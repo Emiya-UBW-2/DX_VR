@@ -1,16 +1,22 @@
 #pragma once
 
 #define NOMINMAX
-
+//共通
 #include <array>
 #include <list>
 #include <vector>
-#include <string>
+//#include <string>
 #include <string_view>
-
+#include <fstream>
+#include <array>
+#include <vector>
+#include <D3D11.h>
+#include <openvr.h>
+#include <memory>
+//DXLIB
 #include "DxLib.h"
 #include"EffekseerForDXLib.h"
-
+//追加
 #include"DXLib_mat.hpp"
 #include "SoundHandle.hpp"
 #include "GraphHandle.hpp"
@@ -18,6 +24,15 @@
 #include "MV1ModelHandle.hpp"
 #include "EffekseerEffectHandle.hpp"
 
+//VR
+#define BUTTON_TRIGGER vr::ButtonMaskFromId(vr::EVRButtonId::k_EButton_SteamVR_Trigger)
+#define BUTTON_SIDE vr::ButtonMaskFromId(vr::EVRButtonId::k_EButton_Grip)
+#define BUTTON_TOUCHPAD vr::ButtonMaskFromId(vr::EVRButtonId::k_EButton_SteamVR_Touchpad)
+#define BUTTON_TOPBUTTON vr::ButtonMaskFromId(vr::EVRButtonId::k_EButton_ApplicationMenu)
+#define DEVICE_HMD vr::TrackedDeviceClass_HMD
+#define DEVICE_CONTROLLER vr::TrackedDeviceClass_Controller
+#define DEVICE_BASESTATION vr::TrackedDeviceClass_TrackingReference
+//
 using std::int8_t;
 using std::size_t;
 using std::uint16_t;
@@ -31,21 +46,22 @@ inline const int desky = (GetSystemMetrics(SM_CYSCREEN));
 #define in2_(mx, my, x1, y1, x2, y2) (mx >= x1 && mx <= x2 && my >= y1 && my <= y2)
 #define in2_mouse(x1, y1, x2, y2) (in2_(mousex, mousey, x1, y1, x2, y2))
 //その他
+ //角度からラジアンに
 template <typename T>
 static float deg2rad(T p1) {
 	return float(p1) * DX_PI_F / 180.f;
-} //角度からラジアンに
+}
+//ラジアンから角度に
 template <typename T>
 static float rad2deg(T p1) {
 	return float(p1) * 180.f / DX_PI_F;
-} //ラジアンから角度に
-//
-static std::string getright(const char* p1) {
-	std::string tempname = p1;
-	return tempname.substr(tempname.find('=') + 1);
 }
-//
+//文字列から数値を取り出す
 class getparams {
+	static std::string getright(const char* p1) {
+		std::string tempname = p1;
+		return tempname.substr(tempname.find('=') + 1);
+	}
 public:
 	static const char* _char(int p1) {
 		char mstr[64];
@@ -88,7 +104,7 @@ public:
 		return (getright(mstr).find("true") != std::string::npos);
 	}
 };
-//
+//イージング
 void easing_set(float* first, const float& aim, const float& ratio, const float& fps) {
 	if (ratio == 0.f) {
 		*first = aim;
@@ -102,7 +118,6 @@ void easing_set(float* first, const float& aim, const float& ratio, const float&
 		}
 	}
 };
-//
 void easing_set(VECTOR_ref* first, const VECTOR_ref& aim, const float& ratio, const float& fps) {
 	if (ratio == 0.f) {
 		*first = aim;
@@ -111,7 +126,6 @@ void easing_set(VECTOR_ref* first, const VECTOR_ref& aim, const float& ratio, co
 		*first += (VECTOR_ref(aim) - *first) * (1.f - powf(ratio, 60.f / fps));
 	}
 };
-
 //ID割り当て
 template <class T>
 void fill_id(std::vector<T>& vect) {
@@ -152,10 +166,6 @@ void start_me(void) {
 	createProcess(Path, SW_HIDE, false);
 }
 //
-bool Hit_Capsule_Tri(VECTOR_ref startpos, VECTOR_ref endpos, float size, VECTOR_ref tri_p1, VECTOR_ref tri_p2, VECTOR_ref tri_p3) {
-	return HitCheck_Capsule_Triangle(startpos.get(), endpos.get(), size, tri_p1.get(), tri_p2.get(), tri_p3.get()) == TRUE;
-}
-//
 enum Effect {
 	ef_fire, //発砲炎
 	ef_reco, //小口径跳弾
@@ -170,8 +180,33 @@ struct EffectS {
 	VECTOR_ref nor;			 /**/
 	float scale = 1.f;		 /**/
 };
+void set_effect(EffectS* efh, VECTOR_ref pos, VECTOR_ref nor, float scale = 1.f) {
+	efh->flug = true;
+	efh->pos = pos;
+	efh->nor = nor;
+	efh->scale = scale;
+}
+void set_pos_effect(EffectS* efh, const EffekseerEffectHandle& handle) {
+	if (efh->flug) {
+		if (efh->handle.IsPlaying()) {
+			efh->handle.Stop();
+		}
+		efh->handle = handle.Play3D();
+		efh->handle.SetPos(efh->pos);
+		efh->handle.SetRotation(atan2(efh->nor.y(), std::hypot(efh->nor.x(), efh->nor.z())), atan2(-efh->nor.x(), -efh->nor.z()), 0);
+		efh->handle.SetScale(efh->scale);
+		efh->flug = false;
+	}
+}
+
 
 class DXDraw {
+public:
+	int disp_x = 1920;
+	int disp_y = 1080;
+	int out_disp_x = 1920;
+	int out_disp_y = 1080;
+	bool use_vr = true;
 private:
 	bool use_shadow = true;			/*影描画*/
 	int shadow_near = 0;			/*近影*/
@@ -182,9 +217,6 @@ private:
 	float frate = 60.f;				     /*フレームレート*/
 	std::array<EffekseerEffectHandle, effects> effHndle; /*エフェクトリソース*/
 	EffekseerEffectHandle gndsmkHndle;		     /*エフェクトリソース*/
-	int disp_x = 1920;
-	int disp_y = 1080;
-
 	//鏡
 	struct Mirror_mod {
 		VECTOR_ref WorldPos[4];	// 鏡のワールド座標
@@ -213,20 +245,56 @@ private:
 	COLOR_U8 DiffuseColor;
 	COLOR_U8 SpecularColor;
 	int TextureW, TextureH;
+	//VR
+	struct system_VR {
+		int id = 0;
+		VECTOR_ref pos = VGet(0, 0, 0);
+		VECTOR_ref xvec = VGet(1, 0, 0);
+		VECTOR_ref yvec = VGet(0, 1, 0);
+		VECTOR_ref zvec = VGet(0, 0, 1);
+		std::array<uint64_t, 2> on{ 0 };
+		VECTOR_ref touch;
+		char num = 0;
+		vr::ETrackedDeviceClass type = vr::TrackedDeviceClass_Invalid;
+		bool turn = false, now = false;
+	};
+	vr::IVRSystem* m_pHMD = nullptr;
+	vr::EVRInitError eError = vr::VRInitError_None;
+	std::vector<system_VR> ctrl;							/*HMD,controller*/
+	char deviceall = 0;
+	VECTOR_ref pos;
+	char hmd_num = -1;
+	char hand1_num = -1;
+	char hand2_num = -1;
 public:
 	EffekseerEffectHandle& get_effHandle(int p1) noexcept { return effHndle[p1]; }
 	const EffekseerEffectHandle& get_effHandle(int p1) const noexcept { return effHndle[p1]; }
 	EffekseerEffectHandle& get_gndhitHandle() noexcept { return gndsmkHndle; }
 	const EffekseerEffectHandle& get_gndhitHandle() const noexcept { return gndsmkHndle; }
-	template<class Y, class D>
-	DXDraw(const char* title, std::unique_ptr<Y, D>& settings, const float& fps = 60.f) {
-		this->use_shadow = settings->shadow_e;
-		this->shadow_size = settings->shadow_level_e;
-		this->disp_x = settings->dispx;
-		this->disp_y = settings->dispy;
+	DXDraw(const char* title, const float& fps = 60.f, const bool& use_VR = false) {
 
-		frate = fps;
-		SetOutApplicationLogValidFlag(settings->getlog_e ? TRUE : FALSE);	/*log*/
+		use_vr = use_VR;
+		if (use_vr) {
+			eError = vr::VRInitError_None;
+			m_pHMD = vr::VR_Init(&eError, vr::VRApplication_Scene);
+			if (eError != vr::VRInitError_None) {
+				m_pHMD = nullptr;
+				use_vr = false;
+			}
+		}
+
+		this->use_shadow = true;
+		this->shadow_size = 13;
+		this->disp_x = 1920;
+		this->disp_y = 1080;
+
+		this->disp_x = 1080 * 2;
+		this->disp_y = 1200 * 2;
+		this->out_disp_x = this->disp_x * (desky * 8 / 9) / this->disp_y;
+		this->out_disp_y = this->disp_y * (desky * 8 / 9) / this->disp_y;
+
+		this->frate = fps;
+		SetOutApplicationLogValidFlag(false ? TRUE : FALSE);				/*log*/
 		SetMainWindowText(title);											/*タイトル*/
 		ChangeWindowMode(TRUE);												/*窓表示*/
 		SetUseDirect3DVersion(DX_DIRECT3D_11);								/*directX ver*/
@@ -255,14 +323,14 @@ public:
 			}
 			gndsmkHndle = EffekseerEffectHandle::load("data/effect/gndsmk.efk");
 		}
-		SetWindowSize(settings->out_dispx, settings->out_dispy);
-		SetWindowPosition(
-			//*
-			deskx+
-			//*/
-			(deskx - settings->out_dispx) / 2 - 8, (desky - settings->out_dispy) / 2 - 32);
+		SetWindowSize(this->out_disp_x, this->out_disp_y);
+		//SetWindowPosition(deskx + (deskx - this->out_disp_x) / 2 - 8, (desky - this->out_disp_y) / 2 - 32);
 	}
 	~DXDraw(void) {
+		if (use_vr&&m_pHMD) {
+			//vr::VR_Shutdown();
+			m_pHMD = NULL;
+		}
 		Effkseer_End();
 		DxLib_End();
 	}
@@ -491,26 +559,153 @@ public:
 			}
 		}
 	}
+
+	//VR
+	const auto& get_hmd_num(void) { return hmd_num; }
+	const auto& get_hand1_num(void) { return hand1_num; }
+	const auto& get_hand2_num(void) { return hand2_num; }
+	auto* get_device(void) { return &ctrl; }
+	void Set_Device(void) {
+		if (use_vr && m_pHMD) {
+			deviceall = 0;
+			int i = 0;
+			for (char k = 0; k < 5; k++) {
+				auto old = deviceall;
+				auto dev = m_pHMD->GetTrackedDeviceClass(k);
+				if (dev == DEVICE_HMD) {
+					hmd_num = deviceall;
+					deviceall++;
+				}
+				else if (dev == DEVICE_CONTROLLER) {
+					switch (i) {
+					case 0:
+						hand1_num = deviceall;
+						i++;
+						break;
+					case 1:
+						hand2_num = deviceall;
+						i++;
+						break;
+					default:
+						break;
+					}
+					deviceall++;
+				}
+				else if (dev == DEVICE_BASESTATION) {
+					deviceall++;
+				}
+				if (deviceall != old) {
+					ctrl.resize(deviceall);
+					ctrl.back().now = false;
+					ctrl.back().id = old;
+					ctrl.back().num = k;
+					ctrl.back().type = dev;
+					ctrl.back().turn = true;
+				}
+			}
+		}
+	}
+	void Move_Player(void) {
+		if (use_vr&&m_pHMD) {
+			vr::TrackedDevicePose_t tmp;
+			vr::VRControllerState_t night;
+			for (auto& c : ctrl) {
+				if (c.type == DEVICE_HMD) {
+					m_pHMD->GetDeviceToAbsoluteTrackingPose(vr::TrackingUniverseStanding, 0.0f, &tmp, 1);
+					c.on[0] = 0;
+					c.on[1] = 0;
+					c.touch = VGet(0, 0, 0);
+					c.now = tmp.bPoseIsValid;
+					c.pos = VGet(tmp.mDeviceToAbsoluteTracking.m[0][3], tmp.mDeviceToAbsoluteTracking.m[1][3], -tmp.mDeviceToAbsoluteTracking.m[2][3]);
+					c.xvec = VGet(tmp.mDeviceToAbsoluteTracking.m[0][0], tmp.mDeviceToAbsoluteTracking.m[1][0], -tmp.mDeviceToAbsoluteTracking.m[2][0]);
+					c.yvec = VGet(tmp.mDeviceToAbsoluteTracking.m[0][1], tmp.mDeviceToAbsoluteTracking.m[1][1], -tmp.mDeviceToAbsoluteTracking.m[2][1]);
+					c.zvec = VGet(-tmp.mDeviceToAbsoluteTracking.m[0][2], -tmp.mDeviceToAbsoluteTracking.m[1][2], tmp.mDeviceToAbsoluteTracking.m[2][2]);
+				}
+				else if (c.type == DEVICE_CONTROLLER || c.type == DEVICE_BASESTATION) {
+					m_pHMD->GetControllerStateWithPose(vr::TrackingUniverseStanding, c.num, &night, sizeof(night), &tmp);
+					c.on[0] = night.ulButtonPressed;
+					c.on[1] = night.ulButtonTouched;
+					c.touch = VGet(night.rAxis[0].x, night.rAxis[0].y, 0);
+					c.now = tmp.bPoseIsValid;
+					c.pos = VGet(tmp.mDeviceToAbsoluteTracking.m[0][3], tmp.mDeviceToAbsoluteTracking.m[1][3], -tmp.mDeviceToAbsoluteTracking.m[2][3]);
+					c.xvec = VGet(tmp.mDeviceToAbsoluteTracking.m[0][0], tmp.mDeviceToAbsoluteTracking.m[1][0], -tmp.mDeviceToAbsoluteTracking.m[2][0]);
+					c.yvec = VGet(tmp.mDeviceToAbsoluteTracking.m[0][1], tmp.mDeviceToAbsoluteTracking.m[1][1], -tmp.mDeviceToAbsoluteTracking.m[2][1]);
+					c.zvec = VGet(-tmp.mDeviceToAbsoluteTracking.m[0][2], -tmp.mDeviceToAbsoluteTracking.m[1][2], tmp.mDeviceToAbsoluteTracking.m[2][2]);
+				}
+			}
+		}
+		else {
+			for (auto& c : ctrl) {
+				c.on[0] = 0;
+				c.on[1] = 0;
+				c.touch = VGet(0, 0, 0);
+				c.pos = VGet(0, 0, 0);
+				c.xvec = VGet(1, 0, 0);
+				c.yvec = VGet(0, 1, 0);
+				c.zvec = VGet(0, 0, 1);
+			}
+		}
+	}
+	inline VECTOR_ref SetEyePositionVR(const char& eye_type) {
+		if (use_vr&&m_pHMD) {
+			const vr::HmdMatrix34_t tmpmat = vr::VRSystem()->GetEyeToHeadTransform((vr::EVREye)eye_type);
+			return ctrl[hmd_num].pos + ctrl[hmd_num].xvec*(tmpmat.m[0][3]) + ctrl[hmd_num].yvec*(tmpmat.m[1][3]) + ctrl[hmd_num].zvec*(-tmpmat.m[2][3]);
+		}
+		else {
+			return VGet(0, 0, 0);
+		}
+	}
+	inline void GetDevicePositionVR(const char& handle_, VECTOR_ref* pos_, MATRIX_ref*mat) {
+		if (use_vr) {
+			if (handle_ != -1) {
+				auto& ptr_ = ctrl[handle_];
+				*pos_ = ptr_.pos;
+				*mat = MATRIX_ref::Axis1(ptr_.xvec*-1.f, ptr_.yvec, ptr_.zvec*-1.f);
+				//ptr_HMD.now;
+			}
+			else {
+				*pos_ = VGet(0, 1.f, 0);
+				*mat = MATRIX_ref::Axis1(VGet(-1, 0, 0), VGet(0, 1, 0), VGet(0, 0, -1));
+			}
+		}
+		else {
+			*pos_ = VGet(0, 1.f, 0);
+			*mat = MATRIX_ref::Axis1(VGet(-1, 0, 0), VGet(0, 1, 0), VGet(0, 0, -1));
+		}
+	}
+	inline VECTOR_ref GetEyePosition_minVR(const char& eye_type) {
+		if (use_vr&&m_pHMD) {
+			const vr::HmdMatrix34_t tmpmat = vr::VRSystem()->GetEyeToHeadTransform((vr::EVREye)eye_type);
+			return ctrl[hmd_num].xvec*(tmpmat.m[0][3]) + ctrl[hmd_num].yvec*(tmpmat.m[1][3]) + ctrl[hmd_num].zvec*(-tmpmat.m[2][3]);
+		}
+		else {
+			return VGet(0, 0, 0);
+		}
+	}
+	inline void PutEye(ID3D11Texture2D* texte, const char& i) {
+		if (use_vr) {
+			vr::Texture_t tex = { (void*)texte, vr::ETextureType::TextureType_DirectX,vr::EColorSpace::ColorSpace_Auto };
+			vr::VRCompositor()->Submit((vr::EVREye)i, &tex, NULL, vr::Submit_Default);
+		}
+	}
+	inline void Eye_Flip(const LONGLONG& waits, const float& f_rate) {
+		if (use_vr&&m_pHMD) {
+			vr::TrackedDevicePose_t tmp;
+			vr::VRCompositor()->WaitGetPoses(&tmp, 1, NULL, 1);
+		}
+		else {
+			while (GetNowHiPerformanceCount() - waits < 1000000.0f / f_rate) {}
+		}
+	}
+	inline void Haptic(const char&id_, unsigned short times) {
+		if (id_ != -1) {
+			if (use_vr&&m_pHMD) {
+				m_pHMD->TriggerHapticPulse(ctrl[id_].id, 2, times);
+			}
+		}
+	}
 };
 
-void set_effect(EffectS* efh, VECTOR_ref pos, VECTOR_ref nor, float scale = 1.f) {
-	efh->flug = true;
-	efh->pos = pos;
-	efh->nor = nor;
-	efh->scale = scale;
-}
-void set_pos_effect(EffectS* efh, const EffekseerEffectHandle& handle) {
-	if (efh->flug) {
-		if (efh->handle.IsPlaying()) {
-			efh->handle.Stop();
-		}
-		efh->handle = handle.Play3D();
-		efh->handle.SetPos(efh->pos);
-		efh->handle.SetRotation(atan2(efh->nor.y(), std::hypot(efh->nor.x(), efh->nor.z())), atan2(-efh->nor.x(), -efh->nor.z()), 0);
-		efh->handle.SetScale(efh->scale);
-		efh->flug = false;
-	}
-}
 typedef std::pair<int, VECTOR_ref> frames;
 class switchs {
 public:

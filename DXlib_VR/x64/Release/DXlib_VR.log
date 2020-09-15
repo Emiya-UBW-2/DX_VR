@@ -1,0 +1,37 @@
+﻿  main.cpp
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3064): warning C4100: 'textureType': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3064): warning C4100: 'path': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3083): warning C4100: 'textureType': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3083): warning C4100: 'size': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3083): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3092): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3142): warning C4100: 'path': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3158): warning C4100: 'size': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3158): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3167): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3219): warning C4100: 'path': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3238): warning C4100: 'fileType': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3238): warning C4100: 'size': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3238): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3248): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3702): warning C4100: 'path': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3718): warning C4100: 'size': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3718): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseer.h(3727): warning C4100: 'source': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseerrendererdx11.h(398): warning C4100: 'commandList': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseerrendererdx11.h(415): warning C4100: 'type': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_vc\dx_vc\effekseerrendererdx11.h(422): warning C4100: 'data': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\main.cpp(7): warning C4100: 'nCmdShow': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\main.cpp(7): warning C4100: 'lpCmdLine': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\main.cpp(7): warning C4100: 'hPrevInstance': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\main.cpp(7): warning C4100: 'hInstance': 引数は関数の本体部で 1 度も参照されません。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\main.cpp(16): warning C4189: 'restart': ローカル変数が初期化されましたが、参照されていません
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\main.cpp(12): warning C4189: 'sets': ローカル変数が初期化されましたが、参照されていません
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_ref\dxlib_mat.hpp(56): warning C4505: 'Hit_Capsule_Tri': 参照されていないローカル関数は削除されました。
+  コード生成しています。
+  1 of 1565 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  コード生成が終了しました。
+EffekseerForDXLib_vs2017_x64.lib(EffekseerForDXLib.obj) : warning LNK4099: PDB 'EffekseerForDXLib_vs2017.pdb' が 'EffekseerForDXLib_vs2017_x64.lib(EffekseerForDXLib.obj)' で、または 'C:\Users\ハンドサイン\source\repos\DX_VR\DXlib_VR\x64\Release\EffekseerForDXLib_vs2017.pdb' に見つかりません。デバッグ情報がないものとして、オブジェクトにリンクします。
+  DXlib_VR.vcxproj -> C:\Users\ハンドサイン\source\repos\DX_VR\DXlib_VR\x64\Release\DXlib_VR.exe

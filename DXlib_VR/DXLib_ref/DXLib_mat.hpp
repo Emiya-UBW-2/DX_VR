@@ -52,7 +52,12 @@ public:
 	float yadd(float p) noexcept { this->value.y += p; return this->value.y; }
 	float zadd(float p) noexcept { this->value.z += p; return this->value.z; }
 };
+//
+static bool Hit_Capsule_Tri(VECTOR_ref startpos, VECTOR_ref endpos, float size, VECTOR_ref tri_p1, VECTOR_ref tri_p2, VECTOR_ref tri_p3) {
+	return HitCheck_Capsule_Triangle(startpos.get(), endpos.get(), size, tri_p1.get(), tri_p2.get(), tri_p3.get()) == TRUE;
+}
 
+//
 class MATRIX_ref {
 	MATRIX value;
 public:
