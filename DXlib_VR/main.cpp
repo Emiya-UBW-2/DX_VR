@@ -9,13 +9,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	std::array<GraphHandle, 3> outScreen;	//スクリーンバッファ
 	GraphHandle BufScreen;					//スクリーンバッファ
-	float start_fl = 0.f, sets = 0.f;
+	float start_fl = 0.f;
 	VECTOR_ref pos_HMD;
 	MATRIX_ref mat_HMD;
 	bool endp = false, startp = false;
-	unsigned char restart = 0;
-	VECTOR_ref campos, campos_buf, camvec, camup, campos_TPS;	//カメラ
-	float fov = deg2rad(45);								//カメラ
+	VECTOR_ref campos, camvec, camup;	//カメラ
+	float fov = deg2rad(90);						//カメラ
 	{
 		BufScreen = GraphHandle::Make(Drawparts->disp_x,Drawparts->disp_y);		/*バッファスクリーン*/
 		outScreen[0] = GraphHandle::Make(Drawparts->disp_x, Drawparts->disp_y);	/*左目*/
@@ -24,6 +23,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		//
 		Drawparts->Set_Device();									//VRセット
 
+		auto draw_doing = [&] {
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+			for (int x = -10; x < 10; x++) {
+				for (int y = -10; y < 10; y++) {
+					DrawCone3D(VGet(float(x)/10.f, 1.5f, float(y) / 10.f), VGet(float(x) / 10.f, 0.f, float(y) / 10.f), 0.05f, 8, GetColor(255, 255, 255), GetColor(255, 255, 255), TRUE);
+				}
+			}
+
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(int(255.f * start_fl / 3.f), 0, 255));
+			DrawBox(0, 0, Drawparts->disp_x, Drawparts->disp_y, GetColor(255, 255, 255), TRUE);
+
+		};
 		//
 		while (ProcessMessage() == 0) {
 			const auto fps = GetFPS();
@@ -50,33 +61,41 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			}
 
 			if (!startp) {
-				campos = mat_HMD.zvec() * 0.6f;
+				if (Drawparts->use_vr) {
+					campos = pos_HMD;
+					camvec = mat_HMD.zvec()*-1.f;
+					camup = mat_HMD.yvec();
+				}
+				else {
+					campos = VGet(0, 0, 1.f);
+					camvec = VGet(0, 0, 0);
+					camup = VGet(0, 1.f, 0);
+				}
 			}
 			else {
-				easing_set(&campos, VGet(0.f, 0.f, 1.f), 0.95f, fps);
 				start_fl += 1.f / fps;
 				if (start_fl > 3.f) {
 					endp = true;
 				}
 			}
+
 			//VR空間に適用
 			Drawparts->Move_Player();
 			{
-				outScreen[0].SetDraw_Screen(0.1f, 10.f, fov, campos, VGet(0, 0, 0), VGet(0.f, 1.f, 0.f));
-				{
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-					DrawCone3D(VGet(0, 0, 0.3f), VGet(0, 0, 0), 0.1f, 6, GetColor(255, 255, 255), GetColor(255, 255, 255), TRUE);
-
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(int(255.f * start_fl / 3.f), 0, 255));
-					DrawBox(0, 0, Drawparts->disp_x, Drawparts->disp_y, GetColor(255, 255, 255), TRUE);
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-				}
 				if (Drawparts->use_vr) {
 					for (char i = 0; i < 2; i++) {
+						VECTOR_ref eyepos = campos + Drawparts->GetEyePosition_minVR(i);
+						outScreen[i].SetDraw_Screen(0.1f, 10.f, fov, eyepos, eyepos + camvec, camup);
+						draw_doing();
 						GraphHandle::SetDraw_Screen((int)DX_SCREEN_BACK);
-						outScreen[0].DrawGraph(0, 0, false);
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+						outScreen[i].DrawGraph(0, 0, false);
 						Drawparts->PutEye((ID3D11Texture2D*)GetUseDirect3D11BackBufferTexture2D(), i);
 					}
+				}
+				else {
+					outScreen[0].SetDraw_Screen(0.1f, 10.f, fov, campos, campos + camvec, camup);
+					draw_doing();
 				}
 				GraphHandle::SetDraw_Screen((int)DX_SCREEN_BACK);
 				{
