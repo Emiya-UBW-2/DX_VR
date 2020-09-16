@@ -215,8 +215,6 @@ private:
 	bool use_pixellighting = true;			     /**/
 	bool use_vsync = false;				     /*垂直同期*/
 	float frate = 60.f;				     /*フレームレート*/
-	std::array<EffekseerEffectHandle, effects> effHndle; /*エフェクトリソース*/
-	EffekseerEffectHandle gndsmkHndle;		     /*エフェクトリソース*/
 	//鏡
 	struct Mirror_mod {
 		VECTOR_ref WorldPos[4];	// 鏡のワールド座標
@@ -266,13 +264,9 @@ private:
 	char hmd_num = -1;
 	char hand1_num = -1;
 	char hand2_num = -1;
+	std::array<GraphHandle, 3> outScreen;	//スクリーンバッファ
 public:
-	EffekseerEffectHandle& get_effHandle(int p1) noexcept { return effHndle[p1]; }
-	const EffekseerEffectHandle& get_effHandle(int p1) const noexcept { return effHndle[p1]; }
-	EffekseerEffectHandle& get_gndhitHandle() noexcept { return gndsmkHndle; }
-	const EffekseerEffectHandle& get_gndhitHandle() const noexcept { return gndsmkHndle; }
 	DXDraw(const char* title, const float& fps = 60.f, const bool& use_VR = false) {
-
 		use_vr = use_VR;
 		if (use_vr) {
 			eError = vr::VRInitError_None;
@@ -285,13 +279,18 @@ public:
 
 		this->use_shadow = true;
 		this->shadow_size = 13;
-		this->disp_x = 1920;
-		this->disp_y = 1080;
-
-		this->disp_x = 1080 * 2;
-		this->disp_y = 1200 * 2;
-		this->out_disp_x = this->disp_x * (desky * 8 / 9) / this->disp_y;
-		this->out_disp_y = this->disp_y * (desky * 8 / 9) / this->disp_y;
+		if (use_vr) {
+			this->disp_x = 1080 * 2;
+			this->disp_y = 1200 * 2;
+			this->out_disp_x = this->disp_x * (desky * 8 / 9) / this->disp_y;
+			this->out_disp_y = this->disp_y * (desky * 8 / 9) / this->disp_y;
+		}
+		else {
+			this->disp_x = 1920;
+			this->disp_y = 1080;
+			this->out_disp_x = this->disp_x;
+			this->out_disp_y = this->disp_y;
+		}
 
 		this->frate = fps;
 		SetOutApplicationLogValidFlag(false ? TRUE : FALSE);				/*log*/
@@ -304,8 +303,8 @@ public:
 		SetWindowSizeChangeEnableFlag(FALSE, FALSE);						/*ウインドウサイズを手動不可、ウインドウサイズに合わせて拡大もしないようにする*/
 		SetUsePixelLighting(use_pixellighting ? TRUE : FALSE);				/*ピクセルシェーダの使用*/
 		SetFullSceneAntiAliasingMode(4, 2);									/*アンチエイリアス*/
-		SetEnableXAudioFlag(TRUE);
-		Set3DSoundOneMetre(1.0f);
+		SetEnableXAudioFlag(TRUE);											/**/
+		Set3DSoundOneMetre(1.0f);											/**/
 		SetWaitVSyncFlag(use_vsync ? TRUE : FALSE);							/*垂直同期*/
 		DxLib_Init();														/**/
 		Effekseer_Init(8000);												/*Effekseer*/
@@ -315,16 +314,11 @@ public:
 		SetUseZBuffer3D(TRUE);												/*zbufuse*/
 		SetWriteZBuffer3D(TRUE);											/*zbufwrite*/
 		MV1SetLoadModelPhysicsWorldGravity(-9.8f);							/*重力*/
-		//エフェクト
-		{
-			size_t j = 0;
-			for (auto& e : effHndle) {
-				e = EffekseerEffectHandle::load("data/effect/" + std::to_string(j++) + ".efk");
-			}
-			gndsmkHndle = EffekseerEffectHandle::load("data/effect/gndsmk.efk");
-		}
 		SetWindowSize(this->out_disp_x, this->out_disp_y);
-		//SetWindowPosition(deskx + (deskx - this->out_disp_x) / 2 - 8, (desky - this->out_disp_y) / 2 - 32);
+		SetWindowPosition(deskx + (deskx - this->out_disp_x) / 2 - 8, (desky - this->out_disp_y) / 2 - 32);
+		outScreen[0] = GraphHandle::Make(this->disp_x, this->disp_y);	/*左目*/
+		outScreen[1] = GraphHandle::Make(this->disp_x, this->disp_y);	/*右目*/
+		outScreen[2] = GraphHandle::Make(this->disp_x, this->disp_y);	/*TPS用*/
 	}
 	~DXDraw(void) {
 		if (use_vr&&m_pHMD) {
@@ -384,20 +378,13 @@ public:
 	}
 	bool Screen_Flip(const LONGLONG& waits) {
 		ScreenFlip();
-		if (!use_vsync) {
+		if (use_vr&&m_pHMD) {
+			vr::TrackedDevicePose_t tmp;
+			vr::VRCompositor()->WaitGetPoses(&tmp, 1, NULL, 1);
+		}
+		else if (!use_vsync) {
 			while (GetNowHiPerformanceCount() - waits < 1000000.0f / frate) {}
 		}
-		return true;
-	}
-	static bool Screen_Flip(const LONGLONG& waits,const float& f_rate) {
-		ScreenFlip();
-		if (GetWaitVSyncFlag()==FALSE) {
-			while (GetNowHiPerformanceCount() - waits < 1000000.0f / f_rate) {}
-		}
-		return true;
-	}
-	static bool Screen_Flip(void) {
-		ScreenFlip();
 		return true;
 	}
 	static bool Capsule3D(const VECTOR_ref& p1, const VECTOR_ref& p2, const float& range, const unsigned int& color, const unsigned int& speccolor) {
@@ -565,6 +552,7 @@ public:
 	const auto& get_hand1_num(void) { return hand1_num; }
 	const auto& get_hand2_num(void) { return hand2_num; }
 	auto* get_device(void) { return &ctrl; }
+	/**/
 	void Set_Device(void) {
 		if (use_vr && m_pHMD) {
 			deviceall = 0;
@@ -605,6 +593,7 @@ public:
 			}
 		}
 	}
+	/**/
 	void Move_Player(void) {
 		if (use_vr&&m_pHMD) {
 			vr::TrackedDevicePose_t tmp;
@@ -646,6 +635,7 @@ public:
 			}
 		}
 	}
+	/**/
 	inline VECTOR_ref SetEyePositionVR(const char& eye_type) {
 		if (use_vr&&m_pHMD) {
 			const vr::HmdMatrix34_t tmpmat = vr::VRSystem()->GetEyeToHeadTransform((vr::EVREye)eye_type);
@@ -655,6 +645,7 @@ public:
 			return VGet(0, 0, 0);
 		}
 	}
+	/**/
 	inline void GetDevicePositionVR(const char& handle_, VECTOR_ref* pos_, MATRIX_ref*mat) {
 		if (use_vr) {
 			if (handle_ != -1) {
@@ -673,6 +664,7 @@ public:
 			*mat = MATRIX_ref::Axis1(VGet(-1, 0, 0), VGet(0, 1, 0), VGet(0, 0, -1));
 		}
 	}
+	/**/
 	inline VECTOR_ref GetEyePosition_minVR(const char& eye_type) {
 		if (use_vr&&m_pHMD) {
 			const vr::HmdMatrix34_t tmpmat = vr::VRSystem()->GetEyeToHeadTransform((vr::EVREye)eye_type);
@@ -682,21 +674,38 @@ public:
 			return VGet(0, 0, 0);
 		}
 	}
+	/**/
 	inline void PutEye(ID3D11Texture2D* texte, const char& i) {
 		if (use_vr) {
 			vr::Texture_t tex = { (void*)texte, vr::ETextureType::TextureType_DirectX,vr::EColorSpace::ColorSpace_Auto };
 			vr::VRCompositor()->Submit((vr::EVREye)i, &tex, NULL, vr::Submit_Default);
 		}
 	}
-	inline void Eye_Flip(const LONGLONG& waits, const float& f_rate) {
-		if (use_vr&&m_pHMD) {
-			vr::TrackedDevicePose_t tmp;
-			vr::VRCompositor()->WaitGetPoses(&tmp, 1, NULL, 1);
+	/**/
+	template <typename T2>
+	void draw_VR(T2 draw_doing, const VECTOR_ref&campos, const VECTOR_ref&camvec, const VECTOR_ref&camup, const float& fov,const float& near_dist, const float&far_dist) {
+		if (this->use_vr) {
+			for (char i = 0; i < 2; i++) {
+				VECTOR_ref eyepos = VECTOR_ref(campos) + this->GetEyePosition_minVR(i);
+				outScreen[i].SetDraw_Screen(near_dist, far_dist, fov, eyepos, eyepos + camvec, camup);
+				draw_doing();
+				GraphHandle::SetDraw_Screen((int)DX_SCREEN_BACK);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+				outScreen[i].DrawGraph(0, 0, false);
+				this->PutEye((ID3D11Texture2D*)GetUseDirect3D11BackBufferTexture2D(), i);
+			}
 		}
 		else {
-			while (GetNowHiPerformanceCount() - waits < 1000000.0f / f_rate) {}
+			outScreen[0].SetDraw_Screen(near_dist, far_dist, fov, campos, VECTOR_ref(campos) + camvec, camup);
+			draw_doing();
+		}
+		GraphHandle::SetDraw_Screen((int)DX_SCREEN_BACK);
+		{
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+			outScreen[0].DrawExtendGraph(0, 0, this->out_disp_x, this->out_disp_y, true);
 		}
 	}
+	/**/
 	inline void Haptic(const char&id_, unsigned short times) {
 		if (id_ != -1) {
 			if (use_vr&&m_pHMD) {
