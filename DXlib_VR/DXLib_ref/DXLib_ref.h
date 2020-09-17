@@ -552,6 +552,8 @@ public:
 	const auto& get_hand1_num(void) { return hand1_num; }
 	const auto& get_hand2_num(void) { return hand2_num; }
 	auto* get_device(void) { return &ctrl; }
+	auto* get_device_hand1(void) { return &ctrl[std::max<char>(hand1_num, 0)]; }
+	auto* get_device_hand1(void) { return &ctrl[std::max<char>(hand2_num, 0)]; }
 	/**/
 	void Set_Device(void) {
 		if (use_vr && m_pHMD) {

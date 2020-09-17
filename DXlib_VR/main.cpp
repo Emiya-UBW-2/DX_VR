@@ -19,18 +19,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		//
 		while (ProcessMessage() == 0) {
 			const auto waits = GetNowHiPerformanceCount();
-			if (Drawparts->use_vr) {
-				Drawparts->GetDevicePositionVR(Drawparts->get_hmd_num(), &pos_HMD, &mat_HMD);
-			}
+			//
+			Drawparts->GetDevicePositionVR(Drawparts->get_hmd_num(), &pos_HMD, &mat_HMD);
 			//‘€ì
 			{
 				//VR—p
-				if (Drawparts->use_vr) {
-					if (Drawparts->get_hand1_num() != -1) {
-						auto& ptr_ = (*Drawparts->get_device())[Drawparts->get_hand1_num()];
-						if (ptr_.turn && ptr_.now) {
-							if ((ptr_.on[0] & BUTTON_TRIGGER) != 0) { startp = true; }
-						}
+				if (Drawparts->get_hand1_num() != -1) {
+					auto& ptr_ = *Drawparts->get_device_hand1();
+					if (ptr_.turn && ptr_.now) {
+						if ((ptr_.on[0] & BUTTON_TRIGGER) != 0) { startp = true; }
 					}
 				}
 				//
