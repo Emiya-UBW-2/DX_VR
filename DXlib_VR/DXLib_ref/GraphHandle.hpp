@@ -66,18 +66,20 @@ public:
 			ClearDrawScreen();
 		}
 	}
-	void SetDraw_Screen(const float& near_, const float& far_, const float& fov, const VECTOR_ref& campos, const VECTOR_ref& camvec, const VECTOR_ref& camup) {
+	void SetDraw_Screen(const VECTOR_ref& campos, const VECTOR_ref& camvec, const VECTOR_ref& camup, const float& fov, const float& near_, const float& far_) {
 		SetDraw_Screen(true);
 		SetCameraNearFar(near_, far_);
 		SetupCamera_Perspective(fov);
 		SetCameraPositionAndTargetAndUpVec(campos.get(), camvec.get(), camup.get());
 	}
 	//
-	static void SetDraw_Screen(const int& handle) {
+	static void SetDraw_Screen(const int& handle, const bool& clear = true) {
 		SetDrawScreen(handle);
-		ClearDrawScreen();
+		if (clear) {
+			ClearDrawScreen();
+		}
 	}
-	static void SetDraw_Screen(const int& handle, const float& near_, const float& far_, const float& fov, const VECTOR_ref& campos, const VECTOR_ref& camvec, const VECTOR_ref& camup) {
+	static void SetDraw_Screen(const int& handle, const VECTOR_ref& campos, const VECTOR_ref& camvec, const VECTOR_ref& camup, const float& fov, const float& near_, const float& far_) {
 		SetDraw_Screen(handle);
 		SetCameraNearFar(near_, far_);
 		SetupCamera_Perspective(fov);

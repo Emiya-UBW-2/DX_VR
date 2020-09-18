@@ -23,7 +23,6 @@
 #include "FontHandle.hpp"
 #include "MV1ModelHandle.hpp"
 #include "EffekseerEffectHandle.hpp"
-
 //VR
 #define BUTTON_TRIGGER vr::ButtonMaskFromId(vr::EVRButtonId::k_EButton_SteamVR_Trigger)
 #define BUTTON_SIDE vr::ButtonMaskFromId(vr::EVRButtonId::k_EButton_Grip)
@@ -207,6 +206,20 @@ public:
 	int out_disp_x = 1920;
 	int out_disp_y = 1080;
 	bool use_vr = true;
+
+	struct cam_info {
+		VECTOR_ref campos, camvec, camup;	//カメラ
+		float fov = deg2rad(90);			//カメラ
+		float near_ = 0.1f, far_ = 10.f;	//ニアファー
+
+		void set_cam_info(const VECTOR_ref& cam_pos, const VECTOR_ref& cam_vec, const VECTOR_ref& cam_up, const float& cam_fov_, const float& cam_near_, const float& cam_far_) {
+			campos=cam_pos;
+			camvec=cam_vec;
+			camup=cam_up;	//カメラ
+			fov = cam_fov_;			//カメラ
+			near_ = cam_near_, far_ = cam_far_;	//ニアファー
+		}
+	};
 private:
 	bool use_shadow = true;			/*影描画*/
 	int shadow_near = 0;			/*近影*/
@@ -315,10 +328,51 @@ public:
 		SetWriteZBuffer3D(TRUE);											/*zbufwrite*/
 		MV1SetLoadModelPhysicsWorldGravity(-9.8f);							/*重力*/
 		SetWindowSize(this->out_disp_x, this->out_disp_y);
-		SetWindowPosition(deskx + (deskx - this->out_disp_x) / 2 - 8, (desky - this->out_disp_y) / 2 - 32);
+		SetWindowPosition(
+			//deskx + 
+			(deskx - this->out_disp_x) / 2 - 8, (desky - this->out_disp_y) / 2 - 32);
 		outScreen[0] = GraphHandle::Make(this->disp_x, this->disp_y);	/*左目*/
 		outScreen[1] = GraphHandle::Make(this->disp_x, this->disp_y);	/*右目*/
 		outScreen[2] = GraphHandle::Make(this->disp_x, this->disp_y);	/*TPS用*/
+		//VRのセット
+		if (use_vr && m_pHMD) {
+			deviceall = 0;
+			int i = 0;
+			for (char k = 0; k < 5; k++) {
+				auto old = deviceall;
+				auto dev = m_pHMD->GetTrackedDeviceClass(k);
+				if (dev == DEVICE_HMD) {
+					hmd_num = deviceall;
+					deviceall++;
+				}
+				else if (dev == DEVICE_CONTROLLER) {
+					switch (i) {
+					case 0:
+						hand1_num = deviceall;
+						i++;
+						break;
+					case 1:
+						hand2_num = deviceall;
+						i++;
+						break;
+					default:
+						break;
+					}
+					deviceall++;
+				}
+				else if (dev == DEVICE_BASESTATION) {
+					deviceall++;
+				}
+				if (deviceall != old) {
+					ctrl.resize(deviceall);
+					ctrl.back().now = false;
+					ctrl.back().id = old;
+					ctrl.back().num = k;
+					ctrl.back().type = dev;
+					ctrl.back().turn = true;
+				}
+			}
+		}
 	}
 	~DXDraw(void) {
 		if (use_vr&&m_pHMD) {
@@ -437,7 +491,7 @@ public:
 		Index.clear();
 	}
 	// 鏡に映る映像を描画するためのカメラの設定を行う.Mirrorcampos,Mirrorcamtgtに反映
-	void Mirror_SetupCamera(Mirror_mod& MirrorNo, const VECTOR_ref& campos, const VECTOR_ref& camtgt, const VECTOR_ref& camup, const float& fov, const float& far_distance = 1000.f, const float& near_distance = 100.f) {
+	void Mirror_SetupCamera(Mirror_mod& MirrorNo, const VECTOR_ref& campos, const VECTOR_ref& camtgt, const VECTOR_ref& camup, const float& fov, const float& near_distance = 100.f, const float& far_distance = 1000.f) {
 		auto& id = MirrorNo;
 		// 鏡の面の法線を算出
 		MirrorNormal = ((id.WorldPos[1] - id.WorldPos[0]).cross(id.WorldPos[2] - id.WorldPos[0])).Norm();
@@ -448,12 +502,12 @@ public:
 		Mirrorcampos = VECTOR_ref(campos) + MirrorNormal * (-EyeLength * 2.0f);
 		Mirrorcamtgt = VECTOR_ref(camtgt) + MirrorNormal * (-TargetLength * 2.0f);
 		// 鏡に映る映像の中での鏡の四隅の座標を算出( 同次座標 )
-		id.Handle.SetDraw_Screen(far_distance, near_distance, fov, Mirrorcampos, Mirrorcamtgt, VGet(0, 1.f, 0.f));
+		id.Handle.SetDraw_Screen(Mirrorcampos, Mirrorcamtgt, VGet(0, 1.f, 0.f), fov, near_distance, far_distance);
 		for (int i = 0; i < 4; i++) {
 			id.ScreenPosW[i] = ConvWorldPosToScreenPosPlusW(id.WorldPos[i].get());
 		}
 		// 鏡に映る映像の中での鏡の四隅の座標を算出( 同次座標 )
-		id.Handle.SetDraw_Screen(far_distance, near_distance, fov, campos, camtgt, camup);
+		id.Handle.SetDraw_Screen(campos, camtgt, camup, fov, near_distance,far_distance);
 		id.canlook = true;
 		for (int z = 0; z < 4; z++) {
 			if (id.canlook) {
@@ -553,47 +607,9 @@ public:
 	const auto& get_hand2_num(void) { return hand2_num; }
 	auto* get_device(void) { return &ctrl; }
 	auto* get_device_hand1(void) { return &ctrl[std::max<char>(hand1_num, 0)]; }
-	auto* get_device_hand1(void) { return &ctrl[std::max<char>(hand2_num, 0)]; }
+	auto* get_device_hand2(void) { return &ctrl[std::max<char>(hand2_num, 0)]; }
 	/**/
 	void Set_Device(void) {
-		if (use_vr && m_pHMD) {
-			deviceall = 0;
-			int i = 0;
-			for (char k = 0; k < 5; k++) {
-				auto old = deviceall;
-				auto dev = m_pHMD->GetTrackedDeviceClass(k);
-				if (dev == DEVICE_HMD) {
-					hmd_num = deviceall;
-					deviceall++;
-				}
-				else if (dev == DEVICE_CONTROLLER) {
-					switch (i) {
-					case 0:
-						hand1_num = deviceall;
-						i++;
-						break;
-					case 1:
-						hand2_num = deviceall;
-						i++;
-						break;
-					default:
-						break;
-					}
-					deviceall++;
-				}
-				else if (dev == DEVICE_BASESTATION) {
-					deviceall++;
-				}
-				if (deviceall != old) {
-					ctrl.resize(deviceall);
-					ctrl.back().now = false;
-					ctrl.back().id = old;
-					ctrl.back().num = k;
-					ctrl.back().type = dev;
-					ctrl.back().turn = true;
-				}
-			}
-		}
 	}
 	/**/
 	void Move_Player(void) {
@@ -649,17 +665,9 @@ public:
 	}
 	/**/
 	inline void GetDevicePositionVR(const char& handle_, VECTOR_ref* pos_, MATRIX_ref*mat) {
-		if (use_vr) {
-			if (handle_ != -1) {
-				auto& ptr_ = ctrl[handle_];
-				*pos_ = ptr_.pos;
-				*mat = MATRIX_ref::Axis1(ptr_.xvec*-1.f, ptr_.yvec, ptr_.zvec*-1.f);
-				//ptr_HMD.now;
-			}
-			else {
-				*pos_ = VGet(0, 1.f, 0);
-				*mat = MATRIX_ref::Axis1(VGet(-1, 0, 0), VGet(0, 1, 0), VGet(0, 0, -1));
-			}
+		if (use_vr && handle_ != -1) {
+			*pos_ = ctrl[handle_].pos;
+			*mat = MATRIX_ref::Axis1(ctrl[handle_].xvec*-1.f, ctrl[handle_].yvec, ctrl[handle_].zvec*-1.f);
 		}
 		else {
 			*pos_ = VGet(0, 1.f, 0);
@@ -685,11 +693,11 @@ public:
 	}
 	/**/
 	template <typename T2>
-	void draw_VR(T2 draw_doing, const VECTOR_ref&campos, const VECTOR_ref&camvec, const VECTOR_ref&camup, const float& fov,const float& near_dist, const float&far_dist) {
+	void draw_VR(T2 draw_doing,const cam_info& cams) {
 		if (this->use_vr) {
 			for (char i = 0; i < 2; i++) {
-				VECTOR_ref eyepos = VECTOR_ref(campos) + this->GetEyePosition_minVR(i);
-				outScreen[i].SetDraw_Screen(near_dist, far_dist, fov, eyepos, eyepos + camvec, camup);
+				VECTOR_ref eyepos = VECTOR_ref(cams.campos) + this->GetEyePosition_minVR(i);
+				outScreen[i].SetDraw_Screen(eyepos, eyepos + cams.camvec, cams.camup, cams.fov, cams.near_, cams.far_);
 				draw_doing();
 				GraphHandle::SetDraw_Screen((int)DX_SCREEN_BACK);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
@@ -698,7 +706,7 @@ public:
 			}
 		}
 		else {
-			outScreen[0].SetDraw_Screen(near_dist, far_dist, fov, campos, VECTOR_ref(campos) + camvec, camup);
+			outScreen[0].SetDraw_Screen(cams.campos, VECTOR_ref(cams.campos) + cams.camvec, cams.camup, cams.fov, cams.near_, cams.far_);
 			draw_doing();
 		}
 		GraphHandle::SetDraw_Screen((int)DX_SCREEN_BACK);
@@ -740,3 +748,6 @@ public:
 		}
 	}
 };
+
+//ついで
+#include "debug.hpp"

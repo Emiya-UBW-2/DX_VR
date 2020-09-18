@@ -169,7 +169,6 @@
     <ClInclude Include="DXLib_ref\GraphHandle.hpp" />
     <ClInclude Include="DXLib_ref\MV1ModelHandle.hpp" />
     <ClInclude Include="DXLib_ref\SoundHandle.hpp" />
-    <ClInclude Include="DXLib_ref\VR.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
