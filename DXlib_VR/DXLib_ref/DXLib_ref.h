@@ -30,6 +30,7 @@
 #define BUTTON_TOPBUTTON vr::ButtonMaskFromId(vr::EVRButtonId::k_EButton_ApplicationMenu)
 #define DEVICE_HMD vr::TrackedDeviceClass_HMD
 #define DEVICE_CONTROLLER vr::TrackedDeviceClass_Controller
+#define DEVICE_TRACKER vr::TrackedDeviceClass_GenericTracker
 #define DEVICE_BASESTATION vr::TrackedDeviceClass_TrackingReference
 //
 using std::int8_t;
@@ -279,6 +280,8 @@ private:
 	char hand2_num = -1;
 	std::array<GraphHandle, 3> outScreen;	//スクリーンバッファ
 public:
+	std::vector<char> tracker_num;
+
 	DXDraw(const char* title, const float& fps = 60.f, const bool& use_VR = false) {
 		use_vr = use_VR;
 		if (use_vr) {
@@ -336,9 +339,10 @@ public:
 		outScreen[2] = GraphHandle::Make(this->disp_x, this->disp_y);	/*TPS用*/
 		//VRのセット
 		if (use_vr && m_pHMD) {
+			tracker_num.clear();
 			deviceall = 0;
 			int i = 0;
-			for (char k = 0; k < 5; k++) {
+			for (char k = 0; k < 8; k++) {
 				auto old = deviceall;
 				auto dev = m_pHMD->GetTrackedDeviceClass(k);
 				if (dev == DEVICE_HMD) {
@@ -360,6 +364,10 @@ public:
 					}
 					deviceall++;
 				}
+				else if (dev == DEVICE_TRACKER) {
+					tracker_num.emplace_back(deviceall);
+					deviceall++;
+				}
 				else if (dev == DEVICE_BASESTATION) {
 					deviceall++;
 				}
@@ -373,6 +381,7 @@ public:
 				}
 			}
 		}
+
 	}
 	~DXDraw(void) {
 		if (use_vr&&m_pHMD) {
@@ -609,9 +618,6 @@ public:
 	auto* get_device_hand1(void) { return &ctrl[std::max<char>(hand1_num, 0)]; }
 	auto* get_device_hand2(void) { return &ctrl[std::max<char>(hand2_num, 0)]; }
 	/**/
-	void Set_Device(void) {
-	}
-	/**/
 	void Move_Player(void) {
 		if (use_vr&&m_pHMD) {
 			vr::TrackedDevicePose_t tmp;
@@ -624,20 +630,20 @@ public:
 					c.touch = VGet(0, 0, 0);
 					c.now = tmp.bPoseIsValid;
 					c.pos = VGet(tmp.mDeviceToAbsoluteTracking.m[0][3], tmp.mDeviceToAbsoluteTracking.m[1][3], -tmp.mDeviceToAbsoluteTracking.m[2][3]);
-					c.xvec = VGet(tmp.mDeviceToAbsoluteTracking.m[0][0], tmp.mDeviceToAbsoluteTracking.m[1][0], -tmp.mDeviceToAbsoluteTracking.m[2][0]);
+					c.xvec = VGet(-tmp.mDeviceToAbsoluteTracking.m[0][0], -tmp.mDeviceToAbsoluteTracking.m[1][0], tmp.mDeviceToAbsoluteTracking.m[2][0]);
 					c.yvec = VGet(tmp.mDeviceToAbsoluteTracking.m[0][1], tmp.mDeviceToAbsoluteTracking.m[1][1], -tmp.mDeviceToAbsoluteTracking.m[2][1]);
-					c.zvec = VGet(-tmp.mDeviceToAbsoluteTracking.m[0][2], -tmp.mDeviceToAbsoluteTracking.m[1][2], tmp.mDeviceToAbsoluteTracking.m[2][2]);
+					c.zvec = VGet(tmp.mDeviceToAbsoluteTracking.m[0][2], tmp.mDeviceToAbsoluteTracking.m[1][2], -tmp.mDeviceToAbsoluteTracking.m[2][2]);
 				}
-				else if (c.type == DEVICE_CONTROLLER || c.type == DEVICE_BASESTATION) {
+				else if (c.type == DEVICE_CONTROLLER || c.type == DEVICE_BASESTATION || c.type == DEVICE_TRACKER) {
 					m_pHMD->GetControllerStateWithPose(vr::TrackingUniverseStanding, c.num, &night, sizeof(night), &tmp);
 					c.on[0] = night.ulButtonPressed;
 					c.on[1] = night.ulButtonTouched;
 					c.touch = VGet(night.rAxis[0].x, night.rAxis[0].y, 0);
 					c.now = tmp.bPoseIsValid;
 					c.pos = VGet(tmp.mDeviceToAbsoluteTracking.m[0][3], tmp.mDeviceToAbsoluteTracking.m[1][3], -tmp.mDeviceToAbsoluteTracking.m[2][3]);
-					c.xvec = VGet(tmp.mDeviceToAbsoluteTracking.m[0][0], tmp.mDeviceToAbsoluteTracking.m[1][0], -tmp.mDeviceToAbsoluteTracking.m[2][0]);
+					c.xvec = VGet(-tmp.mDeviceToAbsoluteTracking.m[0][0], -tmp.mDeviceToAbsoluteTracking.m[1][0], tmp.mDeviceToAbsoluteTracking.m[2][0]);
 					c.yvec = VGet(tmp.mDeviceToAbsoluteTracking.m[0][1], tmp.mDeviceToAbsoluteTracking.m[1][1], -tmp.mDeviceToAbsoluteTracking.m[2][1]);
-					c.zvec = VGet(-tmp.mDeviceToAbsoluteTracking.m[0][2], -tmp.mDeviceToAbsoluteTracking.m[1][2], tmp.mDeviceToAbsoluteTracking.m[2][2]);
+					c.zvec = VGet(tmp.mDeviceToAbsoluteTracking.m[0][2], tmp.mDeviceToAbsoluteTracking.m[1][2], -tmp.mDeviceToAbsoluteTracking.m[2][2]);
 				}
 			}
 		}
@@ -667,18 +673,18 @@ public:
 	inline void GetDevicePositionVR(const char& handle_, VECTOR_ref* pos_, MATRIX_ref*mat) {
 		if (use_vr && handle_ != -1) {
 			*pos_ = ctrl[handle_].pos;
-			*mat = MATRIX_ref::Axis1(ctrl[handle_].xvec*-1.f, ctrl[handle_].yvec, ctrl[handle_].zvec*-1.f);
+			*mat = MATRIX_ref::Axis1(ctrl[handle_].xvec, ctrl[handle_].yvec, ctrl[handle_].zvec*-1.f);
 		}
 		else {
-			*pos_ = VGet(0, 1.f, 0);
-			*mat = MATRIX_ref::Axis1(VGet(-1, 0, 0), VGet(0, 1, 0), VGet(0, 0, -1));
+			*pos_ = VGet(0, 1.6f, 0);
+			*mat = MATRIX_ref::Axis1(VGet(1, 0, 0), VGet(0, 1, 0), VGet(0, 0, -1));
 		}
 	}
 	/**/
 	inline VECTOR_ref GetEyePosition_minVR(const char& eye_type) {
 		if (use_vr&&m_pHMD) {
 			const vr::HmdMatrix34_t tmpmat = vr::VRSystem()->GetEyeToHeadTransform((vr::EVREye)eye_type);
-			return ctrl[hmd_num].xvec*(tmpmat.m[0][3]) + ctrl[hmd_num].yvec*(tmpmat.m[1][3]) + ctrl[hmd_num].zvec*(-tmpmat.m[2][3]);
+			return (ctrl[hmd_num].xvec*(-tmpmat.m[0][3])) + (ctrl[hmd_num].yvec*(tmpmat.m[1][3])) + (ctrl[hmd_num].zvec*(tmpmat.m[2][3]));
 		}
 		else {
 			return VGet(0, 0, 0);
