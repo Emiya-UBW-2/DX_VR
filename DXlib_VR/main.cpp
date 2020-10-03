@@ -326,7 +326,7 @@ public:
 
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow){
-	auto Drawparts = std::make_unique<DXDraw>("FPS_0", FRAME_RATE, true);	/*汎用クラス*/
+	auto Drawparts = std::make_unique<DXDraw>("FPS_0", FRAME_RATE, false);	/*汎用クラス*/
 	auto Debugparts = std::make_unique<DeBuG>(FRAME_RATE);	/*デバッグクラス*/
 	auto grassparts = std::make_unique<GRASS>();	/*草クラス*/
 	//
@@ -337,7 +337,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	VECTOR_ref pos_track2;
 	MATRIX_ref mat_track2;
 
-	VECTOR_ref gunpos_TPS = VGet(-0.1f, -0.1f, -0.25f);
+	VECTOR_ref gunpos_TPS = VGet(-0.1f, -0.05f, -0.3f);
 
 	Chara chara;
 	MV1 body_obj;												//身体モデル
@@ -550,7 +550,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				MATRIX_ref t_inv = MATRIX_ref::RotY(chara.body_yrad);
 				if (Drawparts->use_vr) {
 					//身体
-					MATRIX_ref m_inv = t_inv;
+					MATRIX_ref m_inv = MATRIX_ref::RotY(DX_PI_F)*t_inv;
 					{
 						chara.body.SetMatrix(chara.mat*m_inv  *MATRIX_ref::Mtrans(chara.pos + chara.pos_HMD));
 						chara.body.SetMatrix(chara.mat*m_inv *MATRIX_ref::Mtrans((chara.body.frame(chara.RIGHTeye_f.first) + (chara.body.frame(chara.LEFTeye_f.first) - chara.body.frame(chara.RIGHTeye_f.first))*0.5f)));
@@ -634,13 +634,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				}
 				else {
 					//身体
-					MATRIX_ref m_inv = MATRIX_ref::RotY(deg2rad(30))*MATRIX_ref::RotZ(chara.body_zrad)*MATRIX_ref::RotX(chara.body_xrad)*t_inv;
-					MATRIX_ref mb_inv = MATRIX_ref::RotY(deg2rad(15))*t_inv;
-					MATRIX_ref mg_inv = t_inv;
+					MATRIX_ref m_inv = MATRIX_ref::RotY(deg2rad(30))*MATRIX_ref::RotZ(chara.body_zrad)*MATRIX_ref::RotX(chara.body_xrad)*MATRIX_ref::RotY(DX_PI_F)*t_inv;
+					MATRIX_ref mb_inv = MATRIX_ref::RotY(deg2rad(15))*MATRIX_ref::RotY(DX_PI_F)*t_inv;
+					MATRIX_ref mg_inv = MATRIX_ref::RotY(DX_PI_F)*t_inv;
 					{
 						if (chara.reloadf) {
-							m_inv = MATRIX_ref::RotZ(chara.body_zrad)*MATRIX_ref::RotX(chara.body_xrad)*t_inv;
-							mb_inv = t_inv;
+							m_inv = MATRIX_ref::RotZ(chara.body_zrad)*MATRIX_ref::RotX(chara.body_xrad)*MATRIX_ref::RotY(DX_PI_F)*t_inv;
+							mb_inv = MATRIX_ref::RotY(DX_PI_F)*t_inv;
 						}
 						chara.body.SetMatrix(chara.mat*MATRIX_ref::Mtrans(chara.pos));
 						//
@@ -692,12 +692,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						if (chara.body.get_anime(2).time >= chara.body.get_anime(2).alltime) {
 							chara.body.get_anime(2).time = 0.f;
 						}
+						chara.body.get_anime(8).time += 30.f / fps;
+						if (chara.body.get_anime(8).time >= chara.body.get_anime(8).alltime) {
+							chara.body.get_anime(8).time = 0.f;
+						}
 					}
 					//視点
-					{
-						easing_set(&gunpos_TPS, VGet(-0.1f, -0.05f, -0.3f), 0.75f, fps);
-					}
 					//手
+					gunpos_TPS = VGet(-0.1f, -0.05f, -0.3f);
 					{
 						chara.body.frame_reset(chara.RIGHTarm1_f.first);
 						chara.body.frame_reset(chara.RIGHTarm2_f.first);
@@ -716,8 +718,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 									//視点を一時取得
 									chara.pos_HMD = (chara.body.frame(chara.RIGHTeye_f.first) + (chara.body.frame(chara.LEFTeye_f.first) - chara.body.frame(chara.RIGHTeye_f.first))*0.5f) - chara.pos;
 									//銃器
-									chara.mat_RIGHTHAND = MATRIX_ref::RotVec2(VGet(0, 0, 1.f), chara.vecadd_RIGHTHAND)*chara.mat_HMD;//リコイル
-
+									chara.mat_RIGHTHAND = chara.mat_HMD;//リコイル
 									chara.pos_RIGHTHAND = chara.pos_HMD + MATRIX_ref::Vtrans( gunpos_TPS , chara.mat_RIGHTHAND);
 
 									VECTOR_ref tgt_pt = chara.pos_RIGHTHAND + chara.pos;
@@ -739,7 +740,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 								}
 								//左手
 								{
-									chara.pos_LEFTHAND = chara.pos_RIGHTHAND + chara.pos;//
+									chara.pos_LEFTHAND = chara.pos_RIGHTHAND;//
 									chara.mat_LEFTHAND = chara.mat_HMD;
 									chara.LEFT_hand = false;
 									{
