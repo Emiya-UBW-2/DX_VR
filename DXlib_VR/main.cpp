@@ -26,7 +26,7 @@ public:
 		SetASyncLoadFinishDeleteFlag(graph.get());										 /*grass*/
 		SetASyncLoadFinishDeleteFlag(grass.get());		/*grass*/
 	}
-	bool set_grass_ready(const char* buf,const float x_max=10.f,const float z_max = 10.f, const float x_min = -10.f, const float z_min = -10.f) {
+	bool set_grass_ready(const char* buf, const float x_max = 10.f, const float z_max = 10.f, const float x_min = -10.f, const float z_min = -10.f) {
 		/*grass*/
 		MV1SetupReferenceMesh(grass.get(), -1, TRUE); /*参照用メッシュの作成*/
 		RefMesh = MV1GetReferenceMesh(grass.get(), -1, TRUE); /*参照用メッシュの取得*/
@@ -39,7 +39,7 @@ public:
 		pnum = 0;
 
 		int grass_pos = LoadSoftImage(buf);
-		int xs = 0,ys = 0;
+		int xs = 0, ys = 0;
 		GetSoftImageSize(grass_pos, &xs, &ys);
 
 		for (int i = 0; i < grasss; ++i) {
@@ -48,7 +48,7 @@ public:
 			float z_t = (float)(GetRand(int((z_max - z_min)) * 100) - int(z_max - z_min) * 50) / 100.0f;
 			int _r_, _g_, _b_, _a_;
 			while (1) {
-				GetPixelSoftImage(grass_pos, int((x_t - x_min)/ (x_max - x_min)*float(xs)), int((z_t - z_min) / (z_max - z_min)*float(ys)), &_r_, &_g_, &_b_, &_a_);
+				GetPixelSoftImage(grass_pos, int((x_t - x_min) / (x_max - x_min)*float(xs)), int((z_t - z_min) / (z_max - z_min)*float(ys)), &_r_, &_g_, &_b_, &_a_);
 				if (_r_ <= 128) {
 					break;
 				}
@@ -325,10 +325,11 @@ public:
 };
 
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow){
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	auto Drawparts = std::make_unique<DXDraw>("FPS_0", FRAME_RATE, false);	/*汎用クラス*/
 	auto Debugparts = std::make_unique<DeBuG>(FRAME_RATE);	/*デバッグクラス*/
 	auto grassparts = std::make_unique<GRASS>();	/*草クラス*/
+	GraphHandle screen = GraphHandle::Make(1080, 1200);
 	//
 	VECTOR_ref pos_track0;
 	MATRIX_ref mat_track0;
@@ -367,10 +368,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	grassparts->set_grass_ready_before();
 
-	grassparts->set_grass_ready("data/grassput.bmp",5.f,5.f,-5.f,-5.f);
+	grassparts->set_grass_ready("data/grassput.bmp", 5.f, 5.f, -5.f, -5.f);
 	//
 	bool startp = false;
-	cams.set_cam_info(VGet(0, 1.f, 0), VGet(0, 0, -1.f), VGet(0, 1.f, 0), deg2rad(90), 0.1f, 5000.f);//カメラ
+	cams.set_cam_info(VGet(0, 1.f, 0), VGet(0, 0, -1.f), VGet(0, 1.f, 0), deg2rad(90), 0.1f, 50.f);//カメラ
 	{
 		Drawparts->Set_Light_Shadow(VGet(10.f, 10.f, 10.f), VGet(-10.f, -10.f, -10.f), VGet(-0.5f, -0.5f, -0.5f), [&] {/*map_mod.DrawModel();*/ });	//ライト、影
 		//main_loop
@@ -420,7 +421,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						if (ptr_.turn && ptr_.now) {
 							if ((ptr_.on[1] & BUTTON_TOUCHPAD) != 0) {
 								auto speed = 2.f;
-								easing_set(&add_pos_buf, (chara.mat_HMD.zvec()*ptr_.touch.y() + chara.mat_HMD.xvec()*ptr_.touch.x())*-speed / fps, 0.95f, fps);
+								easing_set(&add_pos_buf, (chara.mat_HMD.zvec()*-1.f*ptr_.touch.y() + chara.mat_HMD.xvec()*-1.f*ptr_.touch.x())*-speed / fps, 0.95f, fps);
 							}
 							else {
 								easing_set(&add_pos_buf, VGet(0, 0, 0), 0.95f, fps);
@@ -496,7 +497,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					{
 						//auto pp = mapparts->map_col_line(pos_t + VGet(0, 1.6f, 0), pos_t, 0);
 						if (chara.add_ypos <= 0.f && true) {
-							if (VECTOR_ref(VGet(0, 1.f, 0.f)).dot(VGet(0,1,0)) >= cos(deg2rad(30))) {
+							if (VECTOR_ref(VGet(0, 1.f, 0.f)).dot(VGet(0, 1, 0)) >= cos(deg2rad(30))) {
 								//pos_t = pp.HitPosition;
 							}
 							else {
@@ -549,16 +550,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				}
 				MATRIX_ref t_inv = MATRIX_ref::RotY(chara.body_yrad);
 				if (Drawparts->use_vr) {
-					//身体
-					MATRIX_ref m_inv = MATRIX_ref::RotY(DX_PI_F)*t_inv;
-					{
-						chara.body.SetMatrix(chara.mat*m_inv  *MATRIX_ref::Mtrans(chara.pos + chara.pos_HMD));
-						chara.body.SetMatrix(chara.mat*m_inv *MATRIX_ref::Mtrans((chara.body.frame(chara.RIGHTeye_f.first) + (chara.body.frame(chara.LEFTeye_f.first) - chara.body.frame(chara.RIGHTeye_f.first))*0.5f)));
-						//chara.body.SetFrameLocalMatrix(chara.bodyc_f.first, m_inv*MATRIX_ref::Mtrans(chara.bodyc_f.second));
-						//chara.body.SetFrameLocalMatrix(chara.body_f.first, m_inv*MATRIX_ref::Mtrans(chara.body_f.second));
-					}
-					//頭部
-					chara.body.SetFrameLocalMatrix(chara.head_f.first, chara.mat_HMD*m_inv.Inverse()*MATRIX_ref::Mtrans(chara.head_f.second));
+					//身体,頭部
+					MATRIX_ref m_inv = t_inv;
+					chara.body.SetMatrix(chara.mat*m_inv);
+					chara.body.SetFrameLocalMatrix(chara.head_f.first, (MATRIX_ref::Axis1(chara.mat_HMD.xvec()*-1.f, chara.mat_HMD.yvec(), chara.mat_HMD.zvec()*-1.f) *m_inv.Inverse())*MATRIX_ref::Mtrans(chara.head_f.second));
+					chara.body.SetMatrix(chara.mat*m_inv 						*MATRIX_ref::Mtrans(chara.pos + chara.pos_HMD - (chara.body.frame(chara.RIGHTeye_f.first) + (chara.body.frame(chara.LEFTeye_f.first) - chara.body.frame(chara.RIGHTeye_f.first))*0.5f)));
 					//足
 					{
 
@@ -699,7 +695,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					}
 					//視点
 					//手
-					gunpos_TPS = VGet(-0.1f, -0.05f, -0.3f);
 					{
 						chara.body.frame_reset(chara.RIGHTarm1_f.first);
 						chara.body.frame_reset(chara.RIGHTarm2_f.first);
@@ -719,7 +714,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 									chara.pos_HMD = (chara.body.frame(chara.RIGHTeye_f.first) + (chara.body.frame(chara.LEFTeye_f.first) - chara.body.frame(chara.RIGHTeye_f.first))*0.5f) - chara.pos;
 									//銃器
 									chara.mat_RIGHTHAND = chara.mat_HMD;//リコイル
-									chara.pos_RIGHTHAND = chara.pos_HMD + MATRIX_ref::Vtrans( gunpos_TPS , chara.mat_RIGHTHAND);
+									chara.pos_RIGHTHAND = chara.pos_HMD + MATRIX_ref::Vtrans(gunpos_TPS, chara.mat_RIGHTHAND);
 
 									VECTOR_ref tgt_pt = chara.pos_RIGHTHAND + chara.pos;
 									//基準
@@ -779,7 +774,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						}
 					}
 				}
-				chara.body.work_anime();
 				if (!Drawparts->use_vr) {
 					//視点取得
 					chara.pos_HMD = (chara.body.frame(chara.RIGHTeye_f.first) + (chara.body.frame(chara.LEFTeye_f.first) - chara.body.frame(chara.RIGHTeye_f.first))*0.5f) - chara.pos;
@@ -846,32 +840,33 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			//描画
 			Drawparts->draw_VR(
 				[&] {
-					
-					SetUseLighting(FALSE);
-					sky_mod.DrawModel();
-					SetUseLighting(TRUE);
 
-					Drawparts->Draw_by_Shadow(
-						[&] {
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-						map_mod.DrawModel();
+				SetUseLighting(FALSE);
+				sky_mod.DrawModel();
+				SetUseLighting(TRUE);
 
-						chara.Draw_chara();
+				Drawparts->Draw_by_Shadow(
+					[&] {
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+					map_mod.DrawModel();
 
-						DrawCone3D((chara.pos + MATRIX_ref::Vtrans((pos_track0 - chara.pos_HMD), chara.mat) + chara.pos_HMD + (mat_track0 * chara.mat).zvec()*0.1f).get(), (chara.pos + MATRIX_ref::Vtrans((pos_track0 - chara.pos_HMD), chara.mat) + chara.pos_HMD - (mat_track0 * chara.mat).zvec()*0.1f).get(), 0.1f, 8, GetColor(255, 0, 0), GetColor(255, 255, 255), TRUE);
-						DrawCone3D((chara.pos + MATRIX_ref::Vtrans((pos_track1 - chara.pos_HMD), chara.mat) + chara.pos_HMD + (mat_track1 * chara.mat).zvec()*0.1f).get(), (chara.pos + MATRIX_ref::Vtrans((pos_track1 - chara.pos_HMD), chara.mat) + chara.pos_HMD - (mat_track1 * chara.mat).zvec()*0.1f).get(), 0.1f, 8, GetColor(255, 0, 0), GetColor(255, 255, 255), TRUE);
-						DrawCone3D((chara.pos + MATRIX_ref::Vtrans((pos_track2 - chara.pos_HMD), chara.mat) + chara.pos_HMD + (mat_track2 * chara.mat).zvec()*0.1f).get(), (chara.pos + MATRIX_ref::Vtrans((pos_track2 - chara.pos_HMD), chara.mat) + chara.pos_HMD - (mat_track2 * chara.mat).zvec()*0.1f).get(), 0.1f, 8, GetColor(255, 0, 0), GetColor(255, 255, 255), TRUE);
+					chara.Draw_chara();
 
-						grassparts->draw_grass();
-					});
-				},
+					DrawCone3D((chara.pos + MATRIX_ref::Vtrans((pos_track0 - chara.pos_HMD), chara.mat) + chara.pos_HMD + (mat_track0 * chara.mat).zvec()*0.1f).get(), (chara.pos + MATRIX_ref::Vtrans((pos_track0 - chara.pos_HMD), chara.mat) + chara.pos_HMD - (mat_track0 * chara.mat).zvec()*0.1f).get(), 0.1f, 8, GetColor(255, 0, 0), GetColor(255, 255, 255), TRUE);
+					DrawCone3D((chara.pos + MATRIX_ref::Vtrans((pos_track1 - chara.pos_HMD), chara.mat) + chara.pos_HMD + (mat_track1 * chara.mat).zvec()*0.1f).get(), (chara.pos + MATRIX_ref::Vtrans((pos_track1 - chara.pos_HMD), chara.mat) + chara.pos_HMD - (mat_track1 * chara.mat).zvec()*0.1f).get(), 0.1f, 8, GetColor(255, 0, 0), GetColor(255, 255, 255), TRUE);
+					DrawCone3D((chara.pos + MATRIX_ref::Vtrans((pos_track2 - chara.pos_HMD), chara.mat) + chara.pos_HMD + (mat_track2 * chara.mat).zvec()*0.1f).get(), (chara.pos + MATRIX_ref::Vtrans((pos_track2 - chara.pos_HMD), chara.mat) + chara.pos_HMD - (mat_track2 * chara.mat).zvec()*0.1f).get(), 0.1f, 8, GetColor(255, 0, 0), GetColor(255, 255, 255), TRUE);
+
+					grassparts->draw_grass();
+				});
+			},
 				cams);
 			//debug
-			GraphHandle::SetDraw_Screen(int(DX_SCREEN_BACK), chara.pos + chara.pos_HMD + VGet(0, 1.f, 2.f), chara.pos + chara.pos_HMD,VGet(0,1,0), cams.fov,cams.near_, cams.far_);
-					map_mod.DrawModel();
-					chara.Draw_chara();
-					grassparts->draw_grass();
-
+			screen.SetDraw_Screen(chara.pos + chara.pos_HMD + VGet(0, 0.3f, 2.f), chara.pos + chara.pos_HMD, VGet(0, 1, 0), cams.fov, cams.near_, cams.far_);
+			map_mod.DrawModel();
+			chara.Draw_chara();
+			grassparts->draw_grass();
+			GraphHandle::SetDraw_Screen(int(DX_SCREEN_BACK));
+			screen.DrawGraph(0, 0, false);
 
 
 			Debugparts->end_way();

@@ -673,11 +673,12 @@ public:
 	inline void GetDevicePositionVR(const char& handle_, VECTOR_ref* pos_, MATRIX_ref*mat) {
 		if (use_vr && handle_ != -1) {
 			*pos_ = ctrl[handle_].pos;
-			*mat = MATRIX_ref::Axis1(ctrl[handle_].xvec, ctrl[handle_].yvec, ctrl[handle_].zvec*-1.f);
+			*mat = MATRIX_ref::Axis1(ctrl[handle_].xvec, ctrl[handle_].yvec, ctrl[handle_].zvec);
+			*mat = MATRIX_ref::Axis1(mat->xvec()*-1.f, mat->yvec(), mat->zvec()*-1.f);
 		}
 		else {
 			*pos_ = VGet(0, 1.6f, 0);
-			*mat = MATRIX_ref::Axis1(VGet(1, 0, 0), VGet(0, 1, 0), VGet(0, 0, -1));
+			*mat = MATRIX_ref::Axis1(VGet(1, 0, 0), VGet(0, 1, 0), VGet(0, 0, 1));
 		}
 	}
 	/**/
