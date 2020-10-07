@@ -161,6 +161,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="classes.hpp" />
     <ClInclude Include="DXLib_ref\debug.hpp" />
     <ClInclude Include="DXLib_ref\DXLib_mat.hpp" />
     <ClInclude Include="DXLib_ref\DXLib_ref.h" />
