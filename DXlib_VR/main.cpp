@@ -467,6 +467,99 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						chara.pos_RIGHTHAND = chara.pos_HMD + MATRIX_ref::Vtrans(gunpos_TPS, chara.mat_RIGHTHAND);
 					}
 				}
+
+				//飛行機演算
+				{
+					auto& c = chara;
+					auto& veh = c.vehicle;
+					float rad_spec = deg2rad(veh.use_veh.body_rad_limit * (veh.use_veh.mid_speed_limit / veh.speed));
+					if (veh.speed < veh.use_veh.min_speed_limit) {
+						rad_spec = deg2rad(veh.use_veh.body_rad_limit * (std::clamp(veh.speed, 0.f, veh.use_veh.min_speed_limit) / veh.use_veh.min_speed_limit));
+					}
+					//ピッチ
+					easing_set(&veh.xradadd_right, ((c.key[2]) ? -(c.key[12] ? rad_spec / 12.f : rad_spec / 4.f) : 0.f), 0.95f, fps);
+					easing_set(&veh.xradadd_left, ((c.key[3]) ? (c.key[12] ? rad_spec / 12.f : rad_spec / 4.f) : 0.f), 0.95f, fps);
+					//ロール
+					easing_set(&veh.zradadd_right, ((c.key[4]) ? (c.key[12] ? rad_spec / 3.f : rad_spec) : 0.f), 0.95f, fps);
+					easing_set(&veh.zradadd_left, ((c.key[5]) ? -(c.key[12] ? rad_spec / 3.f : rad_spec) : 0.f), 0.95f, fps);
+					//ヨー
+					easing_set(&veh.yradadd_left, ((c.key[6]) ? -(c.key[12] ? rad_spec / 24.f : rad_spec / 8.f) : 0.f), 0.95f, fps);
+					easing_set(&veh.yradadd_right, ((c.key[7]) ? (c.key[12] ? rad_spec / 24.f : rad_spec / 8.f) : 0.f), 0.95f, fps);
+					//スロットル
+					easing_set(&veh.speed_add, (((c.key[8]) && veh.speed < veh.use_veh.max_speed_limit) ? (0.5f / 3.6f) : 0.f), 0.95f, fps);
+					easing_set(&veh.speed_sub, (c.key[9]) ? ((veh.speed > veh.use_veh.min_speed_limit) ? (-0.5f / 3.6f) : ((veh.speed > 0.f) ? (-0.2f / 3.6f) : 0.f)) : 0.f, 0.95f, fps);
+					//スピード
+					veh.speed += (veh.speed_add + veh.speed_sub) * 60.f / fps;
+					{
+						auto tmp = veh.mat.zvec();
+						auto tmp2 = sin(atan2f(tmp.y(), std::hypotf(tmp.x(), tmp.z())));
+						veh.speed += (((std::abs(tmp2) > sin(deg2rad(1.0f))) ? tmp2 * 0.5f : 0.f) / 3.6f) * 60.f / fps; //落下
+					}
+					//座標系反映
+					{
+						auto t_mat = veh.mat;
+						veh.mat *= MATRIX_ref::RotAxis(t_mat.xvec(), (veh.xradadd_right + veh.xradadd_left) / fps);
+						veh.mat *= MATRIX_ref::RotAxis(t_mat.zvec(), (veh.zradadd_right + veh.zradadd_left) / fps);
+						veh.mat *= MATRIX_ref::RotAxis(t_mat.yvec(), (veh.yradadd_left + veh.yradadd_right) / fps);
+					}
+					//舵
+					for (int i = 0; i < c.p_animes_rudder.size(); i++) {
+						easing_set(&c.p_animes_rudder[i].second, float(c.key[i + 2]), 0.95f, fps);
+						MV1SetAttachAnimBlendRate(veh.obj.get(), c.p_animes_rudder[i].first, c.p_animes_rudder[i].second);
+					}
+					//
+					{
+						//
+						if (veh.speed >= veh.use_veh.min_speed_limit) {
+							easing_set(&veh.add, VGet(0.f, 0.f, 0.f), 0.9f, fps);
+						}
+						else {
+							veh.add.yadd(M_GR / powf(fps, 2.f));
+						}
+
+						veh.pos += veh.add + (veh.mat.zvec() * (-veh.speed / fps));
+					}
+					//浮く
+					if (veh.use_veh.isfloat) {
+						veh.pos.y(std::max(veh.pos.y(), -veh.use_veh.down_in_water));
+					}
+					//壁の当たり判定
+					bool hitb = false;
+					{
+						VECTOR_ref p_0 = veh.pos + MATRIX_ref::Vtrans(VGet(veh.use_veh.minpos.x(), 0.f, veh.use_veh.maxpos.z()), veh.mat);
+						VECTOR_ref p_1 = veh.pos + MATRIX_ref::Vtrans(VGet(veh.use_veh.maxpos.x(), 0.f, veh.use_veh.maxpos.z()), veh.mat);
+						VECTOR_ref p_2 = veh.pos + MATRIX_ref::Vtrans(VGet(veh.use_veh.maxpos.x(), 0.f, veh.use_veh.minpos.z()), veh.mat);
+						VECTOR_ref p_3 = veh.pos + MATRIX_ref::Vtrans(VGet(veh.use_veh.minpos.x(), 0.f, veh.use_veh.minpos.z()), veh.mat);
+						if (p_0.y() <= 0.f || p_1.y() <= 0.f || p_2.y() <= 0.f || p_3.y() <= 0.f) {
+							hitb = true;
+						}
+						if (!hitb) {
+							/*
+							for (int i = 0; i < mapparts->map_col_get().mesh_num(); i++) {
+								if (mapparts->map_col_line(p_0, p_1, i).HitFlag == TRUE) {
+									hitb = true;
+									break;
+								}
+								if (mapparts->map_col_line(p_1, p_2, i).HitFlag == TRUE) {
+									hitb = true;
+									break;
+								}
+								if (mapparts->map_col_line(p_2, p_3, i).HitFlag == TRUE) {
+									hitb = true;
+									break;
+								}
+								if (mapparts->map_col_line(p_3, p_0, i).HitFlag == TRUE) {
+									hitb = true;
+									break;
+								}
+							}
+							*/
+						}
+					}
+					if (hitb) {
+					}
+				}
+
 				//操作
 				if (Drawparts->use_vr) {
 					if (Drawparts->get_hand1_num() != -1) {
