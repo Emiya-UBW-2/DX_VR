@@ -1,7 +1,7 @@
 #define FRAME_RATE 90.f
 #include"DXLib_ref/DXLib_ref.h"
-
 #include"classes.hpp"
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	auto Drawparts = std::make_unique<DXDraw>("FPS_0", FRAME_RATE, true);	/*汎用クラス*/
 	auto Debugparts = std::make_unique<DeBuG>(FRAME_RATE);	/*デバッグクラス*/
@@ -23,6 +23,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	VECTOR_ref pos_track2;
 	MATRIX_ref mat_track2;
 	VECTOR_ref gunpos_TPS = VGet(-0.1f, -0.05f, -0.3f);
+	VECTOR_ref rec_HMD;
 	Chara chara;
 	MV1 body_obj;												//身体モデル
 	DXDraw::cam_info cams;
@@ -47,13 +48,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			const auto waits = GetNowHiPerformanceCount();
 			Debugparts->put_way();
 			//座標取得
-			if (Drawparts->tracker_num.size > 0) {
+			if (Drawparts->tracker_num.size() > 0) {
 				Drawparts->GetDevicePositionVR(Drawparts->tracker_num[0], &pos_track0, &mat_track0);
 			}
-			if (Drawparts->tracker_num.size > 1) {
+			if (Drawparts->tracker_num.size() > 1) {
 				Drawparts->GetDevicePositionVR(Drawparts->tracker_num[1], &pos_track1, &mat_track1);
 			}
-			if (Drawparts->tracker_num.size > 2) {
+			if (Drawparts->tracker_num.size() > 2) {
 				Drawparts->GetDevicePositionVR(Drawparts->tracker_num[2], &pos_track2, &mat_track2);
 			}
 			//プレイヤー操作
@@ -62,6 +63,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				if (Drawparts->use_vr) {
 					//+視点取得
 					Drawparts->GetDevicePositionVR(Drawparts->get_hmd_num(), &chara.pos_HMD, &chara.mat_HMD);
+					if (chara.start_c) {
+						rec_HMD = VGet(chara.pos_HMD.x(),0.f, chara.pos_HMD.z());
+					}
+					chara.pos_HMD = chara.pos_HMD - rec_HMD;
 				}
 				else {
 					int x_m, y_m;
@@ -502,11 +507,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						veh.mat *= MATRIX_ref::RotAxis(t_mat.zvec(), (veh.zradadd_right + veh.zradadd_left) / fps);
 						veh.mat *= MATRIX_ref::RotAxis(t_mat.yvec(), (veh.yradadd_left + veh.yradadd_right) / fps);
 					}
-					//舵
-					for (int i = 0; i < c.p_animes_rudder.size(); i++) {
-						easing_set(&c.p_animes_rudder[i].second, float(c.key[i + 2]), 0.95f, fps);
-						MV1SetAttachAnimBlendRate(veh.obj.get(), c.p_animes_rudder[i].first, c.p_animes_rudder[i].second);
-					}
 					//
 					{
 						//
@@ -519,18 +519,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 						veh.pos += veh.add + (veh.mat.zvec() * (-veh.speed / fps));
 					}
-					//浮く
-					if (veh.use_veh.isfloat) {
-						veh.pos.y(std::max(veh.pos.y(), -veh.use_veh.down_in_water));
-					}
 					//壁の当たり判定
 					bool hitb = false;
 					{
-						VECTOR_ref p_0 = veh.pos + MATRIX_ref::Vtrans(VGet(veh.use_veh.minpos.x(), 0.f, veh.use_veh.maxpos.z()), veh.mat);
-						VECTOR_ref p_1 = veh.pos + MATRIX_ref::Vtrans(VGet(veh.use_veh.maxpos.x(), 0.f, veh.use_veh.maxpos.z()), veh.mat);
-						VECTOR_ref p_2 = veh.pos + MATRIX_ref::Vtrans(VGet(veh.use_veh.maxpos.x(), 0.f, veh.use_veh.minpos.z()), veh.mat);
-						VECTOR_ref p_3 = veh.pos + MATRIX_ref::Vtrans(VGet(veh.use_veh.minpos.x(), 0.f, veh.use_veh.minpos.z()), veh.mat);
-						if (p_0.y() <= 0.f || p_1.y() <= 0.f || p_2.y() <= 0.f || p_3.y() <= 0.f) {
+						VECTOR_ref p_0 = veh.pos;
+						if (p_0.y() <= 0.f) {
 							hitb = true;
 						}
 						if (!hitb) {
