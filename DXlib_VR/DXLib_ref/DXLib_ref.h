@@ -677,7 +677,7 @@ public:
 			*mat = MATRIX_ref::Axis1(mat->xvec()*-1.f, mat->yvec(), mat->zvec()*-1.f);
 		}
 		else {
-			*pos_ = VGet(0, 1.6f, 0);
+			*pos_ = VGet(0, 0, 0);
 			*mat = MATRIX_ref::Axis1(VGet(1, 0, 0), VGet(0, 1, 0), VGet(0, 0, 1));
 		}
 	}

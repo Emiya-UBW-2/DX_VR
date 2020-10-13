@@ -16,6 +16,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	MV1::Load("data/map/sky/model.mv1", &sky_mod, false);
 	sky_mod.SetMatrix(MGetIdent());
 	//プレイヤー操作変数群
+	bool oldv=true;
 	VECTOR_ref pos_track0;
 	MATRIX_ref mat_track0;
 	VECTOR_ref pos_track1;
@@ -62,10 +63,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				//HMD_mat
 				if (Drawparts->use_vr) {
 					//+視点取得
+					auto& ptr_ = (*Drawparts->get_device())[Drawparts->get_hmd_num()];
 					Drawparts->GetDevicePositionVR(Drawparts->get_hmd_num(), &chara.pos_HMD, &chara.mat_HMD);
-					if (chara.start_c) {
+					if (chara.start_c || (ptr_.turn && ptr_.now)!=oldv) {
 						rec_HMD = VGet(chara.pos_HMD.x(),0.f, chara.pos_HMD.z());
 					}
+					oldv = ptr_.turn && ptr_.now;
 					chara.pos_HMD = chara.pos_HMD - rec_HMD;
 				}
 				else {
@@ -470,86 +473,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						chara.pos_HMD = (chara.body.frame(chara.RIGHTeye_f.first) + (chara.body.frame(chara.LEFTeye_f.first) - chara.body.frame(chara.RIGHTeye_f.first))*0.5f) - chara.pos;
 						//右手
 						chara.pos_RIGHTHAND = chara.pos_HMD + MATRIX_ref::Vtrans(gunpos_TPS, chara.mat_RIGHTHAND);
-					}
-				}
-
-				//飛行機演算
-				{
-					auto& c = chara;
-					auto& veh = c.vehicle;
-					float rad_spec = deg2rad(veh.use_veh.body_rad_limit * (veh.use_veh.mid_speed_limit / veh.speed));
-					if (veh.speed < veh.use_veh.min_speed_limit) {
-						rad_spec = deg2rad(veh.use_veh.body_rad_limit * (std::clamp(veh.speed, 0.f, veh.use_veh.min_speed_limit) / veh.use_veh.min_speed_limit));
-					}
-					//ピッチ
-					easing_set(&veh.xradadd_right, ((c.key[2]) ? -(c.key[12] ? rad_spec / 12.f : rad_spec / 4.f) : 0.f), 0.95f, fps);
-					easing_set(&veh.xradadd_left, ((c.key[3]) ? (c.key[12] ? rad_spec / 12.f : rad_spec / 4.f) : 0.f), 0.95f, fps);
-					//ロール
-					easing_set(&veh.zradadd_right, ((c.key[4]) ? (c.key[12] ? rad_spec / 3.f : rad_spec) : 0.f), 0.95f, fps);
-					easing_set(&veh.zradadd_left, ((c.key[5]) ? -(c.key[12] ? rad_spec / 3.f : rad_spec) : 0.f), 0.95f, fps);
-					//ヨー
-					easing_set(&veh.yradadd_left, ((c.key[6]) ? -(c.key[12] ? rad_spec / 24.f : rad_spec / 8.f) : 0.f), 0.95f, fps);
-					easing_set(&veh.yradadd_right, ((c.key[7]) ? (c.key[12] ? rad_spec / 24.f : rad_spec / 8.f) : 0.f), 0.95f, fps);
-					//スロットル
-					easing_set(&veh.speed_add, (((c.key[8]) && veh.speed < veh.use_veh.max_speed_limit) ? (0.5f / 3.6f) : 0.f), 0.95f, fps);
-					easing_set(&veh.speed_sub, (c.key[9]) ? ((veh.speed > veh.use_veh.min_speed_limit) ? (-0.5f / 3.6f) : ((veh.speed > 0.f) ? (-0.2f / 3.6f) : 0.f)) : 0.f, 0.95f, fps);
-					//スピード
-					veh.speed += (veh.speed_add + veh.speed_sub) * 60.f / fps;
-					{
-						auto tmp = veh.mat.zvec();
-						auto tmp2 = sin(atan2f(tmp.y(), std::hypotf(tmp.x(), tmp.z())));
-						veh.speed += (((std::abs(tmp2) > sin(deg2rad(1.0f))) ? tmp2 * 0.5f : 0.f) / 3.6f) * 60.f / fps; //落下
-					}
-					//座標系反映
-					{
-						auto t_mat = veh.mat;
-						veh.mat *= MATRIX_ref::RotAxis(t_mat.xvec(), (veh.xradadd_right + veh.xradadd_left) / fps);
-						veh.mat *= MATRIX_ref::RotAxis(t_mat.zvec(), (veh.zradadd_right + veh.zradadd_left) / fps);
-						veh.mat *= MATRIX_ref::RotAxis(t_mat.yvec(), (veh.yradadd_left + veh.yradadd_right) / fps);
-					}
-					//
-					{
-						//
-						if (veh.speed >= veh.use_veh.min_speed_limit) {
-							easing_set(&veh.add, VGet(0.f, 0.f, 0.f), 0.9f, fps);
-						}
-						else {
-							veh.add.yadd(M_GR / powf(fps, 2.f));
-						}
-
-						veh.pos += veh.add + (veh.mat.zvec() * (-veh.speed / fps));
-					}
-					//壁の当たり判定
-					bool hitb = false;
-					{
-						VECTOR_ref p_0 = veh.pos;
-						if (p_0.y() <= 0.f) {
-							hitb = true;
-						}
-						if (!hitb) {
-							/*
-							for (int i = 0; i < mapparts->map_col_get().mesh_num(); i++) {
-								if (mapparts->map_col_line(p_0, p_1, i).HitFlag == TRUE) {
-									hitb = true;
-									break;
-								}
-								if (mapparts->map_col_line(p_1, p_2, i).HitFlag == TRUE) {
-									hitb = true;
-									break;
-								}
-								if (mapparts->map_col_line(p_2, p_3, i).HitFlag == TRUE) {
-									hitb = true;
-									break;
-								}
-								if (mapparts->map_col_line(p_3, p_0, i).HitFlag == TRUE) {
-									hitb = true;
-									break;
-								}
-							}
-							*/
-						}
-					}
-					if (hitb) {
 					}
 				}
 

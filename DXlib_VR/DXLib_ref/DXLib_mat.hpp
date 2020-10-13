@@ -6,7 +6,13 @@ class VECTOR_ref {
 public:
 	VECTOR_ref() noexcept : value(DxLib::VGet(0, 0, 0)) {}
 	VECTOR_ref(VECTOR value) { this->value = value; }
-	//‰ÁŽZ
+	//
+	bool operator==(VECTOR_ref obj) {
+		return (this->value.x == obj.value.x)&(this->value.y == obj.value.y)&(this->value.z == obj.value.z);
+	}
+	bool operator!=(VECTOR_ref obj) {
+		return (this->value.x != obj.value.x)|(this->value.y != obj.value.y)|(this->value.z != obj.value.z);
+	}//‰ÁŽZ
 	VECTOR_ref operator+(VECTOR_ref obj) { return VECTOR_ref(DxLib::VAdd(this->value, obj.value)); }
 	VECTOR_ref operator+=(VECTOR_ref obj) {
 		this->value = DxLib::VAdd(this->value, obj.value);

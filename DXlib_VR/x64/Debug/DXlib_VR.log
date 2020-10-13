@@ -25,5 +25,5 @@ c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\main.cpp(5): warning C41
 c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\main.cpp(5): warning C4100: 'lpCmdLine': 引数は関数の本体部で 1 度も参照されません。
 c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\main.cpp(5): warning C4100: 'hPrevInstance': 引数は関数の本体部で 1 度も参照されません。
 c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\main.cpp(5): warning C4100: 'hInstance': 引数は関数の本体部で 1 度も参照されません。
-c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_ref\dxlib_mat.hpp(56): warning C4505: 'Hit_Capsule_Tri': 参照されていないローカル関数は削除されました。
+c:\users\ハンドサイン\source\repos\dx_vr\dxlib_vr\dxlib_ref\dxlib_mat.hpp(62): warning C4505: 'Hit_Capsule_Tri': 参照されていないローカル関数は削除されました。
   DXlib_VR.vcxproj -> C:\Users\ハンドサイン\source\repos\DX_VR\DXlib_VR\x64\Debug\DXlib_VR.exe
