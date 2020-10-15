@@ -50,7 +50,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			Debugparts->put_way();
 			//ç¿ïWéÊìæ
 			if (Drawparts->tracker_num.size() > 0) {
-				Drawparts->GetDevicePositionVR(Drawparts->tracker_num[0], &pos_track0, &mat_track0);
+				Drawparts->GetDevicePositionVR(Drawparts->tracker_num[0], &chara.pos_WAIST, &chara.mat_WAIST);
 			}
 			if (Drawparts->tracker_num.size() > 1) {
 				Drawparts->GetDevicePositionVR(Drawparts->tracker_num[1], &pos_track1, &mat_track1);
@@ -225,7 +225,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				if (Drawparts->use_vr) {
 					//
 					{
-						VECTOR_ref v_ = chara.mat_HMD.zvec();
+						VECTOR_ref v_ = chara.mat_WAIST.zvec()*-1.f;
 						float x_1 = -sinf(chara.body_yrad);
 						float y_1 = cosf(chara.body_yrad);
 						float x_2 = v_.x();
@@ -234,11 +234,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						chara.body_yrad += r_ * FRAME_RATE / fps / 10.f;
 					}
 					MATRIX_ref t_inv = MATRIX_ref::RotY(chara.body_yrad);
-					//êgëÃ,ì™ïî
+					//êgëÃ,ì™ïî,çò
 					MATRIX_ref m_inv = t_inv;
 					chara.body.SetMatrix(chara.mat*m_inv);
-					chara.body.SetFrameLocalMatrix(chara.head_f.first, (MATRIX_ref::Axis1(chara.mat_HMD.xvec()*-1.f, chara.mat_HMD.yvec(), chara.mat_HMD.zvec()*-1.f) *m_inv.Inverse())*MATRIX_ref::Mtrans(chara.head_f.second));
-					chara.body.SetMatrix(chara.mat*m_inv 						*MATRIX_ref::Mtrans(chara.pos + chara.pos_HMD - (chara.body.frame(chara.RIGHTeye_f.first) + (chara.body.frame(chara.LEFTeye_f.first) - chara.body.frame(chara.RIGHTeye_f.first))*0.5f)));
+
+					if (Drawparts->tracker_num.size() > 0) {
+						//çò
+						chara.body.SetFrameLocalMatrix(chara.bodyb_f.first, (chara.mat_WAIST*m_inv.Inverse())*MATRIX_ref::Mtrans(chara.bodyb_f.second));
+						//ì™ïî
+						chara.body.SetFrameLocalMatrix(chara.head_f.first, (MATRIX_ref::Axis1(chara.mat_HMD.xvec()*-1.f, chara.mat_HMD.yvec(), chara.mat_HMD.zvec()*-1.f) *m_inv.Inverse()*(chara.mat_WAIST*m_inv.Inverse()).Inverse())*MATRIX_ref::Mtrans(chara.head_f.second));
+					}
+					else {
+						//ì™ïî
+						chara.body.SetFrameLocalMatrix(chara.head_f.first,(MATRIX_ref::Axis1(chara.mat_HMD.xvec()*-1.f, chara.mat_HMD.yvec(), chara.mat_HMD.zvec()*-1.f) *m_inv.Inverse())*MATRIX_ref::Mtrans(chara.head_f.second));
+					}
+
+					chara.body.SetMatrix(chara.mat*m_inv
+						*MATRIX_ref::Mtrans(chara.pos + chara.pos_HMD - (chara.body.frame(chara.RIGHTeye_f.first) + (chara.body.frame(chara.LEFTeye_f.first) - chara.body.frame(chara.RIGHTeye_f.first))*0.5f))
+					);
 					//ë´
 					{
 

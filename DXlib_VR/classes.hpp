@@ -128,6 +128,7 @@ public:
 	frames RIGHThand_f;
 	frames RIGHTarm2_f;
 	frames RIGHTarm1_f;
+	frames RIGHTarm0_f;
 	//¶ŽèÀ•WŒn
 	VECTOR_ref pos_LEFTHAND;
 	MATRIX_ref mat_LEFTHAND;
@@ -135,6 +136,10 @@ public:
 	frames LEFThand_f;
 	frames LEFTarm2_f;
 	frames LEFTarm1_f;
+	frames LEFTarm0_f;
+	//
+	VECTOR_ref pos_WAIST;
+	MATRIX_ref mat_WAIST;
 	//
 	bool start_c = true;
 
@@ -199,7 +204,7 @@ public:
 
 			}
 			else if (p.find("‰EŒ¨") != std::string::npos) {
-
+				RIGHTarm0_f = { int(i),MATRIX_ref::Vtrans(VGet(0,0,0),this->body.GetFrameLocalMatrix(i)) };
 			}
 			else if (p.find("‰E˜r") != std::string::npos && p.find("€") == std::string::npos) {
 				RIGHTarm1_f = { int(i),MATRIX_ref::Vtrans(VGet(0,0,0),this->body.GetFrameLocalMatrix(i)) };
@@ -218,7 +223,7 @@ public:
 				RIGHThand2_f = { int(i),MATRIX_ref::Vtrans(VGet(0,0,0),this->body.GetFrameLocalMatrix(i)) };
 			}
 			else if (p.find("¶Œ¨") != std::string::npos) {
-
+				LEFTarm0_f = { int(i),MATRIX_ref::Vtrans(VGet(0,0,0),this->body.GetFrameLocalMatrix(i)) };
 			}
 			else if (p.find("¶˜r") != std::string::npos && p.find("€") == std::string::npos) {
 				LEFTarm1_f = { int(i),MATRIX_ref::Vtrans(VGet(0,0,0),this->body.GetFrameLocalMatrix(i)) };
