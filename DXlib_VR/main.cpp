@@ -84,13 +84,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							auto ekey = (CheckHitKey(KEY_INPUT_E) != 0);
 							chara.mat_HMD *= MATRIX_ref::RotAxis(chara.mat_HMD.zvec(), chara.body_zrad).Inverse();
 							if (qkey) {
-								easing_set(&chara.body_zrad, deg2rad(-30), 0.9f, fps);
+								easing_set(&chara.body_zrad, deg2rad(-30), 0.9f);
 							}
 							else if (ekey) {
-								easing_set(&chara.body_zrad, deg2rad(30), 0.9f, fps);
+								easing_set(&chara.body_zrad, deg2rad(30), 0.9f);
 							}
 							else {
-								easing_set(&chara.body_zrad, 0.f, 0.9f, fps);
+								easing_set(&chara.body_zrad, 0.f, 0.9f);
 							}
 							chara.mat_HMD *= MATRIX_ref::RotAxis(chara.mat_HMD.zvec(), chara.body_zrad);
 						}
@@ -112,17 +112,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 							if (ptr_.turn && ptr_.now) {
 								if ((ptr_.on[1] & BUTTON_TOUCHPAD) != 0) {
 									auto speed = 2.f;
-									easing_set(&add_pos_buf, (chara.mat_HMD.zvec()*-1.f*ptr_.touch.y() + chara.mat_HMD.xvec()*-1.f*ptr_.touch.x())*-speed / fps, 0.95f, fps);
+									easing_set(&add_pos_buf, (chara.mat_HMD.zvec()*-1.f*ptr_.touch.y() + chara.mat_HMD.xvec()*-1.f*ptr_.touch.x())*-speed / fps, 0.95f);
 								}
 								else {
-									easing_set(&add_pos_buf, VGet(0, 0, 0), 0.95f, fps);
+									easing_set(&add_pos_buf, VGet(0, 0, 0), 0.95f);
 								}
 								if (chara.add_ypos == 0.f) {
 									//chara.add_ypos = 0.05f;/*ジャンプ*/
 									add_pos = add_pos_buf;
 								}
 								else {
-									easing_set(&add_pos, VGet(0, 0, 0), 0.995f, fps);
+									easing_set(&add_pos, VGet(0, 0, 0), 0.995f);
 								}
 							}
 						}
@@ -146,26 +146,26 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						xv_t = xv_t.Norm();
 
 						if (wkey) {
-							easing_set(&add_pos_buf, zv_t*-speed / fps, 0.95f, fps);
+							easing_set(&add_pos_buf, zv_t*-speed / fps, 0.95f);
 						}
 						if (skey) {
-							easing_set(&add_pos_buf, zv_t*speed / fps, 0.95f, fps);
+							easing_set(&add_pos_buf, zv_t*speed / fps, 0.95f);
 						}
 						if (akey) {
-							easing_set(&add_pos_buf, xv_t*speed / fps, 0.95f, fps);
+							easing_set(&add_pos_buf, xv_t*speed / fps, 0.95f);
 						}
 						if (dkey) {
-							easing_set(&add_pos_buf, xv_t*-speed / fps, 0.95f, fps);
+							easing_set(&add_pos_buf, xv_t*-speed / fps, 0.95f);
 						}
 						if (!wkey && !skey && !akey && !dkey) {
-							easing_set(&add_pos_buf, VGet(0, 0, 0), 0.95f, fps);
+							easing_set(&add_pos_buf, VGet(0, 0, 0), 0.95f);
 						}
 						if (chara.add_ypos == 0.f) {
 							//chara.add_ypos = 0.05f;/*ジャンプ*/
 							add_pos = add_pos_buf;
 						}
 						else {
-							easing_set(&add_pos, VGet(0, 0, 0), 0.995f, fps);
+							easing_set(&add_pos, VGet(0, 0, 0), 0.995f);
 						}
 					}
 				}
@@ -362,31 +362,31 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 						auto speed = ((ads.first ? 2.f : 4.f)*(squat.first ? 0.4f : 1.f));
 						auto ratio_t = add_pos.size() / (speed / fps);
 						if (ads.first) {
-							easing_set(&chara.body.get_anime(2).per, 0.f, 0.95f, fps);
+							easing_set(&chara.body.get_anime(2).per, 0.f, 0.95f);
 							if (!squat.first) {
-								easing_set(&chara.body.get_anime(1).per, 0.5f*ratio_t, 0.95f, fps);
-								easing_set(&chara.body.get_anime(8).per, 0.f, 0.9f, fps);
-								easing_set(&chara.body.get_anime(7).per, 0.f, 0.9f, fps);
+								easing_set(&chara.body.get_anime(1).per, 0.5f*ratio_t, 0.95f);
+								easing_set(&chara.body.get_anime(8).per, 0.f, 0.9f);
+								easing_set(&chara.body.get_anime(7).per, 0.f, 0.9f);
 							}
 							else {
-								easing_set(&chara.body.get_anime(1).per, 0.f, 0.95f, fps);
-								easing_set(&chara.body.get_anime(8).per, 0.5f*ratio_t, 0.9f, fps);
-								easing_set(&chara.body.get_anime(7).per, 1.f - 1.f*ratio_t, 0.9f, fps);
+								easing_set(&chara.body.get_anime(1).per, 0.f, 0.95f);
+								easing_set(&chara.body.get_anime(8).per, 0.5f*ratio_t, 0.9f);
+								easing_set(&chara.body.get_anime(7).per, 1.f - 1.f*ratio_t, 0.9f);
 							}
 						}
 						else {
-							easing_set(&chara.body.get_anime(2).per, 0.f, 0.95f, fps);
+							easing_set(&chara.body.get_anime(2).per, 0.f, 0.95f);
 							if (!squat.first) {
-								easing_set(&chara.body.get_anime(1).per, 1.f*ratio_t, 0.95f, fps);
-								easing_set(&chara.body.get_anime(8).per, 0.f, 0.9f, fps);
-								easing_set(&chara.body.get_anime(7).per, 0.f, 0.9f, fps);
+								easing_set(&chara.body.get_anime(1).per, 1.f*ratio_t, 0.95f);
+								easing_set(&chara.body.get_anime(8).per, 0.f, 0.9f);
+								easing_set(&chara.body.get_anime(7).per, 0.f, 0.9f);
 							}
 							else {
-								easing_set(&chara.body.get_anime(1).per, 0.f, 0.95f, fps);
-								easing_set(&chara.body.get_anime(8).per, 1.f*ratio_t, 0.9f, fps);
-								easing_set(&chara.body.get_anime(7).per, 1.f - 1.f*ratio_t, 0.9f, fps);
+								easing_set(&chara.body.get_anime(1).per, 0.f, 0.95f);
+								easing_set(&chara.body.get_anime(8).per, 1.f*ratio_t, 0.9f);
+								easing_set(&chara.body.get_anime(7).per, 1.f - 1.f*ratio_t, 0.9f);
 							}
-							easing_set(&chara.body.get_anime(0).per, 0.f, 0.95f, fps);
+							easing_set(&chara.body.get_anime(0).per, 0.f, 0.95f);
 						}
 						chara.body.get_anime(1).time += 30.f / fps;
 						if (chara.body.get_anime(1).time >= chara.body.get_anime(1).alltime) {
