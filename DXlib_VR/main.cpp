@@ -70,6 +70,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					}
 					oldv = ptr_.turn && ptr_.now;
 					chara.pos_HMD = chara.pos_HMD - rec_HMD;
+					//chara.mat_HMD = MATRIX_ref::Axis1(chara.mat_HMD.xvec()*-1.f, chara.mat_HMD.yvec(), chara.mat_HMD.zvec()*-1.f);
 				}
 				else {
 					int x_m, y_m;
@@ -521,7 +522,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			//ƒJƒƒ‰Žw’è
 			if (Drawparts->use_vr) {
 				cams.campos = chara.pos + chara.pos_HMD;
-				cams.camvec = (chara.mat_HMD*chara.mat).zvec();
+				cams.camvec = cams.campos + (chara.mat_HMD*chara.mat).zvec();
 				cams.camup = (chara.mat_HMD*chara.mat).yvec();
 			}
 			else {
