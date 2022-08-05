@@ -1,0 +1,2 @@
+Type=Thunder
+CoolDown=30.0
