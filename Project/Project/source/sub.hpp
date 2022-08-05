@@ -14,25 +14,10 @@ namespace std {
 namespace FPS_n2 {
 	//入力
 	class InputControl {
-	public:
+	private:
 		float m_AddxRad{ 0.f };
 		float m_AddyRad{ 0.f };
-		bool m_GoFrontPress{ false };
-		bool m_GoBackPress{ false };
-		bool m_GoLeftPress{ false };
-		bool m_GoRightPress{ false };
-		bool m_RunPress{ false };
-		bool m_QPress{ false };
-		bool m_EPress{ false };
-		bool m_GoFlight{ false };
-		bool m_Press_Accel{ false };
-		bool m_Press_Brake{ false };
-		bool m_RightPress{ false };
-		bool m_LeftPress{ false };
-		bool m_UseItemPress{ false };
-		bool m_UpPress{ false };
-		bool m_DownPress{ false };
-		bool m_UseMagicPress{ false };
+		unsigned int m_Flags{ 0 };
 	public:
 		void			SetInput(
 			float pAddxRad, float pAddyRad,
@@ -44,35 +29,57 @@ namespace FPS_n2 {
 			bool pRunPress,
 			bool pQPress,
 			bool pEPress,
-			bool pGoFlight,
-			bool pPress_Accel,
-			bool pPress_Brake,
+
 			bool pRightPress,
 			bool pLeftPress,
-			bool pUseItemPress,
 			bool pUpPress,
 			bool pDownPress,
-			bool pUseMagicPress
+
+			bool pAction1,
+			bool pAction2,
+			bool pAction3,
+			bool pAction4,
+			bool pAction5
 		) {
 			this->m_AddxRad = pAddxRad;
 			this->m_AddyRad = pAddyRad;
-			this->m_GoFrontPress = pGoFrontPress;
-			this->m_GoBackPress = pGoBackPress;
-			this->m_GoLeftPress = pGoLeftPress;
-			this->m_GoRightPress = pGoRightPress;
-			this->m_RunPress = pRunPress;
-			this->m_QPress = pQPress;
-			this->m_EPress = pEPress;
-			this->m_GoFlight = pGoFlight;
-			this->m_Press_Accel = pPress_Accel;
-			this->m_Press_Brake = pPress_Brake;
-			this->m_RightPress = pRightPress;
-			this->m_LeftPress = pLeftPress;
-			this->m_UseItemPress = pUseItemPress;
-			this->m_UpPress = pUpPress;
-			this->m_DownPress = pDownPress;
-			this->m_UseMagicPress = pUseMagicPress;
+			this->m_Flags = 0;
+			if (pGoFrontPress) { this->m_Flags |= (1 << 0); }
+			if (pGoBackPress) { this->m_Flags |= (1 << 1); }
+			if (pGoLeftPress) { this->m_Flags |= (1 << 2); }
+			if (pGoRightPress) { this->m_Flags |= (1 << 3); }
+			if (pRunPress) { this->m_Flags |= (1 << 4); }
+			if (pQPress) { this->m_Flags |= (1 << 5); }
+			if (pEPress) { this->m_Flags |= (1 << 6); }
+			if (pRightPress) { this->m_Flags |= (1 << 7); }
+			if (pLeftPress) { this->m_Flags |= (1 << 8); }
+			if (pUpPress) { this->m_Flags |= (1 << 9); }
+			if (pDownPress) { this->m_Flags |= (1 << 10); }
+			if (pAction1) { this->m_Flags |= (1 << 11); }
+			if (pAction2) { this->m_Flags |= (1 << 12); }
+			if (pAction3) { this->m_Flags |= (1 << 13); }
+			if (pAction4) { this->m_Flags |= (1 << 14); }
+			if (pAction5) { this->m_Flags |= (1 << 15); }
 		}
+
+		const auto& GetAddxRad() const noexcept { return m_AddxRad; }
+		const auto& GetAddyRad() const noexcept { return m_AddyRad; }
+		const auto GetGoFrontPress() const noexcept { return (this->m_Flags & (1 << 0)) != 0; }
+		const auto GetGoBackPress() const noexcept { return (this->m_Flags & (1 << 1)) != 0; }
+		const auto GetGoLeftPress() const noexcept { return (this->m_Flags & (1 << 2)) != 0; }
+		const auto GetGoRightPress() const noexcept { return (this->m_Flags & (1 << 3)) != 0; }
+		const auto GetRunPress() const noexcept { return (this->m_Flags & (1 << 4)) != 0; }
+		const auto GetQPress() const noexcept { return (this->m_Flags & (1 << 5)) != 0; }
+		const auto GetEPress() const noexcept { return (this->m_Flags & (1 << 6)) != 0; }
+		const auto GetRightPress() const noexcept { return (this->m_Flags & (1 << 7)) != 0; }
+		const auto GetLeftPress() const noexcept { return (this->m_Flags & (1 << 8)) != 0; }
+		const auto GetUpPress() const noexcept { return (this->m_Flags & (1 << 9)) != 0; }
+		const auto GetDownPress() const noexcept { return (this->m_Flags & (1 << 10)) != 0; }
+		const auto GetAction1() const noexcept { return (this->m_Flags & (1 << 11)) != 0; }
+		const auto GetAction2() const noexcept { return (this->m_Flags & (1 << 12)) != 0; }
+		const auto GetAction3() const noexcept { return (this->m_Flags & (1 << 13)) != 0; }
+		const auto GetAction4() const noexcept { return (this->m_Flags & (1 << 14)) != 0; }
+		const auto GetAction5() const noexcept { return (this->m_Flags & (1 << 15)) != 0; }
 	};
 	//キャラ入力
 	class CharacterMoveGroundControl {
@@ -163,16 +170,16 @@ namespace FPS_n2 {
 			bool pGoLeftPress,
 			bool pGoRightPress,
 			bool pRunPress,
-			bool pFlightMode,
+			bool pIsNotActive,
 			bool pQPress,
 			bool pEPress
 		) {
-			this->m_Press_GoFront = pGoFrontPress && !pFlightMode;
-			this->m_Press_GoRear = pGoBackPress && !pFlightMode;
-			this->m_Press_GoLeft = pGoLeftPress && !pFlightMode;
-			this->m_Press_GoRight = pGoRightPress && !pFlightMode;
+			this->m_Press_GoFront = pGoFrontPress && !pIsNotActive;
+			this->m_Press_GoRear = pGoBackPress && !pIsNotActive;
+			this->m_Press_GoLeft = pGoLeftPress && !pIsNotActive;
+			this->m_Press_GoRight = pGoRightPress && !pIsNotActive;
 
-			if (!this->m_IsRun && (pRunPress && !pFlightMode)) {
+			if (!this->m_IsRun && (pRunPress && !pIsNotActive)) {
 				this->m_RunTimer = 1.f;
 			}
 			if (this->m_RunTimer > 0.f) {
@@ -182,15 +189,15 @@ namespace FPS_n2 {
 			}
 			else {
 				this->m_RunTimer = 0.f;
-				this->m_IsRun = pRunPress && !pFlightMode;
+				this->m_IsRun = pRunPress && !pIsNotActive;
 			}
 			if (GetPressRear() || (!GetPressFront() && (GetPressLeft() || GetPressRight()))) {
 				this->m_IsRun = false;
 			}
 			this->m_IsSprint = this->m_IsRun && (!GetPressFront() && !GetPressRear());
 			{
-				m_QKey.GetInput(pQPress && !pFlightMode);
-				m_EKey.GetInput(pEPress && !pFlightMode);
+				m_QKey.GetInput(pQPress && !pIsNotActive);
+				m_EKey.GetInput(pEPress && !pIsNotActive);
 				if (m_EKey.trigger()) {
 					if (this->m_TurnRate > -1) {
 						this->m_TurnRate--;
@@ -250,107 +257,6 @@ namespace FPS_n2 {
 			//
 			Easing(&this->m_RunPer, this->m_IsRun ? 1.f : 0.f, 0.975f, EasingType::OutExpo);
 			Easing(&this->m_SprintPer, this->m_IsSprint ? 1.f : 0.f, 0.95f, EasingType::OutExpo);
-		}
-	};
-	class CharacterMoveFlightControl {
-	private:
-		std::array<float, 7>								m_Vec{ 0,0,0,0,0,0,0 };
-		bool												m_Flightmode{ false };
-		bool												m_Press_Flight{ false };
-		bool												m_Press_GoFront{ false };
-		bool												m_Press_GoRear{ false };
-		bool												m_Press_GoLeft{ false };
-		bool												m_Press_GoRight{ false };
-		switchs												m_QKey;
-		switchs												m_EKey;
-		bool												m_Press_Accel{ false };
-		bool												m_Press_Brake{ false };
-		float												m_FlightPer{ 0.f };
-		VECTOR_ref											m_FradAdd_Buf, m_FradAdd;
-		float												m_PressFlightTime{ 0.f };
-	private: //内部
-		void			SetVec(int pDir, bool Press) {
-			this->m_Vec[pDir] += (Press ? 1.f : -1.f)*2.f / FPS;
-			this->m_Vec[pDir] = std::clamp(this->m_Vec[pDir], 0.f, 1.f);
-		}
-	public:
-		const auto		GetVecFront() const noexcept { return  this->m_Vec[0]; }
-		const auto		GetVecRear() const noexcept { return this->m_Vec[2]; }
-		const auto		GetVecLeft() const noexcept { return this->m_Vec[1]; }
-		const auto		GetVecRight() const noexcept { return this->m_Vec[3]; }
-		const auto		GetVecLeftYaw() const noexcept { return this->m_Vec[4]; }
-		const auto		GetVecRightYaw() const noexcept { return this->m_Vec[5]; }
-		const auto		GetGoFlight() const noexcept { return this->m_Vec[6]; }
-		const auto		GetPressFront() const noexcept { return this->m_Press_GoFront; }
-		const auto		GetPressRear() const noexcept { return this->m_Press_GoRear; }
-		const auto		GetPressLeft() const noexcept { return this->m_Press_GoLeft; }
-		const auto		GetPressRight() const noexcept { return this->m_Press_GoRight; }
-		const auto		GetFlightPer() const noexcept { return this->m_FlightPer; }
-		const auto		GetFradAdd() const noexcept { return this->m_FradAdd; }
-
-		const auto		GetPressAccel() const noexcept { return this->m_Press_Accel; }
-		const auto		GetPressBrake() const noexcept { return this->m_Press_Brake; }
-
-		const auto		GetIsFlightMode() const noexcept { return this->m_Flightmode; }
-		void			SetIsFlightMode(bool value) noexcept { this->m_Flightmode = value; }
-
-	public:
-		void			ValueSet() {
-			this->m_FradAdd_Buf.clear();
-			this->m_FradAdd.clear();
-		}
-		void			SetInput(
-			bool pGoFrontPress,
-			bool pGoBackPress,
-			bool pGoLeftPress,
-			bool pGoRightPress,
-			bool pFlightMode,
-			bool pQPress,
-			bool pEPress,
-			bool pPress_Accel,
-			bool pPress_Brake
-		) {
-			if (this->m_PressFlightTime == 0.f && pFlightMode) {
-				this->m_PressFlightTime = 5.f;
-			}
-			this->m_Press_Flight = (this->m_PressFlightTime > (5.f - 1.f));
-			this->m_Flightmode |= this->m_Press_Flight;
-
-			this->m_Press_GoFront = pGoFrontPress && this->m_Flightmode;
-			this->m_Press_GoRear = pGoBackPress && this->m_Flightmode;
-			this->m_Press_GoLeft = pGoLeftPress && this->m_Flightmode;
-			this->m_Press_GoRight = pGoRightPress && this->m_Flightmode;
-			m_QKey.GetInput(pQPress && this->m_Flightmode);
-			m_EKey.GetInput(pEPress && this->m_Flightmode);
-			this->m_Press_Accel = pPress_Accel && this->m_Flightmode;
-			this->m_Press_Brake = pPress_Brake && this->m_Flightmode;
-			if (m_EKey.trigger()) {
-			}
-			if (m_QKey.trigger()) {
-			}
-		}
-		void			Execute(void) noexcept {
-			//移動ベクトル取得
-			{
-				SetVec(0, GetPressFront());
-				SetVec(1, GetPressLeft());
-				SetVec(2, GetPressRear());
-				SetVec(3, GetPressRight());
-
-				SetVec(4, m_QKey.press());
-				SetVec(5, m_EKey.press());
-
-				SetVec(6, this->m_Press_Flight);
-			}
-			//
-			this->m_PressFlightTime = std::max(this->m_PressFlightTime - 1.f / FPS, 0.f);
-			//
-			Easing(&this->m_FlightPer, this->m_Flightmode ? 1.f : 0.f, 0.95f, EasingType::OutExpo);
-			//回転
-			this->m_FradAdd_Buf.x((GetVecRear() - GetVecFront())*2.f / 100.f);
-			this->m_FradAdd_Buf.y((GetVecRight() - GetVecLeft())*4.f / 100.f);
-			this->m_FradAdd_Buf.z((GetVecRightYaw() - GetVecLeftYaw())*0.6f / 100.f);
-			Easing(&this->m_FradAdd, this->m_FradAdd_Buf, 0.95f, EasingType::OutExpo);
 		}
 	};
 

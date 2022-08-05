@@ -14,14 +14,6 @@ namespace FPS_n2 {
 					this->m_Object.resize(this->m_Object.size() + 1);
 					this->m_Object.back() = std::make_shared<CharacterClass>();
 					break;
-				case ObjType::Houki:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<HoukiClass>();
-					break;
-				case ObjType::Item:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<ItemClass>();
-					break;
 				default:
 					break;
 				}

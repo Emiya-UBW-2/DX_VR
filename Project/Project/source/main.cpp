@@ -5,7 +5,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	OPTION::Create();
 	auto* OptionParts = OPTION::Instance();
 	OptionParts->Load();							//İ’è“Ç‚İ‚İ
-	DXDraw::Create("FPS_n2", FPS_n2::Frame_Rate);	//”Ä—p
+	DXDraw::Create(("Realy3D_" + std::to_string(GetNowHiPerformanceCount())).c_str(), FPS_n2::Frame_Rate);	//”Ä—p
 	FontPool::Create();
 	LightPool::Create();
 	//MV1SetLoadModelUsePackDraw(TRUE);

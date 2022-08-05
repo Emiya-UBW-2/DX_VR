@@ -66,14 +66,8 @@
     <ClInclude Include="source\MainScene\Object\CharacterEnum.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
-    <ClInclude Include="source\MainScene\Object\Houki.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MainScene\Object\Item.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MainScene\Object\ItemEnum.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
+    <ClInclude Include="source\NetWork.hpp">
+      <Filter>ソース ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

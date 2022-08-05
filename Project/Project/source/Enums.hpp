@@ -38,8 +38,6 @@ namespace FPS_n2 {
 		};
 		enum class ObjType {
 			Human,
-			Houki,
-			Item,
 		};
 		enum class SoundEnum {
 			Shot_Gun,

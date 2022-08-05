@@ -5,18 +5,13 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
 		private:
-			static const int		team_num = 3;
-			static const int		enemy_num = 3;
-			static const int		item_num = 9;
+			static const int		team_num = 1;
+			static const int		enemy_num = 1;
 		private:
 			//リソース関連
 			ObjectManager			m_Obj;						//モデル
 			BackGroundClass			m_BackGround;				//BG
 			SoundHandle				m_Env;
-			//ルール
-			float					m_ReadyTime{ 0.f };
-			bool					m_StartSwitch{ false };
-			bool					m_RemoveSwitch{ false };
 			//操作関連
 			float					m_EyeRunPer{ 0.f };
 			switchs					m_FPSActive;
@@ -28,11 +23,7 @@ namespace FPS_n2 {
 			//UI関連
 			UIClass					m_UIclass;
 			float					m_HPBuf{ 0.f };
-			float					m_MPBuf{ 0.f };
 			float					m_ScoreBuf{ 0.f };
-			float					m_AddItemBuf{ 1.f };
-			float					m_SubItemBuf{ 1.f };
-			int						m_PrevPointSel{ 0 };
 			float					m_LockonBuf{ 0.f };
 			float					m_LockoffBuf{ 0.f };
 			int						m_LockoffXposBuf{ 0 };
@@ -54,6 +45,32 @@ namespace FPS_n2 {
 			float					m_TPS_XradR{ 0.f };
 			float					m_TPS_YradR{ 0.f };
 			float					m_TPS_Per{ 1.f };
+
+
+			//通信
+
+
+			struct PlayerNetData {
+			public:
+				char	ID;			//1	* 1	= 1byte
+				InputControl Input;	//4 * 3	= 12byte
+									//		  13byte
+			};
+			struct ServerNetData {
+				unsigned long long Frame;
+				PlayerNetData PlayerData[team_num + enemy_num];
+			};
+
+			NewWorkControl			NetWork;
+			ServerNetData			m_ServerData;		// サーバーデータ
+			PlayerNetData			m_PlayerData;		// 送信用ＩＰアドレスデータ
+			int						Sequence = 0;
+			switchs					m_LeftClick;
+			float					m_LeftPressTimer{ 0.f };
+			bool					Client = true;
+			int						UsePort = 10800;
+			int						IP[4]{ 255,255,255,255 };
+			int						SeqCnt = 0;
 		public:
 			using TEMPSCENE::TEMPSCENE;
 			void Set(void) noexcept override {
@@ -70,16 +87,9 @@ namespace FPS_n2 {
 				this->m_Obj.Init(&this->m_BackGround.GetGroundCol());
 				for (int i = 0; i < team_num; i++) {
 					this->m_Obj.AddObject(ObjType::Human, "data/Charactor/Marisa/");
-					this->m_Obj.AddObject(ObjType::Houki, "data/Houki/Houki01/");
 				}
 				for (int i = 0; i < enemy_num; i++) {
 					this->m_Obj.AddObject(ObjType::Human, "data/Charactor/Marisa/");
-					this->m_Obj.AddObject(ObjType::Houki, "data/Houki/Houki01/");
-				}
-				for (int i = 0; i < item_num / 3; i++) {
-					this->m_Obj.AddObject(ObjType::Item, "data/Item/BluePotion/");
-					this->m_Obj.AddObject(ObjType::Item, "data/Item/YellowPotion/");
-					this->m_Obj.AddObject(ObjType::Item, "data/Item/RedPotion/");
 				}
 				//ロード
 				SetCreate3DSoundFlag(FALSE);
@@ -94,8 +104,7 @@ namespace FPS_n2 {
 				//人
 				for (int i = 0; i < team_num + enemy_num; i++) {
 					auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
-					c->SetHoukiPtr((std::shared_ptr<HoukiClass>&)(*this->m_Obj.GetObj(ObjType::Houki, i)));
-					c->ValueSet(deg2rad(0.f), deg2rad(-90.f), VECTOR_ref::vget(0.f, 0.f, -52.5f + (float)(i - 1)*20.f));
+					c->ValueSet(deg2rad(0.f), deg2rad(-90.f), VECTOR_ref::vget(0.f + (float)(i - 1)*100.f, 0.f, -52.5f));
 					if (i == 0) {
 						c->SetUseRealTimePhysics(true);
 					}
@@ -112,15 +121,7 @@ namespace FPS_n2 {
 				{
 					auto& Chara = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, 0));//自分
 					this->m_HPBuf = Chara->GetHP();
-					this->m_MPBuf = Chara->GetMP();
 					this->m_ScoreBuf = Chara->GetScore();
-				}
-				//アイテム
-				{
-					for (int i = 0; i < item_num; i++) {
-						auto& c = *this->m_Obj.GetObj(ObjType::Item, i);
-						c->SetMove(MATRIX_ref::RotY(deg2rad(0)), VECTOR_ref::vget(20.f * (i / (item_num / 3)), 0.f, 20.f + 20.f * (i % (item_num / 3))));
-					}
 				}
 				//Cam
 				camera_main.set_cam_info(deg2rad(65), 1.f, 100.f);
@@ -147,37 +148,22 @@ namespace FPS_n2 {
 				SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
 				SE->Get((int)SoundEnum::Heart).SetVol_Local(92);
 				SE->Get((int)SoundEnum::GateOpen).SetVol_Local(128);
-				//
-				this->m_ReadyTime = 15.f;
-				this->m_StartSwitch = false;
-				this->m_RemoveSwitch = false;
 				//入力
 				this->m_FPSActive.Init(false);
-				this->m_MouseActive.Init(true);
+				this->m_MouseActive.Init(false);
 				this->m_LookMode = 0;
 				this->m_LookReturnTime = 0.f;
 			}
 			//
 			bool Update(void) noexcept override {
-				auto& Chara = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, 0));//自分
+
+
+
+				auto& Chara = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, m_PlayerData.ID));//自分
 				//FirstDoing
 				if (IsFirstLoop) {
 					SetMousePoint(DXDraw::Instance()->disp_x / 2, DXDraw::Instance()->disp_y / 2);
 					this->m_Env.play(DX_PLAYTYPE_LOOP, TRUE);
-					this->m_ReadyTime = 1.f;
-					this->m_PrevPointSel = Chara->GetItemSel();
-				}
-				//
-				{
-					auto prev = this->m_ReadyTime;
-					this->m_ReadyTime -= 1.f / FPS;
-					auto timep = 0.f;
-
-					timep = 0.f;
-					this->m_StartSwitch = (prev >= timep && this->m_ReadyTime < timep);
-					timep = -10.f;
-					this->m_RemoveSwitch = (prev >= timep && this->m_ReadyTime < timep);
-					//printfDx("%f \n", this->m_ReadyTime);
 				}
 				//Input,AI
 				{
@@ -205,22 +191,22 @@ namespace FPS_n2 {
 					bool Lshift_key = (CheckHitKeyWithCheck(KEY_INPUT_LSHIFT) != 0);
 					bool q_key = (CheckHitKeyWithCheck(KEY_INPUT_Q) != 0);
 					bool e_key = (CheckHitKeyWithCheck(KEY_INPUT_E) != 0);
-					bool space_key = (CheckHitKeyWithCheck(KEY_INPUT_SPACE) != 0);
-					bool r_key = (CheckHitKeyWithCheck(KEY_INPUT_R) != 0);
-					bool f_key = (CheckHitKeyWithCheck(KEY_INPUT_F) != 0);
+
 					bool right_key = (CheckHitKeyWithCheck(KEY_INPUT_RIGHT) != 0);
 					bool left_key = (CheckHitKeyWithCheck(KEY_INPUT_LEFT) != 0);
-					bool useItem_key = (CheckHitKeyWithCheck(KEY_INPUT_J) != 0);
 					bool up_key = (CheckHitKeyWithCheck(KEY_INPUT_UP) != 0);
 					bool down_key = (CheckHitKeyWithCheck(KEY_INPUT_DOWN) != 0);
-					auto wheel = GetMouseWheelRotVol();
-					up_key |= (wheel > 0);
-					down_key |= (wheel < 0);
-					bool useMagic_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_LEFT) != 0);
-					bool look_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_RIGHT) != 0);
+
+					bool a1_key = (CheckHitKeyWithCheck(KEY_INPUT_SPACE) != 0);
+					bool a2_key = (CheckHitKeyWithCheck(KEY_INPUT_R) != 0);
+					bool a3_key = (CheckHitKeyWithCheck(KEY_INPUT_F) != 0);
+					bool a4_key = (CheckHitKeyWithCheck(KEY_INPUT_J) != 0);
+					bool a5_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_LEFT) != 0) && this->m_MouseActive.on();
+
+					bool look_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_RIGHT) != 0) && this->m_MouseActive.on();
 					bool eyechange_key = CheckHitKeyWithCheck(KEY_INPUT_V) != 0;
 
-					bool Lockon_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_MIDDLE) != 0);
+					bool Lockon_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_MIDDLE) != 0) && this->m_MouseActive.on();
 
 					if (GetJoypadNum() > 0) {
 						DINPUT_JOYSTATE input;
@@ -254,7 +240,7 @@ namespace FPS_n2 {
 								}
 								//走り(未定)
 								Lshift_key = (input.Buttons[10] != 0);
-								space_key = (input.Buttons[10] != 0);
+								a1_key = (input.Buttons[10] != 0);
 								//視点切り替え
 								look_key = (input.Buttons[11] != 0);
 								//eyechange_key = (input.Buttons[11]!=0);
@@ -262,8 +248,8 @@ namespace FPS_n2 {
 								q_key = (input.Buttons[6] != 0);
 								e_key = (input.Buttons[7] != 0);
 								//加減速
-								f_key = (input.Buttons[4] != 0);
-								r_key = (input.Buttons[5] != 0);
+								a3_key = (input.Buttons[4] != 0);
+								a2_key = (input.Buttons[5] != 0);
 								//十字
 								deg = (float)(input.POV[0]) / 100.f;
 								up_key = (310.f <= deg || deg <= 50.f);
@@ -271,9 +257,9 @@ namespace FPS_n2 {
 								down_key = (130.f <= deg && deg <= 230.f);
 								right_key = (40.f <= deg && deg <= 140.f);
 								//ボタン
-								useItem_key = (input.Buttons[3] != 0);//□
+								a4_key = (input.Buttons[3] != 0);//□
 								Lockon_key = (input.Buttons[0] != 0);//△
-								useMagic_key = (input.Buttons[1] != 0);//〇
+								a5_key = (input.Buttons[1] != 0);//〇
 								//_key = (input.Buttons[2] != 0);//×
 							}
 							break;
@@ -305,7 +291,8 @@ namespace FPS_n2 {
 					}
 					if (this->m_Lockon.trigger()) {
 						if (Chara->GetLockOn() == nullptr) {
-							for (int i = 1; i < team_num + enemy_num; i++) {
+							for (int i = 0; i < team_num + enemy_num; i++) {
+								if (i == m_PlayerData.ID) { continue; }
 								auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
 
 								if (Chara->GetCharaType() == c->GetCharaType()) { continue; }
@@ -346,22 +333,10 @@ namespace FPS_n2 {
 					Chara->SetEyeVec((camera_main.camvec - camera_main.campos).Norm());
 
 					InputControl Input;
-					bool isready = this->m_ReadyTime < 0.f;
-
-
+					bool isready = true;
+					/*
 					for (int i = 0; i < team_num + enemy_num; i++) {
 						auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
-						//拾い判定
-						for (int j = 0; j < item_num; j++) {
-							if (this->m_Obj.GetObj(ObjType::Item, j) == nullptr) { break; }
-							auto& item = (std::shared_ptr<ItemClass>&)(*this->m_Obj.GetObj(ObjType::Item, j));
-							if (!item->GetHaveChara() && !item->GetUsed()) {
-								if ((item->GetMatrix().pos() - c->GetMatrix().pos()).size() < Scale_Rate*1.f) {
-									c->AddItem(item);
-								}
-							}
-						}
-
 						//操作
 						if (i == 0
 							//&& false
@@ -376,15 +351,17 @@ namespace FPS_n2 {
 								Lshift_key && isready,
 								q_key && isready,
 								e_key && isready,
-								space_key && isready,
-								r_key && isready,
-								f_key && isready,
+
 								right_key && isready,
 								left_key && isready,
-								useItem_key && isready,
 								up_key && isready,
 								down_key && isready,
-								useMagic_key && isready
+
+								a1_key && isready,
+								a2_key && isready,
+								a3_key && isready,
+								a4_key && isready,
+								a5_key && isready
 							);
 							Chara->SetInput(Input, isready);
 							continue;
@@ -407,23 +384,70 @@ namespace FPS_n2 {
 							(false) && isready,
 							(false) && isready,
 							(false) && isready,
-							(GetRand(2) == 0) && isready
+							(false) && isready
 						);
 						c->SetInput(Input, isready);
 						c->SetLockOn((std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, 0)));
 					}
+					//*/
+					m_PlayerData.Input.SetInput(
+						pp_x*(1.f - this->m_TPS_Per),
+						pp_y*(1.f - this->m_TPS_Per),
+						w_key && isready,
+						s_key && isready,
+						a_key && isready,
+						d_key && isready,
+						Lshift_key && isready,
+						q_key && isready,
+						e_key && isready,
+
+						right_key && isready,
+						left_key && isready,
+						up_key && isready,
+						down_key && isready,
+
+						a1_key && isready,
+						a2_key && isready,
+						a3_key && isready,
+						a4_key && isready,
+						a5_key && isready
+					);
+
+
+					if (Sequence == 5) {
+						//サーバー
+						if (!Client) {
+							m_ServerData.PlayerData[m_PlayerData.ID] = m_PlayerData;	// サーバーのプレイヤーデータ
+							m_ServerData.Frame++;
+						}
+						{
+							//クライアント
+							if (Client) {
+								//サーバーからのデータを受信
+								if (NetWork.Recv(&m_ServerData)) {
+								}
+								//自身のデータを送信
+								NetWork.SendtoServer(m_PlayerData);
+							}
+							//サーバー
+							else {
+								PlayerNetData tmpData;										// 送信用ＩＰアドレスデータ
+								if (NetWork.Recv(&tmpData)) {								// 該当ソケットにクライアントから受信したら
+									m_ServerData.PlayerData[tmpData.ID] = tmpData;
+									//サーバーからクライアントに返信
+									NetWork.SendtoClient(m_ServerData);
+								}
+							}
+						}
+					}
+					for (int i = 0; i < team_num + enemy_num; i++) {
+						auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
+						c->SetInput(m_ServerData.PlayerData[i].Input, isready);
+					}
+
 				}
 				//Execute
 				this->m_Obj.ExecuteObject();
-				//アイテム削除
-				for (int i = 0; i < item_num; i++) {
-					if (this->m_Obj.GetObj(ObjType::Item, i) == nullptr) { break; }
-					auto& item = (std::shared_ptr<ItemClass>&)(*this->m_Obj.GetObj(ObjType::Item, i));
-					if (item->GetUsed()) {
-						this->m_Obj.DelObj(ObjType::Item, i);
-						i = 0;
-					}
-				}
 				//col
 
 				//視点
@@ -441,9 +465,6 @@ namespace FPS_n2 {
 						camera_main.camup = Chara->GetMatrix().GetRot().yvec();
 					}
 					else {
-						MATRIX_ref UpperMat = Chara->GetFrameWorldMat(CharaFrame::Upper).GetRot();
-						VECTOR_ref CamPos = Chara->GetMatrix().pos() + Chara->GetMatrix().yvec() * 14.f;
-
 						MATRIX_ref FreeLook;
 						auto charalock = Chara->GetLockOn();
 						if (charalock != nullptr && (this->m_LookMode == 1)) {
@@ -456,16 +477,12 @@ namespace FPS_n2 {
 
 						VECTOR_ref CamVec = Lerp(Chara->GetEyeVecMat().zvec() * -1.f, MATRIX_ref::Vtrans(Chara->GetEyeVecMat().zvec() * -1.f, m_FreeLookMat), this->m_TPS_Per);
 
-						CamPos +=
-							Lerp(
-								Lerp((UpperMat.xvec()*-8.f + UpperMat.yvec()*3.f), (UpperMat.xvec()*-3.f + UpperMat.yvec()*4.f), this->m_EyeRunPer),
-								Lerp(UpperMat.yvec()*8.f, UpperMat.yvec()*14.f, this->m_TPS_Per),
-								Chara->GetFlightPer()
-							);
+						MATRIX_ref UpperMat = Chara->GetFrameWorldMat(CharaFrame::Upper).GetRot();
+						VECTOR_ref CamPos = Chara->GetMatrix().pos() + Chara->GetMatrix().yvec() * 14.f;
+						CamPos += Lerp((UpperMat.xvec()*-8.f + UpperMat.yvec()*3.f), (UpperMat.xvec()*-3.f + UpperMat.yvec()*4.f), this->m_EyeRunPer);
 
-						camera_main.campos = (CamPos + CamVec * Lerp(Lerp(-20.f, -30.f - (Chara->GetFlightSpeed() / 25.f), Chara->GetFlightPer()), -50.f, this->m_TPS_Per)) + this->m_CamShake2 * 5.f;
+						camera_main.campos = (CamPos + CamVec * Lerp(-20.f, -50.f, this->m_TPS_Per)) + this->m_CamShake2 * 5.f;
 						camera_main.camvec = CamPos + CamVec * 100.f;
-
 						camera_main.camup = Chara->GetEyeVecMat().yvec() + this->m_CamShake2 * 0.25f;
 					}
 					Easing(&this->m_EyeRunPer, Chara->GetIsRun() ? 1.f : 0.f, 0.95f, EasingType::OutExpo);
@@ -485,116 +502,27 @@ namespace FPS_n2 {
 				this->m_BackGround.Execute();
 				//UIパラメーター
 				{
-					int minute = (int)((-this->m_ReadyTime) / 60.f);
-					this->m_UIclass.SetIntParam(0, minute);
-					this->m_UIclass.SetfloatParam(0, (-this->m_ReadyTime) - (float)minute*60.f);
-
 					this->m_UIclass.SetIntParam(1, (int)this->m_ScoreBuf);
 					this->m_ScoreBuf += std::clamp((Chara->GetScore() - this->m_ScoreBuf)*100.f, -5.f, 5.f) / FPS;
 
-					this->m_UIclass.SetIntParam(2, Chara->GetFlightMode() ? 1 : 0);
-					this->m_UIclass.SetfloatParam(1, Chara->GetFlightSpeed());
-					this->m_UIclass.SetfloatParam(2, Chara->GetMatrix().pos().y() / Scale_Rate);
+					this->m_UIclass.SetIntParam(2, 1);
 
 					this->m_UIclass.SetIntParam(3, (int)Chara->GetHP());
 					this->m_UIclass.SetIntParam(4, (int)Chara->GetHPMax());
 					this->m_UIclass.SetIntParam(5, (int)(this->m_HPBuf + 0.5f));
 					this->m_HPBuf += std::clamp((Chara->GetHP() - this->m_HPBuf)*100.f, -5.f, 5.f) / FPS;
 
-					this->m_UIclass.SetIntParam(6, (int)Chara->GetMP());
-					this->m_UIclass.SetIntParam(7, (int)Chara->GetMPMax());
-					this->m_UIclass.SetIntParam(8, (int)(this->m_MPBuf + 0.5f));
-					this->m_MPBuf += std::clamp((Chara->GetMP() - this->m_MPBuf)*100.f, -5.f, 5.f) / FPS;
-					//アイテム
-					{
-						int i = 0;
-						int ID = -1;
-						int ID1 = -1;
-						int ID2 = -1;
-						//
-						i = 1;
-						ID = Chara->GetItemSel();
-						if (Chara->GetItemNum() <= ID) { ID = -1; }
-						ID1 = ID;
-
-						this->m_UIclass.SetItemGraph(i, (ID != -1) ? (&(Chara->GetItem(ID)->GetItemGraph())) : nullptr);
-						this->m_UIclass.SetIntParam(9 + i, (ID != -1) ? (int)(Chara->GetItemCnt(ID)) : 0);
-						//
-						i = 0;
-						ID = (Chara->GetItemSel() - 1);
-						if (ID <= -1) { ID = (int)(Chara->GetItemNum()) - 1; }
-						ID2 = ID;
-
-						if (Chara->GetItemNum() <= ID) { ID = -1; }
-						if (ID1 == ID) { ID = -1; }
-
-						this->m_UIclass.SetItemGraph(i, (ID != -1) ? (&(Chara->GetItem(ID)->GetItemGraph())) : nullptr);
-						this->m_UIclass.SetIntParam(9 + i, (ID != -1) ? (int)(Chara->GetItemCnt(ID)) : 0);
-						//
-						i = 2;
-						ID = (Chara->GetItemSel() + 1);
-						if (ID >= Chara->GetItemNum()) { ID = 0; }
-
-						if (Chara->GetItemNum() <= ID) { ID = -1; }
-						if (ID1 == ID) { ID = -1; }
-						//if (ID2 == ID) { ID = -1; }
-						this->m_UIclass.SetItemGraph(i, (ID != -1) ? (&(Chara->GetItem(ID)->GetItemGraph())) : nullptr);
-						this->m_UIclass.SetIntParam(9 + i, (ID != -1) ? (int)(Chara->GetItemCnt(ID)) : 0);
-
-						if (this->m_PrevPointSel > Chara->GetItemSel()) {
-							if (Chara->GetItemSel() == 0 && this->m_PrevPointSel == Chara->GetItemNum() - 1) {
-								this->m_AddItemBuf = 0.f;
-							}
-							else {
-								this->m_SubItemBuf = 0.f;
-							}
-						}
-						else if (this->m_PrevPointSel < Chara->GetItemSel()) {
-							if (Chara->GetItemSel() == Chara->GetItemNum() - 1 && this->m_PrevPointSel == 0) {
-								this->m_SubItemBuf = 0.f;
-							}
-							else {
-								this->m_AddItemBuf = 0.f;
-							}
-						}
-						this->m_PrevPointSel = Chara->GetItemSel();
-
-						this->m_UIclass.SetfloatParam(3, this->m_AddItemBuf);
-						this->m_UIclass.SetfloatParam(4, this->m_SubItemBuf);
-						Easing(&this->m_AddItemBuf, 1.f, 0.9f, EasingType::OutExpo);
-						Easing(&this->m_SubItemBuf, 1.f, 0.9f, EasingType::OutExpo);
-					}
-					//
-					{
-						this->m_UIclass.SetStrParam(0, Chara->GetName());
-					}
-					//魔法
-					{
-						this->m_UIclass.SetIntParam(12, Chara->GetMagicSel());
-						this->m_UIclass.SetIntParam(13, (int)Chara->GetMagicNum());
-						for (int i = 0; i < 4; i++) {
-							this->m_UIclass.SetStrParam(1 + i, "");
-						}
-						for (int i = 0; i < std::min<int>((int)(Chara->GetMagicNum()), 4); i++) {
-							this->m_UIclass.SetStrParam(1 + i, Chara->GetMagicName(i));
-							this->m_UIclass.SetIntParam(14 + 2 * i, (int)((Chara->GetMagicCoolDown(i) - Chara->GetMagicCoolFrame(i))*100.f));
-							this->m_UIclass.SetIntParam(15 + 2 * i, (int)(Chara->GetMagicCoolDown(i)*100.f));
-						}
-					}
-					//メッセージ
-					{
-						auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, 1));
-						this->m_UIclass.SetIntParam(22, (int)c->GetCharaType());
-						this->m_UIclass.SetStrParam(5, c->GetName());
-						this->m_UIclass.SetStrParam(6, "あいうえおかきくけこさしすせそ");
-					}
-					//
+					this->m_UIclass.SetIntParam(6, (int)1.f);
+					this->m_UIclass.SetIntParam(7, (int)1.f);
+					this->m_UIclass.SetIntParam(8, (int)1.f);
 				}
 				TEMPSCENE::Update();
 				Effect_UseControl::Update_Effect();
 				return true;
 			}
 			void Dispose(void) noexcept override {
+				NetWork.Dispose();
+
 				Effect_UseControl::Dispose_Effect();
 				this->m_Obj.DisposeObject();
 			}
@@ -624,7 +552,8 @@ namespace FPS_n2 {
 					Set_is_Blackout(false);
 					Set_is_lens(false);
 				}
-				for (int i = 1; i < team_num + enemy_num; i++) {
+				for (int i = 0; i < team_num + enemy_num; i++) {
+					if (i == m_PlayerData.ID) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
 					auto pos = c->GetFrameWorldMat(CharaFrame::Upper).pos();
 					VECTOR_ref campos = ConvWorldPosToScreenPos(pos.get());
@@ -646,7 +575,7 @@ namespace FPS_n2 {
 			}
 			//UI表示
 			void UI_Draw(void) noexcept  override {
-				auto& Chara = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, 0));//自分
+				auto& Chara = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, m_PlayerData.ID));//自分
 
 				auto* Fonts = FontPool::Instance();
 				auto* DrawParts = DXDraw::Instance();
@@ -656,7 +585,8 @@ namespace FPS_n2 {
 				auto White = GetColor(212, 255, 239);
 				unsigned int color = Red;
 				//キャラ
-				for (int i = 1; i < team_num + enemy_num; i++) {
+				for (int i = 0; i < team_num + enemy_num; i++) {
+					if (i == m_PlayerData.ID) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
 					auto campos = c->GetCameraPosition();
 					if (0.f < campos.z() && campos.z() < 1.f) {
@@ -789,7 +719,8 @@ namespace FPS_n2 {
 						bool isout = true;
 						auto tmpRader = 1.f;
 						int div = 5;
-						for (int i = 1; i < team_num + enemy_num; i++) {
+						for (int i = 0; i < team_num + enemy_num; i++) {
+							if (i == m_PlayerData.ID) { continue; }
 							auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
 							tmpRader = BaseVPer;
 							for (int j = 0; j < div; j++) {
@@ -809,7 +740,8 @@ namespace FPS_n2 {
 						}
 					}
 
-					for (int i = 1; i < team_num + enemy_num; i++) {
+					for (int i = 0; i < team_num + enemy_num; i++) {
+						if (i == m_PlayerData.ID) { continue; }
 						auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
 						auto pos = MATRIX_ref::Vtrans(c->GetMatrix().pos() - BaseBos, MATRIX_ref::RotY(rad))*((1.f / Scale_Rate) * this->m_Rader_r);
 						if ((-xs1 < pos.x() && pos.x() < xs2) && (-ys1 < -pos.z() && -pos.z() < ys2)) {
@@ -828,6 +760,321 @@ namespace FPS_n2 {
 							yp = yp1 + (int)(-pos.z());
 							DrawCircle(xp, yp, (int)(5.f * std::min(1.f, this->m_Rader_r)), color, TRUE);
 						}
+					}
+				}
+				//
+				//通信設定
+				m_LeftClick.GetInput((GetMouseInputWithCheck() & MOUSE_INPUT_LEFT) != 0);
+				if (!m_LeftClick.press()) {
+					m_LeftPressTimer = 0.f;
+				}
+				if (!this->m_MouseActive.on()) {
+					bool Mid_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_MIDDLE) != 0);
+					bool Right_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_RIGHT) != 0);
+					int mx = DXDraw::Instance()->disp_x / 2, my = DXDraw::Instance()->disp_y / 2;
+					GetMousePoint(&mx, &my);
+					int xp1, yp1, xp2, yp2;
+					unsigned int color;
+					{
+						xp1 = y_r(90);
+						yp1 = y_r(340);
+						xp2 = xp1 + y_r(420);
+						yp2 = yp1 + y_r(200);
+						DrawBox(xp1, yp1, xp2, yp2, GetColor(164, 164, 164), TRUE);
+
+						xp1 = y_r(100);
+						yp1 = y_r(350);
+						xp2 = xp1 + y_r(400);
+						yp2 = yp1 + y_r(30);
+						DrawBox(xp1, yp1, xp2, yp2, GetColor(0, 0, 0), TRUE);
+						Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawStringFormat(xp1, yp1, GetColor(255, 255, 255), GetColor(0, 0, 0), " %d/%d", Sequence, 0);
+					}
+					xp1 = y_r(100);
+					yp1 = y_r(550);
+					if (Sequence > 0) {
+						Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawStringFormat(xp1, yp1, GetColor(255, 255, 255), GetColor(0, 0, 0), "種別　[%s]", Client ? "クライアント" : "サーバー"); yp1 += y_r(30);
+					}
+					if (Sequence > 1) {
+						Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawStringFormat(xp1, yp1, GetColor(255, 255, 255), GetColor(0, 0, 0), "ポート[%d]", UsePort); yp1 += y_r(30);
+					}
+					switch (Sequence) {
+					case 0://選択
+					{
+						{
+							xp1 = y_r(100);
+							yp1 = y_r(400);
+							xp2 = xp1 + y_r(400);
+							yp2 = yp1 + y_r(30);
+							bool into = in2_(mx, my, xp1, yp1, xp2, yp2);
+							color = (into) ? GetColor(0, 0, 0) : GetColor(64, 64, 64);
+							DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+							Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawString(xp1, yp1, "クライアントになる", GetColor(255, 255, 255));
+							if (into && m_LeftClick.trigger()) {
+								Client = true;
+								Sequence++;
+							}
+						}
+						{
+							xp1 = y_r(100);
+							yp1 = y_r(450);
+							xp2 = xp1 + y_r(400);
+							yp2 = yp1 + y_r(30);
+							bool into = in2_(mx, my, xp1, yp1, xp2, yp2);
+							color = (into) ? GetColor(0, 0, 0) : GetColor(64, 64, 64);
+							DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+							Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawString(xp1, yp1, "サーバーになる", GetColor(255, 255, 255));
+							if (into && m_LeftClick.trigger()) {
+								Client = false;
+								Sequence++;
+							}
+						}
+						if (Sequence == 1) {
+							if (Client) {
+								m_PlayerData.ID = 1;					//クライアント
+							}
+							else {
+								m_PlayerData.ID = 0;					//サーバー
+							}
+						}
+					}
+						break;
+					case 1://ポート
+					{
+						{
+							xp1 = y_r(100);
+							yp1 = y_r(400);
+							xp2 = xp1 + y_r(400);
+							yp2 = yp1 + y_r(30);
+							color = GetColor(0, 0, 0);
+							DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+							Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawStringFormat(xp1, yp1, GetColor(255, 255, 255), GetColor(0, 0, 0), "ポート=[%d]", UsePort);
+						}
+						{
+							xp1 = y_r(100);
+							yp1 = y_r(450);
+							xp2 = xp1 + y_r(120);
+							yp2 = yp1 + y_r(30);
+							bool into = in2_(mx, my, xp1, yp1, xp2, yp2);
+							color = (into) ? GetColor(0, 0, 0) : GetColor(64, 64, 64);
+							DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+							Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawString_MID(xp1 + (xp2 - xp1) / 2, yp1, "+", GetColor(255, 255, 255));
+							if (into){
+								if (m_LeftClick.trigger()) {
+									UsePort++;
+								}
+								if (m_LeftClick.press()) {
+									m_LeftPressTimer += 1.f / FPS;
+									if (m_LeftPressTimer > 0.5f) {
+										UsePort++;
+									}
+								}
+							}
+						}
+						{
+							xp1 = y_r(240);
+							yp1 = y_r(450);
+							xp2 = xp1 + y_r(120);
+							yp2 = yp1 + y_r(30);
+							bool into = in2_(mx, my, xp1, yp1, xp2, yp2);
+							color = (into) ? GetColor(0, 0, 0) : GetColor(64, 64, 64);
+							DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+							Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawString_MID(xp1 + (xp2 - xp1) / 2, yp1, "-", GetColor(255, 255, 255));
+							if (into) {
+								if (m_LeftClick.trigger()) {
+									UsePort--;
+								}
+								if (m_LeftClick.press()) {
+									m_LeftPressTimer += 1.f / FPS;
+									if (m_LeftPressTimer > 0.5f) {
+										UsePort--;
+									}
+								}
+							}
+						}
+						{
+							xp1 = y_r(380);
+							yp1 = y_r(450);
+							xp2 = xp1 + y_r(120);
+							yp2 = yp1 + y_r(30);
+							bool into = in2_(mx, my, xp1, yp1, xp2, yp2);
+							color = (into) ? GetColor(0, 0, 0) : GetColor(64, 64, 64);
+							DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+							Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawString_MID(xp1 + (xp2 - xp1) / 2, yp1, "Set", GetColor(255, 255, 255));
+							if (into && m_LeftClick.trigger()) {
+								NetWork.Set_Port(UsePort);
+								if (Client) {
+									Sequence+=1;
+								}
+								else {
+									Sequence+=2;
+								}
+							}
+						}
+					}
+						break;
+					case 2://IP
+					{
+						{
+							xp1 = y_r(100);
+							yp1 = y_r(400);
+							xp2 = xp1 + y_r(400);
+							yp2 = yp1 + y_r(30);
+							color = GetColor(0, 0, 0);
+							DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+							Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawStringFormat(xp1, yp1, GetColor(255, 255, 255), GetColor(0, 0, 0), "IP=[%d,%d,%d,%d]", IP[0], IP[1], IP[2], IP[3]);
+						}
+						for (int i = 0; i < 4; i++) {
+							{
+								xp1 = y_r(100 + 70 * i);
+								yp1 = y_r(450);
+								xp2 = xp1 + y_r(50);
+								yp2 = yp1 + y_r(30);
+								bool into = in2_(mx, my, xp1, yp1, xp2, yp2);
+								color = (into) ? GetColor(0, 0, 0) : GetColor(64, 64, 64);
+								DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+								Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawString_MID(xp1 + (xp2 - xp1) / 2, yp1, "+", GetColor(255, 255, 255));
+								if (into) {
+									if (m_LeftClick.trigger()) {
+										IP[i]++;
+									}
+									if (m_LeftClick.press()) {
+										m_LeftPressTimer += 1.f / FPS;
+										if (m_LeftPressTimer > 0.5f) {
+											IP[i]++;
+										}
+									}
+								}
+							}
+							{
+								xp1 = y_r(100 + 70 * i);
+								yp1 = y_r(500);
+								xp2 = xp1 + y_r(50);
+								yp2 = yp1 + y_r(30);
+								bool into = in2_(mx, my, xp1, yp1, xp2, yp2);
+								color = (into) ? GetColor(0, 0, 0) : GetColor(64, 64, 64);
+								DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+								Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawString_MID(xp1 + (xp2 - xp1) / 2, yp1, "-", GetColor(255, 255, 255));
+								if (into) {
+									if (m_LeftClick.trigger()) {
+										IP[i]--;
+									}
+									if (m_LeftClick.press()) {
+										m_LeftPressTimer += 1.f / FPS;
+										if (m_LeftPressTimer > 0.5f) {
+											IP[i]--;
+										}
+									}
+								}
+							}
+							if (IP[i] > 255) { IP[i] = 0; }
+							if (IP[i] < 0) { IP[i] = 255; }
+						}
+						{
+							xp1 = y_r(380);
+							yp1 = y_r(450);
+							xp2 = xp1 + y_r(120);
+							yp2 = yp1 + y_r(30);
+							bool into = in2_(mx, my, xp1, yp1, xp2, yp2);
+							color = (into) ? GetColor(0, 0, 0) : GetColor(64, 64, 64);
+							DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+							Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawString_MID(xp1 + (xp2 - xp1) / 2, yp1, "Set", GetColor(255, 255, 255));
+							if (into && m_LeftClick.trigger()) {
+								IPDATA IPt;					// 送信用ＩＰアドレスデータ
+								IPt.d1 = (unsigned char)(IP[0]);
+								IPt.d2 = (unsigned char)(IP[1]);
+								IPt.d3 = (unsigned char)(IP[2]);
+								IPt.d4 = (unsigned char)(IP[3]);
+								NetWork.SetIP(IPt);
+								Sequence++;
+							}
+						}
+					}
+						break;
+					case 3://init
+					{
+						if (Client) {
+							NetWork.InitClient();
+						}
+						else {
+							NetWork.InitServer();
+							m_ServerData.Frame = 0;
+						}
+						Sequence++;
+					}
+						break;
+					case 4://通信待機
+					{
+						{
+							xp1 = y_r(100);
+							yp1 = y_r(400);
+							xp2 = xp1 + y_r(400);
+							yp2 = yp1 + y_r(30);
+							color = GetColor(0, 0, 0);
+							DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+							Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawString(xp1, yp1, "通信待機中…", GetColor(255, 255, 255));
+						}
+						int tmpData = -1;
+						//クライアント
+						if (Client) {
+							switch (SeqCnt) {
+							case 0:
+								NetWork.SendtoServer(0);			// 通信リクエスト
+								//サーバーからの自分のIDを受信
+								if (NetWork.Recv(&tmpData)) {
+									if (tmpData > 0) {
+										m_PlayerData.ID = tmpData;
+										SeqCnt++;
+									}
+								}
+								break;
+							case 1:
+								NetWork.SendtoServer(1);			// ID取れたよ
+								//サーバーからのデータを受信したら次へ
+								if (NetWork.Recv(&m_ServerData)) {
+									Sequence++;
+								}
+								break;
+							default:
+								break;
+							}
+						}
+						//サーバー
+						else {
+							switch (SeqCnt) {
+							case 0:									//無差別受付
+								if (NetWork.Recv(&tmpData)) {			// 該当ソケットにクライアントから受信したら
+									SeqCnt++;
+								}
+								break;
+							case 1:
+								if (NetWork.Recv(&tmpData)) {
+									NetWork.SendtoClient(1);			// IDを送る
+									if (tmpData == 1) {					// ID取れたと識別出来たら
+										Sequence++;						// マッチ開始
+									}
+								}
+								break;
+							default:
+								break;
+							}
+						}
+					}
+						break;
+					case 5://通信
+					{
+						{
+							xp1 = y_r(100);
+							yp1 = y_r(400);
+							xp2 = xp1 + y_r(400);
+							yp2 = yp1 + y_r(30);
+							color = GetColor(0, 0, 0);
+							DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+							Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawString(xp1, yp1, "通信!", GetColor(255, 255, 255));
+						}
+					}
+						break;
+					default:
+						break;
 					}
 				}
 				//

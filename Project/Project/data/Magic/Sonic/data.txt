@@ -1,2 +1,0 @@
-Type=SearchSonic
-CoolDown=60.0

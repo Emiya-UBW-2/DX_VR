@@ -21,6 +21,7 @@
 #include <fstream>
 #include <cassert>
 #include <filesystem>
+#include <algorithm>
 
 #include "DXLib_ref/DXLib_ref.h"
 #include "Box2D/Box2D.h"
@@ -28,9 +29,8 @@
 using namespace DXLib_ref;
 
 #include "Enums.hpp"
+#include "NetWork.hpp"
 #include "MainScene/Object/ObjectBaseEnum.hpp"
-#include "MainScene/Object/HoukiEnum.hpp"
-#include "MainScene/Object/ItemEnum.hpp"
 #include "MainScene/Object/CharacterEnum.hpp"
 //
 #include "sub.hpp"
@@ -39,8 +39,6 @@ using namespace DXLib_ref;
 #include "MainScene/BackGround/BackGround.hpp"
 
 #include "MainScene/Object/ObjectBase.hpp"
-#include "MainScene/Object/Houki.hpp"
-#include "MainScene/Object/Item.hpp"
 #include "MainScene/Object/Character.hpp"
 
 #include "ObjectManager.hpp"
