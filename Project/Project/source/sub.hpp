@@ -17,6 +17,8 @@ namespace FPS_n2 {
 	private:
 		float m_AddxRad{ 0.f };
 		float m_AddyRad{ 0.f };
+		float m_xRad{ 0.f };
+		float m_yRad{ 0.f };
 		unsigned int m_Flags{ 0 };
 	public:
 		void			SetInput(
@@ -61,9 +63,15 @@ namespace FPS_n2 {
 			if (pAction4) { this->m_Flags |= (1 << 14); }
 			if (pAction5) { this->m_Flags |= (1 << 15); }
 		}
+		void			SetRadBuf(float pxRad, float pyRad) {
+			this->m_xRad = pxRad;
+			this->m_yRad = pyRad;
+		}
 
 		const auto& GetAddxRad() const noexcept { return m_AddxRad; }
 		const auto& GetAddyRad() const noexcept { return m_AddyRad; }
+		const auto& GetxRad() const noexcept { return m_xRad; }
+		const auto& GetyRad() const noexcept { return m_yRad; }
 		const auto GetGoFrontPress() const noexcept { return (this->m_Flags & (1 << 0)) != 0; }
 		const auto GetGoBackPress() const noexcept { return (this->m_Flags & (1 << 1)) != 0; }
 		const auto GetGoLeftPress() const noexcept { return (this->m_Flags & (1 << 2)) != 0; }
@@ -80,6 +88,41 @@ namespace FPS_n2 {
 		const auto GetAction3() const noexcept { return (this->m_Flags & (1 << 13)) != 0; }
 		const auto GetAction4() const noexcept { return (this->m_Flags & (1 << 14)) != 0; }
 		const auto GetAction5() const noexcept { return (this->m_Flags & (1 << 15)) != 0; }
+
+		const InputControl operator+(const InputControl& o) const noexcept {
+			InputControl tmp;
+
+			tmp.m_AddxRad = this->m_AddxRad + o.m_AddxRad;
+			tmp.m_AddyRad = this->m_AddyRad + o.m_AddyRad;
+			tmp.m_xRad = this->m_xRad + o.m_xRad;
+			tmp.m_yRad = this->m_yRad + o.m_yRad;
+			tmp.m_Flags = this->m_Flags;
+
+			return tmp;
+		}
+		const InputControl operator-(const InputControl& o) const noexcept {
+			InputControl tmp;
+
+			tmp.m_AddxRad = this->m_AddxRad - o.m_AddxRad;
+			tmp.m_AddyRad = this->m_AddyRad - o.m_AddyRad;
+			tmp.m_xRad = this->m_xRad - o.m_xRad;
+			tmp.m_yRad = this->m_yRad - o.m_yRad;
+			tmp.m_Flags = this->m_Flags;
+
+			return tmp;
+		}
+		const InputControl operator*(float per) const noexcept {
+			InputControl tmp;
+
+			tmp.m_AddxRad = this->m_AddxRad *per;
+			tmp.m_AddyRad = this->m_AddyRad *per;
+			tmp.m_xRad = this->m_xRad *per;
+			tmp.m_yRad = this->m_yRad *per;
+			tmp.m_Flags = this->m_Flags;
+
+			return tmp;
+		}
+
 	};
 	//ƒLƒƒƒ‰“ü—Í
 	class CharacterMoveGroundControl {
@@ -105,6 +148,7 @@ namespace FPS_n2 {
 			this->m_Vec[pDir] = std::clamp(this->m_Vec[pDir], 0.f, 1.f);
 		}
 	public:
+		const auto		GetRadBuf() const noexcept { return  this->m_rad_Buf; }
 		const auto		GetTurnRatePer() const noexcept { return  this->m_TurnRatePer; }
 		const auto		GetRad() const noexcept { return  this->m_rad; }
 		const auto		GetVecFront() const noexcept { return  this->m_Vec[0] || m_IsSprint; }
@@ -163,8 +207,7 @@ namespace FPS_n2 {
 			this->m_rad = this->m_rad_Buf;
 		}
 		void			SetInput(
-			float pAddxRad, float pAddyRad,
-			const VECTOR_ref& pAddRadvec,
+			float pxRad, float pyRad,
 			bool pGoFrontPress,
 			bool pGoBackPress,
 			bool pGoLeftPress,
@@ -230,6 +273,17 @@ namespace FPS_n2 {
 			}
 			//‰ñ“]
 			{
+				if (pxRad!=-1.f || pyRad != -1.f) {
+					this->m_rad_Buf.x(pxRad);
+					this->m_rad_Buf.y(pyRad);
+				}
+
+				Easing(&this->m_rad, this->m_rad_Buf, 0.5f, EasingType::OutExpo);
+			}
+		}
+		void			ExecuteRadBuf(float pAddxRad, float pAddyRad, const VECTOR_ref& pAddRadvec) noexcept {
+			//‰ñ“]
+			{
 				auto limchange = Lerp(1.f, powf(1.f - this->GetVecFront(), 0.5f), this->m_RunPer * 0.8f);
 				auto tmp = 1.f;
 				Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
@@ -242,8 +296,6 @@ namespace FPS_n2 {
 					this->m_rad_Buf.y() + (pAddyRad + this->m_TurnRatePer / 100.f)*tmp
 					+ this->m_radAdd.y()
 				);
-
-				Easing(&this->m_rad, this->m_rad_Buf, 0.5f, EasingType::OutExpo);
 			}
 		}
 		void			Execute(void) noexcept {

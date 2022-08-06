@@ -5,8 +5,7 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
 		private:
-			static const int		team_num = 1;
-			static const int		enemy_num = 1;
+			static const int		chara_num = 2;
 		private:
 			//リソース関連
 			ObjectManager			m_Obj;						//モデル
@@ -49,28 +48,64 @@ namespace FPS_n2 {
 
 			//通信
 
-
 			struct PlayerNetData {
 			public:
-				char	ID;			//1	* 1	= 1byte
-				InputControl Input;	//4 * 3	= 12byte
-									//		  13byte
+				InputControl	Input;	//4 * 5	= 12byte
+				VECTOR_ref		PosBuf;	//
+				char			ID;		//1	* 1	= 1byte
+										//		  13byte
+			public:
+				const PlayerNetData operator+(const PlayerNetData& o) const noexcept {
+					PlayerNetData tmp;
+
+					tmp.ID = o.ID;
+					tmp.Input = this->Input + o.Input;
+					tmp.PosBuf = this->PosBuf + o.PosBuf;
+
+					return tmp;
+				}
+				const PlayerNetData operator-(const PlayerNetData& o) const noexcept {
+					PlayerNetData tmp;
+
+					tmp.ID = o.ID;
+					tmp.Input = this->Input - o.Input;
+					tmp.PosBuf = this->PosBuf - o.PosBuf;
+
+					return tmp;
+				}
+				const PlayerNetData operator*(float per) const noexcept {
+					PlayerNetData tmp;
+
+					tmp.ID = this->ID;
+					tmp.Input = this->Input*per;
+					tmp.PosBuf = this->PosBuf*per;
+
+					return tmp;
+				}
 			};
 			struct ServerNetData {
 				unsigned long long Frame;
-				PlayerNetData PlayerData[team_num + enemy_num];
+				PlayerNetData PlayerData[chara_num];
 			};
 
+			std::array<ServerNetData, 1> InputRec;	//遅延再現用
+			ServerNetData			m_ServerData;	// サーバーデータ
+			int InputRecCnt = 0;
+
 			NewWorkControl			NetWork;
-			ServerNetData			m_ServerData;		// サーバーデータ
+			unsigned long long		ServerFrame;
+			int						LeapFrame;
+			ServerNetData			m_ServerDataCommon;	// サーバーデータ
+			ServerNetData			m_PrevServerData;	// サーバーデータ
 			PlayerNetData			m_PlayerData;		// 送信用ＩＰアドレスデータ
 			int						Sequence = 0;
 			switchs					m_LeftClick;
 			float					m_LeftPressTimer{ 0.f };
 			bool					Client = true;
-			int						UsePort = 10800;
-			int						IP[4]{ 255,255,255,255 };
+			int						UsePort = 10850;
+			int						IP[4]{ 58,188,85,163 };
 			int						SeqCnt = 0;
+			float					serverCnt = 0;
 		public:
 			using TEMPSCENE::TEMPSCENE;
 			void Set(void) noexcept override {
@@ -85,10 +120,7 @@ namespace FPS_n2 {
 				this->m_BackGround.Load();
 				//
 				this->m_Obj.Init(&this->m_BackGround.GetGroundCol());
-				for (int i = 0; i < team_num; i++) {
-					this->m_Obj.AddObject(ObjType::Human, "data/Charactor/Marisa/");
-				}
-				for (int i = 0; i < enemy_num; i++) {
+				for (int i = 0; i < chara_num; i++) {
 					this->m_Obj.AddObject(ObjType::Human, "data/Charactor/Marisa/");
 				}
 				//ロード
@@ -102,22 +134,25 @@ namespace FPS_n2 {
 				TEMPSCENE::Set();
 				//Set
 				//人
-				for (int i = 0; i < team_num + enemy_num; i++) {
+				for (int i = 0; i < chara_num; i++) {
 					auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
 					c->ValueSet(deg2rad(0.f), deg2rad(-90.f), VECTOR_ref::vget(0.f + (float)(i - 1)*100.f, 0.f, -52.5f));
 					if (i == 0) {
-						c->SetUseRealTimePhysics(true);
-					}
-					else {
 						c->SetUseRealTimePhysics(false);
-					}
-					if (i < team_num) {
 						c->SetCharaType(CharaTypeID::Team);
 					}
 					else {
+						c->SetUseRealTimePhysics(false);
 						c->SetCharaType(CharaTypeID::Enemy);
 					}
+					m_ServerDataCommon.PlayerData[i].PosBuf = c->GetPosBuf();
+					m_PrevServerData.PlayerData[i].PosBuf = c->GetPosBuf();	// サーバーデータ
+					m_ServerData.PlayerData[i].PosBuf = c->GetPosBuf();
 				}
+
+				m_ServerDataCommon.Frame = 0;
+				m_PrevServerData.Frame = 0;
+				m_ServerData.Frame = 0;
 				{
 					auto& Chara = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, 0));//自分
 					this->m_HPBuf = Chara->GetHP();
@@ -153,6 +188,8 @@ namespace FPS_n2 {
 				this->m_MouseActive.Init(false);
 				this->m_LookMode = 0;
 				this->m_LookReturnTime = 0.f;
+
+				this->ServerFrame = 0;
 			}
 			//
 			bool Update(void) noexcept override {
@@ -291,7 +328,7 @@ namespace FPS_n2 {
 					}
 					if (this->m_Lockon.trigger()) {
 						if (Chara->GetLockOn() == nullptr) {
-							for (int i = 0; i < team_num + enemy_num; i++) {
+							for (int i = 0; i < chara_num; i++) {
 								if (i == m_PlayerData.ID) { continue; }
 								auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
 
@@ -335,7 +372,7 @@ namespace FPS_n2 {
 					InputControl Input;
 					bool isready = true;
 					/*
-					for (int i = 0; i < team_num + enemy_num; i++) {
+					for (int i = 0; i < chara_num; i++) {
 						auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
 						//操作
 						if (i == 0
@@ -412,37 +449,88 @@ namespace FPS_n2 {
 						a4_key && isready,
 						a5_key && isready
 					);
+					Chara->ExecuteRadBuf(m_PlayerData.Input);
+					m_PlayerData.Input.SetRadBuf(Chara->GetRadBuf().x(), Chara->GetRadBuf().y());
 
+					m_PlayerData.PosBuf = Chara->GetPosBuf();
 
 					if (Sequence == 5) {
-						//サーバー
-						if (!Client) {
-							m_ServerData.PlayerData[m_PlayerData.ID] = m_PlayerData;	// サーバーのプレイヤーデータ
-							m_ServerData.Frame++;
-						}
-						{
-							//クライアント
-							if (Client) {
-								//サーバーからのデータを受信
-								if (NetWork.Recv(&m_ServerData)) {
-								}
-								//自身のデータを送信
-								NetWork.SendtoServer(m_PlayerData);
+						//クライアント
+						bool recv = false;
+						ServerNetData tmpData;
+						if (Client) {
+							//サーバーからのデータを受信
+							if (NetWork.Recv(&tmpData)) {
+								recv = true;
 							}
-							//サーバー
+							//自身のデータを送信
+							NetWork.SendtoServer(m_PlayerData);
+						}
+						//サーバー
+						else {
+							m_ServerData.PlayerData[m_PlayerData.ID] = m_PlayerData;	// サーバーのプレイヤーデータ
+							PlayerNetData tmpPData;										// 送信用ＩＰアドレスデータ
+							if (NetWork.Recv(&tmpPData)) {								// 該当ソケットにクライアントから受信したら
+								m_ServerData.PlayerData[tmpPData.ID] = tmpPData;		// 更新
+							}
+							m_ServerData.Frame++;
+
+							//サーバーからクライアントに返信
+							serverCnt += 60.f / FPS;
+							if (serverCnt > 20.f) {
+								NetWork.SendtoClient(m_ServerData);
+								serverCnt -= 20.f;
+
+								tmpData = m_ServerData;
+								recv = true;
+							}
+						}
+						if (recv) {
+							//疑似遅延
+							InputRec[0] = tmpData;
+							for (int i = ((int)(InputRec.size()) - 1); i >= 1; i--) {
+								InputRec[i] = InputRec[i - 1];
+							}
+							tmpData = InputRec[InputRecCnt];
+							InputRecCnt = std::clamp<int>(InputRecCnt + 1, 0, (int)(InputRec.size()) - 1);
+
+							if (ServerFrame <= tmpData.Frame && ((tmpData.Frame - ServerFrame) < 20000)) {
+								LeapFrame = 0;
+								m_PrevServerData = m_ServerDataCommon;
+								ServerFrame = tmpData.Frame;
+								m_ServerDataCommon = tmpData;
+							}
+						}
+
+						for (int i = 0; i < chara_num; i++) {
+							auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
+							//c->SetInput(m_ServerDataCommon.PlayerData[i].Input, isready);
+							//continue;
+							if (i == m_PlayerData.ID) {
+								c->SetInput(m_PlayerData.Input, isready);
+							}
 							else {
-								PlayerNetData tmpData;										// 送信用ＩＰアドレスデータ
-								if (NetWork.Recv(&tmpData)) {								// 該当ソケットにクライアントから受信したら
-									m_ServerData.PlayerData[tmpData.ID] = tmpData;
-									//サーバーからクライアントに返信
-									NetWork.SendtoClient(m_ServerData);
+								auto Total = (int)m_ServerDataCommon.Frame - (int)m_PrevServerData.Frame;
+								if (Total <= 0) { Total = 20; }
+								printfDx("\n[%d / %d]\n\n", LeapFrame, Total);
+								auto tmp = Lerp(m_PrevServerData.PlayerData[i], m_ServerDataCommon.PlayerData[i], (float)LeapFrame / (float)Total);
+								LeapFrame = std::clamp<int>(LeapFrame + 1, 0, Total);
+								c->SetInput(tmp.Input, isready);
+								//差があるときだけ移動量変更
+								if ((tmp.PosBuf - c->GetPosBuf()).size() > (1.0f*Scale_Rate)) {
+									c->SetPosBufOverRide(tmp.PosBuf);
 								}
 							}
 						}
 					}
-					for (int i = 0; i < team_num + enemy_num; i++) {
-						auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
-						c->SetInput(m_ServerData.PlayerData[i].Input, isready);
+					else {
+						for (int i = 0; i < chara_num; i++) {
+							auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
+							if (i == m_PlayerData.ID) {
+								c->SetInput(m_PlayerData.Input, isready);
+							}
+						}
+
 					}
 
 				}
@@ -552,7 +640,7 @@ namespace FPS_n2 {
 					Set_is_Blackout(false);
 					Set_is_lens(false);
 				}
-				for (int i = 0; i < team_num + enemy_num; i++) {
+				for (int i = 0; i < chara_num; i++) {
 					if (i == m_PlayerData.ID) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
 					auto pos = c->GetFrameWorldMat(CharaFrame::Upper).pos();
@@ -585,7 +673,7 @@ namespace FPS_n2 {
 				auto White = GetColor(212, 255, 239);
 				unsigned int color = Red;
 				//キャラ
-				for (int i = 0; i < team_num + enemy_num; i++) {
+				for (int i = 0; i < chara_num; i++) {
 					if (i == m_PlayerData.ID) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
 					auto campos = c->GetCameraPosition();
@@ -719,7 +807,7 @@ namespace FPS_n2 {
 						bool isout = true;
 						auto tmpRader = 1.f;
 						int div = 5;
-						for (int i = 0; i < team_num + enemy_num; i++) {
+						for (int i = 0; i < chara_num; i++) {
 							if (i == m_PlayerData.ID) { continue; }
 							auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
 							tmpRader = BaseVPer;
@@ -740,7 +828,7 @@ namespace FPS_n2 {
 						}
 					}
 
-					for (int i = 0; i < team_num + enemy_num; i++) {
+					for (int i = 0; i < chara_num; i++) {
 						if (i == m_PlayerData.ID) { continue; }
 						auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
 						auto pos = MATRIX_ref::Vtrans(c->GetMatrix().pos() - BaseBos, MATRIX_ref::RotY(rad))*((1.f / Scale_Rate) * this->m_Rader_r);
@@ -769,12 +857,12 @@ namespace FPS_n2 {
 					m_LeftPressTimer = 0.f;
 				}
 				if (!this->m_MouseActive.on()) {
-					bool Mid_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_MIDDLE) != 0);
-					bool Right_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_RIGHT) != 0);
+					//bool Mid_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_MIDDLE) != 0);
+					//bool Right_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_RIGHT) != 0);
 					int mx = DXDraw::Instance()->disp_x / 2, my = DXDraw::Instance()->disp_y / 2;
 					GetMousePoint(&mx, &my);
 					int xp1, yp1, xp2, yp2;
-					unsigned int color;
+					//unsigned int color;
 					{
 						xp1 = y_r(90);
 						yp1 = y_r(340);
@@ -837,7 +925,7 @@ namespace FPS_n2 {
 							}
 						}
 					}
-						break;
+					break;
 					case 1://ポート
 					{
 						{
@@ -858,7 +946,7 @@ namespace FPS_n2 {
 							color = (into) ? GetColor(0, 0, 0) : GetColor(64, 64, 64);
 							DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
 							Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawString_MID(xp1 + (xp2 - xp1) / 2, yp1, "+", GetColor(255, 255, 255));
-							if (into){
+							if (into) {
 								if (m_LeftClick.trigger()) {
 									UsePort++;
 								}
@@ -903,15 +991,15 @@ namespace FPS_n2 {
 							if (into && m_LeftClick.trigger()) {
 								NetWork.Set_Port(UsePort);
 								if (Client) {
-									Sequence+=1;
+									Sequence += 1;
 								}
 								else {
-									Sequence+=2;
+									Sequence += 2;
 								}
 							}
 						}
 					}
-						break;
+					break;
 					case 2://IP
 					{
 						{
@@ -989,7 +1077,7 @@ namespace FPS_n2 {
 							}
 						}
 					}
-						break;
+					break;
 					case 3://init
 					{
 						if (Client) {
@@ -997,11 +1085,11 @@ namespace FPS_n2 {
 						}
 						else {
 							NetWork.InitServer();
-							m_ServerData.Frame = 0;
+							m_ServerDataCommon.Frame = 0;
 						}
 						Sequence++;
 					}
-						break;
+					break;
 					case 4://通信待機
 					{
 						{
@@ -1022,7 +1110,18 @@ namespace FPS_n2 {
 								//サーバーからの自分のIDを受信
 								if (NetWork.Recv(&tmpData)) {
 									if (tmpData > 0) {
-										m_PlayerData.ID = tmpData;
+										m_PlayerData.ID = (char)tmpData;
+										for (int i = 0; i < chara_num; i++) {
+											auto& c = (std::shared_ptr<CharacterClass>&)(*this->m_Obj.GetObj(ObjType::Human, i));
+											if (i == m_PlayerData.ID) {
+												//c->SetUseRealTimePhysics(true);
+												c->SetCharaType(CharaTypeID::Team);
+											}
+											else {
+												//c->SetUseRealTimePhysics(false);
+												c->SetCharaType(CharaTypeID::Enemy);
+											}
+										}
 										SeqCnt++;
 									}
 								}
@@ -1030,7 +1129,7 @@ namespace FPS_n2 {
 							case 1:
 								NetWork.SendtoServer(1);			// ID取れたよ
 								//サーバーからのデータを受信したら次へ
-								if (NetWork.Recv(&m_ServerData)) {
+								if (NetWork.Recv(&m_ServerDataCommon)) {
 									Sequence++;
 								}
 								break;
@@ -1059,7 +1158,7 @@ namespace FPS_n2 {
 							}
 						}
 					}
-						break;
+					break;
 					case 5://通信
 					{
 						{
@@ -1069,10 +1168,10 @@ namespace FPS_n2 {
 							yp2 = yp1 + y_r(30);
 							color = GetColor(0, 0, 0);
 							DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
-							Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawString(xp1, yp1, "通信!", GetColor(255, 255, 255));
+							Fonts->Get(y_r(30), FontPool::FontType::Nomal_Edge).Get_handle().DrawString(xp1, yp1, "通信中!", GetColor(255, 255, 255));
 						}
 					}
-						break;
+					break;
 					default:
 						break;
 					}

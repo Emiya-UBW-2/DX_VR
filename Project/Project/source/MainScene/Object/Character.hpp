@@ -98,6 +98,10 @@ namespace FPS_n2 {
 			//
 			std::array<float, (int)CharaAnimeID::AnimeIDMax>	m_AnimPerBuf{ 0 };
 			VECTOR_ref											m_PosBuf;
+
+			bool												m_PosBufOverRideFlag{ false };
+			VECTOR_ref											m_PosBufOverRide;
+
 			MATRIX_ref											m_UpperMatrix;
 			float												m_Speed{ 0.f };
 			float												m_yrad_Upper{ 0.f }, m_yrad_Bottom{ 0.f };
@@ -140,11 +144,13 @@ namespace FPS_n2 {
 			auto&			GetAnimeBuf(CharaAnimeID anim) noexcept { return this->m_AnimPerBuf[(int)anim]; }
 			auto&			GetAnime(CharaAnimeID anim) noexcept { return this->GetObj().get_anime((int)anim); }
 			//
+			const auto		GetRadBuf(void) const noexcept { return this->m_InputGround.GetRadBuf(); }
 			const auto		GetIsRun(void) const noexcept { return this->m_InputGround.GetRun(); }
 			const auto		GetTurnRatePer(void) const noexcept { return this->m_InputGround.GetTurnRatePer(); }
 			const auto		GetCharaDir(void) const noexcept { return this->m_UpperMatrix * this->m_move.mat; }
 			const auto		GetEyeVecMat(void) const noexcept { return GetCharaDir(); }
 			const auto		GetEyePosition(void) const noexcept { return (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f + this->GetEyeVecMat().zvec() * -1.5f; }
+			const auto&		GetPosBuf(void) const noexcept { return this->m_PosBuf; }
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
 			const auto&		GetScore(void) const noexcept { return this->m_Score; }
 			const auto&		GetHP(void) const noexcept { return this->m_HP; }
@@ -160,6 +166,11 @@ namespace FPS_n2 {
 			void			AddHP(float value) noexcept { this->m_HP = std::clamp(this->m_HP + value, 0.f, HPMax); }
 			void			SubHP(float value) noexcept { this->m_HP = std::clamp(this->m_HP - value, 0.f, HPMax); }
 			void			SetHP(float value) noexcept { this->m_HP = value; }
+
+			void			SetPosBufOverRide(const VECTOR_ref& pPos) {
+				this->m_PosBufOverRideFlag = true;
+				this->m_PosBufOverRide = pPos;
+			}
 
 			void			ValueSet(float pxRad, float pyRad, const VECTOR_ref& pPos) noexcept {
 				this->m_KeyActive = false;
@@ -193,6 +204,8 @@ namespace FPS_n2 {
 				//“®ì‚É‚©‚©‚í‚é‘€ì
 				this->m_InputGround.ValueSet(pxRad, pyRad);
 				this->m_PosBuf = pPos;
+				this->m_PosBufOverRideFlag = false;
+				this->m_PosBufOverRide = pPos;
 				//ã‹L‚ð”½‰f‚·‚é‚à‚Ì
 				this->m_yrad_Upper = this->m_InputGround.GetRad().y();
 				this->m_yrad_Bottom = this->m_InputGround.GetRad().y();
@@ -200,14 +213,16 @@ namespace FPS_n2 {
 				this->m_move.vec.clear();
 				SetMove(MATRIX_ref::RotY(this->m_yrad_Bottom), this->m_PosBuf);
 			}
+			void			ExecuteRadBuf(const InputControl& pInput) {
+				m_InputGround.ExecuteRadBuf(pInput.GetAddxRad(), pInput.GetAddyRad(), VECTOR_ref::zero());
+			}
 			void			SetInput(const InputControl& pInput, bool pReady) {
 				this->m_ReadySwitch = (this->m_KeyActive != pReady);
 				this->m_KeyActive = pReady;
 
 				//’n
 				m_InputGround.SetInput(
-					pInput.GetAddxRad(), pInput.GetAddyRad(),
-					VECTOR_ref::zero(),
+					pInput.GetxRad(), pInput.GetyRad(),
 					pInput.GetGoFrontPress(),
 					pInput.GetGoBackPress(),
 					pInput.GetGoLeftPress(),
@@ -491,6 +506,12 @@ namespace FPS_n2 {
 					}
 				}
 				this->m_PosBuf += this->m_move.vec;
+
+				if (this->m_PosBufOverRideFlag) {
+					this->m_PosBufOverRideFlag = false;
+					this->m_PosBuf = this->m_PosBufOverRide;
+				}
+
 				//
 				auto OLDbuf = this->m_PosBuf;
 				if (col_wall(OLDpos, &this->m_PosBuf, *this->m_MapCol)) {}
