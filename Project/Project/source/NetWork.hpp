@@ -51,7 +51,7 @@ public:
 	void Send(IPDATA& Ip, int SendPort, const T& Data) {
 		if (NetUDPHandle != -1) {
 			NetWorkSendUDP(NetUDPHandle, Ip, SendPort, &Data, sizeof(T));	// 文字列の送信
-			printfDx("送信:[%d,%d,%d,%d][%d]\n", Ip.d1, Ip.d2, Ip.d3, Ip.d4, SendPort);
+			//printfDx("送信:[%d,%d,%d,%d][%d]\n", Ip.d1, Ip.d2, Ip.d3, Ip.d4, SendPort);
 		}
 	}
 	template<class T>
@@ -61,13 +61,13 @@ public:
 		case TRUE:
 			NetWorkRecvUDP(NetUDPHandle, &RecvIp, &RecvPort, Data, sizeof(T), FALSE);		// 受信
 			ans = true;
-			printfDx("受信\n");
+			//printfDx("受信\n");
 			break;
 		case FALSE:
-			printfDx("受信待ち\n");			//待ち
+			//printfDx("受信待ち\n");			//待ち
 			break;
 		default:
-			printfDx("受信エラー\n");
+			//printfDx("受信エラー\n");
 			break;
 		}
 		return ans;
