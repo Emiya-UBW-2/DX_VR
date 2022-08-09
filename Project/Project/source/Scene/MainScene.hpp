@@ -413,25 +413,34 @@ namespace FPS_n2 {
 				Set_zoom_lens(3.5f);
 				//ƒTƒEƒ“ƒh
 				auto SE = SoundPool::Instance();
-				SE->Add((int)SoundEnum::Shot_Gun, 3, "data/Sound/SE/gun/shot.wav");
-				SE->Add((int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
+				//SE->Add((int)SoundEnum::Shot_Gun, 3, "data/Sound/SE/gun/shot.wav");
+				//SE->Add((int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
 				for (int i = 0; i < 4; i++) {
-					SE->Add((int)SoundEnum::Cocking0 + i, 3, "data/Sound/SE/gun/slide/bolt/" + std::to_string(i) + ".wav");
+					//SE->Add((int)SoundEnum::Cocking0 + i, 3, "data/Sound/SE/gun/slide/bolt/" + std::to_string(i) + ".wav");
 				}
-				SE->Add((int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
-				SE->Add((int)SoundEnum::SlideFoot, 9, "data/Sound/SE/move/sliding.wav");
-				SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
-				SE->Add((int)SoundEnum::Heart, 9, "data/Sound/SE/move/heart.wav");
-				SE->Add((int)SoundEnum::GateOpen, 1, "data/Sound/SE/GateOpen.wav");
-
-				SE->Get((int)SoundEnum::Shot_Gun).SetVol_Local(128);
-				SE->Get((int)SoundEnum::Trigger).SetVol_Local(128);
+				//SE->Add((int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
+				//SE->Add((int)SoundEnum::SlideFoot, 9, "data/Sound/SE/move/sliding.wav");
+				//SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
+				//SE->Add((int)SoundEnum::Heart, 9, "data/Sound/SE/move/heart.wav");
+				//SE->Add((int)SoundEnum::GateOpen, 1, "data/Sound/SE/GateOpen.wav");
+				SE->Add((int)SoundEnum::Tank_Shot, 3, "data/Sound/SE/gun/fire/0.wav");
+				SE->Add((int)SoundEnum::Tank_Ricochet, 3, "data/Sound/SE/ricochet/0.wav");
+				SE->Add((int)SoundEnum::Tank_Damage, 3, "data/Sound/SE/damage/0.wav");
+				SE->Add((int)SoundEnum::Tank_engine, 10, "data/Sound/SE/engine.wav");
+				SE->Add((int)SoundEnum::Tank_Reload, 3, "data/Sound/SE/reload/hand/0.wav");
+				
+				//SE->Get((int)SoundEnum::Shot_Gun).SetVol_Local(128);
+				//SE->Get((int)SoundEnum::Trigger).SetVol_Local(128);
 				for (int i = 0; i < 4; i++) {
-					SE->Get((int)SoundEnum::Cocking0 + i).SetVol_Local(128);
+					//SE->Get((int)SoundEnum::Cocking0 + i).SetVol_Local(128);
 				}
-				SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
-				SE->Get((int)SoundEnum::Heart).SetVol_Local(92);
-				SE->Get((int)SoundEnum::GateOpen).SetVol_Local(128);
+				//SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
+				//SE->Get((int)SoundEnum::Heart).SetVol_Local(92);
+				//SE->Get((int)SoundEnum::GateOpen).SetVol_Local(128);
+				SE->Get((int)SoundEnum::Tank_Shot).SetVol_Local(128);
+				SE->Get((int)SoundEnum::Tank_Ricochet).SetVol_Local(128);
+				SE->Get((int)SoundEnum::Tank_Damage).SetVol_Local(128);
+				SE->Get((int)SoundEnum::Tank_engine).SetVol_Local(32);
 				//“ü—Í
 				this->m_FPSActive.Init(false);
 				this->m_MouseActive.Init(false);

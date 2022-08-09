@@ -723,7 +723,8 @@ namespace FPS_n2 {
 			float xrad_shot{ 0.f };														//射撃反動x
 			float zrad_shot{ 0.f };														//射撃反動z
 		private:
-			bool Calc_Gun(bool key) {
+			bool Calc_Gun(bool key, const VECTOR_ref& vehPos) {
+				auto SE = SoundPool::Instance();
 				bool ans = (key && this->loadcnt == 0 && this->rounds > 0);
 				if (ans) {
 					this->loadcnt = this->gun_info.Get_load_time();
@@ -735,7 +736,7 @@ namespace FPS_n2 {
 				if (this->reload_se_f && this->loadcnt < 1.f) {
 					this->reload_se_f = false;
 					//サウンド
-					//SE.Get((int)EnumSound::Tank_Reload).Play_3D(use_veh->Reload_ID, this->m_move.pos, 3.f, 128);
+					SE->Get((int)SoundEnum::Tank_Reload).Play_3D(0, vehPos, 3.f*Scale_Rate, 128);
 				}
 				this->loadcnt = std::max(this->loadcnt - 1.f / FPS, 0.f);
 				this->fired = std::max(this->fired - 1.f / FPS, 0.f);
@@ -795,16 +796,17 @@ namespace FPS_n2 {
 				this->Spec = this->gun_info.Get_Spec();
 			}
 			//銃演算
-			bool Update(bool key, const VECTOR_ref& pos_t, const MATRIX_ref& mat_t) {
+			bool Update(bool key, const VECTOR_ref& pos_t, const MATRIX_ref& mat_t, const VECTOR_ref& vehPos) {
+				auto SE = SoundPool::Instance();
 				bool isshot = false;
 				Gun_move.mat = mat_t;
 				//射撃
-				if (Calc_Gun(key)) {
+				if (Calc_Gun(key, vehPos)) {
 					//排莢、弾
 					Create_bullet(&this->Spec[0], pos_t);
 					isshot = true;
 					//サウンド
-					//SE.Get((int)EnumSound::Tank_Shot).Play_3D(this->gun_info.Get_sound(), this->m_move.pos, 250.f, 128);
+					SE->Get((int)SoundEnum::Tank_Shot).Play_3D(this->gun_info.Get_sound(), vehPos, 250.f*Scale_Rate, 128);
 				}
 				//弾の処理
 				for (auto& a : this->bullet) {
@@ -1091,17 +1093,14 @@ namespace FPS_n2 {
 			VEHICLE_HitControl									hitControl;
 			VhehicleData*										use_veh{ nullptr };								/*固有値*/
 		public:
-			const float HPMax = 100.f;
-
-
 			CharaTypeID											m_CharaType{ CharaTypeID::Enemy };
 
-			float												m_HP{ 0.f };							//スコア
 			float												m_Score{ 0.f };							//スコア
 
+
 			const auto&		GetScore(void) const noexcept { return this->m_Score; }
-			const auto&		GetHP(void) const noexcept { return this->m_HP; }
-			const auto&		GetHPMax(void) const noexcept { return HPMax; }
+			const auto&		GetHP(void) const noexcept { return this->Damage.Get_HP(); }
+			const auto&		GetHPMax(void) const noexcept { return this->Damage.Get_HP_full(); }
 
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
 			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
@@ -1176,6 +1175,7 @@ namespace FPS_n2 {
 			}
 			//被弾処理
 			const auto		CalcAmmoHited(AmmoObj& pAmmo, std::shared_ptr<VehicleClass>& pShooter) {
+				auto SE = SoundPool::Instance();
 				this->hitControl.sort_Hit();				//当たり判定を近い順にソート
 				//ダメージ面に届くまで判定
 				std::optional<ArmerMeshInfo> HitArmerMesh;
@@ -1190,7 +1190,7 @@ namespace FPS_n2 {
 							if (pAmmo.PenetrationCheck(HitArmerMesh.value().second, normalvec)) {
 								//貫通
 								pAmmo.FlagOff();
-								//SE.Get((int)EnumSound::Tank_Ricochet).Play_3D(0, position, 50.f, 64);
+								SE->Get((int)SoundEnum::Tank_Ricochet).Play_3D(0, position, 50.f*Scale_Rate, 64);
 								//ダメージ計算
 								auto v1 = MATRIX_ref::RotY(this->yrad_body).zvec();
 								auto v2 = (pShooter->m_move.pos - this->m_move.pos).Norm(); v2.y(0);
@@ -1210,7 +1210,7 @@ namespace FPS_n2 {
 							else {
 								//跳弾
 								pAmmo.Ricochet(position, normalvec);
-								//SE.Get((int)EnumSound::Tank_Damage).Play_3D(0, position, 50.f, 64);
+								SE->Get((int)SoundEnum::Tank_Damage).Play_3D(0, position, 50.f*Scale_Rate, 64);
 							}
 							//エフェクトセット
 							Effect_UseControl::Set_Effect(Effect::ef_reco, position, normalvec, pAmmo.GetEffectSize()*Scale_Rate);
@@ -1527,7 +1527,7 @@ namespace FPS_n2 {
 				for (auto& cg : this->Gun_) {
 					auto mazPos = GetObj().frame(cg.Getgun_info().Get_frame(2).first);
 					auto mazMat = GetObj().GetFrameLocalWorldMatrix(cg.Getgun_info().Get_frame(1).first);
-					if (cg.Update(key[(&cg == &this->Gun_.front()) ? 0 : 1], mazPos, mazMat)) {
+					if (cg.Update(key[(&cg == &this->Gun_.front()) ? 0 : 1], mazPos, mazMat,this->m_move.pos)) {
 						Effect_UseControl::Set_Effect(Effect::ef_fire, mazPos, mazMat.zvec() * -1.f, cg.GetCaliberSize() / 0.1f * Scale_Rate);				//銃発砲エフェクトのセット
 					}
 					for (auto& a : cg.GetBullet()) {
@@ -1796,7 +1796,8 @@ namespace FPS_n2 {
 				}
 				//エンジン音
 				if (this->engine_time == 0.f) {
-					//SE.Get((int)EnumSound::Tank_engine).Play_3D(0, this->m_move.pos, 50.f, 64);
+					auto SE = SoundPool::Instance();
+					SE->Get((int)SoundEnum::Tank_engine).Play_3D(0, this->m_move.pos, 50.f*Scale_Rate, 32);//, DX_PLAYTYPE_LOOP
 					this->engine_time = 1.f;
 				}
 				else {

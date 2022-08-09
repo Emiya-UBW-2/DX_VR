@@ -41,6 +41,12 @@ namespace FPS_n2 {
 			Vehicle,
 		};
 		enum class SoundEnum {
+			Tank_Shot,
+			Tank_Ricochet,
+			Tank_Damage,
+			Tank_engine,
+			Tank_Reload,
+
 			Shot_Gun,
 			Trigger,
 			Cocking0,
