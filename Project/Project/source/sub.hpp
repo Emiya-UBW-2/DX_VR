@@ -5,7 +5,7 @@
 namespace std {
 	template <>
 	struct default_delete<b2Body> {
-		void operator()(b2Body* body) const {
+		void		operator()(b2Body* body) const {
 			body->GetWorld()->DestroyBody(body);
 		}
 	};
@@ -75,22 +75,22 @@ namespace FPS_n2 {
 		const auto& GetAddyRad() const noexcept { return m_AddyRad; }
 		const auto& GetxRad() const noexcept { return m_xRad; }
 		const auto& GetyRad() const noexcept { return m_yRad; }
-		const auto GetGoFrontPress() const noexcept { return (this->m_Flags & (1 << 0)) != 0; }
-		const auto GetGoBackPress() const noexcept { return (this->m_Flags & (1 << 1)) != 0; }
-		const auto GetGoLeftPress() const noexcept { return (this->m_Flags & (1 << 2)) != 0; }
-		const auto GetGoRightPress() const noexcept { return (this->m_Flags & (1 << 3)) != 0; }
-		const auto GetRunPress() const noexcept { return (this->m_Flags & (1 << 4)) != 0; }
-		const auto GetQPress() const noexcept { return (this->m_Flags & (1 << 5)) != 0; }
-		const auto GetEPress() const noexcept { return (this->m_Flags & (1 << 6)) != 0; }
-		const auto GetRightPress() const noexcept { return (this->m_Flags & (1 << 7)) != 0; }
-		const auto GetLeftPress() const noexcept { return (this->m_Flags & (1 << 8)) != 0; }
-		const auto GetUpPress() const noexcept { return (this->m_Flags & (1 << 9)) != 0; }
-		const auto GetDownPress() const noexcept { return (this->m_Flags & (1 << 10)) != 0; }
-		const auto GetAction1() const noexcept { return (this->m_Flags & (1 << 11)) != 0; }
-		const auto GetAction2() const noexcept { return (this->m_Flags & (1 << 12)) != 0; }
-		const auto GetAction3() const noexcept { return (this->m_Flags & (1 << 13)) != 0; }
-		const auto GetAction4() const noexcept { return (this->m_Flags & (1 << 14)) != 0; }
-		const auto GetAction5() const noexcept { return (this->m_Flags & (1 << 15)) != 0; }
+		const auto	GetGoFrontPress() const noexcept { return (this->m_Flags & (1 << 0)) != 0; }
+		const auto	GetGoBackPress() const noexcept { return (this->m_Flags & (1 << 1)) != 0; }
+		const auto	GetGoLeftPress() const noexcept { return (this->m_Flags & (1 << 2)) != 0; }
+		const auto	GetGoRightPress() const noexcept { return (this->m_Flags & (1 << 3)) != 0; }
+		const auto	GetRunPress() const noexcept { return (this->m_Flags & (1 << 4)) != 0; }
+		const auto	GetQPress() const noexcept { return (this->m_Flags & (1 << 5)) != 0; }
+		const auto	GetEPress() const noexcept { return (this->m_Flags & (1 << 6)) != 0; }
+		const auto	GetRightPress() const noexcept { return (this->m_Flags & (1 << 7)) != 0; }
+		const auto	GetLeftPress() const noexcept { return (this->m_Flags & (1 << 8)) != 0; }
+		const auto	GetUpPress() const noexcept { return (this->m_Flags & (1 << 9)) != 0; }
+		const auto	GetDownPress() const noexcept { return (this->m_Flags & (1 << 10)) != 0; }
+		const auto	GetAction1() const noexcept { return (this->m_Flags & (1 << 11)) != 0; }
+		const auto	GetAction2() const noexcept { return (this->m_Flags & (1 << 12)) != 0; }
+		const auto	GetAction3() const noexcept { return (this->m_Flags & (1 << 13)) != 0; }
+		const auto	GetAction4() const noexcept { return (this->m_Flags & (1 << 14)) != 0; }
+		const auto	GetAction5() const noexcept { return (this->m_Flags & (1 << 15)) != 0; }
 
 		const InputControl operator+(const InputControl& o) const noexcept {
 			InputControl tmp;
@@ -322,13 +322,13 @@ namespace FPS_n2 {
 		std::array<EffectS, 256> effcs_G;					/*エフェクト*/
 		int G_cnt = 0;
 	public:
-		const auto CheckPlayEffect(Effect ef_) const noexcept { return this->effcs[(int)ef_].GetIsPlaying(); }
-		void Set_FootEffect(const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept {
+		const auto	CheckPlayEffect(Effect ef_) const noexcept { return this->effcs[(int)ef_].GetIsPlaying(); }
+		void		Set_FootEffect(const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept {
 			this->effcs_G[this->G_cnt].Stop();
 			this->effcs_G[this->G_cnt].Set(pos_t, nomal_t, scale);
 			++this->G_cnt %= 256;
 		}
-		const auto Check_FootEffectCnt(void) noexcept {
+		const auto	Check_FootEffectCnt(void) noexcept {
 			int cnt = 0;
 			for (auto& t : this->effcs_G) {
 				if (t.GetStart()) { cnt++; }
@@ -336,29 +336,26 @@ namespace FPS_n2 {
 			return cnt;
 		}
 
-		void Set_LoopEffect(Effect ef_, const VECTOR_ref& pos_t) noexcept {
+		void		Set_LoopEffect(Effect ef_, const VECTOR_ref& pos_t) noexcept {
 			this->effcs[(int)ef_].Stop();
 			this->effcs[(int)ef_].pos = pos_t;
 			this->effcs[(int)ef_].set_loop(effectControl.effsorce[(int)ef_]);
 		}
-		void Update_LoopEffect(Effect ef_, const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept {
+		void		Update_LoopEffect(Effect ef_, const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept {
 			this->effcs[(int)ef_].put_loop(pos_t, nomal_t, scale);
 		}
 
-		void Set_Effect(Effect ef_, const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept { this->effcs[(int)ef_].Set(pos_t, nomal_t, scale); }
-		void Stop_Effect(Effect ef_) noexcept { this->effcs[(int)ef_].Stop(); }
+		void		Set_Effect(Effect ef_, const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept { this->effcs[(int)ef_].Set(pos_t, nomal_t, scale); }
+		void		Stop_Effect(Effect ef_) noexcept { this->effcs[(int)ef_].Stop(); }
 
-		void SetSpeed_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Speed(value); }
-		void SetScale_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Scale(value); }
+		void		SetSpeed_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Speed(value); }
+		void		SetScale_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Scale(value); }
 		//エフェクトの更新
-		void Update_Effect(void) noexcept {
+		void		Update_Effect(void) noexcept {
 			for (auto& t : this->effcs) {
 				const size_t index = &t - &this->effcs.front();
 				if (
 					index != (int)Effect::ef_smoke
-					&& index != (int)Effect::ef_FireBallLoop
-					&& index != (int)Effect::ef_ThunderStart	//雷はじめ
-					&& index != (int)Effect::ef_ThunderLoop		//雷ループ
 					) {
 					t.put(effectControl.effsorce[index]);
 				}
@@ -368,7 +365,7 @@ namespace FPS_n2 {
 			}
 		}
 		/*おわり*/
-		void Dispose_Effect(void) noexcept {
+		void		Dispose_Effect(void) noexcept {
 			for (auto& t : this->effcs) { t.handle.Dispose(); }
 		}
 	};
@@ -475,7 +472,7 @@ namespace FPS_n2 {
 	public:
 		VECTOR_ref pos;/*仮*/
 
-		void Set(b2Body* body_ptr, b2Shape* dynamicBox) {
+		void		Set(b2Body* body_ptr, b2Shape* dynamicBox) {
 			fixtureDef.shape = dynamicBox;								/**/
 			fixtureDef.density = 1.0f;									/*ボックス密度をゼロ以外に設定すると、動的になる*/
 			fixtureDef.friction = 0.3f;									/*デフォルトの摩擦をオーバーライド*/
@@ -483,33 +480,42 @@ namespace FPS_n2 {
 			this->playerfix = this->body->CreateFixture(&fixtureDef);	/*シェイプをボディに追加*/
 		}
 
-		void SetLinearVelocity(const b2Vec2& position) {
+		void		SetLinearVelocity(const b2Vec2& position) {
 			this->body->SetLinearVelocity(position);
 		}
 
-		void Update(const VECTOR_ref& add, float yradadd) {
+		void		Update(const VECTOR_ref& add, float yradadd) {
 			this->body->SetLinearVelocity(b2Vec2(add.x(), add.z()));
 			this->body->SetAngularVelocity(yradadd);
 		}
 
 
-		void Dispose(void) noexcept {
+		void		Dispose(void) noexcept {
 			if (this->playerfix != nullptr) {
 				delete this->playerfix->GetUserData();
 				this->playerfix->SetUserData(nullptr);
 			}
 		}
 
-		const auto Get(void) noexcept { return body.get(); }
-		const auto Pos(void) noexcept { return body->GetPosition(); }
-		const auto Rad(void) noexcept { return body->GetAngle(); }
-		const float Speed(void) noexcept { return std::hypot(this->body->GetLinearVelocity().x, this->body->GetLinearVelocity().y); }
-
-		void SetTransform(const b2Vec2& position, float32 angle) {
+		const auto	Get(void) noexcept { return body.get(); }
+		const auto	Pos(void) noexcept { return body->GetPosition(); }
+		const auto	Rad(void) noexcept { return body->GetAngle(); }
+		const auto	Speed(void) noexcept { return std::hypot(this->body->GetLinearVelocity().x, this->body->GetLinearVelocity().y); }
+		void		SetTransform(const b2Vec2& position, float32 angle) {
 			body->SetTransform(position, angle);
 		}
 	};
 
 
-
+	//ダメージイベント
+	struct DamageEvent {
+		char ID{ 127 };
+		int Damage{ 0 };
+		float rad{ 0.f };
+		void SetEvent(int pID, int pDamage, float pRad) {
+			this->ID = pID;
+			this->Damage = pDamage;
+			this->rad = pRad;
+		}
+	};
 };

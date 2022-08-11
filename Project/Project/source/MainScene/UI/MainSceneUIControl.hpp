@@ -25,7 +25,7 @@ namespace FPS_n2 {
 				b = Blend3Int(Color1.b, Color2.b, Color3.b, per);
 				return GetColorU8(r, g, b, 255);
 			}
-			void DrawGauge(int xp1, int yp1, int xp2, int yp2,
+			void			DrawGauge(int xp1, int yp1, int xp2, int yp2,
 				int Param1, int ParamMax, int ParamBuf,
 				COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, unsigned int ColorAdd, unsigned int ColorSub) {
 				DrawBox(xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, GetColor(255, 255, 255), FALSE);
@@ -39,12 +39,12 @@ namespace FPS_n2 {
 				DrawBox(xp1 + 2 + length * ParamBuf / ParamMax, yp1 + 2, xp1 + 2 + length * Param1 / ParamMax, yp2 - 2, (ParamBuf > Param1) ? ColorSub : ColorAdd, TRUE);
 			}
 		public:
-			void Set(void) noexcept {
+			void			Set(void) noexcept {
 				for (int i = 0; i < 3; i++) {
 					ItemGraphPtr[i] = nullptr;
 				}
 			}
-			void Draw(void) noexcept {
+			void			Draw(void) noexcept {
 				auto* Fonts = FontPool::Instance();
 				auto* DrawParts = DXDraw::Instance();
 				auto Red = GetColor(255, 0, 0);
@@ -272,10 +272,10 @@ namespace FPS_n2 {
 				}
 			}
 
-			void SetIntParam(int ID, int value) { intParam[ID] = value; }
-			void SetfloatParam(int ID, float value) { floatParam[ID] = value; }
-			void SetStrParam(int ID, std::string_view value) { strParam[ID] = value; }
-			void SetItemGraph(int ID, const GraphHandle* value) { ItemGraphPtr[ID] = (GraphHandle*)value; }
+			void			SetIntParam(int ID, int value) { intParam[ID] = value; }
+			void			SetfloatParam(int ID, float value) { floatParam[ID] = value; }
+			void			SetStrParam(int ID, std::string_view value) { strParam[ID] = value; }
+			void			SetItemGraph(int ID, const GraphHandle* value) { ItemGraphPtr[ID] = (GraphHandle*)value; }
 		};
 	};
 };

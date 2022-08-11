@@ -8,12 +8,8 @@ namespace FPS_n2 {
 			switchs m_ResetP;
 			const MV1* m_MapCol = nullptr;
 		public:
-			void AddObject(ObjType ModelType, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") {
+			void			AddObject(ObjType ModelType, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") {
 				switch (ModelType) {
-				case ObjType::Human:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<CharacterClass>();
-					break;
 				case ObjType::Vehicle:
 					this->m_Object.resize(this->m_Object.size() + 1);
 					this->m_Object.back() = std::make_shared<VehicleClass>();
@@ -52,7 +48,7 @@ namespace FPS_n2 {
 				}
 				return nullptr;
 			}
-			void DelObj(ObjType ModelType, int num) {
+			void			DelObj(ObjType ModelType, int num) {
 				int cnt = 0;
 				for (int i = 0; i < this->m_Object.size(); i++) {
 					auto& o = this->m_Object[i];
@@ -68,12 +64,12 @@ namespace FPS_n2 {
 			}
 			//Delobj予定
 		public:
-			void Init(const MV1* MapCol) {
+			void			Init(const MV1* MapCol) {
 				this->m_MapCol = MapCol;
 			}
-			void ExecuteObject(void) noexcept {
+			void			ExecuteObject(void) noexcept {
 				for (auto& o : this->m_Object) {
-					o->Execute();
+					o->FirstExecute();
 				}
 				//物理アップデート
 				this->m_ResetP.GetInput(CheckHitKeyWithCheck(KEY_INPUT_P) != 0);
@@ -83,23 +79,28 @@ namespace FPS_n2 {
 					o->ExecuteCommon();
 				}
 			}
-			void DrawDepthObject(void) noexcept {
+			void			LateExecuteObject(void) noexcept {
+				for (auto& o : this->m_Object) {
+					o->LateExecute();
+				}
+			}
+			void			DrawDepthObject(void) noexcept {
 				for (auto& o : this->m_Object) {
 					o->Depth_Draw();
 				}
 			}
-			void DrawObject(void) noexcept {
+			void			DrawObject(void) noexcept {
 				for (auto& o : this->m_Object) {
 					o->CheckDraw();
 					o->Draw();
 				}
 			}
-			void DrawObject_Shadow(void) noexcept {
+			void			DrawObject_Shadow(void) noexcept {
 				for (auto& o : this->m_Object) {
 					o->DrawShadow();
 				}
 			}
-			void DisposeObject(void) noexcept {
+			void			DisposeObject(void) noexcept {
 				for (auto& o : this->m_Object) {
 					o->Dispose();
 				}

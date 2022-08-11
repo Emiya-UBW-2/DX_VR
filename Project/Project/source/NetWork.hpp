@@ -12,19 +12,19 @@ class NewWorkControl {
 	IPDATA RecvIp;					// 受信用ＩＰアドレスデータ
 	int RecvPort;					// 受信用ポート
 public:
-	void InitClient() {
+	void			InitClient() {
 		// 送信用ソケットを作って初送信
 		if (NetUDPHandle == -1) {
 			NetUDPHandle = MakeUDPSocket(-1);
 		}
 	}
-	void InitServer() {
+	void			InitServer() {
 		// ＵＤＰ通信用のソケットハンドルを作成
 		if (NetUDPHandle == -1) {
 			NetUDPHandle = MakeUDPSocket(UsePort);
 		}
 	}
-	void Dispose() {
+	void			Dispose() {
 		if (NetUDPHandle != -1) {
 			DeleteUDPSocket(NetUDPHandle);	// ＵＤＰソケットハンドルの削除
 			NetUDPHandle = -1;
@@ -32,23 +32,23 @@ public:
 		}
 	}
 public:
-	void SetIP(const IPDATA& IP) {
+	void			SetIP(const IPDATA& IP) {
 		SendIp = IP;
 	}
-	void Set_Port(int PORT) {
+	void			Set_Port(int PORT) {
 		UsePort = PORT;
 	}
 
 	template<class T>
-	void SendtoServer(const T& Data) {
+	void			SendtoServer(const T& Data) {
 		Send(SendIp, UsePort, Data);
 	}
 	template<class T>
-	void SendtoClient(const T& Data) {
+	void			SendtoClient(const T& Data) {
 		Send(RecvIp, RecvPort, Data);
 	}
 	template<class T>
-	void Send(IPDATA& Ip, int SendPort, const T& Data) {
+	void			Send(IPDATA& Ip, int SendPort, const T& Data) {
 		if (NetUDPHandle != -1) {
 			NetWorkSendUDP(NetUDPHandle, Ip, SendPort, &Data, sizeof(T));	// 文字列の送信
 			//printfDx("送信:[%d,%d,%d,%d][%d]\n", Ip.d1, Ip.d2, Ip.d3, Ip.d4, SendPort);

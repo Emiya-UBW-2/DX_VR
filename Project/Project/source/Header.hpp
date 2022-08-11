@@ -28,10 +28,10 @@
 
 using namespace DXLib_ref;
 
-#include "Enums.hpp"
 #include "NetWork.hpp"
+
+#include "Enums.hpp"
 #include "MainScene/Object/ObjectBaseEnum.hpp"
-#include "MainScene/Object/CharacterEnum.hpp"
 #include "MainScene/Object/VehicleEnum.hpp"
 //
 #include "sub.hpp"
@@ -40,7 +40,6 @@ using namespace DXLib_ref;
 #include "MainScene/BackGround/BackGround.hpp"
 
 #include "MainScene/Object/ObjectBase.hpp"
-#include "MainScene/Object/Character.hpp"
 #include "MainScene/Object/Vehicle.hpp"
 
 #include "ObjectManager.hpp"

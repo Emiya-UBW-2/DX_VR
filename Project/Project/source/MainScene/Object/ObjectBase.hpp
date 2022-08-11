@@ -14,7 +14,7 @@ namespace FPS_n2 {
 			const MV1*									m_MapCol{ nullptr };
 			std::vector<std::pair<int, MATRIX_ref>>		m_Frames;
 			std::vector<std::pair<int, float>>			m_Shapes;
-			ObjType										m_objType{ ObjType::Human };
+			ObjType										m_objType{ (ObjType)0 };
 			std::string									m_FilePath;
 			std::string									m_ObjFileName;
 			std::string									m_ColFileName;
@@ -172,8 +172,12 @@ namespace FPS_n2 {
 					std::string FName = this->GetObj().frame_name(f);
 					bool compare = false;
 					switch (this->m_objType) {
-					case ObjType::Human://human
+					/*
+					case ObjType::Human:
 						compare = (FName == CharaFrameName[i]);
+						break;
+					//*/
+					case ObjType::Vehicle:
 						break;
 					default:
 						break;
@@ -187,8 +191,13 @@ namespace FPS_n2 {
 						f = 0;
 					}
 					switch (this->m_objType) {
+					/*
 					case ObjType::Human://human
 						if (i == (int)CharaFrame::Max) { isEnd = true; }
+						break;
+					//*/
+					case ObjType::Vehicle:
+						isEnd = true;
 						break;
 					default:
 						isEnd = true;
@@ -207,6 +216,7 @@ namespace FPS_n2 {
 					}
 				}
 				switch (this->m_objType) {
+				/*
 				case ObjType::Human://human
 					this->m_Shapes.resize((int)CharaShape::Max);
 					for (int j = 1; j < (int)CharaShape::Max; j++) {
@@ -217,22 +227,29 @@ namespace FPS_n2 {
 						}
 					}
 					break;
+				//*/
+				case ObjType::Vehicle:
+					break;
 				default:
 					break;
 				}
 			}
 			//
-			virtual void	Execute(void) noexcept { }
+			virtual void	FirstExecute(void) noexcept { }
 			void			ExecuteCommon(void) noexcept {
 				if (this->m_IsFirstLoop) {
 					this->m_PrevMat = this->GetObj().GetMatrix();
 				}
 				//シェイプ更新
 				switch (this->m_objType) {
+				/*
 				case ObjType::Human://human
 					for (int j = 1; j < (int)CharaShape::Max; j++) {
 						MV1SetShapeRate(this->GetObj().get(), this->m_Shapes[j].first, (1.f - this->m_Shapes[0].second)*this->m_Shapes[j].second);
 					}
+					break;
+				//*/
+				case ObjType::Vehicle:
 					break;
 				default:
 					break;
@@ -259,6 +276,7 @@ namespace FPS_n2 {
 				//最初のループ終わり
 				this->m_IsFirstLoop = false;
 			}
+			virtual void	LateExecute(void) noexcept { }
 			//
 			virtual void	Depth_Draw(void) noexcept { }
 			virtual void	DrawShadow(void) noexcept {

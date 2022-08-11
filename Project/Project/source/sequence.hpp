@@ -24,7 +24,7 @@ namespace FPS_n2 {
 			//
 			std::array<shaderparam, 2> shaderParam;
 			//
-			virtual void Set_EnvLight(VECTOR_ref Shadow_minpos_t, VECTOR_ref Shadow_maxpos_t, VECTOR_ref Light_vec_t, COLOR_F Light_color_t) noexcept {
+			virtual void			Set_EnvLight(VECTOR_ref Shadow_minpos_t, VECTOR_ref Shadow_maxpos_t, VECTOR_ref Light_vec_t, COLOR_F Light_color_t) noexcept {
 				Shadow_minpos = Shadow_minpos_t;
 				Shadow_maxpos = Shadow_maxpos_t;
 				Light_vec = Light_vec_t;
@@ -36,7 +36,7 @@ namespace FPS_n2 {
 
 			TEMPSCENE(void) noexcept {
 			}
-			void Set_Next(const std::shared_ptr<Sceneclass::TEMPSCENE>& Next_scenes_ptr_t, scenes NEXT) noexcept {
+			void			Set_Next(const std::shared_ptr<Sceneclass::TEMPSCENE>& Next_scenes_ptr_t, scenes NEXT) noexcept {
 				Next_ptr = Next_scenes_ptr_t;
 				Next_scene = NEXT;
 			}
@@ -44,7 +44,7 @@ namespace FPS_n2 {
 			const VECTOR_ref& Get_Light_vec(void) const noexcept { return Light_vec; }
 			cam_info& Get_Camera(void) noexcept { return camera_main; }
 
-			virtual void Set(void) noexcept {
+			virtual void			Set(void) noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				fov_base = deg2rad(DrawParts->use_vr ? 120 : OPTION::Instance()->Get_Fov());	//fov
 				SetUseMaskScreenFlag(FALSE);//←カスタム画面でエフェクトが出なくなるため入れる
@@ -64,9 +64,9 @@ namespace FPS_n2 {
 				IsFirstLoop = false;
 				return true;
 			}
-			virtual void Dispose(void) noexcept {}
+			virtual void		Dispose(void) noexcept {}
 
-			virtual void ReadyDraw(void) noexcept {
+			virtual void		ReadyDraw(void) noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				//音位置指定
 				Set3DSoundListenerPosAndFrontPosAndUpVec(camera_main.campos.get(), camera_main.camvec.get(), camera_main.camup.get());
@@ -74,19 +74,19 @@ namespace FPS_n2 {
 				auto NearShadow = std::min(camera_main.far_, 25.f*Scale_Rate);
 				DrawParts->Ready_Shadow(camera_main.campos, [&] { Shadow_Draw(); }, [&] { Shadow_Draw_NearFar(); }, VECTOR_ref::vget(NearShadow, 30.f, NearShadow), VECTOR_ref::vget(2000.f, 60.f, 2000.f));//MAIN_LOOPのnearはこれ (Get_Mine()->Damage.Get_alive()) ? VECTOR_ref::vget(2.f, 2.5f, 2.f) : VECTOR_ref::vget(10.f, 2.5f, 10.f)
 			}
-			virtual void UI_Draw(void) noexcept {}
-			virtual void BG_Draw(void) noexcept {
+			virtual void		UI_Draw(void) noexcept {}
+			virtual void		BG_Draw(void) noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				DrawBox(0, 0, DrawParts->disp_x, DrawParts->disp_x, GetColor(192, 192, 192), TRUE);
 			}
 
-			virtual void Depth_Draw(void) noexcept {}
+			virtual void		Depth_Draw(void) noexcept {}
 
-			virtual void Shadow_Draw_Far(void) noexcept {}
-			virtual void Shadow_Draw_NearFar(void) noexcept {}
-			virtual void Shadow_Draw(void) noexcept {}
-			virtual void Main_Draw(void) noexcept {}
-			virtual void Main_Draw2(void) noexcept {}
+			virtual void		Shadow_Draw_Far(void) noexcept {}
+			virtual void		Shadow_Draw_NearFar(void) noexcept {}
+			virtual void		Shadow_Draw(void) noexcept {}
+			virtual void		Main_Draw(void) noexcept {}
+			virtual void		Main_Draw2(void) noexcept {}
 
 			const bool& is_lens(void) const noexcept { return shaderParam[0].use; }
 			const float& xp_lens(void) const noexcept { return shaderParam[0].param[0]; }
@@ -94,35 +94,35 @@ namespace FPS_n2 {
 			const float& size_lens(void) const noexcept { return shaderParam[0].param[2]; }
 			const float& zoom_lens(void) const noexcept { return shaderParam[0].param[3]; }
 
-			void Set_is_lens(bool value) noexcept { shaderParam[0].use = value; }
-			void Set_xp_lens(float value) noexcept { shaderParam[0].param[0] = value; }
-			void Set_yp_lens(float value) noexcept { shaderParam[0].param[1] = value; }
-			void Set_size_lens(float value) noexcept { shaderParam[0].param[2] = value; }
-			void Set_zoom_lens(float value) noexcept { shaderParam[0].param[3] = value; }
+			void		Set_is_lens(bool value) noexcept { shaderParam[0].use = value; }
+			void		Set_xp_lens(float value) noexcept { shaderParam[0].param[0] = value; }
+			void		Set_yp_lens(float value) noexcept { shaderParam[0].param[1] = value; }
+			void		Set_size_lens(float value) noexcept { shaderParam[0].param[2] = value; }
+			void		Set_zoom_lens(float value) noexcept { shaderParam[0].param[3] = value; }
 
 			const bool& is_Blackout(void) const noexcept { return shaderParam[1].use; }
 			const float& Per_Blackout(void) const noexcept { return shaderParam[1].param[0]; }
 
-			void Set_is_Blackout(bool value) noexcept { shaderParam[1].use = value; }
-			void Set_Per_Blackout(float value) noexcept { shaderParam[1].param[0] = value; }
+			void		Set_is_Blackout(bool value) noexcept { shaderParam[1].use = value; }
+			void		Set_Per_Blackout(float value) noexcept { shaderParam[1].param[0] = value; }
 
-			virtual void Item_Draw(void) noexcept {}
-			virtual void LAST_Draw(void) noexcept {}
-			virtual void KeyOperation_VR(void) noexcept {}
-			virtual void KeyOperation(void) noexcept {}
+			virtual void		Item_Draw(void) noexcept {}
+			virtual void		LAST_Draw(void) noexcept {}
+			virtual void		KeyOperation_VR(void) noexcept {}
+			virtual void		KeyOperation(void) noexcept {}
 		};
 		//シーンサンプル
 		class SAMPLE : public TEMPSCENE {
-			void Set(void) noexcept override {}
+			void		Set(void) noexcept override {}
 			bool Update(void) noexcept override { return false; }
-			void Dispose(void) noexcept override {}
+			void		Dispose(void) noexcept override {}
 			//
-			void UI_Draw(void) noexcept  override {}
-			void BG_Draw(void) noexcept override {}
-			void Shadow_Draw_NearFar(void) noexcept override {}
-			void Shadow_Draw(void) noexcept override {}
-			void Main_Draw(void) noexcept override {}
-			void LAST_Draw(void) noexcept override {}
+			void		UI_Draw(void) noexcept  override {}
+			void		BG_Draw(void) noexcept override {}
+			void		Shadow_Draw_NearFar(void) noexcept override {}
+			void		Shadow_Draw(void) noexcept override {}
+			void		Main_Draw(void) noexcept override {}
+			void		LAST_Draw(void) noexcept override {}
 		};
 		//
 		class SceneControl {
@@ -166,12 +166,12 @@ namespace FPS_n2 {
 			const auto& isEnd(void) const noexcept { return this->m_EndFlag; }
 			const auto& isPause(void) const noexcept { return this->m_SelPause; }
 			//
-			void ChangeScene(scenes select, std::shared_ptr<Sceneclass::TEMPSCENE>& ptr) {
+			void		ChangeScene(scenes select, std::shared_ptr<Sceneclass::TEMPSCENE>& ptr) {
 				this->m_SelScene = select;
 				this->m_ScenesPtr = ptr;
 			}
 			//開始
-			void StartScene(void) noexcept {
+			void		StartScene(void) noexcept {
 				this->m_ScenesPtr->Set();
 				this->m_SelEnd = false;
 				this->m_SelPause = false;
@@ -209,7 +209,7 @@ namespace FPS_n2 {
 				return false;
 			}
 			//描画
-			void Draw(void) noexcept {
+			void		Draw(void) noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				auto* PostPassParts = PostPassEffect::Instance();				//ホストパスエフェクト(VR、フルスクリーン共用)
 #ifdef DEBUG
@@ -311,18 +311,18 @@ namespace FPS_n2 {
 #ifdef DEBUG
 					DebugParts->end_way();
 					DebugParts->debug(y_r(1920 - 300), y_r(50), float(GetNowHiPerformanceCount() - this->m_Wait) / 1000.f);
-					printfDx("AsyncCount :%d\n", GetASyncLoadNum());
-					printfDx("Drawcall   :%d\n", GetDrawCallCount());
-					printfDx("FPS        :%5.2f fps\n", FPS);
-					printfDx("AllTime    :%5.2f ms\n", float(this->m_OldWait) / 1000.f);
-					printfDx("DrawTime   :%5.2f ms\n", float(this->m_DrawWait) / 1000.f);
-					printfDx("All-Draw   :%5.2f ms\n", float(this->m_OldWait - this->m_DrawWait) / 1000.f);
+					//printfDx("AsyncCount :%d\n", GetASyncLoadNum());
+					//printfDx("Drawcall   :%d\n", GetDrawCallCount());
+					//printfDx("FPS        :%5.2f fps\n", FPS);
+					//printfDx("AllTime    :%5.2f ms\n", float(this->m_OldWait) / 1000.f);
+					//printfDx("DrawTime   :%5.2f ms\n", float(this->m_DrawWait) / 1000.f);
+					//printfDx("All-Draw   :%5.2f ms\n", float(this->m_OldWait - this->m_DrawWait) / 1000.f);
 					//DepthScreen.DrawExtendGraph(0, 0, 960, 540, true);
 #endif // DEBUG
 				}
 			}
 			//垂直同期
-			void Vsync(void) noexcept {
+			void		Vsync(void) noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				//画面の反映
 				DrawParts->Screen_Flip();
@@ -330,7 +330,7 @@ namespace FPS_n2 {
 				//while ((GetNowHiPerformanceCount() - this->m_Wait) <= (1000 * 1000 / 60)) {}
 			}
 			//
-			void NextScene(void) noexcept {
+			void		NextScene(void) noexcept {
 				//解放
 				this->m_ScenesPtr->Dispose();
 				//遷移

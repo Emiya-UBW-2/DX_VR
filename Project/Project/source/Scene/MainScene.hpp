@@ -5,8 +5,8 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
 		private:
-			static const int		Vehicle_num = 2;
-			static const int		Player_num = 2;
+			static const int		Vehicle_num = 3;
+			static const int		Player_num = 3;
 		private:
 			//リソース関連
 			ObjectManager			m_Obj;						//モデル
@@ -42,63 +42,65 @@ namespace FPS_n2 {
 			float					m_Rader{ 1.f };
 			float					m_Rader_r{ 1.f };
 			//通信
+			struct PlayerNetData {
+			public:
+				size_t			CheckSum{ 0 };	//8 * 1	=  8byte
+				InputControl	Input;			//4 * 5	= 20byte
+				VECTOR_ref		PosBuf;			//4 * 3	= 12byte
+				VECTOR_ref		VecBuf;			//4 * 3	= 12byte
+				float			YradBuf;		//4 * 1	=  4byte
+				char			ID{ 0 };		//1	* 1	=  1byte
+				char			IsActive{ 0 };	//1	* 1	=  1byte
+				double			Frame{ 0.0 };	//8 * 1 =  8byte
+				char			DamageSwitch{ 0 };//1*1 =  1byte
+				DamageEvent		Damage{ 100 };	//9 * 1 =  9byte
+												//		  58byte
+			public:
+				const auto	CalcCheckSum(void) noexcept {
+					return (size_t)(((int)(PosBuf.x()) + (int)(PosBuf.y()) + (int)(PosBuf.z())) + ((int)(VecBuf.x()*100.f) + (int)(VecBuf.y()*100.f) + (int)(VecBuf.z())*100.f) + (int)(rad2deg(YradBuf)) + (int)ID);
+				}
+
+				const PlayerNetData operator+(const PlayerNetData& o) const noexcept {
+					PlayerNetData tmp;
+
+					tmp.ID = o.ID;
+					tmp.Input = this->Input + o.Input;
+					tmp.PosBuf = this->PosBuf + o.PosBuf;
+					tmp.VecBuf = this->VecBuf + o.VecBuf;
+					tmp.YradBuf = this->YradBuf + o.YradBuf;
+
+					return tmp;
+				}
+				const PlayerNetData operator-(const PlayerNetData& o) const noexcept {
+					PlayerNetData tmp;
+
+					tmp.ID = o.ID;
+					tmp.Input = this->Input - o.Input;
+					tmp.PosBuf = this->PosBuf - o.PosBuf;
+					tmp.VecBuf = this->VecBuf - o.VecBuf;
+					tmp.YradBuf = this->YradBuf - o.YradBuf;
+
+					return tmp;
+				}
+				const PlayerNetData operator*(float per) const noexcept {
+					PlayerNetData tmp;
+
+					tmp.ID = this->ID;
+					tmp.Input = this->Input*per;
+					tmp.PosBuf = this->PosBuf*per;
+					tmp.VecBuf = this->VecBuf*per;
+					tmp.YradBuf = this->YradBuf*per;
+					return tmp;
+				}
+			};
+			struct ServerNetData {
+				int					Tmp1{ 0 };				//4
+				int					StartFlag{ 0 };			//4
+				size_t				ServerFrame{ 0 };		//8
+				PlayerNetData		PlayerData[Player_num];	//37 * 3
+			};
 			class NetWorkControl {
 			protected:
-				struct PlayerNetData {
-				public:
-					size_t			CheckSum{ 0 };	//4 * 1	=  4byte
-					InputControl	Input;			//4 * 5	= 20byte24
-					VECTOR_ref		PosBuf;			//4 * 3	= 12byte36
-					VECTOR_ref		VecBuf;			//4 * 3	= 12byte48
-					float			YradBuf;		//4 * 1	=  4byte52
-					char			ID{ 0 };		//1	* 1	=  1byte53
-					char			IsActive{ 0 };	//1	* 1	=  1byte54
-					double			Frame{ 0.0 };	//8 * 1 =  4byte58
-													//		  58byte
-				public:
-					const auto CalcCheckSum() {
-						return (size_t)(((int)(PosBuf.x()) + (int)(PosBuf.y()) + (int)(PosBuf.z())) + ((int)(VecBuf.x()*100.f) + (int)(VecBuf.y()*100.f) + (int)(VecBuf.z())*100.f) + (int)(rad2deg(YradBuf)) + (int)ID);
-					}
-
-					const PlayerNetData operator+(const PlayerNetData& o) const noexcept {
-						PlayerNetData tmp;
-
-						tmp.ID = o.ID;
-						tmp.Input = this->Input + o.Input;
-						tmp.PosBuf = this->PosBuf + o.PosBuf;
-						tmp.VecBuf = this->VecBuf + o.VecBuf;
-						tmp.YradBuf = this->YradBuf + o.YradBuf;
-
-						return tmp;
-					}
-					const PlayerNetData operator-(const PlayerNetData& o) const noexcept {
-						PlayerNetData tmp;
-
-						tmp.ID = o.ID;
-						tmp.Input = this->Input - o.Input;
-						tmp.PosBuf = this->PosBuf - o.PosBuf;
-						tmp.VecBuf = this->VecBuf - o.VecBuf;
-						tmp.YradBuf = this->YradBuf - o.YradBuf;
-
-						return tmp;
-					}
-					const PlayerNetData operator*(float per) const noexcept {
-						PlayerNetData tmp;
-
-						tmp.ID = this->ID;
-						tmp.Input = this->Input*per;
-						tmp.PosBuf = this->PosBuf*per;
-						tmp.VecBuf = this->VecBuf*per;
-						tmp.YradBuf = this->YradBuf*per;
-						return tmp;
-					}
-				};
-				struct ServerNetData {
-					int					Tmp1{ 0 };				//4
-					int					StartFlag{ 0 };			//4
-					size_t				ServerFrame{ 0 };		//8
-					PlayerNetData		PlayerData[Player_num];	//37 * 3
-				};
 			protected:
 				std::vector<std::pair<NewWorkControl, int>> m_NetWork;
 				size_t					m_ServerFrame{ 0 };
@@ -108,52 +110,51 @@ namespace FPS_n2 {
 				float					m_TickCnt{ 0.f };
 				float					m_TickRate{ 10.f };
 			public:
-				const auto GetRecvData(int PlayerID) const noexcept { return this->m_LeapFrame[PlayerID] <= 1; }
+				const auto	GetRecvData(int PlayerID) const noexcept { return this->m_LeapFrame[PlayerID] <= 1; }
 				const auto& GetServerDataCommon() const noexcept { return this->m_ServerDataCommon; }
 				const auto& GetMyPlayer() const noexcept { return this->m_PlayerData; }
-				void SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, float pYrad, double pFrame) noexcept {
+				void			SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, float pYrad, double pFrame, const DamageEvent& pDamage, char pDamageSwitch) noexcept {
 					this->m_PlayerData.Input = pInput;
 					this->m_PlayerData.PosBuf = pPos;
 					this->m_PlayerData.VecBuf = pVec;
 					this->m_PlayerData.YradBuf = pYrad;
 					this->m_PlayerData.Frame = pFrame;
+					this->m_PlayerData.Damage = pDamage;
+					this->m_PlayerData.DamageSwitch = pDamageSwitch;
 					this->m_PlayerData.CheckSum = this->m_PlayerData.CalcCheckSum();
 				}
 
-				const auto GetNowServerPlayerData(int PlayerID) {
+				const auto	GetNowServerPlayerData(int PlayerID) {
 					auto Total = (int)this->m_ServerDataCommon.ServerFrame - (int)this->m_PrevServerData.ServerFrame;
 					if (Total <= 0) { Total = 20; }
 					auto Per = (float)this->m_LeapFrame[PlayerID] / (float)Total;
 					auto tmp = Lerp(this->m_PrevServerData.PlayerData[PlayerID], this->m_ServerDataCommon.PlayerData[PlayerID], Per);
-					{
-						auto rad_1 = this->m_PrevServerData.PlayerData[PlayerID].YradBuf;
-						auto rad_2 = this->m_ServerDataCommon.PlayerData[PlayerID].YradBuf;
 
-						auto radvec = Lerp(MATRIX_ref::RotY(rad_1).zvec(), MATRIX_ref::RotY(rad_2).zvec(), Per).Norm();
-
-						tmp.YradBuf = atan2f(radvec.x(), radvec.z());
-					}
+					auto radvec = Lerp(MATRIX_ref::RotY(this->m_PrevServerData.PlayerData[PlayerID].YradBuf).zvec(), MATRIX_ref::RotY(this->m_ServerDataCommon.PlayerData[PlayerID].YradBuf).zvec(), Per).Norm();
+					tmp.YradBuf = -atan2f(radvec.x(), radvec.z());
 					tmp.Frame = this->m_ServerDataCommon.PlayerData[PlayerID].Frame;
+					tmp.Damage = this->m_ServerDataCommon.PlayerData[PlayerID].Damage;
+					tmp.DamageSwitch = this->m_ServerDataCommon.PlayerData[PlayerID].DamageSwitch;
 					this->m_LeapFrame[PlayerID] = std::clamp<int>(this->m_LeapFrame[PlayerID] + 1, 0, Total);
 					return tmp;
 				}
-				virtual void SetParam(int PlayerID, const VECTOR_ref& pPos) noexcept {
+				virtual void			SetParam(int PlayerID, const VECTOR_ref& pPos) noexcept {
 					this->m_ServerDataCommon.PlayerData[PlayerID].PosBuf = pPos;
 					this->m_ServerDataCommon.ServerFrame = 0;
 					this->m_PrevServerData.PlayerData[PlayerID].PosBuf = this->m_ServerDataCommon.PlayerData[PlayerID].PosBuf;	// サーバーデータ
 					this->m_PrevServerData.ServerFrame = 0;
 				}
-				void NetWorkDispose() {
+				void			NetWorkDispose(void) noexcept {
 					for (auto & n : m_NetWork) {
 						n.first.Dispose();
 					}
 					m_NetWork.clear();
 				}
 			protected:
-				void NetWorkInit() {
+				void			NetWorkInit(void) noexcept {
 					this->m_ServerFrame = 0;
 				}
-				void NetCommonExecute(const ServerNetData& pData) {
+				void			NetCommonExecute(const ServerNetData& pData) {
 					auto& tmpData = pData;
 					if (this->m_ServerFrame <= tmpData.ServerFrame && ((tmpData.ServerFrame - this->m_ServerFrame) < 60)) {
 						for (int i = 0; i < Player_num; i++) {
@@ -169,13 +170,13 @@ namespace FPS_n2 {
 				ServerNetData			m_ServerData;
 			public:
 				const auto& GetServerData() const noexcept { return this->m_ServerData; }
-				void SetParam(int PlayerID, const VECTOR_ref& pPos) noexcept override {
+				void			SetParam(int PlayerID, const VECTOR_ref& pPos) noexcept override {
 					NetWorkControl::SetParam(PlayerID, pPos);
 					this->m_ServerData.PlayerData[PlayerID].PosBuf = this->m_ServerDataCommon.PlayerData[PlayerID].PosBuf;
 					this->m_ServerData.PlayerData[PlayerID].IsActive = 0;
 				}
 			public:
-				void ServerInit(int pPort, float pTick) {
+				void			ServerInit(int pPort, float pTick) {
 					NetWorkInit();
 					m_NetWork.resize(Player_num - 1);
 					int i = 0;
@@ -194,7 +195,7 @@ namespace FPS_n2 {
 					this->m_PlayerData.ID = 0;
 					this->m_TickRate = pTick;
 				}
-				bool ServerExecute() {
+				bool ServerExecute(void) noexcept {
 					bool canMatch = true;
 					bool canSend = false;
 					for (auto & n : m_NetWork) {
@@ -267,7 +268,7 @@ namespace FPS_n2 {
 				int						m_NetWorkSel{ 0 };
 				float					m_CannotConnectTimer{ 0.f };
 			public:
-				void ClientInit(int pPort, float pTick, const IPDATA& pIP) {
+				void			ClientInit(int pPort, float pTick, const IPDATA& pIP) {
 					NetWorkInit();
 					m_NetWorkSel = 0;
 					m_CannotConnectTimer = 0.f;
@@ -283,7 +284,7 @@ namespace FPS_n2 {
 					this->m_PlayerData.ID = 1;
 					this->m_TickRate = pTick;
 				}
-				bool ClientExecute() {
+				bool ClientExecute(void) noexcept {
 					ServerNetData tmpData;
 					bool canMatch = true;
 					bool canSend = false;
@@ -356,8 +357,8 @@ namespace FPS_n2 {
 			ServerControl			m_ServerCtrl;
 			//クライアント専用
 			ClientControl			m_ClientCtrl;
-			int						IP[4]{ 127,0,0,1 };
-			//int						IP[4]{ 58,188,85,163 };
+			//int						IP[4]{ 127,0,0,1 };
+			int						IP[4]{ 58,188,85,163 };
 			IPDATA					IPData;				// 送信用ＩＰアドレスデータ
 			//共通
 			bool					m_IsClient{ true };
@@ -369,13 +370,15 @@ namespace FPS_n2 {
 			double					m_ClientFrame{ 0.0 };
 			float					m_Ping{ 0.f };
 
+			std::vector<DamageEvent>	m_DamageEvents;
+
 			bool IsRide = true;
 
 		private:
 			const auto& GetMyPlayerID() const noexcept { return (this->m_IsClient) ? m_ClientCtrl.GetMyPlayer().ID : m_ServerCtrl.GetMyPlayer().ID; }
 		public:
 			using TEMPSCENE::TEMPSCENE;
-			void Set(void) noexcept override {
+			void			Set(void) noexcept override {
 				SoundPool::Create();
 				Set_EnvLight(
 					VECTOR_ref::vget(Scale_Rate*-300.f, Scale_Rate*-10.f, Scale_Rate*-300.f),
@@ -408,13 +411,12 @@ namespace FPS_n2 {
 				for (int i = 0; i < Vehicle_num; i++) {
 					auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
 					vehicle_Pool.emplace_back(v);
-					v->Set_Ptr(&this->vehicle_Pool, &v);
 
 					VECTOR_ref pos_t = VECTOR_ref::vget(0.f + (float)(i)*6.f*Scale_Rate, 0.f, 0.f);
 					auto HitResult = this->m_BackGround.GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
 					if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
 					moves mov; mov.pos = pos_t;
-					v->ValueSet(mov, &vehc_data[0], hit_pic, this->m_BackGround.GetBox2Dworld());
+					v->ValueSet(mov, &vehc_data[0], hit_pic, this->m_BackGround.GetBox2Dworld(), &this->vehicle_Pool, &v);
 				}
 				{
 					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, 0));//自分
@@ -465,9 +467,17 @@ namespace FPS_n2 {
 
 				SE->Get((int)SoundEnum::Tank_Shot).SetVol(0.5f);
 				SE->Get((int)SoundEnum::Tank_engine).SetVol(0.25f);
+				SE->Get((int)SoundEnum::Tank_Ricochet).SetVol(0.25f);
+				SE->Get((int)SoundEnum::Tank_Damage).SetVol(0.25f);
+				SE->Get((int)SoundEnum::Tank_Eject).SetVol(0.25f);
+				SE->Get((int)SoundEnum::Tank_Reload).SetVol(0.25f);
+
+
 				//入力
 				this->m_FPSActive.Init(false);
 				this->m_MouseActive.Init(false);
+
+				this->m_DamageEvents.clear();
 			}
 			//
 			bool Update(void) noexcept override {
@@ -608,7 +618,7 @@ namespace FPS_n2 {
 					}
 					//クライアント
 					if (this->m_IsClient) {
-						m_ClientCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad(), this->m_ClientFrame);
+						m_ClientCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad(), this->m_ClientFrame, Vehicle->GetDamageEvent(), (Vehicle->GetDamageSwitch() ? 1 : 0));
 						if ((this->m_Sequence == SequenceEnum::Matching) && SeqFirst) {
 							m_ClientCtrl.ClientInit(UsePort, this->m_Tick, IPData);
 						}
@@ -627,7 +637,7 @@ namespace FPS_n2 {
 					}
 					//サーバー
 					else {
-						m_ServerCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad(), this->m_ClientFrame);
+						m_ServerCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad(), this->m_ClientFrame, Vehicle->GetDamageEvent(), (Vehicle->GetDamageSwitch() ? 1 : 0));
 						if ((this->m_Sequence == SequenceEnum::Matching) && SeqFirst) {
 							m_ServerCtrl.ServerInit(UsePort, this->m_Tick);
 						}
@@ -656,7 +666,26 @@ namespace FPS_n2 {
 							else {
 								if (IsRide) {
 									v->SetInput(tmp.Input, isready, true);
-									v->SetPosBufOverRide(tmp.PosBuf, tmp.VecBuf, tmp.YradBuf);
+									bool override_true = true;
+									for (int j = 0; j < Vehicle_num; j++) {
+										auto& v2 = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, j));
+										if (v != v2) {
+											if ((v->GetMove().pos - v2->GetMove().pos).size() <= 10.f*Scale_Rate) {
+												override_true = false;
+												break;
+											}
+										}
+									}
+									if (override_true) {
+										v->SetPosBufOverRide(tmp.PosBuf, tmp.VecBuf, tmp.YradBuf);
+									}
+								}
+							}
+							//ダメージイベント処理
+							{
+								if ((tmp.DamageSwitch == 1) != v->GetDamageSwitchRec()) {
+									this->m_DamageEvents.emplace_back(tmp.Damage);
+									v->SetDamageSwitchRec((tmp.DamageSwitch == 1));
 								}
 							}
 						}
@@ -670,20 +699,32 @@ namespace FPS_n2 {
 									v->SetInput(MyInput, isready, false);
 								}
 							}
+							//ダメージイベント処理
+							{
+								if (v->GetDamageSwitch() != v->GetDamageSwitchRec()) {
+									this->m_DamageEvents.emplace_back(v->GetDamageEvent());
+									v->SetDamageSwitchRec(v->GetDamageSwitch());
+								}
+							}
 						}
 						this->m_ClientFrame = 0.0;
 					}
-
+					//ダメージイベント
+					for (int i = 0; i < Vehicle_num; i++) {
+						auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
+						for (int i = 0; i < this->m_DamageEvents.size(); i++) {
+							if (v->SetDamageEvent(this->m_DamageEvents[i])) {
+								std::swap(this->m_DamageEvents.back(), this->m_DamageEvents[i]);
+								this->m_DamageEvents.pop_back();
+								i--;
+							}
+						}
+					}
 				}
 				//Execute
 				this->m_Obj.ExecuteObject();
-				this->m_BackGround.GetBox2Dworld()->Step(1.f, 1, 1);
-				for (int i = 0; i < Vehicle_num; i++) {
-					auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
-					v->Execute_After();
-				}
-				//col
-
+				this->m_BackGround.GetBox2Dworld()->Step(1.f, 1, 1);//物理更新
+				this->m_Obj.LateExecuteObject();
 				//視点
 				{
 					Vehicle->Setcamera(camera_main, fov_base);
@@ -723,7 +764,7 @@ namespace FPS_n2 {
 				Effect_UseControl::Update_Effect();
 				return true;
 			}
-			void Dispose(void) noexcept override {
+			void			Dispose(void) noexcept override {
 				m_ServerCtrl.NetWorkDispose();
 				m_ClientCtrl.NetWorkDispose();
 				Effect_UseControl::Dispose_Effect();
@@ -731,23 +772,23 @@ namespace FPS_n2 {
 				this->vehicle_Pool.clear();
 			}
 			//
-			void Depth_Draw(void) noexcept override {
+			void			Depth_Draw(void) noexcept override {
 				this->m_BackGround.Draw();
 				//this->m_Obj.DrawDepthObject();
 			}
-			void BG_Draw(void) noexcept override {
+			void			BG_Draw(void) noexcept override {
 				this->m_BackGround.BG_Draw();
 			}
-			void Shadow_Draw_NearFar(void) noexcept override {
+			void			Shadow_Draw_NearFar(void) noexcept override {
 				this->m_BackGround.Shadow_Draw_NearFar();
 				//this->m_Obj.DrawObject_Shadow();
 			}
-			void Shadow_Draw(void) noexcept override {
+			void			Shadow_Draw(void) noexcept override {
 				this->m_BackGround.Shadow_Draw();
 				this->m_Obj.DrawObject_Shadow();
 			}
 
-			void Main_Draw(void) noexcept override {
+			void			Main_Draw(void) noexcept override {
 				this->m_BackGround.Draw();
 				this->m_Obj.DrawObject();
 				//this->m_Obj.DrawDepthObject();
@@ -767,13 +808,13 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			void Main_Draw2(void) noexcept override {
+			void			Main_Draw2(void) noexcept override {
 				this->m_Obj.DrawDepthObject();
 			}
-			void LAST_Draw(void) noexcept override {
+			void			LAST_Draw(void) noexcept override {
 			}
 			//UI表示
-			void UI_Draw(void) noexcept  override {
+			void			UI_Draw(void) noexcept  override {
 				auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
 
 				auto* Fonts = FontPool::Instance();

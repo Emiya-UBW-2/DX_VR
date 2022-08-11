@@ -18,7 +18,7 @@ namespace FPS_n2 {
 			};
 			std::vector<wallPats> wall;					//壁をセット
 		public:
-			void Load(void) noexcept {
+			void			Load(void) noexcept {
 				//地形
 				MV1::Load("data/model/map/model.mv1", &Ground);
 				MV1::Load("data/model/map/col.mv1", &GroundCol);
@@ -75,25 +75,25 @@ namespace FPS_n2 {
 				}
 			}
 			//
-			void Execute(void) noexcept {
+			void			Execute(void) noexcept {
 			}
 			//DrawCall => 100
-			void BG_Draw(void) noexcept {
+			void			BG_Draw(void) noexcept {
 				SetUseLighting(FALSE);
 				Sky.DrawModel();
 				SetUseLighting(TRUE);
 			}
 			//共通
-			void DrawCommon(void) noexcept {
+			void			DrawCommon(void) noexcept {
 				Ground.DrawModel();
 			}
-			void Shadow_Draw_NearFar(void) noexcept {
+			void			Shadow_Draw_NearFar(void) noexcept {
 				DrawCommon();
 			}
-			void Shadow_Draw(void) noexcept {
+			void			Shadow_Draw(void) noexcept {
 				DrawCommon();
 			}
-			void Draw(void) noexcept {
+			void			Draw(void) noexcept {
 				DrawCommon();
 			}
 
