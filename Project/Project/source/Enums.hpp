@@ -45,6 +45,7 @@ namespace FPS_n2 {
 			Tank_Ricochet,
 			Tank_Damage,
 			Tank_engine,
+			Tank_Eject,
 			Tank_Reload,
 
 			Shot_Gun,

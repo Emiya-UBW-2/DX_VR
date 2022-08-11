@@ -94,6 +94,7 @@ namespace FPS_n2 {
 		};
 
 		enum class CharaTypeID {
+			Mine,
 			Team,
 			Enemy,
 		};

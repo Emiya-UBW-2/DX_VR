@@ -71,6 +71,22 @@ namespace FPS_n2 {
 					//this->m_col.RefreshCollInfo();
 				}
 			}
+
+			const auto GetMapColNearest(const VECTOR_ref& StartPos, VECTOR_ref* EndPos) {
+				bool ans = false;
+				while (true) {
+					auto colres = m_MapCol->CollCheck_Line(StartPos, *EndPos);
+					if (colres.HitFlag == TRUE) {
+						ans = true;
+						if (*EndPos == colres.HitPosition) { break; }
+						*EndPos = colres.HitPosition;
+					}
+					else {
+						break;
+					}
+				}
+				return ans;
+			}
 		public:
 			void			LoadModel(const char* filepath, const char* objfilename = "model", const char* colfilename = "col") noexcept {
 				this->m_FilePath = filepath;

@@ -5,8 +5,8 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
 		private:
-			static const int		Vehicle_num = 3;
-			static const int		Player_num = 3;
+			static const int		Vehicle_num = 2;
+			static const int		Player_num = 2;
 		private:
 			//リソース関連
 			ObjectManager			m_Obj;						//モデル
@@ -47,13 +47,14 @@ namespace FPS_n2 {
 				struct PlayerNetData {
 				public:
 					size_t			CheckSum{ 0 };	//4 * 1	=  4byte
-					InputControl	Input;			//4 * 5	= 20byte
-					VECTOR_ref		PosBuf;			//4 * 3	= 12byte
-					VECTOR_ref		VecBuf;			//4 * 3	= 12byte
-					float			YradBuf;		//4 * 3	= byte
-					char			ID{ 0 };		//1	* 1	=  1byte
-					char			IsActive{ 0 };	//1	* 1	=  1byte
-													//		  38byte
+					InputControl	Input;			//4 * 5	= 20byte24
+					VECTOR_ref		PosBuf;			//4 * 3	= 12byte36
+					VECTOR_ref		VecBuf;			//4 * 3	= 12byte48
+					float			YradBuf;		//4 * 1	=  4byte52
+					char			ID{ 0 };		//1	* 1	=  1byte53
+					char			IsActive{ 0 };	//1	* 1	=  1byte54
+					double			Frame{ 0.0 };	//8 * 1 =  4byte58
+													//		  58byte
 				public:
 					const auto CalcCheckSum() {
 						return (size_t)(((int)(PosBuf.x()) + (int)(PosBuf.y()) + (int)(PosBuf.z())) + ((int)(VecBuf.x()*100.f) + (int)(VecBuf.y()*100.f) + (int)(VecBuf.z())*100.f) + (int)(rad2deg(YradBuf)) + (int)ID);
@@ -95,40 +96,52 @@ namespace FPS_n2 {
 				struct ServerNetData {
 					int					Tmp1{ 0 };				//4
 					int					StartFlag{ 0 };			//4
-					size_t				Frame{ 0 };				//8
+					size_t				ServerFrame{ 0 };		//8
 					PlayerNetData		PlayerData[Player_num];	//37 * 3
 				};
 			protected:
 				std::vector<std::pair<NewWorkControl, int>> m_NetWork;
 				size_t					m_ServerFrame{ 0 };
-				int						m_LeapFrame{ 0 };
+				std::array<int, Player_num>		m_LeapFrame;
 				ServerNetData			m_ServerDataCommon, m_PrevServerData;
 				PlayerNetData			m_PlayerData;
 				float					m_TickCnt{ 0.f };
 				float					m_TickRate{ 10.f };
 			public:
+				const auto GetRecvData(int PlayerID) const noexcept { return this->m_LeapFrame[PlayerID] <= 1; }
 				const auto& GetServerDataCommon() const noexcept { return this->m_ServerDataCommon; }
 				const auto& GetMyPlayer() const noexcept { return this->m_PlayerData; }
-				void SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, float pYrad) noexcept {
+				void SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, float pYrad, double pFrame) noexcept {
 					this->m_PlayerData.Input = pInput;
 					this->m_PlayerData.PosBuf = pPos;
 					this->m_PlayerData.VecBuf = pVec;
 					this->m_PlayerData.YradBuf = pYrad;
+					this->m_PlayerData.Frame = pFrame;
 					this->m_PlayerData.CheckSum = this->m_PlayerData.CalcCheckSum();
 				}
 
 				const auto GetNowServerPlayerData(int PlayerID) {
-					auto Total = (int)this->m_ServerDataCommon.Frame - (int)this->m_PrevServerData.Frame;
+					auto Total = (int)this->m_ServerDataCommon.ServerFrame - (int)this->m_PrevServerData.ServerFrame;
 					if (Total <= 0) { Total = 20; }
-					auto tmp = Lerp(this->m_PrevServerData.PlayerData[PlayerID], this->m_ServerDataCommon.PlayerData[PlayerID], (float)this->m_LeapFrame / (float)Total);
-					this->m_LeapFrame = std::clamp<int>(this->m_LeapFrame + 1, 0, Total);
+					auto Per = (float)this->m_LeapFrame[PlayerID] / (float)Total;
+					auto tmp = Lerp(this->m_PrevServerData.PlayerData[PlayerID], this->m_ServerDataCommon.PlayerData[PlayerID], Per);
+					{
+						auto rad_1 = this->m_PrevServerData.PlayerData[PlayerID].YradBuf;
+						auto rad_2 = this->m_ServerDataCommon.PlayerData[PlayerID].YradBuf;
+
+						auto radvec = Lerp(MATRIX_ref::RotY(rad_1).zvec(), MATRIX_ref::RotY(rad_2).zvec(), Per).Norm();
+
+						tmp.YradBuf = atan2f(radvec.x(), radvec.z());
+					}
+					tmp.Frame = this->m_ServerDataCommon.PlayerData[PlayerID].Frame;
+					this->m_LeapFrame[PlayerID] = std::clamp<int>(this->m_LeapFrame[PlayerID] + 1, 0, Total);
 					return tmp;
 				}
 				virtual void SetParam(int PlayerID, const VECTOR_ref& pPos) noexcept {
 					this->m_ServerDataCommon.PlayerData[PlayerID].PosBuf = pPos;
-					this->m_ServerDataCommon.Frame = 0;
+					this->m_ServerDataCommon.ServerFrame = 0;
 					this->m_PrevServerData.PlayerData[PlayerID].PosBuf = this->m_ServerDataCommon.PlayerData[PlayerID].PosBuf;	// サーバーデータ
-					this->m_PrevServerData.Frame = 0;
+					this->m_PrevServerData.ServerFrame = 0;
 				}
 				void NetWorkDispose() {
 					for (auto & n : m_NetWork) {
@@ -142,10 +155,12 @@ namespace FPS_n2 {
 				}
 				void NetCommonExecute(const ServerNetData& pData) {
 					auto& tmpData = pData;
-					if (this->m_ServerFrame <= tmpData.Frame && ((tmpData.Frame - this->m_ServerFrame) < 60)) {
-						this->m_LeapFrame = 0;
+					if (this->m_ServerFrame <= tmpData.ServerFrame && ((tmpData.ServerFrame - this->m_ServerFrame) < 60)) {
+						for (int i = 0; i < Player_num; i++) {
+							this->m_LeapFrame[i] = 0;
+						}
 						this->m_PrevServerData = this->m_ServerDataCommon;
-						this->m_ServerFrame = tmpData.Frame;
+						this->m_ServerFrame = tmpData.ServerFrame;
 						this->m_ServerDataCommon = tmpData;
 					}
 				}
@@ -169,12 +184,12 @@ namespace FPS_n2 {
 						n.first.InitServer();
 						n.second = 0;
 					}
-					this->m_ServerDataCommon.Frame = 0;
+					this->m_ServerDataCommon.ServerFrame = 0;
 
 					this->m_ServerData.Tmp1 = 0;
 					this->m_ServerData.StartFlag = 0;
 					this->m_ServerData.PlayerData[0].IsActive = 1;
-					this->m_ServerData.Frame = 0;
+					this->m_ServerData.ServerFrame = 0;
 
 					this->m_PlayerData.ID = 0;
 					this->m_TickRate = pTick;
@@ -197,7 +212,7 @@ namespace FPS_n2 {
 						//サーバーデータの更新
 						this->m_ServerData.StartFlag = 1;
 						this->m_ServerData.PlayerData[GetMyPlayer().ID] = this->m_PlayerData;		// サーバープレイヤーののプレイヤーデータ
-						this->m_ServerData.Frame++;											// サーバーフレーム更新
+						this->m_ServerData.ServerFrame++;											// サーバーフレーム更新
 					}
 					int i = 0;
 					for (auto & n : m_NetWork) {
@@ -351,7 +366,8 @@ namespace FPS_n2 {
 			int						UsePort{ 10850 };
 			float					m_Tick{ 10.f };
 
-
+			double					m_ClientFrame{ 0.0 };
+			float					m_Ping{ 0.f };
 
 			bool IsRide = true;
 
@@ -402,8 +418,8 @@ namespace FPS_n2 {
 				}
 				{
 					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, 0));//自分
-					if (!IsRide) {
-						this->m_HPBuf = Vehicle->GetHP();
+					if (IsRide) {
+						this->m_HPBuf = (float)Vehicle->GetHP();
 						this->m_ScoreBuf = Vehicle->GetScore();
 					}
 				}
@@ -423,12 +439,21 @@ namespace FPS_n2 {
 				//SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
 				//SE->Add((int)SoundEnum::Heart, 9, "data/Sound/SE/move/heart.wav");
 				//SE->Add((int)SoundEnum::GateOpen, 1, "data/Sound/SE/GateOpen.wav");
-				SE->Add((int)SoundEnum::Tank_Shot, 3, "data/Sound/SE/gun/fire/0.wav");
-				SE->Add((int)SoundEnum::Tank_Ricochet, 3, "data/Sound/SE/ricochet/0.wav");
-				SE->Add((int)SoundEnum::Tank_Damage, 3, "data/Sound/SE/damage/0.wav");
+				SE->Add((int)SoundEnum::Tank_Shot, 3, "data/Sound/SE/gun/fire/7.wav");
+				for (int i = 0; i < 17; i++) {
+					SE->Add((int)SoundEnum::Tank_Ricochet, 3, "data/Sound/SE/ricochet/" + std::to_string(i) + ".wav");
+				}
+				for (int i = 0; i < 2; i++) {
+					SE->Add((int)SoundEnum::Tank_Damage, 3, "data/Sound/SE/damage/" + std::to_string(i) + ".wav");
+				}
 				SE->Add((int)SoundEnum::Tank_engine, 10, "data/Sound/SE/engine.wav");
-				SE->Add((int)SoundEnum::Tank_Reload, 3, "data/Sound/SE/reload/hand/0.wav");
-				
+				for (int i = 0; i < 7; i++) {
+					SE->Add((int)SoundEnum::Tank_Eject, 3, "data/Sound/SE/gun/reload/eject/" + std::to_string(i) + ".wav", false);
+				}
+				for (int i = 0; i < 5; i++) {
+					SE->Add((int)SoundEnum::Tank_Reload, 3, "data/Sound/SE/gun/reload/hand/" + std::to_string(i) + ".wav", false);
+				}
+
 				//SE->Get((int)SoundEnum::Shot_Gun).SetVol_Local(128);
 				//SE->Get((int)SoundEnum::Trigger).SetVol_Local(128);
 				for (int i = 0; i < 4; i++) {
@@ -437,10 +462,9 @@ namespace FPS_n2 {
 				//SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
 				//SE->Get((int)SoundEnum::Heart).SetVol_Local(92);
 				//SE->Get((int)SoundEnum::GateOpen).SetVol_Local(128);
-				SE->Get((int)SoundEnum::Tank_Shot).SetVol_Local(128);
-				SE->Get((int)SoundEnum::Tank_Ricochet).SetVol_Local(128);
-				SE->Get((int)SoundEnum::Tank_Damage).SetVol_Local(128);
-				SE->Get((int)SoundEnum::Tank_engine).SetVol_Local(32);
+
+				SE->Get((int)SoundEnum::Tank_Shot).SetVol(0.5f);
+				SE->Get((int)SoundEnum::Tank_engine).SetVol(0.25f);
 				//入力
 				this->m_FPSActive.Init(false);
 				this->m_MouseActive.Init(false);
@@ -580,12 +604,11 @@ namespace FPS_n2 {
 
 					this->m_TPS_YradR += (sin(this->m_TPS_Yrad)*cos(this->m_TPS_YradR) - cos(this->m_TPS_Yrad) * sin(this->m_TPS_YradR))*20.f / FPS;
 					{
-						Vehicle->ExecuteRadBuf(MyInput);
-						MyInput.SetRadBuf(Vehicle->GetRadBuf().x(), Vehicle->GetRadBuf().y());
+						MyInput.SetRadBuf(Vehicle->GetViewxRad(), Vehicle->GetViewyRad());
 					}
 					//クライアント
 					if (this->m_IsClient) {
-						m_ClientCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad());
+						m_ClientCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad(), this->m_ClientFrame);
 						if ((this->m_Sequence == SequenceEnum::Matching) && SeqFirst) {
 							m_ClientCtrl.ClientInit(UsePort, this->m_Tick, IPData);
 						}
@@ -595,7 +618,7 @@ namespace FPS_n2 {
 						for (int i = 0; i < Vehicle_num; i++) {
 							auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
 							if (i == GetMyPlayerID()) {
-								v->SetCharaType(CharaTypeID::Team);
+								v->SetCharaType(CharaTypeID::Mine);
 							}
 							else {
 								v->SetCharaType(CharaTypeID::Enemy);
@@ -604,7 +627,7 @@ namespace FPS_n2 {
 					}
 					//サーバー
 					else {
-						m_ServerCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad());
+						m_ServerCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad(), this->m_ClientFrame);
 						if ((this->m_Sequence == SequenceEnum::Matching) && SeqFirst) {
 							m_ServerCtrl.ServerInit(UsePort, this->m_Tick);
 						}
@@ -621,38 +644,34 @@ namespace FPS_n2 {
 							if (i == GetMyPlayerID()) {
 								if (IsRide) {
 									MyInput.SetKeyInput(tmp.Input.GetKeyInput());//キーフレームだけサーバーに合わせる
-									v->SetInput(MyInput, isready);
+									v->SetInput(MyInput, isready, false);
+									//v->SetInput(tmp.Input, isready, false);
+
+									if ((this->m_IsClient) ? m_ClientCtrl.GetRecvData(i) : m_ServerCtrl.GetRecvData(i)) {
+										this->m_Ping = (float)(this->m_ClientFrame - tmp.Frame)*1000.f;
+									}
+									printfDx("ping %lf \n", this->m_Ping);
 								}
 							}
 							else {
 								if (IsRide) {
-									v->SetInput(tmp.Input, isready);
-									auto diff = (tmp.PosBuf - v->GetMove().pos);
-									auto siz = diff.size();
-									auto vec = tmp.VecBuf;
-									auto yrad = tmp.YradBuf;
-									if ((1.0f*Scale_Rate) < siz) {
-										//if (((1.0f*Scale_Rate) < siz) && (siz < (2.0f*Scale_Rate))) {
-										v->SetPosBufOverRide(tmp.PosBuf, vec, yrad);
-									}
-									//y方向だとベクトルリセット
-									if ((2.0f*Scale_Rate) < std::fabsf(diff.y())) {
-										vec.y(0);
-										v->SetPosBufOverRide(tmp.PosBuf, vec, yrad);
-									}
+									v->SetInput(tmp.Input, isready, true);
+									v->SetPosBufOverRide(tmp.PosBuf, tmp.VecBuf, tmp.YradBuf);
 								}
 							}
 						}
+						this->m_ClientFrame += 1.0 / (double)FPS;
 					}
 					else {
 						for (int i = 0; i < Vehicle_num; i++) {
 							auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
 							if (i == GetMyPlayerID()) {
 								if (IsRide) {
-									v->SetInput(MyInput, isready);
+									v->SetInput(MyInput, isready, false);
 								}
 							}
 						}
+						this->m_ClientFrame = 0.0;
 					}
 
 				}
@@ -773,6 +792,9 @@ namespace FPS_n2 {
 					auto campos = v->GetCameraPosition();
 					if (0.f < campos.z() && campos.z() < 1.f) {
 						switch (v->GetCharaType()) {
+						case CharaTypeID::Mine:
+							color = Blue;
+							break;
 						case CharaTypeID::Team:
 							color = Blue;
 							break;
@@ -871,6 +893,9 @@ namespace FPS_n2 {
 						auto pos = MATRIX_ref::Vtrans(v->GetMatrix().pos() - BaseBos, MATRIX_ref::RotY(rad))*((1.f / Scale_Rate) * this->m_Rader_r);
 						if ((-xs1 < pos.x() && pos.x() < xs2) && (-ys1 < -pos.z() && -pos.z() < ys2)) {
 							switch (v->GetCharaType()) {
+							case CharaTypeID::Mine:
+								color = Blue;
+								break;
 							case CharaTypeID::Team:
 								color = Blue;
 								break;

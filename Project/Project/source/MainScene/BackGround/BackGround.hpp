@@ -9,6 +9,7 @@ namespace FPS_n2 {
 			MV1 Sky;
 			MV1 Ground;
 			MV1 GroundCol;
+			MV1 GroundCol_Box2D;
 
 			std::shared_ptr<b2World> world;
 			struct wallPats {
@@ -22,13 +23,14 @@ namespace FPS_n2 {
 				MV1::Load("data/model/map/model.mv1", &Ground);
 				MV1::Load("data/model/map/col.mv1", &GroundCol);
 				GroundCol.SetupCollInfo(64, 16, 64);
+				MV1::Load("data/model/map/col_box2D.mv1", &GroundCol_Box2D);
 				//空
 				MV1::Load("data/model/sky/model.mv1", &Sky);
 				MV1SetDifColorScale(Sky.get(), GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
 
 				this->world = std::make_shared<b2World>(b2Vec2(0.0f, 0.0f)); /* 剛体を保持およびシミュレートするワールドオブジェクトを構築*/
-				/*
-				MV1_REF_POLYGONLIST p = MV1GetReferenceMesh(mapcol_tank.get(), 0, FALSE);
+				//*
+				MV1_REF_POLYGONLIST p = MV1GetReferenceMesh(GroundCol_Box2D.get(), 0, FALSE);
 				for (int i = 0; i < p.PolygonNum; i++) {
 					//壁
 					{
