@@ -394,9 +394,12 @@ namespace FPS_n2 {
 				//BG
 				this->m_BackGround.Load();
 				//
+				VhehicleData::Set_Pre(&this->vehc_data, "data/tank/");								//êÌé‘
+				for (auto& t : this->vehc_data) { t.Set(); }										//êÌé‘2
+				//
 				this->m_Obj.Init(&this->m_BackGround.GetGroundCol());
 				for (int i = 0; i < Vehicle_num; i++) {
-					this->m_Obj.AddObject(ObjType::Vehicle, "data/tank/T54_3/");
+					this->m_Obj.AddObject(ObjType::Vehicle, ("data/tank/" + this->vehc_data[0].GetName() + "/").c_str());
 				}
 				//ÉçÅ[Éh
 				SetCreate3DSoundFlag(FALSE);
@@ -410,8 +413,6 @@ namespace FPS_n2 {
 				//
 				TEMPSCENE::Set();
 				//Set
-				VhehicleData::Set_Pre(&this->vehc_data, "data/tank/");								//êÌé‘
-				for (auto& t : this->vehc_data) { t.Set(); }										//êÌé‘2
 				//ìoò^
 				for (int i = 0; i < Vehicle_num; i++) {
 					auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
@@ -420,9 +421,7 @@ namespace FPS_n2 {
 					VECTOR_ref pos_t = VECTOR_ref::vget(0.f + (float)(i)*10.f*Scale_Rate, 0.f, 0.f);
 					auto HitResult = this->m_BackGround.GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
 					if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
-					moves mov; mov.pos = pos_t;
-					mov.mat = MATRIX_ref::RotY(deg2rad(90));
-					v->ValueSet(mov, &vehc_data[0], hit_pic, this->m_BackGround.GetBox2Dworld(), &this->vehicle_Pool, &v);
+					v->ValueSet(deg2rad(0), deg2rad(90), pos_t, &vehc_data[0], hit_pic, this->m_BackGround.GetBox2Dworld(), &this->vehicle_Pool, &v);
 				}
 				{
 					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, 0));//é©ï™
@@ -726,6 +725,32 @@ namespace FPS_n2 {
 							}
 						}
 					}
+				}
+				//
+				{
+					auto StartPos = Vehicle->GetGunMuzzlePos();
+					auto EndPos = StartPos + Vehicle->GetGunMuzzleVec() * 500.f*Scale_Rate;
+					Vehicle->GetMapColNearest(StartPos, &EndPos);
+					while (true) {
+						auto colres = this->m_BackGround.GetGroundCol().CollCheck_Line(StartPos, EndPos);
+						if (colres.HitFlag == TRUE) {
+							if (EndPos == colres.HitPosition) { break; }
+							EndPos = colres.HitPosition;
+						}
+						else {
+							break;
+						}
+					}
+					for (int i = 0; i < Vehicle_num; i++) {
+						auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
+						if (i != GetMyPlayerID()) {
+							if (v->RefreshCol(StartPos, EndPos, 10.f*Scale_Rate)) {
+								v->GetColNearestInAllMesh(StartPos, &EndPos);
+							}
+							v->SetAimingDistance(-1.f);
+						}
+					}
+					Vehicle->SetAimingDistance((StartPos - EndPos).size());
 				}
 				//Execute
 				this->m_Obj.ExecuteObject();

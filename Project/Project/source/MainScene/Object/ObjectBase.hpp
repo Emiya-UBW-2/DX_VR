@@ -8,7 +8,10 @@ namespace FPS_n2 {
 			bool										m_Use_RealTimePhysics{ false };
 			MV1											m_obj_REALTIME;
 			MV1											m_obj_LOADCALC;
+
 			MV1											m_col;
+			bool										m_ColActive{ false };							//
+
 			moves										m_move;
 			MATRIX_ref									m_PrevMat;//物理更新のため
 			const MV1*									m_MapCol{ nullptr };
@@ -45,7 +48,6 @@ namespace FPS_n2 {
 					(this->m_ColFileName == colfilename));
 			}
 			const auto&		GetobjType(void) const noexcept { return this->m_objType; }
-			const auto&		GetCol(void) const noexcept { return this->m_col; }
 			const auto&		GetCameraPosition(void) const noexcept { return this->m_CameraPosition; }
 			const auto&		GetCameraSize(void) const noexcept { return this->m_CameraSize; }
 			const auto&		GetMove(void) const noexcept { return this->m_move; }
@@ -86,6 +88,31 @@ namespace FPS_n2 {
 					}
 				}
 				return ans;
+			}
+
+			//判定起動
+			const auto		RefreshCol(const VECTOR_ref& StartPos, const VECTOR_ref& EndPos, float pRange) noexcept {
+				if (this->m_ColActive) { return true; }				//すでに起動しているなら無視
+				if (GetMinLenSegmentToPoint(StartPos, EndPos, this->m_move.pos) <= pRange) {
+					//判定起動
+					this->m_ColActive = true;
+					for (int i = 0; i < this->m_col.mesh_num(); i++) {
+						this->m_col.RefreshCollInfo(-1, i);
+					}
+					return true;
+				}
+				return false;
+			}
+			//判定取得
+			const auto		GetColLine(const VECTOR_ref& StartPos, const VECTOR_ref& EndPos, const int sel = 0) const noexcept { return this->m_col.CollCheck_Line(StartPos, EndPos, -1, sel); }
+			void			GetColNearestInAllMesh(const VECTOR_ref& StartPos, VECTOR_ref* EndPos) const noexcept {
+				MV1_COLL_RESULT_POLY colres;
+				for (int i = 0; i < this->m_col.mesh_num(); ++i) {
+					colres = GetColLine(StartPos, *EndPos, i);
+					if (colres.HitFlag == TRUE) {
+						*EndPos = colres.HitPosition;
+					}
+				}
 			}
 		public:
 			void			LoadModel(const char* filepath, const char* objfilename = "model", const char* colfilename = "col") noexcept {
@@ -135,11 +162,8 @@ namespace FPS_n2 {
 							MV1SaveModelToMV1File(this->m_col.get(), (Path + ".mv1").c_str());
 							MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
 						}
-						else {
-						}
 					}
-
-					//this->m_col.SetupCollInfo(1, 1, 1);
+					for (int i = 0; i < this->m_col.mesh_num(); ++i) { this->m_col.SetupCollInfo(8, 8, 8, -1, i); }
 				}
 				this->m_IsBaseModel = true;
 			}
