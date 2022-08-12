@@ -44,20 +44,25 @@ namespace FPS_n2 {
 			//通信
 			struct PlayerNetData {
 			public:
-				size_t			CheckSum{ 0 };	//8 * 1	=  8byte
-				InputControl	Input;			//4 * 5	= 20byte
-				VECTOR_ref		PosBuf;			//4 * 3	= 12byte
-				VECTOR_ref		VecBuf;			//4 * 3	= 12byte
-				float			YradBuf;		//4 * 1	=  4byte
-				char			ID{ 0 };		//1	* 1	=  1byte
-				char			IsActive{ 0 };	//1	* 1	=  1byte
-				double			Frame{ 0.0 };	//8 * 1 =  8byte
-				char			DamageSwitch{ 0 };//1*1 =  1byte
-				DamageEvent		Damage{ 100 };	//9 * 1 =  9byte
-												//		  58byte
+				size_t			CheckSum{ 0 };		//8 * 1	=  8byte
+				InputControl	Input;				//4 * 5	= 20byte
+				VECTOR_ref		PosBuf;				//4 * 3	= 12byte
+				VECTOR_ref		VecBuf;				//4 * 3	= 12byte
+				float			YradBuf;			//4 * 1	=  4byte
+				char			ID{ 0 };			//1	* 1	=  1byte
+				char			IsActive{ 0 };		//1	* 1	=  1byte
+				double			Frame{ 0.0 };		//8 * 1 =  8byte
+				unsigned char	DamageSwitch{ 0 };	//1 * 1 =  1byte
+				DamageEvent		Damage{ 100 };		//9 * 1 =  9byte
+													//		  76byte
 			public:
 				const auto	CalcCheckSum(void) noexcept {
-					return (size_t)(((int)(PosBuf.x()) + (int)(PosBuf.y()) + (int)(PosBuf.z())) + ((int)(VecBuf.x()*100.f) + (int)(VecBuf.y()*100.f) + (int)(VecBuf.z())*100.f) + (int)(rad2deg(YradBuf)) + (int)ID);
+					return (size_t)(
+							((int)(PosBuf.x()) + (int)(PosBuf.y()) + (int)(PosBuf.z())) + 
+							((int)(VecBuf.x()*100.f) + (int)(VecBuf.y()*100.f) + (int)(VecBuf.z())*100.f) + 
+							(int)(rad2deg(YradBuf)) + 
+							(int)(ID)
+						);
 				}
 
 				const PlayerNetData operator+(const PlayerNetData& o) const noexcept {
@@ -412,10 +417,11 @@ namespace FPS_n2 {
 					auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
 					vehicle_Pool.emplace_back(v);
 
-					VECTOR_ref pos_t = VECTOR_ref::vget(0.f + (float)(i)*6.f*Scale_Rate, 0.f, 0.f);
+					VECTOR_ref pos_t = VECTOR_ref::vget(0.f + (float)(i)*10.f*Scale_Rate, 0.f, 0.f);
 					auto HitResult = this->m_BackGround.GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
 					if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
 					moves mov; mov.pos = pos_t;
+					mov.mat = MATRIX_ref::RotY(deg2rad(90));
 					v->ValueSet(mov, &vehc_data[0], hit_pic, this->m_BackGround.GetBox2Dworld(), &this->vehicle_Pool, &v);
 				}
 				{
@@ -683,9 +689,9 @@ namespace FPS_n2 {
 							}
 							//ダメージイベント処理
 							{
-								if ((tmp.DamageSwitch == 1) != v->GetDamageSwitchRec()) {
+								if (tmp.DamageSwitch != v->GetDamageSwitchRec()) {
 									this->m_DamageEvents.emplace_back(tmp.Damage);
-									v->SetDamageSwitchRec((tmp.DamageSwitch == 1));
+									v->SetDamageSwitchRec(tmp.DamageSwitch);
 								}
 							}
 						}
