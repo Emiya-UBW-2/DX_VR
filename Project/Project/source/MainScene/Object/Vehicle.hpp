@@ -341,7 +341,10 @@ namespace FPS_n2 {
 				}
 				return ColResGround;
 			}
-			const auto PenetrationCheck(float pArmer, const VECTOR_ref& normal) const noexcept { return (this->m_pene > (pArmer * (1.0f / std::abs(this->m_move.vec.Norm().dot(normal))))); }
+			const auto PenetrationCheck(float pArmer, const VECTOR_ref& normal) const noexcept {
+				return (this->m_pene > (pArmer * (1.0f / std::abs(this->m_move.vec.Norm().dot(normal)))));
+
+			}
 			void			Penetrate() noexcept {
 				this->m_IsActive = false;
 				this->m_IsHit = true;
@@ -958,7 +961,8 @@ namespace FPS_n2 {
 							this->m_FootWorld->CreateJoint(&this->f_jointDef);
 						}
 					}
-					for (const auto& w : pUseVeh->Get_b2downsideframe()) {
+					{
+						const auto& w = pUseVeh->Get_b2downsideframe()[((IsLeft) ? 0 : 1)];
 						auto& w2 = this->downsideframe;
 						w2.resize(w.size());
 						for (auto& t : w2) {
@@ -1001,8 +1005,9 @@ namespace FPS_n2 {
 							pTargetObj->frame_Reset(t.frame.first);
 							auto startpos = pTargetObj->frame(t.frame.first);
 							t.colres = pMapPtr->CollCheck_Line(startpos + y_vec * ((-t.frame.second.y()) + 2.f*Scale_Rate), startpos + y_vec * ((-t.frame.second.y()) - 0.3f*Scale_Rate));
+
 							pTargetObj->SetFrameLocalMatrix(t.frame.first,
-								MATRIX_ref::Mtrans(VECTOR_ref::up() * ((t.colres.HitFlag == TRUE) ? (t.colres.HitPosition.y + y_vec.y() * t.frame.second.y() - startpos.y() + 0.3f) : -0.4f)) *
+								MATRIX_ref::Mtrans(VECTOR_ref::up() * ((t.colres.HitFlag == TRUE) ? (t.colres.HitPosition.y + y_vec.y() * t.frame.second.y() - startpos.y()) : -0.4f*Scale_Rate)) *
 								MATRIX_ref::Mtrans(t.frame.second)
 							);
 						}
@@ -1290,8 +1295,8 @@ namespace FPS_n2 {
 				int t = -1;
 				MV1_COLL_RESULT_POLY colres; colres.HitFlag = FALSE;
 				VECTOR_ref EndPos = pAmmo.GetMove().pos;
+				for (const auto& m : this->m_VecData->Get_armer_mesh()) { hitControl.HitCheck(m.first, pAmmo.GetMove().repos, colres); }//全リセット
 				for (const auto& m : this->m_VecData->Get_armer_mesh()) {
-					hitControl.HitCheck(m.first, pAmmo.GetMove().repos, colres);//全リセット
 					auto colres_t = GetColLine(pAmmo.GetMove().repos, EndPos, m.first);
 					if (colres_t.HitFlag == TRUE) {
 						t = m.first;
@@ -1429,7 +1434,7 @@ namespace FPS_n2 {
 						GetObj().frame_Reset(f.first);
 						auto startpos = GetObj().frame(f.first);
 						auto ColResGround = this->m_MapCol->CollCheck_Line(startpos + y_vec * ((-f.second.y()) + 2.f*Scale_Rate), startpos + y_vec * ((-f.second.y()) - 0.3f*Scale_Rate));
-						Easing(&wheel_frameYpos[ID], (ColResGround.HitFlag == TRUE) ? (ColResGround.HitPosition.y + y_vec.y() * f.second.y() - startpos.y()) : -0.3f, 0.9f, EasingType::OutExpo);
+						Easing(&wheel_frameYpos[ID], (ColResGround.HitFlag == TRUE) ? (ColResGround.HitPosition.y + y_vec.y() * f.second.y() - startpos.y()) : -0.3f*Scale_Rate, 0.9f, EasingType::OutExpo);
 						GetObj().SetFrameLocalMatrix(f.first,
 							MATRIX_ref::RotX((f.second.x() >= 0) ? this->wheel_Left : this->wheel_Right) *
 							MATRIX_ref::Mtrans(VECTOR_ref::up() * wheel_frameYpos[ID]) *
