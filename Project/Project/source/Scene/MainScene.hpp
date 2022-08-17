@@ -3,10 +3,381 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		//通信
+		static const int		Player_num = 3;
+
+		struct NewSetting {
+			int						IP[4]{ 127,0,0,1 };
+			int						UsePort{ 10850 };
+		};
+		class NewWorkSetting {
+			std::vector<NewSetting> m_NewWorkSetting;
+		public:
+			void Load(void) noexcept {
+				SetOutApplicationLogValidFlag(FALSE);
+				int mdata = FileRead_open("data/NetWorkSetting.txt", FALSE);
+				while(true){
+					m_NewWorkSetting.resize(m_NewWorkSetting.size() + 1);
+					m_NewWorkSetting.back().UsePort = std::clamp<int>(getparams::_int(mdata), 0, 50000);
+					m_NewWorkSetting.back().IP[0] = std::clamp<int>(getparams::_int(mdata), 0, 255);
+					m_NewWorkSetting.back().IP[1] = std::clamp<int>(getparams::_int(mdata), 0, 255);
+					m_NewWorkSetting.back().IP[2] = std::clamp<int>(getparams::_int(mdata), 0, 255);
+					m_NewWorkSetting.back().IP[3] = std::clamp<int>(getparams::_int(mdata), 0, 255);
+					if (FileRead_eof(mdata) != 0) {
+						break;
+					}
+				}
+				FileRead_close(mdata);
+				SetOutApplicationLogValidFlag(TRUE);
+			}
+			void Save(void) noexcept {
+				std::ofstream outputfile("data/NetWorkSetting.txt");
+				for (auto& n : m_NewWorkSetting) {
+					int ID = (int)(&n - &m_NewWorkSetting.front());
+					outputfile << "Setting" + std::to_string(ID) + "_Port=" + std::to_string(n.UsePort) + "\n";
+					outputfile << "Setting" + std::to_string(ID) + "_IP1=" + std::to_string(n.IP[0]) + "\n";
+					outputfile << "Setting" + std::to_string(ID) + "_IP2=" + std::to_string(n.IP[1]) + "\n";
+					outputfile << "Setting" + std::to_string(ID) + "_IP3=" + std::to_string(n.IP[2]) + "\n";
+					outputfile << "Setting" + std::to_string(ID) + "_IP4=" + std::to_string(n.IP[3]) + "\n";
+				}
+				outputfile.close();
+			}
+
+			const auto GetSize(void) const noexcept { return (int)m_NewWorkSetting.size(); }
+			const auto& Get(int ID) const noexcept { return m_NewWorkSetting[ID]; }
+			const auto Add() noexcept {
+				m_NewWorkSetting.resize(m_NewWorkSetting.size() + 1);
+				m_NewWorkSetting.back().UsePort = 10850;
+				m_NewWorkSetting.back().IP[0] = 127;
+				m_NewWorkSetting.back().IP[1] = 0;
+				m_NewWorkSetting.back().IP[2] = 0;
+				m_NewWorkSetting.back().IP[3] = 1;
+				return (int)m_NewWorkSetting.size() - 1;;
+			}
+			void Set(int ID, const NewSetting& per)noexcept { m_NewWorkSetting[ID] = per; }
+		};
+		struct PlayerNetData {
+		public:
+			size_t			CheckSum{ 0 };		//8 * 1	=  8byte
+			InputControl	Input;				//4 * 5	= 20byte
+			VECTOR_ref		PosBuf;				//4 * 3	= 12byte
+			VECTOR_ref		VecBuf;				//4 * 3	= 12byte
+			float			YradBuf;			//4 * 1	=  4byte
+			char			ID{ 0 };			//1	* 1	=  1byte
+			char			IsActive{ 0 };		//1	* 1	=  1byte
+			double			Frame{ 0.0 };		//8 * 1 =  8byte
+			unsigned char	DamageSwitch{ 0 };	//1 * 1 =  1byte
+			DamageEvent		Damage{ 100 };		//9 * 1 =  9byte
+												//		  76byte
+		public:
+			const auto	CalcCheckSum(void) noexcept {
+				return (size_t)(
+					((int)(PosBuf.x()) + (int)(PosBuf.y()) + (int)(PosBuf.z())) +
+					((int)(VecBuf.x()*100.f) + (int)(VecBuf.y()*100.f) + (int)(VecBuf.z())*100.f) +
+					(int)(rad2deg(YradBuf)) +
+					(int)(ID)
+					);
+			}
+
+			const PlayerNetData operator+(const PlayerNetData& o) const noexcept {
+				PlayerNetData tmp;
+
+				tmp.ID = o.ID;
+				tmp.Input = this->Input + o.Input;
+				tmp.PosBuf = this->PosBuf + o.PosBuf;
+				tmp.VecBuf = this->VecBuf + o.VecBuf;
+				tmp.YradBuf = this->YradBuf + o.YradBuf;
+
+				return tmp;
+			}
+			const PlayerNetData operator-(const PlayerNetData& o) const noexcept {
+				PlayerNetData tmp;
+
+				tmp.ID = o.ID;
+				tmp.Input = this->Input - o.Input;
+				tmp.PosBuf = this->PosBuf - o.PosBuf;
+				tmp.VecBuf = this->VecBuf - o.VecBuf;
+				tmp.YradBuf = this->YradBuf - o.YradBuf;
+
+				return tmp;
+			}
+			const PlayerNetData operator*(float per) const noexcept {
+				PlayerNetData tmp;
+
+				tmp.ID = this->ID;
+				tmp.Input = this->Input*per;
+				tmp.PosBuf = this->PosBuf*per;
+				tmp.VecBuf = this->VecBuf*per;
+				tmp.YradBuf = this->YradBuf*per;
+				return tmp;
+			}
+		};
+		struct ServerNetData {
+			int					Tmp1{ 0 };				//4
+			int					StartFlag{ 0 };			//4
+			size_t				ServerFrame{ 0 };		//8
+			PlayerNetData		PlayerData[Player_num];	//37 * 3
+		};
+		class NetWorkControl {
+		protected:
+		protected:
+			std::vector<std::pair<NewWorkControl, int>> m_NetWork;
+			size_t					m_ServerFrame{ 0 };
+			std::array<int, Player_num>		m_LeapFrame;
+			ServerNetData			m_ServerDataCommon, m_PrevServerData;
+			PlayerNetData			m_PlayerData;
+			float					m_TickCnt{ 0.f };
+			float					m_TickRate{ 10.f };
+		public:
+			const auto	GetRecvData(int PlayerID) const noexcept { return this->m_LeapFrame[PlayerID] <= 1; }
+			const auto& GetServerDataCommon() const noexcept { return this->m_ServerDataCommon; }
+			const auto& GetMyPlayer() const noexcept { return this->m_PlayerData; }
+			void			SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, float pYrad, double pFrame, const DamageEvent& pDamage, char pDamageSwitch) noexcept {
+				this->m_PlayerData.Input = pInput;
+				this->m_PlayerData.PosBuf = pPos;
+				this->m_PlayerData.VecBuf = pVec;
+				this->m_PlayerData.YradBuf = pYrad;
+				this->m_PlayerData.Frame = pFrame;
+				this->m_PlayerData.Damage = pDamage;
+				this->m_PlayerData.DamageSwitch = pDamageSwitch;
+				this->m_PlayerData.CheckSum = this->m_PlayerData.CalcCheckSum();
+			}
+
+			const auto	GetNowServerPlayerData(int PlayerID) {
+				auto Total = (int)this->m_ServerDataCommon.ServerFrame - (int)this->m_PrevServerData.ServerFrame;
+				if (Total <= 0) { Total = 20; }
+				auto Per = (float)this->m_LeapFrame[PlayerID] / (float)Total;
+				auto tmp = Lerp(this->m_PrevServerData.PlayerData[PlayerID], this->m_ServerDataCommon.PlayerData[PlayerID], Per);
+
+				auto radvec = Lerp(MATRIX_ref::RotY(this->m_PrevServerData.PlayerData[PlayerID].YradBuf).zvec(), MATRIX_ref::RotY(this->m_ServerDataCommon.PlayerData[PlayerID].YradBuf).zvec(), Per).Norm();
+				tmp.YradBuf = -atan2f(radvec.x(), radvec.z());
+				tmp.Frame = this->m_ServerDataCommon.PlayerData[PlayerID].Frame;
+				tmp.Damage = this->m_ServerDataCommon.PlayerData[PlayerID].Damage;
+				tmp.DamageSwitch = this->m_ServerDataCommon.PlayerData[PlayerID].DamageSwitch;
+				this->m_LeapFrame[PlayerID] = std::clamp<int>(this->m_LeapFrame[PlayerID] + 1, 0, Total);
+				return tmp;
+			}
+			virtual void			SetParam(int PlayerID, const VECTOR_ref& pPos) noexcept {
+				this->m_ServerDataCommon.PlayerData[PlayerID].PosBuf = pPos;
+				this->m_ServerDataCommon.ServerFrame = 0;
+				this->m_PrevServerData.PlayerData[PlayerID].PosBuf = this->m_ServerDataCommon.PlayerData[PlayerID].PosBuf;	// サーバーデータ
+				this->m_PrevServerData.ServerFrame = 0;
+			}
+			void			NetWorkDispose(void) noexcept {
+				for (auto & n : m_NetWork) {
+					n.first.Dispose();
+				}
+				m_NetWork.clear();
+			}
+		protected:
+			void			NetWorkInit(void) noexcept {
+				this->m_ServerFrame = 0;
+			}
+			void			NetCommonExecute(const ServerNetData& pData) {
+				auto& tmpData = pData;
+				if (this->m_ServerFrame <= tmpData.ServerFrame && ((tmpData.ServerFrame - this->m_ServerFrame) < 60)) {
+					for (int i = 0; i < Player_num; i++) {
+						this->m_LeapFrame[i] = 0;
+					}
+					this->m_PrevServerData = this->m_ServerDataCommon;
+					this->m_ServerFrame = tmpData.ServerFrame;
+					this->m_ServerDataCommon = tmpData;
+				}
+			}
+		};
+		class ServerControl : public NetWorkControl {
+			ServerNetData			m_ServerData;
+		public:
+			const auto& GetServerData() const noexcept { return this->m_ServerData; }
+			void			SetParam(int PlayerID, const VECTOR_ref& pPos) noexcept override {
+				NetWorkControl::SetParam(PlayerID, pPos);
+				this->m_ServerData.PlayerData[PlayerID].PosBuf = this->m_ServerDataCommon.PlayerData[PlayerID].PosBuf;
+				this->m_ServerData.PlayerData[PlayerID].IsActive = 0;
+			}
+		public:
+			void			ServerInit(int pPort, float pTick) {
+				NetWorkInit();
+				m_NetWork.resize(Player_num - 1);
+				int i = 0;
+				for (auto & n : m_NetWork) {
+					n.first.Set_Port(pPort + i); i++;
+					n.first.InitServer();
+					n.second = 0;
+				}
+				this->m_ServerDataCommon.ServerFrame = 0;
+
+				this->m_ServerData.Tmp1 = 0;
+				this->m_ServerData.StartFlag = 0;
+				this->m_ServerData.PlayerData[0].IsActive = 1;
+				this->m_ServerData.ServerFrame = 0;
+
+				this->m_PlayerData.ID = 0;
+				this->m_TickRate = pTick;
+			}
+			bool ServerExecute(void) noexcept {
+				bool canMatch = true;
+				bool canSend = false;
+				for (auto & n : m_NetWork) {
+					if (!(n.second >= 2)) {
+						canMatch = false;
+					}
+				}
+				if (canMatch) {
+					// ティックレート用演算
+					this->m_TickCnt += 60.f / FPS;
+					if (this->m_TickCnt > this->m_TickRate) {
+						this->m_TickCnt -= this->m_TickRate;
+						canSend = true;
+					}
+					//サーバーデータの更新
+					this->m_ServerData.StartFlag = 1;
+					this->m_ServerData.PlayerData[GetMyPlayer().ID] = this->m_PlayerData;		// サーバープレイヤーののプレイヤーデータ
+					this->m_ServerData.ServerFrame++;											// サーバーフレーム更新
+				}
+				int i = 0;
+				for (auto & n : m_NetWork) {
+					int tmpData = -1;
+					switch (n.second) {
+					case 0:										//無差別受付
+						if (n.first.Recv(&tmpData)) {			// 該当ソケットにクライアントからなにか受信したら
+							n.second++;
+						}
+						break;
+					case 1:
+						this->m_ServerData.Tmp1 = 1 + i;
+						this->m_ServerData.StartFlag = 0;
+						this->m_ServerData.PlayerData[1 + i].IsActive = 1;
+
+						n.first.SendtoClient(this->m_ServerData);					//クライアント全員に送る
+
+						if (n.first.Recv(&tmpData)) {
+							if (tmpData == 1) {					// ID取れたと識別出来たら
+								n.second++;
+							}
+						}
+						break;
+					case 2://揃い待ち
+						if (canMatch) { n.second++; }
+						break;
+					case 3:
+					{
+						PlayerNetData tmpPData;
+						if (n.first.Recv(&tmpPData)) {							// クライアントから受信したら
+							if (tmpPData.CheckSum == tmpPData.CalcCheckSum()) {
+								this->m_ServerData.PlayerData[tmpPData.ID] = tmpPData;	// 更新
+							}
+						}
+					}
+					if (canSend) {
+						n.first.SendtoClient(this->m_ServerData);						//クライアント全員に送る
+					}
+					break;
+					default:
+						break;
+					}
+					i++;
+				}
+				if (canSend) {
+					NetCommonExecute(this->m_ServerData);			// 更新
+				}
+				return canMatch;
+			}
+		};
+		class ClientControl : public NetWorkControl {
+			int						m_NetWorkSel{ 0 };
+			float					m_CannotConnectTimer{ 0.f };
+		public:
+			void			ClientInit(int pPort, float pTick, const IPDATA& pIP) {
+				NetWorkInit();
+				m_NetWorkSel = 0;
+				m_CannotConnectTimer = 0.f;
+				m_NetWork.resize(Player_num - 1);
+				int i = 0;
+				for (auto & n : m_NetWork) {
+					n.first.Set_Port(pPort + i); i++;
+					n.first.SetIP(pIP);
+					n.first.InitClient();
+					n.second = 0;
+				}
+
+				this->m_PlayerData.ID = 1;
+				this->m_TickRate = pTick;
+			}
+			bool ClientExecute(void) noexcept {
+				ServerNetData tmpData;
+				bool canMatch = true;
+				bool canSend = false;
+				canMatch = (m_NetWork[m_NetWorkSel].second >= 2);
+				if (canMatch) {
+					// ティックレート用演算
+					this->m_TickCnt += 60.f / FPS;
+					if (this->m_TickCnt > this->m_TickRate) {
+						this->m_TickCnt -= this->m_TickRate;
+						canSend = true;
+					}
+				}
+				switch (m_NetWork[m_NetWorkSel].second) {
+				case 0:
+					m_NetWork[m_NetWorkSel].first.SendtoServer(0);			// 通信リクエスト
+					//サーバーからの自分のIDを受信
+					if (m_NetWork[m_NetWorkSel].first.Recv(&tmpData)) {
+						NetCommonExecute(tmpData);								//更新
+						m_CannotConnectTimer = 0.f;
+						if (tmpData.Tmp1 > 0) {
+							this->m_PlayerData.ID = (char)tmpData.Tmp1;
+							m_NetWork[m_NetWorkSel].second++;
+						}
+					}
+					else {
+						m_CannotConnectTimer += 1.f / FPS;
+						if (m_CannotConnectTimer > 1.f) {
+							m_CannotConnectTimer = 0.f;
+							m_NetWork[m_NetWorkSel].first.Dispose();
+							m_NetWorkSel++;
+							if (m_NetWorkSel >= Player_num) {
+								//満タン
+							}
+						}
+					}
+					break;
+				case 1:
+					m_NetWork[m_NetWorkSel].first.SendtoServer(1);			// ID取れたよ
+					//サーバーからのデータを受信したら次へ
+					if (m_NetWork[m_NetWorkSel].first.Recv(&tmpData)) {
+						NetCommonExecute(tmpData);								//更新
+						if (tmpData.StartFlag == 1) {
+							m_NetWork[m_NetWorkSel].second++;
+						}
+					}
+					break;
+				case 2:
+					if (canSend) {
+						m_NetWork[m_NetWorkSel].first.SendtoServer(this->m_PlayerData);				//自身のデータを送信
+					}
+					if (m_NetWork[m_NetWorkSel].first.Recv(&tmpData)) {					//サーバーからのデータを受信したら
+						NetCommonExecute(tmpData);								//更新
+					}
+					break;
+				default:
+					break;
+				}
+				return canMatch;
+			}
+		};
+		enum class SequenceEnum {
+			SelMode,
+			CheckPreset,
+			Set_Port,
+			SetIP,
+			SetTick,
+			Matching,
+			MainGame,
+		};
+
+
 		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
 		private:
 			static const int		Vehicle_num = 3;
-			static const int		Player_num = 3;
 		private:
 			//リソース関連
 			ObjectManager			m_Obj;						//モデル
@@ -41,344 +412,25 @@ namespace FPS_n2 {
 			//
 			float					m_Rader{ 1.f };
 			float					m_Rader_r{ 1.f };
-			//通信
-			struct PlayerNetData {
-			public:
-				size_t			CheckSum{ 0 };		//8 * 1	=  8byte
-				InputControl	Input;				//4 * 5	= 20byte
-				VECTOR_ref		PosBuf;				//4 * 3	= 12byte
-				VECTOR_ref		VecBuf;				//4 * 3	= 12byte
-				float			YradBuf;			//4 * 1	=  4byte
-				char			ID{ 0 };			//1	* 1	=  1byte
-				char			IsActive{ 0 };		//1	* 1	=  1byte
-				double			Frame{ 0.0 };		//8 * 1 =  8byte
-				unsigned char	DamageSwitch{ 0 };	//1 * 1 =  1byte
-				DamageEvent		Damage{ 100 };		//9 * 1 =  9byte
-													//		  76byte
-			public:
-				const auto	CalcCheckSum(void) noexcept {
-					return (size_t)(
-							((int)(PosBuf.x()) + (int)(PosBuf.y()) + (int)(PosBuf.z())) + 
-							((int)(VecBuf.x()*100.f) + (int)(VecBuf.y()*100.f) + (int)(VecBuf.z())*100.f) + 
-							(int)(rad2deg(YradBuf)) + 
-							(int)(ID)
-						);
-				}
+			//
+			std::vector<DamageEvent>	m_DamageEvents;
+			bool IsRide = true;
 
-				const PlayerNetData operator+(const PlayerNetData& o) const noexcept {
-					PlayerNetData tmp;
-
-					tmp.ID = o.ID;
-					tmp.Input = this->Input + o.Input;
-					tmp.PosBuf = this->PosBuf + o.PosBuf;
-					tmp.VecBuf = this->VecBuf + o.VecBuf;
-					tmp.YradBuf = this->YradBuf + o.YradBuf;
-
-					return tmp;
-				}
-				const PlayerNetData operator-(const PlayerNetData& o) const noexcept {
-					PlayerNetData tmp;
-
-					tmp.ID = o.ID;
-					tmp.Input = this->Input - o.Input;
-					tmp.PosBuf = this->PosBuf - o.PosBuf;
-					tmp.VecBuf = this->VecBuf - o.VecBuf;
-					tmp.YradBuf = this->YradBuf - o.YradBuf;
-
-					return tmp;
-				}
-				const PlayerNetData operator*(float per) const noexcept {
-					PlayerNetData tmp;
-
-					tmp.ID = this->ID;
-					tmp.Input = this->Input*per;
-					tmp.PosBuf = this->PosBuf*per;
-					tmp.VecBuf = this->VecBuf*per;
-					tmp.YradBuf = this->YradBuf*per;
-					return tmp;
-				}
-			};
-			struct ServerNetData {
-				int					Tmp1{ 0 };				//4
-				int					StartFlag{ 0 };			//4
-				size_t				ServerFrame{ 0 };		//8
-				PlayerNetData		PlayerData[Player_num];	//37 * 3
-			};
-			class NetWorkControl {
-			protected:
-			protected:
-				std::vector<std::pair<NewWorkControl, int>> m_NetWork;
-				size_t					m_ServerFrame{ 0 };
-				std::array<int, Player_num>		m_LeapFrame;
-				ServerNetData			m_ServerDataCommon, m_PrevServerData;
-				PlayerNetData			m_PlayerData;
-				float					m_TickCnt{ 0.f };
-				float					m_TickRate{ 10.f };
-			public:
-				const auto	GetRecvData(int PlayerID) const noexcept { return this->m_LeapFrame[PlayerID] <= 1; }
-				const auto& GetServerDataCommon() const noexcept { return this->m_ServerDataCommon; }
-				const auto& GetMyPlayer() const noexcept { return this->m_PlayerData; }
-				void			SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, float pYrad, double pFrame, const DamageEvent& pDamage, char pDamageSwitch) noexcept {
-					this->m_PlayerData.Input = pInput;
-					this->m_PlayerData.PosBuf = pPos;
-					this->m_PlayerData.VecBuf = pVec;
-					this->m_PlayerData.YradBuf = pYrad;
-					this->m_PlayerData.Frame = pFrame;
-					this->m_PlayerData.Damage = pDamage;
-					this->m_PlayerData.DamageSwitch = pDamageSwitch;
-					this->m_PlayerData.CheckSum = this->m_PlayerData.CalcCheckSum();
-				}
-
-				const auto	GetNowServerPlayerData(int PlayerID) {
-					auto Total = (int)this->m_ServerDataCommon.ServerFrame - (int)this->m_PrevServerData.ServerFrame;
-					if (Total <= 0) { Total = 20; }
-					auto Per = (float)this->m_LeapFrame[PlayerID] / (float)Total;
-					auto tmp = Lerp(this->m_PrevServerData.PlayerData[PlayerID], this->m_ServerDataCommon.PlayerData[PlayerID], Per);
-
-					auto radvec = Lerp(MATRIX_ref::RotY(this->m_PrevServerData.PlayerData[PlayerID].YradBuf).zvec(), MATRIX_ref::RotY(this->m_ServerDataCommon.PlayerData[PlayerID].YradBuf).zvec(), Per).Norm();
-					tmp.YradBuf = -atan2f(radvec.x(), radvec.z());
-					tmp.Frame = this->m_ServerDataCommon.PlayerData[PlayerID].Frame;
-					tmp.Damage = this->m_ServerDataCommon.PlayerData[PlayerID].Damage;
-					tmp.DamageSwitch = this->m_ServerDataCommon.PlayerData[PlayerID].DamageSwitch;
-					this->m_LeapFrame[PlayerID] = std::clamp<int>(this->m_LeapFrame[PlayerID] + 1, 0, Total);
-					return tmp;
-				}
-				virtual void			SetParam(int PlayerID, const VECTOR_ref& pPos) noexcept {
-					this->m_ServerDataCommon.PlayerData[PlayerID].PosBuf = pPos;
-					this->m_ServerDataCommon.ServerFrame = 0;
-					this->m_PrevServerData.PlayerData[PlayerID].PosBuf = this->m_ServerDataCommon.PlayerData[PlayerID].PosBuf;	// サーバーデータ
-					this->m_PrevServerData.ServerFrame = 0;
-				}
-				void			NetWorkDispose(void) noexcept {
-					for (auto & n : m_NetWork) {
-						n.first.Dispose();
-					}
-					m_NetWork.clear();
-				}
-			protected:
-				void			NetWorkInit(void) noexcept {
-					this->m_ServerFrame = 0;
-				}
-				void			NetCommonExecute(const ServerNetData& pData) {
-					auto& tmpData = pData;
-					if (this->m_ServerFrame <= tmpData.ServerFrame && ((tmpData.ServerFrame - this->m_ServerFrame) < 60)) {
-						for (int i = 0; i < Player_num; i++) {
-							this->m_LeapFrame[i] = 0;
-						}
-						this->m_PrevServerData = this->m_ServerDataCommon;
-						this->m_ServerFrame = tmpData.ServerFrame;
-						this->m_ServerDataCommon = tmpData;
-					}
-				}
-			};
-			class ServerControl : public NetWorkControl {
-				ServerNetData			m_ServerData;
-			public:
-				const auto& GetServerData() const noexcept { return this->m_ServerData; }
-				void			SetParam(int PlayerID, const VECTOR_ref& pPos) noexcept override {
-					NetWorkControl::SetParam(PlayerID, pPos);
-					this->m_ServerData.PlayerData[PlayerID].PosBuf = this->m_ServerDataCommon.PlayerData[PlayerID].PosBuf;
-					this->m_ServerData.PlayerData[PlayerID].IsActive = 0;
-				}
-			public:
-				void			ServerInit(int pPort, float pTick) {
-					NetWorkInit();
-					m_NetWork.resize(Player_num - 1);
-					int i = 0;
-					for (auto & n : m_NetWork) {
-						n.first.Set_Port(pPort + i); i++;
-						n.first.InitServer();
-						n.second = 0;
-					}
-					this->m_ServerDataCommon.ServerFrame = 0;
-
-					this->m_ServerData.Tmp1 = 0;
-					this->m_ServerData.StartFlag = 0;
-					this->m_ServerData.PlayerData[0].IsActive = 1;
-					this->m_ServerData.ServerFrame = 0;
-
-					this->m_PlayerData.ID = 0;
-					this->m_TickRate = pTick;
-				}
-				bool ServerExecute(void) noexcept {
-					bool canMatch = true;
-					bool canSend = false;
-					for (auto & n : m_NetWork) {
-						if (!(n.second >= 2)) {
-							canMatch = false;
-						}
-					}
-					if (canMatch) {
-						// ティックレート用演算
-						this->m_TickCnt += 60.f / FPS;
-						if (this->m_TickCnt > this->m_TickRate) {
-							this->m_TickCnt -= this->m_TickRate;
-							canSend = true;
-						}
-						//サーバーデータの更新
-						this->m_ServerData.StartFlag = 1;
-						this->m_ServerData.PlayerData[GetMyPlayer().ID] = this->m_PlayerData;		// サーバープレイヤーののプレイヤーデータ
-						this->m_ServerData.ServerFrame++;											// サーバーフレーム更新
-					}
-					int i = 0;
-					for (auto & n : m_NetWork) {
-						int tmpData = -1;
-						switch (n.second) {
-						case 0:										//無差別受付
-							if (n.first.Recv(&tmpData)) {			// 該当ソケットにクライアントからなにか受信したら
-								n.second++;
-							}
-							break;
-						case 1:
-							this->m_ServerData.Tmp1 = 1 + i;
-							this->m_ServerData.StartFlag = 0;
-							this->m_ServerData.PlayerData[1 + i].IsActive = 1;
-
-							n.first.SendtoClient(this->m_ServerData);					//クライアント全員に送る
-
-							if (n.first.Recv(&tmpData)) {
-								if (tmpData == 1) {					// ID取れたと識別出来たら
-									n.second++;
-								}
-							}
-							break;
-						case 2://揃い待ち
-							if (canMatch) { n.second++; }
-							break;
-						case 3:
-						{
-							PlayerNetData tmpPData;
-							if (n.first.Recv(&tmpPData)) {							// クライアントから受信したら
-								if (tmpPData.CheckSum == tmpPData.CalcCheckSum()) {
-									this->m_ServerData.PlayerData[tmpPData.ID] = tmpPData;	// 更新
-								}
-							}
-						}
-						if (canSend) {
-							n.first.SendtoClient(this->m_ServerData);						//クライアント全員に送る
-						}
-						break;
-						default:
-							break;
-						}
-						i++;
-					}
-					if (canSend) {
-						NetCommonExecute(this->m_ServerData);			// 更新
-					}
-					return canMatch;
-				}
-			};
-			class ClientControl : public NetWorkControl {
-				int						m_NetWorkSel{ 0 };
-				float					m_CannotConnectTimer{ 0.f };
-			public:
-				void			ClientInit(int pPort, float pTick, const IPDATA& pIP) {
-					NetWorkInit();
-					m_NetWorkSel = 0;
-					m_CannotConnectTimer = 0.f;
-					m_NetWork.resize(Player_num - 1);
-					int i = 0;
-					for (auto & n : m_NetWork) {
-						n.first.Set_Port(pPort + i); i++;
-						n.first.SetIP(pIP);
-						n.first.InitClient();
-						n.second = 0;
-					}
-
-					this->m_PlayerData.ID = 1;
-					this->m_TickRate = pTick;
-				}
-				bool ClientExecute(void) noexcept {
-					ServerNetData tmpData;
-					bool canMatch = true;
-					bool canSend = false;
-					canMatch = (m_NetWork[m_NetWorkSel].second >= 2);
-					if (canMatch) {
-						// ティックレート用演算
-						this->m_TickCnt += 60.f / FPS;
-						if (this->m_TickCnt > this->m_TickRate) {
-							this->m_TickCnt -= this->m_TickRate;
-							canSend = true;
-						}
-					}
-					switch (m_NetWork[m_NetWorkSel].second) {
-					case 0:
-						m_NetWork[m_NetWorkSel].first.SendtoServer(0);			// 通信リクエスト
-						//サーバーからの自分のIDを受信
-						if (m_NetWork[m_NetWorkSel].first.Recv(&tmpData)) {
-							NetCommonExecute(tmpData);								//更新
-							m_CannotConnectTimer = 0.f;
-							if (tmpData.Tmp1 > 0) {
-								this->m_PlayerData.ID = (char)tmpData.Tmp1;
-								m_NetWork[m_NetWorkSel].second++;
-							}
-						}
-						else {
-							m_CannotConnectTimer += 1.f / FPS;
-							if (m_CannotConnectTimer > 1.f) {
-								m_CannotConnectTimer = 0.f;
-								m_NetWork[m_NetWorkSel].first.Dispose();
-								m_NetWorkSel++;
-								if (m_NetWorkSel >= Player_num) {
-									//満タン
-								}
-							}
-						}
-						break;
-					case 1:
-						m_NetWork[m_NetWorkSel].first.SendtoServer(1);			// ID取れたよ
-						//サーバーからのデータを受信したら次へ
-						if (m_NetWork[m_NetWorkSel].first.Recv(&tmpData)) {
-							NetCommonExecute(tmpData);								//更新
-							if (tmpData.StartFlag == 1) {
-								m_NetWork[m_NetWorkSel].second++;
-							}
-						}
-						break;
-					case 2:
-						if (canSend) {
-							m_NetWork[m_NetWorkSel].first.SendtoServer(this->m_PlayerData);				//自身のデータを送信
-						}
-						if (m_NetWork[m_NetWorkSel].first.Recv(&tmpData)) {					//サーバーからのデータを受信したら
-							NetCommonExecute(tmpData);								//更新
-						}
-						break;
-					default:
-						break;
-					}
-					return canMatch;
-				}
-			};
-			enum class SequenceEnum {
-				SelMode,
-				Set_Port,
-				SetTick,
-				SetIP,
-				Matching,
-				MainGame,
-			};
 			//サーバー専用
 			ServerControl			m_ServerCtrl;
 			//クライアント専用
 			ClientControl			m_ClientCtrl;
-			//int						IP[4]{ 127,0,0,1 };
-			int						IP[4]{ 58,188,85,163 };
 			IPDATA					IPData;				// 送信用ＩＰアドレスデータ
 			//共通
 			bool					m_IsClient{ true };
 			SequenceEnum			m_Sequence{ SequenceEnum::SelMode };
 			bool					SeqFirst{ false };
-			int						UsePort{ 10850 };
 			float					m_Tick{ 10.f };
-
+			NewWorkSetting			m_NewWorkSetting;
+			int						m_NewWorkSelect{ 0 };
+			NewSetting				m_NewSetting;
 			double					m_ClientFrame{ 0.0 };
 			float					m_Ping{ 0.f };
-
-			std::vector<DamageEvent>	m_DamageEvents;
-
-			bool IsRide = true;
-
 		private:
 			const auto& GetMyPlayerID() const noexcept { return (this->m_IsClient) ? m_ClientCtrl.GetMyPlayer().ID : m_ServerCtrl.GetMyPlayer().ID; }
 		public:
@@ -421,7 +473,7 @@ namespace FPS_n2 {
 					VECTOR_ref pos_t = VECTOR_ref::vget(0.f + (float)(i)*10.f*Scale_Rate, 0.f, 0.f);
 					auto HitResult = this->m_BackGround.GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
 					if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
-					v->ValueSet(deg2rad(0), deg2rad(90), pos_t, &vehc_data[0], hit_pic, this->m_BackGround.GetBox2Dworld(), &this->vehicle_Pool, &v);
+					v->ValueSet(deg2rad(0), deg2rad(90), pos_t, &vehc_data[0], hit_pic, this->m_BackGround.GetBox2Dworld(), &this->vehicle_Pool, i);
 				}
 				{
 					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, 0));//自分
@@ -483,9 +535,12 @@ namespace FPS_n2 {
 				this->m_MouseActive.Init(false);
 
 				this->m_DamageEvents.clear();
+
+				m_NewWorkSetting.Load();
+				m_NewWorkSelect = 0;
 			}
 			//
-			bool Update(void) noexcept override {
+			bool			Update(void) noexcept override {
 				auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
 				//FirstDoing
 				if (IsFirstLoop) {
@@ -625,7 +680,7 @@ namespace FPS_n2 {
 					if (this->m_IsClient) {
 						m_ClientCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad(), this->m_ClientFrame, Vehicle->GetDamageEvent(), (Vehicle->GetDamageSwitch() ? 1 : 0));
 						if ((this->m_Sequence == SequenceEnum::Matching) && SeqFirst) {
-							m_ClientCtrl.ClientInit(UsePort, this->m_Tick, IPData);
+							m_ClientCtrl.ClientInit(m_NewSetting.UsePort, this->m_Tick, IPData);
 						}
 						if ((this->m_Sequence >= SequenceEnum::Matching) && m_ClientCtrl.ClientExecute()) {
 							this->m_Sequence = SequenceEnum::MainGame;
@@ -644,7 +699,7 @@ namespace FPS_n2 {
 					else {
 						m_ServerCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad(), this->m_ClientFrame, Vehicle->GetDamageEvent(), (Vehicle->GetDamageSwitch() ? 1 : 0));
 						if ((this->m_Sequence == SequenceEnum::Matching) && SeqFirst) {
-							m_ServerCtrl.ServerInit(UsePort, this->m_Tick);
+							m_ServerCtrl.ServerInit(m_NewSetting.UsePort, this->m_Tick);
 						}
 						if ((this->m_Sequence >= SequenceEnum::Matching) && m_ServerCtrl.ServerExecute()) {
 							this->m_Sequence = SequenceEnum::MainGame;
@@ -717,11 +772,11 @@ namespace FPS_n2 {
 					//ダメージイベント
 					for (int i = 0; i < Vehicle_num; i++) {
 						auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
-						for (int i = 0; i < this->m_DamageEvents.size(); i++) {
-							if (v->SetDamageEvent(this->m_DamageEvents[i])) {
-								std::swap(this->m_DamageEvents.back(), this->m_DamageEvents[i]);
+						for (int j = 0; j < this->m_DamageEvents.size(); j++) {
+							if (v->SetDamageEvent(this->m_DamageEvents[j])) {
+								std::swap(this->m_DamageEvents.back(), this->m_DamageEvents[j]);
 								this->m_DamageEvents.pop_back();
-								i--;
+								j--;
 							}
 						}
 					}
@@ -818,7 +873,6 @@ namespace FPS_n2 {
 				this->m_BackGround.Shadow_Draw();
 				this->m_Obj.DrawObject_Shadow();
 			}
-
 			void			Main_Draw(void) noexcept override {
 				this->m_BackGround.Draw();
 				this->m_Obj.DrawObject();
@@ -990,8 +1044,8 @@ namespace FPS_n2 {
 					int xp, yp, xs, ys;
 					xp = y_r(100);
 					yp = y_r(250);
-					xs = y_r(400);
-					ys = y_r(200);
+					xs = y_r(500);
+					ys = y_r(300);
 
 					int y_h = y_r(30);
 					//bool Mid_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_MIDDLE) != 0);
@@ -1065,7 +1119,7 @@ namespace FPS_n2 {
 								Fonts->Get(y_h, FontPool::FontType::Nomal_Edge).Get_handle().DrawStringFormat(xp1, yp1, GetColor(255, 255, 255), Black, "種別[%s]", this->m_IsClient ? "クライアント" : "サーバー"); yp1 += y_h;
 							}
 							if (this->m_Sequence > SequenceEnum::Set_Port) {
-								Fonts->Get(y_h, FontPool::FontType::Nomal_Edge).Get_handle().DrawStringFormat(xp1, yp1, GetColor(255, 255, 255), Black, "使用ポート[%d-%d]", UsePort, UsePort + Player_num - 1); yp1 += y_h;
+								Fonts->Get(y_h, FontPool::FontType::Nomal_Edge).Get_handle().DrawStringFormat(xp1, yp1, GetColor(255, 255, 255), Black, "使用ポート[%d-%d]", m_NewSetting.UsePort, m_NewSetting.UsePort + Player_num - 1); yp1 += y_h;
 							}
 							if (this->m_Sequence > SequenceEnum::SetTick) {
 								Fonts->Get(y_h, FontPool::FontType::Nomal_Edge).Get_handle().DrawStringFormat(xp1, yp1, GetColor(255, 255, 255), Black, "ティックレート[%4.1f]", Frame_Rate / this->m_Tick); yp1 += y_h;
@@ -1078,45 +1132,71 @@ namespace FPS_n2 {
 						if (ClickBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "クライアントになる")) {
 							this->m_IsClient = true;
 							this->m_Tick = 5.f;
-							this->m_Sequence = SequenceEnum::Set_Port;
+							this->m_Sequence = SequenceEnum::CheckPreset;
 						}
 						if (ClickBox(xp, yp + y_r(100), xp + xs, yp + y_r(100) + y_h, "サーバーになる")) {
 							this->m_IsClient = false;
 							this->m_Tick = 10.f;
-							this->m_Sequence = SequenceEnum::Set_Port;
+							this->m_Sequence = SequenceEnum::CheckPreset;
+						}
+						break;
+					case SequenceEnum::CheckPreset:
+						MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "プリセット設定");
+						for (int i = 0; i < m_NewWorkSetting.GetSize();i++) {
+							auto n = m_NewWorkSetting.Get(i);
+							if (ClickBox(xp, yp + y_r(50)*(i + 2), xp + xs, yp + y_r(50)*(i + 2) + y_h, "[%d][%d,%d,%d,%d]", n.UsePort, n.IP[0], n.IP[1], n.IP[2], n.IP[3])) {
+								this->m_NewSetting.UsePort = n.UsePort;
+								this->m_NewSetting.IP[0] = n.IP[0];
+								this->m_NewSetting.IP[1] = n.IP[1];
+								this->m_NewSetting.IP[2] = n.IP[2];
+								this->m_NewSetting.IP[3] = n.IP[3];
+								this->m_Sequence = SequenceEnum::SetTick;
+								m_NewWorkSelect = i;
+								break;
+							}
+						}
+						{
+							int i = m_NewWorkSetting.GetSize();
+							if (ClickBox(xp, yp + y_r(50)*(i + 2), xp + xs, yp + y_r(50)*(i + 2) + y_h, "設定を追加する")) {
+								m_NewWorkSetting.Add();
+								m_NewWorkSelect = i;
+								this->m_Sequence = SequenceEnum::Set_Port;
+							}
 						}
 						break;
 					case SequenceEnum::Set_Port://ポート
-						MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "ポート=[%d-%d]", UsePort, UsePort + Player_num - 1);
-						AddSubBox(xp, yp + y_r(100), [&]() { UsePort++; }, [&]() { UsePort--; });
+						MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "ポート=[%d-%d]", m_NewSetting.UsePort, m_NewSetting.UsePort + Player_num - 1);
+						AddSubBox(xp, yp + y_r(100), [&]() { m_NewSetting.UsePort++; }, [&]() { m_NewSetting.UsePort--; });
 						if (ClickBox(y_r(380), yp + y_r(100), y_r(380) + y_r(120), yp + y_r(100) + y_h, "Set")) {
+							this->m_Sequence = SequenceEnum::SetIP;//サーバ-は一応いらない
+						}
+						break;
+					case SequenceEnum::SetIP://IP
+						MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "IP=[%d,%d,%d,%d]", m_NewSetting.IP[0], m_NewSetting.IP[1], m_NewSetting.IP[2], m_NewSetting.IP[3]);
+						for (int i = 0; i < 4; i++) {
+							AddSubBox(y_r(100 + 70 * i), yp + y_r(100),
+								[&]() {
+								m_NewSetting.IP[i]++;
+								if (m_NewSetting.IP[i] > 255) { m_NewSetting.IP[i] = 0; }
+							}, [&]() {
+								m_NewSetting.IP[i]--;
+								if (m_NewSetting.IP[i] < 0) { m_NewSetting.IP[i] = 255; }
+							});
+						}
+						if (ClickBox(y_r(380), yp + y_r(100), y_r(380) + y_r(120), yp + y_r(100) + y_h, "Set")) {
+							IPData.d1 = (unsigned char)(m_NewSetting.IP[0]);
+							IPData.d2 = (unsigned char)(m_NewSetting.IP[1]);
+							IPData.d3 = (unsigned char)(m_NewSetting.IP[2]);
+							IPData.d4 = (unsigned char)(m_NewSetting.IP[3]);
 							this->m_Sequence = SequenceEnum::SetTick;
+							m_NewWorkSetting.Set(m_NewWorkSelect, m_NewSetting);
+							m_NewWorkSetting.Save();
 						}
 						break;
 					case SequenceEnum::SetTick:
 						MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "ティック=[%4.1f]", Frame_Rate / this->m_Tick);
 						AddSubBox(xp, yp + y_r(100), [&]() { this->m_Tick = std::clamp(this->m_Tick - 1.f, 1.f, 20.f); }, [&]() { this->m_Tick = std::clamp(this->m_Tick + 1.f, 1.f, 20.f); });
 						if (ClickBox(y_r(380), yp + y_r(100), y_r(380) + y_r(120), yp + y_r(100) + y_h, "Set")) {
-							this->m_Sequence = (this->m_IsClient) ? SequenceEnum::SetIP : SequenceEnum::Matching;
-						}
-						break;
-					case SequenceEnum::SetIP://IP
-						MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "IP=[%d,%d,%d,%d]", IP[0], IP[1], IP[2], IP[3]);
-						for (int i = 0; i < 4; i++) {
-							AddSubBox(y_r(100 + 70 * i), yp + y_r(100),
-								[&]() {
-								IP[i]++;
-								if (IP[i] > 255) { IP[i] = 0; }
-							}, [&]() {
-								IP[i]--;
-								if (IP[i] < 0) { IP[i] = 255; }
-							});
-						}
-						if (ClickBox(y_r(380), yp + y_r(100), y_r(380) + y_r(120), yp + y_r(100) + y_h, "Set")) {
-							IPData.d1 = (unsigned char)(IP[0]);
-							IPData.d2 = (unsigned char)(IP[1]);
-							IPData.d3 = (unsigned char)(IP[2]);
-							IPData.d4 = (unsigned char)(IP[3]);
 							this->m_Sequence = SequenceEnum::Matching;
 						}
 						break;

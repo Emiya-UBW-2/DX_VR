@@ -163,7 +163,10 @@ namespace FPS_n2 {
 							MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
 						}
 					}
-					for (int i = 0; i < this->m_col.mesh_num(); ++i) { this->m_col.SetupCollInfo(8, 8, 8, -1, i); }
+					if (this->m_col.IsActive()) {
+						for (int i = 0; i < this->m_col.mesh_num(); ++i) { this->m_col.SetupCollInfo(8, 8, 8, -1, i); }
+					}
+
 				}
 				this->m_IsBaseModel = true;
 			}
@@ -176,7 +179,9 @@ namespace FPS_n2 {
 				//col
 				if (pBase->m_col.IsActive()) {
 					this->m_col = pBase->m_col.Duplicate();
-					//this->m_col.SetupCollInfo(1, 1, 1);
+					if (this->m_col.IsActive()) {
+						for (int i = 0; i < this->m_col.mesh_num(); ++i) { this->m_col.SetupCollInfo(8, 8, 8, -1, i); }
+					}
 				}
 				this->m_IsBaseModel = false;
 			}
