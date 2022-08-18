@@ -45,7 +45,7 @@ namespace FPS_n2 {
 
 			const auto GetSize(void) const noexcept { return (int)m_NewWorkSetting.size(); }
 			const auto& Get(int ID) const noexcept { return m_NewWorkSetting[ID]; }
-			const auto Add() noexcept {
+			const auto Add(void) noexcept {
 				m_NewWorkSetting.resize(m_NewWorkSetting.size() + 1);
 				m_NewWorkSetting.back().UsePort = 10850;
 				m_NewWorkSetting.back().IP[0] = 127;
@@ -130,8 +130,8 @@ namespace FPS_n2 {
 			float					m_TickRate{ 10.f };
 		public:
 			const auto	GetRecvData(int PlayerID) const noexcept { return this->m_LeapFrame[PlayerID] <= 1; }
-			const auto& GetServerDataCommon() const noexcept { return this->m_ServerDataCommon; }
-			const auto& GetMyPlayer() const noexcept { return this->m_PlayerData; }
+			const auto& GetServerDataCommon(void) const noexcept { return this->m_ServerDataCommon; }
+			const auto& GetMyPlayer(void) const noexcept { return this->m_PlayerData; }
 			void			SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, float pYrad, double pFrame, const DamageEvent& pDamage, char pDamageSwitch) noexcept {
 				this->m_PlayerData.Input = pInput;
 				this->m_PlayerData.PosBuf = pPos;
@@ -188,7 +188,7 @@ namespace FPS_n2 {
 		class ServerControl : public NetWorkControl {
 			ServerNetData			m_ServerData;
 		public:
-			const auto& GetServerData() const noexcept { return this->m_ServerData; }
+			const auto& GetServerData(void) const noexcept { return this->m_ServerData; }
 			void			SetParam(int PlayerID, const VECTOR_ref& pPos) noexcept override {
 				NetWorkControl::SetParam(PlayerID, pPos);
 				this->m_ServerData.PlayerData[PlayerID].PosBuf = this->m_ServerDataCommon.PlayerData[PlayerID].PosBuf;
@@ -432,7 +432,7 @@ namespace FPS_n2 {
 			double					m_ClientFrame{ 0.0 };
 			float					m_Ping{ 0.f };
 		private:
-			const auto& GetMyPlayerID() const noexcept { return (this->m_IsClient) ? m_ClientCtrl.GetMyPlayer().ID : m_ServerCtrl.GetMyPlayer().ID; }
+			const auto& GetMyPlayerID(void) const noexcept { return (this->m_IsClient) ? m_ClientCtrl.GetMyPlayer().ID : m_ServerCtrl.GetMyPlayer().ID; }
 		public:
 			using TEMPSCENE::TEMPSCENE;
 			void			Set(void) noexcept override {

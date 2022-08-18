@@ -68,29 +68,29 @@ namespace FPS_n2 {
 			this->m_yRad = pyRad;
 		}
 		void			SetKeyInput(unsigned int pFlags) { this->m_Flags = pFlags; }
-		const auto& GetKeyInput() const noexcept { return this->m_Flags; }
+		const auto& GetKeyInput(void) const noexcept { return this->m_Flags; }
 
 
-		const auto& GetAddxRad() const noexcept { return m_AddxRad; }
-		const auto& GetAddyRad() const noexcept { return m_AddyRad; }
-		const auto& GetxRad() const noexcept { return m_xRad; }
-		const auto& GetyRad() const noexcept { return m_yRad; }
-		const auto	GetGoFrontPress() const noexcept { return (this->m_Flags & (1 << 0)) != 0; }
-		const auto	GetGoBackPress() const noexcept { return (this->m_Flags & (1 << 1)) != 0; }
-		const auto	GetGoLeftPress() const noexcept { return (this->m_Flags & (1 << 2)) != 0; }
-		const auto	GetGoRightPress() const noexcept { return (this->m_Flags & (1 << 3)) != 0; }
-		const auto	GetRunPress() const noexcept { return (this->m_Flags & (1 << 4)) != 0; }
-		const auto	GetQPress() const noexcept { return (this->m_Flags & (1 << 5)) != 0; }
-		const auto	GetEPress() const noexcept { return (this->m_Flags & (1 << 6)) != 0; }
-		const auto	GetRightPress() const noexcept { return (this->m_Flags & (1 << 7)) != 0; }
-		const auto	GetLeftPress() const noexcept { return (this->m_Flags & (1 << 8)) != 0; }
-		const auto	GetUpPress() const noexcept { return (this->m_Flags & (1 << 9)) != 0; }
-		const auto	GetDownPress() const noexcept { return (this->m_Flags & (1 << 10)) != 0; }
-		const auto	GetAction1() const noexcept { return (this->m_Flags & (1 << 11)) != 0; }
-		const auto	GetAction2() const noexcept { return (this->m_Flags & (1 << 12)) != 0; }
-		const auto	GetAction3() const noexcept { return (this->m_Flags & (1 << 13)) != 0; }
-		const auto	GetAction4() const noexcept { return (this->m_Flags & (1 << 14)) != 0; }
-		const auto	GetAction5() const noexcept { return (this->m_Flags & (1 << 15)) != 0; }
+		const auto& GetAddxRad(void) const noexcept { return m_AddxRad; }
+		const auto& GetAddyRad(void) const noexcept { return m_AddyRad; }
+		const auto& GetxRad(void) const noexcept { return m_xRad; }
+		const auto& GetyRad(void) const noexcept { return m_yRad; }
+		const auto	GetGoFrontPress(void) const noexcept { return (this->m_Flags & (1 << 0)) != 0; }
+		const auto	GetGoBackPress(void) const noexcept { return (this->m_Flags & (1 << 1)) != 0; }
+		const auto	GetGoLeftPress(void) const noexcept { return (this->m_Flags & (1 << 2)) != 0; }
+		const auto	GetGoRightPress(void) const noexcept { return (this->m_Flags & (1 << 3)) != 0; }
+		const auto	GetRunPress(void) const noexcept { return (this->m_Flags & (1 << 4)) != 0; }
+		const auto	GetQPress(void) const noexcept { return (this->m_Flags & (1 << 5)) != 0; }
+		const auto	GetEPress(void) const noexcept { return (this->m_Flags & (1 << 6)) != 0; }
+		const auto	GetRightPress(void) const noexcept { return (this->m_Flags & (1 << 7)) != 0; }
+		const auto	GetLeftPress(void) const noexcept { return (this->m_Flags & (1 << 8)) != 0; }
+		const auto	GetUpPress(void) const noexcept { return (this->m_Flags & (1 << 9)) != 0; }
+		const auto	GetDownPress(void) const noexcept { return (this->m_Flags & (1 << 10)) != 0; }
+		const auto	GetAction1(void) const noexcept { return (this->m_Flags & (1 << 11)) != 0; }
+		const auto	GetAction2(void) const noexcept { return (this->m_Flags & (1 << 12)) != 0; }
+		const auto	GetAction3(void) const noexcept { return (this->m_Flags & (1 << 13)) != 0; }
+		const auto	GetAction4(void) const noexcept { return (this->m_Flags & (1 << 14)) != 0; }
+		const auto	GetAction5(void) const noexcept { return (this->m_Flags & (1 << 15)) != 0; }
 
 		const InputControl operator+(const InputControl& o) const noexcept {
 			InputControl tmp;
@@ -151,23 +151,23 @@ namespace FPS_n2 {
 			this->m_Vec[pDir] = std::clamp(this->m_Vec[pDir], 0.f, 1.f);
 		}
 	public:
-		const auto		GetRadBuf() const noexcept { return  this->m_rad_Buf; }
-		const auto		GetTurnRatePer() const noexcept { return  this->m_TurnRatePer; }
-		const auto		GetRad() const noexcept { return  this->m_rad; }
-		const auto		GetVecFront() const noexcept { return  this->m_Vec[0] || m_IsSprint; }
-		const auto		GetVecRear() const noexcept { return this->m_Vec[2]; }
-		const auto		GetVecLeft() const noexcept { return this->m_Vec[1]; }
-		const auto		GetVecRight() const noexcept { return this->m_Vec[3]; }
-		const auto		GetPressFront() const noexcept { return this->m_Press_GoFront; }
-		const auto		GetPressRear() const noexcept { return this->m_Press_GoRear; }
-		const auto		GetPressLeft() const noexcept { return this->m_Press_GoLeft; }
-		const auto		GetPressRight() const noexcept { return this->m_Press_GoRight; }
-		const auto		GetRun() const noexcept { return this->m_IsRun; }
-		const auto		GetRunPer() const noexcept { return  this->m_RunPer; }
-		const auto		GetSprint() const noexcept { return this->m_IsSprint; }
-		const auto		GetSprintPer() const noexcept { return  this->m_SprintPer; }
-		const auto		GetVec() const noexcept { return VECTOR_ref::vget(GetVecLeft() - GetVecRight(), 0, GetVecRear() - GetVecFront()); }
-		const auto		GetFrontP() const noexcept {
+		const auto		GetRadBuf(void) const noexcept { return  this->m_rad_Buf; }
+		const auto		GetTurnRatePer(void) const noexcept { return  this->m_TurnRatePer; }
+		const auto		GetRad(void) const noexcept { return  this->m_rad; }
+		const auto		GetVecFront(void) const noexcept { return  this->m_Vec[0] || m_IsSprint; }
+		const auto		GetVecRear(void) const noexcept { return this->m_Vec[2]; }
+		const auto		GetVecLeft(void) const noexcept { return this->m_Vec[1]; }
+		const auto		GetVecRight(void) const noexcept { return this->m_Vec[3]; }
+		const auto		GetPressFront(void) const noexcept { return this->m_Press_GoFront; }
+		const auto		GetPressRear(void) const noexcept { return this->m_Press_GoRear; }
+		const auto		GetPressLeft(void) const noexcept { return this->m_Press_GoLeft; }
+		const auto		GetPressRight(void) const noexcept { return this->m_Press_GoRight; }
+		const auto		GetRun(void) const noexcept { return this->m_IsRun; }
+		const auto		GetRunPer(void) const noexcept { return  this->m_RunPer; }
+		const auto		GetSprint(void) const noexcept { return this->m_IsSprint; }
+		const auto		GetSprintPer(void) const noexcept { return  this->m_SprintPer; }
+		const auto		GetVec(void) const noexcept { return VECTOR_ref::vget(GetVecLeft() - GetVecRight(), 0, GetVecRear() - GetVecFront()); }
+		const auto		GetFrontP(void) const noexcept {
 			auto FrontP = ((GetPressFront() && !GetPressRear())) ? (atan2f(GetVec().x(), -GetVec().z()) * GetVecFront()) : 0.f;
 			FrontP += (!GetPressFront() && GetPressRear()) ? (atan2f(-GetVec().x(), GetVec().z()) * GetVecRear()) : 0.f;
 			return FrontP;
