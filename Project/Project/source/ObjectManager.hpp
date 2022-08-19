@@ -7,12 +7,36 @@ namespace FPS_n2 {
 			std::vector<std::shared_ptr<ObjectBaseClass>> m_Object;
 			switchs m_ResetP;
 			const MV1* m_MapCol = nullptr;
+			//シングルトン化
+#if true
+
+		private:
+			static inline  ObjectManager* m_Singleton = nullptr;
 		public:
-			void			AddObject(ObjType ModelType, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") {
+			static void Create() {
+				if (m_Singleton == nullptr) {
+					m_Singleton = new ObjectManager();
+				}
+			}
+			static ObjectManager* Instance(void) {
+				if (m_Singleton == nullptr) {
+					m_Singleton = new ObjectManager();
+				}
+				return m_Singleton;
+			}
+		private:
+
+#endif
+		public:
+			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") {
 				switch (ModelType) {
 				case ObjType::Vehicle:
 					this->m_Object.resize(this->m_Object.size() + 1);
 					this->m_Object.back() = std::make_shared<VehicleClass>();
+					break;
+				case ObjType::Ammo:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<AmmoClass>();
 					break;
 				default:
 					break;
@@ -34,6 +58,27 @@ namespace FPS_n2 {
 				this->m_Object.back()->SetMapCol(this->m_MapCol);
 				this->m_Object.back()->Init();
 				this->m_Object.back()->SetFrameNum();
+
+				return &(this->m_Object[this->m_Object.size() - 1]);
+			}
+			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType) {
+				switch (ModelType) {
+				case ObjType::Vehicle:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<VehicleClass>();
+					break;
+				case ObjType::Ammo:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<AmmoClass>();
+					break;
+				default:
+					break;
+				}
+				this->m_Object.back()->SetMapCol(this->m_MapCol);
+				this->m_Object.back()->Init();
+				this->m_Object.back()->SetFrameNum();
+
+				return &(this->m_Object[this->m_Object.size() - 1]);
 			}
 			std::shared_ptr<ObjectBaseClass>* GetObj(ObjType ModelType, int num) {
 				int cnt = 0;
@@ -68,19 +113,22 @@ namespace FPS_n2 {
 				this->m_MapCol = MapCol;
 			}
 			void			ExecuteObject(void) noexcept {
-				for (auto& o : this->m_Object) {
+				for (int i = 0; i < this->m_Object.size(); i++) {
+					auto& o = this->m_Object[i];
 					o->FirstExecute();
 				}
 				//物理アップデート
 				this->m_ResetP.GetInput(CheckHitKeyWithCheck(KEY_INPUT_P) != 0);
 
-				for (auto& o : this->m_Object) {
+				for (int i = 0; i < this->m_Object.size(); i++) {
+					auto& o = this->m_Object[i];
 					if (this->m_ResetP.trigger()) { o->SetResetP(true); }
 					o->ExecuteCommon();
 				}
 			}
 			void			LateExecuteObject(void) noexcept {
-				for (auto& o : this->m_Object) {
+				for (int i = 0; i < this->m_Object.size(); i++) {
+					auto& o = this->m_Object[i];
 					o->LateExecute();
 				}
 			}

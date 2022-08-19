@@ -315,7 +315,6 @@ namespace FPS_n2 {
 		}
 	};
 
-	EffectControl	effectControl;	//エフェクトリソース
 	//エフェクト利用コントロール
 	class Effect_UseControl {
 		std::array<EffectS, int(Effect::effects)> effcs;	/*エフェクト*/
@@ -337,9 +336,10 @@ namespace FPS_n2 {
 		}
 
 		void		Set_LoopEffect(Effect ef_, const VECTOR_ref& pos_t) noexcept {
+			auto* EffectUseControl = EffectControl::Instance();
 			this->effcs[(int)ef_].Stop();
 			this->effcs[(int)ef_].pos = pos_t;
-			this->effcs[(int)ef_].set_loop(effectControl.effsorce[(int)ef_]);
+			this->effcs[(int)ef_].set_loop(EffectUseControl->effsorce[(int)ef_]);
 		}
 		void		Update_LoopEffect(Effect ef_, const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept {
 			this->effcs[(int)ef_].put_loop(pos_t, nomal_t, scale);
@@ -352,16 +352,17 @@ namespace FPS_n2 {
 		void		SetScale_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Scale(value); }
 		//エフェクトの更新
 		void		Update_Effect(void) noexcept {
+			auto* EffectUseControl = EffectControl::Instance();
 			for (auto& t : this->effcs) {
 				const size_t index = &t - &this->effcs.front();
 				if (
 					index != (int)Effect::ef_smoke
 					) {
-					t.put(effectControl.effsorce[index]);
+					t.put(EffectUseControl->effsorce[index]);
 				}
 			}
 			for (auto& t : this->effcs_G) {
-				t.put(effectControl.effsorce[(int)Effect::ef_gndsmoke]);
+				t.put(EffectUseControl->effsorce[(int)Effect::ef_gndsmoke]);
 			}
 		}
 		/*おわり*/

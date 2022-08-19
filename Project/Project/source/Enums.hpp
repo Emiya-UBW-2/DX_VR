@@ -28,6 +28,7 @@ namespace FPS_n2 {
 		};
 		enum class ObjType {
 			Vehicle,
+			Ammo,
 		};
 		enum class SoundEnum {
 			Tank_Shot,

@@ -380,7 +380,6 @@ namespace FPS_n2 {
 			static const int		Vehicle_num = 3;
 		private:
 			//リソース関連
-			ObjectManager			m_Obj;						//モデル
 			BackGroundClass			m_BackGround;				//BG
 			SoundHandle				m_Env;
 			MV1						hit_pic;					//弾痕  
@@ -398,6 +397,7 @@ namespace FPS_n2 {
 			UIClass					m_UIclass;
 			float					m_HPBuf{ 0.f };
 			float					m_ScoreBuf{ 0.f };
+			GraphHandle				hit_Graph;
 			//
 			float					m_CamShake{ 0.f };
 			VECTOR_ref				m_CamShake1;
@@ -436,7 +436,7 @@ namespace FPS_n2 {
 		public:
 			using TEMPSCENE::TEMPSCENE;
 			void			Set(void) noexcept override {
-				SoundPool::Create();
+				auto* ObjMngr = ObjectManager::Instance();
 				Set_EnvLight(
 					VECTOR_ref::vget(Scale_Rate*-300.f, Scale_Rate*-10.f, Scale_Rate*-300.f),
 					VECTOR_ref::vget(Scale_Rate*300.f, Scale_Rate*50.f, Scale_Rate*300.f),
@@ -449,9 +449,10 @@ namespace FPS_n2 {
 				VhehicleData::Set_Pre(&this->vehc_data, "data/tank/");								//戦車
 				for (auto& t : this->vehc_data) { t.Set(); }										//戦車2
 				//
-				this->m_Obj.Init(&this->m_BackGround.GetGroundCol());
+
+				ObjMngr->Init(&this->m_BackGround.GetGroundCol());
 				for (int i = 0; i < Vehicle_num; i++) {
-					this->m_Obj.AddObject(ObjType::Vehicle, ("data/tank/" + this->vehc_data[0].GetName() + "/").c_str());
+					ObjMngr->AddObject(ObjType::Vehicle, ("data/tank/" + this->vehc_data[0].GetName() + "/").c_str());
 				}
 				//ロード
 				SetCreate3DSoundFlag(FALSE);
@@ -462,21 +463,23 @@ namespace FPS_n2 {
 				MV1::Load("data/model/hit/model.mv1", &this->hit_pic);						//弾痕モデル
 				//UI
 				this->m_UIclass.Set();
+
+				hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
 				//
 				TEMPSCENE::Set();
 				//Set
 				//登録
 				for (int i = 0; i < Vehicle_num; i++) {
-					auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
+					auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 					vehicle_Pool.emplace_back(v);
 
 					VECTOR_ref pos_t = VECTOR_ref::vget(0.f + (float)(i)*10.f*Scale_Rate, 0.f, 0.f);
 					auto HitResult = this->m_BackGround.GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
 					if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
-					v->ValueSet(deg2rad(0), deg2rad(90), pos_t, &vehc_data[0], hit_pic, this->m_BackGround.GetBox2Dworld(), &this->vehicle_Pool, i);
+					v->ValueSet(deg2rad(0), deg2rad(90), pos_t, &vehc_data[0], hit_pic, this->m_BackGround.GetBox2Dworld(), &this->vehicle_Pool,(char)i);
 				}
 				{
-					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, 0));//自分
+					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, 0));//自分
 					if (IsRide) {
 						this->m_HPBuf = (float)Vehicle->GetHP();
 						this->m_ScoreBuf = Vehicle->GetScore();
@@ -541,7 +544,7 @@ namespace FPS_n2 {
 			}
 			//
 			bool			Update(void) noexcept override {
-				auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
+				auto* ObjMngr = ObjectManager::Instance();
 				//FirstDoing
 				if (IsFirstLoop) {
 					SetMousePoint(DXDraw::Instance()->disp_x / 2, DXDraw::Instance()->disp_y / 2);
@@ -549,7 +552,7 @@ namespace FPS_n2 {
 				}
 				//Input,AI
 				{
-
+					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
 					float cam_per = ((camera_main.fov / deg2rad(75)) / (is_lens() ? zoom_lens() : 1.f)) / 100.f;
 					float pp_x = 0.f, pp_y = 0.f;
 					bool look_key = false;
@@ -686,7 +689,7 @@ namespace FPS_n2 {
 							this->m_Sequence = SequenceEnum::MainGame;
 						}
 						for (int i = 0; i < Vehicle_num; i++) {
-							auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
+							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 							if (i == GetMyPlayerID()) {
 								v->SetCharaType(CharaTypeID::Mine);
 							}
@@ -709,7 +712,7 @@ namespace FPS_n2 {
 					bool isready = true;
 					if (this->m_Sequence == SequenceEnum::MainGame) {
 						for (int i = 0; i < Vehicle_num; i++) {
-							auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
+							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 							auto tmp = (this->m_IsClient) ? m_ClientCtrl.GetNowServerPlayerData(i) : m_ServerCtrl.GetNowServerPlayerData(i);
 							if (i == GetMyPlayerID()) {
 								if (IsRide) {
@@ -728,7 +731,7 @@ namespace FPS_n2 {
 									v->SetInput(tmp.Input, isready, true);
 									bool override_true = true;
 									for (int j = 0; j < Vehicle_num; j++) {
-										auto& v2 = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, j));
+										auto& v2 = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, j));
 										if (v != v2) {
 											if ((v->GetMove().pos - v2->GetMove().pos).size() <= 10.f*Scale_Rate) {
 												override_true = false;
@@ -753,7 +756,7 @@ namespace FPS_n2 {
 					}
 					else {
 						for (int i = 0; i < Vehicle_num; i++) {
-							auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
+							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 							if (i == GetMyPlayerID()) {
 								if (IsRide) {
 									v->SetInput(MyInput, isready, false);
@@ -771,7 +774,7 @@ namespace FPS_n2 {
 					}
 					//ダメージイベント
 					for (int i = 0; i < Vehicle_num; i++) {
-						auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
+						auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 						for (int j = 0; j < this->m_DamageEvents.size(); j++) {
 							if (v->SetDamageEvent(this->m_DamageEvents[j])) {
 								std::swap(this->m_DamageEvents.back(), this->m_DamageEvents[j]);
@@ -783,6 +786,7 @@ namespace FPS_n2 {
 				}
 				//
 				{
+					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
 					auto StartPos = Vehicle->GetGunMuzzlePos();
 					auto EndPos = StartPos + Vehicle->GetGunMuzzleVec() * 500.f*Scale_Rate;
 					Vehicle->GetMapColNearest(StartPos, &EndPos);
@@ -797,7 +801,7 @@ namespace FPS_n2 {
 						}
 					}
 					for (int i = 0; i < Vehicle_num; i++) {
-						auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
+						auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 						if (i != GetMyPlayerID()) {
 							if (v->RefreshCol(StartPos, EndPos, 10.f*Scale_Rate)) {
 								v->GetColNearestInAllMesh(StartPos, &EndPos);
@@ -808,11 +812,61 @@ namespace FPS_n2 {
 					Vehicle->SetAimingDistance((StartPos - EndPos).size());
 				}
 				//Execute
-				this->m_Obj.ExecuteObject();
+				ObjMngr->ExecuteObject();
+				//弾の更新
+				{
+					int loop = 0;
+					while (true) {
+						auto ammo = ObjMngr->GetObj(ObjType::Ammo, loop);
+						if (ammo != nullptr) {
+							auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
+							if (!a->IsActive() && !a->GetHitPicActive()) {
+								ObjMngr->DelObj(ObjType::Ammo, loop);
+								loop--;
+							}
+						}
+						else {
+							break;
+						}
+						loop++;
+					}
+				}
+				//弾の更新
+				{
+					int loop = 0;
+					while (true) {
+						auto ammo = ObjMngr->GetObj(ObjType::Ammo, loop);
+						if (ammo != nullptr) {
+							auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
+							if (a->IsActive()) {
+								//AmmoClass
+								MV1_COLL_RESULT_POLY ColResGround = a->ColCheckGround();
+								bool is_HitAll = false;
+								auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, a->GetShootedID()));
+								for (int i = 0; i < Vehicle_num; i++) {
+									auto& tgt = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
+									if (i == a->GetShootedID()) { continue; }
+									auto res = tgt->CheckAmmoHit(a.get(), v->GetMove().pos);
+									is_HitAll |= res.first;
+									if (res.second) { break; }
+								}
+								if (ColResGround.HitFlag == TRUE && !is_HitAll) {
+									a->HitGround();
+									v->HitGround(a->GetMove().pos, ColResGround.Normal, a->GetMove().vec);
+								}
+							}
+						}
+						else {
+							break;
+						}
+						loop++;
+					}
+				}
 				this->m_BackGround.GetBox2Dworld()->Step(1.f, 1, 1);//物理更新
-				this->m_Obj.LateExecuteObject();
+				ObjMngr->LateExecuteObject();
 				//視点
 				{
+					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
 					Vehicle->Setcamera(camera_main, fov_base);
 					{
 						MATRIX_ref FreeLook;
@@ -832,6 +886,7 @@ namespace FPS_n2 {
 				this->m_BackGround.Execute();
 				//UIパラメーター
 				{
+					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
 					this->m_UIclass.SetIntParam(1, (int)this->m_ScoreBuf);
 					this->m_ScoreBuf += std::clamp((Vehicle->GetScore() - this->m_ScoreBuf)*100.f, -5.f, 5.f) / FPS;
 
@@ -851,32 +906,40 @@ namespace FPS_n2 {
 				return true;
 			}
 			void			Dispose(void) noexcept override {
+				auto* ObjMngr = ObjectManager::Instance();
+
 				m_ServerCtrl.NetWorkDispose();
 				m_ClientCtrl.NetWorkDispose();
 				Effect_UseControl::Dispose_Effect();
-				this->m_Obj.DisposeObject();
+				ObjMngr->DisposeObject();
 				this->vehicle_Pool.clear();
 			}
 			//
 			void			Depth_Draw(void) noexcept override {
+				//auto* ObjMngr = ObjectManager::Instance();
 				this->m_BackGround.Draw();
-				//this->m_Obj.DrawDepthObject();
+				//ObjMngr->DrawDepthObject();
 			}
 			void			BG_Draw(void) noexcept override {
 				this->m_BackGround.BG_Draw();
 			}
 			void			Shadow_Draw_NearFar(void) noexcept override {
+				//auto* ObjMngr = ObjectManager::Instance();
 				this->m_BackGround.Shadow_Draw_NearFar();
-				//this->m_Obj.DrawObject_Shadow();
+				//ObjMngr->DrawObject_Shadow();
 			}
 			void			Shadow_Draw(void) noexcept override {
+				auto* ObjMngr = ObjectManager::Instance();
+
 				this->m_BackGround.Shadow_Draw();
-				this->m_Obj.DrawObject_Shadow();
+				ObjMngr->DrawObject_Shadow();
 			}
 			void			Main_Draw(void) noexcept override {
+				auto* ObjMngr = ObjectManager::Instance();
+
 				this->m_BackGround.Draw();
-				this->m_Obj.DrawObject();
-				//this->m_Obj.DrawDepthObject();
+				ObjMngr->DrawObject();
+				//ObjMngr->DrawDepthObject();
 				//シェーダー描画用パラメーターセット
 				{
 					Set_is_Blackout(false);
@@ -884,7 +947,7 @@ namespace FPS_n2 {
 				}
 				for (int i = 0; i < Vehicle_num; i++) {
 					if (i == GetMyPlayerID()) { continue; }
-					auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
+					auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 					auto pos = v->Set_MidPos();
 					VECTOR_ref campos = ConvWorldPosToScreenPos(pos.get());
 					if (0.f < campos.z() && campos.z() < 1.f) {
@@ -894,13 +957,16 @@ namespace FPS_n2 {
 				}
 			}
 			void			Main_Draw2(void) noexcept override {
-				this->m_Obj.DrawDepthObject();
+				auto* ObjMngr = ObjectManager::Instance();
+
+				ObjMngr->DrawDepthObject();
 			}
 			void			LAST_Draw(void) noexcept override {
 			}
 			//UI表示
 			void			UI_Draw(void) noexcept  override {
-				auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
+				auto* ObjMngr = ObjectManager::Instance();
+				auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
 
 				auto* Fonts = FontPool::Instance();
 				auto* DrawParts = DXDraw::Instance();
@@ -914,7 +980,7 @@ namespace FPS_n2 {
 				//キャラ
 				for (int i = 0; i < Vehicle_num; i++) {
 					if (i == GetMyPlayerID()) { continue; }
-					auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
+					auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 					auto campos = v->GetCameraPosition();
 					if (0.f < campos.z() && campos.z() < 1.f) {
 						switch (v->GetCharaType()) {
@@ -941,6 +1007,21 @@ namespace FPS_n2 {
 						//リセット
 						campos.z(-1.f);
 						v->SetCameraPosition(campos);
+					}
+				}
+				//
+				{
+					int loop = 0;
+					while (true) {
+						auto ammo = ObjMngr->GetObj(ObjType::Ammo, loop);
+						if (ammo != nullptr) {
+							auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
+							a->Draw_Hit_UI(hit_Graph);
+						}
+						else {
+							break;
+						}
+						loop++;
 					}
 				}
 				//UI
@@ -994,7 +1075,7 @@ namespace FPS_n2 {
 						int div = 5;
 						for (int i = 0; i < Vehicle_num; i++) {
 							if (i == GetMyPlayerID()) { continue; }
-							auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
+							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 							tmpRader = BaseVPer;
 							for (int j = 0; j < div; j++) {
 								auto pos = MATRIX_ref::Vtrans(v->GetMatrix().pos() - BaseBos, MATRIX_ref::RotY(rad))*((1.f / Scale_Rate) * tmpRader);
@@ -1015,7 +1096,7 @@ namespace FPS_n2 {
 
 					for (int i = 0; i < Vehicle_num; i++) {
 						if (i == GetMyPlayerID()) { continue; }
-						auto& v = (std::shared_ptr<VehicleClass>&)(*this->m_Obj.GetObj(ObjType::Vehicle, i));
+						auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 						auto pos = MATRIX_ref::Vtrans(v->GetMatrix().pos() - BaseBos, MATRIX_ref::RotY(rad))*((1.f / Scale_Rate) * this->m_Rader_r);
 						if ((-xs1 < pos.x() && pos.x() < xs2) && (-ys1 < -pos.z() && -pos.z() < ys2)) {
 							switch (v->GetCharaType()) {

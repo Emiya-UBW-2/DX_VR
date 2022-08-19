@@ -14,6 +14,8 @@
     <ClInclude Include="source\Enums.hpp" />
     <ClInclude Include="source\Header.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGround.hpp" />
+    <ClInclude Include="source\MainScene\Object\Ammo.hpp" />
+    <ClInclude Include="source\MainScene\Object\AmmoEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\ObjectBase.hpp" />
     <ClInclude Include="source\MainScene\Object\ObjectBaseEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\Vehicle.hpp" />
@@ -27,6 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\MainScene\Object\Vehicle.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

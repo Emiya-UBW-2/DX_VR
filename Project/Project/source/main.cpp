@@ -14,8 +14,16 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	OptionParts->Set_useVR(DXDraw::Instance()->use_vr);
 	auto scene = std::make_unique<FPS_n2::Sceneclass::SceneControl>();															//シーンコントロール
 	PostPassEffect::Create();																									//シェーダー
+
+	SoundPool::Create();
+	FPS_n2::Sceneclass::ObjectManager::Create();
+
 	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();														//シーン
-	FPS_n2::effectControl.Init();																								//エフェクト
+	EffectControl::Create();
+
+	auto* EffectUseControl = EffectControl::Instance();
+
+	EffectUseControl->Init();																									//エフェクト
 	MAINLOOPscene->Set_Next(MAINLOOPscene, FPS_n2::Sceneclass::scenes::MAIN_LOOP);												//遷移先指定
 	scene->ChangeScene(FPS_n2::Sceneclass::scenes::MAIN_LOOP, (std::shared_ptr<FPS_n2::Sceneclass::TEMPSCENE>&)MAINLOOPscene);	//開始時遷移先
 	do {
@@ -23,13 +31,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		while (true) {
 			if (scene->Execute()) { break; }																					//更新処理
 			if (!scene->isPause()) {
-				FPS_n2::effectControl.Calc();																					//エフェクシアのアプデを60FPS相当に変更
+				EffectUseControl->Calc();																						//エフェクシアのアプデを60FPS相当に変更
 			}
 			scene->Draw();																										//描画
 			scene->Vsync();																										//FPS待機
 		}
 		scene->NextScene();																										//終了処理
 	} while (!scene->isEnd());
-	FPS_n2::effectControl.Dispose();
+	EffectUseControl->Dispose();
 	return 0;
 }

@@ -258,7 +258,7 @@ namespace FPS_n2 {
 							});
 						}
 						);
-						}, tmp_cam, effectControl.Update_effect_f);
+						}, tmp_cam, EffectControl::Instance()->Update_effect_f);
 						//ÅI•`‰æ
 						PostPassParts->Set_MAIN_Draw();
 					}

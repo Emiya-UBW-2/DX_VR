@@ -8,6 +8,7 @@ namespace FPS_n2 {
 			bool										m_Use_RealTimePhysics{ false };
 			MV1											m_obj_REALTIME;
 			MV1											m_obj_LOADCALC;
+			bool										m_objActive{ false };							//
 
 			MV1											m_col;
 			bool										m_ColActive{ false };							//
@@ -51,6 +52,7 @@ namespace FPS_n2 {
 			const auto&		GetCameraPosition(void) const noexcept { return this->m_CameraPosition; }
 			const auto&		GetCameraSize(void) const noexcept { return this->m_CameraSize; }
 			const auto&		GetMove(void) const noexcept { return this->m_move; }
+			const auto&		IsActive(void) const noexcept { return this->m_IsActive; }
 			//
 			void			SetAnimOnce(int ID, float speed) {
 				this->GetObj().get_anime(ID).time += 30.f / FPS * speed;
@@ -169,6 +171,7 @@ namespace FPS_n2 {
 
 				}
 				this->m_IsBaseModel = true;
+				this->m_objActive = true;
 			}
 			void			CopyModel(std::shared_ptr<ObjectBaseClass>& pBase) noexcept {
 				this->m_FilePath = pBase->m_FilePath;
@@ -194,73 +197,75 @@ namespace FPS_n2 {
 			}
 			//
 			void			SetFrameNum(void) noexcept {
-				int i = 0;
-				bool isEnd = false;
-				auto fNum = this->GetObj().frame_num();
-				for (int f = 0; f < fNum; f++) {
-					std::string FName = this->GetObj().frame_name(f);
-					bool compare = false;
-					switch (this->m_objType) {
-					/*
-					case ObjType::Human:
-						compare = (FName == CharaFrameName[i]);
-						break;
-					//*/
-					case ObjType::Vehicle:
-						break;
-					default:
-						break;
-					}
+				if (this->m_objActive) {
+					int i = 0;
+					bool isEnd = false;
+					auto fNum = this->GetObj().frame_num();
+					for (int f = 0; f < fNum; f++) {
+						std::string FName = this->GetObj().frame_name(f);
+						bool compare = false;
+						switch (this->m_objType) {
+							/*
+							case ObjType::Human:
+								compare = (FName == CharaFrameName[i]);
+								break;
+							//*/
+						case ObjType::Vehicle:
+							break;
+						default:
+							break;
+						}
 
-					if (compare) {
-						this->m_Frames.resize(this->m_Frames.size() + 1);
-						this->m_Frames.back().first = f;
-						this->m_Frames.back().second = MATRIX_ref::Mtrans(this->GetObj().GetFrameLocalMatrix(this->m_Frames.back().first).pos());
-						i++;
-						f = 0;
-					}
-					switch (this->m_objType) {
-					/*
-					case ObjType::Human://human
-						if (i == (int)CharaFrame::Max) { isEnd = true; }
-						break;
-					//*/
-					case ObjType::Vehicle:
-						isEnd = true;
-						break;
-					default:
-						isEnd = true;
-						break;
-					}
-					if (f == fNum - 1) {
-						if (!isEnd) {
+						if (compare) {
 							this->m_Frames.resize(this->m_Frames.size() + 1);
-							this->m_Frames.back().first = -1;
+							this->m_Frames.back().first = f;
+							this->m_Frames.back().second = MATRIX_ref::Mtrans(this->GetObj().GetFrameLocalMatrix(this->m_Frames.back().first).pos());
 							i++;
 							f = 0;
 						}
-					}
-					if (isEnd) {
-						break;
-					}
-				}
-				switch (this->m_objType) {
-				/*
-				case ObjType::Human://human
-					this->m_Shapes.resize((int)CharaShape::Max);
-					for (int j = 1; j < (int)CharaShape::Max; j++) {
-						auto s = MV1SearchShape(this->GetObj().get(), CharaShapeName[j]);
-						if (s >= 0) {
-							this->m_Shapes[j].first = s;
-							this->m_Shapes[j].second = 0.f;
+						switch (this->m_objType) {
+							/*
+							case ObjType::Human://human
+								if (i == (int)CharaFrame::Max) { isEnd = true; }
+								break;
+							//*/
+						case ObjType::Vehicle:
+							isEnd = true;
+							break;
+						default:
+							isEnd = true;
+							break;
+						}
+						if (f == fNum - 1) {
+							if (!isEnd) {
+								this->m_Frames.resize(this->m_Frames.size() + 1);
+								this->m_Frames.back().first = -1;
+								i++;
+								f = 0;
+							}
+						}
+						if (isEnd) {
+							break;
 						}
 					}
-					break;
-				//*/
-				case ObjType::Vehicle:
-					break;
-				default:
-					break;
+					switch (this->m_objType) {
+						/*
+						case ObjType::Human://human
+							this->m_Shapes.resize((int)CharaShape::Max);
+							for (int j = 1; j < (int)CharaShape::Max; j++) {
+								auto s = MV1SearchShape(this->GetObj().get(), CharaShapeName[j]);
+								if (s >= 0) {
+									this->m_Shapes[j].first = s;
+									this->m_Shapes[j].second = 0.f;
+								}
+							}
+							break;
+						//*/
+					case ObjType::Vehicle:
+						break;
+					default:
+						break;
+					}
 				}
 			}
 			//
@@ -313,7 +318,7 @@ namespace FPS_n2 {
 					this->GetObj().DrawModel();
 				}
 			}
-			void			CheckDraw(void) noexcept {
+			virtual void	CheckDraw(void) noexcept {
 				this->m_IsDraw = false;
 				this->m_DistanceToCam = (this->GetObj().GetMatrix().pos() - GetCameraPosition()).size();
 				if (CheckCameraViewClip_Box(

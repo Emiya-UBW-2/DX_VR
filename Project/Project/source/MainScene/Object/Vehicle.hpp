@@ -12,148 +12,7 @@ namespace FPS_n2 {
 		}
 		static const size_t max_bullet{ 64 };
 		//静的弾痕
-		HIT_PASSIVE hit_obj_p;
-		//弾データ
-		class AmmoData {
-		private:
-			std::string		m_name;
-			std::string		m_path;
-			float			m_caliber{ 0.f };
-			float			m_speed{ 100.f };				//弾速
-			float			m_penetration{ 10.f };			//貫通
-			int				m_damage{ 10 };					//ダメージ
-		public://getter
-			const auto&		GetName(void) const noexcept { return this->m_name; }
-			const auto&		GetPath(void) const noexcept { return this->m_path; }
-			const auto&		GetCaliber(void) const noexcept { return this->m_caliber; }
-			const auto&		GetSpeed(void) const noexcept { return this->m_speed; }
-			const auto&		GetPenetration(void) const noexcept { return this->m_penetration; }
-			const auto&		GetDamage(void) const noexcept { return this->m_damage; }
-		public:
-			void			Set(std::string path_, std::string named) {
-				this->m_name = named;
-				this->m_path = path_ + named;
-				int mdata = FileRead_open((this->m_path + "/data.txt").c_str(), FALSE);
-				this->m_caliber = getparams::_float(mdata) * 0.001f;//口径
-				this->m_speed = getparams::_float(mdata);	//弾速
-				this->m_penetration = getparams::_float(mdata);	//貫通
-				this->m_damage = getparams::_int(mdata);//ダメージ
-				FileRead_close(mdata);
-			}
-		};
-		class AmmoObj {
-		private:
-			bool			m_IsActive{ false };
-			bool			m_IsDraw{ false };
-			bool			m_IsHit{ false };
-			float			m_HitTimer{ 0.f };
-			int				m_RicochetCnt{ 0 };
-			AmmoData*		m_AmmoData{ nullptr };
-			moves			m_move;
-			float			m_speed{ 0.f };
-			float			m_penetration{ 0.f };
-			const MV1*		m_MapCol{ nullptr };
-			float			Hit_alpha{ 0.f };
-			int				Hit_window_x{ 0 };
-			int				Hit_window_y{ 0 };
-		public://getter
-			const auto&		IsActive(void) const noexcept { return this->m_IsActive; }
-			const auto&		GetMove(void) const noexcept { return this->m_move; }
-			const auto&		GetDamage(void) const noexcept { return this->m_AmmoData->GetDamage(); }
-			const auto&		GetCaliberSize(void) const noexcept { return this->m_AmmoData->GetCaliber(); }
-			const auto		GetEffectSize(void) const noexcept { return ((this->m_AmmoData->GetCaliber() >= 0.020f) ? this->m_AmmoData->GetCaliber() : 0.025f) / 0.1f; }
-		public:
-			void			Put(AmmoData* pAmmoData, const VECTOR_ref& pPos, const VECTOR_ref& pVec) noexcept {
-				this->m_IsActive = true;
-				this->m_IsDraw = true;
-				this->m_RicochetCnt = 0;
-				this->m_IsHit = false;
-				this->m_HitTimer = 0.f;
-				this->m_move.pos = pPos;
-				this->m_move.repos = this->m_move.pos;
-				this->m_move.vec = pVec;
-				this->m_AmmoData = pAmmoData;
-				this->m_speed = this->m_AmmoData->GetSpeed() * Scale_Rate;
-				this->m_penetration = this->m_AmmoData->GetPenetration();
-			}
-			void			Init(const MV1* pMapPtr) noexcept {
-				this->m_IsActive = false;
-				this->m_IsDraw = false;
-				this->m_MapCol = pMapPtr;
-			}
-			void			Execute(void) noexcept {
-				if (this->m_IsHit) {
-					this->m_IsHit = false;
-					this->m_HitTimer = 0.25f;
-				}
-				this->m_HitTimer = std::clamp(this->m_HitTimer - 1.f / FPS, 0.f, 0.25f);
-				if (this->Hit_alpha > 0.f) {
-					Easing(&this->Hit_alpha, (this->m_HitTimer > 0.f) ? 2.f : 0.f, 0.95f, EasingType::OutExpo);
-					if (this->Hit_alpha <= 0.01f) {
-						this->Hit_alpha = 0;
-					}
-				}
-				if (this->m_IsActive) {
-					//移動確定
-					this->m_move.SetPos(this->m_move.pos + (this->m_move.vec * (this->m_speed / FPS)));
-					//消す(スピードが0以下、貫通が0以下、5回反射する)
-					if (this->m_speed <= 0.f || this->m_penetration <= 0.f || this->m_RicochetCnt > 5) {
-						this->m_IsActive = false;
-					}
-					//this->m_speed -= 5.f / FPS;
-					//this->m_penetration -= 5.f / FPS;
-				}
-			}
-			void			Draw(void) noexcept {
-				if (this->m_IsHit) {
-					auto p = ConvWorldPosToScreenPos(this->m_move.pos.get());
-					if (p.z >= 0.f && p.z <= 1.f) {
-						this->Hit_alpha = 1.f;
-						this->Hit_window_x = int(p.x);
-						this->Hit_window_y = int(p.y);
-					}
-				}
-				if (this->m_IsDraw) {
-					if (!this->m_IsActive) {
-						this->m_IsDraw = false;
-					}
-					DrawCapsule_3D(this->m_move.pos, this->m_move.repos, ((this->m_AmmoData->GetCaliber() - 0.00762f) * 0.1f + 0.00762f)*Scale_Rate, GetColor(255, 255, 172), GetColor(255, 255, 255));
-				}
-			}
-			void			Draw_Hit_UI(GraphHandle& Hit_Graph) noexcept {
-				if (this->Hit_alpha >= 10.f / 255.f) {
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, int(255.f * this->Hit_alpha));
-					Hit_Graph.DrawRotaGraph(this->Hit_window_x, this->Hit_window_y, (float)y_r(this->Hit_alpha * 0.5f * 100.0f) / 100.f, 0.f, true);
-				}
-			}
-			void			Dispose(void) noexcept { this->m_MapCol = nullptr; }
-		public:
-			const auto		ColCheckGround(void) noexcept {
-				MV1_COLL_RESULT_POLY ColResGround; ColResGround.HitFlag = FALSE;
-				if (this->m_IsActive) {
-					ColResGround = this->m_MapCol->CollCheck_Line(this->m_move.repos, this->m_move.pos);
-					if (ColResGround.HitFlag == TRUE) {
-						this->m_move.pos = ColResGround.HitPosition;
-					}
-				}
-				return ColResGround;
-			}
-			const auto		PenetrationCheck(float pArmer, const VECTOR_ref& normal) const noexcept { return (this->m_penetration > (pArmer * (1.0f / std::abs(this->m_move.vec.Norm().dot(normal))))); }
-			void			Penetrate(void) noexcept {
-				this->m_IsActive = false;
-				this->m_IsHit = true;
-			}
-			void			Ricochet(const VECTOR_ref& position, const VECTOR_ref& normal) noexcept {
-				this->m_IsHit = true;
-				//this->m_penetration *= 0.8f;
-				this->m_RicochetCnt++;
-				this->m_move.vec = (this->m_move.vec + normal * ((this->m_move.vec.dot(normal)) * -2.0f)).Norm();
-				this->m_move.pos = this->m_move.vec * (0.1f) + position;
-			}
-			void			HitGround(void) noexcept {
-				this->m_IsActive = false;
-			}
-		};
+		//HIT_PASSIVE hit_obj_p;
 		//戦車砲データ
 		class gun_frame {
 			int						m_Ammo_Cap = 0;
@@ -415,8 +274,6 @@ namespace FPS_n2 {
 		//
 		class Guns {
 		private:
-			std::array<AmmoObj, max_bullet>	bullet;					/*確保する弾*/
-			size_t							use_bullet{ 0 };		/*確保する弾*/
 			float							loadcnt{ 0 };			/*装てんカウンター*/
 			bool							reload_se_f{ true };
 			float							fired{ 0.f };			/*駐退*/
@@ -425,14 +282,12 @@ namespace FPS_n2 {
 			gun_frame						gun_info;				/**/
 			std::vector<AmmoData>			Spec;					/**/
 			VECTOR_ref						m_ShotradAdd;			//
-			VECTOR_ref						m_MuzzlePos;
-			VECTOR_ref						m_MuzzleVec;
 		public:
 			//getter
-			auto&		GetBullet(void) noexcept { return bullet; }
 			const auto&	Getrounds(void) const noexcept { return rounds; }
 			const auto&	Getloadtime(void) const noexcept { return loadcnt; }
-			const auto&	GetCaliberSize(void) const noexcept { return this->Spec[0].GetCaliber(); }
+			const auto&	GetAmmoSpec(void) const noexcept { return this->Spec[0]; }
+			const auto&	GetCaliberSize(void) const noexcept { return GetAmmoSpec().GetCaliber(); }
 			const auto&	GetGunTrunnionFrameID(void) const noexcept { return this->gun_info.Get_frame(1).first; }
 			const auto&	GetGunMuzzleFrameID(void) const noexcept { return this->gun_info.Get_frame(2).first; }
 			const auto&	GetShotSound(void) const noexcept { return this->gun_info.GetShotSound(); }
@@ -463,22 +318,17 @@ namespace FPS_n2 {
 					obj_body_t->SetFrameLocalMatrix(id.first, MATRIX_ref::Mtrans(VECTOR_ref::front() * (this->fired * 0.5f * Scale_Rate)) * MATRIX_ref::Mtrans(id.second));
 					col_body_t->SetFrameLocalMatrix(id.first, MATRIX_ref::Mtrans(VECTOR_ref::front() * (this->fired * 0.5f * Scale_Rate)) * MATRIX_ref::Mtrans(id.second));
 				}
-				this->m_MuzzlePos = obj_body_t->frame(GetGunMuzzleFrameID());
-				this->m_MuzzleVec = obj_body_t->GetFrameLocalWorldMatrix(GetGunTrunnionFrameID()).zvec() * -1.f;
-				Easing(&this->m_ShotradAdd, MATRIX_ref::RotY(yrad).xvec() * -1.f * deg2rad(-this->firereact * this->Spec[0].GetCaliber() * 50.f), 0.85f, EasingType::OutExpo);
+				Easing(&this->m_ShotradAdd, MATRIX_ref::RotY(yrad).xvec() * -1.f * deg2rad(-this->firereact * GetAmmoSpec().GetCaliber() * 50.f), 0.85f, EasingType::OutExpo);
 			}
 		public: //コンストラクタ、デストラクタ
 			Guns(void) noexcept { }
 			Guns(const Guns&) noexcept { }
 		public:
-			void		Init(const gun_frame& resorce, const MV1* pMapPtr) noexcept {
+			void		Init(const gun_frame& resorce) noexcept {
 				this->gun_info = resorce;
 				this->rounds = this->gun_info.Get_Ammo_Cap();
 				//使用砲弾
 				this->Spec = this->gun_info.Get_Spec();
-				for (auto& a : this->bullet) {
-					a.Init(pMapPtr);
-				}
 			}
 			//銃演算
 			bool		Execute(bool key, bool playSound) noexcept {
@@ -489,11 +339,7 @@ namespace FPS_n2 {
 					this->loadcnt = this->gun_info.Get_load_time();
 					this->rounds = std::max<int>(this->rounds - 1, 0);
 					this->fired = 1.f;
-					this->firereact = std::clamp(this->firereact + this->Spec[0].GetCaliber() * 10.f, 0.f, 3.f);
-
-					this->bullet[this->use_bullet].Put(&this->Spec[0], this->m_MuzzlePos, this->m_MuzzleVec);
-					++this->use_bullet %= this->bullet.size();
-
+					this->firereact = std::clamp(this->firereact + GetAmmoSpec().GetCaliber() * 10.f, 0.f, 3.f);
 					this->reload_se_f = true;
 					if (playSound) { SE->Get((int)SoundEnum::Tank_Eject).Play(GetEjectSound()); }
 				}
@@ -506,23 +352,8 @@ namespace FPS_n2 {
 				this->firereact = std::max(this->firereact - 1.f / FPS, 0.f);
 				return isshot;
 			}
-			/*弾道描画*/
-			void		Draw_ammo(void) noexcept {
-				SetUseLighting(FALSE);
-				for (auto& a : this->bullet) {
-					a.Draw();
-				}
-				SetUseLighting(TRUE);
-			}
-			/* UI向けにヒット部分を表示*/
-			void		Draw_Hit_UI(GraphHandle& Hit_Graph) noexcept {
-				for (auto& a : this->bullet) { a.Draw_Hit_UI(Hit_Graph); }
-			}
 			/*おわり*/
 			void		Dispose(void) noexcept {
-				for (auto& a : this->bullet) {
-					a.Dispose();
-				}
 				this->fired = 0.f;
 				this->loadcnt = 0.f;
 				this->reload_se_f = true;
@@ -730,7 +561,7 @@ namespace FPS_n2 {
 						w2.resize(w.size());
 						for (auto& t : w2) {
 							t.frame = w[&t - &w2.front()];
-							t.gndsmkeffcs.set_loop(effectControl.effsorce.back());
+							t.gndsmkeffcs.set_loop(EffectControl::Instance()->effsorce.back());
 							t.gndsmkeffcs.put_loop(VECTOR_ref::vget(0, -1, 0), VECTOR_ref::vget(0, 0, 1), 0.1f*Scale_Rate);
 							t.gndsmksize = 0.1f;
 						}
@@ -969,7 +800,7 @@ namespace FPS_n2 {
 				//砲
 				this->m_Gun.resize(this->m_VecData->Get_gunframe().size());
 				for (auto& g : this->m_Gun) {
-					g.Init(this->m_VecData->Get_gunframe()[&g - &this->m_Gun.front()], this->m_MapCol);
+					g.Init(this->m_VecData->Get_gunframe()[&g - &this->m_Gun.front()]);
 				}
 				//ヒットポイント
 				this->m_DamageControl.Init((int)this->m_col.mesh_num(), this->m_VecData->GetMaxHP());
@@ -1049,7 +880,7 @@ namespace FPS_n2 {
 			}
 		private:
 			//被弾チェック
-			const auto		CheckAmmoHited(const AmmoObj& pAmmo) {
+			const auto		CheckAmmoHited(const AmmoClass& pAmmo) {
 				auto HitCheck_Tank = [&](int m, const moves& ray) { return this->m_HitControl.HitCheck(m, ray.repos, GetColLine(ray.repos, ray.pos, m)); };
 				bool is_Hit = false;
 				for (auto& m : this->m_VecData->Get_module_mesh()) { is_Hit |= HitCheck_Tank(m, pAmmo.GetMove()); }//モジュール
@@ -1073,7 +904,7 @@ namespace FPS_n2 {
 				return is_Hit;
 			}
 			//被弾処理
-			const auto		CalcAmmoHited(AmmoObj* pAmmo, const VECTOR_ref& pShooterPos) {
+			const auto		CalcAmmoHited(AmmoClass* pAmmo, const VECTOR_ref& pShooterPos) {
 				auto SE = SoundPool::Instance();
 				this->m_HitControl.HitSort();				//当たり判定を近い順にソート
 				bool isDamage = false;
@@ -1135,7 +966,7 @@ namespace FPS_n2 {
 				return isDamage;
 			}
 		public:
-			const auto		CheckAmmoHit(AmmoObj* pAmmo, const VECTOR_ref& pShooterPos) {
+			const auto		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& pShooterPos) {
 				std::pair<bool, bool> isDamaged{ false,false };
 				if (this->RefreshCol(pAmmo->GetMove().repos, pAmmo->GetMove().pos, 10.0f*Scale_Rate)) {
 					if (this->CheckAmmoHited(*pAmmo)) {									//とりあえず当たったかどうか探す
@@ -1146,6 +977,10 @@ namespace FPS_n2 {
 					}
 				}
 				return isDamaged;
+			}
+			void			HitGround(const VECTOR_ref& pPos, const VECTOR_ref& pNorm, const VECTOR_ref& pVec) noexcept {
+				Effect_UseControl::Set_FootEffect(pPos, pNorm, 0.05f / 0.1f * Scale_Rate);
+				//hit_obj_p.Set(a.GetCaliberSize() * Scale_Rate, pPos, pNorm, pVec);	//弾痕
 			}
 		private: //更新関連
 			//以前の状態保持														//
@@ -1218,118 +1053,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			//移動操作																//
-			void			ExecuteMove(void) noexcept {
-				auto SE = SoundPool::Instance();
-				bool isfloat = this->m_VecData->GetIsFloat() && (this->m_move.pos.y() == -this->m_VecData->GetDownInWater());
-				//傾きの取得
-				{
-					const auto bNormal = (isfloat) ? VECTOR_ref::up() : this->m_BodyNormal;
-					float yradBody = 0.f;
-					if (this->m_PosBufOverRideFlag) {
-						yradBody = this->m_yRadOverRide;
-					}
-					else {
-						auto pp = (this->m_move.mat * MATRIX_ref::RotVec2(VECTOR_ref::up(), bNormal).Inverse()).zvec() * -1.f;
-						yradBody = atan2f(pp.x(), pp.z());
-					}
-					this->m_move.mat = MATRIX_ref::Axis1_YZ(bNormal, (MATRIX_ref::RotY(yradBody)*MATRIX_ref::RotVec2(VECTOR_ref::up(), bNormal)).zvec() * -1.f);
-					if (this->m_PosBufOverRideFlag) {
-						//一旦その場で地形判定
-						this->m_move.pos = this->m_PosBufOverRide;
-						GetObj().SetMatrix(this->m_move.MatIn());
-					}
-					Easing(&this->m_BodyNormal, ((GetObj().frame(this->m_VecData->Get_square(0)) - GetObj().frame(this->m_VecData->Get_square(3))).cross(GetObj().frame(this->m_VecData->Get_square(1)) - GetObj().frame(this->m_VecData->Get_square(2)))).Norm(), 0.8f, EasingType::OutExpo);
-				}
-				//地面判定
-				{
-					auto pos_ytmp = this->m_move.pos.y();
-					float hight_t = 0.f;
-					int cnt_t = 0;
-					//履帯
-					for (auto& f : this->m_b2Foot) {
-						f.FirstExecute(&GetObj(), this->m_MapCol);
-						for (const auto& t : f.Getb2downsideframe()) {
-							if (t.colres.HitFlag == TRUE) {
-								hight_t += t.colres.HitPosition.y;
-								cnt_t++;
-							}
-						}
-					}
-					int cnt_sq = cnt_t;
-					for (const auto& s : this->m_VecData->Get_square()) {
-						auto p_t = GetObj().frame(s);
-						auto ColResGround = this->m_MapCol->CollCheck_Line(p_t + (VECTOR_ref::up() * 3.f*Scale_Rate), p_t + (VECTOR_ref::up() * -0.5f*Scale_Rate));
-						if (ColResGround.HitFlag == TRUE) {
-							hight_t += ColResGround.HitPosition.y;
-							cnt_t++;
-						}
-					}
-					if (cnt_t > 0) {
-						Easing(&pos_ytmp, (hight_t / cnt_t), 0.9f, EasingType::OutExpo);
-					}
-					this->m_move.pos.y(pos_ytmp);
-					//地面or水面にいるかどうか
-					if ((cnt_t > 0) || isfloat) {
-						//前進後退
-						{
-							const auto spdold = this->m_speed_add + this->m_speed_sub;
-							this->m_speed_add = (this->m_key[2]) ? std::min(this->m_speed_add + (0.15f / 3.6f) * (60.f / FPS), (this->m_VecData->GetMaxFrontSpeed() / 3.6f)) : std::max(this->m_speed_add - (0.7f / 3.6f) * (60.f / FPS), 0.f);
-							this->m_speed_sub = (this->m_key[3]) ? std::max(this->m_speed_sub - (0.15f / 3.6f) * (60.f / FPS), (this->m_VecData->GetMaxBackSpeed() / 3.6f)) : std::min(this->m_speed_sub + (0.7f / 3.6f) * (60.f / FPS), 0.f);
-							this->m_speed = (spdold + ((this->m_speed_add + this->m_speed_sub) - spdold) * 0.1f) / FPS;
-							auto vec = this->m_move.mat.zvec() * -1.f * (this->m_speed*Scale_Rate);
-							this->m_move.vec.x(vec.x());
-							if ((cnt_t - cnt_sq) >= 3) {
-								this->m_move.vec.y(vec.y());
-							}
-							else {
-								this->m_move.vec.yadd(M_GR / (FPS * FPS));
-							}
-							this->m_move.vec.z(vec.z());
-						}
-						//旋回
-						{
-							const auto radold = this->m_radAdd;
-							this->m_yradadd_left = (this->m_key[4]) ? std::max(this->m_yradadd_left - deg2rad(3.5f * (60.f / FPS)), deg2rad(-this->m_VecData->GetMaxBodyRad())) : std::min(this->m_yradadd_left + deg2rad(2.1f * (60.f / FPS)), 0.f);
-							this->m_yradadd_right = (this->m_key[5]) ? std::min(this->m_yradadd_right + deg2rad(3.5f * (60.f / FPS)), deg2rad(this->m_VecData->GetMaxBodyRad())) : std::max(this->m_yradadd_right - deg2rad(2.1f * (60.f / FPS)), 0.f);
-							this->m_radAdd.y((this->m_yradadd_left + this->m_yradadd_right) / FPS);
-							//慣性
-							this->m_radAdd.x(deg2rad(-(this->m_speed / (60.f / FPS)) / (0.1f / 3.6f) * 50.f));
-							this->m_radAdd.z(deg2rad(-this->m_radAdd.y() / (deg2rad(5.f) / FPS) * 5.f));
-							Easing(&this->m_Tilt, VECTOR_ref::vget(std::clamp(this->m_radAdd.x() - radold.x(), deg2rad(-30.f), deg2rad(30.f)), 0.f, std::clamp(this->m_radAdd.z() - radold.z(), deg2rad(-15.f), deg2rad(15.f))), 0.95f, EasingType::OutExpo);
-							this->m_move.mat *= MATRIX_ref::RotAxis(this->m_move.mat.xvec(), -this->m_Tilt.x()) * MATRIX_ref::RotAxis(this->m_move.mat.zvec(), this->m_Tilt.z());
-						}
-						//
-					}
-					else {
-						this->m_move.vec.yadd(M_GR / (FPS * FPS));
-					}
-				}
-				//射撃反動
-				for (auto& cg : this->m_Gun) {
-					cg.FireReaction(&this->m_move.mat);
-					//射撃
-					if (cg.Execute(this->m_key[(&cg == &this->m_Gun.front()) ? 0 : 1], this->m_CharaType == CharaTypeID::Mine)) {
-						SE->Get((int)SoundEnum::Tank_Shot).Play_3D(cg.GetShotSound(), this->m_move.pos, 250.f*Scale_Rate);							//サウンド
-						Effect_UseControl::Set_Effect(Effect::ef_fire, GetObj().frame(cg.GetGunMuzzleFrameID()), GetObj().GetFrameLocalWorldMatrix(cg.GetGunTrunnionFrameID()).zvec() * -1.f, cg.GetCaliberSize() / 0.1f * Scale_Rate);				//銃発砲エフェクトのセット
-					}
-				}
-				//移動
-				if (this->m_PosBufOverRideFlag) {
-					this->m_move.pos = this->m_PosBufOverRide;
-					this->m_move.vec = this->m_VecBufOverRide;
-				}
-				else {
-					this->m_move.pos += this->m_move.vec;
-					//浮く
-					if (this->m_VecData->GetIsFloat()) {
-						this->m_move.pos.y(std::max(this->m_move.pos.y(), -this->m_VecData->GetDownInWater()));
-					}
-				}
-				//転輪
-				this->m_wheel_Left += (-(this->m_speed * 2.f - this->m_radAdd.y() * 5.f));
-				this->m_wheel_Right += (-(this->m_speed * 2.f + this->m_radAdd.y() * 5.f));
-			}
+			void			ExecuteMove(void) noexcept;			//移動操作
 			//SetMat指示更新														//
 			void			ExecuteMatrix(void) noexcept {
 				auto OldPos = this->m_move.pos;
@@ -1388,29 +1112,6 @@ namespace FPS_n2 {
 				else {
 					this->m_b2mine.Update(this->m_move.vec, this->m_radAdd.y());
 				}
-				//弾の更新
-				for (auto& cg : this->m_Gun) {
-					for (auto& a : cg.GetBullet()) {
-						a.Execute();
-						if (a.IsActive()) {
-							//AmmoObj
-							MV1_COLL_RESULT_POLY ColResGround = a.ColCheckGround();
-							bool is_HitAll = false;
-							for (auto& tgt : *this->m_ALL_v) {
-								if (tgt->m_MyID == this->m_MyID) { continue; }
-								auto res = tgt->CheckAmmoHit(&a, this->m_move.pos);
-								is_HitAll |= res.first;
-								if (res.second) { break; }
-							}
-							if (ColResGround.HitFlag == TRUE && !is_HitAll) {
-								a.HitGround();
-								Effect_UseControl::Set_FootEffect(a.GetMove().pos, ColResGround.Normal, 0.05f / 0.1f * Scale_Rate);
-								hit_obj_p.Set(a.GetCaliberSize() * Scale_Rate, a.GetMove().pos, ColResGround.Normal, a.GetMove().vec);	//弾痕
-							}
-						}
-					}
-
-				}
 				this->m_PosBufOverRideFlag = false;
 			}
 			void			LateExecute(void) noexcept override {
@@ -1443,15 +1144,6 @@ namespace FPS_n2 {
 						DrawSphere_3D(EndPos, std::clamp(powf((EndPos - GetCameraPosition()).size() + 0.5f, 2) * 0.2f + 8.f, 0.1f, 5.f)*laser_siz*Scale_Rate, GetColor(255, 0, 0), GetColor(255, 0, 0));
 					}
 					SetUseLighting(TRUE);
-				}
-				//
-				for (auto& cg : this->m_Gun) {
-					cg.Draw_ammo();
-				}
-			}
-			void			Draw_Hit_UI(GraphHandle& hit_Graph) noexcept {
-				for (auto& cg : this->m_Gun) {
-					cg.Draw_Hit_UI(hit_Graph);
 				}
 			}
 			void			Dispose(void) noexcept override {
