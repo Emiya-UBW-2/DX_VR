@@ -38,16 +38,15 @@ namespace FPS_n2 {
 			const AmmoData*	m_AmmoData{ nullptr };
 			float			m_speed{ 0.f };
 			float			m_penetration{ 0.f };
-			float			Hit_alpha{ 0.f };
-			int				Hit_window_x{ 0 };
-			int				Hit_window_y{ 0 };
+			float			m_Hit_alpha{ 0.f };
+			VECTOR_ref		m_Hit_DispPos;
 			int				m_ShootCheraID{ -1 };
 		public://getter
 			const auto&		GetShootedID(void) const noexcept { return this->m_ShootCheraID; }
 			const auto&		GetDamage(void) const noexcept { return this->m_AmmoData->GetDamage(); }
 			const auto&		GetCaliberSize(void) const noexcept { return this->m_AmmoData->GetCaliber(); }
 			const auto		GetEffectSize(void) const noexcept { return ((this->m_AmmoData->GetCaliber() >= 0.020f) ? this->m_AmmoData->GetCaliber() : 0.025f) / 0.1f; }
-			const auto		GetHitPicActive(void) const noexcept { return this->Hit_alpha > 0.f; }
+			const auto		GetHitPicActive(void) const noexcept { return this->m_Hit_alpha > 0.f; }
 		public:
 			void			Put(const AmmoData* pAmmoData, const VECTOR_ref& pPos, const VECTOR_ref& pVec, int pMyID) noexcept {
 				this->m_IsActive = true;
@@ -64,9 +63,9 @@ namespace FPS_n2 {
 				this->m_ShootCheraID = pMyID;
 			}
 			void			Draw_Hit_UI(GraphHandle& Hit_Graph) noexcept {
-				if (this->Hit_alpha >= 10.f / 255.f) {
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, int(255.f * this->Hit_alpha));
-					Hit_Graph.DrawRotaGraph(this->Hit_window_x, this->Hit_window_y, (float)y_r(this->Hit_alpha * 0.5f * 100.0f) / 100.f, 0.f, true);
+				if ((this->m_Hit_alpha >= 10.f / 255.f) && (this->m_Hit_DispPos.z() >= 0.f && this->m_Hit_DispPos.z() <= 1.f)) {
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, int(255.f * this->m_Hit_alpha));
+					Hit_Graph.DrawRotaGraph((int)this->m_Hit_DispPos.x(), (int)this->m_Hit_DispPos.y(), (float)y_r(this->m_Hit_alpha * 0.5f * 100.0f) / 100.f, 0.f, true);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				}
 			}
@@ -109,13 +108,13 @@ namespace FPS_n2 {
 				if (this->m_IsHit) {
 					this->m_IsHit = false;
 					this->m_HitTimer = 0.25f;
-					this->Hit_alpha = 1.f;
+					this->m_Hit_alpha = 1.f;
 				}
 				this->m_HitTimer = std::clamp(this->m_HitTimer - 1.f / FPS, 0.f, 0.25f);
-				if (this->Hit_alpha > 0.f) {
-					Easing(&this->Hit_alpha, (this->m_HitTimer > 0.f) ? 2.f : 0.f, 0.95f, EasingType::OutExpo);
-					if (this->Hit_alpha <= 0.01f) {
-						this->Hit_alpha = 0;
+				if (this->m_Hit_alpha > 0.f) {
+					Easing(&this->m_Hit_alpha, (this->m_HitTimer > 0.f) ? 2.f : 0.f, 0.95f, EasingType::OutExpo);
+					if (this->m_Hit_alpha <= 0.01f) {
+						this->m_Hit_alpha = 0;
 					}
 				}
 				if (this->m_IsActive) {
@@ -133,11 +132,7 @@ namespace FPS_n2 {
 			void			DrawShadow(void) noexcept  override {}
 			void			CheckDraw(void) noexcept  override {
 				if (this->m_IsHit) {
-					auto p = ConvWorldPosToScreenPos(this->m_move.pos.get());
-					if (p.z >= 0.f && p.z <= 1.f) {
-						this->Hit_window_x = int(p.x);
-						this->Hit_window_y = int(p.y);
-					}
+					this->m_Hit_DispPos = ConvWorldPosToScreenPos(this->m_move.pos.get());
 				}
 			}
 			void			Draw(void) noexcept  override {

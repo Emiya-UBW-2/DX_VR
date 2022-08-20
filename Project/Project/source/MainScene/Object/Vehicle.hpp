@@ -73,6 +73,7 @@ namespace FPS_n2 {
 		};
 		//戦車データ
 		class VhehicleData {
+			typedef std::pair<std::shared_ptr<GraphHandle>, int> ViewAndModule;
 		private:
 			std::string							m_name;							//名称
 			HitPoint							m_MaxHP{ 0 };					//HP
@@ -94,6 +95,7 @@ namespace FPS_n2 {
 			std::array<int, 4>					m_square{ 0 };					//車輛の四辺
 			std::array<std::vector<frames>, 2>	m_b2upsideframe;				//履帯上
 			std::array<std::vector<frames>, 2>	m_downsideframe;				//履帯
+			std::array<std::vector<ViewAndModule>, 2>	m_TankViewPic;				//モジュール表示
 		private:
 			const auto		GetSide(bool isLeft, bool isFront) const noexcept {
 				int ans = 0;
@@ -141,6 +143,7 @@ namespace FPS_n2 {
 			const auto&		Get_armer_mesh(void) const noexcept { return this->m_armer_mesh; }
 			const auto&		Get_space_mesh(void) const noexcept { return this->m_space_mesh; }
 			const auto&		Get_module_mesh(void) const noexcept { return this->m_module_mesh; }
+			const auto&		Get_module_view(void) const noexcept { return this->m_TankViewPic; }
 			const auto&		Get_square(size_t ID_t)const noexcept { return this->m_square[ID_t]; }
 			const auto&		Get_square(void) const noexcept { return this->m_square; }
 			const auto&		Get_b2upsideframe(size_t ID_t)const noexcept { return this->m_b2upsideframe[ID_t]; }
@@ -159,8 +162,6 @@ namespace FPS_n2 {
 				this->m_MaxTurretRad = o.m_MaxTurretRad;
 				this->m_GunFrameData = o.m_GunFrameData;
 				this->m_DynamicBox = o.m_DynamicBox;
-				//this->m_DataObj = o.m_DataObj;
-				//this->m_DataCol = o.m_DataCol;
 				this->m_wheelframe = o.m_wheelframe;
 				this->m_wheelframe_nospring = o.m_wheelframe_nospring;
 				this->m_armer_mesh = o.m_armer_mesh;
@@ -169,6 +170,7 @@ namespace FPS_n2 {
 				this->m_square = o.m_square;
 				this->m_b2upsideframe = o.m_b2upsideframe;
 				this->m_downsideframe = o.m_downsideframe;
+				this->m_TankViewPic = o.m_TankViewPic;
 			}
 			~VhehicleData(void) noexcept { }
 		public:
@@ -251,6 +253,11 @@ namespace FPS_n2 {
 				this->m_square[2] = GetSide(false, false);			//3		右後部2
 				this->m_square[3] = GetSide(false, true);			//11	右前部3
 				//装甲
+
+				//車体モジュール
+				this->m_TankViewPic[0].emplace_back(ViewAndModule(std::make_shared<GraphHandle>(GraphHandle::Load("data/UI/body/battle_body.png")), -1));
+				int human_body_num = 0;
+				int ammo_body_num = 0;
 				for (int i = 0; i < this->m_DataCol.mesh_num(); i++) {
 					std::string p = this->m_DataCol.material_name(i);
 					if (p.find("armer", 0) != std::string::npos) {
@@ -259,10 +266,52 @@ namespace FPS_n2 {
 					else if (p.find("space", 0) != std::string::npos) {
 						this->m_space_mesh.emplace_back(i);//空間装甲
 					}
-					else {
+					else if (p.find("left_foot", 0) != std::string::npos) {
 						this->m_module_mesh.emplace_back(i);//モジュール
+						this->m_TankViewPic[0].emplace_back(ViewAndModule(std::make_shared<GraphHandle>(GraphHandle::Load("data/UI/body/battle_track_l.bmp")), (int)this->m_module_mesh.size() - 1));
+					}
+					else if (p.find("right_foot", 0) != std::string::npos) {
+						this->m_module_mesh.emplace_back(i);//モジュール
+						this->m_TankViewPic[0].emplace_back(ViewAndModule(std::make_shared<GraphHandle>(GraphHandle::Load("data/UI/body/battle_track_r.bmp")), (int)this->m_module_mesh.size() - 1));
+					}
+					else if (p.find("engine", 0) != std::string::npos) {
+						this->m_module_mesh.emplace_back(i);//モジュール
+						this->m_TankViewPic[0].emplace_back(ViewAndModule(std::make_shared<GraphHandle>(GraphHandle::Load("data/UI/body/battle_engine_body.bmp")), (int)this->m_module_mesh.size() - 1));
+					}
+					else if (p.find("human_body", 0) != std::string::npos) {
+						this->m_module_mesh.emplace_back(i);//モジュール
+						this->m_TankViewPic[0].emplace_back(ViewAndModule(std::make_shared<GraphHandle>(GraphHandle::Load("data/UI/body/battle_human_body_" + std::to_string(human_body_num) + ".bmp")), (int)this->m_module_mesh.size() - 1));
+						human_body_num++;
+					}
+					else if (p.find("ammo_body", 0) != std::string::npos) {
+						this->m_module_mesh.emplace_back(i);//モジュール
+						this->m_TankViewPic[0].emplace_back(ViewAndModule(std::make_shared<GraphHandle>(GraphHandle::Load("data/UI/body/battle_ammo_body_" + std::to_string(ammo_body_num) + ".bmp")), (int)this->m_module_mesh.size() - 1));
+						ammo_body_num++;
 					}
 				}
+				this->m_TankViewPic[0].emplace_back(ViewAndModule(std::make_shared<GraphHandle>(GraphHandle::Load("data/UI/body/battle_look_body.bmp")), 0));
+				//砲塔モジュール
+				this->m_TankViewPic[1].emplace_back(ViewAndModule(std::make_shared<GraphHandle>(GraphHandle::Load("data/UI/body/battle_turret.png")), -1));
+				int human_turret_num = 0;
+				int ammo_turret_num = 0;
+				for (int i = 0; i < this->m_DataCol.mesh_num(); i++) {
+					std::string p = this->m_DataCol.material_name(i);
+					if (p.find("gun", 0) != std::string::npos) {
+						this->m_module_mesh.emplace_back(i);//モジュール
+						this->m_TankViewPic[1].emplace_back(ViewAndModule(std::make_shared<GraphHandle>(GraphHandle::Load("data/UI/body/battle_gun.bmp")), (int)this->m_module_mesh.size() - 1));
+					}
+					else if (p.find("human_turret", 0) != std::string::npos) {
+						this->m_module_mesh.emplace_back(i);//モジュール
+						this->m_TankViewPic[1].emplace_back(ViewAndModule(std::make_shared<GraphHandle>(GraphHandle::Load("data/UI/body/battle_human_turret_" + std::to_string(human_turret_num) + ".bmp")), (int)this->m_module_mesh.size() - 1));
+						human_turret_num++;
+					}
+					else if (p.find("ammo_turret", 0) != std::string::npos) {
+						this->m_module_mesh.emplace_back(i);//モジュール
+						this->m_TankViewPic[1].emplace_back(ViewAndModule(std::make_shared<GraphHandle>(GraphHandle::Load("data/UI/body/battle_ammo_turret_" + std::to_string(ammo_turret_num) + ".bmp")), (int)this->m_module_mesh.size() - 1));
+						ammo_turret_num++;
+					}
+				}
+				this->m_TankViewPic[1].emplace_back(ViewAndModule(std::make_shared<GraphHandle>(GraphHandle::Load("data/UI/body/battle_look_turret.bmp")), 0));
 				//data
 				{
 					int mdata = FileRead_open(("data/tank/" + this->m_name + "/data.txt").c_str(), FALSE);
@@ -769,6 +818,8 @@ namespace FPS_n2 {
 		public:
 			const std::pair<bool, bool>		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& pShooterPos) noexcept;
 			void			HitGround(const VECTOR_ref& pPos, const VECTOR_ref& pNorm, const VECTOR_ref& pVec) noexcept;
+
+			void			DrawModuleView(int xp, int yp, int size) noexcept;																					//被弾チェック
 		public: //コンストラクタ、デストラクタ
 			VehicleClass(void) noexcept { this->m_objType = ObjType::Vehicle; }
 			~VehicleClass(void) noexcept {}

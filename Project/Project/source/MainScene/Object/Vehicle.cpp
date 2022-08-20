@@ -494,6 +494,22 @@ namespace FPS_n2 {
 			Effect_UseControl::Set_FootEffect(pPos, pNorm, 0.05f / 0.1f * Scale_Rate);
 			//hit_obj_p.Set(a.GetCaliberSize() * Scale_Rate, pPos, pNorm, pVec);	//’e­
 		}
+		//
+		void			VehicleClass::DrawModuleView(int xp, int yp, int size) noexcept {
+			auto base = GetLookVec().zvec()*-1.f;
+			base.y(0.f);
+			base = base.Norm();
 
+			auto vec = VECTOR_ref::front();
+			auto rad = std::atan2f(base.cross(vec).y(), base.dot(vec));
+
+
+			for (auto&m : this->m_VecData->Get_module_view()[0]) {
+				m.first->DrawRotaGraph(xp, yp, (float)size / 200, rad + this->Get_body_yrad(), true);
+			}
+			for (auto&m : this->m_VecData->Get_module_view()[1]) {
+				m.first->DrawRotaGraph(xp, yp, (float)size / 200, rad + this->Get_body_yrad() + this->m_view_yrad, true);
+			}
+		}
 	};
 };
