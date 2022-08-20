@@ -441,7 +441,7 @@ namespace FPS_n2 {
 			//“]—Ö
 			b2Vec2 Gravity2D = b2Vec2((M_GR / FPS / 2.f) * (this->m_move.mat.zvec().dot(VECTOR_ref::up())), (M_GR / FPS / 2.f) * (this->m_move.mat.yvec().dot(VECTOR_ref::up())));
 			for (auto& f : this->m_b2Foot) {
-				f.LateExecute(&f == &this->m_b2Foot.front(), this->m_VecData, &GetObj(), Gravity2D, (&f == &this->m_b2Foot.front()) ? this->m_wheel_Left : this->m_wheel_Right, this->m_speed - this->m_spd_rec);
+				f.LateExecute(&f == &this->m_b2Foot.front(), this->m_VecData, &GetObj(), Gravity2D, (&f == &this->m_b2Foot.front()) ? this->m_wheel_Left : this->m_wheel_Right, this->m_speed - this->m_spd_rec + std::abs(this->m_speed));
 			}
 			UpdateMove();
 			this->m_add_vec_real = this->m_move.pos - OldPos;
@@ -505,11 +505,14 @@ namespace FPS_n2 {
 
 
 			for (auto&m : this->m_VecData->Get_module_view()[0]) {
+				SetDrawBright(0, 255, 0);
 				m.first->DrawRotaGraph(xp, yp, (float)size / 200, rad + this->Get_body_yrad(), true);
 			}
 			for (auto&m : this->m_VecData->Get_module_view()[1]) {
+				SetDrawBright(0, 255, 0);
 				m.first->DrawRotaGraph(xp, yp, (float)size / 200, rad + this->Get_body_yrad() + this->m_view_yrad, true);
 			}
+			SetDrawBright(255, 255, 255);
 		}
 	};
 };

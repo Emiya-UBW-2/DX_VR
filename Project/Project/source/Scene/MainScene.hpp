@@ -71,6 +71,8 @@ namespace FPS_n2 {
 			NewSetting				m_NewSetting;
 			double					m_ClientFrame{ 0.0 };
 			float					m_Ping{ 0.f };
+
+			Grass grassmodel;
 		private:
 			const auto&		GetMyPlayerID(void) const noexcept { return (this->m_IsClient) ? this->m_ClientCtrl.GetMyPlayer().ID : this->m_ServerCtrl.GetMyPlayer().ID; }
 		public:
@@ -105,6 +107,8 @@ namespace FPS_n2 {
 				this->m_Env = SoundHandle::Load("data/Sound/SE/envi.wav");
 				SetCreate3DSoundFlag(FALSE);
 				this->m_Env.vol(64);
+
+				grassmodel.Init(&this->m_BackGround.GetGroundCol());
 				//
 				MV1::Load("data/model/hit/model.mv1", &this->hit_pic);						//’e­ƒ‚ƒfƒ‹
 				//UI
@@ -558,6 +562,8 @@ namespace FPS_n2 {
 				Effect_UseControl::Dispose_Effect();
 				ObjMngr->DisposeObject();
 				this->vehicle_Pool.clear();
+
+				grassmodel.Dispose();
 			}
 			//
 			void			Depth_Draw(void) noexcept override {
@@ -600,6 +606,8 @@ namespace FPS_n2 {
 						v->SetCameraSize(std::max(80.f / ((pos - GetCameraPosition()).size() / 2.f), 0.2f));
 					}
 				}
+
+				grassmodel.Draw(camera_main);
 			}
 			void			Main_Draw2(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();

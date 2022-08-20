@@ -561,13 +561,13 @@ namespace FPS_n2 {
 					}
 					void			EffectExecute(MV1* pTargetObj, float pSpdAdd) noexcept {
 						if (this->m_colres.HitFlag == TRUE) {
-							Easing(&this->m_gndsmksize, 0.1f + std::abs(pSpdAdd) / ((0.01f / 3.6f) / FPS) * 0.5f, 0.975f, EasingType::OutExpo);
+							Easing(&this->m_gndsmksize, 0.2f + std::abs(pSpdAdd) / ((0.01f / 3.6f) / FPS) * 0.9f, 0.975f, EasingType::OutExpo);
 						}
 						else {
-							this->m_gndsmksize = 0.1f;
+							this->m_gndsmksize = 0.2f;
 						}
 						this->m_gndsmkeffcs.handle.SetPos(pTargetObj->frame(this->m_frame.first) + pTargetObj->GetMatrix().yvec() * (-this->m_frame.second.y()));
-						this->m_gndsmkeffcs.handle.SetScale(std::clamp(this->m_gndsmksize, 0.1f, 0.5f)*Scale_Rate);
+						this->m_gndsmkeffcs.handle.SetScale(std::clamp(this->m_gndsmksize, 0.2f, 1.5f)*Scale_Rate);
 					}
 					//
 					void			Dispose(void) noexcept {
