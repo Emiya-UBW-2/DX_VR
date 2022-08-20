@@ -126,18 +126,18 @@ namespace FPS_n2 {
 		};
 		//
 		class SceneControl {
-			bool m_EndFlag{ false };						//終了処理フラグ
-			bool m_SelEnd{ true };
-			bool m_SelPause{ true };
-			scenes m_SelScene{ scenes::NONE_SCENE };		//現在のシーン
-			std::shared_ptr<Sceneclass::TEMPSCENE> m_ScenesPtr{ nullptr };
-			LONGLONG m_DrawWait{ 0 }, m_OldWait{ 0 }, m_Wait{ 0 };
-			shaders::shader_Vertex m_ScreenVertex;			// 頂点データ
-			std::array<shaders, 2> m_Shader2D;
+			bool									m_EndFlag{ false };									//終了処理フラグ
+			bool									m_SelEnd{ true };									//
+			bool									m_SelPause{ true };									//
+			scenes									m_SelScene{ scenes::NONE_SCENE };					//現在のシーン
+			std::shared_ptr<Sceneclass::TEMPSCENE>	m_ScenesPtr{ nullptr };								//
+			LONGLONG								m_DrawWait{ 0 }, m_OldWait{ 0 }, m_Wait{ 0 };	//
+			shaders::shader_Vertex					m_ScreenVertex;										// 頂点データ
+			std::array<shaders, 2>					m_Shader2D;											//
 			//深度
-			GraphHandle DepthScreen;						// 深度を取得するスクリーン
-			shaders shader;									/*シェーダー*/
-			shaders Depth;									/*シェーダー*/
+			GraphHandle								DepthScreen;										// 深度を取得するスクリーン
+			shaders									shader;												//シェーダー*/
+			shaders									Depth;												//シェーダー*/
 		public:
 			SceneControl(void) noexcept {
 				// 深度を描画するテクスチャの作成( １チャンネル浮動小数点１６ビットテクスチャ )
@@ -163,8 +163,8 @@ namespace FPS_n2 {
 				}
 			}
 			//
-			const auto& isEnd(void) const noexcept { return this->m_EndFlag; }
-			const auto& isPause(void) const noexcept { return this->m_SelPause; }
+			const auto&		isEnd(void) const noexcept { return this->m_EndFlag; }
+			const auto&		isPause(void) const noexcept { return this->m_SelPause; }
 			//
 			void		ChangeScene(scenes select, std::shared_ptr<Sceneclass::TEMPSCENE>& ptr) {
 				this->m_SelScene = select;

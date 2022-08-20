@@ -76,10 +76,10 @@ namespace FPS_n2 {
 				}
 			}
 
-			const auto GetMapColNearest(const VECTOR_ref& StartPos, VECTOR_ref* EndPos) {
+			const auto		GetMapColNearest(const VECTOR_ref& StartPos, VECTOR_ref* EndPos) {
 				bool ans = false;
 				while (true) {
-					auto colres = m_MapCol->CollCheck_Line(StartPos, *EndPos);
+					auto colres = this->m_MapCol->CollCheck_Line(StartPos, *EndPos);
 					if (colres.HitFlag == TRUE) {
 						ans = true;
 						if (*EndPos == colres.HitPosition) { break; }
@@ -143,7 +143,7 @@ namespace FPS_n2 {
 					else {
 						MV1::Load(Path + ".pmx", &this->m_obj_LOADCALC, DX_LOADMODEL_PHYSICS_LOADCALC);
 						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
-						MV1SaveModelToMV1File(m_obj_LOADCALC.get(), (Path + "_LOADCALC.mv1").c_str());
+						MV1SaveModelToMV1File(this->m_obj_LOADCALC.get(), (Path + "_LOADCALC.mv1").c_str());
 						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
 					}
 					MV1::SetAnime(&this->m_obj_REALTIME, this->m_obj_REALTIME);
@@ -173,7 +173,7 @@ namespace FPS_n2 {
 				this->m_IsBaseModel = true;
 				this->m_objActive = true;
 			}
-			void			CopyModel(std::shared_ptr<ObjectBaseClass>& pBase) noexcept {
+			void			CopyModel(const std::shared_ptr<ObjectBaseClass>& pBase) noexcept {
 				this->m_FilePath = pBase->m_FilePath;
 				this->m_ObjFileName = pBase->m_ObjFileName;
 				this->m_ColFileName = pBase->m_ColFileName;
@@ -276,13 +276,13 @@ namespace FPS_n2 {
 				}
 				//シェイプ更新
 				switch (this->m_objType) {
-				/*
-				case ObjType::Human://human
-					for (int j = 1; j < (int)CharaShape::Max; j++) {
-						MV1SetShapeRate(this->GetObj().get(), this->m_Shapes[j].first, (1.f - this->m_Shapes[0].second)*this->m_Shapes[j].second);
-					}
-					break;
-				//*/
+					/*
+					case ObjType::Human://human
+						for (int j = 1; j < (int)CharaShape::Max; j++) {
+							MV1SetShapeRate(this->GetObj().get(), this->m_Shapes[j].first, (1.f - this->m_Shapes[0].second)*this->m_Shapes[j].second);
+						}
+						break;
+					//*/
 				case ObjType::Vehicle:
 					break;
 				default:
@@ -295,7 +295,6 @@ namespace FPS_n2 {
 						this->GetObj().PhysicsResetState();
 					}
 					else {
-						//*
 						auto NowMat = this->GetObj().GetMatrix();
 						int Max = 2;
 						for (int i = 0; i < Max; i++) {
@@ -304,7 +303,6 @@ namespace FPS_n2 {
 								* MATRIX_ref::Mtrans(Lerp(this->m_PrevMat.pos(), NowMat.pos(), (float)(i + 1) / (float)Max)));
 							this->GetObj().PhysicsCalculation(1000.0f / FPS * 60.f);
 						}
-						//*/
 					}
 				}
 				//最初のループ終わり

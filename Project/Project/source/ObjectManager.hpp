@@ -4,14 +4,14 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class ObjectManager {
-			std::vector<std::shared_ptr<ObjectBaseClass>> m_Object;
-			switchs m_ResetP;
-			const MV1* m_MapCol = nullptr;
+			std::vector<std::shared_ptr<ObjectBaseClass>>	m_Object;
+			switchs											m_ResetP;
+			const MV1*										m_MapCol = nullptr;
 			//ƒVƒ“ƒOƒ‹ƒgƒ“‰»
 #if true
 
 		private:
-			static inline  ObjectManager* m_Singleton = nullptr;
+			static inline  ObjectManager*	m_Singleton = nullptr;
 		public:
 			static void Create() {
 				if (m_Singleton == nullptr) {
@@ -28,6 +28,20 @@ namespace FPS_n2 {
 
 #endif
 		public:
+			void	LoadModel(ObjectBaseClass* pObj, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") const noexcept {
+				bool iscopy = false;
+				for (auto& o : this->m_Object) {
+					if (o->GetIsBaseModel(filepath, objfilename, colfilename)) {
+						pObj->CopyModel(o);
+						iscopy = true;
+						break;
+					}
+				}
+				if (!iscopy) {
+					pObj->LoadModel(filepath, objfilename, colfilename);
+				}
+			}
+
 			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") {
 				switch (ModelType) {
 				case ObjType::Vehicle:
@@ -41,19 +55,7 @@ namespace FPS_n2 {
 				default:
 					break;
 				}
-				{
-					bool iscopy = false;
-					for (auto& o : this->m_Object) {
-						if (o->GetIsBaseModel(filepath, objfilename, colfilename)) {
-							this->m_Object.back()->CopyModel(o);
-							iscopy = true;
-							break;
-						}
-					}
-					if (!iscopy) {
-						this->m_Object.back()->LoadModel(filepath, objfilename, colfilename);
-					}
-				}
+				LoadModel(this->m_Object.back().get(), filepath, objfilename, colfilename);
 
 				this->m_Object.back()->SetMapCol(this->m_MapCol);
 				this->m_Object.back()->Init();

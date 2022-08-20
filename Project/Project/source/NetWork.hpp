@@ -5,12 +5,12 @@
 
 class NewWorkControl {
 	//通信関連
-	int NetUDPHandle = -1;			// ネットワークハンドル
-	IPDATA SendIp;					// 送信用ＩＰアドレスデータ
-	int UsePort = -1;				// 通信用ポート
+	int NetUDPHandle{ -1 };			// ネットワークハンドル
+	IPDATA SendIp{ 127,0,0,1 };		// 送信用ＩＰアドレスデータ
+	int UsePort{ -1 };				// 通信用ポート
 	//サーバー専用
-	IPDATA RecvIp;					// 受信用ＩＰアドレスデータ
-	int RecvPort;					// 受信用ポート
+	IPDATA RecvIp{ 127,0,0,1 };		// 受信用ＩＰアドレスデータ
+	int RecvPort{ 0 };				// 受信用ポート
 public:
 	void			InitClient() {
 		// 送信用ソケットを作って初送信

@@ -12,14 +12,22 @@ namespace std {
 }; // namespace std
 //
 namespace FPS_n2 {
+	//
+	static auto* CreateB2Body(std::shared_ptr<b2World>& world, b2BodyType type, float32 x_, float32 y_, float angle = 0) noexcept {
+		b2BodyDef f_bodyDef;
+		f_bodyDef.type = type;
+		f_bodyDef.position.Set(x_, y_);
+		f_bodyDef.angle = angle;
+		return world->CreateBody(&f_bodyDef);
+	}
 	//入力
 	class InputControl {
 	private:
-		float m_AddxRad{ 0.f };
-		float m_AddyRad{ 0.f };
-		float m_xRad{ 0.f };
-		float m_yRad{ 0.f };
-		unsigned int m_Flags{ 0 };
+		float			m_AddxRad{ 0.f };
+		float			m_AddyRad{ 0.f };
+		float			m_xRad{ 0.f };
+		float			m_yRad{ 0.f };
+		unsigned int	m_Flags{ 0 };
 	public:
 		void			SetInput(
 			float pAddxRad, float pAddyRad,
@@ -68,13 +76,13 @@ namespace FPS_n2 {
 			this->m_yRad = pyRad;
 		}
 		void			SetKeyInput(unsigned int pFlags) { this->m_Flags = pFlags; }
-		const auto& GetKeyInput(void) const noexcept { return this->m_Flags; }
+		const auto&		GetKeyInput(void) const noexcept { return this->m_Flags; }
 
 
-		const auto& GetAddxRad(void) const noexcept { return m_AddxRad; }
-		const auto& GetAddyRad(void) const noexcept { return m_AddyRad; }
-		const auto& GetxRad(void) const noexcept { return m_xRad; }
-		const auto& GetyRad(void) const noexcept { return m_yRad; }
+		const auto&		GetAddxRad(void) const noexcept { return this->m_AddxRad; }
+		const auto&		GetAddyRad(void) const noexcept { return this->m_AddyRad; }
+		const auto&		GetxRad(void) const noexcept { return this->m_xRad; }
+		const auto&		GetyRad(void) const noexcept { return this->m_yRad; }
 		const auto	GetGoFrontPress(void) const noexcept { return (this->m_Flags & (1 << 0)) != 0; }
 		const auto	GetGoBackPress(void) const noexcept { return (this->m_Flags & (1 << 1)) != 0; }
 		const auto	GetGoLeftPress(void) const noexcept { return (this->m_Flags & (1 << 2)) != 0; }
@@ -154,7 +162,7 @@ namespace FPS_n2 {
 		const auto		GetRadBuf(void) const noexcept { return  this->m_rad_Buf; }
 		const auto		GetTurnRatePer(void) const noexcept { return  this->m_TurnRatePer; }
 		const auto		GetRad(void) const noexcept { return  this->m_rad; }
-		const auto		GetVecFront(void) const noexcept { return  this->m_Vec[0] || m_IsSprint; }
+		const auto		GetVecFront(void) const noexcept { return  this->m_Vec[0] || this->m_IsSprint; }
 		const auto		GetVecRear(void) const noexcept { return this->m_Vec[2]; }
 		const auto		GetVecLeft(void) const noexcept { return this->m_Vec[1]; }
 		const auto		GetVecRight(void) const noexcept { return this->m_Vec[3]; }
@@ -244,7 +252,7 @@ namespace FPS_n2 {
 			{
 				m_QKey.GetInput(pQPress && !pIsNotActive);
 				m_EKey.GetInput(pEPress && !pIsNotActive);
-				if (m_EKey.trigger()) {
+				if (this->m_EKey.trigger()) {
 					if (this->m_TurnRate > -1) {
 						this->m_TurnRate--;
 					}
@@ -252,7 +260,7 @@ namespace FPS_n2 {
 						this->m_TurnRate++;
 					}
 				}
-				if (m_QKey.trigger()) {
+				if (this->m_QKey.trigger()) {
 					if (this->m_TurnRate < 1) {
 						this->m_TurnRate++;
 					}
@@ -276,7 +284,7 @@ namespace FPS_n2 {
 			}
 			//回転
 			{
-				if (pxRad!=-1.f || pyRad != -1.f) {
+				if (pxRad != -1.f || pyRad != -1.f) {
 					this->m_rad_Buf.x(pxRad);
 					this->m_rad_Buf.y(pyRad);
 				}
@@ -317,8 +325,8 @@ namespace FPS_n2 {
 
 	//エフェクト利用コントロール
 	class Effect_UseControl {
-		std::array<EffectS, int(Effect::effects)> effcs;	/*エフェクト*/
-		std::array<EffectS, 256> effcs_G;					/*エフェクト*/
+		std::array<EffectS, int(Effect::effects)> effcs;	//エフェクト
+		std::array<EffectS, 256> effcs_G;					//エフェクト
 		int G_cnt = 0;
 	public:
 		const auto	CheckPlayEffect(Effect ef_) const noexcept { return this->effcs[(int)ef_].GetIsPlaying(); }
@@ -350,7 +358,7 @@ namespace FPS_n2 {
 
 		void		SetSpeed_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Speed(value); }
 		void		SetScale_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Scale(value); }
-		//エフェクトの更新
+
 		void		Update_Effect(void) noexcept {
 			auto* EffectUseControl = EffectControl::Instance();
 			for (auto& t : this->effcs) {
@@ -365,7 +373,6 @@ namespace FPS_n2 {
 				t.put(EffectUseControl->effsorce[(int)Effect::ef_gndsmoke]);
 			}
 		}
-		/*おわり*/
 		void		Dispose_Effect(void) noexcept {
 			for (auto& t : this->effcs) { t.handle.Dispose(); }
 		}
@@ -423,10 +430,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			//*
-			if (
-				HitFlag
-				) {		// 壁に当たっていたら壁から押し出す処理を行う
+			if (HitFlag) {		// 壁に当たっていたら壁から押し出す処理を行う
 				for (int k = 0; k < PLAYER_HIT_TRYNUM; ++k) {			// 壁からの押し出し処理を試みる最大数だけ繰り返し
 					bool HitF = false;
 					for (auto& KeyBind : kabe_) {
@@ -450,7 +454,6 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			//*/
 			kabe_.clear();
 		}
 		MV1CollResultPolyDimTerminate(HitDim);	// 検出したプレイヤーの周囲のポリゴン情報を開放する
@@ -467,18 +470,18 @@ namespace FPS_n2 {
 
 	//BOX2D
 	class b2Pats {
-		b2FixtureDef fixtureDef;			/*動的ボディフィクスチャを定義します*/
-		std::unique_ptr<b2Body> body;		/**/
-		b2Fixture* playerfix{ nullptr };	/**/
+		b2FixtureDef fixtureDef;			//動的ボディフィクスチャを定義します
+		std::unique_ptr<b2Body> body;		//
+		b2Fixture* playerfix{ nullptr };	//
 	public:
-		VECTOR_ref pos;/*仮*/
+		VECTOR_ref pos;//仮
 
 		void		Set(b2Body* body_ptr, b2Shape* dynamicBox) {
-			fixtureDef.shape = dynamicBox;								/**/
-			fixtureDef.density = 1.0f;									/*ボックス密度をゼロ以外に設定すると、動的になる*/
-			fixtureDef.friction = 0.3f;									/*デフォルトの摩擦をオーバーライド*/
-			this->body.reset(body_ptr);									/**/
-			this->playerfix = this->body->CreateFixture(&fixtureDef);	/*シェイプをボディに追加*/
+			fixtureDef.shape = dynamicBox;								//
+			fixtureDef.density = 1.0f;									//ボックス密度をゼロ以外に設定すると、動的になる
+			fixtureDef.friction = 0.3f;									//デフォルトの摩擦をオーバーライド
+			this->body.reset(body_ptr);									//
+			this->playerfix = this->body->CreateFixture(&fixtureDef);	//シェイプをボディに追加
 		}
 
 		void		SetLinearVelocity(const b2Vec2& position) {
@@ -510,10 +513,10 @@ namespace FPS_n2 {
 
 	//ダメージイベント
 	struct DamageEvent {
-		char ID{ 127 };
-		int Damage{ 0 };
+		PlayerID ID{ 127 };
+		HitPoint Damage{ 0 };
 		float rad{ 0.f };
-		void SetEvent(char pID, int pDamage, float pRad) {
+		void SetEvent(PlayerID pID, HitPoint pDamage, float pRad) {
 			this->ID = pID;
 			this->Damage = pDamage;
 			this->rad = pRad;
@@ -524,35 +527,35 @@ namespace FPS_n2 {
 	//インスタシング
 	class Model_Instance {
 	public:
-		int hitss = 0;					/*hitsの数*/
-		std::vector<VERTEX3D> hitsver;	/*hits*/
-		std::vector<DWORD> hitsind;	    /*hits*/
-		int VerBuf = -1, IndexBuf = -1;	/*hits*/
-		MV1 hits;						/*hitsモデル*/
-		GraphHandle hits_pic;			/*画像ハンドル*/
-		int IndexNum = -1, VerNum = -1;	/*hits*/
-		int vnum = -1, pnum = -1;		/*hits*/
-		MV1_REF_POLYGONLIST RefMesh{};	/*hits*/
+		int hitss = 0;					//hitsの数
+		std::vector<VERTEX3D> hitsver;	//hits
+		std::vector<DWORD> hitsind;	    //hits
+		int VerBuf = -1, IndexBuf = -1;	//hits
+		MV1 hits;						//hitsモデル
+		GraphHandle hits_pic;			//画像ハンドル
+		int IndexNum = -1, VerNum = -1;	//hits
+		int vnum = -1, pnum = -1;		//hits
+		MV1_REF_POLYGONLIST RefMesh{};	//hits
 		//初期化
 		void			Init(std::string pngpath, std::string mv1path) noexcept {
 			SetUseASyncLoadFlag(FALSE);
-			this->hits_pic = GraphHandle::Load(pngpath);		 /*grass*/
+			this->hits_pic = GraphHandle::Load(pngpath);		 //grass
 			MV1::Load(mv1path, &this->hits);	//弾痕
 			Init_one();
 		}
 		void			Init_one(void) noexcept {
-			MV1RefreshReferenceMesh(this->hits.get(), -1, TRUE);			/*参照用メッシュの更新*/
-			this->RefMesh = MV1GetReferenceMesh(this->hits.get(), -1, TRUE);	/*参照用メッシュの取得*/
+			MV1RefreshReferenceMesh(this->hits.get(), -1, TRUE);			//参照用メッシュの更新
+			this->RefMesh = MV1GetReferenceMesh(this->hits.get(), -1, TRUE);	//参照用メッシュの取得
 		}
 		//毎回のリセット
 		void			Clear(void) noexcept {
 			this->hitss = 0;
 			this->vnum = 0;
 			this->pnum = 0;
-			this->hitsver.clear();								/*頂点データとインデックスデータを格納するメモリ領域の確保*/
-			this->hitsind.clear();								/*頂点データとインデックスデータを格納するメモリ領域の確保*/
-			this->hitsver.reserve(2000);							/*頂点データとインデックスデータを格納するメモリ領域の確保*/
-			this->hitsind.reserve(2000);							/*頂点データとインデックスデータを格納するメモリ領域の確保*/
+			this->hitsver.clear();								//頂点データとインデックスデータを格納するメモリ領域の確保
+			this->hitsind.clear();								//頂点データとインデックスデータを格納するメモリ領域の確保
+			this->hitsver.reserve(2000);							//頂点データとインデックスデータを格納するメモリ領域の確保
+			this->hitsind.reserve(2000);							//頂点データとインデックスデータを格納するメモリ領域の確保
 		}
 
 		void			Set(const float& caliber, const VECTOR_ref& Position, const VECTOR_ref& Normal, const VECTOR_ref& Zvec) {
@@ -571,10 +574,10 @@ namespace FPS_n2 {
 			Set_one();
 		}
 		void			Set_start(void) noexcept {
-			this->IndexNum = this->RefMesh.PolygonNum * 3 * this->hitss;				/*インデックスの数を取得*/
-			this->VerNum = this->RefMesh.VertexNum * this->hitss;						/*頂点の数を取得*/
-			this->hitsver.resize(this->VerNum);									/*頂点データとインデックスデータを格納するメモリ領域の確保*/
-			this->hitsind.resize(this->IndexNum);								/*頂点データとインデックスデータを格納するメモリ領域の確保*/
+			this->IndexNum = this->RefMesh.PolygonNum * 3 * this->hitss;				//インデックスの数を取得
+			this->VerNum = this->RefMesh.VertexNum * this->hitss;						//頂点の数を取得
+			this->hitsver.resize(this->VerNum);									//頂点データとインデックスデータを格納するメモリ領域の確保
+			this->hitsind.resize(this->IndexNum);								//頂点データとインデックスデータを格納するメモリ領域の確保
 		}
 		void			Set_one(void) noexcept {
 			Init_one();

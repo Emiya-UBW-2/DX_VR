@@ -10,7 +10,7 @@ namespace FPS_n2 {
 			float			m_caliber{ 0.f };
 			float			m_speed{ 100.f };				//弾速
 			float			m_penetration{ 10.f };			//貫通
-			int				m_damage{ 10 };					//ダメージ
+			HitPoint		m_damage{ 10 };					//ダメージ
 		public://getter
 			const auto&		GetName(void) const noexcept { return this->m_name; }
 			const auto&		GetPath(void) const noexcept { return this->m_path; }
@@ -23,10 +23,10 @@ namespace FPS_n2 {
 				this->m_name = named;
 				this->m_path = path_ + named;
 				int mdata = FileRead_open((this->m_path + "/data.txt").c_str(), FALSE);
-				this->m_caliber = getparams::_float(mdata) * 0.001f;//口径
-				this->m_speed = getparams::_float(mdata);	//弾速
-				this->m_penetration = getparams::_float(mdata);	//貫通
-				this->m_damage = getparams::_int(mdata);//ダメージ
+				this->m_caliber = getparams::_float(mdata) * 0.001f;	//口径
+				this->m_speed = getparams::_float(mdata);				//弾速
+				this->m_penetration = getparams::_float(mdata);			//貫通
+				this->m_damage = (HitPoint)getparams::_int(mdata);		//ダメージ
 				FileRead_close(mdata);
 			}
 		};
@@ -47,7 +47,7 @@ namespace FPS_n2 {
 			const auto&		GetDamage(void) const noexcept { return this->m_AmmoData->GetDamage(); }
 			const auto&		GetCaliberSize(void) const noexcept { return this->m_AmmoData->GetCaliber(); }
 			const auto		GetEffectSize(void) const noexcept { return ((this->m_AmmoData->GetCaliber() >= 0.020f) ? this->m_AmmoData->GetCaliber() : 0.025f) / 0.1f; }
-			const auto		GetHitPicActive(void) const noexcept { return this->Hit_alpha>0.f; }
+			const auto		GetHitPicActive(void) const noexcept { return this->Hit_alpha > 0.f; }
 		public:
 			void			Put(const AmmoData* pAmmoData, const VECTOR_ref& pPos, const VECTOR_ref& pVec, int pMyID) noexcept {
 				this->m_IsActive = true;
