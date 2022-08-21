@@ -526,23 +526,18 @@ namespace FPS_n2 {
 				class cat_frame {
 				private:
 					frames					m_frame;
-					float					m_will_y{ 0.f };
-					MV1_COLL_RESULT_POLY	m_colres{};
+					float					m_Res_y{ (std::numeric_limits<float>::max)() };
 					EffectS					m_gndsmkeffcs;
 					float					m_gndsmksize{ 1.f };
 				public:
-					cat_frame(void) noexcept {
-						this->m_frame.first = -1;
-						this->m_will_y = 0.f;
-						this->m_gndsmksize = 1.f;
-					}
+					cat_frame(void) noexcept {}
+					//~cat_frame(void) noexcept {}
 				public://getter
-					const auto&		GetColResult(void) const noexcept { return this->m_colres; }
+					const auto&		GetColResult_Y(void) const noexcept { return this->m_Res_y; }
 				public:
 					void			Init(const frames& pFrame) noexcept {
 						this->m_frame = pFrame;
-						this->m_gndsmkeffcs.set_loop(EffectControl::Instance()->effsorce.back());
-						this->m_gndsmkeffcs.put_loop(VECTOR_ref::vget(0, -1, 0), VECTOR_ref::vget(0, 0, 1), 0.1f*Scale_Rate);
+						this->m_gndsmkeffcs.SetLoop(EffectControl::Instance()->effsorce.back(), VECTOR_ref::vget(0, -1, 0), VECTOR_ref::vget(0, 0, 1), 0.1f*Scale_Rate);
 						this->m_gndsmksize = 0.1f;
 					}
 					//
@@ -551,27 +546,29 @@ namespace FPS_n2 {
 							auto y_vec = pTargetObj->GetMatrix().yvec();
 							pTargetObj->frame_Reset(this->m_frame.first);
 							auto startpos = pTargetObj->frame(this->m_frame.first);
-							this->m_colres = pMapPtr->CollCheck_Line(startpos + y_vec * ((-this->m_frame.second.y()) + 2.f*Scale_Rate), startpos + y_vec * ((-this->m_frame.second.y()) - 0.3f*Scale_Rate));
-
+							auto colres = pMapPtr->CollCheck_Line(
+								startpos + y_vec * ((-this->m_frame.second.y()) + 2.f*Scale_Rate),
+								startpos + y_vec * ((-this->m_frame.second.y()) - 0.3f*Scale_Rate));
+							this->m_Res_y = (colres.HitFlag == TRUE) ? colres.HitPosition.y : (std::numeric_limits<float>::max)();
 							pTargetObj->SetFrameLocalMatrix(this->m_frame.first,
-								MATRIX_ref::Mtrans(VECTOR_ref::up() * ((this->m_colres.HitFlag == TRUE) ? (this->m_colres.HitPosition.y + y_vec.y() * this->m_frame.second.y() - startpos.y()) : -0.4f*Scale_Rate)) *
+								MATRIX_ref::Mtrans(VECTOR_ref::up() * ((colres.HitFlag == TRUE) ? (this->m_Res_y + y_vec.y() * this->m_frame.second.y() - startpos.y()) : -0.4f*Scale_Rate)) *
 								MATRIX_ref::Mtrans(this->m_frame.second)
 							);
 						}
 					}
 					void			EffectExecute(MV1* pTargetObj, float pSpdAdd) noexcept {
-						if (this->m_colres.HitFlag == TRUE) {
-							Easing(&this->m_gndsmksize, 0.2f + std::abs(pSpdAdd) / ((0.01f / 3.6f) / FPS) * 0.9f, 0.975f, EasingType::OutExpo);
+						if (this->m_Res_y != (std::numeric_limits<float>::max)()) {
+							Easing(&this->m_gndsmksize, 0.2f + std::abs(pSpdAdd) / ((0.01f / 3.6f) / FPS) * 0.5f, 0.975f, EasingType::OutExpo);
 						}
 						else {
 							this->m_gndsmksize = 0.2f;
 						}
-						this->m_gndsmkeffcs.handle.SetPos(pTargetObj->frame(this->m_frame.first) + pTargetObj->GetMatrix().yvec() * (-this->m_frame.second.y()));
-						this->m_gndsmkeffcs.handle.SetScale(std::clamp(this->m_gndsmksize, 0.2f, 1.5f)*Scale_Rate);
+						this->m_gndsmkeffcs.Set_Pos(pTargetObj->frame(this->m_frame.first) + pTargetObj->GetMatrix().yvec() * (-this->m_frame.second.y()));
+						this->m_gndsmkeffcs.Set_Scale(std::clamp(this->m_gndsmksize, 0.2f, 1.5f)*Scale_Rate);
 					}
 					//
 					void			Dispose(void) noexcept {
-						this->m_gndsmkeffcs.handle.Dispose();
+						this->m_gndsmkeffcs.Dispose();
 					}
 				};
 			private:
@@ -842,7 +839,7 @@ namespace FPS_n2 {
 			}
 			void			LateExecute(void) noexcept override {
 				ExecuteMatrix();			//SetMatéwé¶//0.03ms
-				Effect_UseControl::Update_Effect();
+				Effect_UseControl::Execute_Effect();
 			}
 			void			Draw(void) noexcept override {
 				DrawCommon();

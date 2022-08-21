@@ -331,50 +331,44 @@ namespace FPS_n2 {
 	public:
 		const auto	CheckPlayEffect(Effect ef_) const noexcept { return this->effcs[(int)ef_].GetIsPlaying(); }
 		void		Set_FootEffect(const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept {
+			auto* EffectUseControl = EffectControl::Instance();
 			this->effcs_G[this->G_cnt].Stop();
-			this->effcs_G[this->G_cnt].Set(pos_t, nomal_t, scale);
+			this->effcs_G[this->G_cnt].SetOnce(EffectUseControl->effsorce[(int)Effect::ef_gndsmoke], pos_t, nomal_t, scale);
 			++this->G_cnt %= 256;
 		}
 		const auto	Check_FootEffectCnt(void) noexcept {
 			int cnt = 0;
 			for (auto& t : this->effcs_G) {
-				if (t.GetStart()) { cnt++; }
+				if (t.GetIsPlaying()) { cnt++; }
 			}
 			return cnt;
 		}
 
-		void		Set_LoopEffect(Effect ef_, const VECTOR_ref& pos_t) noexcept {
+		void		SetLoop(Effect ef_, const VECTOR_ref& pos_t) noexcept {
 			auto* EffectUseControl = EffectControl::Instance();
-			this->effcs[(int)ef_].Stop();
-			this->effcs[(int)ef_].pos = pos_t;
-			this->effcs[(int)ef_].set_loop(EffectUseControl->effsorce[(int)ef_]);
+			this->effcs[(int)ef_].SetLoop(EffectUseControl->effsorce[(int)ef_], pos_t);
+		}
+		void		SetOnce(Effect ef_, const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept {
+			auto* EffectUseControl = EffectControl::Instance();
+			this->effcs[(int)ef_].SetOnce(EffectUseControl->effsorce[(int)ef_], pos_t, nomal_t, scale);
 		}
 		void		Update_LoopEffect(Effect ef_, const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept {
-			this->effcs[(int)ef_].put_loop(pos_t, nomal_t, scale);
+			this->effcs[(int)ef_].SetParam(pos_t, nomal_t, scale);
 		}
-
-		void		Set_Effect(Effect ef_, const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept { this->effcs[(int)ef_].Set(pos_t, nomal_t, scale); }
 		void		Stop_Effect(Effect ef_) noexcept { this->effcs[(int)ef_].Stop(); }
-
 		void		SetSpeed_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Speed(value); }
 		void		SetScale_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Scale(value); }
 
-		void		Update_Effect(void) noexcept {
-			auto* EffectUseControl = EffectControl::Instance();
+		void		Execute_Effect(void) noexcept {
 			for (auto& t : this->effcs) {
-				const size_t index = &t - &this->effcs.front();
-				if (
-					index != (int)Effect::ef_smoke
-					) {
-					t.put(EffectUseControl->effsorce[index]);
-				}
+				t.Execute();
 			}
 			for (auto& t : this->effcs_G) {
-				t.put(EffectUseControl->effsorce[(int)Effect::ef_gndsmoke]);
+				t.Execute();
 			}
 		}
 		void		Dispose_Effect(void) noexcept {
-			for (auto& t : this->effcs) { t.handle.Dispose(); }
+			for (auto& t : this->effcs) { t.Dispose(); }
 		}
 	};
 

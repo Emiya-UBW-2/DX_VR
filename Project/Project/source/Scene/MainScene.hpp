@@ -178,8 +178,8 @@ namespace FPS_n2 {
 
 				SE->Get((int)SoundEnum::Tank_Shot).SetVol(0.5f);
 				SE->Get((int)SoundEnum::Tank_engine).SetVol(0.25f);
-				SE->Get((int)SoundEnum::Tank_Ricochet).SetVol(0.25f);
-				SE->Get((int)SoundEnum::Tank_Damage).SetVol(0.25f);
+				SE->Get((int)SoundEnum::Tank_Ricochet).SetVol(0.65f);
+				SE->Get((int)SoundEnum::Tank_Damage).SetVol(0.65f);
 				SE->Get((int)SoundEnum::Tank_Eject).SetVol(0.25f);
 				SE->Get((int)SoundEnum::Tank_Reload).SetVol(0.25f);
 
@@ -551,7 +551,7 @@ namespace FPS_n2 {
 					this->m_UIclass.SetIntParam(8, (int)1.f);
 				}
 				TEMPSCENE::Update();
-				Effect_UseControl::Update_Effect();
+				Effect_UseControl::Execute_Effect();
 				return true;
 			}
 			void			Dispose(void) noexcept override {

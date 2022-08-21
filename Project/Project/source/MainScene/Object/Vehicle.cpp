@@ -169,14 +169,14 @@ namespace FPS_n2 {
 					for (auto& mesh : this->m_VecData->Get_space_mesh()) {
 						if (tt.GetHitMesh() == mesh) {
 							//空間装甲に当たったのでモジュールに30ダメ
-							Effect_UseControl::Set_Effect(Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate);
+							Effect_UseControl::SetOnce(Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate);
 							//this->m_DamageControl.SubHP_Parts(30, (HitPoint)tt.GetHitMesh());
 						}
 					}
 					for (auto& mesh : this->m_VecData->Get_module_mesh()) {
 						if (tt.GetHitMesh() == mesh) {
 							//モジュールに当たったのでモジュールに30ダメ
-							Effect_UseControl::Set_Effect(Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate);
+							Effect_UseControl::SetOnce(Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate);
 							//this->m_DamageControl.SubHP_Parts(30, (HitPoint)tt.GetHitMesh());
 						}
 					}
@@ -186,7 +186,7 @@ namespace FPS_n2 {
 							//弾がダメージ層に届いた
 							if (pAmmo->PenetrationCheck(mesh.second, HitNormal)) {								//ダメージ面に当たった時に装甲値に勝てるかどうか
 								pAmmo->Penetrate();	//貫通
-								SE->Get((int)SoundEnum::Tank_Damage).Play_3D(GetRand(1), HitPos, 100.f*Scale_Rate, 127);
+								SE->Get((int)SoundEnum::Tank_Damage).Play_3D(GetRand(1), HitPos, 100.f*Scale_Rate, 216);
 								//ダメージ計算
 								auto v1 = MATRIX_ref::RotY(Get_body_yrad()).zvec();
 								auto v2 = (pShooterPos - this->m_move.pos).Norm(); v2.y(0);
@@ -195,16 +195,16 @@ namespace FPS_n2 {
 								//this->m_DamageControl.SubHP_Parts(pAmmo->GetDamage(), (HitPoint)tt.GetHitMesh());
 								if (!this->m_DamageControl.Get_alive()) {
 									//撃破
-									Effect_UseControl::Set_Effect(Effect::ef_greexp2, this->m_move.pos, this->m_move.mat.zvec(), Scale_Rate*2.f);
+									Effect_UseControl::SetOnce(Effect::ef_greexp2, this->m_move.pos, this->m_move.mat.zvec(), Scale_Rate*2.f);
 								}
 								isDamage = true;
 							}
 							else {
 								pAmmo->Ricochet(HitPos, HitNormal);	//跳弾
-								SE->Get((int)SoundEnum::Tank_Ricochet).Play_3D(GetRand(16), HitPos, 100.f*Scale_Rate, 127);
+								SE->Get((int)SoundEnum::Tank_Ricochet).Play_3D(GetRand(16), HitPos, 100.f*Scale_Rate, 216);
 							}
 							//エフェクトセット
-							Effect_UseControl::Set_Effect(Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate*10.f);
+							Effect_UseControl::SetOnce(Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate*10.f);
 							this->m_Hit_active.Set(this->m_move, HitPos, HitNormal, pAmmo->GetMove().vec.Norm(), pAmmo->GetCaliberSize()*Scale_Rate, !pAmmo->IsActive());
 							break;
 						}
@@ -337,8 +337,8 @@ namespace FPS_n2 {
 				for (auto& f : this->m_b2Foot) {
 					f.FirstExecute(&GetObj(), this->m_MapCol);
 					for (const auto& t : f.Getdownsideframe()) {
-						if (t.GetColResult().HitFlag == TRUE) {
-							hight_t += t.GetColResult().HitPosition.y;
+						if (t.GetColResult_Y() != (std::numeric_limits<float>::max)()) {
+							hight_t += t.GetColResult_Y();
 							cnt_t++;
 						}
 					}
@@ -398,7 +398,7 @@ namespace FPS_n2 {
 				//射撃
 				if (cg.Execute(this->m_key[(&cg == &this->m_Gun.front()) ? 0 : 1], this->m_CharaType == CharaTypeID::Mine)) {
 					SE->Get((int)SoundEnum::Tank_Shot).Play_3D(cg.GetShotSound(), this->m_move.pos, 250.f*Scale_Rate);							//サウンド
-					Effect_UseControl::Set_Effect(Effect::ef_fire, GetObj().frame(cg.GetGunMuzzleFrameID()), GetObj().GetFrameLocalWorldMatrix(cg.GetGunTrunnionFrameID()).zvec() * -1.f, cg.GetCaliberSize() / 0.1f * Scale_Rate);				//銃発砲エフェクトのセット
+					Effect_UseControl::SetOnce(Effect::ef_fire, GetObj().frame(cg.GetGunMuzzleFrameID()), GetObj().GetFrameLocalWorldMatrix(cg.GetGunTrunnionFrameID()).zvec() * -1.f, cg.GetCaliberSize() / 0.1f * Scale_Rate);				//銃発砲エフェクトのセット
 
 					auto& LastAmmo = (std::shared_ptr<AmmoClass>&)(*ObjMngr->AddObject(ObjType::Ammo));
 					LastAmmo->Put(cg.GetAmmoSpec(), GetObj().frame(cg.GetGunMuzzleFrameID()), GetObj().GetFrameLocalWorldMatrix(cg.GetGunTrunnionFrameID()).zvec() * -1.f, this->m_MyID);
@@ -449,6 +449,8 @@ namespace FPS_n2 {
 		}
 		//描画共通
 		void			VehicleClass::DrawCommon(void) noexcept {
+			SetFogEnable(TRUE);
+			SetFogColor(128, 128, 128);
 			if (!is_ADS()) {
 				MV1SetFrameTextureAddressTransform(GetObj().get(), 0, -this->m_wheel_Left * 0.1f, 0.f, 1.f, 1.f, 0.5f, 0.5f, 0.f);
 				GetObj().DrawMesh(0);
@@ -474,6 +476,7 @@ namespace FPS_n2 {
 				}
 				SetUseLighting(TRUE);
 			}
+			SetFogEnable(FALSE);
 		}
 
 		//
