@@ -27,8 +27,12 @@ namespace FPS_n2 {
 			MAIN_LOOP
 		};
 		enum class ObjType {
+			Human,
 			Vehicle,
 			Ammo,
+			Gun,
+			Magazine,
+			Cart,
 		};
 		enum class SoundEnum {
 			Tank_Shot,

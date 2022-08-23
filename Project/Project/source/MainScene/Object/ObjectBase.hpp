@@ -205,11 +205,12 @@ namespace FPS_n2 {
 						std::string FName = this->GetObj().frame_name(f);
 						bool compare = false;
 						switch (this->m_objType) {
-							/*
-							case ObjType::Human:
-								compare = (FName == CharaFrameName[i]);
-								break;
-							//*/
+						case ObjType::Human:
+							compare = (FName == CharaFrameName[i]);
+							break;
+						case ObjType::Gun:
+							compare = (FName == GunFrameName[i]);
+							break;
 						case ObjType::Vehicle:
 							break;
 						default:
@@ -224,11 +225,12 @@ namespace FPS_n2 {
 							f = 0;
 						}
 						switch (this->m_objType) {
-							/*
-							case ObjType::Human://human
-								if (i == (int)CharaFrame::Max) { isEnd = true; }
-								break;
-							//*/
+						case ObjType::Human:
+							if (i == (int)CharaFrame::Max) { isEnd = true; }
+							break;
+						case ObjType::Gun:
+							if (i == (int)GunFrame::Max) { isEnd = true; }
+							break;
 						case ObjType::Vehicle:
 							isEnd = true;
 							break;
@@ -249,18 +251,16 @@ namespace FPS_n2 {
 						}
 					}
 					switch (this->m_objType) {
-						/*
-						case ObjType::Human://human
-							this->m_Shapes.resize((int)CharaShape::Max);
-							for (int j = 1; j < (int)CharaShape::Max; j++) {
-								auto s = MV1SearchShape(this->GetObj().get(), CharaShapeName[j]);
-								if (s >= 0) {
-									this->m_Shapes[j].first = s;
-									this->m_Shapes[j].second = 0.f;
-								}
+					case ObjType::Human:
+						this->m_Shapes.resize((int)CharaShape::Max);
+						for (int j = 1; j < (int)CharaShape::Max; j++) {
+							auto s = MV1SearchShape(this->GetObj().get(), CharaShapeName[j]);
+							if (s >= 0) {
+								this->m_Shapes[j].first = s;
+								this->m_Shapes[j].second = 0.f;
 							}
-							break;
-						//*/
+						}
+						break;
 					case ObjType::Vehicle:
 						break;
 					default:
@@ -276,13 +276,11 @@ namespace FPS_n2 {
 				}
 				//シェイプ更新
 				switch (this->m_objType) {
-					/*
-					case ObjType::Human://human
-						for (int j = 1; j < (int)CharaShape::Max; j++) {
-							MV1SetShapeRate(this->GetObj().get(), this->m_Shapes[j].first, (1.f - this->m_Shapes[0].second)*this->m_Shapes[j].second);
-						}
-						break;
-					//*/
+				case ObjType::Human:
+					for (int j = 1; j < (int)CharaShape::Max; j++) {
+						MV1SetShapeRate(this->GetObj().get(), this->m_Shapes[j].first, (1.f - this->m_Shapes[0].second)*this->m_Shapes[j].second);
+					}
+					break;
 				case ObjType::Vehicle:
 					break;
 				default:

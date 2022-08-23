@@ -17,7 +17,11 @@ namespace FPS_n2 {
 
 		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
 		private:
+			static const int		Chara_num = 1;
 			static const int		Vehicle_num = 3;
+
+			static const int		gun_num = Chara_num;
+			static const int		cart_num = 2;
 		private:
 			//リソース関連
 			BackGroundClass			m_BackGround;				//BG
@@ -54,7 +58,7 @@ namespace FPS_n2 {
 			float					m_Rader_r{ 1.f };
 			//
 			std::vector<DamageEvent>	m_DamageEvents;
-			bool IsRide = true;
+			bool IsRide = false;
 
 			//サーバー専用
 			ServerControl			m_ServerCtrl;
@@ -71,8 +75,6 @@ namespace FPS_n2 {
 			NewSetting				m_NewSetting;
 			double					m_ClientFrame{ 0.0 };
 			float					m_Ping{ 0.f };
-
-			Grass grassmodel;
 		private:
 			const auto&		GetMyPlayerID(void) const noexcept { return (this->m_IsClient) ? this->m_ClientCtrl.GetMyPlayer().ID : this->m_ServerCtrl.GetMyPlayer().ID; }
 		public:
@@ -99,16 +101,29 @@ namespace FPS_n2 {
 				//
 
 				ObjMngr->Init(&this->m_BackGround.GetGroundCol());
-				for (int i = 0; i < Vehicle_num; i++) {
-					ObjMngr->AddObject(ObjType::Vehicle, ("data/tank/" + this->vehc_data[0].GetName() + "/").c_str());
+				for (int i = 0; i < Chara_num; i++) {
+					ObjMngr->AddObject(ObjType::Human,"data/Charactor/WinningTicket/");
 				}
+				for (int i = 0; i < Vehicle_num; i++) {
+					ObjMngr->AddObject(ObjType::Vehicle);
+				}
+
+				for (int i = 0; i < gun_num; i++) {
+					ObjMngr->AddObject(ObjType::Gun, "data/gun/Mosin/");
+					ObjMngr->AddObject(ObjType::Magazine, "data/gun/Mosin/", "model_mag");
+
+					auto& m = (std::shared_ptr<MagazineClass>&)(*ObjMngr->GetObj(ObjType::Magazine, i));
+					m->GetAmmoAll();
+					for (int j = 0; j < cart_num; j++) {
+						ObjMngr->AddObject(ObjType::Cart, "data/gun/Mosin/", "ammo");
+					}
+				}
+
 				//ロード
 				SetCreate3DSoundFlag(FALSE);
 				this->m_Env = SoundHandle::Load("data/Sound/SE/envi.wav");
 				SetCreate3DSoundFlag(FALSE);
 				this->m_Env.vol(64);
-
-				grassmodel.Init(&this->m_BackGround.GetGroundCol());
 				//
 				MV1::Load("data/model/hit/model.mv1", &this->hit_pic);						//弾痕モデル
 				//UI
@@ -118,6 +133,31 @@ namespace FPS_n2 {
 				//
 				TEMPSCENE::Set();
 				//Set
+				//人
+				for (int i = 0; i < Chara_num; i++) {
+					auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
+					VECTOR_ref pos_t = VECTOR_ref::vget(0.f + (float)(i)*20.f, 0.f, 0.f);
+					auto HitResult = this->m_BackGround.GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
+					if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
+					//c->SetGunPtr((std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, i)));
+					c->ValueSet(deg2rad(0.f), deg2rad(-90.f), pos_t);
+					if (i == 0) {
+						c->SetUseRealTimePhysics(false);
+						c->SetCharaType(CharaTypeID::Team);
+					}
+					else {
+						c->SetUseRealTimePhysics(false);
+						c->SetCharaType(CharaTypeID::Enemy);
+					}
+				}
+				for (int i = 0; i < gun_num; i++) {
+					auto& g = (std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, i));
+					auto& m = (std::shared_ptr<MagazineClass>&)(*ObjMngr->GetObj(ObjType::Magazine, i));
+					g->SetMagPtr(m);
+					for (int j = 0; j < cart_num; j++) {
+						m->SetCartPtr((std::shared_ptr<CartClass>&)(*ObjMngr->GetObj(ObjType::Cart, i*cart_num + j)));
+					}
+				}
 				//登録
 				for (int i = 0; i < Vehicle_num; i++) {
 					auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
@@ -130,6 +170,7 @@ namespace FPS_n2 {
 					v->ValueSet(deg2rad(0), deg2rad(90), pos_t);
 				}
 				{
+					auto& Chara = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, 0));//自分
 					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, 0));//自分
 					if (IsRide) {
 						this->m_HPBuf = (float)Vehicle->GetHP();
@@ -142,15 +183,15 @@ namespace FPS_n2 {
 				Set_zoom_lens(3.5f);
 				//サウンド
 				auto SE = SoundPool::Instance();
-				//SE->Add((int)SoundEnum::Shot_Gun, 3, "data/Sound/SE/gun/shot.wav");
-				//SE->Add((int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
+				SE->Add((int)SoundEnum::Shot_Gun, 3, "data/Sound/SE/gun/shot.wav");
+				SE->Add((int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
 				for (int i = 0; i < 4; i++) {
-					//SE->Add((int)SoundEnum::Cocking0 + i, 3, "data/Sound/SE/gun/slide/bolt/" + std::to_string(i) + ".wav");
+					SE->Add((int)SoundEnum::Cocking0 + i, 3, "data/Sound/SE/gun/slide/bolt/" + std::to_string(i) + ".wav");
 				}
-				//SE->Add((int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
-				//SE->Add((int)SoundEnum::SlideFoot, 9, "data/Sound/SE/move/sliding.wav");
-				//SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
-				//SE->Add((int)SoundEnum::Heart, 9, "data/Sound/SE/move/heart.wav");
+				SE->Add((int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
+				SE->Add((int)SoundEnum::SlideFoot, 9, "data/Sound/SE/move/sliding.wav");
+				SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
+				SE->Add((int)SoundEnum::Heart, 9, "data/Sound/SE/move/heart.wav");
 				//SE->Add((int)SoundEnum::GateOpen, 1, "data/Sound/SE/GateOpen.wav");
 				SE->Add((int)SoundEnum::Tank_Shot, 3, "data/Sound/SE/gun/fire/7.wav");
 				for (int i = 0; i < 17; i++) {
@@ -167,13 +208,13 @@ namespace FPS_n2 {
 					SE->Add((int)SoundEnum::Tank_Reload, 3, "data/Sound/SE/gun/reload/hand/" + std::to_string(i) + ".wav", false);
 				}
 
-				//SE->Get((int)SoundEnum::Shot_Gun).SetVol_Local(128);
-				//SE->Get((int)SoundEnum::Trigger).SetVol_Local(128);
+				SE->Get((int)SoundEnum::Shot_Gun).SetVol_Local(128);
+				SE->Get((int)SoundEnum::Trigger).SetVol_Local(128);
 				for (int i = 0; i < 4; i++) {
-					//SE->Get((int)SoundEnum::Cocking0 + i).SetVol_Local(128);
+					SE->Get((int)SoundEnum::Cocking0 + i).SetVol_Local(128);
 				}
-				//SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
-				//SE->Get((int)SoundEnum::Heart).SetVol_Local(92);
+				SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
+				SE->Get((int)SoundEnum::Heart).SetVol_Local(92);
 				//SE->Get((int)SoundEnum::GateOpen).SetVol_Local(128);
 
 				SE->Get((int)SoundEnum::Tank_Shot).SetVol(0.5f);
@@ -196,13 +237,14 @@ namespace FPS_n2 {
 			//
 			bool			Update(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
-				//FirstDoing
+				//FirstDoingv
 				if (IsFirstLoop) {
 					SetMousePoint(DXDraw::Instance()->disp_x / 2, DXDraw::Instance()->disp_y / 2);
 					this->m_Env.play(DX_PLAYTYPE_LOOP, TRUE);
 				}
 				//Input,AI
 				{
+					auto& Chara = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, GetMyPlayerID()));//自分
 					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
 					float cam_per = ((camera_main.fov / deg2rad(75)) / (is_lens() ? zoom_lens() : 1.f)) / 100.f;
 					float pp_x = 0.f, pp_y = 0.f;
@@ -327,7 +369,12 @@ namespace FPS_n2 {
 					Easing(&this->m_TPS_XradR, this->m_TPS_Xrad, 0.5f, EasingType::OutExpo);
 
 					this->m_TPS_YradR += (sin(this->m_TPS_Yrad)*cos(this->m_TPS_YradR) - cos(this->m_TPS_Yrad) * sin(this->m_TPS_YradR))*20.f / FPS;
-					{
+					if (!IsRide) {
+						Chara->SetEyeVec((camera_main.camvec - camera_main.campos).Norm());
+						Chara->ExecuteRadBuf(MyInput);
+						MyInput.SetRadBuf(Chara->GetRadBuf().x(), Chara->GetRadBuf().y());
+					}
+					else {
 						MyInput.SetRadBuf(Vehicle->GetViewxRad(), Vehicle->GetViewyRad());
 					}
 					//クライアント
@@ -404,6 +451,14 @@ namespace FPS_n2 {
 						this->m_ClientFrame += 1.0 / (double)FPS;
 					}
 					else {
+						for (int i = 0; i < Chara_num; i++) {
+							auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
+							if (i == GetMyPlayerID()) {
+								if (!IsRide) {
+									c->SetInput(MyInput, isready);
+								}
+							}
+						}
 						for (int i = 0; i < Vehicle_num; i++) {
 							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 							if (i == GetMyPlayerID()) {
@@ -462,6 +517,15 @@ namespace FPS_n2 {
 				}
 				//Execute
 				ObjMngr->ExecuteObject();
+				//
+				for (int j = 0; j < gun_num; j++) {
+					auto& Gun = (std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, j));
+					if (Gun->GetIsShot()) {
+						//エフェクト
+						auto mat = Gun->GetMuzzleMatrix();
+						Effect_UseControl::SetOnce(Effect::ef_fire2, mat.pos(), mat.GetRot().zvec()*-1.f, 1.f);
+					}
+				}
 				//弾の更新
 				{
 					int loop = 0;
@@ -514,7 +578,49 @@ namespace FPS_n2 {
 				this->m_BackGround.GetBox2Dworld()->Step(1.f, 1, 1);//物理更新
 				ObjMngr->LateExecuteObject();
 				//視点
-				{
+				if (!IsRide) {
+					auto& Chara = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, GetMyPlayerID()));//自分
+					if (Chara->GetSendCamShake()) {
+						this->m_CamShake = 1.f;
+					}
+					Easing(&this->m_CamShake1, VECTOR_ref::vget(GetRandf(this->m_CamShake), GetRandf(this->m_CamShake), GetRandf(this->m_CamShake)), 0.8f, EasingType::OutExpo);
+					Easing(&this->m_CamShake2, this->m_CamShake1, 0.8f, EasingType::OutExpo);
+					this->m_CamShake = std::max(this->m_CamShake - 1.f / FPS, 0.f);
+
+					if (this->m_FPSActive.on()) {
+						camera_main.campos = Chara->GetEyePosition();
+						camera_main.camvec = camera_main.campos + Chara->GetEyeVecMat().zvec() * -1.f;
+						camera_main.camup = Chara->GetMatrix().GetRot().yvec();
+					}
+					else {
+						MATRIX_ref FreeLook;
+						FreeLook = MATRIX_ref::RotAxis(Chara->GetMatrix().xvec(), this->m_TPS_XradR) * MATRIX_ref::RotAxis(Chara->GetMatrix().yvec(), this->m_TPS_YradR);
+						Easing_Matrix(&m_FreeLookMat, FreeLook, 0.5f, EasingType::OutExpo);
+
+						VECTOR_ref CamVec = Lerp(Chara->GetEyeVecMat().zvec() * -1.f, MATRIX_ref::Vtrans(Chara->GetEyeVecMat().zvec() * -1.f, m_FreeLookMat), this->m_TPS_Per);
+
+						MATRIX_ref UpperMat = Chara->GetFrameWorldMat(CharaFrame::Upper).GetRot();
+						VECTOR_ref CamPos = Chara->GetMatrix().pos() + Chara->GetMatrix().yvec() * 14.f;
+						CamPos += Lerp((UpperMat.xvec()*-8.f + UpperMat.yvec()*3.f), (UpperMat.xvec()*-3.f + UpperMat.yvec()*4.f), this->m_EyeRunPer);
+
+						camera_main.campos = (CamPos + CamVec * Lerp(-20.f, -50.f, this->m_TPS_Per)) + this->m_CamShake2 * 5.f;
+						camera_main.camvec = CamPos + CamVec * 100.f;
+						camera_main.camup = Chara->GetEyeVecMat().yvec() + this->m_CamShake2 * 0.25f;
+					}
+					Easing(&this->m_EyeRunPer, Chara->GetIsRun() ? 1.f : 0.f, 0.95f, EasingType::OutExpo);
+
+					if (Chara->GetIsRun()) {
+						Easing(&camera_main.fov, deg2rad(90), 0.9f, EasingType::OutExpo);
+						Easing(&camera_main.near_, 3.f, 0.9f, EasingType::OutExpo);
+						Easing(&camera_main.far_, Scale_Rate * 150.f, 0.9f, EasingType::OutExpo);
+					}
+					else {
+						Easing(&camera_main.fov, deg2rad(75), 0.9f, EasingType::OutExpo);
+						Easing(&camera_main.near_, 10.f, 0.9f, EasingType::OutExpo);
+						Easing(&camera_main.far_, Scale_Rate * 300.f, 0.9f, EasingType::OutExpo);
+					}
+				}
+				else {
 					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
 					Vehicle->Setcamera(camera_main, fov_base);
 					{
@@ -562,8 +668,7 @@ namespace FPS_n2 {
 				Effect_UseControl::Dispose_Effect();
 				ObjMngr->DisposeObject();
 				this->vehicle_Pool.clear();
-
-				grassmodel.Dispose();
+				this->m_BackGround.Dispose();
 			}
 			//
 			void			Depth_Draw(void) noexcept override {
@@ -596,6 +701,16 @@ namespace FPS_n2 {
 					Set_is_Blackout(false);
 					Set_is_lens(false);
 				}
+				for (int i = 0; i < Chara_num; i++) {
+					if (i == GetMyPlayerID()) { continue; }
+					auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
+					auto pos = c->GetFrameWorldMat(CharaFrame::Upper).pos();
+					VECTOR_ref campos = ConvWorldPosToScreenPos(pos.get());
+					if (0.f < campos.z() && campos.z() < 1.f) {
+						c->SetCameraPosition(campos);
+						c->SetCameraSize(std::max(20.f / ((pos - GetCameraPosition()).size() / 2.f), 0.2f));
+					}
+				}
 				for (int i = 0; i < Vehicle_num; i++) {
 					if (i == GetMyPlayerID()) { continue; }
 					auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
@@ -606,8 +721,7 @@ namespace FPS_n2 {
 						v->SetCameraSize(std::max(80.f / ((pos - GetCameraPosition()).size() / 2.f), 0.2f));
 					}
 				}
-
-				grassmodel.Draw(camera_main);
+				SetFogStartEnd(camera_main.near_, camera_main.far_*3.f);
 			}
 			void			Main_Draw2(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
@@ -619,6 +733,7 @@ namespace FPS_n2 {
 			//UI表示
 			void			UI_Draw(void) noexcept  override {
 				auto* ObjMngr = ObjectManager::Instance();
+				auto& Chara = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, GetMyPlayerID()));//自分
 				auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
 
 				auto* Fonts = FontPool::Instance();
@@ -631,6 +746,37 @@ namespace FPS_n2 {
 				auto Black = GetColor(0, 0, 0);
 				unsigned int color = Red;
 				//キャラ
+				for (int i = 0; i < Chara_num; i++) {
+					if (i == GetMyPlayerID()) { continue; }
+					auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
+					auto campos = c->GetCameraPosition();
+					if (0.f < campos.z() && campos.z() < 1.f) {
+						switch (c->GetCharaType()) {
+						case CharaTypeID::Mine:
+							color = Blue;
+							break;
+						case CharaTypeID::Team:
+							color = Blue;
+							break;
+						case CharaTypeID::Enemy:
+							color = Red;
+							break;
+						default:
+							break;
+						}
+						int xp = (int)(campos.x());
+						int yp = (int)(campos.y());
+						int xs = (int)(100.f*c->GetCameraSize());
+						int ys = (int)(100.f*c->GetCameraSize());
+						int siz = y_r(std::max((int)(20.f*c->GetCameraSize()), 10));
+						DrawEdgeBox_2D(xp - xs, yp - ys, xp + xs, yp + ys, color, White);
+						Fonts->Get(siz, FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_MID(xp, yp - ys - siz, color, White, "%s", c->GetName().c_str());
+						Fonts->Get(siz, FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat(xp + xs, yp + ys, color, White, "%dm", (int)((c->GetMatrix().pos() - Chara->GetMatrix().pos()).size() / Scale_Rate));
+						//リセット
+						campos.z(-1.f);
+						c->SetCameraPosition(campos);
+					}
+				}
 				for (int i = 0; i < Vehicle_num; i++) {
 					if (i == GetMyPlayerID()) { continue; }
 					auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
@@ -707,13 +853,16 @@ namespace FPS_n2 {
 					ys2 = y_r((int)(256.f * 0.2f*std::min(1.f, this->m_Rader_r)));
 					DrawEdgeBox_2D((int)(xp1 - xs1), (int)(yp1 - ys1), (int)(xp1 + xs2), (int)(yp1 + ys2), White, Green);
 
-					auto BaseBos = Vehicle->GetMatrix().pos();
+					auto BaseBos = ((!IsRide) ? Chara->GetMatrix().pos() : Vehicle->GetMatrix().pos());
 
 					xs1 = y_r((int)(256.f * 0.5f));
 					ys1 = y_r((int)(256.f * 0.8f));
 					xs2 = y_r((int)(256.f * 0.5f));
 					ys2 = y_r((int)(256.f * 0.2f));
-					auto base = Vehicle->GetLookVec().zvec()*-1.f;
+					auto base = Chara->GetCharaDir().zvec()*-1.f;
+					if (IsRide) {
+						base = Vehicle->GetLookVec().zvec()*-1.f;
+					}
 					base.y(0.f);
 					base = base.Norm();
 
@@ -726,6 +875,22 @@ namespace FPS_n2 {
 						bool isout = true;
 						auto tmpRader = 1.f;
 						int div = 5;
+						for (int i = 0; i < Chara_num; i++) {
+							if (i == GetMyPlayerID()) { continue; }
+							auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
+							tmpRader = BaseVPer;
+							for (int j = 0; j < div; j++) {
+								auto pos = MATRIX_ref::Vtrans(c->GetMatrix().pos() - BaseBos, MATRIX_ref::RotY(rad))*((1.f / Scale_Rate) * tmpRader);
+								if (((-xs1 < pos.x() && pos.x() < xs2) && (-ys1 < -pos.z() && -pos.z() < ys2))) {
+									if (this->m_Rader >= tmpRader) {
+										this->m_Rader = tmpRader;
+									}
+									isout = false;
+									break;
+								}
+								tmpRader -= BaseVPer / div;
+							}
+						}
 						for (int i = 0; i < Vehicle_num; i++) {
 							if (i == GetMyPlayerID()) { continue; }
 							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
@@ -747,6 +912,27 @@ namespace FPS_n2 {
 						}
 					}
 
+					for (int i = 0; i < Chara_num; i++) {
+						if (i == GetMyPlayerID()) { continue; }
+						auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
+						auto pos = MATRIX_ref::Vtrans(c->GetMatrix().pos() - BaseBos, MATRIX_ref::RotY(rad))*((1.f / Scale_Rate) * this->m_Rader_r);
+						if ((-xs1 < pos.x() && pos.x() < xs2) && (-ys1 < -pos.z() && -pos.z() < ys2)) {
+							switch (c->GetCharaType()) {
+							case CharaTypeID::Team:
+								color = Blue;
+								break;
+							case CharaTypeID::Enemy:
+								color = Red;
+								break;
+							default:
+								break;
+							}
+							int xp, yp;
+							xp = xp1 + (int)(pos.x());
+							yp = yp1 + (int)(-pos.z());
+							DrawCircle(xp, yp, (int)(5.f * std::min(1.f, this->m_Rader_r)), color, TRUE);
+						}
+					}
 					for (int i = 0; i < Vehicle_num; i++) {
 						if (i == GetMyPlayerID()) { continue; }
 						auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));

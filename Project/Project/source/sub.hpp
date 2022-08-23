@@ -696,15 +696,15 @@ namespace FPS_n2 {
 		};
 	public:
 		static const int grassDiv{ 12 };//6;
-		const float size{ 70.f };
+		const float size{ 60.f };
 	private:
-		const int grasss = 50 * 50;						/*grass‚Ì”*/
+		const int grasss = 30 * 30;						/*grass‚Ì”*/
 		std::array<grass_t, grassDiv>grass__;
 		std::array<VECTOR_ref, grassDiv>grassPosMin;
 		std::array<VECTOR_ref, grassDiv>grassPosMax;
-		int grasss2 = 30 * 30;							/*grass‚Ì”*/
+		int grasss2 = 10 * 10;							/*grass‚Ì”*/
 		std::array<grass_t, grassDiv>grass2__;
-		int grasss3 = 12 * 12;							/*grass‚Ì”*/
+		int grasss3 = 4 * 4;							/*grass‚Ì”*/
 		std::array<grass_t, grassDiv>grass3__;
 		int Flag = 0;
 		std::array<GrassPos, grassDiv> grassPos;
@@ -888,7 +888,7 @@ namespace FPS_n2 {
 							}
 
 							auto tmpvect = grassPosMin[ID] + VECTOR_ref::vget(x1, 0.2f, z1);
-							auto tmpscale = VECTOR_ref::vget(size*1.f, 4.0f + GetRandf(3.5f), size*1.f);
+							auto tmpscale = VECTOR_ref::vget(size*1.f, 6.0f + GetRandf(5.5f), size*1.f);
 							auto tmpMat = MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale);
 							auto res = MapCol->CollCheck_Line(tmpvect + VECTOR_ref::vget(0.f, 10.f*Scale_Rate, 0.f), tmpvect + VECTOR_ref::vget(0.f, -10.f*Scale_Rate, 0.f));
 							if (res.HitFlag == TRUE) { tmpvect = res.HitPosition; }
@@ -916,7 +916,7 @@ namespace FPS_n2 {
 								z1 = zmid + GetRandf(zmid);
 							}
 							auto tmpvect = grassPosMin[ID] + VECTOR_ref::vget(x1, 0.f, z1);
-							auto tmpscale = VECTOR_ref::vget(size*1.f, 4.0f + GetRandf(3.5f), size*1.f);
+							auto tmpscale = VECTOR_ref::vget(size*1.f, 6.0f + GetRandf(5.5f), size*1.f);
 							auto tmpMat = MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale);
 							auto res = MapCol->CollCheck_Line(tmpvect + VECTOR_ref::vget(0.f, 10.f*Scale_Rate, 0.f), tmpvect + VECTOR_ref::vget(0.f, -10.f*Scale_Rate, 0.f));
 							if (res.HitFlag == TRUE) { tmpvect = res.HitPosition; }
@@ -944,7 +944,7 @@ namespace FPS_n2 {
 								z1 = zmid + GetRandf(zmid);
 							}
 							auto tmpvect = grassPosMin[ID] + VECTOR_ref::vget(x1, 0.f, z1);
-							auto tmpscale = VECTOR_ref::vget(size*1.f, 4.0f + GetRandf(3.5f), size*1.f);
+							auto tmpscale = VECTOR_ref::vget(size*1.f, 6.0f + GetRandf(5.5f), size*1.f);
 							auto tmpMat = MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale);
 							auto res = MapCol->CollCheck_Line(tmpvect + VECTOR_ref::vget(0.f, 10.f*Scale_Rate, 0.f), tmpvect + VECTOR_ref::vget(0.f, -10.f*Scale_Rate, 0.f));
 							if (res.HitFlag == TRUE) { tmpvect = res.HitPosition; }
@@ -979,9 +979,8 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void Draw(cam_info camera_buf) noexcept {
+		void Draw(void) noexcept {
 			SetFogEnable(TRUE);
-			SetFogStartEnd(camera_buf.near_, camera_buf.far_*3.f);
 			SetFogColor(184, 187, 118);
 			SetDrawAlphaTest(DX_CMP_GREATER, 128);
 			//SetUseLighting(FALSE);

@@ -15,7 +15,7 @@ namespace FPS_n2 {
 			this->m_VecData = pVeh_data;
 			this->m_Hit_active.Init(hit_pic);														//弾痕
 
-			ObjMngr->LoadModel(this, this->m_FilePath.c_str(), this->m_ObjFileName.c_str(), this->m_ColFileName.c_str());
+			ObjMngr->LoadModel(this, ("data/tank/" + this->m_VecData->GetName() + "/").c_str());
 
 			GetObj().material_AlphaTestAll(true, DX_CMP_GREATER, 128);								//本体
 			this->hitres.resize(this->m_col.mesh_num());											//モジュールごとの当たり判定結果を確保
@@ -122,7 +122,7 @@ namespace FPS_n2 {
 
 		//被弾チェック
 		const auto		VehicleClass::CheckAmmoHited(const AmmoClass& pAmmo) noexcept {
-			auto HitCheck_Tank = [&](int m, const VECTOR_ref& ray_repos,const MV1_COLL_RESULT_POLY& hitres) {
+			auto HitCheck_Tank = [&](int m, const VECTOR_ref& ray_repos, const MV1_COLL_RESULT_POLY& hitres) {
 				this->hitres[m] = hitres;
 				if (this->hitres[m].HitFlag == TRUE) {
 					this->hitssort[m].Set(m, (ray_repos - this->hitres[m].HitPosition).size());

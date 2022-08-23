@@ -44,6 +44,10 @@ namespace FPS_n2 {
 
 			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") {
 				switch (ModelType) {
+				case ObjType::Human:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<CharacterClass>();
+					break;
 				case ObjType::Vehicle:
 					this->m_Object.resize(this->m_Object.size() + 1);
 					this->m_Object.back() = std::make_shared<VehicleClass>();
@@ -51,6 +55,18 @@ namespace FPS_n2 {
 				case ObjType::Ammo:
 					this->m_Object.resize(this->m_Object.size() + 1);
 					this->m_Object.back() = std::make_shared<AmmoClass>();
+					break;
+				case ObjType::Magazine://mag
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<MagazineClass>();
+					break;
+				case ObjType::Gun://gun
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<GunClass>();
+					break;
+				case ObjType::Cart://human
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<CartClass>();
 					break;
 				default:
 					break;
@@ -65,6 +81,10 @@ namespace FPS_n2 {
 			}
 			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType) {
 				switch (ModelType) {
+				case ObjType::Human:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<CharacterClass>();
+					break;
 				case ObjType::Vehicle:
 					this->m_Object.resize(this->m_Object.size() + 1);
 					this->m_Object.back() = std::make_shared<VehicleClass>();

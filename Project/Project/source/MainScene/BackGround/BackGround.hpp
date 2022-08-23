@@ -13,6 +13,7 @@ namespace FPS_n2 {
 			MV1							m_ObjGroundCol_Box2D;
 			std::shared_ptr<b2World>	m_b2world;
 			std::vector<std::pair<b2Pats, std::array<VECTOR_ref, 2>>>	m_b2wallParts;	//•Ç‚ðƒZƒbƒg
+			Grass						m_grass;
 		public://getter
 			const auto&		GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
 			auto&			GetBox2Dworld(void) noexcept { return this->m_b2world; }
@@ -70,6 +71,8 @@ namespace FPS_n2 {
 					bodyDef.angle = 0.f;									//
 					w.first.Set(this->m_b2world->CreateBody(&bodyDef), &chain);	//
 				}
+				//
+				this->m_grass.Init(&this->m_ObjGroundCol);
 			}
 			//
 			void			Execute(void) noexcept {}
@@ -87,6 +90,7 @@ namespace FPS_n2 {
 			}
 			void			Draw(void) noexcept {
 				DrawCommon();
+				this->m_grass.Draw();
 			}
 			//
 			void			Dispose(void) noexcept {
@@ -94,6 +98,7 @@ namespace FPS_n2 {
 				this->m_ObjGround.Dispose();
 				this->m_ObjGroundCol.Dispose();
 				this->m_ObjGroundCol_Box2D.Dispose();
+				this->m_grass.Dispose();
 				for (auto& w : this->m_b2wallParts) {
 					w.first.Dispose();
 					w.second[0].clear();

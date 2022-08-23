@@ -14,6 +14,8 @@ namespace FPS_n2 {
 			int									m_Shot_Sound = -1;
 			int									m_Eject_Sound = -1;
 			int									m_Reload_Sound = -1;
+			float								m_UpRadLimit{ 0.f };
+			float								m_DownRadLimit{ 0.f };
 			std::vector<AmmoData>				m_AmmoSpec;
 			std::array<frames, 3>				m_frame;
 		public:
@@ -25,6 +27,8 @@ namespace FPS_n2 {
 			const auto&		GetReloadSound(void) const noexcept { return this->m_Reload_Sound; }
 			const auto&		GetAmmoSpec(void) const noexcept { return this->m_AmmoSpec; }
 			const auto&		Get_frame(size_t pID)const noexcept { return this->m_frame[pID]; }
+			const auto&		GetUpRadLimit(void) const noexcept { return this->m_UpRadLimit; }
+			const auto&		GetDownRadLimit(void) const noexcept { return this->m_DownRadLimit; }
 		public: //コンストラクタ、デストラクタ
 			GunData(void) noexcept { }
 			~GunData(void) noexcept { }
@@ -61,6 +65,8 @@ namespace FPS_n2 {
 				this->m_Shot_Sound = getparams::_int(mdata);//サウンド
 				this->m_Eject_Sound = getparams::_int(mdata);//サウンド
 				this->m_Reload_Sound = getparams::_int(mdata);//サウンド
+				this->m_UpRadLimit = getparams::_float(mdata);
+				this->m_DownRadLimit = getparams::_float(mdata);
 				while (true) {
 					auto stp = getparams::Getstr(mdata);
 					if (stp.find("useammo" + std::to_string(this->m_AmmoSpec.size())) == std::string::npos) {
@@ -358,7 +364,7 @@ namespace FPS_n2 {
 			//角度指示
 			void		ExecuteGunFrame(const float pGunXrad, const float pGunYrad, MV1* obj_body_t, MV1* col_body_t) noexcept {
 				float yrad = pGunYrad;
-				float xrad = std::clamp(pGunXrad, deg2rad(-10), deg2rad(20));
+				float xrad = std::clamp(pGunXrad, deg2rad(this->m_GunSpec->GetDownRadLimit()), deg2rad(this->m_GunSpec->GetUpRadLimit()));
 				frames id;
 				id = this->m_GunSpec->Get_frame(0);
 				if (id.first >= 0) {
