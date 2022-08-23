@@ -49,7 +49,8 @@ namespace FPS_n2 {
 			bool pAction2,
 			bool pAction3,
 			bool pAction4,
-			bool pAction5
+			bool pAction5,
+			bool pAction6
 		) {
 			this->m_AddxRad = pAddxRad;
 			this->m_AddyRad = pAddyRad;
@@ -70,6 +71,7 @@ namespace FPS_n2 {
 			if (pAction3) { this->m_Flags |= (1 << 13); }
 			if (pAction4) { this->m_Flags |= (1 << 14); }
 			if (pAction5) { this->m_Flags |= (1 << 15); }
+			if (pAction6) { this->m_Flags |= (1 << 16); }
 		}
 		void			SetRadBuf(float pxRad, float pyRad) {
 			this->m_xRad = pxRad;
@@ -99,6 +101,7 @@ namespace FPS_n2 {
 		const auto	GetAction3(void) const noexcept { return (this->m_Flags & (1 << 13)) != 0; }
 		const auto	GetAction4(void) const noexcept { return (this->m_Flags & (1 << 14)) != 0; }
 		const auto	GetAction5(void) const noexcept { return (this->m_Flags & (1 << 15)) != 0; }
+		const auto	GetAction6(void) const noexcept { return (this->m_Flags & (1 << 15)) != 0; }
 
 		const InputControl operator+(const InputControl& o) const noexcept {
 			InputControl tmp;
@@ -143,6 +146,8 @@ namespace FPS_n2 {
 		bool												m_Press_GoRear{ false };
 		bool												m_Press_GoLeft{ false };
 		bool												m_Press_GoRight{ false };
+		switchs												m_Squat;
+		switchs												m_Prone;
 		switchs												m_QKey;
 		switchs												m_EKey;
 		bool												m_IsRun{ false };
@@ -150,7 +155,10 @@ namespace FPS_n2 {
 		float												m_RunPer{ 0.f };
 		float												m_RunTimer{ 0.f };
 		float												m_SprintPer{ 0.f };
+		float												m_SquatPer{ 0.f };
+		float												m_PronePer{ 0.f };
 		VECTOR_ref											m_rad_Buf, m_rad, m_radAdd;
+		bool												m_PronetoStanding{ false };
 		int													m_TurnRate{ 0 };
 		float												m_TurnRatePer{ 0.f };
 	private: //“à•”
@@ -162,6 +170,12 @@ namespace FPS_n2 {
 		const auto		GetRadBuf(void) const noexcept { return  this->m_rad_Buf; }
 		const auto		GetTurnRatePer(void) const noexcept { return  this->m_TurnRatePer; }
 		const auto		GetRad(void) const noexcept { return  this->m_rad; }
+
+		const auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
+		const auto		GetSquatPer(void) const noexcept { return this->m_SquatPer; }
+		const auto		GetIsProne(void) const noexcept { return this->m_Prone.on(); }
+		const auto		GetPronePer(void) const noexcept { return this->m_PronePer; }
+
 		const auto		GetVecFront(void) const noexcept { return  this->m_Vec[0] || this->m_IsSprint; }
 		const auto		GetVecRear(void) const noexcept { return this->m_Vec[2]; }
 		const auto		GetVecLeft(void) const noexcept { return this->m_Vec[1]; }
@@ -174,6 +188,8 @@ namespace FPS_n2 {
 		const auto		GetRunPer(void) const noexcept { return  this->m_RunPer; }
 		const auto		GetSprint(void) const noexcept { return this->m_IsSprint; }
 		const auto		GetSprintPer(void) const noexcept { return  this->m_SprintPer; }
+		void			SetPronetoStanding(bool value) noexcept { this->m_PronetoStanding = value; }
+		const auto		GetPronetoStanding(void) const noexcept { return  this->m_PronetoStanding; }
 		const auto		GetVec(void) const noexcept { return VECTOR_ref::vget(GetVecLeft() - GetVecRight(), 0, GetVecRear() - GetVecFront()); }
 		const auto		GetFrontP(void) const noexcept {
 			auto FrontP = ((GetPressFront() && !GetPressRear())) ? (atan2f(GetVec().x(), -GetVec().z()) * GetVecFront()) : 0.f;
@@ -197,7 +213,7 @@ namespace FPS_n2 {
 			this->m_rad_Buf.z(zbuf);
 		}
 	public:
-		void			ValueSet(float pxRad, float pyRad) {
+		void			ValueSet(float pxRad, float pyRad, bool SquatOn, bool ProneOn) {
 			for (int i = 0; i < 4; i++) {
 				this->m_Vec[i] = 0.f;
 			}
@@ -214,19 +230,27 @@ namespace FPS_n2 {
 			//“®ì‚É‚©‚©‚í‚é‘€ì
 			this->m_rad_Buf.x(pxRad);
 			this->m_rad_Buf.y(pyRad);
+			this->m_Squat.Init(SquatOn);
+			this->m_Prone.Init(ProneOn);
 			//ã‹L‚ð”½‰f‚·‚é‚à‚Ì
 			this->m_rad = this->m_rad_Buf;
+			this->m_SquatPer = SquatOn ? 1.f : 0.f;
+			this->m_PronePer = ProneOn ? 1.f : 0.f;
 		}
 		void			SetInput(
-			float pxRad, float pyRad,
+			float pAddxRad, float pAddyRad,
+			const VECTOR_ref& pAddRadvec,
 			bool pGoFrontPress,
 			bool pGoBackPress,
 			bool pGoLeftPress,
 			bool pGoRightPress,
+			bool pSquatPress,
+			bool pPronePress,
 			bool pRunPress,
 			bool pIsNotActive,
 			bool pQPress,
-			bool pEPress
+			bool pEPress,
+			bool pCannotSprint
 		) {
 			this->m_Press_GoFront = pGoFrontPress && !pIsNotActive;
 			this->m_Press_GoRear = pGoBackPress && !pIsNotActive;
@@ -243,16 +267,38 @@ namespace FPS_n2 {
 			}
 			else {
 				this->m_RunTimer = 0.f;
-				this->m_IsRun = pRunPress && !pIsNotActive;
+				this->m_IsRun = (pRunPress&& !pIsNotActive);
 			}
 			if (GetPressRear() || (!GetPressFront() && (GetPressLeft() || GetPressRight()))) {
 				this->m_IsRun = false;
 			}
+			if (GetIsProne() || GetPronetoStanding()) {
+				this->m_IsRun = false;
+			}
+
 			this->m_IsSprint = this->m_IsRun && (!GetPressFront() && !GetPressRear());
+
+			if (this->m_IsSprint) {
+				if (pCannotSprint) {
+					this->m_Press_GoFront = true;
+					this->m_IsSprint = false;
+				}
+			}
+
+			this->m_Squat.GetInput(pSquatPress && !pIsNotActive);
+			if (this->m_IsRun) { this->m_Squat.first = false; }
+
+			this->m_Prone.GetInput((pPronePress && !pIsNotActive) && (this->m_PronePer == 0.f || this->m_PronePer == 1.f));
+			if (GetIsProne()) { this->m_Squat.first = false; }
+
+			Easing(&this->m_PronePer, GetIsProne() ? 1.f : 0.f, 0.95f, EasingType::OutExpo);
+			if (!GetIsProne() && (0.01f >= this->m_PronePer)) { this->m_PronePer = 0.f; }
+			if (GetIsProne() && (0.99f <= this->m_PronePer)) { this->m_PronePer = 1.f; }
+			//this->m_PronePer = std::clamp(this->m_PronePer + (GetIsProne() ? 1.f : -3.f) / FPS, 0.f, 1.f);
 			{
 				m_QKey.GetInput(pQPress && !pIsNotActive);
 				m_EKey.GetInput(pEPress && !pIsNotActive);
-				if (this->m_EKey.trigger()) {
+				if (m_EKey.trigger()) {
 					if (this->m_TurnRate > -1) {
 						this->m_TurnRate--;
 					}
@@ -260,7 +306,7 @@ namespace FPS_n2 {
 						this->m_TurnRate++;
 					}
 				}
-				if (this->m_QKey.trigger()) {
+				if (m_QKey.trigger()) {
 					if (this->m_TurnRate < 1) {
 						this->m_TurnRate++;
 					}
@@ -284,19 +330,8 @@ namespace FPS_n2 {
 			}
 			//‰ñ“]
 			{
-				if (pxRad != -1.f || pyRad != -1.f) {
-					this->m_rad_Buf.x(pxRad);
-					this->m_rad_Buf.y(pyRad);
-				}
-
-				Easing(&this->m_rad, this->m_rad_Buf, 0.5f, EasingType::OutExpo);
-			}
-		}
-		void			ExecuteRadBuf(float pAddxRad, float pAddyRad, const VECTOR_ref& pAddRadvec) noexcept {
-			//‰ñ“]
-			{
-				auto limchange = Lerp(1.f, powf(1.f - this->GetVecFront(), 0.5f), this->m_RunPer * 0.8f);
-				auto tmp = 1.f;
+				auto limchange = Lerp(Lerp(1.f, powf(1.f - this->GetVecFront(), 0.5f), this->m_RunPer * 0.8f), 0.15f, this->GetPronePer());
+				auto tmp = Lerp(1.f, 0.1f, this->GetPronePer());
 				Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
 
 				this->m_rad_Buf.x(
@@ -307,6 +342,8 @@ namespace FPS_n2 {
 					this->m_rad_Buf.y() + (pAddyRad + this->m_TurnRatePer / 100.f)*tmp
 					+ this->m_radAdd.y()
 				);
+
+				Easing(&this->m_rad, this->m_rad_Buf, 0.5f, EasingType::OutExpo);
 			}
 		}
 		void			Execute(void) noexcept {
@@ -320,6 +357,7 @@ namespace FPS_n2 {
 			//
 			Easing(&this->m_RunPer, this->m_IsRun ? 1.f : 0.f, 0.975f, EasingType::OutExpo);
 			Easing(&this->m_SprintPer, this->m_IsSprint ? 1.f : 0.f, 0.95f, EasingType::OutExpo);
+			Easing(&this->m_SquatPer, GetIsSquat() ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 		}
 	};
 

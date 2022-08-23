@@ -853,10 +853,10 @@ namespace FPS_n2 {
 			void			Dispose(void) noexcept override {
 				ObjectBaseClass::Dispose();
 				Effect_UseControl::Dispose_Effect();
-				this->m_b2mine.Dispose();
 				for (auto& f : this->m_b2Foot) {
 					f.Dispose();
 				}
+				//this->m_b2mine.Dispose();
 				this->m_wheel_frameYpos.clear();
 				for (auto& cg : this->m_Gun) {
 					cg.Dispose();

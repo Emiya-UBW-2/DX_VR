@@ -139,8 +139,8 @@ namespace FPS_n2 {
 					VECTOR_ref pos_t = VECTOR_ref::vget(0.f + (float)(i)*20.f, 0.f, 0.f);
 					auto HitResult = this->m_BackGround.GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
 					if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
-					//c->SetGunPtr((std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, i)));
-					c->ValueSet(deg2rad(0.f), deg2rad(-90.f), pos_t);
+					c->SetGunPtr((std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, i)));
+					c->ValueSet(deg2rad(0.f), deg2rad(-90.f), false, false, pos_t);
 					if (i == 0) {
 						c->SetUseRealTimePhysics(false);
 						c->SetCharaType(CharaTypeID::Team);
@@ -299,7 +299,8 @@ namespace FPS_n2 {
 									(input.Buttons[10] != 0),
 									(input.Buttons[6] != 0), (input.Buttons[7] != 0),
 									right_key, left_key, up_key, down_key,
-									(input.Buttons[10] != 0), (input.Buttons[5] != 0), (input.Buttons[4] != 0), (input.Buttons[3] != 0)/* */, (input.Buttons[1] != 0)/*Z*/
+									(input.Buttons[10] != 0), (input.Buttons[5] != 0), (input.Buttons[4] != 0), (input.Buttons[3] != 0)/* */, (input.Buttons[1] != 0)/*Z*/,
+									false
 								);
 							}
 							break;
@@ -338,9 +339,10 @@ namespace FPS_n2 {
 
 							(CheckHitKeyWithCheck(KEY_INPUT_SPACE) != 0),
 							(CheckHitKeyWithCheck(KEY_INPUT_R) != 0),
-							(CheckHitKeyWithCheck(KEY_INPUT_F) != 0),
-							(CheckHitKeyWithCheck(KEY_INPUT_J) != 0),
-							(((GetMouseInputWithCheck() & MOUSE_INPUT_LEFT) != 0) && this->m_MouseActive.on())
+							(CheckHitKeyWithCheck(KEY_INPUT_X) != 0),
+							(CheckHitKeyWithCheck(KEY_INPUT_C) != 0),
+							(((GetMouseInputWithCheck() & MOUSE_INPUT_LEFT) != 0) && this->m_MouseActive.on()),
+							(((GetMouseInputWithCheck() & MOUSE_INPUT_RIGHT) != 0) && this->m_MouseActive.on())
 						);
 					}
 
@@ -371,7 +373,6 @@ namespace FPS_n2 {
 					this->m_TPS_YradR += (sin(this->m_TPS_Yrad)*cos(this->m_TPS_YradR) - cos(this->m_TPS_Yrad) * sin(this->m_TPS_YradR))*20.f / FPS;
 					if (!IsRide) {
 						Chara->SetEyeVec((camera_main.camvec - camera_main.campos).Norm());
-						Chara->ExecuteRadBuf(MyInput);
 						MyInput.SetRadBuf(Chara->GetRadBuf().x(), Chara->GetRadBuf().y());
 					}
 					else {
