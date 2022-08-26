@@ -771,6 +771,13 @@ namespace FPS_n2 {
 				}
 				this->m_PosBuf += this->m_move.vec;
 				col_wall(OLDpos, &this->m_PosBuf, *this->m_MapCol);
+
+				if (this->m_PosBufOverRideFlag) {
+					this->m_PosBufOverRideFlag = false;
+					this->m_PosBuf = this->m_PosBufOverRide;
+					this->m_move.vec = this->m_VecBufOverRide;
+				}
+
 				this->m_move.mat = MATRIX_ref::RotZ(this->m_InputGround.GetRad().z()) * MATRIX_ref::RotY(this->m_yrad_Bottom)
 					* MATRIX_ref::RotVec2(VECTOR_ref::up(), Lerp(VECTOR_ref::up(), this->m_ProneNormal, this->m_InputGround.GetPronePer()));
 				Easing(&this->m_move.pos, this->m_PosBuf, 0.9f, EasingType::OutExpo);

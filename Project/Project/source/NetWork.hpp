@@ -6,7 +6,7 @@
 class NewWorkControl {
 	//通信関連
 	int NetUDPHandle{ -1 };			// ネットワークハンドル
-	IPDATA SendIp{ 127,0,0,1 };		// 送信用ＩＰアドレスデータ
+	IPDATA IP{ 127,0,0,1 };			// 送信用ＩＰアドレスデータ
 	int UsePort{ -1 };				// 通信用ポート
 	//サーバー専用
 	IPDATA RecvIp{ 127,0,0,1 };		// 受信用ＩＰアドレスデータ
@@ -32,45 +32,33 @@ public:
 		}
 	}
 public:
-	void			SetIP(const IPDATA& IP) {
-		SendIp = IP;
-	}
-	void			Set_Port(int PORT) {
-		UsePort = PORT;
-	}
+	void			SetIP(const IPDATA& pIP) { IP = pIP; }
+	void			Set_Port(int PORT) { UsePort = PORT; }
 
 	template<class T>
-	void			SendtoServer(const T& Data) {
-		Send(SendIp, UsePort, Data);
-	}
+	void			SendtoServer(const T& Data) { Send(IP, UsePort, Data); }
 	template<class T>
-	void			SendtoClient(const T& Data) {
-		Send(RecvIp, RecvPort, Data);
-	}
+	void			SendtoClient(const T& Data) { Send(RecvIp, RecvPort, Data); }
 	template<class T>
 	void			Send(IPDATA& Ip, int SendPort, const T& Data) {
 		if (NetUDPHandle != -1) {
-			NetWorkSendUDP(NetUDPHandle, Ip, SendPort, &Data, sizeof(T));	// 文字列の送信
+			NetWorkSendUDP(NetUDPHandle, Ip, SendPort, &Data, sizeof(T));
 			//printfDx("送信:[%d,%d,%d,%d][%d]\n", Ip.d1, Ip.d2, Ip.d3, Ip.d4, SendPort);
 		}
 	}
 	template<class T>
 	bool Recv(T* Data) {
-		bool ans = false;
 		switch (CheckNetWorkRecvUDP(NetUDPHandle)) {
 		case TRUE:
 			NetWorkRecvUDP(NetUDPHandle, &RecvIp, &RecvPort, Data, sizeof(T), FALSE);		// 受信
-			ans = true;
-			//printfDx("受信\n");
+			return true;
 			break;
-		case FALSE:
-			//printfDx("受信待ち\n");			//待ち
+		case FALSE://待機
 			break;
-		default:
-			//printfDx("受信エラー\n");
+		default://error
 			break;
 		}
-		return ans;
+		return false;
 	}
 };
 
@@ -204,13 +192,15 @@ namespace FPS_n2 {
 			const auto		GetRecvData(int pPlayerID) const noexcept { return this->m_LeapFrame[pPlayerID] <= 1; }
 			const auto&		GetServerDataCommon(void) const noexcept { return this->m_ServerDataCommon; }
 			const auto&		GetMyPlayer(void) const noexcept { return this->m_PlayerData; }
-			void			SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, float pYrad, double pFrame, const DamageEvent& pDamage, char pDamageSwitch) noexcept {
+			void			SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, float pYrad, double pFrame, const DamageEvent* pDamage, char pDamageSwitch) noexcept {
 				this->m_PlayerData.Input = pInput;
 				this->m_PlayerData.PosBuf = pPos;
 				this->m_PlayerData.VecBuf = pVec;
 				this->m_PlayerData.YradBuf = pYrad;
 				this->m_PlayerData.Frame = pFrame;
-				this->m_PlayerData.Damage = pDamage;
+				if (pDamage != nullptr) {
+					this->m_PlayerData.Damage = *pDamage;
+				}
 				this->m_PlayerData.DamageSwitch = pDamageSwitch;
 				this->m_PlayerData.CheckSum = (size_t)this->m_PlayerData.CalcCheckSum();
 			}
@@ -358,28 +348,31 @@ namespace FPS_n2 {
 		class ClientControl : public NetWorkControl {
 			int						m_NetWorkSel{ 0 };
 			float					m_CannotConnectTimer{ 0.f };
+			int						m_Port{ 0 };
+			IPDATA					m_IP{ 127,0,0,1 };
 		public:
 			void			ClientInit(int pPort, float pTick, const IPDATA& pIP) {
 				NetWorkInit();
-				m_NetWorkSel = 0;
-				m_CannotConnectTimer = 0.f;
-				m_NetWork.resize(Player_num - 1);
-				int i = 0;
-				for (auto & n : this->m_NetWork) {
-					n.first.Set_Port(pPort + i); i++;
-					n.first.SetIP(pIP);
-					n.first.InitClient();
-					n.second = 0;
-				}
+
+				this->m_CannotConnectTimer = 0.f;
+				this->m_Port = pPort;
+				this->m_TickRate = pTick;
+				this->m_IP = pIP;
+
+				this->m_NetWork.resize(1);
+				this->m_NetWorkSel = 0;
+				this->m_NetWork.back().first.Set_Port(this->m_Port + this->m_NetWorkSel);
+				this->m_NetWork.back().first.SetIP(pIP);
+				this->m_NetWork.back().first.InitClient();
+				this->m_NetWork.back().second = 0;
 
 				this->m_PlayerData.ID = 1;
-				this->m_TickRate = pTick;
 			}
 			bool ClientExecute(void) noexcept {
 				ServerNetData tmpData;
 				bool canMatch = true;
 				bool canSend = false;
-				canMatch = (this->m_NetWork[m_NetWorkSel].second >= 2);
+				canMatch = (this->m_NetWork.back().second >= 2);
 				if (canMatch) {
 					// ティックレート用演算
 					this->m_TickCnt += 60.f / FPS;
@@ -388,24 +381,28 @@ namespace FPS_n2 {
 						canSend = true;
 					}
 				}
-				switch (this->m_NetWork[m_NetWorkSel].second) {
+				switch (this->m_NetWork.back().second) {
 				case 0:
-					m_NetWork[m_NetWorkSel].first.SendtoServer(0);			// 通信リクエスト
+					this->m_NetWork.back().first.SendtoServer(0);			// 通信リクエスト
 					//サーバーからの自分のIDを受信
-					if (this->m_NetWork[m_NetWorkSel].first.Recv(&tmpData)) {
+					if (this->m_NetWork.back().first.Recv(&tmpData)) {
 						NetCommonExecute(tmpData);								//更新
 						m_CannotConnectTimer = 0.f;
 						if (tmpData.Tmp1 > 0) {
 							this->m_PlayerData.ID = (PlayerID)tmpData.Tmp1;
-							m_NetWork[m_NetWorkSel].second++;
+							this->m_NetWork.back().second++;
 						}
 					}
 					else {
 						m_CannotConnectTimer += 1.f / FPS;
 						if (this->m_CannotConnectTimer > 1.f) {
 							m_CannotConnectTimer = 0.f;
-							m_NetWork[m_NetWorkSel].first.Dispose();
-							m_NetWorkSel++;
+							this->m_NetWork.back().first.Dispose();
+							this->m_NetWorkSel++;
+							this->m_NetWork.back().first.Set_Port(this->m_Port + this->m_NetWorkSel);
+							this->m_NetWork.back().first.SetIP(this->m_IP);
+							this->m_NetWork.back().first.InitClient();
+							this->m_NetWork.back().second = 0;
 							if (this->m_NetWorkSel >= Player_num) {
 								//満タン
 							}
@@ -413,20 +410,20 @@ namespace FPS_n2 {
 					}
 					break;
 				case 1:
-					m_NetWork[m_NetWorkSel].first.SendtoServer(1);			// ID取れたよ
+					this->m_NetWork.back().first.SendtoServer(1);			// ID取れたよ
 					//サーバーからのデータを受信したら次へ
-					if (this->m_NetWork[m_NetWorkSel].first.Recv(&tmpData)) {
+					if (this->m_NetWork.back().first.Recv(&tmpData)) {
 						NetCommonExecute(tmpData);								//更新
 						if (tmpData.StartFlag == 1) {
-							m_NetWork[m_NetWorkSel].second++;
+							this->m_NetWork.back().second++;
 						}
 					}
 					break;
 				case 2:
 					if (canSend) {
-						m_NetWork[m_NetWorkSel].first.SendtoServer(this->m_PlayerData);				//自身のデータを送信
+						this->m_NetWork.back().first.SendtoServer(this->m_PlayerData);				//自身のデータを送信
 					}
-					if (this->m_NetWork[m_NetWorkSel].first.Recv(&tmpData)) {					//サーバーからのデータを受信したら
+					if (this->m_NetWork.back().first.Recv(&tmpData)) {					//サーバーからのデータを受信したら
 						NetCommonExecute(tmpData);								//更新
 					}
 					break;

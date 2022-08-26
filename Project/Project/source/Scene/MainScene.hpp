@@ -17,7 +17,7 @@ namespace FPS_n2 {
 
 		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
 		private:
-			static const int		Chara_num = 2;
+			static const int		Chara_num = 3;
 			static const int		Vehicle_num = 3;
 
 			static const int		gun_num = Chara_num;
@@ -380,7 +380,14 @@ namespace FPS_n2 {
 					}
 					//クライアント
 					if (this->m_IsClient) {
-						m_ClientCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad(), this->m_ClientFrame, Vehicle->GetDamageEvent(), (Vehicle->GetDamageSwitch() ? 1 : 0));
+						if (!IsRide) {
+							auto vec = Chara->GetMove().vec;
+							vec.y(0);
+							m_ClientCtrl.SetMyPlayer(MyInput, Chara->GetMove().pos, vec, Chara->GetRadBuf().y(), this->m_ClientFrame, nullptr, (0));
+						}
+						else {
+							m_ClientCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad(), this->m_ClientFrame, &Vehicle->GetDamageEvent(), (Vehicle->GetDamageSwitch() ? 1 : 0));
+						}
 						if ((this->m_Sequence == SequenceEnum::Matching) && SeqFirst) {
 							m_ClientCtrl.ClientInit(this->m_NewSetting.UsePort, this->m_Tick, IPData);
 						}
@@ -399,7 +406,14 @@ namespace FPS_n2 {
 					}
 					//サーバー
 					else {
-						m_ServerCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad(), this->m_ClientFrame, Vehicle->GetDamageEvent(), (Vehicle->GetDamageSwitch() ? 1 : 0));
+						if (!IsRide) {
+							auto vec = Chara->GetMove().vec;
+							vec.y(0);
+							m_ServerCtrl.SetMyPlayer(MyInput, Chara->GetMove().pos, vec, Chara->GetRadBuf().y(), this->m_ClientFrame, nullptr, (0));
+						}
+						else {
+							m_ServerCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad(), this->m_ClientFrame, &Vehicle->GetDamageEvent(), (Vehicle->GetDamageSwitch() ? 1 : 0));
+						}
 						if ((this->m_Sequence == SequenceEnum::Matching) && SeqFirst) {
 							m_ServerCtrl.ServerInit(this->m_NewSetting.UsePort, this->m_Tick);
 						}
@@ -410,6 +424,29 @@ namespace FPS_n2 {
 					//
 					bool isready = true;
 					if (this->m_Sequence == SequenceEnum::MainGame) {
+						for (int i = 0; i < Chara_num; i++) {
+							auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
+							auto tmp = (this->m_IsClient) ? this->m_ClientCtrl.GetNowServerPlayerData(i) : this->m_ServerCtrl.GetNowServerPlayerData(i);
+							if (i == GetMyPlayerID()) {
+								if (!IsRide) {
+									MyInput.SetKeyInput(tmp.Input.GetKeyInput());//キーフレームだけサーバーに合わせる
+									c->SetInput(MyInput, isready);
+									if ((this->m_IsClient) ? this->m_ClientCtrl.GetRecvData(i) : this->m_ServerCtrl.GetRecvData(i)) {
+										this->m_Ping = (float)(this->m_ClientFrame - tmp.Frame)*1000.f;
+									}
+									printfDx("ping %lf \n", this->m_Ping);
+								}
+							}
+							else {
+								if (!IsRide) {
+									c->SetInput(tmp.Input, isready);
+									bool override_true = (tmp.CalcCheckSum()!=0);
+									if (override_true) {
+										c->SetPosBufOverRide(tmp.PosBuf, tmp.VecBuf);
+									}
+								}
+							}
+						}
 						for (int i = 0; i < Vehicle_num; i++) {
 							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 							auto tmp = (this->m_IsClient) ? this->m_ClientCtrl.GetNowServerPlayerData(i) : this->m_ServerCtrl.GetNowServerPlayerData(i);
