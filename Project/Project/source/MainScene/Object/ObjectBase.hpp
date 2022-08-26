@@ -187,6 +187,7 @@ namespace FPS_n2 {
 					}
 				}
 				this->m_IsBaseModel = false;
+				this->m_objActive = true;
 			}
 			//
 			virtual void	Init(void) noexcept {

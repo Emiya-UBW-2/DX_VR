@@ -40,6 +40,7 @@ namespace FPS_n2 {
 				if (!iscopy) {
 					pObj->LoadModel(filepath, objfilename, colfilename);
 				}
+				pObj->SetFrameNum();
 			}
 
 			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") {
@@ -56,15 +57,15 @@ namespace FPS_n2 {
 					this->m_Object.resize(this->m_Object.size() + 1);
 					this->m_Object.back() = std::make_shared<AmmoClass>();
 					break;
-				case ObjType::Magazine://mag
+				case ObjType::Magazine:
 					this->m_Object.resize(this->m_Object.size() + 1);
 					this->m_Object.back() = std::make_shared<MagazineClass>();
 					break;
-				case ObjType::Gun://gun
+				case ObjType::Gun:
 					this->m_Object.resize(this->m_Object.size() + 1);
 					this->m_Object.back() = std::make_shared<GunClass>();
 					break;
-				case ObjType::Cart://human
+				case ObjType::Cart:
 					this->m_Object.resize(this->m_Object.size() + 1);
 					this->m_Object.back() = std::make_shared<CartClass>();
 					break;
@@ -75,7 +76,6 @@ namespace FPS_n2 {
 
 				this->m_Object.back()->SetMapCol(this->m_MapCol);
 				this->m_Object.back()->Init();
-				this->m_Object.back()->SetFrameNum();
 
 				return &(this->m_Object[this->m_Object.size() - 1]);
 			}
@@ -93,12 +93,23 @@ namespace FPS_n2 {
 					this->m_Object.resize(this->m_Object.size() + 1);
 					this->m_Object.back() = std::make_shared<AmmoClass>();
 					break;
+				case ObjType::Magazine:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<MagazineClass>();
+					break;
+				case ObjType::Gun:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<GunClass>();
+					break;
+				case ObjType::Cart:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<CartClass>();
+					break;
 				default:
 					break;
 				}
 				this->m_Object.back()->SetMapCol(this->m_MapCol);
 				this->m_Object.back()->Init();
-				this->m_Object.back()->SetFrameNum();
 
 				return &(this->m_Object[this->m_Object.size() - 1]);
 			}

@@ -355,7 +355,7 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				//this->m_yrad_Upper、this->m_yrad_Bottom、this->m_rad.z()決定
+				//this->m_yrad_Upper、this->m_yrad_Bottom決定
 				this->m_InputGround.Execute();
 				if (this->m_Speed <= 0.1f) {
 					if (abs(this->m_InputGround.GetRad().y() - this->m_yrad_Upper) > deg2rad(50.f)) {
@@ -374,7 +374,6 @@ namespace FPS_n2 {
 				if (this->m_TurnBody || (this->m_Speed > 0.1f) || GetIsProne()) { Easing(&this->m_yrad_Upper, this->m_InputGround.GetRad().y(), TmpRunPer, EasingType::OutExpo); }
 				auto OLDP = this->m_yrad_Bottom;
 				Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - FrontP * (1.f - this->m_InputGround.GetPronePer()), TmpRunPer, EasingType::OutExpo);
-
 				this->m_InputGround.SetRadBufZ((this->m_yrad_Bottom - OLDP) * 2.f);
 			}
 			//上半身回転															//0.06ms
@@ -772,8 +771,8 @@ namespace FPS_n2 {
 				}
 				this->m_PosBuf += this->m_move.vec;
 				col_wall(OLDpos, &this->m_PosBuf, *this->m_MapCol);
-				//this->m_move.mat = MATRIX_ref::RotZ(this->m_InputGround.GetRad().z()) * MATRIX_ref::RotY(this->m_yrad_Bottom)
-				//	* MATRIX_ref::RotVec2(VECTOR_ref::up(), Lerp(VECTOR_ref::up(), this->m_ProneNormal, this->m_InputGround.GetPronePer()));
+				this->m_move.mat = MATRIX_ref::RotZ(this->m_InputGround.GetRad().z()) * MATRIX_ref::RotY(this->m_yrad_Bottom)
+					* MATRIX_ref::RotVec2(VECTOR_ref::up(), Lerp(VECTOR_ref::up(), this->m_ProneNormal, this->m_InputGround.GetPronePer()));
 				Easing(&this->m_move.pos, this->m_PosBuf, 0.9f, EasingType::OutExpo);
 				UpdateMove();
 				//銃座標指定(アニメアップデート含む)//0.19ms
@@ -806,8 +805,6 @@ namespace FPS_n2 {
 							&& (GetAnimeBuf(CharaAnimeID::All_ProneWalk) <= 0.1f)
 							&& (GetAnimeBuf(CharaAnimeID::All_PronetoStand) <= 0.1f)
 							) ? 1.f : 0.f);
-
-						printfDx("  %f\n", GetAnime(CharaAnimeID::LeftHand).per);
 
 						//アニメアップデート
 						GetObj().work_anime();//0.35ms
