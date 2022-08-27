@@ -486,33 +486,6 @@ namespace FPS_n2 {
 					}
 				}
 			};
-			//HP関連
-			class Damages {
-			private:
-				HitPoint				m_HP{ 100 };
-				HitPoint				m_HP_full{ 100 };
-				std::vector<HitPoint>	m_HP_parts;
-			public:				//getter,setter
-				const auto		Get_alive(void) const noexcept { return this->m_HP != 0; }																								//生きているか
-				const auto&		Get_HP(void) const noexcept { return this->m_HP; }
-				const auto&		Get_HP_full(void) const noexcept { return this->m_HP_full; }
-				const auto&		Get_HP_parts(void) const noexcept { return this->m_HP_parts; }
-				void			SubHP(HitPoint damage_t, float rad_t)  noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, this->m_HP_full); }
-				void			SubHP_Parts(HitPoint damage_t, int parts_Set_t) noexcept { this->m_HP_parts[parts_Set_t] = std::max<HitPoint>(this->m_HP_parts[parts_Set_t] - damage_t, 0); }
-			public:
-				void			Init(int parts_num, HitPoint Full_t = -1) noexcept {
-					if (Full_t > 0) {
-						this->m_HP_full = Full_t;
-					}
-					this->m_HP = this->m_HP_full;
-					this->m_HP_parts.resize(parts_num);
-					for (auto& h : this->m_HP_parts) { h = this->m_HP_full; }//モジュール耐久
-				}
-				void			Dispose(void) noexcept {
-					this->m_HP = 0;
-					this->m_HP_parts.clear();
-				}
-			};
 			//命中関連
 			class HitSortInfo {
 				size_t					m_hitmesh{ SIZE_MAX };
@@ -720,8 +693,7 @@ namespace FPS_n2 {
 			MATRIX_ref											m_MouseVec;										//マウスエイム用変数確保
 			float												m_AimingDistance{ 500.f*Scale_Rate };			//
 			bool												m_view_override{ false };						//
-			float												m_view_xrad{ 0.f };								//
-			float												m_view_yrad{ 0.f };								//
+			VECTOR_ref											m_view_rad;										//
 			float												m_range{ 6.0f };								//
 			float												m_range_r{ this->m_range };						//
 			float												m_range_change{ this->m_range / 10.f };			//
@@ -756,7 +728,8 @@ namespace FPS_n2 {
 			float												m_wheel_Right{ 0.f };							//転輪回転
 			std::vector<float>									m_wheel_frameYpos{ 0.f };						//転輪のY方向保持
 			//ダメージ
-			Damages												m_DamageControl;								//
+			HitPoint											m_HP{ 100 };
+			std::vector<HitPoint>								m_HP_parts;
 			DamageEvent											m_DamageEvent;									//
 			unsigned char										m_DamageSwitch{ 0 };							//
 			unsigned char										m_DamageSwitchRec{ 0 };							//
@@ -764,19 +737,26 @@ namespace FPS_n2 {
 			b2Pats												m_b2mine;										//BOX2D
 			float												m_spd_buf{ 0.f };								//BOX2D
 			std::array<FootWorld, 2>							m_b2Foot;										//履帯BOX2D
+		public:				//getter,setter
 		public:			//setter,getter
 			const auto		SetDamageEvent(const DamageEvent& value) noexcept {
-				if (this->m_MyID == value.ID) { this->m_DamageControl.SubHP(value.Damage, value.rad); }
-				return (this->m_MyID == value.ID);
+				if (this->m_MyID == value.ID && this->m_objType == value.CharaType) {
+					SubHP(value.Damage, value.rad);
+					return true;
+				}
+				return false;
 			}
 			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
 			void			SetDamageSwitchRec(char value) noexcept { this->m_DamageSwitchRec = value; }
 			void			SetAimingDistance(float value) noexcept { this->m_AimingDistance = value; }
+			void			SubHP(HitPoint damage_t, float rad_t)  noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, this->m_VecData->GetMaxHP()); }
+			void			SubHP_Parts(HitPoint damage_t, int parts_Set_t) noexcept { this->m_HP_parts[parts_Set_t] = std::max<HitPoint>(this->m_HP_parts[parts_Set_t] - damage_t, 0); }
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
 			const auto&		GetDamageSwitch(void) const noexcept { return this->m_DamageSwitch; }
 			const auto&		GetDamageSwitchRec(void) const noexcept { return this->m_DamageSwitchRec; }
-			const auto&		GetHP(void) const noexcept { return this->m_DamageControl.Get_HP(); }
-			const auto&		GetHPMax(void) const noexcept { return this->m_DamageControl.Get_HP_full(); }
+			const auto&		GetHP(void) const noexcept { return this->m_HP; }
+			const auto&		Get_HP_parts(void) const noexcept { return this->m_HP_parts; }
+			const auto&		GetHPMax(void) const noexcept { return this->m_VecData->GetMaxHP(); }
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
 			const auto&		GetName(void) const noexcept { return this->m_VecData->GetName(); }
 			const auto&		GetLookVec(void) const noexcept { return this->m_MouseVec; }
@@ -785,9 +765,9 @@ namespace FPS_n2 {
 			const auto&		Gunround(size_t id_t) const noexcept { return this->m_Gun[id_t].Getrounds(); }
 			const auto&		Get_Gunsize(void) const noexcept { return this->m_Gun.size(); }
 			const auto&		Get_changeview(void) const noexcept { return this->m_changeview; }																	//照準変更時
-			const auto&		GetViewxRad(void) const noexcept { return this->m_view_xrad; }
-			const auto&		GetViewyRad(void) const noexcept { return this->m_view_yrad; }
+			const auto&		GetViewRad(void) const noexcept { return this->m_view_rad; }
 			const auto&		Get_ratio(void) const noexcept { return this->m_ratio; }																			//UI用
+			const auto		Get_alive(void) const noexcept { return this->m_HP != 0; }																			//生きているか
 			const auto		Get_body_yrad(void) const noexcept { auto pp = this->m_move.mat.zvec()*-1.f; return atan2f(pp.x(), pp.z()); }
 			const auto		is_ADS(void) const noexcept { return this->m_range == 0.f; }																		//ADS中
 			const auto		GetGunMuzzlePos(void) const noexcept { return GetObj_const().frame(this->m_Gun[0].GetGunMuzzleFrameID()); }
@@ -863,7 +843,8 @@ namespace FPS_n2 {
 				}
 				this->m_Gun.clear();
 				this->m_Hit_active.Dispose();
-				this->m_DamageControl.Dispose();
+				this->m_HP = 0;
+				this->m_HP_parts.clear();
 				this->hitres.clear();
 				this->hitssort.clear();
 			}

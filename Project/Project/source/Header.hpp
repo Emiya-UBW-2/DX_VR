@@ -54,6 +54,7 @@ using namespace DXLib_ref;
 #include "MainScene/Object/Vehicle.hpp"
 
 #include "ObjectManager.hpp"
+#include "MainScene/Player/Player.hpp"
 
 #include "MainScene/UI/MainSceneUIControl.hpp"
 //

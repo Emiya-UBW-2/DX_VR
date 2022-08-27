@@ -17,6 +17,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	SoundPool::Create();
 	FPS_n2::Sceneclass::ObjectManager::Create();
+	FPS_n2::Sceneclass::PlayerManager::Create();
 
 	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();														//ÉVÅ[Éì
 	EffectControl::Create();

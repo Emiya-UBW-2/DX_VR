@@ -28,6 +28,9 @@
     <Filter Include="ソース ファイル\MainScene\UI">
       <UniqueIdentifier>{a481be59-68ff-4107-9bce-dabca4ec7642}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\MainScene\Player">
+      <UniqueIdentifier>{22770e4f-967e-4eff-a117-222b572d8adf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\sequence.hpp">
@@ -95,6 +98,9 @@
     </ClInclude>
     <ClInclude Include="source\MainScene\Object\GunEnum.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\Player\Player.hpp">
+      <Filter>ソース ファイル\MainScene\Player</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

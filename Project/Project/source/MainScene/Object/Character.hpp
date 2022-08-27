@@ -11,7 +11,6 @@ namespace FPS_n2 {
 			const float HeartRateMax{ 180.f };//心拍数最大
 			const float StaminaMax{ 100.f };
 			const float HPMax = 100.f;
-			const float MPMax = 100.f;
 			std::string											m_Name;
 			CharaTypeID											m_CharaType;
 		private:
@@ -61,7 +60,6 @@ namespace FPS_n2 {
 			bool												m_CannotSprint{ false };//スタミナ切れ
 
 			float												m_HP{ 0.f };							//スコア
-			float												m_Score{ 0.f };							//スコア
 
 			float m_LeftHandPer{ 0.f };
 			//表情
@@ -83,9 +81,6 @@ namespace FPS_n2 {
 			void			SetFrameLocalMat(CharaFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(m_Frames[(int)frame].first, value * m_Frames[(int)frame].second); }
 			void			SetShapePer(CharaShape pShape, float Per) noexcept { m_Shapes[(int)pShape].second = Per; }
 			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
-			void			AddScore(float value) noexcept { this->m_Score += value; }
-			void			SubScore(float value) noexcept { this->m_Score -= value; }
-			void			SetScore(float value) noexcept { this->m_Score = value; }
 			void			AddHP(float value) noexcept { this->m_HP = std::clamp(this->m_HP + value, 0.f, HPMax); }
 			void			SubHP(float value) noexcept { this->m_HP = std::clamp(this->m_HP - value, 0.f, HPMax); }
 			void			SetHP(float value) noexcept { this->m_HP = value; }
@@ -156,10 +151,8 @@ namespace FPS_n2 {
 			const auto		GetEyeVecMat(void) const noexcept { return GetCharaDir(); }
 			const auto&		GetPosBuf(void) const noexcept { return this->m_PosBuf; }
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
-			const auto&		GetScore(void) const noexcept { return this->m_Score; }
 			const auto&		GetHP(void) const noexcept { return this->m_HP; }
 			const auto&		GetHPMax(void) const noexcept { return HPMax; }
-			const auto&		GetMPMax(void) const noexcept { return MPMax; }
 			const auto&		GetSendCamShake(void) const noexcept { return this->m_SendCamShake; }
 			const auto&		GetName(void) const noexcept { return this->m_Name; }
 		public:
@@ -194,13 +187,10 @@ namespace FPS_n2 {
 				this->m_Press_Aim = false;
 				this->m_KeyActive = false;
 				this->m_HeartSoundFlag = false;
-				//
-				this->m_Score = 0.f;
 				//this->m_UpperAnimSelect;
 				//this->m_PrevUpperAnimSel;
 				//this->m_BottomAnimSelect;
 				this->m_HP = HPMax;
-				this->m_Score = 0.f;							//スコア
 				//表情
 				this->m_Eyeclose = 0;
 				this->m_EyeclosePer = 0.f;

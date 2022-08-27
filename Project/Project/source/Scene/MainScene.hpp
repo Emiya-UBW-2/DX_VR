@@ -58,8 +58,6 @@ namespace FPS_n2 {
 			float					m_Rader_r{ 1.f };
 			//
 			std::vector<DamageEvent>	m_DamageEvents;
-			bool IsRide = false;
-
 			//サーバー専用
 			ServerControl			m_ServerCtrl;
 			//クライアント専用
@@ -81,6 +79,7 @@ namespace FPS_n2 {
 			using TEMPSCENE::TEMPSCENE;
 			void			Set(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
+				auto* PlayerMngr = PlayerManager::Instance();
 				Set_EnvLight(
 					VECTOR_ref::vget(Scale_Rate*-300.f, Scale_Rate*-10.f, Scale_Rate*-300.f),
 					VECTOR_ref::vget(Scale_Rate*300.f, Scale_Rate*50.f, Scale_Rate*300.f),
@@ -102,7 +101,7 @@ namespace FPS_n2 {
 
 				ObjMngr->Init(&this->m_BackGround.GetGroundCol());
 				for (int i = 0; i < Chara_num; i++) {
-					ObjMngr->AddObject(ObjType::Human,"data/Charactor/WinningTicket/");
+					ObjMngr->AddObject(ObjType::Human, "data/Charactor/WinningTicket/");
 				}
 				for (int i = 0; i < Vehicle_num; i++) {
 					ObjMngr->AddObject(ObjType::Vehicle);
@@ -169,14 +168,23 @@ namespace FPS_n2 {
 					v->ValueInit(&vehc_data[0], hit_pic, this->m_BackGround.GetBox2Dworld(), (PlayerID)i);
 					v->ValueSet(deg2rad(0), deg2rad(90), pos_t);
 				}
-				{
-					auto& Chara = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, 0));//自分
-					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, 0));//自分
-					if (IsRide) {
-						this->m_HPBuf = (float)Vehicle->GetHP();
-						//this->m_ScoreBuf = Vehicle->GetScore();
-					}
+				//player
+				PlayerMngr->Init(Player_num);
+				for (int i = 0; i < Player_num; i++) {
+					PlayerMngr->GetPlayer(i).SetChara((std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i)));
+					//PlayerMngr->GetPlayer(i).SetChara(nullptr);
+					//PlayerMngr->GetPlayer(i).SetVehicle((std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i)));
+					PlayerMngr->GetPlayer(i).SetVehicle(nullptr);
 				}
+				if (!PlayerMngr->GetPlayer(0).IsRide()) {
+					this->m_HPBuf = (float)PlayerMngr->GetPlayer(0).GetChara()->GetHP();
+					this->m_ScoreBuf = PlayerMngr->GetPlayer(0).GetScore();
+				}
+				else {
+					this->m_HPBuf = (float)PlayerMngr->GetPlayer(0).GetVehicle()->GetHP();
+					this->m_ScoreBuf = PlayerMngr->GetPlayer(0).GetScore();
+				}
+
 				//Cam
 				camera_main.set_cam_info(deg2rad(65), 1.f, 100.f);
 				camera_main.set_cam_pos(VECTOR_ref::vget(0, 15, -20), VECTOR_ref::vget(0, 15, 0), VECTOR_ref::vget(0, 1, 0));
@@ -237,6 +245,7 @@ namespace FPS_n2 {
 			//
 			bool			Update(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
+				auto* PlayerMngr = PlayerManager::Instance();
 				//FirstDoingv
 				if (IsFirstLoop) {
 					SetMousePoint(DXDraw::Instance()->disp_x / 2, DXDraw::Instance()->disp_y / 2);
@@ -244,8 +253,6 @@ namespace FPS_n2 {
 				}
 				//Input,AI
 				{
-					auto& Chara = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, GetMyPlayerID()));//自分
-					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
 					float cam_per = ((camera_main.fov / deg2rad(75)) / (is_lens() ? zoom_lens() : 1.f)) / 100.f;
 					float pp_x = 0.f, pp_y = 0.f;
 					bool look_key = false;
@@ -371,32 +378,29 @@ namespace FPS_n2 {
 					Easing(&this->m_TPS_XradR, this->m_TPS_Xrad, 0.5f, EasingType::OutExpo);
 
 					this->m_TPS_YradR += (sin(this->m_TPS_Yrad)*cos(this->m_TPS_YradR) - cos(this->m_TPS_Yrad) * sin(this->m_TPS_YradR))*20.f / FPS;
-					if (!IsRide) {
-						Chara->SetEyeVec((camera_main.camvec - camera_main.campos).Norm());
-						MyInput.SetRadBuf(Chara->GetRadBuf().x(), Chara->GetRadBuf().y());
-					}
-					else {
-						MyInput.SetRadBuf(Vehicle->GetViewxRad(), Vehicle->GetViewyRad());
-					}
+					MyInput.SetRadBuf(PlayerMngr->GetPlayer(GetMyPlayerID()).GetRadBuf());
 					//クライアント
 					if (this->m_IsClient) {
-						if (!IsRide) {
-							auto vec = Chara->GetMove().vec;
-							vec.y(0);
-							m_ClientCtrl.SetMyPlayer(MyInput, Chara->GetMove().pos, vec, Chara->GetRadBuf().y(), this->m_ClientFrame, nullptr, (0));
-						}
-						else {
-							m_ClientCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad(), this->m_ClientFrame, &Vehicle->GetDamageEvent(), (Vehicle->GetDamageSwitch() ? 1 : 0));
-						}
+						auto SendMove = PlayerMngr->GetPlayer(GetMyPlayerID()).GetNetSendMove();
+						m_ClientCtrl.SetMyPlayer(MyInput, SendMove.m_Pos, SendMove.m_Vec, SendMove.m_Yrad, this->m_ClientFrame, SendMove.m_Damage, SendMove.m_DamageSwitch);
 						if ((this->m_Sequence == SequenceEnum::Matching) && SeqFirst) {
 							m_ClientCtrl.ClientInit(this->m_NewSetting.UsePort, this->m_Tick, IPData);
 						}
 						if ((this->m_Sequence >= SequenceEnum::Matching) && this->m_ClientCtrl.ClientExecute()) {
 							this->m_Sequence = SequenceEnum::MainGame;
 						}
+						for (int i = 0; i < Chara_num; i++) {
+							auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
+							if (i == GetMyPlayerID() && !PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) {
+								c->SetCharaType(CharaTypeID::Mine);
+							}
+							else {
+								c->SetCharaType(CharaTypeID::Enemy);
+							}
+						}
 						for (int i = 0; i < Vehicle_num; i++) {
 							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
-							if (i == GetMyPlayerID()) {
+							if (i == GetMyPlayerID() && PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) {
 								v->SetCharaType(CharaTypeID::Mine);
 							}
 							else {
@@ -406,14 +410,8 @@ namespace FPS_n2 {
 					}
 					//サーバー
 					else {
-						if (!IsRide) {
-							auto vec = Chara->GetMove().vec;
-							vec.y(0);
-							m_ServerCtrl.SetMyPlayer(MyInput, Chara->GetMove().pos, vec, Chara->GetRadBuf().y(), this->m_ClientFrame, nullptr, (0));
-						}
-						else {
-							m_ServerCtrl.SetMyPlayer(MyInput, Vehicle->GetMove().pos, Vehicle->GetMove().vec, Vehicle->Get_body_yrad(), this->m_ClientFrame, &Vehicle->GetDamageEvent(), (Vehicle->GetDamageSwitch() ? 1 : 0));
-						}
+						auto SendMove = PlayerMngr->GetPlayer(GetMyPlayerID()).GetNetSendMove();
+						m_ServerCtrl.SetMyPlayer(MyInput, SendMove.m_Pos, SendMove.m_Vec, SendMove.m_Yrad, this->m_ClientFrame, SendMove.m_Damage, SendMove.m_DamageSwitch);
 						if ((this->m_Sequence == SequenceEnum::Matching) && SeqFirst) {
 							m_ServerCtrl.ServerInit(this->m_NewSetting.UsePort, this->m_Tick);
 						}
@@ -424,44 +422,33 @@ namespace FPS_n2 {
 					//
 					bool isready = true;
 					if (this->m_Sequence == SequenceEnum::MainGame) {
-						for (int i = 0; i < Chara_num; i++) {
-							auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
+						for (int i = 0; i < Player_num; i++) {
 							auto tmp = (this->m_IsClient) ? this->m_ClientCtrl.GetNowServerPlayerData(i) : this->m_ServerCtrl.GetNowServerPlayerData(i);
+
+							auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
+							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 							if (i == GetMyPlayerID()) {
-								if (!IsRide) {
-									MyInput.SetKeyInput(tmp.Input.GetKeyInput());//キーフレームだけサーバーに合わせる
+								MyInput.SetKeyInput(tmp.Input.GetKeyInput());//キーフレームだけサーバーに合わせる
+								if (!PlayerMngr->GetPlayer(i).IsRide()) {
 									c->SetInput(MyInput, isready);
-									if ((this->m_IsClient) ? this->m_ClientCtrl.GetRecvData(i) : this->m_ServerCtrl.GetRecvData(i)) {
-										this->m_Ping = (float)(this->m_ClientFrame - tmp.Frame)*1000.f;
-									}
-									printfDx("ping %lf \n", this->m_Ping);
 								}
+								else {
+									v->SetInput(MyInput, isready, false);
+								}
+								if ((this->m_IsClient) ? this->m_ClientCtrl.GetRecvData(i) : this->m_ServerCtrl.GetRecvData(i)) {
+									this->m_Ping = (float)(this->m_ClientFrame - tmp.Frame)*1000.f;
+								}
+								printfDx("ping %lf \n", this->m_Ping);
 							}
 							else {
-								if (!IsRide) {
+								if (!PlayerMngr->GetPlayer(i).IsRide()) {
 									c->SetInput(tmp.Input, isready);
-									bool override_true = (tmp.CalcCheckSum()!=0);
+									bool override_true = (tmp.CalcCheckSum() != 0);
 									if (override_true) {
 										c->SetPosBufOverRide(tmp.PosBuf, tmp.VecBuf);
 									}
 								}
-							}
-						}
-						for (int i = 0; i < Vehicle_num; i++) {
-							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
-							auto tmp = (this->m_IsClient) ? this->m_ClientCtrl.GetNowServerPlayerData(i) : this->m_ServerCtrl.GetNowServerPlayerData(i);
-							if (i == GetMyPlayerID()) {
-								if (IsRide) {
-									MyInput.SetKeyInput(tmp.Input.GetKeyInput());//キーフレームだけサーバーに合わせる
-									v->SetInput(MyInput, isready, false);
-									if ((this->m_IsClient) ? this->m_ClientCtrl.GetRecvData(i) : this->m_ServerCtrl.GetRecvData(i)) {
-										this->m_Ping = (float)(this->m_ClientFrame - tmp.Frame)*1000.f;
-									}
-									printfDx("ping %lf \n", this->m_Ping);
-								}
-							}
-							else {
-								if (IsRide) {
+								else {
 									v->SetInput(tmp.Input, isready, true);
 									bool override_true = true;
 									for (int j = 0; j < Vehicle_num; j++) {
@@ -478,38 +465,39 @@ namespace FPS_n2 {
 									}
 								}
 							}
-							//ダメージイベント処理
-							{
-								if (tmp.DamageSwitch != v->GetDamageSwitchRec()) {
-									this->m_DamageEvents.emplace_back(tmp.Damage);
-									v->SetDamageSwitchRec(tmp.DamageSwitch);
-								}
+						}
+						//ダメージイベント処理
+						for (int i = 0; i < Vehicle_num; i++) {
+							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
+							auto tmp = (this->m_IsClient) ? this->m_ClientCtrl.GetNowServerPlayerData(i) : this->m_ServerCtrl.GetNowServerPlayerData(i);
+							if (tmp.DamageSwitch != v->GetDamageSwitchRec()) {
+								this->m_DamageEvents.emplace_back(tmp.Damage);
+								v->SetDamageSwitchRec(tmp.DamageSwitch);
 							}
 						}
 						this->m_ClientFrame += 1.0 / (double)FPS;
 					}
 					else {
-						for (int i = 0; i < Chara_num; i++) {
+						for (int i = 0; i < Player_num; i++) {
 							auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
+							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 							if (i == GetMyPlayerID()) {
-								if (!IsRide) {
+								if (!PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) {
 									c->SetInput(MyInput, isready);
 								}
 							}
-						}
-						for (int i = 0; i < Vehicle_num; i++) {
-							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 							if (i == GetMyPlayerID()) {
-								if (IsRide) {
+								if (PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) {
 									v->SetInput(MyInput, isready, false);
 								}
 							}
-							//ダメージイベント処理
-							{
-								if (v->GetDamageSwitch() != v->GetDamageSwitchRec()) {
-									this->m_DamageEvents.emplace_back(v->GetDamageEvent());
-									v->SetDamageSwitchRec(v->GetDamageSwitch());
-								}
+						}
+						//ダメージイベント処理
+						for (int i = 0; i < Vehicle_num; i++) {
+							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
+							if (v->GetDamageSwitch() != v->GetDamageSwitchRec()) {
+								this->m_DamageEvents.emplace_back(v->GetDamageEvent());
+								v->SetDamageSwitchRec(v->GetDamageSwitch());
 							}
 						}
 						this->m_ClientFrame = 0.0;
@@ -526,9 +514,9 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				//
-				{
-					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
+				//レーザーサイト
+				if (PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) {
+					auto& Vehicle = PlayerMngr->GetPlayer(GetMyPlayerID()).GetVehicle();
 					auto StartPos = Vehicle->GetGunMuzzlePos();
 					auto EndPos = StartPos + Vehicle->GetGunMuzzleVec() * 500.f*Scale_Rate;
 					Vehicle->GetMapColNearest(StartPos, &EndPos);
@@ -616,8 +604,8 @@ namespace FPS_n2 {
 				this->m_BackGround.GetBox2Dworld()->Step(1.f, 1, 1);//物理更新
 				ObjMngr->LateExecuteObject();
 				//視点
-				if (!IsRide) {
-					auto& Chara = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, GetMyPlayerID()));//自分
+				if (!PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) {
+					auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 					if (Chara->GetSendCamShake()) {
 						this->m_CamShake = 1.f;
 					}
@@ -659,7 +647,7 @@ namespace FPS_n2 {
 					}
 				}
 				else {
-					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
+					auto& Vehicle = PlayerMngr->GetPlayer(GetMyPlayerID()).GetVehicle();
 					Vehicle->Setcamera(camera_main, fov_base);
 					{
 						MATRIX_ref FreeLook;
@@ -675,20 +663,28 @@ namespace FPS_n2 {
 						camera_main.camvec = CamPos + CamVec * 100.f;
 					}
 				}
-
 				this->m_BackGround.Execute();
 				//UIパラメーター
 				{
-					auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
 					this->m_UIclass.SetIntParam(1, (int)this->m_ScoreBuf);
-					//this->m_ScoreBuf += std::clamp((Vehicle->GetScore() - this->m_ScoreBuf)*100.f, -5.f, 5.f) / FPS;
+					this->m_ScoreBuf += std::clamp((PlayerMngr->GetPlayer(0).GetScore() - this->m_ScoreBuf)*100.f, -5.f, 5.f) / FPS;
 
 					this->m_UIclass.SetIntParam(2, 1);
 
-					this->m_UIclass.SetIntParam(3, (int)Vehicle->GetHP());
-					this->m_UIclass.SetIntParam(4, (int)Vehicle->GetHPMax());
-					this->m_UIclass.SetIntParam(5, (int)(this->m_HPBuf + 0.5f));
-					this->m_HPBuf += std::clamp((Vehicle->GetHP() - this->m_HPBuf)*100.f, -5.f, 5.f) / FPS;
+					if (!PlayerMngr->GetPlayer(0).IsRide()) {
+						auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+						this->m_UIclass.SetIntParam(3, (int)Chara->GetHP());
+						this->m_UIclass.SetIntParam(4, (int)Chara->GetHPMax());
+						this->m_UIclass.SetIntParam(5, (int)(this->m_HPBuf + 0.5f));
+						this->m_HPBuf += std::clamp((Chara->GetHP() - this->m_HPBuf)*100.f, -5.f, 5.f) / FPS;
+					}
+					else {
+						auto& Vehicle = PlayerMngr->GetPlayer(GetMyPlayerID()).GetVehicle();
+						this->m_UIclass.SetIntParam(3, (int)Vehicle->GetHP());
+						this->m_UIclass.SetIntParam(4, (int)Vehicle->GetHPMax());
+						this->m_UIclass.SetIntParam(5, (int)(this->m_HPBuf + 0.5f));
+						this->m_HPBuf += std::clamp((Vehicle->GetHP() - this->m_HPBuf)*100.f, -5.f, 5.f) / FPS;
+					}
 
 					this->m_UIclass.SetIntParam(6, (int)1.f);
 					this->m_UIclass.SetIntParam(7, (int)1.f);
@@ -700,10 +696,12 @@ namespace FPS_n2 {
 			}
 			void			Dispose(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
+				auto* PlayerMngr = PlayerManager::Instance();
 
 				m_ServerCtrl.NetWorkDispose();
 				m_ClientCtrl.NetWorkDispose();
 				Effect_UseControl::Dispose_Effect();
+				PlayerMngr->Dispose();
 				ObjMngr->DisposeObject();
 				this->vehicle_Pool.clear();
 				this->m_BackGround.Dispose();
@@ -711,6 +709,8 @@ namespace FPS_n2 {
 			//
 			void			Depth_Draw(void) noexcept override {
 				//auto* ObjMngr = ObjectManager::Instance();
+				//auto* PlayerMngr = PlayerManager::Instance();
+
 				this->m_BackGround.Draw();
 				//ObjMngr->DrawDepthObject();
 			}
@@ -719,6 +719,9 @@ namespace FPS_n2 {
 			}
 			void			Shadow_Draw_NearFar(void) noexcept override {
 				//auto* ObjMngr = ObjectManager::Instance();
+				//auto* PlayerMngr = PlayerManager::Instance();
+
+
 				this->m_BackGround.Shadow_Draw_NearFar();
 				//ObjMngr->DrawObject_Shadow();
 			}
@@ -730,6 +733,7 @@ namespace FPS_n2 {
 			}
 			void			Main_Draw(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
+				auto* PlayerMngr = PlayerManager::Instance();
 
 				this->m_BackGround.Draw();
 				ObjMngr->DrawObject();
@@ -771,8 +775,9 @@ namespace FPS_n2 {
 			//UI表示
 			void			UI_Draw(void) noexcept  override {
 				auto* ObjMngr = ObjectManager::Instance();
-				auto& Chara = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, GetMyPlayerID()));//自分
-				auto& Vehicle = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, GetMyPlayerID()));//自分
+				auto* PlayerMngr = PlayerManager::Instance();
+				//自分
+				auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 
 				auto* Fonts = FontPool::Instance();
 				auto* DrawParts = DXDraw::Instance();
@@ -784,8 +789,9 @@ namespace FPS_n2 {
 				auto Black = GetColor(0, 0, 0);
 				unsigned int color = Red;
 				//キャラ
+				auto BaseBos = PlayerMngr->GetPlayer(GetMyPlayerID()).GetPos();
 				for (int i = 0; i < Chara_num; i++) {
-					if (i == GetMyPlayerID()) { continue; }
+					if ((i == GetMyPlayerID()) && !PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
 					auto campos = c->GetCameraPosition();
 					if (0.f < campos.z() && campos.z() < 1.f) {
@@ -809,14 +815,14 @@ namespace FPS_n2 {
 						int siz = y_r(std::max((int)(20.f*c->GetCameraSize()), 10));
 						DrawEdgeBox_2D(xp - xs, yp - ys, xp + xs, yp + ys, color, White);
 						Fonts->Get(siz, FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_MID(xp, yp - ys - siz, color, White, "%s", c->GetName().c_str());
-						Fonts->Get(siz, FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat(xp + xs, yp + ys, color, White, "%dm", (int)((c->GetMatrix().pos() - Chara->GetMatrix().pos()).size() / Scale_Rate));
+						Fonts->Get(siz, FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat(xp + xs, yp + ys, color, White, "%dm", (int)((c->GetMatrix().pos() - BaseBos).size() / Scale_Rate));
 						//リセット
 						campos.z(-1.f);
 						c->SetCameraPosition(campos);
 					}
 				}
 				for (int i = 0; i < Vehicle_num; i++) {
-					if (i == GetMyPlayerID()) { continue; }
+					if ((i == GetMyPlayerID()) && PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) { continue; }
 					auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 					auto campos = v->GetCameraPosition();
 					if (0.f < campos.z() && campos.z() < 1.f) {
@@ -840,7 +846,7 @@ namespace FPS_n2 {
 						int siz = y_r(std::max((int)(20.f*v->GetCameraSize()), 10));
 						DrawEdgeBox_2D(xp - xs, yp - ys, xp + xs, yp + ys, color, White);
 						Fonts->Get(siz, FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_MID(xp, yp - ys - siz, color, White, "%s", v->GetName().c_str());
-						Fonts->Get(siz, FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat(xp + xs, yp + ys, color, White, "%dm", (int)((v->GetMatrix().pos() - Vehicle->GetMatrix().pos()).size() / Scale_Rate));
+						Fonts->Get(siz, FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat(xp + xs, yp + ys, color, White, "%dm", (int)((v->GetMatrix().pos() - BaseBos).size() / Scale_Rate));
 						//リセット
 						campos.z(-1.f);
 						v->SetCameraPosition(campos);
@@ -891,16 +897,11 @@ namespace FPS_n2 {
 					ys2 = y_r((int)(256.f * 0.2f*std::min(1.f, this->m_Rader_r)));
 					DrawEdgeBox_2D((int)(xp1 - xs1), (int)(yp1 - ys1), (int)(xp1 + xs2), (int)(yp1 + ys2), White, Green);
 
-					auto BaseBos = ((!IsRide) ? Chara->GetMatrix().pos() : Vehicle->GetMatrix().pos());
-
 					xs1 = y_r((int)(256.f * 0.5f));
 					ys1 = y_r((int)(256.f * 0.8f));
 					xs2 = y_r((int)(256.f * 0.5f));
 					ys2 = y_r((int)(256.f * 0.2f));
-					auto base = Chara->GetCharaDir().zvec()*-1.f;
-					if (IsRide) {
-						base = Vehicle->GetLookVec().zvec()*-1.f;
-					}
+					auto base = PlayerMngr->GetPlayer(GetMyPlayerID()).GetAim();
 					base.y(0.f);
 					base = base.Norm();
 
@@ -951,7 +952,7 @@ namespace FPS_n2 {
 					}
 
 					for (int i = 0; i < Chara_num; i++) {
-						if (i == GetMyPlayerID()) { continue; }
+						if ((i == GetMyPlayerID()) && !PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) { continue; }
 						auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
 						auto pos = MATRIX_ref::Vtrans(c->GetMatrix().pos() - BaseBos, MATRIX_ref::RotY(rad))*((1.f / Scale_Rate) * this->m_Rader_r);
 						if ((-xs1 < pos.x() && pos.x() < xs2) && (-ys1 < -pos.z() && -pos.z() < ys2)) {
@@ -972,7 +973,7 @@ namespace FPS_n2 {
 						}
 					}
 					for (int i = 0; i < Vehicle_num; i++) {
-						if (i == GetMyPlayerID()) { continue; }
+						if ((i == GetMyPlayerID()) && PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) { continue; }
 						auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 						auto pos = MATRIX_ref::Vtrans(v->GetMatrix().pos() - BaseBos, MATRIX_ref::RotY(rad))*((1.f / Scale_Rate) * this->m_Rader_r);
 						if ((-xs1 < pos.x() && pos.x() < xs2) && (-ys1 < -pos.z() && -pos.z() < ys2)) {
@@ -997,7 +998,10 @@ namespace FPS_n2 {
 					}
 				}
 
-				Vehicle->DrawModuleView(y_r(1500), y_r(200), y_r(200));
+				if (PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) {
+					auto& Vehicle = PlayerMngr->GetPlayer(GetMyPlayerID()).GetVehicle();
+					Vehicle->DrawModuleView(y_r(1500), y_r(200), y_r(200));
+				}
 				//通信設定
 				if (!this->m_MouseActive.on()) {
 					int xp, yp, xs, ys;

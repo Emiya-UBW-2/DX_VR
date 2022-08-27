@@ -40,7 +40,11 @@ namespace FPS_n2 {
 			for (auto& w : this->m_wheel_frameYpos) { w = 0.f; }
 			//砲
 			//ヒットポイント
-			this->m_DamageControl.Init((int)this->m_col.mesh_num(), this->m_VecData->GetMaxHP());
+			{
+				this->m_HP = this->m_VecData->GetMaxHP();
+				this->m_HP_parts.resize(this->m_col.mesh_num());
+				for (auto& h : this->m_HP_parts) { h = this->m_VecData->GetMaxHP(); }//モジュール耐久
+			}
 			//戦車スポーン
 			this->m_b2mine.SetTransform(b2Vec2(this->m_move.pos.x(), this->m_move.pos.z()), Get_body_yrad());
 			this->m_PosBufOverRideFlag = false;
@@ -71,15 +75,15 @@ namespace FPS_n2 {
 			//
 			if (isOverrideView) {
 				this->m_view_override = true;
-				this->m_view_xrad = pInput.GetxRad();
-				this->m_view_yrad = pInput.GetyRad();
+				this->m_view_rad.x(pInput.GetxRad());
+				this->m_view_rad.y(pInput.GetyRad());
 			}
-			this->m_key[0] = pInput.GetAction5() && pReady && this->m_DamageControl.Get_alive();			//射撃
-			this->m_key[1] = false && pReady && this->m_DamageControl.Get_alive();							//マシンガン
-			this->m_key[2] = pInput.GetGoFrontPress() && pReady && this->m_DamageControl.Get_alive();		//前進
-			this->m_key[3] = pInput.GetGoBackPress() && pReady && this->m_DamageControl.Get_alive();		//後退
-			this->m_key[4] = pInput.GetGoRightPress() && pReady && this->m_DamageControl.Get_alive();		//右
-			this->m_key[5] = pInput.GetGoLeftPress() && pReady && this->m_DamageControl.Get_alive();		//左
+			this->m_key[0] = pInput.GetAction5() && pReady && this->Get_alive();			//射撃
+			this->m_key[1] = false && pReady && this->Get_alive();							//マシンガン
+			this->m_key[2] = pInput.GetGoFrontPress() && pReady && this->Get_alive();		//前進
+			this->m_key[3] = pInput.GetGoBackPress() && pReady && this->Get_alive();		//後退
+			this->m_key[4] = pInput.GetGoRightPress() && pReady && this->Get_alive();		//右
+			this->m_key[5] = pInput.GetGoLeftPress() && pReady && this->Get_alive();		//左
 		}
 		//カメラ設定出力
 		void			VehicleClass::Setcamera(cam_info& camera_main, const float fov_base) noexcept {
@@ -170,14 +174,14 @@ namespace FPS_n2 {
 						if (tt.GetHitMesh() == mesh) {
 							//空間装甲に当たったのでモジュールに30ダメ
 							Effect_UseControl::SetOnce(Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate);
-							//this->m_DamageControl.SubHP_Parts(30, (HitPoint)tt.GetHitMesh());
+							//this->SubHP_Parts(30, (HitPoint)tt.GetHitMesh());
 						}
 					}
 					for (auto& mesh : this->m_VecData->Get_module_mesh()) {
 						if (tt.GetHitMesh() == mesh) {
 							//モジュールに当たったのでモジュールに30ダメ
 							Effect_UseControl::SetOnce(Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate);
-							//this->m_DamageControl.SubHP_Parts(30, (HitPoint)tt.GetHitMesh());
+							//this->SubHP_Parts(30, (HitPoint)tt.GetHitMesh());
 						}
 					}
 					//ダメージ面に当たった
@@ -190,10 +194,10 @@ namespace FPS_n2 {
 								//ダメージ計算
 								auto v1 = MATRIX_ref::RotY(Get_body_yrad()).zvec();
 								auto v2 = (pShooterPos - this->m_move.pos).Norm(); v2.y(0);
-								this->m_DamageEvent.SetEvent(this->m_MyID, pAmmo->GetDamage(), atan2f(v1.cross(v2).y(), v1.dot(v2)));
+								this->m_DamageEvent.SetEvent(this->m_MyID, this->m_objType, pAmmo->GetDamage(), atan2f(v1.cross(v2).y(), v1.dot(v2)));
 								++this->m_DamageSwitch;// %= 255;//
-								//this->m_DamageControl.SubHP_Parts(pAmmo->GetDamage(), (HitPoint)tt.GetHitMesh());
-								if (!this->m_DamageControl.Get_alive()) {
+								//this->SubHP_Parts(pAmmo->GetDamage(), (HitPoint)tt.GetHitMesh());
+								if (!this->Get_alive()) {
 									//撃破
 									Effect_UseControl::SetOnce(Effect::ef_greexp2, this->m_move.pos, this->m_move.mat.zvec(), Scale_Rate*2.f);
 								}
@@ -244,7 +248,7 @@ namespace FPS_n2 {
 			if (!this->m_view_override) {
 				float												view_YradAdd{ 0.f };							//
 				float												view_XradAdd{ 0.f };							//
-				if (this->m_DamageControl.Get_alive()) {
+				if (this->Get_alive()) {
 					if (false) { //砲塔ロック
 						view_XradAdd = 0.f;
 						view_YradAdd = 0.f;
@@ -271,8 +275,8 @@ namespace FPS_n2 {
 					view_XradAdd = 0.f;
 					view_YradAdd = 0.f;
 				}
-				this->m_view_xrad = std::clamp(this->m_view_xrad + view_XradAdd, deg2rad(-10), deg2rad(20));
-				this->m_view_yrad += view_YradAdd;
+				this->m_view_rad.x(std::clamp(this->m_view_rad.x() + view_XradAdd, deg2rad(-10), deg2rad(20)));
+				this->m_view_rad.yadd(view_YradAdd);
 			}
 			this->m_view_override = false;
 		}
@@ -280,7 +284,7 @@ namespace FPS_n2 {
 		void			VehicleClass::ExecuteFrame(void) noexcept {
 			//砲塔旋回
 			for (auto& g : this->m_Gun) {
-				g.ExecuteGunFrame(this->m_view_xrad, this->m_view_yrad, &GetObj(), &this->m_col);
+				g.ExecuteGunFrame(this->m_view_rad.x(), this->m_view_rad.y(), &GetObj(), &this->m_col);
 			}
 			//転輪
 			auto y_vec = GetObj().GetMatrix().yvec();
@@ -513,7 +517,7 @@ namespace FPS_n2 {
 			}
 			for (auto&m : this->m_VecData->Get_module_view()[1]) {
 				SetDrawBright(0, 255, 0);
-				m.first->DrawRotaGraph(xp, yp, (float)size / 200, rad + this->Get_body_yrad() + this->m_view_yrad, true);
+				m.first->DrawRotaGraph(xp, yp, (float)size / 200, rad + this->Get_body_yrad() + this->m_view_rad.y(), true);
 			}
 			SetDrawBright(255, 255, 255);
 		}
