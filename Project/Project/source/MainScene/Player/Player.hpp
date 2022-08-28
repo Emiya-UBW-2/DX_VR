@@ -27,13 +27,6 @@ namespace FPS_n2 {
 			const auto	IsRide(void) const noexcept { return (bool)m_Vehicle; }
 
 			const auto		GetNetSendMove(void) const noexcept {
-				struct SendInfo {
-					VECTOR_ref			m_Pos;
-					VECTOR_ref			m_Vec;
-					float				m_Yrad{ 0.f };
-					const DamageEvent*	m_Damage{ nullptr };
-					char				m_DamageSwitch{ 0 };
-				};
 				SendInfo ans;
 				if (!IsRide()) {
 					ans.m_Pos = m_Chara->GetMove().pos;

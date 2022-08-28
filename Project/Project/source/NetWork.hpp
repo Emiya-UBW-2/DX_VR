@@ -116,6 +116,15 @@ namespace FPS_n2 {
 			}
 			void Set(int ID, const NewSetting& per)noexcept { this->m_NewWorkSetting[ID] = per; }
 		};
+
+		struct SendInfo {
+			VECTOR_ref			m_Pos;
+			VECTOR_ref			m_Vec;
+			float				m_Yrad{ 0.f };
+			const DamageEvent*	m_Damage{ nullptr };
+			char				m_DamageSwitch{ 0 };
+		};
+
 		struct PlayerNetData {
 		public:
 			size_t			CheckSum{ 0 };		//8 * 1	=  8byte
@@ -127,7 +136,7 @@ namespace FPS_n2 {
 			char			IsActive{ 0 };		//1	* 1	=  1byte
 			double			Frame{ 0.0 };		//8 * 1 =  8byte
 			unsigned char	DamageSwitch{ 0 };	//1 * 1 =  1byte
-			DamageEvent		Damage{ 100 };		//9 * 1 =  9byte
+			DamageEvent		Damage;				//9 * 1 =  9byte
 												//		  76byte
 		public:
 			const auto	CalcCheckSum(void) noexcept {
@@ -180,8 +189,6 @@ namespace FPS_n2 {
 		};
 		class NetWorkControl {
 		protected:
-		protected:
-			std::vector<std::pair<NewWorkControl, int>>		m_NetWork;
 			size_t											m_ServerFrame{ 0 };
 			std::array<int, Player_num>						m_LeapFrame{ 0 };
 			ServerNetData									m_ServerDataCommon, m_PrevServerData;
@@ -205,7 +212,7 @@ namespace FPS_n2 {
 				this->m_PlayerData.CheckSum = (size_t)this->m_PlayerData.CalcCheckSum();
 			}
 
-			const auto	GetNowServerPlayerData(int pPlayerID) {
+			const auto		GetNowServerPlayerData(int pPlayerID) noexcept {
 				auto Total = (int)this->m_ServerDataCommon.ServerFrame - (int)this->m_PrevServerData.ServerFrame;
 				if (Total <= 0) { Total = 20; }
 				auto Per = (float)this->m_LeapFrame[pPlayerID] / (float)Total;
@@ -219,20 +226,14 @@ namespace FPS_n2 {
 				this->m_LeapFrame[pPlayerID] = std::clamp<int>(this->m_LeapFrame[pPlayerID] + 1, 0, Total);
 				return tmp;
 			}
-			virtual void			SetParam(int pPlayerID, const VECTOR_ref& pPos) noexcept {
+			virtual void	SetParam(int pPlayerID, const VECTOR_ref& pPos) noexcept {
 				this->m_ServerDataCommon.PlayerData[pPlayerID].PosBuf = pPos;
 				this->m_ServerDataCommon.ServerFrame = 0;
 				this->m_PrevServerData.PlayerData[pPlayerID].PosBuf = this->m_ServerDataCommon.PlayerData[pPlayerID].PosBuf;	// サーバーデータ
 				this->m_PrevServerData.ServerFrame = 0;
 			}
-			void			NetWorkDispose(void) noexcept {
-				for (auto & n : this->m_NetWork) {
-					n.first.Dispose();
-				}
-				m_NetWork.clear();
-			}
 		protected:
-			void			NetWorkInit(void) noexcept {
+			void			CommonInit(void) noexcept {
 				this->m_ServerFrame = 0;
 			}
 			void			NetCommonExecute(const ServerNetData& pData) {
@@ -246,9 +247,14 @@ namespace FPS_n2 {
 					this->m_ServerDataCommon = tmpData;
 				}
 			}
+		public:
+			virtual void	Init(int, float, const IPDATA&) noexcept {}
+			virtual bool	Execute(void) noexcept { return false; }
+			virtual void	Dispose(void) noexcept {}
 		};
 		class ServerControl : public NetWorkControl {
 			ServerNetData			m_ServerData;
+			std::vector<std::pair<NewWorkControl, int>>		m_NetWork;
 		public:
 			const auto&		GetServerData(void) const noexcept { return this->m_ServerData; }
 			void			SetParam(int pPlayerID, const VECTOR_ref& pPos) noexcept override {
@@ -257,8 +263,8 @@ namespace FPS_n2 {
 				this->m_ServerData.PlayerData[pPlayerID].IsActive = 0;
 			}
 		public:
-			void			ServerInit(int pPort, float pTick) {
-				NetWorkInit();
+			void			Init(int pPort, float pTick, const IPDATA&) noexcept override {
+				CommonInit();
 				m_NetWork.resize(Player_num - 1);
 				int i = 0;
 				for (auto & n : this->m_NetWork) {
@@ -276,7 +282,7 @@ namespace FPS_n2 {
 				this->m_PlayerData.ID = 0;
 				this->m_TickRate = pTick;
 			}
-			bool ServerExecute(void) noexcept {
+			bool			Execute(void) noexcept override {
 				bool canMatch = true;
 				bool canSend = false;
 				for (auto & n : this->m_NetWork) {
@@ -344,35 +350,41 @@ namespace FPS_n2 {
 				}
 				return canMatch;
 			}
+			void			Dispose(void) noexcept override {
+				for (auto & n : this->m_NetWork) {
+					n.first.Dispose();
+				}
+				m_NetWork.clear();
+			}
 		};
 		class ClientControl : public NetWorkControl {
 			int						m_NetWorkSel{ 0 };
 			float					m_CannotConnectTimer{ 0.f };
 			int						m_Port{ 0 };
 			IPDATA					m_IP{ 127,0,0,1 };
+			std::pair<NewWorkControl, int > m_NetWork;
 		public:
-			void			ClientInit(int pPort, float pTick, const IPDATA& pIP) {
-				NetWorkInit();
+			void			Init(int pPort, float pTick, const IPDATA& pIP) noexcept override {
+				CommonInit();
 
 				this->m_CannotConnectTimer = 0.f;
 				this->m_Port = pPort;
 				this->m_TickRate = pTick;
 				this->m_IP = pIP;
 
-				this->m_NetWork.resize(1);
 				this->m_NetWorkSel = 0;
-				this->m_NetWork.back().first.Set_Port(this->m_Port + this->m_NetWorkSel);
-				this->m_NetWork.back().first.SetIP(pIP);
-				this->m_NetWork.back().first.InitClient();
-				this->m_NetWork.back().second = 0;
+				this->m_NetWork.first.Set_Port(this->m_Port + this->m_NetWorkSel);
+				this->m_NetWork.first.SetIP(pIP);
+				this->m_NetWork.first.InitClient();
+				this->m_NetWork.second = 0;
 
 				this->m_PlayerData.ID = 1;
 			}
-			bool ClientExecute(void) noexcept {
+			bool			Execute(void) noexcept override {
 				ServerNetData tmpData;
 				bool canMatch = true;
 				bool canSend = false;
-				canMatch = (this->m_NetWork.back().second >= 2);
+				canMatch = (this->m_NetWork.second >= 2);
 				if (canMatch) {
 					// ティックレート用演算
 					this->m_TickCnt += 60.f / FPS;
@@ -381,28 +393,28 @@ namespace FPS_n2 {
 						canSend = true;
 					}
 				}
-				switch (this->m_NetWork.back().second) {
+				switch (this->m_NetWork.second) {
 				case 0:
-					this->m_NetWork.back().first.SendtoServer(0);			// 通信リクエスト
+					this->m_NetWork.first.SendtoServer(0);			// 通信リクエスト
 					//サーバーからの自分のIDを受信
-					if (this->m_NetWork.back().first.Recv(&tmpData)) {
+					if (this->m_NetWork.first.Recv(&tmpData)) {
 						NetCommonExecute(tmpData);								//更新
 						m_CannotConnectTimer = 0.f;
 						if (tmpData.Tmp1 > 0) {
 							this->m_PlayerData.ID = (PlayerID)tmpData.Tmp1;
-							this->m_NetWork.back().second++;
+							this->m_NetWork.second++;
 						}
 					}
 					else {
 						m_CannotConnectTimer += 1.f / FPS;
 						if (this->m_CannotConnectTimer > 1.f) {
 							m_CannotConnectTimer = 0.f;
-							this->m_NetWork.back().first.Dispose();
+							this->m_NetWork.first.Dispose();
 							this->m_NetWorkSel++;
-							this->m_NetWork.back().first.Set_Port(this->m_Port + this->m_NetWorkSel);
-							this->m_NetWork.back().first.SetIP(this->m_IP);
-							this->m_NetWork.back().first.InitClient();
-							this->m_NetWork.back().second = 0;
+							this->m_NetWork.first.Set_Port(this->m_Port + this->m_NetWorkSel);
+							this->m_NetWork.first.SetIP(this->m_IP);
+							this->m_NetWork.first.InitClient();
+							this->m_NetWork.second = 0;
 							if (this->m_NetWorkSel >= Player_num) {
 								//満タン
 							}
@@ -410,20 +422,20 @@ namespace FPS_n2 {
 					}
 					break;
 				case 1:
-					this->m_NetWork.back().first.SendtoServer(1);			// ID取れたよ
+					this->m_NetWork.first.SendtoServer(1);			// ID取れたよ
 					//サーバーからのデータを受信したら次へ
-					if (this->m_NetWork.back().first.Recv(&tmpData)) {
+					if (this->m_NetWork.first.Recv(&tmpData)) {
 						NetCommonExecute(tmpData);								//更新
 						if (tmpData.StartFlag == 1) {
-							this->m_NetWork.back().second++;
+							this->m_NetWork.second++;
 						}
 					}
 					break;
 				case 2:
 					if (canSend) {
-						this->m_NetWork.back().first.SendtoServer(this->m_PlayerData);				//自身のデータを送信
+						this->m_NetWork.first.SendtoServer(this->m_PlayerData);				//自身のデータを送信
 					}
-					if (this->m_NetWork.back().first.Recv(&tmpData)) {					//サーバーからのデータを受信したら
+					if (this->m_NetWork.first.Recv(&tmpData)) {					//サーバーからのデータを受信したら
 						NetCommonExecute(tmpData);								//更新
 					}
 					break;
@@ -431,6 +443,9 @@ namespace FPS_n2 {
 					break;
 				}
 				return canMatch;
+			}
+			void			Dispose(void) noexcept override {
+				this->m_NetWork.first.Dispose();
 			}
 		};
 	};
