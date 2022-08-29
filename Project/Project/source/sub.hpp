@@ -147,7 +147,7 @@ namespace FPS_n2 {
 		const auto	GetAction3(void) const noexcept { return (this->m_Flags & (1 << 13)) != 0; }
 		const auto	GetAction4(void) const noexcept { return (this->m_Flags & (1 << 14)) != 0; }
 		const auto	GetAction5(void) const noexcept { return (this->m_Flags & (1 << 15)) != 0; }
-		const auto	GetAction6(void) const noexcept { return (this->m_Flags & (1 << 15)) != 0; }
+		const auto	GetAction6(void) const noexcept { return (this->m_Flags & (1 << 16)) != 0; }
 
 		const InputControl operator+(const InputControl& o) const noexcept {
 			InputControl tmp;

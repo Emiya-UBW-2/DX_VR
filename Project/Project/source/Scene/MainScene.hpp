@@ -51,6 +51,11 @@ namespace FPS_n2 {
 				m_NewWorkSelect = 0;
 			}
 			void FirstExecute(const InputControl& MyInput, const SendInfo& SendMove) noexcept {
+				this->m_LeftClick.GetInput((GetMouseInputWithCheck() & MOUSE_INPUT_LEFT) != 0);
+				if (!this->m_LeftClick.press()) {
+					this->m_LeftPressTimer = 0.f;
+				}
+
 				if (this->m_IsClient) {
 					m_ClientCtrl.SetMyPlayer(MyInput, SendMove.m_Pos, SendMove.m_Vec, SendMove.m_Yrad, this->m_ClientFrame, SendMove.m_Damage, SendMove.m_DamageSwitch);
 					if ((this->m_Sequence == SequenceEnum::Matching) && m_SeqFirst) {
@@ -294,11 +299,11 @@ namespace FPS_n2 {
 			std::vector<VhehicleData>	vehc_data;
 			std::vector<std::shared_ptr<VehicleClass>> vehicle_Pool;	//戦車のベクター
 			//操作関連
+			float					m_EyePosPer_Prone = 0.f;
+			float					m_EyePosPer = 0.f;
 			float					m_EyeRunPer{ 0.f };
 			switchs					m_FPSActive;
 			switchs					m_MouseActive;
-			switchs					m_LeftClick;
-			float					m_LeftPressTimer{ 0.f };
 			int						m_LookMode{ 0 };
 			//UI関連
 			UIClass					m_UIclass;
@@ -309,6 +314,10 @@ namespace FPS_n2 {
 			float					m_CamShake{ 0.f };
 			VECTOR_ref				m_CamShake1;
 			VECTOR_ref				m_CamShake2;
+			//銃関連
+			bool Reticle_on = false;
+			float Reticle_xpos = 0;
+			float Reticle_ypos = 0;
 			//
 			MATRIX_ref				m_FreeLookMat;
 			float					m_TPS_Xrad{ 0.f };
@@ -501,6 +510,8 @@ namespace FPS_n2 {
 				if (IsFirstLoop) {
 					SetMousePoint(DXDraw::Instance()->disp_x / 2, DXDraw::Instance()->disp_y / 2);
 					this->m_Env.play(DX_PLAYTYPE_LOOP, TRUE);
+					auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+					Chara->LoadReticle();//プレイヤー変更時注意
 				}
 				//Input,AI
 				{
@@ -604,10 +615,6 @@ namespace FPS_n2 {
 						);
 					}
 
-					this->m_LeftClick.GetInput((GetMouseInputWithCheck() & MOUSE_INPUT_LEFT) != 0);
-					if (!this->m_LeftClick.press()) {
-						this->m_LeftPressTimer = 0.f;
-					}
 					this->m_FPSActive.GetInput(eyechange_key);
 					if (look_key) {
 						this->m_LookMode = 1;
@@ -837,9 +844,9 @@ namespace FPS_n2 {
 					Easing(&this->m_CamShake2, this->m_CamShake1, 0.8f, EasingType::OutExpo);
 					this->m_CamShake = std::max(this->m_CamShake - 1.f / FPS, 0.f);
 
-					if (this->m_FPSActive.on()) {
-						camera_main.campos = Chara->GetEyePosition();
-						camera_main.camvec = camera_main.campos + Chara->GetEyeVecMat().zvec() * -1.f;
+					if (this->m_FPSActive.on() || Chara->GetIsADS()) {
+						camera_main.campos = Lerp(Chara->GetEyePosition(), Chara->GetScopePos(), this->m_EyePosPer);
+						camera_main.camvec = camera_main.campos + Chara->GetEyeVector();
 						camera_main.camup = Chara->GetMatrix().GetRot().yvec();
 					}
 					else {
@@ -847,19 +854,27 @@ namespace FPS_n2 {
 						FreeLook = MATRIX_ref::RotAxis(Chara->GetMatrix().xvec(), this->m_TPS_XradR) * MATRIX_ref::RotAxis(Chara->GetMatrix().yvec(), this->m_TPS_YradR);
 						Easing_Matrix(&m_FreeLookMat, FreeLook, 0.5f, EasingType::OutExpo);
 
-						VECTOR_ref CamVec = Lerp(Chara->GetEyeVecMat().zvec() * -1.f, MATRIX_ref::Vtrans(Chara->GetEyeVecMat().zvec() * -1.f, m_FreeLookMat), this->m_TPS_Per);
+						VECTOR_ref CamVec = Lerp(Chara->GetEyeVector(), MATRIX_ref::Vtrans(Chara->GetEyeVector(), m_FreeLookMat), this->m_TPS_Per);
 
 						MATRIX_ref UpperMat = Chara->GetFrameWorldMat(CharaFrame::Upper).GetRot();
 						VECTOR_ref CamPos = Chara->GetMatrix().pos() + Chara->GetMatrix().yvec() * 14.f;
 						CamPos += Lerp((UpperMat.xvec()*-8.f + UpperMat.yvec()*3.f), (UpperMat.xvec()*-3.f + UpperMat.yvec()*4.f), this->m_EyeRunPer);
 
-						camera_main.campos = (CamPos + CamVec * Lerp(-20.f, -50.f, this->m_TPS_Per)) + this->m_CamShake2 * 5.f;
-						camera_main.camvec = CamPos + CamVec * 100.f;
+						camera_main.campos = Lerp(CamPos + CamVec * Lerp(Lerp(-20.f, -50.f, this->m_TPS_Per), 2.f, this->m_EyePosPer_Prone), Chara->GetScopePos(), this->m_EyePosPer);
+						camera_main.camvec = Lerp(CamPos, Chara->GetScopePos(), this->m_EyePosPer) + CamVec * 100.f;
+
 						camera_main.camup = Chara->GetEyeVecMat().yvec() + this->m_CamShake2 * 0.25f;
 					}
 					Easing(&this->m_EyeRunPer, Chara->GetIsRun() ? 1.f : 0.f, 0.95f, EasingType::OutExpo);
+					Easing(&this->m_EyePosPer, Chara->GetIsADS() ? 1.f : 0.f, 0.8f, EasingType::OutExpo);//
 
-					if (Chara->GetIsRun()) {
+					if (Chara->GetIsADS()) {
+						//Easing(&camera_main.fov, deg2rad(90), 0.9f, EasingType::OutExpo);
+						Easing(&camera_main.fov, deg2rad(17), 0.8f, EasingType::OutExpo);
+						Easing(&camera_main.near_, 10.f, 0.9f, EasingType::OutExpo);
+						Easing(&camera_main.far_, 12.5f * 300.f, 0.9f, EasingType::OutExpo);
+					}
+					else if (Chara->GetIsRun()) {
 						Easing(&camera_main.fov, deg2rad(90), 0.9f, EasingType::OutExpo);
 						Easing(&camera_main.near_, 3.f, 0.9f, EasingType::OutExpo);
 						Easing(&camera_main.far_, Scale_Rate * 150.f, 0.9f, EasingType::OutExpo);
@@ -956,15 +971,39 @@ namespace FPS_n2 {
 			}
 			void			Main_Draw(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
-				//auto* PlayerMngr = PlayerManager::Instance();
+				auto* PlayerMngr = PlayerManager::Instance();
 
 				this->m_BackGround.Draw();
 				ObjMngr->DrawObject();
 				//ObjMngr->DrawDepthObject();
 				//シェーダー描画用パラメーターセット
 				{
-					Set_is_Blackout(false);
-					Set_is_lens(false);
+					auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+					//
+					Set_is_Blackout(true);
+					Set_Per_Blackout((1.f + sin(Chara->GetHeartRateRad()*4.f)*0.25f) * ((Chara->GetHeartRate() - 60.f) / (180.f - 60.f)));
+					//
+					Set_is_lens(Chara->GetIsADS());
+					if (is_lens()) {
+						VECTOR_ref LensPos = ConvWorldPosToScreenPos(Chara->GetLensPos().get());
+						if (0.f < LensPos.z() && LensPos.z() < 1.f) {
+							Set_xp_lens(LensPos.x());
+							Set_yp_lens(LensPos.y());
+							LensPos = ConvWorldPosToScreenPos(Chara->GetLensPosSize().get());
+							if (0.f < LensPos.z() && LensPos.z() < 1.f) {
+								Set_size_lens(std::hypotf(xp_lens() - LensPos.x(), yp_lens() - LensPos.y()));
+							}
+						}
+						LensPos = ConvWorldPosToScreenPos(Chara->GetReticlePos().get());
+						if (0.f < LensPos.z() && LensPos.z() < 1.f) {
+							Reticle_xpos = LensPos.x();
+							Reticle_ypos = LensPos.y();
+							Reticle_on = (size_lens() > std::hypotf(xp_lens() - Reticle_xpos, yp_lens() - Reticle_ypos));
+						}
+					}
+					else {
+						Reticle_on = false;
+					}
 				}
 				for (int i = 0; i < Chara_num; i++) {
 					if (i == GetMyPlayerID()) { continue; }
@@ -994,6 +1033,12 @@ namespace FPS_n2 {
 				ObjMngr->DrawDepthObject();
 			}
 			void			LAST_Draw(void) noexcept override {
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+				//レティクル表示
+				if (Reticle_on) {
+					Chara->GetReticle().DrawRotaGraph((int)Reticle_xpos, (int)Reticle_ypos, size_lens() / (3072.f / 2.f), 0.f, true);
+				}
 			}
 			//UI表示
 			void			UI_Draw(void) noexcept  override {
