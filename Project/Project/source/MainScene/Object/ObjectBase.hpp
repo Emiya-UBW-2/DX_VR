@@ -30,6 +30,7 @@ namespace FPS_n2 {
 			bool										m_IsBaseModel{ false };
 			VECTOR_ref									m_CameraPosition;
 			float										m_CameraSize{ 0.f };
+			PlayerID									m_MyID{ 0 };									//
 		public:
 			void			SetUseRealTimePhysics(bool value) noexcept { this->m_Use_RealTimePhysics = value; }
 			void			SetActive(bool value) noexcept { this->m_IsActive = value; }

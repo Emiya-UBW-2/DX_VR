@@ -4,89 +4,6 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class GunClass : public ObjectBaseClass {
-			class BulletClass {
-			private:
-				float m_cal{ 0.00762f };
-			private:
-				bool m_IsActive{ false };
-				moves m_move;
-				float m_speed{ 0.f };
-				float m_yAdd{ 0.f };
-				float m_Timer{ 0.f };
-				float m_HitTimer{ 0.f };
-				std::array<VECTOR_ref, 10> m_Line;
-				int m_LineSel = 0;
-				moves m_move_Hit;
-			public:
-				void Set(const MATRIX_ref& mat, const VECTOR_ref& pos, float speed) noexcept {
-					this->m_IsActive = true;
-					this->m_move.mat = mat;
-					this->m_move.pos = pos;
-					this->m_move.repos = this->m_move.pos;
-					this->m_yAdd = 0.f;
-					this->m_speed = speed;
-					this->m_Timer = 0.f;
-					this->m_HitTimer = 1.5f;
-					for (auto& l : this->m_Line) { l = this->m_move.pos; }
-				}
-				void Execute(void) noexcept {
-					if (this->m_IsActive) {
-						this->m_move.repos = this->m_move.pos;
-						this->m_move.vec = this->m_move.mat.zvec() * (-1.f * this->m_speed * 60.f / FPS) + VECTOR_ref::up()*this->m_yAdd;
-						this->m_move.pos += this->m_move.vec;
-						this->m_yAdd += (M_GR / (FPS*FPS));
-
-						this->m_Line[this->m_LineSel] = this->m_move.pos + VECTOR_ref::vget(GetRandf(12.5f*0.3f*this->m_Timer), GetRandf(12.5f*0.3f*this->m_Timer), GetRandf(12.5f*0.3f*this->m_Timer));
-						++this->m_LineSel %= this->m_Line.size();
-					}
-					if (this->m_Timer > std::min(1.5f, this->m_HitTimer)) {
-						this->m_IsActive = false;
-					}
-					this->m_Timer += 1.f / FPS;
-				}
-				bool CheckBullet(const MV1* pCol) noexcept {
-					if (this->m_IsActive) {
-						auto HitResult = pCol->CollCheck_Line(this->m_move.repos, this->m_move.pos);
-						if (HitResult.HitFlag == TRUE) {
-							this->m_move_Hit.pos = HitResult.HitPosition;
-							this->m_move_Hit.vec = HitResult.Normal;
-							this->m_IsActive = false;
-							this->m_HitTimer = this->m_Timer + 0.5f;
-							return true;
-						}
-					}
-					return false;
-				}
-				void Draw(void) noexcept {
-					if (this->m_IsActive) {
-						SetUseLighting(FALSE);
-						int max = (int)(this->m_Line.size());
-						for (int i = 1; i < max; i++) {
-							int LS = (i + this->m_LineSel);
-							auto p1 = (LS - 1) % max;
-							auto p2 = LS % max;
-							SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(128.f*((float)(i) / max)));
-							if (CheckCameraViewClip_Box(
-								this->m_Line[p1].get(),
-								this->m_Line[p2].get()) == FALSE
-								) {
-								DrawCapsule3D(this->m_Line[p1].get(), this->m_Line[p2].get(), this->m_cal*12.5f*8.f*((float)(i) / max), 3, GetColor(64, 64, 64), GetColor(64, 64, 64), TRUE);
-							}
-						}
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-						if (CheckCameraViewClip_Box(
-							this->m_move.repos.get(),
-							this->m_move.pos.get()) == FALSE
-							) {
-							DrawCapsule3D(this->m_move.repos.get(), this->m_move.pos.get(), this->m_cal*12.5f*4.f, 4, GetColor(255, 200, 0), GetColor(255, 255, 255), TRUE);
-						}
-						SetUseLighting(TRUE);
-					}
-				}
-			public:
-				const auto* Get_Move(void) noexcept { return (this->m_IsActive) ? &this->m_move : (const moves*)nullptr; }
-				const auto& GetMoveHit(void) noexcept { return this->m_move_Hit; }
-			};
 			class ECartClass {
 			private:
 				float m_cal{ 0.00762f };
@@ -192,10 +109,7 @@ namespace FPS_n2 {
 			int m_NowShotCart{ 0 };
 			GraphHandle m_reticle;
 			int m_animSel{ 0 };
-			std::array<BulletClass, 3> m_Bullet;
-			int m_NowShotBullet{ 0 };
-			moves m_move_Hit;
-			bool m_IsHit{ false };
+			std::vector<AmmoData>	m_AmmoSpec;		//
 			bool m_IsShot{ false };
 			bool m_CartFlag{ false };
 			bool m_in_chamber{ true };								//チャンバー内に初弾があるか(弾倉最大+1かどうか)
@@ -209,6 +123,8 @@ namespace FPS_n2 {
 			void ResetFrameLocalMat(GunFrame frame) noexcept { GetObj().frame_Reset(m_Frames[(int)frame].first); }
 			void SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(m_Frames[(int)frame].first, value * m_Frames[(int)frame].second); }
 			const auto GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
+
+			const auto&	GetAmmoSpec(void) const noexcept { return this->m_AmmoSpec[0]; }
 
 			void SetMagPtr(std::shared_ptr<MagazineClass>& pMagPtr) noexcept { this->m_Mag_Ptr = pMagPtr; }
 			void SetIsShot(bool value) noexcept { this->m_IsShot = value; }
@@ -226,9 +142,6 @@ namespace FPS_n2 {
 			const auto GetAmmoNum(void) noexcept { return this->m_Mag_Ptr->GetAmmoNum() + (m_in_chamber ? 1 : 0); }
 			const auto GetCanshot(void) noexcept { return !(this->GetAmmoNum() == 0); }
 			const auto& GetReticle(void) noexcept { return this->m_reticle; }
-			const auto& GetIsHit(void) noexcept { return this->m_IsHit; }
-			const auto& GetHitPos(void) noexcept { return this->m_move_Hit.pos; }
-			const auto& GetHitVec(void) noexcept { return this->m_move_Hit.vec; }
 			const auto& GetIsShot(void) noexcept { return this->m_IsShot; }
 			const auto GetChamberIn(void) noexcept {
 				return
@@ -240,22 +153,7 @@ namespace FPS_n2 {
 				this->m_Mag_Ptr->SetMove(this->GetMagMat().GetRot(), this->GetMagMat().pos());
 				this->m_animSel = pBoltAnim;
 			}
-			void SetBullet(void) noexcept {
-				auto SE = SoundPool::Instance();
-
-				float Spd = 12.5f*800.f / 60.f;
-				this->m_Bullet[this->m_NowShotBullet].Set(GetMuzzleMatrix().GetRot(), GetMuzzleMatrix().pos(), Spd);
-				++this->m_NowShotBullet %= this->m_Bullet.size();
-				SE->Get((int)SoundEnum::Trigger).Play_3D(0, GetMatrix().pos(), 12.5f*5.f);
-				SE->Get((int)SoundEnum::Shot_Gun).Play_3D(0, GetMatrix().pos(), 12.5f*50.f);
-				if (!this->m_in_chamber) {
-					this->m_Mag_Ptr->SubAmmo();//チャンバーインtodo
-				}
-				this->m_in_chamber = false;
-
-				this->m_IsShot = true;
-				this->m_CartFlag = true;
-			}
+			void SetBullet(void) noexcept;
 			void SetCart(void) noexcept {
 				if (GetAnime(GunAnimeID::Cocking).time >= 19.f || GetAnime(GunAnimeID::ReloadStart).time >= 19.f) {
 					if (this->m_CartFlag) {
@@ -269,18 +167,28 @@ namespace FPS_n2 {
 				}
 			}
 			void SetAmmoHandMatrix(const MATRIX_ref& value, float pPer) noexcept { this->m_Mag_Ptr->SetHandMatrix(value, pPer); }
-			const auto* GetLatestAmmoMove(void) noexcept {
-				auto Now = this->m_NowShotBullet - 1;
-				if (Now < 0) { Now = (int)(this->m_Bullet.size()) - 1; }
-				return this->m_Bullet[Now].Get_Move();
-			}
 		public:
 			GunClass(void) noexcept { this->m_objType = ObjType::Gun; }
 			~GunClass(void) noexcept {}
 		public:
 			void Init(void) noexcept override {
 				ObjectBaseClass::Init();
-				MV1::Load(this->m_FilePath + "cart.pmd", &this->m_Cartobj);
+
+				{
+					int mdata = FileRead_open((this->m_FilePath + "data.txt").c_str(), FALSE);
+					while (true) {
+						auto stp = getparams::Getstr(mdata);
+						if (stp.find("useammo" + std::to_string(this->m_AmmoSpec.size())) == std::string::npos) {
+							break;
+						}
+						this->m_AmmoSpec.resize(this->m_AmmoSpec.size() + 1);
+						this->m_AmmoSpec.back().Set("data/ammo/", getparams::getright(stp));
+
+						MV1::Load("data/ammo/"+ getparams::getright(stp) + "/cart.pmd", &this->m_Cartobj);
+					}
+					FileRead_close(mdata);
+				}
+
 				for (auto& b : this->m_Cart) {
 					b.Init(this->m_Cartobj);
 				}
@@ -383,11 +291,9 @@ namespace FPS_n2 {
 				if (this->m_CartFlag) {
 					this->m_Cartobj.SetMatrix(this->GetCartMat());
 				}
-				for (auto& b : this->m_Bullet) {
-					b.Execute();
-				}
 				for (auto& b : this->m_Cart) {
 					b.Execute();
+					b.CheckBullet(this->m_MapCol);
 				}
 				//共通
 				ObjectBaseClass::FirstExecute();
@@ -402,9 +308,6 @@ namespace FPS_n2 {
 				}
 			}
 			void Draw(void) noexcept override {
-				for (auto& b : this->m_Bullet) {
-					b.Draw();
-				}
 				if (this->m_CartFlag) {
 					if (CheckCameraViewClip_Box(
 						(this->m_Cartobj.GetMatrix().pos() + VECTOR_ref::vget(-1, -1, -1)).get(),
@@ -418,24 +321,14 @@ namespace FPS_n2 {
 					b.Draw();
 				}
 			}
+			void			Dispose(void) noexcept override {
+				this->m_AmmoSpec.clear();
+			}
 		public:
 			void LoadReticle(void) noexcept {
 				SetUseASyncLoadFlag(TRUE);
 				this->m_reticle = GraphHandle::Load(this->m_FilePath + "reticle.png");
 				SetUseASyncLoadFlag(FALSE);
-			}
-			bool CheckBullet(const MV1* pCol) noexcept {
-				for (auto& b : this->m_Cart) {
-					b.CheckBullet(pCol);
-				}
-				this->m_IsHit = false;
-				for (auto& b : this->m_Bullet) {
-					if (b.CheckBullet(pCol)) {
-						this->m_move_Hit = b.GetMoveHit();
-						this->m_IsHit = true;
-					}
-				}
-				return this->m_IsHit;
 			}
 		};
 	};

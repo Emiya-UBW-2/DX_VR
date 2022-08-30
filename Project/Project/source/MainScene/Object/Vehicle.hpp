@@ -702,7 +702,6 @@ namespace FPS_n2 {
 			//プレイヤー周り
 			CharaTypeID											m_CharaType{ CharaTypeID::Enemy };				//
 			//車体
-			PlayerID											m_MyID{ 0 };									//
 			const VhehicleData*									m_VecData{ nullptr };							//固有値
 			std::vector<Guns>									m_Gun;											//
 			float												m_speed{ 0.f };									//移動速度

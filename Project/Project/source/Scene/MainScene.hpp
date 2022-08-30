@@ -375,7 +375,7 @@ namespace FPS_n2 {
 					auto& m = (std::shared_ptr<MagazineClass>&)(*ObjMngr->GetObj(ObjType::Magazine, i));
 					m->GetAmmoAll();
 					for (int j = 0; j < cart_num; j++) {
-						ObjMngr->AddObject(ObjType::Cart, "data/gun/Mosin/", "ammo");
+						ObjMngr->AddObject(ObjType::Cart, "data/ammo/7N14/", "ammo");
 					}
 				}
 
@@ -400,7 +400,7 @@ namespace FPS_n2 {
 					auto HitResult = this->m_BackGround.GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
 					if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
 					c->SetGunPtr((std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, i)));
-					c->ValueSet(deg2rad(0.f), deg2rad(-90.f), false, false, pos_t);
+					c->ValueSet(deg2rad(0.f), deg2rad(-90.f), false, false, pos_t, (PlayerID)i);
 					if (i == 0) {
 						c->SetUseRealTimePhysics(false);
 						c->SetCharaType(CharaTypeID::Team);

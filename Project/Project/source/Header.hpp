@@ -33,8 +33,8 @@ using namespace DXLib_ref;
 #include "MainScene/Object/ObjectBaseEnum.hpp"
 #include "MainScene/Object/CartEnum.hpp"
 #include "MainScene/Object/MagazineEnum.hpp"
-#include "MainScene/Object/GunEnum.hpp"
 #include "MainScene/Object/AmmoEnum.hpp"
+#include "MainScene/Object/GunEnum.hpp"
 #include "MainScene/Object/CharacterEnum.hpp"
 #include "MainScene/Object/VehicleEnum.hpp"
 //
@@ -48,8 +48,8 @@ using namespace DXLib_ref;
 #include "MainScene/Object/ObjectBase.hpp"
 #include "MainScene/Object/Cart.hpp"
 #include "MainScene/Object/Magazine.hpp"
-#include "MainScene/Object/Gun.hpp"
 #include "MainScene/Object/Ammo.hpp"
+#include "MainScene/Object/Gun.hpp"
 #include "MainScene/Object/Character.hpp"
 #include "MainScene/Object/Vehicle.hpp"
 

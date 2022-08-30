@@ -158,7 +158,9 @@ namespace FPS_n2 {
 			const auto&		GetName(void) const noexcept { return this->m_Name; }
 		public:
 			//
-			void			ValueSet(float pxRad, float pyRad, bool SquatOn, bool ProneOn, const VECTOR_ref& pPos) noexcept {
+			void			ValueSet(float pxRad, float pyRad, bool SquatOn, bool ProneOn, const VECTOR_ref& pPos, PlayerID pID) noexcept {
+				this->m_MyID = pID;
+				//
 				this->m_KeyActive = false;
 				//
 				for (int i = 0; i < (int)CharaAnimeID::AnimeIDMax; i++) {
@@ -942,8 +944,7 @@ namespace FPS_n2 {
 		public: //コンストラクタ、デストラクタ
 			CharacterClass(void) noexcept {
 				this->m_objType = ObjType::Human;
-				ValueSet(deg2rad(0.f), deg2rad(0.f), false, false, VECTOR_ref::vget(0.f, 0.f, 0.f));
-				this->m_Gun_Ptr.reset();
+				this->m_IsDraw = true;
 			}
 			~CharacterClass(void) noexcept {}
 		public: //継承
