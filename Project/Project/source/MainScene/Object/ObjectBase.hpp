@@ -1,5 +1,5 @@
 #pragma once
-#include"Header.hpp"
+#include	"../../Header.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -312,7 +312,7 @@ namespace FPS_n2 {
 			//
 			virtual void	Depth_Draw(void) noexcept { }
 			virtual void	DrawShadow(void) noexcept {
-				if (this->m_IsActive) {
+				if (this->m_IsActive && this->m_IsDraw) {
 					this->GetObj().DrawModel();
 				}
 			}

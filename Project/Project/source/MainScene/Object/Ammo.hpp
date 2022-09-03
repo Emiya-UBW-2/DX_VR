@@ -1,5 +1,5 @@
 #pragma once
-#include"../../Header.hpp"
+#include	"../../Header.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -21,8 +21,8 @@ namespace FPS_n2 {
 		public:
 			void			Set(std::string path_, std::string named) {
 				this->m_name = named;
-				this->m_path = path_ + named;
-				int mdata = FileRead_open((this->m_path + "/data.txt").c_str(), FALSE);
+				this->m_path = path_ + named + "/";
+				int mdata = FileRead_open((this->m_path + "data.txt").c_str(), FALSE);
 				this->m_caliber = getparams::_float(mdata) * 0.001f;	//ŒûŒa
 				this->m_speed = getparams::_float(mdata);				//’e‘¬
 				this->m_penetration = getparams::_float(mdata);			//ŠÑ’Ê

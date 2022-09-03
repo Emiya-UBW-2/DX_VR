@@ -1,5 +1,5 @@
 #pragma once
-#include"../../Header.hpp"
+#include	"../../Header.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -748,7 +748,7 @@ namespace FPS_n2 {
 			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
 			void			SetDamageSwitchRec(char value) noexcept { this->m_DamageSwitchRec = value; }
 			void			SetAimingDistance(float value) noexcept { this->m_AimingDistance = value; }
-			void			SubHP(HitPoint damage_t, float rad_t)  noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, this->m_VecData->GetMaxHP()); }
+			void			SubHP(HitPoint damage_t, float)  noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, this->m_VecData->GetMaxHP()); }
 			void			SubHP_Parts(HitPoint damage_t, int parts_Set_t) noexcept { this->m_HP_parts[parts_Set_t] = std::max<HitPoint>(this->m_HP_parts[parts_Set_t] - damage_t, 0); }
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
 			const auto&		GetDamageSwitch(void) const noexcept { return this->m_DamageSwitch; }

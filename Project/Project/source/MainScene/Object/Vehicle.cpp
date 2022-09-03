@@ -1,5 +1,5 @@
 #pragma once
-#include"../../Header.hpp"
+#include	"../../Header.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -497,7 +497,7 @@ namespace FPS_n2 {
 			return isDamaged;
 		}
 		//
-		void			VehicleClass::HitGround(const VECTOR_ref& pPos, const VECTOR_ref& pNorm, const VECTOR_ref& pVec) noexcept {
+		void			VehicleClass::HitGround(const VECTOR_ref& pPos, const VECTOR_ref& pNorm, const VECTOR_ref& /*pVec*/) noexcept {
 			Effect_UseControl::Set_FootEffect(pPos, pNorm, 0.05f / 0.1f * Scale_Rate);
 			//hit_obj_p.Set(a.GetCaliberSize() * Scale_Rate, pPos, pNorm, pVec);	//íeç≠
 		}

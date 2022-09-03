@@ -1,2 +1,2 @@
-gun_0_useammo0=7N14
+usemag0=Mosin
 end

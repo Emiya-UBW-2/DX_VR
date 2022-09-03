@@ -1,5 +1,5 @@
 #pragma once
-#include"../../Header.hpp"
+#include	"../../Header.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -661,13 +661,13 @@ namespace FPS_n2 {
 								if (!GetIsProne()) {
 									if (this->m_CharaSound != 1) {
 										this->m_CharaSound = 1;
-										SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), 12.5f * 5.f);
+										SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale_Rate * 5.f);
 									}
 								}
 								else {
 									if (this->m_CharaSound != 2) {
 										this->m_CharaSound = 2;
-										SE->Get((int)SoundEnum::SlideFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), 12.5f * 5.f, 128);
+										SE->Get((int)SoundEnum::SlideFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale_Rate * 5.f, 128);
 									}
 								}
 							}
@@ -676,13 +676,13 @@ namespace FPS_n2 {
 								if (!GetIsProne()) {
 									if (this->m_CharaSound != 3) {
 										this->m_CharaSound = 3;
-										SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), 12.5f * 5.f);
+										SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale_Rate * 5.f);
 									}
 								}
 								else {
 									if (this->m_CharaSound != 4) {
 										this->m_CharaSound = 4;
-										SE->Get((int)SoundEnum::SlideFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), 12.5f * 5.f, 128);
+										SE->Get((int)SoundEnum::SlideFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale_Rate * 5.f, 128);
 									}
 								}
 							}
@@ -695,7 +695,7 @@ namespace FPS_n2 {
 								) {
 								if (this->m_CharaSound != 5) {
 									this->m_CharaSound = 5;
-									SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), 12.5f * 5.f);
+									SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale_Rate * 5.f);
 								}
 							}
 							//R
@@ -705,7 +705,7 @@ namespace FPS_n2 {
 								) {
 								if (this->m_CharaSound != 6) {
 									this->m_CharaSound = 6;
-									SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), 12.5f * 5.f);
+									SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale_Rate * 5.f);
 								}
 							}
 						}
@@ -714,14 +714,14 @@ namespace FPS_n2 {
 					else if (this->m_ReturnStand) {
 						if (this->m_CharaSound != 7) {
 							this->m_CharaSound = 7;
-							SE->Get((int)SoundEnum::SlideFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), 12.5f * 5.f, (int)(192.f * this->m_RunPer2 / SpeedLimit));
+							SE->Get((int)SoundEnum::SlideFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale_Rate * 5.f, (int)(192.f * this->m_RunPer2 / SpeedLimit));
 						}
 						this->m_ReturnStand = false;
 					}
 					if (0.1f < this->m_InputGround.GetPronePer() && this->m_InputGround.GetPronePer() < 0.2f) {
 						if (this->m_CharaSound != 8) {
 							this->m_CharaSound = 8;
-							SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), 12.5f * 5.f);
+							SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale_Rate * 5.f);
 						}
 					}
 				}
@@ -897,7 +897,7 @@ namespace FPS_n2 {
 					) {
 					if (!this->m_HeartSoundFlag) {
 						this->m_HeartSoundFlag = true;
-						SE->Get((int)SoundEnum::Heart).Play_3D(0, GetFrameWorldMat(CharaFrame::Upper2).pos(), 12.5f * 1.f);
+						SE->Get((int)SoundEnum::Heart).Play_3D(0, GetFrameWorldMat(CharaFrame::Upper2).pos(), Scale_Rate * 1.f);
 					}
 				}
 				else {
@@ -934,7 +934,7 @@ namespace FPS_n2 {
 
 				if (this->m_Stamina <= StaminaMax * 0.3f) {
 					if (!this->m_Breath.check()) {
-						this->m_Breath.play_3D(GetFrameWorldMat(CharaFrame::Upper2).pos(), 12.5f * 5.f);
+						this->m_Breath.play_3D(GetFrameWorldMat(CharaFrame::Upper2).pos(), Scale_Rate * 5.f);
 					}
 				}
 				if (this->m_Breath.check()) {

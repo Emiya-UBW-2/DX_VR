@@ -113,5 +113,8 @@
     <ClCompile Include="source\MainScene\Object\Gun.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
+    <ClCompile Include="source\MainScene\Object\Magazine.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
 #pragma once
-#include"Header.hpp"
+#include	"../Header.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -287,9 +287,7 @@ namespace FPS_n2 {
 		private:
 			static const int		Chara_num = 3;
 			static const int		Vehicle_num = 3;
-
 			static const int		gun_num = Chara_num;
-			static const int		cart_num = 2;
 		private:
 			//リソース関連
 			BackGroundClass			m_BackGround;				//BG
@@ -370,15 +368,7 @@ namespace FPS_n2 {
 
 				for (int i = 0; i < gun_num; i++) {
 					ObjMngr->AddObject(ObjType::Gun, "data/gun/Mosin/");
-					ObjMngr->AddObject(ObjType::Magazine, "data/gun/Mosin/", "model_mag");
-
-					auto& m = (std::shared_ptr<MagazineClass>&)(*ObjMngr->GetObj(ObjType::Magazine, i));
-					m->GetAmmoAll();
-					for (int j = 0; j < cart_num; j++) {
-						ObjMngr->AddObject(ObjType::Cart, "data/ammo/7N14/", "ammo");
-					}
 				}
-
 				//ロード
 				SetCreate3DSoundFlag(FALSE);
 				this->m_Env = SoundHandle::Load("data/Sound/SE/envi.wav");
@@ -408,14 +398,6 @@ namespace FPS_n2 {
 					else {
 						c->SetUseRealTimePhysics(false);
 						c->SetCharaType(CharaTypeID::Enemy);
-					}
-				}
-				for (int i = 0; i < gun_num; i++) {
-					auto& g = (std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, i));
-					auto& m = (std::shared_ptr<MagazineClass>&)(*ObjMngr->GetObj(ObjType::Magazine, i));
-					g->SetMagPtr(m);
-					for (int j = 0; j < cart_num; j++) {
-						m->SetCartPtr((std::shared_ptr<CartClass>&)(*ObjMngr->GetObj(ObjType::Cart, i*cart_num + j)));
 					}
 				}
 				//登録
@@ -783,7 +765,7 @@ namespace FPS_n2 {
 						Effect_UseControl::SetOnce(Effect::ef_fire2, mat.pos(), mat.GetRot().zvec()*-1.f, 1.f);
 					}
 				}
-				//弾の更新
+				//いらないオブジェクトの除去
 				{
 					int loop = 0;
 					while (true) {
@@ -792,6 +774,22 @@ namespace FPS_n2 {
 							auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
 							if (!a->IsActive() && !a->GetHitPicActive()) {
 								ObjMngr->DelObj(ObjType::Ammo, loop);
+								loop--;
+							}
+						}
+						else {
+							break;
+						}
+						loop++;
+					}
+				}
+				{
+					int loop = 0;
+					while (true) {
+						auto cart = ObjMngr->GetObj(ObjType::Cart, loop);
+						if (cart != nullptr) {
+							if (!(*cart)->IsActive()) {
+								ObjMngr->DelObj(ObjType::Cart, loop);
 								loop--;
 							}
 						}
@@ -872,7 +870,7 @@ namespace FPS_n2 {
 						//Easing(&camera_main.fov, deg2rad(90), 0.9f, EasingType::OutExpo);
 						Easing(&camera_main.fov, deg2rad(17), 0.8f, EasingType::OutExpo);
 						Easing(&camera_main.near_, 10.f, 0.9f, EasingType::OutExpo);
-						Easing(&camera_main.far_, 12.5f * 300.f, 0.9f, EasingType::OutExpo);
+						Easing(&camera_main.far_, Scale_Rate * 300.f, 0.9f, EasingType::OutExpo);
 					}
 					else if (Chara->GetIsRun()) {
 						Easing(&camera_main.fov, deg2rad(90), 0.9f, EasingType::OutExpo);
