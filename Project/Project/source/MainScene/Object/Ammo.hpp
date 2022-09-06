@@ -49,7 +49,6 @@ namespace FPS_n2 {
 			const auto&		GetDamage(void) const noexcept { return this->m_AmmoData->GetDamage(); }
 			const auto&		GetCaliberSize(void) const noexcept { return this->m_AmmoData->GetCaliber(); }
 			const auto		GetEffectSize(void) const noexcept { return ((this->m_AmmoData->GetCaliber() >= 0.020f) ? this->m_AmmoData->GetCaliber() : 0.025f) / 0.1f; }
-			const auto		GetHitPicActive(void) const noexcept { return this->m_Hit_alpha > 0.f; }
 		public:
 			void			Put(const AmmoData* pAmmoData, const VECTOR_ref& pPos, const VECTOR_ref& pVec, int pMyID) noexcept {
 				this->m_IsActive = true;
@@ -120,6 +119,7 @@ namespace FPS_n2 {
 					Easing(&this->m_Hit_alpha, (this->m_HitTimer > 0.f) ? 2.f : 0.f, 0.95f, EasingType::OutExpo);
 					if (this->m_Hit_alpha <= 0.01f) {
 						this->m_Hit_alpha = 0;
+						this->m_IsDelete = true;
 					}
 				}
 				if (this->m_IsActive) {

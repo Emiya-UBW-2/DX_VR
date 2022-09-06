@@ -60,7 +60,7 @@ namespace FPS_n2 {
 
 				IsFirstLoop = true;
 			}
-			virtual bool Update(void) noexcept {
+			virtual bool Execute(void) noexcept {
 				IsFirstLoop = false;
 				return true;
 			}
@@ -114,7 +114,7 @@ namespace FPS_n2 {
 		//シーンサンプル
 		class SAMPLE : public TEMPSCENE {
 			void		Set(void) noexcept override {}
-			bool Update(void) noexcept override { return false; }
+			bool		Execute(void) noexcept override { return false; }
 			void		Dispose(void) noexcept override {}
 			//
 			void		UI_Draw(void) noexcept  override {}
@@ -197,7 +197,7 @@ namespace FPS_n2 {
 #endif // DEBUG
 				//更新
 				this->m_SelPause = false;
-				this->m_SelEnd |= !this->m_ScenesPtr->Update();
+				this->m_SelEnd |= !this->m_ScenesPtr->Execute();
 				//VR空間に適用
 				DrawParts->Move_Player();
 				//終了判定

@@ -7,8 +7,6 @@ namespace FPS_n2 {
 			auto* ObjMngr = ObjectManager::Instance();
 			for (auto& b : this->m_Cart) {
 				b = ((std::shared_ptr<CartClass>&)(*ObjMngr->AddObject(ObjType::Cart, GetAmmoSpec()->GetPath().c_str(), "ammo")));
-				b->SetInMag(true);
-				b->SetIsEmpty(false);
 			}
 		}
 	};

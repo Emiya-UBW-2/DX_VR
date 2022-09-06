@@ -22,7 +22,10 @@ namespace FPS_n2 {
 			std::string									m_FilePath;
 			std::string									m_ObjFileName;
 			std::string									m_ColFileName;
+
 			bool										m_IsActive{ true };
+			bool										m_IsDelete{ false };
+
 			bool										m_IsResetPhysics{ true };
 			bool										m_IsFirstLoop{ true };
 			bool										m_IsDraw{ true };
@@ -34,10 +37,12 @@ namespace FPS_n2 {
 		public:
 			void			SetUseRealTimePhysics(bool value) noexcept { this->m_Use_RealTimePhysics = value; }
 			void			SetActive(bool value) noexcept { this->m_IsActive = value; }
+			void			SetIsDelete(bool value) noexcept { this->m_IsDelete = value; }
 			void			SetMapCol(const MV1* MapCol) noexcept { this->m_MapCol = MapCol; }
 			void			SetResetP(bool value) { this->m_IsResetPhysics = value; }
 			void			SetCameraPosition(const VECTOR_ref& value) { this->m_CameraPosition = value; }
 			void			SetCameraSize(float value) { this->m_CameraSize = value; }
+
 
 			auto&			GetObj(void) noexcept { return this->m_Use_RealTimePhysics ? this->m_obj_REALTIME : this->m_obj_LOADCALC; }
 			const auto&		GetObj_const(void) const noexcept { return this->m_Use_RealTimePhysics ? this->m_obj_REALTIME : this->m_obj_LOADCALC; }
@@ -54,6 +59,7 @@ namespace FPS_n2 {
 			const auto&		GetCameraSize(void) const noexcept { return this->m_CameraSize; }
 			const auto&		GetMove(void) const noexcept { return this->m_move; }
 			const auto&		IsActive(void) const noexcept { return this->m_IsActive; }
+			const auto&		GetIsDelete(void) const noexcept { return this->m_IsDelete; }
 			//
 			void			SetAnimOnce(int ID, float speed) {
 				this->GetObj().get_anime(ID).time += 30.f / FPS * speed;

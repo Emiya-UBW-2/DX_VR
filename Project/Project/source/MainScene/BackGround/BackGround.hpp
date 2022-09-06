@@ -1,7 +1,5 @@
-
 #pragma once
-
-#include	"Header.hpp"
+#include	"../../Header.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -9,39 +7,33 @@ namespace FPS_n2 {
 		class Grass {
 			class grass_t {
 			public:
-				bool canlook = true;
-				Model_Instance inst;
+				bool			canlook = true;
+				Model_Instance	m_Inst;
 			public:
 				void Init(int total, int sel) {
 					switch (sel) {
 					case 0:
-						this->inst.Init("data/model/grass/grass.png", "data/model/grass/model.mv1");
+						this->m_Inst.Init("data/model/grass/grass.png", "data/model/grass/model.mv1");
 						break;
 					case 1:
-						this->inst.Init("data/model/grass/grass2.png", "data/model/grass/model.mv1");
+						this->m_Inst.Init("data/model/grass/grass2.png", "data/model/grass/model.mv1");
 						break;
 					case 2:
-						this->inst.Init("data/model/grass/grass3.png", "data/model/grass/model.mv1");
+						this->m_Inst.Init("data/model/grass/grass3.png", "data/model/grass/model.mv1");
 						break;
 					}
-					this->inst.Clear();
-					this->inst.hitss = total;
-
-					this->inst.Set_start();
+					this->m_Inst.Reset();
+					this->m_Inst.Set_start(total);
 				}
-				void Set_one(void) noexcept {
-					this->inst.Set_one();
+				void Set_one(const MATRIX_ref& mat) noexcept {
+					this->m_Inst.Set_one(mat);
 				}
 				void put(void) noexcept {
 					canlook = true;
-					this->inst.Update();
+					this->m_Inst.Execute();
 				}
 				void Dispose(void) noexcept {
-					this->inst.hitsver.clear();
-					this->inst.hitsind.clear();
-
-					this->inst.hits.Dispose();
-					this->inst.hits_pic.Dispose();
+					this->m_Inst.Dispose();
 				}
 				/*Ž‹ŠEŠO‚©”Û‚©‚ð”»’f*/
 				void Check_CameraViewClip(const VECTOR_ref& min, const VECTOR_ref& max) noexcept {
@@ -53,7 +45,7 @@ namespace FPS_n2 {
 				}
 				void Draw(void) noexcept {
 					if (this->canlook) {
-						this->inst.Draw();
+						this->m_Inst.Draw();
 					}
 				}
 			};
@@ -258,12 +250,9 @@ namespace FPS_n2 {
 
 								auto tmpvect = grassPosMin[ID] + VECTOR_ref::vget(x1, 0.2f, z1);
 								auto tmpscale = VECTOR_ref::vget(size*1.f, 6.0f + GetRandf(5.5f), size*1.f);
-								auto tmpMat = MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale);
 								auto res = MapCol->CollCheck_Line(tmpvect + VECTOR_ref::vget(0.f, 10.f*Scale_Rate, 0.f), tmpvect + VECTOR_ref::vget(0.f, -10.f*Scale_Rate, 0.f));
 								if (res.HitFlag == TRUE) { tmpvect = res.HitPosition; }
-								tmpMat = tmpMat * MATRIX_ref::RotVec2(VECTOR_ref::up(), ((VECTOR_ref)(res.Normal)).Norm())* MATRIX_ref::Mtrans(tmpvect);
-								tgt_g.inst.hits.SetMatrix(tmpMat);
-								tgt_g.Set_one();
+								tgt_g.Set_one(MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale) * MATRIX_ref::RotVec2(VECTOR_ref::up(), ((VECTOR_ref)(res.Normal)).Norm())* MATRIX_ref::Mtrans(tmpvect));
 							}
 							tgt_g.put();
 						}
@@ -286,12 +275,9 @@ namespace FPS_n2 {
 								}
 								auto tmpvect = grassPosMin[ID] + VECTOR_ref::vget(x1, 0.f, z1);
 								auto tmpscale = VECTOR_ref::vget(size*1.f, 6.0f + GetRandf(5.5f), size*1.f);
-								auto tmpMat = MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale);
 								auto res = MapCol->CollCheck_Line(tmpvect + VECTOR_ref::vget(0.f, 10.f*Scale_Rate, 0.f), tmpvect + VECTOR_ref::vget(0.f, -10.f*Scale_Rate, 0.f));
 								if (res.HitFlag == TRUE) { tmpvect = res.HitPosition; }
-								tmpMat = tmpMat * MATRIX_ref::RotVec2(VECTOR_ref::up(), ((VECTOR_ref)(res.Normal)).Norm())* MATRIX_ref::Mtrans(tmpvect);
-								tgt_g.inst.hits.SetMatrix(tmpMat);
-								tgt_g.Set_one();
+								tgt_g.Set_one(MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale) * MATRIX_ref::RotVec2(VECTOR_ref::up(), ((VECTOR_ref)(res.Normal)).Norm())* MATRIX_ref::Mtrans(tmpvect));
 							}
 							tgt_g.put();
 						}
@@ -314,12 +300,9 @@ namespace FPS_n2 {
 								}
 								auto tmpvect = grassPosMin[ID] + VECTOR_ref::vget(x1, 0.f, z1);
 								auto tmpscale = VECTOR_ref::vget(size*1.f, 6.0f + GetRandf(5.5f), size*1.f);
-								auto tmpMat = MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale);
 								auto res = MapCol->CollCheck_Line(tmpvect + VECTOR_ref::vget(0.f, 10.f*Scale_Rate, 0.f), tmpvect + VECTOR_ref::vget(0.f, -10.f*Scale_Rate, 0.f));
 								if (res.HitFlag == TRUE) { tmpvect = res.HitPosition; }
-								tmpMat = tmpMat * MATRIX_ref::RotVec2(VECTOR_ref::up(), ((VECTOR_ref)(res.Normal)).Norm())* MATRIX_ref::Mtrans(tmpvect);
-								tgt_g.inst.hits.SetMatrix(tmpMat);
-								tgt_g.Set_one();
+								tgt_g.Set_one(MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(tmpscale) * MATRIX_ref::RotVec2(VECTOR_ref::up(), ((VECTOR_ref)(res.Normal)).Norm())* MATRIX_ref::Mtrans(tmpvect));
 							}
 							tgt_g.put();
 						}

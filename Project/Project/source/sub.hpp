@@ -39,7 +39,7 @@ namespace FPS_n2 {
 			this->body->SetLinearVelocity(position);
 		}
 
-		void		Update(const VECTOR_ref& add, float yradadd) {
+		void		Execute(const VECTOR_ref& add, float yradadd) {
 			this->body->SetLinearVelocity(b2Vec2(add.x(), add.z()));
 			this->body->SetAngularVelocity(yradadd);
 		}
@@ -313,7 +313,7 @@ namespace FPS_n2 {
 			}
 			else {
 				this->m_RunTimer = 0.f;
-				this->m_IsRun = (pRunPress&& !pIsNotActive);
+				this->m_IsRun = (pRunPress && !pIsNotActive);
 			}
 			if (GetPressRear() || (!GetPressFront() && (GetPressLeft() || GetPressRight()))) {
 				this->m_IsRun = false;
@@ -555,120 +555,122 @@ namespace FPS_n2 {
 
 	//インスタシング
 	class Model_Instance {
+	private:
+		int						m_Count{ 0 };			//数
+		std::vector<VERTEX3D>	m_Vertex;				//
+		std::vector<DWORD>		m_Index;				//
+		int						m_VerBuf{ -1 };			//
+		int						m_IndexBuf{ -1 };		//
+		MV1						m_obj;					//モデル
+		GraphHandle				m_pic;					//画像ハンドル
+		int						m_vnum{ -1 };			//
+		int						m_pnum{ -1 };			//
+		MV1_REF_POLYGONLIST		m_RefMesh{};			//
+	private:
+		void			Init_one(void) noexcept {
+			MV1RefreshReferenceMesh(this->m_obj.get(), -1, TRUE);			//参照用メッシュの更新
+			this->m_RefMesh = MV1GetReferenceMesh(this->m_obj.get(), -1, TRUE);	//参照用メッシュの取得
+		}
 	public:
-		int hitss = 0;					//hitsの数
-		std::vector<VERTEX3D> hitsver;	//hits
-		std::vector<DWORD> hitsind;	    //hits
-		int VerBuf = -1, IndexBuf = -1;	//hits
-		MV1 hits;						//hitsモデル
-		GraphHandle hits_pic;			//画像ハンドル
-		int IndexNum = -1, VerNum = -1;	//hits
-		int vnum = -1, pnum = -1;		//hits
-		MV1_REF_POLYGONLIST RefMesh{};	//hits
-		//初期化
+		//リセット
+		void			Reset(void) noexcept {
+			this->m_Count = 0;
+			this->m_vnum = 0;
+			this->m_pnum = 0;
+			this->m_Vertex.clear();								//頂点データとインデックスデータを格納するメモリ領域の確保
+			this->m_Vertex.reserve(2000);						//頂点データとインデックスデータを格納するメモリ領域の確保
+			this->m_Index.clear();								//頂点データとインデックスデータを格納するメモリ領域の確保
+			this->m_Index.reserve(2000);						//頂点データとインデックスデータを格納するメモリ領域の確保
+		}
+		void			Set(const float& caliber, const VECTOR_ref& Position, const VECTOR_ref& Normal, const VECTOR_ref& Zvec) {
+			this->m_Count++;
+			Set_start(this->m_Count);
+			float asize = 200.f * caliber;
+			const auto& y_vec = Normal;
+			auto z_vec = y_vec.cross(Zvec).Norm();
+			auto scale = VECTOR_ref::vget(asize / std::abs(y_vec.dot(Zvec)), asize, asize);
+			MATRIX_ref mat = MATRIX_ref::GetScale(scale) * MATRIX_ref::Axis1_YZ(y_vec, z_vec) * MATRIX_ref::Mtrans(Position + y_vec * 0.02f);
+			Set_one(mat);
+		}
+		void			Set_start(int value) noexcept {
+			this->m_Count = value;
+			this->m_Vertex.resize(this->m_RefMesh.VertexNum * this->m_Count);			//頂点データとインデックスデータを格納するメモリ領域の確保
+			this->m_Index.resize(this->m_RefMesh.PolygonNum * 3 * this->m_Count);		//頂点データとインデックスデータを格納するメモリ領域の確保
+		}
+		void			Set_one(const MATRIX_ref& mat) noexcept {
+			this->m_obj.SetMatrix(mat);
+			Init_one();
+			for (size_t j = 0; j < size_t(this->m_RefMesh.VertexNum); ++j) {
+				auto& g = this->m_Vertex[j + this->m_vnum];
+				const auto& r = this->m_RefMesh.Vertexs[j];
+				g.pos = r.Position;
+				g.norm = r.Normal;
+				g.dif = r.DiffuseColor;
+				g.spc = r.SpecularColor;
+				g.u = r.TexCoord[0].u;
+				g.v = r.TexCoord[0].v;
+				g.su = r.TexCoord[1].u;
+				g.sv = r.TexCoord[1].v;
+			}
+			for (size_t j = 0; j < size_t(this->m_RefMesh.PolygonNum); ++j) {
+				for (size_t k = 0; k < std::size(this->m_RefMesh.Polygons[j].VIndex); ++k) {
+					this->m_Index[j * 3 + k + this->m_pnum] = WORD(this->m_RefMesh.Polygons[j].VIndex[k] + this->m_vnum);
+				}
+			}
+			this->m_vnum += this->m_RefMesh.VertexNum;
+			this->m_pnum += this->m_RefMesh.PolygonNum * 3;
+		}
+	public:
 		void			Init(std::string pngpath, std::string mv1path) noexcept {
 			SetUseASyncLoadFlag(FALSE);
-			this->hits_pic = GraphHandle::Load(pngpath);		 //grass
-			MV1::Load(mv1path, &this->hits);	//弾痕
+			this->m_pic = GraphHandle::Load(pngpath);		 //grass
+			MV1::Load(mv1path, &this->m_obj);					//弾痕
 			Init_one();
 		}
-		void			Init_one(void) noexcept {
-			MV1RefreshReferenceMesh(this->hits.get(), -1, TRUE);			//参照用メッシュの更新
-			this->RefMesh = MV1GetReferenceMesh(this->hits.get(), -1, TRUE);	//参照用メッシュの取得
-		}
-		//毎回のリセット
-		void			Clear(void) noexcept {
-			this->hitss = 0;
-			this->vnum = 0;
-			this->pnum = 0;
-			this->hitsver.clear();								//頂点データとインデックスデータを格納するメモリ領域の確保
-			this->hitsind.clear();								//頂点データとインデックスデータを格納するメモリ領域の確保
-			this->hitsver.reserve(2000);							//頂点データとインデックスデータを格納するメモリ領域の確保
-			this->hitsind.reserve(2000);							//頂点データとインデックスデータを格納するメモリ領域の確保
-		}
-
-		void			Set(const float& caliber, const VECTOR_ref& Position, const VECTOR_ref& Normal, const VECTOR_ref& Zvec) {
-			this->hitss++;
-			Set_start();
-			{
-				float asize = 200.f * caliber;
-				const auto& y_vec = Normal;
-				auto z_vec = y_vec.cross(Zvec).Norm();
-				auto scale = VECTOR_ref::vget(asize / std::abs(y_vec.dot(Zvec)), asize, asize);
-				auto pos = Position + y_vec * 0.02f;
-				MATRIX_ref mat = MATRIX_ref::GetScale(scale) * MATRIX_ref::Axis1_YZ(y_vec, z_vec);
-
-				this->hits.SetMatrix(mat * MATRIX_ref::Mtrans(pos));
-			}
-			Set_one();
-		}
-		void			Set_start(void) noexcept {
-			this->IndexNum = this->RefMesh.PolygonNum * 3 * this->hitss;				//インデックスの数を取得
-			this->VerNum = this->RefMesh.VertexNum * this->hitss;						//頂点の数を取得
-			this->hitsver.resize(this->VerNum);									//頂点データとインデックスデータを格納するメモリ領域の確保
-			this->hitsind.resize(this->IndexNum);								//頂点データとインデックスデータを格納するメモリ領域の確保
-		}
-		void			Set_one(void) noexcept {
-			Init_one();
-			for (size_t j = 0; j < size_t(this->RefMesh.VertexNum); ++j) {
-				auto& g = this->hitsver[j + this->vnum];
-				g.pos = this->RefMesh.Vertexs[j].Position;
-				g.norm = this->RefMesh.Vertexs[j].Normal;
-				g.dif = this->RefMesh.Vertexs[j].DiffuseColor;
-				g.spc = this->RefMesh.Vertexs[j].SpecularColor;
-				g.u = this->RefMesh.Vertexs[j].TexCoord[0].u;
-				g.v = this->RefMesh.Vertexs[j].TexCoord[0].v;
-				g.su = this->RefMesh.Vertexs[j].TexCoord[1].u;
-				g.sv = this->RefMesh.Vertexs[j].TexCoord[1].v;
-			}
-			for (size_t j = 0; j < size_t(this->RefMesh.PolygonNum); ++j) {
-				for (size_t k = 0; k < std::size(this->RefMesh.Polygons[j].VIndex); ++k)
-					this->hitsind[j * 3 + k + this->pnum] = WORD(this->RefMesh.Polygons[j].VIndex[k] + this->vnum);
-			}
-			this->vnum += this->RefMesh.VertexNum;
-			this->pnum += this->RefMesh.PolygonNum * 3;
-		}
-
-		void			Update(void) noexcept {
-			this->VerBuf = CreateVertexBuffer(this->VerNum, DX_VERTEX_TYPE_NORMAL_3D);
-			this->IndexBuf = CreateIndexBuffer(this->IndexNum, DX_INDEX_TYPE_32BIT);
-			SetVertexBufferData(0, this->hitsver.data(), this->VerNum, this->VerBuf);
-			SetIndexBufferData(0, this->hitsind.data(), this->IndexNum, this->IndexBuf);
+		void			Execute(void) noexcept {
+			this->m_VerBuf = CreateVertexBuffer((int)this->m_Vertex.size(), DX_VERTEX_TYPE_NORMAL_3D);
+			this->m_IndexBuf = CreateIndexBuffer((int)this->m_Index.size(), DX_INDEX_TYPE_32BIT);
+			SetVertexBufferData(0, this->m_Vertex.data(), (int)this->m_Vertex.size(), this->m_VerBuf);
+			SetIndexBufferData(0, this->m_Index.data(), (int)this->m_Index.size(), this->m_IndexBuf);
 		}
 		void			Draw(void) noexcept {
 			//SetDrawAlphaTest(DX_CMP_GREATER, 128);
-			{
-				DrawPolygonIndexed3D_UseVertexBuffer(this->VerBuf, this->IndexBuf, this->hits_pic.get(), TRUE);
-			}
+			DrawPolygonIndexed3D_UseVertexBuffer(this->m_VerBuf, this->m_IndexBuf, this->m_pic.get(), TRUE);
 			//SetDrawAlphaTest(-1, 0);
+		}
+		void			Dispose(void) noexcept {
+			this->m_Vertex.clear();
+			this->m_Index.clear();
+			this->m_obj.Dispose();
+			this->m_pic.Dispose();
 		}
 	};
 	//命中根
 	class HIT_PASSIVE {
-		Model_Instance inst;
-		bool isUpdate{ true };
+		Model_Instance	m_inst;
+		bool			m_IsUpdate{ true };
 	public:
 		//初期化
 		void			Init(void) noexcept {
-			inst.Init("data/m_obj/hit/hit.png", "data/m_obj/hit/m_obj.mv1");
+			m_inst.Init("data/m_obj/hit/hit.png", "data/m_obj/hit/m_obj.mv1");
 		}
 		//毎回のリセット
 		void			Clear(void) noexcept {
-			inst.Clear();
+			m_inst.Reset();
 		}
 
 		void			Set(const float& caliber, const VECTOR_ref& Position, const VECTOR_ref& Normal, const VECTOR_ref& Zvec) {
-			inst.Set(caliber, Position, Normal, Zvec);
-			isUpdate = true;
+			m_inst.Set(caliber, Position, Normal, Zvec);
+			m_IsUpdate = true;
 		}
-		void			Update(void) noexcept {
-			if (isUpdate) {
-				isUpdate = false;
-				inst.Update();
+		void			Execute(void) noexcept {
+			if (m_IsUpdate) {
+				m_IsUpdate = false;
+				m_inst.Execute();
 			}
 		}
 		void			Draw(void) noexcept {
-			inst.Draw();
+			m_inst.Draw();
 		}
 	};
 };

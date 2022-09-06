@@ -43,7 +43,7 @@ namespace FPS_n2 {
 				pObj->SetFrameNum();
 			}
 
-			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") {
+			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") noexcept {
 				switch (ModelType) {
 				case ObjType::Human:
 					this->m_Object.resize(this->m_Object.size() + 1);
@@ -74,12 +74,13 @@ namespace FPS_n2 {
 				}
 				LoadModel(this->m_Object.back().get(), filepath, objfilename, colfilename);
 
+				auto back = this->m_Object.size();
 				this->m_Object.back()->SetMapCol(this->m_MapCol);
 				this->m_Object.back()->Init();
 
-				return &(this->m_Object[this->m_Object.size() - 1]);
+				return &(this->m_Object[back - 1]);
 			}
-			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType) {
+			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType) noexcept {
 				switch (ModelType) {
 				case ObjType::Human:
 					this->m_Object.resize(this->m_Object.size() + 1);
@@ -113,7 +114,7 @@ namespace FPS_n2 {
 
 				return &(this->m_Object[this->m_Object.size() - 1]);
 			}
-			std::shared_ptr<ObjectBaseClass>* GetObj(ObjType ModelType, int num) {
+			std::shared_ptr<ObjectBaseClass>* GetObj(ObjType ModelType, int num) noexcept {
 				int cnt = 0;
 				for (int i = 0; i < this->m_Object.size(); i++) {
 					auto& o = this->m_Object[i];
@@ -126,7 +127,7 @@ namespace FPS_n2 {
 				}
 				return nullptr;
 			}
-			void			DelObj(ObjType ModelType, int num) {
+			void			DelObj(ObjType ModelType, int num) noexcept {
 				int cnt = 0;
 				for (int i = 0; i < this->m_Object.size(); i++) {
 					auto& o = this->m_Object[i];
@@ -140,9 +141,19 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			//Delobj予定
+			//オブジェクトの排除チェック
+			void			DeleteCheck(void) noexcept {
+				for (int i = 0; i < this->m_Object.size(); i++) {
+					auto& o = this->m_Object[i];
+					if (o->GetIsDelete()) {
+						//順番の維持のためここはerase
+						this->m_Object.erase(this->m_Object.begin() + i);
+						i--;
+					}
+				}
+			}
 		public:
-			void			Init(const MV1* MapCol) {
+			void			Init(const MV1* MapCol) noexcept {
 				this->m_MapCol = MapCol;
 			}
 			void			ExecuteObject(void) noexcept {

@@ -485,7 +485,7 @@ namespace FPS_n2 {
 				m_NetWorkBrowser.Init();
 			}
 			//
-			bool			Update(void) noexcept override {
+			bool			Execute(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
 				//FirstDoingv
@@ -766,39 +766,7 @@ namespace FPS_n2 {
 					}
 				}
 				//いらないオブジェクトの除去
-				{
-					int loop = 0;
-					while (true) {
-						auto ammo = ObjMngr->GetObj(ObjType::Ammo, loop);
-						if (ammo != nullptr) {
-							auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
-							if (!a->IsActive() && !a->GetHitPicActive()) {
-								ObjMngr->DelObj(ObjType::Ammo, loop);
-								loop--;
-							}
-						}
-						else {
-							break;
-						}
-						loop++;
-					}
-				}
-				{
-					int loop = 0;
-					while (true) {
-						auto cart = ObjMngr->GetObj(ObjType::Cart, loop);
-						if (cart != nullptr) {
-							if (!(*cart)->IsActive()) {
-								ObjMngr->DelObj(ObjType::Cart, loop);
-								loop--;
-							}
-						}
-						else {
-							break;
-						}
-						loop++;
-					}
-				}
+				ObjMngr->DeleteCheck();
 				//弾の更新
 				{
 					int loop = 0;
@@ -927,7 +895,7 @@ namespace FPS_n2 {
 					this->m_UIclass.SetIntParam(7, (int)1.f);
 					this->m_UIclass.SetIntParam(8, (int)1.f);
 				}
-				TEMPSCENE::Update();
+				TEMPSCENE::Execute();
 				Effect_UseControl::Execute_Effect();
 				return true;
 			}

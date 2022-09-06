@@ -428,7 +428,7 @@ namespace FPS_n2 {
 				this->m_b2mine.SetTransform(b2Vec2(this->m_move.pos.x(), this->m_move.pos.z()), Get_body_yrad());
 			}
 			else {
-				this->m_b2mine.Update(this->m_move.vec, this->m_radAdd.y());
+				this->m_b2mine.Execute(this->m_move.vec, this->m_radAdd.y());
 			}
 		}
 		//SetMatw¦XV

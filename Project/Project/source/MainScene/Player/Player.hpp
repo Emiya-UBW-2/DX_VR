@@ -70,7 +70,7 @@ namespace FPS_n2 {
 		private:
 			static inline  PlayerManager*	m_Singleton = nullptr;
 		public:
-			static void Create() noexcept {
+			static void Create(void) noexcept {
 				if (m_Singleton == nullptr) {
 					m_Singleton = new PlayerManager();
 				}

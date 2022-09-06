@@ -5,15 +5,18 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class GunClass : public ObjectBaseClass {
 		private:
-			GraphHandle						m_reticle;
-			int								m_animSel{ 0 };
+			GraphHandle						m_reticle;						//
+			int								m_ShotPhase{ 0 };				//
 			std::vector<std::string>		m_MagName;						//
-			bool							m_IsShot{ false };
-			bool							m_in_chamber{ true };			//チャンバー内に初弾があるか(弾倉最大+1かどうか)
+			bool							m_IsShot{ false };				//
+			bool							m_in_chamber{ true };			//チャンバー内に弾があるか
 			int								m_boltSoundSequence{ -1 };		//サウンド
 			std::shared_ptr<MagazineClass>	m_Mag_Ptr{ nullptr };			//刺さっているマガジン
 			std::shared_ptr<CartClass>		m_CartPtr{ nullptr };			//薬莢
-			const AmmoData*					m_NowAmmo{ nullptr };
+			const AmmoData*					m_NowAmmo{ nullptr };			//
+			bool							m_IsChamberMove{ false };		//チャンバー内に弾があるか
+			float							m_ChamberMovePer{ 0.f };
+
 		public://ゲッター
 			const auto GetFrameLocalMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix(m_Frames[(int)frame].first); }
 			const auto GetParentFrameLocalMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix((int)GetObj_const().frame_parent(m_Frames[(int)frame].first)); }
@@ -22,35 +25,28 @@ namespace FPS_n2 {
 			void ResetFrameLocalMat(GunFrame frame) noexcept { GetObj().frame_Reset(m_Frames[(int)frame].first); }
 			void SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(m_Frames[(int)frame].first, value * m_Frames[(int)frame].second); }
 			const auto GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
+			const auto GetNowAnime(void) noexcept { return GetObj().get_anime(this->m_ShotPhase - 2); }
 			void SetIsShot(bool value) noexcept { this->m_IsShot = value; }
 			const auto GetScopePos(void) noexcept { return GetFrameWorldMat(GunFrame::Eyepos).pos(); }
 			const auto GetLensPos(void) noexcept { return GetFrameWorldMat(GunFrame::Lens).pos(); }
 			const auto GetReticlePos(void) noexcept { return GetLensPos() + (GetLensPos() - GetScopePos()).Norm()*10.f; }
 			const auto GetLensPosSize(void) noexcept { return GetFrameWorldMat(GunFrame::LensSize).pos(); }
 			const auto GetMuzzleMatrix(void) noexcept { return GetFrameWorldMat(GunFrame::Muzzle); }
-			const auto GetCartMat(void) noexcept { return GetFrameWorldMat(GunFrame::Cart); }
-			const auto GetCartVec(void) noexcept { return (GetFrameWorldMat(GunFrame::CartVec).pos() - GetCartMat().pos()).Norm(); }
-			const auto GetMagMat(void) noexcept { return GetFrameWorldMat(GunFrame::Magpos); }
-			const auto GetIsEmpty(void) noexcept { return this->m_Mag_Ptr->IsEmpty(); }
-			const auto GetIsMagFull(void) noexcept { return this->m_Mag_Ptr->IsFull(); }
-			const auto GetAmmoAll(void) noexcept { return this->m_Mag_Ptr->GetAmmoAll(); }
-			const auto GetAmmoNum(void) noexcept { return this->m_Mag_Ptr->GetAmmoNum() + (m_in_chamber ? 1 : 0); }
+			const auto GetIsMagEmpty(void) noexcept { return (this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->IsEmpty() : true; }//次弾がない
+			const auto GetIsMagFull(void) noexcept { return (this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->IsFull() : false; }
+			const auto GetAmmoAll(void) noexcept { return (this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->GetAmmoAll() : 0; }
+			const auto GetAmmoNum(void) noexcept { return ((this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->GetAmmoNum() : 0) + (this->m_in_chamber ? 1 : 0); }
 			const auto GetCanshot(void) noexcept { return !(this->GetAmmoNum() == 0); }
 			const auto& GetReticle(void) noexcept { return this->m_reticle; }
 			const auto& GetIsShot(void) noexcept { return this->m_IsShot; }
-			const auto GetChamberIn(void) noexcept {
-				return
-					((GetAnime(GunAnimeID::Cocking).per == 1.f) && (GetAnime(GunAnimeID::Cocking).time >= 25.f))
-					|| ((GetAnime(GunAnimeID::ReloadEnd).per == 1.f) && (GetAnime(GunAnimeID::ReloadEnd).time >= 5.f));
-			}
-			void SetGunMatrix(const MATRIX_ref& value, int pBoltAnim) noexcept {
+			void SetGunMatrix(const MATRIX_ref& value, int pShotPhase) noexcept {
 				SetMove(value.GetRot(), value.pos());
-				this->m_Mag_Ptr->SetMove(this->GetMagMat().GetRot(), this->GetMagMat().pos());
-				this->m_animSel = pBoltAnim;
+				this->m_Mag_Ptr->SetMove(GetFrameWorldMat(GunFrame::Magpos).GetRot(), GetFrameWorldMat(GunFrame::Magpos).pos());
+				this->m_ShotPhase = pShotPhase;
 			}
-			void SetMagazine(const char*) noexcept;
-			void SetBullet(void) noexcept;
-			void SetCart(void) noexcept;
+			void SetMagazine(const char*) noexcept;//マガジンの着脱
+			void ExecuteCartInChamber(void) noexcept;//チャンバーへの装弾、排出
+			void SetBullet(void) noexcept;//発砲
 			void SetAmmoHandMatrix(const MATRIX_ref& value, float pPer) noexcept { this->m_Mag_Ptr->SetHandMatrix(value, pPer); }
 		public:
 			GunClass(void) noexcept { this->m_objType = ObjType::Gun; }
@@ -71,20 +67,16 @@ namespace FPS_n2 {
 					FileRead_close(mdata);
 				}
 				SetMagazine(this->m_MagName[0].c_str());
+				//SetMagazine(nullptr);
 			}
 			void FirstExecute(void) noexcept override {
 				auto SE = SoundPool::Instance();
 				if (this->m_IsFirstLoop) {
-					this->m_Mag_Ptr->SetAmmo(0);
-					this->m_in_chamber = false;
 				}
 				for (int i = 0; i < GetObj().get_anime().size(); i++) {
-					if (this->m_animSel == i) {
-						if (i == 2) {
+					if ((GunAnimeID)(this->m_ShotPhase - 2) == (GunAnimeID)i) {
+						if ((GunAnimeID)i == GunAnimeID::ReloadOne) {
 							if (GetObj().get_anime(i).time == 0.f) {
-								if (this->GetIsMagFull()) {
-									this->m_in_chamber = true;
-								}
 								this->m_Mag_Ptr->AddAmmo();
 							}
 						}
@@ -167,14 +159,10 @@ namespace FPS_n2 {
 				ResetFrameLocalMat(GunFrame::Center);
 				GetObj().work_anime();
 				SetFrameLocalMat(GunFrame::Center, GetFrameLocalMat(GunFrame::Center).GetRot());//1のフレーム移動量を無視する
-				if (this->m_CartPtr.get() != nullptr) {
-					this->m_CartPtr->SetMove(this->GetCartMat().GetRot(), this->GetCartMat().pos());
-				}
 				//共通
 				ObjectBaseClass::FirstExecute();
-
-				this->m_Mag_Ptr->SetChamberIntime(this->GetChamberIn());
-				this->m_Mag_Ptr->SetChamberMatrix(this->GetCartMat());
+				//弾薬の演算
+				ExecuteCartInChamber();
 			}
 			void			Dispose(void) noexcept override {
 				this->m_MagName.clear();

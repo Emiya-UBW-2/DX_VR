@@ -18,13 +18,9 @@ namespace FPS_n2 {
 			CartClass(void) noexcept { this->m_objType = ObjType::Cart; }
 			~CartClass(void) noexcept { }
 		public:
-			void			SetInMag(bool value) noexcept { this->m_IsInMag = value; }
-			const auto&		GetInMag(void) const noexcept { return this->m_IsInMag; }
-			void			SetIsEmpty(bool value) noexcept { this->m_IsEmpty = value; }
-			const auto&		GetIsEmpty(void) const noexcept { return this->m_IsEmpty; }
-		public:
-			void Set(const VECTOR_ref& pos, const MATRIX_ref& mat, const VECTOR_ref& vec) noexcept {
-				this->m_IsEmpty = true;
+			void	SetIsEmpty(bool value) noexcept { this->m_IsEmpty = value; }
+			void	SetEject(const VECTOR_ref& pos, const MATRIX_ref& mat, const VECTOR_ref& vec) noexcept {
+				this->m_IsInMag = false;
 				this->m_move.pos = pos;
 				this->m_move.vec = vec;
 				this->m_yAdd = 0.f;
@@ -35,7 +31,7 @@ namespace FPS_n2 {
 					l = this->m_move.pos;
 				}
 			}
-			void CheckBullet(void) noexcept {
+			void	CheckBullet(void) noexcept {
 				if (this->m_IsActive) {
 					if ((this->m_move.pos - this->m_move.repos).y() <= 0.f) {
 						auto HitResult = this->m_MapCol->CollCheck_Line(this->m_move.repos + VECTOR_ref::up()*1.f, this->m_move.pos);
@@ -50,6 +46,12 @@ namespace FPS_n2 {
 				}
 			}
 		public:
+			void	Init(void) noexcept override {
+				ObjectBaseClass::Init();
+				this->m_IsInMag = true;//チェンバー内にあり
+				this->m_IsEmpty = false;//弾頭付き
+			}
+
 			void	FirstExecute(void) noexcept override {
 				if (!this->m_IsInMag) {
 					if (this->m_IsActive) {
@@ -67,8 +69,8 @@ namespace FPS_n2 {
 						}
 						this->m_move.mat = MATRIX_ref::RotAxis(BB.cross(this->m_move.mat.zvec()), deg2rad(-(20.f + GetRandf(30.f))*60.f / FPS))*this->m_move.mat;
 
-						if (this->m_Timer > 2.f) {
-							this->m_IsActive = false;
+						if (this->m_Timer > 5.f) {
+							this->m_IsDelete = true;
 						}
 						this->m_Timer += 1.f / FPS;
 					}
@@ -120,7 +122,6 @@ namespace FPS_n2 {
 					}
 				}
 			}
-
 		};
 	};
 };

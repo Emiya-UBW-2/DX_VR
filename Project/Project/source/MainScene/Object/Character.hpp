@@ -119,7 +119,6 @@ namespace FPS_n2 {
 			const auto		GetReticlePos(void) noexcept { return (this->m_Gun_Ptr != nullptr) ? this->m_Gun_Ptr->GetReticlePos() : VECTOR_ref::zero(); }
 			const auto		GetLensPosSize(void) noexcept { return (this->m_Gun_Ptr != nullptr) ? this->m_Gun_Ptr->GetLensPosSize() : VECTOR_ref::zero(); }
 			const auto		GetCanshot(void) const noexcept { return (this->m_Gun_Ptr != nullptr) ? (this->m_Gun_Ptr->GetCanshot() && (this->m_ShotPhase <= 1)) : false; }
-			const auto		GetIsEmpty(void) const noexcept { return (this->m_Gun_Ptr != nullptr) ? this->m_Gun_Ptr->GetIsEmpty() : false; }
 			const auto		GetAmmoNum(void) const noexcept { return this->m_Gun_Ptr->GetAmmoNum(); }
 			const auto		GetAmmoAll(void) const noexcept { return this->m_Gun_Ptr->GetAmmoAll(); }
 			const auto&		GetReticle(void) noexcept { return this->m_Gun_Ptr->GetReticle(); }
@@ -429,7 +428,7 @@ namespace FPS_n2 {
 							SetAnimOnce(m_UpperAnimSelect, 1.5f);
 							if (GetAnime(m_UpperAnimSelect).TimeEnd() && !this->m_Press_Shot) {
 								GetAnime(m_UpperAnimSelect).GoStart();
-								if (!this->m_Gun_Ptr->GetIsEmpty()) {
+								if (!this->m_Gun_Ptr->GetIsMagEmpty()) {
 									this->m_ShotPhase = 2;
 								}
 								else {
@@ -475,11 +474,6 @@ namespace FPS_n2 {
 							}
 						}
 						//
-						if (this->m_ShotPhase == 2 || this->m_ShotPhase == 3) {
-							if (this->m_Gun_Ptr != nullptr) {
-								this->m_Gun_Ptr->SetCart();
-							}
-						}
 						if (this->m_ShotPhase < 3) {
 							this->m_LoadAmmoPer = 0.f;
 						}
@@ -840,7 +834,7 @@ namespace FPS_n2 {
 					auto tmp_gunrat = MATRIX_ref::RotVec2(VECTOR_ref::vget(0, 0, -1).Norm(), zVec);
 					tmp_gunrat *= MATRIX_ref::RotVec2(tmp_gunrat.yvec(), yVec);
 					tmp_gunrat *= GetCharaDir() * MATRIX_ref::Mtrans(PosBuf);
-					this->m_Gun_Ptr->SetGunMatrix(tmp_gunrat, this->m_ShotPhase - 2);
+					this->m_Gun_Ptr->SetGunMatrix(tmp_gunrat, this->m_ShotPhase);
 					//弾を手持ち//スコープ内0.01ms
 					{
 						auto Thumb = GetFrameWorldMat(CharaFrame::RightThumb);
