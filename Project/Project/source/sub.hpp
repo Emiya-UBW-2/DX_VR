@@ -21,12 +21,13 @@ namespace FPS_n2 {
 		return world->CreateBody(&f_bodyDef);
 	}
 	class b2Pats {
-		b2FixtureDef fixtureDef;			//動的ボディフィクスチャを定義します
-		std::unique_ptr<b2Body> body;		//
-		b2Fixture* playerfix{ nullptr };	//
+	private:
+		b2FixtureDef				fixtureDef;				//動的ボディフィクスチャを定義します
+		std::unique_ptr<b2Body>		body;					//
+		b2Fixture*					playerfix{ nullptr };	//
 	public:
-		VECTOR_ref pos;//仮
-
+		VECTOR_ref					pos;//仮
+	public:
 		void		Set(b2Body* body_ptr, b2Shape* dynamicBox) {
 			fixtureDef.shape = dynamicBox;								//
 			fixtureDef.density = 1.0f;									//ボックス密度をゼロ以外に設定すると、動的になる
@@ -409,9 +410,10 @@ namespace FPS_n2 {
 
 	//エフェクト利用コントロール
 	class Effect_UseControl {
+	private:
 		std::array<EffectS, int(Effect::effects)> effcs;	//エフェクト
 		std::array<EffectS, 256> effcs_G;					//エフェクト
-		int G_cnt = 0;
+		int G_cnt{ 0 };
 	public:
 		const auto	CheckPlayEffect(Effect ef_) const noexcept { return this->effcs[(int)ef_].GetIsPlaying(); }
 		void		Set_FootEffect(const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept {
@@ -541,7 +543,7 @@ namespace FPS_n2 {
 	//ダメージイベント
 	struct DamageEvent {
 		PlayerID				ID{ 127 };
-		Sceneclass::ObjType		CharaType;
+		Sceneclass::ObjType		CharaType{ Sceneclass::ObjType::Vehicle };
 		HitPoint				Damage{ 0 };
 		float					rad{ 0.f };
 		void SetEvent(PlayerID pID, Sceneclass::ObjType pCharaType, HitPoint pDamage, float pRad) {
@@ -594,8 +596,10 @@ namespace FPS_n2 {
 		}
 		void			Set_start(int value) noexcept {
 			this->m_Count = value;
-			this->m_Vertex.resize(this->m_RefMesh.VertexNum * this->m_Count);			//頂点データとインデックスデータを格納するメモリ領域の確保
-			this->m_Index.resize(this->m_RefMesh.PolygonNum * 3 * this->m_Count);		//頂点データとインデックスデータを格納するメモリ領域の確保
+			int Num = this->m_RefMesh.VertexNum * this->m_Count;
+			this->m_Vertex.resize(Num);			//頂点データとインデックスデータを格納するメモリ領域の確保
+			Num = this->m_RefMesh.PolygonNum * 3 * this->m_Count;
+			this->m_Index.resize(Num);		//頂点データとインデックスデータを格納するメモリ領域の確保
 		}
 		void			Set_one(const MATRIX_ref& mat) noexcept {
 			this->m_obj.SetMatrix(mat);
@@ -647,6 +651,7 @@ namespace FPS_n2 {
 	};
 	//命中根
 	class HIT_PASSIVE {
+	private:
 		Model_Instance	m_inst;
 		bool			m_IsUpdate{ true };
 	public:

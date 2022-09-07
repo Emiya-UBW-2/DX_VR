@@ -25,7 +25,7 @@ namespace FPS_n2 {
 			void ResetFrameLocalMat(GunFrame frame) noexcept { GetObj().frame_Reset(m_Frames[(int)frame].first); }
 			void SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(m_Frames[(int)frame].first, value * m_Frames[(int)frame].second); }
 			const auto GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
-			const auto GetNowAnime(void) noexcept { return GetObj().get_anime(this->m_ShotPhase - 2); }
+			const auto GetNowAnime(void) noexcept { return GetObj().get_anime((size_t)(this->m_ShotPhase - 2)); }
 			void SetIsShot(bool value) noexcept { this->m_IsShot = value; }
 			const auto GetScopePos(void) noexcept { return GetFrameWorldMat(GunFrame::Eyepos).pos(); }
 			const auto GetLensPos(void) noexcept { return GetFrameWorldMat(GunFrame::Lens).pos(); }

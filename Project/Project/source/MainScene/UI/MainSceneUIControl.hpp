@@ -183,13 +183,16 @@ namespace FPS_n2 {
 						Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawString_RIGHT(xp1, yp1 + ys1 * sel, "Å®", Green, White);
 
 						for (int s = 0; s < Num; s++) {
-							if (strParam[1 + s].length() > 0) {
-								Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_RIGHT(xp1 + y_r(150), yp1, (sel == s) ? Green : GetColor(15, 110, 50), White, "%s", strParam[1 + s].c_str());
+							int Num_t = 1 + s;
+							if (strParam[Num_t].length() > 0) {
+								Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_RIGHT(xp1 + y_r(150), yp1, (sel == s) ? Green : GetColor(15, 110, 50), White, "%s", strParam[Num_t].c_str());
 
 								auto color = GetColorU8((sel == s) ? 255 : 240, (sel == s) ? 255 : 192, 0, 255);
+
+								Num_t = 14 + s * 2;
 								DrawGauge(
 									xp1 + y_r(150) + y_r(20), yp1 + y_r(2), xp1 + y_r(150) + y_r(20) + y_r(160), yp1 + y_r(2) + y_r(12),
-									intParam[14 + s * 2], intParam[15 + s * 2], intParam[14 + s * 2], color, color, color,
+									intParam[Num_t], intParam[Num_t + 1], intParam[Num_t], color, color, color,
 									GetColor(0, 0, 255), GetColor(255, 0, 0)
 								);
 							}
