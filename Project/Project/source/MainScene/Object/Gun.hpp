@@ -16,7 +16,6 @@ namespace FPS_n2 {
 			const AmmoData*					m_NowAmmo{ nullptr };			//
 			bool							m_IsChamberMove{ false };		//チャンバー内に弾があるか
 			float							m_ChamberMovePer{ 0.f };
-
 		public://ゲッター
 			const auto GetFrameLocalMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix(m_Frames[(int)frame].first); }
 			const auto GetParentFrameLocalMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix((int)GetObj_const().frame_parent(m_Frames[(int)frame].first)); }
@@ -24,8 +23,8 @@ namespace FPS_n2 {
 			const auto GetParentFrameWorldMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix((int)GetObj_const().frame_parent(m_Frames[(int)frame].first)); }
 			void ResetFrameLocalMat(GunFrame frame) noexcept { GetObj().frame_Reset(m_Frames[(int)frame].first); }
 			void SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(m_Frames[(int)frame].first, value * m_Frames[(int)frame].second); }
-			const auto GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
-			const auto GetNowAnime(void) noexcept { return GetObj().get_anime((size_t)(this->m_ShotPhase - 2)); }
+			const auto& GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
+			const auto& GetNowAnime(void) noexcept { return GetObj().get_anime((size_t)(this->m_ShotPhase - 2)); }
 			void SetIsShot(bool value) noexcept { this->m_IsShot = value; }
 			const auto GetScopePos(void) noexcept { return GetFrameWorldMat(GunFrame::Eyepos).pos(); }
 			const auto GetLensPos(void) noexcept { return GetFrameWorldMat(GunFrame::Lens).pos(); }
@@ -36,7 +35,7 @@ namespace FPS_n2 {
 			const auto GetIsMagFull(void) noexcept { return (this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->IsFull() : false; }
 			const auto GetAmmoAll(void) noexcept { return (this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->GetAmmoAll() : 0; }
 			const auto GetAmmoNum(void) noexcept { return ((this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->GetAmmoNum() : 0) + (this->m_in_chamber ? 1 : 0); }
-			const auto GetCanshot(void) noexcept { return !(this->GetAmmoNum() == 0); }
+			const auto GetCanshot(void) noexcept { return this->m_in_chamber && (this->m_ShotPhase <= 1); }
 			const auto& GetReticle(void) noexcept { return this->m_reticle; }
 			const auto& GetIsShot(void) noexcept { return this->m_IsShot; }
 			void SetGunMatrix(const MATRIX_ref& value, int pShotPhase) noexcept {
@@ -168,7 +167,7 @@ namespace FPS_n2 {
 				this->m_MagName.clear();
 			}
 		public:
-			void LoadReticle(void) noexcept {
+			void			LoadReticle(void) noexcept {
 				SetUseASyncLoadFlag(TRUE);
 				this->m_reticle = GraphHandle::Load(this->m_FilePath + "reticle.png");
 				SetUseASyncLoadFlag(FALSE);

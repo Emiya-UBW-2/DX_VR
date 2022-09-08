@@ -1,2 +1,1 @@
-﻿0:Model File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Project\Project\data\ammo\7N14ammo.pmx
-1:Model File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Project\Project\data\ammo\7N14ammo.pmx
+﻿0:画像ファイル C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Project\Project\data\gun\Gorushi\reticle.png がありません

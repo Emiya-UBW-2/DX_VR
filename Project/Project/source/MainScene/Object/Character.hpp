@@ -118,7 +118,7 @@ namespace FPS_n2 {
 			const auto		GetLensPos(void) noexcept { return (this->m_Gun_Ptr != nullptr) ? this->m_Gun_Ptr->GetLensPos() : VECTOR_ref::zero(); }
 			const auto		GetReticlePos(void) noexcept { return (this->m_Gun_Ptr != nullptr) ? this->m_Gun_Ptr->GetReticlePos() : VECTOR_ref::zero(); }
 			const auto		GetLensPosSize(void) noexcept { return (this->m_Gun_Ptr != nullptr) ? this->m_Gun_Ptr->GetLensPosSize() : VECTOR_ref::zero(); }
-			const auto		GetCanshot(void) const noexcept { return (this->m_Gun_Ptr != nullptr) ? (this->m_Gun_Ptr->GetCanshot() && (this->m_ShotPhase <= 1)) : false; }
+			const auto		GetCanshot(void) const noexcept { return (this->m_Gun_Ptr != nullptr) ? (this->m_Gun_Ptr->GetCanshot()) : false; }
 			const auto		GetAmmoNum(void) const noexcept { return this->m_Gun_Ptr->GetAmmoNum(); }
 			const auto		GetAmmoAll(void) const noexcept { return this->m_Gun_Ptr->GetAmmoAll(); }
 			const auto&		GetReticle(void) noexcept { return this->m_Gun_Ptr->GetReticle(); }
@@ -236,18 +236,22 @@ namespace FPS_n2 {
 				this->m_Press_Shot = pInput.GetAction5() && this->m_KeyActive;
 				this->m_Press_Reload = (pInput.GetAction2() && this->m_KeyActive && (this->m_Gun_Ptr->GetAmmoNum() <= this->m_Gun_Ptr->GetAmmoAll()));
 				if (0.f != this->m_InputGround.GetPronePer() && this->m_InputGround.GetPronePer() != 1.0f) {
-					if (this->m_Press_Shot) {
-						this->m_Press_Shot = false;
-					}
+					this->m_Press_Shot = false;
 					this->m_Press_Reload = false;
 				}
-				if (!GetCanshot()) {
-					if (this->m_ShotPhase == 0) {
-						if (this->m_Press_Shot) {
-							this->m_Press_Shot = false;
-							this->m_Press_Reload = true;
+				if (this->m_Gun_Ptr != nullptr) {
+					if ((this->m_Gun_Ptr->GetAmmoNum() == 0) && !this->m_Gun_Ptr->GetCanshot()) {
+						if (this->m_ShotPhase == 0) {
+							if (this->m_Press_Shot) {
+								this->m_Press_Shot = false;
+								this->m_Press_Reload = true;
+							}
 						}
 					}
+				}
+				else {
+					this->m_Press_Shot = false;
+					this->m_Press_Reload = false;
 				}
 				this->m_Press_Aim = pInput.GetAction6() && this->m_KeyActive && (this->m_InputGround.GetPronePer() == 0.f || this->m_InputGround.GetPronePer() == 1.f);
 				if (this->m_InputGround.GetPronetoStanding()) {
@@ -295,9 +299,17 @@ namespace FPS_n2 {
 						if (this->m_ReadyPer >= 0.9f) {
 							this->m_ReadyPer = 1.f;
 							if (this->m_Press_Shot) {
-								this->m_ShotPhase = 1;
-								if (this->m_Gun_Ptr != nullptr) {
+								if (this->m_Gun_Ptr->GetCanshot()) {
+									this->m_ShotPhase = 1;
 									this->m_Gun_Ptr->SetBullet();
+								}
+								else {
+									if (!this->m_Gun_Ptr->GetIsMagEmpty()) {
+										this->m_ShotPhase = 2;
+									}
+									else {
+										this->m_ShotPhase = 3;
+									}
 								}
 							}
 							if (this->m_Press_Reload) {

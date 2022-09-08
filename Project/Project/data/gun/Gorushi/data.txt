@@ -1,0 +1,2 @@
+usemag0=Gorushi
+end

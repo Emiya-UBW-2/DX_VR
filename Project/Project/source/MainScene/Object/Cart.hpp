@@ -94,7 +94,7 @@ namespace FPS_n2 {
 						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-20, 0, -20)).get(),
 						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(20, 20, 20)).get()) == FALSE
 						) {
-						if (!this->m_IsInMag) {
+						if (!this->m_IsInMag && this->m_IsEmpty) {
 							SetUseLighting(FALSE);
 							int max = (int)(this->m_Line.size());
 							int min = 1 + (int)(this->m_Timer * max / 2.f);
