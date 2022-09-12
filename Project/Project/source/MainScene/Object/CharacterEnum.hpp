@@ -43,6 +43,18 @@ namespace FPS_n2 {
 			Upper_Ready,
 			Upper_Down,
 
+			Upper_Reload2Start,
+			Upper_Reload2One,
+			Upper_Reload2End,
+
+			All_Prone_Reload2Start,
+			All_Prone_Reload2One,
+			All_Prone_Reload2End,
+
+			Upper_Aim2,
+			Upper_Shot2,
+			Upper_Cocking2,
+
 			AnimeIDMax,
 		};
 		enum class CharaFrame {

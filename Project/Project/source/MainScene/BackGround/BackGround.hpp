@@ -1,6 +1,29 @@
 #pragma once
 #include	"../../Header.hpp"
 
+static int msssssssssssssss() {
+	//ランダムに生成する点の数
+	int N = 4;
+
+	std::vector<VECTOR_ref> Pos(N);
+	for (int i = 0; i < N; i++) {
+		Pos[i].x(0.f);
+		Pos[i].y(0.f);
+	}
+
+	std::vector<VECTOR_ref> xy(N);
+	for (int i = 0; i < N; i++) {
+		xy[i] = Pos[i];
+	}
+
+	sort(xy.begin(), xy.end(), [](const VECTOR_ref &p1, const VECTOR_ref &p2) { return atan2l(p1.y(), p1.x()) < atan2l(p2.y(), p2.x()); });
+
+	for (int i = 0; i < N; i++) {
+		xy[i].x(), xy[i].y();
+	}
+	return 0;
+}
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//kusa
@@ -367,21 +390,235 @@ namespace FPS_n2 {
 			}
 		};
 
+		class WallObj {
+		private:
+			MV1							m_obj;
+			std::vector<VERTEX3D>					m_WallVertex;		//壁をセット
+			VERTEX3D*								m_WallVertexPtr;
+			std::vector<WORD>						m_WallIndex;		//壁をセット
+			WORD*									m_WallIndexPtr;
+
+			int										m_TexHandle;
+			MATERIALPARAM							m_Material;
+
+			std::vector<std::vector<VECTOR_ref>>	m_Side;
+			std::vector<std::vector<std::pair<VECTOR_ref, VECTOR_ref>>>	m_SideSort;
+		public://getter
+		public:
+			void			Init(const MV1& obj, const VECTOR_ref& pos, float YRad, float YScale) noexcept {
+				auto matrix = MATRIX_ref::RotY(YRad)*MATRIX_ref::Mtrans(pos);
+
+				MV1_REF_POLYGONLIST PolyList = MV1GetReferenceMesh(obj.get(), 0, FALSE);
+				this->m_TexHandle = MV1GetTextureGraphHandle(obj.get(), 0);
+
+				this->m_WallVertex.clear();
+				for (int i = 0; i < PolyList.VertexNum; i++) {
+					this->m_WallVertex.resize(this->m_WallVertex.size() + 1);
+
+					VECTOR_ref Pos = PolyList.Vertexs[i].Position;
+					if (Pos.y() > 0.f) { Pos.y(Pos.y()*YScale); }
+					this->m_WallVertex.back().pos = MATRIX_ref::Vtrans(Pos, matrix).get();
+					this->m_WallVertex.back().norm = MATRIX_ref::Vtrans(PolyList.Vertexs[i].Normal, matrix.GetRot()).get();
+					this->m_WallVertex.back().dif = PolyList.Vertexs[i].DiffuseColor;
+					this->m_WallVertex.back().spc = PolyList.Vertexs[i].SpecularColor;
+					this->m_WallVertex.back().u = PolyList.Vertexs[i].TexCoord[0].u;
+					this->m_WallVertex.back().v = Lerp(1.f, PolyList.Vertexs[i].TexCoord[0].v, YScale);
+					this->m_WallVertex.back().su = PolyList.Vertexs[i].TexCoord[1].u;
+					this->m_WallVertex.back().sv = PolyList.Vertexs[i].TexCoord[1].v;
+				}
+
+				this->m_WallIndex.clear();
+				for (int i = 0; i < PolyList.PolygonNum; i++) {
+					this->m_WallIndex.emplace_back((WORD)PolyList.Polygons[i].VIndex[0]);
+					this->m_WallIndex.emplace_back((WORD)PolyList.Polygons[i].VIndex[1]);
+					this->m_WallIndex.emplace_back((WORD)PolyList.Polygons[i].VIndex[2]);
+				}
+				this->m_Side.resize(PolyList.PolygonNum);
+				this->m_SideSort.resize(m_Side.size());
+				for (int i = 0; i < PolyList.PolygonNum; i++) {
+					this->m_Side[i].emplace_back(this->m_WallVertex[this->m_WallIndex[i * 3 + 0]].pos);
+					this->m_Side[i].emplace_back(this->m_WallVertex[this->m_WallIndex[i * 3 + 1]].pos);
+					this->m_Side[i].emplace_back(this->m_WallVertex[this->m_WallIndex[i * 3 + 2]].pos);
+				}
+				
+				MV1TerminateReferenceMesh(obj.get(), 0, FALSE);
+				this->m_WallVertexPtr = this->m_WallVertex.data();
+				this->m_WallIndexPtr = this->m_WallIndex.data();
+
+				// マテリアルの自己発光色を暗い青色にする
+				m_Material.Diffuse = GetLightDifColor();
+				m_Material.Specular = GetLightSpcColor();
+				m_Material.Ambient = GetLightAmbColor();
+				m_Material.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);
+				m_Material.Power = 20.0f;
+			}
+
+			void			Draw(bool IsCalling) noexcept {
+				SetUseBackCulling(IsCalling ? TRUE : FALSE);
+				SetMaterialParam(m_Material);
+				SetTextureAddressModeUV(DX_TEXADDRESS_WRAP, DX_TEXADDRESS_WRAP);
+				DrawPolygonIndexed3D(this->m_WallVertexPtr, (int)this->m_WallVertex.size(), this->m_WallIndexPtr, (int)(this->m_WallIndex.size()) / 3, this->m_TexHandle, TRUE);
+				SetUseBackCulling(FALSE);
+
+				for (auto& s : this->m_Side) {
+					for (int i = 0; i < s.size(); i++) {
+						DrawLine3D(s[i].get(), s[(i + 1) % s.size()].get(), GetColor(255, 0, 0));
+					}
+
+					for (auto& s2 : s) {
+						DrawSphere3D(s2.get(), Scale_Rate*0.05f, 4, GetColor(255, 0, 0), GetColor(255, 255, 255), TRUE);
+					}
+				}
+			}
+
+			bool			CheckHit(const VECTOR_ref& repos, VECTOR_ref* pos) {
+
+				bool ishit = false;
+				float length = (*pos - repos).size();
+				for (int i = 0; i < this->m_WallIndex.size() / 3; i++) {
+					auto res = HitCheck_Line_Triangle(repos.get(), pos->get(), this->m_WallVertex[this->m_WallIndex[i * 3 + 0]].pos, this->m_WallVertex[this->m_WallIndex[i * 3 + 1]].pos, this->m_WallVertex[this->m_WallIndex[i * 3 + 2]].pos);
+					if (res.HitFlag == TRUE) {
+						ishit = true;
+						auto lentmp = ((VECTOR_ref)res.Position - repos).size();
+						if (length > lentmp) {
+							length = lentmp;
+						}
+					}
+				}
+				if (ishit) {
+					CalcPoint(repos, *pos);
+				}
+				*pos = repos + (*pos - repos).Norm()*(length);
+
+				return ishit;
+			}
+
+
+			void			CalcPoint(const VECTOR_ref& repos, const VECTOR_ref& pos) {
+				VECTOR_ref vec = (pos - repos);
+				VECTOR_ref xaxis = vec.Norm().cross(VECTOR_ref::up());
+				VECTOR_ref yaxis = vec.Norm().cross(xaxis);
+
+				int Tris = 3;
+				const int N_gon = 4;
+				std::array<VECTOR_ref, N_gon> Point;//辺の数
+
+				for (int index = 0; index < this->m_WallIndex.size() / Tris; index++) {
+					auto& Side = m_Side[index];
+					auto GetIndexPos = [&](int ID) {return &(this->m_WallVertex[this->m_WallIndex[index * Tris + ID]].pos); };
+					VECTOR_ref TriPos0 = *GetIndexPos(0);
+					VECTOR_ref TriPos1 = *GetIndexPos(1);
+					VECTOR_ref TriPos2 = *GetIndexPos(2);
+					VECTOR_ref TriNorm = ((TriPos1 - TriPos0).cross(TriPos2 - TriPos0)).Norm();
+					//平面上のポイント取得
+					for (int gon = 0; gon < N_gon; gon++) {
+						float rad = deg2rad(360.f * (0.5f + (float)gon) / (float)N_gon);
+						VECTOR_ref BasePos = repos + (xaxis * sin(rad) + yaxis * cos(rad))*Scale_Rate*0.3f;
+
+						VECTOR_ref PosN = Plane_Point_MinLength_Position(TriPos0.get(), TriNorm.get(), BasePos.get());
+						float pAN = std::abs((BasePos - PosN).dot(TriNorm));
+						float pBN = std::abs(((BasePos + vec) - PosN).dot(TriNorm));
+						VECTOR_ref Ans = BasePos + vec * (pAN / (pAN + pBN));
+						Point[gon] = Ans;
+					}
+					//n_sideの中にある点の削除(外周としては不要なもののため)
+					for (int s = 0; s < Side.size(); s++) {
+						bool isIn = true;
+						float Dots = 0.f;
+						for (int gon = 0; gon < N_gon; gon++) {
+							VECTOR_ref pos1 = Point[gon].get();
+							VECTOR_ref pos2 = Point[(gon + 1) % N_gon].get();
+							VECTOR_ref pos3 = Point[(gon + 2) % N_gon].get();
+							float dot = (pos2 - pos1).cross(Side[s] - pos1).dot((pos2 - pos1).cross(pos3 - pos1));
+							if (Dots != 0.f) {
+								if (((Dots > 0.f) && (dot < 0.f)) || ((Dots < 0.f) && (dot > 0.f))) {
+									isIn = false;
+									break;
+								}
+							}
+							else {
+								Dots = dot;
+							}
+						}
+						if (isIn) {
+							Side.erase(Side.begin() + s);
+							s--;
+						}
+					}
+					//三角と辺の交点を追加
+					for (int gon = 0; gon < N_gon; gon++) {
+						VECTOR pos1 = Point[gon].get();
+						VECTOR pos2 = Point[(gon + 1) % N_gon].get();
+						SEGMENT_SEGMENT_RESULT Res;
+						for (int tri = 0; tri < Tris; tri++) {
+							Segment_Segment_Analyse(&pos1, &pos2, GetIndexPos(tri), GetIndexPos((tri + 1) % Tris), &Res);
+							float len = 0.001f;
+							if (Res.SegA_SegB_MinDist_Square <= (len*len)) {
+								Side.emplace_back(Res.SegA_MinDist_Pos);
+							}
+						}
+					}
+					//直に入っている部分
+					for (int gon = 0; gon < N_gon; gon++) {
+						float rad = deg2rad(360.f * (0.5f + (float)gon) / (float)N_gon);
+						VECTOR_ref BasePos = repos + (xaxis * sin(rad) + yaxis * cos(rad))*Scale_Rate*0.3f;
+						auto res2 = HitCheck_Line_Triangle(BasePos.get(), (BasePos + vec).get(), TriPos0.get(), TriPos1.get(), TriPos2.get());
+						if (res2.HitFlag == TRUE) {
+							Side.emplace_back(res2.Position);
+						}
+					}
+					//ソート
+					this->m_SideSort[index].resize(Side.size());
+
+					VECTOR_ref Zvec = (Side[1] - Side[0]).Norm();
+					VECTOR_ref Yvec = TriNorm;
+					VECTOR_ref Xvec = Zvec.cross(Yvec);
+					for (int s = 0; s < Side.size(); s++) {
+						this->m_SideSort[index][s].first = Side[s];
+						this->m_SideSort[index][s].second = MATRIX_ref::Vtrans((Side[s] - Side[0]), MATRIX_ref::Axis1_YZ(Yvec, Zvec).Inverse());
+					}
+					std::sort(this->m_SideSort[index].begin(), this->m_SideSort[index].end(),
+						[](const auto &p1, const auto &p2) { return atan2l(p1.second.z(), p1.second.x()) < atan2l(p2.second.z(), p2.second.x()); });
+
+					for (int s = 0; s < Side.size(); s++) {
+						Side[s] = this->m_SideSort[index][s].first;
+					}
+					//
+				}
+			}
+		};
+
 		class BackGroundClass {
 		private:
 			MV1							m_ObjSky;
 			MV1							m_ObjGround;
 			MV1							m_ObjGroundCol;
 			MV1							m_ObjGroundCol_Box2D;
+			MV1							m_objWall;
 			std::shared_ptr<b2World>	m_b2world;
 			std::vector<std::pair<b2Pats, std::array<VECTOR_ref, 2>>>	m_b2wallParts;	//壁をセット
 			Grass						m_grass;
+
+			std::vector<WallObj>		m_Walls;
 		public://getter
 			const auto&		GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
 			auto&			GetBox2Dworld(void) noexcept { return this->m_b2world; }
+
+			const auto		GetWallCol(const VECTOR_ref& repos, VECTOR_ref* pos) noexcept {
+				for (auto& w : this->m_Walls) {
+					if (w.CheckHit(repos, pos)) {
+						return true;
+					}
+				}
+				return false;
+			}
+
 		private:
-			void			DrawCommon(void) noexcept {
+			void			DrawCommon(bool IsCalling) noexcept {
 				this->m_ObjGround.DrawModel();
+				for (auto& w : this->m_Walls) {
+					w.Draw(IsCalling);
+				}
 			}
 		public://
 			//
@@ -417,6 +654,7 @@ namespace FPS_n2 {
 						this->m_b2wallParts.pop_back();
 					}
 				}
+				MV1TerminateReferenceMesh(this->m_ObjGroundCol_Box2D.get(), 0, FALSE);
 				for (auto& w : this->m_b2wallParts) {
 					std::array<b2Vec2, 2> vs;								//
 					vs[0].Set(w.second[0].x(), w.second[0].z());			//
@@ -435,6 +673,12 @@ namespace FPS_n2 {
 				}
 				//
 				this->m_grass.Init(&this->m_ObjGroundCol);
+				
+				MV1::Load("data/model/wall/model.pmx", &this->m_objWall);
+				this->m_Walls.resize(1);
+				for (auto& w : this->m_Walls) {
+					w.Init(this->m_objWall, VECTOR_ref::vget(0, 12.5f*6.f, 0), 0.f, 3.f);
+				}
 			}
 			//
 			void			Execute(void) noexcept {}
@@ -445,13 +689,13 @@ namespace FPS_n2 {
 				SetUseLighting(TRUE);
 			}
 			void			Shadow_Draw_NearFar(void) noexcept {
-				DrawCommon();
+				DrawCommon(false);
 			}
 			void			Shadow_Draw(void) noexcept {
-				DrawCommon();
+				DrawCommon(false);
 			}
 			void			Draw(void) noexcept {
-				DrawCommon();
+				DrawCommon(true);
 				this->m_grass.Draw();
 			}
 			//

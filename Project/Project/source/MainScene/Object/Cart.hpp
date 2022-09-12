@@ -67,7 +67,7 @@ namespace FPS_n2 {
 						if ((this->m_move.pos - this->m_move.repos).y() <= 0.f) {
 							BB *= -1.f;
 						}
-						this->m_move.mat = MATRIX_ref::RotAxis(BB.cross(this->m_move.mat.zvec()), deg2rad(-(20.f + GetRandf(30.f))*60.f / FPS))*this->m_move.mat;
+						this->m_move.mat = MATRIX_ref::RotAxis(BB.cross(this->m_move.mat.zvec()).Norm(), deg2rad((20.f + GetRandf(30.f))/2.f*60.f / FPS))*this->m_move.mat;
 
 						if (this->m_Timer > 5.f) {
 							this->m_IsDelete = true;

@@ -16,6 +16,7 @@ namespace FPS_n2 {
 			const AmmoData*					m_NowAmmo{ nullptr };			//
 			bool							m_IsChamberMove{ false };		//チャンバー内に弾があるか
 			float							m_ChamberMovePer{ 0.f };
+			bool							m_UseMoveParts{ false };
 		public://ゲッター
 			const auto GetFrameLocalMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix(m_Frames[(int)frame].first); }
 			const auto GetParentFrameLocalMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix((int)GetObj_const().frame_parent(m_Frames[(int)frame].first)); }
@@ -26,6 +27,7 @@ namespace FPS_n2 {
 			const auto& GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
 			const auto& GetNowAnime(void) noexcept { return GetObj().get_anime((size_t)(this->m_ShotPhase - 2)); }
 			void SetIsShot(bool value) noexcept { this->m_IsShot = value; }
+			void SetUseMoveParts(bool value) noexcept { this->m_UseMoveParts = value; }
 			const auto GetScopePos(void) noexcept { return GetFrameWorldMat(GunFrame::Eyepos).pos(); }
 			const auto GetLensPos(void) noexcept { return GetFrameWorldMat(GunFrame::Lens).pos(); }
 			const auto GetReticlePos(void) noexcept { return GetLensPos() + (GetLensPos() - GetScopePos()).Norm()*10.f; }
@@ -155,9 +157,39 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				ResetFrameLocalMat(GunFrame::Center);
-				GetObj().work_anime();
-				SetFrameLocalMat(GunFrame::Center, GetFrameLocalMat(GunFrame::Center).GetRot());//1のフレーム移動量を無視する
+
+				{
+					ResetFrameLocalMat(GunFrame::Center);
+					GetObj().work_anime();
+					SetFrameLocalMat(GunFrame::Center, GetFrameLocalMat(GunFrame::Center).GetRot());//1のフレーム移動量を無視する
+				}
+				if(this->m_UseMoveParts){
+					ResetFrameLocalMat(GunFrame::MovePoint);
+					auto baselocalmat = GetFrameLocalMat(GunFrame::MovePoint);
+					auto baseworldmat = GetFrameWorldMat(GunFrame::MovePoint);
+					auto axisworldmat = GetFrameWorldMat(GunFrame::MoveAxis);
+
+					VECTOR_ref pp = baseworldmat.zvec()*-1.f;
+					auto yrad = atan2f(-pp.x(), -pp.z());
+
+					auto vec = MATRIX_ref::Vtrans(baseworldmat.pos() - axisworldmat.pos(), MATRIX_ref::RotY(yrad).Inverse());
+
+					float rad = deg2rad(60.f);
+
+					SetFrameLocalMat(GunFrame::MovePoint,
+						MATRIX_ref::Mtrans(
+							vec*-2.f
+							+ VECTOR_ref::right() * vec.size() * std::cosf(rad)
+							+ VECTOR_ref::up()*-1.5f * vec.size() * std::sinf(rad)
+						)
+						*
+						MATRIX_ref::RotY(yrad)*
+						baseworldmat.GetRot().Inverse()*baselocalmat
+					);
+				}
+				else {
+					ResetFrameLocalMat(GunFrame::MovePoint);
+				}
 				//共通
 				ObjectBaseClass::FirstExecute();
 				//弾薬の演算

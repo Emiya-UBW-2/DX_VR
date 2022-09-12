@@ -342,7 +342,7 @@ namespace FPS_n2 {
 				Set_EnvLight(
 					VECTOR_ref::vget(Scale_Rate*-300.f, Scale_Rate*-10.f, Scale_Rate*-300.f),
 					VECTOR_ref::vget(Scale_Rate*300.f, Scale_Rate*50.f, Scale_Rate*300.f),
-					VECTOR_ref::vget(-0.25f, -0.5f, 0.0f),
+					VECTOR_ref::vget(-0.25f, -0.5f, -0.25f),
 					GetColorF(0.42f, 0.41f, 0.40f, 0.0f));
 				//Load
 				//BG
@@ -367,7 +367,7 @@ namespace FPS_n2 {
 				}
 
 				for (int i = 0; i < gun_num; i++) {
-					ObjMngr->AddObject(ObjType::Gun, "data/gun/Gorushi/");
+					ObjMngr->AddObject(ObjType::Gun, "data/gun/Mosin/");//Gorushi
 				}
 				//ÉçÅ[Éh
 				SetCreate3DSoundFlag(FALSE);
@@ -405,7 +405,7 @@ namespace FPS_n2 {
 					auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 					vehicle_Pool.emplace_back(v);
 
-					VECTOR_ref pos_t = VECTOR_ref::vget(0.f + (float)(i)*10.f*Scale_Rate, 0.f, 0.f);
+					VECTOR_ref pos_t = VECTOR_ref::vget(600.f + (float)(i)*10.f*Scale_Rate, 0.f, 0.f);
 					auto HitResult = this->m_BackGround.GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
 					if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
 					v->ValueInit(&vehc_data[0], hit_pic, this->m_BackGround.GetBox2Dworld(), (PlayerID)i);
@@ -777,6 +777,8 @@ namespace FPS_n2 {
 							if (a->IsActive()) {
 								//AmmoClass
 								MV1_COLL_RESULT_POLY ColResGround = a->ColCheckGround();
+								VECTOR_ref pos_tmp = a->GetMove().pos;
+								bool hitwall = this->m_BackGround.GetWallCol(a->GetMove().repos,&pos_tmp);
 								bool is_HitAll = false;
 								auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, a->GetShootedID()));
 								for (int i = 0; i < Vehicle_num; i++) {
@@ -786,9 +788,14 @@ namespace FPS_n2 {
 									is_HitAll |= res.first;
 									if (res.second) { break; }
 								}
-								if (ColResGround.HitFlag == TRUE && !is_HitAll) {
+								if ((ColResGround.HitFlag == TRUE || hitwall) && !is_HitAll) {
 									a->HitGround();
-									v->HitGround(a->GetMove().pos, ColResGround.Normal, a->GetMove().vec);
+									if (ColResGround.HitFlag == TRUE) {
+										v->HitGround(a->GetMove().pos, ColResGround.Normal, a->GetMove().vec);
+									}
+									else if (hitwall) {
+										v->HitGround(pos_tmp, (pos_tmp - a->GetMove().repos).Norm(), a->GetMove().vec);
+									}
 								}
 							}
 						}

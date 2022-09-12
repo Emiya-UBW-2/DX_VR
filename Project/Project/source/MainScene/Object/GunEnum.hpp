@@ -22,6 +22,8 @@ namespace FPS_n2 {
 			LeftHandPos,
 			LeftHandYvec,
 			LeftHandZvec,
+			MoveAxis,
+			MovePoint,
 			Max,
 		};
 		static const char* GunFrameName[(int)GunFrame::Max] = {
@@ -36,6 +38,8 @@ namespace FPS_n2 {
 			"lefthand",
 			"lefthand_yvec",
 			"lefthand_zvec",
+			"“®ì²",
+			"“®ì“_",
 		};
 	};
 };

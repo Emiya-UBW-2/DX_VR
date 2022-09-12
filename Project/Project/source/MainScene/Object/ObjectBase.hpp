@@ -215,9 +215,15 @@ namespace FPS_n2 {
 						switch (this->m_objType) {
 						case ObjType::Human:
 							compare = (FName == CharaFrameName[i]);
+							if (!compare) {
+								compare = (FName.find(CharaFrameName[i]) != std::string::npos);
+							}
 							break;
 						case ObjType::Gun:
 							compare = (FName == GunFrameName[i]);
+							if (!compare) {
+								compare = (FName.find(GunFrameName[i]) != std::string::npos);
+							}
 							break;
 						case ObjType::Vehicle:
 							break;
@@ -234,10 +240,10 @@ namespace FPS_n2 {
 						}
 						switch (this->m_objType) {
 						case ObjType::Human:
-							if (i == (int)CharaFrame::Max) { isEnd = true; }
+							if (i >= (int)CharaFrame::Max) { isEnd = true; }
 							break;
 						case ObjType::Gun:
-							if (i == (int)GunFrame::Max) { isEnd = true; }
+							if (i >= (int)GunFrame::Max) { isEnd = true; }
 							break;
 						case ObjType::Vehicle:
 							isEnd = true;
@@ -253,6 +259,20 @@ namespace FPS_n2 {
 								i++;
 								f = 0;
 							}
+						}
+						switch (this->m_objType) {
+						case ObjType::Human:
+							if (i >= (int)CharaFrame::Max) { isEnd = true; }
+							break;
+						case ObjType::Gun:
+							if (i >= (int)GunFrame::Max) { isEnd = true; }
+							break;
+						case ObjType::Vehicle:
+							isEnd = true;
+							break;
+						default:
+							isEnd = true;
+							break;
 						}
 						if (isEnd) {
 							break;
