@@ -27,13 +27,8 @@ namespace FPS_n2 {
 		return vec1.cross((pointA - LineA).Norm()).dot(vec1.cross((pointB - LineA).Norm())) > 0.f;
 	};
 
-	/*
 	// 一番外側の巨大三角形を生成、ここでは画面内の点限定として画面サイズを含む三角形を作る
-	VECTOR_ref position; position.Set(0, 0, 0.f);
-	VECTOR_ref Size; Size.Set(w, h, 0.f);
-	GetExternalTriangle(position, Size);
-	*/
-	std::vector<Triangle> CalcDelaunay(const std::vector<SideControl*>& points, const Triangle& ExternalTriangle, const std::vector<VECTOR_ref>& GonPoint2D) {
+	void CalcDelaunay(std::vector<Triangle>* Ans, const std::vector<std::unique_ptr<SideControl>>& points, const Triangle& ExternalTriangle, const std::vector<VECTOR_ref>& GonPoint2D) {
 		std::vector<Triangle*> triangles;		// 見つかった三角形を保持する配列
 
 		Triangle* super_triangle; super_triangle = new Triangle; *super_triangle = ExternalTriangle;
@@ -138,7 +133,6 @@ namespace FPS_n2 {
 		}
 
 		// 最後に、巨大三角形と頂点を共有している三角形をリストから削除
-		std::vector<Triangle> ans;
 		for (auto& point : super_triangle->Getpoints()) {
 			for (auto& tris : triangles) {
 				if (tris && tris->HasPoint(point)) {
@@ -191,7 +185,7 @@ namespace FPS_n2 {
 						if (GetMinLenSegmentToPoint(
 							tris->Getpoints()[loop2],
 							tris->Getpoints()[(loop2 + 1) % 3],
-							tris->Getpoints()[(loop2 + 2) % 3]) <= 0.1f) {
+							tris->Getpoints()[(loop2 + 2) % 3]) <= 0.01f) {
 							delete tris; tris = nullptr;
 							ok = false;
 							break;
@@ -315,17 +309,14 @@ namespace FPS_n2 {
 						if (count == 2) {
 							for (int Lp = 1; Lp < 3; Lp++) {
 								bool ishit = false;
-								VECTOR Pos1t = tris->Getpoints()[ID].get();
-								VECTOR Pos2t = tris->Getpoints()[(ID + Lp) % 3].get();
+								VECTOR_ref Pos1t = tris->Getpoints()[ID];
+								VECTOR_ref Pos2t = tris->Getpoints()[(ID + Lp) % 3];
 								for (int L0 = 1; L0 < 3; L0++) {
-									VECTOR PosAt = triangles[loop2]->Getpoints()[ID2].get();
-									VECTOR PosBt = triangles[loop2]->Getpoints()[(ID2 + L0) % 3].get();
-
-									float len = 0.001f;
+									VECTOR_ref PosAt = triangles[loop2]->Getpoints()[ID2];
+									VECTOR_ref PosBt = triangles[loop2]->Getpoints()[(ID2 + L0) % 3];
 									SEGMENT_SEGMENT_RESULT Res;
-									Segment_Segment_Analyse(&Pos1t, &Pos2t, &PosAt, &PosBt, &Res);
 									if (
-										(Res.SegA_SegB_MinDist_Square <= (len*len)) &&
+										GetSegmenttoSegment(Pos1t, Pos2t, PosAt, PosBt, &Res) &&
 										(
 										(0.01f < Res.SegA_MinDist_Pos1_Pos2_t && Res.SegA_MinDist_Pos1_Pos2_t < 0.99f) &&
 											(0.01f < Res.SegB_MinDist_Pos1_Pos2_t && Res.SegB_MinDist_Pos1_Pos2_t < 0.99f)
@@ -418,6 +409,7 @@ namespace FPS_n2 {
 			//*/
 		}
 		//
+		Ans->clear();
 		for (auto& tris : triangles) {
 			if (tris) {
 				VECTOR_ref Pos0 = tris->Getpoints()[0];
@@ -427,11 +419,10 @@ namespace FPS_n2 {
 				if (cross.z() >= 0.f) {
 					tris->Set(Pos0, Pos2, Pos1);
 				}
-				ans.emplace_back(*tris);
+				Ans->emplace_back(*tris);
 				delete tris; tris = nullptr;
 			}
 		}
 		triangles.clear();
-		return ans;
 	}
 };
