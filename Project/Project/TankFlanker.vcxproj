@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\MainScene\BackGround\BackGround.cpp" />
     <ClCompile Include="source\MainScene\Object\Gun.cpp" />
     <ClCompile Include="source\MainScene\Object\Magazine.cpp" />
     <ClCompile Include="source\MainScene\Object\Vehicle.cpp" />

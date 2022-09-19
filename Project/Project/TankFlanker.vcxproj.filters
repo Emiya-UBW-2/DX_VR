@@ -116,5 +116,8 @@
     <ClCompile Include="source\MainScene\Object\Magazine.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
+    <ClCompile Include="source\MainScene\BackGround\BackGround.cpp">
+      <Filter>ソース ファイル\MainScene\BackGround</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

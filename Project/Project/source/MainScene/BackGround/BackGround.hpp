@@ -1,28 +1,181 @@
 #pragma once
 #include	"../../Header.hpp"
 
-static int msssssssssssssss() {
-	//ランダムに生成する点の数
-	int N = 4;
+namespace FPS_n2 {
+	enum class SideType : char {
+		None,
+		Triangle,
+		Square,
+		Mix_OuttoIn,
+		Mix_IntoOut,
+	};
+	struct SideControl {
+		SideType					Type;
+		int							SquarePoint{ -1 };//触れている四角の辺
+		VECTOR_ref					Pos;
+		VECTOR_ref					Pos2D;
+	public:
+		void Set(SideType type, const VECTOR_ref& pos, const VECTOR_ref& basepos, int squarepoint = -1) {
+			Type == type;
+			SquarePoint = squarepoint;//触れている四角の辺
+			Pos = pos;
+			Pos2D;
+		}
+	};
 
-	std::vector<VECTOR_ref> Pos(N);
-	for (int i = 0; i < N; i++) {
-		Pos[i].x(0.f);
-		Pos[i].y(0.f);
-	}
+	class LineControl {
+		VECTOR_ref m_start;
+		VECTOR_ref m_end;
+	public:
+		void Set(const VECTOR_ref& start, const VECTOR_ref& end) {
+			this->m_start = start;
+			this->m_end = end;
+		}
+		const auto& Getstart() const { return this->m_start; }
+		const auto& Getend() const { return this->m_end; }
+	public:
+		/**
+		 * 与えられた点を含んでいるか
+		 * @param {VECTOR_ref} point 調査対象の点
+		 * @return {bool} 辺が与えれた点を含んでいたらtrue
+		 */
+		bool HasPoint(const VECTOR_ref& point) const { return (this->m_start == point) || (this->m_end == point); }
 
-	std::vector<VECTOR_ref> xy(N);
-	for (int i = 0; i < N; i++) {
-		xy[i] = Pos[i];
-	}
+		bool operator==(const LineControl& tgt) const {
+			return (
+				((this->m_start == tgt.m_start) && (this->m_end == tgt.m_end)) ||
+				((this->m_start == tgt.m_end) && (this->m_end == tgt.m_start))
+				);
+		}
+	};
 
-	sort(xy.begin(), xy.end(), [](const VECTOR_ref &p1, const VECTOR_ref &p2) { return atan2l(p1.y(), p1.x()) < atan2l(p2.y(), p2.x()); });
+	class Triangle {
+		std::array<VECTOR_ref, 3> m_points;
+		std::array<LineControl, 3> m_lines;
+	public:
+		void Set(const VECTOR_ref& point0, const VECTOR_ref& point1, const VECTOR_ref& point2) {
+			this->m_points[0] = point0;
+			this->m_points[1] = point1;
+			this->m_points[2] = point2;
+			this->m_lines[0].Set(this->m_points[0], this->m_points[1]);
+			this->m_lines[1].Set(this->m_points[1], this->m_points[2]);
+			this->m_lines[2].Set(this->m_points[2], this->m_points[0]);
+		}
+		const auto& Getpoints() const { return this->m_points; }
+		const auto& Getlines() const { return this->m_lines; }
+	public:
+		/**
+		 * 与えられた辺を含まない点を返す
+		 * @param {LineControl} line 調査対象の辺
+		 * @return {VECTOR_ref} 与えられた辺に含まれない点
+		 */
+		const VECTOR_ref* noCommonPointByline(const LineControl& line) const {
+			for (int loop = 0; loop < this->m_points.size(); loop++) {
+				if (!line.HasPoint(this->m_points[loop])) {
+					return &(this->m_points[loop]);
+				}
+			}
+			return nullptr;
+		}
 
-	for (int i = 0; i < N; i++) {
-		xy[i].x(), xy[i].y();
-	}
-	return 0;
-}
+		/**
+		 * 与えられた辺以外の辺を返す
+		 * @param {LineControl} line 調査対象の辺
+		 * @return {Array.<LineControl>} 該当の辺以外の辺の配列
+		 */
+		std::vector<LineControl> otherlineByline(const LineControl& line) const {
+			std::vector<LineControl> result;
+			for (int loop = 0; loop < this->m_lines.size(); loop++) {
+				if (!(this->m_lines[loop] == line)) {
+					result.emplace_back(this->m_lines[loop]);
+				}
+			}
+			return result;
+		}
+
+		/**
+		 * 与えられた辺を含んでいるかチェック
+		 * @param {LineControl} line 調査対象の辺
+		 * @return {bool} 与えられた辺を含んでいたらtrue
+		 */
+		bool Hasline(const LineControl& line) const {
+			for (int loop = 0; loop < this->m_lines.size(); loop++) {
+				if ((this->m_lines[loop] == line)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		/**
+		 * 与えられた点の頂点があるか確認
+		 * @param {Pointl} point 調査対象の点
+		 * @return {bool} 対象の点が頂点にあったらtrue
+		 */
+		bool HasPoint(const VECTOR_ref& point) const {
+			for (int loop = 0; loop < this->m_points.size(); loop++) {
+				if ((this->m_points[loop] == point)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool operator==(const Triangle& triangle) const {
+			for (int loop = 0; loop < triangle.m_points.size(); loop++) {
+				if (!HasPoint(triangle.m_points[loop])) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		//外接円にpointが入っているか
+		bool getCircumscribedCircle(const VECTOR_ref& point) {
+			VECTOR_ref point1;
+
+			VECTOR_ref p1 = this->m_points[0];
+			VECTOR_ref p2 = this->m_points[1];
+			VECTOR_ref p3 = this->m_points[2];
+
+			auto x1_p = p1.x() * p1.x();
+			auto x2_p = p2.x() * p2.x();
+			auto x3_p = p3.x() * p3.x();
+			auto y1_p = p1.y() * p1.y();
+			auto y2_p = p2.y() * p2.y();
+			auto y3_p = p3.y() * p3.y();
+
+			// 外接円の中心座標を計算
+			auto c = 2 * ((p2.x() - p1.x()) * (p3.y() - p1.y()) - (p2.y() - p1.y()) * (p3.x() - p1.x()));
+			point1.Set(
+				((p3.y() - p1.y()) * (x2_p - x1_p + y2_p - y1_p) + (p1.y() - p2.y()) * (x3_p - x1_p + y3_p - y1_p)) / c,
+				((p1.x() - p3.x()) * (x2_p - x1_p + y2_p - y1_p) + (p2.x() - p1.x()) * (x3_p - x1_p + y3_p - y1_p)) / c,
+				0.f
+			);
+			return (point - point1).Length() < (p1 - point1).Length();
+		}
+
+		//辺に被りがないかどうか
+		bool IsOverlap() const {
+			return (
+				(this->m_points[0] == this->m_points[1]) ||
+				(this->m_points[1] == this->m_points[2]) ||
+				(this->m_points[2] == this->m_points[0])
+				);
+		}
+	};
+
+	Triangle GetExternalTriangle(const VECTOR_ref& position, const VECTOR_ref& size);
+	//点ABが線の同じ側にいるかどうか
+	bool GetSamePoint(const VECTOR_ref& LineA, const VECTOR_ref& LineB, const VECTOR_ref& pointA, const VECTOR_ref& pointB);
+	/**
+	 * ドロネー三角形分割を計算
+	 *  points 計算対象の点群
+	 *  ExternalTriangle 点を内包する三角形
+	 */
+	std::vector<Triangle> CalcDelaunay(const std::vector<SideControl*>& points, const Triangle& ExternalTriangle, const std::vector<VECTOR_ref>& GonPoint2D);
+};
+
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -392,6 +545,8 @@ namespace FPS_n2 {
 
 		class WallObj {
 		private:
+		public:
+		private:
 			MV1							m_obj;
 			std::vector<VERTEX3D>					m_WallVertex;		//壁をセット
 			VERTEX3D*								m_WallVertexPtr;
@@ -401,8 +556,14 @@ namespace FPS_n2 {
 			int										m_TexHandle;
 			MATERIALPARAM							m_Material;
 
-			std::vector<std::vector<VECTOR_ref>>	m_Side;
-			std::vector<std::vector<std::pair<VECTOR_ref, VECTOR_ref>>>	m_SideSort;
+			std::vector<std::vector<SideControl*>>	m_Side;
+			std::vector<std::vector<Triangle>>		m_Tri2D;
+			VECTOR_ref								m_BasePos;
+
+			std::vector<VERTEX3D>					m_NextWallVertex;		//壁をセット
+			std::vector<WORD>						m_NextWallIndex;		//壁をセット
+
+			int addtri = 0;
 		public://getter
 		public:
 			void			Init(const MV1& obj, const VECTOR_ref& pos, float YRad, float YScale) noexcept {
@@ -434,23 +595,59 @@ namespace FPS_n2 {
 					this->m_WallIndex.emplace_back((WORD)PolyList.Polygons[i].VIndex[2]);
 				}
 				this->m_Side.resize(PolyList.PolygonNum);
-				this->m_SideSort.resize(m_Side.size());
-				for (int i = 0; i < PolyList.PolygonNum; i++) {
-					this->m_Side[i].emplace_back(this->m_WallVertex[this->m_WallIndex[i * 3 + 0]].pos);
-					this->m_Side[i].emplace_back(this->m_WallVertex[this->m_WallIndex[i * 3 + 1]].pos);
-					this->m_Side[i].emplace_back(this->m_WallVertex[this->m_WallIndex[i * 3 + 2]].pos);
+				for (int index = 0; index < PolyList.PolygonNum; index++) {
+					auto& Side = m_Side[index];
+					Side.resize(Side.size() + 3);
+					Side[0] = new SideControl;
+					Side[0]->Pos = this->m_WallVertex[this->m_WallIndex[index * 3 + 0]].pos;
+					Side[0]->Type = SideType::Triangle;
+					Side[0]->SquarePoint = -1;
+
+					Side[1] = new SideControl;
+					Side[1]->Pos = this->m_WallVertex[this->m_WallIndex[index * 3 + 1]].pos;
+					Side[1]->Type = SideType::Triangle;
+					Side[1]->SquarePoint = -1;
+
+					Side[2] = new SideControl;
+					Side[2]->Pos = this->m_WallVertex[this->m_WallIndex[index * 3 + 2]].pos;
+					Side[2]->Type = SideType::Triangle;
+					Side[2]->SquarePoint = -1;
 				}
-				
+				this->m_BasePos = this->m_Side[0][0]->Pos;
+
 				MV1TerminateReferenceMesh(obj.get(), 0, FALSE);
 				this->m_WallVertexPtr = this->m_WallVertex.data();
 				this->m_WallIndexPtr = this->m_WallIndex.data();
 
-				// マテリアルの自己発光色を暗い青色にする
 				m_Material.Diffuse = GetLightDifColor();
 				m_Material.Specular = GetLightSpcColor();
 				m_Material.Ambient = GetLightAmbColor();
 				m_Material.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);
 				m_Material.Power = 20.0f;
+
+				this->m_Tri2D.resize(m_Side.size());
+				int Tris = 3;
+				for (int index = 0; index < this->m_Side.size(); index++) {
+					auto& Side = m_Side[index];
+					auto GetIndexPos = [&](int ID) {return &(this->m_WallVertex[this->m_WallIndex[index * Tris + ID]].pos); };
+					VECTOR_ref TriPos0 = *GetIndexPos(0);
+					VECTOR_ref TriPos1 = *GetIndexPos(1);
+					VECTOR_ref TriPos2 = *GetIndexPos(2);
+					VECTOR_ref TriNorm = ((TriPos1 - TriPos0).cross(TriPos2 - TriPos0)).Norm();
+
+					VECTOR_ref Zvec = VECTOR_ref::up();// (Side[1]->Pos - this->m_BasePos).Norm();
+					MATRIX_ref Mat = MATRIX_ref::Axis1_YZ(TriNorm, Zvec).Inverse();
+
+					for (int s = 0; s < Side.size(); s++) {
+						Side[s]->Pos2D = MATRIX_ref::Vtrans((Side[s]->Pos - this->m_BasePos), Mat);
+						Side[s]->Pos2D.Set(Side[s]->Pos2D.x(), Side[s]->Pos2D.z(), 0.f);
+					}
+					//
+				}
+			}
+
+			void			Execute(void) noexcept {
+				addtri += GetMouseWheelRotVolWithCheck();
 			}
 
 			void			Draw(bool IsCalling) noexcept {
@@ -460,19 +657,41 @@ namespace FPS_n2 {
 				DrawPolygonIndexed3D(this->m_WallVertexPtr, (int)this->m_WallVertex.size(), this->m_WallIndexPtr, (int)(this->m_WallIndex.size()) / 3, this->m_TexHandle, TRUE);
 				SetUseBackCulling(FALSE);
 
+				return;
+
 				for (auto& s : this->m_Side) {
 					for (int i = 0; i < s.size(); i++) {
-						DrawLine3D(s[i].get(), s[(i + 1) % s.size()].get(), GetColor(255, 0, 0));
+						DrawLine3D(s[i]->Pos.get(), s[(i + 1) % s.size()]->Pos.get(), GetColor(255, 0, 0));
 					}
-
 					for (auto& s2 : s) {
-						DrawSphere3D(s2.get(), Scale_Rate*0.05f, 4, GetColor(255, 0, 0), GetColor(255, 255, 255), TRUE);
+						DrawSphere3D(s2->Pos.get(), Scale_Rate*0.05f, 4, GetColor(255, 0, 0), GetColor(255, 255, 255), TRUE);
 					}
+				}
+
+				int x = 400;
+				int y = 400;
+				int xsize = 0;
+				float scale = 20.f;
+				x = 400;
+				for (auto& s : this->m_Tri2D) {
+					for (int loop = 0; loop < (int)s.size(); loop++) {
+						int xadd = loop * addtri;
+						int yadd = 0;
+						{
+							int x1 = x + xadd + (int)(s[loop].Getpoints()[0].x()*scale);
+							int y1 = y + yadd - (int)(s[loop].Getpoints()[0].y()*scale);
+							int x2 = x + xadd + (int)(s[loop].Getpoints()[1].x()*scale);
+							int y2 = y + yadd - (int)(s[loop].Getpoints()[1].y()*scale);
+							int x3 = x + xadd + (int)(s[loop].Getpoints()[2].x()*scale);
+							int y3 = y + yadd - (int)(s[loop].Getpoints()[2].y()*scale);
+							DrawTriangle(x1, y1, x2, y2, x3, y3, GetColor(0, 255 * (loop + 1) / (int)s.size(), 0), TRUE);
+						}
+					}
+					x += xsize;
 				}
 			}
 
 			bool			CheckHit(const VECTOR_ref& repos, VECTOR_ref* pos) {
-
 				bool ishit = false;
 				float length = (*pos - repos).size();
 				for (int i = 0; i < this->m_WallIndex.size() / 3; i++) {
@@ -489,102 +708,190 @@ namespace FPS_n2 {
 					CalcPoint(repos, *pos);
 				}
 				*pos = repos + (*pos - repos).Norm()*(length);
-
 				return ishit;
 			}
-
 
 			void			CalcPoint(const VECTOR_ref& repos, const VECTOR_ref& pos) {
 				VECTOR_ref vec = (pos - repos);
 				VECTOR_ref xaxis = vec.Norm().cross(VECTOR_ref::up());
 				VECTOR_ref yaxis = vec.Norm().cross(xaxis);
 
-				int Tris = 3;
-				const int N_gon = 4;
-				std::array<VECTOR_ref, N_gon> Point;//辺の数
+				const int Tris = 3;
+				const int N_gon = 10;
+				const float Radius = 0.3f*Scale_Rate;
+				std::array<VECTOR_ref, N_gon> GonPoint;//辺の数
 
-				for (int index = 0; index < this->m_WallIndex.size() / Tris; index++) {
-					auto& Side = m_Side[index];
+				for (int index = 0; index < this->m_Side.size(); index++) {
+					auto& Side = this->m_Side[index];
 					auto GetIndexPos = [&](int ID) {return &(this->m_WallVertex[this->m_WallIndex[index * Tris + ID]].pos); };
 					VECTOR_ref TriPos0 = *GetIndexPos(0);
 					VECTOR_ref TriPos1 = *GetIndexPos(1);
 					VECTOR_ref TriPos2 = *GetIndexPos(2);
 					VECTOR_ref TriNorm = ((TriPos1 - TriPos0).cross(TriPos2 - TriPos0)).Norm();
-					//平面上のポイント取得
+
 					for (int gon = 0; gon < N_gon; gon++) {
 						float rad = deg2rad(360.f * (0.5f + (float)gon) / (float)N_gon);
-						VECTOR_ref BasePos = repos + (xaxis * sin(rad) + yaxis * cos(rad))*Scale_Rate*0.3f;
-
-						VECTOR_ref PosN = Plane_Point_MinLength_Position(TriPos0.get(), TriNorm.get(), BasePos.get());
-						float pAN = std::abs((BasePos - PosN).dot(TriNorm));
-						float pBN = std::abs(((BasePos + vec) - PosN).dot(TriNorm));
-						VECTOR_ref Ans = BasePos + vec * (pAN / (pAN + pBN));
-						Point[gon] = Ans;
-					}
-					//n_sideの中にある点の削除(外周としては不要なもののため)
-					for (int s = 0; s < Side.size(); s++) {
-						bool isIn = true;
-						float Dots = 0.f;
-						for (int gon = 0; gon < N_gon; gon++) {
-							VECTOR_ref pos1 = Point[gon].get();
-							VECTOR_ref pos2 = Point[(gon + 1) % N_gon].get();
-							VECTOR_ref pos3 = Point[(gon + 2) % N_gon].get();
-							float dot = (pos2 - pos1).cross(Side[s] - pos1).dot((pos2 - pos1).cross(pos3 - pos1));
-							if (Dots != 0.f) {
-								if (((Dots > 0.f) && (dot < 0.f)) || ((Dots < 0.f) && (dot > 0.f))) {
-									isIn = false;
-									break;
-								}
-							}
-							else {
-								Dots = dot;
-							}
+						VECTOR_ref BasePos = repos + (xaxis * sin(rad) + yaxis * cos(rad))*Radius;
+						//平面上のくりぬきポイント取得
+						{
+							VECTOR_ref PosN = Plane_Point_MinLength_Position(TriPos0.get(), TriNorm.get(), BasePos.get());
+							float pAN = std::abs((BasePos - PosN).dot(TriNorm));
+							float pBN = std::abs(((BasePos + vec) - PosN).dot(TriNorm));
+							GonPoint[gon] = BasePos + vec * (pAN / (pAN + pBN));
 						}
-						if (isIn) {
-							Side.erase(Side.begin() + s);
-							s--;
+						//直に入っている部分
+						{
+							auto res2 = HitCheck_Line_Triangle(BasePos.get(), (BasePos + vec).get(), TriPos0.get(), TriPos1.get(), TriPos2.get());
+							if ((res2.HitFlag == TRUE)) {
+								Side.resize(Side.size() + 1);
+								Side.back() = new SideControl;
+								Side.back()->Pos = res2.Position;
+								Side.back()->Type = SideType::Square;
+								Side.back()->SquarePoint = gon;
+							}
 						}
 					}
 					//三角と辺の交点を追加
 					for (int gon = 0; gon < N_gon; gon++) {
-						VECTOR pos1 = Point[gon].get();
-						VECTOR pos2 = Point[(gon + 1) % N_gon].get();
-						SEGMENT_SEGMENT_RESULT Res;
+						VECTOR pos1 = GonPoint[gon].get();
+						VECTOR pos2 = GonPoint[(gon + 1) % N_gon].get();
 						for (int tri = 0; tri < Tris; tri++) {
-							Segment_Segment_Analyse(&pos1, &pos2, GetIndexPos(tri), GetIndexPos((tri + 1) % Tris), &Res);
+							VECTOR TriPost0 = *GetIndexPos(tri);
+							VECTOR TriPost1 = *GetIndexPos((tri + 1) % Tris);
+							VECTOR TriPost2 = *GetIndexPos((tri + 2) % Tris);
 							float len = 0.001f;
+							SEGMENT_SEGMENT_RESULT Res;
+							Segment_Segment_Analyse(&pos1, &pos2, &TriPost0, &TriPost1, &Res);
 							if (Res.SegA_SegB_MinDist_Square <= (len*len)) {
-								Side.emplace_back(Res.SegA_MinDist_Pos);
+								Side.resize(Side.size() + 1);
+								Side.back() = new SideControl;
+								Side.back()->Pos = Res.SegA_MinDist_Pos;
+
+								//pos2が三角の辺のどちらにいるか
+								if (GetSamePoint(TriPost0, TriPost1, TriPost2, pos2)) {
+									Side.back()->Type = SideType::Mix_OuttoIn;
+									Side.back()->SquarePoint = gon;
+								}
+								else {
+									Side.back()->Type = SideType::Mix_IntoOut;
+									Side.back()->SquarePoint = (gon + 1) % N_gon;
+								}
 							}
 						}
 					}
-					//直に入っている部分
-					for (int gon = 0; gon < N_gon; gon++) {
-						float rad = deg2rad(360.f * (0.5f + (float)gon) / (float)N_gon);
-						VECTOR_ref BasePos = repos + (xaxis * sin(rad) + yaxis * cos(rad))*Scale_Rate*0.3f;
-						auto res2 = HitCheck_Line_Triangle(BasePos.get(), (BasePos + vec).get(), TriPos0.get(), TriPos1.get(), TriPos2.get());
-						if (res2.HitFlag == TRUE) {
-							Side.emplace_back(res2.Position);
+					//n_sideの中にある点の削除(外周としては不要なもののため)
+					for (int s = 0; s < Side.size(); s++) {
+						if (Side[s]->Type == SideType::Triangle) {
+							bool isIn = true;
+							for (int gon = 0; gon < N_gon; gon++) {
+								if (!GetSamePoint(GonPoint[gon], GonPoint[(gon + 1) % N_gon], GonPoint[(gon + 2) % N_gon], Side[s]->Pos)) {
+									isIn = false;
+									break;
+								}
+							}
+							if (isIn) {
+								delete Side[s];
+								Side[s] = nullptr;
+								Side.erase(Side.begin() + s);
+								s--;
+							}
 						}
 					}
-					//ソート
-					this->m_SideSort[index].resize(Side.size());
+					//
+					VECTOR_ref Zvec = VECTOR_ref::up();// (Side[1]->Pos - this->m_BasePos).Norm();
+					MATRIX_ref Mat = MATRIX_ref::Axis1_YZ(TriNorm, Zvec).Inverse();
 
-					VECTOR_ref Zvec = (Side[1] - Side[0]).Norm();
-					VECTOR_ref Yvec = TriNorm;
-					VECTOR_ref Xvec = Zvec.cross(Yvec);
+					this->m_Tri2D[index].resize(Side.size());
 					for (int s = 0; s < Side.size(); s++) {
-						this->m_SideSort[index][s].first = Side[s];
-						this->m_SideSort[index][s].second = MATRIX_ref::Vtrans((Side[s] - Side[0]), MATRIX_ref::Axis1_YZ(Yvec, Zvec).Inverse());
+						Side[s]->Pos2D = MATRIX_ref::Vtrans((Side[s]->Pos - this->m_BasePos), Mat);
+						Side[s]->Pos2D.Set(Side[s]->Pos2D.x(), Side[s]->Pos2D.z(), 0.f);
 					}
-					std::sort(this->m_SideSort[index].begin(), this->m_SideSort[index].end(),
-						[](const auto &p1, const auto &p2) { return atan2l(p1.second.z(), p1.second.x()) < atan2l(p2.second.z(), p2.second.x()); });
+					std::vector<VECTOR_ref>	Point2D;//辺の数
+					{
+						struct DATA {
+							VECTOR_ref point;//辺の数
+							int SquarePoint;//辺の数
+							SideType type;//辺の数
+						};
+						std::vector<DATA> data;//辺の数
+						for (int s = 0; s < Side.size(); s++) {
+							if (Side[s]->SquarePoint != -1) {
+								//IntoOutと番号が同じならOuttoInが優先
+								data.resize(data.size() + 1);
+								data.back().point = Side[s]->Pos2D;
+								data.back().SquarePoint = Side[s]->SquarePoint;
+								data.back().type = Side[s]->Type;
+							}
+						}
+						std::sort(data.begin(), data.end(), [](const DATA& a, const DATA& b) {
+							return (a.SquarePoint == b.SquarePoint) ? ((a.type == SideType::Mix_IntoOut) && (b.type == SideType::Mix_OuttoIn)) : (a.SquarePoint < b.SquarePoint);
+						});
+						for (int loop = 0; loop < data.size(); loop++) {
+							Point2D.emplace_back(data[loop].point);
+						}
+					}
+					// 一番外側の巨大三角形を生成、ここでは画面内の点限定として画面サイズを含む三角形を作る
+					VECTOR_ref position; position.Set(0, 0, 0.f);
+					VECTOR_ref Size; Size.Set(200.f, 200.f, 0.f);
+					this->m_Tri2D[index] = CalcDelaunay(this->m_Side[index], GetExternalTriangle(position, Size), Point2D);
+					Point2D.clear();
+					//出来たものをリストに再登録
+					this->m_NextWallVertex.clear();
+					this->m_NextWallIndex.clear();
+					for (int i = 0; i < this->m_Tri2D.size(); i++) {
+						for (int j = 0; j < this->m_Tri2D[i].size(); j++) {
+							for (auto& p : this->m_Tri2D[i][j].Getpoints()) {
+								VECTOR_ref p2; p2.Set(p.x(), 0.f, p.y());
+								this->m_NextWallVertex.resize(this->m_NextWallVertex.size() + 1);
+								this->m_NextWallVertex.back().pos = (MATRIX_ref::Vtrans(p2, Mat.Inverse()) + this->m_BasePos).get();
+								this->m_NextWallVertex.back().norm = this->m_WallVertex[0].norm;
+								this->m_NextWallVertex.back().dif = this->m_WallVertex[0].dif;
+								this->m_NextWallVertex.back().spc = this->m_WallVertex[0].spc;
+								this->m_NextWallVertex.back().u = -p2.x() / Scale_Rate;
+								this->m_NextWallVertex.back().v = p2.z() / Scale_Rate;
+								this->m_NextWallVertex.back().su = p2.x() / Scale_Rate;
+								this->m_NextWallVertex.back().sv = p2.z() / Scale_Rate;
 
-					for (int s = 0; s < Side.size(); s++) {
-						Side[s] = this->m_SideSort[index][s].first;
+								this->m_NextWallIndex.emplace_back((WORD)(this->m_NextWallVertex.size() - 1));
+							}
+						}
 					}
 					//
 				}
+				this->m_WallVertex.clear();
+				this->m_WallVertex = this->m_NextWallVertex;
+				this->m_WallIndex.clear();
+				this->m_WallIndex = this->m_NextWallIndex;
+				for (auto& s : this->m_Side) {
+					for (auto&s2 : s) {
+						delete s2;
+						s2 = nullptr;
+					}
+				}
+				this->m_Side.clear();
+				this->m_Side.resize(this->m_WallIndex.size() / 3);
+				for (int index = 0; index < this->m_Side.size(); index++) {
+					auto& Side = m_Side[index];
+					Side.resize(Side.size() + 3);
+					Side[0] = new SideControl;
+					Side[0]->Pos = this->m_WallVertex[this->m_WallIndex[index * 3 + 0]].pos;
+					Side[0]->Type = SideType::Triangle;
+					Side[0]->SquarePoint = -1;
+
+					Side[1] = new SideControl;
+					Side[1]->Pos = this->m_WallVertex[this->m_WallIndex[index * 3 + 1]].pos;
+					Side[1]->Type = SideType::Triangle;
+					Side[1]->SquarePoint = -1;
+
+					Side[2] = new SideControl;
+					Side[2]->Pos = this->m_WallVertex[this->m_WallIndex[index * 3 + 2]].pos;
+					Side[2]->Type = SideType::Triangle;
+					Side[2]->SquarePoint = -1;
+				}
+				this->m_Tri2D.resize(m_Side.size());
+
+				this->m_WallVertexPtr = this->m_WallVertex.data();
+				this->m_WallIndexPtr = this->m_WallIndex.data();
 			}
 		};
 
@@ -674,14 +981,19 @@ namespace FPS_n2 {
 				//
 				this->m_grass.Init(&this->m_ObjGroundCol);
 				
-				MV1::Load("data/model/wall/model.pmx", &this->m_objWall);
-				this->m_Walls.resize(1);
+				MV1::Load("data/model/wall/model.mqoz", &this->m_objWall);
+				this->m_Walls.resize(10);
+				int i = 0;
 				for (auto& w : this->m_Walls) {
-					w.Init(this->m_objWall, VECTOR_ref::vget(0, 12.5f*6.f, 0), 0.f, 3.f);
+					w.Init(this->m_objWall, VECTOR_ref::vget(12.5f*i, 12.5f*6.f, 0), deg2rad(180.f), 3.f); i++;
 				}
 			}
 			//
-			void			Execute(void) noexcept {}
+			void			Execute(void) noexcept {
+				for (auto& w : this->m_Walls) {
+					w.Execute();
+				}
+			}
 			//
 			void			BG_Draw(void) noexcept {
 				SetUseLighting(FALSE);

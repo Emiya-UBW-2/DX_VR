@@ -285,8 +285,8 @@ namespace FPS_n2 {
 
 		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
 		private:
-			static const int		Chara_num = 3;
-			static const int		Vehicle_num = 3;
+			static const int		Chara_num = Player_num;
+			static const int		Vehicle_num = Player_num;
 			static const int		gun_num = Chara_num;
 		private:
 			//リソース関連
