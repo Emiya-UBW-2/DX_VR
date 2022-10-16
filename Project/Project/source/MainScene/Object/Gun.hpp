@@ -8,6 +8,10 @@ namespace FPS_n2 {
 			GraphHandle						m_reticle;						//
 			int								m_ShotPhase{ 0 };				//
 			std::vector<std::string>		m_MagName;						//
+			std::vector<SHOTTYPE>			m_ShotType;						//
+			std::vector<RELOADTYPE>			m_ReloadType;					//
+			int								m_HumanAnimType{ 0 };			//
+			float							m_ReticleSize{ 1.f };
 			bool							m_IsShot{ false };				//
 			bool							m_in_chamber{ true };			//ƒ`ƒƒƒ“ƒo[“à‚É’e‚ª‚ ‚é‚©
 			int								m_boltSoundSequence{ -1 };		//ƒTƒEƒ“ƒh
@@ -24,12 +28,29 @@ namespace FPS_n2 {
 			const auto GetParentFrameWorldMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix((int)GetObj_const().frame_parent(m_Frames[(int)frame].first)); }
 			void ResetFrameLocalMat(GunFrame frame) noexcept { GetObj().frame_Reset(m_Frames[(int)frame].first); }
 			void SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(m_Frames[(int)frame].first, value * m_Frames[(int)frame].second); }
+			const auto& GetShotType(void) noexcept { return this->m_ShotType[0]; }
+			const auto& GetReloadType(void) noexcept { return this->m_ReloadType[0]; }
 			const auto& GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
-			const auto& GetNowAnime(void) noexcept { return GetObj().get_anime((size_t)(this->m_ShotPhase - 2)); }
+			const auto& GetNowAnime(void) noexcept {
+				switch (GetShotType()) {
+				case SHOTTYPE::FULL:
+					if ((this->m_ShotPhase) < 2) {
+						return GetObj().get_anime((size_t)4);
+					}
+					else {
+						return GetObj().get_anime((size_t)(this->m_ShotPhase - 2));
+					}
+				case SHOTTYPE::BOLT:
+					return GetObj().get_anime((size_t)(this->m_ShotPhase - 2));
+				default:
+					return GetObj().get_anime((size_t)(this->m_ShotPhase - 2));
+				}
+			}
 			void SetIsShot(bool value) noexcept { this->m_IsShot = value; }
 			void SetUseMoveParts(bool value) noexcept { this->m_UseMoveParts = value; }
 			const auto GetScopePos(void) noexcept { return GetFrameWorldMat(GunFrame::Eyepos).pos(); }
 			const auto GetLensPos(void) noexcept { return GetFrameWorldMat(GunFrame::Lens).pos(); }
+			const auto GetReticleSize(void) noexcept { return m_ReticleSize; }
 			const auto GetReticlePos(void) noexcept { return GetLensPos() + (GetLensPos() - GetScopePos()).Norm()*10.f; }
 			const auto GetLensPosSize(void) noexcept { return GetFrameWorldMat(GunFrame::LensSize).pos(); }
 			const auto GetMuzzleMatrix(void) noexcept { return GetFrameWorldMat(GunFrame::Muzzle); }
@@ -39,6 +60,7 @@ namespace FPS_n2 {
 			const auto GetAmmoNum(void) noexcept { return ((this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->GetAmmoNum() : 0) + (this->m_in_chamber ? 1 : 0); }
 			const auto GetCanshot(void) noexcept { return this->m_in_chamber && (this->m_ShotPhase <= 1); }
 			const auto& GetReticle(void) noexcept { return this->m_reticle; }
+			const auto& GetHumanAnimType(void) noexcept { return this->m_HumanAnimType; }
 			const auto& GetIsShot(void) noexcept { return this->m_IsShot; }
 			void SetGunMatrix(const MATRIX_ref& value, int pShotPhase) noexcept {
 				SetMove(value.GetRot(), value.pos());
@@ -48,7 +70,9 @@ namespace FPS_n2 {
 			void SetMagazine(const char*) noexcept;//ƒ}ƒKƒWƒ“‚Ì’…’E
 			void ExecuteCartInChamber(void) noexcept;//ƒ`ƒƒƒ“ƒo[‚Ö‚Ì‘•’eA”ro
 			void SetBullet(void) noexcept;//”­–C
-			void SetAmmoHandMatrix(const MATRIX_ref& value, float pPer) noexcept { this->m_Mag_Ptr->SetHandMatrix(value, pPer); }
+			void SetAmmoHandMatrix(const MATRIX_ref& value, float pPer) noexcept {
+				this->m_Mag_Ptr->SetHandMatrix(value, pPer, GetReloadType());
+			}
 		public:
 			GunClass(void) noexcept { this->m_objType = ObjType::Gun; }
 			~GunClass(void) noexcept {}
@@ -57,13 +81,34 @@ namespace FPS_n2 {
 				ObjectBaseClass::Init();
 				{
 					int mdata = FileRead_open((this->m_FilePath + "data.txt").c_str(), FALSE);
+					std::string stp;
 					while (true) {
-						auto stp = getparams::Getstr(mdata);
+						stp = getparams::Getstr(mdata);
 						if (stp.find("usemag" + std::to_string(this->m_MagName.size())) == std::string::npos) {
 							break;
 						}
 						this->m_MagName.resize(this->m_MagName.size() + 1);
 						this->m_MagName.back() = getparams::getright(stp);
+					}
+					{
+						auto sel = getparams::getright(stp);
+						if (sel == "FULL") {
+							this->m_ShotType.emplace_back(SHOTTYPE::FULL);
+						}
+						else if (sel == "BOLT") {
+							this->m_ShotType.emplace_back(SHOTTYPE::BOLT);
+						}
+					}
+					this->m_HumanAnimType = getparams::_int(mdata);
+					this->m_ReticleSize = getparams::_float(mdata);
+					{
+						auto sel = getparams::_str(mdata);
+						if (sel == "MAG") {
+							this->m_ReloadType.emplace_back(RELOADTYPE::MAG);
+						}
+						else if (sel == "AMMO") {
+							this->m_ReloadType.emplace_back(RELOADTYPE::AMMO);
+						}
 					}
 					FileRead_close(mdata);
 				}
@@ -74,11 +119,32 @@ namespace FPS_n2 {
 				auto SE = SoundPool::Instance();
 				if (this->m_IsFirstLoop) {
 				}
+
+				GunAnimeID Sel = (GunAnimeID)(this->m_ShotPhase - 2);
+				switch (GetShotType()) {
+				case SHOTTYPE::FULL:
+					if ((this->m_ShotPhase) == 1) {
+						Sel = (GunAnimeID)(4);
+					}
+					break;
+				case SHOTTYPE::BOLT:
+				default:
+					break;
+				}
 				for (int i = 0; i < GetObj().get_anime().size(); i++) {
-					if ((GunAnimeID)(this->m_ShotPhase - 2) == (GunAnimeID)i) {
+					if (Sel == (GunAnimeID)i) {
 						if ((GunAnimeID)i == GunAnimeID::ReloadOne) {
 							if (GetObj().get_anime(i).time == 0.f) {
-								this->m_Mag_Ptr->AddAmmo();
+								switch (GetReloadType()) {
+								case RELOADTYPE::MAG:
+									this->m_Mag_Ptr->SetAmmo(this->m_Mag_Ptr->GetAmmoAll());
+									break;
+								case RELOADTYPE::AMMO:
+									this->m_Mag_Ptr->AddAmmo();
+									break;
+								default:
+									break;
+								}
 							}
 						}
 						GetObj().get_anime(i).per = 1.f;
@@ -157,7 +223,33 @@ namespace FPS_n2 {
 						}
 					}
 				}
-
+				//0
+				{
+					if ((0.5f < GetAnime(GunAnimeID::Shot).time && GetAnime(GunAnimeID::Shot).time < 1.f)) {
+						if (m_boltSoundSequence != 1) {
+							m_boltSoundSequence = 1;
+							SE->Get((int)SoundEnum::Cocking0).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+						}
+					}
+					if ((2.f < GetAnime(GunAnimeID::Shot).time && GetAnime(GunAnimeID::Shot).time < 3.f)) {
+						if (m_boltSoundSequence != 2) {
+							m_boltSoundSequence = 2;
+							SE->Get((int)SoundEnum::Cocking1).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+						}
+					}
+					if ((5.f < GetAnime(GunAnimeID::Shot).time && GetAnime(GunAnimeID::Shot).time < 6.f)) {
+						if (m_boltSoundSequence != 3) {
+							m_boltSoundSequence = 3;
+							SE->Get((int)SoundEnum::Cocking2).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+						}
+					}
+					if ((7.5f < GetAnime(GunAnimeID::Shot).time && GetAnime(GunAnimeID::Shot).time < 8.5f)) {
+						if (m_boltSoundSequence != 4) {
+							m_boltSoundSequence = 4;
+							SE->Get((int)SoundEnum::Cocking3).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+						}
+					}
+				}
 				{
 					ResetFrameLocalMat(GunFrame::Center);
 					GetObj().work_anime();

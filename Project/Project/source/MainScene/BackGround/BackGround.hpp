@@ -947,6 +947,7 @@ namespace FPS_n2 {
 				
 				MV1::Load("data/model/wall/model.mqoz", &this->m_objWall);
 				this->m_Walls.resize(20);
+				this->m_Walls.resize(0);
 				int i = 0;
 				for (auto& w : this->m_Walls) {
 					w.Init(this->m_objWall, VECTOR_ref::vget(12.5f*(i % 10), 12.5f*6.f, -0.1f*12.5f*(i / 10)), deg2rad(180.f), 3.f); i++;

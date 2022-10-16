@@ -184,8 +184,10 @@ namespace FPS_n2 {
 				this->m_FilePath = pBase->m_FilePath;
 				this->m_ObjFileName = pBase->m_ObjFileName;
 				this->m_ColFileName = pBase->m_ColFileName;
-				this->GetObj() = pBase->GetObj().Duplicate();
-				MV1::SetAnime(&this->GetObj(), pBase->GetObj());
+				this->m_obj_REALTIME = pBase->m_obj_REALTIME.Duplicate();
+				this->m_obj_LOADCALC = pBase->m_obj_LOADCALC.Duplicate();
+				MV1::SetAnime(&this->m_obj_REALTIME, pBase->m_obj_REALTIME);
+				MV1::SetAnime(&this->m_obj_LOADCALC, pBase->m_obj_LOADCALC);
 				//col
 				if (pBase->m_col.IsActive()) {
 					this->m_col = pBase->m_col.Duplicate();

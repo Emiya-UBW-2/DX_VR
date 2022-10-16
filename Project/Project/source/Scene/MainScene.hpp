@@ -38,7 +38,7 @@ namespace FPS_n2 {
 			const auto& GetSequence(void) const noexcept { return this->m_Sequence; }
 		public:
 			const auto&		GetMyPlayerID(void) const noexcept { return (this->m_IsClient) ? this->m_ClientCtrl.GetMyPlayer().ID : this->m_ServerCtrl.GetMyPlayer().ID; }
-			const auto		GetNowServerPlayerData(int ID) noexcept { return (this->m_IsClient) ? this->m_ClientCtrl.GetNowServerPlayerData(ID) : this->m_ServerCtrl.GetNowServerPlayerData(ID); }
+			const auto		GetNowServerPlayerData(int ID, bool isYradReset) noexcept { return (this->m_IsClient) ? this->m_ClientCtrl.GetNowServerPlayerData(ID, isYradReset) : this->m_ServerCtrl.GetNowServerPlayerData(ID, isYradReset); }
 			void			GetRecvData(int ID, double ServerFrame) noexcept {
 				if ((this->m_IsClient) ? this->m_ClientCtrl.GetRecvData(ID) : this->m_ServerCtrl.GetRecvData(ID)) {
 					this->m_Ping = (float)(this->m_ClientFrame - ServerFrame)*1000.f;
@@ -57,7 +57,7 @@ namespace FPS_n2 {
 				}
 
 				if (this->m_IsClient) {
-					m_ClientCtrl.SetMyPlayer(MyInput, SendMove.m_Pos, SendMove.m_Vec, SendMove.m_Yrad, this->m_ClientFrame, SendMove.m_Damage, SendMove.m_DamageSwitch);
+					m_ClientCtrl.SetMyPlayer(MyInput, SendMove.m_Pos, SendMove.m_Vec, SendMove.m_rad, this->m_ClientFrame, SendMove.m_Damage, SendMove.m_DamageSwitch);
 					if ((this->m_Sequence == SequenceEnum::Matching) && m_SeqFirst) {
 						m_ClientCtrl.Init(this->m_NewSetting.UsePort, this->m_Tick, IPData);
 					}
@@ -67,7 +67,7 @@ namespace FPS_n2 {
 				}
 				//サーバー
 				else {
-					m_ServerCtrl.SetMyPlayer(MyInput, SendMove.m_Pos, SendMove.m_Vec, SendMove.m_Yrad, this->m_ClientFrame, SendMove.m_Damage, SendMove.m_DamageSwitch);
+					m_ServerCtrl.SetMyPlayer(MyInput, SendMove.m_Pos, SendMove.m_Vec, SendMove.m_rad, this->m_ClientFrame, SendMove.m_Damage, SendMove.m_DamageSwitch);
 					if ((this->m_Sequence == SequenceEnum::Matching) && m_SeqFirst) {
 						m_ServerCtrl.Init(this->m_NewSetting.UsePort, this->m_Tick, IPDATA());
 					}
@@ -87,8 +87,8 @@ namespace FPS_n2 {
 			void Draw(void) noexcept {
 				//auto* ObjMngr = ObjectManager::Instance();
 				//auto* PlayerMngr = PlayerManager::Instance();
-				auto* Fonts = FontPool::Instance();
 				//auto* DrawParts = DXDraw::Instance();
+				auto* Fonts = FontPool::Instance();
 				auto Red = GetColor(255, 0, 0);
 				//auto Blue = GetColor(50, 50, 255);
 				//auto Green = GetColor(43, 163, 91);
@@ -286,7 +286,7 @@ namespace FPS_n2 {
 		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
 		private:
 			static const int		Chara_num = Player_num;
-			static const int		Vehicle_num = Player_num;
+			static const int		Vehicle_num = 0;
 			static const int		gun_num = Chara_num;
 		private:
 			//リソース関連
@@ -359,15 +359,18 @@ namespace FPS_n2 {
 				//
 
 				ObjMngr->Init(&this->m_BackGround.GetGroundCol());
+				ObjMngr->AddObject(ObjType::Human, "data/Charactor/WinningTicket/");
+				ObjMngr->AddObject(ObjType::Human, "data/Charactor/WinningTicket/");
+				//ObjMngr->AddObject(ObjType::Human, "data/Charactor/Sweep/");
+				//ObjMngr->AddObject(ObjType::Human, "data/Charactor/Marisa/");
 				for (int i = 0; i < Chara_num; i++) {
-					ObjMngr->AddObject(ObjType::Human, "data/Charactor/WinningTicket/");
 				}
 				for (int i = 0; i < Vehicle_num; i++) {
 					ObjMngr->AddObject(ObjType::Vehicle);
 				}
 
 				for (int i = 0; i < gun_num; i++) {
-					ObjMngr->AddObject(ObjType::Gun, "data/gun/Mosin/");//Gorushi
+					ObjMngr->AddObject(ObjType::Gun, "data/gun/AKS74U/");//Gorushi//Mosin
 				}
 				//ロード
 				SetCreate3DSoundFlag(FALSE);
@@ -392,6 +395,7 @@ namespace FPS_n2 {
 					c->SetGunPtr((std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, i)));
 					c->ValueSet(deg2rad(0.f), deg2rad(-90.f), false, false, pos_t, (PlayerID)i);
 					if (i == 0) {
+						//c->SetUseRealTimePhysics(true);
 						c->SetUseRealTimePhysics(false);
 						c->SetCharaType(CharaTypeID::Team);
 					}
@@ -431,7 +435,6 @@ namespace FPS_n2 {
 				//Cam
 				camera_main.set_cam_info(deg2rad(65), 1.f, 100.f);
 				camera_main.set_cam_pos(VECTOR_ref::vget(0, 15, -20), VECTOR_ref::vget(0, 15, 0), VECTOR_ref::vget(0, 1, 0));
-				Set_zoom_lens(3.5f);
 				//サウンド
 				auto SE = SoundPool::Instance();
 				SE->Add((int)SoundEnum::Shot_Gun, 3, "data/Sound/SE/gun/shot.wav");
@@ -544,8 +547,10 @@ namespace FPS_n2 {
 								//ボタン
 								Lockon_key = (input.Buttons[0] != 0);/*△*/
 								//_key = (input.Buttons[2] != 0);/*×*/
+								auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 								MyInput.SetInput(
-									pp_x*(1.f - this->m_TPS_Per), pp_y*(1.f - this->m_TPS_Per),
+									pp_x*(1.f - this->m_TPS_Per) - Chara->GetRecoilRadAdd().y(),
+									pp_y*(1.f - this->m_TPS_Per) - Chara->GetRecoilRadAdd().x(),
 									w_key, s_key, a_key, d_key,
 									(input.Buttons[10] != 0),
 									(input.Buttons[6] != 0), (input.Buttons[7] != 0),
@@ -581,8 +586,10 @@ namespace FPS_n2 {
 						look_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_RIGHT) != 0) && this->m_MouseActive.on();
 						eyechange_key = CheckHitKeyWithCheck(KEY_INPUT_V) != 0;
 						Lockon_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_MIDDLE) != 0) && this->m_MouseActive.on();
+						auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 						MyInput.SetInput(
-							pp_x*(1.f - this->m_TPS_Per), pp_y*(1.f - this->m_TPS_Per),
+							pp_x*(1.f - this->m_TPS_Per) - Chara->GetRecoilRadAdd().y(),
+							pp_y*(1.f - this->m_TPS_Per) - Chara->GetRecoilRadAdd().x(),
 							(CheckHitKeyWithCheck(KEY_INPUT_W) != 0), (CheckHitKeyWithCheck(KEY_INPUT_S) != 0), (CheckHitKeyWithCheck(KEY_INPUT_A) != 0), (CheckHitKeyWithCheck(KEY_INPUT_D) != 0),
 							(CheckHitKeyWithCheck(KEY_INPUT_LSHIFT) != 0),
 							(CheckHitKeyWithCheck(KEY_INPUT_Q) != 0), (CheckHitKeyWithCheck(KEY_INPUT_E) != 0),
@@ -626,9 +633,12 @@ namespace FPS_n2 {
 						for (int i = 0; i < Chara_num; i++) {
 							auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
 							if (i == GetMyPlayerID() && !PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) {
+								c->SetUseRealTimePhysics(false);
+								//c->SetUseRealTimePhysics(true);
 								c->SetCharaType(CharaTypeID::Mine);
 							}
 							else {
+								c->SetUseRealTimePhysics(false);
 								c->SetCharaType(CharaTypeID::Enemy);
 							}
 						}
@@ -648,7 +658,7 @@ namespace FPS_n2 {
 						auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
 						auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 						if (m_NetWorkBrowser.GetSequence() == SequenceEnum::MainGame) {
-							auto tmp = m_NetWorkBrowser.GetNowServerPlayerData(i);
+							auto tmp = m_NetWorkBrowser.GetNowServerPlayerData(i, PlayerMngr->GetPlayer(i).IsRide());
 							if (i == GetMyPlayerID()) {
 								MyInput.SetKeyInput(tmp.Input.GetKeyInput());//キーフレームだけサーバーに合わせる
 								if (!PlayerMngr->GetPlayer(i).IsRide()) {
@@ -684,18 +694,20 @@ namespace FPS_n2 {
 								}
 								if (override_true) {
 									if (!PlayerMngr->GetPlayer(i).IsRide()) {
-										c->SetPosBufOverRide(tmp.PosBuf, tmp.VecBuf);
+										c->SetPosBufOverRide(tmp.PosBuf, tmp.VecBuf, tmp.radBuf);
 									}
 									else {
-										v->SetPosBufOverRide(tmp.PosBuf, tmp.VecBuf, tmp.YradBuf);
+										v->SetPosBufOverRide(tmp.PosBuf, tmp.VecBuf, tmp.radBuf);
 									}
 								}
 
 							}
 							//ダメージイベント処理
-							if (tmp.DamageSwitch != v->GetDamageSwitchRec()) {
-								this->m_DamageEvents.emplace_back(tmp.Damage);
-								v->SetDamageSwitchRec(tmp.DamageSwitch);
+							if (ObjMngr->GetObj(ObjType::Vehicle, i) != nullptr) {
+								if (tmp.DamageSwitch != v->GetDamageSwitchRec()) {
+									this->m_DamageEvents.emplace_back(tmp.Damage);
+									v->SetDamageSwitchRec(tmp.DamageSwitch);
+								}
 							}
 						}
 						else {
@@ -708,9 +720,11 @@ namespace FPS_n2 {
 								}
 							}
 							//ダメージイベント処理
-							if (v->GetDamageSwitch() != v->GetDamageSwitchRec()) {
-								this->m_DamageEvents.emplace_back(v->GetDamageEvent());
-								v->SetDamageSwitchRec(v->GetDamageSwitch());
+							if (ObjMngr->GetObj(ObjType::Vehicle, i) != nullptr) {
+								if (v->GetDamageSwitch() != v->GetDamageSwitchRec()) {
+									this->m_DamageEvents.emplace_back(v->GetDamageEvent());
+									v->SetDamageSwitchRec(v->GetDamageSwitch());
+								}
 							}
 						}
 					}
@@ -790,11 +804,13 @@ namespace FPS_n2 {
 								}
 								if ((ColResGround.HitFlag == TRUE || hitwall) && !is_HitAll) {
 									a->HitGround();
-									if (ColResGround.HitFlag == TRUE) {
-										v->HitGround(a->GetMove().pos, ColResGround.Normal, a->GetMove().vec);
-									}
-									else if (hitwall) {
-										v->HitGround(pos_tmp, (pos_tmp - a->GetMove().repos).Norm(), a->GetMove().vec);
+									if (ObjMngr->GetObj(ObjType::Vehicle, a->GetShootedID())) {
+										if (ColResGround.HitFlag == TRUE) {
+											v->HitGround(a->GetMove().pos, ColResGround.Normal, a->GetMove().vec);
+										}
+										else if (hitwall) {
+											v->HitGround(pos_tmp, (pos_tmp - a->GetMove().repos).Norm(), a->GetMove().vec);
+										}
 									}
 								}
 							}
@@ -840,22 +856,40 @@ namespace FPS_n2 {
 					}
 					Easing(&this->m_EyeRunPer, Chara->GetIsRun() ? 1.f : 0.f, 0.95f, EasingType::OutExpo);
 					Easing(&this->m_EyePosPer, Chara->GetIsADS() ? 1.f : 0.f, 0.8f, EasingType::OutExpo);//
-
-					if (Chara->GetIsADS()) {
-						//Easing(&camera_main.fov, deg2rad(90), 0.9f, EasingType::OutExpo);
-						Easing(&camera_main.fov, deg2rad(17), 0.8f, EasingType::OutExpo);
-						Easing(&camera_main.near_, 10.f, 0.9f, EasingType::OutExpo);
-						Easing(&camera_main.far_, Scale_Rate * 300.f, 0.9f, EasingType::OutExpo);
-					}
-					else if (Chara->GetIsRun()) {
-						Easing(&camera_main.fov, deg2rad(90), 0.9f, EasingType::OutExpo);
-						Easing(&camera_main.near_, 3.f, 0.9f, EasingType::OutExpo);
-						Easing(&camera_main.far_, Scale_Rate * 150.f, 0.9f, EasingType::OutExpo);
+					if (this->m_FPSActive.on()) {
+						if (Chara->GetIsADS()) {
+							Easing(&camera_main.fov, deg2rad(30), 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.near_, 1.f, 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.far_, Scale_Rate * 100.f, 0.9f, EasingType::OutExpo);
+						}
+						else if (Chara->GetIsRun()) {
+							Easing(&camera_main.fov, deg2rad(110), 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.near_, 3.f, 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.far_, Scale_Rate * 100.f, 0.9f, EasingType::OutExpo);
+						}
+						else {
+							Easing(&camera_main.fov, deg2rad(105), 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.near_, 1.f, 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.far_, Scale_Rate * 100.f, 0.9f, EasingType::OutExpo);
+						}
 					}
 					else {
-						Easing(&camera_main.fov, deg2rad(75), 0.9f, EasingType::OutExpo);
-						Easing(&camera_main.near_, 10.f, 0.9f, EasingType::OutExpo);
-						Easing(&camera_main.far_, Scale_Rate * 300.f, 0.9f, EasingType::OutExpo);
+						if (Chara->GetIsADS()) {
+							//Easing(&camera_main.fov, deg2rad(90), 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.fov, deg2rad(30), 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.near_, 10.f, 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.far_, Scale_Rate * 300.f, 0.9f, EasingType::OutExpo);
+						}
+						else if (Chara->GetIsRun()) {
+							Easing(&camera_main.fov, deg2rad(70), 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.near_, 3.f, 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.far_, Scale_Rate * 150.f, 0.9f, EasingType::OutExpo);
+						}
+						else {
+							Easing(&camera_main.fov, deg2rad(55), 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.near_, 10.f, 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.far_, Scale_Rate * 300.f, 0.9f, EasingType::OutExpo);
+						}
 					}
 				}
 				else {
@@ -956,8 +990,8 @@ namespace FPS_n2 {
 					Set_is_Blackout(true);
 					Set_Per_Blackout((1.f + sin(Chara->GetHeartRateRad()*4.f)*0.25f) * ((Chara->GetHeartRate() - 60.f) / (180.f - 60.f)));
 					//
-					Set_is_lens(Chara->GetIsADS());
-					if (is_lens()) {
+					Set_is_lens(Chara->GetIsADS() && Chara->GetReticleSize()>1.f);
+					if (Chara->GetIsADS()) {
 						VECTOR_ref LensPos = ConvWorldPosToScreenPos(Chara->GetLensPos().get());
 						if (0.f < LensPos.z() && LensPos.z() < 1.f) {
 							Set_xp_lens(LensPos.x());
@@ -977,6 +1011,7 @@ namespace FPS_n2 {
 					else {
 						Reticle_on = false;
 					}
+					Set_zoom_lens(Chara->GetReticleSize());
 				}
 				for (int i = 0; i < Chara_num; i++) {
 					if (i == GetMyPlayerID()) { continue; }
@@ -1010,7 +1045,9 @@ namespace FPS_n2 {
 				auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 				//レティクル表示
 				if (Reticle_on) {
-					Chara->GetReticle().DrawRotaGraph((int)Reticle_xpos, (int)Reticle_ypos, size_lens() / (3072.f / 2.f), 0.f, true);
+					int x, y;
+					Chara->GetReticle().GetSize(&x, &y);
+					Chara->GetReticle().DrawRotaGraph((int)Reticle_xpos, (int)Reticle_ypos, size_lens() / (y / 2.f), Chara->GetReticleRad(), true);
 				}
 			}
 			//UI表示

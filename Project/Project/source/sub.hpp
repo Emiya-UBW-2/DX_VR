@@ -208,6 +208,8 @@ namespace FPS_n2 {
 		bool												m_PronetoStanding{ false };
 		int													m_TurnRate{ 0 };
 		float												m_TurnRatePer{ 0.f };
+		int													m_LeanRate{ 0 };
+		float												m_LeanRatePer{ 0.f };
 	private: //“à•”
 		void			SetVec(int pDir, bool Press) {
 			this->m_Vec[pDir] += (Press ? 1.f : -1.f)*2.f / FPS;
@@ -216,6 +218,7 @@ namespace FPS_n2 {
 	public:
 		const auto		GetRadBuf(void) const noexcept { return  this->m_rad_Buf; }
 		const auto		GetTurnRatePer(void) const noexcept { return  this->m_TurnRatePer; }
+		const auto		GetLeanRatePer(void) const noexcept { return this->m_LeanRatePer; }
 		const auto		GetRad(void) const noexcept { return  this->m_rad; }
 
 		const auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
@@ -346,6 +349,18 @@ namespace FPS_n2 {
 				m_QKey.GetInput(pQPress && !pIsNotActive);
 				m_EKey.GetInput(pEPress && !pIsNotActive);
 				if (m_EKey.trigger()) {
+					if (this->m_LeanRate == 1) {
+						this->m_LeanRate = -1;
+					}
+					else {
+						if (this->m_LeanRate > -1) {
+							this->m_LeanRate--;
+						}
+						else {
+							this->m_LeanRate++;
+						}
+					}
+
 					if (this->m_TurnRate > -1) {
 						this->m_TurnRate--;
 					}
@@ -354,6 +369,18 @@ namespace FPS_n2 {
 					}
 				}
 				if (m_QKey.trigger()) {
+					if (this->m_LeanRate == -1) {
+						this->m_LeanRate = 1;
+					}
+					else {
+						if (this->m_LeanRate < 1) {
+							this->m_LeanRate++;
+						}
+						else {
+							this->m_LeanRate--;
+						}
+					}
+
 					if (this->m_TurnRate < 1) {
 						this->m_TurnRate++;
 					}
@@ -364,8 +391,12 @@ namespace FPS_n2 {
 				if (!GetRun()) {
 					this->m_TurnRate = 0;
 				}
+				else {
+					this->m_LeanRate = 0;
+				}
 
 				this->m_TurnRate = std::clamp(this->m_TurnRate, -1, 1);
+				this->m_LeanRate = std::clamp(this->m_LeanRate, -1, 1);
 				float xadd = 0.f;
 				if (this->m_IsSprint) {
 					xadd = 0.315f*(-this->m_TurnRate);//ƒXƒvƒŠƒ“ƒg
@@ -374,6 +405,9 @@ namespace FPS_n2 {
 					xadd = 0.2f*(-this->m_TurnRate);//‘–‚è
 				}
 				Easing(&this->m_TurnRatePer, xadd, 0.9f, EasingType::OutExpo);
+
+				xadd = (-this->m_LeanRate);//
+				Easing(&this->m_LeanRatePer, xadd, 0.9f, EasingType::OutExpo);
 			}
 			//‰ñ“]
 			{

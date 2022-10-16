@@ -32,14 +32,14 @@ namespace FPS_n2 {
 					ans.m_Pos = m_Chara->GetMove().pos;
 					ans.m_Vec = m_Chara->GetMove().vec;
 					ans.m_Vec.y(0);
-					ans.m_Yrad = m_Chara->GetRadBuf().y();
+					ans.m_rad = m_Chara->GetRadBuf();
 					ans.m_Damage = nullptr;
 					ans.m_DamageSwitch = 0;
 				}
 				else {
 					ans.m_Pos = m_Vehicle->GetMove().pos;
 					ans.m_Vec = m_Vehicle->GetMove().vec;
-					ans.m_Yrad = m_Vehicle->Get_body_yrad();
+					ans.m_rad.y(m_Vehicle->Get_body_yrad());
 					ans.m_Damage = &m_Vehicle->GetDamageEvent();
 					ans.m_DamageSwitch = (m_Vehicle->GetDamageSwitch() ? 1 : 0);
 				}

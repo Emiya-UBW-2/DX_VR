@@ -23,8 +23,26 @@ namespace FPS_n2 {
 			const auto& PosInMag = this->m_Mag_Ptr->GetObj().GetFrameLocalWorldMatrix(1).pos();
 
 			auto Prev = this->m_IsChamberMove;//GetNowAnime
-			this->m_IsChamberMove = ((this->m_ShotPhase == 2) && (GetNowAnime().time >= 25.f)) || ((this->m_ShotPhase == 5) && (GetNowAnime().time >= 5.f));
-			auto IsEject = ((this->m_ShotPhase == 2) && (GetNowAnime().time >= 19.f)) || ((this->m_ShotPhase == 3) && (GetNowAnime().time >= 19.f));
+			this->m_IsChamberMove = false;
+			bool IsEject = false;
+			switch (GetShotType()) {
+			case SHOTTYPE::FULL:
+				this->m_IsChamberMove |= ((this->m_ShotPhase == 1) && (GetNowAnime().time >= 3.f)) && (!this->m_Mag_Ptr->IsEmpty());
+				IsEject |= ((this->m_ShotPhase == 1) && (GetNowAnime().time >= 1.f));
+
+				this->m_IsChamberMove |= ((this->m_ShotPhase == 2) && (GetNowAnime().time >= 25.f));
+				IsEject |= ((this->m_ShotPhase == 2) && (GetNowAnime().time >= 19.f));
+				break;
+			case SHOTTYPE::BOLT:
+				this->m_IsChamberMove |= ((this->m_ShotPhase == 5) && (GetNowAnime().time >= 5.f));
+				IsEject |= ((this->m_ShotPhase == 3) && (GetNowAnime().time >= 19.f));
+
+				this->m_IsChamberMove |= ((this->m_ShotPhase == 2) && (GetNowAnime().time >= 25.f));
+				IsEject |= ((this->m_ShotPhase == 2) && (GetNowAnime().time >= 19.f));
+				break;
+			default:
+				break;
+			}
 
 			if (this->m_IsChamberMove) {
 				if (this->m_IsChamberMove != Prev) {
@@ -32,7 +50,9 @@ namespace FPS_n2 {
 					this->m_Mag_Ptr->SubAmmo();//チャンバーインtodo
 					this->m_CartPtr = (std::shared_ptr<CartClass>&)(*ObjMngr->AddObject(ObjType::Cart, this->m_NowAmmo->GetPath().c_str(), "ammo"));
 					this->m_ChamberMovePer = 0.f;
-					this->m_in_chamber = true;
+					if (!this->m_Mag_Ptr->IsEmpty()) {
+						this->m_in_chamber = true;
+					}
 				}
 			}
 			else {

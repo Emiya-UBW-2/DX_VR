@@ -721,7 +721,7 @@ namespace FPS_n2 {
 			bool												m_PosBufOverRideFlag{ false };					//
 			VECTOR_ref											m_PosBufOverRide;								//
 			VECTOR_ref											m_VecBufOverRide;								//
-			float												m_yRadOverRide{ 0.f };							//
+			VECTOR_ref											m_RadOverRide;									//
 			//“]—Ö
 			float												m_wheel_Left{ 0.f };							//“]—Ö‰ñ“]
 			float												m_wheel_Right{ 0.f };							//“]—Ö‰ñ“]
@@ -775,11 +775,11 @@ namespace FPS_n2 {
 			const auto		Set_MidPos(void) noexcept { return (this->m_move.pos + (this->m_move.mat.yvec() * 1.5f * Scale_Rate)); }							//HPƒo[‚ð•\Ž¦‚·‚éêŠ
 			//
 			void			ReSet_range(void) noexcept { this->m_range = 6.f; }
-			void			SetPosBufOverRide(const VECTOR_ref& pPos, const VECTOR_ref& pVec, float yrad) noexcept {
+			void			SetPosBufOverRide(const VECTOR_ref& pPos, const VECTOR_ref& pVec, const VECTOR_ref& rad) noexcept {
 				this->m_PosBufOverRideFlag = true;
 				this->m_PosBufOverRide = pPos;
 				this->m_VecBufOverRide = pVec;
-				this->m_yRadOverRide = yrad;
+				this->m_RadOverRide = rad;
 			}
 		public:
 			void			ValueInit(const VhehicleData* pVeh_data, const MV1& hit_pic, std::shared_ptr<b2World>& pB2World, PlayerID pID) noexcept;

@@ -63,7 +63,7 @@ public:
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//’ÊM
-		static const int		Player_num = 1;
+		static const int		Player_num = 2;
 		struct NewSetting {
 			IPDATA					IP{ 127,0,0,1 };
 			int						UsePort{ 10850 };
@@ -118,7 +118,7 @@ namespace FPS_n2 {
 		struct SendInfo {
 			VECTOR_ref			m_Pos;
 			VECTOR_ref			m_Vec;
-			float				m_Yrad{ 0.f };
+			VECTOR_ref			m_rad;
 			const DamageEvent*	m_Damage{ nullptr };
 			char				m_DamageSwitch{ 0 };
 		};
@@ -129,19 +129,19 @@ namespace FPS_n2 {
 			InputControl	Input;				//4 * 5	= 20byte
 			VECTOR_ref		PosBuf;				//4 * 3	= 12byte
 			VECTOR_ref		VecBuf;				//4 * 3	= 12byte
-			float			YradBuf{ 0.f };		//4 * 1	=  4byte
+			VECTOR_ref		radBuf;				//4 * 3	= 12byte
 			PlayerID		ID{ 0 };			//1	* 1	=  1byte
 			char			IsActive{ 0 };		//1	* 1	=  1byte
 			double			Frame{ 0.0 };		//8 * 1 =  8byte
 			unsigned char	DamageSwitch{ 0 };	//1 * 1 =  1byte
 			DamageEvent		Damage;				//9 * 1 =  9byte
-												//		  76byte
+												//		  84byte
 		public:
 			const auto	CalcCheckSum(void) noexcept {
 				return (
 					((int)(PosBuf.x()*100.f) + (int)(PosBuf.y()*100.f) + (int)(PosBuf.z()*100.f)) +
 					((int)(VecBuf.x()*100.f) + (int)(VecBuf.y()*100.f) + (int)(VecBuf.z()*100.f)) +
-					(int)(rad2deg(YradBuf)) +
+					(int)(rad2deg(radBuf.y())) +
 					(int)(ID)
 					);
 			}
@@ -153,7 +153,7 @@ namespace FPS_n2 {
 				tmp.Input = this->Input + o.Input;
 				tmp.PosBuf = this->PosBuf + o.PosBuf;
 				tmp.VecBuf = this->VecBuf + o.VecBuf;
-				tmp.YradBuf = this->YradBuf + o.YradBuf;
+				tmp.radBuf = this->radBuf + o.radBuf;
 
 				return tmp;
 			}
@@ -164,7 +164,7 @@ namespace FPS_n2 {
 				tmp.Input = this->Input - o.Input;
 				tmp.PosBuf = this->PosBuf - o.PosBuf;
 				tmp.VecBuf = this->VecBuf - o.VecBuf;
-				tmp.YradBuf = this->YradBuf - o.YradBuf;
+				tmp.radBuf = this->radBuf - o.radBuf;
 
 				return tmp;
 			}
@@ -175,7 +175,7 @@ namespace FPS_n2 {
 				tmp.Input = this->Input*per;
 				tmp.PosBuf = this->PosBuf*per;
 				tmp.VecBuf = this->VecBuf*per;
-				tmp.YradBuf = this->YradBuf*per;
+				tmp.radBuf = this->radBuf*per;
 				return tmp;
 			}
 		};
@@ -197,11 +197,11 @@ namespace FPS_n2 {
 			const auto		GetRecvData(int pPlayerID) const noexcept { return this->m_LeapFrame[pPlayerID] <= 1; }
 			const auto&		GetServerDataCommon(void) const noexcept { return this->m_ServerDataCommon; }
 			const auto&		GetMyPlayer(void) const noexcept { return this->m_PlayerData; }
-			void			SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, float pYrad, double pFrame, const DamageEvent* pDamage, char pDamageSwitch) noexcept {
+			void			SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, const VECTOR_ref& prad, double pFrame, const DamageEvent* pDamage, char pDamageSwitch) noexcept {
 				this->m_PlayerData.Input = pInput;
 				this->m_PlayerData.PosBuf = pPos;
 				this->m_PlayerData.VecBuf = pVec;
-				this->m_PlayerData.YradBuf = pYrad;
+				this->m_PlayerData.radBuf = prad;
 				this->m_PlayerData.Frame = pFrame;
 				if (pDamage != nullptr) {
 					this->m_PlayerData.Damage = *pDamage;
@@ -210,14 +210,16 @@ namespace FPS_n2 {
 				this->m_PlayerData.CheckSum = (size_t)this->m_PlayerData.CalcCheckSum();
 			}
 
-			const auto		GetNowServerPlayerData(int pPlayerID) noexcept {
+			const auto		GetNowServerPlayerData(int pPlayerID, bool isyradReset) noexcept {
 				auto Total = (int)this->m_ServerDataCommon.ServerFrame - (int)this->m_PrevServerData.ServerFrame;
 				if (Total <= 0) { Total = 20; }
 				auto Per = (float)this->m_LeapFrame[pPlayerID] / (float)Total;
 				auto tmp = Lerp(this->m_PrevServerData.PlayerData[pPlayerID], this->m_ServerDataCommon.PlayerData[pPlayerID], Per);
 
-				auto radvec = Lerp(MATRIX_ref::RotY(this->m_PrevServerData.PlayerData[pPlayerID].YradBuf).zvec(), MATRIX_ref::RotY(this->m_ServerDataCommon.PlayerData[pPlayerID].YradBuf).zvec(), Per).Norm();
-				tmp.YradBuf = -atan2f(radvec.x(), radvec.z());
+				if (isyradReset) {
+					auto radvec = Lerp(MATRIX_ref::RotY(this->m_PrevServerData.PlayerData[pPlayerID].radBuf.y()).zvec(), MATRIX_ref::RotY(this->m_ServerDataCommon.PlayerData[pPlayerID].radBuf.y()).zvec(), Per).Norm();
+					tmp.radBuf.y(-atan2f(radvec.x(), radvec.z()));
+				}
 				tmp.Frame = this->m_ServerDataCommon.PlayerData[pPlayerID].Frame;
 				tmp.Damage = this->m_ServerDataCommon.PlayerData[pPlayerID].Damage;
 				tmp.DamageSwitch = this->m_ServerDataCommon.PlayerData[pPlayerID].DamageSwitch;

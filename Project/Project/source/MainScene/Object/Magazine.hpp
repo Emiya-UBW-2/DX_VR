@@ -11,10 +11,12 @@ namespace FPS_n2 {
 			MATRIX_ref									HandMatrix;
 			float										HandPer{ 0.f };
 			std::vector<AmmoData>						m_AmmoSpec;
+			RELOADTYPE									m_ReloadTypeBuf;
 		public://ƒQƒbƒ^[
-			void			SetHandMatrix(const MATRIX_ref& value, float pPer) noexcept {
+			void			SetHandMatrix(const MATRIX_ref& value, float pPer, RELOADTYPE ReloadType) noexcept {
 				this->HandMatrix = value;
 				this->HandPer = pPer;
+				this->m_ReloadTypeBuf = ReloadType;
 			}
 
 			void			SetAmmo(int value) noexcept { this->m_Capacity = std::clamp(value, 0, this->m_CapacityMax); }
@@ -51,23 +53,54 @@ namespace FPS_n2 {
 				SetCartPtr();
 			}
 			void			FirstExecute(void) noexcept override {
-				//‚±‚¢‚Â‚ðe‘¤‚É•t‚¯‚é
 				{
-					this->m_Cart[0]->SetActive(0 < this->m_Capacity);
-					auto mat = GetObj().GetFrameLocalWorldMatrix(1);
-					this->m_Cart[0]->SetMove(
-						MATRIX_ref::RotVec2(VECTOR_ref::front(), Lerp(mat.GetRot().zvec(), this->HandMatrix.zvec(), this->HandPer)),
-						Lerp(mat.pos(), this->HandMatrix.pos(), this->HandPer));
-				}
-				//‚±‚¢‚Â‚Í‚»‚Ì‚Ü‚Ü
-				{
-					this->m_Cart[1]->SetActive(1 < this->m_Capacity);
-					auto mat = GetObj().GetFrameLocalWorldMatrix(2);
-					auto mat2 = GetObj().GetFrameLocalWorldMatrix(1);
-					this->m_Cart[1]->SetMove(
-						mat.GetRot(),
-						Lerp(mat.pos(), mat2.pos(), this->HandPer)
-					);
+					switch (m_ReloadTypeBuf) {
+					case RELOADTYPE::MAG:
+					{
+						{
+							auto tmp = GetMove();
+							SetMove(
+								tmp.mat.GetRot(),
+								Lerp(tmp.pos, this->HandMatrix.pos(), this->HandPer));
+						}
+						{
+							this->m_Cart[0]->SetActive(0 < this->m_Capacity);
+							auto mat = GetObj().GetFrameLocalWorldMatrix(1);
+							this->m_Cart[0]->SetMove(MATRIX_ref::RotVec2(VECTOR_ref::front(), mat.GetRot().zvec()), mat.pos());
+						}
+						{
+							this->m_Cart[1]->SetActive(1 < this->m_Capacity);
+							auto mat = GetObj().GetFrameLocalWorldMatrix(2);
+							auto mat2 = GetObj().GetFrameLocalWorldMatrix(1);
+							this->m_Cart[1]->SetMove(mat.GetRot(), mat.pos());
+						}
+					}
+					break;
+					case RELOADTYPE::AMMO:
+					{
+						//‚±‚¢‚Â‚ðe‘¤‚É•t‚¯‚é
+						{
+							this->m_Cart[0]->SetActive(0 < this->m_Capacity);
+							auto mat = GetObj().GetFrameLocalWorldMatrix(1);
+							this->m_Cart[0]->SetMove(
+								MATRIX_ref::RotVec2(VECTOR_ref::front(), Lerp(mat.GetRot().zvec(), this->HandMatrix.zvec(), this->HandPer)),
+								Lerp(mat.pos(), this->HandMatrix.pos(), this->HandPer));
+						}
+						//‚±‚¢‚Â‚Í‚»‚Ì‚Ü‚Ü
+						{
+							this->m_Cart[1]->SetActive(1 < this->m_Capacity);
+							auto mat = GetObj().GetFrameLocalWorldMatrix(2);
+							auto mat2 = GetObj().GetFrameLocalWorldMatrix(1);
+							this->m_Cart[1]->SetMove(
+								mat.GetRot(),
+								Lerp(mat.pos(), mat2.pos(), this->HandPer)
+							);
+						}
+					}
+						break;
+					default:
+						break;
+					}
 				}
 				//‹¤’Ê
 				ObjectBaseClass::FirstExecute();

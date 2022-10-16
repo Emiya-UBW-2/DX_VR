@@ -43,6 +43,9 @@ namespace FPS_n2 {
 			Upper_Ready,
 			Upper_Down,
 
+
+
+
 			Upper_Reload2Start,
 			Upper_Reload2One,
 			Upper_Reload2End,
@@ -54,6 +57,31 @@ namespace FPS_n2 {
 			Upper_Aim2,
 			Upper_Shot2,
 			Upper_Cocking2,
+
+			All_Prone2,
+			All_ProneShot2,
+			All_ProneCocking2,
+
+
+
+			Upper_Reload3Start,
+			Upper_Reload3One,
+			Upper_Reload3End,
+
+			All_Prone_Reload3Start,
+			All_Prone_Reload3One,
+			All_Prone_Reload3End,
+
+			Upper_Aim3,
+			Upper_Shot3,
+			Upper_Cocking3,
+
+			All_Prone3,
+			All_ProneShot3,
+			All_ProneCocking3,
+
+
+
 
 			AnimeIDMax,
 		};

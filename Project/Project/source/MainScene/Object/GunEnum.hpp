@@ -8,6 +8,7 @@ namespace FPS_n2 {
 			ReloadStart,
 			ReloadOne,
 			ReloadEnd,
+			Shot,
 			AnimeIDMax,
 		};
 		enum class GunFrame {
@@ -40,6 +41,14 @@ namespace FPS_n2 {
 			"lefthand_zvec",
 			"ìÆçÏé≤",
 			"ìÆçÏì_",
+		};
+		enum class SHOTTYPE {
+			BOLT,
+			FULL,
+		};
+		enum class RELOADTYPE {
+			AMMO,
+			MAG,
 		};
 	};
 };

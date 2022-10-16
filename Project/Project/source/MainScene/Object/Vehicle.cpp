@@ -318,7 +318,7 @@ namespace FPS_n2 {
 				const auto bNormal = (isfloat) ? VECTOR_ref::up() : this->m_BodyNormal;
 				float yradBody = 0.f;
 				if (this->m_PosBufOverRideFlag) {
-					yradBody = this->m_yRadOverRide;
+					yradBody = this->m_RadOverRide.y();
 				}
 				else {
 					auto pp = (this->m_move.mat * MATRIX_ref::RotVec2(VECTOR_ref::up(), bNormal).Inverse()).zvec() * -1.f;
