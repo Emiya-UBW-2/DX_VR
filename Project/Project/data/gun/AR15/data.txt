@@ -1,0 +1,6 @@
+usemag0=STANAG_20
+shottype=FULL
+usehumanAnim=2
+scopezoom=4.0
+reloadType=MAG
+end

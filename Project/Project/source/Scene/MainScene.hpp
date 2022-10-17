@@ -370,7 +370,7 @@ namespace FPS_n2 {
 				}
 
 				for (int i = 0; i < gun_num; i++) {
-					ObjMngr->AddObject(ObjType::Gun, "data/gun/AKS74U/");//Gorushi//Mosin
+					ObjMngr->AddObject(ObjType::Gun, "data/gun/AR15/");//AR15//AKS74U//Gorushi//Mosin
 				}
 				//ƒ[ƒh
 				SetCreate3DSoundFlag(FALSE);
@@ -393,7 +393,7 @@ namespace FPS_n2 {
 					auto HitResult = this->m_BackGround.GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
 					if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
 					c->SetGunPtr((std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, i)));
-					c->ValueSet(deg2rad(0.f), deg2rad(-90.f), false, false, pos_t, (PlayerID)i);
+					c->ValueSet(deg2rad(0.f), deg2rad(-90.f), false, pos_t, (PlayerID)i);
 					if (i == 0) {
 						//c->SetUseRealTimePhysics(true);
 						c->SetUseRealTimePhysics(false);
@@ -863,12 +863,12 @@ namespace FPS_n2 {
 							Easing(&camera_main.far_, Scale_Rate * 100.f, 0.9f, EasingType::OutExpo);
 						}
 						else if (Chara->GetIsRun()) {
-							Easing(&camera_main.fov, deg2rad(110), 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.fov, deg2rad(90), 0.9f, EasingType::OutExpo);
 							Easing(&camera_main.near_, 3.f, 0.9f, EasingType::OutExpo);
 							Easing(&camera_main.far_, Scale_Rate * 100.f, 0.9f, EasingType::OutExpo);
 						}
 						else {
-							Easing(&camera_main.fov, deg2rad(105), 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.fov, deg2rad(75), 0.9f, EasingType::OutExpo);
 							Easing(&camera_main.near_, 1.f, 0.9f, EasingType::OutExpo);
 							Easing(&camera_main.far_, Scale_Rate * 100.f, 0.9f, EasingType::OutExpo);
 						}

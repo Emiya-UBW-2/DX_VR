@@ -10,6 +10,7 @@ namespace FPS_n2 {
 			Upper_Aim,
 			Upper_Shot,
 			Upper_Cocking,
+
 			Upper_RunningStart,
 			Upper_Running,
 			Upper_Sprint,
@@ -24,63 +25,28 @@ namespace FPS_n2 {
 			Bottom_Turn,
 			Bottom_Run,
 
-			All_Prone,
-			All_ProneShot,
-			All_ProneCocking,
-
-			All_ProneWalk,
-
-			All_PronetoStand,
+			Upper_Ready,
+			Upper_Down,
 
 			Upper_ReloadStart,
 			Upper_ReloadOne,
 			Upper_ReloadEnd,
 
-			All_Prone_ReloadStart,
-			All_Prone_ReloadOne,
-			All_Prone_ReloadEnd,
-
-			Upper_Ready,
-			Upper_Down,
-
-
-
-
 			Upper_Reload2Start,
 			Upper_Reload2One,
 			Upper_Reload2End,
-
-			All_Prone_Reload2Start,
-			All_Prone_Reload2One,
-			All_Prone_Reload2End,
 
 			Upper_Aim2,
 			Upper_Shot2,
 			Upper_Cocking2,
 
-			All_Prone2,
-			All_ProneShot2,
-			All_ProneCocking2,
-
-
-
 			Upper_Reload3Start,
 			Upper_Reload3One,
 			Upper_Reload3End,
 
-			All_Prone_Reload3Start,
-			All_Prone_Reload3One,
-			All_Prone_Reload3End,
-
 			Upper_Aim3,
 			Upper_Shot3,
 			Upper_Cocking3,
-
-			All_Prone3,
-			All_ProneShot3,
-			All_ProneCocking3,
-
-
 
 
 			AnimeIDMax,
