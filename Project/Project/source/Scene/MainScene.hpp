@@ -370,7 +370,7 @@ namespace FPS_n2 {
 				}
 
 				for (int i = 0; i < gun_num; i++) {
-					ObjMngr->AddObject(ObjType::Gun, "data/gun/AR15/");//AR15//AKS74U//Gorushi//Mosin
+					ObjMngr->AddObject(ObjType::Gun, "data/gun/AKS74U/");//MP5K//AR15//AKS74U//Gorushi//Mosin
 				}
 				//ÉçÅ[Éh
 				SetCreate3DSoundFlag(FALSE);
