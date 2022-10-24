@@ -473,10 +473,10 @@ namespace FPS_n2 {
 
 
 	// プレイヤー関係の定義
-#define PLAYER_ENUM_DEFAULT_SIZE	(1.8f * Scale_Rate)		// 周囲のポリゴン検出に使用する球の初期サイズ
+#define PLAYER_ENUM_DEFAULT_SIZE	(1.6f * Scale_Rate)		// 周囲のポリゴン検出に使用する球の初期サイズ
 #define PLAYER_HIT_WIDTH			(0.4f * Scale_Rate)		// 当たり判定カプセルの半径
-#define PLAYER_HIT_HEIGHT			(1.8f * Scale_Rate)		// 当たり判定カプセルの高さ
-#define PLAYER_HIT_TRYNUM			(16)					// 壁押し出し処理の最大試行回数
+#define PLAYER_HIT_HEIGHT			(1.6f * Scale_Rate)		// 当たり判定カプセルの高さ
+#define PLAYER_HIT_TRYNUM			(8)					// 壁押し出し処理の最大試行回数
 #define PLAYER_HIT_SLIDE_LENGTH		(0.015f * Scale_Rate)	// 一度の壁押し出し処理でスライドさせる距離
 	//壁判定ユニバーサル
 	static bool col_wall(const VECTOR_ref& OldPos, VECTOR_ref* NowPos, const MV1& col_obj_t) noexcept {

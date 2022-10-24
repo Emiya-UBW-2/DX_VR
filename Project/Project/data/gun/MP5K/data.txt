@@ -1,4 +1,4 @@
-usemag0=STANAG_20
+usemag0=MP5K
 shottype=FULL
 usehumanAnim=2
 scopezoom=4.0
