@@ -44,6 +44,7 @@ namespace FPS_n2 {
 		};
 		enum class SHOTTYPE {
 			BOLT,
+			SEMI,
 			FULL,
 		};
 		enum class RELOADTYPE {

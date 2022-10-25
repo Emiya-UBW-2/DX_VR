@@ -34,6 +34,7 @@ namespace FPS_n2 {
 			const auto& GetNowAnime(void) noexcept {
 				switch (GetShotType()) {
 				case SHOTTYPE::FULL:
+				case SHOTTYPE::SEMI:
 					if ((this->m_ShotPhase) < 2) {
 						return GetObj().get_anime((size_t)4);
 					}
@@ -95,6 +96,9 @@ namespace FPS_n2 {
 						if (sel == "FULL") {
 							this->m_ShotType.emplace_back(SHOTTYPE::FULL);
 						}
+						else if (sel == "SEMI") {
+							this->m_ShotType.emplace_back(SHOTTYPE::SEMI);
+						}
 						else if (sel == "BOLT") {
 							this->m_ShotType.emplace_back(SHOTTYPE::BOLT);
 						}
@@ -123,6 +127,7 @@ namespace FPS_n2 {
 				GunAnimeID Sel = (GunAnimeID)(this->m_ShotPhase - 2);
 				switch (GetShotType()) {
 				case SHOTTYPE::FULL:
+				case SHOTTYPE::SEMI:
 					if ((this->m_ShotPhase) == 1) {
 						Sel = (GunAnimeID)(4);
 					}
@@ -148,7 +153,12 @@ namespace FPS_n2 {
 							}
 						}
 						GetObj().get_anime(i).per = 1.f;
-						SetAnimLoop(i, 1.5f);
+						if (Sel == GunAnimeID::Shot) {
+							SetAnimOnce(i, 1.5f);
+						}
+						else {
+							SetAnimLoop(i, 1.5f);
+						}
 					}
 					else {
 						GetObj().get_anime(i).Reset();

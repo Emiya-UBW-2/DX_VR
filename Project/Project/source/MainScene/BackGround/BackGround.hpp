@@ -891,6 +891,7 @@ namespace FPS_n2 {
 		private:
 			MV1							m_ObjSky;
 			MV1							m_ObjGround;
+			MV1							m_ObjGround2;
 			MV1							m_ObjGroundCol;
 			MV1							m_ObjGroundCol_Box2D;
 			MV1							m_objWall;
@@ -914,6 +915,8 @@ namespace FPS_n2 {
 
 		private:
 			void			DrawCommon(bool IsCalling) noexcept {
+				this->m_ObjGround2.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-318.f, -12.5f, 897.f)));
+				this->m_ObjGround2.DrawModel();
 				this->m_ObjGround.DrawModel();
 				for (auto& w : this->m_Walls) {
 					w.Draw(IsCalling);
@@ -923,6 +926,7 @@ namespace FPS_n2 {
 			//
 			void			Init(void) noexcept {
 				//’nŒ`
+				MV1::Load("data/model/ground/model.mv1", &this->m_ObjGround2);
 				MV1::Load("data/model/map/model.mv1", &this->m_ObjGround);
 				MV1::Load("data/model/map/col.mv1", &this->m_ObjGroundCol);
 				this->m_ObjGroundCol.SetupCollInfo(64, 16, 64);
@@ -971,7 +975,7 @@ namespace FPS_n2 {
 					w.first.Set(this->m_b2world->CreateBody(&bodyDef), &chain);	//
 				}
 				//
-				this->m_grass.Init(&this->m_ObjGroundCol);
+				//this->m_grass.Init(&this->m_ObjGroundCol);
 				
 				MV1::Load("data/model/wall/model.mqoz", &this->m_objWall);
 				this->m_Walls.resize(10);
@@ -1009,15 +1013,16 @@ namespace FPS_n2 {
 			}
 			void			Draw(void) noexcept {
 				DrawCommon(true);
-				this->m_grass.Draw();
+				//this->m_grass.Draw();
 			}
 			//
 			void			Dispose(void) noexcept {
 				this->m_ObjSky.Dispose();
 				this->m_ObjGround.Dispose();
+				this->m_ObjGround2.Dispose();
 				this->m_ObjGroundCol.Dispose();
 				this->m_ObjGroundCol_Box2D.Dispose();
-				this->m_grass.Dispose();
+				//this->m_grass.Dispose();
 				for (auto& w : this->m_b2wallParts) {
 					w.first.Dispose();
 					w.second[0].clear();

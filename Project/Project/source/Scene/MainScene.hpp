@@ -370,7 +370,7 @@ namespace FPS_n2 {
 				}
 
 				for (int i = 0; i < gun_num; i++) {
-					ObjMngr->AddObject(ObjType::Gun, "data/gun/MP5K/");//MP5K//AR15//AKS74U//Gorushi//Mosin
+					ObjMngr->AddObject(ObjType::Gun, "data/gun/AR15/");//MP5K//AR15//AKS74U//Gorushi//Mosin
 				}
 				//ƒ[ƒh
 				SetCreate3DSoundFlag(FALSE);
@@ -804,13 +804,18 @@ namespace FPS_n2 {
 								}
 								if ((ColResGround.HitFlag == TRUE || hitwall) && !is_HitAll) {
 									a->HitGround();
+									if (ColResGround.HitFlag == TRUE) {
+										Effect_UseControl::Set_FootEffect(ColResGround.HitPosition, ColResGround.Normal, 0.05f / 0.1f * Scale_Rate);
+									}
 									if (ObjMngr->GetObj(ObjType::Vehicle, a->GetShootedID())) {
 										if (ColResGround.HitFlag == TRUE) {
-											v->HitGround(a->GetMove().pos, ColResGround.Normal, a->GetMove().vec);
 										}
 										else if (hitwall) {
 											v->HitGround(pos_tmp, (pos_tmp - a->GetMove().repos).Norm(), a->GetMove().vec);
 										}
+									}
+									else {
+
 									}
 								}
 							}
@@ -858,17 +863,17 @@ namespace FPS_n2 {
 					Easing(&this->m_EyePosPer, Chara->GetIsADS() ? 1.f : 0.f, 0.8f, EasingType::OutExpo);//
 					if (this->m_FPSActive.on()) {
 						if (Chara->GetIsADS()) {
-							Easing(&camera_main.fov, deg2rad(30), 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.fov, deg2rad(40), 0.9f, EasingType::OutExpo);
 							Easing(&camera_main.near_, 1.f, 0.9f, EasingType::OutExpo);
 							Easing(&camera_main.far_, Scale_Rate * 100.f, 0.9f, EasingType::OutExpo);
 						}
 						else if (Chara->GetIsRun()) {
-							Easing(&camera_main.fov, deg2rad(90), 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.fov, deg2rad(115), 0.9f, EasingType::OutExpo);
 							Easing(&camera_main.near_, 3.f, 0.9f, EasingType::OutExpo);
 							Easing(&camera_main.far_, Scale_Rate * 100.f, 0.9f, EasingType::OutExpo);
 						}
 						else {
-							Easing(&camera_main.fov, deg2rad(75), 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.fov, deg2rad(95), 0.9f, EasingType::OutExpo);
 							Easing(&camera_main.near_, 1.f, 0.9f, EasingType::OutExpo);
 							Easing(&camera_main.far_, Scale_Rate * 100.f, 0.9f, EasingType::OutExpo);
 						}

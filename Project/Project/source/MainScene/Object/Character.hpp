@@ -452,10 +452,11 @@ namespace FPS_n2 {
 							switch (this->m_Gun_Ptr->GetShotType()) {
 							case SHOTTYPE::FULL:
 								break;
+							case SHOTTYPE::SEMI:
 							case SHOTTYPE::BOLT:
+								ischeck = !this->m_Press_Shot;
 								break;
 							default:
-								ischeck = !this->m_Press_Shot;
 								break;
 							}
 
@@ -464,6 +465,7 @@ namespace FPS_n2 {
 								if (!this->m_Gun_Ptr->GetIsMagEmpty()) {
 									switch (this->m_Gun_Ptr->GetShotType()) {
 									case SHOTTYPE::FULL:
+									case SHOTTYPE::SEMI:
 										this->m_ShotPhase = 0;
 										m_UpperAnimSelect = GetAimAnimSel();
 										break;
@@ -850,6 +852,7 @@ namespace FPS_n2 {
 						}
 						switch (this->m_Gun_Ptr->GetShotType()) {
 						case SHOTTYPE::FULL:
+						case SHOTTYPE::SEMI:
 							GetAnime(CharaAnimeID::RightHand).per = (this->m_ShotPhase <= 2) ? ((!this->m_RunReady || (m_UpperAnimSelect != CharaAnimeID::Upper_Ready)) ? 1.f : 0.f) : 0.f;
 							break;
 						case SHOTTYPE::BOLT:

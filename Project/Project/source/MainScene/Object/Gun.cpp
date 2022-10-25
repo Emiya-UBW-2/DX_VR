@@ -27,6 +27,7 @@ namespace FPS_n2 {
 			bool IsEject = false;
 			switch (GetShotType()) {
 			case SHOTTYPE::FULL:
+			case SHOTTYPE::SEMI:
 				this->m_IsChamberMove |= ((this->m_ShotPhase == 1) && (GetNowAnime().time >= 3.f)) && (!this->m_Mag_Ptr->IsEmpty());
 				IsEject |= ((this->m_ShotPhase == 1) && (GetNowAnime().time >= 1.f));
 
