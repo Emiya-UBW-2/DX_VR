@@ -14,7 +14,7 @@ namespace FPS_n2 {
 		};
 		class CharacterClass : public ObjectBaseClass {
 		private://キャラパラメーター
-			const float SpeedLimit{ 2.f };
+			const float SpeedLimit{ 0.8f };
 			const float UpperTimerLimit = 3.f;
 			const float HeartRateMin{ 60.f };//心拍数最小
 			const float HeartRateMax{ 180.f };//心拍数最大
@@ -61,6 +61,8 @@ namespace FPS_n2 {
 			int													m_ShotPhase{ 0 };
 			float												m_LoadAmmoPer{ 0.f };
 			float												m_NeckPosOffsetPer{ 0.f };
+			float												m_MoveEyePosTimer{ 0.f };
+			VECTOR_ref											m_MoveEyePos;
 			//入力
 			bool												m_Press_Shot{ false };
 			bool												m_Press_Reload{ false };
@@ -136,7 +138,8 @@ namespace FPS_n2 {
 			const auto		GetEyeVector(void) const noexcept { return (this->m_Gun_Ptr != nullptr) ? (Lerp(GetCharaDir().zvec(), this->m_Gun_Ptr->GetMatrix().zvec(), this->m_ReadyPer) * -1.f) : (GetCharaDir().zvec() * -1.f); }
 			const auto		GetEyePosition(void) const noexcept {
 				return (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f + this->GetEyeVector().Norm() * 1.5f
-					+ GetCharaDir().GetRot().yvec() * this->m_NeckPosOffsetPer;
+					+ GetCharaDir().GetRot().yvec() * this->m_NeckPosOffsetPer
+					+ m_MoveEyePos;
 			}
 			const auto		GetScopePos(void) noexcept { return (this->m_Gun_Ptr != nullptr) ? this->m_Gun_Ptr->GetScopePos() : GetEyePosition(); }
 			const auto		GetLensPos(void) noexcept { return (this->m_Gun_Ptr != nullptr) ? this->m_Gun_Ptr->GetLensPos() : VECTOR_ref::zero(); }
@@ -206,6 +209,7 @@ namespace FPS_n2 {
 				this->m_ReturnStand = false;
 				this->m_ShotPhase = 0;
 				this->m_NeckPosOffsetPer = -1.f;
+				this->m_MoveEyePosTimer = 0.f;
 				this->m_RunReady = false;
 				this->m_RunReadyFirst = false;
 				this->m_Running = false;
@@ -324,7 +328,7 @@ namespace FPS_n2 {
 								if (this->m_Gun_Ptr->GetCanshot()) {
 									this->m_ShotPhase = 1;
 									this->m_Gun_Ptr->SetBullet();
-									this->m_RecoilRadAdd.Set(GetRandf(0.01f), -0.02f, 0.f);
+									this->m_RecoilRadAdd.Set(GetRandf(0.005f), -0.03f, 0.f);
 
 									this->m_RecoilRadAdd = MATRIX_ref::Vtrans(this->m_RecoilRadAdd, MATRIX_ref::RotZ(-m_LeanRad));
 								}
@@ -361,7 +365,12 @@ namespace FPS_n2 {
 					}
 				}
 
-				Easing(&this->m_RecoilRadAdd, VECTOR_ref::zero(), 0.7f, EasingType::OutExpo);
+				if (this->m_RecoilRadAdd.y() < 0.f) {
+					Easing(&this->m_RecoilRadAdd, VECTOR_ref::vget(0.f,0.09f,0.f), 0.9f, EasingType::OutExpo);
+				}
+				else {
+					Easing(&this->m_RecoilRadAdd, VECTOR_ref::zero(), 0.7f, EasingType::OutExpo);
+				}
 				//
 				Easing(&this->m_ReadyPer, (this->m_ReadyTimer < UpperTimerLimit) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 				//this->m_yrad_Upper、this->m_yrad_Bottom決定
@@ -403,43 +412,22 @@ namespace FPS_n2 {
 				{
 					//上半身
 					{
+						this->m_SlingPer = 0.f;
 						this->m_UpperAnimSelect = (!this->m_KeyActive) ? CharaAnimeID::Upper_Ready : CharaAnimeID::Upper_Down;
-						if (!this->m_KeyActive) {
-							this->m_SlingPer = 1.f;
-						}
 						if (this->m_ReadySwitch) {
 							this->m_RunReadyFirst = false;
-							GetAnime(CharaAnimeID::Upper_RunningStart).GoEnd();
 						}
 						bool canreverse = true;
-						if (!this->m_RunReady && !this->m_Running && !GetAnime(CharaAnimeID::Upper_RunningStart).TimeEnd()) {
+						if (!this->m_RunReady && !this->m_Running) {
 							this->m_RunReady = true;
 							canreverse = false;
 						}
-						if (this->m_RunReadyFirst) {
-							this->m_SlingPer = 0.f;
-							GetAnime(CharaAnimeID::Upper_RunningStart).GoStart();
-						}
 						if (this->m_RunReady) {
 							if (!this->m_Running) {
-								SetAnimOnce(CharaAnimeID::Upper_RunningStart, 2.f);
-								Easing(&this->m_SlingPer, (canreverse && (GetAnime(CharaAnimeID::Upper_RunningStart).time > 16)) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
-								this->m_InputGround.SetSprintPer(0.f);
-								if (GetAnime(CharaAnimeID::Upper_RunningStart).TimeEnd()) {
-									this->m_Running = true;
-									GetAnime(CharaAnimeID::Upper_Running).GoStart();
-									if (canreverse) {
-										this->m_SlingPer = 1.f;
-									}
-								}
-								m_UpperAnimSelect = CharaAnimeID::Upper_RunningStart;
-							}
-							else {
-								m_UpperAnimSelect = (!this->m_InputGround.GetSprint()) ? CharaAnimeID::Upper_Running : CharaAnimeID::Upper_Sprint;
+								this->m_Running = true;
 							}
 						}
 						else {
-							Easing(&this->m_SlingPer, 0.f, 0.9f, EasingType::OutExpo);
 							this->m_Running = false;
 						}
 						if (this->m_ReadyTimer < UpperTimerLimit) {
@@ -540,6 +528,17 @@ namespace FPS_n2 {
 						//
 						{
 							Easing(&this->m_NeckPosOffsetPer, (this->m_ShotPhase <= 2) ? -1.f : 0.f, 0.9f, EasingType::OutExpo);
+							if (this->m_Speed > 0.f) {
+								this->m_MoveEyePosTimer += this->m_Speed * deg2rad(300.f + 200.f*this->m_InputGround.GetRunPer()) / FPS;
+
+							}
+							else {
+								this->m_MoveEyePosTimer = 0.f;
+							}
+							Easing(&this->m_MoveEyePos,
+								GetCharaDir().GetRot().xvec() * 0.25f*sin(this->m_MoveEyePosTimer)*this->m_Speed
+								+ GetCharaDir().GetRot().yvec() * -0.25f*std::abs(cos(this->m_MoveEyePosTimer))*this->m_Speed
+								, 0.9f, EasingType::OutExpo);
 						}
 						//
 						switch (this->m_Gun_Ptr->GetReloadType()) {
@@ -618,7 +617,7 @@ namespace FPS_n2 {
 					SetAnimLoop(CharaAnimeID::Upper_Sprint, 0.5f * this->m_InputGround.GetVecFront() * this->m_RunPer2);
 					SetAnimLoop(CharaAnimeID::Upper_Running, 0.5f * this->m_InputGround.GetVecFront() * this->m_RunPer2);
 					SetAnimLoop(CharaAnimeID::Bottom_Turn, 0.5f);
-					SetAnimLoop(CharaAnimeID::Bottom_Run, 0.5f * this->m_InputGround.GetVecFront() * this->m_RunPer2);
+					SetAnimLoop(CharaAnimeID::Bottom_Run, 1.25f * this->m_InputGround.GetVecFront() * this->m_RunPer2);
 					SetAnimLoop(CharaAnimeID::Bottom_Walk, 1.15f * this->m_InputGround.GetVecFront());
 					SetAnimLoop(CharaAnimeID::Bottom_LeftStep, 1.15f * this->m_InputGround.GetVecLeft());
 					SetAnimLoop(CharaAnimeID::Bottom_WalkBack, 1.15f * this->m_InputGround.GetVecRear());
