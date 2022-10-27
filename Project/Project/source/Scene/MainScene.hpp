@@ -480,8 +480,8 @@ namespace FPS_n2 {
 
 
 				//“ü—Í
-				this->m_FPSActive.Init(false);
-				this->m_MouseActive.Init(false);
+				this->m_FPSActive.Init(true);
+				this->m_MouseActive.Init(true);
 
 				this->m_DamageEvents.clear();
 

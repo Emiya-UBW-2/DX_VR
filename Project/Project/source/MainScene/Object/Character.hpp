@@ -276,6 +276,9 @@ namespace FPS_n2 {
 							this->m_Press_Reload = true;
 						}
 					}
+					if (!this->m_Gun_Ptr->GetCanshot()) {
+						this->m_Press_Shot = true;
+					}
 				}
 				else {
 					this->m_Press_Shot = false;
@@ -782,7 +785,7 @@ namespace FPS_n2 {
 					this->m_move.vec.z(vecBuf.z());
 				}
 				{
-					auto HitResult = this->m_MapCol->CollCheck_Line(this->m_PosBuf + VECTOR_ref::up() * -1.f, this->m_PosBuf + VECTOR_ref::up() * 15.f);
+					auto HitResult = this->m_MapCol->CollCheck_Line(this->m_PosBuf + VECTOR_ref::up() * -1.f, this->m_PosBuf + VECTOR_ref::up() * 20.f);
 					if (HitResult.HitFlag == TRUE) {
 						auto yPos = this->m_PosBuf.y();
 						Easing(&yPos, HitResult.HitPosition.y, 0.8f, EasingType::OutExpo);
