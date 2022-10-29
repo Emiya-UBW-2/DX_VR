@@ -4,50 +4,39 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		enum class CharaAnimeID : int {
-			RightHand,
-			LeftHand,
-
-			Upper_Aim,
-			Upper_Shot,
-			Upper_Cocking,
-
-			Upper_RunningStart,
-			Upper_Running,
-			Upper_Sprint,
-
-			Mid_Squat,
-
 			Bottom_Stand,
-			Bottom_Walk,
-			Bottom_WalkBack,
-			Bottom_LeftStep,
-			Bottom_RightStep,
-			Bottom_Turn,
-			Bottom_Run,
+			Bottom_Stand_Walk,
+			Bottom_Stand_WalkBack,
+			Bottom_Stand_LeftStep,
+			Bottom_Stand_RightStep,
+			Bottom_Stand_Turn,
+			Bottom_Stand_Run,
 
-			Upper_Ready,
-			Upper_Down,
+			Bottom_Squat,
+			Bottom_Squat_Walk,
+			Bottom_Squat_WalkBack,
+			Bottom_Squat_LeftStep,
+			Bottom_Squat_RightStep,
+			Bottom_Squat_Turn,//12
 
-			Upper_ReloadStart,
-			Upper_ReloadOne,
-			Upper_ReloadEnd,
+			//AR15
+			Upper_Reload1Start,
+			Upper_Reload1One,
+			Upper_Reload1End,
 
+			Upper_Down1,
+			Upper_Ready1,
+			Upper_ADS1,
+			Upper_Cocking1,
+			//ƒnƒ“ƒhƒKƒ“
 			Upper_Reload2Start,
 			Upper_Reload2One,
 			Upper_Reload2End,
 
-			Upper_Aim2,
-			Upper_Shot2,
+			Upper_Down2,
+			Upper_Ready2,
+			Upper_ADS2,
 			Upper_Cocking2,
-
-			Upper_Reload3Start,
-			Upper_Reload3One,
-			Upper_Reload3End,
-
-			Upper_Aim3,
-			Upper_Shot3,
-			Upper_Cocking3,
-
 
 			AnimeIDMax,
 		};

@@ -22,14 +22,15 @@ namespace FPS_n2 {
 			float							m_ChamberMovePer{ 0.f };
 			bool							m_UseMoveParts{ false };
 		public://ƒQƒbƒ^[
+			const auto GetIsFrameActive(GunFrame frame) const noexcept { return m_Frames[(int)frame].first >= 0; }
 			const auto GetFrameLocalMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix(m_Frames[(int)frame].first); }
 			const auto GetParentFrameLocalMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix((int)GetObj_const().frame_parent(m_Frames[(int)frame].first)); }
 			const auto GetFrameWorldMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix(m_Frames[(int)frame].first); }
 			const auto GetParentFrameWorldMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix((int)GetObj_const().frame_parent(m_Frames[(int)frame].first)); }
 			void ResetFrameLocalMat(GunFrame frame) noexcept { GetObj().frame_Reset(m_Frames[(int)frame].first); }
 			void SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(m_Frames[(int)frame].first, value * m_Frames[(int)frame].second); }
-			const auto& GetShotType(void) noexcept { return this->m_ShotType[0]; }
-			const auto& GetReloadType(void) noexcept { return this->m_ReloadType[0]; }
+			const auto& GetShotType(void) const noexcept { return this->m_ShotType[0]; }
+			const auto& GetReloadType(void) const noexcept { return this->m_ReloadType[0]; }
 			const auto& GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
 			const auto& GetNowAnime(void) noexcept {
 				switch (GetShotType()) {
@@ -49,20 +50,20 @@ namespace FPS_n2 {
 			}
 			void SetIsShot(bool value) noexcept { this->m_IsShot = value; }
 			void SetUseMoveParts(bool value) noexcept { this->m_UseMoveParts = value; }
-			const auto GetScopePos(void) noexcept { return GetFrameWorldMat(GunFrame::Eyepos).pos(); }
-			const auto GetLensPos(void) noexcept { return GetFrameWorldMat(GunFrame::Lens).pos(); }
-			const auto GetReticleSize(void) noexcept { return m_ReticleSize; }
-			const auto GetReticlePos(void) noexcept { return GetLensPos() + (GetLensPos() - GetScopePos()).Norm()*10.f; }
-			const auto GetLensPosSize(void) noexcept { return GetFrameWorldMat(GunFrame::LensSize).pos(); }
-			const auto GetMuzzleMatrix(void) noexcept { return GetFrameWorldMat(GunFrame::Muzzle); }
-			const auto GetIsMagEmpty(void) noexcept { return (this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->IsEmpty() : true; }//ŽŸ’e‚ª‚È‚¢
-			const auto GetIsMagFull(void) noexcept { return (this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->IsFull() : false; }
-			const auto GetAmmoAll(void) noexcept { return (this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->GetAmmoAll() : 0; }
-			const auto GetAmmoNum(void) noexcept { return ((this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->GetAmmoNum() : 0) + (this->m_in_chamber ? 1 : 0); }
-			const auto GetCanshot(void) noexcept { return this->m_in_chamber && (this->m_ShotPhase <= 1); }
-			const auto& GetReticle(void) noexcept { return this->m_reticle; }
-			const auto& GetHumanAnimType(void) noexcept { return this->m_HumanAnimType; }
-			const auto& GetIsShot(void) noexcept { return this->m_IsShot; }
+			const auto GetScopePos(void) const noexcept { return GetFrameWorldMat(GunFrame::Eyepos).pos(); }
+			const auto GetLensPos(void) const noexcept { return GetFrameWorldMat(GunFrame::Lens).pos(); }
+			const auto GetReticleSize(void) const noexcept { return m_ReticleSize; }
+			const auto GetReticlePos(void) const noexcept { return GetLensPos() + (GetLensPos() - GetScopePos()).Norm()*10.f; }
+			const auto GetLensPosSize(void) const noexcept { return GetFrameWorldMat(GunFrame::LensSize).pos(); }
+			const auto GetMuzzleMatrix(void) const noexcept { return GetFrameWorldMat(GunFrame::Muzzle); }
+			const auto GetIsMagEmpty(void) const noexcept { return (this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->IsEmpty() : true; }//ŽŸ’e‚ª‚È‚¢
+			const auto GetIsMagFull(void) const noexcept { return (this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->IsFull() : false; }
+			const auto GetAmmoAll(void) const noexcept { return (this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->GetAmmoAll() : 0; }
+			const auto GetAmmoNum(void) const noexcept { return ((this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->GetAmmoNum() : 0) + (this->m_in_chamber ? 1 : 0); }
+			const auto GetCanShot(void) const noexcept { return this->m_in_chamber; }
+			const auto& GetReticle(void) const noexcept { return this->m_reticle; }
+			const auto& GetHumanAnimType(void) const noexcept { return this->m_HumanAnimType; }
+			const auto& GetIsShot(void) const noexcept { return this->m_IsShot; }
 			void SetGunMatrix(const MATRIX_ref& value, int pShotPhase) noexcept {
 				SetMove(value.GetRot(), value.pos());
 				this->m_Mag_Ptr->SetMove(GetFrameWorldMat(GunFrame::Magpos).GetRot(), GetFrameWorldMat(GunFrame::Magpos).pos());
@@ -142,7 +143,7 @@ namespace FPS_n2 {
 							if (GetObj().get_anime(i).time == 0.f) {
 								switch (GetReloadType()) {
 								case RELOADTYPE::MAG:
-									this->m_Mag_Ptr->SetAmmo(this->m_Mag_Ptr->GetAmmoAll());
+									this->m_Mag_Ptr->SetAmmo(GetAmmoAll());
 									break;
 								case RELOADTYPE::AMMO:
 									this->m_Mag_Ptr->AddAmmo();

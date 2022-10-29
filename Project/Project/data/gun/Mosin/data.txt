@@ -1,6 +1,0 @@
-usemag0=Mosin
-shottype=BOLT
-usehumanAnim=0
-scopezoom=3.5
-reloadType=AMMO
-end

@@ -197,10 +197,8 @@ namespace FPS_n2 {
 		switchs												m_QKey;
 		switchs												m_EKey;
 		bool												m_IsRun{ false };
-		bool												m_IsSprint{ false };
 		float												m_RunPer{ 0.f };
 		float												m_RunTimer{ 0.f };
-		float												m_SprintPer{ 0.f };
 		float												m_SquatPer{ 0.f };
 		VECTOR_ref											m_rad_Buf, m_rad, m_radAdd;
 		int													m_TurnRate{ 0 };
@@ -221,7 +219,7 @@ namespace FPS_n2 {
 		const auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
 		const auto		GetSquatPer(void) const noexcept { return this->m_SquatPer; }
 
-		const auto		GetVecFront(void) const noexcept { return  this->m_Vec[0] || this->m_IsSprint; }
+		const auto		GetVecFront(void) const noexcept { return  this->m_Vec[0]; }
 		const auto		GetVecRear(void) const noexcept { return this->m_Vec[2]; }
 		const auto		GetVecLeft(void) const noexcept { return this->m_Vec[1]; }
 		const auto		GetVecRight(void) const noexcept { return this->m_Vec[3]; }
@@ -231,8 +229,6 @@ namespace FPS_n2 {
 		const auto		GetPressRight(void) const noexcept { return this->m_Press_GoRight; }
 		const auto		GetRun(void) const noexcept { return this->m_IsRun; }
 		const auto		GetRunPer(void) const noexcept { return  this->m_RunPer; }
-		const auto		GetSprint(void) const noexcept { return this->m_IsSprint; }
-		const auto		GetSprintPer(void) const noexcept { return  this->m_SprintPer; }
 		const auto		GetVec(void) const noexcept { return VECTOR_ref::vget(GetVecLeft() - GetVecRight(), 0, GetVecRear() - GetVecFront()); }
 		const auto		GetFrontP(void) const noexcept {
 			auto FrontP = ((GetPressFront() && !GetPressRear())) ? (atan2f(GetVec().x(), -GetVec().z()) * GetVecFront()) : 0.f;
@@ -240,7 +236,6 @@ namespace FPS_n2 {
 			return FrontP;
 		}
 
-		void			SetSprintPer(float value) noexcept { this->m_SprintPer = value; }
 		void			SetRadBufX(float x) noexcept {
 			auto xbuf = this->m_rad_Buf.x();
 			Easing(&xbuf, x, 0.9f, EasingType::OutExpo);
@@ -266,10 +261,8 @@ namespace FPS_n2 {
 			this->m_Press_GoRight = false;
 			this->m_radAdd.clear();
 			this->m_IsRun = false;
-			this->m_IsSprint = false;
 			this->m_RunPer = 0.f;
 			this->m_RunTimer = 0.f;
-			this->m_SprintPer = 0.f;
 			//“®ì‚É‚©‚©‚í‚é‘€ì
 			this->m_rad_Buf.x(pxRad);
 			this->m_rad_Buf.y(pyRad);
@@ -312,14 +305,8 @@ namespace FPS_n2 {
 			if (GetPressRear() || (!GetPressFront() && (GetPressLeft() || GetPressRight()))) {
 				this->m_IsRun = false;
 			}
-
-			this->m_IsSprint = this->m_IsRun && (!GetPressFront() && !GetPressRear());
-
-			if (this->m_IsSprint) {
-				if (pCannotSprint) {
-					this->m_Press_GoFront = true;
-					this->m_IsSprint = false;
-				}
+			if (pCannotSprint) {
+				this->m_IsRun = false;
 			}
 
 			this->m_Squat.GetInput(pSquatPress && !pIsNotActive);
@@ -378,10 +365,7 @@ namespace FPS_n2 {
 				this->m_TurnRate = std::clamp(this->m_TurnRate, -1, 1);
 				this->m_LeanRate = std::clamp(this->m_LeanRate, -1, 1);
 				float xadd = 0.f;
-				if (this->m_IsSprint) {
-					xadd = 0.315f*(-this->m_TurnRate);//ƒXƒvƒŠƒ“ƒg
-				}
-				else if (GetRun()) {
+				if (GetRun()) {
 					xadd = 0.2f*(-this->m_TurnRate);//‘–‚è
 				}
 				Easing(&this->m_TurnRatePer, xadd, 0.9f, EasingType::OutExpo);
@@ -416,7 +400,6 @@ namespace FPS_n2 {
 			}
 			//
 			Easing(&this->m_RunPer, this->m_IsRun ? 1.f : 0.f, 0.975f, EasingType::OutExpo);
-			Easing(&this->m_SprintPer, this->m_IsSprint ? 1.f : 0.f, 0.95f, EasingType::OutExpo);
 			Easing(&this->m_SquatPer, GetIsSquat() ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 		}
 	};

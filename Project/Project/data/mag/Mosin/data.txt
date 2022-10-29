@@ -1,3 +1,0 @@
-capacity=5
-useammo0=7N14
-end

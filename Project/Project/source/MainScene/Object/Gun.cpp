@@ -8,7 +8,7 @@ namespace FPS_n2 {
 				std::string magName = MagName;
 				auto* ObjMngr = ObjectManager::Instance();
 				this->m_Mag_Ptr = (std::shared_ptr<MagazineClass>&)(*ObjMngr->AddObject(ObjType::Magazine, ("data/mag/" + magName + "/").c_str()));
-				this->m_Mag_Ptr->SetAmmo(this->m_Mag_Ptr->GetAmmoAll());
+				this->m_Mag_Ptr->SetAmmo(GetAmmoAll());
 				this->m_in_chamber = false;
 			}
 			else {
@@ -28,7 +28,7 @@ namespace FPS_n2 {
 			switch (GetShotType()) {
 			case SHOTTYPE::FULL:
 			case SHOTTYPE::SEMI:
-				this->m_IsChamberMove |= ((this->m_ShotPhase == 1) && (GetNowAnime().time >= 3.f)) && (!this->m_Mag_Ptr->IsEmpty());
+				this->m_IsChamberMove |= ((this->m_ShotPhase == 1) && (GetNowAnime().time >= 3.f));
 				IsEject |= ((this->m_ShotPhase == 1) && (GetNowAnime().time >= 1.f));
 
 				this->m_IsChamberMove |= ((this->m_ShotPhase == 2) && (GetNowAnime().time >= 25.f));
@@ -48,12 +48,12 @@ namespace FPS_n2 {
 			if (this->m_IsChamberMove) {
 				if (this->m_IsChamberMove != Prev) {
 					this->m_NowAmmo = this->m_Mag_Ptr->GetAmmoSpec();//マガジンの一番上の弾データを取る
+					if (!this->GetIsMagEmpty()) {
+						this->m_in_chamber = true;
+					}
 					this->m_Mag_Ptr->SubAmmo();//チャンバーインtodo
 					this->m_CartPtr = (std::shared_ptr<CartClass>&)(*ObjMngr->AddObject(ObjType::Cart, this->m_NowAmmo->GetPath().c_str(), "ammo"));
 					this->m_ChamberMovePer = 0.f;
-					if (!this->m_Mag_Ptr->IsEmpty()) {
-						this->m_in_chamber = true;
-					}
 				}
 			}
 			else {

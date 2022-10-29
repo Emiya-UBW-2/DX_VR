@@ -370,7 +370,8 @@ namespace FPS_n2 {
 				}
 
 				for (int i = 0; i < gun_num; i++) {
-					ObjMngr->AddObject(ObjType::Gun, "data/gun/AKS74U/");//MP5K//AR15//AKS74U//Gorushi//Mosin
+					ObjMngr->AddObject(ObjType::Gun, "data/gun/AR15/");//MP5K//AR15//AKS74U//Gorushi//Mosin//MEU1911
+					ObjMngr->AddObject(ObjType::Gun, "data/gun/MEU1911/");//MP5K//AR15//AKS74U//Gorushi//Mosin//MEU1911
 				}
 				//ƒ[ƒh
 				SetCreate3DSoundFlag(FALSE);
@@ -392,7 +393,10 @@ namespace FPS_n2 {
 					VECTOR_ref pos_t = VECTOR_ref::vget(0.f + (float)(i)*20.f, 0.f, 0.f);
 					auto HitResult = this->m_BackGround.GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
 					if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
-					c->SetGunPtr((std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, i)));
+					c->SetGunPtr(
+						(std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, i * 2 + 0)),
+						(std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, i * 2 + 1))
+					);
 					c->ValueSet(deg2rad(0.f), deg2rad(-90.f), false, pos_t, (PlayerID)i);
 					if (i == 0) {
 						//c->SetUseRealTimePhysics(true);
@@ -940,6 +944,16 @@ namespace FPS_n2 {
 					this->m_UIclass.SetIntParam(6, (int)1.f);
 					this->m_UIclass.SetIntParam(7, (int)1.f);
 					this->m_UIclass.SetIntParam(8, (int)1.f);
+
+
+					this->m_UIclass.SetIntParam(12, (int)0);//Œ»Ý‘I‘ð
+					this->m_UIclass.SetIntParam(13, (int)1);//e‚Ì‘”
+					{
+						auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+						this->m_UIclass.SetStrParam(1, "GUN");
+						this->m_UIclass.SetIntParam(14, (int)(Chara->GetAmmoNum()));
+						this->m_UIclass.SetIntParam(15, (int)(Chara->GetAmmoAll()));
+					}
 				}
 				TEMPSCENE::Execute();
 				Effect_UseControl::Execute_Effect();
