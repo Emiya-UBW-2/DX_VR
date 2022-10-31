@@ -158,7 +158,7 @@ namespace FPS_n2 {
 							SetAnimOnce(i, 1.5f);
 						}
 						else {
-							SetAnimLoop(i, 1.5f);
+							SetAnimOnce(i, 1.5f);
 						}
 					}
 					else {

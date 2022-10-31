@@ -32,7 +32,7 @@ namespace FPS_n2 {
 				}
 			}
 			void	CheckBullet(void) noexcept {
-				if (this->m_IsActive) {
+				if (IsActive()) {
 					if ((this->m_move.pos - this->m_move.repos).y() <= 0.f) {
 						auto HitResult = this->m_MapCol->CollCheck_Line(this->m_move.repos + VECTOR_ref::up()*1.f, this->m_move.pos);
 						if (HitResult.HitFlag == TRUE) {
@@ -54,23 +54,23 @@ namespace FPS_n2 {
 
 			void	FirstExecute(void) noexcept override {
 				if (!this->m_IsInMag) {
-					if (this->m_IsActive) {
+					if (IsActive()) {
 						GetObj().SetMatrix(this->m_move.MatIn());
-						if (this->m_IsActive) {
-							this->m_move.repos = this->m_move.pos;
-							this->m_Line[this->m_LineSel] = GetObj().frame(2);
-							++this->m_LineSel %= this->m_Line.size();
-							this->m_move.pos += this->m_move.vec*60.f / FPS + VECTOR_ref::up()*this->m_yAdd;
-							this->m_yAdd += (M_GR / (FPS*FPS));
-						}
+
+						this->m_move.repos = this->m_move.pos;
+						this->m_Line[this->m_LineSel] = GetObj().frame(2);
+						++this->m_LineSel %= this->m_Line.size();
+						this->m_move.pos += this->m_move.vec*60.f / FPS + VECTOR_ref::up()*this->m_yAdd;
+						this->m_yAdd += (M_GR / (FPS*FPS));
+
 						auto BB = (this->m_move.pos - this->m_move.repos).Norm();
 						if ((this->m_move.pos - this->m_move.repos).y() <= 0.f) {
 							BB *= -1.f;
 						}
-						this->m_move.mat = MATRIX_ref::RotAxis(BB.cross(this->m_move.mat.zvec()).Norm(), deg2rad((20.f + GetRandf(30.f))/2.f*60.f / FPS))*this->m_move.mat;
+						this->m_move.mat = MATRIX_ref::RotAxis(BB.cross(this->m_move.mat.zvec()).Norm(), deg2rad((20.f + GetRandf(30.f)) / 2.f*60.f / FPS))*this->m_move.mat;
 
 						if (this->m_Timer > 5.f) {
-							this->m_IsDelete = true;
+							SetIsDelete(true);
 						}
 						this->m_Timer += 1.f / FPS;
 					}
@@ -79,7 +79,7 @@ namespace FPS_n2 {
 			}
 
 			void	DrawShadow(void) noexcept override {
-				if (this->m_IsActive && this->m_IsDraw) {
+				if (IsActive() && this->m_IsDraw) {
 					if (this->m_IsEmpty) {
 						this->GetObj().DrawMesh(0);
 					}
@@ -89,7 +89,7 @@ namespace FPS_n2 {
 				}
 			}
 			void	Draw(void) noexcept override {
-				if (this->m_IsActive && this->m_IsDraw) {
+				if (IsActive() && this->m_IsDraw) {
 					if (CheckCameraViewClip_Box(
 						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-20, 0, -20)).get(),
 						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(20, 20, 20)).get()) == FALSE

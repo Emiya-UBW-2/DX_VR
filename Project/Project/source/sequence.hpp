@@ -262,6 +262,7 @@ namespace FPS_n2 {
 						//最終描画
 						PostPassParts->Set_MAIN_Draw();
 					}
+					SetDrawMode(DX_DRAWMODE_BILINEAR);
 					GraphHandle::SetDraw_Screen(tmp);
 					{
 						SetUseTextureToShader(0, PostPassParts->Get_MAIN_Screen().get());	//使用するテクスチャをセット
@@ -287,6 +288,7 @@ namespace FPS_n2 {
 						}
 						SetUseTextureToShader(0, -1);	//使用するテクスチャをセット
 					}
+					SetDrawMode(DX_DRAWMODE_NEAREST);
 					GraphHandle::SetDraw_Screen(tmp, tmp_cam.campos, tmp_cam.camvec, tmp_cam.camup, tmp_cam.fov, tmp_cam.near_, tmp_cam.far_, false);
 					{
 						PostPassParts->MAIN_Draw();											//デフォ描画

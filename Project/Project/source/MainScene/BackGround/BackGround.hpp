@@ -745,12 +745,13 @@ namespace FPS_n2 {
 			}
 
 			bool			CheckHit(const VECTOR_ref& repos, VECTOR_ref* pos) {
+				VECTOR_ref pos_t = *pos;
 				bool ishit = false;
-				float length = (*pos - repos).size();
+				float length = (pos_t - repos).size();
 				for (int index = 0; index < this->m_WallIndex.size() / Triangle_Num; index++) {
 					auto GetVertex = [&](int ID) {return &(this->m_WallVertex[this->m_WallIndex[(int)index * Triangle_Num + ID]]); };
 					auto GetVertexPos = [&](int ID) {return &(GetVertex(ID)->pos); };
-					auto res = HitCheck_Line_Triangle(repos.get(), pos->get(), *GetVertexPos(0), *GetVertexPos(1), *GetVertexPos(2));
+					auto res = HitCheck_Line_Triangle(repos.get(), pos_t.get(), *GetVertexPos(0), *GetVertexPos(1), *GetVertexPos(2));
 					if (res.HitFlag == TRUE) {
 						ishit = true;
 						auto lentmp = ((VECTOR_ref)res.Position - repos).size();
@@ -765,7 +766,7 @@ namespace FPS_n2 {
 						OLDTime = GetNowHiPerformanceCount();
 						m_WallCalc = std::make_shared<std::thread>([&]() {
 							{
-								VECTOR_ref vec = (*pos - repos);
+								VECTOR_ref vec = (pos_t - repos);
 								VECTOR_ref xaxis = vec.Norm().cross(VECTOR_ref::up());
 								VECTOR_ref yaxis = vec.Norm().cross(xaxis);
 								const int N_gon = 8;

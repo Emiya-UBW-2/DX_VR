@@ -807,7 +807,7 @@ namespace FPS_n2 {
 									if (res.second) { break; }
 								}
 								if ((ColResGround.HitFlag == TRUE || hitwall) && !is_HitAll) {
-									a->HitGround();
+									a->HitGround(pos_tmp);
 									if (ColResGround.HitFlag == TRUE) {
 										Effect_UseControl::Set_FootEffect(ColResGround.HitPosition, ColResGround.Normal, 0.05f / 0.1f * Scale_Rate);
 									}
@@ -868,18 +868,18 @@ namespace FPS_n2 {
 					if (this->m_FPSActive.on()) {
 						if (Chara->GetIsADS()) {
 							Easing(&camera_main.fov, deg2rad(40), 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.near_, 1.f, 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.far_, Scale_Rate * 100.f, 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.near_, Scale_Rate * 1.f, 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.far_, Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
 						}
 						else if (Chara->GetIsRun()) {
 							Easing(&camera_main.fov, deg2rad(115), 0.9f, EasingType::OutExpo);
 							Easing(&camera_main.near_, 3.f, 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.far_, Scale_Rate * 100.f, 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.far_, Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
 						}
 						else {
 							Easing(&camera_main.fov, deg2rad(95), 0.9f, EasingType::OutExpo);
 							Easing(&camera_main.near_, 1.f, 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.far_, Scale_Rate * 100.f, 0.9f, EasingType::OutExpo);
+							Easing(&camera_main.far_, Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
 						}
 					}
 					else {

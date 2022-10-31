@@ -14,6 +14,30 @@ namespace FPS_n2 {
 
 			CharaAnimeID	m_Reload{ CharaAnimeID::Upper_Reload1Start };
 		};
+
+		class Pendulum2D {
+			float m_PendulumLength = 10.f;
+			float m_PendulumMass = 2.f;
+			float m_drag_coeff = 2.02f;
+
+			float m_rad = deg2rad(12.f);
+			float m_vel = 0.f;
+		public:
+			void Init(float Length, float N, float rad) {
+				m_PendulumLength = Length;
+				m_PendulumMass = N;
+				m_rad = rad;
+				m_vel = 0.f;
+			}
+
+			void Execute() {
+				m_vel += (-9.8f / m_PendulumLength * std::sin(m_rad) - m_drag_coeff / m_PendulumMass * m_vel) / 60.f;
+				m_rad += m_vel / 60.f;
+			}
+
+			const auto GetRad() const noexcept { return m_rad; }
+
+		};
 		class CharacterClass : public ObjectBaseClass {
 		private://キャラパラメーター
 			const float SpeedLimit{ 0.675f };
@@ -50,7 +74,6 @@ namespace FPS_n2 {
 			float												m_RunPer2{ 0.f }, m_PrevRunPer2{ 0.f };
 			float												m_NeckPer{ 0.f };
 			bool												m_TurnBody{ false };
-			bool												m_ReturnStand{ false };
 			bool												m_RunReady{ false };
 			bool												m_RunReadyFirst{ false };
 			bool												m_Running{ false };
@@ -81,6 +104,8 @@ namespace FPS_n2 {
 			float												m_HP{ 0.f };							//スコア
 
 			float m_LeftHandPer{ 0.f };
+
+			Pendulum2D											m_SlingZrad;
 
 			VECTOR_ref											m_RecoilRadAdd;
 			//表情
@@ -189,6 +214,14 @@ namespace FPS_n2 {
 			const auto		GetReloadOneAnimSel(void) const noexcept { return  (CharaAnimeID)((int)GetReloadStartAnimSel() + 1); }
 			const auto		GetReloadEndAnimSel(void) const noexcept { return  (CharaAnimeID)((int)GetReloadStartAnimSel() + 2); }
 
+			const auto		GetBottomStandAnimSel(void) const noexcept { return this->m_InputGround.GetIsSquat() ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
+			const auto		GetBottomWalkAnimSel(void) const noexcept { return this->m_InputGround.GetIsSquat() ? CharaAnimeID::Bottom_Squat_Walk : CharaAnimeID::Bottom_Stand_Walk; }
+			const auto		GetBottomWalkBackAnimSel(void) const noexcept { return this->m_InputGround.GetIsSquat() ? CharaAnimeID::Bottom_Squat_WalkBack : CharaAnimeID::Bottom_Stand_WalkBack; }
+			const auto		GetBottomLeftStepAnimSel(void) const noexcept { return this->m_InputGround.GetIsSquat() ? CharaAnimeID::Bottom_Squat_LeftStep : CharaAnimeID::Bottom_Stand_LeftStep; }
+			const auto		GetBottomRightStepAnimSel(void) const noexcept { return this->m_InputGround.GetIsSquat() ? CharaAnimeID::Bottom_Squat_RightStep : CharaAnimeID::Bottom_Stand_RightStep; }
+			const auto		GetBottomTurnAnimSel(void) const noexcept { return this->m_InputGround.GetIsSquat() ? CharaAnimeID::Bottom_Squat_Turn : CharaAnimeID::Bottom_Stand_Turn; }
+			const auto		GetBottomRunAnimSel(void) const noexcept { return CharaAnimeID::Bottom_Stand_Run; }
+
 			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
 			const auto		GetReadyPer(void) const noexcept { return this->m_ReadyPer; }
 			const auto		GetEyeVecMat(void) const noexcept { return GetCharaDir(); }
@@ -220,9 +253,8 @@ namespace FPS_n2 {
 				this->m_HeartRateRad = 0.f;
 				this->m_LeftHandPer = 0.f;
 				this->m_TurnBody = false;
-				this->m_ReturnStand = false;
 				this->m_ShotPhase = 0;
-				this->m_NeckPosOffsetPer = -1.f;
+				this->m_NeckPosOffsetPer = 0.f;
 				this->m_MoveEyePosTimer = 0.f;
 				this->m_RunReady = false;
 				this->m_RunReadyFirst = false;
@@ -260,6 +292,8 @@ namespace FPS_n2 {
 					MATRIX_ref::RotY(this->m_InputGround.GetRad().y() - this->m_yrad_Bottom);
 				this->m_move.vec.clear();
 				SetMove(MATRIX_ref::RotY(this->m_yrad_Bottom), this->m_PosBuf);
+
+				m_SlingZrad.Init(0.05f*Scale_Rate, 3.f, deg2rad(90));
 			}
 			void			SetInput(const InputControl& pInput, bool pReady) {
 				this->m_ReadySwitch = (this->m_KeyActive != pReady);
@@ -283,6 +317,8 @@ namespace FPS_n2 {
 				//銃切替
 				m_GunChange.GetInput(pInput.GetAction1());
 				if (m_GunChange.trigger()) {
+					m_SlingZrad.Init(0.05f*Scale_Rate, 3.f, deg2rad(90));
+
 					++this->m_GunSelect %= 2;
 				}
 				//AIM
@@ -457,14 +493,7 @@ namespace FPS_n2 {
 							this->m_RunReady = true;
 							canreverse = false;
 						}
-						if (this->m_RunReady) {
-							if (!this->m_Running) {
-								this->m_Running = true;
-							}
-						}
-						else {
-							this->m_Running = false;
-						}
+						this->m_Running = this->m_RunReady;
 						if (this->m_ReadyTimer < UpperTimerLimit) {
 							m_UpperAnimSelect = GetAimAnimSel();
 						}
@@ -559,7 +588,7 @@ namespace FPS_n2 {
 						}
 						//
 						{
-							Easing(&this->m_NeckPosOffsetPer, (this->m_ShotPhase <= 2) ? -1.f : 0.f, 0.9f, EasingType::OutExpo);
+							Easing(&this->m_NeckPosOffsetPer, (this->m_ReadyTimer == UpperTimerLimit || this->m_ShotPhase >= 2) ? -1.f : 0.f, 0.9f, EasingType::OutExpo);
 							if (this->m_Speed > 0.f) {
 								this->m_MoveEyePosTimer += this->m_Speed * deg2rad(300.f + 200.f*this->m_InputGround.GetRunPer()) / FPS;
 
@@ -631,19 +660,19 @@ namespace FPS_n2 {
 					}
 					//下半身
 					{
-						this->m_BottomAnimSelect = CharaAnimeID::Bottom_Stand;
-						if (GetPressLeftGround()) { this->m_BottomAnimSelect = CharaAnimeID::Bottom_Stand_LeftStep; }
-						if (GetPressRightGround()) { this->m_BottomAnimSelect = CharaAnimeID::Bottom_Stand_RightStep; }
-						if (GetPressRearGround()) { this->m_BottomAnimSelect = CharaAnimeID::Bottom_Stand_WalkBack; }
-						if (GetPressFrontGround()) { this->m_BottomAnimSelect = (this->m_InputGround.GetRun()) ? CharaAnimeID::Bottom_Stand_Run : CharaAnimeID::Bottom_Stand_Walk; }
+						this->m_BottomAnimSelect = GetBottomStandAnimSel();
+						if (GetPressLeftGround()) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
+						if (GetPressRightGround()) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
+						if (GetPressRearGround()) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
+						if (GetPressFrontGround()) { this->m_BottomAnimSelect = (this->m_InputGround.GetRun()) ? GetBottomRunAnimSel() : GetBottomWalkAnimSel(); }
 					}
 					//
-					SetAnimLoop(CharaAnimeID::Bottom_Stand_Turn, 0.5f);
-					SetAnimLoop(CharaAnimeID::Bottom_Stand_Run, 1.25f * this->m_InputGround.GetVecFront() * this->m_RunPer2);
-					SetAnimLoop(CharaAnimeID::Bottom_Stand_Walk, 1.15f * this->m_InputGround.GetVecFront());
-					SetAnimLoop(CharaAnimeID::Bottom_Stand_LeftStep, 1.15f * this->m_InputGround.GetVecLeft());
-					SetAnimLoop(CharaAnimeID::Bottom_Stand_WalkBack, 1.15f * this->m_InputGround.GetVecRear());
-					SetAnimLoop(CharaAnimeID::Bottom_Stand_RightStep, 1.15f * this->m_InputGround.GetVecRight());
+					SetAnimLoop(GetBottomTurnAnimSel(), 0.5f);
+					SetAnimLoop(GetBottomRunAnimSel(), 1.25f * this->m_InputGround.GetVecFront() * this->m_RunPer2);
+					SetAnimLoop(GetBottomWalkAnimSel(), 1.15f * this->m_InputGround.GetVecFront());
+					SetAnimLoop(GetBottomLeftStepAnimSel(), 1.15f * this->m_InputGround.GetVecLeft());
+					SetAnimLoop(GetBottomWalkBackAnimSel(), 1.15f * this->m_InputGround.GetVecRear());
+					SetAnimLoop(GetBottomRightStepAnimSel(), 1.15f * this->m_InputGround.GetVecRight());
 
 					Easing(&this->m_LeftHandPer, 1.f, 0.8f, EasingType::OutExpo);
 				}
@@ -658,7 +687,7 @@ namespace FPS_n2 {
 					//真ん中
 					//GetAnimeBuf(CharaAnimeID::Mid_Squat) = this->m_InputGround.GetSquatPer();
 					//下半身
-					Easing(&GetAnimeBuf(CharaAnimeID::Bottom_Stand_Turn), (this->m_TurnBody) ? abs(this->m_InputGround.GetRad().y() - this->m_yrad_Upper) / deg2rad(50.f) : 0.f, 0.8f, EasingType::OutExpo);
+					Easing(&GetAnimeBuf(GetBottomTurnAnimSel()), (this->m_TurnBody) ? abs(this->m_InputGround.GetRad().y() - this->m_yrad_Upper) / deg2rad(50.f) : 0.f, 0.8f, EasingType::OutExpo);
 					//銃操作
 					GetAnimeBuf(GetCockingAnimSel()) = ((GetCockingAnimSel() == m_UpperAnimSelect) ? 1.f : 0.f);
 					GetAnimeBuf(GetReloadStartAnimSel()) = ((GetReloadStartAnimSel() == m_UpperAnimSelect) ? 1.f : 0.f);
@@ -667,16 +696,19 @@ namespace FPS_n2 {
 					//その他
 					for (int i = 0; i < (int)CharaAnimeID::AnimeIDMax; i++) {
 						//上半身
-						if (
-							i == (int)GetDownAnimSel() ||
-							i == (int)GetAimAnimSel() ||
-							i == (int)GetCockingAnimSel() ||
-							i == (int)GetReloadStartAnimSel() ||
-							i == (int)GetReloadOneAnimSel() ||
-							i == (int)GetReloadEndAnimSel()
-							)
-						{
-							GetAnimeBuf((CharaAnimeID)i) += ((i == (int)this->m_UpperAnimSelect) ? 1.f : -1.f)*3.f / FPS;
+						for (auto& a : m_CharaAnimeSet) {
+							if (
+								i == (int)a.m_Down ||
+								i == (int)a.m_Ready ||
+								i == (int)a.m_Cocking ||
+								i == (int)a.m_Reload ||
+								i == ((int)a.m_Reload + 1) ||
+								i == ((int)a.m_Reload + 2)
+								)
+							{
+								GetAnimeBuf((CharaAnimeID)i) += ((i == (int)this->m_UpperAnimSelect) ? 1.f : -1.f)*3.f / FPS;
+								break;
+							}
 						}
 						//下半身
 						if (
@@ -685,7 +717,14 @@ namespace FPS_n2 {
 							i == (int)CharaAnimeID::Bottom_Stand_Walk ||
 							i == (int)CharaAnimeID::Bottom_Stand_LeftStep ||
 							i == (int)CharaAnimeID::Bottom_Stand_RightStep ||
-							i == (int)CharaAnimeID::Bottom_Stand_WalkBack
+							i == (int)CharaAnimeID::Bottom_Stand_WalkBack ||
+							i == (int)CharaAnimeID::Bottom_Stand_Turn ||
+							i == (int)CharaAnimeID::Bottom_Squat ||
+							i == (int)CharaAnimeID::Bottom_Squat_Walk ||
+							i == (int)CharaAnimeID::Bottom_Squat_LeftStep ||
+							i == (int)CharaAnimeID::Bottom_Squat_RightStep ||
+							i == (int)CharaAnimeID::Bottom_Squat_WalkBack ||
+							i == (int)CharaAnimeID::Bottom_Squat_Turn
 							)
 						{
 							GetAnimeBuf((CharaAnimeID)i) += ((i == (int)this->m_BottomAnimSelect) ? 1.f : -1.f)*3.f / FPS;
@@ -698,9 +737,9 @@ namespace FPS_n2 {
 				}
 				//足音
 				{
-					if (this->m_BottomAnimSelect != CharaAnimeID::Bottom_Stand) {
+					if (this->m_BottomAnimSelect != GetBottomStandAnimSel()) {
 						auto Time = GetAnime(this->m_BottomAnimSelect).time;
-						if (this->m_BottomAnimSelect != CharaAnimeID::Bottom_Stand_Run) {
+						if (this->m_BottomAnimSelect != GetBottomRunAnimSel()) {
 							//L
 							if ((9.f < Time && Time < 10.f)) {
 								if (this->m_CharaSound != 1) {
@@ -738,14 +777,6 @@ namespace FPS_n2 {
 								}
 							}
 						}
-						this->m_ReturnStand = true;
-					}
-					else if (this->m_ReturnStand) {
-						if (this->m_CharaSound != 7) {
-							this->m_CharaSound = 7;
-							SE->Get((int)SoundEnum::SlideFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale_Rate * 5.f, (int)(192.f * this->m_RunPer2 / SpeedLimit));
-						}
-						this->m_ReturnStand = false;
 					}
 				}
 				//
@@ -841,13 +872,20 @@ namespace FPS_n2 {
 							GetObj().work_anime((int)GetAimAnimSel());
 							GetObj().work_anime(i);
 						}
-						//背負い場所探索
-						{
-							yVec2 = (MATRIX_ref::RotZ(deg2rad(130)) * MATRIX_ref::RotY(deg2rad(150)) * GetFrameWorldMat(CharaFrame::Upper2).GetRot() * GetCharaDir().Inverse()).xvec();
-							zVec2 = (MATRIX_ref::RotZ(deg2rad(130)) * MATRIX_ref::RotY(deg2rad(150)) * GetFrameWorldMat(CharaFrame::Upper2).GetRot() * GetCharaDir().Inverse()).yvec();
+						//スリング場所探索
+						m_SlingZrad.Execute();
+						{//deg2rad(130)
+
+							printfDx("%6.2f", rad2deg(m_SlingZrad.GetRad()));
+							//yVec2 = (MATRIX_ref::RotZ(deg2rad(130) + m_SlingZrad.GetRad()) * MATRIX_ref::RotY(deg2rad(150)) * GetFrameWorldMat(CharaFrame::Upper2).GetRot() * GetCharaDir().Inverse()).xvec();
+							//zVec2 = (MATRIX_ref::RotZ(deg2rad(130) + m_SlingZrad.GetRad()) * MATRIX_ref::RotY(deg2rad(150)) * GetFrameWorldMat(CharaFrame::Upper2).GetRot() * GetCharaDir().Inverse()).yvec();
+
+							yVec2 = ((MATRIX_ref::RotZ(deg2rad(130) + m_SlingZrad.GetRad()) * MATRIX_ref::RotY(this->m_InputGround.GetRad().y() + deg2rad(180)))*GetCharaDir().Inverse()).xvec();
+							zVec2 = ((MATRIX_ref::RotZ(deg2rad(130) + m_SlingZrad.GetRad()) * MATRIX_ref::RotY(this->m_InputGround.GetRad().y() + deg2rad(180)))*GetCharaDir().Inverse()).yvec();
 							Pos2 =
 								GetFrameWorldMat(CharaFrame::Upper2).pos() +
-								GetFrameWorldMat(CharaFrame::Upper2).GetRot().yvec() * -2.25f +
+								GetFrameWorldMat(CharaFrame::Upper2).GetRot().xvec() * -4.25f*sin(m_SlingZrad.GetRad()) +
+								this->m_move.mat.yvec() * -4.25f*cos(m_SlingZrad.GetRad()) +
 								GetFrameWorldMat(CharaFrame::Upper2).GetRot().zvec() * -3.75f;
 						}
 					}
@@ -1043,7 +1081,7 @@ namespace FPS_n2 {
 			}
 			void			Init(void) noexcept override {
 				ObjectBaseClass::Init();
-				GetAnime(CharaAnimeID::Bottom_Stand).per = 1.f;
+				GetAnime(GetBottomStandAnimSel()).per = 1.f;
 				//
 				SetCreate3DSoundFlag(TRUE);
 				this->m_Breath = SoundHandle::Load("data/Sound/SE/voice/WinningTicket/breath.wav");
@@ -1090,12 +1128,6 @@ namespace FPS_n2 {
 					auto prev = this->m_CharaAnimeSel;
 					auto newtmp = GetGunPtr()->GetHumanAnimType();
 					if (prev != newtmp) {
-						GetAnimeBuf(GetDownAnimSel()) = 0.f;
-						GetAnimeBuf(GetCockingAnimSel()) = 0.f;
-						GetAnimeBuf(GetAimAnimSel()) = 0.f;
-						GetAnimeBuf(GetReloadStartAnimSel()) = 0.f;
-						GetAnimeBuf(GetReloadOneAnimSel()) = 0.f;
-						GetAnimeBuf(GetReloadEndAnimSel()) = 0.f;
 						this->m_ReadyTimer = UpperTimerLimit;
 						this->m_ReadyTimer = 0.1f;
 						this->m_ReadyPer = 0.f;
@@ -1110,7 +1142,30 @@ namespace FPS_n2 {
 				ExecuteShape();				//顔//スコープ内0.01ms
 				ExecuteHeartRate();			//心拍数//0.00ms
 			}
-			//void			Draw(void) noexcept override { ObjectBaseClass::Draw(); }
+			void			Draw(void) noexcept override {
+				int fog_enable;
+				int fog_mode;
+				int fog_r, fog_g, fog_b;
+				float fog_start, fog_end;
+				float fog_density;
+
+				fog_enable = GetFogEnable();													// フォグが有効かどうかを取得する( TRUE:有効  FALSE:無効 )
+				fog_mode = GetFogMode();														// フォグモードを取得する
+				GetFogColor(&fog_r, &fog_g, &fog_b);											// フォグカラーを取得する
+				GetFogStartEnd(&fog_start, &fog_end);											// フォグが始まる距離と終了する距離を取得する( 0.0f ～ 1.0f )
+				fog_density = GetFogDensity();													// フォグの密度を取得する( 0.0f ～ 1.0f )
+
+				SetFogEnable(TRUE);
+				SetFogColor(0, 0, 0);
+				SetFogStartEnd(Scale_Rate*1.f, Scale_Rate*25.f);
+				ObjectBaseClass::Draw();
+
+				SetFogEnable(fog_enable);
+				SetFogMode(fog_mode);
+				SetFogColor(fog_r, fog_g, fog_b);
+				SetFogStartEnd(fog_start, fog_end);
+				SetFogDensity(fog_density);
+			}
 		};
 	};
 };
