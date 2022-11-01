@@ -866,20 +866,25 @@ namespace FPS_n2 {
 					Easing(&this->m_EyeRunPer, Chara->GetIsRun() ? 1.f : 0.f, 0.95f, EasingType::OutExpo);
 					Easing(&this->m_EyePosPer, Chara->GetIsADS() ? 1.f : 0.f, 0.8f, EasingType::OutExpo);//
 					if (this->m_FPSActive.on()) {
+						float fov = 0;
 						if (Chara->GetIsADS()) {
-							Easing(&camera_main.fov, deg2rad(40), 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.near_, Scale_Rate * 1.f, 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.far_, Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
+							fov = deg2rad(40);
 						}
 						else if (Chara->GetIsRun()) {
-							Easing(&camera_main.fov, deg2rad(115), 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.near_, 3.f, 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.far_, Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
+							fov = deg2rad(100);
 						}
 						else {
-							Easing(&camera_main.fov, deg2rad(95), 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.near_, 1.f, 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.far_, Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
+							fov = deg2rad(95);
+						}
+						Easing(&camera_main.near_, Scale_Rate * 1.f, 0.9f, EasingType::OutExpo);
+						Easing(&camera_main.far_, Scale_Rate * 30.f, 0.9f, EasingType::OutExpo);
+
+						if (Chara->GetShotSwitch()) {
+							fov -= deg2rad(5);
+							Easing(&camera_main.fov, fov, 0.5f, EasingType::OutExpo);
+						}
+						else {
+							Easing(&camera_main.fov, fov, 0.9f, EasingType::OutExpo);
 						}
 					}
 					else {
@@ -982,23 +987,18 @@ namespace FPS_n2 {
 				this->m_BackGround.BG_Draw();
 			}
 			void			Shadow_Draw_NearFar(void) noexcept override {
-				//auto* ObjMngr = ObjectManager::Instance();
-				//auto* PlayerMngr = PlayerManager::Instance();
-
-
 				this->m_BackGround.Shadow_Draw_NearFar();
-				//ObjMngr->DrawObject_Shadow();
 			}
 			void			Shadow_Draw(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
 
-				this->m_BackGround.Shadow_Draw();
+				//this->m_BackGround.Shadow_Draw();
 				ObjMngr->DrawObject_Shadow();
 			}
 			void			Main_Draw(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
-
+				SetFogStartEnd(camera_main.near_, camera_main.far_*2.f);
 				this->m_BackGround.Draw();
 				ObjMngr->DrawObject();
 				//ObjMngr->DrawDepthObject();
@@ -1052,7 +1052,6 @@ namespace FPS_n2 {
 						v->SetCameraSize(std::max(80.f / ((pos - GetCameraPosition()).size() / 2.f), 0.2f));
 					}
 				}
-				SetFogStartEnd(camera_main.near_, camera_main.far_*3.f);
 			}
 			void			Main_Draw2(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();

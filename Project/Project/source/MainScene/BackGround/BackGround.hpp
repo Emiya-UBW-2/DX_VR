@@ -918,10 +918,15 @@ namespace FPS_n2 {
 			void			DrawCommon(bool IsCalling) noexcept {
 				this->m_ObjGround2.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-318.f, -12.5f, 897.f)));
 				this->m_ObjGround2.DrawModel();
+
+				SetFogEnable(TRUE);
+				SetFogColor(0, 0, 0);
+				SetFogDensity(0.5f);
 				this->m_ObjGround.DrawModel();
 				for (auto& w : this->m_Walls) {
 					w.Draw(IsCalling);
 				}
+				SetFogEnable(FALSE);
 			}
 		public://
 			//

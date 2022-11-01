@@ -379,7 +379,7 @@ namespace FPS_n2 {
 				Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
 
 				this->m_rad_Buf.x(
-					std::clamp(this->m_rad_Buf.x() + pAddxRad * tmp, -deg2rad(40.f) * limchange, deg2rad(25.f) * limchange)
+					std::clamp(this->m_rad_Buf.x() + pAddxRad * tmp, -deg2rad(80.f) * limchange, deg2rad(80.f) * limchange)
 					+ this->m_radAdd.x()
 				);
 				this->m_rad_Buf.y(
