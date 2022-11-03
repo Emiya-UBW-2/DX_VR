@@ -569,16 +569,17 @@ namespace FPS_n2 {
 		public:
 		private:
 			MV1										m_obj;
-			std::vector<VERTEX3D>					m_WallVertex;		//壁をセット
-			VERTEX3D*								m_WallVertexPtr;
-			std::vector<WORD>						m_WallIndex;		//壁をセット
-			WORD*									m_WallIndexPtr;
+
+			std::array<std::vector<VERTEX3D>,4>		m_WallVertex;		//壁をセット
+			std::array<std::vector<WORD>, 4>		m_WallIndex;		//壁をセット
 
 			int										m_TexHandle;
 
 			std::vector<std::vector<std::unique_ptr<SideControl>>>	m_Side;
 			std::vector<std::vector<Triangle>>		m_Tri2D;
 			VECTOR_ref								m_BasePos;
+
+			VECTOR_ref								m_Pos;
 
 			std::shared_ptr<std::thread>			m_WallCalc;
 			bool									isThreadEnd{ false };
@@ -590,55 +591,90 @@ namespace FPS_n2 {
 		public://getter
 			bool			GetIsBreak() { return Bigcount > 3; }
 		private:
+			//0を基に別オブジェを作る
+			void SetTri(int ID, bool isback, float offset) noexcept {
+				auto& vrt = this->m_WallVertex[ID];
+				auto& ind = this->m_WallIndex[ID];
+				vrt.resize(this->m_WallVertex[0].size());
+				ind.resize(this->m_WallIndex[0].size());
+				for (int i = 0; i < vrt.size(); i++) {
+					vrt[i] = this->m_WallVertex[0][i];
+					vrt[i].pos = ((VECTOR_ref)(vrt[i].pos) + (VECTOR_ref)(vrt[i].norm)*offset).get();
+					if (isback) {
+						vrt[i].norm = ((VECTOR_ref)(vrt[i].norm)*-1.f).get();
+					}
+				}
+				for (int i = 0; i < ind.size() / Triangle_Num; i++) {
+					ind[i * Triangle_Num + 0] = this->m_WallIndex[0][i * Triangle_Num + 0];
+					if (isback) {
+						ind[i * Triangle_Num + 1] = this->m_WallIndex[0][i * Triangle_Num + 2];
+						ind[i * Triangle_Num + 2] = this->m_WallIndex[0][i * Triangle_Num + 1];
+					}
+					else {
+						ind[i * Triangle_Num + 1] = this->m_WallIndex[0][i * Triangle_Num + 1];
+						ind[i * Triangle_Num + 2] = this->m_WallIndex[0][i * Triangle_Num + 2];
+					}
+				}
+			}
+
 			void			SetFirst(const MV1_REF_POLYGONLIST& PolyList, const VECTOR_ref& pos, float YRad, float YScale) noexcept {
+				m_Pos = pos;
 				auto matrix = MATRIX_ref::RotY(YRad)*MATRIX_ref::Mtrans(pos);
-				this->m_WallVertex.resize(PolyList.VertexNum);
-				for (int i = 0; i < this->m_WallVertex.size(); i++) {
+				this->m_WallVertex[0].resize(PolyList.VertexNum);
+				for (int i = 0; i < this->m_WallVertex[0].size(); i++) {
 					VECTOR_ref Pos = PolyList.Vertexs[i].Position;
 					if (Pos.y() > 0.f) { Pos.y(Pos.y()*YScale); }
-					this->m_WallVertex[i].pos = MATRIX_ref::Vtrans(Pos, matrix).get();
-					this->m_WallVertex[i].norm = MATRIX_ref::Vtrans(PolyList.Vertexs[i].Normal, matrix.GetRot()).get();
-					this->m_WallVertex[i].dif = PolyList.Vertexs[i].DiffuseColor;
-					this->m_WallVertex[i].spc = PolyList.Vertexs[i].SpecularColor;
-					this->m_WallVertex[i].u = PolyList.Vertexs[i].TexCoord[0].u;
-					this->m_WallVertex[i].v = Lerp(1.f, PolyList.Vertexs[i].TexCoord[0].v, YScale);
-					this->m_WallVertex[i].su = PolyList.Vertexs[i].TexCoord[1].u;
-					this->m_WallVertex[i].sv = PolyList.Vertexs[i].TexCoord[1].v;
+					this->m_WallVertex[0][i].pos = MATRIX_ref::Vtrans(Pos, matrix).get();
+					this->m_WallVertex[0][i].norm = MATRIX_ref::Vtrans(PolyList.Vertexs[i].Normal, matrix.GetRot()).Norm().get();
+					this->m_WallVertex[0][i].dif = PolyList.Vertexs[i].DiffuseColor;
+					this->m_WallVertex[0][i].spc = PolyList.Vertexs[i].SpecularColor;
+					this->m_WallVertex[0][i].u = PolyList.Vertexs[i].TexCoord[0].u;
+					this->m_WallVertex[0][i].v = Lerp(1.f, PolyList.Vertexs[i].TexCoord[0].v, YScale);
+					this->m_WallVertex[0][i].su = PolyList.Vertexs[i].TexCoord[1].u;
+					this->m_WallVertex[0][i].sv = PolyList.Vertexs[i].TexCoord[1].v;
 				}
-				this->m_WallIndex.resize(PolyList.PolygonNum * Triangle_Num);
-				for (int i = 0; i < this->m_WallIndex.size() / Triangle_Num; i++) {
-					this->m_WallIndex[i * Triangle_Num + 0] = (WORD)PolyList.Polygons[i].VIndex[0];
-					this->m_WallIndex[i * Triangle_Num + 1] = (WORD)PolyList.Polygons[i].VIndex[1];
-					this->m_WallIndex[i * Triangle_Num + 2] = (WORD)PolyList.Polygons[i].VIndex[2];
+				this->m_WallIndex[0].resize(PolyList.PolygonNum * Triangle_Num);
+				for (int i = 0; i < this->m_WallIndex[0].size() / Triangle_Num; i++) {
+					this->m_WallIndex[0][i * Triangle_Num + 0] = (WORD)PolyList.Polygons[i].VIndex[0];
+					this->m_WallIndex[0][i * Triangle_Num + 1] = (WORD)PolyList.Polygons[i].VIndex[1];
+					this->m_WallIndex[0][i * Triangle_Num + 2] = (WORD)PolyList.Polygons[i].VIndex[2];
 				}
-				this->m_WallVertexPtr = this->m_WallVertex.data();
-				this->m_WallIndexPtr = this->m_WallIndex.data();
+				//反転
+				SetTri(1, true, 0.f);
+				//正転
+				SetTri(2, false, -1.f);
+				//反転
+				SetTri(3, true, -1.f);
 			}
 			void			SetNext() {
-				this->m_WallVertex.clear();
-				this->m_WallIndex.clear();
+				this->m_WallVertex[0].clear();
+				this->m_WallIndex[0].clear();
 				for (auto& Side : this->m_Side) {
 					size_t index = &Side - &this->m_Side.front();
 					//出来たものをリストに再登録
 					for (auto& s : this->m_Tri2D[index]) {
 						for (auto& p : s.Getpoints()) {
 							VECTOR_ref p2; p2.Set(p.x(), 0.f, p.y());
-							this->m_WallVertex.resize(this->m_WallVertex.size() + 1);
-							this->m_WallVertex.back().pos = (MATRIX_ref::Vtrans(p2, Side[0]->Mat.Inverse()) + this->m_BasePos).get();
-							this->m_WallVertex.back().norm = Side[0]->Norm.get();
-							this->m_WallVertex.back().dif = Side[0]->dif;
-							this->m_WallVertex.back().spc = Side[0]->spc;
-							this->m_WallVertex.back().u = -p.x() / Scale_Rate;
-							this->m_WallVertex.back().v = p.y() / Scale_Rate;
-							this->m_WallVertex.back().su = -p.x() / Scale_Rate;
-							this->m_WallVertex.back().sv = p.y() / Scale_Rate;
-							this->m_WallIndex.emplace_back((WORD)(this->m_WallVertex.size() - 1));
+							this->m_WallVertex[0].resize(this->m_WallVertex[0].size() + 1);
+							this->m_WallVertex[0].back().pos = (MATRIX_ref::Vtrans(p2, Side[0]->Mat.Inverse()) + this->m_BasePos).get();
+							this->m_WallVertex[0].back().norm = Side[0]->Norm.get();
+							this->m_WallVertex[0].back().dif = Side[0]->dif;
+							this->m_WallVertex[0].back().spc = Side[0]->spc;
+							this->m_WallVertex[0].back().u = -p.x() / Scale_Rate;
+							this->m_WallVertex[0].back().v = p.y() / Scale_Rate;
+							this->m_WallVertex[0].back().su = -p.x() / Scale_Rate;
+							this->m_WallVertex[0].back().sv = p.y() / Scale_Rate;
+
+							this->m_WallIndex[0].emplace_back((WORD)(this->m_WallVertex[0].size() - 1));
 						}
 					}
-					//
 				}
-				this->m_WallVertexPtr = this->m_WallVertex.data();
-				this->m_WallIndexPtr = this->m_WallIndex.data();
+				//反転
+				SetTri(1, true, 0.f);
+				//正転
+				SetTri(2, false, -1.f);
+				//反転
+				SetTri(3, true, -1.f);
 			}
 			void			SetSide(const VECTOR_ref* basepos = nullptr) noexcept {
 				if (basepos) { this->m_BasePos = *basepos; }
@@ -647,11 +683,11 @@ namespace FPS_n2 {
 					s.clear();
 				}
 				this->m_Side.clear();
-				this->m_Side.resize(this->m_WallIndex.size() / Triangle_Num);
+				this->m_Side.resize(this->m_WallIndex[0].size() / Triangle_Num);
 				this->m_Tri2D.resize(m_Side.size());
 				for (auto& Side : this->m_Side) {
 					size_t index = &Side - &this->m_Side.front();
-					auto GetVertex = [&](int ID) {return &(this->m_WallVertex[this->m_WallIndex[(int)index * Triangle_Num + ID]]); };
+					auto GetVertex = [&](int ID) {return &(this->m_WallVertex[0][this->m_WallIndex[0][(int)index * Triangle_Num + ID]]); };
 					auto GetVertexPos = [&](int ID) {return &(GetVertex(ID)->pos); };
 					VECTOR_ref TriPos0 = *GetVertexPos(0);
 					VECTOR_ref TriPos1 = *GetVertexPos(1);
@@ -676,7 +712,7 @@ namespace FPS_n2 {
 				SetFirst(MV1GetReferenceMesh(obj.get(), 0, FALSE), pos, YRad, YScale);
 				MV1TerminateReferenceMesh(obj.get(), 0, FALSE);
 
-				VECTOR_ref basepos = this->m_WallVertex[this->m_WallIndex[0]].pos;
+				VECTOR_ref basepos = this->m_WallVertex[0][this->m_WallIndex[0][0]].pos;
 				SetSide(&basepos);
 
 				MATERIALPARAM							m_Material;
@@ -698,16 +734,23 @@ namespace FPS_n2 {
 					}
 				}
 				//printfDx("スレッド数:%d\n", std::thread::hardware_concurrency());
-				printfDx("処理時間:%d\n", SetTime);
+				//printfDx("処理時間:%d\n", SetTime);
 
 				//addtri += GetMouseWheelRotVolWithCheck();
 			}
 
 			void			Draw(bool IsCalling) noexcept {
-				SetUseBackCulling(IsCalling ? TRUE : FALSE);
-				SetTextureAddressModeUV(DX_TEXADDRESS_WRAP, DX_TEXADDRESS_WRAP);
-				DrawPolygonIndexed3D(this->m_WallVertexPtr, (int)this->m_WallVertex.size(), this->m_WallIndexPtr, (int)(this->m_WallIndex.size()) / Triangle_Num, this->m_TexHandle, TRUE);
-				SetUseBackCulling(FALSE);
+				if (CheckCameraViewClip_Box(
+					(this->m_Pos + VECTOR_ref::vget(-6.25f, 0, -6.25f)).get(),
+					(this->m_Pos + VECTOR_ref::vget(6.25f, 20, 6.25f)).get()) == FALSE
+					) {
+					SetUseBackCulling(IsCalling ? TRUE : FALSE);
+					SetTextureAddressModeUV(DX_TEXADDRESS_WRAP, DX_TEXADDRESS_WRAP);
+					for (int i = 0; i < 4; i++) {
+						DrawPolygonIndexed3D(this->m_WallVertex[i].data(), (int)this->m_WallVertex[i].size(), this->m_WallIndex[i].data(), (int)(this->m_WallIndex[i].size()) / Triangle_Num, this->m_TexHandle, TRUE);
+					}
+					SetUseBackCulling(FALSE);
+				}
 
 				return;
 #if false
@@ -748,16 +791,17 @@ namespace FPS_n2 {
 				VECTOR_ref pos_t = *pos;
 				bool ishit = false;
 				float length = (pos_t - repos).size();
-				for (int index = 0; index < this->m_WallIndex.size() / Triangle_Num; index++) {
-					auto GetVertex = [&](int ID) {return &(this->m_WallVertex[this->m_WallIndex[(int)index * Triangle_Num + ID]]); };
+				bool isback = false;
+				for (int index = 0; index < this->m_WallIndex[0].size() / Triangle_Num; index++) {
+					auto GetVertex = [&](int ID) {return &(this->m_WallVertex[0][this->m_WallIndex[0][(int)index * Triangle_Num + ID]]); };
 					auto GetVertexPos = [&](int ID) {return &(GetVertex(ID)->pos); };
 					auto res = HitCheck_Line_Triangle(repos.get(), pos_t.get(), *GetVertexPos(0), *GetVertexPos(1), *GetVertexPos(2));
 					if (res.HitFlag == TRUE) {
 						ishit = true;
-						auto lentmp = ((VECTOR_ref)res.Position - repos).size();
-						if (length > lentmp) {
-							length = lentmp;
-						}
+						auto vectmp = (VECTOR_ref)res.Position - repos;
+						length = vectmp.size();
+						isback = (vectmp.dot(GetVertex(0)->norm) >= 0.f);
+						break;
 					}
 				}
 				if (ishit) {
@@ -767,14 +811,16 @@ namespace FPS_n2 {
 						m_WallCalc = std::make_shared<std::thread>([&]() {
 							{
 								VECTOR_ref vec = (pos_t - repos);
+								VECTOR_ref RePos = isback ? pos_t : repos;
+								if (isback) { vec *= -1.f; }
 								VECTOR_ref xaxis = vec.Norm().cross(VECTOR_ref::up());
 								VECTOR_ref yaxis = vec.Norm().cross(xaxis);
-								const int N_gon = 8;
-								const float Radius = 0.0762f*Scale_Rate*1.8f;
+								const int N_gon = 5;
+								const float Radius = 0.00762f*Scale_Rate*1.8f*5.f;
 								std::array<VECTOR_ref, N_gon> GonPoint;//辺の数
 								for (auto& Side : this->m_Side) {
 									size_t index = &Side - &this->m_Side.front();
-									auto GetVertex = [&](int ID) {return &(this->m_WallVertex[this->m_WallIndex[(int)index * Triangle_Num + ID]]); };
+									auto GetVertex = [&](int ID) {return &(this->m_WallVertex[0][this->m_WallIndex[0][(int)index * Triangle_Num + ID]]); };
 									auto GetVertexPos = [&](int ID) {return &(GetVertex(ID)->pos); };
 									VECTOR_ref TriPos0 = *GetVertexPos(0);
 									VECTOR_ref TriPos1 = *GetVertexPos(1);
@@ -783,7 +829,7 @@ namespace FPS_n2 {
 
 									for (int gon = 0; gon < N_gon; gon++) {
 										float rad = deg2rad(360.f * (0.5f + (float)gon) / (float)N_gon);
-										VECTOR_ref BasePos = repos + (xaxis * sin(rad) + yaxis * cos(rad))*Radius;
+										VECTOR_ref BasePos = RePos + (xaxis * sin(rad) + yaxis * cos(rad))*Radius;
 										//平面上のくりぬきポイント取得
 										{
 											VECTOR_ref PosN = Plane_Point_MinLength_Position(TriPos0.get(), TriNorm.get(), BasePos.get());
@@ -895,12 +941,14 @@ namespace FPS_n2 {
 			MV1							m_ObjGround2;
 			MV1							m_ObjGroundCol;
 			MV1							m_ObjGroundCol_Box2D;
+			MV1							m_ObjGround_Wallpoint;
 			MV1							m_objWall;
 			std::shared_ptr<b2World>	m_b2world;
 			std::vector<std::pair<b2Pats, std::array<VECTOR_ref, 2>>>	m_b2wallParts;	//壁をセット
 			Grass						m_grass;
 
 			std::vector<WallObj>		m_Walls;
+			std::vector<std::array<VECTOR_ref, 2>>	m_WallParts;	//壁をセット
 		public://getter
 			const auto&		GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
 			auto&			GetBox2Dworld(void) noexcept { return this->m_b2world; }
@@ -937,58 +985,96 @@ namespace FPS_n2 {
 				MV1::Load("data/model/map/col.mv1", &this->m_ObjGroundCol);
 				this->m_ObjGroundCol.SetupCollInfo(64, 16, 64);
 				MV1::Load("data/model/map/col_box2D.mv1", &this->m_ObjGroundCol_Box2D);
+				MV1::Load("data/model/map/wallpoint.mv1", &this->m_ObjGround_Wallpoint);
 				//空
 				MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
 				MV1SetDifColorScale(this->m_ObjSky.get(), GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
 				//壁
-				this->m_b2world = std::make_shared<b2World>(b2Vec2(0.0f, 0.0f)); // 剛体を保持およびシミュレートするワールドオブジェクトを構築
-				MV1_REF_POLYGONLIST p = MV1GetReferenceMesh(this->m_ObjGroundCol_Box2D.get(), 0, FALSE);
-				for (int i = 0; i < p.PolygonNum; i++) {
-					this->m_b2wallParts.resize(this->m_b2wallParts.size() + 1);
-					this->m_b2wallParts.back().second[0] = p.Vertexs[p.Polygons[i].VIndex[0]].Position;
-					this->m_b2wallParts.back().second[1] = p.Vertexs[p.Polygons[i].VIndex[1]].Position;
-					if (b2DistanceSquared(b2Vec2(this->m_b2wallParts.back().second[0].x(), this->m_b2wallParts.back().second[0].z()), b2Vec2(this->m_b2wallParts.back().second[1].x(), this->m_b2wallParts.back().second[1].z())) <= 0.005f * 0.005f) {
-						this->m_b2wallParts.pop_back();
+				{
+					this->m_b2world = std::make_shared<b2World>(b2Vec2(0.0f, 0.0f)); // 剛体を保持およびシミュレートするワールドオブジェクトを構築
+					MV1_REF_POLYGONLIST p = MV1GetReferenceMesh(this->m_ObjGroundCol_Box2D.get(), 0, FALSE);
+					for (int i = 0; i < p.PolygonNum; i++) {
+						this->m_b2wallParts.resize(this->m_b2wallParts.size() + 1);
+						this->m_b2wallParts.back().second[0] = p.Vertexs[p.Polygons[i].VIndex[0]].Position;
+						this->m_b2wallParts.back().second[1] = p.Vertexs[p.Polygons[i].VIndex[1]].Position;
+						if (b2DistanceSquared(b2Vec2(this->m_b2wallParts.back().second[0].x(), this->m_b2wallParts.back().second[0].z()), b2Vec2(this->m_b2wallParts.back().second[1].x(), this->m_b2wallParts.back().second[1].z())) <= 0.005f * 0.005f) {
+							this->m_b2wallParts.pop_back();
+						}
+						this->m_b2wallParts.resize(this->m_b2wallParts.size() + 1);
+						this->m_b2wallParts.back().second[0] = p.Vertexs[p.Polygons[i].VIndex[1]].Position;
+						this->m_b2wallParts.back().second[1] = p.Vertexs[p.Polygons[i].VIndex[2]].Position;
+						if (b2DistanceSquared(b2Vec2(this->m_b2wallParts.back().second[0].x(), this->m_b2wallParts.back().second[0].z()), b2Vec2(this->m_b2wallParts.back().second[1].x(), this->m_b2wallParts.back().second[1].z())) <= 0.005f * 0.005f) {
+							this->m_b2wallParts.pop_back();
+						}
+						this->m_b2wallParts.resize(this->m_b2wallParts.size() + 1);
+						this->m_b2wallParts.back().second[0] = p.Vertexs[p.Polygons[i].VIndex[2]].Position;
+						this->m_b2wallParts.back().second[1] = p.Vertexs[p.Polygons[i].VIndex[0]].Position;
+						if (b2DistanceSquared(b2Vec2(this->m_b2wallParts.back().second[0].x(), this->m_b2wallParts.back().second[0].z()), b2Vec2(this->m_b2wallParts.back().second[1].x(), this->m_b2wallParts.back().second[1].z())) <= 0.005f * 0.005f) {
+							this->m_b2wallParts.pop_back();
+						}
 					}
-					this->m_b2wallParts.resize(this->m_b2wallParts.size() + 1);
-					this->m_b2wallParts.back().second[0] = p.Vertexs[p.Polygons[i].VIndex[1]].Position;
-					this->m_b2wallParts.back().second[1] = p.Vertexs[p.Polygons[i].VIndex[2]].Position;
-					if (b2DistanceSquared(b2Vec2(this->m_b2wallParts.back().second[0].x(), this->m_b2wallParts.back().second[0].z()), b2Vec2(this->m_b2wallParts.back().second[1].x(), this->m_b2wallParts.back().second[1].z())) <= 0.005f * 0.005f) {
-						this->m_b2wallParts.pop_back();
+					MV1TerminateReferenceMesh(this->m_ObjGroundCol_Box2D.get(), 0, FALSE);
+					for (auto& w : this->m_b2wallParts) {
+						std::array<b2Vec2, 2> vs;								//
+						vs[0].Set(w.second[0].x(), w.second[0].z());			//
+						vs[1].Set(w.second[1].x(), w.second[1].z());			//
+						b2ChainShape chain;										// This a chain shape with isolated vertices
+						chain.CreateChain(&vs[0], 2);							//
+						b2FixtureDef fixtureDef;								//動的ボディフィクスチャを定義します
+						fixtureDef.shape = &chain;								//
+						fixtureDef.density = 1.0f;								//ボックス密度をゼロ以外に設定すると、動的になります
+						fixtureDef.friction = 0.3f;								//デフォルトの摩擦をオーバーライドします
+						b2BodyDef bodyDef;										//ダイナミックボディを定義します。その位置を設定し、ボディファクトリを呼び出します
+						bodyDef.type = b2_staticBody;							//
+						bodyDef.position.Set(0, 0);								//
+						bodyDef.angle = 0.f;									//
+						w.first.Set(this->m_b2world->CreateBody(&bodyDef), &chain);	//
 					}
-					this->m_b2wallParts.resize(this->m_b2wallParts.size() + 1);
-					this->m_b2wallParts.back().second[0] = p.Vertexs[p.Polygons[i].VIndex[2]].Position;
-					this->m_b2wallParts.back().second[1] = p.Vertexs[p.Polygons[i].VIndex[0]].Position;
-					if (b2DistanceSquared(b2Vec2(this->m_b2wallParts.back().second[0].x(), this->m_b2wallParts.back().second[0].z()), b2Vec2(this->m_b2wallParts.back().second[1].x(), this->m_b2wallParts.back().second[1].z())) <= 0.005f * 0.005f) {
-						this->m_b2wallParts.pop_back();
-					}
-				}
-				MV1TerminateReferenceMesh(this->m_ObjGroundCol_Box2D.get(), 0, FALSE);
-				for (auto& w : this->m_b2wallParts) {
-					std::array<b2Vec2, 2> vs;								//
-					vs[0].Set(w.second[0].x(), w.second[0].z());			//
-					vs[1].Set(w.second[1].x(), w.second[1].z());			//
-					b2ChainShape chain;										// This a chain shape with isolated vertices
-					chain.CreateChain(&vs[0], 2);							//
-					b2FixtureDef fixtureDef;								//動的ボディフィクスチャを定義します
-					fixtureDef.shape = &chain;								//
-					fixtureDef.density = 1.0f;								//ボックス密度をゼロ以外に設定すると、動的になります
-					fixtureDef.friction = 0.3f;								//デフォルトの摩擦をオーバーライドします
-					b2BodyDef bodyDef;										//ダイナミックボディを定義します。その位置を設定し、ボディファクトリを呼び出します
-					bodyDef.type = b2_staticBody;							//
-					bodyDef.position.Set(0, 0);								//
-					bodyDef.angle = 0.f;									//
-					w.first.Set(this->m_b2world->CreateBody(&bodyDef), &chain);	//
 				}
 				//
 				//this->m_grass.Init(&this->m_ObjGroundCol);
-				
+				//壁
 				MV1::Load("data/model/wall/model.mqoz", &this->m_objWall);
-				this->m_Walls.resize(10);
-				//this->m_Walls.resize(0);
-				int i = 0;
-				for (auto& w : this->m_Walls) {
-					w.Init(this->m_objWall, VECTOR_ref::vget(12.5f*(i % 10), 12.5f*5.f, -0.1f*12.5f*(i / 10)), deg2rad(180.f), 1.8f); i++;
+				{
+					float lim = 0.5f;
+					this->m_b2world = std::make_shared<b2World>(b2Vec2(0.0f, 0.0f)); // 剛体を保持およびシミュレートするワールドオブジェクトを構築
+					MV1_REF_POLYGONLIST p = MV1GetReferenceMesh(this->m_ObjGround_Wallpoint.get(), 0, FALSE);
+					for (int i = 0; i < p.PolygonNum; i++) {
+						VECTOR_ref pos0 = p.Vertexs[p.Polygons[i].VIndex[0]].Position;
+						VECTOR_ref pos1 = p.Vertexs[p.Polygons[i].VIndex[1]].Position;
+						VECTOR_ref pos2 = p.Vertexs[p.Polygons[i].VIndex[2]].Position;
+
+						auto p0 = (pos0 - pos1); auto py0 = p0.y(); p0.y(0);
+						auto p1 = (pos1 - pos2); auto py1 = p1.y();  p1.y(0);
+						auto p2 = (pos2 - pos0); auto py2 = p2.y();  p2.y(0);
+
+						if (p0.Length() > lim && py0 <= lim) {
+							this->m_WallParts.resize(this->m_WallParts.size() + 1);
+							this->m_WallParts.back()[0] = pos0;
+							this->m_WallParts.back()[1] = pos1;
+							continue;
+						}
+						if (p1.Length() > lim && py1 <= lim) {
+							this->m_WallParts.resize(this->m_WallParts.size() + 1);
+							this->m_WallParts.back()[0] = pos1;
+							this->m_WallParts.back()[1] = pos2;
+							continue;
+						}
+						if (p2.Length() > lim && py2 <= lim) {
+							this->m_WallParts.resize(this->m_WallParts.size() + 1);
+							this->m_WallParts.back()[0] = pos2;
+							this->m_WallParts.back()[1] = pos0;
+							continue;
+						}
+					}
+					MV1TerminateReferenceMesh(this->m_ObjGround_Wallpoint.get(), 0, FALSE);
+					this->m_Walls.resize(this->m_WallParts.size());
+					for (int i = 0; i < this->m_WallParts.size(); i++) {
+						auto pos = (this->m_WallParts[i][0] + this->m_WallParts[i][1]) / 2.f;
+						auto vec = (this->m_WallParts[i][0] - this->m_WallParts[i][1]); vec.y(0);
+
+						this->m_Walls[i].Init(this->m_objWall, pos, atan2f(vec.z(), vec.x()), 2.7f);
+					}
 				}
 			}
 			//
