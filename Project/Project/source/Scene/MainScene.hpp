@@ -342,7 +342,7 @@ namespace FPS_n2 {
 				Set_EnvLight(
 					VECTOR_ref::vget(Scale_Rate*-300.f, Scale_Rate*-10.f, Scale_Rate*-300.f),
 					VECTOR_ref::vget(Scale_Rate*300.f, Scale_Rate*50.f, Scale_Rate*300.f),
-					VECTOR_ref::vget(-0.25f, -0.5f, -0.25f),
+					VECTOR_ref::vget(-0.8f, -0.5f, -0.1f),
 					GetColorF(0.42f, 0.41f, 0.40f, 0.0f));
 				//Load
 				//BG
@@ -359,12 +359,14 @@ namespace FPS_n2 {
 				//
 
 				ObjMngr->Init(&this->m_BackGround.GetGroundCol());
-				ObjMngr->AddObject(ObjType::Human, "data/Charactor/WinningTicket/");
-				ObjMngr->AddObject(ObjType::Human, "data/Charactor/WinningTicket/");
+
+				//ObjMngr->AddObject(ObjType::Human, "data/Charactor/WinningTicket/");
 				//ObjMngr->AddObject(ObjType::Human, "data/Charactor/Sweep/");
 				//ObjMngr->AddObject(ObjType::Human, "data/Charactor/Marisa/");
 				for (int i = 0; i < Chara_num; i++) {
+					ObjMngr->AddObject(ObjType::Human, "data/Charactor/WinningTicket/");
 				}
+
 				for (int i = 0; i < Vehicle_num; i++) {
 					ObjMngr->AddObject(ObjType::Vehicle);
 				}
@@ -495,6 +497,9 @@ namespace FPS_n2 {
 			bool			Execute(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
+#ifdef DEBUG
+				auto* DebugParts = DebugClass::Instance();					//デバッグ
+#endif // DEBUG
 				//FirstDoingv
 				if (IsFirstLoop) {
 					SetMousePoint(DXDraw::Instance()->disp_x / 2, DXDraw::Instance()->disp_y / 2);
@@ -772,8 +777,14 @@ namespace FPS_n2 {
 					}
 					Vehicle->SetAimingDistance((StartPos - EndPos).size());
 				}
+#ifdef DEBUG
+				DebugParts->put_way();
+#endif // DEBUG
 				//Execute
 				ObjMngr->ExecuteObject();
+#ifdef DEBUG
+				DebugParts->put_way();
+#endif // DEBUG
 				//
 				for (int j = 0; j < gun_num; j++) {
 					auto& Gun = (std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, j));
@@ -808,7 +819,11 @@ namespace FPS_n2 {
 								}
 								if ((ColResGround.HitFlag == TRUE || hitwall) && !is_HitAll) {
 									a->HitGround(pos_tmp);
-									if (ColResGround.HitFlag == TRUE) {
+
+									if (hitwall) {
+										Effect_UseControl::Set_FootEffect(ColResGround.HitPosition, ColResGround.Normal, 0.05f / 0.1f * Scale_Rate);
+									}
+									else if (ColResGround.HitFlag == TRUE) {
 										Effect_UseControl::Set_FootEffect(ColResGround.HitPosition, ColResGround.Normal, 0.05f / 0.1f * Scale_Rate);
 									}
 									if (ObjMngr->GetObj(ObjType::Vehicle, a->GetShootedID())) {
@@ -1071,80 +1086,16 @@ namespace FPS_n2 {
 			//UI表示
 			void			UI_Draw(void) noexcept  override {
 				auto* ObjMngr = ObjectManager::Instance();
-				auto* PlayerMngr = PlayerManager::Instance();
-				auto* Fonts = FontPool::Instance();
-				auto* DrawParts = DXDraw::Instance();
-				auto Red = GetColor(255, 0, 0);
-				auto Blue = GetColor(50, 50, 255);
-				auto Green = GetColor(43, 163, 91);
-				auto White = GetColor(212, 255, 239);
+				//auto* PlayerMngr = PlayerManager::Instance();
+				//auto* Fonts = FontPool::Instance();
+				//auto* DrawParts = DXDraw::Instance();
+				//auto Red = GetColor(255, 0, 0);
+				//auto Blue = GetColor(50, 50, 255);
+				//auto Green = GetColor(43, 163, 91);
+				//auto White = GetColor(212, 255, 239);
 				//auto Gray = GetColor(64, 64, 64);
 				//auto Black = GetColor(0, 0, 0);
-				unsigned int color = Red;
-				//キャラ
-				auto BaseBos = PlayerMngr->GetPlayer(GetMyPlayerID()).GetPos();
-				for (int i = 0; i < Chara_num; i++) {
-					if ((i == GetMyPlayerID()) && !PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) { continue; }
-					auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
-					auto campos = c->GetCameraPosition();
-					if (0.f < campos.z() && campos.z() < 1.f) {
-						switch (c->GetCharaType()) {
-						case CharaTypeID::Mine:
-							color = Blue;
-							break;
-						case CharaTypeID::Team:
-							color = Blue;
-							break;
-						case CharaTypeID::Enemy:
-							color = Red;
-							break;
-						default:
-							break;
-						}
-						int xp = (int)(campos.x());
-						int yp = (int)(campos.y());
-						int xs = (int)(100.f*c->GetCameraSize());
-						int ys = (int)(100.f*c->GetCameraSize());
-						int siz = y_r(std::max((int)(20.f*c->GetCameraSize()), 10));
-						DrawEdgeBox_2D(xp - xs, yp - ys, xp + xs, yp + ys, color, White);
-						Fonts->Get(siz, FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_MID(xp, yp - ys - siz, color, White, "%s", c->GetName().c_str());
-						Fonts->Get(siz, FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat(xp + xs, yp + ys, color, White, "%dm", (int)((c->GetMatrix().pos() - BaseBos).size() / Scale_Rate));
-						//リセット
-						campos.z(-1.f);
-						c->SetCameraPosition(campos);
-					}
-				}
-				for (int i = 0; i < Vehicle_num; i++) {
-					if ((i == GetMyPlayerID()) && PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) { continue; }
-					auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
-					auto campos = v->GetCameraPosition();
-					if (0.f < campos.z() && campos.z() < 1.f) {
-						switch (v->GetCharaType()) {
-						case CharaTypeID::Mine:
-							color = Blue;
-							break;
-						case CharaTypeID::Team:
-							color = Blue;
-							break;
-						case CharaTypeID::Enemy:
-							color = Red;
-							break;
-						default:
-							break;
-						}
-						int xp = (int)(campos.x());
-						int yp = (int)(campos.y());
-						int xs = (int)(100.f*v->GetCameraSize());
-						int ys = (int)(100.f*v->GetCameraSize());
-						int siz = y_r(std::max((int)(20.f*v->GetCameraSize()), 10));
-						DrawEdgeBox_2D(xp - xs, yp - ys, xp + xs, yp + ys, color, White);
-						Fonts->Get(siz, FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_MID(xp, yp - ys - siz, color, White, "%s", v->GetName().c_str());
-						Fonts->Get(siz, FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat(xp + xs, yp + ys, color, White, "%dm", (int)((v->GetMatrix().pos() - BaseBos).size() / Scale_Rate));
-						//リセット
-						campos.z(-1.f);
-						v->SetCameraPosition(campos);
-					}
-				}
+				//unsigned int color = Red;
 				//
 				{
 					int loop = 0;
@@ -1162,139 +1113,7 @@ namespace FPS_n2 {
 				}
 				//UI
 				this->m_UIclass.Draw();
-				//レーダー
-				{
-					Easing(&this->m_Rader_r, this->m_Rader, 0.8f, EasingType::OutExpo);
 
-					int xp1, yp1;
-					int xs1, ys1, xs2, ys2;
-
-					xs1 = y_r((int)(256.f * 0.5f));
-					ys1 = y_r((int)(256.f * 0.8f));
-					xs2 = y_r((int)(256.f * 0.5f));
-					ys2 = y_r((int)(256.f * 0.2f));
-					xp1 = DrawParts->disp_x - y_r(80) - xs1;
-					yp1 = DrawParts->disp_y - y_r(300) - ys1;
-
-					Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat((int)(xp1 - xs1), (int)(yp1 - ys1) - y_r(20), Green, White, "x%4.2f", this->m_Rader_r);
-
-					DrawLine_2D((int)(xp1 - xs1), (int)(yp1), (int)(xp1 + xs2), (int)(yp1), Green, 3);
-					DrawLine_2D((int)(xp1), (int)(yp1 - ys1), (int)(xp1), (int)(yp1 + ys2), Green, 3);
-					DrawLine_2D((int)(xp1 - xs1), (int)(yp1), (int)(xp1 + xs2), (int)(yp1), White);
-					DrawLine_2D((int)(xp1), (int)(yp1 - ys1), (int)(xp1), (int)(yp1 + ys2), White);
-					DrawEdgeBox_2D((int)(xp1 - xs1), (int)(yp1 - ys1), (int)(xp1 + xs2), (int)(yp1 + ys2), White, Green);
-
-					xs1 = y_r((int)(256.f * 0.5f*std::min(1.f, this->m_Rader_r)));
-					ys1 = y_r((int)(256.f * 0.8f*std::min(1.f, this->m_Rader_r)));
-					xs2 = y_r((int)(256.f * 0.5f*std::min(1.f, this->m_Rader_r)));
-					ys2 = y_r((int)(256.f * 0.2f*std::min(1.f, this->m_Rader_r)));
-					DrawEdgeBox_2D((int)(xp1 - xs1), (int)(yp1 - ys1), (int)(xp1 + xs2), (int)(yp1 + ys2), White, Green);
-
-					xs1 = y_r((int)(256.f * 0.5f));
-					ys1 = y_r((int)(256.f * 0.8f));
-					xs2 = y_r((int)(256.f * 0.5f));
-					ys2 = y_r((int)(256.f * 0.2f));
-					auto base = PlayerMngr->GetPlayer(GetMyPlayerID()).GetAim();
-					base.y(0.f);
-					base = base.Norm();
-
-					auto vec = VECTOR_ref::front();
-					auto rad = std::atan2f(base.cross(vec).y(), base.dot(vec));
-					{
-						float BaseVPer = 2.f;
-
-						this->m_Rader = BaseVPer;
-						bool isout = true;
-						auto tmpRader = 1.f;
-						int div = 5;
-						for (int i = 0; i < Chara_num; i++) {
-							if (i == GetMyPlayerID()) { continue; }
-							auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
-							tmpRader = BaseVPer;
-							for (int j = 0; j < div; j++) {
-								auto pos = MATRIX_ref::Vtrans(c->GetMatrix().pos() - BaseBos, MATRIX_ref::RotY(rad))*((1.f / Scale_Rate) * tmpRader);
-								if (((-xs1 < pos.x() && pos.x() < xs2) && (-ys1 < -pos.z() && -pos.z() < ys2))) {
-									if (this->m_Rader >= tmpRader) {
-										this->m_Rader = tmpRader;
-									}
-									isout = false;
-									break;
-								}
-								tmpRader -= BaseVPer / div;
-							}
-						}
-						for (int i = 0; i < Vehicle_num; i++) {
-							if (i == GetMyPlayerID()) { continue; }
-							auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
-							tmpRader = BaseVPer;
-							for (int j = 0; j < div; j++) {
-								auto pos = MATRIX_ref::Vtrans(v->GetMatrix().pos() - BaseBos, MATRIX_ref::RotY(rad))*((1.f / Scale_Rate) * tmpRader);
-								if (((-xs1 < pos.x() && pos.x() < xs2) && (-ys1 < -pos.z() && -pos.z() < ys2))) {
-									if (this->m_Rader >= tmpRader) {
-										this->m_Rader = tmpRader;
-									}
-									isout = false;
-									break;
-								}
-								tmpRader -= BaseVPer / div;
-							}
-						}
-						if (isout) {
-							this->m_Rader = tmpRader + BaseVPer / div;
-						}
-					}
-
-					for (int i = 0; i < Chara_num; i++) {
-						if ((i == GetMyPlayerID()) && !PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) { continue; }
-						auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
-						auto pos = MATRIX_ref::Vtrans(c->GetMatrix().pos() - BaseBos, MATRIX_ref::RotY(rad))*((1.f / Scale_Rate) * this->m_Rader_r);
-						if ((-xs1 < pos.x() && pos.x() < xs2) && (-ys1 < -pos.z() && -pos.z() < ys2)) {
-							switch (c->GetCharaType()) {
-							case CharaTypeID::Team:
-								color = Blue;
-								break;
-							case CharaTypeID::Enemy:
-								color = Red;
-								break;
-							default:
-								break;
-							}
-							int xp, yp;
-							xp = xp1 + (int)(pos.x());
-							yp = yp1 + (int)(-pos.z());
-							DrawCircle(xp, yp, (int)(5.f * std::min(1.f, this->m_Rader_r)), color, TRUE);
-						}
-					}
-					for (int i = 0; i < Vehicle_num; i++) {
-						if ((i == GetMyPlayerID()) && PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) { continue; }
-						auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
-						auto pos = MATRIX_ref::Vtrans(v->GetMatrix().pos() - BaseBos, MATRIX_ref::RotY(rad))*((1.f / Scale_Rate) * this->m_Rader_r);
-						if ((-xs1 < pos.x() && pos.x() < xs2) && (-ys1 < -pos.z() && -pos.z() < ys2)) {
-							switch (v->GetCharaType()) {
-							case CharaTypeID::Mine:
-								color = Blue;
-								break;
-							case CharaTypeID::Team:
-								color = Blue;
-								break;
-							case CharaTypeID::Enemy:
-								color = Red;
-								break;
-							default:
-								break;
-							}
-							int xp, yp;
-							xp = xp1 + (int)(pos.x());
-							yp = yp1 + (int)(-pos.z());
-							DrawCircle(xp, yp, (int)(5.f * std::min(1.f, this->m_Rader_r)), color, TRUE);
-						}
-					}
-				}
-
-				if (PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) {
-					auto& Vehicle = PlayerMngr->GetPlayer(GetMyPlayerID()).GetVehicle();
-					Vehicle->DrawModuleView(y_r(1500), y_r(200), y_r(200));
-				}
 				//通信設定
 				if (!this->m_MouseActive.on()) {
 					m_NetWorkBrowser.Draw();

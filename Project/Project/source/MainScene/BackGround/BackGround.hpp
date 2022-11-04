@@ -573,7 +573,11 @@ namespace FPS_n2 {
 			std::array<std::vector<VERTEX3D>,4>		m_WallVertex;		//ï«ÇÉZÉbÉg
 			std::array<std::vector<WORD>, 4>		m_WallIndex;		//ï«ÇÉZÉbÉg
 
+			std::array<std::array<VECTOR_ref, 3>, 2>	m_WallBase;
+			VECTOR_ref								m_Wallnorm;
+
 			int										m_TexHandle;
+			int										m_TexHandle2;
 
 			std::vector<std::vector<std::unique_ptr<SideControl>>>	m_Side;
 			std::vector<std::vector<Triangle>>		m_Tri2D;
@@ -589,7 +593,7 @@ namespace FPS_n2 {
 			int Bigcount = 0;
 			//int addtri = 0;
 		public://getter
-			bool			GetIsBreak() { return Bigcount > 3; }
+			bool			GetIsBreak() { return (Bigcount > 3) || (this->m_WallIndex[0].size()>5000); }
 		private:
 			//0ÇäÓÇ…ï ÉIÉuÉWÉFÇçÏÇÈ
 			void SetTri(int ID, bool isback, float offset) noexcept {
@@ -642,9 +646,16 @@ namespace FPS_n2 {
 				//îΩì]
 				SetTri(1, true, 0.f);
 				//ê≥ì]
-				SetTri(2, false, -1.f);
+				SetTri(2, false, -0.7f);
 				//îΩì]
-				SetTri(3, true, -1.f);
+				SetTri(3, true, -0.7f);
+
+				for (int i = 0; i < 2; i++) {
+					m_WallBase[i][0] = this->m_WallVertex[0][this->m_WallIndex[0][i * Triangle_Num + 0]].pos;
+					m_WallBase[i][1] = this->m_WallVertex[0][this->m_WallIndex[0][i * Triangle_Num + 1]].pos;
+					m_WallBase[i][2] = this->m_WallVertex[0][this->m_WallIndex[0][i * Triangle_Num + 2]].pos;
+				}
+				m_Wallnorm = this->m_WallVertex[0][0].norm;
 			}
 			void			SetNext() {
 				this->m_WallVertex[0].clear();
@@ -672,9 +683,9 @@ namespace FPS_n2 {
 				//îΩì]
 				SetTri(1, true, 0.f);
 				//ê≥ì]
-				SetTri(2, false, -1.f);
+				SetTri(2, false, -0.7f);
 				//îΩì]
-				SetTri(3, true, -1.f);
+				SetTri(3, true, -0.7f);
 			}
 			void			SetSide(const VECTOR_ref* basepos = nullptr) noexcept {
 				if (basepos) { this->m_BasePos = *basepos; }
@@ -708,6 +719,7 @@ namespace FPS_n2 {
 		public:
 			void			Init(const MV1& obj, const VECTOR_ref& pos, float YRad, float YScale) noexcept {
 				this->m_TexHandle = MV1GetTextureGraphHandle(obj.get(), 0);
+				this->m_TexHandle2 = MV1GetTextureGraphHandle(obj.get(), 1);
 
 				SetFirst(MV1GetReferenceMesh(obj.get(), 0, FALSE), pos, YRad, YScale);
 				MV1TerminateReferenceMesh(obj.get(), 0, FALSE);
@@ -739,17 +751,19 @@ namespace FPS_n2 {
 				//addtri += GetMouseWheelRotVolWithCheck();
 			}
 
-			void			Draw(bool IsCalling) noexcept {
+			void			Draw() noexcept {
 				if (CheckCameraViewClip_Box(
 					(this->m_Pos + VECTOR_ref::vget(-6.25f, 0, -6.25f)).get(),
 					(this->m_Pos + VECTOR_ref::vget(6.25f, 20, 6.25f)).get()) == FALSE
 					) {
-					SetUseBackCulling(IsCalling ? TRUE : FALSE);
-					SetTextureAddressModeUV(DX_TEXADDRESS_WRAP, DX_TEXADDRESS_WRAP);
 					for (int i = 0; i < 4; i++) {
-						DrawPolygonIndexed3D(this->m_WallVertex[i].data(), (int)this->m_WallVertex[i].size(), this->m_WallIndex[i].data(), (int)(this->m_WallIndex[i].size()) / Triangle_Num, this->m_TexHandle, TRUE);
+						if (1 <= i && i <= 2) {
+							DrawPolygonIndexed3D(this->m_WallVertex[i].data(), (int)this->m_WallVertex[i].size(), this->m_WallIndex[i].data(), (int)(this->m_WallIndex[i].size()) / Triangle_Num, this->m_TexHandle2, TRUE);
+						}
+						else {
+							DrawPolygonIndexed3D(this->m_WallVertex[i].data(), (int)this->m_WallVertex[i].size(), this->m_WallIndex[i].data(), (int)(this->m_WallIndex[i].size()) / Triangle_Num, this->m_TexHandle, TRUE);
+						}
 					}
-					SetUseBackCulling(FALSE);
 				}
 
 				return;
@@ -792,16 +806,28 @@ namespace FPS_n2 {
 				bool ishit = false;
 				float length = (pos_t - repos).size();
 				bool isback = false;
-				for (int index = 0; index < this->m_WallIndex[0].size() / Triangle_Num; index++) {
-					auto GetVertex = [&](int ID) {return &(this->m_WallVertex[0][this->m_WallIndex[0][(int)index * Triangle_Num + ID]]); };
-					auto GetVertexPos = [&](int ID) {return &(GetVertex(ID)->pos); };
-					auto res = HitCheck_Line_Triangle(repos.get(), pos_t.get(), *GetVertexPos(0), *GetVertexPos(1), *GetVertexPos(2));
-					if (res.HitFlag == TRUE) {
-						ishit = true;
-						auto vectmp = (VECTOR_ref)res.Position - repos;
-						length = vectmp.size();
-						isback = (vectmp.dot(GetVertex(0)->norm) >= 0.f);
-						break;
+				{
+					for (int i = 0; i < 2; i++) {
+						auto res = HitCheck_Line_Triangle(repos.get(), pos_t.get(), m_WallBase[i][0].get(), m_WallBase[i][1].get(), m_WallBase[i][2].get());
+						if (res.HitFlag == TRUE) {
+							ishit = true;
+							auto vectmp = (VECTOR_ref)res.Position - repos;
+							length = vectmp.size();
+							isback = (vectmp.dot(m_Wallnorm) >= 0.f);
+							break;
+						}
+					}
+				}
+				if (ishit) {
+					ishit = false;
+					for (int index = 0; index < this->m_WallIndex[0].size() / Triangle_Num; index++) {
+						auto GetVertex = [&](int ID) {return &(this->m_WallVertex[0][this->m_WallIndex[0][(int)index * Triangle_Num + ID]]); };
+						auto GetVertexPos = [&](int ID) {return &(GetVertex(ID)->pos); };
+						auto res = HitCheck_Line_Triangle(repos.get(), pos_t.get(), *GetVertexPos(0), *GetVertexPos(1), *GetVertexPos(2));
+						if (res.HitFlag == TRUE) {
+							ishit = true;
+							break;
+						}
 					}
 				}
 				if (ishit) {
@@ -963,17 +989,19 @@ namespace FPS_n2 {
 			}
 
 		private:
-			void			DrawCommon(bool IsCalling) noexcept {
+			void			DrawCommon() noexcept {
 				this->m_ObjGround2.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-318.f, -12.5f, 897.f)));
-				this->m_ObjGround2.DrawModel();
+				//this->m_ObjGround2.DrawModel();
 
 				SetFogEnable(TRUE);
 				SetFogColor(0, 0, 0);
 				SetFogDensity(0.5f);
+
 				this->m_ObjGround.DrawModel();
 				for (auto& w : this->m_Walls) {
-					w.Draw(IsCalling);
+					w.Draw();
 				}
+				SetUseBackCulling(TRUE);
 				SetFogEnable(FALSE);
 			}
 		public://
@@ -1075,7 +1103,10 @@ namespace FPS_n2 {
 
 						this->m_Walls[i].Init(this->m_objWall, pos, atan2f(vec.z(), vec.x()), 2.7f);
 					}
+					//this->m_Walls.clear();
 				}
+				SetUseBackCulling(TRUE);
+				SetTextureAddressModeUV(DX_TEXADDRESS_WRAP, DX_TEXADDRESS_WRAP);
 			}
 			//
 			void			Execute(void) noexcept {
@@ -1098,13 +1129,13 @@ namespace FPS_n2 {
 				SetUseLighting(TRUE);
 			}
 			void			Shadow_Draw_NearFar(void) noexcept {
-				DrawCommon(false);
+				DrawCommon();
 			}
 			void			Shadow_Draw(void) noexcept {
-				DrawCommon(false);
+				//DrawCommon();
 			}
 			void			Draw(void) noexcept {
-				DrawCommon(true);
+				DrawCommon();
 				//this->m_grass.Draw();
 			}
 			//

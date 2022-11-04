@@ -197,8 +197,8 @@ namespace FPS_n2 {
 				auto tmp2 = 0.2f * GetRandf(deg2rad(1.f));
 				auto tmp3 = Lerp(0.5f, 0.35f, this->m_InputGround.GetSquatPer());
 				VECTOR_ref tmpvec = VECTOR_ref::vget(
-					tmp2 + 0.0002f * sin(this->m_HeartRateRad) * powf(this->m_HeartRate / HeartRateMin, 3.f),
-					tmp2 + 0.0002f * sin(this->m_HeartRateRad * 3) * powf(this->m_HeartRate / HeartRateMin, 3.f),
+					tmp2 + 0.00006f * sin(this->m_HeartRateRad) * powf(this->m_HeartRate / HeartRateMin, 3.f),
+					tmp2 + 0.00006f * sin(this->m_HeartRateRad * 3) * powf(this->m_HeartRate / HeartRateMin, 3.f),
 					0.f
 				);
 				return tmpvec * tmp3;
@@ -853,7 +853,7 @@ namespace FPS_n2 {
 
 							auto mat = (GetFrameWorldMat(CharaFrame::RightHandJoint).GetRot()*GetCharaDir().Inverse());
 							zVec1 = MATRIX_ref::Vtrans(VECTOR_ref::vget(-1, -1, 0).Norm(), mat);
-							yVec1 = zVec1.cross((MATRIX_ref::RotZ(this->m_LeanRad)*this->m_UpperMatrix.Inverse()).yvec().cross(zVec1)).Norm();
+							yVec1 = MATRIX_ref::Vtrans(VECTOR_ref::vget(0, 0, -1).Norm(), mat);
 
 							if (m_ShotPhase <= 1) {
 								zVec1 = Lerp(zVec1, VECTOR_ref::front()*-1.f, m_ReadyPer);;

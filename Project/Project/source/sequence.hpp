@@ -314,12 +314,12 @@ namespace FPS_n2 {
 #ifdef DEBUG
 					DebugParts->end_way();
 					DebugParts->debug(y_r(1920 - 300), y_r(50), float(GetNowHiPerformanceCount() - this->m_Wait) / 1000.f);
-					//printfDx("AsyncCount :%d\n", GetASyncLoadNum());
-					//printfDx("Drawcall   :%d\n", GetDrawCallCount());
-					//printfDx("FPS        :%5.2f fps\n", FPS);
-					//printfDx("AllTime    :%5.2f ms\n", float(this->m_OldWait) / 1000.f);
-					//printfDx("DrawTime   :%5.2f ms\n", float(this->m_DrawWait) / 1000.f);
-					//printfDx("All-Draw   :%5.2f ms\n", float(this->m_OldWait - this->m_DrawWait) / 1000.f);
+					printfDx("AsyncCount :%d\n", GetASyncLoadNum());
+					printfDx("Drawcall   :%d\n", GetDrawCallCount());
+					printfDx("FPS        :%5.2f fps\n", FPS);
+					printfDx("AllTime    :%5.2f ms\n", float(this->m_OldWait) / 1000.f);
+					printfDx("DrawTime   :%5.2f ms\n", float(this->m_DrawWait) / 1000.f);
+					printfDx("All-Draw   :%5.2f ms\n", float(this->m_OldWait - this->m_DrawWait) / 1000.f);
 					//DepthScreen.DrawExtendGraph(0, 0, 960, 540, true);
 #endif // DEBUG
 				}
