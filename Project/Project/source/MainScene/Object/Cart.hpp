@@ -34,7 +34,7 @@ namespace FPS_n2 {
 			void	CheckBullet(void) noexcept {
 				if (IsActive()) {
 					if ((this->m_move.pos - this->m_move.repos).y() <= 0.f) {
-						auto HitResult = this->m_MapCol->CollCheck_Line(this->m_move.repos + VECTOR_ref::up()*1.f, this->m_move.pos);
+						auto HitResult = this->m_BackGround->GetGroundCol().CollCheck_Line(this->m_move.repos + VECTOR_ref::up()*1.f, this->m_move.pos);
 						if (HitResult.HitFlag == TRUE) {
 							this->m_move.pos = HitResult.HitPosition;
 

@@ -15,7 +15,7 @@ namespace FPS_n2 {
 
 			moves										m_move;
 			MATRIX_ref									m_PrevMat;//ï®óùçXêVÇÃÇΩÇﬂ
-			const MV1*									m_MapCol{ nullptr };
+			std::shared_ptr<BackGroundClass>			m_BackGround;				//BG
 			std::vector<std::pair<int, MATRIX_ref>>		m_Frames;
 			std::vector<std::pair<int, float>>			m_Shapes;
 			ObjType										m_objType{ (ObjType)0 };
@@ -38,7 +38,7 @@ namespace FPS_n2 {
 			void			SetUseRealTimePhysics(bool value) noexcept { this->m_Use_RealTimePhysics = value; }
 			void			SetActive(bool value) noexcept { this->m_IsActive = value; }
 			void			SetIsDelete(bool value) noexcept { this->m_IsDelete = value; }
-			void			SetMapCol(const MV1* MapCol) noexcept { this->m_MapCol = MapCol; }
+			void			SetMapCol(const std::shared_ptr<BackGroundClass>& backGround) noexcept { this->m_BackGround = backGround; }
 			void			SetResetP(bool value) { this->m_IsResetPhysics = value; }
 			void			SetCameraPosition(const VECTOR_ref& value) { this->m_CameraPosition = value; }
 			void			SetCameraSize(float value) { this->m_CameraSize = value; }
@@ -86,7 +86,7 @@ namespace FPS_n2 {
 			const auto		GetMapColNearest(const VECTOR_ref& StartPos, VECTOR_ref* EndPos) {
 				bool ans = false;
 				while (true) {
-					auto colres = this->m_MapCol->CollCheck_Line(StartPos, *EndPos);
+					auto colres = this->m_BackGround->GetGroundCol().CollCheck_Line(StartPos, *EndPos);
 					if (colres.HitFlag == TRUE) {
 						ans = true;
 						if (*EndPos == colres.HitPosition) { break; }
@@ -366,6 +366,7 @@ namespace FPS_n2 {
 			}
 			//
 			virtual void	Dispose(void) noexcept {
+				this->m_BackGround.reset();
 				this->GetObj().Dispose();
 				this->m_col.Dispose();
 				this->m_move.vec.clear();

@@ -81,7 +81,7 @@ namespace FPS_n2 {
 			const auto		ColCheckGround(void) noexcept {
 				MV1_COLL_RESULT_POLY ColResGround; ColResGround.HitFlag = FALSE;
 				if (IsActive()) {
-					ColResGround = this->m_MapCol->CollCheck_Line(this->m_move.repos, this->m_move.pos);
+					ColResGround = this->m_BackGround->GetGroundCol().CollCheck_Line(this->m_move.repos, this->m_move.pos);
 					if (ColResGround.HitFlag == TRUE) {
 						this->m_move.pos = ColResGround.HitPosition;
 					}

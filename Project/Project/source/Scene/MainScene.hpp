@@ -290,7 +290,7 @@ namespace FPS_n2 {
 			static const int		gun_num = Chara_num;
 		private:
 			//リソース関連
-			BackGroundClass			m_BackGround;				//BG
+			std::shared_ptr<BackGroundClass>			m_BackGround;				//BG
 			SoundHandle				m_Env;
 			MV1						hit_pic;					//弾痕  
 			//戦車データ
@@ -346,7 +346,8 @@ namespace FPS_n2 {
 					GetColorF(0.42f, 0.41f, 0.40f, 0.0f));
 				//Load
 				//BG
-				this->m_BackGround.Init();
+				this->m_BackGround = std::make_shared<BackGroundClass>();
+				this->m_BackGround->Init();
 				//
 				auto data_t = GetFileNamesInDirectory("data/tank/");
 				for (auto& d : data_t) {
@@ -358,7 +359,7 @@ namespace FPS_n2 {
 				for (auto& t : this->vehc_data) { t.Set(); }										//戦車2
 				//
 
-				ObjMngr->Init(&this->m_BackGround.GetGroundCol());
+				ObjMngr->Init(this->m_BackGround);
 
 				//ObjMngr->AddObject(ObjType::Human, "data/Charactor/WinningTicket/");
 				//ObjMngr->AddObject(ObjType::Human, "data/Charactor/Sweep/");
@@ -393,7 +394,7 @@ namespace FPS_n2 {
 				for (int i = 0; i < Chara_num; i++) {
 					auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
 					VECTOR_ref pos_t = VECTOR_ref::vget(0.f + (float)(i)*20.f, 0.f, 0.f);
-					auto HitResult = this->m_BackGround.GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
+					auto HitResult = this->m_BackGround->GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
 					if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
 					c->SetGunPtr(
 						(std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, i * 2 + 0)),
@@ -416,9 +417,9 @@ namespace FPS_n2 {
 					vehicle_Pool.emplace_back(v);
 
 					VECTOR_ref pos_t = VECTOR_ref::vget(600.f + (float)(i)*10.f*Scale_Rate, 0.f, 0.f);
-					auto HitResult = this->m_BackGround.GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
+					auto HitResult = this->m_BackGround->GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
 					if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
-					v->ValueInit(&vehc_data[0], hit_pic, this->m_BackGround.GetBox2Dworld(), (PlayerID)i);
+					v->ValueInit(&vehc_data[0], hit_pic, this->m_BackGround->GetBox2Dworld(), (PlayerID)i);
 					v->ValueSet(deg2rad(0), deg2rad(90), pos_t);
 				}
 				//player
@@ -498,7 +499,7 @@ namespace FPS_n2 {
 				auto* ObjMngr = ObjectManager::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
 #ifdef DEBUG
-				auto* DebugParts = DebugClass::Instance();					//デバッグ
+				//auto* DebugParts = DebugClass::Instance();					//デバッグ
 #endif // DEBUG
 				//FirstDoingv
 				if (IsFirstLoop) {
@@ -757,7 +758,7 @@ namespace FPS_n2 {
 					auto EndPos = StartPos + Vehicle->GetGunMuzzleVec() * 500.f*Scale_Rate;
 					Vehicle->GetMapColNearest(StartPos, &EndPos);
 					while (true) {
-						auto colres = this->m_BackGround.GetGroundCol().CollCheck_Line(StartPos, EndPos);
+						auto colres = this->m_BackGround->GetGroundCol().CollCheck_Line(StartPos, EndPos);
 						if (colres.HitFlag == TRUE) {
 							if (EndPos == colres.HitPosition) { break; }
 							EndPos = colres.HitPosition;
@@ -777,14 +778,8 @@ namespace FPS_n2 {
 					}
 					Vehicle->SetAimingDistance((StartPos - EndPos).size());
 				}
-#ifdef DEBUG
-				DebugParts->put_way();
-#endif // DEBUG
 				//Execute
 				ObjMngr->ExecuteObject();
-#ifdef DEBUG
-				DebugParts->put_way();
-#endif // DEBUG
 				//
 				for (int j = 0; j < gun_num; j++) {
 					auto& Gun = (std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, j));
@@ -807,9 +802,18 @@ namespace FPS_n2 {
 								//AmmoClass
 								MV1_COLL_RESULT_POLY ColResGround = a->ColCheckGround();
 								VECTOR_ref pos_tmp = a->GetMove().pos;
-								bool hitwall = this->m_BackGround.GetWallCol(a->GetMove().repos,&pos_tmp);
+								VECTOR_ref norm_tmp;
+								bool hitwall = this->m_BackGround->GetWallCol(a->GetMove().repos, &pos_tmp, &norm_tmp, a->GetCaliberSize());//0.00762f
 								bool is_HitAll = false;
-								auto& v = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, a->GetShootedID()));
+								auto& c = *ObjMngr->GetObj(ObjType::Human, a->GetShootedID());//(std::shared_ptr<CharacterClass>&)
+								for (int i = 0; i < Chara_num; i++) {
+									auto& tgt = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
+									if (i == a->GetShootedID()) { continue; }
+									auto res = tgt->CheckAmmoHit(a.get(), c->GetMove().pos);
+									is_HitAll |= res.first;
+									if (res.second) { break; }
+								}
+								auto& v = *ObjMngr->GetObj(ObjType::Vehicle, a->GetShootedID());
 								for (int i = 0; i < Vehicle_num; i++) {
 									auto& tgt = (std::shared_ptr<VehicleClass>&)(*ObjMngr->GetObj(ObjType::Vehicle, i));
 									if (i == a->GetShootedID()) { continue; }
@@ -821,21 +825,20 @@ namespace FPS_n2 {
 									a->HitGround(pos_tmp);
 
 									if (hitwall) {
-										Effect_UseControl::Set_FootEffect(ColResGround.HitPosition, ColResGround.Normal, 0.05f / 0.1f * Scale_Rate);
+										Effect_UseControl::Set_FootEffect(pos_tmp, norm_tmp, a->GetCaliberSize() / 0.1f * Scale_Rate);
 									}
 									else if (ColResGround.HitFlag == TRUE) {
-										Effect_UseControl::Set_FootEffect(ColResGround.HitPosition, ColResGround.Normal, 0.05f / 0.1f * Scale_Rate);
+										Effect_UseControl::Set_FootEffect(ColResGround.HitPosition, ColResGround.Normal, a->GetCaliberSize() / 0.1f * Scale_Rate);
 									}
+									/*
 									if (ObjMngr->GetObj(ObjType::Vehicle, a->GetShootedID())) {
 										if (ColResGround.HitFlag == TRUE) {
 										}
 										else if (hitwall) {
-											v->HitGround(pos_tmp, (pos_tmp - a->GetMove().repos).Norm(), a->GetMove().vec);
+											((std::shared_ptr<VehicleClass>&)v)->HitGround(pos_tmp, (pos_tmp - a->GetMove().repos).Norm(), a->GetMove().vec);
 										}
 									}
-									else {
-
-									}
+									//*/
 								}
 							}
 						}
@@ -845,7 +848,7 @@ namespace FPS_n2 {
 						loop++;
 					}
 				}
-				this->m_BackGround.GetBox2Dworld()->Step(1.f, 1, 1);//物理更新
+				this->m_BackGround->GetBox2Dworld()->Step(1.f, 1, 1);//物理更新
 				ObjMngr->LateExecuteObject();
 				//視点
 				if (!PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) {
@@ -891,8 +894,8 @@ namespace FPS_n2 {
 						else {
 							fov = deg2rad(95);
 						}
-						Easing(&camera_main.near_, Scale_Rate * 1.f, 0.9f, EasingType::OutExpo);
-						Easing(&camera_main.far_, Scale_Rate * 30.f, 0.9f, EasingType::OutExpo);
+						Easing(&camera_main.near_, Scale_Rate * 0.5f, 0.9f, EasingType::OutExpo);
+						Easing(&camera_main.far_, Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
 
 						if (Chara->GetShotSwitch()) {
 							fov -= deg2rad(5);
@@ -938,7 +941,7 @@ namespace FPS_n2 {
 						camera_main.camvec = CamPos + CamVec * 100.f;
 					}
 				}
-				this->m_BackGround.Execute();
+				this->m_BackGround->Execute();
 				//UIパラメーター
 				{
 					this->m_UIclass.SetIntParam(1, (int)this->m_ScoreBuf);
@@ -988,33 +991,33 @@ namespace FPS_n2 {
 				PlayerMngr->Dispose();
 				ObjMngr->DisposeObject();
 				this->vehicle_Pool.clear();
-				this->m_BackGround.Dispose();
+				this->m_BackGround->Dispose();
 			}
 			//
 			void			Depth_Draw(void) noexcept override {
 				//auto* ObjMngr = ObjectManager::Instance();
 				//auto* PlayerMngr = PlayerManager::Instance();
 
-				this->m_BackGround.Draw();
+				this->m_BackGround->Draw();
 				//ObjMngr->DrawDepthObject();
 			}
 			void			BG_Draw(void) noexcept override {
-				this->m_BackGround.BG_Draw();
+				this->m_BackGround->BG_Draw();
 			}
 			void			Shadow_Draw_NearFar(void) noexcept override {
-				this->m_BackGround.Shadow_Draw_NearFar();
+				this->m_BackGround->Shadow_Draw_NearFar();
 			}
 			void			Shadow_Draw(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
 
-				//this->m_BackGround.Shadow_Draw();
+				//this->m_BackGround->Shadow_Draw();
 				ObjMngr->DrawObject_Shadow();
 			}
 			void			Main_Draw(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
 				SetFogStartEnd(camera_main.near_, camera_main.far_*2.f);
-				this->m_BackGround.Draw();
+				this->m_BackGround->Draw();
 				ObjMngr->DrawObject();
 				//ObjMngr->DrawDepthObject();
 				//シェーダー描画用パラメーターセット

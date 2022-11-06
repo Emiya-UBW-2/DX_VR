@@ -567,14 +567,16 @@ namespace FPS_n2 {
 
 		class WallObj {
 		public:
+			MV1										m_PlayerCol;
 		private:
-			MV1										m_obj;
 
+			float									m_BreakTimer{ -1 };
+			bool									m_IsDraw{ true };
 			std::array<std::vector<VERTEX3D>,4>		m_WallVertex;		//壁をセット
 			std::array<std::vector<WORD>, 4>		m_WallIndex;		//壁をセット
 
 			std::array<std::array<VECTOR_ref, 3>, 2>	m_WallBase;
-			VECTOR_ref								m_Wallnorm;
+			VECTOR_ref									m_Wallnorm;
 
 			int										m_TexHandle;
 			int										m_TexHandle2;
@@ -587,13 +589,14 @@ namespace FPS_n2 {
 
 			std::shared_ptr<std::thread>			m_WallCalc;
 			bool									isThreadEnd{ false };
+			std::array<std::vector<VECTOR_ref>, 2>	m_GonPoint;//辺の数
 
-			LONGLONG SetTime = 0;
-			LONGLONG OLDTime = 0;
 			int Bigcount = 0;
 			//int addtri = 0;
 		public://getter
-			bool			GetIsBreak() { return (Bigcount > 3) || (this->m_WallIndex[0].size()>5000); }
+			bool			GetIsBreak() {
+				return (this->m_BreakTimer == 0.f);
+			}
 		private:
 			//0を基に別オブジェを作る
 			void SetTri(int ID, bool isback, float offset) noexcept {
@@ -717,7 +720,7 @@ namespace FPS_n2 {
 				}
 			}
 		public:
-			void			Init(const MV1& obj, const VECTOR_ref& pos, float YRad, float YScale) noexcept {
+			void			Init(const MV1& obj, const MV1& col, const VECTOR_ref& pos, float YRad, float YScale) noexcept {
 				this->m_TexHandle = MV1GetTextureGraphHandle(obj.get(), 0);
 				this->m_TexHandle2 = MV1GetTextureGraphHandle(obj.get(), 1);
 
@@ -734,6 +737,12 @@ namespace FPS_n2 {
 				m_Material.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);
 				m_Material.Power = 20.0f;
 				SetMaterialParam(m_Material);
+				this->m_IsDraw = true;
+
+				m_PlayerCol = col.Duplicate();
+				m_PlayerCol.SetupCollInfo(2, 2, 2);
+				m_PlayerCol.SetMatrix(MATRIX_ref::RotY(YRad)*MATRIX_ref::Mtrans(pos));
+				m_PlayerCol.RefreshCollInfo();
 			}
 
 			void			Execute(void) noexcept {
@@ -745,28 +754,51 @@ namespace FPS_n2 {
 						isThreadEnd = false;
 					}
 				}
+				if ((Bigcount > 3) || (this->m_WallIndex[0].size() > 5000)) {
+					this->m_BreakTimer = std::max(this->m_BreakTimer - 1.f / FPS/2.f, 0.f);
+				}
+				else {
+					this->m_BreakTimer = 1.f;
+				}
 				//printfDx("スレッド数:%d\n", std::thread::hardware_concurrency());
-				//printfDx("処理時間:%d\n", SetTime);
 
 				//addtri += GetMouseWheelRotVolWithCheck();
 			}
 
-			void			Draw() noexcept {
-				if (CheckCameraViewClip_Box(
-					(this->m_Pos + VECTOR_ref::vget(-6.25f, 0, -6.25f)).get(),
-					(this->m_Pos + VECTOR_ref::vget(6.25f, 20, 6.25f)).get()) == FALSE
+			bool			Draw() noexcept {
+
+				//m_PlayerCol.DrawModel();
+				//return true;
+
+				if (
+					(
+						CheckCameraViewClip_Box(
+							(this->m_Pos + VECTOR_ref::vget(-6.25f, 0, -6.25f)).get(),
+							(this->m_Pos + VECTOR_ref::vget(6.25f, 20, 6.25f)).get()) == FALSE
+						)
+					&& this->m_IsDraw
 					) {
+
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*this->m_BreakTimer), 0, 255));
+
+					auto vec_tmp = this->m_Pos - GetCameraPosition();
+					int sel = (this->m_Wallnorm.dot(vec_tmp.Norm()*-1.f) >0.f) ? 0 : 1;
 					for (int i = 0; i < 4; i++) {
-						if (1 <= i && i <= 2) {
-							DrawPolygonIndexed3D(this->m_WallVertex[i].data(), (int)this->m_WallVertex[i].size(), this->m_WallIndex[i].data(), (int)(this->m_WallIndex[i].size()) / Triangle_Num, this->m_TexHandle2, TRUE);
-						}
-						else {
-							DrawPolygonIndexed3D(this->m_WallVertex[i].data(), (int)this->m_WallVertex[i].size(), this->m_WallIndex[i].data(), (int)(this->m_WallIndex[i].size()) / Triangle_Num, this->m_TexHandle, TRUE);
+						if ((i % 2) == sel) {
+							if (1 <= i && i <= 2) {
+								if ((this->m_BreakTimer == 1.f) && (vec_tmp.Length() < 5.f*Scale_Rate)) {
+									DrawPolygonIndexed3D(this->m_WallVertex[i].data(), (int)this->m_WallVertex[i].size(), this->m_WallIndex[i].data(), (int)(this->m_WallIndex[i].size()) / Triangle_Num, this->m_TexHandle2, TRUE);
+								}
+							}
+							else {
+								DrawPolygonIndexed3D(this->m_WallVertex[i].data(), (int)this->m_WallVertex[i].size(), this->m_WallIndex[i].data(), (int)(this->m_WallIndex[i].size()) / Triangle_Num, this->m_TexHandle, TRUE);
+							}
 						}
 					}
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+					return true;
 				}
-
-				return;
+				return false;
 #if false
 				for (auto& s : this->m_Side) {
 					for (int i = 0; i < s.size(); i++) {
@@ -801,49 +833,77 @@ namespace FPS_n2 {
 #endif
 			}
 
-			bool			CheckHit(const VECTOR_ref& repos, VECTOR_ref* pos) {
+			bool			CheckHit(const VECTOR_ref& repos, VECTOR_ref* pos, VECTOR_ref* norm, float radius) {
 				VECTOR_ref pos_t = *pos;
 				bool ishit = false;
-				float length = (pos_t - repos).size();
-				bool isback = false;
-				{
-					for (int i = 0; i < 2; i++) {
-						auto res = HitCheck_Line_Triangle(repos.get(), pos_t.get(), m_WallBase[i][0].get(), m_WallBase[i][1].get(), m_WallBase[i][2].get());
-						if (res.HitFlag == TRUE) {
-							ishit = true;
-							auto vectmp = (VECTOR_ref)res.Position - repos;
-							length = vectmp.size();
-							isback = (vectmp.dot(m_Wallnorm) >= 0.f);
-							break;
-						}
-					}
+				if (this->m_BreakTimer != 1.f) {
+					return false;
 				}
-				if (ishit) {
-					ishit = false;
-					for (int index = 0; index < this->m_WallIndex[0].size() / Triangle_Num; index++) {
-						auto GetVertex = [&](int ID) {return &(this->m_WallVertex[0][this->m_WallIndex[0][(int)index * Triangle_Num + ID]]); };
-						auto GetVertexPos = [&](int ID) {return &(GetVertex(ID)->pos); };
-						auto res = HitCheck_Line_Triangle(repos.get(), pos_t.get(), *GetVertexPos(0), *GetVertexPos(1), *GetVertexPos(2));
-						if (res.HitFlag == TRUE) {
-							ishit = true;
-							break;
+				{
+					bool isback = ((pos_t - repos).dot(m_Wallnorm) >= 0.f);
+					float Radius = radius * Scale_Rate*1.8f*5.f;
+					int N_gon = 5 + std::clamp((int)(radius / 0.015f), 0, 11);
+					VECTOR_ref vec = (isback) ? ((pos_t - repos)*-1.f) : (pos_t - repos);
+					VECTOR_ref RePos = isback ? pos_t : repos;
+					VECTOR_ref xaxis = vec.Norm().cross(VECTOR_ref::up());
+					VECTOR_ref yaxis = vec.Norm().cross(xaxis);
+					m_GonPoint[0].resize(N_gon);
+					m_GonPoint[1].resize(N_gon);
+					for (int gon = 0; gon < N_gon; gon++) {
+						float rad = deg2rad(360.f * (0.5f + (float)gon) / (float)N_gon);
+						m_GonPoint[0][gon] = RePos + (xaxis * sin(rad) + yaxis * cos(rad))*Radius;
+						//平面上のくりぬきポイント取得
+						VECTOR_ref TriPos0 = m_WallBase[0][0];
+						VECTOR_ref TriPos1 = m_WallBase[0][1];
+						VECTOR_ref TriPos2 = m_WallBase[0][2];
+						VECTOR_ref TriNorm = ((TriPos1 - TriPos0).cross(TriPos2 - TriPos0)).Norm();
+
+						VECTOR_ref PosN = Plane_Point_MinLength_Position(TriPos0.get(), TriNorm.get(), m_GonPoint[0][gon].get());
+						float pAN = std::abs((m_GonPoint[0][gon] - PosN).dot(TriNorm));
+						float pBN = std::abs(((m_GonPoint[0][gon] + vec) - PosN).dot(TriNorm));
+						m_GonPoint[1][gon] = m_GonPoint[0][gon] + vec * (pAN / (pAN + pBN));
+					}
+
+					for (int gon = 0; gon < N_gon; gon++) {
+						VECTOR_ref repos_tmp, pos_tmp;
+						if (gon == N_gon) {
+							repos_tmp = repos;
+							pos_tmp = pos_t;
 						}
+						else {
+							repos_tmp = m_GonPoint[0][gon];
+							pos_tmp = m_GonPoint[0][gon] + (m_GonPoint[1][gon] - m_GonPoint[0][gon])*2.f;
+						}
+						for (int i = 0; i < 2; i++) {
+							auto res1 = HitCheck_Line_Triangle(repos_tmp.get(), pos_tmp.get(), m_WallBase[i][0].get(), m_WallBase[i][1].get(), m_WallBase[i][2].get());
+							if (res1.HitFlag == TRUE) {
+								//元の4角にて当たったら
+								for (int index = 0; index < this->m_WallIndex[0].size() / Triangle_Num; index++) {
+									auto GetVertexPos = [&](int ID) {return &(this->m_WallVertex[0][this->m_WallIndex[0][(int)index * Triangle_Num + ID]].pos); };
+									auto res2 = HitCheck_Line_Triangle(repos_tmp.get(), pos_tmp.get(), *GetVertexPos(0), *GetVertexPos(1), *GetVertexPos(2));
+									if (res2.HitFlag == TRUE) {
+										ishit = true;
+										*pos = repos + (*pos - repos).Norm()*(((VECTOR_ref)res1.Position - repos).size());
+										if (norm) {
+											*norm = this->m_Wallnorm;
+										}
+										break;
+									}
+								}
+								break;
+							}
+						}
+						if (ishit) { break; }
 					}
 				}
 				if (ishit) {
 					if (m_WallCalc.get() == nullptr){
-						isThreadEnd = false;
-						OLDTime = GetNowHiPerformanceCount();
 						m_WallCalc = std::make_shared<std::thread>([&]() {
+							isThreadEnd = false;
+							LONGLONG OLDTime = GetNowHiPerformanceCount();
+							auto GonPoint2 = m_GonPoint;//辺の数
+							int N_gon = (int)GonPoint2[1].size();
 							{
-								VECTOR_ref vec = (pos_t - repos);
-								VECTOR_ref RePos = isback ? pos_t : repos;
-								if (isback) { vec *= -1.f; }
-								VECTOR_ref xaxis = vec.Norm().cross(VECTOR_ref::up());
-								VECTOR_ref yaxis = vec.Norm().cross(xaxis);
-								const int N_gon = 5;
-								const float Radius = 0.00762f*Scale_Rate*1.8f*5.f;
-								std::array<VECTOR_ref, N_gon> GonPoint;//辺の数
 								for (auto& Side : this->m_Side) {
 									size_t index = &Side - &this->m_Side.front();
 									auto GetVertex = [&](int ID) {return &(this->m_WallVertex[0][this->m_WallIndex[0][(int)index * Triangle_Num + ID]]); };
@@ -854,23 +914,12 @@ namespace FPS_n2 {
 									VECTOR_ref TriNorm = ((TriPos1 - TriPos0).cross(TriPos2 - TriPos0)).Norm();
 
 									for (int gon = 0; gon < N_gon; gon++) {
-										float rad = deg2rad(360.f * (0.5f + (float)gon) / (float)N_gon);
-										VECTOR_ref BasePos = RePos + (xaxis * sin(rad) + yaxis * cos(rad))*Radius;
-										//平面上のくりぬきポイント取得
-										{
-											VECTOR_ref PosN = Plane_Point_MinLength_Position(TriPos0.get(), TriNorm.get(), BasePos.get());
-											float pAN = std::abs((BasePos - PosN).dot(TriNorm));
-											float pBN = std::abs(((BasePos + vec) - PosN).dot(TriNorm));
-											GonPoint[gon] = BasePos + vec * (pAN / (pAN + pBN));
-										}
 										//直に入っている部分
-										{
-											auto res2 = HitCheck_Line_Triangle(BasePos.get(), (BasePos + vec).get(), TriPos0.get(), TriPos1.get(), TriPos2.get());
-											if ((res2.HitFlag == TRUE)) {
-												Side.resize(Side.size() + 1);
-												Side.back() = std::make_unique<SideControl>();
-												Side.back()->Set(SideType::Square, res2.Position, this->m_BasePos, TriNorm, GetVertex(0)->dif, GetVertex(0)->spc, gon);
-											}
+										auto res2 = HitCheck_Line_Triangle(GonPoint2[0][gon].get(), (GonPoint2[0][gon] + (GonPoint2[1][gon] - GonPoint2[0][gon])*2.f).get(), TriPos0.get(), TriPos1.get(), TriPos2.get());
+										if ((res2.HitFlag == TRUE)) {
+											Side.resize(Side.size() + 1);
+											Side.back() = std::make_unique<SideControl>();
+											Side.back()->Set(SideType::Square, res2.Position, this->m_BasePos, TriNorm, GetVertex(0)->dif, GetVertex(0)->spc, gon);
 										}
 									}
 									//n_sideの中にある点の削除(外周としては不要なもののため)
@@ -878,7 +927,7 @@ namespace FPS_n2 {
 										if (Side[s]->Type == SideType::Triangle) {
 											bool isIn = true;
 											for (int gon = 0; gon < N_gon; gon++) {
-												if (!GetSamePoint(GonPoint[gon], GonPoint[(gon + 1) % N_gon], GonPoint[(gon + 2) % N_gon], Side[s]->Pos)) {
+												if (!GetSamePoint(GonPoint2[1][gon], GonPoint2[1][(gon + 1) % N_gon], GonPoint2[1][(gon + 2) % N_gon], Side[s]->Pos)) {
 													isIn = false;
 													break;
 												}
@@ -892,8 +941,8 @@ namespace FPS_n2 {
 									}
 									//三角と辺の交点を追加
 									for (int gon = 0; gon < N_gon; gon++) {
-										VECTOR_ref pos1 = GonPoint[gon];
-										VECTOR_ref pos2 = GonPoint[(gon + 1) % N_gon];
+										VECTOR_ref pos1 = GonPoint2[1][gon];
+										VECTOR_ref pos2 = GonPoint2[1][(gon + 1) % N_gon];
 										for (int tri = 0; tri < Triangle_Num; tri++) {
 											VECTOR_ref TriPost0 = *GetVertexPos(tri);
 											VECTOR_ref TriPost1 = *GetVertexPos((tri + 1) % Triangle_Num);
@@ -944,18 +993,18 @@ namespace FPS_n2 {
 									CalcDelaunay(&this->m_Tri2D[index], Side, GetExternalTriangle(position, Size), Point2D);
 									Point2D.clear();
 								}
+								this->m_IsDraw = false;
 								SetNext();
 								SetSide();
+								this->m_IsDraw = true;
 							}
 							isThreadEnd = true;
-							SetTime = GetNowHiPerformanceCount() - OLDTime;
-							if (SetTime > 16 * 2 * 1000) {
+							if ((GetNowHiPerformanceCount() - OLDTime) > 16 * 2 * 1000) {
 								Bigcount++;
 							}
 						});
 					}
 				}
-				*pos = repos + (*pos - repos).Norm()*(length);
 				return ishit;
 			}
 		};
@@ -969,6 +1018,7 @@ namespace FPS_n2 {
 			MV1							m_ObjGroundCol_Box2D;
 			MV1							m_ObjGround_Wallpoint;
 			MV1							m_objWall;
+			MV1							m_objWallCol;
 			std::shared_ptr<b2World>	m_b2world;
 			std::vector<std::pair<b2Pats, std::array<VECTOR_ref, 2>>>	m_b2wallParts;	//壁をセット
 			Grass						m_grass;
@@ -977,21 +1027,32 @@ namespace FPS_n2 {
 			std::vector<std::array<VECTOR_ref, 2>>	m_WallParts;	//壁をセット
 		public://getter
 			const auto&		GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
+			const auto&		GetWallGroundCol(int id) noexcept { return this->m_Walls.at(id).m_PlayerCol; }
+			const auto		GetWallGroundColNum() const noexcept { return this->m_Walls.size(); }
+
 			auto&			GetBox2Dworld(void) noexcept { return this->m_b2world; }
 
-			const auto		GetWallCol(const VECTOR_ref& repos, VECTOR_ref* pos) noexcept {
+			const auto		GetWallCol(const VECTOR_ref& repos, VECTOR_ref* pos, VECTOR_ref* norm, float radius) noexcept {
+				bool res = false;
 				for (auto& w : this->m_Walls) {
-					if (w.CheckHit(repos, pos)) {
-						return true;
+					if (w.CheckHit(repos, pos, norm, radius)) {
+						res = true;
+						//return true;
 					}
 				}
-				return false;
+				return res;
 			}
-
 		private:
 			void			DrawCommon() noexcept {
+#ifdef DEBUG
+				auto* DebugParts = DebugClass::Instance();					//デバッグ
+#endif // DEBUG
+#ifdef DEBUG
+				DebugParts->end_way();
+#endif // DEBUG
+
 				this->m_ObjGround2.SetMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(-318.f, -12.5f, 897.f)));
-				//this->m_ObjGround2.DrawModel();
+				this->m_ObjGround2.DrawModel();
 
 				SetFogEnable(TRUE);
 				SetFogColor(0, 0, 0);
@@ -1003,6 +1064,10 @@ namespace FPS_n2 {
 				}
 				SetUseBackCulling(TRUE);
 				SetFogEnable(FALSE);
+
+#ifdef DEBUG
+				DebugParts->end_way();
+#endif // DEBUG
 			}
 		public://
 			//
@@ -1063,6 +1128,7 @@ namespace FPS_n2 {
 				//this->m_grass.Init(&this->m_ObjGroundCol);
 				//壁
 				MV1::Load("data/model/wall/model.mqoz", &this->m_objWall);
+				MV1::Load("data/model/wallcol/model.mv1", &this->m_objWallCol);
 				{
 					float lim = 0.5f;
 					this->m_b2world = std::make_shared<b2World>(b2Vec2(0.0f, 0.0f)); // 剛体を保持およびシミュレートするワールドオブジェクトを構築
@@ -1101,7 +1167,7 @@ namespace FPS_n2 {
 						auto pos = (this->m_WallParts[i][0] + this->m_WallParts[i][1]) / 2.f;
 						auto vec = (this->m_WallParts[i][0] - this->m_WallParts[i][1]); vec.y(0);
 
-						this->m_Walls[i].Init(this->m_objWall, pos, atan2f(vec.z(), vec.x()), 2.7f);
+						this->m_Walls[i].Init(this->m_objWall, this->m_objWallCol, pos, atan2f(vec.z(), vec.x()), 2.7f);
 					}
 					//this->m_Walls.clear();
 				}
@@ -1153,6 +1219,8 @@ namespace FPS_n2 {
 				}
 				this->m_b2wallParts.clear();
 				this->m_b2world.reset();
+
+				this->m_Walls.clear();
 			}
 		};
 	};

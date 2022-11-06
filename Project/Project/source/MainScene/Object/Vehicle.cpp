@@ -293,7 +293,7 @@ namespace FPS_n2 {
 					auto ID = &f - &this->m_VecData->Get_wheelframe().front();
 					GetObj().frame_Reset(f.first);
 					auto startpos = GetObj().frame(f.first);
-					auto ColResGround = this->m_MapCol->CollCheck_Line(startpos + y_vec * ((-f.second.y()) + 2.f*Scale_Rate), startpos + y_vec * ((-f.second.y()) - 0.3f*Scale_Rate));
+					auto ColResGround = this->m_BackGround->GetGroundCol().CollCheck_Line(startpos + y_vec * ((-f.second.y()) + 2.f*Scale_Rate), startpos + y_vec * ((-f.second.y()) - 0.3f*Scale_Rate));
 					Easing(&this->m_wheel_frameYpos[ID], (ColResGround.HitFlag == TRUE) ? (ColResGround.HitPosition.y + y_vec.y() * f.second.y() - startpos.y()) : -0.3f*Scale_Rate, 0.9f, EasingType::OutExpo);
 					GetObj().SetFrameLocalMatrix(f.first,
 						MATRIX_ref::RotX((f.second.x() >= 0) ? this->m_wheel_Left : this->m_wheel_Right) *
@@ -339,7 +339,7 @@ namespace FPS_n2 {
 				int cnt_t = 0;
 				//—š‘Ñ
 				for (auto& f : this->m_b2Foot) {
-					f.FirstExecute(&GetObj(), this->m_MapCol);
+					f.FirstExecute(&GetObj(), &m_BackGround->GetGroundCol());
 					for (const auto& t : f.Getdownsideframe()) {
 						if (t.GetColResult_Y() != (std::numeric_limits<float>::max)()) {
 							hight_t += t.GetColResult_Y();
@@ -350,7 +350,7 @@ namespace FPS_n2 {
 				int cnt_sq = cnt_t;
 				for (const auto& s : this->m_VecData->Get_square()) {
 					auto p_t = GetObj().frame(s);
-					auto ColResGround = this->m_MapCol->CollCheck_Line(p_t + (VECTOR_ref::up() * 3.f*Scale_Rate), p_t + (VECTOR_ref::up() * -0.5f*Scale_Rate));
+					auto ColResGround = this->m_BackGround->GetGroundCol().CollCheck_Line(p_t + (VECTOR_ref::up() * 3.f*Scale_Rate), p_t + (VECTOR_ref::up() * -0.5f*Scale_Rate));
 					if (ColResGround.HitFlag == TRUE) {
 						hight_t += ColResGround.HitPosition.y;
 						cnt_t++;

@@ -6,7 +6,7 @@ namespace FPS_n2 {
 		class ObjectManager {
 			std::vector<std::shared_ptr<ObjectBaseClass>>	m_Object;
 			switchs											m_ResetP;
-			const MV1*										m_MapCol = nullptr;
+			std::shared_ptr<BackGroundClass>			m_BackGround;				//BGコピー
 			//シングルトン化
 #if true
 
@@ -75,7 +75,7 @@ namespace FPS_n2 {
 				LoadModel(this->m_Object.back().get(), filepath, objfilename, colfilename);
 
 				auto back = this->m_Object.size();
-				this->m_Object.back()->SetMapCol(this->m_MapCol);
+				this->m_Object.back()->SetMapCol(this->m_BackGround);
 				this->m_Object.back()->Init();
 
 				return &(this->m_Object[back - 1]);
@@ -109,7 +109,7 @@ namespace FPS_n2 {
 				default:
 					break;
 				}
-				this->m_Object.back()->SetMapCol(this->m_MapCol);
+				this->m_Object.back()->SetMapCol(this->m_BackGround);
 				this->m_Object.back()->Init();
 
 				return &(this->m_Object[this->m_Object.size() - 1]);
@@ -134,6 +134,7 @@ namespace FPS_n2 {
 					if (o->GetobjType() == ModelType) {
 						if (cnt == num) {
 							//順番の維持のためここはerase
+							o->Dispose();
 							this->m_Object.erase(this->m_Object.begin() + i);
 							break;
 						}
@@ -147,14 +148,15 @@ namespace FPS_n2 {
 					auto& o = this->m_Object[i];
 					if (o->GetIsDelete()) {
 						//順番の維持のためここはerase
+						o->Dispose();
 						this->m_Object.erase(this->m_Object.begin() + i);
 						i--;
 					}
 				}
 			}
 		public:
-			void			Init(const MV1* MapCol) noexcept {
-				this->m_MapCol = MapCol;
+			void			Init(const std::shared_ptr<BackGroundClass>& backGround) noexcept {
+				this->m_BackGround = backGround;
 			}
 			void			ExecuteObject(void) noexcept {
 				for (int i = 0; i < this->m_Object.size(); i++) {
@@ -196,6 +198,7 @@ namespace FPS_n2 {
 				for (auto& o : this->m_Object) {
 					o->Dispose();
 				}
+				this->m_Object.clear();
 			}
 			//
 		};

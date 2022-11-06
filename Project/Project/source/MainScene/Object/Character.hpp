@@ -38,6 +38,28 @@ namespace FPS_n2 {
 			const auto GetRad() const noexcept { return m_rad; }
 
 		};
+
+		class HitBox {
+			VECTOR_ref	m_pos;
+			float		m_radius;
+		public:
+			void	Execute(const VECTOR_ref&pos, float radius) {
+				m_pos = pos;
+				m_radius = radius;
+			}
+			void	Draw() {
+				DrawSphere_3D(m_pos, m_radius, GetColor(0, 0, 255), GetColor(0, 0, 255));
+			}
+
+			bool	Colcheck(const AmmoClass& pAmmo) {
+				return (HitCheck_Sphere_Capsule(
+					m_pos.get(), m_radius,
+					pAmmo.GetMove().repos.get(), pAmmo.GetMove().pos.get(), pAmmo.GetCaliberSize()*Scale_Rate
+				) == TRUE);
+			}
+
+		};
+
 		class CharacterClass : public ObjectBaseClass {
 		private://キャラパラメーター
 			const float SpeedLimit{ 0.675f };
@@ -90,6 +112,7 @@ namespace FPS_n2 {
 			float												m_NeckPosOffsetPer{ 0.f };
 			float												m_MoveEyePosTimer{ 0.f };
 			VECTOR_ref											m_MoveEyePos;
+			bool												m_IsStuckGun{ false };
 			//入力
 			bool												m_Press_Shot{ false };
 			bool												m_Press_Reload{ false };
@@ -102,6 +125,8 @@ namespace FPS_n2 {
 			bool												m_CannotRun{ false };//スタミナ切れ
 
 			float												m_HP{ 0.f };							//スコア
+
+			std::vector<HitBox>									m_HitBox;
 
 			float m_LeftHandPer{ 0.f };
 
@@ -377,6 +402,12 @@ namespace FPS_n2 {
 				}
 				SetFrameLocalMat(CharaFrame::Head, MATRIX_ref::RotVec2(v1, v2) * GetFrameLocalMat(CharaFrame::Head).GetRot());
 			}
+			//
+		private:
+			const auto		CheckAmmoHited(const AmmoClass& pAmmo) noexcept;																					//被弾チェック
+			const auto		CalcAmmoHited(AmmoClass* pAmmo, const VECTOR_ref& pShooterPos) noexcept;															//被弾処理
+		public:
+			const std::pair<bool, bool>		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& pShooterPos) noexcept;
 		private: //更新関連
 			//以前の状態保持														//
 			void			ExecuteSavePrev(void) noexcept {
@@ -431,6 +462,10 @@ namespace FPS_n2 {
 						this->m_ReadyTimer = UpperTimerLimit;
 					}
 				}
+				if (m_IsStuckGun) {
+					this->m_ReadyTimer = UpperTimerLimit;
+				}
+
 
 				if (this->m_RecoilRadAdd.y() < 0.f) {
 					Easing(&this->m_RecoilRadAdd, VECTOR_ref::vget(0.f,0.09f,0.f), 0.9f, EasingType::OutExpo);
@@ -803,7 +838,7 @@ namespace FPS_n2 {
 					this->m_move.vec.z(vecBuf.z());
 				}
 				{
-					auto HitResult = this->m_MapCol->CollCheck_Line(this->m_PosBuf + VECTOR_ref::up() * -1.f, this->m_PosBuf + VECTOR_ref::up() * 20.f);
+					auto HitResult = this->m_BackGround->GetGroundCol().CollCheck_Line(this->m_PosBuf + VECTOR_ref::up() * -1.f, this->m_PosBuf + VECTOR_ref::up() * 20.f);
 					if (HitResult.HitFlag == TRUE) {
 						auto yPos = this->m_PosBuf.y();
 						Easing(&yPos, HitResult.HitPosition.y, 0.8f, EasingType::OutExpo);
@@ -815,7 +850,34 @@ namespace FPS_n2 {
 					}
 				}
 				this->m_PosBuf += this->m_move.vec;
-				col_wall(OLDpos, &this->m_PosBuf, *this->m_MapCol);
+
+
+				std::vector<MV1*> cols;
+				cols.emplace_back((MV1*)(&this->m_BackGround->GetGroundCol()));
+				for (int i = 0; i < this->m_BackGround->GetWallGroundColNum(); i++) {
+					cols.emplace_back((MV1*)(&this->m_BackGround->GetWallGroundCol(i)));
+				}
+
+				bool ishit = false;
+				for (const auto& c : cols) {
+					auto HitDim = c->CollCheck_Capsule(GetEyePosition(), GetGunPtr()->GetFrameWorldMat(GunFrame::Muzzle).pos(), 0.5f);
+					if (HitDim.HitNum > 0) {
+						ishit = true;
+						break;
+					}
+				}
+				if (ishit) {
+					m_IsStuckGun = true;
+				}
+				else {
+					if (m_IsStuckGun) {
+						this->m_ReadyTimer = 0.1f;
+					}
+					m_IsStuckGun = false;
+				}
+
+
+				col_wall(OLDpos, &this->m_PosBuf, cols);
 
 				if (this->m_PosBufOverRideFlag) {
 					this->m_PosBufOverRideFlag = false;
@@ -1119,6 +1181,8 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().m_ADS = CharaAnimeID::Upper_ADS2;
 				m_CharaAnimeSet.back().m_Cocking = CharaAnimeID::Upper_Cocking2;
 				m_CharaAnimeSet.back().m_Reload = CharaAnimeID::Upper_Reload2Start;
+
+				m_HitBox.resize(3);
 			}
 			void			FirstExecute(void) noexcept override {
 				//初回のみ更新する内容
@@ -1154,6 +1218,11 @@ namespace FPS_n2 {
 				ExecuteMatrix();			//SetMat指示//0.03ms
 				ExecuteShape();				//顔//スコープ内0.01ms
 				ExecuteHeartRate();			//心拍数//0.00ms
+
+				auto headpos = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f;
+				m_HitBox[0].Execute(headpos, 0.1f*Scale_Rate);
+				m_HitBox[1].Execute((headpos + GetFrameWorldMat(CharaFrame::Upper).pos()) / 2.f, 0.15f*Scale_Rate);
+				m_HitBox[2].Execute(GetFrameWorldMat(CharaFrame::Upper).pos(), 0.1f*Scale_Rate);
 			}
 			void			Draw(void) noexcept override {
 				int fog_enable;
@@ -1171,7 +1240,21 @@ namespace FPS_n2 {
 				SetFogEnable(TRUE);
 				SetFogColor(0, 0, 0);
 				SetFogStartEnd(Scale_Rate*1.f, Scale_Rate*25.f);
+
 				ObjectBaseClass::Draw();
+				{
+					//this->GetObj().SetOpacityRate(0.5f);
+					SetFogEnable(FALSE);
+					SetUseLighting(FALSE);
+					SetUseZBuffer3D(FALSE);
+
+					for (auto& h : m_HitBox) {
+						h.Draw();
+					}
+
+					SetUseZBuffer3D(TRUE);
+					SetUseLighting(TRUE);
+				}
 
 				SetFogEnable(fog_enable);
 				SetFogMode(fog_mode);
