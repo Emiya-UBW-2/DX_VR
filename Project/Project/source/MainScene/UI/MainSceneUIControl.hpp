@@ -192,7 +192,7 @@ namespace FPS_n2 {
 								Num_t = 14 + s * 2;
 								DrawGauge(
 									xp1 + y_r(150) + y_r(20), yp1 + y_r(2), xp1 + y_r(150) + y_r(20) + y_r(160), yp1 + y_r(2) + y_r(12),
-									intParam[Num_t], intParam[Num_t + 1], intParam[Num_t], color, color, color,
+									intParam.at((size_t)Num_t), intParam.at((size_t)Num_t + 1), intParam.at((size_t)Num_t), color, color, color,
 									GetColor(0, 0, 255), GetColor(255, 0, 0)
 								);
 							}

@@ -33,8 +33,8 @@ namespace FPS_n2 {
 					ans.m_Vec = m_Chara->GetMove().vec;
 					ans.m_Vec.y(0);
 					ans.m_rad = m_Chara->GetRadBuf();
-					ans.m_Damage = nullptr;
-					ans.m_DamageSwitch = 0;
+					ans.m_Damage = &m_Chara->GetDamageEvent();
+					ans.m_DamageSwitch = m_Chara->GetDamageSwitch();
 				}
 				else {
 					ans.m_Pos = m_Vehicle->GetMove().pos;

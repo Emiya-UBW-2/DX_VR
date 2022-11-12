@@ -224,9 +224,9 @@ namespace FPS_n2 {
 						VECTOR_ref Pos1 = tris->Getpoints()[(loop2 + 0) % 3];
 						VECTOR_ref Pos2 = tris->Getpoints()[(loop2 + 1) % 3];
 						for (int loop3 = 0; loop3 < N_gon; loop3++) {
-							VECTOR_ref PosZ = GonPoint2D[(loop3 + 0) % N_gon];
-							VECTOR_ref PosA = GonPoint2D[(loop3 + 1) % N_gon];//Šî€
-							VECTOR_ref PosB = GonPoint2D[(loop3 + 2) % N_gon];
+							VECTOR_ref PosZ = GonPoint2D.at(((size_t)loop3 + 0) % N_gon);
+							VECTOR_ref PosA = GonPoint2D.at(((size_t)loop3 + 1) % N_gon);//Šî€
+							VECTOR_ref PosB = GonPoint2D.at(((size_t)loop3 + 2) % N_gon);
 							if (Pos1 == PosA) {
 								if ((Pos2 != PosB) && (Pos2 != PosZ)) {
 									if (

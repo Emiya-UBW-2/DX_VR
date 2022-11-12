@@ -63,7 +63,7 @@ public:
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//通信
-		static const int		Player_num = 10;
+		static const int		Player_num = 2;
 		struct NewSetting {
 			IPDATA					IP{ 127,0,0,1 };
 			int						UsePort{ 10850 };
@@ -120,7 +120,7 @@ namespace FPS_n2 {
 			VECTOR_ref			m_Vec;
 			VECTOR_ref			m_rad;
 			const DamageEvent*	m_Damage{ nullptr };
-			char				m_DamageSwitch{ 0 };
+			unsigned long long	m_DamageSwitch{ 0 };
 		};
 
 		struct PlayerNetData {
@@ -133,7 +133,7 @@ namespace FPS_n2 {
 			PlayerID		ID{ 0 };			//1	* 1	=  1byte
 			char			IsActive{ 0 };		//1	* 1	=  1byte
 			double			Frame{ 0.0 };		//8 * 1 =  8byte
-			unsigned char	DamageSwitch{ 0 };	//1 * 1 =  1byte
+			unsigned long long	DamageSwitch{ 0 };	//1 * 1 =  1byte
 			DamageEvent		Damage;				//9 * 1 =  9byte
 												//		  84byte
 		public:
@@ -197,7 +197,7 @@ namespace FPS_n2 {
 			const auto		GetRecvData(int pPlayerID) const noexcept { return this->m_LeapFrame[pPlayerID] <= 1; }
 			const auto&		GetServerDataCommon(void) const noexcept { return this->m_ServerDataCommon; }
 			const auto&		GetMyPlayer(void) const noexcept { return this->m_PlayerData; }
-			void			SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, const VECTOR_ref& prad, double pFrame, const DamageEvent* pDamage, char pDamageSwitch) noexcept {
+			void			SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, const VECTOR_ref& prad, double pFrame, const DamageEvent* pDamage, unsigned long long pDamageSwitch) noexcept {
 				this->m_PlayerData.Input = pInput;
 				this->m_PlayerData.PosBuf = pPos;
 				this->m_PlayerData.VecBuf = pVec;
@@ -254,7 +254,7 @@ namespace FPS_n2 {
 		};
 		class ServerControl : public NetWorkControl {
 			ServerNetData			m_ServerData;
-			std::vector<std::pair<NewWorkControl, int>>		m_NetWork;
+			std::array<std::pair<NewWorkControl, int>, Player_num - 1>		m_NetWork;
 		public:
 			const auto&		GetServerData(void) const noexcept { return this->m_ServerData; }
 			void			SetParam(int pPlayerID, const VECTOR_ref& pPos) noexcept override {
@@ -265,7 +265,6 @@ namespace FPS_n2 {
 		public:
 			void			Init(int pPort, float pTick, const IPDATA&) noexcept override {
 				CommonInit();
-				m_NetWork.resize(Player_num - 1);
 				int i = 0;
 				for (auto & n : this->m_NetWork) {
 					n.first.Set_Port(pPort + i); i++;
@@ -288,6 +287,7 @@ namespace FPS_n2 {
 				for (auto & n : this->m_NetWork) {
 					if (!(n.second >= 2)) {
 						canMatch = false;
+						break;
 					}
 				}
 				if (canMatch) {
@@ -302,8 +302,8 @@ namespace FPS_n2 {
 					this->m_ServerData.PlayerData[GetMyPlayer().ID] = this->m_PlayerData;		// サーバープレイヤーののプレイヤーデータ
 					this->m_ServerData.ServerFrame++;											// サーバーフレーム更新
 				}
-				int i = 0;
 				for (auto & n : this->m_NetWork) {
+					size_t index = (&n - &this->m_NetWork.front()) + 1;
 					int tmpData = -1;
 					switch (n.second) {
 					case 0:										//無差別受付
@@ -312,9 +312,9 @@ namespace FPS_n2 {
 						}
 						break;
 					case 1:
-						this->m_ServerData.Tmp1 = 1 + i;
+						this->m_ServerData.Tmp1 = (int)index;
 						this->m_ServerData.StartFlag = 0;
-						this->m_ServerData.PlayerData[1 + i].IsActive = 1;
+						this->m_ServerData.PlayerData[index].IsActive = 1;
 
 						n.first.SendtoClient(this->m_ServerData);					//クライアント全員に送る
 
@@ -343,7 +343,6 @@ namespace FPS_n2 {
 					default:
 						break;
 					}
-					i++;
 				}
 				if (canSend) {
 					NetCommonExecute(this->m_ServerData);			// 更新
@@ -354,7 +353,6 @@ namespace FPS_n2 {
 				for (auto & n : this->m_NetWork) {
 					n.first.Dispose();
 				}
-				m_NetWork.clear();
 			}
 		};
 		class ClientControl : public NetWorkControl {

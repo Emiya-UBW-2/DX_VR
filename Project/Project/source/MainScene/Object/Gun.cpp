@@ -81,7 +81,7 @@ namespace FPS_n2 {
 			this->m_IsShot = true;
 			//
 			auto& LastAmmo = (std::shared_ptr<AmmoClass>&)(*ObjMngr->AddObject(ObjType::Ammo));
-			LastAmmo->Put(this->m_NowAmmo, GetMuzzleMatrix().pos(), GetMuzzleMatrix().GetRot().zvec() * -1.f, this->m_MyID);
+				LastAmmo->Put(this->m_NowAmmo, GetMuzzleMatrix().pos(), GetMuzzleMatrix().GetRot().zvec() * -1.f, this->m_MyID);
 			this->m_NowAmmo = nullptr;
 			//
 			this->m_CartPtr->SetIsEmpty(true);//’e“ª‚ð‚È‚­‚·

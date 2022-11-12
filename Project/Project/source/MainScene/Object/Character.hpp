@@ -39,16 +39,37 @@ namespace FPS_n2 {
 
 		};
 
+		enum class HitType {
+			Head,
+			Body,
+			Leg,
+		};
 		class HitBox {
 			VECTOR_ref	m_pos;
-			float		m_radius;
+			float		m_radius{ 0.f };
+			HitType		m_HitType{ HitType::Body };
 		public:
-			void	Execute(const VECTOR_ref&pos, float radius) {
+			void	Execute(const VECTOR_ref&pos, float radius, HitType pHitType) {
 				m_pos = pos;
 				m_radius = radius;
+				m_HitType = pHitType;
 			}
 			void	Draw() {
-				DrawSphere_3D(m_pos, m_radius, GetColor(0, 0, 255), GetColor(0, 0, 255));
+				unsigned int color;
+				switch (m_HitType) {
+				case FPS_n2::Sceneclass::HitType::Head:
+					color = GetColor(255, 0, 0);
+					break;
+				case FPS_n2::Sceneclass::HitType::Body:
+					color = GetColor(0, 255, 0);
+					break;
+				case FPS_n2::Sceneclass::HitType::Leg:
+					color = GetColor(0, 0, 255);
+					break;
+				default:
+					break;
+				}
+				DrawSphere_3D(m_pos, m_radius, color, color);
 			}
 
 			bool	Colcheck(const AmmoClass& pAmmo) {
@@ -58,6 +79,7 @@ namespace FPS_n2 {
 				) == TRUE);
 			}
 
+			const auto GetColType()const noexcept { return m_HitType; }
 		};
 
 		class CharacterClass : public ObjectBaseClass {
@@ -67,7 +89,7 @@ namespace FPS_n2 {
 			const float HeartRateMin{ 60.f };//心拍数最小
 			const float HeartRateMax{ 180.f };//心拍数最大
 			const float StaminaMax{ 100.f };
-			const float HPMax = 100.f;
+			const HitPoint HPMax = 100;
 			std::string											m_Name;
 			CharaTypeID											m_CharaType;
 			std::vector<CharaAnimeSet>							m_CharaAnimeSet;
@@ -124,11 +146,15 @@ namespace FPS_n2 {
 			float												m_Stamina{ StaminaMax };//スタミナ
 			bool												m_CannotRun{ false };//スタミナ切れ
 
-			float												m_HP{ 0.f };							//スコア
+			HitPoint											m_HP{ 0 };							//スコア
 
 			std::vector<HitBox>									m_HitBox;
 
 			float m_LeftHandPer{ 0.f };
+
+			DamageEvent											m_DamageEvent;									//
+			unsigned long long									m_DamageSwitch{ 0 };							//
+			unsigned long long									m_DamageSwitchRec{ 0 };							//
 
 			Pendulum2D											m_SlingZrad;
 			Pendulum2D											m_SlingYrad;
@@ -153,9 +179,6 @@ namespace FPS_n2 {
 			void			SetFrameLocalMat(CharaFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(m_Frames[(int)frame].first, value * m_Frames[(int)frame].second); }
 			void			SetShapePer(CharaShape pShape, float Per) noexcept { m_Shapes[(int)pShape].second = Per; }
 			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
-			void			AddHP(float value) noexcept { this->m_HP = std::clamp(this->m_HP + value, 0.f, HPMax); }
-			void			SubHP(float value) noexcept { this->m_HP = std::clamp(this->m_HP - value, 0.f, HPMax); }
-			void			SetHP(float value) noexcept { this->m_HP = value; }
 			void			SetPosBufOverRide(const VECTOR_ref& pPos, const VECTOR_ref& pVec, const VECTOR_ref& rad) noexcept {
 				this->m_PosBufOverRideFlag = true;
 				this->m_PosBufOverRide = pPos;
@@ -183,6 +206,9 @@ namespace FPS_n2 {
 				this->m_SlingPer[1] = 1.f;
 				if (this->m_Gun_Ptr[0] != nullptr) {
 					this->m_CharaAnimeSel = this->m_Gun_Ptr[0]->GetHumanAnimType();
+				}
+				for (auto& p : this->m_Gun_Ptr) {
+					p->SetPlayerID(this->m_MyID);
 				}
 				this->m_GunSelect = 0;
 			}
@@ -257,6 +283,22 @@ namespace FPS_n2 {
 			const auto&		GetHPMax(void) const noexcept { return HPMax; }
 			const auto&		GetSendCamShake(void) const noexcept { return this->m_SendCamShake; }
 			const auto&		GetName(void) const noexcept { return this->m_Name; }
+
+			void			SubHP(HitPoint damage_t, float)  noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, HPMax); }
+			void			AddHP(HitPoint value) noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP + value, 0, HPMax); }
+			void			SetHP(HitPoint value) noexcept { this->m_HP = value; }
+
+			const auto		SetDamageEvent(const DamageEvent& value) noexcept {
+				if (this->m_MyID == value.ID && this->m_objType == value.CharaType) {
+					SubHP(value.Damage, value.rad);
+					return true;
+				}
+				return false;
+			}
+			void			SetDamageSwitchRec(unsigned long long value) noexcept { this->m_DamageSwitchRec = value; }
+			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
+			const auto&		GetDamageSwitch(void) const noexcept { return this->m_DamageSwitch; }
+			const auto&		GetDamageSwitchRec(void) const noexcept { return this->m_DamageSwitchRec; }
 		public:
 			//
 			void			ValueSet(float pxRad, float pyRad, bool SquatOn, const VECTOR_ref& pPos, PlayerID pID) noexcept {
@@ -321,6 +363,9 @@ namespace FPS_n2 {
 
 				m_SlingZrad.Init(0.05f*Scale_Rate, 3.f, deg2rad(90));
 				m_SlingYrad.Init(0.05f*Scale_Rate, 3.f, deg2rad(30));
+
+				this->m_DamageSwitch = 0;
+				this->m_DamageSwitchRec = this->m_DamageSwitch;
 			}
 			void			SetInput(const InputControl& pInput, bool pReady) {
 				this->m_ReadySwitch = (this->m_KeyActive != pReady);
@@ -1182,7 +1227,7 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().m_Cocking = CharaAnimeID::Upper_Cocking2;
 				m_CharaAnimeSet.back().m_Reload = CharaAnimeID::Upper_Reload2Start;
 
-				m_HitBox.resize(3);
+				m_HitBox.resize(25);
 			}
 			void			FirstExecute(void) noexcept override {
 				//初回のみ更新する内容
@@ -1220,9 +1265,35 @@ namespace FPS_n2 {
 				ExecuteHeartRate();			//心拍数//0.00ms
 
 				auto headpos = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f;
-				m_HitBox[0].Execute(headpos, 0.1f*Scale_Rate);
-				m_HitBox[1].Execute((headpos + GetFrameWorldMat(CharaFrame::Upper).pos()) / 2.f, 0.15f*Scale_Rate);
-				m_HitBox[2].Execute(GetFrameWorldMat(CharaFrame::Upper).pos(), 0.1f*Scale_Rate);
+				m_HitBox[0].Execute(headpos, 0.1f*Scale_Rate, HitType::Head);
+				m_HitBox[1].Execute((headpos + GetFrameWorldMat(CharaFrame::Upper).pos()) / 2.f, 0.15f*Scale_Rate, HitType::Body);
+				m_HitBox[2].Execute(GetFrameWorldMat(CharaFrame::Upper).pos(), 0.1f*Scale_Rate, HitType::Body);
+
+				m_HitBox[3].Execute((GetFrameWorldMat(CharaFrame::RightArm).pos() + GetFrameWorldMat(CharaFrame::RightArm2).pos()) / 2.f, 0.05f*Scale_Rate, HitType::Leg);
+				m_HitBox[4].Execute(GetFrameWorldMat(CharaFrame::RightArm2).pos(), 0.05f*Scale_Rate, HitType::Leg);
+				m_HitBox[5].Execute((GetFrameWorldMat(CharaFrame::RightWrist).pos() + GetFrameWorldMat(CharaFrame::RightArm2).pos()) / 2.f, 0.05f*Scale_Rate, HitType::Leg);
+				m_HitBox[6].Execute(GetFrameWorldMat(CharaFrame::RightWrist).pos(), 0.05f*Scale_Rate, HitType::Leg);
+
+				m_HitBox[7].Execute((GetFrameWorldMat(CharaFrame::LeftArm).pos() + GetFrameWorldMat(CharaFrame::LeftArm2).pos()) / 2.f, 0.05f*Scale_Rate, HitType::Leg);
+				m_HitBox[8].Execute(GetFrameWorldMat(CharaFrame::LeftArm2).pos(), 0.05f*Scale_Rate, HitType::Leg);
+				m_HitBox[9].Execute((GetFrameWorldMat(CharaFrame::LeftWrist).pos() + GetFrameWorldMat(CharaFrame::LeftArm2).pos()) / 2.f, 0.05f*Scale_Rate, HitType::Leg);
+				m_HitBox[10].Execute(GetFrameWorldMat(CharaFrame::LeftWrist).pos(), 0.05f*Scale_Rate, HitType::Leg);
+
+				m_HitBox[11].Execute(GetFrameWorldMat(CharaFrame::RightFoot1).pos(), 0.085f*Scale_Rate, HitType::Leg);
+				m_HitBox[12].Execute((GetFrameWorldMat(CharaFrame::RightFoot1).pos() + GetFrameWorldMat(CharaFrame::RightFoot2).pos()) / 2.f, 0.085f*Scale_Rate, HitType::Leg);
+				m_HitBox[13].Execute(GetFrameWorldMat(CharaFrame::RightFoot2).pos(), 0.085f*Scale_Rate, HitType::Leg);
+				m_HitBox[14].Execute((GetFrameWorldMat(CharaFrame::RightFoot).pos()*0.25f + GetFrameWorldMat(CharaFrame::RightFoot2).pos()*0.75f), 0.085f*Scale_Rate, HitType::Leg);
+				m_HitBox[15].Execute((GetFrameWorldMat(CharaFrame::RightFoot).pos()*0.5f + GetFrameWorldMat(CharaFrame::RightFoot2).pos()*0.5f), 0.085f*Scale_Rate, HitType::Leg);
+				m_HitBox[16].Execute((GetFrameWorldMat(CharaFrame::RightFoot).pos()*0.75f + GetFrameWorldMat(CharaFrame::RightFoot2).pos()*0.25f), 0.085f*Scale_Rate, HitType::Leg);
+				m_HitBox[17].Execute(GetFrameWorldMat(CharaFrame::RightFoot).pos(), 0.085f*Scale_Rate, HitType::Leg);
+
+				m_HitBox[18].Execute(GetFrameWorldMat(CharaFrame::LeftFoot1).pos(), 0.085f*Scale_Rate, HitType::Leg);
+				m_HitBox[19].Execute((GetFrameWorldMat(CharaFrame::LeftFoot1).pos() + GetFrameWorldMat(CharaFrame::LeftFoot2).pos()) / 2.f, 0.085f*Scale_Rate, HitType::Leg);
+				m_HitBox[20].Execute(GetFrameWorldMat(CharaFrame::LeftFoot2).pos(), 0.085f*Scale_Rate, HitType::Leg);
+				m_HitBox[21].Execute((GetFrameWorldMat(CharaFrame::LeftFoot).pos()*0.25f + GetFrameWorldMat(CharaFrame::LeftFoot2).pos()*0.75f), 0.085f*Scale_Rate, HitType::Leg);
+				m_HitBox[22].Execute((GetFrameWorldMat(CharaFrame::LeftFoot).pos()*0.5f + GetFrameWorldMat(CharaFrame::LeftFoot2).pos()*0.5f), 0.085f*Scale_Rate, HitType::Leg);
+				m_HitBox[23].Execute((GetFrameWorldMat(CharaFrame::LeftFoot).pos()*0.75f + GetFrameWorldMat(CharaFrame::LeftFoot2).pos()*0.25f), 0.085f*Scale_Rate, HitType::Leg);
+				m_HitBox[24].Execute(GetFrameWorldMat(CharaFrame::LeftFoot).pos(), 0.085f*Scale_Rate, HitType::Leg);
 			}
 			void			Draw(void) noexcept override {
 				int fog_enable;

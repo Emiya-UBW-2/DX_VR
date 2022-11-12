@@ -35,6 +35,7 @@ namespace FPS_n2 {
 			float										m_CameraSize{ 0.f };
 			PlayerID									m_MyID{ 0 };									//
 		public:
+			void			SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
 			void			SetUseRealTimePhysics(bool value) noexcept { this->m_Use_RealTimePhysics = value; }
 			void			SetActive(bool value) noexcept { this->m_IsActive = value; }
 			void			SetIsDelete(bool value) noexcept { this->m_IsDelete = value; }
@@ -42,7 +43,6 @@ namespace FPS_n2 {
 			void			SetResetP(bool value) { this->m_IsResetPhysics = value; }
 			void			SetCameraPosition(const VECTOR_ref& value) { this->m_CameraPosition = value; }
 			void			SetCameraSize(float value) { this->m_CameraSize = value; }
-
 
 			auto&			GetObj(void) noexcept { return this->m_Use_RealTimePhysics ? this->m_obj_REALTIME : this->m_obj_LOADCALC; }
 			const auto&		GetObj_const(void) const noexcept { return this->m_Use_RealTimePhysics ? this->m_obj_REALTIME : this->m_obj_LOADCALC; }
@@ -60,6 +60,7 @@ namespace FPS_n2 {
 			const auto&		GetMove(void) const noexcept { return this->m_move; }
 			const auto&		IsActive(void) const noexcept { return this->m_IsActive; }
 			const auto&		GetIsDelete(void) const noexcept { return this->m_IsDelete; }
+			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
 			//
 			void			SetAnimOnce(int ID, float speed) {
 				this->GetObj().get_anime(ID).time += 30.f / FPS * speed;
@@ -218,7 +219,7 @@ namespace FPS_n2 {
 						case ObjType::Human:
 							compare = (FName == CharaFrameName[i]);
 							if (!compare) {
-								compare = (FName.find(CharaFrameName[i]) != std::string::npos);
+								//compare = (FName.find(CharaFrameName[i]) != std::string::npos);
 							}
 							break;
 						case ObjType::Gun:

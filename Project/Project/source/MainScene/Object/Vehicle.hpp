@@ -730,8 +730,8 @@ namespace FPS_n2 {
 			HitPoint											m_HP{ 100 };
 			std::vector<HitPoint>								m_HP_parts;
 			DamageEvent											m_DamageEvent;									//
-			unsigned char										m_DamageSwitch{ 0 };							//
-			unsigned char										m_DamageSwitchRec{ 0 };							//
+			unsigned long long									m_DamageSwitch{ 0 };							//
+			unsigned long long									m_DamageSwitchRec{ 0 };							//
 			//box2d
 			b2Pats												m_b2mine;										//BOX2D
 			float												m_spd_buf{ 0.f };								//BOX2D
@@ -746,7 +746,7 @@ namespace FPS_n2 {
 				return false;
 			}
 			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
-			void			SetDamageSwitchRec(char value) noexcept { this->m_DamageSwitchRec = value; }
+			void			SetDamageSwitchRec(unsigned long long value) noexcept { this->m_DamageSwitchRec = value; }
 			void			SetAimingDistance(float value) noexcept { this->m_AimingDistance = value; }
 			void			SubHP(HitPoint damage_t, float)  noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, this->m_VecData->GetMaxHP()); }
 			void			SubHP_Parts(HitPoint damage_t, int parts_Set_t) noexcept { this->m_HP_parts[parts_Set_t] = std::max<HitPoint>(this->m_HP_parts[parts_Set_t] - damage_t, 0); }

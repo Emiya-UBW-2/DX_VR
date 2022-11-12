@@ -14,14 +14,14 @@ namespace FPS_n2 {
 	};
 	struct SideControl {
 	//private:
-		SideType					Type;
-		int							SquarePoint{ -1 };//触れている四角の辺
+		SideType					Type{ SideType::None };
+		int							SquarePoint{ -1 };				//触れている四角の辺
 		VECTOR_ref					Pos;
 		VECTOR_ref					Pos2D;
 		MATRIX_ref					Mat;
 		VECTOR_ref					Norm;							// 法線
-		COLOR_U8					dif;							// ディフューズカラー
-		COLOR_U8					spc;							// スペキュラカラー
+		COLOR_U8					dif{ 0 };						// ディフューズカラー
+		COLOR_U8					spc{ 0 };						// スペキュラカラー
 	public:
 		void Set(SideType type, const VECTOR_ref& pos, const VECTOR_ref& basepos, const VECTOR_ref& normal, 
 				COLOR_U8					difcolor,
@@ -578,8 +578,8 @@ namespace FPS_n2 {
 			std::array<std::array<VECTOR_ref, 3>, 2>	m_WallBase;
 			VECTOR_ref									m_Wallnorm;
 
-			int										m_TexHandle;
-			int										m_TexHandle2;
+			int										m_TexHandle{ -1 };
+			int										m_TexHandle2{ -1 };
 
 			std::vector<std::vector<std::unique_ptr<SideControl>>>	m_Side;
 			std::vector<std::vector<Triangle>>		m_Tri2D;
@@ -591,7 +591,7 @@ namespace FPS_n2 {
 			bool									isThreadEnd{ false };
 			std::array<std::vector<VECTOR_ref>, 2>	m_GonPoint;//辺の数
 
-			int Bigcount = 0;
+			int										Bigcount{ 0 };
 			//int addtri = 0;
 		public://getter
 			bool			GetIsBreak() {
@@ -611,15 +611,16 @@ namespace FPS_n2 {
 						vrt[i].norm = ((VECTOR_ref)(vrt[i].norm)*-1.f).get();
 					}
 				}
-				for (int i = 0; i < ind.size() / Triangle_Num; i++) {
-					ind[i * Triangle_Num + 0] = this->m_WallIndex[0][i * Triangle_Num + 0];
+				for (size_t i = 0; i < ind.size() / (size_t)Triangle_Num; i++) {
+					size_t index = i * (size_t)Triangle_Num;
+					ind.at(index) = this->m_WallIndex[0].at(index);
 					if (isback) {
-						ind[i * Triangle_Num + 1] = this->m_WallIndex[0][i * Triangle_Num + 2];
-						ind[i * Triangle_Num + 2] = this->m_WallIndex[0][i * Triangle_Num + 1];
+						ind.at(index + 1) = this->m_WallIndex[0].at(index + 2);
+						ind.at(index + 2) = this->m_WallIndex[0].at(index + 1);
 					}
 					else {
-						ind[i * Triangle_Num + 1] = this->m_WallIndex[0][i * Triangle_Num + 1];
-						ind[i * Triangle_Num + 2] = this->m_WallIndex[0][i * Triangle_Num + 2];
+						ind.at(index + 1) = this->m_WallIndex[0].at(index + 1);
+						ind.at(index + 2) = this->m_WallIndex[0].at(index + 2);
 					}
 				}
 			}
@@ -640,11 +641,12 @@ namespace FPS_n2 {
 					this->m_WallVertex[0][i].su = PolyList.Vertexs[i].TexCoord[1].u;
 					this->m_WallVertex[0][i].sv = PolyList.Vertexs[i].TexCoord[1].v;
 				}
-				this->m_WallIndex[0].resize(PolyList.PolygonNum * Triangle_Num);
-				for (int i = 0; i < this->m_WallIndex[0].size() / Triangle_Num; i++) {
-					this->m_WallIndex[0][i * Triangle_Num + 0] = (WORD)PolyList.Polygons[i].VIndex[0];
-					this->m_WallIndex[0][i * Triangle_Num + 1] = (WORD)PolyList.Polygons[i].VIndex[1];
-					this->m_WallIndex[0][i * Triangle_Num + 2] = (WORD)PolyList.Polygons[i].VIndex[2];
+				this->m_WallIndex[0].resize((size_t)PolyList.PolygonNum * (size_t)Triangle_Num);
+				for (size_t i = 0; i < this->m_WallIndex[0].size() / (size_t)Triangle_Num; i++) {
+					size_t index = i * (size_t)Triangle_Num;
+					this->m_WallIndex[0][index + 0] = (WORD)PolyList.Polygons[i].VIndex[0];
+					this->m_WallIndex[0][index + 1] = (WORD)PolyList.Polygons[i].VIndex[1];
+					this->m_WallIndex[0][index + 2] = (WORD)PolyList.Polygons[i].VIndex[2];
 				}
 				//反転
 				SetTri(1, true, 0.f);
@@ -653,10 +655,11 @@ namespace FPS_n2 {
 				//反転
 				SetTri(3, true, -0.7f);
 
-				for (int i = 0; i < 2; i++) {
-					m_WallBase[i][0] = this->m_WallVertex[0][this->m_WallIndex[0][i * Triangle_Num + 0]].pos;
-					m_WallBase[i][1] = this->m_WallVertex[0][this->m_WallIndex[0][i * Triangle_Num + 1]].pos;
-					m_WallBase[i][2] = this->m_WallVertex[0][this->m_WallIndex[0][i * Triangle_Num + 2]].pos;
+				for (size_t i = 0; i < 2; i++) {
+					size_t index = i * (size_t)Triangle_Num;
+					m_WallBase[i][0] = this->m_WallVertex[0][this->m_WallIndex[0][index + 0]].pos;
+					m_WallBase[i][1] = this->m_WallVertex[0][this->m_WallIndex[0][index + 1]].pos;
+					m_WallBase[i][2] = this->m_WallVertex[0][this->m_WallIndex[0][index + 2]].pos;
 				}
 				m_Wallnorm = this->m_WallVertex[0][0].norm;
 			}
@@ -701,7 +704,7 @@ namespace FPS_n2 {
 				this->m_Tri2D.resize(m_Side.size());
 				for (auto& Side : this->m_Side) {
 					size_t index = &Side - &this->m_Side.front();
-					auto GetVertex = [&](int ID) {return &(this->m_WallVertex[0][this->m_WallIndex[0][(int)index * Triangle_Num + ID]]); };
+					auto GetVertex = [&](int ID) {return &(this->m_WallVertex[0][this->m_WallIndex[0][index * (size_t)Triangle_Num + ID]]); };
 					auto GetVertexPos = [&](int ID) {return &(GetVertex(ID)->pos); };
 					VECTOR_ref TriPos0 = *GetVertexPos(0);
 					VECTOR_ref TriPos1 = *GetVertexPos(1);
@@ -879,7 +882,7 @@ namespace FPS_n2 {
 							if (res1.HitFlag == TRUE) {
 								//元の4角にて当たったら
 								for (int index = 0; index < this->m_WallIndex[0].size() / Triangle_Num; index++) {
-									auto GetVertexPos = [&](int ID) {return &(this->m_WallVertex[0][this->m_WallIndex[0][(int)index * Triangle_Num + ID]].pos); };
+									auto GetVertexPos = [&](int ID) {return &(this->m_WallVertex[0][this->m_WallIndex[0].at(index * (size_t)Triangle_Num + ID)].pos); };
 									auto res2 = HitCheck_Line_Triangle(repos_tmp.get(), pos_tmp.get(), *GetVertexPos(0), *GetVertexPos(1), *GetVertexPos(2));
 									if (res2.HitFlag == TRUE) {
 										ishit = true;
@@ -905,8 +908,8 @@ namespace FPS_n2 {
 							int N_gon = (int)GonPoint2[1].size();
 							{
 								for (auto& Side : this->m_Side) {
-									size_t index = &Side - &this->m_Side.front();
-									auto GetVertex = [&](int ID) {return &(this->m_WallVertex[0][this->m_WallIndex[0][(int)index * Triangle_Num + ID]]); };
+									int index = (int)(&Side - &this->m_Side.front());
+									auto GetVertex = [&](int ID) {return &(this->m_WallVertex[0][this->m_WallIndex[0].at(index * (size_t)Triangle_Num + ID)]); };
 									auto GetVertexPos = [&](int ID) {return &(GetVertex(ID)->pos); };
 									VECTOR_ref TriPos0 = *GetVertexPos(0);
 									VECTOR_ref TriPos1 = *GetVertexPos(1);
@@ -967,8 +970,8 @@ namespace FPS_n2 {
 									{
 										struct DATA {
 											VECTOR_ref point;//辺の数
-											int SquarePoint;//辺の数
-											SideType type;//辺の数
+											int SquarePoint{ 0 };//辺の数
+											SideType type{ SideType::None };//辺の数
 										};
 										std::vector<DATA> data;//辺の数
 										for (int s = 0; s < Side.size(); s++) {

@@ -11,7 +11,7 @@ namespace FPS_n2 {
 			MATRIX_ref									HandMatrix;
 			float										HandPer{ 0.f };
 			std::vector<AmmoData>						m_AmmoSpec;
-			RELOADTYPE									m_ReloadTypeBuf;
+			RELOADTYPE									m_ReloadTypeBuf{ RELOADTYPE::MAG };
 		public://ƒQƒbƒ^[
 			void			SetHandMatrix(const MATRIX_ref& value, float pPer, RELOADTYPE ReloadType) noexcept {
 				this->HandMatrix = value;

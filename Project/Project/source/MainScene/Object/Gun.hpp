@@ -33,6 +33,7 @@ namespace FPS_n2 {
 			const auto& GetReloadType(void) const noexcept { return this->m_ReloadType[0]; }
 			const auto& GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
 			const auto& GetNowAnime(void) noexcept {
+				size_t animsel = (size_t)(this->m_ShotPhase) - 2;
 				switch (GetShotType()) {
 				case SHOTTYPE::FULL:
 				case SHOTTYPE::SEMI:
@@ -40,12 +41,12 @@ namespace FPS_n2 {
 						return GetObj().get_anime((size_t)4);
 					}
 					else {
-						return GetObj().get_anime((size_t)(this->m_ShotPhase - 2));
+						return GetObj().get_anime(animsel);
 					}
 				case SHOTTYPE::BOLT:
-					return GetObj().get_anime((size_t)(this->m_ShotPhase - 2));
+					return GetObj().get_anime(animsel);
 				default:
-					return GetObj().get_anime((size_t)(this->m_ShotPhase - 2));
+					return GetObj().get_anime(animsel);
 				}
 			}
 			void SetIsShot(bool value) noexcept { this->m_IsShot = value; }
