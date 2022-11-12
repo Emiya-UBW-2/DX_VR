@@ -50,7 +50,8 @@ namespace FPS_n2 {
 				auto Red = GetColor(255, 0, 0);
 				auto Blue = GetColor(50, 50, 255);
 				auto Green = GetColor(43, 163, 91);
-				auto White = GetColor(212, 255, 239);
+				auto White = GetColor(255, 255, 255);
+				auto Black = GetColor(0, 0, 0);
 				//タイム,スコア
 				{
 					int xp1, yp1;
@@ -63,90 +64,13 @@ namespace FPS_n2 {
 					Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawString(xp1, yp1, "SCORE", Green, White);
 					Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_RIGHT(xp1 + y_r(240), yp1, Green, White, "%d", intParam[1]);
 				}
-				//アイテム
-				{
-					float xp1, yp1;
-					float xs1, ys1;
-					float xp1_r, yp1_r;
-					float xs1_r, ys1_r;
-
-					xp1 = (float)y_r(50);
-					yp1 = (float)DrawParts->disp_y - y_r(100);
-					xs1 = (float)y_r(80) / 2;
-					ys1 = (float)y_r(100) / 2;
-
-					float xp2, yp2;
-					float xs2, ys2;
-					float xp2_r, yp2_r;
-					float xs2_r, ys2_r;
-
-					xp2 = (float)y_r(160);
-					yp2 = (float)DrawParts->disp_y - y_r(130);
-					xs2 = (float)y_r(120) / 2;
-					ys2 = (float)y_r(160) / 2;
-
-					float xp3, yp3;
-					float xs3, ys3;
-					float xp3_r, yp3_r;
-					float xs3_r, ys3_r;
-
-					xp3 = (float)y_r(270);
-					yp3 = (float)DrawParts->disp_y - y_r(100);
-					xs3 = (float)y_r(80) / 2;
-					ys3 = (float)y_r(100) / 2;
-
-					float Lper = floatParam[3];//0->1にする
-					float Rper = floatParam[4];//0->1にする
-					//
-					DrawBox((int)(xp1 - xs1), (int)(yp1 - ys1), (int)(xp1 + xs1), (int)(yp1 + ys1), GetColor(0, 0, 0), TRUE);
-					DrawBox((int)(xp2 - xs2), (int)(yp2 - ys2), (int)(xp2 + xs2), (int)(yp2 + ys2), GetColor(0, 0, 0), TRUE);
-					DrawBox((int)(xp3 - xs3), (int)(yp3 - ys3), (int)(xp3 + xs3), (int)(yp3 + ys3), GetColor(0, 0, 0), TRUE);
-					//
-					xp1_r = Lerp(xp2, xp1, Lper);
-					yp1_r = Lerp(yp2, yp1, Lper);
-					xs1_r = Lerp(xs2, Lerp(0.f, xs1, Rper), Lper);
-					ys1_r = Lerp(ys2, Lerp(0.f, ys1, Rper), Lper);
-					//
-					xp2_r = Lerp(xp1, Lerp(xp3, xp2, Lper), Rper);
-					yp2_r = Lerp(yp1, Lerp(yp3, yp2, Lper), Rper);
-					xs2_r = Lerp(xs1, Lerp(xs3, xs2, Lper), Rper);
-					ys2_r = Lerp(ys1, Lerp(ys3, ys2, Lper), Rper);
-					//
-					xp3_r = Lerp(xp2, xp3, Rper);
-					yp3_r = Lerp(yp2, yp3, Rper);
-					xs3_r = Lerp(xs2, Lerp(0.f, xs3, Lper), Rper);
-					ys3_r = Lerp(ys2, Lerp(0.f, ys3, Lper), Rper);
-
-					int col;
-					col = (int)Lerp(255.f, 128.f, Lper*Rper);
-					SetDrawBright(col, col, col);
-					if (ItemGraphPtr[0] != nullptr) {
-						ItemGraphPtr[0]->DrawExtendGraph((int)(xp1_r - xs1_r), (int)(yp1_r - ys1_r), (int)(xp1_r + xs1_r), (int)(yp1_r + ys1_r), true);
-						Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_RIGHT((int)(xp1_r + xs1_r), (int)(yp1_r + ys1_r) - y_r(20), Green, White, "%d", intParam[9]);
-					}
-					if (ItemGraphPtr[2] != nullptr) {
-						ItemGraphPtr[2]->DrawExtendGraph((int)(xp3_r - xs3_r), (int)(yp3_r - ys3_r), (int)(xp3_r + xs3_r), (int)(yp3_r + ys3_r), true);
-						Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_RIGHT((int)(xp3_r + xs3_r), (int)(yp3_r + ys3_r) - y_r(20), Green, White, "%d", intParam[11]);
-					}
-					//中央
-					col = (int)Lerp(128.f, 255.f, Lper*Rper);
-					SetDrawBright(col, col, col);
-					if (ItemGraphPtr[1] != nullptr) {
-						ItemGraphPtr[1]->DrawExtendGraph((int)(xp2_r - xs2_r), (int)(yp2_r - ys2_r), (int)(xp2_r + xs2_r), (int)(yp2_r + ys2_r), true);
-						Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_RIGHT((int)(xp2_r + xs2_r), (int)(yp2_r + ys2_r) - y_r(20), Green, White, "%d", intParam[10]);
-					}
-
-					SetDrawBright(255, 255, 255);
-				}
 				//情報
 				{
 					int xp1, yp1;
-					int Num = intParam[13];
-					int ys1 = y_r(30);
 					//名前、体力、魔力
 					{
-						xp1 = DrawParts->disp_x - y_r(300);
-						yp1 = DrawParts->disp_y - y_r(30) - ys1 * Num - y_r(110);
+						xp1 = y_r(50);
+						yp1 = DrawParts->disp_y - y_r(140);
 
 						Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat(xp1 + y_r(50), yp1, Green, White, "%s", strParam[0].c_str());
 						yp1 += y_r(25);
@@ -175,68 +99,43 @@ namespace FPS_n2 {
 					}
 					//魔法、クールタイム
 					{
-						xp1 = DrawParts->disp_x - y_r(400);
-						yp1 = DrawParts->disp_y - y_r(30) - ys1 * Num;
+						xp1 = DrawParts->disp_x - y_r(275);
+						yp1 = DrawParts->disp_y - y_r(48) - y_r(84);
+						if (strParam[1].length() > 0) {
+							auto per = (float)(100 * intParam.at(14) / intParam.at(15)) / 100.f;
 
-						int sel = intParam[12];
+							if (ItemGraphPtr[0] != nullptr) {
+								int x, y;
+								ItemGraphPtr[0]->GetSize(&x, &y);
+								ItemGraphPtr[0]->DrawRotaGraph(xp1 + y_r(250) - (int)((float)(y_r(x / 2))*0.5f), yp1 - (int)((float)(y_r(y / 2))*0.5f), (float)(y_r(100)) / 100.f*0.5f, 0.f, true);
 
-						Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawString_RIGHT(xp1, yp1 + ys1 * sel, "→", Green, White);
-
-						for (int s = 0; s < Num; s++) {
-							int Num_t = 1 + s;
-							if (strParam[Num_t].length() > 0) {
-								Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_RIGHT(xp1 + y_r(150), yp1, (sel == s) ? Green : GetColor(15, 110, 50), White, "%s", strParam[Num_t].c_str());
-
-								auto color = GetColorU8((sel == s) ? 255 : 240, (sel == s) ? 255 : 192, 0, 255);
-
-								Num_t = 14 + s * 2;
-								DrawGauge(
-									xp1 + y_r(150) + y_r(20), yp1 + y_r(2), xp1 + y_r(150) + y_r(20) + y_r(160), yp1 + y_r(2) + y_r(12),
-									intParam.at((size_t)Num_t), intParam.at((size_t)Num_t + 1), intParam.at((size_t)Num_t), color, color, color,
-									GetColor(0, 0, 255), GetColor(255, 0, 0)
-								);
+								Fonts->Get(y_r(18), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_RIGHT(
+									xp1 + y_r(250) - y_r(x / 2), yp1 - y_r(y / 2), White, Black, "%s", strParam[1].c_str());
 							}
-							yp1 += ys1;
+
+
+							Fonts->Get(y_r(36), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_RIGHT(
+								xp1 + y_r(50) + y_r(80), yp1 - y_r(12 - 4), (per <= 0.6f) ? Red : White, Black, "%03d", intParam.at(14));
+
+							Fonts->Get(y_r(24), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat(
+								xp1 + y_r(50) + y_r(80), yp1, White, Black, " / %03d", intParam.at(15));
 						}
-					}
-				}
-				//飛行UI
-				if (intParam[2] == 1) {
-					//スピード
-					{
-						int xp1, yp1;
-						xp1 = DrawParts->disp_x / 2 - y_r(300);
-						yp1 = DrawParts->disp_y / 2 - y_r(10);
-						Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_RIGHT(xp1, yp1, Green, White, "%06.2f km/h", floatParam[1]);
-					}
-					//高度
-					{
-						int xp1, yp1;
-						xp1 = DrawParts->disp_x / 2 + y_r(300);
-						yp1 = DrawParts->disp_y / 2 - y_r(10);
-						Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat(xp1, yp1, Green, White, "%07.2f m", floatParam[2]);
-					}
-					//
-					{
-						int xp1, yp1, xp2, yp2;
-						xp1 = DrawParts->disp_x / 2 + y_r(120);
-						yp1 = DrawParts->disp_y / 2;
-						xp2 = DrawParts->disp_x / 2 + y_r(240);
-						yp2 = DrawParts->disp_y / 2;
-						DrawLine_2D(xp1, yp1, xp2, yp2, White, 3);
-						DrawLine_2D(xp1, yp1, xp2, yp2, Green);
+						yp1 += y_r(64);
+						for (int i = 1; i <= 2; i++) {
+							if (strParam[1 + i].length() > 0) {
+								if (ItemGraphPtr[0 + i] != nullptr) {
+									SetDrawBright(192, 192, 192);
+									int x, y;
+									ItemGraphPtr[0 + i]->GetSize(&x, &y);
+									ItemGraphPtr[0 + i]->DrawRotaGraph(xp1 + y_r(250) - (int)((float)(y_r(x / 2))*0.25f), yp1 - (int)((float)(y_r(y / 2))*0.25f), (float)(y_r(100)) / 100.f*0.25f, 0.f, true);
 
-						xp1 = DrawParts->disp_x / 2 - y_r(120);
-						yp1 = DrawParts->disp_y / 2;
-						xp2 = DrawParts->disp_x / 2 - y_r(240);
-						yp2 = DrawParts->disp_y / 2;
-						DrawLine_2D(xp1, yp1, xp2, yp2, White, 3);
-						DrawLine_2D(xp1, yp1, xp2, yp2, Green);
-
-						xp1 = DrawParts->disp_x / 2;
-						yp1 = DrawParts->disp_y / 2;
-						DrawCircle(xp1, yp1, y_r(100), White, FALSE, 3);
-						DrawCircle(xp1, yp1, y_r(100), Green, FALSE);
+									Fonts->Get(y_r(12), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_RIGHT(
+										xp1 + y_r(250) - (int)((float)(y_r(x / 2))*0.5f), yp1 - (int)((float)(y_r(y / 2))*0.5f), White, Black, "%s", strParam[1 + i].c_str());
+									SetDrawBright(255, 255, 255);
+								}
+							}
+							yp1 += y_r(48);
+						}
 					}
 				}
 				//セリフ

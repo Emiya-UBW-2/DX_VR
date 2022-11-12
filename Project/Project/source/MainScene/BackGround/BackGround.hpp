@@ -777,7 +777,7 @@ namespace FPS_n2 {
 					(
 						CheckCameraViewClip_Box(
 							(this->m_Pos + VECTOR_ref::vget(-6.25f, 0, -6.25f)).get(),
-							(this->m_Pos + VECTOR_ref::vget(6.25f, 20, 6.25f)).get()) == FALSE
+							(this->m_Pos + VECTOR_ref::vget(6.25f, 40, 6.25f)).get()) == FALSE
 						)
 					&& this->m_IsDraw
 					) {

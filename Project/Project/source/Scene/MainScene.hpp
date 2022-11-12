@@ -32,7 +32,6 @@ namespace FPS_n2 {
 			switchs					m_LeftClick;
 			float					m_LeftPressTimer{ 0.f };
 		public:
-			//const auto& Get(void) const noexcept { return m_SeqFirst; }
 			const auto& GetClient(void) const noexcept { return this->m_IsClient; }
 			const auto& GetSequence(void) const noexcept { return this->m_Sequence; }
 		public:
@@ -311,6 +310,7 @@ namespace FPS_n2 {
 			float					m_HPBuf{ 0.f };
 			float					m_ScoreBuf{ 0.f };
 			GraphHandle				hit_Graph;
+			GraphHandle				aim_Graph;
 			//
 			float					m_CamShake{ 0.f };
 			VECTOR_ref				m_CamShake1;
@@ -373,7 +373,7 @@ namespace FPS_n2 {
 				}
 
 				for (int i = 0; i < gun_num; i++) {
-					ObjMngr->AddObject(ObjType::Gun, "data/gun/AR15/");//MP5K//AR15//AKS74U//Gorushi//Mosin//MEU1911
+					ObjMngr->AddObject(ObjType::Gun, "data/gun/AKS74U/");//MP5K//AR15//AKS74U//Gorushi//Mosin//MEU1911
 					ObjMngr->AddObject(ObjType::Gun, "data/gun/MEU1911/");//MP5K//AR15//AKS74U//Gorushi//Mosin//MEU1911
 				}
 				//ロード
@@ -387,6 +387,7 @@ namespace FPS_n2 {
 				this->m_UIclass.Set();
 
 				hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
+				aim_Graph = GraphHandle::Load("data/UI/battle_aim.bmp");
 				//
 				TEMPSCENE::Set();
 				//Set
@@ -990,10 +991,23 @@ namespace FPS_n2 {
 					this->m_UIclass.SetIntParam(13, (int)1);//銃の総数
 					{
 						auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
-						this->m_UIclass.SetStrParam(1, "GUN");
+						this->m_UIclass.SetStrParam(1, Chara->GetGunPtrNow()->GetName().c_str());
 						this->m_UIclass.SetIntParam(14, (int)(Chara->GetAmmoNum()));
 						this->m_UIclass.SetIntParam(15, (int)(Chara->GetAmmoAll()));
+						this->m_UIclass.SetItemGraph(0, &Chara->GetGunPtrNow()->GetGunPic());
 					}
+					{
+						auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+						this->m_UIclass.SetStrParam(2, Chara->GetGunPtr((Chara->GetGunPtrNowID() + 1) % Chara->GetGunPtrNum())->GetName().c_str());
+						this->m_UIclass.SetItemGraph(1, &Chara->GetGunPtr((Chara->GetGunPtrNowID() + 1) % Chara->GetGunPtrNum())->GetGunPic());
+					}
+					/*
+					{
+						auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+						this->m_UIclass.SetStrParam(3, Chara->GetGunPtrNow()->GetName().c_str());
+						this->m_UIclass.SetItemGraph(2, &Chara->GetGunPtrNow()->GetGunPic());
+					}
+					//*/
 				}
 				TEMPSCENE::Execute();
 				Effect_UseControl::Execute_Effect();
@@ -1100,16 +1114,17 @@ namespace FPS_n2 {
 				//レティクル表示
 				if (Reticle_on) {
 					int x, y;
-					Chara->GetReticle().GetSize(&x, &y);
-					Chara->GetReticle().DrawRotaGraph((int)Reticle_xpos, (int)Reticle_ypos, size_lens() / (y / 2.f), Chara->GetReticleRad(), true);
+					Chara->GetGunPtrNow()->GetReticlePic().GetSize(&x, &y);
+					Chara->GetGunPtrNow()->GetReticlePic().DrawRotaGraph((int)Reticle_xpos, (int)Reticle_ypos, size_lens() / (y / 2.f), Chara->GetReticleRad(), true);
 				}
 			}
 			//UI表示
 			void			UI_Draw(void) noexcept  override {
 				auto* ObjMngr = ObjectManager::Instance();
-				//auto* PlayerMngr = PlayerManager::Instance();
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 				//auto* Fonts = FontPool::Instance();
-				//auto* DrawParts = DXDraw::Instance();
+				auto* DrawParts = DXDraw::Instance();
 				//auto Red = GetColor(255, 0, 0);
 				//auto Blue = GetColor(50, 50, 255);
 				//auto Green = GetColor(43, 163, 91);
@@ -1134,7 +1149,9 @@ namespace FPS_n2 {
 				}
 				//UI
 				this->m_UIclass.Draw();
-
+				if (!Chara->GetIsADS()) {
+					aim_Graph.DrawRotaGraph(DrawParts->disp_x / 2, DrawParts->disp_y / 2, (float)(y_r(100)) / 100.f, 0.f, true);
+				}
 				//通信設定
 				if (!this->m_MouseActive.on()) {
 					m_NetWorkBrowser.Draw();

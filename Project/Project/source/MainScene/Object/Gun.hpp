@@ -5,7 +5,8 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class GunClass : public ObjectBaseClass {
 		private:
-			GraphHandle						m_reticle;						//
+			GraphHandle						m_GunPic;						//
+			GraphHandle						m_reticlePic;					//
 			int								m_ShotPhase{ 0 };				//
 			std::vector<std::string>		m_MagName;						//
 			std::vector<SHOTTYPE>			m_ShotType;						//
@@ -62,7 +63,12 @@ namespace FPS_n2 {
 			const auto GetAmmoAll(void) const noexcept { return (this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->GetAmmoAll() : 0; }
 			const auto GetAmmoNum(void) const noexcept { return ((this->m_Mag_Ptr.get() != nullptr) ? this->m_Mag_Ptr->GetAmmoNum() : 0) + (this->m_in_chamber ? 1 : 0); }
 			const auto GetCanShot(void) const noexcept { return this->m_in_chamber; }
-			const auto& GetReticle(void) const noexcept { return this->m_reticle; }
+			const auto GetName(void) const noexcept {//"data/gun/AR15/"
+				auto now = 9;//"data/gun/"
+				return this->m_FilePath.substr(now, this->m_FilePath.rfind("/") - now);
+			}
+			const auto& GetReticlePic(void) const noexcept { return this->m_reticlePic; }
+			const auto& GetGunPic(void) const noexcept { return this->m_GunPic; }
 			const auto& GetHumanAnimType(void) const noexcept { return this->m_HumanAnimType; }
 			const auto& GetIsShot(void) const noexcept { return this->m_IsShot; }
 			void SetGunMatrix(const MATRIX_ref& value, int pShotPhase) noexcept {
@@ -80,7 +86,7 @@ namespace FPS_n2 {
 			GunClass(void) noexcept { this->m_objType = ObjType::Gun; }
 			~GunClass(void) noexcept {}
 		public:
-			void Init(void) noexcept override {
+			void			Init(void) noexcept override {
 				ObjectBaseClass::Init();
 				{
 					int mdata = FileRead_open((this->m_FilePath + "data.txt").c_str(), FALSE);
@@ -121,7 +127,7 @@ namespace FPS_n2 {
 				SetMagazine(this->m_MagName[0].c_str());
 				//SetMagazine(nullptr);
 			}
-			void FirstExecute(void) noexcept override {
+			void			FirstExecute(void) noexcept override {
 				auto SE = SoundPool::Instance();
 				if (this->m_IsFirstLoop) {
 				}
@@ -299,13 +305,27 @@ namespace FPS_n2 {
 				//’e–ò‚Ì‰‰ŽZ
 				ExecuteCartInChamber();
 			}
+			void			Draw(void) noexcept override {
+				if (this->m_IsActive && this->m_IsDraw) {
+					if (CheckCameraViewClip_Box(
+						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-20, 0, -20)).get(),
+						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(20, 20, 20)).get()) == FALSE
+						) {
+						auto* DrawParts = DXDraw::Instance();
+						DrawParts->SetUseFarShadowDraw(false);
+						this->GetObj().DrawModel();
+						DrawParts->SetUseFarShadowDraw(true);
+					}
+				}
+			}
 			void			Dispose(void) noexcept override {
 				this->m_MagName.clear();
 			}
 		public:
 			void			LoadReticle(void) noexcept {
 				SetUseASyncLoadFlag(TRUE);
-				this->m_reticle = GraphHandle::Load(this->m_FilePath + "reticle.png");
+				this->m_reticlePic = GraphHandle::Load(this->m_FilePath + "reticle.png");
+				this->m_GunPic = GraphHandle::Load(this->m_FilePath + "pic.bmp");
 				SetUseASyncLoadFlag(FALSE);
 			}
 		};
