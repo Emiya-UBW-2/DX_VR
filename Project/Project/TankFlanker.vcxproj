@@ -14,6 +14,7 @@
     <ClInclude Include="source\Enums.hpp" />
     <ClInclude Include="source\Header.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGround.hpp" />
+    <ClInclude Include="source\MainScene\BackGround\BackGroundSub.hpp" />
     <ClInclude Include="source\MainScene\Object\Ammo.hpp" />
     <ClInclude Include="source\MainScene\Object\AmmoEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\Cart.hpp" />
@@ -38,6 +39,7 @@
   <ItemGroup>
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\MainScene\BackGround\BackGround.cpp" />
+    <ClCompile Include="source\MainScene\BackGround\BackGroundSub.cpp" />
     <ClCompile Include="source\MainScene\Object\Character.cpp" />
     <ClCompile Include="source\MainScene\Object\Gun.cpp" />
     <ClCompile Include="source\MainScene\Object\Magazine.cpp" />

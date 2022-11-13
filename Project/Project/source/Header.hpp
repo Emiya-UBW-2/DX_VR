@@ -22,6 +22,7 @@
 #include <cassert>
 #include <filesystem>
 #include <algorithm>
+#include <iostream>
 
 #include "DXLib_ref/DXLib_ref.h"
 #include "Box2D/Box2D.h"
@@ -43,6 +44,7 @@ using namespace DXLib_ref;
 //
 #include "sequence.hpp"
 //
+#include "MainScene/BackGround/BackGroundSub.hpp"
 #include "MainScene/BackGround/BackGround.hpp"
 
 #include "MainScene/Object/ObjectBase.hpp"

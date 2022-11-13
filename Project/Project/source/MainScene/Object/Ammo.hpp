@@ -153,11 +153,9 @@ namespace FPS_n2 {
 			//
 			void			DrawShadow(void) noexcept  override {}
 			void			CheckDraw(void) noexcept  override {
-				if (this->m_IsHit) {
-					auto tmp = ConvWorldPosToScreenPos(this->m_move.pos.get());
-					if (tmp.z >= 0.f && tmp.z <= 1.f) {
-						this->m_Hit_DispPos = tmp;
-					}
+				auto tmp = ConvWorldPosToScreenPos(this->m_move.pos.get());
+				if (tmp.z >= 0.f && tmp.z <= 1.f) {
+					this->m_Hit_DispPos = tmp;
 				}
 			}
 			void			Draw(void) noexcept  override {

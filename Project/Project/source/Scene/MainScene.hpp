@@ -373,8 +373,8 @@ namespace FPS_n2 {
 				}
 
 				for (int i = 0; i < gun_num; i++) {
-					ObjMngr->AddObject(ObjType::Gun, "data/gun/AKS74U/");//MP5K//AR15//AKS74U//Gorushi//Mosin//MEU1911
-					ObjMngr->AddObject(ObjType::Gun, "data/gun/MEU1911/");//MP5K//AR15//AKS74U//Gorushi//Mosin//MEU1911
+					ObjMngr->AddObject(ObjType::Gun, "data/gun/AKS74U/");//MP5K//AR15//AKS74U//Gorushi//MEU1911
+					ObjMngr->AddObject(ObjType::Gun, "data/gun/MEU1911/");//MP5K//AR15//AKS74U//Gorushi//MEU1911
 				}
 				//ロード
 				SetCreate3DSoundFlag(FALSE);
@@ -866,7 +866,7 @@ namespace FPS_n2 {
 						loop++;
 					}
 				}
-				this->m_BackGround->GetBox2Dworld()->Step(1.f, 1, 1);//物理更新
+				this->m_BackGround->FirstExecute();
 				ObjMngr->LateExecuteObject();
 				//視点
 				if (!PlayerMngr->GetPlayer(GetMyPlayerID()).IsRide()) {

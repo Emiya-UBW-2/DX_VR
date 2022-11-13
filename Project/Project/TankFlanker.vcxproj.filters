@@ -102,6 +102,9 @@
     <ClInclude Include="source\MainScene\Player\Player.hpp">
       <Filter>ソース ファイル\MainScene\Player</Filter>
     </ClInclude>
+    <ClInclude Include="source\MainScene\BackGround\BackGroundSub.hpp">
+      <Filter>ソース ファイル\MainScene\BackGround</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -121,6 +124,9 @@
     </ClCompile>
     <ClCompile Include="source\MainScene\Object\Character.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\BackGround\BackGroundSub.cpp">
+      <Filter>ソース ファイル\MainScene\BackGround</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

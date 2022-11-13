@@ -782,7 +782,7 @@ namespace FPS_n2 {
 				this->m_RadOverRide = rad;
 			}
 		public:
-			void			ValueInit(const VhehicleData* pVeh_data, const MV1& hit_pic, std::shared_ptr<b2World>& pB2World, PlayerID pID) noexcept;
+			void			ValueInit(const VhehicleData* pVeh_data, const MV1& hit_pic, const std::shared_ptr<b2World>& pB2World, PlayerID pID) noexcept;
 			void			ValueSet(float pxRad, float pyRad, const VECTOR_ref& pPos) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady, bool isOverrideView) noexcept;													//
 			void			Setcamera(cam_info& camera_main, const float fov_base) noexcept;																	//ÉJÉÅÉâê›íËèoóÕ

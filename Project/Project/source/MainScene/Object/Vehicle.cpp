@@ -8,7 +8,7 @@ namespace FPS_n2 {
 		//----------------------------------------------------------
 
 		//
-		void			VehicleClass::ValueInit(const VhehicleData* pVeh_data, const MV1& hit_pic, std::shared_ptr<b2World>& pB2World, PlayerID pID) noexcept {
+		void			VehicleClass::ValueInit(const VhehicleData* pVeh_data, const MV1& hit_pic, const std::shared_ptr<b2World>& pB2World, PlayerID pID) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 
 			this->m_MyID = pID;
@@ -21,7 +21,7 @@ namespace FPS_n2 {
 			this->hitres.resize(this->m_col.mesh_num());											//モジュールごとの当たり判定結果を確保
 			this->hitssort.resize(this->m_col.mesh_num());											//モジュールごとの当たり判定順序を確保
 			b2PolygonShape dynamicBox = this->m_VecData->GetDynamicBox();
-			this->m_b2mine.Set(CreateB2Body(pB2World, b2_dynamicBody, 0.f, 0.f, 0.f), &dynamicBox);	//シェイプをボディに追加
+			this->m_b2mine.Set(CreateB2Body((std::shared_ptr<b2World>&)pB2World, b2_dynamicBody, 0.f, 0.f, 0.f), &dynamicBox);	//シェイプをボディに追加
 			for (auto& f : this->m_b2Foot) {
 				f.Init(&f == &this->m_b2Foot.front(), this->m_VecData, &GetObj());
 			}
