@@ -37,6 +37,15 @@ namespace FPS_n2 {
 			Upper_Ready2,
 			Upper_ADS2,
 			Upper_Cocking2,
+			//AK
+			Upper_Reload3Start,
+			Upper_Reload3One,
+			Upper_Reload3End,
+
+			Upper_Down3,
+			Upper_Ready3,
+			Upper_ADS3,
+			Upper_Cocking3,
 
 			AnimeIDMax,
 		};

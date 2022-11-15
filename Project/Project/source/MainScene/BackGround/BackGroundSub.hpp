@@ -1009,7 +1009,7 @@ namespace FPS_n2 {
 										VECTOR_ref Pos2D = MATRIX_ref::Vtrans((Pos - this->m_BasePos), Mat) / Scale_Rate;
 										Pos2D.Set(Pos2D.x(), -Pos2D.z(), 0.f);
 
-										DrawCircle((int)(Pos2D.x()*512), (int)(Pos2D.y() * 512), (int)(512.f * radius*10.f), GetColor(0, 0, 0));
+										DrawCircle((int)(Pos2D.x()*512), (int)(Pos2D.y() * 512), (int)(512.f * radius*12.5f), GetColor(0, 0, 0));
 									}
 									break;
 								}

@@ -1245,11 +1245,11 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().m_Reload = CharaAnimeID::Upper_Reload1Start;
 				//AK
 				m_CharaAnimeSet.resize(m_CharaAnimeSet.size() + 1);
-				m_CharaAnimeSet.back().m_Down = CharaAnimeID::Upper_Down1;
-				m_CharaAnimeSet.back().m_Ready = CharaAnimeID::Upper_Ready1;
-				m_CharaAnimeSet.back().m_ADS = CharaAnimeID::Upper_ADS1;
-				m_CharaAnimeSet.back().m_Cocking = CharaAnimeID::Upper_Cocking1;
-				m_CharaAnimeSet.back().m_Reload = CharaAnimeID::Upper_Reload1Start;
+				m_CharaAnimeSet.back().m_Down = CharaAnimeID::Upper_Down3;
+				m_CharaAnimeSet.back().m_Ready = CharaAnimeID::Upper_Ready3;
+				m_CharaAnimeSet.back().m_ADS = CharaAnimeID::Upper_ADS3;
+				m_CharaAnimeSet.back().m_Cocking = CharaAnimeID::Upper_Cocking3;
+				m_CharaAnimeSet.back().m_Reload = CharaAnimeID::Upper_Reload3Start;
 				//ƒnƒ“ƒhƒKƒ“
 				m_CharaAnimeSet.resize(m_CharaAnimeSet.size() + 1);
 				m_CharaAnimeSet.back().m_Down = CharaAnimeID::Upper_Down2;
