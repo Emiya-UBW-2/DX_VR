@@ -49,7 +49,7 @@ namespace FPS_n2 {
 				m_NewWorkSelect = 0;
 			}
 			void FirstExecute(const InputControl& MyInput, const SendInfo& SendMove) noexcept {
-				this->m_LeftClick.GetInput((GetMouseInputWithCheck() & MOUSE_INPUT_LEFT) != 0);
+				this->m_LeftClick.Execute((GetMouseInputWithCheck() & MOUSE_INPUT_LEFT) != 0);
 				if (!this->m_LeftClick.press()) {
 					this->m_LeftPressTimer = 0.f;
 				}
@@ -104,7 +104,7 @@ namespace FPS_n2 {
 				int y_h = y_r(30);
 				//bool Mid_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_MIDDLE) != 0);
 				//bool Right_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_RIGHT) != 0);
-				int mx = DXDraw::Instance()->disp_x / 2, my = DXDraw::Instance()->disp_y / 2;
+				int mx = DXDraw::Instance()->m_DispXSize / 2, my = DXDraw::Instance()->m_DispYSize / 2;
 				GetMousePoint(&mx, &my);
 				//ラムダ
 				auto MsgBox = [&](int xp1, int yp1, int xp2, int yp2, std::string String, auto&&... args) {
@@ -283,7 +283,7 @@ namespace FPS_n2 {
 		};
 
 
-		class MAINLOOP : public TEMPSCENE, public Effect_UseControl {
+		class MAINLOOP : public TEMPSCENE, public EffectControl {
 		private:
 			static const int		Chara_num = Player_num;
 			static const int		Vehicle_num = 0;
@@ -439,8 +439,8 @@ namespace FPS_n2 {
 				}
 
 				//Cam
-				camera_main.set_cam_info(deg2rad(65), 1.f, 100.f);
-				camera_main.set_cam_pos(VECTOR_ref::vget(0, 15, -20), VECTOR_ref::vget(0, 15, 0), VECTOR_ref::vget(0, 1, 0));
+				m_MainCamera.SetCamInfo(deg2rad(65), 1.f, 100.f);
+				m_MainCamera.SetCamPos(VECTOR_ref::vget(0, 15, -20), VECTOR_ref::vget(0, 15, 0), VECTOR_ref::vget(0, 1, 0));
 				//サウンド
 				auto SE = SoundPool::Instance();
 				SE->Add((int)SoundEnum::Shot_Gun, 3, "data/Sound/SE/gun/shot.wav");
@@ -486,8 +486,8 @@ namespace FPS_n2 {
 
 
 				//入力
-				this->m_FPSActive.Init(true);
-				this->m_MouseActive.Init(true);
+				this->m_FPSActive.Set(true);
+				this->m_MouseActive.Set(true);
 
 				this->m_DamageEvents.clear();
 
@@ -502,14 +502,14 @@ namespace FPS_n2 {
 #endif // DEBUG
 				//FirstDoingv
 				if (IsFirstLoop) {
-					SetMousePoint(DXDraw::Instance()->disp_x / 2, DXDraw::Instance()->disp_y / 2);
+					SetMousePoint(DXDraw::Instance()->m_DispXSize / 2, DXDraw::Instance()->m_DispYSize / 2);
 					this->m_Env.play(DX_PLAYTYPE_LOOP, TRUE);
 					auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 					Chara->LoadReticle();//プレイヤー変更時注意
 				}
 				//Input,AI
 				{
-					float cam_per = ((camera_main.fov / deg2rad(75)) / (is_lens() ? zoom_lens() : 1.f)) / 100.f;
+					float cam_per = ((m_MainCamera.GetCamFov() / deg2rad(75)) / (is_lens() ? zoom_lens() : 1.f)) / 100.f;
 					float pp_x = 0.f, pp_y = 0.f;
 					bool look_key = false;
 					bool eyechange_key = false;
@@ -577,21 +577,21 @@ namespace FPS_n2 {
 						}
 					}
 					else {//キーボード
-						this->m_MouseActive.GetInput(CheckHitKeyWithCheck(KEY_INPUT_TAB) != 0);
-						int mx = DXDraw::Instance()->disp_x / 2, my = DXDraw::Instance()->disp_y / 2;
+						this->m_MouseActive.Execute(CheckHitKeyWithCheck(KEY_INPUT_TAB) != 0);
+						int mx = DXDraw::Instance()->m_DispXSize / 2, my = DXDraw::Instance()->m_DispYSize / 2;
 						if (this->m_MouseActive.on()) {
 							if (this->m_MouseActive.trigger()) {
-								SetMousePoint(DXDraw::Instance()->disp_x / 2, DXDraw::Instance()->disp_y / 2);
+								SetMousePoint(DXDraw::Instance()->m_DispXSize / 2, DXDraw::Instance()->m_DispYSize / 2);
 							}
 							GetMousePoint(&mx, &my);
-							SetMousePoint(DXDraw::Instance()->disp_x / 2, DXDraw::Instance()->disp_y / 2);
+							SetMousePoint(DXDraw::Instance()->m_DispXSize / 2, DXDraw::Instance()->m_DispYSize / 2);
 							SetMouseDispFlag(FALSE);
 						}
 						else {
 							SetMouseDispFlag(TRUE);
 						}
-						pp_x = std::clamp(-(float)(my - DXDraw::Instance()->disp_y / 2)*1.f, -9.f, 9.f) * cam_per;
-						pp_y = std::clamp((float)(mx - DXDraw::Instance()->disp_x / 2)*1.f, -9.f, 9.f) * cam_per;
+						pp_x = std::clamp(-(float)(my - DXDraw::Instance()->m_DispYSize / 2)*1.f, -9.f, 9.f) * cam_per;
+						pp_y = std::clamp((float)(mx - DXDraw::Instance()->m_DispXSize / 2)*1.f, -9.f, 9.f) * cam_per;
 						look_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_RIGHT) != 0) && this->m_MouseActive.on();
 						eyechange_key = CheckHitKeyWithCheck(KEY_INPUT_V) != 0;
 						Lockon_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_MIDDLE) != 0) && this->m_MouseActive.on();
@@ -613,7 +613,7 @@ namespace FPS_n2 {
 						);
 					}
 
-					this->m_FPSActive.GetInput(eyechange_key);
+					this->m_FPSActive.Execute(eyechange_key);
 					if (look_key) {
 						this->m_LookMode = 1;
 					}
@@ -806,7 +806,7 @@ namespace FPS_n2 {
 					if (Gun->GetIsShot()) {
 						//エフェクト
 						auto mat = Gun->GetMuzzleMatrix();
-						Effect_UseControl::SetOnce(Effect::ef_fire2, mat.pos(), mat.GetRot().zvec()*-1.f, 1.f);
+						EffectControl::SetOnce(EffectResource::Effect::ef_fire2, mat.pos(), mat.GetRot().zvec()*-1.f, 1.f);
 					}
 				}
 				//いらないオブジェクトの除去
@@ -843,10 +843,10 @@ namespace FPS_n2 {
 									a->HitGround(pos_tmp);
 
 									if (hitwall) {
-										Effect_UseControl::Set_FootEffect(pos_tmp, norm_tmp, a->GetCaliberSize() / 0.1f * Scale_Rate);
+										EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.1f * Scale_Rate);
 									}
 									else if (ColResGround.HitFlag == TRUE) {
-										Effect_UseControl::Set_FootEffect(ColResGround.HitPosition, ColResGround.Normal, a->GetCaliberSize() / 0.1f * Scale_Rate);
+										EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, ColResGround.HitPosition, ColResGround.Normal, a->GetCaliberSize() / 0.1f * Scale_Rate);
 									}
 									/*
 									if (ObjMngr->GetObj(ObjType::Vehicle, a->GetShootedID())) {
@@ -879,9 +879,8 @@ namespace FPS_n2 {
 					this->m_CamShake = std::max(this->m_CamShake - 1.f / FPS, 0.f);
 
 					if (this->m_FPSActive.on() || Chara->GetIsADS()) {
-						camera_main.campos = Lerp(Chara->GetEyePosition(), Chara->GetScopePos(), this->m_EyePosPer);
-						camera_main.camvec = camera_main.campos + Chara->GetEyeVector();
-						camera_main.camup = Chara->GetMatrix().GetRot().yvec();
+						VECTOR_ref CamPos = Lerp(Chara->GetEyePosition(), Chara->GetScopePos(), this->m_EyePosPer);
+						m_MainCamera.SetCamPos(CamPos, CamPos + Chara->GetEyeVector(), Chara->GetMatrix().GetRot().yvec());
 					}
 					else {
 						MATRIX_ref FreeLook;
@@ -894,13 +893,16 @@ namespace FPS_n2 {
 						VECTOR_ref CamPos = Chara->GetMatrix().pos() + Chara->GetMatrix().yvec() * 14.f;
 						CamPos += Lerp((UpperMat.xvec()*-8.f + UpperMat.yvec()*3.f), (UpperMat.xvec()*-3.f + UpperMat.yvec()*4.f), this->m_EyeRunPer);
 
-						camera_main.campos = Lerp(CamPos + CamVec * Lerp(Lerp(-20.f, -50.f, this->m_TPS_Per), 2.f, this->m_EyePosPer_Prone), Chara->GetScopePos(), this->m_EyePosPer);
-						camera_main.camvec = Lerp(CamPos, Chara->GetScopePos(), this->m_EyePosPer) + CamVec * 100.f;
-
-						camera_main.camup = Chara->GetEyeVecMat().yvec() + this->m_CamShake2 * 0.25f;
+						m_MainCamera.SetCamPos(
+							Lerp(CamPos + CamVec * Lerp(Lerp(-20.f, -50.f, this->m_TPS_Per), 2.f, this->m_EyePosPer_Prone), Chara->GetScopePos(), this->m_EyePosPer),
+							Lerp(CamPos, Chara->GetScopePos(), this->m_EyePosPer) + CamVec * 100.f,
+							Chara->GetEyeVecMat().yvec() + this->m_CamShake2 * 0.25f);
 					}
 					Easing(&this->m_EyeRunPer, Chara->GetIsRun() ? 1.f : 0.f, 0.95f, EasingType::OutExpo);
 					Easing(&this->m_EyePosPer, Chara->GetIsADS() ? 1.f : 0.f, 0.8f, EasingType::OutExpo);//
+					auto fov_t = m_MainCamera.GetCamFov();
+					auto near_t = m_MainCamera.GetCamNear();
+					auto far_t = m_MainCamera.GetCamFar();
 					if (this->m_FPSActive.on()) {
 						float fov = 0;
 						if (Chara->GetIsADS()) {
@@ -912,51 +914,54 @@ namespace FPS_n2 {
 						else {
 							fov = deg2rad(95);
 						}
-						Easing(&camera_main.near_, Scale_Rate * 0.5f, 0.9f, EasingType::OutExpo);
-						Easing(&camera_main.far_, Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
+						Easing(&near_t, Scale_Rate * 0.5f, 0.9f, EasingType::OutExpo);
+						Easing(&far_t, Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
 
 						if (Chara->GetShotSwitch()) {
 							fov -= deg2rad(5);
-							Easing(&camera_main.fov, fov, 0.5f, EasingType::OutExpo);
+							Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
 						}
 						else {
-							Easing(&camera_main.fov, fov, 0.9f, EasingType::OutExpo);
+							Easing(&fov_t, fov, 0.9f, EasingType::OutExpo);
 						}
 					}
 					else {
 						if (Chara->GetIsADS()) {
-							//Easing(&camera_main.fov, deg2rad(90), 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.fov, deg2rad(30), 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.near_, 10.f, 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.far_, Scale_Rate * 300.f, 0.9f, EasingType::OutExpo);
+							//Easing(&fov_t, deg2rad(90), 0.9f, EasingType::OutExpo);
+							Easing(&fov_t, deg2rad(30), 0.9f, EasingType::OutExpo);
+							Easing(&near_t, 10.f, 0.9f, EasingType::OutExpo);
+							Easing(&far_t, Scale_Rate * 300.f, 0.9f, EasingType::OutExpo);
 						}
 						else if (Chara->GetIsRun()) {
-							Easing(&camera_main.fov, deg2rad(70), 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.near_, 3.f, 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.far_, Scale_Rate * 150.f, 0.9f, EasingType::OutExpo);
+							Easing(&fov_t, deg2rad(70), 0.9f, EasingType::OutExpo);
+							Easing(&near_t, 3.f, 0.9f, EasingType::OutExpo);
+							Easing(&far_t, Scale_Rate * 150.f, 0.9f, EasingType::OutExpo);
 						}
 						else {
-							Easing(&camera_main.fov, deg2rad(55), 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.near_, 10.f, 0.9f, EasingType::OutExpo);
-							Easing(&camera_main.far_, Scale_Rate * 300.f, 0.9f, EasingType::OutExpo);
+							Easing(&fov_t, deg2rad(55), 0.9f, EasingType::OutExpo);
+							Easing(&near_t, 10.f, 0.9f, EasingType::OutExpo);
+							Easing(&far_t, Scale_Rate * 300.f, 0.9f, EasingType::OutExpo);
 						}
 					}
+					m_MainCamera.SetCamInfo(fov_t, near_t, far_t);
 				}
 				else {
 					auto& Vehicle = PlayerMngr->GetPlayer(GetMyPlayerID()).GetVehicle();
-					Vehicle->Setcamera(camera_main, fov_base);
+					Vehicle->Setcamera(m_MainCamera, fov_base);
 					{
 						MATRIX_ref FreeLook;
-						FreeLook = MATRIX_ref::RotAxis((camera_main.camvec - camera_main.campos).cross(camera_main.camup), this->m_TPS_XradR) * MATRIX_ref::RotAxis(camera_main.camup, this->m_TPS_YradR);
+						FreeLook = MATRIX_ref::RotAxis((m_MainCamera.GetCamVec() - m_MainCamera.GetCamPos()).cross(m_MainCamera.GetCamUp()), this->m_TPS_XradR) * MATRIX_ref::RotAxis(m_MainCamera.GetCamUp(), this->m_TPS_YradR);
 						Easing_Matrix(&this->m_FreeLookMat, FreeLook, 0.5f, EasingType::OutExpo);
 
-						VECTOR_ref CamVec = (camera_main.camvec - camera_main.campos).Norm();
+						VECTOR_ref CamVec = (m_MainCamera.GetCamVec() - m_MainCamera.GetCamPos()).Norm();
 						CamVec = Lerp(CamVec, MATRIX_ref::Vtrans(CamVec, this->m_FreeLookMat), this->m_TPS_Per);
 
 						VECTOR_ref CamPos = Vehicle->Get_EyePos_Base();
 
-						camera_main.campos = Lerp(camera_main.campos, (CamPos + CamVec * -100.f), this->m_TPS_Per);
-						camera_main.camvec = CamPos + CamVec * 100.f;
+						m_MainCamera.SetCamPos(
+							Lerp(m_MainCamera.GetCamPos(), (CamPos + CamVec * -100.f), this->m_TPS_Per),
+							CamPos + CamVec * 100.f,
+							VECTOR_ref::up());
 					}
 				}
 				this->m_BackGround->Execute();
@@ -1010,7 +1015,7 @@ namespace FPS_n2 {
 					//*/
 				}
 				TEMPSCENE::Execute();
-				Effect_UseControl::Execute_Effect();
+				EffectControl::Execute();
 				return true;
 			}
 			void			Dispose(void) noexcept override {
@@ -1018,7 +1023,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 
 				m_NetWorkBrowser.Dispose();
-				Effect_UseControl::Dispose_Effect();
+				EffectControl::Dispose();
 				PlayerMngr->Dispose();
 				ObjMngr->DisposeObject();
 				for (auto& v : this->vehicle_Pool) {
@@ -1050,7 +1055,7 @@ namespace FPS_n2 {
 			void			Main_Draw(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
-				SetFogStartEnd(camera_main.near_, camera_main.far_*2.f);
+				SetFogStartEnd(m_MainCamera.GetCamNear(), m_MainCamera.GetCamFar()*2.f);
 				this->m_BackGround->Draw();
 				ObjMngr->DrawObject();
 				//ObjMngr->DrawDepthObject();
@@ -1150,7 +1155,7 @@ namespace FPS_n2 {
 				//UI
 				this->m_UIclass.Draw();
 				if (!Chara->GetIsADS()) {
-					aim_Graph.DrawRotaGraph(DrawParts->disp_x / 2, DrawParts->disp_y / 2, (float)(y_r(100)) / 100.f, 0.f, true);
+					aim_Graph.DrawRotaGraph(DrawParts->m_DispXSize / 2, DrawParts->m_DispYSize / 2, (float)(y_r(100)) / 100.f, 0.f, true);
 				}
 				//通信設定
 				if (!this->m_MouseActive.on()) {

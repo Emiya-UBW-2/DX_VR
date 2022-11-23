@@ -34,28 +34,22 @@ namespace FPS_n2 {
 			~GunData(void) noexcept { }
 		public:
 			void			SetFrame(const MV1& obj, int i) noexcept {
-				this->m_frame[0].Set_World(i, obj);
-				this->m_frame[2].first = -1;
-				this->m_frame[1].first = -1;
-				auto p2 = obj.frame_parent(this->m_frame[0].first);
-				if (p2 >= 0) {
-					this->m_frame[0].second -= obj.frame(int(p2)); //親がいる時引いとく
-				}
-				if (obj.frame_child_num(this->m_frame[0].first) <= 0) {
+				this->m_frame[0].Set(i, obj);
+				if (obj.frame_child_num(this->m_frame[0].GetFrameID()) <= 0) {
 					return;
 				}
-				int child_num = (int)obj.frame_child(this->m_frame[0].first, 0);
+				int child_num = (int)obj.frame_child(this->m_frame[0].GetFrameID(), 0);
 				if (obj.frame_name(child_num).find("仰角", 0) != std::string::npos) {
-					this->m_frame[1].Set_Local(child_num, obj);
+					this->m_frame[1].Set(child_num, obj);
 				}
-				if (this->m_frame[1].first == -1) {
+				if (this->m_frame[1].GetFrameID() == -1) {
 					return;
 				}
-				if (obj.frame_child_num(this->m_frame[1].first) <= 0) {
+				if (obj.frame_child_num(this->m_frame[1].GetFrameID()) <= 0) {
 					return;
 				}
 				{
-					this->m_frame[2].Set_Local((int)obj.frame_child(this->m_frame[1].first, 0), obj);
+					this->m_frame[2].Set((int)obj.frame_child(this->m_frame[1].GetFrameID(), 0), obj);
 				}
 			}
 			void			Set(int mdata, const std::string& stt) noexcept {
@@ -107,25 +101,25 @@ namespace FPS_n2 {
 				int ans = 0;
 				float tmp = 0.f;
 				for (auto& f : this->m_wheelframe) {
-					if ((isLeft ? 1.f : -1.f) * f.second.x() >= 0) {
-						ans = f.first;
-						tmp = f.second.z();
+					if ((isLeft ? 1.f : -1.f) * f.GetFrameWorldPosition().x() >= 0) {
+						ans = f.GetFrameID();
+						tmp = f.GetFrameWorldPosition().z();
 						break;
 					}
 				}
 				for (auto& f : this->m_wheelframe) {
-					if (ans != f.first) {
-						if ((isLeft ? 1.f : -1.f) * f.second.x() >= 0) {
+					if (ans != f.GetFrameID()) {
+						if ((isLeft ? 1.f : -1.f) * f.GetFrameWorldPosition().x() >= 0) {
 							if (isFront) {
-								if (tmp > f.second.z()) {
-									ans = f.first;
-									tmp = f.second.z();
+								if (tmp > f.GetFrameWorldPosition().z()) {
+									ans = f.GetFrameID();
+									tmp = f.GetFrameWorldPosition().z();
 								}
 							}
 							else {
-								if (tmp < f.second.z()) {
-									ans = f.first;
-									tmp = f.second.z();
+								if (tmp < f.GetFrameWorldPosition().z()) {
+									ans = f.GetFrameID();
+									tmp = f.GetFrameWorldPosition().z();
 								}
 							}
 						}
@@ -202,11 +196,11 @@ namespace FPS_n2 {
 					std::string p = this->m_DataObj.frame_name(i);
 					if (p.find("転輪", 0) != std::string::npos) {
 						this->m_wheelframe.resize(this->m_wheelframe.size() + 1);
-						this->m_wheelframe.back().Set_World(i, this->m_DataObj);
+						this->m_wheelframe.back().Set(i, this->m_DataObj);
 					}
 					else if ((p.find("輪", 0) != std::string::npos) && (p.find("転輪", 0) == std::string::npos)) {
 						this->m_wheelframe_nospring.resize(this->m_wheelframe_nospring.size() + 1);
-						this->m_wheelframe_nospring.back().Set_World(i, this->m_DataObj);
+						this->m_wheelframe_nospring.back().Set(i, this->m_DataObj);
 					}
 					else if (p.find("旋回", 0) != std::string::npos) {
 						this->m_GunFrameData.resize(this->m_GunFrameData.size() + 1);
@@ -224,15 +218,15 @@ namespace FPS_n2 {
 						for (int z = 0; z < this->m_DataObj.frame_child_num(i); z++) {
 							if (this->m_DataObj.frame(i + 1 + z).x() > 0) {
 								this->m_b2upsideframe[0].resize(this->m_b2upsideframe[0].size() + 1);
-								this->m_b2upsideframe[0].back().Set_World(i + 1 + z, this->m_DataObj);
+								this->m_b2upsideframe[0].back().Set(i + 1 + z, this->m_DataObj);
 							}
 							else {
 								this->m_b2upsideframe[1].resize(this->m_b2upsideframe[1].size() + 1);
-								this->m_b2upsideframe[1].back().Set_World(i + 1 + z, this->m_DataObj);
+								this->m_b2upsideframe[1].back().Set(i + 1 + z, this->m_DataObj);
 							}
 						}
-						std::sort(this->m_b2upsideframe[0].begin(), this->m_b2upsideframe[0].end(), [](const frames& x, const frames& y) { return x.second.z() < y.second.z(); }); //ソート
-						std::sort(this->m_b2upsideframe[1].begin(), this->m_b2upsideframe[1].end(), [](const frames& x, const frames& y) { return x.second.z() < y.second.z(); }); //ソート
+						std::sort(this->m_b2upsideframe[0].begin(), this->m_b2upsideframe[0].end(), [](const frames& x, const frames& y) { return x.GetFrameWorldPosition().z() < y.GetFrameWorldPosition().z(); }); //ソート
+						std::sort(this->m_b2upsideframe[1].begin(), this->m_b2upsideframe[1].end(), [](const frames& x, const frames& y) { return x.GetFrameWorldPosition().z() < y.GetFrameWorldPosition().z(); }); //ソート
 					}
 					else if (p.find("履帯設置部", 0) != std::string::npos) { //2D物理
 						this->m_downsideframe[0].clear();
@@ -240,11 +234,11 @@ namespace FPS_n2 {
 						for (int z = 0; z < this->m_DataObj.frame_child_num(i); z++) {
 							if (this->m_DataObj.frame(i + 1 + z).x() > 0) {
 								this->m_downsideframe[0].resize(this->m_downsideframe[0].size() + 1);
-								this->m_downsideframe[0].back().Set_World(i + 1 + z, this->m_DataObj);
+								this->m_downsideframe[0].back().Set(i + 1 + z, this->m_DataObj);
 							}
 							else {
 								this->m_downsideframe[1].resize(this->m_downsideframe[1].size() + 1);
-								this->m_downsideframe[1].back().Set_World(i + 1 + z, this->m_DataObj);
+								this->m_downsideframe[1].back().Set(i + 1 + z, this->m_DataObj);
 							}
 						}
 					}
@@ -351,8 +345,8 @@ namespace FPS_n2 {
 			const auto&	Getloadtime(void) const noexcept { return m_loadtimer; }
 			const auto&	GetAmmoSpec(void) const noexcept { return this->m_AmmoSpec[0]; }
 			const auto&	GetCaliberSize(void) const noexcept { return GetAmmoSpec()->GetCaliber(); }
-			const auto&	GetGunTrunnionFrameID(void) const noexcept { return this->m_GunSpec->Get_frame(1).first; }
-			const auto&	GetGunMuzzleFrameID(void) const noexcept { return this->m_GunSpec->Get_frame(2).first; }
+			const auto&	GetGunTrunnionFrameID(void) const noexcept { return this->m_GunSpec->Get_frame(1).GetFrameID(); }
+			const auto&	GetGunMuzzleFrameID(void) const noexcept { return this->m_GunSpec->Get_frame(2).GetFrameID(); }
 			const auto&	GetShotSound(void) const noexcept { return this->m_GunSpec->GetShotSound(); }
 			const auto&	GetReloadSound(void) const noexcept { return this->m_GunSpec->GetReloadSound(); }
 			const auto&	GetEjectSound(void) const noexcept { return this->m_GunSpec->GetEjectSound(); }
@@ -367,19 +361,19 @@ namespace FPS_n2 {
 				float xrad = std::clamp(pGunXrad, deg2rad(this->m_GunSpec->GetDownRadLimit()), deg2rad(this->m_GunSpec->GetUpRadLimit()));
 				frames id;
 				id = this->m_GunSpec->Get_frame(0);
-				if (id.first >= 0) {
-					obj_body_t->SetFrameLocalMatrix(id.first, MATRIX_ref::RotY(yrad) * MATRIX_ref::Mtrans(id.second));
-					col_body_t->SetFrameLocalMatrix(id.first, MATRIX_ref::RotY(yrad) * MATRIX_ref::Mtrans(id.second));
+				if (id.GetFrameID() >= 0) {
+					obj_body_t->SetFrameLocalMatrix(id.GetFrameID(), MATRIX_ref::RotY(yrad) * MATRIX_ref::Mtrans(id.GetFrameLocalPosition()));
+					col_body_t->SetFrameLocalMatrix(id.GetFrameID(), MATRIX_ref::RotY(yrad) * MATRIX_ref::Mtrans(id.GetFrameLocalPosition()));
 				}
 				id = this->m_GunSpec->Get_frame(1);
-				if (id.first >= 0) {
-					obj_body_t->SetFrameLocalMatrix(id.first, MATRIX_ref::RotX(xrad) * MATRIX_ref::Mtrans(id.second));
-					col_body_t->SetFrameLocalMatrix(id.first, MATRIX_ref::RotX(xrad) * MATRIX_ref::Mtrans(id.second));
+				if (id.GetFrameID() >= 0) {
+					obj_body_t->SetFrameLocalMatrix(id.GetFrameID(), MATRIX_ref::RotX(xrad) * MATRIX_ref::Mtrans(id.GetFrameLocalPosition()));
+					col_body_t->SetFrameLocalMatrix(id.GetFrameID(), MATRIX_ref::RotX(xrad) * MATRIX_ref::Mtrans(id.GetFrameLocalPosition()));
 				}
 				id = this->m_GunSpec->Get_frame(2);
-				if (id.first >= 0) {
-					obj_body_t->SetFrameLocalMatrix(id.first, MATRIX_ref::Mtrans(VECTOR_ref::front() * (this->m_Recoil * 0.5f * Scale_Rate)) * MATRIX_ref::Mtrans(id.second));
-					col_body_t->SetFrameLocalMatrix(id.first, MATRIX_ref::Mtrans(VECTOR_ref::front() * (this->m_Recoil * 0.5f * Scale_Rate)) * MATRIX_ref::Mtrans(id.second));
+				if (id.GetFrameID() >= 0) {
+					obj_body_t->SetFrameLocalMatrix(id.GetFrameID(), MATRIX_ref::Mtrans(VECTOR_ref::front() * (this->m_Recoil * 0.5f * Scale_Rate)) * MATRIX_ref::Mtrans(id.GetFrameLocalPosition()));
+					col_body_t->SetFrameLocalMatrix(id.GetFrameID(), MATRIX_ref::Mtrans(VECTOR_ref::front() * (this->m_Recoil * 0.5f * Scale_Rate)) * MATRIX_ref::Mtrans(id.GetFrameLocalPosition()));
 				}
 				Easing(&this->m_ShotRadAdd, MATRIX_ref::RotY(yrad).xvec() * -1.f * deg2rad(-this->m_React * GetAmmoSpec()->GetCaliber() * 50.f), 0.85f, EasingType::OutExpo);
 			}
@@ -428,7 +422,7 @@ namespace FPS_n2 {
 			}
 		};
 		//戦車
-		class VehicleClass : public ObjectBaseClass, public Effect_UseControl {
+		class VehicleClass : public ObjectBaseClass, public EffectControl {
 		private:
 			//弾痕
 			class HIT_ACTIVE {
@@ -516,22 +510,22 @@ namespace FPS_n2 {
 				public:
 					void			Init(const frames& pFrame) noexcept {
 						this->m_frame = pFrame;
-						this->m_gndsmkeffcs.SetLoop(EffectControl::Instance()->effsorce.back(), VECTOR_ref::vget(0, -1, 0), VECTOR_ref::vget(0, 0, 1), 0.1f*Scale_Rate);
+						this->m_gndsmkeffcs.SetLoop(EffectResource::Instance()->effsorce.back(), VECTOR_ref::vget(0, -1, 0), VECTOR_ref::vget(0, 0, 1), 0.1f*Scale_Rate);
 						this->m_gndsmksize = 0.1f;
 					}
 					//
 					void			FrameExecute(MV1* pTargetObj, const MV1* pMapPtr) noexcept {
-						if (this->m_frame.first >= 0) {
+						if (this->m_frame.GetFrameID() >= 0) {
 							auto y_vec = pTargetObj->GetMatrix().yvec();
-							pTargetObj->frame_Reset(this->m_frame.first);
-							auto startpos = pTargetObj->frame(this->m_frame.first);
+							pTargetObj->frame_Reset(this->m_frame.GetFrameID());
+							auto startpos = pTargetObj->frame(this->m_frame.GetFrameID());
 							auto colres = pMapPtr->CollCheck_Line(
-								startpos + y_vec * ((-this->m_frame.second.y()) + 2.f*Scale_Rate),
-								startpos + y_vec * ((-this->m_frame.second.y()) - 0.3f*Scale_Rate));
+								startpos + y_vec * ((-this->m_frame.GetFrameWorldPosition().y()) + 2.f*Scale_Rate),
+								startpos + y_vec * ((-this->m_frame.GetFrameWorldPosition().y()) - 0.3f*Scale_Rate));
 							this->m_Res_y = (colres.HitFlag == TRUE) ? colres.HitPosition.y : (std::numeric_limits<float>::max)();
-							pTargetObj->SetFrameLocalMatrix(this->m_frame.first,
-								MATRIX_ref::Mtrans(VECTOR_ref::up() * ((colres.HitFlag == TRUE) ? (this->m_Res_y + y_vec.y() * this->m_frame.second.y() - startpos.y()) : -0.4f*Scale_Rate)) *
-								MATRIX_ref::Mtrans(this->m_frame.second)
+							pTargetObj->SetFrameLocalMatrix(this->m_frame.GetFrameID(),
+								MATRIX_ref::Mtrans(VECTOR_ref::up() * ((colres.HitFlag == TRUE) ? (this->m_Res_y + y_vec.y() * this->m_frame.GetFrameWorldPosition().y() - startpos.y()) : -0.4f*Scale_Rate)) *
+								MATRIX_ref::Mtrans(this->m_frame.GetFrameWorldPosition())
 							);
 						}
 					}
@@ -542,8 +536,8 @@ namespace FPS_n2 {
 						else {
 							this->m_gndsmksize = 0.2f;
 						}
-						this->m_gndsmkeffcs.Set_Pos(pTargetObj->frame(this->m_frame.first) + pTargetObj->GetMatrix().yvec() * (-this->m_frame.second.y()));
-						this->m_gndsmkeffcs.Set_Scale(std::clamp(this->m_gndsmksize, 0.2f, 1.5f)*Scale_Rate);
+						this->m_gndsmkeffcs.SetEffectPos(pTargetObj->frame(this->m_frame.GetFrameID()) + pTargetObj->GetMatrix().yvec() * (-this->m_frame.GetFrameWorldPosition().y()));
+						this->m_gndsmkeffcs.SetEffectScale(std::clamp(this->m_gndsmksize, 0.2f, 1.5f)*Scale_Rate);
 					}
 					//
 					void			Dispose(void) noexcept {
@@ -572,8 +566,8 @@ namespace FPS_n2 {
 						b2Body* BodyA = BodyB;
 						b2Vec2 anchor;
 						for (const auto& w : pUseVeh->Get_b2upsideframe(IsLeft ? 0 : 1)) {
-							anchor = b2Vec2(w.second.z(), w.second.y());
-							if (w.second.x() * LorR > 0) {
+							anchor = b2Vec2(w.GetFrameWorldPosition().z(), w.GetFrameWorldPosition().y());
+							if (w.GetFrameWorldPosition().x() * LorR > 0) {
 								this->m_Foot.resize(this->m_Foot.size() + 1);
 								b2PolygonShape f_dynamicBox; //ダイナミックボディに別のボックスシェイプを定義
 								f_dynamicBox.SetAsBox(0.2f, 0.05f);
@@ -601,7 +595,7 @@ namespace FPS_n2 {
 					if (!this->m_Foot.empty()) {
 						//転輪(動く)
 						for (const auto& w : pUseVeh->Get_wheelframe()) {
-							VECTOR_ref vects = pTargetObj->GetFrameLocalMatrix(w.first).pos();
+							VECTOR_ref vects = pTargetObj->GetFrameLocalMatrix(w.GetFrameID()).pos();
 							if (vects.x() * LorR > 0) {
 								this->m_Wheel.resize(this->m_Wheel.size() + 1);
 								b2CircleShape shape;
@@ -611,7 +605,7 @@ namespace FPS_n2 {
 						}
 						//誘導輪(動かない)
 						for (const auto& w : pUseVeh->Get_wheelframe_nospring()) {
-							VECTOR_ref vects = pTargetObj->GetFrameLocalMatrix(w.first).pos();
+							VECTOR_ref vects = pTargetObj->GetFrameLocalMatrix(w.GetFrameID()).pos();
 							if (vects.x() * LorR > 0) {
 								this->m_Yudo.resize(this->m_Yudo.size() + 1);
 								b2CircleShape shape;
@@ -632,7 +626,7 @@ namespace FPS_n2 {
 					if (this->m_Foot.size() != 0) {
 						auto Wheel_t = this->m_Wheel.begin();
 						for (const auto& w : pUseVeh->Get_wheelframe()) {
-							VECTOR_ref vects = pTargetObj->GetFrameLocalMatrix(w.first).pos();
+							VECTOR_ref vects = pTargetObj->GetFrameLocalMatrix(w.GetFrameID()).pos();
 							if (vects.x() * LR_t > 0) {
 								Wheel_t->SetTransform(b2Vec2(vects.z(), vects.y()), pWheelRotate);
 								Wheel_t++;
@@ -640,7 +634,7 @@ namespace FPS_n2 {
 						}
 						size_t i = 0;
 						for (const auto& w : pUseVeh->Get_wheelframe_nospring()) {
-							VECTOR_ref vects = pTargetObj->GetFrameLocalMatrix(w.first).pos();
+							VECTOR_ref vects = pTargetObj->GetFrameLocalMatrix(w.GetFrameID()).pos();
 							if (vects.x() * LR_t > 0) {
 								this->m_Yudo[i++].SetTransform(b2Vec2(vects.z(), vects.y()), pWheelRotate);
 							}
@@ -658,10 +652,10 @@ namespace FPS_n2 {
 					{
 						size_t i = 0;
 						for (const auto& w : pUseVeh->Get_b2upsideframe((IsLeft) ? 0 : 1)) {
-							if (w.second.x() * LR_t > 0) {
+							if (w.GetFrameWorldPosition().x() * LR_t > 0) {
 								auto& t = this->m_Foot[i++];
-								t.pos = VECTOR_ref::vget(w.second.x(), t.pos.y(), t.pos.z());
-								pTargetObj->SetFrameLocalMatrix(w.first, MATRIX_ref::Mtrans(t.pos));
+								t.pos = VECTOR_ref::vget(w.GetFrameWorldPosition().x(), t.pos.y(), t.pos.z());
+								pTargetObj->SetFrameLocalMatrix(w.GetFrameID(), MATRIX_ref::Mtrans(t.pos));
 							}
 						}
 					}
@@ -785,7 +779,7 @@ namespace FPS_n2 {
 			void			ValueInit(const VhehicleData* pVeh_data, const MV1& hit_pic, const std::shared_ptr<b2World>& pB2World, PlayerID pID) noexcept;
 			void			ValueSet(float pxRad, float pyRad, const VECTOR_ref& pPos) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady, bool isOverrideView) noexcept;													//
-			void			Setcamera(cam_info& camera_main, const float fov_base) noexcept;																	//カメラ設定出力
+			void			Setcamera(Camera3DInfo& m_MainCamera, const float fov_base) noexcept;																	//カメラ設定出力
 		private://更新関連
 			const auto		CheckAmmoHited(const AmmoClass& pAmmo) noexcept;																					//被弾チェック
 			const auto		CalcAmmoHited(AmmoClass* pAmmo, const VECTOR_ref& pShooterPos) noexcept;															//被弾処理
@@ -824,14 +818,14 @@ namespace FPS_n2 {
 			}
 			void			LateExecute(void) noexcept override {
 				ExecuteMatrix();			//SetMat指示//0.03ms
-				Effect_UseControl::Execute_Effect();
+				EffectControl::Execute();
 			}
 			void			Draw(void) noexcept override {
 				DrawCommon();
 			}
 			void			Dispose(void) noexcept override {
 				ObjectBaseClass::Dispose();
-				Effect_UseControl::Dispose_Effect();
+				EffectControl::Dispose();
 				for (auto& f : this->m_b2Foot) {
 					f.Dispose();
 				}

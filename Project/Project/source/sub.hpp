@@ -266,7 +266,7 @@ namespace FPS_n2 {
 			//動作にかかわる操作
 			this->m_rad_Buf.x(pxRad);
 			this->m_rad_Buf.y(pyRad);
-			this->m_Squat.Init(SquatOn);
+			this->m_Squat.Set(SquatOn);
 			//上記を反映するもの
 			this->m_rad = this->m_rad_Buf;
 			this->m_SquatPer = SquatOn ? 1.f : 0.f;
@@ -309,12 +309,12 @@ namespace FPS_n2 {
 				this->m_IsRun = false;
 			}
 
-			this->m_Squat.GetInput(pSquatPress && !pIsNotActive);
-			if (this->m_IsRun) { this->m_Squat.first = false; }
+			this->m_Squat.Execute(pSquatPress && !pIsNotActive);
+			if (this->m_IsRun) { this->m_Squat.Set(false); }
 
 			{
-				m_QKey.GetInput(pQPress && !pIsNotActive);
-				m_EKey.GetInput(pEPress && !pIsNotActive);
+				m_QKey.Execute(pQPress && !pIsNotActive);
+				m_EKey.Execute(pEPress && !pIsNotActive);
 				if (m_EKey.trigger()) {
 					if (this->m_LeanRate == 1) {
 						this->m_LeanRate = -1;
@@ -403,57 +403,6 @@ namespace FPS_n2 {
 			Easing(&this->m_SquatPer, GetIsSquat() ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 		}
 	};
-
-	//エフェクト利用コントロール
-	class Effect_UseControl {
-	private:
-		std::array<EffectS, int(Effect::effects)> effcs;	//エフェクト
-		std::array<EffectS, 256> effcs_G;					//エフェクト
-		int G_cnt{ 0 };
-	public:
-		const auto	CheckPlayEffect(Effect ef_) const noexcept { return this->effcs[(int)ef_].GetIsPlaying(); }
-		void		Set_FootEffect(const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept {
-			auto* EffectUseControl = EffectControl::Instance();
-			this->effcs_G[this->G_cnt].Stop();
-			this->effcs_G[this->G_cnt].SetOnce(EffectUseControl->effsorce[(int)Effect::ef_gndsmoke], pos_t, nomal_t, scale);
-			++this->G_cnt %= 256;
-		}
-		const auto	Check_FootEffectCnt(void) noexcept {
-			int cnt = 0;
-			for (auto& t : this->effcs_G) {
-				if (t.GetIsPlaying()) { cnt++; }
-			}
-			return cnt;
-		}
-
-		void		SetLoop(Effect ef_, const VECTOR_ref& pos_t) noexcept {
-			auto* EffectUseControl = EffectControl::Instance();
-			this->effcs[(int)ef_].SetLoop(EffectUseControl->effsorce[(int)ef_], pos_t);
-		}
-		void		SetOnce(Effect ef_, const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept {
-			auto* EffectUseControl = EffectControl::Instance();
-			this->effcs[(int)ef_].SetOnce(EffectUseControl->effsorce[(int)ef_], pos_t, nomal_t, scale);
-		}
-		void		Update_LoopEffect(Effect ef_, const VECTOR_ref& pos_t, const VECTOR_ref& nomal_t, float scale = 1.f) noexcept {
-			this->effcs[(int)ef_].SetParam(pos_t, nomal_t, scale);
-		}
-		void		Stop_Effect(Effect ef_) noexcept { this->effcs[(int)ef_].Stop(); }
-		void		SetSpeed_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Speed(value); }
-		void		SetScale_Effect(Effect ef_, float value) noexcept { this->effcs[(int)ef_].Set_Scale(value); }
-
-		void		Execute_Effect(void) noexcept {
-			for (auto& t : this->effcs) {
-				t.Execute();
-			}
-			for (auto& t : this->effcs_G) {
-				t.Execute();
-			}
-		}
-		void		Dispose_Effect(void) noexcept {
-			for (auto& t : this->effcs) { t.Dispose(); }
-		}
-	};
-
 
 	// プレイヤー関係の定義
 #define PLAYER_ENUM_MIN_SIZE		(0.1f * Scale_Rate)		// 周囲のポリゴン検出に使用する球の初期サイズ

@@ -70,7 +70,7 @@ namespace FPS_n2 {
 					//名前、体力、魔力
 					{
 						xp1 = y_r(50);
-						yp1 = DrawParts->disp_y - y_r(140);
+						yp1 = DrawParts->m_DispYSize - y_r(140);
 
 						Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat(xp1 + y_r(50), yp1, Green, White, "%s", strParam[0].c_str());
 						yp1 += y_r(25);
@@ -99,8 +99,8 @@ namespace FPS_n2 {
 					}
 					//魔法、クールタイム
 					{
-						xp1 = DrawParts->disp_x - y_r(275);
-						yp1 = DrawParts->disp_y - y_r(48) - y_r(84);
+						xp1 = DrawParts->m_DispXSize - y_r(275);
+						yp1 = DrawParts->m_DispYSize - y_r(48) - y_r(84);
 						if (strParam[1].length() > 0) {
 							auto per = (float)(100 * intParam.at(14) / intParam.at(15)) / 100.f;
 
@@ -157,16 +157,16 @@ namespace FPS_n2 {
 
 						int xp1, yp1;
 						int xs1, ys1;
-						xp1 = DrawParts->disp_x / 2;
-						yp1 = DrawParts->disp_y / 20;
+						xp1 = DrawParts->m_DispXSize / 2;
+						yp1 = DrawParts->m_DispYSize / 20;
 						Fonts->Get(y_r(28), FontPool::FontType::Nomal_Edge).Get_handle().DrawStringFormat_MID(xp1, yp1, color, White, "<%s>", Mes.c_str());
 
-						int picx = std::max(DrawParts->disp_x / 8, Fonts->Get(y_r(28), FontPool::FontType::Nomal_Edge).Get_handle().GetDrawWidthFormat("<%s>", Mes.c_str()) / 2 + y_r(20));
+						int picx = std::max(DrawParts->m_DispXSize / 8, Fonts->Get(y_r(28), FontPool::FontType::Nomal_Edge).Get_handle().GetDrawWidthFormat("<%s>", Mes.c_str()) / 2 + y_r(20));
 
 						xs1 = y_r(40);
 						ys1 = y_r(40);
-						xp1 = DrawParts->disp_x / 2 + picx + xs1;
-						yp1 = DrawParts->disp_y / 20 - y_r(28) + ys1;
+						xp1 = DrawParts->m_DispXSize / 2 + picx + xs1;
+						yp1 = DrawParts->m_DispYSize / 20 - y_r(28) + ys1;
 
 						DrawBox((int)(xp1 - xs1), (int)(yp1 - ys1), (int)(xp1 + xs1), (int)(yp1 + ys1), GetColor(0, 0, 0), TRUE);
 						Fonts->Get(y_r(20), FontPool::FontType::HUD_Edge).Get_handle().DrawStringFormat_MID(xp1, yp1 + ys1, color, White, "%s", strParam[5].c_str());

@@ -164,7 +164,7 @@ namespace FPS_n2 {
 					o->FirstExecute();
 				}
 				//物理アップデート
-				this->m_ResetP.GetInput(CheckHitKeyWithCheck(KEY_INPUT_P) != 0);
+				this->m_ResetP.Execute(CheckHitKeyWithCheck(KEY_INPUT_P) != 0);
 
 				for (int i = 0; i < this->m_Object.size(); i++) {
 					auto& o = this->m_Object[i];

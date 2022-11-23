@@ -391,7 +391,7 @@ namespace FPS_n2 {
 					this->m_CannotRun
 				);
 				//eØ‘Ö
-				m_GunChange.GetInput(pInput.GetAction1());
+				m_GunChange.Execute(pInput.GetAction1());
 				if (m_GunChange.trigger() && GetCanshot()) {
 					m_SlingZrad.Init(0.05f*Scale_Rate, 3.f, deg2rad(90));
 					m_SlingYrad.Init(0.05f*Scale_Rate, 3.f, deg2rad(30));
@@ -429,10 +429,10 @@ namespace FPS_n2 {
 				}
 				this->m_Press_Aim = pInput.GetAction6() && this->m_KeyActive;
 				//
-				m_Rightkey.GetInput(pInput.GetRightPress());
-				m_Leftkey.GetInput(pInput.GetLeftPress());
-				m_Upkey.GetInput(pInput.GetUpPress());
-				m_Downkey.GetInput(pInput.GetDownPress());
+				m_Rightkey.Execute(pInput.GetRightPress());
+				m_Leftkey.Execute(pInput.GetLeftPress());
+				m_Upkey.Execute(pInput.GetUpPress());
+				m_Downkey.Execute(pInput.GetDownPress());
 				//
 				{
 					auto TmpReady = !(!GetIsRun() || (this->m_ShotPhase >= 2));

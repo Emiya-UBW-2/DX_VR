@@ -86,7 +86,11 @@ namespace FPS_n2 {
 			this->m_key[5] = pInput.GetGoLeftPress() && pReady && this->Get_alive();		//左
 		}
 		//カメラ設定出力
-		void			VehicleClass::Setcamera(cam_info& camera_main, const float fov_base) noexcept {
+		void			VehicleClass::Setcamera(Camera3DInfo& m_MainCamera, const float fov_base) noexcept {
+			auto fov_t = m_MainCamera.GetCamFov();
+			auto near_t = m_MainCamera.GetCamNear();
+			auto far_t = m_MainCamera.GetCamFar();
+
 			VECTOR_ref eyepos, eyetgt;
 			auto OLD = this->m_range;
 			if (is_ADS()) {
@@ -97,7 +101,7 @@ namespace FPS_n2 {
 					this->m_range_r = this->m_range;
 				}
 				else {
-					Easing(&camera_main.fov, fov_base / this->m_ratio, 0.9f, EasingType::OutExpo);
+					Easing(&fov_t, fov_base / this->m_ratio, 0.9f, EasingType::OutExpo);
 				}
 			}
 			else {
@@ -109,15 +113,16 @@ namespace FPS_n2 {
 				this->m_range = std::clamp(this->m_range - float(GetMouseWheelRotVolWithCheck()) * this->m_range_change, 0.f, 9.f);
 				Easing(&this->m_range_r, this->m_range, 0.8f, EasingType::OutExpo);
 
-				Easing(&camera_main.fov, fov_base, 0.9f, EasingType::OutExpo);
+				Easing(&fov_t, fov_base, 0.9f, EasingType::OutExpo);
 			}
 			eyetgt = Get_EyePos_Base() + this->m_MouseVec.zvec() * -1.f * std::max(this->m_range_r*Scale_Rate, 1.f);
 
 			this->m_changeview = ((this->m_range != OLD) && (this->m_range == 0.f || OLD == 0.f));
-			camera_main.set_cam_pos(eyepos, eyetgt, this->m_move.mat.yvec());
+			m_MainCamera.SetCamPos(eyepos, eyetgt, this->m_move.mat.yvec());
 
-			Easing(&camera_main.near_, 1.f + 2.f*((is_ADS()) ? this->m_ratio : 0.f), 0.9f, EasingType::OutExpo);
-			Easing(&camera_main.far_, std::max(this->m_AimingDistance, Scale_Rate * 20.f) + Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
+			Easing(&near_t, 1.f + 2.f*((is_ADS()) ? this->m_ratio : 0.f), 0.9f, EasingType::OutExpo);
+			Easing(&far_t, std::max(this->m_AimingDistance, Scale_Rate * 20.f) + Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
+			m_MainCamera.SetCamInfo(fov_t, near_t, far_t);
 		}
 
 		//----------------------------------------------------------
@@ -173,14 +178,14 @@ namespace FPS_n2 {
 					for (auto& mesh : this->m_VecData->Get_space_mesh()) {
 						if (tt.GetHitMesh() == mesh) {
 							//空間装甲に当たったのでモジュールに30ダメ
-							Effect_UseControl::SetOnce(Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate);
+							EffectControl::SetOnce(EffectResource::Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate);
 							//this->SubHP_Parts(30, (HitPoint)tt.GetHitMesh());
 						}
 					}
 					for (auto& mesh : this->m_VecData->Get_module_mesh()) {
 						if (tt.GetHitMesh() == mesh) {
 							//モジュールに当たったのでモジュールに30ダメ
-							Effect_UseControl::SetOnce(Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate);
+							EffectControl::SetOnce(EffectResource::Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate);
 							//this->SubHP_Parts(30, (HitPoint)tt.GetHitMesh());
 						}
 					}
@@ -199,7 +204,7 @@ namespace FPS_n2 {
 								//this->SubHP_Parts(pAmmo->GetDamage(), (HitPoint)tt.GetHitMesh());
 								if (!this->Get_alive()) {
 									//撃破
-									Effect_UseControl::SetOnce(Effect::ef_greexp2, this->m_move.pos, this->m_move.mat.zvec(), Scale_Rate*2.f);
+									EffectControl::SetOnce(EffectResource::Effect::ef_greexp2, this->m_move.pos, this->m_move.mat.zvec(), Scale_Rate*2.f);
 								}
 								isDamage = true;
 							}
@@ -208,7 +213,7 @@ namespace FPS_n2 {
 								SE->Get((int)SoundEnum::Tank_Ricochet).Play_3D(GetRand(16), HitPos, 100.f*Scale_Rate, 216);
 							}
 							//エフェクトセット
-							Effect_UseControl::SetOnce(Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate*10.f);
+							EffectControl::SetOnce(EffectResource::Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate*10.f);
 							this->m_Hit_active.Set(this->m_move, HitPos, HitNormal, pAmmo->GetMove().vec.Norm(), pAmmo->GetCaliberSize()*Scale_Rate, !pAmmo->IsActive());
 							break;
 						}
@@ -289,22 +294,22 @@ namespace FPS_n2 {
 			//転輪
 			auto y_vec = GetObj().GetMatrix().yvec();
 			for (auto& f : this->m_VecData->Get_wheelframe()) {
-				if (f.first >= 0) {
+				if (f.GetFrameID() >= 0) {
 					auto ID = &f - &this->m_VecData->Get_wheelframe().front();
-					GetObj().frame_Reset(f.first);
-					auto startpos = GetObj().frame(f.first);
-					auto ColResGround = this->m_BackGround->GetGroundCol().CollCheck_Line(startpos + y_vec * ((-f.second.y()) + 2.f*Scale_Rate), startpos + y_vec * ((-f.second.y()) - 0.3f*Scale_Rate));
-					Easing(&this->m_wheel_frameYpos[ID], (ColResGround.HitFlag == TRUE) ? (ColResGround.HitPosition.y + y_vec.y() * f.second.y() - startpos.y()) : -0.3f*Scale_Rate, 0.9f, EasingType::OutExpo);
-					GetObj().SetFrameLocalMatrix(f.first,
-						MATRIX_ref::RotX((f.second.x() >= 0) ? this->m_wheel_Left : this->m_wheel_Right) *
+					GetObj().frame_Reset(f.GetFrameID());
+					auto startpos = GetObj().frame(f.GetFrameID());
+					auto ColResGround = this->m_BackGround->GetGroundCol().CollCheck_Line(startpos + y_vec * ((-f.GetFrameWorldPosition().y()) + 2.f*Scale_Rate), startpos + y_vec * ((-f.GetFrameWorldPosition().y()) - 0.3f*Scale_Rate));
+					Easing(&this->m_wheel_frameYpos[ID], (ColResGround.HitFlag == TRUE) ? (ColResGround.HitPosition.y + y_vec.y() * f.GetFrameWorldPosition().y() - startpos.y()) : -0.3f*Scale_Rate, 0.9f, EasingType::OutExpo);
+					GetObj().SetFrameLocalMatrix(f.GetFrameID(),
+						MATRIX_ref::RotX((f.GetFrameWorldPosition().x() >= 0) ? this->m_wheel_Left : this->m_wheel_Right) *
 						MATRIX_ref::Mtrans(VECTOR_ref::up() * this->m_wheel_frameYpos[ID]) *
-						MATRIX_ref::Mtrans(f.second)
+						MATRIX_ref::Mtrans(f.GetFrameWorldPosition())
 					);
 				}
 			}
 			for (const auto& f : this->m_VecData->Get_wheelframe_nospring()) {
-				if (f.first >= 0) {
-					GetObj().SetFrameLocalMatrix(f.first, MATRIX_ref::RotX((f.second.x() >= 0) ? this->m_wheel_Left : this->m_wheel_Right) * MATRIX_ref::Mtrans(f.second));
+				if (f.GetFrameID() >= 0) {
+					GetObj().SetFrameLocalMatrix(f.GetFrameID(), MATRIX_ref::RotX((f.GetFrameWorldPosition().x() >= 0) ? this->m_wheel_Left : this->m_wheel_Right) * MATRIX_ref::Mtrans(f.GetFrameWorldPosition()));
 				}
 			}
 		}
@@ -402,7 +407,7 @@ namespace FPS_n2 {
 				//射撃
 				if (cg.Execute(this->m_key[(&cg == &this->m_Gun.front()) ? 0 : 1], this->m_CharaType == CharaTypeID::Mine)) {
 					SE->Get((int)SoundEnum::Tank_Shot).Play_3D(cg.GetShotSound(), this->m_move.pos, 250.f*Scale_Rate);							//サウンド
-					Effect_UseControl::SetOnce(Effect::ef_fire, GetObj().frame(cg.GetGunMuzzleFrameID()), GetObj().GetFrameLocalWorldMatrix(cg.GetGunTrunnionFrameID()).zvec() * -1.f, cg.GetCaliberSize() / 0.1f * Scale_Rate);				//銃発砲エフェクトのセット
+					EffectControl::SetOnce(EffectResource::Effect::ef_fire, GetObj().frame(cg.GetGunMuzzleFrameID()), GetObj().GetFrameLocalWorldMatrix(cg.GetGunTrunnionFrameID()).zvec() * -1.f, cg.GetCaliberSize() / 0.1f * Scale_Rate);				//銃発砲エフェクトのセット
 
 					auto& LastAmmo = (std::shared_ptr<AmmoClass>&)(*ObjMngr->AddObject(ObjType::Ammo));
 					LastAmmo->Put(cg.GetAmmoSpec(), GetObj().frame(cg.GetGunMuzzleFrameID()), GetObj().GetFrameLocalWorldMatrix(cg.GetGunTrunnionFrameID()).zvec() * -1.f, this->m_MyID);
@@ -498,7 +503,7 @@ namespace FPS_n2 {
 		}
 		//
 		void			VehicleClass::HitGround(const VECTOR_ref& pPos, const VECTOR_ref& pNorm, const VECTOR_ref& /*pVec*/) noexcept {
-			Effect_UseControl::Set_FootEffect(pPos, pNorm, 0.05f / 0.1f * Scale_Rate);
+			EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, pPos, pNorm, 0.05f / 0.1f * Scale_Rate);
 			//hit_obj_p.Set(a.GetCaliberSize() * Scale_Rate, pPos, pNorm, pVec);	//弾痕
 		}
 		//
