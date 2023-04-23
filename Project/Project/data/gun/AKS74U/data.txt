@@ -1,6 +1,0 @@
-usemag0=AKS74U
-shottype=FULL
-usehumanAnim=2
-scopezoom=1.0
-reloadType=MAG
-end

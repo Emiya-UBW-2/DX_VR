@@ -1,6 +1,0 @@
-usemag0=MEU
-shottype=SEMI
-usehumanAnim=3
-scopezoom=1.0
-reloadType=MAG
-end

@@ -1,6 +1,0 @@
-usemag0=MP5K
-shottype=FULL
-usehumanAnim=2
-scopezoom=4.0
-reloadType=MAG
-end

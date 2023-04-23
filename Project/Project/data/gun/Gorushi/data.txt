@@ -1,6 +1,0 @@
-usemag0=Gorushi
-shottype=BOLT
-usehumanAnim=1
-scopezoom=1.0
-reloadType=AMMO
-end
