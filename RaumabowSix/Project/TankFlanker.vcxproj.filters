@@ -90,11 +90,14 @@
     <ClInclude Include="source\MainScene\BackGround\BackGroundSub.hpp">
       <Filter>ソース ファイル\MainScene\BackGround</Filter>
     </ClInclude>
-    <ClInclude Include="source\Scene\NetworkBrowser.hpp">
-      <Filter>ソース ファイル\MainScene</Filter>
-    </ClInclude>
     <ClInclude Include="source\MainScene\Object\Character_before.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\NetworkBrowser.hpp">
+      <Filter>ソース ファイル\MainScene</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\CharaAnimData.hpp">
+      <Filter>ソース ファイル\MainScene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -15,6 +15,8 @@
     <ClInclude Include="source\Header.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGround.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGroundSub.hpp" />
+    <ClInclude Include="source\MainScene\CharaAnimData.hpp" />
+    <ClInclude Include="source\MainScene\NetworkBrowser.hpp" />
     <ClInclude Include="source\MainScene\Object\Ammo.hpp" />
     <ClInclude Include="source\MainScene\Object\AmmoEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\Character.hpp" />
@@ -30,7 +32,6 @@
     <ClInclude Include="source\NetWork.hpp" />
     <ClInclude Include="source\ObjectManager.hpp" />
     <ClInclude Include="source\Scene\MainScene.hpp" />
-    <ClInclude Include="source\Scene\NetworkBrowser.hpp" />
     <ClInclude Include="source\sub.hpp" />
   </ItemGroup>
   <ItemGroup>

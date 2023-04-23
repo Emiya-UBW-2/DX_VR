@@ -247,7 +247,7 @@ namespace FPS_n2 {
 					this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / FPS, 0.f, m_Press_Aim ? 0.f : UpperTimerLimit);
 				}
 				if ((this->m_ShotPhase >= 2) ) {
-					//this->m_ReadyTimer = UpperTimerLimit;
+					this->m_ReadyTimer = UpperTimerLimit;
 				}
 				if (KeyControl::GetIsRun()) {
 					this->m_ReadyTimer = UpperTimerLimit;
@@ -271,7 +271,7 @@ namespace FPS_n2 {
 				Easing(&this->m_RecoilRadAdd, VECTOR_ref::zero(), 0.7f, EasingType::OutExpo);
 			}
 			//
-			Easing(&this->m_ReadyPer, (this->m_ReadyTimer < UpperTimerLimit) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+			Easing(&this->m_ReadyPer, (this->m_ReadyTimer < UpperTimerLimit || !(m_ShotPhase <= 1)) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 			//this->m_yrad_Upper、this->m_yrad_Bottom決定
 			if (this->m_Speed <= 0.1f) {
 				if (abs(KeyControl::GetRad().y() - this->m_yrad_Upper) > deg2rad(50.f)) {
@@ -560,6 +560,8 @@ namespace FPS_n2 {
 		}
 		//SetMat指示更新														//0.03ms
 		void			CharacterClass::ExecuteMatrix(void) noexcept {
+			auto* AnimMngr = GunAnimManager::Instance();
+
 			this->m_RunPer2 = Lerp(0.35f, SpeedLimit / 2.f, KeyControl::GetRunPer());
 			this->m_RunPer2 = Lerp(this->m_RunPer2, 0.15f, KeyControl::GetSquatPer());
 			if (this->m_PrevRunPer2 == 0.f) {
@@ -630,6 +632,8 @@ namespace FPS_n2 {
 			//銃座標指定(アニメアップデート含む)//0.19ms
 			{
 				VECTOR_ref yVec1, zVec1, Pos1;
+				VECTOR_ref yVect, zVect, Post;
+
 				VECTOR_ref yVec2, zVec2, Pos2;
 				if (GetGunPtrNow() != nullptr) {
 					//持ち手探索
@@ -638,64 +642,56 @@ namespace FPS_n2 {
 						GetObj().work_anime();//0.35ms
 						//レディ
 						{
-							auto mat = MATRIX_ref::RotX(deg2rad(-25));
-							zVec1 = MATRIX_ref::Vtrans(VECTOR_ref::front()*-1.f, mat);
-							yVec1 = MATRIX_ref::Vtrans(VECTOR_ref::up(), mat);
-							Pos1 = GetFrameWorldMat(CharaFrame::Head).pos() +
-								(
-									GetEyeVecX()*-0.06f +
-									GetEyeVecY()*-0.4f +
-									GetEyeVector()*0.2f
-									)*Scale_Rate;
-							Pos1 = GetFrameWorldMat(CharaFrame::Head).pos() +
-								(
-									GetEyeVecX()*-0.06f +
-									GetEyeVecY()*-0.3f +
-									GetEyeVector()*0.35f
-									)*Scale_Rate;
+							auto* Ptr = AnimMngr->GetAnimData(EnumGunAnim::M1911_ready);
+							if (Ptr) {
+								auto Now = AnimMngr->GetAnimNow(Ptr, 0.f);
+								Now.GetPos();
+								auto mat = MATRIX_ref::RotX(deg2rad(Now.GetRotate().y()));
+								zVec1 = MATRIX_ref::Vtrans(VECTOR_ref::front()*-1.f, mat);
+								yVec1 = MATRIX_ref::Vtrans(VECTOR_ref::up(), mat);
+								Pos1 = GetFrameWorldMat(CharaFrame::Head).pos() +
+									(
+										GetEyeVecX()*Now.GetPos().x() +
+										GetEyeVecY()*Now.GetPos().y() +
+										GetEyeVector()*Now.GetPos().z()
+										)*Scale_Rate;
+							}
 						}
-						{
-							auto mat = MATRIX_ref::RotX(deg2rad(25));
-							zVec1 = MATRIX_ref::Vtrans(VECTOR_ref::front()*-1.f, mat);
-							yVec1 = MATRIX_ref::Vtrans(VECTOR_ref::up(), mat);
-
-							Pos1 = GetFrameWorldMat(CharaFrame::Head).pos() +
-								(
-									GetEyeVecX()*-0.1f +
-									GetEyeVecY()*-0.2f +
-									GetEyeVector()*0.25f
-									)*Scale_Rate;
-							Pos1 = GetFrameWorldMat(CharaFrame::Head).pos() +
-								(
-									GetEyeVecX()*-0.1f +
-									GetEyeVecY()*-0.1f +
-									GetEyeVector()*0.4f
-									)*Scale_Rate;
-						}
-						//構え
 						if (m_ShotPhase <= 1) {
-							VECTOR_ref yVect, zVect, Post;
-							auto mat = MATRIX_ref::RotX(deg2rad(0));
-							zVect = MATRIX_ref::Vtrans(VECTOR_ref::front()*-1.f, mat);
-							yVect = MATRIX_ref::Vtrans(VECTOR_ref::up(), mat);
-
-							Post = GetFrameWorldMat(CharaFrame::Head).pos() +
-								(
-									GetEyeVecX()*-0.1f +
-									GetEyeVecY()*-0.2f +
-									GetEyeVector()*0.25f
-									)*Scale_Rate;
-							Post = GetFrameWorldMat(CharaFrame::Head).pos() +
-								(
-									GetEyeVecX()*-0.1f +
-									GetEyeVecY()*-0.1f +
-									GetEyeVector()*0.4f
-									)*Scale_Rate;
-
-							zVec1 = Lerp(zVec1, zVect, m_ReadyPer);
-							yVec1 = Lerp(yVec1, yVect, m_ReadyPer);
-							Pos1 = Lerp(Pos1, Post, m_ReadyPer);
+							//構え
+							auto* Ptr = AnimMngr->GetAnimData(EnumGunAnim::M1911_aim);
+							if (Ptr) {
+								auto Now = AnimMngr->GetAnimNow(Ptr, 0.f);
+								auto mat = MATRIX_ref::RotX(deg2rad(Now.GetRotate().y()));
+								zVect = MATRIX_ref::Vtrans(VECTOR_ref::front()*-1.f, mat);
+								yVect = MATRIX_ref::Vtrans(VECTOR_ref::up(), mat);
+								Post = GetFrameWorldMat(CharaFrame::Head).pos() +
+									(
+										GetEyeVecX()*Now.GetPos().x() +
+										GetEyeVecY()*Now.GetPos().y() +
+										GetEyeVector()*Now.GetPos().z()
+										)*Scale_Rate;
+							}
 						}
+						else {
+							//リロード
+							auto* Ptr = AnimMngr->GetAnimData(EnumGunAnim::M1911_reload);
+							if (Ptr) {
+								auto Now = AnimMngr->GetAnimNow(Ptr, 0.f);
+								auto mat = MATRIX_ref::RotX(deg2rad(Now.GetRotate().y()));
+								zVect = MATRIX_ref::Vtrans(VECTOR_ref::front()*-1.f, mat);
+								yVect = MATRIX_ref::Vtrans(VECTOR_ref::up(), mat);
+								Post = GetFrameWorldMat(CharaFrame::Head).pos() +
+									(
+										GetEyeVecX()*Now.GetPos().x() +
+										GetEyeVecY()*Now.GetPos().y() +
+										GetEyeVector()*Now.GetPos().z()
+										)*Scale_Rate;
+							}
+						}
+						zVec1 = Lerp(zVec1, zVect, m_ReadyPer);
+						yVec1 = Lerp(yVec1, yVect, m_ReadyPer);
+						Pos1 = Lerp(Pos1, Post, m_ReadyPer);
 					}
 					//スリング場所探索
 					m_SlingZrad.Execute();

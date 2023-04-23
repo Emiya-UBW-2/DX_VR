@@ -47,6 +47,7 @@ using namespace DXLib_ref;
 #include "MainScene/Object/Ammo.hpp"
 #include "MainScene/Object/Magazine.hpp"
 #include "MainScene/Object/Gun.hpp"
+#include "MainScene/CharaAnimData.hpp"
 #include "MainScene/Object/Character_before.hpp"
 #include "MainScene/Object/Character.hpp"
 

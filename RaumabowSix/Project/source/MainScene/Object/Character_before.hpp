@@ -38,7 +38,6 @@ namespace FPS_n2 {
 			const auto GetRad() const noexcept { return this->m_rad; }
 
 		};
-
 		enum class HitType {
 			Head,
 			Body,
@@ -81,6 +80,7 @@ namespace FPS_n2 {
 
 			const auto GetColType()const noexcept { return this->m_HitType; }
 		};
+
 		//キャラのうち特定機能だけ抜き出したもの
 		class StaminaControl {
 		private://キャラパラメーター

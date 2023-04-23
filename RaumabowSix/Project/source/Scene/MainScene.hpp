@@ -58,6 +58,8 @@ namespace FPS_n2 {
 		public:
 			MAINLOOP(void) noexcept { }
 			void			Set_Sub(void) noexcept override {
+				GunAnimManager::Create();
+				auto* AnimMngr = GunAnimManager::Instance();
 				auto* ObjMngr = ObjectManager::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
 				SetAmbientShadow(
@@ -90,6 +92,12 @@ namespace FPS_n2 {
 				aim_Graph = GraphHandle::Load("data/UI/battle_aim.bmp");
 				//Set
 				//êl
+				for (int loop = 0; loop < (int)EnumGunAnim::Max; loop++) {
+					std::string Path = "data/CharaAnime/";
+					Path += EnumGunAnimName[loop];
+					Path += ".txt";
+					AnimMngr->LoadAction(Path.c_str(), (EnumGunAnim)loop);
+				}
 				for (auto& c : this->character_Pool) {
 					size_t index = &c - &this->character_Pool.front();
 					VECTOR_ref pos_t = VECTOR_ref::vget(0.f + (float)(index)*20.f, 0.f, 0.f);
