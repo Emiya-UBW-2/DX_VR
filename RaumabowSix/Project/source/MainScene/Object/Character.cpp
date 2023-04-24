@@ -457,11 +457,6 @@ namespace FPS_n2 {
 			{
 				//下半身
 				Easing(&GetAnimeBuf(GetBottomTurnAnimSel()), (this->m_TurnBody) ? abs(KeyControl::GetRad().y() - this->m_yrad_Upper) / deg2rad(50.f) : 0.f, 0.8f, EasingType::OutExpo);
-				//銃操作
-				GetAnimeBuf(GetCockingAnimSel()) = ((GetCockingAnimSel() == this->m_UpperAnimSelect) ? 1.f : 0.f);
-				GetAnimeBuf(GetReloadStartAnimSel()) = ((GetReloadStartAnimSel() == this->m_UpperAnimSelect) ? 1.f : 0.f);
-				GetAnimeBuf(GetReloadOneAnimSel()) = ((GetReloadOneAnimSel() == this->m_UpperAnimSelect) ? 1.f : 0.f);
-				GetAnimeBuf(GetReloadEndAnimSel()) = ((GetReloadEndAnimSel() == this->m_UpperAnimSelect) ? 1.f : 0.f);
 				//その他
 				for (int i = 0; i < (int)CharaAnimeID::AnimeIDMax; i++) {
 					//上半身
@@ -633,6 +628,7 @@ namespace FPS_n2 {
 			{
 				VECTOR_ref yVec1, zVec1, Pos1;
 				VECTOR_ref yVect, zVect, Post;
+				VECTOR_ref yVect2, zVect2, Post2;
 
 				VECTOR_ref yVec2, zVec2, Pos2;
 				if (GetGunPtrNow() != nullptr) {
@@ -642,10 +638,9 @@ namespace FPS_n2 {
 						GetObj().work_anime();//0.35ms
 						//レディ
 						{
-							auto* Ptr = AnimMngr->GetAnimData(EnumGunAnim::M1911_ready);
+							auto* Ptr = AnimMngr->GetAnimData(GetReadyGunAnimSel());
 							if (Ptr) {
-								auto Now = AnimMngr->GetAnimNow(Ptr, 0.f);
-								Now.GetPos();
+								auto Now = AnimMngr->GetAnimNow(Ptr, m_UpperAnim);
 								auto mat = MATRIX_ref::RotX(deg2rad(Now.GetRotate().y()));
 								zVec1 = MATRIX_ref::Vtrans(VECTOR_ref::front()*-1.f, mat);
 								yVec1 = MATRIX_ref::Vtrans(VECTOR_ref::up(), mat);
@@ -659,9 +654,9 @@ namespace FPS_n2 {
 						}
 						if (m_ShotPhase <= 1) {
 							//構え
-							auto* Ptr = AnimMngr->GetAnimData(EnumGunAnim::M1911_aim);
+							auto* Ptr = AnimMngr->GetAnimData(GetAimGunAnimSel());
 							if (Ptr) {
-								auto Now = AnimMngr->GetAnimNow(Ptr, 0.f);
+								auto Now = AnimMngr->GetAnimNow(Ptr, m_UpperAnim);
 								auto mat = MATRIX_ref::RotX(deg2rad(Now.GetRotate().y()));
 								zVect = MATRIX_ref::Vtrans(VECTOR_ref::front()*-1.f, mat);
 								yVect = MATRIX_ref::Vtrans(VECTOR_ref::up(), mat);
@@ -675,9 +670,9 @@ namespace FPS_n2 {
 						}
 						else {
 							//リロード
-							auto* Ptr = AnimMngr->GetAnimData(EnumGunAnim::M1911_reload);
+							auto* Ptr = AnimMngr->GetAnimData(GetReloadGunAnimSel());
 							if (Ptr) {
-								auto Now = AnimMngr->GetAnimNow(Ptr, 0.f);
+								auto Now = AnimMngr->GetAnimNow(Ptr, m_UpperAnim);
 								auto mat = MATRIX_ref::RotX(deg2rad(Now.GetRotate().y()));
 								zVect = MATRIX_ref::Vtrans(VECTOR_ref::front()*-1.f, mat);
 								yVect = MATRIX_ref::Vtrans(VECTOR_ref::up(), mat);
@@ -692,7 +687,28 @@ namespace FPS_n2 {
 						zVec1 = Lerp(zVec1, zVect, m_ReadyPer);
 						yVec1 = Lerp(yVec1, yVect, m_ReadyPer);
 						Pos1 = Lerp(Pos1, Post, m_ReadyPer);
+						//ラン
+						{
+							auto* Ptr = AnimMngr->GetAnimData(GetRunGunAnimSel());
+							if (Ptr) {
+								auto Now = AnimMngr->GetAnimNow(Ptr, m_UpperAnim);
+								Now.GetPos();
+								auto mat = MATRIX_ref::RotX(deg2rad(Now.GetRotate().y()));
+								zVect2 = MATRIX_ref::Vtrans(VECTOR_ref::front()*-1.f, mat);
+								yVect2 = MATRIX_ref::Vtrans(VECTOR_ref::up(), mat);
+								Post2 = GetFrameWorldMat(CharaFrame::Head).pos() +
+									(
+										GetEyeVecX()*Now.GetPos().x() +
+										GetEyeVecY()*Now.GetPos().y() +
+										GetEyeVector()*Now.GetPos().z()
+										)*Scale_Rate;
+							}
+						}
+						zVec1 = Lerp(zVec1, zVect2, KeyControl::GetRunPer());
+						yVec1 = Lerp(yVec1, yVect2, KeyControl::GetRunPer());
+						Pos1 = Lerp(Pos1, Post2, KeyControl::GetRunPer());
 					}
+					m_UpperAnim += 1.f / FPS;
 					//スリング場所探索
 					m_SlingZrad.Execute();
 					m_SlingYrad.Execute();

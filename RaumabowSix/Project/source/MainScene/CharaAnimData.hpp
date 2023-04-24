@@ -7,13 +7,22 @@ namespace FPS_n2 {
 			M1911_ready,
 			M1911_aim,
 			M1911_reload,
-
+			M1911_run,
+			M16_ready,
+			M16_aim,
+			M16_reload,
+			M16_run,
 			Max,
 		};
 		static const char* EnumGunAnimName[(int)EnumGunAnim::Max] = {
 			"M1911_ready",
 			"M1911_aim",
 			"M1911_reload",
+			"M1911_run",
+			"M16_ready",
+			"M16_aim",
+			"M16_reload",
+			"M16_run",
 		};
 
 		class GunanimData {
@@ -135,8 +144,27 @@ namespace FPS_n2 {
 			static GunAnimNow	GetAnimNow(const DataPair* data, float nowframe) noexcept {
 				GunAnimNow Ret; Ret.Set(VECTOR_ref::zero(), VECTOR_ref::zero());
 				if (data) {
+					int total = 0;
+					for (auto& ani : data->second) {
+						total += ani->GetFrame();
+					}
+					if (data->first->GetIsLoop()) {
+						while (true) {
+							if ((nowframe - (float)total) > 0.f) {
+								nowframe -= (float)total;
+							}
+							else {
+								break;
+							}
+						}
+					}
+					else {
+						if ((nowframe - (float)total) > 0.f) {
+							nowframe = (float)total;
+						}
+					}
 					//‚Ç‚¤‚É‚©‚µ‚½‚¢
-					for (auto ani = data->second.begin(), e = data->second.end(); ani != e; ++ani) {
+					for (auto ani = data->second.begin(), e = data->second.end() - 1; ani != e; ++ani) {
 						float Frame = (float)(*ani)->GetFrame();
 						if ((nowframe - Frame) <= 0.f) {
 							Ret.Set(

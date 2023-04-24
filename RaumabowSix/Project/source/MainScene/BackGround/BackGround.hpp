@@ -10,6 +10,23 @@ namespace FPS_n2 {
 			MV1							m_ObjGroundCol;
 		public://getter
 			const auto&		GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
+			const auto		CheckLinetoMap(const VECTOR_ref& StartPos, VECTOR_ref* EndPos, bool isNearest, VECTOR_ref* Normal = nullptr) {
+				bool isHit = false;
+				{
+					auto col_p = this->m_ObjGroundCol.CollCheck_Line(StartPos, *EndPos);
+					if (col_p.HitFlag == TRUE) {
+						isHit = true;
+						if (isNearest) {
+							*EndPos = col_p.HitPosition;
+							if (Normal) { *Normal = col_p.Normal; }
+						}
+						else {
+							return isHit;
+						}
+					}
+				}
+				return isHit;
+			}
 		private:
 			void			DrawCommon() noexcept {
 #ifdef DEBUG

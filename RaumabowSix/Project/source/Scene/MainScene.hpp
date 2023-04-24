@@ -53,6 +53,9 @@ namespace FPS_n2 {
 			double					m_ClientFrame{ 0.0 };
 
 			float					fov_base{ 0.f };
+
+			VECTOR_ref				LaserStartPos;
+			VECTOR_ref				LaserEndPos;
 		private:
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_NetWorkBrowser.GetMyPlayerID(); }
 		public:
@@ -498,6 +501,20 @@ namespace FPS_n2 {
 					SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
 				}
 				this->m_BackGround->Execute();
+				//レーザーサイト
+				{
+					auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+
+					LaserStartPos = Chara->GetGunPtrNow()->GetMuzzleMatrix().pos() + Chara->GetGunPtrNow()->GetMuzzleMatrix().yvec()*-0.05f*Scale_Rate;
+					LaserEndPos = LaserStartPos + Chara->GetGunPtrNow()->GetMuzzleMatrix().zvec()*-1.f * 50.f*Scale_Rate;
+					this->m_BackGround->CheckLinetoMap(LaserStartPos, &LaserEndPos, true);
+					for (auto& c : this->character_Pool) {
+						if (c->GetMyPlayerID() == GetMyPlayerID()) { continue; }
+						if (c->RefreshCol(LaserStartPos, LaserEndPos, 10.f*Scale_Rate)) {
+							c->GetColNearestInAllMesh(LaserStartPos, &LaserEndPos);
+						}
+					}
+				}
 				//UIパラメーター
 				{
 					this->m_UIclass.SetIntParam(1, (int)this->m_ScoreBuf);
@@ -548,6 +565,13 @@ namespace FPS_n2 {
 				PlayerMngr->Dispose();
 				ObjMngr->DisposeObject();
 				this->m_BackGround->Dispose();
+			}
+			//
+			void		DrawLaser() noexcept {
+				SetUseLighting(FALSE);
+				DrawSphere_3D(LaserEndPos, 0.01f*Scale_Rate, GetColor(255, 24, 24), GetColor(0, 0, 0));
+				DrawCapsule_3D(LaserStartPos, LaserEndPos, 0.0015f*Scale_Rate, GetColor(255, 24, 24), GetColor(0, 0, 0));
+				SetUseLighting(TRUE);
 			}
 			//
 			void			Depth_Draw_Sub(void) noexcept override {
@@ -615,6 +639,7 @@ namespace FPS_n2 {
 						c->SetCameraSize(std::max(20.f / ((pos - GetCameraPosition()).size() / 2.f), 0.2f));
 					}
 				}
+				DrawLaser();
 			}
 			void			MainDrawbyDepth_Sub(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();

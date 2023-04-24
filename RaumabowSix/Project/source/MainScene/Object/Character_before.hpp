@@ -14,6 +14,12 @@ namespace FPS_n2 {
 
 			CharaAnimeID	m_Reload{ CharaAnimeID::Upper_Reload1Start };
 		};
+		struct GunAnimeSet {
+			EnumGunAnim	m_Run{ EnumGunAnim::M1911_run };
+			EnumGunAnim	m_Ready{ EnumGunAnim::M1911_ready };
+			EnumGunAnim	m_Aim{ EnumGunAnim::M1911_aim };
+			EnumGunAnim	m_Reload{ EnumGunAnim::M1911_reload };
+		};
 
 		class Pendulum2D {
 			float	m_PendulumLength = 10.f;

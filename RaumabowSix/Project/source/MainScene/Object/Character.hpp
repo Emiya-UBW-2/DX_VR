@@ -18,6 +18,7 @@ namespace FPS_n2 {
 		private:
 			CharaTypeID											m_CharaType;
 			std::vector<CharaAnimeSet>							m_CharaAnimeSet;
+			std::vector<GunAnimeSet>							m_GunAnimeSet;
 			int													m_CharaAnimeSel{ 0 };
 			//
 			std::array<float, (int)CharaAnimeID::AnimeIDMax>	m_AnimPerBuf{ 0 };
@@ -71,6 +72,8 @@ namespace FPS_n2 {
 			int													m_GunSelect{ 0 };
 			//
 			bool												m_SendCamShake{ false };
+
+			float												m_UpperAnim{ 0.f };
 		public://ゲッター
 			//const auto		GetShotAnimSel(void) const noexcept { return this->m_CharaAnimeSet[this->m_CharaAnimeSel].m_ADS; }
 			//const auto		GetTurnRatePer(void) const noexcept { return this->m_InputGround.GetTurnRatePer(); }
@@ -139,7 +142,7 @@ namespace FPS_n2 {
 				for (auto& p : this->m_Gun_Ptr) {
 					p->SetPlayerID(this->m_MyID);
 				}
-				this->m_GunSelect = 1;
+				this->m_GunSelect = 0;
 			}
 		public://ゲッター
 			const auto		GetFrameLocalMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalMatrix(GetCharaFrame(frame)); }
@@ -171,6 +174,12 @@ namespace FPS_n2 {
 			const auto		GetReloadStartAnimSel(void) const noexcept { return this->m_CharaAnimeSet[this->m_CharaAnimeSel].m_Reload; }
 			const auto		GetReloadOneAnimSel(void) const noexcept { return  (CharaAnimeID)((int)GetReloadStartAnimSel() + 1); }
 			const auto		GetReloadEndAnimSel(void) const noexcept { return  (CharaAnimeID)((int)GetReloadStartAnimSel() + 2); }
+
+			const auto		GetRunGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Run; }
+			const auto		GetReadyGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Ready; }
+			const auto		GetAimGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Aim; }
+			const auto		GetReloadGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Reload; }
+
 			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
 			const auto		GetEyeVecMat(void) const noexcept { return GetCharaDir(); }
 		private:
@@ -254,7 +263,21 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().m_ADS = CharaAnimeID::Upper_ADS2;
 				m_CharaAnimeSet.back().m_Cocking = CharaAnimeID::Upper_Cocking2;
 				m_CharaAnimeSet.back().m_Reload = CharaAnimeID::Upper_Reload2Start;
-
+				//
+				m_GunAnimeSet.clear();
+				//M4
+				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
+				m_GunAnimeSet.back().m_Run = EnumGunAnim::M16_run;
+				m_GunAnimeSet.back().m_Ready = EnumGunAnim::M16_ready;
+				m_GunAnimeSet.back().m_Aim = EnumGunAnim::M16_aim;
+				m_GunAnimeSet.back().m_Reload = EnumGunAnim::M16_reload;
+				//ハンドガン
+				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
+				m_GunAnimeSet.back().m_Run = EnumGunAnim::M1911_run;
+				m_GunAnimeSet.back().m_Ready = EnumGunAnim::M1911_ready;
+				m_GunAnimeSet.back().m_Aim = EnumGunAnim::M1911_aim;
+				m_GunAnimeSet.back().m_Reload = EnumGunAnim::M1911_reload;
+				//
 				m_HitBox.resize(27);
 			}
 			void			FirstExecute(void) noexcept override {
