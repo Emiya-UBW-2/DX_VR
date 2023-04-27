@@ -43,6 +43,7 @@ namespace FPS_n2 {
 			Bottom_Stand_LLern,
 			Bottom_Stand_RLern,
 
+			Hand_Ready,
 
 			AnimeIDMax,
 		};
@@ -72,6 +73,8 @@ namespace FPS_n2 {
 			LeftMag,
 			LeftMagzvec,
 			LeftMagyvec,
+			Gun,
+			Holster,
 			Max,
 		};
 		static const char* CharaFrameName[(int)CharaFrame::Max] = {
@@ -100,6 +103,8 @@ namespace FPS_n2 {
 			"LEFT_mag",
 			"LEFT_magzvec",
 			"LEFT_magyvec",
+			"Gun",
+			"Holster",
 		};
 		enum class CharaShape {
 			None,

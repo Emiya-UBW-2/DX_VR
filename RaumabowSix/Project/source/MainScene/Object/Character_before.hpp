@@ -43,6 +43,7 @@ namespace FPS_n2 {
 
 			const auto GetRad() const noexcept { return this->m_rad; }
 
+			void AddRad(float value) noexcept { this->m_rad += value; }
 		};
 		enum class HitType {
 			Head,
@@ -77,6 +78,23 @@ namespace FPS_n2 {
 				DrawSphere_3D(m_pos, m_radius, color, color);
 			}
 
+			bool	Colcheck(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
+				if (HitCheck_Sphere_Capsule(
+					m_pos.get(), m_radius,
+					StartPos.get(), pEndPos->get(), 0.001f*Scale_Rate
+				) == TRUE) {
+					VECTOR pos1 = StartPos.get();
+					VECTOR pos2 = pEndPos->get();
+					VECTOR pos3 = m_pos.get();
+					SEGMENT_POINT_RESULT Res;
+					Segment_Point_Analyse(&pos1, &pos2, &pos3, &Res);
+
+					*pEndPos = Res.Seg_MinDist_Pos;
+
+					return TRUE;
+				}
+				return FALSE;
+			}
 			bool	Colcheck(const AmmoClass& pAmmo) {
 				return (HitCheck_Sphere_Capsule(
 					m_pos.get(), m_radius,
@@ -248,14 +266,14 @@ namespace FPS_n2 {
 			}
 			void		InputKey(
 				const InputControl& pInput, bool pReady,
-				const VECTOR_ref& pAddRadvec, bool pCannotSprint
+				const VECTOR_ref& pAddRadvec, bool pCannotSprint, bool IsReloading
 			) {
 				this->m_ReadySwitch = (this->m_KeyActive != pReady);
 				this->m_KeyActive = pReady;
 
 				//ín
 				m_InputGround.SetInput(
-					pInput.GetAddxRad(), pInput.GetAddyRad(),
+					pInput.GetAddxRad()*(GetIsRun() ? 0.5f : 1.f), pInput.GetAddyRad()*(GetIsRun() ? 0.5f : 1.f),
 					pAddRadvec,
 					pInput.GetGoFrontPress(),
 					pInput.GetGoBackPress(),
@@ -264,13 +282,13 @@ namespace FPS_n2 {
 					pInput.GetAction4(),
 					pInput.GetRunPress(),
 					false,
-					(pInput.GetGoLeftPress()),
-					(pInput.GetGoRightPress()),
+					pInput.GetGoLeftPress(),
+					pInput.GetGoRightPress(),
 					pCannotSprint,
-					(!pInput.GetGoLeftPress() && !pInput.GetGoRightPress())
+					(!pInput.GetGoLeftPress() && !pInput.GetGoRightPress()) && !(pInput.GetGoFrontPress() || pInput.GetGoBackPress()) || IsReloading
 				);
 				//
-				m_SideMove.Execute(pInput.GetAction1());				//ïΩçsà⁄ìÆ
+				m_SideMove.Execute(pInput.GetAction4());				//ïΩçsà⁄ìÆ
 				m_GunChange.Execute(pInput.GetAction3());				//èeêÿë÷
 
 				m_GoRightkey.Execute(pInput.GetGoRightPress() && m_SideMove.press());

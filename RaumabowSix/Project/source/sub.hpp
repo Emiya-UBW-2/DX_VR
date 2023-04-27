@@ -216,7 +216,7 @@ namespace FPS_n2 {
 		const auto		GetLeanRatePer(void) const noexcept { return this->m_LeanRatePer; }
 		const auto		GetRad(void) const noexcept { return  this->m_rad; }
 
-		const auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
+		const auto		GetIsSquat(void) const noexcept { return this->m_Squat.press(); }//on
 		const auto		GetSquatPer(void) const noexcept { return this->m_SquatPer; }
 
 		const auto		GetVecFront(void) const noexcept { return  this->m_Vec[0]; }

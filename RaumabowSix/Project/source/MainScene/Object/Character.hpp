@@ -42,11 +42,11 @@ namespace FPS_n2 {
 			//銃
 			float												m_ReadyTimer{ 0.f };
 			float												m_ReadyPer{ 0.f };
+			float												m_ReloadPer{ 0.f };
 
 			int													m_ShotPhase{ 0 };
 
 			float												m_MagHansPer{ 0.f };
-			float												m_NeckPosOffsetPer{ 0.f };
 			float												m_MoveEyePosTimer{ 0.f };
 			VECTOR_ref											m_MoveEyePos;
 			bool												m_IsStuckGun{ false };
@@ -69,11 +69,25 @@ namespace FPS_n2 {
 			int													m_CharaSound{ -1 };
 			std::array<std::shared_ptr<GunClass>,2>				m_Gun_Ptr{ nullptr };			//銃
 			std::array<float, 2>								m_SlingPer;
+			std::array<MATRIX_ref, 2>							m_SlingMat;
 			int													m_GunSelect{ 0 };
 			//
 			bool												m_SendCamShake{ false };
 
+			VECTOR_ref											m_UpperPrevRad;
+			VECTOR_ref											m_UpperRad;
+			VECTOR_ref											m_UpperyVec, m_UpperzVec, m_UpperPos;
 			float												m_UpperAnim{ 0.f };
+
+			float												m_AutoAimScale{ 1.f };
+			bool												m_IsActiveAutoAim{ false };
+			float												m_AutoAimPer{ 0.f };
+			VECTOR_ref											m_AutoAimVec;
+			VECTOR_ref											m_AutoAimPos;
+
+			VECTOR_ref											LaserStartPos;
+			VECTOR_ref											LaserEndPos;
+			VECTOR_ref											LaserEndPos2D;
 		public://ゲッター
 			//const auto		GetShotAnimSel(void) const noexcept { return this->m_CharaAnimeSet[this->m_CharaAnimeSel].m_ADS; }
 			//const auto		GetTurnRatePer(void) const noexcept { return this->m_InputGround.GetTurnRatePer(); }
@@ -104,7 +118,16 @@ namespace FPS_n2 {
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
 			const auto&		GetDamageSwitch(void) const noexcept { return this->m_DamageSwitch; }
 			const auto&		GetDamageSwitchRec(void) const noexcept { return this->m_DamageSwitchRec; }
+			const auto&		GetIsActiveAutoAim(void) const noexcept { return this->m_IsActiveAutoAim; }
+			const auto&		GetActiveAutoScale(void) const noexcept { return this->m_AutoAimScale; }
 		public://セッター
+			void			SetAutoAim(const VECTOR_ref* value = nullptr) noexcept {
+				m_IsActiveAutoAim = (value) && !GetIsRun();
+				if (value) {
+					m_AutoAimPos = *value;
+				}
+			}
+
 			void			SetDamageSwitchRec(unsigned long long value) noexcept { this->m_DamageSwitchRec = value; }
 			void			ResetFrameLocalMat(CharaFrame frame) noexcept { GetObj().frame_Reset(GetCharaFrame(frame)); }
 			void			LoadReticle(void) noexcept {
@@ -150,16 +173,9 @@ namespace FPS_n2 {
 			const auto		GetParentFrameWorldMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalWorldMatrix((int)this->GetObj_const().frame_parent(GetCharaFrame(frame))); }
 			const auto		GetGunPtrNum() const noexcept { return this->m_Gun_Ptr.size(); }
 			const auto		GetCharaDir(void) const noexcept { return this->m_UpperMatrix * this->m_move.mat; }
-			const auto		GetEyeVecX(void) const noexcept { return GetCharaDir().xvec(); }
-			const auto		GetEyeVecY(void) const noexcept { return GetCharaDir().yvec(); }
-			const auto		GetEyeVector(void) const noexcept { return GetCharaDir().zvec() * -1.f; }
-			const auto		GetEyePosition(void) const noexcept {
-				return (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f
-					+ this->GetEyeVector().Norm() * 0.5f
-					+ this->GetEyeVecY() * this->m_NeckPosOffsetPer
-					+ this->m_MoveEyePos;
-			}
-			const auto		GetScopePos(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetScopePos() : GetEyePosition(); }
+			const auto		GetCharaVecX(void) const noexcept { return GetCharaDir().xvec(); }
+			const auto		GetCharaVecY(void) const noexcept { return GetCharaDir().yvec(); }
+			const auto		GetCharaVector(void) const noexcept { return GetCharaDir().zvec() * -1.f; }
 			const auto		GetLensPos(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetLensPos() : VECTOR_ref::zero(); }
 			const auto		GetReticleSize(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetReticleSize() : 1.f; }
 			const auto		GetReticlePos(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetReticlePos() : VECTOR_ref::zero(); }
@@ -181,13 +197,37 @@ namespace FPS_n2 {
 			const auto		GetReloadGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Reload; }
 
 			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
-			const auto		GetEyeVecMat(void) const noexcept { return GetCharaDir(); }
+
+			const auto		GetEyeVecMat(void) const noexcept {
+				auto tmpUpperMatrix =
+					MATRIX_ref::RotZ(this->m_LeanRad) *
+					MATRIX_ref::RotX(KeyControl::GetRad().x()) *
+					MATRIX_ref::RotY(KeyControl::GetRad().y() - this->m_yrad_Bottom);
+				return tmpUpperMatrix * this->m_move.mat;
+			}
+			const auto		GetEyeVecX(void) const noexcept { return GetEyeVecMat().xvec(); }
+			const auto		GetEyeVecY(void) const noexcept { return GetEyeVecMat().yvec(); }
+			const auto		GetEyeVector(void) const noexcept { return GetEyeVecMat().zvec() * -1.f; }
+			const auto		GetEyePosition(void) const noexcept {
+				return (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f
+					+ this->GetEyeVecY() * 0.f
+					+ this->GetEyeVector() * 0.5f
+					+ this->m_MoveEyePos;
+			}
+			const auto		GetScopePos(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetScopePos() : GetEyePosition(); }
 		private:
 			//被弾チェック
 			const auto		CheckAmmoHited(const AmmoClass& pAmmo) noexcept {
 				bool is_Hit = false;
 				for (auto& h : this->m_HitBox) {
 					is_Hit |= h.Colcheck(pAmmo);
+				}
+				return is_Hit;
+			}
+			const auto		CheckLineHited(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
+				bool is_Hit = false;
+				for (auto& h : this->m_HitBox) {
+					is_Hit |= h.Colcheck(StartPos, pEndPos);
 				}
 				return is_Hit;
 			}
@@ -199,7 +239,7 @@ namespace FPS_n2 {
 						h.GetColType();
 						pAmmo->Penetrate();	//貫通
 						//ダメージ計算
-						auto v1 = GetEyeVector();
+						auto v1 = GetCharaVector();
 						auto v2 = (pShooterPos - this->m_move.pos).Norm(); v2.y(0);
 						this->m_DamageEvent.SetEvent(this->m_MyID, m_objType, pAmmo->GetDamage(), atan2f(v1.cross(v2).y(), v1.dot(v2)));
 						++this->m_DamageSwitch;// %= 255;//
@@ -210,6 +250,14 @@ namespace FPS_n2 {
 				return false;
 			}
 		public:
+			const auto		CheckLineHit(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
+				if (GetMinLenSegmentToPoint(StartPos, *pEndPos, m_move.pos) <= 2.0f*Scale_Rate) {
+					if (this->CheckLineHited(StartPos, pEndPos)) {									//とりあえず当たったかどうか探す
+						return true;
+					}
+				}
+				return false;
+			}
 			const auto		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& pShooterPos) noexcept {
 				std::pair<bool, bool> isDamaged{ false,false };
 				if (GetMinLenSegmentToPoint(pAmmo->GetMove().repos, pAmmo->GetMove().pos, m_move.pos) <= 2.0f*Scale_Rate) {
@@ -228,6 +276,27 @@ namespace FPS_n2 {
 			void			ValueSet(float pxRad, float pyRad, bool SquatOn, const VECTOR_ref& pPos, PlayerID pID) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady) noexcept;
 			void			SetEyeVec(const VECTOR_ref& camvec) noexcept;
+		public://レーザーサイト
+			const auto&		GetLaser(void) const noexcept { return this->LaserEndPos; }
+			const auto&		GetLaser2D(void) const noexcept { return this->LaserEndPos2D; }
+			void			SetLaser2D(const VECTOR_ref& value) noexcept { this->LaserEndPos2D = value; }
+			void			SetLaser(const std::vector<std::shared_ptr<CharacterClass>>* CharaPool) noexcept {
+				LaserStartPos = this->GetGunPtrNow()->GetMuzzleMatrix().pos() + this->GetGunPtrNow()->GetMuzzleMatrix().yvec()*-0.05f*Scale_Rate;
+				LaserEndPos = LaserStartPos + this->GetGunPtrNow()->GetMuzzleMatrix().zvec()*-1.f * 50.f*Scale_Rate;
+				this->m_BackGround->CheckLinetoMap(LaserStartPos, &LaserEndPos, true);
+				for (const auto& c : *CharaPool) {
+					if (c->GetMyPlayerID() == GetMyPlayerID()) { continue; }
+					c->CheckLineHit(LaserStartPos, &LaserEndPos);
+				}
+				auto Vec = (LaserEndPos - LaserStartPos);
+				LaserEndPos = LaserStartPos + Vec.Norm()*std::max(Vec.Length() - 0.3f*Scale_Rate, 0.f);
+			}
+			void			DrawLaser() noexcept {
+				SetUseLighting(FALSE);
+				DrawSphere_3D(LaserEndPos, 0.01f*Scale_Rate, GetColor(255, 24, 24), GetColor(0, 0, 0));
+				DrawCapsule_3D(LaserStartPos, LaserEndPos, 0.0015f*Scale_Rate, GetColor(255, 24, 24), GetColor(0, 0, 0));
+				SetUseLighting(TRUE);
+			}
 		private: //更新関連
 			void			ExecuteSavePrev(void) noexcept;			//以前の状態保持														//
 			void			ExecuteInput(void) noexcept;			//操作																	//0.01ms
