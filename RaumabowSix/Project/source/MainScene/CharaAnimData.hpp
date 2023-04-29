@@ -6,10 +6,12 @@ namespace FPS_n2 {
 		enum class EnumGunAnim {
 			M1911_ready,
 			M1911_aim,
+			M1911_ads,
 			M1911_reload,
 			M1911_run,
 			M16_ready,
 			M16_aim,
+			M16_ads,
 			M16_reload,
 			M16_run,
 			Max,
@@ -17,10 +19,12 @@ namespace FPS_n2 {
 		static const char* EnumGunAnimName[(int)EnumGunAnim::Max] = {
 			"M1911_ready",
 			"M1911_aim",
+			"M1911_ads",
 			"M1911_reload",
 			"M1911_run",
 			"M16_ready",
 			"M16_aim",
+			"M16_ads",
 			"M16_reload",
 			"M16_run",
 		};
@@ -103,7 +107,7 @@ namespace FPS_n2 {
 					}
 				}
 				m_Rotate.Set(std::stof(Args[0]), std::stof(Args[1]), std::stof(Args[2]));
-				m_Pos.Set(std::stof(Args[3]), std::stof(Args[4]), std::stof(Args[5]));
+				m_Pos.Set(std::stof(Args[3]), std::stof(Args[4]), -std::stof(Args[5]));
 				m_Frame = std::stoi(Args[6]);
 			}
 		public:
@@ -163,7 +167,6 @@ namespace FPS_n2 {
 							nowframe = (float)total;
 						}
 					}
-					//‚Ç‚¤‚É‚©‚µ‚½‚¢
 					for (auto ani = data->second.begin(), e = data->second.end() - 1; ani != e; ++ani) {
 						float Frame = (float)(*ani)->GetFrame();
 						if ((nowframe - Frame) <= 0.f) {

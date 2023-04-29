@@ -42,7 +42,7 @@ namespace FPS_n2 {
 			float			m_Hit_alpha{ 0.f };
 			VECTOR_ref		m_Hit_DispPos;
 			int				m_ShootCheraID{ -1 };
-			std::array<VECTOR_ref, 5>	m_Line;
+			std::array<VECTOR_ref, 15>	m_Line;
 			int				m_LineSel = 0;
 			float			m_yAdd{ 0.f };
 			float			m_Timer{ 0.f };
@@ -81,10 +81,7 @@ namespace FPS_n2 {
 			const auto		ColCheckGround(void) noexcept {
 				MV1_COLL_RESULT_POLY ColResGround; ColResGround.HitFlag = FALSE;
 				if (IsActive()) {
-					ColResGround = this->m_BackGround->GetGroundCol().CollCheck_Line(this->m_move.repos, m_move.pos);
-					if (ColResGround.HitFlag == TRUE) {
-						this->m_move.pos = ColResGround.HitPosition;
-					}
+					this->m_BackGround->CheckLinetoMap(this->m_move.repos, &this->m_move.pos,true,nullptr,&ColResGround);
 				}
 				return ColResGround;
 			}
@@ -136,7 +133,7 @@ namespace FPS_n2 {
 				if (IsActive()) {
 					//ˆÚ“®Šm’è
 					this->m_move.SetPos(this->m_move.pos + (this->m_move.vec * (this->m_speed / FPS)) + VECTOR_ref::up()*this->m_yAdd);
-					this->m_yAdd += (M_GR / (FPS*FPS));
+					//this->m_yAdd += (M_GR / (FPS*FPS));
 
 					this->m_Line[this->m_LineSel] = this->m_move.pos + VECTOR_ref::vget(GetRandf(Scale_Rate*0.1f*this->m_Timer), GetRandf(Scale_Rate*0.1f*this->m_Timer), GetRandf(Scale_Rate*0.1f*this->m_Timer));
 					++this->m_LineSel %= this->m_Line.size();

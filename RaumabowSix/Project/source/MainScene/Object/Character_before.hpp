@@ -18,6 +18,7 @@ namespace FPS_n2 {
 			EnumGunAnim	m_Run{ EnumGunAnim::M1911_run };
 			EnumGunAnim	m_Ready{ EnumGunAnim::M1911_ready };
 			EnumGunAnim	m_Aim{ EnumGunAnim::M1911_aim };
+			EnumGunAnim	m_ADS{ EnumGunAnim::M1911_aim };
 			EnumGunAnim	m_Reload{ EnumGunAnim::M1911_reload };
 		};
 
@@ -279,7 +280,7 @@ namespace FPS_n2 {
 					pInput.GetGoBackPress(),
 					pInput.GetGoLeftPress() && !m_SideMove.press(),
 					pInput.GetGoRightPress() && !m_SideMove.press(),
-					pInput.GetAction4(),
+					pInput.GetAction1(),
 					pInput.GetRunPress(),
 					false,
 					pInput.GetGoLeftPress(),
@@ -288,7 +289,7 @@ namespace FPS_n2 {
 					(!pInput.GetGoLeftPress() && !pInput.GetGoRightPress()) && !(pInput.GetGoFrontPress() || pInput.GetGoBackPress()) || IsReloading
 				);
 				//
-				m_SideMove.Execute(pInput.GetAction4());				//ïΩçsà⁄ìÆ
+				m_SideMove.Execute(pInput.GetAction1());				//ïΩçsà⁄ìÆ
 				m_GunChange.Execute(pInput.GetAction3());				//èeêÿë÷
 
 				m_GoRightkey.Execute(pInput.GetGoRightPress() && m_SideMove.press());

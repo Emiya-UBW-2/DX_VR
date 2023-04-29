@@ -16,7 +16,6 @@ namespace FPS_n2 {
 			std::vector<std::shared_ptr<CharacterClass>> character_Pool;	//ポインター別持ち
 			//操作関連
 			float					m_EyePosPer_Prone = 0.f;
-			float					m_EyePosPer = 0.f;
 			float					m_EyeRunPer{ 0.f };
 			switchs					m_FPSActive;
 			switchs					m_MouseActive;
@@ -43,9 +42,6 @@ namespace FPS_n2 {
 			float					m_TPS_YradR{ 0.f };
 			float					m_TPS_Per{ 1.f };
 			//
-			float					m_Rader{ 1.f };
-			float					m_Rader_r{ 1.f };
-			//
 			std::vector<DamageEvent>	m_DamageEvents;
 
 			NetWorkBrowser			m_NetWorkBrowser;
@@ -55,6 +51,7 @@ namespace FPS_n2 {
 			float					fov_base{ 0.f };
 
 			float					m_AimRot{ 0.f };
+			VECTOR_ref				m_Laserpos2D;
 		private:
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_NetWorkBrowser.GetMyPlayerID(); }
 		public:
@@ -165,7 +162,6 @@ namespace FPS_n2 {
 			bool			Update_Sub(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto* DrawParts = DXDraw::Instance();
 #ifdef DEBUG
 				//auto* DebugParts = DebugClass::Instance();					//デバッグ
 #endif // DEBUG
@@ -183,7 +179,6 @@ namespace FPS_n2 {
 					float pp_x = 0.f, pp_y = 0.f;
 					bool look_key = false;
 					bool eyechange_key = false;
-					bool Lockon_key = false;
 					InputControl MyInput;
 
 					if (GetJoypadNum() > 0) {
@@ -224,7 +219,7 @@ namespace FPS_n2 {
 								bool up_key = (310.f <= deg || deg <= 50.f);
 								bool down_key = (130.f <= deg && deg <= 230.f);
 								//ボタン
-								Lockon_key = (input.Buttons[0] != 0);/*△*/
+								//_key = (input.Buttons[0] != 0);/*△*/
 								//_key = (input.Buttons[2] != 0);/*×*/
 								auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 								MyInput.SetInput(
@@ -262,9 +257,8 @@ namespace FPS_n2 {
 						}
 						pp_x = std::clamp((-(float)(my - DXDraw::Instance()->m_DispYSize / 2))*0.5f, -9.f, 9.f) * cam_per;
 						pp_y = std::clamp(((float)(mx - DXDraw::Instance()->m_DispXSize / 2))*0.5f, -9.f, 9.f) * cam_per;
-						look_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_RIGHT) != 0) && this->m_MouseActive.on();
+						look_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_MIDDLE) != 0) && this->m_MouseActive.on();
 						eyechange_key = CheckHitKeyWithCheck(KEY_INPUT_V) != 0;
-						Lockon_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_MIDDLE) != 0) && this->m_MouseActive.on();
 						auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 						MyInput.SetInput(
 							pp_x*(1.f - this->m_TPS_Per) - Chara->GetRecoilRadAdd().y(),
@@ -382,7 +376,7 @@ namespace FPS_n2 {
 					if (Gun->GetIsShot()) {
 						//エフェクト
 						auto mat = Gun->GetMuzzleMatrix();
-						EffectControl::SetOnce(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 1.f);
+						//EffectControl::SetOnce(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 1.f);
 					}
 				}
 				//いらないオブジェクトの除去
@@ -433,8 +427,8 @@ namespace FPS_n2 {
 					Easing(&this->m_CamShake2, m_CamShake1, 0.8f, EasingType::OutExpo);
 					this->m_CamShake = std::max(this->m_CamShake - 1.f / FPS, 0.f);
 
-					if (this->m_FPSActive.on() || Chara->GetIsADS()) {
-						VECTOR_ref CamPos = Lerp(Chara->GetEyePosition(), Chara->GetScopePos(), m_EyePosPer);
+					if (this->m_FPSActive.on()) {
+						VECTOR_ref CamPos = Lerp(Chara->GetEyePosition(), Chara->GetScopePos(), Chara->GetADSPer());
 						SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeVector(), Chara->GetMatrix().yvec());
 					}
 					else {
@@ -449,54 +443,54 @@ namespace FPS_n2 {
 						CamPos += Lerp((UpperMat.xvec()*-8.f + UpperMat.yvec()*3.f), (UpperMat.xvec()*-3.f + UpperMat.yvec()*4.f), m_EyeRunPer);
 
 						SetMainCamera().SetCamPos(
-							Lerp(CamPos + CamVec * Lerp(Lerp(-20.f, -50.f, m_TPS_Per), 2.f, m_EyePosPer_Prone), Chara->GetScopePos(), m_EyePosPer),
-							Lerp(CamPos, Chara->GetScopePos(), m_EyePosPer) + CamVec * 100.f,
+							CamPos + CamVec * Lerp(Lerp(-20.f, -50.f, m_TPS_Per), 2.f, m_EyePosPer_Prone),
+							CamPos + CamVec * 100.f,
 							Chara->GetEyeVecMat().yvec() + this->m_CamShake2 * 0.25f);
 					}
 					Easing(&this->m_EyeRunPer, Chara->GetIsRun() ? 1.f : 0.f, 0.95f, EasingType::OutExpo);
-					Easing(&this->m_EyePosPer, Chara->GetIsADS() ? 1.f : 0.f, 0.8f, EasingType::OutExpo);//
 					auto fov_t = GetMainCamera().GetCamFov();
 					auto near_t = GetMainCamera().GetCamNear();
 					auto far_t = GetMainCamera().GetCamFar();
 					if (this->m_FPSActive.on()) {
-						float fov = 0;
 						if (Chara->GetIsADS()) {
-							fov = deg2rad(40);
-						}
-						else if (Chara->GetIsRun()) {
-							fov = deg2rad(100);
+							Easing(&near_t, Scale_Rate * 1.f, 0.9f, EasingType::OutExpo);
+							Easing(&far_t, Scale_Rate * 40.f, 0.9f, EasingType::OutExpo);
 						}
 						else {
-							fov = deg2rad(95);
-						}
-						Easing(&near_t, Scale_Rate * 0.5f, 0.9f, EasingType::OutExpo);
-						Easing(&far_t, Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
-
-						if (Chara->GetShotSwitch()) {
-							fov -= deg2rad(5);
-							Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
-						}
-						else {
-							Easing(&fov_t, fov, 0.9f, EasingType::OutExpo);
+							Easing(&near_t, Scale_Rate * 0.5f, 0.9f, EasingType::OutExpo);
+							Easing(&far_t, Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
 						}
 					}
 					else {
 						if (Chara->GetIsADS()) {
-							//Easing(&fov_t, deg2rad(90), 0.9f, EasingType::OutExpo);
-							Easing(&fov_t, deg2rad(30), 0.9f, EasingType::OutExpo);
 							Easing(&near_t, 10.f, 0.9f, EasingType::OutExpo);
 							Easing(&far_t, Scale_Rate * 30.f, 0.9f, EasingType::OutExpo);
 						}
 						else if (Chara->GetIsRun()) {
-							Easing(&fov_t, deg2rad(70), 0.9f, EasingType::OutExpo);
 							Easing(&near_t, 3.f, 0.9f, EasingType::OutExpo);
 							Easing(&far_t, Scale_Rate * 15.f, 0.9f, EasingType::OutExpo);
 						}
 						else {
-							Easing(&fov_t, deg2rad(55), 0.9f, EasingType::OutExpo);
 							Easing(&near_t, 10.f, 0.9f, EasingType::OutExpo);
 							Easing(&far_t, Scale_Rate * 30.f, 0.9f, EasingType::OutExpo);
 						}
+					}
+					//fov
+					if (this->m_FPSActive.on()) {
+						fov_t = Chara->GetFov();
+					}
+					else {
+						float fov = 0;
+						if (Chara->GetIsADS()) {
+							fov = deg2rad(50);
+						}
+						else if (Chara->GetIsRun()) {
+							fov = deg2rad(70);
+						}
+						else {
+							fov = deg2rad(55);
+						}
+						Easing(&fov_t, fov, 0.9f, EasingType::OutExpo);
 					}
 					SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
 				}
@@ -504,7 +498,13 @@ namespace FPS_n2 {
 				//レーザーサイト
 				for (auto& c : this->character_Pool) {
 					c->SetLaser(&character_Pool);
+					VECTOR_ref CamPos = Lerp(c->GetEyePosition(), c->GetScopePos(), c->GetADSPer());
+					VECTOR_ref Laserpos = GetScreenPos(CamPos, CamPos + c->GetEyeVector(), c->GetMatrix().yvec(), c->GetFov(), c->GetLaser());
+					if (0.f < Laserpos.z() && Laserpos.z() < 1.f) {
+						c->SetLaser2D(Laserpos);
+					}
 				}
+
 				//UIパラメーター
 				{
 					this->m_UIclass.SetIntParam(1, (int)this->m_ScoreBuf);
@@ -532,8 +532,9 @@ namespace FPS_n2 {
 						this->m_UIclass.SetItemGraph(0, &Chara->GetGunPtrNow()->GetGunPic());
 					}
 					{
-						this->m_UIclass.SetStrParam(2, Chara->GetGunPtr((Chara->GetGunPtrNowID() + 1) % Chara->GetGunPtrNum())->GetName().c_str());
-						this->m_UIclass.SetItemGraph(1, &Chara->GetGunPtr((Chara->GetGunPtrNowID() + 1) % Chara->GetGunPtrNum())->GetGunPic());
+						auto Next = (int)((Chara->GetGunPtrNowID() + 1) % Chara->GetGunPtrNum());
+						this->m_UIclass.SetStrParam(2, Chara->GetGunPtr(Next)->GetName().c_str());
+						this->m_UIclass.SetItemGraph(1, &Chara->GetGunPtr(Next)->GetGunPic());
 					}
 					/*
 					{
@@ -545,41 +546,38 @@ namespace FPS_n2 {
 				}
 				EffectControl::Execute();
 				//オートエイム
-				{
-					auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+				for (auto& Chara : this->character_Pool) {
 					Chara->SetAutoAim();
 					if (!Chara->GetIsADS()) {
-						std::shared_ptr<CharacterClass>* cPtr = nullptr;
-
-						VECTOR_ref Laserpos = Chara->GetLaser2D();
-						if (!(0.f < Laserpos.z() && Laserpos.z() < 1.f)) {
-							Laserpos.Set((float)DrawParts->m_DispXSize / 2, (float)DrawParts->m_DispYSize / 2, 0.f);
-						}
+						bool CanAutoAim = false;
+						VECTOR_ref AimPos;
 						{
 							auto MyPos = Chara->GetGunPtrNow()->GetMuzzleMatrix().pos();
 							float lenBuf = 1000.f*Scale_Rate;
-							for (auto& c : this->character_Pool) {
+							for (const auto& c : this->character_Pool) {
 								if (Chara->GetMyPlayerID() == c->GetMyPlayerID()) { continue; }
-								VECTOR_ref campos = c->GetCameraPosition();
+								auto TargetPos = c->GetFrameWorldMat(CharaFrame::Upper).pos();
+								VECTOR_ref CamPos = Lerp(Chara->GetEyePosition(), Chara->GetScopePos(), Chara->GetADSPer());
+								VECTOR_ref campos = GetScreenPos(CamPos,CamPos + Chara->GetEyeVector(), Chara->GetMatrix().yvec(), Chara->GetFov(), TargetPos);
 								if (0.f < campos.z() && campos.z() < 1.f) {
-									if (std::hypotf(campos.x() - Laserpos.x(), campos.y() - Laserpos.y()) <= y_r(128)*Chara->GetActiveAutoScale()) {
-										auto vec = (c->GetFrameWorldMat(CharaFrame::Upper).pos() - MyPos);
-										if (lenBuf >= vec.Length()) {
-											lenBuf = vec.Length();
-											cPtr = &c;
+									campos = campos - Chara->GetAimPoint();
+									campos.z(0.f);
+									if (campos.Length() <= y_r(128) * Chara->GetActiveAutoScale()) {
+										if (!this->m_BackGround->CheckLinetoMap(MyPos, &TargetPos, false)) {
+											auto vec = (TargetPos - MyPos);
+											if (lenBuf >= vec.Length()) {
+												lenBuf = vec.Length();
+												AimPos = TargetPos;
+												CanAutoAim = true;
+											}
 										}
+
 									}
 								}
 							}
 						}
-						if (cPtr) {
-							VECTOR_ref campos = (*cPtr)->GetCameraPosition();
-							if (0.f < campos.z() && campos.z() < 1.f) {
-								if (std::hypotf(campos.x() - Laserpos.x(), campos.y() - Laserpos.y()) <= y_r(128)*Chara->GetActiveAutoScale()) {
-									auto pos = (*cPtr)->GetFrameWorldMat(CharaFrame::Upper).pos();
-									Chara->SetAutoAim(&pos);
-								}
-							}
+						if (CanAutoAim) {
+							Chara->SetAutoAim(&AimPos);
 						}
 					}
 				}
@@ -587,7 +585,6 @@ namespace FPS_n2 {
 				for (auto& c : this->character_Pool) {
 					VECTOR_ref campos; campos.z(-1.f);
 					c->SetCameraPosition(campos);
-					//c->SetLaser2D(campos);
 				}
 				return true;
 			}
@@ -624,16 +621,16 @@ namespace FPS_n2 {
 			void			MainDraw_Sub(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
-				SetFogStartEnd(GetMainCamera().GetCamNear(), GetMainCamera().GetCamFar()*2.f);
+				auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+				SetFogStartEnd(Scale_Rate * 10.f, Scale_Rate * 50.f);
 				this->m_BackGround->Draw();
 				ObjMngr->DrawObject();
 				//ObjMngr->DrawDepthObject();
 				//シェーダー描画用パラメーターセット
 				{
-					auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 					//
 					Set_is_Blackout(true);
-					Set_Per_Blackout((1.f + sin(Chara->GetHeartRateRad()*4.f)*0.25f) * ((Chara->GetHeartRate() - 60.f) / (180.f - 60.f)));
+					Set_Per_Blackout(0.5f + (1.f + sin(Chara->GetHeartRateRad()*4.f)*0.25f) * ((Chara->GetHeartRate() - 60.f) / (180.f - 60.f)));
 					//
 					Set_is_lens(Chara->GetIsADS() && Chara->GetReticleSize()>1.f);
 					if (Chara->GetIsADS()) {
@@ -668,10 +665,10 @@ namespace FPS_n2 {
 					}
 
 				}
-				for (auto& c : this->character_Pool) {
-					VECTOR_ref Laserpos = ConvWorldPosToScreenPos(c->GetLaser().get());
-					if (0.f < Laserpos.z() && Laserpos.z() < 1.f) {
-						c->SetLaser2D(Laserpos);
+				{
+					VECTOR_ref Laserpos2D = ConvWorldPosToScreenPos(Chara->GetLaser().get());
+					if (0.f < Laserpos2D.z() && Laserpos2D.z() < 1.f) {
+						m_Laserpos2D = Laserpos2D;
 					}
 				}
 				for (auto& c : this->character_Pool) {
@@ -689,7 +686,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 				//auto* Fonts = FontPool::Instance();
-				auto* DrawParts = DXDraw::Instance();
+				//auto* DrawParts = DXDraw::Instance();
 				//auto Red = GetColor(255, 0, 0);
 				//auto Blue = GetColor(50, 50, 255);
 				//auto Green = GetColor(43, 163, 91);
@@ -715,11 +712,9 @@ namespace FPS_n2 {
 				//UI
 				this->m_UIclass.Draw();
 				if (!Chara->GetIsADS()) {
-					VECTOR_ref Laserpos = Chara->GetLaser2D();
-					if (!(0.f < Laserpos.z() && Laserpos.z() < 1.f)) {
-						Laserpos.Set((float)DrawParts->m_DispXSize / 2, (float)DrawParts->m_DispYSize / 2, 0.f);
+					if (0.f < m_Laserpos2D.z() && m_Laserpos2D.z() < 1.f) {
+						aim_Graph.DrawRotaGraph((int)m_Laserpos2D.x(), (int)m_Laserpos2D.y(), (float)(y_r(100)) / 100.f*Chara->GetActiveAutoScale(), m_AimRot, true);
 					}
-					aim_Graph.DrawRotaGraph((int)Laserpos.x(), (int)Laserpos.y(), (float)(y_r(100)) / 100.f*Chara->GetActiveAutoScale(), m_AimRot, true);
 				}
 				m_AimRot += 60.f / FPS;
 				//通信設定

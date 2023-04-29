@@ -3,4 +3,137 @@
 
 
 namespace FPS_n2 {
+	class Builds {
+		int						m_mesh{ -1 };
+		MV1						m_Col;
+		MATRIX_ref				m_mat;
+		VECTOR_ref				m_MinPos;
+		VECTOR_ref				m_MaxPos;
+	public:
+		const auto&		GetMeshSel(void) const noexcept { return m_mesh; }
+		const auto&		GetCol(void) const noexcept { return this->m_Col; }
+		const auto&		GetMinPos(void) const noexcept { return m_MinPos; }
+		const auto&		GetMaxPos(void) const noexcept { return m_MaxPos; }
+		const auto&		GetMatrix(void) const noexcept { return m_mat; }
+		const auto		GetColLine(const VECTOR_ref& repos, const VECTOR_ref& pos) const noexcept { return this->m_Col.CollCheck_Line(repos, pos, m_mesh); }
+	public:
+		void		Set(const MV1& ColModel, int frame) {
+			this->m_Col = ColModel.Duplicate();
+			this->m_mesh = frame;
+			this->m_Col.SetupCollInfo(1, 1, 1, m_mesh);
+		}
+		void		ChangeSel(int frame) {
+			if (this->m_Col.IsActive()) {
+				MV1TerminateCollInfo(this->m_Col.get(), m_mesh);
+				this->m_mesh = frame;
+				this->m_Col.SetupCollInfo(1, 1, 1, m_mesh);
+			}
+		}
+		void		SetPosition(const MV1& colModel, VECTOR_ref pos, float rad, bool isTilt) {
+			this->m_mat.clear();
+			auto res = colModel.CollCheck_Line(pos + VECTOR_ref::vget(0.f, 100.f*Scale_Rate, 0.f), pos + VECTOR_ref::vget(0.f, -100.f*Scale_Rate, 0.f));
+			if (res.HitFlag == TRUE) {
+				pos = res.HitPosition;
+				pos += VECTOR_ref::up()*(0.1f*Scale_Rate);
+				if (isTilt) {
+					this->m_mat = MATRIX_ref::RotVec2(VECTOR_ref::up(), res.Normal);
+				}
+			}
+			this->m_mat = MATRIX_ref::RotY(rad)*m_mat*MATRIX_ref::Mtrans(pos);
+			this->m_Col.SetMatrix(this->m_mat);
+			this->m_Col.RefreshCollInfo(this->m_mesh);
+			this->m_MinPos = this->m_mat.pos() + this->m_Col.mesh_minpos(this->m_mesh) + VECTOR_ref::up()*(-1.f*Scale_Rate);
+			this->m_MaxPos = this->m_mat.pos() + this->m_Col.mesh_maxpos(this->m_mesh) + VECTOR_ref::up()*(1.f*Scale_Rate);
+
+			//this->m_MinPos = this->m_mat.pos() + VECTOR_ref::vget(-30.f*Scale_Rate, -10.f*Scale_Rate, -30.f*Scale_Rate);
+			//this->m_MaxPos = this->m_mat.pos() + VECTOR_ref::vget(30.f*Scale_Rate, 30.f*Scale_Rate, 30.f*Scale_Rate);
+		}
+	};
+	class BuildControl {
+		MV1							m_ObjBuildBase;
+		MV1							m_ColBuildBase;
+
+		std::vector<Builds>			m_ObjBuilds;
+
+		std::vector<Model_Instance>	m_Inst;
+	public:
+		const auto&		GetBuildCol(void) const noexcept { return this->m_ObjBuilds; }
+		const auto&		GetBuildCol(void) noexcept { return this->m_ObjBuilds; }
+	public:
+		void			Load(void) noexcept {
+			MV1::Load("data/model/build/model.mv1", &this->m_ObjBuildBase);
+			MV1::Load("data/model/build/col.mv1", &this->m_ColBuildBase);
+		}
+		void			Init(const MV1* MapCol) noexcept {
+			int OneSize = 200;
+
+			this->m_ObjBuilds.resize(OneSize);
+			this->m_Inst.resize(4);
+			{
+				for (int loop = 0; loop < OneSize; loop++) {
+					VECTOR_ref BasePos;
+					while (true) {
+						BasePos.Set(GetRandf(25.f*Scale_Rate), 0.f, GetRandf(25.f*Scale_Rate));
+						if (BasePos.Length() <= 5.f*Scale_Rate) {
+							continue;
+						}
+
+						bool isHit = false;
+						for (int loop2 = 0; loop2 < loop; loop2++) {
+							auto Len = this->m_ObjBuilds[loop2].GetMatrix().pos() - BasePos;
+							Len.y(0);
+							if (Len.Length() <= 2.f*Scale_Rate) {
+								isHit = true;
+								break;
+							}
+						}
+						if (!isHit) { break; }
+					}
+					{
+						this->m_ObjBuilds[loop].Set(this->m_ColBuildBase, GetRand(4 - 1));
+						this->m_ObjBuilds[loop].SetPosition(*MapCol, BasePos, deg2rad(GetRandf(180.f)), false);
+					}
+				}
+			}
+			for (int i = 0; i < 4; i++) {
+				int total = 0;
+				for (auto& b : m_ObjBuilds) {
+					if (b.GetMeshSel() == i) {
+						total++;
+					}
+				}
+				this->m_Inst[i].Init(this->m_ObjBuildBase, i);
+				this->m_Inst[i].Reset();
+				this->m_Inst[i].Set_start(total);
+				for (auto& b : m_ObjBuilds) {
+					if (b.GetMeshSel() == i) {
+						this->m_Inst[i].Set_one(b.GetMatrix());
+					}
+				}
+				this->m_Inst[i].Execute();
+			}
+
+			MATERIALPARAM							Material_t;
+			Material_t.Diffuse = GetLightDifColor();
+			Material_t.Specular = GetLightSpcColor();
+			Material_t.Ambient = GetColorF(1.0f, 1.0f, 1.0f, 1.0f);;
+			Material_t.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);
+			Material_t.Power = 20.0f;
+			SetMaterialParam(Material_t);
+		}
+		void			Draw() noexcept {
+			for (auto& b : this->m_Inst) {
+				b.Draw();
+			}
+		}
+		void			Dispose(void) noexcept {
+			this->m_ObjBuildBase.Dispose();
+			this->m_ColBuildBase.Dispose();
+			for (auto& b : this->m_Inst) {
+				b.Dispose();
+			}
+			this->m_Inst.clear();
+		}
+
+	};
 };

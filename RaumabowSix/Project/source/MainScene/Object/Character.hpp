@@ -88,6 +88,9 @@ namespace FPS_n2 {
 			VECTOR_ref											LaserStartPos;
 			VECTOR_ref											LaserEndPos;
 			VECTOR_ref											LaserEndPos2D;
+
+			float												m_ADSPer = 0.f;
+			float												m_Fov = 0.f;
 		public://ゲッター
 			//const auto		GetShotAnimSel(void) const noexcept { return this->m_CharaAnimeSet[this->m_CharaAnimeSel].m_ADS; }
 			//const auto		GetTurnRatePer(void) const noexcept { return this->m_InputGround.GetTurnRatePer(); }
@@ -194,9 +197,11 @@ namespace FPS_n2 {
 			const auto		GetRunGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Run; }
 			const auto		GetReadyGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Ready; }
 			const auto		GetAimGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Aim; }
+			const auto		GetADSGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_ADS; }
 			const auto		GetReloadGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Reload; }
 
 			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
+			const auto&		GetADSPer(void) const noexcept { return this->m_ADSPer; }
 
 			const auto		GetEyeVecMat(void) const noexcept {
 				auto tmpUpperMatrix =
@@ -250,6 +255,26 @@ namespace FPS_n2 {
 				return false;
 			}
 		public:
+			const auto&		GetFov(void) const noexcept { return this->m_Fov; }
+			const auto		CalcFov() noexcept {
+			float fov = 0;
+			if (this->GetIsADS()) {
+				fov = deg2rad(60);
+			}
+			else if (this->GetIsRun()) {
+				fov = deg2rad(80);
+			}
+			else {
+				fov = deg2rad(75);
+			}
+			if (this->GetShotSwitch()) {
+				fov -= deg2rad(5);
+				Easing(&this->m_Fov, fov, 0.5f, EasingType::OutExpo);
+			}
+			else {
+				Easing(&this->m_Fov, fov, 0.9f, EasingType::OutExpo);
+			}
+		}
 			const auto		CheckLineHit(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
 				if (GetMinLenSegmentToPoint(StartPos, *pEndPos, m_move.pos) <= 2.0f*Scale_Rate) {
 					if (this->CheckLineHited(StartPos, pEndPos)) {									//とりあえず当たったかどうか探す
@@ -278,8 +303,14 @@ namespace FPS_n2 {
 			void			SetEyeVec(const VECTOR_ref& camvec) noexcept;
 		public://レーザーサイト
 			const auto&		GetLaser(void) const noexcept { return this->LaserEndPos; }
-			const auto&		GetLaser2D(void) const noexcept { return this->LaserEndPos2D; }
-			void			SetLaser2D(const VECTOR_ref& value) noexcept { this->LaserEndPos2D = value; }
+			const auto&		GetAimPoint(void) const noexcept { return this->LaserEndPos2D; }
+			void			SetLaser2D(const VECTOR_ref& value) noexcept {
+				this->LaserEndPos2D = value;
+				if (!(0.f < this->LaserEndPos2D.z() && this->LaserEndPos2D.z() < 1.f)) {
+					auto* DrawParts = DXDraw::Instance();
+					this->LaserEndPos2D.Set((float)DrawParts->m_DispXSize / 2, (float)DrawParts->m_DispYSize / 2, 0.f);
+				}
+			}
 			void			SetLaser(const std::vector<std::shared_ptr<CharacterClass>>* CharaPool) noexcept {
 				LaserStartPos = this->GetGunPtrNow()->GetMuzzleMatrix().pos() + this->GetGunPtrNow()->GetMuzzleMatrix().yvec()*-0.05f*Scale_Rate;
 				LaserEndPos = LaserStartPos + this->GetGunPtrNow()->GetMuzzleMatrix().zvec()*-1.f * 50.f*Scale_Rate;
@@ -339,12 +370,14 @@ namespace FPS_n2 {
 				m_GunAnimeSet.back().m_Run = EnumGunAnim::M16_run;
 				m_GunAnimeSet.back().m_Ready = EnumGunAnim::M16_ready;
 				m_GunAnimeSet.back().m_Aim = EnumGunAnim::M16_aim;
+				m_GunAnimeSet.back().m_ADS = EnumGunAnim::M16_ads;
 				m_GunAnimeSet.back().m_Reload = EnumGunAnim::M16_reload;
 				//ハンドガン
 				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
 				m_GunAnimeSet.back().m_Run = EnumGunAnim::M1911_run;
 				m_GunAnimeSet.back().m_Ready = EnumGunAnim::M1911_ready;
 				m_GunAnimeSet.back().m_Aim = EnumGunAnim::M1911_aim;
+				m_GunAnimeSet.back().m_ADS = EnumGunAnim::M1911_ads;
 				m_GunAnimeSet.back().m_Reload = EnumGunAnim::M1911_reload;
 				//
 				m_HitBox.resize(27);
@@ -383,6 +416,7 @@ namespace FPS_n2 {
 				ExecuteMatrix();			//SetMat指示//0.03ms
 				ExecuteShape();				//顔//スコープ内0.01ms
 				ExecuteHeartRate();			//心拍数//0.00ms
+				CalcFov();
 			}
 			void			Draw(void) noexcept override {
 				int fog_enable;
@@ -399,13 +433,14 @@ namespace FPS_n2 {
 
 				SetFogEnable(TRUE);
 				SetFogColor(0, 0, 0);
-				SetFogStartEnd(Scale_Rate*1.f, Scale_Rate*25.f);
+				SetFogStartEnd(Scale_Rate*1.f, Scale_Rate*20.f);
+				SetFogEnable(FALSE);
 
 				//
 				if (this->m_IsActive && this->m_IsDraw) {
 					if (CheckCameraViewClip_Box(
-						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-20, 0, -20)).get(),
-						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(20, 20, 20)).get()) == FALSE
+						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-30, 0, -30)).get(),
+						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(30, 30, 30)).get()) == FALSE
 						) {
 						auto* DrawParts = DXDraw::Instance();
 						DrawParts->SetUseFarShadowDraw(false);

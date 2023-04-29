@@ -316,44 +316,55 @@ namespace FPS_n2 {
 			{
 				m_QKey.Execute(pQPress && !pIsNotActive);
 				m_EKey.Execute(pEPress && !pIsNotActive);
-				if (m_EKey.trigger()) {
-					if (this->m_LeanRate == 1) {
-						this->m_LeanRate = -1;
-					}
-					else {
-						if (this->m_LeanRate > -1) {
-							this->m_LeanRate--;
+				if (false) {
+					if (m_EKey.trigger()) {
+						if (this->m_LeanRate == 1) {
+							this->m_LeanRate = -1;
 						}
 						else {
-							this->m_LeanRate++;
+							if (this->m_LeanRate > -1) {
+								this->m_LeanRate--;
+							}
+							else {
+								this->m_LeanRate++;
+							}
+						}
+
+						if (this->m_TurnRate > -1) {
+							this->m_TurnRate--;
+						}
+						else {
+							this->m_TurnRate++;
 						}
 					}
+					if (m_QKey.trigger()) {
+						if (this->m_LeanRate == -1) {
+							this->m_LeanRate = 1;
+						}
+						else {
+							if (this->m_LeanRate < 1) {
+								this->m_LeanRate++;
+							}
+							else {
+								this->m_LeanRate--;
+							}
+						}
 
-					if (this->m_TurnRate > -1) {
-						this->m_TurnRate--;
-					}
-					else {
-						this->m_TurnRate++;
+						if (this->m_TurnRate < 1) {
+							this->m_TurnRate++;
+						}
+						else {
+							this->m_TurnRate--;
+						}
 					}
 				}
-				if (m_QKey.trigger()) {
-					if (this->m_LeanRate == -1) {
+				else {
+					this->m_LeanRate = 0;
+					if (m_EKey.press()) {
+						this->m_LeanRate = -1;
+					}
+					if (m_QKey.press()) {
 						this->m_LeanRate = 1;
-					}
-					else {
-						if (this->m_LeanRate < 1) {
-							this->m_LeanRate++;
-						}
-						else {
-							this->m_LeanRate--;
-						}
-					}
-
-					if (this->m_TurnRate < 1) {
-						this->m_TurnRate++;
-					}
-					else {
-						this->m_TurnRate--;
 					}
 				}
 				if (!GetRun()) {
@@ -383,7 +394,7 @@ namespace FPS_n2 {
 				Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
 
 				this->m_rad_Buf.x(
-					std::clamp(this->m_rad_Buf.x() + pAddxRad * tmp, -deg2rad(80.f) * limchange, deg2rad(80.f) * limchange)
+					std::clamp(this->m_rad_Buf.x() + pAddxRad * tmp, -deg2rad(80.f) * limchange, deg2rad(30.f) * limchange)
 					+ this->m_radAdd.x()
 				);
 				this->m_rad_Buf.y(
@@ -416,13 +427,13 @@ namespace FPS_n2 {
 #define PLAYER_HIT_TRYNUM			(16)					// 壁押し出し処理の最大試行回数
 #define PLAYER_HIT_SLIDE_LENGTH		(0.015f * Scale_Rate)	// 一度の壁押し出し処理でスライドさせる距離
 	//壁判定ユニバーサル
-	static bool col_wall(const VECTOR_ref& OldPos, VECTOR_ref* NowPos, const std::vector<MV1*>& col_obj_t) noexcept {
+	static bool col_wall(const VECTOR_ref& OldPos, VECTOR_ref* NowPos, const std::vector<std::pair<MV1*, int>>& col_obj_t) noexcept {
 		auto MoveVector = *NowPos - OldPos;
 		//MoveVector.y(0);
 		// プレイヤーの周囲にあるステージポリゴンを取得する( 検出する範囲は移動距離も考慮する )
 		std::vector<MV1_COLL_RESULT_POLY> kabe_;// 壁ポリゴンと判断されたポリゴンの構造体のアドレスを保存しておく
 		for (const auto& objs : col_obj_t) {
-			auto HitDim = objs->CollCheck_Sphere(OldPos, PLAYER_ENUM_DEFAULT_SIZE + MoveVector.size());
+			auto HitDim = objs.first->CollCheck_Sphere(OldPos, PLAYER_ENUM_DEFAULT_SIZE + MoveVector.size(), objs.second);
 			// 検出されたポリゴンが壁ポリゴン( ＸＺ平面に垂直なポリゴン )か床ポリゴン( ＸＺ平面に垂直ではないポリゴン )かを判断する
 			for (int i = 0; i < HitDim.HitNum; ++i) {
 				auto& h_d = HitDim.Dim[i];
@@ -523,10 +534,11 @@ namespace FPS_n2 {
 		int						m_vnum{ -1 };			//
 		int						m_pnum{ -1 };			//
 		MV1_REF_POLYGONLIST		m_RefMesh{};			//
+		int						m_Mesh{ 0 };			//
 	private:
 		void			Init_one(void) noexcept {
-			MV1RefreshReferenceMesh(this->m_obj.get(), -1, TRUE);			//参照用メッシュの更新
-			this->m_RefMesh = MV1GetReferenceMesh(this->m_obj.get(), -1, TRUE);	//参照用メッシュの取得
+			MV1RefreshReferenceMesh(this->m_obj.get(), -1, TRUE, FALSE, m_Mesh);				//参照用メッシュの更新
+			this->m_RefMesh = MV1GetReferenceMesh(this->m_obj.get(), -1, TRUE, FALSE, m_Mesh);	//参照用メッシュの取得
 		}
 	public:
 		//リセット
@@ -580,21 +592,30 @@ namespace FPS_n2 {
 			this->m_pnum += this->m_RefMesh.PolygonNum * 3;
 		}
 	public:
-		void			Init(std::string pngpath, std::string mv1path) noexcept {
+		void			Init(MV1& mv1path, int MeshNum) noexcept {
 			SetUseASyncLoadFlag(FALSE);
+			this->m_Mesh = MeshNum;
+			auto path = MV1GetTextureGraphHandle(mv1path.get(), MV1GetMaterialDifMapTexture(mv1path.get(), MV1GetMeshMaterial(mv1path.get(), m_Mesh)));
+			this->m_pic = path;								 //grass
+			this->m_obj = mv1path.Duplicate();				//弾痕
+			Init_one();
+		}
+		void			Init(std::string pngpath, std::string mv1path, int MeshNum) noexcept {
+			SetUseASyncLoadFlag(FALSE);
+			this->m_Mesh = MeshNum;
 			this->m_pic = GraphHandle::Load(pngpath);		 //grass
-			MV1::Load(mv1path, &this->m_obj);					//弾痕
+			MV1::Load(mv1path, &this->m_obj);				//弾痕
 			Init_one();
 		}
 		void			Execute(void) noexcept {
 			this->m_VerBuf = CreateVertexBuffer((int)this->m_Vertex.size(), DX_VERTEX_TYPE_NORMAL_3D);
 			this->m_IndexBuf = CreateIndexBuffer((int)this->m_Index.size(), DX_INDEX_TYPE_32BIT);
-			SetVertexBufferData(0, m_Vertex.data(), (int)this->m_Vertex.size(), m_VerBuf);
-			SetIndexBufferData(0, m_Index.data(), (int)this->m_Index.size(), m_IndexBuf);
+			SetVertexBufferData(0, this->m_Vertex.data(), (int)this->m_Vertex.size(), this->m_VerBuf);
+			SetIndexBufferData(0, this->m_Index.data(), (int)this->m_Index.size(), this->m_IndexBuf);
 		}
 		void			Draw(void) noexcept {
 			//SetDrawAlphaTest(DX_CMP_GREATER, 128);
-			DrawPolygonIndexed3D_UseVertexBuffer(this->m_VerBuf, m_IndexBuf, m_pic.get(), TRUE);
+			DrawPolygonIndexed3D_UseVertexBuffer(this->m_VerBuf, this->m_IndexBuf, this->m_pic.get(), TRUE);
 			//SetDrawAlphaTest(-1, 0);
 		}
 		void			Dispose(void) noexcept {
@@ -612,25 +633,61 @@ namespace FPS_n2 {
 	public:
 		//初期化
 		void			Init(void) noexcept {
-			m_inst.Init("data/m_obj/hit/hit.png", "data/m_obj/hit/m_obj.mv1");
+			this->m_inst.Init("data/m_obj/hit/hit.png", "data/m_obj/hit/m_obj.mv1", -1);
 		}
 		//毎回のリセット
 		void			Clear(void) noexcept {
-			m_inst.Reset();
+			this->m_inst.Reset();
 		}
 
 		void			Set(const float& caliber, const VECTOR_ref& Position, const VECTOR_ref& Normal, const VECTOR_ref& Zvec) {
-			m_inst.Set(caliber, Position, Normal, Zvec);
-			m_IsUpdate = true;
+			this->m_inst.Set(caliber, Position, Normal, Zvec);
+			this->m_IsUpdate = true;
 		}
 		void			Execute(void) noexcept {
-			if (m_IsUpdate) {
-				m_IsUpdate = false;
-				m_inst.Execute();
+			if (this->m_IsUpdate) {
+				this->m_IsUpdate = false;
+				this->m_inst.Execute();
 			}
 		}
 		void			Draw(void) noexcept {
-			m_inst.Draw();
+			this->m_inst.Draw();
 		}
 	};
+
+	static VECTOR_ref GetScreenPos(const VECTOR_ref&campos, const VECTOR_ref&camvec, const VECTOR_ref&camup, float fov, const VECTOR_ref&worldpos) noexcept {
+		int ScrX = y_r(1920);
+		int ScrY = y_r(1080);
+		// ビュー行列と射影行列の取得
+		MATRIX mat_view;					// ビュー行列
+		VECTOR vec_from = campos.get();		// カメラの位置
+		VECTOR vec_lookat = camvec.get();   // カメラの注視点
+		VECTOR vec_up = camup.get();        // カメラの上方向
+		CreateLookAtMatrix(&mat_view, &vec_from, &vec_lookat, &vec_up);
+		SetCameraNearFar(0.f, 100.f*Scale_Rate);
+		SetupCamera_Perspective(fov);
+		MATRIX proj = GetCameraProjectionMatrix();
+		// ビューポート行列（スクリーン行列）の作成
+		float w = (float)ScrX / 2.0f;
+		float h = (float)ScrY / 2.0f;
+		MATRIX viewport = {
+			w , 0 , 0 , 0 ,
+			0 ,-h , 0 , 0 ,
+			0 , 0 , 1 , 0 ,
+			w , h , 0 , 1
+		};
+		VECTOR screenPos, tmp = worldpos.get();
+		// ビュー変換とプロジェクション変換
+		tmp = VTransform(tmp, mat_view);
+		tmp = VTransform(tmp, proj);
+		// zで割って-1~1の範囲に収める
+		tmp.x /= tmp.z; tmp.y /= tmp.z; tmp.z /= tmp.z;
+		// スクリーン変換
+		screenPos = VTransform(tmp, viewport);
+		screenPos.z = -1.f;
+		if ((camvec - campos).dot(worldpos - campos) > 0.f) {
+			screenPos.z = 0.5f;
+		}
+		return screenPos;
+	}
 };
