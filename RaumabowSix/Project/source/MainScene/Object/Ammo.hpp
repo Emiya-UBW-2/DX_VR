@@ -44,6 +44,8 @@ namespace FPS_n2 {
 			int				m_ShootCheraID{ -1 };
 			std::array<VECTOR_ref, 15>	m_Line;
 			int				m_LineSel = 0;
+			VECTOR_ref		m_HopupVec;
+			float			m_yHopupAdd{ 0.f };
 			float			m_yAdd{ 0.f };
 			float			m_Timer{ 0.f };
 		public://getter
@@ -52,7 +54,7 @@ namespace FPS_n2 {
 			const auto&		GetCaliberSize(void) const noexcept { return this->m_AmmoData->GetCaliber(); }
 			const auto		GetEffectSize(void) const noexcept { return ((this->m_AmmoData->GetCaliber() >= 0.020f) ? this->m_AmmoData->GetCaliber() : 0.025f) / 0.1f; }
 		public:
-			void			Put(const AmmoData* pAmmoData, const VECTOR_ref& pPos, const VECTOR_ref& pVec, int pMyID) noexcept {
+			void			Put(const AmmoData* pAmmoData, const VECTOR_ref& pPos, const VECTOR_ref& pVec, const VECTOR_ref& pUp, int pMyID) noexcept {
 				SetActive(true);
 				this->m_RicochetCnt = 0;
 				this->m_IsHit = false;
@@ -64,6 +66,10 @@ namespace FPS_n2 {
 				this->m_AmmoData = pAmmoData;
 				this->m_speed = this->m_AmmoData->GetSpeed() * Scale_Rate;
 				this->m_penetration = this->m_AmmoData->GetPenetration();
+
+				this->m_HopupVec = pUp;
+				this->m_yHopupAdd = 0.f;
+
 				this->m_yAdd = 0.f;
 				this->m_Timer = 0.f;
 				this->m_ShootCheraID = pMyID;
@@ -132,8 +138,18 @@ namespace FPS_n2 {
 				}
 				if (IsActive()) {
 					//ˆÚ“®Šm’è
-					this->m_move.SetPos(this->m_move.pos + (this->m_move.vec * (this->m_speed / FPS)) + VECTOR_ref::up()*this->m_yAdd);
-					//this->m_yAdd += (M_GR / (FPS*FPS));
+					this->m_move.SetPos(this->m_move.pos + (this->m_move.vec * (this->m_speed / FPS))
+						+ VECTOR_ref::up()*this->m_yAdd
+						+ this->m_HopupVec*this->m_yHopupAdd
+					);
+					this->m_yAdd += (M_GR / (FPS*FPS));
+					if (this->m_Timer < 0.05f) {
+						this->m_yHopupAdd += ((9.8f*Scale_Rate*4.f) / (FPS*FPS));
+					}
+					else {
+						this->m_yHopupAdd += -5.f/FPS;
+						if (this->m_yHopupAdd < 0.f) { this->m_yHopupAdd = 0.f; }
+					}
 
 					this->m_Line[this->m_LineSel] = this->m_move.pos + VECTOR_ref::vget(GetRandf(Scale_Rate*0.1f*this->m_Timer), GetRandf(Scale_Rate*0.1f*this->m_Timer), GetRandf(Scale_Rate*0.1f*this->m_Timer));
 					++this->m_LineSel %= this->m_Line.size();

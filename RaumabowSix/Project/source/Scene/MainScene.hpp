@@ -136,16 +136,29 @@ namespace FPS_n2 {
 				for (int i = 0; i < 4; i++) {
 					SE->Add((int)SoundEnum::Cocking0 + i, 3, "data/Sound/SE/gun/slide/bolt/" + std::to_string(i) + ".wav");
 				}
+				for (int i = 4; i < 6; i++) {
+					SE->Add((int)SoundEnum::Cocking0 + i, 3, "data/Sound/SE/gun/slide/auto/" + std::to_string(i-4) + ".wav");
+				}
+				SE->Add((int)SoundEnum::Unload, 6, "data/Sound/SE/gun/unload.wav");
+				SE->Add((int)SoundEnum::Load, 6, "data/Sound/SE/gun/load.wav");
+
+
 				SE->Add((int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
 				SE->Add((int)SoundEnum::SlideFoot, 9, "data/Sound/SE/move/sliding.wav");
 				SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
-				SE->Add((int)SoundEnum::Heart, 9, "data/Sound/SE/move/heart.wav");
+				SE->Add((int)SoundEnum::Heart, Chara_num * 2, "data/Sound/SE/move/heart.wav");
 
-				SE->Get((int)SoundEnum::Shot_Gun).SetVol_Local(128);
-				SE->Get((int)SoundEnum::Trigger).SetVol_Local(128);
+				SE->Get((int)SoundEnum::Shot_Gun).SetVol_Local(216);
+				SE->Get((int)SoundEnum::Trigger).SetVol_Local(48);
 				for (int i = 0; i < 4; i++) {
 					SE->Get((int)SoundEnum::Cocking0 + i).SetVol_Local(128);
 				}
+				for (int i = 4; i < 6; i++) {
+					SE->Get((int)SoundEnum::Cocking0 + i).SetVol_Local(255);
+				}
+				SE->Get((int)SoundEnum::Unload).SetVol_Local(255);
+				SE->Get((int)SoundEnum::Load).SetVol_Local(255);
+
 				SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
 				SE->Get((int)SoundEnum::Heart).SetVol_Local(92);
 
@@ -443,7 +456,7 @@ namespace FPS_n2 {
 						CamPos += Lerp((UpperMat.xvec()*-8.f + UpperMat.yvec()*3.f), (UpperMat.xvec()*-3.f + UpperMat.yvec()*4.f), m_EyeRunPer);
 
 						SetMainCamera().SetCamPos(
-							CamPos + CamVec * Lerp(Lerp(-20.f, -50.f, m_TPS_Per), 2.f, m_EyePosPer_Prone),
+							CamPos + CamVec * Lerp(Lerp(-20.f, -30.f, m_TPS_Per), 2.f, m_EyePosPer_Prone),
 							CamPos + CamVec * 100.f,
 							Chara->GetEyeVecMat().yvec() + this->m_CamShake2 * 0.25f);
 					}
@@ -633,7 +646,7 @@ namespace FPS_n2 {
 					Set_Per_Blackout(0.5f + (1.f + sin(Chara->GetHeartRateRad()*4.f)*0.25f) * ((Chara->GetHeartRate() - 60.f) / (180.f - 60.f)));
 					//
 					Set_is_lens(Chara->GetIsADS() && Chara->GetReticleSize()>1.f);
-					if (Chara->GetIsADS()) {
+					if (true) {
 						VECTOR_ref LensPos = ConvWorldPosToScreenPos(Chara->GetLensPos().get());
 						if (0.f < LensPos.z() && LensPos.z() < 1.f) {
 							Set_xp_lens(LensPos.x());

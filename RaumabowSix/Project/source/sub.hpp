@@ -207,7 +207,7 @@ namespace FPS_n2 {
 		float												m_LeanRatePer{ 0.f };
 	private: //“à•”
 		void			SetVec(int pDir, bool Press) {
-			this->m_Vec[pDir] += (Press ? 1.f : -1.f)*5.f / FPS;
+			this->m_Vec[pDir] += (Press ? 1.f : -3.f)*5.f / FPS;
 			this->m_Vec[pDir] = std::clamp(this->m_Vec[pDir], 0.f, 1.f);
 		}
 	public:
@@ -284,7 +284,8 @@ namespace FPS_n2 {
 			bool pQPress,
 			bool pEPress,
 			bool pCannotSprint,
-			bool isLernReset
+			bool isLernReset,
+			bool isLernToggle
 		) {
 			this->m_Press_GoFront = pGoFrontPress && !pIsNotActive;
 			this->m_Press_GoRear = pGoBackPress && !pIsNotActive;
@@ -316,7 +317,7 @@ namespace FPS_n2 {
 			{
 				m_QKey.Execute(pQPress && !pIsNotActive);
 				m_EKey.Execute(pEPress && !pIsNotActive);
-				if (false) {
+				if (isLernToggle) {
 					if (m_EKey.trigger()) {
 						if (this->m_LeanRate == 1) {
 							this->m_LeanRate = -1;
@@ -394,7 +395,7 @@ namespace FPS_n2 {
 				Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
 
 				this->m_rad_Buf.x(
-					std::clamp(this->m_rad_Buf.x() + pAddxRad * tmp, -deg2rad(80.f) * limchange, deg2rad(30.f) * limchange)
+					std::clamp(this->m_rad_Buf.x() + pAddxRad * tmp, -deg2rad(80.f) * limchange, deg2rad(24.f) * limchange)
 					+ this->m_radAdd.x()
 				);
 				this->m_rad_Buf.y(

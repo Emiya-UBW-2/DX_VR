@@ -5,7 +5,8 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		enum class EnumGunAnim {
 			M1911_ready,
-			M1911_aim,
+			M1911_aim1,
+			M1911_aim2,
 			M1911_ads,
 			M1911_reload,
 			M1911_run,
@@ -18,7 +19,8 @@ namespace FPS_n2 {
 		};
 		static const char* EnumGunAnimName[(int)EnumGunAnim::Max] = {
 			"M1911_ready",
-			"M1911_aim",
+			"M1911_aim1",
+			"M1911_aim2",
 			"M1911_ads",
 			"M1911_reload",
 			"M1911_run",

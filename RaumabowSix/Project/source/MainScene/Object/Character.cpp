@@ -135,6 +135,7 @@ namespace FPS_n2 {
 			//ã‹L‚ð”½‰f‚·‚é‚à‚Ì
 			this->m_yrad_Upper = KeyControl::GetRad().y();
 			this->m_yrad_Bottom = KeyControl::GetRad().y();
+			this->m_LateLeanRad = 0.f;
 			this->m_LeanRad = 0.f;
 			this->m_UpperMatrix =
 				MATRIX_ref::RotZ(this->m_LeanRad) *
@@ -154,7 +155,7 @@ namespace FPS_n2 {
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
 			auto prev = KeyControl::GetRad();
 
-			KeyControl::InputKey(pInput, pReady, StaminaControl::GetHeartRandVec(KeyControl::GetSquatPer()), StaminaControl::GetCannotRun(), (this->m_ShotPhase >= 2));
+			KeyControl::InputKey(pInput, pReady, StaminaControl::GetHeartRandVec(KeyControl::GetSquatPer()), StaminaControl::GetCannotRun(), (this->m_ShotPhase >= 2),(this->m_ReadyTimer == UpperTimerLimit));
 			{
 				auto Vec = KeyControl::GetRad() - prev;
 				this->LaserEndPos2D.xadd(Vec.y()*1000.f);
@@ -311,6 +312,7 @@ namespace FPS_n2 {
 		}
 		//ã”¼g‰ñ“]															//0.06ms
 		void			CharacterClass::ExecuteUpperMatrix(void) noexcept {
+			Easing(&this->m_LateLeanRad, this->m_LeanRad, 0.9f, EasingType::OutExpo);
 			this->m_LeanRad = deg2rad(25) * KeyControl::GetLeanRatePer();
 
 			float yrad = Lerp(KeyControl::GetRad().y() - this->m_yrad_Bottom, 0.f, KeyControl::GetRunPer());
@@ -462,7 +464,7 @@ namespace FPS_n2 {
 				}
 				//
 				SetAnimLoop(GetBottomTurnAnimSel(), 0.5f);
-				SetAnimLoop(GetBottomRunAnimSel(), 1.25f * KeyControl::GetVecFront() * this->m_RunPer2);
+				SetAnimLoop(GetBottomRunAnimSel(), 1.f * KeyControl::GetVecFront() * this->m_RunPer2);
 				SetAnimLoop(GetBottomWalkAnimSel(), 1.15f * KeyControl::GetVecFront());
 				SetAnimLoop(GetBottomLeftStepAnimSel(), 1.15f * KeyControl::GetVecLeft());
 				SetAnimLoop(GetBottomWalkBackAnimSel(), 1.15f * KeyControl::GetVecRear());
@@ -664,7 +666,7 @@ namespace FPS_n2 {
 						}
 						//\‚¦
 						{
-							auto* Ptr = AnimMngr->GetAnimData(GetAimGunAnimSel());
+							auto* Ptr = AnimMngr->GetAnimData(GetAimGunAnimSel().at(std::clamp<int>(this->m_AimAnimeSel, 0, (int)(GetAimGunAnimSel().size())-1)));
 							if (Ptr) {
 								auto Now = AnimMngr->GetAnimNow(Ptr, m_UpperAnim);
 								MatT[MatSel] = (MATRIX_ref::RotY(deg2rad(Now.GetRotate().x())) * MATRIX_ref::RotX(deg2rad(Now.GetRotate().y())) * MATRIX_ref::RotZ(deg2rad(Now.GetRotate().z()))) * MATRIX_ref::Mtrans(PosBase + MATRIX_ref::Vtrans(Now.GetPos(), GetCharaDir())*Scale_Rate);
@@ -720,6 +722,13 @@ namespace FPS_n2 {
 						zVec1 = Lerp(zVect0, MatT[4].zvec(), KeyControl::GetRunPer());
 						yVec1 = Lerp(yVect0, MatT[4].yvec(), KeyControl::GetRunPer());
 						Pos1 = Lerp(Post0, MatT[4].pos(), KeyControl::GetRunPer());
+
+
+						if (this->m_ReadyPer <= 0.01f || this->m_ReloadPer>0.99f) {
+							this->m_AimAnimeSel = GetRand(1);
+						}
+
+						yVec1 = MATRIX_ref::Vtrans(yVec1, MATRIX_ref::RotAxis(zVec1, (this->m_LateLeanRad - this->m_LeanRad)));
 					}
 
 					m_UpperAnim += 60.f / FPS;
@@ -918,7 +927,7 @@ namespace FPS_n2 {
 				(this->m_Speed * this->m_RunPer2 / SpeedLimit * 1.95f) / FPS,
 				KeyControl::GetIsSquatGround())) {
 				auto SE = SoundPool::Instance();
-				SE->Get((int)SoundEnum::Heart).Play_3D(0, GetFrameWorldMat(CharaFrame::Upper2).pos(), Scale_Rate * 1.f);
+				SE->Get((int)SoundEnum::Heart).Play_3D(0, GetFrameWorldMat(CharaFrame::Head).pos(), Scale_Rate * 0.5f);
 			}
 		}
 	};

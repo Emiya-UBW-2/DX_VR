@@ -13,13 +13,14 @@ namespace FPS_n2 {
 			public ShapeControl
 		{
 		private://キャラパラメーター
-			const float											SpeedLimit{ 1.25f };
+			const float											SpeedLimit{ 1.75f };
 			const float											UpperTimerLimit = 10.f;
 		private:
 			CharaTypeID											m_CharaType;
 			std::vector<CharaAnimeSet>							m_CharaAnimeSet;
 			std::vector<GunAnimeSet>							m_GunAnimeSet;
 			int													m_CharaAnimeSel{ 0 };
+			int													m_AimAnimeSel{ 0 };
 			//
 			std::array<float, (int)CharaAnimeID::AnimeIDMax>	m_AnimPerBuf{ 0 };
 			VECTOR_ref											m_PosBuf;
@@ -30,6 +31,7 @@ namespace FPS_n2 {
 
 			MATRIX_ref											m_UpperMatrix;
 			float												m_LeanRad{ 0.f };
+			float												m_LateLeanRad{ 0.f };
 			float												m_Speed{ 0.f };
 			float												m_yrad_Upper{ 0.f }, m_yrad_Bottom{ 0.f };
 			float												m_RunPer2{ 0.f }, m_PrevRunPer2{ 0.f };
@@ -196,7 +198,7 @@ namespace FPS_n2 {
 
 			const auto		GetRunGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Run; }
 			const auto		GetReadyGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Ready; }
-			const auto		GetAimGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Aim; }
+			const auto&		GetAimGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Aim; }
 			const auto		GetADSGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_ADS; }
 			const auto		GetReloadGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Reload; }
 
@@ -259,16 +261,19 @@ namespace FPS_n2 {
 			const auto		CalcFov() noexcept {
 			float fov = 0;
 			if (this->GetIsADS()) {
-				fov = deg2rad(60);
+				fov = deg2rad(70);
 			}
 			else if (this->GetIsRun()) {
-				fov = deg2rad(80);
+				fov = deg2rad(90);
 			}
 			else {
-				fov = deg2rad(75);
+				fov = deg2rad(85);
 			}
+
 			if (this->GetShotSwitch()) {
-				fov -= deg2rad(5);
+				if (this->GetIsADS()) {
+					fov -= deg2rad(5);
+				}
 				Easing(&this->m_Fov, fov, 0.5f, EasingType::OutExpo);
 			}
 			else {
@@ -369,14 +374,15 @@ namespace FPS_n2 {
 				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
 				m_GunAnimeSet.back().m_Run = EnumGunAnim::M16_run;
 				m_GunAnimeSet.back().m_Ready = EnumGunAnim::M16_ready;
-				m_GunAnimeSet.back().m_Aim = EnumGunAnim::M16_aim;
+				m_GunAnimeSet.back().m_Aim.emplace_back(EnumGunAnim::M16_aim);
 				m_GunAnimeSet.back().m_ADS = EnumGunAnim::M16_ads;
 				m_GunAnimeSet.back().m_Reload = EnumGunAnim::M16_reload;
 				//ハンドガン
 				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
 				m_GunAnimeSet.back().m_Run = EnumGunAnim::M1911_run;
 				m_GunAnimeSet.back().m_Ready = EnumGunAnim::M1911_ready;
-				m_GunAnimeSet.back().m_Aim = EnumGunAnim::M1911_aim;
+				m_GunAnimeSet.back().m_Aim.emplace_back(EnumGunAnim::M1911_aim1);
+				m_GunAnimeSet.back().m_Aim.emplace_back(EnumGunAnim::M1911_aim2);
 				m_GunAnimeSet.back().m_ADS = EnumGunAnim::M1911_ads;
 				m_GunAnimeSet.back().m_Reload = EnumGunAnim::M1911_reload;
 				//

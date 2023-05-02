@@ -30,11 +30,13 @@ namespace FPS_n2 {
 			}
 		}
 		void		SetPosition(const MV1& colModel, VECTOR_ref pos, float rad, bool isTilt) {
+			auto ofset = pos.y();
+			pos.y(0.f);
 			this->m_mat.clear();
 			auto res = colModel.CollCheck_Line(pos + VECTOR_ref::vget(0.f, 100.f*Scale_Rate, 0.f), pos + VECTOR_ref::vget(0.f, -100.f*Scale_Rate, 0.f));
 			if (res.HitFlag == TRUE) {
 				pos = res.HitPosition;
-				pos += VECTOR_ref::up()*(0.1f*Scale_Rate);
+				pos += VECTOR_ref::up()*(0.1f*Scale_Rate + ofset);
 				if (isTilt) {
 					this->m_mat = MATRIX_ref::RotVec2(VECTOR_ref::up(), res.Normal);
 				}
@@ -65,16 +67,27 @@ namespace FPS_n2 {
 			MV1::Load("data/model/build/col.mv1", &this->m_ColBuildBase);
 		}
 		void			Init(const MV1* MapCol) noexcept {
-			int OneSize = 200;
+			int OneSize = 100;
 
 			this->m_ObjBuilds.resize(OneSize);
-			this->m_Inst.resize(4);
+			this->m_Inst.resize(10);
 			{
 				for (int loop = 0; loop < OneSize; loop++) {
+					int ID = GetRand((int)this->m_Inst.size() - 1);
+					if (4 <= ID && ID <= 6) {
+						auto per = GetRand(100);
+						if (per < 25) {
+							ID = GetRand(4 - 1);
+						}
+						else if (per < 25 + 35) {
+							ID = 7 + GetRand(2);
+						}
+					}
+
 					VECTOR_ref BasePos;
 					while (true) {
 						BasePos.Set(GetRandf(25.f*Scale_Rate), 0.f, GetRandf(25.f*Scale_Rate));
-						if (BasePos.Length() <= 5.f*Scale_Rate) {
+						if (BasePos.Length() <= 2.f*Scale_Rate) {
 							continue;
 						}
 
@@ -90,12 +103,25 @@ namespace FPS_n2 {
 						if (!isHit) { break; }
 					}
 					{
-						this->m_ObjBuilds[loop].Set(this->m_ColBuildBase, GetRand(4 - 1));
-						this->m_ObjBuilds[loop].SetPosition(*MapCol, BasePos, deg2rad(GetRandf(180.f)), false);
+						bool xzturn = false;
+						//
+						if (0 <= ID && ID <= 3) {
+							BasePos.y(-0.2f*Scale_Rate);
+						}
+						if (4 <= ID && ID <= 6) {
+							BasePos.y(-0.4f*Scale_Rate);
+						}
+						if (7 <= ID && ID <= 9) {
+							BasePos.y(-0.1f*Scale_Rate);
+							xzturn = true;
+						}
+
+						this->m_ObjBuilds[loop].Set(this->m_ColBuildBase, ID);
+						this->m_ObjBuilds[loop].SetPosition(*MapCol, BasePos, deg2rad(GetRandf(180.f)), xzturn);
 					}
 				}
 			}
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < (int)this->m_Inst.size(); i++) {
 				int total = 0;
 				for (auto& b : m_ObjBuilds) {
 					if (b.GetMeshSel() == i) {

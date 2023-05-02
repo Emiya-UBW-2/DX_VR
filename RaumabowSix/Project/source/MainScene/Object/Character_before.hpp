@@ -17,8 +17,8 @@ namespace FPS_n2 {
 		struct GunAnimeSet {
 			EnumGunAnim	m_Run{ EnumGunAnim::M1911_run };
 			EnumGunAnim	m_Ready{ EnumGunAnim::M1911_ready };
-			EnumGunAnim	m_Aim{ EnumGunAnim::M1911_aim };
-			EnumGunAnim	m_ADS{ EnumGunAnim::M1911_aim };
+			std::vector<EnumGunAnim>	m_Aim;
+			EnumGunAnim	m_ADS{ EnumGunAnim::M1911_ads };
 			EnumGunAnim	m_Reload{ EnumGunAnim::M1911_reload };
 		};
 
@@ -267,11 +267,10 @@ namespace FPS_n2 {
 			}
 			void		InputKey(
 				const InputControl& pInput, bool pReady,
-				const VECTOR_ref& pAddRadvec, bool pCannotSprint, bool IsReloading
+				const VECTOR_ref& pAddRadvec, bool pCannotSprint, bool IsReloading, bool pCannotLern
 			) {
 				this->m_ReadySwitch = (this->m_KeyActive != pReady);
 				this->m_KeyActive = pReady;
-
 				//’n
 				m_InputGround.SetInput(
 					pInput.GetAddxRad()*(GetIsRun() ? 0.5f : 1.f), pInput.GetAddyRad()*(GetIsRun() ? 0.5f : 1.f),
@@ -283,10 +282,11 @@ namespace FPS_n2 {
 					pInput.GetAction1(),
 					pInput.GetRunPress(),
 					false,
-					pInput.GetGoLeftPress(),
-					pInput.GetGoRightPress(),
+					(pInput.GetGoBackPress() ? pInput.GetGoRightPress() : pInput.GetGoLeftPress()) || pInput.GetQPress(),
+					(pInput.GetGoBackPress() ? pInput.GetGoLeftPress() : pInput.GetGoRightPress()) || pInput.GetEPress(),
 					pCannotSprint,
-					(!pInput.GetGoLeftPress() && !pInput.GetGoRightPress()) && !(pInput.GetGoFrontPress() || pInput.GetGoBackPress()) || IsReloading
+					((0.01f < GetVec().Length() && GetVec().Length() < 0.5f) && !(pInput.GetQPress() || pInput.GetEPress())) || IsReloading || pCannotLern,
+					!(pInput.GetGoFrontPress() || pInput.GetGoBackPress() || pInput.GetGoRightPress() || pInput.GetGoLeftPress())
 				);
 				//
 				m_SideMove.Execute(pInput.GetAction1());				//•½sˆÚ“®
