@@ -2,5 +2,6 @@ usemag0=STANAG_20
 shottype=SEMI
 usehumanAnim=0
 scopezoom=4.0
+soundsel=0
 reloadType=MAG
 end

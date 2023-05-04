@@ -55,14 +55,15 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 
 			SE->Get((int)SoundEnum::Trigger).Play_3D(0, GetMatrix().pos(), Scale_Rate*5.f);
-			SE->Get((int)SoundEnum::Shot_Gun).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+			SE->Get((int)m_GunSoundSet[this->m_SoundSel].m_Shot).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
 
 			this->m_in_chamber = false;
 
 			this->m_IsShot = true;
 			//
 			auto& LastAmmo = (std::shared_ptr<AmmoClass>&)(*ObjMngr->AddObject(ObjType::Ammo));
-				LastAmmo->Put(this->m_NowAmmo, GetMuzzleMatrix().pos(), GetMuzzleMatrix().zvec() * -1.f, GetMuzzleMatrix().yvec(), m_MyID);
+			auto mat = MATRIX_ref::RotZ(deg2rad(GetRandf(1.f))) * MATRIX_ref::RotX(deg2rad(GetRandf(1.f))) * GetMuzzleMatrix();
+			LastAmmo->Put(this->m_NowAmmo, mat.pos(), mat.zvec() * -1.f, mat.yvec(), m_MyID);
 			this->m_NowAmmo = nullptr;
 		}
 	};

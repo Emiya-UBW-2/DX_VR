@@ -21,16 +21,24 @@ namespace FPS_n2 {
 			Magazine,
 		};
 		enum class SoundEnum {
-			Shot_Gun,
 			Trigger,
-			Cocking0,
-			Cocking1,
-			Cocking2,
-			Cocking3,
-			Cocking4,
-			Cocking5,
-			Unload,
-			Load,
+			Cocking1_0,
+			Cocking1_1,
+			Cocking1_2,
+			Cocking1_3,
+
+			Cocking2_0,
+			Cocking2_1,
+			Shot2,
+			Unload2,
+			Load2,
+
+			Cocking3_0,
+			Cocking3_1,
+			Shot3,
+			Unload3,
+			Load3,
+
 			RunFoot,
 			SlideFoot,
 			StandupFoot,

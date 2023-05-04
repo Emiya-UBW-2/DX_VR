@@ -131,16 +131,16 @@ namespace FPS_n2 {
 				SetMainCamera().SetCamPos(VECTOR_ref::vget(0, 15, -20), VECTOR_ref::vget(0, 15, 0), VECTOR_ref::vget(0, 1, 0));
 				//サウンド
 				auto SE = SoundPool::Instance();
-				SE->Add((int)SoundEnum::Shot_Gun, 3, "data/Sound/SE/gun/shot.wav");
 				SE->Add((int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
 				for (int i = 0; i < 4; i++) {
-					SE->Add((int)SoundEnum::Cocking0 + i, 3, "data/Sound/SE/gun/slide/bolt/" + std::to_string(i) + ".wav");
+					SE->Add((int)SoundEnum::Cocking1_0 + i, 3, "data/Sound/SE/gun/bolt/" + std::to_string(i) + ".wav");
 				}
-				for (int i = 4; i < 6; i++) {
-					SE->Add((int)SoundEnum::Cocking0 + i, 3, "data/Sound/SE/gun/slide/auto/" + std::to_string(i-4) + ".wav");
+				for (int i = 0; i < 5; i++) {
+					SE->Add((int)SoundEnum::Cocking2_0 + i, 3, "data/Sound/SE/gun/autoM16/" + std::to_string(i) + ".wav");
 				}
-				SE->Add((int)SoundEnum::Unload, 6, "data/Sound/SE/gun/unload.wav");
-				SE->Add((int)SoundEnum::Load, 6, "data/Sound/SE/gun/load.wav");
+				for (int i = 0; i < 5; i++) {
+					SE->Add((int)SoundEnum::Cocking3_0 + i, 3, "data/Sound/SE/gun/auto1911/" + std::to_string(i) + ".wav");
+				}
 
 
 				SE->Add((int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
@@ -148,20 +148,27 @@ namespace FPS_n2 {
 				SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
 				SE->Add((int)SoundEnum::Heart, Chara_num * 2, "data/Sound/SE/move/heart.wav");
 
-				SE->Get((int)SoundEnum::Shot_Gun).SetVol_Local(216);
 				SE->Get((int)SoundEnum::Trigger).SetVol_Local(48);
 				for (int i = 0; i < 4; i++) {
-					SE->Get((int)SoundEnum::Cocking0 + i).SetVol_Local(128);
+					SE->Get((int)SoundEnum::Cocking1_0 + i).SetVol_Local(128);
 				}
-				for (int i = 4; i < 6; i++) {
-					SE->Get((int)SoundEnum::Cocking0 + i).SetVol_Local(255);
+				for (int i = 0; i < 2; i++) {
+					SE->Get((int)SoundEnum::Cocking2_0 + i).SetVol_Local(255);
 				}
-				SE->Get((int)SoundEnum::Unload).SetVol_Local(255);
-				SE->Get((int)SoundEnum::Load).SetVol_Local(255);
+				SE->Get((int)SoundEnum::Shot2).SetVol_Local(216);
+				SE->Get((int)SoundEnum::Unload2).SetVol_Local(255);
+				SE->Get((int)SoundEnum::Load2).SetVol_Local(255);
+				for (int i = 0; i < 2; i++) {
+					SE->Get((int)SoundEnum::Cocking3_0 + i).SetVol_Local(255);
+				}
+				SE->Get((int)SoundEnum::Shot3).SetVol_Local(216);
+				SE->Get((int)SoundEnum::Unload3).SetVol_Local(255);
+				SE->Get((int)SoundEnum::Load3).SetVol_Local(255);
+
+
 
 				SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
 				SE->Get((int)SoundEnum::Heart).SetVol_Local(92);
-
 
 				//入力
 				this->m_FPSActive.Set(true);
@@ -442,7 +449,7 @@ namespace FPS_n2 {
 
 					if (this->m_FPSActive.on()) {
 						VECTOR_ref CamPos = Lerp(Chara->GetEyePosition(), Chara->GetScopePos(), Chara->GetADSPer());
-						SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeVector(), Chara->GetMatrix().yvec());
+						SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeVector(), Chara->GetEyeVecY());
 					}
 					else {
 						MATRIX_ref FreeLook;
@@ -458,7 +465,7 @@ namespace FPS_n2 {
 						SetMainCamera().SetCamPos(
 							CamPos + CamVec * Lerp(Lerp(-20.f, -30.f, m_TPS_Per), 2.f, m_EyePosPer_Prone),
 							CamPos + CamVec * 100.f,
-							Chara->GetEyeVecMat().yvec() + this->m_CamShake2 * 0.25f);
+							Chara->GetEyeVecY() + this->m_CamShake2 * 0.25f);
 					}
 					Easing(&this->m_EyeRunPer, Chara->GetIsRun() ? 1.f : 0.f, 0.95f, EasingType::OutExpo);
 					auto fov_t = GetMainCamera().GetCamFov();
@@ -561,7 +568,7 @@ namespace FPS_n2 {
 				//オートエイム
 				for (auto& Chara : this->character_Pool) {
 					Chara->SetAutoAim();
-					if (!Chara->GetIsADS()) {
+					if (!Chara->GetIsADS() && !Chara->GetIsRun()) {
 						bool CanAutoAim = false;
 						VECTOR_ref AimPos;
 						{
@@ -724,7 +731,7 @@ namespace FPS_n2 {
 				}
 				//UI
 				this->m_UIclass.Draw();
-				if (!Chara->GetIsADS()) {
+				if (!Chara->GetIsADS() && !Chara->GetIsRun()) {
 					if (0.f < m_Laserpos2D.z() && m_Laserpos2D.z() < 1.f) {
 						aim_Graph.DrawRotaGraph((int)m_Laserpos2D.x(), (int)m_Laserpos2D.y(), (float)(y_r(100)) / 100.f*Chara->GetActiveAutoScale(), m_AimRot, true);
 					}

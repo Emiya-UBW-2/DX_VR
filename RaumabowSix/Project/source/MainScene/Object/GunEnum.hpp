@@ -9,6 +9,7 @@ namespace FPS_n2 {
 			ReloadOne,
 			ReloadEnd,
 			Shot,
+			Base,
 			AnimeIDMax,
 		};
 		enum class GunFrame {
@@ -26,6 +27,9 @@ namespace FPS_n2 {
 			RightHandPos,
 			RightHandYvec,
 			RightHandZvec,
+			LeftHandRPos,
+			LeftHandRYvec,
+			LeftHandRZvec,
 			MoveAxis,
 			MovePoint,
 			Max,
@@ -45,6 +49,9 @@ namespace FPS_n2 {
 			"righthand",
 			"righthand_yvec",
 			"righthand_zvec",
+			"lefthandR",
+			"lefthandR_yvec",
+			"lefthandR_zvec",
 			"ìÆçÏé≤",
 			"ìÆçÏì_",
 		};
@@ -56,6 +63,13 @@ namespace FPS_n2 {
 		enum class RELOADTYPE {
 			AMMO,
 			MAG,
+		};
+
+		struct GunSoundSet {
+			std::array<SoundEnum,4>	m_Cock;
+			SoundEnum				m_Shot{ SoundEnum::Shot2 };
+			SoundEnum				m_Unload{ SoundEnum::Unload2 };
+			SoundEnum				m_Load{ SoundEnum::Load2 };
 		};
 	};
 };

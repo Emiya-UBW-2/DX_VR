@@ -21,6 +21,11 @@ namespace FPS_n2 {
 			std::vector<GunAnimeSet>							m_GunAnimeSet;
 			int													m_CharaAnimeSel{ 0 };
 			int													m_AimAnimeSel{ 0 };
+			bool												m_IsFastSwitch{ true };
+			bool												m_IsSwitch{ true };
+			float												m_SwitchCooltime{ 0.f };
+			float												m_FastSwitchPer{ 1.f };
+			float												m_HandSwitchPer{ 1.f };
 			//
 			std::array<float, (int)CharaAnimeID::AnimeIDMax>	m_AnimPerBuf{ 0 };
 			VECTOR_ref											m_PosBuf;
@@ -93,6 +98,16 @@ namespace FPS_n2 {
 
 			float												m_ADSPer = 0.f;
 			float												m_Fov = 0.f;
+
+			VECTOR_ref											m_PrevPos;
+			VECTOR_ref											m_WalkSwingRad;
+			VECTOR_ref											m_WalkSwing;
+			VECTOR_ref											m_WalkSwing_p;
+			VECTOR_ref											m_WalkSwing_t;
+
+			float												m_GunShakePer{ 0.f };
+			VECTOR_ref											m_GunShake;
+			VECTOR_ref											m_GunShake_r;
 		public://ゲッター
 			//const auto		GetShotAnimSel(void) const noexcept { return this->m_CharaAnimeSet[this->m_CharaAnimeSel].m_ADS; }
 			//const auto		GetTurnRatePer(void) const noexcept { return this->m_InputGround.GetTurnRatePer(); }
@@ -206,11 +221,14 @@ namespace FPS_n2 {
 			const auto&		GetADSPer(void) const noexcept { return this->m_ADSPer; }
 
 			const auto		GetEyeVecMat(void) const noexcept {
+				auto tmpSwingMatrix =
+					MATRIX_ref::RotZ(deg2rad(m_WalkSwing.z()*m_WalkSwingRad.z()))*
+					MATRIX_ref::RotX(deg2rad(m_WalkSwing.x()*m_WalkSwingRad.x()));
 				auto tmpUpperMatrix =
-					MATRIX_ref::RotZ(this->m_LeanRad) *
+					//MATRIX_ref::RotZ(this->m_LeanRad) *
 					MATRIX_ref::RotX(KeyControl::GetRad().x()) *
 					MATRIX_ref::RotY(KeyControl::GetRad().y() - this->m_yrad_Bottom);
-				return tmpUpperMatrix * this->m_move.mat;
+				return tmpSwingMatrix * tmpUpperMatrix * this->m_move.mat;
 			}
 			const auto		GetEyeVecX(void) const noexcept { return GetEyeVecMat().xvec(); }
 			const auto		GetEyeVecY(void) const noexcept { return GetEyeVecMat().yvec(); }
@@ -221,7 +239,10 @@ namespace FPS_n2 {
 					+ this->GetEyeVector() * 0.5f
 					+ this->m_MoveEyePos;
 			}
-			const auto		GetScopePos(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetScopePos() : GetEyePosition(); }
+			const auto		GetScopePos(void) const noexcept {
+				return ((GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetScopePos() : GetEyePosition()) + 
+					m_GunShake_r*0.3f/((GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetReticleSize() : 1.f);
+			}
 		private:
 			//被弾チェック
 			const auto		CheckAmmoHited(const AmmoClass& pAmmo) noexcept {
@@ -268,6 +289,9 @@ namespace FPS_n2 {
 			}
 			else {
 				fov = deg2rad(85);
+				if (m_IsActiveAutoAim) {
+					fov = deg2rad(75);
+				}
 			}
 
 			if (this->GetShotSwitch()) {

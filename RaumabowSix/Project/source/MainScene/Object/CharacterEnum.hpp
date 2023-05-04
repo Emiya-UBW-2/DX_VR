@@ -45,6 +45,9 @@ namespace FPS_n2 {
 
 			Hand_Ready,
 
+			Upper_ReadyR,
+			Hand_ReadyR,
+
 			AnimeIDMax,
 		};
 		enum class CharaFrame {

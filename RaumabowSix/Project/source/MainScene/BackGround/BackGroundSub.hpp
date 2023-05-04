@@ -70,7 +70,7 @@ namespace FPS_n2 {
 			int OneSize = 100;
 
 			this->m_ObjBuilds.resize(OneSize);
-			this->m_Inst.resize(10);
+			this->m_Inst.resize(8);
 			{
 				for (int loop = 0; loop < OneSize; loop++) {
 					int ID = GetRand((int)this->m_Inst.size() - 1);
@@ -80,7 +80,7 @@ namespace FPS_n2 {
 							ID = GetRand(4 - 1);
 						}
 						else if (per < 25 + 35) {
-							ID = 7 + GetRand(2);
+							ID = 7;// +GetRand(2);
 						}
 					}
 
@@ -111,8 +111,8 @@ namespace FPS_n2 {
 						if (4 <= ID && ID <= 6) {
 							BasePos.y(-0.4f*Scale_Rate);
 						}
-						if (7 <= ID && ID <= 9) {
-							BasePos.y(-0.1f*Scale_Rate);
+						if (7 <= ID && ID <= 7) {
+							BasePos.y(-0.05f*Scale_Rate);
 							xzturn = true;
 						}
 
