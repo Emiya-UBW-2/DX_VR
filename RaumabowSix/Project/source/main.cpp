@@ -35,7 +35,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			clsDx();
 			DebugParts->SetStartPoint();
 #endif // DEBUG
+#ifdef DEBUG
+			DebugParts->SetPoint("Execute start");
+#endif // DEBUG
 			if (scene->Execute()) { break; }		//更新
+
 			if (!scene->isPause()) {
 				EffectUseControl->Calc();			//エフェクシアのアプデを60FPS相当に変更
 			}

@@ -32,6 +32,7 @@ namespace FPS_n2 {
 			LeftHandRZvec,
 			MoveAxis,
 			MovePoint,
+			Move,
 			Max,
 		};
 		static const char* GunFrameName[(int)GunFrame::Max] = {
@@ -54,6 +55,7 @@ namespace FPS_n2 {
 			"lefthandR_zvec",
 			"“®ì²",
 			"“®ì“_",
+			"ˆÚ“®",
 		};
 		enum class SHOTTYPE {
 			BOLT,
@@ -66,10 +68,10 @@ namespace FPS_n2 {
 		};
 
 		struct GunSoundSet {
-			std::array<SoundEnum,4>	m_Cock;
-			SoundEnum				m_Shot{ SoundEnum::Shot2 };
-			SoundEnum				m_Unload{ SoundEnum::Unload2 };
-			SoundEnum				m_Load{ SoundEnum::Load2 };
+			std::array<SoundEnum, 4>	m_Cock{ SoundEnum::Shot2 ,SoundEnum::Shot2 ,SoundEnum::Shot2 ,SoundEnum::Shot2 };
+			SoundEnum					m_Shot{ SoundEnum::Shot2 };
+			SoundEnum					m_Unload{ SoundEnum::Unload2 };
+			SoundEnum					m_Load{ SoundEnum::Load2 };
 		};
 	};
 };

@@ -201,6 +201,7 @@ namespace FPS_n2 {
 		float												m_RunTimer{ 0.f };
 		float												m_SquatPer{ 0.f };
 		VECTOR_ref											m_rad_Buf, m_rad, m_radAdd;
+		VECTOR_ref											m_radEasingPer;
 		int													m_TurnRate{ 0 };
 		float												m_TurnRatePer{ 0.f };
 		int													m_LeanRate{ 0 };
@@ -214,6 +215,7 @@ namespace FPS_n2 {
 		const auto		GetRadBuf(void) const noexcept { return  this->m_rad_Buf; }
 		const auto		GetTurnRatePer(void) const noexcept { return  this->m_TurnRatePer; }
 		const auto		GetLeanRatePer(void) const noexcept { return this->m_LeanRatePer; }
+		const auto		GetLeanRate(void) const noexcept { return this->m_LeanRate; }
 		const auto		GetRad(void) const noexcept { return  this->m_rad; }
 
 		const auto		GetIsSquat(void) const noexcept { return this->m_Squat.press(); }//on
@@ -245,10 +247,23 @@ namespace FPS_n2 {
 			this->m_rad_Buf.y(y);
 			this->m_rad.y(y);
 		}
+		void			SetRad_BufY(float y) noexcept {
+			this->m_rad_Buf.y(y);
+		}
 		void			SetRadBufZ(float z) noexcept {
 			auto zbuf = this->m_rad_Buf.z();
 			Easing(&zbuf, z, 0.9f, EasingType::OutExpo);
 			this->m_rad_Buf.z(zbuf);
+		}
+
+		void			SetRadEasingPerX(float x) noexcept {
+			this->m_radEasingPer.x(x);
+		}
+		void			SetRadEasingPerY(float y) noexcept {
+			this->m_radEasingPer.y(y);
+		}
+		void			SetRadEasingPerZ(float z) noexcept {
+			this->m_radEasingPer.z(z);
 		}
 	public:
 		void			ValueSet(float pxRad, float pyRad, bool SquatOn) {
@@ -264,6 +279,7 @@ namespace FPS_n2 {
 			this->m_RunPer = 0.f;
 			this->m_RunTimer = 0.f;
 			//動作にかかわる操作
+			this->m_radEasingPer.Set(0.5f, 0.2f, 0.5f);
 			this->m_rad_Buf.x(pxRad);
 			this->m_rad_Buf.y(pyRad);
 			this->m_Squat.Set(SquatOn);
@@ -402,8 +418,32 @@ namespace FPS_n2 {
 					this->m_rad_Buf.y() + (pAddyRad + this->m_TurnRatePer / 100.f)*tmp
 					+ this->m_radAdd.y()
 				);
+				{
+					auto Buf = this->m_rad.x();
+					Easing(&Buf, m_rad_Buf.x(), this->m_radEasingPer.x(), EasingType::OutExpo);
+					this->m_rad.x(Buf);
+				}
+				{
+					float	view_YradAdd{ 0.f };							//
+					//反映
+					auto vec_a = MATRIX_ref::RotY(this->m_rad_Buf.y()).zvec();
+					auto vec_z = MATRIX_ref::RotY(this->m_rad.y()).zvec();
+					//float a_hyp = std::hypotf(vec_a.x(), vec_a.z());
+					float z_hyp = std::hypotf(vec_z.x(), vec_z.z());
+					{
+						float cost = vec_z.cross(vec_a).y() / z_hyp;
+						float sint = sqrtf(std::abs(1.f - cost * cost));
+						view_YradAdd = (std::atan2f(cost, sint)) *(1.f - this->m_radEasingPer.y());
+					}
 
-				Easing(&this->m_rad, m_rad_Buf, 0.5f, EasingType::OutExpo);
+					float limit = deg2rad(180)*60.f / FPS;
+					this->m_rad.yadd(std::clamp(view_YradAdd, -limit, limit));
+				}
+				{
+					auto Buf = this->m_rad.z();
+					Easing(&Buf, m_rad_Buf.z(), this->m_radEasingPer.z(), EasingType::OutExpo);
+					this->m_rad.z(Buf);
+				}
 			}
 		}
 		void			Execute(void) noexcept {
@@ -423,7 +463,7 @@ namespace FPS_n2 {
 	// プレイヤー関係の定義
 #define PLAYER_ENUM_MIN_SIZE		(0.1f * Scale_Rate)		// 周囲のポリゴン検出に使用する球の初期サイズ
 #define PLAYER_ENUM_DEFAULT_SIZE	(1.6f * Scale_Rate)		// 周囲のポリゴン検出に使用する球の初期サイズ
-#define PLAYER_HIT_WIDTH			(0.4f * Scale_Rate)		// 当たり判定カプセルの半径
+#define PLAYER_HIT_WIDTH			(0.45f * Scale_Rate)		// 当たり判定カプセルの半径
 #define PLAYER_HIT_HEIGHT			(1.6f * Scale_Rate)		// 当たり判定カプセルの高さ
 #define PLAYER_HIT_TRYNUM			(16)					// 壁押し出し処理の最大試行回数
 #define PLAYER_HIT_SLIDE_LENGTH		(0.015f * Scale_Rate)	// 一度の壁押し出し処理でスライドさせる距離
@@ -434,6 +474,12 @@ namespace FPS_n2 {
 		// プレイヤーの周囲にあるステージポリゴンを取得する( 検出する範囲は移動距離も考慮する )
 		std::vector<MV1_COLL_RESULT_POLY> kabe_;// 壁ポリゴンと判断されたポリゴンの構造体のアドレスを保存しておく
 		for (const auto& objs : col_obj_t) {
+			if ((&objs - &col_obj_t.front()) != 0) {
+				if (GetMinLenSegmentToPoint(OldPos, OldPos + VECTOR_ref::up(), objs.first->GetMatrix().pos()) >=
+					(20.f*Scale_Rate + PLAYER_ENUM_DEFAULT_SIZE + MoveVector.size())) {
+					continue;
+				}
+			}
 			auto HitDim = objs.first->CollCheck_Sphere(OldPos, PLAYER_ENUM_DEFAULT_SIZE + MoveVector.size(), objs.second);
 			// 検出されたポリゴンが壁ポリゴン( ＸＺ平面に垂直なポリゴン )か床ポリゴン( ＸＺ平面に垂直ではないポリゴン )かを判断する
 			for (int i = 0; i < HitDim.HitNum; ++i) {

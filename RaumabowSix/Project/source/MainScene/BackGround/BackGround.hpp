@@ -10,6 +10,7 @@ namespace FPS_n2 {
 			MV1							m_ObjGroundCol;
 
 			BuildControl				m_BuildControl;
+			WallLines					m_Box2DWall;
 		public://getter
 			const auto&		GetBuildCol(void) noexcept { return this->m_BuildControl.GetBuildCol(); }
 			const auto&		GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
@@ -29,8 +30,8 @@ namespace FPS_n2 {
 						}
 					}
 				}
-
-				for (auto& bu : this->m_BuildControl.GetBuildCol()) {
+				//*
+				for (auto& bu : this->GetBuildCol()) {
 					if (bu.GetMeshSel() < 0) { continue; }
 					if (GetMinLenSegmentToPoint(StartPos, *EndPos, bu.GetMatrix().pos()) >= 20.f*Scale_Rate) { continue; }
 					auto col_p = bu.GetColLine(StartPos, *EndPos);
@@ -46,19 +47,13 @@ namespace FPS_n2 {
 						}
 					}
 				}
+				//*/
 				return isHit;
 			}
 		private:
 			void			DrawCommon() noexcept {
-#ifdef DEBUG
-				auto* DebugParts = DebugClass::Instance();					//デバッグ
-#endif // DEBUG
-#ifdef DEBUG
-				DebugParts->SetPoint("");
-#endif // DEBUG
-
 				SetFogEnable(TRUE);
-				SetFogColor(24, 20, 0);
+				SetFogColor(124, 120, 100);
 				SetFogDensity(0.5f);
 
 				this->m_ObjGround.DrawModel();
@@ -66,10 +61,6 @@ namespace FPS_n2 {
 
 				SetUseBackCulling(TRUE);
 				SetFogEnable(FALSE);
-
-#ifdef DEBUG
-				DebugParts->SetPoint("");
-#endif // DEBUG
 			}
 		public://
 			//
@@ -81,6 +72,14 @@ namespace FPS_n2 {
 				MV1::Load("data/model/map/col.mv1", &this->m_ObjGroundCol);
 				this->m_ObjGroundCol.SetupCollInfo(64, 16, 64);
 				this->m_BuildControl.Init(&this->m_ObjGroundCol);
+
+				for (auto& bu : this->m_BuildControl.GetBuildCol()) {
+					if (bu.GetMeshSel() >= 0) {
+						this->m_Box2DWall.Add(MV1GetReferenceMesh(bu.GetWallLine().get(), bu.GetMeshSel(), TRUE));
+						MV1TerminateReferenceMesh(bu.GetWallLine().get(), bu.GetMeshSel(), TRUE);
+					}
+				}
+				this->m_Box2DWall.Init();
 				//空
 				MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
 				MV1SetDifColorScale(this->m_ObjSky.get(), GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
@@ -108,11 +107,16 @@ namespace FPS_n2 {
 				DrawCommon();
 			}
 			//
+			void			DrawWallUI(int x, int y, int size, float scale, const VECTOR_ref& Pos, float Yrad) noexcept {
+				this->m_Box2DWall.Draw(x, y, size, scale, Pos, Yrad);
+			}
+			//
 			void			Dispose(void) noexcept {
 				this->m_ObjSky.Dispose();
 				this->m_ObjGround.Dispose();
 				this->m_ObjGroundCol.Dispose();
 				this->m_BuildControl.Dispose();
+				this->m_Box2DWall.Dispose();
 			}
 		};
 	};

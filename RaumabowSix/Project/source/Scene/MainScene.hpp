@@ -12,6 +12,7 @@ namespace FPS_n2 {
 			//リソース関連
 			std::shared_ptr<BackGroundClass>			m_BackGround;				//BG
 			SoundHandle				m_Env;
+			SoundHandle				m_AimOn;
 			//人
 			std::vector<std::shared_ptr<CharacterClass>> character_Pool;	//ポインター別持ち
 			//操作関連
@@ -24,8 +25,15 @@ namespace FPS_n2 {
 			UIClass					m_UIclass;
 			float					m_HPBuf{ 0.f };
 			float					m_ScoreBuf{ 0.f };
+			GraphHandle				autoaimpoint_Graph;
+			GraphHandle				Enemyaimpoint_Graph;
 			GraphHandle				hit_Graph;
 			GraphHandle				aim_Graph;
+			std::array<GraphHandle,4>stand_Graph;
+			int						stand_sel{ 0 };
+			float					stand_selAnim{ 0.f };
+			float					stand_selAnimR{ 0.f };
+			float					stand_AnimTime{ 0.f };
 			//
 			float					m_CamShake{ 0.f };
 			VECTOR_ref				m_CamShake1;
@@ -52,6 +60,20 @@ namespace FPS_n2 {
 
 			float					m_AimRot{ 0.f };
 			VECTOR_ref				m_Laserpos2D;
+
+			bool					m_IsDrawAimPoint{ false };
+			struct AimPosControl {
+				VECTOR_ref	pos;
+				VECTOR_ref	pos2D;
+				int			type{ 0 };
+			};
+			std::vector<AimPosControl>	m_AutoAimPos;
+
+			GraphHandle				m_MiniMapScreen;
+
+			std::array<shaders, 1>	m_Shader;
+			RealTimeCubeMap			m_RealTimeCubeMap;
+			int						cubeTex{ -1 };
 		private:
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_NetWorkBrowser.GetMyPlayerID(); }
 		public:
@@ -75,20 +97,37 @@ namespace FPS_n2 {
 				for (int i = 0; i < Chara_num; i++) {
 					character_Pool.emplace_back((std::shared_ptr<CharacterClass>&)(*ObjMngr->AddObject(ObjType::Human, "data/Charactor/Soldier1/")));
 				}
+				m_Shader[0].Init("CubeMapTestShader_VS.vso", "CubeMapTestShader_PS.pso");
+				m_RealTimeCubeMap.Init();
+				cubeTex = LoadGraph("data/SkyCube.dds");	// キューブマップテクスチャの読み込み
 				for (int i = 0; i < gun_num; i++) {
-					ObjMngr->AddObject(ObjType::Gun, "data/gun/AR15/");
-					ObjMngr->AddObject(ObjType::Gun, "data/gun/MEU1911/");
+					ObjMngr->AddObject(ObjType::Gun, "data/gun/M16A3/");
+					(*ObjMngr->GetObj(ObjType::Gun, i * 2 + 0))->SetUseShader(&m_Shader[0]);
+					(*ObjMngr->GetObj(ObjType::Gun, i * 2 + 0))->SetShaderTexHandle(0, m_RealTimeCubeMap.GetCubeMapTex());
+					(*ObjMngr->GetObj(ObjType::Gun, i * 2 + 0))->SetShaderTexHandle(1, cubeTex);
+					ObjMngr->AddObject(ObjType::Gun, "data/gun/M1911/");
+					(*ObjMngr->GetObj(ObjType::Gun, i * 2 + 1))->SetUseShader(&m_Shader[0]);
+					(*ObjMngr->GetObj(ObjType::Gun, i * 2 + 1))->SetShaderTexHandle(0, m_RealTimeCubeMap.GetCubeMapTex());
+					(*ObjMngr->GetObj(ObjType::Gun, i * 2 + 1))->SetShaderTexHandle(1, cubeTex);
 				}
 				//ロード
 				SetCreate3DSoundFlag(FALSE);
 				this->m_Env = SoundHandle::Load("data/Sound/SE/envi.wav");
+				this->m_AimOn = SoundHandle::Load("data/Sound/SE/aim_on.wav");
 				SetCreate3DSoundFlag(FALSE);
 				this->m_Env.vol(64);
 				//UI
 				this->m_UIclass.Set();
 
+				autoaimpoint_Graph = GraphHandle::Load("data/UI/battle_autoaimpoint.bmp");
+				Enemyaimpoint_Graph = GraphHandle::Load("data/UI/battle_enemyaimpoint.bmp");
 				hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
 				aim_Graph = GraphHandle::Load("data/UI/battle_aim.bmp");
+				stand_Graph[0] = GraphHandle::Load("data/UI/Stand.bmp");
+				stand_Graph[1] = GraphHandle::Load("data/UI/Squat.bmp");
+				stand_Graph[2] = GraphHandle::Load("data/UI/StandR.bmp");
+				stand_Graph[3] = GraphHandle::Load("data/UI/SquatR.bmp");
+				stand_AnimTime = 5.f;
 				//Set
 				//人
 				for (int loop = 0; loop < (int)EnumGunAnim::Max; loop++) {
@@ -99,10 +138,23 @@ namespace FPS_n2 {
 				}
 				for (auto& c : this->character_Pool) {
 					size_t index = &c - &this->character_Pool.front();
-					VECTOR_ref pos_t = VECTOR_ref::vget(0.f + (float)(index)*20.f, 0.f, 0.f);
+
+					VECTOR_ref pos_t;
+					float rad_t = 0.f;
+					if (index < Chara_num / 2) {
+						pos_t = VECTOR_ref::vget(22.f*Scale_Rate - (float)(index)*1.f*Scale_Rate, 0.f, 22.f*Scale_Rate);
+						rad_t = deg2rad(45.f);
+					}
+					else {
+						pos_t = VECTOR_ref::vget(-22.f*Scale_Rate + (float)((index - Chara_num / 2))*1.f*Scale_Rate, 0.f, -22.f*Scale_Rate);
+						rad_t = deg2rad(180.f+ 45.f);
+					}
+
+
+
 					auto HitResult = this->m_BackGround->GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
 					if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
-					c->ValueSet(deg2rad(0.f), deg2rad(-90.f), false, pos_t, (PlayerID)index);
+					c->ValueSet(deg2rad(0.f), rad_t, false, pos_t, (PlayerID)index);
 					c->SetGunPtr(
 						(std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, (int)(index * 2 + 0))),
 						(std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, (int)(index * 2 + 1)))
@@ -147,6 +199,8 @@ namespace FPS_n2 {
 				SE->Add((int)SoundEnum::SlideFoot, 9, "data/Sound/SE/move/sliding.wav");
 				SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
 				SE->Add((int)SoundEnum::Heart, Chara_num * 2, "data/Sound/SE/move/heart.wav");
+				SE->Add((int)SoundEnum::Switch, Chara_num, "data/Sound/SE/move/standup.wav");
+				
 
 				SE->Get((int)SoundEnum::Trigger).SetVol_Local(48);
 				for (int i = 0; i < 4; i++) {
@@ -169,6 +223,7 @@ namespace FPS_n2 {
 
 				SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
 				SE->Get((int)SoundEnum::Heart).SetVol_Local(92);
+				SE->Get((int)SoundEnum::Switch).SetVol_Local(255);
 
 				//入力
 				this->m_FPSActive.Set(true);
@@ -177,9 +232,17 @@ namespace FPS_n2 {
 				this->m_DamageEvents.clear();
 
 				m_NetWorkBrowser.Init();
+
+				m_MiniMapScreen = GraphHandle::Make(y_r(128) * 2, y_r(128) * 2);
 			}
 			//
 			bool			Update_Sub(void) noexcept override {
+#ifdef DEBUG
+				auto* DebugParts = DebugClass::Instance();					//デバッグ
+#endif // DEBUG
+#ifdef DEBUG
+				DebugParts->SetPoint("update start");
+#endif // DEBUG
 				auto* ObjMngr = ObjectManager::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
 #ifdef DEBUG
@@ -524,6 +587,9 @@ namespace FPS_n2 {
 						c->SetLaser2D(Laserpos);
 					}
 				}
+#ifdef DEBUG
+				DebugParts->SetPoint("---");
+#endif // DEBUG
 
 				//UIパラメーター
 				{
@@ -552,7 +618,7 @@ namespace FPS_n2 {
 						this->m_UIclass.SetItemGraph(0, &Chara->GetGunPtrNow()->GetGunPic());
 					}
 					{
-						auto Next = (int)((Chara->GetGunPtrNowID() + 1) % Chara->GetGunPtrNum());
+						auto Next = (int)((Chara->GetGunPtrNowID() + 1) % (int)Chara->GetGunPtrNum());
 						this->m_UIclass.SetStrParam(2, Chara->GetGunPtr(Next)->GetName().c_str());
 						this->m_UIclass.SetItemGraph(1, &Chara->GetGunPtr(Next)->GetGunPic());
 					}
@@ -567,45 +633,194 @@ namespace FPS_n2 {
 				EffectControl::Execute();
 				//オートエイム
 				for (auto& Chara : this->character_Pool) {
-					Chara->SetAutoAim();
+					if (Chara->GetMyPlayerID() == GetMyPlayerID()) {
+						m_AutoAimPos.clear();
+					}
+					bool CanAutoAim = false;
+					bool IsCutpai = false;
+					std::vector<VECTOR_ref> CutPaiVec;
 					if (!Chara->GetIsADS() && !Chara->GetIsRun()) {
-						bool CanAutoAim = false;
+
+						VECTOR_ref CamPos = Lerp(Chara->GetEyePosition(), Chara->GetScopePos(), Chara->GetADSPer());
 						VECTOR_ref AimPos;
+						//
 						{
-							auto MyPos = Chara->GetGunPtrNow()->GetMuzzleMatrix().pos();
-							float lenBuf = 1000.f*Scale_Rate;
-							for (const auto& c : this->character_Pool) {
-								if (Chara->GetMyPlayerID() == c->GetMyPlayerID()) { continue; }
-								auto TargetPos = c->GetFrameWorldMat(CharaFrame::Upper).pos();
-								VECTOR_ref CamPos = Lerp(Chara->GetEyePosition(), Chara->GetScopePos(), Chara->GetADSPer());
-								VECTOR_ref campos = GetScreenPos(CamPos,CamPos + Chara->GetEyeVector(), Chara->GetMatrix().yvec(), Chara->GetFov(), TargetPos);
-								if (0.f < campos.z() && campos.z() < 1.f) {
-									campos = campos - Chara->GetAimPoint();
-									campos.z(0.f);
-									if (campos.Length() <= y_r(128) * Chara->GetActiveAutoScale()) {
-										if (!this->m_BackGround->CheckLinetoMap(MyPos, &TargetPos, false)) {
-											auto vec = (TargetPos - MyPos);
-											if (lenBuf >= vec.Length()) {
-												lenBuf = vec.Length();
-												AimPos = TargetPos;
-												CanAutoAim = true;
+							struct Buffer {
+								float Len{ 0.f };
+								VECTOR_ref Pos;
+								std::vector<VECTOR_ref> Vec;
+							};
+
+							std::vector<Buffer> PosBuf;
+							auto MyPos = Chara->GetFrameWorldMat(CharaFrame::Upper).pos();
+							for (const auto& C : this->m_BackGround->GetBuildCol()) {
+								for (const auto& L : C.GetLockPointPos()) {
+									auto Pos = C.GetLockPoint().frame(L.first);
+									VECTOR_ref PosAdd = VECTOR_ref::zero();
+
+									if (L.second.size() > 0) {
+										auto TgtVec = (Pos - Chara->GetMatrix().pos()); TgtVec.y(0.f);
+										TgtVec = TgtVec.Norm();
+
+										//全てのベクトルの左/右にいるかどうか
+										int Lcnt = 0;
+										int Rcnt = 0;
+										for (auto& V : L.second) {
+											auto Vec = (C.GetLockPoint().frame(V) - Pos);
+											Vec.y(0.f); Vec = Vec.Norm();
+											if (Vec.cross(TgtVec).y() > 0.f) {
+												Lcnt++;
+											}
+											else {
+												Rcnt++;
 											}
 										}
+										if (Rcnt != 0 && Lcnt != 0) {
+											continue;//ベクトル同士の中間にいるのでターゲットにしない
+										}
+									}
 
+									for (const auto& V : L.second) {
+										auto Vec = (C.GetLockPoint().frame(V) - Pos).Norm();
+										PosAdd += Pos + Vec * (0.2f*Scale_Rate);
+										//
+									}
+									if (L.second.size() > 0) {
+										PosAdd /= (float)(L.second.size());
+										Pos = PosAdd;
+									}
+									Pos.y(MyPos.y());
+
+									auto TargetPos = Pos;
+									VECTOR_ref Tgtpos2D = GetScreenPos(CamPos, CamPos + Chara->GetEyeVector(), Chara->GetMatrix().yvec(), Chara->GetFov(), TargetPos);
+									if (0.f < Tgtpos2D.z() && Tgtpos2D.z() < 1.f) {
+										Tgtpos2D = Tgtpos2D - Chara->GetAimPoint();
+										Tgtpos2D.z(0.f);
+										if (Tgtpos2D.Length() <= y_r(256)) {
+											if (!this->m_BackGround->CheckLinetoMap(MyPos, &TargetPos, false)) {
+												auto vecLen = (TargetPos - MyPos).Length();
+												if (vecLen >= 10.f*Scale_Rate) { continue; }
+												if (vecLen <= 1.8f*Scale_Rate) { continue; }
+												if (Chara->GetMyPlayerID() == GetMyPlayerID()) {
+													AimPosControl tmp;
+													tmp.pos = TargetPos;
+													tmp.pos2D = VECTOR_ref::vget(0.f, 0.f, -1.f);
+													tmp.type = 0;
+													m_AutoAimPos.emplace_back(tmp);
+												}
+												if (Tgtpos2D.Length() <= y_r(128) * Chara->GetActiveAutoScale()) {
+													Buffer tmp;
+													PosBuf.emplace_back(tmp);
+													PosBuf.back().Len = vecLen;
+													PosBuf.back().Pos = Pos;
+													for (const auto& V : L.second) {
+														auto Vec = (C.GetLockPoint().frame(V) - Pos).Norm();
+														PosBuf.back().Vec.emplace_back(Vec);
+													}
+												}
+											}
+										}
+									}
+									//
+								}
+							}
+
+							if (PosBuf.size() >= 2) {
+								std::sort(PosBuf.begin(), PosBuf.end(), [&](const Buffer& a, const Buffer& b) {return a.Len < b.Len; });
+								AimPos = PosBuf.at(1).Pos;
+								CanAutoAim = true;
+								IsCutpai = true;
+								CutPaiVec = PosBuf.at(1).Vec;
+							}
+							else if (PosBuf.size() >= 1) {
+								AimPos = PosBuf.at(0).Pos;
+								CanAutoAim = true;
+								IsCutpai = true;
+								CutPaiVec = PosBuf.at(0).Vec;
+							}
+						}
+						//敵相手のオートエイム再設定
+						{
+						float lenBuf = 1000.f*Scale_Rate;
+						auto MyPos = Chara->GetGunPtrNow()->GetMuzzleMatrix().pos();
+						for (const auto& c : this->character_Pool) {
+							if (Chara->GetMyPlayerID() == c->GetMyPlayerID()) { continue; }
+							auto TargetPos = c->GetFrameWorldMat(CharaFrame::Upper).pos();
+							VECTOR_ref Tgtpos2D = GetScreenPos(CamPos, CamPos + Chara->GetEyeVector(), Chara->GetMatrix().yvec(), Chara->GetFov(), TargetPos);
+							if (0.f < Tgtpos2D.z() && Tgtpos2D.z() < 1.f) {
+								Tgtpos2D = Tgtpos2D - Chara->GetAimPoint();
+								Tgtpos2D.z(0.f);
+								if (Tgtpos2D.Length() <= y_r(256)) {
+									if (!this->m_BackGround->CheckLinetoMap(MyPos, &TargetPos, false)) {
+										auto vecLen = (TargetPos - MyPos).Length();
+										if (vecLen >= 50.f*Scale_Rate) { continue; }
+										if (vecLen <= 1.8f*Scale_Rate) { continue; }
+										if (Chara->GetMyPlayerID() == GetMyPlayerID()) {
+											AimPosControl tmp;
+											tmp.pos = TargetPos;
+											tmp.pos2D = VECTOR_ref::vget(0.f, 0.f, -1.f);
+											tmp.type = 1;
+											m_AutoAimPos.emplace_back(tmp);
+										}
+										if (Tgtpos2D.Length() <= y_r(128) * Chara->GetActiveAutoScale()) {
+											if (lenBuf >= vecLen) {
+												lenBuf = vecLen;
+												AimPos = TargetPos;
+												CanAutoAim = true;
+												IsCutpai = false;
+											}
+										}
 									}
 								}
 							}
 						}
+						}
+
+						//設定
 						if (CanAutoAim) {
-							Chara->SetAutoAim(&AimPos);
+							Chara->SetAutoAim(&AimPos, IsCutpai, &CutPaiVec);
 						}
 					}
+					if (!CanAutoAim) {
+						Chara->SetAutoAim();
+					}
+				}
+				//
+				{
+					auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+				
+					bool OLD = m_IsDrawAimPoint;
+					m_IsDrawAimPoint = Chara->GetLaserActive();
+					if (OLD != m_IsDrawAimPoint) {
+						m_AimOn.play(DX_PLAYTYPE_BACK, TRUE);
+					}
+
 				}
 				//
 				for (auto& c : this->character_Pool) {
 					VECTOR_ref campos; campos.z(-1.f);
 					c->SetCameraPosition(campos);
 				}
+				//
+				//m_RealTimeCubeMap.ReadyDraw(GetMainCamera().GetCamPos(), [&]() { ObjMngr->DrawObject(); });
+				//
+				{
+					auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+
+					m_MiniMapScreen.SetDraw_Screen();
+					{
+						this->m_BackGround->DrawWallUI(y_r(128), y_r(128), y_r(128),
+							1.f + Chara->GetRunPer()*0.25f - Chara->GetADSPer()*0.1f
+							//0.1f
+							,
+							Chara->GetMatrix().pos(), Chara->GetRad().y());
+					}
+				}
+				GraphHandle::SetDraw_Screen((int)DX_SCREEN_BACK);
+				//
+#ifdef DEBUG
+				DebugParts->SetPoint("update end");
+#endif // DEBUG
 				return true;
 			}
 			void			Dispose_Sub(void) noexcept override {
@@ -631,6 +846,8 @@ namespace FPS_n2 {
 			}
 			void			ShadowDraw_NearFar_Sub(void) noexcept override {
 				this->m_BackGround->Shadow_Draw_NearFar();
+				//auto* ObjMngr = ObjectManager::Instance();
+				//ObjMngr->DrawObject_Shadow();
 			}
 			void			ShadowDraw_Sub(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
@@ -685,14 +902,23 @@ namespace FPS_n2 {
 					}
 
 				}
-				{
+				if (Chara->GetLaserActive()) {
 					VECTOR_ref Laserpos2D = ConvWorldPosToScreenPos(Chara->GetLaser().get());
 					if (0.f < Laserpos2D.z() && Laserpos2D.z() < 1.f) {
 						m_Laserpos2D = Laserpos2D;
 					}
 				}
 				for (auto& c : this->character_Pool) {
-					c->DrawLaser();
+					if (c->GetLaserActive()) {
+						c->DrawLaser();
+					}
+				}
+
+				for (auto& a : m_AutoAimPos) {
+					auto tmp = ConvWorldPosToScreenPos(a.pos.get());
+					if (tmp.z >= 0.f && tmp.z <= 1.f) {
+						a.pos2D = tmp;
+					}
 				}
 			}
 			void			MainDrawbyDepth_Sub(void) noexcept override {
@@ -731,12 +957,32 @@ namespace FPS_n2 {
 				}
 				//UI
 				this->m_UIclass.Draw();
-				if (!Chara->GetIsADS() && !Chara->GetIsRun()) {
-					if (0.f < m_Laserpos2D.z() && m_Laserpos2D.z() < 1.f) {
-						aim_Graph.DrawRotaGraph((int)m_Laserpos2D.x(), (int)m_Laserpos2D.y(), (float)(y_r(100)) / 100.f*Chara->GetActiveAutoScale(), m_AimRot, true);
+				if (Chara->GetLaserActive()) {
+					if (!Chara->GetIsADS() && !Chara->GetIsRun()) {
+						if (0.f < m_Laserpos2D.z() && m_Laserpos2D.z() < 1.f) {
+							aim_Graph.DrawRotaGraph((int)m_Laserpos2D.x(), (int)m_Laserpos2D.y(), (float)(y_r(100)) / 100.f*Chara->GetActiveAutoScale(), m_AimRot, true);
+						}
 					}
 				}
 				m_AimRot += 60.f / FPS;
+				//立ち
+				{
+					auto OLD = stand_sel;
+					stand_sel = (Chara->GetIsSquatGround() ? 1 : 0) + (!Chara->GetIsFastSwitch() ? 2 : 0);
+					if (OLD != stand_sel) {
+						stand_selAnim = 1.f;
+						stand_AnimTime = 5.f;
+					}
+					Easing(&stand_selAnimR, stand_selAnim, (stand_selAnimR < stand_selAnim) ? 0.5f : 0.8f, EasingType::OutExpo);
+
+					if (stand_AnimTime > 0.f) {
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)std::clamp(255.f*(stand_AnimTime / 1.f), 0.f, 255.f));
+						stand_Graph[stand_sel].DrawRotaGraph(y_r(24) + y_r(128 / 2), y_r(1080) - y_r(128) - y_r(128 / 2), (float)(y_r(128 / 2)) / 128.f *(1.f + stand_selAnimR * 0.3f), 0.f, true);
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);
+					}
+					stand_AnimTime = std::max(stand_AnimTime - 1.f / FPS, 0.f);
+					stand_selAnim = std::max(stand_selAnim - 1.f / FPS /0.03f, 0.f);
+				}
 				//通信設定
 				if (!this->m_MouseActive.on()) {
 					m_NetWorkBrowser.Draw();
@@ -744,14 +990,40 @@ namespace FPS_n2 {
 				//
 			}
 			void			DrawUI_In_Sub(void) noexcept override {
+				auto* DrawParts = DXDraw::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+				//
+				if (m_IsDrawAimPoint) {
+					for (auto& p : m_AutoAimPos) {
+						if (p.pos2D.z() >= 0.f && p.pos2D.z() <= 1.f) {
+							float AutoAimScale = 1.f;
+							VECTOR_ref Laserpos = p.pos2D;
+							Laserpos.Set(Laserpos.x() - (float)DrawParts->m_DispXSize / 2, Laserpos.y() - (float)DrawParts->m_DispYSize / 2, Laserpos.z());
+							Laserpos.z(0.f);
+							Laserpos /= ((float)DrawParts->m_DispXSize / 2);
+
+							AutoAimScale = 1.f * (1.f - Laserpos.Length()*2.f);
+							AutoAimScale *= std::clamp((1.f - (p.pos - Chara->GetEyePosition()).Length() / (100.f*Scale_Rate)), 0.f, 1.f);
+							switch (p.type) {
+							case 1:
+								Enemyaimpoint_Graph.DrawRotaGraph((int)p.pos2D.x(), (int)p.pos2D.y(), (float)(y_r(100)) / 100.f*AutoAimScale, m_AimRot, true);
+								break;
+							default:
+								autoaimpoint_Graph.DrawRotaGraph((int)p.pos2D.x(), (int)p.pos2D.y(), (float)(y_r(100)) / 100.f*AutoAimScale, m_AimRot, true);
+								break;
+							}
+						}
+					}
+				}
 				//レティクル表示
 				if (Reticle_on) {
 					int x, y;
 					Chara->GetGunPtrNow()->GetReticlePic().GetSize(&x, &y);
 					Chara->GetGunPtrNow()->GetReticlePic().DrawRotaGraph((int)Reticle_xpos, (int)Reticle_ypos, size_lens() / (y / 2.f), Chara->GetReticleRad(), true);
 				}
+				//MiniMap
+				this->m_MiniMapScreen.DrawRotaGraph(y_r(128 + 24), y_r(384 + 24), 1.f, 0.f, false);
 			}
 		};
 	};

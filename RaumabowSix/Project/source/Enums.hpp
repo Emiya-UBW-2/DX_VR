@@ -43,6 +43,7 @@ namespace FPS_n2 {
 			SlideFoot,
 			StandupFoot,
 			Heart,
+			Switch,
 			GateOpen,
 			Num,
 		};

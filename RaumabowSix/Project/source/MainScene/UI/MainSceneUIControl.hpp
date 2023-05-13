@@ -124,11 +124,11 @@ namespace FPS_n2 {
 						yp1 += y_r(64);
 						for (int i = 1; i <= 2; i++) {
 							if (strParam[1 + i].length() > 0) {
-								if (ItemGraphPtr[0 + i] != nullptr) {
+								if (ItemGraphPtr[i] != nullptr) {
 									SetDrawBright(192, 192, 192);
 									int x, y;
-									ItemGraphPtr[0 + i]->GetSize(&x, &y);
-									ItemGraphPtr[0 + i]->DrawRotaGraph(xp1 + y_r(250) - (int)((float)(y_r(x / 2))*0.25f), yp1 - (int)((float)(y_r(y / 2))*0.25f), (float)(y_r(100)) / 100.f*0.25f, 0.f, true);
+									ItemGraphPtr[i]->GetSize(&x, &y);
+									ItemGraphPtr[i]->DrawRotaGraph(xp1 + y_r(250) - (int)((float)(y_r(x / 2))*0.25f), yp1 - (int)((float)(y_r(y / 2))*0.25f), (float)(y_r(100)) / 100.f*0.25f, 0.f, true);
 
 									Fonts->Get(FontPool::FontType::HUD_Edge).DrawString(y_r(12), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
 										xp1 + y_r(250) - (int)((float)(y_r(x / 2))*0.5f), yp1 - (int)((float)(y_r(y / 2))*0.5f), White, Black, "%s", strParam[1 + i].c_str());

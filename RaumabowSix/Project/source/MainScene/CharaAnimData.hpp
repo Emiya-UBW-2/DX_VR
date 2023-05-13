@@ -4,7 +4,8 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		enum class EnumGunAnim {
-			M1911_ready,
+			M1911_ready1,
+			M1911_ready2,
 			M1911_aim1,
 			M1911_aim2,
 			M1911_ads,
@@ -18,7 +19,8 @@ namespace FPS_n2 {
 			Max,
 		};
 		static const char* EnumGunAnimName[(int)EnumGunAnim::Max] = {
-			"M1911_ready",
+			"M1911_ready1",
+			"M1911_ready2",
 			"M1911_aim1",
 			"M1911_aim2",
 			"M1911_ads",
@@ -32,7 +34,7 @@ namespace FPS_n2 {
 		};
 
 		class GunanimData {
-			EnumGunAnim		m_EnumGunAnim{ EnumGunAnim::M1911_ready };
+			EnumGunAnim		m_EnumGunAnim{ EnumGunAnim::M1911_ready1 };
 			bool			m_IsLoop{ true };
 		public:
 			void Set(const std::string& data, EnumGunAnim EnumSel) {

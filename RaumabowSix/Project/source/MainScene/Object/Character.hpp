@@ -20,10 +20,11 @@ namespace FPS_n2 {
 			std::vector<CharaAnimeSet>							m_CharaAnimeSet;
 			std::vector<GunAnimeSet>							m_GunAnimeSet;
 			int													m_CharaAnimeSel{ 0 };
+			int													m_ReadyAnimeSel{ 0 };
 			int													m_AimAnimeSel{ 0 };
 			bool												m_IsFastSwitch{ true };
 			bool												m_IsSwitch{ true };
-			float												m_SwitchCooltime{ 0.f };
+			float												m_SwitchTime{ 0.f };
 			float												m_FastSwitchPer{ 1.f };
 			float												m_HandSwitchPer{ 1.f };
 			//
@@ -53,6 +54,7 @@ namespace FPS_n2 {
 
 			int													m_ShotPhase{ 0 };
 
+			float												m_MagHans{ 0.f };
 			float												m_MagHansPer{ 0.f };
 			float												m_MoveEyePosTimer{ 0.f };
 			VECTOR_ref											m_MoveEyePos;
@@ -83,15 +85,22 @@ namespace FPS_n2 {
 
 			VECTOR_ref											m_UpperPrevRad;
 			VECTOR_ref											m_UpperRad;
+			VECTOR_ref											m_UpperyVecAuto, m_UpperzVecAuto;
+			VECTOR_ref											m_UpperyVecNormal, m_UpperzVecNormal;
 			VECTOR_ref											m_UpperyVec, m_UpperzVec, m_UpperPos;
 			float												m_UpperAnim{ 0.f };
 
 			float												m_AutoAimScale{ 1.f };
 			bool												m_IsActiveAutoAim{ false };
+			bool												m_IsCutpai{ false };
+			float												m_IsActiveAutoAimTime{ 0.f };
 			float												m_AutoAimPer{ 0.f };
 			VECTOR_ref											m_AutoAimVec;
-			VECTOR_ref											m_AutoAimPos;
 
+			VECTOR_ref											m_AutoAimPos;
+			std::vector<VECTOR_ref>								m_AutoAimCutPaiVec;
+
+			switchs												m_LaserSwitch;
 			VECTOR_ref											LaserStartPos;
 			VECTOR_ref											LaserEndPos;
 			VECTOR_ref											LaserEndPos2D;
@@ -108,6 +117,8 @@ namespace FPS_n2 {
 			float												m_GunShakePer{ 0.f };
 			VECTOR_ref											m_GunShake;
 			VECTOR_ref											m_GunShake_r;
+
+			float												m_AmmoHand{ 0.f };
 		public://ゲッター
 			//const auto		GetShotAnimSel(void) const noexcept { return this->m_CharaAnimeSet[this->m_CharaAnimeSel].m_ADS; }
 			//const auto		GetTurnRatePer(void) const noexcept { return this->m_InputGround.GetTurnRatePer(); }
@@ -132,7 +143,7 @@ namespace FPS_n2 {
 			auto&			GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr[this->m_GunSelect]; }
 			const auto&		GetGunPtrNow_Const(void) const noexcept { return this->m_Gun_Ptr[this->m_GunSelect]; }
 			const auto&		GetGunPtrNowID() const noexcept { return this->m_GunSelect; }
-			const auto&		GetReticleRad(void) const noexcept { return this->m_LeanRad; }
+			const auto&		GetReticleRad(void) const noexcept { return this->m_LateLeanRad; }
 			const auto&		GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd; }
 			const auto&		GetSendCamShake(void) const noexcept { return this->m_SendCamShake; }
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
@@ -140,12 +151,40 @@ namespace FPS_n2 {
 			const auto&		GetDamageSwitchRec(void) const noexcept { return this->m_DamageSwitchRec; }
 			const auto&		GetIsActiveAutoAim(void) const noexcept { return this->m_IsActiveAutoAim; }
 			const auto&		GetActiveAutoScale(void) const noexcept { return this->m_AutoAimScale; }
+			const auto&		GetIsFastSwitch(void) const noexcept { return this->m_IsSwitch; }
+
+			const auto		GetLaserActive(void) const noexcept { return this->m_LaserSwitch.on(); }
+			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
 		public://セッター
-			void			SetAutoAim(const VECTOR_ref* value = nullptr) noexcept {
-				m_IsActiveAutoAim = (value) && !GetIsRun();
+			void			SetAutoAim(const VECTOR_ref* value = nullptr, bool IsCutpai = false, const std::vector<VECTOR_ref>* CutPaiVec = nullptr) noexcept {
+				bool isactive = value;
+				if (!isactive) {
+					m_IsActiveAutoAimTime += 1.f / FPS;
+					if (m_IsActiveAutoAimTime > 0.5f) {
+						m_IsActiveAutoAim = false;
+						m_IsCutpai = IsCutpai;
+					}
+				}
+				else {
+					m_IsActiveAutoAim = true;
+					m_IsCutpai = IsCutpai;
+					m_IsActiveAutoAimTime = 0.f;
+				}
 				if (value) {
 					m_AutoAimPos = *value;
 				}
+				if (CutPaiVec) {
+					if (m_IsCutpai) {
+						m_AutoAimCutPaiVec = *CutPaiVec;
+					}
+				}
+
+				if (m_IsActiveAutoAim) {
+					if ((this->m_ShotPhase >= 2) || GetIsADS() || GetIsRun() || !GetLaserActive()) {
+						m_IsActiveAutoAim = false;
+					}
+				}
+
 			}
 
 			void			SetDamageSwitchRec(unsigned long long value) noexcept { this->m_DamageSwitchRec = value; }
@@ -217,7 +256,6 @@ namespace FPS_n2 {
 			const auto		GetADSGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_ADS; }
 			const auto		GetReloadGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Reload; }
 
-			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
 			const auto&		GetADSPer(void) const noexcept { return this->m_ADSPer; }
 
 			const auto		GetEyeVecMat(void) const noexcept {
@@ -290,7 +328,10 @@ namespace FPS_n2 {
 			else {
 				fov = deg2rad(85);
 				if (m_IsActiveAutoAim) {
-					fov = deg2rad(75);
+					fov -= deg2rad(15);
+					if (!m_IsCutpai) {
+						fov -= deg2rad(15);
+					}
 				}
 			}
 
@@ -397,14 +438,15 @@ namespace FPS_n2 {
 				//M4
 				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
 				m_GunAnimeSet.back().m_Run = EnumGunAnim::M16_run;
-				m_GunAnimeSet.back().m_Ready = EnumGunAnim::M16_ready;
+				m_GunAnimeSet.back().m_Ready.emplace_back(EnumGunAnim::M16_ready);
 				m_GunAnimeSet.back().m_Aim.emplace_back(EnumGunAnim::M16_aim);
 				m_GunAnimeSet.back().m_ADS = EnumGunAnim::M16_ads;
 				m_GunAnimeSet.back().m_Reload = EnumGunAnim::M16_reload;
 				//ハンドガン
 				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
 				m_GunAnimeSet.back().m_Run = EnumGunAnim::M1911_run;
-				m_GunAnimeSet.back().m_Ready = EnumGunAnim::M1911_ready;
+				m_GunAnimeSet.back().m_Ready.emplace_back(EnumGunAnim::M1911_ready1);
+				m_GunAnimeSet.back().m_Ready.emplace_back(EnumGunAnim::M1911_ready2);
 				m_GunAnimeSet.back().m_Aim.emplace_back(EnumGunAnim::M1911_aim1);
 				m_GunAnimeSet.back().m_Aim.emplace_back(EnumGunAnim::M1911_aim2);
 				m_GunAnimeSet.back().m_ADS = EnumGunAnim::M1911_ads;

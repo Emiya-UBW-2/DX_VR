@@ -22,6 +22,9 @@ namespace FPS_n2 {
 			float							m_ChamberMovePer{ 0.f };
 			bool							m_UseMoveParts{ false };
 
+			int								GradTexHandle{ -1 };
+			int								NormalTexHandle{ -1 };
+			int								MetallicTexHandle{ -1 };
 
 			std::vector<GunSoundSet>		m_GunSoundSet;
 			int								m_SoundSel{ 0 };
@@ -147,10 +150,14 @@ namespace FPS_n2 {
 				m_GunSoundSet.back().m_Shot = SoundEnum::Shot3;
 				m_GunSoundSet.back().m_Unload = SoundEnum::Unload3;
 				m_GunSoundSet.back().m_Load = SoundEnum::Load3;
+
 			}
 			void			FirstExecute(void) noexcept override {
 				auto SE = SoundPool::Instance();
 				if (this->m_IsFirstLoop) {
+					GradTexHandle = MV1GetTextureGraphHandle(this->GetObj().get(), 0);
+					NormalTexHandle = MV1GetTextureGraphHandle(this->GetObj().get(), 2);
+					MetallicTexHandle = MV1GetTextureGraphHandle(this->GetObj().get(), 3);
 				}
 
 				GunAnimeID Sel = (GunAnimeID)(this->m_ShotPhase - 2);
@@ -379,10 +386,57 @@ namespace FPS_n2 {
 						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-20, 0, -20)).get(),
 						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(20, 20, 20)).get()) == FALSE
 						) {
-						auto* DrawParts = DXDraw::Instance();
-						DrawParts->SetUseFarShadowDraw(false);
-						this->GetObj().DrawModel();
-						DrawParts->SetUseFarShadowDraw(true);
+						int fog_enable;
+						int fog_mode;
+						int fog_r, fog_g, fog_b;
+						float fog_start, fog_end;
+						float fog_density;
+
+						fog_enable = GetFogEnable();													// フォグが有効かどうかを取得する( TRUE:有効  FALSE:無効 )
+						fog_mode = GetFogMode();														// フォグモードを取得する
+						GetFogColor(&fog_r, &fog_g, &fog_b);											// フォグカラーを取得する
+						GetFogStartEnd(&fog_start, &fog_end);											// フォグが始まる距離と終了する距離を取得する( 0.0f ～ 1.0f )
+						fog_density = GetFogDensity();													// フォグの密度を取得する( 0.0f ～ 1.0f )
+
+						SetFogEnable(TRUE);
+						SetFogColor(0, 0, 0);
+						SetFogStartEnd(Scale_Rate*1.f, Scale_Rate*5.f);
+						SetFogEnable(FALSE);
+						{
+							auto* DrawParts = DXDraw::Instance();
+							DrawParts->SetUseFarShadowDraw(false);
+
+							VECTOR_ref CameraPos = DxLib::GetCameraPosition();
+
+							bool UseShader = ((CameraPos - this->GetObj().GetMatrix().pos()).Length() < 3.f*Scale_Rate);
+							if (m_UseShader && UseShader) {
+								m_UseShader->SetVertexParam(CameraPos.x(), CameraPos.y(), CameraPos.z(), 0.0f);
+							}
+							if (m_UseShader && UseShader) {
+								SetUseTextureToShader(1, m_ShaderTex[0]);
+								SetUseTextureToShader(2, m_ShaderTex[1]);
+								SetUseTextureToShader(3, GradTexHandle);
+								SetUseTextureToShader(4, NormalTexHandle);
+								SetUseTextureToShader(5, MetallicTexHandle);
+								m_UseShader->Draw_lamda([&]() {
+									this->GetObj().DrawModel();
+								});
+								SetUseTextureToShader(1, -1);
+								SetUseTextureToShader(2, -1);
+								SetUseTextureToShader(3, -1);
+								SetUseTextureToShader(4, -1);
+								SetUseTextureToShader(5, -1);
+							}
+							else {
+								this->GetObj().DrawModel();
+							}
+							DrawParts->SetUseFarShadowDraw(true);
+						}
+						SetFogEnable(fog_enable);
+						SetFogMode(fog_mode);
+						SetFogColor(fog_r, fog_g, fog_b);
+						SetFogStartEnd(fog_start, fog_end);
+						SetFogDensity(fog_density);
 					}
 				}
 			}

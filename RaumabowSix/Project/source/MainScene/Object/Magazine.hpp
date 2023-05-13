@@ -56,7 +56,7 @@ namespace FPS_n2 {
 						{
 							auto tmp = GetMove();
 							SetMove(
-								tmp.mat.GetRot(),
+								MATRIX_ref::RotX(deg2rad(-30.f*this->HandPer))*tmp.mat.GetRot(),
 								Lerp(tmp.pos, this->HandMatrix.pos(), this->HandPer));
 						}
 					}
