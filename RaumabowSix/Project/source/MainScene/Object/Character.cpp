@@ -107,6 +107,7 @@ namespace FPS_n2 {
 			}
 			this->m_ReadyPer = 0.f;
 			this->m_ReloadPer = 0.f;
+			this->m_ReloadEyePer = 0.f;
 			this->m_ReadyTimer = UpperTimerLimit;
 
 			this->m_MagHansPer = 0.f;
@@ -158,7 +159,7 @@ namespace FPS_n2 {
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
 			auto prev = KeyControl::GetRad();
 
-			KeyControl::InputKey(pInput, pReady, StaminaControl::GetHeartRandVec(KeyControl::GetSquatPer()), StaminaControl::GetCannotRun(), (this->m_ShotPhase >= 2),(this->m_ReadyTimer == UpperTimerLimit),GetIsADS());
+			KeyControl::InputKey(pInput, pReady, StaminaControl::GetHeartRandVec(KeyControl::GetSquatPer()), StaminaControl::GetCannotRun(), (this->m_ShotPhase >= 2), !GetIsAim(),GetIsADS());
 			{
 				auto Vec = KeyControl::GetRad() - prev;
 				this->LaserEndPos2D.xadd(Vec.y()*1000.f);
@@ -167,6 +168,9 @@ namespace FPS_n2 {
 			//銃切替
 			if (KeyControl::GetGunChange().trigger() && GetCanshot()) {
 				++this->m_GunSelect %= 2;
+				//リセットする
+				this->m_IsFastSwitch = true;
+				this->m_IsSwitch = true;
 			}
 			//AIM
 			if (GetGunPtrNow() != nullptr) {
@@ -291,6 +295,8 @@ namespace FPS_n2 {
 			}
 			//
 			Easing(&this->m_ReloadPer, (this->m_ShotPhase >= 2) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+			Easing(&this->m_ReloadEyePer, (this->m_ShotPhase >= 3) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+			
 
 			Easing(&this->m_ReadyPer, (this->m_ReadyTimer < UpperTimerLimit || !(m_ShotPhase <= 1)) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 			//this->m_yrad_Upper、this->m_yrad_Bottom決定
@@ -663,6 +669,7 @@ namespace FPS_n2 {
 			}
 
 			this->m_move.mat = MATRIX_ref::RotZ(KeyControl::GetRad().z()) * MATRIX_ref::RotY(this->m_yrad_Bottom);
+			this->m_move.repos = this->m_move.pos;
 			Easing(&this->m_move.pos, m_PosBuf, 0.9f, EasingType::OutExpo);
 			UpdateMove();
 			//銃座標指定(アニメアップデート含む)//0.19ms
@@ -824,7 +831,7 @@ namespace FPS_n2 {
 							this->m_AimAnimeSel = GetRand(1);
 						}
 						if (this->m_ReadyPer > 0.99f) {
-							this->m_ReadyAnimeSel = 1;
+							this->m_ReadyAnimeSel = GetRand(1);
 						}
 						if (KeyControl::GetRunPer() > 0.99f) {
 							this->m_ReadyAnimeSel = 0;
@@ -1098,7 +1105,7 @@ namespace FPS_n2 {
 				}
 				auto WS_tmp = m_WalkSwing_t * std::clamp(this->m_Speed * this->m_RunPer2 / SpeedLimit, 0.f, 1.f);
 
-				WS_tmp.xadd(-2.f*m_ReloadPer);
+				WS_tmp.xadd(-2.f*m_ReloadEyePer);
 				//X
 				{
 					auto tmp = m_WalkSwing_p.x();

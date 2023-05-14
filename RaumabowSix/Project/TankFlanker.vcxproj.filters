@@ -99,6 +99,9 @@
     <ClInclude Include="source\MainScene\CharaAnimData.hpp">
       <Filter>ソース ファイル\MainScene</Filter>
     </ClInclude>
+    <ClInclude Include="source\MainScene\Player\CPU.hpp">
+      <Filter>ソース ファイル\MainScene\Player</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">

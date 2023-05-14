@@ -51,6 +51,7 @@ namespace FPS_n2 {
 			float												m_ReadyTimer{ 0.f };
 			float												m_ReadyPer{ 0.f };
 			float												m_ReloadPer{ 0.f };
+			float												m_ReloadEyePer{ 0.f };
 
 			int													m_ShotPhase{ 0 };
 
@@ -143,7 +144,7 @@ namespace FPS_n2 {
 			auto&			GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr[this->m_GunSelect]; }
 			const auto&		GetGunPtrNow_Const(void) const noexcept { return this->m_Gun_Ptr[this->m_GunSelect]; }
 			const auto&		GetGunPtrNowID() const noexcept { return this->m_GunSelect; }
-			const auto&		GetReticleRad(void) const noexcept { return this->m_LateLeanRad; }
+			const auto&		GetReticleRad(void) const noexcept { return this->m_LateLeanRad + (KeyControl::GetRad().y() - this->m_yrad_Bottom)*0.15f; }
 			const auto&		GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd; }
 			const auto&		GetSendCamShake(void) const noexcept { return this->m_SendCamShake; }
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
@@ -152,9 +153,11 @@ namespace FPS_n2 {
 			const auto&		GetIsActiveAutoAim(void) const noexcept { return this->m_IsActiveAutoAim; }
 			const auto&		GetActiveAutoScale(void) const noexcept { return this->m_AutoAimScale; }
 			const auto&		GetIsFastSwitch(void) const noexcept { return this->m_IsSwitch; }
-
+			const auto&		GetSpeed(void) const noexcept { return this->m_Speed; }
+			
 			const auto		GetLaserActive(void) const noexcept { return this->m_LaserSwitch.on(); }
 			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
+			const auto		GetIsAim(void) const noexcept { return !(this->m_ReadyTimer == UpperTimerLimit); }
 		public://セッター
 			void			SetAutoAim(const VECTOR_ref* value = nullptr, bool IsCutpai = false, const std::vector<VECTOR_ref>* CutPaiVec = nullptr) noexcept {
 				bool isactive = value;
@@ -438,7 +441,8 @@ namespace FPS_n2 {
 				//M4
 				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
 				m_GunAnimeSet.back().m_Run = EnumGunAnim::M16_run;
-				m_GunAnimeSet.back().m_Ready.emplace_back(EnumGunAnim::M16_ready);
+				m_GunAnimeSet.back().m_Ready.emplace_back(EnumGunAnim::M16_ready1);
+				m_GunAnimeSet.back().m_Ready.emplace_back(EnumGunAnim::M16_ready2);
 				m_GunAnimeSet.back().m_Aim.emplace_back(EnumGunAnim::M16_aim);
 				m_GunAnimeSet.back().m_ADS = EnumGunAnim::M16_ads;
 				m_GunAnimeSet.back().m_Reload = EnumGunAnim::M16_reload;

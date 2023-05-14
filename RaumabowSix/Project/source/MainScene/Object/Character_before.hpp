@@ -282,7 +282,7 @@ namespace FPS_n2 {
 			) {
 				this->m_ReadySwitch = (this->m_KeyActive != pReady);
 				this->m_KeyActive = pReady;
-
+				if (!m_KeyActive) { return; }
 				this->m_Lean.Execute(!IsReloading && (pInput.GetQPress() || pInput.GetEPress()));
 				//’n
 				m_InputGround.SetInput(

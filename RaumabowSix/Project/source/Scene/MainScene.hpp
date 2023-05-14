@@ -15,6 +15,7 @@ namespace FPS_n2 {
 			SoundHandle				m_AimOn;
 			//人
 			std::vector<std::shared_ptr<CharacterClass>> character_Pool;	//ポインター別持ち
+			std::vector<std::shared_ptr<AIControl>>		m_AICtrl;						//AI
 			//操作関連
 			float					m_EyePosPer_Prone = 0.f;
 			float					m_EyeRunPer{ 0.f };
@@ -74,6 +75,8 @@ namespace FPS_n2 {
 			std::array<shaders, 1>	m_Shader;
 			RealTimeCubeMap			m_RealTimeCubeMap;
 			int						cubeTex{ -1 };
+
+			float Timer{ 5.f };
 		private:
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_NetWorkBrowser.GetMyPlayerID(); }
 		public:
@@ -96,6 +99,7 @@ namespace FPS_n2 {
 				ObjMngr->Init(this->m_BackGround);
 				for (int i = 0; i < Chara_num; i++) {
 					character_Pool.emplace_back((std::shared_ptr<CharacterClass>&)(*ObjMngr->AddObject(ObjType::Human, "data/Charactor/Soldier1/")));
+					this->m_AICtrl.emplace_back(std::make_shared<AIControl>());
 				}
 				m_Shader[0].Init("CubeMapTestShader_VS.vso", "CubeMapTestShader_PS.pso");
 				m_RealTimeCubeMap.Init();
@@ -142,11 +146,11 @@ namespace FPS_n2 {
 					VECTOR_ref pos_t;
 					float rad_t = 0.f;
 					if (index < Chara_num / 2) {
-						pos_t = VECTOR_ref::vget(22.f*Scale_Rate - (float)(index)*1.f*Scale_Rate, 0.f, 22.f*Scale_Rate);
+						pos_t = VECTOR_ref::vget(22.f*Scale_Rate - (float)(index)*2.f*Scale_Rate, 0.f, 22.f*Scale_Rate);
 						rad_t = deg2rad(45.f);
 					}
 					else {
-						pos_t = VECTOR_ref::vget(-22.f*Scale_Rate + (float)((index - Chara_num / 2))*1.f*Scale_Rate, 0.f, -22.f*Scale_Rate);
+						pos_t = VECTOR_ref::vget(-22.f*Scale_Rate + (float)((index - Chara_num / 2))*2.f*Scale_Rate, 0.f, -22.f*Scale_Rate);
 						rad_t = deg2rad(180.f+ 45.f);
 					}
 
@@ -174,6 +178,8 @@ namespace FPS_n2 {
 				for (int i = 0; i < Player_num; i++) {
 					PlayerMngr->GetPlayer(i).SetChara((std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i)));
 					//PlayerMngr->GetPlayer(i).SetChara(nullptr);
+
+					this->m_AICtrl[i]->Init(&this->character_Pool, this->m_BackGround, PlayerMngr->GetPlayer(i).GetChara());
 				}
 				this->m_HPBuf = (float)PlayerMngr->GetPlayer(0).GetChara()->GetHP();
 				this->m_ScoreBuf = PlayerMngr->GetPlayer(0).GetScore();
@@ -234,6 +240,8 @@ namespace FPS_n2 {
 				m_NetWorkBrowser.Init();
 
 				m_MiniMapScreen = GraphHandle::Make(y_r(128) * 2, y_r(128) * 2);
+
+				Timer = 10.f;
 			}
 			//
 			bool			Update_Sub(void) noexcept override {
@@ -255,6 +263,10 @@ namespace FPS_n2 {
 					auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 					Chara->LoadReticle();//プレイヤー変更時注意
 					fov_base = GetMainCamera().GetCamFov();
+					Timer = 10.f;
+				}
+				else {
+					Timer = std::max(Timer - 1.f / FPS, 0.f);
 				}
 				//Input,AI
 				{
@@ -399,7 +411,8 @@ namespace FPS_n2 {
 						}
 					}
 					//
-					bool isready = true;
+					printfDx("[%f]\n", Timer);
+					bool isready = (Timer == 0.f);
 					for (int i = 0; i < Player_num; i++) {
 						auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
 						if (m_NetWorkBrowser.GetSequence() == SequenceEnum::MainGame) {
@@ -410,6 +423,9 @@ namespace FPS_n2 {
 								m_NetWorkBrowser.GetRecvData(i, tmp.Frame);
 							}
 							else {
+								if (!m_NetWorkBrowser.GetClient()) {
+									m_AICtrl[i]->AI_move(&tmp.Input);
+								}
 								c->SetInput(tmp.Input, isready);
 								bool override_true = true;
 								override_true = (tmp.CalcCheckSum() != 0);
@@ -429,6 +445,11 @@ namespace FPS_n2 {
 						else {
 							if (i == GetMyPlayerID()) {
 								c->SetInput(MyInput, isready);
+							}
+							else {
+								InputControl OtherInput;
+								m_AICtrl[i]->AI_move(&OtherInput);//めっちゃ重い
+								c->SetInput(OtherInput, isready);
 							}
 							//ダメージイベント処理
 							if (ObjMngr->GetObj(ObjType::Human, i) != nullptr) {
@@ -920,6 +941,10 @@ namespace FPS_n2 {
 						a.pos2D = tmp;
 					}
 				}
+
+				for (int i = 0; i < Player_num; i++) {
+					m_AICtrl[i]->Draw();
+				}
 			}
 			void			MainDrawbyDepth_Sub(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
@@ -1020,7 +1045,7 @@ namespace FPS_n2 {
 				if (Reticle_on) {
 					int x, y;
 					Chara->GetGunPtrNow()->GetReticlePic().GetSize(&x, &y);
-					Chara->GetGunPtrNow()->GetReticlePic().DrawRotaGraph((int)Reticle_xpos, (int)Reticle_ypos, size_lens() / (y / 2.f), Chara->GetReticleRad(), true);
+					Chara->GetGunPtrNow()->GetReticlePic().DrawRotaGraph((int)Reticle_xpos, (int)Reticle_ypos, size_lens() / (y / 3.f), Chara->GetReticleRad(), true);
 				}
 				//MiniMap
 				this->m_MiniMapScreen.DrawRotaGraph(y_r(128 + 24), y_r(384 + 24), 1.f, 0.f, false);

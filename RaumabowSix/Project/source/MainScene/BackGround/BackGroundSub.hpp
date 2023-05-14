@@ -133,10 +133,10 @@ namespace FPS_n2 {
 					int ID = GetRand((int)this->m_Inst.size() - 1);
 					if (4 <= ID && ID <= 6) {
 						auto per = GetRand(100);
-						if (per < 15) {
+						if (per < 24) {
 							ID = GetRand(4 - 1);
 						}
-						else if (per < 15 + 25) {
+						else if (per < 25 + 35) {
 							ID = 7;// +GetRand(2);
 						}
 					}
@@ -148,6 +148,12 @@ namespace FPS_n2 {
 							continue;
 						}
 						if ((BasePos - VECTOR_ref::vget(-25.f*Scale_Rate, 0.f, -25.f*Scale_Rate)).Length() <= 15.f*Scale_Rate) {
+							continue;
+						}
+						if (std::abs(BasePos.x()) >= 22.f*Scale_Rate) {
+							continue;
+						}
+						if (std::abs(BasePos.z()) >= 22.f*Scale_Rate) {
 							continue;
 						}
 
