@@ -16,9 +16,7 @@ namespace FPS_n2 {
 		};
 		enum class ObjType {
 			Human,
-			Ammo,
-			Gun,
-			Magazine,
+			Weapon,
 		};
 		enum class SoundEnum {
 			Trigger,

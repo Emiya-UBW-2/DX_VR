@@ -103,7 +103,7 @@ namespace FPS_n2 {
 						xp1 = DrawParts->m_DispXSize - y_r(275);
 						yp1 = DrawParts->m_DispYSize - y_r(48) - y_r(84);
 						if (strParam[1].length() > 0) {
-							auto per = (float)(100 * intParam.at(14) / intParam.at(15)) / 100.f;
+							auto per = 1.f;
 
 							if (ItemGraphPtr[0] != nullptr) {
 								int x, y;

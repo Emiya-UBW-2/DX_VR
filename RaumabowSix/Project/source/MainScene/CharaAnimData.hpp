@@ -36,7 +36,7 @@ namespace FPS_n2 {
 		};
 
 		class GunanimData {
-			EnumGunAnim		m_EnumGunAnim{ EnumGunAnim::M1911_ready1 };
+			EnumGunAnim		m_EnumGunAnim{ EnumGunAnim::M16_ready1 };
 			bool			m_IsLoop{ true };
 		public:
 			void Set(const std::string& data, EnumGunAnim EnumSel) {

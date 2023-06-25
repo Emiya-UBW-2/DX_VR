@@ -227,10 +227,10 @@ namespace FPS_n2 {
 								//compare = (FName.find(CharaFrameName[i]) != std::string::npos);
 							}
 							break;
-						case ObjType::Gun:
-							compare = (FName == GunFrameName[i]);
+						case ObjType::Weapon:
+							compare = (FName == WeaponFrameName[i]);
 							if (!compare) {
-								compare = (FName.find(GunFrameName[i]) != std::string::npos);
+								compare = (FName.find(WeaponFrameName[i]) != std::string::npos);
 							}
 							break;
 						default:
@@ -248,8 +248,8 @@ namespace FPS_n2 {
 						case ObjType::Human:
 							if (i >= (int)CharaFrame::Max) { isEnd = true; }
 							break;
-						case ObjType::Gun:
-							if (i >= (int)GunFrame::Max) { isEnd = true; }
+						case ObjType::Weapon:
+							if (i >= (int)WeaponFrame::Max) { isEnd = true; }
 							break;
 						default:
 							isEnd = true;
@@ -267,8 +267,8 @@ namespace FPS_n2 {
 						case ObjType::Human:
 							if (i >= (int)CharaFrame::Max) { isEnd = true; }
 							break;
-						case ObjType::Gun:
-							if (i >= (int)GunFrame::Max) { isEnd = true; }
+						case ObjType::Weapon:
+							if (i >= (int)WeaponFrame::Max) { isEnd = true; }
 							break;
 						default:
 							isEnd = true;

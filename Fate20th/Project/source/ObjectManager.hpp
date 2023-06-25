@@ -32,17 +32,9 @@ namespace FPS_n2 {
 					this->m_Object.resize(this->m_Object.size() + 1);
 					this->m_Object.back() = std::make_shared<CharacterClass>();
 					break;
-				case ObjType::Ammo:
+				case ObjType::Weapon:
 					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<AmmoClass>();
-					break;
-				case ObjType::Magazine:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<MagazineClass>();
-					break;
-				case ObjType::Gun:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<GunClass>();
+					this->m_Object.back() = std::make_shared<WeaponClass>();
 					break;
 				default:
 					break;
@@ -61,17 +53,9 @@ namespace FPS_n2 {
 					this->m_Object.resize(this->m_Object.size() + 1);
 					this->m_Object.back() = std::make_shared<CharacterClass>();
 					break;
-				case ObjType::Ammo:
+				case ObjType::Weapon:
 					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<AmmoClass>();
-					break;
-				case ObjType::Magazine:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<MagazineClass>();
-					break;
-				case ObjType::Gun:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<GunClass>();
+					this->m_Object.back() = std::make_shared<WeaponClass>();
 					break;
 				default:
 					break;

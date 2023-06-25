@@ -63,25 +63,10 @@
     <ClInclude Include="source\NetWork.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="source\MainScene\Object\AmmoEnum.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MainScene\Object\Ammo.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
     <ClInclude Include="source\MainScene\Object\CharacterEnum.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
     <ClInclude Include="source\MainScene\Object\Character.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MainScene\Object\Gun.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MainScene\Object\Magazine.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MainScene\Object\GunEnum.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
     <ClInclude Include="source\MainScene\Player\Player.hpp">
@@ -102,16 +87,16 @@
     <ClInclude Include="source\MainScene\Player\CPU.hpp">
       <Filter>ソース ファイル\MainScene\Player</Filter>
     </ClInclude>
+    <ClInclude Include="source\MainScene\Object\Weapon.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\Object\WeaponEnum.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
       <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="source\MainScene\Object\Gun.cpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="source\MainScene\Object\Magazine.cpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
     <ClCompile Include="source\MainScene\BackGround\BackGround.cpp">
       <Filter>ソース ファイル\MainScene\BackGround</Filter>
@@ -121,6 +106,9 @@
     </ClCompile>
     <ClCompile Include="source\MainScene\BackGround\BackGroundSub.cpp">
       <Filter>ソース ファイル\MainScene\BackGround</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\Weapon.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

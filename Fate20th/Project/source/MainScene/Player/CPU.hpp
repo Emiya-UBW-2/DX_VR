@@ -57,41 +57,7 @@ namespace FPS_n2 {
 				this->wayp_pre[0] = ppp;
 			}
 #ifdef DEBUG
-			void Draw_Debug(const VECTOR_ref& MyPos, const std::vector<Builds>* way_point) {
-				for (size_t i = 0; i < this->wayp_pre.size() - 1; i++) {
-					VECTOR_ref startpos;// = (*way_point)[this->wayp_pre[i]];
-					VECTOR_ref endpos;// = (*way_point)[this->wayp_pre[i + 1]];
-					{
-						int id = 0;
-						for (const auto& C : *way_point) {
-							for (const auto& L : C.GetLockPointPos()) {
-								auto Pos = C.GetLockPoint().frame(L.first);
-								VECTOR_ref PosAdd = VECTOR_ref::zero();
-								for (const auto& V : L.second) {
-									auto Vec = (C.GetLockPoint().frame(V) - Pos).Norm();
-									PosAdd += Pos + Vec * (0.4f*Scale_Rate);
-								}
-								if (L.second.size() > 0) {
-									PosAdd /= (float)(L.second.size());
-									Pos = PosAdd;
-								}
-								Pos.y(MyPos.y());
-
-								if (this->wayp_pre[i] == id) {
-									startpos = Pos;
-								}
-								if (this->wayp_pre[i + 1] == id) {
-									endpos = Pos;
-								}
-								id++;
-							}
-						}
-					}
-
-					startpos.yadd(5.5f*Scale_Rate);
-					endpos.yadd(5.5f*Scale_Rate);
-					DrawCapsule_3D(startpos, endpos, 0.25f*Scale_Rate, GetColor(0, 255, 0), GetColor(0, 255, 0));
-				}
+			void Draw_Debug(const VECTOR_ref&) {
 			}
 #endif
 		};
@@ -110,48 +76,8 @@ namespace FPS_n2 {
 
 			float StopTimer{ 0.f };
 		private:
-			int Get_next_waypoint(std::vector<int> wayp_pre, VECTOR_ref poss, VECTOR_ref zvec = VECTOR_ref::zero()) {
+			int Get_next_waypoint(std::vector<int>, VECTOR_ref, VECTOR_ref) {
 				int now = -1;
-				auto tmp = VECTOR_ref::vget(0, 20.f*Scale_Rate, 0);
-				{
-					int id = 0;
-					auto MyPos = MyChara->GetFrameWorldMat(CharaFrame::Upper).pos();
-					for (const auto& C : this->m_BackGround->GetBuildCol()) {
-						for (const auto& L : C.GetLockPointPos()) {
-							auto Pos = C.GetLockPoint().frame(L.first);
-							VECTOR_ref PosAdd = VECTOR_ref::zero();
-							for (const auto& V : L.second) {
-								auto Vec = (C.GetLockPoint().frame(V) - Pos).Norm();
-								PosAdd += Pos + Vec * (0.4f*Scale_Rate);
-							}
-							if (L.second.size() > 0) {
-								PosAdd /= (float)(L.second.size());
-								Pos = PosAdd;
-							}
-							Pos.y(MyPos.y());
-
-							bool tt = true;
-							for (auto& ww : wayp_pre) {
-								if (id == ww) {
-									tt = false;
-								}
-							}
-							if (tt) {
-								if (tmp.size() >= (Pos - poss).size()) {
-									if (zvec == VECTOR_ref::zero() || zvec.Norm().dot((Pos - poss).Norm()) < 0.f) {
-										auto startpos = Pos;// +VECTOR_ref::vget(0, 0.5f*Scale_Rate, 0);
-										auto endpos = poss;// + VECTOR_ref::vget(0, 0.5f*Scale_Rate, 0);
-										if (!m_BackGround->CheckLinetoMap(startpos, &endpos, true, false)) {
-											tmp = (Pos - poss);
-											now = int(id);
-										}
-									}
-								}
-							}
-							id++;
-						}
-					}
-				}
 				return now;
 			}
 		public:
@@ -179,10 +105,10 @@ namespace FPS_n2 {
 				VECTOR_ref vec_to = VECTOR_ref::zero();
 				//
 				auto vec_mat = MyChara->GetMove().mat;
-				auto vec_gunmat = MyChara->GetEyeVecMat();
-				auto vec_x = vec_gunmat.xvec();
-				auto vec_y = vec_gunmat.yvec();
-				auto vec_zp = vec_gunmat.zvec() * -1.f;
+				auto vec_Weaponmat = MyChara->GetEyeVecMat();
+				auto vec_x = vec_Weaponmat.xvec();
+				auto vec_y = vec_Weaponmat.yvec();
+				auto vec_zp = vec_Weaponmat.zvec() * -1.f;
 				auto vec_z = vec_mat.zvec() * -1.f;
 				//狙うキャラを探索+AIのフェーズ選択
 				{
@@ -194,16 +120,6 @@ namespace FPS_n2 {
 						VECTOR_ref EndPos = tgt->GetMove().pos + VECTOR_ref::vget(0.f, 1.5f*Scale_Rate, 0.f);
 						VECTOR_ref vec_tmp = EndPos - StartPos;
 						if (vec_tmp.size() > 150.f*Scale_Rate) { return false; }
-						if (vec_tmp.size() > 30.f*Scale_Rate) {
-							auto vec_gunmat2 = MyChara->GetGunPtrNow_Const()->GetMuzzleMatrix();
-							auto vec_zp2 = vec_gunmat2.zvec() * -1.f;
-							if (!(
-								(vec_zp2.dot(vec_tmp.Norm()) > std::cos(deg2rad(45))) ||
-								(vec_z.dot(vec_tmp.Norm()) > std::cos(deg2rad(45)))
-								)) {
-								return false;
-							}
-						}
 						if (this->m_BackGround->CheckLinetoMap(StartPos, &EndPos, false, false)) { return false; }
 						if (Res) { *Res = vec_tmp; }
 						return true;
@@ -293,31 +209,6 @@ namespace FPS_n2 {
 
 					VECTOR_ref Vec_tmp;
 					VECTOR_ref Pos_tmp;
-					{
-						int id = 0;
-						auto MyPos = MyChara->GetFrameWorldMat(CharaFrame::Upper).pos();
-						for (const auto& C : this->m_BackGround->GetBuildCol()) {
-							for (const auto& L : C.GetLockPointPos()) {
-								auto Pos = C.GetLockPoint().frame(L.first);
-								VECTOR_ref PosAdd = VECTOR_ref::zero();
-								for (const auto& V : L.second) {
-									auto Vec = (C.GetLockPoint().frame(V) - Pos).Norm();
-									PosAdd += Pos + Vec * (0.4f*Scale_Rate);
-								}
-								if (L.second.size() > 0) {
-									PosAdd /= (float)(L.second.size());
-									Pos = PosAdd;
-								}
-								Pos.y(MyPos.y());
-								//
-								if (this->cpu_do.wayp_pre.front() == id) {
-									Pos_tmp = Pos;
-									Vec_tmp = PosAdd;
-								}
-								id++;
-							}
-						}
-					}
 					vec_to = Pos_tmp - this->MyChara->GetMove().pos;
 					vec_to.y(0.f);
 
@@ -332,7 +223,6 @@ namespace FPS_n2 {
 					if (vec_to.size() >= 5.f*Scale_Rate) {
 						Run_key = true;
 					}
-					Ads_key = (GetRand(100) < 2) && !MyChara->GetIsAim();
 
 					{
 						auto Zbuf = vec_zp.Norm();
@@ -445,12 +335,6 @@ namespace FPS_n2 {
 				//A_key = false;
 				//D_key = false;
 
-				shotMain_Key = MyChara->GetIsActiveAutoAimtoChara() && (GetRand(100) < 10);
-
-				if (!MyChara->GetIsActiveAutoAimtoChara()) {
-					Reload_key= (GetRand(100) < 3);
-				}
-
 				//shotMain_Key = false;
 				//shotSub_Key = false;
 
@@ -476,7 +360,7 @@ namespace FPS_n2 {
 				this->m_BackGround = BackBround_t;
 
 				//AIの選択をリセット
-				int now = Get_next_waypoint(this->cpu_do.wayp_pre, this->MyChara->GetMove().pos);
+				int now = Get_next_waypoint(this->cpu_do.wayp_pre, this->MyChara->GetMove().pos, VECTOR_ref::zero());
 				this->cpu_do.Spawn((now != -1) ? now : 0);
 			}
 			void Execute() noexcept {
@@ -487,7 +371,7 @@ namespace FPS_n2 {
 				//if (!MyChara->Get_alive()) { return; }
 				if (MyChara == chara_Pool->at(0)) { return; }
 				auto MyPos = MyChara->GetFrameWorldMat(CharaFrame::Upper).pos();
-				cpu_do.Draw_Debug(MyPos, &m_BackGround->GetBuildCol());
+				cpu_do.Draw_Debug(MyPos);
 				if (this->cpu_do.ai_phase == 1) {
 					auto& tgt = chara_Pool->at(this->cpu_do.ai_AimTarget);
 					VECTOR_ref StartPos = MyChara->GetEyePosition() + VECTOR_ref::vget(0.f, 5.f*Scale_Rate, 0.f);
@@ -497,10 +381,10 @@ namespace FPS_n2 {
 				}
 				//*
 				{
-					auto vec_gunmat = MyChara->GetGunPtrNow_Const()->GetMuzzleMatrix();
-					auto vec_x = vec_gunmat.xvec();
-					auto vec_y = vec_gunmat.yvec();
-					auto vec_zp = vec_gunmat.zvec() * -1.f;
+					auto vec_Weaponmat = MyChara->GetEyeVecMat();
+					auto vec_x = vec_Weaponmat.xvec();
+					auto vec_y = vec_Weaponmat.yvec();
+					auto vec_zp = vec_Weaponmat.zvec() * -1.f;
 
 					VECTOR_ref StartPos = MyChara->GetEyePosition() + VECTOR_ref::vget(0.f, 5.f*Scale_Rate, 0.f);
 

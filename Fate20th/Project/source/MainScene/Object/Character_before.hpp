@@ -8,14 +8,11 @@ namespace FPS_n2 {
 			CharaAnimeID	m_Ready{ CharaAnimeID::Upper_Ready1 };
 			CharaAnimeID	m_ADS{ CharaAnimeID::Upper_ADS1 };
 			CharaAnimeID	m_Cocking{ CharaAnimeID::Upper_Cocking1 };
-			CharaAnimeID	m_Reload{ CharaAnimeID::Upper_Reload1Start };
 		};
-		struct GunAnimeSet {
-			EnumGunAnim	m_Run{ EnumGunAnim::M1911_run };
-			std::vector<EnumGunAnim>	m_Ready;
-			std::vector<EnumGunAnim>	m_Aim;
-			EnumGunAnim	m_ADS{ EnumGunAnim::M1911_ads };
-			EnumGunAnim	m_Reload{ EnumGunAnim::M1911_reload };
+		struct WeaponAnimeSet {
+			EnumWeaponAnim	m_Run{ EnumWeaponAnim::Saber_Run };
+			std::vector<EnumWeaponAnim>	m_Ready;
+			std::vector<EnumWeaponAnim>	m_Aim;
 		};
 
 		class Pendulum2D {
@@ -92,13 +89,6 @@ namespace FPS_n2 {
 				}
 				return FALSE;
 			}
-			bool	Colcheck(const AmmoClass& pAmmo) {
-				return (HitCheck_Sphere_Capsule(
-					m_pos.get(), m_radius,
-					pAmmo.GetMove().repos.get(), pAmmo.GetMove().pos.get(), pAmmo.GetCaliberSize()*Scale_Rate
-				) == TRUE);
-			}
-
 			const auto GetColType()const noexcept { return this->m_HitType; }
 		};
 
@@ -220,18 +210,11 @@ namespace FPS_n2 {
 			switchs												m_Leftkey;
 			switchs												m_Upkey;
 			switchs												m_Downkey;
-			switchs												m_SideMove;
-			switchs												m_GunChange;
-			switchs												m_GoRightkey;
-			switchs												m_GoLeftkey;
-			switchs												m_Lean;
 		public://ゲッター
 			const auto		GetRad(void) const noexcept { return this->m_InputGround.GetRad(); }
 			const auto		GetIsRun(void) const noexcept { return this->m_InputGround.GetRun(); }
 			const auto		GetRunPer(void) const noexcept { return this->m_InputGround.GetRunPer(); }
 			const auto		GetRadBuf(void) const noexcept { return this->m_InputGround.GetRadBuf(); }
-			const auto		GetLeanRate(void) const noexcept { return this->m_InputGround.GetLeanRate(); }
-			const auto		GetLeanRatePer(void) const noexcept { return this->m_InputGround.GetLeanRatePer(); }
 			const auto		GetPressFrontGround(void) const noexcept { return this->m_InputGround.GetPressFront(); }
 			const auto		GetPressRearGround(void) const noexcept { return this->m_InputGround.GetPressRear(); }
 			const auto		GetPressLeftGround(void) const noexcept { return this->m_InputGround.GetPressLeft(); }
@@ -246,11 +229,6 @@ namespace FPS_n2 {
 			const auto		GetVecRight(void) const noexcept { return this->m_InputGround.GetVecRight(); }
 			const auto		GetKeyActive(void) const noexcept { return this->m_KeyActive; }
 			const auto		GeReadySwitch(void) const noexcept { return this->m_ReadySwitch; }
-			const auto		GetSideMove(void) const noexcept { return this->m_SideMove; }
-			const auto		GetGunChange(void) const noexcept { return this->m_GunChange; }
-			const auto		GetGoRightkey(void) const noexcept { return this->m_GoRightkey; }
-			const auto		GetGoLeftkey(void) const noexcept { return this->m_GoLeftkey; }
-			const auto		GetLean(void) const noexcept { return this->m_Lean.trigger(); }
 			void			SetRadBufXY(const VECTOR_ref& buf) noexcept {
 				this->m_InputGround.SetRadBufX(buf.x());
 				this->m_InputGround.SetRadBufY(buf.y());
@@ -278,36 +256,29 @@ namespace FPS_n2 {
 			}
 			void		InputKey(
 				const InputControl& pInput, bool pReady,
-				const VECTOR_ref& pAddRadvec, bool pCannotSprint, bool IsReloading, bool pCannotLern,bool isAds
+				const VECTOR_ref& pAddRadvec, bool pCannotSprint, bool IsReloading, bool pCannotLern,bool isaccel
 			) {
 				this->m_ReadySwitch = (this->m_KeyActive != pReady);
 				this->m_KeyActive = pReady;
 				if (!m_KeyActive) { return; }
-				this->m_Lean.Execute(!IsReloading && (pInput.GetQPress() || pInput.GetEPress()));
 				//地
 				m_InputGround.SetInput(
-					pInput.GetAddxRad()*(GetIsRun() ? 0.5f : 1.f), pInput.GetAddyRad()*(GetIsRun() ? 0.5f : 1.f),
+					(!isaccel) ? pInput.GetAddxRad()*(GetIsRun() ? 0.5f : 1.f) : 0.f, (!isaccel) ? pInput.GetAddyRad()*(GetIsRun() ? 0.5f : 1.f) : 0.f,
 					pAddRadvec,
-					pInput.GetGoFrontPress(),
-					pInput.GetGoBackPress(),
-					pInput.GetGoLeftPress() && !m_SideMove.press(),
-					pInput.GetGoRightPress() && !m_SideMove.press(),
+					pInput.GetGoFrontPress() && !isaccel,
+					pInput.GetGoBackPress() && !isaccel,
+					pInput.GetGoLeftPress() && !isaccel,
+					pInput.GetGoRightPress() && !isaccel,
 					pInput.GetAction4(),
-					pInput.GetRunPress(),
+					pInput.GetRunPress() && !isaccel,
 					false,
-					((pInput.GetGoBackPress() ? pInput.GetGoRightPress() : pInput.GetGoLeftPress()) && !isAds) || pInput.GetQPress(),
-					((pInput.GetGoBackPress() ? pInput.GetGoLeftPress() : pInput.GetGoRightPress()) && !isAds) || pInput.GetEPress(),
+					((pInput.GetGoBackPress() ? pInput.GetGoRightPress() : pInput.GetGoLeftPress()) && !false) || pInput.GetQPress(),
+					((pInput.GetGoBackPress() ? pInput.GetGoLeftPress() : pInput.GetGoRightPress()) && !false) || pInput.GetEPress(),
 					pCannotSprint,
 					((0.01f < GetVec().Length() && GetVec().Length() < 0.5f) && !(pInput.GetQPress() || pInput.GetEPress())) || IsReloading || pCannotLern,
 					!(pInput.GetGoFrontPress() || pInput.GetGoBackPress() || pInput.GetGoRightPress() || pInput.GetGoLeftPress())
 				);
 				//
-				m_SideMove.Execute(pInput.GetAction4());				//平行移動
-				m_GunChange.Execute(pInput.GetAction3());				//銃切替
-
-				m_GoRightkey.Execute(pInput.GetGoRightPress() && m_SideMove.press());
-				m_GoLeftkey.Execute(pInput.GetGoLeftPress() && m_SideMove.press());
-
 				m_Rightkey.Execute(pInput.GetRightPress());
 				m_Leftkey.Execute(pInput.GetLeftPress());
 				m_Upkey.Execute(pInput.GetUpPress());

@@ -17,14 +17,11 @@
     <ClInclude Include="source\MainScene\BackGround\BackGroundSub.hpp" />
     <ClInclude Include="source\MainScene\CharaAnimData.hpp" />
     <ClInclude Include="source\MainScene\NetworkBrowser.hpp" />
-    <ClInclude Include="source\MainScene\Object\Ammo.hpp" />
-    <ClInclude Include="source\MainScene\Object\AmmoEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\Character.hpp" />
     <ClInclude Include="source\MainScene\Object\CharacterEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\Character_before.hpp" />
-    <ClInclude Include="source\MainScene\Object\Gun.hpp" />
-    <ClInclude Include="source\MainScene\Object\GunEnum.hpp" />
-    <ClInclude Include="source\MainScene\Object\Magazine.hpp" />
+    <ClInclude Include="source\MainScene\Object\Weapon.hpp" />
+    <ClInclude Include="source\MainScene\Object\WeaponEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\ObjectBase.hpp" />
     <ClInclude Include="source\MainScene\Object\ObjectBaseEnum.hpp" />
     <ClInclude Include="source\MainScene\Player\CPU.hpp" />
@@ -40,8 +37,7 @@
     <ClCompile Include="source\MainScene\BackGround\BackGround.cpp" />
     <ClCompile Include="source\MainScene\BackGround\BackGroundSub.cpp" />
     <ClCompile Include="source\MainScene\Object\Character.cpp" />
-    <ClCompile Include="source\MainScene\Object\Gun.cpp" />
-    <ClCompile Include="source\MainScene\Object\Magazine.cpp" />
+    <ClCompile Include="source\MainScene\Object\Weapon.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

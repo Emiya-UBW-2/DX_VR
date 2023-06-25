@@ -12,41 +12,16 @@ namespace FPS_n2 {
 			Bottom_Stand_Turn,
 			Bottom_Stand_Run,
 
-			Bottom_Squat,
-			Bottom_Squat_Walk,
-			Bottom_Squat_WalkBack,
-			Bottom_Squat_LeftStep,
-			Bottom_Squat_RightStep,
-			Bottom_Squat_Turn,//12
+			Upper_Ready,
+			Hand_Ready,
 
 			//AR15
-			Upper_Reload1Start,
-			Upper_Reload1One,
-			Upper_Reload1End,
-
 			Upper_Down1,
 			Upper_Ready1,
 			Upper_ADS1,
 			Upper_Cocking1,
-			//ハンドガン
-			Upper_Reload2Start,
-			Upper_Reload2One,
-			Upper_Reload2End,
 
-			Upper_Down2,
-			Upper_Ready2,
-			Upper_ADS2,
-			Upper_Cocking2,
-
-			Upper_Ready,
-
-			Bottom_Stand_LLern,
-			Bottom_Stand_RLern,
-
-			Hand_Ready,
-
-			Upper_ReadyR,
-			Hand_ReadyR,
+			Upper_Slash,
 
 			AnimeIDMax,
 		};
@@ -54,7 +29,9 @@ namespace FPS_n2 {
 			Center,
 			Upper,
 			Upper2,
+			Bottom,
 			Head,
+			Neck,
 			LeftEye,
 			RightEye,
 			LeftFoot1,
@@ -76,7 +53,7 @@ namespace FPS_n2 {
 			LeftMag,
 			LeftMagzvec,
 			LeftMagyvec,
-			Gun,
+			Weapon,
 			Holster,
 			Max,
 		};
@@ -84,7 +61,9 @@ namespace FPS_n2 {
 			"センター",
 			"上半身",
 			"上半身2",
+			"下半身",
 			"頭",
+			"首",
 			"左目",
 			"右目",
 			"左足",
@@ -106,7 +85,7 @@ namespace FPS_n2 {
 			"LEFT_mag",
 			"LEFT_magzvec",
 			"LEFT_magyvec",
-			"Gun",
+			"Weapon",
 			"Holster",
 		};
 		enum class CharaShape {
