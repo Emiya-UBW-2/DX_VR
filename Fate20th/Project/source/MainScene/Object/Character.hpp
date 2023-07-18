@@ -10,7 +10,9 @@ namespace FPS_n2 {
 			public StaminaControl,
 			public LifeControl,
 			public KeyControl,
-			public ShapeControl
+			public ShapeControl,
+
+			public EffectControl
 		{
 		private://キャラパラメーター
 			const float											SpeedLimit{ 4.5f };
@@ -21,6 +23,8 @@ namespace FPS_n2 {
 			int													m_CharaAnimeSel{ 0 };
 			int													m_ReadyAnimeSel{ 0 };
 			int													m_SlashAnimeSel{ 0 };
+			//
+			float												m_RunSpeed{ 1.f };
 			//
 			std::array<float, (int)CharaAnimeID::AnimeIDMax>	m_AnimPerBuf{ 0 };
 			VECTOR_ref											m_PosBuf;
@@ -78,6 +82,10 @@ namespace FPS_n2 {
 			VECTOR_ref											m_MoveVecRec;
 			float												m_BodyMoveSpd{ 0.f };
 			float												m_SkirtSpd{ 0.f };
+
+			float												m_Boost{ 0.f };
+			bool												m_BoostSwitch{ false };
+			bool												m_BoostEnd{ false };
 		public://ゲッター
 			//const auto		GetShotAnimSel(void) const noexcept { return this->m_CharaAnimeSet[this->m_CharaAnimeSel].m_ADS; }
 			//const auto		GetTurnRatePer(void) const noexcept { return this->m_InputGround.GetTurnRatePer(); }
@@ -140,9 +148,6 @@ namespace FPS_n2 {
 			}
 			void			SetWeaponPtr(std::shared_ptr<WeaponClass>& pWeaponPtr0) noexcept {
 				this->m_Weapon_Ptr[0] = pWeaponPtr0;
-				if (this->GetWeaponPtr(0) != nullptr) {
-					this->m_CharaAnimeSel = this->GetWeaponPtr(0)->GetHumanAnimType();
-				}
 				for (auto& p : this->m_Weapon_Ptr) {
 					p->SetPlayerID(this->m_MyID);
 				}
@@ -197,10 +202,10 @@ namespace FPS_n2 {
 					fov = deg2rad(70);
 				}
 				else {
-					fov = deg2rad(55);
+					fov = deg2rad(60);
 				}
 				if (m_Slash) {
-					fov += deg2rad(15);
+					fov += deg2rad(10);
 				}
 				Easing(&this->m_Fov, fov, 0.9f, EasingType::OutExpo);
 			}
@@ -245,6 +250,12 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().m_Ready = CharaAnimeID::Upper_Ready1;
 				m_CharaAnimeSet.back().m_ADS = CharaAnimeID::Upper_ADS1;
 				m_CharaAnimeSet.back().m_Cocking = CharaAnimeID::Upper_Cocking1;
+				//M4
+				m_CharaAnimeSet.resize(m_CharaAnimeSet.size() + 1);
+				m_CharaAnimeSet.back().m_Down = CharaAnimeID::Upper_Down1;
+				m_CharaAnimeSet.back().m_Ready = CharaAnimeID::Upper_Ready1;
+				m_CharaAnimeSet.back().m_ADS = CharaAnimeID::Upper_ADS1;
+				m_CharaAnimeSet.back().m_Cocking = CharaAnimeID::Upper_Cocking1;
 				//
 				m_WeaponAnimeSet.clear();
 				//M4
@@ -254,6 +265,21 @@ namespace FPS_n2 {
 				m_WeaponAnimeSet.back().m_Aim.emplace_back(EnumWeaponAnim::Saber_Slash1);
 				m_WeaponAnimeSet.back().m_Aim.emplace_back(EnumWeaponAnim::Saber_Slash2);
 				m_WeaponAnimeSet.back().m_Aim.emplace_back(EnumWeaponAnim::Saber_Slash3);
+				//M4
+				m_WeaponAnimeSet.resize(m_WeaponAnimeSet.size() + 1);
+				m_WeaponAnimeSet.back().m_Run = EnumWeaponAnim::Berserker_Run;
+				m_WeaponAnimeSet.back().m_Ready.emplace_back(EnumWeaponAnim::Berserker_Ready);
+				m_WeaponAnimeSet.back().m_Aim.emplace_back(EnumWeaponAnim::Berserker_Slash1);
+				m_WeaponAnimeSet.back().m_Aim.emplace_back(EnumWeaponAnim::Berserker_Slash2);
+				m_WeaponAnimeSet.back().m_Aim.emplace_back(EnumWeaponAnim::Berserker_Slash3);
+				//
+				{
+					int mdata = FileRead_open((this->m_FilePath + "data.txt").c_str(), FALSE);
+					getparams::_str(mdata);
+					this->m_CharaAnimeSel = getparams::_int(mdata);
+					this->m_RunSpeed = getparams::_float(mdata);
+					FileRead_close(mdata);
+				}
 				//
 				m_HitBox.resize(27);
 			}
@@ -290,6 +316,7 @@ namespace FPS_n2 {
 				ExecuteShape();				//顔//スコープ内0.01ms
 				ExecuteHeartRate();			//心拍数//0.00ms
 				CalcFov();
+				EffectControl::Execute();
 			}
 			void			Draw(void) noexcept override {
 				int fog_enable;
@@ -346,6 +373,14 @@ namespace FPS_n2 {
 				if (this->m_IsActive) {
 					this->GetObj().DrawModel();
 				}
+			}
+			//
+			void			Dispose(void) noexcept override {
+				this->m_BackGround.reset();
+				this->GetObj().Dispose();
+				this->m_col.Dispose();
+				this->m_move.vec.clear();
+				EffectControl::Dispose();
 			}
 		};
 	};

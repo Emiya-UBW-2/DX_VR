@@ -23,6 +23,10 @@ namespace FPS_n2 {
 
 			Upper_Slash,
 
+			Bottom_JumpReady,
+			Bottom_Jump,
+			Bottom_JumpEnd,
+
 			AnimeIDMax,
 		};
 		enum class CharaFrame {

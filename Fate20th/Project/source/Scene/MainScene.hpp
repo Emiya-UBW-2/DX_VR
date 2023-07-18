@@ -38,10 +38,6 @@ namespace FPS_n2 {
 			float					m_CamShake{ 0.f };
 			VECTOR_ref				m_CamShake1;
 			VECTOR_ref				m_CamShake2;
-			//銃関連
-			bool Reticle_on = false;
-			float Reticle_xpos = 0;
-			float Reticle_ypos = 0;
 			//
 			MATRIX_ref				m_FreeLookMat;
 			float					m_TPS_Xrad{ 0.f };
@@ -101,20 +97,21 @@ namespace FPS_n2 {
 				ObjMngr->Init(this->m_BackGround);
 				for (int i = 0; i < Chara_num / 2; i++) {
 					character_Pool.emplace_back((std::shared_ptr<CharacterClass>&)(*ObjMngr->AddObject(ObjType::Human, "data/Charactor/saber/")));
+					//character_Pool.emplace_back((std::shared_ptr<CharacterClass>&)(*ObjMngr->AddObject(ObjType::Human, "data/Charactor/berserker/")));
 					this->m_AICtrl.emplace_back(std::make_shared<AIControl>());
 				}
 				for (int i = Chara_num / 2; i < Chara_num; i++) {
-					character_Pool.emplace_back((std::shared_ptr<CharacterClass>&)(*ObjMngr->AddObject(ObjType::Human, "data/Charactor/saber/")));
+					character_Pool.emplace_back((std::shared_ptr<CharacterClass>&)(*ObjMngr->AddObject(ObjType::Human, "data/Charactor/berserker/")));
 					this->m_AICtrl.emplace_back(std::make_shared<AIControl>());
 				}
 				m_Shader[0].Init("CubeMapTestShader_VS.vso", "CubeMapTestShader_PS.pso");
 				m_RealTimeCubeMap.Init();
-				cubeTex = LoadGraph("data/SkyCube.dds");	// キューブマップテクスチャの読み込み
-				for (int i = 0; i < Weapon_num; i++) {
+				for (int i = 0; i < Weapon_num / 2; i++) {
 					ObjMngr->AddObject(ObjType::Weapon, "data/Weapon/Excalibur/");
-					(*ObjMngr->GetObj(ObjType::Weapon, i))->SetUseShader(&m_Shader[0]);
-					(*ObjMngr->GetObj(ObjType::Weapon, i))->SetShaderTexHandle(0, m_RealTimeCubeMap.GetCubeMapTex());
-					(*ObjMngr->GetObj(ObjType::Weapon, i))->SetShaderTexHandle(1, cubeTex);
+					//ObjMngr->AddObject(ObjType::Weapon, "data/Weapon/berserker/");
+				}
+				for (int i = Weapon_num / 2; i < Weapon_num; i++) {
+					ObjMngr->AddObject(ObjType::Weapon, "data/Weapon/berserker/");
 				}
 				//ロード
 				SetCreate3DSoundFlag(FALSE);
@@ -167,12 +164,13 @@ namespace FPS_n2 {
 					c->ValueSet(deg2rad(0.f), rad_t, false, pos_t, (PlayerID)index);
 					c->SetWeaponPtr((std::shared_ptr<WeaponClass>&)(*ObjMngr->GetObj(ObjType::Weapon, (int)(index))));
 					if (index < Chara_num / 2) {
-						//c->SetUseRealTimePhysics(true);
-						c->SetUseRealTimePhysics(false);
+						c->SetUseRealTimePhysics(true);
+						//c->SetUseRealTimePhysics(false);
 						c->SetCharaType(CharaTypeID::Team);
 					}
 					else {
-						c->SetUseRealTimePhysics(false);
+						c->SetUseRealTimePhysics(true);
+						//c->SetUseRealTimePhysics(false);
 						c->SetCharaType(CharaTypeID::Enemy);
 					}
 				}
@@ -242,7 +240,7 @@ namespace FPS_n2 {
 
 				m_NetWorkBrowser.Init();
 
-				Timer = 1.f;
+				Timer = 3.f;
 			}
 			//
 			bool			Update_Sub(void) noexcept override {
@@ -264,7 +262,7 @@ namespace FPS_n2 {
 					auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 					Chara->LoadReticle();//プレイヤー変更時注意
 					fov_base = GetMainCamera().GetCamFov();
-					Timer = 1.f;
+					Timer = 3.f;
 				}
 				else {
 					Timer = std::max(Timer - 1.f / FPS, 0.f);
@@ -371,7 +369,7 @@ namespace FPS_n2 {
 							else {
 								SetMouseDispFlag(TRUE);
 							}
-							bool LockMode = false;
+							bool LockMode = (CheckHitKeyWithCheck(KEY_INPUT_SPACE) != 0) && (Chara->GetRunPer() < 0.1f);
 							int WKey = CheckHitKeyWithCheck(KEY_INPUT_W) != 0;
 							int AKey = CheckHitKeyWithCheck(KEY_INPUT_A) != 0;
 							int SKey = CheckHitKeyWithCheck(KEY_INPUT_S) != 0;
@@ -405,6 +403,11 @@ namespace FPS_n2 {
 							}
 							if (Chara->GetSlash()) {
 								AimYDeg = 0;
+							}
+							if (LockMode) {
+								if (AimYDeg != -1) {
+									AimYDeg = 0;
+								}
 							}
 							if (AimYDeg != -1) {
 								VECTOR_ref Vec1 = GetMainCamera().GetCamVec() - GetMainCamera().GetCamPos(); Vec1.y(0); Vec1 = Vec1.Norm();
@@ -447,7 +450,7 @@ namespace FPS_n2 {
 								(CheckHitKeyWithCheck(KEY_INPUT_Q) != 0), (CheckHitKeyWithCheck(KEY_INPUT_E) != 0),
 								(CheckHitKeyWithCheck(KEY_INPUT_RIGHT) != 0), (CheckHitKeyWithCheck(KEY_INPUT_LEFT) != 0), (CheckHitKeyWithCheck(KEY_INPUT_UP) != 0), (CheckHitKeyWithCheck(KEY_INPUT_DOWN) != 0),
 
-								(CheckHitKeyWithCheck(KEY_INPUT_SPACE) != 0),
+								(CheckHitKeyWithCheck(KEY_INPUT_SPACE) != 0) &&!LockMode,
 								(CheckHitKeyWithCheck(KEY_INPUT_R) != 0) && false,
 								(CheckHitKeyWithCheck(KEY_INPUT_X) != 0) && false,
 								(CheckHitKeyWithCheck(KEY_INPUT_C) != 0) && false,
@@ -561,11 +564,9 @@ namespace FPS_n2 {
 				//Execute
 				ObjMngr->ExecuteObject();
 				//
-				for (int j = 0; j < Weapon_num; j++) {
-					auto& Weapon = (std::shared_ptr<WeaponClass>&)(*ObjMngr->GetObj(ObjType::Weapon, j));
-					if (Weapon->GetIsShot()) {
-					}
-				}
+				//for (int j = 0; j < Weapon_num; j++) {
+					//auto& Weapon = (std::shared_ptr<WeaponClass>&)(*ObjMngr->GetObj(ObjType::Weapon, j));
+				//}
 				//いらないオブジェクトの除去
 				ObjMngr->DeleteCheck();
 				//弾の更新
@@ -625,11 +626,11 @@ namespace FPS_n2 {
 						else {
 							if (Chara->GetIsRun()) {
 								Easing(&near_t, 3.f, 0.9f, EasingType::OutExpo);
-								Easing(&far_t, Scale_Rate * 15.f, 0.9f, EasingType::OutExpo);
+								Easing(&far_t, Scale_Rate * 45.f, 0.9f, EasingType::OutExpo);
 							}
 							else {
 								Easing(&near_t, 10.f, 0.9f, EasingType::OutExpo);
-								Easing(&far_t, Scale_Rate * 30.f, 0.9f, EasingType::OutExpo);
+								Easing(&far_t, Scale_Rate * 45.f, 0.9f, EasingType::OutExpo);
 							}
 						}
 						//fov
@@ -682,14 +683,6 @@ namespace FPS_n2 {
 				{
 					if (CheckHitKeyWithCheck(KEY_INPUT_0) != 0) { WatchSelect = GetMyPlayerID(); }
 					if (CheckHitKeyWithCheck(KEY_INPUT_1) != 0) { WatchSelect = 1; }
-					if (CheckHitKeyWithCheck(KEY_INPUT_2) != 0) { WatchSelect = 2; }
-					if (CheckHitKeyWithCheck(KEY_INPUT_3) != 0) { WatchSelect = 3; }
-					if (CheckHitKeyWithCheck(KEY_INPUT_4) != 0) { WatchSelect = 4; }
-					if (CheckHitKeyWithCheck(KEY_INPUT_5) != 0) { WatchSelect = 5; }
-					if (CheckHitKeyWithCheck(KEY_INPUT_6) != 0) { WatchSelect = 6; }
-					if (CheckHitKeyWithCheck(KEY_INPUT_7) != 0) { WatchSelect = 7; }
-					if (CheckHitKeyWithCheck(KEY_INPUT_8) != 0) { WatchSelect = 8; }
-					if (CheckHitKeyWithCheck(KEY_INPUT_9) != 0) { WatchSelect = 9; }
 				}
 				{
 					if (CheckHitKeyWithCheck(KEY_INPUT_NUMPAD0) != 0) { WatchPoint = 0; }
@@ -780,8 +773,8 @@ namespace FPS_n2 {
 			}
 			void			ShadowDraw_NearFar_Sub(void) noexcept override {
 				this->m_BackGround->Shadow_Draw_NearFar();
-				//auto* ObjMngr = ObjectManager::Instance();
-				//ObjMngr->DrawObject_Shadow();
+				auto* ObjMngr = ObjectManager::Instance();
+				ObjMngr->DrawObject_Shadow();
 			}
 			void			ShadowDraw_Sub(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
@@ -804,7 +797,6 @@ namespace FPS_n2 {
 					Set_Per_Blackout(0.5f + (1.f + sin(Chara->GetHeartRateRad()*4.f)*0.25f) * ((Chara->GetHeartRate() - 60.f) / (180.f - 60.f)));
 					//
 					Set_is_lens(false);
-					Reticle_on = false;
 				}
 				for (auto& c : this->character_Pool) {
 					if (c->GetMyPlayerID() == GetMyPlayerID()) { continue; }
@@ -906,12 +898,6 @@ namespace FPS_n2 {
 							}
 						}
 					}
-				}
-				//レティクル表示
-				if (Reticle_on) {
-					int x, y;
-					Chara->GetWeaponPtrNow()->GetReticlePic().GetSize(&x, &y);
-					Chara->GetWeaponPtrNow()->GetReticlePic().DrawRotaGraph((int)Reticle_xpos, (int)Reticle_ypos, size_lens() / (y / 3.f), Chara->GetReticleRad(), true);
 				}
 			}
 		};

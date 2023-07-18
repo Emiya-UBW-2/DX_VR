@@ -1,0 +1,4 @@
+Name=Berserker
+soundsel=0
+animsel=1
+end

@@ -210,6 +210,7 @@ namespace FPS_n2 {
 			switchs												m_Leftkey;
 			switchs												m_Upkey;
 			switchs												m_Downkey;
+			switchs												m_Jump;
 		public://ƒQƒbƒ^[
 			const auto		GetRad(void) const noexcept { return this->m_InputGround.GetRad(); }
 			const auto		GetIsRun(void) const noexcept { return this->m_InputGround.GetRun(); }
@@ -229,6 +230,7 @@ namespace FPS_n2 {
 			const auto		GetVecRight(void) const noexcept { return this->m_InputGround.GetVecRight(); }
 			const auto		GetKeyActive(void) const noexcept { return this->m_KeyActive; }
 			const auto		GeReadySwitch(void) const noexcept { return this->m_ReadySwitch; }
+			const auto		GetJump(void) const noexcept { return this->m_Jump; }
 			void			SetRadBufXY(const VECTOR_ref& buf) noexcept {
 				this->m_InputGround.SetRadBufX(buf.x());
 				this->m_InputGround.SetRadBufY(buf.y());
@@ -283,6 +285,7 @@ namespace FPS_n2 {
 				m_Leftkey.Execute(pInput.GetLeftPress());
 				m_Upkey.Execute(pInput.GetUpPress());
 				m_Downkey.Execute(pInput.GetDownPress());
+				m_Jump.Execute(pInput.GetAction1());
 			}
 			void		ExcuteKey() {
 				this->m_InputGround.Execute();

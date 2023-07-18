@@ -3,18 +3,18 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class WeaponClass : public ObjectBaseClass {
+		class WeaponClass :
+			public ObjectBaseClass,
+			public EffectControl
+		{
 		private:
-			GraphHandle						m_WeaponPic;						//
-			GraphHandle						m_reticlePic;					//
+			GraphHandle						m_WeaponPic;					//
 			int								m_ShotPhase{ 0 };				//
 			int								m_HumanAnimType{ 0 };			//
-			float							m_ReticleSize{ 1.f };
-			bool							m_IsShot{ false };				//
-			bool							m_in_chamber{ true };			//チャンバー内に弾があるか
+			bool							m_IsDrawEffectRec{ false };		//
+			bool							m_IsDrawEffect{ false };		//
+			float							m_EffectAlphaPer{ 0.f };		//
 			int								m_boltSoundSequence{ -1 };		//サウンド
-			bool							m_IsChamberMove{ false };		//チャンバー内に弾があるか
-			float							m_ChamberMovePer{ 0.f };
 
 			std::vector<WeaponSoundSet>		m_WeaponSoundSet;
 			int								m_SoundSel{ 0 };
@@ -31,16 +31,13 @@ namespace FPS_n2 {
 				size_t animsel = (size_t)(this->m_ShotPhase) - 2;
 				return GetObj().get_anime(animsel);
 			}
-			void SetIsShot(bool value) noexcept { this->m_IsShot = value; }
-			const auto GetCanShot(void) const noexcept { return this->m_in_chamber; }
+			void SetIsDrawEffect(bool value) noexcept { this->m_IsDrawEffect = value; }
 			const auto GetName(void) const noexcept {//"data/Weapon/AR15/"
 				auto now = 9;//"data/Weapon/"
 				return this->m_FilePath.substr(now, m_FilePath.rfind("/") - now);
 			}
-			const auto& GetReticlePic(void) const noexcept { return this->m_reticlePic; }
 			const auto& GetWeaponPic(void) const noexcept { return this->m_WeaponPic; }
 			const auto& GetHumanAnimType(void) const noexcept { return this->m_HumanAnimType; }
-			const auto& GetIsShot(void) const noexcept { return this->m_IsShot; }
 			void SetWeaponMatrix(const MATRIX_ref& value, int pShotPhase) noexcept {
 				SetMove(value.GetRot(), value.pos());
 				this->m_ShotPhase = pShotPhase;
@@ -55,6 +52,7 @@ namespace FPS_n2 {
 					int mdata = FileRead_open((this->m_FilePath + "data.txt").c_str(), FALSE);
 					getparams::_str(mdata);
 					this->m_SoundSel = getparams::_int(mdata);
+					this->m_HumanAnimType = getparams::_int(mdata);
 					FileRead_close(mdata);
 				}
 				m_WeaponSoundSet.clear();
@@ -65,11 +63,37 @@ namespace FPS_n2 {
 				m_WeaponSoundSet.back().m_Shot = SoundEnum::Shot2;
 				m_WeaponSoundSet.back().m_Unload = SoundEnum::Unload2;
 				m_WeaponSoundSet.back().m_Load = SoundEnum::Load2;
+
 			}
 			void			FirstExecute(void) noexcept override {
 				auto SE = SoundPool::Instance();
 				if (this->m_IsFirstLoop) {
+					this->m_IsDrawEffectRec = this->m_IsDrawEffect;
 				}
+
+				if (this->m_IsDrawEffect != this->m_IsDrawEffectRec) {
+					if (this->m_IsDrawEffect) {
+						EffectControl::SetLoop((EffectResource::Effect)3, GetMatrix().pos());
+						EffectControl::SetLoop((EffectResource::Effect)4, GetMatrix().pos());
+						EffectControl::SetLoop((EffectResource::Effect)5, GetMatrix().pos());
+						this->m_EffectAlphaPer = 1.f;
+					}
+				}
+				this->m_IsDrawEffectRec = this->m_IsDrawEffect;
+				if (this->m_IsDrawEffect) {
+					EffectControl::Update_LoopEffect((EffectResource::Effect)3, GetMatrix().pos() + GetMatrix().yvec()*Scale_Rate*0.9f, GetMatrix().zvec()*-1.f, 0.12f*0.9f);
+					EffectControl::Update_LoopEffect((EffectResource::Effect)4, GetMatrix().pos() + GetMatrix().yvec()*Scale_Rate*0.8f, GetMatrix().zvec()*-1.f, 0.12f*0.6f);
+					EffectControl::Update_LoopEffect((EffectResource::Effect)5, GetMatrix().pos() + GetMatrix().yvec()*Scale_Rate*0.6f, GetMatrix().zvec()*-1.f, 0.12f*0.3f);
+				}
+				else {
+					Easing(&this->m_EffectAlphaPer, 0.f, 0.95f, EasingType::OutExpo);
+					int Alpha = std::clamp((int)(255.f* this->m_EffectAlphaPer), 0, 255);
+					EffectControl::SetEffectColor((EffectResource::Effect)3, 255, 255, 255, Alpha);
+					EffectControl::SetEffectColor((EffectResource::Effect)4, 255, 255, 255, Alpha);
+					EffectControl::SetEffectColor((EffectResource::Effect)5, 255, 255, 255, Alpha);
+				}
+
+
 
 				WeaponAnimeID Sel = (WeaponAnimeID)(this->m_ShotPhase - 2);
 				for (int i = 0; i < GetObj().get_anime().size(); i++) {
@@ -113,6 +137,7 @@ namespace FPS_n2 {
 				}
 				//共通
 				ObjectBaseClass::FirstExecute();
+				EffectControl::Execute();
 			}
 			void			Draw(void) noexcept override {
 				if (this->m_IsActive && this->m_IsDraw) {
@@ -147,11 +172,17 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			void			Dispose(void) noexcept override {}
+			void			DrawShadow(void) noexcept override {
+				if (this->m_IsActive) {
+					this->GetObj().DrawModel();
+				}
+			}
+			void			Dispose(void) noexcept override {
+				EffectControl::Dispose();
+			}
 		public:
 			void			LoadReticle(void) noexcept {
 				SetUseASyncLoadFlag(TRUE);
-				this->m_reticlePic = GraphHandle::Load(this->m_FilePath + "reticle.png");
 				this->m_WeaponPic = GraphHandle::Load(this->m_FilePath + "pic.bmp");
 				SetUseASyncLoadFlag(FALSE);
 			}

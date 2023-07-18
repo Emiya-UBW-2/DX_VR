@@ -9,6 +9,11 @@ namespace FPS_n2 {
 			Saber_Slash1,
 			Saber_Slash2,
 			Saber_Slash3,
+			Berserker_Ready,
+			Berserker_Run,
+			Berserker_Slash1,
+			Berserker_Slash2,
+			Berserker_Slash3,
 			Max,
 		};
 		static const char* EnumWeaponAnimName[(int)EnumWeaponAnim::Max] = {
@@ -17,7 +22,13 @@ namespace FPS_n2 {
 			"Saber_Slash1",
 			"Saber_Slash2",
 			"Saber_Slash3",
+			"Berserker_Ready",
+			"Berserker_Run",
+			"Berserker_Slash1",
+			"Berserker_Slash2",
+			"Berserker_Slash3",
 		};
+		//Berserker
 
 		class WeaponanimData {
 			EnumWeaponAnim		m_EnumWeaponAnim{ EnumWeaponAnim::Saber_Ready };

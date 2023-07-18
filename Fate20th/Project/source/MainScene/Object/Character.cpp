@@ -150,7 +150,7 @@ namespace FPS_n2 {
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
 			auto prev = KeyControl::GetRad();
 
-			KeyControl::InputKey(pInput, pReady, StaminaControl::GetHeartRandVec(KeyControl::GetSquatPer()), StaminaControl::GetCannotRun(), false, true, m_Accel.size() > 0.03f);
+			KeyControl::InputKey(pInput, pReady, StaminaControl::GetHeartRandVec(KeyControl::GetSquatPer()), StaminaControl::GetCannotRun(), false, true, (m_Accel.size() > 0.03f) && m_Slash);
 			//AIM
 			if (GetWeaponPtrNow() != nullptr) {
 				this->m_Press_Shot = pInput.GetAction5() && KeyControl::GetKeyActive();
@@ -183,7 +183,6 @@ namespace FPS_n2 {
 			//
 			this->m_SendCamShake = false;
 			if (GetWeaponPtrNow() != nullptr) {
-				GetWeaponPtrNow()->SetIsShot(false);
 				if (this->m_Press_Shot) {
 					if (!m_Slash) {
 						m_UpperAnim = 0.f;
@@ -191,6 +190,7 @@ namespace FPS_n2 {
 					}
 					m_Slash = true;
 				}
+				GetWeaponPtrNow()->SetIsDrawEffect(m_Slash);
 			}
 			Easing(&m_SlashPer, m_Slash ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
 			//this->m_yrad_UpperAthis->m_yrad_BottomŒˆ’è
@@ -214,7 +214,27 @@ namespace FPS_n2 {
 			Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - FrontP, TmpRunPer, EasingType::OutExpo);
 			KeyControl::SetRadBufZ((this->m_yrad_Bottom - OLDP) * 5.f*(this->m_RunPer2 / SpeedLimit));
 			if (this->m_MyID == 0) {
-				SetEyeVec((m_Accel.size()>0.01f) ? m_Accel.Norm() : m_CamEyeVec);
+				VECTOR_ref V = m_Accel; V.y(0.f);
+				SetEyeVec(((V.size() > 0.01f) && m_Slash) ? V.Norm() : m_CamEyeVec);
+			}
+			{
+				if (KeyControl::GetJump().trigger() && (m_Boost == 0.f)) {
+					m_Boost = 0.5f;
+				}
+				auto OLD = m_Boost;
+				m_Boost = std::max(m_Boost - 1.f / FPS, 0.f);
+				m_BoostSwitch = (m_Boost == 0.f) && (m_Boost != OLD);
+				if (m_BoostSwitch) {
+					m_Accel = GetCharaDir().zvec()*-1.f  * 11.5f;
+					m_Accel.y(3.f);
+					m_BoostEnd = false;
+
+					VECTOR_ref pos = this->GetFrameWorldMat(CharaFrame::Upper2).pos();
+
+					pos += GetMatrix().zvec() * -1.f * Scale_Rate*1.f;
+
+					EffectControl::SetOnce(EffectResource::Effect::ef_reco, pos, GetMatrix().zvec() * -1.f, 0.5f);
+				}
 			}
 		}
 		//ã”¼g‰ñ“]															//0.06ms
@@ -294,8 +314,11 @@ namespace FPS_n2 {
 			GetObj().frame_Reset(GetCharaFrame(CharaFrame::Neck));
 			SetFrameLocalMat(CharaFrame::Neck, GetFrameLocalMat(CharaFrame::Neck).GetRot() * MatRet.Inverse());
 
-			if (this->m_move.vec.size() > 0.0001f) {
-				m_MoveVecRec = this->m_move.vec.Norm();
+			{
+				VECTOR_ref V = this->m_move.vec; V.y(0.f);
+				if (V.size() > 0.01f) {
+					m_MoveVecRec = V.Norm();
+				}
 			}
 			float spd = this->m_move.vec.size()*40.f;
 			Easing(&m_BodyMoveSpd, std::clamp(spd, -20.f, 20.f), 0.9f, EasingType::OutExpo);
@@ -328,16 +351,41 @@ namespace FPS_n2 {
 					//Easing(&m_NeckPer, m_Slash ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 				}
 				//‰º”¼g
+				auto OLDBottom = this->m_BottomAnimSelect;
 				{
 					this->m_BottomAnimSelect = GetBottomStandAnimSel();
 					if (KeyControl::GetPressLeftGround()) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
 					if (KeyControl::GetPressRightGround()) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
 					if (KeyControl::GetPressRearGround()) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
 					if (KeyControl::GetPressFrontGround()) { this->m_BottomAnimSelect = KeyControl::GetIsRun() ? GetBottomRunAnimSel() : GetBottomWalkAnimSel(); }
+					if (m_Boost > 0.f) {
+						this->m_BottomAnimSelect = CharaAnimeID::Bottom_JumpReady;
+					}
+					if (m_Accel.size() > 0.03f && !m_Slash) {
+						this->m_BottomAnimSelect = CharaAnimeID::Bottom_Jump;
+					}
+					if (m_BoostEnd) {
+						this->m_BottomAnimSelect = CharaAnimeID::Bottom_JumpEnd;
+					}
 				}
 				//
 				SetAnimLoop(GetBottomTurnAnimSel(), 0.5f);
-				SetAnimLoop(GetBottomRunAnimSel(), 2.f * KeyControl::GetVecFront() * (this->m_RunPer2 / SpeedLimit));
+				if ((int)this->m_BottomAnimSelect == (int)CharaAnimeID::Bottom_JumpReady) {
+					if (OLDBottom != this->m_BottomAnimSelect) {
+						GetAnime((CharaAnimeID)this->m_BottomAnimSelect).time = 0.f;
+					}
+					SetAnimOnce((int)CharaAnimeID::Bottom_JumpReady, 1.5f);
+				}
+				if ((int)this->m_BottomAnimSelect == (int)CharaAnimeID::Bottom_JumpEnd) {
+					if (OLDBottom != this->m_BottomAnimSelect) {
+						GetAnime((CharaAnimeID)this->m_BottomAnimSelect).time = 0.f;
+					}
+					SetAnimOnce((int)CharaAnimeID::Bottom_JumpEnd, 0.5f);
+					if (GetAnime(CharaAnimeID::Bottom_JumpEnd).TimeEnd()) {
+						m_BoostEnd = false;
+					}
+				}
+				SetAnimLoop(GetBottomRunAnimSel(), 2.f * KeyControl::GetVecFront() * (this->m_RunPer2 / (SpeedLimit  * this->m_RunSpeed / SpeedLimit)));
 				SetAnimLoop(GetBottomWalkAnimSel(), 1.15f * KeyControl::GetVecFront());
 				SetAnimLoop(GetBottomLeftStepAnimSel(), 1.15f * KeyControl::GetVecLeft());
 				SetAnimLoop(GetBottomWalkBackAnimSel(), 1.15f * KeyControl::GetVecRear());
@@ -350,6 +398,32 @@ namespace FPS_n2 {
 			{
 				//‰º”¼g
 				Easing(&GetAnimeBuf(GetBottomTurnAnimSel()), (this->m_TurnBody) ? abs(KeyControl::GetRad().y() - this->m_yrad_Upper) / deg2rad(50.f) : 0.f, 0.8f, EasingType::OutExpo);
+				//
+				if (
+					(int)this->m_BottomAnimSelect == (int)CharaAnimeID::Bottom_JumpReady ||
+					(int)this->m_BottomAnimSelect == (int)CharaAnimeID::Bottom_Jump ||
+					(int)this->m_BottomAnimSelect == (int)CharaAnimeID::Bottom_JumpEnd
+					) {
+					for (int i = 0; i < (int)CharaAnimeID::AnimeIDMax; i++) {
+						//‰º”¼g
+						if (
+							i == (int)CharaAnimeID::Bottom_Stand ||
+							i == (int)CharaAnimeID::Bottom_Stand_Run ||
+							i == (int)CharaAnimeID::Bottom_Stand_Walk ||
+							i == (int)CharaAnimeID::Bottom_Stand_LeftStep ||
+							i == (int)CharaAnimeID::Bottom_Stand_RightStep ||
+							i == (int)CharaAnimeID::Bottom_Stand_WalkBack ||
+							i == (int)CharaAnimeID::Bottom_Stand_Turn ||
+							i == (int)CharaAnimeID::Bottom_JumpReady ||
+							i == (int)CharaAnimeID::Bottom_Jump ||
+							i == (int)CharaAnimeID::Bottom_JumpEnd
+							)
+						{
+							GetAnimeBuf((CharaAnimeID)i) = 0.f;
+						}
+					}
+					GetAnimeBuf(this->m_BottomAnimSelect) = 1.f;
+				}
 				//‚»‚Ì‘¼
 				for (int i = 0; i < (int)CharaAnimeID::AnimeIDMax; i++) {
 					//ã”¼g
@@ -382,7 +456,10 @@ namespace FPS_n2 {
 						i == (int)CharaAnimeID::Bottom_Stand_LeftStep ||
 						i == (int)CharaAnimeID::Bottom_Stand_RightStep ||
 						i == (int)CharaAnimeID::Bottom_Stand_WalkBack ||
-						i == (int)CharaAnimeID::Bottom_Stand_Turn
+						i == (int)CharaAnimeID::Bottom_Stand_Turn ||
+						i == (int)CharaAnimeID::Bottom_JumpReady ||
+						i == (int)CharaAnimeID::Bottom_Jump ||
+						i == (int)CharaAnimeID::Bottom_JumpEnd
 						)
 					{
 						GetAnimeBuf((CharaAnimeID)i) += ((i == (int)this->m_BottomAnimSelect) ? 1.f : -1.f)*2.f / FPS;
@@ -402,36 +479,34 @@ namespace FPS_n2 {
 						if ((9.f < Time && Time < 10.f)) {
 							if (this->m_CharaSound != 1) {
 								this->m_CharaSound = 1;
-								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale_Rate * 5.f);
+								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale_Rate * 35.f);
 							}
 						}
 						//R
 						if ((27.f < Time &&Time < 28.f)) {
 							if (this->m_CharaSound != 3) {
 								this->m_CharaSound = 3;
-								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale_Rate * 5.f);
+								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale_Rate * 35.f);
 							}
 						}
 					}
 					else {
 						//L
 						if (
-							(18.f < Time &&Time < 19.f) ||
-							(38.f < Time &&Time < 39.f)
+							(15.f < Time &&Time < 16.f)
 							) {
 							if (this->m_CharaSound != 5) {
 								this->m_CharaSound = 5;
-								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale_Rate * 5.f);
+								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale_Rate * 55.f);
 							}
 						}
 						//R
 						if (
-							(8.f < Time &&Time < 9.f) ||
-							(28.f < Time &&Time < 29.f)
+							(8.f < Time &&Time < 9.f)
 							) {
 							if (this->m_CharaSound != 6) {
 								this->m_CharaSound = 6;
-								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale_Rate * 5.f);
+								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale_Rate * 55.f);
 							}
 						}
 					}
@@ -444,9 +519,9 @@ namespace FPS_n2 {
 		void			CharacterClass::ExecuteMatrix(void) noexcept {
 			//auto SE = SoundPool::Instance();
 			auto* AnimMngr = WeaponAnimManager::Instance();
-			auto* DrawParts = DXDraw::Instance();
+			//auto* DrawParts = DXDraw::Instance();
 
-			this->m_RunPer2 = Lerp(0.35f, SpeedLimit / 2.f, KeyControl::GetRunPer());
+			this->m_RunPer2 = Lerp(0.35f, SpeedLimit / 2.f * this->m_RunSpeed / SpeedLimit, KeyControl::GetRunPer());
 			this->m_RunPer2 = Lerp(this->m_RunPer2, 0.15f, KeyControl::GetSquatPer());
 			if (this->m_PrevRunPer2 == 0.f) {
 				this->m_PrevRunPer2 = this->m_RunPer2;
@@ -454,6 +529,9 @@ namespace FPS_n2 {
 
 			auto OLDpos = this->m_PosBuf;
 			VECTOR_ref vecBuf = MATRIX_ref::Vtrans(KeyControl::GetVec(), MATRIX_ref::RotY(this->m_yrad_Upper));
+			if (m_Boost > 0.f) {
+				vecBuf = VECTOR_ref::zero();
+			}
 			SetRadEasingPerY(0.8f);
 
 			this->m_Speed = std::clamp(vecBuf.size(), 0.f, 1.f);
@@ -475,15 +553,28 @@ namespace FPS_n2 {
 					Easing(&yPos, HitResult.HitPosition.y, 0.8f, EasingType::OutExpo);
 					this->m_PosBuf.y(yPos);
 					Buf.y(0.f);
+
+					bool IsBoostRun = (this->m_BottomAnimSelect == CharaAnimeID::Bottom_Jump) && (m_Accel.size() < 1.f);
+					if (IsBoostRun) {
+						m_BoostEnd = true;
+					}
 				}
 				else {
-					Buf.yadd(M_GR / (FPS * FPS));
+					Buf.yadd(M_GR / (FPS * FPS) * 3.f);
 				}
-			}
-			Easing(&this->m_move.vec, Buf + m_Accel, 0.7f, EasingType::OutExpo);
-			Easing(&m_Accel, VECTOR_ref::zero(), 0.9f, EasingType::OutExpo);
-			if (m_Accel.size() <= 0.03f) {
-				m_Accel.clear();
+				Easing(&this->m_move.vec, Buf + m_Accel * 60.f / FPS, 0.7f, EasingType::OutExpo);
+				m_Accel.y(0.f);
+				if (HitResult.HitFlag == TRUE) {
+					Easing(&m_Accel, VECTOR_ref::zero(), 0.6f, EasingType::OutExpo);//–€ŽC
+				}
+				else {
+					if (m_Accel.size() >= 6.5f) {
+						Easing(&m_Accel, m_Accel.Norm()*4.f, 0.3f, EasingType::OutExpo);//–€ŽC
+					}
+				}
+				if (m_Accel.size() <= 0.03f) {
+					m_Accel.clear();
+				}
 			}
 
 			this->m_PosBuf += this->m_move.vec;
@@ -544,7 +635,7 @@ namespace FPS_n2 {
 								if (m_Slash) {
 									auto Per = AnimMngr->GetAnimPer(Ptr, m_UpperAnim);
 									if (0.25f <= Per && Per <= 0.35f) {
-										m_Accel = GetCharaDir().zvec()*-1.f  * 5.f * 60.f / FPS;
+										m_Accel = GetCharaDir().zvec()*-1.f  * 5.f;
 										m_Accel.y(0.f);
 										if (this->m_SlashAnimeSel == 1) {
 										//	m_yrad_Rotate = -deg2rad(360);
@@ -587,9 +678,14 @@ namespace FPS_n2 {
 						yVect0 = MatT[0].yvec();
 						Post0 = MatT[0].pos();
 
-						zVect0 = Lerp(zVect0, MatT[2].zvec(), KeyControl::GetRunPer());
-						yVect0 = Lerp(yVect0, MatT[2].yvec(), KeyControl::GetRunPer());
-						Post0 = Lerp(Post0, MatT[2].pos(), KeyControl::GetRunPer());
+						bool IsBoostRun = (this->m_BottomAnimSelect == CharaAnimeID::Bottom_JumpReady) ||
+							(this->m_BottomAnimSelect == CharaAnimeID::Bottom_Jump) ||
+							(this->m_BottomAnimSelect == CharaAnimeID::Bottom_JumpEnd)
+							;
+
+						zVect0 = Lerp(zVect0, MatT[2].zvec(), IsBoostRun ? 1.f : KeyControl::GetRunPer());
+						yVect0 = Lerp(yVect0, MatT[2].yvec(), IsBoostRun ? 1.f : KeyControl::GetRunPer());
+						Post0 = Lerp(Post0, MatT[2].pos(), IsBoostRun ? 1.f : KeyControl::GetRunPer());
 
 						zVect0 = Lerp(zVect0, MatT[1].zvec(), m_SlashPer);
 						yVect0 = Lerp(yVect0, MatT[1].yvec(), m_SlashPer);
