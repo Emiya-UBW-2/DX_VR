@@ -1,5 +1,7 @@
 #pragma once
 #include	"../../Header.hpp"
+#include "../CharaAnimData.hpp"
+#include "Character_before.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -16,6 +18,8 @@ namespace FPS_n2 {
 		{
 		private://キャラパラメーター
 			const float											SpeedLimit{ 4.5f };
+		private:
+			class Impl;
 		private:
 			CharaTypeID											m_CharaType;
 			std::vector<CharaAnimeSet>							m_CharaAnimeSet;
@@ -168,7 +172,7 @@ namespace FPS_n2 {
 			const auto		GetCockingAnimSel(void) const noexcept { return this->m_CharaAnimeSet[this->m_CharaAnimeSel].m_Cocking; }
 
 			const auto		GetRunWeaponAnimSel(void) const noexcept { return this->m_WeaponAnimeSet[this->m_CharaAnimeSel].m_Run; }
-			const auto		GetReadyWeaponAnimSel(void) const noexcept { return this->m_WeaponAnimeSet[this->m_CharaAnimeSel].m_Ready; }
+			const auto&		GetReadyWeaponAnimSel(void) const noexcept { return this->m_WeaponAnimeSet[this->m_CharaAnimeSel].m_Ready; }
 			const auto&		GetAimWeaponAnimSel(void) const noexcept { return this->m_WeaponAnimeSet[this->m_CharaAnimeSel].m_Aim; }
 
 			const auto		GetEyeVecMat(void) const noexcept {
@@ -239,149 +243,12 @@ namespace FPS_n2 {
 			~CharacterClass(void) noexcept {}
 		public: //継承
 			//
-			void			Init(void) noexcept override {
-				ObjectBaseClass::Init();
-				GetAnime(GetBottomStandAnimSel()).per = 1.f;
-				//
-				m_CharaAnimeSet.clear();
-				//M4
-				m_CharaAnimeSet.resize(m_CharaAnimeSet.size() + 1);
-				m_CharaAnimeSet.back().m_Down = CharaAnimeID::Upper_Down1;
-				m_CharaAnimeSet.back().m_Ready = CharaAnimeID::Upper_Ready1;
-				m_CharaAnimeSet.back().m_ADS = CharaAnimeID::Upper_ADS1;
-				m_CharaAnimeSet.back().m_Cocking = CharaAnimeID::Upper_Cocking1;
-				//M4
-				m_CharaAnimeSet.resize(m_CharaAnimeSet.size() + 1);
-				m_CharaAnimeSet.back().m_Down = CharaAnimeID::Upper_Down1;
-				m_CharaAnimeSet.back().m_Ready = CharaAnimeID::Upper_Ready1;
-				m_CharaAnimeSet.back().m_ADS = CharaAnimeID::Upper_ADS1;
-				m_CharaAnimeSet.back().m_Cocking = CharaAnimeID::Upper_Cocking1;
-				//
-				m_WeaponAnimeSet.clear();
-				//M4
-				m_WeaponAnimeSet.resize(m_WeaponAnimeSet.size() + 1);
-				m_WeaponAnimeSet.back().m_Run = EnumWeaponAnim::Saber_Run;
-				m_WeaponAnimeSet.back().m_Ready.emplace_back(EnumWeaponAnim::Saber_Ready);
-				m_WeaponAnimeSet.back().m_Aim.emplace_back(EnumWeaponAnim::Saber_Slash1);
-				m_WeaponAnimeSet.back().m_Aim.emplace_back(EnumWeaponAnim::Saber_Slash2);
-				m_WeaponAnimeSet.back().m_Aim.emplace_back(EnumWeaponAnim::Saber_Slash3);
-				//M4
-				m_WeaponAnimeSet.resize(m_WeaponAnimeSet.size() + 1);
-				m_WeaponAnimeSet.back().m_Run = EnumWeaponAnim::Berserker_Run;
-				m_WeaponAnimeSet.back().m_Ready.emplace_back(EnumWeaponAnim::Berserker_Ready);
-				m_WeaponAnimeSet.back().m_Aim.emplace_back(EnumWeaponAnim::Berserker_Slash1);
-				m_WeaponAnimeSet.back().m_Aim.emplace_back(EnumWeaponAnim::Berserker_Slash2);
-				m_WeaponAnimeSet.back().m_Aim.emplace_back(EnumWeaponAnim::Berserker_Slash3);
-				//
-				{
-					int mdata = FileRead_open((this->m_FilePath + "data.txt").c_str(), FALSE);
-					getparams::_str(mdata);
-					this->m_CharaAnimeSel = getparams::_int(mdata);
-					this->m_RunSpeed = getparams::_float(mdata);
-					FileRead_close(mdata);
-				}
-				//
-				m_HitBox.resize(27);
-			}
-			void			FirstExecute(void) noexcept override {
-				//初回のみ更新する内容
-				if (this->m_IsFirstLoop) {
-					for (int i = 0; i < GetObj().get_anime().size(); i++) { GetAnime((CharaAnimeID)i).per = GetAnimeBuf((CharaAnimeID)i); }
-					GetObj().work_anime();
-				}
-				if (GetWeaponPtrNow() != nullptr) {
-					auto prev = this->m_CharaAnimeSel;
-					auto newtmp = GetWeaponPtrNow()->GetHumanAnimType();
-					bool ischange = true;
-					if (prev != newtmp) {
-						if (this->m_UpperAnimSelect == GetDownAnimSel()) {
-							ischange = false;
-						}
-						if (ischange) {
-							GetAnimeBuf(GetAimAnimSel()) = 0.f;
-						}
-					}
-					this->m_CharaAnimeSel = newtmp;
-					if (prev != newtmp) {
-						if (ischange) {
-							GetAnimeBuf(GetDownAnimSel()) = 1.f;
-						}
-					}
-				}
-				ExecuteSavePrev();			//以前の状態保持
-				ExecuteInput();				//操作//0.01ms
-				ExecuteUpperMatrix();		//上半身回転//0.06ms
-				ExecuteAnim();				//AnimUpdte//0.03ms
-				ExecuteMatrix();			//SetMat指示//0.03ms
-				ExecuteShape();				//顔//スコープ内0.01ms
-				ExecuteHeartRate();			//心拍数//0.00ms
-				CalcFov();
-				EffectControl::Execute();
-			}
-			void			Draw(void) noexcept override {
-				int fog_enable;
-				int fog_mode;
-				int fog_r, fog_g, fog_b;
-				float fog_start, fog_end;
-				float fog_density;
-
-				fog_enable = GetFogEnable();													// フォグが有効かどうかを取得する( TRUE:有効  FALSE:無効 )
-				fog_mode = GetFogMode();														// フォグモードを取得する
-				GetFogColor(&fog_r, &fog_g, &fog_b);											// フォグカラーを取得する
-				GetFogStartEnd(&fog_start, &fog_end);											// フォグが始まる距離と終了する距離を取得する( 0.0f ～ 1.0f )
-				fog_density = GetFogDensity();													// フォグの密度を取得する( 0.0f ～ 1.0f )
-
-				SetFogEnable(TRUE);
-				SetFogColor(0, 0, 0);
-				SetFogStartEnd(Scale_Rate*1.f, Scale_Rate*20.f);
-				SetFogEnable(FALSE);
-
-				//
-				if (this->m_IsActive && this->m_IsDraw) {
-					if (CheckCameraViewClip_Box(
-						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-30, 0, -30)).get(),
-						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(30, 30, 30)).get()) == FALSE
-						) {
-						auto* DrawParts = DXDraw::Instance();
-						DrawParts->SetUseFarShadowDraw(false);
-						this->GetObj().DrawModel();
-						DrawParts->SetUseFarShadowDraw(true);
-					}
-				}
-				//hitbox描画
-				if (false) {
-					//this->GetObj().SetOpacityRate(0.5f);
-					SetFogEnable(FALSE);
-					SetUseLighting(FALSE);
-					SetUseZBuffer3D(FALSE);
-
-					for (auto& h : this->m_HitBox) {
-						h.Draw();
-					}
-
-					SetUseZBuffer3D(TRUE);
-					SetUseLighting(TRUE);
-				}
-
-				SetFogEnable(fog_enable);
-				SetFogMode(fog_mode);
-				SetFogColor(fog_r, fog_g, fog_b);
-				SetFogStartEnd(fog_start, fog_end);
-				SetFogDensity(fog_density);
-			}
-			void			DrawShadow(void) noexcept override {
-				if (this->m_IsActive) {
-					this->GetObj().DrawModel();
-				}
-			}
+			void			Init(void) noexcept override;
+			void			FirstExecute(void) noexcept override;
+			void			Draw(void) noexcept override;
+			void			DrawShadow(void) noexcept override;
 			//
-			void			Dispose(void) noexcept override {
-				this->m_BackGround.reset();
-				this->GetObj().Dispose();
-				this->m_col.Dispose();
-				this->m_move.vec.clear();
-				EffectControl::Dispose();
-			}
+			void			Dispose(void) noexcept override;
 		};
 	};
 };

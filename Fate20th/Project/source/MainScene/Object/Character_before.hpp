@@ -1,19 +1,9 @@
 #pragma once
 #include	"../../Header.hpp"
+#include "../CharaAnimData.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		struct CharaAnimeSet {
-			CharaAnimeID	m_Down{ CharaAnimeID::Upper_Down1 };
-			CharaAnimeID	m_Ready{ CharaAnimeID::Upper_Ready1 };
-			CharaAnimeID	m_ADS{ CharaAnimeID::Upper_ADS1 };
-			CharaAnimeID	m_Cocking{ CharaAnimeID::Upper_Cocking1 };
-		};
-		struct WeaponAnimeSet {
-			EnumWeaponAnim	m_Run{ EnumWeaponAnim::Saber_Run };
-			std::vector<EnumWeaponAnim>	m_Ready;
-			std::vector<EnumWeaponAnim>	m_Aim;
-		};
 
 		class Pendulum2D {
 			float	m_PendulumLength = 10.f;

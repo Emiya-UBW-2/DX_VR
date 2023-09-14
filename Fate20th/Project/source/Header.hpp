@@ -12,23 +12,12 @@
 #define DEBUG
 
 
-#include <D3D11.h>
-#include <array>
-#include <fstream>
-#include <memory>
-#include <optional>
-#include <vector>
-#include <fstream>
-#include <cassert>
-#include <filesystem>
-#include <algorithm>
-#include <iostream>
-
-#include "DXLib_ref/DXLib_ref.h"
-#include "Box2D/Box2D.h"
+#include "DXLib_ref.h"
 
 using namespace DXLib_ref;
 
+//FPS(‹¤’Ê)
+inline float FPS{ 60.f };
 
 #include "Enums.hpp"
 #include "MainScene/Object/ObjectBaseEnum.hpp"
@@ -43,8 +32,6 @@ using namespace DXLib_ref;
 
 #include "MainScene/Object/ObjectBase.hpp"
 #include "MainScene/Object/Weapon.hpp"
-#include "MainScene/CharaAnimData.hpp"
-#include "MainScene/Object/Character_before.hpp"
 #include "MainScene/Object/Character.hpp"
 
 #include "ObjectManager.hpp"
