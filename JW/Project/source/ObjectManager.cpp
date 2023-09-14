@@ -7,7 +7,7 @@
 const FPS_n2::Sceneclass::ObjectManager* SingletonBase<FPS_n2::Sceneclass::ObjectManager>::m_Singleton = nullptr;
 namespace FPS_n2 {
 	namespace Sceneclass {
-		std::shared_ptr<ObjectBaseClass>*  ObjectManager::AddObject(ObjType ModelType, const char* filepath, const char* objfilename, const char* colfilename) noexcept {
+		std::shared_ptr<ObjectBaseClass>*  ObjectManager::AddObject(ObjType ModelType, PHYSICS_SETUP TYPE, bool UseToonWhenCreateFile, const char* filepath, const char* objfilename, const char* colfilename) noexcept {
 			switch (ModelType) {
 			case ObjType::Human:
 				this->m_Object.resize(this->m_Object.size() + 1);
@@ -28,7 +28,7 @@ namespace FPS_n2 {
 			default:
 				break;
 			}
-			LoadModel(this->m_Object.back().get(), filepath, objfilename, colfilename);
+			LoadModel(TYPE, UseToonWhenCreateFile, this->m_Object.back().get(), filepath, objfilename, colfilename);
 
 			auto back = this->m_Object.size();
 			this->m_Object.back()->SetMapCol(this->m_BackGround);

@@ -64,17 +64,17 @@ namespace FPS_n2 {
 					int xp1, yp1;
 					xp1 = y_r(30);
 					yp1 = y_r(10);
-					//Fonts->Get(FontPool::FontType::HUD_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-					Fonts->Get(FontPool::FontType::HUD_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Gray, "TIME");
+					//Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Gray, "TIME");
 
-					Fonts->Get(FontPool::FontType::HUD_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + y_r(240), yp1, White, Gray, "%d:%05.2f",
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + y_r(240), yp1, White, Gray, "%d:%05.2f",
 						(int)(floatParam[0] / 60.f),
 						(float)((int)(floatParam[0]) % 60) + (floatParam[0] - (float)((int)(floatParam[0])))
 					);
 
 					yp1 += y_r(25);
-					Fonts->Get(FontPool::FontType::HUD_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Gray, "SCORE");
-					Fonts->Get(FontPool::FontType::HUD_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + y_r(240), yp1, White, Gray, "%d", intParam[6]);
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Gray, "SCORE");
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + y_r(240), yp1, White, Gray, "%d", intParam[6]);
 				}
 				{
 					int xp1, yp1;
@@ -92,7 +92,7 @@ namespace FPS_n2 {
 						if (s.second > 0.f) {
 							float per = std::powf(2.f - s.second, 2.f);
 							SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - per)), 0, 255));
-							Fonts->Get(FontPool::FontType::HUD_Edge).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_r(per*96.f), Green, Gray, "+%d", s.first);
+							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_r(per*96.f), Green, Gray, "+%d", s.first);
 						}
 						else {
 							std::swap(s, ScoreAdd.back());
@@ -111,11 +111,11 @@ namespace FPS_n2 {
 						xp1 = DrawParts->m_DispXSize - y_r(260);
 						yp1 = DrawParts->m_DispYSize - y_r(80);
 
-						Fonts->Get(FontPool::FontType::HUD_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1 + y_r(50), yp1, White, Gray, "%s", strParam[0].c_str());
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1 + y_r(50), yp1, White, Gray, "%s", strParam[0].c_str());
 						yp1 += y_r(25);
 
-						Fonts->Get(FontPool::FontType::HUD_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Gray, "HP");
-						Fonts->Get(FontPool::FontType::HUD_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1 + y_r(50), yp1, White, Gray, "%03d / %03d", intParam[3], intParam[4]);
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Gray, "HP");
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1 + y_r(50), yp1, White, Gray, "%03d / %03d", intParam[3], intParam[4]);
 						yp1 += y_r(32);
 
 						DrawGauge(
@@ -142,7 +142,7 @@ namespace FPS_n2 {
 						DrawCircleGauge(xp1 + y_r(256), yp1, 50.0 + (double)((50.f - 15.0f*2.f)*per) + 15.0, ItemGraphPtr[0]->get(), 50.0 + 15.0, (double)((float)(DrawParts->m_DispYSize) / 1080.f));
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-						//Fonts->Get(FontPool::FontType::HUD_Edge).DrawString(y_r(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1, yp1, (per > 0.f) ? White : Red, Gray, "SPEED %5.2f km/h", floatParam[1]);
+						//Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1, yp1, (per > 0.f) ? White : Red, Gray, "SPEED %5.2f km/h", floatParam[1]);
 					}
 					if (ItemGraphPtr[1]) {
 						float per = (floatParam[4]) / (500.f);
@@ -155,7 +155,7 @@ namespace FPS_n2 {
 						DrawCircleGauge(xp1 - y_r(256), yp1, (double)(50.f - 15.0f*2.f) + 15.0, ItemGraphPtr[1]->get(), (double)((50.f - 15.0f*2.f)*(1.f - per)) + 15.0, (double)((float)(DrawParts->m_DispYSize) / 1080.f));
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-						//Fonts->Get(FontPool::FontType::HUD_Edge).DrawString(y_r(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, (per > 0.f) ? White : Red, Gray, "ALT %4d m", (int)floatParam[2]);
+						//Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, (per > 0.f) ? White : Red, Gray, "ALT %4d m", (int)floatParam[2]);
 					}
 				}
 				//

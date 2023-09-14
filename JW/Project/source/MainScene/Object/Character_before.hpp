@@ -8,12 +8,7 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		struct CharaAnimeSet {
-			CharaAnimeID	m_Down{ CharaAnimeID::Upper_Down1 };
-			CharaAnimeID	m_Ready{ CharaAnimeID::Upper_Ready1 };
-			CharaAnimeID	m_ADS{ CharaAnimeID::Upper_ADS1 };
-			CharaAnimeID	m_Cocking{ CharaAnimeID::Upper_Cocking1 };
-			CharaAnimeID	m_Check{ CharaAnimeID::Upper_Check1Start };
-			CharaAnimeID	m_Reload{ CharaAnimeID::Upper_Reload1Start };
+			std::array<int, (int)CharaGunAnimeID::Max> m_GunAnimFrame;
 		};
 		struct GunAnimeSet {
 			EnumGunAnim	m_Run{ EnumGunAnim::M1911_run };
@@ -233,8 +228,6 @@ namespace FPS_n2 {
 			}
 
 		public://ゲッター
-			//const auto		GetKeyActive(void) const noexcept { return this->m_KeyActive; }
-			//const auto		GeReadySwitch(void) const noexcept { return this->m_ReadySwitch; }
 			const auto		GetQKey(void) const noexcept { return this->m_QKey; }
 			const auto		GetEKey(void) const noexcept { return this->m_EKey; }
 			const auto		GetLeanRate(void) const noexcept { return this->m_LeanRate; }
@@ -246,9 +239,6 @@ namespace FPS_n2 {
 			const auto		GetShotKey(void) const noexcept { return this->m_ShotKey; }
 			const auto		GetADSKey(void) const noexcept { return this->m_ADSKey; }
 		public://セッター
-			//void			SetRadEasingPerX(float x) noexcept { this->m_radEasingPer.x(x); }
-			void			SetRadEasingPerY(float y) noexcept { this->m_radEasingPer.y(y); }
-			//void			SetRadEasingPerZ(float z) noexcept { this->m_radEasingPer.z(z); }
 			void			SetRadBufXY(const VECTOR_ref& buf) noexcept {
 				//
 				auto xbuf = this->m_rad_Buf.x();

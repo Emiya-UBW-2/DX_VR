@@ -35,7 +35,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DXDraw::Create();								//汎用
 	SetMainWindowText("JW");						//タイトル
 	PostPassEffect::Create();						//シェーダー
-	FontPool::Create();
 #ifdef DEBUG
 	auto* DebugParts = DebugClass::Instance();		//デバッグ
 #endif // DEBUG
@@ -82,7 +81,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 #else
 			{
 				auto* Fonts = FontPool::Instance();
-				Fonts->Get(FontPool::FontType::HUD_Edge).DrawString(y_r(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, y_r(1920 - 8), y_r(8), GetColor(255, 255, 255), GetColor(0, 0, 0), "%5.2f FPS", FPS);
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, y_r(1920 - 8), y_r(8), GetColor(255, 255, 255), GetColor(0, 0, 0), "%5.2f FPS", FPS);
 			}
 #endif // DEBUG
 			DrawParts->Screen_Flip();				//画面の反映

@@ -50,8 +50,14 @@ namespace FPS_n2 {
 			bool												m_TurnBody{ false };
 			bool												m_RunReady{ false };
 			bool												m_Running{ false };
-			CharaAnimeID										m_UpperAnimSelect, m_PrevUpperAnimSel;
+			CharaGunAnimeID										m_GunAnimSelect;
 			CharaAnimeID										m_BottomAnimSelect;
+			std::array<float, (int)CharaGunAnimeID::Max>		m_GunAnimFrame;
+			float			GetAllTime(CharaGunAnimeID ID) { return (float)m_CharaAnimeSet.at(this->m_CharaAnimeSel).m_GunAnimFrame.at((int)ID); }
+			void			UpdateGunAnim(CharaGunAnimeID ID, float speed) { m_GunAnimFrame.at((int)ID) += 30.f / FPS * speed; }
+			bool			GetGunAnimEnd(CharaGunAnimeID ID) { return m_GunAnimFrame.at((int)ID) >= GetAllTime(ID); }
+			float			GetTimePer(CharaGunAnimeID ID) { return (GetAllTime(ID) > 0.f) ? (m_GunAnimFrame.at((int)ID) / GetAllTime(ID)) : 1.f; }
+
 			//銃
 			float												m_ReadyTimer{ 0.f };
 			float												m_ReadyPer{ 0.f };
@@ -80,44 +86,29 @@ namespace FPS_n2 {
 			unsigned long long									m_DamageSwitchRec{ 0 };							//
 			//
 			float												m_LeftHandPer{ 0.f };
-			Pendulum2D											m_SlingZrad;
-			Pendulum2D											m_SlingYrad;
 
 			VECTOR_ref											m_RecoilRadAdd;
 			//サウンド
 			int													m_CharaSound{ -1 };
-			std::array<std::shared_ptr<GunClass>, 2>			m_Gun_Ptr{ nullptr, nullptr };			//銃
-			std::array<float, 2>								m_SlingPer;
-			std::array<MATRIX_ref, 2>							m_SlingMat;
-			int													m_GunSelect{ 0 };
+			//
+			std::shared_ptr<GunClass>							m_Gun_Ptr{ nullptr };			//銃
 			//
 			bool												m_SendCamShake{ false };
-
+			//
 			VECTOR_ref											m_UpperPrevRad;
 			VECTOR_ref											m_UpperRad;
-			VECTOR_ref											m_UpperyVecAuto, m_UpperzVecAuto;
 			VECTOR_ref											m_UpperyVecNormal, m_UpperzVecNormal;
 			VECTOR_ref											m_UpperyVec, m_UpperzVec, m_UpperPos;
 			float												m_UpperAnim{ 0.f };
-
-			float												m_AutoAimScale{ 1.f };
-			bool												m_IsActiveAutoAim{ false };
-			bool												m_IsCutpai{ false };
-			float												m_IsActiveAutoAimTime{ 0.f };
-			float												m_AutoAimPer{ 0.f };
-			VECTOR_ref											m_AutoAimVec;
-
-			VECTOR_ref											m_AutoAimPos;
-			std::vector<VECTOR_ref>								m_AutoAimCutPaiVec;
-
+			//
 			switchs												m_LaserSwitch;
 			VECTOR_ref											LaserStartPos;
 			VECTOR_ref											LaserEndPos;
 			VECTOR_ref											LaserEndPos2D;
-
+			//
 			float												m_ADSPer = 0.f;
 			float												m_Fov = 0.f;
-
+			//
 			VECTOR_ref											m_PrevPos;
 			VECTOR_ref											m_WalkSwingRad;
 			VECTOR_ref											m_WalkSwing;
@@ -143,13 +134,6 @@ namespace FPS_n2 {
 		public:
 			bool m_NearAmmo{ false };//至近弾(被弾含む)
 			int aim_cnt{ 0 };
-
-		public://ゲッター
-			//const auto		GetShotAnimSel(void) const noexcept { return this->m_CharaAnimeSet[this->m_CharaAnimeSel].m_ADS; }
-			//const auto		GetReadyPer(void) const noexcept { return this->m_ReadyPer; }
-			//const auto&		GetPosBuf(void) const noexcept { return this->m_PosBuf; }
-			//void				SetAnimOnce(CharaAnimeID ID, float speed) { ObjectBaseClass::SetAnimOnce((int)ID, speed); }
-			//const auto		GetParentFrameLocalMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalMatrix((int)this->GetObj_const().frame_parent(GetCharaFrame(frame))); }
 		public://ゲッター(ラッパー)
 			const auto		GetBottomStandAnimSel(void) const noexcept { return KeyControl::GetIsSquat() ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
 			const auto		GetBottomWalkAnimSel(void) const noexcept { return KeyControl::GetIsSquat() ? CharaAnimeID::Bottom_Squat_Walk : CharaAnimeID::Bottom_Stand_Walk; }
@@ -162,19 +146,14 @@ namespace FPS_n2 {
 		public://ゲッター
 			auto&			GetAnimeBuf(CharaAnimeID anim) noexcept { return this->m_AnimPerBuf[(int)anim]; }
 			auto&			GetAnime(CharaAnimeID anim) noexcept { return this->GetObj().get_anime((int)anim); }
-			auto&			GetGunPtr(int ID) noexcept { return this->m_Gun_Ptr[ID]; }
-			auto&			GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr[this->m_GunSelect]; }
-			const auto&		GetGunPtrNow_Const(void) const noexcept { return this->m_Gun_Ptr[this->m_GunSelect]; }
-			const auto&		GetGunPtrNowID() const noexcept { return this->m_GunSelect; }
+			auto&			GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr; }
+			const auto&		GetGunPtrNow_Const(void) const noexcept { return this->m_Gun_Ptr; }
 			const auto		GetReticleRad(void) const noexcept { return this->m_LateLeanRad + (KeyControl::GetRad().y() - this->m_yrad_Bottom)*0.15f; }
 			const auto&		GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd; }
 			const auto&		GetSendCamShake(void) const noexcept { return this->m_SendCamShake; }
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
 			const auto&		GetDamageSwitch(void) const noexcept { return this->m_DamageSwitch; }
 			const auto&		GetDamageSwitchRec(void) const noexcept { return this->m_DamageSwitchRec; }
-			const auto&		GetIsActiveAutoAim(void) const noexcept { return this->m_IsActiveAutoAim; }
-			const auto		GetIsActiveAutoAimtoChara(void) const noexcept { return this->m_IsActiveAutoAim && !this->m_IsCutpai; }
-			const auto&		GetActiveAutoScale(void) const noexcept { return this->m_AutoAimScale; }
 			const auto&		GetSpeed(void) const noexcept { return this->m_Speed; }
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
 
@@ -182,46 +161,12 @@ namespace FPS_n2 {
 			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
 			const auto		GetIsAim(void) const noexcept { return !(this->m_ReadyTimer == UpperTimerLimit); }
 		public://セッター
-			void			SetAutoAim(const VECTOR_ref* value = nullptr, bool IsCutpai = false, const std::vector<VECTOR_ref>* CutPaiVec = nullptr) noexcept {
-				bool isactive = value;
-				if (!isactive) {
-					m_IsActiveAutoAimTime += 1.f / FPS;
-					if (m_IsActiveAutoAimTime > 0.5f) {
-						m_IsActiveAutoAim = false;
-						m_IsCutpai = IsCutpai;
-					}
-				}
-				else {
-					m_IsActiveAutoAim = true;
-					m_IsCutpai = IsCutpai;
-					m_IsActiveAutoAimTime = 0.f;
-				}
-				if (value) {
-					m_AutoAimPos = *value;
-				}
-				if (CutPaiVec) {
-					if (m_IsCutpai) {
-						m_AutoAimCutPaiVec = *CutPaiVec;
-					}
-				}
-
-				if (m_IsActiveAutoAim) {
-					if ((this->m_ShotPhase >= CharaAnimPhase::Cocking) || GetIsADS() || !GetLaserActive()) {
-						m_IsActiveAutoAim = false;
-					}
-				}
-
-			}
-
 			void			SetCamEyeVec(const VECTOR_ref& value) noexcept { this->m_CamEyeVec = value; }
-
 			void			SetDamageSwitchRec(unsigned long long value) noexcept { this->m_DamageSwitchRec = value; }
 			void			ResetFrameLocalMat(CharaFrame frame) noexcept { GetObj().frame_Reset(GetCharaFrame(frame)); }
 			void			LoadReticle(void) noexcept {
-				for (auto& p : this->m_Gun_Ptr) {
-					if (p != nullptr) {
-						p->LoadReticle();
-					}
+				if (this->m_Gun_Ptr != nullptr) {
+					this->m_Gun_Ptr->LoadReticle();
 				}
 			}
 			bool			SetDamageEvent(const DamageEvent& value) noexcept {
@@ -235,26 +180,17 @@ namespace FPS_n2 {
 			void			SetFrameLocalMat(CharaFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetCharaFrame(frame), value * this->m_Frames[(int)frame].second); }
 			void			SetShapePer(CharaShape pShape, float Per) noexcept { this->m_Shapes[(int)pShape].second = Per; }
 			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
-			void			SetGunPtr(const std::shared_ptr<GunClass>& pGunPtr0, int Sel) noexcept {
-				this->m_Gun_Ptr[Sel] = pGunPtr0;
-				this->m_SlingPer[Sel] = (float)Sel;
-			}
+			void			SetGunPtr(const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_Gun_Ptr = pGunPtr0; }
 			void			GunSetUp() noexcept {
-				if (this->GetGunPtr(0) != nullptr) {
-					this->m_CharaAnimeSel = this->GetGunPtr(0)->GetHumanAnimType();
+				if (this->m_Gun_Ptr != nullptr) {
+					this->m_CharaAnimeSel = this->m_Gun_Ptr->GetHumanAnimType();
+					this->m_Gun_Ptr->SetPlayerID(this->m_MyID);
 				}
-				for (auto& p : this->m_Gun_Ptr) {
-					if (p != nullptr) {
-						p->SetPlayerID(this->m_MyID);
-					}
-				}
-				this->m_GunSelect = 0;
 			}
 		public://ゲッター
 			const auto		GetFrameLocalMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalMatrix(GetCharaFrame(frame)); }
 			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalWorldMatrix(GetCharaFrame(frame)); }
 			const auto		GetParentFrameWorldMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalWorldMatrix((int)this->GetObj_const().frame_parent(GetCharaFrame(frame))); }
-			const auto		GetGunPtrNum() const noexcept { return this->m_Gun_Ptr.size(); }
 			const auto		GetCharaDir(void) const noexcept { return this->m_UpperMatrix * this->m_move.mat; }
 			const auto		GetCharaVecX(void) const noexcept { return GetCharaDir().xvec(); }
 			const auto		GetCharaVecY(void) const noexcept { return GetCharaDir().yvec(); }
@@ -267,22 +203,11 @@ namespace FPS_n2 {
 			const auto		GetAmmoNum(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetAmmoNum() : 0; }
 			const auto		GetAmmoAll(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetAmmoAll() : 0; }
 			const auto		GetShotSwitch(void) const noexcept { return this->m_ShotPhase == CharaAnimPhase::Shot; }
-			const auto		GetDownAnimSel(void) const noexcept { return this->m_CharaAnimeSet[this->m_CharaAnimeSel].m_Down; }
-			const auto		GetAimAnimSel(void) const noexcept { return this->m_CharaAnimeSet[this->m_CharaAnimeSel].m_Ready; }
-			const auto		GetCockingAnimSel(void) const noexcept { return this->m_CharaAnimeSet[this->m_CharaAnimeSel].m_Cocking; }
-			const auto		GetCheckAnimSel(void) const noexcept { return this->m_CharaAnimeSet[this->m_CharaAnimeSel].m_Check; }
-			const auto		GetCheckingAnimSel(void) const noexcept { return (CharaAnimeID)((int)GetCheckAnimSel() + 1); }
-			const auto		GetCheckEndAnimSel(void) const noexcept { return (CharaAnimeID)((int)GetCheckAnimSel() + 2); }
-
-			const auto		GetReloadStartAnimSel(void) const noexcept { return this->m_CharaAnimeSet[this->m_CharaAnimeSel].m_Reload; }
-			const auto		GetReloadOneAnimSel(void) const noexcept { return  (CharaAnimeID)((int)GetReloadStartAnimSel() + 1); }
-			const auto		GetReloadEndAnimSel(void) const noexcept { return  (CharaAnimeID)((int)GetReloadStartAnimSel() + 2); }
 
 			const auto		GetRunGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Run; }
 			const auto		GetReadyGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Ready; }
 			const auto&		GetAimGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Aim; }
 			const auto&		GetCheckGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Check; }
-
 			const auto		GetADSGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_ADS; }
 			const auto		GetReloadGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Reload; }
 
@@ -346,17 +271,11 @@ namespace FPS_n2 {
 				if (this->GetIsADS()) {
 					fov = deg2rad(60);
 				}
-				//else if (this->GetIsRun()) {
-				//	fov = deg2rad(90);
-				//}
+				else if (this->GetRun()) {
+					fov = deg2rad(80);
+				}
 				else {
 					fov = deg2rad(75);
-					if (m_IsActiveAutoAim) {
-						fov -= deg2rad(5);
-						if (!m_IsCutpai) {
-							fov -= deg2rad(5);
-						}
-					}
 				}
 
 				if (this->GetShotSwitch()) {

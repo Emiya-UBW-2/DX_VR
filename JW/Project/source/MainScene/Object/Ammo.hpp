@@ -87,7 +87,6 @@ namespace FPS_n2 {
 		public: //åpè≥
 			void			Init() noexcept override {
 				ObjectBaseClass::Init();
-				SetUseRealTimePhysics(false);
 				SetActive(false);
 			}
 			//

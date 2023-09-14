@@ -6,15 +6,19 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		enum class PHYSICS_SETUP {
+			DISABLE,
+			LOADCALC,
+			REALTIME,
+		};
+
 		class ObjectBaseClass {
 		protected:
-			bool										m_Use_RealTimePhysics{ false };
-			MV1											m_obj_REALTIME;
-			MV1											m_obj_LOADCALC;
+			PHYSICS_SETUP								m_PHYSICS_SETUP{ PHYSICS_SETUP::DISABLE };
 			bool										m_objActive{ false };							//
-
-			MV1											m_col;
 			bool										m_ColActive{ false };							//
+			MV1											m_obj;
+			MV1											m_col;
 
 			moves										m_move;
 			MATRIX_ref									m_PrevMat;//物理更新のため
@@ -42,7 +46,6 @@ namespace FPS_n2 {
 			std::array<int, 2>							m_ShaderTex{ -1 , -1 };
 		public:
 			void			SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
-			void			SetUseRealTimePhysics(bool value) noexcept { this->m_Use_RealTimePhysics = value; }
 			void			SetActive(bool value) noexcept { this->m_IsActive = value; }
 			void			SetIsDelete(bool value) noexcept { this->m_IsDelete = value; }
 			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept { this->m_BackGround = backGround; }
@@ -52,8 +55,9 @@ namespace FPS_n2 {
 			void			SetUseShader(ShaderUseClass* value) noexcept { this->m_UseShader = value; }
 			void			SetShaderTexHandle(int id, int value) noexcept { this->m_ShaderTex[id] = value; }
 
-			auto&			GetObj(void) noexcept { return this->m_Use_RealTimePhysics ? this->m_obj_REALTIME : this->m_obj_LOADCALC; }
-			const auto&		GetObj_const(void) const noexcept { return this->m_Use_RealTimePhysics ? this->m_obj_REALTIME : this->m_obj_LOADCALC; }
+			auto&			GetObj(void) noexcept { return this->m_obj; }
+			const auto&		GetObj_const(void) const noexcept { return this->m_obj; }
+
 			const auto		GetMatrix(void) const noexcept { return this->GetObj_const().GetMatrix(); }
 			const auto		GetIsBaseModel(const char* filepath, const char* objfilename, const char* colfilename) const noexcept {
 				return (
@@ -137,7 +141,8 @@ namespace FPS_n2 {
 				}
 			}
 		public:
-			void			LoadModel(const char* filepath, const char* objfilename = "model", const char* colfilename = "col") noexcept {
+			void			LoadModel(PHYSICS_SETUP TYPE, bool UseToonWhenCreateFile, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") noexcept {
+				this->m_PHYSICS_SETUP = TYPE;
 				this->m_FilePath = filepath;
 				this->m_ObjFileName = objfilename;
 				this->m_ColFileName = colfilename;
@@ -146,28 +151,57 @@ namespace FPS_n2 {
 				{
 					std::string Path = this->m_FilePath;
 					Path += this->m_ObjFileName;
-					if (FileRead_findFirst((Path + "_REALTIME.mv1").c_str(), &FileInfo) != (DWORD_PTR)-1) {
-						//MV1::Load(Path + ".pmx", &this->m_obj_REALTIME, DX_LOADMODEL_PHYSICS_REALTIME);
-						MV1::Load((Path + "_REALTIME.mv1").c_str(), &this->m_obj_REALTIME, DX_LOADMODEL_PHYSICS_REALTIME);
+
+					switch (this->m_PHYSICS_SETUP) {
+					case FPS_n2::Sceneclass::PHYSICS_SETUP::DISABLE:
+						if (FileRead_findFirst((Path + "_DISABLE.mv1").c_str(), &FileInfo) != (DWORD_PTR)-1) {
+							//MV1::Load(Path + ".pmx", &this->m_obj, DX_LOADMODEL_PHYSICS_DISABLE);
+							MV1::Load((Path + "_DISABLE.mv1").c_str(), &this->m_obj, DX_LOADMODEL_PHYSICS_DISABLE);
+						}
+						else {
+							MV1::Load(Path + ".pmx", &this->m_obj, DX_LOADMODEL_PHYSICS_DISABLE);
+							if (!UseToonWhenCreateFile) {
+								MV1SetMaterialTypeAll(this->m_obj.get(), DX_MATERIAL_TYPE_NORMAL);
+							}
+							MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_DISABLE);
+							MV1SaveModelToMV1File(this->m_obj.get(), (Path + "_DISABLE.mv1").c_str());
+							MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
+						}
+						break;
+					case FPS_n2::Sceneclass::PHYSICS_SETUP::LOADCALC:
+						if (FileRead_findFirst((Path + "_LOADCALC.mv1").c_str(), &FileInfo) != (DWORD_PTR)-1) {
+							//MV1::Load(Path + ".pmx", &this->m_obj, DX_LOADMODEL_PHYSICS_LOADCALC);
+							MV1::Load((Path + "_LOADCALC.mv1").c_str(), &this->m_obj, DX_LOADMODEL_PHYSICS_LOADCALC);
+						}
+						else {
+							MV1::Load(Path + ".pmx", &this->m_obj, DX_LOADMODEL_PHYSICS_LOADCALC);
+							if (!UseToonWhenCreateFile) {
+								MV1SetMaterialTypeAll(this->m_obj.get(), DX_MATERIAL_TYPE_NORMAL);
+							}
+							MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
+							MV1SaveModelToMV1File(this->m_obj.get(), (Path + "_LOADCALC.mv1").c_str());
+							MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
+						}
+						break;
+					case FPS_n2::Sceneclass::PHYSICS_SETUP::REALTIME:
+						if (FileRead_findFirst((Path + "_REALTIME.mv1").c_str(), &FileInfo) != (DWORD_PTR)-1) {
+							//MV1::Load(Path + ".pmx", &this->m_obj, DX_LOADMODEL_PHYSICS_REALTIME);
+							MV1::Load((Path + "_REALTIME.mv1").c_str(), &this->m_obj, DX_LOADMODEL_PHYSICS_REALTIME);
+						}
+						else {
+							MV1::Load(Path + ".pmx", &this->m_obj, DX_LOADMODEL_PHYSICS_REALTIME);
+							if (!UseToonWhenCreateFile) {
+								MV1SetMaterialTypeAll(this->m_obj.get(), DX_MATERIAL_TYPE_NORMAL);
+							}
+							MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_REALTIME);
+							MV1SaveModelToMV1File(this->m_obj.get(), (Path + "_REALTIME.mv1").c_str());
+							MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
+						}
+						break;
+					default:
+						break;
 					}
-					else {
-						MV1::Load(Path + ".pmx", &this->m_obj_REALTIME, DX_LOADMODEL_PHYSICS_REALTIME);
-						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_REALTIME);
-						MV1SaveModelToMV1File(this->m_obj_REALTIME.get(), (Path + "_REALTIME.mv1").c_str());
-						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
-					}
-					if (FileRead_findFirst((Path + "_LOADCALC.mv1").c_str(), &FileInfo) != (DWORD_PTR)-1) {
-						//MV1::Load(Path + ".pmx", &this->m_obj_LOADCALC, DX_LOADMODEL_PHYSICS_LOADCALC);
-						MV1::Load((Path + "_LOADCALC.mv1").c_str(), &this->m_obj_LOADCALC, DX_LOADMODEL_PHYSICS_LOADCALC);
-					}
-					else {
-						MV1::Load(Path + ".pmx", &this->m_obj_LOADCALC, DX_LOADMODEL_PHYSICS_LOADCALC);
-						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
-						MV1SaveModelToMV1File(this->m_obj_LOADCALC.get(), (Path + "_LOADCALC.mv1").c_str());
-						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
-					}
-					MV1::SetAnime(&this->m_obj_REALTIME, m_obj_REALTIME);
-					MV1::SetAnime(&this->m_obj_LOADCALC, m_obj_LOADCALC);
+					MV1::SetAnime(&this->m_obj, m_obj);
 				}
 				//col
 				{
@@ -194,13 +228,12 @@ namespace FPS_n2 {
 				this->m_objActive = true;
 			}
 			void			CopyModel(const std::shared_ptr<ObjectBaseClass>& pBase) noexcept {
+				this->m_PHYSICS_SETUP = pBase->m_PHYSICS_SETUP;
 				this->m_FilePath = pBase->m_FilePath;
 				this->m_ObjFileName = pBase->m_ObjFileName;
 				this->m_ColFileName = pBase->m_ColFileName;
-				this->m_obj_REALTIME = pBase->m_obj_REALTIME.Duplicate();
-				this->m_obj_LOADCALC = pBase->m_obj_LOADCALC.Duplicate();
-				MV1::SetAnime(&this->m_obj_REALTIME, pBase->m_obj_REALTIME);
-				MV1::SetAnime(&this->m_obj_LOADCALC, pBase->m_obj_LOADCALC);
+				this->m_obj = pBase->m_obj.Duplicate();
+				MV1::SetAnime(&this->m_obj, pBase->m_obj);
 				//col
 				if (pBase->m_col.IsActive()) {
 					this->m_col = pBase->m_col.Duplicate();
@@ -318,7 +351,7 @@ namespace FPS_n2 {
 					break;
 				}
 				//物理更新
-				if (this->m_Use_RealTimePhysics) {
+				if (this->m_PHYSICS_SETUP == PHYSICS_SETUP::REALTIME) {
 					if (this->m_IsResetPhysics) {
 						this->m_IsResetPhysics = false;
 						this->GetObj().PhysicsResetState();

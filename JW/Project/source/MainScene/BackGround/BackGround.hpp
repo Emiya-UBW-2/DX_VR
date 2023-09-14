@@ -67,19 +67,19 @@ namespace FPS_n2 {
 				path = MapPath;
 				if (path != "") {
 					path += "model.mv1";
-					MV1::Load(path, &this->m_ObjGround);
+					MV1::Load(path, &this->m_ObjGround, DX_LOADMODEL_PHYSICS_DISABLE);
 				}
 				path = MapPath;
 				if (path != "") {
 					path += "col.mv1";
-					MV1::Load(path, &this->m_ObjGroundCol);
+					MV1::Load(path, &this->m_ObjGroundCol, DX_LOADMODEL_PHYSICS_DISABLE);
 					this->m_ObjGroundCol.SetupCollInfo(64, 16, 64);
 				}
 				//‹ó
 				path = SkyPath;
 				if (path != "") {
 					path += "model.mv1";
-					MV1::Load(path, &this->m_ObjSky);
+					MV1::Load(path, &this->m_ObjSky, DX_LOADMODEL_PHYSICS_DISABLE);
 					this->m_ObjSky.SetScale(VECTOR_ref::vget(10.f, 10.f, 10.f));
 					MV1SetDifColorScale(this->m_ObjSky.get(), GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
 				}
@@ -134,7 +134,6 @@ namespace FPS_n2 {
 		private:
 			BuildControl				m_BuildControl;
 		public://
-			void	SetCamPos(const Camera3DInfo& value) noexcept { this->m_BuildControl.SetCamPos(value); }
 			const auto&		GetNearestLight(int No) noexcept { return this->m_BuildControl.GetNearestLight(No); }
 			const auto&		GetBuildCol(void) noexcept { return this->m_BuildControl.GetBuildCol(); }
 			const auto&		GetMapGraph(void) noexcept { return this->m_BuildControl.GetMapGraph(); }
@@ -148,7 +147,7 @@ namespace FPS_n2 {
 			//
 			void			Init_Sub(void) noexcept override {
 				this->m_BuildControl.Load();
-				this->m_BuildControl.Init(&this->m_ObjGroundCol);
+				this->m_BuildControl.Init();
 			}
 			//
 			void			Execute_Sub(void) noexcept override {

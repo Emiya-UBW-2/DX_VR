@@ -15,7 +15,7 @@ namespace FPS_n2 {
 			this->m_Press_GoRight = false;
 			this->m_radAdd.clear();
 			//“®ì‚É‚©‚©‚í‚é‘€ì
-			this->m_radEasingPer.Set(0.5f, 0.2f, 0.5f);
+			this->m_radEasingPer.Set(0.5f, 0.8f, 0.5f);
 			this->m_rad_Buf.x(pxRad);
 			this->m_rad_Buf.y(pyRad);
 			//ã‹L‚ğ”½‰f‚·‚é‚à‚Ì

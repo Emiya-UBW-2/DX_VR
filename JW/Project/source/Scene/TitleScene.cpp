@@ -143,7 +143,7 @@ namespace FPS_n2 {
 				auto WhiteR = GetColor(255, 64, 64);
 				auto GrayR = GetColor(128, 16, 16);
 				Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(48 * 3 / 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1 + y_r(40), yp1 + y_r(20), GrayR, Gray, "Final EpiSode");
-				Fonts->Get(FontPool::FontType::Fette_AA).DrawString(y_r(48 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1, yp1, WhiteR, Gray, "Final EpiSode");
+				Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(48 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1, yp1, WhiteR, Gray, "Final EpiSode");
 			}
 			else {
 				DrawFetteString(xp1, yp1, 1.33f, false, "Final EpiSode");
@@ -156,7 +156,7 @@ namespace FPS_n2 {
 				auto per = std::clamp((1.f - GameStart), 0.f, 1.f);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
 				Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(48 * 3 / 2 * 3 / 4), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1 + y_r(40), yp1 + y_r(20), (select == 0) ? Red75 : Gray75, Gray, "Start Game");
-				Fonts->Get(FontPool::FontType::Fette_AA).DrawString(y_r(48 * 2 * 3 / 4), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1, yp1, (select == 0) ? Red : White, Gray, "Start Game");
+				Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(48 * 2 * 3 / 4), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1, yp1, (select == 0) ? Red : White, Gray, "Start Game");
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 
@@ -170,15 +170,15 @@ namespace FPS_n2 {
 					auto WhiteR = GetColor(255, 64, 64);
 					auto GrayR = GetColor(128, 16, 16);
 
-					Fonts->Get(FontPool::FontType::Fette_AA).DrawString(y_r(48), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1 - y_r(500), yp1, Gray75, Gray, "%02d / %02d", kill, killTotal);
+					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(48), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1 - y_r(500), yp1, Gray75, Gray, "%02d / %02d", kill, killTotal);
 
 					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(48 * 3 / 2 * 3 / 4), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1 + y_r(40), yp1 + y_r(20), (select == 1) ? Red75 : GrayR, Gray, "Red Baron Mode");
-					Fonts->Get(FontPool::FontType::Fette_AA).DrawString(y_r(48 * 2 * 3 / 4), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1, yp1, (select == 1) ? Red : WhiteR, Gray, "Red Baron Mode");
+					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(48 * 2 * 3 / 4), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1, yp1, (select == 1) ? Red : WhiteR, Gray, "Red Baron Mode");
 				}
 				else {
 					DrawFetteString(xp1, yp1, 1.f, (select == 1), "Free Flight");
 
-					Fonts->Get(FontPool::FontType::Fette_AA).DrawString(y_r(48), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1 - y_r(350), yp1, White, Gray, "%02d / %02d", kill, killTotal);
+					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(48), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1 - y_r(350), yp1, White, Gray, "%02d / %02d", kill, killTotal);
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}

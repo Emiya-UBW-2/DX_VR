@@ -4,318 +4,345 @@
 #include	"../../sub.hpp"
 
 namespace FPS_n2 {
-	class Grass::grass_t {
-	public:
-		bool			canlook = true;
-		Model_Instance	m_Inst;
-	public:
-		void Init(int total, const char* Graph, const char* Model) {
-			this->m_Inst.Init(Graph, Model, -1);
-			this->m_Inst.Reset();
-			this->m_Inst.Set_start(total);
-		}
-		void Set_one(const MATRIX_ref& mat) {
-			this->m_Inst.Set_one(mat);
-		}
-		void put(void) noexcept {
-			canlook = true;
-			this->m_Inst.Execute();
-		}
-		void Dispose(void) noexcept {
-			this->m_Inst.Dispose();
-		}
-		/*視界外か否かを判断*/
-		void Check_CameraViewClip(const VECTOR_ref& min, const VECTOR_ref& max) {
-			this->canlook = true;
-			if (CheckCameraViewClip_Box(min.get(), max.get())) {
-				this->canlook = false;
-				return;
-			}
-		}
-		void Draw(void) noexcept {
-			if (this->canlook) {
-				this->m_Inst.Draw();
-			}
-		}
-	};
+	void			BuildControl::Load(void) noexcept {
+		MV1::Load("data/model/map_parts/model.mv1", &this->m_ObjBuildBase, DX_LOADMODEL_PHYSICS_DISABLE);
+		MV1::Load("data/model/map_parts/col.mv1", &this->m_ColBuildBase, DX_LOADMODEL_PHYSICS_DISABLE);
+		MV1::Load("data/model/map_parts/light.mv1", &this->m_ObjLightBase, DX_LOADMODEL_PHYSICS_DISABLE);
+	}
+	void			BuildControl::Init() noexcept {
+		int Size = 19;
+		float tileSize = 30.f;
+		/* 迷路の作成 */
+		m_MazeControl.createMaze(Size, Size);
+		{
+			m_MapGraph = GraphHandle::Make(Size * (int)tileSize, Size * (int)tileSize, true);
+			m_MapGraph.SetDraw_Screen();
+			{
+				for (int y = 0; y < Size; y++) {
+					for (int x = 0; x < Size; x++) {
+						if (m_MazeControl.PosIsPath(x, y)) {
+							int count = 0;
 
-	class Grass::Impl {
-	public:
-		static const int grassDiv{ 12 };//^2;
-	private:
-		int grasss = 6 * 6;						/*grassの数*/
-		std::array<std::pair<float, int>, grassDiv>grassLen;
-		std::array<grass_t, grassDiv>grass__;
-		std::array<VECTOR_ref, grassDiv>grassPosMin;
-		std::array<VECTOR_ref, grassDiv>grassPosMax;
-		int Flag = 0;
-		std::array<GrassPos, grassDiv> grassPos;
-	public:
-		Impl() {}
-		~Impl() {}
-	public:
-		int GetColorSoftImage(int softimage, int x_, int y_) {
-			int _r_, _g_, _b_;
-			int CCC = 0;
-			GetPixelSoftImage(softimage, x_, y_, &_r_, &_g_, &_b_, nullptr);
-			if (_r_ <= 64) {}
-			else if (_r_ <= 192) { CCC |= (1 << 1); }
-			else if (_r_ <= 256) { CCC |= (1 << 2); }
-			if (_g_ <= 64) {}
-			else if (_g_ <= 192) { CCC |= (1 << 4); }
-			else if (_g_ <= 256) { CCC |= (1 << 5); }
-			if (_b_ <= 64) {}
-			else if (_b_ <= 192) { CCC |= (1 << 7); }
-			else if (_b_ <= 256) { CCC |= (1 << 8); }
-			return CCC;
-		}
-		//y方向に操作する前提
-		void SetMinMax(int CCC, int ID, int softimage, int x_t, int y_t, int sizex, int sizey) {
-			int BufC = -1;
-			if ((Flag & (1 << ID)) == 0) {
-				Flag |= (1 << ID);
-				//xmin
-				grassPos[ID].X_PosMin = x_t;
-				y_t;
-				//ymin
-				BufC = -1;
-				for (int y_ = 0; y_ < sizey; y_++) {
-					for (int x_ = grassPos[ID].X_PosMin; x_ < sizex; x_++) {
-						BufC = GetColorSoftImage(softimage, x_, y_);
-						if (BufC == CCC) {
-							grassPos[ID].Y_PosMin = y_;
-							break;
-						}
-						else {
-							BufC = -1;
+							bool XP = m_MazeControl.PosIsPath(x + 1, y);
+							bool XM = m_MazeControl.PosIsPath(x - 1, y);
+							bool ZP = m_MazeControl.PosIsPath(x, y + 1);
+							bool ZM = m_MazeControl.PosIsPath(x, y - 1);
+
+							if (XP) { count++; }
+							if (XM) { count++; }
+							if (ZP) { count++; }
+							if (ZM) { count++; }
+
+							int color = 255;// *count / 4;
+
+							int Wall = 3;
+
+							DrawBox(
+								x * 30 + (!XM ? Wall : 0),
+								y * 30 + (!ZM ? Wall : 0),
+								(x + 1) * 30 - (!XP ? Wall : 0),
+								(y + 1) * 30 - (!ZP ? Wall : 0),
+								GetColor(color, color, color), TRUE);
 						}
 					}
-					if (BufC >= 0) { break; }
-				}
-				//xmax
-				BufC = -1;
-				for (int x_ = sizex - 1; x_ >= grassPos[ID].X_PosMin; x_--) {
-					for (int y_ = sizey - 1; y_ >= grassPos[ID].Y_PosMin; y_--) {
-						BufC = GetColorSoftImage(softimage, x_, y_);
-						if (BufC == CCC) {
-							grassPos[ID].X_PosMax = x_ + 1;
-							break;
-						}
-						else {
-							BufC = -1;
-						}
-					}
-					if (BufC >= 0) { break; }
-				}
-				//ymax
-				BufC = -1;
-				for (int y_ = sizey - 1; y_ >= grassPos[ID].Y_PosMin; y_--) {
-					for (int x_ = grassPos[ID].X_PosMax - 1; x_ >= grassPos[ID].X_PosMin; x_--) {
-						BufC = GetColorSoftImage(softimage, x_, y_);
-						if (BufC == CCC) {
-							grassPos[ID].Y_PosMax = y_ + 1;
-							break;
-						}
-						else {
-							BufC = -1;
-						}
-					}
-					if (BufC >= 0) { break; }
-				}
-				//ok
-			}
-		}
-		void Init(const MV1* MapCol, int softimage, const char* Graph, const char* Model, float MAPX, float MAPZ, int count) {
-			grasss = count * count;
-			//float MAPX = 6000.f*Scale_Rate;
-			//float MAPZ = 6000.f*Scale_Rate;
-			float PosX = 0.f;
-			float PosZ = 0.f;
-
-			float MINX = -MAPX / 2.f + PosX;
-			float MINZ = -MAPZ / 2.f + PosZ;
-
-			float MAXX = MAPX / 2.f + PosX;
-			float MAXZ = MAPZ / 2.f + PosZ;
-
-			int sizex = 0, sizey = 0;
-			GetSoftImageSize(softimage, &sizex, &sizey);
-
-			Flag = 0;
-			for (int x_ = 0; x_ < sizex; x_++) {
-				for (int y_ = 0; y_ < sizey; y_++) {
-					int CCC = GetColorSoftImage(softimage, x_, y_);
-					//255,0,0
-					if (CCC == (1 << 2)) {
-						SetMinMax(CCC, 0, softimage, x_, y_, sizex, sizey);
-					}
-					//255,128,0
-					else if (CCC == ((1 << 2) | (1 << 4))) {
-						SetMinMax(CCC, 1, softimage, x_, y_, sizex, sizey);
-					}
-					//255,255,0
-					else if (CCC == ((1 << 2) | (1 << 5))) {
-						SetMinMax(CCC, 2, softimage, x_, y_, sizex, sizey);
-					}
-					//128,255,0
-					else if (CCC == ((1 << 1) | (1 << 5))) {
-						SetMinMax(CCC, 3, softimage, x_, y_, sizex, sizey);
-					}
-					//0,255,0
-					else if (CCC == (1 << 5)) {
-						SetMinMax(CCC, 4, softimage, x_, y_, sizex, sizey);
-					}
-					//0,255,128
-					else if (CCC == ((1 << 5) | (1 << 7))) {
-						SetMinMax(CCC, 5, softimage, x_, y_, sizex, sizey);
-					}
-					//0,255,255
-					else if (CCC == ((1 << 5) | (1 << 8))) {
-						SetMinMax(CCC, 6, softimage, x_, y_, sizex, sizey);
-					}
-					//0,128,255
-					else if (CCC == ((1 << 4) | (1 << 8))) {
-						SetMinMax(CCC, 7, softimage, x_, y_, sizex, sizey);
-					}
-					//0,0,255
-					else if (CCC == (1 << 8)) {
-						SetMinMax(CCC, 8, softimage, x_, y_, sizex, sizey);
-					}
-					//128,0,255
-					else if (CCC == ((1 << 1) | (1 << 8))) {
-						SetMinMax(CCC, 9, softimage, x_, y_, sizex, sizey);
-					}
-					//255,0,255
-					else if (CCC == ((1 << 2) | (1 << 8))) {
-						SetMinMax(CCC, 10, softimage, x_, y_, sizex, sizey);
-					}
-					//255,0,128
-					else if (CCC == ((1 << 2) | (1 << 7))) {
-						SetMinMax(CCC, 11, softimage, x_, y_, sizex, sizey);
-					}
-
-					//MINX + (MAXX - MINX) * x_ / sizex = x_t 
-					//MINZ + (MAXZ - MINZ) * y_ / sizey = z_t 
 				}
 			}
-			//*/
-			for (int ID = 0; ID < grassDiv; ID++) {
-				//ポジション決定
-				float xp = MINX + (MAXX - MINX) * grassPos[ID].X_PosMin / sizex;
-				float zp = MINZ + (MAXZ - MINZ) * grassPos[ID].Y_PosMin / sizey;
-				float xp2 = MINX + (MAXX - MINX) * grassPos[ID].X_PosMax / sizex;
-				float zp2 = MINZ + (MAXZ - MINZ) * grassPos[ID].Y_PosMax / sizey;
-				float xsize = xp2 - xp;
-				float zsize = zp2 - zp;
-				//
-				{
-					grassPosMin[ID] = VECTOR_ref::vget(xp, 0.2f, zp);
-					grassPosMax[ID] = grassPosMin[ID] + VECTOR_ref::vget(xsize, 1.f, zsize);
-					float xmid = xsize / 2.f;
-					float zmid = zsize / 2.f;
-					if (grasss != 0) {
-						auto& tgt_g = grass__[ID];
-						tgt_g.Init(grasss, Graph, Model);
-						for (int i = 0; i < grasss; ++i) {
-							float x1 = xmid + GetRandf(xmid);
-							float z1 = zmid + GetRandf(zmid);
-							int count_buf = 0;
-							while (true) {
-								int CCC = GetColorSoftImage(softimage,
-									(int)(((grassPosMin[ID].x() + x1) - MINX) / (MAXX - MINX) * float(sizex)),
-									(int)(((grassPosMin[ID].z() + z1) - MINZ) / (MAXZ - MINZ) * float(sizey))
-								);
-								if (CCC != 0) {
-									break;
-								}
-								x1 = xmid + GetRandf(xmid);
-								z1 = zmid + GetRandf(zmid);
-								count_buf++;
-								if (count_buf > 10) { break; }
+			m_MapGraph.GetSize(&m_MapGraphXSize, &m_MapGraphYSize);
+		}
+		{
+			int OneSize = 0;
+			for (int y = 0; y < Size; y++) {
+				for (int x = 0; x < Size; x++) {
+					if (m_MazeControl.PosIsPath(x, y)) {
+						OneSize++;
+					}
+				}
+			}
+			//
+			this->m_ObjBuilds.resize(OneSize);
+			{
+				VECTOR_ref BasePos;
+				float deg = 0.f;
+				int loop = 0;
+				for (int y = 0; y < Size; y++) {
+					for (int x = 0; x < Size; x++) {
+						if (m_MazeControl.PosIsPath(x, y)) {
+							int count = 0;
+
+							bool XP = m_MazeControl.PosIsPath(x + 1, y);
+							bool XM = m_MazeControl.PosIsPath(x - 1, y);
+							bool ZP = m_MazeControl.PosIsPath(x, y + 1);
+							bool ZM = m_MazeControl.PosIsPath(x, y - 1);
+
+							if (XP) { count++; }
+							if (XM) { count++; }
+							if (ZP) { count++; }
+							if (ZM) { count++; }
+
+							int ID = 0;
+							switch (count) {
+							case 1:
+								ID = 0;
+								if (ZM) { deg = 0.f; }
+								if (XM) { deg = 90.f; }
+								if (ZP) { deg = 180.f; }
+								if (XP) { deg = 270.f; }
+								break;
+							case 2:
+								if (ZP && ZM) { ID = 1; deg = 0.f; }
+								if (XP && XM) { ID = 1; deg = 90.f; }
+
+								if (XP && ZP) { ID = 4; deg = 270.f; }
+								if (XM && ZP) { ID = 4; deg = 180.f; }
+								if (XM && ZM) { ID = 4; deg = 90.f; }
+								if (XP && ZM) { ID = 4; deg = 0.f; }
+								break;
+							case 3:
+								ID = 2;
+								if (ZP && XP && ZM) { deg = 0.f; }
+								if (ZP && XM && ZM) { deg = 180.f; }
+								if (XP && ZP && XM) { deg = 270.f; }
+								if (XP && ZM && XM) { deg = 90.f; }
+								break;
+							case 4:
+								ID = 3;
+								break;
+							default:
+								break;
 							}
 
-							auto tmpvect = grassPosMin[ID] + VECTOR_ref::vget(x1, 0.2f, z1);
-							auto scale = 15.f / 10.f*Scale_Rate;
-							auto res = MapCol->CollCheck_Line(tmpvect + VECTOR_ref::up()*300.f*Scale_Rate, tmpvect + VECTOR_ref::up()*-300.f*Scale_Rate);
-							if (res.HitFlag == TRUE) { tmpvect = res.HitPosition; }
-							tgt_g.Set_one(MATRIX_ref::RotY(deg2rad(GetRand(90))) * MATRIX_ref::GetScale(VECTOR_ref::vget(scale, scale, scale)) *  MATRIX_ref::Mtrans(tmpvect));
+							BasePos.Set(tileSize * (float)x, 0.f, tileSize * (float)y);
+							BasePos -= VECTOR_ref::vget(tileSize * (float)Size / 2.f, 0.f, tileSize * (float)Size / 2.f);
+
+							this->m_ObjBuilds[loop].Set(this->m_ObjBuildBase, this->m_ColBuildBase, ID);
+							this->m_ObjBuilds[loop].SetPosition(BasePos, deg2rad(deg));
+
+							loop++;
 						}
-						tgt_g.put();
 					}
-					{
-						auto res = MapCol->CollCheck_Line(grassPosMin[ID] + VECTOR_ref::up()*300.f*Scale_Rate, grassPosMin[ID] + VECTOR_ref::up()*-300.f*Scale_Rate);
-						if (res.HitFlag == TRUE) { grassPosMin[ID] = res.HitPosition; }
-						res = MapCol->CollCheck_Line(grassPosMax[ID] + VECTOR_ref::up()*300.f*Scale_Rate, grassPosMax[ID] + VECTOR_ref::up()*-300.f*Scale_Rate);
-						if (res.HitFlag == TRUE) { grassPosMax[ID] = res.HitPosition; }
-					}
-				}
-				//
-			}
-		}
-		void Dispose(void) noexcept {
-			for (int ID = 0; ID < grassDiv; ID++) {
-				if (grasss != 0) {
-					grass__[ID].Dispose();
 				}
 			}
 		}
-		void Draw(void) noexcept {
-			SetFogEnable(TRUE);
-			SetFogColor(4, 16, 0);
-			SetDrawAlphaTest(DX_CMP_GREATER, 128);
-			//SetUseLighting(FALSE);
-			SetUseLightAngleAttenuation(FALSE);
-			//auto dir=GetLightDirection();
-			//VECTOR_ref vec = (VECTOR_ref)GetCameraPosition() - GetCameraTarget();
-			//SetLightDirection(vec.Norm().get());
+		MATERIALPARAM Material_t;
+		Material_t.Diffuse = GetLightDifColor();
+		Material_t.Specular = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);
+		Material_t.Ambient = GetColorF(1.0f, 1.0f, 1.0f, 1.0f);;
+		Material_t.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);
+		Material_t.Power = 20.0f;
+		SetMaterialParam(Material_t);
+		{
+			Light_Graph = GraphHandle::Load("data/Picture/light.png");
+			int OneSize = 0;
+			for (int y = 0; y < Size; y++) {
+				for (int x = 0; x < Size; x++) {
+					if (m_MazeControl.PosIsPath(x, y)) {
+						bool isHit = false;
+						if ((y % 4) == 0) {
+							if ((x % 3) == 0) { isHit = true; }
+						}
+						if ((y % 4) == 2) {
+							if ((x % 3) == 2) { isHit = true; }
+						}
+						if ((y % 2) == 1) {
+							if ((x % 3) == 1) { isHit = true; }
+						}
+						if (!isHit) { continue; }
 
-
-			for (int ID = 0; ID < grassDiv; ID++) {
-				this->grassLen[ID].first = 10000.f*Scale_Rate;
-				this->grassLen[ID].second = ID;
-				if (grasss != 0) {
-					this->grass__[ID].Check_CameraViewClip(grassPosMin[ID], grassPosMax[ID]);
-					if (this->grass__[ID].canlook) {
-						this->grassLen[ID].first = ((grassPosMin[ID] + grassPosMax[ID]) / 2.f - GetCameraPosition()).Length();
-						this->grassLen[ID].second = ID;
+						OneSize++;
 					}
 				}
 			}
-			std::sort(this->grassLen.begin(), this->grassLen.end(), [&](const std::pair<float, int>&A, const std::pair<float, int>&B) {return A.first < B.first; });
+			this->m_LightPoiont.resize(OneSize);
+			VECTOR_ref BasePos;
+			int loop = 0;
+			for (int y = 0; y < Size; y++) {
+				for (int x = 0; x < Size; x++) {
+					if (m_MazeControl.PosIsPath(x, y)) {
+						bool isHit = false;
+						if ((y % 4) == 0) {
+							if ((x % 3) == 0) { isHit = true; }
+						}
+						if ((y % 4) == 2) {
+							if ((x % 3) == 2) { isHit = true; }
+						}
+						if ((y % 2) == 1) {
+							if ((x % 3) == 1) { isHit = true; }
+						}
+						if (!isHit) { continue; }
 
-			for (int i = 0; i < grassDiv / 2; i++) {
-				int ID = this->grassLen[i].second;
-#ifdef DEBUG
-				//DrawCube3D(grassPosMin[ID].get(), grassPosMax[ID].get(), GetColor(0, 0, 0), GetColor(0, 0, 0), FALSE);
-#endif
-				if (grasss != 0) {
-					if (this->grassLen[i].first < 4000.f*Scale_Rate) {
-						grass__[ID].Draw();
+						BasePos.Set(tileSize * (float)x, 0.f, tileSize * (float)y);
+						BasePos -= VECTOR_ref::vget(tileSize * (float)(Size) / 2.f, 0.f, tileSize * (float)(Size) / 2.f);
+						BasePos.yadd(2.65f*Scale_Rate);
+
+						this->m_LightPoiont[loop].m_Pos = BasePos;
+						this->m_LightPoiont[loop].m_Obj = this->m_ObjLightBase.Duplicate();
+						this->m_LightPoiont[loop].m_SlingZrad.Init(0.05f*Scale_Rate, 3.f, deg2rad(0));
+						loop++;
 					}
 				}
 			}
-			//SetLightDirection(dir);
-
-			SetUseLightAngleAttenuation(TRUE);
-			//SetUseLighting(TRUE);
-			SetDrawAlphaTest(-1, 0);
-			SetFogEnable(FALSE);
+			for (int i = 0; i < 2; i++) {
+				m_LightHandle[i] = CreateSpotLightHandle(
+					this->m_LightPoiont[i].m_Pos.get(),
+					VGet(0.0f, -1.0f, 0.0f),
+					DX_PI_F / 4.0f,
+					DX_PI_F / 6.0f,
+					5.0f*Scale_Rate,
+					0.0f,
+					0.006f,
+					0.0f);
+				SetLightDifColorHandle(m_LightHandle[i], GetColorF(1.f, 1.f, 1.f, 1.f));
+				SetLightSpcColorHandle(m_LightHandle[i], GetColorF(0.01f, 0.01f, 0.01f, 0.f));
+				SetLightAmbColorHandle(m_LightHandle[i], GetColorF(0.1f, 0.1f, 0.1f, 1.f));
+			}
+			ChangeLightTypeSpot(this->m_LightPoiont[3].m_Pos.get(),
+				VGet(0.0f, -1.0f, 0.0f),
+				DX_PI_F / 4.0f,
+				DX_PI_F / 6.0f,
+				5.0f*Scale_Rate,
+				0.0f,
+				0.006f,
+				0.0f);
+			SetLightDifColor(GetColorF(1.f, 1.f, 1.f, 1.f));
+			SetLightSpcColor(GetColorF(0.01f, 0.01f, 0.01f, 0.f));
+			SetLightAmbColor(GetColorF(0.1f, 0.1f, 0.1f, 1.f));
 		}
-	};
+	}
+	void			BuildControl::Execute(void) noexcept {
+		auto* DrawParts = DXDraw::Instance();
+		for (int i = 0; i < this->m_LightPoiont.size(); i++) {
+			auto& o = this->m_LightPoiont[i];
+
+			o.m_SlingZrad.Execute();
+
+			o.m_SlingZrad.AddRad(1.f / FPS * o.m_SlingPower);
+			o.m_SlingPower = 0.f;
+
+			if (o.m_isHit) {
+				o.m_Pos.yadd(o.m_Yadd);
+				o.m_Yadd += M_GR / (FPS * FPS);
+				o.m_EraseTimer -= 1.f / FPS;
+			}
 
 
-	Grass::Grass() {
-		m_Impl = new Impl();
-	}
-	Grass::~Grass() {}
-	void Grass::Init(const MV1* MapCol, int softimage, const char* Graph, const char* Model, float MAPX, float MAPZ, int count) {
-		m_Impl->Init(MapCol, softimage, Graph, Model, MAPX, MAPZ, count);
-	}
-	void Grass::Dispose(void) noexcept {
-		m_Impl->Dispose();
-	}
-	void Grass::Draw(void) noexcept {
-		m_Impl->Draw();
-	}
+			o.m_SlingZrad.GetRad();
 
+			auto Vec = (o.m_Pos - DrawParts->GetMainCamera().GetCamPos());
+			o.m_Obj.SetMatrix(MATRIX_ref::RotAxis(Vec.Norm(), o.m_SlingZrad.GetRad()) * MATRIX_ref::Mtrans(o.m_Pos));
+			o.m_length = Vec.Length();
+
+			if (o.m_EraseTimer <= 0.f) {
+				std::swap(o, this->m_LightPoiont.back());
+				this->m_LightPoiont.pop_back();
+				i--;
+			}
+		}
+		std::sort(this->m_LightPoiont.begin(), this->m_LightPoiont.end(), [&](const Lights& a, const Lights& b) { return a.m_length < b.m_length && !a.m_isHit; });
+
+		int count = 0;
+		for (auto& o : this->m_LightPoiont) {
+			auto vec1 = (DrawParts->GetMainCamera().GetCamVec() - DrawParts->GetMainCamera().GetCamPos());
+			auto vec2 = (o.m_Pos - DrawParts->GetMainCamera().GetCamPos()); vec2.y(0.f);
+			float dot = vec1.Norm().dot(vec2.Norm());
+			if (dot > std::sin(deg2rad(-60))) {
+				auto Vec = MATRIX_ref::Vtrans(VECTOR_ref::up()*-1.f, MATRIX_ref::RotAxis((o.m_Pos - DrawParts->GetMainCamera().GetCamPos()).Norm(), o.m_SlingZrad.GetRad()));
+				if (count <= 1) {
+					SetLightPositionHandle(m_LightHandle[count], o.m_Pos.get());
+					SetLightDirectionHandle(m_LightHandle[count], Vec.get());
+				}
+				else {
+					SetLightPosition(o.m_Pos.get());
+					SetLightDirection(Vec.get());
+				}
+				count++;
+				if (count >= 2) { break; }
+			}
+		}
+	}
+	void			BuildControl::Draw() noexcept {
+		auto* DrawParts = DXDraw::Instance();
+		int fog_enable = 0;
+		int fog_mode = 0;
+		int fog_r = 0, fog_g = 0, fog_b = 0;
+		float fog_start = 0.f, fog_end = 0.f;
+		float fog_density = 0.f;
+
+		fog_enable = GetFogEnable();													// フォグが有効かどうかを取得する( TRUE:有効  FALSE:無効 )
+		fog_mode = GetFogMode();														// フォグモードを取得する
+		GetFogColor(&fog_r, &fog_g, &fog_b);											// フォグカラーを取得する
+		GetFogStartEnd(&fog_start, &fog_end);											// フォグが始まる距離と終了する距離を取得する( 0.0f ～ 1.0f )
+		fog_density = GetFogDensity();													// フォグの密度を取得する( 0.0f ～ 1.0f )
+
+		SetFogEnable(TRUE);
+		SetFogMode(DX_FOGMODE_EXP2);
+		SetFogStartEnd(Scale_Rate*6.f, Scale_Rate*10.f);
+		SetFogColor(26, 29, 20);
+		SetFogDensity(0.01f);
+		for (auto& b : this->m_ObjBuilds) {
+			auto Pos = b.GetObj().GetMatrix().pos();
+			auto Vec = (Pos - DrawParts->GetMainCamera().GetCamPos()); Vec.y(0.f);
+			auto Len = Vec.Length();
+			if (Len <= 15.f*Scale_Rate) {
+				if (CheckCameraViewClip_Box(
+					(Pos + VECTOR_ref::vget(-1.5f*Scale_Rate, -0.5f*Scale_Rate, -1.5f*Scale_Rate)).get(),
+					(Pos + VECTOR_ref::vget(1.5f*Scale_Rate, 3.f*Scale_Rate, 1.5f*Scale_Rate)).get()) == FALSE
+					) {
+					b.GetObj().DrawMesh(b.GetMeshSel());
+				}
+			}
+		}
+		for (auto& b : this->m_LightPoiont) {
+			auto Pos = b.m_Pos;
+			auto Vec = (Pos - DrawParts->GetMainCamera().GetCamPos()); Vec.y(0.f);
+			auto Len = Vec.Length();
+			if (Len <= 15.f*Scale_Rate) {
+				if (CheckCameraViewClip_Box(
+					(Pos + VECTOR_ref::vget(-1.5f*Scale_Rate, -0.5f*Scale_Rate, -1.5f*Scale_Rate)).get(),
+					(Pos + VECTOR_ref::vget(1.5f*Scale_Rate, 3.f*Scale_Rate, 1.5f*Scale_Rate)).get()) == FALSE
+					) {
+					b.m_Obj.DrawModel();
+				}
+			}
+		}
+
+		SetFogEnable(fog_enable);
+		SetFogMode(fog_mode);
+		SetFogColor(fog_r, fog_g, fog_b);
+		SetFogStartEnd(fog_start, fog_end);
+		SetFogDensity(fog_density);
+		//
+		SetUseLighting(FALSE);
+		float rad = -(DrawParts->GetMainCamera().GetCamVec() - DrawParts->GetMainCamera().GetCamPos()).cross(VECTOR_ref::up()).dot(DrawParts->GetMainCamera().GetCamUp());
+		int max = (int)this->m_LightPoiont.size();
+		for (int i = max - 1; i >= 0; i--) {
+			auto& o = this->m_LightPoiont[i];
+			if (!o.m_isHit) {
+				auto Pos = o.m_Pos;
+				auto Vec = (Pos - DrawParts->GetMainCamera().GetCamPos()); Vec.y(0.f);
+				auto Len = Vec.Length();
+				if (Len <= 15.f*Scale_Rate) {
+					if (CheckCameraViewClip_Box(
+						(Pos + VECTOR_ref::vget(-1.5f*Scale_Rate, -0.5f*Scale_Rate, -1.5f*Scale_Rate)).get(),
+						(Pos + VECTOR_ref::vget(1.5f*Scale_Rate, 3.f*Scale_Rate, 1.5f*Scale_Rate)).get()) == FALSE
+						) {
+						float per = 0.5f*std::clamp((Len - 50.f) / 30.f, 0.f, 1.f);
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
+						DrawBillboard3D(o.m_Pos.get(), 0.5f, 1.f, 2.2f*Scale_Rate, rad + o.m_SlingZrad.GetRad(), Light_Graph.get(), TRUE);
+					}
+				}
+			}
+		}
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+		SetUseLighting(TRUE);
+	}
+	void			BuildControl::Dispose(void) noexcept {
+		this->m_ObjBuildBase.Dispose();
+		this->m_ColBuildBase.Dispose();
+		m_MazeControl.Reset();
+		for (auto& b : this->m_LightPoiont) {
+			b.m_Obj.Dispose();
+		}
+		m_LightPoiont.clear();
+		Light_Graph.Dispose();
+	}
 };

@@ -1,4 +1,4 @@
-grass_level=1
+grass_level=0
 DoF=true
 bloom=true
 shadow=false

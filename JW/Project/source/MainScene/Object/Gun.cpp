@@ -9,7 +9,7 @@ namespace FPS_n2 {
 			if (MagName != nullptr) {
 				std::string magName = MagName;
 				auto* ObjMngr = ObjectManager::Instance();
-				this->m_Mag_Ptr = (std::shared_ptr<MagazineClass>&)(*ObjMngr->AddObject(ObjType::Magazine, ("data/mag/" + magName + "/").c_str()));
+				this->m_Mag_Ptr = (std::shared_ptr<MagazineClass>&)(*ObjMngr->AddObject(ObjType::Magazine, PHYSICS_SETUP::DISABLE, false, ("data/mag/" + magName + "/").c_str()));
 				this->m_Mag_Ptr->SetAmmo(GetAmmoAll());
 				this->m_in_chamber = false;
 			}

@@ -12,7 +12,7 @@ namespace FPS_n2 {
 			switchs											m_ResetP;
 			std::shared_ptr<BackGroundClassBase>				m_BackGround;				//BGƒRƒs[
 		public:
-			void	LoadModel(ObjectBaseClass* pObj, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") const noexcept {
+			void	LoadModel(PHYSICS_SETUP TYPE, bool UseToonWhenCreateFile, ObjectBaseClass* pObj, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") const noexcept {
 				bool iscopy = false;
 				for (auto& o : this->m_Object) {
 					if (o->GetIsBaseModel(filepath, objfilename, colfilename)) {
@@ -22,12 +22,12 @@ namespace FPS_n2 {
 					}
 				}
 				if (!iscopy) {
-					pObj->LoadModel(filepath, objfilename, colfilename);
+					pObj->LoadModel(TYPE, UseToonWhenCreateFile, filepath, objfilename, colfilename);
 				}
 				pObj->SetFrameNum();
 			}
 
-			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") noexcept;
+			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType, PHYSICS_SETUP TYPE, bool UseToonWhenCreateFile, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") noexcept;
 			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType) noexcept;
 			std::shared_ptr<ObjectBaseClass>* GetObj(ObjType ModelType, int num) noexcept {
 				int cnt = 0;
