@@ -11,16 +11,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\DX_VR\RaumabowSix\Project\source\MainScene\CharaAnimData.hpp" />
     <ClInclude Include="..\..\..\DX_VR\RaumabowSix\Project\source\MainScene\Object\AmmoData.hpp" />
     <ClInclude Include="source\Enums.hpp" />
     <ClInclude Include="source\Header.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGround.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGroundSub.hpp" />
+    <ClInclude Include="source\MainScene\CharaAnimData.hpp" />
     <ClInclude Include="source\MainScene\NetworkBrowser.hpp" />
     <ClInclude Include="source\MainScene\Object\Ammo.hpp" />
     <ClInclude Include="source\MainScene\Object\AmmoData.hpp" />
     <ClInclude Include="source\MainScene\Object\AmmoEnum.hpp" />
+    <ClInclude Include="source\MainScene\Object\Cart.hpp" />
     <ClInclude Include="source\MainScene\Object\Character.hpp" />
     <ClInclude Include="source\MainScene\Object\CharacterEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\Character_before.hpp" />
@@ -44,6 +45,7 @@
     <ClCompile Include="source\MainScene\BackGround\BackGround.cpp" />
     <ClCompile Include="source\MainScene\BackGround\BackGroundSub.cpp" />
     <ClCompile Include="source\MainScene\CharaAnimData.cpp" />
+    <ClCompile Include="source\MainScene\Object\Cart.cpp" />
     <ClCompile Include="source\MainScene\Object\Character.cpp" />
     <ClCompile Include="source\MainScene\Object\Character_before.cpp" />
     <ClCompile Include="source\MainScene\Object\Gun.cpp" />

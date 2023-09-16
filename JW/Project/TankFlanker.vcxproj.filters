@@ -111,7 +111,10 @@
     <ClInclude Include="..\..\..\DX_VR\RaumabowSix\Project\source\MainScene\Object\AmmoData.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\DX_VR\RaumabowSix\Project\source\MainScene\CharaAnimData.hpp">
+    <ClInclude Include="source\MainScene\Object\Cart.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\CharaAnimData.hpp">
       <Filter>ソース ファイル\MainScene</Filter>
     </ClInclude>
   </ItemGroup>
@@ -157,6 +160,9 @@
     </ClCompile>
     <ClCompile Include="source\sub.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\Cart.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

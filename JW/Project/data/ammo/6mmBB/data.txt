@@ -1,3 +1,4 @@
+Name=6mmBB
 ammo_cal(mm)=6.0
 ammo_speed(m/s)=90
 ammo_pene(mm)=6

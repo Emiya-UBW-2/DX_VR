@@ -3,6 +3,7 @@
 #include "MainScene/Object/Gun.hpp"
 #include "MainScene/Object/Magazine.hpp"
 #include "MainScene/Object/Character.hpp"
+#include "MainScene/Object/Cart.hpp"
 
 const FPS_n2::Sceneclass::ObjectManager* SingletonBase<FPS_n2::Sceneclass::ObjectManager>::m_Singleton = nullptr;
 namespace FPS_n2 {
@@ -24,6 +25,10 @@ namespace FPS_n2 {
 			case ObjType::Gun:
 				this->m_Object.resize(this->m_Object.size() + 1);
 				this->m_Object.back() = std::make_shared<GunClass>();
+				break;
+			case ObjType::Cart:
+				this->m_Object.resize(this->m_Object.size() + 1);
+				this->m_Object.back() = std::make_shared<CartClass>();
 				break;
 			default:
 				break;
@@ -53,6 +58,10 @@ namespace FPS_n2 {
 			case ObjType::Gun:
 				this->m_Object.resize(this->m_Object.size() + 1);
 				this->m_Object.back() = std::make_shared<GunClass>();
+				break;
+			case ObjType::Cart:
+				this->m_Object.resize(this->m_Object.size() + 1);
+				this->m_Object.back() = std::make_shared<CartClass>();
 				break;
 			default:
 				break;

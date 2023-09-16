@@ -13,15 +13,16 @@ namespace FPS_n2 {
 			auto* AnimMngr = GunAnimManager::Instance();
 
 			SE->Add((int)SoundEnum::LaserSwitch, 1, "data/Sound/SE/aim_on.wav", false);
+			SE->Add((int)SoundEnum::CateFall, 6, "data/Sound/SE/gun/cate/case_1.wav", false);
 			SE->Add((int)SoundEnum::Env, 1, "data/Sound/SE/envi.wav", false);
 			SE->Add((int)SoundEnum::Env2, 1, "data/Sound/SE/envi2.wav", false);
 			SE->Add((int)SoundEnum::StandUp, 1, "data/Sound/SE/move/sliding.wav", false);
 			SE->Add((int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
 			for (int i = 0; i < 5; i++) {
-				SE->Add((int)SoundEnum::Cocking2_0 + i, 3, "data/Sound/SE/gun/autoM16/" + std::to_string(i) + ".wav");
+				SE->Add((int)SoundEnum::Cocking2_0 + i, 4, "data/Sound/SE/gun/autoM16/" + std::to_string(i) + ".wav");
 			}
 			for (int i = 0; i < 5; i++) {
-				SE->Add((int)SoundEnum::Cocking3_0 + i, 3, "data/Sound/SE/gun/auto1911/" + std::to_string(i) + ".wav");
+				SE->Add((int)SoundEnum::Cocking3_0 + i, 4, "data/Sound/SE/gun/auto1911/" + std::to_string(i) + ".wav");
 				if (i == 2) {
 					SOUND3D_REVERB_PARAM ReverbParam;
 					ReverbParam.WetDryMix = 100.0f;
@@ -148,23 +149,10 @@ namespace FPS_n2 {
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(65), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(VECTOR_ref::vget(0, 15, -20), VECTOR_ref::vget(0, 15, 0), VECTOR_ref::vget(0, 1, 0));
 			//サウンド
+			SE->Get((int)SoundEnum::CateFall).SetVol_Local(48);
 			SE->Get((int)SoundEnum::Trigger).SetVol_Local(48);
-			for (int i = 0; i < 4; i++) {
-				SE->Get((int)SoundEnum::Cocking1_0 + i).SetVol_Local(128);
-			}
-			for (int i = 0; i < 2; i++) {
-				SE->Get((int)SoundEnum::Cocking2_0 + i).SetVol_Local(255);
-			}
 			SE->Get((int)SoundEnum::Shot2).SetVol_Local(216);
-			SE->Get((int)SoundEnum::Unload2).SetVol_Local(255);
-			SE->Get((int)SoundEnum::Load2).SetVol_Local(255);
-			for (int i = 0; i < 2; i++) {
-				SE->Get((int)SoundEnum::Cocking3_0 + i).SetVol_Local(255);
-			}
 			SE->Get((int)SoundEnum::Shot3).SetVol_Local(216);
-			SE->Get((int)SoundEnum::Unload3).SetVol_Local(255);
-			SE->Get((int)SoundEnum::Load3).SetVol_Local(255);
-
 			SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
 			SE->Get((int)SoundEnum::Heart).SetVol_Local(92);
 			//UI
@@ -291,7 +279,7 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* SE = SoundPool::Instance();
-			//auto* OptionParts = OPTION::Instance();
+			auto* OptionParts = OPTION::Instance();
 #ifdef DEBUG
 			//auto* DebugParts = DebugClass::Instance();					//デバッグ
 #endif // DEBUG
@@ -513,7 +501,22 @@ namespace FPS_n2 {
 						Easing(&far_t, Scale_Rate * 30.f, 0.9f, EasingType::OutExpo);
 					}
 					//fov
-					fov_t = Chara->GetFov();
+					{
+						float fov = deg2rad(OptionParts->Get_Fov());
+						if (Chara->GetIsADS()) {
+							fov -= deg2rad(15);
+						}
+						else if (Chara->GetRun()) {
+							fov += deg2rad(5);
+						}
+						if (Chara->GetShotSwitch()) {
+							fov -= deg2rad(5);
+							Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
+						}
+						else {
+							Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
+						}
+					}
 					DrawParts->SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
 					//DoF
 					if (Chara->GetIsADS()) {
@@ -536,7 +539,7 @@ namespace FPS_n2 {
 			for (auto& c : this->character_Pool) {
 				c->SetLaser(&character_Pool);
 				VECTOR_ref CamPos = Lerp(c->GetEyePosition(), c->GetScopePos(), c->GetADSPer());
-				VECTOR_ref Laserpos = GetScreenPos(CamPos, CamPos + c->GetEyeVector(), c->GetMatrix().yvec(), c->GetFov(), c->GetLaser());
+				VECTOR_ref Laserpos = GetScreenPos(CamPos, CamPos + c->GetEyeVector(), c->GetMatrix().yvec(), DrawParts->GetMainCamera().GetCamFov(), c->GetLaser());
 				if (0.f < Laserpos.z() && Laserpos.z() < 1.f) {
 					c->SetLaser2D(Laserpos);
 				}

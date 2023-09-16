@@ -11,6 +11,7 @@ namespace FPS_n2 {
 			CheckStart,
 			Check,
 			CheckEnd,
+			ReloadStart_Empty,
 			ReloadStart,
 			ReloadOne,
 			ReloadEnd,
@@ -118,19 +119,6 @@ namespace FPS_n2 {
 			"Ç®",
 			"ê^ñ ñ⁄",
 			"Ç‹ÇŒÇΩÇ´",
-		};
-
-		enum class CharaAnimPhase {
-			Normal,
-			Shot,
-			Cocking,
-			Unload,
-			LoadOne,
-			LoadEnd,
-			CheckStart,
-			Check,
-			CheckEnd,
-			Max,
 		};
 	};
 };

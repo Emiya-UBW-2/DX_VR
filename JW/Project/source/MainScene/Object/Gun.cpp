@@ -10,8 +10,17 @@ namespace FPS_n2 {
 				std::string magName = MagName;
 				auto* ObjMngr = ObjectManager::Instance();
 				this->m_Mag_Ptr = (std::shared_ptr<MagazineClass>&)(*ObjMngr->AddObject(ObjType::Magazine, PHYSICS_SETUP::DISABLE, false, ("data/mag/" + magName + "/").c_str()));
+				this->m_Mag_Ptr->SetIsHand(true);
 				this->m_Mag_Ptr->SetAmmo(GetAmmoAll());
+
+				this->m_FallMag_Ptr = (std::shared_ptr<MagazineClass>&)(*ObjMngr->AddObject(ObjType::Magazine, PHYSICS_SETUP::DISABLE, false, ("data/mag/" + magName + "/").c_str()));
+				this->m_FallMag_Ptr->SetIsHand(false);
+
 				this->m_in_chamber = false;
+				//’e‘•“U
+				for (auto& c : m_CartPtr) {
+					c = (std::shared_ptr<CartClass>&)(*ObjMngr->AddObject(ObjType::Cart, PHYSICS_SETUP::DISABLE, false, this->m_Mag_Ptr->GetAmmoSpec()->GetPath().c_str(), "ammo"));
+				}
 			}
 			else {
 				this->m_Mag_Ptr.reset();
@@ -24,23 +33,29 @@ namespace FPS_n2 {
 			switch (GetShotType()) {
 			case SHOTTYPE::FULL:
 			case SHOTTYPE::SEMI:
-				this->m_IsChamberMove |= ((this->m_ShotPhase == CharaAnimPhase::Shot) && (GetNowAnime().time >= 3.f));
-				IsEject |= ((this->m_ShotPhase == CharaAnimPhase::Shot) && (GetNowAnime().time >= 1.f));
+				this->m_IsChamberMove |= ((this->m_ShotPhase == GunAnimeID::Shot) && (GetNowAnime().time >= 3.f));
+				IsEject |= ((this->m_ShotPhase == GunAnimeID::Shot) && (1.f <= GetNowAnime().time && GetNowAnime().time <= 2.f));
 
-				this->m_IsChamberMove |= ((this->m_ShotPhase == CharaAnimPhase::Cocking) && (GetNowAnime().time >= 25.f));
-				IsEject |= ((this->m_ShotPhase == CharaAnimPhase::Cocking) && (GetNowAnime().time >= 19.f));
+				this->m_IsChamberMove |= ((this->m_ShotPhase == GunAnimeID::Cocking) && (GetNowAnime().time >= 25.f));
+				//IsEject |= ((this->m_ShotPhase == GunAnimeID::Cocking) && (GetNowAnime().time >= 19.f && !GetNowAnime().TimeEnd()));
 				break;
 			case SHOTTYPE::BOLT:
-				this->m_IsChamberMove |= ((this->m_ShotPhase == CharaAnimPhase::LoadEnd) && (GetNowAnime().time >= 5.f));
-				IsEject |= ((this->m_ShotPhase == CharaAnimPhase::Unload) && (GetNowAnime().time >= 19.f));
+				this->m_IsChamberMove |= ((this->m_ShotPhase == GunAnimeID::ReloadEnd) && (GetNowAnime().time >= 5.f));
+				IsEject |= ((
+					this->m_ShotPhase == GunAnimeID::ReloadStart_Empty ||
+					this->m_ShotPhase == GunAnimeID::ReloadStart
+					) && (GetNowAnime().time >= 19.f && !GetNowAnime().TimeEnd()));
 
-				this->m_IsChamberMove |= ((this->m_ShotPhase == CharaAnimPhase::Cocking) && (GetNowAnime().time >= 25.f));
-				IsEject |= ((this->m_ShotPhase == CharaAnimPhase::Cocking) && (GetNowAnime().time >= 19.f));
+				this->m_IsChamberMove |= ((this->m_ShotPhase == GunAnimeID::Cocking) && (GetNowAnime().time >= 25.f));
+				IsEject |= ((this->m_ShotPhase == GunAnimeID::Cocking) && (GetNowAnime().time >= 19.f && !GetNowAnime().TimeEnd()));
 				break;
 			default:
 				break;
 			}
 
+			if (IsEject) {
+				SetCart();
+			}
 			if (this->m_IsChamberMove) {
 				if (this->m_IsChamberMove != Prev) {
 					this->m_AmmoData = this->m_Mag_Ptr->GetAmmoSpec();//ƒ}ƒKƒWƒ“‚Ìˆê”Ôã‚Ì’eƒf[ƒ^‚ðŽæ‚é
@@ -68,6 +83,8 @@ namespace FPS_n2 {
 			LastAmmo->Put(this->m_AmmoData, mat.pos(), mat.zvec() * -1.f, m_MyID);
 			this->m_AmmoData.reset();
 			this->m_AmmoData = nullptr;
+
+			m_LinePer = std::clamp(m_LinePer + 0.1f, 0.f, 1.f);
 		}
 	};
 };

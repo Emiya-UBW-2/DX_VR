@@ -31,11 +31,11 @@ namespace FPS_n2 {
 			CharaTypeID											m_CharaType;
 			std::vector<CharaAnimeSet>							m_CharaAnimeSet;
 			std::vector<GunAnimeSet>							m_GunAnimeSet;
+
 			int													m_CharaAnimeSel{ 0 };
 			int													m_ReadyAnimeSel{ 0 };
 			int													m_AimAnimeSel{ 0 };
 			int													m_CheckAnimeSel{ 0 };
-			float												m_FastSwitchPer{ 1.f };
 			//
 			std::array<float, (int)CharaAnimeID::AnimeIDMax>	m_AnimPerBuf{ 0 };
 			VECTOR_ref											m_PosBuf;
@@ -53,24 +53,65 @@ namespace FPS_n2 {
 			CharaGunAnimeID										m_GunAnimSelect;
 			CharaAnimeID										m_BottomAnimSelect;
 			std::array<float, (int)CharaGunAnimeID::Max>		m_GunAnimFrame;
-			float			GetAllTime(CharaGunAnimeID ID) { return (float)m_CharaAnimeSet.at(this->m_CharaAnimeSel).m_GunAnimFrame.at((int)ID); }
+			float			GetAllTime(CharaGunAnimeID ID) { return (float)m_CharaAnimeSet.at(this->m_CharaAnimeSel).m_GunAnimAllFrame.at((int)ID); }
 			void			UpdateGunAnim(CharaGunAnimeID ID, float speed) { m_GunAnimFrame.at((int)ID) += 30.f / FPS * speed; }
+			bool			GetGunAnimZero(CharaGunAnimeID ID) { return m_GunAnimFrame.at((int)ID) <= 0.f; }
 			bool			GetGunAnimEnd(CharaGunAnimeID ID) { return m_GunAnimFrame.at((int)ID) >= GetAllTime(ID); }
 			float			GetTimePer(CharaGunAnimeID ID) { return (GetAllTime(ID) > 0.f) ? (m_GunAnimFrame.at((int)ID) / GetAllTime(ID)) : 1.f; }
 
 			//e
 			float												m_ReadyTimer{ 0.f };
 			float												m_ReadyPer{ 0.f };
-			float												m_ReloadPer{ 0.f };
-			float												m_ReloadEyePer{ 0.f };
 
-			float												m_CheckPer{ 0.f };
+			class ArmMovePerClass {
+				float												m_ArmPer{ 0.f };
+				bool												m_Armon{ false };
+			public:
+				void Init(bool isOn)noexcept {
+					m_Armon = isOn;
+					m_ArmPer = isOn ? 1.f : 0.f;
+				}
+				void Execute(bool isOn, float OnOver = 0.2f, float OffOver = 0.2f) noexcept {
+					if (isOn) {
+						if (m_Armon) {
+							Easing(&this->m_ArmPer, 1.f, 0.9f, EasingType::OutExpo);
+						}
+						else {
+							Easing(&this->m_ArmPer, 1.f + OnOver, 0.8f, EasingType::OutExpo);
+							if (this->m_ArmPer >= 1.f + OnOver / 2.f) {
+								m_Armon = true;
+							}
+						}
+					}
+					else {
+						if (!m_Armon) {
+							Easing(&this->m_ArmPer, 0.f, 0.9f, EasingType::OutExpo);
+						}
+						else {
+							Easing(&this->m_ArmPer, 0.f - OffOver, 0.8f, EasingType::OutExpo);
+							if (this->m_ArmPer <= 0.f - OffOver / 2.f) {
+								m_Armon = false;
+							}
+						}
+					}
+				}
+			public:
+				const auto& Per() { return m_ArmPer; }
+			};
+
+			ArmMovePerClass										m_ReadyArm;
+			ArmMovePerClass										m_ReloadStartEmptyArm;
+			ArmMovePerClass										m_ReloadStartArm;
+			ArmMovePerClass										m_ReloadArm;
+			ArmMovePerClass										m_CheckArm;
+
+			float												m_ReloadEyePer{ 0.f };
 			float												m_CheckEyePer{ 0.f };
 
-			CharaAnimPhase										m_ShotPhase{ CharaAnimPhase::Normal };
+			GunAnimeID											m_ShotPhase{ GunAnimeID::Base };
 
-			float												m_MagHans{ 0.f };
-			float												m_MagHansPer{ 0.f };
+			bool												m_MagHand{ false };
+			ArmMovePerClass										m_MagArm;
 			float												m_MoveEyePosTimer{ 0.f };
 			VECTOR_ref											m_MoveEyePos;
 			bool												m_IsStuckGun{ false };
@@ -107,7 +148,6 @@ namespace FPS_n2 {
 			VECTOR_ref											LaserEndPos2D;
 			//
 			float												m_ADSPer = 0.f;
-			float												m_Fov = 0.f;
 			//
 			VECTOR_ref											m_PrevPos;
 			VECTOR_ref											m_WalkSwingRad;
@@ -165,8 +205,8 @@ namespace FPS_n2 {
 			void			SetDamageSwitchRec(unsigned long long value) noexcept { this->m_DamageSwitchRec = value; }
 			void			ResetFrameLocalMat(CharaFrame frame) noexcept { GetObj().frame_Reset(GetCharaFrame(frame)); }
 			void			LoadReticle(void) noexcept {
-				if (this->m_Gun_Ptr != nullptr) {
-					this->m_Gun_Ptr->LoadReticle();
+				if (GetGunPtrNow() != nullptr) {
+					GetGunPtrNow()->LoadReticle();
 				}
 			}
 			bool			SetDamageEvent(const DamageEvent& value) noexcept {
@@ -182,9 +222,9 @@ namespace FPS_n2 {
 			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
 			void			SetGunPtr(const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_Gun_Ptr = pGunPtr0; }
 			void			GunSetUp() noexcept {
-				if (this->m_Gun_Ptr != nullptr) {
-					this->m_CharaAnimeSel = this->m_Gun_Ptr->GetHumanAnimType();
-					this->m_Gun_Ptr->SetPlayerID(this->m_MyID);
+				if (GetGunPtrNow() != nullptr) {
+					this->m_CharaAnimeSel = GetGunPtrNow()->GetHumanAnimType();
+					GetGunPtrNow()->SetPlayerID(this->m_MyID);
 				}
 			}
 		public://ƒQƒbƒ^[
@@ -199,20 +239,11 @@ namespace FPS_n2 {
 			const auto		GetReticleSize(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetReticleSize() : 1.f; }
 			const auto		GetReticlePos(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetReticlePos() : VECTOR_ref::zero(); }
 			const auto		GetLensPosSize(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetLensPosSize() : VECTOR_ref::zero(); }
-			const auto		GetCanshot(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? (GetGunPtrNow_Const()->GetCanShot() && (this->m_ShotPhase <= CharaAnimPhase::Shot)) : false; }
+			const auto		GetCanshot(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? (GetGunPtrNow_Const()->GetCanShot() && (this->m_ShotPhase <= GunAnimeID::Shot)) : false; }
 			const auto		GetAmmoNum(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetAmmoNum() : 0; }
 			const auto		GetAmmoAll(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetAmmoAll() : 0; }
-			const auto		GetShotSwitch(void) const noexcept { return this->m_ShotPhase == CharaAnimPhase::Shot; }
-
-			const auto		GetRunGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Run; }
-			const auto		GetReadyGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Ready; }
-			const auto&		GetAimGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Aim; }
-			const auto&		GetCheckGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Check; }
-			const auto		GetADSGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_ADS; }
-			const auto		GetReloadGunAnimSel(void) const noexcept { return this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Reload; }
-
+			const auto		GetShotSwitch(void) const noexcept { return this->m_ShotPhase == GunAnimeID::Shot; }
 			const auto&		GetADSPer(void) const noexcept { return this->m_ADSPer; }
-
 			const auto		GetEyeVecMat(void) const noexcept {
 				auto tmpSwingMatrix =
 					MATRIX_ref::RotZ(deg2rad(m_WalkSwing.z()*m_WalkSwingRad.z()))*
@@ -265,27 +296,6 @@ namespace FPS_n2 {
 				return false;
 			}
 		public:
-			const auto&		GetFov(void) const noexcept { return this->m_Fov; }
-			const auto		CalcFov() noexcept {
-				float fov = 0;
-				if (this->GetIsADS()) {
-					fov = deg2rad(60);
-				}
-				else if (this->GetRun()) {
-					fov = deg2rad(80);
-				}
-				else {
-					fov = deg2rad(75);
-				}
-
-				if (this->GetShotSwitch()) {
-					fov -= deg2rad(5);
-					Easing(&this->m_Fov, fov, 0.5f, EasingType::OutExpo);
-				}
-				else {
-					Easing(&this->m_Fov, fov, 0.9f, EasingType::OutExpo);
-				}
-			}
 			const auto		CheckLineHit(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
 				if (GetMinLenSegmentToPoint(StartPos, *pEndPos, m_move.pos) <= 2.0f*Scale_Rate) {
 					if (this->CheckLineHited(StartPos, pEndPos)) {									//‚Æ‚è‚ ‚¦‚¸“–‚½‚Á‚½‚©‚Ç‚¤‚©’T‚·

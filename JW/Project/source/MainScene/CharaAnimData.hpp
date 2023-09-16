@@ -3,6 +3,17 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		enum class EnumGunAnimType {
+			Aim,
+			ADS,
+			ReloadStart_Empty,
+			ReloadStart,
+			Reload,
+			Ready,
+			Run,
+			Check,
+			Max,
+		};
 		enum class EnumGunAnim {
 			M1911_ready1,
 			M1911_ready2,
@@ -10,6 +21,8 @@ namespace FPS_n2 {
 			M1911_aim2,
 			M1911_ads,
 			M1911_reload,
+			M1911_reloadstart_empty,
+			M1911_reloadstart,
 			M1911_run,
 			M1911_check1,
 			M16_ready1,
@@ -27,6 +40,8 @@ namespace FPS_n2 {
 			"M1911_aim2",
 			"M1911_ads",
 			"M1911_reload",
+			"M1911_reloadstart_empty",
+			"M1911_reloadstart",
 			"M1911_run",
 			"M1911_check1",
 			"M16_ready1",
@@ -82,8 +97,10 @@ namespace FPS_n2 {
 				m_Pos = Pos;
 			}
 		public:
-			const auto& GetRotate() const noexcept { return this->m_Rotate; }
-			const auto& GetPos() const noexcept { return this->m_Pos; }
+			const auto	GetRot() const noexcept {
+				return MATRIX_ref::RotY(deg2rad(this->m_Rotate.x())) * MATRIX_ref::RotX(deg2rad(this->m_Rotate.y())) * MATRIX_ref::RotZ(deg2rad(this->m_Rotate.z()));
+			}
+			const auto GetPos() const noexcept { return this->m_Pos*Scale_Rate; }
 		};
 		class GunAnim {
 			VECTOR_ref		m_Rotate;

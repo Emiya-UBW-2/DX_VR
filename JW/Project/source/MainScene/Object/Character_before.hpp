@@ -8,15 +8,12 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		struct CharaAnimeSet {
-			std::array<int, (int)CharaGunAnimeID::Max> m_GunAnimFrame;
+			std::array<int, (int)CharaGunAnimeID::Max> m_GunAnimAllFrame;
 		};
+
+
 		struct GunAnimeSet {
-			EnumGunAnim	m_Run{ EnumGunAnim::M1911_run };
-			std::vector<EnumGunAnim>	m_Ready;
-			std::vector<EnumGunAnim>	m_Aim;
-			std::vector<EnumGunAnim>	m_Check;
-			EnumGunAnim	m_ADS{ EnumGunAnim::M1911_ads };
-			EnumGunAnim	m_Reload{ EnumGunAnim::M1911_reload };
+			std::array<std::vector<EnumGunAnim>, (int)EnumGunAnimType::Max> m_Anim;
 		};
 
 		enum class HitType {

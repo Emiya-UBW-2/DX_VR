@@ -7,6 +7,7 @@ namespace FPS_n2 {
 			Base,//0
 			Shot,//1
 			Cocking,//2
+			ReloadStart_Empty,//3
 			ReloadStart,//3
 			ReloadOne,//4
 			ReloadEnd,//5

@@ -1,21 +1,49 @@
 #pragma once
 #include	"../../Header.hpp"
+#include "../../MainScene/Object/ObjectBase.hpp"
+#include "AmmoData.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class MagazineClass : public ObjectBaseClass {
 		private:
+			bool										m_IsHand{ true };
+
+			std::vector<std::shared_ptr<AmmoData>>		m_AmmoSpec;
 			int											m_Capacity{ 0 };
 			int											m_CapacityMax{ 0 };
 			MATRIX_ref									HandMatrix;
 			float										HandPer{ 0.f };
-			std::vector<std::shared_ptr<AmmoData>>		m_AmmoSpec;
 			RELOADTYPE									m_ReloadTypeBuf{ RELOADTYPE::MAG };
+
+			float m_yAdd{ 0.f };
+			float m_Timer{ 0.f };
+			bool m_SoundSwitch{ false };
 		public://ƒQƒbƒ^[
 			void			SetHandMatrix(const MATRIX_ref& value, float pPer, RELOADTYPE ReloadType) noexcept {
 				this->HandMatrix = value;
 				this->HandPer = pPer;
 				this->m_ReloadTypeBuf = ReloadType;
+			}
+
+			void			SetIsHand(bool value) noexcept {
+				this->m_IsHand = value;
+				if (!this->m_IsHand) {
+					this->m_Timer = 2.f;
+					this->m_IsActive = false;
+				}
+			}
+			void SetFall(const VECTOR_ref& pos, const MATRIX_ref& mat, const VECTOR_ref& vec) noexcept {
+				if (!this->m_IsHand) {
+					this->m_IsActive = true;
+					this->m_move.pos = pos;
+					this->m_move.vec = vec;
+					this->m_yAdd = 0.f;
+					this->m_move.repos = this->m_move.pos;
+					this->m_move.mat = mat;
+					this->m_Timer = 0.f;
+					this->m_SoundSwitch = true;
+				}
 			}
 
 			void			SetAmmo(int value) noexcept { this->m_Capacity = std::clamp(value, 0, m_CapacityMax); }
@@ -48,29 +76,18 @@ namespace FPS_n2 {
 				}
 				this->m_Capacity = this->m_CapacityMax;
 			}
-			void			FirstExecute(void) noexcept override {
-				{
-					switch (m_ReloadTypeBuf) {
-					case RELOADTYPE::MAG:
-					{
-						{
-							auto tmp = GetMove();
-							SetMove(
-								MATRIX_ref::RotX(deg2rad(-30.f*this->HandPer))*tmp.mat.GetRot(),
-								Lerp(tmp.pos, this->HandMatrix.pos(), this->HandPer));
+			void			FirstExecute(void) noexcept override;
+			void			Draw(bool isDrawSemiTrans) noexcept override {
+				if (this->m_IsActive && this->m_IsDraw) {
+					if (CheckCameraViewClip_Box(
+						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-0.1f*Scale_Rate, -0.1f*Scale_Rate, -0.1f*Scale_Rate)).get(),
+						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(0.1f*Scale_Rate, 0.1f*Scale_Rate, 0.1f*Scale_Rate)).get()) == FALSE
+						) {
+						if (!isDrawSemiTrans) {
+							this->m_obj.DrawModel();
 						}
 					}
-					break;
-					case RELOADTYPE::AMMO:
-					{
-					}
-					break;
-					default:
-						break;
-					}
 				}
-				//‹¤’Ê
-				ObjectBaseClass::FirstExecute();
 			}
 			void			Dispose(void) noexcept override {
 				this->m_AmmoSpec.clear();

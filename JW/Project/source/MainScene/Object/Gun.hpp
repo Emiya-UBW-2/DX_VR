@@ -8,6 +8,7 @@
 #include "../../MainScene/Object/AmmoData.hpp"
 #include "../../MainScene/Object/Ammo.hpp"
 #include "../../MainScene/Object/Magazine.hpp"
+#include "../../MainScene/Object/Cart.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -15,7 +16,7 @@ namespace FPS_n2 {
 		private:
 			GraphHandle						m_GunPic;						//
 			GraphHandle						m_reticlePic;					//
-			CharaAnimPhase					m_ShotPhase{ CharaAnimPhase::Normal };//
+			GunAnimeID					m_ShotPhase{ GunAnimeID::Base };//
 			std::vector<std::string>		m_MagName;						//
 			std::vector<SHOTTYPE>			m_ShotType;						//
 			std::vector<RELOADTYPE>			m_ReloadType;					//
@@ -25,17 +26,21 @@ namespace FPS_n2 {
 			bool							m_in_chamber{ true };			//チャンバー内に弾があるか
 			int								m_boltSoundSequence{ -1 };		//サウンド
 			std::shared_ptr<MagazineClass>	m_Mag_Ptr{ nullptr };			//刺さっているマガジン
+			std::shared_ptr<MagazineClass>	m_FallMag_Ptr{ nullptr };		//刺さっているマガジン
 			std::shared_ptr<AmmoData>		m_AmmoData{ nullptr };			//
 			bool							m_IsChamberMove{ false };		//チャンバー内に弾があるか
 			float							m_ChamberMovePer{ 0.f };
 			bool							m_UseMoveParts{ false };
-
-			int								GradTexHandle{ -1 };
-			int								NormalTexHandle{ -1 };
-			int								MetallicTexHandle{ -1 };
-
 			std::vector<GunSoundSet>		m_GunSoundSet;
 			int								m_SoundSel{ 0 };
+			//
+			float m_CartInterval{ 0.f };
+			std::array<std::shared_ptr<CartClass>, 4> m_CartPtr;
+			int m_NowShotCart{ 0 };
+			//
+			std::array<VECTOR_ref, 15> m_Line;
+			int m_LineSel = 0;
+			float m_LinePer{ 0.f };
 		public://ゲッター
 			const auto GetIsFrameActive(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first >= 0; }
 			const auto GetFrameLocalMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix(m_Frames[(int)frame].first); }
@@ -69,7 +74,7 @@ namespace FPS_n2 {
 			const auto& GetGunPic(void) const noexcept { return this->m_GunPic; }
 			const auto& GetHumanAnimType(void) const noexcept { return this->m_HumanAnimType; }
 			const auto& GetIsShot(void) const noexcept { return this->m_IsShot; }
-			void SetGunMatrix(const MATRIX_ref& value, CharaAnimPhase pShotPhase) noexcept {
+			void SetGunMatrix(const MATRIX_ref& value, GunAnimeID pShotPhase) noexcept {
 				SetMove(value.GetRot(), value.pos());
 				this->m_Mag_Ptr->SetMove(GetFrameWorldMat(GunFrame::Magpos).GetRot(), GetFrameWorldMat(GunFrame::Magpos).pos());
 				this->m_ShotPhase = pShotPhase;
@@ -77,9 +82,40 @@ namespace FPS_n2 {
 			void SetMagazine(const char*) noexcept;//マガジンの着脱
 			void ExecuteCartInChamber(void) noexcept;//チャンバーへの装弾、排出
 			void SetBullet(void) noexcept;//発砲
+
+			const auto GetCartMat(void) noexcept { return GetFrameWorldMat(GunFrame::Cart); }
+			const auto GetCartVec(void) noexcept { return (GetFrameWorldMat(GunFrame::CartVec).pos() - GetCartMat().pos()).Norm(); }
+
+			void SetCart(void) noexcept {
+				if (this->m_CartInterval == 0.f) {
+					this->m_CartInterval = -1.f;//負の値なら何でもよい
+				}
+			}
+			void ExecuteCart(void) noexcept {
+				if (this->m_CartInterval < -0.5f) {
+					this->m_CartInterval = 0.1f;
+
+					float Spd = Scale_Rate*2.f / 60.f;
+					this->m_CartPtr[this->m_NowShotCart]->Set(GetCartMat().pos(), GetMuzzleMatrix().GetRot(),
+						GetCartVec()*Spd);
+					++this->m_NowShotCart %= this->m_CartPtr.size();
+				}
+				else {
+					this->m_CartInterval = std::max(this->m_CartInterval - 1.f / FPS, 0.f);
+				}
+			}
+
 			void SetAmmoHandMatrix(const MATRIX_ref& value, float pPer) noexcept {
 				this->m_Mag_Ptr->SetHandMatrix(value, pPer, GetReloadType());
 			}
+
+			void SetMagFall() noexcept {
+				float Spd = Scale_Rate * 3.f / 60.f;
+				this->m_FallMag_Ptr->SetFall(GetFrameWorldMat(GunFrame::Magpos).pos(), GetFrameWorldMat(GunFrame::Magpos).GetRot(),
+					GetMove().mat.yvec()*-1.f*Spd
+				);
+			}
+			
 		public:
 			GunClass(void) noexcept { this->m_objType = ObjType::Gun; }
 			~GunClass(void) noexcept {}
@@ -125,8 +161,7 @@ namespace FPS_n2 {
 					FileRead_close(mdata);
 				}
 				SetMagazine(this->m_MagName[0].c_str());
-				//SetMagazine(nullptr);
-
+				//
 				m_GunSoundSet.clear();
 				//M4
 				m_GunSoundSet.resize(m_GunSoundSet.size() + 1);
@@ -147,9 +182,20 @@ namespace FPS_n2 {
 			void			FirstExecute(void) noexcept override {
 				auto SE = SoundPool::Instance();
 				if (this->m_IsFirstLoop) {
-					GradTexHandle = MV1GetTextureGraphHandle(this->GetObj().get(), 0);
-					NormalTexHandle = MV1GetTextureGraphHandle(this->GetObj().get(), 2);
-					MetallicTexHandle = MV1GetTextureGraphHandle(this->GetObj().get(), 3);
+					//
+					for (auto& l : this->m_Line) {
+						l = GetFrameWorldMat(GunFrame::Muzzle).pos();
+					}
+				}
+				else {
+					for (auto& l : this->m_Line) {
+						l += VECTOR_ref::vget(
+							GetRandf(0.6f*Scale_Rate / FPS),
+							1.2f*Scale_Rate / FPS + GetRandf(0.8f*Scale_Rate / FPS),
+							GetRandf(0.6f*Scale_Rate) / FPS);
+					}
+					this->m_Line[this->m_LineSel] = GetFrameWorldMat(GunFrame::Muzzle).pos();
+					++this->m_LineSel %= this->m_Line.size();
 				}
 
 				GunAnimeID Sel = (GunAnimeID)(this->m_ShotPhase);
@@ -234,6 +280,19 @@ namespace FPS_n2 {
 				}
 				//1
 				{
+					if ((5.f < GetAnime(GunAnimeID::ReloadStart_Empty).time && GetAnime(GunAnimeID::ReloadStart_Empty).time < 6.f)) {
+						if (m_boltSoundSequence != 5) {
+							m_boltSoundSequence = 5;
+							SE->Get((int)m_GunSoundSet[this->m_SoundSel].m_Cock[0]).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+						}
+					}
+					if ((11.f < GetAnime(GunAnimeID::ReloadStart_Empty).time && GetAnime(GunAnimeID::ReloadStart_Empty).time < 12.f)) {
+						if (m_boltSoundSequence != 6) {
+							m_boltSoundSequence = 6;
+							SE->Get((int)m_GunSoundSet[this->m_SoundSel].m_Cock[1]).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+						}
+					}
+
 					if ((5.f < GetAnime(GunAnimeID::ReloadStart).time && GetAnime(GunAnimeID::ReloadStart).time < 6.f)) {
 						if (m_boltSoundSequence != 5) {
 							m_boltSoundSequence = 5;
@@ -321,6 +380,12 @@ namespace FPS_n2 {
 				}
 				//1
 				{
+					if ((0.f < GetAnime(GunAnimeID::ReloadStart_Empty).time && GetAnime(GunAnimeID::ReloadStart_Empty).time < 1.f)) {
+						if (m_boltSoundSequence != 3) {
+							m_boltSoundSequence = 3;
+							SE->Get((int)m_GunSoundSet[this->m_SoundSel].m_Unload).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
+						}
+					}
 					if ((0.f < GetAnime(GunAnimeID::ReloadStart).time && GetAnime(GunAnimeID::ReloadStart).time < 1.f)) {
 						if (m_boltSoundSequence != 3) {
 							m_boltSoundSequence = 3;
@@ -395,6 +460,8 @@ namespace FPS_n2 {
 				ObjectBaseClass::FirstExecute();
 				//弾薬の演算
 				ExecuteCartInChamber();
+				ExecuteCart();
+				m_LinePer = std::clamp(m_LinePer - 1.f / FPS / 10.f, 0.f, 1.f);
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				if (this->m_IsActive && this->m_IsDraw) {
@@ -402,6 +469,28 @@ namespace FPS_n2 {
 						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-0.5f*Scale_Rate, -0.5f*Scale_Rate, -0.5f*Scale_Rate)).get(),
 						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(0.5f*Scale_Rate, 0.5f*Scale_Rate, 0.5f*Scale_Rate)).get()) == FALSE
 						) {
+						if (isDrawSemiTrans) {
+							SetUseLighting(FALSE);
+							int max = (int)(this->m_Line.size());
+							int min = 1 + (int)((1.f - m_LinePer) * (float)max);
+							for (int i = max - 1; i >= min; i--) {
+								int LS = (i + this->m_LineSel);
+								SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(128.f*((float)(i - min) / max)));
+								auto p1 = (LS - 1) % max;
+								auto p2 = LS % max;
+								if (CheckCameraViewClip_Box(
+									this->m_Line[p1].get(),
+									this->m_Line[p2].get()) == FALSE
+									) {
+									DrawCapsule3D(this->m_Line[p1].get(), this->m_Line[p2].get(), (0.00762f)*Scale_Rate*1.f*((float)(i - min) / max), 3, 
+										GetColor(192, 128, 128),
+										GetColor(96, 96, 64),
+										TRUE);
+								}
+							}
+							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+							SetUseLighting(TRUE);
+						}
 						for (int i = 0; i < this->GetObj().mesh_num(); i++) {
 							if ((MV1GetMeshSemiTransState(this->GetObj().get(), i) == TRUE) == isDrawSemiTrans) {
 								this->GetObj().DrawMesh(i);

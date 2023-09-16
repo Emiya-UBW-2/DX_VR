@@ -106,12 +106,18 @@ namespace FPS_n2 {
 				GetAnimeBuf((CharaAnimeID)i) = 0.f;
 			}
 			this->m_ReadyPer = 0.f;
-			this->m_ReloadPer = 0.f;
+
+			this->m_ReadyArm.Init(false);
+			this->m_ReloadStartEmptyArm.Init(false);
+			this->m_ReloadStartArm.Init(false);
+			this->m_ReloadArm.Init(false);
+			this->m_CheckArm.Init(false);
+
 			this->m_ReloadEyePer = 0.f;
 			this->m_ReadyTimer = UpperTimerLimit;
 
-			this->m_MagHansPer = 0.f;
-			this->m_MagHans = 0.f;
+			this->m_MagArm.Init(false);
+			this->m_MagHand = false;
 
 			this->m_Speed = 0.f;
 			this->m_RunPer2 = 0.f;
@@ -119,7 +125,7 @@ namespace FPS_n2 {
 			this->m_NeckPer = 0.f;
 			this->m_LeftHandPer = 0.f;
 			this->m_TurnBody = false;
-			this->m_ShotPhase = CharaAnimPhase::Normal;
+			this->m_ShotPhase = GunAnimeID::Base;
 			this->m_MoveEyePosTimer = 0.f;
 			this->m_RunReady = false;
 			this->m_Running = false;
@@ -148,10 +154,7 @@ namespace FPS_n2 {
 			this->m_DamageSwitch = 0;
 			this->m_DamageSwitchRec = this->m_DamageSwitch;
 
-			this->m_Fov = deg2rad(70);
-
 			this->m_LaserSwitch.Set(true);
-
 
 			this->m_SquatPer = 0.f;
 			this->m_RunPer = 0.f;
@@ -201,7 +204,7 @@ namespace FPS_n2 {
 			}
 			this->m_Press_Aim = KeyControl::GetADSKey().press();
 			//
-			this->m_RunReady = (KeyControl::GetRun() && (this->m_ShotPhase <= CharaAnimPhase::Shot));
+			this->m_RunReady = (KeyControl::GetRun() && (this->m_ShotPhase <= GunAnimeID::Shot));
 			//
 			this->m_LaserSwitch.Execute(KeyControl::GetAction());
 			if (this->m_LaserSwitch.trigger()) {
@@ -232,16 +235,16 @@ namespace FPS_n2 {
 		void			CharacterClass::ExecuteInput(void) noexcept {
 			//
 			if (GetGunPtrNow() != nullptr) {
-				this->m_Gun_Ptr->SetUseMoveParts(true);
+				GetGunPtrNow()->SetUseMoveParts(true);
 
 				GetGunPtrNow()->SetIsShot(false);
-				if ((this->m_Press_Shot || this->m_Press_Reload || this->m_Press_Check) && (this->m_ShotPhase == CharaAnimPhase::Normal)) {
+				if ((this->m_Press_Shot || this->m_Press_Reload || this->m_Press_Check) && (this->m_ShotPhase == GunAnimeID::Base)) {
 					this->m_ReadyTimer = std::min(this->m_ReadyTimer, 0.1f);
 					if (this->m_ReadyPer >= 0.9f) {
 						this->m_ReadyPer = 1.f;
 						if (this->m_Press_Shot) {
 							if (GetGunPtrNow()->GetCanShot()) {
-								this->m_ShotPhase = CharaAnimPhase::Shot;
+								this->m_ShotPhase = GunAnimeID::Shot;
 								GetGunPtrNow()->SetBullet();
 								this->m_GunShakePer = 1.f;
 								this->m_RecoilRadAdd.Set(GetRandf(0.007f), -0.01f, 0.f);
@@ -250,18 +253,23 @@ namespace FPS_n2 {
 							}
 							else {
 								if (!GetGunPtrNow()->GetIsMagEmpty()) {
-									this->m_ShotPhase = CharaAnimPhase::Cocking;
+									this->m_ShotPhase = GunAnimeID::Cocking;
 								}
 								else {
-									this->m_ShotPhase = CharaAnimPhase::Unload;
+									this->m_ShotPhase = GunAnimeID::ReloadStart_Empty;
 								}
 							}
 						}
 						if (this->m_Press_Reload) {
-							this->m_ShotPhase = CharaAnimPhase::Unload;
+							if (!GetGunPtrNow()->GetIsMagEmpty()) {
+								this->m_ShotPhase = GunAnimeID::ReloadStart;
+							}
+							else {
+								this->m_ShotPhase = GunAnimeID::ReloadStart_Empty;
+							}
 						}
 						if (this->m_Press_Check) {
-							this->m_ShotPhase = CharaAnimPhase::CheckStart;
+							this->m_ShotPhase = GunAnimeID::CheckStart;
 						}
 
 					}
@@ -269,7 +277,7 @@ namespace FPS_n2 {
 				else {
 					this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / FPS, 0.f, m_Press_Aim ? 0.f : UpperTimerLimit);
 				}
-				if ((this->m_ShotPhase >= CharaAnimPhase::Cocking)) {
+				if ((this->m_ShotPhase >= GunAnimeID::Cocking)) {
 					this->m_ReadyTimer = UpperTimerLimit;
 				}
 				if (KeyControl::GetRun()) {
@@ -293,14 +301,15 @@ namespace FPS_n2 {
 				Easing(&this->m_RecoilRadAdd, VECTOR_ref::zero(), 0.7f, EasingType::OutExpo);
 			}
 			//
-			Easing(&this->m_ReloadPer, (this->m_ShotPhase >= CharaAnimPhase::Unload && this->m_ShotPhase <= CharaAnimPhase::LoadEnd) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
-			Easing(&this->m_ReloadEyePer, (this->m_ShotPhase >= CharaAnimPhase::Cocking && this->m_ShotPhase <= CharaAnimPhase::LoadEnd) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
-			//
-			Easing(&this->m_CheckPer, (this->m_ShotPhase >= CharaAnimPhase::CheckStart && this->m_ShotPhase <= CharaAnimPhase::Check) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
-			Easing(&this->m_CheckEyePer, (this->m_ShotPhase >= CharaAnimPhase::Check) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+			Easing(&this->m_ReloadEyePer, (this->m_ShotPhase >= GunAnimeID::Cocking && this->m_ShotPhase <= GunAnimeID::ReloadEnd) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+			Easing(&this->m_CheckEyePer, (this->m_ShotPhase >= GunAnimeID::Checking) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+			Easing(&this->m_ReadyPer, (this->m_ReadyTimer < UpperTimerLimit || !(m_ShotPhase <= GunAnimeID::Shot)) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 
-
-			Easing(&this->m_ReadyPer, (this->m_ReadyTimer < UpperTimerLimit || !(m_ShotPhase <= CharaAnimPhase::Shot)) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+			this->m_ReloadStartArm.Execute(this->m_ShotPhase == GunAnimeID::ReloadStart, 0.2f, 0.2f);
+			this->m_ReloadStartEmptyArm.Execute(this->m_ShotPhase == GunAnimeID::ReloadStart_Empty, 0.5f, 0.2f);
+			this->m_ReloadArm.Execute(this->m_ShotPhase >= GunAnimeID::ReloadOne && this->m_ShotPhase <= GunAnimeID::ReloadEnd, 0.1f, 0.2f);
+			this->m_ReadyArm.Execute(!(this->m_ReadyTimer < UpperTimerLimit || !(m_ShotPhase <= GunAnimeID::Shot)), 0.1f, 0.2f);
+			this->m_CheckArm.Execute(this->m_ShotPhase >= GunAnimeID::CheckStart && this->m_ShotPhase <= GunAnimeID::Checking, 0.05f, 0.2f);
 			//this->m_yrad_Upper、this->m_yrad_Bottom決定
 			if (this->m_Speed <= 0.1f) {
 				if (abs(KeyControl::GetRad().y() - this->m_yrad_Upper) > deg2rad(50.f)) {
@@ -395,49 +404,64 @@ namespace FPS_n2 {
 								switch (GetGunPtrNow()->GetShotType()) {
 								case SHOTTYPE::FULL:
 								case SHOTTYPE::SEMI:
-									this->m_ShotPhase = CharaAnimPhase::Normal;
+									this->m_ShotPhase = GunAnimeID::Base;
 									break;
 								case SHOTTYPE::BOLT:
-									this->m_ShotPhase = CharaAnimPhase::Cocking;
+									this->m_ShotPhase = GunAnimeID::Cocking;
 									break;
 								default:
 									break;
 								}
 							}
 							else {
-								this->m_ShotPhase = CharaAnimPhase::Normal;
+								this->m_ShotPhase = GunAnimeID::Base;
 							}
 						}
 					}
 					//コッキング
-					if (this->m_ShotPhase == CharaAnimPhase::Cocking) {
+					if (this->m_ShotPhase == GunAnimeID::Cocking) {
 						this->m_GunAnimSelect = CharaGunAnimeID::Cocking;
 						UpdateGunAnim(this->m_GunAnimSelect, 1.5f);
 						if (GetGunAnimEnd(this->m_GunAnimSelect)) {
-							this->m_ShotPhase = CharaAnimPhase::Normal;
+							this->m_ShotPhase = GunAnimeID::Base;
 							this->m_ReadyTimer = 0.1f;
 						}
 					}
 					//リロード開始
-					if (this->m_ShotPhase == CharaAnimPhase::Unload) {
-						this->m_GunAnimSelect = CharaGunAnimeID::ReloadStart;
+					if (this->m_ShotPhase == GunAnimeID::ReloadStart_Empty) {
+						this->m_GunAnimSelect = CharaGunAnimeID::ReloadStart_Empty;
+						if (GetGunAnimZero(this->m_GunAnimSelect)) {
+							m_UpperAnim = 0.f;
+						}
 						UpdateGunAnim(this->m_GunAnimSelect, 1.5f);
 						if (GetGunAnimEnd(this->m_GunAnimSelect)) {
-							this->m_ShotPhase = CharaAnimPhase::LoadOne;
+							this->m_ShotPhase = GunAnimeID::ReloadOne;
 							this->m_ReadyTimer = 0.1f;
 						}
 					}
-					if (this->m_ShotPhase == CharaAnimPhase::LoadOne) {
+					if (this->m_ShotPhase == GunAnimeID::ReloadStart) {
+						this->m_GunAnimSelect = CharaGunAnimeID::ReloadStart;
+						if (GetGunAnimZero(this->m_GunAnimSelect)) {
+							m_UpperAnim = 0.f;
+						}
+						UpdateGunAnim(this->m_GunAnimSelect, 1.5f);
+						if (GetGunAnimEnd(this->m_GunAnimSelect)) {
+							this->m_ShotPhase = GunAnimeID::ReloadOne;
+							this->m_ReadyTimer = 0.1f;
+						}
+					}
+					//
+					if (this->m_ShotPhase == GunAnimeID::ReloadOne) {
 						this->m_GunAnimSelect = CharaGunAnimeID::ReloadOne;
 						UpdateGunAnim(this->m_GunAnimSelect, 1.5f);
 						if (GetGunAnimEnd(this->m_GunAnimSelect)) {
 							switch (GetGunPtrNow()->GetReloadType()) {
 							case RELOADTYPE::MAG:
-								this->m_ShotPhase = CharaAnimPhase::LoadEnd;
+								this->m_ShotPhase = GunAnimeID::ReloadEnd;
 								break;
 							case RELOADTYPE::AMMO:
 								if (GetGunPtrNow()->GetIsMagFull()) {
-									this->m_ShotPhase = CharaAnimPhase::LoadEnd;
+									this->m_ShotPhase = GunAnimeID::ReloadEnd;
 								}
 								break;
 							default:
@@ -446,44 +470,44 @@ namespace FPS_n2 {
 							this->m_ReadyTimer = 0.1f;
 						}
 					}
-					if (this->m_ShotPhase == CharaAnimPhase::LoadEnd) {
+					if (this->m_ShotPhase == GunAnimeID::ReloadEnd) {
 						this->m_GunAnimSelect = CharaGunAnimeID::ReloadEnd;
 						UpdateGunAnim(this->m_GunAnimSelect, 1.5f);
 						if (GetGunAnimEnd(this->m_GunAnimSelect)) {
 							if (GetGunPtrNow()->GetCanShot()) {
-								this->m_ShotPhase = CharaAnimPhase::Normal;
+								this->m_ShotPhase = GunAnimeID::Base;
 							}
 							else {
 								if (!GetGunPtrNow()->GetIsMagEmpty()) {
-									this->m_ShotPhase = CharaAnimPhase::Cocking;
+									this->m_ShotPhase = GunAnimeID::Cocking;
 								}
 								else {
-									this->m_ShotPhase = CharaAnimPhase::Unload;
+									this->m_ShotPhase = GunAnimeID::ReloadStart;
 								}
 							}
 							this->m_ReadyTimer = 0.1f;
 						}
 					}
 					//
-					if (this->m_ShotPhase == CharaAnimPhase::CheckStart) {
+					if (this->m_ShotPhase == GunAnimeID::CheckStart) {
 						this->m_GunAnimSelect = CharaGunAnimeID::CheckStart;
 						UpdateGunAnim(this->m_GunAnimSelect, 1.5f);
 						if (GetGunAnimEnd(this->m_GunAnimSelect)) {
-							this->m_ShotPhase = CharaAnimPhase::Check;
+							this->m_ShotPhase = GunAnimeID::Checking;
 						}
 					}
-					if (this->m_ShotPhase == CharaAnimPhase::Check) {
+					if (this->m_ShotPhase == GunAnimeID::Checking) {
 						this->m_GunAnimSelect = CharaGunAnimeID::Check;
 						UpdateGunAnim(this->m_GunAnimSelect, 1.f);
 						if (GetGunAnimEnd(this->m_GunAnimSelect)) {
-							this->m_ShotPhase = CharaAnimPhase::CheckEnd;
+							this->m_ShotPhase = GunAnimeID::CheckEnd;
 						}
 					}
-					if (this->m_ShotPhase == CharaAnimPhase::CheckEnd) {
+					if (this->m_ShotPhase == GunAnimeID::CheckEnd) {
 						this->m_GunAnimSelect = CharaGunAnimeID::CheckEnd;
 						UpdateGunAnim(this->m_GunAnimSelect, 2.f);
 						if (GetGunAnimEnd(this->m_GunAnimSelect)) {
-							this->m_ShotPhase = CharaAnimPhase::Normal;
+							this->m_ShotPhase = GunAnimeID::Base;
 							this->m_ReadyTimer = 0.1f;
 						}
 					}
@@ -715,128 +739,63 @@ namespace FPS_n2 {
 				auto PosO = GetFrameWorldMat(CharaFrame::Head).pos();
 				VECTOR_ref yVec1, zVec1, Pos1;
 				if (GetGunPtrNow() != nullptr) {
-					std::array<MATRIX_ref, 6> MatT;
-					int MatSel = 0;
-
-					auto PosBase = GetFrameWorldMat(CharaFrame::Head).pos() - PosO;
 					//持ち手探索
 					{
 						//アニメアップデート
-						GetObj().work_anime();//0.35ms
-						//レディ
-						{
-							auto* Ptr = AnimMngr->GetAnimData(GetReadyGunAnimSel().at(std::clamp<int>(this->m_ReadyAnimeSel, 0, (int)(GetReadyGunAnimSel().size()) - 1)));
+						GetObj().work_anime();
+						//銃の位置を指定するアニメ
+						auto PosBase = GetFrameWorldMat(CharaFrame::Head).pos() - PosO;
+						std::array<MATRIX_ref, (int)EnumGunAnimType::Max> MatT;
+						for (int i = 0; i < (int)EnumGunAnimType::Max; i++) {
+							auto* Ptr = AnimMngr->GetAnimData(this->m_GunAnimeSet[this->m_CharaAnimeSel].m_Anim.at(i).at(this->m_ReadyAnimeSel));
 							if (Ptr) {
 								auto Now = AnimMngr->GetAnimNow(Ptr, m_UpperAnim);
-								auto Pos = Now.GetPos();
-								Pos.x(Pos.x()*m_FastSwitchPer);
-								MatT[MatSel] = (MATRIX_ref::RotY(deg2rad(Now.GetRotate().x()*m_FastSwitchPer)) * MATRIX_ref::RotX(deg2rad(Now.GetRotate().y())) * MATRIX_ref::RotZ(deg2rad(Now.GetRotate().z()*m_FastSwitchPer))) * MATRIX_ref::Mtrans(PosBase + MATRIX_ref::Vtrans(Pos, GetCharaDir())*Scale_Rate);
+								MatT[i] = Now.GetRot() * MATRIX_ref::Mtrans(PosBase + MATRIX_ref::Vtrans(Now.GetPos(), GetCharaDir()));
 							}
-							MatSel++;
 						}
-						//構え
-						{
-							auto* Ptr = AnimMngr->GetAnimData(GetAimGunAnimSel().at(std::clamp<int>(this->m_AimAnimeSel, 0, (int)(GetAimGunAnimSel().size()) - 1)));
-							if (Ptr) {
-								auto Now = AnimMngr->GetAnimNow(Ptr, m_UpperAnim);
-								auto Pos = Now.GetPos();
-								Pos.x(Pos.x()*m_FastSwitchPer);
-								MatT[MatSel] = (MATRIX_ref::RotY(deg2rad(Now.GetRotate().x()*m_FastSwitchPer)) * MATRIX_ref::RotX(deg2rad(Now.GetRotate().y())) * MATRIX_ref::RotZ(deg2rad(Now.GetRotate().z()*m_FastSwitchPer))) * MATRIX_ref::Mtrans(PosBase + MATRIX_ref::Vtrans(Pos, GetCharaDir())*Scale_Rate);
-							}
-							MatSel++;
-						}
-						//ADS
-						{
-							auto* Ptr = AnimMngr->GetAnimData(GetADSGunAnimSel());
-							if (Ptr) {
-								auto Now = AnimMngr->GetAnimNow(Ptr, m_UpperAnim);
-								auto Pos = Now.GetPos();
-								Pos.x(Pos.x()*m_FastSwitchPer);
-								MatT[MatSel] = (MATRIX_ref::RotY(deg2rad(Now.GetRotate().x()*m_FastSwitchPer)) * MATRIX_ref::RotX(deg2rad(Now.GetRotate().y())) * MATRIX_ref::RotZ(deg2rad(Now.GetRotate().z()*m_FastSwitchPer))) * MATRIX_ref::Mtrans(PosBase + MATRIX_ref::Vtrans(Pos, GetCharaDir())*Scale_Rate);
-
-							}
-							MatSel++;
-						}
-						//リロード
-						{
-							auto* Ptr = AnimMngr->GetAnimData(GetReloadGunAnimSel());
-							if (Ptr) {
-								auto Now = AnimMngr->GetAnimNow(Ptr, m_UpperAnim);
-								auto Pos = Now.GetPos();
-								Pos.x(Pos.x()*m_FastSwitchPer);
-								MatT[MatSel] = (MATRIX_ref::RotY(deg2rad(Now.GetRotate().x()*m_FastSwitchPer)) * MATRIX_ref::RotX(deg2rad(Now.GetRotate().y())) * MATRIX_ref::RotZ(deg2rad(Now.GetRotate().z()*m_FastSwitchPer))) * MATRIX_ref::Mtrans(PosBase + MATRIX_ref::Vtrans(Pos, GetCharaDir())*Scale_Rate);
-							}
-							MatSel++;
-						}
-						//ラン
-						{
-							auto* Ptr = AnimMngr->GetAnimData(GetRunGunAnimSel());
-							if (Ptr) {
-								auto Now = AnimMngr->GetAnimNow(Ptr, m_UpperAnim);
-								auto Pos = Now.GetPos();
-								Pos.x(Pos.x()*m_FastSwitchPer);
-								MatT[MatSel] = (MATRIX_ref::RotY(deg2rad(Now.GetRotate().x()*m_FastSwitchPer)) * MATRIX_ref::RotX(deg2rad(Now.GetRotate().y())) * MATRIX_ref::RotZ(deg2rad(Now.GetRotate().z()*m_FastSwitchPer))) * MATRIX_ref::Mtrans(PosBase + MATRIX_ref::Vtrans(Pos, GetCharaDir())*Scale_Rate);
-							}
-							MatSel++;
-						}
-						//チェック
-						{
-							auto* Ptr = AnimMngr->GetAnimData(GetCheckGunAnimSel().at(std::clamp<int>(this->m_CheckAnimeSel, 0, (int)(GetCheckGunAnimSel().size()) - 1)));
-							if (Ptr) {
-								auto Now = AnimMngr->GetAnimNow(Ptr, m_UpperAnim);
-								auto Pos = Now.GetPos();
-								Pos.x(Pos.x()*m_FastSwitchPer);
-								MatT[MatSel] = (MATRIX_ref::RotY(deg2rad(Now.GetRotate().x()*m_FastSwitchPer)) * MATRIX_ref::RotX(deg2rad(Now.GetRotate().y())) * MATRIX_ref::RotZ(deg2rad(Now.GetRotate().z()*m_FastSwitchPer))) * MATRIX_ref::Mtrans(PosBase + MATRIX_ref::Vtrans(Pos, GetCharaDir())*Scale_Rate);
-							}
-							MatSel++;
-						}
-
+						//
 						VECTOR_ref yVect0, zVect0, Post0;
 
-						zVect0 = MatT[1].zvec();
-						yVect0 = MatT[1].yvec();
-						Post0 = MatT[1].pos();
+						zVect0 = MatT[(int)EnumGunAnimType::Aim].zvec();
+						yVect0 = MatT[(int)EnumGunAnimType::Aim].yvec();
+						Post0 = MatT[(int)EnumGunAnimType::Aim].pos();
 
-						zVect0 = Lerp(zVect0, MatT[2].zvec(), this->m_ADSPer);
-						yVect0 = Lerp(yVect0, MatT[2].yvec(), this->m_ADSPer);
-						Post0 = Lerp(Post0, MatT[2].pos(), this->m_ADSPer);
+						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::ADS].zvec(), this->m_ADSPer);
+						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::ADS].yvec(), this->m_ADSPer);
+						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::ADS].pos(), this->m_ADSPer);
 
-						zVect0 = Lerp(zVect0, MatT[3].zvec(), this->m_ReloadPer);
-						yVect0 = Lerp(yVect0, MatT[3].yvec(), this->m_ReloadPer);
-						Post0 = Lerp(Post0, MatT[3].pos(), this->m_ReloadPer);
+						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::ReloadStart_Empty].zvec(), this->m_ReloadStartEmptyArm.Per());
+						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::ReloadStart_Empty].yvec(), this->m_ReloadStartEmptyArm.Per());
+						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::ReloadStart_Empty].pos(), this->m_ReloadStartEmptyArm.Per());
+						
+						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::ReloadStart].zvec(), this->m_ReloadStartArm.Per());
+						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::ReloadStart].yvec(), this->m_ReloadStartArm.Per());
+						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::ReloadStart].pos(), this->m_ReloadStartArm.Per());
 
-						zVect0 = Lerp(zVect0, MatT[0].zvec(), 1.f - m_ReadyPer);
-						yVect0 = Lerp(yVect0, MatT[0].yvec(), 1.f - m_ReadyPer);
-						Post0 = Lerp(Post0, MatT[0].pos(), 1.f - m_ReadyPer);
+						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::Reload].zvec(), this->m_ReloadArm.Per());
+						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::Reload].yvec(), this->m_ReloadArm.Per());
+						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::Reload].pos(), this->m_ReloadArm.Per());
 
-						zVect0 = Lerp(zVect0, MatT[4].zvec(), this->m_RunPer);
-						yVect0 = Lerp(yVect0, MatT[4].yvec(), this->m_RunPer);
-						Post0 = Lerp(Post0, MatT[4].pos(), this->m_RunPer);
+						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::Ready].zvec(), this->m_ReadyArm.Per());
+						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::Ready].yvec(), this->m_ReadyArm.Per());
+						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::Ready].pos(), this->m_ReadyArm.Per());
 
-						zVect0 = Lerp(zVect0, MatT[5].zvec(), this->m_CheckPer);
-						yVect0 = Lerp(yVect0, MatT[5].yvec(), this->m_CheckPer);
-						Post0 = Lerp(Post0, MatT[5].pos(), this->m_CheckPer);
+						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::Run].zvec(), this->m_RunPer);
+						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::Run].yvec(), this->m_RunPer);
+						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::Run].pos(), this->m_RunPer);
+
+						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::Check].zvec(), this->m_CheckArm.Per());
+						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::Check].yvec(), this->m_CheckArm.Per());
+						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::Check].pos(), this->m_CheckArm.Per());
+						//
 
 						zVec1 = zVect0;
-						yVec1 = yVect0;
+						yVec1 = MATRIX_ref::Vtrans(yVect0, MATRIX_ref::RotAxis(zVect0, (KeyControl::GetRad().y() - this->m_yrad_Bottom)*0.15f + (this->m_LateLeanRad - this->m_LeanRad)));
 						Pos1 = Post0 + m_GunShake_r;
 						//銃振動
 						m_GunShakePer = std::max(m_GunShakePer - 1.f / FPS / 0.1f, 0.f);
 						Easing(&m_GunShake, VECTOR_ref::vget(GetRandf(1.f), 0.5f + GetRandf(1.f), GetRandf(1.f))*Scale_Rate, 0.7f, EasingType::OutExpo);
 						Easing(&m_GunShake_r, m_GunShake*m_GunShakePer*0.1f, 0.9f, EasingType::OutExpo);
-
-
-						if (this->m_ReadyPer <= 0.01f || this->m_ReloadPer > 0.99f) {
-							this->m_AimAnimeSel = GetRand(1);
-						}
-						if (this->m_ReadyPer > 0.99f) {
-							this->m_ReadyAnimeSel = GetRand(1);
-						}
-						if (this->m_RunPer > 0.99f) {
-							this->m_ReadyAnimeSel = 0;
-						}
-
-						yVec1 = MATRIX_ref::Vtrans(yVec1, MATRIX_ref::RotAxis(zVec1, (KeyControl::GetRad().y() - this->m_yrad_Bottom)*0.15f + (this->m_LateLeanRad - this->m_LeanRad)));
 					}
 
 					m_UpperAnim += 60.f / FPS;
@@ -850,12 +809,12 @@ namespace FPS_n2 {
 					Easing(&m_UpperyVec, m_UpperyVecNormal, 0.8f, EasingType::OutExpo);
 					Easing(&m_UpperzVec, m_UpperzVecNormal, 0.8f, EasingType::OutExpo);
 				}
-				if (this->m_Gun_Ptr != nullptr) {
+				if (GetGunPtrNow() != nullptr) {
 					auto tmp_gunrat = MATRIX_ref::RotVec2(VECTOR_ref::front(), zVec1);
 					tmp_gunrat *= MATRIX_ref::RotVec2(tmp_gunrat.yvec(), yVec1);
 					tmp_gunrat *= MATRIX_ref::Axis1_YZ(m_UpperyVec.Norm(), m_UpperzVec.Norm());
 					tmp_gunrat *= GetCharaDir() * MATRIX_ref::Mtrans(PosO + Pos1);
-					this->m_Gun_Ptr->SetGunMatrix(tmp_gunrat, this->m_ShotPhase);
+					GetGunPtrNow()->SetGunMatrix(tmp_gunrat, this->m_ShotPhase);
 				}
 				if (GetGunPtrNow() != nullptr) {
 					VECTOR_ref GunPos = GetGunPtrNow()->GetFrameWorldMat(GunFrame::RightHandPos).pos();
@@ -876,30 +835,32 @@ namespace FPS_n2 {
 						switch (GetGunPtrNow()->GetReloadType()) {
 						case RELOADTYPE::MAG:
 							switch (this->m_ShotPhase) {
-							case CharaAnimPhase::Unload:
-								m_MagHans = 1.f;
-								break;
-							case CharaAnimPhase::LoadOne:
-								if (GetTimePer(m_GunAnimSelect) < 0.6f) {
-									m_MagHans = 1.f;
+							case GunAnimeID::ReloadStart_Empty:
+								if (GetTimePer(m_GunAnimSelect) > 0.5f) {
+									if (!m_MagHand) {
+										GetGunPtrNow()->SetMagFall();
+									}
+									m_MagHand = true;
 								}
 								else {
-									if (m_MagHansPer > 0.3f) {
-										m_MagHans = 0.f;
-									}
-									if (0.22f < m_MagHansPer && m_MagHansPer < 0.26f) {
-										m_MagHans = 0.21f;
-									}
-									if (0.1f < m_MagHansPer && m_MagHansPer < 0.22f) {
-										m_MagHans = -0.1f;
-									}
-									if (m_MagHansPer <= 0.f) {
-										m_MagHans = 0.f;
-									}
+									m_MagHand = false;
+								}
+								break;
+							case GunAnimeID::ReloadStart:
+								if (GetTimePer(m_GunAnimSelect) > 0.8f) {
+									m_MagHand = true;
+								}
+								break;
+							case GunAnimeID::ReloadOne:
+								if (GetTimePer(m_GunAnimSelect) < 0.6f) {
+									m_MagHand = true;
+								}
+								else {
+									m_MagHand = false;
 								}
 								break;
 							default:
-								m_MagHans = 0.f;
+								m_MagHand = false;
 								break;
 							}
 							break;
@@ -908,12 +869,11 @@ namespace FPS_n2 {
 						default:
 							break;
 						}
-						Easing(&m_MagHansPer, m_MagHans, 0.9f, EasingType::OutExpo);
-						m_MagHansPer = std::clamp(m_MagHansPer, 0.f, 1.f);
+						m_MagArm.Execute(m_MagHand, 0.3f, 0.5f);
 
-						HandPos = Lerp(HandPos, MagPos, m_MagHansPer);
-						Handyvec = Lerp(Handyvec, Magyvec, (m_MagHans > 0.5f) ? 1.f : 0.f);
-						Handzvec = Lerp(Handzvec, Magzvec, (m_MagHans > 0.5f) ? 1.f : 0.f);
+						HandPos = Lerp(HandPos, MagPos, m_MagArm.Per());
+						Handyvec = Lerp(Handyvec, Magyvec, m_MagHand ? 1.f : 0.f);
+						Handzvec = Lerp(Handzvec, Magzvec, m_MagHand ? 1.f : 0.f);
 					}
 					//腕座標指定
 					{
@@ -925,19 +885,24 @@ namespace FPS_n2 {
 					{
 						MATRIX_ref Mat = GetGunPtrNow()->GetFrameWorldMat(GunFrame::Magpos);
 						if (
-							this->m_ShotPhase == CharaAnimPhase::Unload ||
-							this->m_ShotPhase == CharaAnimPhase::LoadOne ||
-							this->m_ShotPhase == CharaAnimPhase::CheckStart ||
-							this->m_ShotPhase == CharaAnimPhase::Check
+							this->m_ShotPhase == GunAnimeID::ReloadStart_Empty ||
+							this->m_ShotPhase == GunAnimeID::ReloadStart ||
+							this->m_ShotPhase == GunAnimeID::ReloadOne ||
+							this->m_ShotPhase == GunAnimeID::CheckStart ||
+							this->m_ShotPhase == GunAnimeID::Checking
 							) {
 							Mat = GetFrameWorldMat(CharaFrame::LeftHandJoint);
 						}
 						switch (this->m_ShotPhase) {
-						case CharaAnimPhase::Unload:
+						case GunAnimeID::ReloadStart_Empty:
 							m_AmmoHandR = 1.f;
 							m_AmmoHand = 1.f;
 							break;
-						case CharaAnimPhase::LoadOne:
+						case GunAnimeID::ReloadStart:
+							m_AmmoHandR = 1.f;
+							m_AmmoHand = 1.f;
+							break;
+						case GunAnimeID::ReloadOne:
 							if (GetTimePer(m_GunAnimSelect) < 0.86f) {
 								m_AmmoHandR = 1.f;
 								m_AmmoHand = 1.f;
@@ -948,11 +913,11 @@ namespace FPS_n2 {
 								m_AmmoHand = 0.f;
 							}
 							break;
-						case CharaAnimPhase::CheckStart:
+						case GunAnimeID::CheckStart:
 							if (GetTimePer(m_GunAnimSelect) > 0.8f) {
 								m_AmmoHandR = 1.f;
 							}
-						case CharaAnimPhase::Check:
+						case GunAnimeID::Checking:
 							if (GetTimePer(m_GunAnimSelect) < 0.8f) {
 								m_AmmoHandR = 1.f;
 								m_AmmoHand = 1.f;
@@ -1084,49 +1049,56 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.clear();
 				//M4
 				m_CharaAnimeSet.resize(m_CharaAnimeSet.size() + 1);
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::Down) = 0;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::Ready) = 0;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::ADS) = 0;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::Cocking) = 35;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::CheckStart) = 15;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::Check) = 30;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::CheckEnd) = 30;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::ReloadStart) = 15;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::ReloadOne) = 30;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::ReloadEnd) = 10;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::Down) = 0;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::Ready) = 0;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::ADS) = 0;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::Cocking) = 35;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::CheckStart) = 15;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::Check) = 30;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::CheckEnd) = 30;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::ReloadStart_Empty) = 15;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::ReloadStart) = 15;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::ReloadOne) = 30;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::ReloadEnd) = 10;
 				//ハンドガン
 				m_CharaAnimeSet.resize(m_CharaAnimeSet.size() + 1);
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::Down) = 0;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::Ready) = 0;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::ADS) = 0;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::Cocking) = 35;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::CheckStart) = 15;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::Check) = 30;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::CheckEnd) = 30;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::ReloadStart) = 15;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::ReloadOne) = 30;
-				m_CharaAnimeSet.back().m_GunAnimFrame.at((int)CharaGunAnimeID::ReloadEnd) = 10;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::Down) = 0;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::Ready) = 0;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::ADS) = 0;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::Cocking) = 35;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::CheckStart) = 15;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::Check) = 30;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::CheckEnd) = 30;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::ReloadStart_Empty) = 15;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::ReloadStart) = 15;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::ReloadOne) = 30;
+				m_CharaAnimeSet.back().m_GunAnimAllFrame.at((int)CharaGunAnimeID::ReloadEnd) = 10;
 				//
 				m_GunAnimeSet.clear();
 				//M4
 				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
-				m_GunAnimeSet.back().m_Run = EnumGunAnim::M16_run;
-				m_GunAnimeSet.back().m_Ready.emplace_back(EnumGunAnim::M16_ready1);
-				m_GunAnimeSet.back().m_Ready.emplace_back(EnumGunAnim::M16_ready2);
-				m_GunAnimeSet.back().m_Aim.emplace_back(EnumGunAnim::M16_aim);
-				m_GunAnimeSet.back().m_Check.emplace_back(EnumGunAnim::M1911_check1);
-				m_GunAnimeSet.back().m_ADS = EnumGunAnim::M16_ads;
-				m_GunAnimeSet.back().m_Reload = EnumGunAnim::M16_reload;
+				
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::Aim).emplace_back(EnumGunAnim::M16_aim);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::ADS).emplace_back(EnumGunAnim::M16_ads);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::ReloadStart_Empty).emplace_back(EnumGunAnim::M1911_reloadstart_empty);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::ReloadStart).emplace_back(EnumGunAnim::M1911_reloadstart);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::Reload).emplace_back(EnumGunAnim::M16_reload);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::Ready).emplace_back(EnumGunAnim::M16_ready1);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::Ready).emplace_back(EnumGunAnim::M16_ready2);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::Run).emplace_back(EnumGunAnim::M16_run);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::Check).emplace_back(EnumGunAnim::M1911_check1);
 				//ハンドガン
 				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
-				m_GunAnimeSet.back().m_Run = EnumGunAnim::M1911_run;
-				m_GunAnimeSet.back().m_Ready.emplace_back(EnumGunAnim::M1911_ready1);
-				m_GunAnimeSet.back().m_Ready.emplace_back(EnumGunAnim::M1911_ready2);
-				m_GunAnimeSet.back().m_Aim.emplace_back(EnumGunAnim::M1911_aim1);
-				m_GunAnimeSet.back().m_Aim.emplace_back(EnumGunAnim::M1911_aim2);
-				m_GunAnimeSet.back().m_Check.emplace_back(EnumGunAnim::M1911_check1);
-				m_GunAnimeSet.back().m_ADS = EnumGunAnim::M1911_ads;
-				m_GunAnimeSet.back().m_Reload = EnumGunAnim::M1911_reload;
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::Aim).emplace_back(EnumGunAnim::M1911_aim1);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::Aim).emplace_back(EnumGunAnim::M1911_aim2);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::ADS).emplace_back(EnumGunAnim::M1911_ads);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::ReloadStart_Empty).emplace_back(EnumGunAnim::M1911_reloadstart_empty);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::ReloadStart).emplace_back(EnumGunAnim::M1911_reloadstart);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::Reload).emplace_back(EnumGunAnim::M1911_reload);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::Ready).emplace_back(EnumGunAnim::M1911_ready1);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::Ready).emplace_back(EnumGunAnim::M1911_ready2);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::Run).emplace_back(EnumGunAnim::M1911_run);
+				m_GunAnimeSet.back().m_Anim.at((int)EnumGunAnimType::Check).emplace_back(EnumGunAnim::M1911_check1);
 				//
 				m_HitBox.resize(27);
 			}
@@ -1164,7 +1136,6 @@ namespace FPS_n2 {
 			ExecuteMatrix();			//SetMat指示//0.03ms
 			ExecuteShape();				//顔//スコープ内0.01ms
 			ExecuteHeartRate();			//心拍数//0.00ms
-			CalcFov();
 			EffectControl::Execute();
 		}
 		void			CharacterClass::Draw(bool isDrawSemiTrans) noexcept {

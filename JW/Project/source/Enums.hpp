@@ -19,6 +19,7 @@ namespace FPS_n2 {
 			Ammo,
 			Gun,
 			Magazine,
+			Cart,
 		};
 		enum class SoundEnum {
 			RunFoot = (int)SoundEnumCommon::Num,
@@ -31,11 +32,6 @@ namespace FPS_n2 {
 			Env2,
 			//
 			Trigger,
-			//
-			Cocking1_0,
-			Cocking1_1,
-			Cocking1_2,
-			Cocking1_3,
 			//
 			Cocking2_0,
 			Cocking2_1,
@@ -50,6 +46,7 @@ namespace FPS_n2 {
 			Load3,
 			//
 			LaserSwitch,
+			CateFall,
 		};
 		enum class CharaTypeID {
 			Mine,
