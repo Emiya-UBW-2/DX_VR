@@ -1,0 +1,3 @@
+capacity=33
+useammo0=9x19
+end

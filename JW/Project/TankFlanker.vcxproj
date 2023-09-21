@@ -16,19 +16,21 @@
     <ClInclude Include="source\Header.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGround.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGroundSub.hpp" />
-    <ClInclude Include="source\MainScene\CharaAnimData.hpp" />
     <ClInclude Include="source\MainScene\NetworkBrowser.hpp" />
     <ClInclude Include="source\MainScene\Object\Ammo.hpp" />
     <ClInclude Include="source\MainScene\Object\AmmoData.hpp" />
     <ClInclude Include="source\MainScene\Object\AmmoEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\Cart.hpp" />
+    <ClInclude Include="source\MainScene\Object\CharaAnimData.hpp" />
     <ClInclude Include="source\MainScene\Object\Character.hpp" />
     <ClInclude Include="source\MainScene\Object\CharacterEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\Character_before.hpp" />
     <ClInclude Include="source\MainScene\Object\Gun.hpp" />
+    <ClInclude Include="source\MainScene\Object\GunData.hpp" />
     <ClInclude Include="source\MainScene\Object\GunEnum.hpp" />
-    <ClInclude Include="source\MainScene\Object\Magazine.hpp" />
-    <ClInclude Include="source\MainScene\Object\MagazineEnum.hpp" />
+    <ClInclude Include="source\MainScene\Object\Gun_before.hpp" />
+    <ClInclude Include="source\MainScene\Object\Mod.hpp" />
+    <ClInclude Include="source\MainScene\Object\ModEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\ObjectBase.hpp" />
     <ClInclude Include="source\MainScene\Object\ObjectBaseEnum.hpp" />
     <ClInclude Include="source\MainScene\Player\CPU.hpp" />
@@ -44,12 +46,14 @@
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\MainScene\BackGround\BackGround.cpp" />
     <ClCompile Include="source\MainScene\BackGround\BackGroundSub.cpp" />
-    <ClCompile Include="source\MainScene\CharaAnimData.cpp" />
     <ClCompile Include="source\MainScene\Object\Cart.cpp" />
+    <ClCompile Include="source\MainScene\Object\CharaAnimData.cpp" />
     <ClCompile Include="source\MainScene\Object\Character.cpp" />
     <ClCompile Include="source\MainScene\Object\Character_before.cpp" />
     <ClCompile Include="source\MainScene\Object\Gun.cpp" />
-    <ClCompile Include="source\MainScene\Object\Magazine.cpp" />
+    <ClCompile Include="source\MainScene\Object\GunData.cpp" />
+    <ClCompile Include="source\MainScene\Object\Gun_before.cpp" />
+    <ClCompile Include="source\MainScene\Object\Mod.cpp" />
     <ClCompile Include="source\MainScene\Player\CPU.cpp" />
     <ClCompile Include="source\MainScene\Player\Player.cpp" />
     <ClCompile Include="source\ObjectManager.cpp" />
@@ -103,8 +107,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>
-      </SDLCheck>
+      <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\..\..\DxLib_VC\DX_VC;..\..\..\DxLib_VC\DX_VC\DXLib_ref;..\..\..\openvr;..\..\..\Box2D;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -112,6 +115,8 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <CompileAsWinRT>false</CompileAsWinRT>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

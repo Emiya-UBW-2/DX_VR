@@ -1,3 +1,0 @@
-capacity=20
-useammo0=6mmBB
-end

@@ -99,12 +99,6 @@
     <ClInclude Include="source\MainScene\Object\GunEnum.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
-    <ClInclude Include="source\MainScene\Object\Magazine.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MainScene\Object\MagazineEnum.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
     <ClInclude Include="source\MainScene\Object\Gun.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
@@ -114,8 +108,20 @@
     <ClInclude Include="source\MainScene\Object\Cart.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
-    <ClInclude Include="source\MainScene\CharaAnimData.hpp">
-      <Filter>ソース ファイル\MainScene</Filter>
+    <ClInclude Include="source\MainScene\Object\GunData.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\Object\Gun_before.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\Object\CharaAnimData.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\Object\ModEnum.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\Object\Mod.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -146,22 +152,28 @@
     <ClCompile Include="source\Scene\TitleScene.cpp">
       <Filter>ソース ファイル\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="source\MainScene\Object\Magazine.cpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClCompile>
     <ClCompile Include="source\MainScene\Object\Gun.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
     <ClCompile Include="source\MainScene\Object\Character_before.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
-    <ClCompile Include="source\MainScene\CharaAnimData.cpp">
-      <Filter>ソース ファイル\MainScene</Filter>
-    </ClCompile>
     <ClCompile Include="source\sub.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="source\MainScene\Object\Cart.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\Gun_before.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\GunData.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\CharaAnimData.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\Mod.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
   </ItemGroup>

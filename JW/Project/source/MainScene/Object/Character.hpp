@@ -2,14 +2,14 @@
 #include	"../../Header.hpp"
 #include "CharacterEnum.hpp"
 #include "Character_before.hpp"
-#include "../CharaAnimData.hpp"
+#include "CharaAnimData.hpp"
 
 
 #include "../../sub.hpp"
-#include "../../MainScene/Object/ObjectBase.hpp"
-#include "../../MainScene/Object/AmmoData.hpp"
-#include "../../MainScene/Object/Ammo.hpp"
-#include "../../MainScene/Object/Gun.hpp"
+#include "ObjectBase.hpp"
+#include "AmmoData.hpp"
+#include "Ammo.hpp"
+#include "Gun.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -29,8 +29,8 @@ namespace FPS_n2 {
 			const float											UpperTimerLimit = 10.f;
 		private:
 			CharaTypeID											m_CharaType;
-			std::vector<CharaAnimeSet>							m_CharaAnimeSet;
-			std::vector<GunAnimeSet>							m_GunAnimeSet;
+			std::vector<std::array<int, (int)CharaGunAnimeID::Max>>							m_CharaAnimeSet;
+			std::vector<std::array<std::vector<EnumGunAnim>, (int)EnumGunAnimType::Max>>							m_GunAnimeSet;
 
 			int													m_CharaAnimeSel{ 0 };
 			int													m_ReadyAnimeSel{ 0 };
@@ -53,7 +53,7 @@ namespace FPS_n2 {
 			CharaGunAnimeID										m_GunAnimSelect;
 			CharaAnimeID										m_BottomAnimSelect;
 			std::array<float, (int)CharaGunAnimeID::Max>		m_GunAnimFrame;
-			float			GetAllTime(CharaGunAnimeID ID) { return (float)m_CharaAnimeSet.at(this->m_CharaAnimeSel).m_GunAnimAllFrame.at((int)ID); }
+			float			GetAllTime(CharaGunAnimeID ID) { return (float)m_CharaAnimeSet.at(this->m_CharaAnimeSel).at((int)ID); }
 			void			UpdateGunAnim(CharaGunAnimeID ID, float speed) { m_GunAnimFrame.at((int)ID) += 30.f / FPS * speed; }
 			bool			GetGunAnimZero(CharaGunAnimeID ID) { return m_GunAnimFrame.at((int)ID) <= 0.f; }
 			bool			GetGunAnimEnd(CharaGunAnimeID ID) { return m_GunAnimFrame.at((int)ID) >= GetAllTime(ID); }
@@ -61,54 +61,16 @@ namespace FPS_n2 {
 
 			//銃
 			float												m_ReadyTimer{ 0.f };
-			float												m_ReadyPer{ 0.f };
-
-			class ArmMovePerClass {
-				float												m_ArmPer{ 0.f };
-				bool												m_Armon{ false };
-			public:
-				void Init(bool isOn)noexcept {
-					m_Armon = isOn;
-					m_ArmPer = isOn ? 1.f : 0.f;
-				}
-				void Execute(bool isOn, float OnOver = 0.2f, float OffOver = 0.2f) noexcept {
-					if (isOn) {
-						if (m_Armon) {
-							Easing(&this->m_ArmPer, 1.f, 0.9f, EasingType::OutExpo);
-						}
-						else {
-							Easing(&this->m_ArmPer, 1.f + OnOver, 0.8f, EasingType::OutExpo);
-							if (this->m_ArmPer >= 1.f + OnOver / 2.f) {
-								m_Armon = true;
-							}
-						}
-					}
-					else {
-						if (!m_Armon) {
-							Easing(&this->m_ArmPer, 0.f, 0.9f, EasingType::OutExpo);
-						}
-						else {
-							Easing(&this->m_ArmPer, 0.f - OffOver, 0.8f, EasingType::OutExpo);
-							if (this->m_ArmPer <= 0.f - OffOver / 2.f) {
-								m_Armon = false;
-							}
-						}
-					}
-				}
-			public:
-				const auto& Per() { return m_ArmPer; }
-			};
 
 			ArmMovePerClass										m_ReadyArm;
 			ArmMovePerClass										m_ReloadStartEmptyArm;
 			ArmMovePerClass										m_ReloadStartArm;
 			ArmMovePerClass										m_ReloadArm;
 			ArmMovePerClass										m_CheckArm;
+			ArmMovePerClass										m_WatchArm;
 
 			float												m_ReloadEyePer{ 0.f };
 			float												m_CheckEyePer{ 0.f };
-
-			GunAnimeID											m_ShotPhase{ GunAnimeID::Base };
 
 			bool												m_MagHand{ false };
 			ArmMovePerClass										m_MagArm;
@@ -120,6 +82,7 @@ namespace FPS_n2 {
 			bool												m_Press_Reload{ false };
 			bool												m_Press_Aim{ false };
 			bool												m_Press_Check{ false };
+			bool												m_Press_Watch{ false };
 			//体力
 			std::vector<HitBox>									m_HitBox;
 			DamageEvent											m_DamageEvent;									//
@@ -182,7 +145,7 @@ namespace FPS_n2 {
 			const auto		GetBottomRightStepAnimSel(void) const noexcept { return KeyControl::GetIsSquat() ? CharaAnimeID::Bottom_Squat_RightStep : CharaAnimeID::Bottom_Stand_RightStep; }
 			const auto		GetBottomTurnAnimSel(void) const noexcept { return KeyControl::GetIsSquat() ? CharaAnimeID::Bottom_Squat_Turn : CharaAnimeID::Bottom_Stand_Turn; }
 			const auto		GetBottomRunAnimSel(void) const noexcept { return CharaAnimeID::Bottom_Stand_Run; }
-			const auto		GetCharaFrame(CharaFrame frame) const noexcept { return m_Frames[(int)frame].first; }
+			const auto		GetFrame(CharaFrame frame) const noexcept { return m_Frames[(int)frame].first; }
 		public://ゲッター
 			auto&			GetAnimeBuf(CharaAnimeID anim) noexcept { return this->m_AnimPerBuf[(int)anim]; }
 			auto&			GetAnime(CharaAnimeID anim) noexcept { return this->GetObj().get_anime((int)anim); }
@@ -200,15 +163,14 @@ namespace FPS_n2 {
 			const auto		GetLaserActive(void) const noexcept { return this->m_LaserSwitch.on(); }
 			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
 			const auto		GetIsAim(void) const noexcept { return !(this->m_ReadyTimer == UpperTimerLimit); }
+		private:
+			void			SetReady(void) noexcept { this->m_ReadyTimer = UpperTimerLimit; }
+			void			SetAim(void) noexcept { this->m_ReadyTimer = 0.1f; }
+			void			SetADS(void) noexcept { this->m_ReadyTimer = 0.f; }
 		public://セッター
 			void			SetCamEyeVec(const VECTOR_ref& value) noexcept { this->m_CamEyeVec = value; }
 			void			SetDamageSwitchRec(unsigned long long value) noexcept { this->m_DamageSwitchRec = value; }
-			void			ResetFrameLocalMat(CharaFrame frame) noexcept { GetObj().frame_Reset(GetCharaFrame(frame)); }
-			void			LoadReticle(void) noexcept {
-				if (GetGunPtrNow() != nullptr) {
-					GetGunPtrNow()->LoadReticle();
-				}
-			}
+			void			ResetFrameLocalMat(CharaFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }
 			bool			SetDamageEvent(const DamageEvent& value) noexcept {
 				if (this->m_MyID == value.ID && this->m_objType == value.CharaType) {
 					SubHP(value.Damage, value.rad);
@@ -217,7 +179,7 @@ namespace FPS_n2 {
 				return false;
 			}
 			void			SetAnimLoop(CharaAnimeID ID, float speed) { ObjectBaseClass::SetAnimLoop((int)ID, speed); }
-			void			SetFrameLocalMat(CharaFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetCharaFrame(frame), value * this->m_Frames[(int)frame].second); }
+			void			SetFrameLocalMat(CharaFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * this->m_Frames[(int)frame].second); }
 			void			SetShapePer(CharaShape pShape, float Per) noexcept { this->m_Shapes[(int)pShape].second = Per; }
 			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
 			void			SetGunPtr(const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_Gun_Ptr = pGunPtr0; }
@@ -227,23 +189,7 @@ namespace FPS_n2 {
 					GetGunPtrNow()->SetPlayerID(this->m_MyID);
 				}
 			}
-		public://ゲッター
-			const auto		GetFrameLocalMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalMatrix(GetCharaFrame(frame)); }
-			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalWorldMatrix(GetCharaFrame(frame)); }
-			const auto		GetParentFrameWorldMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalWorldMatrix((int)this->GetObj_const().frame_parent(GetCharaFrame(frame))); }
-			const auto		GetCharaDir(void) const noexcept { return this->m_UpperMatrix * this->m_move.mat; }
-			const auto		GetCharaVecX(void) const noexcept { return GetCharaDir().xvec(); }
-			const auto		GetCharaVecY(void) const noexcept { return GetCharaDir().yvec(); }
-			const auto		GetCharaVector(void) const noexcept { return GetCharaDir().zvec() * -1.f; }
-			const auto		GetLensPos(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetLensPos() : VECTOR_ref::zero(); }
-			const auto		GetReticleSize(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetReticleSize() : 1.f; }
-			const auto		GetReticlePos(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetReticlePos() : VECTOR_ref::zero(); }
-			const auto		GetLensPosSize(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetLensPosSize() : VECTOR_ref::zero(); }
-			const auto		GetCanshot(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? (GetGunPtrNow_Const()->GetCanShot() && (this->m_ShotPhase <= GunAnimeID::Shot)) : false; }
-			const auto		GetAmmoNum(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetAmmoNum() : 0; }
-			const auto		GetAmmoAll(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetAmmoAll() : 0; }
-			const auto		GetShotSwitch(void) const noexcept { return this->m_ShotPhase == GunAnimeID::Shot; }
-			const auto&		GetADSPer(void) const noexcept { return this->m_ADSPer; }
+		private:
 			const auto		GetEyeVecMat(void) const noexcept {
 				auto tmpSwingMatrix =
 					MATRIX_ref::RotZ(deg2rad(m_WalkSwing.z()*m_WalkSwingRad.z()))*
@@ -254,18 +200,30 @@ namespace FPS_n2 {
 					MATRIX_ref::RotY(KeyControl::GetRad().y() - this->m_yrad_Bottom);
 				return tmpSwingMatrix * tmpUpperMatrix * this->m_move.mat;
 			}
-			const auto		GetEyeVecX(void) const noexcept { return GetEyeVecMat().xvec(); }
+		public://ゲッター
+			const auto		GetFrameLocalMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalMatrix(GetFrame(frame)); }
+			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalWorldMatrix(GetFrame(frame)); }
+			const auto		GetParentFrameWorldMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalWorldMatrix((int)this->GetObj_const().frame_parent(GetFrame(frame))); }
+			const auto		GetCharaDir(void) const noexcept { return this->m_UpperMatrix * this->m_move.mat; }
+			const auto		GetCharaVecX(void) const noexcept { return GetCharaDir().xvec(); }
+			const auto		GetCharaVecY(void) const noexcept { return GetCharaDir().yvec(); }
+			const auto		GetCharaVector(void) const noexcept { return GetCharaDir().zvec() * -1.f; }
+			const auto		GetCanshot(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetCanShot() : false; }
+			const auto		GetAmmoNum(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetAmmoNum() : 0; }
+			const auto		GetAmmoAll(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetAmmoAll() : 0; }
+			const auto		GetShoting(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetShoting() : false; }
+			const auto&		GetADSPer(void) const noexcept { return this->m_ADSPer; }
 			const auto		GetEyeVecY(void) const noexcept { return GetEyeVecMat().yvec(); }
 			const auto		GetEyeVector(void) const noexcept { return GetEyeVecMat().zvec() * -1.f; }
 			const auto		GetEyePosition(void) const noexcept {
-				return (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f
-					+ this->GetEyeVecY() * 0.f
-					+ this->GetEyeVector() * 0.5f
-					+ this->m_MoveEyePos;
-			}
-			const auto		GetScopePos(void) const noexcept {
-				return ((GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetScopePos() : GetEyePosition()) +
-					m_GunShake_r * 0.3f / ((GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetReticleSize() : 1.f);
+				auto EyePosition = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f
+					+ MATRIX_ref::Vtrans(VECTOR_ref::vget(0.f,0.f,-0.5f), GetEyeVecMat()) + this->m_MoveEyePos;
+				if (GetGunPtrNow_Const()) {
+					return Lerp(EyePosition, GetGunPtrNow_Const()->GetEyePos() + m_GunShake_r * 0.3f, this->m_ADSPer);
+				}
+				else {
+					return EyePosition;
+				}
 			}
 		private:
 			//被弾チェック

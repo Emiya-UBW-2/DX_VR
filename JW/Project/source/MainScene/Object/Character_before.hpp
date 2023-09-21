@@ -2,19 +2,47 @@
 #include	"../../Header.hpp"
 
 #include "../../sub.hpp"
-#include "../CharaAnimData.hpp"
+#include "CharaAnimData.hpp"
 #include "CharacterEnum.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		struct CharaAnimeSet {
-			std::array<int, (int)CharaGunAnimeID::Max> m_GunAnimAllFrame;
+		class ArmMovePerClass {
+			float												m_ArmPer{ 0.f };
+			bool												m_Armon{ false };
+		public:
+			void Init(bool isOn)noexcept {
+				m_Armon = isOn;
+				m_ArmPer = isOn ? 1.f : 0.f;
+			}
+			void Execute(bool isOn, float OnOver = 0.2f, float OffOver = 0.2f) noexcept {
+				if (isOn) {
+					if (m_Armon) {
+						Easing(&this->m_ArmPer, 1.f, 0.9f, EasingType::OutExpo);
+					}
+					else {
+						Easing(&this->m_ArmPer, 1.f + OnOver, 0.8f, EasingType::OutExpo);
+						if (this->m_ArmPer >= 1.f + OnOver / 2.f) {
+							m_Armon = true;
+						}
+					}
+				}
+				else {
+					if (!m_Armon) {
+						Easing(&this->m_ArmPer, 0.f, 0.9f, EasingType::OutExpo);
+					}
+					else {
+						Easing(&this->m_ArmPer, 0.f - OffOver, 0.8f, EasingType::OutExpo);
+						if (this->m_ArmPer <= 0.f - OffOver / 2.f) {
+							m_Armon = false;
+						}
+					}
+				}
+			}
+		public:
+			const auto& Per() { return m_ArmPer; }
 		};
 
-
-		struct GunAnimeSet {
-			std::array<std::vector<EnumGunAnim>, (int)EnumGunAnimType::Max> m_Anim;
-		};
 
 		enum class HitType {
 			Head,
@@ -231,7 +259,7 @@ namespace FPS_n2 {
 			const auto		GetRKey(void) const noexcept { return this->m_RKey; }
 			const auto		GetFKey(void) const noexcept { return this->m_FKey; }
 			const auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
-			const auto		GetRun(void) const noexcept { return this->m_Run.press(); }
+			const auto		GetRun(void) const noexcept { return this->m_Run.press() && GetPressFront(); }
 			const auto		GetAction(void) const noexcept { return this->m_Action.press(); }
 			const auto		GetShotKey(void) const noexcept { return this->m_ShotKey; }
 			const auto		GetADSKey(void) const noexcept { return this->m_ADSKey; }

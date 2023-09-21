@@ -1,8 +1,8 @@
 #pragma once
 #include	"../../Header.hpp"
 #include	"../../MainScene/BackGround/BackGround.hpp"
-#include "../../MainScene/Object/CharacterEnum.hpp"
-#include "../../MainScene/Object/GunEnum.hpp"
+#include "CharacterEnum.hpp"
+#include "GunEnum.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -268,6 +268,10 @@ namespace FPS_n2 {
 							}
 							break;
 						case ObjType::Gun:
+						case ObjType::Magazine:
+						case ObjType::Lower:
+						case ObjType::Upper:
+						case ObjType::Barrel:
 							compare = (FName == GunFrameName[i]);
 							if (!compare) {
 								compare = (FName.find(GunFrameName[i]) != std::string::npos);
@@ -289,6 +293,10 @@ namespace FPS_n2 {
 							if (i >= (int)CharaFrame::Max) { isEnd = true; }
 							break;
 						case ObjType::Gun:
+						case ObjType::Magazine:
+						case ObjType::Lower:
+						case ObjType::Upper:
+						case ObjType::Barrel:
 							if (i >= (int)GunFrame::Max) { isEnd = true; }
 							break;
 						default:
@@ -308,6 +316,10 @@ namespace FPS_n2 {
 							if (i >= (int)CharaFrame::Max) { isEnd = true; }
 							break;
 						case ObjType::Gun:
+						case ObjType::Magazine:
+						case ObjType::Lower:
+						case ObjType::Upper:
+						case ObjType::Barrel:
 							if (i >= (int)GunFrame::Max) { isEnd = true; }
 							break;
 						default:
@@ -318,6 +330,7 @@ namespace FPS_n2 {
 							break;
 						}
 					}
+					//シェイプ
 					switch (this->m_objType) {
 					case ObjType::Human:
 						this->m_Shapes.resize((int)CharaShape::Max);

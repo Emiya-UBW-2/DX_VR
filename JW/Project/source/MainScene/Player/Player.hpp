@@ -27,7 +27,6 @@ namespace FPS_n2 {
 			const SendInfo	GetNetSendMove(void) const noexcept;
 
 			const auto			GetPos(void) const noexcept { return this->m_Chara->GetMatrix().pos(); }
-			//const auto		GetAim(void) const noexcept { return this->m_Chara->GetEyeVector(); }
 			const VECTOR_ref	GetRadBuf(void) const noexcept;
 		public:
 			void Init(void) noexcept {

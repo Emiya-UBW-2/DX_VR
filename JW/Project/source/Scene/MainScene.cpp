@@ -11,7 +11,7 @@ namespace FPS_n2 {
 		void			MAINLOOP::Load_Sub(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* AnimMngr = GunAnimManager::Instance();
-
+			//
 			SE->Add((int)SoundEnum::LaserSwitch, 1, "data/Sound/SE/aim_on.wav", false);
 			SE->Add((int)SoundEnum::CateFall, 6, "data/Sound/SE/gun/cate/case_1.wav", false);
 			SE->Add((int)SoundEnum::Env, 1, "data/Sound/SE/envi.wav", false);
@@ -60,7 +60,7 @@ namespace FPS_n2 {
 			SE->Add((int)SoundEnum::SlideFoot, 3, "data/Sound/SE/move/sliding.wav");
 			SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
 			SE->Add((int)SoundEnum::Heart, 3, "data/Sound/SE/move/heart.wav");
-
+			//
 			Gauge_Graph = GraphHandle::Load("data/UI/Gauge.png");
 			hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
 			aim_Graph = GraphHandle::Load("data/UI/battle_aim.bmp");
@@ -69,12 +69,7 @@ namespace FPS_n2 {
 			this->m_BackGround = std::make_shared<BackGroundClassMain>();
 			this->m_BackGround->Init("", "");
 			//
-			for (int loop = 0; loop < (int)EnumGunAnim::Max; loop++) {
-				std::string Path = "data/CharaAnime/";
-				Path += EnumGunAnimName[loop];
-				Path += ".txt";
-				AnimMngr->LoadAction(Path.c_str(), (EnumGunAnim)loop);
-			}
+			AnimMngr->Load("data/CharaAnime/");
 		}
 		void			MAINLOOP::Set_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
@@ -88,20 +83,20 @@ namespace FPS_n2 {
 			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
 			//
 			ObjMngr->Init(this->m_BackGround);
-			for (int i = 0; i < Chara_num / 2; i++) {
+			for (int i = 0; i < 1; i++) {
 				character_Pool.emplace_back((std::shared_ptr<CharacterClass>&)(*ObjMngr->AddObject(ObjType::Human, PHYSICS_SETUP::DISABLE, false, "data/Charactor/Suit/")));
 				this->m_AICtrl.emplace_back(std::make_shared<AIControl>());
 			}
-			for (int i = Chara_num / 2; i < Chara_num; i++) {
+			for (int i = 1; i < Chara_num; i++) {
 				character_Pool.emplace_back((std::shared_ptr<CharacterClass>&)(*ObjMngr->AddObject(ObjType::Human, PHYSICS_SETUP::DISABLE, false, "data/Charactor/Soldier/")));
 				this->m_AICtrl.emplace_back(std::make_shared<AIControl>());
 			}
 
-			for (int i = 0; i < gun_num / 2; i++) {
-				ObjMngr->AddObject(ObjType::Gun, PHYSICS_SETUP::DISABLE, false, "data/gun/M1911/");
+			for (int i = 0; i < 1; i++) {
+				ObjMngr->AddObject(ObjType::Gun, PHYSICS_SETUP::DISABLE, false, "data/gun/G17Gen3/");
 			}
-			for (int i = gun_num / 2; i < gun_num; i++) {
-				ObjMngr->AddObject(ObjType::Gun, PHYSICS_SETUP::DISABLE, false, "data/gun/M16A4/");
+			for (int i = 1; i < gun_num; i++) {
+				ObjMngr->AddObject(ObjType::Gun, PHYSICS_SETUP::DISABLE, false, "data/gun/AR15_90/");
 			}
 			//ロード
 			//人
@@ -126,7 +121,7 @@ namespace FPS_n2 {
 				c->ValueSet(deg2rad(0.f), rad_t, pos_t, (PlayerID)index);
 				c->SetGunPtr((std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, (int)index)));
 				c->GunSetUp();
-				if (index < Chara_num / 2) {
+				if (index < 1) {
 					c->SetCharaType(CharaTypeID::Team);
 				}
 				else {
@@ -165,6 +160,8 @@ namespace FPS_n2 {
 			for (auto& y : SelYadd) {
 				y = 0.f;
 			}
+
+			m_Retire = false;
 		}
 		bool			MAINLOOP::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
@@ -181,13 +178,14 @@ namespace FPS_n2 {
 				}
 				else {
 					KeyGuide->Reset();
-					KeyGuide->AddGuide("R_stick.png", "機首下上(ピッチ),左右回転(ロール)");
+					KeyGuide->AddGuide("R_stick.png", "移動");
 					KeyGuide->AddGuide("L1.png", "");
-					KeyGuide->AddGuide("R1.png", "左右傾け(ヨー)");
-					KeyGuide->AddGuide("square.png", "");
-					KeyGuide->AddGuide("triangle.png", "加減速");
+					KeyGuide->AddGuide("R1.png", "左右傾け(リーン)");
+					KeyGuide->AddGuide("R_stick.png", "押し込みで走り");
+					KeyGuide->AddGuide("ng.png", "しゃがみ");
+					KeyGuide->AddGuide("square.png", "リロード");
 					KeyGuide->AddGuide("R2.png", "射撃");
-					KeyGuide->AddGuide("L_stick.png", "押し込みでフリールック");
+					KeyGuide->AddGuide("triangle.png", "レーザー点灯/消灯");
 					KeyGuide->AddGuide("L2.png", "エイム");
 					KeyGuide->AddGuide("option.png", "ポーズ");
 				}
@@ -208,15 +206,17 @@ namespace FPS_n2 {
 				else {
 					KeyGuide->Reset();
 					KeyGuide->AddGuide("W.jpg", "");
-					KeyGuide->AddGuide("S.jpg", "機首下上(ピッチ)");
+					KeyGuide->AddGuide("S.jpg", "");
 					KeyGuide->AddGuide("A.jpg", "");
-					KeyGuide->AddGuide("D.jpg", "左右回転(ロール)");
+					KeyGuide->AddGuide("D.jpg", "移動");
 					KeyGuide->AddGuide("Q.jpg", "");
-					KeyGuide->AddGuide("E.jpg", "左右傾け(ヨー)");
-					KeyGuide->AddGuide("R.jpg", "");
-					KeyGuide->AddGuide("F.jpg", "加減速");
+					KeyGuide->AddGuide("E.jpg", "左右傾け(リーン)");
+					KeyGuide->AddGuide("Shift.jpg", "走る");
+					KeyGuide->AddGuide("R.jpg", "リロード");
+					KeyGuide->AddGuide("C.jpg", "");
+					KeyGuide->AddGuide("X.jpg", "しゃがみ");
 					KeyGuide->AddGuide("LM.jpg", "射撃");
-					KeyGuide->AddGuide("MM.jpg", "フリールック");
+					KeyGuide->AddGuide("F.jpg", "レーザー点灯/消灯");
 					KeyGuide->AddGuide("RM.jpg", "エイム");
 					KeyGuide->AddGuide("Tab.jpg", "ポーズ");
 				}
@@ -246,6 +246,7 @@ namespace FPS_n2 {
 						SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						switch (select) {
 						case 0:
+							m_Retire = true;
 							DXDraw::Instance()->PauseExit();
 							break;
 						case 1:
@@ -286,7 +287,6 @@ namespace FPS_n2 {
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
-				//Chara->LoadReticle();//プレイヤー変更時注意
 				SetMousePoint(DXDraw::Instance()->m_DispXSize / 2, DXDraw::Instance()->m_DispYSize / 2);
 				Timer = 3.f;
 				SE->Get((int)SoundEnum::Env).Play(0, DX_PLAYTYPE_LOOP);
@@ -318,8 +318,8 @@ namespace FPS_n2 {
 				}
 
 				MyInput.SetInput(
-					pp_x,
-					pp_y,
+					pp_x - Chara->GetRecoilRadAdd().y(),
+					pp_y - Chara->GetRecoilRadAdd().x(),
 					Pad->GetUpKey().press(), Pad->GetDownKey().press(), Pad->GetLeftKey().press(), Pad->GetRightKey().press(),
 					Pad->GetRunKey().press(),
 					Pad->GetQKey().press(), Pad->GetEKey().press(),
@@ -342,7 +342,7 @@ namespace FPS_n2 {
 							c->SetCharaType(CharaTypeID::Team);
 						}
 						else {
-							if (c->GetMyPlayerID() < Chara_num * 1 / 3) {
+							if (c->GetMyPlayerID() < 1) {
 								c->SetCharaType(CharaTypeID::Team);
 							}
 							else {
@@ -418,15 +418,6 @@ namespace FPS_n2 {
 			}
 			//Execute
 			ObjMngr->ExecuteObject();
-			//
-			for (int j = 0; j < gun_num; j++) {
-				auto& Gun = (std::shared_ptr<GunClass>&)(*ObjMngr->GetObj(ObjType::Gun, j));
-				if (Gun->GetIsShot()) {
-					//エフェクト
-					auto mat = Gun->GetMuzzleMatrix();
-					EffectControl::SetOnce(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 1.f);
-				}
-			}
 			//いらないオブジェクトの除去
 			ObjMngr->DeleteCheck();
 			//弾の更新
@@ -486,7 +477,7 @@ namespace FPS_n2 {
 
 				{
 					//FPSカメラ
-					VECTOR_ref CamPos = Lerp(Chara->GetEyePosition(), Chara->GetScopePos(), Chara->GetADSPer()) + this->m_CamShake2;
+					VECTOR_ref CamPos = Chara->GetEyePosition() + this->m_CamShake2;
 					DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeVector(), Chara->GetEyeVecY());
 					//info
 					auto fov_t = DrawParts->GetMainCamera().GetCamFov();
@@ -509,7 +500,7 @@ namespace FPS_n2 {
 						else if (Chara->GetRun()) {
 							fov += deg2rad(5);
 						}
-						if (Chara->GetShotSwitch()) {
+						if (Chara->GetShoting()) {
 							fov -= deg2rad(5);
 							Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
 						}
@@ -527,8 +518,26 @@ namespace FPS_n2 {
 					}
 				}
 			}
+			{
+				auto Len = (DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(0)).Length();
+
+				Easing(&Min, Lerp(0.f, 25.f, std::clamp(Len / (5.f*Scale_Rate), 0.f, 1.f)), 0.95f, EasingType::OutExpo);
+				Easing(&Gamma, Lerp(1.f, 1.15f, std::clamp(Len / (5.f*Scale_Rate), 0.f, 1.f)), 0.95f, EasingType::OutExpo);
+
+				PostPassEffect::Instance()->SetLevelFilter((int)Min, 255, Gamma);
+			}
 			//
 			this->m_BackGround->Execute();
+			//射撃光
+			if (Chara->GetGunPtrNow()->GetShotSwitch()) {
+				auto mat = Chara->GetGunPtrNow()->GetMuzzleMatrix();
+				SetLightEnable(TRUE);
+				ChangeLightTypePoint(mat.pos().get(),
+					2.0f*Scale_Rate,
+					0.1f,
+					0.6f,
+					0.0f);
+			}
 			{
 				SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(0)).Norm(), 0);
 				SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(1)).Norm(), 1);
@@ -538,8 +547,8 @@ namespace FPS_n2 {
 			//レーザーサイト
 			for (auto& c : this->character_Pool) {
 				c->SetLaser(&character_Pool);
-				VECTOR_ref CamPos = Lerp(c->GetEyePosition(), c->GetScopePos(), c->GetADSPer());
-				VECTOR_ref Laserpos = GetScreenPos(CamPos, CamPos + c->GetEyeVector(), c->GetMatrix().yvec(), DrawParts->GetMainCamera().GetCamFov(), c->GetLaser());
+				VECTOR_ref CamPos = c->GetEyePosition();
+				VECTOR_ref Laserpos = GetScreenPos(CamPos, CamPos + c->GetEyeVector(), c->GetEyeVecY(), DrawParts->GetMainCamera().GetCamFov(), c->GetLaser());
 				if (0.f < Laserpos.z() && Laserpos.z() < 1.f) {
 					c->SetLaser2D(Laserpos);
 				}
@@ -612,6 +621,9 @@ namespace FPS_n2 {
 #ifdef DEBUG
 			DebugParts->SetPoint("update end");
 #endif // DEBUG
+			if (m_Retire) {
+				return false;
+			}
 			return true;
 		}
 		void			MAINLOOP::Dispose_Sub(void) noexcept {

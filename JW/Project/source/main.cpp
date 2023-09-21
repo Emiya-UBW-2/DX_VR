@@ -17,7 +17,7 @@
 
 #include "MainScene/Object/Ammo.hpp"
 #include "MainScene/Object/Gun.hpp"
-#include "MainScene/Object/Magazine.hpp"
+#include "MainScene/Object/Mod.hpp"
 #include "MainScene/Object/Character.hpp"
 
 #include "ObjectManager.hpp"
@@ -48,6 +48,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//メインシーン用
 	FPS_n2::Sceneclass::PlayerManager::Create();
 	FPS_n2::Sceneclass::GunAnimManager::Create();
+	FPS_n2::Sceneclass::GunDataManager::Create();
 	//MV1SetLoadModelUsePackDraw(TRUE);
 	//シーン
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();

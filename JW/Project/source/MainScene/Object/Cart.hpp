@@ -1,6 +1,6 @@
 #pragma once
 #include	"../../Header.hpp"
-#include "../../MainScene/Object/ObjectBase.hpp"
+#include "ObjectBase.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {

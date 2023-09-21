@@ -17,9 +17,13 @@ namespace FPS_n2 {
 		enum class ObjType {
 			Human,
 			Ammo,
+			Cart,
 			Gun,
 			Magazine,
-			Cart,
+			Lower,
+			Upper,
+			Barrel,
+			Max,
 		};
 		enum class SoundEnum {
 			RunFoot = (int)SoundEnumCommon::Num,

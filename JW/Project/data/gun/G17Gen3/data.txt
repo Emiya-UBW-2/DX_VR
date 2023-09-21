@@ -1,0 +1,25 @@
+Name=Glock17 Gen3
+
+shottype=SEMI
+usehumanAnim=1
+soundsel=1
+reloadType=MAG
+
+Slot0Type=Magazine
+Slot0Item=GMag33
+Slot0Item=GMag17
+
+Slot1Type=Upper
+Slot1Item=G17Gen2Slide
+Slot1Item=G17Gen3Slide
+
+Slot2Type=Lower
+Slot2Item=G19LPFrame
+Slot2Item=G17Gen2Frame
+Slot2Item=G17Gen3Frame
+
+Slot3Type=Barrel
+Slot3Item=G17Gen2Barrel
+Slot3Item=G17Gen3Barrel
+
+end

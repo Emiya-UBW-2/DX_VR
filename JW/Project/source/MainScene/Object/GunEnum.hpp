@@ -8,13 +8,14 @@ namespace FPS_n2 {
 			Shot,//1
 			Cocking,//2
 			ReloadStart_Empty,//3
-			ReloadStart,//3
-			ReloadOne,//4
-			ReloadEnd,//5
+			ReloadStart,//4
+			ReloadOne,//5
+			ReloadEnd,//6
 			CheckStart,
 			Checking,
 			CheckEnd,
 			Open,
+			Watch,
 			AnimeIDMax,
 		};
 		enum class GunFrame {
@@ -32,12 +33,12 @@ namespace FPS_n2 {
 			RightHandPos,
 			RightHandYvec,
 			RightHandZvec,
-			LeftHandRPos,
-			LeftHandRYvec,
-			LeftHandRZvec,
 			MoveAxis,
 			MovePoint,
 			Move,
+			Lower,
+			Upper,
+			Barrel,
 			Max,
 		};
 		static const char* GunFrameName[(int)GunFrame::Max] = {
@@ -55,12 +56,12 @@ namespace FPS_n2 {
 			"righthand",
 			"righthand_yvec",
 			"righthand_zvec",
-			"lefthandR",
-			"lefthandR_yvec",
-			"lefthandR_zvec",
 			"ìÆçÏé≤",
 			"ìÆçÏì_",
 			"à⁄ìÆ",
+			"Lower",
+			"Upper",
+			"Barrel",
 		};
 		enum class SHOTTYPE {
 			BOLT,
@@ -73,10 +74,43 @@ namespace FPS_n2 {
 		};
 
 		struct GunSoundSet {
-			std::array<SoundEnum, 4>	m_Cock{ SoundEnum::Shot2 ,SoundEnum::Shot2 ,SoundEnum::Shot2 ,SoundEnum::Shot2 };
+			SoundEnum					m_Cock1{ SoundEnum::Shot2 };
+			SoundEnum					m_Cock2{ SoundEnum::Shot2 };
 			SoundEnum					m_Shot{ SoundEnum::Shot2 };
 			SoundEnum					m_Unload{ SoundEnum::Unload2 };
 			SoundEnum					m_Load{ SoundEnum::Load2 };
+		};
+		const GunSoundSet GunSoundSets[] = {
+			{
+				//M4
+				SoundEnum::Cocking2_0,
+				SoundEnum::Cocking2_1,
+				SoundEnum::Shot2,
+				SoundEnum::Unload2,
+				SoundEnum::Load2
+			},
+			{
+				//ÉnÉìÉhÉKÉì
+				SoundEnum::Cocking3_0,
+				SoundEnum::Cocking3_1,
+				SoundEnum::Shot3,
+				SoundEnum::Unload3,
+				SoundEnum::Load3
+			},
+		};
+		
+		enum class GunSlot {
+			Magazine,
+			Upper,
+			Lower,
+			Barrel,
+			Max,
+		};
+		static const char* GunSlotName[(int)GunSlot::Max] = {
+			"Magazine",
+			"Upper",
+			"Lower",
+			"Barrel",
 		};
 	};
 };

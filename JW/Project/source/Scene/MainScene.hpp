@@ -39,6 +39,11 @@ namespace FPS_n2 {
 			//‹¤’Ê
 			VECTOR_ref										m_Laserpos2D;
 			float											Timer{ 5.f };
+
+			float	Min = 0.f;
+			float	Gamma = 1.f;
+
+			bool	m_Retire{ false };
 		private:
 			int select{ 0 };
 			std::array<float, 3> SelYadd{};

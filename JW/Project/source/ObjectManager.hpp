@@ -11,6 +11,8 @@ namespace FPS_n2 {
 			std::vector<std::shared_ptr<ObjectBaseClass>>	m_Object;
 			switchs											m_ResetP;
 			std::shared_ptr<BackGroundClassBase>				m_BackGround;				//BGÉRÉsÅ[
+		private:
+			std::shared_ptr<ObjectBaseClass>* MakeObject(ObjType ModelType) noexcept;
 		public:
 			void	LoadModel(PHYSICS_SETUP TYPE, bool UseToonWhenCreateFile, ObjectBaseClass* pObj, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") const noexcept {
 				bool iscopy = false;
