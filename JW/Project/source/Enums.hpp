@@ -50,7 +50,8 @@ namespace FPS_n2 {
 			Load3,
 			//
 			LaserSwitch,
-			CateFall,
+			CartFall,
+			MagFall,
 		};
 		enum class CharaTypeID {
 			Mine,

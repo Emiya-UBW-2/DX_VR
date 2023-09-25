@@ -18,7 +18,7 @@ namespace FPS_n2 {
 			VECTOR_ref Localyvec = VECTOR_ref::vget(0.f, 0.f, -1.f).Norm();
 			VECTOR_ref Localzvec = VECTOR_ref::vget(-1.f, -1.f, 0.f).Norm();
 
-			VECTOR_ref RetPos = Lerp(GunPos, GetFrameWorldMat(CharaFrame::RightWrist).pos(), m_LeftHandPer);
+			VECTOR_ref RetPos = GunPos;
 			//基準
 			auto vec_a1 = MATRIX_ref::Vtrans((RetPos - GetFrameWorldMat(CharaFrame::RightArm).pos()).Norm(), matBase);//基準
 			auto vec_a1L1 = VECTOR_ref(VECTOR_ref::vget(-1.5f, -1.f, vec_a1.y() / -abs(vec_a1.z()))).Norm();//x=0とする
@@ -39,7 +39,6 @@ namespace FPS_n2 {
 			auto AngleOf2Vector = [&](VECTOR_ref A, VECTOR_ref B) { return acos(A.dot(B) / (A.Length() * B.Length())); };			//２つのベクトルABのなす角度θを求める
 			matBase = GetParentFrameWorldMat(CharaFrame::RightWrist).GetRot().Inverse();
 			MATRIX_ref mat1;
-			MATRIX_ref mat2 = GetFrameLocalMat(CharaFrame::RightWrist);
 			{
 				auto zvec = MATRIX_ref::Vtrans(Localzvec, GetFrameWorldMat(CharaFrame::RightWrist).GetRot());
 				mat1 = MATRIX_ref::RotVec2(MATRIX_ref::Vtrans(zvec, matBase), MATRIX_ref::Vtrans(Gunzvec, matBase)) * mat1;
@@ -47,7 +46,7 @@ namespace FPS_n2 {
 				auto xvec = MATRIX_ref::Vtrans(Localyvec, GetFrameWorldMat(CharaFrame::RightWrist).GetRot());
 				mat1 = MATRIX_ref::RotAxis(Localzvec, AngleOf2Vector(xvec, Gunxvec)*(((Gunyvec*-1.f).dot(xvec) > 0.f) ? -1.f : 1.f))*mat1;
 			}
-			MATRIX_ref RetMat = Lerp_Matrix(mat1, mat2, m_LeftHandPer);
+			MATRIX_ref RetMat = mat1;
 			SetFrameLocalMat(CharaFrame::RightWrist, RetMat);
 		}
 		void			CharacterClass::move_LeftArm(const VECTOR_ref& GunPos, const VECTOR_ref& Gunyvec, const VECTOR_ref& Gunzvec) noexcept {
@@ -61,7 +60,7 @@ namespace FPS_n2 {
 			VECTOR_ref Localyvec = VECTOR_ref::vget(0.f, 0.f, -1.f).Norm();
 			VECTOR_ref Localzvec = VECTOR_ref::vget(1.f, -1.f, 0.f).Norm();
 
-			VECTOR_ref RetPos = Lerp(GunPos, GetFrameWorldMat(CharaFrame::LeftWrist).pos(), m_LeftHandPer);
+			VECTOR_ref RetPos = GunPos;
 			//基準
 			auto vec_a1 = MATRIX_ref::Vtrans((RetPos - GetFrameWorldMat(CharaFrame::LeftArm).pos()).Norm(), matBase);//基準
 			auto vec_a1L1 = VECTOR_ref(VECTOR_ref::vget(1.5f, -1.f, vec_a1.y() / -abs(vec_a1.z()))).Norm();//x=0とする
@@ -82,7 +81,6 @@ namespace FPS_n2 {
 			auto AngleOf2Vector = [&](VECTOR_ref A, VECTOR_ref B) { return acos(A.dot(B) / (A.Length() * B.Length())); };			//２つのベクトルABのなす角度θを求める
 			matBase = GetParentFrameWorldMat(CharaFrame::LeftWrist).GetRot().Inverse();
 			MATRIX_ref mat1;
-			MATRIX_ref mat2 = GetFrameLocalMat(CharaFrame::LeftWrist);
 			{
 				auto zvec = MATRIX_ref::Vtrans(Localzvec, GetFrameWorldMat(CharaFrame::LeftWrist).GetRot());
 				mat1 = MATRIX_ref::RotVec2(MATRIX_ref::Vtrans(zvec, matBase), MATRIX_ref::Vtrans(Gunzvec, matBase)) * mat1;
@@ -90,7 +88,7 @@ namespace FPS_n2 {
 				auto xvec = MATRIX_ref::Vtrans(Localyvec, GetFrameWorldMat(CharaFrame::LeftWrist).GetRot());
 				mat1 = MATRIX_ref::RotAxis(Localzvec, AngleOf2Vector(xvec, Gunxvec)*((Gunyvec.dot(xvec) > 0.f) ? -1.f : 1.f))*mat1;
 			}
-			MATRIX_ref RetMat = Lerp_Matrix(mat1, mat2, m_LeftHandPer);
+			MATRIX_ref RetMat = mat1;
 			SetFrameLocalMat(CharaFrame::LeftWrist, RetMat);
 		}
 		//
@@ -106,12 +104,9 @@ namespace FPS_n2 {
 				GetAnimeBuf((CharaAnimeID)i) = 0.f;
 			}
 
-			this->m_ReadyArm.Init(false);
-			this->m_ReloadStartEmptyArm.Init(false);
-			this->m_ReloadStartArm.Init(false);
-			this->m_ReloadArm.Init(false);
-			this->m_CheckArm.Init(false);
-			this->m_WatchArm.Init(false);
+			for (auto& a : this->m_Arm) {
+				a.Init(false);
+			}
 
 			this->m_ReloadEyePer = 0.f;
 			SetReady();
@@ -123,7 +118,6 @@ namespace FPS_n2 {
 			this->m_RunPer2 = 0.f;
 			this->m_PrevRunPer2 = 0.f;
 			this->m_NeckPer = 0.f;
-			this->m_LeftHandPer = 0.f;
 			this->m_TurnBody = false;
 			this->m_MoveEyePosTimer = 0.f;
 			this->m_RunReady = false;
@@ -257,12 +251,17 @@ namespace FPS_n2 {
 				GetGunPtrNow()->SetShotSwitchOff();
 				if ((this->m_Press_Shot || this->m_Press_Reload || this->m_Press_Check || this->m_Press_Watch) && (GetGunPtrNow_Const()->GetShotPhase() == GunAnimeID::Base)) {
 					this->m_ReadyTimer = std::min(this->m_ReadyTimer, 0.1f);
-					if (this->m_ReadyArm.Per() <= 0.1f) {
+					if (this->m_Arm[(int)EnumGunAnimType::Ready].Per() <= 0.1f) {
 						if (this->m_Press_Shot) {
 							if (GetGunPtrNow()->GetInChamber()) {
 								GetGunPtrNow()->SetBullet();
 								this->m_GunShakePer = 1.f;
-								this->m_RecoilRadAdd.Set(GetRandf(0.012f), -0.012f, 0.f);
+								if (m_CharaType == CharaTypeID::Enemy) {
+									this->m_RecoilRadAdd.Set(GetRandf(0.012f), -0.012f, 0.f);
+								}
+								else {
+									this->m_RecoilRadAdd.Set(GetRandf(0.002f), -0.006f, 0.f);
+								}
 								this->m_RecoilRadAdd = MATRIX_ref::Vtrans(this->m_RecoilRadAdd, MATRIX_ref::RotZ(-m_LeanRad / 5.f));
 							}
 							else {
@@ -316,13 +315,14 @@ namespace FPS_n2 {
 			Easing(&this->m_ReloadEyePer, (GetGunPtrNow_Const()->GetCocking() || GetGunPtrNow_Const()->GetReloading()) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 			Easing(&this->m_CheckEyePer, (GetGunPtrNow_Const()->GetShotPhase() >= GunAnimeID::Checking) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 
-			this->m_ReloadStartArm.Execute(GetGunPtrNow_Const()->GetShotPhase() == GunAnimeID::ReloadStart, 0.2f, 0.2f);
-			this->m_ReloadStartEmptyArm.Execute(GetGunPtrNow_Const()->GetShotPhase() == GunAnimeID::ReloadStart_Empty, 0.5f, 0.2f);
-			this->m_ReloadArm.Execute(GetGunPtrNow_Const()->GetShotPhase() >= GunAnimeID::ReloadOne && GetGunPtrNow_Const()->GetShotPhase() <= GunAnimeID::ReloadEnd, 0.1f, 0.2f);
-			this->m_ReadyArm.Execute(!(GetIsAim() || !GetGunPtrNow_Const()->GetShootReady()), 0.1f, 0.2f);
-			this->m_CheckArm.Execute(GetGunPtrNow_Const()->GetShotPhase() >= GunAnimeID::CheckStart && GetGunPtrNow_Const()->GetShotPhase() <= GunAnimeID::Checking, 0.05f, 0.2f);
-
-			this->m_WatchArm.Execute(GetGunPtrNow_Const()->GetShotPhase() == GunAnimeID::Watch, 0.1f, 0.1f);
+			this->m_Arm[(int)EnumGunAnimType::ADS].Execute(this->GetIsADS(), 0.2f, 0.2f);
+			this->m_Arm[(int)EnumGunAnimType::ReloadStart].Execute(GetGunPtrNow_Const()->GetShotPhase() == GunAnimeID::ReloadStart, 0.2f, 0.2f);
+			this->m_Arm[(int)EnumGunAnimType::ReloadStart_Empty].Execute(GetGunPtrNow_Const()->GetShotPhase() == GunAnimeID::ReloadStart_Empty, 0.5f, 0.2f);
+			this->m_Arm[(int)EnumGunAnimType::Reload].Execute(GetGunPtrNow_Const()->GetShotPhase() >= GunAnimeID::ReloadOne && GetGunPtrNow_Const()->GetShotPhase() <= GunAnimeID::ReloadEnd, 0.1f, 0.2f);
+			this->m_Arm[(int)EnumGunAnimType::Ready].Execute(!(GetIsAim() || !GetGunPtrNow_Const()->GetShootReady()), 0.1f, 0.2f);
+			this->m_Arm[(int)EnumGunAnimType::Run].Execute(KeyControl::GetRun(), 0.1f, 0.2f);
+			this->m_Arm[(int)EnumGunAnimType::Check].Execute(GetGunPtrNow_Const()->GetShotPhase() >= GunAnimeID::CheckStart && GetGunPtrNow_Const()->GetShotPhase() <= GunAnimeID::Checking, 0.05f, 0.2f);
+			this->m_Arm[(int)EnumGunAnimType::Watch].Execute(GetGunPtrNow_Const()->GetShotPhase() == GunAnimeID::Watch, 0.1f, 0.1f);
 			
 
 			//this->m_yrad_Upper、this->m_yrad_Bottom決定
@@ -361,7 +361,11 @@ namespace FPS_n2 {
 			if (this->m_TurnBody || (this->m_Speed > 0.1f)) { Easing(&this->m_yrad_Upper, KeyControl::GetRad().y(), TmpRunPer, EasingType::OutExpo); }
 			auto OLDP = this->m_yrad_Bottom;
 			Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - FrontP, TmpRunPer, EasingType::OutExpo);
-			KeyControl::SetRadBufZ((this->m_yrad_Bottom - OLDP) * 2.f);
+			KeyControl::SetRadBufZ(
+				(abs((this->m_yrad_Bottom - OLDP)) > deg2rad(10)) ? 
+				0.f : 
+				std::clamp((this->m_yrad_Bottom - OLDP) * 3.f, -deg2rad(10), deg2rad(10))
+			);
 
 			SetEyeVec();
 		}
@@ -570,9 +574,6 @@ namespace FPS_n2 {
 				SetAnimLoop(GetBottomWalkBackAnimSel(), 1.15f * KeyControl::GetVecRear());
 				SetAnimLoop(GetBottomRightStepAnimSel(), 1.15f * KeyControl::GetVecRight());
 
-				Easing(&this->m_LeftHandPer, 1.f, 0.8f, EasingType::OutExpo);
-				this->m_LeftHandPer = 0.f;
-
 				Easing(&this->m_ADSPer, this->GetIsADS() ? 1.f : 0.f, 0.8f, EasingType::OutExpo);//
 			}
 			//アニメセレクト
@@ -744,7 +745,7 @@ namespace FPS_n2 {
 			//cols.emplace_back(std::make_pair((MV1*)(&this->m_BackGround->GetGroundCol()), -1));
 			{
 				auto& MainGB = (std::shared_ptr<BackGroundClassMain>&)(this->m_BackGround);
-				for (auto& C : MainGB->GetBuildCol()) {
+				for (auto& C : MainGB->GetBuildDatas()) {
 					auto Vec = (C.GetMatrix().pos() - this->m_move.pos); Vec.y(0.f);
 					if (Vec.Length() <= 2.f*Scale_Rate) {
 						cols.emplace_back(std::make_pair((MV1*)(&C.GetCol()), C.GetMeshSel()));
@@ -788,37 +789,11 @@ namespace FPS_n2 {
 						yVect0 = MatT[(int)EnumGunAnimType::Aim].yvec();
 						Post0 = MatT[(int)EnumGunAnimType::Aim].pos();
 
-						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::ADS].zvec(), this->m_ADSPer);
-						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::ADS].yvec(), this->m_ADSPer);
-						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::ADS].pos(), this->m_ADSPer);
-
-						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::ReloadStart_Empty].zvec(), this->m_ReloadStartEmptyArm.Per());
-						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::ReloadStart_Empty].yvec(), this->m_ReloadStartEmptyArm.Per());
-						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::ReloadStart_Empty].pos(), this->m_ReloadStartEmptyArm.Per());
-
-						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::ReloadStart].zvec(), this->m_ReloadStartArm.Per());
-						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::ReloadStart].yvec(), this->m_ReloadStartArm.Per());
-						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::ReloadStart].pos(), this->m_ReloadStartArm.Per());
-
-						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::Reload].zvec(), this->m_ReloadArm.Per());
-						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::Reload].yvec(), this->m_ReloadArm.Per());
-						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::Reload].pos(), this->m_ReloadArm.Per());
-
-						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::Ready].zvec(), this->m_ReadyArm.Per());
-						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::Ready].yvec(), this->m_ReadyArm.Per());
-						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::Ready].pos(), this->m_ReadyArm.Per());
-
-						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::Run].zvec(), this->m_RunPer);
-						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::Run].yvec(), this->m_RunPer);
-						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::Run].pos(), this->m_RunPer);
-
-						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::Check].zvec(), this->m_CheckArm.Per());
-						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::Check].yvec(), this->m_CheckArm.Per());
-						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::Check].pos(), this->m_CheckArm.Per());
-						//
-						zVect0 = Lerp(zVect0, MatT[(int)EnumGunAnimType::Watch].zvec(), this->m_WatchArm.Per());
-						yVect0 = Lerp(yVect0, MatT[(int)EnumGunAnimType::Watch].yvec(), this->m_WatchArm.Per());
-						Post0 = Lerp(Post0, MatT[(int)EnumGunAnimType::Watch].pos(), this->m_WatchArm.Per());
+						for (int i = 1; i < (int)EnumGunAnimType::Max; i++) {
+							zVect0 = Lerp(zVect0, MatT[i].zvec(), this->m_Arm[i].Per());
+							yVect0 = Lerp(yVect0, MatT[i].yvec(), this->m_Arm[i].Per());
+							Post0 = Lerp(Post0, MatT[i].pos(), this->m_Arm[i].Per());
+						}
 						//
 
 						zVec1 = zVect0;
@@ -1026,9 +1001,7 @@ namespace FPS_n2 {
 					}
 				}
 				auto WS_tmp = m_WalkSwing_t * std::clamp(this->m_Speed * this->m_RunPer2 / SpeedLimit, 0.f, 1.f);
-
-				WS_tmp.xadd(-2.f*m_ReloadEyePer);
-				WS_tmp.xadd(-1.f*this->m_CheckEyePer);
+				WS_tmp.xadd(-2.f*this->m_ReloadEyePer + -1.f*this->m_CheckEyePer);
 				//X
 				{
 					auto tmp = m_WalkSwing_p.x();

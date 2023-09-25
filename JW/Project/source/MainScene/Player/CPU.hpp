@@ -6,99 +6,64 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		enum class ENUM_AI_PHASE {
+			Normal,
+		};
 		//AI用
 		class AI {
 		public:
-			float ai_time_a{ 0.f };
-			float ai_time_d{ 0.f };
-			float ai_time_q{ 0.f };
-			float ai_time_e{ 0.f };
-			float ai_time_shoot{ 0.f };
-			float ai_time_tankback{ 0.f };
-			float ai_time_tankback_ing{ 0.f };
-			float ai_time_find{ 0.f };
-			VECTOR_ref LastFindPoint;
-			float ai_time_turn{ 0.f };
-			int ai_tankback_cnt = 0;
-			float ai_time_walk{ 0.f };
-			bool ai_reload{ false };
-			int ai_phase{ 0 };
-			std::vector<int> wayp_pre{ 0 };
-			int ai_AimTarget{ 0 };
+		public:
+			std::shared_ptr<BackGroundClassBase>	m_BackGround;				//BG
+			PlayerID								m_MyCharaID{ 0 };
+			ENUM_AI_PHASE							m_Phase{ ENUM_AI_PHASE::Normal };
+			std::array<int, 6>						m_WayPoints;
+			PlayerID								m_TargetCharaID{ 0 };
+		public:
+			AI(void) noexcept { }
+			~AI(void) noexcept { }
+		public:
+			void SetBackGround(const std::shared_ptr<BackGroundClassBase>& BackBround_t) { m_BackGround = BackBround_t; }
 
-			AI(void) noexcept {
-				wayp_pre.resize(12);
+			void FillWayPoints(int now) {
+				for (auto& w : this->m_WayPoints) { w = now; }
 			}
-			~AI(void) noexcept {
-				wayp_pre.clear();
+			void PushFrontWayPoint(int now) {
+				for (size_t i = (this->m_WayPoints.size() - 1); i >= 1; i--) { this->m_WayPoints[i] = this->m_WayPoints[i - 1]; }
+				this->m_WayPoints[0] = now;
+			}
+		public:
+			VECTOR_ref		GetNowWaypointPos();
+			int		GetNextWaypoint(const VECTOR_ref&);
+			void	SetNextWaypoint(const VECTOR_ref& vec_z) {
+				int now = this->GetNextWaypoint(vec_z);
+				if (now != -1) {
+					this->PushFrontWayPoint(now);
+				}
 			}
 
-			void Spawn(int now) {
-				this->ai_phase = 0;
-				this->ai_AimTarget = -1;
-				this->ai_time_shoot = 0.f;
-				this->ai_time_a = 0.f;
-				this->ai_time_d = 0.f;
-				this->ai_time_e = 0.f;
-				this->ai_time_tankback = 0.f;
-				this->ai_time_tankback_ing = 0.f;
-				this->ai_time_find = 0.f;
-				this->ai_time_turn = 0.f;
-				this->ai_tankback_cnt = 0;
-				this->fill_wayp_pre(now);
-			}
-			void fill_wayp_pre(int now) {
-				for (auto& w : this->wayp_pre) { w = now; }
-			}
-			void Set_wayp_pre(int now) {
-				for (size_t i = (this->wayp_pre.size() - 1); i >= 1; i--) { this->wayp_pre[i] = this->wayp_pre[i - 1]; }
-				this->wayp_pre[0] = now;
-			}
 			void Set_wayp_return(void) noexcept {
-				auto ppp = this->wayp_pre[1];
-				for (size_t i = (this->wayp_pre.size() - 1); i >= 1; i--) { this->wayp_pre[i] = this->wayp_pre[0]; }
-				this->wayp_pre[0] = ppp;
+				auto ppp = this->m_WayPoints[1];
+				this->FillWayPoints(this->m_WayPoints[0]);
+				this->m_WayPoints[0] = ppp;
 			}
-#ifdef DEBUG
-			void Draw_Debug(const VECTOR_ref&) {
+		public:
+			void Init() {
+				this->m_Phase = ENUM_AI_PHASE::Normal;
+				int now = GetNextWaypoint(VECTOR_ref::zero());
+				this->FillWayPoints((now != -1) ? now : 0);
 			}
-#endif
 		};
 
 		class AIControl {
 			const float										SearchTotal{ 1.f };
 		private:
-			//
-			std::shared_ptr<BackGroundClassBase>			m_BackGround;				//BG
-			//
-			AI												cpu_do;						//AI用
-			PlayerID										m_MyCharaID{ 0 };
-			VECTOR_ref										tgtpos;
-			float											SearchCount{ 0.f };
-			int												tgtID{ -1 };
-			bool											tgtLock{ false };
-			float											AfterKillCount{ 0.f };		//キルした後のカウント
-			float											AvoidCount{ 0.f };
-			bool											IsAvoidLR{ false };
-
-			float											GabaCount{ 0.f };
-			//
+			AI												m_AI;						//AI用
 		private:
-			int Get_next_waypoint(std::vector<int>, VECTOR_ref, VECTOR_ref) {
-				int now = -1;
-				return now;
-			}
-		public:
-			//AI操作
-			void SetNextWaypoint(const VECTOR_ref& vec_z);
-			void AI_move(InputControl* MyInput) noexcept;
 		public:
 			void Init(const std::shared_ptr<BackGroundClassBase>& BackBround_t, PlayerID MyCharaID) noexcept;
-			void Execute() noexcept {}
+			void Execute(InputControl* MyInput) noexcept;
 			void Draw() noexcept;
-			void Dispose() noexcept {
-
-			}
+			void Dispose() noexcept {}
 		};
 	};
 };

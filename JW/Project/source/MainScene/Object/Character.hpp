@@ -62,12 +62,7 @@ namespace FPS_n2 {
 			//銃
 			float												m_ReadyTimer{ 0.f };
 
-			ArmMovePerClass										m_ReadyArm;
-			ArmMovePerClass										m_ReloadStartEmptyArm;
-			ArmMovePerClass										m_ReloadStartArm;
-			ArmMovePerClass										m_ReloadArm;
-			ArmMovePerClass										m_CheckArm;
-			ArmMovePerClass										m_WatchArm;
+			std::array<ArmMovePerClass, (int)EnumGunAnimType::Max>	m_Arm;
 
 			float												m_ReloadEyePer{ 0.f };
 			float												m_CheckEyePer{ 0.f };
@@ -89,8 +84,6 @@ namespace FPS_n2 {
 			unsigned long long									m_DamageSwitch{ 0 };							//
 			unsigned long long									m_DamageSwitchRec{ 0 };							//
 			//
-			float												m_LeftHandPer{ 0.f };
-
 			VECTOR_ref											m_RecoilRadAdd;
 			//サウンド
 			int													m_CharaSound{ -1 };
@@ -134,9 +127,6 @@ namespace FPS_n2 {
 			float												m_RunPer{ 0.f };
 
 			bool												m_SquatSoundReq{ false };
-		public:
-			bool m_NearAmmo{ false };//至近弾(被弾含む)
-			int aim_cnt{ 0 };
 		public://ゲッター(ラッパー)
 			const auto		GetBottomStandAnimSel(void) const noexcept { return KeyControl::GetIsSquat() ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
 			const auto		GetBottomWalkAnimSel(void) const noexcept { return KeyControl::GetIsSquat() ? CharaAnimeID::Bottom_Squat_Walk : CharaAnimeID::Bottom_Stand_Walk; }

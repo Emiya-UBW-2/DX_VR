@@ -22,7 +22,7 @@ namespace FPS_n2 {
 		private:
 			std::shared_ptr<GunDataClass>	m_GunDataClass;
 
-			std::shared_ptr<AmmoData>		m_ChamberAmmoData{ nullptr };			//
+			std::shared_ptr<AmmoDataClass>		m_ChamberAmmoData{ nullptr };			//
 			GunAnimeID						m_ShotPhase{ GunAnimeID::Base };//
 			bool							m_ShotSwitch{ false };				//
 			int								m_boltSoundSequence{ -1 };		//ƒTƒEƒ“ƒh

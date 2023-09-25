@@ -1,32 +1,7 @@
 #include"Header.hpp"
 
-#include "Enums.hpp"
-#include "MainScene/Object/ObjectBaseEnum.hpp"
-#include "MainScene/Object/AmmoEnum.hpp"
-#include "MainScene/Object/CharacterEnum.hpp"
-//
-#include "sub.hpp"
-#include "NetWork.hpp"
-//
-#include "MainScene/BackGround/BackGroundSub.hpp"
-#include "MainScene/BackGround/BackGround.hpp"
-
-#include "MainScene/Object/AmmoData.hpp"
-
-#include "MainScene/Object/ObjectBase.hpp"
-
-#include "MainScene/Object/Ammo.hpp"
-#include "MainScene/Object/Gun.hpp"
-#include "MainScene/Object/Mod.hpp"
-#include "MainScene/Object/Character.hpp"
-
-#include "ObjectManager.hpp"
 #include "MainScene/Player/Player.hpp"
-#include "MainScene/Player/CPU.hpp"
-
-#include "MainScene/UI/MainSceneUIControl.hpp"
 //
-#include "MainScene/NetworkBrowser.hpp"
 #include "Scene/TitleScene.hpp"
 #include "Scene/MainScene.hpp"
 
@@ -34,22 +9,20 @@
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DXDraw::Create();								//汎用
 	SetMainWindowText("JW");						//タイトル
+	//MV1SetLoadModelUsePackDraw(TRUE);
 	PostPassEffect::Create();						//シェーダー
 #ifdef DEBUG
 	auto* DebugParts = DebugClass::Instance();		//デバッグ
 #endif // DEBUG
 	auto* DrawParts = DXDraw::Instance();
-	auto* EffectUseControl = EffectResource::Instance();
-	//auto* SE = SoundPool::Instance();
 	//
 	FPS_n2::SaveDataClass::Create();
-	FPS_n2::SaveDataClass::Instance()->Load();
 	FPS_n2::Sceneclass::ObjectManager::Create();
-	//メインシーン用
 	FPS_n2::Sceneclass::PlayerManager::Create();
 	FPS_n2::Sceneclass::GunAnimManager::Create();
+	//
 	FPS_n2::Sceneclass::GunDataManager::Create();
-	//MV1SetLoadModelUsePackDraw(TRUE);
+	FPS_n2::Sceneclass::AmmoDataManager::Create();
 	//シーン
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();
@@ -62,9 +35,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	while (true) {
 		scene->StartScene();
 		while (true) {
-			if ((ProcessMessage() != 0) || (CheckHitKeyWithCheck(KEY_INPUT_ESCAPE) != 0)) {
-				return 0;
-			}
+			if ((ProcessMessage() != 0) || (CheckHitKeyWithCheck(KEY_INPUT_ESCAPE) != 0)) { return 0; }
 			FPS = GetFPS();
 #ifdef DEBUG
 			clsDx();
@@ -74,7 +45,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			DebugParts->SetPoint("Execute start");
 #endif // DEBUG
 			if (scene->Execute()) { break; }		//更新
-			EffectUseControl->Calc(DXDraw::Instance()->IsPause());//エフェクシアのアプデを60FPS相当に変更
 			scene->Draw();							//描画
 			//デバッグ
 #ifdef DEBUG

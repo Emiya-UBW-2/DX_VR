@@ -57,9 +57,6 @@
     <ClInclude Include="source\MainScene\UI\MainSceneUIControl.hpp">
       <Filter>ソース ファイル\MainScene\UI</Filter>
     </ClInclude>
-    <ClInclude Include="source\MainScene\Object\ObjectBaseEnum.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
     <ClInclude Include="source\NetWork.hpp">
       <Filter>ソース ファイル</Filter>
     </ClInclude>
@@ -87,9 +84,6 @@
     <ClInclude Include="source\MainScene\Object\AmmoData.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
-    <ClInclude Include="source\MainScene\Object\AmmoEnum.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
     <ClInclude Include="source\MainScene\Object\Ammo.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
@@ -100,9 +94,6 @@
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
     <ClInclude Include="source\MainScene\Object\Gun.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\DX_VR\RaumabowSix\Project\source\MainScene\Object\AmmoData.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
     <ClInclude Include="source\MainScene\Object\Cart.hpp">
@@ -121,6 +112,9 @@
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
     <ClInclude Include="source\MainScene\Object\Mod.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\Object\ObjectBase_before.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
   </ItemGroup>
@@ -174,6 +168,9 @@
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
     <ClCompile Include="source\MainScene\Object\Mod.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\AmmoData.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
   </ItemGroup>

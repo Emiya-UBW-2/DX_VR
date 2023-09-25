@@ -1,5 +1,6 @@
 #pragma once
 #include	"../../Header.hpp"
+
 #include "ObjectBase.hpp"
 #include "AmmoData.hpp"
 
@@ -55,7 +56,7 @@ namespace FPS_n2 {
 		private:
 			bool										m_IsHand{ true };
 
-			std::vector<std::shared_ptr<AmmoData>>		m_AmmoSpec;
+			std::vector<std::shared_ptr<AmmoDataClass>>	m_AmmoSpec;
 			int											m_Capacity{ 0 };
 			int											m_CapacityMax{ 0 };
 			MATRIX_ref									HandMatrix;
@@ -68,7 +69,10 @@ namespace FPS_n2 {
 		public://ƒQƒbƒ^[
 			void			SetReloadType(RELOADTYPE ReloadType) noexcept { this->m_ReloadTypeBuf = ReloadType; }
 
-			void			SetHandMatrix(const MATRIX_ref& value, float pPer) noexcept;
+			void			SetHandMatrix(const MATRIX_ref& value, float pPer) noexcept {
+				this->HandMatrix = value;
+				this->HandPer = pPer;
+			}
 
 			void			SetIsHand(bool value) noexcept;
 			void			SetFall(const VECTOR_ref& pos, const MATRIX_ref& mat, const VECTOR_ref& vec) noexcept;

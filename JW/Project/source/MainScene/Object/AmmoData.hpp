@@ -1,44 +1,10 @@
 #pragma once
 #include	"../../Header.hpp"
+#include "ObjectBase_before.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class ItemData {
-		private:
-			std::string		m_path;
-			std::string		m_name;
-		public://getter
-			const auto&		GetPath(void) const noexcept { return this->m_path; }
-			const auto&		GetName(void) const noexcept { return this->m_name; }
-		protected:
-			virtual void	Set_Sub(const std::string&, const std::string&) noexcept {}
-		public:
-			void			Set(std::string path_) {
-				this->m_path = path_;
-				int mdata = FileRead_open((this->m_path + "data.txt").c_str(), FALSE);
-				while (true) {
-					if (FileRead_eof(mdata) != 0) { break; }
-					auto ALL = getparams::Getstr(mdata);
-					//コメントアウト
-					if (ALL.find("//") != std::string::npos) {
-						ALL = ALL.substr(0, ALL.find("//"));
-					}
-					//
-					if (ALL == "") { continue; }
-					auto LEFT = getparams::getleft(ALL);
-					auto RIGHT = getparams::getright(ALL);
-					//アイテムデータ読みとり
-					if (LEFT == "Name") {
-						this->m_name = RIGHT;
-					}
-					Set_Sub(LEFT, RIGHT);
-				}
-				FileRead_close(mdata);
-			}
-		};
-
-
-		class AmmoData : public ItemData {
+		class AmmoDataClass : public ItemData {
 		private:
 			float			m_caliber{ 0.f };
 			float			m_speed{ 100.f };				//弾速
@@ -65,6 +31,25 @@ namespace FPS_n2 {
 				}
 			}
 		public:
+		};
+
+		class AmmoDataManager : public SingletonBase<AmmoDataManager> {
+		private:
+			friend class SingletonBase<AmmoDataManager>;
+		private:
+			std::vector<std::shared_ptr<AmmoDataClass>>	m_Object;
+		public:
+			const auto&	LoadAction(const std::string& filepath) noexcept {
+				for (auto& o : m_Object) {
+					if (o->GetPath() == filepath) {
+						return o;
+					}
+				}
+				m_Object.resize(m_Object.size() + 1);
+				m_Object.back() = std::make_shared<AmmoDataClass>();
+				m_Object.back()->Set(filepath);
+				return m_Object.back();
+			}
 		};
 	};
 };

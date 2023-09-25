@@ -411,6 +411,11 @@ namespace FPS_n2 {
 		friend class SingletonBase<SaveDataClass>;
 	private:
 		std::vector<SaveParam> m_data;
+	private:
+		SaveDataClass() {
+			Load();
+		}
+		~SaveDataClass() {}
 	public:
 		SaveParam* GetData(std::string_view Name) noexcept {
 			for (auto& d : m_data) {

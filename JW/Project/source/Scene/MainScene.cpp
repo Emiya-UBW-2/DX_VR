@@ -10,66 +10,34 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		void			MAINLOOP::Load_Sub(void) noexcept {
 			auto* SE = SoundPool::Instance();
-			auto* AnimMngr = GunAnimManager::Instance();
-			//
-			SE->Add((int)SoundEnum::LaserSwitch, 1, "data/Sound/SE/aim_on.wav", false);
-			SE->Add((int)SoundEnum::CateFall, 6, "data/Sound/SE/gun/cate/case_1.wav", false);
 			SE->Add((int)SoundEnum::Env, 1, "data/Sound/SE/envi.wav", false);
 			SE->Add((int)SoundEnum::Env2, 1, "data/Sound/SE/envi2.wav", false);
-			SE->Add((int)SoundEnum::StandUp, 1, "data/Sound/SE/move/sliding.wav", false);
+			SE->Add((int)SoundEnum::LaserSwitch, 1, "data/Sound/SE/aim_on.wav", false);
+
+			SE->Add((int)SoundEnum::CartFall, 6, "data/Sound/SE/gun/case.wav", false);
+			SE->Add((int)SoundEnum::MagFall, 6, "data/Sound/SE/gun/ModFall.wav", false);
 			SE->Add((int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
 			for (int i = 0; i < 5; i++) {
 				SE->Add((int)SoundEnum::Cocking2_0 + i, 4, "data/Sound/SE/gun/autoM16/" + std::to_string(i) + ".wav");
 			}
 			for (int i = 0; i < 5; i++) {
 				SE->Add((int)SoundEnum::Cocking3_0 + i, 4, "data/Sound/SE/gun/auto1911/" + std::to_string(i) + ".wav");
-				if (i == 2) {
-					SOUND3D_REVERB_PARAM ReverbParam;
-					ReverbParam.WetDryMix = 100.0f;
-					ReverbParam.ReflectionsDelay = 20;
-					ReverbParam.ReverbDelay = 29;
-					ReverbParam.RearDelay = 5;
-					ReverbParam.PositionLeft = 6;
-					ReverbParam.PositionRight = 6;
-					ReverbParam.PositionMatrixLeft = 27;
-					ReverbParam.PositionMatrixRight = 27;
-					ReverbParam.EarlyDiffusion = 15;
-					ReverbParam.LateDiffusion = 15;
-					ReverbParam.LowEQGain = 8;
-					ReverbParam.LowEQCutoff = 4;
-					ReverbParam.HighEQGain = 8;
-					ReverbParam.HighEQCutoff = 6;
-					ReverbParam.RoomFilterFreq = 5000.0f;
-					ReverbParam.RoomFilterMain = -10.0f;
-					ReverbParam.RoomFilterHF = -5.0f;
-					ReverbParam.ReflectionsGain = -12.3f;
-					ReverbParam.ReverbGain = -0.02f;
-					ReverbParam.DecayTime = 3.9200001f;
-					ReverbParam.Density = 100.0f;
-					ReverbParam.RoomSize = 100.0f;
-
-					auto& handles = SE->Get((int)SoundEnum::Cocking3_0 + i).GetHandles();
-					for (auto& hs : handles) {
-						for (auto& h : hs.handle) {
-							Set3DReverbParamSoundMem(&ReverbParam, h.get());
-						}
-					}
-				}
 			}
+			SE->Add((int)SoundEnum::StandUp, 1, "data/Sound/SE/move/sliding.wav", false);
 			SE->Add((int)SoundEnum::RunFoot, 3, "data/Sound/SE/move/runfoot.wav");
 			SE->Add((int)SoundEnum::SlideFoot, 3, "data/Sound/SE/move/sliding.wav");
 			SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
 			SE->Add((int)SoundEnum::Heart, 3, "data/Sound/SE/move/heart.wav");
 			//
-			Gauge_Graph = GraphHandle::Load("data/UI/Gauge.png");
-			hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
-			aim_Graph = GraphHandle::Load("data/UI/battle_aim.bmp");
-			m_MiniMapScreen = GraphHandle::Make(y_r(128) * 2, y_r(128) * 2, true);
+			this->Gauge_Graph = GraphHandle::Load("data/UI/Gauge.png");
+			this->hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
+			this->aim_Graph = GraphHandle::Load("data/UI/battle_aim.bmp");
+			this->m_MiniMapScreen = GraphHandle::Make(y_r(128) * 2, y_r(128) * 2, true);
 			//BG
 			this->m_BackGround = std::make_shared<BackGroundClassMain>();
 			this->m_BackGround->Init("", "");
 			//
-			AnimMngr->Load("data/CharaAnime/");
+			GunAnimManager::Instance()->Load("data/CharaAnime/");
 		}
 		void			MAINLOOP::Set_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
@@ -105,13 +73,16 @@ namespace FPS_n2 {
 
 				VECTOR_ref pos_t;
 				float rad_t = 0.f;
-				if (index < Chara_num / 2) {
-					pos_t = VECTOR_ref::vget(12.f*Scale_Rate - (float)(index)*2.f*Scale_Rate, 0.f, 12.f*Scale_Rate);
-					rad_t = deg2rad(45.f);
+				if (index == 0) {
+					pos_t = VECTOR_ref::vget(0.f, 0.f, 0.f);
+					rad_t = deg2rad(GetRandf(180.f));
 				}
 				else {
-					pos_t = VECTOR_ref::vget(-12.f*Scale_Rate + (float)((index - Chara_num / 2))*2.f*Scale_Rate, 0.f, -12.f*Scale_Rate);
-					rad_t = deg2rad(180.f + 45.f);
+					pos_t = VECTOR_ref::vget(
+						GetRandf(30 * 19 / 2),
+						0.f,
+						GetRandf(30 * 19 / 2));
+					rad_t = deg2rad(GetRandf(180.f));
 				}
 
 
@@ -144,7 +115,8 @@ namespace FPS_n2 {
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(65), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(VECTOR_ref::vget(0, 15, -20), VECTOR_ref::vget(0, 15, 0), VECTOR_ref::vget(0, 1, 0));
 			//サウンド
-			SE->Get((int)SoundEnum::CateFall).SetVol_Local(48);
+			SE->Get((int)SoundEnum::CartFall).SetVol_Local(48);
+			SE->Get((int)SoundEnum::MagFall).SetVol_Local(48);
 			SE->Get((int)SoundEnum::Trigger).SetVol_Local(48);
 			SE->Get((int)SoundEnum::Shot2).SetVol_Local(216);
 			SE->Get((int)SoundEnum::Shot3).SetVol_Local(216);
@@ -174,7 +146,7 @@ namespace FPS_n2 {
 					KeyGuide->Reset();
 					KeyGuide->AddGuide("ng.png", "決定");
 					KeyGuide->AddGuide("ok.png", "戻る");
-					KeyGuide->AddGuide("R_stick.png", "上下選択,調整");
+					KeyGuide->AddGuide("R_stick.png", "上下選択");
 				}
 				else {
 					KeyGuide->Reset();
@@ -200,8 +172,6 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide("X.jpg", "戻る");
 					KeyGuide->AddGuide("W.jpg", "");
 					KeyGuide->AddGuide("S.jpg", "上下選択");
-					KeyGuide->AddGuide("A.jpg", "");
-					KeyGuide->AddGuide("D.jpg", "調整");
 				}
 				else {
 					KeyGuide->Reset();
@@ -310,9 +280,9 @@ namespace FPS_n2 {
 				float pp_x = 0.f, pp_y = 0.f;
 				InputControl MyInput;
 				//
-				pp_x = Pad->GetLS_Y() * cam_per;
-				pp_y = Pad->GetLS_X() * cam_per;
-				if (Pad->GetFreeLook().press()) {
+				pp_x = Pad->GetLS_Y() * cam_per*0.75f;
+				pp_y = Pad->GetLS_X() * cam_per*0.75f;
+				if (Pad->GetFreeLook().press() || Chara->GetRun()) {
 					pp_x /= 2.f;
 					pp_y /= 2.f;
 				}
@@ -352,10 +322,6 @@ namespace FPS_n2 {
 					}
 				}
 				//
-				for (int i = 0; i < Chara_num; i++) {
-					auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
-					c->aim_cnt = 0;
-				}
 				bool isready = (Timer == 0.f);
 				for (int i = 0; i < Player_num; i++) {
 					auto& c = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, i));
@@ -368,7 +334,7 @@ namespace FPS_n2 {
 						}
 						else {
 							if (!m_NetWorkBrowser.GetClient()) {
-								m_AICtrl[i]->AI_move(&tmp.Input);
+								m_AICtrl[i]->Execute(&tmp.Input);
 							}
 							c->SetInput(tmp.Input, isready);
 							bool override_true = true;
@@ -392,7 +358,7 @@ namespace FPS_n2 {
 						}
 						else {
 							InputControl OtherInput;
-							m_AICtrl[i]->AI_move(&OtherInput);//めっちゃ重い
+							m_AICtrl[i]->Execute(&OtherInput);//めっちゃ重い
 							c->SetInput(OtherInput, isready);
 						}
 						//ダメージイベント処理
@@ -630,12 +596,33 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
-			auto* OptionParts = OPTION::Instance();
 
 			SE->Get((int)SoundEnum::Env).StopAll(0);
 			SE->Get((int)SoundEnum::Env2).StopAll(0);
-			SE->SetVol(OptionParts->Get_SE());
 
+			SE->Delete((int)SoundEnum::LaserSwitch);
+			SE->Delete((int)SoundEnum::CartFall);
+			SE->Delete((int)SoundEnum::MagFall);
+			SE->Delete((int)SoundEnum::Env);
+			SE->Delete((int)SoundEnum::Env2);
+			SE->Delete((int)SoundEnum::StandUp);
+			SE->Delete((int)SoundEnum::Trigger);
+			for (int i = 0; i < 5; i++) {
+				SE->Delete((int)SoundEnum::Cocking2_0 + i);
+			}
+			for (int i = 0; i < 5; i++) {
+				SE->Delete((int)SoundEnum::Cocking3_0 + i);
+			}
+			SE->Delete((int)SoundEnum::RunFoot);
+			SE->Delete((int)SoundEnum::SlideFoot);
+			SE->Delete((int)SoundEnum::StandupFoot);
+			SE->Delete((int)SoundEnum::Heart);
+			//
+			this->Gauge_Graph.Dispose();
+			this->hit_Graph.Dispose();
+			this->aim_Graph.Dispose();
+			this->m_MiniMapScreen.Dispose();
+			//
 			for (auto& c : character_Pool) {
 				c.reset();
 			}
@@ -650,12 +637,6 @@ namespace FPS_n2 {
 			this->m_BackGround.reset();
 		}
 
-		void			MAINLOOP::Depth_Draw_Sub(void) noexcept {
-			//auto* ObjMngr = ObjectManager::Instance();
-			//auto* PlayerMngr = PlayerManager::Instance();
-			this->m_BackGround->Draw();
-			//ObjMngr->DrawDepthObject();
-		}
 		void			MAINLOOP::BG_Draw_Sub(void) noexcept {
 			this->m_BackGround->BG_Draw();
 		}
@@ -670,9 +651,8 @@ namespace FPS_n2 {
 			ObjMngr->DrawObject_Shadow();
 		}
 		void			MAINLOOP::ShadowDraw_Sub(void) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
-
 			//this->m_BackGround->Shadow_Draw();
+			auto* ObjMngr = ObjectManager::Instance();
 			ObjMngr->DrawObject_Shadow();
 		}
 		void			MAINLOOP::MainDraw_Sub(void) noexcept {
@@ -736,13 +716,11 @@ namespace FPS_n2 {
 		}
 		//UI表示
 		void			MAINLOOP::DrawUI_Base_Sub(void) noexcept {
-			//return;
-
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			//auto* Fonts = FontPool::Instance();
-			auto* DrawParts = DXDraw::Instance();
+			//auto* DrawParts = DXDraw::Instance();
 			//auto Red = GetColor(255, 0, 0);
 			//auto Blue = GetColor(50, 50, 255);
 			//auto Green = GetColor(43, 163, 91);
@@ -779,16 +757,11 @@ namespace FPS_n2 {
 			if (DXDraw::Instance()->IsPause()) {
 				//m_NetWorkBrowser.Draw();
 			}
+			//
+		}
+		void			MAINLOOP::DrawUI_In_Sub(void) noexcept {
 			//ポーズ
 			if (DXDraw::Instance()->IsPause()) {
-				{
-					auto per = std::clamp(0.7f, 0.f, 1.f);
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
-
-					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
-
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-				}
 				int xp1, yp1;
 				//auto* Fonts = FontPool::Instance();
 				//auto Red = GetColor(255, 0, 0);
@@ -809,27 +782,13 @@ namespace FPS_n2 {
 				yp1 = y_r(1080 - 108 + (int)SelYadd[2]);
 				DrawFetteString(xp1, yp1, 1.f, (select == 2), "Return Game");
 			}
-			//
-		}
-		void			MAINLOOP::DrawUI_In_Sub(void) noexcept {
-			//return;
-
-			//auto* ObjMngr = ObjectManager::Instance();
-			//auto* DrawParts = DXDraw::Instance();
-			auto* PlayerMngr = PlayerManager::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
-
-			{
-				int xp = y_r(960);
-				int yp = y_r(840);
-				m_MiniMapScreen.DrawRotaGraph(
-					xp,
-					yp,
-					1.f,
-					0.f, true);
-			}
-			if (Chara->GetLaserActive()) {
-				if (!Chara->GetIsADS()) {
+			else {
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+				//
+				m_MiniMapScreen.DrawRotaGraph(y_r(960), y_r(840), 1.f, 0.f, true);
+				//
+				if (Chara->GetLaserActive() && !Chara->GetIsADS()) {
 					if (0.f < m_Laserpos2D.z() && m_Laserpos2D.z() < 1.f) {
 						aim_Graph.DrawRotaGraph((int)m_Laserpos2D.x(), (int)m_Laserpos2D.y(), (float)(y_r(100)) / 100.f, 0.f, true);
 					}

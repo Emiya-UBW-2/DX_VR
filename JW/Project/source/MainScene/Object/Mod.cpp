@@ -3,11 +3,6 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//マガジン
-		void			MagazineClass::SetHandMatrix(const MATRIX_ref& value, float pPer) noexcept {
-			this->HandMatrix = value;
-			this->HandPer = pPer;
-		}
-
 		void			MagazineClass::SetIsHand(bool value) noexcept {
 			this->m_IsHand = value;
 			if (!this->m_IsHand) {
@@ -29,21 +24,17 @@ namespace FPS_n2 {
 		}
 
 		void			MagazineClass::Init_Mod(void) noexcept {
-			{
-				int mdata = FileRead_open((this->m_FilePath + "data.txt").c_str(), FALSE);
-				this->m_CapacityMax = (HitPoint)getparams::_int(mdata);		//総弾数
-				while (true) {
-					auto stp = getparams::Getstr(mdata);
-					if (stp.find("useammo" + std::to_string(this->m_AmmoSpec.size())) == std::string::npos) {
-						break;
-					}
-					this->m_AmmoSpec.emplace_back(std::make_shared<AmmoData>());
-					this->m_AmmoSpec.back()->Set("data/ammo/" + getparams::getright(stp) + "/");
-					//"data/ammo/"+ getparams::getright(stp)
-				}
-				FileRead_close(mdata);
-			}
+			int mdata = FileRead_open((this->m_FilePath + "data.txt").c_str(), FALSE);
+			this->m_CapacityMax = (HitPoint)getparams::_int(mdata);		//総弾数
 			this->m_Capacity = this->m_CapacityMax;
+			while (true) {
+				auto stp = getparams::Getstr(mdata);
+				if (stp.find("useammo" + std::to_string(this->m_AmmoSpec.size())) == std::string::npos) {
+					break;
+				}
+				this->m_AmmoSpec.emplace_back(AmmoDataManager::Instance()->LoadAction("data/ammo/" + getparams::getright(stp) + "/"));
+			}
+			FileRead_close(mdata);
 		}
 		void			MagazineClass::FirstExecute_Mod(void) noexcept {
 			if (m_IsHand) {
@@ -67,7 +58,7 @@ namespace FPS_n2 {
 
 					if ((this->GetMove().pos - this->GetMove().repos).y() < 0.f) {
 						auto& MainGB = (std::shared_ptr<BackGroundClassMain>&)(this->m_BackGround);
-						for (auto& C : MainGB->GetBuildCol()) {
+						for (auto& C : MainGB->GetBuildDatas()) {
 							auto Vec = (C.GetMatrix().pos() - this->GetMove().pos); Vec.y(0.f);
 							if (Vec.Length() <= 2.f*Scale_Rate) {
 								auto HitResult = C.GetColLine(this->GetMove().repos, this->GetMove().pos);
@@ -84,7 +75,7 @@ namespace FPS_n2 {
 									if (m_SoundSwitch) {
 										m_SoundSwitch = false;
 										auto SE = SoundPool::Instance();
-										SE->Get((int)SoundEnum::CateFall).Play_3D(0, this->m_move.pos, Scale_Rate * 3.f);
+										SE->Get((int)SoundEnum::MagFall).Play_3D(0, this->m_move.pos, Scale_Rate * 3.f);
 									}
 									break;
 								}
@@ -110,7 +101,6 @@ namespace FPS_n2 {
 		void			MagazineClass::Dispose_Mod(void) noexcept {
 			this->m_AmmoSpec.clear();
 		}
-		//ロアレシーバー
 
 	};
 };

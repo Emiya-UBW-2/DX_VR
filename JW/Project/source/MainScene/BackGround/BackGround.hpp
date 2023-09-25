@@ -135,7 +135,7 @@ namespace FPS_n2 {
 			BuildControl				m_BuildControl;
 		public://
 			const auto&		GetNearestLight(int No) noexcept { return this->m_BuildControl.GetNearestLight(No); }
-			const auto&		GetBuildCol(void) noexcept { return this->m_BuildControl.GetBuildCol(); }
+			const auto&		GetBuildDatas(void) noexcept { return this->m_BuildControl.GetBuildDatas(); }
 			const auto&		GetMapGraph(void) noexcept { return this->m_BuildControl.GetMapGraph(); }
 			const auto&		GetMapGraphXSize(void) noexcept { return this->m_BuildControl.GetMapGraphXSize(); }
 			const auto&		GetMapGraphYSize(void) noexcept { return this->m_BuildControl.GetMapGraphYSize(); }
@@ -167,7 +167,7 @@ namespace FPS_n2 {
 			bool			CheckLinetoMap_Sub(const VECTOR_ref& StartPos, VECTOR_ref* EndPos, bool isNearest, VECTOR_ref* Normal, MV1_COLL_RESULT_POLY* Ret) override {
 				bool isHit = false;
 				//*
-				for (auto& bu : this->GetBuildCol()) {
+				for (auto& bu : this->GetBuildDatas()) {
 					if (bu.GetMeshSel() < 0) { continue; }
 					if (GetMinLenSegmentToPoint(StartPos, *EndPos, bu.GetMatrix().pos()) >= 25.f*Scale_Rate) { continue; }
 					auto col_p = bu.GetColLine(StartPos, *EndPos);

@@ -194,7 +194,8 @@ namespace FPS_n2 {
 		std::vector<Builds>			m_ObjBuilds;
 		MazeControl					m_MazeControl;
 	public:
-		const auto&		GetBuildCol(void) const noexcept { return this->m_ObjBuilds; }
+		const auto&		GetBuildDatas(void) const noexcept { return this->m_ObjBuilds; }
+	private:
 		const auto		GetPos(int x, int y) const noexcept {
 			VECTOR_ref BasePos;
 			BasePos.Set(tileSize * (float)x, 0.f, tileSize * (float)y);
