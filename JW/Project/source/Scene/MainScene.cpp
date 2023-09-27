@@ -50,21 +50,36 @@ namespace FPS_n2 {
 			SetMiddleShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
 			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
 			//
-			ObjMngr->Init(this->m_BackGround);
 			for (int i = 0; i < 1; i++) {
-				character_Pool.emplace_back((std::shared_ptr<CharacterClass>&)(*ObjMngr->AddObject(ObjType::Human, PHYSICS_SETUP::DISABLE, false, "data/Charactor/Suit/")));
+				auto* Ptr = ObjMngr->MakeObject(ObjType::Human);
+				ObjMngr->LoadModel(PHYSICS_SETUP::DISABLE, false, (*Ptr).get(), "data/Charactor/Suit/");
+				character_Pool.emplace_back((std::shared_ptr<CharacterClass>&)(*Ptr));
+				character_Pool.back()->SetMapCol(this->m_BackGround);
+				(*Ptr)->Init();
 				this->m_AICtrl.emplace_back(std::make_shared<AIControl>());
 			}
 			for (int i = 1; i < Chara_num; i++) {
-				character_Pool.emplace_back((std::shared_ptr<CharacterClass>&)(*ObjMngr->AddObject(ObjType::Human, PHYSICS_SETUP::DISABLE, false, "data/Charactor/Soldier/")));
+				auto* Ptr = ObjMngr->MakeObject(ObjType::Human);
+				ObjMngr->LoadModel(PHYSICS_SETUP::DISABLE, false, (*Ptr).get(), "data/Charactor/Soldier/");
+				character_Pool.emplace_back((std::shared_ptr<CharacterClass>&)(*Ptr));
+				character_Pool.back()->SetMapCol(this->m_BackGround);
+				(*Ptr)->Init();
 				this->m_AICtrl.emplace_back(std::make_shared<AIControl>());
 			}
 
 			for (int i = 0; i < 1; i++) {
-				ObjMngr->AddObject(ObjType::Gun, PHYSICS_SETUP::DISABLE, false, "data/gun/G17Gen3/");
+				auto* Ptr = ObjMngr->MakeObject(ObjType::Gun);
+				ObjMngr->LoadModel(PHYSICS_SETUP::DISABLE, false, (*Ptr).get(), "data/gun/G17Gen3/");
+				auto& Gun = ((std::shared_ptr<GunClass>&)(*Ptr));
+				Gun->SetMapCol(this->m_BackGround);
+				(*Ptr)->Init();
 			}
 			for (int i = 1; i < gun_num; i++) {
-				ObjMngr->AddObject(ObjType::Gun, PHYSICS_SETUP::DISABLE, false, "data/gun/AR15_90/");
+				auto* Ptr = ObjMngr->MakeObject(ObjType::Gun);
+				ObjMngr->LoadModel(PHYSICS_SETUP::DISABLE, false, (*Ptr).get(), "data/gun/AR15_90/");
+				auto& Gun = ((std::shared_ptr<GunClass>&)(*Ptr));
+				Gun->SetMapCol(this->m_BackGround);
+				(*Ptr)->Init();
 			}
 			//ロード
 			//人
@@ -280,9 +295,9 @@ namespace FPS_n2 {
 				float pp_x = 0.f, pp_y = 0.f;
 				InputControl MyInput;
 				//
-				pp_x = Pad->GetLS_Y() * cam_per*0.75f;
-				pp_y = Pad->GetLS_X() * cam_per*0.75f;
-				if (Pad->GetFreeLook().press() || Chara->GetRun()) {
+				pp_x = Pad->GetLS_Y() * cam_per*0.25f;
+				pp_y = Pad->GetLS_X() * cam_per*0.25f;
+				if (Pad->GetFreeLook().press()) {
 					pp_x /= 2.f;
 					pp_y /= 2.f;
 				}
@@ -384,8 +399,6 @@ namespace FPS_n2 {
 			}
 			//Execute
 			ObjMngr->ExecuteObject();
-			//いらないオブジェクトの除去
-			ObjMngr->DeleteCheck();
 			//弾の更新
 			{
 				int loop = 0;
@@ -397,19 +410,15 @@ namespace FPS_n2 {
 							//AmmoClass
 							VECTOR_ref pos_tmp = a->GetMove().pos;
 							VECTOR_ref norm_tmp;
-							auto ColResGround = a->ColCheckGround(&norm_tmp);
+							auto ColResGround = this->m_BackGround->CheckLinetoMap(a->GetMove().repos, &pos_tmp, true, &norm_tmp);
 							bool is_HitAll = false;
 							for (auto& tgt : this->character_Pool) {
 								if (tgt->GetHP() == 0) { continue; }
 								if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }
-								auto res = tgt->CheckAmmoHit(a.get(), tgt->GetMove().pos);
-								is_HitAll |= res.second;
+								is_HitAll |= tgt->CheckAmmoHit(a.get(), a->GetMove().repos, &pos_tmp, tgt->GetMove().pos);
 							}
-							{
-								VECTOR_ref pos_tmp2 = a->GetMove().pos;
-								if (this->m_BackGround->HitLightCheck(a->GetMove().repos, &pos_tmp2)) {
-									EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, pos_tmp2, norm_tmp, a->GetCaliberSize() / 0.02f * Scale_Rate);
-								}
+							if (this->m_BackGround->HitLightCheck(a->GetMove().repos, &pos_tmp)) {
+								EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale_Rate);
 							}
 							if (ColResGround && !is_HitAll) {
 								a->HitGround(pos_tmp);
@@ -466,8 +475,8 @@ namespace FPS_n2 {
 						else if (Chara->GetRun()) {
 							fov += deg2rad(5);
 						}
-						if (Chara->GetShoting()) {
-							fov -= deg2rad(5);
+						if (Chara->GetGunPtrNow()->GetShotSwitch()) {
+							fov -= deg2rad(8);
 							Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
 						}
 						else {
@@ -490,7 +499,7 @@ namespace FPS_n2 {
 				Easing(&Min, Lerp(0.f, 25.f, std::clamp(Len / (5.f*Scale_Rate), 0.f, 1.f)), 0.95f, EasingType::OutExpo);
 				Easing(&Gamma, Lerp(1.f, 1.15f, std::clamp(Len / (5.f*Scale_Rate), 0.f, 1.f)), 0.95f, EasingType::OutExpo);
 
-				PostPassEffect::Instance()->SetLevelFilter((int)Min, 255, Gamma);
+				PostPassEffect::Instance()->SetLevelFilter((int)Min, 192, Gamma);
 			}
 			//
 			this->m_BackGround->Execute();
@@ -512,12 +521,20 @@ namespace FPS_n2 {
 			}
 			//レーザーサイト
 			for (auto& c : this->character_Pool) {
-				c->SetLaser(&character_Pool);
-				VECTOR_ref CamPos = c->GetEyePosition();
-				VECTOR_ref Laserpos = GetScreenPos(CamPos, CamPos + c->GetEyeVector(), c->GetEyeVecY(), DrawParts->GetMainCamera().GetCamFov(), c->GetLaser());
-				if (0.f < Laserpos.z() && Laserpos.z() < 1.f) {
-					c->SetLaser2D(Laserpos);
+				//
+				auto LaserStartPos = c->GetLaserStartPos();
+				auto LaserEndPos = LaserStartPos + c->GetGunPtrNow()->GetMuzzleMatrix().zvec()*-1.f * 15.f*Scale_Rate;
+				this->m_BackGround->CheckLinetoMap(LaserStartPos, &LaserEndPos, true);
+				for (const auto& c2 : this->character_Pool) {
+					if (c2->GetMyPlayerID() == c->GetMyPlayerID()) { continue; }
+					c2->CheckLineHit(LaserStartPos, &LaserEndPos);
 				}
+				auto Vec = (LaserEndPos - LaserStartPos);
+				LaserEndPos = LaserStartPos + Vec.Norm()*std::max(Vec.Length() - 0.3f*Scale_Rate, 0.f);
+				c->SetLaserPos(LaserEndPos);
+				//
+				VECTOR_ref CamPos = c->GetEyePosition();
+				c->SetLaser2D(GetScreenPos(CamPos, CamPos + c->GetEyeVector(), c->GetEyeVecY(), DrawParts->GetMainCamera().GetCamFov(), LaserEndPos));
 			}
 #ifdef DEBUG
 			DebugParts->SetPoint("---");
@@ -664,12 +681,6 @@ namespace FPS_n2 {
 			ObjMngr->DrawObject();
 			this->m_BackGround->Draw();
 			//レーザー
-			if (Chara->GetLaserActive()) {
-				VECTOR_ref Laserpos2D = ConvWorldPosToScreenPos(Chara->GetLaser().get());
-				if (0.f < Laserpos2D.z() && Laserpos2D.z() < 1.f) {
-					m_Laserpos2D = Laserpos2D;
-				}
-			}
 			for (auto& c : this->character_Pool) {
 				if (c->GetLaserActive()) {
 					c->DrawLaser();
@@ -789,8 +800,9 @@ namespace FPS_n2 {
 				m_MiniMapScreen.DrawRotaGraph(y_r(960), y_r(840), 1.f, 0.f, true);
 				//
 				if (Chara->GetLaserActive() && !Chara->GetIsADS()) {
-					if (0.f < m_Laserpos2D.z() && m_Laserpos2D.z() < 1.f) {
-						aim_Graph.DrawRotaGraph((int)m_Laserpos2D.x(), (int)m_Laserpos2D.y(), (float)(y_r(100)) / 100.f, 0.f, true);
+					VECTOR_ref Laserpos2D = Chara->GetAimPoint();
+					if (0.f < Laserpos2D.z() && Laserpos2D.z() < 1.f) {
+						aim_Graph.DrawRotaGraph((int)Laserpos2D.x(), (int)Laserpos2D.y(), (float)(y_r(100)) / 100.f, 0.f, true);
 					}
 				}
 			}

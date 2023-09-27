@@ -127,6 +127,15 @@ namespace FPS_n2 {
 			float												m_RunPer{ 0.f };
 
 			bool												m_SquatSoundReq{ false };
+
+
+			VECTOR_ref											m_HitAxis{ VECTOR_ref::front() };
+			float												m_HitPower{ 0.f };
+			float												m_HitPowerR{ 0.f };
+		private:
+			std::shared_ptr<BackGroundClassBase>		m_BackGround;				//BG
+		public:
+			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept { this->m_BackGround = backGround; }
 		public://ゲッター(ラッパー)
 			const auto		GetBottomStandAnimSel(void) const noexcept { return KeyControl::GetIsSquat() ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
 			const auto		GetBottomWalkAnimSel(void) const noexcept { return KeyControl::GetIsSquat() ? CharaAnimeID::Bottom_Squat_Walk : CharaAnimeID::Bottom_Stand_Walk; }
@@ -191,9 +200,9 @@ namespace FPS_n2 {
 				return tmpSwingMatrix * tmpUpperMatrix * this->m_move.mat;
 			}
 		public://ゲッター
-			const auto		GetFrameLocalMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalMatrix(GetFrame(frame)); }
-			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalWorldMatrix(GetFrame(frame)); }
-			const auto		GetParentFrameWorldMat(CharaFrame frame) const noexcept { return this->GetObj_const().GetFrameLocalWorldMatrix((int)this->GetObj_const().frame_parent(GetFrame(frame))); }
+			const auto		GetFrameLocalMat(CharaFrame frame) const noexcept { return GetFrameLocalMatrix(GetFrame(frame)); }
+			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetFrameWorldMatrix(GetFrame(frame)); }
+			const auto		GetParentFrameWorldMat(CharaFrame frame) const noexcept { return GetParentFrameWorldMatrix(GetFrame(frame)); }
 			const auto		GetCharaDir(void) const noexcept { return this->m_UpperMatrix * this->m_move.mat; }
 			const auto		GetCharaVecX(void) const noexcept { return GetCharaDir().xvec(); }
 			const auto		GetCharaVecY(void) const noexcept { return GetCharaDir().yvec(); }
@@ -224,25 +233,6 @@ namespace FPS_n2 {
 				}
 				return is_Hit;
 			}
-			//被弾処理
-			const auto		CalcAmmoHited(AmmoClass* pAmmo, const VECTOR_ref& pShooterPos) noexcept {
-				//auto SE = SoundPool::Instance();
-				for (auto& h : this->m_HitBox) {
-					auto EndPos = pAmmo->GetMove().pos;
-					if (h.Colcheck(pAmmo->GetMove().repos, &EndPos)) {
-						h.GetColType();
-						pAmmo->Penetrate();	//貫通
-						//ダメージ計算
-						auto v1 = GetCharaVector();
-						auto v2 = (pShooterPos - this->m_move.pos).Norm(); v2.y(0);
-						this->m_DamageEvent.SetEvent(this->m_MyID, m_objType, pAmmo->GetDamage(), atan2f(v1.cross(v2).y(), v1.dot(v2)));
-						++this->m_DamageSwitch;// %= 255;//
-						//エフェクトセット
-						return true;
-					}
-				}
-				return false;
-			}
 		public:
 			const auto		CheckLineHit(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
 				if (GetMinLenSegmentToPoint(StartPos, *pEndPos, m_move.pos) <= 2.0f*Scale_Rate) {
@@ -252,18 +242,38 @@ namespace FPS_n2 {
 				}
 				return false;
 			}
-			const auto		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& pShooterPos) noexcept {
-				std::pair<bool, bool> isDamaged{ false,false };
-				auto EndPos = pAmmo->GetMove().pos;
-				if (GetMinLenSegmentToPoint(pAmmo->GetMove().repos, EndPos, m_move.pos) <= 2.0f*Scale_Rate) {
-					if (this->CheckLineHited(pAmmo->GetMove().repos, &EndPos)) {									//とりあえず当たったかどうか探す
-						isDamaged.first = true;
-						if (this->CalcAmmoHited(pAmmo, pShooterPos)) {
-							isDamaged.second = true;
+			const auto		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos, const VECTOR_ref& pShooterPos) noexcept {
+				if (!CheckLineHit(StartPos, pEndPos)) { return false; }
+				//被弾処理
+				for (auto& h : this->m_HitBox) {
+					if (h.Colcheck(StartPos, pEndPos)) {
+						h.GetColType();
+						pAmmo->Penetrate();	//貫通
+						//ダメージ計算
+						{
+							auto v1 = GetCharaVector();
+							auto v2 = (pShooterPos - this->m_move.pos).Norm(); v2.y(0);
+							this->m_DamageEvent.SetEvent(this->m_MyID, m_objType, pAmmo->GetDamage(), atan2f(v1.cross(v2).y(), v1.dot(v2)));
+							++this->m_DamageSwitch;// %= 255;//
 						}
+						//エフェクトセット
+						{
+							EffectControl::SetOnce(EffectResource::Effect::ef_hitblood, *pEndPos, VECTOR_ref::front(), 12.5f);
+							EffectControl::SetEffectSpeed(EffectResource::Effect::ef_hitblood, 2.f);
+						}
+						//ヒットモーション
+						{
+							m_HitAxis = MATRIX_ref::Vtrans((*pEndPos - StartPos).Norm().cross(VECTOR_ref::up())*-1.f, GetFrameWorldMat(CharaFrame::Upper2).GetRot().Inverse());
+							m_HitPower = 1.f;
+							if (h.GetColType() == HitType::Leg) {
+								KeyControl::SetIsSquat(true);
+							}
+						}
+						//todo : ヒットした部分に近い頂点を赤くする
+						return true;
 					}
 				}
-				return isDamaged;
+				return false;
 			}
 			void			move_RightArm(const VECTOR_ref& GunPos, const VECTOR_ref& Gunyvec, const VECTOR_ref& Gunzvec) noexcept;
 			void			move_LeftArm(const VECTOR_ref& GunPos, const VECTOR_ref& Gunyvec, const VECTOR_ref& Gunzvec) noexcept;
@@ -279,30 +289,22 @@ namespace FPS_n2 {
 			void			SetInput(const InputControl& pInput, bool pReady) noexcept;
 			void			SetEyeVec() noexcept;
 		public://レーザーサイト
-			const auto&		GetLaser(void) const noexcept { return this->LaserEndPos; }
 			const auto&		GetAimPoint(void) const noexcept { return this->LaserEndPos2D; }
 			void			SetLaser2D(const VECTOR_ref& value) noexcept {
 				this->LaserEndPos2D = value;
 				if (!(0.f < this->LaserEndPos2D.z() && this->LaserEndPos2D.z() < 1.f)) {
 					auto* DrawParts = DXDraw::Instance();
-					this->LaserEndPos2D.Set((float)DrawParts->m_DispXSize / 2, (float)DrawParts->m_DispYSize / 2, 0.f);
+					this->LaserEndPos2D.Set((float)DrawParts->m_DispXSize / 2, (float)DrawParts->m_DispYSize / 2, -1.f);
 				}
 			}
-			void			SetLaser(const std::vector<std::shared_ptr<CharacterClass>>* CharaPool) noexcept {
-				LaserStartPos = this->GetGunPtrNow()->GetMuzzleMatrix().pos() + this->GetGunPtrNow()->GetMuzzleMatrix().yvec()*-0.05f*Scale_Rate;
-				LaserEndPos = LaserStartPos + this->GetGunPtrNow()->GetMuzzleMatrix().zvec()*-1.f * 15.f*Scale_Rate;
-				this->m_BackGround->CheckLinetoMap(LaserStartPos, &LaserEndPos, true);
-				for (const auto& c : *CharaPool) {
-					if (c->GetMyPlayerID() == GetMyPlayerID()) { continue; }
-					c->CheckLineHit(LaserStartPos, &LaserEndPos);
-				}
-				auto Vec = (LaserEndPos - LaserStartPos);
-				LaserEndPos = LaserStartPos + Vec.Norm()*std::max(Vec.Length() - 0.3f*Scale_Rate, 0.f);
-			}
+
+			const auto		GetLaserStartPos(void) const noexcept { return this->GetGunPtrNow_Const()->GetMuzzleMatrix().pos() + this->GetGunPtrNow_Const()->GetMuzzleMatrix().yvec()*-0.05f*Scale_Rate; }
+			void			SetLaserPos(const VECTOR_ref& value) noexcept { LaserEndPos = value; }
+
 			void			DrawLaser() noexcept {
 				SetUseLighting(FALSE);
 				DrawSphere_3D(LaserEndPos, 0.01f*Scale_Rate, GetColor(255, 24, 24), GetColor(0, 0, 0));
-				DrawCapsule_3D(LaserStartPos, LaserEndPos, 0.0015f*Scale_Rate, GetColor(255, 24, 24), GetColor(0, 0, 0));
+				DrawCapsule_3D(GetLaserStartPos(), LaserEndPos, 0.0015f*Scale_Rate, GetColor(255, 24, 24), GetColor(0, 0, 0));
 				SetUseLighting(TRUE);
 			}
 		private: //更新関連

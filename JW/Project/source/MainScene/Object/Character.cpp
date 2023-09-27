@@ -236,13 +236,8 @@ namespace FPS_n2 {
 			if (GetGunPtrNow() != nullptr) {
 				//アニメ変更に対応
 				{
-					auto prev = this->m_CharaAnimeSel;
 					auto newtmp = GetGunPtrNow()->GetHumanAnimType();
-					bool ischange = true;
-					if (prev != newtmp) {
-						if (this->m_GunAnimSelect == CharaGunAnimeID::Down) {
-							ischange = false;
-						}
+					if (this->m_CharaAnimeSel != newtmp) {
 						SetAim();
 					}
 					this->m_CharaAnimeSel = newtmp;
@@ -389,7 +384,11 @@ namespace FPS_n2 {
 			GetObj().frame_Reset(GetFrame(CharaFrame::Upper));
 			SetFrameLocalMat(CharaFrame::Upper, GetFrameLocalMat(CharaFrame::Upper).GetRot() * tmpUpperMatrix);
 			GetObj().frame_Reset(GetFrame(CharaFrame::Upper2));
-			SetFrameLocalMat(CharaFrame::Upper2, GetFrameLocalMat(CharaFrame::Upper2).GetRot() * MATRIX_ref::RotX(KeyControl::GetRad().x() / 2.f));
+			SetFrameLocalMat(CharaFrame::Upper2, GetFrameLocalMat(CharaFrame::Upper2).GetRot() * MATRIX_ref::RotX(KeyControl::GetRad().x() / 2.f)*
+				MATRIX_ref::RotAxis(m_HitAxis, m_HitPowerR*deg2rad(90.f))
+			);
+			Easing(&this->m_HitPowerR, this->m_HitPower, 0.8f, EasingType::OutExpo);
+			this->m_HitPower = std::max(this->m_HitPower - 1.f / FPS / 0.3f, 0.f);
 		}
 		//SetMat指示															//0.03ms
 		void			CharacterClass::ExecuteAnim(void) noexcept {
@@ -526,6 +525,7 @@ namespace FPS_n2 {
 							GetGunPtrNow()->SetShotPhase(GunAnimeID::Base);
 						}
 					}
+					//
 					if (GetGunPtrNow_Const()->GetShotPhase() == GunAnimeID::Watch) {
 						this->m_GunAnimSelect = CharaGunAnimeID::Watch;
 						UpdateGunAnim(this->m_GunAnimSelect, 1.5f);
@@ -533,8 +533,7 @@ namespace FPS_n2 {
 							GetGunPtrNow()->SetShotPhase(GunAnimeID::Base);
 						}
 					}
-
-
+					//
 					for (int i = 0; i < (int)CharaGunAnimeID::Max; i++) {
 						if (this->m_GunAnimSelect != (CharaGunAnimeID)i) {
 							m_GunAnimFrame.at(i) = 0.f;
@@ -949,15 +948,15 @@ namespace FPS_n2 {
 				m_HitBox[ID].Execute((GetFrameWorldMat(CharaFrame::Upper).pos() + GetFrameWorldMat(CharaFrame::RightFoot1).pos()) / 2.f, 0.13f*Scale_Rate, HitType::Body); ID++;
 				m_HitBox[ID].Execute((GetFrameWorldMat(CharaFrame::Upper).pos() + GetFrameWorldMat(CharaFrame::LeftFoot1).pos()) / 2.f, 0.13f*Scale_Rate, HitType::Body); ID++;
 
-				m_HitBox[ID].Execute((GetFrameWorldMat(CharaFrame::RightArm).pos() + GetFrameWorldMat(CharaFrame::RightArm2).pos()) / 2.f, 0.06f*Scale_Rate, HitType::Leg); ID++;
-				m_HitBox[ID].Execute(GetFrameWorldMat(CharaFrame::RightArm2).pos(), 0.06*Scale_Rate, HitType::Leg); ID++;
-				m_HitBox[ID].Execute((GetFrameWorldMat(CharaFrame::RightWrist).pos() + GetFrameWorldMat(CharaFrame::RightArm2).pos()) / 2.f, 0.06*Scale_Rate, HitType::Leg); ID++;
-				m_HitBox[ID].Execute(GetFrameWorldMat(CharaFrame::RightWrist).pos(), 0.06*Scale_Rate, HitType::Leg); ID++;
+				m_HitBox[ID].Execute((GetFrameWorldMat(CharaFrame::RightArm).pos() + GetFrameWorldMat(CharaFrame::RightArm2).pos()) / 2.f, 0.06f*Scale_Rate, HitType::Arm); ID++;
+				m_HitBox[ID].Execute(GetFrameWorldMat(CharaFrame::RightArm2).pos(), 0.06*Scale_Rate, HitType::Arm); ID++;
+				m_HitBox[ID].Execute((GetFrameWorldMat(CharaFrame::RightWrist).pos() + GetFrameWorldMat(CharaFrame::RightArm2).pos()) / 2.f, 0.06*Scale_Rate, HitType::Arm); ID++;
+				m_HitBox[ID].Execute(GetFrameWorldMat(CharaFrame::RightWrist).pos(), 0.06*Scale_Rate, HitType::Arm); ID++;
 
-				m_HitBox[ID].Execute((GetFrameWorldMat(CharaFrame::LeftArm).pos() + GetFrameWorldMat(CharaFrame::LeftArm2).pos()) / 2.f, 0.06*Scale_Rate, HitType::Leg); ID++;
-				m_HitBox[ID].Execute(GetFrameWorldMat(CharaFrame::LeftArm2).pos(), 0.06*Scale_Rate, HitType::Leg); ID++;
-				m_HitBox[ID].Execute((GetFrameWorldMat(CharaFrame::LeftWrist).pos() + GetFrameWorldMat(CharaFrame::LeftArm2).pos()) / 2.f, 0.06*Scale_Rate, HitType::Leg); ID++;
-				m_HitBox[ID].Execute(GetFrameWorldMat(CharaFrame::LeftWrist).pos(), 0.06*Scale_Rate, HitType::Leg); ID++;
+				m_HitBox[ID].Execute((GetFrameWorldMat(CharaFrame::LeftArm).pos() + GetFrameWorldMat(CharaFrame::LeftArm2).pos()) / 2.f, 0.06*Scale_Rate, HitType::Arm); ID++;
+				m_HitBox[ID].Execute(GetFrameWorldMat(CharaFrame::LeftArm2).pos(), 0.06*Scale_Rate, HitType::Arm); ID++;
+				m_HitBox[ID].Execute((GetFrameWorldMat(CharaFrame::LeftWrist).pos() + GetFrameWorldMat(CharaFrame::LeftArm2).pos()) / 2.f, 0.06*Scale_Rate, HitType::Arm); ID++;
+				m_HitBox[ID].Execute(GetFrameWorldMat(CharaFrame::LeftWrist).pos(), 0.06*Scale_Rate, HitType::Arm); ID++;
 
 				m_HitBox[ID].Execute(GetFrameWorldMat(CharaFrame::RightFoot1).pos(), 0.095f*Scale_Rate, HitType::Leg); ID++;
 				m_HitBox[ID].Execute((GetFrameWorldMat(CharaFrame::RightFoot1).pos() + GetFrameWorldMat(CharaFrame::RightFoot2).pos()) / 2.f, 0.095f*Scale_Rate, HitType::Leg); ID++;

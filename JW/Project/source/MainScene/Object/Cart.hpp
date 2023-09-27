@@ -8,27 +8,20 @@ namespace FPS_n2 {
 			float m_yAdd{ 0.f };
 			float m_Timer{ 0.f };
 			bool m_SoundSwitch{ false };
+			SoundEnum m_CallSound{ SoundEnum::CartFall };
+		private:
+			std::shared_ptr<BackGroundClassBase>		m_BackGround;				//BG
+		public:
+			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept { this->m_BackGround = backGround; }
 		public:
 			CartClass(void) noexcept { this->m_objType = ObjType::Cart; }
 			~CartClass(void) noexcept { }
 		public:
-			void Set(const VECTOR_ref& pos, const MATRIX_ref& mat, const VECTOR_ref& vec) noexcept {
-				this->m_IsActive = true;
-				this->m_move.pos = pos;
-				this->m_move.vec = vec;
-				this->m_yAdd = 0.f;
-				this->m_move.repos = this->m_move.pos;
-				this->m_move.mat = mat;
-				this->m_Timer = 0.f;
-				this->m_SoundSwitch = true;
-			}
+			void			SetFall(const VECTOR_ref& pos, const MATRIX_ref& mat, const VECTOR_ref& vec, float timer, SoundEnum sound) noexcept;
 		public:
 			void			Init(void) noexcept override {
 				ObjectBaseClass::Init();
-				{
-					this->m_Timer = 2.f;
-					this->m_IsActive = false;
-				}
+				this->m_IsActive = false;
 			}
 			void			FirstExecute(void) noexcept override;
 			void			Draw(bool isDrawSemiTrans) noexcept override {
@@ -44,6 +37,9 @@ namespace FPS_n2 {
 				}
 			}
 			void			Dispose(void) noexcept override {
+				this->m_BackGround.reset();
+				this->GetObj().Dispose();
+				this->m_col.Dispose();
 			}
 		};
 	};

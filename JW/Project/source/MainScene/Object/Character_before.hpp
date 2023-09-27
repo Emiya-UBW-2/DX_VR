@@ -47,6 +47,7 @@ namespace FPS_n2 {
 		enum class HitType {
 			Head,
 			Body,
+			Arm,
 			Leg,
 		};
 		class HitBox {
@@ -67,6 +68,9 @@ namespace FPS_n2 {
 					break;
 				case FPS_n2::Sceneclass::HitType::Body:
 					color = GetColor(0, 255, 0);
+					break;
+				case FPS_n2::Sceneclass::HitType::Arm:
+					color = GetColor(0, 0, 255);
 					break;
 				case FPS_n2::Sceneclass::HitType::Leg:
 					color = GetColor(0, 0, 255);
@@ -259,6 +263,7 @@ namespace FPS_n2 {
 			const auto		GetRKey(void) const noexcept { return this->m_RKey; }
 			const auto		GetFKey(void) const noexcept { return this->m_FKey; }
 			const auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
+			void			SetIsSquat(bool value) noexcept { this->m_Squat.Set(value); }
 			const auto		GetRun(void) const noexcept { return this->m_Run.press() && GetPressFront(); }
 			const auto		GetAction(void) const noexcept { return this->m_Action.press(); }
 			const auto		GetShotKey(void) const noexcept { return this->m_ShotKey; }

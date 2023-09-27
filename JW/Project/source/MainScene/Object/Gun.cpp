@@ -7,7 +7,7 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		const MATRIX_ref  GunClass::GetFrameLocalMat(GunFrame frame) const noexcept {
 			if (GetFrame(frame) != -1) {
-				return GetObj_const().GetFrameLocalMatrix(GetFrame(frame));
+				return GetFrameLocalMatrix(GetFrame(frame));
 			}
 			else {
 				switch (frame) {
@@ -50,7 +50,7 @@ namespace FPS_n2 {
 		}
 		const MATRIX_ref  GunClass::GetFrameWorldMat(GunFrame frame) const noexcept {
 			if (GetFrame(frame) != -1) {
-				return GetObj_const().GetFrameLocalWorldMatrix(GetFrame(frame));
+				return GetFrameWorldMatrix(GetFrame(frame));
 			}
 			else {
 				switch (frame) {
@@ -188,50 +188,62 @@ namespace FPS_n2 {
 			SE->Get((int)SoundEnum::Trigger).Play_3D(0, GetMatrix().pos(), Scale_Rate*5.f);
 			SE->Get((int)GetGunSoundSet().m_Shot).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
 			//
-			auto& LastAmmo = (std::shared_ptr<AmmoClass>&)(*ObjMngr->AddObject(ObjType::Ammo));
-			auto mat = MATRIX_ref::RotZ(deg2rad(GetRandf(1.f))) * MATRIX_ref::RotX(deg2rad(GetRandf(1.f))) * GetMuzzleMatrix();
-			LastAmmo->Put(this->m_ChamberAmmoData, mat.pos(), mat.zvec() * -1.f, m_MyID);
+			{
+				auto& LastAmmo = (std::shared_ptr<AmmoClass>&)(*ObjMngr->MakeObject(ObjType::Ammo));
+				LastAmmo->Init();
+				auto mat = MATRIX_ref::RotZ(deg2rad(GetRandf(1.f))) * MATRIX_ref::RotX(deg2rad(GetRandf(1.f))) * GetMuzzleMatrix();
+				LastAmmo->Put(this->m_ChamberAmmoData, mat.pos(), mat.zvec() * -1.f, m_MyID);
+			}
 			//
 			UnloadChamber();
 			//
 			AddMuzzleSmokePower();
 		}
-		void GunClass::SetMagFall() noexcept { SetFallMagControl(GetFrameWorldMat(GunFrame::Magpos)); }
 
 		void GunClass::ExecuteCartInChamber(void) noexcept {
-			auto Prev = this->m_IsChamberOn;//GetNowAnime
-			switch (GetShotType()) {
-			case SHOTTYPE::FULL:
-			case SHOTTYPE::SEMI:
-				this->m_IsChamberOn = false;
-				this->m_IsChamberOn |= (GetShoting() && (GetNowAnime().time >= 3.f));
-				this->m_IsChamberOn |= (GetCocking() && (GetNowAnime().time >= 25.f));
-				if (GetShoting() && (1.f <= GetNowAnime().time && GetNowAnime().time <= 2.f)) {
-					SetCart();
+			{
+				auto Prev = this->m_IsChamberOn;
+				switch (GetShotType()) {
+				case SHOTTYPE::FULL:
+				case SHOTTYPE::SEMI:
+					this->m_IsChamberOn = false;
+					this->m_IsChamberOn |= (GetShoting() && (GetNowAnime().time >= 3.f));
+					this->m_IsChamberOn |= (GetCocking() && (GetNowAnime().time >= 25.f));
+					break;
+				case SHOTTYPE::BOLT:
+					this->m_IsChamberOn = false;
+					this->m_IsChamberOn |= ((this->m_ShotPhase == GunAnimeID::ReloadEnd) && (GetNowAnime().time >= 5.f));
+					this->m_IsChamberOn |= (GetCocking() && (GetNowAnime().time >= 25.f));
+					break;
+				default:
+					break;
 				}
-				break;
-			case SHOTTYPE::BOLT:
-				this->m_IsChamberOn = false;
-				this->m_IsChamberOn |= ((this->m_ShotPhase == GunAnimeID::ReloadEnd) && (GetNowAnime().time >= 5.f));
-				this->m_IsChamberOn |= (GetCocking() && (GetNowAnime().time >= 25.f));
-				{
-					bool IsEject = false;
-					IsEject |= ((this->m_ShotPhase == GunAnimeID::ReloadStart_Empty || this->m_ShotPhase == GunAnimeID::ReloadStart) && (GetNowAnime().time >= 19.f && !GetNowAnime().TimeEnd()));
-					IsEject |= (GetCocking() && (GetNowAnime().time >= 19.f && !GetNowAnime().TimeEnd()));
-					if (IsEject) {
-						SetCart();
+				if (this->m_IsChamberOn && (this->m_IsChamberOn != Prev)) {
+					if (!GetIsMagEmpty()) {
+						CockByMag();
 					}
+					this->GetMagazinePtr()->SubAmmo();
 				}
-				break;
-			default:
-				break;
 			}
-
-			if (this->m_IsChamberOn && (this->m_IsChamberOn != Prev)) {
-				if (!GetIsMagEmpty()) {
-					CockByMag();
+			{
+				auto Prev = this->m_IsEject;
+				switch (GetShotType()) {
+				case SHOTTYPE::FULL:
+				case SHOTTYPE::SEMI:
+					this->m_IsEject = false;
+					this->m_IsEject |= (GetShoting() && (1.f <= GetNowAnime().time && GetNowAnime().time <= 2.f));
+					break;
+				case SHOTTYPE::BOLT:
+					this->m_IsEject = false;
+					this->m_IsEject |= ((this->m_ShotPhase == GunAnimeID::ReloadStart_Empty || this->m_ShotPhase == GunAnimeID::ReloadStart) && (GetNowAnime().time >= 19.f && !GetNowAnime().TimeEnd()));
+					this->m_IsEject |= (GetCocking() && (GetNowAnime().time >= 19.f && !GetNowAnime().TimeEnd()));
+					break;
+				default:
+					break;
 				}
-				SubOnceMag();
+				if (this->m_IsEject && (this->m_IsEject != Prev)) {
+					SetFallControl(GetCartMat().pos(), GetMuzzleMatrix().GetRot(), GetCartVec()*(Scale_Rate * 2.f / 60.f));
+				}
 			}
 		}
 
@@ -242,14 +254,10 @@ namespace FPS_n2 {
 			//ƒf[ƒ^
 			m_GunDataClass = GunDataManager::Instance()->LoadAction(this->m_FilePath);
 			//ƒ}ƒKƒWƒ“‚Ì—pˆÓ
-			{
+			if (m_GunDataClass->GetPartsSlot(GunSlot::Magazine)) {
 				int size = (int)m_GunDataClass->GetPartsSlot(GunSlot::Magazine)->m_Items.size();
 				std::string magName = "data/Mods/mag/" + m_GunDataClass->GetPartsSlot(GunSlot::Magazine)->m_Items.at(GetRand(size - 1)) + "/";
-				HaveMag(magName, GetReloadType());
-				InitFallMagControl(magName);
-				FillMag();												//ƒ}ƒKƒWƒ“‚Íƒtƒ‹‘•“U
-				InitFallCartControl(GetAmmoSpecMagTop()->GetPath());	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
-				CockByMag();											//ƒ`ƒƒƒ“ƒo[ƒCƒ“
+				SetParts(magName, ObjType::Magazine);
 			}
 			//
 			if (m_GunDataClass->GetPartsSlot(GunSlot::Lower)) {
@@ -269,8 +277,15 @@ namespace FPS_n2 {
 				std::string magName = "data/Mods/Barrel/" + m_GunDataClass->GetPartsSlot(GunSlot::Barrel)->m_Items.at(GetRand(size - 1)) + "/";
 				SetParts(magName, ObjType::Barrel);
 			}
-			
-
+			//
+			this->GetMagazinePtr()->SetReloadType(GetReloadType());
+			FillMag();															//ƒ}ƒKƒWƒ“‚Íƒtƒ‹‘•“U
+			CockByMag();														//ƒ`ƒƒƒ“ƒo[ƒCƒ“
+			//
+			InitFallMagControl(m_BackGround, this->GetMagazinePtr()->GetFilePath());
+			//
+			InitFallCartControl(m_BackGround, this->GetMagazinePtr()->GetAmmoSpecMagTop()->GetPath());	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
+			//
 			this->m_ShotPhase = GunAnimeID::Base;
 		}
 		void GunClass::FirstExecute(void) noexcept {
@@ -292,7 +307,7 @@ namespace FPS_n2 {
 								FillMag();
 								break;
 							case RELOADTYPE::AMMO:
-								AddOnceMag();
+								this->GetMagazinePtr()->AddAmmo();
 								break;
 							default:
 								break;
@@ -475,7 +490,6 @@ namespace FPS_n2 {
 			ObjectBaseClass::FirstExecute();
 			//’e–ò‚Ì‰‰ŽZ
 			ExecuteCartInChamber();
-			ExecuteFallCartControl(GetCartMat().pos(), GetMuzzleMatrix().GetRot(), GetCartVec());
 		}
 		void GunClass::Draw(bool isDrawSemiTrans) noexcept {
 			if (this->m_IsActive && this->m_IsDraw) {
@@ -495,6 +509,7 @@ namespace FPS_n2 {
 			}
 		}
 		void GunClass::Dispose(void) noexcept {
+			m_BackGround.reset();
 			m_GunDataClass.reset();
 		}
 	};

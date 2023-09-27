@@ -14,8 +14,8 @@ namespace FPS_n2 {
 		public:
 			auto& GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
 			const auto& GetFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first; }
-			const auto GetFrameLocalMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix(GetFrame(frame)); }
-			const auto GetFrameWorldMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix(GetFrame(frame)); }
+			const auto GetFrameLocalMat(GunFrame frame) const noexcept { return GetFrameLocalMatrix(GetFrame(frame)); }
+			const auto GetFrameWorldMat(GunFrame frame) const noexcept { return GetFrameWorldMatrix(GetFrame(frame)); }
 		public:
 			void ResetFrameLocalMat(GunFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }
 			void SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * this->m_Frames[(int)frame].second); }
@@ -44,6 +44,8 @@ namespace FPS_n2 {
 			}
 			void			Dispose(void) noexcept override {
 				Dispose_Mod();
+				this->GetObj().Dispose();
+				this->m_col.Dispose();
 			}
 		public:
 			virtual void			Init_Mod(void) noexcept {}
@@ -52,37 +54,26 @@ namespace FPS_n2 {
 			virtual void			Dispose_Mod(void) noexcept {}
 		};
 
+
 		class MagazineClass : public ModClass {
 		private:
-			bool										m_IsHand{ true };
-
 			std::vector<std::shared_ptr<AmmoDataClass>>	m_AmmoSpec;
 			int											m_Capacity{ 0 };
 			int											m_CapacityMax{ 0 };
 			MATRIX_ref									HandMatrix;
 			float										HandPer{ 0.f };
 			RELOADTYPE									m_ReloadTypeBuf{ RELOADTYPE::MAG };
-
-			float m_yAdd{ 0.f };
-			float m_Timer{ 0.f };
-			bool m_SoundSwitch{ false };
-		public://ゲッター
+		public:
 			void			SetReloadType(RELOADTYPE ReloadType) noexcept { this->m_ReloadTypeBuf = ReloadType; }
-
 			void			SetHandMatrix(const MATRIX_ref& value, float pPer) noexcept {
 				this->HandMatrix = value;
 				this->HandPer = pPer;
 			}
-
-			void			SetIsHand(bool value) noexcept;
-			void			SetFall(const VECTOR_ref& pos, const MATRIX_ref& mat, const VECTOR_ref& vec) noexcept;
-
 			void			SetAmmo(int value) noexcept { this->m_Capacity = std::clamp(value, 0, m_CapacityMax); }
 			void			SubAmmo(void) noexcept { SetAmmo(this->m_Capacity - 1); }
 			void			AddAmmo(void) noexcept { SetAmmo(this->m_Capacity + 1); }
-			const auto		IsEmpty(void) const noexcept { return this->m_Capacity == 0; }
-			const auto		IsFull(void) const noexcept { return this->m_Capacity == this->m_CapacityMax; }
-			const auto&		GetAmmoSpec(void) const noexcept { return this->m_AmmoSpec[0]; }
+		public://ゲッター
+			const auto&		GetAmmoSpecMagTop(void) const noexcept { return this->m_AmmoSpec[0]; }
 			const auto&		GetAmmoNum(void) const noexcept { return this->m_Capacity; }
 			const auto&		GetAmmoAll(void) const noexcept { return  this->m_CapacityMax; }
 		public:

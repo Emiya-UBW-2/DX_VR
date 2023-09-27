@@ -173,5 +173,8 @@
     <ClCompile Include="source\MainScene\Object\AmmoData.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
+    <ClCompile Include="source\MainScene\Object\ObjectBase.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

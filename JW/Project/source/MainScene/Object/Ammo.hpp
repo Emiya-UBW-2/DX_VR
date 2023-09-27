@@ -17,6 +17,8 @@ namespace FPS_n2 {
 			float			m_penetration{ 0.f };
 			float			m_Hit_alpha{ 0.f };
 			VECTOR_ref		m_Hit_DispPos;
+			int				m_Hit_AddX{ 0 };
+			int				m_Hit_AddY{ 0 };
 			int				m_ShootCheraID{ -1 };
 			std::array<VECTOR_ref, 1> m_Line;
 			int				m_LineSel = 0;
@@ -50,15 +52,15 @@ namespace FPS_n2 {
 					if ((this->m_Hit_alpha >= 10.f / 255.f) && (this->m_Hit_DispPos.z() >= 0.f && this->m_Hit_DispPos.z() <= 1.f)) {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, int(255.f * this->m_Hit_alpha));
 						Hit_Graph.DrawRotaGraph((int)this->m_Hit_DispPos.x(), (int)this->m_Hit_DispPos.y(), (float)y_r(this->m_Hit_alpha * 0.5f * 100.0f) / 100.f, 0.f, true);
+
+						auto* Fonts = FontPool::Instance();
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+							(int)this->m_Hit_DispPos.x() + m_Hit_AddX, (int)this->m_Hit_DispPos.y() + m_Hit_AddY,
+							GetColor(255, 128, 0), GetColor(0, 0, 0), "%d", this->m_AmmoData->GetDamage());
+
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 					}
 				}
-			}
-			const auto		ColCheckGround(VECTOR_ref* Normal = nullptr) {
-				if (IsActive()) {
-					return this->m_BackGround->CheckLinetoMap(this->m_move.repos, &this->m_move.pos, true, Normal);
-				}
-				return false;
 			}
 			const auto		PenetrationCheck(float pArmer, const VECTOR_ref& normal) const noexcept { return (this->m_penetration > (pArmer * (1.0f / std::abs(this->m_move.vec.Norm().dot(normal))))); }
 			void			Penetrate(void) noexcept {
@@ -95,6 +97,8 @@ namespace FPS_n2 {
 					this->m_IsHit = false;
 					this->m_HitTimer = 0.25f;
 					this->m_Hit_alpha = 1.f;
+					this->m_Hit_AddX = GetRand(32);
+					this->m_Hit_AddY = GetRand(32);
 				}
 				this->m_HitTimer = std::clamp(this->m_HitTimer - 1.f / FPS, 0.f, 0.25f);
 				if (this->m_Hit_alpha > 0.f) {

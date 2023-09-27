@@ -8,7 +8,7 @@
 const FPS_n2::Sceneclass::ObjectManager* SingletonBase<FPS_n2::Sceneclass::ObjectManager>::m_Singleton = nullptr;
 namespace FPS_n2 {
 	namespace Sceneclass {
-		std::shared_ptr<ObjectBaseClass>* ObjectManager::MakeObject(ObjType ModelType) noexcept {
+		SharedObj*		ObjectManager::MakeObject(ObjType ModelType) noexcept {
 			switch (ModelType) {
 			case ObjType::Human:
 				this->m_Object.resize(this->m_Object.size() + 1);
@@ -47,22 +47,47 @@ namespace FPS_n2 {
 			}
 			return &(this->m_Object[this->m_Object.size() - 1]);
 		}
-
-		std::shared_ptr<ObjectBaseClass>*  ObjectManager::AddObject(ObjType ModelType, PHYSICS_SETUP TYPE, bool UseToonWhenCreateFile, const char* filepath, const char* objfilename, const char* colfilename) noexcept {
-			auto* Ptr = MakeObject(ModelType);
-
-			LoadModel(TYPE, UseToonWhenCreateFile, (*Ptr).get(), filepath, objfilename, colfilename);
-
-			(*Ptr)->SetMapCol(this->m_BackGround);
-			(*Ptr)->Init();
-			return Ptr;
+		void			ObjectManager::LoadModel(PHYSICS_SETUP TYPE, bool UseToonWhenCreateFile, ObjectBaseClass* pObj, const char* filepath, const char* objfilename, const char* colfilename) const noexcept {
+			bool iscopy = false;
+			for (auto& o : this->m_Object) {
+				if (o->GetIsBaseModel(filepath, objfilename, colfilename)) {
+					pObj->CopyModel(o);
+					iscopy = true;
+					break;
+				}
+			}
+			if (!iscopy) {
+				pObj->LoadModel(TYPE, UseToonWhenCreateFile, filepath, objfilename, colfilename);
+			}
+			pObj->SetFrameNum();
 		}
-		std::shared_ptr<ObjectBaseClass>* ObjectManager::AddObject(ObjType ModelType) noexcept {
-			auto* Ptr = MakeObject(ModelType);
-
-			(*Ptr)->SetMapCol(this->m_BackGround);
-			(*Ptr)->Init();
-			return Ptr;
+		//
+		SharedObj*		ObjectManager::GetObj(ObjType ModelType, int num) noexcept {
+			int cnt = 0;
+			for (auto&o : this->m_Object) {
+				if (o->GetobjType() == ModelType) {
+					if (cnt == num) {
+						return &o;
+					}
+					cnt++;
+				}
+			}
+			return nullptr;
+		}
+		//
+		void			ObjectManager::DelObj(ObjType ModelType, int num) noexcept {
+			int cnt = 0;
+			for (auto&o : this->m_Object) {
+				if (o->GetobjType() == ModelType) {
+					if (cnt == num) {
+						//‡”Ô‚ÌˆÛŽ‚Ì‚½‚ß‚±‚±‚Íerase
+						o->Dispose();
+						this->m_Object.erase(this->m_Object.begin() + (&o - &this->m_Object.front()));
+						break;
+					}
+					cnt++;
+				}
+			}
 		}
 	};
 };

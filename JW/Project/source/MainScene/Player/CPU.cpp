@@ -76,6 +76,7 @@ namespace FPS_n2 {
 			bool E_key{ false };
 			bool R_key{ false };
 			bool F_key{ false };
+			bool C_key{ false };
 			bool shotMain_Key{ false };
 
 			int32_t x_m{ 0 }, y_m{ 0 };
@@ -110,10 +111,10 @@ namespace FPS_n2 {
 				D_key = GetRand(100) > 50;
 
 				if (dot > 0.f) {
-					y_m = 6.f*cross;
+					y_m = (int32_t)(6.f*cross);
 				}
 				else {
-					y_m = -10.f;
+					y_m = (int32_t)(-10.f);
 				}
 
 				if (Vec_XZ.Length() < 1.5f*Scale_Rate) {
@@ -136,7 +137,12 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			/*
+			if (MyChara->GetIsSquat()) {
+				C_key = GetRand(100) < 1;
+			}
+
+			//*
+			y_m = 0;
 			W_key = false;
 			S_key = false;
 			A_key = false;
@@ -154,7 +160,7 @@ namespace FPS_n2 {
 				false,//1
 				R_key,
 				F_key,
-				false,
+				C_key,
 				shotMain_Key,
 				false
 			);

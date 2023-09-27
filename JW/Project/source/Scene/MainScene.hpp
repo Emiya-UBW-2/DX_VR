@@ -37,7 +37,6 @@ namespace FPS_n2 {
 			NetWorkBrowser									m_NetWorkBrowser;
 			double											m_ClientFrame{ 0.0 };
 			//‹¤’Ê
-			VECTOR_ref										m_Laserpos2D;
 			float											Timer{ 5.f };
 
 			float	Min = 0.f;

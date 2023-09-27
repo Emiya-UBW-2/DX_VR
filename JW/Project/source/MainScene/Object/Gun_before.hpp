@@ -57,177 +57,83 @@ namespace FPS_n2 {
 		};
 		class FallMagControl {
 		private:
-			std::shared_ptr<MagazineClass>	m_FallMag_Ptr{ nullptr };		//Žh‚³‚Á‚Ä‚¢‚éƒ}ƒKƒWƒ“
+			std::shared_ptr<CartClass>	m_FallMag_Ptr{ nullptr };		//Žh‚³‚Á‚Ä‚¢‚éƒ}ƒKƒWƒ“
 		protected:
-			void		InitFallMagControl(const std::string& pPath) {
+			void		InitFallMagControl(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath) {
 				auto* ObjMngr = ObjectManager::Instance();
-				this->m_FallMag_Ptr = (std::shared_ptr<MagazineClass>&)(*ObjMngr->AddObject(ObjType::Magazine, PHYSICS_SETUP::DISABLE, false, pPath.c_str()));
-				this->m_FallMag_Ptr->SetIsHand(false);
+				auto* Ptr = ObjMngr->MakeObject(ObjType::Cart);
+				ObjMngr->LoadModel(PHYSICS_SETUP::DISABLE, false, (*Ptr).get(), pPath.c_str());
+				this->m_FallMag_Ptr = (std::shared_ptr<CartClass>&)(*Ptr);
+				this->m_FallMag_Ptr->SetMapCol(backGround);
+				(*Ptr)->Init();
 			}
-			void		SetFallMagControl(const MATRIX_ref& pMat) {
-				float Spd = Scale_Rate * 3.f / 60.f;
-				this->m_FallMag_Ptr->SetFall(pMat.pos(), pMat.GetRot(), pMat.yvec()*-1.f*Spd);
+			void		SetFallMagControl(const VECTOR_ref& pPos, const MATRIX_ref& pMat, const VECTOR_ref& pVec) {
+				this->m_FallMag_Ptr->SetFall(pPos, pMat.GetRot(), pVec,12.f, SoundEnum::MagFall);
 			}
 		};
 		class FallCartControl {
 		private:
-			float							m_CartInterval{ 0.f };
-			std::array<std::shared_ptr<CartClass>, 4> m_CartPtr;
-			int								m_NowShotCart{ 0 };
-		public:
-			void		SetCart(void) noexcept {
-				if (this->m_CartInterval == 0.f) {
-					this->m_CartInterval = -1.f;//•‰‚Ì’l‚È‚ç‰½‚Å‚à‚æ‚¢
-				}
-			}
+			std::array<std::shared_ptr<CartClass>, 4>	m_Ptr;
+			int											m_Now{ 0 };
 		protected:
-			void		InitFallCartControl(const std::string& pPath) {
+			void		InitFallCartControl(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath) {
 				auto* ObjMngr = ObjectManager::Instance();
-				for (auto& c : m_CartPtr) {
-					c = (std::shared_ptr<CartClass>&)(*ObjMngr->AddObject(ObjType::Cart, PHYSICS_SETUP::DISABLE, false, pPath.c_str(), "ammo"));
+				for (auto& c : m_Ptr) {
+					auto* Ptr = ObjMngr->MakeObject(ObjType::Cart);
+					ObjMngr->LoadModel(PHYSICS_SETUP::DISABLE, false, (*Ptr).get(), pPath.c_str());
+					c = (std::shared_ptr<CartClass>&)(*Ptr);
+					c->SetMapCol(backGround);
+					(*Ptr)->Init();
 				}
 			}
-			void		ExecuteFallCartControl(const VECTOR_ref& pPos, const MATRIX_ref& pMat, const VECTOR_ref& pVec) {
-				if (this->m_CartInterval < -0.5f) {
-					this->m_CartInterval = 0.1f;
-
-					float Spd = Scale_Rate * 2.f / 60.f;
-					this->m_CartPtr[this->m_NowShotCart]->Set(pPos, pMat.GetRot(), pVec*Spd);
-					++this->m_NowShotCart %= this->m_CartPtr.size();
-				}
-				else {
-					this->m_CartInterval = std::max(this->m_CartInterval - 1.f / FPS, 0.f);
-				}
+			void		SetFallControl(const VECTOR_ref& pPos, const MATRIX_ref& pMat, const VECTOR_ref& pVec) {
+				this->m_Ptr[this->m_Now]->SetFall(pPos, pMat.GetRot(), pVec, 2.f, SoundEnum::CartFall);
+				++this->m_Now %= this->m_Ptr.size();
 			}
 		};
-		class HaveMagControl {
-		private:
-			std::shared_ptr<MagazineClass>	m_Mag_Ptr{ nullptr };			//Žh‚³‚Á‚Ä‚¢‚éƒ}ƒKƒWƒ“
-		public:
-			const auto HasMagazine(void) const noexcept { return (this->m_Mag_Ptr.get() != nullptr); }
 
-			const auto GetIsMagEmpty(void) const noexcept { return HasMagazine() ? this->m_Mag_Ptr->IsEmpty() : true; }//ŽŸ’e‚ª‚È‚¢
-			const auto GetIsMagFull(void) const noexcept { return HasMagazine() ? this->m_Mag_Ptr->IsFull() : false; }
-			const auto GetAmmoAll(void) const noexcept { return HasMagazine() ? this->m_Mag_Ptr->GetAmmoAll() : 0; }
-			const auto GetAmmoNumHaveMagControl(void) const noexcept { return HasMagazine() ? this->m_Mag_Ptr->GetAmmoNum() : 0; }
-			const auto&GetAmmoSpecMagTop(void) const noexcept { return this->m_Mag_Ptr->GetAmmoSpec(); }
-		public:
-			void		UpdateMagMove(const MATRIX_ref& pMat) { this->m_Mag_Ptr->SetMove(pMat.GetRot(), pMat.pos()); }
-			void		SetAmmoHandMatrix(const MATRIX_ref& value, float pPer) noexcept { this->m_Mag_Ptr->SetHandMatrix(value, pPer); }
-		public:
-			void		AddOnceMag() noexcept { this->m_Mag_Ptr->AddAmmo(); }
-			void		SubOnceMag() noexcept { this->m_Mag_Ptr->SubAmmo(); }
-			void		FillMag() noexcept{ this->m_Mag_Ptr->SetAmmo(GetAmmoAll()); }
-		protected:
-			void		HaveMag(const std::string& pPath, RELOADTYPE ReloadType) {
-				if (!HasMagazine()) {
-					auto* ObjMngr = ObjectManager::Instance();
-					this->m_Mag_Ptr = (std::shared_ptr<MagazineClass>&)(*ObjMngr->AddObject(ObjType::Magazine, PHYSICS_SETUP::DISABLE, false, pPath.c_str()));
-					this->m_Mag_Ptr->SetIsHand(true);
-					this->m_Mag_Ptr->SetAmmo(GetAmmoAll());
-					this->m_Mag_Ptr->SetReloadType(ReloadType);
-				}
-			}
-			void		DisposeHaveMagControl() {
-				if (HasMagazine()) {
-					this->m_Mag_Ptr.reset();
-				}
-			}
-		};
 		class SlotPartsControl {
 		private:
-			std::shared_ptr<LowerClass>	m_Lower_Ptr{ nullptr };
-			std::shared_ptr<UpperClass>	m_Upper_Ptr{ nullptr };
-			std::shared_ptr<BarrelClass>	m_Barrel_Ptr{ nullptr };
+			std::array<std::shared_ptr<ModClass>, (int)ObjType::Max>	m_Parts_Ptr{ nullptr };
 		public:
-			const auto HasParts(ObjType objType) const noexcept {
-				switch (objType) {
-				case FPS_n2::Sceneclass::ObjType::Magazine:
-					break;
-				case FPS_n2::Sceneclass::ObjType::Lower:
-					return (this->m_Lower_Ptr.get() != nullptr);
-				case FPS_n2::Sceneclass::ObjType::Upper:
-					return (this->m_Upper_Ptr.get() != nullptr);
-				case FPS_n2::Sceneclass::ObjType::Barrel:
-					return (this->m_Barrel_Ptr.get() != nullptr);
-				default:
-					break;
-				}
-				return (this->m_Lower_Ptr.get() != nullptr);
-			}
-			std::shared_ptr<ModClass>& SetPartsPtr(ObjType objType) noexcept {
-				switch (objType) {
-				case FPS_n2::Sceneclass::ObjType::Magazine:
-					break;
-				case FPS_n2::Sceneclass::ObjType::Lower:
-					return (std::shared_ptr<ModClass>&)this->m_Lower_Ptr;
-				case FPS_n2::Sceneclass::ObjType::Upper:
-					return (std::shared_ptr<ModClass>&)this->m_Upper_Ptr;
-				case FPS_n2::Sceneclass::ObjType::Barrel:
-					return (std::shared_ptr<ModClass>&)this->m_Barrel_Ptr;
-				default:
-					break;
-				}
-				return (std::shared_ptr<ModClass>&)this->m_Lower_Ptr;
-			}
-			const std::shared_ptr<ModClass>& GetPartsPtr(ObjType objType) const noexcept {
-				switch (objType) {
-				case FPS_n2::Sceneclass::ObjType::Magazine:
-					break;
-				case FPS_n2::Sceneclass::ObjType::Lower:
-					return (std::shared_ptr<ModClass>&)this->m_Lower_Ptr;
-				case FPS_n2::Sceneclass::ObjType::Upper:
-					return (std::shared_ptr<ModClass>&)this->m_Upper_Ptr;
-				case FPS_n2::Sceneclass::ObjType::Barrel:
-					return (std::shared_ptr<ModClass>&)this->m_Barrel_Ptr;
-				default:
-					break;
-				}
-				return (std::shared_ptr<ModClass>&)this->m_Lower_Ptr;
-			}
-			
+			const auto							HasParts(ObjType objType) const noexcept { return (this->m_Parts_Ptr[(int)objType].get() != nullptr); }
+			std::shared_ptr<ModClass>&			SetPartsPtr(ObjType objType) noexcept { return this->m_Parts_Ptr[(int)objType]; }
+			const std::shared_ptr<ModClass>&	GetPartsPtr(ObjType objType) const noexcept { return this->m_Parts_Ptr[(int)objType]; }
+		public:
+			const std::shared_ptr<MagazineClass>& GetMagazinePtr(void) const noexcept { return (std::shared_ptr<MagazineClass>&)GetPartsPtr(ObjType::Magazine); }
 		public:
 			void		UpdatePartsAnim(const MV1& pParent) {
 				for (int loop = 0; loop < (int)ObjType::Max; loop++) {
-					if (HasParts((ObjType)loop)) {
-						for (int i = 0; i < pParent.get_anime().size(); i++) {
-							GetPartsPtr((ObjType)loop)->GetAnime((GunAnimeID)i).per = pParent.getanime(i).per;
-							GetPartsPtr((ObjType)loop)->GetAnime((GunAnimeID)i).time = pParent.getanime(i).time;
+					if (this->m_Parts_Ptr[loop]) {
+						for (int i = 0; i < this->m_Parts_Ptr[loop]->GetObj().get_anime().size(); i++) {
+							this->m_Parts_Ptr[loop]->GetAnime((GunAnimeID)i).per = pParent.getanime(i).per;
+							this->m_Parts_Ptr[loop]->GetAnime((GunAnimeID)i).time = pParent.getanime(i).time;
 						}
-						GetPartsPtr((ObjType)loop)->ResetFrameLocalMat(GunFrame::Center);
-						GetPartsPtr((ObjType)loop)->GetObj().work_anime();
-						GetPartsPtr((ObjType)loop)->SetFrameLocalMat(GunFrame::Center, GetPartsPtr((ObjType)loop)->GetFrameLocalMat(GunFrame::Center).GetRot());//1‚ÌƒtƒŒ[ƒ€ˆÚ“®—Ê‚ð–³Ž‹‚·‚é
+						this->m_Parts_Ptr[loop]->ResetFrameLocalMat(GunFrame::Center);
+						this->m_Parts_Ptr[loop]->GetObj().work_anime();
+						this->m_Parts_Ptr[loop]->SetFrameLocalMat(GunFrame::Center, this->m_Parts_Ptr[loop]->GetFrameLocalMat(GunFrame::Center).GetRot());//1‚ÌƒtƒŒ[ƒ€ˆÚ“®—Ê‚ð–³Ž‹‚·‚é
 					}
 				}
 			}
 			void		UpdatePartsMove(const MATRIX_ref& pMat, ObjType objType) {
-				if (HasParts(objType)) {
-					GetPartsPtr(objType)->SetMove(pMat.GetRot(), pMat.pos());
+				if (this->m_Parts_Ptr[(int)objType]) {
+					this->m_Parts_Ptr[(int)objType]->SetMove(pMat.GetRot(), pMat.pos());
 				}
 			}
 		protected:
 			void		SetParts(const std::string& pPath, ObjType objType) {
-				if (!HasParts(objType)) {
+				if (!this->m_Parts_Ptr[(int)objType]) {
 					auto* ObjMngr = ObjectManager::Instance();
-					switch (objType) {
-					case FPS_n2::Sceneclass::ObjType::Magazine:
-						break;
-					case FPS_n2::Sceneclass::ObjType::Lower:
-						this->m_Lower_Ptr = (std::shared_ptr<LowerClass>&)(*ObjMngr->AddObject(ObjType::Lower, PHYSICS_SETUP::DISABLE, false, pPath.c_str()));
-						break;
-					case FPS_n2::Sceneclass::ObjType::Upper:
-						this->m_Upper_Ptr = (std::shared_ptr<UpperClass>&)(*ObjMngr->AddObject(ObjType::Upper, PHYSICS_SETUP::DISABLE, false, pPath.c_str()));
-						break;
-					case FPS_n2::Sceneclass::ObjType::Barrel:
-						this->m_Barrel_Ptr = (std::shared_ptr<BarrelClass>&)(*ObjMngr->AddObject(ObjType::Barrel, PHYSICS_SETUP::DISABLE, false, pPath.c_str()));
-						break;
-					default:
-						break;
-					}
+					auto* Ptr = ObjMngr->MakeObject(objType);
+					ObjMngr->LoadModel(PHYSICS_SETUP::DISABLE, false, (*Ptr).get(), pPath.c_str());
+					this->m_Parts_Ptr[(int)objType] = (std::shared_ptr<ModClass>&)(*Ptr);
+					(*Ptr)->Init();
 				}
 			}
 			void		DisposeSlotPartsControl() {
-				this->m_Lower_Ptr.reset();
+				for (auto& p : this->m_Parts_Ptr) {
+					p.reset();
+				}
 			}
 		};
 	};

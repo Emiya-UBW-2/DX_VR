@@ -4,63 +4,33 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		typedef std::shared_ptr<ObjectBaseClass> SharedObj;
+
 		class ObjectManager : public SingletonBase<ObjectManager> {
 		private:
 			friend class SingletonBase<ObjectManager>;
 		private:
-			std::vector<std::shared_ptr<ObjectBaseClass>>	m_Object;
+			std::vector<SharedObj>	m_Object;
 			switchs											m_ResetP;
-			std::shared_ptr<BackGroundClassBase>				m_BackGround;				//BGコピー
-		private:
-			std::shared_ptr<ObjectBaseClass>* MakeObject(ObjType ModelType) noexcept;
 		public:
-			void	LoadModel(PHYSICS_SETUP TYPE, bool UseToonWhenCreateFile, ObjectBaseClass* pObj, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") const noexcept {
-				bool iscopy = false;
-				for (auto& o : this->m_Object) {
-					if (o->GetIsBaseModel(filepath, objfilename, colfilename)) {
-						pObj->CopyModel(o);
-						iscopy = true;
-						break;
-					}
-				}
-				if (!iscopy) {
-					pObj->LoadModel(TYPE, UseToonWhenCreateFile, filepath, objfilename, colfilename);
-				}
-				pObj->SetFrameNum();
-			}
+			SharedObj*		MakeObject(ObjType ModelType) noexcept;
+			void			LoadModel(PHYSICS_SETUP TYPE, bool UseToonWhenCreateFile, ObjectBaseClass* pObj, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") const noexcept;
 
-			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType, PHYSICS_SETUP TYPE, bool UseToonWhenCreateFile, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") noexcept;
-			std::shared_ptr<ObjectBaseClass>* AddObject(ObjType ModelType) noexcept;
-			std::shared_ptr<ObjectBaseClass>* GetObj(ObjType ModelType, int num) noexcept {
-				int cnt = 0;
-				for (int i = 0; i < this->m_Object.size(); i++) {
-					auto& o = this->m_Object[i];
-					if (o->GetobjType() == ModelType) {
-						if (cnt == num) {
-							return &this->m_Object[i];
-						}
-						cnt++;
-					}
+			SharedObj*		GetObj(ObjType ModelType, int num) noexcept;
+
+			void			DelObj(ObjType ModelType, int num) noexcept;
+		public:
+			void			ExecuteObject(void) noexcept {
+				for (auto&o : this->m_Object) {
+					o->FirstExecute();
 				}
-				return nullptr;
-			}
-			void			DelObj(ObjType ModelType, int num) noexcept {
-				int cnt = 0;
-				for (int i = 0; i < this->m_Object.size(); i++) {
-					auto& o = this->m_Object[i];
-					if (o->GetobjType() == ModelType) {
-						if (cnt == num) {
-							//順番の維持のためここはerase
-							o->Dispose();
-							this->m_Object.erase(this->m_Object.begin() + i);
-							break;
-						}
-						cnt++;
-					}
+				//物理アップデート
+				this->m_ResetP.Execute(CheckHitKeyWithCheck(KEY_INPUT_P) != 0);
+				for (auto&o : this->m_Object) {
+					if (this->m_ResetP.trigger()) { o->SetResetP(true); }
+					o->ExecuteCommon();
 				}
-			}
-			//オブジェクトの排除チェック
-			void			DeleteCheck(void) noexcept {
+				//オブジェクトの排除チェック
 				for (int i = 0; i < this->m_Object.size(); i++) {
 					auto& o = this->m_Object[i];
 					if (o->GetIsDelete()) {
@@ -71,27 +41,8 @@ namespace FPS_n2 {
 					}
 				}
 			}
-		public:
-			void			Init(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept {
-				this->m_BackGround = backGround;
-			}
-			void			ExecuteObject(void) noexcept {
-				for (int i = 0; i < this->m_Object.size(); i++) {
-					auto& o = this->m_Object[i];
-					o->FirstExecute();
-				}
-				//物理アップデート
-				this->m_ResetP.Execute(CheckHitKeyWithCheck(KEY_INPUT_P) != 0);
-
-				for (int i = 0; i < this->m_Object.size(); i++) {
-					auto& o = this->m_Object[i];
-					if (this->m_ResetP.trigger()) { o->SetResetP(true); }
-					o->ExecuteCommon();
-				}
-			}
 			void			LateExecuteObject(void) noexcept {
-				for (int i = 0; i < this->m_Object.size(); i++) {
-					auto& o = this->m_Object[i];
+				for (auto&o : this->m_Object) {
 					o->LateExecute();
 				}
 			}
@@ -120,7 +71,6 @@ namespace FPS_n2 {
 				}
 				this->m_Object.clear();
 			}
-			//
 		};
 	};
 };
