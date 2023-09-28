@@ -52,7 +52,8 @@ namespace FPS_n2 {
 			//
 			for (int i = 0; i < 1; i++) {
 				auto* Ptr = ObjMngr->MakeObject(ObjType::Human);
-				ObjMngr->LoadModel(PHYSICS_SETUP::DISABLE, false, (*Ptr).get(), "data/Charactor/Suit/");
+				ObjMngr->LoadObjectModel((*Ptr).get(), "data/Charactor/Suit/");
+				MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
 				character_Pool.emplace_back((std::shared_ptr<CharacterClass>&)(*Ptr));
 				character_Pool.back()->SetMapCol(this->m_BackGround);
 				(*Ptr)->Init();
@@ -60,7 +61,8 @@ namespace FPS_n2 {
 			}
 			for (int i = 1; i < Chara_num; i++) {
 				auto* Ptr = ObjMngr->MakeObject(ObjType::Human);
-				ObjMngr->LoadModel(PHYSICS_SETUP::DISABLE, false, (*Ptr).get(), "data/Charactor/Soldier/");
+				ObjMngr->LoadObjectModel((*Ptr).get(), "data/Charactor/Soldier/");
+				MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
 				character_Pool.emplace_back((std::shared_ptr<CharacterClass>&)(*Ptr));
 				character_Pool.back()->SetMapCol(this->m_BackGround);
 				(*Ptr)->Init();
@@ -69,14 +71,16 @@ namespace FPS_n2 {
 
 			for (int i = 0; i < 1; i++) {
 				auto* Ptr = ObjMngr->MakeObject(ObjType::Gun);
-				ObjMngr->LoadModel(PHYSICS_SETUP::DISABLE, false, (*Ptr).get(), "data/gun/G17Gen3/");
+				ObjMngr->LoadObjectModel((*Ptr).get(), "data/gun/G17Gen3/");
+				MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
 				auto& Gun = ((std::shared_ptr<GunClass>&)(*Ptr));
 				Gun->SetMapCol(this->m_BackGround);
 				(*Ptr)->Init();
 			}
 			for (int i = 1; i < gun_num; i++) {
 				auto* Ptr = ObjMngr->MakeObject(ObjType::Gun);
-				ObjMngr->LoadModel(PHYSICS_SETUP::DISABLE, false, (*Ptr).get(), "data/gun/AR15_90/");
+				ObjMngr->LoadObjectModel((*Ptr).get(), "data/gun/AR15_90/");
+				MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
 				auto& Gun = ((std::shared_ptr<GunClass>&)(*Ptr));
 				Gun->SetMapCol(this->m_BackGround);
 				(*Ptr)->Init();
@@ -695,6 +699,26 @@ namespace FPS_n2 {
 				Set_Per_Blackout(0.5f + (1.f + sin(Chara->GetHeartRateRad()*4.f)*0.25f) * ((Chara->GetHeartRate() - 60.f) / (180.f - 60.f)));
 				//
 				Set_is_lens(false);
+				if (Chara->GetGunPtrNow_Const() && Chara->GetGunPtrNow_Const()->GetReticlePtr()) {
+					VECTOR_ref LensPos = ConvWorldPosToScreenPos(Chara->GetGunPtrNow_Const()->GetLensPos().get());
+					if (0.f < LensPos.z() && LensPos.z() < 1.f) {
+						Set_xp_lens(LensPos.x());
+						Set_yp_lens(LensPos.y());
+						LensPos = ConvWorldPosToScreenPos(Chara->GetGunPtrNow_Const()->GetLensPosSize().get());
+						if (0.f < LensPos.z() && LensPos.z() < 1.f) {
+							Set_size_lens(std::hypotf(xp_lens() - LensPos.x(), yp_lens() - LensPos.y()));
+						}
+					}
+					LensPos = ConvWorldPosToScreenPos(Chara->GetGunPtrNow_Const()->GetReticlePos().get());
+					if (0.f < LensPos.z() && LensPos.z() < 1.f) {
+						Reticle_xpos = LensPos.x();
+						Reticle_ypos = LensPos.y();
+						Reticle_on = (size_lens() > std::hypotf(xp_lens() - Reticle_xpos, yp_lens() - Reticle_ypos));
+					}
+				}
+				else {
+					Reticle_on = false;
+				}
 			}
 			for (auto& c : this->character_Pool) {
 				if (c->GetMyPlayerID() == GetMyPlayerID()) { continue; }
@@ -761,6 +785,10 @@ namespace FPS_n2 {
 				//OIL_Graph.DrawExtendGraph(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, true);
 
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+			}
+			//レティクル表示
+			if (Reticle_on) {
+				Chara->GetGunPtrNow_Const()->GetReticlePtr()->DrawRotaGraph((int)Reticle_xpos, (int)Reticle_ypos, 1.f, Chara->GetReticleRad(), true);
 			}
 			//UI
 			this->m_UIclass.Draw();

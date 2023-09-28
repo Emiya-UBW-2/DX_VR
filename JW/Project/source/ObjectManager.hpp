@@ -11,24 +11,34 @@ namespace FPS_n2 {
 			friend class SingletonBase<ObjectManager>;
 		private:
 			std::vector<SharedObj>	m_Object;
-			switchs											m_ResetP;
+			switchs					m_ResetP;
+
+			PHYSICS_SETUP			m_DefaultType{ PHYSICS_SETUP::DISABLE };
+			bool					m_UseToonWhenCreateFile{ false };
 		public:
 			SharedObj*		MakeObject(ObjType ModelType) noexcept;
-			void			LoadModel(PHYSICS_SETUP TYPE, bool UseToonWhenCreateFile, ObjectBaseClass* pObj, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") const noexcept;
+			void			LoadObjectModel(ObjectBaseClass* pObj, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") const noexcept;
 
 			SharedObj*		GetObj(ObjType ModelType, int num) noexcept;
 
 			void			DelObj(ObjType ModelType, int num) noexcept;
 		public:
 			void			ExecuteObject(void) noexcept {
-				for (auto&o : this->m_Object) {
-					o->FirstExecute();
+				//オブジェクトが増えた場合に備えて範囲forは使わない
+				for (int i = 0; i < this->m_Object.size(); i++) {
+					auto& o = this->m_Object[i];
+					if (!o->GetIsDelete()) {
+						o->FirstExecute();
+					}
 				}
 				//物理アップデート
 				this->m_ResetP.Execute(CheckHitKeyWithCheck(KEY_INPUT_P) != 0);
-				for (auto&o : this->m_Object) {
-					if (this->m_ResetP.trigger()) { o->SetResetP(true); }
-					o->ExecuteCommon();
+				for (int i = 0; i < this->m_Object.size(); i++) {
+					auto& o = this->m_Object[i];
+					if (!o->GetIsDelete()) {
+						if (this->m_ResetP.trigger()) { o->SetResetP(true); }
+						o->ExecuteCommon();
+					}
 				}
 				//オブジェクトの排除チェック
 				for (int i = 0; i < this->m_Object.size(); i++) {

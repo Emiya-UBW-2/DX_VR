@@ -22,6 +22,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::Sceneclass::GunAnimManager::Create();
 	//
 	FPS_n2::Sceneclass::GunDataManager::Create();
+	FPS_n2::Sceneclass::ModDataManager::Create();
 	FPS_n2::Sceneclass::AmmoDataManager::Create();
 	//ÉVÅ[Éì
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();

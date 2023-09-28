@@ -3,35 +3,21 @@
 
 #include "ObjectBase_before.hpp"
 #include "GunEnum.hpp"
+#include "ModData.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		struct PartsSlot {
-			GunSlot						m_GunSlot;
-			std::vector<std::string>	m_Items;
-			std::vector<std::string>	m_Conflicts;
-		};
-
-		class GunDataClass : public ItemData {
+		class GunDataClass : public ModDataClass {
 		private:
 			SHOTTYPE						m_ShotType{ SHOTTYPE::SEMI };		//
 			int								m_HumanAnimType{ 0 };				//
 			int								m_SoundSel{ 0 };
 			RELOADTYPE						m_ReloadType{ RELOADTYPE::MAG };	//
-			std::vector<PartsSlot>			m_PartsSlot;						//
 		public://ƒQƒbƒ^[
 			const auto& GetShotType(void) const noexcept { return this->m_ShotType; }
 			const auto& GetHumanAnimType(void) const noexcept { return this->m_HumanAnimType; }
 			const auto& GetSoundSel(void) const noexcept { return this->m_SoundSel; }
 			const auto& GetReloadType(void) const noexcept { return this->m_ReloadType; }
-			const PartsSlot* GetPartsSlot(GunSlot sel) const noexcept {
-				for (const auto& s : this->m_PartsSlot) {
-					if (s.m_GunSlot == sel) {
-						return &s;
-					}
-				}
-				return nullptr;
-			}
 		public://
 			void		Set_Sub(const std::string& LEFT, const std::string&RIGHT) noexcept override {
 				if (LEFT == "shottype") {
@@ -59,22 +45,8 @@ namespace FPS_n2 {
 						this->m_ReloadType = RELOADTYPE::AMMO;
 					}
 				}
-				else if (LEFT.find("Slot") != std::string::npos) {
-					if (LEFT.find("Type") != std::string::npos) {
-						for (int i = 0; i < (int)GunSlot::Max; i++) {
-							if (RIGHT == GunSlotName[i]) {
-								this->m_PartsSlot.resize(this->m_PartsSlot.size() + 1);
-								this->m_PartsSlot.back().m_GunSlot = (GunSlot)i;
-								break;
-							}
-						}
-					}
-					else if (LEFT.find("Item") != std::string::npos) {
-						this->m_PartsSlot.back().m_Items.emplace_back(RIGHT);
-					}
-					else if (LEFT.find("Conflict") != std::string::npos) {
-						this->m_PartsSlot.back().m_Conflicts.emplace_back(RIGHT);
-					}
+				else {
+					ModDataClass::SetSlot(LEFT, RIGHT);
 				}
 			}
 		};

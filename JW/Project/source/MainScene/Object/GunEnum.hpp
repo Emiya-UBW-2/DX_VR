@@ -39,6 +39,8 @@ namespace FPS_n2 {
 			Lower,
 			Upper,
 			Barrel,
+			UnderRail,
+			Sight,
 			Max,
 		};
 		static const char* GunFrameName[(int)GunFrame::Max] = {
@@ -62,6 +64,8 @@ namespace FPS_n2 {
 			"Lower",
 			"Upper",
 			"Barrel",
+			"UnderRail",
+			"Sight",
 		};
 		enum class SHOTTYPE {
 			BOLT,
@@ -104,6 +108,8 @@ namespace FPS_n2 {
 			Upper,
 			Lower,
 			Barrel,
+			UnderRail,
+			Sight,
 			Max,
 		};
 		static const char* GunSlotName[(int)GunSlot::Max] = {
@@ -111,6 +117,8 @@ namespace FPS_n2 {
 			"Upper",
 			"Lower",
 			"Barrel",
+			"UnderRail",
+			"Sight",
 		};
 	};
 };

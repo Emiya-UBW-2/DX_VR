@@ -1,33 +1,42 @@
 #pragma once
 #include	"../../Header.hpp"
 
-#include "ObjectBase.hpp"
+#include "ModData.hpp"
+#include "Gun_before.hpp"
 #include "AmmoData.hpp"
+
+#include "ObjectBase.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class ModClass : public ObjectBaseClass {
 		private:
+			SlotPartsControl				m_ModControl;
+			std::shared_ptr<ModDataClass>	m_ModDataClass;
 		public:
-			ModClass(void) noexcept { }
-			~ModClass(void) noexcept { }
+			ModClass(void) noexcept {}
+			~ModClass(void) noexcept {}
 		public:
-			auto& GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
-			const auto& GetFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first; }
-			const auto GetFrameLocalMat(GunFrame frame) const noexcept { return GetFrameLocalMatrix(GetFrame(frame)); }
-			const auto GetFrameWorldMat(GunFrame frame) const noexcept { return GetFrameWorldMatrix(GetFrame(frame)); }
+			auto&			GetModControl() noexcept { return this->m_ModControl; }
+
+			auto&			GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
+			const auto&		GetFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first; }
+			const auto		GetFrameLocalMat(GunFrame frame) const noexcept { return GetFrameLocalMatrix(GetFrame(frame)); }
+			const auto		GetFrameWorldMat(GunFrame frame) const noexcept { return GetFrameWorldMatrix(GetFrame(frame)); }
+			void			ResetFrameLocalMat(GunFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }
+			void			SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * this->m_Frames[(int)frame].second); }
 		public:
-			void ResetFrameLocalMat(GunFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }
-			void SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * this->m_Frames[(int)frame].second); }
-		public:
-			void			Init(void) noexcept override {
-				ObjectBaseClass::Init();
-				Init_Mod();
-			}
+			void			Init(void) noexcept override;
 			void			FirstExecute(void) noexcept override {
 				ObjectBaseClass::FirstExecute();
 				SetMove(GetMove().mat.GetRot(), GetMove().pos);
 				FirstExecute_Mod();
+			}
+			void			SetGunMatrix(const MATRIX_ref& value) noexcept {
+				SetMove(value.GetRot(), value.pos());
+				m_ModControl.UpdatePartsAnim(GetObj());
+				m_ModControl.UpdatePartsMove(GetFrameWorldMat(GunFrame::UnderRail), ObjType::UnderRail);
+				m_ModControl.UpdatePartsMove(GetFrameWorldMat(GunFrame::Sight), ObjType::Sight);
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				Draw_Mod(isDrawSemiTrans);
@@ -44,14 +53,15 @@ namespace FPS_n2 {
 			}
 			void			Dispose(void) noexcept override {
 				Dispose_Mod();
+				m_ModDataClass.reset();
 				this->GetObj().Dispose();
 				this->m_col.Dispose();
 			}
 		public:
-			virtual void			Init_Mod(void) noexcept {}
-			virtual void			FirstExecute_Mod(void) noexcept {}
-			virtual void			Draw_Mod(bool) noexcept {}
-			virtual void			Dispose_Mod(void) noexcept {}
+			virtual void	Init_Mod(void) noexcept {}
+			virtual void	FirstExecute_Mod(void) noexcept {}
+			virtual void	Draw_Mod(bool) noexcept {}
+			virtual void	Dispose_Mod(void) noexcept {}
 		};
 
 
@@ -81,8 +91,25 @@ namespace FPS_n2 {
 			~MagazineClass(void) noexcept { }
 		public:
 			void			Init_Mod(void) noexcept override;
-			void			FirstExecute_Mod(void) noexcept override;
-			void			Dispose_Mod(void) noexcept override;
+			void			FirstExecute_Mod(void) noexcept override {
+				switch (m_ReloadTypeBuf) {
+				case RELOADTYPE::MAG:
+					if (this->HandPer > 0.f) {
+						SetMove(MATRIX_ref::RotX(deg2rad(-30.f*this->HandPer))*GetMove().mat.GetRot(), Lerp(GetMove().pos, this->HandMatrix.pos(), this->HandPer));
+					}
+					break;
+				case RELOADTYPE::AMMO:
+					break;
+				default:
+					break;
+				}
+			}
+			void			Dispose_Mod(void) noexcept override {
+				for (auto& A : this->m_AmmoSpec) {
+					A.reset();
+				}
+				this->m_AmmoSpec.clear();
+			}
 		public:
 		};
 
@@ -111,6 +138,29 @@ namespace FPS_n2 {
 			BarrelClass(void) noexcept { this->m_objType = ObjType::Barrel; }
 			~BarrelClass(void) noexcept { }
 		public:
+		};
+
+		class UnderRailClass : public ModClass {
+		private:
+		public://ゲッター
+		public:
+			UnderRailClass(void) noexcept { this->m_objType = ObjType::UnderRail; }
+			~UnderRailClass(void) noexcept { }
+		public:
+		};
+
+		class SightClass : public ModClass {
+		private:
+			GraphHandle m_Reitcle;
+		public://ゲッター
+			const auto&		GetReitcleGraph(void) const noexcept { return this->m_Reitcle; }
+		public:
+			SightClass(void) noexcept { this->m_objType = ObjType::Sight; }
+			~SightClass(void) noexcept { }
+		public:
+			void			Init_Mod(void) noexcept override {
+				m_Reitcle = GraphHandle::Load(this->m_FilePath + "reticle_0.png");
+			}
 		};
 	};
 };

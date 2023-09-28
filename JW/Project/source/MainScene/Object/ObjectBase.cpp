@@ -2,196 +2,103 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		void			ObjectBaseClass::LoadModel(PHYSICS_SETUP TYPE, bool UseToonWhenCreateFile, const char* filepath, const char* objfilename, const char* colfilename) noexcept {
+		void			ObjectBaseClass::LoadModel(PHYSICS_SETUP TYPE, const char* filepath, const char* objfilename, const char* colfilename) noexcept {
+			this->m_IsBaseModel = true;
+			this->m_objActive = true;
 			this->m_PHYSICS_SETUP = TYPE;
 			this->m_FilePath = filepath;
 			this->m_ObjFileName = objfilename;
 			this->m_ColFileName = colfilename;
-			FILEINFO FileInfo;
+			auto Load = [&](MV1* obj, std::string Path, std::string NameAdd, int PHYSICS_TYPE) {
+				FILEINFO FileInfo;
+				if (FileRead_findFirst((Path + NameAdd + ".mv1").c_str(), &FileInfo) != (DWORD_PTR)-1) {
+					//MV1::Load(Path + ".pmx", obj, PHYSICS_TYPE);
+					MV1::Load((Path + NameAdd + ".mv1").c_str(), obj, PHYSICS_TYPE);
+				}
+				else if (FileRead_findFirst((Path + ".pmx").c_str(), &FileInfo) != (DWORD_PTR)-1) {
+					MV1::Load(Path + ".pmx", obj, PHYSICS_TYPE);
+				}
+			};
 			//model
+			switch (this->m_PHYSICS_SETUP) {
+			case PHYSICS_SETUP::DISABLE:
+				Load(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_DISABLE", DX_LOADMODEL_PHYSICS_DISABLE);
+				break;
+			case PHYSICS_SETUP::LOADCALC:
+				Load(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_LOADCALC", DX_LOADMODEL_PHYSICS_LOADCALC);
+				break;
+			case PHYSICS_SETUP::REALTIME:
+				Load(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_REALTIME", DX_LOADMODEL_PHYSICS_REALTIME);
+				break;
+			default:
+				break;
+			}
+			//col
+			Load(&this->m_col, this->m_FilePath + this->m_ColFileName, "", DX_LOADMODEL_PHYSICS_DISABLE);
+			if (this->m_col.IsActive()) {
+				for (int i = 0; i < this->m_col.mesh_num(); ++i) { this->m_col.SetupCollInfo(8, 8, 8, -1, i); }
+			}
+			//フレーム
 			{
-				std::string Path = this->m_FilePath;
-				Path += this->m_ObjFileName;
-
-				switch (this->m_PHYSICS_SETUP) {
-				case FPS_n2::Sceneclass::PHYSICS_SETUP::DISABLE:
-					if (FileRead_findFirst((Path + "_DISABLE.mv1").c_str(), &FileInfo) != (DWORD_PTR)-1) {
-						//MV1::Load(Path + ".pmx", &this->m_obj, DX_LOADMODEL_PHYSICS_DISABLE);
-						MV1::Load((Path + "_DISABLE.mv1").c_str(), &this->m_obj, DX_LOADMODEL_PHYSICS_DISABLE);
-					}
-					else {
-						MV1::Load(Path + ".pmx", &this->m_obj, DX_LOADMODEL_PHYSICS_DISABLE);
-						if (!UseToonWhenCreateFile) {
-							MV1SetMaterialTypeAll(this->m_obj.get(), DX_MATERIAL_TYPE_NORMAL);
-						}
-						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_DISABLE);
-						MV1SaveModelToMV1File(this->m_obj.get(), (Path + "_DISABLE.mv1").c_str());
-						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
-					}
+				switch (this->m_objType) {
+				case ObjType::Human:
+					this->m_Frames.resize((int)CharaFrame::Max);
 					break;
-				case FPS_n2::Sceneclass::PHYSICS_SETUP::LOADCALC:
-					if (FileRead_findFirst((Path + "_LOADCALC.mv1").c_str(), &FileInfo) != (DWORD_PTR)-1) {
-						//MV1::Load(Path + ".pmx", &this->m_obj, DX_LOADMODEL_PHYSICS_LOADCALC);
-						MV1::Load((Path + "_LOADCALC.mv1").c_str(), &this->m_obj, DX_LOADMODEL_PHYSICS_LOADCALC);
-					}
-					else {
-						MV1::Load(Path + ".pmx", &this->m_obj, DX_LOADMODEL_PHYSICS_LOADCALC);
-						if (!UseToonWhenCreateFile) {
-							MV1SetMaterialTypeAll(this->m_obj.get(), DX_MATERIAL_TYPE_NORMAL);
-						}
-						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
-						MV1SaveModelToMV1File(this->m_obj.get(), (Path + "_LOADCALC.mv1").c_str());
-						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
-					}
-					break;
-				case FPS_n2::Sceneclass::PHYSICS_SETUP::REALTIME:
-					if (FileRead_findFirst((Path + "_REALTIME.mv1").c_str(), &FileInfo) != (DWORD_PTR)-1) {
-						//MV1::Load(Path + ".pmx", &this->m_obj, DX_LOADMODEL_PHYSICS_REALTIME);
-						MV1::Load((Path + "_REALTIME.mv1").c_str(), &this->m_obj, DX_LOADMODEL_PHYSICS_REALTIME);
-					}
-					else {
-						MV1::Load(Path + ".pmx", &this->m_obj, DX_LOADMODEL_PHYSICS_REALTIME);
-						if (!UseToonWhenCreateFile) {
-							MV1SetMaterialTypeAll(this->m_obj.get(), DX_MATERIAL_TYPE_NORMAL);
-						}
-						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_REALTIME);
-						MV1SaveModelToMV1File(this->m_obj.get(), (Path + "_REALTIME.mv1").c_str());
-						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
-					}
+				case ObjType::Gun:
+				case ObjType::Magazine:
+				case ObjType::Lower:
+				case ObjType::Upper:
+				case ObjType::Barrel:
+				case ObjType::UnderRail:
+				case ObjType::Sight:
+					this->m_Frames.resize((int)GunFrame::Max);
 					break;
 				default:
+					this->m_Frames.clear();
 					break;
 				}
-				MV1::SetAnime(&this->m_obj, m_obj);
-			}
-			//col
-			{
-				std::string Path = this->m_FilePath;
-				Path += this->m_ColFileName;
-				if (FileRead_findFirst((Path + ".mv1").c_str(), &FileInfo) != (DWORD_PTR)-1) {
-					MV1::Load(Path + ".pmx", &this->m_col, DX_LOADMODEL_PHYSICS_DISABLE);
-					//MV1::Load((Path + ".mv1").c_str(), &this->m_col, DX_LOADMODEL_PHYSICS_DISABLE);
+				for (auto& f : this->m_Frames) {
+					f.first = -1;
 				}
-				else {
-					if (FileRead_findFirst((Path + ".pmx").c_str(), &FileInfo) != (DWORD_PTR)-1) {
-						MV1::Load(Path + ".pmx", &this->m_col, DX_LOADMODEL_PHYSICS_DISABLE);
-						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_DISABLE);
-						MV1SaveModelToMV1File(this->m_col.get(), (Path + ".mv1").c_str());
-						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
-					}
-				}
-				if (this->m_col.IsActive()) {
-					for (int i = 0; i < this->m_col.mesh_num(); ++i) { this->m_col.SetupCollInfo(8, 8, 8, -1, i); }
-				}
-
-			}
-			this->m_IsBaseModel = true;
-			this->m_objActive = true;
-		}
-		void			ObjectBaseClass::CopyModel(const std::shared_ptr<ObjectBaseClass>& pBase) noexcept {
-			this->m_PHYSICS_SETUP = pBase->m_PHYSICS_SETUP;
-			this->m_FilePath = pBase->m_FilePath;
-			this->m_ObjFileName = pBase->m_ObjFileName;
-			this->m_ColFileName = pBase->m_ColFileName;
-			this->m_obj = pBase->m_obj.Duplicate();
-			MV1::SetAnime(&this->m_obj, pBase->m_obj);
-			//col
-			if (pBase->m_col.IsActive()) {
-				this->m_col = pBase->m_col.Duplicate();
-				if (this->m_col.IsActive()) {
-					for (int i = 0; i < this->m_col.mesh_num(); ++i) { this->m_col.SetupCollInfo(8, 8, 8, -1, i); }
-				}
-			}
-			this->m_IsBaseModel = false;
-			this->m_objActive = true;
-		}
-		//
-		void			ObjectBaseClass::Init(void) noexcept {
-			this->m_IsActive = true;
-			this->m_IsResetPhysics = true;
-			this->m_IsFirstLoop = true;
-			this->m_IsDraw = false;
-		}
-		//
-		void			ObjectBaseClass::SetFrameNum(void) noexcept {
-			if (this->m_objActive) {
-				int i = 0;
-				bool isEnd = false;
-				auto fNum = this->GetObj().frame_num();
-				for (int f = 0; f < fNum; f++) {
-					std::string FName = this->GetObj().frame_name(f);
-					bool compare = false;
+				int count = 0;
+				for (int frameNum = 0; frameNum < this->GetObj().frame_num(); frameNum++) {
+					std::string FName = this->GetObj().frame_name(frameNum);
+					std::string CName = "";
 					switch (this->m_objType) {
 					case ObjType::Human:
-						compare = (FName == CharaFrameName[i]);
-						if (!compare) {
-							//compare = (FName.find(CharaFrameName[i]) != std::string::npos);
-						}
+						CName = CharaFrameName[count];
 						break;
 					case ObjType::Gun:
 					case ObjType::Magazine:
 					case ObjType::Lower:
 					case ObjType::Upper:
 					case ObjType::Barrel:
-						compare = (FName == GunFrameName[i]);
-						if (!compare) {
-							compare = (FName.find(GunFrameName[i]) != std::string::npos);
-						}
+					case ObjType::UnderRail:
+					case ObjType::Sight:
+						CName = GunFrameName[count];
 						break;
 					default:
 						break;
 					}
-
+					bool compare = (FName == CName);
+					//if (!compare) { compare = (FName.find(CName) != std::string::npos); }
 					if (compare) {
-						this->m_Frames.resize(this->m_Frames.size() + 1);
-						this->m_Frames.back().first = f;
-						this->m_Frames.back().second = MATRIX_ref::Mtrans(this->GetObj().GetFrameLocalMatrix(this->m_Frames.back().first).pos());
-						i++;
-						f = 0;
+						//そのフレームを登録
+						this->m_Frames[count].first = frameNum;
+						this->m_Frames[count].second = MATRIX_ref::Mtrans(this->GetObj().GetFrameLocalMatrix(this->m_Frames[count].first).pos());
 					}
-					switch (this->m_objType) {
-					case ObjType::Human:
-						if (i >= (int)CharaFrame::Max) { isEnd = true; }
-						break;
-					case ObjType::Gun:
-					case ObjType::Magazine:
-					case ObjType::Lower:
-					case ObjType::Upper:
-					case ObjType::Barrel:
-						if (i >= (int)GunFrame::Max) { isEnd = true; }
-						break;
-					default:
-						isEnd = true;
-						break;
+					else if (frameNum < this->GetObj().frame_num() - 1) {
+						continue;//飛ばす
 					}
-					if (f == fNum - 1) {
-						if (!isEnd) {
-							this->m_Frames.resize(this->m_Frames.size() + 1);
-							this->m_Frames.back().first = -1;
-							i++;
-							f = 0;
-						}
-					}
-					switch (this->m_objType) {
-					case ObjType::Human:
-						if (i >= (int)CharaFrame::Max) { isEnd = true; }
-						break;
-					case ObjType::Gun:
-					case ObjType::Magazine:
-					case ObjType::Lower:
-					case ObjType::Upper:
-					case ObjType::Barrel:
-						if (i >= (int)GunFrame::Max) { isEnd = true; }
-						break;
-					default:
-						isEnd = true;
-						break;
-					}
-					if (isEnd) {
+					count++;
+					frameNum = 0;
+					if (count >= (int)this->m_Frames.size()) {
 						break;
 					}
 				}
-				//シェイプ
+			}
+			//シェイプ
+			{
 				switch (this->m_objType) {
 				case ObjType::Human:
 					this->m_Shapes.resize((int)CharaShape::Max);
@@ -204,10 +111,88 @@ namespace FPS_n2 {
 					}
 					break;
 				default:
+					this->m_Shapes.clear();
 					break;
 				}
 			}
 		}
+		void			ObjectBaseClass::CopyModel(const std::shared_ptr<ObjectBaseClass>& pBase) noexcept {
+			this->m_IsBaseModel = false;
+			this->m_objActive = true;
+			this->m_PHYSICS_SETUP = pBase->m_PHYSICS_SETUP;
+			this->m_FilePath = pBase->m_FilePath;
+			this->m_ObjFileName = pBase->m_ObjFileName;
+			this->m_ColFileName = pBase->m_ColFileName;
+			//model
+			this->m_obj = pBase->m_obj.Duplicate();
+			//col
+			if (pBase->m_col.IsActive()) {
+				this->m_col = pBase->m_col.Duplicate();
+			}
+			if (this->m_col.IsActive()) {
+				for (int i = 0; i < this->m_col.mesh_num(); ++i) { this->m_col.SetupCollInfo(8, 8, 8, -1, i); }
+			}
+			//フレーム
+			this->m_Frames.resize(pBase->m_Frames.size());
+			for (auto& f : this->m_Frames) {
+				auto index = &f - &this->m_Frames.front();
+				f.first = pBase->m_Frames.at(index).first;
+				if (f.first != -1) {
+					f.second = pBase->m_Frames.at(index).second;
+				}
+			}
+			//シェイプ
+			this->m_Shapes.resize(pBase->m_Shapes.size());
+			for (auto& f : this->m_Shapes) {
+				auto index = &f - &this->m_Shapes.front();
+				f.first = pBase->m_Shapes.at(index).first;
+				if (f.first != -1) {
+					f.second = pBase->m_Shapes.at(index).second;
+				}
+			}
+		}
+		void			ObjectBaseClass::SaveModel(bool UseToonWhenCreateFile) noexcept {
+			if (this->m_IsBaseModel) {
+				auto Save = [&](MV1* obj, std::string Path, std::string NameAdd, int PHYSICS_TYPE) {
+					FILEINFO FileInfo;
+					if (
+						!(FileRead_findFirst((Path + NameAdd + ".mv1").c_str(), &FileInfo) != (DWORD_PTR)-1) &&
+						(FileRead_findFirst((Path + ".pmx").c_str(), &FileInfo) != (DWORD_PTR)-1)
+						) {
+						MV1SetLoadModelUsePhysicsMode(PHYSICS_TYPE);
+						if (!UseToonWhenCreateFile) {
+							MV1SetMaterialTypeAll(obj->get(), DX_MATERIAL_TYPE_NORMAL);
+						}
+						MV1SaveModelToMV1File(obj->get(), (Path + NameAdd + ".mv1").c_str());
+						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
+					}
+				};
+				//model
+				switch (this->m_PHYSICS_SETUP) {
+				case PHYSICS_SETUP::DISABLE:
+					Save(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_DISABLE", DX_LOADMODEL_PHYSICS_DISABLE);
+					break;
+				case PHYSICS_SETUP::LOADCALC:
+					Save(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_LOADCALC", DX_LOADMODEL_PHYSICS_LOADCALC);
+					break;
+				case PHYSICS_SETUP::REALTIME:
+					Save(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_REALTIME", DX_LOADMODEL_PHYSICS_REALTIME);
+					break;
+				default:
+					break;
+				}
+				//col
+				Save(&this->m_col, this->m_FilePath + this->m_ColFileName, "", DX_LOADMODEL_PHYSICS_DISABLE);
+			}
+		}
+		//
+		void			ObjectBaseClass::Init(void) noexcept {
+			this->m_IsActive = true;
+			this->m_IsResetPhysics = true;
+			this->m_IsFirstLoop = true;
+			this->m_IsDraw = false;
+		}
+		//
 		void			ObjectBaseClass::ExecuteCommon(void) noexcept {
 			if (this->m_IsFirstLoop) {
 				this->m_PrevMat = this->GetObj().GetMatrix();

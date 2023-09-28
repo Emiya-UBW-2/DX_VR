@@ -3,7 +3,7 @@
 #include "MainScene/Object/Gun.hpp"
 #include "MainScene/Object/Mod.hpp"
 #include "MainScene/Object/Character.hpp"
-#include "MainScene/Object/Cart.hpp"
+#include "MainScene/Object/FallObj.hpp"
 
 const FPS_n2::Sceneclass::ObjectManager* SingletonBase<FPS_n2::Sceneclass::ObjectManager>::m_Singleton = nullptr;
 namespace FPS_n2 {
@@ -18,9 +18,9 @@ namespace FPS_n2 {
 				this->m_Object.resize(this->m_Object.size() + 1);
 				this->m_Object.back() = std::make_shared<AmmoClass>();
 				break;
-			case ObjType::Cart:
+			case ObjType::FallObj:
 				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<CartClass>();
+				this->m_Object.back() = std::make_shared<FallObjClass>();
 				break;
 			case ObjType::Gun:
 				this->m_Object.resize(this->m_Object.size() + 1);
@@ -42,24 +42,28 @@ namespace FPS_n2 {
 				this->m_Object.resize(this->m_Object.size() + 1);
 				this->m_Object.back() = std::make_shared<BarrelClass>();
 				break;
+			case ObjType::UnderRail:
+				this->m_Object.resize(this->m_Object.size() + 1);
+				this->m_Object.back() = std::make_shared<UnderRailClass>();
+				break;
+			case ObjType::Sight:
+				this->m_Object.resize(this->m_Object.size() + 1);
+				this->m_Object.back() = std::make_shared<SightClass>();
+				break;
 			default:
 				break;
 			}
 			return &(this->m_Object[this->m_Object.size() - 1]);
 		}
-		void			ObjectManager::LoadModel(PHYSICS_SETUP TYPE, bool UseToonWhenCreateFile, ObjectBaseClass* pObj, const char* filepath, const char* objfilename, const char* colfilename) const noexcept {
-			bool iscopy = false;
+		void			ObjectManager::LoadObjectModel(ObjectBaseClass* pObj, const char* filepath, const char* objfilename, const char* colfilename) const noexcept {
 			for (auto& o : this->m_Object) {
-				if (o->GetIsBaseModel(filepath, objfilename, colfilename)) {
-					pObj->CopyModel(o);
-					iscopy = true;
-					break;
-				}
+				if (!o->GetIsBaseModel()) { continue; }
+				if (!o->GetPathCompare(filepath, objfilename, colfilename)) { continue; }
+				pObj->CopyModel(o);
+				return;
 			}
-			if (!iscopy) {
-				pObj->LoadModel(TYPE, UseToonWhenCreateFile, filepath, objfilename, colfilename);
-			}
-			pObj->SetFrameNum();
+			pObj->LoadModel(m_DefaultType, filepath, objfilename, colfilename);
+			pObj->SaveModel(m_UseToonWhenCreateFile);
 		}
 		//
 		SharedObj*		ObjectManager::GetObj(ObjType ModelType, int num) noexcept {

@@ -96,9 +96,6 @@
     <ClInclude Include="source\MainScene\Object\Gun.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
-    <ClInclude Include="source\MainScene\Object\Cart.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
     <ClInclude Include="source\MainScene\Object\GunData.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
@@ -115,6 +112,12 @@
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
     <ClInclude Include="source\MainScene\Object\ObjectBase_before.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\Object\FallObj.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\Object\ModData.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
   </ItemGroup>
@@ -155,9 +158,6 @@
     <ClCompile Include="source\sub.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="source\MainScene\Object\Cart.cpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClCompile>
     <ClCompile Include="source\MainScene\Object\Gun_before.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
@@ -174,6 +174,12 @@
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
     <ClCompile Include="source\MainScene\Object\ObjectBase.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\FallObj.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\ModData.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
   </ItemGroup>

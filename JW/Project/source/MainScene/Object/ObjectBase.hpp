@@ -51,9 +51,9 @@ namespace FPS_n2 {
 			const auto		GetFrameWorldMatrix(int frame) const noexcept { return this->m_obj.GetFrameLocalWorldMatrix(frame); }
 			const auto		GetParentFrameWorldMatrix(int frame) const noexcept { return GetFrameWorldMatrix((int)this->m_obj.frame_parent(frame)); }
 		public:
-			const auto		GetIsBaseModel(const char* filepath, const char* objfilename, const char* colfilename) const noexcept {
+			const auto&		GetIsBaseModel(void) const noexcept { return this->m_IsBaseModel; }
+			const auto		GetPathCompare(const char* filepath, const char* objfilename, const char* colfilename) const noexcept {
 				return (
-					this->m_IsBaseModel &&
 					(this->m_FilePath == filepath) &&
 					(this->m_ObjFileName == objfilename) &&
 					(this->m_ColFileName == colfilename));
@@ -125,11 +125,11 @@ namespace FPS_n2 {
 				}
 			}
 		public:
-			void			LoadModel(PHYSICS_SETUP TYPE, bool UseToonWhenCreateFile, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") noexcept;
+			void			LoadModel(PHYSICS_SETUP TYPE, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") noexcept;
 			void			CopyModel(const std::shared_ptr<ObjectBaseClass>& pBase) noexcept;
+			void			SaveModel(bool UseToonWhenCreateFile) noexcept;
 		public:
 			virtual void	Init(void) noexcept;
-			void			SetFrameNum(void) noexcept;
 			virtual void	FirstExecute(void) noexcept { }
 			void			ExecuteCommon(void) noexcept;
 			virtual void	LateExecute(void) noexcept { }

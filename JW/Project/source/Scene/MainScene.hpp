@@ -32,6 +32,9 @@ namespace FPS_n2 {
 			VECTOR_ref										m_CamShake1;
 			VECTOR_ref										m_CamShake2;
 			//銃関連
+			bool Reticle_on = false;
+			float Reticle_xpos = 0;
+			float Reticle_ypos = 0;
 			std::vector<DamageEvent>						m_DamageEvents;
 			//ネットワーク
 			NetWorkBrowser									m_NetWorkBrowser;

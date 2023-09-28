@@ -63,16 +63,16 @@ namespace FPS_n2 {
 			void	Draw() {
 				unsigned int color;
 				switch (m_HitType) {
-				case FPS_n2::Sceneclass::HitType::Head:
+				case HitType::Head:
 					color = GetColor(255, 0, 0);
 					break;
-				case FPS_n2::Sceneclass::HitType::Body:
+				case HitType::Body:
 					color = GetColor(0, 255, 0);
 					break;
-				case FPS_n2::Sceneclass::HitType::Arm:
+				case HitType::Arm:
 					color = GetColor(0, 0, 255);
 					break;
-				case FPS_n2::Sceneclass::HitType::Leg:
+				case HitType::Leg:
 					color = GetColor(0, 0, 255);
 					break;
 				default:

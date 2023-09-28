@@ -1,0 +1,6 @@
+Name=Universal Pistol Mount
+
+Slot0Type=Sight
+Slot0Item=VIPER_DotSight
+
+end

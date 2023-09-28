@@ -6,174 +6,38 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		const MATRIX_ref  GunClass::GetFrameLocalMat(GunFrame frame) const noexcept {
+			//ŠY“–ƒtƒŒ[ƒ€‚ª‚ ‚é‚Ì‚È‚çã‘‚«
+			MATRIX_ref Ret;
+			if (m_ModControl.GetPartsFrameLocalMat(frame, &Ret)) {
+				return Ret;
+			}
 			if (GetFrame(frame) != -1) {
 				return GetFrameLocalMatrix(GetFrame(frame));
-			}
-			else {
-				switch (frame) {
-				case FPS_n2::Sceneclass::GunFrame::Center:
-				case FPS_n2::Sceneclass::GunFrame::Move:
-				case FPS_n2::Sceneclass::GunFrame::MoveAxis:
-				case FPS_n2::Sceneclass::GunFrame::MovePoint:
-					break;
-				case FPS_n2::Sceneclass::GunFrame::Muzzle:
-					if (HasParts(ObjType::Barrel)) {
-						return GetPartsPtr(ObjType::Barrel)->GetFrameLocalMat(frame);
-					}
-					break;
-				case FPS_n2::Sceneclass::GunFrame::Cart:
-				case FPS_n2::Sceneclass::GunFrame::CartVec:
-				case FPS_n2::Sceneclass::GunFrame::Eyepos:
-				case FPS_n2::Sceneclass::GunFrame::Lens:
-				case FPS_n2::Sceneclass::GunFrame::LensSize:
-					if (HasParts(ObjType::Upper)) {
-						return GetPartsPtr(ObjType::Upper)->GetFrameLocalMat(frame);
-					}
-					break;
-
-				case FPS_n2::Sceneclass::GunFrame::Magpos:
-				case FPS_n2::Sceneclass::GunFrame::LeftHandPos:
-				case FPS_n2::Sceneclass::GunFrame::LeftHandYvec:
-				case FPS_n2::Sceneclass::GunFrame::LeftHandZvec:
-				case FPS_n2::Sceneclass::GunFrame::RightHandPos:
-				case FPS_n2::Sceneclass::GunFrame::RightHandYvec:
-				case FPS_n2::Sceneclass::GunFrame::RightHandZvec:
-					if (HasParts(ObjType::Lower)) {
-						return GetPartsPtr(ObjType::Lower)->GetFrameLocalMat(frame);
-					}
-					break;
-				default:
-					break;
-				}
 			}
 			return MATRIX_ref::zero();
 		}
 		const MATRIX_ref  GunClass::GetFrameWorldMat(GunFrame frame) const noexcept {
+			//ŠY“–ƒtƒŒ[ƒ€‚ª‚ ‚é‚Ì‚È‚çã‘‚«
+			MATRIX_ref Ret;
+			if (m_ModControl.GetPartsFrameWorldMat(frame, &Ret)) {
+				return Ret;
+			}
 			if (GetFrame(frame) != -1) {
 				return GetFrameWorldMatrix(GetFrame(frame));
-			}
-			else {
-				switch (frame) {
-				case FPS_n2::Sceneclass::GunFrame::Center:
-				case FPS_n2::Sceneclass::GunFrame::Move:
-				case FPS_n2::Sceneclass::GunFrame::MoveAxis:
-				case FPS_n2::Sceneclass::GunFrame::MovePoint:
-					break;
-				case FPS_n2::Sceneclass::GunFrame::Muzzle:
-					if (HasParts(ObjType::Barrel)) {
-						return GetPartsPtr(ObjType::Barrel)->GetFrameWorldMat(frame);
-					}
-					break;
-				case FPS_n2::Sceneclass::GunFrame::Cart:
-				case FPS_n2::Sceneclass::GunFrame::CartVec:
-				case FPS_n2::Sceneclass::GunFrame::Eyepos:
-				case FPS_n2::Sceneclass::GunFrame::Lens:
-				case FPS_n2::Sceneclass::GunFrame::LensSize:
-					if (HasParts(ObjType::Upper)) {
-						return GetPartsPtr(ObjType::Upper)->GetFrameWorldMat(frame);
-					}
-					break;
-
-				case FPS_n2::Sceneclass::GunFrame::Magpos:
-				case FPS_n2::Sceneclass::GunFrame::LeftHandPos:
-				case FPS_n2::Sceneclass::GunFrame::LeftHandYvec:
-				case FPS_n2::Sceneclass::GunFrame::LeftHandZvec:
-				case FPS_n2::Sceneclass::GunFrame::RightHandPos:
-				case FPS_n2::Sceneclass::GunFrame::RightHandYvec:
-				case FPS_n2::Sceneclass::GunFrame::RightHandZvec:
-					if (HasParts(ObjType::Lower)) {
-						return GetPartsPtr(ObjType::Lower)->GetFrameWorldMat(frame);
-					}
-					break;
-				default:
-					break;
-				}
 			}
 			return MATRIX_ref::zero();
 		}
 
 		void GunClass::ResetFrameLocalMat(GunFrame frame) noexcept {
+			m_ModControl.ResetPartsFrameLocalMat(frame);
 			if (GetFrame(frame) != -1) {
 				GetObj().frame_Reset(GetFrame(frame));
 			}
-			else {
-				switch (frame) {
-				case FPS_n2::Sceneclass::GunFrame::Center:
-				case FPS_n2::Sceneclass::GunFrame::Move:
-				case FPS_n2::Sceneclass::GunFrame::MoveAxis:
-				case FPS_n2::Sceneclass::GunFrame::MovePoint:
-					break;
-				case FPS_n2::Sceneclass::GunFrame::Muzzle:
-					if (HasParts(ObjType::Barrel)) {
-						GetPartsPtr(ObjType::Barrel)->ResetFrameLocalMat(frame);
-					}
-					break;
-				case FPS_n2::Sceneclass::GunFrame::Cart:
-				case FPS_n2::Sceneclass::GunFrame::CartVec:
-				case FPS_n2::Sceneclass::GunFrame::Eyepos:
-				case FPS_n2::Sceneclass::GunFrame::Lens:
-				case FPS_n2::Sceneclass::GunFrame::LensSize:
-					if (HasParts(ObjType::Upper)) {
-						GetPartsPtr(ObjType::Upper)->ResetFrameLocalMat(frame);
-					}
-					break;
-
-				case FPS_n2::Sceneclass::GunFrame::Magpos:
-				case FPS_n2::Sceneclass::GunFrame::LeftHandPos:
-				case FPS_n2::Sceneclass::GunFrame::LeftHandYvec:
-				case FPS_n2::Sceneclass::GunFrame::LeftHandZvec:
-				case FPS_n2::Sceneclass::GunFrame::RightHandPos:
-				case FPS_n2::Sceneclass::GunFrame::RightHandYvec:
-				case FPS_n2::Sceneclass::GunFrame::RightHandZvec:
-					if (HasParts(ObjType::Lower)) {
-						GetPartsPtr(ObjType::Lower)->ResetFrameLocalMat(frame);
-					}
-					break;
-				default:
-					break;
-				}
-			}
 		}
 		void GunClass::SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept {
+			m_ModControl.SetPartsFrameLocalMat(frame, value);
 			if (GetFrame(frame) != -1) {
 				GetObj().SetFrameLocalMatrix(GetFrame(frame), value * this->m_Frames[(int)frame].second);
-			}
-			else {
-				switch (frame) {
-				case FPS_n2::Sceneclass::GunFrame::Center:
-				case FPS_n2::Sceneclass::GunFrame::Move:
-				case FPS_n2::Sceneclass::GunFrame::MoveAxis:
-				case FPS_n2::Sceneclass::GunFrame::MovePoint:
-					break;
-				case FPS_n2::Sceneclass::GunFrame::Muzzle:
-					if (HasParts(ObjType::Barrel)) {
-						GetPartsPtr(ObjType::Barrel)->SetFrameLocalMat(frame, value);
-					}
-					break;
-				case FPS_n2::Sceneclass::GunFrame::Cart:
-				case FPS_n2::Sceneclass::GunFrame::CartVec:
-				case FPS_n2::Sceneclass::GunFrame::Eyepos:
-				case FPS_n2::Sceneclass::GunFrame::Lens:
-				case FPS_n2::Sceneclass::GunFrame::LensSize:
-					if (HasParts(ObjType::Upper)) {
-						GetPartsPtr(ObjType::Upper)->SetFrameLocalMat(frame, value);
-					}
-					break;
-
-				case FPS_n2::Sceneclass::GunFrame::Magpos:
-				case FPS_n2::Sceneclass::GunFrame::LeftHandPos:
-				case FPS_n2::Sceneclass::GunFrame::LeftHandYvec:
-				case FPS_n2::Sceneclass::GunFrame::LeftHandZvec:
-				case FPS_n2::Sceneclass::GunFrame::RightHandPos:
-				case FPS_n2::Sceneclass::GunFrame::RightHandYvec:
-				case FPS_n2::Sceneclass::GunFrame::RightHandZvec:
-					if (HasParts(ObjType::Lower)) {
-						GetPartsPtr(ObjType::Lower)->SetFrameLocalMat(frame, value);
-					}
-					break;
-				default:
-					break;
-				}
 			}
 		}
 
@@ -222,7 +86,7 @@ namespace FPS_n2 {
 					if (!GetIsMagEmpty()) {
 						CockByMag();
 					}
-					this->GetMagazinePtr()->SubAmmo();
+					GetMagazinePtr()->SubAmmo();
 				}
 			}
 			{
@@ -242,7 +106,7 @@ namespace FPS_n2 {
 					break;
 				}
 				if (this->m_IsEject && (this->m_IsEject != Prev)) {
-					SetFallControl(GetCartMat().pos(), GetMuzzleMatrix().GetRot(), GetCartVec()*(Scale_Rate * 2.f / 60.f));
+					m_CartFall.SetFall(GetCartMat().pos(), GetMuzzleMatrix().GetRot(), GetCartVec()*(Scale_Rate * 2.f / 60.f), 2.f);
 				}
 			}
 		}
@@ -256,35 +120,38 @@ namespace FPS_n2 {
 			//ƒ}ƒKƒWƒ“‚Ì—pˆÓ
 			if (m_GunDataClass->GetPartsSlot(GunSlot::Magazine)) {
 				int size = (int)m_GunDataClass->GetPartsSlot(GunSlot::Magazine)->m_Items.size();
-				std::string magName = "data/Mods/mag/" + m_GunDataClass->GetPartsSlot(GunSlot::Magazine)->m_Items.at(GetRand(size - 1)) + "/";
-				SetParts(magName, ObjType::Magazine);
+				m_ModControl.SetParts(m_GunDataClass->GetPartsSlot(GunSlot::Magazine)->m_Items.at(GetRand(size - 1)), ObjType::Magazine, GetObj());
 			}
 			//
 			if (m_GunDataClass->GetPartsSlot(GunSlot::Lower)) {
 				int size = (int)m_GunDataClass->GetPartsSlot(GunSlot::Lower)->m_Items.size();
-				std::string magName = "data/Mods/Lower/" + m_GunDataClass->GetPartsSlot(GunSlot::Lower)->m_Items.at(GetRand(size - 1)) + "/";
-				SetParts(magName,ObjType::Lower);
+				m_ModControl.SetParts(m_GunDataClass->GetPartsSlot(GunSlot::Lower)->m_Items.at(GetRand(size - 1)),ObjType::Lower, GetObj());
 			}
 			//
 			if (m_GunDataClass->GetPartsSlot(GunSlot::Upper)) {
 				int size = (int)m_GunDataClass->GetPartsSlot(GunSlot::Upper)->m_Items.size();
-				std::string magName = "data/Mods/Upper/" + m_GunDataClass->GetPartsSlot(GunSlot::Upper)->m_Items.at(GetRand(size - 1)) + "/";
-				SetParts(magName, ObjType::Upper);
+				m_ModControl.SetParts(m_GunDataClass->GetPartsSlot(GunSlot::Upper)->m_Items.at(GetRand(size - 1)), ObjType::Upper, GetObj());
 			}
 
 			if (m_GunDataClass->GetPartsSlot(GunSlot::Barrel)) {
 				int size = (int)m_GunDataClass->GetPartsSlot(GunSlot::Barrel)->m_Items.size();
-				std::string magName = "data/Mods/Barrel/" + m_GunDataClass->GetPartsSlot(GunSlot::Barrel)->m_Items.at(GetRand(size - 1)) + "/";
-				SetParts(magName, ObjType::Barrel);
+				m_ModControl.SetParts(m_GunDataClass->GetPartsSlot(GunSlot::Barrel)->m_Items.at(GetRand(size - 1)), ObjType::Barrel, GetObj());
+			}
+			m_PartsList.clear();
+			m_ModControl.GetChildPartsList(&m_PartsList);
+			m_SightPtr = nullptr;
+			for (auto& p : m_PartsList) {
+				if ((*p)->GetobjType() == ObjType::Sight) {
+					m_SightPtr = &((std::shared_ptr<SightClass>&)(*p));
+				}
 			}
 			//
-			this->GetMagazinePtr()->SetReloadType(GetReloadType());
+			GetMagazinePtr()->SetReloadType(GetReloadType());
 			FillMag();															//ƒ}ƒKƒWƒ“‚Íƒtƒ‹‘•“U
 			CockByMag();														//ƒ`ƒƒƒ“ƒo[ƒCƒ“
 			//
-			InitFallMagControl(m_BackGround, this->GetMagazinePtr()->GetFilePath());
-			//
-			InitFallCartControl(m_BackGround, this->GetMagazinePtr()->GetAmmoSpecMagTop()->GetPath());	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
+			m_MagFall.Init(m_BackGround, GetMagazinePtr()->GetFilePath());
+			m_CartFall.Init(m_BackGround, GetMagazinePtr()->GetAmmoSpecMagTop()->GetPath());	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
 			//
 			this->m_ShotPhase = GunAnimeID::Base;
 		}
@@ -307,7 +174,7 @@ namespace FPS_n2 {
 								FillMag();
 								break;
 							case RELOADTYPE::AMMO:
-								this->GetMagazinePtr()->AddAmmo();
+								GetMagazinePtr()->AddAmmo();
 								break;
 							default:
 								break;

@@ -2,11 +2,52 @@
 #include	"../../Header.hpp"
 
 #include "../../ObjectManager.hpp"
-#include "Mod.hpp"
-#include "Cart.hpp"
+#include "FallObj.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		//
+		class FallControl {
+		private:
+			std::array<std::shared_ptr<FallObjClass>, 4>	m_Ptr;
+			int												m_Now{ 0 };
+		public:
+			void		Init(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath) {
+				auto* ObjMngr = ObjectManager::Instance();
+				for (auto& c : m_Ptr) {
+					auto* Ptr = ObjMngr->MakeObject(ObjType::FallObj);
+					ObjMngr->LoadObjectModel((*Ptr).get(), pPath.c_str());
+					MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
+					c = (std::shared_ptr<FallObjClass>&)(*Ptr);
+					c->SetMapCol(backGround);
+					(*Ptr)->Init();
+				}
+			}
+			void		SetFall(const VECTOR_ref& pPos, const MATRIX_ref& pMat, const VECTOR_ref& pVec, float time) {
+				this->m_Ptr[this->m_Now]->SetFall(pPos, pMat, pVec, time, SoundEnum::CartFall);
+				++this->m_Now %= this->m_Ptr.size();
+			}
+		};
+		//
+		class SlotPartsControl {
+		private:
+			std::array<std::shared_ptr<ObjectBaseClass>, (int)ObjType::Max>	m_Parts_Ptr{ nullptr };
+		public:
+			const bool	HasParts(ObjType objType) const noexcept { return (this->m_Parts_Ptr[(int)objType].get() != nullptr); }
+			const auto&	GetPartsPtr(ObjType objType) const noexcept { return this->m_Parts_Ptr[(int)objType]; }
+			const bool	IsEffectParts(ObjType objType, GunFrame frame) const noexcept;
+			const bool	GetPartsFrameLocalMat(GunFrame frame, MATRIX_ref* pRet) const noexcept;
+			const bool	GetPartsFrameWorldMat(GunFrame frame, MATRIX_ref* pRet) const noexcept;
+			void		GetChildPartsList(std::vector<const std::shared_ptr<ObjectBaseClass>*>* Ret) const noexcept;
+			void		ResetPartsFrameLocalMat(GunFrame frame) noexcept;
+			void		SetPartsFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept;
+		public:
+			void		SetParts(std::string pPath, ObjType objType, const MV1& BaseModel);
+			void		UpdatePartsAnim(const MV1& pParent);
+			void		UpdatePartsMove(const MATRIX_ref& pMat, ObjType objType);
+			void		DisposeSlotPartsControl();
+		};
+		//
 		class MuzzleSmokeControl {
 		private://キャラパラメーター
 			std::array<VECTOR_ref, 8>		m_Line;
@@ -53,87 +94,6 @@ namespace FPS_n2 {
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				SetUseLighting(TRUE);
-			}
-		};
-		class FallMagControl {
-		private:
-			std::shared_ptr<CartClass>	m_FallMag_Ptr{ nullptr };		//刺さっているマガジン
-		protected:
-			void		InitFallMagControl(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath) {
-				auto* ObjMngr = ObjectManager::Instance();
-				auto* Ptr = ObjMngr->MakeObject(ObjType::Cart);
-				ObjMngr->LoadModel(PHYSICS_SETUP::DISABLE, false, (*Ptr).get(), pPath.c_str());
-				this->m_FallMag_Ptr = (std::shared_ptr<CartClass>&)(*Ptr);
-				this->m_FallMag_Ptr->SetMapCol(backGround);
-				(*Ptr)->Init();
-			}
-			void		SetFallMagControl(const VECTOR_ref& pPos, const MATRIX_ref& pMat, const VECTOR_ref& pVec) {
-				this->m_FallMag_Ptr->SetFall(pPos, pMat.GetRot(), pVec,12.f, SoundEnum::MagFall);
-			}
-		};
-		class FallCartControl {
-		private:
-			std::array<std::shared_ptr<CartClass>, 4>	m_Ptr;
-			int											m_Now{ 0 };
-		protected:
-			void		InitFallCartControl(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath) {
-				auto* ObjMngr = ObjectManager::Instance();
-				for (auto& c : m_Ptr) {
-					auto* Ptr = ObjMngr->MakeObject(ObjType::Cart);
-					ObjMngr->LoadModel(PHYSICS_SETUP::DISABLE, false, (*Ptr).get(), pPath.c_str());
-					c = (std::shared_ptr<CartClass>&)(*Ptr);
-					c->SetMapCol(backGround);
-					(*Ptr)->Init();
-				}
-			}
-			void		SetFallControl(const VECTOR_ref& pPos, const MATRIX_ref& pMat, const VECTOR_ref& pVec) {
-				this->m_Ptr[this->m_Now]->SetFall(pPos, pMat.GetRot(), pVec, 2.f, SoundEnum::CartFall);
-				++this->m_Now %= this->m_Ptr.size();
-			}
-		};
-
-		class SlotPartsControl {
-		private:
-			std::array<std::shared_ptr<ModClass>, (int)ObjType::Max>	m_Parts_Ptr{ nullptr };
-		public:
-			const auto							HasParts(ObjType objType) const noexcept { return (this->m_Parts_Ptr[(int)objType].get() != nullptr); }
-			std::shared_ptr<ModClass>&			SetPartsPtr(ObjType objType) noexcept { return this->m_Parts_Ptr[(int)objType]; }
-			const std::shared_ptr<ModClass>&	GetPartsPtr(ObjType objType) const noexcept { return this->m_Parts_Ptr[(int)objType]; }
-		public:
-			const std::shared_ptr<MagazineClass>& GetMagazinePtr(void) const noexcept { return (std::shared_ptr<MagazineClass>&)GetPartsPtr(ObjType::Magazine); }
-		public:
-			void		UpdatePartsAnim(const MV1& pParent) {
-				for (int loop = 0; loop < (int)ObjType::Max; loop++) {
-					if (this->m_Parts_Ptr[loop]) {
-						for (int i = 0; i < this->m_Parts_Ptr[loop]->GetObj().get_anime().size(); i++) {
-							this->m_Parts_Ptr[loop]->GetAnime((GunAnimeID)i).per = pParent.getanime(i).per;
-							this->m_Parts_Ptr[loop]->GetAnime((GunAnimeID)i).time = pParent.getanime(i).time;
-						}
-						this->m_Parts_Ptr[loop]->ResetFrameLocalMat(GunFrame::Center);
-						this->m_Parts_Ptr[loop]->GetObj().work_anime();
-						this->m_Parts_Ptr[loop]->SetFrameLocalMat(GunFrame::Center, this->m_Parts_Ptr[loop]->GetFrameLocalMat(GunFrame::Center).GetRot());//1のフレーム移動量を無視する
-					}
-				}
-			}
-			void		UpdatePartsMove(const MATRIX_ref& pMat, ObjType objType) {
-				if (this->m_Parts_Ptr[(int)objType]) {
-					this->m_Parts_Ptr[(int)objType]->SetMove(pMat.GetRot(), pMat.pos());
-				}
-			}
-		protected:
-			void		SetParts(const std::string& pPath, ObjType objType) {
-				if (!this->m_Parts_Ptr[(int)objType]) {
-					auto* ObjMngr = ObjectManager::Instance();
-					auto* Ptr = ObjMngr->MakeObject(objType);
-					ObjMngr->LoadModel(PHYSICS_SETUP::DISABLE, false, (*Ptr).get(), pPath.c_str());
-					this->m_Parts_Ptr[(int)objType] = (std::shared_ptr<ModClass>&)(*Ptr);
-					(*Ptr)->Init();
-				}
-			}
-			void		DisposeSlotPartsControl() {
-				for (auto& p : this->m_Parts_Ptr) {
-					p.reset();
-				}
 			}
 		};
 	};

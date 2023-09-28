@@ -1,0 +1,6 @@
+Name=Glock19 LP Frame
+
+Slot0Type=UnderRail
+Slot0Item=Uni_PistolRail
+
+end

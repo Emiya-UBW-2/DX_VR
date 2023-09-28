@@ -211,6 +211,7 @@ namespace FPS_n2 {
 			const auto		GetAmmoNum(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetAmmoNum() : 0; }
 			const auto		GetAmmoAll(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetAmmoAll() : 0; }
 			const auto		GetShoting(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetShoting() : false; }
+
 			const auto&		GetADSPer(void) const noexcept { return this->m_ADSPer; }
 			const auto		GetEyeVecY(void) const noexcept { return GetEyeVecMat().yvec(); }
 			const auto		GetEyeVector(void) const noexcept { return GetEyeVecMat().zvec() * -1.f; }

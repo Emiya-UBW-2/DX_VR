@@ -17,12 +17,16 @@ namespace FPS_n2 {
 		enum class ObjType {
 			Human,
 			Ammo,
-			Cart,
+			FallObj,
 			Gun,
-			Magazine,
+			Parts_Start,
+			Magazine = Parts_Start,
 			Lower,
 			Upper,
 			Barrel,
+			UnderRail,
+			Sight,
+			Parts_End,
 			Max,
 		};
 		enum class SoundEnum {
