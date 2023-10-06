@@ -120,8 +120,7 @@ namespace FPS_n2 {
 			VECTOR_ref			m_Pos;
 			VECTOR_ref			m_Vec;
 			VECTOR_ref			m_rad;
-			const DamageEvent*	m_Damage{ nullptr };
-			unsigned long long	m_DamageSwitch{ 0 };
+			std::vector<DamageEvent>	m_Damage;
 		};
 
 		struct PlayerNetData {
@@ -134,8 +133,7 @@ namespace FPS_n2 {
 			PlayerID		ID{ 0 };			//1	* 1	=  1byte
 			char			IsActive{ 0 };		//1	* 1	=  1byte
 			double			Frame{ 0.0 };		//8 * 1 =  8byte
-			unsigned long long	DamageSwitch{ 0 };	//1 * 1 =  1byte
-			DamageEvent		Damage;				//9 * 1 =  9byte
+			std::vector<DamageEvent>		Damage;				//9 * 1 =  9byte
 												//		  84byte
 		public:
 			const auto	CalcCheckSum(void) noexcept {
@@ -198,16 +196,13 @@ namespace FPS_n2 {
 			const auto		GetRecvData(int pPlayerID) const noexcept { return this->m_LeapFrame[pPlayerID] <= 1; }
 			const auto&		GetServerDataCommon(void) const noexcept { return this->m_ServerDataCommon; }
 			const auto&		GetMyPlayer(void) const noexcept { return this->m_PlayerData; }
-			void			SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, const VECTOR_ref& prad, double pFrame, const DamageEvent* pDamage, unsigned long long pDamageSwitch) noexcept {
+			void			SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, const VECTOR_ref& prad, double pFrame, const std::vector<DamageEvent>& pDamage) noexcept {
 				this->m_PlayerData.Input = pInput;
 				this->m_PlayerData.PosBuf = pPos;
 				this->m_PlayerData.VecBuf = pVec;
 				this->m_PlayerData.radBuf = prad;
 				this->m_PlayerData.Frame = pFrame;
-				if (pDamage != nullptr) {
-					this->m_PlayerData.Damage = *pDamage;
-				}
-				this->m_PlayerData.DamageSwitch = pDamageSwitch;
+				this->m_PlayerData.Damage = pDamage;
 				this->m_PlayerData.CheckSum = (size_t)this->m_PlayerData.CalcCheckSum();
 			}
 
@@ -223,7 +218,6 @@ namespace FPS_n2 {
 				}
 				tmp.Frame = this->m_ServerDataCommon.PlayerData[pPlayerID].Frame;
 				tmp.Damage = this->m_ServerDataCommon.PlayerData[pPlayerID].Damage;
-				tmp.DamageSwitch = this->m_ServerDataCommon.PlayerData[pPlayerID].DamageSwitch;
 				this->m_LeapFrame[pPlayerID] = std::clamp<int>(this->m_LeapFrame[pPlayerID] + 1, 0, Total);
 				return tmp;
 			}

@@ -1,5 +1,8 @@
-Name=PCC9
+Name=PCC-9
 
+ShotRate=800
+RecoilPower=120
+RecoilReturn=0.9
 shottype=FULL
 usehumanAnim=0
 soundsel=1
@@ -8,5 +11,6 @@ reloadType=MAG
 Slot0Type=Magazine
 Slot0Item=GMag33
 Slot0Item=GMag17
+Slot0Item=GMag17Gen5
 
 end

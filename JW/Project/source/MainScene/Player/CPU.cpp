@@ -81,7 +81,7 @@ namespace FPS_n2 {
 
 			int32_t x_m{ 0 }, y_m{ 0 };
 			//AI
-			if (MyChara->GetHP() != 0) {
+			if (MyChara->IsAlive()) {
 				auto Dir = MyChara->GetMove().mat.zvec()*-1.f;
 				auto Vec = this->m_AI.GetNowWaypointPos() - MyChara->GetMove().pos;
 
@@ -140,15 +140,16 @@ namespace FPS_n2 {
 			if (MyChara->GetIsSquat()) {
 				C_key = GetRand(100) < 1;
 			}
-
-			//*
-			y_m = 0;
+			//shotMain_Key = GetRand(100) < 50;
+			/*
+			//y_m = 0;
 			W_key = false;
 			S_key = false;
 			A_key = false;
 			D_key = false;
 			Q_key = false;
 			E_key = false;
+			shotMain_Key = false;
 			//*/
 			MyInput->SetInput(
 				(float)x_m / 100.f,

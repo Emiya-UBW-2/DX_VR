@@ -51,6 +51,7 @@ namespace FPS_n2 {
 					case GunFrame::Eyepos:
 					case GunFrame::Lens:
 					case GunFrame::LensSize:
+					case GunFrame::LaserSight:
 						Ret = true;
 						break;
 					default:
@@ -68,14 +69,39 @@ namespace FPS_n2 {
 						break;
 					}
 					break;
+				case ObjType::MuzzleAdapter:
+					switch (frame) {
+					case GunFrame::Muzzle:
+						Ret = true;
+						break;
+					default:
+						break;
+					}
+					break;
 				default:
 					break;
 				}
 			}
 			if (Ret) {
 				auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[(int)objType]);
-				if (Obj->GetFrame(frame) != 0) {
+				if (Obj->HaveFrame(frame)) {
 					return true;
+				}
+			}
+			return false;
+		}
+		const bool  SlotPartsControl::HasFrame(GunFrame frame) const noexcept {
+			for (int loop = 0; loop < (int)ObjType::Max; loop++) {
+				if (IsEffectParts((ObjType)loop, frame)) {
+					return true;
+				}
+			}
+			//‘·‚ª‚ ‚ê‚Î‚»‚¿‚ç‚ð—Dæ
+			for (int loop = 0; loop < (int)ObjType::Max; loop++) {
+				if (this->m_Parts_Ptr[loop]) {
+					if (((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModControl().HasFrame(frame)) {
+						return true;
+					}
 				}
 			}
 			return false;
@@ -178,6 +204,9 @@ namespace FPS_n2 {
 					break;
 				case ObjType::Sight:
 					pPath = "Sight/" + pPath;
+					break;
+				case ObjType::MuzzleAdapter:
+					pPath = "Muzzle/" + pPath;
 					break;
 				default:
 					break;

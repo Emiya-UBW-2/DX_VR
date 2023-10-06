@@ -19,7 +19,6 @@ namespace FPS_n2 {
 			GraphHandle										m_MiniMapScreen;
 			GraphHandle										Gauge_Graph;
 			GraphHandle										hit_Graph;
-			GraphHandle										aim_Graph;
 			//人
 			std::vector<std::shared_ptr<CharacterClass>>	character_Pool;				//ポインター別持ち
 			std::vector<std::shared_ptr<AIControl>>			m_AICtrl;					//AI

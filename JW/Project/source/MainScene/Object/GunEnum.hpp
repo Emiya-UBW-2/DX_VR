@@ -41,6 +41,8 @@ namespace FPS_n2 {
 			Barrel,
 			UnderRail,
 			Sight,
+			MuzzleAdapter,
+			LaserSight,
 			Max,
 		};
 		static const char* GunFrameName[(int)GunFrame::Max] = {
@@ -66,11 +68,19 @@ namespace FPS_n2 {
 			"Barrel",
 			"UnderRail",
 			"Sight",
+			"MuzzleAdapter",
+			"LaserSight",
 		};
 		enum class SHOTTYPE {
 			BOLT,
 			SEMI,
 			FULL,
+			Max,
+		};
+		static const char* SHOTTYPEName[(int)SHOTTYPE::Max] = {
+			"BOLT",
+			"SEMI",
+			"FULL",
 		};
 		enum class RELOADTYPE {
 			AMMO,
@@ -80,7 +90,8 @@ namespace FPS_n2 {
 		struct GunSoundSet {
 			SoundEnum					m_Cock1{ SoundEnum::Shot2 };
 			SoundEnum					m_Cock2{ SoundEnum::Shot2 };
-			SoundEnum					m_Shot{ SoundEnum::Shot2 };
+			SoundEnum					m_ShotNormal{ SoundEnum::Shot2 };
+			SoundEnum					m_ShotSuppressor{ SoundEnum::Shot2 };
 			SoundEnum					m_Unload{ SoundEnum::Unload2 };
 			SoundEnum					m_Load{ SoundEnum::Load2 };
 		};
@@ -90,6 +101,7 @@ namespace FPS_n2 {
 				SoundEnum::Cocking2_0,
 				SoundEnum::Cocking2_1,
 				SoundEnum::Shot2,
+				SoundEnum::Shot2_Suppressor,
 				SoundEnum::Unload2,
 				SoundEnum::Load2
 			},
@@ -98,8 +110,18 @@ namespace FPS_n2 {
 				SoundEnum::Cocking3_0,
 				SoundEnum::Cocking3_1,
 				SoundEnum::Shot3,
+				SoundEnum::Shot3_Suppressor,
 				SoundEnum::Unload3,
 				SoundEnum::Load3
+			},
+			{
+				//M4
+				SoundEnum::Cocking1_0,
+				SoundEnum::Cocking1_1,
+				SoundEnum::Shot1,
+				SoundEnum::Shot1_Suppressor,
+				SoundEnum::Unload1,
+				SoundEnum::Load1
 			},
 		};
 		
@@ -110,6 +132,7 @@ namespace FPS_n2 {
 			Barrel,
 			UnderRail,
 			Sight,
+			MuzzleAdapter,
 			Max,
 		};
 		static const char* GunSlotName[(int)GunSlot::Max] = {
@@ -119,6 +142,17 @@ namespace FPS_n2 {
 			"Barrel",
 			"UnderRail",
 			"Sight",
+			"MuzzleAdapter",
+		};
+
+		enum class GunShootSound {
+			Normal,
+			Suppressor,
+			Max,
+		};
+		static const char* GunShootSoundName[(int)GunShootSound::Max] = {
+			"Normal",
+			"Suppressor",
 		};
 	};
 };

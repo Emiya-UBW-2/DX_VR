@@ -51,6 +51,7 @@ namespace FPS_n2 {
 				case ObjType::Barrel:
 				case ObjType::UnderRail:
 				case ObjType::Sight:
+				case ObjType::MuzzleAdapter:
 					this->m_Frames.resize((int)GunFrame::Max);
 					break;
 				default:
@@ -73,8 +74,12 @@ namespace FPS_n2 {
 					case ObjType::Lower:
 					case ObjType::Upper:
 					case ObjType::Barrel:
-					case ObjType::UnderRail:
+					//case ObjType::UnderRail:
 					case ObjType::Sight:
+					case ObjType::MuzzleAdapter:
+						CName = GunFrameName[count];
+						break;
+					case ObjType::UnderRail:
 						CName = GunFrameName[count];
 						break;
 					default:

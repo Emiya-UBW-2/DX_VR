@@ -6,11 +6,11 @@ namespace FPS_n2 {
 		enum class EnumGunAnimType {
 			Aim,
 			ADS,
+			Run,
 			ReloadStart_Empty,
 			ReloadStart,
 			Reload,
 			Ready,
-			Run,
 			Check,
 			Watch,
 			Max,

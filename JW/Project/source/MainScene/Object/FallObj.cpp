@@ -32,7 +32,7 @@ namespace FPS_n2 {
 								VECTOR_ref Normal = HitResult.Normal;
 								this->m_move.vec += Normal * ((Normal).dot(this->m_move.vec*-1.f))*2.f;
 								if (Normal.y() > 0.5f) {
-									this->m_yAdd = 0.f;
+									//this->m_yAdd = 0.f;
 								}
 								if (m_SoundSwitch) {
 									m_SoundSwitch = false;

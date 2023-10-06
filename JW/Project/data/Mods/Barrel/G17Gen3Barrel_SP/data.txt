@@ -1,0 +1,7 @@
+Name=Glock17 Gen3 Barrel
+
+Slot0Type=MuzzleAdapter
+Slot0Item=Suppressor9x19
+
+
+end

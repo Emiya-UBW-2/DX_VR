@@ -200,6 +200,7 @@ namespace FPS_n2 {
 			//void				AddHP(HitPoint value) noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP + value, 0, HPMax); }
 			//void				SetHP(HitPoint value) noexcept { this->m_HP = value; }
 			const auto&		GetHP(void) const noexcept { return this->m_HP; }
+			const auto		IsAlive(void) const noexcept { return this->m_HP != 0; }
 			const auto&		GetHPMax(void) const noexcept { return HPMax; }
 			void			SubHP(HitPoint damage_t, float)  noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, HPMax); }
 		public:
@@ -350,6 +351,30 @@ namespace FPS_n2 {
 				}
 				return false;
 			}
+		};
+
+		class LaserSightClass {
+		private:
+			bool												m_IsLaserActive{ false };
+			VECTOR_ref											LaserStartPos;
+			VECTOR_ref											LaserEndPos;
+		public://ÉQÉbÉ^Å[
+			void			SetIsLaserActive(bool value) noexcept { m_IsLaserActive = value; }
+			void			SetLaserStartPos(const VECTOR_ref& value) noexcept { LaserStartPos = value; }
+			void			SetLaserEndPos(const VECTOR_ref& value) noexcept { LaserEndPos = value; }
+
+			void			DrawLaser() noexcept {
+				if (m_IsLaserActive) {
+					SetUseLighting(FALSE);
+					DrawSphere_3D(LaserEndPos, 0.01f*Scale_Rate, GetColor(255, 24, 24), GetColor(0, 0, 0));
+					DrawCapsule_3D(LaserStartPos, LaserEndPos, 0.0015f*Scale_Rate, GetColor(255, 24, 24), GetColor(0, 0, 0));
+					SetUseLighting(TRUE);
+				}
+			}
+		public:
+			LaserSightClass(void) noexcept { }
+			~LaserSightClass(void) noexcept { }
+		public:
 		};
 	};
 };

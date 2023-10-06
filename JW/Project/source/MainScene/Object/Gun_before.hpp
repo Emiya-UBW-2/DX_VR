@@ -23,8 +23,8 @@ namespace FPS_n2 {
 					(*Ptr)->Init();
 				}
 			}
-			void		SetFall(const VECTOR_ref& pPos, const MATRIX_ref& pMat, const VECTOR_ref& pVec, float time) {
-				this->m_Ptr[this->m_Now]->SetFall(pPos, pMat, pVec, time, SoundEnum::CartFall);
+			void		SetFall(const VECTOR_ref& pPos, const MATRIX_ref& pMat, const VECTOR_ref& pVec, float time, SoundEnum sound) {
+				this->m_Ptr[this->m_Now]->SetFall(pPos, pMat, pVec, time, sound);
 				++this->m_Now %= this->m_Ptr.size();
 			}
 		};
@@ -36,6 +36,7 @@ namespace FPS_n2 {
 			const bool	HasParts(ObjType objType) const noexcept { return (this->m_Parts_Ptr[(int)objType].get() != nullptr); }
 			const auto&	GetPartsPtr(ObjType objType) const noexcept { return this->m_Parts_Ptr[(int)objType]; }
 			const bool	IsEffectParts(ObjType objType, GunFrame frame) const noexcept;
+			const bool	HasFrame(GunFrame frame) const noexcept;
 			const bool	GetPartsFrameLocalMat(GunFrame frame, MATRIX_ref* pRet) const noexcept;
 			const bool	GetPartsFrameWorldMat(GunFrame frame, MATRIX_ref* pRet) const noexcept;
 			void		GetChildPartsList(std::vector<const std::shared_ptr<ObjectBaseClass>*>* Ret) const noexcept;

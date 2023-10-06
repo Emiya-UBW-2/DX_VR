@@ -1,0 +1,8 @@
+Name=12ga BuckShot
+ammo_cal(mm)=1.8
+ammo_speed(m/s)=300
+ammo_pene(mm)=10
+ammo_damage=15
+FallSound=1
+Pellets=8
+Accuracy=3.0

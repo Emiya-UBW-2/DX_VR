@@ -55,7 +55,7 @@ namespace FPS_n2 {
 				}
 
 				if (this->m_IsClient) {
-					m_ClientCtrl.SetMyPlayer(MyInput, SendMove.m_Pos, SendMove.m_Vec, SendMove.m_rad, this->m_ClientFrame, SendMove.m_Damage, SendMove.m_DamageSwitch);
+					m_ClientCtrl.SetMyPlayer(MyInput, SendMove.m_Pos, SendMove.m_Vec, SendMove.m_rad, this->m_ClientFrame, SendMove.m_Damage);
 					if ((this->m_Sequence == SequenceEnum::Matching) && m_SeqFirst) {
 						m_ClientCtrl.Init(this->m_NewSetting.UsePort, this->m_Tick, this->m_NewSetting.IP);
 					}
@@ -65,7 +65,7 @@ namespace FPS_n2 {
 				}
 				//サーバー
 				else {
-					m_ServerCtrl.SetMyPlayer(MyInput, SendMove.m_Pos, SendMove.m_Vec, SendMove.m_rad, this->m_ClientFrame, SendMove.m_Damage, SendMove.m_DamageSwitch);
+					m_ServerCtrl.SetMyPlayer(MyInput, SendMove.m_Pos, SendMove.m_Vec, SendMove.m_rad, this->m_ClientFrame, SendMove.m_Damage);
 					if ((this->m_Sequence == SequenceEnum::Matching) && m_SeqFirst) {
 						m_ServerCtrl.Init(this->m_NewSetting.UsePort, this->m_Tick, IPDATA());
 					}

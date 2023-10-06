@@ -50,6 +50,10 @@ namespace FPS_n2 {
 				this->m_Object.resize(this->m_Object.size() + 1);
 				this->m_Object.back() = std::make_shared<SightClass>();
 				break;
+			case ObjType::MuzzleAdapter:
+				this->m_Object.resize(this->m_Object.size() + 1);
+				this->m_Object.back() = std::make_shared<MuzzleClass>();
+				break;
 			default:
 				break;
 			}

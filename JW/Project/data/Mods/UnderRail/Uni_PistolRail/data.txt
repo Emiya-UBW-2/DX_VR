@@ -3,4 +3,8 @@ Name=Universal Pistol Mount
 Slot0Type=Sight
 Slot0Item=VIPER_DotSight
 
+Slot1Type=UnderRail
+Slot1Item=X400_LaserSight
+Slot1Item=SBalPL_LaserSight
+
 end

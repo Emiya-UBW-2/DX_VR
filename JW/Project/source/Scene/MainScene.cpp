@@ -12,15 +12,13 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			SE->Add((int)SoundEnum::Env, 1, "data/Sound/SE/envi.wav", false);
 			SE->Add((int)SoundEnum::Env2, 1, "data/Sound/SE/envi2.wav", false);
-			SE->Add((int)SoundEnum::LaserSwitch, 1, "data/Sound/SE/aim_on.wav", false);
 
 			SE->Add((int)SoundEnum::CartFall, 6, "data/Sound/SE/gun/case.wav", false);
 			SE->Add((int)SoundEnum::MagFall, 6, "data/Sound/SE/gun/ModFall.wav", false);
 			SE->Add((int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
-			for (int i = 0; i < 5; i++) {
+			for (int i = 0; i < 6; i++) {
+				SE->Add((int)SoundEnum::Cocking1_0 + i, 4, "data/Sound/SE/gun/autoM870/" + std::to_string(i) + ".wav");
 				SE->Add((int)SoundEnum::Cocking2_0 + i, 4, "data/Sound/SE/gun/autoM16/" + std::to_string(i) + ".wav");
-			}
-			for (int i = 0; i < 5; i++) {
 				SE->Add((int)SoundEnum::Cocking3_0 + i, 4, "data/Sound/SE/gun/auto1911/" + std::to_string(i) + ".wav");
 			}
 			SE->Add((int)SoundEnum::StandUp, 1, "data/Sound/SE/move/sliding.wav", false);
@@ -31,7 +29,6 @@ namespace FPS_n2 {
 			//
 			this->Gauge_Graph = GraphHandle::Load("data/UI/Gauge.png");
 			this->hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
-			this->aim_Graph = GraphHandle::Load("data/UI/battle_aim.bmp");
 			this->m_MiniMapScreen = GraphHandle::Make(y_r(128) * 2, y_r(128) * 2, true);
 			//BG
 			this->m_BackGround = std::make_shared<BackGroundClassMain>();
@@ -71,7 +68,7 @@ namespace FPS_n2 {
 
 			for (int i = 0; i < 1; i++) {
 				auto* Ptr = ObjMngr->MakeObject(ObjType::Gun);
-				ObjMngr->LoadObjectModel((*Ptr).get(), "data/gun/G17Gen3/");
+				ObjMngr->LoadObjectModel((*Ptr).get(), "data/gun/Mod870/");
 				MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
 				auto& Gun = ((std::shared_ptr<GunClass>&)(*Ptr));
 				Gun->SetMapCol(this->m_BackGround);
@@ -286,7 +283,7 @@ namespace FPS_n2 {
 			}
 			{
 				/*
-				m_GameEnd |= (!(Chara->GetHP() != 0 && (Timer <= TotalTime)));
+				m_GameEnd |= (!(Chara->IsAlive() && (Timer <= TotalTime)));
 				if (m_GameEnd) {
 					EndTimer = std::max(EndTimer - 1.f / FPS, 0.f);
 				}
@@ -299,16 +296,16 @@ namespace FPS_n2 {
 				float pp_x = 0.f, pp_y = 0.f;
 				InputControl MyInput;
 				//
-				pp_x = Pad->GetLS_Y() * cam_per*0.25f;
-				pp_y = Pad->GetLS_X() * cam_per*0.25f;
+				pp_x = std::clamp(Pad->GetLS_Y() * cam_per*0.5f, -0.2f, 0.2f);
+				pp_y = std::clamp(Pad->GetLS_X() * cam_per*0.5f, -0.2f, 0.2f);
 				if (Pad->GetFreeLook().press()) {
 					pp_x /= 2.f;
 					pp_y /= 2.f;
 				}
 
 				MyInput.SetInput(
-					pp_x - Chara->GetRecoilRadAdd().y(),
-					pp_y - Chara->GetRecoilRadAdd().x(),
+					pp_x - Chara->GetGunPtrNow()->GetRecoilRadAdd().y(),
+					pp_y - Chara->GetGunPtrNow()->GetRecoilRadAdd().x(),
 					Pad->GetUpKey().press(), Pad->GetDownKey().press(), Pad->GetLeftKey().press(), Pad->GetRightKey().press(),
 					Pad->GetRunKey().press(),
 					Pad->GetQKey().press(), Pad->GetEKey().press(),
@@ -365,9 +362,8 @@ namespace FPS_n2 {
 						}
 						//ダメージイベント処理
 						if (ObjMngr->GetObj(ObjType::Human, i) != nullptr) {
-							if (tmp.DamageSwitch != c->GetDamageSwitchRec()) {
-								this->m_DamageEvents.emplace_back(tmp.Damage);
-								c->SetDamageSwitchRec(tmp.DamageSwitch);
+							for (auto& e : tmp.Damage) {
+								this->m_DamageEvents.emplace_back(e);
 							}
 						}
 					}
@@ -382,10 +378,10 @@ namespace FPS_n2 {
 						}
 						//ダメージイベント処理
 						if (ObjMngr->GetObj(ObjType::Human, i) != nullptr) {
-							if (c->GetDamageSwitch() != c->GetDamageSwitchRec()) {
-								this->m_DamageEvents.emplace_back(c->GetDamageEvent());
-								c->SetDamageSwitchRec(c->GetDamageSwitch());
+							for (auto& e : c->GetDamageEvent()) {
+								this->m_DamageEvents.emplace_back(e);
 							}
+							c->GetDamageEvent().clear();
 						}
 					}
 				}
@@ -412,16 +408,17 @@ namespace FPS_n2 {
 						auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
 						if (a->IsActive()) {
 							//AmmoClass
+							VECTOR_ref repos_tmp = a->GetMove().repos;
 							VECTOR_ref pos_tmp = a->GetMove().pos;
 							VECTOR_ref norm_tmp;
-							auto ColResGround = this->m_BackGround->CheckLinetoMap(a->GetMove().repos, &pos_tmp, true, &norm_tmp);
+							auto ColResGround = this->m_BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, true, &norm_tmp);
 							bool is_HitAll = false;
 							for (auto& tgt : this->character_Pool) {
-								if (tgt->GetHP() == 0) { continue; }
+								if (!tgt->IsAlive()) { continue; }
 								if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }
-								is_HitAll |= tgt->CheckAmmoHit(a.get(), a->GetMove().repos, &pos_tmp, tgt->GetMove().pos);
+								is_HitAll |= tgt->CheckAmmoHit(a.get(), repos_tmp, &pos_tmp);
 							}
-							if (this->m_BackGround->HitLightCheck(a->GetMove().repos, &pos_tmp)) {
+							if (this->m_BackGround->HitLightCheck(repos_tmp, &pos_tmp)) {
 								EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale_Rate);
 							}
 							if (ColResGround && !is_HitAll) {
@@ -439,11 +436,6 @@ namespace FPS_n2 {
 			//背景更新
 			this->m_BackGround->FirstExecute();
 			ObjMngr->LateExecuteObject();
-			//首の向き
-			{
-				MATRIX_ref FreeLook = MATRIX_ref::RotX(std::clamp(0.f, deg2rad(-20), deg2rad(20))) * MATRIX_ref::RotY(0.f);
-				Chara->SetCamEyeVec(FreeLook.zvec()*-1.f);
-			}
 			//視点
 			{
 				float ShakeTime = 0.1f;
@@ -480,7 +472,7 @@ namespace FPS_n2 {
 							fov += deg2rad(5);
 						}
 						if (Chara->GetGunPtrNow()->GetShotSwitch()) {
-							fov -= deg2rad(8);
+							fov -= deg2rad(15);
 							Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
 						}
 						else {
@@ -509,7 +501,7 @@ namespace FPS_n2 {
 			this->m_BackGround->Execute();
 			//射撃光
 			if (Chara->GetGunPtrNow()->GetShotSwitch()) {
-				auto mat = Chara->GetGunPtrNow()->GetMuzzleMatrix();
+				auto mat = Chara->GetGunPtrNow()->GetFrameWorldMat(GunFrame::Muzzle);
 				SetLightEnable(TRUE);
 				ChangeLightTypePoint(mat.pos().get(),
 					2.0f*Scale_Rate,
@@ -525,20 +517,24 @@ namespace FPS_n2 {
 			}
 			//レーザーサイト
 			for (auto& c : this->character_Pool) {
+				if (!c->GetGunPtrNow_Const()->HasFrame(GunFrame::LaserSight)) {
+					c->SetIsLaserActive(false);
+					continue;
+				}
 				//
-				auto LaserStartPos = c->GetLaserStartPos();
-				auto LaserEndPos = LaserStartPos + c->GetGunPtrNow()->GetMuzzleMatrix().zvec()*-1.f * 15.f*Scale_Rate;
-				this->m_BackGround->CheckLinetoMap(LaserStartPos, &LaserEndPos, true);
+				auto mat = c->GetGunPtrNow_Const()->GetFrameWorldMat(GunFrame::LaserSight);
+				VECTOR_ref StartPos = mat.pos();
+				VECTOR_ref EndPos = StartPos + mat.zvec()*-1.f * 15.f*Scale_Rate;
+				this->m_BackGround->CheckLinetoMap(StartPos, &EndPos, true);
 				for (const auto& c2 : this->character_Pool) {
 					if (c2->GetMyPlayerID() == c->GetMyPlayerID()) { continue; }
-					c2->CheckLineHit(LaserStartPos, &LaserEndPos);
+					c2->CheckLineHit(StartPos, &EndPos);
 				}
-				auto Vec = (LaserEndPos - LaserStartPos);
-				LaserEndPos = LaserStartPos + Vec.Norm()*std::max(Vec.Length() - 0.3f*Scale_Rate, 0.f);
-				c->SetLaserPos(LaserEndPos);
-				//
-				VECTOR_ref CamPos = c->GetEyePosition();
-				c->SetLaser2D(GetScreenPos(CamPos, CamPos + c->GetEyeVector(), c->GetEyeVecY(), DrawParts->GetMainCamera().GetCamFov(), LaserEndPos));
+				auto Vec = (EndPos - StartPos);
+				EndPos = StartPos + Vec.Norm()*std::max(Vec.Length() - 0.3f*Scale_Rate, 0.f);
+				c->SetLaserStartPos(StartPos);
+				c->SetLaserEndPos(EndPos);
+				c->SetIsLaserActive(true);
 			}
 #ifdef DEBUG
 			DebugParts->SetPoint("---");
@@ -554,6 +550,7 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(5, (int)(this->m_HPBuf + 0.5f));
 				this->m_HPBuf += (int)(std::clamp((float)(Chara->GetHP() - this->m_HPBuf)*20.f, -15.f, 15.f) / FPS);
 				//SPeed,ALT
+				printfDx("%d / %d \n", Chara->GetGunPtrNow()->GetAmmoNum(), Chara->GetGunPtrNow()->GetAmmoAll());
 
 				this->m_UIclass.SetIntParam(0, (int)(this->m_CamShake2.x()*100.f));
 				this->m_UIclass.SetIntParam(1, (int)(this->m_CamShake2.y()*100.f));
@@ -621,17 +618,15 @@ namespace FPS_n2 {
 			SE->Get((int)SoundEnum::Env).StopAll(0);
 			SE->Get((int)SoundEnum::Env2).StopAll(0);
 
-			SE->Delete((int)SoundEnum::LaserSwitch);
 			SE->Delete((int)SoundEnum::CartFall);
 			SE->Delete((int)SoundEnum::MagFall);
 			SE->Delete((int)SoundEnum::Env);
 			SE->Delete((int)SoundEnum::Env2);
 			SE->Delete((int)SoundEnum::StandUp);
 			SE->Delete((int)SoundEnum::Trigger);
-			for (int i = 0; i < 5; i++) {
+			for (int i = 0; i < 6; i++) {
+				SE->Delete((int)SoundEnum::Cocking1_0 + i);
 				SE->Delete((int)SoundEnum::Cocking2_0 + i);
-			}
-			for (int i = 0; i < 5; i++) {
 				SE->Delete((int)SoundEnum::Cocking3_0 + i);
 			}
 			SE->Delete((int)SoundEnum::RunFoot);
@@ -641,7 +636,6 @@ namespace FPS_n2 {
 			//
 			this->Gauge_Graph.Dispose();
 			this->hit_Graph.Dispose();
-			this->aim_Graph.Dispose();
 			this->m_MiniMapScreen.Dispose();
 			//
 			for (auto& c : character_Pool) {
@@ -686,9 +680,7 @@ namespace FPS_n2 {
 			this->m_BackGround->Draw();
 			//レーザー
 			for (auto& c : this->character_Pool) {
-				if (c->GetLaserActive()) {
-					c->DrawLaser();
-				}
+				c->DrawLaser();
 			}
 
 			//ObjMngr->DrawDepthObject();
@@ -704,7 +696,7 @@ namespace FPS_n2 {
 					if (0.f < LensPos.z() && LensPos.z() < 1.f) {
 						Set_xp_lens(LensPos.x());
 						Set_yp_lens(LensPos.y());
-						LensPos = ConvWorldPosToScreenPos(Chara->GetGunPtrNow_Const()->GetLensPosSize().get());
+						LensPos = ConvWorldPosToScreenPos(Chara->GetGunPtrNow_Const()->GetFrameWorldMat(GunFrame::LensSize).pos().get());
 						if (0.f < LensPos.z() && LensPos.z() < 1.f) {
 							Set_size_lens(std::hypotf(xp_lens() - LensPos.x(), yp_lens() - LensPos.y()));
 						}
@@ -730,7 +722,7 @@ namespace FPS_n2 {
 					c->SetCameraSize(std::max(20.f / ((pos - GetCameraPosition()).size() / 2.f), 0.2f));
 				}
 			}
-			if (Chara->GetHP() != 0) {
+			if (Chara->IsAlive()) {
 				auto pos = Chara->GetMatrix().pos() + Chara->GetMatrix().zvec()*-1.f*100.f*Scale_Rate;
 				VECTOR_ref campos = ConvWorldPosToScreenPos(pos.get());
 				if (0.f < campos.z() && campos.z() < 1.f) {
@@ -754,7 +746,7 @@ namespace FPS_n2 {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
-			//auto* Fonts = FontPool::Instance();
+			auto* Fonts = FontPool::Instance();
 			//auto* DrawParts = DXDraw::Instance();
 			//auto Red = GetColor(255, 0, 0);
 			//auto Blue = GetColor(50, 50, 255);
@@ -770,13 +762,30 @@ namespace FPS_n2 {
 					auto ammo = ObjMngr->GetObj(ObjType::Ammo, loop);
 					if (ammo != nullptr) {
 						auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
-						a->Draw_Hit_UI(hit_Graph);
+						if (a->m_IsDrawHitUI) {
+							int			Alpha = (int)(a->m_Hit_alpha * 255.f);
+							int			Damage = (int)a->m_Damage;
+							VECTOR_ref	DispPos = a->m_Hit_DispPos;
+							if ((Alpha >= 10) && (DispPos.z() >= 0.f && DispPos.z() <= 1.f)) {
+								SetDrawBlendMode(DX_BLENDMODE_ALPHA, Alpha);
+								//
+								int r = (int)(255 * std::clamp((float)Damage / 100.f*2.f, 0.f, 1.f));
+								int g = (int)(255 * std::clamp(1.f - (float)Damage / 100.f*2.f, 0.f, 1.f));
+								SetDrawBright(r, g, 0);
+								hit_Graph.DrawRotaGraph((int)DispPos.x(), (int)DispPos.y(), (float)y_r((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+								SetDrawBright(255, 255, 255);
+								//
+								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+									(int)DispPos.x() + a->m_Hit_AddX, (int)DispPos.y() + a->m_Hit_AddY, GetColor(r, g, 0), GetColor(0, 0, 0), "%d", Damage);
+							}
+						}
 					}
 					else {
 						break;
 					}
 					loop++;
 				}
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}
 			{
 				auto per = std::clamp(std::abs((float)(Chara->GetHP() - this->m_HPBuf))*0.1f, 0.f, 0.5f);
@@ -822,17 +831,8 @@ namespace FPS_n2 {
 				DrawFetteString(xp1, yp1, 1.f, (select == 2), "Return Game");
 			}
 			else {
-				auto* PlayerMngr = PlayerManager::Instance();
-				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
-				//
+				//ミニマップ
 				m_MiniMapScreen.DrawRotaGraph(y_r(960), y_r(840), 1.f, 0.f, true);
-				//
-				if (Chara->GetLaserActive() && !Chara->GetIsADS()) {
-					VECTOR_ref Laserpos2D = Chara->GetAimPoint();
-					if (0.f < Laserpos2D.z() && Laserpos2D.z() < 1.f) {
-						aim_Graph.DrawRotaGraph((int)Laserpos2D.x(), (int)Laserpos2D.y(), (float)(y_r(100)) / 100.f, 0.f, true);
-					}
-				}
 			}
 		}
 	};

@@ -14,6 +14,166 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 
+		//人間のフレーム、アニメ管理
+		class HumanControl {
+		private:
+			//体のフレーム情報
+			class frame_body {
+			public:
+				//頭
+				frames head_f;
+				//胴体
+				frames bodyg_f;
+				frames bodyc_f;
+				frames bodyb_f;
+				frames body_f;
+				//右手座標系
+				frames RIGHThand2_f;
+				frames RIGHThand_f;
+				frames RIGHTarm2_f;
+				frames RIGHTarm1_f;
+				//左手座標系
+				frames LEFThand2_f;
+				frames LEFThand_f;
+				frames LEFTarm2_f;
+				frames LEFTarm1_f;
+
+				//右手座標系
+				frames RIGHTreg2_f;
+				frames RIGHTreg_f;
+				frames RIGHTfoot2_f;
+				frames RIGHTfoot1_f;
+				//左手座標系
+				frames LEFTreg2_f;
+				frames LEFTreg_f;
+				frames LEFTfoot2_f;
+				frames LEFTfoot1_f;
+			public:
+				//
+				void Get_frame(MV1& obj_) noexcept {
+					for (int i = 0; i < int(obj_.frame_num()); ++i) {
+						std::string p = obj_.frame_name(i);
+						if (p == std::string("グルーブ")) {
+							this->bodyg_f.Set(i, obj_);
+						}
+						else if (p == std::string("下半身")) {
+							this->bodyc_f.Set(i, obj_);
+						}
+
+						else if (p.find("左足") != std::string::npos && p.find("首") == std::string::npos && p.find("先") == std::string::npos && p.find("ＩＫ") == std::string::npos) {
+							this->LEFTfoot1_f.Set(i, obj_);
+						}
+						else if (p.find("左ひざ") != std::string::npos) {
+							this->LEFTfoot2_f.Set(i, obj_);
+						}
+						else if (p.find("左足首") != std::string::npos && p.find("先") == std::string::npos) {
+							this->LEFTreg_f.Set(i, obj_);
+						}
+						else if (p.find("左足首先") != std::string::npos) {
+							this->LEFTreg2_f.Set(i, obj_);
+						}
+
+						else if (p.find("右足") != std::string::npos && p.find("首") == std::string::npos && p.find("先") == std::string::npos && p.find("ＩＫ") == std::string::npos) {
+							this->RIGHTfoot1_f.Set(i, obj_);
+						}
+						else if (p.find("右ひざ") != std::string::npos) {
+							this->RIGHTfoot2_f.Set(i, obj_);
+						}
+						else if (p.find("右足首") != std::string::npos && p.find("先") == std::string::npos) {
+							this->RIGHTreg_f.Set(i, obj_);
+						}
+						else if (p.find("右足首先") != std::string::npos) {
+							this->RIGHTreg2_f.Set(i, obj_);
+						}
+						else if (p.find("上半身") != std::string::npos && p.find("上半身2") == std::string::npos) {
+							this->bodyb_f.Set(i, obj_);
+						}
+						else if (p.find("上半身2") != std::string::npos) {
+							this->body_f.Set(i, obj_);
+						}
+						else if (p.find("頭") != std::string::npos && p.find("先") == std::string::npos) {
+							this->head_f.Set(i, obj_);
+							//head_hight = obj_.frame(this->head_f.first).y();
+						}
+
+						else if (p.find("右腕") != std::string::npos && p.find("捩") == std::string::npos) {
+							this->RIGHTarm1_f.Set(i, obj_);
+						}
+						else if (p.find("右ひじ") != std::string::npos) {
+							this->RIGHTarm2_f.Set(i, obj_);
+						}
+						else if (p == std::string("右手首")) {
+							this->RIGHThand_f.Set(i, obj_);
+						}
+						else if (p == std::string("右手先") || p == std::string("右手首先")) {
+							this->RIGHThand2_f.Set(i, obj_);
+						}
+
+						else if (p.find("左腕") != std::string::npos && p.find("捩") == std::string::npos) {
+							this->LEFTarm1_f.Set(i, obj_);
+						}
+						else if (p.find("左ひじ") != std::string::npos) {
+							this->LEFTarm2_f.Set(i, obj_);
+						}
+						else if (p == std::string("左手首")) {
+							this->LEFThand_f.Set(i, obj_);
+						}
+						else if (p == std::string("左手先") || p == std::string("左手首先")) {
+							this->LEFThand2_f.Set(i, obj_);
+						}
+					}
+				}
+				//
+				void copy_frame(MV1& mine, frame_body& frame_tgt_, MV1* tgt) noexcept {
+					tgt->SetMatrix(mine.GetMatrix());
+					//
+					tgt->SetFrameLocalMatrix(frame_tgt_.head_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.head_f.GetFrameID()));
+					//
+					tgt->SetFrameLocalMatrix(frame_tgt_.bodyg_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.bodyg_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.bodyc_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.bodyc_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.bodyb_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.bodyb_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.body_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.body_f.GetFrameID()));
+					//右手座標系
+					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHThand2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHThand2_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHThand_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHThand_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHTarm2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHTarm2_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHTarm1_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHTarm1_f.GetFrameID()));
+					//左手座標系
+					tgt->SetFrameLocalMatrix(frame_tgt_.LEFThand2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFThand2_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.LEFThand_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFThand_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTarm2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTarm2_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTarm1_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTarm1_f.GetFrameID()));
+					//右手座標系
+					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHTreg2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHTreg2_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHTreg_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHTreg_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHTfoot2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHTfoot2_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHTfoot1_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHTfoot1_f.GetFrameID()));
+					//左手座標系
+					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTreg2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTreg2_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTreg_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTreg_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTfoot2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTfoot2_f.GetFrameID()));
+					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTfoot1_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTfoot1_f.GetFrameID()));
+					for (int i = 0; i < tgt->get_anime().size(); ++i) {
+						tgt->get_anime(i).per = mine.get_anime(i).per;
+						tgt->get_anime(i).time = mine.get_anime(i).time;
+					}
+				}
+				//
+			};
+		protected:
+			//体のフレーム情報
+			frame_body lagframe_;							//フレーム
+			frame_body frame_s;								//フレーム
+		protected:
+			void Set_Body(MV1& obj_body_t, MV1& obj_lag_t) noexcept {
+				//身体
+				this->frame_s.Get_frame(obj_body_t);
+				//ラグドール
+				this->lagframe_.Get_frame(obj_lag_t);
+			}
+			void Frame_Copy_Lag(MV1& obj_body_t, MV1* obj_lag_t) { this->frame_s.copy_frame(obj_body_t, this->lagframe_, obj_lag_t); }
+		};
+
 
 		class CharacterClass :
 			public ObjectBaseClass,
@@ -22,7 +182,9 @@ namespace FPS_n2 {
 			public KeyControl,
 			public ShapeControl,
 			public OverrideControl,
-			public EffectControl
+			public EffectControl,
+			public LaserSightClass,
+			public HumanControl
 		{
 		private://キャラパラメーター
 			const float											SpeedLimit{ 1.75f };
@@ -64,14 +226,18 @@ namespace FPS_n2 {
 
 			std::array<ArmMovePerClass, (int)EnumGunAnimType::Max>	m_Arm;
 
-			float												m_ReloadEyePer{ 0.f };
-			float												m_CheckEyePer{ 0.f };
-
 			bool												m_MagHand{ false };
 			ArmMovePerClass										m_MagArm;
 			float												m_MoveEyePosTimer{ 0.f };
 			VECTOR_ref											m_MoveEyePos;
 			bool												m_IsStuckGun{ false };
+			float												m_IsStuckLeftHandTimer{ 0.f };
+			bool												m_IsStuckLeftHand{ false };
+			ArmMovePerClass										m_StuckLeftHand;
+			VECTOR_ref											m_StuckLeftHandPos;
+			VECTOR_ref											m_StuckLeftHandNormal;
+			VECTOR_ref											m_StuckLeftHandPos_R;
+			VECTOR_ref											m_StuckLeftHandNormal_R;
 			//入力
 			bool												m_Press_Shot{ false };
 			bool												m_Press_Reload{ false };
@@ -80,11 +246,7 @@ namespace FPS_n2 {
 			bool												m_Press_Watch{ false };
 			//体力
 			std::vector<HitBox>									m_HitBox;
-			DamageEvent											m_DamageEvent;									//
-			unsigned long long									m_DamageSwitch{ 0 };							//
-			unsigned long long									m_DamageSwitchRec{ 0 };							//
-			//
-			VECTOR_ref											m_RecoilRadAdd;
+			std::vector<DamageEvent>							m_DamageEvent;									//
 			//サウンド
 			int													m_CharaSound{ -1 };
 			//
@@ -97,11 +259,6 @@ namespace FPS_n2 {
 			VECTOR_ref											m_UpperyVecNormal, m_UpperzVecNormal;
 			VECTOR_ref											m_UpperyVec, m_UpperzVec, m_UpperPos;
 			float												m_UpperAnim{ 0.f };
-			//
-			switchs												m_LaserSwitch;
-			VECTOR_ref											LaserStartPos;
-			VECTOR_ref											LaserEndPos;
-			VECTOR_ref											LaserEndPos2D;
 			//
 			float												m_ADSPer = 0.f;
 			//
@@ -118,9 +275,6 @@ namespace FPS_n2 {
 			float												m_AmmoHandR{ 0.f };
 			float												m_AmmoHand{ 0.f };
 
-
-			VECTOR_ref											m_EyeVecR, m_CamEyeVec;
-
 			int													m_LeanSoundReq{ 0 };
 			float												m_LeanRatePer{ 0.f };
 			float												m_SquatPer{ 0.f };
@@ -132,6 +286,10 @@ namespace FPS_n2 {
 			VECTOR_ref											m_HitAxis{ VECTOR_ref::front() };
 			float												m_HitPower{ 0.f };
 			float												m_HitPowerR{ 0.f };
+
+
+			MV1													m_RagDoll;
+			float												m_RagDollTimer{ 0.f };						//ラグドールの物理演算フラグ
 		private:
 			std::shared_ptr<BackGroundClassBase>		m_BackGround;				//BG
 		public:
@@ -144,22 +302,20 @@ namespace FPS_n2 {
 			const auto		GetBottomRightStepAnimSel(void) const noexcept { return KeyControl::GetIsSquat() ? CharaAnimeID::Bottom_Squat_RightStep : CharaAnimeID::Bottom_Stand_RightStep; }
 			const auto		GetBottomTurnAnimSel(void) const noexcept { return KeyControl::GetIsSquat() ? CharaAnimeID::Bottom_Squat_Turn : CharaAnimeID::Bottom_Stand_Turn; }
 			const auto		GetBottomRunAnimSel(void) const noexcept { return CharaAnimeID::Bottom_Stand_Run; }
+			const bool		HaveFrame(CharaFrame frame) const noexcept { return this->m_Frames[(int)frame].first != -1; }
 			const auto		GetFrame(CharaFrame frame) const noexcept { return m_Frames[(int)frame].first; }
+			const auto&		GetFrameBaseLocalMat(CharaFrame frame) const noexcept { return this->m_Frames[(int)frame].second; }
 		public://ゲッター
 			auto&			GetAnimeBuf(CharaAnimeID anim) noexcept { return this->m_AnimPerBuf[(int)anim]; }
 			auto&			GetAnime(CharaAnimeID anim) noexcept { return this->GetObj().get_anime((int)anim); }
 			auto&			GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr; }
+			auto&			GetDamageEvent(void) noexcept { return this->m_DamageEvent; }
 			const auto&		GetGunPtrNow_Const(void) const noexcept { return this->m_Gun_Ptr; }
 			const auto		GetReticleRad(void) const noexcept { return this->m_LateLeanRad + (KeyControl::GetRad().y() - this->m_yrad_Bottom)*0.15f; }
-			const auto&		GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd; }
 			const auto&		GetSendCamShake(void) const noexcept { return this->m_SendCamShake; }
-			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
-			const auto&		GetDamageSwitch(void) const noexcept { return this->m_DamageSwitch; }
-			const auto&		GetDamageSwitchRec(void) const noexcept { return this->m_DamageSwitchRec; }
 			const auto&		GetSpeed(void) const noexcept { return this->m_Speed; }
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
 
-			const auto		GetLaserActive(void) const noexcept { return this->m_LaserSwitch.on(); }
 			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
 			const auto		GetIsAim(void) const noexcept { return !(this->m_ReadyTimer == UpperTimerLimit); }
 		private:
@@ -167,8 +323,6 @@ namespace FPS_n2 {
 			void			SetAim(void) noexcept { this->m_ReadyTimer = 0.1f; }
 			void			SetADS(void) noexcept { this->m_ReadyTimer = 0.f; }
 		public://セッター
-			void			SetCamEyeVec(const VECTOR_ref& value) noexcept { this->m_CamEyeVec = value; }
-			void			SetDamageSwitchRec(unsigned long long value) noexcept { this->m_DamageSwitchRec = value; }
 			void			ResetFrameLocalMat(CharaFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }
 			bool			SetDamageEvent(const DamageEvent& value) noexcept {
 				if (this->m_MyID == value.ID && this->m_objType == value.CharaType) {
@@ -178,7 +332,7 @@ namespace FPS_n2 {
 				return false;
 			}
 			void			SetAnimLoop(CharaAnimeID ID, float speed) { ObjectBaseClass::SetAnimLoop((int)ID, speed); }
-			void			SetFrameLocalMat(CharaFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * this->m_Frames[(int)frame].second); }
+			void			SetFrameLocalMat(CharaFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * GetFrameBaseLocalMat(frame)); }
 			void			SetShapePer(CharaShape pShape, float Per) noexcept { this->m_Shapes[(int)pShape].second = Per; }
 			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
 			void			SetGunPtr(const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_Gun_Ptr = pGunPtr0; }
@@ -217,7 +371,7 @@ namespace FPS_n2 {
 			const auto		GetEyeVector(void) const noexcept { return GetEyeVecMat().zvec() * -1.f; }
 			const auto		GetEyePosition(void) const noexcept {
 				auto EyePosition = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f
-					+ MATRIX_ref::Vtrans(VECTOR_ref::vget(0.f,0.f,-0.5f), GetEyeVecMat()) + this->m_MoveEyePos;
+					+ MATRIX_ref::Vtrans(VECTOR_ref::vget(0.f, 0.f, -0.5f), GetEyeVecMat()) + this->m_MoveEyePos;
 				if (GetGunPtrNow_Const()) {
 					return Lerp(EyePosition, GetGunPtrNow_Const()->GetEyePos() + m_GunShake_r * 0.3f, this->m_ADSPer);
 				}
@@ -228,11 +382,16 @@ namespace FPS_n2 {
 		private:
 			//被弾チェック
 			const auto		CheckLineHited(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
-				bool is_Hit = false;
-				for (auto& h : this->m_HitBox) {
-					is_Hit |= h.Colcheck(StartPos, pEndPos);
+				if (IsAlive()) {
+					bool is_Hit = false;
+					for (auto& h : this->m_HitBox) {
+						is_Hit |= h.Colcheck(StartPos, pEndPos);
+					}
+					return is_Hit;
 				}
-				return is_Hit;
+				else {
+					return false;
+				}
 			}
 		public:
 			const auto		CheckLineHit(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
@@ -243,71 +402,12 @@ namespace FPS_n2 {
 				}
 				return false;
 			}
-			const auto		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos, const VECTOR_ref& pShooterPos) noexcept {
-				if (!CheckLineHit(StartPos, pEndPos)) { return false; }
-				//被弾処理
-				for (auto& h : this->m_HitBox) {
-					if (h.Colcheck(StartPos, pEndPos)) {
-						h.GetColType();
-						pAmmo->Penetrate();	//貫通
-						//ダメージ計算
-						{
-							auto v1 = GetCharaVector();
-							auto v2 = (pShooterPos - this->m_move.pos).Norm(); v2.y(0);
-							this->m_DamageEvent.SetEvent(this->m_MyID, m_objType, pAmmo->GetDamage(), atan2f(v1.cross(v2).y(), v1.dot(v2)));
-							++this->m_DamageSwitch;// %= 255;//
-						}
-						//エフェクトセット
-						{
-							EffectControl::SetOnce(EffectResource::Effect::ef_hitblood, *pEndPos, VECTOR_ref::front(), 12.5f);
-							EffectControl::SetEffectSpeed(EffectResource::Effect::ef_hitblood, 2.f);
-						}
-						//ヒットモーション
-						{
-							m_HitAxis = MATRIX_ref::Vtrans((*pEndPos - StartPos).Norm().cross(VECTOR_ref::up())*-1.f, GetFrameWorldMat(CharaFrame::Upper2).GetRot().Inverse());
-							m_HitPower = 1.f;
-							if (h.GetColType() == HitType::Leg) {
-								KeyControl::SetIsSquat(true);
-							}
-						}
-						//todo : ヒットした部分に近い頂点を赤くする
-						return true;
-					}
-				}
-				return false;
-			}
+			const bool		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept;
 			void			move_RightArm(const VECTOR_ref& GunPos, const VECTOR_ref& Gunyvec, const VECTOR_ref& Gunzvec) noexcept;
 			void			move_LeftArm(const VECTOR_ref& GunPos, const VECTOR_ref& Gunyvec, const VECTOR_ref& Gunzvec) noexcept;
-			void			HitDamage(const VECTOR_ref& ShooterPos, HitPoint Damage) {
-				//ダメージ計算
-				auto v1 = GetCharaVector();
-				auto v2 = (ShooterPos - this->m_move.pos).Norm(); v2.y(0);
-				this->m_DamageEvent.SetEvent(this->m_MyID, m_objType, Damage, atan2f(v1.cross(v2).y(), v1.dot(v2)));
-				++this->m_DamageSwitch;// %= 255;//
-			}
 			//
 			void			ValueSet(float pxRad, float pyRad, const VECTOR_ref& pPos, PlayerID pID) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady) noexcept;
-			void			SetEyeVec() noexcept;
-		public://レーザーサイト
-			const auto&		GetAimPoint(void) const noexcept { return this->LaserEndPos2D; }
-			void			SetLaser2D(const VECTOR_ref& value) noexcept {
-				this->LaserEndPos2D = value;
-				if (!(0.f < this->LaserEndPos2D.z() && this->LaserEndPos2D.z() < 1.f)) {
-					auto* DrawParts = DXDraw::Instance();
-					this->LaserEndPos2D.Set((float)DrawParts->m_DispXSize / 2, (float)DrawParts->m_DispYSize / 2, -1.f);
-				}
-			}
-
-			const auto		GetLaserStartPos(void) const noexcept { return this->GetGunPtrNow_Const()->GetMuzzleMatrix().pos() + this->GetGunPtrNow_Const()->GetMuzzleMatrix().yvec()*-0.05f*Scale_Rate; }
-			void			SetLaserPos(const VECTOR_ref& value) noexcept { LaserEndPos = value; }
-
-			void			DrawLaser() noexcept {
-				SetUseLighting(FALSE);
-				DrawSphere_3D(LaserEndPos, 0.01f*Scale_Rate, GetColor(255, 24, 24), GetColor(0, 0, 0));
-				DrawCapsule_3D(GetLaserStartPos(), LaserEndPos, 0.0015f*Scale_Rate, GetColor(255, 24, 24), GetColor(0, 0, 0));
-				SetUseLighting(TRUE);
-			}
 		private: //更新関連
 			void			ExecuteSavePrev(void) noexcept;			//以前の状態保持														//
 			void			ExecuteInput(void) noexcept;			//操作																	//0.01ms

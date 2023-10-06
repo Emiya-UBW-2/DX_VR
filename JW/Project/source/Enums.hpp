@@ -26,6 +26,7 @@ namespace FPS_n2 {
 			Barrel,
 			UnderRail,
 			Sight,
+			MuzzleAdapter,
 			Parts_End,
 			Max,
 		};
@@ -41,19 +42,27 @@ namespace FPS_n2 {
 			//
 			Trigger,
 			//
+			Cocking1_0,
+			Cocking1_1,
+			Shot1,
+			Unload1,
+			Load1,
+			Shot1_Suppressor,
+			//
 			Cocking2_0,
 			Cocking2_1,
 			Shot2,
 			Unload2,
 			Load2,
+			Shot2_Suppressor,
 			//
 			Cocking3_0,
 			Cocking3_1,
 			Shot3,
 			Unload3,
 			Load3,
+			Shot3_Suppressor,
 			//
-			LaserSwitch,
 			CartFall,
 			MagFall,
 		};

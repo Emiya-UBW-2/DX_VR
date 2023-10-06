@@ -1,3 +1,7 @@
 Name=Glock17 Gen3 Slide
 
+Slot0Type=Sight
+Slot0Item=GNormalSight
+Slot0Item=GHeightSight
+
 end

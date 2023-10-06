@@ -15,8 +15,7 @@ namespace FPS_n2 {
 			ans.m_Vec = CharaPtr->GetMove().vec;
 			ans.m_Vec.y(0);
 			ans.m_rad = CharaPtr->GetRadBuf();
-			ans.m_Damage = &CharaPtr->GetDamageEvent();
-			ans.m_DamageSwitch = CharaPtr->GetDamageSwitch();
+			ans.m_Damage = CharaPtr->GetDamageEvent();
 			return ans;
 		}
 		const VECTOR_ref	PlayerControl::GetRadBuf(void) const noexcept {

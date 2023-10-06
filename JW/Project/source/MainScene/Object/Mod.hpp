@@ -20,11 +20,13 @@ namespace FPS_n2 {
 			auto&			GetModControl() noexcept { return this->m_ModControl; }
 
 			auto&			GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
+			const bool		HaveFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first != -1; }
 			const auto&		GetFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first; }
+			const auto&		GetFrameBaseLocalMat(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].second; }
 			const auto		GetFrameLocalMat(GunFrame frame) const noexcept { return GetFrameLocalMatrix(GetFrame(frame)); }
 			const auto		GetFrameWorldMat(GunFrame frame) const noexcept { return GetFrameWorldMatrix(GetFrame(frame)); }
 			void			ResetFrameLocalMat(GunFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }
-			void			SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * this->m_Frames[(int)frame].second); }
+			void			SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * GetFrameBaseLocalMat(frame)); }
 		public:
 			void			Init(void) noexcept override;
 			void			FirstExecute(void) noexcept override {
@@ -37,6 +39,7 @@ namespace FPS_n2 {
 				m_ModControl.UpdatePartsAnim(GetObj());
 				m_ModControl.UpdatePartsMove(GetFrameWorldMat(GunFrame::UnderRail), ObjType::UnderRail);
 				m_ModControl.UpdatePartsMove(GetFrameWorldMat(GunFrame::Sight), ObjType::Sight);
+				m_ModControl.UpdatePartsMove(GetFrameWorldMat(GunFrame::MuzzleAdapter), ObjType::MuzzleAdapter);
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				Draw_Mod(isDrawSemiTrans);
@@ -124,11 +127,25 @@ namespace FPS_n2 {
 
 		class UpperClass : public ModClass {
 		private:
+			bool							m_IsRecoilPower{ false };
+			bool							m_IsRecoilReturn{ false };
+			bool							m_IsShotType{ false };		//
+
+			int								m_RecoilPower{ 120 };
+			float							m_RecoilReturn{ 0.9f };
+			SHOTTYPE						m_ShotType{ SHOTTYPE::SEMI };		//
 		public://ゲッター
+			const auto& GetIsRecoilPower(void) const noexcept { return this->m_IsRecoilPower; }
+			const auto& GetIsRecoilReturn(void) const noexcept { return this->m_IsRecoilReturn; }
+			const auto& GetIsShotType(void) const noexcept { return this->m_IsShotType; }
+			const auto& GetRecoilPower(void) const noexcept { return this->m_RecoilPower; }
+			const auto& GetRecoilReturn(void) const noexcept { return this->m_RecoilReturn; }
+			const auto& GetShotType(void) const noexcept { return this->m_ShotType; }
 		public:
 			UpperClass(void) noexcept { this->m_objType = ObjType::Upper; }
 			~UpperClass(void) noexcept { }
 		public:
+			void			Init_Mod(void) noexcept override;
 		};
 
 		class BarrelClass : public ModClass {
@@ -162,5 +179,19 @@ namespace FPS_n2 {
 				m_Reitcle = GraphHandle::Load(this->m_FilePath + "reticle_0.png");
 			}
 		};
+
+		class MuzzleClass : public ModClass {
+		private:
+			GunShootSound	m_GunShootSound{ GunShootSound::Normal };
+		public://ゲッター
+			const auto&		GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
+		public:
+			MuzzleClass(void) noexcept { this->m_objType = ObjType::MuzzleAdapter; }
+			~MuzzleClass(void) noexcept { }
+		public:
+			void			Init_Mod(void) noexcept override;
+		};
+
+		
 	};
 };

@@ -1,5 +1,8 @@
 Name=Glock17 Gen3
 
+ShotRate=1200
+RecoilPower=100
+RecoilReturn=0.9
 shottype=SEMI
 usehumanAnim=1
 soundsel=1
@@ -8,18 +11,24 @@ reloadType=MAG
 Slot0Type=Magazine
 Slot0Item=GMag33
 Slot0Item=GMag17
+Slot0Item=GMag17Gen5
 
 Slot1Type=Upper
 Slot1Item=G17Gen2Slide
 Slot1Item=G17Gen3Slide
+Slot1Item=G17Gen5Slide
+Slot1Item=G18SlideForG17
 
 Slot2Type=Lower
 Slot2Item=G19LPFrame
 Slot2Item=G17Gen2Frame
 Slot2Item=G17Gen3Frame
+Slot2Item=G17Gen5Frame
 
 Slot3Type=Barrel
+Slot3Item=G17Gen3Barrel_SP
 Slot3Item=G17Gen2Barrel
 Slot3Item=G17Gen3Barrel
+Slot3Item=G17Gen5Barrel
 
 end
