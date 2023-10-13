@@ -7,7 +7,17 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		const bool  GunClass::HasFrame(GunFrame frame) const noexcept {
 			//該当フレームがあるのなら上書き
-			if (m_ModControl.HasFrame(frame)) {
+			if (m_SightPtr) {
+				switch (frame) {
+				case GunFrame::Eyepos:
+				case GunFrame::Lens:
+				case GunFrame::LensSize:
+					return true;
+				default:
+					break;
+				}
+			}
+			if (GetSlotControl()->HasFrame(frame)) {
 				return true;
 			}
 			if (HaveFrame(frame)) {
@@ -17,8 +27,18 @@ namespace FPS_n2 {
 		}
 		const MATRIX_ref  GunClass::GetFrameLocalMat(GunFrame frame) const noexcept {
 			//該当フレームがあるのなら上書き
+			if (m_SightPtr) {
+				switch (frame) {
+				case GunFrame::Eyepos:
+				case GunFrame::Lens:
+				case GunFrame::LensSize:
+					return (*m_SightPtr)->GetFrameLocalMat(frame);
+				default:
+					break;
+				}
+			}
 			MATRIX_ref Ret;
-			if (m_ModControl.GetPartsFrameLocalMat(frame, &Ret)) {
+			if (GetSlotControl()->GetPartsFrameLocalMat(frame, &Ret)) {
 				return Ret;
 			}
 			if (HaveFrame(frame)) {
@@ -28,8 +48,18 @@ namespace FPS_n2 {
 		}
 		const MATRIX_ref  GunClass::GetFrameWorldMat(GunFrame frame) const noexcept {
 			//該当フレームがあるのなら上書き
+			if (m_SightPtr) {
+				switch (frame) {
+				case GunFrame::Eyepos:
+				case GunFrame::Lens:
+				case GunFrame::LensSize:
+					return (*m_SightPtr)->GetFrameWorldMat(frame);
+				default:
+					break;
+				}
+			}
 			MATRIX_ref Ret;
-			if (m_ModControl.GetPartsFrameWorldMat(frame, &Ret)) {
+			if (GetSlotControl()->GetPartsFrameWorldMat(frame, &Ret)) {
 				return Ret;
 			}
 			if (HaveFrame(frame)) {
@@ -39,13 +69,13 @@ namespace FPS_n2 {
 		}
 
 		void GunClass::ResetFrameLocalMat(GunFrame frame) noexcept {
-			m_ModControl.ResetPartsFrameLocalMat(frame);
+			GetSlotControl()->ResetPartsFrameLocalMat(frame);
 			if (HaveFrame(frame)) {
 				GetObj().frame_Reset(GetFrame(frame));
 			}
 		}
 		void GunClass::SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept {
-			m_ModControl.SetPartsFrameLocalMat(frame, value);
+			GetSlotControl()->SetPartsFrameLocalMat(frame, value);
 			if (HaveFrame(frame)) {
 				GetObj().SetFrameLocalMatrix(GetFrame(frame), value * this->GetFrameBaseLocalMat(frame));
 			}
@@ -55,9 +85,6 @@ namespace FPS_n2 {
 		void GunClass::SetBullet(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* SE = SoundPool::Instance();
-			//
-			this->m_ShotPhase = GunAnimeID::Shot;
-			this->m_ShotSwitch = true;
 			//
 			SE->Get((int)SoundEnum::Trigger).Play_3D(0, GetMatrix().pos(), Scale_Rate*5.f);
 			switch (GetGunShootSound()) {
@@ -85,9 +112,52 @@ namespace FPS_n2 {
 			//
 			AddMuzzleSmokePower();
 			//
-			float Power = 0.0001f*this->m_GunDataClass->GetRecoilPower();
+			float Power = 0.0001f*GetGunDataClass()->GetRecoilPower();
 			this->m_RecoilRadAdd.Set(GetRandf(Power/4.f), -Power, 0.f);
 			//this->m_RecoilRadAdd = MATRIX_ref::Vtrans(this->m_RecoilRadAdd, MATRIX_ref::RotZ(-m_LeanRad / 5.f));
+		}
+		void	GunClass::SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept {
+			m_MagFall.Dispose();
+			m_CartFall.Dispose();
+			m_MagFall.Init(backGround, (*m_MagazinePtr)->GetFilePath());
+			m_CartFall.Init(backGround, (*m_MagazinePtr)->GetAmmoSpecMagTop()->GetPath());	//装填したマガジンの弾に合わせて薬莢生成
+		}
+		void	GunClass::Init_Gun(void) noexcept {
+			{
+				std::vector<const std::shared_ptr<ObjectBaseClass>*> PartsList;
+				GetSlotControl()->GetChildPartsList(&PartsList);
+				m_SightPtr = nullptr;
+				m_MuzzlePtr = nullptr;
+				m_UpperPtr = nullptr;
+				m_MagazinePtr = nullptr;
+				for (auto& p : PartsList) {
+					if ((*p)->GetobjType() == ObjType::Sight) {
+						const auto* Ptr = &((std::shared_ptr<SightClass>&)(*p));
+						if (m_SightPtr) {
+							if (!(*Ptr)->GetReitcleGraph().IsActive()) {
+								continue;
+							}
+						}
+						m_SightPtr = Ptr;
+					}
+					if ((*p)->GetobjType() == ObjType::MuzzleAdapter) {
+						m_MuzzlePtr = &((std::shared_ptr<MuzzleClass>&)(*p));
+					}
+					if ((*p)->GetobjType() == ObjType::Upper) {
+						m_UpperPtr = &((std::shared_ptr<UpperClass>&)(*p));
+					}
+					if ((*p)->GetobjType() == ObjType::Magazine) {
+						m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(*p));
+					}
+				}
+				PartsList.clear();
+			}
+			(*m_MagazinePtr)->SetReloadType(GetReloadType());
+			FillMag();															//マガジンはフル装填
+			CockByMag();														//チャンバーイン
+			//
+			//
+			this->m_ShotPhase = GunAnimeID::Base;
 		}
 
 		void GunClass::ExecuteCartInChamber(void) noexcept {
@@ -119,8 +189,7 @@ namespace FPS_n2 {
 				switch (GetShotType()) {
 				case SHOTTYPE::FULL:
 				case SHOTTYPE::SEMI:
-					this->m_IsEject = false;
-					this->m_IsEject |= (GetShoting() && (1.f <= GetNowAnime().time && GetNowAnime().time <= 2.f));
+					this->m_IsEject = this->m_ShotSwitch;
 					break;
 				case SHOTTYPE::BOLT:
 					this->m_IsEject = false;
@@ -139,78 +208,166 @@ namespace FPS_n2 {
 
 		void GunClass::Init(void) noexcept {
 			ObjectBaseClass::Init();
-
 			//データ
-			m_GunDataClass = GunDataManager::Instance()->LoadAction(this->m_FilePath);
-			//マガジンの用意
-			if (m_GunDataClass->GetPartsSlot(GunSlot::Magazine)) {
-				int size = (int)m_GunDataClass->GetPartsSlot(GunSlot::Magazine)->m_Items.size();
-				int ID = GetRand(size - 1);
-				if (ID != size) {
-					m_ModControl.SetParts(m_GunDataClass->GetPartsSlot(GunSlot::Magazine)->m_Items.at(ID), ObjType::Magazine, GetObj());
-				}
-			}
-			//
-			if (m_GunDataClass->GetPartsSlot(GunSlot::Upper)) {
-				int size = (int)m_GunDataClass->GetPartsSlot(GunSlot::Upper)->m_Items.size();
-				int ID = GetRand(size - 1);
-				if (ID != size) {
-					m_ModControl.SetParts(m_GunDataClass->GetPartsSlot(GunSlot::Upper)->m_Items.at(ID), ObjType::Upper, GetObj());
-				}
-			}
-			if (m_GunDataClass->GetPartsSlot(GunSlot::Lower)) {
-				int size = (int)m_GunDataClass->GetPartsSlot(GunSlot::Lower)->m_Items.size();
-				int ID = GetRand(size - 1);
-				if (ID != size) {
-					m_ModControl.SetParts(m_GunDataClass->GetPartsSlot(GunSlot::Lower)->m_Items.at(ID), ObjType::Lower, GetObj());
-				}
-			}
-			if (m_GunDataClass->GetPartsSlot(GunSlot::Barrel)) {
-				int size = (int)m_GunDataClass->GetPartsSlot(GunSlot::Barrel)->m_Items.size();
-				int ID = GetRand(size - 1);
-				if (ID != size) {
-					m_ModControl.SetParts(m_GunDataClass->GetPartsSlot(GunSlot::Barrel)->m_Items.at(ID), ObjType::Barrel, GetObj());
-				}
-			}
-			if (m_GunDataClass->GetPartsSlot(GunSlot::Sight)) {
-				int size = (int)m_GunDataClass->GetPartsSlot(GunSlot::Sight)->m_Items.size();
-				int ID = GetRand(size);
-				if (ID != size) {
-					m_ModControl.SetParts(m_GunDataClass->GetPartsSlot(GunSlot::Sight)->m_Items.at(ID), ObjType::Sight, GetObj());
+			InitModSlotControl(this->m_FilePath, false);
+			//パーツの用意
+			{
+				auto* Slots = GetGunDataClass()->GetPartsSlot(GunSlot::Magazine);
+				if (Slots) {
+					int size = (int)Slots->m_ItemsUniqueID.size();
+					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
+					if (ID != size) {
+						SetMod(GunSlot::Magazine, ID, GetObj());
+						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Magazine));
+						if (Ptr) {
+							Ptr->SetRandomChildParts();
+						}
+					}
 				}
 			}
 			{
-				std::vector<const std::shared_ptr<ObjectBaseClass>*> PartsList;
-				m_ModControl.GetChildPartsList(&PartsList);
-				m_SightPtr = nullptr;
-				m_MuzzlePtr = nullptr;
-				m_UpperPtr = nullptr;
-				m_MagazinePtr = nullptr;
-				for (auto& p : PartsList) {
-					if ((*p)->GetobjType() == ObjType::Sight) {
-						m_SightPtr = &((std::shared_ptr<SightClass>&)(*p));
-					}
-					if ((*p)->GetobjType() == ObjType::MuzzleAdapter) {
-						m_MuzzlePtr = &((std::shared_ptr<MuzzleClass>&)(*p));
-					}
-					if ((*p)->GetobjType() == ObjType::Upper) {
-						m_UpperPtr = &((std::shared_ptr<UpperClass>&)(*p));
-					}
-					if ((*p)->GetobjType() == ObjType::Magazine) {
-						m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(*p));
+				auto* Slots = GetGunDataClass()->GetPartsSlot(GunSlot::Upper);
+				if (Slots) {
+					int size = (int)Slots->m_ItemsUniqueID.size();
+					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
+					if (ID != size) {
+						SetMod(GunSlot::Upper, ID, GetObj());
+						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Upper));
+						if (Ptr) {
+							Ptr->SetRandomChildParts();
+						}
 					}
 				}
-				PartsList.clear();
+			}
+			{
+				auto* Slots = GetGunDataClass()->GetPartsSlot(GunSlot::Lower);
+				if (Slots) {
+					int size = (int)Slots->m_ItemsUniqueID.size();
+					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
+					if (ID != size) {
+						SetMod(GunSlot::Lower, ID, GetObj());
+						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Lower));
+						if (Ptr) {
+							Ptr->SetRandomChildParts();
+						}
+					}
+				}
+			}
+			{
+				auto* Slots = GetGunDataClass()->GetPartsSlot(GunSlot::Barrel);
+				if (Slots) {
+					int size = (int)Slots->m_ItemsUniqueID.size();
+					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
+					if (ID != size) {
+						SetMod(GunSlot::Barrel, ID, GetObj());
+						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Barrel));
+						if (Ptr) {
+							Ptr->SetRandomChildParts();
+						}
+					}
+				}
+			}
+			{
+				auto* Slots = GetGunDataClass()->GetPartsSlot(GunSlot::Sight);
+				if (Slots) {
+					int size = (int)Slots->m_ItemsUniqueID.size();
+					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
+					if (ID != size) {
+						SetMod(GunSlot::Sight, ID, GetObj());
+						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Sight));
+						if (Ptr) {
+							Ptr->SetRandomChildParts();
+						}
+					}
+				}
 			}
 			//
-			(*m_MagazinePtr)->SetReloadType(GetReloadType());
-			FillMag();															//マガジンはフル装填
-			CockByMag();														//チャンバーイン
+			{
+				m_CharaAnimeSet.clear();
+				//M4
+				m_CharaAnimeSet.resize(m_CharaAnimeSet.size() + 1);
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Down) = 0;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Ready) = 0;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ADS) = 0;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Cocking) = 35;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::CheckStart) = 15;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Check) = 30;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::CheckEnd) = 30;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadStart_Empty) = 15;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadStart) = 15;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadOne) = 30;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 10;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 60;
+				//ハンドガン
+				m_CharaAnimeSet.resize(m_CharaAnimeSet.size() + 1);
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Down) = 0;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Ready) = 0;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ADS) = 0;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Cocking) = 35;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::CheckStart) = 15;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Check) = 30;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::CheckEnd) = 30;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadStart_Empty) = 15;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadStart) = 15;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadOne) = 30;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 10;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 60;
+				//M870
+				m_CharaAnimeSet.resize(m_CharaAnimeSet.size() + 1);
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Down) = 0;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Ready) = 0;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ADS) = 0;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Cocking) = 35;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::CheckStart) = 15;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Check) = 15;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::CheckEnd) = 30;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadStart_Empty) = 15;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadStart) = 15;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadOne) = 30;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 10;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 60;
+				//
+				m_GunAnimeSet.clear();
+				//M4
+				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Aim).emplace_back(EnumGunAnim::M16_aim);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::ADS).emplace_back(EnumGunAnim::M16_ads);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::ReloadStart_Empty).emplace_back(EnumGunAnim::M16_reloadstart_empty);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::ReloadStart).emplace_back(EnumGunAnim::M16_reloadstart);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Reload).emplace_back(EnumGunAnim::M16_reload);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Ready).emplace_back(EnumGunAnim::M16_ready1);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Ready).emplace_back(EnumGunAnim::M16_ready2);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Run).emplace_back(EnumGunAnim::M16_run);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Check).emplace_back(EnumGunAnim::M16_check1);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Watch).emplace_back(EnumGunAnim::M1911_watch);
+				//ハンドガン
+				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Aim).emplace_back(EnumGunAnim::M1911_aim1);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Aim).emplace_back(EnumGunAnim::M1911_aim2);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::ADS).emplace_back(EnumGunAnim::M1911_ads);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::ReloadStart_Empty).emplace_back(EnumGunAnim::M1911_reloadstart_empty);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::ReloadStart).emplace_back(EnumGunAnim::M1911_reloadstart);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Reload).emplace_back(EnumGunAnim::M1911_reload);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Ready).emplace_back(EnumGunAnim::M1911_ready1);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Ready).emplace_back(EnumGunAnim::M1911_ready2);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Run).emplace_back(EnumGunAnim::M1911_run);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Check).emplace_back(EnumGunAnim::M1911_check1);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Watch).emplace_back(EnumGunAnim::M1911_watch);
+				//M870
+				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Aim).emplace_back(EnumGunAnim::M16_aim);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::ADS).emplace_back(EnumGunAnim::M16_ads);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::ReloadStart_Empty).emplace_back(EnumGunAnim::M16_reloadstart_empty);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::ReloadStart).emplace_back(EnumGunAnim::M16_reloadstart);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Reload).emplace_back(EnumGunAnim::M16_reload);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Ready).emplace_back(EnumGunAnim::M16_ready1);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Ready).emplace_back(EnumGunAnim::M16_ready2);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Run).emplace_back(EnumGunAnim::M16_run);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Check).emplace_back(EnumGunAnim::M16_check1);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Watch).emplace_back(EnumGunAnim::M1911_watch);
+			}
 			//
-			m_MagFall.Init(m_BackGround, (*m_MagazinePtr)->GetFilePath());
-			m_CartFall.Init(m_BackGround, (*m_MagazinePtr)->GetAmmoSpecMagTop()->GetPath());	//装填したマガジンの弾に合わせて薬莢生成
-			//
-			this->m_ShotPhase = GunAnimeID::Base;
+			Init_Gun();
 		}
 		void GunClass::FirstExecute(void) noexcept {
 			auto SE = SoundPool::Instance();
@@ -240,7 +397,7 @@ namespace FPS_n2 {
 					}
 					GetObj().get_anime(i).per = 1.f;
 					if (Sel == GunAnimeID::Shot) {
-						SetAnimOnce(i, ((float)this->m_GunDataClass->GetShotRate()) / 300.f);//分間300
+						SetAnimOnce(i, ((float)this->GetGunDataClass()->GetShotRate()) / 300.f);//分間300
 					}
 					else {
 						SetAnimOnce(i, 1.5f);
@@ -416,7 +573,7 @@ namespace FPS_n2 {
 			ExecuteCartInChamber();
 			//リコイルの演算
 			if (this->m_RecoilRadAdd.y() < 0.f) {
-				Easing(&this->m_RecoilRadAdd, VECTOR_ref::vget(0.f, 0.01f, 0.f), this->m_GunDataClass->GetRecoilReturn(), EasingType::OutExpo);
+				Easing(&this->m_RecoilRadAdd, VECTOR_ref::vget(0.f, 0.01f, 0.f), this->GetGunDataClass()->GetRecoilReturn(), EasingType::OutExpo);
 			}
 			else {
 				Easing(&this->m_RecoilRadAdd, VECTOR_ref::zero(), 0.7f, EasingType::OutExpo);
@@ -440,8 +597,8 @@ namespace FPS_n2 {
 			}
 		}
 		void GunClass::Dispose(void) noexcept {
-			m_BackGround.reset();
-			m_GunDataClass.reset();
+			ObjectBaseClass::Dispose();
+			DisposeModSlotControl();
 		}
 	};
 };

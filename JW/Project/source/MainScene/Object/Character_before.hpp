@@ -4,6 +4,7 @@
 #include "../../sub.hpp"
 #include "CharaAnimData.hpp"
 #include "CharacterEnum.hpp"
+#include "ObjectBase.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -375,6 +376,50 @@ namespace FPS_n2 {
 			LaserSightClass(void) noexcept { }
 			~LaserSightClass(void) noexcept { }
 		public:
+		};
+
+		class HitBoxControl {
+		private:
+			std::vector<HitBox>									m_HitBox;
+		protected:
+			//被弾チェック
+			const auto		CheckLineHited(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
+				bool is_Hit = false;
+				for (auto& h : this->m_HitBox) {
+					is_Hit |= h.Colcheck(StartPos, pEndPos);
+				}
+				return is_Hit;
+			}
+		public://ゲッター
+			const HitBox*		GetLineHit(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
+				for (auto& h : this->m_HitBox) {
+					if (h.Colcheck(StartPos, pEndPos)) {
+						return &h;
+					}
+				}
+				return nullptr;
+			}
+		public:
+			HitBoxControl(void) noexcept { }
+			~HitBoxControl(void) noexcept { }
+		protected:
+			void InitHitBox() noexcept {
+				m_HitBox.resize(27);
+			}
+			void UpdataHitBox(const ObjectBaseClass* ptr, float SizeRate) noexcept;
+			void DrawHitBox() noexcept {
+				//this->GetObj().SetOpacityRate(0.5f);
+				SetFogEnable(FALSE);
+				SetUseLighting(FALSE);
+				//SetUseZBuffer3D(FALSE);
+
+				for (auto& h : this->m_HitBox) {
+					h.Draw();
+				}
+
+				//SetUseZBuffer3D(TRUE);
+				SetUseLighting(TRUE);
+			}
 		};
 	};
 };

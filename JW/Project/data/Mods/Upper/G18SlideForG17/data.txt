@@ -1,10 +1,11 @@
-Name=Glock18 Slide processed for Glock17
+Name=Glock18 Slide (for 17)
 
 RecoilPower=600
 RecoilReturn=0.95
 shottype=FULL
 
 Slot0Type=Sight
+Slot0IsNeed=true
 Slot0Item=GNormalSight
 Slot0Item=GHeightSight
 

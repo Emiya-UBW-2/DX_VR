@@ -1,6 +1,7 @@
 Name=Glock19 LP Frame
 
 Slot0Type=UnderRail
+Slot0IsNeed=false
 Slot0Item=Uni_PistolRail
 Slot0Item=X400_LaserSight
 Slot0Item=SBalPL_LaserSight

@@ -27,15 +27,22 @@ namespace FPS_n2 {
 				this->m_Ptr[this->m_Now]->SetFall(pPos, pMat, pVec, time, sound);
 				++this->m_Now %= this->m_Ptr.size();
 			}
+			void		Dispose() noexcept {
+				auto* ObjMngr = ObjectManager::Instance();
+				for (auto& c : m_Ptr) {
+					ObjMngr->DelObj((SharedObj*)&c);
+					c.reset();
+				}
+			}
 		};
 		//
 		class SlotPartsControl {
 		private:
-			std::array<std::shared_ptr<ObjectBaseClass>, (int)ObjType::Max>	m_Parts_Ptr{ nullptr };
+			std::array<std::shared_ptr<ObjectBaseClass>, (int)GunSlot::Max>	m_Parts_Ptr{ nullptr };
 		public:
-			const bool	HasParts(ObjType objType) const noexcept { return (this->m_Parts_Ptr[(int)objType].get() != nullptr); }
-			const auto&	GetPartsPtr(ObjType objType) const noexcept { return this->m_Parts_Ptr[(int)objType]; }
-			const bool	IsEffectParts(ObjType objType, GunFrame frame) const noexcept;
+			const bool	HasParts(GunSlot objType) const noexcept { return (this->m_Parts_Ptr[(int)objType].get() != nullptr); }
+			const auto&	GetPartsPtr(GunSlot objType) const noexcept { return this->m_Parts_Ptr[(int)objType]; }
+			const bool	IsEffectParts(GunSlot objType, GunFrame frame) const noexcept;
 			const bool	HasFrame(GunFrame frame) const noexcept;
 			const bool	GetPartsFrameLocalMat(GunFrame frame, MATRIX_ref* pRet) const noexcept;
 			const bool	GetPartsFrameWorldMat(GunFrame frame, MATRIX_ref* pRet) const noexcept;
@@ -43,9 +50,10 @@ namespace FPS_n2 {
 			void		ResetPartsFrameLocalMat(GunFrame frame) noexcept;
 			void		SetPartsFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept;
 		public:
-			void		SetParts(std::string pPath, ObjType objType, const MV1& BaseModel);
+			const SharedObj*	SetParts(int uniqueID, GunSlot objType, const MV1& BaseModel);
+			void		RemoveParts(GunSlot objType);
 			void		UpdatePartsAnim(const MV1& pParent);
-			void		UpdatePartsMove(const MATRIX_ref& pMat, ObjType objType);
+			void		UpdatePartsMove(const MATRIX_ref& pMat, GunSlot objType);
 			void		DisposeSlotPartsControl();
 		};
 		//

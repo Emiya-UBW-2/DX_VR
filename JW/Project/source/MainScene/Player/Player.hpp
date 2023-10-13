@@ -8,7 +8,7 @@ namespace FPS_n2 {
 		class PlayerControl {
 		private:
 			std::shared_ptr<ObjectBaseClass>	m_Chara{ nullptr };
-			int								m_Score{ 0 };							//スコア
+			int									m_Score{ 0 };							//スコア
 		public:
 			PlayerControl(void) noexcept {
 				this->m_Score = 0;
@@ -34,7 +34,8 @@ namespace FPS_n2 {
 			}
 
 			void Dispose(void) noexcept {
-				m_Chara = nullptr;
+				m_Chara.reset();
+				m_Score = 0;
 			}
 		};
 

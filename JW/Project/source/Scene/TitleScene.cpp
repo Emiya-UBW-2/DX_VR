@@ -5,11 +5,7 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			TitleScene::Set_Sub(void) noexcept {
-			Get_Next()->Load();
-			//auto* SE = SoundPool::Instance();
-			//ƒTƒEƒ“ƒh
-			//this->m_BGM = SoundHandle::Load("data/Sound/BGM/Beethoven8_2.wav");
-			//this->m_BGM.vol(128);
+			//Get_Next()->Load();
 			select = 0;
 			GameFadeIn = 0.f;
 			GameStart = 0.f;

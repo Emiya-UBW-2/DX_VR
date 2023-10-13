@@ -9,9 +9,11 @@ soundsel=2
 reloadType=AMMO
 
 Slot0Type=Magazine
+Slot0IsNeed=true
 Slot0Item=Mod870Mag
 
 Slot1Type=Sight
+Slot1IsNeed=false
 Slot1Item=VIPER_DotSight
 
 end

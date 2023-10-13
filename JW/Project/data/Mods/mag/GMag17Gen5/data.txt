@@ -1,6 +1,0 @@
-Name=GMag 17Round(Gen5)
-
-capacity=17
-useammo0=9x19
-
-end

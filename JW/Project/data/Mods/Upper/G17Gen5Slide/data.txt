@@ -1,6 +1,7 @@
 Name=Glock17 Gen5 Slide
 
 Slot0Type=Sight
+Slot0IsNeed=false
 Slot0Item=CTS1500
 
 end

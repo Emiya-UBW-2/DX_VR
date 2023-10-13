@@ -184,6 +184,7 @@ namespace FPS_n2 {
 			public OverrideControl,
 			public EffectControl,
 			public LaserSightClass,
+			public HitBoxControl,
 			public HumanControl
 		{
 		private://キャラパラメーター
@@ -191,41 +192,22 @@ namespace FPS_n2 {
 			const float											UpperTimerLimit = 10.f;
 		private:
 			CharaTypeID											m_CharaType;
-			std::vector<std::array<int, (int)CharaGunAnimeID::Max>>							m_CharaAnimeSet;
-			std::vector<std::array<std::vector<EnumGunAnim>, (int)EnumGunAnimType::Max>>							m_GunAnimeSet;
-
-			int													m_CharaAnimeSel{ 0 };
-			int													m_ReadyAnimeSel{ 0 };
 			int													m_AimAnimeSel{ 0 };
 			int													m_CheckAnimeSel{ 0 };
-			//
-			std::array<float, (int)CharaAnimeID::AnimeIDMax>	m_AnimPerBuf{ 0 };
 			VECTOR_ref											m_PosBuf;
-
 			MATRIX_ref											m_UpperMatrix;
 			float												m_LeanRad{ 0.f };
 			float												m_LateLeanRad{ 0.f };
 			float												m_Speed{ 0.f };
 			float												m_yrad_Upper{ 0.f }, m_yrad_Bottom{ 0.f };
 			float												m_RunPer2{ 0.f }, m_PrevRunPer2{ 0.f };
-			float												m_NeckPer{ 0.f };
 			bool												m_TurnBody{ false };
 			bool												m_RunReady{ false };
 			bool												m_Running{ false };
-			CharaGunAnimeID										m_GunAnimSelect;
 			CharaAnimeID										m_BottomAnimSelect;
-			std::array<float, (int)CharaGunAnimeID::Max>		m_GunAnimFrame;
-			float			GetAllTime(CharaGunAnimeID ID) { return (float)m_CharaAnimeSet.at(this->m_CharaAnimeSel).at((int)ID); }
-			void			UpdateGunAnim(CharaGunAnimeID ID, float speed) { m_GunAnimFrame.at((int)ID) += 30.f / FPS * speed; }
-			bool			GetGunAnimZero(CharaGunAnimeID ID) { return m_GunAnimFrame.at((int)ID) <= 0.f; }
-			bool			GetGunAnimEnd(CharaGunAnimeID ID) { return m_GunAnimFrame.at((int)ID) >= GetAllTime(ID); }
-			float			GetTimePer(CharaGunAnimeID ID) { return (GetAllTime(ID) > 0.f) ? (m_GunAnimFrame.at((int)ID) / GetAllTime(ID)) : 1.f; }
-
-			//銃
+			std::array<float, (int)CharaAnimeID::AnimeIDMax>	m_AnimPerBuf{ 0 };
 			float												m_ReadyTimer{ 0.f };
-
 			std::array<ArmMovePerClass, (int)EnumGunAnimType::Max>	m_Arm;
-
 			bool												m_MagHand{ false };
 			ArmMovePerClass										m_MagArm;
 			float												m_MoveEyePosTimer{ 0.f };
@@ -245,12 +227,9 @@ namespace FPS_n2 {
 			bool												m_Press_Check{ false };
 			bool												m_Press_Watch{ false };
 			//体力
-			std::vector<HitBox>									m_HitBox;
 			std::vector<DamageEvent>							m_DamageEvent;									//
 			//サウンド
 			int													m_CharaSound{ -1 };
-			//
-			std::shared_ptr<GunClass>							m_Gun_Ptr{ nullptr };			//銃
 			//
 			bool												m_SendCamShake{ false };
 			//
@@ -258,7 +237,6 @@ namespace FPS_n2 {
 			VECTOR_ref											m_UpperRad;
 			VECTOR_ref											m_UpperyVecNormal, m_UpperzVecNormal;
 			VECTOR_ref											m_UpperyVec, m_UpperzVec, m_UpperPos;
-			float												m_UpperAnim{ 0.f };
 			//
 			float												m_ADSPer = 0.f;
 			//
@@ -267,33 +245,30 @@ namespace FPS_n2 {
 			VECTOR_ref											m_WalkSwing;
 			VECTOR_ref											m_WalkSwing_p;
 			VECTOR_ref											m_WalkSwing_t;
-
 			float												m_GunShakePer{ 0.f };
 			VECTOR_ref											m_GunShake;
 			VECTOR_ref											m_GunShake_r;
-
 			float												m_AmmoHandR{ 0.f };
 			float												m_AmmoHand{ 0.f };
-
 			int													m_LeanSoundReq{ 0 };
 			float												m_LeanRatePer{ 0.f };
 			float												m_SquatPer{ 0.f };
 			float												m_RunPer{ 0.f };
-
 			bool												m_SquatSoundReq{ false };
-
-
 			VECTOR_ref											m_HitAxis{ VECTOR_ref::front() };
 			float												m_HitPower{ 0.f };
 			float												m_HitPowerR{ 0.f };
-
-
 			MV1													m_RagDoll;
 			float												m_RagDollTimer{ 0.f };						//ラグドールの物理演算フラグ
+			//銃
+			std::shared_ptr<GunClass>							m_Gun_Ptr{ nullptr };			//銃
 		private:
 			std::shared_ptr<BackGroundClassBase>		m_BackGround;				//BG
 		public:
-			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept { this->m_BackGround = backGround; }
+			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept {
+				m_BackGround.reset();
+				this->m_BackGround = backGround;
+			}
 		public://ゲッター(ラッパー)
 			const auto		GetBottomStandAnimSel(void) const noexcept { return KeyControl::GetIsSquat() ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
 			const auto		GetBottomWalkAnimSel(void) const noexcept { return KeyControl::GetIsSquat() ? CharaAnimeID::Bottom_Squat_Walk : CharaAnimeID::Bottom_Stand_Walk; }
@@ -318,6 +293,9 @@ namespace FPS_n2 {
 
 			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
 			const auto		GetIsAim(void) const noexcept { return !(this->m_ReadyTimer == UpperTimerLimit); }
+			const auto		GetShotPhase(void) const noexcept { return (GetGunPtrNow_Const()) ? GetGunPtrNow_Const()->GetShotPhase() : GunAnimeID::Base; }
+
+			const auto		GetShootReady(void) const noexcept { return (GetGunPtrNow_Const()) ? GetGunPtrNow_Const()->GetShootReady() : false; }
 		private:
 			void			SetReady(void) noexcept { this->m_ReadyTimer = UpperTimerLimit; }
 			void			SetAim(void) noexcept { this->m_ReadyTimer = 0.1f; }
@@ -338,7 +316,6 @@ namespace FPS_n2 {
 			void			SetGunPtr(const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_Gun_Ptr = pGunPtr0; }
 			void			GunSetUp() noexcept {
 				if (GetGunPtrNow() != nullptr) {
-					this->m_CharaAnimeSel = GetGunPtrNow()->GetHumanAnimType();
 					GetGunPtrNow()->SetPlayerID(this->m_MyID);
 				}
 			}
@@ -358,13 +335,8 @@ namespace FPS_n2 {
 			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetFrameWorldMatrix(GetFrame(frame)); }
 			const auto		GetParentFrameWorldMat(CharaFrame frame) const noexcept { return GetParentFrameWorldMatrix(GetFrame(frame)); }
 			const auto		GetCharaDir(void) const noexcept { return this->m_UpperMatrix * this->m_move.mat; }
-			const auto		GetCharaVecX(void) const noexcept { return GetCharaDir().xvec(); }
-			const auto		GetCharaVecY(void) const noexcept { return GetCharaDir().yvec(); }
-			const auto		GetCharaVector(void) const noexcept { return GetCharaDir().zvec() * -1.f; }
-			const auto		GetCanshot(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetCanShot() : false; }
 			const auto		GetAmmoNum(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetAmmoNum() : 0; }
 			const auto		GetAmmoAll(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetAmmoAll() : 0; }
-			const auto		GetShoting(void) const noexcept { return (GetGunPtrNow_Const() != nullptr) ? GetGunPtrNow_Const()->GetShoting() : false; }
 
 			const auto&		GetADSPer(void) const noexcept { return this->m_ADSPer; }
 			const auto		GetEyeVecY(void) const noexcept { return GetEyeVecMat().yvec(); }
@@ -379,28 +351,12 @@ namespace FPS_n2 {
 					return EyePosition;
 				}
 			}
-		private:
-			//被弾チェック
-			const auto		CheckLineHited(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
-				if (IsAlive()) {
-					bool is_Hit = false;
-					for (auto& h : this->m_HitBox) {
-						is_Hit |= h.Colcheck(StartPos, pEndPos);
-					}
-					return is_Hit;
-				}
-				else {
-					return false;
-				}
-			}
 		public:
+			//とりあえず当たったかどうか探す
 			const auto		CheckLineHit(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
-				if (GetMinLenSegmentToPoint(StartPos, *pEndPos, m_move.pos) <= 2.0f*Scale_Rate) {
-					if (this->CheckLineHited(StartPos, pEndPos)) {									//とりあえず当たったかどうか探す
-						return true;
-					}
-				}
-				return false;
+				if (!IsAlive()) { return false; }
+				if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, m_move.pos) <= 2.0f*Scale_Rate)) { return false; }
+				return HitBoxControl::CheckLineHited(StartPos, pEndPos);
 			}
 			const bool		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept;
 			void			move_RightArm(const VECTOR_ref& GunPos, const VECTOR_ref& Gunyvec, const VECTOR_ref& Gunzvec) noexcept;

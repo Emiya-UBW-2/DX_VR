@@ -4,6 +4,7 @@
 #include "GunEnum.hpp"
 #include "GunData.hpp"
 #include "Gun_before.hpp"
+#include "CharaAnimData.hpp"
 
 #include "../../sub.hpp"
 #include "ObjectBase.hpp"
@@ -14,10 +15,10 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class GunClass :
 			public ObjectBaseClass,
-			public MuzzleSmokeControl
+			public MuzzleSmokeControl,
+			public ModSlotControl
 		{
 		private:
-			std::shared_ptr<GunDataClass>			m_GunDataClass;
 			std::shared_ptr<AmmoDataClass>			m_ChamberAmmoData{ nullptr };		//
 			GunAnimeID								m_ShotPhase{ GunAnimeID::Base };	//
 			bool									m_ShotSwitch{ false };				//
@@ -27,15 +28,30 @@ namespace FPS_n2 {
 			VECTOR_ref								m_RecoilRadAdd;
 			FallControl								m_MagFall;
 			FallControl								m_CartFall;
-			SlotPartsControl						m_ModControl;
 			const std::shared_ptr<SightClass>*		m_SightPtr{ nullptr };
 			const std::shared_ptr<MuzzleClass>*		m_MuzzlePtr{ nullptr };
 			const std::shared_ptr<UpperClass>*		m_UpperPtr{ nullptr };
 			const std::shared_ptr<MagazineClass>*	m_MagazinePtr{ nullptr };
 		private:
-			std::shared_ptr<BackGroundClassBase>	m_BackGround;						//BG
+			std::array<float, (int)CharaGunAnimeID::Max>									m_GunAnimFrame;
+			std::vector<std::array<int, (int)CharaGunAnimeID::Max>>							m_CharaAnimeSet;
+			std::vector<std::array<std::vector<EnumGunAnim>, (int)EnumGunAnimType::Max>>	m_GunAnimeSet;
+			float																			m_UpperAnim{ 0.f };
 		public:
-			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept { this->m_BackGround = backGround; }
+			const auto&		GetUpperAnim(void) const noexcept { return this->m_UpperAnim; }
+			const auto&		GetGunDataClass(void) const noexcept { return (std::shared_ptr<GunDataClass>&)this->GetModData(); }
+			const auto&		GetHumanAnimType(void) const noexcept { return GetGunDataClass()->GetHumanAnimType(); }
+			const auto&		GetGunAnimeSet(EnumGunAnimType ID) const noexcept { return this->m_GunAnimeSet.at(GetHumanAnimType()).at((int)ID).at(0); }
+			float			GetAllTime(CharaGunAnimeID ID) { return (float)m_CharaAnimeSet.at(GetHumanAnimType()).at((int)ID); }
+			auto&			GetGunAnimFrame(CharaGunAnimeID ID) { return m_GunAnimFrame.at((int)ID); }
+
+			void			SetGunAnim(CharaGunAnimeID ID, float value) { GetGunAnimFrame(ID) = value; }
+			void			UpdateGunAnim(CharaGunAnimeID ID, float speed) { GetGunAnimFrame(ID) += 30.f / FPS * speed; }
+			bool			GetGunAnimZero(CharaGunAnimeID ID) { return GetGunAnimFrame(ID) <= 0.f; }
+			bool			GetGunAnimEnd(CharaGunAnimeID ID) { return GetGunAnimFrame(ID) >= GetAllTime(ID); }
+			float			GetTimePer(CharaGunAnimeID ID) { return (GetAllTime(ID) > 0.f) ? (GetGunAnimFrame(ID) / GetAllTime(ID)) : 1.f; }
+		public:
+			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept;
 		public://ゲッター
 			const auto& GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
 			const bool	HaveFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first != -1; }
@@ -48,7 +64,7 @@ namespace FPS_n2 {
 			void ResetFrameLocalMat(GunFrame frame) noexcept;
 			void SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept;
 		private:
-			const auto	GetGunSoundSet(void) const noexcept { return GunSoundSets[this->m_GunDataClass->GetSoundSel()]; }
+			const auto	GetGunSoundSet(void) const noexcept { return GunSoundSets[GetGunDataClass()->GetSoundSel()]; }
 		public://ゲッター
 			const GraphHandle* GetReticlePtr(void) const noexcept {
 				if (this->m_SightPtr) {
@@ -56,13 +72,13 @@ namespace FPS_n2 {
 				}
 				return nullptr;
 			}
-			const auto& GetName(void) const noexcept { return this->m_GunDataClass->GetName(); }
-			const auto& GetHumanAnimType(void) const noexcept { return this->m_GunDataClass->GetHumanAnimType(); }
-			const auto& GetReloadType(void) const noexcept { return this->m_GunDataClass->GetReloadType(); }
+			const auto& GetName(void) const noexcept { return GetGunDataClass()->GetName(); }
+			const auto& GetReloadType(void) const noexcept { return GetGunDataClass()->GetReloadType(); }
 			const auto& GetShotSwitch(void) const noexcept { return this->m_ShotSwitch; }
 			const auto& GetShotPhase(void) const noexcept { return this->m_ShotPhase; }
 			const auto&	GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd; }
 			const auto& GetNowAnime(void) noexcept { return GetObj().get_anime((size_t)this->m_ShotPhase); }
+			const auto& GetMagazinePtr(void) const noexcept { return m_MagazinePtr; }
 			const auto& GetAmmoAll(void) const noexcept { return (*m_MagazinePtr)->GetAmmoAll(); }
 			const auto	GetIsMagEmpty(void) const noexcept { return (*m_MagazinePtr)->GetAmmoNum() == 0; }//次弾がない
 			const auto	GetIsMagFull(void) const noexcept { return (*m_MagazinePtr)->GetAmmoNum() == this->GetAmmoAll(); }
@@ -71,25 +87,25 @@ namespace FPS_n2 {
 				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetIsRecoilPower()) {
 					return (*this->m_UpperPtr)->GetRecoilPower();
 				}
-				return this->m_GunDataClass->GetRecoilPower();
+				return GetGunDataClass()->GetRecoilPower();
 			}
 			const auto& GetRecoilReturn(void) const noexcept {
 				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetIsRecoilReturn()) {
 					return (*this->m_UpperPtr)->GetRecoilReturn();
 				}
-				return this->m_GunDataClass->GetRecoilReturn();
+				return GetGunDataClass()->GetRecoilReturn();
 			}
 			const auto	GetShotType(void) const noexcept {
 				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetIsShotType()) {
 					return (*this->m_UpperPtr)->GetShotType();
 				}
-				return this->m_GunDataClass->GetShotType();
+				return GetGunDataClass()->GetShotType();
 			}
 			const auto	GetGunShootSound(void) const noexcept {
 				if (this->m_MuzzlePtr) {
 					return (*this->m_MuzzlePtr)->GetGunShootSound();
 				}
-				return this->m_GunDataClass->GetGunShootSound();
+				return GetGunDataClass()->GetGunShootSound();
 			}
 			const auto	GetShoting(void) const noexcept { return this->m_ShotPhase == GunAnimeID::Shot; }
 			const auto	GetCocking(void) const noexcept { return this->m_ShotPhase == GunAnimeID::Cocking; }
@@ -115,12 +131,12 @@ namespace FPS_n2 {
 			void		SetShotSwitchOff() noexcept { this->m_ShotSwitch = false; }
 			void		SetGunMatrix(const MATRIX_ref& value) noexcept {
 				SetMove(value.GetRot(), value.pos());
-				m_ModControl.UpdatePartsAnim(GetObj());
-				m_ModControl.UpdatePartsMove(GetFrameWorldMat(GunFrame::Lower), ObjType::Lower);
-				m_ModControl.UpdatePartsMove(GetFrameWorldMat(GunFrame::Upper), ObjType::Upper);
-				m_ModControl.UpdatePartsMove(GetFrameWorldMat(GunFrame::Barrel), ObjType::Barrel);
-				m_ModControl.UpdatePartsMove(GetFrameWorldMat(GunFrame::Sight), ObjType::Sight);
-				m_ModControl.UpdatePartsMove(GetFrameWorldMat(GunFrame::Magpos), ObjType::Magazine);
+				GetSlotControl()->UpdatePartsAnim(GetObj());
+				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::Lower), GunSlot::Lower);
+				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::Upper), GunSlot::Upper);
+				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::Barrel), GunSlot::Barrel);
+				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::Sight), GunSlot::Sight);
+				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::Magpos), GunSlot::Magazine);
 			}
 			void		SetShotPhase(GunAnimeID pShotPhase) noexcept { this->m_ShotPhase = pShotPhase; }
 			void		SetBullet(void) noexcept;//発砲
@@ -131,7 +147,163 @@ namespace FPS_n2 {
 					GetFrameWorldMat(GunFrame::Magpos).yvec()*-1.f*(Scale_Rate * 3.f / 60.f),
 					12.f, SoundEnum::MagFall);
 			}
+
+			void		SetPressShot() noexcept {
+				if (this->GetInChamber()) {
+					this->SetBullet();
+					this->m_ShotPhase = GunAnimeID::Shot;
+					this->m_ShotSwitch = true;
+				}
+				else {
+					this->m_ShotPhase = (!GetIsMagEmpty()) ? GunAnimeID::Cocking : GunAnimeID::ReloadStart_Empty;
+				}
+			}
 			void		SetReloadStart() noexcept { this->m_ShotPhase = (!GetIsMagEmpty()) ? GunAnimeID::ReloadStart : GunAnimeID::ReloadStart_Empty; }
+
+			void		UpdateGunAnims(bool PressShot) {
+				if (this->GetShoting()) {
+					bool ischeck = true;
+					switch (this->GetShotType()) {
+					case SHOTTYPE::FULL:
+						ischeck = this->GetInChamber() || this->GetIsMagEmpty();
+						break;
+					case SHOTTYPE::SEMI:
+					case SHOTTYPE::BOLT:
+						ischeck = !PressShot;
+						break;
+					default:
+						break;
+					}
+
+					if (this->GetNowAnime().TimeEnd() && ischeck) {
+						this->SetGunAnim(CharaGunAnimeID::Down, 0.f);
+						if (!this->GetIsMagEmpty()) {
+							switch (this->GetShotType()) {
+							case SHOTTYPE::FULL:
+							case SHOTTYPE::SEMI:
+								this->m_ShotPhase = GunAnimeID::Base;
+								break;
+							case SHOTTYPE::BOLT:
+								this->m_ShotPhase = GunAnimeID::Cocking;
+								break;
+							default:
+								break;
+							}
+						}
+						else {
+							this->m_ShotPhase = GunAnimeID::Base;
+						}
+					}
+				}
+				{
+					CharaGunAnimeID GunAnimSelect = CharaGunAnimeID::Down;
+					//コッキング
+					if (this->m_ShotPhase == GunAnimeID::Cocking) {
+						GunAnimSelect = CharaGunAnimeID::Cocking;
+						UpdateGunAnim(GunAnimSelect, 1.5f);
+						if (GetGunAnimEnd(GunAnimSelect)) {
+							this->m_ShotPhase = GunAnimeID::Base;
+						}
+					}
+					//リロード開始
+					if (this->m_ShotPhase == GunAnimeID::ReloadStart_Empty) {
+						GunAnimSelect = CharaGunAnimeID::ReloadStart_Empty;
+						if (this->GetGunAnimZero(GunAnimSelect)) {
+							m_UpperAnim = 0.f;
+						}
+						UpdateGunAnim(GunAnimSelect, 1.5f);
+						if (GetGunAnimEnd(GunAnimSelect)) {
+							this->m_ShotPhase = GunAnimeID::ReloadOne;
+						}
+					}
+					if (this->m_ShotPhase == GunAnimeID::ReloadStart) {
+						GunAnimSelect = CharaGunAnimeID::ReloadStart;
+						if (this->GetGunAnimZero(GunAnimSelect)) {
+							m_UpperAnim = 0.f;
+						}
+						UpdateGunAnim(GunAnimSelect, 1.5f);
+						if (GetGunAnimEnd(GunAnimSelect)) {
+							this->m_ShotPhase = GunAnimeID::ReloadOne;
+						}
+					}
+					//
+					if (this->m_ShotPhase == GunAnimeID::ReloadOne) {
+						GunAnimSelect = CharaGunAnimeID::ReloadOne;
+						UpdateGunAnim(GunAnimSelect, 1.5f);
+						if (GetGunAnimEnd(GunAnimSelect)) {
+							switch (this->GetReloadType()) {
+							case RELOADTYPE::MAG:
+								this->m_ShotPhase = GunAnimeID::ReloadEnd;
+								break;
+							case RELOADTYPE::AMMO:
+								if (this->GetIsMagFull()) {
+									this->m_ShotPhase = GunAnimeID::ReloadEnd;
+								}
+								else {
+									this->SetGunAnim(GunAnimSelect, 0.f);
+									this->GetObj().get_anime((int)this->m_ShotPhase).Reset();
+								}
+								break;
+							default:
+								break;
+							}
+						}
+					}
+					if (this->m_ShotPhase == GunAnimeID::ReloadEnd) {
+						GunAnimSelect = CharaGunAnimeID::ReloadEnd;
+						UpdateGunAnim(GunAnimSelect, 1.5f);
+						if (GetGunAnimEnd(GunAnimSelect)) {
+							if (this->GetInChamber()) {
+								this->m_ShotPhase = GunAnimeID::Base;
+							}
+							else {
+								if (!this->GetIsMagEmpty()) {
+									this->m_ShotPhase = GunAnimeID::Cocking;
+								}
+								else {
+									this->m_ShotPhase = GunAnimeID::ReloadStart;
+								}
+							}
+						}
+					}
+					//
+					if (this->m_ShotPhase == GunAnimeID::CheckStart) {
+						GunAnimSelect = CharaGunAnimeID::CheckStart;
+						UpdateGunAnim(GunAnimSelect, 1.5f);
+						if (GetGunAnimEnd(GunAnimSelect)) {
+							this->m_ShotPhase = GunAnimeID::Checking;
+						}
+					}
+					if (this->m_ShotPhase == GunAnimeID::Checking) {
+						GunAnimSelect = CharaGunAnimeID::Check;
+						UpdateGunAnim(GunAnimSelect, 1.f);
+						if (GetGunAnimEnd(GunAnimSelect)) {
+							this->m_ShotPhase = GunAnimeID::CheckEnd;
+						}
+					}
+					if (this->m_ShotPhase == GunAnimeID::CheckEnd) {
+						GunAnimSelect = CharaGunAnimeID::CheckEnd;
+						UpdateGunAnim(GunAnimSelect, 2.f);
+						if (GetGunAnimEnd(GunAnimSelect)) {
+							this->m_ShotPhase = GunAnimeID::Base;
+						}
+					}
+					//
+					if (this->m_ShotPhase == GunAnimeID::Watch) {
+						GunAnimSelect = CharaGunAnimeID::Watch;
+						UpdateGunAnim(GunAnimSelect, 1.5f);
+						if (GetGunAnimEnd(GunAnimSelect)) {
+							this->m_ShotPhase = GunAnimeID::Base;
+						}
+					}
+					for (int i = 0; i < (int)CharaGunAnimeID::Max; i++) {
+						if (GunAnimSelect != (CharaGunAnimeID)i) {
+							this->SetGunAnim((CharaGunAnimeID)i, 0.f);
+						}
+					}
+					m_UpperAnim += 60.f / FPS;
+				}
+			}
 		private:
 			void		ExecuteCartInChamber(void) noexcept;//チャンバーへの装弾、排出
 		public:
@@ -139,6 +311,7 @@ namespace FPS_n2 {
 			~GunClass(void) noexcept {}
 		public:
 			void			Init(void) noexcept override;
+			void			Init_Gun(void) noexcept;
 			void			FirstExecute(void) noexcept override;
 			void			Draw(bool isDrawSemiTrans) noexcept override;
 			void			Dispose(void) noexcept override;

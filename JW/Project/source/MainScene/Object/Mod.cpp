@@ -2,35 +2,69 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		void			ModSlotControl::SetMod(GunSlot Slot, int ID, const MV1& BaseModel) noexcept {
+			auto* Slots = this->m_ModDataClass->GetPartsSlot(Slot);
+			if (Slots) {
+				auto& Ptr = (std::shared_ptr<ModClass>&)(*this->m_SlotControl->SetParts(Slots->m_ItemsUniqueID.at(ID), Slot, BaseModel));
+				if (Ptr) {
+					Ptr->Init();
+				}
+			}
+		}
+
+
 		void			ModClass::Init(void) noexcept {
 			ObjectBaseClass::Init();
 			//データ
-			m_ModDataClass = ModDataManager::Instance()->LoadAction(this->m_FilePath);
-			//
-			if (m_ModDataClass->GetPartsSlot(GunSlot::UnderRail)) {
-				int size = (int)m_ModDataClass->GetPartsSlot(GunSlot::UnderRail)->m_Items.size();
-				int ID = GetRand(size);
-				if (ID != size) {
-					m_ModControl.SetParts(m_ModDataClass->GetPartsSlot(GunSlot::UnderRail)->m_Items.at(ID), ObjType::UnderRail, GetObj());
-				}
-			}
-			if (m_ModDataClass->GetPartsSlot(GunSlot::Sight)) {
-				int size = (int)m_ModDataClass->GetPartsSlot(GunSlot::Sight)->m_Items.size();
-				int ID = GetRand(size);
-				if (ID != size) {
-					m_ModControl.SetParts(m_ModDataClass->GetPartsSlot(GunSlot::Sight)->m_Items.at(ID), ObjType::Sight, GetObj());
-				}
-			}
-			if (m_ModDataClass->GetPartsSlot(GunSlot::MuzzleAdapter)) {
-				int size = (int)m_ModDataClass->GetPartsSlot(GunSlot::MuzzleAdapter)->m_Items.size();
-				int ID = GetRand(size);
-				if (ID != size) {
-					m_ModControl.SetParts(m_ModDataClass->GetPartsSlot(GunSlot::MuzzleAdapter)->m_Items.at(ID), ObjType::MuzzleAdapter, GetObj());
-				}
-			}
-			//
+			InitModSlotControl(this->m_FilePath, true);
 			Init_Mod();
 		}
+		void			ModClass::SetRandomChildParts(void) noexcept {
+			//パーツの用意
+			{
+				auto* Slots = GetModData()->GetPartsSlot(GunSlot::UnderRail);
+				if (Slots) {
+					int size = (int)Slots->m_ItemsUniqueID.size();
+					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
+					if (ID != size) {
+						SetMod(GunSlot::UnderRail, ID, GetObj());
+						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::UnderRail));
+						if (Ptr) {
+							Ptr->SetRandomChildParts();
+						}
+					}
+				}
+			}
+			{
+				auto* Slots = GetModData()->GetPartsSlot(GunSlot::Sight);
+				if (Slots) {
+					int size = (int)Slots->m_ItemsUniqueID.size();
+					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
+					if (ID != size) {
+						SetMod(GunSlot::Sight, ID, GetObj());
+						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Sight));
+						if (Ptr) {
+							Ptr->SetRandomChildParts();
+						}
+					}
+				}
+			}
+			{
+				auto* Slots = GetModData()->GetPartsSlot(GunSlot::MuzzleAdapter);
+				if (Slots) {
+					int size = (int)Slots->m_ItemsUniqueID.size();
+					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
+					if (ID != size) {
+						SetMod(GunSlot::MuzzleAdapter, ID, GetObj());
+						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::MuzzleAdapter));
+						if (Ptr) {
+							Ptr->SetRandomChildParts();
+						}
+					}
+				}
+			}
+		}
+
 		//マズル
 		void			UpperClass::Init_Mod(void) noexcept {
 			this->m_IsRecoilPower = false;
@@ -95,6 +129,13 @@ namespace FPS_n2 {
 				}
 			}
 			FileRead_close(mdata);
+		}
+		//
+		void			SightClass::Init_Mod(void) noexcept {
+			FILEINFO FileInfo;
+			if (FileRead_findFirst((this->m_FilePath + "reticle_0.png").c_str(), &FileInfo) != (DWORD_PTR)-1) {
+				m_Reitcle = GraphHandle::Load(this->m_FilePath + "reticle_0.png");
+			}
 		}
 		//マズル
 		void			MuzzleClass::Init_Mod(void) noexcept {

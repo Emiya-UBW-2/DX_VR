@@ -1,6 +1,7 @@
 #include	"CPU.hpp"
 #include "../../NetWork.hpp"
 #include "../../MainScene/Object/Character.hpp"
+#include "../../MainScene/Player/Player.hpp"
 #include "../../Scene/MainScene.hpp"
 
 namespace FPS_n2 {
@@ -13,8 +14,8 @@ namespace FPS_n2 {
 		}
 
 		int AI::GetNextWaypoint(const VECTOR_ref& Dir) {
-			auto* ObjMngr = ObjectManager::Instance();
-			auto& MyChara = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, m_MyCharaID));
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(m_MyCharaID).GetChara();
 			auto& MainGB = (std::shared_ptr<BackGroundClassMain>&)(this->m_BackGround);
 
 			int now = -1;
@@ -59,13 +60,13 @@ namespace FPS_n2 {
 		}
 		//
 		void AIControl::Init(const std::shared_ptr<BackGroundClassBase>& BackBround_t, PlayerID MyCharaID) noexcept {
-			m_AI.m_MyCharaID = MyCharaID;
+			this->m_AI.m_MyCharaID = MyCharaID;
 			this->m_AI.SetBackGround(BackBround_t);
 			this->m_AI.Init();
 		}
 		void AIControl::Execute(InputControl* MyInput) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
-			auto& MyChara = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, m_AI.m_MyCharaID));
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(m_AI.m_MyCharaID).GetChara();
 
 			bool W_key{ false };
 			bool S_key{ false };
@@ -118,8 +119,7 @@ namespace FPS_n2 {
 				}
 
 				if (Vec_XZ.Length() < 1.5f*Scale_Rate) {
-					auto& TargetChara = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, 0));
-
+					auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
 					{
 						auto Dir_t = TargetChara->GetMove().pos - MyChara->GetMove().pos;
 						auto Len = Dir_t.Length();
@@ -169,9 +169,9 @@ namespace FPS_n2 {
 		void AIControl::Draw() noexcept {
 #ifdef DEBUG
 			if (this->m_AI.m_Phase != ENUM_AI_PHASE::Normal) {
-				auto* ObjMngr = ObjectManager::Instance();
-				auto& MyChara = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, m_AI.m_MyCharaID));
-				auto& TargetChara = (std::shared_ptr<CharacterClass>&)(*ObjMngr->GetObj(ObjType::Human, this->m_AI.m_TargetCharaID));
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_AI.m_MyCharaID).GetChara();
+				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_AI.m_TargetCharaID).GetChara();
 				VECTOR_ref StartPos = MyChara->GetEyePosition() + VECTOR_ref::vget(0.f, 5.f*Scale_Rate, 0.f);
 				VECTOR_ref EndPos = TargetChara->GetMove().pos + VECTOR_ref::vget(0.f, 5.f*Scale_Rate, 0.f);
 				DrawCapsule_3D(StartPos, EndPos, 0.1f*Scale_Rate, GetColor(255, 0, 0), GetColor(255, 0, 0));

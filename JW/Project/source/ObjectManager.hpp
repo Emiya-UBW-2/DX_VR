@@ -22,6 +22,8 @@ namespace FPS_n2 {
 			SharedObj*		GetObj(ObjType ModelType, int num) noexcept;
 
 			void			DelObj(ObjType ModelType, int num) noexcept;
+			void			DelObj(SharedObj* ptr) noexcept;
+			void			DelObjAll(ObjType ModelType) noexcept;
 		public:
 			void			ExecuteObject(void) noexcept {
 				//オブジェクトが増えた場合に備えて範囲forは使わない

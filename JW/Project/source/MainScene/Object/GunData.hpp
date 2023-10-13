@@ -27,7 +27,7 @@ namespace FPS_n2 {
 			const auto& GetReloadType(void) const noexcept { return this->m_ReloadType; }
 			const auto& GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
 		public://
-			void		Set_Sub(const std::string& LEFT, const std::string&RIGHT) noexcept override {
+			void		SetMod(const std::string& LEFT, const std::string&RIGHT) noexcept override {
 				
 				if (LEFT == "ShotRate") {
 					this->m_ShotRate = std::stoi(RIGHT);
@@ -72,25 +72,6 @@ namespace FPS_n2 {
 				else {
 					ModDataClass::SetSlot(LEFT, RIGHT);
 				}
-			}
-		};
-
-		class GunDataManager : public SingletonBase<GunDataManager> {
-		private:
-			friend class SingletonBase<GunDataManager>;
-		private:
-			std::vector<std::shared_ptr<GunDataClass>>	m_Object;
-		public:
-			const auto&	LoadAction(const std::string& filepath) noexcept {
-				for (auto& o : m_Object) {
-					if (o->GetPath() == filepath) {
-						return o;
-					}
-				}
-				m_Object.resize(m_Object.size() + 1);
-				m_Object.back() = std::make_shared<GunDataClass>();
-				m_Object.back()->Set(filepath);
-				return m_Object.back();
 			}
 		};
 	};

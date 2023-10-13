@@ -14,13 +14,14 @@ namespace FPS_n2 {
 			static const int		Chara_num = Player_num;
 			static const int		gun_num = Chara_num;
 		private:
+			bool											m_IsFirstLoad{ true };
+		private:
 			//リソース関連
 			std::shared_ptr<BackGroundClassMain>			m_BackGround;				//BG
 			GraphHandle										m_MiniMapScreen;
 			GraphHandle										Gauge_Graph;
 			GraphHandle										hit_Graph;
 			//人
-			std::vector<std::shared_ptr<CharacterClass>>	character_Pool;				//ポインター別持ち
 			std::vector<std::shared_ptr<AIControl>>			m_AICtrl;					//AI
 			//UI関連
 			UIClass											m_UIclass;

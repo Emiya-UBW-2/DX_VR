@@ -8,12 +8,6 @@ namespace FPS_n2 {
 	static const float Scale_Rate{ 12.5f };
 
 	namespace Sceneclass {
-		enum class scenes
-		{
-			NONE_SCENE,
-			LOAD_SCENE,
-			MAIN_LOOP
-		};
 		enum class ObjType {
 			Human,
 			Ammo,

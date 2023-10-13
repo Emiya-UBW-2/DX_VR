@@ -7,32 +7,20 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class ModDataClass : public ItemData {
+		public://ゲッター
 			struct PartsSlot {
 				GunSlot						m_GunSlot;
-				std::vector<std::string>	m_Items;
+				std::vector<int>			m_ItemsUniqueID;
 				std::vector<std::string>	m_Conflicts;
+				bool						m_IsNeed{ false };
 			};
 		private:
+			int								m_UniqueID{ 0 };
 			std::vector<PartsSlot>			m_PartsSlot;						//
 		protected:
-			void		SetSlot(const std::string& LEFT, const std::string&RIGHT) noexcept {
-				if (LEFT.find("Slot") != std::string::npos) {
-					if (LEFT.find("Type") != std::string::npos) {
-						for (int i = 0; i < (int)GunSlot::Max; i++) {
-							if (RIGHT == GunSlotName[i]) {
-								this->m_PartsSlot.resize(this->m_PartsSlot.size() + 1);
-								this->m_PartsSlot.back().m_GunSlot = (GunSlot)i;
-								break;
-							}
-						}
-					}
-					else if (LEFT.find("Item") != std::string::npos) {
-						this->m_PartsSlot.back().m_Items.emplace_back(RIGHT);
-					}
-					else if (LEFT.find("Conflict") != std::string::npos) {
-						this->m_PartsSlot.back().m_Conflicts.emplace_back(RIGHT);
-					}
-				}
+			void				SetSlot(const std::string& LEFT, const std::string&RIGHT) noexcept;
+			virtual void		SetMod(const std::string& LEFT, const std::string&RIGHT) noexcept {
+				SetSlot(LEFT, RIGHT);
 			}
 		public://ゲッター
 			const PartsSlot* GetPartsSlot(GunSlot sel) const noexcept {
@@ -43,9 +31,12 @@ namespace FPS_n2 {
 				}
 				return nullptr;
 			}
+			const auto&		GetUniqueID(void) const noexcept { return this->m_UniqueID; }
+		public://
+			void			SetUniqueID(int value) noexcept { m_UniqueID = value; }
 		public://
 			void		Set_Sub(const std::string& LEFT, const std::string&RIGHT) noexcept override {
-				SetSlot(LEFT, RIGHT);
+				SetMod(LEFT, RIGHT);
 			}
 		};
 
@@ -53,19 +44,22 @@ namespace FPS_n2 {
 		private:
 			friend class SingletonBase<ModDataManager>;
 		private:
-			std::vector<std::shared_ptr<ModDataClass>>	m_Object;
+			std::list<std::shared_ptr<ModDataClass>>	m_Object;
+			int											m_LastUniqueID{ 0 };
+		private:
+			ModDataManager() {}
+			~ModDataManager() {}
 		public:
-			const auto&	LoadAction(const std::string& filepath) noexcept {
+			const std::shared_ptr<ModDataClass>*	GetData(int uniqueID) noexcept {
 				for (auto& o : m_Object) {
-					if (o->GetPath() == filepath) {
-						return o;
+					if (o->GetUniqueID() == uniqueID) {
+						return &o;
 					}
 				}
-				m_Object.resize(m_Object.size() + 1);
-				m_Object.back() = std::make_shared<ModDataClass>();
-				m_Object.back()->Set(filepath);
-				return m_Object.back();
+				return nullptr;
 			}
+		public:
+			const std::shared_ptr<ModDataClass>*	AddData(const std::string& filepath, bool isMod) noexcept;
 		};
 	};
 };

@@ -97,5 +97,25 @@ namespace FPS_n2 {
 				}
 			}
 		}
+		//
+		void			ObjectManager::DelObj(SharedObj* ptr) noexcept {
+			for (auto&o : this->m_Object) {
+				if (o == *ptr) {
+					//‡”Ô‚ÌˆÛŽ‚Ì‚½‚ß‚±‚±‚Íerase
+					o->Dispose();
+					this->m_Object.erase(this->m_Object.begin() + (&o - &this->m_Object.front()));
+					break;
+				}
+			}
+		}
+		//
+		void			ObjectManager::DelObjAll(ObjType ModelType) noexcept {
+			for (auto&o : this->m_Object) {
+				if (o->GetobjType() == ModelType) {
+					o->Dispose();
+					this->m_Object.erase(this->m_Object.begin() + (&o - &this->m_Object.front()));
+				}
+			}
+		}
 	};
 };

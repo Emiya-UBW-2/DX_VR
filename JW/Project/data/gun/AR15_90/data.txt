@@ -9,6 +9,7 @@ soundsel=1
 reloadType=MAG
 
 Slot0Type=Magazine
+Slot0IsNeed=true
 Slot0Item=GMag33
 Slot0Item=GMag17
 Slot0Item=GMag17Gen5

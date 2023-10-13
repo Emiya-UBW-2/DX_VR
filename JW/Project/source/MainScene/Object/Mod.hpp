@@ -9,16 +9,42 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class ModClass : public ObjectBaseClass {
+		class ModSlotControl {
 		private:
-			SlotPartsControl				m_ModControl;
-			std::shared_ptr<ModDataClass>	m_ModDataClass;
+			std::unique_ptr<SlotPartsControl>	m_SlotControl;
+			std::shared_ptr<ModDataClass>		m_ModDataClass;
+		public:
+			auto&			GetSlotControl() noexcept { return this->m_SlotControl; }
+			const auto&		GetSlotControl() const noexcept { return this->m_SlotControl; }
+			auto&			GetModData() noexcept { return this->m_ModDataClass; }
+			const auto&		GetModData() const noexcept { return this->m_ModDataClass; }
+		protected:
+			void			InitModSlotControl(const std::string& PilePath,bool ismod) noexcept {
+				//ÉfÅ[É^
+				m_SlotControl = std::make_unique<SlotPartsControl>();
+				m_ModDataClass = *ModDataManager::Instance()->AddData(PilePath, ismod);
+			}
+			void			DisposeModSlotControl(void) noexcept {
+				m_SlotControl->DisposeSlotPartsControl();
+				m_ModDataClass.reset();
+			}
+		public:
+			void			SetMod(GunSlot Slot, int ID, const MV1& BaseModel) noexcept;
+			void			RemoveMod(GunSlot Slot) noexcept {
+				if (this->m_SlotControl->HasParts(Slot)) {
+					this->m_SlotControl->RemoveParts(Slot);
+				}
+			}
+		};
+
+		class ModClass :
+			public ObjectBaseClass,
+			public ModSlotControl
+		{
 		public:
 			ModClass(void) noexcept {}
 			~ModClass(void) noexcept {}
 		public:
-			auto&			GetModControl() noexcept { return this->m_ModControl; }
-
 			auto&			GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
 			const bool		HaveFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first != -1; }
 			const auto&		GetFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first; }
@@ -29,6 +55,8 @@ namespace FPS_n2 {
 			void			SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * GetFrameBaseLocalMat(frame)); }
 		public:
 			void			Init(void) noexcept override;
+			void			SetRandomChildParts(void) noexcept;
+
 			void			FirstExecute(void) noexcept override {
 				ObjectBaseClass::FirstExecute();
 				SetMove(GetMove().mat.GetRot(), GetMove().pos);
@@ -36,10 +64,10 @@ namespace FPS_n2 {
 			}
 			void			SetGunMatrix(const MATRIX_ref& value) noexcept {
 				SetMove(value.GetRot(), value.pos());
-				m_ModControl.UpdatePartsAnim(GetObj());
-				m_ModControl.UpdatePartsMove(GetFrameWorldMat(GunFrame::UnderRail), ObjType::UnderRail);
-				m_ModControl.UpdatePartsMove(GetFrameWorldMat(GunFrame::Sight), ObjType::Sight);
-				m_ModControl.UpdatePartsMove(GetFrameWorldMat(GunFrame::MuzzleAdapter), ObjType::MuzzleAdapter);
+				GetSlotControl()->UpdatePartsAnim(GetObj());
+				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::UnderRail), GunSlot::UnderRail);
+				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::Sight), GunSlot::Sight);
+				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::MuzzleAdapter), GunSlot::MuzzleAdapter);
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				Draw_Mod(isDrawSemiTrans);
@@ -56,7 +84,7 @@ namespace FPS_n2 {
 			}
 			void			Dispose(void) noexcept override {
 				Dispose_Mod();
-				m_ModDataClass.reset();
+				DisposeModSlotControl();
 				this->GetObj().Dispose();
 				this->m_col.Dispose();
 			}
@@ -175,9 +203,7 @@ namespace FPS_n2 {
 			SightClass(void) noexcept { this->m_objType = ObjType::Sight; }
 			~SightClass(void) noexcept { }
 		public:
-			void			Init_Mod(void) noexcept override {
-				m_Reitcle = GraphHandle::Load(this->m_FilePath + "reticle_0.png");
-			}
+			void			Init_Mod(void) noexcept override;
 		};
 
 		class MuzzleClass : public ModClass {

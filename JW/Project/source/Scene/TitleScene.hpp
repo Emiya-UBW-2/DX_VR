@@ -13,6 +13,8 @@ namespace FPS_n2 {
 			float GameStart2{ 0.f };
 			float GameStart3{ 0.f };
 		public:
+			const auto SelMode() const noexcept { return select; }
+		public:
 			TitleScene(void) noexcept { }
 			void			Set_Sub(void) noexcept override;
 			//

@@ -3,6 +3,7 @@
 #include "MainScene/Player/Player.hpp"
 //
 #include "Scene/TitleScene.hpp"
+#include "Scene/CustomScene.hpp"
 #include "Scene/MainScene.hpp"
 
 
@@ -21,16 +22,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::Sceneclass::PlayerManager::Create();
 	FPS_n2::Sceneclass::GunAnimManager::Create();
 	//
-	FPS_n2::Sceneclass::GunDataManager::Create();
 	FPS_n2::Sceneclass::ModDataManager::Create();
 	FPS_n2::Sceneclass::AmmoDataManager::Create();
 	//シーン
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
+	auto Customscene = std::make_shared<FPS_n2::Sceneclass::CustomScene>();
 	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();
 	//シーンコントロール
 	auto scene = std::make_unique<SceneControl>(Titlescene);
 	//遷移先指定
 	Titlescene->Set_Next(MAINLOOPscene);
+	Customscene->Set_Next(Titlescene);
 	MAINLOOPscene->Set_Next(Titlescene);
 	//繰り返し
 	while (true) {
@@ -59,7 +61,23 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			DrawParts->Screen_Flip();				//画面の反映
 		}
 		FPS_n2::SaveDataClass::Instance()->Save();
+		bool isTitle = (scene->GetNowScene() == Titlescene);
+		if (isTitle) {
+			switch (Titlescene->SelMode()) {
+			case 0:
+				Titlescene->Set_Next(Customscene);
+				break;
+			case 1:
+				Titlescene->Set_Next(MAINLOOPscene);
+				break;
+			default:
+				break;
+			}
+		}
 		scene->NextScene();							//次のシーンへ移行
+		if (isTitle) {
+			Titlescene->Set_Next(MAINLOOPscene);//戻しとく
+		}
 	}
 	return 0;
 }
