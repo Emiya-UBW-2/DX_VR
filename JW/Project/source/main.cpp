@@ -34,6 +34,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Titlescene->Set_Next(MAINLOOPscene);
 	Customscene->Set_Next(Titlescene);
 	MAINLOOPscene->Set_Next(Titlescene);
+	bool isMainLoop = false;
 	//繰り返し
 	while (true) {
 		scene->StartScene();
@@ -52,6 +53,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			//デバッグ
 #ifdef DEBUG
 			DebugParts->DebugWindow(1920 - 300, 50);
+			//TestDrawShadowMap(DrawParts->m_Shadow[0].GetHandle(), 0, 0, 960, 540);
 #else
 			{
 				auto* Fonts = FontPool::Instance();
@@ -66,9 +68,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			switch (Titlescene->SelMode()) {
 			case 0:
 				Titlescene->Set_Next(Customscene);
+				if (isMainLoop) {
+					isMainLoop = false;
+					MAINLOOPscene->Dispose_Load();
+				}
 				break;
 			case 1:
 				Titlescene->Set_Next(MAINLOOPscene);
+				if (!isMainLoop) {
+					isMainLoop = true;
+					MAINLOOPscene->Load();
+				}
 				break;
 			default:
 				break;

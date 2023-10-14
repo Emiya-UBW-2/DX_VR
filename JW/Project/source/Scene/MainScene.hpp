@@ -6,10 +6,11 @@
 #include "../MainScene/NetworkBrowser.hpp"
 #include "../MainScene/Object/Character.hpp"
 #include "../MainScene/Player/CPU.hpp"
+#include "CustomScene.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class MAINLOOP : public TEMPSCENE, public EffectControl {
+		class MAINLOOP : public TEMPSCENE, public EffectControl, public GunsModify {
 		private:
 			static const int		Chara_num = Player_num;
 			static const int		gun_num = Chara_num;
@@ -70,6 +71,8 @@ namespace FPS_n2 {
 			//UI•\Ž¦
 			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override;
+		public:
+			void			Dispose_Load(void) noexcept;
 		};
 	};
 };

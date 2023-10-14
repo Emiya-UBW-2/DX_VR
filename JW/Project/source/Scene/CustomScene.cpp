@@ -4,7 +4,44 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		bool			CustomScene::DelSelData(const Slot* SlotPtr) {
+		void			GunsModify::AddSelData(const std::shared_ptr<ObjectBaseClass>& ModPtr, const Slot* SlotPtr, bool isPreset) {
+			if (!ModPtr) { return; }
+			ModSlotControl* ModP = nullptr;
+			if (SlotPtr) {
+				ModP = ((std::shared_ptr<ModClass>&)ModPtr).get();
+
+			}
+			else {
+				ModP = ((std::shared_ptr<GunClass>&)ModPtr).get();
+			}
+			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+				if (ModP->GetModData()->GetPartsSlot((GunSlot)loop)) {
+					SelData.emplace_back(new Slot);
+					auto& y = SelData.back();
+					y->Init();
+					y->SlotType = (GunSlot)loop;
+					y->ParentSlot = SlotPtr;
+					y->m_Data = ModPtr;
+					const auto& Data = ModP->GetModData()->GetPartsSlot(y->SlotType);
+					y->m_sel = Data->m_IsNeed ? 0 : (int)Data->m_ItemsUniqueID.size();
+					if (isPreset) {
+						for (const auto& S : SlotSave) {
+							if (y->ParentSlot) {
+								if (!S.IsParent(y->ParentSlot->SlotType, y->ParentSlot->m_sel)) { continue; }
+							}
+							else {
+								if (!S.IsParentNone()) { continue; }
+							}
+							if (y->SlotType == S.SlotType) {
+								y->m_sel = S.m_sel;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		bool			GunsModify::DelSelData(const Slot* SlotPtr) {
 			for (int loop = 0; loop < (int)SelData.size(); loop++) {
 				const auto& y = SelData[loop];
 				if (y != SlotPtr) {
@@ -21,15 +58,51 @@ namespace FPS_n2 {
 					y->m_selectSwitch = true;
 					SetMods(ModPtr, y->ParentSlot);
 					SelData.erase(SelData.begin() + loop);
-					if (select >= (int)SelData.size()) {
-						select = (int)SelData.size() - 1;
-					}
 					return true;
 				}
 			}
 			return false;
 		}
-		void			CustomScene::ChangeSelData(const Slot* SlotPtr, int sel) {
+		void			GunsModify::SetMods(ModSlotControl* ModPtr, const Slot* SlotPtr) {
+			//自分の下の世代のオブジェをセット
+			for (auto& y : SelData) {
+				if (y->ParentSlot == SlotPtr) {
+					if (y->m_sel != (int)ModPtr->GetModData()->GetPartsSlot(y->SlotType)->m_ItemsUniqueID.size()) {
+						if (y->m_selectSwitch) {
+							y->m_selectSwitch = false;
+							ModPtr->RemoveMod(y->SlotType);
+							ModPtr->SetMod(y->SlotType, y->m_sel, *m_BaseObj);
+						}
+					}
+					else {
+						ModPtr->RemoveMod(y->SlotType);
+					}
+				}
+			}
+		}
+		void			GunsModify::UpdateMods(ModSlotControl* ModPtr, const Slot* SlotPtr, bool isPreset) noexcept {
+			for (int loop = 0; loop < (int)SelData.size(); loop++) {
+				const Slot* ChildSlot = SelData[loop];
+				if (ChildSlot->ParentSlot != SlotPtr) { continue; }
+				if (!ModPtr->GetSlotControl()->HasParts(ChildSlot->SlotType)) { continue; }
+
+				auto& ChildPtr = (std::shared_ptr<ModClass>&)(ModPtr->GetSlotControl()->GetPartsPtr(ChildSlot->SlotType));
+				AddSelData((std::shared_ptr<ObjectBaseClass>&)ChildPtr, ChildSlot, isPreset);
+				SetMods(ChildPtr.get(), ChildSlot);
+
+				UpdateMods(ChildPtr.get(), ChildSlot, isPreset);
+			}
+		}
+		//
+		void			GunsModify::CreateSelData(const std::shared_ptr<GunClass>& GunPtr) {
+			m_BaseObj = &GunPtr->GetObj();
+			//子
+			AddSelData((std::shared_ptr<ObjectBaseClass>&)GunPtr, nullptr, true);
+			SetMods(GunPtr.get(), nullptr);
+			//孫以降
+			UpdateMods(GunPtr.get(), nullptr, true);
+		}
+		void			GunsModify::ChangeSelData(const Slot* SlotPtr, int sel) {
 			for (int loop = 0; loop < (int)SelData.size(); loop++) {
 				const auto& y = SelData[loop];
 				if (y != SlotPtr) {
@@ -46,77 +119,89 @@ namespace FPS_n2 {
 					SetMods((ModSlotControl*)y->GetData(), y->ParentSlot);
 					//子
 					auto& ModPtr1 = (std::shared_ptr<ModClass>&)(y->GetData()->GetSlotControl()->GetPartsPtr(y->SlotType));
-					AddSelData((std::shared_ptr<ObjectBaseClass>&)ModPtr1, y);
+					AddSelData((std::shared_ptr<ObjectBaseClass>&)ModPtr1, y, false);
 					SetMods(ModPtr1.get(), y);
 					//孫以降
-					UpdateMods(ModPtr1.get(), y);
+					UpdateMods(ModPtr1.get(), y, false);
 					break;
 				}
 			}
-			for (int loop = 0; loop < (int)SelData.size(); loop++) {
-				const auto& y = SelData[loop];
-				auto* ModPtr = (ModSlotControl*)y->GetData();
-				if (!ModPtr->GetModData()) {
-					int a = 0;
+		}
+		void			GunsModify::LoadSlots(const char* path) {
+			/*
+			{
+				SlotSave.clear();
+				//
+				SlotSave.resize(SlotSave.size() + 1);
+				SlotSave.back().SlotType = GunSlot::Magazine;
+				SlotSave.back().m_sel = 0;
+				SlotSave.back().ParentSlotType = GunSlot::Gun;
+				SlotSave.back().m_Parentsel = 0;
+				//
+				SlotSave.resize(SlotSave.size() + 1);
+				SlotSave.back().SlotType = GunSlot::Upper;
+				SlotSave.back().m_sel = 0;
+				SlotSave.back().ParentSlotType = GunSlot::Gun;
+				SlotSave.back().m_Parentsel = 0;
+				//
+				SlotSave.resize(SlotSave.size() + 1);
+				SlotSave.back().SlotType = GunSlot::Lower;
+				SlotSave.back().m_sel = 0;
+				SlotSave.back().ParentSlotType = GunSlot::Gun;
+				SlotSave.back().m_Parentsel = 0;
+				//
+				SlotSave.resize(SlotSave.size() + 1);
+				SlotSave.back().SlotType = GunSlot::Barrel;
+				SlotSave.back().m_sel = 0;
+				SlotSave.back().ParentSlotType = GunSlot::Gun;
+				SlotSave.back().m_Parentsel = 0;
+				//
+				SlotSave.resize(SlotSave.size() + 1);
+				SlotSave.back().SlotType = GunSlot::Sight;
+				SlotSave.back().m_sel = 0;
+				SlotSave.back().ParentSlotType = GunSlot::Upper;
+				SlotSave.back().m_Parentsel = 0;
+			}
+			//*/
+			{
+				SlotSave.clear();
+				std::ifstream inputfile(path, std::ios::binary);
+				while (!inputfile.eof()) {  //ファイルの最後まで続ける
+					SlotSave.resize(SlotSave.size() + 1);
+					inputfile.read(reinterpret_cast<char *>(&SlotSave.back()), sizeof(SlotSave.back()));
 				}
+				inputfile.close();
 			}
 		}
-		void			CustomScene::AddSelData(const std::shared_ptr<ObjectBaseClass>& ModPtr, const Slot* SlotPtr) {
-			if (!ModPtr) { return; }
-			ModSlotControl* ModP = nullptr;
-			if (SlotPtr) {
-				ModP = ((std::shared_ptr<ModClass>&)ModPtr).get();
-
-			}
-			else {
-				ModP = ((std::shared_ptr<GunClass>&)ModPtr).get();
-			}
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
-				if (ModP->GetModData()->GetPartsSlot((GunSlot)loop)) {
-					SelData.emplace_back(new Slot);
-					SelData.back()->ParentSlot = SlotPtr;
-					SelData.back()->Init((GunSlot)loop, ModPtr);
-				}
-			}
-		}
-		//自分の下の世代のオブジェをセット
-		void			CustomScene::SetMods(ModSlotControl* ModPtr, const Slot* SlotPtr) {
+		void			GunsModify::SaveSlots(const char* path) {
+			SlotSave.clear();
+			std::ofstream outputfile(path, std::ios::binary);
 			for (auto& y : SelData) {
-				if (y->ParentSlot == SlotPtr) {
-					if (y->m_sel != (int)ModPtr->GetModData()->GetPartsSlot(y->SlotType)->m_ItemsUniqueID.size()) {
-						if (y->m_selectSwitch) {
-							y->m_selectSwitch = false;
-							ModPtr->RemoveMod(y->SlotType);
-							ModPtr->SetMod(y->SlotType, y->m_sel, m_GunPtr->GetObj());
-						}
-					}
-					else {
-						ModPtr->RemoveMod(y->SlotType);
-					}
-				}
+				SlotSave.resize(SlotSave.size() + 1);
+				SlotSave.back().SlotType = y->SlotType;
+				SlotSave.back().m_sel = y->m_sel;
+				SlotSave.back().ParentSlotType = (y->ParentSlot) ? y->ParentSlot->SlotType : GunSlot::Gun;
+				SlotSave.back().m_Parentsel = (y->ParentSlot) ? y->ParentSlot->m_sel : 0;
+
+				outputfile.write(reinterpret_cast<char *>(&SlotSave.back()), sizeof(SlotSave.back()));
 			}
+			outputfile.close();
 		}
-		void			CustomScene::UpdateMods(ModSlotControl* ModPtr, const Slot* SlotPtr) noexcept {
-			for (int loop = 0; loop < (int)SelData.size(); loop++) {
-				const Slot* ChildSlot = SelData[loop];
-				if (ChildSlot->ParentSlot != SlotPtr) { continue; }
-				if (!ModPtr->GetSlotControl()->HasParts(ChildSlot->SlotType)) { continue; }
-
-				auto& ChildPtr = (std::shared_ptr<ModClass>&)(ModPtr->GetSlotControl()->GetPartsPtr(ChildSlot->SlotType));
-				AddSelData((std::shared_ptr<ObjectBaseClass>&)ChildPtr, ChildSlot);
-				SetMods(ChildPtr.get(), ChildSlot);
-
-				UpdateMods(ChildPtr.get(), ChildSlot);
-			}
-		}
-
+		//
 		void			CustomScene::Set_Sub(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			//
-			SetAmbientLight(VECTOR_ref::vget(-0.8f, -0.5f, -0.1f), GetColorF(0.92f, 0.91f, 0.90f, 0.0f));
-			SetFarShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
-			SetMiddleShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
-			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
+			SetAmbientLight(VECTOR_ref::vget(0.4f, -0.5f, 0.1f), GetColorF(1.f, 1.f, 1.f, 0.0f));
+			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-6.f, Scale_Rate*-6.f, Scale_Rate*-6.f), VECTOR_ref::vget(Scale_Rate*6.f, Scale_Rate*0.f, Scale_Rate*6.f));
+			SetShadowDir(GetLightVec(), 0);
+			//
+			DeleteLightHandleAll();
+			SetLightEnable(TRUE);
+			ChangeLightTypeDir(GetLightVec().get());
+			SetLightDifColor(GetColorF(1.f, 1.f, 1.f, 1.f));
+			SetLightSpcColor(GetColorF(0.01f, 0.01f, 0.01f, 0.f));
+			SetLightAmbColor(GetColorF(0.5f, 0.5f, 0.5f, 1.f));
 			//
 			select = 0;
 			//
@@ -131,23 +216,21 @@ namespace FPS_n2 {
 					m_GunPtr->RemoveMod((GunSlot)loop);
 				}
 			}
-			m_Yrad = deg2rad(135);
+			{
+				auto* Ptr = ObjMngr->MakeObject(ObjType::MovieObj);
+				ObjMngr->LoadObjectModel((*Ptr).get(), "data/model/table/");
+				(*Ptr)->Init();
+			}
+			m_Yrad = deg2rad(-45);
 			m_Xrad = 0.f;
+			m_Range = 100.f;
 			m_SelAlpha = 0.f;
 			//
-			{
-				const Slot* MySlot0 = nullptr;
-				//子
-				auto& ModPtr0 = m_GunPtr;
-				AddSelData((std::shared_ptr<ObjectBaseClass>&)ModPtr0, MySlot0);
-				SetMods(ModPtr0.get(), MySlot0);
-				//孫以降
-				UpdateMods(ModPtr0.get(), MySlot0);
-				m_GunPtr->Init_Gun();
-			}
+			GunsModify::LoadSlots("data/bokuzyo.ok");
 			//
+			GunsModify::CreateSelData(m_GunPtr);
+			m_GunPtr->Init_Gun();
 		}
-		//
 		bool			CustomScene::Update_Sub(void) noexcept {
 			if (DXDraw::Instance()->IsPause()) {
 				return true;
@@ -178,21 +261,21 @@ namespace FPS_n2 {
 			{
 				if (Pad->GetUpKey().trigger()) {
 					--select;
-					if (select < 0) { select = (int)SelData.size() - 1; }
-					SelData[select]->Yadd = 10.f;
+					if (select < 0) { select = (int)GetSelData().size() - 1; }
+					GetSelData()[select]->Yadd = 10.f;
 					SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					m_SelAlpha = 2.f;
 				}
 				if (Pad->GetDownKey().trigger()) {
 					++select;
-					if (select > (int)SelData.size() - 1) { select = 0; }
-					SelData[select]->Yadd = -10.f;
+					if (select > (int)GetSelData().size() - 1) { select = 0; }
+					GetSelData()[select]->Yadd = -10.f;
 					SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					m_SelAlpha = 2.f;
 				}
-				if (SelData.size() > 0) {
+				if (GetSelData().size() > 0) {
 					bool IsChange = false;
-					auto& y = SelData[select];
+					auto& y = GetSelData()[select];
 					if (Pad->GetLeftKey().trigger()) {
 						++y->m_sel;
 						const auto& Data = y->GetData()->GetModData()->GetPartsSlot(y->SlotType);
@@ -224,7 +307,7 @@ namespace FPS_n2 {
 						ChangeSelData(y, y->m_sel);
 					}
 				}
-				for (auto& y : SelData) {
+				for (auto& y : GetSelData()) {
 					Easing(&y->Xadd, 0.f, 0.95f, EasingType::OutExpo);
 					Easing(&y->Yadd, 0.f, 0.95f, EasingType::OutExpo);
 				}
@@ -235,23 +318,43 @@ namespace FPS_n2 {
 				}
 			}
 
-			m_GunPtr->SetGunMatrix(MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.05f, 0.f)*Scale_Rate));
-			(*m_GunPtr->GetMagazinePtr())->SetMove(MATRIX_ref::RotZ(deg2rad(90)), VECTOR_ref::vget(0.2f, 0.f, 0.f)*Scale_Rate);
+			auto Per = 1.f - std::clamp(m_Range - 1.f, 0.f, 1.f);
+
+			m_GunPtr->SetGunMatrix(
+				Lerp_Matrix(MATRIX_ref::RotY(deg2rad(90)) * MATRIX_ref::RotX(deg2rad(30)), MATRIX_ref::RotY(deg2rad(0)), std::clamp(Per*2.f, 0.f, 1.f))*
+				MATRIX_ref::Mtrans(
+					Lerp(
+						Lerp(VECTOR_ref::vget(0.1f, 1.05f, 0.f)*Scale_Rate, VECTOR_ref::vget(0.f, 1.2f, 0.f)*Scale_Rate, std::clamp(Per*2.f, 0.f, 1.f))
+						, VECTOR_ref::vget(0.f, 1.05f, 0.f)*Scale_Rate, std::clamp(Per*2.f - 1.f, 0.f, 1.f))
+				)
+			);
+			auto Mat = m_GunPtr->GetFrameWorldMat(GunFrame::Magpos);
+			(*m_GunPtr->GetMagazinePtr())->SetMove(
+				Lerp_Matrix(Mat.GetRot(), MATRIX_ref::RotZ(deg2rad(90)), std::clamp(Per*2.f - 1.f, 0.f, 1.f)),
+				Lerp(
+					Lerp(Mat.pos(), Mat.pos() + MATRIX_ref::Vtrans(VECTOR_ref::vget(0.f, -0.15f, 0.05f)*Scale_Rate, Mat.GetRot()), std::clamp(Per*2.f, 0.f, 1.f))
+					, VECTOR_ref::vget(0.2f, 1.f, 0.f)*Scale_Rate, std::clamp(Per*2.f - 1.f, 0.f, 1.f))
+				
+			);
 			(*m_GunPtr->GetMagazinePtr())->UpdateMove();
 
 			m_Yrad += Pad->GetLS_X() / 1000.f;
+			m_Yrad = std::clamp(m_Yrad, deg2rad(-120), deg2rad(120));
 			m_Xrad += Pad->GetLS_Y() / 1000.f;
-			m_Xrad = std::clamp(m_Xrad, deg2rad(-80), deg2rad(-10));
+			m_Xrad = std::clamp(m_Xrad, deg2rad(-20), deg2rad(-20));
+			Easing(&m_Range, Pad->GetFreeLook().press() ? 2.f : 1.f, 0.95f, EasingType::OutExpo);
 
 			ObjMngr->ExecuteObject();
 			ObjMngr->LateExecuteObject();
 
+			VECTOR_ref Pos = VECTOR_ref::vget(0.f, 1.f, 0.f)*Scale_Rate;
 			DrawParts->SetMainCamera().SetCamPos(
-				MATRIX_ref::Vtrans(VECTOR_ref::vget(0.f, 0.f, 1.f)*Scale_Rate, MATRIX_ref::RotX(m_Xrad)*MATRIX_ref::RotY(m_Yrad)),
-				VECTOR_ref::vget(0.f, 0.f, 0.f),
+				Pos + MATRIX_ref::Vtrans(VECTOR_ref::front()*(m_Range*Scale_Rate), MATRIX_ref::RotX(m_Xrad)*MATRIX_ref::RotY(m_Yrad + DX_PI_F)),
+				Pos,
 				VECTOR_ref::vget(0.f,1.f,0.f));
-			DrawParts->SetMainCamera().SetCamInfo(deg2rad(45), 0.1f*Scale_Rate, 10.f*Scale_Rate);
-			PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.5f, 0.1f*Scale_Rate / 2, 0.1f*Scale_Rate, 10.f*Scale_Rate);
+			float far_t = 20.f*Scale_Rate;
+			DrawParts->SetMainCamera().SetCamInfo(deg2rad(45), 0.5f*Scale_Rate, far_t);
+			PostPassEffect::Instance()->Set_DoFNearFar(1.f * Scale_Rate, far_t / 2, 0.5f*Scale_Rate, far_t);
 
 			if (Pad->GetNGKey().trigger()) {
 				return false;
@@ -261,10 +364,18 @@ namespace FPS_n2 {
 		void			CustomScene::Dispose_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 
-			SelData.clear();
+			GunsModify::SaveSlots("data/bokuzyo.ok");
+
+			GunsModify::DisposeSlots();
 
 			ObjMngr->DelObj((SharedObj*)&m_GunPtr);
 			m_GunPtr.reset();
+			ObjMngr->DisposeObject();
+		}
+		void			CustomScene::ShadowDraw_Sub(void) noexcept {
+			//this->m_BackGround->Shadow_Draw();
+			auto* ObjMngr = ObjectManager::Instance();
+			ObjMngr->DrawObject_Shadow();
 		}
 		void			CustomScene::MainDraw_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
@@ -272,7 +383,7 @@ namespace FPS_n2 {
 
 			ClearDrawScreenZBuffer();
 			{
-				auto& y = SelData[select];
+				auto& y = GetSelData()[select];
 				auto& ModPtr1 = (std::shared_ptr<ModClass>&)(y->GetData()->GetSlotControl()->GetPartsPtr(y->SlotType));
 				if (ModPtr1) {
 					SetUseLighting(FALSE);
@@ -303,17 +414,17 @@ namespace FPS_n2 {
 			{
 				xp1 = y_r(960 - 480);
 				yp1 = y_r(540 - 270);
-				auto& y = SelData[select];
+				auto& y = GetSelData()[select];
 				const auto& Data = y->GetData()->GetModData()->GetPartsSlot(y->SlotType);
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(32), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 					xp1, yp1, White, Gray25, GunSlotName[(int)Data->m_GunSlot]);
 			}
-			for (int loop = -1; loop <= (int)SelData.size(); loop++) {
+			for (int loop = -1; loop <= (int)GetSelData().size(); loop++) {
 				if (!(select == loop + 1 ||select == loop - 1)) { continue; }
 				int index = loop;
-				if (index < 0) { index = (int)SelData.size() - 1; }
-				if (index > (int)SelData.size() - 1) { index = 0; }
-				auto& y = SelData[index];
+				if (index < 0) { index = (int)GetSelData().size() - 1; }
+				if (index > (int)GetSelData().size() - 1) { index = 0; }
+				auto& y = GetSelData()[index];
 				const auto& Data = y->GetData()->GetModData()->GetPartsSlot(y->SlotType);
 				xp1 = y_r(960);
 				yp1 = y_r(840 + 64 * (loop - select) + (int)y->Yadd);
@@ -356,7 +467,7 @@ namespace FPS_n2 {
 				}
 			}
 			{
-				auto& y = SelData[select];
+				auto& y = GetSelData()[select];
 				const auto& Data = y->GetData()->GetModData()->GetPartsSlot(y->SlotType);
 				xp1 = y_r(960);
 				yp1 = y_r(840 + (int)y->Yadd);
@@ -375,21 +486,21 @@ namespace FPS_n2 {
 						Name = (*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[sel]))->GetName();
 					}
 					if (loop2 == -1) {
-						int add = y_r(320) + (int)y->Xadd / 2;
+						int add = y_r(380) + (int)y->Xadd / 2;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(36), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
 							xp1 + add, yp1 + y_r(20), Green50, Green25, Name);
 					}
 					if (loop2 == 1) {
-						int add = -y_r(320) + (int)y->Xadd / 2;
+						int add = -y_r(380) + (int)y->Xadd / 2;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
 							xp1 + add, yp1 + y_r(20), Green50, Green25, Name);
 					}
 				}
 				{
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(54), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
-						xp1 + -y_r(280), yp1 + y_r(20), Green, Green25, "<");
+						xp1 + -y_r(350), yp1 + y_r(20), Green, Green25, "<");
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(54), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
-						xp1 + y_r(280), yp1 + y_r(20), Green, Green25, ">");
+						xp1 + y_r(350), yp1 + y_r(20), Green, Green25, ">");
 				}
 				{
 					std::string Name = "None";
@@ -406,19 +517,7 @@ namespace FPS_n2 {
 				yp1 = y_r(1080 - 32 - 32);
 
 				std::string Info = "";
-				switch (select) {
-				case 0:
-					Info = "3分間の間敵を倒し続けてください。累計撃墜数はこちらでのみカウントされます";
-					break;
-				case 1:
-					Info = "時間制限の緩いモードです";
-					break;
-				case 2:
-					Info = "オプションを開きます";
-					break;
-				default:
-					break;
-				}
+				Info = "3分間の間敵を倒し続けてください。累計撃墜数はこちらでのみカウントされます";
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1, White, Black, Info);
 			}
 		}

@@ -1,11 +1,10 @@
 #include	"TitleScene.hpp"
-
+#include "../ObjectManager.hpp"
 #include "../sub.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			TitleScene::Set_Sub(void) noexcept {
-			//Get_Next()->Load();
 			select = 0;
 			GameFadeIn = 0.f;
 			GameStart = 0.f;

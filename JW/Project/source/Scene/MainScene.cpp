@@ -1,4 +1,3 @@
-#pragma once
 #include	"MainScene.hpp"
 #include "../sub.hpp"
 #include "../ObjectManager.hpp"
@@ -10,14 +9,13 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		void			MAINLOOP::Load_Sub(void) noexcept {
 			//ロード
+			m_IsFirstLoad = true;
 			if (m_IsFirstLoad) {
 				m_IsFirstLoad = false;
 				auto* ObjMngr = ObjectManager::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto* SE = SoundPool::Instance();
 				//BG
-				this->m_BackGround = std::make_shared<BackGroundClassMain>();
-				//
 				GunAnimManager::Instance()->Load("data/CharaAnime/");
 				//
 				SE->Add((int)SoundEnum::Env, 1, "data/Sound/SE/envi.wav", false);
@@ -64,7 +62,6 @@ namespace FPS_n2 {
 					(*Ptr)->Init();
 				}
 			}
-			this->m_BackGround->Init("", "");
 		}
 		void			MAINLOOP::Set_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
@@ -76,6 +73,8 @@ namespace FPS_n2 {
 			SetFarShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
 			SetMiddleShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
 			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
+			this->m_BackGround = std::make_shared<BackGroundClassMain>();
+			this->m_BackGround->Init("", "");
 			//ロード
 			{
 				auto* Ptr = ObjMngr->MakeObject(ObjType::Human);
@@ -88,10 +87,20 @@ namespace FPS_n2 {
 				auto* Ptr = ObjMngr->MakeObject(ObjType::Gun);
 				ObjMngr->LoadObjectModel((*Ptr).get(), "data/gun/G17Gen3/");
 				MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
-				auto& Gun = ((std::shared_ptr<GunClass>&)(*Ptr));
+				auto Gun = ((std::shared_ptr<GunClass>&)(*Ptr));
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 				c->SetGunPtr(Gun);
 				(*Ptr)->Init();
+				//全消し
+				for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+					Gun->RemoveMod((GunSlot)loop);
+				}
+				//
+				GunsModify::LoadSlots("data/bokuzyo.ok");
+				//
+				GunsModify::CreateSelData(Gun);
+				Gun->Init_Gun();
+				Gun.reset();
 			}
 			{
 				int loop = 0;
@@ -645,38 +654,16 @@ namespace FPS_n2 {
 			//使い回しオブジェ系
 			if (false)
 			{
-				SE->Delete((int)SoundEnum::CartFall);
-				SE->Delete((int)SoundEnum::MagFall);
-				SE->Delete((int)SoundEnum::Env);
-				SE->Delete((int)SoundEnum::Env2);
-				SE->Delete((int)SoundEnum::StandUp);
-				SE->Delete((int)SoundEnum::Trigger);
-				for (int i = 0; i < 6; i++) {
-					SE->Delete((int)SoundEnum::Cocking1_0 + i);
-					SE->Delete((int)SoundEnum::Cocking2_0 + i);
-					SE->Delete((int)SoundEnum::Cocking3_0 + i);
-				}
-				SE->Delete((int)SoundEnum::RunFoot);
-				SE->Delete((int)SoundEnum::SlideFoot);
-				SE->Delete((int)SoundEnum::StandupFoot);
-				SE->Delete((int)SoundEnum::Heart);
-				//
-				m_AICtrl.clear();
-				//
-				this->Gauge_Graph.Dispose();
-				this->hit_Graph.Dispose();
-				this->m_MiniMapScreen.Dispose();
-				PlayerMngr->Dispose();
-				ObjMngr->DisposeObject();
-				this->m_BackGround->Dispose();
-				this->m_BackGround.reset();
+				Dispose_Load();
 			}
 			else {
 				auto* Ptr = &PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 				ObjMngr->DelObj(Ptr);
 				PlayerMngr->GetPlayer(GetMyPlayerID()).Dispose();
-				this->m_BackGround->Dispose();
 			}
+			this->m_BackGround->Dispose();
+			this->m_BackGround.reset();
+			GunsModify::DisposeSlots();
 			//
 			m_NetWorkBrowser.Dispose();
 			EffectControl::Dispose();
@@ -866,6 +853,37 @@ namespace FPS_n2 {
 				//ミニマップ
 				m_MiniMapScreen.DrawRotaGraph(y_r(960), y_r(840), 1.f, 0.f, true);
 			}
+		}
+
+		void			MAINLOOP::Dispose_Load(void) noexcept {
+			auto* SE = SoundPool::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
+
+			//使い回しオブジェ系
+			SE->Delete((int)SoundEnum::CartFall);
+			SE->Delete((int)SoundEnum::MagFall);
+			SE->Delete((int)SoundEnum::Env);
+			SE->Delete((int)SoundEnum::Env2);
+			SE->Delete((int)SoundEnum::StandUp);
+			SE->Delete((int)SoundEnum::Trigger);
+			for (int i = 0; i < 6; i++) {
+				SE->Delete((int)SoundEnum::Cocking1_0 + i);
+				SE->Delete((int)SoundEnum::Cocking2_0 + i);
+				SE->Delete((int)SoundEnum::Cocking3_0 + i);
+			}
+			SE->Delete((int)SoundEnum::RunFoot);
+			SE->Delete((int)SoundEnum::SlideFoot);
+			SE->Delete((int)SoundEnum::StandupFoot);
+			SE->Delete((int)SoundEnum::Heart);
+			//
+			m_AICtrl.clear();
+			//
+			this->Gauge_Graph.Dispose();
+			this->hit_Graph.Dispose();
+			this->m_MiniMapScreen.Dispose();
+			PlayerMngr->Dispose();
+			ObjMngr->DisposeObject();
 		}
 	};
 };

@@ -69,6 +69,9 @@ namespace FPS_n2 {
 				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::Sight), GunSlot::Sight);
 				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::MuzzleAdapter), GunSlot::MuzzleAdapter);
 			}
+			void			DrawShadow(void) noexcept override {
+				this->m_obj.DrawModel();
+			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				Draw_Mod(isDrawSemiTrans);
 				if (this->m_IsActive && this->m_IsDraw) {

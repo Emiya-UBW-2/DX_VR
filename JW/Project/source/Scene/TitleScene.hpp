@@ -19,9 +19,7 @@ namespace FPS_n2 {
 			void			Set_Sub(void) noexcept override;
 			//
 			bool			Update_Sub(void) noexcept override;
-			void			Dispose_Sub(void) noexcept override {
-				//auto* SE = SoundPool::Instance();
-			}
+			void			Dispose_Sub(void) noexcept override{}
 			//
 			void			Depth_Draw_Sub(void) noexcept override {}
 			void			BG_Draw_Sub(void) noexcept override {}

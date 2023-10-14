@@ -1,4 +1,4 @@
-Name=Glock17 Gen3 Barrel(threaded)
+Name=G17 ThreadedBarrel
 
 Slot0Type=MuzzleAdapter
 Slot0IsNeed=false

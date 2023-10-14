@@ -5,7 +5,8 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class CustomScene : public TEMPSCENE {
+		class GunsModify {
+		public:
 			struct Slot {
 				GunSlot SlotType{ GunSlot::Magazine };
 				float Xadd{ 0.f };
@@ -32,36 +33,57 @@ namespace FPS_n2 {
 					}
 				}
 			public:
-				void Init(GunSlot value, const std::shared_ptr<ObjectBaseClass>& ptr) noexcept {
+				void Init() noexcept {
 					this->Xadd = 0.f;
 					this->Yadd = 0.f;
-					this->SlotType = value;
-					this->m_Data = ptr;
-					const auto& Data = GetData()->GetModData()->GetPartsSlot(this->SlotType);
-					if (Data->m_IsNeed) {
-						this->m_sel = 0;
-					}
-					else {
-						this->m_sel = (int)Data->m_ItemsUniqueID.size();
-					}
 					this->m_selectSwitch = true;
 				}
 			};
 		private:
+			struct SlotSaveData {
+				GunSlot SlotType{ GunSlot::Magazine };
+				int		m_sel{ 0 };
+				GunSlot ParentSlotType{ GunSlot::Gun };
+				int		m_Parentsel{ 0 };
+			public:
+				const auto IsParentNone() const noexcept { return (ParentSlotType == GunSlot::Gun); }
+				const auto IsParent(GunSlot Slot_t, int sel_t) const noexcept { return (ParentSlotType == Slot_t) && (m_Parentsel == sel_t); }
+			};
+		private:
+			std::vector<Slot*>			SelData;
+			std::vector<SlotSaveData>	SlotSave;
+			MV1*						m_BaseObj{ nullptr };
+		public:
+			const auto&		GetSelData() const noexcept { return SelData; }
+		private:
+			void			AddSelData(const std::shared_ptr<ObjectBaseClass>& ModPtr, const Slot* SlotPtr, bool isPreset);
+			bool			DelSelData(const Slot* SlotPtr);
+			void			SetMods(ModSlotControl* ModPtr, const Slot* SlotPtr);
+			void			UpdateMods(ModSlotControl* ModPtr, const Slot* SlotPtr, bool isPreset) noexcept;
+		public:
+			void			CreateSelData(const std::shared_ptr<GunClass>& GunPtr);
+			void			ChangeSelData(const Slot* SlotPtr, int sel);
+			void			LoadSlots(const char* path);
+			void			SaveSlots(const char* path);
+		public:
+			void			DisposeSlots() {
+				for (auto& y : SelData) {
+					delete y;
+				}
+				SlotSave.clear();
+				SelData.clear();
+			}
+		};
+
+		class CustomScene : public TEMPSCENE, public GunsModify {
 			int select{ 0 };
-			std::vector<Slot*> SelData{};
 			float m_SelAlpha{ 0.f };
 
 			float m_Yrad{ 0.f };
 			float m_Xrad{ 0.f };
+			float m_Range{ 1.f };
 		private:
 			std::shared_ptr<GunClass>		m_GunPtr;				//ポインター別持ち
-		public:
-			bool			DelSelData(const Slot* SlotPtr);
-			void			ChangeSelData(const Slot* SlotPtr,int sel);
-			void			AddSelData(const std::shared_ptr<ObjectBaseClass>& ModPtr, const Slot* SlotPtr);
-			void			SetMods(ModSlotControl* ModPtr, const Slot* SlotPtr);
-			void			UpdateMods(ModSlotControl* ModPtr, const Slot* SlotPtr) noexcept;
 		public:
 			CustomScene(void) noexcept { }
 			void			Set_Sub(void) noexcept override;
@@ -73,7 +95,7 @@ namespace FPS_n2 {
 			//void			BG_Draw_Sub(void) noexcept override {}
 			void			ShadowDraw_Far_Sub(void) noexcept override {}
 			void			ShadowDraw_NearFar_Sub(void) noexcept override {}
-			void			ShadowDraw_Sub(void) noexcept override {}
+			void			ShadowDraw_Sub(void) noexcept override;
 			void			MainDraw_Sub(void) noexcept override;
 			void			MainDrawbyDepth_Sub(void) noexcept override {}
 			//UI表示

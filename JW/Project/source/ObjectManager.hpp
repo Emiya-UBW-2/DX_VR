@@ -79,7 +79,9 @@ namespace FPS_n2 {
 			}
 			void			DisposeObject(void) noexcept {
 				for (auto& o : this->m_Object) {
-					o->Dispose();
+					if (o) {
+						o->Dispose();
+					}
 				}
 				this->m_Object.clear();
 			}

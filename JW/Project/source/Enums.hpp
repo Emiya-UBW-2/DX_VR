@@ -13,15 +13,14 @@ namespace FPS_n2 {
 			Ammo,
 			FallObj,
 			Gun,
-			Parts_Start,
-			Magazine = Parts_Start,
+			Magazine,
 			Lower,
 			Upper,
 			Barrel,
 			UnderRail,
 			Sight,
 			MuzzleAdapter,
-			Parts_End,
+			MovieObj,
 			Max,
 		};
 		enum class SoundEnum {

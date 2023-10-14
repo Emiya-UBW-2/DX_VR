@@ -126,6 +126,7 @@ namespace FPS_n2 {
 		};
 		
 		enum class GunSlot {
+			Gun,
 			Magazine,
 			Upper,
 			Lower,
@@ -136,6 +137,7 @@ namespace FPS_n2 {
 			Max,
 		};
 		static const char* GunSlotName[(int)GunSlot::Max] = {
+			"Gun",
 			"Magazine",
 			"Upper",
 			"Lower",
