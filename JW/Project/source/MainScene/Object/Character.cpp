@@ -1060,7 +1060,12 @@ namespace FPS_n2 {
 		}
 		void			CharacterClass::DrawShadow(void) noexcept {
 			if (this->m_IsActive) {
-				this->GetObj().DrawModel();
+				if (IsAlive()) {
+					this->GetObj().DrawModel();
+				}
+				else {
+					this->m_RagDoll.DrawModel();
+				}
 			}
 		}
 		//

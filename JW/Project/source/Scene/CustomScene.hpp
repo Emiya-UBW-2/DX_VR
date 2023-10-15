@@ -9,8 +9,6 @@ namespace FPS_n2 {
 		public:
 			struct Slot {
 				GunSlot SlotType{ GunSlot::Magazine };
-				float Xadd{ 0.f };
-				float Yadd{ 0.f };
 				int m_sel{ 0 };
 				bool m_selectSwitch{ 0 };
 				const Slot* ParentSlot{ nullptr };
@@ -34,8 +32,6 @@ namespace FPS_n2 {
 				}
 			public:
 				void Init() noexcept {
-					this->Xadd = 0.f;
-					this->Yadd = 0.f;
 					this->m_selectSwitch = true;
 				}
 			};
@@ -61,7 +57,7 @@ namespace FPS_n2 {
 			void			SetMods(ModSlotControl* ModPtr, const Slot* SlotPtr);
 			void			UpdateMods(ModSlotControl* ModPtr, const Slot* SlotPtr, bool isPreset) noexcept;
 		public:
-			void			CreateSelData(const std::shared_ptr<GunClass>& GunPtr);
+			void			CreateSelData(const std::shared_ptr<GunClass>& GunPtr, bool isPreset);
 			void			ChangeSelData(const Slot* SlotPtr, int sel);
 			void			LoadSlots(const char* path);
 			void			SaveSlots(const char* path);
@@ -76,14 +72,65 @@ namespace FPS_n2 {
 		};
 
 		class CustomScene : public TEMPSCENE, public GunsModify {
+			class SlotMove {
+			public:
+				float				Xadd{ 0.f };
+				float				Yadd{ 0.f };
+				GunsModify::Slot*	Ptr;
+				int					index{ 0 };
+			};
+		private:
 			int select{ 0 };
 			float m_SelAlpha{ 0.f };
 
 			float m_Yrad{ 0.f };
 			float m_Xrad{ 0.f };
 			float m_Range{ 1.f };
+			std::vector<SlotMove>			SelMoveClass;
 		private:
 			std::shared_ptr<GunClass>		m_GunPtr;				//ポインター別持ち
+
+			void			UpdateSlotMove() {
+				//もう存在せんものを削除
+				for (int loop = 0; loop < SelMoveClass.size(); loop++) {
+					bool isHit = false;
+					for (const auto& S : GetSelData()) {
+						if (S == SelMoveClass[loop].Ptr) {
+							isHit = true;
+							break;
+						}
+					}
+					if (!isHit) {
+						SelMoveClass.erase(SelMoveClass.begin() + loop);
+						loop--;
+					}
+				}
+				//存在するものを追加+順番を指定
+				for (const auto& S : GetSelData()) {
+					int index = (int)(&S - &GetSelData().front());
+					bool isHit = false;
+					for (int loop = 0; loop < SelMoveClass.size(); loop++) {
+						if (S == SelMoveClass[loop].Ptr) {
+							SelMoveClass[loop].index = index;
+							isHit = true;
+							break;
+						}
+					}
+					if (!isHit) {
+						SelMoveClass.resize(SelMoveClass.size() + 1);
+						SelMoveClass.back().Ptr = S;
+						SelMoveClass.back().index = index;
+						SelMoveClass.back().Xadd = 0.f;
+						SelMoveClass.back().Yadd = 0.f;
+					}
+				}
+				//SelMoveClassをGetSelData()に合わせてソート
+				std::sort(SelMoveClass.begin(), SelMoveClass.end(),
+					[](const SlotMove& a, const SlotMove& b) {
+					return a.index < b.index;
+				}
+				);
+			}
 		public:
 			CustomScene(void) noexcept { }
 			void			Set_Sub(void) noexcept override;

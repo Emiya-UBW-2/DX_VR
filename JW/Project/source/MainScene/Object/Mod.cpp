@@ -19,51 +19,6 @@ namespace FPS_n2 {
 			InitModSlotControl(this->m_FilePath, true);
 			Init_Mod();
 		}
-		void			ModClass::SetRandomChildParts(void) noexcept {
-			//パーツの用意
-			{
-				auto* Slots = GetModData()->GetPartsSlot(GunSlot::UnderRail);
-				if (Slots) {
-					int size = (int)Slots->m_ItemsUniqueID.size();
-					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
-					if (ID != size) {
-						SetMod(GunSlot::UnderRail, ID, GetObj());
-						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::UnderRail));
-						if (Ptr) {
-							Ptr->SetRandomChildParts();
-						}
-					}
-				}
-			}
-			{
-				auto* Slots = GetModData()->GetPartsSlot(GunSlot::Sight);
-				if (Slots) {
-					int size = (int)Slots->m_ItemsUniqueID.size();
-					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
-					if (ID != size) {
-						SetMod(GunSlot::Sight, ID, GetObj());
-						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Sight));
-						if (Ptr) {
-							Ptr->SetRandomChildParts();
-						}
-					}
-				}
-			}
-			{
-				auto* Slots = GetModData()->GetPartsSlot(GunSlot::MuzzleAdapter);
-				if (Slots) {
-					int size = (int)Slots->m_ItemsUniqueID.size();
-					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
-					if (ID != size) {
-						SetMod(GunSlot::MuzzleAdapter, ID, GetObj());
-						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::MuzzleAdapter));
-						if (Ptr) {
-							Ptr->SetRandomChildParts();
-						}
-					}
-				}
-			}
-		}
 
 		//マズル
 		void			UpperClass::Init_Mod(void) noexcept {

@@ -94,13 +94,13 @@ namespace FPS_n2 {
 			}
 		}
 		//
-		void			GunsModify::CreateSelData(const std::shared_ptr<GunClass>& GunPtr) {
+		void			GunsModify::CreateSelData(const std::shared_ptr<GunClass>& GunPtr, bool isPreset) {
 			m_BaseObj = &GunPtr->GetObj();
 			//éq
-			AddSelData((std::shared_ptr<ObjectBaseClass>&)GunPtr, nullptr, true);
+			AddSelData((std::shared_ptr<ObjectBaseClass>&)GunPtr, nullptr, isPreset);
 			SetMods(GunPtr.get(), nullptr);
 			//ë∑à»ç~
-			UpdateMods(GunPtr.get(), nullptr, true);
+			UpdateMods(GunPtr.get(), nullptr, isPreset);
 		}
 		void			GunsModify::ChangeSelData(const Slot* SlotPtr, int sel) {
 			for (int loop = 0; loop < (int)SelData.size(); loop++) {
@@ -211,10 +211,6 @@ namespace FPS_n2 {
 				MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
 				m_GunPtr = ((std::shared_ptr<GunClass>&)(*Ptr));
 				(*Ptr)->Init();
-				//ëSè¡Çµ
-				for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
-					m_GunPtr->RemoveMod((GunSlot)loop);
-				}
 			}
 			{
 				auto* Ptr = ObjMngr->MakeObject(ObjType::MovieObj);
@@ -228,7 +224,8 @@ namespace FPS_n2 {
 			//
 			GunsModify::LoadSlots("data/bokuzyo.ok");
 			//
-			GunsModify::CreateSelData(m_GunPtr);
+			GunsModify::CreateSelData(m_GunPtr, true);
+			UpdateSlotMove();
 			m_GunPtr->Init_Gun();
 		}
 		bool			CustomScene::Update_Sub(void) noexcept {
@@ -261,15 +258,15 @@ namespace FPS_n2 {
 			{
 				if (Pad->GetUpKey().trigger()) {
 					--select;
-					if (select < 0) { select = (int)GetSelData().size() - 1; }
-					GetSelData()[select]->Yadd = 10.f;
+					if (select < 0) { select = (int)SelMoveClass.size() - 1; }
+					SelMoveClass[select].Yadd = 10.f;
 					SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					m_SelAlpha = 2.f;
 				}
 				if (Pad->GetDownKey().trigger()) {
 					++select;
-					if (select > (int)GetSelData().size() - 1) { select = 0; }
-					GetSelData()[select]->Yadd = -10.f;
+					if (select > (int)SelMoveClass.size() - 1) { select = 0; }
+					SelMoveClass[select].Yadd = -10.f;
 					SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					m_SelAlpha = 2.f;
 				}
@@ -286,7 +283,7 @@ namespace FPS_n2 {
 							if (y->m_sel > (int)Data->m_ItemsUniqueID.size()) { y->m_sel = 0; }
 						}
 						IsChange = true;
-						y->Xadd = 10.f;
+						SelMoveClass[select].Xadd = 1.f;
 						SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					}
 					if (Pad->GetRightKey().trigger()) {
@@ -299,17 +296,18 @@ namespace FPS_n2 {
 							if (y->m_sel < 0) { y->m_sel = (int)Data->m_ItemsUniqueID.size(); }
 						}
 						IsChange = true;
-						y->Xadd = -10.f;
+						SelMoveClass[select].Xadd = -1.f;
 						SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					}
 					if (IsChange) {
 						m_SelAlpha = 2.f;
 						ChangeSelData(y, y->m_sel);
+						UpdateSlotMove();
 					}
 				}
-				for (auto& y : GetSelData()) {
-					Easing(&y->Xadd, 0.f, 0.95f, EasingType::OutExpo);
-					Easing(&y->Yadd, 0.f, 0.95f, EasingType::OutExpo);
+				for (auto& y : SelMoveClass) {
+					Easing(&y.Xadd, 0.f, 0.9f, EasingType::OutExpo);
+					Easing(&y.Yadd, 0.f, 0.95f, EasingType::OutExpo);
 				}
 				m_SelAlpha = std::max(m_SelAlpha - 1.f / FPS, 0.f);
 
@@ -427,7 +425,7 @@ namespace FPS_n2 {
 				auto& y = GetSelData()[index];
 				const auto& Data = y->GetData()->GetModData()->GetPartsSlot(y->SlotType);
 				xp1 = y_r(960);
-				yp1 = y_r(840 + 64 * (loop - select) + (int)y->Yadd);
+				yp1 = y_r(840 + 64 * (loop - select) + (int)SelMoveClass[index].Yadd);
 
 				for (int loop2 = -1; loop2 <= 1; loop2++) {
 					int sel = y->m_sel + loop2;
@@ -444,13 +442,13 @@ namespace FPS_n2 {
 						Name = (*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[sel]))->GetName();
 					}
 					if (loop2 == -1) {
-						int add = y_r(200) + (int)y->Xadd / 2;
+						int add = y_r(200) + y_r(SelMoveClass[index].Xadd*300.f) / 2;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT,
 							(select == loop + 1) ? FontHandle::FontYCenter::TOP : FontHandle::FontYCenter::BOTTOM,
 							xp1 + add, yp1 + y_r(20), Gray50, Gray25, Name);
 					}
 					if (loop2 == 1) {
-						int add = -y_r(200) + (int)y->Xadd / 2;
+						int add = -y_r(200) + +y_r(SelMoveClass[index].Xadd*300.f) / 2;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT,
 							(select == loop + 1) ? FontHandle::FontYCenter::TOP : FontHandle::FontYCenter::BOTTOM,
 							xp1 + add, yp1 + y_r(20), Gray50, Gray25, Name);
@@ -463,14 +461,14 @@ namespace FPS_n2 {
 					}
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE,
 						(select == loop + 1) ? FontHandle::FontYCenter::TOP : FontHandle::FontYCenter::BOTTOM,
-						xp1 + (int)y->Xadd, yp1 + y_r(20), Gray50, Gray25, Name);
+						xp1 + +y_r(SelMoveClass[index].Xadd*300.f), yp1 + y_r(20), Gray50, Gray25, Name);
 				}
 			}
 			{
 				auto& y = GetSelData()[select];
 				const auto& Data = y->GetData()->GetModData()->GetPartsSlot(y->SlotType);
 				xp1 = y_r(960);
-				yp1 = y_r(840 + (int)y->Yadd);
+				yp1 = y_r(840 + (int)SelMoveClass[select].Yadd);
 				for (int loop2 = -1; loop2 <= 1; loop2++) {
 					int sel = y->m_sel + loop2;
 					if (Data->m_IsNeed) {
@@ -486,12 +484,12 @@ namespace FPS_n2 {
 						Name = (*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[sel]))->GetName();
 					}
 					if (loop2 == -1) {
-						int add = y_r(380) + (int)y->Xadd / 2;
+						int add = y_r(380) + y_r(SelMoveClass[select].Xadd*300.f) / 2;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(36), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
 							xp1 + add, yp1 + y_r(20), Green50, Green25, Name);
 					}
 					if (loop2 == 1) {
-						int add = -y_r(380) + (int)y->Xadd / 2;
+						int add = -y_r(380) + y_r(SelMoveClass[select].Xadd*300.f) / 2;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
 							xp1 + add, yp1 + y_r(20), Green50, Green25, Name);
 					}
@@ -508,7 +506,7 @@ namespace FPS_n2 {
 						Name = (*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[y->m_sel]))->GetName();
 					}
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(54), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-						xp1 + (int)y->Xadd, yp1 + y_r(20), Green, Green25, Name);
+						xp1 + y_r(SelMoveClass[select].Xadd*300.f), yp1 + y_r(20), Green, Green25, Name);
 				}
 			}
 			//

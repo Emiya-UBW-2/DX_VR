@@ -210,77 +210,6 @@ namespace FPS_n2 {
 			ObjectBaseClass::Init();
 			//データ
 			InitModSlotControl(this->m_FilePath, false);
-			//パーツの用意
-			{
-				auto* Slots = GetGunDataClass()->GetPartsSlot(GunSlot::Magazine);
-				if (Slots) {
-					int size = (int)Slots->m_ItemsUniqueID.size();
-					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
-					if (ID != size) {
-						SetMod(GunSlot::Magazine, ID, GetObj());
-						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Magazine));
-						if (Ptr) {
-							Ptr->SetRandomChildParts();
-						}
-					}
-				}
-			}
-			{
-				auto* Slots = GetGunDataClass()->GetPartsSlot(GunSlot::Upper);
-				if (Slots) {
-					int size = (int)Slots->m_ItemsUniqueID.size();
-					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
-					if (ID != size) {
-						SetMod(GunSlot::Upper, ID, GetObj());
-						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Upper));
-						if (Ptr) {
-							Ptr->SetRandomChildParts();
-						}
-					}
-				}
-			}
-			{
-				auto* Slots = GetGunDataClass()->GetPartsSlot(GunSlot::Lower);
-				if (Slots) {
-					int size = (int)Slots->m_ItemsUniqueID.size();
-					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
-					if (ID != size) {
-						SetMod(GunSlot::Lower, ID, GetObj());
-						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Lower));
-						if (Ptr) {
-							Ptr->SetRandomChildParts();
-						}
-					}
-				}
-			}
-			{
-				auto* Slots = GetGunDataClass()->GetPartsSlot(GunSlot::Barrel);
-				if (Slots) {
-					int size = (int)Slots->m_ItemsUniqueID.size();
-					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
-					if (ID != size) {
-						SetMod(GunSlot::Barrel, ID, GetObj());
-						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Barrel));
-						if (Ptr) {
-							Ptr->SetRandomChildParts();
-						}
-					}
-				}
-			}
-			{
-				auto* Slots = GetGunDataClass()->GetPartsSlot(GunSlot::Sight);
-				if (Slots) {
-					int size = (int)Slots->m_ItemsUniqueID.size();
-					int ID = (Slots->m_IsNeed) ? GetRand(size - 1) : GetRand(size);
-					if (ID != size) {
-						SetMod(GunSlot::Sight, ID, GetObj());
-						auto& Ptr = (std::shared_ptr<ModClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Sight));
-						if (Ptr) {
-							Ptr->SetRandomChildParts();
-						}
-					}
-				}
-			}
 			//
 			{
 				m_CharaAnimeSet.clear();
@@ -366,8 +295,6 @@ namespace FPS_n2 {
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Check).emplace_back(EnumGunAnim::M16_check1);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Watch).emplace_back(EnumGunAnim::M1911_watch);
 			}
-			//
-			Init_Gun();
 		}
 		void GunClass::FirstExecute(void) noexcept {
 			auto SE = SoundPool::Instance();

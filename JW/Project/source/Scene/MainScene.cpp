@@ -60,6 +60,8 @@ namespace FPS_n2 {
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
 					c->SetGunPtr(Gun);
 					(*Ptr)->Init();
+					GunsModify::CreateSelData(Gun, false);
+					Gun->Init_Gun();
 				}
 			}
 		}
@@ -91,14 +93,10 @@ namespace FPS_n2 {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 				c->SetGunPtr(Gun);
 				(*Ptr)->Init();
-				//ëSè¡Çµ
-				for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
-					Gun->RemoveMod((GunSlot)loop);
-				}
 				//
 				GunsModify::LoadSlots("data/bokuzyo.ok");
 				//
-				GunsModify::CreateSelData(Gun);
+				GunsModify::CreateSelData(Gun, true);
 				Gun->Init_Gun();
 				Gun.reset();
 			}

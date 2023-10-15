@@ -55,7 +55,6 @@ namespace FPS_n2 {
 			void			SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * GetFrameBaseLocalMat(frame)); }
 		public:
 			void			Init(void) noexcept override;
-			void			SetRandomChildParts(void) noexcept;
 
 			void			FirstExecute(void) noexcept override {
 				ObjectBaseClass::FirstExecute();
