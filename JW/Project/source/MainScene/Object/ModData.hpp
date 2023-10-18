@@ -9,7 +9,7 @@ namespace FPS_n2 {
 		class ModDataClass : public ItemData {
 		public://ÉQÉbÉ^Å[
 			struct PartsSlot {
-				GunSlot						m_GunSlot;
+				GunSlot						m_GunSlot{ GunSlot::Gun };
 				std::vector<int>			m_ItemsUniqueID;
 				std::vector<std::string>	m_Conflicts;
 				bool						m_IsNeed{ false };

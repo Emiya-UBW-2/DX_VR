@@ -13,11 +13,12 @@ namespace FPS_n2 {
 		class AI {
 		public:
 		public:
-			std::shared_ptr<BackGroundClassBase>	m_BackGround;				//BG
+			std::shared_ptr<BackGroundClassBase>	m_BackGround{ nullptr };				//BG
 			PlayerID								m_MyCharaID{ 0 };
 			ENUM_AI_PHASE							m_Phase{ ENUM_AI_PHASE::Normal };
-			std::array<int, 6>						m_WayPoints;
+			std::array<int, 6>						m_WayPoints{ 0,0,0,0,0,0 };
 			PlayerID								m_TargetCharaID{ 0 };
+			float									m_CheckAgain{ 0.f };
 		public:
 			AI(void) noexcept { }
 			~AI(void) noexcept { }
@@ -33,9 +34,9 @@ namespace FPS_n2 {
 			}
 		public:
 			VECTOR_ref		GetNowWaypointPos();
-			int		GetNextWaypoint(const VECTOR_ref&);
+			int		GetNextWaypoint(const VECTOR_ref&, int Rank);
 			void	SetNextWaypoint(const VECTOR_ref& vec_z) {
-				int now = this->GetNextWaypoint(vec_z);
+				int now = this->GetNextWaypoint(vec_z, 0);
 				if (now != -1) {
 					this->PushFrontWayPoint(now);
 				}
@@ -49,8 +50,9 @@ namespace FPS_n2 {
 		public:
 			void Init() {
 				this->m_Phase = ENUM_AI_PHASE::Normal;
-				int now = GetNextWaypoint(VECTOR_ref::zero());
+				int now = GetNextWaypoint(VECTOR_ref::zero(), 0);
 				this->FillWayPoints((now != -1) ? now : 0);
+				this->m_CheckAgain = 0.f;
 			}
 		};
 

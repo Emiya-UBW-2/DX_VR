@@ -138,8 +138,12 @@ namespace FPS_n2 {
 
 
 						SetDrawBlendMode(DX_BLENDMODE_ADD, 32);
-						DrawCircleGauge(xp1 + y_r(256), yp1, 50.0 + (double)((50.f - 15.0f*2.f)*1.f) + 15.0, ItemGraphPtr[0]->get(), 50.0 + 15.0, (double)((float)(DrawParts->m_DispYSize) / 1080.f));
-						DrawCircleGauge(xp1 + y_r(256), yp1, 50.0 + (double)((50.f - 15.0f*2.f)*per) + 15.0, ItemGraphPtr[0]->get(), 50.0 + 15.0, (double)((float)(DrawParts->m_DispYSize) / 1080.f));
+						DrawCircleGauge(xp1 + y_r(256), yp1,
+							50.0 + ((50.0 - 15.0*2.0)*1.0) + 15.0,
+							ItemGraphPtr[0]->get(), 50.0 + 15.0, ((double)(DrawParts->m_DispYSize) / 1080.0));
+						DrawCircleGauge(xp1 + y_r(256), yp1,
+							50.0 + ((50.0 - 15.0*2.0)*(double)per) + 15.0,
+							ItemGraphPtr[0]->get(), 50.0 + 15.0, ((double)(DrawParts->m_DispYSize) / 1080.0));
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 						//Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1, yp1, (per > 0.f) ? White : Red, Gray, "SPEED %5.2f km/h", floatParam[1]);
@@ -151,8 +155,14 @@ namespace FPS_n2 {
 						yp1 = DrawParts->m_DispYSize / 2 + intParam[1] + y_r(300.f*std::sin(rad)) - y_r(18) / 2;
 
 						SetDrawBlendMode(DX_BLENDMODE_ADD, 32);
-						DrawCircleGauge(xp1 - y_r(256), yp1, (double)(50.f - 15.0f*2.f) + 15.0, ItemGraphPtr[1]->get(), (double)((50.f - 15.0f*2.f)*(1.f - 1.f)) + 15.0, (double)((float)(DrawParts->m_DispYSize) / 1080.f));
-						DrawCircleGauge(xp1 - y_r(256), yp1, (double)(50.f - 15.0f*2.f) + 15.0, ItemGraphPtr[1]->get(), (double)((50.f - 15.0f*2.f)*(1.f - per)) + 15.0, (double)((float)(DrawParts->m_DispYSize) / 1080.f));
+						DrawCircleGauge(xp1 - y_r(256), yp1,
+							(50.0 - 15.0*2.0) + 15.0,
+							ItemGraphPtr[1]->get(), (double)((50.0 - 15.0*2.0)*(1.0 - 1.0)) + 15.0,
+							((double)(DrawParts->m_DispYSize) / 1080.0));
+						DrawCircleGauge(xp1 - y_r(256), yp1,
+							(50.0 - 15.0*2.0) + 15.0,
+							ItemGraphPtr[1]->get(), (double)((50.0 - 15.0*2.0)*(1.0 - (double)per)) + 15.0,
+							((double)(DrawParts->m_DispYSize) / 1080.0));
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 						//Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, (per > 0.f) ? White : Red, Gray, "ALT %4d m", (int)floatParam[2]);

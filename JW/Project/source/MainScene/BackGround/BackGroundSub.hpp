@@ -206,7 +206,7 @@ namespace FPS_n2 {
 		MV1							m_ObjLightBase;
 		GraphHandle					Light_Graph;
 		std::vector<Lights>			m_LightPoiont;
-		std::array<int, 2>			m_LightHandle;
+		std::array<int, 2>			m_LightHandle{ -1,-1 };
 	private:
 		void	InitLight() noexcept;
 		void	UpdateLight() noexcept;

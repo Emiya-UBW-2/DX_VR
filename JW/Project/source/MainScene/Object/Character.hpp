@@ -358,6 +358,11 @@ namespace FPS_n2 {
 				if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, m_move.pos) <= 2.0f*Scale_Rate)) { return false; }
 				return HitBoxControl::CheckLineHited(StartPos, pEndPos);
 			}
+			void			HealHP(HitPoint value) noexcept{
+				this->m_DamageEvent.resize(this->m_DamageEvent.size() + 1);
+				this->m_DamageEvent.back().SetEvent(this->m_MyID, m_objType, -value, DX_PI_F);
+			}
+
 			const bool		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept;
 			void			move_RightArm(const VECTOR_ref& GunPos, const VECTOR_ref& Gunyvec, const VECTOR_ref& Gunzvec) noexcept;
 			void			move_LeftArm(const VECTOR_ref& GunPos, const VECTOR_ref& Gunyvec, const VECTOR_ref& Gunzvec) noexcept;

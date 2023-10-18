@@ -123,8 +123,8 @@ namespace FPS_n2 {
 			{
 				auto per = std::clamp((1.f - GameStart), 0.f, 1.f);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
-				Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(48 * 3 / 2 * 3 / 4), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1 + y_r(40), yp1 + y_r(20), (select == 0) ? Red75 : Gray75, Gray, "Start Game");
-				Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(48 * 2 * 3 / 4), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1, yp1, (select == 0) ? Red : White, Gray, "Start Game");
+				Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(48 * 9 / 8), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1 + y_r(40), yp1 + y_r(20), (select == 0) ? Red75 : Gray75, Gray, "Custom");
+				Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(48 * 6 / 4), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1, yp1, (select == 0) ? Red : White, Gray, "Custom");
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 			//
@@ -133,7 +133,7 @@ namespace FPS_n2 {
 			{
 				auto per = std::clamp((1.f - GameStart2), 0.f, 1.f);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
-				DrawFetteString(xp1, yp1, 1.f, (select == 1), "Free Flight");
+				DrawFetteString(xp1, yp1, 1.f, (select == 1), "Go Defense");
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 			//

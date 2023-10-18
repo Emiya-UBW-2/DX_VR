@@ -8,32 +8,11 @@ namespace FPS_n2 {
 		class GunsModify {
 		public:
 			struct Slot {
-				GunSlot SlotType{ GunSlot::Magazine };
-				int m_sel{ 0 };
-				bool m_selectSwitch{ 0 };
-				const Slot* ParentSlot{ nullptr };
-				std::shared_ptr<ObjectBaseClass> m_Data{ nullptr };
-			public:
-				const auto& GetDataObj() const noexcept {
-					if (this->ParentSlot) {
-						return (std::shared_ptr<ObjectBaseClass>&)((std::shared_ptr<ModClass>&)this->m_Data);
-					}
-					else {
-						return (std::shared_ptr<ObjectBaseClass>&)((std::shared_ptr<GunClass>&)this->m_Data);
-					}
-				}
-				const auto* GetData() const noexcept {
-					if (this->ParentSlot) {
-						return (ModSlotControl*)((std::shared_ptr<ModClass>&)this->m_Data).get();
-					}
-					else {
-						return (ModSlotControl*)((std::shared_ptr<GunClass>&)this->m_Data).get();
-					}
-				}
-			public:
-				void Init() noexcept {
-					this->m_selectSwitch = true;
-				}
+				GunSlot			SlotType{ GunSlot::Magazine };
+				int				m_sel{ 0 };
+				bool			m_selectSwitch{ 0 };
+				const Slot*		ParentSlot{ nullptr };
+				ModSlotControl*	m_Data{ nullptr };
 			};
 		private:
 			struct SlotSaveData {
@@ -52,13 +31,12 @@ namespace FPS_n2 {
 		public:
 			const auto&		GetSelData() const noexcept { return SelData; }
 		private:
-			void			AddSelData(const std::shared_ptr<ObjectBaseClass>& ModPtr, const Slot* SlotPtr, bool isPreset);
-			bool			DelSelData(const Slot* SlotPtr);
 			void			SetMods(ModSlotControl* ModPtr, const Slot* SlotPtr);
 			void			UpdateMods(ModSlotControl* ModPtr, const Slot* SlotPtr, bool isPreset) noexcept;
 		public:
 			void			CreateSelData(const std::shared_ptr<GunClass>& GunPtr, bool isPreset);
-			void			ChangeSelData(const Slot* SlotPtr, int sel);
+			bool			ChangeSelData(const Slot* SlotPtr, int sel, bool isDeleteSlot);
+		public:
 			void			LoadSlots(const char* path);
 			void			SaveSlots(const char* path);
 		public:
@@ -66,7 +44,6 @@ namespace FPS_n2 {
 				for (auto& y : SelData) {
 					delete y;
 				}
-				SlotSave.clear();
 				SelData.clear();
 			}
 		};
@@ -76,17 +53,22 @@ namespace FPS_n2 {
 			public:
 				float				Xadd{ 0.f };
 				float				Yadd{ 0.f };
-				GunsModify::Slot*	Ptr;
+				GunsModify::Slot*	Ptr{ nullptr };
 				int					index{ 0 };
 			};
 		private:
 			int select{ 0 };
 			float m_SelAlpha{ 0.f };
-
 			float m_Yrad{ 0.f };
 			float m_Xrad{ 0.f };
+			float m_Yrad_R{ 0.f };
+			float m_Xrad_R{ 0.f };
 			float m_Range{ 1.f };
 			std::vector<SlotMove>			SelMoveClass;
+
+			bool m_IsEnd{ false };
+			float m_Alpha{ 0.f };
+			bool m_PrevShadow{ false };
 		private:
 			std::shared_ptr<GunClass>		m_GunPtr;				//ポインター別持ち
 

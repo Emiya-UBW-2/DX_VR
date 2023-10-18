@@ -152,7 +152,9 @@ namespace FPS_n2 {
 				}
 				PartsList.clear();
 			}
-			(*m_MagazinePtr)->SetReloadType(GetReloadType());
+			if (m_MagazinePtr) {
+				(*m_MagazinePtr)->SetReloadType(GetReloadType());
+			}
 			FillMag();															//マガジンはフル装填
 			CockByMag();														//チャンバーイン
 			//
