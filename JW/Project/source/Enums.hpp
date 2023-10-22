@@ -58,6 +58,24 @@ namespace FPS_n2 {
 			//
 			CartFall,
 			MagFall,
+			//
+			Man_Hurt1,
+			Man_Hurt2,
+			Man_Hurt3,
+			Man_Hurt4,
+			Man_Hurt5,
+			Man_Hurt6,
+			//
+			Man_Death1,
+			Man_Death2,
+			Man_Death3,
+			Man_Death4,
+			Man_Death5,
+			Man_Death6,
+			Man_Death7,
+			Man_Death8,
+			//
+			Hit,
 		};
 		enum class CharaTypeID {
 			Mine,

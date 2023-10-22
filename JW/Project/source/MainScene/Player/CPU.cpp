@@ -21,6 +21,7 @@ namespace FPS_n2 {
 			std::vector<std::pair<float, int>> DirChecks;
 			bool CheckDir = (Dir.Length() > 0.f);
 			for (auto& C : MainGB->GetBuildDatas()) {
+				if (C.GetMeshSel() < 0) { continue; }
 				int index = (int)(&C - &MainGB->GetBuildDatas().front());
 				if (std::find(m_WayPoints.begin(), m_WayPoints.end(), index) != m_WayPoints.end()) {
 					continue;
@@ -35,8 +36,9 @@ namespace FPS_n2 {
 						auto Dot = Vec_XZ.dot(Dir_XZ.Norm());
 						if (Dot > 0.f) {
 							auto StartPos = MyChara->GetMove().pos + VECTOR_ref::up()*1.f*Scale_Rate;
-							auto Endpos = StartPos + Vec_XZ * (5.f*Scale_Rate);
-							auto ret = C.GetColLine(StartPos, Endpos);
+							auto EndPos = StartPos + Vec_XZ * (5.f*Scale_Rate);
+							if (GetMinLenSegmentToPoint(StartPos, EndPos, C.GetMatrix().pos()) >= 5.f*Scale_Rate) { continue; }
+							auto ret = C.GetColLine(StartPos, EndPos);
 							if (ret.HitFlag == FALSE) {
 								DirChecks.emplace_back(std::make_pair(Dot, index));
 							}
@@ -184,7 +186,17 @@ namespace FPS_n2 {
 					auto Dir_t = TargetChara->GetMove().pos - MyChara->GetMove().pos;
 					auto Len = Dir_t.Length();
 					if (Len > 10.f*Scale_Rate) {
-						MyChara->HealHP(100);
+						for (auto& C : MainGB->GetBuildDatas()) {
+							if (C.GetMeshSel() < 0) { continue; }
+							auto StartPos = MyChara->GetMove().pos + VECTOR_ref::up()*1.f*Scale_Rate;
+							auto EndPos = TargetChara->GetMove().pos + VECTOR_ref::up()*1.f*Scale_Rate;
+							if (GetMinLenSegmentToPoint(StartPos, EndPos, C.GetMatrix().pos()) >= 5.f*Scale_Rate) { continue; }
+							auto ret = C.GetColLine(StartPos, EndPos);
+							if (ret.HitFlag == TRUE) {
+								MyChara->Heal(100);
+								break;
+							}
+						}
 					}
 				}
 

@@ -28,10 +28,6 @@ namespace FPS_n2 {
 			UIClass											m_UIclass;
 			int												m_HPBuf{ 0 };
 			int												m_ScoreBuf{ 0 };
-			//
-			float											m_CamShake{ 0.f };
-			VECTOR_ref										m_CamShake1;
-			VECTOR_ref										m_CamShake2;
 			//èeä÷òA
 			bool Reticle_on = false;
 			float Reticle_xpos = 0;

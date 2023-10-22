@@ -34,6 +34,14 @@ namespace FPS_n2 {
 				SE->Add((int)SoundEnum::SlideFoot, 3, "data/Sound/SE/move/sliding.wav");
 				SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
 				SE->Add((int)SoundEnum::Heart, 3, "data/Sound/SE/move/heart.wav");
+				SE->Add((int)SoundEnum::Hit, 3, "data/Sound/SE/hit.wav");
+				
+				for (int i = 0; i < 6; i++) {
+					SE->Add((int)SoundEnum::Man_Hurt1 + i, 2, "data/Sound/SE/voice/hurt_0" + std::to_string(i + 1) + ".wav");
+				}
+				for (int i = 0; i < 8; i++) {
+					SE->Add((int)SoundEnum::Man_Death1 + i, 2, "data/Sound/SE/voice/death_0" + std::to_string(i + 1) + ".wav");
+				}
 				//
 				this->m_AICtrl.resize(Chara_num);
 				for (int i = 1; i < Chara_num; i++) {
@@ -138,7 +146,6 @@ namespace FPS_n2 {
 				auto HitResult = this->m_BackGround->GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
 				if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
 				c->ValueSet(deg2rad(0.f), rad_t, pos_t, (PlayerID)index);
-				c->GunSetUp();
 				if (index < 1) {
 					c->SetCharaType(CharaTypeID::Team);
 				}
@@ -163,6 +170,7 @@ namespace FPS_n2 {
 			SE->Get((int)SoundEnum::Shot3).SetVol_Local(216);
 			SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
 			SE->Get((int)SoundEnum::Heart).SetVol_Local(92);
+			SE->Get((int)SoundEnum::Hit).SetVol_Local(255);
 			//UI
 			this->m_UIclass.Set();
 			//入力
@@ -463,17 +471,9 @@ namespace FPS_n2 {
 			ObjMngr->LateExecuteObject();
 			//視点
 			{
-				float ShakeTime = 0.1f;
-				if (Chara->GetSendCamShake()) {
-					this->m_CamShake = ShakeTime;
-				}
-				Easing(&this->m_CamShake1, VECTOR_ref::vget(GetRandf(this->m_CamShake / ShakeTime), GetRandf(this->m_CamShake / ShakeTime), GetRandf(this->m_CamShake / ShakeTime)), 0.8f, EasingType::OutExpo);
-				Easing(&this->m_CamShake2, m_CamShake1, 0.8f, EasingType::OutExpo);
-				this->m_CamShake = std::max(this->m_CamShake - 1.f / FPS, 0.f);
-
 				{
 					//FPSカメラ
-					VECTOR_ref CamPos = Chara->GetEyePosition() + this->m_CamShake2;
+					VECTOR_ref CamPos = Chara->GetEyePosition() + DrawParts->GetCamShake();
 					DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeVector(), Chara->GetEyeVecY());
 					//info
 					auto fov_t = DrawParts->GetMainCamera().GetCamFov();
@@ -543,20 +543,22 @@ namespace FPS_n2 {
 			//レーザーサイト
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-				if (!c->GetGunPtrNow_Const()) { continue; }
-				if (!c->GetGunPtrNow_Const()->HasFrame(GunFrame::LaserSight)) {
+				if (!c->GetGunPtrNow()) { continue; }
+				if (!c->GetGunPtrNow()->HasFrame(GunFrame::LaserSight)) {
 					c->SetIsLaserActive(false);
 					continue;
 				}
 				//
-				auto mat = c->GetGunPtrNow_Const()->GetFrameWorldMat(GunFrame::LaserSight);
+				auto mat = c->GetGunPtrNow()->GetFrameWorldMat(GunFrame::LaserSight);
 				VECTOR_ref StartPos = mat.pos();
 				VECTOR_ref EndPos = StartPos + mat.zvec()*-1.f * 15.f*Scale_Rate;
 				this->m_BackGround->CheckLinetoMap(StartPos, &EndPos, true);
 				for (int index2 = 0; index2 < Chara_num; index2++) {
 					auto& c2 = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index2).GetChara();
 					if (c2->GetMyPlayerID() == c->GetMyPlayerID()) { continue; }
-					c2->CheckLineHit(StartPos, &EndPos);
+					if (!c2->IsAlive()) { continue; }
+					if (!(GetMinLenSegmentToPoint(StartPos, EndPos, c2->GetMove().pos) <= 2.0f*Scale_Rate)) { continue; }
+					c2->CheckLineHitNearest(StartPos, &EndPos);
 				}
 				auto Vec = (EndPos - StartPos);
 				EndPos = StartPos + Vec.Norm()*std::max(Vec.Length() - 0.3f*Scale_Rate, 0.f);
@@ -582,8 +584,8 @@ namespace FPS_n2 {
 					printfDx("%d / %d \n", Chara->GetGunPtrNow()->GetAmmoNum(), Chara->GetGunPtrNow()->GetAmmoAll());
 				}
 
-				this->m_UIclass.SetIntParam(0, (int)(this->m_CamShake2.x()*100.f));
-				this->m_UIclass.SetIntParam(1, (int)(this->m_CamShake2.y()*100.f));
+				this->m_UIclass.SetIntParam(0, (int)(DrawParts->GetCamShake().x()*100.f));
+				this->m_UIclass.SetIntParam(1, (int)(DrawParts->GetCamShake().y()*100.f));
 				this->m_UIclass.SetIntParam(2, (int)(0.f*100.f));
 
 				this->m_UIclass.SetItemGraph(0, &Gauge_Graph);
@@ -707,17 +709,17 @@ namespace FPS_n2 {
 				Set_Per_Blackout(0.5f + (1.f + sin(Chara->GetHeartRateRad()*4.f)*0.25f) * ((Chara->GetHeartRate() - 60.f) / (180.f - 60.f)));
 				//
 				Set_is_lens(false);
-				if (Chara->GetGunPtrNow_Const() && Chara->GetGunPtrNow_Const()->GetReticlePtr()) {
-					VECTOR_ref LensPos = ConvWorldPosToScreenPos(Chara->GetGunPtrNow_Const()->GetLensPos().get());
+				if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetReticlePtr()) {
+					VECTOR_ref LensPos = ConvWorldPosToScreenPos(Chara->GetGunPtrNow()->GetLensPos().get());
 					if (0.f < LensPos.z() && LensPos.z() < 1.f) {
 						Set_xp_lens(LensPos.x());
 						Set_yp_lens(LensPos.y());
-						LensPos = ConvWorldPosToScreenPos(Chara->GetGunPtrNow_Const()->GetFrameWorldMat(GunFrame::LensSize).pos().get());
+						LensPos = ConvWorldPosToScreenPos(Chara->GetGunPtrNow()->GetFrameWorldMat(GunFrame::LensSize).pos().get());
 						if (0.f < LensPos.z() && LensPos.z() < 1.f) {
 							Set_size_lens(std::hypotf(xp_lens() - LensPos.x(), yp_lens() - LensPos.y()));
 						}
 					}
-					LensPos = ConvWorldPosToScreenPos(Chara->GetGunPtrNow_Const()->GetReticlePos().get());
+					LensPos = ConvWorldPosToScreenPos(Chara->GetGunPtrNow()->GetReticlePos().get());
 					if (0.f < LensPos.z() && LensPos.z() < 1.f) {
 						Reticle_xpos = LensPos.x();
 						Reticle_ypos = LensPos.y();
@@ -814,7 +816,7 @@ namespace FPS_n2 {
 			}
 			//レティクル表示
 			if (Reticle_on) {
-				Chara->GetGunPtrNow_Const()->GetReticlePtr()->DrawRotaGraph((int)Reticle_xpos, (int)Reticle_ypos, 1.f, Chara->GetReticleRad(), true);
+				Chara->GetGunPtrNow()->GetReticlePtr()->DrawRotaGraph((int)Reticle_xpos, (int)Reticle_ypos, 1.f, Chara->GetGunRadAdd(), true);
 			}
 			//UI
 			this->m_UIclass.Draw();
@@ -874,6 +876,13 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::SlideFoot);
 			SE->Delete((int)SoundEnum::StandupFoot);
 			SE->Delete((int)SoundEnum::Heart);
+			SE->Delete((int)SoundEnum::Hit);
+			for (int i = 0; i < 6; i++) {
+				SE->Delete((int)SoundEnum::Man_Hurt1 + i);
+			}
+			for (int i = 0; i < 8; i++) {
+				SE->Delete((int)SoundEnum::Man_Death1 + i);
+			}
 			//
 			m_AICtrl.clear();
 			//
