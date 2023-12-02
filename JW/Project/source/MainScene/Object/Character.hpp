@@ -129,6 +129,7 @@ namespace FPS_n2 {
 				}
 			}
 		public://ƒQƒbƒ^[
+			auto&			GetRagDoll(void) noexcept { return this->m_RagDoll; }
 			auto&			GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr; }
 			const auto		GetGunRadAdd(void) const noexcept { return this->m_LateLeanRad + this->m_yrad_BottomChange*0.15f; }
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }

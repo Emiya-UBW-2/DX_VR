@@ -63,7 +63,6 @@ namespace FPS_n2 {
 			void			Init(const char* MapPath, const char* SkyPath) noexcept {
 				//’nŒ`
 				std::string path;
-
 				path = MapPath;
 				if (path != "") {
 					path += "model.mv1";
@@ -146,8 +145,8 @@ namespace FPS_n2 {
 		public://
 			//
 			void			Init_Sub(void) noexcept override {
-				this->m_BuildControl.Load();
-				this->m_BuildControl.Init();
+				this->m_BuildControl.Load();//1.13•b
+				this->m_BuildControl.Init();//0.4•b
 			}
 			//
 			void			Execute_Sub(void) noexcept override {
@@ -155,6 +154,9 @@ namespace FPS_n2 {
 			}
 			//
 			void			Shadow_Draw_Far_Sub(void) noexcept override {
+			}
+			void			Shadow_Draw_Sub(void) noexcept override {
+				this->m_BuildControl.ShadowDraw();
 			}
 			void			Draw_Sub(void) noexcept override {
 				this->m_BuildControl.Draw();

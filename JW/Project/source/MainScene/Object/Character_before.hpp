@@ -119,8 +119,13 @@ namespace FPS_n2 {
 			//const auto&		GetStamina(void) const noexcept { return this->m_Stamina; }
 			//const auto&		GetStaminaMax(void) const noexcept { return this->StaminaMax; }
 			//const auto&		GetCannotRun(void) const noexcept { return this->m_CannotRun; }
-			const auto&		GetHeartRate(void) const noexcept { return this->m_HeartRate; }
-			const auto&		GetHeartRateRad(void) const noexcept { return this->m_HeartRateRad; }
+			//const auto&		GetHeartRate(void) const noexcept { return this->m_HeartRate; }
+			//const auto&		GetHeartRateRad(void) const noexcept { return this->m_HeartRateRad; }
+
+			//シェーダーに渡す場合
+			//Set_is_Blackout(true);
+			//Set_Per_Blackout(0.5f + (1.f + sin(Chara->GetHeartRateRad()*4.f)*0.25f) * ((Chara->GetHeartRate() - 60.f) / (180.f - 60.f)));
+
 			const auto		GetHeartRandVec(float SquatPer) const noexcept {
 				auto tmp2 = 0.2f * GetRandf(deg2rad(1.f));
 				auto tmp3 = Lerp(0.5f, 0.35f, SquatPer);

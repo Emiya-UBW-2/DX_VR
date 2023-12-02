@@ -309,6 +309,8 @@ namespace FPS_n2 {
 			}
 		}
 		//
+		this->m_Garbage.Set();
+		//
 		MakeMiniMap();
 		UpdateMiniMap();
 		//
@@ -402,10 +404,14 @@ namespace FPS_n2 {
 				}
 			}
 		}
+		this->m_Garbage.Execute(DrawParts->GetMainCamera().GetCamPos());
 		//
 		UpdateLight();
 		//
 		//UpdateMiniMap();
+	}
+	void			BuildControl::ShadowDraw() noexcept {
+		this->m_Garbage.ShadowDraw();
 	}
 	void			BuildControl::Draw() noexcept {
 		int fog_enable = 0;
@@ -433,6 +439,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
+		this->m_Garbage.Draw();
 
 		DrawLight();
 
@@ -448,5 +455,6 @@ namespace FPS_n2 {
 		this->m_ColBuildBase.Dispose();
 		m_MazeControl.Reset();
 		DisposeLight();
+		this->m_Garbage.Dispose();
 	}
 };

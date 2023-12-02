@@ -277,6 +277,12 @@ namespace FPS_n2 {
 						GetGunPtrNow()->SetShotPhase(GunAnimeID::Watch);
 					}
 				}
+				if (GetShotPhase() == GunAnimeID::ReloadOne) {
+					if (KeyControl::GetRKey().trigger()) {
+						GetGunPtrNow()->SetReloadCancel();
+					}
+				}
+
 				if (GetGunPtrNow()->GetShotSwitch()) {
 					if (this->m_MyID == 0) {
 						DrawParts->SetCamShake(0.1f, 0.3f);
@@ -829,8 +835,6 @@ namespace FPS_n2 {
 
 		void			CharacterClass::Init(void) noexcept {
 			ObjectBaseClass::Init();
-			MV1::Load((this->m_FilePath + "model_Rag.mv1").c_str(), &this->m_RagDoll, DX_LOADMODEL_PHYSICS_REALTIME, -1.f);//身体ラグドール
-			MV1::SetAnime(&this->m_RagDoll, GetObj());
 			HumanControl::Set_Body(this->GetObj(), this->m_RagDoll);
 			for (auto& a : this->m_AnimPerBuf) { a = 0.f; }
 			GetAnime(GetBottomStandAnimSel()).per = 1.f;

@@ -21,6 +21,7 @@ namespace FPS_n2 {
 		private:
 			std::shared_ptr<AmmoDataClass>			m_ChamberAmmoData{ nullptr };		//
 			GunAnimeID								m_ShotPhase{ GunAnimeID::Base };	//
+			bool									m_ReloadCancel{ false };			//
 			bool									m_ShotSwitch{ false };				//
 			int										m_boltSoundSequence{ -1 };			//サウンド
 			bool									m_IsChamberOn{ false };				//チャンバーに弾を込めるか
@@ -52,6 +53,7 @@ namespace FPS_n2 {
 			float			GetTimePer(CharaGunAnimeID ID) { return (GetAllTime(ID) > 0.f) ? (GetGunAnimFrame(ID) / GetAllTime(ID)) : 1.f; }
 		public:
 			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept;
+			void			SetReloadCancel() noexcept { m_ReloadCancel = true; }
 		public://ゲッター
 			const auto& GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
 			const bool	HaveFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first != -1; }
@@ -236,7 +238,8 @@ namespace FPS_n2 {
 								this->m_ShotPhase = GunAnimeID::ReloadEnd;
 								break;
 							case RELOADTYPE::AMMO:
-								if (this->GetIsMagFull()) {
+								if (this->GetIsMagFull() || this->m_ReloadCancel) {
+									this->m_ReloadCancel = false;
 									this->m_ShotPhase = GunAnimeID::ReloadEnd;
 								}
 								else {

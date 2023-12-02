@@ -76,6 +76,7 @@ namespace FPS_n2 {
 			Man_Death8,
 			//
 			Hit,
+			Tank_near,
 		};
 		enum class CharaTypeID {
 			Mine,

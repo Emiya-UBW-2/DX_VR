@@ -175,8 +175,101 @@ namespace FPS_n2 {
 
 			Builds*		m_NearPath{ nullptr };
 		};
+		class Garbage {
+			static const int Blocks{ 5 };
+			struct GarbageObjct
+			{
+				MV1 m_Obj;
+				bool IsChanged{ false };
+				float m_Rad{ 0.f };
+				float m_PrevRad{ 0.f };
+				VECTOR_ref m_Pos;
+			};
+		private:
+			MV1									m_Base;
+			std::array<GarbageObjct, Blocks * Blocks>		m_Obj;
+			int xprev = -1000;
+			int zprev = -1000;
+		public:
+			void		Set() {
+				MV1::Load("data/model/map_gareki/model.mv1", &this->m_Base, DX_LOADMODEL_PHYSICS_DISABLE);
+				for (auto& o : m_Obj) {
+					o.m_Obj = m_Base.Duplicate();
+				}
+			}
+			void		Execute(const VECTOR_ref& CamPos) {
+				int x = (int)(CamPos.x() / 100.f*2.f);
+				int z = (int)(CamPos.z() / 100.f*2.f);
+				{
+					int abx = abs(x);
+					if (abx > 0) {
+						if (abx % 2 == 1) {
+							abx += 1;
+						}
+						x = (x > 0) ? abx : -abx;
+					}
+					x /= 2;
+				}
+				{
+					int abz = abs(z);
+					if (abz > 0) {
+						if (abz % 2 == 1) {
+							abz += 1;
+						}
+						z = (z > 0) ? abz : -abz;
+					}
+					z /= 2;
+				}
+				for (auto& o : m_Obj) {
+					if (xprev != x || zprev != z) {
+						int index = (int)(&o - &m_Obj.front());
+						int xp = (x + (index % Blocks) - 2);
+						int zp = (z + (index / Blocks) - 2);
+						//前のフレームでの同じ場所を参照
+						o.IsChanged = true;
+						for (auto& o2 : m_Obj) {
+							int index2 = (int)(&o2 - &m_Obj.front());
+							int xp2 = (xprev + (index2 % Blocks) - 2);
+							int zp2 = (zprev + (index2 / Blocks) - 2);
+							if (xp == xp2 && zp == zp2) {
+								o.m_Rad = o2.m_PrevRad;
+								o.IsChanged = false;
+								break;
+							}
+						}
+						if (o.IsChanged) {
+							o.IsChanged = false;
+							o.m_Rad = deg2rad(GetRandf(180.f));
+						}
+						o.m_Pos = VECTOR_ref::vget((float)(xp * 100), 0.f, (float)(zp * 100));
+					}
+				}
+				for (auto& o : m_Obj) {
+					o.m_PrevRad = o.m_Rad;
+				}
+				xprev = x;
+				zprev = z;
+				for (auto& o : m_Obj) {
+					o.m_Obj.SetMatrix(MATRIX_ref::RotY(o.m_Rad) * MATRIX_ref::Mtrans(o.m_Pos));
+				}
+			}
+			void		ShadowDraw() {
+				m_Obj.at(Blocks * Blocks / 2).m_Obj.DrawModel();
+			}
+			void		Draw() {
+				for (auto& o : m_Obj) {
+					o.m_Obj.DrawModel();
+				}
+			}
+			void		Dispose() {
+				m_Base.Dispose();
+				for (auto& o : m_Obj) {
+					o.m_Obj.Dispose();
+				}
+			}
+		};
 	private:
-		const int Size = 19;
+		const int Size = 29;
 		const float tileSize = 30.f;
 	private:
 		GraphHandle					m_MapGraph;
@@ -193,6 +286,7 @@ namespace FPS_n2 {
 		MV1							m_ColBuildBase;
 		std::vector<Builds>			m_ObjBuilds;
 		MazeControl					m_MazeControl;
+		Garbage						m_Garbage;
 	public:
 		const auto&		GetBuildDatas(void) const noexcept { return this->m_ObjBuilds; }
 	private:
@@ -235,6 +329,7 @@ namespace FPS_n2 {
 		void			Load(void) noexcept;
 		void			Init() noexcept;
 		void			Execute(void) noexcept;
+		void			ShadowDraw() noexcept;
 		void			Draw() noexcept;
 		void			Dispose(void) noexcept;
 	};

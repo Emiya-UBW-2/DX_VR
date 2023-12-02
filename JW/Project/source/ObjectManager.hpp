@@ -15,6 +15,14 @@ namespace FPS_n2 {
 
 			PHYSICS_SETUP			m_DefaultType{ PHYSICS_SETUP::DISABLE };
 			bool					m_UseToonWhenCreateFile{ false };
+		private:
+			ObjectManager() {
+				m_Object.reserve(256);
+			}
+			~ObjectManager() {
+				m_Object.clear();
+				m_Object.shrink_to_fit();
+			}
 		public:
 			SharedObj*		MakeObject(ObjType ModelType) noexcept;
 			void			LoadObjectModel(ObjectBaseClass* pObj, const char* filepath, const char* objfilename = "model", const char* colfilename = "col") const noexcept;

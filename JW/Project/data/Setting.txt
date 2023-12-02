@@ -1,7 +1,7 @@
 grass_level=0
 DoF=true
 bloom=true
-shadow=false
+shadow=true
 usevr=false
 SSAO=true
 fov=90.000000

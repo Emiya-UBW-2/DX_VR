@@ -1,6 +1,7 @@
 #pragma once
 #include	"../Header.hpp"
 #include "../NetWork.hpp"
+#include "../MainScene/MainSceneSub.hpp"
 #include "../MainScene/UI/MainSceneUIControl.hpp"
 #include "../MainScene/BackGround/BackGround.hpp"
 #include "../MainScene/NetworkBrowser.hpp"
@@ -15,39 +16,30 @@ namespace FPS_n2 {
 			static const int		Chara_num = Player_num;
 			static const int		gun_num = Chara_num;
 		private:
-			bool											m_IsFirstLoad{ true };
-		private:
 			//リソース関連
+			bool											m_IsFirstLoad{ true };
 			std::shared_ptr<BackGroundClassMain>			m_BackGround;				//BG
 			GraphHandle										m_MiniMapScreen;
-			GraphHandle										Gauge_Graph;
 			GraphHandle										hit_Graph;
 			//人
 			std::vector<std::shared_ptr<AIControl>>			m_AICtrl;					//AI
 			//UI関連
 			UIClass											m_UIclass;
-			int												m_HPBuf{ 0 };
-			int												m_ScoreBuf{ 0 };
-			//銃関連
-			bool Reticle_on = false;
-			float Reticle_xpos = 0;
-			float Reticle_ypos = 0;
+			float											m_HPBuf{ 0.f };
+			float											m_ScoreBuf{ 0.f };
+			GraphHandle										Gauge_Graph;
+			GraphHandle				OIL_Graph;
+			//ダメージ
 			std::vector<DamageEvent>						m_DamageEvents;
-			//ネットワーク
-			NetWorkBrowser									m_NetWorkBrowser;
-			double											m_ClientFrame{ 0.0 };
 			//共通
 			float											Timer{ 5.f };
-
 			float	Min = 0.f;
 			float	Gamma = 1.f;
-
-			bool	m_Retire{ false };
-		private:
-			int select{ 0 };
-			std::array<float, 3> SelYadd{};
-		private:
-			const auto&		GetMyPlayerID(void) const noexcept { return this->m_NetWorkBrowser.GetMyPlayerID(); }
+			//
+			MyPlayerReticleControl							m_MyPlayerReticleControl;		//銃関連
+			NetWorkBrowser									m_NetWorkBrowser;				//ネットワーク
+			ConcussionControl								m_ConcussionControl;			//コンカッション
+			MainLoopPauseControl							m_MainLoopPauseControl;			//ポーズメニュー
 		public:
 			MAINLOOP(void) noexcept { }
 			~MAINLOOP(void) noexcept { }
@@ -59,8 +51,8 @@ namespace FPS_n2 {
 			//
 			void			Depth_Draw_Sub(void) noexcept override {}
 			void			BG_Draw_Sub(void) noexcept override;
-			void			ShadowDraw_Far_Sub(void) noexcept override;
-			void			ShadowDraw_NearFar_Sub(void) noexcept override;
+			void			ShadowDraw_Far_Sub(void) noexcept override{}
+			void			ShadowDraw_NearFar_Sub(void) noexcept override{}
 			void			ShadowDraw_Sub(void) noexcept override;
 			void			MainDraw_Sub(void) noexcept override;
 			void			MainDrawbyDepth_Sub(void) noexcept override;
@@ -69,6 +61,18 @@ namespace FPS_n2 {
 			void			DrawUI_In_Sub(void) noexcept override;
 		public:
 			void			Dispose_Load(void) noexcept;
+		private:
+			const auto&		GetMyPlayerID(void) const noexcept { return this->m_NetWorkBrowser.GetMyPlayerID(); }
+		private:
+			void			SetDrawMiniMap(void) noexcept;
+			void			DrawHitGraph(void) noexcept;
+		private:
+			void			LoadSE(void) noexcept;
+			void			SetSE(void) noexcept;
+			void			DisposeSE(void) noexcept;
+		private:
+			void			LoadChara(const std::string&FolderName, PlayerID ID, bool IsRagDoll, bool IsRagDollBaseObj = false) noexcept;
+			void			LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset) noexcept;
 		};
 	};
 };
