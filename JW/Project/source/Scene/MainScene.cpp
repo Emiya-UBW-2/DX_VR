@@ -23,9 +23,8 @@ namespace FPS_n2 {
 					this->m_AICtrl[i] = std::make_shared<AIControl>();
 				}
 				//
-				this->Gauge_Graph = GraphHandle::Load("data/UI/Gauge.png");
+				this->m_UIclass.Load();
 				this->hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
-				OIL_Graph = GraphHandle::Load("data/UI/back.png");
 				this->m_MiniMapScreen = GraphHandle::Make(y_r(128) * 2, y_r(128) * 2, true);
 				PlayerMngr->Init(Chara_num);
 				for (int i = 1; i < Chara_num; i++) {
@@ -33,12 +32,11 @@ namespace FPS_n2 {
 				}
 
 				for (int i = 1; i < gun_num; i++) {
-					LoadGun("AR15_90", (PlayerID)i, false);
+					LoadGun("AR15_90", (PlayerID)i, false, 0);
 				}
 			}
 		}
 		void			MAINLOOP::Set_Sub(void) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			//
@@ -51,31 +49,21 @@ namespace FPS_n2 {
 			this->m_BackGround->Init("", "");//1.59秒
 			//ロード
 			LoadChara("Suit", GetMyPlayerID(), false);
-#if true
-			GunsModify::LoadSlots("data/bokuzyo.ok");
-			LoadGun("G17Gen3", GetMyPlayerID(), true);
-#else
-			LoadGun("Mod870", GetMyPlayerID(), false);
-#endif
-			{
-				int loop = 0;
-				while (true) {
-					auto gun = ObjMngr->GetObj(ObjType::Gun, loop);
-					if (gun != nullptr) {
-						auto& Gun = (std::shared_ptr<GunClass>&)(*gun);
-						Gun->SetMapCol(this->m_BackGround);
-					}
-					else {
-						break;
-					}
-					loop++;
-				}
-			}
-			//人
+			GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
+			LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
+			LoadGun("Mod870", GetMyPlayerID(), false, 1);
+			//BGをオブジェに登録
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 				c->SetMapCol(this->m_BackGround);
-
+				c->GetGunPtr(0)->SetMapCol(this->m_BackGround);
+				if (c->GetGunPtr(1)) {
+					c->GetGunPtr(1)->SetMapCol(this->m_BackGround);
+				}
+			}
+			//人の座標設定
+			for (int index = 0; index < Chara_num; index++) {
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 				VECTOR_ref pos_t;
 				float rad_t = 0.f;
 				if (index == 0) {
@@ -83,10 +71,17 @@ namespace FPS_n2 {
 					rad_t = deg2rad(GetRandf(180.f));
 				}
 				else {
-					pos_t = VECTOR_ref::vget(
-						(float)((int)GetRandf(30 * 19 / 2)),
-						0.f,
-						(float)((int)GetRandf(30 * 19 / 2)));
+					auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
+					auto TgtPos_XZ = TargetChara->GetMove().pos; TgtPos_XZ.y(0.f);
+					VECTOR_ref BGPos_XZ;
+					while (true) {
+						auto& C = this->m_BackGround->GetBuildDatas().at(GetRand((int)(this->m_BackGround->GetBuildDatas().size()) - 1));
+						BGPos_XZ = C.GetMatrix().pos(); BGPos_XZ.y(0.f);
+						if ((BGPos_XZ - TgtPos_XZ).Length() > 10.f*Scale_Rate) {
+							break;
+						}
+					}
+					pos_t = BGPos_XZ;
 					rad_t = deg2rad(GetRandf(180.f));
 				}
 
@@ -101,10 +96,6 @@ namespace FPS_n2 {
 					this->m_AICtrl[index]->Init(this->m_BackGround, (PlayerID)index);
 				}
 			}
-			//player
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
-			this->m_HPBuf = (float)Chara->GetHP();
-			this->m_ScoreBuf = (float)PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore();
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(65), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(VECTOR_ref::vget(0, 15, -20), VECTOR_ref::vget(0, 15, 0), VECTOR_ref::vget(0, 1, 0));
@@ -115,7 +106,8 @@ namespace FPS_n2 {
 			//入力
 			this->m_DamageEvents.clear();
 			m_NetWorkBrowser.Init();
-			Timer = 3.f;
+			m_ReadyTimer = 6.f;
+			m_Timer = 180.f;
 			//
 			m_MainLoopPauseControl.Init();
 			m_ConcussionControl.Init();
@@ -207,12 +199,15 @@ namespace FPS_n2 {
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
 				SetMousePoint(DXDraw::Instance()->m_DispXSize / 2, DXDraw::Instance()->m_DispYSize / 2);
-				Timer = 3.f;
+				m_ReadyTimer = 6.f;
 				SE->Get((int)SoundEnum::Env).Play(0, DX_PLAYTYPE_LOOP);
 				SE->Get((int)SoundEnum::Env2).Play(0, DX_PLAYTYPE_LOOP);
 			}
 			else {
-				Timer = std::max(Timer - 1.f / FPS, 0.f);
+				m_ReadyTimer = std::max(m_ReadyTimer - 1.f / FPS, 0.f);
+				if (m_ReadyTimer == 0.f) {
+					m_Timer = std::max(m_Timer - 1.f / FPS, 0.f);
+				}
 			}
 			{
 				/*
@@ -278,7 +273,7 @@ namespace FPS_n2 {
 					}
 				}
 				//
-				bool isready = (Timer == 0.f);
+				bool isready = (m_ReadyTimer == 0.f);
 				for (int index = 0; index < Player_num; index++) {
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 					if (m_NetWorkBrowser.GetSequence() == SequenceEnum::MainGame) {
@@ -364,10 +359,12 @@ namespace FPS_n2 {
 							}
 							if (this->m_BackGround->HitLightCheck(repos_tmp, &pos_tmp)) {
 								EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale_Rate);
+								SE->Get((int)SoundEnum::HitGround0 + GetRand(5 - 1)).Play_3D(0, pos_tmp, Scale_Rate * 10.f);
 							}
 							if (ColResGround && !is_HitAll) {
 								a->HitGround(pos_tmp);
 								EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale_Rate);
+								SE->Get((int)SoundEnum::HitGround0 + GetRand(5 - 1)).Play_3D(0, pos_tmp, Scale_Rate * 10.f);
 							}
 						}
 					}
@@ -384,6 +381,23 @@ namespace FPS_n2 {
 				Set_is_Blackout(m_ConcussionControl.IsActive());
 				Set_Per_Blackout(m_ConcussionControl.GetPer());
 				m_ConcussionControl.Update();
+			}
+			//近接攻撃
+			{
+				for (int index = 0; index < Player_num; index++) {
+					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+					if (c->GetShotPhase() == GunAnimeID::Melee) {
+						VECTOR_ref StartPos = c->GetEyePosition();
+						VECTOR_ref EndPos = StartPos + c->GetEyeVector() * (1.f*Scale_Rate);
+						for (int index2 = 0; index2 < Player_num; index2++) {
+							if (index == index2) { continue; }
+							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index2).GetChara();
+							if (tgt->GetHP() <= 0) { continue; }
+							if (tgt->IsDamaging()) { continue; }
+							tgt->CheckMeleeHit(c->GetMyPlayerID(), StartPos, &EndPos);
+						}
+					}
+				}
 			}
 			//背景更新
 			this->m_BackGround->FirstExecute();
@@ -415,7 +429,11 @@ namespace FPS_n2 {
 						else if (Chara->GetRun()) {
 							fov += deg2rad(5);
 						}
-						if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetShotSwitch()) {
+						if (Chara->GetMeleeSwitch()) {
+							fov += deg2rad(25);
+							Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
+						}
+						else if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetShotSwitch()) {
 							fov -= deg2rad(15);
 							Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
 						}
@@ -435,11 +453,16 @@ namespace FPS_n2 {
 			}
 			{
 				auto Len = (DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(0)).Length();
+				auto LenPer = std::clamp(Len / (5.f*Scale_Rate), 0.f, 1.f);
+				bool HPLow = Chara->GetHP() < (Chara->GetHPMax() * 3 / 10);
+				Easing(&Min, 
+					(HPLow) ? Lerp(20.f, 35.f, LenPer) : Lerp(0.f, 25.f, LenPer),
+					0.95f, EasingType::OutExpo);
+				Easing(&Gamma, 
+					(HPLow) ? Lerp(1.15f, 1.35f, LenPer) : Lerp(1.f, 1.15f, LenPer),
+					0.95f, EasingType::OutExpo);
 
-				Easing(&Min, Lerp(0.f, 25.f, std::clamp(Len / (5.f*Scale_Rate), 0.f, 1.f)), 0.95f, EasingType::OutExpo);
-				Easing(&Gamma, Lerp(1.f, 1.15f, std::clamp(Len / (5.f*Scale_Rate), 0.f, 1.f)), 0.95f, EasingType::OutExpo);
-
-				PostPassEffect::Instance()->SetLevelFilter((int)Min, 192, Gamma);
+				PostPassEffect::Instance()->SetLevelFilter((int)Min, (HPLow) ? 128 : 192, Gamma);
 			}
 			//
 			this->m_BackGround->Execute();
@@ -453,13 +476,11 @@ namespace FPS_n2 {
 					0.012f,
 					0.004f);
 			}
-			{
-				SetShadowDir(VECTOR_ref::vget(0.f, -1.f, 0.f), 0);
-				//SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(0)).Norm(), 0);
-				//SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(1)).Norm(), 1);
-				//SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(2)).Norm(), 2);
-				//SetisUpdateFarShadow(true);
-			}
+			SetShadowDir(VECTOR_ref::vget(0.f, -1.f, 0.f), 0);
+			//SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(0)).Norm(), 0);
+			//SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(1)).Norm(), 1);
+			//SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(2)).Norm(), 2);
+			//SetisUpdateFarShadow(true);
 			//レーザーサイト
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
@@ -491,26 +512,54 @@ namespace FPS_n2 {
 #endif // DEBUG
 			//UIパラメーター
 			{
-				//Time,Score
-				this->m_UIclass.SetfloatParam(0, Timer);
-				this->m_UIclass.SetIntParam(6, PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
-				//HP
-				this->m_UIclass.SetIntParam(3, (int)Chara->GetHP());
-				this->m_UIclass.SetIntParam(4, (int)Chara->GetHPMax());
-				this->m_UIclass.SetIntParam(5, (int)(this->m_HPBuf + 0.5f));
-				this->m_HPBuf += std::clamp((float)(Chara->GetHP() - this->m_HPBuf)*20.f, -30.f, 30.f) / FPS;
-				//SPeed,ALT
-				if (Chara->GetGunPtrNow()) {
-					//printfDx("%d / %d \n", Chara->GetGunPtrNow()->GetAmmoNum(), Chara->GetGunPtrNow()->GetAmmoAll());
+				VECTOR_ref MyPos = Chara->GetMove().pos;
+				for (int index = 0; index < Chara_num; index++) {
+					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+					if (index == 0) { continue; }
+					c->CanLookTarget = true;
+					{
+						VECTOR_ref TgtPos = c->GetMove().pos;
+						//
+						c->CanLookTarget = true;
+						auto Dir_t = TgtPos - MyPos;
+						if (Dir_t.Length() < 15.f*Scale_Rate) {
+							for (auto& C : this->m_BackGround->GetBuildDatas()) {
+								if (C.GetMeshSel() < 0) { continue; }
+								auto StartPos = MyPos;
+								auto EndPos = TgtPos;
+								if (GetMinLenSegmentToPoint(StartPos, EndPos, C.GetMatrix().pos()) >= 5.f*Scale_Rate) { continue; }
+								auto ret = C.GetColLine(StartPos, EndPos);
+								if (ret.HitFlag == TRUE) {
+									c->CanLookTarget = false;
+									break;
+								}
+							}
+						}
+						else {
+							c->CanLookTarget = false;
+						}
+					}
 				}
-
+			}
+			{
+				//シェイク
 				this->m_UIclass.SetIntParam(0, (int)(DrawParts->GetCamShake().x()*100.f));
 				this->m_UIclass.SetIntParam(1, (int)(DrawParts->GetCamShake().y()*100.f));
-				this->m_UIclass.SetIntParam(2, (int)(0.f*100.f));
-
-				this->m_UIclass.SetItemGraph(0, &Gauge_Graph);
-				this->m_UIclass.SetItemGraph(1, &Gauge_Graph);
+				this->m_UIclass.SetIntParam(2, (int)(rad2deg(Chara->GetGunRadAdd())*5.f));
+				//Time
+				this->m_UIclass.SetfloatParam(0, m_Timer);
+				this->m_UIclass.SetfloatParam(1, m_ReadyTimer);
+				//Score
+				this->m_UIclass.SetIntParam(6, PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
+				//HP
+				this->m_UIclass.SetGaugeParam(0, (int)Chara->GetHP(), (int)Chara->GetHPMax());
+				//SPeed,ALT
+				if (Chara->GetGunPtrNow()) {
+					this->m_UIclass.SetGaugeParam(1, (int)100, (int)100);
+					this->m_UIclass.SetGaugeParam(2, (int)Chara->GetGunPtrNow()->GetAmmoNum(), (int)Chara->GetGunPtrNow()->GetAmmoAll() + 1);
+				}
 			}
+			//
 			EffectControl::Execute();
 			//
 			for (int index = 0; index < Chara_num; index++) {
@@ -614,25 +663,14 @@ namespace FPS_n2 {
 			//
 #endif
 		}
-		void			MAINLOOP::MainDrawbyDepth_Sub(void) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DrawDepthObject();
-		}
 		//UI表示
 		void			MAINLOOP::DrawUI_Base_Sub(void) noexcept {
-			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			//着弾表示
 			DrawHitGraph();
-			//ダメージ表示
-			{
-				auto per = std::clamp(std::abs(((float)Chara->GetHP() - this->m_HPBuf))*0.1f, 0.f, 0.5f);
-				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
-
-				OIL_Graph.DrawExtendGraph(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, true);
-
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+			if (!DXDraw::Instance()->IsPause()) {
+				DrawSoundGraph();
 			}
 			//レティクル表示
 			if (m_MyPlayerReticleControl.IsActive()) {
@@ -668,7 +706,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				DisposeSE();
 				m_AICtrl.clear();
-				this->Gauge_Graph.Dispose();
+				this->m_UIclass.Dispose();
 				this->hit_Graph.Dispose();
 				this->m_MiniMapScreen.Dispose();
 				PlayerMngr->Dispose();
@@ -679,18 +717,14 @@ namespace FPS_n2 {
 		void			MAINLOOP::SetDrawMiniMap(void) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
-
 			m_MiniMapScreen.SetDraw_Screen();
 			{
 				float size = 0.7f;
 				int xp = y_r(128);
 				int yp = y_r(128);
 
-				int xp1 = 0;
-				int yp1 = 0;
-
-				xp1 -= (int)(15.f + Chara->GetMove().pos.x());
-				yp1 -= -(int)(15.f + Chara->GetMove().pos.z());
+				int xp1 = -(int)(15.f + Chara->GetMove().pos.x());
+				int yp1 = (int)(15.f + Chara->GetMove().pos.z());
 
 				float rad = std::atan2f(
 					Chara->GetEyeVector().cross(VECTOR_ref::front()).y(),
@@ -706,16 +740,102 @@ namespace FPS_n2 {
 					rad, true);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
+				VECTOR_ref MyPos = Chara->GetMove().pos;
 				for (int index = 0; index < Chara_num; index++) {
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+					if (index == 0) { continue; }
+					if (!c->CanLookTarget) { continue; }
+					unsigned int Color = (c->GetHP() > 0) ? GetColor(255, 0, 0) : GetColor(128, 0, 0);
 					int xp2 = xp1 + (int)(15.f + c->GetMove().pos.x());
 					int yp2 = yp1 - (int)(15.f + c->GetMove().pos.z());
 					DrawCircle(
 						xp + (int)(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
 						yp + (int)(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
-						5, GetColor(255, 0, 0), TRUE);
+						5, Color, TRUE);
+				}
+				{
+					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
+					unsigned int Color = (c->GetHP() > 0) ? GetColor(0, 255, 0) : GetColor(0, 128, 0);
+					int xp2 = xp1 + (int)(15.f + c->GetMove().pos.x());
+					int yp2 = yp1 - (int)(15.f + c->GetMove().pos.z());
+					DrawCircle(
+						xp + (int)(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
+						yp + (int)(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
+						5, Color, TRUE);
 				}
 			}
+		}
+		void			MAINLOOP::DrawSoundGraph(void) noexcept {
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+
+			int xp = y_r(960);
+			int yp = y_r(540);
+
+			float size = 200.0f;
+
+			int xp1 = -(int)(Chara->GetMove().pos.x());
+			int yp1 = (int)(Chara->GetMove().pos.z());
+
+			float rad = std::atan2f(
+				Chara->GetEyeVector().cross(VECTOR_ref::front()).y(),
+				Chara->GetEyeVector().dot(VECTOR_ref::front())
+			);
+
+			VECTOR_ref MyPos = Chara->GetMove().pos;
+			const int DegDiv = 360 / 5;
+			std::array<std::pair<float, int>, DegDiv> DegPers;
+			for (auto& d : DegPers) {
+				d.first = 0.f;
+				d.second = 0;
+			}
+			for (int index = 0; index < Chara_num; index++) {
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+				if (index == 0) { continue; }
+				//if (!c->CanLookTarget) { continue; }
+				float length = (MyPos - c->GetMove().pos).Length() / (50.f*Scale_Rate);
+				float xp2 = xp1 + (int)(c->GetMove().pos.x());
+				float yp2 = yp1 - (int)(c->GetMove().pos.z());
+				float len = std::hypotf(xp2, yp2);
+				if (len > 0.f) {
+					xp2 = (xp2 / len);
+					yp2 = (yp2 / len);
+				}
+				float xp3 = (xp2 * std::cos(rad) - yp2 * std::sin(rad));
+				float yp3 = (yp2 * std::cos(rad) + xp2 * std::sin(rad));
+				int rad_3 = (((int)rad2deg(std::atan2f(yp3, xp3)) + 360) % 360) * DegDiv / 360;
+				for (int loop = -5; loop <= 5; loop++) {
+					int rad_2 = rad_3 + loop;
+					if (rad_2 < 0) {
+						rad_2 += DegDiv;
+					}
+					if (rad_2 > DegDiv - 1) {
+						rad_2 -= DegDiv;
+					}
+					DegPers.at(rad_2).first += GetRandf(c->GetSoundPower() * 0.1f / length) * (float)(5 - std::abs(loop)) / 5.f;
+					DegPers.at(rad_2).second++;
+				}
+			}
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
+			for (auto& d : DegPers) {
+				if (d.second > 0) {
+					d.first = 1.f + d.first / d.second + GetRandf(0.01f);
+				}
+				else {
+					d.first = 1.f + GetRandf(0.01f);
+				}
+			}
+			for (int index = 0; index < DegDiv; index++) {
+				int next = (index + 1) % DegDiv;
+				DrawLine(
+					xp + (int)(cos(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f)),
+					yp + (int)(sin(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f)),
+					xp + (int)(cos(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f)),
+					yp + (int)(sin(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f)),
+					GetColor(255, 255, 255),
+					3);
+			}
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 		}
 		void			MAINLOOP::DrawHitGraph(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
@@ -725,7 +845,7 @@ namespace FPS_n2 {
 				auto ammo = ObjMngr->GetObj(ObjType::Ammo, loop);
 				if (ammo != nullptr) {
 					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
-					if (a->m_IsDrawHitUI) {
+					if (a->m_IsDrawHitUI && a->GetShootedID() == 0) {
 						int			Alpha = (int)(a->m_Hit_alpha * 255.f);
 						int			Damage = (int)a->m_Damage;
 						VECTOR_ref	DispPos = a->m_Hit_DispPos;
@@ -750,8 +870,7 @@ namespace FPS_n2 {
 			}
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 		}
-
-		//
+		//SE
 		void			MAINLOOP::LoadSE(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			SE->Add((int)SoundEnum::Env, 1, "data/Sound/SE/envi.wav", false);
@@ -766,18 +885,27 @@ namespace FPS_n2 {
 				SE->Add((int)SoundEnum::Cocking3_0 + i, 4, "data/Sound/SE/gun/auto1911/" + std::to_string(i) + ".wav");
 			}
 			SE->Add((int)SoundEnum::StandUp, 1, "data/Sound/SE/move/sliding.wav", false);
-			SE->Add((int)SoundEnum::RunFoot, 3, "data/Sound/SE/move/runfoot.wav");
+			SE->Add((int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
 			SE->Add((int)SoundEnum::SlideFoot, 3, "data/Sound/SE/move/sliding.wav");
 			SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
 			SE->Add((int)SoundEnum::Heart, 3, "data/Sound/SE/move/heart.wav");
 			SE->Add((int)SoundEnum::Hit, 3, "data/Sound/SE/hit.wav");
-
+			for (int i = 0; i < 5; i++) {
+				SE->Add((int)SoundEnum::HitGround0 + i, 2, "data/Sound/SE/gun/HitGround/" + std::to_string(i + 1) + ".wav");
+			}
+			
 			for (int i = 0; i < 6; i++) {
 				SE->Add((int)SoundEnum::Man_Hurt1 + i, 2, "data/Sound/SE/voice/hurt_0" + std::to_string(i + 1) + ".wav");
 			}
 			for (int i = 0; i < 8; i++) {
 				SE->Add((int)SoundEnum::Man_Death1 + i, 2, "data/Sound/SE/voice/death_0" + std::to_string(i + 1) + ".wav");
 			}
+			SE->Add((int)SoundEnum::Man_contact, 10, "data/Sound/SE/voice/contact.wav");
+			SE->Add((int)SoundEnum::Man_openfire, 10, "data/Sound/SE/voice/openfire.wav");
+			SE->Add((int)SoundEnum::Man_reload, 10, "data/Sound/SE/voice/reload.wav");
+			SE->Add((int)SoundEnum::Man_takecover, 10, "data/Sound/SE/voice/takecover.wav");
+			SE->Add((int)SoundEnum::Man_teamdown, 10, "data/Sound/SE/voice/teamdown.wav");
+
 
 			SE->Add((int)SoundEnum::Tank_near, 5, "data/Sound/SE/near.wav");
 		}
@@ -791,6 +919,9 @@ namespace FPS_n2 {
 			SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
 			SE->Get((int)SoundEnum::Heart).SetVol_Local(92);
 			SE->Get((int)SoundEnum::Hit).SetVol_Local(255);
+			for (int i = 0; i < 5; i++) {
+				SE->Get((int)SoundEnum::HitGround0 + i).SetVol_Local(92);
+			}
 		}
 		void			MAINLOOP::DisposeSE(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -810,12 +941,21 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::StandupFoot);
 			SE->Delete((int)SoundEnum::Heart);
 			SE->Delete((int)SoundEnum::Hit);
+			for (int i = 0; i < 5; i++) {
+				SE->Delete((int)SoundEnum::HitGround0 + i);
+			}
 			for (int i = 0; i < 6; i++) {
 				SE->Delete((int)SoundEnum::Man_Hurt1 + i);
 			}
 			for (int i = 0; i < 8; i++) {
 				SE->Delete((int)SoundEnum::Man_Death1 + i);
 			}
+			SE->Delete((int)SoundEnum::Man_contact);
+			SE->Delete((int)SoundEnum::Man_openfire);
+			SE->Delete((int)SoundEnum::Man_reload);
+			SE->Delete((int)SoundEnum::Man_takecover);
+			SE->Delete((int)SoundEnum::Man_teamdown);
+
 			SE->Delete((int)SoundEnum::Tank_near);
 		}
 		//
@@ -843,7 +983,7 @@ namespace FPS_n2 {
 			(*Ptr)->Init();
 			PlayerMngr->GetPlayer(ID).SetChara(*Ptr);
 		}
-		void			MAINLOOP::LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset) noexcept {
+		void			MAINLOOP::LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 
@@ -855,7 +995,7 @@ namespace FPS_n2 {
 			MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
 			auto& Gun = ((std::shared_ptr<GunClass>&)(*Ptr));
 			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID).GetChara();
-			c->SetGunPtr(Gun);
+			c->SetGunPtr(Sel, Gun);
 			(*Ptr)->Init();
 			GunsModify::CreateSelData(Gun, IsPreset);
 			Gun->Init_Gun();

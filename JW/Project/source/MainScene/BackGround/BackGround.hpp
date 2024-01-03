@@ -138,9 +138,15 @@ namespace FPS_n2 {
 			const auto&		GetMapGraph(void) noexcept { return this->m_BuildControl.GetMapGraph(); }
 			const auto&		GetMapGraphXSize(void) noexcept { return this->m_BuildControl.GetMapGraphXSize(); }
 			const auto&		GetMapGraphYSize(void) noexcept { return this->m_BuildControl.GetMapGraphYSize(); }
+			const int		GetNearestBuilds(const VECTOR_ref& NowPosition) noexcept {
+				return this->m_BuildControl.GetNearestBuilds(NowPosition);
+			}
 
 			bool			HitLightCheck(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept {
 				return this->m_BuildControl.HitLightCheck(StartPos, pEndPos);
+			}
+			bool CheckPolyMoveWidth(VECTOR_ref StartPos, int TargetIndex, float Width) const {
+				return this->m_BuildControl.CheckPolyMoveWidth(StartPos, TargetIndex, Width);
 			}
 		public://
 			//

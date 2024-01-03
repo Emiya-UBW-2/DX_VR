@@ -8,7 +8,8 @@ namespace FPS_n2 {
 			//自分の下の世代のオブジェをセット
 			for (auto& y : SelData) {
 				if (y->ParentSlot == SlotPtr) {
-					if (y->m_sel != (int)ModPtr->GetModData()->GetPartsSlot(y->SlotType)->m_ItemsUniqueID.size()) {
+					const auto& Data = ModPtr->GetModData()->GetPartsSlot(y->SlotType);
+					if (Data && y->m_sel != (int)Data->m_ItemsUniqueID.size()) {
 						if (y->m_selectSwitch) {
 							y->m_selectSwitch = false;
 							ModPtr->RemoveMod(y->SlotType);

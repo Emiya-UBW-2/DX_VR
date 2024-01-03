@@ -114,6 +114,7 @@ namespace FPS_n2 {
 			const auto	GetReloading(void) const noexcept { return (GunAnimeID::ReloadStart_Empty <= this->m_ShotPhase) && (this->m_ShotPhase <= GunAnimeID::ReloadEnd); }
 			const auto	GetChecking(void) const noexcept { return (GunAnimeID::CheckStart <= this->m_ShotPhase) && (this->m_ShotPhase <= GunAnimeID::CheckEnd); }
 			const auto	GetWatching(void) const noexcept { return (this->m_ShotPhase == GunAnimeID::Watch); }
+			const auto	IsMelee(void) const noexcept { return (this->m_ShotPhase == GunAnimeID::Melee); }
 			const auto	GetShootReady(void) const noexcept { return this->m_ShotPhase <= GunAnimeID::Shot; }
 			const auto	GetInChamber(void) const noexcept { return this->m_ChamberAmmoData != nullptr; }
 			const auto	GetCanShot(void) const noexcept { return GetInChamber() && GetShootReady(); }
@@ -299,6 +300,15 @@ namespace FPS_n2 {
 							this->m_ShotPhase = GunAnimeID::Base;
 						}
 					}
+					//
+					if (this->m_ShotPhase == GunAnimeID::Melee) {
+						GunAnimSelect = CharaGunAnimeID::Melee;
+						UpdateGunAnim(GunAnimSelect, 1.5f);
+						if (GetGunAnimEnd(GunAnimSelect)) {
+							this->m_ShotPhase = GunAnimeID::Base;
+						}
+					}
+					//
 					for (int i = 0; i < (int)CharaGunAnimeID::Max; i++) {
 						if (GunAnimSelect != (CharaGunAnimeID)i) {
 							this->SetGunAnim((CharaGunAnimeID)i, 0.f);

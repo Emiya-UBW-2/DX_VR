@@ -56,12 +56,17 @@ namespace FPS_n2 {
 			MV1													m_RagDoll;
 			float												m_RagDollTimer{ 0.f };						//ラグドールの物理演算フラグ
 			//銃
-			std::shared_ptr<GunClass>							m_Gun_Ptr{ nullptr };			//銃
+			int													m_GunSelect{ 0 };
+			std::array<std::shared_ptr<GunClass>, 2>			m_Gun_Ptr{ nullptr , nullptr };			//銃
 			//入力
 			bool												m_Press_Shot{ false };
 			bool												m_Press_Reload{ false };
 			bool												m_Press_Aim{ false };
+			bool												m_IsChanging{ false };
+			float												m_MeleeCoolDown{ 0.f };
+			bool												m_ArmBreak{ false };
 			//サウンド
+			float												m_SoundPower{ 0.f };
 			int													m_CharaSound{ -1 };
 			int													m_LeanSoundReq{ 0 };
 			bool												m_SquatSoundReq{ false };
@@ -69,6 +74,8 @@ namespace FPS_n2 {
 			VECTOR_ref											m_HitAxis{ VECTOR_ref::front() };
 			float												m_HitPower{ 0.f };
 			float												m_HitPowerR{ 0.f };
+		public:
+			bool												CanLookTarget{ true };
 		private:
 			std::shared_ptr<BackGroundClassBase>				m_BackGround;				//BG
 		public:
@@ -129,17 +136,23 @@ namespace FPS_n2 {
 				}
 			}
 		public://ゲッター
+			auto&			GetSoundPower(void) noexcept { return this->m_SoundPower; }
 			auto&			GetRagDoll(void) noexcept { return this->m_RagDoll; }
-			auto&			GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr; }
+			auto&			GetGunPtr(int ID) noexcept { return this->m_Gun_Ptr[ID]; }
+			auto&			GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr[m_GunSelect]; }
+			const auto&		GetGunPtrNow(void) const noexcept { return this->m_Gun_Ptr[m_GunSelect]; }
 			const auto		GetGunRadAdd(void) const noexcept { return this->m_LateLeanRad + this->m_yrad_BottomChange*0.15f; }
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
 
 			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
 			const auto		GetIsAim(void) const noexcept { return !(this->m_ReadyTimer == UpperTimerLimit); }
-			const auto		GetShotPhase(void) const noexcept { return (this->m_Gun_Ptr) ? this->m_Gun_Ptr->GetShotPhase() : GunAnimeID::Base; }
-			const auto		GetShootReady(void) const noexcept { return (this->m_Gun_Ptr) ? this->m_Gun_Ptr->GetShootReady() : false; }
-			const auto		GetAmmoNum(void) const noexcept { return (this->m_Gun_Ptr) ? this->m_Gun_Ptr->GetAmmoNum() : 0; }
-			const auto		GetAmmoAll(void) const noexcept { return (this->m_Gun_Ptr) ? this->m_Gun_Ptr->GetAmmoAll() : 0; }
+			const auto		GetShotPhase(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetShotPhase() : GunAnimeID::Base; }
+			const auto		GetShootReady(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetShootReady() : false; }
+			const auto		GetAmmoNum(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetAmmoNum() : 0; }
+			const auto		GetAmmoAll(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetAmmoAll() : 0; }
+			const auto		GetMeleeSwitch(void) const noexcept { return m_MeleeCoolDown == 1.f; }
+			const auto		IsDamaging(void) const noexcept { return m_HitPower > 0.f; }
+			
 			const auto		GetCharaDir(void) const noexcept {
 				auto tmpUpperMatrix =
 					MATRIX_ref::RotZ(this->m_LeanRad) *
@@ -152,8 +165,8 @@ namespace FPS_n2 {
 			const auto		GetEyePosition(void) const noexcept {
 				auto EyePosition = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f
 					+ MATRIX_ref::Vtrans(VECTOR_ref::front()*-0.5f, GetEyeVecMat()) + this->m_MoveEyePos;
-				if (this->m_Gun_Ptr) {
-					return Lerp(EyePosition, this->m_Gun_Ptr->GetEyePos(), this->m_ADSPer);
+				if (GetGunPtrNow()) {
+					return Lerp(EyePosition, GetGunPtrNow()->GetEyePos(), this->m_ADSPer);
 				}
 				else {
 					return EyePosition;
@@ -162,9 +175,10 @@ namespace FPS_n2 {
 		public://セッター
 			bool			SetDamageEvent(const DamageEvent& value) noexcept;
 			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
-			void			SetGunPtr(const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_Gun_Ptr = pGunPtr0; }
-			void			Heal(HitPoint value) noexcept { LifeControl::SetHealEvent(this->m_MyID, m_objType, value); }
+			void			SetGunPtr(int ID, const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_Gun_Ptr[ID] = pGunPtr0; }
+			void			Heal(HitPoint value) noexcept { LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, m_objType, value); }
 			const bool		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept;
+			const bool		CheckMeleeHit(PlayerID MeleeID, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept;
 		public:
 			void			ValueSet(float pxRad, float pyRad, const VECTOR_ref& pPos, PlayerID pID) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady) noexcept;

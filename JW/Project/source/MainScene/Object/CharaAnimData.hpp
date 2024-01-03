@@ -13,6 +13,7 @@ namespace FPS_n2 {
 			Ready,
 			Check,
 			Watch,
+			Melee,
 			Max,
 		};
 		enum class EnumGunAnim {
@@ -27,6 +28,7 @@ namespace FPS_n2 {
 			M1911_run,
 			M1911_check1,
 			M1911_watch,
+			M1911_melee,
 			M16_ready1,
 			M16_ready2,
 			M16_aim,
@@ -50,6 +52,7 @@ namespace FPS_n2 {
 			"M1911_run",
 			"M1911_check1",
 			"M1911_watch",
+			"M1911_melee",
 			"M16_ready1",
 			"M16_ready2",
 			"M16_aim",

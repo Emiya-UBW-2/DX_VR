@@ -204,13 +204,13 @@ namespace FPS_n2 {
 			HitPoint											m_HP{ 0 };							//スコア
 			std::vector<DamageEvent>							m_DamageEvent;						//ダメージイベント
 		protected:
-			void			SetHealEvent(PlayerID pID, Sceneclass::ObjType pCharaType, HitPoint value) noexcept {
+			void			SetHealEvent(PlayerID ShotID_t, PlayerID DamageID_t, Sceneclass::ObjType pCharaType, HitPoint value) noexcept {
 				this->m_DamageEvent.resize(this->m_DamageEvent.size() + 1);
-				this->m_DamageEvent.back().SetEvent(pID, pCharaType, -value, DX_PI_F);
+				this->m_DamageEvent.back().SetEvent(ShotID_t, DamageID_t, pCharaType, -value, DX_PI_F);
 			}
-			void			SetSubHPEvent(PlayerID pID, Sceneclass::ObjType pCharaType, HitPoint value,float Rad) noexcept {
+			void			SetSubHPEvent(PlayerID ShotID_t, PlayerID DamageID_t, Sceneclass::ObjType pCharaType, HitPoint value,float Rad) noexcept {
 				this->m_DamageEvent.resize(this->m_DamageEvent.size() + 1);
-				this->m_DamageEvent.back().SetEvent(pID, pCharaType, value, Rad);
+				this->m_DamageEvent.back().SetEvent(ShotID_t, DamageID_t, pCharaType, value, Rad);
 			}
 		public://ゲッター
 			const auto		IsAlive(void) const noexcept { return this->m_HP != 0; }

@@ -299,10 +299,31 @@ namespace FPS_n2 {
 						default:
 							break;
 						}
-
-						this->m_ObjBuilds[loop].Set(this->m_ObjBuildBase, this->m_ColBuildBase, ID);
+						this->m_ObjBuilds[loop].Set(loop, this->m_ObjBuildBase, this->m_ColBuildBase, ID);
 						this->m_ObjBuilds[loop].SetPosition(GetPos(x, y), deg2rad(deg));
-
+						loop++;
+					}
+				}
+			}
+		}
+		{
+			int loop = 0;
+			for (int y = 0; y < Size; y++) {
+				for (int x = 0; x < Size; x++) {
+					if (m_MazeControl.PosIsPath(x, y)) {
+						auto& bu = this->m_ObjBuilds[loop];
+						if (m_MazeControl.PosIsPath(x + 1, y)) {
+							bu.SetLink(0, GetNearestBuilds(GetPos(x + 1, y)));
+						}
+						if (m_MazeControl.PosIsPath(x, y + 1)) {
+							bu.SetLink(1, GetNearestBuilds(GetPos(x, y + 1)));
+						}
+						if (m_MazeControl.PosIsPath(x - 1, y)) {
+							bu.SetLink(2, GetNearestBuilds(GetPos(x - 1, y)));
+						}
+						if (m_MazeControl.PosIsPath(x, y - 1)) {
+							bu.SetLink(3, GetNearestBuilds(GetPos(x, y - 1)));
+						}
 						loop++;
 					}
 				}

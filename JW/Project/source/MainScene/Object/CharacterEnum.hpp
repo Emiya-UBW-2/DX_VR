@@ -16,6 +16,7 @@ namespace FPS_n2 {
 			ReloadOne,
 			ReloadEnd,
 			Watch,
+			Melee,
 			Max,
 		};
 		enum class CharaAnimeID : int {

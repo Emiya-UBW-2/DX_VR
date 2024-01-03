@@ -16,6 +16,7 @@ namespace FPS_n2 {
 			CheckEnd,
 			Open,
 			Watch,
+			Melee,
 			AnimeIDMax,
 		};
 		enum class GunFrame {

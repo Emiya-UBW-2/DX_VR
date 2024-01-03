@@ -229,6 +229,7 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadOne) = 30;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 10;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 60;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Melee) = 10;
 				//ƒnƒ“ƒhƒKƒ“
 				m_CharaAnimeSet.resize(m_CharaAnimeSet.size() + 1);
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Down) = 0;
@@ -243,6 +244,7 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadOne) = 30;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 10;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 60;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Melee) = 10;
 				//M870
 				m_CharaAnimeSet.resize(m_CharaAnimeSet.size() + 1);
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Down) = 0;
@@ -257,6 +259,7 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadOne) = 30;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 10;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 60;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Melee) = 10;
 				//
 				m_GunAnimeSet.clear();
 				//M4
@@ -271,6 +274,7 @@ namespace FPS_n2 {
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Run).emplace_back(EnumGunAnim::M16_run);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Check).emplace_back(EnumGunAnim::M16_check1);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Watch).emplace_back(EnumGunAnim::M1911_watch);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Melee).emplace_back(EnumGunAnim::M1911_melee);
 				//ƒnƒ“ƒhƒKƒ“
 				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Aim).emplace_back(EnumGunAnim::M1911_aim1);
@@ -284,6 +288,7 @@ namespace FPS_n2 {
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Run).emplace_back(EnumGunAnim::M1911_run);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Check).emplace_back(EnumGunAnim::M1911_check1);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Watch).emplace_back(EnumGunAnim::M1911_watch);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Melee).emplace_back(EnumGunAnim::M1911_melee);
 				//M870
 				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Aim).emplace_back(EnumGunAnim::M16_aim);
@@ -296,6 +301,7 @@ namespace FPS_n2 {
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Run).emplace_back(EnumGunAnim::M16_run);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Check).emplace_back(EnumGunAnim::M16_check1);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Watch).emplace_back(EnumGunAnim::M1911_watch);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Melee).emplace_back(EnumGunAnim::M1911_melee);
 			}
 		}
 		void GunClass::FirstExecute(void) noexcept {

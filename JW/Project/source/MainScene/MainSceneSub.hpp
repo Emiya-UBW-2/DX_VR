@@ -31,7 +31,7 @@ namespace FPS_n2 {
 			}
 		public:
 			void SetActive() noexcept { m_Timer = 1.f; }
-			const auto		GetActiveSwitch(void) const noexcept { return this->m_Timer > 0.f; }
+			const auto		GetActiveSwitch(void) const noexcept { return this->m_Timer == 1.f; }
 			const auto		IsActive(void) const noexcept { return this->m_Timer > 0.f; }
 			const auto		GetPer(void) const noexcept { return this->m_Per  * 1.5f; }
 		private:
@@ -131,7 +131,7 @@ namespace FPS_n2 {
 			float Reticle_ypos = 0;
 			float Lens_xpos = 0;
 			float Lens_ypos = 0;
-			float LensSize = 0;
+			float LensSize = 10000;
 		public:
 			MyPlayerReticleControl() {}
 			~MyPlayerReticleControl() {}
@@ -139,7 +139,6 @@ namespace FPS_n2 {
 			void Update(const VECTOR_ref& LensPos, const VECTOR_ref& LensPos2, const VECTOR_ref& ReticlePos) noexcept {
 				VECTOR_ref LensPosBuf = ConvWorldPosToScreenPos(LensPos.get());
 				if (!(0.f < LensPosBuf.z() && LensPosBuf.z() < 1.f)) {
-					Reticle_on = false;
 					return;
 				}
 				Lens_xpos = LensPosBuf.x();

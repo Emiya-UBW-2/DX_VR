@@ -16,30 +16,22 @@ namespace FPS_n2 {
 			static const int		Chara_num = Player_num;
 			static const int		gun_num = Chara_num;
 		private:
-			//リソース関連
-			bool											m_IsFirstLoad{ true };
-			std::shared_ptr<BackGroundClassMain>			m_BackGround;				//BG
-			GraphHandle										m_MiniMapScreen;
-			GraphHandle										hit_Graph;
-			//人
-			std::vector<std::shared_ptr<AIControl>>			m_AICtrl;					//AI
-			//UI関連
-			UIClass											m_UIclass;
-			float											m_HPBuf{ 0.f };
-			float											m_ScoreBuf{ 0.f };
-			GraphHandle										Gauge_Graph;
-			GraphHandle				OIL_Graph;
-			//ダメージ
-			std::vector<DamageEvent>						m_DamageEvents;
-			//共通
-			float											Timer{ 5.f };
-			float	Min = 0.f;
-			float	Gamma = 1.f;
-			//
+			bool											m_IsFirstLoad{ true };			//共通リソースをロードしたか
+			std::shared_ptr<BackGroundClassMain>			m_BackGround;					//BG
+			UIClass											m_UIclass;						//UI関連
 			MyPlayerReticleControl							m_MyPlayerReticleControl;		//銃関連
 			NetWorkBrowser									m_NetWorkBrowser;				//ネットワーク
 			ConcussionControl								m_ConcussionControl;			//コンカッション
 			MainLoopPauseControl							m_MainLoopPauseControl;			//ポーズメニュー
+			//共通
+			GraphHandle										m_MiniMapScreen;
+			GraphHandle										hit_Graph;
+			std::vector<std::shared_ptr<AIControl>>			m_AICtrl;					//AI
+			std::vector<DamageEvent>						m_DamageEvents;				//ダメージ
+			float											m_ReadyTimer{ 0.f };
+			float											m_Timer{ 0.f };
+			float											Min = 0.f;
+			float											Gamma = 1.f;
 		public:
 			MAINLOOP(void) noexcept { }
 			~MAINLOOP(void) noexcept { }
@@ -55,7 +47,7 @@ namespace FPS_n2 {
 			void			ShadowDraw_NearFar_Sub(void) noexcept override{}
 			void			ShadowDraw_Sub(void) noexcept override;
 			void			MainDraw_Sub(void) noexcept override;
-			void			MainDrawbyDepth_Sub(void) noexcept override;
+			void			MainDrawbyDepth_Sub(void) noexcept override {}
 			//UI表示
 			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override;
@@ -65,6 +57,7 @@ namespace FPS_n2 {
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_NetWorkBrowser.GetMyPlayerID(); }
 		private:
 			void			SetDrawMiniMap(void) noexcept;
+			void			DrawSoundGraph(void) noexcept;
 			void			DrawHitGraph(void) noexcept;
 		private:
 			void			LoadSE(void) noexcept;
@@ -72,7 +65,7 @@ namespace FPS_n2 {
 			void			DisposeSE(void) noexcept;
 		private:
 			void			LoadChara(const std::string&FolderName, PlayerID ID, bool IsRagDoll, bool IsRagDollBaseObj = false) noexcept;
-			void			LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset) noexcept;
+			void			LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept;
 		};
 	};
 };

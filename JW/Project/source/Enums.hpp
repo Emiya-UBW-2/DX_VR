@@ -75,8 +75,19 @@ namespace FPS_n2 {
 			Man_Death7,
 			Man_Death8,
 			//
+			Man_contact,
+			Man_openfire,
+			Man_reload,
+			Man_takecover,
+			Man_teamdown,
+			//
 			Hit,
 			Tank_near,
+			HitGround0,
+			HitGround1,
+			HitGround2,
+			HitGround3,
+			HitGround4,
 		};
 		enum class CharaTypeID {
 			Mine,
