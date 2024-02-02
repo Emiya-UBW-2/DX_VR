@@ -143,7 +143,7 @@ namespace FPS_n2 {
 			return Ret;
 		}
 
-		void		SlotPartsControl::GetChildPartsList(std::vector<const std::shared_ptr<ObjectBaseClass>*>* Ret) const noexcept {
+		void		SlotPartsControl::GetChildPartsList(std::vector<const SharedObj*>* Ret) const noexcept {
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (this->m_Parts_Ptr[loop]) {
 					Ret->emplace_back(&this->m_Parts_Ptr[loop]);
@@ -182,6 +182,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
+
 		const SharedObj*	SlotPartsControl::SetParts(int uniqueID, GunSlot objType, const MV1& BaseModel) {
 			if (!this->m_Parts_Ptr[(int)objType]) {
 				auto* ObjMngr = ObjectManager::Instance();

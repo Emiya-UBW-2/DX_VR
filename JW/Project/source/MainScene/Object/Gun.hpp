@@ -26,6 +26,8 @@ namespace FPS_n2 {
 			int										m_boltSoundSequence{ -1 };			//サウンド
 			bool									m_IsChamberOn{ false };				//チャンバーに弾を込めるか
 			bool									m_IsEject{ false };
+			int										m_NextMagNum{ 0 };
+			int										m_NextMagUniqueID{ 0 };
 			VECTOR_ref								m_RecoilRadAdd;
 			FallControl								m_MagFall;
 			FallControl								m_CartFall;
@@ -126,6 +128,10 @@ namespace FPS_n2 {
 			const auto	GetCartMat(void) noexcept { return GetFrameWorldMat(GunFrame::Cart); }
 			const auto	GetCartVec(void) noexcept { return (GetFrameWorldMat(GunFrame::CartVec).pos() - GetCartMat().pos()).Norm(); }
 			const auto	GetAmmoNum(void) const noexcept { return (*m_MagazinePtr)->GetAmmoNum() + (GetInChamber() ? 1 : 0); }
+
+			const auto	CanReload(void) const noexcept {
+				return GetAmmoNum() <= GetAmmoAll();
+			}
 		public:
 			void		SetAmmoHandMatrix(const MATRIX_ref& value, float pPer) noexcept { (*m_MagazinePtr)->SetHandMatrix(value, pPer); }
 			void		FillMag() noexcept { (*m_MagazinePtr)->SetAmmo(GetAmmoAll()); }
@@ -161,7 +167,18 @@ namespace FPS_n2 {
 					this->m_ShotPhase = (!GetIsMagEmpty()) ? GunAnimeID::Cocking : GunAnimeID::ReloadStart_Empty;
 				}
 			}
-			void		SetReloadStart() noexcept { this->m_ShotPhase = (!GetIsMagEmpty()) ? GunAnimeID::ReloadStart : GunAnimeID::ReloadStart_Empty; }
+			void		SetReloadStartMag(int NextMagNum, int NextMagUniqueID) noexcept {
+				if (this->GetReloadType() != RELOADTYPE::MAG) { return; }
+				this->m_NextMagNum = NextMagNum;
+				this->m_NextMagUniqueID = NextMagUniqueID;
+				this->m_ShotPhase = (!GetIsMagEmpty()) ? GunAnimeID::ReloadStart : GunAnimeID::ReloadStart_Empty;
+			}
+			void		SetReloadStartAmmo(int NextMagNum) noexcept {
+				if (this->GetReloadType() != RELOADTYPE::AMMO) { return; }
+				this->m_NextMagNum = NextMagNum;
+				this->m_NextMagUniqueID = 0;
+				this->m_ShotPhase = (!GetIsMagEmpty()) ? GunAnimeID::ReloadStart : GunAnimeID::ReloadStart_Empty;
+			}
 
 			void		UpdateGunAnims(bool PressShot) {
 				if (this->GetShoting()) {
@@ -239,7 +256,7 @@ namespace FPS_n2 {
 								this->m_ShotPhase = GunAnimeID::ReloadEnd;
 								break;
 							case RELOADTYPE::AMMO:
-								if (this->GetIsMagFull() || this->m_ReloadCancel) {
+								if ((this->GetIsMagFull() || (m_NextMagNum <= 0)) || this->m_ReloadCancel) {
 									this->m_ReloadCancel = false;
 									this->m_ShotPhase = GunAnimeID::ReloadEnd;
 								}

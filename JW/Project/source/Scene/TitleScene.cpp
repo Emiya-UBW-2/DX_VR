@@ -27,14 +27,14 @@ namespace FPS_n2 {
 
 			Pad->ChangeGuide(
 				[&]() {
-					auto* KeyGuide = KeyGuideClass::Instance();
+					auto* KeyGuide = KeyConfigAndGuide::Instance();
 					KeyGuide->Reset();
 					KeyGuide->AddGuide("ng.png", "決定");
 					KeyGuide->AddGuide("ok.png", "戻る");
 					KeyGuide->AddGuide("R_stick.png", "上下選択");
 				},
 				[&]() {
-					auto* KeyGuide = KeyGuideClass::Instance();
+					auto* KeyGuide = KeyConfigAndGuide::Instance();
 					KeyGuide->Reset();
 					KeyGuide->AddGuide("none.jpg", "決定");
 					KeyGuide->AddGuide("X.jpg", "戻る");
@@ -116,7 +116,7 @@ namespace FPS_n2 {
 			//
 			xp1 = y_r(64 + 600);
 			yp1 = y_r(64 + 48 * 2);
-			DrawFetteString(xp1, yp1, 1.33f, false, "Final EpiSode");
+			DrawFetteString(xp1, yp1, 1.33f, false, "JW-ProtoType");
 			//
 			xp1 = y_r(1920 - 256 - 54 * 2 - (int)(GameStart*100.f));
 			yp1 = y_r(1080 - 108 - 108 * 2 + (int)SelYadd[0]);
@@ -148,10 +148,10 @@ namespace FPS_n2 {
 				std::string Info = "";
 				switch (select) {
 				case 0:
-					Info = "3分間の間敵を倒し続けてください。累計撃墜数はこちらでのみカウントされます";
+					Info = "使用する拳銃のカスタマイズをすることができます";
 					break;
 				case 1:
-					Info = "時間制限の緩いモードです";
+					Info = "戦闘を行います。(現状ではリタイア、ESCキーで終わる以外で特に目標はありません。無限に甦る敵兵士を倒し続けます)";
 					break;
 				case 2:
 					Info = "オプションを開きます";

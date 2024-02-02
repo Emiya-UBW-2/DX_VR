@@ -61,7 +61,7 @@ namespace FPS_n2 {
 				{
 					auto v1 = GetCharaDir().zvec() * -1.f;
 					auto v2 = (Chara->GetMove().pos - this->m_move.pos).Norm(); v2.y(0);
-					LifeControl::SetSubHPEvent(pAmmo->GetShootedID(), this->m_MyID, m_objType, Damage, atan2f(v1.cross(v2).y(), v1.dot(v2)));
+					LifeControl::SetSubHPEvent((PlayerID)pAmmo->GetShootedID(), this->m_MyID, m_objType, Damage, atan2f(v1.cross(v2).y(), v1.dot(v2)));
 				}
 				//SE
 				if (pAmmo->GetShootedID() == 0) {
@@ -260,6 +260,15 @@ namespace FPS_n2 {
 			//銃のIDセットアップ
 			if (GetGunPtrNow()) {
 				GetGunPtrNow()->SetPlayerID(this->m_MyID);
+
+				auto* ObjMngr = ObjectManager::Instance();
+				auto& Mag = (*GetGunPtrNow()->GetMagazinePtr());
+				size_t Total = m_MagazineStock.size();
+				for (size_t i = 0; i < Total; i++) {
+					m_MagazineStock[i].AmmoNum = Mag->GetAmmoNum();
+					m_MagazineStock[i].ModUniqueID = Mag->GetModData()->GetUniqueID();
+				}
+				m_UseMagazineID = 0;
 			}
 		}
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
@@ -267,8 +276,15 @@ namespace FPS_n2 {
 			//AIM
 			if (GetGunPtrNow()) {
 				this->m_Press_Shot = KeyControl::GetShotKey().press();
-				this->m_Press_Reload = (KeyControl::GetRKey().press() && (GetAmmoNum() <= GetAmmoAll()));
+				this->m_Press_Reload = (KeyControl::GetRKey().press() && GetGunPtrNow()->CanReload());
 				this->m_Press_Aim = KeyControl::GetADSKey().press();
+				if (this->m_Press_Reload) {
+					if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
+						if ((m_MagazineStock[0].AmmoNum != GetAmmoAll()) && (m_MagazineStock[0].AmmoNum >= m_MagazineStock[1].AmmoNum)) {
+							this->m_Press_Reload = false;
+						}
+					}
+				}
 				if (!GetGunPtrNow()->GetCanShot()) {
 					if (GetAmmoNum() == 0) {
 						if (this->m_Press_Shot) {
@@ -330,10 +346,36 @@ namespace FPS_n2 {
 				if ((GetShotPhase() == GunAnimeID::Base) && this->m_Arm[(int)EnumGunAnimType::Ready].Per() <= 0.1f) {
 					if (this->m_Press_Shot) {
 						GetGunPtrNow()->SetPressShot();
+						//
 						this->m_SoundPower = 1.f;
 					}
 					if (this->m_Press_Reload) {
-						GetGunPtrNow()->SetReloadStart();
+						switch (GetGunPtrNow()->GetReloadType()) {
+						case RELOADTYPE::MAG:
+						{
+							auto& Mag = (*GetGunPtrNow()->GetMagazinePtr());
+							m_MagazineStock[m_UseMagazineID].AmmoNum = Mag->GetAmmoNum();
+							m_MagazineStock[m_UseMagazineID].ModUniqueID = Mag->GetModData()->GetUniqueID();
+							(++m_UseMagazineID) %= m_MagazineStock.size();
+							GetGunPtrNow()->SetReloadStartMag(m_MagazineStock[m_UseMagazineID].AmmoNum, m_MagazineStock[m_UseMagazineID].ModUniqueID);
+						}
+						//次使うマガジンをソート
+						{
+							m_UseMagazineID = 0;
+							std::sort(m_MagazineStock.begin(), m_MagazineStock.end(), [&](const MagStock&A, const MagStock&B) {return A.AmmoNum > B.AmmoNum; });
+						}
+						break;
+						case RELOADTYPE::AMMO:
+						{
+							//todo:弾残数に応じて変更
+							GetGunPtrNow()->SetReloadStartAmmo(m_MagazineStock[m_UseMagazineID].AmmoNum);
+						}
+						break;
+						default:
+							break;
+						}
+
+
 						if (this->m_MyID != 0) {
 							auto SE = SoundPool::Instance();
 							if (GetRand(1) == 0) {
@@ -989,6 +1031,15 @@ namespace FPS_n2 {
 			ExecuteMatrix();			//SetMat指示//0.03ms
 			ExecuteShape();				//顔//スコープ内0.01ms
 			EffectControl::Execute();
+
+			if (this->m_MyID == 0) {
+				size_t Total = m_MagazineStock.size();
+				clsDx();
+				printfDx("NowMag %d\n", GetGunPtrNow()->GetAmmoNum());
+				for (size_t i = 0; i < Total; i++) {
+					printfDx("Mag %d\n", m_MagazineStock[(i + m_UseMagazineID) % m_MagazineStock.size()].AmmoNum);
+				}
+			}
 		}
 		void			CharacterClass::Draw(bool isDrawSemiTrans) noexcept {
 			if (this->m_IsActive && this->m_IsDraw) {

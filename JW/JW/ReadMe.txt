@@ -1,61 +1,45 @@
-Final Episode　ver1.0.8　　　　　　笑也 知郎
+JW(仮称)　　　　　　笑也 知郎
 
 このアプリケーションについて
-　　WW1のドイツ航空隊をテーマにしたドラマの最終回を意識したフライトシューティングです。ただただ敵を倒すだけです。
+　　現在制作中のFPSです。ただただ敵を倒すだけです。
 
-敵味方に付いて
-	味方はドイツのアルバトロスDIII、敵はイギリスのソッピースキャメルとなります。
-
-撃墜判定について
-	5発当てることで撃墜されます。煙を吹き始めている場合はあと1発で撃墜される状態です。
-	また、車輪以外で接地することでも墜落となります。
-
-1戦ごとの評価について
-	1撃墜もできなかった→Newbie
-	1撃墜以上できた→Sargent
-	5撃墜以上して生還した→Ace
-	8撃墜以上した→Red Baron
-	※味方を撃墜してもスコアが入ります。
-
-	累計80機まで撃墜すると…？
+キル判定について
+	敵味方ともに100HPを持っており、拳銃弾1発で1/3ほど削られます。手足だと減衰しますがヘッドショットは一撃です。
 
 ！タイトル画面から進んだ際に「動作を停止しました」が出る場合！
 影の設定をDisableにすることで初回の起動にて通るかと思います。
 通らない場合は垂直同期以外のすべての設定を落としていただければと思います。
 
-操縦操作
-　　WS　機首下上　ピッチ
-	AD　左右回転　ロール
-	QE　左右傾け　ヨー
-	RF　加減速
-	マウス　エイム(ピッチ、ロールの制御)
-	左クリック　射撃
-	右クリック　エイム
-	中クリック　フリールック
-	Esc　ゲーム終了(確認ウィンドウは出ません、誤打に注意)
-
-履歴
-2023/08/09 ver1.0.0公開(とりあえず遊べる段階として公開)
-2023/08/09 ver1.0.1公開(FPS表示と敵位置表示修正)
-2023/08/10 ver1.0.2公開(レッドバロンモード、オプションの追加)
-2023/08/14 ver1.0.3公開(オプションにグラフィック周りを追加、バグ修正)
-2023/08/15 ver1.0.4公開(バグ修正、ガイドテキストのゲームパッド対応)
-2023/08/16 ver1.0.5公開(バグ修正)
-2023/08/19 ver1.0.6公開(バグ修正:Windows10より前での挙動を改善)
-2023/08/21 ver1.0.7公開(バグ修正:ムービーで異常に多かった草を修正、死亡時に機体を透明にしていくように修正、Xboxコンの場合にはキーボードで操作できるように修正)
-2023/08/26 ver1.0.8公開(バグ修正:DirectXのバージョンを指定できるオプション追加)
+操作
+　　PS4コンに対応しています。該当のパッドが刺さっている場合そちらでの操作が優先されます。
+　　詳しい操作は各画面左下のアイコンを参照ください。
+　　どんな場面でもESCキーで確認せず共生停止します。
 
 以下著作権表記です
 
 使用素材
-・「MMD用モブ戦闘機・パイロット1918セット」短足沼地人様
-・「MMD用モブ航空機スカイドーム」短足沼地人様
-・「Sopwith Camel E.1」a.a.volodyaev様(CC)
+・「着せ替え用スーツver.1.01」フラン様
+・「着せ替え用スーツver.1.01」フラン様
 ・「血のフレーム　ダメージエフェクト」ポクテ様
 ・　SE全般　効果音ラボ様
-・ベートーヴェン：ピアノソナタ第8番 ハ短調 Op.13「悲愴」 第2楽章　http://classical-sound.seesaa.net/様
-・x14y24pxHeadUpDaisy　ヘッドアップデイジー　患者長ひっく様
+・　Oculus Audio Pack 1
+・　replicastudios
 
+武器パーツモデル群
+・https://sketchfab.com/3d-models/surefire-x400-ultra-flashlight-ed0c8530e4a6459d9affe7fe000cc0b3
+・https://sketchfab.com/3d-models/laser-sight-sbal-pl-0430b70e99974d1188b97372aeab8200
+・https://sketchfab.com/3d-models/ar15-9mm-9ef0990a450f40be8ca96fbbd83df691
+・https://sketchfab.com/3d-models/rifle-laser-sight-55d74d7d4f6a4071af856d2ffc2c429a
+・https://sketchfab.com/3d-models/silencers-pack-1-e96a019757a6440390edfef888f0867e
+・https://sketchfab.com/3d-models/universal-pistol-rail-d03caba7bc4b49709908dfba36f65ec7
+・https://sketchfab.com/3d-models/vortex-viper-red-dot-004ff239467941ca9eb83eb6f75b5ac3
+・https://sketchfab.com/3d-models/9mm-pistol-43bc09f5aace4346a8a2b6e1580fc03f
+・https://www.cgtrader.com/free-3d-models/military/gun/glock-17-gen-5
+・https://sketchfab.com/3d-models/12ga-85mm-buckshot-kinghunter-armory-4548952dfa874ae99b45d20be0811cad
+・https://sketchfab.com/3d-models/abandoned-warehouse-1e40d433ed6f48fb880a0d2172aff7ca
+・https://sketchfab.com/3d-models/interogation-room-6e9151ec29494469a74081ddc054d569
+・https://sketchfab.com/3d-models/russian-soldier-66df4b2856194d40a546afe2d1d77cfe
+・https://sketchfab.com/3d-models/remington-870-shotgun-6db0ad4764d14eee8f063eea3600071b
 
 以下DXライブラリ著作権表記です
 

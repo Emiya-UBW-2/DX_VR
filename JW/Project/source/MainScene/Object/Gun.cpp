@@ -124,7 +124,7 @@ namespace FPS_n2 {
 		}
 		void	GunClass::Init_Gun(void) noexcept {
 			{
-				std::vector<const std::shared_ptr<ObjectBaseClass>*> PartsList;
+				std::vector<const SharedObj*> PartsList;
 				GetSlotControl()->GetChildPartsList(&PartsList);
 				m_SightPtr = nullptr;
 				m_MuzzlePtr = nullptr;
@@ -155,7 +155,7 @@ namespace FPS_n2 {
 			if (m_MagazinePtr) {
 				(*m_MagazinePtr)->SetReloadType(GetReloadType());
 			}
-			FillMag();															//マガジンはフル装填
+			(*m_MagazinePtr)->SetAmmo(GetAmmoAll());							//マガジン装填
 			CockByMag();														//チャンバーイン
 			//
 			//
@@ -320,10 +320,17 @@ namespace FPS_n2 {
 						if (GetObj().get_anime(i).time == 0.f) {
 							switch (GetReloadType()) {
 							case RELOADTYPE::MAG:
-								FillMag();
+								//ユニークIDが異なる場合登録するオブジェと切り替える
+								if (this->m_NextMagUniqueID != (*m_MagazinePtr)->GetModData()->GetUniqueID()) {
+									RemoveMod(GunSlot::Magazine);
+									SetMod(GunSlot::Magazine, this->m_NextMagUniqueID, this->GetObj());
+									m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Magazine)));
+								}
+								(*m_MagazinePtr)->SetAmmo(m_NextMagNum);
 								break;
 							case RELOADTYPE::AMMO:
 								(*m_MagazinePtr)->AddAmmo();
+								m_NextMagNum--;
 								break;
 							default:
 								break;

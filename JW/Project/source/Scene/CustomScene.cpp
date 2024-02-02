@@ -181,7 +181,7 @@ namespace FPS_n2 {
 
 			Pad->ChangeGuide(
 				[&]() {
-				auto* KeyGuide = KeyGuideClass::Instance();
+				auto* KeyGuide = KeyConfigAndGuide::Instance();
 				KeyGuide->Reset();
 				KeyGuide->AddGuide("L_stick.png", "押し込みで離して見る");
 				KeyGuide->AddGuide("ok.png", "セーブして終了");
@@ -189,7 +189,7 @@ namespace FPS_n2 {
 				KeyGuide->AddGuide("square.png", "編集開始時に戻す");
 			},
 				[&]() {
-				auto* KeyGuide = KeyGuideClass::Instance();
+				auto* KeyGuide = KeyConfigAndGuide::Instance();
 				KeyGuide->Reset();
 				KeyGuide->AddGuide("MM.jpg", "離して見る");
 				KeyGuide->AddGuide("X.jpg", "セーブして終了");

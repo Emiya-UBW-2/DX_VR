@@ -74,6 +74,15 @@ namespace FPS_n2 {
 			VECTOR_ref											m_HitAxis{ VECTOR_ref::front() };
 			float												m_HitPower{ 0.f };
 			float												m_HitPowerR{ 0.f };
+
+			class MagStock {
+			public:
+				int AmmoNum{ 0 };
+				int ModUniqueID{ -1 };
+			};
+
+			std::array<MagStock, 4>								m_MagazineStock;
+			int													m_UseMagazineID{ 0 };
 		public:
 			bool												CanLookTarget{ true };
 		private:

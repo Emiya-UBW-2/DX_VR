@@ -38,7 +38,7 @@ namespace FPS_n2 {
 		//
 		class SlotPartsControl {
 		private:
-			std::array<std::shared_ptr<ObjectBaseClass>, (int)GunSlot::Max>	m_Parts_Ptr{ nullptr };
+			std::array<SharedObj, (int)GunSlot::Max>	m_Parts_Ptr{ nullptr };
 		public:
 			const bool	HasParts(GunSlot objType) const noexcept { return (this->m_Parts_Ptr[(int)objType].get() != nullptr); }
 			const auto&	GetPartsPtr(GunSlot objType) const noexcept { return this->m_Parts_Ptr[(int)objType]; }
@@ -46,9 +46,11 @@ namespace FPS_n2 {
 			const bool	HasFrame(GunFrame frame) const noexcept;
 			const bool	GetPartsFrameLocalMat(GunFrame frame, MATRIX_ref* pRet) const noexcept;
 			const bool	GetPartsFrameWorldMat(GunFrame frame, MATRIX_ref* pRet) const noexcept;
-			void		GetChildPartsList(std::vector<const std::shared_ptr<ObjectBaseClass>*>* Ret) const noexcept;
+			void		GetChildPartsList(std::vector<const SharedObj*>* Ret) const noexcept;
 			void		ResetPartsFrameLocalMat(GunFrame frame) noexcept;
 			void		SetPartsFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept;
+
+			SharedObj& ChangeMagazine(int MagUniqueID);
 		public:
 			const SharedObj*	SetParts(int uniqueID, GunSlot objType, const MV1& BaseModel);
 			void		RemoveParts(GunSlot objType);

@@ -121,7 +121,7 @@ namespace FPS_n2 {
 			auto* Pad = PadControl::Instance();
 			Pad->ChangeGuide(
 				[&]() {
-				auto* KeyGuide = KeyGuideClass::Instance();
+				auto* KeyGuide = KeyConfigAndGuide::Instance();
 				//KeyGuide->Reset();
 				//return;
 				if (DXDraw::Instance()->IsPause()) {
@@ -136,16 +136,17 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide("L1.png", "");
 					KeyGuide->AddGuide("R1.png", "左右傾け(リーン)");
 					KeyGuide->AddGuide("R_stick.png", "押し込みで走り");
-					KeyGuide->AddGuide("ng.png", "しゃがみ");
+					KeyGuide->AddGuide("ok.png", "しゃがみ");
 					KeyGuide->AddGuide("square.png", "リロード");
 					KeyGuide->AddGuide("R2.png", "射撃");
-					KeyGuide->AddGuide("triangle.png", "レーザー点灯/消灯");
+					KeyGuide->AddGuide("triangle.png", "武器切替");
 					KeyGuide->AddGuide("L2.png", "エイム");
 					KeyGuide->AddGuide("option.png", "ポーズ");
+					KeyGuide->AddGuide("ng.png", "近接攻撃");
 				}
 			},
 				[&]() {
-				auto* KeyGuide = KeyGuideClass::Instance();
+				auto* KeyGuide = KeyConfigAndGuide::Instance();
 				//KeyGuide->Reset();
 				//return;
 				if (DXDraw::Instance()->IsPause()) {
@@ -164,13 +165,14 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide("Q.jpg", "");
 					KeyGuide->AddGuide("E.jpg", "左右傾け(リーン)");
 					KeyGuide->AddGuide("Shift.jpg", "走る");
+					KeyGuide->AddGuide("X.jpg", "しゃがみ");
 					KeyGuide->AddGuide("R.jpg", "リロード");
 					KeyGuide->AddGuide("C.jpg", "");
-					KeyGuide->AddGuide("X.jpg", "しゃがみ");
 					KeyGuide->AddGuide("LM.jpg", "射撃");
-					KeyGuide->AddGuide("F.jpg", "レーザー点灯/消灯");
+					KeyGuide->AddGuide("F.jpg", "武器切替");
 					KeyGuide->AddGuide("RM.jpg", "エイム");
 					KeyGuide->AddGuide("Tab.jpg", "ポーズ");
+					KeyGuide->AddGuide("none.jpg", "近接攻撃");
 				}
 			});
 
@@ -772,8 +774,6 @@ namespace FPS_n2 {
 			int xp = y_r(960);
 			int yp = y_r(540);
 
-			float size = 200.0f;
-
 			int xp1 = -(int)(Chara->GetMove().pos.x());
 			int yp1 = (int)(Chara->GetMove().pos.z());
 
@@ -794,8 +794,8 @@ namespace FPS_n2 {
 				if (index == 0) { continue; }
 				//if (!c->CanLookTarget) { continue; }
 				float length = (MyPos - c->GetMove().pos).Length() / (50.f*Scale_Rate);
-				float xp2 = xp1 + (int)(c->GetMove().pos.x());
-				float yp2 = yp1 - (int)(c->GetMove().pos.z());
+				float xp2 = (float)(xp1 + (int)(c->GetMove().pos.x()));
+				float yp2 = (float)(yp1 - (int)(c->GetMove().pos.z()));
 				float len = std::hypotf(xp2, yp2);
 				if (len > 0.f) {
 					xp2 = (xp2 / len);
