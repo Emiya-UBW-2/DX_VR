@@ -448,20 +448,20 @@ namespace FPS_n2 {
 				}
 			}
 			void		Execute_After(InputControl* MyInput) noexcept {
-				MyInput->SetInput(
-					(float)this->x_m / 10000.f,
-					(float)this->y_m / 10000.f,
-					this->W_key, this->S_key, this->A_key, this->D_key,
-					this->Run_key,
-					this->Q_key, this->E_key,//QE
-					false, false, false, false,
-					false,//1
-					this->R_key,
-					this->F_key,
-					this->C_key,
-					this->shotMain_Key,
-					false
-				);
+				MyInput->SetInputStart((float)this->x_m / 10000.f, (float)this->y_m / 10000.f, VECTOR_ref::zero());
+				MyInput->SetInputPADS(PADS::MOVE_W, this->W_key);
+				MyInput->SetInputPADS(PADS::MOVE_S, this->S_key);
+				MyInput->SetInputPADS(PADS::MOVE_A, this->A_key);
+				MyInput->SetInputPADS(PADS::MOVE_D, this->D_key);
+				MyInput->SetInputPADS(PADS::RUN, this->Run_key);
+				MyInput->SetInputPADS(PADS::LEAN_L, this->Q_key);
+				MyInput->SetInputPADS(PADS::LEAN_R, this->E_key);
+				MyInput->SetInputPADS(PADS::MELEE, false);
+				MyInput->SetInputPADS(PADS::RELOAD, this->R_key);
+				MyInput->SetInputPADS(PADS::INTERACT, this->F_key);
+				MyInput->SetInputPADS(PADS::SQUAT, this->C_key);
+				MyInput->SetInputPADS(PADS::SHOT, this->shotMain_Key);
+				MyInput->SetInputPADS(PADS::AIM, false);
 			}
 		};
 		//
@@ -479,10 +479,7 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->GetParam()->m_MyCharaID).GetChara();
 			auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->GetParam()->m_TargetCharaID).GetChara();
-			auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
-			auto MyPos = MyChara->GetEyePosition();
 
-			auto Dir_t = TgtPos - MyPos;
 			//AI
 			this->GetParam()->Execute_Before();
 			if (MyChara->IsAlive()) {
@@ -498,7 +495,7 @@ namespace FPS_n2 {
 				}
 
 				if (!this->GetParam()->CanLookTarget) {
-					if (Dir_t.Length() > 15.f*Scale_Rate) {
+					if ((TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos() - MyChara->GetEyePosition()).Length() > 15.f*Scale_Rate) {
 						if (this->GetParam()->m_RepopTimer > 10.f) {
 							auto TgtPos_XZ = TargetChara->GetMove().pos; TgtPos_XZ.y(0.f);
 							VECTOR_ref pos_t;
@@ -530,7 +527,7 @@ namespace FPS_n2 {
 			}
 			else {
 				if (!this->GetParam()->CanLookTarget) {
-					if (Dir_t.Length() > 15.f*Scale_Rate) {
+					if ((TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos() - MyChara->GetEyePosition()).Length() > 15.f*Scale_Rate) {
 						auto TgtPos_XZ = TargetChara->GetMove().pos; TgtPos_XZ.y(0.f);
 						VECTOR_ref pos_t;
 						while (true) {
@@ -552,18 +549,6 @@ namespace FPS_n2 {
 				}
 			}
 			this->GetParam()->Execute_After(MyInput);
-		}
-		void AIControl::Draw() noexcept {
-#ifdef DEBUG
-			if (this->GetParam()->m_Phase != ENUM_AI_PHASE::Normal) {
-				auto* PlayerMngr = PlayerManager::Instance();
-				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->GetParam()->m_MyCharaID).GetChara();
-				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->GetParam()->m_TargetCharaID).GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
-				auto MyPos = MyChara->GetEyePosition();
-				DrawCapsule_3D(MyPos, TgtPos, 0.1f*Scale_Rate, GetColor(255, 0, 0), GetColor(255, 0, 0));
-			}
-#endif
 		}
 	};
 };

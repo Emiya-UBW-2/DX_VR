@@ -35,7 +35,7 @@ namespace FPS_n2 {
 			const auto& GetClient(void) const noexcept { return this->m_IsClient; }
 			const auto& GetSequence(void) const noexcept { return this->m_Sequence; }
 		public:
-			const auto&		GetMyPlayerID(void) const noexcept { return (this->m_IsClient) ? this->m_ClientCtrl.GetMyPlayer().ID : this->m_ServerCtrl.GetMyPlayer().ID; }
+			const auto&		GetMyPlayerID(void) const noexcept { return (this->m_IsClient) ? this->m_ClientCtrl.GetMyPlayerID() : this->m_ServerCtrl.GetMyPlayerID(); }
 			const auto		GetNowServerPlayerData(int ID, bool isYradReset) noexcept { return (this->m_IsClient) ? this->m_ClientCtrl.GetNowServerPlayerData(ID, isYradReset) : this->m_ServerCtrl.GetNowServerPlayerData(ID, isYradReset); }
 			void			GetRecvData(int ID, double ServerFrame) noexcept {
 				if ((this->m_IsClient) ? this->m_ClientCtrl.GetRecvData(ID) : this->m_ServerCtrl.GetRecvData(ID)) {
@@ -48,14 +48,14 @@ namespace FPS_n2 {
 				m_NewWorkSetting.Load();
 				m_NewWorkSelect = 0;
 			}
-			void FirstExecute(const InputControl& MyInput, const SendInfo& SendMove) noexcept {
+			void FirstExecute(const InputControl& MyInput, const moves & move_t, const std::vector<DamageEvent>& Damage_t) noexcept {
 				this->m_LeftClick.Execute((GetMouseInputWithCheck() & MOUSE_INPUT_LEFT) != 0);
 				if (!this->m_LeftClick.press()) {
 					this->m_LeftPressTimer = 0.f;
 				}
 
 				if (this->m_IsClient) {
-					m_ClientCtrl.SetMyPlayer(MyInput, SendMove.m_Pos, SendMove.m_Vec, SendMove.m_rad, this->m_ClientFrame, SendMove.m_Damage);
+					m_ClientCtrl.SetMyPlayer(MyInput, move_t, Damage_t, this->m_ClientFrame);
 					if ((this->m_Sequence == SequenceEnum::Matching) && m_SeqFirst) {
 						m_ClientCtrl.Init(this->m_NewSetting.UsePort, this->m_Tick, this->m_NewSetting.IP);
 					}
@@ -65,7 +65,7 @@ namespace FPS_n2 {
 				}
 				//サーバー
 				else {
-					m_ServerCtrl.SetMyPlayer(MyInput, SendMove.m_Pos, SendMove.m_Vec, SendMove.m_rad, this->m_ClientFrame, SendMove.m_Damage);
+					m_ServerCtrl.SetMyPlayer(MyInput, move_t, Damage_t, this->m_ClientFrame);
 					if ((this->m_Sequence == SequenceEnum::Matching) && m_SeqFirst) {
 						m_ServerCtrl.Init(this->m_NewSetting.UsePort, this->m_Tick, IPDATA());
 					}
@@ -260,7 +260,7 @@ namespace FPS_n2 {
 				case SequenceEnum::Matching:
 					MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "他プレイヤー待機中…");
 					for (int i = 0; i < Player_num; i++) {
-						bool isActive = (((this->m_IsClient) ? this->m_ClientCtrl.GetServerDataCommon() : this->m_ServerCtrl.GetServerData()).PlayerData[i].IsActive == 1);
+						bool isActive = (this->m_IsClient) ? this->m_ClientCtrl.GetServerDataCommon().PlayerData[i].IsActive : this->m_ServerCtrl.GetServerData().PlayerData[i].IsActive;
 						int yp1 = yp + y_r(50) + y_r(35)*(i + 1);
 						color = isActive ? Black : Gray;
 						DrawBox(y_r(200), yp1, y_r(200) + y_r(300), yp1 + y_h, color, TRUE);

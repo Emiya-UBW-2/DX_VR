@@ -53,14 +53,14 @@ namespace FPS_n2 {
 				auto* Pad = PadControl::Instance();
 				auto* SE = SoundPool::Instance();
 				if (!OptionWindowClass::Instance()->IsActive()) {
-					if (Pad->GetUpKey().trigger()) {
+					if (Pad->GetKey(PADS::MOVE_W).trigger()) {
 						--select;
 						if (select < 0) { select = 2; }
 						SelYadd[select] = 10.f;
 
 						SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					}
-					if (Pad->GetDownKey().trigger()) {
+					if (Pad->GetKey(PADS::MOVE_S).trigger()) {
 						++select;
 						if (select > 2) { select = 0; }
 						SelYadd[select] = -10.f;
@@ -70,7 +70,7 @@ namespace FPS_n2 {
 					for (int i = 0; i < 3; i++) {
 						Easing(&SelYadd[i], 0.f, 0.95f, EasingType::OutExpo);
 					}
-					if (Pad->GetOKKey().trigger()) {
+					if (Pad->GetKey(PADS::INTERACT).trigger()) {
 						SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						switch (select) {
 						case 0:
@@ -88,7 +88,7 @@ namespace FPS_n2 {
 							break;
 						}
 					}
-					if (Pad->GetNGKey().trigger()) {
+					if (Pad->GetKey(PADS::RELOAD).trigger()) {
 						SE->Get((int)SoundEnumCommon::UI_NG).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						DXDraw::Instance()->PauseExit();
 					}

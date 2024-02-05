@@ -121,59 +121,32 @@ namespace FPS_n2 {
 			auto* Pad = PadControl::Instance();
 			Pad->ChangeGuide(
 				[&]() {
-				auto* KeyGuide = KeyConfigAndGuide::Instance();
-				//KeyGuide->Reset();
-				//return;
+				auto* KeyGuide = PadControl::Instance();
 				if (DXDraw::Instance()->IsPause()) {
-					KeyGuide->Reset();
-					KeyGuide->AddGuide("ng.png", "決定");
-					KeyGuide->AddGuide("ok.png", "戻る");
-					KeyGuide->AddGuide("R_stick.png", "上下選択");
+					KeyGuide->AddGuide(PADS::INTERACT, "決定");
+					KeyGuide->AddGuide(PADS::RELOAD, "戻る");
+					KeyGuide->AddGuide(PADS::MOVE_W, "");
+					KeyGuide->AddGuide(PADS::MOVE_S, "");
+					KeyGuide->AddGuide(PADS::MOVE_STICK, "選択");
 				}
 				else {
-					KeyGuide->Reset();
-					KeyGuide->AddGuide("R_stick.png", "移動");
-					KeyGuide->AddGuide("L1.png", "");
-					KeyGuide->AddGuide("R1.png", "左右傾け(リーン)");
-					KeyGuide->AddGuide("R_stick.png", "押し込みで走り");
-					KeyGuide->AddGuide("ok.png", "しゃがみ");
-					KeyGuide->AddGuide("square.png", "リロード");
-					KeyGuide->AddGuide("R2.png", "射撃");
-					KeyGuide->AddGuide("triangle.png", "武器切替");
-					KeyGuide->AddGuide("L2.png", "エイム");
-					KeyGuide->AddGuide("option.png", "ポーズ");
-					KeyGuide->AddGuide("ng.png", "近接攻撃");
-				}
-			},
-				[&]() {
-				auto* KeyGuide = KeyConfigAndGuide::Instance();
-				//KeyGuide->Reset();
-				//return;
-				if (DXDraw::Instance()->IsPause()) {
-					KeyGuide->Reset();
-					KeyGuide->AddGuide("none.jpg", "決定");
-					KeyGuide->AddGuide("X.jpg", "戻る");
-					KeyGuide->AddGuide("W.jpg", "");
-					KeyGuide->AddGuide("S.jpg", "上下選択");
-				}
-				else {
-					KeyGuide->Reset();
-					KeyGuide->AddGuide("W.jpg", "");
-					KeyGuide->AddGuide("S.jpg", "");
-					KeyGuide->AddGuide("A.jpg", "");
-					KeyGuide->AddGuide("D.jpg", "移動");
-					KeyGuide->AddGuide("Q.jpg", "");
-					KeyGuide->AddGuide("E.jpg", "左右傾け(リーン)");
-					KeyGuide->AddGuide("Shift.jpg", "走る");
-					KeyGuide->AddGuide("X.jpg", "しゃがみ");
-					KeyGuide->AddGuide("R.jpg", "リロード");
-					KeyGuide->AddGuide("C.jpg", "");
-					KeyGuide->AddGuide("LM.jpg", "射撃");
-					KeyGuide->AddGuide("F.jpg", "武器切替");
-					KeyGuide->AddGuide("RM.jpg", "エイム");
-					KeyGuide->AddGuide("Tab.jpg", "ポーズ");
-					KeyGuide->AddGuide("none.jpg", "近接攻撃");
-				}
+					KeyGuide->AddGuide(PADS::MOVE_W, "");
+					KeyGuide->AddGuide(PADS::MOVE_S, "");
+					KeyGuide->AddGuide(PADS::MOVE_A, "");
+					KeyGuide->AddGuide(PADS::MOVE_D, "");
+					KeyGuide->AddGuide(PADS::MOVE_STICK, "移動");
+
+					KeyGuide->AddGuide(PADS::LEAN_L, "");
+					KeyGuide->AddGuide(PADS::LEAN_R, "左右傾け(リーン)");
+					KeyGuide->AddGuide(PADS::RUN, "走る");
+					KeyGuide->AddGuide(PADS::SQUAT, "しゃがみ");
+					KeyGuide->AddGuide(PADS::RELOAD, "リロード");
+					KeyGuide->AddGuide(PADS::SHOT, "射撃");
+					KeyGuide->AddGuide(PADS::INTERACT, "武器切替");
+					KeyGuide->AddGuide(PADS::AIM, "エイム");
+					KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
+					KeyGuide->AddGuide(PADS::MELEE, "近接攻撃");
+				}	
 			});
 
 			if (DXDraw::Instance()->IsPause()) {
@@ -231,7 +204,7 @@ namespace FPS_n2 {
 				pp_x = std::clamp(Pad->GetLS_Y() * cam_per*0.5f, -0.2f, 0.2f);
 				pp_y = std::clamp(Pad->GetLS_X() * cam_per*0.5f, -0.2f, 0.2f);
 
-				if (Pad->GetFreeLook().press()) {
+				if (Pad->GetKey(PADS::AIM).press()) {
 					pp_x /= 2.f;
 					pp_y /= 2.f;
 				}
@@ -239,24 +212,30 @@ namespace FPS_n2 {
 					pp_x -= Chara->GetGunPtrNow()->GetRecoilRadAdd().y();
 					pp_y -= Chara->GetGunPtrNow()->GetRecoilRadAdd().x();
 				}
-
-				MyInput.SetInput(
-					pp_x, pp_y,
-					Pad->GetUpKey().press(), Pad->GetDownKey().press(), Pad->GetLeftKey().press(), Pad->GetRightKey().press(),
-					Pad->GetRunKey().press(),
-					Pad->GetQKey().press(), Pad->GetEKey().press(),
-					false, false, false, false,
-					Pad->GetOKKey().press(),
-					Pad->GetAccelKey().press(),
-					Pad->GetBrakeKey().press(),
-					Pad->GetNGKey().press(),
-					(Pad->GetShotKey().press() && !DXDraw::Instance()->IsPause()),
-					(Pad->GetLookKey().press() && !DXDraw::Instance()->IsPause())
-				);
-				//
-				MyInput.SetRadBuf(PlayerMngr->GetPlayer(GetMyPlayerID()).GetRadBuf());
+				MyInput.SetInputStart(pp_x, pp_y, Chara->GetRadBuf());
+				MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
+				MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
+				MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
+				MyInput.SetInputPADS(PADS::MOVE_D, Pad->GetKey(PADS::MOVE_D).press());
+				MyInput.SetInputPADS(PADS::RUN, Pad->GetKey(PADS::RUN).press());
+				MyInput.SetInputPADS(PADS::LEAN_L, Pad->GetKey(PADS::LEAN_L).press());
+				MyInput.SetInputPADS(PADS::LEAN_R, Pad->GetKey(PADS::LEAN_R).press());
+				MyInput.SetInputPADS(PADS::MELEE, Pad->GetKey(PADS::MELEE).press());
+				MyInput.SetInputPADS(PADS::RELOAD, Pad->GetKey(PADS::RELOAD).press());
+				MyInput.SetInputPADS(PADS::INTERACT, Pad->GetKey(PADS::INTERACT).press());
+				MyInput.SetInputPADS(PADS::SQUAT, Pad->GetKey(PADS::SQUAT).press());
+				MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press() && !DXDraw::Instance()->IsPause());
+				MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press() && !DXDraw::Instance()->IsPause());
 				//ネットワーク
-				m_NetWorkBrowser.FirstExecute(MyInput, PlayerMngr->GetPlayer(GetMyPlayerID()).GetNetSendMove());
+				auto& CharaPtr = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+
+				moves tmpmove;
+				tmpmove.pos = CharaPtr->GetMove().pos;
+				tmpmove.vec = CharaPtr->GetMove().vec;
+				tmpmove.vec.y(0);
+				tmpmove.rad = CharaPtr->GetRadBuf();
+
+				m_NetWorkBrowser.FirstExecute(MyInput, tmpmove, CharaPtr->GetDamageEvent());
 				//クライアント
 				if (m_NetWorkBrowser.GetClient()) {
 					for (int index = 0; index < Chara_num; index++) {
@@ -281,9 +260,9 @@ namespace FPS_n2 {
 					if (m_NetWorkBrowser.GetSequence() == SequenceEnum::MainGame) {
 						auto tmp = this->m_NetWorkBrowser.GetNowServerPlayerData(index, false);
 						if (index == GetMyPlayerID()) {
-							MyInput.SetKeyInput(tmp.Input.GetKeyInput());//キーフレームだけサーバーに合わせる
+							MyInput.SetKeyInputFlags(tmp.Input);//キーフレームだけサーバーに合わせる
 							c->SetInput(MyInput, isready);
-							m_NetWorkBrowser.GetRecvData(index, tmp.Frame);
+							m_NetWorkBrowser.GetRecvData(index, tmp.GetFrame());
 						}
 						else {
 							if (!m_NetWorkBrowser.GetClient()) {
@@ -291,14 +270,14 @@ namespace FPS_n2 {
 							}
 							c->SetInput(tmp.Input, isready);
 							bool override_true = true;
-							override_true = (tmp.CalcCheckSum() != 0);
+							override_true = tmp.GetIsActive();
 							if (override_true) {
-								c->SetPosBufOverRide(tmp.PosBuf, tmp.VecBuf, tmp.radBuf);
+								c->SetPosBufOverRide(tmp.m_move);
 							}
 
 						}
 						//ダメージイベント処理
-						for (auto& e : tmp.Damage) {
+						for (auto& e : tmp.m_DamageEvents) {
 							this->m_DamageEvents.emplace_back(e);
 						}
 					}

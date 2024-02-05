@@ -248,7 +248,7 @@ namespace FPS_n2 {
 			this->m_CharaSound = -1;
 			//“®ì‚É‚©‚©‚í‚é‘€ì
 			this->m_PosBuf = pPos;
-			OverrideControl::InitOverride(pPos);
+			OverrideControl::InitOverride();
 			//ã‹L‚ð”½‰f‚·‚é‚à‚Ì
 			this->m_yrad_Upper = KeyControl::GetRad().y();
 			this->m_yrad_Bottom = KeyControl::GetRad().y();
@@ -261,7 +261,6 @@ namespace FPS_n2 {
 			if (GetGunPtrNow()) {
 				GetGunPtrNow()->SetPlayerID(this->m_MyID);
 
-				auto* ObjMngr = ObjectManager::Instance();
 				auto& Mag = (*GetGunPtrNow()->GetMagazinePtr());
 				size_t Total = m_MagazineStock.size();
 				for (size_t i = 0; i < Total; i++) {
@@ -275,9 +274,9 @@ namespace FPS_n2 {
 			KeyControl::InputKey(pInput, pReady, StaminaControl::GetHeartRandVec(0.f));
 			//AIM
 			if (GetGunPtrNow()) {
-				this->m_Press_Shot = KeyControl::GetShotKey().press();
-				this->m_Press_Reload = (KeyControl::GetRKey().press() && GetGunPtrNow()->CanReload());
-				this->m_Press_Aim = KeyControl::GetADSKey().press();
+				this->m_Press_Shot = KeyControl::GetInputControl().GetPADSPress(PADS::SHOT);
+				this->m_Press_Reload = (KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && GetGunPtrNow()->CanReload());
+				this->m_Press_Aim = KeyControl::GetInputControl().GetPADSPress(PADS::AIM);
 				if (this->m_Press_Reload) {
 					if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
 						if ((m_MagazineStock[0].AmmoNum != GetAmmoAll()) && (m_MagazineStock[0].AmmoNum >= m_MagazineStock[1].AmmoNum)) {
@@ -335,8 +334,8 @@ namespace FPS_n2 {
 			if ((
 				this->m_Press_Shot ||
 				this->m_Press_Reload ||
-				((KeyControl::GetRKey().press() && !(GetAmmoNum() <= GetAmmoAll())) && GetGunPtrNow()->GetCanShot()) ||
-				(KeyControl::GetAction() && GetGunPtrNow()->GetCanShot())
+				((KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && !(GetAmmoNum() <= GetAmmoAll())) && GetGunPtrNow()->GetCanShot()) ||
+				(KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && GetGunPtrNow()->GetCanShot())
 				) && (GetShotPhase() == GunAnimeID::Base)) {
 				this->m_ReadyTimer = std::min(this->m_ReadyTimer, 0.1f);
 			}
@@ -387,16 +386,16 @@ namespace FPS_n2 {
 							this->m_SoundPower = 0.6f;
 						}
 					}
-					if ((KeyControl::GetRKey().press() && !(GetAmmoNum() <= GetAmmoAll())) && GetGunPtrNow()->GetCanShot()) {
+					if ((KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && !(GetAmmoNum() <= GetAmmoAll())) && GetGunPtrNow()->GetCanShot()) {
 						GetGunPtrNow()->SetShotPhase(GunAnimeID::CheckStart);
 					}
 
-					if (KeyControl::GetAction() && GetGunPtrNow()->GetCanShot()) {
+					if (KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && GetGunPtrNow()->GetCanShot()) {
 						//GetGunPtrNow()->SetShotPhase(GunAnimeID::Watch);
 					}
 					m_MeleeCoolDown = std::max(m_MeleeCoolDown - 1.f / FPS, 0.f);
 
-					if (KeyControl::GetAction() && m_MeleeCoolDown==0.f) {
+					if (KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && m_MeleeCoolDown==0.f) {
 						GetGunPtrNow()->SetShotPhase(GunAnimeID::Melee);
 						m_MeleeCoolDown = 1.f;
 						if (this->m_MyID == 0) {
@@ -405,7 +404,7 @@ namespace FPS_n2 {
 					}
 				}
 				if (GetShotPhase() == GunAnimeID::ReloadOne) {
-					if (KeyControl::GetRKey().trigger()) {
+					if (KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD)) {
 						GetGunPtrNow()->SetReloadCancel();
 					}
 				}
@@ -467,7 +466,7 @@ namespace FPS_n2 {
 			auto YradChange = this->m_yrad_Bottom;
 			Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - KeyControl::GetFrontP(), 0.85f, EasingType::OutExpo);
 			YradChange = this->m_yrad_Bottom - YradChange;
-			KeyControl::SetRadBufZ((abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)));
+			KeyControl::SetRadBuf().SetEasingZ((abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f);
 			this->m_yrad_UpperChange = KeyControl::GetRad().y() - this->m_yrad_Upper;
 			this->m_yrad_BottomChange = KeyControl::GetRad().y() - this->m_yrad_Bottom;
 		}
@@ -503,10 +502,10 @@ namespace FPS_n2 {
 			{
 				//‰º”¼g
 				this->m_BottomAnimSelect = GetBottomStandAnimSel();
-				if (KeyControl::GetPressLeft()) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
-				if (KeyControl::GetPressRight()) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
-				if (KeyControl::GetPressRear()) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
-				if (KeyControl::GetPressFront()) { this->m_BottomAnimSelect = KeyControl::GetRun() ? GetBottomRunAnimSel() : GetBottomWalkAnimSel(); }
+				if (KeyControl::GetInputControl().GetPADSPress(PADS::MOVE_A)) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
+				if (KeyControl::GetInputControl().GetPADSPress(PADS::MOVE_D)) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
+				if (KeyControl::GetInputControl().GetPADSPress(PADS::MOVE_S)) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
+				if (KeyControl::GetInputControl().GetPADSPress(PADS::MOVE_W)) { this->m_BottomAnimSelect = KeyControl::GetRun() ? GetBottomRunAnimSel() : GetBottomWalkAnimSel(); }
 				SetAnimLoop(GetBottomTurnAnimSel(), 0.5f);
 				SetAnimLoop(GetBottomRunAnimSel(), 1.f * KeyControl::GetVecFront() * GetSpeedPer());
 				SetAnimLoop(GetBottomWalkAnimSel(), 1.15f * KeyControl::GetVecFront());
@@ -751,11 +750,13 @@ namespace FPS_n2 {
 				}
 			}
 			//
-			{
-				VECTOR_ref RadOverRide;
-				if (OverrideControl::PutOverride(&this->m_PosBuf, &this->m_move.vec, &RadOverRide)) {
-					KeyControl::SetRadBufXY(RadOverRide);
-				}
+			if (OverrideControl::PutOverride()) {
+				auto& info_move = OverrideControl::GetOverRideInfo();
+				this->m_PosBuf = info_move.pos;
+				this->m_move.vec = info_move.vec;
+				KeyControl::SetRadBuf().SetEasingX(info_move.rad.x(), 0.9f);
+				KeyControl::SetRadBuf().y(info_move.rad.y());
+				KeyControl::SetRad().y(info_move.rad.y());
 			}
 			this->m_move.mat = MATRIX_ref::RotZ(KeyControl::GetRad().z() / 2.f) * MATRIX_ref::RotY(this->m_yrad_Bottom);
 			this->m_move.repos = this->m_move.pos;

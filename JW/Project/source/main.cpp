@@ -17,7 +17,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 #endif // DEBUG
 	auto* DrawParts = DXDraw::Instance();
 	//
-	FPS_n2::SaveDataClass::Create();
 	FPS_n2::Sceneclass::ObjectManager::Create();
 	FPS_n2::Sceneclass::PlayerManager::Create();
 	FPS_n2::Sceneclass::GunAnimManager::Create();
@@ -62,7 +61,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 #endif // DEBUG
 			DrawParts->Screen_Flip();				//‰æ–Ê‚Ì”½‰f
 		}
-		FPS_n2::SaveDataClass::Instance()->Save();
+		SaveDataClass::Instance()->Save();
 		bool isTitle = (scene->GetNowScene() == Titlescene);
 		if (isTitle) {
 			switch (Titlescene->SelMode()) {

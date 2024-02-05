@@ -116,65 +116,55 @@ namespace FPS_n2 {
 			void Set(int ID, const NewSetting& per)noexcept { this->m_NewWorkSetting[ID] = per; }
 		};
 
-		struct SendInfo {
-			VECTOR_ref			m_Pos;
-			VECTOR_ref			m_Vec;
-			VECTOR_ref			m_rad;
-			std::vector<DamageEvent>	m_Damage;
-		};
-
-		struct PlayerNetData {
+		class PlayerNetData {
+		private:
+			size_t						CheckSum{ 0 };
+			double						Frame{ 0.0 };
 		public:
-			size_t			CheckSum{ 0 };		//8 * 1	=  8byte
-			InputControl	Input;				//4 * 5	= 20byte
-			VECTOR_ref		PosBuf;				//4 * 3	= 12byte
-			VECTOR_ref		VecBuf;				//4 * 3	= 12byte
-			VECTOR_ref		radBuf;				//4 * 3	= 12byte
-			PlayerID		ID{ 0 };			//1	* 1	=  1byte
-			char			IsActive{ 0 };		//1	* 1	=  1byte
-			double			Frame{ 0.0 };		//8 * 1 =  8byte
-			std::vector<DamageEvent>		Damage;				//9 * 1 =  9byte
-												//		  84byte
-		public:
-			const auto	CalcCheckSum(void) noexcept {
+			bool						IsActive{ false };
+			PlayerID					ID{ 0 };
+			InputControl				Input;
+			moves						m_move;
+			std::vector<DamageEvent>	m_DamageEvents;
+		private:
+			const auto			CalcCheckSum(void) noexcept {
 				return (
-					((int)(PosBuf.x()*100.f) + (int)(PosBuf.y()*100.f) + (int)(PosBuf.z()*100.f)) +
-					((int)(VecBuf.x()*100.f) + (int)(VecBuf.y()*100.f) + (int)(VecBuf.z()*100.f)) +
-					(int)(rad2deg(radBuf.y())) +
+					((int)(this->m_move.pos.x()*100.f) + (int)(this->m_move.pos.y()*100.f) + (int)(this->m_move.pos.z()*100.f)) +
+					((int)(this->m_move.vec.x()*100.f) + (int)(this->m_move.vec.y()*100.f) + (int)(this->m_move.vec.z()*100.f)) +
+					(int)(rad2deg(this->m_move.rad.y())) +
 					(int)(ID)
 					);
 			}
+		public:
+			const auto			GetIsActive(void) noexcept { return this->CalcCheckSum() != 0; }
+			const auto			IsCheckSum(void) noexcept { return CheckSum == (size_t)this->CalcCheckSum(); }
 
-			const PlayerNetData operator+(const PlayerNetData& o) const noexcept {
-				PlayerNetData tmp;
+			const auto&			GetID(void) const noexcept { return this->ID; }
+			const auto&			GetFrame(void) const noexcept { return this->Frame; }
 
-				tmp.ID = o.ID;
-				tmp.Input = this->Input + o.Input;
-				tmp.PosBuf = this->PosBuf + o.PosBuf;
-				tmp.VecBuf = this->VecBuf + o.VecBuf;
-				tmp.radBuf = this->radBuf + o.radBuf;
-
-				return tmp;
+			void				SetMyPlayer(const InputControl& pInput, const moves & move_t, const std::vector<DamageEvent>& Damage_t, double pFrame) noexcept {
+				this->Input = pInput;
+				this->m_move = move_t;
+				this->m_DamageEvents = Damage_t;
+				this->Frame = pFrame;
+				this->CheckSum = (size_t)this->CalcCheckSum();
 			}
-			const PlayerNetData operator-(const PlayerNetData& o) const noexcept {
+		public:
+			static const auto	GetLerpData(const PlayerNetData&PrevData, const PlayerNetData& ServerData,float Per, bool isYradReset) {
 				PlayerNetData tmp;
-
-				tmp.ID = o.ID;
-				tmp.Input = this->Input - o.Input;
-				tmp.PosBuf = this->PosBuf - o.PosBuf;
-				tmp.VecBuf = this->VecBuf - o.VecBuf;
-				tmp.radBuf = this->radBuf - o.radBuf;
-
-				return tmp;
-			}
-			const PlayerNetData operator*(float per) const noexcept {
-				PlayerNetData tmp;
-
-				tmp.ID = this->ID;
-				tmp.Input = this->Input*per;
-				tmp.PosBuf = this->PosBuf*per;
-				tmp.VecBuf = this->VecBuf*per;
-				tmp.radBuf = this->radBuf*per;
+				//
+				tmp.Input = Lerp(PrevData.Input, ServerData.Input, Per);
+				tmp.m_move = Lerp(PrevData.m_move, ServerData.m_move, Per);
+				//
+				tmp.ID = ServerData.ID;
+				tmp.IsActive = ServerData.IsActive;
+				tmp.Frame = ServerData.Frame;
+				tmp.Input.SetKeyInputFlags(ServerData.Input);
+				if (isYradReset) {
+					auto radvec = Lerp(MATRIX_ref::RotY(PrevData.m_move.rad.y()).zvec(), MATRIX_ref::RotY(ServerData.m_move.rad.y()).zvec(), Per).Norm();
+					tmp.m_move.rad.y(-atan2f(radvec.x(), radvec.z()));
+				}
+				tmp.m_DamageEvents = ServerData.m_DamageEvents;
 				return tmp;
 			}
 		};
@@ -195,36 +185,25 @@ namespace FPS_n2 {
 		public:
 			const auto		GetRecvData(int pPlayerID) const noexcept { return this->m_LeapFrame[pPlayerID] <= 1; }
 			const auto&		GetServerDataCommon(void) const noexcept { return this->m_ServerDataCommon; }
-			const auto&		GetMyPlayer(void) const noexcept { return this->m_PlayerData; }
-			void			SetMyPlayer(const InputControl& pInput, const VECTOR_ref& pPos, const VECTOR_ref& pVec, const VECTOR_ref& prad, double pFrame, const std::vector<DamageEvent>& pDamage) noexcept {
-				this->m_PlayerData.Input = pInput;
-				this->m_PlayerData.PosBuf = pPos;
-				this->m_PlayerData.VecBuf = pVec;
-				this->m_PlayerData.radBuf = prad;
-				this->m_PlayerData.Frame = pFrame;
-				this->m_PlayerData.Damage = pDamage;
-				this->m_PlayerData.CheckSum = (size_t)this->m_PlayerData.CalcCheckSum();
+			const auto&		GetMyPlayerID(void) const noexcept { return this->m_PlayerData.GetID(); }
+			void			SetMyPlayer(const InputControl& pInput, const moves & move_t, const std::vector<DamageEvent>& Damage_t, double pFrame) noexcept {
+				this->m_PlayerData.SetMyPlayer(pInput, move_t, Damage_t, pFrame);
 			}
 
 			const auto		GetNowServerPlayerData(int pPlayerID, bool isyradReset) noexcept {
 				auto Total = (int)this->m_ServerDataCommon.ServerFrame - (int)this->m_PrevServerData.ServerFrame;
 				if (Total <= 0) { Total = 20; }
-				auto Per = (float)this->m_LeapFrame[pPlayerID] / (float)Total;
-				auto tmp = Lerp(this->m_PrevServerData.PlayerData[pPlayerID], m_ServerDataCommon.PlayerData[pPlayerID], Per);
-
-				if (isyradReset) {
-					auto radvec = Lerp(MATRIX_ref::RotY(this->m_PrevServerData.PlayerData[pPlayerID].radBuf.y()).zvec(), MATRIX_ref::RotY(this->m_ServerDataCommon.PlayerData[pPlayerID].radBuf.y()).zvec(), Per).Norm();
-					tmp.radBuf.y(-atan2f(radvec.x(), radvec.z()));
-				}
-				tmp.Frame = this->m_ServerDataCommon.PlayerData[pPlayerID].Frame;
-				tmp.Damage = this->m_ServerDataCommon.PlayerData[pPlayerID].Damage;
+				PlayerNetData tmp;
+				tmp = PlayerNetData::GetLerpData(
+					this->m_PrevServerData.PlayerData[pPlayerID], this->m_ServerDataCommon.PlayerData[pPlayerID],
+					(float)this->m_LeapFrame[pPlayerID] / (float)Total, isyradReset);
 				this->m_LeapFrame[pPlayerID] = std::clamp<int>(this->m_LeapFrame[pPlayerID] + 1, 0, Total);
 				return tmp;
 			}
 			virtual void	SetParam(int pPlayerID, const VECTOR_ref& pPos) noexcept {
-				this->m_ServerDataCommon.PlayerData[pPlayerID].PosBuf = pPos;
+				this->m_ServerDataCommon.PlayerData[pPlayerID].m_move.pos = pPos;
 				this->m_ServerDataCommon.ServerFrame = 0;
-				this->m_PrevServerData.PlayerData[pPlayerID].PosBuf = this->m_ServerDataCommon.PlayerData[pPlayerID].PosBuf;	// サーバーデータ
+				this->m_PrevServerData.PlayerData[pPlayerID].m_move.pos = pPos;	// サーバーデータ
 				this->m_PrevServerData.ServerFrame = 0;
 			}
 		protected:
@@ -254,8 +233,8 @@ namespace FPS_n2 {
 			const auto&		GetServerData(void) const noexcept { return this->m_ServerData; }
 			void			SetParam(int pPlayerID, const VECTOR_ref& pPos) noexcept override {
 				NetWorkControl::SetParam(pPlayerID, pPos);
-				this->m_ServerData.PlayerData[pPlayerID].PosBuf = this->m_ServerDataCommon.PlayerData[pPlayerID].PosBuf;
-				this->m_ServerData.PlayerData[pPlayerID].IsActive = 0;
+				this->m_ServerData.PlayerData[pPlayerID].m_move.pos = this->m_ServerDataCommon.PlayerData[pPlayerID].m_move.pos;
+				this->m_ServerData.PlayerData[pPlayerID].IsActive = false;
 			}
 		public:
 			void			Init(int pPort, float pTick, const IPDATA&) noexcept override {
@@ -270,7 +249,7 @@ namespace FPS_n2 {
 
 				this->m_ServerData.Tmp1 = 0;
 				this->m_ServerData.StartFlag = 0;
-				this->m_ServerData.PlayerData[0].IsActive = 1;
+				this->m_ServerData.PlayerData[0].IsActive = true;
 				this->m_ServerData.ServerFrame = 0;
 
 				this->m_PlayerData.ID = 0;
@@ -294,7 +273,7 @@ namespace FPS_n2 {
 					}
 					//サーバーデータの更新
 					this->m_ServerData.StartFlag = 1;
-					this->m_ServerData.PlayerData[GetMyPlayer().ID] = this->m_PlayerData;		// サーバープレイヤーののプレイヤーデータ
+					this->m_ServerData.PlayerData[this->m_PlayerData.ID] = this->m_PlayerData;		// サーバープレイヤーののプレイヤーデータ
 					this->m_ServerData.ServerFrame++;											// サーバーフレーム更新
 				}
 				for (auto & n : this->m_NetWork) {
@@ -309,7 +288,7 @@ namespace FPS_n2 {
 					case 1:
 						this->m_ServerData.Tmp1 = (int)index;
 						this->m_ServerData.StartFlag = 0;
-						this->m_ServerData.PlayerData[index].IsActive = 1;
+						this->m_ServerData.PlayerData[index].IsActive = true;
 
 						n.first.SendtoClient(this->m_ServerData);					//クライアント全員に送る
 
@@ -326,7 +305,7 @@ namespace FPS_n2 {
 					{
 						PlayerNetData tmpPData;
 						if (n.first.Recv(&tmpPData)) {							// クライアントから受信したら
-							if (tmpPData.CheckSum == tmpPData.CalcCheckSum()) {
+							if (tmpPData.IsCheckSum()) {
 								this->m_ServerData.PlayerData[tmpPData.ID] = tmpPData;	// 更新
 							}
 						}

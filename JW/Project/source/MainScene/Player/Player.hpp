@@ -24,10 +24,7 @@ namespace FPS_n2 {
 			auto&		GetChara(void) noexcept { return this->m_Chara; }
 			const auto&	GetScore(void) const noexcept { return this->m_Score; }
 
-			const SendInfo	GetNetSendMove(void) const noexcept;
-
-			const auto			GetPos(void) const noexcept { return this->m_Chara->GetMatrix().pos(); }
-			const VECTOR_ref	GetRadBuf(void) const noexcept;
+			const auto	GetPos(void) const noexcept { return this->m_Chara->GetMatrix().pos(); }
 		public:
 			void Init(void) noexcept {
 				m_Chara = nullptr;

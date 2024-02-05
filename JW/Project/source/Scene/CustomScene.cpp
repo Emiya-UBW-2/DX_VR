@@ -181,35 +181,27 @@ namespace FPS_n2 {
 
 			Pad->ChangeGuide(
 				[&]() {
-				auto* KeyGuide = KeyConfigAndGuide::Instance();
-				KeyGuide->Reset();
-				KeyGuide->AddGuide("L_stick.png", "押し込みで離して見る");
-				KeyGuide->AddGuide("ok.png", "セーブして終了");
-				KeyGuide->AddGuide("R_stick.png", "パーツを変更");
-				KeyGuide->AddGuide("square.png", "編集開始時に戻す");
-			},
-				[&]() {
-				auto* KeyGuide = KeyConfigAndGuide::Instance();
-				KeyGuide->Reset();
-				KeyGuide->AddGuide("MM.jpg", "離して見る");
-				KeyGuide->AddGuide("X.jpg", "セーブして終了");
-				KeyGuide->AddGuide("W.jpg", "");
-				KeyGuide->AddGuide("S.jpg", "変更するスロットを選択");
-				KeyGuide->AddGuide("A.jpg", "");
-				KeyGuide->AddGuide("D.jpg", "スロットにつけるパーツを変更");
-				KeyGuide->AddGuide("R.jpg", "編集開始時に戻す");
+				auto* KeyGuide = PadControl::Instance();
+				KeyGuide->AddGuide(PADS::MOVE_W, "");
+				KeyGuide->AddGuide(PADS::MOVE_S, "");
+				KeyGuide->AddGuide(PADS::MOVE_A, "");
+				KeyGuide->AddGuide(PADS::MOVE_D, "");
+				KeyGuide->AddGuide(PADS::MOVE_STICK, "スロット選択,パーツ変更");
+				KeyGuide->AddGuide(PADS::AIM, "離して見る");
+				KeyGuide->AddGuide(PADS::RELOAD, "セーブして終了");
+				KeyGuide->AddGuide(PADS::MELEE, "編集開始時に戻す");
 			}
 			);
 
 			{
-				if (Pad->GetUpKey().trigger()) {
+				if (Pad->GetKey(PADS::MOVE_W).trigger()) {
 					--select;
 					if (select < 0) { select = (int)SelMoveClass.size() - 1; }
 					SelMoveClass[select].Yadd = 10.f;
 					SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					m_SelAlpha = 2.f;
 				}
-				if (Pad->GetDownKey().trigger()) {
+				if (Pad->GetKey(PADS::MOVE_S).trigger()) {
 					++select;
 					if (select > (int)SelMoveClass.size() - 1) { select = 0; }
 					SelMoveClass[select].Yadd = -10.f;
@@ -219,7 +211,7 @@ namespace FPS_n2 {
 				if (GetSelData().size() > 0) {
 					bool IsChange = false;
 					auto& y = GetSelData()[select];
-					if (Pad->GetLeftKey().trigger()) {
+					if (Pad->GetKey(PADS::MOVE_A).trigger()) {
 						++y->m_sel;
 						const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
 						if (Data->m_IsNeed) {
@@ -232,7 +224,7 @@ namespace FPS_n2 {
 						SelMoveClass[select].Xadd = -1.f;
 						SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					}
-					if (Pad->GetRightKey().trigger()) {
+					if (Pad->GetKey(PADS::MOVE_D).trigger()) {
 						--y->m_sel;
 						const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
 						if (Data->m_IsNeed) {
@@ -257,7 +249,7 @@ namespace FPS_n2 {
 				}
 				m_SelAlpha = std::max(m_SelAlpha - 1.f / FPS, 0.f);
 
-				if (Pad->GetAccelKey().trigger()) {
+				if (Pad->GetKey(PADS::MELEE).trigger()) {
 					SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					//
 					GunsModify::DisposeSlots();
@@ -293,12 +285,12 @@ namespace FPS_n2 {
 			m_Xrad = std::clamp(m_Xrad, deg2rad(-20), deg2rad(-20));
 			Easing(&m_Xrad_R, m_Xrad, 0.95f, EasingType::OutExpo);
 			Easing(&m_Yrad_R, m_Yrad, 0.95f, EasingType::OutExpo);
-			Easing(&m_Range, Pad->GetFreeLook().press() ? 2.f : 1.f, 0.95f, EasingType::OutExpo);
+			Easing(&m_Range, Pad->GetKey(PADS::AIM).press() ? 2.f : 1.f, 0.95f, EasingType::OutExpo);
 
-			if (Pad->GetFreeLook().release_trigger()) {
+			if (Pad->GetKey(PADS::AIM).release_trigger()) {
 				m_Yrad = deg2rad(-45);
 			}
-			if (Pad->GetFreeLook().trigger()) {
+			if (Pad->GetKey(PADS::AIM).trigger()) {
 				m_Yrad = deg2rad(15);
 			}
 
@@ -314,7 +306,7 @@ namespace FPS_n2 {
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(45), 0.5f*Scale_Rate, far_t);
 			PostPassEffect::Instance()->Set_DoFNearFar(1.f * Scale_Rate, far_t / 2, 0.5f*Scale_Rate, far_t);
 
-			m_IsEnd |= Pad->GetNGKey().trigger();
+			m_IsEnd |= Pad->GetKey(PADS::RELOAD).trigger();
 			m_Alpha = std::clamp(m_Alpha + (m_IsEnd ? 1.f : -1.f) / 60, 0.f, 1.f);//一旦FPS使わない
 			if (m_IsEnd && m_Alpha == 1.f) {
 				return false;

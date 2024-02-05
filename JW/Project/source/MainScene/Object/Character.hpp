@@ -62,8 +62,8 @@ namespace FPS_n2 {
 			bool												m_Press_Shot{ false };
 			bool												m_Press_Reload{ false };
 			bool												m_Press_Aim{ false };
-			bool												m_IsChanging{ false };
 			float												m_MeleeCoolDown{ 0.f };
+			bool												m_IsChanging{ false };
 			bool												m_ArmBreak{ false };
 			//ƒTƒEƒ“ƒh
 			float												m_SoundPower{ 0.f };

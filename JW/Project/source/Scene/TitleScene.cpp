@@ -27,31 +27,23 @@ namespace FPS_n2 {
 
 			Pad->ChangeGuide(
 				[&]() {
-					auto* KeyGuide = KeyConfigAndGuide::Instance();
-					KeyGuide->Reset();
-					KeyGuide->AddGuide("ng.png", "Œˆ’è");
-					KeyGuide->AddGuide("ok.png", "–ß‚é");
-					KeyGuide->AddGuide("R_stick.png", "ã‰º‘I‘ð");
-				},
-				[&]() {
-					auto* KeyGuide = KeyConfigAndGuide::Instance();
-					KeyGuide->Reset();
-					KeyGuide->AddGuide("none.jpg", "Œˆ’è");
-					KeyGuide->AddGuide("X.jpg", "–ß‚é");
-					KeyGuide->AddGuide("W.jpg", "");
-					KeyGuide->AddGuide("S.jpg", "ã‰º‘I‘ð");
-				}
+					auto* KeyGuide = PadControl::Instance();
+					KeyGuide->AddGuide(PADS::MOVE_W, "");
+					KeyGuide->AddGuide(PADS::MOVE_S, "");
+					KeyGuide->AddGuide(PADS::MOVE_STICK, "‘I‘ð");
+					KeyGuide->AddGuide(PADS::INTERACT, "Œˆ’è");
+			}
 			);
 			if (!OptionWindowClass::Instance()->IsActive()) {
 				if (GameStart == 0.f && GameStart2 == 0.f) {
-					if (Pad->GetUpKey().trigger()) {
+					if (Pad->GetKey(PADS::MOVE_W).trigger()) {
 						--select;
 						if (select < 0) { select = 2; }
 						SelYadd[select] = 10.f;
 
 						SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					}
-					if (Pad->GetDownKey().trigger()) {
+					if (Pad->GetKey(PADS::MOVE_S).trigger()) {
 						++select;
 						if (select > 2) { select = 0; }
 						SelYadd[select] = -10.f;
@@ -66,26 +58,26 @@ namespace FPS_n2 {
 				if (GameFadeIn == 0.f) {
 					switch (select) {
 					case 0:
-						if (Pad->GetOKKey().trigger()) {
+						if (Pad->GetKey(PADS::INTERACT).trigger()) {
 							SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						}
-						if (!(GameStart == 0.f && !Pad->GetOKKey().trigger())) {
+						if (!(GameStart == 0.f && !Pad->GetKey(PADS::INTERACT).trigger())) {
 							GameStart += 1.f / FPS / 0.5f;
 						}
 						break;
 					case 1:
-						if (Pad->GetOKKey().trigger()) {
+						if (Pad->GetKey(PADS::INTERACT).trigger()) {
 							SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						}
-						if (!(GameStart2 == 0.f && !Pad->GetOKKey().trigger())) {
+						if (!(GameStart2 == 0.f && !Pad->GetKey(PADS::INTERACT).trigger())) {
 							GameStart2 += 1.f / FPS / 0.5f;
 						}
 						break;
 					case 2:
-						if (Pad->GetOKKey().trigger()) {
+						if (Pad->GetKey(PADS::INTERACT).trigger()) {
 							SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						}
-						if (Pad->GetOKKey().trigger()) {
+						if (Pad->GetKey(PADS::INTERACT).trigger()) {
 							OptionWindowClass::Instance()->SetActive();
 						}
 						break;

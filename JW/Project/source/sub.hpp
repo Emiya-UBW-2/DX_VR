@@ -9,120 +9,53 @@ namespace FPS_n2 {
 		float			m_AddyRad{ 0.f };
 		float			m_xRad{ 0.f };
 		float			m_yRad{ 0.f };
-		unsigned int	m_Flags{ 0 };
+		unsigned long long	m_Flags{ 0 };
 	public:
-		void			SetInput(
-			float pAddxRad, float pAddyRad,
-			bool pGoFrontPress,
-			bool pGoBackPress,
-			bool pGoLeftPress,
-			bool pGoRightPress,
-
-			bool pRunPress,
-			bool pQPress,
-			bool pEPress,
-
-			bool pRightPress,
-			bool pLeftPress,
-			bool pUpPress,
-			bool pDownPress,
-
-			bool pAction1,
-			bool pAction2,
-			bool pAction3,
-			bool pAction4,
-			bool pAction5,
-			bool pAction6
-		) {
+		void			SetInputStart(float pAddxRad, float pAddyRad, const VECTOR_ref& pRad) {
 			this->m_AddxRad = pAddxRad;
 			this->m_AddyRad = pAddyRad;
-			this->m_Flags = 0;
-			if (pGoFrontPress) { this->m_Flags |= (1 << 0); }
-			if (pGoBackPress) { this->m_Flags |= (1 << 1); }
-			if (pGoLeftPress) { this->m_Flags |= (1 << 2); }
-			if (pGoRightPress) { this->m_Flags |= (1 << 3); }
-			if (pRunPress) { this->m_Flags |= (1 << 4); }
-			if (pQPress) { this->m_Flags |= (1 << 5); }
-			if (pEPress) { this->m_Flags |= (1 << 6); }
-			if (pRightPress) { this->m_Flags |= (1 << 7); }
-			if (pLeftPress) { this->m_Flags |= (1 << 8); }
-			if (pUpPress) { this->m_Flags |= (1 << 9); }
-			if (pDownPress) { this->m_Flags |= (1 << 10); }
-			if (pAction1) { this->m_Flags |= (1 << 11); }
-			if (pAction2) { this->m_Flags |= (1 << 12); }
-			if (pAction3) { this->m_Flags |= (1 << 13); }
-			if (pAction4) { this->m_Flags |= (1 << 14); }
-			if (pAction5) { this->m_Flags |= (1 << 15); }
-			if (pAction6) { this->m_Flags |= (1 << 16); }
-		}
-		void			SetRadBuf(float pxRad, float pyRad) {
-			this->m_xRad = pxRad;
-			this->m_yRad = pyRad;
-		}
-		void			SetRadBuf(const VECTOR_ref& pRad) {
 			this->m_xRad = pRad.x();
 			this->m_yRad = pRad.y();
+			this->m_Flags = 0;
 		}
-		void			SetKeyInput(unsigned int pFlags) { this->m_Flags = pFlags; }
-		const auto&		GetKeyInput(void) const noexcept { return this->m_Flags; }
+		void			SetInputPADS(PADS select, bool value) {
+			if (value) { this->m_Flags |= ((unsigned long long)1 << (0 + (int)select)); }
+		}
 
+		void			SetKeyInputFlags(const InputControl& o) { this->m_Flags = o.m_Flags; }
 
 		const auto&		GetAddxRad(void) const noexcept { return this->m_AddxRad; }
 		const auto&		GetAddyRad(void) const noexcept { return this->m_AddyRad; }
-		const auto&		GetxRad(void) const noexcept { return this->m_xRad; }
-		const auto&		GetyRad(void) const noexcept { return this->m_yRad; }
-		const auto	GetGoFrontPress(void) const noexcept { return (this->m_Flags & (1 << 0)) != 0; }
-		const auto	GetGoBackPress(void) const noexcept { return (this->m_Flags & (1 << 1)) != 0; }
-		const auto	GetGoLeftPress(void) const noexcept { return (this->m_Flags & (1 << 2)) != 0; }
-		const auto	GetGoRightPress(void) const noexcept { return (this->m_Flags & (1 << 3)) != 0; }
-		const auto	GetRunPress(void) const noexcept { return (this->m_Flags & (1 << 4)) != 0; }
-		const auto	GetQPress(void) const noexcept { return (this->m_Flags & (1 << 5)) != 0; }
-		const auto	GetEPress(void) const noexcept { return (this->m_Flags & (1 << 6)) != 0; }
-		const auto	GetRightPress(void) const noexcept { return (this->m_Flags & (1 << 7)) != 0; }
-		const auto	GetLeftPress(void) const noexcept { return (this->m_Flags & (1 << 8)) != 0; }
-		const auto	GetUpPress(void) const noexcept { return (this->m_Flags & (1 << 9)) != 0; }
-		const auto	GetDownPress(void) const noexcept { return (this->m_Flags & (1 << 10)) != 0; }
-		const auto	GetAction1(void) const noexcept { return (this->m_Flags & (1 << 11)) != 0; }
-		const auto	GetAction2(void) const noexcept { return (this->m_Flags & (1 << 12)) != 0; }
-		const auto	GetAction3(void) const noexcept { return (this->m_Flags & (1 << 13)) != 0; }
-		const auto	GetAction4(void) const noexcept { return (this->m_Flags & (1 << 14)) != 0; }
-		const auto	GetAction5(void) const noexcept { return (this->m_Flags & (1 << 15)) != 0; }
-		const auto	GetAction6(void) const noexcept { return (this->m_Flags & (1 << 16)) != 0; }
 
-		const InputControl operator+(const InputControl& o) const noexcept {
+		const auto	GetPADSPress(PADS select) const noexcept { return (this->m_Flags & ((unsigned long long)1 << (0 + (int)select))) != 0; }
+
+		const auto operator+(const InputControl& o) const noexcept {
 			InputControl tmp;
-
 			tmp.m_AddxRad = this->m_AddxRad + o.m_AddxRad;
 			tmp.m_AddyRad = this->m_AddyRad + o.m_AddyRad;
 			tmp.m_xRad = this->m_xRad + o.m_xRad;
 			tmp.m_yRad = this->m_yRad + o.m_yRad;
 			tmp.m_Flags = this->m_Flags;
-
 			return tmp;
 		}
-		const InputControl operator-(const InputControl& o) const noexcept {
+		const auto operator-(const InputControl& o) const noexcept {
 			InputControl tmp;
-
 			tmp.m_AddxRad = this->m_AddxRad - o.m_AddxRad;
 			tmp.m_AddyRad = this->m_AddyRad - o.m_AddyRad;
 			tmp.m_xRad = this->m_xRad - o.m_xRad;
 			tmp.m_yRad = this->m_yRad - o.m_yRad;
 			tmp.m_Flags = this->m_Flags;
-
 			return tmp;
 		}
-		const InputControl operator*(float per) const noexcept {
+		const auto operator*(float per) const noexcept {
 			InputControl tmp;
-
 			tmp.m_AddxRad = this->m_AddxRad *per;
 			tmp.m_AddyRad = this->m_AddyRad *per;
 			tmp.m_xRad = this->m_xRad *per;
 			tmp.m_yRad = this->m_yRad *per;
 			tmp.m_Flags = this->m_Flags;
-
 			return tmp;
 		}
-
 	};
 
 	// プレイヤー関係の定義
@@ -370,104 +303,7 @@ namespace FPS_n2 {
 		}
 	};
 
-	static VECTOR_ref GetScreenPos(const VECTOR_ref&campos, const VECTOR_ref&camvec, const VECTOR_ref&camup, float fov, const VECTOR_ref&worldpos) noexcept {
-		int ScrX = y_r(1920);
-		int ScrY = y_r(1080);
-		// ビュー行列と射影行列の取得
-		MATRIX mat_view;					// ビュー行列
-		VECTOR vec_from = campos.get();		// カメラの位置
-		VECTOR vec_lookat = camvec.get();   // カメラの注視点
-		VECTOR vec_up = camup.get();        // カメラの上方向
-		CreateLookAtMatrix(&mat_view, &vec_from, &vec_lookat, &vec_up);
-		SetCameraNearFar(0.f, 100.f*Scale_Rate);
-		SetupCamera_Perspective(fov);
-		MATRIX proj = GetCameraProjectionMatrix();
-		// ビューポート行列（スクリーン行列）の作成
-		float w = (float)ScrX / 2.0f;
-		float h = (float)ScrY / 2.0f;
-		MATRIX viewport = {
-			w , 0 , 0 , 0 ,
-			0 ,-h , 0 , 0 ,
-			0 , 0 , 1 , 0 ,
-			w , h , 0 , 1
-		};
-		VECTOR screenPos, tmp = worldpos.get();
-		// ビュー変換とプロジェクション変換
-		tmp = VTransform(tmp, mat_view);
-		tmp = VTransform(tmp, proj);
-		// zで割って-1~1の範囲に収める
-		tmp.x /= tmp.z; tmp.y /= tmp.z; tmp.z /= tmp.z;
-		// スクリーン変換
-		screenPos = VTransform(tmp, viewport);
-		screenPos.z = -1.f;
-		if ((camvec - campos).dot(worldpos - campos) > 0.f) {
-			screenPos.z = 0.5f;
-		}
-		return screenPos;
-	}
 
-
-	typedef std::pair<std::string, int> SaveParam;
-	class SaveDataClass : public SingletonBase<SaveDataClass> {
-	private:
-		friend class SingletonBase<SaveDataClass>;
-	private:
-		std::vector<SaveParam> m_data;
-	private:
-		SaveDataClass() {
-			Load();
-		}
-		~SaveDataClass() {}
-	public:
-		SaveParam* GetData(std::string_view Name) noexcept {
-			for (auto& d : m_data) {
-				if (d.first == Name) {
-					return &d;
-				}
-			}
-			return nullptr;
-		}
-	public:
-		void SetParam(std::string_view Name, int value) noexcept {
-			auto* Data = GetData(Name);
-			if (Data) {
-				Data->second = value;
-			}
-			else {
-				m_data.emplace_back(std::make_pair((std::string)Name, value));
-			}
-		}
-		auto GetParam(std::string_view Name) noexcept {
-			auto* Data = GetData(Name);
-			if (Data) {
-				return Data->second;
-			}
-			return -1;
-		}
-	public:
-		void Save() noexcept {
-			std::ofstream outputfile("data/Plane/bokuzyo.ok");
-			for (auto& d : m_data) {
-				outputfile << d.first + "=" + std::to_string(d.second) + "\n";
-			}
-			outputfile.close();
-		}
-		void Load() noexcept {
-
-			m_data.clear();
-
-			std::ifstream inputputfile("data/Plane/bokuzyo.ok");
-			std::string line;
-			while (std::getline(inputputfile, line)) {
-				auto Start = line.find("=");
-				if (Start != std::string::npos) {
-					m_data.emplace_back(std::make_pair(line.substr(0, Start), std::stoi(line.substr(Start + 1))));
-				}
-			}
-			inputputfile.close();
-
-		}
-	};
 
 	template <typename... Args>
 	static void DrawFetteString(int xp1, int yp1, float per, bool IsSelect, const std::string& String, Args&&... args) noexcept {
@@ -481,32 +317,4 @@ namespace FPS_n2 {
 		Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r((int)((float)(48 * 3 / 2 * 3 / 4) * per)), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1 + y_r(40.f*per), yp1 + y_r(20.f*per), IsSelect ? Red75 : Gray75, Gray, String, args...);
 		Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r((int)((float)(48 * 2 * 3 / 4) * per)), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1, yp1, IsSelect ? Red : White, Gray, String, args...);
 	}
-
-	class Pendulum2D {
-		float	m_PendulumLength = 10.f;
-		float	m_PendulumMass = 2.f;
-		float	m_drag_coeff = 2.02f;
-
-		float	m_rad = deg2rad(12.f);
-		float	m_vel = 0.f;
-	public:
-		void Init(float Length, float N, float rad) {
-			m_PendulumLength = Length;
-			m_PendulumMass = N;
-			m_rad = rad;
-			m_vel = 0.f;
-		}
-
-		void Execute() {
-			m_vel += (-9.8f / this->m_PendulumLength * std::sin(m_rad) - this->m_drag_coeff / this->m_PendulumMass * this->m_vel) / 60.f;
-			m_rad += this->m_vel / 60.f;
-		}
-
-		const auto GetRad() const noexcept { return this->m_rad; }
-
-		void AddRad(float value) noexcept { this->m_rad += value; }
-	};
-
-	namespace Sceneclass {
-	};
 };
