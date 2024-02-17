@@ -9,6 +9,7 @@ namespace FPS_n2 {
 		enum class ENUM_AI_PHASE {
 			Normal,
 			Shot,
+			Dead,
 		};
 
 		class AIControl {
@@ -19,6 +20,7 @@ namespace FPS_n2 {
 		public:
 			AIControl();
 			~AIControl();
+		public:
 			void Init(const std::shared_ptr<BackGroundClassMain>& BackBround_t, PlayerID MyCharaID) noexcept;
 			void Execute(InputControl* MyInput) noexcept;
 			void Draw() noexcept{}

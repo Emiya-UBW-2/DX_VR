@@ -17,13 +17,13 @@ namespace FPS_n2 {
 				m_Armon = isOn;
 				m_ArmPer = isOn ? 1.f : 0.f;
 			}
-			void Execute(bool isOn, float OnOver = 0.2f, float OffOver = 0.2f) noexcept {
+			void Execute(bool isOn, float OnOver = 0.2f, float OffOver = 0.2f, float Per = 0.8f) noexcept {
 				if (isOn) {
 					if (m_Armon) {
 						Easing(&this->m_ArmPer, 1.f, 0.9f, EasingType::OutExpo);
 					}
 					else {
-						Easing(&this->m_ArmPer, 1.f + OnOver, 0.8f, EasingType::OutExpo);
+						Easing(&this->m_ArmPer, 1.f + OnOver, Per, EasingType::OutExpo);
 						if (this->m_ArmPer >= 1.f + OnOver / 2.f) {
 							m_Armon = true;
 						}
@@ -34,7 +34,7 @@ namespace FPS_n2 {
 						Easing(&this->m_ArmPer, 0.f, 0.9f, EasingType::OutExpo);
 					}
 					else {
-						Easing(&this->m_ArmPer, 0.f - OffOver, 0.8f, EasingType::OutExpo);
+						Easing(&this->m_ArmPer, 0.f - OffOver, Per, EasingType::OutExpo);
 						if (this->m_ArmPer <= 0.f - OffOver / 2.f) {
 							m_Armon = false;
 						}
@@ -201,36 +201,60 @@ namespace FPS_n2 {
 		class LifeControl {
 		private://キャラパラメーター
 			const HitPoint										HPMax = 100;
+			const ArmerPoint									APMax = 100;
 		private:
 			HitPoint											m_HP{ 0 };							//スコア
+			ArmerPoint											m_AP{ 0 };							//スコア
 			std::vector<DamageEvent>							m_DamageEvent;						//ダメージイベント
 		protected:
-			void			SetHealEvent(PlayerID ShotID_t, PlayerID DamageID_t, Sceneclass::ObjType pCharaType, HitPoint value) noexcept {
+			void			SetHealEvent(PlayerID ShotID_t, PlayerID DamageID_t, Sceneclass::ObjType pCharaType, HitPoint value, ArmerPoint Armervalue) noexcept {
 				this->m_DamageEvent.resize(this->m_DamageEvent.size() + 1);
-				this->m_DamageEvent.back().SetEvent(ShotID_t, DamageID_t, pCharaType, -value, DX_PI_F);
+				this->m_DamageEvent.back().SetEvent(ShotID_t, DamageID_t, pCharaType, -value, -Armervalue, DX_PI_F);
 			}
-			void			SetSubHPEvent(PlayerID ShotID_t, PlayerID DamageID_t, Sceneclass::ObjType pCharaType, HitPoint value,float Rad) noexcept {
+			void			SetSubHPEvent(PlayerID ShotID_t, PlayerID DamageID_t, Sceneclass::ObjType pCharaType, HitPoint value, ArmerPoint Armervalue,float Rad) noexcept {
 				this->m_DamageEvent.resize(this->m_DamageEvent.size() + 1);
-				this->m_DamageEvent.back().SetEvent(ShotID_t, DamageID_t, pCharaType, value, Rad);
+				this->m_DamageEvent.back().SetEvent(ShotID_t, DamageID_t, pCharaType, value, Armervalue, Rad);
 			}
 		public://ゲッター
 			const auto		IsAlive(void) const noexcept { return this->m_HP != 0; }
 			const auto&		GetHP(void) const noexcept { return this->m_HP; }
 			const auto&		GetHPMax(void) const noexcept { return HPMax; }
-			void			SubHP(HitPoint damage_t, float)  noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, HPMax); }
+			void			SubHP(HitPoint damage_t)  noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, HPMax); }
+
+			const auto		IsArmerActive(void) const noexcept { return this->m_AP != 0; }
+			const auto&		GetAP(void) const noexcept { return this->m_AP; }
+			const auto&		GetAPMax(void) const noexcept { return APMax; }
+			void			SubAP(ArmerPoint damage_t)  noexcept { this->m_AP = std::clamp<ArmerPoint>(this->m_AP - damage_t, 0, APMax); }
+
 			auto&			GetDamageEvent(void) noexcept { return this->m_DamageEvent; }
 		public:
 			void		InitLife() {
 				this->m_HP = HPMax;
+				this->m_AP = APMax;
 			}
 		};
 
+		class ULTControl {
+		private://キャラパラメーター
+			const int										ULTMax = 100;
+		private:
+			int											m_ULT{ 0 };							//スコア
+		public://ゲッター
+			const auto		IsULTActive(void) const noexcept { return this->m_ULT == ULTMax; }
+			const auto&		GetULT(void) const noexcept { return this->m_ULT; }
+			const auto&		GetULTMax(void) const noexcept { return ULTMax; }
+			void			AddULT(int damage_t)  noexcept { this->m_ULT = std::clamp<int>(this->m_ULT + damage_t, 0, ULTMax); }
+		public:
+			void		InitULT() {
+				this->m_ULT = 0;
+			}
+		};
 		//キャラ入力
 		class KeyControl {
 		private://キャラパラメーター
 			std::array<float, 4>								m_Vec{ 0,0,0,0 };
 			InputControl										m_Input;
-			switchs												m_FKey;
+			switchs												m_ULTKey;
 			switchs												m_Squat;
 			int													m_LeanRate{ 0 };
 			switchs												m_QKey;
@@ -251,7 +275,7 @@ namespace FPS_n2 {
 				return FrontP;
 			}
 			const auto		GetLeanRate(void) const noexcept { return this->m_LeanRate; }
-			const auto		GetFKey(void) const noexcept { return this->m_FKey; }
+			const auto		GetULTKey(void) const noexcept { return this->m_ULTKey; }
 			const auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
 			const auto		GetRun(void) const noexcept { return this->m_Input.GetPADSPress(PADS::RUN) && this->m_Input.GetPADSPress(PADS::MOVE_W); }
 		public://セッター
@@ -377,8 +401,191 @@ namespace FPS_n2 {
 				SetUseLighting(TRUE);
 			}
 		};
-		//人間のフレーム、アニメ管理
-		class HumanControl {
+		//歩く時の揺れ
+		class WalkSwingControl {
+		private:
+			VECTOR_ref											m_WalkSwingRad;
+			VECTOR_ref											m_WalkSwing;
+			VECTOR_ref											m_WalkSwing_p;
+			VECTOR_ref											m_WalkSwing_t;
+			VECTOR_ref											m_PrevPos;
+		public://ゲッター
+			const auto		GetWalkSwingMat(void) const noexcept {
+				return MATRIX_ref::RotZ(deg2rad(m_WalkSwing.z()*m_WalkSwingRad.z()))*
+					MATRIX_ref::RotX(deg2rad(m_WalkSwing.x()*m_WalkSwingRad.x()));
+			}
+		public:
+			WalkSwingControl(void) noexcept { }
+			~WalkSwingControl(void) noexcept { }
+		public:
+			void UpdateWalkSwing(const VECTOR_ref& Pos, float SwingPer)noexcept {
+				m_WalkSwingRad.Set(5.f, 0.f, 10.f);
+				//X
+				{
+					if (m_PrevPos.y() > Pos.y()) {
+						m_WalkSwing_t.x(1.f);
+					}
+					else {
+						m_WalkSwing_t.x(std::max(m_WalkSwing_t.x() - 15.f / FPS, 0.f));
+					}
+				}
+				//Z
+				{
+					if (m_WalkSwing_t.x() == 1.f) {
+						if (m_WalkSwing_t.z() >= 0.f) {
+							m_WalkSwing_t.z(-1.f);
+						}
+						else {
+							m_WalkSwing_t.z(1.f);
+						}
+					}
+				}
+				auto WS_tmp = m_WalkSwing_t * SwingPer;
+				//X
+				{
+					auto tmp = m_WalkSwing_p.x();
+					Easing(&tmp, WS_tmp.x(), (m_WalkSwing_p.x() > WS_tmp.x()) ? 0.6f : 0.9f, EasingType::OutExpo);
+					m_WalkSwing_p.x(tmp);
+				}
+				//Z
+				{
+					auto tmp = m_WalkSwing_p.z();
+					Easing(&tmp, WS_tmp.z(), 0.95f, EasingType::OutExpo);
+					m_WalkSwing_p.z(tmp);
+				}
+				//
+				m_PrevPos = Pos;
+				//
+				Easing(&m_WalkSwing, m_WalkSwing_p, 0.5f, EasingType::OutExpo);
+			}
+		};
+		//銃の揺れ
+		class GunSwingControl {
+		private:
+			VECTOR_ref											m_UpperPrevRad;
+			VECTOR_ref											m_UpperRad;
+			VECTOR_ref											m_UpperyVecNormal, m_UpperzVecNormal;
+			VECTOR_ref											m_UpperyVec, m_UpperzVec, m_UpperPos;
+		public://ゲッター
+			const auto		GetGunSwingMat(void) const noexcept {
+				return MATRIX_ref::Axis1_YZ(m_UpperyVec.Norm(), m_UpperzVec.Norm());
+			}
+		public:
+			GunSwingControl(void) noexcept { }
+			~GunSwingControl(void) noexcept { }
+		public:
+			void UpdateGunSwing(const VECTOR_ref& CharaRad)noexcept {
+				Easing(&m_UpperRad, (CharaRad - this->m_UpperPrevRad)*-1.f, 0.9f, EasingType::OutExpo);
+				m_UpperPrevRad = CharaRad;
+				auto mat = MATRIX_ref::RotX(m_UpperRad.x()) * MATRIX_ref::RotY(m_UpperRad.y());
+				Easing(&m_UpperyVecNormal, mat.yvec(), 0.8f, EasingType::OutExpo);
+				Easing(&m_UpperzVecNormal, mat.zvec(), 0.8f, EasingType::OutExpo);
+				Easing(&m_UpperyVec, m_UpperyVecNormal, 0.8f, EasingType::OutExpo);
+				Easing(&m_UpperzVec, m_UpperzVecNormal, 0.8f, EasingType::OutExpo);
+			}
+		};
+		//
+		class StackLeftHandControl {
+		private:
+			float												m_IsStuckLeftHandTimer{ 0.f };
+			bool												m_IsStuckLeftHand{ false };
+			ArmMovePerClass										m_StuckLeftHand;
+			VECTOR_ref											m_StuckLeftHandPos;
+			VECTOR_ref											m_StuckLeftHandNormal;
+			VECTOR_ref											m_StuckLeftHandPos_R;
+			VECTOR_ref											m_StuckLeftHandYVec;
+		public://ゲッター
+			const auto&		GetStuckLeftHandPos(void) const noexcept { return m_StuckLeftHandPos_R; }
+			const auto&		GetStuckLeftHandYVec(void) const noexcept { return m_StuckLeftHandYVec; }
+			const auto		GetStuckLeftHandPer(void) const noexcept { return m_StuckLeftHand.Per(); }
+		public:
+			StackLeftHandControl(void) noexcept { }
+			~StackLeftHandControl(void) noexcept { }
+		public:
+			void InitStackLeftHand() {
+				this->m_IsStuckLeftHandTimer = 0.f;
+				this->m_IsStuckLeftHand = false;
+				this->m_StuckLeftHand.Init(false);
+			}
+			void UpdateStackLeftHand() {
+				Easing(&m_StuckLeftHandPos_R, m_StuckLeftHandPos, 0.9f, EasingType::OutExpo);
+				Easing(&m_StuckLeftHandYVec, m_StuckLeftHandNormal, 0.9f, EasingType::OutExpo);
+				m_StuckLeftHand.Execute(m_IsStuckLeftHand, 0.2f, 0.2f);
+			}
+		public:
+			void ResetStackLeftHand() {
+				m_IsStuckLeftHand = false;
+				m_IsStuckLeftHandTimer = 0.f;
+			}
+			void SetStackLeftHand(const VECTOR_ref& Pos, const VECTOR_ref& Normal) {
+				if (m_IsStuckLeftHandTimer >= 0.5f) {
+					if (!m_IsStuckLeftHand) {
+						m_StuckLeftHandPos = Pos;
+						m_StuckLeftHandNormal = Normal;
+						m_StuckLeftHandPos_R = Pos;
+						m_StuckLeftHandYVec = Normal;
+					}
+					else {
+						if ((m_StuckLeftHandPos - Pos).Length() > 0.3f*Scale_Rate) {
+							m_StuckLeftHandPos = Pos;
+							m_StuckLeftHandNormal = Normal;
+						}
+						m_StuckLeftHandPos.y(Pos.y());
+					}
+					m_IsStuckLeftHand = true;
+				}
+				m_IsStuckLeftHandTimer = std::min(m_IsStuckLeftHandTimer + 1.f / FPS, 0.5f);
+			}
+		};
+		//
+		class MagStockControl {
+		private:
+			class MagStock {
+			public:
+				int AmmoNum{ 0 };
+				int ModUniqueID{ -1 };
+			};
+
+			std::array<MagStock, 4>								m_MagazineStock;
+			int													m_UseMagazineID{ 0 };
+		private:
+			const auto GetNextMagID() const noexcept { return (m_UseMagazineID + 1) % ((int)m_MagazineStock.size()); }
+		public:
+			MagStockControl(void) noexcept { }
+			~MagStockControl(void) noexcept { }
+		public:
+			const auto& GetNowMag() const noexcept { return m_MagazineStock[m_UseMagazineID]; }
+			const auto& GetNextMag() const noexcept { return m_MagazineStock[GetNextMagID()]; }
+		public:
+			void Init_MagStockControl(int AmmoNum, int ModUniqueID) noexcept;
+			void SetNextMag(int OLDAmmoNum, int OLDModUniqueID) noexcept;
+			void SortMag() noexcept;
+		};
+		//
+		class HitReactionControl {
+		private:
+			VECTOR_ref											m_HitAxis{ VECTOR_ref::front() };
+			float												m_HitPower{ 0.f };
+			float												m_HitPowerR{ 0.f };
+		private:
+		public:
+			HitReactionControl(void) noexcept { }
+			~HitReactionControl(void) noexcept { }
+		public:
+			const auto GetHitReactionMat() const noexcept { return MATRIX_ref::RotAxis(m_HitAxis, m_HitPowerR*deg2rad(90.f)); }
+			const auto IsDamaging(void) const noexcept { return m_HitPower > 0.f; }
+		public:
+			void SetHit(const VECTOR_ref& Axis) noexcept {
+				m_HitAxis = Axis;
+				m_HitPower = 1.f;
+			}
+			void Execute_HitReactionControl() noexcept {
+				Easing(&this->m_HitPowerR, this->m_HitPower, 0.8f, EasingType::OutExpo);
+				this->m_HitPower = std::max(this->m_HitPower - 1.f / FPS / 0.3f, 0.f);
+			}
+		};
+		//ラグドール
+		class RagDollControl {
 		private:
 			//体のフレーム情報
 			class frame_body {
@@ -523,153 +730,43 @@ namespace FPS_n2 {
 				}
 				//
 			};
+		private:
+			MV1													m_RagDoll;
+			float												m_RagDollTimer{ 0.f };						//ラグドールの物理演算フラグ
 		protected:
 			//体のフレーム情報
 			frame_body lagframe_;							//フレーム
 			frame_body frame_s;								//フレーム
-		protected:
-			void Set_Body(MV1& obj_body_t, MV1& obj_lag_t) noexcept {
+		public:
+			RagDollControl(void) noexcept { }
+			~RagDollControl(void) noexcept { }
+		public:
+			auto&			GetRagDoll(void) noexcept { return this->m_RagDoll; }
+		public:
+			void Init_RagDollControl(MV1& obj_body_t) noexcept {
 				//身体
 				this->frame_s.Get_frame(obj_body_t);
 				//ラグドール
-				this->lagframe_.Get_frame(obj_lag_t);
+				this->lagframe_.Get_frame(m_RagDoll);
 			}
-			void Frame_Copy_Lag(MV1& obj_body_t, MV1* obj_lag_t) { this->frame_s.copy_frame(obj_body_t, this->lagframe_, obj_lag_t); }
-		};
-		//歩く時の揺れ
-		class WalkSwingControl {
-		private:
-			VECTOR_ref											m_WalkSwingRad;
-			VECTOR_ref											m_WalkSwing;
-			VECTOR_ref											m_WalkSwing_p;
-			VECTOR_ref											m_WalkSwing_t;
-			VECTOR_ref											m_PrevPos;
-		public://ゲッター
-			const auto		GetWalkSwingMat(void) const noexcept {
-				return MATRIX_ref::RotZ(deg2rad(m_WalkSwing.z()*m_WalkSwingRad.z()))*
-					MATRIX_ref::RotX(deg2rad(m_WalkSwing.x()*m_WalkSwingRad.x()));
-			}
-		public:
-			WalkSwingControl(void) noexcept { }
-			~WalkSwingControl(void) noexcept { }
-		public:
-			void UpdateWalkSwing(const VECTOR_ref& Pos, float SwingPer)noexcept {
-				m_WalkSwingRad.Set(5.f, 0.f, 10.f);
-				//X
-				{
-					if (m_PrevPos.y() > Pos.y()) {
-						m_WalkSwing_t.x(1.f);
+			void Execute_RagDollControl(MV1& obj_body_t, bool isAlive) noexcept {
+				if (isAlive) {
+					this->m_RagDollTimer = 0.f;
+				}
+				else {
+					this->m_RagDollTimer = std::min(this->m_RagDollTimer + 1.f / FPS, 3.f);
+				}
+				if (this->m_RagDollTimer < 3.f) {
+					MV1SetPrioritizePhysicsOverAnimFlag(this->m_RagDoll.get(), TRUE);
+					this->frame_s.copy_frame(obj_body_t, this->lagframe_, &m_RagDoll);
+					this->m_RagDoll.work_anime();
+					if (this->m_RagDollTimer == 0.f) {
+						this->m_RagDoll.PhysicsResetState();
 					}
 					else {
-						m_WalkSwing_t.x(std::max(m_WalkSwing_t.x() - 15.f / FPS, 0.f));
+						this->m_RagDoll.PhysicsCalculation(1000.f / FPS);
 					}
 				}
-				//Z
-				{
-					if (m_WalkSwing_t.x() == 1.f) {
-						if (m_WalkSwing_t.z() >= 0.f) {
-							m_WalkSwing_t.z(-1.f);
-						}
-						else {
-							m_WalkSwing_t.z(1.f);
-						}
-					}
-				}
-				auto WS_tmp = m_WalkSwing_t * SwingPer;
-				//X
-				{
-					auto tmp = m_WalkSwing_p.x();
-					Easing(&tmp, WS_tmp.x(), (m_WalkSwing_p.x() > WS_tmp.x()) ? 0.6f : 0.9f, EasingType::OutExpo);
-					m_WalkSwing_p.x(tmp);
-				}
-				//Z
-				{
-					auto tmp = m_WalkSwing_p.z();
-					Easing(&tmp, WS_tmp.z(), 0.95f, EasingType::OutExpo);
-					m_WalkSwing_p.z(tmp);
-				}
-				//
-				m_PrevPos = Pos;
-				//
-				Easing(&m_WalkSwing, m_WalkSwing_p, 0.5f, EasingType::OutExpo);
-			}
-		};
-		//銃の揺れ
-		class GunSwingControl {
-		private:
-			VECTOR_ref											m_UpperPrevRad;
-			VECTOR_ref											m_UpperRad;
-			VECTOR_ref											m_UpperyVecNormal, m_UpperzVecNormal;
-			VECTOR_ref											m_UpperyVec, m_UpperzVec, m_UpperPos;
-		public://ゲッター
-			const auto		GetGunSwingMat(void) const noexcept {
-				return MATRIX_ref::Axis1_YZ(m_UpperyVec.Norm(), m_UpperzVec.Norm());
-			}
-		public:
-			GunSwingControl(void) noexcept { }
-			~GunSwingControl(void) noexcept { }
-		public:
-			void UpdateGunSwing(const VECTOR_ref& CharaRad)noexcept {
-				Easing(&m_UpperRad, (CharaRad - this->m_UpperPrevRad)*-1.f, 0.9f, EasingType::OutExpo);
-				m_UpperPrevRad = CharaRad;
-				auto mat = MATRIX_ref::RotX(m_UpperRad.x()) * MATRIX_ref::RotY(m_UpperRad.y());
-				Easing(&m_UpperyVecNormal, mat.yvec(), 0.8f, EasingType::OutExpo);
-				Easing(&m_UpperzVecNormal, mat.zvec(), 0.8f, EasingType::OutExpo);
-				Easing(&m_UpperyVec, m_UpperyVecNormal, 0.8f, EasingType::OutExpo);
-				Easing(&m_UpperzVec, m_UpperzVecNormal, 0.8f, EasingType::OutExpo);
-			}
-		};
-		//
-		class StackLeftHandControl {
-		private:
-			float												m_IsStuckLeftHandTimer{ 0.f };
-			bool												m_IsStuckLeftHand{ false };
-			ArmMovePerClass										m_StuckLeftHand;
-			VECTOR_ref											m_StuckLeftHandPos;
-			VECTOR_ref											m_StuckLeftHandNormal;
-			VECTOR_ref											m_StuckLeftHandPos_R;
-			VECTOR_ref											m_StuckLeftHandYVec;
-		public://ゲッター
-			const auto&		GetStuckLeftHandPos(void) const noexcept { return m_StuckLeftHandPos_R; }
-			const auto&		GetStuckLeftHandYVec(void) const noexcept { return m_StuckLeftHandYVec; }
-			const auto		GetStuckLeftHandPer(void) const noexcept { return m_StuckLeftHand.Per(); }
-		public:
-			StackLeftHandControl(void) noexcept { }
-			~StackLeftHandControl(void) noexcept { }
-		public:
-			void InitStackLeftHand() {
-				this->m_IsStuckLeftHandTimer = 0.f;
-				this->m_IsStuckLeftHand = false;
-				this->m_StuckLeftHand.Init(false);
-			}
-			void UpdateStackLeftHand() {
-				Easing(&m_StuckLeftHandPos_R, m_StuckLeftHandPos, 0.9f, EasingType::OutExpo);
-				Easing(&m_StuckLeftHandYVec, m_StuckLeftHandNormal, 0.9f, EasingType::OutExpo);
-				m_StuckLeftHand.Execute(m_IsStuckLeftHand, 0.2f, 0.2f);
-			}
-		public:
-			void ResetStackLeftHand() {
-				m_IsStuckLeftHand = false;
-				m_IsStuckLeftHandTimer = 0.f;
-			}
-			void SetStackLeftHand(const VECTOR_ref& Pos, const VECTOR_ref& Normal) {
-				if (m_IsStuckLeftHandTimer >= 0.5f) {
-					if (!m_IsStuckLeftHand) {
-						m_StuckLeftHandPos = Pos;
-						m_StuckLeftHandNormal = Normal;
-						m_StuckLeftHandPos_R = Pos;
-						m_StuckLeftHandYVec = Normal;
-					}
-					else {
-						if ((m_StuckLeftHandPos - Pos).Length() > 0.3f*Scale_Rate) {
-							m_StuckLeftHandPos = Pos;
-							m_StuckLeftHandNormal = Normal;
-						}
-						m_StuckLeftHandPos.y(Pos.y());
-					}
-					m_IsStuckLeftHand = true;
-				}
-				m_IsStuckLeftHandTimer = std::min(m_IsStuckLeftHandTimer + 1.f / FPS, 0.5f);
 			}
 		};
 	};

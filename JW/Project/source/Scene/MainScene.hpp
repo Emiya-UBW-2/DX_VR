@@ -26,6 +26,7 @@ namespace FPS_n2 {
 			//ã§í 
 			GraphHandle										m_MiniMapScreen;
 			GraphHandle										hit_Graph;
+			GraphHandle										guard_Graph;
 			std::vector<std::shared_ptr<AIControl>>			m_AICtrl;					//AI
 			std::vector<DamageEvent>						m_DamageEvents;				//É_ÉÅÅ[ÉW
 			float											m_ReadyTimer{ 0.f };

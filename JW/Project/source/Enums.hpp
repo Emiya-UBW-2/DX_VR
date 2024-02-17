@@ -12,6 +12,7 @@ namespace FPS_n2 {
 			Human,
 			Ammo,
 			FallObj,
+			Armer,
 			Gun,
 			Magazine,
 			Lower,
@@ -98,4 +99,5 @@ namespace FPS_n2 {
 
 	typedef char PlayerID;
 	typedef short HitPoint;
+	typedef short ArmerPoint;
 };

@@ -91,6 +91,26 @@ namespace FPS_n2 {
 			if (FileRead_findFirst((this->m_FilePath + "reticle_0.png").c_str(), &FileInfo) != (DWORD_PTR)-1) {
 				m_Reitcle = GraphHandle::Load(this->m_FilePath + "reticle_0.png");
 			}
+
+			//追加データ
+			int mdata = FileRead_open((this->m_FilePath + "data.txt").c_str(), FALSE);
+			while (true) {
+				if (FileRead_eof(mdata) != 0) { break; }
+				auto ALL = getparams::Getstr(mdata);
+				//コメントアウト
+				if (ALL.find("//") != std::string::npos) {
+					ALL = ALL.substr(0, ALL.find("//"));
+				}
+				//
+				if (ALL == "") { continue; }
+				auto LEFT = getparams::getleft(ALL);
+				auto RIGHT = getparams::getright(ALL);
+				//
+				if (LEFT == "zoom") {
+					m_ZoomSize = std::stof(RIGHT);
+				}
+			}
+			FileRead_close(mdata);
 		}
 		//マズル
 		void			MuzzleClass::Init_Mod(void) noexcept {

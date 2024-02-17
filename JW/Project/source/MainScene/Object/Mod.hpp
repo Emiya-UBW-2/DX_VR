@@ -199,8 +199,10 @@ namespace FPS_n2 {
 		class SightClass : public ModClass {
 		private:
 			GraphHandle m_Reitcle;
+			float m_ZoomSize{ 1.f };
 		public://ƒQƒbƒ^[
 			const auto&		GetReitcleGraph(void) const noexcept { return this->m_Reitcle; }
+			const auto&		GetZoomSize(void) const noexcept { return this->m_ZoomSize; }
 		public:
 			SightClass(void) noexcept { this->m_objType = ObjType::Sight; }
 			~SightClass(void) noexcept { }

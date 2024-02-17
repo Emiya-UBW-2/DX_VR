@@ -279,7 +279,7 @@ namespace FPS_n2 {
 			}
 		};
 	private:
-		const int Size = 29;
+		const int Size = 19;
 		const float tileSize = 30.f;
 	private:
 		GraphHandle					m_MapGraph;

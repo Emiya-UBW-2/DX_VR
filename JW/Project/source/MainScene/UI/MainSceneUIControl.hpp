@@ -25,9 +25,41 @@ namespace FPS_n2 {
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, (float)this->m_Now / (float)this->m_Max);
 					COLOR_U8 ColorAddSub = (ParamBuf > this->m_Now) ? ColorSub : ColorAdd;
 
-					DrawBox(xp1 + 1 + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + 1, xp2 - 1, yp2 - 1, GetColor(0, 0, 0), TRUE);
-					DrawBox(xp1 + 1, yp1 + 1, xp1 + 1 + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - 1, GetColor(Color.r, Color.g, Color.b), TRUE);
-					DrawBox(xp1 + 1 + length * ParamBuf / this->m_Max, yp1 + 1, xp1 + 1 + length * this->m_Now / this->m_Max, yp2 - 1, GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), TRUE);
+					DrawBox(
+						xp1 + 1 + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + 1,
+						xp2 - 1, yp2 - 1,
+						GetColor(0, 0, 0), TRUE);
+					DrawBox(
+						xp1 + 1, yp1 + 1,
+						xp1 + 1 + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - 1,
+						GetColor(Color.r, Color.g, Color.b), TRUE);
+					DrawBox(
+						xp1 + 1 + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + 1,
+						xp1 + 1 + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - 1,
+						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), TRUE);
+				}
+				void			DrawGaugeUp(int xp1, int yp1, int xp2, int yp2,
+					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) {
+					//return;
+					int ParamBuf = (int)(this->m_Buffer + 0.5f);
+					DrawBox(xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, GetColor(255, 255, 255), FALSE);
+					int length = (yp2 - 1) - (yp1 + 1);
+
+					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, (float)this->m_Now / (float)this->m_Max);
+					COLOR_U8 ColorAddSub = (ParamBuf > this->m_Now) ? ColorSub : ColorAdd;
+
+					DrawBox(
+						xp1 + 1, yp1 + 1,
+						xp2 - 1, yp2 - 1 - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
+						GetColor(0, 0, 0), TRUE);
+					DrawBox(
+						xp1 + 1, yp2 - 1 - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
+						xp2 + 1, yp2 - 1,
+						GetColor(Color.r, Color.g, Color.b), TRUE);
+					DrawBox(
+						xp1 + 1, yp2 - 1 - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
+						xp2 + 1, yp2 - 1 - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
+						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), TRUE);
 				}
 				void			DrawGaugeCircleLeft(int xp1, int yp1,
 					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
@@ -109,7 +141,7 @@ namespace FPS_n2 {
 				}
 			};
 		private:
-			std::array<GaugeParam, 3>		m_GaugeParam;
+			std::array<GaugeParam, 4>		m_GaugeParam;
 			std::array<int, 23>				intParam{ 0 };
 			std::array<float, 5>			floatParam{ 0 };
 			std::array<std::string, 7>		strParam;
@@ -119,15 +151,25 @@ namespace FPS_n2 {
 
 			int prevScore{ 0 };
 			std::vector<std::pair<int, float>> ScoreAdd;
+
+			int ultxp{ 0 }, ultyp{ 0 };
+			GraphHandle UltGaugeMask;
+			GraphHandle UltGauge;
 		private:
 		public:
 			void			Load(void) noexcept {
 				this->Gauge_Graph = GraphHandle::Load("data/UI/Gauge.png");
 				this->OIL_Graph = GraphHandle::Load("data/UI/back.png");
+
+				UltGaugeMask = GraphHandle::Load("data/UI/Gauge_Mod870.png");
+				UltGaugeMask.GetSize(&ultxp, &ultyp);
+				UltGauge = GraphHandle::Make(ultxp, ultyp, true);
 			}
 			void			Dispose(void) noexcept {
 				this->Gauge_Graph.Dispose();
 				this->OIL_Graph.Dispose();
+				UltGaugeMask.Dispose();
+				UltGauge.Dispose();
 			}
 			void			Set(void) noexcept {
 				for (int i = 0; i < 3; i++) {
@@ -221,7 +263,7 @@ namespace FPS_n2 {
 						xp1 = DrawParts->m_DispXSize / 2 + intParam[0] - y_r(300.f*std::cos(rad));
 						yp1 = DrawParts->m_DispYSize / 2 + intParam[1] - y_r(300.f*std::sin(rad)) - y_r(18) / 2;
 						m_GaugeParam[1].DrawGaugeCircleLeft(xp1, yp1,
-							GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(255, 255, 255, 255),
+							GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(64, 64, 255, 255),
 							GetColorU8(0, 255, 0, 255), GetColorU8(255, 0, 0, 255),
 							&this->Gauge_Graph, deg);
 					}
@@ -229,7 +271,7 @@ namespace FPS_n2 {
 						xp1 = DrawParts->m_DispXSize / 2 + intParam[0] + y_r(300.f*std::cos(rad));
 						yp1 = DrawParts->m_DispYSize / 2 + intParam[1] + y_r(300.f*std::sin(rad)) - y_r(18) / 2;
 						m_GaugeParam[2].DrawGaugeCircleRight(xp1, yp1,
-							GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(255, 255, 255, 255),
+							GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(64, 64, 255, 255),
 							GetColorU8(0, 255, 0, 255), GetColorU8(255, 0, 0, 255),
 							&this->Gauge_Graph, deg);
 					}
@@ -243,6 +285,32 @@ namespace FPS_n2 {
 						(int)(floatParam[1] / 60.f),
 						(float)((int)(floatParam[1]) % 60) + (floatParam[1] - (float)((int)(floatParam[1])))
 					);
+				}
+				//ÉQÅ[ÉW
+				{
+					int xp1, yp1;
+					xp1 = y_r(1920-20-ultxp * 6 / 10);
+					yp1 = y_r(512);
+					//
+					int Prev = GetDrawScreen();
+					UltGauge.SetDraw_Screen();
+					{
+						m_GaugeParam[3].DrawGaugeUp(
+							-1, -1, 1 + ultxp, 1 + ultyp,
+							GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
+							GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
+						);
+					}
+					SetDrawScreen(Prev);
+					GraphBlend(UltGauge.get(), UltGaugeMask.get(), 255, DX_GRAPH_BLEND_RGBA_SELECT_MIX,
+						DX_RGBA_SELECT_SRC_R,
+						DX_RGBA_SELECT_SRC_G,
+						DX_RGBA_SELECT_SRC_B,
+						DX_RGBA_SELECT_BLEND_R
+						);
+					//
+
+					UltGauge.DrawExtendGraph(xp1, yp1, xp1 + ultxp * 6 / 10, yp1 + ultyp * 6 / 10, true);
 				}
 			}
 

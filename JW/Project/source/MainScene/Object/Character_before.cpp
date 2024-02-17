@@ -19,7 +19,7 @@ namespace FPS_n2 {
 			if (!pReady) { return; }
 			//“ü—Í
 			this->m_Input = pInput;
-			this->m_FKey.Execute(this->m_Input.GetPADSPress(PADS::INTERACT));
+			this->m_ULTKey.Execute(this->m_Input.GetPADSPress(PADS::ULT));
 			this->m_Squat.Execute(this->m_Input.GetPADSPress(PADS::SQUAT));
 			if (this->GetRun()) { SetIsSquat(false); }
 			//‰ñ“]
@@ -125,5 +125,25 @@ namespace FPS_n2 {
 			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::LeftFoot).pos()*0.75f + Ptr->GetFrameWorldMat(CharaFrame::LeftFoot2).pos()*0.25f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
 			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::LeftFoot).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
 		}
+
+		void MagStockControl::Init_MagStockControl(int AmmoNum, int ModUniqueID) noexcept {
+			size_t Total = m_MagazineStock.size();
+			for (size_t i = 0; i < Total; i++) {
+				m_MagazineStock[i].AmmoNum = AmmoNum;
+				m_MagazineStock[i].ModUniqueID = ModUniqueID;
+			}
+			m_UseMagazineID = 0;
+
+		}
+		void MagStockControl::SetNextMag(int OLDAmmoNum, int OLDModUniqueID) noexcept {
+			m_MagazineStock[m_UseMagazineID].AmmoNum = OLDAmmoNum;
+			m_MagazineStock[m_UseMagazineID].ModUniqueID = OLDModUniqueID;
+			m_UseMagazineID = GetNextMagID();
+		}
+		void MagStockControl::SortMag() noexcept {
+			m_UseMagazineID = 0;
+			std::sort(m_MagazineStock.begin(), m_MagazineStock.end(), [&](const MagStock&A, const MagStock&B) {return A.AmmoNum > B.AmmoNum; });
+		}
+
 	};
 };

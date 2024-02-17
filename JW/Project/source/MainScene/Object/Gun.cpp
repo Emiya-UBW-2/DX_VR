@@ -226,8 +226,8 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::CheckEnd) = 30;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadStart_Empty) = 15;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadStart) = 15;
-				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadOne) = 30;
-				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 10;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadOne) = 45;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 20;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 60;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Melee) = 10;
 				//ƒnƒ“ƒhƒKƒ“

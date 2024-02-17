@@ -12,7 +12,6 @@ Slot0Type=Magazine
 Slot0IsNeed=true
 Slot0Item=GMag17
 Slot0Item=GMag17Gen5
-Slot0Item=GMag33
 
 Slot1Type=Upper
 Slot1IsNeed=true

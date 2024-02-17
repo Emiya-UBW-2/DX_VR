@@ -1,0 +1,3 @@
+Name=ACOG TA31 Scope
+zoom=3.5
+end

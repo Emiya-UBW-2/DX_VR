@@ -25,6 +25,7 @@ namespace FPS_n2 {
 
 			GameFadeIn = std::max(GameFadeIn - 1.f / FPS, 0.f);
 
+			Pad->SetMouseMoveEnable(false);
 			Pad->ChangeGuide(
 				[&]() {
 					auto* KeyGuide = PadControl::Instance();

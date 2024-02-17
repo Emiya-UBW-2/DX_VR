@@ -1,6 +1,7 @@
 #include	"ObjectManager.hpp"
 #include "MainScene/Object/Ammo.hpp"
 #include "MainScene/Object/Gun.hpp"
+#include "MainScene/Object/Armer.hpp"
 #include "MainScene/Object/Mod.hpp"
 #include "MainScene/Object/Character.hpp"
 #include "MainScene/Object/FallObj.hpp"
@@ -22,6 +23,10 @@ namespace FPS_n2 {
 			case ObjType::FallObj:
 				this->m_Object.resize(this->m_Object.size() + 1);
 				this->m_Object.back() = std::make_shared<FallObjClass>();
+				break;
+			case ObjType::Armer:
+				this->m_Object.resize(this->m_Object.size() + 1);
+				this->m_Object.back() = std::make_shared<ArmerClass>();
 				break;
 			case ObjType::Gun:
 				this->m_Object.resize(this->m_Object.size() + 1);

@@ -76,6 +76,12 @@ namespace FPS_n2 {
 				}
 				return nullptr;
 			}
+			const float GetZoomSize(void) const noexcept {
+				if (this->m_SightPtr) {
+					return (*this->m_SightPtr)->GetZoomSize();
+				}
+				return 1.f;
+			}
 			const auto& GetName(void) const noexcept { return GetGunDataClass()->GetName(); }
 			const auto& GetReloadType(void) const noexcept { return GetGunDataClass()->GetReloadType(); }
 			const auto& GetShotSwitch(void) const noexcept { return this->m_ShotSwitch; }

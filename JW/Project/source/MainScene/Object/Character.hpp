@@ -10,6 +10,7 @@
 #include "AmmoData.hpp"
 #include "Ammo.hpp"
 #include "Gun.hpp"
+#include "Armer.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -24,10 +25,13 @@ namespace FPS_n2 {
 			public EffectControl,
 			public LaserSightClass,
 			public HitBoxControl,
-			public HumanControl,
 			public WalkSwingControl,
 			public GunSwingControl,
-			public StackLeftHandControl
+			public StackLeftHandControl,
+			public MagStockControl,
+			public HitReactionControl,
+			public RagDollControl,
+			public ULTControl
 		{
 		private://キャラパラメーター
 			const float											UpperTimerLimit = 10.f;
@@ -53,36 +57,29 @@ namespace FPS_n2 {
 			float												m_ADSPer{ 0.f };
 			float												m_AmmoHandR{ 0.f };
 			float												m_AmmoHand{ 0.f };
-			MV1													m_RagDoll;
-			float												m_RagDollTimer{ 0.f };						//ラグドールの物理演算フラグ
 			//銃
 			int													m_GunSelect{ 0 };
 			std::array<std::shared_ptr<GunClass>, 2>			m_Gun_Ptr{ nullptr , nullptr };			//銃
+			bool												m_IsChanging{ false };
+			//
+			std::shared_ptr<ArmerClass>							m_Armer_Ptr{ nullptr };
+			ArmMovePerClass										m_Wear_Armer;
+			bool												m_IsWearArmer{ false };
+			bool												m_IsWearingArmer{ false };
+			bool												m_WearArmer{ false };
+			float												m_ULTUp{ 0.f };
+			bool												m_ULTActive{ false };
 			//入力
 			bool												m_Press_Shot{ false };
 			bool												m_Press_Reload{ false };
 			bool												m_Press_Aim{ false };
 			float												m_MeleeCoolDown{ 0.f };
-			bool												m_IsChanging{ false };
 			bool												m_ArmBreak{ false };
 			//サウンド
 			float												m_SoundPower{ 0.f };
 			int													m_CharaSound{ -1 };
 			int													m_LeanSoundReq{ 0 };
 			bool												m_SquatSoundReq{ false };
-			//ダメージリアクション
-			VECTOR_ref											m_HitAxis{ VECTOR_ref::front() };
-			float												m_HitPower{ 0.f };
-			float												m_HitPowerR{ 0.f };
-
-			class MagStock {
-			public:
-				int AmmoNum{ 0 };
-				int ModUniqueID{ -1 };
-			};
-
-			std::array<MagStock, 4>								m_MagazineStock;
-			int													m_UseMagazineID{ 0 };
 		public:
 			bool												CanLookTarget{ true };
 		private:
@@ -144,9 +141,9 @@ namespace FPS_n2 {
 					GetAnime((CharaAnimeID)i).per = GetAnimeBuf((CharaAnimeID)i);
 				}
 			}
+			void			SetArmer(const std::shared_ptr<ArmerClass>& pArmer) noexcept { this->m_Armer_Ptr = pArmer; }
 		public://ゲッター
 			auto&			GetSoundPower(void) noexcept { return this->m_SoundPower; }
-			auto&			GetRagDoll(void) noexcept { return this->m_RagDoll; }
 			auto&			GetGunPtr(int ID) noexcept { return this->m_Gun_Ptr[ID]; }
 			auto&			GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr[m_GunSelect]; }
 			const auto&		GetGunPtrNow(void) const noexcept { return this->m_Gun_Ptr[m_GunSelect]; }
@@ -160,7 +157,6 @@ namespace FPS_n2 {
 			const auto		GetAmmoNum(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetAmmoNum() : 0; }
 			const auto		GetAmmoAll(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetAmmoAll() : 0; }
 			const auto		GetMeleeSwitch(void) const noexcept { return m_MeleeCoolDown == 1.f; }
-			const auto		IsDamaging(void) const noexcept { return m_HitPower > 0.f; }
 			
 			const auto		GetCharaDir(void) const noexcept {
 				auto tmpUpperMatrix =
@@ -185,7 +181,10 @@ namespace FPS_n2 {
 			bool			SetDamageEvent(const DamageEvent& value) noexcept;
 			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
 			void			SetGunPtr(int ID, const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_Gun_Ptr[ID] = pGunPtr0; }
-			void			Heal(HitPoint value) noexcept { LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, m_objType, value); }
+			void			Heal(HitPoint value) noexcept {
+				LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, m_objType, value, 0);
+				m_ArmBreak = false;
+			}
 			const bool		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept;
 			const bool		CheckMeleeHit(PlayerID MeleeID, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept;
 		public:

@@ -25,6 +25,7 @@ namespace FPS_n2 {
 				//
 				this->m_UIclass.Load();
 				this->hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
+				this->guard_Graph = GraphHandle::Load("data/UI/battle_guard.bmp");
 				this->m_MiniMapScreen = GraphHandle::Make(y_r(128) * 2, y_r(128) * 2, true);
 				PlayerMngr->Init(Chara_num);
 				for (int i = 1; i < Chara_num; i++) {
@@ -32,7 +33,7 @@ namespace FPS_n2 {
 				}
 
 				for (int i = 1; i < gun_num; i++) {
-					LoadGun("AR15_90", (PlayerID)i, false, 0);
+					LoadGun("PCC_4", (PlayerID)i, false, 0);
 				}
 			}
 		}
@@ -51,6 +52,8 @@ namespace FPS_n2 {
 			LoadChara("Suit", GetMyPlayerID(), false);
 			GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
 			LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
+			//LoadGun("PCC_4", GetMyPlayerID(), false, 0);
+			//LoadGun("M16-4", GetMyPlayerID(), false, 0);
 			LoadGun("Mod870", GetMyPlayerID(), false, 1);
 			//BGをオブジェに登録
 			for (int index = 0; index < Chara_num; index++) {
@@ -119,6 +122,7 @@ namespace FPS_n2 {
 		}
 		bool			MAINLOOP::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
+			Pad->SetMouseMoveEnable(true);
 			Pad->ChangeGuide(
 				[&]() {
 				auto* KeyGuide = PadControl::Instance();
@@ -142,11 +146,12 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide(PADS::SQUAT, "しゃがみ");
 					KeyGuide->AddGuide(PADS::RELOAD, "リロード");
 					KeyGuide->AddGuide(PADS::SHOT, "射撃");
-					KeyGuide->AddGuide(PADS::INTERACT, "武器切替");
+					KeyGuide->AddGuide(PADS::INTERACT, "補充");
 					KeyGuide->AddGuide(PADS::AIM, "エイム");
 					KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
 					KeyGuide->AddGuide(PADS::MELEE, "近接攻撃");
-				}	
+					KeyGuide->AddGuide(PADS::ULT, "武器切替");
+				}
 			});
 
 			if (DXDraw::Instance()->IsPause()) {
@@ -226,6 +231,7 @@ namespace FPS_n2 {
 				MyInput.SetInputPADS(PADS::SQUAT, Pad->GetKey(PADS::SQUAT).press());
 				MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press() && !DXDraw::Instance()->IsPause());
 				MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press() && !DXDraw::Instance()->IsPause());
+				MyInput.SetInputPADS(PADS::ULT, Pad->GetKey(PADS::ULT).press());
 				//ネットワーク
 				auto& CharaPtr = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 
@@ -394,18 +400,19 @@ namespace FPS_n2 {
 					auto near_t = DrawParts->GetMainCamera().GetCamNear();
 					auto far_t = DrawParts->GetMainCamera().GetCamFar();
 					if (Chara->GetIsADS()) {
-						Easing(&near_t, Scale_Rate * 0.01f, 0.9f, EasingType::OutExpo);
-						Easing(&far_t, Scale_Rate * 60.f, 0.5f, EasingType::OutExpo);
+						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
+						Easing(&far_t, Scale_Rate * 30.f, 0.5f, EasingType::OutExpo);
 					}
 					else {
-						Easing(&near_t, Scale_Rate * 0.01f, 0.9f, EasingType::OutExpo);
-						Easing(&far_t, Scale_Rate * 30.f, 0.9f, EasingType::OutExpo);
+						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
+						Easing(&far_t, Scale_Rate * 30.f, 0.5f, EasingType::OutExpo);
 					}
 					//fov
 					{
 						float fov = deg2rad(OptionParts->Get_Fov());
 						if (Chara->GetIsADS()) {
 							fov -= deg2rad(15);
+							fov /= std::max(1.f, Chara->GetGunPtrNow()->GetZoomSize() / 2.f);
 						}
 						else if (Chara->GetRun()) {
 							fov += deg2rad(5);
@@ -493,31 +500,20 @@ namespace FPS_n2 {
 #endif // DEBUG
 			//UIパラメーター
 			{
-				VECTOR_ref MyPos = Chara->GetMove().pos;
+				VECTOR_ref StartPos = Chara->GetEyePosition();
 				for (int index = 0; index < Chara_num; index++) {
-					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 					if (index == 0) { continue; }
+					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+					VECTOR_ref TgtPos = c->GetEyePosition();
 					c->CanLookTarget = true;
-					{
-						VECTOR_ref TgtPos = c->GetMove().pos;
-						//
-						c->CanLookTarget = true;
-						auto Dir_t = TgtPos - MyPos;
-						if (Dir_t.Length() < 15.f*Scale_Rate) {
-							for (auto& C : this->m_BackGround->GetBuildDatas()) {
-								if (C.GetMeshSel() < 0) { continue; }
-								auto StartPos = MyPos;
-								auto EndPos = TgtPos;
-								if (GetMinLenSegmentToPoint(StartPos, EndPos, C.GetMatrix().pos()) >= 5.f*Scale_Rate) { continue; }
-								auto ret = C.GetColLine(StartPos, EndPos);
-								if (ret.HitFlag == TRUE) {
-									c->CanLookTarget = false;
-									break;
-								}
-							}
-						}
-						else {
+					for (auto& C : this->m_BackGround->GetBuildDatas()) {
+						if (C.GetMeshSel() < 0) { continue; }
+						auto EndPos = TgtPos;
+						if (GetMinLenSegmentToPoint(StartPos, EndPos, C.GetMatrix().pos()) >= 8.f*Scale_Rate) { continue; }
+						auto ret = C.GetColLine(StartPos, EndPos);
+						if (ret.HitFlag == TRUE) {
 							c->CanLookTarget = false;
+							break;
 						}
 					}
 				}
@@ -534,11 +530,14 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(6, PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
 				//HP
 				this->m_UIclass.SetGaugeParam(0, (int)Chara->GetHP(), (int)Chara->GetHPMax());
-				//SPeed,ALT
+				//AP
+				this->m_UIclass.SetGaugeParam(1, (int)Chara->GetAP(), (int)Chara->GetAPMax());
+				//Ammo
 				if (Chara->GetGunPtrNow()) {
-					this->m_UIclass.SetGaugeParam(1, (int)100, (int)100);
 					this->m_UIclass.SetGaugeParam(2, (int)Chara->GetGunPtrNow()->GetAmmoNum(), (int)Chara->GetGunPtrNow()->GetAmmoAll() + 1);
 				}
+				//ULT
+				this->m_UIclass.SetGaugeParam(3, (int)Chara->GetULT(), (int)Chara->GetULTMax());
 			}
 			//
 			EffectControl::Execute();
@@ -603,18 +602,23 @@ namespace FPS_n2 {
 			//シェーダー描画用パラメーターセット
 			{
 				//
-				if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetReticlePtr()) {
+				if (Chara->GetGunPtrNow()) {
 					m_MyPlayerReticleControl.Update(
 						Chara->GetGunPtrNow()->GetLensPos(),
 						Chara->GetGunPtrNow()->GetFrameWorldMat(GunFrame::LensSize).pos(),
 						Chara->GetGunPtrNow()->GetReticlePos()
 					);
-					/*
-					if (m_MyPlayerReticleControl.IsActive()) {
-						Set_is_lens(false);
+					//*
+					if (m_MyPlayerReticleControl.IsActive() && Chara->GetGunPtrNow()->GetZoomSize() > 1.f) {
+						Set_is_lens(true);
 						Set_xp_lens(m_MyPlayerReticleControl.GetLensXPos());
 						Set_yp_lens(m_MyPlayerReticleControl.GetLensYPos());
 						Set_size_lens(m_MyPlayerReticleControl.GetLensSize());
+						Set_zoom_lens(std::max(1.f, Chara->GetGunPtrNow()->GetZoomSize() / 2.f));
+					}
+					else {
+						Set_is_lens(false);
+						Set_zoom_lens(1.f);
 					}
 					//*/
 				}
@@ -654,7 +658,7 @@ namespace FPS_n2 {
 				DrawSoundGraph();
 			}
 			//レティクル表示
-			if (m_MyPlayerReticleControl.IsActive()) {
+			if (m_MyPlayerReticleControl.IsActive() && Chara->GetGunPtrNow()->GetReticlePtr()) {
 				Chara->GetGunPtrNow()->GetReticlePtr()->DrawRotaGraph(
 					(int)m_MyPlayerReticleControl.GetReticleXPos(),
 					(int)m_MyPlayerReticleControl.GetReticleYPos(),
@@ -689,6 +693,7 @@ namespace FPS_n2 {
 				m_AICtrl.clear();
 				this->m_UIclass.Dispose();
 				this->hit_Graph.Dispose();
+				this->guard_Graph.Dispose();
 				this->m_MiniMapScreen.Dispose();
 				PlayerMngr->Dispose();
 				ObjMngr->DisposeObject();
@@ -826,19 +831,31 @@ namespace FPS_n2 {
 					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
 					if (a->m_IsDrawHitUI && a->GetShootedID() == 0) {
 						int			Alpha = (int)(a->m_Hit_alpha * 255.f);
-						int			Damage = (int)a->m_Damage;
 						VECTOR_ref	DispPos = a->m_Hit_DispPos;
 						if ((Alpha >= 10) && (DispPos.z() >= 0.f && DispPos.z() <= 1.f)) {
 							SetDrawBlendMode(DX_BLENDMODE_ALPHA, Alpha);
 							//
-							int r = (int)(255 * std::clamp((float)Damage / 100.f*2.f, 0.f, 1.f));
-							int g = (int)(255 * std::clamp(1.f - (float)Damage / 100.f*2.f, 0.f, 1.f));
-							SetDrawBright(r, g, 0);
-							hit_Graph.DrawRotaGraph((int)DispPos.x(), (int)DispPos.y(), (float)y_r((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+							int r = (int)(255 * std::clamp((float)a->m_Damage / 100.f*2.f, 0.f, 1.f));
+							int g = 255 - r;
+							if (a->m_Damage > 0) {
+								SetDrawBright(r, g, 0);
+								hit_Graph.DrawRotaGraph((int)DispPos.x(), (int)DispPos.y(), (float)y_r((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+							}
+							if (a->m_ArmerDamage > 0) {
+								SetDrawBright(128, 128, 128);
+								guard_Graph.DrawRotaGraph((int)DispPos.x(), (int)DispPos.y(), (float)y_r((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+							}
 							SetDrawBright(255, 255, 255);
 							//
-							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-								(int)DispPos.x() + a->m_Hit_AddX, (int)DispPos.y() + a->m_Hit_AddY, GetColor(r, g, 0), GetColor(0, 0, 0), "%d", Damage);
+							if (a->m_Damage > 0) {
+								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+									(int)DispPos.x() + a->m_Hit_AddX, (int)DispPos.y() + a->m_Hit_AddY, GetColor(r, g, 0), GetColor(0, 0, 0), "%d", a->m_Damage);
+							}
+							//防いだダメージ
+							if (a->m_ArmerDamage > 0) {
+								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(20), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
+									(int)DispPos.x() + a->m_Hit_AddX - y_r(10), (int)DispPos.y() + a->m_Hit_AddY, GetColor(128, 128, 128), GetColor(0, 0, 0), "%d", a->m_ArmerDamage);
+							}
 						}
 					}
 				}
@@ -890,6 +907,8 @@ namespace FPS_n2 {
 		}
 		void			MAINLOOP::SetSE(void) noexcept {
 			auto* SE = SoundPool::Instance();
+			auto* OptionParts = OPTION::Instance();
+
 			SE->Get((int)SoundEnum::CartFall).SetVol_Local(48);
 			SE->Get((int)SoundEnum::MagFall).SetVol_Local(48);
 			SE->Get((int)SoundEnum::Trigger).SetVol_Local(48);
@@ -901,6 +920,7 @@ namespace FPS_n2 {
 			for (int i = 0; i < 5; i++) {
 				SE->Get((int)SoundEnum::HitGround0 + i).SetVol_Local(92);
 			}
+			SE->SetVol(OptionParts->Get_SE());
 		}
 		void			MAINLOOP::DisposeSE(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -942,13 +962,13 @@ namespace FPS_n2 {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* Ptr = ObjMngr->MakeObject(ObjType::Human);
+			auto& c = (std::shared_ptr<CharacterClass>&)(*Ptr);
 			std::string Path = "data/Charactor/";
 			Path += FolderName;
 			Path += "/";
 			ObjMngr->LoadObjectModel((*Ptr).get(), Path.c_str());
 			MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
 			if (IsRagDoll) {
-				auto& c = (std::shared_ptr<CharacterClass>&)(*Ptr);
 				if (IsRagDollBaseObj) {
 					MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME, -1.f);//身体ラグドール
 					MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
@@ -961,6 +981,17 @@ namespace FPS_n2 {
 			}
 			(*Ptr)->Init();
 			PlayerMngr->GetPlayer(ID).SetChara(*Ptr);
+			if (ID == 0) {
+				auto* ArmerPtr = ObjMngr->MakeObject(ObjType::Armer);
+				auto& a = (std::shared_ptr<ArmerClass>&)(*ArmerPtr);
+				
+				ObjMngr->LoadObjectModel((*ArmerPtr).get(), "data/model/PlateCarrler/");
+				(*ArmerPtr)->Init();
+				c->SetArmer(a);
+			}
+			else {
+				c->SetArmer(nullptr);
+			}
 		}
 		void			MAINLOOP::LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();

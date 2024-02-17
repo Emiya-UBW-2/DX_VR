@@ -14,6 +14,7 @@ namespace FPS_n2 {
 			int				m_Hit_AddX{ 0 };
 			int				m_Hit_AddY{ 0 };
 			HitPoint		m_Damage{ 0 };
+			ArmerPoint		m_ArmerDamage{ 0 };
 		private:
 			bool			m_IsHit{ false };
 			float			m_HitTimer{ 0.f };
@@ -46,11 +47,12 @@ namespace FPS_n2 {
 				this->m_ShootCheraID = pMyID;
 			}
 			const auto		PenetrationCheck(float pArmer, const VECTOR_ref& normal) const noexcept { return (this->m_penetration > (pArmer * (1.0f / std::abs(this->m_move.vec.Norm().dot(normal))))); }
-			void			Penetrate(int Damage = -1) noexcept {
+			void			Penetrate(HitPoint Damage, ArmerPoint ArmerDamage) noexcept {
 				SetActive(false);
 				this->m_IsHit = true;
-				this->m_IsDrawHitUI = (Damage != -1);
-				this->m_Damage = (HitPoint)Damage;
+				this->m_IsDrawHitUI = true;
+				this->m_Damage = Damage;
+				this->m_ArmerDamage = ArmerDamage;
 			}
 			void			Ricochet(const VECTOR_ref& position, const VECTOR_ref& normal) {
 				this->m_IsHit = true;

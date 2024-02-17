@@ -22,6 +22,8 @@ namespace FPS_n2 {
 			if (value) { this->m_Flags |= ((unsigned long long)1 << (0 + (int)select)); }
 		}
 
+		void			SetAddxRad(float AddxRad) { this->m_AddxRad = AddxRad; }
+		void			SetAddyRad(float AddyRad) { this->m_AddyRad = AddyRad; }
 		void			SetKeyInputFlags(const InputControl& o) { this->m_Flags = o.m_Flags; }
 
 		const auto&		GetAddxRad(void) const noexcept { return this->m_AddxRad; }
@@ -55,6 +57,14 @@ namespace FPS_n2 {
 			tmp.m_yRad = this->m_yRad *per;
 			tmp.m_Flags = this->m_Flags;
 			return tmp;
+		}
+
+		void operator=(const InputControl& o) noexcept {
+			this->m_AddxRad = o.m_AddxRad;
+			this->m_AddyRad = o.m_AddyRad;
+			this->m_xRad = o.m_xRad;
+			this->m_yRad = o.m_yRad;
+			this->m_Flags = o.m_Flags;
 		}
 	};
 
@@ -158,12 +168,14 @@ namespace FPS_n2 {
 		PlayerID				DamageID{ 127 };
 		Sceneclass::ObjType		CharaType{ Sceneclass::ObjType::Human };
 		HitPoint				Damage{ 0 };
+		ArmerPoint				ArmerDamage{ 0 };
 		float					rad{ 0.f };
-		void SetEvent(PlayerID ShotID_t, PlayerID DamageID_t, Sceneclass::ObjType pCharaType, HitPoint pDamage, float pRad) {
+		void SetEvent(PlayerID ShotID_t, PlayerID DamageID_t, Sceneclass::ObjType pCharaType, HitPoint pDamage, ArmerPoint pArmerDamage, float pRad) {
 			this->ShotID = ShotID_t;
 			this->DamageID = DamageID_t;
 			this->CharaType = pCharaType;
 			this->Damage = pDamage;
+			this->ArmerDamage = pArmerDamage;
 			this->rad = pRad;
 		}
 	};

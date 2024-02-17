@@ -162,190 +162,221 @@ namespace FPS_n2 {
 		public:
 			ENUM_AI_PHASE							m_Phase{ ENUM_AI_PHASE::Normal };
 			PlayerID								m_MyCharaID{ 0 };
-			PlayerID								m_TargetCharaID{ 0 };
+			InputControl							m_MyInput;
 		private:
-			int			TargetPathPlanningIndex;		// 次の中間地点となる経路上のポリゴンの経路探索情報が格納されているメモリアドレスを格納する変数
-			PathChecker m_PathChecker;
-			float									m_PathUpdateTimer{ 0.f };
+			const PlayerID							m_TargetCharaID{ 0 };
+
+			int										TargetPathPlanningIndex;		// 次の中間地点となる経路上のポリゴンの経路探索情報が格納されているメモリアドレスを格納する変数
+			PathChecker								m_PathChecker;
 
 			std::shared_ptr<BackGroundClassMain>	m_BackGround{ nullptr };				//BG
+
+			float									m_PathUpdateTimer{ 0.f };
 			float									m_CheckAgain{ 0.f };
 			float									m_ShotTimer{ 0.f };
 			float									m_BackTimer{ 0.f };
-			int										m_LeanLR{ 0 };
-		public:
-			BOOL CanLookTarget{ true };
 			float									m_RepopTimer{ 0.f };
-		private:
-			bool W_key{ false };
-			bool S_key{ false };
-			bool A_key{ false };
-			bool D_key{ false };
-			bool Run_key{ false };
-			bool Q_key{ false };
-			bool E_key{ false };
-			bool R_key{ false };
-			bool F_key{ false };
-			bool C_key{ false };
-			bool shotMain_Key{ false };
-			int32_t x_m{ 0 }, y_m{ 0 };
+
+			int										m_LeanLR{ 0 };
 		public:
 			Impl(void) noexcept { }
 			~Impl(void) noexcept { }
-		public:
-			auto&		GetBackGround() noexcept { return m_BackGround; }
 		private:
-			void		SetBackGround(const std::shared_ptr<BackGroundClassMain>& BackBround_t) noexcept { m_BackGround = BackBround_t; }
-		public:
-			void		Reset() noexcept {
-				this->m_Phase = ENUM_AI_PHASE::Normal;
-				this->m_CheckAgain = 0.f;
-			}
-
-			void		ChangePoint() noexcept {
+			bool									IsGotLengthToTarget{ true };
+			float									LengthToTarget{ 0.f };
+			VECTOR_ref								VectorToTarget;
+			float					GetLengthToTarget() {
+				if (IsGotLengthToTarget) {
+					return LengthToTarget;
+				}
+				IsGotLengthToTarget = true;
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
+				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 
-				auto MyPos_XZ = MyChara->GetMove().pos; MyPos_XZ.y(0.f);
-				auto TgtPos_XZ = TargetChara->GetMove().pos; TgtPos_XZ.y(0.f);
-				auto Dir_t = TgtPos_XZ - MyPos_XZ;
-				if (Dir_t.Length() > 10.f*Scale_Rate) {
-					std::vector<int> SelList;
-					for (auto& C : this->m_BackGround->GetBuildDatas()) {
-						if (C.GetMeshSel() < 0) { continue; }
-						auto BGPos_XZ = C.GetMatrix().pos(); BGPos_XZ.y(0.f);
-						if ((BGPos_XZ - TgtPos_XZ).Length() < 10.f*Scale_Rate) {
-							SelList.emplace_back((int)(&C - &this->m_BackGround->GetBuildDatas().front()));
-						}
-					}
-					auto& C = this->m_BackGround->GetBuildDatas().at(SelList.at(GetRand((int)SelList.size() - 1)));
-					auto BGPos_XZ = C.GetMatrix().pos(); BGPos_XZ.y(0.f);
-					TgtPos_XZ = BGPos_XZ;
+				auto MyPos = MyChara->GetEyePosition();
+
+				LengthToTarget = (TgtPos - MyPos).Length();
+				VectorToTarget = (TgtPos - MyPos).Norm();
+
+				return LengthToTarget;
+			}
+			const VECTOR_ref&		GetVectorToTarget() {
+				if (IsGotLengthToTarget) {
+					return VectorToTarget;
 				}
-				m_PathChecker.Dispose();
-				m_PathChecker.Init(MyPos_XZ, TgtPos_XZ);	// 指定の２点の経路情報を探索する
-				this->TargetPathPlanningIndex = m_PathChecker.GetStartUnit()->GetPolyIndex();	// 移動開始時点の移動中間地点の経路探索情報もスタート地点にあるポリゴンの情報
-			}
-		public:
-			void		Init(const std::shared_ptr<BackGroundClassMain>& BackBround_t, PlayerID MyCharaID) noexcept {
-				this->m_MyCharaID = MyCharaID;
-				this->SetBackGround(BackBround_t);
-				this->Reset();
+				IsGotLengthToTarget = true;
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
+				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
+				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 
-				m_PathChecker.SetBackGround(this->m_BackGround);
+				auto MyPos = MyChara->GetEyePosition();
 
-				this->ChangePoint();
-				m_PathUpdateTimer = 1.f;
+				LengthToTarget = (TgtPos - MyPos).Length();
+				VectorToTarget = (TgtPos - MyPos).Norm();
+
+				return VectorToTarget;
 			}
-			void		Execute_Before() noexcept {
+		private:
+			void		Reset() noexcept {
+				this->m_Phase = ENUM_AI_PHASE::Normal;
+				this->m_CheckAgain = 0.f;
+				this->m_PathUpdateTimer = 1.f;
+			}
+			void		ChangePoint() noexcept {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
 				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 				auto MyPos = MyChara->GetEyePosition();
 
-				W_key = false;
-				S_key = false;
-				A_key = false;
-				D_key = false;
-				Run_key = false;
-				Q_key = false;
-				E_key = false;
-				R_key = false;
-				F_key = false;
-				C_key = false;
-				shotMain_Key = false;
-				x_m = 0;
-				y_m = 0;
+				auto Target = TgtPos;
+				if (GetLengthToTarget() > 10.f*Scale_Rate) {
+					std::vector<int> SelList;
+					for (auto& C : this->m_BackGround->GetBuildDatas()) {
+						if (C.GetMeshSel() < 0) { continue; }
+						auto Vec = C.GetMatrix().pos() - Target; Vec.y(0.f);
+						if (Vec.Length() < 10.f*Scale_Rate) {
+							SelList.emplace_back((int)(&C - &this->m_BackGround->GetBuildDatas().front()));
+						}
+					}
+					Target = this->m_BackGround->GetBuildDatas().at(SelList.at(GetRand((int)SelList.size() - 1))).GetMatrix().pos();
+				}
+				m_PathChecker.Dispose();
+				auto MyPos_XZ = MyPos; MyPos_XZ.y(0.f);
+				Target.y(0.f);
+				m_PathChecker.Init(MyPos_XZ, Target);	// 指定の２点の経路情報を探索する
+				this->TargetPathPlanningIndex = m_PathChecker.GetStartUnit()->GetPolyIndex();	// 移動開始時点の移動中間地点の経路探索情報もスタート地点にあるポリゴンの情報
+			}
+			void		Repop() noexcept {
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
+				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
+				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 
+				VECTOR_ref pos_t;
+				while (true) {
+					pos_t = this->m_BackGround->GetBuildDatas().at(GetRand((int)(this->m_BackGround->GetBuildDatas().size()) - 1)).GetMatrix().pos();
+
+					VECTOR_ref StartPos = TgtPos;
+					VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 1.f*Scale_Rate;
+					if (this->m_BackGround->CheckLinetoMap(StartPos, &EndPos, false)) {
+						break;
+					}
+				}
+
+				auto HitResult = this->m_BackGround->GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -10.f*Scale_Rate, pos_t + VECTOR_ref::up() * 10.f*Scale_Rate);
+				if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
+
+
+				MyChara->ValueSet(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, this->m_MyCharaID);
+				MyChara->Heal(100);
+				this->Reset();
+			}
+			void		AimDir(const VECTOR_ref& VEC) {
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
+
+				auto Vec = VEC; Vec.y(0.f);
+
+				auto Dir = MyChara->GetEyeVector();
+				auto Dir_XZ = Dir; Dir_XZ.y(0.f);
 				{
-					//
-					CanLookTarget = true;
-					auto Dir_t = TgtPos - MyPos;
-					if (Dir_t.Length() < 15.f*Scale_Rate) {
-						for (auto& C : this->m_BackGround->GetBuildDatas()) {
-							if (C.GetMeshSel() < 0) { continue; }
-							auto StartPos = MyPos;
-							auto EndPos = TgtPos;
-							if (GetMinLenSegmentToPoint(StartPos, EndPos, C.GetMatrix().pos()) >= 5.f*Scale_Rate) { continue; }
-							auto ret = C.GetColLine(StartPos, EndPos);
-							if (ret.HitFlag == TRUE) {
-								CanLookTarget = false;
-								break;
-							}
+					VECTOR_ref DirHY; DirHY.Set(Dir_XZ.Length(), 0.f, Dir.y());
+					VECTOR_ref VecHY; VecHY.Set(Vec.Length(), 0.f, VEC.y());
+					auto IsFront = ((DirHY.Norm().dot(VecHY.Norm())) > 0.f);
+					auto cross = DirHY.Norm().cross(VecHY.Norm()).y();
+					m_MyInput.SetAddxRad(IsFront ? (-0.04f*cross) : 0.f);
+				}
+				{
+					auto IsFront = ((Dir_XZ.Norm().dot(Vec.Norm())) > 0.f);
+					auto cross = Dir_XZ.Norm().cross(Vec.Norm()).y();
+					if (IsFront) {
+						if (abs(cross) < 0.4f) {
+							m_MyInput.SetAddyRad(cross * 0.07f);
+						}
+						else {
+							m_MyInput.SetAddyRad(cross * 0.14f);
 						}
 					}
 					else {
-						CanLookTarget = false;
+						m_MyInput.SetAddyRad((cross > 0) ? 0.1f : -0.1f);
+					}
+					if (!(IsFront && (abs(cross) < 0.4f))) {
+						if (m_MyInput.GetAddyRad() > 0.07f) {
+							this->m_LeanLR = 1;
+						}
+						if (m_MyInput.GetAddyRad() < -0.07f) {
+							this->m_LeanLR = -1;
+						}
 					}
 				}
-
+			}
+		public:
+			void		SetupBackGround(const std::shared_ptr<BackGroundClassMain>& BackBround_t) noexcept {
+				m_BackGround = BackBround_t;
+				m_PathChecker.SetBackGround(this->m_BackGround);
+			}
+			void		SetMyCharaID(PlayerID MyCharaID) noexcept { this->m_MyCharaID = MyCharaID; }
+		public:
+			void		Init() noexcept {
+				this->Reset();
+				this->m_PathUpdateTimer = 0.f;
+			}
+			//
+			void		Execute_Before() noexcept {
+				//初期化
+				m_MyInput.SetInputStart(0, 0, VECTOR_ref::zero());
+				IsGotLengthToTarget = false;
+				//前準備
+				m_PathUpdateTimer = std::max(m_PathUpdateTimer - 1.f / FPS, 0.f);
 				if(m_PathUpdateTimer<=0.f){
+					m_PathUpdateTimer += 1.f;
 					this->ChangePoint();
-					m_PathUpdateTimer = 1.f;
+				}
+
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
+
+				m_MyInput.SetInputPADS(PADS::SQUAT, MyChara->GetIsSquat() && (GetRand(100) < 1));
+
+				if (!MyChara->CanLookTarget && (GetLengthToTarget() > 15.f*Scale_Rate)) {
+					this->m_RepopTimer += 1.f / FPS;
+					if (this->m_RepopTimer > 10.f) {
+						this->m_RepopTimer -= 10.f;
+						Repop();
+					}
 				}
 				else {
-					m_PathUpdateTimer = std::max(m_PathUpdateTimer - 1.f / FPS, 0.f);
+					this->m_RepopTimer = 0.f;
 				}
-
-				if (MyChara->GetIsSquat()) {
-					this->C_key = GetRand(100) < 1;
+				if (!MyChara->IsAlive()) {
+					this->m_Phase = ENUM_AI_PHASE::Dead;
 				}
 			}
 			void		Execute_Normal() noexcept {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
-
-				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
-				auto TgtPos_XZ = TgtPos; TgtPos_XZ.y(0.f);
-
-				auto Dir = MyChara->GetEyeVector();
-				auto Dir_XZ = Dir; Dir_XZ.y(0.f);
-
-				auto MyPos = MyChara->GetMove().pos;
-				auto MyPos_XZ = MyPos; MyPos_XZ.y(0.f);
-
-				auto Dir_t = TgtPos - MyPos;
+				auto MyPos = MyChara->GetEyePosition();
 				//
-				Dir_XZ = Dir_XZ.Norm();
-
-				VECTOR_ref GonePoint = m_PathChecker.GetNextPoint(MyPos, &this->TargetPathPlanningIndex);
-				GonePoint.y(0.f);
-				auto Vec = GonePoint - MyPos_XZ;
-
-				A_key = GetRand(100) > 50;
-				D_key = GetRand(100) > 50;
-				auto dot = Dir_XZ.dot(Vec.Norm());
-				auto cross = Dir_XZ.cross(Vec.Norm()).y();
-				if (dot > 0.f) {
-					if (abs(cross) < sin(deg2rad(40.f))) {
-						W_key = true;
-
-						if (abs(cross) < sin(deg2rad(10.f))) {
-							if (Dir_t.Length() < 10.f*Scale_Rate) {
-								Run_key = true;
-							}
+				m_MyInput.SetInputPADS(PADS::MOVE_A, GetRand(100) > 50);
+				m_MyInput.SetInputPADS(PADS::MOVE_D, GetRand(100) > 50);
+				//エイム
+				VECTOR_ref Vec = m_PathChecker.GetNextPoint(MyPos, &this->TargetPathPlanningIndex) - MyPos; Vec.y(0.f);
+				AimDir(MATRIX_ref::Vtrans(Vec, MATRIX_ref::RotX(deg2rad(GetRandf(15.f))) * MATRIX_ref::RotY(deg2rad(GetRandf(15.f)))));
+				//
+				if (MyChara->CanLookTarget) {
+					this->m_CheckAgain = 0.f;
+					this->m_Phase = ENUM_AI_PHASE::Shot;
+					if (GetLengthToTarget() < 5.f*Scale_Rate) {
+						auto SE = SoundPool::Instance();
+						if (GetRand(1) == 0) {
+							SE->Get((int)SoundEnum::Man_contact).Play_3D(0, MyPos, Scale_Rate * 10.f);
 						}
-					}
-					y_m = (int32_t)(700.f*cross);
-				}
-				else {
-					y_m = (int32_t)((cross > 0) ? 1000.f : -1000.f);
-				}
-				this->m_CheckAgain = 0.f;
-				if (CanLookTarget) {
-					if (Dir_t.Length() < 20.f*Scale_Rate) {
-						this->m_Phase = ENUM_AI_PHASE::Shot;
-						if (Dir_t.Length() < 5.f*Scale_Rate) {
-							auto SE = SoundPool::Instance();
-							if (GetRand(1) == 0) {
-								SE->Get((int)SoundEnum::Man_contact).Play_3D(0, Dir, Scale_Rate * 10.f);
-							}
-							else {
-								SE->Get((int)SoundEnum::Man_openfire).Play_3D(0, Dir, Scale_Rate * 10.f);
-							}
+						else {
+							SE->Get((int)SoundEnum::Man_openfire).Play_3D(0, MyPos, Scale_Rate * 10.f);
 						}
 					}
 				}
@@ -353,115 +384,43 @@ namespace FPS_n2 {
 			void		Execute_Shot() noexcept {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
-
-				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
-				auto TgtPos_XZ = TgtPos; TgtPos_XZ.y(0.f);
-
-				auto Dir = MyChara->GetEyeVector();
-				auto Dir_XZ = Dir; Dir_XZ.y(0.f);
-
-				auto MyPos = MyChara->GetMove().pos;
-				auto MyPos_XZ = MyPos; MyPos_XZ.y(0.f);
-
-				//
-				auto VecT = TgtPos - MyChara->GetEyePosition();
-				VecT = MATRIX_ref::Vtrans(VecT.Norm(), MATRIX_ref::RotX(deg2rad(GetRandf(25.f))) * MATRIX_ref::RotY(deg2rad(GetRandf(25.f))));
-				auto Vec = VecT; Vec.y(0.f);
-				{
-					auto dot = Dir_XZ.Norm().dot(Vec.Norm());
-					auto cross = Dir_XZ.Norm().cross(Vec.Norm()).y();
-					if (dot > 0.f) {
-						if (abs(cross) < 0.4f) {
-							y_m = (int32_t)(700.f*cross);
-						}
-						else {
-							y_m = (int32_t)(1400.f*cross);
-						}
-					}
-					else {
-						y_m = (int32_t)((cross > 0) ? 1000.f : -1000.f);
-					}
-
-					if (!((dot > 0.f) && (abs(cross) < 0.4f))) {
-						if (y_m > 700) {
-							this->m_LeanLR = 1;
-						}
-						if (y_m < -700) {
-							this->m_LeanLR = -1;
-						}
-					}
-				}
-				{
-					VECTOR_ref DirHY; DirHY.Set(Dir_XZ.Length(), 0.f, Dir.y()); DirHY = DirHY.Norm();
-					VECTOR_ref VecHY; VecHY.Set(Vec.Length(), 0.f, VecT.y()); VecHY = VecHY.Norm();
-					auto dot = DirHY.dot(VecHY);
-					auto cross = DirHY.cross(VecHY).y();
-					if (dot > 0.f) {
-						x_m = -(int32_t)(400.f*cross);
-					}
-				}
+				//エイム
+				AimDir(MATRIX_ref::Vtrans(GetVectorToTarget(), MATRIX_ref::RotX(deg2rad(GetRandf(15.f))) * MATRIX_ref::RotY(deg2rad(GetRandf(15.f)))));
 				//リーン
-				if (this->m_LeanLR == 1) {
-					Q_key = true;
-				}
-				else if (this->m_LeanLR == -1) {
-					E_key = true;
-				}
-				//
-				if (this->m_ShotTimer == 0.f) {
-					shotMain_Key = GetRand(100) < 10;
-					if (shotMain_Key) {
-						if (CanLookTarget) {
-							this->m_ShotTimer = (float)(50 + GetRand(200)) / 100.f;
-						}
-						else {
-							this->m_ShotTimer = (float)(10 + GetRand(100)) / 100.f;
-						}
-					}
-				}
-				else {
-					this->m_ShotTimer = std::max(this->m_ShotTimer - 1.f / FPS, 0.f);
-				}
-
-				if (!CanLookTarget) {
-					auto Dir_t = TgtPos - MyPos;
-					if (Dir_t.Length() > 20.f*Scale_Rate) {
-						this->m_Phase = ENUM_AI_PHASE::Normal;
-					}
-					if (this->m_CheckAgain == 0.f) {
-						this->m_Phase = ENUM_AI_PHASE::Normal;
-					}
-					this->m_CheckAgain = std::max(this->m_CheckAgain - 1.f / FPS, 0.f);
-					this->m_BackTimer = 3.f + GetRandf(2.f);
-				}
-				else {
-					this->m_CheckAgain = 5.f;
-
+				m_MyInput.SetInputPADS(PADS::LEAN_L, (this->m_LeanLR == 1));
+				m_MyInput.SetInputPADS(PADS::LEAN_R, (this->m_LeanLR == -1));
+				//後退
+				if (MyChara->CanLookTarget) {
 					this->m_BackTimer = std::max(this->m_BackTimer - 1.f / FPS, 0.f);
 					if (this->m_BackTimer == 0.f) {
 						this->m_BackTimer = 3.f + GetRandf(2.f);
 					}
 					if (this->m_BackTimer <= 1.f) {
-						S_key = true;
+						m_MyInput.SetInputPADS(PADS::MOVE_S, true);
 					}
 				}
-			}
-			void		Execute_After(InputControl* MyInput) noexcept {
-				MyInput->SetInputStart((float)this->x_m / 10000.f, (float)this->y_m / 10000.f, VECTOR_ref::zero());
-				MyInput->SetInputPADS(PADS::MOVE_W, this->W_key);
-				MyInput->SetInputPADS(PADS::MOVE_S, this->S_key);
-				MyInput->SetInputPADS(PADS::MOVE_A, this->A_key);
-				MyInput->SetInputPADS(PADS::MOVE_D, this->D_key);
-				MyInput->SetInputPADS(PADS::RUN, this->Run_key);
-				MyInput->SetInputPADS(PADS::LEAN_L, this->Q_key);
-				MyInput->SetInputPADS(PADS::LEAN_R, this->E_key);
-				MyInput->SetInputPADS(PADS::MELEE, false);
-				MyInput->SetInputPADS(PADS::RELOAD, this->R_key);
-				MyInput->SetInputPADS(PADS::INTERACT, this->F_key);
-				MyInput->SetInputPADS(PADS::SQUAT, this->C_key);
-				MyInput->SetInputPADS(PADS::SHOT, this->shotMain_Key);
-				MyInput->SetInputPADS(PADS::AIM, false);
+				else {
+					this->m_BackTimer = 3.f + GetRandf(2.f);
+				}
+				//
+				this->m_ShotTimer = std::max(this->m_ShotTimer - 1.f / FPS, 0.f);
+				if (this->m_ShotTimer == 0.f) {
+					m_MyInput.SetInputPADS(PADS::SHOT, true);
+					this->m_ShotTimer = MyChara->CanLookTarget ? ((float)(10 + GetRand(100)) / 100.f) : ((float)(50 + GetRand(400)) / 100.f);
+				}
+				//
+				if (!MyChara->CanLookTarget) {
+					if (
+						(GetLengthToTarget() > 20.f*Scale_Rate) ||
+						(this->m_CheckAgain == 0.f)
+						) {
+						this->m_Phase = ENUM_AI_PHASE::Normal;
+					}
+					this->m_CheckAgain = std::max(this->m_CheckAgain - 1.f / FPS, 0.f);
+				}
+				else {
+					this->m_CheckAgain = 5.f;
+				}
 			}
 		};
 		//
@@ -473,82 +432,26 @@ namespace FPS_n2 {
 		}
 		//
 		void AIControl::Init(const std::shared_ptr<BackGroundClassMain>& BackBround_t, PlayerID MyCharaID) noexcept {
-			this->GetParam()->Init(BackBround_t, MyCharaID);
+			this->GetParam()->SetupBackGround(BackBround_t);
+			this->GetParam()->SetMyCharaID(MyCharaID);
+			this->GetParam()->Init();
 		}
 		void AIControl::Execute(InputControl* MyInput) noexcept {
-			auto* PlayerMngr = PlayerManager::Instance();
-			auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->GetParam()->m_MyCharaID).GetChara();
-			auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->GetParam()->m_TargetCharaID).GetChara();
-
 			//AI
 			this->GetParam()->Execute_Before();
-			if (MyChara->IsAlive()) {
-				switch (this->GetParam()->m_Phase) {
-				case ENUM_AI_PHASE::Normal:
-					this->GetParam()->Execute_Normal();
-					break;
-				case ENUM_AI_PHASE::Shot:
-					this->GetParam()->Execute_Shot();
-					break;
-				default:
-					break;
-				}
-
-				if (!this->GetParam()->CanLookTarget) {
-					if ((TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos() - MyChara->GetEyePosition()).Length() > 15.f*Scale_Rate) {
-						if (this->GetParam()->m_RepopTimer > 10.f) {
-							auto TgtPos_XZ = TargetChara->GetMove().pos; TgtPos_XZ.y(0.f);
-							VECTOR_ref pos_t;
-							while (true) {
-								auto& C = this->GetParam()->GetBackGround()->GetBuildDatas().at(GetRand((int)(this->GetParam()->GetBackGround()->GetBuildDatas().size()) - 1));
-								pos_t = C.GetMatrix().pos(); pos_t.y(0.f);
-								if ((pos_t - TgtPos_XZ).Length() > 10.f*Scale_Rate) {
-									break;
-								}
-							}
-
-							auto HitResult = this->GetParam()->GetBackGround()->GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
-							if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
-
-
-							MyChara->ValueSet(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, MyChara->GetMyPlayerID());
-							MyChara->Heal(100);
-							this->GetParam()->Reset();
-							this->GetParam()->m_RepopTimer = 0.f;
-						}
-						else {
-							this->GetParam()->m_RepopTimer += 1.f / FPS;
-						}
-					}
-					else {
-						this->GetParam()->m_RepopTimer = 0.f;
-					}
-				}
+			switch (this->GetParam()->m_Phase) {
+			case ENUM_AI_PHASE::Normal:
+				this->GetParam()->Execute_Normal();
+				break;
+			case ENUM_AI_PHASE::Shot:
+				this->GetParam()->Execute_Shot();
+				break;
+			case ENUM_AI_PHASE::Dead:
+				break;
+			default:
+				break;
 			}
-			else {
-				if (!this->GetParam()->CanLookTarget) {
-					if ((TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos() - MyChara->GetEyePosition()).Length() > 15.f*Scale_Rate) {
-						auto TgtPos_XZ = TargetChara->GetMove().pos; TgtPos_XZ.y(0.f);
-						VECTOR_ref pos_t;
-						while (true) {
-							auto& C = this->GetParam()->GetBackGround()->GetBuildDatas().at(GetRand((int)(this->GetParam()->GetBackGround()->GetBuildDatas().size()) - 1));
-							pos_t = C.GetMatrix().pos(); pos_t.y(0.f);
-							if ((pos_t - TgtPos_XZ).Length() > 10.f*Scale_Rate) {
-								break;
-							}
-						}
-
-						auto HitResult = this->GetParam()->GetBackGround()->GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
-						if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
-
-
-						MyChara->ValueSet(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, MyChara->GetMyPlayerID());
-						MyChara->Heal(100);
-						this->GetParam()->Reset();
-					}
-				}
-			}
-			this->GetParam()->Execute_After(MyInput);
+			*MyInput = this->GetParam()->m_MyInput;
 		}
 	};
 };

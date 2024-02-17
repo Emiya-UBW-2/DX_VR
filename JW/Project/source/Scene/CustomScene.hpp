@@ -71,6 +71,23 @@ namespace FPS_n2 {
 			bool m_PrevShadow{ false };
 		private:
 			std::shared_ptr<GunClass>		m_GunPtr;				//ポインター別持ち
+			std::array<std::shared_ptr<GunClass>, 3>		m_UltPtr;
+
+			bool IsG17Parts(Slot* S) {
+				bool IsG17 = false;
+				{
+					auto* Data = S->ParentSlot;
+					while (true) {
+						if (Data == nullptr) { break; }
+						if (Data->m_Data->GetModData()->GetName() == "Glock17 Gen3") {
+							IsG17 = true;
+							break;
+						}
+						Data = Data->ParentSlot;
+					}
+				}
+				return IsG17;
+			}
 
 			void			UpdateSlotMove() {
 				//もう存在せんものを削除
@@ -89,6 +106,7 @@ namespace FPS_n2 {
 				}
 				//存在するものを追加+順番を指定
 				for (const auto& S : GetSelData()) {
+					if (!IsG17Parts(S)) { continue; }
 					int index = (int)(&S - &GetSelData().front());
 					bool isHit = false;
 					for (int loop = 0; loop < SelMoveClass.size(); loop++) {
