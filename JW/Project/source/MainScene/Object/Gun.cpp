@@ -154,12 +154,209 @@ namespace FPS_n2 {
 			}
 			if (m_MagazinePtr) {
 				(*m_MagazinePtr)->SetReloadType(GetReloadType());
+				(*m_MagazinePtr)->SetAmmo(GetAmmoAll());							//マガジン装填
 			}
-			(*m_MagazinePtr)->SetAmmo(GetAmmoAll());							//マガジン装填
 			CockByMag();														//チャンバーイン
 			//
 			//
 			this->m_ShotPhase = GunAnimeID::Base;
+		}
+
+		void	GunClass::UpdateGunAnims(bool PressShot) noexcept {
+			if (this->GetShoting()) {
+				bool ischeck = true;
+				switch (this->GetShotType()) {
+				case SHOTTYPE::FULL:
+					ischeck = this->GetInChamber() || this->GetIsMagEmpty();
+					break;
+				case SHOTTYPE::SEMI:
+				case SHOTTYPE::BOLT:
+					ischeck = !PressShot;
+					break;
+				default:
+					break;
+				}
+
+				if (this->GetNowAnime().TimeEnd() && ischeck) {
+					this->SetGunAnim(CharaGunAnimeID::Down, 0.f);
+					if (!this->GetIsMagEmpty()) {
+						switch (this->GetShotType()) {
+						case SHOTTYPE::FULL:
+						case SHOTTYPE::SEMI:
+							this->m_ShotPhase = GunAnimeID::Base;
+							break;
+						case SHOTTYPE::BOLT:
+							this->m_ShotPhase = GunAnimeID::Cocking;
+							break;
+						default:
+							break;
+						}
+					}
+					else {
+						this->m_ShotPhase = GunAnimeID::Base;
+					}
+				}
+			}
+			{
+				CharaGunAnimeID GunAnimSelect = CharaGunAnimeID::Down;
+				//コッキング
+				if (this->m_ShotPhase == GunAnimeID::Cocking) {
+					GunAnimSelect = CharaGunAnimeID::Cocking;
+					UpdateGunAnim(GunAnimSelect, 1.5f);
+					if (GetGunAnimEnd(GunAnimSelect)) {
+						this->m_ShotPhase = GunAnimeID::Base;
+					}
+				}
+				//リロード開始
+				if (this->m_ShotPhase == GunAnimeID::ReloadStart_Empty) {
+					GunAnimSelect = CharaGunAnimeID::ReloadStart_Empty;
+					if (this->GetGunAnimZero(GunAnimSelect)) {
+						m_UpperAnim = 0.f;
+					}
+					UpdateGunAnim(GunAnimSelect, 1.5f);
+					if (GetGunAnimEnd(GunAnimSelect)) {
+						this->m_ShotPhase = GunAnimeID::ReloadOne;
+					}
+				}
+				if (this->m_ShotPhase == GunAnimeID::ReloadStart) {
+					GunAnimSelect = CharaGunAnimeID::ReloadStart;
+					if (this->GetGunAnimZero(GunAnimSelect)) {
+						m_UpperAnim = 0.f;
+					}
+					UpdateGunAnim(GunAnimSelect, 1.5f);
+					if (GetGunAnimEnd(GunAnimSelect)) {
+						this->m_ShotPhase = GunAnimeID::ReloadOne;
+					}
+				}
+				//
+				if (this->m_ShotPhase == GunAnimeID::ReloadOne) {
+					GunAnimSelect = CharaGunAnimeID::ReloadOne;
+					UpdateGunAnim(GunAnimSelect, 1.5f);
+					if (GetGunAnimEnd(GunAnimSelect)) {
+						switch (this->GetReloadType()) {
+						case RELOADTYPE::MAG:
+							this->m_ShotPhase = GunAnimeID::ReloadEnd;
+							break;
+						case RELOADTYPE::AMMO:
+							if ((this->GetIsMagFull() || (m_NextMagNum <= 0)) || this->m_ReloadCancel) {
+								this->m_ReloadCancel = false;
+								this->m_ShotPhase = GunAnimeID::ReloadEnd;
+							}
+							else {
+								this->SetGunAnim(GunAnimSelect, 0.f);
+								this->GetObj().get_anime((int)this->m_ShotPhase).Reset();
+								this->GetObj().get_anime((int)this->m_ShotPhase).per = 1.f;
+							}
+							break;
+						default:
+							break;
+						}
+					}
+				}
+				if (this->m_ShotPhase == GunAnimeID::ReloadEnd) {
+					GunAnimSelect = CharaGunAnimeID::ReloadEnd;
+					UpdateGunAnim(GunAnimSelect, 1.5f);
+					if (GetGunAnimEnd(GunAnimSelect)) {
+						if (this->GetInChamber()) {
+							this->m_ShotPhase = GunAnimeID::Base;
+						}
+						else {
+							if (!this->GetIsMagEmpty()) {
+								this->m_ShotPhase = GunAnimeID::Cocking;
+							}
+							else {
+								this->m_ShotPhase = GunAnimeID::ReloadStart;
+							}
+						}
+					}
+				}
+				//
+				if (this->m_ShotPhase == GunAnimeID::CheckStart) {
+					GunAnimSelect = CharaGunAnimeID::CheckStart;
+					UpdateGunAnim(GunAnimSelect, 1.5f);
+					if (GetGunAnimEnd(GunAnimSelect)) {
+						this->m_ShotPhase = GunAnimeID::Checking;
+					}
+				}
+				if (this->m_ShotPhase == GunAnimeID::Checking) {
+					GunAnimSelect = CharaGunAnimeID::Check;
+					UpdateGunAnim(GunAnimSelect, 1.f);
+					if (GetGunAnimEnd(GunAnimSelect)) {
+						this->m_ShotPhase = GunAnimeID::CheckEnd;
+					}
+				}
+				if (this->m_ShotPhase == GunAnimeID::CheckEnd) {
+					GunAnimSelect = CharaGunAnimeID::CheckEnd;
+					UpdateGunAnim(GunAnimSelect, 2.f);
+					if (GetGunAnimEnd(GunAnimSelect)) {
+						this->m_ShotPhase = GunAnimeID::Base;
+					}
+				}
+				//
+				if (this->m_ShotPhase == GunAnimeID::Watch) {
+					GunAnimSelect = CharaGunAnimeID::Watch;
+					UpdateGunAnim(GunAnimSelect, 1.5f);
+					if (GetGunAnimEnd(GunAnimSelect)) {
+						this->m_ShotPhase = GunAnimeID::Base;
+					}
+				}
+				//
+				if (this->m_ShotPhase == GunAnimeID::Melee) {
+					GunAnimSelect = CharaGunAnimeID::Melee;
+					UpdateGunAnim(GunAnimSelect, 1.5f);
+					if (GetGunAnimEnd(GunAnimSelect)) {
+						this->m_ShotPhase = GunAnimeID::Base;
+					}
+				}
+				//
+				if (this->m_ShotPhase == GunAnimeID::AmmoLoadStart) {
+					GunAnimSelect = CharaGunAnimeID::AmmoLoadStart;
+					UpdateGunAnim(GunAnimSelect, 1.5f);
+					if (GetGunAnimEnd(GunAnimSelect)) {
+						this->m_ShotPhase = GunAnimeID::AmmoLoading;
+						this->m_AmmoLoadCount = 1;
+						this->m_IsAmmoLoadCount = false;
+					}
+				}
+				if (this->m_ShotPhase == GunAnimeID::AmmoLoading) {
+					GunAnimSelect = CharaGunAnimeID::AmmoLoading;
+					UpdateGunAnim(GunAnimSelect, 1.0f);
+
+					if (!this->m_IsAmmoLoadCount && (GetGunAnimFrame(GunAnimSelect) >= GetAllTime(GunAnimSelect) * 3 / 10)) {
+						auto* SE = SoundPool::Instance();
+						//
+						SE->Get((int)SoundEnum::AmmoLoad).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+						this->m_IsAmmoLoadCount = true;
+					}
+
+					if (GetGunAnimEnd(GunAnimSelect)) {
+						if (this->m_AmmoLoadCount >= 3) {
+							this->m_ShotPhase = GunAnimeID::AmmoLoadEnd;
+						}
+						else {
+							this->SetGunAnim(GunAnimSelect, 0.f);
+							this->GetObj().get_anime((int)this->m_ShotPhase).Reset();
+							this->GetObj().get_anime((int)this->m_ShotPhase).per = 1.f;
+							this->m_AmmoLoadCount++;
+							this->m_IsAmmoLoadCount = false;
+						}
+					}
+				}
+				if (this->m_ShotPhase == GunAnimeID::AmmoLoadEnd) {
+					GunAnimSelect = CharaGunAnimeID::AmmoLoadEnd;
+					UpdateGunAnim(GunAnimSelect, 1.5f);
+					if (GetGunAnimEnd(GunAnimSelect)) {
+						this->m_ShotPhase = GunAnimeID::Base;
+					}
+				}
+				//
+				for (int i = 0; i < (int)CharaGunAnimeID::Max; i++) {
+					if (GunAnimSelect != (CharaGunAnimeID)i) {
+						this->SetGunAnim((CharaGunAnimeID)i, 0.f);
+					}
+				}
+				m_UpperAnim += 60.f / FPS;
+			}
 		}
 
 		void GunClass::ExecuteCartInChamber(void) noexcept {
@@ -230,6 +427,9 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 20;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 60;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Melee) = 10;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoadStart) = 15;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoading) = 36;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoadEnd) = 10;
 				//ハンドガン
 				m_CharaAnimeSet.resize(m_CharaAnimeSet.size() + 1);
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Down) = 0;
@@ -245,6 +445,9 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 10;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 60;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Melee) = 10;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoadStart) = 15;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoading) = 36;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoadEnd) = 10;
 				//M870
 				m_CharaAnimeSet.resize(m_CharaAnimeSet.size() + 1);
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Down) = 0;
@@ -260,6 +463,9 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 10;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 60;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Melee) = 10;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoadStart) = 15;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoading) = 36;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoadEnd) = 10;
 				//
 				m_GunAnimeSet.clear();
 				//M4
@@ -275,6 +481,7 @@ namespace FPS_n2 {
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Check).emplace_back(EnumGunAnim::M16_check1);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Watch).emplace_back(EnumGunAnim::M1911_watch);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Melee).emplace_back(EnumGunAnim::M1911_melee);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::AmmoLoad).emplace_back(EnumGunAnim::M1911_reload);
 				//ハンドガン
 				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Aim).emplace_back(EnumGunAnim::M1911_aim1);
@@ -289,6 +496,7 @@ namespace FPS_n2 {
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Check).emplace_back(EnumGunAnim::M1911_check1);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Watch).emplace_back(EnumGunAnim::M1911_watch);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Melee).emplace_back(EnumGunAnim::M1911_melee);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::AmmoLoad).emplace_back(EnumGunAnim::M1911_reload);
 				//M870
 				m_GunAnimeSet.resize(m_GunAnimeSet.size() + 1);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Aim).emplace_back(EnumGunAnim::M16_aim);
@@ -302,6 +510,7 @@ namespace FPS_n2 {
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Check).emplace_back(EnumGunAnim::M16_check1);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Watch).emplace_back(EnumGunAnim::M1911_watch);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Melee).emplace_back(EnumGunAnim::M1911_melee);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::AmmoLoad).emplace_back(EnumGunAnim::M1911_reload);
 			}
 		}
 		void GunClass::FirstExecute(void) noexcept {

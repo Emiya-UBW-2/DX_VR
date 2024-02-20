@@ -132,6 +132,9 @@
     <ClInclude Include="source\MainScene\Object\Armer.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
+    <ClInclude Include="source\Scene\TutorialScene.hpp">
+      <Filter>ソース ファイル\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -202,6 +205,9 @@
     </ClCompile>
     <ClCompile Include="source\MainScene\Object\Armer.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Scene\TutorialScene.cpp">
+      <Filter>ソース ファイル\Scene</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

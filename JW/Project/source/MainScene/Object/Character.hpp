@@ -69,6 +69,7 @@ namespace FPS_n2 {
 			bool												m_WearArmer{ false };
 			float												m_ULTUp{ 0.f };
 			bool												m_ULTActive{ false };
+			float												m_HPRec{ 0.f };
 			//“ü—Í
 			bool												m_Press_Shot{ false };
 			bool												m_Press_Reload{ false };
@@ -84,10 +85,12 @@ namespace FPS_n2 {
 			bool												CanLookTarget{ true };
 		private:
 			std::shared_ptr<BackGroundClassBase>				m_BackGround;				//BG
+			bool												m_IsMainGame{ false };
 		public:
-			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept {
+			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround, bool IsMainGame) noexcept {
 				m_BackGround.reset();
 				this->m_BackGround = backGround;
+				this->m_IsMainGame = IsMainGame;
 			}
 		private:
 			void			SetReady(void) noexcept { this->m_ReadyTimer = UpperTimerLimit; }

@@ -28,6 +28,8 @@ namespace FPS_n2 {
 			bool									m_IsEject{ false };
 			int										m_NextMagNum{ 0 };
 			int										m_NextMagUniqueID{ 0 };
+			int										m_AmmoLoadCount{ 0 };
+			bool									m_IsAmmoLoadCount{ false };
 			VECTOR_ref								m_RecoilRadAdd;
 			FallControl								m_MagFall;
 			FallControl								m_CartFall;
@@ -64,6 +66,8 @@ namespace FPS_n2 {
 			const bool HasFrame(GunFrame frame) const noexcept;
 			const MATRIX_ref GetFrameLocalMat(GunFrame frame) const noexcept;
 			const MATRIX_ref GetFrameWorldMat(GunFrame frame) const noexcept;
+
+			const auto&		GetAmmoLoadCount(void) const noexcept { return m_AmmoLoadCount; }
 		public:
 			void ResetFrameLocalMat(GunFrame frame) noexcept;
 			void SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept;
@@ -123,6 +127,7 @@ namespace FPS_n2 {
 			const auto	GetChecking(void) const noexcept { return (GunAnimeID::CheckStart <= this->m_ShotPhase) && (this->m_ShotPhase <= GunAnimeID::CheckEnd); }
 			const auto	GetWatching(void) const noexcept { return (this->m_ShotPhase == GunAnimeID::Watch); }
 			const auto	IsMelee(void) const noexcept { return (this->m_ShotPhase == GunAnimeID::Melee); }
+			const auto	IsAmmoLoading(void) const noexcept { return (GunAnimeID::AmmoLoadStart <= this->m_ShotPhase) && (this->m_ShotPhase <= GunAnimeID::AmmoLoadEnd); }
 			const auto	GetShootReady(void) const noexcept { return this->m_ShotPhase <= GunAnimeID::Shot; }
 			const auto	GetInChamber(void) const noexcept { return this->m_ChamberAmmoData != nullptr; }
 			const auto	GetCanShot(void) const noexcept { return GetInChamber() && GetShootReady(); }
@@ -139,7 +144,7 @@ namespace FPS_n2 {
 				return GetAmmoNum() <= GetAmmoAll();
 			}
 		public:
-			void		SetAmmoHandMatrix(const MATRIX_ref& value, float pPer) noexcept { (*m_MagazinePtr)->SetHandMatrix(value, pPer); }
+			void		SetAmmoHandMatrix(const MATRIX_ref& value, float pPer, bool isDirect) noexcept { (*m_MagazinePtr)->SetHandMatrix(value, pPer, isDirect); }
 			void		FillMag() noexcept { (*m_MagazinePtr)->SetAmmo(GetAmmoAll()); }
 			void		CockByMag() noexcept { this->m_ChamberAmmoData = (*m_MagazinePtr)->GetAmmoSpecMagTop(); }//マガジンの一番上の弾データをチャンバーイン
 			void		UnloadChamber() noexcept { this->m_ChamberAmmoData.reset(); }
@@ -186,160 +191,7 @@ namespace FPS_n2 {
 				this->m_ShotPhase = (!GetIsMagEmpty()) ? GunAnimeID::ReloadStart : GunAnimeID::ReloadStart_Empty;
 			}
 
-			void		UpdateGunAnims(bool PressShot) {
-				if (this->GetShoting()) {
-					bool ischeck = true;
-					switch (this->GetShotType()) {
-					case SHOTTYPE::FULL:
-						ischeck = this->GetInChamber() || this->GetIsMagEmpty();
-						break;
-					case SHOTTYPE::SEMI:
-					case SHOTTYPE::BOLT:
-						ischeck = !PressShot;
-						break;
-					default:
-						break;
-					}
-
-					if (this->GetNowAnime().TimeEnd() && ischeck) {
-						this->SetGunAnim(CharaGunAnimeID::Down, 0.f);
-						if (!this->GetIsMagEmpty()) {
-							switch (this->GetShotType()) {
-							case SHOTTYPE::FULL:
-							case SHOTTYPE::SEMI:
-								this->m_ShotPhase = GunAnimeID::Base;
-								break;
-							case SHOTTYPE::BOLT:
-								this->m_ShotPhase = GunAnimeID::Cocking;
-								break;
-							default:
-								break;
-							}
-						}
-						else {
-							this->m_ShotPhase = GunAnimeID::Base;
-						}
-					}
-				}
-				{
-					CharaGunAnimeID GunAnimSelect = CharaGunAnimeID::Down;
-					//コッキング
-					if (this->m_ShotPhase == GunAnimeID::Cocking) {
-						GunAnimSelect = CharaGunAnimeID::Cocking;
-						UpdateGunAnim(GunAnimSelect, 1.5f);
-						if (GetGunAnimEnd(GunAnimSelect)) {
-							this->m_ShotPhase = GunAnimeID::Base;
-						}
-					}
-					//リロード開始
-					if (this->m_ShotPhase == GunAnimeID::ReloadStart_Empty) {
-						GunAnimSelect = CharaGunAnimeID::ReloadStart_Empty;
-						if (this->GetGunAnimZero(GunAnimSelect)) {
-							m_UpperAnim = 0.f;
-						}
-						UpdateGunAnim(GunAnimSelect, 1.5f);
-						if (GetGunAnimEnd(GunAnimSelect)) {
-							this->m_ShotPhase = GunAnimeID::ReloadOne;
-						}
-					}
-					if (this->m_ShotPhase == GunAnimeID::ReloadStart) {
-						GunAnimSelect = CharaGunAnimeID::ReloadStart;
-						if (this->GetGunAnimZero(GunAnimSelect)) {
-							m_UpperAnim = 0.f;
-						}
-						UpdateGunAnim(GunAnimSelect, 1.5f);
-						if (GetGunAnimEnd(GunAnimSelect)) {
-							this->m_ShotPhase = GunAnimeID::ReloadOne;
-						}
-					}
-					//
-					if (this->m_ShotPhase == GunAnimeID::ReloadOne) {
-						GunAnimSelect = CharaGunAnimeID::ReloadOne;
-						UpdateGunAnim(GunAnimSelect, 1.5f);
-						if (GetGunAnimEnd(GunAnimSelect)) {
-							switch (this->GetReloadType()) {
-							case RELOADTYPE::MAG:
-								this->m_ShotPhase = GunAnimeID::ReloadEnd;
-								break;
-							case RELOADTYPE::AMMO:
-								if ((this->GetIsMagFull() || (m_NextMagNum <= 0)) || this->m_ReloadCancel) {
-									this->m_ReloadCancel = false;
-									this->m_ShotPhase = GunAnimeID::ReloadEnd;
-								}
-								else {
-									this->SetGunAnim(GunAnimSelect, 0.f);
-									this->GetObj().get_anime((int)this->m_ShotPhase).Reset();
-								}
-								break;
-							default:
-								break;
-							}
-						}
-					}
-					if (this->m_ShotPhase == GunAnimeID::ReloadEnd) {
-						GunAnimSelect = CharaGunAnimeID::ReloadEnd;
-						UpdateGunAnim(GunAnimSelect, 1.5f);
-						if (GetGunAnimEnd(GunAnimSelect)) {
-							if (this->GetInChamber()) {
-								this->m_ShotPhase = GunAnimeID::Base;
-							}
-							else {
-								if (!this->GetIsMagEmpty()) {
-									this->m_ShotPhase = GunAnimeID::Cocking;
-								}
-								else {
-									this->m_ShotPhase = GunAnimeID::ReloadStart;
-								}
-							}
-						}
-					}
-					//
-					if (this->m_ShotPhase == GunAnimeID::CheckStart) {
-						GunAnimSelect = CharaGunAnimeID::CheckStart;
-						UpdateGunAnim(GunAnimSelect, 1.5f);
-						if (GetGunAnimEnd(GunAnimSelect)) {
-							this->m_ShotPhase = GunAnimeID::Checking;
-						}
-					}
-					if (this->m_ShotPhase == GunAnimeID::Checking) {
-						GunAnimSelect = CharaGunAnimeID::Check;
-						UpdateGunAnim(GunAnimSelect, 1.f);
-						if (GetGunAnimEnd(GunAnimSelect)) {
-							this->m_ShotPhase = GunAnimeID::CheckEnd;
-						}
-					}
-					if (this->m_ShotPhase == GunAnimeID::CheckEnd) {
-						GunAnimSelect = CharaGunAnimeID::CheckEnd;
-						UpdateGunAnim(GunAnimSelect, 2.f);
-						if (GetGunAnimEnd(GunAnimSelect)) {
-							this->m_ShotPhase = GunAnimeID::Base;
-						}
-					}
-					//
-					if (this->m_ShotPhase == GunAnimeID::Watch) {
-						GunAnimSelect = CharaGunAnimeID::Watch;
-						UpdateGunAnim(GunAnimSelect, 1.5f);
-						if (GetGunAnimEnd(GunAnimSelect)) {
-							this->m_ShotPhase = GunAnimeID::Base;
-						}
-					}
-					//
-					if (this->m_ShotPhase == GunAnimeID::Melee) {
-						GunAnimSelect = CharaGunAnimeID::Melee;
-						UpdateGunAnim(GunAnimSelect, 1.5f);
-						if (GetGunAnimEnd(GunAnimSelect)) {
-							this->m_ShotPhase = GunAnimeID::Base;
-						}
-					}
-					//
-					for (int i = 0; i < (int)CharaGunAnimeID::Max; i++) {
-						if (GunAnimSelect != (CharaGunAnimeID)i) {
-							this->SetGunAnim((CharaGunAnimeID)i, 0.f);
-						}
-					}
-					m_UpperAnim += 60.f / FPS;
-				}
-			}
+			void		UpdateGunAnims(bool PressShot) noexcept;
 		private:
 			void		ExecuteCartInChamber(void) noexcept;//チャンバーへの装弾、排出
 		public:

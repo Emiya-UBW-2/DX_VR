@@ -45,7 +45,7 @@ namespace FPS_n2 {
 				isHit |= CheckLinetoMap_Sub(StartPos, EndPos, isNearest, Normal, Ret);
 				return isHit;
 			}
-		private:
+		protected:
 			void			DrawCommon() noexcept {
 				if (this->m_ObjGround.IsActive()) {
 					SetFogEnable(TRUE);
@@ -182,17 +182,38 @@ namespace FPS_n2 {
 					if (col_p.HitFlag == TRUE) {
 						isHit = true;
 						if (Ret) { *Ret = col_p; }
-						if (isNearest) {
-							*EndPos = col_p.HitPosition;
-							if (Normal) { *Normal = col_p.Normal; }
-						}
-						else {
+						*EndPos = col_p.HitPosition;
+						if (Normal) { *Normal = col_p.Normal; }
+						if (!isNearest) {
 							return isHit;
 						}
 					}
 				}
 				//*/
 				return isHit;
+			}
+		};
+		//
+		class BackGroundClassTutorial : public BackGroundClassBase {
+		private:
+		public://
+			//
+			void			Init_Sub(void) noexcept override {
+				MV1SetMaterialDrawAlphaTestAll(this->m_ObjGround.get(), TRUE, DX_CMP_GREATER, 216);
+			}
+			//
+			void			Execute_Sub(void) noexcept override {
+			}
+			//
+			void			Shadow_Draw_Far_Sub(void) noexcept override {
+			}
+			void			Shadow_Draw_Sub(void) noexcept override {
+				DrawCommon();
+			}
+			void			Draw_Sub(void) noexcept override {
+			}
+			//
+			void			Dispose_Sub(void) noexcept override {
 			}
 		};
 		//

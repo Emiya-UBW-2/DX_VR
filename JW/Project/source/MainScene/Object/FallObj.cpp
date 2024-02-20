@@ -22,24 +22,17 @@ namespace FPS_n2 {
 					this->m_yAdd += (M_GR / (FPS*FPS));
 				}
 				if ((this->GetMove().pos - this->GetMove().repos).y() < 0.f) {
-					auto& MainGB = (std::shared_ptr<BackGroundClassMain>&)(this->m_BackGround);
-					for (auto& C : MainGB->GetBuildDatas()) {
-						auto Vec = (C.GetMatrix().pos() - this->GetMove().pos); Vec.y(0.f);
-						if (Vec.Length() <= 2.f*Scale_Rate) {
-							auto HitResult = C.GetColLine(this->GetMove().repos, this->GetMove().pos);
-							if (HitResult.HitFlag == TRUE) {
-								this->m_move.pos = HitResult.HitPosition;
-								VECTOR_ref Normal = HitResult.Normal;
-								this->m_move.vec += Normal * ((Normal).dot(this->m_move.vec*-1.f))*2.f;
-								if (Normal.y() > 0.5f) {
-									//this->m_yAdd = 0.f;
-								}
-								if (m_SoundSwitch) {
-									m_SoundSwitch = false;
-									SoundPool::Instance()->Get((int)this->m_CallSound).Play_3D(0, this->m_move.pos, Scale_Rate * 3.f);
-								}
-								break;
-							}
+					VECTOR_ref EndPos = this->GetMove().pos;
+					VECTOR_ref Normal;
+					if (this->m_BackGround->CheckLinetoMap(this->GetMove().repos, &EndPos, false, &Normal)) {
+						this->m_move.pos = EndPos;
+						this->m_move.vec += Normal * ((Normal).dot(this->m_move.vec*-1.f))*2.f;
+						if (Normal.y() > 0.5f) {
+							//this->m_yAdd = 0.f;
+						}
+						if (m_SoundSwitch) {
+							m_SoundSwitch = false;
+							SoundPool::Instance()->Get((int)this->m_CallSound).Play_3D(0, this->m_move.pos, Scale_Rate * 3.f);
 						}
 					}
 				}

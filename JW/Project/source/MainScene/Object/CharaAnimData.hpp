@@ -14,6 +14,7 @@ namespace FPS_n2 {
 			Check,
 			Watch,
 			Melee,
+			AmmoLoad,
 			Max,
 		};
 		enum class EnumGunAnim {

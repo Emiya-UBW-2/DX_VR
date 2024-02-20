@@ -182,6 +182,19 @@ namespace FPS_n2 {
 				}
 			}
 		}
+		void		SlotPartsControl::SetActive(bool value) noexcept {
+			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+				if (HasParts((GunSlot)loop)) {
+					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->SetActive(value);
+				}
+			}
+			//‘·‚ª‚ ‚ê‚Î‚»‚¿‚ç‚à
+			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+				if (this->m_Parts_Ptr[loop]) {
+					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetSlotControl()->SetActive(value);
+				}
+			}
+		}
 
 		const SharedObj*	SlotPartsControl::SetParts(int uniqueID, GunSlot objType, const MV1& BaseModel) {
 			if (!this->m_Parts_Ptr[(int)objType]) {

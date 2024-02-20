@@ -548,6 +548,8 @@ namespace FPS_n2 {
 
 			std::array<MagStock, 4>								m_MagazineStock;
 			int													m_UseMagazineID{ 0 };
+		public:
+			const auto GetNowMagID() const noexcept { return m_UseMagazineID; }
 		private:
 			const auto GetNextMagID() const noexcept { return (m_UseMagazineID + 1) % ((int)m_MagazineStock.size()); }
 		public:
@@ -556,8 +558,21 @@ namespace FPS_n2 {
 		public:
 			const auto& GetNowMag() const noexcept { return m_MagazineStock[m_UseMagazineID]; }
 			const auto& GetNextMag() const noexcept { return m_MagazineStock[GetNextMagID()]; }
+			const auto& GetMagDatas() const noexcept { return m_MagazineStock; }
+			const auto IsEnableReload() const noexcept {
+				for (const auto& M : GetMagDatas()) {
+					if (GetNowMagID() == (int)(&M - &GetMagDatas().front())) {
+						continue;
+					}
+					if (M.AmmoNum > 0) {
+						return true;
+					}
+				}
+				return false;
+			}
 		public:
 			void Init_MagStockControl(int AmmoNum, int ModUniqueID) noexcept;
+			void SetMag(int select, int AmmoNum) noexcept;
 			void SetNextMag(int OLDAmmoNum, int OLDModUniqueID) noexcept;
 			void SortMag() noexcept;
 		};

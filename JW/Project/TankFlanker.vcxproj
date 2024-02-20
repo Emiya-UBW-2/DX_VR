@@ -43,6 +43,7 @@
     <ClInclude Include="source\Scene\CustomScene.hpp" />
     <ClInclude Include="source\Scene\MainScene.hpp" />
     <ClInclude Include="source\Scene\TitleScene.hpp" />
+    <ClInclude Include="source\Scene\TutorialScene.hpp" />
     <ClInclude Include="source\sub.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -68,6 +69,7 @@
     <ClCompile Include="source\Scene\CustomScene.cpp" />
     <ClCompile Include="source\Scene\MainScene.cpp" />
     <ClCompile Include="source\Scene\TitleScene.cpp" />
+    <ClCompile Include="source\Scene\TutorialScene.cpp" />
     <ClCompile Include="source\sub.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

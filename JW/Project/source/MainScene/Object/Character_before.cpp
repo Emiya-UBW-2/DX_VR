@@ -16,9 +16,13 @@ namespace FPS_n2 {
 			SetIsSquat(false);
 		}
 		void		KeyControl::InputKey(const InputControl& pInput, bool pReady, const VECTOR_ref& pAddRadvec) {
-			if (!pReady) { return; }
+			if (!pReady) {
+				this->m_Input.ResetInput();
+			}
+			else {
+				this->m_Input = pInput;
+			}
 			//“ü—Í
-			this->m_Input = pInput;
 			this->m_ULTKey.Execute(this->m_Input.GetPADSPress(PADS::ULT));
 			this->m_Squat.Execute(this->m_Input.GetPADSPress(PADS::SQUAT));
 			if (this->GetRun()) { SetIsSquat(false); }
@@ -135,10 +139,16 @@ namespace FPS_n2 {
 			m_UseMagazineID = 0;
 
 		}
+		void MagStockControl::SetMag(int select, int AmmoNum) noexcept {
+			m_MagazineStock[select].AmmoNum = AmmoNum;
+		}
 		void MagStockControl::SetNextMag(int OLDAmmoNum, int OLDModUniqueID) noexcept {
 			m_MagazineStock[m_UseMagazineID].AmmoNum = OLDAmmoNum;
 			m_MagazineStock[m_UseMagazineID].ModUniqueID = OLDModUniqueID;
-			m_UseMagazineID = GetNextMagID();
+			for (int i = 0; i < 4; i++) {
+				m_UseMagazineID = GetNextMagID();
+				if (m_MagazineStock[m_UseMagazineID].AmmoNum != 0) { break; }
+			}
 		}
 		void MagStockControl::SortMag() noexcept {
 			m_UseMagazineID = 0;

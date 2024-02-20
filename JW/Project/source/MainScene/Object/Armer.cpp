@@ -9,7 +9,6 @@ namespace FPS_n2 {
 			ObjectBaseClass::Init();
 		}
 		void ArmerClass::FirstExecute(void) noexcept {
-			auto SE = SoundPool::Instance();
 			if (this->m_IsFirstLoop) {
 			}
 			else {

@@ -124,6 +124,9 @@ namespace FPS_n2 {
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
 				const auto		GetGaugeDiff() const noexcept { return (float)this->m_Now - std::min((float)this->m_Max, this->m_Buffer); }
+				const auto&		GetGauge() const noexcept { return this->m_Now; }
+				const auto&		GetGaugeMax() const noexcept { return this->m_Max; }
+
 			private:
 				int Blend3Int(int pInt1, int pInt2, int pInt3, float per) {
 					int ans;
@@ -140,8 +143,44 @@ namespace FPS_n2 {
 					return GetColorU8(r, g, b, 255);
 				}
 			};
+
+			class GaugeMask {
+			private:
+				int ultxp{ 0 }, ultyp{ 0 };
+				GraphHandle UltGaugeMask;
+				GraphHandle UltGauge;
+			public:
+				const auto&		GetXSize(void) const noexcept { return this->ultxp; }
+				const auto&		GetYSize(void) const noexcept { return this->ultyp; }
+				const auto&		GetGraph(void) const noexcept { return this->UltGauge; }
+			public:
+				void			Load(const char* Path) noexcept {
+					UltGaugeMask = GraphHandle::Load(Path);
+					UltGaugeMask.GetSize(&ultxp, &ultyp);
+					UltGauge = GraphHandle::Make(ultxp, ultyp, true);
+				}
+				void			Dispose(void) noexcept {
+					UltGaugeMask.Dispose();
+					UltGauge.Dispose();
+				}
+
+				void SetDraw(std::function<void()> Doing) noexcept {
+					int Prev = GetDrawScreen();
+					UltGauge.SetDraw_Screen();
+					{
+						Doing();
+					}
+					SetDrawScreen(Prev);
+					GraphBlend(UltGauge.get(), UltGaugeMask.get(), 255, DX_GRAPH_BLEND_RGBA_SELECT_MIX,
+						DX_RGBA_SELECT_SRC_R,
+						DX_RGBA_SELECT_SRC_G,
+						DX_RGBA_SELECT_SRC_B,
+						DX_RGBA_SELECT_BLEND_R
+					);
+				}
+			};
 		private:
-			std::array<GaugeParam, 4>		m_GaugeParam;
+			std::array<GaugeParam, 4 + 3>	m_GaugeParam;
 			std::array<int, 23>				intParam{ 0 };
 			std::array<float, 5>			floatParam{ 0 };
 			std::array<std::string, 7>		strParam;
@@ -152,24 +191,24 @@ namespace FPS_n2 {
 			int prevScore{ 0 };
 			std::vector<std::pair<int, float>> ScoreAdd;
 
-			int ultxp{ 0 }, ultyp{ 0 };
-			GraphHandle UltGaugeMask;
-			GraphHandle UltGauge;
+			std::array<GaugeMask, 1 + 4>	m_GaugeMask;
 		private:
 		public:
 			void			Load(void) noexcept {
 				this->Gauge_Graph = GraphHandle::Load("data/UI/Gauge.png");
 				this->OIL_Graph = GraphHandle::Load("data/UI/back.png");
 
-				UltGaugeMask = GraphHandle::Load("data/UI/Gauge_Mod870.png");
-				UltGaugeMask.GetSize(&ultxp, &ultyp);
-				UltGauge = GraphHandle::Make(ultxp, ultyp, true);
+				m_GaugeMask.at(0).Load("data/UI/Gauge_Mod870.png");
+				for (int i = 0; i < 4; i++) {
+					m_GaugeMask.at(i + 1).Load("data/UI/Mag.png");
+				}
 			}
 			void			Dispose(void) noexcept {
 				this->Gauge_Graph.Dispose();
 				this->OIL_Graph.Dispose();
-				UltGaugeMask.Dispose();
-				UltGauge.Dispose();
+				for (auto& m : m_GaugeMask) {
+					m.Dispose();
+				}
 			}
 			void			Set(void) noexcept {
 				for (int i = 0; i < 3; i++) {
@@ -184,6 +223,7 @@ namespace FPS_n2 {
 				auto Green = GetColor(64, 192, 48);
 				auto White = GetColor(255, 255, 255);
 				auto Gray = GetColor(64, 64, 64);
+				auto Red = GetColor(255, 0, 0);
 				//ダメージ表示
 				{
 					auto per = std::clamp(-(m_GaugeParam[0].GetGaugeDiff())*1.f, 0.f, 1.f);
@@ -242,13 +282,13 @@ namespace FPS_n2 {
 				{
 					int xp1, yp1;
 					//体力
-					xp1 = DrawParts->m_DispXSize - y_r(260);
-					yp1 = DrawParts->m_DispYSize - y_r(24);
+					xp1 = DrawParts->m_DispXSize - y_r(320);
+					yp1 = DrawParts->m_DispYSize - y_r(48);
 
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1 - y_r(12), yp1 + y_r(12), White, Gray, "HP");
 
 					m_GaugeParam[0].DrawGauge(
-						xp1, yp1, xp1 + y_r(230), yp1 + y_r(12),
+						xp1, yp1, xp1 + y_r(300), yp1 + y_r(32),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
 					);
@@ -276,6 +316,19 @@ namespace FPS_n2 {
 							&this->Gauge_Graph, deg);
 					}
 				}
+				//リロード表示
+				{
+					if (m_GaugeParam[2].GetGauge() < m_GaugeParam[2].GetGaugeMax() * 3 / 10) {
+						int xp1, yp1;
+						//体力
+						xp1 = DrawParts->m_DispXSize/2;
+						yp1 = DrawParts->m_DispYSize/2+y_r(100);
+
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1, Red, Gray,
+							"残弾が少ない");
+
+					}
+				}
 				//タイム
 				if (floatParam[1] > 0) {
 					int xp1, yp1;
@@ -288,29 +341,39 @@ namespace FPS_n2 {
 				}
 				//ゲージ
 				{
-					int xp1, yp1;
-					xp1 = y_r(1920-20-ultxp * 6 / 10);
-					yp1 = y_r(512);
-					//
-					int Prev = GetDrawScreen();
-					UltGauge.SetDraw_Screen();
-					{
+					m_GaugeMask.at(0).SetDraw([&]() {
 						m_GaugeParam[3].DrawGaugeUp(
-							-1, -1, 1 + ultxp, 1 + ultyp,
+							-1, -1, 1 + m_GaugeMask.at(0).GetXSize(), 1 + m_GaugeMask.at(0).GetYSize(),
 							GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 							GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
 						);
-					}
-					SetDrawScreen(Prev);
-					GraphBlend(UltGauge.get(), UltGaugeMask.get(), 255, DX_GRAPH_BLEND_RGBA_SELECT_MIX,
-						DX_RGBA_SELECT_SRC_R,
-						DX_RGBA_SELECT_SRC_G,
-						DX_RGBA_SELECT_SRC_B,
-						DX_RGBA_SELECT_BLEND_R
-						);
+					});
 					//
+					int xp1, yp1;
+					xp1 = y_r(1920 - 20 - m_GaugeMask.at(0).GetXSize() * 6 / 10);
+					yp1 = y_r(555);
+					m_GaugeMask.at(0).GetGraph().DrawExtendGraph(xp1, yp1, xp1 + y_r(m_GaugeMask.at(0).GetXSize() * 6 / 10), yp1 + y_r(m_GaugeMask.at(0).GetYSize() * 6 / 10), true);
+				}
+				//ゲージ
+				{
+					int xp1, yp1;
+					xp1 = y_r(1590);
+					yp1 = y_r(940);
+					for (int i = 0; i < 3; i++) {
+						auto& g = m_GaugeMask.at(i + 1);
+						g.SetDraw([&]() {
+							m_GaugeParam[i + 4].DrawGaugeUp(
+								-1, -1, 1 + g.GetXSize(), 1 + g.GetYSize(),
+								GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
+								GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
+							);
+						});
+						//
+						//Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_r(12), White, Gray, "%d", m_GaugeParam[i + 4].GetGauge());
 
-					UltGauge.DrawExtendGraph(xp1, yp1, xp1 + ultxp * 6 / 10, yp1 + ultyp * 6 / 10, true);
+						g.GetGraph().DrawExtendGraph(xp1, yp1, xp1 + y_r(g.GetXSize() * 6 / 10), yp1 + y_r(g.GetYSize() * 6 / 10), true);
+						xp1 += y_r(g.GetXSize() * 6 / 10 + 6);
+					}
 				}
 			}
 

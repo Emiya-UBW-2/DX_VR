@@ -105,12 +105,14 @@ namespace FPS_n2 {
 			int											m_CapacityMax{ 0 };
 			MATRIX_ref									HandMatrix;
 			float										HandPer{ 0.f };
+			bool										m_isDirect{ false };
 			RELOADTYPE									m_ReloadTypeBuf{ RELOADTYPE::MAG };
 		public:
 			void			SetReloadType(RELOADTYPE ReloadType) noexcept { this->m_ReloadTypeBuf = ReloadType; }
-			void			SetHandMatrix(const MATRIX_ref& value, float pPer) noexcept {
+			void			SetHandMatrix(const MATRIX_ref& value, float pPer,bool isDirect) noexcept {
 				this->HandMatrix = value;
 				this->HandPer = pPer;
+				this->m_isDirect = isDirect;
 			}
 			void			SetAmmo(int value) noexcept { this->m_Capacity = std::clamp(value, 0, m_CapacityMax); }
 			void			SubAmmo(void) noexcept { SetAmmo(this->m_Capacity - 1); }
@@ -127,7 +129,10 @@ namespace FPS_n2 {
 			void			FirstExecute_Mod(void) noexcept override {
 				switch (m_ReloadTypeBuf) {
 				case RELOADTYPE::MAG:
-					if (this->HandPer > 0.f) {
+					if (this->m_isDirect) {
+						SetMove(this->HandMatrix.GetRot(), this->HandMatrix.pos());
+					}
+					else if (this->HandPer > 0.f) {
 						SetMove(MATRIX_ref::RotX(deg2rad(-30.f*this->HandPer))*GetMove().mat.GetRot(), Lerp(GetMove().pos, this->HandMatrix.pos(), this->HandPer));
 					}
 					break;

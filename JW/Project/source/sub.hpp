@@ -11,6 +11,13 @@ namespace FPS_n2 {
 		float			m_yRad{ 0.f };
 		unsigned long long	m_Flags{ 0 };
 	public:
+		void			ResetInput() {
+			this->m_AddxRad = 0.f;
+			this->m_AddyRad = 0.f;
+			this->m_xRad = 0.f;
+			this->m_yRad = 0.f;
+			this->m_Flags = 0;
+		}
 		void			SetInputStart(float pAddxRad, float pAddyRad, const VECTOR_ref& pRad) {
 			this->m_AddxRad = pAddxRad;
 			this->m_AddyRad = pAddyRad;

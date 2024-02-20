@@ -52,13 +52,13 @@ namespace FPS_n2 {
 			LoadChara("Suit", GetMyPlayerID(), false);
 			GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
 			LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
-			//LoadGun("PCC_4", GetMyPlayerID(), false, 0);
-			//LoadGun("M16-4", GetMyPlayerID(), false, 0);
-			LoadGun("Mod870", GetMyPlayerID(), false, 1);
+			//LoadGun("PCC_4", GetMyPlayerID(), false, 1);
+			LoadGun("M16-4", GetMyPlayerID(), false, 1);
+			//LoadGun("Mod870", GetMyPlayerID(), false, 1);
 			//BGをオブジェに登録
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-				c->SetMapCol(this->m_BackGround);
+				c->SetMapCol(this->m_BackGround, true);
 				c->GetGunPtr(0)->SetMapCol(this->m_BackGround);
 				if (c->GetGunPtr(1)) {
 					c->GetGunPtr(1)->SetMapCol(this->m_BackGround);
@@ -141,16 +141,22 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide(PADS::MOVE_STICK, "移動");
 
 					KeyGuide->AddGuide(PADS::LEAN_L, "");
-					KeyGuide->AddGuide(PADS::LEAN_R, "左右傾け(リーン)");
+					KeyGuide->AddGuide(PADS::LEAN_R, "左右覗き");
 					KeyGuide->AddGuide(PADS::RUN, "走る");
-					KeyGuide->AddGuide(PADS::SQUAT, "しゃがみ");
-					KeyGuide->AddGuide(PADS::RELOAD, "リロード");
+					KeyGuide->AddGuide(PADS::SQUAT, "しゃがむ");
+
 					KeyGuide->AddGuide(PADS::SHOT, "射撃");
-					KeyGuide->AddGuide(PADS::INTERACT, "補充");
-					KeyGuide->AddGuide(PADS::AIM, "エイム");
-					KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
-					KeyGuide->AddGuide(PADS::MELEE, "近接攻撃");
 					KeyGuide->AddGuide(PADS::ULT, "武器切替");
+					KeyGuide->AddGuide(PADS::AIM, "エイム");
+					KeyGuide->AddGuide(PADS::MELEE, "殴打");
+
+					KeyGuide->AddGuide(PADS::RELOAD, "リロード");
+
+					KeyGuide->AddGuide(PADS::THROW, "弾込");
+					KeyGuide->AddGuide(PADS::CHECK, "アーマー着用");
+
+					KeyGuide->AddGuide(PADS::INTERACT, "取得");
+					KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
 				}
 			});
 
@@ -232,6 +238,8 @@ namespace FPS_n2 {
 				MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press() && !DXDraw::Instance()->IsPause());
 				MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press() && !DXDraw::Instance()->IsPause());
 				MyInput.SetInputPADS(PADS::ULT, Pad->GetKey(PADS::ULT).press());
+				MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
+				MyInput.SetInputPADS(PADS::CHECK, Pad->GetKey(PADS::CHECK).press());
 				//ネットワーク
 				auto& CharaPtr = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 
@@ -267,14 +275,14 @@ namespace FPS_n2 {
 						auto tmp = this->m_NetWorkBrowser.GetNowServerPlayerData(index, false);
 						if (index == GetMyPlayerID()) {
 							MyInput.SetKeyInputFlags(tmp.Input);//キーフレームだけサーバーに合わせる
-							c->SetInput(MyInput, isready);
+							c->SetInput(MyInput, isready && c->IsAlive());
 							m_NetWorkBrowser.GetRecvData(index, tmp.GetFrame());
 						}
 						else {
 							if (!m_NetWorkBrowser.GetClient()) {
 								m_AICtrl[index]->Execute(&tmp.Input);
 							}
-							c->SetInput(tmp.Input, isready);
+							c->SetInput(tmp.Input, isready && c->IsAlive());
 							bool override_true = true;
 							override_true = tmp.GetIsActive();
 							if (override_true) {
@@ -289,12 +297,12 @@ namespace FPS_n2 {
 					}
 					else {
 						if (index == GetMyPlayerID()) {
-							c->SetInput(MyInput, isready);
+							c->SetInput(MyInput, isready && c->IsAlive());
 						}
 						else {
 							InputControl OtherInput;
 							m_AICtrl[index]->Execute(&OtherInput);//めっちゃ重い
-							c->SetInput(OtherInput, isready);
+							c->SetInput(OtherInput, isready && c->IsAlive());
 						}
 						//ダメージイベント処理
 						for (auto& e : c->GetDamageEvent()) {
@@ -401,11 +409,11 @@ namespace FPS_n2 {
 					auto far_t = DrawParts->GetMainCamera().GetCamFar();
 					if (Chara->GetIsADS()) {
 						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
-						Easing(&far_t, Scale_Rate * 30.f, 0.5f, EasingType::OutExpo);
+						Easing(&far_t, Scale_Rate * 40.f, 0.5f, EasingType::OutExpo);
 					}
 					else {
 						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
-						Easing(&far_t, Scale_Rate * 30.f, 0.5f, EasingType::OutExpo);
+						Easing(&far_t, Scale_Rate * 40.f, 0.5f, EasingType::OutExpo);
 					}
 					//fov
 					{
@@ -473,7 +481,7 @@ namespace FPS_n2 {
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 				if (!c->GetGunPtrNow()) { continue; }
-				if (!c->GetGunPtrNow()->HasFrame(GunFrame::LaserSight)) {
+				if (!c->GetGunPtrNow()->HasFrame(GunFrame::LaserSight) || !c->GetGunPtrNow()->IsActive()) {
 					c->SetIsLaserActive(false);
 					continue;
 				}
@@ -538,6 +546,15 @@ namespace FPS_n2 {
 				}
 				//ULT
 				this->m_UIclass.SetGaugeParam(3, (int)Chara->GetULT(), (int)Chara->GetULTMax());
+				//mag
+				int mags = 0;
+				for (const auto& M : Chara->GetMagDatas()) {
+					if (Chara->GetNowMagID() == (int)(&M - &Chara->GetMagDatas().front())) {
+						continue;
+					}
+					this->m_UIclass.SetGaugeParam(4 + mags, (int)M.AmmoNum, (int)Chara->GetAmmoAll());
+					mags++;
+				}
 			}
 			//
 			EffectControl::Execute();
@@ -654,24 +671,26 @@ namespace FPS_n2 {
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			//着弾表示
 			DrawHitGraph();
-			if (!DXDraw::Instance()->IsPause()) {
-				DrawSoundGraph();
+			if (Chara->IsAlive()) {
+				if (!DXDraw::Instance()->IsPause()) {
+					DrawSoundGraph();
+				}
+				//レティクル表示
+				if (m_MyPlayerReticleControl.IsActive() && Chara->GetGunPtrNow()->GetReticlePtr()) {
+					Chara->GetGunPtrNow()->GetReticlePtr()->DrawRotaGraph(
+						(int)m_MyPlayerReticleControl.GetReticleXPos(),
+						(int)m_MyPlayerReticleControl.GetReticleYPos(),
+						1.f, Chara->GetGunRadAdd(), true);
+				}
+				//UI
+				this->m_UIclass.Draw();
+				//通信設定
+				/*
+				if (DXDraw::Instance()->IsPause()) {
+					m_NetWorkBrowser.Draw();
+				}
+				//*/
 			}
-			//レティクル表示
-			if (m_MyPlayerReticleControl.IsActive() && Chara->GetGunPtrNow()->GetReticlePtr()) {
-				Chara->GetGunPtrNow()->GetReticlePtr()->DrawRotaGraph(
-					(int)m_MyPlayerReticleControl.GetReticleXPos(),
-					(int)m_MyPlayerReticleControl.GetReticleYPos(),
-					1.f, Chara->GetGunRadAdd(), true);
-			}
-			//UI
-			this->m_UIclass.Draw();
-			//通信設定
-			/*
-			if (DXDraw::Instance()->IsPause()) {
-				m_NetWorkBrowser.Draw();
-			}
-			//*/
 		}
 		void			MAINLOOP::DrawUI_In_Sub(void) noexcept {
 			//ポーズ
@@ -679,8 +698,12 @@ namespace FPS_n2 {
 				m_MainLoopPauseControl.Draw();
 			}
 			else {
-				//ミニマップ
-				m_MiniMapScreen.DrawRotaGraph(y_r(960), y_r(840), 1.f, 0.f, true);
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+				if (Chara->IsAlive()) {
+					//ミニマップ
+					m_MiniMapScreen.DrawRotaGraph(y_r(960), y_r(840), 1.f, 0.f, true);
+				}
 			}
 		}
 		//使い回しオブジェ系
@@ -800,13 +823,50 @@ namespace FPS_n2 {
 					DegPers.at(rad_2).second++;
 				}
 			}
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
 			for (auto& d : DegPers) {
 				if (d.second > 0) {
 					d.first = 1.f + d.first / d.second + GetRandf(0.01f);
 				}
 				else {
 					d.first = 1.f + GetRandf(0.01f);
+				}
+			}
+			//
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
+			for (int index = 0; index < Chara_num; index++) {
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+				if (index == 0) { continue; }
+				if(!c->IsAlive()) { continue; }
+				if (c->CanLookTarget) {
+					float length = std::max(1.f, 0.5f / std::max((MyPos - c->GetMove().pos).Length() / (100.f*Scale_Rate), 0.1f));
+
+					float xp2 = (float)(xp1 + (int)(c->GetMove().pos.x()));
+					float yp2 = (float)(yp1 - (int)(c->GetMove().pos.z()));
+					float xp3 = (xp2 * std::cos(rad) - yp2 * std::sin(rad));
+					float yp3 = (yp2 * std::cos(rad) + xp2 * std::sin(rad));
+					int rad_3 = (((int)rad2deg(std::atan2f(yp3, xp3)) + 360) % 360);
+
+					int rad_2 = rad_3 - 10;
+					int rad_4 = rad_3 + 10;
+
+					float Len = y_r(180) - (float)y_r(10) *length;
+					//(int)(std::max(1.f, 3.f / length))
+					DrawTriangle(
+						xp + (int)(cos(deg2rad(rad_2))*(Len)),
+						yp + (int)(sin(deg2rad(rad_2))*(Len)),
+						xp + (int)(cos(deg2rad(rad_3))*(y_r(180))),
+						yp + (int)(sin(deg2rad(rad_3))*(y_r(180))),
+						xp + (int)(cos(deg2rad(rad_3))*(Len)),
+						yp + (int)(sin(deg2rad(rad_3))*(Len)),
+						GetColor(255, std::clamp(255 - (int)(25.f*length), 0, 255), 0), TRUE);
+					DrawTriangle(
+						xp + (int)(cos(deg2rad(rad_3))*(Len)),
+						yp + (int)(sin(deg2rad(rad_3))*(Len)),
+						xp + (int)(cos(deg2rad(rad_3))*(y_r(180))),
+						yp + (int)(sin(deg2rad(rad_3))*(y_r(180))),
+						xp + (int)(cos(deg2rad(rad_4))*(Len)),
+						yp + (int)(sin(deg2rad(rad_4))*(Len)),
+						GetColor(255, std::clamp(255 - (int)(25.f*length), 0, 255), 0), TRUE);
 				}
 			}
 			for (int index = 0; index < DegDiv; index++) {
@@ -875,6 +935,7 @@ namespace FPS_n2 {
 			SE->Add((int)SoundEnum::CartFall, 6, "data/Sound/SE/gun/case.wav", false);
 			SE->Add((int)SoundEnum::MagFall, 6, "data/Sound/SE/gun/ModFall.wav", false);
 			SE->Add((int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
+			SE->Add((int)SoundEnum::AmmoLoad, 1, "data/Sound/SE/gun/ammoload.wav", false);
 			for (int i = 0; i < 6; i++) {
 				SE->Add((int)SoundEnum::Cocking1_0 + i, 4, "data/Sound/SE/gun/autoM870/" + std::to_string(i) + ".wav");
 				SE->Add((int)SoundEnum::Cocking2_0 + i, 4, "data/Sound/SE/gun/autoM16/" + std::to_string(i) + ".wav");
@@ -912,6 +973,7 @@ namespace FPS_n2 {
 			SE->Get((int)SoundEnum::CartFall).SetVol_Local(48);
 			SE->Get((int)SoundEnum::MagFall).SetVol_Local(48);
 			SE->Get((int)SoundEnum::Trigger).SetVol_Local(48);
+			//SE->Get((int)SoundEnum::AmmoLoad).SetVol_Local(48);
 			SE->Get((int)SoundEnum::Shot2).SetVol_Local(216);
 			SE->Get((int)SoundEnum::Shot3).SetVol_Local(216);
 			SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
@@ -930,6 +992,7 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::Env2);
 			SE->Delete((int)SoundEnum::StandUp);
 			SE->Delete((int)SoundEnum::Trigger);
+			SE->Delete((int)SoundEnum::AmmoLoad);
 			for (int i = 0; i < 6; i++) {
 				SE->Delete((int)SoundEnum::Cocking1_0 + i);
 				SE->Delete((int)SoundEnum::Cocking2_0 + i);

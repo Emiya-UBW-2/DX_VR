@@ -49,6 +49,7 @@ namespace FPS_n2 {
 			void		GetChildPartsList(std::vector<const SharedObj*>* Ret) const noexcept;
 			void		ResetPartsFrameLocalMat(GunFrame frame) noexcept;
 			void		SetPartsFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept;
+			void		SetActive(bool value) noexcept;
 
 			SharedObj& ChangeMagazine(int MagUniqueID);
 		public:

@@ -4,6 +4,7 @@
 //
 #include "Scene/TitleScene.hpp"
 #include "Scene/CustomScene.hpp"
+#include "Scene/TutorialScene.hpp"
 #include "Scene/MainScene.hpp"
 
 
@@ -26,13 +27,16 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//シーン
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto Customscene = std::make_shared<FPS_n2::Sceneclass::CustomScene>();
+	auto Tutorialscene = std::make_shared<FPS_n2::Sceneclass::TutorialScene>();
 	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();
 	//シーンコントロール
 	auto scene = std::make_unique<SceneControl>(Titlescene);
 	//遷移先指定
 	Titlescene->Set_Next(MAINLOOPscene);
 	Customscene->Set_Next(Titlescene);
+	Tutorialscene->Set_Next(Titlescene);
 	MAINLOOPscene->Set_Next(Titlescene);
+	bool isTutorialLoop = false;
 	bool isMainLoop = false;
 	//繰り返し
 	while (true) {
@@ -65,18 +69,39 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		bool isTitle = (scene->GetNowScene() == Titlescene);
 		if (isTitle) {
 			switch (Titlescene->SelMode()) {
+				/*
 			case 0:
 				Titlescene->Set_Next(Customscene);
 				if (isMainLoop) {
 					isMainLoop = false;
 					MAINLOOPscene->Dispose_Load();
 				}
+				if (isTutorialLoop) {
+					isTutorialLoop = false;
+					Tutorialscene->Dispose_Load();
+				}
 				break;
+				//*/
 			case 1:
 				Titlescene->Set_Next(MAINLOOPscene);
+				if (isTutorialLoop) {
+					isTutorialLoop = false;
+					Tutorialscene->Dispose_Load();
+				}
 				if (!isMainLoop) {
 					isMainLoop = true;
 					MAINLOOPscene->Load();
+				}
+				break;
+			case 0:
+				Titlescene->Set_Next(Tutorialscene);
+				if (isMainLoop) {
+					isMainLoop = false;
+					MAINLOOPscene->Dispose_Load();
+				}
+				if (!isTutorialLoop) {
+					isTutorialLoop = true;
+					Tutorialscene->Load();
 				}
 				break;
 			default:

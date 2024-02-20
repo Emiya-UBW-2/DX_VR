@@ -166,7 +166,7 @@ namespace FPS_n2 {
 		private:
 			const PlayerID							m_TargetCharaID{ 0 };
 
-			int										TargetPathPlanningIndex;		// 次の中間地点となる経路上のポリゴンの経路探索情報が格納されているメモリアドレスを格納する変数
+			int										TargetPathPlanningIndex{ 0 };		// 次の中間地点となる経路上のポリゴンの経路探索情報が格納されているメモリアドレスを格納する変数
 			PathChecker								m_PathChecker;
 
 			std::shared_ptr<BackGroundClassMain>	m_BackGround{ nullptr };				//BG
@@ -176,6 +176,7 @@ namespace FPS_n2 {
 			float									m_ShotTimer{ 0.f };
 			float									m_BackTimer{ 0.f };
 			float									m_RepopTimer{ 0.f };
+			float									m_MoveFrontTimer{ 0.f };
 
 			int										m_LeanLR{ 0 };
 		public:
@@ -324,6 +325,7 @@ namespace FPS_n2 {
 			void		Init() noexcept {
 				this->Reset();
 				this->m_PathUpdateTimer = 0.f;
+				this->m_MoveFrontTimer = (float)(GetRand(6));
 			}
 			//
 			void		Execute_Before() noexcept {
@@ -361,6 +363,11 @@ namespace FPS_n2 {
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto MyPos = MyChara->GetEyePosition();
 				//
+				if (this->m_MoveFrontTimer>6.f) {
+					this->m_MoveFrontTimer -= 6.f;
+				}
+				this->m_MoveFrontTimer += 1.f / FPS;
+				m_MyInput.SetInputPADS(PADS::MOVE_W, this->m_MoveFrontTimer > 4.f);
 				m_MyInput.SetInputPADS(PADS::MOVE_A, GetRand(100) > 50);
 				m_MyInput.SetInputPADS(PADS::MOVE_D, GetRand(100) > 50);
 				//エイム

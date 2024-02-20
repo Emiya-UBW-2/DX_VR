@@ -35,6 +35,7 @@ namespace FPS_n2 {
 			Env2,
 			//
 			Trigger,
+			AmmoLoad,
 			//
 			Cocking1_0,
 			Cocking1_1,
