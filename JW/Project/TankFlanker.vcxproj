@@ -29,6 +29,7 @@
     <ClInclude Include="source\MainScene\Object\GunData.hpp" />
     <ClInclude Include="source\MainScene\Object\GunEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\Gun_before.hpp" />
+    <ClInclude Include="source\MainScene\Object\ItemObj.hpp" />
     <ClInclude Include="source\MainScene\Object\Mod.hpp" />
     <ClInclude Include="source\MainScene\Object\ModData.hpp" />
     <ClInclude Include="source\MainScene\Object\ModEnum.hpp" />
@@ -59,6 +60,7 @@
     <ClCompile Include="source\MainScene\Object\Gun.cpp" />
     <ClCompile Include="source\MainScene\Object\GunData.cpp" />
     <ClCompile Include="source\MainScene\Object\Gun_before.cpp" />
+    <ClCompile Include="source\MainScene\Object\ItemObj.cpp" />
     <ClCompile Include="source\MainScene\Object\Mod.cpp" />
     <ClCompile Include="source\MainScene\Object\ModData.cpp" />
     <ClCompile Include="source\MainScene\Object\MovieObj.cpp" />

@@ -316,9 +316,10 @@ namespace FPS_n2 {
 						this->m_ShotPhase = GunAnimeID::AmmoLoading;
 						this->m_AmmoLoadCount = 1;
 						this->m_IsAmmoLoadCount = false;
+						this->m_AmmoLoadSwitch = true;
 					}
 				}
-				if (this->m_ShotPhase == GunAnimeID::AmmoLoading) {
+				else if (this->m_ShotPhase == GunAnimeID::AmmoLoading) {
 					GunAnimSelect = CharaGunAnimeID::AmmoLoading;
 					UpdateGunAnim(GunAnimSelect, 1.0f);
 
@@ -328,7 +329,7 @@ namespace FPS_n2 {
 						SE->Get((int)SoundEnum::AmmoLoad).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
 						this->m_IsAmmoLoadCount = true;
 					}
-
+					this->m_AmmoLoadSwitch = false;
 					if (GetGunAnimEnd(GunAnimSelect)) {
 						if (this->m_AmmoLoadCount >= 3) {
 							this->m_ShotPhase = GunAnimeID::AmmoLoadEnd;
@@ -339,6 +340,7 @@ namespace FPS_n2 {
 							this->GetObj().get_anime((int)this->m_ShotPhase).per = 1.f;
 							this->m_AmmoLoadCount++;
 							this->m_IsAmmoLoadCount = false;
+							this->m_AmmoLoadSwitch = true;
 						}
 					}
 				}

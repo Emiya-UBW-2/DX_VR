@@ -357,7 +357,7 @@ namespace FPS_n2 {
 				//ゲージ
 				{
 					int xp1, yp1;
-					xp1 = y_r(1590);
+					xp1 = y_r(1500);
 					yp1 = y_r(940);
 					for (int i = 0; i < 3; i++) {
 						auto& g = m_GaugeMask.at(i + 1);
@@ -374,6 +374,13 @@ namespace FPS_n2 {
 						g.GetGraph().DrawExtendGraph(xp1, yp1, xp1 + y_r(g.GetXSize() * 6 / 10), yp1 + y_r(g.GetYSize() * 6 / 10), true);
 						xp1 += y_r(g.GetXSize() * 6 / 10 + 6);
 					}
+					//弾ストック表示
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+						xp1, yp1+ y_r(80), White, Gray,
+						"AmmoStock");
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+						xp1 + y_r(110), yp1 + y_r(80), White, Gray,
+						"%03d", intParam[3]);
 				}
 			}
 

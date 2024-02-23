@@ -64,9 +64,11 @@ namespace FPS_n2 {
 			//
 			std::shared_ptr<ArmerClass>							m_Armer_Ptr{ nullptr };
 			ArmMovePerClass										m_Wear_Armer;
+			bool												m_CanWearArmer{ false };
 			bool												m_IsWearArmer{ false };
 			bool												m_IsWearingArmer{ false };
 			bool												m_WearArmer{ false };
+
 			float												m_ULTUp{ 0.f };
 			bool												m_ULTActive{ false };
 			float												m_HPRec{ 0.f };
@@ -81,6 +83,8 @@ namespace FPS_n2 {
 			int													m_CharaSound{ -1 };
 			int													m_LeanSoundReq{ 0 };
 			bool												m_SquatSoundReq{ false };
+			//
+			std::array<ItemFallControl, 2>						m_ItemFallControl;
 		public:
 			bool												CanLookTarget{ true };
 		private:
@@ -89,8 +93,12 @@ namespace FPS_n2 {
 		public:
 			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround, bool IsMainGame) noexcept {
 				m_BackGround.reset();
+				m_ItemFallControl.at(0).Dispose();
+				m_ItemFallControl.at(1).Dispose();
 				this->m_BackGround = backGround;
 				this->m_IsMainGame = IsMainGame;
+				m_ItemFallControl.at(0).Init(this->m_BackGround, "data/model/AmmoBox/", ItemType::AMMO);
+				m_ItemFallControl.at(1).Init(this->m_BackGround, "data/model/Armer/", ItemType::ARMER);
 			}
 		private:
 			void			SetReady(void) noexcept { this->m_ReadyTimer = UpperTimerLimit; }
@@ -104,6 +112,9 @@ namespace FPS_n2 {
 				return WalkSwingControl::GetWalkSwingMat() * tmpUpperMatrix * this->m_move.mat;
 			}
 			const auto		GetSpeedPer(void) const noexcept {
+				if (KeyControl::GetInputControl().GetPADSPress(PADS::WALK)) {
+					return 0.15f;
+				}
 				if (KeyControl::GetIsSquat()) {
 					return 0.45f;
 				}
@@ -185,9 +196,10 @@ namespace FPS_n2 {
 			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
 			void			SetGunPtr(int ID, const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_Gun_Ptr[ID] = pGunPtr0; }
 			void			Heal(HitPoint value) noexcept {
-				LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, m_objType, value, 0);
+				LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, value, 0);
 				m_ArmBreak = false;
 			}
+			bool			GetArmer() noexcept;
 			const bool		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept;
 			const bool		CheckMeleeHit(PlayerID MeleeID, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept;
 		public:

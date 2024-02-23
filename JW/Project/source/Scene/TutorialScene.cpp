@@ -34,8 +34,12 @@ namespace FPS_n2 {
 			LoadChara("Suit");
 			GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
 			LoadGun("G17Gen3", true, 0);
+			//LoadGun("AKS-74", false, 0);
+
+
 			//LoadGun("PCC_4", false, 1);
-			LoadGun("M16-4", false, 1);
+			LoadGun("AKS-74", false, 1);
+			//LoadGun("M16-4", false, 1);
 			//LoadGun("Mod870", false, 1);
 			//BGをオブジェに登録
 			{
@@ -97,8 +101,9 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide(PADS::MOVE_STICK, "移動");
 
 					KeyGuide->AddGuide(PADS::LEAN_L, "");
-					KeyGuide->AddGuide(PADS::LEAN_R, "左右覗き");
+					KeyGuide->AddGuide(PADS::LEAN_R, "覗き");
 					KeyGuide->AddGuide(PADS::RUN, "走る");
+					KeyGuide->AddGuide(PADS::WALK, "歩く");
 					KeyGuide->AddGuide(PADS::SQUAT, "しゃがむ");
 
 					KeyGuide->AddGuide(PADS::SHOT, "射撃");
@@ -106,12 +111,12 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide(PADS::AIM, "エイム");
 					KeyGuide->AddGuide(PADS::MELEE, "殴打");
 
-					KeyGuide->AddGuide(PADS::RELOAD, "リロード");
+					KeyGuide->AddGuide(PADS::RELOAD, "再装填");
 
-					KeyGuide->AddGuide(PADS::THROW, "弾込");
-					KeyGuide->AddGuide(PADS::CHECK, "アーマー着用");
+					//KeyGuide->AddGuide(PADS::THROW, "弾込");
+					//KeyGuide->AddGuide(PADS::CHECK, "アーマー着用");
 
-					KeyGuide->AddGuide(PADS::INTERACT, "取得");
+					//KeyGuide->AddGuide(PADS::INTERACT, "取得");
 					KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
 				}
 			});
@@ -187,6 +192,7 @@ namespace FPS_n2 {
 				MyInput.SetInputPADS(PADS::ULT, Pad->GetKey(PADS::ULT).press());
 				MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
 				MyInput.SetInputPADS(PADS::CHECK, Pad->GetKey(PADS::CHECK).press());
+				MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 				//
 				bool isready = true;
 				m_CharacterPtr->SetInput(MyInput, isready && m_CharacterPtr->IsAlive());
@@ -254,11 +260,11 @@ namespace FPS_n2 {
 					auto near_t = DrawParts->GetMainCamera().GetCamNear();
 					auto far_t = DrawParts->GetMainCamera().GetCamFar();
 					if (m_CharacterPtr->GetIsADS()) {
-						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
+						Easing(&near_t, Scale_Rate * 0.03f, 0.9f, EasingType::OutExpo);
 						Easing(&far_t, Scale_Rate * 90.f, 0.5f, EasingType::OutExpo);
 					}
 					else {
-						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
+						Easing(&near_t, Scale_Rate * 0.03f, 0.9f, EasingType::OutExpo);
 						Easing(&far_t, Scale_Rate * 90.f, 0.5f, EasingType::OutExpo);
 					}
 					//fov
@@ -343,6 +349,8 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(0, (int)(DrawParts->GetCamShake().x()*100.f));
 				this->m_UIclass.SetIntParam(1, (int)(DrawParts->GetCamShake().y()*100.f));
 				this->m_UIclass.SetIntParam(2, (int)(rad2deg(m_CharacterPtr->GetGunRadAdd())*5.f));
+				//AmmoStock
+				this->m_UIclass.SetIntParam(3, m_CharacterPtr->GetAmmoStock());
 				//Time
 				this->m_UIclass.SetfloatParam(0, 0);
 				this->m_UIclass.SetfloatParam(1, 0);
@@ -508,6 +516,7 @@ namespace FPS_n2 {
 			SE->Add((int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
 			SE->Add((int)SoundEnum::SlideFoot, 3, "data/Sound/SE/move/sliding.wav");
 			SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
+			SE->Add((int)SoundEnum::GetAmmo, 3, "data/Sound/SE/move/getammo.wav");
 			SE->Add((int)SoundEnum::Heart, 3, "data/Sound/SE/move/heart.wav");
 			SE->Add((int)SoundEnum::Hit, 3, "data/Sound/SE/hit.wav");
 			for (int i = 0; i < 5; i++) {
@@ -564,6 +573,7 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::RunFoot);
 			SE->Delete((int)SoundEnum::SlideFoot);
 			SE->Delete((int)SoundEnum::StandupFoot);
+			SE->Delete((int)SoundEnum::GetAmmo);
 			SE->Delete((int)SoundEnum::Heart);
 			SE->Delete((int)SoundEnum::Hit);
 			for (int i = 0; i < 5; i++) {

@@ -53,7 +53,8 @@ namespace FPS_n2 {
 			GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
 			LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
 			//LoadGun("PCC_4", GetMyPlayerID(), false, 1);
-			LoadGun("M16-4", GetMyPlayerID(), false, 1);
+			LoadGun("AKS-74", GetMyPlayerID(), false, 1);
+			//LoadGun("M16-4", GetMyPlayerID(), false, 1);
 			//LoadGun("Mod870", GetMyPlayerID(), false, 1);
 			//BGをオブジェに登録
 			for (int index = 0; index < Chara_num; index++) {
@@ -78,7 +79,7 @@ namespace FPS_n2 {
 					auto TgtPos_XZ = TargetChara->GetMove().pos; TgtPos_XZ.y(0.f);
 					VECTOR_ref BGPos_XZ;
 					while (true) {
-						auto& C = this->m_BackGround->GetBuildDatas().at(GetRand((int)(this->m_BackGround->GetBuildDatas().size()) - 1));
+						auto& C = this->m_BackGround->GetBuildData().at(GetRand((int)(this->m_BackGround->GetBuildData().size()) - 1));
 						BGPos_XZ = C.GetMatrix().pos(); BGPos_XZ.y(0.f);
 						if ((BGPos_XZ - TgtPos_XZ).Length() > 10.f*Scale_Rate) {
 							break;
@@ -141,8 +142,9 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide(PADS::MOVE_STICK, "移動");
 
 					KeyGuide->AddGuide(PADS::LEAN_L, "");
-					KeyGuide->AddGuide(PADS::LEAN_R, "左右覗き");
+					KeyGuide->AddGuide(PADS::LEAN_R, "覗き");
 					KeyGuide->AddGuide(PADS::RUN, "走る");
+					KeyGuide->AddGuide(PADS::WALK, "歩く");
 					KeyGuide->AddGuide(PADS::SQUAT, "しゃがむ");
 
 					KeyGuide->AddGuide(PADS::SHOT, "射撃");
@@ -150,12 +152,12 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide(PADS::AIM, "エイム");
 					KeyGuide->AddGuide(PADS::MELEE, "殴打");
 
-					KeyGuide->AddGuide(PADS::RELOAD, "リロード");
+					KeyGuide->AddGuide(PADS::RELOAD, "再装填");
 
-					KeyGuide->AddGuide(PADS::THROW, "弾込");
-					KeyGuide->AddGuide(PADS::CHECK, "アーマー着用");
+					//KeyGuide->AddGuide(PADS::THROW, "弾込");
+					//KeyGuide->AddGuide(PADS::CHECK, "アーマー着用");
 
-					KeyGuide->AddGuide(PADS::INTERACT, "取得");
+					//KeyGuide->AddGuide(PADS::INTERACT, "取得");
 					KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
 				}
 			});
@@ -240,6 +242,7 @@ namespace FPS_n2 {
 				MyInput.SetInputPADS(PADS::ULT, Pad->GetKey(PADS::ULT).press());
 				MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
 				MyInput.SetInputPADS(PADS::CHECK, Pad->GetKey(PADS::CHECK).press());
+				MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 				//ネットワーク
 				auto& CharaPtr = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 
@@ -249,7 +252,7 @@ namespace FPS_n2 {
 				tmpmove.vec.y(0);
 				tmpmove.rad = CharaPtr->GetRadBuf();
 
-				m_NetWorkBrowser.FirstExecute(MyInput, tmpmove, CharaPtr->GetDamageEvent());
+				//m_NetWorkBrowser.FirstExecute(MyInput, tmpmove, CharaPtr->GetDamageEvent());
 				//クライアント
 				if (m_NetWorkBrowser.GetClient()) {
 					for (int index = 0; index < Chara_num; index++) {
@@ -305,7 +308,7 @@ namespace FPS_n2 {
 							c->SetInput(OtherInput, isready && c->IsAlive());
 						}
 						//ダメージイベント処理
-						for (auto& e : c->GetDamageEvent()) {
+						for (const auto& e : c->GetDamageEvent()) {
 							this->m_DamageEvents.emplace_back(e);
 						}
 						c->GetDamageEvent().clear();
@@ -377,6 +380,52 @@ namespace FPS_n2 {
 				Set_Per_Blackout(m_ConcussionControl.GetPer());
 				m_ConcussionControl.Update();
 			}
+			//アイテム入手
+			{
+				int loop = 0;
+				while (true) {
+					auto ammo = ObjMngr->GetObj(ObjType::ItemObj, loop);
+					if (ammo != nullptr) {
+						auto& a = (std::shared_ptr<ItemObjClass>&)(*ammo);
+						if (a->IsActive()) {
+							VECTOR_ref pos_tmp = a->GetMove().pos;
+							bool isHit = false;
+							for (int index = 0; index < Chara_num; index++) {
+								auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+								if (tgt->GetCharaType() == CharaTypeID::Enemy) { break; }
+								float Len = (tgt->GetMove().pos - pos_tmp).Length();
+								if (Len < 1.f*Scale_Rate) {
+									switch (a->GetItemType()) {
+									case ItemType::AMMO:
+										tgt->AddAmmoStock(2 + GetRand(8));
+										isHit = true;
+										SE->Get((int)SoundEnum::GetAmmo).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
+										break;
+									case ItemType::ARMER:
+										if (tgt->GetArmer()) {
+											isHit = true;
+											SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
+										}
+										break;
+									default:
+										break;
+									}
+									if (isHit) {
+										break;
+									}
+								}
+							}
+							if (isHit) {
+								a->SetIsDelete(true);
+							}
+						}
+					}
+					else {
+						break;
+					}
+					loop++;
+				}
+			}
 			//近接攻撃
 			{
 				for (int index = 0; index < Player_num; index++) {
@@ -408,11 +457,11 @@ namespace FPS_n2 {
 					auto near_t = DrawParts->GetMainCamera().GetCamNear();
 					auto far_t = DrawParts->GetMainCamera().GetCamFar();
 					if (Chara->GetIsADS()) {
-						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
+						Easing(&near_t, Scale_Rate * 0.03f, 0.9f, EasingType::OutExpo);
 						Easing(&far_t, Scale_Rate * 40.f, 0.5f, EasingType::OutExpo);
 					}
 					else {
-						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
+						Easing(&near_t, Scale_Rate * 0.03f, 0.9f, EasingType::OutExpo);
 						Easing(&far_t, Scale_Rate * 40.f, 0.5f, EasingType::OutExpo);
 					}
 					//fov
@@ -514,7 +563,7 @@ namespace FPS_n2 {
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 					VECTOR_ref TgtPos = c->GetEyePosition();
 					c->CanLookTarget = true;
-					for (auto& C : this->m_BackGround->GetBuildDatas()) {
+					for (auto& C : this->m_BackGround->GetBuildData()) {
 						if (C.GetMeshSel() < 0) { continue; }
 						auto EndPos = TgtPos;
 						if (GetMinLenSegmentToPoint(StartPos, EndPos, C.GetMatrix().pos()) >= 8.f*Scale_Rate) { continue; }
@@ -531,6 +580,8 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(0, (int)(DrawParts->GetCamShake().x()*100.f));
 				this->m_UIclass.SetIntParam(1, (int)(DrawParts->GetCamShake().y()*100.f));
 				this->m_UIclass.SetIntParam(2, (int)(rad2deg(Chara->GetGunRadAdd())*5.f));
+				//AmmoStock
+				this->m_UIclass.SetIntParam(3, Chara->GetAmmoStock());
 				//Time
 				this->m_UIclass.SetfloatParam(0, m_Timer);
 				this->m_UIclass.SetfloatParam(1, m_ReadyTimer);
@@ -945,6 +996,7 @@ namespace FPS_n2 {
 			SE->Add((int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
 			SE->Add((int)SoundEnum::SlideFoot, 3, "data/Sound/SE/move/sliding.wav");
 			SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
+			SE->Add((int)SoundEnum::GetAmmo, 3, "data/Sound/SE/move/getammo.wav");
 			SE->Add((int)SoundEnum::Heart, 3, "data/Sound/SE/move/heart.wav");
 			SE->Add((int)SoundEnum::Hit, 3, "data/Sound/SE/hit.wav");
 			for (int i = 0; i < 5; i++) {
@@ -1001,6 +1053,7 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::RunFoot);
 			SE->Delete((int)SoundEnum::SlideFoot);
 			SE->Delete((int)SoundEnum::StandupFoot);
+			SE->Delete((int)SoundEnum::GetAmmo);
 			SE->Delete((int)SoundEnum::Heart);
 			SE->Delete((int)SoundEnum::Hit);
 			for (int i = 0; i < 5; i++) {

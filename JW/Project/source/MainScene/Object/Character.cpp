@@ -9,7 +9,7 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		//
 		bool			CharacterClass::SetDamageEvent(const DamageEvent& value) noexcept {
-			if (this->m_MyID == value.DamageID && this->m_objType == value.CharaType) {
+			if (this->m_MyID == value.DamageID) {
 				auto PrevLive = LifeControl::IsAlive();
 				LifeControl::SubHP(value.Damage);
 				LifeControl::SubAP(value.ArmerDamage);
@@ -20,6 +20,13 @@ namespace FPS_n2 {
 					}
 					else {
 						//SE->Get((int)SoundEnum::Man_Hurt1 + GetRand(6 - 1)).Play_3D(0, GetFrameWorldMat(CharaFrame::Head).pos(), Scale_Rate * 10.f);
+						//
+						if (!PrevLive) {
+							m_ItemFallControl.at(0).Dispose();
+							m_ItemFallControl.at(1).Dispose();
+							m_ItemFallControl.at(0).Init(this->m_BackGround, "data/model/AmmoBox/", ItemType::AMMO);
+							m_ItemFallControl.at(1).Init(this->m_BackGround, "data/model/Armer/", ItemType::ARMER);
+						}
 					}
 				}
 				else if (PrevLive) {
@@ -31,11 +38,28 @@ namespace FPS_n2 {
 						auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(value.ShotID).GetChara();
 						Chara->AddULT(20);
 					}
+					int Rand = GetRand(99);
+					if (Rand < 30) {
+						m_ItemFallControl.at(0).SetFall(GetMove().pos + VECTOR_ref::up()*(0.5f*Scale_Rate), VECTOR_ref::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
+					}
+					else if (Rand < 60) {
+						m_ItemFallControl.at(1).SetFall(GetMove().pos + VECTOR_ref::up()*(0.5f*Scale_Rate), VECTOR_ref::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
+					}
+					else {
+						m_ItemFallControl.at(0).SetFall(GetMove().pos + VECTOR_ref::up()*(0.5f*Scale_Rate), VECTOR_ref::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
+						m_ItemFallControl.at(1).SetFall(GetMove().pos + VECTOR_ref::up()*(0.5f*Scale_Rate), VECTOR_ref::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
+					}
 				}
 				this->m_SoundPower = 0.5f;
 				return true;
 			}
 			return false;
+		}
+
+		bool			CharacterClass::GetArmer() noexcept {
+			bool prev = this->m_CanWearArmer;
+			this->m_CanWearArmer = true;
+			return this->m_CanWearArmer != prev;
 		}
 
 		const bool		CharacterClass::CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept {
@@ -82,7 +106,8 @@ namespace FPS_n2 {
 				{
 					auto v1 = GetCharaDir().zvec() * -1.f;
 					auto v2 = (Chara->GetMove().pos - this->m_move.pos).Norm(); v2.y(0);
-					LifeControl::SetSubHPEvent((PlayerID)pAmmo->GetShootedID(), this->m_MyID, m_objType, Damage, ArmerDamage, atan2f(v1.cross(v2).y(), v1.dot(v2)));
+					//atan2f(v1.cross(v2).y(), v1.dot(v2))
+					LifeControl::SetSubHPEvent((PlayerID)pAmmo->GetShootedID(), this->m_MyID, Damage, ArmerDamage);
 				}
 				//SE
 				if (pAmmo->GetShootedID() == 0) {
@@ -124,7 +149,8 @@ namespace FPS_n2 {
 				{
 					auto v1 = GetCharaDir().zvec() * -1.f;
 					auto v2 = (Chara->GetMove().pos - this->m_move.pos).Norm(); v2.y(0);
-					LifeControl::SetSubHPEvent(MeleeID, this->m_MyID, m_objType, Damage, 0, atan2f(v1.cross(v2).y(), v1.dot(v2)));
+					//atan2f(v1.cross(v2).y(), v1.dot(v2))
+					LifeControl::SetSubHPEvent(MeleeID, this->m_MyID, Damage, 0);
 				}
 				//SE
 				if (MeleeID == 0) {
@@ -267,6 +293,7 @@ namespace FPS_n2 {
 
 			this->m_Wear_Armer.Init(false);
 			this->m_IsWearArmer = false;
+			this->m_CanWearArmer = false;
 			this->m_IsWearingArmer = false;
 			this->m_WearArmer = false;
 			if (this->m_Armer_Ptr) {
@@ -290,7 +317,7 @@ namespace FPS_n2 {
 				GetGunPtrNow()->SetPlayerID(this->m_MyID);
 
 				auto& Mag = (*GetGunPtrNow()->GetMagazinePtr());
-				MagStockControl::Init_MagStockControl(Mag->GetAmmoNum(), Mag->GetModData()->GetUniqueID());
+				MagStockControl::Init_MagStockControl(Mag->GetAmmoNum(), Mag->GetAmmoAll(), Mag->GetModData()->GetUniqueID());
 			}
 		}
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
@@ -325,7 +352,12 @@ namespace FPS_n2 {
 					}
 				}
 				if (m_GunSelect == 0) {
-					if (!MagStockControl::IsEnableReload()) {
+					bool IsCheck = (GetAmmoNum() > GetAmmoAll());
+					if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
+						IsCheck = (GetAmmoNum() >= MagStockControl::GetNextMag().AmmoNum);
+					}
+
+					if (IsCheck) {
 						this->m_Press_Reload = false;
 					}
 				}
@@ -402,10 +434,8 @@ namespace FPS_n2 {
 			this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / FPS, 0.f, UpperTimerLimit);
 			{
 				bool IsCheck = (GetAmmoNum() > GetAmmoAll());
-				if (this->m_Press_Reload) {
-					if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
-						IsCheck = (GetAmmoNum() >= MagStockControl::GetNextMag().AmmoNum);
-					}
+				if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
+					IsCheck = (GetAmmoNum() >= MagStockControl::GetNextMag().AmmoNum);
 				}
 				if ((
 					this->m_Press_Shot ||
@@ -419,8 +449,9 @@ namespace FPS_n2 {
 			//アーマーを着る
 			if (this->m_Armer_Ptr) {
 				if (!this->m_IsWearArmer) {
-					if (KeyControl::GetInputControl().GetPADSPress(PADS::CHECK)) {
+					if (KeyControl::GetInputControl().GetPADSPress(PADS::CHECK) && this->m_CanWearArmer && (LifeControl::GetAP() < LifeControl::GetAPMax())) {
 						this->m_IsWearArmer = true;
+						this->m_CanWearArmer = false;
 					}
 				}
 				else if (!this->m_IsWearingArmer) {
@@ -448,7 +479,7 @@ namespace FPS_n2 {
 						this->m_Armer_Ptr->SetActive(false);
 						SetAim();
 
-						LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, m_objType, 0, LifeControl::GetAPMax());
+						LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, 0, LifeControl::GetAPMax());
 					}
 				}
 			}
@@ -467,8 +498,9 @@ namespace FPS_n2 {
 						{
 							if (m_GunSelect == 0) {
 								auto& Mag = (*GetGunPtrNow()->GetMagazinePtr());
-								MagStockControl::SetNextMag(Mag->GetAmmoNum(), Mag->GetModData()->GetUniqueID());
+								MagStockControl::SetNextMag(Mag->GetAmmoNum(), Mag->GetAmmoAll(), Mag->GetModData()->GetUniqueID());
 								GetGunPtrNow()->SetReloadStartMag(MagStockControl::GetNowMag().AmmoNum, MagStockControl::GetNowMag().ModUniqueID);
+								MagStockControl::SortMag();//次使うマガジンをソート
 							}
 							else {
 								auto& Mag = (*GetGunPtrNow()->GetMagazinePtr());
@@ -505,10 +537,8 @@ namespace FPS_n2 {
 					}
 					{
 						bool IsCheck = (GetAmmoNum() > GetAmmoAll());
-						if (this->m_Press_Reload) {
-							if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
-								IsCheck = (GetAmmoNum() >= MagStockControl::GetNextMag().AmmoNum);
-							}
+						if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
+							IsCheck = (GetAmmoNum() >= MagStockControl::GetNextMag().AmmoNum);
 						}
 						if ((KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && IsCheck) && GetGunPtrNow()->GetCanShot()) {
 							GetGunPtrNow()->SetShotPhase(GunAnimeID::CheckStart);
@@ -523,9 +553,9 @@ namespace FPS_n2 {
 						}
 					}
 					if (m_GunSelect == 0) {
-						if (KeyControl::GetInputControl().GetPADSPress(PADS::CHECK) && GetGunPtrNow()->GetCanShot()) {
-							//GetGunPtrNow()->SetShotPhase(GunAnimeID::Watch);
-						}
+						//if (KeyControl::GetInputControl().GetPADSPress(PADS::CHECK) && GetGunPtrNow()->GetCanShot()) {
+						//	GetGunPtrNow()->SetShotPhase(GunAnimeID::Watch);
+						//}
 						if (KeyControl::GetInputControl().GetPADSPress(PADS::THROW) && GetGunPtrNow()->GetShootReady() && !GetGunPtrNow()->IsAmmoLoading()) {
 							GetGunPtrNow()->SetShotPhase(GunAnimeID::AmmoLoadStart);
 						}
@@ -537,23 +567,37 @@ namespace FPS_n2 {
 						GetGunPtrNow()->SetReloadCancel();
 					}
 				}
-				if (GetGunPtrNow()->GetShotPhase() == GunAnimeID::AmmoLoading) {
+				if (GetGunPtrNow()->GetAmmoLoadSwitch()) {
 					auto& Mag = (*GetGunPtrNow()->GetMagazinePtr());
-					switch (GetGunPtrNow()->GetAmmoLoadCount()){
+
+					auto NeedAmmoStock = MagStockControl::GetNeedAmmoStock();
+					if (NeedAmmoStock > MagStockControl::GetAmmoStock()) {
+					}
+
+					int InAmmo = MagStockControl::GetAmmoStock();
+					switch (GetGunPtrNow()->GetAmmoLoadCount()) {
 					case 1:
-						MagStockControl::SortMag();//次使うマガジンをソート
+						if (MagStockControl::GetNowMagID() == 0) {
+							InAmmo = std::clamp(InAmmo, 0, Mag->GetAmmoAll() - MagStockControl::GetMag(1));
+							MagStockControl::SetMag(1, MagStockControl::GetMag(1) + InAmmo);
+						}
+						else {
+							InAmmo = std::clamp(InAmmo, 0, Mag->GetAmmoAll() - MagStockControl::GetMag(0));
+							MagStockControl::SetMag(0, MagStockControl::GetMag(0) + InAmmo);
+						}
 						break;
 					case 2:
-						MagStockControl::SetMag(0, Mag->GetAmmoAll());
-						MagStockControl::SetMag(1, Mag->GetAmmoAll());
+						InAmmo = std::clamp(InAmmo, 0, Mag->GetAmmoAll() - MagStockControl::GetMag(2));
+						MagStockControl::SetMag(2, MagStockControl::GetMag(2) + InAmmo);
 						break;
 					case 3:
-						MagStockControl::SetMag(2, Mag->GetAmmoAll());
-						MagStockControl::SetMag(3, Mag->GetAmmoAll());
+						InAmmo = std::clamp(InAmmo, 0, Mag->GetAmmoAll() - MagStockControl::GetMag(3));
+						MagStockControl::SetMag(3, MagStockControl::GetMag(3) + InAmmo);
 						break;
 					default:
 						break;
 					}
+					MagStockControl::SubAmmoStock(InAmmo);
 				}
 
 
@@ -612,6 +656,7 @@ namespace FPS_n2 {
 			if (KeyControl::GetRun()) {
 				KeyControl::ResetLeanRate();
 			}
+
 			//
 			if (this->m_TurnBody || (this->m_MoverPer > 0.1f)) { Easing(&this->m_yrad_Upper, KeyControl::GetRad().y(), 0.85f, EasingType::OutExpo); }
 			auto YradChange = this->m_yrad_Bottom;
@@ -656,10 +701,12 @@ namespace FPS_n2 {
 				if (KeyControl::GetInputControl().GetPADSPress(PADS::MOVE_W)) { this->m_BottomAnimSelect = KeyControl::GetRun() ? GetBottomRunAnimSel() : GetBottomWalkAnimSel(); }
 				SetAnimLoop(GetBottomTurnAnimSel(), 0.5f);
 				SetAnimLoop(GetBottomRunAnimSel(), 1.f * KeyControl::GetVecFront() * GetSpeedPer());
-				SetAnimLoop(GetBottomWalkAnimSel(), 1.15f * KeyControl::GetVecFront());
-				SetAnimLoop(GetBottomLeftStepAnimSel(), 1.15f * KeyControl::GetVecLeft());
-				SetAnimLoop(GetBottomWalkBackAnimSel(), 1.15f * KeyControl::GetVecRear());
-				SetAnimLoop(GetBottomRightStepAnimSel(), 1.15f * KeyControl::GetVecRight());
+
+				float Per = std::clamp(GetSpeedPer() / 0.65f, 0.5f, 1.f);
+				SetAnimLoop(GetBottomWalkAnimSel(), 1.15f * KeyControl::GetVecFront() * Per);
+				SetAnimLoop(GetBottomLeftStepAnimSel(), 1.15f * KeyControl::GetVecLeft() * Per);
+				SetAnimLoop(GetBottomWalkBackAnimSel(), 1.15f * KeyControl::GetVecRear() * Per);
+				SetAnimLoop(GetBottomRightStepAnimSel(), 1.15f * KeyControl::GetVecRight() * Per);
 				//
 				Easing(&GetAnimeBuf(GetBottomTurnAnimSel()), (this->m_TurnBody) ? abs(this->m_yrad_UpperChange) / deg2rad(50.f) : 0.f, 0.8f, EasingType::OutExpo);
 			}
@@ -879,10 +926,16 @@ namespace FPS_n2 {
 			if (this->m_BackGround) {
 				if (m_IsMainGame) {
 					auto& MainGB = (std::shared_ptr<BackGroundClassMain>&)(this->m_BackGround);
-					for (auto& C : MainGB->GetBuildDatas()) {
+					for (auto& C : MainGB->GetBuildData()) {
 						auto Vec = (C.GetMatrix().pos() - this->m_move.pos); Vec.y(0.f);
 						if (Vec.Length() <= 2.f*Scale_Rate) {
 							cols.emplace_back(std::make_pair((MV1*)(&C.GetCol()), C.GetMeshSel()));
+						}
+					}
+					for (const auto& C : MainGB->GetDrumControl().GetDrum()) {
+						auto Vec = (C.m_Pos - this->m_move.pos); Vec.y(0.f);
+						if (Vec.Length() <= 2.f*Scale_Rate) {
+							cols.emplace_back(std::make_pair((MV1*)(&C.m_Col), -1));
 						}
 					}
 				}
@@ -894,7 +947,7 @@ namespace FPS_n2 {
 			//ほかプレイヤーとの判定
 			if (m_IsMainGame) {
 				auto* PlayerMngr = PlayerManager::Instance();
-				float Radius = 0.25f*Scale_Rate;
+				float Radius = 0.5f*Scale_Rate;
 				for (int i = 0; i < Player_num; i++) {
 					if (i == this->m_MyID) { continue; }
 					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();

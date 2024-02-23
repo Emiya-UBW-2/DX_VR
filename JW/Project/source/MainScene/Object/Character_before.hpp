@@ -6,6 +6,7 @@
 #include "CharaAnimData.hpp"
 #include "CharacterEnum.hpp"
 #include "ObjectBase.hpp"
+#include "ItemObj.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -207,13 +208,13 @@ namespace FPS_n2 {
 			ArmerPoint											m_AP{ 0 };							//スコア
 			std::vector<DamageEvent>							m_DamageEvent;						//ダメージイベント
 		protected:
-			void			SetHealEvent(PlayerID ShotID_t, PlayerID DamageID_t, Sceneclass::ObjType pCharaType, HitPoint value, ArmerPoint Armervalue) noexcept {
+			void			SetHealEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint value, ArmerPoint Armervalue) noexcept {
 				this->m_DamageEvent.resize(this->m_DamageEvent.size() + 1);
-				this->m_DamageEvent.back().SetEvent(ShotID_t, DamageID_t, pCharaType, -value, -Armervalue, DX_PI_F);
+				this->m_DamageEvent.back().SetEvent(ShotID_t, DamageID_t, -value, -Armervalue);
 			}
-			void			SetSubHPEvent(PlayerID ShotID_t, PlayerID DamageID_t, Sceneclass::ObjType pCharaType, HitPoint value, ArmerPoint Armervalue,float Rad) noexcept {
+			void			SetSubHPEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint value, ArmerPoint Armervalue) noexcept {
 				this->m_DamageEvent.resize(this->m_DamageEvent.size() + 1);
-				this->m_DamageEvent.back().SetEvent(ShotID_t, DamageID_t, pCharaType, value, Armervalue, Rad);
+				this->m_DamageEvent.back().SetEvent(ShotID_t, DamageID_t, value, Armervalue);
 			}
 		public://ゲッター
 			const auto		IsAlive(void) const noexcept { return this->m_HP != 0; }
@@ -543,11 +544,14 @@ namespace FPS_n2 {
 			class MagStock {
 			public:
 				int AmmoNum{ 0 };
+				int AmmoAll{ 0 };
 				int ModUniqueID{ -1 };
 			};
 
 			std::array<MagStock, 4>								m_MagazineStock;
 			int													m_UseMagazineID{ 0 };
+
+			int													m_AmmoStock{ 0 };
 		public:
 			const auto GetNowMagID() const noexcept { return m_UseMagazineID; }
 		private:
@@ -556,9 +560,18 @@ namespace FPS_n2 {
 			MagStockControl(void) noexcept { }
 			~MagStockControl(void) noexcept { }
 		public:
+			const auto& GetAmmoStock() const noexcept { return m_AmmoStock; }
+			void AddAmmoStock(int Ammo) noexcept {
+				m_AmmoStock += Ammo;
+			}
+			void SubAmmoStock(int Ammo) noexcept {
+				m_AmmoStock -= Ammo;
+			}
+
 			const auto& GetNowMag() const noexcept { return m_MagazineStock[m_UseMagazineID]; }
 			const auto& GetNextMag() const noexcept { return m_MagazineStock[GetNextMagID()]; }
 			const auto& GetMagDatas() const noexcept { return m_MagazineStock; }
+			const auto& GetMag(int select) const noexcept { return m_MagazineStock[select].AmmoNum; }
 			const auto IsEnableReload() const noexcept {
 				for (const auto& M : GetMagDatas()) {
 					if (GetNowMagID() == (int)(&M - &GetMagDatas().front())) {
@@ -571,10 +584,11 @@ namespace FPS_n2 {
 				return false;
 			}
 		public:
-			void Init_MagStockControl(int AmmoNum, int ModUniqueID) noexcept;
+			void Init_MagStockControl(int AmmoNum, int AmmoAll, int ModUniqueID) noexcept;
 			void SetMag(int select, int AmmoNum) noexcept;
-			void SetNextMag(int OLDAmmoNum, int OLDModUniqueID) noexcept;
+			void SetNextMag(int OLDAmmoNum, int OLDAmmoAll, int OLDModUniqueID) noexcept;
 			void SortMag() noexcept;
+			int GetNeedAmmoStock() noexcept;
 		};
 		//
 		class HitReactionControl {
@@ -783,6 +797,16 @@ namespace FPS_n2 {
 					}
 				}
 			}
+		};
+		//
+		class ItemFallControl {
+		private:
+			std::array<std::shared_ptr<ItemObjClass>, 4>	m_Ptr;
+			int												m_Now{ 0 };
+		public:
+			void		Init(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath, ItemType type);
+			void		SetFall(const VECTOR_ref& pPos, const VECTOR_ref& pVec);
+			void		Dispose() noexcept;
 		};
 	};
 };

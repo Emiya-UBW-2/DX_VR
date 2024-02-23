@@ -23,10 +23,10 @@ namespace FPS_n2 {
 			public:
 				bool SetPrevPolyUnit(PATHPLANNING_UNIT *PUnit, int tris, const std::shared_ptr<BackGroundClassMain>& m_BackGround) {
 					// 隣接するポリゴンが既に経路探索処理が行われていて、且つより距離の長い経路となっている場合は何もしない
-					auto& Unit = m_BackGround->GetBuildDatas().at(PUnit->PolyIndex);
+					auto& Unit = m_BackGround->GetBuildData().at(PUnit->PolyIndex);
 
 					auto trisdistance = PUnit->TotalDistance +
-						(m_BackGround->GetBuildDatas().at(Unit.GetLinkPolyIndex(tris)).GetMatrix().pos() + Unit.GetMatrix().pos()).Length();
+						(m_BackGround->GetBuildData().at(Unit.GetLinkPolyIndex(tris)).GetMatrix().pos() + Unit.GetMatrix().pos()).Length();
 
 					if (this->TotalDistance > trisdistance) {
 						this->TotalDistance = trisdistance;		// 隣接するポリゴンにここに到達するまでの距離を代入する
@@ -90,7 +90,7 @@ namespace FPS_n2 {
 						}
 					}
 					// 移動方向を決定する、移動方向は現在の座標から中間地点のポリゴンの中心座標に向かう方向
-					return m_BackGround->GetBuildDatas().at(*TargetPathPlanningIndex).GetMatrix().pos();
+					return m_BackGround->GetBuildData().at(*TargetPathPlanningIndex).GetMatrix().pos();
 				}
 				else {
 					// 方向は目標座標
@@ -102,7 +102,7 @@ namespace FPS_n2 {
 				// 指定の２点の経路を探索する( 戻り値  true:経路構築成功  false:経路構築失敗( スタート地点とゴール地点を繋ぐ経路が無かった等 ) )
 				this->GoalPosition = GoalPos;			// ゴール位置を保存
 
-				this->UnitArray.resize(m_BackGround->GetBuildDatas().size());			// 経路探索用のポリゴン情報を格納するメモリ領域を確保、初期化
+				this->UnitArray.resize(m_BackGround->GetBuildData().size());			// 経路探索用のポリゴン情報を格納するメモリ領域を確保、初期化
 				for (auto& p : this->UnitArray) {
 					p.Init((int)(&p - &this->UnitArray.front()));
 				}
@@ -126,7 +126,7 @@ namespace FPS_n2 {
 					while (true) {
 						// ポリゴンの辺の数だけ繰り返し
 						for (int K = 0; K < 4; K++) {
-							int Index = m_BackGround->GetBuildDatas().at(PUnit->GetPolyIndex()).GetLinkPolyIndex(K);
+							int Index = m_BackGround->GetBuildData().at(PUnit->GetPolyIndex()).GetLinkPolyIndex(K);
 							if (Index == -1) { continue; }											// 辺に隣接するポリゴンが無い場合は何もしない
 							if (Index == this->StartUnit->GetPolyIndex()) { continue; }				//スタート地点のポリゴンだった場合は何もしない
 							auto& NowUnit = this->UnitArray[Index];
@@ -236,14 +236,14 @@ namespace FPS_n2 {
 				auto Target = TgtPos;
 				if (GetLengthToTarget() > 10.f*Scale_Rate) {
 					std::vector<int> SelList;
-					for (auto& C : this->m_BackGround->GetBuildDatas()) {
+					for (auto& C : this->m_BackGround->GetBuildData()) {
 						if (C.GetMeshSel() < 0) { continue; }
 						auto Vec = C.GetMatrix().pos() - Target; Vec.y(0.f);
 						if (Vec.Length() < 10.f*Scale_Rate) {
-							SelList.emplace_back((int)(&C - &this->m_BackGround->GetBuildDatas().front()));
+							SelList.emplace_back((int)(&C - &this->m_BackGround->GetBuildData().front()));
 						}
 					}
-					Target = this->m_BackGround->GetBuildDatas().at(SelList.at(GetRand((int)SelList.size() - 1))).GetMatrix().pos();
+					Target = this->m_BackGround->GetBuildData().at(SelList.at(GetRand((int)SelList.size() - 1))).GetMatrix().pos();
 				}
 				m_PathChecker.Dispose();
 				auto MyPos_XZ = MyPos; MyPos_XZ.y(0.f);
@@ -259,7 +259,7 @@ namespace FPS_n2 {
 
 				VECTOR_ref pos_t;
 				while (true) {
-					pos_t = this->m_BackGround->GetBuildDatas().at(GetRand((int)(this->m_BackGround->GetBuildDatas().size()) - 1)).GetMatrix().pos();
+					pos_t = this->m_BackGround->GetBuildData().at(GetRand((int)(this->m_BackGround->GetBuildData().size()) - 1)).GetMatrix().pos();
 
 					VECTOR_ref StartPos = TgtPos;
 					VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 1.f*Scale_Rate;

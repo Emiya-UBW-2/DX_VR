@@ -29,6 +29,7 @@ namespace FPS_n2 {
 			int										m_NextMagNum{ 0 };
 			int										m_NextMagUniqueID{ 0 };
 			int										m_AmmoLoadCount{ 0 };
+			bool									m_AmmoLoadSwitch{ false };
 			bool									m_IsAmmoLoadCount{ false };
 			VECTOR_ref								m_RecoilRadAdd;
 			FallControl								m_MagFall;
@@ -68,6 +69,7 @@ namespace FPS_n2 {
 			const MATRIX_ref GetFrameWorldMat(GunFrame frame) const noexcept;
 
 			const auto&		GetAmmoLoadCount(void) const noexcept { return m_AmmoLoadCount; }
+			const auto&		GetAmmoLoadSwitch(void) const noexcept { return m_AmmoLoadSwitch; }
 		public:
 			void ResetFrameLocalMat(GunFrame frame) noexcept;
 			void SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept;

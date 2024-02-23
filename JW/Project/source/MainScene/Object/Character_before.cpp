@@ -130,20 +130,23 @@ namespace FPS_n2 {
 			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::LeftFoot).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
 		}
 
-		void MagStockControl::Init_MagStockControl(int AmmoNum, int ModUniqueID) noexcept {
+		void MagStockControl::Init_MagStockControl(int AmmoNum, int AmmoAll, int ModUniqueID) noexcept {
 			size_t Total = m_MagazineStock.size();
 			for (size_t i = 0; i < Total; i++) {
 				m_MagazineStock[i].AmmoNum = AmmoNum;
+				m_MagazineStock[i].AmmoAll = AmmoAll;
 				m_MagazineStock[i].ModUniqueID = ModUniqueID;
 			}
 			m_UseMagazineID = 0;
 
+			m_AmmoStock = 0;
 		}
 		void MagStockControl::SetMag(int select, int AmmoNum) noexcept {
 			m_MagazineStock[select].AmmoNum = AmmoNum;
 		}
-		void MagStockControl::SetNextMag(int OLDAmmoNum, int OLDModUniqueID) noexcept {
+		void MagStockControl::SetNextMag(int OLDAmmoNum, int OLDAmmoAll, int OLDModUniqueID) noexcept {
 			m_MagazineStock[m_UseMagazineID].AmmoNum = OLDAmmoNum;
+			m_MagazineStock[m_UseMagazineID].AmmoAll = OLDAmmoAll;
 			m_MagazineStock[m_UseMagazineID].ModUniqueID = OLDModUniqueID;
 			for (int i = 0; i < 4; i++) {
 				m_UseMagazineID = GetNextMagID();
@@ -154,6 +157,38 @@ namespace FPS_n2 {
 			m_UseMagazineID = 0;
 			std::sort(m_MagazineStock.begin(), m_MagazineStock.end(), [&](const MagStock&A, const MagStock&B) {return A.AmmoNum > B.AmmoNum; });
 		}
+		int MagStockControl::GetNeedAmmoStock() noexcept {
+			int Ret = 0;
+			int Total = (int)m_MagazineStock.size();
+			for (int i = 0; i < Total; i++) {
+				if (i == m_UseMagazineID) { continue; }
+				Ret += m_MagazineStock[i].AmmoAll - m_MagazineStock[i].AmmoNum;
+			}
+			return Ret;
+		}
 
+		void ItemFallControl::Init(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath, ItemType type) {
+			auto* ObjMngr = ObjectManager::Instance();
+			for (auto& c : m_Ptr) {
+				auto* Ptr = ObjMngr->MakeObject(ObjType::ItemObj);
+				ObjMngr->LoadObjectModel((*Ptr).get(), pPath.c_str());
+				MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
+				c = (std::shared_ptr<ItemObjClass>&)(*Ptr);
+				c->SetMapCol(backGround);
+				c->Init();
+				c->SetItemType(type);
+			}
+		}
+		void ItemFallControl::SetFall(const VECTOR_ref& pPos, const VECTOR_ref& pVec) {
+			this->m_Ptr[this->m_Now]->SetFall(pPos, pVec);
+			++this->m_Now %= this->m_Ptr.size();
+		}
+		void ItemFallControl::Dispose() noexcept {
+			auto* ObjMngr = ObjectManager::Instance();
+			for (auto& c : m_Ptr) {
+				ObjMngr->DelObj((SharedObj*)&c);
+				c.reset();
+			}
+		}
 	};
 };

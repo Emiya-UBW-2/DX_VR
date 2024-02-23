@@ -22,6 +22,7 @@ namespace FPS_n2 {
 			Sight,
 			MuzzleAdapter,
 			MovieObj,
+			ItemObj,
 			Max,
 		};
 		enum class SoundEnum {
@@ -29,6 +30,7 @@ namespace FPS_n2 {
 			StandUp,
 			SlideFoot,
 			StandupFoot,
+			GetAmmo,
 			Heart,
 			//
 			Env,
