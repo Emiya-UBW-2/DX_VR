@@ -98,6 +98,10 @@ namespace FPS_n2 {
 				this->m_IsMainGame = IsMainGame;
 				m_ItemFallControl.at(0).Init(this->m_BackGround, "data/model/AmmoBox/", ItemType::AMMO);
 				m_ItemFallControl.at(1).Init(this->m_BackGround, "data/model/Armer/", ItemType::ARMER);
+				this->m_Gun_Ptr[0]->SetMapCol(this->m_BackGround);
+				if (this->m_Gun_Ptr[1]) {
+				this->m_Gun_Ptr[1]->SetMapCol(this->m_BackGround);
+				}
 			}
 		private:
 			void			SetReady(void) noexcept { this->m_ReadyTimer = UpperTimerLimit; }
