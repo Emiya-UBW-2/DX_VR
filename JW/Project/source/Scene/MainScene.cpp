@@ -50,8 +50,10 @@ namespace FPS_n2 {
 			this->m_BackGround->Init("", "");//1.59秒
 			//ロード
 			LoadChara("Suit", GetMyPlayerID(), false);
-			GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
-			LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
+			//GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
+			//LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
+			LoadGun("PCC_4", GetMyPlayerID(), false, 0);
+
 			//LoadGun("PCC_4", GetMyPlayerID(), false, 1);
 			LoadGun("AKS-74", GetMyPlayerID(), false, 1);
 			//LoadGun("M16-4", GetMyPlayerID(), false, 1);

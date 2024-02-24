@@ -7,7 +7,8 @@
 #include "../MainScene/NetworkBrowser.hpp"
 #include "../MainScene/Object/Character.hpp"
 #include "../MainScene/Player/CPU.hpp"
-#include "CustomScene.hpp"
+
+#include "../MainScene/Object/GunsModify.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {

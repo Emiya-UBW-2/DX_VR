@@ -1,10 +1,11 @@
 #pragma once
 #include	"../Header.hpp"
 
-#include	"CustomScene.hpp"
 #include "../MainScene/MainSceneSub.hpp"
 #include "../MainScene/Object/Character.hpp"
 #include "../MainScene/UI/MainSceneUIControl.hpp"
+
+#include "../MainScene/Object/GunsModify.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
