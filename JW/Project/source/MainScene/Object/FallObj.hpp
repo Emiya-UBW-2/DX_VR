@@ -5,17 +5,17 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class FallObjClass : public ObjectBaseClass {
-			float m_yAdd{ 0.f };
-			float m_Timer{ 0.f };
-			bool m_SoundSwitch{ false };
-			SoundEnum m_CallSound{ SoundEnum::CartFall };
+			float m_yAdd{0.f};
+			float m_Timer{0.f};
+			bool m_SoundSwitch{false};
+			SoundEnum m_CallSound{SoundEnum::CartFall};
 		private:
 			std::shared_ptr<BackGroundClassBase>		m_BackGround;				//BG
 		public:
 			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept { this->m_BackGround = backGround; }
 		public:
 			FallObjClass(void) noexcept { this->m_objType = ObjType::FallObj; }
-			~FallObjClass(void) noexcept { }
+			~FallObjClass(void) noexcept {}
 		public:
 			void			SetFall(const VECTOR_ref& pos, const MATRIX_ref& mat, const VECTOR_ref& vec, float timer, SoundEnum sound) noexcept;
 		public:

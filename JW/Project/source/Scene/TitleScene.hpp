@@ -5,20 +5,20 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class TitleScene : public TEMPSCENE {
 		private:
-			int select{ 0 };
+			int select{0};
 
 			std::array<float, 4> GameStart{};
 			std::array<float, 4> SelYadd{};
 
-			float GameFadeIn{ 0.f };
+			float GameFadeIn{0.f};
 		public:
 			const auto SelMode() const noexcept { return select; }
 		public:
-			TitleScene(void) noexcept { }
+			TitleScene(void) noexcept {}
 			void			Set_Sub(void) noexcept override;
 			//
 			bool			Update_Sub(void) noexcept override;
-			void			Dispose_Sub(void) noexcept override{}
+			void			Dispose_Sub(void) noexcept override {}
 			//
 			void			Depth_Draw_Sub(void) noexcept override {}
 			void			BG_Draw_Sub(void) noexcept override {}

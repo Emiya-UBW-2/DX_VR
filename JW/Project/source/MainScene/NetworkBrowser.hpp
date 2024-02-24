@@ -19,18 +19,18 @@ namespace FPS_n2 {
 			//クライアント専用
 			ClientControl			m_ClientCtrl;																//
 			//共通
-			bool					m_IsClient{ true };															//
-			SequenceEnum			m_Sequence{ SequenceEnum::SelMode };										//
-			bool					m_SeqFirst{ false };														//
-			float					m_Tick{ 1.f };																//
+			bool					m_IsClient{true};															//
+			SequenceEnum			m_Sequence{SequenceEnum::SelMode};										//
+			bool					m_SeqFirst{false};														//
+			float					m_Tick{1.f};																//
 			NewWorkSetting			m_NewWorkSetting;															//
-			int						m_NewWorkSelect{ 0 };														//
+			int						m_NewWorkSelect{0};														//
 			NewSetting				m_NewSetting;																//
-			double					m_ClientFrame{ 0.0 };
-			float					m_Ping{ 0.f };
+			double					m_ClientFrame{0.0};
+			float					m_Ping{0.f};
 
 			switchs					m_LeftClick;
-			float					m_LeftPressTimer{ 0.f };
+			float					m_LeftPressTimer{0.f};
 		public:
 			const auto& GetClient(void) const noexcept { return this->m_IsClient; }
 			const auto& GetSequence(void) const noexcept { return this->m_Sequence; }
@@ -185,94 +185,94 @@ namespace FPS_n2 {
 				}
 				auto Prev = this->m_Sequence;
 				switch (this->m_Sequence) {
-				case SequenceEnum::SelMode:
-					if (ClickBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "クライアントになる")) {
-						this->m_IsClient = true;
-						this->m_Tick = 1.f;
-						this->m_Sequence = SequenceEnum::CheckPreset;
-					}
-					if (ClickBox(xp, yp + y_r(100), xp + xs, yp + y_r(100) + y_h, "サーバーになる")) {
-						this->m_IsClient = false;
-						this->m_Tick = 1.f;
-						this->m_Sequence = SequenceEnum::CheckPreset;
-					}
-					break;
-				case SequenceEnum::CheckPreset:
-					MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "プリセット設定");
-					for (int i = 0; i < this->m_NewWorkSetting.GetSize(); i++) {
-						auto n = this->m_NewWorkSetting.Get(i);
-						if (ClickBox(xp, yp + y_r(50)*(i + 2), xp + xs, yp + y_r(50)*(i + 2) + y_h, "[%d][%d,%d,%d,%d]", n.UsePort, n.IP.d1, n.IP.d2, n.IP.d3, n.IP.d4)) {
-							this->m_NewSetting.UsePort = n.UsePort;
-							this->m_NewSetting.IP = n.IP;
+					case SequenceEnum::SelMode:
+						if (ClickBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "クライアントになる")) {
+							this->m_IsClient = true;
+							this->m_Tick = 1.f;
+							this->m_Sequence = SequenceEnum::CheckPreset;
+						}
+						if (ClickBox(xp, yp + y_r(100), xp + xs, yp + y_r(100) + y_h, "サーバーになる")) {
+							this->m_IsClient = false;
+							this->m_Tick = 1.f;
+							this->m_Sequence = SequenceEnum::CheckPreset;
+						}
+						break;
+					case SequenceEnum::CheckPreset:
+						MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "プリセット設定");
+						for (int i = 0; i < this->m_NewWorkSetting.GetSize(); i++) {
+							auto n = this->m_NewWorkSetting.Get(i);
+							if (ClickBox(xp, yp + y_r(50)*(i + 2), xp + xs, yp + y_r(50)*(i + 2) + y_h, "[%d][%d,%d,%d,%d]", n.UsePort, n.IP.d1, n.IP.d2, n.IP.d3, n.IP.d4)) {
+								this->m_NewSetting.UsePort = n.UsePort;
+								this->m_NewSetting.IP = n.IP;
+								this->m_Sequence = SequenceEnum::SetTick;
+								m_NewWorkSelect = i;
+								break;
+							}
+						}
+						{
+							int i = this->m_NewWorkSetting.GetSize();
+							if (ClickBox(xp, yp + y_r(50)*(i + 2), xp + xs, yp + y_r(50)*(i + 2) + y_h, "設定を追加する")) {
+								m_NewWorkSetting.Add();
+								m_NewWorkSelect = i;
+								this->m_Sequence = SequenceEnum::Set_Port;
+							}
+						}
+						break;
+					case SequenceEnum::Set_Port://ポート
+						MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "ポート=[%d-%d]", this->m_NewSetting.UsePort, this->m_NewSetting.UsePort + Player_num - 1);
+						AddSubBox(xp, yp + y_r(100), [&]() { this->m_NewSetting.UsePort++; }, [&]() { this->m_NewSetting.UsePort--; });
+						if (ClickBox(y_r(380), yp + y_r(100), y_r(380) + y_r(120), yp + y_r(100) + y_h, "Set")) {
+							this->m_Sequence = SequenceEnum::SetIP;//サーバ-は一応いらない
+						}
+						break;
+					case SequenceEnum::SetIP://IP
+						MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "IP=[%d,%d,%d,%d]", this->m_NewSetting.IP.d1, this->m_NewSetting.IP.d2, this->m_NewSetting.IP.d3, this->m_NewSetting.IP.d4);
+						for (int i = 0; i < 4; i++) {
+							auto* ip_tmp = &this->m_NewSetting.IP.d1;
+							switch (i) {
+								case 0:ip_tmp = &this->m_NewSetting.IP.d1; break;
+								case 1:ip_tmp = &this->m_NewSetting.IP.d2; break;
+								case 2:ip_tmp = &this->m_NewSetting.IP.d3; break;
+								case 3:ip_tmp = &this->m_NewSetting.IP.d4; break;
+							}
+							AddSubBox(y_r(100 + 70 * i), yp + y_r(100),
+									  [&]() {
+										  if (*ip_tmp == 255) { *ip_tmp = 0; }
+										  else { (*ip_tmp)++; }
+									  }, [&]() {
+										  if (*ip_tmp == 0) { *ip_tmp = 255; }
+										  else { (*ip_tmp)--; }
+									  });
+						}
+						if (ClickBox(y_r(380), yp + y_r(100), y_r(380) + y_r(120), yp + y_r(100) + y_h, "Set")) {
 							this->m_Sequence = SequenceEnum::SetTick;
-							m_NewWorkSelect = i;
-							break;
+							m_NewWorkSetting.Set(this->m_NewWorkSelect, this->m_NewSetting);
+							m_NewWorkSetting.Save();
 						}
-					}
-					{
-						int i = this->m_NewWorkSetting.GetSize();
-						if (ClickBox(xp, yp + y_r(50)*(i + 2), xp + xs, yp + y_r(50)*(i + 2) + y_h, "設定を追加する")) {
-							m_NewWorkSetting.Add();
-							m_NewWorkSelect = i;
-							this->m_Sequence = SequenceEnum::Set_Port;
+						break;
+					case SequenceEnum::SetTick:
+						MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "ティック=[%4.1f]", Frame_Rate / this->m_Tick);
+						AddSubBox(xp, yp + y_r(100), [&]() { this->m_Tick = std::clamp(this->m_Tick - 1.f, 1.f, 20.f); }, [&]() { this->m_Tick = std::clamp(this->m_Tick + 1.f, 1.f, 20.f); });
+						if (ClickBox(y_r(380), yp + y_r(100), y_r(380) + y_r(120), yp + y_r(100) + y_h, "Set")) {
+							this->m_Sequence = SequenceEnum::Matching;
 						}
-					}
-					break;
-				case SequenceEnum::Set_Port://ポート
-					MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "ポート=[%d-%d]", this->m_NewSetting.UsePort, this->m_NewSetting.UsePort + Player_num - 1);
-					AddSubBox(xp, yp + y_r(100), [&]() { this->m_NewSetting.UsePort++; }, [&]() { this->m_NewSetting.UsePort--; });
-					if (ClickBox(y_r(380), yp + y_r(100), y_r(380) + y_r(120), yp + y_r(100) + y_h, "Set")) {
-						this->m_Sequence = SequenceEnum::SetIP;//サーバ-は一応いらない
-					}
-					break;
-				case SequenceEnum::SetIP://IP
-					MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "IP=[%d,%d,%d,%d]", this->m_NewSetting.IP.d1, this->m_NewSetting.IP.d2, this->m_NewSetting.IP.d3, this->m_NewSetting.IP.d4);
-					for (int i = 0; i < 4; i++) {
-						auto* ip_tmp = &this->m_NewSetting.IP.d1;
-						switch (i) {
-						case 0:ip_tmp = &this->m_NewSetting.IP.d1; break;
-						case 1:ip_tmp = &this->m_NewSetting.IP.d2; break;
-						case 2:ip_tmp = &this->m_NewSetting.IP.d3; break;
-						case 3:ip_tmp = &this->m_NewSetting.IP.d4; break;
+						break;
+					case SequenceEnum::Matching:
+						MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "他プレイヤー待機中…");
+						for (int i = 0; i < Player_num; i++) {
+							bool isActive = (this->m_IsClient) ? this->m_ClientCtrl.GetServerDataCommon().PlayerData[i].IsActive : this->m_ServerCtrl.GetServerData().PlayerData[i].IsActive;
+							int yp1 = yp + y_r(50) + y_r(35)*(i + 1);
+							color = isActive ? Black : Gray;
+							DrawBox(y_r(200), yp1, y_r(200) + y_r(300), yp1 + y_h, color, TRUE);
+							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, y_r(200), yp1, White, Black, "Player");
+							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, y_r(200) + y_r(300), yp1, White, Black, (isActive ? "〇" : ""));
 						}
-						AddSubBox(y_r(100 + 70 * i), yp + y_r(100),
-							[&]() {
-							if (*ip_tmp == 255) { *ip_tmp = 0; }
-							else { (*ip_tmp)++; }
-						}, [&]() {
-							if (*ip_tmp == 0) { *ip_tmp = 255; }
-							else { (*ip_tmp)--; }
-						});
-					}
-					if (ClickBox(y_r(380), yp + y_r(100), y_r(380) + y_r(120), yp + y_r(100) + y_h, "Set")) {
-						this->m_Sequence = SequenceEnum::SetTick;
-						m_NewWorkSetting.Set(this->m_NewWorkSelect, this->m_NewSetting);
-						m_NewWorkSetting.Save();
-					}
-					break;
-				case SequenceEnum::SetTick:
-					MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "ティック=[%4.1f]", Frame_Rate / this->m_Tick);
-					AddSubBox(xp, yp + y_r(100), [&]() { this->m_Tick = std::clamp(this->m_Tick - 1.f, 1.f, 20.f); }, [&]() { this->m_Tick = std::clamp(this->m_Tick + 1.f, 1.f, 20.f); });
-					if (ClickBox(y_r(380), yp + y_r(100), y_r(380) + y_r(120), yp + y_r(100) + y_h, "Set")) {
-						this->m_Sequence = SequenceEnum::Matching;
-					}
-					break;
-				case SequenceEnum::Matching:
-					MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "他プレイヤー待機中…");
-					for (int i = 0; i < Player_num; i++) {
-						bool isActive = (this->m_IsClient) ? this->m_ClientCtrl.GetServerDataCommon().PlayerData[i].IsActive : this->m_ServerCtrl.GetServerData().PlayerData[i].IsActive;
-						int yp1 = yp + y_r(50) + y_r(35)*(i + 1);
-						color = isActive ? Black : Gray;
-						DrawBox(y_r(200), yp1, y_r(200) + y_r(300), yp1 + y_h, color, TRUE);
-						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, y_r(200), yp1, White, Black, "Player");
-						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, y_r(200) + y_r(300), yp1, White, Black, (isActive ? "〇" : ""));
-					}
-					break;
-				case SequenceEnum::MainGame:
-					MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "通信中!");
-					break;
-				default:
-					break;
+						break;
+					case SequenceEnum::MainGame:
+						MsgBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, "通信中!");
+						break;
+					default:
+						break;
 				}
 				m_SeqFirst = (Prev != this->m_Sequence);
 			}

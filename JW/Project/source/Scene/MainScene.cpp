@@ -128,41 +128,41 @@ namespace FPS_n2 {
 			Pad->SetMouseMoveEnable(true);
 			Pad->ChangeGuide(
 				[&]() {
-				auto* KeyGuide = PadControl::Instance();
-				if (DXDraw::Instance()->IsPause()) {
-					KeyGuide->AddGuide(PADS::INTERACT, "決定");
-					KeyGuide->AddGuide(PADS::RELOAD, "戻る");
-					KeyGuide->AddGuide(PADS::MOVE_W, "");
-					KeyGuide->AddGuide(PADS::MOVE_S, "");
-					KeyGuide->AddGuide(PADS::MOVE_STICK, "選択");
-				}
-				else {
-					KeyGuide->AddGuide(PADS::MOVE_W, "");
-					KeyGuide->AddGuide(PADS::MOVE_S, "");
-					KeyGuide->AddGuide(PADS::MOVE_A, "");
-					KeyGuide->AddGuide(PADS::MOVE_D, "");
-					KeyGuide->AddGuide(PADS::MOVE_STICK, "移動");
+					auto* KeyGuide = PadControl::Instance();
+					if (DXDraw::Instance()->IsPause()) {
+						KeyGuide->AddGuide(PADS::INTERACT, "決定");
+						KeyGuide->AddGuide(PADS::RELOAD, "戻る");
+						KeyGuide->AddGuide(PADS::MOVE_W, "");
+						KeyGuide->AddGuide(PADS::MOVE_S, "");
+						KeyGuide->AddGuide(PADS::MOVE_STICK, "選択");
+					}
+					else {
+						KeyGuide->AddGuide(PADS::MOVE_W, "");
+						KeyGuide->AddGuide(PADS::MOVE_S, "");
+						KeyGuide->AddGuide(PADS::MOVE_A, "");
+						KeyGuide->AddGuide(PADS::MOVE_D, "");
+						KeyGuide->AddGuide(PADS::MOVE_STICK, "移動");
 
-					KeyGuide->AddGuide(PADS::LEAN_L, "");
-					KeyGuide->AddGuide(PADS::LEAN_R, "覗き");
-					KeyGuide->AddGuide(PADS::RUN, "走る");
-					KeyGuide->AddGuide(PADS::WALK, "歩く");
-					KeyGuide->AddGuide(PADS::SQUAT, "しゃがむ");
+						KeyGuide->AddGuide(PADS::LEAN_L, "");
+						KeyGuide->AddGuide(PADS::LEAN_R, "覗き");
+						KeyGuide->AddGuide(PADS::RUN, "走る");
+						KeyGuide->AddGuide(PADS::WALK, "歩く");
+						KeyGuide->AddGuide(PADS::SQUAT, "しゃがむ");
 
-					KeyGuide->AddGuide(PADS::SHOT, "射撃");
-					KeyGuide->AddGuide(PADS::ULT, "武器切替");
-					KeyGuide->AddGuide(PADS::AIM, "エイム");
-					KeyGuide->AddGuide(PADS::MELEE, "殴打");
+						KeyGuide->AddGuide(PADS::SHOT, "射撃");
+						KeyGuide->AddGuide(PADS::ULT, "武器切替");
+						KeyGuide->AddGuide(PADS::AIM, "エイム");
+						KeyGuide->AddGuide(PADS::MELEE, "殴打");
 
-					KeyGuide->AddGuide(PADS::RELOAD, "再装填");
+						KeyGuide->AddGuide(PADS::RELOAD, "再装填");
 
-					//KeyGuide->AddGuide(PADS::THROW, "弾込");
-					//KeyGuide->AddGuide(PADS::CHECK, "アーマー着用");
+						//KeyGuide->AddGuide(PADS::THROW, "弾込");
+						//KeyGuide->AddGuide(PADS::CHECK, "アーマー着用");
 
-					//KeyGuide->AddGuide(PADS::INTERACT, "取得");
-					KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
-				}
-			});
+						//KeyGuide->AddGuide(PADS::INTERACT, "取得");
+						KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
+					}
+				});
 
 			if (DXDraw::Instance()->IsPause()) {
 				m_MainLoopPauseControl.Execute();
@@ -398,19 +398,19 @@ namespace FPS_n2 {
 								float Len = (tgt->GetMove().pos - pos_tmp).Length();
 								if (Len < 1.f*Scale_Rate) {
 									switch (a->GetItemType()) {
-									case ItemType::AMMO:
-										tgt->AddAmmoStock(2 + GetRand(8));
-										isHit = true;
-										SE->Get((int)SoundEnum::GetAmmo).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
-										break;
-									case ItemType::ARMER:
-										if (tgt->GetArmer()) {
+										case ItemType::AMMO:
+											tgt->AddAmmoStock(2 + GetRand(8));
 											isHit = true;
-											SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
-										}
-										break;
-									default:
-										break;
+											SE->Get((int)SoundEnum::GetAmmo).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
+											break;
+										case ItemType::ARMER:
+											if (tgt->GetArmer()) {
+												isHit = true;
+												SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
+											}
+											break;
+										default:
+											break;
 									}
 									if (isHit) {
 										break;
@@ -502,12 +502,12 @@ namespace FPS_n2 {
 				auto Len = (DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(0)).Length();
 				auto LenPer = std::clamp(Len / (5.f*Scale_Rate), 0.f, 1.f);
 				bool HPLow = Chara->GetHP() < (Chara->GetHPMax() * 3 / 10);
-				Easing(&Min, 
+				Easing(&Min,
 					(HPLow) ? Lerp(20.f, 35.f, LenPer) : Lerp(0.f, 25.f, LenPer),
-					0.95f, EasingType::OutExpo);
-				Easing(&Gamma, 
+					   0.95f, EasingType::OutExpo);
+				Easing(&Gamma,
 					(HPLow) ? Lerp(1.15f, 1.35f, LenPer) : Lerp(1.f, 1.15f, LenPer),
-					0.95f, EasingType::OutExpo);
+					   0.95f, EasingType::OutExpo);
 
 				PostPassEffect::Instance()->SetLevelFilter((int)Min, (HPLow) ? 128 : 192, Gamma);
 			}
@@ -518,10 +518,10 @@ namespace FPS_n2 {
 				auto mat = Chara->GetGunPtrNow()->GetFrameWorldMat(GunFrame::Muzzle);
 				SetLightEnable(TRUE);
 				ChangeLightTypePoint(mat.pos().get(),
-					4.0f*Scale_Rate,
-					0.001f,
-					0.012f,
-					0.004f);
+									 4.0f*Scale_Rate,
+									 0.001f,
+									 0.012f,
+									 0.004f);
 			}
 			SetShadowDir(VECTOR_ref::vget(0.f, -1.f, 0.f), 0);
 			//SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(0)).Norm(), 0);
@@ -709,8 +709,7 @@ namespace FPS_n2 {
 				}
 			}
 #ifdef DEBUG
-			if (false)
-			{
+			if (false) {
 				for (int i = 1; i < Chara_num; i++) {
 					m_AICtrl[i]->Draw();
 				}
@@ -889,7 +888,7 @@ namespace FPS_n2 {
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 				if (index == 0) { continue; }
-				if(!c->IsAlive()) { continue; }
+				if (!c->IsAlive()) { continue; }
 				if (c->CanLookTarget) {
 					float length = std::max(1.f, 0.5f / std::max((MyPos - c->GetMove().pos).Length() / (100.f*Scale_Rate), 0.1f));
 
@@ -1004,7 +1003,7 @@ namespace FPS_n2 {
 			for (int i = 0; i < 5; i++) {
 				SE->Add((int)SoundEnum::HitGround0 + i, 2, "data/Sound/SE/gun/HitGround/" + std::to_string(i + 1) + ".wav");
 			}
-			
+
 			for (int i = 0; i < 6; i++) {
 				SE->Add((int)SoundEnum::Man_Hurt1 + i, 2, "data/Sound/SE/voice/hurt_0" + std::to_string(i + 1) + ".wav");
 			}
@@ -1102,7 +1101,7 @@ namespace FPS_n2 {
 			if (ID == 0) {
 				auto* ArmerPtr = ObjMngr->MakeObject(ObjType::Armer);
 				auto& a = (std::shared_ptr<ArmerClass>&)(*ArmerPtr);
-				
+
 				ObjMngr->LoadObjectModel((*ArmerPtr).get(), "data/model/PlateCarrler/");
 				(*ArmerPtr)->Init();
 				c->SetArmer(a);

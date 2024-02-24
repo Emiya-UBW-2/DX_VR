@@ -92,41 +92,41 @@ namespace FPS_n2 {
 			Pad->SetMouseMoveEnable(true);
 			Pad->ChangeGuide(
 				[&]() {
-				auto* KeyGuide = PadControl::Instance();
-				if (DXDraw::Instance()->IsPause()) {
-					KeyGuide->AddGuide(PADS::INTERACT, "決定");
-					KeyGuide->AddGuide(PADS::RELOAD, "戻る");
-					KeyGuide->AddGuide(PADS::MOVE_W, "");
-					KeyGuide->AddGuide(PADS::MOVE_S, "");
-					KeyGuide->AddGuide(PADS::MOVE_STICK, "選択");
-				}
-				else {
-					KeyGuide->AddGuide(PADS::MOVE_W, "");
-					KeyGuide->AddGuide(PADS::MOVE_S, "");
-					KeyGuide->AddGuide(PADS::MOVE_A, "");
-					KeyGuide->AddGuide(PADS::MOVE_D, "");
-					KeyGuide->AddGuide(PADS::MOVE_STICK, "移動");
+					auto* KeyGuide = PadControl::Instance();
+					if (DXDraw::Instance()->IsPause()) {
+						KeyGuide->AddGuide(PADS::INTERACT, "決定");
+						KeyGuide->AddGuide(PADS::RELOAD, "戻る");
+						KeyGuide->AddGuide(PADS::MOVE_W, "");
+						KeyGuide->AddGuide(PADS::MOVE_S, "");
+						KeyGuide->AddGuide(PADS::MOVE_STICK, "選択");
+					}
+					else {
+						KeyGuide->AddGuide(PADS::MOVE_W, "");
+						KeyGuide->AddGuide(PADS::MOVE_S, "");
+						KeyGuide->AddGuide(PADS::MOVE_A, "");
+						KeyGuide->AddGuide(PADS::MOVE_D, "");
+						KeyGuide->AddGuide(PADS::MOVE_STICK, "移動");
 
-					KeyGuide->AddGuide(PADS::LEAN_L, "");
-					KeyGuide->AddGuide(PADS::LEAN_R, "覗き");
-					KeyGuide->AddGuide(PADS::RUN, "走る");
-					KeyGuide->AddGuide(PADS::WALK, "歩く");
-					KeyGuide->AddGuide(PADS::SQUAT, "しゃがむ");
+						KeyGuide->AddGuide(PADS::LEAN_L, "");
+						KeyGuide->AddGuide(PADS::LEAN_R, "覗き");
+						KeyGuide->AddGuide(PADS::RUN, "走る");
+						KeyGuide->AddGuide(PADS::WALK, "歩く");
+						KeyGuide->AddGuide(PADS::SQUAT, "しゃがむ");
 
-					KeyGuide->AddGuide(PADS::SHOT, "射撃");
-					KeyGuide->AddGuide(PADS::ULT, "武器切替");
-					KeyGuide->AddGuide(PADS::AIM, "エイム");
-					KeyGuide->AddGuide(PADS::MELEE, "殴打");
+						KeyGuide->AddGuide(PADS::SHOT, "射撃");
+						KeyGuide->AddGuide(PADS::ULT, "武器切替");
+						KeyGuide->AddGuide(PADS::AIM, "エイム");
+						KeyGuide->AddGuide(PADS::MELEE, "殴打");
 
-					KeyGuide->AddGuide(PADS::RELOAD, "再装填");
+						KeyGuide->AddGuide(PADS::RELOAD, "再装填");
 
-					//KeyGuide->AddGuide(PADS::THROW, "弾込");
-					//KeyGuide->AddGuide(PADS::CHECK, "アーマー着用");
+						//KeyGuide->AddGuide(PADS::THROW, "弾込");
+						//KeyGuide->AddGuide(PADS::CHECK, "アーマー着用");
 
-					//KeyGuide->AddGuide(PADS::INTERACT, "取得");
-					KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
-				}
-			});
+						//KeyGuide->AddGuide(PADS::INTERACT, "取得");
+						KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
+					}
+				});
 
 			if (DXDraw::Instance()->IsPause()) {
 				m_MainLoopPauseControl.Execute();
@@ -329,7 +329,7 @@ namespace FPS_n2 {
 			//SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(2)).Norm(), 2);
 			//SetisUpdateFarShadow(true);
 			//レーザーサイト
-			while(true){
+			while (true) {
 				if (!m_CharacterPtr->GetGunPtrNow()) { continue; }
 				if (!m_CharacterPtr->GetGunPtrNow()->HasFrame(GunFrame::LaserSight) || !m_CharacterPtr->GetGunPtrNow()->IsActive()) {
 					m_CharacterPtr->SetIsLaserActive(false);

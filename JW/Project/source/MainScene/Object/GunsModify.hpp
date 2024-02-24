@@ -9,18 +9,18 @@ namespace FPS_n2 {
 		class GunsModify {
 		public:
 			struct Slot {
-				GunSlot			SlotType{ GunSlot::Magazine };
-				int				m_sel{ 0 };
-				bool			m_selectSwitch{ 0 };
-				const Slot*		ParentSlot{ nullptr };
-				ModSlotControl*	m_Data{ nullptr };
+				GunSlot			SlotType{GunSlot::Magazine};
+				int				m_sel{0};
+				bool			m_selectSwitch{0};
+				const Slot*		ParentSlot{nullptr};
+				ModSlotControl*	m_Data{nullptr};
 			};
 		private:
 			struct SlotSaveData {
-				GunSlot SlotType{ GunSlot::Magazine };
-				int		m_sel{ 0 };
-				GunSlot ParentSlotType{ GunSlot::Gun };
-				int		m_Parentsel{ 0 };
+				GunSlot SlotType{GunSlot::Magazine};
+				int		m_sel{0};
+				GunSlot ParentSlotType{GunSlot::Gun};
+				int		m_Parentsel{0};
 			public:
 				const auto IsParentNone() const noexcept { return (ParentSlotType == GunSlot::Gun); }
 				const auto IsParent(GunSlot Slot_t, int sel_t) const noexcept { return (ParentSlotType == Slot_t) && (m_Parentsel == sel_t); }
@@ -28,7 +28,7 @@ namespace FPS_n2 {
 		private:
 			std::vector<Slot*>			SelData;
 			std::vector<SlotSaveData>	SlotSave;
-			MV1*						m_BaseObj{ nullptr };
+			MV1*						m_BaseObj{nullptr};
 		public:
 			const auto&		GetSelData() const noexcept { return SelData; }
 		private:

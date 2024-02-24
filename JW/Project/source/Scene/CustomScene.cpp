@@ -90,16 +90,16 @@ namespace FPS_n2 {
 
 			Pad->ChangeGuide(
 				[&]() {
-				auto* KeyGuide = PadControl::Instance();
-				KeyGuide->AddGuide(PADS::MOVE_W, "");
-				KeyGuide->AddGuide(PADS::MOVE_S, "");
-				KeyGuide->AddGuide(PADS::MOVE_A, "");
-				KeyGuide->AddGuide(PADS::MOVE_D, "");
-				KeyGuide->AddGuide(PADS::MOVE_STICK, "スロット選択,パーツ変更");
-				KeyGuide->AddGuide(PADS::AIM, "離して見る");
-				KeyGuide->AddGuide(PADS::RELOAD, "セーブして終了");
-				KeyGuide->AddGuide(PADS::MELEE, "編集開始時に戻す");
-			}
+					auto* KeyGuide = PadControl::Instance();
+					KeyGuide->AddGuide(PADS::MOVE_W, "");
+					KeyGuide->AddGuide(PADS::MOVE_S, "");
+					KeyGuide->AddGuide(PADS::MOVE_A, "");
+					KeyGuide->AddGuide(PADS::MOVE_D, "");
+					KeyGuide->AddGuide(PADS::MOVE_STICK, "スロット選択,パーツ変更");
+					KeyGuide->AddGuide(PADS::AIM, "離して見る");
+					KeyGuide->AddGuide(PADS::RELOAD, "セーブして終了");
+					KeyGuide->AddGuide(PADS::MELEE, "編集開始時に戻す");
+				}
 			);
 
 			{
@@ -300,7 +300,7 @@ namespace FPS_n2 {
 				auto& y = GetSelData()[SelMoveClass[select].index];
 				const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(32), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-					xp1, yp1, White, Gray25, GunSlotName[(int)Data->m_GunSlot]);
+																	  xp1, yp1, White, Gray25, GunSlotName[(int)Data->m_GunSlot]);
 			}
 			for (int loop = -1; loop <= (int)SelMoveClass.size(); loop++) {
 				if (!(select == loop + 1 || select == loop - 1)) { continue; }
@@ -330,13 +330,13 @@ namespace FPS_n2 {
 						int add = y_r(200) + y_r(SelMoveClass[index].Xadd*300.f) / 2;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT,
 							(select == loop + 1) ? FontHandle::FontYCenter::TOP : FontHandle::FontYCenter::BOTTOM,
-							xp1 + add, yp1 + y_r(20), Gray50, Gray25, Name);
+																			  xp1 + add, yp1 + y_r(20), Gray50, Gray25, Name);
 					}
 					if (loop2 == 1) {
 						int add = -y_r(200) + +y_r(SelMoveClass[index].Xadd*300.f) / 2;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT,
 							(select == loop + 1) ? FontHandle::FontYCenter::TOP : FontHandle::FontYCenter::BOTTOM,
-							xp1 + add, yp1 + y_r(20), Gray50, Gray25, Name);
+																			  xp1 + add, yp1 + y_r(20), Gray50, Gray25, Name);
 					}
 				}
 				{
@@ -346,7 +346,7 @@ namespace FPS_n2 {
 					}
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE,
 						(select == loop + 1) ? FontHandle::FontYCenter::TOP : FontHandle::FontYCenter::BOTTOM,
-						xp1 + +y_r(SelMoveClass[index].Xadd*300.f), yp1 + y_r(20), Gray50, Gray25, Name);
+																		  xp1 + +y_r(SelMoveClass[index].Xadd*300.f), yp1 + y_r(20), Gray50, Gray25, Name);
 				}
 			}
 			{
@@ -371,19 +371,19 @@ namespace FPS_n2 {
 					if (loop2 == -1) {
 						int add = y_r(380) + y_r(SelMoveClass[select].Xadd*300.f) / 2;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(36), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
-							xp1 + add, yp1 + y_r(20), Green50, Green25, Name);
+																			  xp1 + add, yp1 + y_r(20), Green50, Green25, Name);
 					}
 					if (loop2 == 1) {
 						int add = -y_r(380) + y_r(SelMoveClass[select].Xadd*300.f) / 2;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
-							xp1 + add, yp1 + y_r(20), Green50, Green25, Name);
+																			  xp1 + add, yp1 + y_r(20), Green50, Green25, Name);
 					}
 				}
 				{
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(54), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
-						xp1 + -y_r(350), yp1 + y_r(20), Green, Green25, "<");
+																		  xp1 + -y_r(350), yp1 + y_r(20), Green, Green25, "<");
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(54), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
-						xp1 + y_r(350), yp1 + y_r(20), Green, Green25, ">");
+																		  xp1 + y_r(350), yp1 + y_r(20), Green, Green25, ">");
 				}
 				{
 					std::string Name = "None";
@@ -391,7 +391,7 @@ namespace FPS_n2 {
 						Name = (*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[y->m_sel]))->GetName();
 					}
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(54), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-						xp1 + y_r(SelMoveClass[select].Xadd*300.f), yp1 + y_r(20), Green, Green25, Name);
+																		  xp1 + y_r(SelMoveClass[select].Xadd*300.f), yp1 + y_r(20), Green, Green25, Name);
 				}
 			}
 			//

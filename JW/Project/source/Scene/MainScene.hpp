@@ -17,7 +17,7 @@ namespace FPS_n2 {
 			static const int		Chara_num = Player_num;
 			static const int		gun_num = Chara_num;
 		private:
-			bool											m_IsFirstLoad{ true };			//共通リソースをロードしたか
+			bool											m_IsFirstLoad{true};			//共通リソースをロードしたか
 			std::shared_ptr<BackGroundClassMain>			m_BackGround;					//BG
 			UIClass											m_UIclass;						//UI関連
 			MyPlayerReticleControl							m_MyPlayerReticleControl;		//銃関連
@@ -30,13 +30,13 @@ namespace FPS_n2 {
 			GraphHandle										guard_Graph;
 			std::vector<std::shared_ptr<AIControl>>			m_AICtrl;					//AI
 			std::vector<DamageEvent>						m_DamageEvents;				//ダメージ
-			float											m_ReadyTimer{ 0.f };
-			float											m_Timer{ 0.f };
+			float											m_ReadyTimer{0.f};
+			float											m_Timer{0.f};
 			float											Min = 0.f;
 			float											Gamma = 1.f;
 		public:
-			MAINLOOP(void) noexcept { }
-			~MAINLOOP(void) noexcept { }
+			MAINLOOP(void) noexcept {}
+			~MAINLOOP(void) noexcept {}
 		public:
 			void			Load_Sub(void) noexcept override;
 			void			Set_Sub(void) noexcept override;
@@ -45,8 +45,8 @@ namespace FPS_n2 {
 			//
 			void			Depth_Draw_Sub(void) noexcept override {}
 			void			BG_Draw_Sub(void) noexcept override;
-			void			ShadowDraw_Far_Sub(void) noexcept override{}
-			void			ShadowDraw_NearFar_Sub(void) noexcept override{}
+			void			ShadowDraw_Far_Sub(void) noexcept override {}
+			void			ShadowDraw_NearFar_Sub(void) noexcept override {}
 			void			ShadowDraw_Sub(void) noexcept override;
 			void			MainDraw_Sub(void) noexcept override;
 			void			MainDrawbyDepth_Sub(void) noexcept override {}

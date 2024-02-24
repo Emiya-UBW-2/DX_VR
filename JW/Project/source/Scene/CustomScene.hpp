@@ -1,8 +1,5 @@
 #pragma once
 #include	"../Header.hpp"
-#include "../MainScene/Object/Gun.hpp"
-#include "../MainScene/Object/ModData.hpp"
-
 #include "../MainScene/Object/GunsModify.hpp"
 
 namespace FPS_n2 {
@@ -11,24 +8,24 @@ namespace FPS_n2 {
 		class CustomScene : public TEMPSCENE, public GunsModify {
 			class SlotMove {
 			public:
-				float				Xadd{ 0.f };
-				float				Yadd{ 0.f };
-				GunsModify::Slot*	Ptr{ nullptr };
-				int					index{ 0 };
+				float				Xadd{0.f};
+				float				Yadd{0.f};
+				GunsModify::Slot*	Ptr{nullptr};
+				int					index{0};
 			};
 		private:
-			int select{ 0 };
-			float m_SelAlpha{ 0.f };
-			float m_Yrad{ 0.f };
-			float m_Xrad{ 0.f };
-			float m_Yrad_R{ 0.f };
-			float m_Xrad_R{ 0.f };
-			float m_Range{ 1.f };
+			int select{0};
+			float m_SelAlpha{0.f};
+			float m_Yrad{0.f};
+			float m_Xrad{0.f};
+			float m_Yrad_R{0.f};
+			float m_Xrad_R{0.f};
+			float m_Range{1.f};
 			std::vector<SlotMove>			SelMoveClass;
 
-			bool m_IsEnd{ false };
-			float m_Alpha{ 0.f };
-			bool m_PrevShadow{ false };
+			bool m_IsEnd{false};
+			float m_Alpha{0.f};
+			bool m_PrevShadow{false};
 		private:
 			std::shared_ptr<GunClass>		m_GunPtr;				//ポインター別持ち
 			std::array<std::shared_ptr<GunClass>, 3>		m_UltPtr;
@@ -86,13 +83,13 @@ namespace FPS_n2 {
 				}
 				//SelMoveClassをGetSelData()に合わせてソート
 				std::sort(SelMoveClass.begin(), SelMoveClass.end(),
-					[](const SlotMove& a, const SlotMove& b) {
-					return a.index < b.index;
-				}
+						  [](const SlotMove& a, const SlotMove& b) {
+							  return a.index < b.index;
+						  }
 				);
 			}
 		public:
-			CustomScene(void) noexcept { }
+			CustomScene(void) noexcept {}
 			void			Set_Sub(void) noexcept override;
 			//
 			bool			Update_Sub(void) noexcept override;

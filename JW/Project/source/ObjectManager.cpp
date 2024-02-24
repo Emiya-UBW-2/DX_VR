@@ -13,64 +13,64 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		SharedObj*		ObjectManager::MakeObject(ObjType ModelType) noexcept {
 			switch (ModelType) {
-			case ObjType::Human:
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<CharacterClass>();
-				break;
-			case ObjType::Ammo:
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<AmmoClass>();
-				break;
-			case ObjType::FallObj:
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<FallObjClass>();
-				break;
-			case ObjType::ItemObj:
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<ItemObjClass>();
-				break;
-			case ObjType::Armer:
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<ArmerClass>();
-				break;
-			case ObjType::Gun:
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<GunClass>();
-				break;
-			case ObjType::Magazine:
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<MagazineClass>();
-				break;
-			case ObjType::Lower:
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<LowerClass>();
-				break;
-			case ObjType::Upper:
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<UpperClass>();
-				break;
-			case ObjType::Barrel:
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<BarrelClass>();
-				break;
-			case ObjType::UnderRail:
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<UnderRailClass>();
-				break;
-			case ObjType::Sight:
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<SightClass>();
-				break;
-			case ObjType::MuzzleAdapter:
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<MuzzleClass>();
-				break;
-			case ObjType::MovieObj:
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<MovieObjClass>();
-				break;
-			default:
-				break;
+				case ObjType::Human:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<CharacterClass>();
+					break;
+				case ObjType::Ammo:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<AmmoClass>();
+					break;
+				case ObjType::FallObj:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<FallObjClass>();
+					break;
+				case ObjType::ItemObj:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<ItemObjClass>();
+					break;
+				case ObjType::Armer:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<ArmerClass>();
+					break;
+				case ObjType::Gun:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<GunClass>();
+					break;
+				case ObjType::Magazine:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<MagazineClass>();
+					break;
+				case ObjType::Lower:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<LowerClass>();
+					break;
+				case ObjType::Upper:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<UpperClass>();
+					break;
+				case ObjType::Barrel:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<BarrelClass>();
+					break;
+				case ObjType::UnderRail:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<UnderRailClass>();
+					break;
+				case ObjType::Sight:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<SightClass>();
+					break;
+				case ObjType::MuzzleAdapter:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<MuzzleClass>();
+					break;
+				case ObjType::MovieObj:
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<MovieObjClass>();
+					break;
+				default:
+					break;
 			}
 			return &(this->m_Object[this->m_Object.size() - 1]);
 		}

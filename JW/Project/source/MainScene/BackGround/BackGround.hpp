@@ -136,7 +136,7 @@ namespace FPS_n2 {
 			BuildControl				m_BuildControl;
 		public://
 			const auto&		GetNearestLight(int No) noexcept { return this->m_BuildControl.GetNearestLight(No); }
-			
+
 			const auto&		GetDrumControl(void) noexcept { return this->m_BuildControl.GetDrumControl(); }
 			const auto&		GetBuildData(void) noexcept { return this->m_BuildControl.GetBuildDatas(); }
 			const auto&		GetMapGraph(void) noexcept { return this->m_BuildControl.GetMapGraph(); }
@@ -163,8 +163,7 @@ namespace FPS_n2 {
 				this->m_BuildControl.Execute();
 			}
 			//
-			void			Shadow_Draw_Far_Sub(void) noexcept override {
-			}
+			void			Shadow_Draw_Far_Sub(void) noexcept override {}
 			void			Shadow_Draw_Sub(void) noexcept override {
 				this->m_BuildControl.ShadowDraw();
 			}
@@ -217,19 +216,15 @@ namespace FPS_n2 {
 				MV1SetMaterialDrawAlphaTestAll(this->m_ObjGround.get(), TRUE, DX_CMP_GREATER, 216);
 			}
 			//
-			void			Execute_Sub(void) noexcept override {
-			}
+			void			Execute_Sub(void) noexcept override {}
 			//
-			void			Shadow_Draw_Far_Sub(void) noexcept override {
-			}
+			void			Shadow_Draw_Far_Sub(void) noexcept override {}
 			void			Shadow_Draw_Sub(void) noexcept override {
 				DrawCommon();
 			}
-			void			Draw_Sub(void) noexcept override {
-			}
+			void			Draw_Sub(void) noexcept override {}
 			//
-			void			Dispose_Sub(void) noexcept override {
-			}
+			void			Dispose_Sub(void) noexcept override {}
 		};
 		//
 	};

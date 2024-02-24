@@ -16,33 +16,32 @@ namespace FPS_n2 {
 		class GunClass :
 			public ObjectBaseClass,
 			public MuzzleSmokeControl,
-			public ModSlotControl
-		{
+			public ModSlotControl {
 		private:
-			std::shared_ptr<AmmoDataClass>			m_ChamberAmmoData{ nullptr };		//
-			GunAnimeID								m_ShotPhase{ GunAnimeID::Base };	//
-			bool									m_ReloadCancel{ false };			//
-			bool									m_ShotSwitch{ false };				//
-			int										m_boltSoundSequence{ -1 };			//サウンド
-			bool									m_IsChamberOn{ false };				//チャンバーに弾を込めるか
-			bool									m_IsEject{ false };
-			int										m_NextMagNum{ 0 };
-			int										m_NextMagUniqueID{ 0 };
-			int										m_AmmoLoadCount{ 0 };
-			bool									m_AmmoLoadSwitch{ false };
-			bool									m_IsAmmoLoadCount{ false };
+			std::shared_ptr<AmmoDataClass>			m_ChamberAmmoData{nullptr};		//
+			GunAnimeID								m_ShotPhase{GunAnimeID::Base};	//
+			bool									m_ReloadCancel{false};			//
+			bool									m_ShotSwitch{false};				//
+			int										m_boltSoundSequence{-1};			//サウンド
+			bool									m_IsChamberOn{false};				//チャンバーに弾を込めるか
+			bool									m_IsEject{false};
+			int										m_NextMagNum{0};
+			int										m_NextMagUniqueID{0};
+			int										m_AmmoLoadCount{0};
+			bool									m_AmmoLoadSwitch{false};
+			bool									m_IsAmmoLoadCount{false};
 			VECTOR_ref								m_RecoilRadAdd;
 			FallControl								m_MagFall;
 			FallControl								m_CartFall;
-			const std::shared_ptr<SightClass>*		m_SightPtr{ nullptr };
-			const std::shared_ptr<MuzzleClass>*		m_MuzzlePtr{ nullptr };
-			const std::shared_ptr<UpperClass>*		m_UpperPtr{ nullptr };
-			const std::shared_ptr<MagazineClass>*	m_MagazinePtr{ nullptr };
+			const std::shared_ptr<SightClass>*		m_SightPtr{nullptr};
+			const std::shared_ptr<MuzzleClass>*		m_MuzzlePtr{nullptr};
+			const std::shared_ptr<UpperClass>*		m_UpperPtr{nullptr};
+			const std::shared_ptr<MagazineClass>*	m_MagazinePtr{nullptr};
 		private:
 			std::array<float, (int)CharaGunAnimeID::Max>									m_GunAnimFrame;
 			std::vector<std::array<int, (int)CharaGunAnimeID::Max>>							m_CharaAnimeSet;
 			std::vector<std::array<std::vector<EnumGunAnim>, (int)EnumGunAnimType::Max>>	m_GunAnimeSet;
-			float																			m_UpperAnim{ 0.f };
+			float																			m_UpperAnim{0.f};
 		public:
 			const auto&		GetUpperAnim(void) const noexcept { return this->m_UpperAnim; }
 			const auto&		GetGunDataClass(void) const noexcept { return (std::shared_ptr<GunDataClass>&)this->GetModData(); }

@@ -13,8 +13,8 @@ namespace FPS_n2 {
 			std::vector<SharedObj>	m_Object;
 			switchs					m_ResetP;
 
-			PHYSICS_SETUP			m_DefaultType{ PHYSICS_SETUP::DISABLE };
-			bool					m_UseToonWhenCreateFile{ false };
+			PHYSICS_SETUP			m_DefaultType{PHYSICS_SETUP::DISABLE};
+			bool					m_UseToonWhenCreateFile{false};
 		private:
 			ObjectManager() {
 				m_Object.reserve(256);

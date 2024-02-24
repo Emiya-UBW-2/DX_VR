@@ -21,17 +21,17 @@ namespace FPS_n2 {
 			};
 			//model
 			switch (this->m_PHYSICS_SETUP) {
-			case PHYSICS_SETUP::DISABLE:
-				Load(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_DISABLE", DX_LOADMODEL_PHYSICS_DISABLE);
-				break;
-			case PHYSICS_SETUP::LOADCALC:
-				Load(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_LOADCALC", DX_LOADMODEL_PHYSICS_LOADCALC);
-				break;
-			case PHYSICS_SETUP::REALTIME:
-				Load(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_REALTIME", DX_LOADMODEL_PHYSICS_REALTIME);
-				break;
-			default:
-				break;
+				case PHYSICS_SETUP::DISABLE:
+					Load(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_DISABLE", DX_LOADMODEL_PHYSICS_DISABLE);
+					break;
+				case PHYSICS_SETUP::LOADCALC:
+					Load(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_LOADCALC", DX_LOADMODEL_PHYSICS_LOADCALC);
+					break;
+				case PHYSICS_SETUP::REALTIME:
+					Load(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_REALTIME", DX_LOADMODEL_PHYSICS_REALTIME);
+					break;
+				default:
+					break;
 			}
 			//col
 			Load(&this->m_col, this->m_FilePath + this->m_ColFileName, "", DX_LOADMODEL_PHYSICS_DISABLE);
@@ -41,22 +41,22 @@ namespace FPS_n2 {
 			//フレーム
 			{
 				switch (this->m_objType) {
-				case ObjType::Human:
-					this->m_Frames.resize((int)CharaFrame::Max);
-					break;
-				case ObjType::Gun:
-				case ObjType::Magazine:
-				case ObjType::Lower:
-				case ObjType::Upper:
-				case ObjType::Barrel:
-				case ObjType::UnderRail:
-				case ObjType::Sight:
-				case ObjType::MuzzleAdapter:
-					this->m_Frames.resize((int)GunFrame::Max);
-					break;
-				default:
-					this->m_Frames.clear();
-					break;
+					case ObjType::Human:
+						this->m_Frames.resize((int)CharaFrame::Max);
+						break;
+					case ObjType::Gun:
+					case ObjType::Magazine:
+					case ObjType::Lower:
+					case ObjType::Upper:
+					case ObjType::Barrel:
+					case ObjType::UnderRail:
+					case ObjType::Sight:
+					case ObjType::MuzzleAdapter:
+						this->m_Frames.resize((int)GunFrame::Max);
+						break;
+					default:
+						this->m_Frames.clear();
+						break;
 				}
 				for (auto& f : this->m_Frames) {
 					f.first = -1;
@@ -66,24 +66,24 @@ namespace FPS_n2 {
 					std::string FName = this->GetObj().frame_name(frameNum);
 					std::string CName = "";
 					switch (this->m_objType) {
-					case ObjType::Human:
-						CName = CharaFrameName[count];
-						break;
-					case ObjType::Gun:
-					case ObjType::Magazine:
-					case ObjType::Lower:
-					case ObjType::Upper:
-					case ObjType::Barrel:
-					//case ObjType::UnderRail:
-					case ObjType::Sight:
-					case ObjType::MuzzleAdapter:
-						CName = GunFrameName[count];
-						break;
-					case ObjType::UnderRail:
-						CName = GunFrameName[count];
-						break;
-					default:
-						break;
+						case ObjType::Human:
+							CName = CharaFrameName[count];
+							break;
+						case ObjType::Gun:
+						case ObjType::Magazine:
+						case ObjType::Lower:
+						case ObjType::Upper:
+						case ObjType::Barrel:
+							//case ObjType::UnderRail:
+						case ObjType::Sight:
+						case ObjType::MuzzleAdapter:
+							CName = GunFrameName[count];
+							break;
+						case ObjType::UnderRail:
+							CName = GunFrameName[count];
+							break;
+						default:
+							break;
 					}
 					bool compare = (FName == CName);
 					//if (!compare) { compare = (FName.find(CName) != std::string::npos); }
@@ -105,19 +105,19 @@ namespace FPS_n2 {
 			//シェイプ
 			{
 				switch (this->m_objType) {
-				case ObjType::Human:
-					this->m_Shapes.resize((int)CharaShape::Max);
-					for (int j = 1; j < (int)CharaShape::Max; j++) {
-						auto s = MV1SearchShape(this->GetObj().get(), CharaShapeName[j]);
-						if (s >= 0) {
-							this->m_Shapes[j].first = s;
-							this->m_Shapes[j].second = 0.f;
+					case ObjType::Human:
+						this->m_Shapes.resize((int)CharaShape::Max);
+						for (int j = 1; j < (int)CharaShape::Max; j++) {
+							auto s = MV1SearchShape(this->GetObj().get(), CharaShapeName[j]);
+							if (s >= 0) {
+								this->m_Shapes[j].first = s;
+								this->m_Shapes[j].second = 0.f;
+							}
 						}
-					}
-					break;
-				default:
-					this->m_Shapes.clear();
-					break;
+						break;
+					default:
+						this->m_Shapes.clear();
+						break;
 				}
 			}
 		}
@@ -174,17 +174,17 @@ namespace FPS_n2 {
 				};
 				//model
 				switch (this->m_PHYSICS_SETUP) {
-				case PHYSICS_SETUP::DISABLE:
-					Save(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_DISABLE", DX_LOADMODEL_PHYSICS_DISABLE);
-					break;
-				case PHYSICS_SETUP::LOADCALC:
-					Save(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_LOADCALC", DX_LOADMODEL_PHYSICS_LOADCALC);
-					break;
-				case PHYSICS_SETUP::REALTIME:
-					Save(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_REALTIME", DX_LOADMODEL_PHYSICS_REALTIME);
-					break;
-				default:
-					break;
+					case PHYSICS_SETUP::DISABLE:
+						Save(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_DISABLE", DX_LOADMODEL_PHYSICS_DISABLE);
+						break;
+					case PHYSICS_SETUP::LOADCALC:
+						Save(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_LOADCALC", DX_LOADMODEL_PHYSICS_LOADCALC);
+						break;
+					case PHYSICS_SETUP::REALTIME:
+						Save(&this->m_obj, this->m_FilePath + this->m_ObjFileName, "_REALTIME", DX_LOADMODEL_PHYSICS_REALTIME);
+						break;
+					default:
+						break;
 				}
 				//col
 				Save(&this->m_col, this->m_FilePath + this->m_ColFileName, "", DX_LOADMODEL_PHYSICS_DISABLE);
@@ -204,13 +204,13 @@ namespace FPS_n2 {
 			}
 			//シェイプ更新
 			switch (this->m_objType) {
-			case ObjType::Human:
-				for (int j = 1; j < (int)CharaShape::Max; j++) {
-					MV1SetShapeRate(this->GetObj().get(), m_Shapes[j].first, (1.f - this->m_Shapes[0].second)*this->m_Shapes[j].second);
-				}
-				break;
-			default:
-				break;
+				case ObjType::Human:
+					for (int j = 1; j < (int)CharaShape::Max; j++) {
+						MV1SetShapeRate(this->GetObj().get(), m_Shapes[j].first, (1.f - this->m_Shapes[0].second)*this->m_Shapes[j].second);
+					}
+					break;
+				default:
+					break;
 			}
 			//物理更新
 			if (this->m_PHYSICS_SETUP == PHYSICS_SETUP::REALTIME) {

@@ -11,8 +11,8 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class TutorialScene : public TEMPSCENE, public EffectControl, public GunsModify {
 		private:
-			bool											m_PrevSSAO{ true };
-			bool											m_IsFirstLoad{ true };			//共通リソースをロードしたか
+			bool											m_PrevSSAO{true};
+			bool											m_IsFirstLoad{true};			//共通リソースをロードしたか
 			std::shared_ptr<BackGroundClassTutorial>		m_BackGround;					//BG
 			MyPlayerReticleControl							m_MyPlayerReticleControl;		//銃関連
 			MainLoopPauseControl							m_MainLoopPauseControl;			//ポーズメニュー
@@ -25,8 +25,8 @@ namespace FPS_n2 {
 			std::shared_ptr<GunClass>		m_GunPtr;				//ポインター別持ち
 			std::shared_ptr<CharacterClass>	m_CharacterPtr;			//ポインター別持ち
 		public:
-			TutorialScene(void) noexcept { }
-			~TutorialScene(void) noexcept { }
+			TutorialScene(void) noexcept {}
+			~TutorialScene(void) noexcept {}
 		public:
 			void			Load_Sub(void) noexcept override;
 			void			Set_Sub(void) noexcept override;

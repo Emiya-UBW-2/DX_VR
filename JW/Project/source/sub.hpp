@@ -5,11 +5,11 @@ namespace FPS_n2 {
 	//入力
 	class InputControl {
 	private:
-		float			m_AddxRad{ 0.f };
-		float			m_AddyRad{ 0.f };
-		float			m_xRad{ 0.f };
-		float			m_yRad{ 0.f };
-		unsigned long long	m_Flags{ 0 };
+		float			m_AddxRad{0.f};
+		float			m_AddyRad{0.f};
+		float			m_xRad{0.f};
+		float			m_yRad{0.f};
+		unsigned long long	m_Flags{0};
 	public:
 		void			ResetInput() {
 			this->m_AddxRad = 0.f;
@@ -171,10 +171,10 @@ namespace FPS_n2 {
 
 	//ダメージイベント
 	struct DamageEvent {
-		PlayerID				ShotID{ 127 };
-		PlayerID				DamageID{ 127 };
-		HitPoint				Damage{ 0 };
-		ArmerPoint				ArmerDamage{ 0 };
+		PlayerID				ShotID{127};
+		PlayerID				DamageID{127};
+		HitPoint				Damage{0};
+		ArmerPoint				ArmerDamage{0};
 		void SetEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint pDamage, ArmerPoint pArmerDamage) {
 			this->ShotID = ShotID_t;
 			this->DamageID = DamageID_t;
@@ -187,17 +187,17 @@ namespace FPS_n2 {
 	//インスタシング
 	class Model_Instance {
 	private:
-		int						m_Count{ 0 };			//数
+		int						m_Count{0};			//数
 		std::vector<VERTEX3D>	m_Vertex;				//
 		std::vector<DWORD>		m_Index;				//
-		int						m_VerBuf{ -1 };			//
-		int						m_IndexBuf{ -1 };		//
+		int						m_VerBuf{-1};			//
+		int						m_IndexBuf{-1};		//
 		MV1						m_obj;					//モデル
 		GraphHandle				m_pic;					//画像ハンドル
-		int						m_vnum{ -1 };			//
-		int						m_pnum{ -1 };			//
+		int						m_vnum{-1};			//
+		int						m_pnum{-1};			//
 		MV1_REF_POLYGONLIST		m_RefMesh{};			//
-		int						m_Mesh{ 0 };			//
+		int						m_Mesh{0};			//
 	private:
 		void			Init_one(void) noexcept {
 			MV1RefreshReferenceMesh(this->m_obj.get(), -1, TRUE, FALSE, m_Mesh);				//参照用メッシュの更新
@@ -292,7 +292,7 @@ namespace FPS_n2 {
 	class HIT_PASSIVE {
 	private:
 		Model_Instance	m_inst;
-		bool			m_IsUpdate{ true };
+		bool			m_IsUpdate{true};
 	public:
 		//初期化
 		void			Init(void) noexcept {

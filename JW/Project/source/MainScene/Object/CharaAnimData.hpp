@@ -66,8 +66,8 @@ namespace FPS_n2 {
 		};
 
 		class GunanimData {
-			EnumGunAnim		m_EnumGunAnim{ EnumGunAnim::M16_ready1 };
-			bool			m_IsLoop{ true };
+			EnumGunAnim		m_EnumGunAnim{EnumGunAnim::M16_ready1};
+			bool			m_IsLoop{true};
 		public:
 			void Set(const std::string& data, EnumGunAnim EnumSel) {
 				std::vector<std::string> Args;
@@ -118,7 +118,7 @@ namespace FPS_n2 {
 		class GunAnim {
 			VECTOR_ref		m_Rotate;
 			VECTOR_ref		m_Pos;
-			int				m_Frame{ 1 };
+			int				m_Frame{1};
 		public:
 			void Set(const std::string& data) {
 				std::vector<std::string> Args;

@@ -8,23 +8,23 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class AmmoClass : public ObjectBaseClass {
 		public:
-			bool			m_IsDrawHitUI{ false };
-			float			m_Hit_alpha{ 0.f };
+			bool			m_IsDrawHitUI{false};
+			float			m_Hit_alpha{0.f};
 			VECTOR_ref		m_Hit_DispPos;
-			int				m_Hit_AddX{ 0 };
-			int				m_Hit_AddY{ 0 };
-			HitPoint		m_Damage{ 0 };
-			ArmerPoint		m_ArmerDamage{ 0 };
+			int				m_Hit_AddX{0};
+			int				m_Hit_AddY{0};
+			HitPoint		m_Damage{0};
+			ArmerPoint		m_ArmerDamage{0};
 		private:
-			bool			m_IsHit{ false };
-			float			m_HitTimer{ 0.f };
-			int				m_RicochetCnt{ 0 };
-			std::shared_ptr<AmmoDataClass>	m_AmmoData{ nullptr };
-			float			m_speed{ 0.f };
-			float			m_penetration{ 0.f };
-			int				m_ShootCheraID{ -1 };
-			float			m_yAdd{ 0.f };
-			float			m_Timer{ 0.f };
+			bool			m_IsHit{false};
+			float			m_HitTimer{0.f};
+			int				m_RicochetCnt{0};
+			std::shared_ptr<AmmoDataClass>	m_AmmoData{nullptr};
+			float			m_speed{0.f};
+			float			m_penetration{0.f};
+			int				m_ShootCheraID{-1};
+			float			m_yAdd{0.f};
+			float			m_Timer{0.f};
 		public://getter
 			const auto&		GetShootedID(void) const noexcept { return this->m_ShootCheraID; }
 			const auto&		GetDamage(void) const noexcept { return this->m_AmmoData->GetDamage(); }

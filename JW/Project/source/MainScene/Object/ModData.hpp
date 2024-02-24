@@ -9,13 +9,13 @@ namespace FPS_n2 {
 		class ModDataClass : public ItemData {
 		public://ÉQÉbÉ^Å[
 			struct PartsSlot {
-				GunSlot						m_GunSlot{ GunSlot::Gun };
+				GunSlot						m_GunSlot{GunSlot::Gun};
 				std::vector<int>			m_ItemsUniqueID;
 				std::vector<std::string>	m_Conflicts;
-				bool						m_IsNeed{ false };
+				bool						m_IsNeed{false};
 			};
 		private:
-			int								m_UniqueID{ 0 };
+			int								m_UniqueID{0};
 			std::vector<PartsSlot>			m_PartsSlot;						//
 		protected:
 			void				SetSlot(const std::string& LEFT, const std::string&RIGHT) noexcept;
@@ -45,7 +45,7 @@ namespace FPS_n2 {
 			friend class SingletonBase<ModDataManager>;
 		private:
 			std::list<std::shared_ptr<ModDataClass>>	m_Object;
-			int											m_LastUniqueID{ 0 };
+			int											m_LastUniqueID{0};
 		private:
 			ModDataManager() {}
 			~ModDataManager() {}

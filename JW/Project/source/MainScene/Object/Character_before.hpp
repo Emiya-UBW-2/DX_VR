@@ -11,8 +11,8 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class ArmMovePerClass {
-			float												m_ArmPer{ 0.f };
-			bool												m_Armon{ false };
+			float												m_ArmPer{0.f};
+			bool												m_Armon{false};
 		public:
 			void Init(bool isOn)noexcept {
 				m_Armon = isOn;
@@ -55,8 +55,8 @@ namespace FPS_n2 {
 		};
 		class HitBox {
 			VECTOR_ref	m_pos;
-			float		m_radius{ 0.f };
-			HitType		m_HitType{ HitType::Body };
+			float		m_radius{0.f};
+			HitType		m_HitType{HitType::Body};
 		public:
 			void	Execute(const VECTOR_ref&pos, float radius, HitType pHitType) {
 				m_pos = pos;
@@ -66,20 +66,20 @@ namespace FPS_n2 {
 			void	Draw() {
 				unsigned int color;
 				switch (m_HitType) {
-				case HitType::Head:
-					color = GetColor(255, 0, 0);
-					break;
-				case HitType::Body:
-					color = GetColor(0, 255, 0);
-					break;
-				case HitType::Arm:
-					color = GetColor(0, 0, 255);
-					break;
-				case HitType::Leg:
-					color = GetColor(0, 0, 255);
-					break;
-				default:
-					break;
+					case HitType::Head:
+						color = GetColor(255, 0, 0);
+						break;
+					case HitType::Body:
+						color = GetColor(0, 255, 0);
+						break;
+					case HitType::Arm:
+						color = GetColor(0, 0, 255);
+						break;
+					case HitType::Leg:
+						color = GetColor(0, 0, 255);
+						break;
+					default:
+						break;
 				}
 				DrawSphere_3D(m_pos, m_radius, color, color);
 			}
@@ -107,16 +107,16 @@ namespace FPS_n2 {
 		//キャラのうち特定機能だけ抜き出したもの
 		class StaminaControl {
 		private://キャラパラメーター
-			const float											HeartRateMin{ 60.f };//心拍数最小
-			const float											HeartRateMax{ 180.f };//心拍数最大
-			const float											StaminaMax{ 100.f };
+			const float											HeartRateMin{60.f};//心拍数最小
+			const float											HeartRateMax{180.f};//心拍数最大
+			const float											StaminaMax{100.f};
 		private:
-			float												m_HeartRate{ HeartRateMin };//心拍数
-			float												m_HeartRate_r{ HeartRateMin };//心拍数
-			float												m_HeartRateRad{ 0.f };//呼吸Sin渡し
-			float												m_Stamina{ StaminaMax };//スタミナ
-			bool												m_CannotRun{ false };//スタミナ切れ
-			bool												m_HeartSoundFlag{ false };
+			float												m_HeartRate{HeartRateMin};//心拍数
+			float												m_HeartRate_r{HeartRateMin};//心拍数
+			float												m_HeartRateRad{0.f};//呼吸Sin渡し
+			float												m_Stamina{StaminaMax};//スタミナ
+			bool												m_CannotRun{false};//スタミナ切れ
+			bool												m_HeartSoundFlag{false};
 		public://ゲッター
 			//const auto&		GetStamina(void) const noexcept { return this->m_Stamina; }
 			//const auto&		GetStaminaMax(void) const noexcept { return this->StaminaMax; }
@@ -204,8 +204,8 @@ namespace FPS_n2 {
 			const HitPoint										HPMax = 100;
 			const ArmerPoint									APMax = 100;
 		private:
-			HitPoint											m_HP{ 0 };							//スコア
-			ArmerPoint											m_AP{ 0 };							//スコア
+			HitPoint											m_HP{0};							//スコア
+			ArmerPoint											m_AP{0};							//スコア
 			std::vector<DamageEvent>							m_DamageEvent;						//ダメージイベント
 		protected:
 			void			SetHealEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint value, ArmerPoint Armervalue) noexcept {
@@ -239,7 +239,7 @@ namespace FPS_n2 {
 		private://キャラパラメーター
 			const int										ULTMax = 100;
 		private:
-			int											m_ULT{ 0 };							//スコア
+			int											m_ULT{0};							//スコア
 		public://ゲッター
 			const auto		IsULTActive(void) const noexcept { return this->m_ULT == ULTMax; }
 			const auto&		GetULT(void) const noexcept { return this->m_ULT; }
@@ -253,11 +253,11 @@ namespace FPS_n2 {
 		//キャラ入力
 		class KeyControl {
 		private://キャラパラメーター
-			std::array<float, 4>								m_Vec{ 0,0,0,0 };
+			std::array<float, 4>								m_Vec{0,0,0,0};
 			InputControl										m_Input;
 			switchs												m_ULTKey;
 			switchs												m_Squat;
-			int													m_LeanRate{ 0 };
+			int													m_LeanRate{0};
 			switchs												m_QKey;
 			switchs												m_EKey;
 			VECTOR_ref											m_rad_Buf, m_rad, m_radAdd;
@@ -297,8 +297,8 @@ namespace FPS_n2 {
 		class ShapeControl {
 		private://キャラパラメーター
 		private:
-			int													m_Eyeclose{ 0 };
-			float												m_EyeclosePer{ 0.f };
+			int													m_Eyeclose{0};
+			float												m_EyeclosePer{0.f};
 		public://ゲッター
 			const auto&			GetEyeclosePer() const noexcept { return this->m_EyeclosePer; }
 		public:
@@ -318,7 +318,7 @@ namespace FPS_n2 {
 		};
 		class OverrideControl {
 		private://キャラパラメーター
-			bool												m_PosBufOverRideFlag{ false };
+			bool												m_PosBufOverRideFlag{false};
 			moves												m_OverRideInfo;
 		private:
 		public://ゲッター
@@ -340,7 +340,7 @@ namespace FPS_n2 {
 
 		class LaserSightClass {
 		private:
-			bool												m_IsLaserActive{ false };
+			bool												m_IsLaserActive{false};
 			VECTOR_ref											LaserStartPos;
 			VECTOR_ref											LaserEndPos;
 		public://ゲッター
@@ -357,8 +357,8 @@ namespace FPS_n2 {
 				}
 			}
 		public:
-			LaserSightClass(void) noexcept { }
-			~LaserSightClass(void) noexcept { }
+			LaserSightClass(void) noexcept {}
+			~LaserSightClass(void) noexcept {}
 		public:
 		};
 
@@ -381,8 +381,8 @@ namespace FPS_n2 {
 				}
 			}
 		public:
-			HitBoxControl(void) noexcept { }
-			~HitBoxControl(void) noexcept { }
+			HitBoxControl(void) noexcept {}
+			~HitBoxControl(void) noexcept {}
 		protected:
 			void InitHitBox() noexcept {
 				m_HitBox.resize(27);
@@ -416,8 +416,8 @@ namespace FPS_n2 {
 					MATRIX_ref::RotX(deg2rad(m_WalkSwing.x()*m_WalkSwingRad.x()));
 			}
 		public:
-			WalkSwingControl(void) noexcept { }
-			~WalkSwingControl(void) noexcept { }
+			WalkSwingControl(void) noexcept {}
+			~WalkSwingControl(void) noexcept {}
 		public:
 			void UpdateWalkSwing(const VECTOR_ref& Pos, float SwingPer)noexcept {
 				m_WalkSwingRad.Set(5.f, 0.f, 10.f);
@@ -472,8 +472,8 @@ namespace FPS_n2 {
 				return MATRIX_ref::Axis1_YZ(m_UpperyVec.Norm(), m_UpperzVec.Norm());
 			}
 		public:
-			GunSwingControl(void) noexcept { }
-			~GunSwingControl(void) noexcept { }
+			GunSwingControl(void) noexcept {}
+			~GunSwingControl(void) noexcept {}
 		public:
 			void UpdateGunSwing(const VECTOR_ref& CharaRad)noexcept {
 				Easing(&m_UpperRad, (CharaRad - this->m_UpperPrevRad)*-1.f, 0.9f, EasingType::OutExpo);
@@ -488,8 +488,8 @@ namespace FPS_n2 {
 		//
 		class StackLeftHandControl {
 		private:
-			float												m_IsStuckLeftHandTimer{ 0.f };
-			bool												m_IsStuckLeftHand{ false };
+			float												m_IsStuckLeftHandTimer{0.f};
+			bool												m_IsStuckLeftHand{false};
 			ArmMovePerClass										m_StuckLeftHand;
 			VECTOR_ref											m_StuckLeftHandPos;
 			VECTOR_ref											m_StuckLeftHandNormal;
@@ -500,8 +500,8 @@ namespace FPS_n2 {
 			const auto&		GetStuckLeftHandYVec(void) const noexcept { return m_StuckLeftHandYVec; }
 			const auto		GetStuckLeftHandPer(void) const noexcept { return m_StuckLeftHand.Per(); }
 		public:
-			StackLeftHandControl(void) noexcept { }
-			~StackLeftHandControl(void) noexcept { }
+			StackLeftHandControl(void) noexcept {}
+			~StackLeftHandControl(void) noexcept {}
 		public:
 			void InitStackLeftHand() {
 				this->m_IsStuckLeftHandTimer = 0.f;
@@ -543,22 +543,22 @@ namespace FPS_n2 {
 		private:
 			class MagStock {
 			public:
-				int AmmoNum{ 0 };
-				int AmmoAll{ 0 };
-				int ModUniqueID{ -1 };
+				int AmmoNum{0};
+				int AmmoAll{0};
+				int ModUniqueID{-1};
 			};
 
 			std::array<MagStock, 4>								m_MagazineStock;
-			int													m_UseMagazineID{ 0 };
+			int													m_UseMagazineID{0};
 
-			int													m_AmmoStock{ 0 };
+			int													m_AmmoStock{0};
 		public:
 			const auto GetNowMagID() const noexcept { return m_UseMagazineID; }
 		private:
 			const auto GetNextMagID() const noexcept { return (m_UseMagazineID + 1) % ((int)m_MagazineStock.size()); }
 		public:
-			MagStockControl(void) noexcept { }
-			~MagStockControl(void) noexcept { }
+			MagStockControl(void) noexcept {}
+			~MagStockControl(void) noexcept {}
 		public:
 			const auto& GetAmmoStock() const noexcept { return m_AmmoStock; }
 			void AddAmmoStock(int Ammo) noexcept {
@@ -593,13 +593,13 @@ namespace FPS_n2 {
 		//
 		class HitReactionControl {
 		private:
-			VECTOR_ref											m_HitAxis{ VECTOR_ref::front() };
-			float												m_HitPower{ 0.f };
-			float												m_HitPowerR{ 0.f };
+			VECTOR_ref											m_HitAxis{VECTOR_ref::front()};
+			float												m_HitPower{0.f};
+			float												m_HitPowerR{0.f};
 		private:
 		public:
-			HitReactionControl(void) noexcept { }
-			~HitReactionControl(void) noexcept { }
+			HitReactionControl(void) noexcept {}
+			~HitReactionControl(void) noexcept {}
 		public:
 			const auto GetHitReactionMat() const noexcept { return MATRIX_ref::RotAxis(m_HitAxis, m_HitPowerR*deg2rad(90.f)); }
 			const auto IsDamaging(void) const noexcept { return m_HitPower > 0.f; }
@@ -761,14 +761,14 @@ namespace FPS_n2 {
 			};
 		private:
 			MV1													m_RagDoll;
-			float												m_RagDollTimer{ 0.f };						//ラグドールの物理演算フラグ
+			float												m_RagDollTimer{0.f};						//ラグドールの物理演算フラグ
 		protected:
 			//体のフレーム情報
 			frame_body lagframe_;							//フレーム
 			frame_body frame_s;								//フレーム
 		public:
-			RagDollControl(void) noexcept { }
-			~RagDollControl(void) noexcept { }
+			RagDollControl(void) noexcept {}
+			~RagDollControl(void) noexcept {}
 		public:
 			auto&			GetRagDoll(void) noexcept { return this->m_RagDoll; }
 		public:
@@ -802,7 +802,7 @@ namespace FPS_n2 {
 		class ItemFallControl {
 		private:
 			std::array<std::shared_ptr<ItemObjClass>, 4>	m_Ptr;
-			int												m_Now{ 0 };
+			int												m_Now{0};
 		public:
 			void		Init(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath, ItemType type);
 			void		SetFall(const VECTOR_ref& pPos, const VECTOR_ref& pVec);

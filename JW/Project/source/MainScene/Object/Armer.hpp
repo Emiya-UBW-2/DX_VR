@@ -7,8 +7,7 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class ArmerClass :
-			public ObjectBaseClass
-		{
+			public ObjectBaseClass {
 		private:
 		public:
 		public:

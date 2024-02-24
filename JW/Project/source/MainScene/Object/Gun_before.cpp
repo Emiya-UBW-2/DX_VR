@@ -7,79 +7,79 @@ namespace FPS_n2 {
 			bool Ret = false;
 			if (HasParts(objType)) {
 				switch (objType) {
-				case GunSlot::Magazine:
-					break;
-				case GunSlot::Lower:
-					switch (frame) {
-					case GunFrame::Magpos:
-					case GunFrame::LeftHandPos:
-					case GunFrame::LeftHandYvec:
-					case GunFrame::LeftHandZvec:
-					case GunFrame::RightHandPos:
-					case GunFrame::RightHandYvec:
-					case GunFrame::RightHandZvec:
-						Ret = true;
+					case GunSlot::Magazine:
+						break;
+					case GunSlot::Lower:
+						switch (frame) {
+							case GunFrame::Magpos:
+							case GunFrame::LeftHandPos:
+							case GunFrame::LeftHandYvec:
+							case GunFrame::LeftHandZvec:
+							case GunFrame::RightHandPos:
+							case GunFrame::RightHandYvec:
+							case GunFrame::RightHandZvec:
+								Ret = true;
+								break;
+							default:
+								break;
+						}
+						break;
+					case GunSlot::Upper:
+						switch (frame) {
+							case GunFrame::Cart:
+							case GunFrame::CartVec:
+							case GunFrame::Eyepos:
+							case GunFrame::Lens:
+							case GunFrame::LensSize:
+								Ret = true;
+								break;
+							default:
+								break;
+						}
+						break;
+					case GunSlot::Barrel:
+						switch (frame) {
+							case GunFrame::Muzzle:
+								Ret = true;
+								break;
+							default:
+								break;
+						}
+						break;
+					case GunSlot::UnderRail:
+						switch (frame) {
+							case GunFrame::Eyepos:
+							case GunFrame::Lens:
+							case GunFrame::LensSize:
+							case GunFrame::LaserSight:
+								Ret = true;
+								break;
+							default:
+								break;
+						}
+						break;
+					case GunSlot::Sight:
+						switch (frame) {
+							case GunFrame::Eyepos:
+							case GunFrame::Lens:
+							case GunFrame::LensSize:
+								Ret = true;
+								break;
+							default:
+								break;
+						}
+						break;
+					case GunSlot::MuzzleAdapter:
+						switch (frame) {
+							case GunFrame::Muzzle:
+								Ret = true;
+								break;
+							default:
+								break;
+						}
 						break;
 					default:
 						break;
-					}
-					break;
-				case GunSlot::Upper:
-					switch (frame) {
-					case GunFrame::Cart:
-					case GunFrame::CartVec:
-					case GunFrame::Eyepos:
-					case GunFrame::Lens:
-					case GunFrame::LensSize:
-						Ret = true;
-						break;
-					default:
-						break;
-					}
-					break;
-				case GunSlot::Barrel:
-					switch (frame) {
-					case GunFrame::Muzzle:
-						Ret = true;
-						break;
-					default:
-						break;
-					}
-					break;
-				case GunSlot::UnderRail:
-					switch (frame) {
-					case GunFrame::Eyepos:
-					case GunFrame::Lens:
-					case GunFrame::LensSize:
-					case GunFrame::LaserSight:
-						Ret = true;
-						break;
-					default:
-						break;
-					}
-					break;
-				case GunSlot::Sight:
-					switch (frame) {
-					case GunFrame::Eyepos:
-					case GunFrame::Lens:
-					case GunFrame::LensSize:
-						Ret = true;
-						break;
-					default:
-						break;
-					}
-					break;
-				case GunSlot::MuzzleAdapter:
-					switch (frame) {
-					case GunFrame::Muzzle:
-						Ret = true;
-						break;
-					default:
-						break;
-					}
-					break;
-				default:
-					break;
 				}
 			}
 			if (Ret) {
@@ -202,14 +202,14 @@ namespace FPS_n2 {
 
 				ObjType Type = ObjType::Magazine;
 				switch (objType) {
-				case GunSlot::Magazine:				Type = ObjType::Magazine;			break;
-				case GunSlot::Upper:				Type = ObjType::Upper;				break;
-				case GunSlot::Lower:				Type = ObjType::Lower;				break;
-				case GunSlot::Barrel:				Type = ObjType::Barrel;				break;
-				case GunSlot::UnderRail:			Type = ObjType::UnderRail;			break;
-				case GunSlot::Sight:				Type = ObjType::Sight;				break;
-				case GunSlot::MuzzleAdapter:		Type = ObjType::MuzzleAdapter;		break;
-				default: break;
+					case GunSlot::Magazine:				Type = ObjType::Magazine;			break;
+					case GunSlot::Upper:				Type = ObjType::Upper;				break;
+					case GunSlot::Lower:				Type = ObjType::Lower;				break;
+					case GunSlot::Barrel:				Type = ObjType::Barrel;				break;
+					case GunSlot::UnderRail:			Type = ObjType::UnderRail;			break;
+					case GunSlot::Sight:				Type = ObjType::Sight;				break;
+					case GunSlot::MuzzleAdapter:		Type = ObjType::MuzzleAdapter;		break;
+					default: break;
 				}
 
 				auto* Ptr = ObjMngr->MakeObject(Type);

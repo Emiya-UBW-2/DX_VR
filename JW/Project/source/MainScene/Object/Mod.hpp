@@ -19,7 +19,7 @@ namespace FPS_n2 {
 			auto&			GetModData() noexcept { return this->m_ModDataClass; }
 			const auto&		GetModData() const noexcept { return this->m_ModDataClass; }
 		protected:
-			void			InitModSlotControl(const std::string& PilePath,bool ismod) noexcept {
+			void			InitModSlotControl(const std::string& PilePath, bool ismod) noexcept {
 				//データ
 				m_SlotControl = std::make_unique<SlotPartsControl>();
 				m_ModDataClass = *ModDataManager::Instance()->AddData(PilePath, ismod);
@@ -39,8 +39,7 @@ namespace FPS_n2 {
 
 		class ModClass :
 			public ObjectBaseClass,
-			public ModSlotControl
-		{
+			public ModSlotControl {
 		public:
 			ModClass(void) noexcept {}
 			~ModClass(void) noexcept {}
@@ -101,15 +100,15 @@ namespace FPS_n2 {
 		class MagazineClass : public ModClass {
 		private:
 			std::vector<std::shared_ptr<AmmoDataClass>>	m_AmmoSpec;
-			int											m_Capacity{ 0 };
-			int											m_CapacityMax{ 0 };
+			int											m_Capacity{0};
+			int											m_CapacityMax{0};
 			MATRIX_ref									HandMatrix;
-			float										HandPer{ 0.f };
-			bool										m_isDirect{ false };
-			RELOADTYPE									m_ReloadTypeBuf{ RELOADTYPE::MAG };
+			float										HandPer{0.f};
+			bool										m_isDirect{false};
+			RELOADTYPE									m_ReloadTypeBuf{RELOADTYPE::MAG};
 		public:
 			void			SetReloadType(RELOADTYPE ReloadType) noexcept { this->m_ReloadTypeBuf = ReloadType; }
-			void			SetHandMatrix(const MATRIX_ref& value, float pPer,bool isDirect) noexcept {
+			void			SetHandMatrix(const MATRIX_ref& value, float pPer, bool isDirect) noexcept {
 				this->HandMatrix = value;
 				this->HandPer = pPer;
 				this->m_isDirect = isDirect;
@@ -123,23 +122,23 @@ namespace FPS_n2 {
 			const auto&		GetAmmoAll(void) const noexcept { return  this->m_CapacityMax; }
 		public:
 			MagazineClass(void) noexcept { this->m_objType = ObjType::Magazine; }
-			~MagazineClass(void) noexcept { }
+			~MagazineClass(void) noexcept {}
 		public:
 			void			Init_Mod(void) noexcept override;
 			void			FirstExecute_Mod(void) noexcept override {
 				switch (m_ReloadTypeBuf) {
-				case RELOADTYPE::MAG:
-					if (this->m_isDirect) {
-						SetMove(this->HandMatrix.GetRot(), this->HandMatrix.pos());
-					}
-					else if (this->HandPer > 0.f) {
-						SetMove(MATRIX_ref::RotX(deg2rad(-30.f*this->HandPer))*GetMove().mat.GetRot(), Lerp(GetMove().pos, this->HandMatrix.pos(), this->HandPer));
-					}
-					break;
-				case RELOADTYPE::AMMO:
-					break;
-				default:
-					break;
+					case RELOADTYPE::MAG:
+						if (this->m_isDirect) {
+							SetMove(this->HandMatrix.GetRot(), this->HandMatrix.pos());
+						}
+						else if (this->HandPer > 0.f) {
+							SetMove(MATRIX_ref::RotX(deg2rad(-30.f*this->HandPer))*GetMove().mat.GetRot(), Lerp(GetMove().pos, this->HandMatrix.pos(), this->HandPer));
+						}
+						break;
+					case RELOADTYPE::AMMO:
+						break;
+					default:
+						break;
 				}
 			}
 			void			Dispose_Mod(void) noexcept override {
@@ -156,19 +155,19 @@ namespace FPS_n2 {
 		public://ゲッター
 		public:
 			LowerClass(void) noexcept { this->m_objType = ObjType::Lower; }
-			~LowerClass(void) noexcept { }
+			~LowerClass(void) noexcept {}
 		public:
 		};
 
 		class UpperClass : public ModClass {
 		private:
-			bool							m_IsRecoilPower{ false };
-			bool							m_IsRecoilReturn{ false };
-			bool							m_IsShotType{ false };		//
+			bool							m_IsRecoilPower{false};
+			bool							m_IsRecoilReturn{false};
+			bool							m_IsShotType{false};		//
 
-			int								m_RecoilPower{ 120 };
-			float							m_RecoilReturn{ 0.9f };
-			SHOTTYPE						m_ShotType{ SHOTTYPE::SEMI };		//
+			int								m_RecoilPower{120};
+			float							m_RecoilReturn{0.9f};
+			SHOTTYPE						m_ShotType{SHOTTYPE::SEMI};		//
 		public://ゲッター
 			const auto& GetIsRecoilPower(void) const noexcept { return this->m_IsRecoilPower; }
 			const auto& GetIsRecoilReturn(void) const noexcept { return this->m_IsRecoilReturn; }
@@ -178,7 +177,7 @@ namespace FPS_n2 {
 			const auto& GetShotType(void) const noexcept { return this->m_ShotType; }
 		public:
 			UpperClass(void) noexcept { this->m_objType = ObjType::Upper; }
-			~UpperClass(void) noexcept { }
+			~UpperClass(void) noexcept {}
 		public:
 			void			Init_Mod(void) noexcept override;
 		};
@@ -188,7 +187,7 @@ namespace FPS_n2 {
 		public://ゲッター
 		public:
 			BarrelClass(void) noexcept { this->m_objType = ObjType::Barrel; }
-			~BarrelClass(void) noexcept { }
+			~BarrelClass(void) noexcept {}
 		public:
 		};
 
@@ -197,36 +196,36 @@ namespace FPS_n2 {
 		public://ゲッター
 		public:
 			UnderRailClass(void) noexcept { this->m_objType = ObjType::UnderRail; }
-			~UnderRailClass(void) noexcept { }
+			~UnderRailClass(void) noexcept {}
 		public:
 		};
 
 		class SightClass : public ModClass {
 		private:
 			GraphHandle m_Reitcle;
-			float m_ZoomSize{ 1.f };
+			float m_ZoomSize{1.f};
 		public://ゲッター
 			const auto&		GetReitcleGraph(void) const noexcept { return this->m_Reitcle; }
 			const auto&		GetZoomSize(void) const noexcept { return this->m_ZoomSize; }
 		public:
 			SightClass(void) noexcept { this->m_objType = ObjType::Sight; }
-			~SightClass(void) noexcept { }
+			~SightClass(void) noexcept {}
 		public:
 			void			Init_Mod(void) noexcept override;
 		};
 
 		class MuzzleClass : public ModClass {
 		private:
-			GunShootSound	m_GunShootSound{ GunShootSound::Normal };
+			GunShootSound	m_GunShootSound{GunShootSound::Normal};
 		public://ゲッター
 			const auto&		GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
 		public:
 			MuzzleClass(void) noexcept { this->m_objType = ObjType::MuzzleAdapter; }
-			~MuzzleClass(void) noexcept { }
+			~MuzzleClass(void) noexcept {}
 		public:
 			void			Init_Mod(void) noexcept override;
 		};
 
-		
+
 	};
 };

@@ -79,34 +79,34 @@ namespace FPS_n2 {
 
 						int ID = 0;
 						switch (count) {
-						case 1:
-							ID = 0;
-							if (ZM) { deg = 0.f; }
-							if (XM) { deg = 90.f; }
-							if (ZP) { deg = 180.f; }
-							if (XP) { deg = 270.f; }
-							break;
-						case 2:
-							if (ZP && ZM) { ID = 1; deg = 0.f; }
-							if (XP && XM) { ID = 1; deg = 90.f; }
+							case 1:
+								ID = 0;
+								if (ZM) { deg = 0.f; }
+								if (XM) { deg = 90.f; }
+								if (ZP) { deg = 180.f; }
+								if (XP) { deg = 270.f; }
+								break;
+							case 2:
+								if (ZP && ZM) { ID = 1; deg = 0.f; }
+								if (XP && XM) { ID = 1; deg = 90.f; }
 
-							if (XP && ZP) { ID = 4; deg = 270.f; }
-							if (XM && ZP) { ID = 4; deg = 180.f; }
-							if (XM && ZM) { ID = 4; deg = 90.f; }
-							if (XP && ZM) { ID = 4; deg = 0.f; }
-							break;
-						case 3:
-							ID = 2;
-							if (ZP && XP && ZM) { deg = 0.f; }
-							if (ZP && XM && ZM) { deg = 180.f; }
-							if (XP && ZP && XM) { deg = 270.f; }
-							if (XP && ZM && XM) { deg = 90.f; }
-							break;
-						case 4:
-							ID = 3;
-							break;
-						default:
-							break;
+								if (XP && ZP) { ID = 4; deg = 270.f; }
+								if (XM && ZP) { ID = 4; deg = 180.f; }
+								if (XM && ZM) { ID = 4; deg = 90.f; }
+								if (XP && ZM) { ID = 4; deg = 0.f; }
+								break;
+							case 3:
+								ID = 2;
+								if (ZP && XP && ZM) { deg = 0.f; }
+								if (ZP && XM && ZM) { deg = 180.f; }
+								if (XP && ZP && XM) { deg = 270.f; }
+								if (XP && ZM && XM) { deg = 90.f; }
+								break;
+							case 4:
+								ID = 3;
+								break;
+							default:
+								break;
 						}
 						this->m_ObjBuilds[loop].Set(loop, this->m_ObjBuildBase, this->m_ColBuildBase, ID);
 						this->m_ObjBuilds[loop].SetPosition(GetPos(x, y), deg2rad(deg));

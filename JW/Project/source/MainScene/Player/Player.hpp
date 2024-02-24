@@ -7,8 +7,8 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class PlayerControl {
 		private:
-			std::shared_ptr<ObjectBaseClass>	m_Chara{ nullptr };
-			int									m_Score{ 0 };							//スコア
+			std::shared_ptr<ObjectBaseClass>	m_Chara{nullptr};
+			int									m_Score{0};							//スコア
 		public:
 			PlayerControl(void) noexcept {
 				this->m_Score = 0;

@@ -9,7 +9,7 @@ namespace FPS_n2 {
 			ARMER,
 		};
 		class ItemObjClass : public ObjectBaseClass {
-			float m_yAdd{ 0.f };
+			float m_yAdd{0.f};
 			ItemType m_ItemType;
 		private:
 			std::shared_ptr<BackGroundClassBase>		m_BackGround;				//BG
@@ -17,7 +17,7 @@ namespace FPS_n2 {
 			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept { this->m_BackGround = backGround; }
 		public:
 			ItemObjClass(void) noexcept { this->m_objType = ObjType::ItemObj; }
-			~ItemObjClass(void) noexcept { }
+			~ItemObjClass(void) noexcept {}
 		public:
 			void			SetFall(const VECTOR_ref& pos, const VECTOR_ref& vec) noexcept;
 			void			SetItemType(ItemType item) noexcept { this->m_ItemType = item; }

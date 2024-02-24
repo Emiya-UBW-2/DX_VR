@@ -9,14 +9,14 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class GunDataClass : public ModDataClass {
 		private:
-			int								m_ShotRate{ 300 };
-			int								m_RecoilPower{ 120 };
-			float							m_RecoilReturn{ 0.9f };
-			SHOTTYPE						m_ShotType{ SHOTTYPE::SEMI };		//
-			int								m_HumanAnimType{ 0 };				//
-			int								m_SoundSel{ 0 };
-			RELOADTYPE						m_ReloadType{ RELOADTYPE::MAG };	//
-			GunShootSound					m_GunShootSound{ GunShootSound::Normal };
+			int								m_ShotRate{300};
+			int								m_RecoilPower{120};
+			float							m_RecoilReturn{0.9f};
+			SHOTTYPE						m_ShotType{SHOTTYPE::SEMI};		//
+			int								m_HumanAnimType{0};				//
+			int								m_SoundSel{0};
+			RELOADTYPE						m_ReloadType{RELOADTYPE::MAG};	//
+			GunShootSound					m_GunShootSound{GunShootSound::Normal};
 		public://ƒQƒbƒ^[
 			const auto& GetShotRate(void) const noexcept { return this->m_ShotRate; }
 			const auto& GetRecoilPower(void) const noexcept { return this->m_RecoilPower; }
@@ -28,7 +28,7 @@ namespace FPS_n2 {
 			const auto& GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
 		public://
 			void		SetMod(const std::string& LEFT, const std::string&RIGHT) noexcept override {
-				
+
 				if (LEFT == "ShotRate") {
 					this->m_ShotRate = std::stoi(RIGHT);
 				}

@@ -31,65 +31,64 @@ namespace FPS_n2 {
 			public MagStockControl,
 			public HitReactionControl,
 			public RagDollControl,
-			public ULTControl
-		{
+			public ULTControl {
 		private://キャラパラメーター
 			const float											UpperTimerLimit = 10.f;
 		private:
 			CharaTypeID											m_CharaType;
 			VECTOR_ref											m_PosBuf;
 			CharaAnimeID										m_BottomAnimSelect;
-			std::array<float, (int)CharaAnimeID::AnimeIDMax>	m_AnimPerBuf{ 0 };
+			std::array<float, (int)CharaAnimeID::AnimeIDMax>	m_AnimPerBuf{0};
 			std::array<ArmMovePerClass, (int)EnumGunAnimType::Max>	m_Arm;
-			float												m_ReadyTimer{ 0.f };
-			float												m_LeanRad{ 0.f };
-			float												m_LateLeanRad{ 0.f };
-			float												m_MoverPer{ 0.f };
-			float												m_Speed{ 0.f };
-			float												m_yrad_Upper{ 0.f }, m_yrad_Bottom{ 0.f };
-			float												m_yrad_UpperChange{ 0.f }, m_yrad_BottomChange{ 0.f };
-			bool												m_TurnBody{ false };
-			bool												m_MagHand{ false };
+			float												m_ReadyTimer{0.f};
+			float												m_LeanRad{0.f};
+			float												m_LateLeanRad{0.f};
+			float												m_MoverPer{0.f};
+			float												m_Speed{0.f};
+			float												m_yrad_Upper{0.f}, m_yrad_Bottom{0.f};
+			float												m_yrad_UpperChange{0.f}, m_yrad_BottomChange{0.f};
+			bool												m_TurnBody{false};
+			bool												m_MagHand{false};
 			ArmMovePerClass										m_MagArm;
-			float												m_MoveEyePosTimer{ 0.f };
+			float												m_MoveEyePosTimer{0.f};
 			VECTOR_ref											m_MoveEyePos;
-			bool												m_IsStuckGun{ false };
-			float												m_ADSPer{ 0.f };
-			float												m_AmmoHandR{ 0.f };
-			float												m_AmmoHand{ 0.f };
+			bool												m_IsStuckGun{false};
+			float												m_ADSPer{0.f};
+			float												m_AmmoHandR{0.f};
+			float												m_AmmoHand{0.f};
 			//銃
-			int													m_GunSelect{ 0 };
-			std::array<std::shared_ptr<GunClass>, 2>			m_Gun_Ptr{ nullptr , nullptr };			//銃
-			bool												m_IsChanging{ false };
+			int													m_GunSelect{0};
+			std::array<std::shared_ptr<GunClass>, 2>			m_Gun_Ptr{nullptr , nullptr};			//銃
+			bool												m_IsChanging{false};
 			//
-			std::shared_ptr<ArmerClass>							m_Armer_Ptr{ nullptr };
+			std::shared_ptr<ArmerClass>							m_Armer_Ptr{nullptr};
 			ArmMovePerClass										m_Wear_Armer;
-			bool												m_CanWearArmer{ false };
-			bool												m_IsWearArmer{ false };
-			bool												m_IsWearingArmer{ false };
-			bool												m_WearArmer{ false };
+			bool												m_CanWearArmer{false};
+			bool												m_IsWearArmer{false};
+			bool												m_IsWearingArmer{false};
+			bool												m_WearArmer{false};
 
-			float												m_ULTUp{ 0.f };
-			bool												m_ULTActive{ false };
-			float												m_HPRec{ 0.f };
+			float												m_ULTUp{0.f};
+			bool												m_ULTActive{false};
+			float												m_HPRec{0.f};
 			//入力
-			bool												m_Press_Shot{ false };
-			bool												m_Press_Reload{ false };
-			bool												m_Press_Aim{ false };
-			float												m_MeleeCoolDown{ 0.f };
-			bool												m_ArmBreak{ false };
+			bool												m_Press_Shot{false};
+			bool												m_Press_Reload{false};
+			bool												m_Press_Aim{false};
+			float												m_MeleeCoolDown{0.f};
+			bool												m_ArmBreak{false};
 			//サウンド
-			float												m_SoundPower{ 0.f };
-			int													m_CharaSound{ -1 };
-			int													m_LeanSoundReq{ 0 };
-			bool												m_SquatSoundReq{ false };
+			float												m_SoundPower{0.f};
+			int													m_CharaSound{-1};
+			int													m_LeanSoundReq{0};
+			bool												m_SquatSoundReq{false};
 			//
 			std::array<ItemFallControl, 2>						m_ItemFallControl;
 		public:
-			bool												CanLookTarget{ true };
+			bool												CanLookTarget{true};
 		private:
 			std::shared_ptr<BackGroundClassBase>				m_BackGround;				//BG
-			bool												m_IsMainGame{ false };
+			bool												m_IsMainGame{false};
 		public:
 			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround, bool IsMainGame) noexcept {
 				m_BackGround.reset();
@@ -171,7 +170,7 @@ namespace FPS_n2 {
 			const auto		GetAmmoNum(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetAmmoNum() : 0; }
 			const auto		GetAmmoAll(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetAmmoAll() : 0; }
 			const auto		GetMeleeSwitch(void) const noexcept { return m_MeleeCoolDown == 1.f; }
-			
+
 			const auto		GetCharaDir(void) const noexcept {
 				auto tmpUpperMatrix =
 					MATRIX_ref::RotZ(this->m_LeanRad) *

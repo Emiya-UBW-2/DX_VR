@@ -14,9 +14,9 @@ namespace FPS_n2 {
 
 		class ObjectBaseClass {
 		protected:
-			PHYSICS_SETUP								m_PHYSICS_SETUP{ PHYSICS_SETUP::DISABLE };
-			bool										m_objActive{ false };							//
-			bool										m_ColActive{ false };							//
+			PHYSICS_SETUP								m_PHYSICS_SETUP{PHYSICS_SETUP::DISABLE};
+			bool										m_objActive{false};							//
+			bool										m_ColActive{false};							//
 			MV1											m_obj;
 			MV1											m_col;
 
@@ -24,25 +24,25 @@ namespace FPS_n2 {
 			MATRIX_ref									m_PrevMat;//ï®óùçXêVÇÃÇΩÇﬂ
 			std::vector<std::pair<int, MATRIX_ref>>		m_Frames;
 			std::vector<std::pair<int, float>>			m_Shapes;
-			ObjType										m_objType{ (ObjType)0 };
+			ObjType										m_objType{(ObjType)0};
 			std::string									m_FilePath;
 			std::string									m_ObjFileName;
 			std::string									m_ColFileName;
 
-			bool										m_IsActive{ true };
-			bool										m_IsDelete{ false };
+			bool										m_IsActive{true};
+			bool										m_IsDelete{false};
 
-			bool										m_IsResetPhysics{ true };
-			bool										m_IsFirstLoop{ true };
-			bool										m_IsDraw{ true };
-			float										m_DistanceToCam{ 0.f };
-			bool										m_IsBaseModel{ false };
+			bool										m_IsResetPhysics{true};
+			bool										m_IsFirstLoop{true};
+			bool										m_IsDraw{true};
+			float										m_DistanceToCam{0.f};
+			bool										m_IsBaseModel{false};
 			VECTOR_ref									m_CameraPosition;
-			float										m_CameraSize{ 0.f };
-			PlayerID									m_MyID{ 0 };									//
+			float										m_CameraSize{0.f};
+			PlayerID									m_MyID{0};									//
 
-			ShaderUseClass*								m_UseShader{ nullptr };
-			std::array<int, 2>							m_ShaderTex{ -1 , -1 };
+			ShaderUseClass*								m_UseShader{nullptr};
+			std::array<int, 2>							m_ShaderTex{-1 , -1};
 		public:
 			auto&			GetObj(void) noexcept { return this->m_obj; }
 			//const auto&		GetObj_const(void) const noexcept { return this->m_obj; }
@@ -130,10 +130,10 @@ namespace FPS_n2 {
 			void			SaveModel(bool UseToonWhenCreateFile) noexcept;
 		public:
 			virtual void	Init(void) noexcept;
-			virtual void	FirstExecute(void) noexcept { }
+			virtual void	FirstExecute(void) noexcept {}
 			void			ExecuteCommon(void) noexcept;
-			virtual void	LateExecute(void) noexcept { }
-			virtual void	Depth_Draw(void) noexcept { }
+			virtual void	LateExecute(void) noexcept {}
+			virtual void	Depth_Draw(void) noexcept {}
 			virtual void	DrawShadow(void) noexcept;
 			virtual void	CheckDraw(void) noexcept;
 			virtual void	Draw(bool isDrawSemiTrans) noexcept;

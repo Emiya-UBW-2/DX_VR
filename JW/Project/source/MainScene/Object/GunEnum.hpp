@@ -92,12 +92,12 @@ namespace FPS_n2 {
 		};
 
 		struct GunSoundSet {
-			SoundEnum					m_Cock1{ SoundEnum::Shot2 };
-			SoundEnum					m_Cock2{ SoundEnum::Shot2 };
-			SoundEnum					m_ShotNormal{ SoundEnum::Shot2 };
-			SoundEnum					m_ShotSuppressor{ SoundEnum::Shot2 };
-			SoundEnum					m_Unload{ SoundEnum::Unload2 };
-			SoundEnum					m_Load{ SoundEnum::Load2 };
+			SoundEnum					m_Cock1{SoundEnum::Shot2};
+			SoundEnum					m_Cock2{SoundEnum::Shot2};
+			SoundEnum					m_ShotNormal{SoundEnum::Shot2};
+			SoundEnum					m_ShotSuppressor{SoundEnum::Shot2};
+			SoundEnum					m_Unload{SoundEnum::Unload2};
+			SoundEnum					m_Load{SoundEnum::Load2};
 		};
 		const GunSoundSet GunSoundSets[] = {
 			{
@@ -128,7 +128,7 @@ namespace FPS_n2 {
 				SoundEnum::Load1
 			},
 		};
-		
+
 		enum class GunSlot {
 			Gun,
 			Magazine,

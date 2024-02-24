@@ -9,7 +9,7 @@ namespace FPS_n2 {
 			this->m_move.pos = pos;
 			this->m_move.vec = vec;
 			this->m_move.repos = this->m_move.pos;
-			this->m_move.mat=MATRIX_ref::zero();
+			this->m_move.mat = MATRIX_ref::zero();
 		}
 		void			ItemObjClass::FirstExecute(void) noexcept {
 			if (this->m_IsActive) {

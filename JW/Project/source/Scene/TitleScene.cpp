@@ -32,7 +32,7 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide(PADS::MOVE_S, "");
 					KeyGuide->AddGuide(PADS::MOVE_STICK, "選択");
 					KeyGuide->AddGuide(PADS::INTERACT, "決定");
-			}
+				}
 			);
 			if (!OptionWindowClass::Instance()->IsActive()) {
 				if (GameStart[0] == 0.f && GameStart[1] == 0.f && GameStart[2] == 0.f) {
@@ -60,28 +60,28 @@ namespace FPS_n2 {
 						SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					}
 					switch (select) {
-					case 0:
-						if ((GameStart[0] != 0.f) || Pad->GetKey(PADS::INTERACT).trigger()) {
-							GameStart[0] += 1.f / FPS / 0.5f;
-						}
-						break;
-					case 1:
-						if ((GameStart[1] != 0.f) || Pad->GetKey(PADS::INTERACT).trigger()) {
-							GameStart[1] += 1.f / FPS / 0.5f;
-						}
-						break;
-					case 2:
-						if ((GameStart[2] != 0.f) || Pad->GetKey(PADS::INTERACT).trigger()) {
-							GameStart[2] += 1.f / FPS / 0.5f;
-						}
-						break;
-					case 3:
-						if (Pad->GetKey(PADS::INTERACT).trigger()) {
-							OptionWindowClass::Instance()->SetActive();
-						}
-						break;
-					default:
-						break;
+						case 0:
+							if ((GameStart[0] != 0.f) || Pad->GetKey(PADS::INTERACT).trigger()) {
+								GameStart[0] += 1.f / FPS / 0.5f;
+							}
+							break;
+						case 1:
+							if ((GameStart[1] != 0.f) || Pad->GetKey(PADS::INTERACT).trigger()) {
+								GameStart[1] += 1.f / FPS / 0.5f;
+							}
+							break;
+						case 2:
+							if ((GameStart[2] != 0.f) || Pad->GetKey(PADS::INTERACT).trigger()) {
+								GameStart[2] += 1.f / FPS / 0.5f;
+							}
+							break;
+						case 3:
+							if (Pad->GetKey(PADS::INTERACT).trigger()) {
+								OptionWindowClass::Instance()->SetActive();
+							}
+							break;
+						default:
+							break;
 					}
 				}
 			}
@@ -106,7 +106,7 @@ namespace FPS_n2 {
 			yp1 = y_r(64 + 48 * 2);
 			DrawFetteString(xp1, yp1, 1.33f, false, "JW-ProtoType");
 			//
-			xp1 = y_r(1920 - 256 - 54 * 3 - (int)(GameStart[0] *100.f));
+			xp1 = y_r(1920 - 256 - 54 * 3 - (int)(GameStart[0] * 100.f));
 			yp1 = y_r(1080 - 108 - 108 * 3 + (int)SelYadd[0]);
 			{
 				auto per = std::clamp((1.f - GameStart[0]), 0.f, 1.f);
@@ -115,7 +115,7 @@ namespace FPS_n2 {
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 			//
-			xp1 = y_r(1920 - 256 - 54 * 2 - (int)(GameStart[1] *100.f));
+			xp1 = y_r(1920 - 256 - 54 * 2 - (int)(GameStart[1] * 100.f));
 			yp1 = y_r(1080 - 108 - 108 * 2 + (int)SelYadd[1]);
 			{
 				auto per = std::clamp((1.f - GameStart[1]), 0.f, 1.f);
@@ -124,7 +124,7 @@ namespace FPS_n2 {
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 			//
-			xp1 = y_r(1920 - 256 - 54 * 1 - (int)(GameStart[2] *100.f));
+			xp1 = y_r(1920 - 256 - 54 * 1 - (int)(GameStart[2] * 100.f));
 			yp1 = y_r(1080 - 108 - 108 * 1 + (int)SelYadd[2]);
 			{
 				auto per = std::clamp((1.f - GameStart[2]), 0.f, 1.f);
@@ -148,20 +148,20 @@ namespace FPS_n2 {
 
 				std::string Info = "";
 				switch (select) {
-				case 0:
-					Info = "使用する拳銃のカスタマイズをすることができます";
-					break;
-				case 1:
-					Info = "射撃場で装備を試します";
-					break;
-				case 2:
-					Info = "戦闘を行います。(現状ではリタイア、ESCキーで終わる以外で特に目標はありません。無限に甦る敵兵士を倒し続けます)";
-					break;
-				case 3:
-					Info = "オプションを開きます";
-					break;
-				default:
-					break;
+					case 0:
+						Info = "使用する拳銃のカスタマイズをすることができます";
+						break;
+					case 1:
+						Info = "射撃場で装備を試します";
+						break;
+					case 2:
+						Info = "戦闘を行います。(現状ではリタイア、ESCキーで終わる以外で特に目標はありません。無限に甦る敵兵士を倒し続けます)";
+						break;
+					case 3:
+						Info = "オプションを開きます";
+						break;
+					default:
+						break;
 				}
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1, White, Black, Info);
 			}

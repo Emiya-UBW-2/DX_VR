@@ -10,7 +10,7 @@ namespace FPS_n2 {
 		class FallControl {
 		private:
 			std::array<std::shared_ptr<FallObjClass>, 4>	m_Ptr;
-			int												m_Now{ 0 };
+			int												m_Now{0};
 		public:
 			void		Init(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath) {
 				auto* ObjMngr = ObjectManager::Instance();
@@ -38,7 +38,7 @@ namespace FPS_n2 {
 		//
 		class SlotPartsControl {
 		private:
-			std::array<SharedObj, (int)GunSlot::Max>	m_Parts_Ptr{ nullptr };
+			std::array<SharedObj, (int)GunSlot::Max>	m_Parts_Ptr{nullptr};
 		public:
 			const bool	HasParts(GunSlot objType) const noexcept { return (this->m_Parts_Ptr[(int)objType].get() != nullptr); }
 			const auto&	GetPartsPtr(GunSlot objType) const noexcept { return this->m_Parts_Ptr[(int)objType]; }
@@ -64,7 +64,7 @@ namespace FPS_n2 {
 		private://キャラパラメーター
 			std::array<VECTOR_ref, 8>		m_Line;
 			int								m_LineSel = 0;
-			float							m_LinePer{ 0.f };
+			float							m_LinePer{0.f};
 		private:
 		public://ゲッター
 			void			AddMuzzleSmokePower() noexcept { m_LinePer = std::clamp(m_LinePer + 0.1f, 0.f, 1.f); }
@@ -99,9 +99,9 @@ namespace FPS_n2 {
 						this->m_Line[p2].get()) == FALSE
 						) {
 						DrawCapsule3D(this->m_Line[p1].get(), this->m_Line[p2].get(), (0.00762f)*Scale_Rate*1.f*((float)(i - min) / max), 3,
-							GetColor(192, 128, 128),
-							GetColor(96, 96, 64),
-							TRUE);
+									  GetColor(192, 128, 128),
+									  GetColor(96, 96, 64),
+									  TRUE);
 					}
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);

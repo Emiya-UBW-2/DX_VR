@@ -5,8 +5,8 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class ConcussionControl {
-			float										m_Timer{ 0.f };
-			float										m_Per{ 0.f };
+			float										m_Timer{0.f};
+			float										m_Per{0.f};
 		public:
 			ConcussionControl() {}
 			~ConcussionControl() {}
@@ -41,9 +41,9 @@ namespace FPS_n2 {
 
 		};
 		class MainLoopPauseControl {
-			int select{ 0 };
+			int select{0};
 			std::array<float, 3> SelYadd{};
-			bool	m_IsRetire{ false };
+			bool	m_IsRetire{false};
 		public:
 			MainLoopPauseControl() {}
 			~MainLoopPauseControl() {}
@@ -76,19 +76,19 @@ namespace FPS_n2 {
 					if (Pad->GetKey(PADS::INTERACT).trigger()) {
 						SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						switch (select) {
-						case 0:
-							m_IsRetire = true;
-							DXDraw::Instance()->PauseExit();
-							break;
-						case 1:
-							OptionWindowClass::Instance()->SetActive();
-							break;
-						case 2:
-							DXDraw::Instance()->PauseExit();
-							break;
-						default:
-							DXDraw::Instance()->PauseExit();
-							break;
+							case 0:
+								m_IsRetire = true;
+								DXDraw::Instance()->PauseExit();
+								break;
+							case 1:
+								OptionWindowClass::Instance()->SetActive();
+								break;
+							case 2:
+								DXDraw::Instance()->PauseExit();
+								break;
+							default:
+								DXDraw::Instance()->PauseExit();
+								break;
 						}
 					}
 					if (Pad->GetKey(PADS::RELOAD).trigger()) {

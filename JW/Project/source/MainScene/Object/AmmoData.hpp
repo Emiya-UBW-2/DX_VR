@@ -6,13 +6,13 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class AmmoDataClass : public ItemData {
 		private:
-			float			m_caliber{ 0.f };
-			float			m_speed{ 100.f };				//弾速
-			float			m_penetration{ 10.f };			//貫通
-			HitPoint		m_damage{ 10 };					//ダメージ
-			int				m_Pellet{ 1 };
-			float			m_Accuracy{ 0.f };
-			int				m_FallSound{ 0 };
+			float			m_caliber{0.f};
+			float			m_speed{100.f};				//弾速
+			float			m_penetration{10.f};			//貫通
+			HitPoint		m_damage{10};					//ダメージ
+			int				m_Pellet{1};
+			float			m_Accuracy{0.f};
+			int				m_FallSound{0};
 		public://getter
 			const auto&		GetCaliber(void) const noexcept { return this->m_caliber; }
 			const auto&		GetSpeed(void) const noexcept { return this->m_speed; }
@@ -44,7 +44,7 @@ namespace FPS_n2 {
 				if (LEFT == "FallSound") {
 					this->m_FallSound = std::stoi(RIGHT);				//ペレットの数
 				}
-				
+
 			}
 		public:
 		};

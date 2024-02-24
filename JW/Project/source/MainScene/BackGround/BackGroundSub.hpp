@@ -10,8 +10,8 @@ namespace FPS_n2 {
 				PATH,
 			};
 		private:
-			int m_Width{ 1 };
-			int m_Height{ 1 };
+			int m_Width{1};
+			int m_Height{1};
 			std::vector<std::vector<MAZETYPE>> m_Maze;
 		private:
 			//ŒŠŒ@‚è
@@ -111,17 +111,17 @@ namespace FPS_n2 {
 			}
 		};
 		class Builds {
-			int						m_mesh{ -1 };
+			int						m_mesh{-1};
 			MV1						m_Obj;
 			MV1						m_Col;
 			MATRIX_ref				m_mat;
 			VECTOR_ref				m_MinPos;
 			VECTOR_ref				m_MaxPos;
 
-			bool checkDraw{ true };
+			bool checkDraw{true};
 
-			int							MyIndex{ 0 };
-			int						LinkPolyIndex[4]{ -1,-1,-1,-1 };
+			int							MyIndex{0};
+			int						LinkPolyIndex[4]{-1,-1,-1,-1};
 		public:
 			const int	GetIndex() const noexcept { return MyIndex; }
 			const int	GetLinkPolyIndex(int ID) const noexcept { return LinkPolyIndex[ID]; }
@@ -173,25 +173,25 @@ namespace FPS_n2 {
 		class LightControl {
 		private:
 			struct Lights {
-				bool		m_isHit{ false };
+				bool		m_isHit{false};
 
-				float		m_SlingPower{ 0.1f };
-				float		m_EraseTimer{ 3.f };
+				float		m_SlingPower{0.1f};
+				float		m_EraseTimer{3.f};
 
 				Pendulum2D	m_SlingZrad;
 
-				float		m_Yadd{ 0.f };
+				float		m_Yadd{0.f};
 				VECTOR_ref	m_Pos;
-				float		m_length{ 0.f };
+				float		m_length{0.f};
 				MV1			m_Obj;
 
-				Builds*		m_NearPath{ nullptr };
+				Builds*		m_NearPath{nullptr};
 			};
 		private:
 			GraphHandle					Light_Graph;
 			MV1							m_ObjLightBase;
 			std::vector<Lights>			m_LightPoiont;
-			std::array<int, 2>			m_LightHandle{ -1,-1 };
+			std::array<int, 2>			m_LightHandle{-1,-1};
 		public:
 			const auto&		GetNearestLight(int No) const noexcept { return this->m_LightPoiont[No].m_Pos; }
 		public:
@@ -241,13 +241,13 @@ namespace FPS_n2 {
 					SetLightAmbColorHandle(m_LightHandle[i], GetColorF(0.1f, 0.1f, 0.1f, 1.f));
 				}
 				ChangeLightTypeSpot(GetNearestLight(2).get(),
-					VGet(0.0f, -1.0f, 0.0f),
-					DX_PI_F / 4.0f,
-					DX_PI_F / 6.0f,
-					5.0f*Scale_Rate,
-					0.0f,
-					0.006f,
-					0.0f);
+									VGet(0.0f, -1.0f, 0.0f),
+									DX_PI_F / 4.0f,
+									DX_PI_F / 6.0f,
+									5.0f*Scale_Rate,
+									0.0f,
+									0.006f,
+									0.0f);
 				SetLightDifColor(GetColorF(1.f, 1.f, 1.f, 1.f));
 				SetLightSpcColor(GetColorF(0.01f, 0.01f, 0.01f, 0.f));
 				SetLightAmbColor(GetColorF(0.1f, 0.1f, 0.1f, 1.f));
@@ -307,13 +307,13 @@ namespace FPS_n2 {
 							}
 							else {//2
 								ChangeLightTypeSpot(Pos.get(),
-									Vec.get(),
-									DX_PI_F / 4.0f,
-									DX_PI_F / 6.0f,
-									5.0f*Scale_Rate,
-									0.0f,
-									0.006f,
-									0.0f);
+													Vec.get(),
+													DX_PI_F / 4.0f,
+													DX_PI_F / 6.0f,
+													5.0f*Scale_Rate,
+													0.0f,
+													0.006f,
+													0.0f);
 								//SetLightPosition(Pos.get());
 								//SetLightDirection(Vec.get());
 							}
@@ -367,13 +367,12 @@ namespace FPS_n2 {
 			}
 		};
 		class Garbage {
-			static const int Blocks{ 5 };
-			struct GarbageObjct
-			{
+			static const int Blocks{5};
+			struct GarbageObjct {
 				MV1 m_Obj;
-				bool IsChanged{ false };
-				float m_Rad{ 0.f };
-				float m_PrevRad{ 0.f };
+				bool IsChanged{false};
+				float m_Rad{0.f};
+				float m_PrevRad{0.f};
 				VECTOR_ref m_Pos;
 			};
 		private:
@@ -465,7 +464,7 @@ namespace FPS_n2 {
 				VECTOR_ref	m_Pos;
 				MV1			m_Obj;
 				MV1			m_Col;
-				Builds*		m_NearPath{ nullptr };
+				Builds*		m_NearPath{nullptr};
 			};
 		private:
 			MV1							m_ObjDrumBase;
@@ -522,7 +521,7 @@ namespace FPS_n2 {
 		const float tileSize = 30.f;
 	private:
 		GraphHandle					m_MapGraph;
-		int m_MapGraphXSize{ 0 }, m_MapGraphYSize{ 0 };
+		int m_MapGraphXSize{0}, m_MapGraphYSize{0};
 	private:
 		void	MakeMiniMap() noexcept;
 		void	UpdateMiniMap() noexcept;

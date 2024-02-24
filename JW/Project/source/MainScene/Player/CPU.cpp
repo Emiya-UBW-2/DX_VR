@@ -7,7 +7,7 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class PathChecker {
-			std::shared_ptr<BackGroundClassMain>	m_BackGround{ nullptr };				//BG
+			std::shared_ptr<BackGroundClassMain>	m_BackGround{nullptr};				//BG
 		public:
 			// 経路探索処理用の１ポリゴンの情報
 			class PATHPLANNING_UNIT {
@@ -70,8 +70,8 @@ namespace FPS_n2 {
 		private:
 			VECTOR_ref GoalPosition;					// 目標位置
 			std::vector<PATHPLANNING_UNIT>UnitArray;	// 経路探索処理で使用する全ポリゴンの情報配列が格納されたメモリ領域の先頭メモリアドレスを格納する変数
-			PATHPLANNING_UNIT *StartUnit{ nullptr };			// 経路のスタート地点にあるポリゴン情報へのメモリアドレスを格納する変数
-			PATHPLANNING_UNIT *GoalUnit{ nullptr };				// 経路のゴール地点にあるポリゴン情報へのメモリアドレスを格納する変数
+			PATHPLANNING_UNIT *StartUnit{nullptr};			// 経路のスタート地点にあるポリゴン情報へのメモリアドレスを格納する変数
+			PATHPLANNING_UNIT *GoalUnit{nullptr};				// 経路のゴール地点にあるポリゴン情報へのメモリアドレスを格納する変数
 		public:
 			void		SetBackGround(const std::shared_ptr<BackGroundClassMain>& BackBround_t) noexcept { m_BackGround = BackBround_t; }
 			const auto& GetStartUnit() const noexcept { return this->StartUnit; }
@@ -160,31 +160,31 @@ namespace FPS_n2 {
 		//AI用
 		class AIControl::Impl {
 		public:
-			ENUM_AI_PHASE							m_Phase{ ENUM_AI_PHASE::Normal };
-			PlayerID								m_MyCharaID{ 0 };
+			ENUM_AI_PHASE							m_Phase{ENUM_AI_PHASE::Normal};
+			PlayerID								m_MyCharaID{0};
 			InputControl							m_MyInput;
 		private:
-			const PlayerID							m_TargetCharaID{ 0 };
+			const PlayerID							m_TargetCharaID{0};
 
-			int										TargetPathPlanningIndex{ 0 };		// 次の中間地点となる経路上のポリゴンの経路探索情報が格納されているメモリアドレスを格納する変数
+			int										TargetPathPlanningIndex{0};		// 次の中間地点となる経路上のポリゴンの経路探索情報が格納されているメモリアドレスを格納する変数
 			PathChecker								m_PathChecker;
 
-			std::shared_ptr<BackGroundClassMain>	m_BackGround{ nullptr };				//BG
+			std::shared_ptr<BackGroundClassMain>	m_BackGround{nullptr};				//BG
 
-			float									m_PathUpdateTimer{ 0.f };
-			float									m_CheckAgain{ 0.f };
-			float									m_ShotTimer{ 0.f };
-			float									m_BackTimer{ 0.f };
-			float									m_RepopTimer{ 0.f };
-			float									m_MoveFrontTimer{ 0.f };
+			float									m_PathUpdateTimer{0.f};
+			float									m_CheckAgain{0.f};
+			float									m_ShotTimer{0.f};
+			float									m_BackTimer{0.f};
+			float									m_RepopTimer{0.f};
+			float									m_MoveFrontTimer{0.f};
 
-			int										m_LeanLR{ 0 };
+			int										m_LeanLR{0};
 		public:
-			Impl(void) noexcept { }
-			~Impl(void) noexcept { }
+			Impl(void) noexcept {}
+			~Impl(void) noexcept {}
 		private:
-			bool									IsGotLengthToTarget{ true };
-			float									LengthToTarget{ 0.f };
+			bool									IsGotLengthToTarget{true};
+			float									LengthToTarget{0.f};
 			VECTOR_ref								VectorToTarget;
 			float					GetLengthToTarget() {
 				if (IsGotLengthToTarget) {
@@ -334,7 +334,7 @@ namespace FPS_n2 {
 				IsGotLengthToTarget = false;
 				//前準備
 				m_PathUpdateTimer = std::max(m_PathUpdateTimer - 1.f / FPS, 0.f);
-				if(m_PathUpdateTimer<=0.f){
+				if (m_PathUpdateTimer <= 0.f) {
 					m_PathUpdateTimer += 1.f;
 					this->ChangePoint();
 				}
@@ -363,7 +363,7 @@ namespace FPS_n2 {
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto MyPos = MyChara->GetEyePosition();
 				//
-				if (this->m_MoveFrontTimer>6.f) {
+				if (this->m_MoveFrontTimer > 6.f) {
 					this->m_MoveFrontTimer -= 6.f;
 				}
 				this->m_MoveFrontTimer += 1.f / FPS;
@@ -447,16 +447,16 @@ namespace FPS_n2 {
 			//AI
 			this->GetParam()->Execute_Before();
 			switch (this->GetParam()->m_Phase) {
-			case ENUM_AI_PHASE::Normal:
-				this->GetParam()->Execute_Normal();
-				break;
-			case ENUM_AI_PHASE::Shot:
-				this->GetParam()->Execute_Shot();
-				break;
-			case ENUM_AI_PHASE::Dead:
-				break;
-			default:
-				break;
+				case ENUM_AI_PHASE::Normal:
+					this->GetParam()->Execute_Normal();
+					break;
+				case ENUM_AI_PHASE::Shot:
+					this->GetParam()->Execute_Shot();
+					break;
+				case ENUM_AI_PHASE::Dead:
+					break;
+				default:
+					break;
 			}
 			*MyInput = this->GetParam()->m_MyInput;
 		}
