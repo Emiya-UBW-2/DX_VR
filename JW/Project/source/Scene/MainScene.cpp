@@ -595,7 +595,7 @@ namespace FPS_n2 {
 				this->m_UIclass.SetGaugeParam(1, (int)Chara->GetAP(), (int)Chara->GetAPMax());
 				//Ammo
 				if (Chara->GetGunPtrNow()) {
-					this->m_UIclass.SetGaugeParam(2, (int)Chara->GetGunPtrNow()->GetAmmoNum(), (int)Chara->GetGunPtrNow()->GetAmmoAll() + 1);
+					this->m_UIclass.SetGaugeParam(2, (int)Chara->GetGunPtrNow()->GetAmmoNumTotal(), (int)Chara->GetGunPtrNow()->GetAmmoAll() + 1);
 				}
 				//ULT
 				this->m_UIclass.SetGaugeParam(3, (int)Chara->GetULT(), (int)Chara->GetULTMax());
@@ -605,7 +605,7 @@ namespace FPS_n2 {
 					if (Chara->GetNowMagID() == (int)(&M - &Chara->GetMagDatas().front())) {
 						continue;
 					}
-					this->m_UIclass.SetGaugeParam(4 + mags, (int)M.AmmoNum, (int)Chara->GetAmmoAll());
+					this->m_UIclass.SetGaugeParam(4 + mags, M.AmmoNum, M.AmmoAll);
 					mags++;
 				}
 			}

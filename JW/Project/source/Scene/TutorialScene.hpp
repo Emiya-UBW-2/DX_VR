@@ -5,7 +5,7 @@
 #include "../MainScene/Object/Character.hpp"
 #include "../MainScene/UI/MainSceneUIControl.hpp"
 
-#include "../MainScene/Object/GunsModify.hpp"
+#include "../CommonScene/Object/GunsModify.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {

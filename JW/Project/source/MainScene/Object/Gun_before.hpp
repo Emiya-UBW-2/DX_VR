@@ -3,6 +3,7 @@
 
 #include "../../ObjectManager.hpp"
 #include "FallObj.hpp"
+#include "ModData.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -108,5 +109,34 @@ namespace FPS_n2 {
 				SetUseLighting(TRUE);
 			}
 		};
+
+		class ModSlotControl {
+		private:
+			std::unique_ptr<SlotPartsControl>	m_SlotControl;
+			std::shared_ptr<ModDataClass>		m_ModDataClass;
+		public:
+			auto&			GetSlotControl() noexcept { return this->m_SlotControl; }
+			const auto&		GetSlotControl() const noexcept { return this->m_SlotControl; }
+			auto&			GetModData() noexcept { return this->m_ModDataClass; }
+			const auto&		GetModData() const noexcept { return this->m_ModDataClass; }
+		protected:
+			void			InitModSlotControl(const std::string& PilePath, bool ismod) noexcept {
+				//ÉfÅ[É^
+				m_SlotControl = std::make_unique<SlotPartsControl>();
+				m_ModDataClass = *ModDataManager::Instance()->AddData(PilePath, ismod);
+			}
+			void			DisposeModSlotControl(void) noexcept {
+				m_SlotControl->DisposeSlotPartsControl();
+				m_ModDataClass.reset();
+			}
+		public:
+			void			SetMod(GunSlot Slot, int ID, const MV1& BaseModel) noexcept;
+			void			RemoveMod(GunSlot Slot) noexcept {
+				if (this->m_SlotControl->HasParts(Slot)) {
+					this->m_SlotControl->RemoveParts(Slot);
+				}
+			}
+		};
+
 	};
 };

@@ -11,10 +11,14 @@ namespace FPS_n2 {
 			const auto&		GetPath(void) const noexcept { return this->m_path; }
 			const auto&		GetName(void) const noexcept { return this->m_name; }
 		protected:
+			virtual void	Load_Sub(const std::string&) noexcept {}
 			virtual void	Set_Sub(const std::string&, const std::string&) noexcept {}
 		public:
 			void			Set(std::string path_) {
 				this->m_path = path_;
+
+				Load_Sub(this->m_path);
+
 				int mdata = FileRead_open((this->m_path + "data.txt").c_str(), FALSE);
 				while (true) {
 					if (FileRead_eof(mdata) != 0) { break; }

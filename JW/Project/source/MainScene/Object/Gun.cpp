@@ -120,7 +120,7 @@ namespace FPS_n2 {
 			m_MagFall.Dispose();
 			m_CartFall.Dispose();
 			m_MagFall.Init(backGround, (*m_MagazinePtr)->GetFilePath());
-			m_CartFall.Init(backGround, (*m_MagazinePtr)->GetAmmoSpecMagTop()->GetPath());	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
+			m_CartFall.Init(backGround, (*m_MagazinePtr)->GetModData()->GetAmmoSpecMagTop()->GetPath());	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
 		}
 		void	GunClass::Init_Gun(void) noexcept {
 			{
@@ -134,7 +134,7 @@ namespace FPS_n2 {
 					if ((*p)->GetobjType() == ObjType::Sight) {
 						const auto* Ptr = &((std::shared_ptr<SightClass>&)(*p));
 						if (m_SightPtr) {
-							if (!(*Ptr)->GetReitcleGraph().IsActive()) {
+							if (!(*Ptr)->GetModData()->GetReitcleGraph().IsActive()) {
 								continue;
 							}
 						}
@@ -152,13 +152,8 @@ namespace FPS_n2 {
 				}
 				PartsList.clear();
 			}
-			if (m_MagazinePtr) {
-				(*m_MagazinePtr)->SetReloadType(GetReloadType());
-				(*m_MagazinePtr)->SetAmmo(GetAmmoAll());							//ƒ}ƒKƒWƒ“‘•“U
-			}
-			CockByMag();														//ƒ`ƒƒƒ“ƒo[ƒCƒ“
-			//
-			//
+			SetAmmo(GetAmmoAll());								//ƒ}ƒKƒWƒ“‘•“U
+			CockByMag();										//ƒ`ƒƒƒ“ƒo[ƒCƒ“
 			this->m_ShotPhase = GunAnimeID::Base;
 		}
 
@@ -382,7 +377,7 @@ namespace FPS_n2 {
 					if (!GetIsMagEmpty()) {
 						CockByMag();
 					}
-					(*m_MagazinePtr)->SubAmmo();
+					SetAmmo(this->m_Capacity - 1);
 				}
 			}
 			{
@@ -537,10 +532,10 @@ namespace FPS_n2 {
 										SetMod(GunSlot::Magazine, this->m_NextMagUniqueID, this->GetObj());
 										m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Magazine)));
 									}
-									(*m_MagazinePtr)->SetAmmo(m_NextMagNum);
+									SetAmmo(m_NextMagNum);
 									break;
 								case RELOADTYPE::AMMO:
-									(*m_MagazinePtr)->AddAmmo();
+									SetAmmo(this->m_Capacity + 1);
 									m_NextMagNum--;
 									break;
 								default:
@@ -562,7 +557,7 @@ namespace FPS_n2 {
 					}
 					else if ((GunAnimeID)i == GunAnimeID::Open) {
 						bool isHit = false;
-						if (GetAmmoNum() == 0) {
+						if (GetAmmoNumTotal() == 0) {
 							isHit = true;
 						}
 						else {

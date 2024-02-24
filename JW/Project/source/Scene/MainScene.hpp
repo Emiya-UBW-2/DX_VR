@@ -1,14 +1,15 @@
 #pragma once
 #include	"../Header.hpp"
-#include "../NetWork.hpp"
 #include "../MainScene/MainSceneSub.hpp"
 #include "../MainScene/UI/MainSceneUIControl.hpp"
 #include "../MainScene/BackGround/BackGround.hpp"
-#include "../MainScene/NetworkBrowser.hpp"
 #include "../MainScene/Object/Character.hpp"
 #include "../MainScene/Player/CPU.hpp"
 
-#include "../MainScene/Object/GunsModify.hpp"
+#include "../CommonScene/NetWork.hpp"
+#include "../CommonScene/NetworkBrowser.hpp"
+
+#include "../CommonScene/Object/GunsModify.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {

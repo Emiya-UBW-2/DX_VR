@@ -256,5 +256,15 @@ namespace FPS_n2 {
 				RemoveParts((GunSlot)loop);
 			}
 		}
+
+		void			ModSlotControl::SetMod(GunSlot Slot, int ID, const MV1& BaseModel) noexcept {
+			auto* Slots = this->m_ModDataClass->GetPartsSlot(Slot);
+			if (Slots) {
+				auto& Ptr = (std::shared_ptr<ModClass>&)(*this->m_SlotControl->SetParts(Slots->m_ItemsUniqueID.at(ID), Slot, BaseModel));
+				if (Ptr) {
+					Ptr->Init();
+				}
+			}
+		}
 	};
 };

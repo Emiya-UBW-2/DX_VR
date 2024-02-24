@@ -3,6 +3,7 @@
 
 #include "ObjectBase_before.hpp"
 #include "GunEnum.hpp"
+#include "AmmoData.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -17,11 +18,41 @@ namespace FPS_n2 {
 		private:
 			int								m_UniqueID{0};
 			std::vector<PartsSlot>			m_PartsSlot;						//
+		private:
+			bool							m_IsRecoilPower{false};
+			bool							m_IsRecoilReturn{false};
+			bool							m_IsShotType{false};		//
+
+			int								m_RecoilPower{120};
+			float							m_RecoilReturn{0.9f};
+			SHOTTYPE						m_ShotType{SHOTTYPE::SEMI};		//
+
+			GunShootSound					m_GunShootSound{GunShootSound::Normal};
+
+			GraphHandle						m_Reitcle;
+			float							m_ZoomSize{1.f};
+
+			std::vector<std::shared_ptr<AmmoDataClass>>	m_AmmoSpec;
+			int											m_CapacityMax{0};
+		public://ゲッター
+			//性能
+			const auto& GetIsRecoilPower(void) const noexcept { return this->m_IsRecoilPower; }
+			const auto& GetIsRecoilReturn(void) const noexcept { return this->m_IsRecoilReturn; }
+			const auto& GetIsShotType(void) const noexcept { return this->m_IsShotType; }
+			const auto& GetRecoilPower(void) const noexcept { return this->m_RecoilPower; }
+			const auto& GetRecoilReturn(void) const noexcept { return this->m_RecoilReturn; }
+			const auto& GetShotType(void) const noexcept { return this->m_ShotType; }
+			//銃声
+			const auto&	GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
+			//スコープ
+			const auto&		GetReitcleGraph(void) const noexcept { return this->m_Reitcle; }
+			const auto&		GetZoomSize(void) const noexcept { return this->m_ZoomSize; }
+			//マガジン
+			const auto&		GetAmmoAll(void) const noexcept { return  this->m_CapacityMax; }
+			const auto&		GetAmmoSpecMagTop(void) const noexcept { return this->m_AmmoSpec[0]; }
 		protected:
 			void				SetSlot(const std::string& LEFT, const std::string&RIGHT) noexcept;
-			virtual void		SetMod(const std::string& LEFT, const std::string&RIGHT) noexcept {
-				SetSlot(LEFT, RIGHT);
-			}
+			virtual void		SetMod_Sub(const std::string&, const std::string&) noexcept {}
 		public://ゲッター
 			const PartsSlot* GetPartsSlot(GunSlot sel) const noexcept {
 				for (const auto& s : this->m_PartsSlot) {
@@ -35,8 +66,17 @@ namespace FPS_n2 {
 		public://
 			void			SetUniqueID(int value) noexcept { m_UniqueID = value; }
 		public://
+			void		Load_Sub(const std::string& Path) noexcept override {
+				FILEINFO FileInfo;
+				if (FileRead_findFirst((Path + "reticle_0.png").c_str(), &FileInfo) != (DWORD_PTR)-1) {
+					m_Reitcle = GraphHandle::Load(Path + "reticle_0.png");
+				}
+
+				this->m_AmmoSpec.clear();
+			}
 			void		Set_Sub(const std::string& LEFT, const std::string&RIGHT) noexcept override {
-				SetMod(LEFT, RIGHT);
+				SetSlot(LEFT, RIGHT);
+				SetMod_Sub(LEFT, RIGHT);
 			}
 		};
 

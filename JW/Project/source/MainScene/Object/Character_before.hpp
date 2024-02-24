@@ -2,7 +2,7 @@
 #include	"../../Header.hpp"
 
 #include "../../sub.hpp"
-#include "../../NetWork.hpp"
+#include "../../CommonScene/NetWork.hpp"
 #include "CharaAnimData.hpp"
 #include "CharacterEnum.hpp"
 #include "ObjectBase.hpp"

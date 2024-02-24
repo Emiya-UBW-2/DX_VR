@@ -315,9 +315,7 @@ namespace FPS_n2 {
 			//銃のIDセットアップ
 			if (GetGunPtrNow()) {
 				GetGunPtrNow()->SetPlayerID(this->m_MyID);
-
-				auto& Mag = (*GetGunPtrNow()->GetMagazinePtr());
-				MagStockControl::Init_MagStockControl(Mag->GetAmmoNum(), Mag->GetAmmoAll(), Mag->GetModData()->GetUniqueID());
+				MagStockControl::Init_MagStockControl(GetGunPtrNow()->GetAmmoNum(), GetGunPtrNow()->GetAmmoAll(), GetGunPtrNow()->GetMagUniqueID());
 			}
 		}
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
@@ -325,10 +323,10 @@ namespace FPS_n2 {
 			//AIM
 			if (GetGunPtrNow()) {
 				this->m_Press_Shot = KeyControl::GetInputControl().GetPADSPress(PADS::SHOT) && !m_IsChanging;
-				this->m_Press_Reload = (KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && GetGunPtrNow()->CanReload()) && !m_IsChanging;
+				this->m_Press_Reload = KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && !m_IsChanging;
 				this->m_Press_Aim = KeyControl::GetInputControl().GetPADSPress(PADS::AIM) && !m_IsChanging;
 				if (!GetGunPtrNow()->GetCanShot()) {
-					if (GetAmmoNum() == 0) {
+					if (GetGunPtrNow()->GetIsMagEmpty()) {
 						if (this->m_Press_Shot) {
 							this->m_Press_Shot = false;
 							this->m_Press_Reload = true;
@@ -339,7 +337,7 @@ namespace FPS_n2 {
 							this->m_Press_Shot = true;
 							break;
 						case SHOTTYPE::SEMI:
-							if (GetAmmoNum() != 0) {
+							if (!GetGunPtrNow()->GetIsMagEmpty()) {
 								this->m_Press_Shot = true;
 							}
 							break;
@@ -352,9 +350,9 @@ namespace FPS_n2 {
 					}
 				}
 				if (m_GunSelect == 0) {
-					bool IsCheck = (GetAmmoNum() > GetAmmoAll());
+					bool IsCheck = GetGunPtrNow()->GetIsMagFull();
 					if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
-						IsCheck = (GetAmmoNum() >= MagStockControl::GetNextMag().AmmoNum);
+						IsCheck = (GetGunPtrNow()->GetAmmoNum() > MagStockControl::GetNextMag().AmmoNum);
 					}
 
 					if (IsCheck) {
@@ -411,8 +409,7 @@ namespace FPS_n2 {
 							m_GunSelect = 1;
 						}
 						else {
-							auto& Mag = (*GetGunPtrNow()->GetMagazinePtr());
-							Mag->SetAmmo(Mag->GetAmmoAll());
+							GetGunPtrNow()->SetAmmo(GetGunPtrNow()->GetAmmoAll());
 							GetGunPtrNow()->CockByMag();
 							GetGunPtrNow()->SetShotPhase(GunAnimeID::Base);
 							m_GunSelect = 0;
@@ -433,9 +430,9 @@ namespace FPS_n2 {
 			//
 			this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / FPS, 0.f, UpperTimerLimit);
 			{
-				bool IsCheck = (GetAmmoNum() > GetAmmoAll());
+				bool IsCheck = GetGunPtrNow()->GetIsMagFull();
 				if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
-					IsCheck = (GetAmmoNum() >= MagStockControl::GetNextMag().AmmoNum);
+					IsCheck = (GetGunPtrNow()->GetAmmoNum() > MagStockControl::GetNextMag().AmmoNum);
 				}
 				if ((
 					this->m_Press_Shot ||
@@ -497,14 +494,12 @@ namespace FPS_n2 {
 							case RELOADTYPE::MAG:
 								{
 									if (m_GunSelect == 0) {
-										auto& Mag = (*GetGunPtrNow()->GetMagazinePtr());
-										MagStockControl::SetNextMag(Mag->GetAmmoNum(), Mag->GetAmmoAll(), Mag->GetModData()->GetUniqueID());
+										MagStockControl::SetNextMag(GetGunPtrNow()->GetAmmoNum(), GetGunPtrNow()->GetAmmoAll(), GetGunPtrNow()->GetMagUniqueID());
 										GetGunPtrNow()->SetReloadStartMag(MagStockControl::GetNowMag().AmmoNum, MagStockControl::GetNowMag().ModUniqueID);
 										MagStockControl::SortMag();//次使うマガジンをソート
 									}
 									else {
-										auto& Mag = (*GetGunPtrNow()->GetMagazinePtr());
-										GetGunPtrNow()->SetReloadStartMag(Mag->GetAmmoAll(), Mag->GetModData()->GetUniqueID());
+										GetGunPtrNow()->SetReloadStartMag(GetGunPtrNow()->GetAmmoAll(), GetGunPtrNow()->GetMagUniqueID());
 									}
 								}
 								break;
@@ -536,9 +531,9 @@ namespace FPS_n2 {
 						}
 					}
 					{
-						bool IsCheck = (GetAmmoNum() > GetAmmoAll());
+						bool IsCheck = GetGunPtrNow()->GetIsMagFull();
 						if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
-							IsCheck = (GetAmmoNum() >= MagStockControl::GetNextMag().AmmoNum);
+							IsCheck = (GetGunPtrNow()->GetAmmoNum() > MagStockControl::GetNextMag().AmmoNum);
 						}
 						if ((KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && IsCheck) && GetGunPtrNow()->GetCanShot()) {
 							GetGunPtrNow()->SetShotPhase(GunAnimeID::CheckStart);
@@ -568,30 +563,27 @@ namespace FPS_n2 {
 					}
 				}
 				if (GetGunPtrNow()->GetAmmoLoadSwitch()) {
-					auto& Mag = (*GetGunPtrNow()->GetMagazinePtr());
-
 					auto NeedAmmoStock = MagStockControl::GetNeedAmmoStock();
 					if (NeedAmmoStock > MagStockControl::GetAmmoStock()) {
 					}
-
 					int InAmmo = MagStockControl::GetAmmoStock();
 					switch (GetGunPtrNow()->GetAmmoLoadCount()) {
 						case 1:
 							if (MagStockControl::GetNowMagID() == 0) {
-								InAmmo = std::clamp(InAmmo, 0, Mag->GetAmmoAll() - MagStockControl::GetMag(1));
+								InAmmo = std::clamp(InAmmo, 0, GetGunPtrNow()->GetAmmoAll() - MagStockControl::GetMag(1));
 								MagStockControl::SetMag(1, MagStockControl::GetMag(1) + InAmmo);
 							}
 							else {
-								InAmmo = std::clamp(InAmmo, 0, Mag->GetAmmoAll() - MagStockControl::GetMag(0));
+								InAmmo = std::clamp(InAmmo, 0, GetGunPtrNow()->GetAmmoAll() - MagStockControl::GetMag(0));
 								MagStockControl::SetMag(0, MagStockControl::GetMag(0) + InAmmo);
 							}
 							break;
 						case 2:
-							InAmmo = std::clamp(InAmmo, 0, Mag->GetAmmoAll() - MagStockControl::GetMag(2));
+							InAmmo = std::clamp(InAmmo, 0, GetGunPtrNow()->GetAmmoAll() - MagStockControl::GetMag(2));
 							MagStockControl::SetMag(2, MagStockControl::GetMag(2) + InAmmo);
 							break;
 						case 3:
-							InAmmo = std::clamp(InAmmo, 0, Mag->GetAmmoAll() - MagStockControl::GetMag(3));
+							InAmmo = std::clamp(InAmmo, 0, GetGunPtrNow()->GetAmmoAll() - MagStockControl::GetMag(3));
 							MagStockControl::SetMag(3, MagStockControl::GetMag(3) + InAmmo);
 							break;
 						default:
@@ -610,7 +602,7 @@ namespace FPS_n2 {
 				if (m_Press_Aim) {
 					SetADS();
 				}
-				if (KeyControl::GetRun() || this->m_IsWearArmer || (GetGunPtrNow()->GetShotPhase() == GunAnimeID::AmmoLoadStart || GetGunPtrNow()->GetShotPhase() == GunAnimeID::AmmoLoadEnd)) {
+				if (KeyControl::GetRun() || this->m_IsWearArmer || (GetShotPhase() == GunAnimeID::AmmoLoadStart || GetShotPhase() == GunAnimeID::AmmoLoadEnd)) {
 					SetReady();
 				}
 				if (
@@ -619,7 +611,7 @@ namespace FPS_n2 {
 					GetGunPtrNow()->GetChecking() ||
 					GetGunPtrNow()->GetWatching() ||
 					GetGunPtrNow()->IsMelee() ||
-					(GunAnimeID::AmmoLoading == GetGunPtrNow()->GetShotPhase())
+					(GunAnimeID::AmmoLoading == GetShotPhase())
 					) {
 					SetAim();
 				}
@@ -635,7 +627,7 @@ namespace FPS_n2 {
 			this->m_Arm[(int)EnumGunAnimType::ReloadStart_Empty].Execute(GetShotPhase() == GunAnimeID::ReloadStart_Empty, 0.5f, 0.2f);
 			this->m_Arm[(int)EnumGunAnimType::ReloadStart].Execute(GetShotPhase() == GunAnimeID::ReloadStart, 0.2f, 0.2f);
 			this->m_Arm[(int)EnumGunAnimType::Reload].Execute(GetShotPhase() >= GunAnimeID::ReloadOne && GetShotPhase() <= GunAnimeID::ReloadEnd, 0.1f, 0.2f, 0.9f);
-			this->m_Arm[(int)EnumGunAnimType::Ready].Execute(!GetIsAim() && (GetShootReady() || (GetGunPtrNow()->GetShotPhase() == GunAnimeID::AmmoLoadStart || GetShotPhase() == GunAnimeID::AmmoLoadEnd)), 0.1f, 0.2f, 0.9f);
+			this->m_Arm[(int)EnumGunAnimType::Ready].Execute(!GetIsAim() && (GetShootReady() || (GetShotPhase() == GunAnimeID::AmmoLoadStart || GetShotPhase() == GunAnimeID::AmmoLoadEnd)), 0.1f, 0.2f, 0.9f);
 			this->m_Arm[(int)EnumGunAnimType::Check].Execute(GetShotPhase() >= GunAnimeID::CheckStart && GetShotPhase() <= GunAnimeID::Checking, 0.05f, 0.2f);
 			this->m_Arm[(int)EnumGunAnimType::Watch].Execute(GetShotPhase() == GunAnimeID::Watch, 0.1f, 0.1f);
 			this->m_Arm[(int)EnumGunAnimType::Melee].Execute(GetShotPhase() == GunAnimeID::Melee, 1.1f, 0.1f);
@@ -1221,7 +1213,15 @@ namespace FPS_n2 {
 									Mat = GetGunPtrNow()->GetFrameWorldMat(GunFrame::Magpos);
 									break;
 							}
-							GetGunPtrNow()->SetAmmoHandMatrix(Mat, m_AmmoHand, isDirect);
+							switch (GetGunPtrNow()->GetReloadType()) {
+								case RELOADTYPE::AMMO:
+									m_AmmoHand = 0.f;
+									isDirect = false;
+									break;
+								default:
+									break;
+							}
+							(*GetGunPtrNow()->GetMagazinePtr())->SetHandMatrix(Mat, m_AmmoHand, isDirect);
 							Easing(&m_AmmoHand, m_AmmoHandR, 0.9f, EasingType::OutExpo);
 						}
 					}

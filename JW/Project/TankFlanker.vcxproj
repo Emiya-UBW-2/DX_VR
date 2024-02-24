@@ -11,12 +11,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\CommonScene\NetWork.hpp" />
+    <ClInclude Include="source\CommonScene\NetworkBrowser.hpp" />
+    <ClInclude Include="source\CommonScene\Object\GunsModify.hpp" />
     <ClInclude Include="source\Enums.hpp" />
     <ClInclude Include="source\Header.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGround.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGroundSub.hpp" />
     <ClInclude Include="source\MainScene\MainSceneSub.hpp" />
-    <ClInclude Include="source\MainScene\NetworkBrowser.hpp" />
     <ClInclude Include="source\MainScene\Object\Ammo.hpp" />
     <ClInclude Include="source\MainScene\Object\AmmoData.hpp" />
     <ClInclude Include="source\MainScene\Object\Armer.hpp" />
@@ -28,7 +30,6 @@
     <ClInclude Include="source\MainScene\Object\Gun.hpp" />
     <ClInclude Include="source\MainScene\Object\GunData.hpp" />
     <ClInclude Include="source\MainScene\Object\GunEnum.hpp" />
-    <ClInclude Include="source\MainScene\Object\GunsModify.hpp" />
     <ClInclude Include="source\MainScene\Object\Gun_before.hpp" />
     <ClInclude Include="source\MainScene\Object\ItemObj.hpp" />
     <ClInclude Include="source\MainScene\Object\Mod.hpp" />
@@ -40,7 +41,6 @@
     <ClInclude Include="source\MainScene\Player\CPU.hpp" />
     <ClInclude Include="source\MainScene\Player\Player.hpp" />
     <ClInclude Include="source\MainScene\UI\MainSceneUIControl.hpp" />
-    <ClInclude Include="source\NetWork.hpp" />
     <ClInclude Include="source\ObjectManager.hpp" />
     <ClInclude Include="source\Scene\CustomScene.hpp" />
     <ClInclude Include="source\Scene\MainScene.hpp" />
@@ -49,6 +49,7 @@
     <ClInclude Include="source\sub.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\CommonScene\Object\GunsModify.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\MainScene\BackGround\BackGround.cpp" />
     <ClCompile Include="source\MainScene\BackGround\BackGroundSub.cpp" />
@@ -60,7 +61,6 @@
     <ClCompile Include="source\MainScene\Object\Character_before.cpp" />
     <ClCompile Include="source\MainScene\Object\Gun.cpp" />
     <ClCompile Include="source\MainScene\Object\GunData.cpp" />
-    <ClCompile Include="source\MainScene\Object\GunsModify.cpp" />
     <ClCompile Include="source\MainScene\Object\Gun_before.cpp" />
     <ClCompile Include="source\MainScene\Object\ItemObj.cpp" />
     <ClCompile Include="source\MainScene\Object\Mod.cpp" />

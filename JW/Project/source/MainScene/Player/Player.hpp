@@ -1,6 +1,6 @@
 #pragma once
 #include	"../../Header.hpp"
-#include "../../NetWork.hpp"
+#include "../../CommonScene/NetWork.hpp"
 #include "../../MainScene/Object/ObjectBase.hpp"
 
 namespace FPS_n2 {

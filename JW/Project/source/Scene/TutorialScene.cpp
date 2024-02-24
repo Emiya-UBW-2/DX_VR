@@ -62,7 +62,7 @@ namespace FPS_n2 {
 					m_CharacterPtr->SetMag((int)(&M - &m_CharacterPtr->GetMagDatas().front()), 0);
 				}
 				m_CharacterPtr->GetGunPtrNow()->UnloadChamber();
-				(*m_CharacterPtr->GetGunPtrNow()->GetMagazinePtr())->SetAmmo(0);
+				m_CharacterPtr->GetGunPtrNow()->SetAmmo(0);
 			}
 			//l‚ÌÀ•WÝ’è
 			{
@@ -369,7 +369,7 @@ namespace FPS_n2 {
 				this->m_UIclass.SetGaugeParam(1, (int)m_CharacterPtr->GetAP(), (int)m_CharacterPtr->GetAPMax());
 				//Ammo
 				if (m_CharacterPtr->GetGunPtrNow()) {
-					this->m_UIclass.SetGaugeParam(2, (int)m_CharacterPtr->GetGunPtrNow()->GetAmmoNum(), (int)m_CharacterPtr->GetGunPtrNow()->GetAmmoAll() + 1);
+					this->m_UIclass.SetGaugeParam(2, (int)m_CharacterPtr->GetGunPtrNow()->GetAmmoNumTotal(), (int)m_CharacterPtr->GetGunPtrNow()->GetAmmoAll() + 1);
 				}
 				//ULT
 				this->m_UIclass.SetGaugeParam(3, (int)m_CharacterPtr->GetULT(), (int)m_CharacterPtr->GetULTMax());
@@ -379,7 +379,7 @@ namespace FPS_n2 {
 					if (m_CharacterPtr->GetNowMagID() == (int)(&M - &m_CharacterPtr->GetMagDatas().front())) {
 						continue;
 					}
-					this->m_UIclass.SetGaugeParam(4 + mags, (int)M.AmmoNum, (int)m_CharacterPtr->GetAmmoAll());
+					this->m_UIclass.SetGaugeParam(4 + mags, M.AmmoNum, M.AmmoAll);
 					mags++;
 				}
 			}

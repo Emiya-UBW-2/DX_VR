@@ -4,6 +4,7 @@
 const FPS_n2::Sceneclass::ModDataManager* SingletonBase<FPS_n2::Sceneclass::ModDataManager>::m_Singleton = nullptr;
 namespace FPS_n2 {
 	namespace Sceneclass {
+
 		void		ModDataClass::SetSlot(const std::string& LEFT, const std::string&RIGHT) noexcept {
 			if (LEFT.find("Slot") != std::string::npos) {
 				if (LEFT.find("Type") != std::string::npos) {
@@ -28,6 +29,44 @@ namespace FPS_n2 {
 				else if (LEFT.find("IsNeed") != std::string::npos) {
 					this->m_PartsSlot.back().m_IsNeed = (RIGHT == "true");
 				}
+			}
+
+			if (LEFT == "RecoilPower") {
+				this->m_RecoilPower = std::stoi(RIGHT);
+				this->m_IsRecoilPower = true;
+			}
+			else if (LEFT == "RecoilReturn") {
+				this->m_RecoilReturn = std::stof(RIGHT);
+				this->m_IsRecoilReturn = true;
+			}
+			else if (LEFT == "shottype") {
+				for (int i = 0; i < (int)SHOTTYPE::Max; i++) {
+					if (RIGHT == SHOTTYPEName[i]) {
+						this->m_ShotType = (SHOTTYPE)i;
+						this->m_IsShotType = true;
+						break;
+					}
+				}
+			}
+
+			else if (LEFT == "GunShootSound") {
+				for (int i = 0; i < (int)GunShootSound::Max; i++) {
+					if (RIGHT == GunShootSoundName[i]) {
+						this->m_GunShootSound = (GunShootSound)i;
+						break;
+					}
+				}
+			}
+
+			else if (LEFT == "zoom") {
+				m_ZoomSize = std::stof(RIGHT);
+			}
+
+			else if (LEFT == "capacity") {
+				this->m_CapacityMax = (HitPoint)std::stoi(RIGHT);		//‘’e”
+			}
+			else if (LEFT.find("useammo" + std::to_string(this->m_AmmoSpec.size())) != std::string::npos) {
+				this->m_AmmoSpec.emplace_back(AmmoDataManager::Instance()->LoadAction("data/ammo/" + RIGHT + "/"));
 			}
 		}
 

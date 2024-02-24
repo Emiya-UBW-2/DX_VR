@@ -167,8 +167,6 @@ namespace FPS_n2 {
 			const auto		GetIsAim(void) const noexcept { return !(this->m_ReadyTimer == UpperTimerLimit); }
 			const auto		GetShotPhase(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetShotPhase() : GunAnimeID::Base; }
 			const auto		GetShootReady(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetShootReady() : false; }
-			const auto		GetAmmoNum(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetAmmoNum() : 0; }
-			const auto		GetAmmoAll(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetAmmoAll() : 0; }
 			const auto		GetMeleeSwitch(void) const noexcept { return m_MeleeCoolDown == 1.f; }
 
 			const auto		GetCharaDir(void) const noexcept {

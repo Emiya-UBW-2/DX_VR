@@ -31,6 +31,12 @@
     <Filter Include="ソース ファイル\MainScene\Player">
       <UniqueIdentifier>{22770e4f-967e-4eff-a117-222b572d8adf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\CommonScene">
+      <UniqueIdentifier>{31c94280-5ffc-4bc8-b089-54c54968d7cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\CommonScene\Object">
+      <UniqueIdentifier>{ff44695c-5ce8-4529-b654-a6bdb9eec2d5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\sub.hpp">
@@ -57,9 +63,6 @@
     <ClInclude Include="source\MainScene\UI\MainSceneUIControl.hpp">
       <Filter>ソース ファイル\MainScene\UI</Filter>
     </ClInclude>
-    <ClInclude Include="source\NetWork.hpp">
-      <Filter>ソース ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="source\MainScene\Object\CharacterEnum.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
@@ -74,9 +77,6 @@
     </ClInclude>
     <ClInclude Include="source\MainScene\Object\Character_before.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MainScene\NetworkBrowser.hpp">
-      <Filter>ソース ファイル\MainScene</Filter>
     </ClInclude>
     <ClInclude Include="source\MainScene\Player\CPU.hpp">
       <Filter>ソース ファイル\MainScene\Player</Filter>
@@ -138,8 +138,14 @@
     <ClInclude Include="source\MainScene\Object\ItemObj.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
-    <ClInclude Include="source\MainScene\Object\GunsModify.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
+    <ClInclude Include="source\CommonScene\NetworkBrowser.hpp">
+      <Filter>ソース ファイル\CommonScene</Filter>
+    </ClInclude>
+    <ClInclude Include="source\CommonScene\NetWork.hpp">
+      <Filter>ソース ファイル\CommonScene</Filter>
+    </ClInclude>
+    <ClInclude Include="source\CommonScene\Object\GunsModify.hpp">
+      <Filter>ソース ファイル\CommonScene\Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -218,8 +224,8 @@
     <ClCompile Include="source\MainScene\Object\ItemObj.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
-    <ClCompile Include="source\MainScene\Object\GunsModify.cpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
+    <ClCompile Include="source\CommonScene\Object\GunsModify.cpp">
+      <Filter>ソース ファイル\CommonScene\Object</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

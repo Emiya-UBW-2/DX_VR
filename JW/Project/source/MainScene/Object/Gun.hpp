@@ -37,6 +37,8 @@ namespace FPS_n2 {
 			const std::shared_ptr<MuzzleClass>*		m_MuzzlePtr{nullptr};
 			const std::shared_ptr<UpperClass>*		m_UpperPtr{nullptr};
 			const std::shared_ptr<MagazineClass>*	m_MagazinePtr{nullptr};
+
+			int										m_Capacity{0};//弾数
 		private:
 			std::array<float, (int)CharaGunAnimeID::Max>									m_GunAnimFrame;
 			std::vector<std::array<int, (int)CharaGunAnimeID::Max>>							m_CharaAnimeSet;
@@ -75,50 +77,64 @@ namespace FPS_n2 {
 		private:
 			const auto	GetGunSoundSet(void) const noexcept { return GunSoundSets[GetGunDataClass()->GetSoundSel()]; }
 		public://ゲッター
-			const GraphHandle* GetReticlePtr(void) const noexcept {
-				if (this->m_SightPtr) {
-					return &(*this->m_SightPtr)->GetReitcleGraph();
-				}
-				return nullptr;
-			}
-			const float GetZoomSize(void) const noexcept {
-				if (this->m_SightPtr) {
-					return (*this->m_SightPtr)->GetZoomSize();
-				}
-				return 1.f;
-			}
 			const auto& GetName(void) const noexcept { return GetGunDataClass()->GetName(); }
 			const auto& GetReloadType(void) const noexcept { return GetGunDataClass()->GetReloadType(); }
 			const auto& GetShotSwitch(void) const noexcept { return this->m_ShotSwitch; }
 			const auto& GetShotPhase(void) const noexcept { return this->m_ShotPhase; }
 			const auto&	GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd; }
 			const auto& GetNowAnime(void) noexcept { return GetObj().get_anime((size_t)this->m_ShotPhase); }
+			const auto&	GetAmmoNum(void) const noexcept { return this->m_Capacity; }
 			const auto& GetMagazinePtr(void) const noexcept { return m_MagazinePtr; }
-			const auto& GetAmmoAll(void) const noexcept { return (*m_MagazinePtr)->GetAmmoAll(); }
-			const auto	GetIsMagEmpty(void) const noexcept { return (*m_MagazinePtr)->GetAmmoNum() == 0; }//次弾がない
-			const auto	GetIsMagFull(void) const noexcept { return (*m_MagazinePtr)->GetAmmoNum() == this->GetAmmoAll(); }
-
 			const auto& GetRecoilPower(void) const noexcept {
-				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetIsRecoilPower()) {
-					return (*this->m_UpperPtr)->GetRecoilPower();
+				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModData()->GetIsRecoilPower()) {
+					return (*this->m_UpperPtr)->GetModData()->GetRecoilPower();
 				}
 				return GetGunDataClass()->GetRecoilPower();
 			}
 			const auto& GetRecoilReturn(void) const noexcept {
-				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetIsRecoilReturn()) {
-					return (*this->m_UpperPtr)->GetRecoilReturn();
+				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModData()->GetIsRecoilReturn()) {
+					return (*this->m_UpperPtr)->GetModData()->GetRecoilReturn();
 				}
 				return GetGunDataClass()->GetRecoilReturn();
 			}
+
+			const GraphHandle* GetReticlePtr(void) const noexcept {
+				if (this->m_SightPtr) {
+					return &(*this->m_SightPtr)->GetModData()->GetReitcleGraph();
+				}
+				return nullptr;
+			}
+			const auto	GetZoomSize(void) const noexcept {
+				if (this->m_SightPtr) {
+					return (*this->m_SightPtr)->GetModData()->GetZoomSize();
+				}
+				return 1.f;
+			}
+			const auto	GetInChamber(void) const noexcept { return this->m_ChamberAmmoData != nullptr; }
+			const auto	GetAmmoAll(void) const noexcept {
+				if (this->m_MagazinePtr) {
+					return (*m_MagazinePtr)->GetModData()->GetAmmoAll();
+				}
+				return 0;
+			}
+			const auto	GetMagUniqueID(void) const noexcept {
+				if (this->m_MagazinePtr) {
+					return (*m_MagazinePtr)->GetModData()->GetUniqueID();
+				}
+				return GetModData()->GetUniqueID();
+			}
+			const auto	GetAmmoNumTotal(void) const noexcept { return this->m_Capacity + (GetInChamber() ? 1 : 0); }
+			const auto	GetIsMagEmpty(void) const noexcept { return this->m_Capacity == 0; }//次弾がない
+			const auto	GetIsMagFull(void) const noexcept { return this->m_Capacity == this->GetAmmoAll(); }
 			const auto	GetShotType(void) const noexcept {
-				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetIsShotType()) {
-					return (*this->m_UpperPtr)->GetShotType();
+				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModData()->GetIsShotType()) {
+					return (*this->m_UpperPtr)->GetModData()->GetShotType();
 				}
 				return GetGunDataClass()->GetShotType();
 			}
 			const auto	GetGunShootSound(void) const noexcept {
 				if (this->m_MuzzlePtr) {
-					return (*this->m_MuzzlePtr)->GetGunShootSound();
+					return (*this->m_MuzzlePtr)->GetModData()->GetGunShootSound();
 				}
 				return GetGunDataClass()->GetGunShootSound();
 			}
@@ -130,7 +146,6 @@ namespace FPS_n2 {
 			const auto	IsMelee(void) const noexcept { return (this->m_ShotPhase == GunAnimeID::Melee); }
 			const auto	IsAmmoLoading(void) const noexcept { return (GunAnimeID::AmmoLoadStart <= this->m_ShotPhase) && (this->m_ShotPhase <= GunAnimeID::AmmoLoadEnd); }
 			const auto	GetShootReady(void) const noexcept { return this->m_ShotPhase <= GunAnimeID::Shot; }
-			const auto	GetInChamber(void) const noexcept { return this->m_ChamberAmmoData != nullptr; }
 			const auto	GetCanShot(void) const noexcept { return GetInChamber() && GetShootReady(); }
 
 			const auto	GetEyePos(void) const noexcept { return GetFrameWorldMat(GunFrame::Eyepos).pos(); }
@@ -139,15 +154,10 @@ namespace FPS_n2 {
 
 			const auto	GetCartMat(void) noexcept { return GetFrameWorldMat(GunFrame::Cart); }
 			const auto	GetCartVec(void) noexcept { return (GetFrameWorldMat(GunFrame::CartVec).pos() - GetCartMat().pos()).Norm(); }
-			const auto	GetAmmoNum(void) const noexcept { return (*m_MagazinePtr)->GetAmmoNum() + (GetInChamber() ? 1 : 0); }
 
-			const auto	CanReload(void) const noexcept {
-				return GetAmmoNum() <= GetAmmoAll();
-			}
 		public:
-			void		SetAmmoHandMatrix(const MATRIX_ref& value, float pPer, bool isDirect) noexcept { (*m_MagazinePtr)->SetHandMatrix(value, pPer, isDirect); }
-			void		FillMag() noexcept { (*m_MagazinePtr)->SetAmmo(GetAmmoAll()); }
-			void		CockByMag() noexcept { this->m_ChamberAmmoData = (*m_MagazinePtr)->GetAmmoSpecMagTop(); }//マガジンの一番上の弾データをチャンバーイン
+			void		SetAmmo(int value) noexcept { this->m_Capacity = std::clamp(value, 0, this->GetAmmoAll()); }
+			void		CockByMag() noexcept { this->m_ChamberAmmoData = (*m_MagazinePtr)->GetModData()->GetAmmoSpecMagTop(); }//マガジンの一番上の弾データをチャンバーイン
 			void		UnloadChamber() noexcept { this->m_ChamberAmmoData.reset(); }
 			void		SetShotSwitchOff() noexcept { this->m_ShotSwitch = false; }
 			void		SetGunMatrix(const MATRIX_ref& value) noexcept {

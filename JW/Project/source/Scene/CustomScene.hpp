@@ -1,6 +1,6 @@
 #pragma once
 #include	"../Header.hpp"
-#include "../MainScene/Object/GunsModify.hpp"
+#include "../CommonScene/Object/GunsModify.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
