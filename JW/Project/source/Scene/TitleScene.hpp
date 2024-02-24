@@ -6,12 +6,11 @@ namespace FPS_n2 {
 		class TitleScene : public TEMPSCENE {
 		private:
 			int select{ 0 };
-			std::array<float, 3> SelYadd{};
+
+			std::array<float, 4> GameStart{};
+			std::array<float, 4> SelYadd{};
 
 			float GameFadeIn{ 0.f };
-			float GameStart{ 0.f };
-			float GameStart2{ 0.f };
-			float GameStart3{ 0.f };
 		public:
 			const auto SelMode() const noexcept { return select; }
 		public:

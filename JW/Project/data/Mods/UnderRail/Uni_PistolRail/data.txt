@@ -1,5 +1,7 @@
 Name=Universal Mount
 
+ReloadRate_Diff=-1
+
 Slot0Type=Sight
 Slot0IsNeed=false
 Slot0Item=VIPER_DotSight

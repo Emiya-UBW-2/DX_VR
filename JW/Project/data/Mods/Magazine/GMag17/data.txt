@@ -1,5 +1,7 @@
 Name=GMag 17Round
 
+ReloadRate_Diff=1
+
 capacity=17
 useammo0=9x19
 

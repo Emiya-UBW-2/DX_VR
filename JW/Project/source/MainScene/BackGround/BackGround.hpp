@@ -49,7 +49,9 @@ namespace FPS_n2 {
 			void			DrawCommon() noexcept {
 				if (this->m_ObjGround.IsActive()) {
 					SetFogEnable(TRUE);
-					SetFogStartEnd(Scale_Rate*2.f, Scale_Rate*40.f);
+					auto* DrawParts = DXDraw::Instance();
+					auto far_t = DrawParts->GetMainCamera().GetCamFar();
+					SetFogStartEnd(far_t / 3.f, far_t);
 					SetFogColor(26, 29, 20);
 
 					this->m_ObjGround.DrawModel();

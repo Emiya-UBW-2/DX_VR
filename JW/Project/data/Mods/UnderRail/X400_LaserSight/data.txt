@@ -1,3 +1,5 @@
 Name=X400 LaserSight
 
+ReloadRate_Diff=-1
+
 end

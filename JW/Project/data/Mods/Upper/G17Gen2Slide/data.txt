@@ -1,5 +1,8 @@
 Name=Glock17 Gen2 Slide
 
+ShootRate_Diff=1
+ReloadRate_Diff=-1
+
 Slot0Type=Sight
 Slot0IsNeed=true
 Slot0Item=GNormalSight

@@ -1,7 +1,7 @@
 Name=PCC-9
 
 ShotRate=800
-RecoilPower=120
+RecoilPower=50
 RecoilReturn=0.9
 shottype=FULL
 usehumanAnim=0
@@ -16,7 +16,7 @@ Slot0Item=GMag17Gen5
 
 Slot1Type=Sight
 Slot1IsNeed=true
-Slot1Item=ACOG
 Slot1Item=VIPER_DotSight
+Slot1Item=ACOG
 
 end

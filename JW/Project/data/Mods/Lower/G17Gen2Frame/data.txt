@@ -1,3 +1,5 @@
 Name=Glock17 Gen2 Frame
 
+ReloadRate_Diff=1
+
 end

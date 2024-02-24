@@ -23,11 +23,18 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* OptionParts = OPTION::Instance();
 			//
-			SetAmbientLight(VECTOR_ref::vget(-0.8f, -0.5f, -0.1f), GetColorF(0.92f, 0.91f, 0.90f, 0.0f));
+			SetAmbientLight(VECTOR_ref::vget(-0.8f, -0.5f, -0.8f), GetColorF(1.f, 1.f, 1.f, 0.0f));
 			SetFarShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
 			SetMiddleShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
 			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
-
+			//
+			DeleteLightHandleAll();
+			SetLightEnable(TRUE);
+			ChangeLightTypeDir(GetLightVec().get());
+			SetLightDifColor(GetColorF(1.f, 1.f, 1.f, 1.f));
+			SetLightSpcColor(GetColorF(0.1f, 0.1f, 0.1f, 0.f));
+			SetLightAmbColor(GetColorF(0.9f, 0.9f, 0.9f, 1.f));
+			//
 			this->m_BackGround = std::make_shared<BackGroundClassTutorial>();
 			this->m_BackGround->Init("data/model/map/", "data/model/sky/");//1.59•b
 			//ƒ[ƒh
