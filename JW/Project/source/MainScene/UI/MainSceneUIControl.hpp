@@ -200,7 +200,7 @@ namespace FPS_n2 {
 
 				m_GaugeMask.at(0).Load("data/UI/Gauge_Mod870.png");
 				for (int i = 0; i < 4; i++) {
-					m_GaugeMask.at(i + 1).Load("data/UI/Mag.png");
+					m_GaugeMask.at((size_t)(i + 1)).Load("data/UI/Mag.png");
 				}
 			}
 			void			Dispose(void) noexcept {
@@ -360,9 +360,9 @@ namespace FPS_n2 {
 					xp1 = y_r(1500);
 					yp1 = y_r(940);
 					for (int i = 0; i < 3; i++) {
-						auto& g = m_GaugeMask.at(i + 1);
+						auto& g = m_GaugeMask.at((size_t)(i + 1));
 						g.SetDraw([&]() {
-							m_GaugeParam[i + 4].DrawGaugeUp(
+							m_GaugeParam[(size_t)(i + 4)].DrawGaugeUp(
 								-1, -1, 1 + g.GetXSize(), 1 + g.GetYSize(),
 								GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 								GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)

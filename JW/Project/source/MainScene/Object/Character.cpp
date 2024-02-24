@@ -350,12 +350,7 @@ namespace FPS_n2 {
 					}
 				}
 				if (m_GunSelect == 0) {
-					bool IsCheck = GetGunPtrNow()->GetIsMagFull();
-					if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
-						IsCheck = (GetGunPtrNow()->GetAmmoNum() > MagStockControl::GetNextMag().AmmoNum);
-					}
-
-					if (IsCheck) {
+					if (GetIsCheck()) {
 						this->m_Press_Reload = false;
 					}
 				}
@@ -429,19 +424,13 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			//
 			this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / FPS, 0.f, UpperTimerLimit);
-			{
-				bool IsCheck = GetGunPtrNow()->GetIsMagFull();
-				if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
-					IsCheck = (GetGunPtrNow()->GetAmmoNum() > MagStockControl::GetNextMag().AmmoNum);
-				}
-				if ((
-					this->m_Press_Shot ||
-					this->m_Press_Reload ||
-					((KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && IsCheck) && GetGunPtrNow()->GetCanShot()) ||
-					(KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && GetGunPtrNow()->GetCanShot())
-					) && (GetShotPhase() == GunAnimeID::Base)) {
-					this->m_ReadyTimer = std::min(this->m_ReadyTimer, 0.1f);
-				}
+			if ((
+				this->m_Press_Shot ||
+				this->m_Press_Reload ||
+				((KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && GetIsCheck()) && GetGunPtrNow()->GetCanShot()) ||
+				(KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && GetGunPtrNow()->GetCanShot() && false)
+				) && (GetShotPhase() == GunAnimeID::Base)) {
+				this->m_ReadyTimer = std::min(this->m_ReadyTimer, 0.1f);
 			}
 			//アーマーを着る
 			if (this->m_Armer_Ptr) {
@@ -482,11 +471,45 @@ namespace FPS_n2 {
 			}
 			//射撃
 			if (GetGunPtrNow()) {
+				//リコイルの演算
+				if (this->m_RecoilRadAdd.y() < 0.f) {
+					Easing(&this->m_RecoilRadAdd, VECTOR_ref::vget(0.f, 0.01f, 0.f), GetGunPtrNow()->GetGunDataClass()->GetRecoilReturn(), EasingType::OutExpo);
+				}
+				else {
+					Easing(&this->m_RecoilRadAdd, VECTOR_ref::zero(), 0.7f, EasingType::OutExpo);
+				}
+
+
 				GetGunPtrNow()->SetShotSwitchOff();
 				if ((GetShotPhase() == GunAnimeID::Base) && this->m_Arm[(int)EnumGunAnimType::Ready].Per() <= 0.1f) {
 					if (this->m_Press_Shot) {
-						GetGunPtrNow()->SetPressShot();
-						//
+						if (GetGunPtrNow()->GetInChamber()) {
+							GetGunPtrNow()->SetBullet();
+
+							float Power = 0.0001f*GetGunPtrNow()->GetGunDataClass()->GetRecoilPower();
+							this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power, 0.f);
+							//this->m_RecoilRadAdd = MATRIX_ref::Vtrans(this->m_RecoilRadAdd, MATRIX_ref::RotZ(-m_LeanRad / 5.f));
+							if (this->m_MyID == 0) {
+								DrawParts->SetCamShake(0.1f, 0.3f);
+							}
+							//エフェクト
+							auto mat = GetGunPtrNow()->GetFrameWorldMat(GunFrame::Muzzle);
+							switch (GetGunPtrNow()->GetGunShootSound()) {
+								case GunShootSound::Normal:
+									EffectControl::SetOnce(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.5f);
+									EffectControl::SetEffectSpeed(EffectResource::Effect::ef_fire2, 2.f);
+									break;
+								case GunShootSound::Suppressor:
+									EffectControl::SetOnce(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.25f);
+									EffectControl::SetEffectSpeed(EffectResource::Effect::ef_fire2, 2.f);
+									break;
+								default:
+									break;
+							}
+						}
+						else {
+							GetGunPtrNow()->SetPressShotEmpty();
+						}
 						this->m_SoundPower = 1.f;
 					}
 					if (this->m_Press_Reload) {
@@ -531,16 +554,12 @@ namespace FPS_n2 {
 						}
 					}
 					{
-						bool IsCheck = GetGunPtrNow()->GetIsMagFull();
-						if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
-							IsCheck = (GetGunPtrNow()->GetAmmoNum() > MagStockControl::GetNextMag().AmmoNum);
-						}
-						if ((KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && IsCheck) && GetGunPtrNow()->GetCanShot()) {
+						if ((KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && GetIsCheck()) && GetGunPtrNow()->GetCanShot()) {
 							GetGunPtrNow()->SetShotPhase(GunAnimeID::CheckStart);
 						}
 					}
 					m_MeleeCoolDown = std::max(m_MeleeCoolDown - 1.f / FPS, 0.f);
-					if (KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && m_MeleeCoolDown == 0.f) {
+					if (KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && m_MeleeCoolDown == 0.f && false) {
 						GetGunPtrNow()->SetShotPhase(GunAnimeID::Melee);
 						m_MeleeCoolDown = 1.f;
 						if (this->m_MyID == 0) {
@@ -554,6 +573,11 @@ namespace FPS_n2 {
 						if (KeyControl::GetInputControl().GetPADSPress(PADS::THROW) && GetGunPtrNow()->GetShootReady() && !GetGunPtrNow()->IsAmmoLoading()) {
 							GetGunPtrNow()->SetShotPhase(GunAnimeID::AmmoLoadStart);
 						}
+					}
+
+					m_SightChange.Execute(KeyControl::GetInputControl().GetPADSPress(PADS::MELEE));
+					if (m_SightChange.trigger()) {
+						GetGunPtrNow()->ChangeSightSel();
 					}
 					//テスト系
 				}
@@ -590,13 +614,6 @@ namespace FPS_n2 {
 							break;
 					}
 					MagStockControl::SubAmmoStock(InAmmo);
-				}
-
-
-				if (GetGunPtrNow()->GetShotSwitch()) {
-					if (this->m_MyID == 0) {
-						DrawParts->SetCamShake(0.1f, 0.3f);
-					}
 				}
 				//
 				if (m_Press_Aim) {
@@ -896,22 +913,6 @@ namespace FPS_n2 {
 						m_IsStuckGun = false;
 					}
 				}
-				//エフェクト
-				if (GetGunPtrNow()->GetShotSwitch()) {
-					auto mat = GetGunPtrNow()->GetFrameWorldMat(GunFrame::Muzzle);
-					switch (GetGunPtrNow()->GetGunShootSound()) {
-						case GunShootSound::Normal:
-							EffectControl::SetOnce(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.5f);
-							EffectControl::SetEffectSpeed(EffectResource::Effect::ef_fire2, 2.f);
-							break;
-						case GunShootSound::Suppressor:
-							EffectControl::SetOnce(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.25f);
-							EffectControl::SetEffectSpeed(EffectResource::Effect::ef_fire2, 2.f);
-							break;
-						default:
-							break;
-					}
-				}
 			}
 			//
 			std::vector<std::pair<MV1*, int>> cols;
@@ -990,27 +991,34 @@ namespace FPS_n2 {
 					if (LifeControl::IsAlive()) {
 						auto tmp_gunrat = MATRIX_ref::RotVec2(VECTOR_ref::front(), zVect0);
 						tmp_gunrat *= MATRIX_ref::RotVec2(tmp_gunrat.yvec(), yVect0);
-						tmp_gunrat *= GunSwingControl::GetGunSwingMat() * GetCharaDir() * MATRIX_ref::Mtrans(GetFrameWorldMat(CharaFrame::Head).pos() + Post0);
+						tmp_gunrat *= GunSwingControl::GetGunSwingMat() * GetCharaDir();
+						
+						VECTOR_ref vec = Lerp(GetGunPtrNow()->GetMatrix().yvec(), GetGunPtrNow()->GetEyeYVec(), this->m_ADSPer);
+
+						tmp_gunrat *= MATRIX_ref::RotVec2(vec, GetGunPtrNow()->GetMatrix().yvec());
+
+						tmp_gunrat *= MATRIX_ref::Mtrans(GetFrameWorldMat(CharaFrame::Head).pos() + Post0);
 						GetGunPtrNow()->SetGunMatrix(tmp_gunrat);
 					}
 					else {
 						auto tmp_gunrat =
 							lagframe_.RIGHThand_f.GetFrameWorldPosition().GetRot().Inverse() *
 							RagDollControl::GetRagDoll().GetFrameLocalWorldMatrix(lagframe_.RIGHThand_f.GetFrameID());
+
 						GetGunPtrNow()->SetGunMatrix(tmp_gunrat);
 					}
 					{
 						bool isActive = GetGunPtrNow()->IsActive();
 						if (GetShotPhase() >= GunAnimeID::AmmoLoading && GetShotPhase() <= GunAnimeID::AmmoLoadEnd) {
 							if (isActive) {
-								GetGunPtrNow()->GetSlotControl()->SetActive(false);
+								GetGunPtrNow()->SetActiveBySlot(false);
 								(*GetGunPtrNow()->GetMagazinePtr())->SetActive(true);
 							}
 							GetGunPtrNow()->SetActive(false);
 						}
 						else {
 							if (!isActive) {
-								GetGunPtrNow()->GetSlotControl()->SetActive(true);
+								GetGunPtrNow()->SetActiveBySlot(true);
 							}
 							GetGunPtrNow()->SetActive(true);
 						}
@@ -1255,7 +1263,7 @@ namespace FPS_n2 {
 					GetGunPtrNow()->SetGunMatrix(tmp_gunrat);
 				}
 			}
-			auto& GunPtr = this->m_Gun_Ptr[1 - m_GunSelect];
+			auto& GunPtr = this->m_Gun_Ptr[(size_t)(1 - m_GunSelect)];
 			if (GunPtr) {
 				//仮の画面外指定
 				auto tmp_gunrat = GetFrameWorldMat(CharaFrame::Upper);

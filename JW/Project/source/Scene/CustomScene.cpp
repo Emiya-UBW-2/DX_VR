@@ -262,7 +262,7 @@ namespace FPS_n2 {
 			ClearDrawScreenZBuffer();
 			{
 				auto& y = GetSelData()[SelMoveClass[select].index];
-				auto& ModPtr1 = (std::shared_ptr<ModClass>&)(y->m_Data->GetSlotControl()->GetPartsPtr(y->SlotType));
+				auto& ModPtr1 = (std::shared_ptr<ModClass>&)(y->m_Data->GetPartsPtr(y->SlotType));
 				if (ModPtr1) {
 					SetUseLighting(FALSE);
 					ModPtr1->GetObj().SetOpacityRate(0.5f*std::clamp(m_SelAlpha, 0.f, 1.f));

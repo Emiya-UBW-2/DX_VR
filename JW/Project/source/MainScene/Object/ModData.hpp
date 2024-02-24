@@ -32,6 +32,10 @@ namespace FPS_n2 {
 			GraphHandle						m_Reitcle;
 			float							m_ZoomSize{1.f};
 
+			int								m_ShootRate_Diff{0};
+			int								m_ReloadRate_Diff{0};
+
+
 			std::vector<std::shared_ptr<AmmoDataClass>>	m_AmmoSpec;
 			int											m_CapacityMax{0};
 		public://ゲッター
@@ -50,6 +54,9 @@ namespace FPS_n2 {
 			//マガジン
 			const auto&		GetAmmoAll(void) const noexcept { return  this->m_CapacityMax; }
 			const auto&		GetAmmoSpecMagTop(void) const noexcept { return this->m_AmmoSpec[0]; }
+			//性能周り
+			const auto&		GetShootRate_Diff(void) const noexcept { return this->m_ShootRate_Diff; }
+			const auto&		GetReloadRate_Diff(void) const noexcept { return this->m_ReloadRate_Diff; }
 		protected:
 			void				SetSlot(const std::string& LEFT, const std::string&RIGHT) noexcept;
 			virtual void		SetMod_Sub(const std::string&, const std::string&) noexcept {}

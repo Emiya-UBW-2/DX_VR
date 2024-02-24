@@ -16,4 +16,8 @@ Slot1Type=Sight
 Slot1IsNeed=true
 Slot1Item=ACOG
 
+Slot2Type=UnderRail
+Slot2IsNeed=true
+Slot2Item=offsetmount
+
 end

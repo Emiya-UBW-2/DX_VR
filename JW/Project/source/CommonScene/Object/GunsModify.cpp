@@ -11,7 +11,6 @@ namespace FPS_n2 {
 					if (Data && y->m_sel < (int)Data->m_ItemsUniqueID.size()) {
 						if (y->m_selectSwitch) {
 							y->m_selectSwitch = false;
-							ModPtr->RemoveMod(y->SlotType);
 							ModPtr->SetMod(y->SlotType, y->m_sel, *m_BaseObj);
 						}
 					}
@@ -56,7 +55,7 @@ namespace FPS_n2 {
 			for (int loop = 0; loop < (int)SelData.size(); loop++) {
 				const Slot* y = SelData[loop];
 				if (y->ParentSlot == SlotPtr) {
-					UpdateMods(((std::shared_ptr<ModClass>&)(ModPtr->GetSlotControl()->GetPartsPtr(y->SlotType))).get(), y, isPreset);
+					UpdateMods(((std::shared_ptr<ModClass>&)(ModPtr->GetPartsPtr(y->SlotType))).get(), y, isPreset);
 				}
 			}
 		}
@@ -89,7 +88,7 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						UpdateMods(((std::shared_ptr<ModClass>&)(y->m_Data->GetSlotControl()->GetPartsPtr(y->SlotType))).get(), y, false);
+						UpdateMods(((std::shared_ptr<ModClass>&)(y->m_Data->GetPartsPtr(y->SlotType))).get(), y, false);
 					}
 					Ret = true;
 					break;

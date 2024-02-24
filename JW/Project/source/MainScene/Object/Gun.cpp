@@ -7,7 +7,7 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		const bool  GunClass::HasFrame(GunFrame frame) const noexcept {
 			//該当フレームがあるのなら上書き
-			if (m_SightPtr) {
+			if (m_SightPtr[m_GunSightSel]) {
 				switch (frame) {
 					case GunFrame::Eyepos:
 					case GunFrame::Lens:
@@ -17,7 +17,7 @@ namespace FPS_n2 {
 						break;
 				}
 			}
-			if (GetSlotControl()->HasFrame(frame)) {
+			if (HasFrameBySlot(frame)) {
 				return true;
 			}
 			if (HaveFrame(frame)) {
@@ -27,18 +27,18 @@ namespace FPS_n2 {
 		}
 		const MATRIX_ref  GunClass::GetFrameLocalMat(GunFrame frame) const noexcept {
 			//該当フレームがあるのなら上書き
-			if (m_SightPtr) {
+			if (m_SightPtr[m_GunSightSel]) {
 				switch (frame) {
 					case GunFrame::Eyepos:
 					case GunFrame::Lens:
 					case GunFrame::LensSize:
-						return (*m_SightPtr)->GetFrameLocalMat(frame);
+						return (*m_SightPtr[m_GunSightSel])->GetFrameLocalMat(frame);
 					default:
 						break;
 				}
 			}
 			MATRIX_ref Ret;
-			if (GetSlotControl()->GetPartsFrameLocalMat(frame, &Ret)) {
+			if (ModSlotControl::GetPartsFrameLocalMatBySlot(frame, &Ret)) {
 				return Ret;
 			}
 			if (HaveFrame(frame)) {
@@ -48,18 +48,18 @@ namespace FPS_n2 {
 		}
 		const MATRIX_ref  GunClass::GetFrameWorldMat(GunFrame frame) const noexcept {
 			//該当フレームがあるのなら上書き
-			if (m_SightPtr) {
+			if (m_SightPtr[m_GunSightSel]) {
 				switch (frame) {
 					case GunFrame::Eyepos:
 					case GunFrame::Lens:
 					case GunFrame::LensSize:
-						return (*m_SightPtr)->GetFrameWorldMat(frame);
+						return (*m_SightPtr[m_GunSightSel])->GetFrameWorldMat(frame);
 					default:
 						break;
 				}
 			}
 			MATRIX_ref Ret;
-			if (GetSlotControl()->GetPartsFrameWorldMat(frame, &Ret)) {
+			if (ModSlotControl::GetPartsFrameWorldMat(frame, &Ret)) {
 				return Ret;
 			}
 			if (HaveFrame(frame)) {
@@ -69,13 +69,13 @@ namespace FPS_n2 {
 		}
 
 		void GunClass::ResetFrameLocalMat(GunFrame frame) noexcept {
-			GetSlotControl()->ResetPartsFrameLocalMat(frame);
+			ModSlotControl::ResetPartsFrameLocalMat(frame);
 			if (HaveFrame(frame)) {
 				GetObj().frame_Reset(GetFrame(frame));
 			}
 		}
 		void GunClass::SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept {
-			GetSlotControl()->SetPartsFrameLocalMat(frame, value);
+			ModSlotControl::SetPartsFrameLocalMat(frame, value);
 			if (HaveFrame(frame)) {
 				GetObj().SetFrameLocalMatrix(GetFrame(frame), value * this->GetFrameBaseLocalMat(frame));
 			}
@@ -97,7 +97,6 @@ namespace FPS_n2 {
 				default:
 					break;
 			}
-			//
 			for (int i = 0; i < this->m_ChamberAmmoData->GetPellet(); i++) {
 				auto& LastAmmo = (std::shared_ptr<AmmoClass>&)(*ObjMngr->MakeObject(ObjType::Ammo));
 				LastAmmo->Init();
@@ -107,14 +106,10 @@ namespace FPS_n2 {
 					GetFrameWorldMat(GunFrame::Muzzle);
 				LastAmmo->Put(this->m_ChamberAmmoData, mat.pos(), mat.zvec() * -1.f, m_MyID);
 			}
-			//
 			UnloadChamber();
-			//
 			AddMuzzleSmokePower();
-			//
-			float Power = 0.0001f*GetGunDataClass()->GetRecoilPower();
-			this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power, 0.f);
-			//this->m_RecoilRadAdd = MATRIX_ref::Vtrans(this->m_RecoilRadAdd, MATRIX_ref::RotZ(-m_LeanRad / 5.f));
+			this->m_ShotPhase = GunAnimeID::Shot;
+			this->m_ShotSwitch = true;
 		}
 		void	GunClass::SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept {
 			m_MagFall.Dispose();
@@ -125,20 +120,28 @@ namespace FPS_n2 {
 		void	GunClass::Init_Gun(void) noexcept {
 			{
 				std::vector<const SharedObj*> PartsList;
-				GetSlotControl()->GetChildPartsList(&PartsList);
-				m_SightPtr = nullptr;
+				ModSlotControl::GetChildPartsList(&PartsList);
+				m_SightPtr[0] = nullptr;
+				m_SightPtr[1] = nullptr;
+				int SightSel = 0;
 				m_MuzzlePtr = nullptr;
 				m_UpperPtr = nullptr;
 				m_MagazinePtr = nullptr;
+				m_ShootRate_Diff = 0;
+				m_ReloadRate_Diff = 0;
+
 				for (auto& p : PartsList) {
 					if ((*p)->GetobjType() == ObjType::Sight) {
-						const auto* Ptr = &((std::shared_ptr<SightClass>&)(*p));
-						if (m_SightPtr) {
-							if (!(*Ptr)->GetModData()->GetReitcleGraph().IsActive()) {
-								continue;
+						if (SightSel < m_SightPtr.size()) {
+							const auto* Ptr = &((std::shared_ptr<SightClass>&)(*p));
+							if (m_SightPtr[SightSel]) {
+								if (!(*Ptr)->GetModData()->GetReitcleGraph().IsActive()) {
+									continue;
+								}
 							}
+							m_SightPtr[SightSel] = Ptr;
+							SightSel++;
 						}
-						m_SightPtr = Ptr;
 					}
 					if ((*p)->GetobjType() == ObjType::MuzzleAdapter) {
 						m_MuzzlePtr = &((std::shared_ptr<MuzzleClass>&)(*p));
@@ -148,6 +151,13 @@ namespace FPS_n2 {
 					}
 					if ((*p)->GetobjType() == ObjType::Magazine) {
 						m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(*p));
+					}
+
+					//性能周り
+					{
+						auto& d = ((std::shared_ptr<ModClass>&)(*p))->GetModData();
+						m_ShootRate_Diff += d->GetShootRate_Diff();
+						m_ReloadRate_Diff += d->GetReloadRate_Diff();
 					}
 				}
 				PartsList.clear();
@@ -230,9 +240,16 @@ namespace FPS_n2 {
 					if (GetGunAnimEnd(GunAnimSelect)) {
 						switch (this->GetReloadType()) {
 							case RELOADTYPE::MAG:
+								//ユニークIDが異なる場合登録するオブジェと切り替える
+								if (this->m_NextMagUniqueID != (*m_MagazinePtr)->GetModData()->GetUniqueID()) {
+									m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(ModSlotControl::SetMod(GunSlot::Magazine, this->m_NextMagUniqueID, this->GetObj())));
+								}
+								SetAmmo(m_NextMagNum);
 								this->m_ShotPhase = GunAnimeID::ReloadEnd;
 								break;
 							case RELOADTYPE::AMMO:
+								SetAmmo(this->m_Capacity + 1);
+								m_NextMagNum--;
 								if ((this->GetIsMagFull() || (m_NextMagNum <= 0)) || this->m_ReloadCancel) {
 									this->m_ReloadCancel = false;
 									this->m_ShotPhase = GunAnimeID::ReloadEnd;
@@ -522,27 +539,6 @@ namespace FPS_n2 {
 			GunAnimeID Sel = (GunAnimeID)(this->m_ShotPhase);
 			for (int i = 0; i < GetObj().get_anime().size(); i++) {
 				if (Sel == (GunAnimeID)i) {
-					if ((GunAnimeID)i == GunAnimeID::ReloadOne) {
-						if (GetObj().get_anime(i).time == 0.f) {
-							switch (GetReloadType()) {
-								case RELOADTYPE::MAG:
-									//ユニークIDが異なる場合登録するオブジェと切り替える
-									if (this->m_NextMagUniqueID != (*m_MagazinePtr)->GetModData()->GetUniqueID()) {
-										RemoveMod(GunSlot::Magazine);
-										SetMod(GunSlot::Magazine, this->m_NextMagUniqueID, this->GetObj());
-										m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(GetSlotControl()->GetPartsPtr(GunSlot::Magazine)));
-									}
-									SetAmmo(m_NextMagNum);
-									break;
-								case RELOADTYPE::AMMO:
-									SetAmmo(this->m_Capacity + 1);
-									m_NextMagNum--;
-									break;
-								default:
-									break;
-							}
-						}
-					}
 					GetObj().get_anime(i).per = 1.f;
 					if (Sel == GunAnimeID::Shot) {
 						SetAnimOnce(i, ((float)this->GetGunDataClass()->GetShotRate()) / 300.f);//分間300
@@ -715,17 +711,12 @@ namespace FPS_n2 {
 				GetObj().work_anime();
 				SetFrameLocalMat(GunFrame::Center, GetFrameLocalMat(GunFrame::Center).GetRot());//1のフレーム移動量を無視する
 			}
+
+			Easing(&m_GunChangePer, 1.f, 0.8f, EasingType::OutExpo);
 			//共通
 			ObjectBaseClass::FirstExecute();
 			//弾薬の演算
 			ExecuteCartInChamber();
-			//リコイルの演算
-			if (this->m_RecoilRadAdd.y() < 0.f) {
-				Easing(&this->m_RecoilRadAdd, VECTOR_ref::vget(0.f, 0.01f, 0.f), this->GetGunDataClass()->GetRecoilReturn(), EasingType::OutExpo);
-			}
-			else {
-				Easing(&this->m_RecoilRadAdd, VECTOR_ref::zero(), 0.7f, EasingType::OutExpo);
-			}
 		}
 		void GunClass::Draw(bool isDrawSemiTrans) noexcept {
 			if (this->m_IsActive && this->m_IsDraw) {

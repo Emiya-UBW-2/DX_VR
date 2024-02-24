@@ -77,6 +77,7 @@ namespace FPS_n2 {
 			bool												m_Press_Aim{false};
 			float												m_MeleeCoolDown{0.f};
 			bool												m_ArmBreak{false};
+			switchs												m_SightChange;
 			//サウンド
 			float												m_SoundPower{0.f};
 			int													m_CharaSound{-1};
@@ -84,6 +85,7 @@ namespace FPS_n2 {
 			bool												m_SquatSoundReq{false};
 			//
 			std::array<ItemFallControl, 2>						m_ItemFallControl;
+			VECTOR_ref											m_RecoilRadAdd;
 		public:
 			bool												CanLookTarget{true};
 		private:
@@ -160,6 +162,7 @@ namespace FPS_n2 {
 			}
 			void			SetArmer(const std::shared_ptr<ArmerClass>& pArmer) noexcept { this->m_Armer_Ptr = pArmer; }
 		public://ゲッター
+			const auto&		GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd; }
 			auto&			GetSoundPower(void) noexcept { return this->m_SoundPower; }
 			auto&			GetGunPtr(int ID) noexcept { return this->m_Gun_Ptr[ID]; }
 			auto&			GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr[m_GunSelect]; }
@@ -191,6 +194,24 @@ namespace FPS_n2 {
 				else {
 					return EyePosition;
 				}
+			}
+			const auto		GetIsCheck() const noexcept {
+				bool IsCheck = GetGunPtrNow()->GetIsMagFull();
+				if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
+					IsCheck = (GetGunPtrNow()->GetAmmoNum() >= MagStockControl::GetNextMag().AmmoNum);
+				}
+				return IsCheck;
+			}
+			const auto		IsSightActive() const noexcept {
+				return GetGunPtrNow()->IsSightActive();
+			}
+			
+			const auto&		GetSightReitcleGraphPtr() const noexcept {
+				return GetGunPtrNow()->GetSightPtr()->GetModData()->GetReitcleGraph();
+			}
+			const auto		GetSightZoomSize() const noexcept {
+				if (!IsSightActive()) { return 1.f; }
+				return GetGunPtrNow()->GetSightPtr()->GetModData()->GetZoomSize();
 			}
 		public://セッター
 			bool			SetDamageEvent(const DamageEvent& value) noexcept;

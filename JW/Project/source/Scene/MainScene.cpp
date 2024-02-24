@@ -50,9 +50,9 @@ namespace FPS_n2 {
 			this->m_BackGround->Init("", "");//1.59秒
 			//ロード
 			LoadChara("Suit", GetMyPlayerID(), false);
-			//GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
-			//LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
-			LoadGun("PCC_4", GetMyPlayerID(), false, 0);
+			GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
+			LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
+			//LoadGun("PCC_4", GetMyPlayerID(), false, 0);
 
 			//LoadGun("PCC_4", GetMyPlayerID(), false, 1);
 			LoadGun("AKS-74", GetMyPlayerID(), false, 1);
@@ -62,10 +62,6 @@ namespace FPS_n2 {
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 				c->SetMapCol(this->m_BackGround, true);
-				c->GetGunPtr(0)->SetMapCol(this->m_BackGround);
-				if (c->GetGunPtr(1)) {
-					c->GetGunPtr(1)->SetMapCol(this->m_BackGround);
-				}
 			}
 			//人の座標設定
 			for (int index = 0; index < Chara_num; index++) {
@@ -224,8 +220,8 @@ namespace FPS_n2 {
 					pp_y /= 2.f;
 				}
 				if (Chara->GetGunPtrNow()) {
-					pp_x -= Chara->GetGunPtrNow()->GetRecoilRadAdd().y();
-					pp_y -= Chara->GetGunPtrNow()->GetRecoilRadAdd().x();
+					pp_x -= Chara->GetRecoilRadAdd().y();
+					pp_y -= Chara->GetRecoilRadAdd().x();
 				}
 				MyInput.SetInputStart(pp_x, pp_y, Chara->GetRadBuf());
 				MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
@@ -471,17 +467,17 @@ namespace FPS_n2 {
 						float fov = deg2rad(OptionParts->Get_Fov());
 						if (Chara->GetIsADS()) {
 							fov -= deg2rad(15);
-							fov /= std::max(1.f, Chara->GetGunPtrNow()->GetZoomSize() / 2.f);
+							fov /= std::max(1.f, Chara->GetSightZoomSize() / 2.f);
 						}
 						else if (Chara->GetRun()) {
 							fov += deg2rad(5);
 						}
 						if (Chara->GetMeleeSwitch()) {
-							fov += deg2rad(25);
+							fov += deg2rad(15);
 							Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
 						}
 						else if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetShotSwitch()) {
-							fov -= deg2rad(15);
+							fov -= deg2rad(5);
 							Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
 						}
 						else {
@@ -679,12 +675,12 @@ namespace FPS_n2 {
 						Chara->GetGunPtrNow()->GetReticlePos()
 					);
 					//*
-					if (m_MyPlayerReticleControl.IsActive() && Chara->GetGunPtrNow()->GetZoomSize() > 1.f) {
+					if (m_MyPlayerReticleControl.IsActive() && Chara->GetSightZoomSize() > 1.f) {
 						Set_is_lens(true);
 						Set_xp_lens(m_MyPlayerReticleControl.GetLensXPos());
 						Set_yp_lens(m_MyPlayerReticleControl.GetLensYPos());
 						Set_size_lens(m_MyPlayerReticleControl.GetLensSize());
-						Set_zoom_lens(std::max(1.f, Chara->GetGunPtrNow()->GetZoomSize() / 2.f));
+						Set_zoom_lens(std::max(1.f, Chara->GetSightZoomSize() / 2.f));
 					}
 					else {
 						Set_is_lens(false);
@@ -728,8 +724,8 @@ namespace FPS_n2 {
 					DrawSoundGraph();
 				}
 				//レティクル表示
-				if (m_MyPlayerReticleControl.IsActive() && Chara->GetGunPtrNow()->GetReticlePtr()) {
-					Chara->GetGunPtrNow()->GetReticlePtr()->DrawRotaGraph(
+				if (m_MyPlayerReticleControl.IsActive() && Chara->IsSightActive()) {
+					Chara->GetSightReitcleGraphPtr().DrawRotaGraph(
 						(int)m_MyPlayerReticleControl.GetReticleXPos(),
 						(int)m_MyPlayerReticleControl.GetReticleYPos(),
 						1.f, Chara->GetGunRadAdd(), true);

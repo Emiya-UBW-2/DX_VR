@@ -20,8 +20,30 @@ namespace FPS_n2 {
 			const auto&		GetFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first; }
 			const auto&		GetFrameBaseLocalMat(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].second; }
 			const auto		GetFrameLocalMat(GunFrame frame) const noexcept { return GetFrameLocalMatrix(GetFrame(frame)); }
-			const auto		GetFrameWorldMat(GunFrame frame) const noexcept { return GetFrameWorldMatrix(GetFrame(frame)); }
+			const auto		GetChildFrameNum(GunFrame frame) const noexcept { return ObjectBaseClass::GetChildFrameNum(GetFrame(frame)); }
+			const auto		GetChildFrameWorldMat(GunFrame frame, int ID) const noexcept { return ObjectBaseClass::GetChildFrameWorldMatrix(GetFrame(frame), ID); }
+			const auto		GetFrameWorldMat(GunFrame frame) const noexcept {
+				//ŠY“–ƒtƒŒ[ƒ€‚ª‚ ‚é‚Ì‚È‚çã‘‚«
+				MATRIX_ref Ret;
+				if (ModSlotControl::GetPartsFrameWorldMat(frame, &Ret)) {
+					return Ret;
+				}
+				if (HaveFrame(frame)) {
+					Ret = GetFrameWorldMatrix(GetFrame(frame));
+					if (frame == GunFrame::Sight) {
+						if (GetChildFrameNum(frame) > 0) {
+							VECTOR_ref vec = (GetChildFrameWorldMat(frame, 0).pos() - Ret.pos()).Norm();
+							//pRet->xvec().cross(vec)
+							Ret = (Ret.GetRot()*MATRIX_ref::RotVec2(Ret.yvec(), vec)) * MATRIX_ref::Mtrans(Ret.pos());
+						}
+					}
+					return Ret;
+				}
+				return MATRIX_ref::zero();
+			}
 			void			ResetFrameLocalMat(GunFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }
+			
+
 			void			SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * GetFrameBaseLocalMat(frame)); }
 		public:
 			void			Init(void) noexcept override;
@@ -31,12 +53,12 @@ namespace FPS_n2 {
 				SetMove(GetMove().mat.GetRot(), GetMove().pos);
 				FirstExecute_Mod();
 			}
-			void			SetGunMatrix(const MATRIX_ref& value) noexcept {
+			void			SetModMatrix(const MATRIX_ref& value) noexcept {
 				SetMove(value.GetRot(), value.pos());
-				GetSlotControl()->UpdatePartsAnim(GetObj());
-				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::UnderRail), GunSlot::UnderRail);
-				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::Sight), GunSlot::Sight);
-				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::MuzzleAdapter), GunSlot::MuzzleAdapter);
+				ModSlotControl::UpdatePartsAnim(GetObj());
+				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::UnderRail), GunSlot::UnderRail);
+				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::Sight), GunSlot::Sight);
+				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::MuzzleAdapter), GunSlot::MuzzleAdapter);
 			}
 			void			DrawShadow(void) noexcept override {
 				this->m_obj.DrawModel();

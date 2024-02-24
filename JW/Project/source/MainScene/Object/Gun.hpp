@@ -27,16 +27,23 @@ namespace FPS_n2 {
 			bool									m_IsEject{false};
 			int										m_NextMagNum{0};
 			int										m_NextMagUniqueID{0};
+
 			int										m_AmmoLoadCount{0};
 			bool									m_AmmoLoadSwitch{false};
 			bool									m_IsAmmoLoadCount{false};
-			VECTOR_ref								m_RecoilRadAdd;
+
 			FallControl								m_MagFall;
 			FallControl								m_CartFall;
-			const std::shared_ptr<SightClass>*		m_SightPtr{nullptr};
+
+			int										m_GunSightSel{0};
+			float									m_GunChangePer{0.f};
+			std::array<const std::shared_ptr<SightClass>*, 2>	m_SightPtr{nullptr};
 			const std::shared_ptr<MuzzleClass>*		m_MuzzlePtr{nullptr};
 			const std::shared_ptr<UpperClass>*		m_UpperPtr{nullptr};
 			const std::shared_ptr<MagazineClass>*	m_MagazinePtr{nullptr};
+
+			int										m_ShootRate_Diff{0};
+			int										m_ReloadRate_Diff{0};
 
 			int										m_Capacity{0};//’e”
 		private:
@@ -81,7 +88,6 @@ namespace FPS_n2 {
 			const auto& GetReloadType(void) const noexcept { return GetGunDataClass()->GetReloadType(); }
 			const auto& GetShotSwitch(void) const noexcept { return this->m_ShotSwitch; }
 			const auto& GetShotPhase(void) const noexcept { return this->m_ShotPhase; }
-			const auto&	GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd; }
 			const auto& GetNowAnime(void) noexcept { return GetObj().get_anime((size_t)this->m_ShotPhase); }
 			const auto&	GetAmmoNum(void) const noexcept { return this->m_Capacity; }
 			const auto& GetMagazinePtr(void) const noexcept { return m_MagazinePtr; }
@@ -98,18 +104,32 @@ namespace FPS_n2 {
 				return GetGunDataClass()->GetRecoilReturn();
 			}
 
-			const GraphHandle* GetReticlePtr(void) const noexcept {
-				if (this->m_SightPtr) {
-					return &(*this->m_SightPtr)->GetModData()->GetReitcleGraph();
+			const auto	GetSightMax() const noexcept { return (int)this->m_SightPtr.size(); }
+			const bool	IsSightActive() const noexcept { return this->m_SightPtr.at(m_GunSightSel) != nullptr; }
+			const auto&	GetSightPtr() const noexcept {
+				if (m_GunChangePer < 0.5f) {
+					int Prev = (m_GunSightSel - 1);
+					if (Prev < 0) { Prev = GetSightMax() - 1; }
+					return *this->m_SightPtr.at(Prev);
+
 				}
-				return nullptr;
-			}
-			const auto	GetZoomSize(void) const noexcept {
-				if (this->m_SightPtr) {
-					return (*this->m_SightPtr)->GetModData()->GetZoomSize();
+				else {
+					return *this->m_SightPtr.at(m_GunSightSel);
 				}
-				return 1.f;
 			}
+			void ChangeSightSel() noexcept {
+				for (int i = 0;i < GetSightMax();i++) {
+					m_GunSightSel++;
+					if (m_GunSightSel >= GetSightMax()) {
+						m_GunSightSel = 0;
+					}
+					if (IsSightActive()) {
+						break;
+					}
+				}
+				m_GunChangePer = 0.f;
+			}
+
 			const auto	GetInChamber(void) const noexcept { return this->m_ChamberAmmoData != nullptr; }
 			const auto	GetAmmoAll(void) const noexcept {
 				if (this->m_MagazinePtr) {
@@ -148,7 +168,34 @@ namespace FPS_n2 {
 			const auto	GetShootReady(void) const noexcept { return this->m_ShotPhase <= GunAnimeID::Shot; }
 			const auto	GetCanShot(void) const noexcept { return GetInChamber() && GetShootReady(); }
 
-			const auto	GetEyePos(void) const noexcept { return GetFrameWorldMat(GunFrame::Eyepos).pos(); }
+			const auto	GetEyePos(void) const noexcept {
+				if (!this->m_SightPtr.at(m_GunSightSel)) {
+					return GetFrameWorldMat(GunFrame::Eyepos).pos();
+				}
+
+				int Prev = (m_GunSightSel - 1);
+				if (Prev < 0) { Prev = GetSightMax() - 1; }
+				VECTOR_ref Pos = (*m_SightPtr[m_GunSightSel])->GetFrameWorldMat(GunFrame::Eyepos).pos();
+				if (this->m_SightPtr.at(Prev)) {
+					Pos = Lerp((*m_SightPtr[Prev])->GetFrameWorldMat(GunFrame::Eyepos).pos(), Pos, m_GunChangePer);
+				}
+				return Pos;
+			}
+
+			const auto	GetEyeYVec(void) const noexcept {
+				if (!this->m_SightPtr.at(m_GunSightSel)) {
+					return GetFrameWorldMat(GunFrame::Eyepos).yvec();
+				}
+
+				int Prev = (m_GunSightSel - 1);
+				if (Prev < 0) { Prev = GetSightMax() - 1; }
+				VECTOR_ref Pos = (*m_SightPtr[m_GunSightSel])->GetFrameWorldMat(GunFrame::Eyepos).yvec();
+				if (this->m_SightPtr.at(Prev)) {
+					Pos = Lerp((*m_SightPtr[Prev])->GetFrameWorldMat(GunFrame::Eyepos).yvec(), Pos, m_GunChangePer);
+				}
+				return Pos;
+			}
+
 			const auto	GetLensPos(void) const noexcept { return GetFrameWorldMat(GunFrame::Lens).pos(); }
 			const auto	GetReticlePos(void) const noexcept { return GetLensPos() + (GetLensPos() - GetEyePos()).Norm()*10.f; }
 
@@ -162,12 +209,13 @@ namespace FPS_n2 {
 			void		SetShotSwitchOff() noexcept { this->m_ShotSwitch = false; }
 			void		SetGunMatrix(const MATRIX_ref& value) noexcept {
 				SetMove(value.GetRot(), value.pos());
-				GetSlotControl()->UpdatePartsAnim(GetObj());
-				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::Lower), GunSlot::Lower);
-				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::Upper), GunSlot::Upper);
-				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::Barrel), GunSlot::Barrel);
-				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::Sight), GunSlot::Sight);
-				GetSlotControl()->UpdatePartsMove(GetFrameWorldMat(GunFrame::Magpos), GunSlot::Magazine);
+				ModSlotControl::UpdatePartsAnim(GetObj());
+				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::UnderRail), GunSlot::UnderRail);
+				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::Lower), GunSlot::Lower);
+				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::Upper), GunSlot::Upper);
+				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::Barrel), GunSlot::Barrel);
+				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::Sight), GunSlot::Sight);
+				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::Magpos), GunSlot::Magazine);
 			}
 			void		SetShotPhase(GunAnimeID pShotPhase) noexcept { this->m_ShotPhase = pShotPhase; }
 			void		SetBullet(void) noexcept;//”­–C
@@ -179,15 +227,8 @@ namespace FPS_n2 {
 					12.f, SoundEnum::MagFall);
 			}
 
-			void		SetPressShot() noexcept {
-				if (this->GetInChamber()) {
-					this->SetBullet();
-					this->m_ShotPhase = GunAnimeID::Shot;
-					this->m_ShotSwitch = true;
-				}
-				else {
-					this->m_ShotPhase = (!GetIsMagEmpty()) ? GunAnimeID::Cocking : GunAnimeID::ReloadStart_Empty;
-				}
+			void		SetPressShotEmpty() noexcept {
+				this->m_ShotPhase = (!GetIsMagEmpty()) ? GunAnimeID::Cocking : GunAnimeID::ReloadStart_Empty;
 			}
 			void		SetReloadStartMag(int NextMagNum, int NextMagUniqueID) noexcept {
 				if (this->GetReloadType() != RELOADTYPE::MAG) { return; }

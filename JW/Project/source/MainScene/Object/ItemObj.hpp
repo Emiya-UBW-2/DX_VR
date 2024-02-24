@@ -9,8 +9,8 @@ namespace FPS_n2 {
 			ARMER,
 		};
 		class ItemObjClass : public ObjectBaseClass {
-			float m_yAdd{0.f};
-			ItemType m_ItemType;
+			float		m_yAdd{0.f};
+			ItemType	m_ItemType{ItemType::ARMER};
 		private:
 			std::shared_ptr<BackGroundClassBase>		m_BackGround;				//BG
 		public:

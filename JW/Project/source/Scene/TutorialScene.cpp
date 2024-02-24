@@ -33,36 +33,32 @@ namespace FPS_n2 {
 			ChangeLightTypeDir(GetLightVec().get());
 			SetLightDifColor(GetColorF(1.f, 1.f, 1.f, 1.f));
 			SetLightSpcColor(GetColorF(0.1f, 0.1f, 0.1f, 0.f));
-			SetLightAmbColor(GetColorF(0.9f, 0.9f, 0.9f, 1.f));
+			SetLightAmbColor(GetColorF(0.1f, 0.1f, 0.1f, 1.f));
 			//
 			this->m_BackGround = std::make_shared<BackGroundClassTutorial>();
 			this->m_BackGround->Init("data/model/map/", "data/model/sky/");//1.59秒
 			//ロード
 			LoadChara("Suit");
-			GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
-			LoadGun("G17Gen3", true, 0);
+			//GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
+			//LoadGun("G17Gen3", true, 0);
 			//LoadGun("AKS-74", false, 0);
-
+			LoadGun("M16-4", false, 0);
 
 			//LoadGun("PCC_4", false, 1);
 			LoadGun("AKS-74", false, 1);
 			//LoadGun("M16-4", false, 1);
 			//LoadGun("Mod870", false, 1);
 			//BGをオブジェに登録
-			{
-				m_CharacterPtr->SetMapCol(this->m_BackGround, false);
-				m_CharacterPtr->GetGunPtr(0)->SetMapCol(this->m_BackGround);
-				if (m_CharacterPtr->GetGunPtr(1)) {
-					m_CharacterPtr->GetGunPtr(1)->SetMapCol(this->m_BackGround);
-				}
-			}
+			m_CharacterPtr->SetMapCol(this->m_BackGround, false);
 			//
 			{
+				/*
 				for (auto& M : m_CharacterPtr->GetMagDatas()) {
 					m_CharacterPtr->SetMag((int)(&M - &m_CharacterPtr->GetMagDatas().front()), 0);
 				}
 				m_CharacterPtr->GetGunPtrNow()->UnloadChamber();
 				m_CharacterPtr->GetGunPtrNow()->SetAmmo(0);
+				//*/
 			}
 			//人の座標設定
 			{
@@ -179,8 +175,8 @@ namespace FPS_n2 {
 					pp_y /= 2.f;
 				}
 				if (m_CharacterPtr->GetGunPtrNow()) {
-					pp_x -= m_CharacterPtr->GetGunPtrNow()->GetRecoilRadAdd().y();
-					pp_y -= m_CharacterPtr->GetGunPtrNow()->GetRecoilRadAdd().x();
+					pp_x -= m_CharacterPtr->GetRecoilRadAdd().y();
+					pp_y -= m_CharacterPtr->GetRecoilRadAdd().x();
 				}
 				MyInput.SetInputStart(pp_x, pp_y, m_CharacterPtr->GetRadBuf());
 				MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
@@ -279,17 +275,17 @@ namespace FPS_n2 {
 						float fov = deg2rad(OptionParts->Get_Fov());
 						if (m_CharacterPtr->GetIsADS()) {
 							fov -= deg2rad(15);
-							fov /= std::max(1.f, m_CharacterPtr->GetGunPtrNow()->GetZoomSize() / 2.f);
+							fov /= std::max(1.f, m_CharacterPtr->GetSightZoomSize() / 2.f);
 						}
 						else if (m_CharacterPtr->GetRun()) {
 							fov += deg2rad(5);
 						}
 						if (m_CharacterPtr->GetMeleeSwitch()) {
-							fov += deg2rad(25);
+							fov += deg2rad(15);
 							Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
 						}
 						else if (m_CharacterPtr->GetGunPtrNow() && m_CharacterPtr->GetGunPtrNow()->GetShotSwitch()) {
-							fov -= deg2rad(15);
+							fov -= deg2rad(5);
 							Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
 						}
 						else {
@@ -444,12 +440,12 @@ namespace FPS_n2 {
 						m_CharacterPtr->GetGunPtrNow()->GetReticlePos()
 					);
 					//*
-					if (m_MyPlayerReticleControl.IsActive() && m_CharacterPtr->GetGunPtrNow()->GetZoomSize() > 1.f) {
+					if (m_MyPlayerReticleControl.IsActive() && m_CharacterPtr->GetSightZoomSize() > 1.f) {
 						Set_is_lens(true);
 						Set_xp_lens(m_MyPlayerReticleControl.GetLensXPos());
 						Set_yp_lens(m_MyPlayerReticleControl.GetLensYPos());
 						Set_size_lens(m_MyPlayerReticleControl.GetLensSize());
-						Set_zoom_lens(std::max(1.f, m_CharacterPtr->GetGunPtrNow()->GetZoomSize() / 2.f));
+						Set_zoom_lens(std::max(1.f, m_CharacterPtr->GetSightZoomSize() / 2.f));
 					}
 					else {
 						Set_is_lens(false);
@@ -468,8 +464,8 @@ namespace FPS_n2 {
 			//着弾表示
 			if (m_CharacterPtr->IsAlive()) {
 				//レティクル表示
-				if (m_MyPlayerReticleControl.IsActive() && m_CharacterPtr->GetGunPtrNow()->GetReticlePtr()) {
-					m_CharacterPtr->GetGunPtrNow()->GetReticlePtr()->DrawRotaGraph(
+				if (m_MyPlayerReticleControl.IsActive() && m_CharacterPtr->IsSightActive()) {
+					m_CharacterPtr->GetSightReitcleGraphPtr().DrawRotaGraph(
 						(int)m_MyPlayerReticleControl.GetReticleXPos(),
 						(int)m_MyPlayerReticleControl.GetReticleYPos(),
 						1.f, m_CharacterPtr->GetGunRadAdd(), true);

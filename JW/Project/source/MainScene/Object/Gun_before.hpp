@@ -37,30 +37,6 @@ namespace FPS_n2 {
 			}
 		};
 		//
-		class SlotPartsControl {
-		private:
-			std::array<SharedObj, (int)GunSlot::Max>	m_Parts_Ptr{nullptr};
-		public:
-			const bool	HasParts(GunSlot objType) const noexcept { return (this->m_Parts_Ptr[(int)objType].get() != nullptr); }
-			const auto&	GetPartsPtr(GunSlot objType) const noexcept { return this->m_Parts_Ptr[(int)objType]; }
-			const bool	IsEffectParts(GunSlot objType, GunFrame frame) const noexcept;
-			const bool	HasFrame(GunFrame frame) const noexcept;
-			const bool	GetPartsFrameLocalMat(GunFrame frame, MATRIX_ref* pRet) const noexcept;
-			const bool	GetPartsFrameWorldMat(GunFrame frame, MATRIX_ref* pRet) const noexcept;
-			void		GetChildPartsList(std::vector<const SharedObj*>* Ret) const noexcept;
-			void		ResetPartsFrameLocalMat(GunFrame frame) noexcept;
-			void		SetPartsFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept;
-			void		SetActive(bool value) noexcept;
-
-			SharedObj& ChangeMagazine(int MagUniqueID);
-		public:
-			const SharedObj*	SetParts(int uniqueID, GunSlot objType, const MV1& BaseModel);
-			void		RemoveParts(GunSlot objType);
-			void		UpdatePartsAnim(const MV1& pParent);
-			void		UpdatePartsMove(const MATRIX_ref& pMat, GunSlot objType);
-			void		DisposeSlotPartsControl();
-		};
-		//
 		class MuzzleSmokeControl {
 		private://キャラパラメーター
 			std::array<VECTOR_ref, 8>		m_Line;
@@ -112,30 +88,39 @@ namespace FPS_n2 {
 
 		class ModSlotControl {
 		private:
-			std::unique_ptr<SlotPartsControl>	m_SlotControl;
+			std::array<SharedObj, (int)GunSlot::Max>	m_Parts_Ptr{nullptr};
 			std::shared_ptr<ModDataClass>		m_ModDataClass;
 		public:
-			auto&			GetSlotControl() noexcept { return this->m_SlotControl; }
-			const auto&		GetSlotControl() const noexcept { return this->m_SlotControl; }
 			auto&			GetModData() noexcept { return this->m_ModDataClass; }
 			const auto&		GetModData() const noexcept { return this->m_ModDataClass; }
 		protected:
 			void			InitModSlotControl(const std::string& PilePath, bool ismod) noexcept {
-				//データ
-				m_SlotControl = std::make_unique<SlotPartsControl>();
 				m_ModDataClass = *ModDataManager::Instance()->AddData(PilePath, ismod);
 			}
 			void			DisposeModSlotControl(void) noexcept {
-				m_SlotControl->DisposeSlotPartsControl();
+				for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+					RemoveMod((GunSlot)loop);
+				}
 				m_ModDataClass.reset();
 			}
 		public:
-			void			SetMod(GunSlot Slot, int ID, const MV1& BaseModel) noexcept;
-			void			RemoveMod(GunSlot Slot) noexcept {
-				if (this->m_SlotControl->HasParts(Slot)) {
-					this->m_SlotControl->RemoveParts(Slot);
-				}
-			}
+			const SharedObj&			SetMod(GunSlot Slot, int ID, const MV1& BaseModel) noexcept;
+			void			RemoveMod(GunSlot Slot) noexcept;
+		private:
+			const bool	IsEffectParts(GunSlot Slot, GunFrame frame) const noexcept;
+		public:
+			const auto&	GetPartsPtr(GunSlot Slot) const noexcept { return this->m_Parts_Ptr[(int)Slot]; }
+			const bool	HasFrameBySlot(GunFrame frame) const noexcept;
+			const bool	GetPartsFrameLocalMatBySlot(GunFrame frame, MATRIX_ref* pRet) const noexcept;
+			const bool	GetPartsFrameWorldMat(GunFrame frame, MATRIX_ref* pRet) const noexcept;
+
+			void		ResetPartsFrameLocalMat(GunFrame frame) noexcept;
+			void		SetPartsFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept;
+			void		GetChildPartsList(std::vector<const SharedObj*>* Ret) const noexcept;
+			void		SetActiveBySlot(bool value) noexcept;
+		public:
+			void		UpdatePartsAnim(const MV1& pParent);
+			void		UpdatePartsMove(const MATRIX_ref& pMat, GunSlot Slot);
 		};
 
 	};

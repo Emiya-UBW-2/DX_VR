@@ -68,6 +68,13 @@ namespace FPS_n2 {
 			else if (LEFT.find("useammo" + std::to_string(this->m_AmmoSpec.size())) != std::string::npos) {
 				this->m_AmmoSpec.emplace_back(AmmoDataManager::Instance()->LoadAction("data/ammo/" + RIGHT + "/"));
 			}
+
+			else if (LEFT == "ShootRate_Diff") {
+				m_ShootRate_Diff = std::stoi(RIGHT);
+			}
+			else if (LEFT == "ReloadRate_Diff") {
+				m_ReloadRate_Diff = std::stoi(RIGHT);
+			}
 		}
 
 		const std::shared_ptr<ModDataClass>*	ModDataManager::AddData(const std::string& filepath, bool isMod) noexcept {

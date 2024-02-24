@@ -50,6 +50,8 @@ namespace FPS_n2 {
 			const auto		GetFrameLocalMatrix(int frame) const noexcept { return this->m_obj.GetFrameLocalMatrix(frame); }
 			const auto		GetFrameWorldMatrix(int frame) const noexcept { return this->m_obj.GetFrameLocalWorldMatrix(frame); }
 			const auto		GetParentFrameWorldMatrix(int frame) const noexcept { return GetFrameWorldMatrix((int)this->m_obj.frame_parent(frame)); }
+			const auto		GetChildFrameNum(int frame) const noexcept { return (int)this->m_obj.frame_child_num(frame); }
+			const auto		GetChildFrameWorldMatrix(int frame, int ID) const noexcept { return GetFrameWorldMatrix((int)this->m_obj.frame_child(frame, ID)); }
 		public:
 			const auto&		GetIsBaseModel(void) const noexcept { return this->m_IsBaseModel; }
 			const auto		GetPathCompare(const char* filepath, const char* objfilename, const char* colfilename) const noexcept {
