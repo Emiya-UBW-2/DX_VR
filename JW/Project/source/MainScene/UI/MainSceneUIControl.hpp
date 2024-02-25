@@ -199,7 +199,6 @@ namespace FPS_n2 {
 				this->Gauge_Aim_Graph = GraphHandle::Load("data/UI/Gauge_Aim.png");
 				this->OIL_Graph = GraphHandle::Load("data/UI/back.png");
 
-				m_GaugeMask.at(0).Load("data/UI/Gauge_Mod870.png");
 				for (int i = 0; i < 4; i++) {
 					m_GaugeMask.at((size_t)i + 1).Load("data/UI/Mag.png");
 				}
@@ -212,9 +211,15 @@ namespace FPS_n2 {
 					m.Dispose();
 				}
 			}
-			void			Set(void) noexcept {
+			void			Set(const char* GunName) noexcept {
 				prevScore = 0;
 				ScoreAdd.clear();
+
+				std::string Path = "data/gun/";
+				Path += GunName;
+				Path += "/Gauge.png";
+				m_GaugeMask.at(0).Dispose();
+				m_GaugeMask.at(0).Load(Path.c_str());
 			}
 			void			Draw(void) noexcept {
 				auto* Fonts = FontPool::Instance();

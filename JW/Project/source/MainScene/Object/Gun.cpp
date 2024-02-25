@@ -551,6 +551,13 @@ namespace FPS_n2 {
 					if ((GunAnimeID)i == GunAnimeID::Base) {
 						GetObj().get_anime(i).per = 1.f;
 					}
+					else if ((GunAnimeID)i == GunAnimeID::OffsetAnim) {
+						bool isHit = false;
+						if (m_GunSightSel == 1) {
+							isHit = true;
+						}
+						GetObj().get_anime(i).per = std::clamp(GetObj().get_anime(i).per + 1.f / FPS * (isHit ? 1.f : -1.f), 0.f, 1.f);
+					}
 					else if ((GunAnimeID)i == GunAnimeID::Open) {
 						bool isHit = false;
 						if (GetAmmoNumTotal() == 0) {
@@ -717,6 +724,11 @@ namespace FPS_n2 {
 			ObjectBaseClass::FirstExecute();
 			//’e–ò‚Ì‰‰ŽZ
 			ExecuteCartInChamber();
+		}
+		void GunClass::DrawShadow(void) noexcept {
+			if (this->m_IsActive && this->m_IsDraw) {
+				this->GetObj().DrawModel();
+			}
 		}
 		void GunClass::Draw(bool isDrawSemiTrans) noexcept {
 			if (this->m_IsActive && this->m_IsDraw) {

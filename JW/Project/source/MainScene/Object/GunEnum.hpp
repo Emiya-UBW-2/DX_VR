@@ -20,6 +20,7 @@ namespace FPS_n2 {
 			AmmoLoadStart,
 			AmmoLoading,
 			AmmoLoadEnd,
+			OffsetAnim,
 			AnimeIDMax,
 		};
 		enum class GunFrame {

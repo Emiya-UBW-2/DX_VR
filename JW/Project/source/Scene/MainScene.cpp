@@ -54,10 +54,13 @@ namespace FPS_n2 {
 			LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
 			//LoadGun("PCC_4", GetMyPlayerID(), false, 0);
 
-			//LoadGun("PCC_4", GetMyPlayerID(), false, 1);
-			LoadGun("AKS-74", GetMyPlayerID(), false, 1);
-			//LoadGun("M16-4", GetMyPlayerID(), false, 1);
-			//LoadGun("Mod870", GetMyPlayerID(), false, 1);
+			std::string ULTName = "";
+			ULTName = "PCC_4";
+			//ULTName = "AKS-74";
+			//ULTName = "M16-4";
+			//ULTName = "Mod870";
+
+			LoadGun(ULTName.c_str(), GetMyPlayerID(), false, 1);
 			//BGをオブジェに登録
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
@@ -104,7 +107,7 @@ namespace FPS_n2 {
 			//サウンド
 			SetSE();
 			//UI
-			this->m_UIclass.Set();
+			this->m_UIclass.Set(ULTName.c_str());
 			//入力
 			this->m_DamageEvents.clear();
 			m_NetWorkBrowser.Init();
@@ -144,6 +147,7 @@ namespace FPS_n2 {
 						KeyGuide->AddGuide(PADS::RUN, "走る");
 						KeyGuide->AddGuide(PADS::WALK, "歩く");
 						KeyGuide->AddGuide(PADS::SQUAT, "しゃがむ");
+						KeyGuide->AddGuide(PADS::JUMP, "スタンス切替");
 
 						KeyGuide->AddGuide(PADS::SHOT, "射撃");
 						KeyGuide->AddGuide(PADS::ULT, "武器切替");
@@ -241,6 +245,7 @@ namespace FPS_n2 {
 				MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
 				MyInput.SetInputPADS(PADS::CHECK, Pad->GetKey(PADS::CHECK).press());
 				MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
+				MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
 				//ネットワーク
 				auto& CharaPtr = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 
@@ -729,7 +734,10 @@ namespace FPS_n2 {
 					DrawSoundGraph();
 				}
 				//レティクル表示
-				if (m_MyPlayerReticleControl.IsActive() && Chara->IsSightPtrActive()) {
+				if (m_MyPlayerReticleControl.IsActive() && Chara->IsSightPtrActive()
+					&&
+					!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)
+					) {
 					Chara->GetSightReitcleGraphPtr().DrawRotaGraph(
 						(int)m_MyPlayerReticleControl.GetReticleXPos(),
 						(int)m_MyPlayerReticleControl.GetReticleYPos(),

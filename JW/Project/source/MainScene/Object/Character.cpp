@@ -36,7 +36,13 @@ namespace FPS_n2 {
 						PlayerMngr->GetPlayer(value.ShotID).AddScore(1);
 
 						auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(value.ShotID).GetChara();
-						Chara->AddULT(20);
+						if (m_AutoAim != -1) {
+
+							Chara->AddULT((m_GunSelect == 1) ? 1 : 6);
+						}
+						else {
+							Chara->AddULT((m_GunSelect == 1) ? 9 : 20);
+						}
 					}
 					int Rand = GetRand(99);
 					if (Rand < 30) {
@@ -317,6 +323,11 @@ namespace FPS_n2 {
 				GetGunPtrNow()->SetPlayerID(this->m_MyID);
 				MagStockControl::Init_MagStockControl(GetGunPtrNow()->GetAmmoNum(), GetGunPtrNow()->GetAmmoAll(), GetGunPtrNow()->GetMagUniqueID());
 			}
+
+			m_SlingZrad.Init(0.05f*Scale_Rate, 3.f, deg2rad(50));
+			m_SlingYrad.Init(0.05f*Scale_Rate, 3.f, deg2rad(50));
+			this->m_SlingPer[0] = 0.f;
+			this->m_SlingPer[1] = 1.f;
 		}
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
 			KeyControl::InputKey(pInput, pReady, StaminaControl::GetHeartRandVec(0.f));
@@ -428,7 +439,7 @@ namespace FPS_n2 {
 				this->m_Press_Shot ||
 				this->m_Press_Reload ||
 				((KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && GetIsCheck()) && GetGunPtrNow()->GetCanShot()) ||
-				(KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && GetGunPtrNow()->GetCanShot() && false)
+				(KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && GetGunPtrNow()->GetCanShot())
 				) && (GetShotPhase() == GunAnimeID::Base)) {
 				this->m_ReadyTimer = std::min(this->m_ReadyTimer, 0.1f);
 			}
@@ -485,7 +496,9 @@ namespace FPS_n2 {
 					if (this->m_Press_Shot) {
 						if (GetGunPtrNow()->GetInChamber()) {
 							GetGunPtrNow()->SetBullet();
-
+							if (m_GunSelect == 1) {
+								ULTControl::AddULT(-3);
+							}
 							float Power = 0.0001f*GetGunPtrNow()->GetGunDataClass()->GetRecoilPower();
 							this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power, 0.f);
 							//this->m_RecoilRadAdd = MATRIX_ref::Vtrans(this->m_RecoilRadAdd, MATRIX_ref::RotZ(-m_LeanRad / 5.f));
@@ -559,7 +572,7 @@ namespace FPS_n2 {
 						}
 					}
 					m_MeleeCoolDown = std::max(m_MeleeCoolDown - 1.f / FPS, 0.f);
-					if (KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && m_MeleeCoolDown == 0.f && false) {
+					if (KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && m_MeleeCoolDown == 0.f) {
 						GetGunPtrNow()->SetShotPhase(GunAnimeID::Melee);
 						m_MeleeCoolDown = 1.f;
 						if (this->m_MyID == 0) {
@@ -575,7 +588,7 @@ namespace FPS_n2 {
 						}
 					}
 
-					m_SightChange.Execute(KeyControl::GetInputControl().GetPADSPress(PADS::MELEE));
+					m_SightChange.Execute(KeyControl::GetInputControl().GetPADSPress(PADS::JUMP));
 					if (m_SightChange.trigger()) {
 						GetGunPtrNow()->ChangeSightSel();
 					}
@@ -967,6 +980,34 @@ namespace FPS_n2 {
 			Easing(&this->m_move.pos, this->m_PosBuf, 0.9f, EasingType::OutExpo);
 			this->m_Speed = (this->m_move.pos - this->m_move.repos).Length();
 			UpdateMove();
+			//スリング場所探索
+			{
+				m_SlingZrad.Execute();
+				m_SlingYrad.Execute();
+
+				m_SlingZrad.AddRad(1.f / FPS * (1.f - m_SlingPer[1 - this->m_GunSelect]));
+				m_SlingZrad.AddRad(1.f / FPS * (KeyControl::GetRad().y() - this->m_yrad_Bottom));
+				{
+					m_SlingMat[0] = MATRIX_ref::RotX(deg2rad(-90))*GetFrameWorldMat(CharaFrame::Upper);
+				}
+				{
+					auto mat = MATRIX_ref::RotX(deg2rad(-30)) * MATRIX_ref::RotY(deg2rad(-90)) * 
+						(
+							(
+								MATRIX_ref::RotZ(-this->m_SlingZrad.GetRad()) * MATRIX_ref::RotY(KeyControl::GetRad().y() + this->m_SlingYrad.GetRad())
+							)*
+							GetCharaDir().Inverse()
+							);
+					m_SlingMat[1] = mat * MATRIX_ref::Mtrans(
+						GetFrameWorldMat(CharaFrame::Head).pos() +
+
+						GetFrameWorldMat(CharaFrame::Head).zvec() * -2.f +
+						(
+							this->m_move.mat.xvec() * sin(m_SlingZrad.GetRad()) +
+							this->m_move.mat.yvec() * cos(m_SlingZrad.GetRad())
+							) * -6.25f);
+				}
+			}
 			//銃座標指定
 			if (!this->m_IsWearingArmer) {
 				if (GetGunPtrNow()) {
@@ -988,7 +1029,7 @@ namespace FPS_n2 {
 					yVect0 = MATRIX_ref::Vtrans(yVect0, MATRIX_ref::RotAxis(zVect0, GetGunRadAdd() - this->m_LeanRad));
 					//エイム先
 					GunSwingControl::UpdateGunSwing(KeyControl::GetRad());
-
+					//
 					{
 						auto prev = m_AutoAimTimer;
 						m_AutoAimTimer = std::max(m_AutoAimTimer - 1.f / FPS, 0.f);
@@ -1006,51 +1047,76 @@ namespace FPS_n2 {
 						Easing(&m_AutoAimOn, IsAutoAimActive() ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 					}
 					if (LifeControl::IsAlive()) {
-						auto tmp_gunrat = MATRIX_ref::RotVec2(VECTOR_ref::front(), zVect0);
+						Post0 = GetFrameWorldMat(CharaFrame::Head).pos() + Post0;
 
-						//オートエイム
-						if (GetIsADS() && IsAutoAimActive() && m_IsMainGame) {
-							VECTOR_ref BasePos = GetGunPtrNow()->GetFrameWorldMat(GunFrame::Muzzle).pos();
+						for (auto& p : this->m_Gun_Ptr) {
+							if (p != nullptr) {
+								int index = (int)(&p - &this->m_Gun_Ptr.front());
+								auto yVec = Lerp(yVect0, m_SlingMat[index].yvec(), m_SlingPer[index]);
+								auto zVec = Lerp(zVect0, m_SlingMat[index].zvec(), m_SlingPer[index]);
+								auto PosBuf = Lerp(Post0, m_SlingMat[index].pos(), m_SlingPer[index]);
+								Easing(&this->m_SlingPer[index], (index == this->m_GunSelect) ? 0.f : 1.f, (index == this->m_GunSelect) ? 0.9f : 0.9f, EasingType::OutExpo);
+								if (this->m_SlingPer[index] <= 0.05f) {
+									this->m_SlingPer[index] = 0;
+								}
 
-							auto* PlayerMngr = PlayerManager::Instance();
-							for (int i = 0; i < Player_num; i++) {
-								if (i == this->m_MyID) { continue; }
-								auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
-								if (Chara->GetHP() <= 0) { continue; }
-								if (!Chara->CanLookTarget) { continue; }
-								VECTOR_ref Vec = (Chara->GetFrameWorldMat(CharaFrame::Head).pos() - BasePos);
-								if (Vec.Length() >= (Scale_Rate*7.f)) { continue; }
-								if (GetEyeVector().dot(Vec.Norm()) < cos(deg2rad(15))) { continue; }
+								auto tmp_gunrat = MATRIX_ref::RotVec2(VECTOR_ref::front(), zVec);
 
-								m_AutoAimTimer = 1.f;
-								m_AutoAim = i;
-								break;
-							}
+								//オートエイム
+								if (index == this->m_GunSelect) {
+									if (GetIsADS() && IsAutoAimActive() && m_IsMainGame) {
+										VECTOR_ref BasePos = p->GetFrameWorldMat(GunFrame::Muzzle).pos();
 
-							if (m_AutoAim != -1) {
-								auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(m_AutoAim).GetChara();
-								VECTOR_ref Vec = (Chara->GetFrameWorldMat(CharaFrame::Head).pos() - BasePos);
-								tmp_gunrat = MATRIX_ref::RotVec2(GetEyeVector(), Vec.Norm()) * tmp_gunrat;
+										auto* PlayerMngr = PlayerManager::Instance();
+										for (int i = 0; i < Player_num; i++) {
+											if (i == this->m_MyID) { continue; }
+											auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
+											if (Chara->GetHP() <= 0) { continue; }
+											if (!Chara->CanLookTarget) { continue; }
+											VECTOR_ref Vec = (Chara->GetFrameWorldMat(CharaFrame::Head).pos() - BasePos);
+											if (Vec.Length() >= (Scale_Rate*7.f)) { continue; }
+											if (GetEyeVector().dot(Vec.Norm()) < cos(deg2rad(15))) { continue; }
 
+											m_AutoAimTimer = 1.f;
+											m_AutoAim = i;
+											break;
+										}
+
+										if (m_AutoAim != -1) {
+											auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(m_AutoAim).GetChara();
+											VECTOR_ref Vec = (Chara->GetFrameWorldMat(CharaFrame::Head).pos() - BasePos);
+											tmp_gunrat = MATRIX_ref::RotVec2(GetEyeVector(), Vec.Norm()) * tmp_gunrat;
+
+										}
+									}
+								}
+
+								tmp_gunrat *= MATRIX_ref::RotVec2(tmp_gunrat.yvec(), yVec);
+								tmp_gunrat *= GunSwingControl::GetGunSwingMat() * GetCharaDir();
+
+								VECTOR_ref vec = Lerp(p->GetMatrix().yvec(), p->GetEyeYVec(), this->m_ADSPer);
+								tmp_gunrat *= MATRIX_ref::RotVec2(vec, p->GetMatrix().yvec());
+
+								tmp_gunrat *= MATRIX_ref::Mtrans(PosBuf);
+								p->SetGunMatrix(tmp_gunrat);
 							}
 						}
-
-
-						tmp_gunrat *= MATRIX_ref::RotVec2(tmp_gunrat.yvec(), yVect0);
-						tmp_gunrat *= GunSwingControl::GetGunSwingMat() * GetCharaDir();
-
-						VECTOR_ref vec = Lerp(GetGunPtrNow()->GetMatrix().yvec(), GetGunPtrNow()->GetEyeYVec(), this->m_ADSPer);
-						tmp_gunrat *= MATRIX_ref::RotVec2(vec, GetGunPtrNow()->GetMatrix().yvec());
-
-						tmp_gunrat *= MATRIX_ref::Mtrans(GetFrameWorldMat(CharaFrame::Head).pos() + Post0);
-						GetGunPtrNow()->SetGunMatrix(tmp_gunrat);
 					}
 					else {
-						auto tmp_gunrat =
-							lagframe_.RIGHThand_f.GetFrameWorldPosition().GetRot().Inverse() *
-							RagDollControl::GetRagDoll().GetFrameLocalWorldMatrix(lagframe_.RIGHThand_f.GetFrameID());
+						{
+							auto tmp_gunrat =
+								lagframe_.RIGHThand_f.GetFrameWorldPosition().GetRot().Inverse() *
+								RagDollControl::GetRagDoll().GetFrameLocalWorldMatrix(lagframe_.RIGHThand_f.GetFrameID());
 
-						GetGunPtrNow()->SetGunMatrix(tmp_gunrat);
+							GetGunPtrNow()->SetGunMatrix(tmp_gunrat);
+						}
+						auto& GunPtr = this->m_Gun_Ptr[(size_t)(1 - (size_t)m_GunSelect)];
+						if (GunPtr) {
+							//仮の画面外指定
+							auto tmp_gunrat = GetFrameWorldMat(CharaFrame::Upper);
+							tmp_gunrat = MATRIX_ref::RotX(deg2rad(90))*tmp_gunrat;
+							GunPtr->SetGunMatrix(tmp_gunrat);
+						}
 					}
 					{
 						bool isActive = GetGunPtrNow()->IsActive();
@@ -1307,13 +1373,13 @@ namespace FPS_n2 {
 					tmp_gunrat = MATRIX_ref::RotX(deg2rad(90))*tmp_gunrat;
 					GetGunPtrNow()->SetGunMatrix(tmp_gunrat);
 				}
-			}
-			auto& GunPtr = this->m_Gun_Ptr[(size_t)(1 - (size_t)m_GunSelect)];
-			if (GunPtr) {
-				//仮の画面外指定
-				auto tmp_gunrat = GetFrameWorldMat(CharaFrame::Upper);
-				tmp_gunrat = MATRIX_ref::RotX(deg2rad(90))*tmp_gunrat;
-				GunPtr->SetGunMatrix(tmp_gunrat);
+				auto& GunPtr = this->m_Gun_Ptr[(size_t)(1 - (size_t)m_GunSelect)];
+				if (GunPtr) {
+					//仮の画面外指定
+					auto tmp_gunrat = GetFrameWorldMat(CharaFrame::Upper);
+					tmp_gunrat = MATRIX_ref::RotX(deg2rad(90))*tmp_gunrat;
+					GunPtr->SetGunMatrix(tmp_gunrat);
+				}
 			}
 			//ラグドール
 			RagDollControl::Execute_RagDollControl(this->GetObj(), LifeControl::IsAlive());
@@ -1420,8 +1486,8 @@ namespace FPS_n2 {
 			EffectControl::Dispose();
 			this->m_BackGround.reset();
 			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DelObj((SharedObj*)&m_Gun_Ptr);
 			for (auto& g : m_Gun_Ptr) {
+				ObjMngr->DelObj((SharedObj*)&g);
 				g.reset();
 			}
 		}

@@ -194,10 +194,6 @@ namespace FPS_n2 {
 			const auto	GetCanShot(void) const noexcept { return GetInChamber() && GetShootReady(); }
 
 			const auto	GetEyePos(void) const noexcept {
-				if (!this->m_SightPtr.at(0)) {
-					return GetFrameWorldMat(GunFrame::Eyepos).pos();
-				}
-
 				VECTOR_ref Pos;
 				if (this->m_SightPtr.at(1)) {
 					int Prev = (m_GunSightSel - 1);
@@ -208,27 +204,23 @@ namespace FPS_n2 {
 						m_GunChangePer);
 				}
 				else {
-					if (m_GunSightSel == 0) {
-						Pos = Lerp(
-							GetFrameWorldMat(GunFrame::EyeOffsetPos).pos(),
-							(*m_SightPtr[0])->GetFrameWorldMat(GunFrame::Eyepos).pos(),
-							m_GunChangePer);
+					if (!this->m_SightPtr.at(0)) {
+						Pos = GetFrameWorldMat(GunFrame::Eyepos).pos();
 					}
 					else {
-						Pos = Lerp(
-							(*m_SightPtr[0])->GetFrameWorldMat(GunFrame::Eyepos).pos(),
-							GetFrameWorldMat(GunFrame::EyeOffsetPos).pos(),
-							m_GunChangePer);
+						Pos = (*m_SightPtr[0])->GetFrameWorldMat(GunFrame::Eyepos).pos();
+					}
+					if (m_GunSightSel == 0) {
+						Pos = Lerp(GetFrameWorldMat(GunFrame::EyeOffsetPos).pos(), Pos, m_GunChangePer);
+					}
+					else {
+						Pos = Lerp(Pos, GetFrameWorldMat(GunFrame::EyeOffsetPos).pos(), m_GunChangePer);
 					}
 				}
 				return Pos;
 			}
 
 			const auto	GetEyeYVec(void) const noexcept {
-				if (!this->m_SightPtr.at(0)) {
-					return GetFrameWorldMat(GunFrame::Eyepos).yvec();
-				}
-
 				VECTOR_ref Pos;
 				if (this->m_SightPtr.at(1)) {
 					int Prev = (m_GunSightSel - 1);
@@ -244,17 +236,17 @@ namespace FPS_n2 {
 						vec = (GetChildFrameWorldMat(GunFrame::EyeOffsetPos, 0).pos() - GetFrameWorldMat(GunFrame::EyeOffsetPos).pos()).Norm();
 					}
 
-					if (m_GunSightSel == 0) {
-						Pos = Lerp(
-							vec,
-							(*m_SightPtr[0])->GetFrameWorldMat(GunFrame::Eyepos).yvec(),
-							m_GunChangePer);
+					if (!this->m_SightPtr.at(0)) {
+						Pos = GetFrameWorldMat(GunFrame::Eyepos).yvec();
 					}
 					else {
-						Pos = Lerp(
-							(*m_SightPtr[0])->GetFrameWorldMat(GunFrame::Eyepos).yvec(),
-							vec,
-							m_GunChangePer);
+						Pos = (*m_SightPtr[0])->GetFrameWorldMat(GunFrame::Eyepos).yvec();
+					}
+					if (m_GunSightSel == 0) {
+						Pos = Lerp(vec, Pos, m_GunChangePer);
+					}
+					else {
+						Pos = Lerp(Pos, vec, m_GunChangePer);
 					}
 				}
 				return Pos;
@@ -317,6 +309,7 @@ namespace FPS_n2 {
 			void			Init(void) noexcept override;
 			void			Init_Gun(void) noexcept;
 			void			FirstExecute(void) noexcept override;
+			void			DrawShadow(void) noexcept override;
 			void			Draw(bool isDrawSemiTrans) noexcept override;
 			void			Dispose(void) noexcept override;
 		};

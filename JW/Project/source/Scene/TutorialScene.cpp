@@ -39,15 +39,18 @@ namespace FPS_n2 {
 			this->m_BackGround->Init("data/model/map/", "data/model/sky/");//1.59秒
 			//ロード
 			LoadChara("Suit");
-			//GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
-			//LoadGun("G17Gen3", true, 0);
+			GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
+			LoadGun("G17Gen3", true, 0);
 			//LoadGun("AKS-74", false, 0);
-			LoadGun("M16-4", false, 0);
+			//LoadGun("M16-4", false, 0);
 
-			//LoadGun("PCC_4", false, 1);
-			LoadGun("AKS-74", false, 1);
-			//LoadGun("M16-4", false, 1);
-			//LoadGun("Mod870", false, 1);
+			std::string ULTName = "";
+			//ULTName = "PCC_4";
+			ULTName = "AKS-74";
+			//ULTName = "M16-4";
+			//ULTName = "Mod870";
+
+			LoadGun(ULTName.c_str(), false, 1);
 			//BGをオブジェに登録
 			m_CharacterPtr->SetMapCol(this->m_BackGround, false);
 			//
@@ -76,7 +79,7 @@ namespace FPS_n2 {
 			//サウンド
 			SetSE();
 			//UI
-			this->m_UIclass.Set();
+			this->m_UIclass.Set(ULTName.c_str());
 			//
 			m_MainLoopPauseControl.Init();
 
@@ -108,6 +111,7 @@ namespace FPS_n2 {
 						KeyGuide->AddGuide(PADS::RUN, "走る");
 						KeyGuide->AddGuide(PADS::WALK, "歩く");
 						KeyGuide->AddGuide(PADS::SQUAT, "しゃがむ");
+						KeyGuide->AddGuide(PADS::JUMP, "スタンス切替");
 
 						KeyGuide->AddGuide(PADS::SHOT, "射撃");
 						KeyGuide->AddGuide(PADS::ULT, "武器切替");
@@ -196,6 +200,7 @@ namespace FPS_n2 {
 				MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
 				MyInput.SetInputPADS(PADS::CHECK, Pad->GetKey(PADS::CHECK).press());
 				MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
+				MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
 				//
 				bool isready = true;
 				m_CharacterPtr->SetInput(MyInput, isready && m_CharacterPtr->IsAlive());
@@ -469,7 +474,11 @@ namespace FPS_n2 {
 			//着弾表示
 			if (m_CharacterPtr->IsAlive()) {
 				//レティクル表示
-				if (m_MyPlayerReticleControl.IsActive() && m_CharacterPtr->IsSightPtrActive()) {
+				if (m_MyPlayerReticleControl.IsActive() && m_CharacterPtr->IsSightPtrActive()
+					
+					&&
+					!((m_CharacterPtr->GetADSPer() < 0.8f) && m_CharacterPtr->GetSightZoomSize() > 1.f)
+					) {
 					m_CharacterPtr->GetSightReitcleGraphPtr().DrawRotaGraph(
 						(int)m_MyPlayerReticleControl.GetReticleXPos(),
 						(int)m_MyPlayerReticleControl.GetReticleYPos(),

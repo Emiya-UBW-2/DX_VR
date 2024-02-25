@@ -91,6 +91,11 @@ namespace FPS_n2 {
 			//
 			std::array<ItemFallControl, 2>						m_ItemFallControl;
 			VECTOR_ref											m_RecoilRadAdd;
+			//
+			Pendulum2D											m_SlingZrad;
+			Pendulum2D											m_SlingYrad;
+			std::array<float, 2>								m_SlingPer;
+			std::array<MATRIX_ref, 2>							m_SlingMat;
 		public:
 			bool												CanLookTarget{true};
 		private:
@@ -192,6 +197,7 @@ namespace FPS_n2 {
 					MATRIX_ref::RotY(KeyControl::GetRun() ? 0.f : this->m_yrad_BottomChange);
 				return tmpUpperMatrix * this->m_move.mat;
 			}
+			const auto&		GetADSPer(void) const noexcept { return this->m_ADSPer; }
 			const auto		GetEyeVecY(void) const noexcept { return GetEyeVecMat().yvec(); }
 			const auto		GetEyeVector(void) const noexcept { return GetEyeVecMat().zvec() * -1.f; }
 			const auto		GetEyePosition(void) const noexcept {
