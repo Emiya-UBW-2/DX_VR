@@ -455,11 +455,11 @@ namespace FPS_n2 {
 					auto near_t = DrawParts->GetMainCamera().GetCamNear();
 					auto far_t = DrawParts->GetMainCamera().GetCamFar();
 					if (Chara->GetIsADS()) {
-						Easing(&near_t, Scale_Rate * 0.03f, 0.9f, EasingType::OutExpo);
+						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
 						Easing(&far_t, Scale_Rate * 40.f, 0.5f, EasingType::OutExpo);
 					}
 					else {
-						Easing(&near_t, Scale_Rate * 0.03f, 0.9f, EasingType::OutExpo);
+						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
 						Easing(&far_t, Scale_Rate * 40.f, 0.5f, EasingType::OutExpo);
 					}
 					//fov
@@ -583,6 +583,11 @@ namespace FPS_n2 {
 				//Time
 				this->m_UIclass.SetfloatParam(0, m_Timer);
 				this->m_UIclass.SetfloatParam(1, m_ReadyTimer);
+				//
+				this->m_UIclass.SetGaugeParam(4 + 3, (int)(Chara->GetAutoAimPer()*20.f), 20);
+				this->m_UIclass.SetGaugeParam(4 + 3 + 1, (int)(Chara->GetAutoAimPer()*20.f), 20);
+				this->m_UIclass.SetIntParam(4, Chara->GetAutoAimID());
+				this->m_UIclass.SetfloatParam(2, Chara->GetAutoAimOn());
 				//Score
 				this->m_UIclass.SetIntParam(6, PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
 				//HP
@@ -724,7 +729,7 @@ namespace FPS_n2 {
 					DrawSoundGraph();
 				}
 				//レティクル表示
-				if (m_MyPlayerReticleControl.IsActive() && Chara->IsSightActive()) {
+				if (m_MyPlayerReticleControl.IsActive() && Chara->IsSightPtrActive()) {
 					Chara->GetSightReitcleGraphPtr().DrawRotaGraph(
 						(int)m_MyPlayerReticleControl.GetReticleXPos(),
 						(int)m_MyPlayerReticleControl.GetReticleYPos(),

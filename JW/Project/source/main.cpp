@@ -43,7 +43,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		scene->StartScene();
 		while (true) {
 			if ((ProcessMessage() != 0) || (CheckHitKeyWithCheck(KEY_INPUT_ESCAPE) != 0)) { return 0; }
-			FPS = GetFPS();
+			FPS = std::max(GetFPS(), 30.f);
 #ifdef DEBUG
 			clsDx();
 			DebugParts->SetStartPoint();

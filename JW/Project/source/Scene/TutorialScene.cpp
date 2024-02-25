@@ -23,7 +23,7 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* OptionParts = OPTION::Instance();
 			//
-			SetAmbientLight(VECTOR_ref::vget(-0.8f, -0.5f, -0.8f), GetColorF(1.f, 1.f, 1.f, 0.0f));
+			SetAmbientLight(VECTOR_ref::vget(0.1f, -0.5f, 0.8f), GetColorF(1.f, 1.f, 1.f, 0.0f));
 			SetFarShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
 			SetMiddleShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
 			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
@@ -264,11 +264,11 @@ namespace FPS_n2 {
 					auto far_t = DrawParts->GetMainCamera().GetCamFar();
 					if (m_CharacterPtr->GetIsADS()) {
 						Easing(&near_t, Scale_Rate * 0.03f, 0.9f, EasingType::OutExpo);
-						Easing(&far_t, Scale_Rate * 90.f, 0.5f, EasingType::OutExpo);
+						Easing(&far_t, Scale_Rate * 50.f, 0.5f, EasingType::OutExpo);
 					}
 					else {
-						Easing(&near_t, Scale_Rate * 0.03f, 0.9f, EasingType::OutExpo);
-						Easing(&far_t, Scale_Rate * 90.f, 0.5f, EasingType::OutExpo);
+						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
+						Easing(&far_t, Scale_Rate * 50.f, 0.5f, EasingType::OutExpo);
 					}
 					//fov
 					{
@@ -357,6 +357,11 @@ namespace FPS_n2 {
 				//Time
 				this->m_UIclass.SetfloatParam(0, 0);
 				this->m_UIclass.SetfloatParam(1, 0);
+				//
+				this->m_UIclass.SetGaugeParam(4 + 3, (int)(m_CharacterPtr->GetAutoAimPer()*20.f), 20);
+				this->m_UIclass.SetGaugeParam(4 + 3 + 1, (int)(m_CharacterPtr->GetAutoAimPer()*20.f), 20);
+				this->m_UIclass.SetIntParam(4, m_CharacterPtr->GetAutoAimID());
+				this->m_UIclass.SetfloatParam(2, m_CharacterPtr->GetAutoAimOn());
 				//Score
 				this->m_UIclass.SetIntParam(6, 0);
 				//HP
@@ -464,7 +469,7 @@ namespace FPS_n2 {
 			//着弾表示
 			if (m_CharacterPtr->IsAlive()) {
 				//レティクル表示
-				if (m_MyPlayerReticleControl.IsActive() && m_CharacterPtr->IsSightActive()) {
+				if (m_MyPlayerReticleControl.IsActive() && m_CharacterPtr->IsSightPtrActive()) {
 					m_CharacterPtr->GetSightReitcleGraphPtr().DrawRotaGraph(
 						(int)m_MyPlayerReticleControl.GetReticleXPos(),
 						(int)m_MyPlayerReticleControl.GetReticleYPos(),

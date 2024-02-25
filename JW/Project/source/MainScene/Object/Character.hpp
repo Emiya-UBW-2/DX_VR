@@ -78,6 +78,11 @@ namespace FPS_n2 {
 			float												m_MeleeCoolDown{0.f};
 			bool												m_ArmBreak{false};
 			switchs												m_SightChange;
+
+			float												m_AutoAimTimer{0.f};
+			int													m_AutoAim{-1};
+			float												m_AutoAimOn{0.f};
+
 			//サウンド
 			float												m_SoundPower{0.f};
 			int													m_CharaSound{-1};
@@ -162,7 +167,11 @@ namespace FPS_n2 {
 			}
 			void			SetArmer(const std::shared_ptr<ArmerClass>& pArmer) noexcept { this->m_Armer_Ptr = pArmer; }
 		public://ゲッター
-			const auto&		GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd; }
+			const auto		GetAutoAimPer(void) const noexcept { return this->m_AutoAimTimer / 1.f; }
+			const auto&		GetAutoAimID(void) const noexcept { return this->m_AutoAim; }
+			const auto&		GetAutoAimOn(void) const noexcept { return this->m_AutoAimOn; }
+
+			const auto		GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd*(60.f / FPS); }
 			auto&			GetSoundPower(void) noexcept { return this->m_SoundPower; }
 			auto&			GetGunPtr(int ID) noexcept { return this->m_Gun_Ptr[ID]; }
 			auto&			GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr[m_GunSelect]; }
@@ -205,12 +214,18 @@ namespace FPS_n2 {
 			const auto		IsSightActive() const noexcept {
 				return GetGunPtrNow()->IsSightActive();
 			}
-			
+			const auto		IsSightPtrActive() const noexcept {
+				return GetGunPtrNow()->IsSightPtrActive();
+			}
+			const auto		IsAutoAimActive() const noexcept {
+				return GetGunPtrNow()->IsAutoAimActive();
+			}
+
 			const auto&		GetSightReitcleGraphPtr() const noexcept {
 				return GetGunPtrNow()->GetSightPtr()->GetModData()->GetReitcleGraph();
 			}
 			const auto		GetSightZoomSize() const noexcept {
-				if (!IsSightActive()) { return 1.f; }
+				if (!IsSightPtrActive()) { return 1.f; }
 				return GetGunPtrNow()->GetSightPtr()->GetModData()->GetZoomSize();
 			}
 		public://セッター

@@ -46,9 +46,9 @@ namespace FPS_n2 {
 			}
 			return MATRIX_ref::zero();
 		}
-		const MATRIX_ref  GunClass::GetFrameWorldMat(GunFrame frame) const noexcept {
+		const MATRIX_ref  GunClass::GetFrameWorldMat(GunFrame frame, bool CheckSight) const noexcept {
 			//ŠY“–ƒtƒŒ[ƒ€‚ª‚ ‚é‚Ì‚È‚çã‘‚«
-			if (m_SightPtr[m_GunSightSel]) {
+			if (m_SightPtr[m_GunSightSel] && CheckSight) {
 				switch (frame) {
 					case GunFrame::Eyepos:
 					case GunFrame::Lens:

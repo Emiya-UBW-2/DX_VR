@@ -74,7 +74,10 @@ namespace FPS_n2 {
 			const auto& GetFrameBaseLocalMat(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].second; }
 			const bool HasFrame(GunFrame frame) const noexcept;
 			const MATRIX_ref GetFrameLocalMat(GunFrame frame) const noexcept;
-			const MATRIX_ref GetFrameWorldMat(GunFrame frame) const noexcept;
+			const MATRIX_ref GetFrameWorldMat(GunFrame frame, bool CheckSight = true) const noexcept;
+
+			const auto		GetChildFrameNum(GunFrame frame) const noexcept { return ObjectBaseClass::GetChildFrameNum(GetFrame(frame)); }
+			const auto		GetChildFrameWorldMat(GunFrame frame, int ID) const noexcept { return ObjectBaseClass::GetChildFrameWorldMatrix(GetFrame(frame), ID); }
 
 			const auto&		GetAmmoLoadCount(void) const noexcept { return m_AmmoLoadCount; }
 			const auto&		GetAmmoLoadSwitch(void) const noexcept { return m_AmmoLoadSwitch; }
@@ -106,6 +109,17 @@ namespace FPS_n2 {
 
 			const auto	GetSightMax() const noexcept { return (int)this->m_SightPtr.size(); }
 			const bool	IsSightActive() const noexcept { return this->m_SightPtr.at(m_GunSightSel) != nullptr; }
+			const bool	IsSightPtrActive() const noexcept {
+				if (m_GunChangePer < 0.5f) {
+					int Prev = (m_GunSightSel - 1);
+					if (Prev < 0) { Prev = GetSightMax() - 1; }
+					return this->m_SightPtr.at(Prev) != nullptr;
+
+				}
+				else {
+					return this->m_SightPtr.at(m_GunSightSel) != nullptr;
+				}
+			}
 			const auto&	GetSightPtr() const noexcept {
 				if (m_GunChangePer < 0.5f) {
 					int Prev = (m_GunSightSel - 1);
@@ -118,16 +132,27 @@ namespace FPS_n2 {
 				}
 			}
 			void ChangeSightSel() noexcept {
-				for (int i = 0;i < GetSightMax();i++) {
+				if (true) {
 					m_GunSightSel++;
 					if (m_GunSightSel >= GetSightMax()) {
 						m_GunSightSel = 0;
 					}
-					if (IsSightActive()) {
-						break;
+				}
+				else {
+					for (int i = 0;i < GetSightMax();i++) {
+						m_GunSightSel++;
+						if (m_GunSightSel >= GetSightMax()) {
+							m_GunSightSel = 0;
+						}
+						if (IsSightActive()) {
+							break;
+						}
 					}
 				}
 				m_GunChangePer = 0.f;
+			}
+			const bool	IsAutoAimActive() const noexcept {
+				return ((m_GunSightSel == 1) && !this->m_SightPtr.at(1));
 			}
 
 			const auto	GetInChamber(void) const noexcept { return this->m_ChamberAmmoData != nullptr; }
@@ -169,29 +194,68 @@ namespace FPS_n2 {
 			const auto	GetCanShot(void) const noexcept { return GetInChamber() && GetShootReady(); }
 
 			const auto	GetEyePos(void) const noexcept {
-				if (!this->m_SightPtr.at(m_GunSightSel)) {
+				if (!this->m_SightPtr.at(0)) {
 					return GetFrameWorldMat(GunFrame::Eyepos).pos();
 				}
 
-				int Prev = (m_GunSightSel - 1);
-				if (Prev < 0) { Prev = GetSightMax() - 1; }
-				VECTOR_ref Pos = (*m_SightPtr[m_GunSightSel])->GetFrameWorldMat(GunFrame::Eyepos).pos();
-				if (this->m_SightPtr.at(Prev)) {
-					Pos = Lerp((*m_SightPtr[Prev])->GetFrameWorldMat(GunFrame::Eyepos).pos(), Pos, m_GunChangePer);
+				VECTOR_ref Pos;
+				if (this->m_SightPtr.at(1)) {
+					int Prev = (m_GunSightSel - 1);
+					if (Prev < 0) { Prev = GetSightMax() - 1; }
+					Pos = Lerp(
+						(*m_SightPtr[Prev])->GetFrameWorldMat(GunFrame::Eyepos).pos(),
+						(*m_SightPtr[m_GunSightSel])->GetFrameWorldMat(GunFrame::Eyepos).pos(),
+						m_GunChangePer);
+				}
+				else {
+					if (m_GunSightSel == 0) {
+						Pos = Lerp(
+							GetFrameWorldMat(GunFrame::EyeOffsetPos).pos(),
+							(*m_SightPtr[0])->GetFrameWorldMat(GunFrame::Eyepos).pos(),
+							m_GunChangePer);
+					}
+					else {
+						Pos = Lerp(
+							(*m_SightPtr[0])->GetFrameWorldMat(GunFrame::Eyepos).pos(),
+							GetFrameWorldMat(GunFrame::EyeOffsetPos).pos(),
+							m_GunChangePer);
+					}
 				}
 				return Pos;
 			}
 
 			const auto	GetEyeYVec(void) const noexcept {
-				if (!this->m_SightPtr.at(m_GunSightSel)) {
+				if (!this->m_SightPtr.at(0)) {
 					return GetFrameWorldMat(GunFrame::Eyepos).yvec();
 				}
 
-				int Prev = (m_GunSightSel - 1);
-				if (Prev < 0) { Prev = GetSightMax() - 1; }
-				VECTOR_ref Pos = (*m_SightPtr[m_GunSightSel])->GetFrameWorldMat(GunFrame::Eyepos).yvec();
-				if (this->m_SightPtr.at(Prev)) {
-					Pos = Lerp((*m_SightPtr[Prev])->GetFrameWorldMat(GunFrame::Eyepos).yvec(), Pos, m_GunChangePer);
+				VECTOR_ref Pos;
+				if (this->m_SightPtr.at(1)) {
+					int Prev = (m_GunSightSel - 1);
+					if (Prev < 0) { Prev = GetSightMax() - 1; }
+					Pos = Lerp(
+						(*m_SightPtr[Prev])->GetFrameWorldMat(GunFrame::Eyepos).yvec(),
+						(*m_SightPtr[m_GunSightSel])->GetFrameWorldMat(GunFrame::Eyepos).yvec(),
+						m_GunChangePer);
+				}
+				else {
+					VECTOR_ref vec = GetFrameWorldMat(GunFrame::EyeOffsetPos).yvec();
+					if (GetChildFrameNum(GunFrame::EyeOffsetPos) > 0) {
+						vec = (GetChildFrameWorldMat(GunFrame::EyeOffsetPos, 0).pos() - GetFrameWorldMat(GunFrame::EyeOffsetPos).pos()).Norm();
+					}
+
+					if (m_GunSightSel == 0) {
+						Pos = Lerp(
+							vec,
+							(*m_SightPtr[0])->GetFrameWorldMat(GunFrame::Eyepos).yvec(),
+							m_GunChangePer);
+					}
+					else {
+						Pos = Lerp(
+							(*m_SightPtr[0])->GetFrameWorldMat(GunFrame::Eyepos).yvec(),
+							vec,
+							m_GunChangePer);
+					}
 				}
 				return Pos;
 			}

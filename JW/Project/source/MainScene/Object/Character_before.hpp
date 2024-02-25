@@ -136,7 +136,7 @@ namespace FPS_n2 {
 					tmp2 + 0.00006f * sin(this->m_HeartRateRad * 3) * powf(this->m_HeartRate / HeartRateMin, 3.f),
 					0.f
 				);
-				return tmpvec * tmp3;
+				return tmpvec * tmp3 * (60.f / FPS);
 			}
 			const auto		GetMousePer(void) const noexcept { return (0.75f + sin(this->m_HeartRateRad * 3)*0.25f)*(1.f - this->m_Stamina / StaminaMax); }
 		public:

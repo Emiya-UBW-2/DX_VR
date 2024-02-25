@@ -62,16 +62,16 @@ namespace FPS_n2 {
 						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), TRUE);
 				}
 				void			DrawGaugeCircleLeft(int xp1, int yp1,
-													COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
-													GraphHandle* CircleObj, float deg) {
+													COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
+													GraphHandle* CircleObj, float deg, int Add) {
 					//return;
 					auto* DrawParts = DXDraw::Instance();
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, (float)this->m_Now / (float)this->m_Max);
 					COLOR_U8 ColorAddSub = (this->m_Buffer > this->m_Now) ? ColorSub : ColorAdd;
 					float per = std::clamp((float)this->m_Now / this->m_Max, 0.f, 1.f);
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
-
-					SetDrawBlendMode(DX_BLENDMODE_ADD, 32);//GetColor(Color.r, Color.g, Color.b)
+					SetDrawBlendMode(DX_BLENDMODE_ADD, Add);
+					SetDrawBright(ColorBase.r, ColorBase.g, ColorBase.b);
 					DrawCircleGauge(xp1 + y_r(256), yp1,
 									50.0 + ((50.0 - 15.0*2.0)*1.0) + 15.0 + deg,
 									CircleObj->get(),
@@ -79,9 +79,9 @@ namespace FPS_n2 {
 									((double)(DrawParts->m_DispYSize) / 1080.0));
 					SetDrawBright(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
 					DrawCircleGauge(xp1 + y_r(256), yp1,
-									50.0 + ((50.0 - 15.0*2.0)*(double)std::min(per, perbuf)) + 15.0 + deg,
-									CircleObj->get(),
 									50.0 + ((50.0 - 15.0*2.0)*(double)std::max(per, perbuf)) + 15.0 + deg,
+									CircleObj->get(),
+									50.0 + ((50.0 - 15.0*2.0)*(double)std::min(per, perbuf)) + 15.0 + deg,
 									((double)(DrawParts->m_DispYSize) / 1080.0));
 					SetDrawBright(Color.r, Color.g, Color.b);
 					DrawCircleGauge(xp1 + y_r(256), yp1,
@@ -93,16 +93,16 @@ namespace FPS_n2 {
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
 				void			DrawGaugeCircleRight(int xp1, int yp1,
-													 COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
-													 GraphHandle* CircleObj, float deg) {
+													 COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
+													 GraphHandle* CircleObj, float deg, int Add) {
 					//return;
 					auto* DrawParts = DXDraw::Instance();
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, (float)this->m_Now / (float)this->m_Max);
 					COLOR_U8 ColorAddSub = (this->m_Buffer > this->m_Now) ? ColorSub : ColorAdd;
 					float per = std::clamp((float)this->m_Now / this->m_Max, 0.f, 1.f);
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
-
-					SetDrawBlendMode(DX_BLENDMODE_ADD, 32);//GetColor(Color.r, Color.g, Color.b)
+					SetDrawBlendMode(DX_BLENDMODE_ADD, Add);
+					SetDrawBright(ColorBase.r, ColorBase.g, ColorBase.b);
 					DrawCircleGauge(xp1 - y_r(256), yp1,
 						(50.0 - 15.0*2.0) + 15.0 + deg,
 									CircleObj->get(),
@@ -180,12 +180,12 @@ namespace FPS_n2 {
 				}
 			};
 		private:
-			std::array<GaugeParam, 4 + 3>	m_GaugeParam;
+			std::array<GaugeParam, 4 + 3 + 2>	m_GaugeParam;
 			std::array<int, 23>				intParam{0};
 			std::array<float, 5>			floatParam{0};
 			std::array<std::string, 7>		strParam;
-			std::array<GraphHandle*, 3>		ItemGraphPtr{0};
 			GraphHandle						Gauge_Graph;
+			GraphHandle						Gauge_Aim_Graph;
 			GraphHandle						OIL_Graph;
 
 			int prevScore{0};
@@ -196,24 +196,23 @@ namespace FPS_n2 {
 		public:
 			void			Load(void) noexcept {
 				this->Gauge_Graph = GraphHandle::Load("data/UI/Gauge.png");
+				this->Gauge_Aim_Graph = GraphHandle::Load("data/UI/Gauge_Aim.png");
 				this->OIL_Graph = GraphHandle::Load("data/UI/back.png");
 
 				m_GaugeMask.at(0).Load("data/UI/Gauge_Mod870.png");
 				for (int i = 0; i < 4; i++) {
-					m_GaugeMask.at((size_t)(i + 1)).Load("data/UI/Mag.png");
+					m_GaugeMask.at((size_t)i + 1).Load("data/UI/Mag.png");
 				}
 			}
 			void			Dispose(void) noexcept {
 				this->Gauge_Graph.Dispose();
+				this->Gauge_Aim_Graph.Dispose();
 				this->OIL_Graph.Dispose();
 				for (auto& m : m_GaugeMask) {
 					m.Dispose();
 				}
 			}
 			void			Set(void) noexcept {
-				for (int i = 0; i < 3; i++) {
-					ItemGraphPtr[i] = nullptr;
-				}
 				prevScore = 0;
 				ScoreAdd.clear();
 			}
@@ -303,17 +302,47 @@ namespace FPS_n2 {
 						xp1 = DrawParts->m_DispXSize / 2 + intParam[0] - y_r(300.f*std::cos(rad));
 						yp1 = DrawParts->m_DispYSize / 2 + intParam[1] - y_r(300.f*std::sin(rad)) - y_r(18) / 2;
 						m_GaugeParam[1].DrawGaugeCircleLeft(xp1, yp1,
+															GetColorU8(255, 255, 255, 255),
 															GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(64, 64, 255, 255),
 															GetColorU8(0, 255, 0, 255), GetColorU8(255, 0, 0, 255),
-															&this->Gauge_Graph, deg);
+															&this->Gauge_Graph, deg, 32);
 					}
 					{
 						xp1 = DrawParts->m_DispXSize / 2 + intParam[0] + y_r(300.f*std::cos(rad));
 						yp1 = DrawParts->m_DispYSize / 2 + intParam[1] + y_r(300.f*std::sin(rad)) - y_r(18) / 2;
 						m_GaugeParam[2].DrawGaugeCircleRight(xp1, yp1,
+															 GetColorU8(255, 255, 255, 255),
 															 GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(64, 64, 255, 255),
 															 GetColorU8(0, 255, 0, 255), GetColorU8(255, 0, 0, 255),
-															 &this->Gauge_Graph, deg);
+															 &this->Gauge_Graph, deg, 32);
+					}
+				}
+				//オートエイム
+				{
+					int ID = intParam[4];
+					int Per = (int)(floatParam[2] * 96.f);
+					if (ID > 0 || Per > 0) {
+						float deg = (float)(intParam[2]) / 60.f;
+						float rad = deg2rad(deg);
+						int xp1, yp1;
+						{
+							xp1 = DrawParts->m_DispXSize / 2 + intParam[0] - y_r(300.f*std::cos(rad));
+							yp1 = DrawParts->m_DispYSize / 2 + intParam[1] - y_r(300.f*std::sin(rad)) - y_r(18) / 2;
+							m_GaugeParam[4 + 3].DrawGaugeCircleLeft(xp1, yp1,
+																	GetColorU8(255, 255, 255, 64),
+																	GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255),
+																	GetColorU8(255, 0, 0, 255), GetColorU8(0, 0, 0, 0),
+																	&this->Gauge_Aim_Graph, deg, Per);
+						}
+						{
+							xp1 = DrawParts->m_DispXSize / 2 + intParam[0] + y_r(300.f*std::cos(rad));
+							yp1 = DrawParts->m_DispYSize / 2 + intParam[1] + y_r(300.f*std::sin(rad)) - y_r(18) / 2;
+							m_GaugeParam[4 + 3 + 1].DrawGaugeCircleRight(xp1, yp1,
+																		 GetColorU8(255, 255, 255, 64),
+																		 GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255),
+																		 GetColorU8(255, 0, 0, 255), GetColorU8(0, 0, 0, 0),
+																		 &this->Gauge_Aim_Graph, deg, Per);
+						}
 					}
 				}
 				//リロード表示
@@ -359,7 +388,7 @@ namespace FPS_n2 {
 					int xp1, yp1;
 					xp1 = y_r(1500);
 					yp1 = y_r(940);
-					for (int i = 0; i < 3; i++) {
+					for (size_t i = 0; i < 3; i++) {
 						auto& g = m_GaugeMask.at((size_t)(i + 1));
 						g.SetDraw([&]() {
 							m_GaugeParam[(size_t)(i + 4)].DrawGaugeUp(
@@ -389,7 +418,6 @@ namespace FPS_n2 {
 			void			SetIntParam(int ID, int value) { intParam[ID] = value; }
 			void			SetfloatParam(int ID, float value) { floatParam[ID] = value; }
 			void			SetStrParam(int ID, std::string_view value) { strParam[ID] = value; }
-			void			SetItemGraph(int ID, const GraphHandle* value) { ItemGraphPtr[ID] = (GraphHandle*)value; }
 		};
 	};
 };

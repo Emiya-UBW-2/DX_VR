@@ -47,6 +47,7 @@ namespace FPS_n2 {
 			Sight,
 			MuzzleAdapter,
 			LaserSight,
+			EyeOffsetPos,
 			Max,
 		};
 		static const char* GunFrameName[(int)GunFrame::Max] = {
@@ -74,6 +75,7 @@ namespace FPS_n2 {
 			"Sight",
 			"MuzzleAdapter",
 			"LaserSight",
+			"EyeOffsetPos",
 		};
 		enum class SHOTTYPE {
 			BOLT,

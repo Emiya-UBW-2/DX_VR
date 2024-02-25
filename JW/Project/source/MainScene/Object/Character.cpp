@@ -988,13 +988,58 @@ namespace FPS_n2 {
 					yVect0 = MATRIX_ref::Vtrans(yVect0, MATRIX_ref::RotAxis(zVect0, GetGunRadAdd() - this->m_LeanRad));
 					//エイム先
 					GunSwingControl::UpdateGunSwing(KeyControl::GetRad());
+
+					{
+						auto prev = m_AutoAimTimer;
+						m_AutoAimTimer = std::max(m_AutoAimTimer - 1.f / FPS, 0.f);
+						if (prev > 0.f && m_AutoAimTimer == 0.f) {
+							m_AutoAim = -1;
+						}
+						if (m_AutoAim != -1) {
+							auto* PlayerMngr = PlayerManager::Instance();
+							auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(m_AutoAim).GetChara();
+							if (Chara->GetHP() <= 0) {
+								m_AutoAim = -1;
+							}
+						}
+
+						Easing(&m_AutoAimOn, IsAutoAimActive() ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+					}
 					if (LifeControl::IsAlive()) {
 						auto tmp_gunrat = MATRIX_ref::RotVec2(VECTOR_ref::front(), zVect0);
+
+						//オートエイム
+						if (GetIsADS() && IsAutoAimActive() && m_IsMainGame) {
+							VECTOR_ref BasePos = GetGunPtrNow()->GetFrameWorldMat(GunFrame::Muzzle).pos();
+
+							auto* PlayerMngr = PlayerManager::Instance();
+							for (int i = 0; i < Player_num; i++) {
+								if (i == this->m_MyID) { continue; }
+								auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
+								if (Chara->GetHP() <= 0) { continue; }
+								if (!Chara->CanLookTarget) { continue; }
+								VECTOR_ref Vec = (Chara->GetFrameWorldMat(CharaFrame::Head).pos() - BasePos);
+								if (Vec.Length() >= (Scale_Rate*7.f)) { continue; }
+								if (GetEyeVector().dot(Vec.Norm()) < cos(deg2rad(15))) { continue; }
+
+								m_AutoAimTimer = 1.f;
+								m_AutoAim = i;
+								break;
+							}
+
+							if (m_AutoAim != -1) {
+								auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(m_AutoAim).GetChara();
+								VECTOR_ref Vec = (Chara->GetFrameWorldMat(CharaFrame::Head).pos() - BasePos);
+								tmp_gunrat = MATRIX_ref::RotVec2(GetEyeVector(), Vec.Norm()) * tmp_gunrat;
+
+							}
+						}
+
+
 						tmp_gunrat *= MATRIX_ref::RotVec2(tmp_gunrat.yvec(), yVect0);
 						tmp_gunrat *= GunSwingControl::GetGunSwingMat() * GetCharaDir();
-						
-						VECTOR_ref vec = Lerp(GetGunPtrNow()->GetMatrix().yvec(), GetGunPtrNow()->GetEyeYVec(), this->m_ADSPer);
 
+						VECTOR_ref vec = Lerp(GetGunPtrNow()->GetMatrix().yvec(), GetGunPtrNow()->GetEyeYVec(), this->m_ADSPer);
 						tmp_gunrat *= MATRIX_ref::RotVec2(vec, GetGunPtrNow()->GetMatrix().yvec());
 
 						tmp_gunrat *= MATRIX_ref::Mtrans(GetFrameWorldMat(CharaFrame::Head).pos() + Post0);
@@ -1263,7 +1308,7 @@ namespace FPS_n2 {
 					GetGunPtrNow()->SetGunMatrix(tmp_gunrat);
 				}
 			}
-			auto& GunPtr = this->m_Gun_Ptr[(size_t)(1 - m_GunSelect)];
+			auto& GunPtr = this->m_Gun_Ptr[(size_t)(1 - (size_t)m_GunSelect)];
 			if (GunPtr) {
 				//仮の画面外指定
 				auto tmp_gunrat = GetFrameWorldMat(CharaFrame::Upper);

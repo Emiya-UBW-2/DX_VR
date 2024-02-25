@@ -444,6 +444,7 @@ namespace FPS_n2 {
 			this->GetParam()->Init();
 		}
 		void AIControl::Execute(InputControl* MyInput) noexcept {
+			//return;
 			//AI
 			this->GetParam()->Execute_Before();
 			switch (this->GetParam()->m_Phase) {
