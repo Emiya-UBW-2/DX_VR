@@ -23,21 +23,19 @@ namespace FPS_n2 {
 			virtual void			Draw_Sub(void) noexcept {}
 			//
 			virtual void			Dispose_Sub(void) noexcept {}
-			virtual bool			CheckLinetoMap_Sub(const VECTOR_ref&, VECTOR_ref*, bool, VECTOR_ref*, MV1_COLL_RESULT_POLY*) { return false; }
+			virtual bool			CheckLinetoMap_Sub(const VECTOR_ref&, VECTOR_ref*, bool, VECTOR_ref*, MV1_COLL_RESULT_POLY*) const noexcept { return false; }
 		public://
 			const auto&		GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
-			const auto		CheckLinetoMap(const VECTOR_ref& StartPos, VECTOR_ref* EndPos, bool isNearest, VECTOR_ref* Normal = nullptr, MV1_COLL_RESULT_POLY* Ret = nullptr) {
+			const auto		CheckLinetoMap(const VECTOR_ref& StartPos, VECTOR_ref* EndPos, bool isNearest, VECTOR_ref* Normal = nullptr, MV1_COLL_RESULT_POLY* Ret = nullptr) const noexcept {
 				bool isHit = false;
-				{
+				if (this->m_ObjGroundCol.IsActive()) {
 					auto col_p = this->m_ObjGroundCol.CollCheck_Line(StartPos, *EndPos);
 					if (col_p.HitFlag == TRUE) {
 						isHit = true;
+						*EndPos = col_p.HitPosition;
 						if (Ret) { *Ret = col_p; }
-						if (isNearest) {
-							*EndPos = col_p.HitPosition;
-							if (Normal) { *Normal = col_p.Normal; }
-						}
-						else {
+						if (Normal) { *Normal = col_p.Normal; }
+						if (!isNearest) {
 							return isHit;
 						}
 					}
@@ -137,8 +135,9 @@ namespace FPS_n2 {
 		public://
 			const auto&		GetNearestLight(int No) noexcept { return this->m_BuildControl.GetNearestLight(No); }
 
-			const auto&		GetDrumControl(void) noexcept { return this->m_BuildControl.GetDrumControl(); }
 			const auto&		GetBuildData(void) noexcept { return this->m_BuildControl.GetBuildDatas(); }
+			const auto&		GetDrumControl(void) noexcept { return this->m_BuildControl.GetDrumControl(); }
+
 			const auto&		GetMapGraph(void) noexcept { return this->m_BuildControl.GetMapGraph(); }
 			const auto&		GetMapGraphXSize(void) noexcept { return this->m_BuildControl.GetMapGraphXSize(); }
 			const auto&		GetMapGraphYSize(void) noexcept { return this->m_BuildControl.GetMapGraphYSize(); }
@@ -175,29 +174,29 @@ namespace FPS_n2 {
 				this->m_BuildControl.Dispose();
 			}
 
-			bool			CheckLinetoMap_Sub(const VECTOR_ref& StartPos, VECTOR_ref* EndPos, bool isNearest, VECTOR_ref* Normal, MV1_COLL_RESULT_POLY* Ret) override {
+			bool			CheckLinetoMap_Sub(const VECTOR_ref& StartPos, VECTOR_ref* EndPos, bool isNearest, VECTOR_ref* Normal, MV1_COLL_RESULT_POLY* Ret) const noexcept override {
 				bool isHit = false;
-				for (auto& bu : this->GetBuildData()) {
+				for (const auto& bu : this->m_BuildControl.GetBuildDatas()) {
 					if (bu.GetMeshSel() < 0) { continue; }
-					if (GetMinLenSegmentToPoint(StartPos, *EndPos, bu.GetMatrix().pos()) >= 25.f*Scale_Rate) { continue; }
+					if (GetMinLenSegmentToPoint(StartPos, *EndPos, bu.GetMatrix().pos()) >= 5.f*Scale_Rate) { continue; }
 					auto col_p = bu.GetColLine(StartPos, *EndPos);
 					if (col_p.HitFlag == TRUE) {
 						isHit = true;
-						if (Ret) { *Ret = col_p; }
 						*EndPos = col_p.HitPosition;
+						if (Ret) { *Ret = col_p; }
 						if (Normal) { *Normal = col_p.Normal; }
 						if (!isNearest) {
 							return isHit;
 						}
 					}
 				}
-				for (const auto& C : this->GetDrumControl().GetDrum()) {
-					if (GetMinLenSegmentToPoint(StartPos, *EndPos, C.m_Pos) >= 2.f*Scale_Rate) { continue; }
+				for (const auto& C : this->m_BuildControl.GetDrumControl().GetDrum()) {
+					if (GetMinLenSegmentToPoint(StartPos, *EndPos, C.m_Pos) >= 3.f*Scale_Rate) { continue; }
 					auto col_p = C.m_Col.CollCheck_Line(StartPos, *EndPos);
 					if (col_p.HitFlag == TRUE) {
 						isHit = true;
-						if (Ret) { *Ret = col_p; }
 						*EndPos = col_p.HitPosition;
+						if (Ret) { *Ret = col_p; }
 						if (Normal) { *Normal = col_p.Normal; }
 						if (!isNearest) {
 							return isHit;

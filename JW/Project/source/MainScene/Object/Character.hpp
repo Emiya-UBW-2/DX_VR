@@ -52,11 +52,14 @@ namespace FPS_n2 {
 			ArmMovePerClass										m_MagArm;
 			float												m_MoveEyePosTimer{0.f};
 			VECTOR_ref											m_MoveEyePos;
+			float												m_StuckGunTimer{0.f};
 			bool												m_IsStuckGun{false};
 			float												m_ADSPer{0.f};
 			float												m_AmmoHandR{0.f};
 			float												m_AmmoHand{0.f};
 			//銃
+			int													m_ReadyAnimPhase{0};
+			float												m_ReadyAnim{-1.f};
 			int													m_GunSelect{0};
 			std::array<std::shared_ptr<GunClass>, 2>			m_Gun_Ptr{nullptr , nullptr};			//銃
 			bool												m_IsChanging{false};
@@ -158,6 +161,8 @@ namespace FPS_n2 {
 			const auto		GetFrameLocalMat(CharaFrame frame) const noexcept { return GetFrameLocalMatrix(GetFrame(frame)); }
 			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetFrameWorldMatrix(GetFrame(frame)); }
 			const auto		GetParentFrameWorldMat(CharaFrame frame) const noexcept { return GetParentFrameWorldMatrix(GetFrame(frame)); }
+			const auto		CanWearArmer() const noexcept { return this->m_CanWearArmer && (LifeControl::GetAP() < LifeControl::GetAPMax()); }
+			
 		public://セッター(ラッパー)
 			void			ResetFrameLocalMat(CharaFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }
 			void			SetAnimLoop(CharaAnimeID ID, float speed) { ObjectBaseClass::SetAnimLoop((int)ID, speed); }
@@ -212,24 +217,17 @@ namespace FPS_n2 {
 			}
 			const auto		GetIsCheck() const noexcept {
 				bool IsCheck = GetGunPtrNow()->GetIsMagFull();
-				if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
-					IsCheck = (GetGunPtrNow()->GetAmmoNum() >= MagStockControl::GetNextMag().AmmoNum);
+				if (m_GunSelect == 0 && GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
+					IsCheck = (GetGunPtrNow()->GetAmmoNum() >= MagStockControl::GetMag(0));
 				}
 				return IsCheck;
 			}
-			const auto		IsSightActive() const noexcept {
-				return GetGunPtrNow()->IsSightActive();
-			}
-			const auto		IsSightPtrActive() const noexcept {
-				return GetGunPtrNow()->IsSightPtrActive();
-			}
-			const auto		IsAutoAimActive() const noexcept {
-				return GetGunPtrNow()->IsAutoAimActive();
-			}
+			const auto		GetAmmoLoading() const noexcept { return GetGunPtrNow()->IsAmmoLoading(); }
+			const auto		IsSightActive() const noexcept { return GetGunPtrNow()->IsSightActive(); }
+			const auto		IsSightPtrActive() const noexcept { return GetGunPtrNow()->IsSightPtrActive(); }
+			const auto		IsAutoAimActive() const noexcept { return GetGunPtrNow()->IsAutoAimActive(); }
 
-			const auto&		GetSightReitcleGraphPtr() const noexcept {
-				return GetGunPtrNow()->GetSightPtr()->GetModData()->GetReitcleGraph();
-			}
+			const auto&		GetSightReitcleGraphPtr() const noexcept { return GetGunPtrNow()->GetSightPtr()->GetModData()->GetReitcleGraph(); }
 			const auto		GetSightZoomSize() const noexcept {
 				if (!IsSightPtrActive()) { return 1.f; }
 				return GetGunPtrNow()->GetSightPtr()->GetModData()->GetZoomSize();
@@ -242,11 +240,15 @@ namespace FPS_n2 {
 				LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, value, 0);
 				m_ArmBreak = false;
 			}
-			bool			GetArmer() noexcept;
+			bool			GetArmer() noexcept {
+				bool prev = this->m_CanWearArmer;
+				this->m_CanWearArmer = true;
+				return this->m_CanWearArmer != prev;
+			}
 			const bool		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept;
 			const bool		CheckMeleeHit(PlayerID MeleeID, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept;
 		public:
-			void			ValueSet(float pxRad, float pyRad, const VECTOR_ref& pPos, PlayerID pID) noexcept;
+			void			ValueSet(float pxRad, float pyRad, const VECTOR_ref& pPos, PlayerID pID, int GunSel) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady) noexcept;
 		private: //更新関連
 			void			ExecuteInput(void) noexcept;			//操作																	//0.01ms

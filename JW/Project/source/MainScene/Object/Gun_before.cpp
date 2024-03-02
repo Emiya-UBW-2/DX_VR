@@ -92,7 +92,7 @@ namespace FPS_n2 {
 			}
 			return false;
 		}
-		const bool  ModSlotControl::HasFrameBySlot(GunFrame frame) const noexcept {
+		const bool ModSlotControl::HasFrameBySlot(GunFrame frame) const noexcept {
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
 					return true;
@@ -209,8 +209,7 @@ namespace FPS_n2 {
 		void		ModSlotControl::RemoveMod(GunSlot Slot) noexcept {
 			if (this->m_Parts_Ptr[(int)Slot]) {
 				auto* ObjMngr = ObjectManager::Instance();
-				auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[(int)Slot]);
-				Obj->Dispose();
+				this->m_Parts_Ptr[(int)Slot]->Dispose();
 				ObjMngr->DelObj(&this->m_Parts_Ptr[(int)Slot]);
 				this->m_Parts_Ptr[(int)Slot].reset();
 			}

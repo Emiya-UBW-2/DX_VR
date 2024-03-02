@@ -104,14 +104,14 @@ namespace FPS_n2 {
 			//
 			xp1 = y_r(64 + 600);
 			yp1 = y_r(64 + 48 * 2);
-			DrawFetteString(xp1, yp1, 1.33f, false, "JW-ProtoType");
+			DrawFetteString(xp1, yp1, 1.33f, false, FontHandle::FontXCenter::RIGHT, "JW-ProtoType");
 			//
 			xp1 = y_r(1920 - 256 - 54 * 3 - (int)(GameStart[0] * 100.f));
 			yp1 = y_r(1080 - 108 - 108 * 3 + (int)SelYadd[0]);
 			{
 				auto per = std::clamp((1.f - GameStart[0]), 0.f, 1.f);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
-				DrawFetteString(xp1, yp1, 1.f, (select == 0), "Custom");
+				DrawFetteString(xp1, yp1, 1.f, (select == 0), FontHandle::FontXCenter::RIGHT, "Custom");
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 			//
@@ -120,7 +120,7 @@ namespace FPS_n2 {
 			{
 				auto per = std::clamp((1.f - GameStart[1]), 0.f, 1.f);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
-				DrawFetteString(xp1, yp1, 1.f, (select == 1), "Shoot Range");
+				DrawFetteString(xp1, yp1, 1.f, (select == 1), FontHandle::FontXCenter::RIGHT, "Shoot Range");
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 			//
@@ -129,7 +129,7 @@ namespace FPS_n2 {
 			{
 				auto per = std::clamp((1.f - GameStart[2]), 0.f, 1.f);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
-				DrawFetteString(xp1, yp1, 1.f, (select == 2), "Go Defense");
+				DrawFetteString(xp1, yp1, 1.f, (select == 2), FontHandle::FontXCenter::RIGHT, "Go Defense");
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 			//
@@ -138,7 +138,7 @@ namespace FPS_n2 {
 			{
 				auto per = std::clamp((1.f - GameStart[3]), 0.f, 1.f);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
-				DrawFetteString(xp1, yp1, 1.f, (select == 3), "Option");
+				DrawFetteString(xp1, yp1, 1.f, (select == 3), FontHandle::FontXCenter::RIGHT, "Option");
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 			//

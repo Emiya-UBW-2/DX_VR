@@ -54,11 +54,7 @@ namespace FPS_n2 {
 			LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
 			//LoadGun("PCC_4", GetMyPlayerID(), false, 0);
 
-			std::string ULTName = "";
-			ULTName = "PCC_4";
-			//ULTName = "AKS-74";
-			//ULTName = "M16-4";
-			//ULTName = "Mod870";
+			std::string ULTName = ULT_GUNName[(int)GunsModify::GetULTSelect()];
 
 			LoadGun(ULTName.c_str(), GetMyPlayerID(), false, 1);
 			//BGをオブジェに登録
@@ -73,6 +69,15 @@ namespace FPS_n2 {
 				float rad_t = 0.f;
 				if (index == 0) {
 					pos_t = VECTOR_ref::vget(0.f, 0.f, 0.f);
+					VECTOR_ref BGPos_XZ;
+					for (auto& C : this->m_BackGround->GetBuildData()) {
+						if (C.GetMeshSel() < 0) { continue; }
+						BGPos_XZ = C.GetMatrix().pos(); BGPos_XZ.y(0.f);
+						if (BGPos_XZ.Length() < 5.f*Scale_Rate) {
+							pos_t = BGPos_XZ;
+							break;
+						}
+					}
 					rad_t = deg2rad(GetRandf(180.f));
 				}
 				else {
@@ -90,9 +95,12 @@ namespace FPS_n2 {
 					rad_t = deg2rad(GetRandf(180.f));
 				}
 
-				auto HitResult = this->m_BackGround->GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
-				if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
-				c->ValueSet(deg2rad(0.f), rad_t, pos_t, (PlayerID)index);
+				VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 10.f*Scale_Rate;
+				if (this->m_BackGround->CheckLinetoMap(pos_t + VECTOR_ref::up() * -10.f*Scale_Rate, &EndPos, false)) {
+					pos_t = EndPos;
+				}
+
+				c->ValueSet(deg2rad(0.f), rad_t, pos_t, (PlayerID)index, (index == 0) ? 1 : 0);
 				if (index == 0) {
 					c->SetCharaType(CharaTypeID::Team);
 				}
@@ -104,6 +112,8 @@ namespace FPS_n2 {
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(65), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(VECTOR_ref::vget(0, 15, -20), VECTOR_ref::vget(0, 15, 0), VECTOR_ref::vget(0, 1, 0));
+			m_DeathCamYAdd = 0.f;
+			m_DeathPer = 0.f;
 			//サウンド
 			SetSE();
 			//UI
@@ -156,8 +166,7 @@ namespace FPS_n2 {
 
 						KeyGuide->AddGuide(PADS::RELOAD, "再装填");
 
-						//KeyGuide->AddGuide(PADS::THROW, "弾込");
-						//KeyGuide->AddGuide(PADS::CHECK, "アーマー着用");
+						KeyGuide->AddGuide(PADS::CHECK, "装備確認");
 
 						//KeyGuide->AddGuide(PADS::INTERACT, "取得");
 						KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
@@ -182,9 +191,6 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* OptionParts = OPTION::Instance();
-#ifdef DEBUG
-			//auto* DebugParts = DebugClass::Instance();					//デバッグ
-#endif // DEBUG
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
@@ -198,14 +204,6 @@ namespace FPS_n2 {
 				if (m_ReadyTimer == 0.f) {
 					m_Timer = std::max(m_Timer - 1.f / FPS, 0.f);
 				}
-			}
-			{
-				/*
-				m_GameEnd |= (!(Chara->IsAlive() && (Timer <= TotalTime)));
-				if (m_GameEnd) {
-					EndTimer = std::max(EndTimer - 1.f / FPS, 0.f);
-				}
-				//*/
 			}
 			//Input,AI
 			{
@@ -242,7 +240,7 @@ namespace FPS_n2 {
 				MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press() && !DXDraw::Instance()->IsPause());
 				MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press() && !DXDraw::Instance()->IsPause());
 				MyInput.SetInputPADS(PADS::ULT, Pad->GetKey(PADS::ULT).press());
-				MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
+				//MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
 				MyInput.SetInputPADS(PADS::CHECK, Pad->GetKey(PADS::CHECK).press());
 				MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 				MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
@@ -400,9 +398,11 @@ namespace FPS_n2 {
 								if (Len < 1.f*Scale_Rate) {
 									switch (a->GetItemType()) {
 										case ItemType::AMMO:
-											tgt->AddAmmoStock(2 + GetRand(8));
-											isHit = true;
-											SE->Get((int)SoundEnum::GetAmmo).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
+											if (!tgt->GetAmmoLoading()) {
+												tgt->AddAmmoStock(2 + GetRand(8));
+												isHit = true;
+												SE->Get((int)SoundEnum::GetAmmo).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
+											}
 											break;
 										case ItemType::ARMER:
 											if (tgt->GetArmer()) {
@@ -453,19 +453,48 @@ namespace FPS_n2 {
 			{
 				{
 					//FPSカメラ
-					VECTOR_ref CamPos = Chara->GetEyePosition() + DrawParts->GetCamShake();
-					DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeVector(), Chara->GetEyeVecY());
+					if (Chara->IsAlive()) {
+						VECTOR_ref CamPos = Chara->GetEyePosition() + DrawParts->GetCamShake();
+						DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeVector(), Chara->GetEyeVecY());
+						m_DeathCamYAdd = -0.2f;
+					}
+					else {
+						VECTOR_ref CamPos = DrawParts->SetMainCamera().GetCamPos();
+						VECTOR_ref CamVec = DrawParts->SetMainCamera().GetCamVec() - CamPos;
+						VECTOR_ref CamUp = DrawParts->SetMainCamera().GetCamUp();
+						CamPos.yadd(m_DeathCamYAdd);
+						if (std::abs(m_DeathCamYAdd) > 0.01f) {
+							m_DeathCamYAdd += (M_GR / (FPS * FPS))/2.f;
+						}
+						else {
+							m_DeathCamYAdd = 0.f;
+						}
+						if (CamPos.y() < 0.1f) {
+							CamPos.y(0.1f);
+							m_DeathCamYAdd *= -0.2f;
+						}
+						float y = CamVec.y();
+						Easing(&y, 0.9f, 0.95f, EasingType::OutExpo);
+						CamVec.y(y);
+
+						float x = CamUp.y();
+						Easing(&y, 0.2f, 0.95f, EasingType::OutExpo);
+						CamUp.x(x);
+						DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + CamVec, CamUp);
+
+						Easing(&m_DeathPer, 1.f, 0.975f, EasingType::OutExpo);
+					}
 					//info
 					auto fov_t = DrawParts->GetMainCamera().GetCamFov();
 					auto near_t = DrawParts->GetMainCamera().GetCamNear();
 					auto far_t = DrawParts->GetMainCamera().GetCamFar();
 					if (Chara->GetIsADS()) {
 						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
-						Easing(&far_t, Scale_Rate * 40.f, 0.5f, EasingType::OutExpo);
+						Easing(&far_t, Scale_Rate * 50.f, 0.5f, EasingType::OutExpo);
 					}
 					else {
 						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
-						Easing(&far_t, Scale_Rate * 40.f, 0.5f, EasingType::OutExpo);
+						Easing(&far_t, Scale_Rate * 50.f, 0.5f, EasingType::OutExpo);
 					}
 					//fov
 					{
@@ -505,12 +534,17 @@ namespace FPS_n2 {
 				bool HPLow = Chara->GetHP() < (Chara->GetHPMax() * 3 / 10);
 				Easing(&Min,
 					(HPLow) ? Lerp(20.f, 35.f, LenPer) : Lerp(0.f, 25.f, LenPer),
-					   0.95f, EasingType::OutExpo);
+					  0.95f, EasingType::OutExpo);
 				Easing(&Gamma,
 					(HPLow) ? Lerp(1.15f, 1.35f, LenPer) : Lerp(1.f, 1.15f, LenPer),
-					   0.95f, EasingType::OutExpo);
+					  0.95f, EasingType::OutExpo);
 
 				PostPassEffect::Instance()->SetLevelFilter((int)Min, (HPLow) ? 128 : 192, Gamma);
+
+				Easing(&AberrationPower,
+					(HPLow) ? (10.f + GetRandf(30.f)) : 1.f,
+					  0.95f, EasingType::OutExpo);
+				DrawParts->SetAberrationPower(AberrationPower);
 			}
 			//
 			this->m_BackGround->Execute();
@@ -608,9 +642,6 @@ namespace FPS_n2 {
 				//mag
 				int mags = 0;
 				for (const auto& M : Chara->GetMagDatas()) {
-					if (Chara->GetNowMagID() == (int)(&M - &Chara->GetMagDatas().front())) {
-						continue;
-					}
 					this->m_UIclass.SetGaugeParam(4 + mags, M.AmmoNum, M.AmmoAll);
 					mags++;
 				}
@@ -628,7 +659,7 @@ namespace FPS_n2 {
 #ifdef DEBUG
 			DebugParts->SetPoint("update end");
 #endif // DEBUG
-			if (m_MainLoopPauseControl.GetIsRetireSelected()) {
+			if (m_MainLoopPauseControl.GetIsRetireSelected() || (m_DeathPer >= 0.99f)) {
 				return false;
 			}
 			return true;
@@ -754,8 +785,17 @@ namespace FPS_n2 {
 			}
 		}
 		void			MAINLOOP::DrawUI_In_Sub(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
+			if (m_DeathPer > 0.f) {
+				auto per = m_DeathPer;
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f - 255.f*(1.f - per * 1.3f)), 0, 255));
+
+				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
+
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+			}
 			//ポーズ
-			if (DXDraw::Instance()->IsPause()) {
+			if (DrawParts->IsPause()) {
 				m_MainLoopPauseControl.Draw();
 			}
 			else {
@@ -814,24 +854,47 @@ namespace FPS_n2 {
 				for (int index = 0; index < Chara_num; index++) {
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 					if (index == 0) { continue; }
+					if (c->GetHP() <= 0) { continue; }
 					if (!c->CanLookTarget) { continue; }
-					unsigned int Color = (c->GetHP() > 0) ? GetColor(255, 0, 0) : GetColor(128, 0, 0);
 					int xp2 = xp1 + (int)(15.f + c->GetMove().pos.x());
 					int yp2 = yp1 - (int)(15.f + c->GetMove().pos.z());
 					DrawCircle(
 						xp + (int)(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
 						yp + (int)(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
-						5, Color, TRUE);
+						5, GetColor(255, 0, 0), TRUE);
+				}
+				//アイテム入手
+				{
+					auto* ObjMngr = ObjectManager::Instance();
+					int loop = 0;
+					while (true) {
+						auto ammo = ObjMngr->GetObj(ObjType::ItemObj, loop);
+						if (ammo != nullptr) {
+							auto& a = (std::shared_ptr<ItemObjClass>&)(*ammo);
+							if (a->IsActive()) {
+								int xp2 = xp1 + (int)(15.f + a->GetMove().pos.x());
+								int yp2 = yp1 - (int)(15.f + a->GetMove().pos.z());
+								DrawCircle(
+									xp + (int)(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
+									yp + (int)(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
+									2, GetColor(255, 255, 0), TRUE);
+
+							}
+						}
+						else {
+							break;
+						}
+						loop++;
+					}
 				}
 				{
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
-					unsigned int Color = (c->GetHP() > 0) ? GetColor(0, 255, 0) : GetColor(0, 128, 0);
 					int xp2 = xp1 + (int)(15.f + c->GetMove().pos.x());
 					int yp2 = yp1 - (int)(15.f + c->GetMove().pos.z());
 					DrawCircle(
 						xp + (int)(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
 						yp + (int)(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
-						5, Color, TRUE);
+						5, GetColor(0, 255, 0), TRUE);
 				}
 			}
 		}
@@ -997,6 +1060,7 @@ namespace FPS_n2 {
 			SE->Add((int)SoundEnum::MagFall, 6, "data/Sound/SE/gun/ModFall.wav", false);
 			SE->Add((int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
 			SE->Add((int)SoundEnum::AmmoLoad, 1, "data/Sound/SE/gun/ammoload.wav", false);
+			SE->Add((int)SoundEnum::Tinnitus, 2, "data/Sound/SE/Tinnitus.wav");
 			for (int i = 0; i < 6; i++) {
 				SE->Add((int)SoundEnum::Cocking1_0 + i, 4, "data/Sound/SE/gun/autoM870/" + std::to_string(i) + ".wav");
 				SE->Add((int)SoundEnum::Cocking2_0 + i, 4, "data/Sound/SE/gun/autoM16/" + std::to_string(i) + ".wav");
@@ -1055,6 +1119,7 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::StandUp);
 			SE->Delete((int)SoundEnum::Trigger);
 			SE->Delete((int)SoundEnum::AmmoLoad);
+			SE->Delete((int)SoundEnum::Tinnitus);
 			for (int i = 0; i < 6; i++) {
 				SE->Delete((int)SoundEnum::Cocking1_0 + i);
 				SE->Delete((int)SoundEnum::Cocking2_0 + i);
@@ -1129,12 +1194,11 @@ namespace FPS_n2 {
 			Path += "/";
 			ObjMngr->LoadObjectModel((*Ptr).get(), Path.c_str());
 			MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
-			auto& Gun = ((std::shared_ptr<GunClass>&)(*Ptr));
 			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID).GetChara();
-			c->SetGunPtr(Sel, Gun);
+			c->SetGunPtr(Sel, ((std::shared_ptr<GunClass>&)(*Ptr)));
 			(*Ptr)->Init();
-			GunsModify::CreateSelData(Gun, IsPreset);
-			Gun->Init_Gun();
+			GunsModify::CreateSelData(((std::shared_ptr<GunClass>&)(*Ptr)), IsPreset);
+			c->GetGunPtr(Sel)->Init_Gun();
 		}
 	};
 };

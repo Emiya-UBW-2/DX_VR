@@ -20,7 +20,7 @@ namespace FPS_n2 {
 		private:
 			std::shared_ptr<AmmoDataClass>			m_ChamberAmmoData{nullptr};		//
 			GunAnimeID								m_ShotPhase{GunAnimeID::Base};	//
-			bool									m_ReloadCancel{false};			//
+			bool									m_Cancel{false};			//
 			bool									m_ShotSwitch{false};				//
 			int										m_boltSoundSequence{-1};			//サウンド
 			bool									m_IsChamberOn{false};				//チャンバーに弾を込めるか
@@ -66,7 +66,7 @@ namespace FPS_n2 {
 			float			GetTimePer(CharaGunAnimeID ID) { return (GetAllTime(ID) > 0.f) ? (GetGunAnimFrame(ID) / GetAllTime(ID)) : 1.f; }
 		public:
 			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept;
-			void			SetReloadCancel() noexcept { m_ReloadCancel = true; }
+			void			SetCancel() noexcept { m_Cancel = true; }
 		public://ゲッター
 			const auto& GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
 			const bool	HaveFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first != -1; }
@@ -151,9 +151,7 @@ namespace FPS_n2 {
 				}
 				m_GunChangePer = 0.f;
 			}
-			const bool	IsAutoAimActive() const noexcept {
-				return ((m_GunSightSel == 1) && !this->m_SightPtr.at(1));
-			}
+			const bool	IsAutoAimActive() const noexcept { return ((m_GunSightSel == 1) && !this->m_SightPtr.at(1)); }
 
 			const auto	GetInChamber(void) const noexcept { return this->m_ChamberAmmoData != nullptr; }
 			const auto	GetAmmoAll(void) const noexcept {
@@ -210,11 +208,13 @@ namespace FPS_n2 {
 					else {
 						Pos = (*m_SightPtr[0])->GetFrameWorldMat(GunFrame::Eyepos).pos();
 					}
-					if (m_GunSightSel == 0) {
-						Pos = Lerp(GetFrameWorldMat(GunFrame::EyeOffsetPos).pos(), Pos, m_GunChangePer);
-					}
-					else {
-						Pos = Lerp(Pos, GetFrameWorldMat(GunFrame::EyeOffsetPos).pos(), m_GunChangePer);
+					if (HasFrame(GunFrame::EyeOffsetPos)) {
+						if (m_GunSightSel == 0) {
+							Pos = Lerp(GetFrameWorldMat(GunFrame::EyeOffsetPos).pos(), Pos, m_GunChangePer);
+						}
+						else {
+							Pos = Lerp(Pos, GetFrameWorldMat(GunFrame::EyeOffsetPos).pos(), m_GunChangePer);
+						}
 					}
 				}
 				return Pos;
@@ -231,22 +231,23 @@ namespace FPS_n2 {
 						m_GunChangePer);
 				}
 				else {
-					VECTOR_ref vec = GetFrameWorldMat(GunFrame::EyeOffsetPos).yvec();
-					if (GetChildFrameNum(GunFrame::EyeOffsetPos) > 0) {
-						vec = (GetChildFrameWorldMat(GunFrame::EyeOffsetPos, 0).pos() - GetFrameWorldMat(GunFrame::EyeOffsetPos).pos()).Norm();
-					}
-
 					if (!this->m_SightPtr.at(0)) {
 						Pos = GetFrameWorldMat(GunFrame::Eyepos).yvec();
 					}
 					else {
 						Pos = (*m_SightPtr[0])->GetFrameWorldMat(GunFrame::Eyepos).yvec();
 					}
-					if (m_GunSightSel == 0) {
-						Pos = Lerp(vec, Pos, m_GunChangePer);
-					}
-					else {
-						Pos = Lerp(Pos, vec, m_GunChangePer);
+					if (HasFrame(GunFrame::EyeOffsetPos)) {
+						VECTOR_ref vec = GetFrameWorldMat(GunFrame::EyeOffsetPos).yvec();
+						if (GetChildFrameNum(GunFrame::EyeOffsetPos) > 0) {
+							vec = (GetChildFrameWorldMat(GunFrame::EyeOffsetPos, 0).pos() - GetFrameWorldMat(GunFrame::EyeOffsetPos).pos()).Norm();
+						}
+						if (m_GunSightSel == 0) {
+							Pos = Lerp(vec, Pos, m_GunChangePer);
+						}
+						else {
+							Pos = Lerp(Pos, vec, m_GunChangePer);
+						}
 					}
 				}
 				return Pos;

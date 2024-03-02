@@ -25,8 +25,8 @@ namespace FPS_n2 {
 					int Dir = GetRand(3) % 4;
 					ok |= (1 << Dir);
 					float rad = deg2rad(Dir * 90);
-					int next_x = x + (int)(sin(rad)*2.f);//0 2  0 -2
-					int next_y = y + (int)(cos(rad)*2.f);//2 0 -2  0
+					int next_x = x + (int)(sin(rad)*2.f);//0 2 0 -2
+					int next_y = y + (int)(cos(rad)*2.f);//2 0 -2 0
 					if ((0 <= next_x && next_x < m_Width) && (0 <= next_y && next_y < m_Height)) {
 						if (m_Maze[next_x][next_y] == MAZETYPE::WALL) {
 							m_Maze[(next_x + x) / 2][(next_y + y) / 2] = MAZETYPE::PATH;
@@ -348,9 +348,16 @@ namespace FPS_n2 {
 								) {
 								auto Vec = (b.m_Pos - DrawParts->GetMainCamera().GetCamPos()); Vec.y(0.f);
 								auto Len = Vec.Length();
-								float per = 0.5f*std::clamp((Len - 50.f) / 30.f, 0.f, 1.f);
-								SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
-								DrawBillboard3D(b.m_Pos.get(), 0.5f, 1.f, 2.2f*Scale_Rate, rad + b.m_SlingZrad.GetRad(), Light_Graph.get(), TRUE);
+								auto Min = 4.f*Scale_Rate;
+								auto Max = 20.f*Scale_Rate;
+								float per = 0.5f*std::clamp((Len - Min) / 30.f, 0.f, 1.f);
+								if (Len > Max) {
+									per = 0.5f*std::clamp(1.f - (Len - Max) / 30.f, 0.f, 1.f);
+								}
+								if (per > 1.f / 255.f) {
+									SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
+									DrawBillboard3D(b.m_Pos.get(), 0.5f, 1.f, 2.2f*Scale_Rate, rad + b.m_SlingZrad.GetRad(), Light_Graph.get(), TRUE);
+								}
 							}
 						}
 					}
@@ -388,6 +395,10 @@ namespace FPS_n2 {
 				}
 			}
 			void		Execute(const VECTOR_ref& CamPos) {
+				auto* OptionParts = OPTION::Instance();
+				if (OptionParts->Get_grass_level()==0) {
+					return;
+				}
 				int x = (int)(CamPos.x() / 100.f*2.f);
 				int z = (int)(CamPos.z() / 100.f*2.f);
 				{
@@ -444,9 +455,17 @@ namespace FPS_n2 {
 				}
 			}
 			void		ShadowDraw() {
+				auto* OptionParts = OPTION::Instance();
+				if (OptionParts->Get_grass_level() == 0) {
+					return;
+				}
 				m_Obj.at(Blocks * Blocks / 2).m_Obj.DrawModel();
 			}
 			void		Draw() {
+				auto* OptionParts = OPTION::Instance();
+				if (OptionParts->Get_grass_level() == 0) {
+					return;
+				}
 				for (auto& o : m_Obj) {
 					o.m_Obj.DrawModel();
 				}
@@ -562,7 +581,7 @@ namespace FPS_n2 {
 			return -1;
 		}
 		bool CheckPolyMoveWidth(VECTOR_ref StartPos, int TargetIndex, float Width) const {
-			// ポリゴン同士の連結情報を使用して指定の二つの座標間を直線的に移動できるかどうかをチェックする( 戻り値  true:直線的に移動できる  false:直線的に移動できない )( 幅指定版 )
+			// ポリゴン同士の連結情報を使用して指定の二つの座標間を直線的に移動できるかどうかをチェックする( 戻り値 true:直線的に移動できる false:直線的に移動できない )( 幅指定版 )
 			VECTOR_ref TargetPos = GetBuildDatas().at(TargetIndex).GetMatrix().pos();
 			// 最初に開始座標から目標座標に直線的に移動できるかどうかをチェック
 			if (CheckPolyMove(StartPos, TargetPos) == false) { return false; }
@@ -589,7 +608,7 @@ namespace FPS_n2 {
 			return true;		// ここまできたら指定の幅があっても直線的に移動できるということなので true を返す
 		}
 	private:
-		// ポリゴン同士の連結情報を使用して指定の二つの座標間を直線的に移動できるかどうかをチェックする( 戻り値  true:直線的に移動できる  false:直線的に移動できない )
+		// ポリゴン同士の連結情報を使用して指定の二つの座標間を直線的に移動できるかどうかをチェックする( 戻り値 true:直線的に移動できる false:直線的に移動できない )
 		bool CheckPolyMove(VECTOR_ref StartPos, VECTOR_ref TargetPos) const {
 			int CheckPoly[4];
 			int CheckPolyPrev[4];

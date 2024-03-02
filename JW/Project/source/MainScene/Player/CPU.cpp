@@ -94,12 +94,12 @@ namespace FPS_n2 {
 				}
 				else {
 					// 方向は目標座標
-					return  this->GoalPosition;
+					return this->GoalPosition;
 				}
 			}
 		public:
 			bool Init(VECTOR_ref StartPos, VECTOR_ref GoalPos) {
-				// 指定の２点の経路を探索する( 戻り値  true:経路構築成功  false:経路構築失敗( スタート地点とゴール地点を繋ぐ経路が無かった等 ) )
+				// 指定の２点の経路を探索する( 戻り値 true:経路構築成功 false:経路構築失敗( スタート地点とゴール地点を繋ぐ経路が無かった等 ) )
 				this->GoalPosition = GoalPos;			// ゴール位置を保存
 
 				this->UnitArray.resize(m_BackGround->GetBuildData().size());			// 経路探索用のポリゴン情報を格納するメモリ領域を確保、初期化
@@ -263,16 +263,18 @@ namespace FPS_n2 {
 
 					VECTOR_ref StartPos = TgtPos;
 					VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 1.f*Scale_Rate;
+					if ((StartPos - EndPos).Length() <= 10.f*Scale_Rate) { continue; }
 					if (this->m_BackGround->CheckLinetoMap(StartPos, &EndPos, false)) {
 						break;
 					}
 				}
 
-				auto HitResult = this->m_BackGround->GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -10.f*Scale_Rate, pos_t + VECTOR_ref::up() * 10.f*Scale_Rate);
-				if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
+				VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 10.f*Scale_Rate;
+				if (this->m_BackGround->CheckLinetoMap(pos_t + VECTOR_ref::up() * -10.f*Scale_Rate, &EndPos, false)) {
+					pos_t = EndPos;
+				}
 
-
-				MyChara->ValueSet(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, this->m_MyCharaID);
+				MyChara->ValueSet(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, this->m_MyCharaID, 0);
 				MyChara->Heal(100);
 				this->Reset();
 			}

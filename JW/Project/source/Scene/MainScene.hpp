@@ -35,6 +35,10 @@ namespace FPS_n2 {
 			float											m_Timer{0.f};
 			float											Min = 0.f;
 			float											Gamma = 1.f;
+			float											AberrationPower{1.f};
+
+			float											m_DeathCamYAdd{0.f};
+			float											m_DeathPer{0.f};
 		public:
 			MAINLOOP(void) noexcept {}
 			~MAINLOOP(void) noexcept {}

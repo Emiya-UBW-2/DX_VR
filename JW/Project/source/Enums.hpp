@@ -25,6 +25,22 @@ namespace FPS_n2 {
 			ItemObj,
 			Max,
 		};
+		static const char* ObjTypeName[(int)ObjType::Max] = {
+			"Human",
+			"Ammo",
+			"FallObj",
+			"Armer",
+			"Gun",
+			"Magazine",
+			"Lower",
+			"Upper",
+			"Barrel",
+			"UnderRail",
+			"Sight",
+			"MuzzleAdapter",
+			"MovieObj",
+			"ItemObj",
+		};
 		enum class SoundEnum {
 			RunFoot = (int)SoundEnumCommon::Num,
 			StandUp,
@@ -38,6 +54,7 @@ namespace FPS_n2 {
 			//
 			Trigger,
 			AmmoLoad,
+			Tinnitus,
 			//
 			Cocking1_0,
 			Cocking1_1,
@@ -97,6 +114,20 @@ namespace FPS_n2 {
 			Mine,
 			Team,
 			Enemy,
+		};
+
+		enum class ULT_GUN {
+			PCC_4,
+			AKS_74,
+			Mod870,
+			M16_4,
+			Max,
+		};
+		static const char* ULT_GUNName[(int)ULT_GUN::Max] = {
+			"PCC_4",
+			"AKS-74",
+			"Mod870",
+			"M16-4",
 		};
 	};
 

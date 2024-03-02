@@ -10,11 +10,12 @@ namespace FPS_n2 {
 		//
 		class FallControl {
 		private:
-			std::array<std::shared_ptr<FallObjClass>, 4>	m_Ptr;
-			int												m_Now{0};
+			std::vector<std::shared_ptr<FallObjClass>>	m_Ptr;
+			int											m_Now{0};
 		public:
-			void		Init(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath) {
+			void		Init(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath, int count) {
 				auto* ObjMngr = ObjectManager::Instance();
+				m_Ptr.resize(count);
 				for (auto& c : m_Ptr) {
 					auto* Ptr = ObjMngr->MakeObject(ObjType::FallObj);
 					ObjMngr->LoadObjectModel((*Ptr).get(), pPath.c_str());
@@ -34,6 +35,7 @@ namespace FPS_n2 {
 					ObjMngr->DelObj((SharedObj*)&c);
 					c.reset();
 				}
+				m_Ptr.clear();
 			}
 		};
 		//
@@ -76,9 +78,9 @@ namespace FPS_n2 {
 						this->m_Line[p2].get()) == FALSE
 						) {
 						DrawCapsule3D(this->m_Line[p1].get(), this->m_Line[p2].get(), (0.00762f)*Scale_Rate*1.f*((float)(i - min) / max), 3,
-									  GetColor(192, 128, 128),
-									  GetColor(96, 96, 64),
-									  TRUE);
+									 GetColor(192, 128, 128),
+									 GetColor(96, 96, 64),
+									 TRUE);
 					}
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);

@@ -11,7 +11,10 @@ namespace FPS_n2 {
 		float			m_yRad{0.f};
 		unsigned long long	m_Flags{0};
 	public:
-		void			ResetInput() {
+		void			ResetKeyInput() {
+			this->m_Flags = 0;
+		}
+		void			ResetAllInput() {
 			this->m_AddxRad = 0.f;
 			this->m_AddyRad = 0.f;
 			this->m_xRad = 0.f;
@@ -321,7 +324,7 @@ namespace FPS_n2 {
 
 
 	template <typename... Args>
-	static void DrawFetteString(int xp1, int yp1, float per, bool IsSelect, const std::string& String, Args&&... args) noexcept {
+	static void DrawFetteString(int xp1, int yp1, float per, bool IsSelect, FontHandle::FontXCenter LR, const std::string& String, Args&&... args) noexcept {
 		auto* Fonts = FontPool::Instance();
 		auto Red = GetColor(255, 0, 0);
 		auto Red75 = GetColor(192, 0, 0);
@@ -329,7 +332,7 @@ namespace FPS_n2 {
 		auto Gray75 = GetColor(128, 128, 128);
 		auto Gray = GetColor(64, 64, 64);
 
-		Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r((int)((float)(48 * 3 / 2 * 3 / 4) * per)), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1 + y_r(40.f*per), yp1 + y_r(20.f*per), IsSelect ? Red75 : Gray75, Gray, String, args...);
-		Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r((int)((float)(48 * 2 * 3 / 4) * per)), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1, yp1, IsSelect ? Red : White, Gray, String, args...);
+		Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r((int)((float)(48 * 3 / 2 * 3 / 4) * per)), LR, FontHandle::FontYCenter::BOTTOM, xp1 + y_r(40.f*per), yp1 + y_r(20.f*per), IsSelect ? Red75 : Gray75, Gray, String, args...);
+		Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r((int)((float)(48 * 2 * 3 / 4) * per)), LR, FontHandle::FontYCenter::BOTTOM, xp1, yp1, IsSelect ? Red : White, Gray, String, args...);
 	}
 };

@@ -89,6 +89,10 @@ namespace FPS_n2 {
 				this->m_move.vec.clear();
 				SetMove(mat, pos);
 			}
+			void			SetMove(const moves& movs) noexcept {
+				this->m_move = movs;
+				UpdateMove();
+			}
 			void			SetMove(const MATRIX_ref& mat, const VECTOR_ref& pos) noexcept {
 				this->m_move.mat = mat;
 				this->m_move.pos = pos;

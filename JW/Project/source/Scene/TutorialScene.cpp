@@ -44,11 +44,7 @@ namespace FPS_n2 {
 			//LoadGun("AKS-74", false, 0);
 			//LoadGun("M16-4", false, 0);
 
-			std::string ULTName = "";
-			//ULTName = "PCC_4";
-			ULTName = "AKS-74";
-			//ULTName = "M16-4";
-			//ULTName = "Mod870";
+			std::string ULTName = ULT_GUNName[(int)GunsModify::GetULTSelect()];
 
 			LoadGun(ULTName.c_str(), false, 1);
 			//BGをオブジェに登録
@@ -68,9 +64,11 @@ namespace FPS_n2 {
 				VECTOR_ref pos_t;
 				pos_t = VECTOR_ref::vget(6.5f*Scale_Rate, 0.f, -2.f*Scale_Rate);
 
-				auto HitResult = this->m_BackGround->GetGroundCol().CollCheck_Line(pos_t + VECTOR_ref::up() * -125.f, pos_t + VECTOR_ref::up() * 125.f);
-				if (HitResult.HitFlag == TRUE) { pos_t = HitResult.HitPosition; }
-				m_CharacterPtr->ValueSet(deg2rad(0.f), deg2rad(120.f), pos_t, (PlayerID)0);
+				VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 10.f*Scale_Rate;
+				if (this->m_BackGround->CheckLinetoMap(pos_t + VECTOR_ref::up() * -10.f*Scale_Rate, &EndPos, false)) {
+					pos_t = EndPos;
+				}
+				m_CharacterPtr->ValueSet(deg2rad(0.f), deg2rad(120.f), pos_t, (PlayerID)0, 0);
 				m_CharacterPtr->SetCharaType(CharaTypeID::Team);
 			}
 			//Cam
@@ -85,6 +83,9 @@ namespace FPS_n2 {
 
 			m_PrevSSAO = OptionParts->Get_SSAO();
 			OptionParts->Set_SSAO(false);
+
+
+			//m_CharacterPtr->AddAmmoStock(99);
 		}
 		bool			TutorialScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
@@ -120,8 +121,7 @@ namespace FPS_n2 {
 
 						KeyGuide->AddGuide(PADS::RELOAD, "再装填");
 
-						//KeyGuide->AddGuide(PADS::THROW, "弾込");
-						//KeyGuide->AddGuide(PADS::CHECK, "アーマー着用");
+						KeyGuide->AddGuide(PADS::CHECK, "装備確認");
 
 						//KeyGuide->AddGuide(PADS::INTERACT, "取得");
 						KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
@@ -197,7 +197,7 @@ namespace FPS_n2 {
 				MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press() && !DXDraw::Instance()->IsPause());
 				MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press() && !DXDraw::Instance()->IsPause());
 				MyInput.SetInputPADS(PADS::ULT, Pad->GetKey(PADS::ULT).press());
-				MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
+				//MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
 				MyInput.SetInputPADS(PADS::CHECK, Pad->GetKey(PADS::CHECK).press());
 				MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 				MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
@@ -217,6 +217,8 @@ namespace FPS_n2 {
 						j--;
 					}
 				}
+				m_CharacterPtr->AddULT(100);
+				m_CharacterPtr->AddAmmoStock(99 - m_CharacterPtr->GetAmmoStock());
 			}
 			//Execute
 			ObjMngr->ExecuteObject();
@@ -382,9 +384,6 @@ namespace FPS_n2 {
 				//mag
 				int mags = 0;
 				for (const auto& M : m_CharacterPtr->GetMagDatas()) {
-					if (m_CharacterPtr->GetNowMagID() == (int)(&M - &m_CharacterPtr->GetMagDatas().front())) {
-						continue;
-					}
 					this->m_UIclass.SetGaugeParam(4 + mags, M.AmmoNum, M.AmmoAll);
 					mags++;
 				}
@@ -524,6 +523,8 @@ namespace FPS_n2 {
 			SE->Add((int)SoundEnum::MagFall, 6, "data/Sound/SE/gun/ModFall.wav", false);
 			SE->Add((int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
 			SE->Add((int)SoundEnum::AmmoLoad, 1, "data/Sound/SE/gun/ammoload.wav");
+			SE->Add((int)SoundEnum::Tinnitus, 2, "data/Sound/SE/Tinnitus.wav");
+			
 			for (int i = 0; i < 6; i++) {
 				SE->Add((int)SoundEnum::Cocking1_0 + i, 4, "data/Sound/SE/gun/autoM870/" + std::to_string(i) + ".wav");
 				SE->Add((int)SoundEnum::Cocking2_0 + i, 4, "data/Sound/SE/gun/autoM16/" + std::to_string(i) + ".wav");
@@ -582,6 +583,7 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::StandUp);
 			SE->Delete((int)SoundEnum::Trigger);
 			SE->Delete((int)SoundEnum::AmmoLoad);
+			SE->Delete((int)SoundEnum::Tinnitus);
 			for (int i = 0; i < 6; i++) {
 				SE->Delete((int)SoundEnum::Cocking1_0 + i);
 				SE->Delete((int)SoundEnum::Cocking2_0 + i);

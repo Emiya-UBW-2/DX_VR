@@ -52,7 +52,7 @@ namespace FPS_n2 {
 			const auto&		GetReitcleGraph(void) const noexcept { return this->m_Reitcle; }
 			const auto&		GetZoomSize(void) const noexcept { return this->m_ZoomSize; }
 			//ƒ}ƒKƒWƒ“
-			const auto&		GetAmmoAll(void) const noexcept { return  this->m_CapacityMax; }
+			const auto&		GetAmmoAll(void) const noexcept { return this->m_CapacityMax; }
 			const auto&		GetAmmoSpecMagTop(void) const noexcept { return this->m_AmmoSpec[0]; }
 			//«”\Žü‚è
 			const auto&		GetShootRate_Diff(void) const noexcept { return this->m_ShootRate_Diff; }

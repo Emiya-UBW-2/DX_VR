@@ -236,13 +236,13 @@ namespace FPS_n2 {
 								case 3:ip_tmp = &this->m_NewSetting.IP.d4; break;
 							}
 							AddSubBox(y_r(100 + 70 * i), yp + y_r(100),
-									  [&]() {
-										  if (*ip_tmp == 255) { *ip_tmp = 0; }
-										  else { (*ip_tmp)++; }
-									  }, [&]() {
-										  if (*ip_tmp == 0) { *ip_tmp = 255; }
-										  else { (*ip_tmp)--; }
-									  });
+									 [&]() {
+										 if (*ip_tmp == 255) { *ip_tmp = 0; }
+										 else { (*ip_tmp)++; }
+									 }, [&]() {
+										 if (*ip_tmp == 0) { *ip_tmp = 255; }
+										 else { (*ip_tmp)--; }
+									 });
 						}
 						if (ClickBox(y_r(380), yp + y_r(100), y_r(380) + y_r(120), yp + y_r(100) + y_h, "Set")) {
 							this->m_Sequence = SequenceEnum::SetTick;

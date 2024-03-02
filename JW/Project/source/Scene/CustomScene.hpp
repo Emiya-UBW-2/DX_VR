@@ -4,6 +4,17 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		enum class LookSelect {
+			ModSet,
+			ULTSet,
+			FreeLook,
+			Max,
+		};
+		static const char* LookSelectName[(int)LookSelect::Max] = {
+			"改造",
+			"プライマリウェポン選択",
+			"フリールック",
+		};
 
 		class CustomScene : public TEMPSCENE, public GunsModify {
 			class SlotMove {
@@ -26,9 +37,12 @@ namespace FPS_n2 {
 			bool m_IsEnd{false};
 			float m_Alpha{0.f};
 			bool m_PrevShadow{false};
+
+			LookSelect	m_LookSel{LookSelect::ModSet};
+			float m_LookSelPer{1.f};
 		private:
 			std::shared_ptr<GunClass>		m_GunPtr;				//ポインター別持ち
-			std::array<std::shared_ptr<GunClass>, 3>		m_UltPtr;
+			std::array<std::shared_ptr<GunClass>, (int)ULT_GUN::Max>		m_UltPtr;
 
 			bool IsG17Parts(const Slot& S) {
 				bool IsG17 = false;
@@ -50,8 +64,8 @@ namespace FPS_n2 {
 				//もう存在せんものを削除
 				for (int loop = 0; loop < SelMoveClass.size(); loop++) {
 					bool isHit = false;
-					for (const auto& S : GetSelData()) {
-						if (S == SelMoveClass[loop].Ptr) {
+					for (const auto& S : GunsModify::GetSelData()) {
+						if (S.get() == SelMoveClass[loop].Ptr) {
 							isHit = true;
 							break;
 						}
@@ -62,12 +76,12 @@ namespace FPS_n2 {
 					}
 				}
 				//存在するものを追加+順番を指定
-				for (const auto& S : GetSelData()) {
+				for (const auto& S : GunsModify::GetSelData()) {
 					if (!IsG17Parts(*S)) { continue; }
-					int index = (int)(&S - &GetSelData().front());
+					int index = (int)(&S - &GunsModify::GetSelData().front());
 					bool isHit = false;
 					for (int loop = 0; loop < SelMoveClass.size(); loop++) {
-						if (S == SelMoveClass[loop].Ptr) {
+						if (S.get() == SelMoveClass[loop].Ptr) {
 							SelMoveClass[loop].index = index;
 							isHit = true;
 							break;
@@ -75,17 +89,17 @@ namespace FPS_n2 {
 					}
 					if (!isHit) {
 						SelMoveClass.resize(SelMoveClass.size() + 1);
-						SelMoveClass.back().Ptr = S;
+						SelMoveClass.back().Ptr = S.get();
 						SelMoveClass.back().index = index;
 						SelMoveClass.back().Xadd = 0.f;
 						SelMoveClass.back().Yadd = 0.f;
 					}
 				}
-				//SelMoveClassをGetSelData()に合わせてソート
+				//SelMoveClassをGunsModify::GetSelData()に合わせてソート
 				std::sort(SelMoveClass.begin(), SelMoveClass.end(),
-						  [](const SlotMove& a, const SlotMove& b) {
-							  return a.index < b.index;
-						  }
+						 [](const SlotMove& a, const SlotMove& b) {
+							 return a.index < b.index;
+						 }
 				);
 			}
 		public:
@@ -103,7 +117,7 @@ namespace FPS_n2 {
 			void			MainDraw_Sub(void) noexcept override;
 			void			MainDrawbyDepth_Sub(void) noexcept override {}
 			//UI表示
-			void			DrawUI_Base_Sub(void) noexcept  override;
+			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override {}
 		};
 	};

@@ -256,6 +256,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
+			m_DrumControl.Update();
 		}
 		//
 	}
@@ -352,24 +353,19 @@ namespace FPS_n2 {
 		m_LightControl.Update();
 		m_LightControl.SetLight();
 		//
-		m_DrumControl.Update();
 		//UpdateMiniMap();
 	}
 	void			BuildControl::ShadowDraw() noexcept {
 		this->m_Garbage.ShadowDraw();
 	}
 	void			BuildControl::Draw() noexcept {
-		int fog_enable = 0;
-		int fog_mode = 0;
+		int fog_enable = GetFogEnable();
+		int fog_mode = GetFogMode();
+		float fog_density = GetFogDensity();
 		int fog_r = 0, fog_g = 0, fog_b = 0;
 		float fog_start = 0.f, fog_end = 0.f;
-		float fog_density = 0.f;
-
-		fog_enable = GetFogEnable();													// フォグが有効かどうかを取得する( TRUE:有効  FALSE:無効 )
-		fog_mode = GetFogMode();														// フォグモードを取得する
 		GetFogColor(&fog_r, &fog_g, &fog_b);											// フォグカラーを取得する
 		GetFogStartEnd(&fog_start, &fog_end);											// フォグが始まる距離と終了する距離を取得する( 0.0f ～ 1.0f )
-		fog_density = GetFogDensity();													// フォグの密度を取得する( 0.0f ～ 1.0f )
 
 		SetFogEnable(TRUE);
 		SetFogMode(DX_FOGMODE_EXP2);

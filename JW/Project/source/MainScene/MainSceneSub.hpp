@@ -36,7 +36,7 @@ namespace FPS_n2 {
 			void SetActive() noexcept { m_Timer = 1.f; }
 			const auto		GetActiveSwitch(void) const noexcept { return this->m_Timer == 1.f; }
 			const auto		IsActive(void) const noexcept { return this->m_Timer > 0.f; }
-			const auto		GetPer(void) const noexcept { return this->m_Per  * 1.5f; }
+			const auto		GetPer(void) const noexcept { return this->m_Per * 1.5f; }
 		private:
 
 		};
@@ -108,15 +108,15 @@ namespace FPS_n2 {
 
 				xp1 = y_r(1920 - 256 - 54 * 2);
 				yp1 = y_r(1080 - 108 - 108 * 2 + (int)SelYadd[0]);
-				DrawFetteString(xp1, yp1, 1.f, (select == 0), "Retire");
+				DrawFetteString(xp1, yp1, 1.f, (select == 0), FontHandle::FontXCenter::RIGHT, "Retire");
 
 				xp1 = y_r(1920 - 256 - 54 * 1);
 				yp1 = y_r(1080 - 108 - 108 * 1 + (int)SelYadd[1]);
-				DrawFetteString(xp1, yp1, 1.f, (select == 1), "Option");
+				DrawFetteString(xp1, yp1, 1.f, (select == 1), FontHandle::FontXCenter::RIGHT, "Option");
 
 				xp1 = y_r(1920 - 256);
 				yp1 = y_r(1080 - 108 + (int)SelYadd[2]);
-				DrawFetteString(xp1, yp1, 1.f, (select == 2), "Return Game");
+				DrawFetteString(xp1, yp1, 1.f, (select == 2), FontHandle::FontXCenter::RIGHT, "Return Game");
 			}
 		public:
 			void Reset() noexcept {

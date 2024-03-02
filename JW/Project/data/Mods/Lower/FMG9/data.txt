@@ -1,0 +1,10 @@
+Name=FMG-9 Carbine Kit
+
+ReloadRate_Diff=-1
+
+Slot0Type=Sight
+Slot0IsNeed=true
+Slot0Item=VIPER_DotSight
+Slot0Item=LP_FX2
+
+end

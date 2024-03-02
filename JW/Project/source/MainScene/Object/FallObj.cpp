@@ -52,8 +52,7 @@ namespace FPS_n2 {
 				}
 				this->m_Timer -= 1.f / FPS;
 				//‹¤’Ê
-				ObjectBaseClass::FirstExecute();
-				SetMove(GetMove().mat.GetRot(), GetMove().pos);
+				UpdateMove();
 			}
 		}
 	};

@@ -16,11 +16,9 @@ namespace FPS_n2 {
 			SetIsSquat(false);
 		}
 		void		KeyControl::InputKey(const InputControl& pInput, bool pReady, const VECTOR_ref& pAddRadvec) {
+			this->m_Input = pInput;
 			if (!pReady) {
-				this->m_Input.ResetInput();
-			}
-			else {
-				this->m_Input = pInput;
+				this->m_Input.ResetKeyInput();
 			}
 			//“ü—Í
 			this->m_ULTKey.Execute(this->m_Input.GetPADSPress(PADS::ULT));
@@ -45,10 +43,11 @@ namespace FPS_n2 {
 				this->m_rad.SetEasingZ(m_rad_Buf.z(), 0.5f);
 			}
 			//ˆÚ“®
-			SetVec(0, this->m_Input.GetPADSPress(PADS::MOVE_W));
-			SetVec(1, this->m_Input.GetPADSPress(PADS::MOVE_A));
-			SetVec(2, this->m_Input.GetPADSPress(PADS::MOVE_S));
-			SetVec(3, this->m_Input.GetPADSPress(PADS::MOVE_D));
+			SetVec(
+				this->m_Input.GetPADSPress(PADS::MOVE_W),
+				this->m_Input.GetPADSPress(PADS::MOVE_A),
+				this->m_Input.GetPADSPress(PADS::MOVE_S),
+				this->m_Input.GetPADSPress(PADS::MOVE_D));
 			//ƒŠ[ƒ“
 			if (true) {//ƒgƒOƒ‹Ž®
 				this->m_QKey.Execute(this->m_Input.GetPADSPress(PADS::LEAN_L));
@@ -128,43 +127,6 @@ namespace FPS_n2 {
 			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::LeftFoot).pos()*0.5f + Ptr->GetFrameWorldMat(CharaFrame::LeftFoot2).pos()*0.5f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
 			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::LeftFoot).pos()*0.75f + Ptr->GetFrameWorldMat(CharaFrame::LeftFoot2).pos()*0.25f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
 			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::LeftFoot).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
-		}
-
-		void MagStockControl::Init_MagStockControl(int AmmoNum, int AmmoAll, int ModUniqueID) noexcept {
-			size_t Total = m_MagazineStock.size();
-			for (size_t i = 0; i < Total; i++) {
-				m_MagazineStock[i].AmmoNum = AmmoNum;
-				m_MagazineStock[i].AmmoAll = AmmoAll;
-				m_MagazineStock[i].ModUniqueID = ModUniqueID;
-			}
-			m_UseMagazineID = 0;
-
-			m_AmmoStock = 0;
-		}
-		void MagStockControl::SetMag(int select, int AmmoNum) noexcept {
-			m_MagazineStock[select].AmmoNum = AmmoNum;
-		}
-		void MagStockControl::SetNextMag(int OLDAmmoNum, int OLDAmmoAll, int OLDModUniqueID) noexcept {
-			m_MagazineStock[m_UseMagazineID].AmmoNum = OLDAmmoNum;
-			m_MagazineStock[m_UseMagazineID].AmmoAll = OLDAmmoAll;
-			m_MagazineStock[m_UseMagazineID].ModUniqueID = OLDModUniqueID;
-			for (int i = 0; i < 4; i++) {
-				m_UseMagazineID = GetNextMagID();
-				if (m_MagazineStock[m_UseMagazineID].AmmoNum != 0) { break; }
-			}
-		}
-		void MagStockControl::SortMag() noexcept {
-			m_UseMagazineID = 0;
-			std::sort(m_MagazineStock.begin(), m_MagazineStock.end(), [&](const MagStock&A, const MagStock&B) {return A.AmmoNum > B.AmmoNum; });
-		}
-		int MagStockControl::GetNeedAmmoStock() noexcept {
-			int Ret = 0;
-			int Total = (int)m_MagazineStock.size();
-			for (int i = 0; i < Total; i++) {
-				if (i == m_UseMagazineID) { continue; }
-				Ret += m_MagazineStock[i].AmmoAll - m_MagazineStock[i].AmmoNum;
-			}
-			return Ret;
 		}
 
 		void ItemFallControl::Init(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath, ItemType type) {

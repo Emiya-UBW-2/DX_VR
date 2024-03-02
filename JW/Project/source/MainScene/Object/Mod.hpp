@@ -49,8 +49,7 @@ namespace FPS_n2 {
 			void			Init(void) noexcept override;
 
 			void			FirstExecute(void) noexcept override {
-				ObjectBaseClass::FirstExecute();
-				SetMove(GetMove().mat.GetRot(), GetMove().pos);
+				UpdateMove();
 				FirstExecute_Mod();
 			}
 			void			SetModMatrix(const MATRIX_ref& value) noexcept {
@@ -62,6 +61,8 @@ namespace FPS_n2 {
 			}
 			void			DrawShadow(void) noexcept override {
 				if (this->m_IsActive && this->m_IsDraw) {
+					auto* DrawParts = DXDraw::Instance();
+					if ((GetMove().pos - DrawParts->GetMainCamera().GetCamPos()).Length() > 10.f*Scale_Rate) { return; }
 					this->m_obj.DrawModel();
 				}
 			}
@@ -69,10 +70,12 @@ namespace FPS_n2 {
 				Draw_Mod(isDrawSemiTrans);
 				if (this->m_IsActive && this->m_IsDraw) {
 					if (CheckCameraViewClip_Box(
-						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-0.1f*Scale_Rate, -0.1f*Scale_Rate, -0.1f*Scale_Rate)).get(),
-						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(0.1f*Scale_Rate, 0.1f*Scale_Rate, 0.1f*Scale_Rate)).get()) == FALSE
+						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-1.f*Scale_Rate, -1.f*Scale_Rate, -1.f*Scale_Rate)).get(),
+						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(1.f*Scale_Rate, 1.f*Scale_Rate, 1.f*Scale_Rate)).get()) == FALSE
 						) {
 						if (!isDrawSemiTrans) {
+							auto* DrawParts = DXDraw::Instance();
+							if ((GetMove().pos - DrawParts->GetMainCamera().GetCamPos()).Length() > 10.f*Scale_Rate) { return; }
 							this->m_obj.DrawModel();
 						}
 					}

@@ -5,7 +5,7 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		const bool  GunClass::HasFrame(GunFrame frame) const noexcept {
+		const bool GunClass::HasFrame(GunFrame frame) const noexcept {
 			//ŠY“–ƒtƒŒ[ƒ€‚ª‚ ‚é‚Ì‚È‚çã‘‚«
 			if (m_SightPtr[m_GunSightSel]) {
 				switch (frame) {
@@ -25,7 +25,7 @@ namespace FPS_n2 {
 			}
 			return false;
 		}
-		const MATRIX_ref  GunClass::GetFrameLocalMat(GunFrame frame) const noexcept {
+		const MATRIX_ref GunClass::GetFrameLocalMat(GunFrame frame) const noexcept {
 			//ŠY“–ƒtƒŒ[ƒ€‚ª‚ ‚é‚Ì‚È‚çã‘‚«
 			if (m_SightPtr[m_GunSightSel]) {
 				switch (frame) {
@@ -46,7 +46,7 @@ namespace FPS_n2 {
 			}
 			return MATRIX_ref::zero();
 		}
-		const MATRIX_ref  GunClass::GetFrameWorldMat(GunFrame frame, bool CheckSight) const noexcept {
+		const MATRIX_ref GunClass::GetFrameWorldMat(GunFrame frame, bool CheckSight) const noexcept {
 			//ŠY“–ƒtƒŒ[ƒ€‚ª‚ ‚é‚Ì‚È‚çã‘‚«
 			if (m_SightPtr[m_GunSightSel] && CheckSight) {
 				switch (frame) {
@@ -114,8 +114,8 @@ namespace FPS_n2 {
 		void	GunClass::SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept {
 			m_MagFall.Dispose();
 			m_CartFall.Dispose();
-			m_MagFall.Init(backGround, (*m_MagazinePtr)->GetFilePath());
-			m_CartFall.Init(backGround, (*m_MagazinePtr)->GetModData()->GetAmmoSpecMagTop()->GetPath());	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
+			m_MagFall.Init(backGround, (*m_MagazinePtr)->GetFilePath(), 1);
+			m_CartFall.Init(backGround, (*m_MagazinePtr)->GetModData()->GetAmmoSpecMagTop()->GetPath(), 4);	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
 		}
 		void	GunClass::Init_Gun(void) noexcept {
 			{
@@ -250,8 +250,8 @@ namespace FPS_n2 {
 							case RELOADTYPE::AMMO:
 								SetAmmo(this->m_Capacity + 1);
 								m_NextMagNum--;
-								if ((this->GetIsMagFull() || (m_NextMagNum <= 0)) || this->m_ReloadCancel) {
-									this->m_ReloadCancel = false;
+								if ((this->GetIsMagFull() || (m_NextMagNum <= 0)) || this->m_Cancel) {
+									this->m_Cancel = false;
 									this->m_ShotPhase = GunAnimeID::ReloadEnd;
 								}
 								else {
@@ -343,7 +343,8 @@ namespace FPS_n2 {
 					}
 					this->m_AmmoLoadSwitch = false;
 					if (GetGunAnimEnd(GunAnimSelect)) {
-						if (this->m_AmmoLoadCount >= 3) {
+						if (this->m_AmmoLoadCount >= 4 || this->m_Cancel) {
+							this->m_Cancel = false;
 							this->m_ShotPhase = GunAnimeID::AmmoLoadEnd;
 						}
 						else {
@@ -360,7 +361,7 @@ namespace FPS_n2 {
 					GunAnimSelect = CharaGunAnimeID::AmmoLoadEnd;
 					UpdateGunAnim(GunAnimSelect, 1.5f);
 					if (GetGunAnimEnd(GunAnimSelect)) {
-						this->m_ShotPhase = GunAnimeID::Base;
+						this->m_ShotPhase = !GetInChamber() ? GunAnimeID::Cocking : GunAnimeID::Base;
 					}
 				}
 				//
@@ -720,13 +721,13 @@ namespace FPS_n2 {
 			}
 
 			Easing(&m_GunChangePer, 1.f, 0.8f, EasingType::OutExpo);
-			//‹¤’Ê
-			ObjectBaseClass::FirstExecute();
 			//’e–ò‚Ì‰‰Z
 			ExecuteCartInChamber();
 		}
 		void GunClass::DrawShadow(void) noexcept {
 			if (this->m_IsActive && this->m_IsDraw) {
+				auto* DrawParts = DXDraw::Instance();
+				if ((GetMove().pos - DrawParts->GetMainCamera().GetCamPos()).Length() > 10.f*Scale_Rate) { return; }
 				this->GetObj().DrawModel();
 			}
 		}

@@ -23,33 +23,31 @@ namespace FPS_n2 {
 			//
 			select = 0;
 			//
+			GunsModify::LoadSlots("data/bokuzyo.ok");
+			//
 			{
 				auto* Ptr = ObjMngr->MakeObject(ObjType::Gun);
 				ObjMngr->LoadObjectModel((*Ptr).get(), "data/gun/G17Gen3/");
 				MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
 				m_GunPtr = ((std::shared_ptr<GunClass>&)(*Ptr));
-				(*Ptr)->Init();
+				m_GunPtr->Init();
+				GunsModify::CreateSelData(m_GunPtr, true);
+				UpdateSlotMove();
+				m_GunPtr->Init_Gun();
 			}
-			{
+			std::string Path;
+			for(auto& U : m_UltPtr){
+				int index = (int)(&U - &m_UltPtr.front());
 				auto* Ptr = ObjMngr->MakeObject(ObjType::Gun);
-				ObjMngr->LoadObjectModel((*Ptr).get(), "data/gun/M16-4/");
+				Path = "data/gun/";
+				Path += ULT_GUNName[index];
+				Path += "/";
+				ObjMngr->LoadObjectModel((*Ptr).get(), Path.c_str());
 				MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
-				m_UltPtr[0] = ((std::shared_ptr<GunClass>&)(*Ptr));
-				(*Ptr)->Init();
-			}
-			{
-				auto* Ptr = ObjMngr->MakeObject(ObjType::Gun);
-				ObjMngr->LoadObjectModel((*Ptr).get(), "data/gun/Mod870/");
-				MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
-				m_UltPtr[1] = ((std::shared_ptr<GunClass>&)(*Ptr));
-				(*Ptr)->Init();
-			}
-			{
-				auto* Ptr = ObjMngr->MakeObject(ObjType::Gun);
-				ObjMngr->LoadObjectModel((*Ptr).get(), "data/gun/PCC_4/");
-				MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
-				m_UltPtr[2] = ((std::shared_ptr<GunClass>&)(*Ptr));
-				(*Ptr)->Init();
+				U = ((std::shared_ptr<GunClass>&)(*Ptr));
+				U->Init();
+				GunsModify::CreateSelData(U, false);
+				U->Init_Gun();
 			}
 			{
 				auto* Ptr = ObjMngr->MakeObject(ObjType::MovieObj);
@@ -63,23 +61,21 @@ namespace FPS_n2 {
 			m_Range = 100.f;
 			m_SelAlpha = 0.f;
 			//
-			GunsModify::LoadSlots("data/bokuzyo.ok");
-			//
-			GunsModify::CreateSelData(m_GunPtr, true);
-			UpdateSlotMove();
-			m_GunPtr->Init_Gun();
-
-			for (auto&u : m_UltPtr) {
-				GunsModify::CreateSelData(u, false);
-				u->Init_Gun();
-			}
 			m_IsEnd = false;
 			m_Alpha = 1.f;
 
 			m_PrevShadow = OptionParts->Get_Shadow();
 			OptionParts->Set_Shadow(true);
+
+			m_LookSel = LookSelect::ModSet;
+			m_LookSelPer = 3.f;
 		}
 		bool			CustomScene::Update_Sub(void) noexcept {
+			if (GetIsFirstLoop()) {
+				m_Yrad = deg2rad(-45);
+				m_Range = 100.f;
+				m_SelAlpha = 2.f;
+			}
 			if (DXDraw::Instance()->IsPause()) {
 				return true;
 			}
@@ -102,83 +98,117 @@ namespace FPS_n2 {
 				}
 			);
 
-			{
-				if (Pad->GetKey(PADS::MOVE_W).trigger()) {
-					--select;
-					if (select < 0) { select = (int)SelMoveClass.size() - 1; }
-					SelMoveClass[select].Yadd = 10.f;
-					SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
-					m_SelAlpha = 2.f;
-				}
-				if (Pad->GetKey(PADS::MOVE_S).trigger()) {
-					++select;
-					if (select > (int)SelMoveClass.size() - 1) { select = 0; }
-					SelMoveClass[select].Yadd = -10.f;
-					SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
-					m_SelAlpha = 2.f;
-				}
-				if (GetSelData().size() > 0) {
-					bool IsChange = false;
-					auto& y = GetSelData()[SelMoveClass[select].index];
-					if (Pad->GetKey(PADS::MOVE_A).trigger()) {
-						++y->m_sel;
-						const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
-						if (Data->m_IsNeed) {
-							if (y->m_sel > (int)Data->m_ItemsUniqueID.size() - 1) { y->m_sel = 0; }
+			switch (m_LookSel) {
+				case LookSelect::ModSet:
+					{
+						if (Pad->GetKey(PADS::MOVE_W).trigger()) {
+							--select;
+							if (select < 0) { select = (int)SelMoveClass.size() - 1; }
+							SelMoveClass[select].Yadd = 10.f;
+							SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							m_SelAlpha = 2.f;
 						}
-						else {
-							if (y->m_sel > (int)Data->m_ItemsUniqueID.size()) { y->m_sel = 0; }
+						if (Pad->GetKey(PADS::MOVE_S).trigger()) {
+							++select;
+							if (select > (int)SelMoveClass.size() - 1) { select = 0; }
+							SelMoveClass[select].Yadd = -10.f;
+							SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							m_SelAlpha = 2.f;
 						}
-						IsChange = true;
-						SelMoveClass[select].Xadd = -1.f;
-						SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
-					}
-					if (Pad->GetKey(PADS::MOVE_D).trigger()) {
-						--y->m_sel;
-						const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
-						if (Data->m_IsNeed) {
-							if (y->m_sel < 0) { y->m_sel = (int)Data->m_ItemsUniqueID.size() - 1; }
+						if (GunsModify::GetSelData().size() > 0) {
+							bool IsChange = false;
+							auto& y = GunsModify::GetSelData()[SelMoveClass[select].index];
+							if (Pad->GetKey(PADS::MOVE_A).trigger()) {
+								++y->m_sel;
+								const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
+								if (Data->m_IsNeed) {
+									if (y->m_sel > (int)Data->m_ItemsUniqueID.size() - 1) { y->m_sel = 0; }
+								}
+								else {
+									if (y->m_sel > (int)Data->m_ItemsUniqueID.size()) { y->m_sel = 0; }
+								}
+								IsChange = true;
+								SelMoveClass[select].Xadd = -1.f;
+								SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							}
+							if (Pad->GetKey(PADS::MOVE_D).trigger()) {
+								--y->m_sel;
+								const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
+								if (Data->m_IsNeed) {
+									if (y->m_sel < 0) { y->m_sel = (int)Data->m_ItemsUniqueID.size() - 1; }
+								}
+								else {
+									if (y->m_sel < 0) { y->m_sel = (int)Data->m_ItemsUniqueID.size(); }
+								}
+								IsChange = true;
+								SelMoveClass[select].Xadd = 1.f;
+								SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							}
+							if (IsChange) {
+								m_SelAlpha = 2.f;
+								GunsModify::ChangeSelData(y.get(), y->m_sel, false);
+								UpdateSlotMove();
+							}
 						}
-						else {
-							if (y->m_sel < 0) { y->m_sel = (int)Data->m_ItemsUniqueID.size(); }
+						for (auto& y : SelMoveClass) {
+							Easing(&y.Xadd, 0.f, 0.9f, EasingType::OutExpo);
+							Easing(&y.Yadd, 0.f, 0.95f, EasingType::OutExpo);
 						}
-						IsChange = true;
-						SelMoveClass[select].Xadd = 1.f;
-						SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
-					}
-					if (IsChange) {
-						m_SelAlpha = 2.f;
-						GunsModify::ChangeSelData(y, y->m_sel, false);
-						UpdateSlotMove();
-					}
-				}
-				for (auto& y : SelMoveClass) {
-					Easing(&y.Xadd, 0.f, 0.9f, EasingType::OutExpo);
-					Easing(&y.Yadd, 0.f, 0.95f, EasingType::OutExpo);
-				}
-				m_SelAlpha = std::max(m_SelAlpha - 1.f / FPS, 0.f);
 
-				if (Pad->GetKey(PADS::MELEE).trigger()) {
-					SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
-					//
-					GunsModify::DisposeSlots();
-					GunsModify::CreateSelData(m_GunPtr, true);
-					UpdateSlotMove();
-					m_GunPtr->Init_Gun();
-				}
+						if (Pad->GetKey(PADS::MELEE).trigger()) {
+							SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							//
+							GunsModify::DisposeSlots();
+							GunsModify::CreateSelData(m_GunPtr, true);
+							UpdateSlotMove();
+							m_GunPtr->Init_Gun();
+						}
+					}
+					break;
+				case LookSelect::ULTSet:
+					{
+						if (Pad->GetKey(PADS::MOVE_A).trigger()) {
+							int tmp = ((int)GunsModify::GetULTSelect() + 1);
+							if (tmp >= (int)ULT_GUN::Max) {
+								tmp = 0;
+							}
+							GunsModify::SetULTSelect((ULT_GUN)tmp);
+							SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							m_SelAlpha = 2.f;
+						}
+						if (Pad->GetKey(PADS::MOVE_D).trigger()) {
+							int tmp = ((int)GunsModify::GetULTSelect() - 1);
+							if (tmp <= 0 - 1) {
+								tmp = (int)ULT_GUN::Max - 1;
+							}
+							GunsModify::SetULTSelect((ULT_GUN)tmp);
+							SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							m_SelAlpha = 2.f;
+						}
+					}
+					break;
+				case LookSelect::FreeLook:
+					break;
+				default:
+					break;
 			}
+
+			m_SelAlpha = std::max(m_SelAlpha - 1.f / FPS, 0.f);
 
 			auto Per = 1.f - std::clamp(m_Range - 1.f, 0.f, 1.f);
 
 			m_UltPtr[0]->SetGunMatrix(
-				MATRIX_ref::RotZ(deg2rad(90)) * MATRIX_ref::RotY(deg2rad(210)) *
-				MATRIX_ref::Mtrans(VECTOR_ref::vget(-0.8f, 0.95f, 0.f)*Scale_Rate));
+				MATRIX_ref::RotZ(deg2rad(90)) * MATRIX_ref::RotY(deg2rad(0)) *
+				MATRIX_ref::Mtrans(VECTOR_ref::vget(1.1f, 0.95f, 0.f)*Scale_Rate));
 			m_UltPtr[1]->SetGunMatrix(
 				MATRIX_ref::RotZ(deg2rad(90)) * MATRIX_ref::RotY(deg2rad(190)) *
 				MATRIX_ref::Mtrans(VECTOR_ref::vget(0.7f, 0.95f, -0.3f)*Scale_Rate));
 			m_UltPtr[2]->SetGunMatrix(
-				MATRIX_ref::RotZ(deg2rad(90)) * MATRIX_ref::RotY(deg2rad(0)) *
-				MATRIX_ref::Mtrans(VECTOR_ref::vget(1.1f, 0.95f, 0.f)*Scale_Rate));
+				MATRIX_ref::RotZ(deg2rad(90)) * MATRIX_ref::RotY(deg2rad(-10)) *
+				MATRIX_ref::Mtrans(VECTOR_ref::vget(-0.5f, 0.95f, 0.3f)*Scale_Rate));
+			m_UltPtr[3]->SetGunMatrix(
+				MATRIX_ref::RotZ(deg2rad(80)) * MATRIX_ref::RotY(deg2rad(190)) *
+				MATRIX_ref::Mtrans(VECTOR_ref::vget(-0.9f, 0.95f, 0.f)*Scale_Rate));
 
 			m_GunPtr->SetGunMatrix(
 				Lerp_Matrix(MATRIX_ref::RotY(deg2rad(90)) * MATRIX_ref::RotX(deg2rad(30)), MATRIX_ref::RotY(deg2rad(0)), std::clamp(Per*2.f, 0.f, 1.f))*
@@ -197,6 +227,13 @@ namespace FPS_n2 {
 
 			);
 			(*m_GunPtr->GetMagazinePtr())->UpdateMove();
+			if (Pad->GetKey(PADS::AIM).trigger()) {
+				m_LookSel = (LookSelect)(((int)m_LookSel + 1) % ((int)LookSelect::Max));
+				m_LookSelPer = 3.f;
+
+				m_SelAlpha = 2.f;
+			}
+			m_LookSelPer = std::max(m_LookSelPer - 1.f / FPS, 0.f);
 
 			m_Yrad += Pad->GetLS_X() / 1000.f;
 			m_Yrad = std::clamp(m_Yrad, deg2rad(-100), deg2rad(100));
@@ -204,14 +241,16 @@ namespace FPS_n2 {
 			m_Xrad = std::clamp(m_Xrad, deg2rad(-20), deg2rad(-20));
 			Easing(&m_Xrad_R, m_Xrad, 0.95f, EasingType::OutExpo);
 			Easing(&m_Yrad_R, m_Yrad, 0.95f, EasingType::OutExpo);
-			Easing(&m_Range, Pad->GetKey(PADS::AIM).press() ? 2.f : 1.f, 0.95f, EasingType::OutExpo);
-			Pad->SetMouseMoveEnable(Pad->GetKey(PADS::AIM).press());
+			Easing(&m_Range, (m_LookSel != LookSelect::ModSet) ? 2.f : 1.f, 0.95f, EasingType::OutExpo);
+			Pad->SetMouseMoveEnable(m_LookSel==LookSelect::FreeLook);
 
-			if (Pad->GetKey(PADS::AIM).release_trigger()) {
-				m_Yrad = deg2rad(-45);
-			}
 			if (Pad->GetKey(PADS::AIM).trigger()) {
-				m_Yrad = deg2rad(15);
+				if (m_LookSel == LookSelect::ModSet) {
+					m_Yrad = deg2rad(-45);
+				}
+				if (m_LookSel == LookSelect::ULTSet) {
+					m_Yrad = deg2rad(15);
+				}
 			}
 
 			ObjMngr->ExecuteObject();
@@ -239,40 +278,66 @@ namespace FPS_n2 {
 
 			GunsModify::SaveSlots("data/bokuzyo.ok");
 
-			GunsModify::DisposeSlots();
-
 			ObjMngr->DelObj((SharedObj*)&m_GunPtr);
 			m_GunPtr.reset();
 			for (auto&u : m_UltPtr) {
-				ObjMngr->DelObj((SharedObj*)&u);
-				u.reset();
+				if (u) {
+					ObjMngr->DelObj((SharedObj*)&u);
+					u.reset();
+				}
 			}
+			GunsModify::DisposeSlots();
+
 			ObjMngr->DisposeObject();
 			OptionParts->Set_Shadow(m_PrevShadow);
 		}
 		void			CustomScene::ShadowDraw_Sub(void) noexcept {
 			//this->m_BackGround->Shadow_Draw();
 			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DrawObject_Shadow();
+			//ObjMngr->DrawObject_Shadow();
+			ObjMngr->DrawObject();
 		}
 		void			CustomScene::MainDraw_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 			ObjMngr->DrawObject();
 
 			ClearDrawScreenZBuffer();
-			{
-				auto& y = GetSelData()[SelMoveClass[select].index];
-				auto& ModPtr1 = (std::shared_ptr<ModClass>&)(y->m_Data->GetPartsPtr(y->SlotType));
-				if (ModPtr1) {
-					SetUseLighting(FALSE);
-					ModPtr1->GetObj().SetOpacityRate(0.5f*std::clamp(m_SelAlpha, 0.f, 1.f));
-					MV1SetMaterialDrawAddColorAll(ModPtr1->GetObj().get(), -255, 255, -255);
-					ModPtr1->GetObj().DrawModel();
-					MV1SetMaterialDrawAddColorAll(ModPtr1->GetObj().get(), 0, 0, 0);
-					ModPtr1->GetObj().SetOpacityRate(1.f);
-					SetUseLighting(TRUE);
-				}
+			switch (m_LookSel) {
+				case LookSelect::ModSet:
+					{
+						auto& y = GunsModify::GetSelData()[SelMoveClass[select].index];
+						auto& ModPtr1 = (std::shared_ptr<ModClass>&)(y->m_Data->GetPartsPtr(y->SlotType));
+						if (ModPtr1) {
+							SetUseLighting(FALSE);
+							ModPtr1->GetObj().SetOpacityRate(0.5f*std::clamp(m_SelAlpha, 0.f, 1.f));
+							MV1SetMaterialDrawAddColorAll(ModPtr1->GetObj().get(), -255, 255, -255);
+							ModPtr1->GetObj().DrawModel();
+							MV1SetMaterialDrawAddColorAll(ModPtr1->GetObj().get(), 0, 0, 0);
+							ModPtr1->GetObj().SetOpacityRate(1.f);
+							SetUseLighting(TRUE);
+						}
+					}
+					break;
+				case LookSelect::ULTSet:
+					{
+						auto& ModPtr1 = m_UltPtr[(int)GunsModify::GetULTSelect()];
+						if (ModPtr1) {
+							SetUseLighting(FALSE);
+							ModPtr1->GetObj().SetOpacityRate(0.5f*std::clamp(m_SelAlpha, 0.f, 1.f));
+							MV1SetMaterialDrawAddColorAll(ModPtr1->GetObj().get(), -255, 255, -255);
+							ModPtr1->GetObj().DrawModel();
+							MV1SetMaterialDrawAddColorAll(ModPtr1->GetObj().get(), 0, 0, 0);
+							ModPtr1->GetObj().SetOpacityRate(1.f);
+							SetUseLighting(TRUE);
+						}
+					}
+					break;
+				case LookSelect::FreeLook:
+					break;
+				default:
+					break;
 			}
+
 		}
 
 		void			CustomScene::DrawUI_Base_Sub(void) noexcept {
@@ -287,27 +352,29 @@ namespace FPS_n2 {
 			auto Black = GetColor(0, 0, 0);
 			int xp1, yp1;
 			//
-			xp1 = y_r(64 + 300);
-			yp1 = y_r(64 + 48 * 2);
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(m_LookSelPer, 0.f, 1.f)), 0, 255));
+			{
+				xp1 = y_r(64 + 300);
+				yp1 = y_r(64 + 48 * 2);
 
+				DrawFetteString(xp1, yp1, 1.0f, false, FontHandle::FontXCenter::LEFT, LookSelectName[(int)m_LookSel]);
+			}
 			auto Per = 1.f - std::clamp(m_Range - 1.f, 0.f, 1.f);
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(Per*2.f - 1.f, 0.f, 1.f)), 0, 255));
-
-			DrawFetteString(xp1, yp1, 1.33f, false, "Custom");
 			{
 				xp1 = y_r(960 - 480);
 				yp1 = y_r(540 - 270);
-				auto& y = GetSelData()[SelMoveClass[select].index];
+				auto& y = GunsModify::GetSelData()[SelMoveClass[select].index];
 				const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(32), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																	  xp1, yp1, White, Gray25, GunSlotName[(int)Data->m_GunSlot]);
+																	 xp1, yp1, White, Gray25, GunSlotName[(int)Data->m_GunSlot]);
 			}
 			for (int loop = -1; loop <= (int)SelMoveClass.size(); loop++) {
 				if (!(select == loop + 1 || select == loop - 1)) { continue; }
 				int index = loop;
 				if (index < 0) { index = (int)SelMoveClass.size() - 1; }
 				if (index > (int)SelMoveClass.size() - 1) { index = 0; }
-				auto& y = GetSelData()[SelMoveClass[index].index];
+				auto& y = GunsModify::GetSelData()[SelMoveClass[index].index];
 				const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
 				xp1 = y_r(960);
 				yp1 = y_r(840 + 64 * (loop - select) + (int)SelMoveClass[index].Yadd);
@@ -330,13 +397,13 @@ namespace FPS_n2 {
 						int add = y_r(200) + y_r(SelMoveClass[index].Xadd*300.f) / 2;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT,
 							(select == loop + 1) ? FontHandle::FontYCenter::TOP : FontHandle::FontYCenter::BOTTOM,
-																			  xp1 + add, yp1 + y_r(20), Gray50, Gray25, Name);
+																			 xp1 + add, yp1 + y_r(20), Gray50, Gray25, Name);
 					}
 					if (loop2 == 1) {
 						int add = -y_r(200) + +y_r(SelMoveClass[index].Xadd*300.f) / 2;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT,
 							(select == loop + 1) ? FontHandle::FontYCenter::TOP : FontHandle::FontYCenter::BOTTOM,
-																			  xp1 + add, yp1 + y_r(20), Gray50, Gray25, Name);
+																			 xp1 + add, yp1 + y_r(20), Gray50, Gray25, Name);
 					}
 				}
 				{
@@ -346,11 +413,11 @@ namespace FPS_n2 {
 					}
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE,
 						(select == loop + 1) ? FontHandle::FontYCenter::TOP : FontHandle::FontYCenter::BOTTOM,
-																		  xp1 + +y_r(SelMoveClass[index].Xadd*300.f), yp1 + y_r(20), Gray50, Gray25, Name);
+																		 xp1 + +y_r(SelMoveClass[index].Xadd*300.f), yp1 + y_r(20), Gray50, Gray25, Name);
 				}
 			}
 			{
-				auto& y = GetSelData()[SelMoveClass[select].index];
+				auto& y = GunsModify::GetSelData()[SelMoveClass[select].index];
 				const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
 				xp1 = y_r(960);
 				yp1 = y_r(840 + (int)SelMoveClass[select].Yadd);
@@ -371,19 +438,19 @@ namespace FPS_n2 {
 					if (loop2 == -1) {
 						int add = y_r(380) + y_r(SelMoveClass[select].Xadd*300.f) / 2;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(36), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
-																			  xp1 + add, yp1 + y_r(20), Green50, Green25, Name);
+																			 xp1 + add, yp1 + y_r(20), Green50, Green25, Name);
 					}
 					if (loop2 == 1) {
 						int add = -y_r(380) + y_r(SelMoveClass[select].Xadd*300.f) / 2;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
-																			  xp1 + add, yp1 + y_r(20), Green50, Green25, Name);
+																			 xp1 + add, yp1 + y_r(20), Green50, Green25, Name);
 					}
 				}
 				{
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(54), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
-																		  xp1 + -y_r(350), yp1 + y_r(20), Green, Green25, "<");
+																		 xp1 + -y_r(350), yp1 + y_r(20), Green, Green25, "<");
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(54), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
-																		  xp1 + y_r(350), yp1 + y_r(20), Green, Green25, ">");
+																		 xp1 + y_r(350), yp1 + y_r(20), Green, Green25, ">");
 				}
 				{
 					std::string Name = "None";
@@ -391,7 +458,7 @@ namespace FPS_n2 {
 						Name = (*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[y->m_sel]))->GetName();
 					}
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(54), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-																		  xp1 + y_r(SelMoveClass[select].Xadd*300.f), yp1 + y_r(20), Green, Green25, Name);
+																		 xp1 + y_r(SelMoveClass[select].Xadd*300.f), yp1 + y_r(20), Green, Green25, Name);
 				}
 			}
 			//

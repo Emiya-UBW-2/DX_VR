@@ -220,12 +220,12 @@ namespace FPS_n2 {
 			const auto		IsAlive(void) const noexcept { return this->m_HP != 0; }
 			const auto&		GetHP(void) const noexcept { return this->m_HP; }
 			const auto&		GetHPMax(void) const noexcept { return HPMax; }
-			void			SubHP(HitPoint damage_t)  noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, HPMax); }
+			void			SubHP(HitPoint damage_t) noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, HPMax); }
 
 			const auto		IsArmerActive(void) const noexcept { return this->m_AP != 0; }
 			const auto&		GetAP(void) const noexcept { return this->m_AP; }
 			const auto&		GetAPMax(void) const noexcept { return APMax; }
-			void			SubAP(ArmerPoint damage_t)  noexcept { this->m_AP = std::clamp<ArmerPoint>(this->m_AP - damage_t, 0, APMax); }
+			void			SubAP(ArmerPoint damage_t) noexcept { this->m_AP = std::clamp<ArmerPoint>(this->m_AP - damage_t, 0, APMax); }
 
 			auto&			GetDamageEvent(void) noexcept { return this->m_DamageEvent; }
 		public:
@@ -244,7 +244,7 @@ namespace FPS_n2 {
 			const auto		IsULTActive(void) const noexcept { return this->m_ULT == ULTMax; }
 			const auto&		GetULT(void) const noexcept { return this->m_ULT; }
 			const auto&		GetULTMax(void) const noexcept { return ULTMax; }
-			void			AddULT(int damage_t)  noexcept { this->m_ULT = std::clamp<int>(this->m_ULT + damage_t, 0, ULTMax); }
+			void			AddULT(int damage_t) noexcept { this->m_ULT = std::clamp<int>(this->m_ULT + damage_t, 0, ULTMax); }
 		public:
 			void		InitULT() {
 				this->m_ULT = 0;
@@ -253,6 +253,7 @@ namespace FPS_n2 {
 		//キャラ入力
 		class KeyControl {
 		private://キャラパラメーター
+			VECTOR_ref											m_VecTotal;
 			std::array<float, 4>								m_Vec{0,0,0,0};
 			InputControl										m_Input;
 			switchs												m_ULTKey;
@@ -262,17 +263,19 @@ namespace FPS_n2 {
 			switchs												m_EKey;
 			VECTOR_ref											m_rad_Buf, m_rad, m_radAdd;
 		public://ゲッター
-			const auto		GetInputControl(void) const noexcept { return  this->m_Input; }
-			const auto		GetRadBuf(void) const noexcept { return  this->m_rad_Buf; }
-			const auto		GetRad(void) const noexcept { return  this->m_rad; }
-			const auto		GetVecFront(void) const noexcept { return  this->m_Vec[0]; }
+			const auto		GetInputControl(void) const noexcept { return this->m_Input; }
+			const auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }
+			const auto		GetRad(void) const noexcept { return this->m_rad; }
+			const auto		GetVecFront(void) const noexcept { return this->m_Vec[0]; }
 			const auto		GetVecRear(void) const noexcept { return this->m_Vec[2]; }
 			const auto		GetVecLeft(void) const noexcept { return this->m_Vec[1]; }
 			const auto		GetVecRight(void) const noexcept { return this->m_Vec[3]; }
-			const auto		GetVec(void) const noexcept { return VECTOR_ref::vget(GetVecLeft() - GetVecRight(), 0, GetVecRear() - GetVecFront()); }
+			const auto		GetVec(void) const noexcept { return m_VecTotal; }
 			const auto		GetFrontP(void) const noexcept {
-				auto FrontP = ((this->m_Input.GetPADSPress(PADS::MOVE_W) && !this->m_Input.GetPADSPress(PADS::MOVE_S))) ? (atan2f(GetVec().x(), -GetVec().z()) * GetVecFront()) : 0.f;
-				FrontP += (!this->m_Input.GetPADSPress(PADS::MOVE_W) && this->m_Input.GetPADSPress(PADS::MOVE_S)) ? (atan2f(-GetVec().x(), GetVec().z()) * GetVecRear()) : 0.f;
+				auto wkey = this->m_Input.GetPADSPress(PADS::MOVE_W);
+				auto skey = this->m_Input.GetPADSPress(PADS::MOVE_S);
+				auto FrontP = (wkey && !skey) ? (atan2f(m_VecTotal.x(), -m_VecTotal.z()) * -m_VecTotal.z()) : 0.f;
+				FrontP += (!wkey && skey) ? (atan2f(-m_VecTotal.x(), m_VecTotal.z()) * m_VecTotal.z()) : 0.f;
 				return FrontP;
 			}
 			const auto		GetLeanRate(void) const noexcept { return this->m_LeanRate; }
@@ -280,14 +283,17 @@ namespace FPS_n2 {
 			const auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
 			const auto		GetRun(void) const noexcept { return this->m_Input.GetPADSPress(PADS::RUN) && this->m_Input.GetPADSPress(PADS::MOVE_W); }
 		public://セッター
-			auto&			SetRadBuf(void) noexcept { return  this->m_rad_Buf; }
-			auto&			SetRad(void) noexcept { return  this->m_rad; }
+			auto&			SetRadBuf(void) noexcept { return this->m_rad_Buf; }
+			auto&			SetRad(void) noexcept { return this->m_rad; }
 			void			ResetLeanRate(void) noexcept { this->m_LeanRate = 0; }
 			void			SetIsSquat(bool value) noexcept { this->m_Squat.Set(value); }
 		private: //内部
-			void			SetVec(int pDir, bool Press) {
-				this->m_Vec[pDir] += (Press ? 1.f : -3.f)*5.f / FPS;
-				this->m_Vec[pDir] = std::clamp(this->m_Vec[pDir], 0.f, 1.f);
+			void			SetVec(bool Press0, bool Press1, bool Press2, bool Press3) {
+				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (Press0 ? 5.f : -15.f) / FPS, 0.f, 1.f);
+				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (Press1 ? 5.f : -15.f) / FPS, 0.f, 1.f);
+				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (Press2 ? 5.f : -15.f) / FPS, 0.f, 1.f);
+				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (Press3 ? 5.f : -15.f) / FPS, 0.f, 1.f);
+				m_VecTotal = VECTOR_ref::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
 			}
 		public:
 			void		InitKey(float pxRad, float pyRad);
@@ -344,6 +350,7 @@ namespace FPS_n2 {
 			VECTOR_ref											LaserStartPos;
 			VECTOR_ref											LaserEndPos;
 		public://ゲッター
+			const auto&			GetIsLaserActive() const noexcept { return this->m_IsLaserActive; }
 			void			SetIsLaserActive(bool value) noexcept { m_IsLaserActive = value; }
 			void			SetLaserStartPos(const VECTOR_ref& value) noexcept { LaserStartPos = value; }
 			void			SetLaserEndPos(const VECTOR_ref& value) noexcept { LaserEndPos = value; }
@@ -548,47 +555,57 @@ namespace FPS_n2 {
 				int ModUniqueID{-1};
 			};
 
-			std::array<MagStock, 4>								m_MagazineStock;
-			int													m_UseMagazineID{0};
-
-			int													m_AmmoStock{0};
+			std::array<MagStock, 3>								m_MagazineStock;
 		public:
-			const auto GetNowMagID() const noexcept { return m_UseMagazineID; }
-		private:
-			const auto GetNextMagID() const noexcept { return (m_UseMagazineID + 1) % ((int)m_MagazineStock.size()); }
+			int													m_AmmoStock{0};
+			const auto& GetAmmoStock() const noexcept { return m_AmmoStock; }
+			void AddAmmoStock(int Ammo) noexcept { m_AmmoStock += Ammo; }
+			void SubAmmoStock(int Ammo) noexcept { m_AmmoStock -= Ammo; }
 		public:
 			MagStockControl(void) noexcept {}
 			~MagStockControl(void) noexcept {}
 		public:
-			const auto& GetAmmoStock() const noexcept { return m_AmmoStock; }
-			void AddAmmoStock(int Ammo) noexcept {
-				m_AmmoStock += Ammo;
-			}
-			void SubAmmoStock(int Ammo) noexcept {
-				m_AmmoStock -= Ammo;
-			}
-
-			const auto& GetNowMag() const noexcept { return m_MagazineStock[m_UseMagazineID]; }
-			const auto& GetNextMag() const noexcept { return m_MagazineStock[GetNextMagID()]; }
+			const auto& GetNowMag() const noexcept { return m_MagazineStock[0]; }
 			const auto& GetMagDatas() const noexcept { return m_MagazineStock; }
 			const auto& GetMag(int select) const noexcept { return m_MagazineStock[select].AmmoNum; }
-			const auto IsEnableReload() const noexcept {
-				for (const auto& M : GetMagDatas()) {
-					if (GetNowMagID() == (int)(&M - &GetMagDatas().front())) {
-						continue;
+		public:
+			void Init_MagStockControl(int AmmoNum, int AmmoAll, int ModUniqueID) noexcept {
+				size_t Total = m_MagazineStock.size();
+				for (size_t i = 0; i < Total; i++) {
+					m_MagazineStock[i].AmmoNum = AmmoNum;
+					m_MagazineStock[i].AmmoAll = AmmoAll;
+					m_MagazineStock[i].ModUniqueID = ModUniqueID;
+				}
+				m_AmmoStock = 0;
+			}
+			void SetMag(int select, int AmmoNum) noexcept { m_MagazineStock[select].AmmoNum = AmmoNum; }
+			void SetOldMag(int OLDAmmoNum, int OLDAmmoAll, int OLDModUniqueID) noexcept {
+				m_MagazineStock[0].AmmoNum = OLDAmmoNum;
+				m_MagazineStock[0].AmmoAll = OLDAmmoAll;
+				m_MagazineStock[0].ModUniqueID = OLDModUniqueID;
+				std::sort(m_MagazineStock.begin(), m_MagazineStock.end(), [&](const MagStock&A, const MagStock&B) {return A.AmmoNum > B.AmmoNum; });
+			}
+			bool GetNeedAmmoLoad(bool MagInGunFull, bool MagInGunEmpty) noexcept {
+				int Total = (int)m_MagazineStock.size();
+				//半端マグが2個以上ある
+				//もしくは半端マグがあってストックもある
+				int RetNotFull = MagInGunFull ? 0 : 1;
+				int RetEmpty = MagInGunEmpty ? 1 : 0;
+				for (int i = 0; i < Total; i++) {
+					if (m_MagazineStock[i].AmmoNum != m_MagazineStock[i].AmmoAll) {
+						RetNotFull++;
 					}
-					if (M.AmmoNum > 0) {
-						return true;
+					if (m_MagazineStock[i].AmmoNum == 0) {
+						RetEmpty++;
 					}
 				}
+				if (RetEmpty >= Total + 1 && m_AmmoStock == 0) { return false; }
+				//if (RetFull >= Total + 1) { return false; }
+				if (RetNotFull > 1) { return true; }
+				if (RetNotFull > 0 && m_AmmoStock > 0) { return true; }
+				//
 				return false;
 			}
-		public:
-			void Init_MagStockControl(int AmmoNum, int AmmoAll, int ModUniqueID) noexcept;
-			void SetMag(int select, int AmmoNum) noexcept;
-			void SetNextMag(int OLDAmmoNum, int OLDAmmoAll, int OLDModUniqueID) noexcept;
-			void SortMag() noexcept;
-			int GetNeedAmmoStock() noexcept;
 		};
 		//
 		class HitReactionControl {
@@ -801,7 +818,7 @@ namespace FPS_n2 {
 		//
 		class ItemFallControl {
 		private:
-			std::array<std::shared_ptr<ItemObjClass>, 4>	m_Ptr;
+			std::array<std::shared_ptr<ItemObjClass>, 1>	m_Ptr;
 			int												m_Now{0};
 		public:
 			void		Init(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath, ItemType type);

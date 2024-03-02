@@ -34,6 +34,16 @@ namespace FPS_n2 {
 			void			DelObjAll(ObjType ModelType) noexcept;
 		public:
 			void			ExecuteObject(void) noexcept {
+				/*
+#ifdef DEBUG
+				for (int i = 0; i < this->m_Object.size(); i++) {
+					auto& o = this->m_Object[i];
+					if (!o->GetIsDelete()) {
+						printfDx("OBJ:[%s]\n", ObjTypeName[(int)o->GetobjType()]);
+					}
+				}
+#endif // DEBUG
+				//*/
 				//オブジェクトが増えた場合に備えて範囲forは使わない
 				for (int i = 0; i < this->m_Object.size(); i++) {
 					auto& o = this->m_Object[i];
