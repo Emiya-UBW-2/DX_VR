@@ -358,20 +358,26 @@ namespace FPS_n2 {
 
 				m_MyInput.SetInputPADS(PADS::SQUAT, MyChara->GetIsSquat() && (GetRand(100) < 1));
 
-				m_CanRepop = CanRepop;
-				if (m_CanRepop && !MyChara->CanLookTarget && (GetLengthToTarget() > 10.f*Scale_Rate)) {
-					this->m_RepopTimer += 1.f / FPS;
-					if (this->m_RepopTimer > 10.f) {
-						this->m_RepopTimer -= 10.f;
-						Repop(CanRepop);
-						if (!CanRepop) {
-							m_CanRepop = false;
+				if (m_CanRepop) {
+					if (
+						(CanRepop && !MyChara->CanLookTarget && (GetLengthToTarget() > 10.f*Scale_Rate)) ||
+						(!CanRepop && !MyChara->IsAlive())
+						) {
+						this->m_RepopTimer += 1.f / FPS;
+						if (this->m_RepopTimer > 10.f) {
+							this->m_RepopTimer -= 10.f;
+							Repop(CanRepop);
+							m_CanRepop = CanRepop;
 						}
+					}
+					else {
+						this->m_RepopTimer = 0.f;
 					}
 				}
 				else {
 					this->m_RepopTimer = 0.f;
 				}
+				//CanRepop
 				if (!MyChara->IsAlive()) {
 					this->m_Phase = ENUM_AI_PHASE::Dead;
 				}

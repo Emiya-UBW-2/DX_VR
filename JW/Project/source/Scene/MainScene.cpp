@@ -890,7 +890,7 @@ namespace FPS_n2 {
 				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
-			else if (m_PreEndTimer != -1.f) {
+			else if (m_PreEndTimer == -1.f) {
 				if (m_DeathPer > 0.f) {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f - 255.f*(1.f - m_DeathPer * 1.3f)), 0, 255));
 					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);

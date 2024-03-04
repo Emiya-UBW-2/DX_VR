@@ -1583,8 +1583,10 @@ namespace FPS_n2 {
 			this->m_BackGround.reset();
 			auto* ObjMngr = ObjectManager::Instance();
 			for (auto& g : m_Gun_Ptr) {
-				ObjMngr->DelObj((SharedObj*)&g);
-				g.reset();
+				if (g) {
+					ObjMngr->DelObj((SharedObj*)&g);
+					g.reset();
+				}
 			}
 		}
 	};
