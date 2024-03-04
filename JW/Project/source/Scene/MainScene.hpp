@@ -32,13 +32,20 @@ namespace FPS_n2 {
 			std::vector<std::shared_ptr<AIControl>>			m_AICtrl;					//AI
 			std::vector<DamageEvent>						m_DamageEvents;				//É_ÉÅÅ[ÉW
 			float											m_ReadyTimer{0.f};
+			int												m_LastMan{0};
 			float											m_Timer{0.f};
+			bool											m_IsEnd{false};
+			float											m_PreEndTimer{0.f};
+			float											m_EndTimer{0.f};
 			float											Min = 0.f;
 			float											Gamma = 1.f;
 			float											AberrationPower{1.f};
 
 			float											m_DeathCamYAdd{0.f};
 			float											m_DeathPer{0.f};
+
+			GraphHandle movie;										//
+			int m_movieTotalFrame{0};
 		public:
 			MAINLOOP(void) noexcept {}
 			~MAINLOOP(void) noexcept {}

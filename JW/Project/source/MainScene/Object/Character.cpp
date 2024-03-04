@@ -422,7 +422,7 @@ namespace FPS_n2 {
 				}
 				if (m_IsChanging) {
 					SetReady();
-					if (this->m_Arm[(int)EnumGunAnimType::Ready].Per() >= 1.f) {
+					if (this->m_Arm[(int)EnumGunAnimType::Ready].Per() >= 0.95f) {
 						SetAim();
 						if (m_ULTActive) {
 							m_GunSelect = 1;
@@ -504,11 +504,31 @@ namespace FPS_n2 {
 					Easing(&this->m_RecoilRadAdd, VECTOR_ref::zero(), 0.7f, EasingType::OutExpo);
 				}
 				if (m_ReadyAnim > 0.f) {
+					m_ReadyAnim = std::max(m_ReadyAnim - 1.f / FPS, 0.f);
 					switch (m_ReadyAnimPhase) {
 						case 0:
+							if (m_ReadyAnim < 4.f) {
+								m_ReadyAnimPhase++;
+							}
+							break;
+						case 1:
 							{
 								if (!GetGunPtrNow()->GetReloading()) {
-									GetGunPtrNow()->SetShotPhase(GunAnimeID::ReloadStart);
+									switch (GetGunPtrNow()->GetReloadType()) {
+										case RELOADTYPE::MAG:
+											{
+												GetGunPtrNow()->SetAmmo(0);
+												GetGunPtrNow()->SetReloadStartMag(GetGunPtrNow()->GetAmmoAll(), GetGunPtrNow()->GetMagUniqueID());
+											}
+											break;
+										case RELOADTYPE::AMMO:
+											{
+												GetGunPtrNow()->SetReloadStartAmmo(GetGunPtrNow()->GetAmmoAll());
+											}
+											break;
+										default:
+											break;
+									}
 									DrawParts->SetCamShake(0.1f, 2.f);
 								}
 								if (GetGunPtrNow()->GetShotPhase() == GunAnimeID::ReloadEnd) {
@@ -517,10 +537,10 @@ namespace FPS_n2 {
 								}
 							}
 							break;
-						case 1:
+						case 2:
 							{
 								SetReady();
-								if (this->m_Arm[(int)EnumGunAnimType::Ready].Per() >= 1.f) {
+								if (this->m_Arm[(int)EnumGunAnimType::Ready].Per() >= 0.95f) {
 									SetAim();
 									m_GunSelect = 0;
 									m_ReadyAnimPhase++;
@@ -528,7 +548,7 @@ namespace FPS_n2 {
 								}
 							}
 							break;
-						case 2:
+						case 3:
 							{
 								if (!GetGunPtrNow()->GetChecking() && (this->m_Arm[(int)EnumGunAnimType::Ready].Per() <= 0.1f)) {
 									GetGunPtrNow()->SetShotPhase(GunAnimeID::CheckStart);
@@ -539,6 +559,7 @@ namespace FPS_n2 {
 							}
 							break;
 						default:
+							m_ReadyAnim = -1.f;
 							break;
 					}
 				}
@@ -691,7 +712,12 @@ namespace FPS_n2 {
 				}
 				//
 				if (m_Press_Aim) {
-					SetADS();
+					if (!m_IsStuckGun) {
+						SetADS();
+					}
+					else {
+						SetAim();
+					}
 				}
 				if (KeyControl::GetRun() || this->m_IsWearArmer || (GetShotPhase() == GunAnimeID::AmmoLoadStart || GetShotPhase() == GunAnimeID::AmmoLoadEnd)) {
 					SetReady();
@@ -978,12 +1004,12 @@ namespace FPS_n2 {
 			this->m_move.vec = vecBuf;
 			this->m_PosBuf += this->m_move.vec;
 			//e‚Ð‚Á‚±‚ß
-			if (GetGunPtrNow() && GetIsAim() && this->m_BackGround) {
+			if (GetGunPtrNow() && this->m_BackGround) {
 				if (m_StuckGunTimer == 0.f) {
+					m_StuckGunTimer = 0.1f;
 					auto EndPos = GetGunPtrNow()->GetFrameWorldMat(GunFrame::Muzzle).pos();
 					if (this->m_BackGround->CheckLinetoMap(GetFrameWorldMat(CharaFrame::Head).pos(), &EndPos, false)) {//0.03ms
 						m_IsStuckGun = true;
-						SetReady();
 					}
 					else {
 						if (m_IsStuckGun) {
@@ -991,10 +1017,12 @@ namespace FPS_n2 {
 						}
 						m_IsStuckGun = false;
 					}
-					m_StuckGunTimer = 0.1f;
 				}
 				else {
 					m_StuckGunTimer = std::max(m_StuckGunTimer - 1.f / FPS, 0.f);
+				}
+				if (m_IsStuckGun) {
+					SetReady();
 				}
 			}
 			//•Ç”»’è

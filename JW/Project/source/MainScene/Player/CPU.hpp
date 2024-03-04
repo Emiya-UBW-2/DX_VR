@@ -22,9 +22,11 @@ namespace FPS_n2 {
 			~AIControl();
 		public:
 			void Init(const std::shared_ptr<BackGroundClassMain>& BackBround_t, PlayerID MyCharaID) noexcept;
-			void Execute(InputControl* MyInput) noexcept;
+			void Execute(InputControl* MyInput, bool CanRepop) noexcept;
 			void Draw() noexcept {}
 			void Dispose() noexcept {}
+		public:
+			const bool CannotRepop() noexcept;
 		};
 	};
 };

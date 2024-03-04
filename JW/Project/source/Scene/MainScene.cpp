@@ -122,7 +122,11 @@ namespace FPS_n2 {
 			this->m_DamageEvents.clear();
 			m_NetWorkBrowser.Init();
 			m_ReadyTimer = 6.f;
-			m_Timer = 180.f;
+			m_Timer = 180.f;//61.f;
+			m_IsEnd = false;
+			m_PreEndTimer = -1.f;
+			m_EndTimer = -1.f;
+			m_LastMan = -1;
 			//
 			m_MainLoopPauseControl.Init();
 			m_ConcussionControl.Init();
@@ -133,6 +137,12 @@ namespace FPS_n2 {
 			//*/
 		}
 		bool			MAINLOOP::Update_Sub(void) noexcept {
+			auto* ObjMngr = ObjectManager::Instance();
+			auto* DrawParts = DXDraw::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto* SE = SoundPool::Instance();
+			auto* OptionParts = OPTION::Instance();
+
 			auto* Pad = PadControl::Instance();
 			Pad->SetMouseMoveEnable(true);
 			Pad->ChangeGuide(
@@ -146,39 +156,85 @@ namespace FPS_n2 {
 						KeyGuide->AddGuide(PADS::MOVE_STICK, "選択");
 					}
 					else {
-						KeyGuide->AddGuide(PADS::MOVE_W, "");
-						KeyGuide->AddGuide(PADS::MOVE_S, "");
-						KeyGuide->AddGuide(PADS::MOVE_A, "");
-						KeyGuide->AddGuide(PADS::MOVE_D, "");
-						KeyGuide->AddGuide(PADS::MOVE_STICK, "移動");
+						if (m_PreEndTimer==0.f) {
+							KeyGuide->AddGuide(PADS::INTERACT, "スキップ");
+						}
+						else if (m_PreEndTimer == -1.f) {
+							KeyGuide->AddGuide(PADS::MOVE_W, "");
+							KeyGuide->AddGuide(PADS::MOVE_S, "");
+							KeyGuide->AddGuide(PADS::MOVE_A, "");
+							KeyGuide->AddGuide(PADS::MOVE_D, "");
+							KeyGuide->AddGuide(PADS::MOVE_STICK, "移動");
 
-						KeyGuide->AddGuide(PADS::LEAN_L, "");
-						KeyGuide->AddGuide(PADS::LEAN_R, "覗き");
-						KeyGuide->AddGuide(PADS::RUN, "走る");
-						KeyGuide->AddGuide(PADS::WALK, "歩く");
-						KeyGuide->AddGuide(PADS::SQUAT, "しゃがむ");
-						KeyGuide->AddGuide(PADS::JUMP, "スタンス切替");
+							KeyGuide->AddGuide(PADS::LEAN_L, "");
+							KeyGuide->AddGuide(PADS::LEAN_R, "覗き");
+							KeyGuide->AddGuide(PADS::RUN, "走る");
+							KeyGuide->AddGuide(PADS::WALK, "歩く");
+							KeyGuide->AddGuide(PADS::SQUAT, "しゃがむ");
+							KeyGuide->AddGuide(PADS::JUMP, "スタンス切替");
 
-						KeyGuide->AddGuide(PADS::SHOT, "射撃");
-						KeyGuide->AddGuide(PADS::ULT, "武器切替");
-						KeyGuide->AddGuide(PADS::AIM, "エイム");
-						KeyGuide->AddGuide(PADS::MELEE, "殴打");
+							KeyGuide->AddGuide(PADS::SHOT, "射撃");
+							KeyGuide->AddGuide(PADS::ULT, "武器切替");
+							KeyGuide->AddGuide(PADS::AIM, "エイム");
+							KeyGuide->AddGuide(PADS::MELEE, "殴打");
 
-						KeyGuide->AddGuide(PADS::RELOAD, "再装填");
+							KeyGuide->AddGuide(PADS::RELOAD, "再装填");
 
-						KeyGuide->AddGuide(PADS::CHECK, "装備確認");
+							KeyGuide->AddGuide(PADS::CHECK, "装備確認");
 
-						//KeyGuide->AddGuide(PADS::INTERACT, "取得");
-						KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
+							//KeyGuide->AddGuide(PADS::INTERACT, "取得");
+							KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
+						}
 					}
 				});
 
 			if (DXDraw::Instance()->IsPause()) {
 				m_MainLoopPauseControl.Execute();
+				if (m_IsEnd && GetMovieStateToGraph(movie.get()) == 1) {
+					PauseMovieToGraph(movie.get());
+				}
 				return true;
 			}
 			else {
 				m_MainLoopPauseControl.Reset();
+				if (!m_IsEnd) {
+					if (m_LastMan == 0 || (m_Timer<=0.f)) {
+						if (m_PreEndTimer < 0.f) {
+							m_PreEndTimer = 3.f;
+						}
+						else {
+							m_PreEndTimer = std::max(m_PreEndTimer - 1.f / FPS, 0.f);
+						}
+						if (m_PreEndTimer == 0.f) {
+							m_IsEnd = true;
+							movie = GraphHandle::Load("data/Movie/end0.mp4");
+							PlayMovieToGraph(movie.get());
+							ChangeMovieVolumeToGraph(std::clamp((int)(255.f*OptionParts->Get_SE()), 0, 255), movie.get());
+							m_movieTotalFrame = GetMovieTotalFrameToGraph(movie.get());
+
+							PadControl::Instance()->SetGuideUpdate();
+						}
+					}
+				}
+				else {
+					if (GetMovieStateToGraph(movie.get()) == 0) {
+						PlayMovieToGraph(movie.get());
+					}
+					if (m_EndTimer < 0.f) {
+						if (Pad->GetKey(PADS::INTERACT).trigger()) {
+							m_EndTimer = 2.f;
+						}
+						if (TellMovieToGraphToFrame(movie.get()) >= m_movieTotalFrame - 5) {
+							m_EndTimer = 2.f;
+						}
+					}
+					else {
+						m_EndTimer = std::max(m_EndTimer - 1.f / FPS, 0.f);
+					}
+					if (m_EndTimer == 0.f) {
+						return false;
+					}
+				}
 			}
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
@@ -186,11 +242,6 @@ namespace FPS_n2 {
 #ifdef DEBUG
 			DebugParts->SetPoint("update start");
 #endif // DEBUG
-			auto* ObjMngr = ObjectManager::Instance();
-			auto* DrawParts = DXDraw::Instance();
-			auto* PlayerMngr = PlayerManager::Instance();
-			auto* SE = SoundPool::Instance();
-			auto* OptionParts = OPTION::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
@@ -201,7 +252,7 @@ namespace FPS_n2 {
 			}
 			else {
 				m_ReadyTimer = std::max(m_ReadyTimer - 1.f / FPS, 0.f);
-				if (m_ReadyTimer == 0.f) {
+				if (m_ReadyTimer == 0.f && Chara->IsAlive()) {
 					m_Timer = std::max(m_Timer - 1.f / FPS, 0.f);
 				}
 			}
@@ -272,7 +323,22 @@ namespace FPS_n2 {
 					}
 				}
 				//
-				bool isready = (m_ReadyTimer == 0.f);
+				if (Chara->IsAlive()) {
+					if (m_Timer > 60.f) {
+						m_LastMan = -1;
+					}
+					else {
+						m_LastMan = 0;
+						for (int index = 0; index < Player_num; index++) {
+							if (index != GetMyPlayerID()) {
+								if (!m_AICtrl[index]->CannotRepop()) {
+									m_LastMan++;
+								}
+							}
+						}
+					}
+				}
+				bool isready = (m_ReadyTimer == 0.f) && (m_PreEndTimer == -1.f);
 				for (int index = 0; index < Player_num; index++) {
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 					if (m_NetWorkBrowser.GetSequence() == SequenceEnum::MainGame) {
@@ -284,7 +350,7 @@ namespace FPS_n2 {
 						}
 						else {
 							if (!m_NetWorkBrowser.GetClient()) {
-								m_AICtrl[index]->Execute(&tmp.Input);
+								m_AICtrl[index]->Execute(&tmp.Input, (m_Timer > 60.f));
 							}
 							c->SetInput(tmp.Input, isready && c->IsAlive());
 							bool override_true = true;
@@ -305,7 +371,7 @@ namespace FPS_n2 {
 						}
 						else {
 							InputControl OtherInput;
-							m_AICtrl[index]->Execute(&OtherInput);//めっちゃ重い
+							m_AICtrl[index]->Execute(&OtherInput, (m_Timer > 60.f));
 							c->SetInput(OtherInput, isready && c->IsAlive());
 						}
 						//ダメージイベント処理
@@ -628,6 +694,7 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(4, Chara->GetAutoAimID());
 				this->m_UIclass.SetfloatParam(2, Chara->GetAutoAimOn());
 				//Score
+				this->m_UIclass.SetIntParam(5, m_LastMan);
 				this->m_UIclass.SetIntParam(6, PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
 				//HP
 				this->m_UIclass.SetGaugeParam(0, (int)Chara->GetHP(), (int)Chara->GetHPMax());
@@ -681,17 +748,34 @@ namespace FPS_n2 {
 			//
 			m_NetWorkBrowser.Dispose();
 			EffectControl::Dispose();
+
+			{
+				auto* DrawParts = DXDraw::Instance();
+				PostPassEffect::Instance()->SetLevelFilter(0, 255, 1.f);
+				DrawParts->SetAberrationPower(1.f);
+			}
+
+			movie.Dispose();
 		}
 		//
 		void			MAINLOOP::BG_Draw_Sub(void) noexcept {
+			if (m_IsEnd) {
+				return;
+			}
 			this->m_BackGround->BG_Draw();
 		}
 		void			MAINLOOP::ShadowDraw_Sub(void) noexcept {
+			if (m_IsEnd) {
+				return;
+			}
 			this->m_BackGround->Shadow_Draw();
 			auto* ObjMngr = ObjectManager::Instance();
 			ObjMngr->DrawObject_Shadow();
 		}
 		void			MAINLOOP::MainDraw_Sub(void) noexcept {
+			if (m_IsEnd) {
+				return;
+			}
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
@@ -756,6 +840,9 @@ namespace FPS_n2 {
 		}
 		//UI表示
 		void			MAINLOOP::DrawUI_Base_Sub(void) noexcept {
+			if (m_PreEndTimer != -1.f) {
+				return;
+			}
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			//着弾表示
@@ -786,25 +873,41 @@ namespace FPS_n2 {
 		}
 		void			MAINLOOP::DrawUI_In_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
-			if (m_DeathPer > 0.f) {
-				auto per = m_DeathPer;
-				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f - 255.f*(1.f - per * 1.3f)), 0, 255));
+			if (m_IsEnd) {
+				movie.DrawExtendGraph(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, FALSE);
 
+				float per = (1.f - (16.f / 9.f) / 2.35f) / 2.f;
+				DrawBox(0, 0, DrawParts->m_DispXSize, (int)(DrawParts->m_DispYSize * per), GetColor(0, 0, 0), TRUE);
+				DrawBox(0, DrawParts->m_DispYSize - (int)(DrawParts->m_DispYSize * per), DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
+				if (m_EndTimer > 0.f) {
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - m_EndTimer) * 2.f), 0, 255));
+					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+				}
+			}
+			else if (m_PreEndTimer > 0.f) {
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - std::max(m_PreEndTimer - 2.f, 0.f)) * 2.f), 0, 255));
 				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
-
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+			}
+			else if (m_PreEndTimer != -1.f) {
+				if (m_DeathPer > 0.f) {
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f - 255.f*(1.f - m_DeathPer * 1.3f)), 0, 255));
+					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+				}
+				if (!DrawParts->IsPause()) {
+					auto* PlayerMngr = PlayerManager::Instance();
+					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+					if (Chara->IsAlive()) {
+						//ミニマップ
+						m_MiniMapScreen.DrawRotaGraph(y_r(960), y_r(840), 1.f, 0.f, true);
+					}
+				}
 			}
 			//ポーズ
 			if (DrawParts->IsPause()) {
 				m_MainLoopPauseControl.Draw();
-			}
-			else {
-				auto* PlayerMngr = PlayerManager::Instance();
-				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
-				if (Chara->IsAlive()) {
-					//ミニマップ
-					m_MiniMapScreen.DrawRotaGraph(y_r(960), y_r(840), 1.f, 0.f, true);
-				}
 			}
 		}
 		//使い回しオブジェ系

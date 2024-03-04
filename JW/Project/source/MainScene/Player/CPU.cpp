@@ -176,6 +176,7 @@ namespace FPS_n2 {
 			float									m_ShotTimer{0.f};
 			float									m_BackTimer{0.f};
 			float									m_RepopTimer{0.f};
+			bool									m_CanRepop{true};
 			float									m_MoveFrontTimer{0.f};
 
 			int										m_LeanLR{0};
@@ -234,7 +235,7 @@ namespace FPS_n2 {
 				auto MyPos = MyChara->GetEyePosition();
 
 				auto Target = TgtPos;
-				if (GetLengthToTarget() > 10.f*Scale_Rate) {
+				if (GetLengthToTarget() > 20.f*Scale_Rate) {
 					std::vector<int> SelList;
 					for (auto& C : this->m_BackGround->GetBuildData()) {
 						if (C.GetMeshSel() < 0) { continue; }
@@ -251,7 +252,7 @@ namespace FPS_n2 {
 				m_PathChecker.Init(MyPos_XZ, Target);	// 指定の２点の経路情報を探索する
 				this->TargetPathPlanningIndex = m_PathChecker.GetStartUnit()->GetPolyIndex();	// 移動開始時点の移動中間地点の経路探索情報もスタート地点にあるポリゴンの情報
 			}
-			void		Repop() noexcept {
+			void		Repop(bool CanRepop) noexcept {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
@@ -261,10 +262,14 @@ namespace FPS_n2 {
 				while (true) {
 					pos_t = this->m_BackGround->GetBuildData().at(GetRand((int)(this->m_BackGround->GetBuildData().size()) - 1)).GetMatrix().pos();
 
-					VECTOR_ref StartPos = TgtPos;
 					VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 1.f*Scale_Rate;
-					if ((StartPos - EndPos).Length() <= 10.f*Scale_Rate) { continue; }
-					if (this->m_BackGround->CheckLinetoMap(StartPos, &EndPos, false)) {
+					if (CanRepop) {
+						if ((TgtPos - EndPos).Length() <= 10.f*Scale_Rate) { continue; }
+					}
+					else {
+						if ((TgtPos - EndPos).Length() >= 15.f*Scale_Rate) { continue; }
+					}
+					if (this->m_BackGround->CheckLinetoMap(TgtPos, &EndPos, false)) {
 						break;
 					}
 				}
@@ -323,14 +328,21 @@ namespace FPS_n2 {
 				m_PathChecker.SetBackGround(this->m_BackGround);
 			}
 			void		SetMyCharaID(PlayerID MyCharaID) noexcept { this->m_MyCharaID = MyCharaID; }
+
+			const bool CannotRepop() const noexcept {
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
+				return (!m_CanRepop && !MyChara->IsAlive());
+			}
 		public:
 			void		Init() noexcept {
 				this->Reset();
 				this->m_PathUpdateTimer = 0.f;
 				this->m_MoveFrontTimer = (float)(GetRand(6));
+				this->m_CanRepop = true;
 			}
 			//
-			void		Execute_Before() noexcept {
+			void		Execute_Before(bool CanRepop) noexcept {
 				//初期化
 				m_MyInput.SetInputStart(0, 0, VECTOR_ref::zero());
 				IsGotLengthToTarget = false;
@@ -346,11 +358,15 @@ namespace FPS_n2 {
 
 				m_MyInput.SetInputPADS(PADS::SQUAT, MyChara->GetIsSquat() && (GetRand(100) < 1));
 
-				if (!MyChara->CanLookTarget && (GetLengthToTarget() > 15.f*Scale_Rate)) {
+				m_CanRepop = CanRepop;
+				if (m_CanRepop && !MyChara->CanLookTarget && (GetLengthToTarget() > 10.f*Scale_Rate)) {
 					this->m_RepopTimer += 1.f / FPS;
 					if (this->m_RepopTimer > 10.f) {
 						this->m_RepopTimer -= 10.f;
-						Repop();
+						Repop(CanRepop);
+						if (!CanRepop) {
+							m_CanRepop = false;
+						}
 					}
 				}
 				else {
@@ -445,10 +461,10 @@ namespace FPS_n2 {
 			this->GetParam()->SetMyCharaID(MyCharaID);
 			this->GetParam()->Init();
 		}
-		void AIControl::Execute(InputControl* MyInput) noexcept {
+		void AIControl::Execute(InputControl* MyInput, bool CanRepop) noexcept {
 			//return;
 			//AI
-			this->GetParam()->Execute_Before();
+			this->GetParam()->Execute_Before(CanRepop);
 			switch (this->GetParam()->m_Phase) {
 				case ENUM_AI_PHASE::Normal:
 					this->GetParam()->Execute_Normal();
@@ -462,6 +478,10 @@ namespace FPS_n2 {
 					break;
 			}
 			*MyInput = this->GetParam()->m_MyInput;
+		}
+
+		const bool AIControl::CannotRepop() noexcept {
+			return this->GetParam()->CannotRepop();
 		}
 	};
 };

@@ -189,6 +189,8 @@ namespace FPS_n2 {
 			GraphHandle						OIL_Graph;
 
 			int prevScore{0};
+			int prevLastMan{0};
+			float LastManPer{0.f};
 			std::vector<std::pair<int, float>> ScoreAdd;
 
 			std::array<GaugeMask, 1 + 4>	m_GaugeMask;
@@ -213,6 +215,8 @@ namespace FPS_n2 {
 			}
 			void			Set(const char* GunName) noexcept {
 				prevScore = 0;
+				prevLastMan = -1;
+				LastManPer = 0.f;
 				ScoreAdd.clear();
 
 				std::string Path = "data/gun/";
@@ -372,6 +376,23 @@ namespace FPS_n2 {
 						(int)(floatParam[1] / 60.f),
 																		  (float)((int)(floatParam[1]) % 60) + (floatParam[1] - (float)((int)(floatParam[1])))
 					);
+				}
+				//m_LastMan
+				if (intParam[5] != prevLastMan) {
+					if (intParam[5] >= 0) {
+						LastManPer = 3.f;
+					}
+					prevLastMan = intParam[5];
+				}
+				LastManPer = std::max(LastManPer - 1.f / FPS, 0.f);
+				if (intParam[5] >= 0) {
+					int xp1, yp1;
+					xp1 = DrawParts->m_DispXSize / 2;
+					yp1 = DrawParts->m_DispYSize / 2 - y_r(64);
+
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*LastManPer), 0, 255));
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 255, 255), Gray, "残り%d人", intParam[5]);
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
 				//ゲージ
 				{
