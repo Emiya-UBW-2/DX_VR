@@ -332,7 +332,7 @@ namespace FPS_n2 {
 		auto Gray75 = GetColor(128, 128, 128);
 		auto Gray = GetColor(64, 64, 64);
 
-		Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r((int)((float)(48 * 3 / 2 * 3 / 4) * per)), LR, FontHandle::FontYCenter::BOTTOM, xp1 + y_r(40.f*per), yp1 + y_r(20.f*per), IsSelect ? Red75 : Gray75, Gray, String, args...);
-		Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r((int)((float)(48 * 2 * 3 / 4) * per)), LR, FontHandle::FontYCenter::BOTTOM, xp1, yp1, IsSelect ? Red : White, Gray, String, args...);
+		Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_r((int)((float)(48 * 3 / 2 * 3 / 4) * per)), LR, FontHandle::FontYCenter::BOTTOM, xp1 + y_r(40.f*per), yp1 + y_r(20.f*per), IsSelect ? Red75 : Gray75, Gray, String, args...);
+		Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_r((int)((float)(48 * 2 * 3 / 4) * per)), LR, FontHandle::FontYCenter::BOTTOM, xp1, yp1, IsSelect ? Red : White, Gray, String, args...);
 	}
 };

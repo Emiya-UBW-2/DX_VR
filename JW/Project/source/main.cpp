@@ -70,6 +70,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		if (isTitle) {
 			switch (Titlescene->SelMode()) {
 				case 0:
+					Titlescene->Set_Next(MAINLOOPscene);
+					if (isTutorialLoop) {
+						isTutorialLoop = false;
+						Tutorialscene->Dispose_Load();
+					}
+					if (!isMainLoop) {
+						isMainLoop = true;
+						MAINLOOPscene->Load();
+					}
+					break;
+				case 1:
 					Titlescene->Set_Next(Customscene);
 					if (isMainLoop) {
 						isMainLoop = false;
@@ -80,7 +91,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 						Tutorialscene->Dispose_Load();
 					}
 					break;
-				case 1:
+				case 2:
 					Titlescene->Set_Next(Tutorialscene);
 					if (isMainLoop) {
 						isMainLoop = false;
@@ -89,17 +100,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					if (!isTutorialLoop) {
 						isTutorialLoop = true;
 						Tutorialscene->Load();
-					}
-					break;
-				case 2:
-					Titlescene->Set_Next(MAINLOOPscene);
-					if (isTutorialLoop) {
-						isTutorialLoop = false;
-						Tutorialscene->Dispose_Load();
-					}
-					if (!isMainLoop) {
-						isMainLoop = true;
-						MAINLOOPscene->Load();
 					}
 					break;
 				default:
