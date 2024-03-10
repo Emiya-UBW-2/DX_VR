@@ -676,7 +676,7 @@ namespace FPS_n2 {
 					}
 					//ƒeƒXƒgŒn
 				}
-				if ((GetShotPhase() == GunAnimeID::ReloadOne) && (GetShotPhase() == GunAnimeID::AmmoLoading)) {
+				if ((GetShotPhase() == GunAnimeID::ReloadOne) || (GetShotPhase() == GunAnimeID::AmmoLoading)) {
 					if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
 						GetGunPtrNow()->SetCancel();
 					}
@@ -1092,7 +1092,7 @@ namespace FPS_n2 {
 			if (m_Gun_Ptr[1]) {
 				m_SlingZrad.Execute();
 				m_SlingYrad.Execute();
-				m_SlingZrad.AddRad(1.f / FPS * (1.f - m_SlingPer[1 - this->m_GunSelect]));
+				m_SlingZrad.AddRad(1.f / FPS * (1.f - m_SlingPer.at((int)(1 - this->m_GunSelect))));
 				m_SlingZrad.AddRad(1.f / FPS * (KeyControl::GetRad().y() - this->m_yrad_Bottom));
 				auto mat = MATRIX_ref::RotX(deg2rad(-30)) * MATRIX_ref::RotY(deg2rad(-90)) *
 					(

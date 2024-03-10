@@ -25,7 +25,6 @@ Slot2IsNeed=true
 Slot2Item=G17Gen3Frame
 Slot2Item=G17Gen5Frame
 Slot2Item=G17Gen2Frame
-Slot2Item=G19LPFrame
 Slot2Item=FMG9
 
 Slot3Type=Barrel
