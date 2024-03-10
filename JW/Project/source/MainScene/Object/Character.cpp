@@ -300,6 +300,18 @@ namespace FPS_n2 {
 			this->m_Press_Aim = false;
 			this->m_IsChanging = false;
 
+			this->m_Wear_Morphine.Init(false);
+			this->m_IsWearMorphine = false;
+			this->m_CanWearMorphine = false;
+			this->m_IsWearingMorphine = false;
+			this->m_WearMorphine = false;
+			if (this->m_Morphine_Ptr) {
+				this->m_Morphine_Ptr->SetActive(false);
+			}
+
+			m_ArmBreak = true;
+			this->m_CanWearMorphine = true;
+
 			this->m_Wear_Armer.Init(false);
 			this->m_IsWearArmer = false;
 			this->m_CanWearArmer = false;
@@ -494,6 +506,48 @@ namespace FPS_n2 {
 					}
 				}
 			}
+			//Morphine
+			if (this->m_Morphine_Ptr) {
+				if (!this->m_IsWearMorphine) {
+					if (KeyControl::GetInputControl().GetPADSPress(PADS::INTERACT) && CanWearMorphine()) {
+						this->m_IsWearMorphine = true;
+						this->m_CanWearMorphine = false;
+					}
+				}
+				else if (!this->m_IsWearingMorphine) {
+					if (this->m_Arm[(int)EnumGunAnimType::Ready].Per() >= 0.95f) {
+						this->m_IsWearingMorphine = true;
+
+						this->m_Morphine_Ptr->SetActive(true);
+
+						//this->m_Wear_Morphine.Init(this->m_WearMorphine);
+						//this->m_WearMorphine ^= 1;
+
+						this->m_WearMorphine = true;
+						this->m_Wear_Morphine.Init(false);
+						this->m_Wear_MorphineFrame = 0.f;
+
+						auto SE = SoundPool::Instance();
+						SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetEyePosition(), Scale_Rate * 10.f);
+					}
+				}
+				else {
+					this->m_Wear_MorphineFrame += 1.f / FPS;
+
+					this->m_Wear_Morphine.Execute((this->m_Wear_MorphineFrame < 1.5f), 0.1f, 0.1f, 0.8f);
+					if (this->m_Wear_MorphineFrame > 2.f) {
+						this->m_IsWearMorphine = false;
+						this->m_IsWearingMorphine = false;
+
+						this->m_Morphine_Ptr->SetActive(false);
+						SetAim();
+
+						//
+						Heal(100);
+						//this->m_CanWearMorphine = true;
+					}
+				}
+			}
 			//射撃
 			if (GetGunPtrNow()) {
 				//リコイルの演算
@@ -664,6 +718,7 @@ namespace FPS_n2 {
 						if (
 							KeyControl::GetInputControl().GetPADSPress(PADS::CHECK) &&
 							(!CanWearArmer() && !this->m_IsWearArmer) &&
+							(!CanWearMorphine() && !this->m_IsWearMorphine) &&
 							MagStockControl::GetNeedAmmoLoad(GetGunPtrNow()->GetIsMagFull(), GetGunPtrNow()->GetIsMagEmpty()) &&
 							GetGunPtrNow()->GetShootReady() && !GetGunPtrNow()->IsAmmoLoading()) {
 							GetGunPtrNow()->SetShotPhase(GunAnimeID::AmmoLoadStart);
@@ -719,7 +774,7 @@ namespace FPS_n2 {
 						SetAim();
 					}
 				}
-				if (KeyControl::GetRun() || this->m_IsWearArmer || (GetShotPhase() == GunAnimeID::AmmoLoadStart || GetShotPhase() == GunAnimeID::AmmoLoadEnd)) {
+				if (KeyControl::GetRun() || this->m_IsWearArmer || this->m_IsWearMorphine || (GetShotPhase() == GunAnimeID::AmmoLoadStart || GetShotPhase() == GunAnimeID::AmmoLoadEnd)) {
 					SetReady();
 				}
 				if (
@@ -1109,7 +1164,7 @@ namespace FPS_n2 {
 						) * -6.25f);
 			}
 			//銃座標指定
-			if (!this->m_IsWearingArmer) {
+			if (!this->m_IsWearingArmer && !this->m_IsWearingMorphine) {
 				if (GetGunPtrNow()) {
 					//オートエイム
 					{
@@ -1463,6 +1518,39 @@ namespace FPS_n2 {
 
 					move_RightArm(GunPos, Gunyvec, Gunzvec);
 					move_LeftArm(HandsPos, Handsyvec, Handszvec);
+				}
+				//Morphine
+				if (this->m_Morphine_Ptr) {
+					auto tmp_armrat = GetFrameWorldMat(CharaFrame::Head);
+					VECTOR_ref HandsPos = tmp_armrat.pos()
+						+ tmp_armrat.xvec()*(-0.2f*Scale_Rate)
+						+ tmp_armrat.yvec()*(0.01f*Scale_Rate)
+						+ tmp_armrat.zvec()*(-0.5f*Scale_Rate)
+						;
+					VECTOR_ref Handsyvec = MATRIX_ref::Vtrans(VECTOR_ref::vget(1.f, 0.f, 0.f), tmp_armrat.GetRot());
+					VECTOR_ref Handszvec = MATRIX_ref::Vtrans(VECTOR_ref::vget(0.f, 0.f, -1.f), tmp_armrat.GetRot());
+					move_LeftArm(HandsPos, Handsyvec, Handszvec);
+
+					tmp_armrat = GetFrameWorldMat(CharaFrame::LeftWrist);
+
+					auto tmp_injmat = GetFrameWorldMat(CharaFrame::Head);
+					tmp_injmat = MATRIX_ref::RotX(deg2rad(-90.f))*MATRIX_ref::RotY(deg2rad(-45.f))*tmp_injmat;
+
+					VECTOR_ref GunPos = tmp_armrat.pos()
+						+ tmp_injmat.zvec()*(0.5f*Scale_Rate * (1.f - this->m_Wear_Morphine.Per()))
+						
+						+ tmp_armrat.xvec()*(-0.1f*Scale_Rate)
+						+ tmp_armrat.yvec()*(0.2f*Scale_Rate)
+						+ tmp_armrat.zvec()*(-0.05f*Scale_Rate)
+						;
+					VECTOR_ref Gunyvec = MATRIX_ref::Vtrans(VECTOR_ref::vget(-1.f, 0.f, 0.f), tmp_injmat.GetRot());
+					VECTOR_ref Gunzvec = MATRIX_ref::Vtrans(VECTOR_ref::vget(0.f, 1.f, 0.f), tmp_injmat.GetRot());
+
+					move_RightArm(GunPos, Gunyvec, Gunzvec);
+
+					auto tmp_gunrat = GetFrameWorldMat(CharaFrame::RightHandJoint);
+					this->m_Morphine_Ptr->SetMove(tmp_gunrat.GetRot(), tmp_gunrat.pos());
+					this->m_Morphine_Ptr->UpdateMove();
 				}
 				if (GetGunPtrNow()) {
 					//仮の画面外指定

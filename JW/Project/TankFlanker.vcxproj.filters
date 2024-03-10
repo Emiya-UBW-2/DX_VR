@@ -147,6 +147,9 @@
     <ClInclude Include="source\CommonScene\Object\GunsModify.hpp">
       <Filter>ソース ファイル\CommonScene\Object</Filter>
     </ClInclude>
+    <ClInclude Include="source\MainScene\Object\Morphine.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -226,6 +229,9 @@
     </ClCompile>
     <ClCompile Include="source\CommonScene\Object\GunsModify.cpp">
       <Filter>ソース ファイル\CommonScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\Morphine.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

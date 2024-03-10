@@ -9,7 +9,7 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			TitleScene::Set_Sub(void) noexcept {
-			select = -1;
+			select = 0;
 			m_MouseSelMode = false;
 			GameFadeIn = 0.f;
 			for (auto& y : GameStart) {
@@ -254,7 +254,7 @@ namespace FPS_n2 {
 				auto rad = deg2rad(90) * std::clamp(GameStart[0] * 2.f, 0.f, 1.f);
 				auto Color = GetColor((int)(255.f * sin(rad)), (int)(255.f * cos(rad)), 0);
 				Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(fontsize,
-																	FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1, IsSelect ? Color : ((select == -1) ? Gray25 : Gray), Black, SelectName[0]);
+																	FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1, IsSelect ? Color : ((select == -1) ? GetColor(148, 216, 132) : Gray), Black, SelectName[0]);
 			}
 			//
 			{

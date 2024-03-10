@@ -11,6 +11,8 @@
 #include "Ammo.hpp"
 #include "Gun.hpp"
 #include "Armer.hpp"
+#include "Morphine.hpp"
+
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -70,6 +72,14 @@ namespace FPS_n2 {
 			bool												m_IsWearArmer{false};
 			bool												m_IsWearingArmer{false};
 			bool												m_WearArmer{false};
+
+			std::shared_ptr<MorphineClass>						m_Morphine_Ptr{nullptr};
+			ArmMovePerClass										m_Wear_Morphine;
+			float												m_Wear_MorphineFrame{0.f};
+			bool												m_CanWearMorphine{false};
+			bool												m_IsWearMorphine{false};
+			bool												m_IsWearingMorphine{false};
+			bool												m_WearMorphine{false};
 
 			float												m_ULTUp{0.f};
 			bool												m_ULTActive{false};
@@ -162,6 +172,8 @@ namespace FPS_n2 {
 			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetFrameWorldMatrix(GetFrame(frame)); }
 			const auto		GetParentFrameWorldMat(CharaFrame frame) const noexcept { return GetParentFrameWorldMatrix(GetFrame(frame)); }
 			const auto		CanWearArmer() const noexcept { return this->m_CanWearArmer && (LifeControl::GetAP() < LifeControl::GetAPMax()); }
+			const auto		CanWearMorphine() const noexcept { return this->m_CanWearMorphine && m_ArmBreak; }
+			
 			
 		public://セッター(ラッパー)
 			void			ResetFrameLocalMat(CharaFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }
@@ -176,6 +188,7 @@ namespace FPS_n2 {
 				}
 			}
 			void			SetArmer(const std::shared_ptr<ArmerClass>& pArmer) noexcept { this->m_Armer_Ptr = pArmer; }
+			void			SetMorphine(const std::shared_ptr<MorphineClass>& pMorphine) noexcept { this->m_Morphine_Ptr = pMorphine; }
 		public://ゲッター
 			const auto		GetAutoAimPer(void) const noexcept { return this->m_AutoAimTimer / 1.f; }
 			const auto&		GetAutoAimID(void) const noexcept { return this->m_AutoAim; }
@@ -244,6 +257,11 @@ namespace FPS_n2 {
 				bool prev = this->m_CanWearArmer;
 				this->m_CanWearArmer = true;
 				return this->m_CanWearArmer != prev;
+			}
+			bool			GetMorphine() noexcept {
+				bool prev = this->m_CanWearMorphine;
+				this->m_CanWearMorphine = true;
+				return this->m_CanWearMorphine != prev;
 			}
 			const bool		CheckAmmoHit(AmmoClass* pAmmo, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept;
 			const bool		CheckMeleeHit(PlayerID MeleeID, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept;

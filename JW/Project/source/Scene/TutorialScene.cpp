@@ -263,8 +263,13 @@ namespace FPS_n2 {
 			{
 				{
 					//FPSカメラ
-					VECTOR_ref CamPos = m_CharacterPtr->GetEyePosition() + DrawParts->GetCamShake();
-					DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + m_CharacterPtr->GetEyeVector(), m_CharacterPtr->GetEyeVecY());
+					//VECTOR_ref CamPos = m_CharacterPtr->GetEyePosition() + DrawParts->GetCamShake();
+					//DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + m_CharacterPtr->GetEyeVector(), m_CharacterPtr->GetEyeVecY());
+
+					VECTOR_ref CamPos = VECTOR_ref::vget(0.f, 1.5f, 0.f)*Scale_Rate;
+					VECTOR_ref CamVec = VECTOR_ref::vget(1.f, 1.5f, 0.f)*Scale_Rate;
+					DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, m_CharacterPtr->GetEyeVecY());
+
 					//info
 					auto fov_t = DrawParts->GetMainCamera().GetCamFov();
 					auto near_t = DrawParts->GetMainCamera().GetCamNear();
@@ -624,12 +629,22 @@ namespace FPS_n2 {
 			MV1::SetAnime(&m_CharacterPtr->GetObj(), m_CharacterPtr->GetObj());
 			m_CharacterPtr->Init();
 			//アーマー
-			auto* ArmerPtr = ObjMngr->MakeObject(ObjType::Armer);
-			auto& a = (std::shared_ptr<ArmerClass>&)(*ArmerPtr);
+			{
+				auto* ArmerPtr = ObjMngr->MakeObject(ObjType::Armer);
+				auto& a = (std::shared_ptr<ArmerClass>&)(*ArmerPtr);
 
-			ObjMngr->LoadObjectModel((*ArmerPtr).get(), "data/model/PlateCarrler/");
-			(*ArmerPtr)->Init();
-			m_CharacterPtr->SetArmer(a);
+				ObjMngr->LoadObjectModel((*ArmerPtr).get(), "data/model/PlateCarrler/");
+				(*ArmerPtr)->Init();
+				m_CharacterPtr->SetArmer(a);
+			}
+			{
+				auto* MorphinePtr = ObjMngr->MakeObject(ObjType::Morphine);
+				auto& a = (std::shared_ptr<MorphineClass>&)(*MorphinePtr);
+
+				ObjMngr->LoadObjectModel((*MorphinePtr).get(), "data/model/Morphine/");
+				(*MorphinePtr)->Init();
+				m_CharacterPtr->SetMorphine(a);
+			}
 		}
 		void			TutorialScene::LoadGun(const std::string&FolderName, bool IsPreset, int Sel) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();

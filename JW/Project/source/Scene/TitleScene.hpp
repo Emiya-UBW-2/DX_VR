@@ -5,7 +5,7 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 
 		static const char* SelectName[5] = {
-			"Ready!",
+			"Ready",
 			"Customize Handgun",
 			"Shooting Range",
 			"",

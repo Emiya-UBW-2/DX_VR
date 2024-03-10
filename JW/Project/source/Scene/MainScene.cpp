@@ -1276,12 +1276,22 @@ namespace FPS_n2 {
 			(*Ptr)->Init();
 			PlayerMngr->GetPlayer(ID).SetChara(*Ptr);
 			if (ID == 0) {
-				auto* ArmerPtr = ObjMngr->MakeObject(ObjType::Armer);
-				auto& a = (std::shared_ptr<ArmerClass>&)(*ArmerPtr);
+				{
+					auto* ArmerPtr = ObjMngr->MakeObject(ObjType::Armer);
+					auto& a = (std::shared_ptr<ArmerClass>&)(*ArmerPtr);
 
-				ObjMngr->LoadObjectModel((*ArmerPtr).get(), "data/model/PlateCarrler/");
-				(*ArmerPtr)->Init();
-				c->SetArmer(a);
+					ObjMngr->LoadObjectModel((*ArmerPtr).get(), "data/model/PlateCarrler/");
+					(*ArmerPtr)->Init();
+					c->SetArmer(a);
+				}
+				{
+					auto* MorphinePtr = ObjMngr->MakeObject(ObjType::Morphine);
+					auto& a = (std::shared_ptr<MorphineClass>&)(*MorphinePtr);
+
+					ObjMngr->LoadObjectModel((*MorphinePtr).get(), "data/model/Morphine/");
+					(*MorphinePtr)->Init();
+					c->SetMorphine(a);
+				}
 			}
 			else {
 				c->SetArmer(nullptr);

@@ -1,7 +1,6 @@
 プレイヤーモデル改造元　着せ替え用スーツ 　フラン様
 護衛対象　　　　　　　　高科ちなみV4 　　　スパークリング湯豆腐様
 敵兵士　　　　　　　　　Russian Soldier　　Bzovius様
-
 壁面オブジェクト　　　Interogation Room　　denis_cliofas様
 地面オブジェクト　　　Abandoned Warehouse　denis_cliofas様
 Oil Drum (Game Model)　　　　　　　　　　　Michael Makivic様
@@ -33,6 +32,7 @@ Silencers Pack 1 　　　　　　　　　　　　　Pedro Belthori様
 Rifle Laser Sight　　　　　　　　　　　　　trolosqlfod様
 12ゲージ薬莢 　　　　KINGHUNTER Armory 　　deadcomrade様
 アーマー 　　　　　　Plate Carrler 　　　　ロウロー様
+Morphine Auto Injector 　　　　　　　　　　doodyk2019様
 アーマーアイテム 　　　　　　　　　　　　　短足沼地人様
 ムービー内AK-12　現用ロシア系銃火器セット　とりそば様
 ムービー内Glock17　　Glock17 G1 Ver.2　　　ミリタリーP様
@@ -48,5 +48,6 @@ Rifle Laser Sight　　　　　　　　　　　　　trolosqlfod様
 血痕　　　　　　　　nc202223 　　　　　　　フリー素材あそび様
 ステージLoDライト用画像　nc209434　　　　　みんちり様
 UI用アイコン 　　　　　　　　　　　　　　　icooon-mono.com様
+キーボードのアイコン 　　　　　　　　　　　Digipot様
 
 DXライブラリ 　　　　　　　　　　　　　　　山田巧様
