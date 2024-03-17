@@ -33,15 +33,13 @@ namespace FPS_n2 {
 			float m_Yrad_R{0.f};
 			float m_Xrad_R{0.f};
 			float m_Range{1.f};
-			std::vector<SlotMove>			SelMoveClass;
-
-			bool m_IsEnd{false};
-			float m_Alpha{0.f};
-			bool m_PrevShadow{false};
-
+			std::vector<SlotMove>		SelMoveClass;
+			bool						m_IsEnd{false};
+			float						m_Alpha{0.f};
 			LookSelect					m_LookSel{LookSelect::ModSet};
 
 			GraphHandle					m_SelectBackImage;
+			std::array<float, 3>		ButtonAlpha{};
 			std::array<ButtonClass, 3>	ButtonSel{};
 			int							bselect{0};
 
@@ -50,7 +48,7 @@ namespace FPS_n2 {
 			std::shared_ptr<GunClass>		m_GunPtr;				//ポインター別持ち
 			std::array<std::shared_ptr<GunClass>, (int)ULT_GUN::Max>		m_UltPtr;
 
-			bool IsG17Parts(const Slot& S) {
+			bool			IsG17Parts(const Slot& S) {
 				bool IsG17 = false;
 				{
 					auto* Data = &S;
@@ -108,8 +106,16 @@ namespace FPS_n2 {
 						 }
 				);
 			}
+			void			DrawCustomUI(void) noexcept;
+			void			DrawULTUI(void) noexcept;
+
+			const std::shared_ptr<GunsModify::Slot>& GetPartsSlotData(int SlotSel);
+
+			const char* ItemSelName(int SlotSel, int sel);
 		public:
 			CustomScene(void) noexcept {}
+			~CustomScene(void) noexcept {}
+		public:
 			void			Set_Sub(void) noexcept override;
 			//
 			bool			Update_Sub(void) noexcept override;

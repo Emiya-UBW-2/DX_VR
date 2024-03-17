@@ -1,4 +1,4 @@
-Name=PCC-9
+Name=PCC-4 Carbine
 
 ShotRate=800
 RecoilPower=50

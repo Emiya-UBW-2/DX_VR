@@ -14,6 +14,8 @@ namespace FPS_n2 {
 				std::vector<int>			m_ItemsUniqueID;
 				std::vector<std::string>	m_Conflicts;
 				bool						m_IsNeed{false};
+
+				const auto					ItemMaxCount(void) const noexcept { return  this->m_IsNeed ? ((int)this->m_ItemsUniqueID.size() - 1) : (int)this->m_ItemsUniqueID.size(); }
 			};
 		private:
 			int								m_UniqueID{0};
