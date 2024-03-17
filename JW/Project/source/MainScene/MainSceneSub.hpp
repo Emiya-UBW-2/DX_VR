@@ -2,6 +2,8 @@
 
 #include "../sub.hpp"
 
+#include "../CommonScene/UI/CommonUIControl.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class ConcussionControl {
@@ -41,9 +43,13 @@ namespace FPS_n2 {
 
 		};
 		class MainLoopPauseControl {
-			int select{0};
-			std::array<float, 3> SelYadd{};
-			bool	m_IsRetire{false};
+			GraphHandle					m_SelectBackImage;
+			std::array<ButtonClass, 3>	ButtonSel{};
+			int							select{0};
+
+			bool						m_MouseSelMode{false};
+
+			bool						m_IsRetire{false};
 		public:
 			MainLoopPauseControl() {}
 			~MainLoopPauseControl() {}
@@ -51,30 +57,58 @@ namespace FPS_n2 {
 			void Init() noexcept {
 				Reset();
 				m_IsRetire = false;
+
+				m_SelectBackImage = GraphHandle::Load("data/UI/select.png");
+				for (auto& y : ButtonSel) {
+					y.LoadCommon(&m_SelectBackImage);
+				}
+
+				ButtonSel.at(0).Load_String("Retire", y_r(48));
+				ButtonSel.at(0).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+				ButtonSel.at(1).Load_String("Option", y_r(48));
+				ButtonSel.at(1).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 1), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+				ButtonSel.at(2).Load_String("Return Game", y_r(48));
+				ButtonSel.at(2).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 0), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 			}
 			void Execute() noexcept {
 				auto* Pad = PadControl::Instance();
 				auto* SE = SoundPool::Instance();
 				if (!OptionWindowClass::Instance()->IsActive()) {
-					if (Pad->GetKey(PADS::MOVE_W).trigger()) {
-						--select;
-						if (select < 0) { select = 2; }
-						SelYadd[select] = 10.f;
+					int preselect = select;
+					bool preMouseSel = m_MouseSelMode;
 
-						SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
+					if (Pad->GetKey(PADS::MOVE_W).trigger()) {
+						if (select != -1) {
+							--select;
+							if (select < 0) { select = (int)ButtonSel.size() - 1; }
+						}
+						else {
+							select = 0;
+						}
+						m_MouseSelMode = false;
 					}
 					if (Pad->GetKey(PADS::MOVE_S).trigger()) {
-						++select;
-						if (select > 2) { select = 0; }
-						SelYadd[select] = -10.f;
+						if (select != -1) {
+							++select;
+							if (select > (int)ButtonSel.size() - 1) { select = 0; }
+						}
+						else {
+							select = 0;
+						}
+						m_MouseSelMode = false;
+					}
 
-						SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
+					if (m_MouseSelMode) {
+						select = -1;
 					}
-					for (int i = 0; i < 3; i++) {
-						Easing(&SelYadd[i], 0.f, 0.95f, EasingType::OutExpo);
+					//
+					for (auto& y : ButtonSel) {
+						if (y.GetInto()) {
+							m_MouseSelMode = true;
+							select = (int)(&y - &ButtonSel.front());
+						}
 					}
-					if (Pad->GetKey(PADS::INTERACT).trigger()) {
-						SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
+					if ((select != -1) && (m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetKey(PADS::INTERACT).trigger())) {
 						switch (select) {
 							case 0:
 								m_IsRetire = true;
@@ -90,40 +124,49 @@ namespace FPS_n2 {
 								DXDraw::Instance()->PauseExit();
 								break;
 						}
+						SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					}
+					if (preselect != select || preMouseSel != m_MouseSelMode) {
+						if (select != -1) {
+							for (auto& y : ButtonSel) {
+								y.SetNone();
+							}
+							ButtonSel.at(select).SetFocus();
+							SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
+						}
+						else {
+							for (auto& y : ButtonSel) {
+								y.SetReady();
+							}
+						}
+					}
+
 					if (Pad->GetKey(PADS::RELOAD).trigger()) {
 						SE->Get((int)SoundEnumCommon::UI_NG).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						DXDraw::Instance()->PauseExit();
 					}
+
+					for (auto& y : ButtonSel) {
+						y.Update();
+					}
 				}
 			}
 			void Draw() noexcept {
-				int xp1, yp1;
-				//auto* Fonts = FontPool::Instance();
-				//auto Red = GetColor(255, 0, 0);
-				//auto Red75 = GetColor(192, 0, 0);
-				//auto White = GetColor(255, 255, 255);
-				//auto Gray75 = GetColor(128, 128, 128);
-				//auto Gray = GetColor(64, 64, 64);
-
-				xp1 = y_r(1920 - 256 - 54 * 2);
-				yp1 = y_r(1080 - 108 - 108 * 2 + (int)SelYadd[0]);
-				DrawFetteString(xp1, yp1, 1.f, (select == 0), FontHandle::FontXCenter::RIGHT, "Retire");
-
-				xp1 = y_r(1920 - 256 - 54 * 1);
-				yp1 = y_r(1080 - 108 - 108 * 1 + (int)SelYadd[1]);
-				DrawFetteString(xp1, yp1, 1.f, (select == 1), FontHandle::FontXCenter::RIGHT, "Option");
-
-				xp1 = y_r(1920 - 256);
-				yp1 = y_r(1080 - 108 + (int)SelYadd[2]);
-				DrawFetteString(xp1, yp1, 1.f, (select == 2), FontHandle::FontXCenter::RIGHT, "Return Game");
+				for (auto& y : ButtonSel) {
+					y.Draw();
+				}
 			}
+			void Dispose() noexcept {
+				m_SelectBackImage.Dispose();
+				for (auto& y : ButtonSel) {
+					y.Dispose();
+				}
+			}
+
 		public:
 			void Reset() noexcept {
-				for (auto& y : SelYadd) {
-					y = 0.f;
-				}
 				select = 0;
+				m_MouseSelMode = false;
 			}
 			const auto&		GetIsRetireSelected(void) const noexcept { return this->m_IsRetire; }
 		private:

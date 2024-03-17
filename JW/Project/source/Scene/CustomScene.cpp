@@ -6,6 +6,21 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		//
 		void			CustomScene::Set_Sub(void) noexcept {
+			bselect = 0;
+			m_MouseSelMode = false;
+
+			m_SelectBackImage = GraphHandle::Load("data/UI/select.png");
+			for (auto& y : ButtonSel) {
+				y.LoadCommon(&m_SelectBackImage);
+			}
+
+			ButtonSel.at(0).Load_Icon("data/UI/Customs.png");
+			ButtonSel.at(0).Set(y_r(1920 - 96 * 2 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(1).Load_Icon("data/UI/WeaponChange.png");
+			ButtonSel.at(1).Set(y_r(1920 - 96 * 1 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(2).Load_Icon("data/UI/FreeLook.png");
+			ButtonSel.at(2).Set(y_r(1920 - 96 * 0 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+
 			//auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* OptionParts = OPTION::Instance();
@@ -68,7 +83,6 @@ namespace FPS_n2 {
 			OptionParts->Set_Shadow(true);
 
 			m_LookSel = LookSelect::ModSet;
-			m_LookSelPer = 3.f;
 		}
 		bool			CustomScene::Update_Sub(void) noexcept {
 			if (GetIsFirstLoop()) {
@@ -87,14 +101,18 @@ namespace FPS_n2 {
 			Pad->ChangeGuide(
 				[&]() {
 					auto* KeyGuide = PadControl::Instance();
-					KeyGuide->AddGuide(PADS::MOVE_W, "");
-					KeyGuide->AddGuide(PADS::MOVE_S, "");
-					KeyGuide->AddGuide(PADS::MOVE_A, "");
-					KeyGuide->AddGuide(PADS::MOVE_D, "");
-					KeyGuide->AddGuide(PADS::MOVE_STICK, "スロット選択,パーツ変更");
-					KeyGuide->AddGuide(PADS::AIM, "離して見る");
-					KeyGuide->AddGuide(PADS::RELOAD, "セーブして終了");
-					KeyGuide->AddGuide(PADS::MELEE, "編集開始時に戻す");
+					if (m_LookSel == LookSelect::FreeLook) {
+						KeyGuide->AddGuide(PADS::RELOAD, "フリールックをやめる");
+					}
+					else {
+						KeyGuide->AddGuide(PADS::MOVE_W, "");
+						KeyGuide->AddGuide(PADS::MOVE_S, "");
+						KeyGuide->AddGuide(PADS::MOVE_A, "");
+						KeyGuide->AddGuide(PADS::MOVE_D, "");
+						KeyGuide->AddGuide(PADS::MOVE_STICK, "スロット選択,パーツ変更");
+						KeyGuide->AddGuide(PADS::RELOAD, "セーブして終了");
+						KeyGuide->AddGuide(PADS::MELEE, "編集開始時に戻す");
+					}
 				}
 			);
 
@@ -227,13 +245,103 @@ namespace FPS_n2 {
 
 			);
 			(*m_GunPtr->GetMagazinePtr())->UpdateMove();
-			if (Pad->GetKey(PADS::AIM).trigger()) {
-				m_LookSel = (LookSelect)(((int)m_LookSel + 1) % ((int)LookSelect::Max));
-				m_LookSelPer = 3.f;
 
-				m_SelAlpha = 2.f;
+			int preselect = bselect;
+			bool preMouseSel = m_MouseSelMode;
+
+			/*
+			if (Pad->GetKey(PADS::MOVE_W).trigger()) {
+				if (bselect != -1) {
+					--bselect;
+					if (bselect < 0) { bselect = (int)ButtonSel.size() - 1; }
+				}
+				else {
+					bselect = 0;
+				}
+				m_MouseSelMode = false;
 			}
-			m_LookSelPer = std::max(m_LookSelPer - 1.f / FPS, 0.f);
+			if (Pad->GetKey(PADS::MOVE_S).trigger()) {
+				if (bselect != -1) {
+					++bselect;
+					if (bselect > (int)ButtonSel.size() - 1) { bselect = 0; }
+				}
+				else {
+					bselect = 0;
+				}
+				m_MouseSelMode = false;
+			}
+			//*/
+
+			if (m_MouseSelMode) {
+				bselect = -1;
+			}
+			//
+			for (auto& y : ButtonSel) {
+				if (y.GetInto()) {
+					m_MouseSelMode = true;
+					bselect = (int)(&y - &ButtonSel.front());
+				}
+			}
+
+			if (Pad->GetKey(PADS::RELOAD).trigger()) {
+				if (m_LookSel == LookSelect::FreeLook) {
+					m_LookSel = LookSelect::ModSet;
+					m_Yrad = deg2rad(-45);
+					bselect = 0;
+					Pad->SetGuideUpdate();
+				}
+				else {
+					m_IsEnd = true;
+				}
+				SE->Get((int)SoundEnumCommon::UI_NG).Play(0, DX_PLAYTYPE_BACK, TRUE);
+			}
+
+			if ((bselect != -1) && (m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetKey(PADS::INTERACT).trigger())) {
+				switch (bselect) {
+					case 0:
+						m_LookSel = LookSelect::ModSet;
+						m_Yrad = deg2rad(-45);
+						break;
+					case 1:
+						m_LookSel = LookSelect::ULTSet;
+						m_Yrad = deg2rad(15);
+						break;
+					case 2:
+						m_LookSel = LookSelect::FreeLook;
+						bselect = -1;
+						Pad->SetGuideUpdate();
+						break;
+					default:
+						break;
+				}
+				m_SelAlpha = 2.f;
+				SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
+			}
+
+			if (preselect != bselect || preMouseSel != m_MouseSelMode) {
+				if (m_LookSel == LookSelect::FreeLook) {
+					for (auto& y : ButtonSel) {
+						y.SetNone();
+					}
+				}
+				else {
+					if (bselect != -1) {
+						for (auto& y : ButtonSel) {
+							y.SetNone();
+						}
+						ButtonSel.at(bselect).SetFocus();
+						SE->Get((int)SoundEnumCommon::UI_Select).Play(0, DX_PLAYTYPE_BACK, TRUE);
+					}
+					else {
+						for (auto& y : ButtonSel) {
+							y.SetReady();
+						}
+					}
+				}
+			}
+			for (auto& y : ButtonSel) {
+				y.Update();
+			}
 
 			m_Yrad += Pad->GetLS_X() / 1000.f;
 			m_Yrad = std::clamp(m_Yrad, deg2rad(-100), deg2rad(100));
@@ -243,15 +351,6 @@ namespace FPS_n2 {
 			Easing(&m_Yrad_R, m_Yrad, 0.95f, EasingType::OutExpo);
 			Easing(&m_Range, (m_LookSel != LookSelect::ModSet) ? 2.f : 1.f, 0.95f, EasingType::OutExpo);
 			Pad->SetMouseMoveEnable(m_LookSel==LookSelect::FreeLook);
-
-			if (Pad->GetKey(PADS::AIM).trigger()) {
-				if (m_LookSel == LookSelect::ModSet) {
-					m_Yrad = deg2rad(-45);
-				}
-				if (m_LookSel == LookSelect::ULTSet) {
-					m_Yrad = deg2rad(15);
-				}
-			}
 
 			ObjMngr->ExecuteObject();
 			ObjMngr->LateExecuteObject();
@@ -265,7 +364,6 @@ namespace FPS_n2 {
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(45), 0.5f*Scale_Rate, far_t);
 			PostPassEffect::Instance()->Set_DoFNearFar(1.f * Scale_Rate, far_t / 2, 0.5f*Scale_Rate, far_t);
 
-			m_IsEnd |= Pad->GetKey(PADS::RELOAD).trigger();
 			m_Alpha = std::clamp(m_Alpha + (m_IsEnd ? 1.f : -1.f) / 60, 0.f, 1.f);//一旦FPS使わない
 			if (m_IsEnd && m_Alpha == 1.f) {
 				return false;
@@ -290,6 +388,11 @@ namespace FPS_n2 {
 
 			ObjMngr->DisposeObject();
 			OptionParts->Set_Shadow(m_PrevShadow);
+
+			m_SelectBackImage.Dispose();
+			for (auto& y : ButtonSel) {
+				y.Dispose();
+			}
 		}
 		void			CustomScene::ShadowDraw_Sub(void) noexcept {
 			//this->m_BackGround->Shadow_Draw();
@@ -352,13 +455,10 @@ namespace FPS_n2 {
 			auto Black = GetColor(0, 0, 0);
 			int xp1, yp1;
 			//
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(m_LookSelPer, 0.f, 1.f)), 0, 255));
-			{
-				xp1 = y_r(64 + 300);
-				yp1 = y_r(64 + 48 * 2);
-
-				DrawFetteString(xp1, yp1, 1.0f, false, FontHandle::FontXCenter::LEFT, LookSelectName[(int)m_LookSel]);
-			}
+			Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(96),
+																FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+																y_r(64), y_r(64), White, Black, "Customize");
+			//
 			auto Per = 1.f - std::clamp(m_Range - 1.f, 0.f, 1.f);
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(Per*2.f - 1.f, 0.f, 1.f)), 0, 255));
 			{
@@ -462,16 +562,16 @@ namespace FPS_n2 {
 				}
 			}
 			//
-			{
-				xp1 = y_r(32);
-				yp1 = y_r(1080 - 32 - 32);
-
-				std::string Info = "";
-				Info = "3分間の間敵を倒し続けてください。累計撃墜数はこちらでのみカウントされます";
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1, White, Black, Info);
+			for (auto& y : ButtonSel) {
+				y.Draw();
 			}
-			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-
+			//
+			if (bselect != -1) {
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
+																	  FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+																	  y_r(32), y_r(1080 - 32 - 32), White, Black, LookSelectName[bselect]);
+			}
+			//
 			{
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*m_Alpha), 0, 255));
 

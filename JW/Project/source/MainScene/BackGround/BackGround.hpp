@@ -21,6 +21,7 @@ namespace FPS_n2 {
 			virtual void			Shadow_Draw_NearFar_Sub(void) noexcept {}
 			virtual void			Shadow_Draw_Sub(void) noexcept {}
 			virtual void			Draw_Sub(void) noexcept {}
+			virtual void			DrawFront_Sub(void) noexcept {}
 			//
 			virtual void			Dispose_Sub(void) noexcept {}
 			virtual bool			CheckLinetoMap_Sub(const VECTOR_ref&, VECTOR_ref*, bool, VECTOR_ref*, MV1_COLL_RESULT_POLY*) const noexcept { return false; }
@@ -120,6 +121,9 @@ namespace FPS_n2 {
 				DrawCommon();
 				Draw_Sub();
 			}
+			void			DrawFront(void) noexcept {
+				DrawFront_Sub();
+			}
 			//
 			void			Dispose(void) noexcept {
 				this->m_ObjSky.Dispose();
@@ -168,6 +172,9 @@ namespace FPS_n2 {
 			}
 			void			Draw_Sub(void) noexcept override {
 				this->m_BuildControl.Draw();
+			}
+			void			DrawFront_Sub(void) noexcept override {
+				this->m_BuildControl.DrawFront();
 			}
 			//
 			void			Dispose_Sub(void) noexcept override {

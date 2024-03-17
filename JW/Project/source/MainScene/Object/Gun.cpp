@@ -307,6 +307,9 @@ namespace FPS_n2 {
 				//
 				if (this->m_ShotPhase == GunAnimeID::Watch) {
 					GunAnimSelect = CharaGunAnimeID::Watch;
+					if (this->GetGunAnimZero(GunAnimSelect)) {
+						m_UpperAnim = 0.f;
+					}
 					UpdateGunAnim(GunAnimSelect, 1.5f);
 					if (GetGunAnimEnd(GunAnimSelect)) {
 						this->m_ShotPhase = GunAnimeID::Base;
@@ -458,7 +461,7 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadStart) = 15;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadOne) = 30;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 10;
-				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 60;
+				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 120;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Melee) = 10;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoadStart) = 15;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoading) = 36;
@@ -494,7 +497,7 @@ namespace FPS_n2 {
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Ready).emplace_back(EnumGunAnim::M16_ready2);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Run).emplace_back(EnumGunAnim::M16_run);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Check).emplace_back(EnumGunAnim::M16_check1);
-				m_GunAnimeSet.back().at((int)EnumGunAnimType::Watch).emplace_back(EnumGunAnim::M1911_watch);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Watch).emplace_back(EnumGunAnim::M16_watch);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Melee).emplace_back(EnumGunAnim::M1911_melee);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::AmmoLoad).emplace_back(EnumGunAnim::M1911_reload);
 				//ƒnƒ“ƒhƒKƒ“
@@ -523,7 +526,7 @@ namespace FPS_n2 {
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Ready).emplace_back(EnumGunAnim::M16_ready2);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Run).emplace_back(EnumGunAnim::M16_run);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Check).emplace_back(EnumGunAnim::M16_check1);
-				m_GunAnimeSet.back().at((int)EnumGunAnimType::Watch).emplace_back(EnumGunAnim::M1911_watch);
+				m_GunAnimeSet.back().at((int)EnumGunAnimType::Watch).emplace_back(EnumGunAnim::M16_watch);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::Melee).emplace_back(EnumGunAnim::M1911_melee);
 				m_GunAnimeSet.back().at((int)EnumGunAnimType::AmmoLoad).emplace_back(EnumGunAnim::M1911_reload);
 			}
@@ -541,6 +544,9 @@ namespace FPS_n2 {
 			for (int i = 0; i < GetObj().get_anime().size(); i++) {
 				if (Sel == (GunAnimeID)i) {
 					GetObj().get_anime(i).per = 1.f;
+					if (Sel == GunAnimeID::Watch) {
+						GetObj().get_anime(i).per = 0.f;
+					}
 					if (Sel == GunAnimeID::Shot) {
 						SetAnimOnce(i, ((float)this->GetGunDataClass()->GetShotRate()) / 300.f);//•ªŠÔ300
 					}

@@ -20,7 +20,12 @@ namespace FPS_n2 {
 		private:
 			bool											m_IsFirstLoad{true};			//共通リソースをロードしたか
 			std::shared_ptr<BackGroundClassMain>			m_BackGround;					//BG
+
 			UIClass											m_UIclass;						//UI関連
+			GetItemLog										m_GetItemLog;
+			int												prevScore{0};
+			int												prevLastMan{0};
+
 			MyPlayerReticleControl							m_MyPlayerReticleControl;		//銃関連
 			NetWorkBrowser									m_NetWorkBrowser;				//ネットワーク
 			ConcussionControl								m_ConcussionControl;			//コンカッション
@@ -34,6 +39,7 @@ namespace FPS_n2 {
 			float											m_ReadyTimer{0.f};
 			int												m_LastMan{0};
 			float											m_Timer{0.f};
+			bool											m_RashStartLog{false};
 			bool											m_IsEnd{false};
 			float											m_PreEndTimer{0.f};
 			float											m_EndTimer{0.f};
@@ -61,6 +67,7 @@ namespace FPS_n2 {
 			void			ShadowDraw_NearFar_Sub(void) noexcept override {}
 			void			ShadowDraw_Sub(void) noexcept override;
 			void			MainDraw_Sub(void) noexcept override;
+			void			MainDrawFront_Sub(void) noexcept override;
 			void			MainDrawbyDepth_Sub(void) noexcept override {}
 			//UI表示
 			void			DrawUI_Base_Sub(void) noexcept override;

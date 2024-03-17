@@ -1,0 +1,5 @@
+Name=STANAG 20Round
+
+capacity=20
+useammo0=556x45
+end

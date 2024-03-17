@@ -1,6 +1,7 @@
 #pragma once
 #include	"../Header.hpp"
 #include "../CommonScene/Object/GunsModify.hpp"
+#include "../CommonScene/UI/CommonUIControl.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -11,9 +12,9 @@ namespace FPS_n2 {
 			Max,
 		};
 		static const char* LookSelectName[(int)LookSelect::Max] = {
-			"改造",
-			"プライマリウェポン選択",
-			"フリールック",
+			"ハンドガンのカスタマイズを行います",
+			"プライマリウェポンを変更します",
+			"銃を見まわします",
 		};
 
 		class CustomScene : public TEMPSCENE, public GunsModify {
@@ -38,8 +39,13 @@ namespace FPS_n2 {
 			float m_Alpha{0.f};
 			bool m_PrevShadow{false};
 
-			LookSelect	m_LookSel{LookSelect::ModSet};
-			float m_LookSelPer{1.f};
+			LookSelect					m_LookSel{LookSelect::ModSet};
+
+			GraphHandle					m_SelectBackImage;
+			std::array<ButtonClass, 3>	ButtonSel{};
+			int							bselect{0};
+
+			bool						m_MouseSelMode{false};
 		private:
 			std::shared_ptr<GunClass>		m_GunPtr;				//ポインター別持ち
 			std::array<std::shared_ptr<GunClass>, (int)ULT_GUN::Max>		m_UltPtr;

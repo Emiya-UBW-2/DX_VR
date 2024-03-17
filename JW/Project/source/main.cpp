@@ -7,16 +7,19 @@
 #include "Scene/TutorialScene.hpp"
 #include "Scene/MainScene.hpp"
 
+#define LineHeight	y_r(18)
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DXDraw::Create();								//汎用
-	SetMainWindowText("JW");						//タイトル
-	//MV1SetLoadModelUsePackDraw(TRUE);
-	PostPassEffect::Create();						//シェーダー
 #ifdef DEBUG
 	auto* DebugParts = DebugClass::Instance();		//デバッグ
 #endif // DEBUG
 	auto* DrawParts = DXDraw::Instance();
+
+	DrawParts->Init();
+	SetMainWindowText("JW");						//タイトル
+	//MV1SetLoadModelUsePackDraw(TRUE);
+	PostPassEffect::Create();						//シェーダー
 	//
 	FPS_n2::Sceneclass::ObjectManager::Create();
 	FPS_n2::Sceneclass::PlayerManager::Create();
@@ -42,7 +45,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	while (true) {
 		scene->StartScene();
 		while (true) {
-			if ((ProcessMessage() != 0) || (CheckHitKeyWithCheck(KEY_INPUT_ESCAPE) != 0)) { return 0; }
+			if ((ProcessMessage() != 0) || DrawParts->UpdateEscWindow()) { return 0; }
 			FPS = std::max(GetFPS(), 30.f);
 #ifdef DEBUG
 			clsDx();

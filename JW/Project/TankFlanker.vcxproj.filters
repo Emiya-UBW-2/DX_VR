@@ -37,6 +37,9 @@
     <Filter Include="ソース ファイル\CommonScene\Object">
       <UniqueIdentifier>{ff44695c-5ce8-4529-b654-a6bdb9eec2d5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\CommonScene\UI">
+      <UniqueIdentifier>{7aaa1d2a-1d70-4d92-9079-12f1474a38f4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\sub.hpp">
@@ -149,6 +152,9 @@
     </ClInclude>
     <ClInclude Include="source\MainScene\Object\Morphine.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\CommonScene\UI\CommonUIControl.hpp">
+      <Filter>ソース ファイル\CommonScene\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

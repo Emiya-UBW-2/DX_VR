@@ -65,19 +65,24 @@ namespace FPS_n2 {
 			int													m_GunSelect{0};
 			std::array<std::shared_ptr<GunClass>, 2>			m_Gun_Ptr{nullptr , nullptr};			//銃
 			bool												m_IsChanging{false};
+			bool												m_HeadShotSwitch{false};
+			float												m_HeadShotPer{0.f};
 			//
 			std::shared_ptr<ArmerClass>							m_Armer_Ptr{nullptr};
 			ArmMovePerClass										m_Wear_Armer;
 			bool												m_CanWearArmer{false};
 			bool												m_IsWearArmer{false};
+			bool												m_WearArmerSwitch{false};
 			bool												m_IsWearingArmer{false};
 			bool												m_WearArmer{false};
 
 			std::shared_ptr<MorphineClass>						m_Morphine_Ptr{nullptr};
 			ArmMovePerClass										m_Wear_Morphine;
 			float												m_Wear_MorphineFrame{0.f};
+			float												m_Wear_MorphinePer{0.f};
 			bool												m_CanWearMorphine{false};
 			bool												m_IsWearMorphine{false};
+			bool												m_MorphineSwitch{false};
 			bool												m_IsWearingMorphine{false};
 			bool												m_WearMorphine{false};
 
@@ -172,8 +177,15 @@ namespace FPS_n2 {
 			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetFrameWorldMatrix(GetFrame(frame)); }
 			const auto		GetParentFrameWorldMat(CharaFrame frame) const noexcept { return GetParentFrameWorldMatrix(GetFrame(frame)); }
 			const auto		CanWearArmer() const noexcept { return this->m_CanWearArmer && (LifeControl::GetAP() < LifeControl::GetAPMax()); }
-			const auto		CanWearMorphine() const noexcept { return this->m_CanWearMorphine && m_ArmBreak; }
-			
+			const auto		CanWearMorphine() const noexcept { return this->m_CanWearMorphine && (LifeControl::GetHP() < LifeControl::GetHPMax()); }
+			const auto		GetWearArmerSwitch() const noexcept { return this->m_WearArmerSwitch; }
+			const auto		GetMorphineSwitch() const noexcept { return this->m_MorphineSwitch; }
+
+			const auto		PopHeadShotSwitch() noexcept {
+				auto ret = this->m_HeadShotSwitch;
+				this->m_HeadShotSwitch = false;
+				return ret;
+			}
 			
 		public://セッター(ラッパー)
 			void			ResetFrameLocalMat(CharaFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }

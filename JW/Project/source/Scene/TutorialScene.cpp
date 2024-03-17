@@ -123,6 +123,8 @@ namespace FPS_n2 {
 
 						KeyGuide->AddGuide(PADS::CHECK, "装備確認");
 
+						KeyGuide->AddGuide(PADS::THROW, "モルヒネ注射");
+
 						//KeyGuide->AddGuide(PADS::INTERACT, "取得");
 						KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
 					}
@@ -151,8 +153,6 @@ namespace FPS_n2 {
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
 				SetMousePoint(DXDraw::Instance()->m_DispXSize / 2, DXDraw::Instance()->m_DispYSize / 2);
-				SE->Get((int)SoundEnum::Env).Play(0, DX_PLAYTYPE_LOOP);
-				SE->Get((int)SoundEnum::Env2).Play(0, DX_PLAYTYPE_LOOP);
 			}
 			{
 				/*
@@ -197,7 +197,7 @@ namespace FPS_n2 {
 				MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press() && !DXDraw::Instance()->IsPause());
 				MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press() && !DXDraw::Instance()->IsPause());
 				MyInput.SetInputPADS(PADS::ULT, Pad->GetKey(PADS::ULT).press());
-				//MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
+				MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
 				MyInput.SetInputPADS(PADS::CHECK, Pad->GetKey(PADS::CHECK).press());
 				MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 				MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
@@ -263,12 +263,12 @@ namespace FPS_n2 {
 			{
 				{
 					//FPSカメラ
-					//VECTOR_ref CamPos = m_CharacterPtr->GetEyePosition() + DrawParts->GetCamShake();
-					//DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + m_CharacterPtr->GetEyeVector(), m_CharacterPtr->GetEyeVecY());
+					VECTOR_ref CamPos = m_CharacterPtr->GetEyePosition() + DrawParts->GetCamShake();
+					DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + m_CharacterPtr->GetEyeVector(), m_CharacterPtr->GetEyeVecY());
 
-					VECTOR_ref CamPos = VECTOR_ref::vget(0.f, 1.5f, 0.f)*Scale_Rate;
-					VECTOR_ref CamVec = VECTOR_ref::vget(1.f, 1.5f, 0.f)*Scale_Rate;
-					DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, m_CharacterPtr->GetEyeVecY());
+					//VECTOR_ref CamPos = VECTOR_ref::vget(0.f, 1.5f, 0.f)*Scale_Rate;
+					//VECTOR_ref CamVec = VECTOR_ref::vget(1.f, 1.5f, 0.f)*Scale_Rate;
+					//DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, m_CharacterPtr->GetEyeVecY());
 
 					//info
 					auto fov_t = DrawParts->GetMainCamera().GetCamFov();
@@ -307,7 +307,7 @@ namespace FPS_n2 {
 					DrawParts->SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
 					//DoF
 					if (m_CharacterPtr->GetIsADS()) {
-						PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.5f, far_t - 0.1f, Scale_Rate * 0.3f, far_t);
+						PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.5f, far_t - 0.1f, Scale_Rate * 0.1f, far_t);
 					}
 					else {
 						PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.5f, far_t - 0.1f, near_t, far_t);
@@ -409,12 +409,9 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			TutorialScene::Dispose_Sub(void) noexcept {
-			auto* SE = SoundPool::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* OptionParts = OPTION::Instance();
 
-			SE->Get((int)SoundEnum::Env).StopAll(0);
-			SE->Get((int)SoundEnum::Env2).StopAll(0);
 			//使い回しオブジェ系
 			ObjMngr->DelObj((SharedObj*)&m_CharacterPtr);
 			m_CharacterPtr->Dispose();
@@ -438,8 +435,8 @@ namespace FPS_n2 {
 		void			TutorialScene::MainDraw_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 			SetFogEnable(FALSE);
-			ObjMngr->DrawObject();
 			this->m_BackGround->Draw();
+			ObjMngr->DrawObject();
 			//レーザー
 			m_CharacterPtr->DrawLaser();
 
@@ -475,6 +472,7 @@ namespace FPS_n2 {
 		}
 
 		void			TutorialScene::DrawUI_Base_Sub(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			//着弾表示
 			if (m_CharacterPtr->IsAlive()) {
 				//レティクル表示
@@ -489,10 +487,12 @@ namespace FPS_n2 {
 						1.f, m_CharacterPtr->GetGunRadAdd(), true);
 				}
 				//UI
-				this->m_UIclass.Draw();
+				if (!DrawParts->IsPause()) {
+					this->m_UIclass.Draw();
+				}
 				//通信設定
 				/*
-				if (DXDraw::Instance()->IsPause()) {
+				if (DrawParts->IsPause()) {
 					m_NetWorkBrowser.Draw();
 				}
 				//*/
@@ -521,8 +521,6 @@ namespace FPS_n2 {
 		//SE
 		void			TutorialScene::LoadSE(void) noexcept {
 			auto* SE = SoundPool::Instance();
-			SE->Add((int)SoundEnum::Env, 1, "data/Sound/SE/envi.wav", false);
-			SE->Add((int)SoundEnum::Env2, 1, "data/Sound/SE/envi2.wav", false);
 
 			SE->Add((int)SoundEnum::CartFall, 6, "data/Sound/SE/gun/case.wav", false);
 			SE->Add((int)SoundEnum::MagFall, 6, "data/Sound/SE/gun/ModFall.wav", false);
@@ -560,6 +558,7 @@ namespace FPS_n2 {
 
 
 			SE->Add((int)SoundEnum::Tank_near, 5, "data/Sound/SE/near.wav");
+			SE->Add((int)SoundEnum::Stim, 1, "data/Sound/SE/Stim.wav");
 		}
 		void			TutorialScene::SetSE(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -616,6 +615,7 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::Man_teamdown);
 
 			SE->Delete((int)SoundEnum::Tank_near);
+			SE->Delete((int)SoundEnum::Stim);
 		}
 		//
 		void			TutorialScene::LoadChara(const std::string&FolderName) noexcept {

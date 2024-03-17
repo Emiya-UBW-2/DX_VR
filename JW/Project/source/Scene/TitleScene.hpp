@@ -1,5 +1,6 @@
 #pragma once
 #include	"../Header.hpp"
+#include "../CommonScene/UI/CommonUIControl.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -21,26 +22,26 @@ namespace FPS_n2 {
 
 		class TitleScene : public TEMPSCENE {
 		private:
-			int select{0};
+			GraphHandle					m_SelectBackImage;
+			std::array<ButtonClass, 5>	ButtonSel{};
+			int							select{0};
 
-			std::array<float, 5> GameStart{};
-			std::array<float, 5> SelYadd{};
+			float						GameFadeIn{0.f};
+			float						GameStart{0.f};
 
-			float GameFadeIn{0.f};
-			GraphHandle	m_SelectBackImage;
-			GraphHandle	m_SettingImage;
-			GraphHandle	m_CreditImage;
-			bool m_MouseSelMode{false};
+			bool						m_MouseSelMode{false};
 
-			static const int CharMax = 256;
-			bool m_CreditActive{false};
-			float m_ActivePer{0.f};
-			int m_CreditCoulm{0};
+			static const int			CharMax = 256;
+			int							m_CreditCoulm{0};
 			std::array<char[CharMax], 64> m_CreditStr{};
+			bool						m_CreditActive{false};
+			PopUpDrawClass				m_PopUpDrawClass;
 		public:
 			const auto SelMode() const noexcept { return select; }
 		public:
 			TitleScene(void) noexcept {}
+			~TitleScene(void) noexcept {}
+		public:
 			void			Set_Sub(void) noexcept override;
 			//
 			bool			Update_Sub(void) noexcept override;
@@ -56,8 +57,6 @@ namespace FPS_n2 {
 			//UI•\Ž¦
 			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override {}
-		private:
-			const auto GetGameStartMax() const noexcept { return std::max(std::max(GameStart[0], GameStart[1]), GameStart[2]); }
 		};
 	};
 };

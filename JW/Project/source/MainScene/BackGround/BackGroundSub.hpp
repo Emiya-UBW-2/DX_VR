@@ -324,7 +324,6 @@ namespace FPS_n2 {
 				}
 			}
 			void			Draw() {
-				auto* DrawParts = DXDraw::Instance();
 				for (auto& b : this->m_LightPoiont) {
 					if (b.m_NearPath->IsDraw()) {
 						if (CheckCameraViewClip_Box(
@@ -335,6 +334,9 @@ namespace FPS_n2 {
 						}
 					}
 				}
+			}
+			void			DrawFront() {
+				auto* DrawParts = DXDraw::Instance();
 				SetUseLighting(FALSE);
 				float rad = -(DrawParts->GetMainCamera().GetCamVec() - DrawParts->GetMainCamera().GetCamPos()).cross(VECTOR_ref::up()).dot(DrawParts->GetMainCamera().GetCamUp());
 				int max = (int)this->m_LightPoiont.size();
@@ -558,6 +560,7 @@ namespace FPS_n2 {
 		void			Execute(void) noexcept;
 		void			ShadowDraw() noexcept;
 		void			Draw() noexcept;
+		void			DrawFront() noexcept;
 		void			Dispose(void) noexcept;
 	public:
 		const auto&		GetMapGraph(void) noexcept { return this->m_MapGraph; }

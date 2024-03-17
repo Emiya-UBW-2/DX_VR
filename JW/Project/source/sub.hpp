@@ -320,19 +320,4 @@ namespace FPS_n2 {
 			this->m_inst.Draw();
 		}
 	};
-
-
-
-	template <typename... Args>
-	static void DrawFetteString(int xp1, int yp1, float per, bool IsSelect, FontHandle::FontXCenter LR, const std::string& String, Args&&... args) noexcept {
-		auto* Fonts = FontPool::Instance();
-		auto Red = GetColor(255, 0, 0);
-		auto Red75 = GetColor(192, 0, 0);
-		auto White = GetColor(255, 255, 255);
-		auto Gray75 = GetColor(128, 128, 128);
-		auto Gray = GetColor(64, 64, 64);
-
-		Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_r((int)((float)(48 * 3 / 2 * 3 / 4) * per)), LR, FontHandle::FontYCenter::BOTTOM, xp1 + y_r(40.f*per), yp1 + y_r(20.f*per), IsSelect ? Red75 : Gray75, Gray, String, args...);
-		Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_r((int)((float)(48 * 2 * 3 / 4) * per)), LR, FontHandle::FontYCenter::BOTTOM, xp1, yp1, IsSelect ? Red : White, Gray, String, args...);
-	}
 };

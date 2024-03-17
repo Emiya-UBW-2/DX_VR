@@ -1,0 +1,5 @@
+Name=Glock17 Gen5 Barrel
+
+ShootRate_Diff=1
+
+end

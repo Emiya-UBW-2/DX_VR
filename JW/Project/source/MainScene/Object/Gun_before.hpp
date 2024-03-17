@@ -56,9 +56,9 @@ namespace FPS_n2 {
 			void		ExecuteMuzzleSmoke(const VECTOR_ref& pPos) {
 				for (auto& l : this->m_Line) {
 					l += VECTOR_ref::vget(
-						GetRandf(0.2f*Scale_Rate / FPS),
-						0.4f*Scale_Rate / FPS + GetRandf(0.3f*Scale_Rate / FPS),
-						GetRandf(0.2f*Scale_Rate) / FPS);
+						GetRandf(0.1f*Scale_Rate / FPS),
+						0.4f*Scale_Rate / FPS + GetRandf(0.1f*Scale_Rate / FPS),
+						GetRandf(0.1f*Scale_Rate) / FPS);
 				}
 				this->m_Line[this->m_LineSel] = pPos;
 				++this->m_LineSel %= this->m_Line.size();
@@ -70,7 +70,7 @@ namespace FPS_n2 {
 				int min = 1 + (int)((1.f - m_LinePer) * (float)max);
 				for (int i = max - 1; i >= min; i--) {
 					int LS = (i + this->m_LineSel);
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(128.f*((float)(i - min) / max)));
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*((float)(i - min) / max)));
 					auto p1 = (LS - 1) % max;
 					auto p2 = LS % max;
 					if (CheckCameraViewClip_Box(
@@ -78,7 +78,7 @@ namespace FPS_n2 {
 						this->m_Line[p2].get()) == FALSE
 						) {
 						DrawCapsule3D(this->m_Line[p1].get(), this->m_Line[p2].get(), (0.00762f)*Scale_Rate*1.f*((float)(i - min) / max), 3,
-									 GetColor(192, 128, 128),
+									 GetColor(216, 216, 216),
 									 GetColor(96, 96, 64),
 									 TRUE);
 					}

@@ -118,11 +118,14 @@ namespace FPS_n2 {
 			SetSE();
 			//UI
 			this->m_UIclass.Set(ULTName.c_str());
+			prevScore = 0;
+			prevLastMan = -1;
 			//入力
 			this->m_DamageEvents.clear();
 			m_NetWorkBrowser.Init();
 			m_ReadyTimer = 6.f;
 			m_Timer = 180.f;//61.f;
+			m_RashStartLog = false;
 			m_IsEnd = false;
 			m_PreEndTimer = -1.f;
 			m_EndTimer = -1.f;
@@ -144,7 +147,7 @@ namespace FPS_n2 {
 			auto* OptionParts = OPTION::Instance();
 
 			auto* Pad = PadControl::Instance();
-			Pad->SetMouseMoveEnable(true);
+			Pad->SetMouseMoveEnable(!m_IsEnd);
 			Pad->ChangeGuide(
 				[&]() {
 					auto* KeyGuide = PadControl::Instance();
@@ -182,6 +185,8 @@ namespace FPS_n2 {
 
 							KeyGuide->AddGuide(PADS::CHECK, "装備確認");
 
+							KeyGuide->AddGuide(PADS::THROW, "モルヒネ注射");
+							
 							//KeyGuide->AddGuide(PADS::INTERACT, "取得");
 							KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
 						}
@@ -190,9 +195,12 @@ namespace FPS_n2 {
 
 			if (DXDraw::Instance()->IsPause()) {
 				m_MainLoopPauseControl.Execute();
+#if FALSE
 				if (m_IsEnd && GetMovieStateToGraph(movie.get()) == 1) {
 					PauseMovieToGraph(movie.get());
 				}
+#else
+#endif
 				return true;
 			}
 			else {
@@ -201,10 +209,15 @@ namespace FPS_n2 {
 					if (m_LastMan == 0 || (m_Timer<=0.f)) {
 						if (m_PreEndTimer < 0.f) {
 							m_PreEndTimer = 3.f;
+							this->m_GetItemLog.AddLog(GetColor(25, 122, 75), "クリア +%4d", 100);
+							if (m_LastMan==0) {
+								this->m_GetItemLog.AddLog(GetColor(25, 122, 75), "ラッシュ対処ボーナス +%4d", 100);
+							}
 						}
 						else {
 							m_PreEndTimer = std::max(m_PreEndTimer - 1.f / FPS, 0.f);
 						}
+#if FALSE
 						if (m_PreEndTimer == 0.f) {
 							m_IsEnd = true;
 							movie = GraphHandle::Load("data/Movie/end0.mp4");
@@ -214,9 +227,17 @@ namespace FPS_n2 {
 
 							PadControl::Instance()->SetGuideUpdate();
 						}
+#else
+						if (m_PreEndTimer == 0.f) {
+							m_IsEnd = true;
+
+							PadControl::Instance()->SetGuideUpdate();
+						}
+#endif
 					}
 				}
 				else {
+#if FALSE
 					if (GetMovieStateToGraph(movie.get()) == 0) {
 						PlayMovieToGraph(movie.get());
 					}
@@ -234,6 +255,19 @@ namespace FPS_n2 {
 					if (m_EndTimer == 0.f) {
 						return false;
 					}
+#else
+					if (m_EndTimer < 0.f) {
+						if (Pad->GetKey(PADS::INTERACT).trigger()) {
+							m_EndTimer = 2.f;
+						}
+					}
+					else {
+						m_EndTimer = std::max(m_EndTimer - 1.f / FPS, 0.f);
+					}
+					if (m_EndTimer == 0.f) {
+						return false;
+					}
+#endif
 				}
 			}
 #ifdef DEBUG
@@ -249,6 +283,8 @@ namespace FPS_n2 {
 				m_ReadyTimer = 6.f;
 				SE->Get((int)SoundEnum::Env).Play(0, DX_PLAYTYPE_LOOP);
 				SE->Get((int)SoundEnum::Env2).Play(0, DX_PLAYTYPE_LOOP);
+
+				this->m_GetItemLog.AddLog(GetColor(251, 91, 1), "3分間 敵の進攻から耐えろ");
 			}
 			else {
 				m_ReadyTimer = std::max(m_ReadyTimer - 1.f / FPS, 0.f);
@@ -291,7 +327,7 @@ namespace FPS_n2 {
 				MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press() && !DXDraw::Instance()->IsPause());
 				MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press() && !DXDraw::Instance()->IsPause());
 				MyInput.SetInputPADS(PADS::ULT, Pad->GetKey(PADS::ULT).press());
-				//MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
+				MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
 				MyInput.SetInputPADS(PADS::CHECK, Pad->GetKey(PADS::CHECK).press());
 				MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 				MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
@@ -328,6 +364,10 @@ namespace FPS_n2 {
 						m_LastMan = -1;
 					}
 					else {
+						if (!m_RashStartLog) {
+							m_RashStartLog = true;
+							this->m_GetItemLog.AddLog(GetColor(251, 91, 1), "敵の行動が活発になった、最後の一押しだ");
+						}
 						m_LastMan = 0;
 						for (int index = 0; index < Player_num; index++) {
 							if (index != GetMyPlayerID()) {
@@ -336,7 +376,11 @@ namespace FPS_n2 {
 								}
 							}
 						}
+						if (m_LastMan != prevLastMan) {
+							this->m_GetItemLog.AddLog(GetColor(251, 91, 1), "残り%d人", m_LastMan);
+						}
 					}
+					prevLastMan = m_LastMan;
 				}
 				bool isready = (m_ReadyTimer == 0.f) && (m_PreEndTimer == -1.f);
 				for (int index = 0; index < Player_num; index++) {
@@ -465,15 +509,18 @@ namespace FPS_n2 {
 									switch (a->GetItemType()) {
 										case ItemType::AMMO:
 											if (!tgt->GetAmmoLoading()) {
-												tgt->AddAmmoStock(2 + GetRand(8));
+												int Add = 2 + GetRand(8);
+												tgt->AddAmmoStock(Add);
 												isHit = true;
 												SE->Get((int)SoundEnum::GetAmmo).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
+												this->m_GetItemLog.AddLog(GetColor(183, 143, 0), "弾薬を入手(+%d)", Add);
 											}
 											break;
 										case ItemType::ARMER:
 											if (tgt->GetArmer()) {
 												isHit = true;
 												SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
+												this->m_GetItemLog.AddLog(GetColor(183, 143, 0), "アーマーを入手");
 											}
 											break;
 										default:
@@ -587,7 +634,7 @@ namespace FPS_n2 {
 					DrawParts->SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
 					//DoF
 					if (Chara->GetIsADS()) {
-						PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.5f, far_t - 0.1f, Scale_Rate * 0.3f, far_t);
+						PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.5f, far_t - 0.1f, Scale_Rate * 0.1f, far_t);
 					}
 					else {
 						PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.5f, far_t / 2, near_t, far_t);
@@ -597,7 +644,7 @@ namespace FPS_n2 {
 			{
 				auto Len = (DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(0)).Length();
 				auto LenPer = std::clamp(Len / (5.f*Scale_Rate), 0.f, 1.f);
-				bool HPLow = Chara->GetHP() < (Chara->GetHPMax() * 3 / 10);
+				bool HPLow = Chara->GetHP() < (Chara->GetHPMax() * 35 / 100);
 				Easing(&Min,
 					(HPLow) ? Lerp(20.f, 35.f, LenPer) : Lerp(0.f, 25.f, LenPer),
 					  0.95f, EasingType::OutExpo);
@@ -610,6 +657,9 @@ namespace FPS_n2 {
 				Easing(&AberrationPower,
 					(HPLow) ? (10.f + GetRandf(30.f)) : 1.f,
 					  0.95f, EasingType::OutExpo);
+				if (Chara->PopHeadShotSwitch()) {
+					AberrationPower = 30.f;
+				}
 				DrawParts->SetAberrationPower(AberrationPower);
 			}
 			//
@@ -694,7 +744,6 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(4, Chara->GetAutoAimID());
 				this->m_UIclass.SetfloatParam(2, Chara->GetAutoAimOn());
 				//Score
-				this->m_UIclass.SetIntParam(5, m_LastMan);
 				this->m_UIclass.SetIntParam(6, PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
 				//HP
 				this->m_UIclass.SetGaugeParam(0, (int)Chara->GetHP(), (int)Chara->GetHPMax());
@@ -712,6 +761,28 @@ namespace FPS_n2 {
 					this->m_UIclass.SetGaugeParam(4 + mags, M.AmmoNum, M.AmmoAll);
 					mags++;
 				}
+				//
+				this->m_UIclass.SetIntParam(5, 0);
+				auto ScoreBuf = PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore();
+				if (ScoreBuf > prevScore) {
+					this->m_UIclass.SetIntParam(5, (ScoreBuf - prevScore));
+					this->m_GetItemLog.AddLog(GetColor(206, 0, 0), "敵をキル +%4d", (ScoreBuf - prevScore));
+				}
+				if (Chara->GetWearArmerSwitch()) {
+					this->m_GetItemLog.AddLog(GetColor(25, 122, 75), "アーマーを着用 +%4d", 10);
+					PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(10);
+				}
+				if (Chara->GetMorphineSwitch()) {
+					this->m_GetItemLog.AddLog(GetColor(25, 122, 75), "モルヒネ注射 +%4d", 50);
+					PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(50);
+				}
+				if (Chara->ULTActiveSwitch()) {
+					this->m_GetItemLog.AddLog(GetColor(251, 91, 1), "プライマリを使用可能");
+				}
+				this->m_GetItemLog.Update();
+				prevScore = PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore();
+				//
+				this->m_UIclass.SetIntParam(6, PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
 			}
 			//
 			EffectControl::Execute();
@@ -755,7 +826,11 @@ namespace FPS_n2 {
 				DrawParts->SetAberrationPower(1.f);
 			}
 
+			m_MainLoopPauseControl.Dispose();
+#if FALSE
 			movie.Dispose();
+#else
+#endif
 		}
 		//
 		void			MAINLOOP::BG_Draw_Sub(void) noexcept {
@@ -781,8 +856,8 @@ namespace FPS_n2 {
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			SetFogStartEnd(Scale_Rate * 1200.f, Scale_Rate * 1600.f);
 
-			ObjMngr->DrawObject();
 			this->m_BackGround->Draw();
+			ObjMngr->DrawObject();
 			//レーザー
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
@@ -838,17 +913,24 @@ namespace FPS_n2 {
 			//
 #endif
 		}
+		void			MAINLOOP::MainDrawFront_Sub(void) noexcept {
+			if (m_IsEnd) {
+				return;
+			}
+			this->m_BackGround->DrawFront();
+		}
 		//UI表示
 		void			MAINLOOP::DrawUI_Base_Sub(void) noexcept {
 			if (m_PreEndTimer != -1.f) {
 				return;
 			}
+			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			//着弾表示
 			DrawHitGraph();
 			if (Chara->IsAlive()) {
-				if (!DXDraw::Instance()->IsPause()) {
+				if (!DrawParts->IsPause()) {
 					DrawSoundGraph();
 				}
 				//レティクル表示
@@ -862,10 +944,12 @@ namespace FPS_n2 {
 						1.f, Chara->GetGunRadAdd(), true);
 				}
 				//UI
-				this->m_UIclass.Draw();
+				if (!DrawParts->IsPause()) {
+					this->m_UIclass.Draw();
+				}
 				//通信設定
 				/*
-				if (DXDraw::Instance()->IsPause()) {
+				if (DrawParts->IsPause()) {
 					m_NetWorkBrowser.Draw();
 				}
 				//*/
@@ -874,7 +958,11 @@ namespace FPS_n2 {
 		void			MAINLOOP::DrawUI_In_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			if (m_IsEnd) {
+#if FALSE
 				movie.DrawExtendGraph(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, FALSE);
+#else
+				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(64, 64, 64), TRUE);
+#endif
 
 				float per = (1.f - (16.f / 9.f) / 2.35f) / 2.f;
 				DrawBox(0, 0, DrawParts->m_DispXSize, (int)(DrawParts->m_DispYSize * per), GetColor(0, 0, 0), TRUE);
@@ -904,6 +992,10 @@ namespace FPS_n2 {
 						m_MiniMapScreen.DrawRotaGraph(y_r(960), y_r(840), 1.f, 0.f, true);
 					}
 				}
+			}
+
+			if (!DrawParts->IsPause()) {
+				this->m_GetItemLog.Draw();
 			}
 			//ポーズ
 			if (DrawParts->IsPause()) {
@@ -1176,6 +1268,8 @@ namespace FPS_n2 {
 			SE->Add((int)SoundEnum::GetAmmo, 3, "data/Sound/SE/move/getammo.wav");
 			SE->Add((int)SoundEnum::Heart, 3, "data/Sound/SE/move/heart.wav");
 			SE->Add((int)SoundEnum::Hit, 3, "data/Sound/SE/hit.wav");
+			SE->Add((int)SoundEnum::HitMe, 3, "data/Sound/SE/HitMe.wav");
+			SE->Add((int)SoundEnum::HitGuard, 3, "data/Sound/SE/Guard.wav");
 			for (int i = 0; i < 5; i++) {
 				SE->Add((int)SoundEnum::HitGround0 + i, 2, "data/Sound/SE/gun/HitGround/" + std::to_string(i + 1) + ".wav");
 			}
@@ -1191,9 +1285,12 @@ namespace FPS_n2 {
 			SE->Add((int)SoundEnum::Man_reload, 10, "data/Sound/SE/voice/reload.wav");
 			SE->Add((int)SoundEnum::Man_takecover, 10, "data/Sound/SE/voice/takecover.wav");
 			SE->Add((int)SoundEnum::Man_teamdown, 10, "data/Sound/SE/voice/teamdown.wav");
-
+			SE->Add((int)SoundEnum::Man_breathing, 10, "data/Sound/SE/voice/breathing.wav", false);
+			SE->Add((int)SoundEnum::Man_breathend, 10, "data/Sound/SE/voice/breathend.wav", false);
+			
 
 			SE->Add((int)SoundEnum::Tank_near, 5, "data/Sound/SE/near.wav");
+			SE->Add((int)SoundEnum::Stim, 1, "data/Sound/SE/Stim.wav");
 		}
 		void			MAINLOOP::SetSE(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -1208,6 +1305,11 @@ namespace FPS_n2 {
 			SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
 			SE->Get((int)SoundEnum::Heart).SetVol_Local(92);
 			SE->Get((int)SoundEnum::Hit).SetVol_Local(255);
+			SE->Get((int)SoundEnum::HitMe).SetVol_Local(255);
+			SE->Get((int)SoundEnum::HitGuard).SetVol_Local(255);
+
+			SE->Get((int)SoundEnum::Man_breathing).SetVol_Local(192);
+			SE->Get((int)SoundEnum::Man_breathend).SetVol_Local(192);
 			for (int i = 0; i < 5; i++) {
 				SE->Get((int)SoundEnum::HitGround0 + i).SetVol_Local(92);
 			}
@@ -1234,6 +1336,8 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::GetAmmo);
 			SE->Delete((int)SoundEnum::Heart);
 			SE->Delete((int)SoundEnum::Hit);
+			SE->Delete((int)SoundEnum::HitMe);
+			SE->Delete((int)SoundEnum::HitGuard);
 			for (int i = 0; i < 5; i++) {
 				SE->Delete((int)SoundEnum::HitGround0 + i);
 			}
@@ -1248,8 +1352,11 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::Man_reload);
 			SE->Delete((int)SoundEnum::Man_takecover);
 			SE->Delete((int)SoundEnum::Man_teamdown);
+			SE->Delete((int)SoundEnum::Man_breathing);
+			SE->Delete((int)SoundEnum::Man_breathend);
 
 			SE->Delete((int)SoundEnum::Tank_near);
+			SE->Delete((int)SoundEnum::Stim);
 		}
 		//
 		void			MAINLOOP::LoadChara(const std::string&FolderName, PlayerID ID, bool IsRagDoll, bool IsRagDollBaseObj) noexcept {

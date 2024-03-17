@@ -81,6 +81,7 @@ namespace FPS_n2 {
 			//
 			CartFall,
 			MagFall,
+			Stim,
 			//
 			Man_Hurt1,
 			Man_Hurt2,
@@ -103,8 +104,13 @@ namespace FPS_n2 {
 			Man_reload,
 			Man_takecover,
 			Man_teamdown,
+			Man_breathing,
+			Man_breathend,
 			//
 			Hit,
+			HitMe,
+			HitGuard,
+
 			Tank_near,
 			HitGround0,
 			HitGround1,

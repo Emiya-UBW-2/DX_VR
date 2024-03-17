@@ -188,10 +188,8 @@ namespace FPS_n2 {
 			GraphHandle						Gauge_Aim_Graph;
 			GraphHandle						OIL_Graph;
 
-			int prevScore{0};
-			int prevLastMan{0};
-			float LastManPer{0.f};
-			std::vector<std::pair<int, float>> ScoreAdd;
+			std::array<std::pair<int, float>, 6> ScoreAdd{};
+			int m_ScoreAddSel{0};
 
 			std::array<GaugeMask, 1 + 4>	m_GaugeMask;
 		private:
@@ -214,10 +212,7 @@ namespace FPS_n2 {
 				}
 			}
 			void			Set(const char* GunName) noexcept {
-				prevScore = 0;
-				prevLastMan = -1;
-				LastManPer = 0.f;
-				ScoreAdd.clear();
+				m_ScoreAddSel = 0;
 
 				std::string Path = "data/gun/";
 				Path += GunName;
@@ -228,7 +223,6 @@ namespace FPS_n2 {
 			void			Draw(void) noexcept {
 				auto* Fonts = FontPool::Instance();
 				auto* DrawParts = DXDraw::Instance();
-				auto Green = GetColor(64, 192, 48);
 				auto White = GetColor(255, 255, 255);
 				auto Gray = GetColor(64, 64, 64);
 				auto Red = GetColor(255, 0, 0);
@@ -264,25 +258,18 @@ namespace FPS_n2 {
 					xp1 = DrawParts->m_DispXSize / 2;
 					yp1 = DrawParts->m_DispYSize / 2;
 
-					if (intParam[6] != prevScore) {
-						if (intParam[6] > prevScore) {
-							ScoreAdd.emplace_back(std::make_pair(intParam[6] - prevScore, 2.f));
-						}
-						prevScore = intParam[6];
+					if (intParam[5] > 0) {
+						ScoreAdd.at(m_ScoreAddSel) = std::make_pair(intParam[5], 2.f);
+						++m_ScoreAddSel %= (int)ScoreAdd.size();
 					}
-					for (int i = 0; i < ScoreAdd.size(); i++) {
+					for (int i = 0; i < (int)ScoreAdd.size(); i++) {
 						auto& s = ScoreAdd[i];
 						if (s.second > 0.f) {
 							float per = std::powf(2.f - s.second, 2.f);
 							SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - per)), 0, 255));
-							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_r(per*96.f), Green, Gray, "+%d", s.first);
+							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_r(per*96.f), GetColor(206, 0, 0), Gray, "+%d", s.first);
+							s.second = std::max(s.second - 1.f / FPS, 0.f);
 						}
-						else {
-							std::swap(s, ScoreAdd.back());
-							ScoreAdd.pop_back();
-							i--;
-						}
-						s.second = std::max(s.second - 1.f / FPS, 0.f);
 					}
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
@@ -377,23 +364,6 @@ namespace FPS_n2 {
 																		  (float)((int)(floatParam[1]) % 60) + (floatParam[1] - (float)((int)(floatParam[1])))
 					);
 				}
-				//m_LastMan
-				if (intParam[5] != prevLastMan) {
-					if (intParam[5] >= 0) {
-						LastManPer = 3.f;
-					}
-					prevLastMan = intParam[5];
-				}
-				LastManPer = std::max(LastManPer - 1.f / FPS, 0.f);
-				if (intParam[5] >= 0) {
-					int xp1, yp1;
-					xp1 = DrawParts->m_DispXSize / 2;
-					yp1 = DrawParts->m_DispYSize / 2 - y_r(64);
-
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*LastManPer), 0, 255));
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 255, 255), Gray, "残り%d人", intParam[5]);
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-				}
 				//ゲージ
 				{
 					m_GaugeMask.at(0).SetDraw([&]() {
@@ -444,6 +414,80 @@ namespace FPS_n2 {
 			void			SetIntParam(int ID, int value) { intParam[ID] = value; }
 			void			SetfloatParam(int ID, float value) { floatParam[ID] = value; }
 			void			SetStrParam(int ID, std::string_view value) { strParam[ID] = value; }
+		};
+
+		class ItemLogData {
+			unsigned int m_Color{0};
+			char m_Message[64]{};
+			float m_Time{-1.f};
+			float m_Flip{0.f};
+			float m_Flip_Y{0.f};
+		public:
+			void AddFlip(float value) noexcept { m_Flip += value; }
+			template <typename... Args>
+			void SetData(unsigned int Color, const char* Mes, Args&&... args) noexcept {
+				snprintfDx(m_Message, 64, Mes, args...);
+				m_Time = 3.f;
+				m_Flip = 0.f;
+				m_Flip_Y = -1.f;
+				m_Color = Color;
+			}
+			void UpdateActive() noexcept {
+				if (m_Time > 0.f) {
+					m_Time -= 1.f / FPS;
+				}
+				else {
+					m_Time = -1.f;
+				}
+				Easing(&m_Flip_Y, m_Flip, 0.9f, EasingType::OutExpo);
+			}
+		public:
+			const float GetFlip() { return m_Flip_Y; }
+			const float ActivePer() { return (m_Time > 1.f) ? std::clamp((3.f - m_Time)*5.f + 0.1f, 0.f, 1.f) : std::clamp(m_Time, 0.f, 1.f); }
+			const char* GetMsg() { return m_Message; }
+			const unsigned int GetMsgColor() { return m_Color; }
+		};
+		class GetItemLog {
+			std::array<ItemLogData, 16> data;
+			int LastSel{0};
+		public:
+			template <typename... Args>
+			void AddLog(unsigned int Color, const char* Mes, Args&&... args) noexcept {
+				for (auto& d : data) {
+					d.AddFlip(1.f);
+				}
+				data.at(LastSel).SetData(Color, Mes, args...);
+				++LastSel %= ((int)data.size());
+			}
+			void Update() noexcept {
+				for (auto& d : data) {
+					if (d.ActivePer() > 0.f) {
+						d.UpdateActive();
+					}
+				}
+			}
+			void Draw() noexcept {
+				auto* Fonts = FontPool::Instance();
+				auto Black = GetColor(0, 0, 0);
+
+				int xp1, yp1;
+				xp1 = y_r(64);
+				yp1 = y_r(256);
+
+				for (auto& d : data) {
+					if (d.ActivePer() > 0.f) {
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*d.ActivePer()), 0, 255));
+						int yp = yp1 - y_r(24.f * d.GetFlip());
+						DrawBox(
+							xp1 - y_r(6), yp + y_r(18),
+							xp1 - y_r(6) + (int)(std::max(Fonts->Get(FontPool::FontType::Nomal_Edge).GetStringWidth(y_r(18), d.GetMsg()), y_r(200))*d.ActivePer()), yp + y_r(18) + y_r(5),
+							Black, TRUE);
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+																			  xp1, yp, d.GetMsgColor(), Black, d.GetMsg());
+					}
+				}
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+			}
 		};
 	};
 };

@@ -3,6 +3,34 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+
+		bool MagStockControl::GetNeedAmmoLoad(bool MagInGunFull, bool MagInGunEmpty) noexcept {
+			int Total = (int)m_MagazineStock.size();
+			//半端マグが2個以上ある
+			//もしくは半端マグがあってストックもある
+			int RetFull = MagInGunFull ? 1 : 0;
+			int RetEmpty = MagInGunEmpty ? 1 : 0;
+			int RetNotFull = (!MagInGunEmpty && !MagInGunFull) ? 1 : 0;
+			for (int i = 0; i < Total; i++) {
+				if (m_MagazineStock[i].AmmoNum == 0) {
+					RetEmpty++;
+				}
+				else if (m_MagazineStock[i].AmmoNum == m_MagazineStock[i].AmmoAll) {
+					RetFull++;
+				}
+				else {
+					RetNotFull++;
+				}
+			}
+			if (RetFull >= Total + 1) { return false; }//全部満タン
+			if (RetEmpty >= Total + 1 && m_AmmoStock == 0) { return false; }//全部空で予備もない
+			if (RetNotFull >= 2) { return true; }//半端マグが2本以上ある
+			if (RetNotFull == 1 && !MagInGunFull) { return true; }//半端マグが2本以上ある
+			if ((RetEmpty + RetNotFull) >= 1 && m_AmmoStock > 0) { return true; }//半端マグが1本以上あって予備弾もある
+			//
+			return false;
+		}
+
 		void		KeyControl::InitKey(float pxRad, float pyRad) {
 			for (int i = 0; i < 4; i++) {
 				this->m_Vec[i] = 0.f;

@@ -14,6 +14,7 @@
     <ClInclude Include="source\CommonScene\NetWork.hpp" />
     <ClInclude Include="source\CommonScene\NetworkBrowser.hpp" />
     <ClInclude Include="source\CommonScene\Object\GunsModify.hpp" />
+    <ClInclude Include="source\CommonScene\UI\CommonUIControl.hpp" />
     <ClInclude Include="source\Enums.hpp" />
     <ClInclude Include="source\Header.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGround.hpp" />

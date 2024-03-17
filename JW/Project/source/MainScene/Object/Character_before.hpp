@@ -240,14 +240,25 @@ namespace FPS_n2 {
 			const int										ULTMax = 100;
 		private:
 			int											m_ULT{0};							//スコア
+			bool										m_ULTSwitch{false};
 		public://ゲッター
 			const auto		IsULTActive(void) const noexcept { return this->m_ULT == ULTMax; }
+			const auto		ULTActiveSwitch(void) noexcept {
+				auto ret = this->m_ULTSwitch;
+				this->m_ULTSwitch = false;
+				return ret;
+			}
 			const auto&		GetULT(void) const noexcept { return this->m_ULT; }
 			const auto&		GetULTMax(void) const noexcept { return ULTMax; }
-			void			AddULT(int damage_t) noexcept { this->m_ULT = std::clamp<int>(this->m_ULT + damage_t, 0, ULTMax); }
+			void			AddULT(int damage_t) noexcept {
+				auto prev = this->m_ULT;
+				this->m_ULT = std::clamp<int>(this->m_ULT + damage_t, 0, ULTMax);
+				m_ULTSwitch |= ((prev != ULTMax) && IsULTActive());
+			}
 		public:
 			void		InitULT() {
 				this->m_ULT = 0;
+				this->m_ULTSwitch = false;
 			}
 		};
 		//キャラ入力
@@ -585,27 +596,7 @@ namespace FPS_n2 {
 				m_MagazineStock[0].ModUniqueID = OLDModUniqueID;
 				std::sort(m_MagazineStock.begin(), m_MagazineStock.end(), [&](const MagStock&A, const MagStock&B) {return A.AmmoNum > B.AmmoNum; });
 			}
-			bool GetNeedAmmoLoad(bool MagInGunFull, bool MagInGunEmpty) noexcept {
-				int Total = (int)m_MagazineStock.size();
-				//半端マグが2個以上ある
-				//もしくは半端マグがあってストックもある
-				int RetNotFull = MagInGunFull ? 0 : 1;
-				int RetEmpty = MagInGunEmpty ? 1 : 0;
-				for (int i = 0; i < Total; i++) {
-					if (m_MagazineStock[i].AmmoNum != m_MagazineStock[i].AmmoAll) {
-						RetNotFull++;
-					}
-					if (m_MagazineStock[i].AmmoNum == 0) {
-						RetEmpty++;
-					}
-				}
-				if (RetEmpty >= Total + 1 && m_AmmoStock == 0) { return false; }
-				//if (RetFull >= Total + 1) { return false; }
-				if (RetNotFull > 1) { return true; }
-				if (RetNotFull > 0 && m_AmmoStock > 0) { return true; }
-				//
-				return false;
-			}
+			bool GetNeedAmmoLoad(bool MagInGunFull, bool MagInGunEmpty) noexcept;
 		};
 		//
 		class HitReactionControl {

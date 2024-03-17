@@ -391,6 +391,10 @@ namespace FPS_n2 {
 		SetFogDensity(fog_density);
 		//
 	}
+	void			BuildControl::DrawFront() noexcept {
+		m_LightControl.DrawFront();
+	}
+	
 	void			BuildControl::Dispose(void) noexcept {
 		this->m_ObjBuildBase.Dispose();
 		this->m_ColBuildBase.Dispose();

@@ -1,0 +1,9 @@
+Name=Offset Mount
+
+ReloadRate_Diff=-1
+
+Slot0Type=Sight
+Slot0IsNeed=true
+Slot0Item=CTS1500
+
+end

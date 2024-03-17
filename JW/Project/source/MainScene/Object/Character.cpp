@@ -33,7 +33,7 @@ namespace FPS_n2 {
 					SE->Get((int)SoundEnum::Man_Death1 + GetRand(8 - 1)).Play_3D(0, GetFrameWorldMat(CharaFrame::Head).pos(), Scale_Rate * 10.f);
 					if (value.ShotID == 0) {
 						auto* PlayerMngr = PlayerManager::Instance();
-						PlayerMngr->GetPlayer(value.ShotID).AddScore(1);
+						PlayerMngr->GetPlayer(value.ShotID).AddScore(100 + (((m_GunSelect==0) && (value.Damage >= 100)) ? 20 : 0));
 
 						auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(value.ShotID).GetChara();
 						if (m_AutoAim != -1) {
@@ -80,6 +80,8 @@ namespace FPS_n2 {
 
 							auto* SE = SoundPool::Instance();
 							SE->Get((int)SoundEnum::Tinnitus).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+							m_HeadShotSwitch = true;
+							m_HeadShotPer = 1.f;
 						}
 						else {
 							Damage = Damage * 100 / 10;
@@ -121,12 +123,29 @@ namespace FPS_n2 {
 				//SE
 				if (pAmmo->GetShootedID() == 0) {
 					auto SE = SoundPool::Instance();
-					SE->Get((int)SoundEnum::Hit).Play_3D(0, GetFrameWorldMat(CharaFrame::Head).pos(), Scale_Rate * 10.f);
+					if (Damage > 0) {
+						SE->Get((int)SoundEnum::Hit).Play_3D(0, GetFrameWorldMat(CharaFrame::Head).pos(), Scale_Rate * 10.f);
+					}
+					else {
+						SE->Get((int)SoundEnum::HitGuard).Play_3D(0, GetFrameWorldMat(CharaFrame::Head).pos(), Scale_Rate * 10.f,128);
+					}
+				}
+				if (m_MyID == 0 && m_IsMainGame) {
+					auto SE = SoundPool::Instance();
+					if (Damage > 0) {
+						SE->Get((int)SoundEnum::HitMe).Play_3D(0, GetFrameWorldMat(CharaFrame::Head).pos(), Scale_Rate * 10.f);
+					}
+					else {
+						SE->Get((int)SoundEnum::HitGuard).Play_3D(0, GetFrameWorldMat(CharaFrame::Head).pos(), Scale_Rate * 10.f, 255);
+					}
 				}
 				//エフェクトセット
 				if (Damage > 0) {
-					EffectControl::SetOnce(EffectResource::Effect::ef_hitblood, *pEndPos, VECTOR_ref::front(), 12.5f);
+					EffectControl::SetOnce(EffectResource::Effect::ef_hitblood, *pEndPos, VECTOR_ref::front(), Scale_Rate);
 					EffectControl::SetEffectSpeed(EffectResource::Effect::ef_hitblood, 2.f);
+				}
+				else {
+					EffectControl::SetOnce(EffectResource::Effect::ef_gndsmoke, *pEndPos, (Chara->GetMove().pos - this->m_move.pos).Norm(), 0.25f * Scale_Rate);
 				}
 				//ヒットモーション
 				{
@@ -168,7 +187,7 @@ namespace FPS_n2 {
 				}
 				//エフェクトセット
 				{
-					EffectControl::SetOnce(EffectResource::Effect::ef_hitblood, *pEndPos, VECTOR_ref::front(), 12.5f);
+					EffectControl::SetOnce(EffectResource::Effect::ef_hitblood, *pEndPos, VECTOR_ref::front(), Scale_Rate);
 					EffectControl::SetEffectSpeed(EffectResource::Effect::ef_hitblood, 2.f);
 				}
 				//ヒットモーション
@@ -309,7 +328,7 @@ namespace FPS_n2 {
 				this->m_Morphine_Ptr->SetActive(false);
 			}
 
-			m_ArmBreak = true;
+			//m_ArmBreak = true;
 			this->m_CanWearMorphine = true;
 
 			this->m_Wear_Armer.Init(false);
@@ -352,6 +371,7 @@ namespace FPS_n2 {
 			else {
 				m_ReadyAnim = -1.f;
 			}
+			m_HPRec = 0.f;
 		}
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
 			KeyControl::InputKey(pInput, pReady, StaminaControl::GetHeartRandVec(0.f));
@@ -362,8 +382,7 @@ namespace FPS_n2 {
 				this->m_Press_Aim = KeyControl::GetInputControl().GetPADSPress(PADS::AIM) && !m_IsChanging;
 				if (!GetGunPtrNow()->GetCanShot()) {
 					if (GetGunPtrNow()->GetIsMagEmpty()) {
-						if (this->m_Press_Shot) {
-							this->m_Press_Shot = false;
+						if (this->m_Press_Shot && !GetGunPtrNow()->GetShoting()) {
 							this->m_Press_Reload = true;
 						}
 					}
@@ -421,13 +440,24 @@ namespace FPS_n2 {
 					if (IsAlive()) {
 						int per = 100 * LifeControl::GetHP() / LifeControl::GetHPMax();
 						if (per < 35) {
-							if (m_HPRec > 1.f) {
-								m_HPRec -= 1.f;
-								Heal(1);
+							if (m_HPRec >= 0.f) {
+								m_HPRec -= 2.f;
+								Heal(2);
+								if (m_MyID == 0) {
+									auto SE = SoundPool::Instance();
+									SE->Get((int)SoundEnum::Man_breathing).Play(0, DX_PLAYTYPE_BACK);
+								}
 							}
 							m_HPRec += 1.f / FPS;
 						}
 						else {
+							if (m_HPRec != 0.f) {
+								if (m_MyID == 0) {
+									auto SE = SoundPool::Instance();
+									SE->Get((int)SoundEnum::Man_breathing).StopAll(0);
+									SE->Get((int)SoundEnum::Man_breathend).Play(0, DX_PLAYTYPE_BACK);
+								}
+							}
 							m_HPRec = 0.f;
 						}
 					}
@@ -471,45 +501,44 @@ namespace FPS_n2 {
 			}
 			//アーマーを着る
 			if (this->m_Armer_Ptr) {
-				if (!this->m_IsWearArmer) {
-					if (KeyControl::GetInputControl().GetPADSPress(PADS::CHECK) && CanWearArmer()) {
-						this->m_IsWearArmer = true;
-						this->m_CanWearArmer = false;
+				this->m_WearArmerSwitch = false;
+				if (this->m_IsWearArmer) {
+					if (!this->m_IsWearingArmer) {
+						if (this->m_Arm[(int)EnumGunAnimType::Ready].Per() >= 0.95f) {
+							this->m_IsWearingArmer = true;
+
+							this->m_Armer_Ptr->SetActive(true);
+
+							//this->m_Wear_Armer.Init(this->m_WearArmer);
+							//this->m_WearArmer ^= 1;
+
+							this->m_WearArmer = true;
+							this->m_Wear_Armer.Init(false);
+
+							auto SE = SoundPool::Instance();
+							SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetEyePosition(), Scale_Rate * 10.f);
+						}
 					}
-				}
-				else if (!this->m_IsWearingArmer) {
-					if (this->m_Arm[(int)EnumGunAnimType::Ready].Per() >= 0.95f) {
-						this->m_IsWearingArmer = true;
+					else {
+						this->m_Wear_Armer.Execute(this->m_WearArmer, 0.1f, 0.1f, 0.95f);
+						if ((this->m_Wear_Armer.Per() < 0.f) || (1.f < this->m_Wear_Armer.Per())) {
+							this->m_IsWearArmer = false;
+							this->m_IsWearingArmer = false;
 
-						this->m_Armer_Ptr->SetActive(true);
+							this->m_Armer_Ptr->SetActive(false);
+							SetAim();
 
-						//this->m_Wear_Armer.Init(this->m_WearArmer);
-						//this->m_WearArmer ^= 1;
-
-						this->m_WearArmer = true;
-						this->m_Wear_Armer.Init(false);
-
-						auto SE = SoundPool::Instance();
-						SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetEyePosition(), Scale_Rate * 10.f);
-					}
-				}
-				else {
-					this->m_Wear_Armer.Execute(this->m_WearArmer, 0.1f, 0.1f, 0.95f);
-					if ((this->m_Wear_Armer.Per() < 0.f) || (1.f < this->m_Wear_Armer.Per())) {
-						this->m_IsWearArmer = false;
-						this->m_IsWearingArmer = false;
-
-						this->m_Armer_Ptr->SetActive(false);
-						SetAim();
-
-						LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, 0, LifeControl::GetAPMax());
+							LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, 0, LifeControl::GetAPMax());
+							this->m_WearArmerSwitch = true;
+						}
 					}
 				}
 			}
 			//Morphine
 			if (this->m_Morphine_Ptr) {
+				this->m_MorphineSwitch = false;
 				if (!this->m_IsWearMorphine) {
-					if (KeyControl::GetInputControl().GetPADSPress(PADS::INTERACT) && CanWearMorphine()) {
+					if (KeyControl::GetInputControl().GetPADSPress(PADS::THROW) && CanWearMorphine()) {
 						this->m_IsWearMorphine = true;
 						this->m_CanWearMorphine = false;
 					}
@@ -526,15 +555,21 @@ namespace FPS_n2 {
 						this->m_WearMorphine = true;
 						this->m_Wear_Morphine.Init(false);
 						this->m_Wear_MorphineFrame = 0.f;
+						this->m_Wear_MorphinePer = 0.f;
 
 						auto SE = SoundPool::Instance();
 						SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetEyePosition(), Scale_Rate * 10.f);
+
+
+						SE->Get((int)SoundEnum::Stim).Play_3D(0, GetEyePosition(), Scale_Rate * 10.f);
 					}
 				}
 				else {
 					this->m_Wear_MorphineFrame += 1.f / FPS;
+					this->m_Wear_MorphinePer += 1.f / FPS;
 
 					this->m_Wear_Morphine.Execute((this->m_Wear_MorphineFrame < 1.5f), 0.1f, 0.1f, 0.8f);
+
 					if (this->m_Wear_MorphineFrame > 2.f) {
 						this->m_IsWearMorphine = false;
 						this->m_IsWearingMorphine = false;
@@ -542,9 +577,12 @@ namespace FPS_n2 {
 						this->m_Morphine_Ptr->SetActive(false);
 						SetAim();
 
-						//
-						Heal(100);
 						//this->m_CanWearMorphine = true;
+						this->m_MorphineSwitch = true;
+					}
+					if (this->m_Wear_MorphinePer >= 0.f) {
+						this->m_Wear_MorphinePer -= 0.4f;
+						Heal(20);
 					}
 				}
 			}
@@ -711,26 +749,32 @@ namespace FPS_n2 {
 							DrawParts->SetCamShake(0.1f, 5.f);
 						}
 					}
-					if (m_GunSelect == 0) {
-						//if (KeyControl::GetInputControl().GetPADSPress(PADS::) && GetGunPtrNow()->GetCanShot()) {
-						//	GetGunPtrNow()->SetShotPhase(GunAnimeID::Watch);
-						//}
-						if (
-							KeyControl::GetInputControl().GetPADSPress(PADS::CHECK) &&
-							(!CanWearArmer() && !this->m_IsWearArmer) &&
-							(!CanWearMorphine() && !this->m_IsWearMorphine) &&
-							MagStockControl::GetNeedAmmoLoad(GetGunPtrNow()->GetIsMagFull(), GetGunPtrNow()->GetIsMagEmpty()) &&
-							GetGunPtrNow()->GetShootReady() && !GetGunPtrNow()->IsAmmoLoading()) {
-							GetGunPtrNow()->SetShotPhase(GunAnimeID::AmmoLoadStart);
-						}
-					}
-
 					m_SightChange.Execute(KeyControl::GetInputControl().GetPADSPress(PADS::JUMP));
 					if (m_SightChange.trigger()) {
 						GetGunPtrNow()->ChangeSightSel();
 					}
 					//テスト系
 				}
+				if (KeyControl::GetInputControl().GetPADSPress(PADS::CHECK) && (GetShotPhase() == GunAnimeID::Base) && !this->m_IsWearArmer && !this->m_IsWearMorphine) {
+					if (CanWearArmer()) {
+						this->m_IsWearArmer = true;
+						this->m_CanWearArmer = false;
+					}
+					else if (
+						(m_GunSelect == 0) &&
+						MagStockControl::GetNeedAmmoLoad(GetGunPtrNow()->GetIsMagFull(), GetGunPtrNow()->GetIsMagEmpty()) &&
+						!GetGunPtrNow()->IsAmmoLoading()
+						) {
+						GetGunPtrNow()->SetShotPhase(GunAnimeID::AmmoLoadStart);
+					}
+					else if (GetGunPtrNow()->GetCanShot()) {
+						GetGunPtrNow()->SetShotPhase(GunAnimeID::Watch);
+					}
+					else if (GetGunPtrNow()->GetShootReady()) {
+						GetGunPtrNow()->SetShotPhase(GunAnimeID::Watch);//空
+					}
+				}
+
 				if ((GetShotPhase() == GunAnimeID::ReloadOne) || (GetShotPhase() == GunAnimeID::AmmoLoading)) {
 					if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
 						GetGunPtrNow()->SetCancel();
@@ -742,12 +786,12 @@ namespace FPS_n2 {
 						int InAmmo = std::clamp(MagStockControl::GetAmmoStock(), 0, GetGunPtrNow()->GetAmmoAll() - GetGunPtrNow()->GetAmmoNum());
 						GetGunPtrNow()->SetAmmo(GetGunPtrNow()->GetAmmoNum() + InAmmo);
 						MagStockControl::SubAmmoStock(InAmmo);
-						for (int i = 3;i >= Select + 1;i--) {
+						for (int i = 2;i >= Select + 1;i--) {
 							InAmmo = std::clamp(MagStockControl::GetMag(i), 0, GetGunPtrNow()->GetAmmoAll() - GetGunPtrNow()->GetAmmoNum());
 							GetGunPtrNow()->SetAmmo(GetGunPtrNow()->GetAmmoNum() + InAmmo);
 							MagStockControl::SetMag(i, MagStockControl::GetMag(i) - InAmmo);
 						}
-						if ((Select < 3) && (MagStockControl::GetMag(Select + 1) == 0) && (MagStockControl::GetAmmoStock() == 0)) {
+						if ((Select < 2) && (MagStockControl::GetMag(Select + 1) == 0) && (MagStockControl::GetAmmoStock() == 0)) {
 							GetGunPtrNow()->SetCancel();
 						}
 					}
@@ -755,12 +799,12 @@ namespace FPS_n2 {
 						int InAmmo = std::clamp(MagStockControl::GetAmmoStock(), 0, GetGunPtrNow()->GetAmmoAll() - MagStockControl::GetMag(Select));
 						MagStockControl::SetMag(Select, MagStockControl::GetMag(Select) + InAmmo);
 						MagStockControl::SubAmmoStock(InAmmo);
-						for (int i = 3;i >= Select + 1;i--) {
+						for (int i = 2;i >= Select + 1;i--) {
 							InAmmo = std::clamp(MagStockControl::GetMag(i), 0, GetGunPtrNow()->GetAmmoAll() - MagStockControl::GetMag(Select));
 							MagStockControl::SetMag(Select, MagStockControl::GetMag(Select) + InAmmo);
 							MagStockControl::SetMag(i, MagStockControl::GetMag(i) - InAmmo);
 						}
-						if ((Select < 3) && (MagStockControl::GetMag(Select + 1) == 0) && (MagStockControl::GetAmmoStock() == 0)) {
+						if ((Select < 2) && (MagStockControl::GetMag(Select + 1) == 0) && (MagStockControl::GetAmmoStock() == 0)) {
 							GetGunPtrNow()->SetCancel();
 						}
 					}
@@ -835,8 +879,9 @@ namespace FPS_n2 {
 		//上半身回転
 		void			CharacterClass::ExecuteUpperMatrix(void) noexcept {
 			Easing(&this->m_LateLeanRad, this->m_LeanRad, 0.9f, EasingType::OutExpo);
-			Easing(&this->m_LeanRad, (float)(-KeyControl::GetLeanRate())*deg2rad(25), 0.9f, EasingType::OutExpo);
-
+			Easing(&this->m_LeanRad, ((float)(-KeyControl::GetLeanRate())+this->m_HeadShotPer)*deg2rad(25), 0.9f, EasingType::OutExpo);
+			Easing(&this->m_HeadShotPer, 0.f, 0.9f, EasingType::OutExpo);
+			
 			auto tmpUpperMatrix =
 				MATRIX_ref::RotZ(this->m_LeanRad) *
 				MATRIX_ref::RotX(KeyControl::GetRad().x() / 2.f) *
@@ -1294,9 +1339,6 @@ namespace FPS_n2 {
 						VECTOR_ref Handsyvec;
 						VECTOR_ref Handszvec;
 						{
-							if (GetShotPhase() == GunAnimeID::Watch) {
-								m_MagHand = true;
-							}
 							switch (GetGunPtrNow()->GetReloadType()) {
 								case RELOADTYPE::MAG:
 									switch (GetShotPhase()) {
@@ -1377,6 +1419,19 @@ namespace FPS_n2 {
 							}
 							if (GetShotPhase() == GunAnimeID::Melee) {
 								m_MagHand = true;
+							}
+							if (GetShotPhase() == GunAnimeID::Watch) {
+								if (m_ArmBreak) {
+									m_MagHand = true;
+								}
+								else {
+									if (this->m_GunSelect == 0) {
+										m_MagHand = true;
+									}
+									else {
+										m_MagHand = false;
+									}
+								}
 							}
 
 							m_MagArm.Execute(m_MagHand, 0.3f, 0.5f);
@@ -1520,7 +1575,7 @@ namespace FPS_n2 {
 					move_LeftArm(HandsPos, Handsyvec, Handszvec);
 				}
 				//Morphine
-				if (this->m_Morphine_Ptr) {
+				if (this->m_Morphine_Ptr && this->m_Morphine_Ptr->IsActive()) {
 					auto tmp_armrat = GetFrameWorldMat(CharaFrame::Head);
 					VECTOR_ref HandsPos = tmp_armrat.pos()
 						+ tmp_armrat.xvec()*(-0.2f*Scale_Rate)

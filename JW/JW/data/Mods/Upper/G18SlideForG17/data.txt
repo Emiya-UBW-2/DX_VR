@@ -1,0 +1,14 @@
+Name=Glock18 Slide (for 17)
+
+ReloadRate_Diff=-3
+
+RecoilPower=600
+RecoilReturn=0.95
+shottype=FULL
+
+Slot0Type=Sight
+Slot0IsNeed=true
+Slot0Item=GNormalSight
+Slot0Item=GHeightSight
+
+end
