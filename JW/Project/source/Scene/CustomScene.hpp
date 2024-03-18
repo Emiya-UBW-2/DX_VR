@@ -11,10 +11,15 @@ namespace FPS_n2 {
 			FreeLook,
 			Max,
 		};
-		static const char* LookSelectName[(int)LookSelect::Max] = {
+		static const char* LookSelectName[8] = {
 			"ハンドガンのカスタマイズを行います",
 			"プライマリウェポンを変更します",
 			"銃を見まわします",
+			"",
+			"",
+			"",
+			"",
+			"カスタマイズを開いた際の状態にリセットします",
 		};
 
 		class CustomScene : public TEMPSCENE, public GunsModify {
@@ -26,27 +31,25 @@ namespace FPS_n2 {
 				int					index{0};
 			};
 		private:
-			int select{0};
-			float m_SelAlpha{0.f};
-			float m_Yrad{0.f};
-			float m_Xrad{0.f};
-			float m_Yrad_R{0.f};
-			float m_Xrad_R{0.f};
-			float m_Range{1.f};
+			int							select{0};
+			float						m_SelAlpha{0.f};
+			float						m_Yrad{0.f};
+			float						m_Xrad{0.f};
+			float						m_Yrad_R{0.f};
+			float						m_Xrad_R{0.f};
+			float						m_Range{1.f};
 			std::vector<SlotMove>		SelMoveClass;
 			bool						m_IsEnd{false};
 			float						m_Alpha{0.f};
 			LookSelect					m_LookSel{LookSelect::ModSet};
-
 			GraphHandle					m_SelectBackImage;
 			std::array<float, 3>		ButtonAlpha{};
-			std::array<ButtonClass, 3>	ButtonSel{};
+			std::array<ButtonClass, 8>	ButtonSel{};
 			int							bselect{0};
-
 			bool						m_MouseSelMode{false};
+			std::shared_ptr<GunClass>									m_GunPtr;
+			std::array<std::shared_ptr<GunClass>, (int)ULT_GUN::Max>	m_UltPtr;
 		private:
-			std::shared_ptr<GunClass>		m_GunPtr;				//ポインター別持ち
-			std::array<std::shared_ptr<GunClass>, (int)ULT_GUN::Max>		m_UltPtr;
 
 			bool			IsG17Parts(const Slot& S) {
 				bool IsG17 = false;
@@ -111,7 +114,12 @@ namespace FPS_n2 {
 
 			const std::shared_ptr<GunsModify::Slot>& GetPartsSlotData(int SlotSel);
 
-			const char* ItemSelName(int SlotSel, int sel);
+			const char*		ItemSelName(int SlotSel, int sel);
+
+			void			ResetMod() noexcept;
+			void			ChangeModSel(int add) noexcept;
+			void			ChangeMod(int add) noexcept;
+			void			ChangeULT(int add) noexcept;
 		public:
 			CustomScene(void) noexcept {}
 			~CustomScene(void) noexcept {}
