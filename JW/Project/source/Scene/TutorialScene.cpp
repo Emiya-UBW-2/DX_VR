@@ -15,8 +15,6 @@ namespace FPS_n2 {
 				LoadSE();
 				//
 				this->m_UIclass.Load();
-				this->hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
-				this->guard_Graph = GraphHandle::Load("data/UI/battle_guard.bmp");
 			}
 		}
 		void			TutorialScene::Set_Sub(void) noexcept {
@@ -84,8 +82,34 @@ namespace FPS_n2 {
 			m_PrevSSAO = OptionParts->Get_SSAO();
 			OptionParts->Set_SSAO(false);
 
-
 			//m_CharacterPtr->AddAmmoStock(99);
+
+			this->m_TutorialLog.Set();
+			this->m_Tutorial.clear();
+			{
+				int mdata = FileRead_open("data/Tutorial.txt", FALSE);
+				while (true) {
+					if (FileRead_eof(mdata) != 0) { break; }
+					auto ALL = getparams::Getstr(mdata);
+					//コメントアウト
+					if (ALL.find("//") != std::string::npos) {
+						ALL = ALL.substr(0, ALL.find("//"));
+					}
+					//
+					if (ALL == "") { continue; }
+					if (ALL.find('=') != std::string::npos) {
+						auto LEFT = getparams::getleft(ALL);
+						auto RIGHT = getparams::getright(ALL);
+						if (LEFT == "Voice") {
+							m_Tutorial.emplace_back(RIGHT + "\n");
+						}
+					}
+					else {
+						m_Tutorial.back() += ALL + "\n";
+					}
+				}
+				FileRead_close(mdata);
+			}
 		}
 		bool			TutorialScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
@@ -153,6 +177,30 @@ namespace FPS_n2 {
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
 				SetMousePoint(DXDraw::Instance()->m_DispXSize / 2, DXDraw::Instance()->m_DispYSize / 2);
+				m_TutorialNow = 0;
+			}
+			if (Pad->GetKey(PADS::INTERACT).trigger()) {
+				if (m_TutorialNow < m_Tutorial.size()) {
+					this->m_TutorialLog.AddLog(m_Tutorial.at(m_TutorialNow).c_str());
+					SetCreate3DSoundFlag(FALSE);
+					m_TutorialVoice.stop();
+					m_TutorialVoice.Dispose();
+
+					char Mes[256]{};
+					snprintfDx(Mes, 256, "data/Sound/VOICE/voice-%d.wav", m_TutorialNow);
+
+					m_TutorialVoice = SoundHandle::Load(Mes);
+					m_TutorialVoice.play(DX_PLAYTYPE_BACK, TRUE);
+					m_TutorialVoice.vol((int)(255 * OptionParts->Get_SE()));
+
+					m_TutorialNow++;
+				}
+				else {
+					this->m_TutorialLog.AddLog();
+				}
+			}
+			if (Pad->GetKey(PADS::THROW).trigger()) {
+				this->m_TutorialLog.SubLog();
 			}
 			{
 				/*
@@ -392,6 +440,7 @@ namespace FPS_n2 {
 					this->m_UIclass.SetGaugeParam(4 + mags, M.AmmoNum, M.AmmoAll);
 					mags++;
 				}
+				this->m_TutorialLog.Update();
 			}
 			//
 			EffectControl::Execute();
@@ -422,6 +471,7 @@ namespace FPS_n2 {
 			EffectControl::Dispose();
 
 			OptionParts->Set_SSAO(m_PrevSSAO);
+			this->m_TutorialLog.Dispose();
 		}
 		//
 		void			TutorialScene::BG_Draw_Sub(void) noexcept {
@@ -490,6 +540,7 @@ namespace FPS_n2 {
 				if (!DrawParts->IsPause()) {
 					this->m_UIclass.Draw();
 				}
+				this->m_TutorialLog.Draw();
 				//通信設定
 				/*
 				if (DrawParts->IsPause()) {
@@ -511,8 +562,6 @@ namespace FPS_n2 {
 				auto* ObjMngr = ObjectManager::Instance();
 				DisposeSE();
 				this->m_UIclass.Dispose();
-				this->hit_Graph.Dispose();
-				this->guard_Graph.Dispose();
 				m_GunPtr.reset();
 				m_CharacterPtr.reset();
 				ObjMngr->DisposeObject();
