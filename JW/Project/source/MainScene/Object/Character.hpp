@@ -180,6 +180,7 @@ namespace FPS_n2 {
 			const auto		CanWearMorphine() const noexcept { return this->m_CanWearMorphine && (LifeControl::GetHP() < LifeControl::GetHPMax()); }
 			const auto		GetWearArmerSwitch() const noexcept { return this->m_WearArmerSwitch; }
 			const auto		GetMorphineSwitch() const noexcept { return this->m_MorphineSwitch; }
+			const auto		IsULTSelect() const noexcept { return this->m_GunSelect == 1; }
 
 			const auto		PopHeadShotSwitch() noexcept {
 				auto ret = this->m_HeadShotSwitch;
@@ -261,9 +262,11 @@ namespace FPS_n2 {
 			bool			SetDamageEvent(const DamageEvent& value) noexcept;
 			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
 			void			SetGunPtr(int ID, const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_Gun_Ptr[ID] = pGunPtr0; }
-			void			Heal(HitPoint value) noexcept {
+			void			Heal(HitPoint value, bool SwitchOn) noexcept {
 				LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, value, 0);
-				m_ArmBreak = false;
+				if (SwitchOn) {
+					m_ArmBreak = false;
+				}
 			}
 			bool			GetArmer() noexcept {
 				bool prev = this->m_CanWearArmer;

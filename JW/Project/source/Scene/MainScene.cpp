@@ -743,8 +743,6 @@ namespace FPS_n2 {
 				this->m_UIclass.SetGaugeParam(4 + 3 + 1, (int)(Chara->GetAutoAimPer()*20.f), 20);
 				this->m_UIclass.SetIntParam(4, Chara->GetAutoAimID());
 				this->m_UIclass.SetfloatParam(2, Chara->GetAutoAimOn());
-				//Score
-				this->m_UIclass.SetIntParam(6, PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
 				//HP
 				this->m_UIclass.SetGaugeParam(0, (int)Chara->GetHP(), (int)Chara->GetHPMax());
 				//AP
@@ -755,6 +753,7 @@ namespace FPS_n2 {
 				}
 				//ULT
 				this->m_UIclass.SetGaugeParam(3, (int)Chara->GetULT(), (int)Chara->GetULTMax());
+				this->m_UIclass.SetIntParam(7, ((m_ReadyTimer == 0.f) && (m_PreEndTimer == -1.f) && (Chara->IsULTSelect() || Chara->IsULTActive())) ? 1 : 0);
 				//mag
 				int mags = 0;
 				for (const auto& M : Chara->GetMagDatas()) {
@@ -762,11 +761,13 @@ namespace FPS_n2 {
 					mags++;
 				}
 				//
-				this->m_UIclass.SetIntParam(5, 0);
 				auto ScoreBuf = PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore();
 				if (ScoreBuf > prevScore) {
 					this->m_UIclass.SetIntParam(5, (ScoreBuf - prevScore));
 					this->m_GetItemLog.AddLog(GetColor(206, 0, 0), "敵をキル +%4d", (ScoreBuf - prevScore));
+				}
+				else {
+					this->m_UIclass.SetIntParam(5, 0);
 				}
 				if (Chara->GetWearArmerSwitch()) {
 					this->m_GetItemLog.AddLog(GetColor(25, 122, 75), "アーマーを着用 +%4d", 10);

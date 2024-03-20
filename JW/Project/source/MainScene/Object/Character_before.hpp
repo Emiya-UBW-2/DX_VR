@@ -250,10 +250,12 @@ namespace FPS_n2 {
 			}
 			const auto&		GetULT(void) const noexcept { return this->m_ULT; }
 			const auto&		GetULTMax(void) const noexcept { return ULTMax; }
-			void			AddULT(int damage_t) noexcept {
+			void			AddULT(int damage_t, bool SwitchOn) noexcept {
 				auto prev = this->m_ULT;
 				this->m_ULT = std::clamp<int>(this->m_ULT + damage_t, 0, ULTMax);
-				m_ULTSwitch |= ((prev != ULTMax) && IsULTActive());
+				if (SwitchOn) {
+					m_ULTSwitch |= ((prev != ULTMax) && IsULTActive());
+				}
 			}
 		public:
 			void		InitULT() {

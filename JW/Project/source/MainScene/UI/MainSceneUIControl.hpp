@@ -187,6 +187,9 @@ namespace FPS_n2 {
 			GraphHandle						Gauge_Graph;
 			GraphHandle						Gauge_Aim_Graph;
 			GraphHandle						OIL_Graph;
+			GraphHandle						ULT_Graph;
+
+			float							ULTTimer{0.f};
 
 			std::array<std::pair<int, float>, 6> ScoreAdd{};
 			int m_ScoreAddSel{0};
@@ -219,6 +222,7 @@ namespace FPS_n2 {
 				Path += "/Gauge.png";
 				m_GaugeMask.at(0).Dispose();
 				m_GaugeMask.at(0).Load(Path.c_str());
+				ULT_Graph = GraphHandle::Load(Path);
 			}
 			void			Draw(void) noexcept {
 				auto* Fonts = FontPool::Instance();
@@ -378,6 +382,12 @@ namespace FPS_n2 {
 					xp1 = y_r(1920 - 20 - m_GaugeMask.at(0).GetXSize() * 6 / 10);
 					yp1 = y_r(555);
 					m_GaugeMask.at(0).GetGraph().DrawExtendGraph(xp1, yp1, xp1 + y_r(m_GaugeMask.at(0).GetXSize() * 6 / 10), yp1 + y_r(m_GaugeMask.at(0).GetYSize() * 6 / 10), true);
+					if (intParam[7] == 1) {
+						SetDrawBlendMode(DX_BLENDMODE_ADD, std::clamp((int)(255.f*sin(deg2rad(ULTTimer))), 0, 255));
+						ULT_Graph.DrawExtendGraph(xp1, yp1, xp1 + y_r(m_GaugeMask.at(0).GetXSize() * 6 / 10), yp1 + y_r(m_GaugeMask.at(0).GetYSize() * 6 / 10), true);
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+						ULTTimer += 5.f * 60.f / FPS;
+					}
 				}
 				//ÉQÅ[ÉW
 				{

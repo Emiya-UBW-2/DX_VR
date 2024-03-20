@@ -151,6 +151,9 @@ namespace FPS_n2 {
 
 						//KeyGuide->AddGuide(PADS::INTERACT, "取得");
 						KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
+
+						KeyGuide->AddGuide(PADS::INTERACT, "");
+						KeyGuide->AddGuide(PADS::THROW, "チュートリアルを進める/戻る");
 					}
 				});
 
@@ -265,7 +268,7 @@ namespace FPS_n2 {
 						j--;
 					}
 				}
-				m_CharacterPtr->AddULT(100);
+				m_CharacterPtr->AddULT(100, true);
 				m_CharacterPtr->AddAmmoStock(99 - m_CharacterPtr->GetAmmoStock());
 			}
 			//Execute

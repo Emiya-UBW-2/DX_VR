@@ -280,7 +280,7 @@ namespace FPS_n2 {
 				}
 
 				MyChara->ValueSet(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, this->m_MyCharaID, 0);
-				MyChara->Heal(100);
+				MyChara->Heal(100, true);
 				this->Reset();
 			}
 			void		AimDir(const VECTOR_ref& VEC) {

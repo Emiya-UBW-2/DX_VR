@@ -33,25 +33,25 @@ namespace FPS_n2 {
 					SE->Get((int)SoundEnum::Man_Death1 + GetRand(8 - 1)).Play_3D(0, GetFrameWorldMat(CharaFrame::Head).pos(), Scale_Rate * 10.f);
 					if (value.ShotID == 0) {
 						auto* PlayerMngr = PlayerManager::Instance();
-						PlayerMngr->GetPlayer(value.ShotID).AddScore(100 + (((m_GunSelect==0) && (value.Damage >= 100)) ? 20 : 0));
+						PlayerMngr->GetPlayer(value.ShotID).AddScore(100 + (((m_GunSelect == 0) && (value.Damage >= 100)) ? 20 : 0));
 
 						auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(value.ShotID).GetChara();
-						if (m_AutoAim != -1) {
+						if (Chara->m_AutoAim != -1) {
 
-							Chara->AddULT((m_GunSelect == 1) ? 1 : 6);
+							Chara->AddULT((m_GunSelect == 1) ? 1 : 6, Chara->m_GunSelect == 0);
 						}
 						else {
-							Chara->AddULT((m_GunSelect == 1) ? 9 : 20);
+							Chara->AddULT((m_GunSelect == 1) ? 9 : 20, Chara->m_GunSelect == 0);
 						}
 					}
 					int Rand = GetRand(99);
-					if (Rand < 30) {
+					if (Rand < 45) {
 						m_ItemFallControl.at(0).SetFall(GetMove().pos + VECTOR_ref::up()*(0.5f*Scale_Rate), VECTOR_ref::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
 					}
-					else if (Rand < 60) {
+					else if (Rand < 45 + 15) {
 						m_ItemFallControl.at(1).SetFall(GetMove().pos + VECTOR_ref::up()*(0.5f*Scale_Rate), VECTOR_ref::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
 					}
-					else {
+					else if (Rand < 45 + 15 + 20) {
 						m_ItemFallControl.at(0).SetFall(GetMove().pos + VECTOR_ref::up()*(0.5f*Scale_Rate), VECTOR_ref::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
 						m_ItemFallControl.at(1).SetFall(GetMove().pos + VECTOR_ref::up()*(0.5f*Scale_Rate), VECTOR_ref::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
 					}
@@ -412,7 +412,7 @@ namespace FPS_n2 {
 						if (!m_ULTActive) {
 							if (m_ULTUp > 0.5f) {
 								m_ULTUp -= 0.5f;
-								ULTControl::AddULT(1);
+								ULTControl::AddULT(1, true);
 							}
 							m_ULTUp += 1.f / FPS;
 							if (ULTControl::IsULTActive()) {
@@ -426,14 +426,14 @@ namespace FPS_n2 {
 						else {
 							if (m_ULTUp > 0.25f) {
 								m_ULTUp -= 0.25f;
-								ULTControl::AddULT(-1);
+								ULTControl::AddULT(-1, true);
 							}
 							m_ULTUp += 1.f / FPS;
 							if (ULTControl::GetULT() == 0 || (GetIsAim() && KeyControl::GetULTKey().trigger())) {
 								m_IsChanging = true;
 								m_ULTActive = false;
 								m_ULTUp = 0.f;
-								ULTControl::AddULT(-20);
+								ULTControl::AddULT(-20, false);
 							}
 						}
 					}
@@ -442,7 +442,7 @@ namespace FPS_n2 {
 						if (per < 35) {
 							if (m_HPRec >= 0.f) {
 								m_HPRec -= 2.f;
-								Heal(2);
+								Heal(2, false);
 								if (m_MyID == 0) {
 									auto SE = SoundPool::Instance();
 									SE->Get((int)SoundEnum::Man_breathing).Play(0, DX_PLAYTYPE_BACK);
@@ -582,7 +582,7 @@ namespace FPS_n2 {
 					}
 					if (this->m_Wear_MorphinePer >= 0.f) {
 						this->m_Wear_MorphinePer -= 0.4f;
-						Heal(20);
+						Heal(20, true);
 					}
 				}
 			}
@@ -662,7 +662,7 @@ namespace FPS_n2 {
 						if (GetGunPtrNow()->GetInChamber()) {
 							GetGunPtrNow()->SetBullet();
 							if (m_GunSelect == 1) {
-								ULTControl::AddULT(-3);
+								ULTControl::AddULT(-3, true);
 							}
 							float Power = 0.0001f*GetGunPtrNow()->GetGunDataClass()->GetRecoilPower();
 							if (GetIsSquat()) {
