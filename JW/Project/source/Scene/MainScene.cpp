@@ -201,6 +201,8 @@ namespace FPS_n2 {
 				}
 #else
 #endif
+				m_CountDownBGM.vol((int)(255 * OptionParts->Get_SE()));
+				m_CountDownBGM2.vol((int)(255 * OptionParts->Get_SE()));
 				return true;
 			}
 			else {
@@ -285,6 +287,7 @@ namespace FPS_n2 {
 				SE->Get((int)SoundEnum::Env2).Play(0, DX_PLAYTYPE_LOOP);
 
 				this->m_GetItemLog.AddLog(GetColor(251, 91, 1), "3ï™ä‘ ìGÇÃêiçUÇ©ÇÁëœÇ¶ÇÎ");
+
 			}
 			else {
 				m_ReadyTimer = std::max(m_ReadyTimer - 1.f / FPS, 0.f);
@@ -381,6 +384,27 @@ namespace FPS_n2 {
 						}
 					}
 					prevLastMan = m_LastMan;
+
+					if (m_Timer < 61.f) {
+						if (!m_CountDownBGM2Flag) {
+							m_CountDownBGM2Flag = true;
+							m_CountDownBGM2.play(DX_PLAYTYPE_BACK, TRUE);
+						}
+					}
+					else {
+						m_CountDownBGM2Flag = false;
+					}
+					if (m_Timer < 15.f) {
+						if (m_LastMan != 0) {
+							if (m_CountDownBGMTimer != (int)m_Timer) {
+								m_CountDownBGMTimer = (int)m_Timer;
+								m_CountDownBGM.play(DX_PLAYTYPE_BACK, TRUE);
+							}
+						}
+					}
+					else {
+						m_CountDownBGMTimer = -1;
+					}
 				}
 				bool isready = (m_ReadyTimer == 0.f) && (m_PreEndTimer == -1.f);
 				for (int index = 0; index < Player_num; index++) {
@@ -832,6 +856,9 @@ namespace FPS_n2 {
 			movie.Dispose();
 #else
 #endif
+			m_CountDownBGM.stop();
+			m_CountDownBGM2.stop();
+
 		}
 		//
 		void			MAINLOOP::BG_Draw_Sub(void) noexcept {
@@ -1119,7 +1146,7 @@ namespace FPS_n2 {
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 				if (index == 0) { continue; }
-				//if (!c->CanLookTarget) { continue; }
+				if (!c->IsAlive()) { continue; }
 				float length = (MyPos - c->GetMove().pos).Length() / (50.f*Scale_Rate);
 				float xp2 = (float)(xp1 + (int)(c->GetMove().pos.x()));
 				float yp2 = (float)(yp1 - (int)(c->GetMove().pos.z()));
@@ -1315,6 +1342,11 @@ namespace FPS_n2 {
 				SE->Get((int)SoundEnum::HitGround0 + i).SetVol_Local(92);
 			}
 			SE->SetVol(OptionParts->Get_SE());
+			m_CountDownBGM = SoundHandle::Load("data/Sound/SE/CountDown.wav");
+			m_CountDownBGM.vol((int)(255 * OptionParts->Get_SE()));
+
+			m_CountDownBGM2 = SoundHandle::Load("data/Sound/SE/OneMinute.wav");
+			m_CountDownBGM2.vol((int)(255 * OptionParts->Get_SE()));
 		}
 		void			MAINLOOP::DisposeSE(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -1358,6 +1390,9 @@ namespace FPS_n2 {
 
 			SE->Delete((int)SoundEnum::Tank_near);
 			SE->Delete((int)SoundEnum::Stim);
+
+			m_CountDownBGM.Dispose();
+			m_CountDownBGM2.Dispose();
 		}
 		//
 		void			MAINLOOP::LoadChara(const std::string&FolderName, PlayerID ID, bool IsRagDoll, bool IsRagDollBaseObj) noexcept {

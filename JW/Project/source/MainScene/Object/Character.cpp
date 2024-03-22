@@ -30,6 +30,17 @@ namespace FPS_n2 {
 					}
 				}
 				else if (PrevLive) {
+					for (int i = 0; i < 6; i++) {
+						SE->Get((int)SoundEnum::Man_Hurt1 + i).StopAll(0);
+					}
+					SE->Get((int)SoundEnum::Man_contact).StopAll(0);
+					SE->Get((int)SoundEnum::Man_openfire).StopAll(0);
+					SE->Get((int)SoundEnum::Man_reload).StopAll(0);
+					SE->Get((int)SoundEnum::Man_takecover).StopAll(0);
+					SE->Get((int)SoundEnum::Man_teamdown).StopAll(0);
+					SE->Get((int)SoundEnum::Man_breathing).StopAll(0);
+					SE->Get((int)SoundEnum::Man_breathend).StopAll(0);
+
 					SE->Get((int)SoundEnum::Man_Death1 + GetRand(8 - 1)).Play_3D(0, GetFrameWorldMat(CharaFrame::Head).pos(), Scale_Rate * 10.f);
 					if (value.ShotID == 0) {
 						auto* PlayerMngr = PlayerManager::Instance();

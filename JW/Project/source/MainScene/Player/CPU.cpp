@@ -401,7 +401,7 @@ namespace FPS_n2 {
 				if (MyChara->CanLookTarget) {
 					this->m_CheckAgain = 0.f;
 					this->m_Phase = ENUM_AI_PHASE::Shot;
-					if (GetLengthToTarget() < 5.f*Scale_Rate) {
+					if (GetLengthToTarget() < 10.f*Scale_Rate) {
 						auto SE = SoundPool::Instance();
 						if (GetRand(1) == 0) {
 							SE->Get((int)SoundEnum::Man_contact).Play_3D(0, MyPos, Scale_Rate * 10.f);

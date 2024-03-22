@@ -36,6 +36,7 @@ namespace FPS_n2 {
 			std::array<char[CharMax], 64> m_CreditStr{};
 			bool						m_CreditActive{false};
 			PopUpDrawClass				m_PopUpDrawClass;
+			SoundHandle										m_BGM;
 		public:
 			const auto SelMode() const noexcept { return select; }
 		public:

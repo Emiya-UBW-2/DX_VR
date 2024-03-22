@@ -50,6 +50,11 @@ namespace FPS_n2 {
 			float											m_DeathCamYAdd{0.f};
 			float											m_DeathPer{0.f};
 
+			int												m_CountDownBGMTimer{0};
+			SoundHandle										m_CountDownBGM;
+			bool											m_CountDownBGM2Flag{true};
+			SoundHandle										m_CountDownBGM2;
+
 			GraphHandle movie;										//
 			int m_movieTotalFrame{0};
 		public:

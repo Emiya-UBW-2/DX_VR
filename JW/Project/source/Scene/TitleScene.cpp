@@ -58,8 +58,25 @@ namespace FPS_n2 {
 					yp1 += Height;
 				}
 								 });
+
+			auto* OptionParts = OPTION::Instance();
+
+			if (!m_BGM.check()) {
+				m_BGM = SoundHandle::Load("data/Sound/BGM/Vivaldi_Winter.wav");
+				m_BGM.play(DX_PLAYTYPE_LOOP, TRUE);
+			}
+			m_BGM.vol((int)(255 * OptionParts->Get_BGM()));
 		}
 		void			TitleScene::Dispose_Sub(void) noexcept {
+			switch (select) {
+				case 0:
+				case 2:
+					m_BGM.stop();
+					m_BGM.Dispose();
+					break;
+				default:
+					break;
+			}
 			m_SelectBackImage.Dispose();
 			for (auto& y : ButtonSel) {
 				y.Dispose();
@@ -73,6 +90,17 @@ namespace FPS_n2 {
 			}
 			auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();
+			auto* OptionParts = OPTION::Instance();
+
+			switch (select) {
+				case 0:
+				case 2:
+					m_BGM.vol((int)(255.f * OptionParts->Get_BGM()*(1.f- GameStart)));
+					break;
+				default:
+					m_BGM.vol((int)(255 * OptionParts->Get_BGM()));
+					break;
+			}
 
 			Pad->SetMouseMoveEnable(false);
 			Pad->ChangeGuide(
