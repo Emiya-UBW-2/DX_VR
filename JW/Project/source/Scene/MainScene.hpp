@@ -18,6 +18,8 @@ namespace FPS_n2 {
 			static const int		Chara_num = Player_num;
 			static const int		gun_num = Chara_num;
 		private:
+			bool											m_IsHardMode{false};
+
 			bool											m_IsFirstLoad{true};			//共通リソースをロードしたか
 			std::shared_ptr<BackGroundClassMain>			m_BackGround;					//BG
 
@@ -51,9 +53,12 @@ namespace FPS_n2 {
 			float											m_DeathPer{0.f};
 
 			int												m_CountDownBGMTimer{0};
-			SoundHandle										m_CountDownBGM;
+			bool											m_CountDownBGM1Flag{true};
+			SoundHandle										m_CountDownBGM1;
 			bool											m_CountDownBGM2Flag{true};
 			SoundHandle										m_CountDownBGM2;
+			bool											m_CountDownBGM3Flag{true};
+			SoundHandle										m_CountDownBGM3;
 
 			GraphHandle movie;										//
 			int m_movieTotalFrame{0};

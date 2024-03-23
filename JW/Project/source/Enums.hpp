@@ -117,6 +117,8 @@ namespace FPS_n2 {
 			HitGround2,
 			HitGround3,
 			HitGround4,
+
+			CountDown,
 		};
 		enum class CharaTypeID {
 			Mine,

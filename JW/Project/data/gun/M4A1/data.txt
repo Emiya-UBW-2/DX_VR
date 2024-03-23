@@ -1,0 +1,20 @@
+Name=M4A1  AssaultRifle
+
+ShotRate=800
+RecoilPower=90
+RecoilReturn=0.9
+shottype=FULL
+usehumanAnim=0
+soundsel=1
+reloadType=MAG
+
+Slot0Type=Magazine
+Slot0IsNeed=true
+Slot0Item=STANAG_30
+
+Slot1Type=Sight
+Slot1IsNeed=true
+Slot1Item=VIPER_DotSight
+Slot1Item=ACOG
+
+end

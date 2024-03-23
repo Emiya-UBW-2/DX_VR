@@ -27,6 +27,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//
 	FPS_n2::Sceneclass::ModDataManager::Create();
 	FPS_n2::Sceneclass::AmmoDataManager::Create();
+
+	auto* BGM = BGMPool::Instance();
+	auto* OptionParts = OPTION::Instance();
+	BGM->Add(0, "data/Sound/BGM/Title.wav");
+	BGM->Add(1, "data/Sound/BGM/Vivaldi_Winter.wav");
+	BGM->SetVol(OptionParts->Get_BGM());
 	//ƒV[ƒ“
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto Customscene = std::make_shared<FPS_n2::Sceneclass::CustomScene>();

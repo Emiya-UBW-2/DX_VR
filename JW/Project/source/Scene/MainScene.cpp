@@ -9,6 +9,7 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		//
 		void			MAINLOOP::Load_Sub(void) noexcept {
+			m_IsHardMode = true;
 			//ロード
 			if (m_IsFirstLoad) {
 				m_IsFirstLoad = false;
@@ -33,7 +34,13 @@ namespace FPS_n2 {
 				}
 
 				for (int i = 1; i < gun_num; i++) {
-					LoadGun("PCC_4", (PlayerID)i, false, 0);
+					if (!m_IsHardMode) {
+						LoadGun("PCC_4", (PlayerID)i, false, 0);
+					}
+					else {
+						std::string ULTName = ULT_GUNName[GetRand((int)ULT_GUN::Max - 1)];
+						LoadGun(ULTName.c_str(), (PlayerID)i, false, 0);
+					}
 				}
 			}
 		}
@@ -51,12 +58,22 @@ namespace FPS_n2 {
 			//ロード
 			LoadChara("Suit", GetMyPlayerID(), false);
 			GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
-			LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
-			//LoadGun("PCC_4", GetMyPlayerID(), false, 0);
+			if (!m_IsHardMode) {
+				LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
+			}
+			else {
+				LoadGun("M4A1", GetMyPlayerID(), false, 0);
+			}
+			
 
-			std::string ULTName = ULT_GUNName[(int)GunsModify::GetULTSelect()];
+			if (!m_IsHardMode) {
+				std::string ULTName = ULT_GUNName[(int)GunsModify::GetULTSelect()];
+				LoadGun(ULTName.c_str(), GetMyPlayerID(), false, 1);
+			}
+			else {
+				LoadGun("G17Gen3", GetMyPlayerID(), true, 1);
+			}
 
-			LoadGun(ULTName.c_str(), GetMyPlayerID(), false, 1);
 			//BGをオブジェに登録
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
@@ -117,7 +134,13 @@ namespace FPS_n2 {
 			//サウンド
 			SetSE();
 			//UI
-			this->m_UIclass.Set(ULTName.c_str());
+			if (!m_IsHardMode) {
+				std::string ULTName = ULT_GUNName[(int)GunsModify::GetULTSelect()];
+				this->m_UIclass.Set(ULTName.c_str());
+			}
+			else {
+				this->m_UIclass.Set("G17Gen3");
+			}
 			prevScore = 0;
 			prevLastMan = -1;
 			//入力
@@ -144,6 +167,7 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* SE = SoundPool::Instance();
+			auto* BGM = BGMPool::Instance();
 			auto* OptionParts = OPTION::Instance();
 
 			auto* Pad = PadControl::Instance();
@@ -201,8 +225,10 @@ namespace FPS_n2 {
 				}
 #else
 #endif
-				m_CountDownBGM.vol((int)(255 * OptionParts->Get_SE()));
+				m_CountDownBGM1.vol((int)(255 * OptionParts->Get_SE()));
 				m_CountDownBGM2.vol((int)(255 * OptionParts->Get_SE()));
+				m_CountDownBGM3.vol((int)(255 * OptionParts->Get_SE()));
+				m_CountDownBGMTimer = (int)m_ReadyTimer;
 				return true;
 			}
 			else {
@@ -210,7 +236,7 @@ namespace FPS_n2 {
 				if (!m_IsEnd) {
 					if (m_LastMan == 0 || (m_Timer<=0.f)) {
 						if (m_PreEndTimer < 0.f) {
-							m_PreEndTimer = 3.f;
+							m_PreEndTimer = 5.f;
 							this->m_GetItemLog.AddLog(GetColor(25, 122, 75), "クリア +%4d", 100);
 							if (m_LastMan==0) {
 								this->m_GetItemLog.AddLog(GetColor(25, 122, 75), "ラッシュ対処ボーナス +%4d", 100);
@@ -260,7 +286,7 @@ namespace FPS_n2 {
 #else
 					if (m_EndTimer < 0.f) {
 						if (Pad->GetKey(PADS::INTERACT).trigger()) {
-							m_EndTimer = 2.f;
+							m_EndTimer = 1.f;
 						}
 					}
 					else {
@@ -292,7 +318,18 @@ namespace FPS_n2 {
 			else {
 				m_ReadyTimer = std::max(m_ReadyTimer - 1.f / FPS, 0.f);
 				if (m_ReadyTimer == 0.f && Chara->IsAlive()) {
-					m_Timer = std::max(m_Timer - 1.f / FPS, 0.f);
+					if (!m_IsHardMode) {
+						m_Timer = std::max(m_Timer - 1.f / FPS, 0.f);
+					}
+				}
+				if (m_ReadyTimer>0.f) {
+					BGM->Get(0).SetVol_Local((int)(255.f*m_ReadyTimer / 6.f));
+				}
+				else {
+					BGM->Get(0).Stop();
+				}
+				if (m_IsHardMode) {
+					Chara->AddULT(100, false);
 				}
 			}
 			//Input,AI
@@ -385,6 +422,15 @@ namespace FPS_n2 {
 					}
 					prevLastMan = m_LastMan;
 
+					if (m_Timer <= 6.f) {
+						if (!m_CountDownBGM1Flag) {
+							m_CountDownBGM1Flag = true;
+							m_CountDownBGM1.play(DX_PLAYTYPE_BACK, TRUE);
+						}
+					}
+					else {
+						m_CountDownBGM1Flag = false;
+					}
 					if (m_Timer < 61.f) {
 						if (!m_CountDownBGM2Flag) {
 							m_CountDownBGM2Flag = true;
@@ -394,12 +440,29 @@ namespace FPS_n2 {
 					else {
 						m_CountDownBGM2Flag = false;
 					}
-					if (m_Timer < 15.f) {
+					if (m_Timer < 0.5f) {
+						if (!m_CountDownBGM3Flag) {
+							m_CountDownBGM3Flag = true;
+							m_CountDownBGM3.play(DX_PLAYTYPE_BACK, TRUE);
+						}
+					}
+					else {
+						m_CountDownBGM3Flag = false;
+					}
+					if (m_Timer < 60.f) {
 						if (m_LastMan != 0) {
 							if (m_CountDownBGMTimer != (int)m_Timer) {
 								m_CountDownBGMTimer = (int)m_Timer;
-								m_CountDownBGM.play(DX_PLAYTYPE_BACK, TRUE);
+								SE->Get((int)SoundEnum::CountDown).Play(0, DX_PLAYTYPE_BACK, TRUE);
+								SE->Get((int)SoundEnum::CountDown).SetVol_Local((int)Lerp(64.f, 255.f, std::clamp(1.f - ((m_Timer - 15.f) / (60.f - 15.f)), 0.f, 1.f)));
 							}
+						}
+					}
+					else if (m_ReadyTimer > 0 && m_ReadyTimer <= 5) {
+						if (m_CountDownBGMTimer != (int)m_ReadyTimer) {
+							m_CountDownBGMTimer = (int)m_ReadyTimer;
+							SE->Get((int)SoundEnum::CountDown).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							SE->Get((int)SoundEnum::CountDown).SetVol_Local(128);
 						}
 					}
 					else {
@@ -533,7 +596,13 @@ namespace FPS_n2 {
 									switch (a->GetItemType()) {
 										case ItemType::AMMO:
 											if (!tgt->GetAmmoLoading()) {
-												int Add = 2 + GetRand(8);
+												int Add = 0;
+												if (!m_IsHardMode) {
+													Add = 2 + GetRand(8);
+												}
+												else {
+													Add = 12 + GetRand(18);
+												}
 												tgt->AddAmmoStock(Add);
 												isHit = true;
 												SE->Get((int)SoundEnum::GetAmmo).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
@@ -829,8 +898,11 @@ namespace FPS_n2 {
 		}
 		void			MAINLOOP::Dispose_Sub(void) noexcept {
 			auto* SE = SoundPool::Instance();
+			auto* BGM = BGMPool::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
+
+			BGM->Get(0).Stop();
 
 			SE->Get((int)SoundEnum::Env).StopAll(0);
 			SE->Get((int)SoundEnum::Env2).StopAll(0);
@@ -856,9 +928,9 @@ namespace FPS_n2 {
 			movie.Dispose();
 #else
 #endif
-			m_CountDownBGM.stop();
+			m_CountDownBGM1.stop();
 			m_CountDownBGM2.stop();
-
+			m_CountDownBGM3.stop();
 		}
 		//
 		void			MAINLOOP::BG_Draw_Sub(void) noexcept {
@@ -985,11 +1057,16 @@ namespace FPS_n2 {
 		}
 		void			MAINLOOP::DrawUI_In_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
+			auto* Fonts = FontPool::Instance();
 			if (m_IsEnd) {
 #if FALSE
 				movie.DrawExtendGraph(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, FALSE);
 #else
 				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(64, 64, 64), TRUE);
+
+				auto* PlayerMngr = PlayerManager::Instance();
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(48), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+					y_r(256),y_r(384), GetColor(255, 255, 255), GetColor(0, 0, 0), "Score : %d", PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
 #endif
 
 				float per = (1.f - (16.f / 9.f) / 2.35f) / 2.f;
@@ -1298,6 +1375,7 @@ namespace FPS_n2 {
 			SE->Add((int)SoundEnum::Hit, 3, "data/Sound/SE/hit.wav");
 			SE->Add((int)SoundEnum::HitMe, 3, "data/Sound/SE/HitMe.wav");
 			SE->Add((int)SoundEnum::HitGuard, 3, "data/Sound/SE/Guard.wav");
+			SE->Add((int)SoundEnum::CountDown, 2, "data/Sound/SE/CountDown.wav", false);
 			for (int i = 0; i < 5; i++) {
 				SE->Add((int)SoundEnum::HitGround0 + i, 2, "data/Sound/SE/gun/HitGround/" + std::to_string(i + 1) + ".wav");
 			}
@@ -1335,6 +1413,7 @@ namespace FPS_n2 {
 			SE->Get((int)SoundEnum::Hit).SetVol_Local(255);
 			SE->Get((int)SoundEnum::HitMe).SetVol_Local(255);
 			SE->Get((int)SoundEnum::HitGuard).SetVol_Local(255);
+			SE->Get((int)SoundEnum::CountDown).SetVol_Local(128);
 
 			SE->Get((int)SoundEnum::Man_breathing).SetVol_Local(192);
 			SE->Get((int)SoundEnum::Man_breathend).SetVol_Local(192);
@@ -1342,11 +1421,13 @@ namespace FPS_n2 {
 				SE->Get((int)SoundEnum::HitGround0 + i).SetVol_Local(92);
 			}
 			SE->SetVol(OptionParts->Get_SE());
-			m_CountDownBGM = SoundHandle::Load("data/Sound/SE/CountDown.wav");
-			m_CountDownBGM.vol((int)(255 * OptionParts->Get_SE()));
 
+			m_CountDownBGM1 = SoundHandle::Load("data/Sound/SE/second.wav");
+			m_CountDownBGM1.vol((int)(255 * OptionParts->Get_SE()));
 			m_CountDownBGM2 = SoundHandle::Load("data/Sound/SE/OneMinute.wav");
 			m_CountDownBGM2.vol((int)(255 * OptionParts->Get_SE()));
+			m_CountDownBGM3 = SoundHandle::Load("data/Sound/SE/TimeUp.wav");
+			m_CountDownBGM3.vol((int)(255 * OptionParts->Get_SE()));
 		}
 		void			MAINLOOP::DisposeSE(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -1371,6 +1452,7 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::Hit);
 			SE->Delete((int)SoundEnum::HitMe);
 			SE->Delete((int)SoundEnum::HitGuard);
+			SE->Delete((int)SoundEnum::CountDown);
 			for (int i = 0; i < 5; i++) {
 				SE->Delete((int)SoundEnum::HitGround0 + i);
 			}
@@ -1391,8 +1473,9 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::Tank_near);
 			SE->Delete((int)SoundEnum::Stim);
 
-			m_CountDownBGM.Dispose();
+			m_CountDownBGM1.Dispose();
 			m_CountDownBGM2.Dispose();
+			m_CountDownBGM3.Dispose();
 		}
 		//
 		void			MAINLOOP::LoadChara(const std::string&FolderName, PlayerID ID, bool IsRagDoll, bool IsRagDollBaseObj) noexcept {

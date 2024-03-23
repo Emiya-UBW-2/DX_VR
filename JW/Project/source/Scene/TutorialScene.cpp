@@ -110,6 +110,9 @@ namespace FPS_n2 {
 				}
 				FileRead_close(mdata);
 			}
+
+			auto* BGM = BGMPool::Instance();
+			BGM->StopAll();
 		}
 		bool			TutorialScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
