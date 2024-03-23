@@ -26,6 +26,7 @@ namespace FPS_n2 {
 			
 			ButtonStatus m_ButtonStatus{ButtonStatus::Ready};
 			ButtonMode m_ButtonMode{ButtonMode::String};
+			bool m_EnableSelect{false};
 		private:
 			char m_String[64];
 			GraphHandle m_Icon;
@@ -33,19 +34,21 @@ namespace FPS_n2 {
 			void			LoadCommon(GraphHandle* BGPath) noexcept {
 				m_SelectBackImage = BGPath;
 			}
-			void			Load_Icon(const char* IconPath) noexcept {
+			void			Load_Icon(const char* IconPath, bool IsEnableSelect) noexcept {
 				m_Icon = GraphHandle::Load(IconPath);
 				m_Icon.GetSize(&xsize, &ysize);
 				xsize = y_r(xsize);
 				ysize = y_r(ysize);
 				m_ButtonMode = ButtonMode::Icon;
+				m_EnableSelect = IsEnableSelect;
 			}
-			void			Load_String(const char* String, int fontsize) noexcept {
+			void			Load_String(const char* String, int fontsize, bool IsEnableSelect) noexcept {
 				auto* Fonts = FontPool::Instance();
 				snprintfDx(m_String, 64, String);
 				xsize = Fonts->Get(FontPool::FontType::Nomal_AA).GetStringWidth(fontsize, m_String);
 				ysize = fontsize;
 				m_ButtonMode = ButtonMode::String;
+				m_EnableSelect = IsEnableSelect;
 			}
 			void			Set(int xp, int yp, FontHandle::FontXCenter FontX, FontHandle::FontYCenter FontY) noexcept {
 				xp1 = xp;
@@ -171,12 +174,21 @@ namespace FPS_n2 {
 								switch (m_ButtonStatus) {
 									case ButtonStatus::None:
 										Color = Gray;
+										if (!m_EnableSelect) {
+											Color = GetColor(64, 48, 48);
+										}
 										break;
 									case ButtonStatus::Ready:
 										Color = Gray25;
+										if (!m_EnableSelect) {
+											Color = GetColor(96, 96, 96);
+										}
 										break;
 									case ButtonStatus::Focus:
 										Color = WhiteSel;
+										if (!m_EnableSelect) {
+											Color = GetColor(216, 143, 143);
+										}
 										break;
 									default:
 										break;

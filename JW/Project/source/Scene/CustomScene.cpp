@@ -13,23 +13,23 @@ namespace FPS_n2 {
 			for (auto& y : ButtonSel) {
 				y.LoadCommon(&m_SelectBackImage);
 			}
-			ButtonSel.at(0).Load_Icon("data/UI/Customs.png");
+			ButtonSel.at(0).Load_Icon("data/UI/Customs.png", true);
 			ButtonSel.at(0).Set(y_r(1920 - 96 * 2 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonSel.at(1).Load_Icon("data/UI/WeaponChange.png");
+			ButtonSel.at(1).Load_Icon("data/UI/WeaponChange.png", true);
 			ButtonSel.at(1).Set(y_r(1920 - 96 * 1 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonSel.at(2).Load_Icon("data/UI/FreeLook.png");
+			ButtonSel.at(2).Load_Icon("data/UI/FreeLook.png", true);
 			ButtonSel.at(2).Set(y_r(1920 - 96 * 0 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 
-			ButtonSel.at(3).Load_Icon("data/UI/Left.png");
+			ButtonSel.at(3).Load_Icon("data/UI/Left.png", true);
 			ButtonSel.at(3).Set(y_r(960 - 100), y_r(920), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonSel.at(4).Load_Icon("data/UI/Right.png");
+			ButtonSel.at(4).Load_Icon("data/UI/Right.png", true);
 			ButtonSel.at(4).Set(y_r(960 + 100), y_r(920), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			
-			ButtonSel.at(5).Load_Icon("data/UI/Left.png");
+			ButtonSel.at(5).Load_Icon("data/UI/Left.png", true);
 			ButtonSel.at(5).Set(y_r(960 - 400 - 48), y_r(540 - 270 + 48), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonSel.at(6).Load_Icon("data/UI/Right.png");
+			ButtonSel.at(6).Load_Icon("data/UI/Right.png", true);
 			ButtonSel.at(6).Set(y_r(960 - 400 + 48), y_r(540 - 270 + 48), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonSel.at(7).Load_Icon("data/UI/Reset.png");
+			ButtonSel.at(7).Load_Icon("data/UI/Reset.png", true);
 			ButtonSel.at(7).Set(y_r(1920 - 96 * 2 - 64), y_r(64 + 64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			//
 			SetAmbientLight(VECTOR_ref::vget(0.4f, -0.5f, 0.1f), GetColorF(1.f, 1.f, 1.f, 0.0f));
@@ -250,7 +250,7 @@ namespace FPS_n2 {
 				else {
 					m_IsEnd = true;
 				}
-				SE->Get((int)SoundEnumCommon::UI_NG).Play(0, DX_PLAYTYPE_BACK, TRUE);
+				SE->Get((int)SoundEnumCommon::UI_CANCEL).Play(0, DX_PLAYTYPE_BACK, TRUE);
 			}
 
 			if ((bselect != -1) && (m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetKey(PADS::INTERACT).trigger())) {

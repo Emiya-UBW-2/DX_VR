@@ -20,6 +20,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetMainWindowText("JW");						//タイトル
 	//MV1SetLoadModelUsePackDraw(TRUE);
 	PostPassEffect::Create();						//シェーダー
+
+	auto* SaveDataParts = SaveDataClass::Instance();
+	SaveDataParts->Load();
+	SaveDataParts->Save();
+
+	//SaveDataParts->SetParam("UnlockHardMode", 0);
+	//SaveDataParts->Save();
+
 	//
 	FPS_n2::Sceneclass::ObjectManager::Create();
 	FPS_n2::Sceneclass::PlayerManager::Create();
@@ -80,13 +88,20 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			switch (Titlescene->SelMode()) {
 				case 0:
 					Titlescene->Set_Next(MAINLOOPscene);
-					if (isTutorialLoop) {
-						isTutorialLoop = false;
-						Tutorialscene->Dispose_Load();
-					}
-					if (!isMainLoop) {
+					if (MAINLOOPscene->SetPlayMode(false)) {
 						isMainLoop = true;
+						MAINLOOPscene->Dispose_Load();
 						MAINLOOPscene->Load();
+					}
+					else {
+						if (isTutorialLoop) {
+							isTutorialLoop = false;
+							Tutorialscene->Dispose_Load();
+						}
+						if (!isMainLoop) {
+							isMainLoop = true;
+							MAINLOOPscene->Load();
+						}
 					}
 					break;
 				case 1:
@@ -109,6 +124,24 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					if (!isTutorialLoop) {
 						isTutorialLoop = true;
 						Tutorialscene->Load();
+					}
+					break;
+				case 3:
+					Titlescene->Set_Next(MAINLOOPscene);
+					if (MAINLOOPscene->SetPlayMode(true)) {
+						isMainLoop = true;
+						MAINLOOPscene->Dispose_Load();
+						MAINLOOPscene->Load();
+					}
+					else {
+						if (isTutorialLoop) {
+							isTutorialLoop = false;
+							Tutorialscene->Dispose_Load();
+						}
+						if (!isMainLoop) {
+							isMainLoop = true;
+							MAINLOOPscene->Load();
+						}
 					}
 					break;
 				default:

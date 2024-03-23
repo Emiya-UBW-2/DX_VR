@@ -11,6 +11,8 @@ namespace FPS_n2 {
 		void			TitleScene::Set_Sub(void) noexcept {
 			select = 0;
 			m_MouseSelMode = false;
+			auto* SaveDataParts = SaveDataClass::Instance();
+			m_HardModeActive = (SaveDataParts->GetParam("UnlockHardMode") == 1);
 			GameFadeIn = 1.f;
 			GameStart = 0.f;
 
@@ -19,17 +21,20 @@ namespace FPS_n2 {
 				y.LoadCommon(&m_SelectBackImage);
 			}
 
-			ButtonSel.at(0).Load_String(SelectName[0], y_r(64));
+			ButtonSel.at(0).Load_String(SelectName[0], y_r(64), true);
 			ButtonSel.at(0).Set(y_r(1920 / 2), y_r(1080 - 96), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM);
-			ButtonSel.at(1).Load_String(SelectName[1], y_r(48));
-			ButtonSel.at(1).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 1), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonSel.at(2).Load_String(SelectName[2], y_r(48));
-			ButtonSel.at(2).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 0), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonSel.at(1).Load_String(SelectName[1], y_r(48), true);
+			ButtonSel.at(1).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonSel.at(2).Load_String(SelectName[2], y_r(48), true);
+			ButtonSel.at(2).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 1), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 
-			ButtonSel.at(3).Load_Icon("data/UI/setting.png");
-			ButtonSel.at(3).Set(y_r(1920 - 96 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonSel.at(4).Load_Icon("data/UI/credit.png");
-			ButtonSel.at(4).Set(y_r(1920 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(3).Load_String(SelectName[3], y_r(48), m_HardModeActive);
+			ButtonSel.at(3).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 0), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+
+			ButtonSel.at(4).Load_Icon("data/UI/setting.png", true);
+			ButtonSel.at(4).Set(y_r(1920 - 96 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(5).Load_Icon("data/UI/credit.png", true);
+			ButtonSel.at(5).Set(y_r(1920 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			//クレジット
 			int mdata = FileRead_open("data/Credit.txt", FALSE);
 			m_CreditCoulm = 0;
@@ -79,7 +84,6 @@ namespace FPS_n2 {
 			}
 			auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();
-			auto* OptionParts = OPTION::Instance();
 
 			Pad->SetMouseMoveEnable(false);
 			Pad->ChangeGuide(
@@ -135,17 +139,28 @@ namespace FPS_n2 {
 							case 1:
 							case 2:
 								GameStart += 0.0001f;
+								SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 								break;
 							case 3:
-								OptionWindowClass::Instance()->SetActive();
+								if (m_HardModeActive) {
+									GameStart += 0.0001f;
+									SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
+								}
+								else {
+									SE->Get((int)SoundEnumCommon::UI_NG).Play(0, DX_PLAYTYPE_BACK, TRUE);
+								}
 								break;
 							case 4:
+								OptionWindowClass::Instance()->SetActive();
+								SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
+								break;
+							case 5:
 								m_CreditActive = true;
+								SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 								break;
 							default:
 								break;
 						}
-						SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					}
 					if (preselect != select || preMouseSel != m_MouseSelMode) {
 						if (select != -1) {

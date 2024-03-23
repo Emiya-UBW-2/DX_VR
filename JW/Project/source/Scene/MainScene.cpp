@@ -9,7 +9,6 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		//
 		void			MAINLOOP::Load_Sub(void) noexcept {
-			m_IsHardMode = true;
 			//ロード
 			if (m_IsFirstLoad) {
 				m_IsFirstLoad = false;
@@ -897,6 +896,27 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			MAINLOOP::Dispose_Sub(void) noexcept {
+			{
+				//
+				auto* SaveDataParts = SaveDataClass::Instance();
+
+				if (m_MainLoopPauseControl.GetIsRetireSelected()) {
+					//リタイア
+				}
+				else if((m_DeathPer >= 0.99f)) {
+					//死亡
+				}
+				else if (m_EndTimer == 0.f) {
+					//クリア
+					//ハードモードアンロック
+					if (SaveDataParts->GetParam("UnlockHardMode") != 1) {
+						SaveDataParts->SetParam("UnlockHardMode", 1);
+						//メッセージ
+					}
+					//ハイスコア更新
+				}
+				SaveDataParts->Save();
+			}
 			auto* SE = SoundPool::Instance();
 			auto* BGM = BGMPool::Instance();
 			auto* ObjMngr = ObjectManager::Instance();

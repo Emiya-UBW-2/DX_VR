@@ -63,11 +63,11 @@ namespace FPS_n2 {
 					y.LoadCommon(&m_SelectBackImage);
 				}
 
-				ButtonSel.at(0).Load_String("Retire", y_r(48));
+				ButtonSel.at(0).Load_String("Retire", y_r(48), true);
 				ButtonSel.at(0).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-				ButtonSel.at(1).Load_String("Option", y_r(48));
+				ButtonSel.at(1).Load_String("Option", y_r(48), true);
 				ButtonSel.at(1).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 1), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-				ButtonSel.at(2).Load_String("Return Game", y_r(48));
+				ButtonSel.at(2).Load_String("Return Game", y_r(48), true);
 				ButtonSel.at(2).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 0), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 			}
 			void Execute() noexcept {
@@ -142,7 +142,7 @@ namespace FPS_n2 {
 					}
 
 					if (Pad->GetKey(PADS::RELOAD).trigger()) {
-						SE->Get((int)SoundEnumCommon::UI_NG).Play(0, DX_PLAYTYPE_BACK, TRUE);
+						SE->Get((int)SoundEnumCommon::UI_CANCEL).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						DXDraw::Instance()->PauseExit();
 					}
 

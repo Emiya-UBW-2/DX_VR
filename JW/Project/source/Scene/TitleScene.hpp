@@ -5,17 +5,19 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 
-		static const char* SelectName[5] = {
+		static const char* SelectName[6] = {
 			"Ready",
 			"Customize Handgun",
 			"Shooting Range",
+			"Fire Party",
 			"",
 			"",
 		};
-		static const char* SelectInfoName[5] = {
+		static const char* SelectInfoName[6] = {
 			"戦闘を行います",
 			"使用する拳銃のカスタマイズをすることができます",
 			"射撃場で装備を試します",
+			"戦闘を行います(Hard Mode)",
 			"オプションを開きます",
 			"クレジットを開きます",
 		};
@@ -23,7 +25,7 @@ namespace FPS_n2 {
 		class TitleScene : public TEMPSCENE {
 		private:
 			GraphHandle					m_SelectBackImage;
-			std::array<ButtonClass, 5>	ButtonSel{};
+			std::array<ButtonClass, 6>	ButtonSel{};
 			int							select{0};
 
 			float						GameFadeIn{0.f};
@@ -36,6 +38,7 @@ namespace FPS_n2 {
 			std::array<char[CharMax], 64> m_CreditStr{};
 			bool						m_CreditActive{false};
 			PopUpDrawClass				m_PopUpDrawClass;
+			bool						m_HardModeActive{false};
 		public:
 			const auto SelMode() const noexcept { return select; }
 		public:
