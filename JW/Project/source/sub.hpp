@@ -320,4 +320,85 @@ namespace FPS_n2 {
 			this->m_inst.Draw();
 		}
 	};
+
+
+	class ItemLogData {
+		unsigned int m_Color{0};
+		char m_Message[64]{};
+		float m_TimeMax{-1.f};
+		float m_Time{-1.f};
+		float m_Flip{0.f};
+		float m_Flip_Y{0.f};
+	public:
+		void AddFlip(float value) noexcept { m_Flip += value; }
+		template <typename... Args>
+		void SetData(float second, unsigned int Color, const char* Mes, Args&&... args) noexcept {
+			snprintfDx(m_Message, 64, Mes, args...);
+			m_TimeMax = second;
+			m_Time = m_TimeMax;
+			m_Flip = 0.f;
+			m_Flip_Y = -1.f;
+			m_Color = Color;
+		}
+		void UpdateActive() noexcept {
+			if (m_Time > 0.f) {
+				m_Time -= 1.f / FPS;
+			}
+			else {
+				m_Time = -1.f;
+			}
+			Easing(&m_Flip_Y, m_Flip, 0.9f, EasingType::OutExpo);
+		}
+	public:
+		const float GetFlip() { return m_Flip_Y; }
+		const float ActivePer() { return (m_Time > 1.f) ? std::clamp((m_TimeMax - m_Time)*5.f + 0.1f, 0.f, 1.f) : std::clamp(m_Time, 0.f, 1.f); }
+		const char* GetMsg() { return m_Message; }
+		const unsigned int GetMsgColor() { return m_Color; }
+	};
+
+	class GetItemLog : public SingletonBase<GetItemLog> {
+	private:
+		friend class SingletonBase<GetItemLog>;
+	private:
+		std::array<ItemLogData, 16> data;
+		int LastSel{0};
+	public:
+		template <typename... Args>
+		void AddLog(float second, unsigned int Color, const char* Mes, Args&&... args) noexcept {
+			for (auto& d : data) {
+				d.AddFlip(1.f);
+			}
+			data.at(LastSel).SetData(second, Color, Mes, args...);
+			++LastSel %= ((int)data.size());
+		}
+		void Update() noexcept {
+			for (auto& d : data) {
+				if (d.ActivePer() > 0.f) {
+					d.UpdateActive();
+				}
+			}
+		}
+		void Draw() noexcept {
+			auto* Fonts = FontPool::Instance();
+			auto Black = GetColor(0, 0, 0);
+
+			int xp1, yp1;
+			xp1 = y_r(64);
+			yp1 = y_r(256);
+
+			for (auto& d : data) {
+				if (d.ActivePer() > 0.f) {
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*d.ActivePer()), 0, 255));
+					int yp = yp1 - y_r(24.f * d.GetFlip());
+					DrawBox(
+						xp1 - y_r(6), yp + y_r(18),
+						xp1 - y_r(6) + (int)(std::max(Fonts->Get(FontPool::FontType::Nomal_Edge).GetStringWidth(y_r(18), d.GetMsg()), y_r(200))*d.ActivePer()), yp + y_r(18) + y_r(5),
+						Black, TRUE);
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+																		  xp1, yp, d.GetMsgColor(), Black, d.GetMsg());
+				}
+			}
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+		}
+	};
 };

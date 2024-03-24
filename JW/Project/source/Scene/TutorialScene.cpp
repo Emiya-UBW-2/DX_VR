@@ -2,6 +2,8 @@
 
 #include "../sub.hpp"
 
+#include "../MainScene/Object/Target.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//
@@ -20,11 +22,16 @@ namespace FPS_n2 {
 		void			TutorialScene::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* OptionParts = OPTION::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
 			//
-			SetAmbientLight(VECTOR_ref::vget(0.1f, -0.5f, 0.8f), GetColorF(1.f, 1.f, 1.f, 0.0f));
-			SetFarShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
+			SetAmbientLight(VECTOR_ref::vget(0.f, -1.f, 0.f), GetColorF(1.f, 1.f, 1.f, 0.0f));
+			SetFarShadow(VECTOR_ref::vget(Scale_Rate*-100.f, Scale_Rate*0.f, Scale_Rate*-100.f), VECTOR_ref::vget(Scale_Rate*100.f, Scale_Rate*1.f, Scale_Rate*100.f));
 			SetMiddleShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
-			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
+			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.5f, Scale_Rate*10.f));
+
+			SetShadowDir(GetLightVec(), 0);
+			SetShadowDir(GetLightVec(), 1);
+			SetShadowDir(GetLightVec(), 2);
 			//
 			DeleteLightHandleAll();
 			SetLightEnable(TRUE);
@@ -34,10 +41,10 @@ namespace FPS_n2 {
 			SetLightAmbColor(GetColorF(0.1f, 0.1f, 0.1f, 1.f));
 			//
 			this->m_BackGround = std::make_shared<BackGroundClassTutorial>();
-			this->m_BackGround->Init("data/model/map/", "data/model/sky/");//1.59秒
+			this->m_BackGround->Init("data/model/map/","");//1.59秒
 			//ロード
 			LoadChara("Suit");
-			GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
+			GunsModify::LoadSlots("Save/gundata.svf");//プリセット読み込み
 			LoadGun("G17Gen3", true, 0);
 			//LoadGun("AKS-74", false, 0);
 			//LoadGun("M16-4", false, 0);
@@ -60,13 +67,13 @@ namespace FPS_n2 {
 			//人の座標設定
 			{
 				VECTOR_ref pos_t;
-				pos_t = VECTOR_ref::vget(6.5f*Scale_Rate, 0.f, -2.f*Scale_Rate);
+				pos_t = VECTOR_ref::vget(0.f, 0.f, 0.f);
 
 				VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 10.f*Scale_Rate;
 				if (this->m_BackGround->CheckLinetoMap(pos_t + VECTOR_ref::up() * -10.f*Scale_Rate, &EndPos, false)) {
 					pos_t = EndPos;
 				}
-				m_CharacterPtr->ValueSet(deg2rad(0.f), deg2rad(120.f), pos_t, (PlayerID)0, 0);
+				m_CharacterPtr->ValueSet(deg2rad(0.f), deg2rad(90.f), pos_t, (PlayerID)0, 0);
 				m_CharacterPtr->SetCharaType(CharaTypeID::Team);
 			}
 			//Cam
@@ -113,6 +120,40 @@ namespace FPS_n2 {
 
 			auto* BGM = BGMPool::Instance();
 			BGM->StopAll();
+
+			ScoreBoard = GraphHandle::Load("data/UI/Score.png");
+			//
+			for (int j = 0; j < 5; j++) {
+				ObjMngr->MakeObject(ObjType::Target);
+				auto& t = *ObjMngr->GetObj(ObjType::Target, j);
+				ObjMngr->LoadObjectModel(t.get(), "data/model/Target/");
+				MV1::SetAnime(&t->GetObj(), t->GetObj());
+				t->SetMove(MATRIX_ref::RotY(deg2rad(-90)), VECTOR_ref::vget(Scale_Rate*-(5.f + 10.f*j), 0.f, Scale_Rate*((-2.f * 5 / 2) + 2.f*j)));
+			}
+			//UI
+			tgtSel = -1;
+			tgtTimer = 0.f;
+
+			{
+				this->m_UIclass.InitGaugeParam(4 + 3, 0, 20);
+				this->m_UIclass.InitGaugeParam(4 + 3 + 1, 0, 20);
+				//HP
+				this->m_UIclass.InitGaugeParam(0, (int)m_CharacterPtr->GetHPMax(), (int)m_CharacterPtr->GetHPMax());
+				//AP
+				this->m_UIclass.InitGaugeParam(1, (int)m_CharacterPtr->GetAPMax(), (int)m_CharacterPtr->GetAPMax());
+				//Ammo
+				if (m_CharacterPtr->GetGunPtrNow()) {
+					this->m_UIclass.InitGaugeParam(2, (int)m_CharacterPtr->GetGunPtrNow()->GetAmmoAll() + 1, (int)m_CharacterPtr->GetGunPtrNow()->GetAmmoAll() + 1);
+				}
+				//ULT
+				this->m_UIclass.InitGaugeParam(3, (int)m_CharacterPtr->GetULTMax(), (int)m_CharacterPtr->GetULTMax());
+				//mag
+				int mags = 0;
+				for (const auto& M : m_CharacterPtr->GetMagDatas()) {
+					this->m_UIclass.InitGaugeParam(4 + mags, M.AmmoAll, M.AmmoAll);
+					mags++;
+				}
+			}
 		}
 		bool			TutorialScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
@@ -288,6 +329,32 @@ namespace FPS_n2 {
 							VECTOR_ref repos_tmp = a->GetMove().repos;
 							VECTOR_ref pos_tmp = a->GetMove().pos;
 
+							int j = 0;
+							while (true) {
+								auto target = ObjMngr->GetObj(ObjType::Target, j);
+								if (target != nullptr) {
+									auto& t = (std::shared_ptr<TargetClass>&)(*target);
+									auto Res = t->GetColLine(repos_tmp, pos_tmp, -1);
+									if (Res.HitFlag == TRUE) {
+										//エフェクト
+										EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, Res.HitPosition, Res.Normal, a->GetCaliberSize() / 0.02f * Scale_Rate);
+										//ヒット演算
+										if (tgtSel != -1 && tgtSel != j) {
+											auto& tOLD = (std::shared_ptr<TargetClass>&)(*ObjMngr->GetObj(ObjType::Target, tgtSel));
+											tOLD->ResetHit();
+										}
+										tgtSel = j;
+										tgtTimer = 2.f;
+
+										t->SetHitPos(Res.HitPosition);
+									}
+								}
+								else {
+									break;
+								}
+								j++;
+							}
+
 							VECTOR_ref norm_tmp;
 							auto ColResGround = this->m_BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, true, &norm_tmp);
 							bool is_HitAll = false;
@@ -307,6 +374,7 @@ namespace FPS_n2 {
 				Set_is_Blackout(false);
 				Set_Per_Blackout(0.f);
 			}
+			tgtTimer = std::max(tgtTimer - 1.f / FPS, 0.f);
 			//近接攻撃
 			{
 			}
@@ -385,7 +453,7 @@ namespace FPS_n2 {
 					0.004f);
 				//*/
 			}
-			SetShadowDir(VECTOR_ref::vget(0.1f, -1.f, 0.1f), 0);
+			
 			//SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(0)).Norm(), 0);
 			//SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(1)).Norm(), 1);
 			//SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(2)).Norm(), 2);
@@ -478,13 +546,18 @@ namespace FPS_n2 {
 
 			OptionParts->Set_SSAO(m_PrevSSAO);
 			this->m_TutorialLog.Dispose();
+
+			ScoreBoard.Dispose();
 		}
 		//
 		void			TutorialScene::BG_Draw_Sub(void) noexcept {
 			this->m_BackGround->BG_Draw();
 		}
+		void			TutorialScene::ShadowDraw_Far_Sub(void) noexcept {
+			//this->m_BackGround->Shadow_Draw();
+		}
+
 		void			TutorialScene::ShadowDraw_Sub(void) noexcept {
-			this->m_BackGround->Shadow_Draw();
 			auto* ObjMngr = ObjectManager::Instance();
 			ObjMngr->DrawObject_Shadow();
 		}
@@ -559,6 +632,43 @@ namespace FPS_n2 {
 			//ポーズ
 			if (DXDraw::Instance()->IsPause()) {
 				m_MainLoopPauseControl.Draw();
+			}
+			else {
+				//的ヒット状況表示
+				if (tgtSel >= 0) {
+					auto* ObjMngr = ObjectManager::Instance();
+					auto* DrawParts = DXDraw::Instance();
+					auto& t = (std::shared_ptr<TargetClass>&)(*ObjMngr->GetObj(ObjType::Target, tgtSel));
+
+					int xp = DrawParts->m_DispXSize / 2 - y_r(300);
+					int yp = DrawParts->m_DispYSize / 2 + y_r(100);
+					int size = y_r(100);
+					int xs = size / 2;
+					int ys = size / 2;
+					int xp2 = xp + ys * 2;
+					int yp2 = yp + ys * 2;
+					float AlphaPer = std::clamp(tgtTimer, 0.f, 1.f);
+					if (AlphaPer > 0.01f) {
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*AlphaPer));
+						//背景
+						ScoreBoard.DrawExtendGraph(xp, yp, xp2, yp2, true);
+						//命中箇所
+						for (auto& r : t->GetHitPosRec()) {
+							float cos_t, sin_t;
+							t->GetHitPoint(r, &cos_t, &sin_t);
+							DrawCircle(xp + xs + (int)((float)xs * cos_t), yp + ys + (int)((float)ys * sin_t), 2, GetColor(0, 255, 0));
+						}
+						//点数
+						int ypAdd = 0;
+						auto* Fonts = FontPool::Instance();
+						for (auto& r : t->GetHitPosRec()) {
+							Fonts->Get(FontPool::FontType::Gothic_AA, y_r(24)).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+																						  xp, yp2 + ypAdd, GetColor(255, 255, 255), GetColor(255, 255, 255), "[%4.1f]", t->GetHitPoint(r));
+							ypAdd += y_r(24);
+						}
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+					}
+				}
 			}
 		}
 		//使い回しオブジェ系

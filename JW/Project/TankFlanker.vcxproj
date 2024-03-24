@@ -40,6 +40,7 @@
     <ClInclude Include="source\MainScene\Object\MovieObj.hpp" />
     <ClInclude Include="source\MainScene\Object\ObjectBase.hpp" />
     <ClInclude Include="source\MainScene\Object\ObjectBase_before.hpp" />
+    <ClInclude Include="source\MainScene\Object\Target.hpp" />
     <ClInclude Include="source\MainScene\Player\CPU.hpp" />
     <ClInclude Include="source\MainScene\Player\Player.hpp" />
     <ClInclude Include="source\MainScene\UI\MainSceneUIControl.hpp" />
@@ -70,6 +71,7 @@
     <ClCompile Include="source\MainScene\Object\Morphine.cpp" />
     <ClCompile Include="source\MainScene\Object\MovieObj.cpp" />
     <ClCompile Include="source\MainScene\Object\ObjectBase.cpp" />
+    <ClCompile Include="source\MainScene\Object\Target.cpp" />
     <ClCompile Include="source\MainScene\Player\CPU.cpp" />
     <ClCompile Include="source\MainScene\Player\Player.cpp" />
     <ClCompile Include="source\ObjectManager.cpp" />

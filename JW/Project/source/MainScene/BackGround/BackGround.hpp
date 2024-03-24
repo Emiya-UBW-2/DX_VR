@@ -224,6 +224,10 @@ namespace FPS_n2 {
 			//
 			void			Execute_Sub(void) noexcept override {}
 			//
+			void			BG_Draw_Sub(void) noexcept override {
+				auto* DrawParts = DXDraw::Instance();
+				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(255, 255, 255), TRUE);
+			}
 			void			Shadow_Draw_Far_Sub(void) noexcept override {}
 			void			Shadow_Draw_Sub(void) noexcept override {
 				DrawCommon();

@@ -1,4 +1,4 @@
-Name=AKS-74N
+Name=AKS-74N AssaultRifle
 
 ShotRate=600
 RecoilPower=210

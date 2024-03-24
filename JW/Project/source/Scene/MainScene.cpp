@@ -50,13 +50,13 @@ namespace FPS_n2 {
 			SetAmbientLight(VECTOR_ref::vget(-0.8f, -0.5f, -0.1f), GetColorF(0.92f, 0.91f, 0.90f, 0.0f));
 			SetFarShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
 			SetMiddleShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
-			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
+			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.5f, Scale_Rate*10.f));
 
 			this->m_BackGround = std::make_shared<BackGroundClassMain>();
 			this->m_BackGround->Init("", "");//1.59秒
 			//ロード
 			LoadChara("Suit", GetMyPlayerID(), false);
-			GunsModify::LoadSlots("data/bokuzyo.ok");//プリセット読み込み
+			GunsModify::LoadSlots("Save/gundata.svf");//プリセット読み込み
 			if (!m_IsHardMode) {
 				LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
 			}
@@ -160,6 +160,27 @@ namespace FPS_n2 {
 			LogFileFmtAdd("End2[%f]", (float)(GetNowHiPerformanceCount() - P) / 1000.f / 1000.f);
 			P = GetNowHiPerformanceCount();
 			//*/
+			{
+				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+				this->m_UIclass.InitGaugeParam(4 + 3, 0, 20);
+				this->m_UIclass.InitGaugeParam(4 + 3 + 1, 0, 20);
+				//HP
+				this->m_UIclass.InitGaugeParam(0, (int)Chara->GetHPMax(), (int)Chara->GetHPMax());
+				//AP
+				this->m_UIclass.InitGaugeParam(1, (int)Chara->GetAPMax(), (int)Chara->GetAPMax());
+				//Ammo
+				if (Chara->GetGunPtrNow()) {
+					this->m_UIclass.InitGaugeParam(2, (int)Chara->GetGunPtrNow()->GetAmmoAll() + 1, (int)Chara->GetGunPtrNow()->GetAmmoAll() + 1);
+				}
+				//ULT
+				this->m_UIclass.InitGaugeParam(3, 0, (int)Chara->GetULTMax());
+				//mag
+				int mags = 0;
+				for (const auto& M : Chara->GetMagDatas()) {
+					this->m_UIclass.InitGaugeParam(4 + mags, M.AmmoAll, M.AmmoAll);
+					mags++;
+				}
+			}
 		}
 		bool			MAINLOOP::Update_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
@@ -168,6 +189,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* BGM = BGMPool::Instance();
 			auto* OptionParts = OPTION::Instance();
+			auto* ItemLogParts = GetItemLog::Instance();
 
 			auto* Pad = PadControl::Instance();
 			Pad->SetMouseMoveEnable(!m_IsEnd);
@@ -236,9 +258,9 @@ namespace FPS_n2 {
 					if (m_LastMan == 0 || (m_Timer<=0.f)) {
 						if (m_PreEndTimer < 0.f) {
 							m_PreEndTimer = 5.f;
-							this->m_GetItemLog.AddLog(GetColor(25, 122, 75), "クリア +%4d", 100);
+							ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "クリア +%4d", 100);
 							if (m_LastMan==0) {
-								this->m_GetItemLog.AddLog(GetColor(25, 122, 75), "ラッシュ対処ボーナス +%4d", 100);
+								ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "ラッシュ対処ボーナス +%4d", 100);
 							}
 						}
 						else {
@@ -311,7 +333,7 @@ namespace FPS_n2 {
 				SE->Get((int)SoundEnum::Env).Play(0, DX_PLAYTYPE_LOOP);
 				SE->Get((int)SoundEnum::Env2).Play(0, DX_PLAYTYPE_LOOP);
 
-				this->m_GetItemLog.AddLog(GetColor(251, 91, 1), "3分間 敵の進攻から耐えろ");
+				ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "3分間 敵の進攻から耐えろ");
 
 			}
 			else {
@@ -405,7 +427,7 @@ namespace FPS_n2 {
 					else {
 						if (!m_RashStartLog) {
 							m_RashStartLog = true;
-							this->m_GetItemLog.AddLog(GetColor(251, 91, 1), "敵の行動が活発になった、最後の一押しだ");
+							ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "敵の行動が活発になった、最後の一押しだ");
 						}
 						m_LastMan = 0;
 						for (int index = 0; index < Player_num; index++) {
@@ -416,7 +438,7 @@ namespace FPS_n2 {
 							}
 						}
 						if (m_LastMan != prevLastMan) {
-							this->m_GetItemLog.AddLog(GetColor(251, 91, 1), "残り%d人", m_LastMan);
+							ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "残り%d人", m_LastMan);
 						}
 					}
 					prevLastMan = m_LastMan;
@@ -605,14 +627,14 @@ namespace FPS_n2 {
 												tgt->AddAmmoStock(Add);
 												isHit = true;
 												SE->Get((int)SoundEnum::GetAmmo).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
-												this->m_GetItemLog.AddLog(GetColor(183, 143, 0), "弾薬を入手(+%d)", Add);
+												ItemLogParts->AddLog(3.f, GetColor(183, 143, 0), "弾薬を入手(+%d)", Add);
 											}
 											break;
 										case ItemType::ARMER:
 											if (tgt->GetArmer()) {
 												isHit = true;
 												SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
-												this->m_GetItemLog.AddLog(GetColor(183, 143, 0), "アーマーを入手");
+												ItemLogParts->AddLog(3.f, GetColor(183, 143, 0), "アーマーを入手");
 											}
 											break;
 										default:
@@ -856,23 +878,22 @@ namespace FPS_n2 {
 				auto ScoreBuf = PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore();
 				if (ScoreBuf > prevScore) {
 					this->m_UIclass.SetIntParam(5, (ScoreBuf - prevScore));
-					this->m_GetItemLog.AddLog(GetColor(206, 0, 0), "敵をキル +%4d", (ScoreBuf - prevScore));
+					ItemLogParts->AddLog(3.f, GetColor(206, 0, 0), "敵をキル +%4d", (ScoreBuf - prevScore));
 				}
 				else {
 					this->m_UIclass.SetIntParam(5, 0);
 				}
 				if (Chara->GetWearArmerSwitch()) {
-					this->m_GetItemLog.AddLog(GetColor(25, 122, 75), "アーマーを着用 +%4d", 10);
+					ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "アーマーを着用 +%4d", 10);
 					PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(10);
 				}
 				if (Chara->GetMorphineSwitch()) {
-					this->m_GetItemLog.AddLog(GetColor(25, 122, 75), "モルヒネ注射 +%4d", 50);
+					ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "モルヒネ注射 +%4d", 50);
 					PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(50);
 				}
 				if (Chara->ULTActiveSwitch()) {
-					this->m_GetItemLog.AddLog(GetColor(251, 91, 1), "プライマリを使用可能");
+					ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "プライマリを使用可能");
 				}
-				this->m_GetItemLog.Update();
 				prevScore = PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore();
 				//
 				this->m_UIclass.SetIntParam(6, PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
@@ -899,6 +920,7 @@ namespace FPS_n2 {
 			{
 				//
 				auto* SaveDataParts = SaveDataClass::Instance();
+				auto* ItemLogParts = FPS_n2::GetItemLog::Instance();
 
 				if (m_MainLoopPauseControl.GetIsRetireSelected()) {
 					//リタイア
@@ -911,7 +933,7 @@ namespace FPS_n2 {
 					//ハードモードアンロック
 					if (SaveDataParts->GetParam("UnlockHardMode") != 1) {
 						SaveDataParts->SetParam("UnlockHardMode", 1);
-						//メッセージ
+						ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "Fire Party モードが開放されました！");
 					}
 					//ハイスコア更新
 				}
@@ -1119,9 +1141,6 @@ namespace FPS_n2 {
 				}
 			}
 
-			if (!DrawParts->IsPause()) {
-				this->m_GetItemLog.Draw();
-			}
 			//ポーズ
 			if (DrawParts->IsPause()) {
 				m_MainLoopPauseControl.Draw();

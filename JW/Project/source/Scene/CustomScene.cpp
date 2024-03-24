@@ -33,7 +33,7 @@ namespace FPS_n2 {
 			ButtonSel.at(7).Set(y_r(1920 - 96 * 2 - 64), y_r(64 + 64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			//
 			SetAmbientLight(VECTOR_ref::vget(0.4f, -0.5f, 0.1f), GetColorF(1.f, 1.f, 1.f, 0.0f));
-			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-6.f, Scale_Rate*-6.f, Scale_Rate*-6.f), VECTOR_ref::vget(Scale_Rate*6.f, Scale_Rate*0.f, Scale_Rate*6.f));
+			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-6.f, Scale_Rate*-6.f, Scale_Rate*-6.f), VECTOR_ref::vget(Scale_Rate*6.f, Scale_Rate*0.5f, Scale_Rate*6.f));
 			SetShadowDir(GetLightVec(), 0);
 			//
 			DeleteLightHandleAll();
@@ -45,7 +45,7 @@ namespace FPS_n2 {
 			//
 			select = 0;
 			//
-			GunsModify::LoadSlots("data/bokuzyo.ok");
+			GunsModify::LoadSlots("Save/gundata.svf");
 			//
 			auto* ObjMngr = ObjectManager::Instance();
 			{
@@ -367,7 +367,7 @@ namespace FPS_n2 {
 		void			CustomScene::Dispose_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 
-			GunsModify::SaveSlots("data/bokuzyo.ok");
+			GunsModify::SaveSlots("Save/gundata.svf");
 
 			GunsModify::DisposeSlots();
 

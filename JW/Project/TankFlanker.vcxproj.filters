@@ -156,6 +156,9 @@
     <ClInclude Include="source\CommonScene\UI\CommonUIControl.hpp">
       <Filter>ソース ファイル\CommonScene\UI</Filter>
     </ClInclude>
+    <ClInclude Include="source\MainScene\Object\Target.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -237,6 +240,9 @@
       <Filter>ソース ファイル\CommonScene\Object</Filter>
     </ClCompile>
     <ClCompile Include="source\MainScene\Object\Morphine.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\Target.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
   </ItemGroup>

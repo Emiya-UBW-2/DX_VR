@@ -8,6 +8,7 @@
 #include "MainScene/Object/FallObj.hpp"
 #include "MainScene/Object/MovieObj.hpp"
 #include "MainScene/Object/ItemObj.hpp"
+#include "MainScene/Object/Target.hpp"
 
 const FPS_n2::Sceneclass::ObjectManager* SingletonBase<FPS_n2::Sceneclass::ObjectManager>::m_Singleton = nullptr;
 namespace FPS_n2 {
@@ -73,6 +74,10 @@ namespace FPS_n2 {
 				case ObjType::MovieObj:
 					this->m_Object.resize(this->m_Object.size() + 1);
 					this->m_Object.back() = std::make_shared<MovieObjClass>();
+					break;
+				case ObjType::Target://human
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back() = std::make_shared<TargetClass>();
 					break;
 				default:
 					break;

@@ -159,6 +159,11 @@ namespace FPS_n2 {
 
 			std::shared_ptr<GunClass>		m_GunPtr;				//ポインター別持ち
 			std::shared_ptr<CharacterClass>	m_CharacterPtr;			//ポインター別持ち
+
+
+			int tgtSel = 0;
+			float tgtTimer = 0.f;
+			GraphHandle ScoreBoard;
 		public:
 			TutorialScene(void) noexcept {}
 			~TutorialScene(void) noexcept {}
@@ -170,7 +175,7 @@ namespace FPS_n2 {
 			//
 			void			Depth_Draw_Sub(void) noexcept override {}
 			void			BG_Draw_Sub(void) noexcept override;
-			void			ShadowDraw_Far_Sub(void) noexcept override {}
+			void			ShadowDraw_Far_Sub(void) noexcept override;
 			void			ShadowDraw_NearFar_Sub(void) noexcept override {}
 			void			ShadowDraw_Sub(void) noexcept override;
 			void			MainDraw_Sub(void) noexcept override;

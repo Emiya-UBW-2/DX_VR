@@ -19,7 +19,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DrawParts->Init();
 	SetMainWindowText("JW");						//タイトル
 	//MV1SetLoadModelUsePackDraw(TRUE);
+	//SetUseHalfLambertLighting(TRUE);	//ハーフランバート化
+
 	PostPassEffect::Create();						//シェーダー
+
+	FPS_n2::GetItemLog::Create();
+	auto* ItemLogParts = FPS_n2::GetItemLog::Instance();
 
 	auto* SaveDataParts = SaveDataClass::Instance();
 	SaveDataParts->Load();
@@ -55,10 +60,21 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	MAINLOOPscene->Set_Next(Titlescene);
 	bool isTutorialLoop = false;
 	bool isMainLoop = false;
+
+#ifdef DEBUG
+#else
+	std::array<float, 60> FPSAvgs;
+	int m_FPSAvg = 0;
+	for (auto& f : FPSAvgs) {
+		f = 60.f;
+	}
+#endif
+
 	//繰り返し
 	while (true) {
 		scene->StartScene();
 		while (true) {
+			DrawParts->SetStartTime();
 			if ((ProcessMessage() != 0) || DrawParts->UpdateEscWindow()) { return 0; }
 			FPS = std::max(GetFPS(), 30.f);
 #ifdef DEBUG
@@ -70,14 +86,26 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 #endif // DEBUG
 			if (scene->Execute()) { break; }		//更新
 			scene->Draw();							//描画
+
+			ItemLogParts->Update();
+			ItemLogParts->Draw();
 			//デバッグ
 #ifdef DEBUG
-			DebugParts->DebugWindow(1920 - 300, 50);
+			DebugParts->DebugWindow(y_r(1920 - 250), y_r(150));
 			//TestDrawShadowMap(DrawParts->m_Shadow[0].GetHandle(), 0, 0, 960, 540);
 #else
 			{
+				FPSAvgs.at(m_FPSAvg) = FPS;
+				++m_FPSAvg %= ((int)FPSAvgs.size());
+
+				float Avg = 0.f;
+				for (auto& f : FPSAvgs) {
+					Avg += f;
+				}
+				Avg = Avg / ((float)FPSAvgs.size());
+
 				auto* Fonts = FontPool::Instance();
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, y_r(1920 - 8), y_r(8), GetColor(255, 255, 255), GetColor(0, 0, 0), "%5.2f FPS(%d)", FPS, GetDrawCallCount());
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, y_r(1920 - 8), y_r(8), GetColor(255, 255, 255), GetColor(0, 0, 0), "%5.2f FPS", Avg);
 			}
 #endif // DEBUG
 			DrawParts->Screen_Flip();				//画面の反映

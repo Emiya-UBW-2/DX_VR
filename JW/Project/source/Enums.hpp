@@ -24,6 +24,7 @@ namespace FPS_n2 {
 			MuzzleAdapter,
 			MovieObj,
 			ItemObj,
+			Target,
 			Max,
 		};
 		static const char* ObjTypeName[(int)ObjType::Max] = {
@@ -42,6 +43,7 @@ namespace FPS_n2 {
 			"MuzzleAdapter",
 			"MovieObj",
 			"ItemObj",
+			"Target",
 		};
 		enum class SoundEnum {
 			RunFoot = (int)SoundEnumCommon::Num,

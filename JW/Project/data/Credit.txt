@@ -6,9 +6,7 @@
 Oil Drum (Game Model)　　　　　　　　　　　Michael Makivic様
 テーブル改造元　　　　Office of a Crane Operator　SwissCH様
 テーブル改造元　　　　Javier Clemente Garcia (ElGEOsProds)様
-野外射撃場 　　　　　　　　　　　　　　　　QUAPPA-EL様
-　内部画像　日本のテクスチャ素材画像集／テラ リソース様
-スカイドーム 　　　　　　　　　　　　　　　短足沼地人様
+地下駐車場 　　　　　　　　　　　　　　　　ボボヂ様
 
 Glock17 Gen2　　　　　9mm Pistol 　　　　　TORI106様
 Glock17 Gen3　　　　　Hand Gun 　　　　　　Danny-firth様

@@ -1,4 +1,4 @@
-Name=M16A4
+Name=M16-4  AssaultCarbine
 
 ShotRate=800
 RecoilPower=120
