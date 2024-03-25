@@ -138,7 +138,6 @@ namespace FPS_n2 {
 				);
 				return tmpvec * tmp3 * (60.f / FPS);
 			}
-			const auto		GetMousePer(void) const noexcept { return (0.75f + sin(this->m_HeartRateRad * 3)*0.25f)*(1.f - this->m_Stamina / StaminaMax); }
 		public:
 			void		InitStamina() {
 				this->m_HeartRate = HeartRateMin;
@@ -199,6 +198,7 @@ namespace FPS_n2 {
 				return this->m_HeartSoundFlag;
 			}
 		};
+		//
 		class LifeControl {
 		private://キャラパラメーター
 			const HitPoint										HPMax = 100;
@@ -234,7 +234,7 @@ namespace FPS_n2 {
 				this->m_AP = APMax;
 			}
 		};
-
+		//
 		class ULTControl {
 		private://キャラパラメーター
 			const int										ULTMax = 100;
@@ -263,9 +263,41 @@ namespace FPS_n2 {
 				this->m_ULTSwitch = false;
 			}
 		};
+		//
+		class CharaTypeControl {
+		private:
+			CharaTypeID											m_CharaType;
+		public://ゲッター
+			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
+			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
+		};
+		//
+		class GunReadyControl {
+		private://キャラパラメーター
+			const float											UpperTimerLimit = 10.f;
+		private:
+			float												m_ReadyTimer{0.f};
+			float												m_ADSPer{0.f};
+		public://ゲッター
+			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
+			const auto		GetIsAim(void) const noexcept { return !(this->m_ReadyTimer == UpperTimerLimit); }
+			const auto&		GetADSPer(void) const noexcept { return this->m_ADSPer; }
+		protected:
+			void			SetReady(void) noexcept { this->m_ReadyTimer = UpperTimerLimit; }
+			void			SetAim(void) noexcept { this->m_ReadyTimer = 0.1f; }
+			void			SetADS(void) noexcept { this->m_ReadyTimer = 0.f; }
+			void			UpdateReady(void) noexcept {
+				this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / FPS, 0.f, UpperTimerLimit);
+				Easing(&this->m_ADSPer, this->GetIsADS() ? 1.f : 0.f, 0.9f, EasingType::OutExpo);//
+			}
+			void			SetAimOrADS(void) noexcept {
+				this->m_ReadyTimer = std::min(this->m_ReadyTimer, 0.1f);
+			}
+		};
 		//キャラ入力
 		class KeyControl {
 		private://キャラパラメーター
+			float												m_MoverPer{0.f};
 			VECTOR_ref											m_VecTotal;
 			std::array<float, 4>								m_Vec{0,0,0,0};
 			InputControl										m_Input;
@@ -284,6 +316,8 @@ namespace FPS_n2 {
 			const auto		GetVecLeft(void) const noexcept { return this->m_Vec[1]; }
 			const auto		GetVecRight(void) const noexcept { return this->m_Vec[3]; }
 			const auto		GetVec(void) const noexcept { return m_VecTotal; }
+			const auto		GetMoverPer(void) const noexcept { return m_MoverPer; }
+			const auto		IsMove(void) const noexcept { return m_MoverPer > 0.1f; }
 			const auto		GetFrontP(void) const noexcept {
 				auto wkey = this->m_Input.GetPADSPress(PADS::MOVE_W);
 				auto skey = this->m_Input.GetPADSPress(PADS::MOVE_S);
@@ -307,34 +341,13 @@ namespace FPS_n2 {
 				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (Press2 ? 5.f : -15.f) / FPS, 0.f, 1.f);
 				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (Press3 ? 5.f : -15.f) / FPS, 0.f, 1.f);
 				m_VecTotal = VECTOR_ref::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
+				m_MoverPer = m_VecTotal.Length();
 			}
 		public:
 			void		InitKey(float pxRad, float pyRad);
 			void		InputKey(const InputControl& pInput, bool pReady, const VECTOR_ref& pAddRadvec);
 		};
-
-		class ShapeControl {
-		private://キャラパラメーター
-		private:
-			int													m_Eyeclose{0};
-			float												m_EyeclosePer{0.f};
-		public://ゲッター
-			const auto&			GetEyeclosePer() const noexcept { return this->m_EyeclosePer; }
-		public:
-			void		InitShape() {
-				this->m_Eyeclose = 0;
-				this->m_EyeclosePer = 0.f;
-			}
-			void		ExcuteShape() {
-				if (this->m_EyeclosePer <= 0.05f && (GetRand(100) == 0)) {
-					this->m_Eyeclose = 1;
-				}
-				if (this->m_EyeclosePer >= 0.95f) {
-					this->m_Eyeclose = 0;
-				}
-				Easing(&this->m_EyeclosePer, (float)this->m_Eyeclose, 0.5f, EasingType::OutExpo);
-			}
-		};
+		//
 		class OverrideControl {
 		private://キャラパラメーター
 			bool												m_PosBufOverRideFlag{false};
@@ -356,7 +369,7 @@ namespace FPS_n2 {
 				return false;
 			}
 		};
-
+		//
 		class LaserSightClass {
 		private:
 			bool												m_IsLaserActive{false};
@@ -381,7 +394,7 @@ namespace FPS_n2 {
 			~LaserSightClass(void) noexcept {}
 		public:
 		};
-
+		//
 		class HitBoxControl {
 		private:
 			std::vector<HitBox>									m_HitBox;
@@ -478,6 +491,31 @@ namespace FPS_n2 {
 				m_PrevPos = Pos;
 				//
 				Easing(&m_WalkSwing, m_WalkSwing_p, 0.5f, EasingType::OutExpo);
+			}
+		};
+		class EyeSwingControl {
+		private:
+			float												m_MoveEyePosTimer{0.f};
+			VECTOR_ref											m_MoveEyePos;
+		public://ゲッター
+			const auto&		GetEyeSwingPos(void) const noexcept { return this->m_MoveEyePos; }
+		public:
+			EyeSwingControl(void) noexcept {}
+			~EyeSwingControl(void) noexcept {}
+		public:
+			void InitEyeSwing() noexcept {
+				this->m_MoveEyePosTimer = 0.f;
+			}
+			void UpdateEyeSwing(const MATRIX_ref& pCharaMat, float SwingPer, float SwingSpeed)noexcept {
+				if (SwingPer > 0.f) {
+					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed)*60.f / FPS;
+				}
+				else {
+					this->m_MoveEyePosTimer = 0.f;
+				}
+				auto EyePos = MATRIX_ref::Vtrans(VECTOR_ref::up()*(0.25f*SwingPer), MATRIX_ref::RotZ(this->m_MoveEyePosTimer));
+				EyePos.y(-std::abs(EyePos.y()));
+				Easing(&this->m_MoveEyePos, MATRIX_ref::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
 			}
 		};
 		//銃の揺れ

@@ -666,7 +666,7 @@ namespace FPS_n2 {
 						for (int index2 = 0; index2 < Player_num; index2++) {
 							if (index == index2) { continue; }
 							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index2).GetChara();
-							if (tgt->GetHP() <= 0) { continue; }
+							if (!tgt->IsAlive()) { continue; }
 							if (tgt->IsDamaging()) { continue; }
 							tgt->CheckMeleeHit(c->GetMyPlayerID(), StartPos, &EndPos);
 						}
@@ -1193,7 +1193,7 @@ namespace FPS_n2 {
 				for (int index = 0; index < Chara_num; index++) {
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 					if (index == 0) { continue; }
-					if (c->GetHP() <= 0) { continue; }
+					if (!c->IsAlive()) { continue; }
 					if (!c->CanLookTarget) { continue; }
 					int xp2 = xp1 + (int)(15.f + c->GetMove().pos.x());
 					int yp2 = yp1 - (int)(15.f + c->GetMove().pos.z());

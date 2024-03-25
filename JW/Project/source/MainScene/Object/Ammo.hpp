@@ -96,7 +96,7 @@ namespace FPS_n2 {
 				}
 				if (IsActive()) {
 					//移動確定
-					this->m_move.SetPos(this->m_move.pos + (this->m_move.vec * (this->m_speed / FPS)) + VECTOR_ref::up()*this->m_yAdd);
+					this->m_move.UpdatePos(this->m_move.pos + (this->m_move.vec * (this->m_speed / FPS)) + VECTOR_ref::up()*this->m_yAdd);
 					this->m_yAdd += (M_GR / (FPS*FPS));
 
 					//消す(スピードが0以下、貫通が0以下、5回反射する)
