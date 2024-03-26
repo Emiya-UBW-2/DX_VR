@@ -1,5 +1,6 @@
 #include	"Character_before.hpp"
 #include	"Character.hpp"
+#include "../../MainScene/Player/Player.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -77,6 +78,8 @@ namespace FPS_n2 {
 				this->m_Input.GetPADSPress(PADS::MOVE_S),
 				this->m_Input.GetPADSPress(PADS::MOVE_D));
 			//ƒŠ[ƒ“
+			m_LeanSwitch = false;
+			auto Prev = this->m_LeanRate;
 			if (true) {//ƒgƒOƒ‹Ž®
 				this->m_QKey.Execute(this->m_Input.GetPADSPress(PADS::LEAN_L));
 				if (this->m_QKey.trigger()) {
@@ -117,6 +120,7 @@ namespace FPS_n2 {
 				}
 			}
 			this->m_LeanRate = std::clamp(this->m_LeanRate, -1, 1);
+			m_LeanSwitch = (Prev != this->m_LeanRate);
 		}
 
 		void HitBoxControl::UpdataHitBox(const ObjectBaseClass* ptr, float SizeRate) noexcept {
@@ -180,5 +184,24 @@ namespace FPS_n2 {
 				c.reset();
 			}
 		}
+
+
+		void AutoAimControl::UpdateAutoAim(bool isActive) noexcept {
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto prev = m_AutoAimTimer;
+			m_AutoAimTimer = std::max(m_AutoAimTimer - 1.f / FPS, 0.f);
+			if (prev > 0.f && m_AutoAimTimer == 0.f) {
+				m_AutoAim = -1;
+			}
+			if (m_AutoAim != -1) {
+				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(m_AutoAim).GetChara();
+				if (!Chara->IsAlive()) {
+					m_AutoAim = -1;
+				}
+			}
+
+			Easing(&m_AutoAimOn, isActive ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+		}
+
 	};
 };

@@ -385,12 +385,12 @@ namespace FPS_n2 {
 			{
 				{
 					//FPSƒJƒƒ‰
-					VECTOR_ref CamPos = m_CharacterPtr->GetEyePosition() + DrawParts->GetCamShake();
-					DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + m_CharacterPtr->GetEyeVector(), m_CharacterPtr->GetEyeVecY());
+					VECTOR_ref CamPos = m_CharacterPtr->GetEyeMatrix().pos() + DrawParts->GetCamShake();
+					DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + m_CharacterPtr->GetEyeMatrix().zvec() * -1.f, m_CharacterPtr->GetEyeMatrix().yvec());
 
 					//VECTOR_ref CamPos = VECTOR_ref::vget(0.f, 1.5f, 0.f)*Scale_Rate;
 					//VECTOR_ref CamVec = VECTOR_ref::vget(1.f, 1.5f, 0.f)*Scale_Rate;
-					//DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, m_CharacterPtr->GetEyeVecY());
+					//DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, m_CharacterPtr->GetEyeMatrix().yvec());
 
 					//info
 					auto fov_t = DrawParts->GetMainCamera().GetCamFov();

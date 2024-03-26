@@ -197,7 +197,7 @@ namespace FPS_n2 {
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
 				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 
-				auto MyPos = MyChara->GetEyePosition();
+				auto MyPos = MyChara->GetEyeMatrix().pos();
 
 				LengthToTarget = (TgtPos - MyPos).Length();
 				VectorToTarget = (TgtPos - MyPos).Norm();
@@ -214,7 +214,7 @@ namespace FPS_n2 {
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
 				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 
-				auto MyPos = MyChara->GetEyePosition();
+				auto MyPos = MyChara->GetEyeMatrix().pos();
 
 				LengthToTarget = (TgtPos - MyPos).Length();
 				VectorToTarget = (TgtPos - MyPos).Norm();
@@ -232,7 +232,7 @@ namespace FPS_n2 {
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
 				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
-				auto MyPos = MyChara->GetEyePosition();
+				auto MyPos = MyChara->GetEyeMatrix().pos();
 
 				auto Target = TgtPos;
 				if (GetLengthToTarget() > 20.f*Scale_Rate) {
@@ -289,7 +289,7 @@ namespace FPS_n2 {
 
 				auto Vec = VEC; Vec.y(0.f);
 
-				auto Dir = MyChara->GetEyeVector();
+				auto Dir = MyChara->GetEyeMatrix().zvec() * -1.f;
 				auto Dir_XZ = Dir; Dir_XZ.y(0.f);
 				{
 					VECTOR_ref DirHY; DirHY.Set(Dir_XZ.Length(), 0.f, Dir.y());
@@ -385,7 +385,7 @@ namespace FPS_n2 {
 			void		Execute_Normal() noexcept {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
-				auto MyPos = MyChara->GetEyePosition();
+				auto MyPos = MyChara->GetEyeMatrix().pos();
 				//
 				if (this->m_MoveFrontTimer > 6.f) {
 					this->m_MoveFrontTimer -= 6.f;

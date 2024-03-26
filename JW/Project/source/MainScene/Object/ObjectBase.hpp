@@ -52,6 +52,20 @@ namespace FPS_n2 {
 			const auto		GetParentFrameWorldMatrix(int frame) const noexcept { return GetFrameWorldMatrix((int)this->m_obj.frame_parent(frame)); }
 			const auto		GetChildFrameNum(int frame) const noexcept { return (int)this->m_obj.frame_child_num(frame); }
 			const auto		GetChildFrameWorldMatrix(int frame, int ID) const noexcept { return GetFrameWorldMatrix((int)this->m_obj.frame_child(frame, ID)); }
+
+
+		public://ゲッター キャラ
+			const bool		HaveFrame(CharaFrame frame) const noexcept { return this->m_Frames[(int)frame].first != -1; }
+			const auto		GetFrame(CharaFrame frame) const noexcept { return m_Frames[(int)frame].first; }
+			const auto&		GetFrameBaseLocalMat(CharaFrame frame) const noexcept { return this->m_Frames[(int)frame].second; }
+			const auto		GetFrameLocalMat(CharaFrame frame) const noexcept { return GetFrameLocalMatrix(GetFrame(frame)); }
+			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetFrameWorldMatrix(GetFrame(frame)); }
+			const auto		GetParentFrameWorldMat(CharaFrame frame) const noexcept { return GetParentFrameWorldMatrix(GetFrame(frame)); }
+		public://セッター キャラ
+			void			ResetFrameLocalMat(CharaFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }
+			void			SetFrameLocalMat(CharaFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * GetFrameBaseLocalMat(frame)); }
+			void			SetShapePer(CharaShape pShape, float Per) noexcept { this->m_Shapes[(int)pShape].second = Per; }
+
 		public:
 			const auto&		GetIsBaseModel(void) const noexcept { return this->m_IsBaseModel; }
 			const auto		GetPathCompare(const char* filepath, const char* objfilename, const char* colfilename) const noexcept {

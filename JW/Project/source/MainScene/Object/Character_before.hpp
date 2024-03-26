@@ -8,6 +8,10 @@
 #include "ObjectBase.hpp"
 #include "ItemObj.hpp"
 
+#include "Gun.hpp"
+#include "Armer.hpp"
+#include "Morphine.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class ArmMovePerClass {
@@ -222,6 +226,8 @@ namespace FPS_n2 {
 			const auto&		GetHPMax(void) const noexcept { return HPMax; }
 			void			SubHP(HitPoint damage_t) noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, HPMax); }
 
+			const auto		IsLowHP(void) const noexcept { return GetHP() < (GetHPMax() * 35 / 100); }
+
 			const auto		IsArmerActive(void) const noexcept { return this->m_AP != 0; }
 			const auto&		GetAP(void) const noexcept { return this->m_AP; }
 			const auto&		GetAPMax(void) const noexcept { return APMax; }
@@ -287,8 +293,8 @@ namespace FPS_n2 {
 			void			SetAim(void) noexcept { this->m_ReadyTimer = 0.1f; }
 			void			SetADS(void) noexcept { this->m_ReadyTimer = 0.f; }
 			void			UpdateReady(void) noexcept {
-				this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / FPS, 0.f, UpperTimerLimit);
 				Easing(&this->m_ADSPer, this->GetIsADS() ? 1.f : 0.f, 0.9f, EasingType::OutExpo);//
+				this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / FPS, 0.f, UpperTimerLimit);
 			}
 			void			SetAimOrADS(void) noexcept {
 				this->m_ReadyTimer = std::min(this->m_ReadyTimer, 0.1f);
@@ -304,6 +310,7 @@ namespace FPS_n2 {
 			switchs												m_ULTKey;
 			switchs												m_Squat;
 			int													m_LeanRate{0};
+			bool												m_LeanSwitch{false};
 			switchs												m_QKey;
 			switchs												m_EKey;
 			VECTOR_ref											m_rad_Buf, m_rad, m_radAdd;
@@ -326,13 +333,18 @@ namespace FPS_n2 {
 				return FrontP;
 			}
 			const auto		GetLeanRate(void) const noexcept { return this->m_LeanRate; }
+			const auto		GetLeanSwitch(void) const noexcept { return this->m_LeanSwitch; }
 			const auto		GetULTKey(void) const noexcept { return this->m_ULTKey; }
 			const auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
+			const auto		GetSquatSwitch(void) const noexcept { return this->m_Squat.trigger(); }
 			const auto		GetRun(void) const noexcept { return this->m_Input.GetPADSPress(PADS::RUN) && this->m_Input.GetPADSPress(PADS::MOVE_W); }
 		public://セッター
 			auto&			SetRadBuf(void) noexcept { return this->m_rad_Buf; }
 			auto&			SetRad(void) noexcept { return this->m_rad; }
-			void			ResetLeanRate(void) noexcept { this->m_LeanRate = 0; }
+			void			ResetLeanRate(void) noexcept {
+				m_LeanSwitch = (this->m_LeanRate != 0);
+				this->m_LeanRate = 0;
+			}
 			void			SetIsSquat(bool value) noexcept { this->m_Squat.Set(value); }
 		private: //内部
 			void			SetVec(bool Press0, bool Press1, bool Press2, bool Press3) {
@@ -517,6 +529,134 @@ namespace FPS_n2 {
 				EyePos.y(-std::abs(EyePos.y()));
 				Easing(&this->m_MoveEyePos, MATRIX_ref::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
 			}
+		};
+		//
+		class GunPtrControl {
+		private:
+			int													m_GunSelect{0};
+			std::array<std::shared_ptr<GunClass>, 2>			m_Gun_Ptr{nullptr , nullptr};			//銃
+		public://ゲッター
+			auto&			GetGunPtr(int ID) noexcept { return this->m_Gun_Ptr[ID]; }
+			auto&			GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr[m_GunSelect]; }
+			const auto&		GetGunPtrNow(void) const noexcept { return this->m_Gun_Ptr[m_GunSelect]; }
+
+			auto&			GetGunPtrOther(void) noexcept { return this->m_Gun_Ptr[GetOtherGunSelect()]; }
+			const auto&		GetGunPtrOther(void) const noexcept { return this->m_Gun_Ptr[GetOtherGunSelect()]; }
+
+			const auto		GetShotPhase(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetShotPhase() : GunAnimeID::Base; }
+			const auto		GetShootReady(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetShootReady() : false; }
+			const auto		GetAmmoLoading() const noexcept { return GetGunPtrNow()->IsAmmoLoading(); }
+			const auto		IsSightActive() const noexcept { return GetGunPtrNow()->IsSightActive(); }
+			const auto		IsSightPtrActive() const noexcept { return GetGunPtrNow()->IsSightPtrActive(); }
+			const auto		IsAutoAimActive() const noexcept { return GetGunPtrNow()->IsAutoAimActive(); }
+
+			const auto&		GetSightReitcleGraphPtr() const noexcept { return GetGunPtrNow()->GetSightPtr()->GetModData()->GetReitcleGraph(); }
+			const auto		GetSightZoomSize() const noexcept {
+				if (!IsSightPtrActive()) { return 1.f; }
+				return GetGunPtrNow()->GetSightPtr()->GetModData()->GetZoomSize();
+			}
+
+			const int		GetNowGunSelect() const noexcept { return this->m_GunSelect; }
+			const int		GetOtherGunSelect() const noexcept { return 1 - this->m_GunSelect; }
+
+			const auto		IsGun0Select() const noexcept { return this->m_GunSelect == 0; }
+			const auto		IsULTSelect() const noexcept { return this->m_GunSelect == 1; }
+		public://セッター
+			void			SelectGun(int ID) noexcept { this->m_GunSelect = ID; }
+			void			SetGunPtr(int ID, const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_Gun_Ptr[ID] = pGunPtr0; }
+		public:
+			GunPtrControl(void) noexcept {}
+			~GunPtrControl(void) noexcept {}
+		public:
+			//void UpdateEyeSwing(const MATRIX_ref& pCharaMat, float SwingPer, float SwingSpeed)noexcept {}
+			void DisposeGunPtr() noexcept {
+				auto* ObjMngr = ObjectManager::Instance();
+				for (auto& g : m_Gun_Ptr) {
+					if (g) {
+						ObjMngr->DelObj((SharedObj*)&g);
+						g.reset();
+					}
+				}
+			}
+		};
+		//
+		enum class ArmerWearPhase {
+			Ready,
+			Have,
+			Wear,
+		};
+		class ArmerPtrControl {
+		private:
+		protected:
+			std::shared_ptr<ArmerClass>							m_Armer_Ptr{nullptr};
+			ArmMovePerClass										m_Wear_Armer;
+			ArmerWearPhase										m_ArmerWearPhase{ArmerWearPhase::Ready};
+		protected:
+			const auto		isWearingArmer() const noexcept { return (this->m_ArmerWearPhase != ArmerWearPhase::Ready); }
+		public:
+			ArmerPtrControl(void) noexcept {}
+			~ArmerPtrControl(void) noexcept {}
+		public:
+			void InitArmerPtr() {
+				this->m_Wear_Armer.Init(false);
+				this->m_ArmerWearPhase = ArmerWearPhase::Ready;
+				if (this->m_Armer_Ptr) {
+					this->m_Armer_Ptr->SetActive(false);
+				}
+			}
+			void			SetArmer(const std::shared_ptr<ArmerClass>& pArmer) noexcept { this->m_Armer_Ptr = pArmer; }
+		};
+
+		enum class MorphinePhase {
+			Ready,
+			Have,
+			Wear,
+		};
+		class MorphinePtrControl {
+		private:
+		protected:
+			std::shared_ptr<MorphineClass>						m_Morphine_Ptr{nullptr};
+			ArmMovePerClass										m_Wear_Morphine;
+			float												m_Wear_MorphineFrame{0.f};
+			float												m_Wear_MorphinePer{0.f};
+			MorphinePhase										m_MorphinePhase{MorphinePhase::Ready};
+		protected:
+			const auto		isMorphineing() const noexcept { return (this->m_MorphinePhase != MorphinePhase::Ready); }
+		public:
+			MorphinePtrControl(void) noexcept {}
+			~MorphinePtrControl(void) noexcept {}
+		public:
+			void			SetMorphine(const std::shared_ptr<MorphineClass>& pMorphine) noexcept { this->m_Morphine_Ptr = pMorphine; }
+		public:
+			void InitMorphinePtr() {
+				this->m_Wear_Morphine.Init(false);
+				if (this->m_Morphine_Ptr) {
+					this->m_Morphine_Ptr->SetActive(false);
+				}
+			}
+		};
+		//
+		class AutoAimControl {
+		private:
+			int													m_AutoAim{-1};
+			float												m_AutoAimOn{0.f};
+			float												m_AutoAimTimer{0.f};
+		public://ゲッター
+		public:
+			AutoAimControl(void) noexcept {}
+			~AutoAimControl(void) noexcept {}
+		public:
+			const auto&		GetAutoAimID(void) const noexcept { return this->m_AutoAim; }
+			const auto&		GetAutoAimOn(void) const noexcept { return this->m_AutoAimOn; }
+
+			const auto		GetAutoAimActive(void) const noexcept { return this->m_AutoAim != -1; }
+			const auto		GetAutoAimPer(void) const noexcept { return this->m_AutoAimTimer / 1.f; }
+		public:
+			void SetAutoAimActive(int ID) noexcept {
+				m_AutoAimTimer = 1.f;
+				m_AutoAim = ID;
+			}
+			void UpdateAutoAim(bool isActive) noexcept;
 		};
 		//銃の揺れ
 		class GunSwingControl {

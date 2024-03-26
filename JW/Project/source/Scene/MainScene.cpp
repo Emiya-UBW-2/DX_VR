@@ -572,7 +572,12 @@ namespace FPS_n2 {
 							for (int index = 0; index < Chara_num; index++) {
 								auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 								if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }
-								is_HitAll |= tgt->CheckAmmoHit(a.get(), repos_tmp, &pos_tmp);
+								HitPoint Damage = a->GetDamage();
+								ArmerPoint ArmerDamage = 0;
+								if (tgt->CheckDamageRay(&Damage, &ArmerDamage, true, (PlayerID)a->GetShootedID(), repos_tmp, &pos_tmp)) {
+									a->Penetrate(Damage, ArmerDamage);
+									is_HitAll = true;
+								}
 							}
 							if (this->m_BackGround->HitLightCheck(repos_tmp, &pos_tmp)) {
 								EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale_Rate);
@@ -626,14 +631,14 @@ namespace FPS_n2 {
 												}
 												tgt->AddAmmoStock(Add);
 												isHit = true;
-												SE->Get((int)SoundEnum::GetAmmo).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
+												SE->Get((int)SoundEnum::GetAmmo).Play_3D(0, tgt->GetEyeMatrix().pos(), Scale_Rate * 10.f);
 												ItemLogParts->AddLog(3.f, GetColor(183, 143, 0), "弾薬を入手(+%d)", Add);
 											}
 											break;
 										case ItemType::ARMER:
 											if (tgt->GetArmer()) {
 												isHit = true;
-												SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, tgt->GetEyePosition(), Scale_Rate * 10.f);
+												SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, tgt->GetEyeMatrix().pos(), Scale_Rate * 10.f);
 												ItemLogParts->AddLog(3.f, GetColor(183, 143, 0), "アーマーを入手");
 											}
 											break;
@@ -661,14 +666,16 @@ namespace FPS_n2 {
 				for (int index = 0; index < Player_num; index++) {
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 					if (c->GetShotPhase() == GunAnimeID::Melee) {
-						VECTOR_ref StartPos = c->GetEyePosition();
-						VECTOR_ref EndPos = StartPos + c->GetEyeVector() * (1.f*Scale_Rate);
+						VECTOR_ref StartPos = c->GetEyeMatrix().pos();
+						VECTOR_ref EndPos = StartPos + c->GetEyeMatrix().zvec() * (-1.f*Scale_Rate);
 						for (int index2 = 0; index2 < Player_num; index2++) {
 							if (index == index2) { continue; }
 							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index2).GetChara();
 							if (!tgt->IsAlive()) { continue; }
 							if (tgt->IsDamaging()) { continue; }
-							tgt->CheckMeleeHit(c->GetMyPlayerID(), StartPos, &EndPos);
+							HitPoint Damage = 100;
+							ArmerPoint ArmerDamage = 0;
+							tgt->CheckDamageRay(&Damage, &ArmerDamage, false, c->GetMyPlayerID(), StartPos, &EndPos);
 						}
 					}
 				}
@@ -681,8 +688,8 @@ namespace FPS_n2 {
 				{
 					//FPSカメラ
 					if (Chara->IsAlive()) {
-						VECTOR_ref CamPos = Chara->GetEyePosition() + DrawParts->GetCamShake();
-						DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeVector(), Chara->GetEyeVecY());
+						VECTOR_ref CamPos = Chara->GetEyeMatrix().pos() + DrawParts->GetCamShake();
+						DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeMatrix().zvec() * -1.f, Chara->GetEyeMatrix().yvec());
 						m_DeathCamYAdd = -0.2f;
 					}
 					else {
@@ -758,7 +765,7 @@ namespace FPS_n2 {
 			{
 				auto Len = (DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(0)).Length();
 				auto LenPer = std::clamp(Len / (5.f*Scale_Rate), 0.f, 1.f);
-				bool HPLow = Chara->GetHP() < (Chara->GetHPMax() * 35 / 100);
+				bool HPLow = Chara->IsLowHP();
 				Easing(&Min,
 					(HPLow) ? Lerp(20.f, 35.f, LenPer) : Lerp(0.f, 25.f, LenPer),
 					  0.95f, EasingType::OutExpo);
@@ -824,11 +831,11 @@ namespace FPS_n2 {
 #endif // DEBUG
 			//UIパラメーター
 			{
-				VECTOR_ref StartPos = Chara->GetEyePosition();
+				VECTOR_ref StartPos = Chara->GetEyeMatrix().pos();
 				for (int index = 0; index < Chara_num; index++) {
 					if (index == 0) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-					VECTOR_ref TgtPos = c->GetEyePosition();
+					VECTOR_ref TgtPos = c->GetEyeMatrix().pos();
 					c->CanLookTarget = true;
 					for (auto& C : this->m_BackGround->GetBuildData()) {
 						if (C.GetMeshSel() < 0) { continue; }
@@ -882,14 +889,6 @@ namespace FPS_n2 {
 				}
 				else {
 					this->m_UIclass.SetIntParam(5, 0);
-				}
-				if (Chara->GetWearArmerSwitch()) {
-					ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "アーマーを着用 +%4d", 10);
-					PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(10);
-				}
-				if (Chara->GetMorphineSwitch()) {
-					ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "モルヒネ注射 +%4d", 50);
-					PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(50);
 				}
 				if (Chara->ULTActiveSwitch()) {
 					ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "プライマリを使用可能");
@@ -1176,8 +1175,8 @@ namespace FPS_n2 {
 				int yp1 = (int)(15.f + Chara->GetMove().pos.z());
 
 				float rad = std::atan2f(
-					Chara->GetEyeVector().cross(VECTOR_ref::front()).y(),
-					Chara->GetEyeVector().dot(VECTOR_ref::front())
+					(Chara->GetEyeMatrix().zvec() * -1.f).cross(VECTOR_ref::front()).y(),
+					(Chara->GetEyeMatrix().zvec() * -1.f).dot(VECTOR_ref::front())
 				);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, 216);
 				this->m_BackGround->GetMapGraph().DrawRotaGraph3(
@@ -1248,8 +1247,8 @@ namespace FPS_n2 {
 			int yp1 = (int)(Chara->GetMove().pos.z());
 
 			float rad = std::atan2f(
-				Chara->GetEyeVector().cross(VECTOR_ref::front()).y(),
-				Chara->GetEyeVector().dot(VECTOR_ref::front())
+				(Chara->GetEyeMatrix().zvec() * -1.f).cross(VECTOR_ref::front()).y(),
+				(Chara->GetEyeMatrix().zvec() * -1.f).dot(VECTOR_ref::front())
 			);
 
 			VECTOR_ref MyPos = Chara->GetMove().pos;
