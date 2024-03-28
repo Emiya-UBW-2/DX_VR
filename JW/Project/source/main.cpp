@@ -27,10 +27,25 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	auto* ItemLogParts = FPS_n2::GetItemLog::Instance();
 
 	auto* SaveDataParts = SaveDataClass::Instance();
+	//初回データ作成を兼ねてセーブ
 	SaveDataParts->Load();
 	SaveDataParts->Save();
 
-	//SaveDataParts->SetParam("UnlockHardMode", 0);
+	//初期開放品
+	SaveDataParts->SetParam("Glock17 Gen3 Barrel", 1);
+	SaveDataParts->SetParam("Glock17 Gen3 Frame", 1);
+	SaveDataParts->SetParam("Glock17 Gen3 Slide", 1);
+	SaveDataParts->SetParam("GMag 17Round", 1);
+	SaveDataParts->SetParam("G-Normal IronSight", 1);
+	SaveDataParts->SetParam("X400 LaserSight", 1);
+	SaveDataParts->SetParam("Universal Mount", 1);
+	SaveDataParts->SetParam("VIPER RedDotSight", 1);
+	SaveDataParts->SetParam("ULT Unlock", std::max(SaveDataParts->GetParam("ULT Unlock"), 1));
+	SaveDataParts->SetParam("Glock Unlock", std::max(SaveDataParts->GetParam("Glock Unlock"), 1));
+
+	SaveDataParts->Save();
+
+	SaveDataParts->SetParam("UnlockHardMode", 1);
 	//SaveDataParts->Save();
 
 	//

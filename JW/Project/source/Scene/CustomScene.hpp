@@ -49,6 +49,8 @@ namespace FPS_n2 {
 			bool						m_MouseSelMode{false};
 			std::shared_ptr<GunClass>									m_GunPtr;
 			std::array<std::shared_ptr<GunClass>, (int)ULT_GUN::Max>	m_UltPtr;
+			std::array<MATRIX_ref, (int)ULT_GUN::Max>	m_UltMat;
+			std::array<float, (int)ULT_GUN::Max>	m_UltPer;
 		private:
 
 			bool			IsG17Parts(const Slot& S) {

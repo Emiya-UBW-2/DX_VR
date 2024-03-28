@@ -332,15 +332,22 @@ namespace FPS_n2 {
 				m_ReadyTimer = 6.f;
 				SE->Get((int)SoundEnum::Env).Play(0, DX_PLAYTYPE_LOOP);
 				SE->Get((int)SoundEnum::Env2).Play(0, DX_PLAYTYPE_LOOP);
-
-				ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "3分間 敵の進攻から耐えろ");
-
+				if (!m_IsHardMode) {
+					ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "3分間 敵の進攻から耐えろ");
+				}
+				else {
+					ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "命の続く限り敵を倒し続けろ");
+					m_Timer = 0.001f;
+				}
 			}
 			else {
 				m_ReadyTimer = std::max(m_ReadyTimer - 1.f / FPS, 0.f);
 				if (m_ReadyTimer == 0.f && Chara->IsAlive()) {
 					if (!m_IsHardMode) {
 						m_Timer = std::max(m_Timer - 1.f / FPS, 0.f);
+					}
+					else {
+						m_Timer = m_Timer + 1.f / FPS;
 					}
 				}
 				if (m_ReadyTimer>0.f) {
@@ -421,73 +428,75 @@ namespace FPS_n2 {
 				}
 				//
 				if (Chara->IsAlive()) {
-					if (m_Timer > 60.f) {
-						m_LastMan = -1;
-					}
-					else {
-						if (!m_RashStartLog) {
-							m_RashStartLog = true;
-							ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "敵の行動が活発になった、最後の一押しだ");
+					if (!m_IsHardMode) {
+						if (m_Timer > 60.f) {
+							m_LastMan = -1;
 						}
-						m_LastMan = 0;
-						for (int index = 0; index < Player_num; index++) {
-							if (index != GetMyPlayerID()) {
-								if (!m_AICtrl[index]->CannotRepop()) {
-									m_LastMan++;
+						else {
+							if (!m_RashStartLog) {
+								m_RashStartLog = true;
+								ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "敵の行動が活発になった、最後の一押しだ");
+							}
+							m_LastMan = 0;
+							for (int index = 0; index < Player_num; index++) {
+								if (index != GetMyPlayerID()) {
+									if (!m_AICtrl[index]->CannotRepop()) {
+										m_LastMan++;
+									}
+								}
+							}
+							if (m_LastMan != prevLastMan) {
+								ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "残り%d人", m_LastMan);
+							}
+						}
+						prevLastMan = m_LastMan;
+
+						if (m_Timer <= 6.f) {
+							if (!m_CountDownBGM1Flag) {
+								m_CountDownBGM1Flag = true;
+								m_CountDownBGM1.play(DX_PLAYTYPE_BACK, TRUE);
+							}
+						}
+						else {
+							m_CountDownBGM1Flag = false;
+						}
+						if (m_Timer < 61.f) {
+							if (!m_CountDownBGM2Flag) {
+								m_CountDownBGM2Flag = true;
+								m_CountDownBGM2.play(DX_PLAYTYPE_BACK, TRUE);
+							}
+						}
+						else {
+							m_CountDownBGM2Flag = false;
+						}
+						if (m_Timer < 0.5f) {
+							if (!m_CountDownBGM3Flag) {
+								m_CountDownBGM3Flag = true;
+								m_CountDownBGM3.play(DX_PLAYTYPE_BACK, TRUE);
+							}
+						}
+						else {
+							m_CountDownBGM3Flag = false;
+						}
+						if (m_Timer < 60.f) {
+							if (m_LastMan != 0) {
+								if (m_CountDownBGMTimer != (int)m_Timer) {
+									m_CountDownBGMTimer = (int)m_Timer;
+									SE->Get((int)SoundEnum::CountDown).Play(0, DX_PLAYTYPE_BACK, TRUE);
+									SE->Get((int)SoundEnum::CountDown).SetVol_Local((int)Lerp(64.f, 255.f, std::clamp(1.f - ((m_Timer - 15.f) / (60.f - 15.f)), 0.f, 1.f)));
 								}
 							}
 						}
-						if (m_LastMan != prevLastMan) {
-							ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "残り%d人", m_LastMan);
-						}
-					}
-					prevLastMan = m_LastMan;
-
-					if (m_Timer <= 6.f) {
-						if (!m_CountDownBGM1Flag) {
-							m_CountDownBGM1Flag = true;
-							m_CountDownBGM1.play(DX_PLAYTYPE_BACK, TRUE);
-						}
-					}
-					else {
-						m_CountDownBGM1Flag = false;
-					}
-					if (m_Timer < 61.f) {
-						if (!m_CountDownBGM2Flag) {
-							m_CountDownBGM2Flag = true;
-							m_CountDownBGM2.play(DX_PLAYTYPE_BACK, TRUE);
-						}
-					}
-					else {
-						m_CountDownBGM2Flag = false;
-					}
-					if (m_Timer < 0.5f) {
-						if (!m_CountDownBGM3Flag) {
-							m_CountDownBGM3Flag = true;
-							m_CountDownBGM3.play(DX_PLAYTYPE_BACK, TRUE);
-						}
-					}
-					else {
-						m_CountDownBGM3Flag = false;
-					}
-					if (m_Timer < 60.f) {
-						if (m_LastMan != 0) {
-							if (m_CountDownBGMTimer != (int)m_Timer) {
-								m_CountDownBGMTimer = (int)m_Timer;
+						else if (m_ReadyTimer > 0 && m_ReadyTimer <= 5) {
+							if (m_CountDownBGMTimer != (int)m_ReadyTimer) {
+								m_CountDownBGMTimer = (int)m_ReadyTimer;
 								SE->Get((int)SoundEnum::CountDown).Play(0, DX_PLAYTYPE_BACK, TRUE);
-								SE->Get((int)SoundEnum::CountDown).SetVol_Local((int)Lerp(64.f, 255.f, std::clamp(1.f - ((m_Timer - 15.f) / (60.f - 15.f)), 0.f, 1.f)));
+								SE->Get((int)SoundEnum::CountDown).SetVol_Local(128);
 							}
 						}
-					}
-					else if (m_ReadyTimer > 0 && m_ReadyTimer <= 5) {
-						if (m_CountDownBGMTimer != (int)m_ReadyTimer) {
-							m_CountDownBGMTimer = (int)m_ReadyTimer;
-							SE->Get((int)SoundEnum::CountDown).Play(0, DX_PLAYTYPE_BACK, TRUE);
-							SE->Get((int)SoundEnum::CountDown).SetVol_Local(128);
+						else {
+							m_CountDownBGMTimer = -1;
 						}
-					}
-					else {
-						m_CountDownBGMTimer = -1;
 					}
 				}
 				bool isready = (m_ReadyTimer == 0.f) && (m_PreEndTimer == -1.f);
@@ -502,7 +511,7 @@ namespace FPS_n2 {
 						}
 						else {
 							if (!m_NetWorkBrowser.GetClient()) {
-								m_AICtrl[index]->Execute(&tmp.Input, (m_Timer > 60.f));
+								m_AICtrl[index]->Execute(&tmp.Input, !m_IsHardMode && (m_Timer > 60.f));
 							}
 							c->SetInput(tmp.Input, isready && c->IsAlive());
 							bool override_true = true;
@@ -523,7 +532,7 @@ namespace FPS_n2 {
 						}
 						else {
 							InputControl OtherInput;
-							m_AICtrl[index]->Execute(&OtherInput, (m_Timer > 60.f));
+							m_AICtrl[index]->Execute(&OtherInput, !m_IsHardMode && (m_Timer > 60.f));
 							c->SetInput(OtherInput, isready && c->IsAlive());
 						}
 						//ダメージイベント処理
@@ -723,7 +732,7 @@ namespace FPS_n2 {
 					auto near_t = DrawParts->GetMainCamera().GetCamNear();
 					auto far_t = DrawParts->GetMainCamera().GetCamFar();
 					if (Chara->GetIsADS()) {
-						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
+						Easing(&near_t, Scale_Rate * 0.03f, 0.9f, EasingType::OutExpo);
 						Easing(&far_t, Scale_Rate * 50.f, 0.5f, EasingType::OutExpo);
 					}
 					else {
@@ -932,9 +941,64 @@ namespace FPS_n2 {
 					//ハードモードアンロック
 					if (SaveDataParts->GetParam("UnlockHardMode") != 1) {
 						SaveDataParts->SetParam("UnlockHardMode", 1);
-						ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "Fire Party モードが開放されました！");
+						ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "Fire Party モード");
 					}
 					//ハイスコア更新
+				}
+				//
+				if (!m_MainLoopPauseControl.GetIsRetireSelected()) {
+					int bases = std::clamp(SaveDataParts->GetParam("ULT Unlock"), 1, (int)ULT_GUN::Max);
+					SaveDataParts->SetParam("ULT Unlock", std::clamp(bases + 1, 1, (int)ULT_GUN::Max));
+					if (bases != SaveDataParts->GetParam("ULT Unlock")) {
+						ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", ULT_GUNName[SaveDataParts->GetParam("ULT Unlock") - 1]);
+					}
+				}
+				//
+				if (!m_MainLoopPauseControl.GetIsRetireSelected()) {
+					int bases = std::clamp(SaveDataParts->GetParam("Glock Unlock"), 1, 4);
+					SaveDataParts->SetParam("Glock Unlock", std::clamp(bases + 1, 1, 4));
+					int after = SaveDataParts->GetParam("Glock Unlock");
+					if (bases != after) {
+						switch (after - 1) {
+							case 1:
+								{
+									SaveDataParts->SetParam("Glock17 Gen2 Barrel", 1);
+									SaveDataParts->SetParam("Glock17 Gen2 Frame", 1);
+									SaveDataParts->SetParam("Glock17 Gen2 Slide", 1);
+									ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "Glock17 Gen2キット");
+								}
+								break;
+							case 2:
+								{
+									SaveDataParts->SetParam("G17 ThreadedBarrel", 1);
+									SaveDataParts->SetParam("9x19 Suppressor", 1);
+									SaveDataParts->SetParam("G-High IronSight", 1);
+									ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "サプレッサーキット");
+								}
+								break;
+							case 3:
+								{
+									SaveDataParts->SetParam("Glock17 Gen5 Barrel", 1);
+									SaveDataParts->SetParam("Glock17 Gen5 Frame", 1);
+									SaveDataParts->SetParam("Glock17 Gen5 Slide", 1);
+									SaveDataParts->SetParam("GMag 17Round(Gen5)", 1);
+									SaveDataParts->SetParam("CTS1500 DotSight", 1);
+									SaveDataParts->SetParam("SBal PL LaserSight", 1);
+									ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "Glock17 Gen5キット");
+								}
+								break;
+							case 4:
+								{
+									SaveDataParts->SetParam("FMG-9 Carbine Kit", 1);
+									SaveDataParts->SetParam("Glock18 Slide (for 17)", 1);
+									SaveDataParts->SetParam("Lpd FX-II Scope", 1);
+									ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "FMG-9キット");
+								}
+								break;
+							default:
+								break;
+						}
+					}
 				}
 				SaveDataParts->Save();
 			}

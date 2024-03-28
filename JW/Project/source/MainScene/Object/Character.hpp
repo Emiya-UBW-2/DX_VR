@@ -48,7 +48,7 @@ namespace FPS_n2 {
 			float												m_LeanRad{0.f};
 			float												m_LateLeanRad{0.f};
 			float												m_yrad_Upper{0.f}, m_yrad_Bottom{0.f};
-			float												m_yrad_UpperChange{0.f}, m_yrad_BottomChange{0.f}, m_yrad_BottomChangeRun{0.f};
+			float												m_yrad_UpperChange{0.f}, m_yrad_BottomChange{0.f};
 			bool												m_TurnBody{false};
 			bool												m_MagHand{false};
 			ArmMovePerClass										m_MagArm;
@@ -130,7 +130,7 @@ namespace FPS_n2 {
 				auto tmpUpperMatrix =
 					MATRIX_ref::RotZ(this->m_LeanRad) *
 					MATRIX_ref::RotX(KeyControl::GetRad().x()) *
-					MATRIX_ref::RotY(this->m_yrad_BottomChangeRun);
+					MATRIX_ref::RotY(Lerp(this->m_yrad_BottomChange, 0.f, this->m_Arm[(int)EnumGunAnimType::Run].Per()));
 				return tmpUpperMatrix * this->m_move.mat;
 			}
 			const auto		GetGunRadAdd(void) const noexcept { return this->m_LateLeanRad + this->m_yrad_BottomChange*0.15f; }

@@ -10,10 +10,19 @@ namespace FPS_n2 {
 				MATRIX_ref::RotZ(this->m_LeanRad / 5.f) *
 				MATRIX_ref::RotX(KeyControl::GetRad().x()) *
 				MATRIX_ref::RotY(this->m_yrad_BottomChange);
-			tmpUpperMatrix = WalkSwingControl::GetWalkSwingMat() * tmpUpperMatrix * this->m_move.mat;
+
+			auto* OptionParts = OPTION::Instance();
+			bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->Get_HeadBobbing());
+			if (HeadBobbing) {
+				tmpUpperMatrix = WalkSwingControl::GetWalkSwingMat() * tmpUpperMatrix;
+			}
+			tmpUpperMatrix *= this->m_move.mat;
 
 			auto EyePosition = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f + tmpUpperMatrix.zvec()*(-0.04f*Scale_Rate);
-			EyePosition += EyeSwingControl::GetEyeSwingPos();
+
+			if (HeadBobbing) {
+				EyePosition += EyeSwingControl::GetEyeSwingPos();
+			}
 			if (GetGunPtrNow()) {
 				EyePosition = Lerp<VECTOR_ref>(EyePosition, GunPtrControl::GetGunPtrNow()->GetEyePos(), GunReadyControl::GetADSPer());
 			}
@@ -610,7 +619,7 @@ namespace FPS_n2 {
 			if (!isWearingArmer() && !isMorphineing()) {
 				if (KeyControl::GetInputControl().GetPADSPress(PADS::THROW)) {
 					//ƒ‚ƒ‹ƒqƒl
-					if ((this->m_MorphineStock != 0)) {
+					if ((this->m_MorphineStock != 0) && (LifeControl::GetHP() < LifeControl::GetHPMax())) {
 						this->m_MorphineStock = std::max(this->m_MorphineStock - 1, 0);
 						this->m_MorphinePhase = MorphinePhase::Have;
 					}
@@ -648,11 +657,18 @@ namespace FPS_n2 {
 			this->m_Arm[(int)EnumGunAnimType::AmmoLoad].Execute(GetShotPhase() == GunAnimeID::AmmoLoading, 0.1f, 0.1f);
 			//
 			if (!KeyControl::IsMove()) {
-				if (deg2rad(50.f) < abs(this->m_yrad_UpperChange)) {
-					this->m_TurnBody = true;
+				auto* OptionParts = OPTION::Instance();
+				bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->Get_HeadBobbing());
+				if (HeadBobbing) {
+					if (deg2rad(50.f) < abs(this->m_yrad_UpperChange)) {
+						this->m_TurnBody = true;
+					}
+					if (abs(this->m_yrad_UpperChange) < deg2rad(0.5f)) {
+						this->m_TurnBody = false;
+					}
 				}
-				if (abs(this->m_yrad_UpperChange) < deg2rad(0.5f)) {
-					this->m_TurnBody = false;
+				else {
+					this->m_TurnBody = true;
 				}
 			}
 			else {
@@ -671,7 +687,6 @@ namespace FPS_n2 {
 			KeyControl::SetRadBuf().SetEasingZ((abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f);
 			this->m_yrad_UpperChange = KeyControl::GetRad().y() - this->m_yrad_Upper;
 			this->m_yrad_BottomChange = KeyControl::GetRad().y() - this->m_yrad_Bottom;
-			this->m_yrad_BottomChangeRun = Lerp(this->m_yrad_BottomChange, 0.f, this->m_Arm[(int)EnumGunAnimType::Run].Per());
 		}
 		//ã”¼g‰ñ“]
 		void			CharacterClass::ExecuteUpperMatrix(void) noexcept {
@@ -682,7 +697,7 @@ namespace FPS_n2 {
 			auto tmpUpperMatrix =
 				MATRIX_ref::RotZ(this->m_LeanRad) *
 				MATRIX_ref::RotX(KeyControl::GetRad().x() / 2.f) *
-				MATRIX_ref::RotY(this->m_yrad_BottomChangeRun);
+				MATRIX_ref::RotY(Lerp(this->m_yrad_BottomChange, 0.f, this->m_Arm[(int)EnumGunAnimType::Run].Per()));
 
 			GetObj().frame_Reset(GetFrame(CharaFrame::Upper));
 			SetFrameLocalMat(CharaFrame::Upper, GetFrameLocalMat(CharaFrame::Upper).GetRot() * tmpUpperMatrix);
@@ -762,7 +777,11 @@ namespace FPS_n2 {
 								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale_Rate * 5.f);
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
-										DrawParts->SetCamShake(0.1f, 1.f);
+										auto* OptionParts = OPTION::Instance();
+										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->Get_HeadBobbing());
+										if (HeadBobbing) {
+											DrawParts->SetCamShake(0.1f, 1.f);
+										}
 									}
 								}
 							}
@@ -778,7 +797,11 @@ namespace FPS_n2 {
 								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale_Rate * 5.f);
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
-										DrawParts->SetCamShake(0.1f, 1.f);
+										auto* OptionParts = OPTION::Instance();
+										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->Get_HeadBobbing());
+										if (HeadBobbing) {
+											DrawParts->SetCamShake(0.1f, 1.f);
+										}
 									}
 								}
 							}
@@ -797,7 +820,11 @@ namespace FPS_n2 {
 								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale_Rate * 15.f);
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
-										DrawParts->SetCamShake(0.1f, 1.f);
+										auto* OptionParts = OPTION::Instance();
+										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->Get_HeadBobbing());
+										if (HeadBobbing) {
+											DrawParts->SetCamShake(0.1f, 1.f);
+										}
 									}
 								}
 							}
@@ -814,7 +841,11 @@ namespace FPS_n2 {
 								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale_Rate * 15.f);
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
-										DrawParts->SetCamShake(0.1f, 1.f);
+										auto* OptionParts = OPTION::Instance();
+										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->Get_HeadBobbing());
+										if (HeadBobbing) {
+											DrawParts->SetCamShake(0.1f, 1.f);
+										}
 									}
 								}
 							}
@@ -920,7 +951,9 @@ namespace FPS_n2 {
 				KeyControl::SetRadBuf().y(info_move.rad.y());
 				KeyControl::SetRad().y(info_move.rad.y());
 			}
-			this->m_move.mat = MATRIX_ref::RotZ(KeyControl::GetRad().z() / 2.f) * MATRIX_ref::RotY(this->m_yrad_Bottom);
+			auto* OptionParts = OPTION::Instance();
+			bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->Get_HeadBobbing());
+			this->m_move.mat = MATRIX_ref::RotZ(HeadBobbing ? (KeyControl::GetRad().z() / 2.f) : 0.f) * MATRIX_ref::RotY(this->m_yrad_Bottom);
 			this->m_move.UpdatePosBuf(this->m_move.posbuf, 0.9f);
 			UpdateMove();
 			//e‚Ð‚Á‚±‚ß
@@ -1439,7 +1472,6 @@ namespace FPS_n2 {
 			this->m_yrad_Upper = KeyControl::GetRad().y();
 			this->m_yrad_Bottom = KeyControl::GetRad().y();
 			this->m_yrad_BottomChange = 0.f;
-			this->m_yrad_BottomChangeRun = 0.f;
 			this->m_LateLeanRad = 0.f;
 			this->m_LeanRad = 0.f;
 			this->m_move.vec.clear();

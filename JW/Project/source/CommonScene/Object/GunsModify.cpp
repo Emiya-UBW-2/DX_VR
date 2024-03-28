@@ -100,14 +100,19 @@ namespace FPS_n2 {
 			SlotSaveData Tmp;
 			SlotSave.clear();
 			std::ifstream inputfile(path, std::ios::binary);
-			{
-				int ULTSel = 0;
-				inputfile.read(reinterpret_cast<char *>(&ULTSel), sizeof(ULTSel));
-				m_ULTSelect = (ULT_GUN)ULTSel;
+			if (!inputfile) {
+				m_ULTSelect = (ULT_GUN)0;
 			}
-			while (!inputfile.eof()) { //ファイルの最後まで続ける
-				inputfile.read(reinterpret_cast<char *>(&Tmp), sizeof(Tmp));
-				SlotSave.emplace_back(Tmp);
+			else {
+				{
+					int ULTSel = 0;
+					inputfile.read(reinterpret_cast<char *>(&ULTSel), sizeof(ULTSel));
+					m_ULTSelect = (ULT_GUN)ULTSel;
+				}
+				while (!inputfile.eof()) { //ファイルの最後まで続ける
+					inputfile.read(reinterpret_cast<char *>(&Tmp), sizeof(Tmp));
+					SlotSave.emplace_back(Tmp);
+				}
 			}
 			inputfile.close();
 		}
