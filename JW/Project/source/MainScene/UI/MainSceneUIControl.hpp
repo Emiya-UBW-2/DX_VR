@@ -202,14 +202,11 @@ namespace FPS_n2 {
 			std::array<GaugeMask, 1 + 4>	m_GaugeMask;
 		private:
 		public:
-			void			Load(void) noexcept {
+			void			Load() noexcept {
 				this->Gauge_Graph = GraphHandle::Load("data/UI/Gauge.png");
 				this->Gauge_Aim_Graph = GraphHandle::Load("data/UI/Gauge_Aim.png");
 				this->OIL_Graph = GraphHandle::Load("data/UI/back.png");
 
-				for (int i = 0; i < 4; i++) {
-					m_GaugeMask.at((size_t)i + 1).Load("data/UI/Mag.png");
-				}
 			}
 			void			Dispose(void) noexcept {
 				this->Gauge_Graph.Dispose();
@@ -219,7 +216,7 @@ namespace FPS_n2 {
 					m.Dispose();
 				}
 			}
-			void			Set(const char* GunName) noexcept {
+			void			Set(const char* GunName, bool isHardmode) noexcept {
 				m_ScoreAddSel = 0;
 
 				std::string Path = "data/gun/";
@@ -228,6 +225,20 @@ namespace FPS_n2 {
 				m_GaugeMask.at(0).Dispose();
 				m_GaugeMask.at(0).Load(Path.c_str());
 				ULT_Graph = GraphHandle::Load(Path);
+				//
+				for (int i = 0; i < 4; i++) {
+					m_GaugeMask.at((size_t)i + 1).Dispose();
+				}
+				if (isHardmode) {
+					for (int i = 0; i < 4; i++) {
+						m_GaugeMask.at((size_t)i + 1).Load("data/UI/MagM4.png");
+					}
+				}
+				else {
+					for (int i = 0; i < 4; i++) {
+						m_GaugeMask.at((size_t)i + 1).Load("data/UI/Mag.png");
+					}
+				}
 			}
 			void			Draw(void) noexcept {
 				auto* Fonts = FontPool::Instance();

@@ -82,7 +82,7 @@ namespace FPS_n2 {
 			//ƒTƒEƒ“ƒh
 			SetSE();
 			//UI
-			this->m_UIclass.Set(ULTName.c_str());
+			this->m_UIclass.Set(ULTName.c_str(), false);
 			//
 			m_MainLoopPauseControl.Init();
 

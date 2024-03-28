@@ -40,6 +40,7 @@ namespace FPS_n2 {
 			std::array<const std::shared_ptr<SightClass>*, 2>	m_SightPtr{nullptr};
 			const std::shared_ptr<MuzzleClass>*		m_MuzzlePtr{nullptr};
 			const std::shared_ptr<UpperClass>*		m_UpperPtr{nullptr};
+			const std::shared_ptr<LowerClass>*		m_LowerPtr{nullptr};
 			const std::shared_ptr<MagazineClass>*	m_MagazinePtr{nullptr};
 
 			int										m_ShootRate_Diff{0};
@@ -54,9 +55,6 @@ namespace FPS_n2 {
 		public:
 			const auto&		GetUpperAnim(void) const noexcept { return this->m_UpperAnim; }
 			const auto&		GetGunDataClass(void) const noexcept { return (std::shared_ptr<GunDataClass>&)this->GetModData(); }
-			const auto&		GetHumanAnimType(void) const noexcept { return GetGunDataClass()->GetHumanAnimType(); }
-			const auto&		GetGunAnimeSet(EnumGunAnimType ID) const noexcept { return this->m_GunAnimeSet.at(GetHumanAnimType()).at((int)ID).at(0); }
-			float			GetAllTime(CharaGunAnimeID ID) { return (float)m_CharaAnimeSet.at(GetHumanAnimType()).at((int)ID); }
 			auto&			GetGunAnimFrame(CharaGunAnimeID ID) { return m_GunAnimFrame.at((int)ID); }
 
 			void			SetGunAnim(CharaGunAnimeID ID, float value) { GetGunAnimFrame(ID) = value; }
@@ -181,6 +179,16 @@ namespace FPS_n2 {
 				}
 				return GetGunDataClass()->GetGunShootSound();
 			}
+			const auto	GetHumanAnimType(void) const noexcept {
+				if (this->m_LowerPtr && (*this->m_LowerPtr)->GetModData()->GetHumanAnimType() != -1) {
+					return (*this->m_LowerPtr)->GetModData()->GetHumanAnimType();
+				}
+				return GetGunDataClass()->GetHumanAnimType();
+			}
+			//const auto&		GetHumanAnimType(void) const noexcept { return GetGunDataClass()->GetHumanAnimType(); }
+			const auto&		GetGunAnimeSet(EnumGunAnimType ID) const noexcept { return this->m_GunAnimeSet.at(GetHumanAnimType()).at((int)ID).at(0); }
+			float			GetAllTime(CharaGunAnimeID ID) { return (float)m_CharaAnimeSet.at(GetHumanAnimType()).at((int)ID); }
+
 			const auto	GetShoting(void) const noexcept { return this->m_ShotPhase == GunAnimeID::Shot; }
 			const auto	GetCocking(void) const noexcept { return this->m_ShotPhase == GunAnimeID::Cocking; }
 			const auto	GetReloading(void) const noexcept { return (GunAnimeID::ReloadStart_Empty <= this->m_ShotPhase) && (this->m_ShotPhase <= GunAnimeID::ReloadEnd); }

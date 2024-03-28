@@ -126,6 +126,7 @@ namespace FPS_n2 {
 				int SightSel = 0;
 				m_MuzzlePtr = nullptr;
 				m_UpperPtr = nullptr;
+				m_LowerPtr = nullptr;
 				m_MagazinePtr = nullptr;
 				m_ShootRate_Diff = 0;
 				m_ReloadRate_Diff = 0;
@@ -148,6 +149,9 @@ namespace FPS_n2 {
 					}
 					if ((*p)->GetobjType() == ObjType::Upper) {
 						m_UpperPtr = &((std::shared_ptr<UpperClass>&)(*p));
+					}
+					if ((*p)->GetobjType() == ObjType::Lower) {
+						m_LowerPtr = &((std::shared_ptr<LowerClass>&)(*p));
 					}
 					if ((*p)->GetobjType() == ObjType::Magazine) {
 						m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(*p));

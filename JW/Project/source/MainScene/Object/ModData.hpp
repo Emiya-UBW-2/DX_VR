@@ -33,6 +33,7 @@ namespace FPS_n2 {
 
 			GraphHandle						m_Reitcle;
 			float							m_ZoomSize{1.f};
+			int								m_HumanAnimType{-1};				//
 
 			int								m_ShootRate_Diff{0};
 			int								m_ReloadRate_Diff{0};
@@ -48,6 +49,7 @@ namespace FPS_n2 {
 			const auto& GetRecoilPower(void) const noexcept { return this->m_RecoilPower; }
 			const auto& GetRecoilReturn(void) const noexcept { return this->m_RecoilReturn; }
 			const auto& GetShotType(void) const noexcept { return this->m_ShotType; }
+			const auto& GetHumanAnimType(void) const noexcept { return this->m_HumanAnimType; }
 			//銃声
 			const auto&	GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
 			//スコープ

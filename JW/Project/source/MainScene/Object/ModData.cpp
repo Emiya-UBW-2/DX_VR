@@ -62,6 +62,10 @@ namespace FPS_n2 {
 				m_ZoomSize = std::stof(RIGHT);
 			}
 
+			else if (LEFT == "usehumanAnim") {
+				this->m_HumanAnimType = std::stoi(RIGHT);
+			}
+
 			else if (LEFT == "capacity") {
 				this->m_CapacityMax = (HitPoint)std::stoi(RIGHT);		//‘’e”
 			}

@@ -135,10 +135,10 @@ namespace FPS_n2 {
 			//UI
 			if (!m_IsHardMode) {
 				std::string ULTName = ULT_GUNName[(int)GunsModify::GetULTSelect()];
-				this->m_UIclass.Set(ULTName.c_str());
+				this->m_UIclass.Set(ULTName.c_str(), m_IsHardMode);
 			}
 			else {
-				this->m_UIclass.Set("G17Gen3");
+				this->m_UIclass.Set("G17Gen3", m_IsHardMode);
 			}
 			prevScore = 0;
 			prevLastMan = -1;
@@ -955,8 +955,8 @@ namespace FPS_n2 {
 				}
 				//
 				if (!m_MainLoopPauseControl.GetIsRetireSelected()) {
-					int bases = std::clamp(SaveDataParts->GetParam("Glock Unlock"), 1, 4);
-					SaveDataParts->SetParam("Glock Unlock", std::clamp(bases + 1, 1, 4));
+					int bases = std::clamp(SaveDataParts->GetParam("Glock Unlock"), 1, 5);
+					SaveDataParts->SetParam("Glock Unlock", std::clamp(bases + 1, 1, 5));
 					int after = SaveDataParts->GetParam("Glock Unlock");
 					if (bases != after) {
 						switch (after - 1) {
