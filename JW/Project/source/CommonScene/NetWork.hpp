@@ -64,7 +64,11 @@ public:
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//í êM
+#if HIGH_FPS_ROM
+		static const int		Player_num = 5;
+#else
 		static const int		Player_num = 11;
+#endif
 		struct NewSetting {
 			IPDATA					IP{127,0,0,1};
 			int						UsePort{10850};

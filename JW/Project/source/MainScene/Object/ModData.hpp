@@ -28,6 +28,7 @@ namespace FPS_n2 {
 			int								m_RecoilPower{120};
 			float							m_RecoilReturn{0.9f};
 			SHOTTYPE						m_ShotType{SHOTTYPE::SEMI};		//
+			bool							m_IronSight{false};
 
 			GunShootSound					m_GunShootSound{GunShootSound::Normal};
 
@@ -50,6 +51,7 @@ namespace FPS_n2 {
 			const auto& GetRecoilReturn(void) const noexcept { return this->m_RecoilReturn; }
 			const auto& GetShotType(void) const noexcept { return this->m_ShotType; }
 			const auto& GetHumanAnimType(void) const noexcept { return this->m_HumanAnimType; }
+			const auto& GetIronSight(void) const noexcept { return this->m_IronSight; }
 			//銃声
 			const auto&	GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
 			//スコープ

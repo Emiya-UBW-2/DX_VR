@@ -135,11 +135,6 @@ namespace FPS_n2 {
 					if ((*p)->GetobjType() == ObjType::Sight) {
 						if (SightSel < m_SightPtr.size()) {
 							const auto* Ptr = &((std::shared_ptr<SightClass>&)(*p));
-							if (m_SightPtr[SightSel]) {
-								if (!(*Ptr)->GetModData()->GetReitcleGraph().IsActive()) {
-									continue;
-								}
-							}
 							m_SightPtr[SightSel] = Ptr;
 							SightSel++;
 						}
@@ -162,6 +157,20 @@ namespace FPS_n2 {
 						auto& d = ((std::shared_ptr<ModClass>&)(*p))->GetModData();
 						m_ShootRate_Diff += d->GetShootRate_Diff();
 						m_ReloadRate_Diff += d->GetReloadRate_Diff();
+					}
+				}
+				//2つ以上サイトがあるときアイアンサイトを省く
+				if (SightSel >= m_SightPtr.size()) {
+					for (int i = 0;i < m_SightPtr.size();i++) {
+						auto&s = m_SightPtr[i];
+						if (m_SightPtr[i]) {
+							if ((*m_SightPtr[i])->GetModData()->GetIronSight()) {
+								for (int k = i;k < m_SightPtr.size()-1;k++) {
+									m_SightPtr[k] = m_SightPtr[k + 1];
+								}
+								m_SightPtr.back() = nullptr;
+							}
+						}
 					}
 				}
 				PartsList.clear();
@@ -748,9 +757,12 @@ namespace FPS_n2 {
 					(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(0.5f*Scale_Rate, 0.5f*Scale_Rate, 0.5f*Scale_Rate)).get()) == FALSE
 					) {
 					if (isDrawSemiTrans) {
+#if HIGH_FPS_ROM
+#else
 						if (m_MyID == 0) {
 							DrawMuzzleSmoke();
 						}
+#endif
 					}
 					for (int i = 0; i < this->GetObj().mesh_num(); i++) {
 						if ((MV1GetMeshSemiTransState(this->GetObj().get(), i) == TRUE) == isDrawSemiTrans) {

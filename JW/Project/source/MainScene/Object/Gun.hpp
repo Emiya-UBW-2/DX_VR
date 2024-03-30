@@ -112,7 +112,6 @@ namespace FPS_n2 {
 					int Prev = (m_GunSightSel - 1);
 					if (Prev < 0) { Prev = GetSightMax() - 1; }
 					return this->m_SightPtr.at(Prev) != nullptr;
-
 				}
 				else {
 					return this->m_SightPtr.at(m_GunSightSel) != nullptr;
@@ -123,7 +122,6 @@ namespace FPS_n2 {
 					int Prev = (m_GunSightSel - 1);
 					if (Prev < 0) { Prev = GetSightMax() - 1; }
 					return *this->m_SightPtr.at(Prev);
-
 				}
 				else {
 					return *this->m_SightPtr.at(m_GunSightSel);

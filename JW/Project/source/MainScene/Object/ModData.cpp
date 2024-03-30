@@ -79,6 +79,9 @@ namespace FPS_n2 {
 			else if (LEFT == "ReloadRate_Diff") {
 				m_ReloadRate_Diff = std::stoi(RIGHT);
 			}
+			else if (LEFT == "IronSight") {
+				this->m_IronSight = true;
+			}
 		}
 
 		const std::shared_ptr<ModDataClass>*	ModDataManager::AddData(const std::string& filepath, bool isMod) noexcept {

@@ -380,9 +380,15 @@ namespace FPS_n2 {
 				}
 			}
 		}
+#if HIGH_FPS_ROM
+#else
 		this->m_Garbage.Draw();
+#endif
 		m_DrumControl.Draw();
+#if HIGH_FPS_ROM
+#else
 		m_LightControl.Draw();
+#endif
 
 		SetFogEnable(fog_enable);
 		SetFogMode(fog_mode);
@@ -392,6 +398,7 @@ namespace FPS_n2 {
 		//
 	}
 	void			BuildControl::DrawFront() noexcept {
+
 		m_LightControl.DrawFront();
 	}
 	

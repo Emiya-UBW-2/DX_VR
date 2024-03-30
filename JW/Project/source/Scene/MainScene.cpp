@@ -792,6 +792,8 @@ namespace FPS_n2 {
 			this->m_BackGround->Execute();
 			//射撃光
 			if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetShotSwitch()) {// 
+#if HIGH_FPS_ROM
+#else
 				auto mat = Chara->GetGunPtrNow()->GetFrameWorldMat(GunFrame::Muzzle);
 				SetLightEnable(TRUE);
 				ChangeLightTypePoint(mat.pos().get(),
@@ -799,6 +801,7 @@ namespace FPS_n2 {
 									 0.001f,
 									 0.012f,
 									 0.004f);
+#endif
 			}
 			//レーザーサイト
 			for (int index = 0; index < Chara_num; index++) {

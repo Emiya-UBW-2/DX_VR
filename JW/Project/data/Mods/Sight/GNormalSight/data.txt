@@ -1,3 +1,3 @@
 Name=G-Normal IronSight
-
+IronSight=true
 end

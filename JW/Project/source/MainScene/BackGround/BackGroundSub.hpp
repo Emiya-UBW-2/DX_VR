@@ -285,11 +285,16 @@ namespace FPS_n2 {
 				std::sort(this->m_LightPoiont.begin(), this->m_LightPoiont.end(), [&](const Lights& a, const Lights& b) {			return a.m_length < b.m_length && a.m_NearPath->IsDraw() && !a.m_isHit; 		});
 			}
 			void			SetLight() {
+#if HIGH_FPS_ROM
+				SetLightEnable(TRUE);
+				return;
+#endif
 				auto* DrawParts = DXDraw::Instance();
 				for (int i = 0; i < 2; i++) {
 					SetLightEnableHandle(m_LightHandle[i], FALSE);
 				}
 				SetLightEnable(FALSE);
+
 				int count = 0;
 				for (auto& b : this->m_LightPoiont) {
 					if (b.m_NearPath->IsDraw()) {
@@ -538,7 +543,11 @@ namespace FPS_n2 {
 			}
 		};
 	private:
+#if HIGH_FPS_ROM
+		const int Size = 13;
+#else
 		const int Size = 15;
+#endif
 		const float tileSize = 30.f;
 	private:
 		GraphHandle					m_MapGraph;
