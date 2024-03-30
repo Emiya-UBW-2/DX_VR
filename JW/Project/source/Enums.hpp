@@ -105,22 +105,25 @@ namespace FPS_n2 {
 			Man_openfire,
 			Man_reload,
 			Man_takecover,
-			Man_teamdown,
 			Man_breathing,
 			Man_breathend,
 			//
 			Hit,
 			HitMe,
 			HitGuard,
-
-			Tank_near,
+			Near,
+			//
 			HitGround0,
 			HitGround1,
 			HitGround2,
 			HitGround3,
 			HitGround4,
-
+			//
 			CountDown,
+			Second,
+			OneMunute,
+			TimeUp,
+			
 		};
 		enum class CharaTypeID {
 			Mine,

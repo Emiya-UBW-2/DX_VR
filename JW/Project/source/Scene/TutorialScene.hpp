@@ -157,10 +157,6 @@ namespace FPS_n2 {
 
 			std::vector<DamageEvent>						m_DamageEvents;				//ダメージ
 
-			std::shared_ptr<GunClass>		m_GunPtr;				//ポインター別持ち
-			std::shared_ptr<CharacterClass>	m_CharacterPtr;			//ポインター別持ち
-
-
 			int tgtSel = 0;
 			float tgtTimer = 0.f;
 			GraphHandle ScoreBoard;
@@ -186,12 +182,7 @@ namespace FPS_n2 {
 		public:
 			void			Dispose_Load(void) noexcept;
 		private:
-			void			LoadSE(void) noexcept;
-			void			SetSE(void) noexcept;
-			void			DisposeSE(void) noexcept;
-		private:
-			void			LoadChara(const std::string&FolderName) noexcept;
-			void			LoadGun(const std::string&FolderName, bool IsPreset, int Sel) noexcept;
+			void			LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept;
 		};
 	};
 };

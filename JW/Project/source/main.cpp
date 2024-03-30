@@ -7,8 +7,6 @@
 #include "Scene/TutorialScene.hpp"
 #include "Scene/MainScene.hpp"
 
-#define LineHeight	y_r(18)
-
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DXDraw::Create();								//汎用
 #ifdef DEBUG
@@ -20,18 +18,20 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetMainWindowText("Phantom of the Bunker");						//タイトル
 	//MV1SetLoadModelUsePackDraw(TRUE);
 	SetUseHalfLambertLighting(TRUE);	//ハーフランバート化
-
-	PostPassEffect::Create();						//シェーダー
-
+	//
 	FPS_n2::GetItemLog::Create();
+	FPS_n2::Sceneclass::ObjectManager::Create();
+	FPS_n2::Sceneclass::PlayerManager::Create();
+	FPS_n2::Sceneclass::GunAnimManager::Create();
+	FPS_n2::Sceneclass::ModDataManager::Create();
+	FPS_n2::Sceneclass::AmmoDataManager::Create();
+	FPS_n2::Sceneclass::CommonBattleResource::Create();
+	//
 	auto* ItemLogParts = FPS_n2::GetItemLog::Instance();
-
 	auto* SaveDataParts = SaveDataClass::Instance();
-	//初回データ作成を兼ねてセーブ
-	SaveDataParts->Load();
-	SaveDataParts->Save();
-
-	//初期開放品
+	auto* BGM = BGMPool::Instance();
+	auto* OptionParts = OPTION::Instance();
+	//初期開放
 	SaveDataParts->SetParam("Glock17 Gen3 Barrel", 1);
 	SaveDataParts->SetParam("Glock17 Gen3 Frame", 1);
 	SaveDataParts->SetParam("Glock17 Gen3 Slide", 1);
@@ -42,22 +42,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SaveDataParts->SetParam("VIPER RedDotSight", 1);
 	SaveDataParts->SetParam("ULT Unlock", std::max(SaveDataParts->GetParam("ULT Unlock"), 1));
 	SaveDataParts->SetParam("Glock Unlock", std::max(SaveDataParts->GetParam("Glock Unlock"), 1));
-
+	//SaveDataParts->SetParam("UnlockHardMode", 1);
 	SaveDataParts->Save();
-
-	SaveDataParts->SetParam("UnlockHardMode", 1);
-	//SaveDataParts->Save();
-
-	//
-	FPS_n2::Sceneclass::ObjectManager::Create();
-	FPS_n2::Sceneclass::PlayerManager::Create();
-	FPS_n2::Sceneclass::GunAnimManager::Create();
-	//
-	FPS_n2::Sceneclass::ModDataManager::Create();
-	FPS_n2::Sceneclass::AmmoDataManager::Create();
-
-	auto* BGM = BGMPool::Instance();
-	auto* OptionParts = OPTION::Instance();
+	//BGM
 	BGM->Add(0, "data/Sound/BGM/Title.wav");
 	BGM->Add(1, "data/Sound/BGM/Vivaldi_Winter.wav");
 	BGM->SetVol(OptionParts->Get_BGM());
@@ -76,60 +63,34 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	bool isTutorialLoop = false;
 	bool isMainLoop = false;
 
-#ifdef DEBUG
-#else
-	std::array<float, 60> FPSAvgs;
-	int m_FPSAvg = 0;
-	for (auto& f : FPSAvgs) {
-		f = 60.f;
-	}
-#endif
-	isMainLoop = true;
-	MAINLOOPscene->Load();
-
 	//繰り返し
 	while (true) {
 		scene->StartScene();
 		while (true) {
-			DrawParts->SetStartTime();
-			if ((ProcessMessage() != 0) || DrawParts->UpdateEscWindow()) { return 0; }
-			FPS = std::max(GetFPS(), 30.f);
+			if (!DrawParts->FirstExecute()) {
+				SaveDataParts->Save();//セーブ
+				return 0;
+			}
+			FPS = GetFrameRate();
 #ifdef DEBUG
 			clsDx();
 			DebugParts->SetStartPoint();
-#endif // DEBUG
-#ifdef DEBUG
 			DebugParts->SetPoint("Execute start");
 #endif // DEBUG
-			if (scene->Execute()) { break; }		//更新
-			scene->Draw();							//描画
-
+			if (scene->Execute()) { break; }
 			ItemLogParts->Update();
+			//描画
+			scene->Draw();
 			ItemLogParts->Draw();
 			//デバッグ
 #ifdef DEBUG
 			DebugParts->DebugWindow(y_r(1920 - 250), y_r(150));
 			//TestDrawShadowMap(DrawParts->m_Shadow[0].GetHandle(), 0, 0, 960, 540);
-#else
-			{
-				FPSAvgs.at(m_FPSAvg) = FPS;
-				++m_FPSAvg %= ((int)FPSAvgs.size());
-
-				float Avg = 0.f;
-				for (auto& f : FPSAvgs) {
-					Avg += f;
-				}
-				Avg = Avg / ((float)FPSAvgs.size());
-
-				auto* Fonts = FontPool::Instance();
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, y_r(1920 - 8), y_r(8), GetColor(255, 255, 255), GetColor(0, 0, 0), "%5.2f FPS", Avg);
-			}
 #endif // DEBUG
-			DrawParts->Screen_Flip();				//画面の反映
+			DrawParts->Screen_Flip();//画面の反映
 		}
-		SaveDataClass::Instance()->Save();
-		bool isTitle = (scene->GetNowScene() == Titlescene);
-		if (isTitle) {
+		SaveDataParts->Save();//セーブ
+		if (scene->GetNowScene() == Titlescene) {
 			switch (Titlescene->SelMode()) {
 				case 0:
 					Titlescene->Set_Next(MAINLOOPscene);
@@ -190,13 +151,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					}
 					break;
 				default:
+					Titlescene->Set_Next(MAINLOOPscene);//戻しとく
 					break;
 			}
 		}
-		scene->NextScene();							//次のシーンへ移行
-		if (isTitle) {
-			Titlescene->Set_Next(MAINLOOPscene);//戻しとく
-		}
+		scene->NextScene();
 	}
 	return 0;
 }

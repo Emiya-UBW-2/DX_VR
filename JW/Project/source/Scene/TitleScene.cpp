@@ -4,8 +4,6 @@
 
 #include"../Header.hpp"
 
-#define LineHeight	y_r(18)
-
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			TitleScene::Set_Sub(void) noexcept {
@@ -53,7 +51,7 @@ namespace FPS_n2 {
 				int xp1, yp1;
 
 				xp1 = y_r(960) - WinSizeX / 2 + y_r(48);
-				yp1 = y_r(540) - WinSizeY / 2 + LineHeight * 3 + LineHeight;
+				yp1 = y_r(540) - WinSizeY / 2 + y_r(18) * 3 + y_r(18);
 				int Height = y_r(12);
 				for (int i = 0;i < m_CreditCoulm;i++) {
 					int xpos = xp1 + y_r(6);

@@ -54,11 +54,8 @@ namespace FPS_n2 {
 
 			int												m_CountDownBGMTimer{0};
 			bool											m_CountDownBGM1Flag{true};
-			SoundHandle										m_CountDownBGM1;
 			bool											m_CountDownBGM2Flag{true};
-			SoundHandle										m_CountDownBGM2;
 			bool											m_CountDownBGM3Flag{true};
-			SoundHandle										m_CountDownBGM3;
 
 			GraphHandle movie;										//
 			int m_movieTotalFrame{0};
@@ -97,11 +94,6 @@ namespace FPS_n2 {
 			void			DrawSoundGraph(void) noexcept;
 			void			DrawHitGraph(void) noexcept;
 		private:
-			void			LoadSE(void) noexcept;
-			void			SetSE(void) noexcept;
-			void			DisposeSE(void) noexcept;
-		private:
-			void			LoadChara(const std::string&FolderName, PlayerID ID, bool IsRagDoll, bool IsRagDollBaseObj = false) noexcept;
 			void			LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept;
 		};
 	};

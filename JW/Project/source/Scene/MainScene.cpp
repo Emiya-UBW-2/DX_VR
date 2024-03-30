@@ -13,10 +13,11 @@ namespace FPS_n2 {
 			if (m_IsFirstLoad) {
 				m_IsFirstLoad = false;
 				auto* PlayerMngr = PlayerManager::Instance();
+				auto* BattleResourceMngr = CommonBattleResource::Instance();
 				//BG
 				GunAnimManager::Instance()->Load("data/CharaAnime/");
 				//
-				LoadSE();
+				BattleResourceMngr->Load();
 				//
 				this->m_AICtrl.resize(Chara_num);
 				for (int i = 1; i < Chara_num; i++) {
@@ -29,47 +30,45 @@ namespace FPS_n2 {
 				this->m_MiniMapScreen = GraphHandle::Make(y_r(128) * 2, y_r(128) * 2, true);
 				PlayerMngr->Init(Chara_num);
 				for (int i = 1; i < Chara_num; i++) {
-					LoadChara("Soldier", (PlayerID)i, true, (i == 1));
+					BattleResourceMngr->LoadChara("Soldier", (PlayerID)i, true, (i == 1));
 				}
 
+				std::string GunName;
 				for (int i = 1; i < gun_num; i++) {
 					if (!m_IsHardMode) {
-						LoadGun("PCC_4", (PlayerID)i, false, 0);
+						GunName = "PCC_4";
 					}
 					else {
-						std::string ULTName = ULT_GUNName[GetRand((int)ULT_GUN::Max - 1)];
-						LoadGun(ULTName.c_str(), (PlayerID)i, false, 0);
+						GunName = ULT_GUNName[GetRand((int)ULT_GUN::Max - 1)];
 					}
+					LoadGun(GunName.c_str(), (PlayerID)i, false, 0);
 				}
 			}
 		}
 		void			MAINLOOP::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
+			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			//
-			SetAmbientLight(VECTOR_ref::vget(-0.8f, -0.5f, -0.1f), GetColorF(0.92f, 0.91f, 0.90f, 0.0f));
-			SetFarShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
-			SetMiddleShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.f, Scale_Rate*10.f));
-			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-10.f, Scale_Rate*-3.f, Scale_Rate*-10.f), VECTOR_ref::vget(Scale_Rate*10.f, Scale_Rate*0.5f, Scale_Rate*10.f));
+			VECTOR_ref LightVec = VECTOR_ref::vget(0.f, -1.f, 0.f);
+			DrawParts->SetAmbientLight(LightVec, GetColorF(0.92f, 0.91f, 0.90f, 0.0f));
+
+			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.5f, 10.f)*Scale_Rate, 0);
+			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.f, 10.f)*Scale_Rate, 1);
+			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.f, 10.f)*Scale_Rate, 2);
 
 			this->m_BackGround = std::make_shared<BackGroundClassMain>();
 			this->m_BackGround->Init("", "");//1.59秒
 			//ロード
-			LoadChara("Suit", GetMyPlayerID(), false);
+			BattleResourceMngr->LoadChara("Suit", GetMyPlayerID(), false);
 			GunsModify::LoadSlots("Save/gundata.svf");//プリセット読み込み
 			if (!m_IsHardMode) {
 				LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
-			}
-			else {
-				LoadGun("M4A1", GetMyPlayerID(), false, 0);
-			}
-			
-
-			if (!m_IsHardMode) {
 				std::string ULTName = ULT_GUNName[(int)GunsModify::GetULTSelect()];
 				LoadGun(ULTName.c_str(), GetMyPlayerID(), false, 1);
 			}
 			else {
+				LoadGun("M4A1", GetMyPlayerID(), false, 0);
 				LoadGun("G17Gen3", GetMyPlayerID(), true, 1);
 			}
 
@@ -131,7 +130,7 @@ namespace FPS_n2 {
 			m_DeathCamYAdd = 0.f;
 			m_DeathPer = 0.f;
 			//サウンド
-			SetSE();
+			BattleResourceMngr->Set();
 			//UI
 			if (!m_IsHardMode) {
 				std::string ULTName = ULT_GUNName[(int)GunsModify::GetULTSelect()];
@@ -246,9 +245,6 @@ namespace FPS_n2 {
 				}
 #else
 #endif
-				m_CountDownBGM1.vol((int)(255 * OptionParts->Get_SE()));
-				m_CountDownBGM2.vol((int)(255 * OptionParts->Get_SE()));
-				m_CountDownBGM3.vol((int)(255 * OptionParts->Get_SE()));
 				m_CountDownBGMTimer = (int)m_ReadyTimer;
 				return true;
 			}
@@ -362,7 +358,7 @@ namespace FPS_n2 {
 			}
 			//Input,AI
 			{
-				float cam_per = ((DrawParts->GetMainCamera().GetCamFov() / deg2rad(75)) / (is_lens() ? zoom_lens() : 1.f)) / 100.f;
+				float cam_per = ((DrawParts->GetMainCamera().GetCamFov() / deg2rad(75)) / (DrawParts->is_lens() ? DrawParts->zoom_lens() : 1.f)) / 100.f;
 				cam_per *= 0.6f;
 				float pp_x = 0.f, pp_y = 0.f;
 				InputControl MyInput;
@@ -454,7 +450,7 @@ namespace FPS_n2 {
 						if (m_Timer <= 6.f) {
 							if (!m_CountDownBGM1Flag) {
 								m_CountDownBGM1Flag = true;
-								m_CountDownBGM1.play(DX_PLAYTYPE_BACK, TRUE);
+								SE->Get((int)SoundEnum::Second).Play(0, DX_PLAYTYPE_BACK, TRUE);
 							}
 						}
 						else {
@@ -463,7 +459,7 @@ namespace FPS_n2 {
 						if (m_Timer < 61.f) {
 							if (!m_CountDownBGM2Flag) {
 								m_CountDownBGM2Flag = true;
-								m_CountDownBGM2.play(DX_PLAYTYPE_BACK, TRUE);
+								SE->Get((int)SoundEnum::OneMunute).Play(0, DX_PLAYTYPE_BACK, TRUE);
 							}
 						}
 						else {
@@ -472,7 +468,7 @@ namespace FPS_n2 {
 						if (m_Timer < 0.5f) {
 							if (!m_CountDownBGM3Flag) {
 								m_CountDownBGM3Flag = true;
-								m_CountDownBGM3.play(DX_PLAYTYPE_BACK, TRUE);
+								SE->Get((int)SoundEnum::TimeUp).Play(0, DX_PLAYTYPE_BACK, TRUE);
 							}
 						}
 						else {
@@ -607,10 +603,10 @@ namespace FPS_n2 {
 
 				//コンカッション
 				if (m_ConcussionControl.GetActiveSwitch()) {
-					SE->Get((int)SoundEnum::Tank_near).Play_3D(0, DrawParts->GetMainCamera().GetCamPos(), 10.f*Scale_Rate, 255);//, DX_PLAYTYPE_LOOP
+					SE->Get((int)SoundEnum::Near).Play_3D(0, DrawParts->GetMainCamera().GetCamPos(), 10.f*Scale_Rate, 255);//, DX_PLAYTYPE_LOOP
 				}
-				Set_is_Blackout(m_ConcussionControl.IsActive());
-				Set_Per_Blackout(m_ConcussionControl.GetPer());
+				DrawParts->Set_is_Blackout(m_ConcussionControl.IsActive());
+				DrawParts->Set_Per_Blackout(m_ConcussionControl.GetPer());
 				m_ConcussionControl.Update();
 			}
 			//アイテム入手
@@ -804,11 +800,6 @@ namespace FPS_n2 {
 									 0.012f,
 									 0.004f);
 			}
-			SetShadowDir(VECTOR_ref::vget(0.f, -1.f, 0.f), 0);
-			//SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(0)).Norm(), 0);
-			//SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(1)).Norm(), 1);
-			//SetShadowDir((DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(2)).Norm(), 2);
-			//SetisUpdateFarShadow(true);
 			//レーザーサイト
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
@@ -1021,9 +1012,6 @@ namespace FPS_n2 {
 			movie.Dispose();
 #else
 #endif
-			m_CountDownBGM1.stop();
-			m_CountDownBGM2.stop();
-			m_CountDownBGM3.stop();
 		}
 		//
 		void			MAINLOOP::BG_Draw_Sub(void) noexcept {
@@ -1044,6 +1032,7 @@ namespace FPS_n2 {
 			if (m_IsEnd) {
 				return;
 			}
+			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
@@ -1069,21 +1058,22 @@ namespace FPS_n2 {
 					);
 					//*
 					if (m_MyPlayerReticleControl.IsActive() && Chara->GetSightZoomSize() > 1.f) {
-						Set_is_lens(true);
-						Set_xp_lens(m_MyPlayerReticleControl.GetLensXPos());
-						Set_yp_lens(m_MyPlayerReticleControl.GetLensYPos());
-						Set_size_lens(m_MyPlayerReticleControl.GetLensSize());
-						Set_zoom_lens(std::max(1.f, Chara->GetSightZoomSize() / 2.f));
+						DrawParts->Set_is_lens(true);
+						DrawParts->Set_xp_lens(m_MyPlayerReticleControl.GetLensXPos());
+						DrawParts->Set_yp_lens(m_MyPlayerReticleControl.GetLensYPos());
+						DrawParts->Set_size_lens(m_MyPlayerReticleControl.GetLensSize());
+						DrawParts->Set_zoom_lens(std::max(1.f, Chara->GetSightZoomSize() / 2.f));
 					}
 					else {
-						Set_is_lens(false);
-						Set_zoom_lens(1.f);
+						DrawParts->Set_is_lens(false);
+						DrawParts->Set_zoom_lens(1.f);
 					}
 					//*/
 				}
 				else {
 					m_MyPlayerReticleControl.SetActiveOff();
-					Set_is_lens(false);
+					DrawParts->Set_is_lens(false);
+					DrawParts->Set_zoom_lens(1.f);
 				}
 			}
 			for (int index = 0; index < Chara_num; index++) {
@@ -1203,7 +1193,8 @@ namespace FPS_n2 {
 				m_IsFirstLoad = true;
 				auto* ObjMngr = ObjectManager::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
-				DisposeSE();
+				auto* BattleResourceMngr = CommonBattleResource::Instance();
+				BattleResourceMngr->Dispose();
 				m_AICtrl.clear();
 				this->m_UIclass.Dispose();
 				this->hit_Graph.Dispose();
@@ -1385,11 +1376,11 @@ namespace FPS_n2 {
 			}
 			for (int index = 0; index < DegDiv; index++) {
 				int next = (index + 1) % DegDiv;
-				DrawLine(
-					xp + (int)(cos(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f)),
-					yp + (int)(sin(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f)),
-					xp + (int)(cos(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f)),
-					yp + (int)(sin(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f)),
+				DrawLine_2D(
+					xp + y_r(cos(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f)),
+					yp + y_r(sin(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f)),
+					xp + y_r(cos(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f)),
+					yp + y_r(sin(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f)),
 					GetColor(255, 255, 255),
 					3);
 			}
@@ -1440,193 +1431,13 @@ namespace FPS_n2 {
 			}
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 		}
-		//SE
-		void			MAINLOOP::LoadSE(void) noexcept {
-			auto* SE = SoundPool::Instance();
-			SE->Add((int)SoundEnum::Env, 1, "data/Sound/SE/envi.wav", false);
-			SE->Add((int)SoundEnum::Env2, 1, "data/Sound/SE/envi2.wav", false);
-
-			SE->Add((int)SoundEnum::CartFall, 6, "data/Sound/SE/gun/case.wav", false);
-			SE->Add((int)SoundEnum::MagFall, 6, "data/Sound/SE/gun/ModFall.wav", false);
-			SE->Add((int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
-			SE->Add((int)SoundEnum::AmmoLoad, 1, "data/Sound/SE/gun/ammoload.wav", false);
-			SE->Add((int)SoundEnum::Tinnitus, 2, "data/Sound/SE/Tinnitus.wav");
-			for (int i = 0; i < 6; i++) {
-				SE->Add((int)SoundEnum::Cocking1_0 + i, 4, "data/Sound/SE/gun/autoM870/" + std::to_string(i) + ".wav");
-				SE->Add((int)SoundEnum::Cocking2_0 + i, 4, "data/Sound/SE/gun/autoM16/" + std::to_string(i) + ".wav");
-				SE->Add((int)SoundEnum::Cocking3_0 + i, 4, "data/Sound/SE/gun/auto1911/" + std::to_string(i) + ".wav");
-			}
-			SE->Add((int)SoundEnum::StandUp, 1, "data/Sound/SE/move/sliding.wav", false);
-			SE->Add((int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
-			SE->Add((int)SoundEnum::SlideFoot, 3, "data/Sound/SE/move/sliding.wav");
-			SE->Add((int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
-			SE->Add((int)SoundEnum::GetAmmo, 3, "data/Sound/SE/move/getammo.wav");
-			SE->Add((int)SoundEnum::Heart, 3, "data/Sound/SE/move/heart.wav");
-			SE->Add((int)SoundEnum::Hit, 3, "data/Sound/SE/hit.wav");
-			SE->Add((int)SoundEnum::HitMe, 3, "data/Sound/SE/HitMe.wav");
-			SE->Add((int)SoundEnum::HitGuard, 3, "data/Sound/SE/Guard.wav");
-			SE->Add((int)SoundEnum::CountDown, 2, "data/Sound/SE/CountDown.wav", false);
-			for (int i = 0; i < 5; i++) {
-				SE->Add((int)SoundEnum::HitGround0 + i, 2, "data/Sound/SE/gun/HitGround/" + std::to_string(i + 1) + ".wav");
-			}
-
-			for (int i = 0; i < 6; i++) {
-				SE->Add((int)SoundEnum::Man_Hurt1 + i, 2, "data/Sound/SE/voice/hurt_0" + std::to_string(i + 1) + ".wav");
-			}
-			for (int i = 0; i < 8; i++) {
-				SE->Add((int)SoundEnum::Man_Death1 + i, 2, "data/Sound/SE/voice/death_0" + std::to_string(i + 1) + ".wav");
-			}
-			SE->Add((int)SoundEnum::Man_contact, 10, "data/Sound/SE/voice/contact.wav");
-			SE->Add((int)SoundEnum::Man_openfire, 10, "data/Sound/SE/voice/openfire.wav");
-			SE->Add((int)SoundEnum::Man_reload, 10, "data/Sound/SE/voice/reload.wav");
-			SE->Add((int)SoundEnum::Man_takecover, 10, "data/Sound/SE/voice/takecover.wav");
-			SE->Add((int)SoundEnum::Man_teamdown, 10, "data/Sound/SE/voice/teamdown.wav");
-			SE->Add((int)SoundEnum::Man_breathing, 10, "data/Sound/SE/voice/breathing.wav", false);
-			SE->Add((int)SoundEnum::Man_breathend, 10, "data/Sound/SE/voice/breathend.wav", false);
-			
-
-			SE->Add((int)SoundEnum::Tank_near, 5, "data/Sound/SE/near.wav");
-			SE->Add((int)SoundEnum::Stim, 1, "data/Sound/SE/Stim.wav");
-		}
-		void			MAINLOOP::SetSE(void) noexcept {
-			auto* SE = SoundPool::Instance();
-			auto* OptionParts = OPTION::Instance();
-
-			SE->Get((int)SoundEnum::CartFall).SetVol_Local(48);
-			SE->Get((int)SoundEnum::MagFall).SetVol_Local(48);
-			SE->Get((int)SoundEnum::Trigger).SetVol_Local(48);
-			//SE->Get((int)SoundEnum::AmmoLoad).SetVol_Local(48);
-			SE->Get((int)SoundEnum::Shot2).SetVol_Local(216);
-			SE->Get((int)SoundEnum::Shot3).SetVol_Local(216);
-			SE->Get((int)SoundEnum::RunFoot).SetVol_Local(128);
-			SE->Get((int)SoundEnum::Heart).SetVol_Local(92);
-			SE->Get((int)SoundEnum::Hit).SetVol_Local(255);
-			SE->Get((int)SoundEnum::HitMe).SetVol_Local(255);
-			SE->Get((int)SoundEnum::HitGuard).SetVol_Local(255);
-			SE->Get((int)SoundEnum::CountDown).SetVol_Local(128);
-
-			SE->Get((int)SoundEnum::Man_breathing).SetVol_Local(192);
-			SE->Get((int)SoundEnum::Man_breathend).SetVol_Local(192);
-			for (int i = 0; i < 5; i++) {
-				SE->Get((int)SoundEnum::HitGround0 + i).SetVol_Local(92);
-			}
-			SE->SetVol(OptionParts->Get_SE());
-
-			m_CountDownBGM1 = SoundHandle::Load("data/Sound/SE/second.wav");
-			m_CountDownBGM1.vol((int)(255 * OptionParts->Get_SE()));
-			m_CountDownBGM2 = SoundHandle::Load("data/Sound/SE/OneMinute.wav");
-			m_CountDownBGM2.vol((int)(255 * OptionParts->Get_SE()));
-			m_CountDownBGM3 = SoundHandle::Load("data/Sound/SE/TimeUp.wav");
-			m_CountDownBGM3.vol((int)(255 * OptionParts->Get_SE()));
-		}
-		void			MAINLOOP::DisposeSE(void) noexcept {
-			auto* SE = SoundPool::Instance();
-			SE->Delete((int)SoundEnum::CartFall);
-			SE->Delete((int)SoundEnum::MagFall);
-			SE->Delete((int)SoundEnum::Env);
-			SE->Delete((int)SoundEnum::Env2);
-			SE->Delete((int)SoundEnum::StandUp);
-			SE->Delete((int)SoundEnum::Trigger);
-			SE->Delete((int)SoundEnum::AmmoLoad);
-			SE->Delete((int)SoundEnum::Tinnitus);
-			for (int i = 0; i < 6; i++) {
-				SE->Delete((int)SoundEnum::Cocking1_0 + i);
-				SE->Delete((int)SoundEnum::Cocking2_0 + i);
-				SE->Delete((int)SoundEnum::Cocking3_0 + i);
-			}
-			SE->Delete((int)SoundEnum::RunFoot);
-			SE->Delete((int)SoundEnum::SlideFoot);
-			SE->Delete((int)SoundEnum::StandupFoot);
-			SE->Delete((int)SoundEnum::GetAmmo);
-			SE->Delete((int)SoundEnum::Heart);
-			SE->Delete((int)SoundEnum::Hit);
-			SE->Delete((int)SoundEnum::HitMe);
-			SE->Delete((int)SoundEnum::HitGuard);
-			SE->Delete((int)SoundEnum::CountDown);
-			for (int i = 0; i < 5; i++) {
-				SE->Delete((int)SoundEnum::HitGround0 + i);
-			}
-			for (int i = 0; i < 6; i++) {
-				SE->Delete((int)SoundEnum::Man_Hurt1 + i);
-			}
-			for (int i = 0; i < 8; i++) {
-				SE->Delete((int)SoundEnum::Man_Death1 + i);
-			}
-			SE->Delete((int)SoundEnum::Man_contact);
-			SE->Delete((int)SoundEnum::Man_openfire);
-			SE->Delete((int)SoundEnum::Man_reload);
-			SE->Delete((int)SoundEnum::Man_takecover);
-			SE->Delete((int)SoundEnum::Man_teamdown);
-			SE->Delete((int)SoundEnum::Man_breathing);
-			SE->Delete((int)SoundEnum::Man_breathend);
-
-			SE->Delete((int)SoundEnum::Tank_near);
-			SE->Delete((int)SoundEnum::Stim);
-
-			m_CountDownBGM1.Dispose();
-			m_CountDownBGM2.Dispose();
-			m_CountDownBGM3.Dispose();
-		}
 		//
-		void			MAINLOOP::LoadChara(const std::string&FolderName, PlayerID ID, bool IsRagDoll, bool IsRagDollBaseObj) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
-			auto* PlayerMngr = PlayerManager::Instance();
-			auto* Ptr = ObjMngr->MakeObject(ObjType::Human);
-			auto& c = (std::shared_ptr<CharacterClass>&)(*Ptr);
-			std::string Path = "data/Charactor/";
-			Path += FolderName;
-			Path += "/";
-			ObjMngr->LoadObjectModel((*Ptr).get(), Path.c_str());
-			MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
-			if (IsRagDoll) {
-				if (IsRagDollBaseObj) {
-					MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME, -1.f);//身体ラグドール
-					MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
-				}
-				else {
-					auto& Base = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1).GetChara();
-					c->GetRagDoll() = Base->GetRagDoll().Duplicate();
-					MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
-				}
-			}
-			(*Ptr)->Init();
-			PlayerMngr->GetPlayer(ID).SetChara(*Ptr);
-			if (ID == 0) {
-				{
-					auto* ArmerPtr = ObjMngr->MakeObject(ObjType::Armer);
-					auto& a = (std::shared_ptr<ArmerClass>&)(*ArmerPtr);
-
-					ObjMngr->LoadObjectModel((*ArmerPtr).get(), "data/model/PlateCarrler/");
-					(*ArmerPtr)->Init();
-					c->SetArmer(a);
-				}
-				{
-					auto* MorphinePtr = ObjMngr->MakeObject(ObjType::Morphine);
-					auto& a = (std::shared_ptr<MorphineClass>&)(*MorphinePtr);
-
-					ObjMngr->LoadObjectModel((*MorphinePtr).get(), "data/model/Morphine/");
-					(*MorphinePtr)->Init();
-					c->SetMorphine(a);
-				}
-			}
-			else {
-				c->SetArmer(nullptr);
-			}
-		}
 		void			MAINLOOP::LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
-
-			auto* Ptr = ObjMngr->MakeObject(ObjType::Gun);
-			std::string Path = "data/gun/";
-			Path += FolderName;
-			Path += "/";
-			ObjMngr->LoadObjectModel((*Ptr).get(), Path.c_str());
-			MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
+			auto* BattleResourceMngr = CommonBattleResource::Instance();
+			BattleResourceMngr->LoadGun(FolderName, ID, Sel);
 			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID).GetChara();
-			c->SetGunPtr(Sel, ((std::shared_ptr<GunClass>&)(*Ptr)));
-			(*Ptr)->Init();
-			GunsModify::CreateSelData(((std::shared_ptr<GunClass>&)(*Ptr)), IsPreset);
+			GunsModify::CreateSelData(c->GetGunPtr(Sel), IsPreset);
 			c->GetGunPtr(Sel)->Init_Gun();
 		}
 	};

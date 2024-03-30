@@ -32,14 +32,18 @@ namespace FPS_n2 {
 			ButtonSel.at(7).Load_Icon("data/UI/Reset.png", true);
 			ButtonSel.at(7).Set(y_r(1920 - 96 * 2 - 64), y_r(64 + 64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			//
-			SetAmbientLight(VECTOR_ref::vget(-0.4f, -0.5f, 0.1f), GetColorF(1.f, 1.f, 1.f, 0.0f));
-			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-6.f, Scale_Rate*-6.f, Scale_Rate*-6.f), VECTOR_ref::vget(Scale_Rate*6.f, Scale_Rate*0.5f, Scale_Rate*6.f));
-			SetShadowDir(GetLightVec(), 0);
+			auto* DrawParts = DXDraw::Instance();
+
+			VECTOR_ref LightVec = VECTOR_ref::vget(-0.4f, -0.5f, 0.1f);
+			DrawParts->SetAmbientLight(LightVec, GetColorF(1.f, 1.f, 1.f, 0.0f));
+			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-6.f, -6.f, -6.f)*Scale_Rate, VECTOR_ref::vget(6.f, 0.5f, 6.f)*Scale_Rate, 0);
+			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-6.f, -6.f, -6.f)*Scale_Rate, VECTOR_ref::vget(6.f, 0.5f, 6.f)*Scale_Rate, 1);
+			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-6.f, -6.f, -6.f)*Scale_Rate, VECTOR_ref::vget(6.f, 0.5f, 6.f)*Scale_Rate, 2);
 			//
 			//
 			DeleteLightHandleAll();
 			SetLightEnable(TRUE);
-			ChangeLightTypeDir(GetLightVec().get());
+			ChangeLightTypeDir(LightVec.get());
 			SetLightDifColor(GetColorF(1.f, 1.f, 1.f, 1.f));
 			SetLightSpcColor(GetColorF(0.01f, 0.01f, 0.01f, 0.f));
 			SetLightAmbColor(GetColorF(0.5f, 0.5f, 0.5f, 1.f));

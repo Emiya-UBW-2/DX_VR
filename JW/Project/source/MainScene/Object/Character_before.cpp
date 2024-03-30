@@ -67,9 +67,14 @@ namespace FPS_n2 {
 					this->m_rad_Buf.y() + (this->m_Input.GetAddyRad()*(this->m_Input.GetPADSPress(PADS::RUN) ? 0.5f : 1.f))
 					+ this->m_radAdd.y()
 				);
-				this->m_rad.SetEasingX(m_rad_Buf.x(), 0.5f);
-				this->m_rad.SetEasingY(m_rad_Buf.y(), 0.8f);
-				this->m_rad.SetEasingZ(m_rad_Buf.z(), 0.5f);
+
+				float X = this->m_rad.x();
+				float Y = this->m_rad.y();
+				float Z = this->m_rad.z();
+				Easing(&X, m_rad_Buf.x(), 0.5f, EasingType::OutExpo);
+				Easing(&Y, m_rad_Buf.y(), 0.8f, EasingType::OutExpo);
+				Easing(&Z, m_rad_Buf.z(), 0.5f, EasingType::OutExpo);
+				this->m_rad.Set(X,Y,Z);
 			}
 			//ˆÚ“®
 			SetVec(

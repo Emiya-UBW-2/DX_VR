@@ -59,7 +59,6 @@ namespace FPS_n2 {
 					SE->Get((int)SoundEnum::Man_openfire).StopAll(0);
 					SE->Get((int)SoundEnum::Man_reload).StopAll(0);
 					SE->Get((int)SoundEnum::Man_takecover).StopAll(0);
-					SE->Get((int)SoundEnum::Man_teamdown).StopAll(0);
 					SE->Get((int)SoundEnum::Man_breathing).StopAll(0);
 					SE->Get((int)SoundEnum::Man_breathend).StopAll(0);
 
@@ -290,6 +289,26 @@ namespace FPS_n2 {
 			SetFrameLocalMat(CharaFrame::LeftWrist, RetMat);
 		}
 
+		void			CharacterClass::LoadExtends() noexcept {
+			auto* ObjMngr = ObjectManager::Instance();
+			//アーマー
+			{
+				auto* ArmerPtr = ObjMngr->MakeObject(ObjType::Armer);
+				auto& a = (std::shared_ptr<ArmerClass>&)(*ArmerPtr);
+
+				ObjMngr->LoadObjectModel((*ArmerPtr).get(), "data/model/PlateCarrler/");
+				(*ArmerPtr)->Init();
+				this->SetArmer(a);
+			}
+			{
+				auto* MorphinePtr = ObjMngr->MakeObject(ObjType::Morphine);
+				auto& a = (std::shared_ptr<MorphineClass>&)(*MorphinePtr);
+
+				ObjMngr->LoadObjectModel((*MorphinePtr).get(), "data/model/Morphine/");
+				(*MorphinePtr)->Init();
+				this->SetMorphine(a);
+			}
+		}
 		//操作
 		void			CharacterClass::ExecuteInput(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -684,7 +703,9 @@ namespace FPS_n2 {
 			auto YradChange = this->m_yrad_Bottom;
 			Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - KeyControl::GetFrontP(), 0.85f, EasingType::OutExpo);
 			YradChange = this->m_yrad_Bottom - YradChange;
-			KeyControl::SetRadBuf().SetEasingZ((abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f);
+			float Z = KeyControl::SetRadBuf().z();
+			Easing(&Z, (abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f, EasingType::OutExpo);
+			KeyControl::SetRadBuf().z(Z);
 			this->m_yrad_UpperChange = KeyControl::GetRad().y() - this->m_yrad_Upper;
 			this->m_yrad_BottomChange = KeyControl::GetRad().y() - this->m_yrad_Bottom;
 		}
@@ -947,7 +968,10 @@ namespace FPS_n2 {
 				auto& info_move = OverrideControl::GetOverRideInfo();
 				this->m_move.posbuf = info_move.pos;
 				this->m_move.vec = info_move.vec;
-				KeyControl::SetRadBuf().SetEasingX(info_move.rad.x(), 0.9f);
+
+				float X = KeyControl::SetRadBuf().x();
+				Easing(&X, info_move.rad.x(), 0.9f, EasingType::OutExpo);
+				KeyControl::SetRadBuf().x(X);
 				KeyControl::SetRadBuf().y(info_move.rad.y());
 				KeyControl::SetRad().y(info_move.rad.y());
 			}
@@ -980,7 +1004,7 @@ namespace FPS_n2 {
 			}
 			//スリング場所探索//0.02ms↓
 			if (GetGunPtr(1)) {
-				m_SlingZrad.Execute();
+				m_SlingZrad.Update();
 				m_SlingZrad.AddRad(1.f / FPS * (1.f - m_SlingPer.at(GetOtherGunSelect())));
 				m_SlingZrad.AddRad(1.f / FPS * (KeyControl::GetRad().y() - this->m_yrad_Bottom));
 			}

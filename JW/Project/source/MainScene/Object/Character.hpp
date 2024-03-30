@@ -155,6 +155,7 @@ namespace FPS_n2 {
 				}
 				GetObj().work_anime();
 			}
+			void			LoadExtends() noexcept;
 		private: //çXêVä÷òA
 			void			ExecuteInput(void) noexcept;
 			void			ExecuteUpperMatrix(void) noexcept;

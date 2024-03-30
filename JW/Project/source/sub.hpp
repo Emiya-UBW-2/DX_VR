@@ -1,5 +1,6 @@
 #pragma once
 #include	"Header.hpp"
+
 //
 namespace FPS_n2 {
 	//“ü—Í
@@ -321,7 +322,7 @@ namespace FPS_n2 {
 		}
 	};
 
-
+	//
 	class ItemLogData {
 		unsigned int m_Color{0};
 		char m_Message[64]{};
@@ -355,7 +356,6 @@ namespace FPS_n2 {
 		const char* GetMsg() { return m_Message; }
 		const unsigned int GetMsgColor() { return m_Color; }
 	};
-
 	class GetItemLog : public SingletonBase<GetItemLog> {
 	private:
 		friend class SingletonBase<GetItemLog>;
@@ -400,5 +400,20 @@ namespace FPS_n2 {
 			}
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 		}
+	};
+	//
+	namespace Sceneclass {
+		class CommonBattleResource : public SingletonBase<CommonBattleResource> {
+		private:
+			friend class SingletonBase<CommonBattleResource>;
+		private:
+		public:
+			void			Load(void) noexcept;
+			void			Set(void) noexcept;
+			void			Dispose(void) noexcept;
+		public:
+			void			LoadChara(const std::string&FolderName, PlayerID ID, bool IsRagDoll, bool IsRagDollBaseObj = false) noexcept;
+			void			LoadGun(const std::string&FolderName, PlayerID ID, int Sel) noexcept;
+		};
 	};
 };

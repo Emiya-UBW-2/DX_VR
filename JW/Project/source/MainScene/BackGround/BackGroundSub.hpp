@@ -258,7 +258,7 @@ namespace FPS_n2 {
 				for (int i = 0; i < this->m_LightPoiont.size(); i++) {
 					auto& o = this->m_LightPoiont[i];
 
-					o.m_SlingZrad.Execute();
+					o.m_SlingZrad.Update();
 
 					o.m_SlingZrad.AddRad(1.f / FPS * o.m_SlingPower);
 					o.m_SlingPower = 0.f;
