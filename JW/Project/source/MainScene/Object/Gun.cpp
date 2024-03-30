@@ -748,7 +748,9 @@ namespace FPS_n2 {
 					(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(0.5f*Scale_Rate, 0.5f*Scale_Rate, 0.5f*Scale_Rate)).get()) == FALSE
 					) {
 					if (isDrawSemiTrans) {
-						DrawMuzzleSmoke();
+						if (m_MyID == 0) {
+							DrawMuzzleSmoke();
+						}
 					}
 					for (int i = 0; i < this->GetObj().mesh_num(); i++) {
 						if ((MV1GetMeshSemiTransState(this->GetObj().get(), i) == TRUE) == isDrawSemiTrans) {

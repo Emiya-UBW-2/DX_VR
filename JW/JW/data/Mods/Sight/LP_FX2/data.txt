@@ -1,3 +1,0 @@
-Name=Lpd FX-II Scope
-zoom=4.0
-end

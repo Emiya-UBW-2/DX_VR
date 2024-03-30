@@ -157,6 +157,14 @@ namespace FPS_n2 {
 		}
 		bool			TutorialScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
+			auto* DrawParts = DXDraw::Instance();
+			auto* SE = SoundPool::Instance();
+			auto* OptionParts = OPTION::Instance();
+#ifdef DEBUG
+			//auto* DebugParts = DebugClass::Instance();					//デバッグ
+#endif // DEBUG
+
 			Pad->SetMouseMoveEnable(true);
 			Pad->ChangeGuide(
 				[&]() {
@@ -203,23 +211,19 @@ namespace FPS_n2 {
 
 			if (DXDraw::Instance()->IsPause()) {
 				m_MainLoopPauseControl.Execute();
+				m_PrevSSAO = OptionParts->Get_SSAO();
+				OptionParts->Set_SSAO(m_PrevSSAO);
 				return true;
 			}
 			else {
 				m_MainLoopPauseControl.Reset();
+				OptionParts->Set_SSAO(false);
 			}
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
 #endif // DEBUG
 #ifdef DEBUG
 			DebugParts->SetPoint("update start");
-#endif // DEBUG
-			auto* ObjMngr = ObjectManager::Instance();
-			auto* DrawParts = DXDraw::Instance();
-			auto* SE = SoundPool::Instance();
-			auto* OptionParts = OPTION::Instance();
-#ifdef DEBUG
-			//auto* DebugParts = DebugClass::Instance();					//デバッグ
 #endif // DEBUG
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
@@ -657,14 +661,6 @@ namespace FPS_n2 {
 							float cos_t, sin_t;
 							t->GetHitPoint(r, &cos_t, &sin_t);
 							DrawCircle(xp + xs + (int)((float)xs * cos_t), yp + ys + (int)((float)ys * sin_t), 2, GetColor(0, 255, 0));
-						}
-						//点数
-						int ypAdd = 0;
-						auto* Fonts = FontPool::Instance();
-						for (auto& r : t->GetHitPosRec()) {
-							Fonts->Get(FontPool::FontType::Gothic_AA, y_r(24)).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																						  xp, yp2 + ypAdd, GetColor(255, 255, 255), GetColor(255, 255, 255), "[%4.1f]", t->GetHitPoint(r));
-							ypAdd += y_r(24);
 						}
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 					}

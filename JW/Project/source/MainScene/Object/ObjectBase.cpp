@@ -167,6 +167,12 @@ namespace FPS_n2 {
 						MV1SetLoadModelUsePhysicsMode(PHYSICS_TYPE);
 						if (!UseToonWhenCreateFile) {
 							MV1SetMaterialTypeAll(obj->get(), DX_MATERIAL_TYPE_NORMAL);
+							int num = MV1GetMaterialNum(obj->get());
+							for (int i = 0;i < num;i++) {
+								MV1SetMaterialDifColor(obj->get(), i, GetColorF(1.f, 1.f, 1.f, 1.f));
+								MV1SetMaterialSpcColor(obj->get(), i, GetColorF(0.f, 0.f, 0.f, 0.f));
+								MV1SetMaterialAmbColor(obj->get(), i, GetColorF(1.f, 1.f, 1.f, 1.f));
+							}
 						}
 						MV1SaveModelToMV1File(obj->get(), (Path + NameAdd + ".mv1").c_str());
 						MV1SetLoadModelUsePhysicsMode(DX_LOADMODEL_PHYSICS_LOADCALC);
@@ -221,11 +227,14 @@ namespace FPS_n2 {
 				else {
 					auto NowMat = this->GetObj().GetMatrix();
 					int Max = 2;
+					if (FPS > 120.f) {
+						Max = 1;
+					}
 					for (int i = 0; i < Max; i++) {
 						this->GetObj().SetMatrix(
 							Lerp_Matrix(this->m_PrevMat.GetRot(), NowMat.GetRot(), (float)(i + 1) / (float)Max)
 							* MATRIX_ref::Mtrans(Lerp(this->m_PrevMat.pos(), NowMat.pos(), (float)(i + 1) / (float)Max)));
-						this->GetObj().PhysicsCalculation(1000.0f / FPS * 60.f);
+						this->GetObj().PhysicsCalculation(1000.0f *60.f / FPS / Max);
 					}
 				}
 			}

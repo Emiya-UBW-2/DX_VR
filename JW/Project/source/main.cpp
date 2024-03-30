@@ -17,9 +17,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	auto* DrawParts = DXDraw::Instance();
 
 	DrawParts->Init();
-	SetMainWindowText("JW");						//タイトル
+	SetMainWindowText("Phantom of the Bunker");						//タイトル
 	//MV1SetLoadModelUsePackDraw(TRUE);
-	//SetUseHalfLambertLighting(TRUE);	//ハーフランバート化
+	SetUseHalfLambertLighting(TRUE);	//ハーフランバート化
 
 	PostPassEffect::Create();						//シェーダー
 
@@ -84,6 +84,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		f = 60.f;
 	}
 #endif
+	isMainLoop = true;
+	MAINLOOPscene->Load();
 
 	//繰り返し
 	while (true) {

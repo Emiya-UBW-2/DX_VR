@@ -208,7 +208,7 @@ namespace FPS_n2 {
 			//
 			Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(96),
 																FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																y_r(64), y_r(64), White, Black, "JW-ProtoType");
+																y_r(64), y_r(64), White, Black, "Phantom of the Bunker");
 			//
 			for (auto& y : ButtonSel) {
 				y.Draw();

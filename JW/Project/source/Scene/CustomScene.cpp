@@ -32,9 +32,10 @@ namespace FPS_n2 {
 			ButtonSel.at(7).Load_Icon("data/UI/Reset.png", true);
 			ButtonSel.at(7).Set(y_r(1920 - 96 * 2 - 64), y_r(64 + 64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			//
-			SetAmbientLight(VECTOR_ref::vget(0.4f, -0.5f, 0.1f), GetColorF(1.f, 1.f, 1.f, 0.0f));
+			SetAmbientLight(VECTOR_ref::vget(-0.4f, -0.5f, 0.1f), GetColorF(1.f, 1.f, 1.f, 0.0f));
 			SetNearShadow(VECTOR_ref::vget(Scale_Rate*-6.f, Scale_Rate*-6.f, Scale_Rate*-6.f), VECTOR_ref::vget(Scale_Rate*6.f, Scale_Rate*0.5f, Scale_Rate*6.f));
 			SetShadowDir(GetLightVec(), 0);
+			//
 			//
 			DeleteLightHandleAll();
 			SetLightEnable(TRUE);
@@ -106,6 +107,10 @@ namespace FPS_n2 {
 				else {
 					y.SetReady();
 				}
+			}
+
+			for (auto& up : m_UltPer) {
+				up = 0.f;
 			}
 		}
 		bool			CustomScene::Update_Sub(void) noexcept {

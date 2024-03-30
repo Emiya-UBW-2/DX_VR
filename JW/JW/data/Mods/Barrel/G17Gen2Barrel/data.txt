@@ -1,5 +1,0 @@
-Name=Glock17 Gen2 Barrel
-
-ShootRate_Diff=-2
-
-end

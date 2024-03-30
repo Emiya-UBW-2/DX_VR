@@ -955,43 +955,31 @@ namespace FPS_n2 {
 				}
 				//
 				if (!m_MainLoopPauseControl.GetIsRetireSelected()) {
-					int bases = std::clamp(SaveDataParts->GetParam("Glock Unlock"), 1, 5);
-					SaveDataParts->SetParam("Glock Unlock", std::clamp(bases + 1, 1, 5));
+					int bases = std::clamp(SaveDataParts->GetParam("Glock Unlock"), 1, 4);
+					SaveDataParts->SetParam("Glock Unlock", std::clamp(bases + 1, 1, 4));
 					int after = SaveDataParts->GetParam("Glock Unlock");
 					if (bases != after) {
 						switch (after - 1) {
 							case 1:
 								{
-									SaveDataParts->SetParam("Glock17 Gen2 Barrel", 1);
-									SaveDataParts->SetParam("Glock17 Gen2 Frame", 1);
-									SaveDataParts->SetParam("Glock17 Gen2 Slide", 1);
-									ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "Glock17 Gen2キット");
+									SaveDataParts->SetParam("G17 ThreadedBarrel", 1);
+									SaveDataParts->SetParam("9x19 Suppressor", 1);
+									ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "サプレッサーキット");
 								}
 								break;
 							case 2:
 								{
-									SaveDataParts->SetParam("G17 ThreadedBarrel", 1);
-									SaveDataParts->SetParam("9x19 Suppressor", 1);
 									SaveDataParts->SetParam("G-High IronSight", 1);
-									ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "サプレッサーキット");
+									SaveDataParts->SetParam("Glock17 Gen2 Frame", 1);
+									SaveDataParts->SetParam("SBal PL LaserSight", 1);
+									ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "スポーターキット");
 								}
 								break;
 							case 3:
 								{
-									SaveDataParts->SetParam("Glock17 Gen5 Barrel", 1);
-									SaveDataParts->SetParam("Glock17 Gen5 Frame", 1);
-									SaveDataParts->SetParam("Glock17 Gen5 Slide", 1);
-									SaveDataParts->SetParam("GMag 17Round(Gen5)", 1);
-									SaveDataParts->SetParam("CTS1500 DotSight", 1);
-									SaveDataParts->SetParam("SBal PL LaserSight", 1);
-									ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "Glock17 Gen5キット");
-								}
-								break;
-							case 4:
-								{
 									SaveDataParts->SetParam("FMG-9 Carbine Kit", 1);
 									SaveDataParts->SetParam("Glock18 Slide (for 17)", 1);
-									SaveDataParts->SetParam("Lpd FX-II Scope", 1);
+									SaveDataParts->SetParam("ACOG TA31 Scope", 1);
 									ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "FMG-9キット");
 								}
 								break;

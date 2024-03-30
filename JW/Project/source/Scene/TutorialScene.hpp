@@ -43,7 +43,7 @@ namespace FPS_n2 {
 			const char* GetMsg() { return m_Message; }
 		};
 		class TutorialLog {
-			std::array<TutorialLogData, 29> data;
+			std::array<TutorialLogData, 64> data;
 			int LastSel{0};
 			GraphHandle						m_tutorialGraph;
 			int xs{0}, ys{0};
