@@ -507,7 +507,7 @@ namespace FPS_n2 {
 						}
 						else {
 							if (!m_NetWorkBrowser.GetClient()) {
-								m_AICtrl[index]->Execute(&tmp.Input, !m_IsHardMode && (m_Timer > 60.f));
+								m_AICtrl[index]->Execute(&tmp.Input, (!m_IsHardMode && (m_Timer > 60.f)) || m_IsHardMode);
 							}
 							c->SetInput(tmp.Input, isready && c->IsAlive());
 							bool override_true = true;
@@ -528,7 +528,7 @@ namespace FPS_n2 {
 						}
 						else {
 							InputControl OtherInput;
-							m_AICtrl[index]->Execute(&OtherInput, !m_IsHardMode && (m_Timer > 60.f));
+							m_AICtrl[index]->Execute(&OtherInput, (!m_IsHardMode && (m_Timer > 60.f)) || m_IsHardMode);
 							c->SetInput(OtherInput, isready && c->IsAlive());
 						}
 						//ダメージイベント処理

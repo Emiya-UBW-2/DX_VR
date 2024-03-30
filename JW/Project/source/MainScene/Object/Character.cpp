@@ -494,7 +494,9 @@ namespace FPS_n2 {
 					}
 					//ƒeƒXƒgŒn
 				}
-				if ((GetShotPhase() == GunAnimeID::ReloadOne) || (GetShotPhase() == GunAnimeID::AmmoLoading)) {
+				if (
+					((GetGunPtrNow()->GetReloadType() == RELOADTYPE::AMMO) && (GetShotPhase() == GunAnimeID::ReloadOne)) ||
+					(GetShotPhase() == GunAnimeID::AmmoLoading)) {
 					if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
 						GetGunPtrNow()->SetCancel();
 					}

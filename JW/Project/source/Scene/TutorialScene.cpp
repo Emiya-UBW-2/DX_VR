@@ -57,16 +57,6 @@ namespace FPS_n2 {
 			//BGをオブジェに登録
 			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
 			c->SetMapCol(this->m_BackGround, false);
-			//
-			{
-				/*
-				for (auto& M : c->GetMagDatas()) {
-					c->SetMag((int)(&M - &c->GetMagDatas().front()), 0);
-				}
-				c->GetGunPtrNow()->UnloadChamber();
-				c->GetGunPtrNow()->SetAmmo(0);
-				//*/
-			}
 			//人の座標設定
 			{
 				VECTOR_ref pos_t;
@@ -91,8 +81,6 @@ namespace FPS_n2 {
 
 			m_PrevSSAO = OptionParts->Get_SSAO();
 			OptionParts->Set_SSAO(false);
-
-			//c->AddAmmoStock(99);
 
 			this->m_TutorialLog.Set();
 			this->m_Tutorial.clear();
