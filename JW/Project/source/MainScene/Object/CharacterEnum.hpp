@@ -17,9 +17,9 @@ namespace FPS_n2 {
 			ReloadEnd,
 			Watch,
 			Melee,
-			AmmoLoadStart,
 			AmmoLoading,
 			AmmoLoadEnd,
+			OffsetAnim,
 			Max,
 		};
 		enum class CharaAnimeID : int {

@@ -4,8 +4,22 @@
 
 #include"../Header.hpp"
 
+#include "../MainScene/Player/Player.hpp"
+#include "../MainScene/Object/Character.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
+		void			TitleScene::Load_Sub(void) noexcept {
+			//ロード
+			if (m_IsFirstLoad) {
+				m_IsFirstLoad = false;
+				auto* PlayerMngr = PlayerManager::Instance();
+				//BG
+				GunAnimManager::Instance()->Load("data/CharaAnime/");
+				//
+				PlayerMngr->Init(1);
+			}
+		}
 		void			TitleScene::Set_Sub(void) noexcept {
 			select = 0;
 			m_MouseSelMode = false;
@@ -43,7 +57,7 @@ namespace FPS_n2 {
 			}
 			FileRead_close(mdata);
 
-			m_PopUpDrawClass.Set("Exit", y_r(720), y_r(840), [&](int WinSizeX, int WinSizeY, bool) {
+			m_PopUpDrawClass.Set("Credit", y_r(720), y_r(840), [&](int WinSizeX, int WinSizeY, bool) {
 				auto* Fonts = FontPool::Instance();
 
 				auto White = GetColor(255, 255, 255);
@@ -61,27 +75,61 @@ namespace FPS_n2 {
 					yp1 += Height;
 				}
 								 });
+			//
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto* BattleResourceMngr = CommonBattleResource::Instance();
+
+			BattleResourceMngr->LoadChara("Suit", (PlayerID)(0));
+			//
+			GunsModify::LoadSlots("Save/gundata.svf");
+			{
+				BattleResourceMngr->LoadGun("G17Gen3", (PlayerID)(0), 0);
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer((PlayerID)(0)).GetChara();
+				auto& g = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer((PlayerID)(0)).GetGun(0);
+				c->SetGunPtr(0, g);
+				GunsModify::CreateSelData(c->GetGunPtr(0), true);
+				c->GetGunPtr(0)->Init_Gun();
+			}
+			{
+				BattleResourceMngr->LoadGun(ULT_GUNName[(int)GunsModify::GetULTSelect()], (PlayerID)(0), 1);
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer((PlayerID)(0)).GetChara();
+				auto& g = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer((PlayerID)(0)).GetGun(1);
+				c->SetGunPtr(1, g);
+				GunsModify::CreateSelData(c->GetGunPtr(1), false);
+				c->GetGunPtr(1)->Init_Gun();
+			}
+			{
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer((PlayerID)(0)).GetChara();
+				c->ValueSet((PlayerID)(0), false, CharaTypeID::Team);
+
+				VECTOR_ref pos_t = VECTOR_ref::vget(-0.6f, 0.0f, 0.2f)*Scale_Rate;
+				float rad_t = 0.f;
+				c->MovePoint(deg2rad(0.f), rad_t, pos_t, 0);
+				c->Heal(100, true);
+			}
 
 			auto* BGM = BGMPool::Instance();
 			if (!BGM->Get(0).Check()) {
 				BGM->Get(0).Play(DX_PLAYTYPE_LOOP, TRUE);
 			}
 			BGM->Get(0).SetVol_Local(255);
-		}
-		void			TitleScene::Dispose_Sub(void) noexcept {
-			m_SelectBackImage.Dispose();
-			for (auto& y : ButtonSel) {
-				y.Dispose();
-			}
-		}
 
-		//
+			m_Yrad = deg2rad(45);
+			m_Xrad = 0.f;
+			m_Yrad_R = m_Yrad;
+			m_Xrad_R = m_Xrad;
+		}
 		bool			TitleScene::Update_Sub(void) noexcept {
 			if (DXDraw::Instance()->IsPause()) {
 				return true;
 			}
-			auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
+			auto* DrawParts = DXDraw::Instance();
+			auto* SE = SoundPool::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
+
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
 
 			Pad->SetMouseMoveEnable(false);
 			Pad->ChangeGuide(
@@ -173,6 +221,23 @@ namespace FPS_n2 {
 								y.SetReady();
 							}
 						}
+
+						//
+						if (select == 0) {
+							Chara->SetAimOrADS();
+							Chara->SelectGun(0);
+						}
+						else if (select == 1 || select == 2) {
+							Chara->SetADS();
+							Chara->GetGunPtrNow()->ChangeSightSel();
+						}
+						else if ((m_HardModeActive && (select == 3))) {
+							Chara->SetAimOrADS();
+							Chara->SelectGun(1);
+						}
+						else {
+							Chara->SetReady();
+						}
 					}
 				}
 			}
@@ -187,6 +252,28 @@ namespace FPS_n2 {
 				);
 			}
 			//
+			if (select == 1 || select == 2) {
+				Chara->SetADS();
+			}
+			//
+			ObjMngr->ExecuteObject();
+			ObjMngr->LateExecuteObject();
+
+			Easing(&m_Xrad, deg2rad(0.f + GetRandf(10.f)), 0.95f, EasingType::OutExpo);
+			Easing(&m_Yrad, deg2rad(45.f + GetRandf(10.f)), 0.95f, EasingType::OutExpo);
+			Easing(&m_Xrad_R, m_Xrad, 0.95f, EasingType::OutExpo);
+			Easing(&m_Yrad_R, m_Yrad, 0.95f, EasingType::OutExpo);
+
+			VECTOR_ref Pos = VECTOR_ref::vget(0.f, 1.25f, 0.0f)*Scale_Rate;
+			DrawParts->SetMainCamera().SetCamPos(
+				Pos + MATRIX_ref::Vtrans(VECTOR_ref::front()*(3.f*Scale_Rate), MATRIX_ref::RotX(m_Xrad_R)*MATRIX_ref::RotY(m_Yrad_R + DX_PI_F)),
+				Pos,
+				VECTOR_ref::vget(0.f, 1.f, 0.f));
+			float far_t = 20.f*Scale_Rate;
+			DrawParts->SetMainCamera().SetCamInfo(deg2rad(45), 0.5f*Scale_Rate, far_t);
+			PostPassEffect::Instance()->Set_DoFNearFar(1.f * Scale_Rate, far_t / 2, 0.5f*Scale_Rate, far_t);
+
+			//
 			for (auto& y : ButtonSel) {
 				y.Update();
 			}
@@ -194,15 +281,46 @@ namespace FPS_n2 {
 			if (GameStart != 0.f) { GameStart += 1.f / FPS / 0.5f; }
 			return  (GameStart < 1.f);
 		}
+		void			TitleScene::Dispose_Sub(void) noexcept {
+			auto* ObjMngr = ObjectManager::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
+			{
+				auto* Ptr = &PlayerMngr->GetPlayer((PlayerID)(0)).GetChara();
+				ObjMngr->DelObj(Ptr);
+			}
+			{
+				auto* Ptr = &PlayerMngr->GetPlayer((PlayerID)(0)).GetGun(0);
+				ObjMngr->DelObj(Ptr);
+			}
+			PlayerMngr->GetPlayer(0).Dispose();
+			GunsModify::DisposeSlots();
+			//
+			m_SelectBackImage.Dispose();
+			for (auto& y : ButtonSel) {
+				y.Dispose();
+			}
+		}
+		void			TitleScene::BG_Draw_Sub(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
+			//
+			DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(96, 96, 96), TRUE);
+		}
 
+		void			TitleScene::ShadowDraw_Sub(void) noexcept {
+			auto* ObjMngr = ObjectManager::Instance();
+			ObjMngr->DrawObject();
+		}
+		void			TitleScene::MainDraw_Sub(void) noexcept {
+			auto* ObjMngr = ObjectManager::Instance();
+			ObjMngr->DrawObject();
+		}
+		//
 		void			TitleScene::DrawUI_Base_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* Fonts = FontPool::Instance();
 
 			auto White = GetColor(255, 255, 255);
 			auto Black = GetColor(0, 0, 0);
-			//
-			DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(8, 8, 8), TRUE);
 			//
 			Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(96),
 																FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
@@ -230,5 +348,17 @@ namespace FPS_n2 {
 			//クレジット
 			m_PopUpDrawClass.Draw();
 		}
+		//使い回しオブジェ系
+		void			TitleScene::Dispose_Load(void) noexcept {
+			if (!m_IsFirstLoad) {
+				m_IsFirstLoad = true;
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto* ObjMngr = ObjectManager::Instance();
+
+				PlayerMngr->Dispose();
+				ObjMngr->DisposeObject();
+			}
+		}
+		//
 	};
 };

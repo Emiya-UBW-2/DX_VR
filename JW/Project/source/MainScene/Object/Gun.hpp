@@ -193,7 +193,7 @@ namespace FPS_n2 {
 			const auto	GetChecking(void) const noexcept { return (GunAnimeID::CheckStart <= this->m_ShotPhase) && (this->m_ShotPhase <= GunAnimeID::CheckEnd); }
 			const auto	GetWatching(void) const noexcept { return (this->m_ShotPhase == GunAnimeID::Watch); }
 			const auto	IsMelee(void) const noexcept { return (this->m_ShotPhase == GunAnimeID::Melee); }
-			const auto	IsAmmoLoading(void) const noexcept { return (GunAnimeID::AmmoLoadStart <= this->m_ShotPhase) && (this->m_ShotPhase <= GunAnimeID::AmmoLoadEnd); }
+			const auto	IsAmmoLoading(void) const noexcept { return (GunAnimeID::AmmoLoading <= this->m_ShotPhase) && (this->m_ShotPhase <= GunAnimeID::AmmoLoadEnd); }
 			const auto	GetShootReady(void) const noexcept { return this->m_ShotPhase <= GunAnimeID::Shot; }
 			const auto	GetCanShot(void) const noexcept { return GetInChamber() && GetShootReady(); }
 
@@ -266,6 +266,7 @@ namespace FPS_n2 {
 			const auto	GetCartVec(void) noexcept { return (GetFrameWorldMat(GunFrame::CartVec).pos() - GetCartMat().pos()).Norm(); }
 
 		public:
+			void		SetActiveAll(bool value) noexcept;
 			void		SetAmmo(int value) noexcept { this->m_Capacity = std::clamp(value, 0, this->GetAmmoAll()); }
 			void		CockByMag() noexcept { this->m_ChamberAmmoData = (*m_MagazinePtr)->GetModData()->GetAmmoSpecMagTop(); }//マガジンの一番上の弾データをチャンバーイン
 			void		UnloadChamber() noexcept { this->m_ChamberAmmoData.reset(); }
@@ -280,6 +281,7 @@ namespace FPS_n2 {
 				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::Sight), GunSlot::Sight);
 				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::Magpos), GunSlot::Magazine);
 			}
+			void		StartAmmoLoad() noexcept;
 			void		SetShotPhase(GunAnimeID pShotPhase) noexcept { this->m_ShotPhase = pShotPhase; }
 			void		SetBullet(void) noexcept;//発砲
 			void		SetMagFall() noexcept {

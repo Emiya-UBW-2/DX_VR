@@ -1,5 +1,7 @@
 #pragma once
 #include	"../Header.hpp"
+
+#include "../CommonScene/Object/GunsModify.hpp"
 #include "../CommonScene/UI/CommonUIControl.hpp"
 
 namespace FPS_n2 {
@@ -22,8 +24,10 @@ namespace FPS_n2 {
 			"クレジットを開きます",
 		};
 
-		class TitleScene : public TEMPSCENE {
+		class TitleScene : public TEMPSCENE, public GunsModify {
 		private:
+			bool						m_IsFirstLoad{true};			//共通リソースをロードしたか
+
 			GraphHandle					m_SelectBackImage;
 			std::array<ButtonClass, 6>	ButtonSel{};
 			int							select{0};
@@ -39,27 +43,35 @@ namespace FPS_n2 {
 			bool						m_CreditActive{false};
 			PopUpDrawClass				m_PopUpDrawClass;
 			bool						m_HardModeActive{false};
+
+			float						m_Yrad{0.f};
+			float						m_Xrad{0.f};
+			float						m_Yrad_R{0.f};
+			float						m_Xrad_R{0.f};
 		public:
 			const auto SelMode() const noexcept { return select; }
 		public:
 			TitleScene(void) noexcept {}
 			~TitleScene(void) noexcept {}
 		public:
+			void			Load_Sub(void) noexcept override;
 			void			Set_Sub(void) noexcept override;
 			//
 			bool			Update_Sub(void) noexcept override;
 			void			Dispose_Sub(void) noexcept override;
 			//
 			void			Depth_Draw_Sub(void) noexcept override {}
-			void			BG_Draw_Sub(void) noexcept override {}
+			void			BG_Draw_Sub(void) noexcept override;
 			void			ShadowDraw_Far_Sub(void) noexcept override {}
 			void			ShadowDraw_NearFar_Sub(void) noexcept override {}
-			void			ShadowDraw_Sub(void) noexcept override {}
-			void			MainDraw_Sub(void) noexcept override {}
+			void			ShadowDraw_Sub(void) noexcept override;
+			void			MainDraw_Sub(void) noexcept override;
 			void			MainDrawbyDepth_Sub(void) noexcept override {}
 			//UI表示
 			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override {}
+		public:
+			void			Dispose_Load(void) noexcept;
 		};
 	};
 };

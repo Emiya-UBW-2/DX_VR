@@ -47,7 +47,7 @@ namespace FPS_n2 {
 			this->m_BackGround = std::make_shared<BackGroundClassTutorial>();
 			this->m_BackGround->Init("data/model/map/","");
 			//ロード
-			BattleResourceMngr->LoadChara("Suit", 0, false);
+			BattleResourceMngr->LoadChara("Suit", 0);
 			GunsModify::LoadSlots("Save/gundata.svf");//プリセット読み込み
 			LoadGun("G17Gen3", 0, true, 0);
 
@@ -56,7 +56,7 @@ namespace FPS_n2 {
 			LoadGun(ULTName.c_str(), 0, false, 1);
 			//BGをオブジェに登録
 			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
-			c->SetMapCol(this->m_BackGround, false);
+			c->SetMapCol(this->m_BackGround);
 			//人の座標設定
 			{
 				VECTOR_ref pos_t;
@@ -66,8 +66,9 @@ namespace FPS_n2 {
 				if (this->m_BackGround->CheckLinetoMap(pos_t + VECTOR_ref::up() * -10.f*Scale_Rate, &EndPos, false)) {
 					pos_t = EndPos;
 				}
-				c->ValueSet(deg2rad(0.f), deg2rad(90.f), pos_t, (PlayerID)0, 0);
-				c->SetCharaType(CharaTypeID::Team);
+				c->ValueSet((PlayerID)0, false, CharaTypeID::Team);
+				c->MovePoint(deg2rad(0.f), deg2rad(90.f), pos_t, 0);
+				c->Heal(100, true);
 			}
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(65), 1.f, 100.f);
@@ -474,7 +475,7 @@ namespace FPS_n2 {
 				//シェイク
 				this->m_UIclass.SetIntParam(0, (int)(DrawParts->GetCamShake().x()*100.f));
 				this->m_UIclass.SetIntParam(1, (int)(DrawParts->GetCamShake().y()*100.f));
-				this->m_UIclass.SetIntParam(2, (int)(rad2deg(Chara->GetGunRadAdd())*5.f));
+				this->m_UIclass.SetIntParam(2, (int)(rad2deg(Chara->GetLeanRad()*5.f)));
 				//AmmoStock
 				this->m_UIclass.SetIntParam(3, Chara->GetAmmoStock());
 				//Time
@@ -613,7 +614,7 @@ namespace FPS_n2 {
 					Chara->GetSightReitcleGraphPtr().DrawRotaGraph(
 						(int)m_MyPlayerReticleControl.GetReticleXPos(),
 						(int)m_MyPlayerReticleControl.GetReticleYPos(),
-						1.f, Chara->GetGunRadAdd(), true);
+						1.f, Chara->GetLeanRad(), true);
 				}
 				//UI
 				if (!DrawParts->IsPause()) {
@@ -682,6 +683,8 @@ namespace FPS_n2 {
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			BattleResourceMngr->LoadGun(FolderName, ID, Sel);
 			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID).GetChara();
+			auto& g = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(ID).GetGun(Sel);
+			c->SetGunPtr(Sel, g);
 			GunsModify::CreateSelData(c->GetGunPtr(Sel), IsPreset);
 			c->GetGunPtr(Sel)->Init_Gun();
 		}

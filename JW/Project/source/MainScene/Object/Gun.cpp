@@ -81,6 +81,27 @@ namespace FPS_n2 {
 			}
 		}
 
+		void		GunClass::SetActiveAll(bool value) noexcept {
+			bool isActive = this->IsActive();
+			if (value) {
+				if (!isActive) {
+					this->SetActiveBySlot(true);
+					this->SetActive(true);
+				}
+			}
+			else {
+				if (isActive) {
+					this->SetActiveBySlot(false);
+					this->SetActive(false);
+				}
+			}
+		}
+		void		GunClass::StartAmmoLoad() noexcept {
+			this->m_ShotPhase = GunAnimeID::AmmoLoading;
+			this->m_AmmoLoadCount = 1;
+			this->m_IsAmmoLoadCount = false;
+			this->m_AmmoLoadSwitch = true;
+		}
 
 		void GunClass::SetBullet(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
@@ -162,7 +183,6 @@ namespace FPS_n2 {
 				//2つ以上サイトがあるときアイアンサイトを省く
 				if (SightSel >= m_SightPtr.size()) {
 					for (int i = 0;i < m_SightPtr.size();i++) {
-						auto&s = m_SightPtr[i];
 						if (m_SightPtr[i]) {
 							if ((*m_SightPtr[i])->GetModData()->GetIronSight()) {
 								for (int k = i;k < m_SightPtr.size()-1;k++) {
@@ -337,17 +357,7 @@ namespace FPS_n2 {
 					}
 				}
 				//
-				if (this->m_ShotPhase == GunAnimeID::AmmoLoadStart) {
-					GunAnimSelect = CharaGunAnimeID::AmmoLoadStart;
-					UpdateGunAnim(GunAnimSelect, 1.5f);
-					if (GetGunAnimEnd(GunAnimSelect)) {
-						this->m_ShotPhase = GunAnimeID::AmmoLoading;
-						this->m_AmmoLoadCount = 1;
-						this->m_IsAmmoLoadCount = false;
-						this->m_AmmoLoadSwitch = true;
-					}
-				}
-				else if (this->m_ShotPhase == GunAnimeID::AmmoLoading) {
+				if (this->m_ShotPhase == GunAnimeID::AmmoLoading) {
 					GunAnimSelect = CharaGunAnimeID::AmmoLoading;
 					UpdateGunAnim(GunAnimSelect, 1.0f);
 
@@ -458,7 +468,6 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 20;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 60;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Melee) = 10;
-				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoadStart) = 15;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoading) = 36;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoadEnd) = 10;
 				//ハンドガン
@@ -476,7 +485,6 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 10;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 120;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Melee) = 10;
-				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoadStart) = 15;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoading) = 36;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoadEnd) = 10;
 				//M870
@@ -494,7 +502,6 @@ namespace FPS_n2 {
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::ReloadEnd) = 10;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Watch) = 60;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::Melee) = 10;
-				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoadStart) = 15;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoading) = 36;
 				m_CharaAnimeSet.back().at((int)CharaGunAnimeID::AmmoLoadEnd) = 10;
 				//
@@ -600,138 +607,140 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			switch (GetShotType()) {
-				case SHOTTYPE::BOLT:
-					//0
-					{
-						if ((5.f < GetAnime(GunAnimeID::Cocking).time && GetAnime(GunAnimeID::Cocking).time < 6.f)) {
-							if (m_boltSoundSequence != 1) {
-								m_boltSoundSequence = 1;
-								SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+			if (false) {//todo:タイトル用仮
+				switch (GetShotType()) {
+					case SHOTTYPE::BOLT:
+						//0
+						{
+							if ((5.f < GetAnime(GunAnimeID::Cocking).time && GetAnime(GunAnimeID::Cocking).time < 6.f)) {
+								if (m_boltSoundSequence != 1) {
+									m_boltSoundSequence = 1;
+									SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+								}
+							}
+							if ((28.f < GetAnime(GunAnimeID::Cocking).time && GetAnime(GunAnimeID::Cocking).time < 29.f)) {
+								if (m_boltSoundSequence != 3) {
+									m_boltSoundSequence = 3;
+									SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+								}
 							}
 						}
-						if ((28.f < GetAnime(GunAnimeID::Cocking).time && GetAnime(GunAnimeID::Cocking).time < 29.f)) {
-							if (m_boltSoundSequence != 3) {
-								m_boltSoundSequence = 3;
-								SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+						//1
+						{
+							if ((5.f < GetAnime(GunAnimeID::ReloadStart_Empty).time && GetAnime(GunAnimeID::ReloadStart_Empty).time < 6.f)) {
+								if (m_boltSoundSequence != 5) {
+									m_boltSoundSequence = 5;
+									SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+								}
 							}
-						}
-					}
-					//1
-					{
-						if ((5.f < GetAnime(GunAnimeID::ReloadStart_Empty).time && GetAnime(GunAnimeID::ReloadStart_Empty).time < 6.f)) {
-							if (m_boltSoundSequence != 5) {
-								m_boltSoundSequence = 5;
-								SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
-							}
-						}
 
-						if ((5.f < GetAnime(GunAnimeID::ReloadStart).time && GetAnime(GunAnimeID::ReloadStart).time < 6.f)) {
-							if (m_boltSoundSequence != 5) {
-								m_boltSoundSequence = 5;
-								SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+							if ((5.f < GetAnime(GunAnimeID::ReloadStart).time && GetAnime(GunAnimeID::ReloadStart).time < 6.f)) {
+								if (m_boltSoundSequence != 5) {
+									m_boltSoundSequence = 5;
+									SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+								}
 							}
 						}
-					}
-					//2
-					{
-						if ((10.f < GetAnime(GunAnimeID::ReloadOne).time && GetAnime(GunAnimeID::ReloadOne).time < 11.f)) {
-							if (m_boltSoundSequence != 7) {
-								m_boltSoundSequence = 7;
-								SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+						//2
+						{
+							if ((10.f < GetAnime(GunAnimeID::ReloadOne).time && GetAnime(GunAnimeID::ReloadOne).time < 11.f)) {
+								if (m_boltSoundSequence != 7) {
+									m_boltSoundSequence = 7;
+									SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+								}
+							}
+							else if (GetAnime(GunAnimeID::ReloadOne).per != 0.f) {
+								m_boltSoundSequence = -1;
 							}
 						}
-						else if (GetAnime(GunAnimeID::ReloadOne).per != 0.f) {
-							m_boltSoundSequence = -1;
-						}
-					}
-					//3
-					{
-						if ((8.f < GetAnime(GunAnimeID::ReloadEnd).time && GetAnime(GunAnimeID::ReloadEnd).time < 9.f)) {
-							if (m_boltSoundSequence != 8) {
-								m_boltSoundSequence = 8;
-								SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+						//3
+						{
+							if ((8.f < GetAnime(GunAnimeID::ReloadEnd).time && GetAnime(GunAnimeID::ReloadEnd).time < 9.f)) {
+								if (m_boltSoundSequence != 8) {
+									m_boltSoundSequence = 8;
+									SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+								}
 							}
 						}
-					}
-					//4
-					{
-						if ((0.5f < GetAnime(GunAnimeID::Shot).time && GetAnime(GunAnimeID::Shot).time < 1.f)) {
-							if (m_boltSoundSequence != 1) {
-								m_boltSoundSequence = 1;
-								SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+						//4
+						{
+							if ((0.5f < GetAnime(GunAnimeID::Shot).time && GetAnime(GunAnimeID::Shot).time < 1.f)) {
+								if (m_boltSoundSequence != 1) {
+									m_boltSoundSequence = 1;
+									SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+								}
+							}
+							if ((5.f < GetAnime(GunAnimeID::Shot).time && GetAnime(GunAnimeID::Shot).time < 6.f)) {
+								if (m_boltSoundSequence != 3) {
+									m_boltSoundSequence = 3;
+									SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+								}
 							}
 						}
-						if ((5.f < GetAnime(GunAnimeID::Shot).time && GetAnime(GunAnimeID::Shot).time < 6.f)) {
-							if (m_boltSoundSequence != 3) {
-								m_boltSoundSequence = 3;
-								SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetMatrix().pos(), Scale_Rate*50.f);
+						break;
+					case SHOTTYPE::FULL:
+					case SHOTTYPE::SEMI:
+						//0
+						{
+							if ((8.f < GetAnime(GunAnimeID::Cocking).time && GetAnime(GunAnimeID::Cocking).time < 9.f)) {
+								if (m_boltSoundSequence != 1) {
+									m_boltSoundSequence = 1;
+									SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
+								}
+							}
+							if ((18.f < GetAnime(GunAnimeID::Cocking).time && GetAnime(GunAnimeID::Cocking).time < 19.f)) {
+								if (m_boltSoundSequence != 2) {
+									m_boltSoundSequence = 2;
+									SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
+								}
 							}
 						}
-					}
-					break;
-				case SHOTTYPE::FULL:
-				case SHOTTYPE::SEMI:
-					//0
-					{
-						if ((8.f < GetAnime(GunAnimeID::Cocking).time && GetAnime(GunAnimeID::Cocking).time < 9.f)) {
-							if (m_boltSoundSequence != 1) {
-								m_boltSoundSequence = 1;
-								SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
+						//1
+						{
+							if ((0.f < GetAnime(GunAnimeID::ReloadStart_Empty).time && GetAnime(GunAnimeID::ReloadStart_Empty).time < 1.f)) {
+								if (m_boltSoundSequence != 3) {
+									m_boltSoundSequence = 3;
+									SE->Get((int)GetGunSoundSet().m_Unload).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
+								}
+							}
+							if ((0.f < GetAnime(GunAnimeID::ReloadStart).time && GetAnime(GunAnimeID::ReloadStart).time < 1.f)) {
+								if (m_boltSoundSequence != 3) {
+									m_boltSoundSequence = 3;
+									SE->Get((int)GetGunSoundSet().m_Unload).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
+								}
 							}
 						}
-						if ((18.f < GetAnime(GunAnimeID::Cocking).time && GetAnime(GunAnimeID::Cocking).time < 19.f)) {
-							if (m_boltSoundSequence != 2) {
-								m_boltSoundSequence = 2;
-								SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
+						//3
+						{
+							if ((0.f < GetAnime(GunAnimeID::ReloadEnd).time && GetAnime(GunAnimeID::ReloadEnd).time < 1.f)) {
+								if (m_boltSoundSequence != 5) {
+									m_boltSoundSequence = 5;
+									SE->Get((int)GetGunSoundSet().m_Load).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
+								}
 							}
 						}
-					}
-					//1
-					{
-						if ((0.f < GetAnime(GunAnimeID::ReloadStart_Empty).time && GetAnime(GunAnimeID::ReloadStart_Empty).time < 1.f)) {
-							if (m_boltSoundSequence != 3) {
-								m_boltSoundSequence = 3;
-								SE->Get((int)GetGunSoundSet().m_Unload).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
+						//6
+						{
+							if ((0.f < GetAnime(GunAnimeID::CheckStart).time && GetAnime(GunAnimeID::CheckStart).time < 1.f)) {
+								if (m_boltSoundSequence != 6) {
+									m_boltSoundSequence = 6;
+									SE->Get((int)GetGunSoundSet().m_Unload).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
+								}
 							}
 						}
-						if ((0.f < GetAnime(GunAnimeID::ReloadStart).time && GetAnime(GunAnimeID::ReloadStart).time < 1.f)) {
-							if (m_boltSoundSequence != 3) {
-								m_boltSoundSequence = 3;
-								SE->Get((int)GetGunSoundSet().m_Unload).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
+						//7
+						{
+							if ((25.f < GetAnime(GunAnimeID::Checking).time && GetAnime(GunAnimeID::Checking).time < 26.f)) {
+								if (m_boltSoundSequence != 7) {
+									m_boltSoundSequence = 7;
+									SE->Get((int)GetGunSoundSet().m_Load).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
+								}
 							}
 						}
-					}
-					//3
-					{
-						if ((0.f < GetAnime(GunAnimeID::ReloadEnd).time && GetAnime(GunAnimeID::ReloadEnd).time < 1.f)) {
-							if (m_boltSoundSequence != 5) {
-								m_boltSoundSequence = 5;
-								SE->Get((int)GetGunSoundSet().m_Load).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
-							}
-						}
-					}
-					//6
-					{
-						if ((0.f < GetAnime(GunAnimeID::CheckStart).time && GetAnime(GunAnimeID::CheckStart).time < 1.f)) {
-							if (m_boltSoundSequence != 6) {
-								m_boltSoundSequence = 6;
-								SE->Get((int)GetGunSoundSet().m_Unload).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
-							}
-						}
-					}
-					//7
-					{
-						if ((25.f < GetAnime(GunAnimeID::Checking).time && GetAnime(GunAnimeID::Checking).time < 26.f)) {
-							if (m_boltSoundSequence != 7) {
-								m_boltSoundSequence = 7;
-								SE->Get((int)GetGunSoundSet().m_Load).Play_3D(0, GetMatrix().pos(), Scale_Rate*2.f);
-							}
-						}
-					}
-					break;
-				default:
-					break;
+						break;
+					default:
+						break;
+				}
 			}
 			{
 				ResetFrameLocalMat(GunFrame::Center);

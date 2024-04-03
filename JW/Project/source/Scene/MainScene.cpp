@@ -30,7 +30,18 @@ namespace FPS_n2 {
 				this->m_MiniMapScreen = GraphHandle::Make(y_r(128) * 2, y_r(128) * 2, true);
 				PlayerMngr->Init(Chara_num);
 				for (int i = 1; i < Chara_num; i++) {
-					BattleResourceMngr->LoadChara("Soldier", (PlayerID)i, true, (i == 1));
+					BattleResourceMngr->LoadChara("Soldier", (PlayerID)i);
+					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
+					if (i == 1) {
+						MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME, -1.f);//身体ラグドール
+						MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
+					}
+					else {
+						auto& Base = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1).GetChara();
+						c->GetRagDoll() = Base->GetRagDoll().Duplicate();
+						MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
+					}
+					c->Init_RagDollControl(c->GetObj());
 				}
 
 				std::string GunName;
@@ -60,7 +71,11 @@ namespace FPS_n2 {
 			this->m_BackGround = std::make_shared<BackGroundClassMain>();
 			this->m_BackGround->Init("", "");//1.59秒
 			//ロード
-			BattleResourceMngr->LoadChara("Suit", GetMyPlayerID(), false);
+			BattleResourceMngr->LoadChara("Suit", GetMyPlayerID());
+			{
+				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+				Chara->LoadExtends();
+			}
 			GunsModify::LoadSlots("Save/gundata.svf");//プリセット読み込み
 			if (!m_IsHardMode) {
 				LoadGun("G17Gen3", GetMyPlayerID(), true, 0);
@@ -75,7 +90,7 @@ namespace FPS_n2 {
 			//BGをオブジェに登録
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-				c->SetMapCol(this->m_BackGround, true);
+				c->SetMapCol(this->m_BackGround);
 			}
 			//人の座標設定
 			for (int index = 0; index < Chara_num; index++) {
@@ -110,17 +125,17 @@ namespace FPS_n2 {
 					rad_t = deg2rad(GetRandf(180.f));
 				}
 
+				/*
 				VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 10.f*Scale_Rate;
 				if (this->m_BackGround->CheckLinetoMap(pos_t + VECTOR_ref::up() * -10.f*Scale_Rate, &EndPos, false)) {
 					pos_t = EndPos;
 				}
+				*/
 
-				c->ValueSet(deg2rad(0.f), rad_t, pos_t, (PlayerID)index, (index == 0) ? 1 : 0);
-				if (index == 0) {
-					c->SetCharaType(CharaTypeID::Team);
-				}
-				else {
-					c->SetCharaType(CharaTypeID::Enemy);
+				c->ValueSet((PlayerID)index, true, (index == 0) ? CharaTypeID::Team : CharaTypeID::Enemy);
+				c->MovePoint(deg2rad(0.f), rad_t, pos_t, (index == 0) ? 1 : 0);
+				c->Heal(100, true);
+				if (index != 0) {
 					this->m_AICtrl[index]->Init(this->m_BackGround, (PlayerID)index);
 				}
 			}
@@ -407,6 +422,7 @@ namespace FPS_n2 {
 				//m_NetWorkBrowser.FirstExecute(MyInput, tmpmove, CharaPtr->GetDamageEvent());
 				//クライアント
 				if (m_NetWorkBrowser.GetClient()) {
+					/*
 					for (int index = 0; index < Chara_num; index++) {
 						auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 						if (c->GetMyPlayerID() == GetMyPlayerID()) {
@@ -421,6 +437,7 @@ namespace FPS_n2 {
 							}
 						}
 					}
+					//*/
 				}
 				//
 				if (Chara->IsAlive()) {
@@ -620,8 +637,8 @@ namespace FPS_n2 {
 							VECTOR_ref pos_tmp = a->GetMove().pos;
 							bool isHit = false;
 							for (int index = 0; index < Chara_num; index++) {
+								if (index != 0) { break; }
 								auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-								if (tgt->GetCharaType() == CharaTypeID::Enemy) { break; }
 								float Len = (tgt->GetMove().pos - pos_tmp).Length();
 								if (Len < 1.f*Scale_Rate) {
 									switch (a->GetItemType()) {
@@ -784,6 +801,8 @@ namespace FPS_n2 {
 					(HPLow) ? (10.f + GetRandf(30.f)) : 1.f,
 					  0.95f, EasingType::OutExpo);
 				if (Chara->PopHeadShotSwitch()) {
+					SE->Get((int)SoundEnum::Tinnitus).Play_3D(0, Chara->GetEyeMatrix().pos(), Scale_Rate*50.f);
+					Chara->SetHeadShot();
 					AberrationPower = 30.f;
 				}
 				DrawParts->SetAberrationPower(AberrationPower);
@@ -856,7 +875,7 @@ namespace FPS_n2 {
 				//シェイク
 				this->m_UIclass.SetIntParam(0, (int)(DrawParts->GetCamShake().x()*100.f));
 				this->m_UIclass.SetIntParam(1, (int)(DrawParts->GetCamShake().y()*100.f));
-				this->m_UIclass.SetIntParam(2, (int)(rad2deg(Chara->GetGunRadAdd())*5.f));
+				this->m_UIclass.SetIntParam(2, (int)(rad2deg(Chara->GetLeanRad()*5.f)));
 				//AmmoStock
 				this->m_UIclass.SetIntParam(3, Chara->GetAmmoStock());
 				//Time
@@ -1032,6 +1051,13 @@ namespace FPS_n2 {
 			ObjMngr->DrawObject_Shadow();
 		}
 		void			MAINLOOP::MainDraw_Sub(void) noexcept {
+			/*
+			SetVerticalFogEnable(TRUE);
+			SetVerticalFogMode(DX_FOGMODE_EXP2);
+			SetVerticalFogColor(255, 0, 0);
+			//SetVerticalFogStartEnd(1.5f*Scale_Rate, 0.8f*Scale_Rate);
+			SetVerticalFogDensity(0.3f*Scale_Rate, 0.2f);
+			//*/
 			if (m_IsEnd) {
 				return;
 			}
@@ -1098,6 +1124,8 @@ namespace FPS_n2 {
 			}
 			//
 #endif
+			SetVerticalFogEnable(FALSE);
+
 		}
 		void			MAINLOOP::MainDrawFront_Sub(void) noexcept {
 			if (m_IsEnd) {
@@ -1127,7 +1155,7 @@ namespace FPS_n2 {
 					Chara->GetSightReitcleGraphPtr().DrawRotaGraph(
 						(int)m_MyPlayerReticleControl.GetReticleXPos(),
 						(int)m_MyPlayerReticleControl.GetReticleYPos(),
-						1.f, Chara->GetGunRadAdd(), true);
+						1.f, Chara->GetLeanRad(), true);
 				}
 				//UI
 				if (!DrawParts->IsPause()) {
@@ -1440,6 +1468,8 @@ namespace FPS_n2 {
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			BattleResourceMngr->LoadGun(FolderName, ID, Sel);
 			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID).GetChara();
+			auto& g = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(ID).GetGun(Sel);
+			c->SetGunPtr(Sel, g);
 			GunsModify::CreateSelData(c->GetGunPtr(Sel), IsPreset);
 			c->GetGunPtr(Sel)->Init_Gun();
 		}

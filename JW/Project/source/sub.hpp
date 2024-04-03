@@ -412,7 +412,7 @@ namespace FPS_n2 {
 			void			Set(void) noexcept;
 			void			Dispose(void) noexcept;
 		public:
-			void			LoadChara(const std::string&FolderName, PlayerID ID, bool IsRagDoll, bool IsRagDollBaseObj = false) noexcept;
+			void			LoadChara(const std::string&FolderName, PlayerID ID) noexcept;
 			void			LoadGun(const std::string&FolderName, PlayerID ID, int Sel) noexcept;
 		};
 	};

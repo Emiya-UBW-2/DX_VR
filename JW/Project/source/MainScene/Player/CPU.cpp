@@ -274,12 +274,14 @@ namespace FPS_n2 {
 					}
 				}
 
+				/*
 				VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 10.f*Scale_Rate;
 				if (this->m_BackGround->CheckLinetoMap(pos_t + VECTOR_ref::up() * -10.f*Scale_Rate, &EndPos, false)) {
 					pos_t = EndPos;
 				}
+				//*/
 
-				MyChara->ValueSet(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, this->m_MyCharaID, 0);
+				MyChara->MovePoint(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, 0);
 				MyChara->Heal(100, true);
 				this->Reset();
 			}

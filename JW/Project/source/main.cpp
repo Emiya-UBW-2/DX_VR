@@ -60,9 +60,68 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Customscene->Set_Next(Titlescene);
 	Tutorialscene->Set_Next(Titlescene);
 	MAINLOOPscene->Set_Next(Titlescene);
+	bool isTitleLoop = false;
+	auto TitleLoad = [&]() {
+		if (!isTitleLoop) {
+			isTitleLoop = true;
+			Titlescene->Load();
+		}
+	};
+	auto TitleUnLoad = [&]() {
+		if (isTitleLoop) {
+			isTitleLoop = false;
+			Titlescene->Dispose_Load();
+		}
+	};
+	bool isCustomLoop = false;
+	auto CustomLoad = [&]() {
+		if (!isCustomLoop) {
+			isCustomLoop = true;
+			Customscene->Load();
+		}
+	};
+	auto CustomUnLoad = [&]() {
+		if (isCustomLoop) {
+			isCustomLoop = false;
+			Customscene->Dispose_Load();
+		}
+	};
 	bool isTutorialLoop = false;
+	auto TutorialLoad = [&]() {
+		if (!isTutorialLoop) {
+			isTutorialLoop = true;
+			Tutorialscene->Load();
+		}
+	};
+	auto TutorialUnLoad = [&]() {
+		if (isTutorialLoop) {
+			isTutorialLoop = false;
+			Tutorialscene->Dispose_Load();
+		}
+	};
 	bool isMainLoop = false;
+	auto MainLoad = [&](bool IsHardMode) {
+		if (MAINLOOPscene->SetPlayMode(IsHardMode)) {
+			isMainLoop = true;
+			MAINLOOPscene->Dispose_Load();
+			MAINLOOPscene->Load();
+		}
+		else {
+			if (!isMainLoop) {
+				isMainLoop = true;
+				MAINLOOPscene->Load();
+			}
+		}
+	};
+	auto MainUnLoad = [&]() {
+		if (isMainLoop) {
+			isMainLoop = false;
+			MAINLOOPscene->Dispose_Load();
+		}
+	};
 
+	//Å‰‚Ì“Ç‚Ýž‚Ý
+	TitleLoad();
 	//ŒJ‚è•Ô‚µ
 	while (true) {
 		scene->StartScene();
@@ -90,65 +149,21 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			DrawParts->Screen_Flip();//‰æ–Ê‚Ì”½‰f
 		}
 		SaveDataParts->Save();//ƒZ[ƒu
-		if (scene->GetNowScene() == Titlescene) {
+		bool IsGoTitle = (scene->GetNowScene() == Titlescene);
+		bool IsReturnTitle = (scene->GetNowScene()->Get_Next() == Titlescene);
+		if (IsGoTitle) {
 			switch (Titlescene->SelMode()) {
 				case 0:
 					Titlescene->Set_Next(MAINLOOPscene);
-					if (MAINLOOPscene->SetPlayMode(false)) {
-						isMainLoop = true;
-						MAINLOOPscene->Dispose_Load();
-						MAINLOOPscene->Load();
-					}
-					else {
-						if (isTutorialLoop) {
-							isTutorialLoop = false;
-							Tutorialscene->Dispose_Load();
-						}
-						if (!isMainLoop) {
-							isMainLoop = true;
-							MAINLOOPscene->Load();
-						}
-					}
 					break;
 				case 1:
 					Titlescene->Set_Next(Customscene);
-					if (isMainLoop) {
-						isMainLoop = false;
-						MAINLOOPscene->Dispose_Load();
-					}
-					if (isTutorialLoop) {
-						isTutorialLoop = false;
-						Tutorialscene->Dispose_Load();
-					}
 					break;
 				case 2:
 					Titlescene->Set_Next(Tutorialscene);
-					if (isMainLoop) {
-						isMainLoop = false;
-						MAINLOOPscene->Dispose_Load();
-					}
-					if (!isTutorialLoop) {
-						isTutorialLoop = true;
-						Tutorialscene->Load();
-					}
 					break;
 				case 3:
 					Titlescene->Set_Next(MAINLOOPscene);
-					if (MAINLOOPscene->SetPlayMode(true)) {
-						isMainLoop = true;
-						MAINLOOPscene->Dispose_Load();
-						MAINLOOPscene->Load();
-					}
-					else {
-						if (isTutorialLoop) {
-							isTutorialLoop = false;
-							Tutorialscene->Dispose_Load();
-						}
-						if (!isMainLoop) {
-							isMainLoop = true;
-							MAINLOOPscene->Load();
-						}
-					}
 					break;
 				default:
 					Titlescene->Set_Next(MAINLOOPscene);//–ß‚µ‚Æ‚­
@@ -156,6 +171,39 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			}
 		}
 		scene->NextScene();
+		if (IsGoTitle) {
+			TitleUnLoad();
+			switch (Titlescene->SelMode()) {
+				case 0:
+					CustomUnLoad();
+					TutorialUnLoad();
+					MainLoad(false);
+					break;
+				case 1:
+					MainUnLoad();
+					TutorialUnLoad();
+					CustomLoad();
+					break;
+				case 2:
+					MainUnLoad();
+					CustomUnLoad();
+					TutorialLoad();
+					break;
+				case 3:
+					CustomUnLoad();
+					TutorialUnLoad();
+					MainLoad(true);
+					break;
+				default:
+					break;
+			}
+		}
+		else if (IsReturnTitle) {
+			MainUnLoad();
+			CustomUnLoad();
+			TutorialUnLoad();
+			TitleLoad();
+		}
 	}
 	return 0;
 }

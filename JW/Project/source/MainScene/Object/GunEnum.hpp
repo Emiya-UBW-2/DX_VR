@@ -17,7 +17,6 @@ namespace FPS_n2 {
 			Open,
 			Watch,
 			Melee,
-			AmmoLoadStart,
 			AmmoLoading,
 			AmmoLoadEnd,
 			OffsetAnim,

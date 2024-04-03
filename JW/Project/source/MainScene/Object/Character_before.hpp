@@ -50,7 +50,7 @@ namespace FPS_n2 {
 			const auto& Per() const noexcept { return m_ArmPer; }
 		};
 
-
+		//
 		enum class HitType {
 			Head,
 			Body,
@@ -270,14 +270,6 @@ namespace FPS_n2 {
 			}
 		};
 		//
-		class CharaTypeControl {
-		private:
-			CharaTypeID											m_CharaType;
-		public://ゲッター
-			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
-			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
-		};
-		//
 		class GunReadyControl {
 		private://キャラパラメーター
 			const float											UpperTimerLimit = 10.f;
@@ -288,7 +280,7 @@ namespace FPS_n2 {
 			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
 			const auto		GetIsAim(void) const noexcept { return !(this->m_ReadyTimer == UpperTimerLimit); }
 			const auto&		GetADSPer(void) const noexcept { return this->m_ADSPer; }
-		protected:
+		public:
 			void			SetReady(void) noexcept { this->m_ReadyTimer = UpperTimerLimit; }
 			void			SetAim(void) noexcept { this->m_ReadyTimer = 0.1f; }
 			void			SetADS(void) noexcept { this->m_ReadyTimer = 0.f; }
@@ -303,6 +295,9 @@ namespace FPS_n2 {
 		//キャラ入力
 		class KeyControl {
 		private://キャラパラメーター
+			float												m_LeanRad{0.f};
+			float												m_LateLeanRad{0.f};
+			float												m_HeadShotPer{0.f};
 			float												m_MoverPer{0.f};
 			VECTOR_ref											m_VecTotal;
 			std::array<float, 4>								m_Vec{0,0,0,0};
@@ -314,15 +309,35 @@ namespace FPS_n2 {
 			switchs												m_QKey;
 			switchs												m_EKey;
 			VECTOR_ref											m_rad_Buf, m_rad, m_radAdd;
+			float												m_yrad_Upper{0.f}, m_yrad_Bottom{0.f};
+			float												m_yrad_UpperChange{0.f}, m_yrad_BottomChange{0.f};
+			VECTOR_ref											m_UpperPrevRad;
+			VECTOR_ref											m_UpperRad;
+			VECTOR_ref											m_UpperyVecNormal, m_UpperzVecNormal;
+			VECTOR_ref											m_UpperyVec, m_UpperzVec, m_UpperPos;
+			std::array<float, (int)CharaAnimeID::AnimeIDMax>	m_AnimPerBuf{0};
+			bool												m_TurnBody{false};
+
+			bool												m_PosBufOverRideFlag{false};
+			moves												m_OverRideInfo;
 		public://ゲッター
-			const auto		GetInputControl(void) const noexcept { return this->m_Input; }
+			CharaAnimeID										m_BottomAnimSelect;
+		public://ゲッター
+			const auto		GetRun(void) const noexcept { return this->m_Input.GetPADSPress(PADS::RUN) && this->m_Input.GetPADSPress(PADS::MOVE_W); }
 			const auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }
+			const auto		GetLeanRad(void) const noexcept { return this->m_LeanRad; }
+			const auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
+		public://セッター
+			auto&			SetRadBuf(void) noexcept { return this->m_rad_Buf; }
+			auto&			SetRad(void) noexcept { return this->m_rad; }
+			void			SetIsSquat(bool value) noexcept { this->m_Squat.Set(value); }
+			void			SetHeadShot(void) noexcept { m_HeadShotPer = 1.f; }
+		protected:
+			const auto		GetInputControl(void) const noexcept { return this->m_Input; }
 			const auto		GetRad(void) const noexcept { return this->m_rad; }
-			const auto		GetVecFront(void) const noexcept { return this->m_Vec[0]; }
-			const auto		GetVecRear(void) const noexcept { return this->m_Vec[2]; }
-			const auto		GetVecLeft(void) const noexcept { return this->m_Vec[1]; }
-			const auto		GetVecRight(void) const noexcept { return this->m_Vec[3]; }
-			const auto		GetVec(void) const noexcept { return m_VecTotal; }
+			const auto		GetYRadBottom(void) const noexcept { return this->m_yrad_Bottom; }
+			const auto		GetYRadUpperChange(void) const noexcept { return this->m_yrad_UpperChange; }
+			const auto		GetYRadBottomChange(void) const noexcept { return this->m_yrad_BottomChange; }
 			const auto		GetMoverPer(void) const noexcept { return m_MoverPer; }
 			const auto		IsMove(void) const noexcept { return m_MoverPer > 0.1f; }
 			const auto		GetFrontP(void) const noexcept {
@@ -334,41 +349,68 @@ namespace FPS_n2 {
 			}
 			const auto		GetLeanRate(void) const noexcept { return this->m_LeanRate; }
 			const auto		GetLeanSwitch(void) const noexcept { return this->m_LeanSwitch; }
-			const auto		GetULTKey(void) const noexcept { return this->m_ULTKey; }
-			const auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
+			const auto		GetULTKey(void) const noexcept { return this->m_ULTKey.trigger(); }
 			const auto		GetSquatSwitch(void) const noexcept { return this->m_Squat.trigger(); }
-			const auto		GetRun(void) const noexcept { return this->m_Input.GetPADSPress(PADS::RUN) && this->m_Input.GetPADSPress(PADS::MOVE_W); }
-		public://セッター
-			auto&			SetRadBuf(void) noexcept { return this->m_rad_Buf; }
-			auto&			SetRad(void) noexcept { return this->m_rad; }
-			void			ResetLeanRate(void) noexcept {
-				m_LeanSwitch = (this->m_LeanRate != 0);
-				this->m_LeanRate = 0;
-			}
-			void			SetIsSquat(bool value) noexcept { this->m_Squat.Set(value); }
-		private: //内部
-			void			SetVec(bool Press0, bool Press1, bool Press2, bool Press3) {
-				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (Press0 ? 5.f : -15.f) / FPS, 0.f, 1.f);
-				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (Press1 ? 5.f : -15.f) / FPS, 0.f, 1.f);
-				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (Press2 ? 5.f : -15.f) / FPS, 0.f, 1.f);
-				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (Press3 ? 5.f : -15.f) / FPS, 0.f, 1.f);
-				m_VecTotal = VECTOR_ref::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
-				m_MoverPer = m_VecTotal.Length();
-			}
-		public:
-			void		InitKey(float pxRad, float pyRad);
-			void		InputKey(const InputControl& pInput, bool pReady, const VECTOR_ref& pAddRadvec);
-		};
-		//
-		class OverrideControl {
-		private://キャラパラメーター
-			bool												m_PosBufOverRideFlag{false};
-			moves												m_OverRideInfo;
-		private:
-		public://ゲッター
+			const auto		GetGunSwingMat(void) const noexcept { return MATRIX_ref::Axis1_YZ(m_UpperyVec.Norm(), m_UpperzVec.Norm()); }
+			auto&			GetCharaAnimeBufID(CharaAnimeID value) noexcept { return this->m_AnimPerBuf.at((int)value); }
 			const auto&			GetOverRideInfo() const noexcept { return this->m_OverRideInfo; }
+			//
+			const auto		GetBottomStandAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
+			const auto		GetBottomWalkAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_Walk : CharaAnimeID::Bottom_Stand_Walk; }
+			const auto		GetBottomWalkBackAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_WalkBack : CharaAnimeID::Bottom_Stand_WalkBack; }
+			const auto		GetBottomLeftStepAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_LeftStep : CharaAnimeID::Bottom_Stand_LeftStep; }
+			const auto		GetBottomRightStepAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_RightStep : CharaAnimeID::Bottom_Stand_RightStep; }
+			const auto		GetBottomTurnAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_Turn : CharaAnimeID::Bottom_Stand_Turn; }
+
+			const auto		GetSpeedPer(void) const noexcept {
+				if (this->m_Input.GetPADSPress(PADS::WALK)) {
+					return 0.15f;
+				}
+				if (GetIsSquat()) {
+					return 0.45f;
+				}
+				else if (GetRun()) {
+					return 0.875f;
+				}
+				else {
+					return 0.65f;
+				}
+			}
+			const auto		GetVec(void) const noexcept {
+				VECTOR_ref vecBuf = m_VecTotal;
+				if (m_MoverPer > 0.f) {
+					vecBuf = vecBuf.Norm() * (GetSpeedPer() * 60.f / FPS);
+				}
+				vecBuf = MATRIX_ref::Vtrans(vecBuf, MATRIX_ref::RotY(this->m_yrad_Upper));
+				return vecBuf;
+			}
+			const auto		GetVecFront(void) const noexcept { return 1.15f * this->m_Vec[0] * std::clamp(GetSpeedPer() / 0.65f, 0.5f, 1.f); }
+			const auto		GetVecRear(void) const noexcept { return 1.15f * this->m_Vec[2] * std::clamp(GetSpeedPer() / 0.65f, 0.5f, 1.f); }
+			const auto		GetVecLeft(void) const noexcept { return 1.15f * this->m_Vec[1] * std::clamp(GetSpeedPer() / 0.65f, 0.5f, 1.f); }
+			const auto		GetVecRight(void) const noexcept { return 1.15f * this->m_Vec[3] * std::clamp(GetSpeedPer() / 0.65f, 0.5f, 1.f); }
 		public:
 			void		InitOverride() { this->m_PosBufOverRideFlag = false; }
+			void		InitKey(float pxRad, float pyRad) {
+				for (int i = 0; i < 4; i++) {
+					this->m_Vec[i] = 0.f;
+				}
+				this->m_Input.SetInputStart(0.f, 0.f, VECTOR_ref::zero());
+				this->m_radAdd.clear();
+				this->m_rad_Buf.x(pxRad);
+				this->m_rad_Buf.y(pyRad);
+				this->m_rad = this->m_rad_Buf;
+
+				SetIsSquat(false);
+				this->m_yrad_Upper = this->m_rad.y();
+				this->m_yrad_Bottom = this->m_rad.y();
+				this->m_yrad_BottomChange = 0.f;
+				this->m_LateLeanRad = 0.f;
+				this->m_LeanRad = 0.f;
+				this->m_TurnBody = false;
+				//
+				for (auto& a : this->m_AnimPerBuf) { a = 0.f; }
+			}
+			//
 			void		SetPosBufOverRide(const moves& o) noexcept {
 				this->m_PosBufOverRideFlag = true;
 				this->m_OverRideInfo = o;
@@ -376,9 +418,168 @@ namespace FPS_n2 {
 			bool		PutOverride() {
 				if (this->m_PosBufOverRideFlag) {
 					this->m_PosBufOverRideFlag = false;
+
+					float X = this->m_rad_Buf.x();
+					Easing(&X, this->m_OverRideInfo.rad.x(), 0.9f, EasingType::OutExpo);
+					this->m_rad_Buf.x(X);
+					this->m_rad_Buf.y(this->m_OverRideInfo.rad.y());
+					this->m_rad.y(this->m_OverRideInfo.rad.y());
+
 					return true;
 				}
 				return false;
+			}
+			void		InputKey(const InputControl& pInput, bool pReady, const VECTOR_ref& pAddRadvec) {
+				this->m_Input = pInput;
+				if (!pReady) {
+					this->m_Input.ResetKeyInput();
+				}
+				//入力
+				this->m_ULTKey.Execute(this->m_Input.GetPADSPress(PADS::ULT));
+				this->m_Squat.Execute(this->m_Input.GetPADSPress(PADS::SQUAT));
+				if (this->GetRun()) { SetIsSquat(false); }
+				//回転
+				{
+					Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
+
+					this->m_rad_Buf.x(
+						std::clamp(
+							this->m_rad_Buf.x() + (this->m_Input.GetAddxRad()*(this->m_Input.GetPADSPress(PADS::RUN) ? 0.5f : 1.f)),
+							deg2rad(-70.f), deg2rad(24.f))
+						+ this->m_radAdd.x()
+					);
+					this->m_rad_Buf.y(
+						this->m_rad_Buf.y() + (this->m_Input.GetAddyRad()*(this->m_Input.GetPADSPress(PADS::RUN) ? 0.5f : 1.f))
+						+ this->m_radAdd.y()
+					);
+
+					float X = this->m_rad.x();
+					float Y = this->m_rad.y();
+					float Z = this->m_rad.z();
+					Easing(&X, m_rad_Buf.x(), 0.5f, EasingType::OutExpo);
+					Easing(&Y, m_rad_Buf.y(), 0.8f, EasingType::OutExpo);
+					Easing(&Z, m_rad_Buf.z(), 0.5f, EasingType::OutExpo);
+					this->m_rad.Set(X, Y, Z);
+				}
+				//移動
+				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (this->m_Input.GetPADSPress(PADS::MOVE_W) ? 5.f : -15.f) / FPS, 0.f, 1.f);
+				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (this->m_Input.GetPADSPress(PADS::MOVE_A) ? 5.f : -15.f) / FPS, 0.f, 1.f);
+				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (this->m_Input.GetPADSPress(PADS::MOVE_S) ? 5.f : -15.f) / FPS, 0.f, 1.f);
+				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (this->m_Input.GetPADSPress(PADS::MOVE_D) ? 5.f : -15.f) / FPS, 0.f, 1.f);
+				m_VecTotal = VECTOR_ref::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
+				m_MoverPer = m_VecTotal.Length();
+				//リーン
+				m_LeanSwitch = false;
+				auto Prev = this->m_LeanRate;
+				if (true) {//トグル式
+					this->m_QKey.Execute(this->m_Input.GetPADSPress(PADS::LEAN_L));
+					if (this->m_QKey.trigger()) {
+						if (this->m_LeanRate == -1) {
+							this->m_LeanRate = 1;
+						}
+						else {
+							if (this->m_LeanRate < 1) {
+								this->m_LeanRate++;
+							}
+							else {
+								this->m_LeanRate--;
+							}
+						}
+					}
+					this->m_EKey.Execute(this->m_Input.GetPADSPress(PADS::LEAN_R));
+					if (this->m_EKey.trigger()) {
+						if (this->m_LeanRate == 1) {
+							this->m_LeanRate = -1;
+						}
+						else {
+							if (this->m_LeanRate > -1) {
+								this->m_LeanRate--;
+							}
+							else {
+								this->m_LeanRate++;
+							}
+						}
+					}
+				}
+				else {
+					this->m_LeanRate = 0;
+					if (this->m_Input.GetPADSPress(PADS::LEAN_L)) {
+						this->m_LeanRate = 1;
+					}
+					if (this->m_Input.GetPADSPress(PADS::LEAN_R)) {
+						this->m_LeanRate = -1;
+					}
+				}
+				this->m_LeanRate = std::clamp(this->m_LeanRate, -1, 1);
+				m_LeanSwitch = (Prev != this->m_LeanRate);
+			}
+			void		UpdateKeyRad() {
+				//
+				if (!KeyControl::IsMove()) {
+					if (deg2rad(50.f) < abs(KeyControl::GetYRadUpperChange())) {
+						this->m_TurnBody = true;
+					}
+					if (abs(KeyControl::GetYRadUpperChange()) < deg2rad(0.5f)) {
+						this->m_TurnBody = false;
+					}
+				}
+				else {
+					this->m_TurnBody = false;
+				}
+
+				if (GetRun()) {//リーンをリセット
+					m_LeanSwitch = (this->m_LeanRate != 0);
+					this->m_LeanRate = 0;
+				}
+				if (this->m_TurnBody || IsMove()) { Easing(&this->m_yrad_Upper, this->m_rad.y(), 0.85f, EasingType::OutExpo); }
+				auto YradChange = this->m_yrad_Bottom;
+				Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - GetFrontP(), 0.85f, EasingType::OutExpo);
+				YradChange = this->m_yrad_Bottom - YradChange;
+				float Z = this->m_rad_Buf.z();
+				Easing(&Z, (abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f, EasingType::OutExpo);
+				this->m_rad_Buf.z(Z);
+				this->m_yrad_UpperChange = this->m_rad.y() - this->m_yrad_Upper;
+				this->m_yrad_BottomChange = this->m_rad.y() - this->m_yrad_Bottom;
+				Easing(&this->m_LateLeanRad, this->m_LeanRad, 0.9f, EasingType::OutExpo);
+				Easing(&this->m_LeanRad, ((float)(-this->m_LeanRate) + this->m_HeadShotPer)*deg2rad(25), 0.9f, EasingType::OutExpo);
+				Easing(&this->m_HeadShotPer, 0.f, 0.9f, EasingType::OutExpo);
+				//銃の揺れ
+				Easing(&m_UpperRad, (this->m_rad - this->m_UpperPrevRad)*-1.f, 0.9f, EasingType::OutExpo);
+				m_UpperPrevRad = this->m_rad;
+				auto mat = MATRIX_ref::RotX(m_UpperRad.x()) * MATRIX_ref::RotY(m_UpperRad.y());
+				Easing(&m_UpperyVecNormal, mat.yvec(), 0.8f, EasingType::OutExpo);
+				Easing(&m_UpperzVecNormal, mat.zvec(), 0.8f, EasingType::OutExpo);
+				Easing(&m_UpperyVec, m_UpperyVecNormal, 0.8f, EasingType::OutExpo);
+				Easing(&m_UpperzVec, m_UpperzVecNormal, 0.8f, EasingType::OutExpo);
+
+				this->m_BottomAnimSelect = GetBottomStandAnimSel();
+				if (this->m_Input.GetPADSPress(PADS::MOVE_A)) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
+				if (this->m_Input.GetPADSPress(PADS::MOVE_D)) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
+				if (this->m_Input.GetPADSPress(PADS::MOVE_S)) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
+				if (this->m_Input.GetPADSPress(PADS::MOVE_W)) { this->m_BottomAnimSelect = GetRun() ? CharaAnimeID::Bottom_Stand_Run : GetBottomWalkAnimSel(); }
+				//下半身
+				Easing(&GetCharaAnimeBufID(GetBottomTurnAnimSel()), (this->m_TurnBody) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
+				for (int i = 0; i < (int)CharaAnimeID::AnimeIDMax; i++) {
+					if (
+						i == (int)CharaAnimeID::Bottom_Stand ||
+						i == (int)CharaAnimeID::Bottom_Stand_Run ||
+						i == (int)CharaAnimeID::Bottom_Stand_Walk ||
+						i == (int)CharaAnimeID::Bottom_Stand_LeftStep ||
+						i == (int)CharaAnimeID::Bottom_Stand_RightStep ||
+						i == (int)CharaAnimeID::Bottom_Stand_WalkBack) {
+						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 6.f : -2.f) / FPS, 0.f, 1.f);
+					}
+					if (
+						i == (int)CharaAnimeID::Bottom_Squat ||
+						i == (int)CharaAnimeID::Bottom_Squat_Walk ||
+						i == (int)CharaAnimeID::Bottom_Squat_LeftStep ||
+						i == (int)CharaAnimeID::Bottom_Squat_RightStep ||
+						i == (int)CharaAnimeID::Bottom_Squat_WalkBack ||
+						i == (int)CharaAnimeID::Bottom_Stand_LLern ||
+						i == (int)CharaAnimeID::Bottom_Stand_RLern) {
+						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 2.f : -2.f) / FPS, 0.f, 1.f);
+					}
+				}
 			}
 		};
 		//
@@ -657,31 +858,6 @@ namespace FPS_n2 {
 				m_AutoAim = ID;
 			}
 			void UpdateAutoAim(bool isActive) noexcept;
-		};
-		//銃の揺れ
-		class GunSwingControl {
-		private:
-			VECTOR_ref											m_UpperPrevRad;
-			VECTOR_ref											m_UpperRad;
-			VECTOR_ref											m_UpperyVecNormal, m_UpperzVecNormal;
-			VECTOR_ref											m_UpperyVec, m_UpperzVec, m_UpperPos;
-		public://ゲッター
-			const auto		GetGunSwingMat(void) const noexcept {
-				return MATRIX_ref::Axis1_YZ(m_UpperyVec.Norm(), m_UpperzVec.Norm());
-			}
-		public:
-			GunSwingControl(void) noexcept {}
-			~GunSwingControl(void) noexcept {}
-		public:
-			void UpdateGunSwing(const VECTOR_ref& CharaRad)noexcept {
-				Easing(&m_UpperRad, (CharaRad - this->m_UpperPrevRad)*-1.f, 0.9f, EasingType::OutExpo);
-				m_UpperPrevRad = CharaRad;
-				auto mat = MATRIX_ref::RotX(m_UpperRad.x()) * MATRIX_ref::RotY(m_UpperRad.y());
-				Easing(&m_UpperyVecNormal, mat.yvec(), 0.8f, EasingType::OutExpo);
-				Easing(&m_UpperzVecNormal, mat.zvec(), 0.8f, EasingType::OutExpo);
-				Easing(&m_UpperyVec, m_UpperyVecNormal, 0.8f, EasingType::OutExpo);
-				Easing(&m_UpperzVec, m_UpperzVecNormal, 0.8f, EasingType::OutExpo);
-			}
 		};
 		//
 		class StackLeftHandControl {
@@ -987,14 +1163,22 @@ namespace FPS_n2 {
 			}
 		};
 		//
-		class ItemFallControl {
+		class ItemPopControl {
+			class ItemFallControl {
+			private:
+				std::array<std::shared_ptr<ItemObjClass>, 1>	m_Ptr;
+				int												m_Now{0};
+			public:
+				void		Init(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath, ItemType type);
+				void		SetFall(const VECTOR_ref& pPos, const VECTOR_ref& pVec);
+				void		Dispose() noexcept;
+			};
 		private:
-			std::array<std::shared_ptr<ItemObjClass>, 1>	m_Ptr;
-			int												m_Now{0};
+			std::array<ItemFallControl, 2>						m_ItemFallControl;
 		public:
-			void		Init(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath, ItemType type);
-			void		SetFall(const VECTOR_ref& pPos, const VECTOR_ref& pVec);
-			void		Dispose() noexcept;
+			void		RepopItem(const std::shared_ptr<BackGroundClassBase>& backGround);
+			void		SetPop(const VECTOR_ref& pPos);
+			void		DisposeItemPop() noexcept;
 		};
 	};
 };

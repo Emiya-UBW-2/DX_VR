@@ -2,9 +2,19 @@
 
 #include "../sub.hpp"
 
+#include "../MainScene/Player/Player.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//
+		void			CustomScene::Load_Sub(void) noexcept {
+			//ロード
+			if (m_IsFirstLoad) {
+				m_IsFirstLoad = false;
+				auto* PlayerMngr = PlayerManager::Instance();
+				PlayerMngr->Init(1 + (int)ULT_GUN::Max);
+			}
+		}
 		void			CustomScene::Set_Sub(void) noexcept {
 			//
 			bselect = 0;
@@ -53,33 +63,22 @@ namespace FPS_n2 {
 			GunsModify::LoadSlots("Save/gundata.svf");
 			//
 			auto* ObjMngr = ObjectManager::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto* BattleResourceMngr = CommonBattleResource::Instance();
+
 			{
-				auto* Ptr = ObjMngr->MakeObject(ObjType::Gun);
-				m_GunPtr = ((std::shared_ptr<GunClass>&)(*Ptr));
-				ObjMngr->LoadObjectModel(m_GunPtr.get(), "data/gun/G17Gen3/");
-				MV1::SetAnime(&m_GunPtr->GetObj(), m_GunPtr->GetObj());
-				m_GunPtr->Init();
-				GunsModify::CreateSelData(m_GunPtr, true);
+				BattleResourceMngr->LoadGun("G17Gen3", (PlayerID)(0), 0);
+				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
+				GunsModify::CreateSelData(GunPtr, true);
 				UpdateSlotMove();
-				m_GunPtr->Init_Gun();
+				GunPtr->Init_Gun();
 			}
+
 			auto* SaveDataParts = SaveDataClass::Instance();
-			int max = std::clamp(SaveDataParts->GetParam("ULT Unlock"), 1, (int)ULT_GUN::Max) - 1;
-			std::string Path;
-			for(auto& GunPtr : m_UltPtr){
-				int index = (int)(&GunPtr - &m_UltPtr.front());
-				if (max < index) {
-					GunPtr = nullptr;
-					continue;
-				}
-				auto* Ptr = ObjMngr->MakeObject(ObjType::Gun);
-				GunPtr = ((std::shared_ptr<GunClass>&)(*Ptr));
-				Path = "data/gun/";
-				Path += ULT_GUNName[index];
-				Path += "/";
-				ObjMngr->LoadObjectModel(GunPtr.get(), Path.c_str());
-				MV1::SetAnime(&GunPtr->GetObj(), GunPtr->GetObj());
-				GunPtr->Init();
+			int max = std::clamp(SaveDataParts->GetParam("ULT Unlock"), 1, (int)ULT_GUN::Max);
+			for (int i = 0;i < max;i++) {
+				BattleResourceMngr->LoadGun(ULT_GUNName[i], (PlayerID)(1 + i), 0);
+				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + i).GetGun(0);
 				GunsModify::CreateSelData(GunPtr, false);
 				GunPtr->Init_Gun();
 			}
@@ -92,7 +91,7 @@ namespace FPS_n2 {
 			m_Xrad = 0.f;
 			m_Yrad_R = m_Yrad;
 			m_Xrad_R = m_Xrad;
-			m_Range = 100.f;
+			m_Range = 10.f;
 			m_SelAlpha = 0.f;
 			//
 			m_IsEnd = false;
@@ -120,7 +119,7 @@ namespace FPS_n2 {
 		bool			CustomScene::Update_Sub(void) noexcept {
 			if (GetIsFirstLoop()) {
 				m_Yrad = deg2rad(-45);
-				m_Range = 100.f;
+				m_Range = 10.f;
 				m_SelAlpha = 2.f;
 			}
 			if (DXDraw::Instance()->IsPause()) {
@@ -130,6 +129,7 @@ namespace FPS_n2 {
 			auto* Pad = PadControl::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
 
 			Pad->ChangeGuide(
 				[&]() {
@@ -196,19 +196,20 @@ namespace FPS_n2 {
 			m_UltMat[3] = MATRIX_ref::RotZ(deg2rad(80)) * MATRIX_ref::RotY(deg2rad(190)) *
 				MATRIX_ref::Mtrans(VECTOR_ref::vget(-0.9f, 0.95f, 0.f)*Scale_Rate);
 			{
-				for (auto& GunPtr : m_UltPtr) {
-					int index = (int)(&GunPtr - &m_UltPtr.front());
-					auto Per = std::clamp(m_UltPer[index], 0.f, 1.f);
+				for (int i = 0;i < (int)ULT_GUN::Max;i++) {
+					auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + i).GetGun(0);
+					auto Per = std::clamp(m_UltPer[i], 0.f, 1.f);
 					if (GunPtr) {
 						GunPtr->SetGunMatrix(
-							Lerp_Matrix(MATRIX_ref::RotY(deg2rad(90)) * MATRIX_ref::RotX(deg2rad(30)), m_UltMat[index].GetRot(), Per)*
-							MATRIX_ref::Mtrans(Lerp(VECTOR_ref::vget(-0.05f, 1.2f, -0.6f)*Scale_Rate, m_UltMat[index].pos(), Per)));
+							Lerp_Matrix(MATRIX_ref::RotY(deg2rad(90)) * MATRIX_ref::RotX(deg2rad(30)), m_UltMat[i].GetRot(), Per)*
+							MATRIX_ref::Mtrans(Lerp(VECTOR_ref::vget(-0.05f, 1.2f, -0.6f)*Scale_Rate, m_UltMat[i].pos(), Per)));
 					}
 				}
 			}
 			{
+				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
 				auto Per = 1.f - std::clamp(m_Range - 1.f, 0.f, 1.f);
-				m_GunPtr->SetGunMatrix(
+				GunPtr->SetGunMatrix(
 					Lerp_Matrix(MATRIX_ref::RotY(deg2rad(90)) * MATRIX_ref::RotX(deg2rad(30)), MATRIX_ref::RotY(deg2rad(0)), std::clamp(Per*2.f, 0.f, 1.f))*
 					MATRIX_ref::Mtrans(
 						Lerp(
@@ -216,15 +217,15 @@ namespace FPS_n2 {
 							, VECTOR_ref::vget(0.f, 1.05f, 0.f)*Scale_Rate, std::clamp(Per*2.f - 1.f, 0.f, 1.f))
 					)
 				);
-				auto Mat = m_GunPtr->GetFrameWorldMat(GunFrame::Magpos);
-				(*m_GunPtr->GetMagazinePtr())->SetMove(
+				auto Mat = GunPtr->GetFrameWorldMat(GunFrame::Magpos);
+				(*GunPtr->GetMagazinePtr())->SetMove(
 					Lerp_Matrix(Mat.GetRot(), MATRIX_ref::RotZ(deg2rad(90)), std::clamp(Per*2.f - 1.f, 0.f, 1.f)),
 					Lerp(
 						Lerp(Mat.pos(), Mat.pos() + MATRIX_ref::Vtrans(VECTOR_ref::vget(0.f, -0.15f, 0.05f)*Scale_Rate, Mat.GetRot()), std::clamp(Per*2.f, 0.f, 1.f))
 						, VECTOR_ref::vget(0.2f, 1.f, 0.f)*Scale_Rate, std::clamp(Per*2.f - 1.f, 0.f, 1.f))
 
 				);
-				(*m_GunPtr->GetMagazinePtr())->UpdateMove();
+				(*GunPtr->GetMagazinePtr())->UpdateMove();
 			}
 			int preselect = bselect;
 			bool preMouseSel = m_MouseSelMode;
@@ -367,9 +368,8 @@ namespace FPS_n2 {
 			Easing(&m_Xrad_R, m_Xrad, 0.95f, EasingType::OutExpo);
 			Easing(&m_Yrad_R, m_Yrad, 0.95f, EasingType::OutExpo);
 			Easing(&m_Range, (m_LookSel != LookSelect::ModSet) ? 2.f : 1.f, 0.95f, EasingType::OutExpo);
-			for (auto& GunPtr : m_UltPtr) {
-				int index = (int)(&GunPtr - &m_UltPtr.front());
-				Easing(&m_UltPer[index], ((index == (int)GunsModify::GetULTSelect()) && (m_LookSel == LookSelect::ULTSet)) ? 0.f : 1.f, 0.9f, EasingType::OutExpo);
+			for (int i = 0;i < (int)ULT_GUN::Max;i++) {
+				Easing(&m_UltPer[i], ((i == (int)GunsModify::GetULTSelect()) && (m_LookSel == LookSelect::ULTSet)) ? 0.f : 1.f, 0.9f, EasingType::OutExpo);
 			}
 			Pad->SetMouseMoveEnable(m_LookSel==LookSelect::FreeLook);
 
@@ -393,22 +393,21 @@ namespace FPS_n2 {
 		}
 		void			CustomScene::Dispose_Sub(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
 
 			GunsModify::SaveSlots("Save/gundata.svf");
 
-			GunsModify::DisposeSlots();
-
-			for (int i = 0;i < (int)m_UltPtr.size();i++) {
-				if (m_UltPtr[i]) {
-					ObjMngr->DelObj((SharedObj*)&m_UltPtr[i]);
-					m_UltPtr[i].reset();
-				}
+			for (int i = 0;i < (int)ULT_GUN::Max;i++) {
+				auto* Ptr = &PlayerMngr->GetPlayer(0).GetGun(1 + i);
+				ObjMngr->DelObj(Ptr);
 			}
-
-			ObjMngr->DelObj((SharedObj*)&m_GunPtr);
-			m_GunPtr.reset();
-
-			ObjMngr->DisposeObject();
+			auto* Ptr = &PlayerMngr->GetPlayer(0).GetGun(0);
+			ObjMngr->DelObj(Ptr);
+			PlayerMngr->GetPlayer(0).Dispose();
+			for (int i = 0;i < (int)ULT_GUN::Max;i++) {
+				PlayerMngr->GetPlayer(1+i).Dispose();
+			}
+			GunsModify::DisposeSlots();
 			//
 			m_SelectBackImage.Dispose();
 			for (auto& y : ButtonSel) {
@@ -427,7 +426,7 @@ namespace FPS_n2 {
 			switch (m_LookSel) {
 				case LookSelect::ModSet:
 					{
-						auto& y = GetPartsSlotData(select);
+						auto& y = GunsModify::GetSelData()[SelMoveClass[select].index];
 						auto& ModPtr1 = (std::shared_ptr<ModClass>&)(y->m_Data->GetPartsPtr(y->SlotType));
 						if (ModPtr1) {
 							SetUseLighting(FALSE);
@@ -495,10 +494,8 @@ namespace FPS_n2 {
 			}
 		}
 
-		const std::shared_ptr<GunsModify::Slot>&	CustomScene::GetPartsSlotData(int SlotSel) { return GunsModify::GetSelData()[SelMoveClass[SlotSel].index]; }
-
 		const char*		CustomScene::ItemSelName(int SlotSel, int sel) {
-			auto& y = GetPartsSlotData(SlotSel);
+			auto& y = GunsModify::GetSelData()[SelMoveClass[SlotSel].index];
 			const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
 			if (sel != (int)Data->m_ItemsUniqueID.size()) {
 				return (*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[sel]))->GetName().c_str();
@@ -537,8 +534,10 @@ namespace FPS_n2 {
 
 		void			CustomScene::ResetMod() noexcept {
 			auto* SE = SoundPool::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
 			GunsModify::DisposeSlots();
-			GunsModify::CreateSelData(m_GunPtr, true);
+			GunsModify::CreateSelData(GunPtr, true);
 			UpdateSlotMove();
 			SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 		}
@@ -548,7 +547,7 @@ namespace FPS_n2 {
 				auto* SE = SoundPool::Instance();
 				auto* SaveDataParts = SaveDataClass::Instance();
 
-				auto& y = GetPartsSlotData(select);
+				auto& y = GunsModify::GetSelData()[SelMoveClass[select].index];
 				const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
 
 
@@ -618,7 +617,7 @@ namespace FPS_n2 {
 
 			int xp1, yp1;
 
-			const auto& y = GetPartsSlotData(select);
+			const auto& y = GunsModify::GetSelData()[SelMoveClass[select].index];
 			const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
 			//
 			{
@@ -704,6 +703,7 @@ namespace FPS_n2 {
 		}
 		void			CustomScene::DrawULTUI(void) noexcept {
 			auto* Fonts = FontPool::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
 
 			auto Green = GetColor(0, 255, 0);
 			auto Green25 = GetColor(0, 64, 0);
@@ -721,10 +721,10 @@ namespace FPS_n2 {
 			{
 				xp1 = y_r(960);
 				yp1 = y_r(840);
-				auto& ModPtr1 = m_UltPtr[(int)GunsModify::GetULTSelect()];
-				if (ModPtr1) {
+				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + (int)GunsModify::GetULTSelect()).GetGun(0);
+				if (GunPtr) {
 					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-																		  xp1, yp1, Green, Green25, ModPtr1->GetName());
+																		  xp1, yp1, Green, Green25, GunPtr->GetName());
 				}
 			}
 			//
@@ -735,5 +735,17 @@ namespace FPS_n2 {
 																	   xp1, yp1, Green, Green25, "%d / %d", (int)GunsModify::GetULTSelect() + 1, (int)ULT_GUN::Max);
 			}
 		}
+		//使い回しオブジェ系
+		void			CustomScene::Dispose_Load(void) noexcept {
+			if (!m_IsFirstLoad) {
+				m_IsFirstLoad = true;
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto* ObjMngr = ObjectManager::Instance();
+
+				PlayerMngr->Dispose();
+				ObjMngr->DisposeObject();
+			}
+		}
+		//
 	};
 };

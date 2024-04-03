@@ -31,6 +31,8 @@ namespace FPS_n2 {
 				int					index{0};
 			};
 		private:
+			bool											m_IsFirstLoad{true};			//共通リソースをロードしたか
+
 			int							select{0};
 			float						m_SelAlpha{0.f};
 			float						m_Yrad{0.f};
@@ -47,8 +49,6 @@ namespace FPS_n2 {
 			std::array<ButtonClass, 8>	ButtonSel{};
 			int							bselect{0};
 			bool						m_MouseSelMode{false};
-			std::shared_ptr<GunClass>									m_GunPtr;
-			std::array<std::shared_ptr<GunClass>, (int)ULT_GUN::Max>	m_UltPtr;
 			std::array<MATRIX_ref, (int)ULT_GUN::Max>	m_UltMat;
 			std::array<float, (int)ULT_GUN::Max>	m_UltPer;
 		private:
@@ -114,8 +114,6 @@ namespace FPS_n2 {
 			void			DrawCustomUI(void) noexcept;
 			void			DrawULTUI(void) noexcept;
 
-			const std::shared_ptr<GunsModify::Slot>& GetPartsSlotData(int SlotSel);
-
 			const char*		ItemSelName(int SlotSel, int sel);
 
 			void			ResetMod() noexcept;
@@ -126,6 +124,7 @@ namespace FPS_n2 {
 			CustomScene(void) noexcept {}
 			~CustomScene(void) noexcept {}
 		public:
+			void			Load_Sub(void) noexcept override;
 			void			Set_Sub(void) noexcept override;
 			//
 			bool			Update_Sub(void) noexcept override;
@@ -141,6 +140,8 @@ namespace FPS_n2 {
 			//UI表示
 			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override {}
+		public:
+			void			Dispose_Load(void) noexcept;
 		};
 	};
 };

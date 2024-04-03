@@ -130,48 +130,34 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::TimeUp);
 		}
 		//
-		void			CommonBattleResource::LoadChara(const std::string&FolderName, PlayerID ID, bool IsRagDoll, bool IsRagDollBaseObj) noexcept {
+		void			CommonBattleResource::LoadChara(const std::string&FolderName, PlayerID ID) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
+
 			auto* Ptr = ObjMngr->MakeObject(ObjType::Human);
-			auto& c = (std::shared_ptr<CharacterClass>&)(*Ptr);
+			PlayerMngr->GetPlayer(ID).SetChara(*Ptr);
+
 			std::string Path = "data/Charactor/";
 			Path += FolderName;
 			Path += "/";
 			ObjMngr->LoadObjectModel((*Ptr).get(), Path.c_str());
 			MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
-			if (IsRagDoll) {
-				if (IsRagDollBaseObj) {
-					MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME, -1.f);//身体ラグドール
-					MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
-				}
-				else {
-					auto& Base = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1).GetChara();
-					c->GetRagDoll() = Base->GetRagDoll().Duplicate();
-					MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
-				}
-			}
+
 			(*Ptr)->Init();
-			PlayerMngr->GetPlayer(ID).SetChara(*Ptr);
-			if (ID == 0) {
-				c->LoadExtends();
-			}
-			else {
-				c->SetArmer(nullptr);
-			}
 		}
 		void			CommonBattleResource::LoadGun(const std::string&FolderName, PlayerID ID, int Sel) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 
 			auto* Ptr = ObjMngr->MakeObject(ObjType::Gun);
+			PlayerMngr->GetPlayer(ID).SetGun(Sel, *Ptr);
+
 			std::string Path = "data/gun/";
 			Path += FolderName;
 			Path += "/";
 			ObjMngr->LoadObjectModel((*Ptr).get(), Path.c_str());
 			MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
-			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID).GetChara();
-			c->SetGunPtr(Sel, ((std::shared_ptr<GunClass>&)(*Ptr)));
+
 			(*Ptr)->Init();
 		}
 	};
