@@ -368,7 +368,7 @@ namespace FPS_n2 {
 		GetFogStartEnd(&fog_start, &fog_end);											// フォグが始まる距離と終了する距離を取得する( 0.0f ～ 1.0f )
 
 		SetFogEnable(TRUE);
-		SetFogMode(DX_FOGMODE_EXP2);
+		//SetFogMode(DX_FOGMODE_EXP2);
 		SetFogStartEnd(Scale_Rate*6.f, Scale_Rate*10.f);
 		SetFogColor(26, 29, 20);
 		SetFogDensity(0.01f);

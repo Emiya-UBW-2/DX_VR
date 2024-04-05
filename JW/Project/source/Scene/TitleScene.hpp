@@ -28,6 +28,7 @@ namespace FPS_n2 {
 		private:
 			bool						m_IsFirstLoad{true};			//共通リソースをロードしたか
 
+			GraphHandle					m_TitleImage;
 			GraphHandle					m_SelectBackImage;
 			std::array<ButtonClass, 6>	ButtonSel{};
 			int							select{0};

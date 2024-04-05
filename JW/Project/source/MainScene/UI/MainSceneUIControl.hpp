@@ -185,7 +185,7 @@ namespace FPS_n2 {
 				}
 			};
 		private:
-			std::array<GaugeParam, 4 + 3 + 2>	m_GaugeParam;
+			std::array<GaugeParam, 5 + 3 + 2>	m_GaugeParam;
 			std::array<int, 23>				intParam{0};
 			std::array<float, 5>			floatParam{0};
 			std::array<std::string, 7>		strParam;
@@ -199,7 +199,7 @@ namespace FPS_n2 {
 			std::array<std::pair<int, float>, 6> ScoreAdd{};
 			int m_ScoreAddSel{0};
 
-			std::array<GaugeMask, 1 + 4>	m_GaugeMask;
+			std::array<GaugeMask, 2 + 3>	m_GaugeMask;
 		private:
 		public:
 			void			Load() noexcept {
@@ -216,27 +216,35 @@ namespace FPS_n2 {
 					m.Dispose();
 				}
 			}
-			void			Set(const char* GunName, bool isHardmode) noexcept {
+			void			Set(const char* GunName, const char* ULTName, bool isHardmode) noexcept {
 				m_ScoreAddSel = 0;
-
-				std::string Path = "data/gun/";
-				Path += GunName;
-				Path += "/Gauge.png";
-				m_GaugeMask.at(0).Dispose();
-				m_GaugeMask.at(0).Load(Path.c_str());
-				ULT_Graph = GraphHandle::Load(Path);
+				{
+					std::string Path = "data/gun/";
+					Path += GunName;
+					Path += "/Gauge.png";
+					m_GaugeMask.at(1).Dispose();
+					m_GaugeMask.at(1).Load(Path.c_str());
+				}
+				{
+					std::string Path = "data/gun/";
+					Path += ULTName;
+					Path += "/Gauge.png";
+					m_GaugeMask.at(0).Dispose();
+					m_GaugeMask.at(0).Load(Path.c_str());
+					ULT_Graph = GraphHandle::Load(Path);
+				}
 				//
-				for (int i = 0; i < 4; i++) {
-					m_GaugeMask.at((size_t)i + 1).Dispose();
+				for (int i = 0; i < 3; i++) {
+					m_GaugeMask.at((size_t)i + 2).Dispose();
 				}
 				if (isHardmode) {
-					for (int i = 0; i < 4; i++) {
-						m_GaugeMask.at((size_t)i + 1).Load("data/UI/MagM4.png");
+					for (int i = 0; i < 3; i++) {
+						m_GaugeMask.at((size_t)i + 2).Load("data/UI/MagM4.png");
 					}
 				}
 				else {
-					for (int i = 0; i < 4; i++) {
-						m_GaugeMask.at((size_t)i + 1).Load("data/UI/Mag.png");
+					for (int i = 0; i < 3; i++) {
+						m_GaugeMask.at((size_t)i + 2).Load("data/UI/Mag.png");
 					}
 				}
 			}
@@ -297,13 +305,13 @@ namespace FPS_n2 {
 				{
 					int xp1, yp1;
 					//体力
-					xp1 = DrawParts->m_DispXSize - y_r(320);
-					yp1 = DrawParts->m_DispYSize - y_r(48);
+					xp1 = y_r(24);
+					yp1 = DrawParts->m_DispYSize - y_r(96);
 
-					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM, xp1 - y_r(12), yp1 + y_r(12), White, Gray, "HP");
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(36), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1 + y_r(300) + y_r(18), yp1 + y_r(6), White, Gray, "HP");
 
 					m_GaugeParam[0].DrawGauge(
-						xp1, yp1, xp1 + y_r(300), yp1 + y_r(32),
+						xp1, yp1, xp1 + y_r(300), yp1 + y_r(18),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
 					);
@@ -344,7 +352,7 @@ namespace FPS_n2 {
 						{
 							xp1 = DrawParts->m_DispXSize / 2 + intParam[0] - y_r(300.f*std::cos(rad));
 							yp1 = DrawParts->m_DispYSize / 2 + intParam[1] - y_r(300.f*std::sin(rad)) - y_r(18) / 2;
-							m_GaugeParam[4 + 3].DrawGaugeCircleLeft(xp1, yp1,
+							m_GaugeParam[5 + 3].DrawGaugeCircleLeft(xp1, yp1,
 																	GetColorU8(255, 255, 255, 64),
 																	GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255),
 																	GetColorU8(255, 0, 0, 255), GetColorU8(0, 0, 0, 0),
@@ -353,7 +361,7 @@ namespace FPS_n2 {
 						{
 							xp1 = DrawParts->m_DispXSize / 2 + intParam[0] + y_r(300.f*std::cos(rad));
 							yp1 = DrawParts->m_DispYSize / 2 + intParam[1] + y_r(300.f*std::sin(rad)) - y_r(18) / 2;
-							m_GaugeParam[4 + 3 + 1].DrawGaugeCircleRight(xp1, yp1,
+							m_GaugeParam[5 + 3 + 1].DrawGaugeCircleRight(xp1, yp1,
 																		 GetColorU8(255, 255, 255, 64),
 																		 GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255),
 																		 GetColorU8(255, 0, 0, 255), GetColorU8(0, 0, 0, 0),
@@ -384,6 +392,7 @@ namespace FPS_n2 {
 																		  (float)((int)(floatParam[1]) % 60) + (floatParam[1] - (float)((int)(floatParam[1])))
 					);
 				}
+				float UltPer = 1.f - floatParam[3];
 				//ゲージ
 				{
 					m_GaugeMask.at(0).SetDraw([&]() {
@@ -395,43 +404,103 @@ namespace FPS_n2 {
 											 });
 					//
 					int xp1, yp1;
-					xp1 = y_r(1920 - 20 - m_GaugeMask.at(0).GetXSize() * 6 / 10);
-					yp1 = y_r(555);
-					m_GaugeMask.at(0).GetGraph().DrawExtendGraph(xp1, yp1, xp1 + y_r(m_GaugeMask.at(0).GetXSize() * 6 / 10), yp1 + y_r(m_GaugeMask.at(0).GetYSize() * 6 / 10), true);
+					float rad = deg2rad(-90)*UltPer;
+					xp1 = y_r(1920 - 20 - m_GaugeMask.at(0).GetXSize() * 3 / 10);
+					yp1 = y_r(555 + m_GaugeMask.at(0).GetYSize() * 3 / 10);
+					xp1 = (int)Lerp((float)xp1, (float)y_r(1920 - 20 - m_GaugeMask.at(0).GetYSize() * 3 / 10), UltPer);
+					yp1 = (int)Lerp((float)yp1, (float)y_r(960 + m_GaugeMask.at(0).GetXSize() * 3 / 10), UltPer);
+					if (intParam[7] == -1) {
+						xp1 = y_r(1920 - 20 - m_GaugeMask.at(0).GetXSize() * 3 / 10);
+						yp1 = y_r(800 + m_GaugeMask.at(0).GetYSize() * 3 / 10) + y_r(150.f* UltPer);
+						rad = 0.f;
+					}
+					m_GaugeMask.at(0).GetGraph().DrawRotaGraph(xp1, yp1, 0.6f *(float)y_r(100) / 100.f, rad, true);
 					if (intParam[7] == 1) {
 						SetDrawBlendMode(DX_BLENDMODE_ADD, std::clamp((int)(255.f*sin(deg2rad(ULTTimer))), 0, 255));
-						ULT_Graph.DrawExtendGraph(xp1, yp1, xp1 + y_r(m_GaugeMask.at(0).GetXSize() * 6 / 10), yp1 + y_r(m_GaugeMask.at(0).GetYSize() * 6 / 10), true);
+						ULT_Graph.DrawRotaGraph(xp1, yp1, 0.6f *(float)y_r(100) / 100.f, rad, true);
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-						ULTTimer += 5.f * 60.f / FPS;
+						ULTTimer += 15.f * 60.f / FPS;
+					}
+				}
+				//ゲージ
+				{
+					m_GaugeMask.at(1).SetDraw([&]() {
+						m_GaugeParam[4].DrawGaugeUp(
+							-1, -1, 1 + m_GaugeMask.at(1).GetXSize(), 1 + m_GaugeMask.at(1).GetYSize(),
+							GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
+							GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
+						);
+											  });
+					//
+					int xp1, yp1;
+					xp1 = y_r(1500 - 20 - m_GaugeMask.at(1).GetXSize() * 3 / 10);
+					yp1 = y_r(960 + m_GaugeMask.at(1).GetYSize() * 3 / 10) + y_r(300.f* UltPer);
+					if (intParam[7] == -1) {
+						xp1 += y_r(280);
+						yp1 -= y_r(40);
+					}
+					m_GaugeMask.at(1).GetGraph().DrawRotaGraph(xp1, yp1, 0.6f *(float)y_r(100) / 100.f, 0.f, true);
+
+					if (UltPer > 0.f && (intParam[7] != -1)) {
+						xp1 += y_r(150);
+						yp1 = y_r(980);
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*UltPer), 0, 255));
+						//弾ストック表示
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+																			  xp1, yp1 + y_r(80), White, Gray,
+																			  "sec");
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
+																			  xp1, yp1 + y_r(80), White, Gray,
+																			  "%04.2f",
+																			  floatParam[4]
+						);
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 					}
 				}
 				//ゲージ
 				{
 					int xp1, yp1;
 					xp1 = y_r(1500);
-					yp1 = y_r(940);
+					yp1 = y_r(980) + y_r(300.f* UltPer);
+					if (intParam[7] == -1) {
+						xp1 += y_r(280);
+						yp1 -= y_r(40);
+					}
 					for (size_t i = 0; i < 3; i++) {
-						auto& g = m_GaugeMask.at((size_t)(i + 1));
+						auto& g = m_GaugeMask.at((size_t)(i + 2));
 						g.SetDraw([&]() {
-							m_GaugeParam[(size_t)(i + 4)].DrawGaugeUp(
+							m_GaugeParam[(size_t)(i + 5)].DrawGaugeUp(
 								-1, -1, 1 + g.GetXSize(), 1 + g.GetYSize(),
 								GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 								GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
 							);
 								 });
 						//
-						//Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_r(12), White, Gray, "%d", m_GaugeParam[i + 4].GetGauge());
+						//Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_r(12), White, Gray, "%d", m_GaugeParam[i + 5].GetGauge());
 
 						g.GetGraph().DrawExtendGraph(xp1, yp1, xp1 + y_r(g.GetXSize() * 6 / 10), yp1 + y_r(g.GetYSize() * 6 / 10), true);
 						xp1 += y_r(g.GetXSize() * 6 / 10 + 6);
 					}
-					//弾ストック表示
-					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-																		 xp1, yp1 + y_r(80), White, Gray,
-																		 "AmmoStock");
-					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-																		 xp1 + y_r(110), yp1 + y_r(80), White, Gray,
-																		 "%03d", intParam[3]);
+
+					if ((1.f - UltPer) > 0.f) {
+						if (intParam[7] == -1) {
+							xp1 = y_r(1760);
+							yp1 = y_r(980);
+						}
+						else {
+							xp1 = y_r(1500);
+							yp1 = y_r(980);
+						}
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - UltPer)), 0, 255));
+						//弾ストック表示
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+																			  xp1, yp1 + y_r(80), White, Gray,
+																			  "AmmoStock");
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+																			  xp1 + y_r(110), yp1 + y_r(80), White, Gray,
+																			  "%03d", intParam[3]);
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+					}
 				}
 			}
 

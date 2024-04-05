@@ -63,9 +63,9 @@ namespace FPS_n2 {
 			//
 			VECTOR_ref LightVec = VECTOR_ref::vget(0.f, -1.f, 0.f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(0.92f, 0.91f, 0.90f, 0.0f));
-
-			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.5f, 10.f)*Scale_Rate, 0);
-			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.f, 10.f)*Scale_Rate, 1);
+			DrawParts->SetIsUpdateShadow(0, false);
+			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-5.f, -3.f, -5.f)*Scale_Rate, VECTOR_ref::vget(5.f, 0.5f, 5.f)*Scale_Rate, 0);
+			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-5.f, -3.f, -5.f)*Scale_Rate, VECTOR_ref::vget(5.f, 0.5f, 5.f)*Scale_Rate, 1);
 			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.f, 10.f)*Scale_Rate, 2);
 
 			this->m_BackGround = std::make_shared<BackGroundClassMain>();
@@ -149,10 +149,10 @@ namespace FPS_n2 {
 			//UI
 			if (!m_IsHardMode) {
 				std::string ULTName = ULT_GUNName[(int)GunsModify::GetULTSelect()];
-				this->m_UIclass.Set(ULTName.c_str(), m_IsHardMode);
+				this->m_UIclass.Set("G17Gen3", ULTName.c_str(), m_IsHardMode);
 			}
 			else {
-				this->m_UIclass.Set("G17Gen3", m_IsHardMode);
+				this->m_UIclass.Set("M4A1", "G17Gen3", m_IsHardMode);
 			}
 			prevScore = 0;
 			prevLastMan = -1;
@@ -176,8 +176,8 @@ namespace FPS_n2 {
 			//*/
 			{
 				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
-				this->m_UIclass.InitGaugeParam(4 + 3, 0, 20);
-				this->m_UIclass.InitGaugeParam(4 + 3 + 1, 0, 20);
+				this->m_UIclass.InitGaugeParam(4 + 4, 0, 20);
+				this->m_UIclass.InitGaugeParam(4 + 4 + 1, 0, 20);
 				//HP
 				this->m_UIclass.InitGaugeParam(0, (int)Chara->GetHPMax(), (int)Chara->GetHPMax());
 				//AP
@@ -188,10 +188,14 @@ namespace FPS_n2 {
 				}
 				//ULT
 				this->m_UIclass.InitGaugeParam(3, 0, (int)Chara->GetULTMax());
+				//GUN
+				if (Chara->GetGunPtr(0)) {
+					this->m_UIclass.InitGaugeParam(4, (int)Chara->GetGunPtr(0)->GetAmmoAll() + 1, (int)Chara->GetGunPtr(0)->GetAmmoAll() + 1);
+				}
 				//mag
 				int mags = 0;
 				for (const auto& M : Chara->GetMagDatas()) {
-					this->m_UIclass.InitGaugeParam(4 + mags, M.AmmoAll, M.AmmoAll);
+					this->m_UIclass.InitGaugeParam(5 + mags, M.AmmoAll, M.AmmoAll);
 					mags++;
 				}
 			}
@@ -882,8 +886,8 @@ namespace FPS_n2 {
 				this->m_UIclass.SetfloatParam(0, m_Timer);
 				this->m_UIclass.SetfloatParam(1, m_ReadyTimer);
 				//
-				this->m_UIclass.SetGaugeParam(4 + 3, (int)(Chara->GetAutoAimPer()*20.f), 20);
-				this->m_UIclass.SetGaugeParam(4 + 3 + 1, (int)(Chara->GetAutoAimPer()*20.f), 20);
+				this->m_UIclass.SetGaugeParam(5 + 3, (int)(Chara->GetAutoAimPer()*20.f), 20);
+				this->m_UIclass.SetGaugeParam(5 + 3 + 1, (int)(Chara->GetAutoAimPer()*20.f), 20);
 				this->m_UIclass.SetIntParam(4, Chara->GetAutoAimID());
 				this->m_UIclass.SetfloatParam(2, Chara->GetAutoAimOn());
 				//HP
@@ -896,11 +900,22 @@ namespace FPS_n2 {
 				}
 				//ULT
 				this->m_UIclass.SetGaugeParam(3, (int)Chara->GetULT(), (int)Chara->GetULTMax());
-				this->m_UIclass.SetIntParam(7, ((m_ReadyTimer == 0.f) && (m_PreEndTimer == -1.f) && (Chara->IsULTSelect() || Chara->IsULTActive())) ? 1 : 0);
+				if (m_IsHardMode) {
+					this->m_UIclass.SetIntParam(7, -1);
+				}
+				else {
+					this->m_UIclass.SetIntParam(7, ((m_ReadyTimer == 0.f) && (m_PreEndTimer == -1.f) && (Chara->IsULTSelect() || Chara->IsULTActive())) ? 1 : 0);
+				}
+				if (Chara->GetGunPtr(0)) {
+					this->m_UIclass.SetGaugeParam(4, (int)Chara->GetGunPtr(0)->GetAmmoNumTotal(), (int)Chara->GetGunPtr(0)->GetAmmoAll() + 1);
+				}
+				this->m_UIclass.SetfloatParam(3, Chara->GetGunSelPer());
+				this->m_UIclass.SetfloatParam(4, m_ULTCounter);
+				Easing(&m_ULTCounter, (100.f / (1.f / 0.25f)) * Chara->GetULT() / Chara->GetULTMax(), 0.95f, EasingType::OutExpo);
 				//mag
 				int mags = 0;
 				for (const auto& M : Chara->GetMagDatas()) {
-					this->m_UIclass.SetGaugeParam(4 + mags, M.AmmoNum, M.AmmoAll);
+					this->m_UIclass.SetGaugeParam(5 + mags, M.AmmoNum, M.AmmoAll);
 					mags++;
 				}
 				//
@@ -1027,6 +1042,7 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				PostPassEffect::Instance()->SetLevelFilter(0, 255, 1.f);
 				DrawParts->SetAberrationPower(1.f);
+				DrawParts->SetIsUpdateShadow(0, true);
 			}
 
 			m_MainLoopPauseControl.Dispose();
@@ -1041,6 +1057,14 @@ namespace FPS_n2 {
 				return;
 			}
 			this->m_BackGround->BG_Draw();
+		}
+		void			MAINLOOP::ShadowDraw_NearFar_Sub(void) noexcept {
+			if (m_IsEnd) {
+				return;
+			}
+			this->m_BackGround->Shadow_Draw();
+			auto* ObjMngr = ObjectManager::Instance();
+			ObjMngr->DrawObject_Shadow();
 		}
 		void			MAINLOOP::ShadowDraw_Sub(void) noexcept {
 			if (m_IsEnd) {
@@ -1124,7 +1148,7 @@ namespace FPS_n2 {
 			}
 			//
 #endif
-			SetVerticalFogEnable(FALSE);
+			//SetVerticalFogEnable(FALSE);
 
 		}
 		void			MAINLOOP::MainDrawFront_Sub(void) noexcept {

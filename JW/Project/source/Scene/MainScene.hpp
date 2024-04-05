@@ -51,6 +51,7 @@ namespace FPS_n2 {
 
 			float											m_DeathCamYAdd{0.f};
 			float											m_DeathPer{0.f};
+			float											m_ULTCounter{0.f};
 
 			int												m_CountDownBGMTimer{0};
 			bool											m_CountDownBGM1Flag{true};
@@ -71,7 +72,7 @@ namespace FPS_n2 {
 			void			Depth_Draw_Sub(void) noexcept override {}
 			void			BG_Draw_Sub(void) noexcept override;
 			void			ShadowDraw_Far_Sub(void) noexcept override {}
-			void			ShadowDraw_NearFar_Sub(void) noexcept override {}
+			void			ShadowDraw_NearFar_Sub(void) noexcept override;
 			void			ShadowDraw_Sub(void) noexcept override;
 			void			MainDraw_Sub(void) noexcept override;
 			void			MainDrawFront_Sub(void) noexcept override;

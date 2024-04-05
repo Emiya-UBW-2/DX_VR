@@ -76,7 +76,7 @@ namespace FPS_n2 {
 			//ƒTƒEƒ“ƒh
 			BattleResourceMngr->Set();
 			//UI
-			this->m_UIclass.Set(ULTName.c_str(), false);
+			this->m_UIclass.Set("G17Gen3", ULTName.c_str(), false);
 			//
 			m_MainLoopPauseControl.Init();
 
@@ -127,8 +127,8 @@ namespace FPS_n2 {
 			tgtTimer = 0.f;
 
 			{
-				this->m_UIclass.InitGaugeParam(4 + 3, 0, 20);
-				this->m_UIclass.InitGaugeParam(4 + 3 + 1, 0, 20);
+				this->m_UIclass.InitGaugeParam(5 + 3, 0, 20);
+				this->m_UIclass.InitGaugeParam(5 + 3 + 1, 0, 20);
 				//HP
 				this->m_UIclass.InitGaugeParam(0, (int)c->GetHPMax(), (int)c->GetHPMax());
 				//AP
@@ -139,10 +139,14 @@ namespace FPS_n2 {
 				}
 				//ULT
 				this->m_UIclass.InitGaugeParam(3, (int)c->GetULTMax(), (int)c->GetULTMax());
+				//ULT
+				if (c->GetGunPtr(0)) {
+					this->m_UIclass.InitGaugeParam(4, (int)c->GetGunPtr(0)->GetAmmoAll() + 1, (int)c->GetGunPtr(0)->GetAmmoAll() + 1);
+				}
 				//mag
 				int mags = 0;
 				for (const auto& M : c->GetMagDatas()) {
-					this->m_UIclass.InitGaugeParam(4 + mags, M.AmmoAll, M.AmmoAll);
+					this->m_UIclass.InitGaugeParam(5 + mags, M.AmmoAll, M.AmmoAll);
 					mags++;
 				}
 			}
@@ -393,11 +397,11 @@ namespace FPS_n2 {
 					auto far_t = DrawParts->GetMainCamera().GetCamFar();
 					if (Chara->GetIsADS()) {
 						Easing(&near_t, Scale_Rate * 0.03f, 0.9f, EasingType::OutExpo);
-						Easing(&far_t, Scale_Rate * 50.f, 0.5f, EasingType::OutExpo);
+						Easing(&far_t, Scale_Rate * 100.f, 0.5f, EasingType::OutExpo);
 					}
 					else {
 						Easing(&near_t, Scale_Rate * 0.05f, 0.9f, EasingType::OutExpo);
-						Easing(&far_t, Scale_Rate * 50.f, 0.5f, EasingType::OutExpo);
+						Easing(&far_t, Scale_Rate * 100.f, 0.5f, EasingType::OutExpo);
 					}
 					//fov
 					{
@@ -482,8 +486,8 @@ namespace FPS_n2 {
 				this->m_UIclass.SetfloatParam(0, 0);
 				this->m_UIclass.SetfloatParam(1, 0);
 				//
-				this->m_UIclass.SetGaugeParam(4 + 3, (int)(Chara->GetAutoAimPer()*20.f), 20);
-				this->m_UIclass.SetGaugeParam(4 + 3 + 1, (int)(Chara->GetAutoAimPer()*20.f), 20);
+				this->m_UIclass.SetGaugeParam(5 + 3, (int)(Chara->GetAutoAimPer()*20.f), 20);
+				this->m_UIclass.SetGaugeParam(5 + 3 + 1, (int)(Chara->GetAutoAimPer()*20.f), 20);
 				this->m_UIclass.SetIntParam(4, Chara->GetAutoAimID());
 				this->m_UIclass.SetfloatParam(2, Chara->GetAutoAimOn());
 				//Score
@@ -498,10 +502,15 @@ namespace FPS_n2 {
 				}
 				//ULT
 				this->m_UIclass.SetGaugeParam(3, (int)Chara->GetULT(), (int)Chara->GetULTMax());
+				if (Chara->GetGunPtr(0)) {
+					this->m_UIclass.SetGaugeParam(4, (int)Chara->GetGunPtr(0)->GetAmmoNumTotal(), (int)Chara->GetGunPtr(0)->GetAmmoAll() + 1);
+				}
+				this->m_UIclass.SetfloatParam(3, Chara->GetGunSelPer());
+				this->m_UIclass.SetfloatParam(4, 99.99f);
 				//mag
 				int mags = 0;
 				for (const auto& M : Chara->GetMagDatas()) {
-					this->m_UIclass.SetGaugeParam(4 + mags, M.AmmoNum, M.AmmoAll);
+					this->m_UIclass.SetGaugeParam(5 + mags, M.AmmoNum, M.AmmoAll);
 					mags++;
 				}
 				this->m_TutorialLog.Update();

@@ -67,6 +67,7 @@ namespace FPS_n2 {
 			Pendulum2D											m_SlingZrad;
 			std::array<float, 2>								m_SlingPer;
 			std::array<MATRIX_ref, 2>							m_SlingMat;
+			ArmMovePerClass										m_ULTBar;
 			std::shared_ptr<BackGroundClassBase>				m_BackGround;				//BG
 			CharaTypeID											m_CharaType;
 			bool												m_IsMainGame{false};
@@ -98,6 +99,7 @@ namespace FPS_n2 {
 			const auto		IsLowReadyPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() >= 0.95f); }
 		public://ƒQƒbƒ^[
 			const MATRIX_ref GetEyeMatrix(void) const noexcept;
+			const auto&		GetGunSelPer(void) const noexcept { return this->m_ULTBar.Per(); }
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
 			auto&			GetSoundPower(void) noexcept { return this->m_SoundPower; }
 			const auto		GetMeleeSwitch(void) const noexcept { return m_MeleeCoolDown == 1.f; }

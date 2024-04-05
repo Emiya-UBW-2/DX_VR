@@ -17,7 +17,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DrawParts->Init();
 	SetMainWindowText("Phantom of the Bunker");						//タイトル
 	//MV1SetLoadModelUsePackDraw(TRUE);
-	SetUseHalfLambertLighting(TRUE);	//ハーフランバート化
+	//SetUseHalfLambertLighting(TRUE);	//ハーフランバート化
 	//
 	FPS_n2::GetItemLog::Create();
 	FPS_n2::Sceneclass::ObjectManager::Create();
@@ -125,6 +125,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//繰り返し
 	while (true) {
 		scene->StartScene();
+		//SetUsePixelLighting(FALSE);									//ピクセルライティングの使用(DXLIBまち)
+
 		while (true) {
 			if (!DrawParts->FirstExecute()) {
 				SaveDataParts->Save();//セーブ

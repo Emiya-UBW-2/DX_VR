@@ -695,7 +695,7 @@ namespace FPS_n2 {
 			}
 			GetObj().work_anime();
 			//ˆÚ“®‚ÌÛ‚ÌŽ‹“_§Œä
-			EyeSwingControl::UpdateEyeSwing(GetCharaDir(), KeyControl::GetMoverPer(), KeyControl::GetRun() ? 8.f : 5.f);
+			EyeSwingControl::UpdateEyeSwing(GetCharaDir(), KeyControl::GetVec().Length() / 0.65f, KeyControl::GetRun() ? 8.f : 5.f);
 		}
 		//‰¹ŽwŽ¦
 		void			CharacterClass::ExecuteSound(void) noexcept {
@@ -1016,6 +1016,8 @@ namespace FPS_n2 {
 						Post0 = Lerp(Post0, MatT.pos(), this->m_Arm[i].Per());
 					}
 					Post0 = GetFrameWorldMat(CharaFrame::Head).pos() + Post0;
+					//
+					this->m_ULTBar.Execute(IsGun0Select(),0.1f,0.1f,0.7f);
 					//
 					for (int index = 0;index < 2;index++) {
 						auto& p = GetGunPtr(index);
@@ -1368,6 +1370,7 @@ namespace FPS_n2 {
 				MagStockControl::Init_MagStockControl(GetGunPtr(0)->GetAmmoNum(), GetGunPtr(0)->GetAmmoAll(), GetGunPtr(0)->GetMagUniqueID());
 			}
 			SelectGun(GunSel);
+			this->m_ULTBar.Init(IsGun0Select());
 			this->m_SlingPer[0] = (IsGun0Select()) ? 0.f : 1.f;
 			this->m_SlingPer[1] = 1.f - this->m_SlingPer[0];
 			if (GunSel == 1) {

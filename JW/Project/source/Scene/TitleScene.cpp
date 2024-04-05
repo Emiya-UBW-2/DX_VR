@@ -28,6 +28,7 @@ namespace FPS_n2 {
 			GameFadeIn = 1.f;
 			GameStart = 0.f;
 
+			m_TitleImage = GraphHandle::Load("data/UI/Title.png");
 			m_SelectBackImage = GraphHandle::Load("data/UI/select.png");
 			for (auto& y : ButtonSel) {
 				y.LoadCommon(&m_SelectBackImage);
@@ -299,6 +300,8 @@ namespace FPS_n2 {
 			for (auto& y : ButtonSel) {
 				y.Dispose();
 			}
+			//
+			m_TitleImage.Dispose();
 		}
 		void			TitleScene::BG_Draw_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -322,9 +325,7 @@ namespace FPS_n2 {
 			auto White = GetColor(255, 255, 255);
 			auto Black = GetColor(0, 0, 0);
 			//
-			Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(96),
-																FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																y_r(64), y_r(64), White, Black, "Phantom of the Bunker");
+			m_TitleImage.DrawGraph(y_r(64), y_r(64), true);
 			//
 			for (auto& y : ButtonSel) {
 				y.Draw();
