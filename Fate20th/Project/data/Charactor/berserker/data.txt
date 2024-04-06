@@ -1,4 +1,0 @@
-Name=Berserker
-animsel=1
-runspeed=7.5
-end
