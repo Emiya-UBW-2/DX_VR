@@ -3,6 +3,20 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		enum class CharaActionID : int {
+			Ready,		//何もしていない
+			Cocking,	//コッキング
+			Check,		//マガジンチェック
+			Reload,		//リロード
+			Watch,		//銃を眺める
+			Melee,		//近接
+			AmmoLoad,	//弾込め
+			WearArmer,	//アーマー着用
+			Morphine,	//モルヒネ
+			Max,
+		};
+
+
 		enum class CharaGunAnimeID : int {
 			Down,
 			Ready,

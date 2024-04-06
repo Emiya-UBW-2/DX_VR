@@ -380,7 +380,6 @@ namespace FPS_n2 {
 		}
 		void Draw() noexcept {
 			auto* Fonts = FontPool::Instance();
-			auto Black = GetColor(0, 0, 0);
 
 			int xp1, yp1;
 			xp1 = y_r(64);

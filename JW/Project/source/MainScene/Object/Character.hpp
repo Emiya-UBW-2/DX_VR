@@ -40,6 +40,8 @@ namespace FPS_n2 {
 			public ItemPopControl
 		{
 		private:
+			bool												m_ActionFirstFrame{false};
+			CharaActionID										m_CharaAction{CharaActionID::Ready};
 			std::array<ArmMovePerClass, (int)EnumGunAnimType::Max>	m_Arm;
 			bool												m_MagHand{false};
 			ArmMovePerClass										m_MagArm;
@@ -97,6 +99,8 @@ namespace FPS_n2 {
 			const auto		GetCharaPosition(void) const noexcept { return this->m_move.pos; }
 			const auto		IsAimPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() <= 0.1f); }
 			const auto		IsLowReadyPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() >= 0.95f); }
+		private:
+			void			Reload_Start() noexcept;
 		public://ƒQƒbƒ^[
 			const MATRIX_ref GetEyeMatrix(void) const noexcept;
 			const auto&		GetGunSelPer(void) const noexcept { return this->m_ULTBar.Per(); }

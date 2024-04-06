@@ -61,8 +61,6 @@ namespace FPS_n2 {
 			m_PopUpDrawClass.Set("Credit", y_r(720), y_r(840), [&](int WinSizeX, int WinSizeY, bool) {
 				auto* Fonts = FontPool::Instance();
 
-				auto White = GetColor(255, 255, 255);
-				auto Black = GetColor(0, 0, 0);
 				int xp1, yp1;
 
 				xp1 = y_r(960) - WinSizeX / 2 + y_r(48);
@@ -306,7 +304,7 @@ namespace FPS_n2 {
 		void			TitleScene::BG_Draw_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			//
-			DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(96, 96, 96), TRUE);
+			DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Gray65, TRUE);
 		}
 
 		void			TitleScene::ShadowDraw_Sub(void) noexcept {
@@ -322,8 +320,6 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* Fonts = FontPool::Instance();
 
-			auto White = GetColor(255, 255, 255);
-			auto Black = GetColor(0, 0, 0);
 			//
 			m_TitleImage.DrawGraph(y_r(64), y_r(64), true);
 			//
@@ -339,10 +335,10 @@ namespace FPS_n2 {
 			//
 			{
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(GameFadeIn, 0.f, 1.f)), 0, 255));
-				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
+				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Black, TRUE);
 
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(GameStart, 0.f, 1.f)), 0, 255));
-				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(255, 255, 255), TRUE);
+				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, White, TRUE);
 
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}

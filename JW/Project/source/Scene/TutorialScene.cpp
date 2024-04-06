@@ -666,7 +666,7 @@ namespace FPS_n2 {
 						for (auto& r : t->GetHitPosRec()) {
 							float cos_t, sin_t;
 							t->GetHitPoint(r, &cos_t, &sin_t);
-							DrawCircle(xp + xs + (int)((float)xs * cos_t), yp + ys + (int)((float)ys * sin_t), 2, GetColor(0, 255, 0));
+							DrawCircle(xp + xs + (int)((float)xs * cos_t), yp + ys + (int)((float)ys * sin_t), 2, Green);
 						}
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 					}

@@ -100,8 +100,6 @@ namespace FPS_n2 {
 			}
 			void Draw() noexcept {
 				auto* Fonts = FontPool::Instance();
-				auto Gray = GetColor(64, 64, 64);
-				auto Black = GetColor(0, 0, 0);
 
 				int xp1, yp1;
 				xp1 = y_r(64);
@@ -127,7 +125,7 @@ namespace FPS_n2 {
 							xp + y_r(xs), yp + y_r(ys),
 							true);
 						Fonts->Get(FontPool::FontType::Gothic_AA, y_r(24)).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																			  xp + y_r(69), yp + y_r(14), Gray, Black, d.GetMsg());
+																			  xp + y_r(69), yp + y_r(14), Gray75, Black, d.GetMsg());
 					}
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);

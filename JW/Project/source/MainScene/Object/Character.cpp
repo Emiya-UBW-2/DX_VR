@@ -5,6 +5,48 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		void			CharacterClass::Reload_Start() noexcept {
+			auto* SE = SoundPool::Instance();
+			switch (GetGunPtrNow()->GetReloadType()) {
+				case RELOADTYPE::MAG:
+					{
+						if (IsGun0Select()) {
+							int Num = GetGunPtrNow()->GetAmmoNum();
+							int All = GetGunPtrNow()->GetAmmoAll();
+							int UniqueID = GetGunPtrNow()->GetMagUniqueID();
+							GetGunPtrNow()->SetReloadStartMag(MagStockControl::GetNowMag().AmmoNum, MagStockControl::GetNowMag().ModUniqueID);
+							MagStockControl::SetOldMag(Num, All, UniqueID);
+						}
+						else {
+							GetGunPtrNow()->SetReloadStartMag(GetGunPtrNow()->GetAmmoAll(), GetGunPtrNow()->GetMagUniqueID());
+						}
+					}
+					break;
+				case RELOADTYPE::AMMO:
+					{
+						if (IsGun0Select()) {
+							//todo:弾残数に応じて変更
+							GetGunPtrNow()->SetReloadStartAmmo(MagStockControl::GetNowMag().AmmoNum);
+						}
+						else {
+							GetGunPtrNow()->SetReloadStartAmmo(GetGunPtrNow()->GetAmmoAll());
+						}
+					}
+					break;
+				default:
+					break;
+			}
+			if (this->m_MyID != 0) {
+				if (GetRand(1) == 0) {
+					SE->Get((int)SoundEnum::Man_reload).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
+				}
+				else {
+					SE->Get((int)SoundEnum::Man_takecover).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
+				}
+				this->m_SoundPower = 0.6f * (CanLookTarget ? 1.f : 0.5f);
+			}
+		}
+
 		const MATRIX_ref CharacterClass::GetEyeMatrix(void) const noexcept {
 			auto tmpUpperMatrix = MATRIX_ref::RotZ(KeyControl::GetLeanRad() / 5.f);
 
@@ -300,402 +342,341 @@ namespace FPS_n2 {
 			auto* ItemLogParts = GetItemLog::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			//
-			GunReadyControl::UpdateReady();
-			if ((
-				this->m_Press_Shot ||
-				this->m_Press_Reload ||
-				((KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && GetIsCheck()) && GetGunPtrNow()->GetCanShot()) ||
-				(KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && GetGunPtrNow()->GetCanShot())
-				) && (GetShotPhase() == GunAnimeID::Base) && !m_IsChanging) {
-				GunReadyControl::SetAimOrADS();
+			auto PrevAction = m_CharaAction;
+			//開始演出
+			if (GetGunPtrNow() && m_ReadyAnim > 0.f) {
+				m_ReadyAnim = std::max(m_ReadyAnim - 1.f / FPS, 0.f);
+				switch (m_ReadyAnimPhase) {
+					case 0:
+						GunReadyControl::SetAim();
+						if (m_ReadyAnim < 4.f) {
+							m_ReadyAnimPhase++;
+							//リロード
+							m_CharaAction = CharaActionID::Reload;
+							DrawParts->SetCamShake(0.1f, 2.f);
+						}
+						break;
+					case 1:
+						if (GetGunPtrNow()->GetShotPhase() == GunAnimeID::ReloadEnd) {
+							m_ReadyAnimPhase++;
+							DrawParts->SetCamShake(0.1f, 2.f);
+						}
+						break;
+					case 2:
+						GunReadyControl::SetReady();
+						if (IsLowReadyPer()) {
+							m_ReadyAnimPhase++;
+							GunReadyControl::SetAim();
+							SelectGun(0);
+							m_CharaAction = CharaActionID::Check;
+							DrawParts->SetCamShake(0.1f, 2.f);
+						}
+						break;
+					case 3:
+						if (GetGunPtrNow()->GetShotPhase() == GunAnimeID::CheckEnd) {
+							m_ReadyAnimPhase++;
+						}
+						break;
+					default:
+						m_ReadyAnim = -1.f;
+						break;
+				}
 			}
-
-			//射撃
-			if (GetGunPtrNow()) {
-				//リコイルの演算
-				if (this->m_RecoilRadAdd.y() < 0.f) {
-					Easing(&this->m_RecoilRadAdd, VECTOR_ref::vget(0.f, 0.01f, 0.f), GetGunPtrNow()->GetGunDataClass()->GetRecoilReturn(), EasingType::OutExpo);
-				}
-				else {
-					Easing(&this->m_RecoilRadAdd, VECTOR_ref::zero(), 0.7f, EasingType::OutExpo);
-				}
-				if (m_ReadyAnim > 0.f) {
-					m_ReadyAnim = std::max(m_ReadyAnim - 1.f / FPS, 0.f);
-					switch (m_ReadyAnimPhase) {
-						case 0:
-							if (m_ReadyAnim < 4.f) {
-								m_ReadyAnimPhase++;
+			//
+			if (PrevAction == m_CharaAction) {
+				switch (m_CharaAction) {
+					case CharaActionID::Ready:
+						//モルヒネ
+						if (KeyControl::GetInputControl().GetPADSPress(PADS::THROW)) {
+							if ((this->m_MorphineStock != 0) && (LifeControl::GetHP() < LifeControl::GetHPMax())) {
+								this->m_MorphineStock = std::max(this->m_MorphineStock - 1, 0);
+								m_CharaAction = CharaActionID::Morphine;
 							}
-							break;
-						case 1:
-							{
-								if (!GetGunPtrNow()->GetReloading()) {
-									switch (GetGunPtrNow()->GetReloadType()) {
-										case RELOADTYPE::MAG:
-											{
-												GetGunPtrNow()->SetAmmo(0);
-												GetGunPtrNow()->SetReloadStartMag(GetGunPtrNow()->GetAmmoAll(), GetGunPtrNow()->GetMagUniqueID());
-											}
+						}
+						//アーマー着用/弾込め
+						if (KeyControl::GetInputControl().GetPADSPress(PADS::CHECK)) {
+							if ((this->m_ArmerStock != 0) && (LifeControl::GetAP() < LifeControl::GetAPMax())) {
+								this->m_ArmerStock = std::max(this->m_ArmerStock - 1, 0);
+								m_CharaAction = CharaActionID::WearArmer;
+							}
+							else if (GetGunPtrNow()) {
+								if (IsGun0Select() && MagStockControl::GetNeedAmmoLoad(GetGunPtrNow()->GetIsMagFull(), GetGunPtrNow()->GetIsMagEmpty())) {
+									m_CharaAction = CharaActionID::AmmoLoad;
+								}
+								else if (GetGunPtrNow()->GetCanShot()) {
+									m_CharaAction = CharaActionID::Watch;
+								}
+							}
+						}
+						//射撃
+						if (!KeyControl::GetRun() && this->m_Press_Shot) {
+							if ((GetGunPtrNow() && (GetShotPhase() == GunAnimeID::Base) && IsAimPer())) {
+								if (GetGunPtrNow()->GetInChamber()) {
+									GetGunPtrNow()->SetBullet();
+									if (IsULTSelect()) {
+										ULTControl::AddULT(-3, true);
+									}
+									float Power = 0.0001f*GetGunPtrNow()->GetGunDataClass()->GetRecoilPower();
+									if (GetIsSquat()) {
+										Power *= 0.5f;
+									}
+									this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power, 0.f);
+									//this->m_RecoilRadAdd = MATRIX_ref::Vtrans(this->m_RecoilRadAdd, MATRIX_ref::RotZ(-m_LeanRad / 5.f));
+									if (this->m_MyID == 0) {
+										DrawParts->SetCamShake(0.1f, 0.3f);
+									}
+									//エフェクト
+									auto mat = GetGunPtrNow()->GetFrameWorldMat(GunFrame::Muzzle);
+									switch (GetGunPtrNow()->GetGunShootSound()) {
+										case GunShootSound::Normal:
+											EffectControl::SetOnce(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.5f);
+											EffectControl::SetEffectSpeed(EffectResource::Effect::ef_fire2, 2.f);
 											break;
-										case RELOADTYPE::AMMO:
-											{
-												GetGunPtrNow()->SetReloadStartAmmo(GetGunPtrNow()->GetAmmoAll());
-											}
+										case GunShootSound::Suppressor:
+											EffectControl::SetOnce(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.25f);
+											EffectControl::SetEffectSpeed(EffectResource::Effect::ef_fire2, 2.f);
 											break;
 										default:
 											break;
 									}
-									DrawParts->SetCamShake(0.1f, 2.f);
-								}
-								if (GetGunPtrNow()->GetShotPhase() == GunAnimeID::ReloadEnd) {
-									DrawParts->SetCamShake(0.1f, 2.f);
-									m_ReadyAnimPhase++;
+									//音
+									this->m_SoundPower = 1.f * (CanLookTarget ? 1.f : 0.5f);
 								}
 							}
-							break;
-						case 2:
-							{
-								GunReadyControl::SetReady();
-								if (IsLowReadyPer()) {
-									GunReadyControl::SetAim();
-									SelectGun(0);
-									m_ReadyAnimPhase++;
-									DrawParts->SetCamShake(0.1f, 2.f);
-								}
+							GunReadyControl::SetAimOrADS();
+						}
+						//リロード/マガジンチェック
+						if (!KeyControl::GetRun() && this->m_Press_Reload) {
+							if (!GetIsCheck()) {
+								m_CharaAction = CharaActionID::Reload;
 							}
-							break;
-						case 3:
-							{
-								if (!GetGunPtrNow()->GetChecking() && IsAimPer()) {
-									GetGunPtrNow()->SetShotPhase(GunAnimeID::CheckStart);
-								}
-								if (GetGunPtrNow()->GetShotPhase() == GunAnimeID::CheckEnd) {
-									m_ReadyAnimPhase++;
-								}
+							else {
+								m_CharaAction = CharaActionID::Check;
 							}
-							break;
-						default:
-							m_ReadyAnim = -1.f;
-							break;
-					}
-				}
 
-				GetGunPtrNow()->SetShotSwitchOff();
-				if ((GetShotPhase() == GunAnimeID::Base) && IsAimPer()) {
-					if (this->m_Press_Shot) {
-						if (GetGunPtrNow()->GetInChamber()) {
-							GetGunPtrNow()->SetBullet();
-							if (IsULTSelect()) {
-								ULTControl::AddULT(-3, true);
+
+						}
+						//姿勢指定
+						if (m_Press_Aim) {
+							if (!m_IsStuckGun) {
+								GunReadyControl::SetADS();
 							}
-							float Power = 0.0001f*GetGunPtrNow()->GetGunDataClass()->GetRecoilPower();
-							if (GetIsSquat()) {
-								Power *= 0.5f;
+							else {
+								GunReadyControl::SetAim();
 							}
-							this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power, 0.f);
-							//this->m_RecoilRadAdd = MATRIX_ref::Vtrans(this->m_RecoilRadAdd, MATRIX_ref::RotZ(-m_LeanRad / 5.f));
-							if (this->m_MyID == 0) {
-								DrawParts->SetCamShake(0.1f, 0.3f);
-							}
-							//エフェクト
-							auto mat = GetGunPtrNow()->GetFrameWorldMat(GunFrame::Muzzle);
-							switch (GetGunPtrNow()->GetGunShootSound()) {
-								case GunShootSound::Normal:
-									EffectControl::SetOnce(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.5f);
-									EffectControl::SetEffectSpeed(EffectResource::Effect::ef_fire2, 2.f);
-									break;
-								case GunShootSound::Suppressor:
-									EffectControl::SetOnce(EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec()*-1.f, 0.25f);
-									EffectControl::SetEffectSpeed(EffectResource::Effect::ef_fire2, 2.f);
-									break;
-								default:
-									break;
-							}
+						}
+						if (KeyControl::GetRun()) {
+							GunReadyControl::SetReady();
+						}
+						break;
+					case CharaActionID::Cocking:
+						//
+						if (!GetGunPtrNow()->GetCocking()) {
+							m_CharaAction = CharaActionID::Ready;
+						}
+						//姿勢指定
+						GunReadyControl::SetAim();
+						break;
+					case CharaActionID::Check:
+						if (m_ActionFirstFrame) {
+							GetGunPtrNow()->SetShotPhase(GunAnimeID::CheckStart);
+						}
+						//
+						if (!GetGunPtrNow()->GetChecking()) {
+							m_CharaAction = CharaActionID::Ready;
+						}
+						//姿勢指定
+						GunReadyControl::SetAim();
+						break;
+					case CharaActionID::Reload:
+						if (m_ActionFirstFrame) {
+							Reload_Start();
 						}
 						else {
-							//	GetGunPtrNow()->SetPressShotEmpty();
+							if ((GetGunPtrNow()->GetReloadType() == RELOADTYPE::AMMO) && (GetShotPhase() == GunAnimeID::ReloadOne)) {
+								if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
+									GetGunPtrNow()->SetCancel();
+								}
+							}
+							if (!GetGunPtrNow()->GetReloading()) {
+								m_CharaAction = CharaActionID::Ready;
+							}
 						}
-						this->m_SoundPower = 1.f * (CanLookTarget ? 1.f : 0.5f);
-					}
-					if (this->m_Press_Reload) {
-						switch (GetGunPtrNow()->GetReloadType()) {
-							case RELOADTYPE::MAG:
-								{
-									if (IsGun0Select()) {
-										int Num = GetGunPtrNow()->GetAmmoNum();
-										int All = GetGunPtrNow()->GetAmmoAll();
-										int UniqueID = GetGunPtrNow()->GetMagUniqueID();
-										GetGunPtrNow()->SetReloadStartMag(MagStockControl::GetNowMag().AmmoNum, MagStockControl::GetNowMag().ModUniqueID);
-										MagStockControl::SetOldMag(Num, All, UniqueID);
-									}
-									else {
-										GetGunPtrNow()->SetReloadStartMag(GetGunPtrNow()->GetAmmoAll(), GetGunPtrNow()->GetMagUniqueID());
+						//姿勢指定
+						GunReadyControl::SetAim();
+						break;
+					case CharaActionID::Watch:
+						if (m_ActionFirstFrame) {
+							GetGunPtrNow()->SetShotPhase(GunAnimeID::Watch);
+						}
+						//
+						if (!GetGunPtrNow()->GetWatching()) {
+							m_CharaAction = CharaActionID::Ready;
+						}
+						//姿勢指定
+						GunReadyControl::SetAim();
+						break;
+					case CharaActionID::Melee:
+						if (m_ActionFirstFrame) {
+							GetGunPtrNow()->SetShotPhase(GunAnimeID::Melee);
+							m_MeleeCoolDown = 1.f;
+							if (this->m_MyID == 0) {
+								DrawParts->SetCamShake(0.1f, 5.f);
+							}
+						}
+						//
+						if (!GetGunPtrNow()->IsMelee()) {
+							m_CharaAction = CharaActionID::Ready;
+						}
+						//姿勢指定
+						GunReadyControl::SetAim();
+						break;
+					case CharaActionID::AmmoLoad:
+						if (m_ActionFirstFrame) {
+							this->m_AmmoLoadStart = true;
+						}
+						if (GetGunPtrNow()) {
+							if (this->m_AmmoLoadStart) {
+								if (IsLowReadyPer()) {
+									this->m_AmmoLoadStart = false;
+									GetGunPtrNow()->StartAmmoLoad();
+								}
+								GunReadyControl::SetReady();
+							}
+							else {
+								if (GetGunPtrNow()->IsAmmoLoading()) {
+									GunReadyControl::SetAim();
+									if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
+										GetGunPtrNow()->SetCancel();
 									}
 								}
+								else {
+									GunReadyControl::SetReady();
+									m_CharaAction = CharaActionID::Ready;
+								}
+							}
+							if (GetGunPtrNow()->GetAmmoLoadSwitch()) {
+								int Select = GetGunPtrNow()->GetAmmoLoadCount() - 1 - 1;
+								if (GetGunPtrNow()->GetAmmoLoadCount() == 1) {
+									int InAmmo = std::clamp(MagStockControl::GetAmmoStock(), 0, GetGunPtrNow()->GetAmmoAll() - GetGunPtrNow()->GetAmmoNum());
+									GetGunPtrNow()->SetAmmo(GetGunPtrNow()->GetAmmoNum() + InAmmo);
+									MagStockControl::SubAmmoStock(InAmmo);
+									for (int i = 2;i >= Select + 1;i--) {
+										InAmmo = std::clamp(MagStockControl::GetMag(i), 0, GetGunPtrNow()->GetAmmoAll() - GetGunPtrNow()->GetAmmoNum());
+										GetGunPtrNow()->SetAmmo(GetGunPtrNow()->GetAmmoNum() + InAmmo);
+										MagStockControl::SetMag(i, MagStockControl::GetMag(i) - InAmmo);
+									}
+									if ((Select < 2) && (MagStockControl::GetMag(Select + 1) == 0) && (MagStockControl::GetAmmoStock() == 0)) {
+										GetGunPtrNow()->SetCancel();
+									}
+								}
+								else {
+									int InAmmo = std::clamp(MagStockControl::GetAmmoStock(), 0, GetGunPtrNow()->GetAmmoAll() - MagStockControl::GetMag(Select));
+									MagStockControl::SetMag(Select, MagStockControl::GetMag(Select) + InAmmo);
+									MagStockControl::SubAmmoStock(InAmmo);
+									for (int i = 2;i >= Select + 1;i--) {
+										InAmmo = std::clamp(MagStockControl::GetMag(i), 0, GetGunPtrNow()->GetAmmoAll() - MagStockControl::GetMag(Select));
+										MagStockControl::SetMag(Select, MagStockControl::GetMag(Select) + InAmmo);
+										MagStockControl::SetMag(i, MagStockControl::GetMag(i) - InAmmo);
+									}
+									if ((Select < 2) && (MagStockControl::GetMag(Select + 1) == 0) && (MagStockControl::GetAmmoStock() == 0)) {
+										GetGunPtrNow()->SetCancel();
+									}
+								}
+							}
+						}
+						break;
+					case CharaActionID::WearArmer:
+						if (m_ActionFirstFrame) {
+							this->m_ArmerWearPhase = ArmerWearPhase::Have;
+						}
+						switch (this->m_ArmerWearPhase) {
+							case ArmerWearPhase::Have:
+								if (IsLowReadyPer()) {
+									this->m_ArmerWearPhase = ArmerWearPhase::Wear;
+									this->m_Wear_Armer.Init(false);
+									if (this->m_Armer_Ptr) {
+										this->m_Armer_Ptr->SetActive(true);
+									}
+									SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
+								}
+								GunReadyControl::SetReady();
 								break;
-							case RELOADTYPE::AMMO:
-								{
-									if (IsGun0Select()) {
-										//todo:弾残数に応じて変更
-										GetGunPtrNow()->SetReloadStartAmmo(MagStockControl::GetNowMag().AmmoNum);
+							case ArmerWearPhase::Wear:
+								this->m_Wear_Armer.Execute(1.f, 0.1f, 0.1f, 0.95f);
+								if ((this->m_Wear_Armer.Per() < 0.f) || (1.f < this->m_Wear_Armer.Per())) {
+									this->m_ArmerWearPhase = ArmerWearPhase::Have;
+									m_CharaAction = CharaActionID::Ready;
+									if (this->m_Armer_Ptr) {
+										this->m_Armer_Ptr->SetActive(false);
 									}
-									else {
-										GetGunPtrNow()->SetReloadStartAmmo(GetGunPtrNow()->GetAmmoAll());
+									if (m_IsMainGame) {
+										ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "アーマーを着用 +%4d", 10);
+										PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(10);
 									}
+									GunReadyControl::SetAim();
+									LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, 0, LifeControl::GetAPMax());
 								}
 								break;
 							default:
 								break;
 						}
+						break;
+					case CharaActionID::Morphine:
+						if (m_ActionFirstFrame) {
+							this->m_MorphinePhase = MorphinePhase::Have;
+						}
+						switch (this->m_MorphinePhase) {
+							case MorphinePhase::Have:
+								if (IsLowReadyPer()) {
+									this->m_MorphinePhase = MorphinePhase::Wear;
+									this->m_Wear_Morphine.Init(false);
+									if (this->m_Morphine_Ptr) {
+										this->m_Morphine_Ptr->SetActive(true);
+									}
+									this->m_Wear_MorphineFrame = 0.f;
+									this->m_Wear_MorphinePer = 0.f;
+									SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
+									SE->Get((int)SoundEnum::Stim).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
+								}
+								GunReadyControl::SetReady();
+								break;
+							case MorphinePhase::Wear:
+								this->m_Wear_MorphineFrame += 1.f / FPS;
+								this->m_Wear_Morphine.Execute((this->m_Wear_MorphineFrame < 1.5f), 0.1f, 0.1f, 0.8f);
+								if (this->m_Wear_MorphineFrame > 2.f) {
+									this->m_MorphinePhase = MorphinePhase::Have;
+									m_CharaAction = CharaActionID::Ready;
+									if (this->m_Morphine_Ptr) {
+										this->m_Morphine_Ptr->SetActive(false);
+									}
+									GunReadyControl::SetAim();
+									if (m_IsMainGame) {
+										ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "モルヒネ注射 +%4d", 50);
+										PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(50);
+									}
+								}
 
-
-						if (this->m_MyID != 0) {
-							if (GetRand(1) == 0) {
-								SE->Get((int)SoundEnum::Man_reload).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
-							}
-							else {
-								SE->Get((int)SoundEnum::Man_takecover).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
-							}
-							this->m_SoundPower = 0.6f * (CanLookTarget ? 1.f : 0.5f);
+								this->m_Wear_MorphinePer += 1.f / FPS;
+								if (this->m_Wear_MorphinePer >= 0.f) {
+									this->m_Wear_MorphinePer -= 0.4f;
+									Heal(20, true);
+								}
+								break;
+							default:
+								break;
 						}
-					}
-					{
-						if ((KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && GetIsCheck()) && GetGunPtrNow()->GetCanShot()) {
-							GetGunPtrNow()->SetShotPhase(GunAnimeID::CheckStart);
-						}
-					}
-					m_MeleeCoolDown = std::max(m_MeleeCoolDown - 1.f / FPS, 0.f);
-					if (KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && m_MeleeCoolDown == 0.f) {
-						GetGunPtrNow()->SetShotPhase(GunAnimeID::Melee);
-						m_MeleeCoolDown = 1.f;
-						if (this->m_MyID == 0) {
-							DrawParts->SetCamShake(0.1f, 5.f);
-						}
-					}
-					m_SightChange.Execute(KeyControl::GetInputControl().GetPADSPress(PADS::JUMP));
-					if (m_SightChange.trigger()) {
-						GetGunPtrNow()->ChangeSightSel();
-					}
-					//テスト系
+						break;
+					default:
+						break;
 				}
-				if (
-					((GetGunPtrNow()->GetReloadType() == RELOADTYPE::AMMO) && (GetShotPhase() == GunAnimeID::ReloadOne)) ||
-					GetGunPtrNow()->IsAmmoLoading()) {
-					if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
-						GetGunPtrNow()->SetCancel();
-					}
-				}
-				if (GetGunPtrNow()->GetAmmoLoadSwitch()) {
-					int Select = GetGunPtrNow()->GetAmmoLoadCount() - 1 - 1;
-					if (GetGunPtrNow()->GetAmmoLoadCount() == 1) {
-						int InAmmo = std::clamp(MagStockControl::GetAmmoStock(), 0, GetGunPtrNow()->GetAmmoAll() - GetGunPtrNow()->GetAmmoNum());
-						GetGunPtrNow()->SetAmmo(GetGunPtrNow()->GetAmmoNum() + InAmmo);
-						MagStockControl::SubAmmoStock(InAmmo);
-						for (int i = 2;i >= Select + 1;i--) {
-							InAmmo = std::clamp(MagStockControl::GetMag(i), 0, GetGunPtrNow()->GetAmmoAll() - GetGunPtrNow()->GetAmmoNum());
-							GetGunPtrNow()->SetAmmo(GetGunPtrNow()->GetAmmoNum() + InAmmo);
-							MagStockControl::SetMag(i, MagStockControl::GetMag(i) - InAmmo);
-						}
-						if ((Select < 2) && (MagStockControl::GetMag(Select + 1) == 0) && (MagStockControl::GetAmmoStock() == 0)) {
-							GetGunPtrNow()->SetCancel();
-						}
-					}
-					else {
-						int InAmmo = std::clamp(MagStockControl::GetAmmoStock(), 0, GetGunPtrNow()->GetAmmoAll() - MagStockControl::GetMag(Select));
-						MagStockControl::SetMag(Select, MagStockControl::GetMag(Select) + InAmmo);
-						MagStockControl::SubAmmoStock(InAmmo);
-						for (int i = 2;i >= Select + 1;i--) {
-							InAmmo = std::clamp(MagStockControl::GetMag(i), 0, GetGunPtrNow()->GetAmmoAll() - MagStockControl::GetMag(Select));
-							MagStockControl::SetMag(Select, MagStockControl::GetMag(Select) + InAmmo);
-							MagStockControl::SetMag(i, MagStockControl::GetMag(i) - InAmmo);
-						}
-						if ((Select < 2) && (MagStockControl::GetMag(Select + 1) == 0) && (MagStockControl::GetAmmoStock() == 0)) {
-							GetGunPtrNow()->SetCancel();
-						}
-					}
-				}
-				//
-				if (m_Press_Aim) {
-					if (!m_IsStuckGun) {
-						GunReadyControl::SetADS();
-					}
-					else {
-						GunReadyControl::SetAim();
-					}
-				}
-
-				if (
-					(
-						GetGunPtrNow()->GetCocking() ||
-						GetGunPtrNow()->GetReloading() ||
-						GetGunPtrNow()->GetChecking() ||
-						GetGunPtrNow()->GetWatching() ||
-						GetGunPtrNow()->IsMelee() ||
-						GetGunPtrNow()->IsAmmoLoading()
-						) &&
-					!m_IsChanging) {
-					GunReadyControl::SetAim();
-				}
-				if (GetShotPhase() == GunAnimeID::AmmoLoadEnd) {
-					GunReadyControl::SetReady();
-				}
-			}
-			if (KeyControl::GetRun()) {
-				GunReadyControl::SetReady();
-			}
-
-			//弾を込める
-			if (this->m_AmmoLoadStart) {
-				if (IsLowReadyPer()) {
-					this->m_AmmoLoadStart = false;
-					GetGunPtrNow()->StartAmmoLoad();
-				}
-				GunReadyControl::SetReady();
-			}
-			//アーマーを着る
-			switch (this->m_ArmerWearPhase) {
-				case ArmerWearPhase::Ready:
-					break;
-				case ArmerWearPhase::Have:
-					if (IsLowReadyPer()) {
-						this->m_ArmerWearPhase = ArmerWearPhase::Wear;
-						this->m_Wear_Armer.Init(false);
-						if (this->m_Armer_Ptr) {
-							this->m_Armer_Ptr->SetActive(true);
-						}
-						SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
-					}
-					GunReadyControl::SetReady();
-					break;
-				case ArmerWearPhase::Wear:
-					this->m_Wear_Armer.Execute(1.f, 0.1f, 0.1f, 0.95f);
-					if ((this->m_Wear_Armer.Per() < 0.f) || (1.f < this->m_Wear_Armer.Per())) {
-						this->m_ArmerWearPhase = ArmerWearPhase::Ready;
-						if (this->m_Armer_Ptr) {
-							this->m_Armer_Ptr->SetActive(false);
-						}
-						if (m_IsMainGame) {
-							ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "アーマーを着用 +%4d", 10);
-							PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(10);
-						}
-
-						GunReadyControl::SetAim();
-						LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, 0, LifeControl::GetAPMax());
-					}
-					break;
-				default:
-					break;
-			}
-			//Morphine
-			switch (this->m_MorphinePhase) {
-				case MorphinePhase::Ready:
-					break;
-				case MorphinePhase::Have:
-					if (IsLowReadyPer()) {
-						this->m_MorphinePhase = MorphinePhase::Wear;
-						this->m_Wear_Morphine.Init(false);
-						if (this->m_Morphine_Ptr) {
-							this->m_Morphine_Ptr->SetActive(true);
-						}
-						this->m_Wear_MorphineFrame = 0.f;
-						this->m_Wear_MorphinePer = 0.f;
-						SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
-						SE->Get((int)SoundEnum::Stim).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
-					}
-					GunReadyControl::SetReady();
-					break;
-				case MorphinePhase::Wear:
-					this->m_Wear_MorphineFrame += 1.f / FPS;
-					this->m_Wear_Morphine.Execute((this->m_Wear_MorphineFrame < 1.5f), 0.1f, 0.1f, 0.8f);
-					if (this->m_Wear_MorphineFrame > 2.f) {
-						this->m_MorphinePhase = MorphinePhase::Ready;
-						if (this->m_Morphine_Ptr) {
-							this->m_Morphine_Ptr->SetActive(false);
-						}
-						GunReadyControl::SetAim();
-						if (m_IsMainGame) {
-							ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "モルヒネ注射 +%4d", 50);
-							PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(50);
-						}
-					}
-
-					this->m_Wear_MorphinePer += 1.f / FPS;
-					if (this->m_Wear_MorphinePer >= 0.f) {
-						this->m_Wear_MorphinePer -= 0.4f;
-						Heal(20, true);
-					}
-					break;
-				default:
-					break;
-			}
-
-			if (!isWearingArmer() && !isMorphineing()) {
-				if (KeyControl::GetInputControl().GetPADSPress(PADS::THROW)) {
-					//モルヒネ
-					if ((this->m_MorphineStock != 0) && (LifeControl::GetHP() < LifeControl::GetHPMax())) {
-						this->m_MorphineStock = std::max(this->m_MorphineStock - 1, 0);
-						this->m_MorphinePhase = MorphinePhase::Have;
-					}
-				}
-				if (KeyControl::GetInputControl().GetPADSPress(PADS::CHECK)) {
-					//アーマー着用
-					if ((this->m_ArmerStock != 0) && (LifeControl::GetAP() < LifeControl::GetAPMax())) {
-						this->m_ArmerStock = std::max(this->m_ArmerStock - 1, 0);
-						this->m_ArmerWearPhase = ArmerWearPhase::Have;
-					}
-					else if (GetGunPtrNow() && (GetShotPhase() == GunAnimeID::Base)) {
-						if (
-							IsGun0Select() &&
-							MagStockControl::GetNeedAmmoLoad(GetGunPtrNow()->GetIsMagFull(), GetGunPtrNow()->GetIsMagEmpty()) &&
-							!GetGunPtrNow()->IsAmmoLoading()
-							) {
-							this->m_AmmoLoadStart = true;
-						}
-						else if (GetGunPtrNow()->GetCanShot()) {
-							GetGunPtrNow()->SetShotPhase(GunAnimeID::Watch);
-						}
-					}
+				//近接
+				if (!KeyControl::GetRun() && KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && m_MeleeCoolDown == 0.f && IsAimPer()) {
+					m_CharaAction = CharaActionID::Melee;
 				}
 			}
 			//
-			this->m_Arm[(int)EnumGunAnimType::ADS].Execute(GunReadyControl::GetIsADS(), 0.2f, 0.2f, 0.9f);
-			this->m_Arm[(int)EnumGunAnimType::Run].Execute(!GetIsAim() && KeyControl::GetRun(), 0.1f, 0.2f, 0.95f);
-			this->m_Arm[(int)EnumGunAnimType::ReloadStart_Empty].Execute(GetShotPhase() == GunAnimeID::ReloadStart_Empty, 0.5f, 0.2f);
-			this->m_Arm[(int)EnumGunAnimType::ReloadStart].Execute(GetShotPhase() == GunAnimeID::ReloadStart, 0.2f, 0.2f);
-			this->m_Arm[(int)EnumGunAnimType::Reload].Execute(GetShotPhase() >= GunAnimeID::ReloadOne && GetShotPhase() <= GunAnimeID::ReloadEnd, 0.1f, 0.2f, 0.9f);
-			this->m_Arm[(int)EnumGunAnimType::Ready].Execute(!GetIsAim() && GetShootReady(), 0.1f, 0.2f, 0.9f);
-			this->m_Arm[(int)EnumGunAnimType::Check].Execute(GetShotPhase() >= GunAnimeID::CheckStart && GetShotPhase() <= GunAnimeID::Checking, 0.05f, 0.2f);
-			this->m_Arm[(int)EnumGunAnimType::Watch].Execute(GetShotPhase() == GunAnimeID::Watch, 0.1f, 0.1f);
-			this->m_Arm[(int)EnumGunAnimType::Melee].Execute(GetShotPhase() == GunAnimeID::Melee, 1.1f, 0.1f);
-			this->m_Arm[(int)EnumGunAnimType::AmmoLoad].Execute(GetIsAim() && GetGunPtrNow()->IsAmmoLoading(), 0.1f, 0.1f);
-			//
-			KeyControl::UpdateKeyRad();
-			GetObj().frame_Reset(GetFrame(CharaFrame::Upper));
-			SetFrameLocalMat(CharaFrame::Upper, GetFrameLocalMat(CharaFrame::Upper).GetRot() * MATRIX_ref::RotX(-KeyControl::GetRad().x() / 2.f) * (GetCharaDir()*this->m_move.mat.Inverse()).GetRot());
-			GetObj().frame_Reset(GetFrame(CharaFrame::Upper2));
-			SetFrameLocalMat(CharaFrame::Upper2, GetFrameLocalMat(CharaFrame::Upper2).GetRot() * MATRIX_ref::RotX(KeyControl::GetRad().x() / 2.f) * HitReactionControl::GetHitReactionMat());
-			HitReactionControl::Execute_HitReactionControl();
-			//上半身演算
-			if (GetGunPtrNow()) {
-				GetGunPtrNow()->UpdateGunAnims(this->m_Press_Shot);
-			}
-			//上半身アニメ演算
-			GetCharaAnimeBufID(CharaAnimeID::Upper_Ready) = 1.f;
-			GetCharaAnimeBufID(CharaAnimeID::Hand_Ready) = 1.f;
-			//下半身アニメ演算
-			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomTurnAnimSel(), 0.5f);
-			ObjectBaseClass::SetAnimLoop((int)CharaAnimeID::Bottom_Stand_Run, KeyControl::GetSpeedPer());
-			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomWalkAnimSel(), KeyControl::GetVecFront());
-			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomLeftStepAnimSel(), KeyControl::GetVecLeft());
-			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomWalkBackAnimSel(), KeyControl::GetVecRear());
-			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomRightStepAnimSel(), KeyControl::GetVecRight());
-			//アニメ反映
-			for (int i = 0; i < GetObj().get_anime().size(); i++) {
-				this->GetObj().get_anime(i).per = GetCharaAnimeBufID((CharaAnimeID)i);
-			}
-			GetObj().work_anime();
-			//移動の際の視点制御
-			EyeSwingControl::UpdateEyeSwing(GetCharaDir(), KeyControl::GetVec().Length() / 0.65f, KeyControl::GetRun() ? 8.f : 5.f);
+			m_ActionFirstFrame = (PrevAction != m_CharaAction);
 		}
 		//音指示
 		void			CharacterClass::ExecuteSound(void) noexcept {
@@ -917,7 +898,7 @@ namespace FPS_n2 {
 			//銃座標指定
 			if ((this->m_ArmerWearPhase == ArmerWearPhase::Wear) || (this->m_MorphinePhase == MorphinePhase::Wear)) {
 				//アーマー
-				if (this->m_Armer_Ptr && isWearingArmer()) {
+				if (this->m_Armer_Ptr && this->m_Armer_Ptr->IsActive()) {
 					MATRIX_ref tmp_gunrat = GetFrameWorldMat(CharaFrame::Head);
 					tmp_gunrat = MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, -0.5f, 0.2f)*Scale_Rate*std::clamp(1.f - this->m_Wear_Armer.Per() * 1.5f, 0.f, 1.f)) * tmp_gunrat;
 					tmp_gunrat = MATRIX_ref::Mtrans(VECTOR_ref::vget(0.f, 0.15f, -0.5f)*Scale_Rate*(1.f - this->m_Wear_Armer.Per()))*tmp_gunrat;
@@ -1361,6 +1342,8 @@ namespace FPS_n2 {
 			}
 			m_SlingZrad.Init(0.05f*Scale_Rate, 3.f, deg2rad(50));
 			m_HPRec = 0.f;
+			m_CharaAction = CharaActionID::Ready;
+			m_ActionFirstFrame = true;
 		}
 		void			CharacterClass::MovePoint(float pxRad, float pyRad, const VECTOR_ref& pPos, int GunSel) noexcept {
 			KeyControl::InitKey(pxRad, pyRad);
@@ -1416,10 +1399,6 @@ namespace FPS_n2 {
 							break;
 					}
 				}
-				if (GetIsCheck()) {
-					this->m_Press_Reload = false;
-				}
-
 				if (pReady) {
 					if (!m_IsChanging) {
 						if (!m_ULTActive) {
@@ -1507,9 +1486,70 @@ namespace FPS_n2 {
 			//初回のみ更新する内容
 			if (this->m_IsFirstLoop) {}
 			this->m_SoundPower = std::max(this->m_SoundPower - 1.f / FPS, 0.f);
+			GunReadyControl::UpdateReady();
+			m_MeleeCoolDown = std::max(m_MeleeCoolDown - 1.f / FPS, 0.f);
+			if (GetGunPtrNow()) {
+				GetGunPtrNow()->SetShotSwitchOff();
+				//リコイルの演算
+				if (this->m_RecoilRadAdd.y() < 0.f) {
+					Easing(&this->m_RecoilRadAdd, VECTOR_ref::vget(0.f, 0.01f, 0.f), GetGunPtrNow()->GetGunDataClass()->GetRecoilReturn(), EasingType::OutExpo);
+				}
+				else {
+					Easing(&this->m_RecoilRadAdd, VECTOR_ref::zero(), 0.7f, EasingType::OutExpo);
+				}
+			}
+			//
 			ExecuteInput();
+			if (GetGunPtrNow()) {
+				m_SightChange.Execute(GetIsADS() && KeyControl::GetInputControl().GetPADSPress(PADS::JUMP));
+				if (m_SightChange.trigger()) {
+					GetGunPtrNow()->ChangeSightSel();
+				}
+			}
+			//
+			this->m_Arm[(int)EnumGunAnimType::ADS].Execute(GunReadyControl::GetIsADS(), 0.2f, 0.2f, 0.9f);
+			this->m_Arm[(int)EnumGunAnimType::Run].Execute(!GetIsAim() && KeyControl::GetRun(), 0.1f, 0.2f, 0.95f);
+			this->m_Arm[(int)EnumGunAnimType::ReloadStart_Empty].Execute(GetShotPhase() == GunAnimeID::ReloadStart_Empty, 0.5f, 0.2f);
+			this->m_Arm[(int)EnumGunAnimType::ReloadStart].Execute(GetShotPhase() == GunAnimeID::ReloadStart, 0.2f, 0.2f);
+			this->m_Arm[(int)EnumGunAnimType::Reload].Execute(GetShotPhase() >= GunAnimeID::ReloadOne && GetShotPhase() <= GunAnimeID::ReloadEnd, 0.1f, 0.2f, 0.9f);
+			this->m_Arm[(int)EnumGunAnimType::Ready].Execute(!GetIsAim() && GetShootReady(), 0.1f, 0.2f, 0.9f);
+			this->m_Arm[(int)EnumGunAnimType::Check].Execute(GetShotPhase() >= GunAnimeID::CheckStart && GetShotPhase() <= GunAnimeID::Checking, 0.05f, 0.2f);
+			this->m_Arm[(int)EnumGunAnimType::Watch].Execute(GetShotPhase() == GunAnimeID::Watch, 0.1f, 0.1f);
+			this->m_Arm[(int)EnumGunAnimType::Melee].Execute(GetShotPhase() == GunAnimeID::Melee, 1.1f, 0.1f);
+			this->m_Arm[(int)EnumGunAnimType::AmmoLoad].Execute(GetIsAim() && GetGunPtrNow()->IsAmmoLoading(), 0.1f, 0.1f);
+			//
+			KeyControl::UpdateKeyRad();
+			GetObj().frame_Reset(GetFrame(CharaFrame::Upper));
+			SetFrameLocalMat(CharaFrame::Upper, GetFrameLocalMat(CharaFrame::Upper).GetRot() * MATRIX_ref::RotX(-KeyControl::GetRad().x() / 2.f) * (GetCharaDir()*this->m_move.mat.Inverse()).GetRot());
+			GetObj().frame_Reset(GetFrame(CharaFrame::Upper2));
+			SetFrameLocalMat(CharaFrame::Upper2, GetFrameLocalMat(CharaFrame::Upper2).GetRot() * MATRIX_ref::RotX(KeyControl::GetRad().x() / 2.f) * HitReactionControl::GetHitReactionMat());
+			HitReactionControl::Execute_HitReactionControl();
+			//上半身演算
+			if (GetGunPtrNow()) {
+				GetGunPtrNow()->UpdateGunAnims(this->m_Press_Shot);
+			}
+			//上半身アニメ演算
+			GetCharaAnimeBufID(CharaAnimeID::Upper_Ready) = 1.f;
+			GetCharaAnimeBufID(CharaAnimeID::Hand_Ready) = 1.f;
+			//下半身アニメ演算
+			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomTurnAnimSel(), 0.5f);
+			ObjectBaseClass::SetAnimLoop((int)CharaAnimeID::Bottom_Stand_Run, KeyControl::GetSpeedPer());
+			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomWalkAnimSel(), KeyControl::GetVecFront());
+			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomLeftStepAnimSel(), KeyControl::GetVecLeft());
+			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomWalkBackAnimSel(), KeyControl::GetVecRear());
+			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomRightStepAnimSel(), KeyControl::GetVecRight());
+			//アニメ反映
+			for (int i = 0; i < GetObj().get_anime().size(); i++) {
+				this->GetObj().get_anime(i).per = GetCharaAnimeBufID((CharaAnimeID)i);
+			}
+			GetObj().work_anime();
+			//移動の際の視点制御
+			EyeSwingControl::UpdateEyeSwing(GetCharaDir(), KeyControl::GetVec().Length() / 0.65f, KeyControl::GetRun() ? 8.f : 5.f);
+			//
 			ExecuteSound();
+			//
 			ExecuteMatrix();
+			//
 			RagDollControl::Execute_RagDollControl(this->GetObj(), LifeControl::IsAlive());													//ラグドール
 			HitBoxControl::UpdataHitBox(this, (this->GetCharaType() == CharaTypeID::Enemy) ? 1.1f : 1.f);									//ヒットボックス
 			WalkSwingControl::UpdateWalkSwing(GetEyeMatrix().pos() - GetCharaPosition(), std::clamp(this->m_move.Speed / 2.f, 0.f, 1.f));

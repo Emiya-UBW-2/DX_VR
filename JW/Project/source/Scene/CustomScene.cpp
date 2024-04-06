@@ -452,8 +452,6 @@ namespace FPS_n2 {
 		void			CustomScene::DrawUI_Base_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* Fonts = FontPool::Instance();
-			auto White = GetColor(255, 255, 255);
-			auto Black = GetColor(0, 0, 0);
 			//
 			Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(96),
 																FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
@@ -488,7 +486,7 @@ namespace FPS_n2 {
 			{
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*m_Alpha), 0, 255));
 
-				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
+				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Black, TRUE);
 
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
@@ -610,11 +608,6 @@ namespace FPS_n2 {
 		void			CustomScene::DrawCustomUI(void) noexcept {
 			auto* Fonts = FontPool::Instance();
 
-			auto Green = GetColor(0, 255, 0);
-			auto Green25 = GetColor(0, 64, 0);
-			auto White = GetColor(255, 255, 255);
-			auto Gray25 = GetColor(64, 64, 64);
-
 			int xp1, yp1;
 
 			const auto& y = GunsModify::GetSelData()[SelMoveClass[select].index];
@@ -624,13 +617,13 @@ namespace FPS_n2 {
 				xp1 = y_r(960 - 400) + y_r(SelMoveClass[select].Yadd*64.f);
 				yp1 = y_r(540 - 270);
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
-																	  xp1, yp1, White, Gray25, GunSlotName[(int)Data->m_GunSlot]);
+																	  xp1, yp1, White, Gray75, GunSlotName[(int)Data->m_GunSlot]);
 			}
 			{
 				xp1 = y_r(960 - 400);
 				yp1 = y_r(540 - 270 + 48);
 				Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(18), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-																	   xp1, yp1, White, Gray25, "%d/%d", select + 1, (int)SelMoveClass.size());
+																	   xp1, yp1, White, Gray75, "%d/%d", select + 1, (int)SelMoveClass.size());
 			}
 			//
 			{
@@ -639,13 +632,13 @@ namespace FPS_n2 {
 
 				if (y->m_sel != (int)Data->m_ItemsUniqueID.size()) {
 					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-																		xp1 + y_r(SelMoveClass[select].Xadd*100.f), yp1 + y_r(SelMoveClass[select].Yadd*64.f), Green, Green25,
+																		xp1 + y_r(SelMoveClass[select].Xadd*100.f), yp1 + y_r(SelMoveClass[select].Yadd*64.f), Green, DarkGreen,
 																		(*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[y->m_sel]))->GetName().c_str()
 					);
 				}
 				else {
 					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-																		xp1 + y_r(SelMoveClass[select].Xadd*100.f), yp1 + y_r(SelMoveClass[select].Yadd*64.f), Green, Green25,
+																		xp1 + y_r(SelMoveClass[select].Xadd*100.f), yp1 + y_r(SelMoveClass[select].Yadd*64.f), Green, DarkGreen,
 																		"None"
 					);
 				}
@@ -655,7 +648,7 @@ namespace FPS_n2 {
 				xp1 = y_r(960);
 				yp1 = y_r(920);
 				Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-																	   xp1, yp1, Green, Green25, "%d / %d", y->m_sel + 1, Data->ItemMaxCount() + 1);
+																	   xp1, yp1, Green, DarkGreen, "%d / %d", y->m_sel + 1, Data->ItemMaxCount() + 1);
 			}
 			//
 			{
@@ -667,20 +660,16 @@ namespace FPS_n2 {
 
 				int mouseover = -1;
 				for (int sel = 0;sel <= Data->ItemMaxCount();sel++) {
-					unsigned int Color = GetColor(128, 128, 128);
-					if (y->m_sel == sel) {
-						Color = Green;
-					}
+					unsigned int Color = (y->m_sel == sel) ? Green : Gray50;
 					if (sel != (int)Data->m_ItemsUniqueID.size()) {
 						const char* Name = (*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[sel]))->GetName().c_str();
 						if (SaveDataParts->GetParam(Name) == 1) {
 							Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-																				xp1, yp1, Color, Green25, Name);
+																				xp1, yp1, Color, DarkGreen, Name);
 						}
 						else {
-							Color = GetColor(216, 143, 143);
 							Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-																				xp1, yp1, Color, Green25, "????");
+																				xp1, yp1, GetColor(216, 143, 143), DarkGreen, "????");
 							int xsize = Fonts->Get(FontPool::FontType::Nomal_AA).GetStringWidth(y_r(24), "????");
 							int ysize = y_r(24);
 							if (in2_(Pad->GetMS_X(), Pad->GetMS_Y(), xp1 - xsize, yp1, xp1, yp1 + ysize)) {
@@ -690,13 +679,13 @@ namespace FPS_n2 {
 					}
 					else {
 						Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-																			xp1, yp1, Color, Green25, "None");
+																			xp1, yp1, Color, DarkGreen, "None");
 					}
 					yp1 += y_r(28);
 				}
 				if (mouseover != -1) {
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
-																		Pad->GetMS_X(), Pad->GetMS_Y(), White, Gray25, "ゲームをプレイする毎にアンロックされます");
+																		Pad->GetMS_X(), Pad->GetMS_Y(), White, Gray75, "ゲームをプレイする毎にアンロックされます");
 
 				}
 			}
@@ -705,17 +694,12 @@ namespace FPS_n2 {
 			auto* Fonts = FontPool::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 
-			auto Green = GetColor(0, 255, 0);
-			auto Green25 = GetColor(0, 64, 0);
-			auto White = GetColor(255, 255, 255);
-			auto Gray25 = GetColor(64, 64, 64);
-
 			int xp1, yp1;
 			{
 				xp1 = y_r(960 - 400);
 				yp1 = y_r(540 - 270);
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
-																	  xp1, yp1, White, Gray25, "プライマリウェポンの変更");
+																	  xp1, yp1, White, Gray75, "プライマリウェポンの変更");
 			}
 			//
 			{
@@ -724,7 +708,7 @@ namespace FPS_n2 {
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + (int)GunsModify::GetULTSelect()).GetGun(0);
 				if (GunPtr) {
 					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-																		  xp1, yp1, Green, Green25, GunPtr->GetName());
+																		  xp1, yp1, Green, DarkGreen, GunPtr->GetName());
 				}
 			}
 			//
@@ -732,7 +716,7 @@ namespace FPS_n2 {
 				xp1 = y_r(960);
 				yp1 = y_r(920);
 				Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-																	   xp1, yp1, Green, Green25, "%d / %d", (int)GunsModify::GetULTSelect() + 1, (int)ULT_GUN::Max);
+																	   xp1, yp1, Green, DarkGreen, "%d / %d", (int)GunsModify::GetULTSelect() + 1, (int)ULT_GUN::Max);
 			}
 		}
 		//使い回しオブジェ系

@@ -292,9 +292,6 @@ namespace FPS_n2 {
 					12.f, SoundEnum::MagFall);
 			}
 
-			void		SetPressShotEmpty() noexcept {
-				this->m_ShotPhase = (!GetIsMagEmpty()) ? GunAnimeID::Cocking : GunAnimeID::ReloadStart_Empty;
-			}
 			void		SetReloadStartMag(int NextMagNum, int NextMagUniqueID) noexcept {
 				if (this->GetReloadType() != RELOADTYPE::MAG) { return; }
 				this->m_NextMagNum = NextMagNum;

@@ -1200,31 +1200,31 @@ namespace FPS_n2 {
 #if FALSE
 				movie.DrawExtendGraph(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, FALSE);
 #else
-				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(64, 64, 64), TRUE);
+				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Gray75, TRUE);
 
 				auto* PlayerMngr = PlayerManager::Instance();
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(48), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-					y_r(256),y_r(384), GetColor(255, 255, 255), GetColor(0, 0, 0), "Score : %d", PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
+					y_r(256),y_r(384), White, Black, "Score : %d", PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
 #endif
 
 				float per = (1.f - (16.f / 9.f) / 2.35f) / 2.f;
-				DrawBox(0, 0, DrawParts->m_DispXSize, (int)(DrawParts->m_DispYSize * per), GetColor(0, 0, 0), TRUE);
-				DrawBox(0, DrawParts->m_DispYSize - (int)(DrawParts->m_DispYSize * per), DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
+				DrawBox(0, 0, DrawParts->m_DispXSize, (int)(DrawParts->m_DispYSize * per), Black, TRUE);
+				DrawBox(0, DrawParts->m_DispYSize - (int)(DrawParts->m_DispYSize * per), DrawParts->m_DispXSize, DrawParts->m_DispYSize, Black, TRUE);
 				if (m_EndTimer > 0.f) {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - m_EndTimer) * 2.f), 0, 255));
-					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
+					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Black, TRUE);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
 			}
 			else if (m_PreEndTimer > 0.f) {
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - std::max(m_PreEndTimer - 2.f, 0.f)) * 2.f), 0, 255));
-				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
+				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Black, TRUE);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 			else if (m_PreEndTimer == -1.f) {
 				if (m_DeathPer > 0.f) {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f - 255.f*(1.f - m_DeathPer * 1.3f)), 0, 255));
-					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, GetColor(0, 0, 0), TRUE);
+					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Black, TRUE);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
 				if (!DrawParts->IsPause()) {
@@ -1297,7 +1297,7 @@ namespace FPS_n2 {
 					DrawCircle(
 						xp + (int)(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
 						yp + (int)(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
-						5, GetColor(255, 0, 0), TRUE);
+						5, Red, TRUE);
 				}
 				//アイテム入手
 				{
@@ -1313,7 +1313,7 @@ namespace FPS_n2 {
 								DrawCircle(
 									xp + (int)(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
 									yp + (int)(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
-									2, GetColor(255, 255, 0), TRUE);
+									2, Yellow, TRUE);
 
 							}
 						}
@@ -1330,7 +1330,7 @@ namespace FPS_n2 {
 					DrawCircle(
 						xp + (int)(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
 						yp + (int)(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
-						5, GetColor(0, 255, 0), TRUE);
+						5, Green, TRUE);
 				}
 			}
 		}
@@ -1436,7 +1436,7 @@ namespace FPS_n2 {
 					yp + y_r(sin(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f)),
 					xp + y_r(cos(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f)),
 					yp + y_r(sin(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f)),
-					GetColor(255, 255, 255),
+					White,
 					3);
 			}
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
@@ -1469,12 +1469,12 @@ namespace FPS_n2 {
 							//
 							if (a->m_Damage > 0) {
 								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-									(int)DispPos.x() + a->m_Hit_AddX, (int)DispPos.y() + a->m_Hit_AddY, GetColor(r, g, 0), GetColor(0, 0, 0), "%d", a->m_Damage);
+									(int)DispPos.x() + a->m_Hit_AddX, (int)DispPos.y() + a->m_Hit_AddY, GetColor(r, g, 0), Black, "%d", a->m_Damage);
 							}
 							//防いだダメージ
 							if (a->m_ArmerDamage > 0) {
 								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(20), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-									(int)DispPos.x() + a->m_Hit_AddX - y_r(10), (int)DispPos.y() + a->m_Hit_AddY, GetColor(128, 128, 128), GetColor(0, 0, 0), "%d", a->m_ArmerDamage);
+									(int)DispPos.x() + a->m_Hit_AddX - y_r(10), (int)DispPos.y() + a->m_Hit_AddY, Gray50, Black, "%d", a->m_ArmerDamage);
 							}
 						}
 					}

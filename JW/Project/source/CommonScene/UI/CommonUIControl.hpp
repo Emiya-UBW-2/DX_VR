@@ -109,12 +109,6 @@ namespace FPS_n2 {
 					case ButtonMode::String:
 						{
 							auto* Fonts = FontPool::Instance();
-
-							auto WhiteSel = GetColor(216, 255, 216);
-							auto Gray25 = GetColor(216, 216, 216);
-							auto Gray = GetColor(64, 64, 64);
-							auto Black = GetColor(0, 0, 0);
-
 							if (SelYadd > 0.f) {
 								int xp = xp1;
 								int yp = yp1;
@@ -158,13 +152,13 @@ namespace FPS_n2 {
 							if (ysize > y_r(50)) {
 								switch (m_ButtonStatus) {
 									case ButtonStatus::None:
-										Color = Gray;
+										Color = Gray75;
 										break;
 									case ButtonStatus::Ready:
 										Color = GetColor(148, 216, 132);
 										break;
 									case ButtonStatus::Focus:
-										Color = GetColor(0, 255, 0);
+										Color = Green;
 										break;
 									default:
 										break;
@@ -173,15 +167,15 @@ namespace FPS_n2 {
 							else {
 								switch (m_ButtonStatus) {
 									case ButtonStatus::None:
-										Color = Gray;
+										Color = Gray75;
 										if (!m_EnableSelect) {
 											Color = GetColor(64, 48, 48);
 										}
 										break;
 									case ButtonStatus::Ready:
-										Color = Gray25;
+										Color = Gray15;
 										if (!m_EnableSelect) {
-											Color = GetColor(96, 96, 96);
+											Color = Gray65;
 										}
 										break;
 									case ButtonStatus::Focus:

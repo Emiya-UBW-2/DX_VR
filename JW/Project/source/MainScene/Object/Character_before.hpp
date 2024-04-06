@@ -71,16 +71,16 @@ namespace FPS_n2 {
 				unsigned int color;
 				switch (m_HitType) {
 					case HitType::Head:
-						color = GetColor(255, 0, 0);
+						color = Red;
 						break;
 					case HitType::Body:
-						color = GetColor(0, 255, 0);
+						color = Green;
 						break;
 					case HitType::Arm:
-						color = GetColor(0, 0, 255);
+						color = Blue;
 						break;
 					case HitType::Leg:
-						color = GetColor(0, 0, 255);
+						color = Blue;
 						break;
 					default:
 						break;
@@ -597,8 +597,8 @@ namespace FPS_n2 {
 			void			DrawLaser() noexcept {
 				if (m_IsLaserActive) {
 					SetUseLighting(FALSE);
-					DrawSphere_3D(LaserEndPos, 0.01f*Scale_Rate, GetColor(255, 24, 24), GetColor(0, 0, 0));
-					DrawCapsule_3D(LaserStartPos, LaserEndPos, 0.0015f*Scale_Rate, GetColor(255, 24, 24), GetColor(0, 0, 0));
+					DrawSphere_3D(LaserEndPos, 0.01f*Scale_Rate, GetColor(255, 24, 24), Black);
+					DrawCapsule_3D(LaserStartPos, LaserEndPos, 0.0015f*Scale_Rate, GetColor(255, 24, 24), Black);
 					SetUseLighting(TRUE);
 				}
 			}
@@ -782,7 +782,6 @@ namespace FPS_n2 {
 		};
 		//
 		enum class ArmerWearPhase {
-			Ready,
 			Have,
 			Wear,
 		};
@@ -791,16 +790,14 @@ namespace FPS_n2 {
 		protected:
 			std::shared_ptr<ArmerClass>							m_Armer_Ptr{nullptr};
 			ArmMovePerClass										m_Wear_Armer;
-			ArmerWearPhase										m_ArmerWearPhase{ArmerWearPhase::Ready};
-		protected:
-			const auto		isWearingArmer() const noexcept { return (this->m_ArmerWearPhase != ArmerWearPhase::Ready); }
+			ArmerWearPhase										m_ArmerWearPhase{ArmerWearPhase::Have};
 		public:
 			ArmerPtrControl(void) noexcept {}
 			~ArmerPtrControl(void) noexcept {}
 		public:
 			void InitArmerPtr() {
 				this->m_Wear_Armer.Init(false);
-				this->m_ArmerWearPhase = ArmerWearPhase::Ready;
+				this->m_ArmerWearPhase = ArmerWearPhase::Have;
 				if (this->m_Armer_Ptr) {
 					this->m_Armer_Ptr->SetActive(false);
 				}
@@ -809,7 +806,6 @@ namespace FPS_n2 {
 		};
 
 		enum class MorphinePhase {
-			Ready,
 			Have,
 			Wear,
 		};
@@ -820,9 +816,7 @@ namespace FPS_n2 {
 			ArmMovePerClass										m_Wear_Morphine;
 			float												m_Wear_MorphineFrame{0.f};
 			float												m_Wear_MorphinePer{0.f};
-			MorphinePhase										m_MorphinePhase{MorphinePhase::Ready};
-		protected:
-			const auto		isMorphineing() const noexcept { return (this->m_MorphinePhase != MorphinePhase::Ready); }
+			MorphinePhase										m_MorphinePhase{MorphinePhase::Have};
 		public:
 			MorphinePtrControl(void) noexcept {}
 			~MorphinePtrControl(void) noexcept {}
