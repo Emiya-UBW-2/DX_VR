@@ -461,10 +461,10 @@ namespace FPS_n2 {
 				{
 					int xp1, yp1;
 					xp1 = y_r(1500);
-					yp1 = y_r(980) + y_r(300.f* UltPer);
+					yp1 = y_r(970) + y_r(300.f* UltPer);
 					if (intParam[7] == -1) {
 						xp1 += y_r(280);
-						yp1 -= y_r(40);
+						yp1 -= y_r(50);
 					}
 					for (size_t i = 0; i < 3; i++) {
 						auto& g = m_GaugeMask.at((size_t)(i + 2));
@@ -489,7 +489,7 @@ namespace FPS_n2 {
 						}
 						else {
 							xp1 = y_r(1500);
-							yp1 = y_r(980);
+							yp1 = y_r(990);
 						}
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - UltPer)), 0, 255));
 						//弾ストック表示

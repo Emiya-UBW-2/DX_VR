@@ -10,7 +10,7 @@ reloadType=MAG
 
 Slot0Type=Magazine
 Slot0IsNeed=true
-Slot0Item=STANAG_20
+Slot0Item=STANAG_30
 
 Slot1Type=Sight
 Slot1IsNeed=true
