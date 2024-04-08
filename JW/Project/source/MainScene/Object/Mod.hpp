@@ -16,11 +16,6 @@ namespace FPS_n2 {
 			~ModClass(void) noexcept {}
 		public:
 			auto&			GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
-			const bool		HaveFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first != -1; }
-			const auto&		GetFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first; }
-			const auto&		GetFrameBaseLocalMat(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].second; }
-			const auto		GetFrameLocalMat(GunFrame frame) const noexcept { return GetFrameLocalMatrix(GetFrame(frame)); }
-			const auto		GetChildFrameNum(GunFrame frame) const noexcept { return ObjectBaseClass::GetChildFrameNum(GetFrame(frame)); }
 			const auto		GetChildFrameWorldMat(GunFrame frame, int ID) const noexcept { return ObjectBaseClass::GetChildFrameWorldMatrix(GetFrame(frame), ID); }
 			const auto		GetFrameWorldMat(GunFrame frame) const noexcept {
 				//ŠY“–ƒtƒŒ[ƒ€‚ª‚ ‚é‚Ì‚È‚çã‘‚«
@@ -31,7 +26,7 @@ namespace FPS_n2 {
 				if (HaveFrame(frame)) {
 					Ret = GetFrameWorldMatrix(GetFrame(frame));
 					if (frame == GunFrame::Sight) {
-						if (GetChildFrameNum(frame) > 0) {
+						if (GetChildFramesNum(frame) > 0) {
 							VECTOR_ref vec = (GetChildFrameWorldMat(frame, 0).pos() - Ret.pos()).Norm();
 							//pRet->xvec().cross(vec)
 							Ret = (Ret.GetRot()*MATRIX_ref::RotVec2(Ret.yvec(), vec)) * MATRIX_ref::Mtrans(Ret.pos());

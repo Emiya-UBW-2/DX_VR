@@ -1,16 +1,17 @@
 #pragma once
 #include	"../../Header.hpp"
+#include "CharaAnimData.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
 		enum class GunAnimeID : int {
-			Base,//0
-			Shot,//1
-			Cocking,//2
-			ReloadStart_Empty,//3
-			ReloadStart,//4
-			ReloadOne,//5
-			ReloadEnd,//6
+			Base,
+			Shot,
+			Cocking,
+			ReloadStart_Empty,
+			ReloadStart,
+			ReloadOne,
+			ReloadEnd,
 			CheckStart,
 			Checking,
 			CheckEnd,
@@ -77,6 +78,7 @@ namespace FPS_n2 {
 			"LaserSight",
 			"EyeOffsetPos",
 		};
+
 		enum class SHOTTYPE {
 			BOLT,
 			SEMI,
@@ -92,7 +94,6 @@ namespace FPS_n2 {
 			AMMO,
 			MAG,
 		};
-
 		struct GunSoundSet {
 			SoundEnum					m_Cock1{SoundEnum::Shot2};
 			SoundEnum					m_Cock2{SoundEnum::Shot2};
@@ -130,7 +131,6 @@ namespace FPS_n2 {
 				SoundEnum::Load1
 			},
 		};
-
 		enum class GunSlot {
 			Gun,
 			Magazine,
@@ -152,7 +152,6 @@ namespace FPS_n2 {
 			"Sight",
 			"MuzzleAdapter",
 		};
-
 		enum class GunShootSound {
 			Normal,
 			Suppressor,

@@ -40,8 +40,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SaveDataParts->SetParam("X400 LaserSight", 1);
 	SaveDataParts->SetParam("Universal Mount", 1);
 	SaveDataParts->SetParam("VIPER RedDotSight", 1);
-	SaveDataParts->SetParam("ULT Unlock", std::max(SaveDataParts->GetParam("ULT Unlock"), 1));
-	SaveDataParts->SetParam("Glock Unlock", std::max(SaveDataParts->GetParam("Glock Unlock"), 1));
+	SaveDataParts->SetParam("ULT Unlock", std::max(static_cast<int>(SaveDataParts->GetParam("ULT Unlock")), 1));
+	SaveDataParts->SetParam("Glock Unlock", std::max(static_cast<int>(SaveDataParts->GetParam("Glock Unlock")), 1));
 	//SaveDataParts->SetParam("UnlockHardMode", 1);
 	SaveDataParts->Save();
 	//BGM

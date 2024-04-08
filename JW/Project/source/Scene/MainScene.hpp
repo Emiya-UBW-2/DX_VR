@@ -28,7 +28,6 @@ namespace FPS_n2 {
 			int												prevScore{0};
 			int												prevLastMan{0};
 
-			MyPlayerReticleControl							m_MyPlayerReticleControl;		//銃関連
 			NetWorkBrowser									m_NetWorkBrowser;				//ネットワーク
 			ConcussionControl								m_ConcussionControl;			//コンカッション
 			MainLoopPauseControl							m_MainLoopPauseControl;			//ポーズメニュー
@@ -45,21 +44,64 @@ namespace FPS_n2 {
 			bool											m_IsEnd{false};
 			float											m_PreEndTimer{0.f};
 			float											m_EndTimer{0.f};
+			int												m_ResultPhase{0};
+
+			struct ResultFlips {
+				float m_Flip{0.f};
+				float m_Point{0.f};
+				float m_Timer{0.f};
+				float m_Up{0.f};
+			public:
+				void Init() {
+					m_Flip = 0.f;
+					m_Point = 0.f;
+					m_Timer = 0.f;
+					m_Up = 0.f;
+				}
+
+				bool Update(int Aim, bool skip) {
+					float diff = ((float)Aim - m_Point);
+					if (skip) { diff = 0.f; }
+					if (diff <= 0.f) {
+						m_Point = (float)Aim;
+					}
+					else {
+						m_Point += 1.f / FPS * ((float)Aim / 4.f);
+					}
+
+					Easing(&m_Up, 0.f, 0.9f, EasingType::OutExpo);
+					if (abs((float)Aim - m_Point) > 1.f) {
+						m_Timer += 1.f / FPS;
+						if (m_Timer > 0.4f) {
+							m_Timer -= 0.4f;
+							m_Up = 1.f;
+						}
+					}
+					else {
+						return true;
+					}
+					return false;
+				}
+			};
+			std::array<ResultFlips,3>						m_ResultFlip{};
+			float											m_ResultRankingPer{0.f};
+			float											m_ResultRankDrawTime{0.f};
+			int												m_ResultRank{0};
+			std::vector<std::pair<int, int64_t>>			m_Ranking{};
+			int64_t											m_StartTime{0};
+
 			float											Min = 0.f;
 			float											Gamma = 1.f;
 			float											AberrationPower{1.f};
-
 			float											m_DeathCamYAdd{0.f};
 			float											m_DeathPer{0.f};
 			float											m_ULTCounter{0.f};
-
 			int												m_CountDownBGMTimer{0};
 			bool											m_CountDownBGM1Flag{true};
 			bool											m_CountDownBGM2Flag{true};
 			bool											m_CountDownBGM3Flag{true};
-
-			GraphHandle movie;										//
-			int m_movieTotalFrame{0};
+			//GraphHandle movie;										//
+			//int m_movieTotalFrame{0};
 		public:
 			MAINLOOP(void) noexcept {}
 			~MAINLOOP(void) noexcept {}
@@ -91,11 +133,27 @@ namespace FPS_n2 {
 		private:
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_NetWorkBrowser.GetMyPlayerID(); }
 		private:
-			void			SetDrawMiniMap(void) noexcept;
+			void			LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept;
+		private:
+			void			StartUIParam(void) noexcept;
+			void			StartResult(void) noexcept;
+		private:
+			bool			UpdateResult(void) noexcept;
+			void			UpdateInput(void) noexcept;
+			void			UpdateBullet(void) noexcept;
+			void			UpdateItem(void) noexcept;
+			void			UpdateMelee(void) noexcept;
+			void			UpdateView(void) noexcept;
+			void			UpdateLight(void) noexcept;
+			void			UpdateLaser(void) noexcept;
+			void			UpdateUIParam(void) noexcept;
+			void			UpdateMiniMap(void) noexcept;
+		private:
 			void			DrawSoundGraph(void) noexcept;
 			void			DrawHitGraph(void) noexcept;
-		private:
-			void			LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept;
+
+			void			DrawResult(void) noexcept;
+			void			DrawBlackOut(float per) noexcept;
 		};
 	};
 };

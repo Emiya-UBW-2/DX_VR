@@ -16,26 +16,6 @@ namespace FPS_n2 {
 			Max,
 		};
 
-
-		enum class CharaGunAnimeID : int {
-			Down,
-			Ready,
-			ADS,
-			Cocking,
-			CheckStart,
-			Check,
-			CheckEnd,
-			ReloadStart_Empty,
-			ReloadStart,
-			ReloadOne,
-			ReloadEnd,
-			Watch,
-			Melee,
-			AmmoLoading,
-			AmmoLoadEnd,
-			OffsetAnim,
-			Max,
-		};
 		enum class CharaAnimeID : int {
 			Bottom_Stand,
 			Bottom_Stand_Walk,

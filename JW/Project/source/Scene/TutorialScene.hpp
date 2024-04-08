@@ -144,7 +144,6 @@ namespace FPS_n2 {
 			bool											m_PrevSSAO{true};
 			bool											m_IsFirstLoad{true};			//共通リソースをロードしたか
 			std::shared_ptr<BackGroundClassTutorial>		m_BackGround;					//BG
-			MyPlayerReticleControl							m_MyPlayerReticleControl;		//銃関連
 			MainLoopPauseControl							m_MainLoopPauseControl;			//ポーズメニュー
 			UIClass											m_UIclass;						//UI関連
 

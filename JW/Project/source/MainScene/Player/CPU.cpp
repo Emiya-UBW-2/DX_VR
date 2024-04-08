@@ -455,6 +455,13 @@ namespace FPS_n2 {
 					this->m_CheckAgain = 5.f;
 				}
 			}
+			void		Execute_Dead() noexcept {
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
+				if (MyChara->IsAlive()) {
+					this->m_Phase = ENUM_AI_PHASE::Dead;
+				}
+			}
 		};
 		//
 		AIControl::AIControl() {
@@ -481,6 +488,7 @@ namespace FPS_n2 {
 					this->GetParam()->Execute_Shot();
 					break;
 				case ENUM_AI_PHASE::Dead:
+					this->GetParam()->Execute_Dead();
 					break;
 				default:
 					break;

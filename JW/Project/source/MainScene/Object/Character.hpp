@@ -4,16 +4,6 @@
 #include "Character_before.hpp"
 #include "CharaAnimData.hpp"
 
-
-#include "../../sub.hpp"
-#include "ObjectBase.hpp"
-#include "AmmoData.hpp"
-#include "Ammo.hpp"
-#include "Gun.hpp"
-#include "Armer.hpp"
-#include "Morphine.hpp"
-
-
 namespace FPS_n2 {
 	namespace Sceneclass {
 
@@ -57,9 +47,6 @@ namespace FPS_n2 {
 			bool												m_ULTActive{false};
 			float												m_HPRec{0.f};
 			//“ü—Í
-			bool												m_Press_Shot{false};
-			bool												m_Press_Reload{false};
-			bool												m_Press_Aim{false};
 			float												m_MeleeCoolDown{0.f};
 			bool												m_ArmBreak{false};
 			switchs												m_SightChange;
@@ -76,6 +63,8 @@ namespace FPS_n2 {
 			int													m_ArmerStock{0};
 			int													m_MorphineStock{0};
 			bool												m_AmmoLoadStart{false};
+			bool												m_AmmoLoadSwitch{false};
+			int													m_AmmoLoadCount{0};
 		public:
 			bool												CanLookTarget{true};
 
@@ -89,22 +78,17 @@ namespace FPS_n2 {
 			void			move_LeftArm(const VECTOR_ref& GunPos, const VECTOR_ref& Gunyvec, const VECTOR_ref& Gunzvec) noexcept;
 			const MATRIX_ref GetCharaDir(void) const noexcept;
 
-			const auto		GetIsCheck() const noexcept {
-				bool IsCheck = GetGunPtrNow()->GetIsMagFull();
-				if (IsGun0Select() && GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
-					IsCheck = (GetGunPtrNow()->GetAmmoNum() >= MagStockControl::GetMag(0));
-				}
-				return IsCheck;
-			}
-			const auto		GetCharaPosition(void) const noexcept { return this->m_move.pos; }
+			const auto		GetCharaPosition(void) const noexcept { return this->m_move.posbuf; }
 			const auto		IsAimPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() <= 0.1f); }
 			const auto		IsLowReadyPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() >= 0.95f); }
 		private:
+			void			Shot_Start() noexcept;
 			void			Reload_Start() noexcept;
 		public://ƒQƒbƒ^[
 			const MATRIX_ref GetEyeMatrix(void) const noexcept;
 			const auto&		GetGunSelPer(void) const noexcept { return this->m_ULTBar.Per(); }
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
+			const auto&		GetCharaAction(void) const noexcept { return this->m_CharaAction; }
 			auto&			GetSoundPower(void) noexcept { return this->m_SoundPower; }
 			const auto		GetMeleeSwitch(void) const noexcept { return m_MeleeCoolDown == 1.f; }
 			const auto		GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd*(60.f / FPS); }

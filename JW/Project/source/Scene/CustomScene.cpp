@@ -75,7 +75,7 @@ namespace FPS_n2 {
 			}
 
 			auto* SaveDataParts = SaveDataClass::Instance();
-			int max = std::clamp(SaveDataParts->GetParam("ULT Unlock"), 1, (int)ULT_GUN::Max);
+			int max = std::clamp(static_cast<int>(SaveDataParts->GetParam("ULT Unlock")), 1, (int)ULT_GUN::Max);
 			for (int i = 0;i < max;i++) {
 				BattleResourceMngr->LoadGun(ULT_GUNName[i], (PlayerID)(1 + i), 0);
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + i).GetGun(0);
@@ -592,7 +592,7 @@ namespace FPS_n2 {
 			}
 
 			if (IsChange) {
-				int max = std::clamp(SaveDataParts->GetParam("ULT Unlock"), 1, (int)ULT_GUN::Max);
+				int max = std::clamp(static_cast<int>(SaveDataParts->GetParam("ULT Unlock")), 1, (int)ULT_GUN::Max);
 				if (tmp > max - 1) { tmp = 0; }
 				if (tmp < 0) { tmp = max - 1; }
 				if (tmp != (int)GunsModify::GetULTSelect()) {
@@ -708,7 +708,7 @@ namespace FPS_n2 {
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + (int)GunsModify::GetULTSelect()).GetGun(0);
 				if (GunPtr) {
 					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-																		  xp1, yp1, Green, DarkGreen, GunPtr->GetName());
+																		  xp1, yp1, Green, DarkGreen, GunPtr->GetModData()->GetName());
 				}
 			}
 			//

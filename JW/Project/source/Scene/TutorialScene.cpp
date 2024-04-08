@@ -577,33 +577,21 @@ namespace FPS_n2 {
 
 			//ObjMngr->DrawDepthObject();
 			//シェーダー描画用パラメーターセット
-			{
-				//
-				if (Chara->GetGunPtrNow()) {
-					m_MyPlayerReticleControl.Update(
-						Chara->GetGunPtrNow()->GetLensPos(),
-						Chara->GetGunPtrNow()->GetFrameWorldMat(GunFrame::LensSize).pos(),
-						Chara->GetGunPtrNow()->GetReticlePos()
-					);
-					//*
-					if (m_MyPlayerReticleControl.IsActive() && Chara->GetSightZoomSize() > 1.f) {
-						DrawParts->Set_is_lens(true);
-						DrawParts->Set_xp_lens(m_MyPlayerReticleControl.GetLensXPos());
-						DrawParts->Set_yp_lens(m_MyPlayerReticleControl.GetLensYPos());
-						DrawParts->Set_size_lens(m_MyPlayerReticleControl.GetLensSize());
-						DrawParts->Set_zoom_lens(std::max(1.f, Chara->GetSightZoomSize() / 2.f));
-					}
-					else {
-						DrawParts->Set_is_lens(false);
-						DrawParts->Set_zoom_lens(1.f);
-					}
-					//*/
+			if (Chara->GetGunPtrNow()) {
+				Chara->GetGunPtrNow()->UpdateReticle();
+				float Zoom = Chara->GetSightZoomSize();
+				bool IsActive = Chara->GetGunPtrNow()->IsActiveReticle() && Zoom > 1.f;
+				DrawParts->Set_is_lens(IsActive);
+				DrawParts->Set_zoom_lens(std::max(1.f, Zoom / 2.f));
+				if (IsActive) {
+					DrawParts->Set_xp_lens(Chara->GetGunPtrNow()->GetLensXPos());
+					DrawParts->Set_yp_lens(Chara->GetGunPtrNow()->GetLensYPos());
+					DrawParts->Set_size_lens(Chara->GetGunPtrNow()->GetLensSize());
 				}
-				else {
-					m_MyPlayerReticleControl.SetActiveOff();
-					DrawParts->Set_is_lens(false);
-					DrawParts->Set_zoom_lens(1.f);
-				}
+			}
+			else {
+				DrawParts->Set_is_lens(false);
+				DrawParts->Set_zoom_lens(1.f);
 			}
 		}
 
@@ -615,15 +603,14 @@ namespace FPS_n2 {
 			//着弾表示
 			if (Chara->IsAlive()) {
 				//レティクル表示
-				if (m_MyPlayerReticleControl.IsActive() && Chara->IsSightPtrActive()
-					
-					&&
-					!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)
-					) {
-					Chara->GetSightReitcleGraphPtr().DrawRotaGraph(
-						(int)m_MyPlayerReticleControl.GetReticleXPos(),
-						(int)m_MyPlayerReticleControl.GetReticleYPos(),
-						1.f, Chara->GetLeanRad(), true);
+				if (Chara->GetGunPtrNow()) {
+					if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&
+						!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
+						(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph().DrawRotaGraph(
+							(int)Chara->GetGunPtrNow()->GetReticleXPos(),
+							(int)Chara->GetGunPtrNow()->GetReticleYPos(),
+							1.f, Chara->GetLeanRad(), true);
+					}
 				}
 				//UI
 				if (!DrawParts->IsPause()) {

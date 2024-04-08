@@ -133,7 +133,7 @@ namespace FPS_n2 {
 					auto& m = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
 					*pRet = m->GetFrameWorldMat(frame);
 					if (frame == GunFrame::Sight) {
-						if (m->GetChildFrameNum(frame) > 0) {
+						if (m->GetChildFramesNum(frame) > 0) {
 							VECTOR_ref vec = (m->GetChildFrameWorldMat(frame, 0).pos() - pRet->pos()).Norm();
 							//pRet->xvec().cross(vec)
 							*pRet *= MATRIX_ref::RotVec2(pRet->yvec(), vec);

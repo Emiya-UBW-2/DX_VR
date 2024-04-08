@@ -54,9 +54,17 @@ namespace FPS_n2 {
 			const auto		GetChildFrameWorldMatrix(int frame, int ID) const noexcept { return GetFrameWorldMatrix((int)this->m_obj.frame_child(frame, ID)); }
 
 
+		public://ゲッター ガン
+			const bool		HaveFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first != -1; }
+			const auto&		GetFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first; }
+			const auto&		GetFrameBaseLocalMat(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].second; }
+			const auto		GetFrameLocalMat(GunFrame frame) const noexcept { return GetFrameLocalMatrix(GetFrame(frame)); }
+			const auto		GetChildFramesNum(GunFrame frame) const noexcept { return GetChildFrameNum(GetFrame(frame)); }
+			const auto		GetChildFrameWorldMat(GunFrame frame, int ID) const noexcept { return GetChildFrameWorldMatrix(GetFrame(frame), ID); }
+
 		public://ゲッター キャラ
 			const bool		HaveFrame(CharaFrame frame) const noexcept { return this->m_Frames[(int)frame].first != -1; }
-			const auto		GetFrame(CharaFrame frame) const noexcept { return m_Frames[(int)frame].first; }
+			const auto&		GetFrame(CharaFrame frame) const noexcept { return m_Frames[(int)frame].first; }
 			const auto&		GetFrameBaseLocalMat(CharaFrame frame) const noexcept { return this->m_Frames[(int)frame].second; }
 			const auto		GetFrameLocalMat(CharaFrame frame) const noexcept { return GetFrameLocalMatrix(GetFrame(frame)); }
 			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetFrameWorldMatrix(GetFrame(frame)); }

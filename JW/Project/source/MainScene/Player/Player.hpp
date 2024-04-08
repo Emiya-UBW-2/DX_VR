@@ -14,9 +14,15 @@ namespace FPS_n2 {
 				std::shared_ptr<ObjectBaseClass>				m_Chara{nullptr};
 				std::array<std::shared_ptr<ObjectBaseClass>, 2>	m_Gun{};
 				int												m_Score{0};							//スコア
+				int												m_Kill{0};							//スコア
+				int												m_Hit{0};							//スコア
+				int												m_Shot{0};							//スコア
 			public:
 				PlayerControl(void) noexcept {
 					this->m_Score = 0;
+					this->m_Kill = 0;
+					this->m_Hit = 0;
+					this->m_Shot = 0;
 				}
 				~PlayerControl(void) noexcept {
 					this->Dispose();
@@ -28,11 +34,20 @@ namespace FPS_n2 {
 				auto&		GetGun(int ID) noexcept { return this->m_Gun[ID]; }
 
 				void		AddScore(int value) noexcept { this->m_Score += value; }
-				void		SubScore(int value) noexcept { this->m_Score -= value; }
 				void		SetScore(int value) noexcept { this->m_Score = value; }
 				const auto&	GetScore(void) const noexcept { return this->m_Score; }
 
-				//const auto	GetPos(void) const noexcept { return this->m_Chara->GetMatrix().pos(); }
+				void		AddKill(int value) noexcept { this->m_Kill += value; }
+				void		SetKill(int value) noexcept { this->m_Kill = value; }
+				const auto&	GetKill(void) const noexcept { return this->m_Kill; }
+
+				void		AddHit(int value) noexcept { this->m_Hit += value; }
+				void		SetHit(int value) noexcept { this->m_Hit = value; }
+				const auto&	GetHit(void) const noexcept { return this->m_Hit; }
+
+				void		AddShot(int value) noexcept { this->m_Shot += value; }
+				void		SetShot(int value) noexcept { this->m_Shot = value; }
+				const auto&	GetShot(void) const noexcept { return this->m_Shot; }
 			public:
 				void Init(void) noexcept {
 					m_Chara = nullptr;

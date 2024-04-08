@@ -10,6 +10,7 @@ namespace FPS_n2 {
 			ReloadStart_Empty,
 			ReloadStart,
 			Reload,
+			ReloadEnd,
 			Ready,
 			Check,
 			Watch,
@@ -23,23 +24,28 @@ namespace FPS_n2 {
 			M1911_aim1,
 			M1911_aim2,
 			M1911_ads,
-			M1911_reload,
 			M1911_reloadstart_empty,
 			M1911_reloadstart,
+			M1911_reload,
+			M1911_reloadend,
 			M1911_run,
 			M1911_check1,
 			M1911_watch,
 			M1911_melee,
+			M1911_ammoload,
 			M16_ready1,
 			M16_ready2,
 			M16_aim,
 			M16_ads,
-			M16_reload,
 			M16_reloadstart_empty,
 			M16_reloadstart,
+			M16_reload,
+			M16_reloadend,
 			M16_run,
 			M16_check1,
 			M16_watch,
+			M16_ammoload,
+			M870_raload,
 			Max,
 		};
 		static const char* EnumGunAnimName[(int)EnumGunAnim::Max] = {
@@ -48,23 +54,28 @@ namespace FPS_n2 {
 			"M1911_aim1",
 			"M1911_aim2",
 			"M1911_ads",
-			"M1911_reload",
 			"M1911_reloadstart_empty",
 			"M1911_reloadstart",
+			"M1911_reload",
+			"M1911_reloadend",
 			"M1911_run",
 			"M1911_check1",
 			"M1911_watch",
 			"M1911_melee",
+			"M1911_ammoload",
 			"M16_ready1",
 			"M16_ready2",
 			"M16_aim",
 			"M16_ads",
-			"M16_reload",
 			"M16_reloadstart_empty",
 			"M16_reloadstart",
+			"M16_reload",
+			"M16_reloadend",
 			"M16_run",
 			"M16_check1",
 			"M16_watch",
+			"M16_ammoload",
+			"M870_raload",
 		};
 
 		class GunanimData {
@@ -159,9 +170,20 @@ namespace FPS_n2 {
 		class GunAnimManager : public SingletonBase<GunAnimManager> {
 		private:
 			friend class SingletonBase<GunAnimManager>;
-			typedef std::pair<std::shared_ptr<GunanimData>, std::vector<std::shared_ptr<GunAnim>>> DataPair;
+			struct AnimDatas {
+				std::shared_ptr<GunanimData> first;
+				std::vector<std::shared_ptr<GunAnim>> second;
+
+				const auto GetTotalTime() const {
+					int total = 0;
+					for (auto& ani : second) {
+						total += ani->GetFrame();
+					}
+					return total;
+				}
+			};
 		private:
-			std::vector<DataPair>	m_Object;
+			std::vector<AnimDatas>	m_Object;
 		public:
 			void	Load(const char* filepath) {
 				for (int loop = 0; loop < (int)EnumGunAnim::Max; loop++) {
@@ -185,25 +207,22 @@ namespace FPS_n2 {
 				FileRead_close(mdata);
 			}
 
-			const DataPair*	GetAnimData(EnumGunAnim EnumSel) const noexcept {
-				auto Find = std::find_if(m_Object.begin(), m_Object.end(), [&](const DataPair& tgt) {return tgt.first->GetEnumGunAnim() == EnumSel; });
+			const AnimDatas*	GetAnimData(EnumGunAnim EnumSel) const noexcept {
+				auto Find = std::find_if(m_Object.begin(), m_Object.end(), [&](const AnimDatas& tgt) {return tgt.first->GetEnumGunAnim() == EnumSel; });
 				if (Find != m_Object.end()) {
 					return &*Find;
 				}
 				return nullptr;
 			}
 
-			static GunAnimNow	GetAnimNow(const DataPair* data, float nowframe) noexcept {
+			static GunAnimNow	GetAnimNow(const AnimDatas* data, float nowframe) noexcept {
 				GunAnimNow Ret; Ret.Set(VECTOR_ref::zero(), VECTOR_ref::zero());
 				if (data) {
-					int total = 0;
-					for (auto& ani : data->second) {
-						total += ani->GetFrame();
-					}
+					float totalTime = (float)data->GetTotalTime();
 					if (data->first->GetIsLoop()) {
 						while (true) {
-							if ((nowframe - (float)total) > 0.f) {
-								nowframe -= (float)total;
+							if ((nowframe - totalTime) > 0.f) {
+								nowframe -= totalTime;
 							}
 							else {
 								break;
@@ -211,8 +230,8 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						if ((nowframe - (float)total) > 0.f) {
-							nowframe = (float)total;
+						if ((nowframe - totalTime) > 0.f) {
+							nowframe = totalTime;
 						}
 					}
 					for (auto ani = data->second.begin(), e = data->second.end() - 1; ani != e; ++ani) {
@@ -231,5 +250,56 @@ namespace FPS_n2 {
 			}
 		};
 
+
+		struct GunAnimSet {
+			std::array<EnumGunAnim, (int)EnumGunAnimType::Max> Anim;
+		};
+		const GunAnimSet GunAnimeSets[] = {
+			{
+				//M4
+				EnumGunAnim::M16_aim,
+				EnumGunAnim::M16_ads,
+				EnumGunAnim::M16_run,
+				EnumGunAnim::M16_reloadstart_empty,
+				EnumGunAnim::M16_reloadstart,
+				EnumGunAnim::M16_reload,
+				EnumGunAnim::M16_reloadend,
+				EnumGunAnim::M16_ready1,
+				EnumGunAnim::M16_check1,
+				EnumGunAnim::M16_watch,
+				EnumGunAnim::M1911_melee,
+				EnumGunAnim::M1911_ammoload
+			},
+			{
+				//ƒnƒ“ƒhƒKƒ“
+				EnumGunAnim::M1911_aim1,
+				EnumGunAnim::M1911_ads,
+				EnumGunAnim::M1911_run,
+				EnumGunAnim::M1911_reloadstart_empty,
+				EnumGunAnim::M1911_reloadstart,
+				EnumGunAnim::M1911_reload,
+				EnumGunAnim::M1911_reloadend,
+				EnumGunAnim::M1911_ready1,
+				EnumGunAnim::M1911_check1,
+				EnumGunAnim::M1911_watch,
+				EnumGunAnim::M1911_melee,
+				EnumGunAnim::M1911_ammoload
+			},
+			{
+				//M4
+				EnumGunAnim::M16_aim,
+				EnumGunAnim::M16_ads,
+				EnumGunAnim::M16_run,
+				EnumGunAnim::M16_reloadstart_empty,
+				EnumGunAnim::M16_reloadstart,
+				EnumGunAnim::M870_raload,
+				EnumGunAnim::M16_reloadend,
+				EnumGunAnim::M16_ready1,
+				EnumGunAnim::M16_check1,
+				EnumGunAnim::M16_watch,
+				EnumGunAnim::M1911_melee,
+				EnumGunAnim::M1911_ammoload
+			},
+		};
 	};
 };

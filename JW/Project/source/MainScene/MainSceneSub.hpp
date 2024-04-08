@@ -171,46 +171,5 @@ namespace FPS_n2 {
 			const auto&		GetIsRetireSelected(void) const noexcept { return this->m_IsRetire; }
 		private:
 		};
-		class MyPlayerReticleControl {
-			bool Reticle_on = false;
-			float Reticle_xpos = 0;
-			float Reticle_ypos = 0;
-			float Lens_xpos = 0;
-			float Lens_ypos = 0;
-			float LensSize = 10000;
-		public:
-			MyPlayerReticleControl() {}
-			~MyPlayerReticleControl() {}
-		public:
-			void Update(const VECTOR_ref& LensPos, const VECTOR_ref& LensPos2, const VECTOR_ref& ReticlePos) noexcept {
-				VECTOR_ref LensPosBuf = ConvWorldPosToScreenPos(LensPos.get());
-				if (!(0.f < LensPosBuf.z() && LensPosBuf.z() < 1.f)) {
-					return;
-				}
-				Lens_xpos = LensPosBuf.x();
-				Lens_ypos = LensPosBuf.y();
-				VECTOR_ref LensSizeBuf = ConvWorldPosToScreenPos(LensPos2.get());
-				if (0.f < LensSizeBuf.z() && LensSizeBuf.z() < 1.f) {
-					LensSize = std::hypotf(Lens_xpos - LensSizeBuf.x(), Lens_ypos - LensSizeBuf.y());
-				}
-				VECTOR_ref ReticlePosBuf = ConvWorldPosToScreenPos(ReticlePos.get());
-				if (0.f < ReticlePosBuf.z() && ReticlePosBuf.z() < 1.f) {
-					Reticle_xpos = ReticlePosBuf.x();
-					Reticle_ypos = ReticlePosBuf.y();
-					Reticle_on = (LensSize > std::hypotf(Lens_xpos - Reticle_xpos, Lens_ypos - Reticle_ypos));
-				}
-			}
-		public:
-			void SetActiveOff() noexcept {
-				Reticle_on = false;
-			}
-			const auto&		IsActive(void) const noexcept { return this->Reticle_on; }
-			const auto&		GetReticleXPos(void) const noexcept { return this->Reticle_xpos; }
-			const auto&		GetReticleYPos(void) const noexcept { return this->Reticle_ypos; }
-			const auto&		GetLensXPos(void) const noexcept { return this->Lens_xpos; }
-			const auto&		GetLensYPos(void) const noexcept { return this->Lens_ypos; }
-			const auto&		GetLensSize(void) const noexcept { return this->LensSize; }
-		private:
-		};
 	};
 };

@@ -738,27 +738,17 @@ namespace FPS_n2 {
 			std::array<std::shared_ptr<GunClass>, 2>			m_Gun_Ptr{nullptr , nullptr};			//e
 		public://ƒQƒbƒ^[
 			auto&			GetGunPtr(int ID) noexcept { return this->m_Gun_Ptr[ID]; }
-			auto&			GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr[m_GunSelect]; }
-			const auto&		GetGunPtrNow(void) const noexcept { return this->m_Gun_Ptr[m_GunSelect]; }
+
+			const int		GetNowGunSelect() const noexcept { return this->m_GunSelect; }
+			const int		GetOtherGunSelect() const noexcept { return 1 - this->m_GunSelect; }
+
+			auto&			GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr[GetNowGunSelect()]; }
+			const auto&		GetGunPtrNow(void) const noexcept { return this->m_Gun_Ptr[GetNowGunSelect()]; }
 
 			auto&			GetGunPtrOther(void) noexcept { return this->m_Gun_Ptr[GetOtherGunSelect()]; }
 			const auto&		GetGunPtrOther(void) const noexcept { return this->m_Gun_Ptr[GetOtherGunSelect()]; }
 
-			const auto		GetShotPhase(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetShotPhase() : GunAnimeID::Base; }
-			const auto		GetShootReady(void) const noexcept { return (GetGunPtrNow()) ? GetGunPtrNow()->GetShootReady() : false; }
-			const auto		GetAmmoLoading() const noexcept { return GetGunPtrNow()->IsAmmoLoading(); }
-			const auto		IsSightActive() const noexcept { return GetGunPtrNow()->IsSightActive(); }
-			const auto		IsSightPtrActive() const noexcept { return GetGunPtrNow()->IsSightPtrActive(); }
-			const auto		IsAutoAimActive() const noexcept { return GetGunPtrNow()->IsAutoAimActive(); }
-
-			const auto&		GetSightReitcleGraphPtr() const noexcept { return GetGunPtrNow()->GetSightPtr()->GetModData()->GetReitcleGraph(); }
-			const auto		GetSightZoomSize() const noexcept {
-				if (!IsSightPtrActive()) { return 1.f; }
-				return GetGunPtrNow()->GetSightPtr()->GetModData()->GetZoomSize();
-			}
-
-			const int		GetNowGunSelect() const noexcept { return this->m_GunSelect; }
-			const int		GetOtherGunSelect() const noexcept { return 1 - this->m_GunSelect; }
+			const auto		GetSightZoomSize() const noexcept { return GetGunPtrNow()->GetSightPtr() ? (*GetGunPtrNow()->GetSightPtr())->GetModData()->GetZoomSize() : 1.f; }
 
 			const auto		IsGun0Select() const noexcept { return this->m_GunSelect == 0; }
 			const auto		IsULTSelect() const noexcept { return this->m_GunSelect == 1; }
