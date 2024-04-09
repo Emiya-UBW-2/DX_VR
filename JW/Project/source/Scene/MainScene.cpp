@@ -76,6 +76,7 @@ namespace FPS_n2 {
 			{
 				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 				Chara->LoadExtends();
+				Chara->SetPlayMode(m_IsHardMode);
 			}
 			GunsModify::LoadSlots("Save/gundata.svf");//プリセット読み込み
 			if (!m_IsHardMode) {
@@ -119,9 +120,23 @@ namespace FPS_n2 {
 						auto& C = this->m_BackGround->GetBuildData().at(GetRand((int)(this->m_BackGround->GetBuildData().size()) - 1));
 						BGPos_XZ = C.GetMatrix().pos(); BGPos_XZ.y(0.f);
 						if ((BGPos_XZ - TgtPos_XZ).Length() > 10.f*Scale_Rate) {
-							break;
+							auto StartPos = TgtPos_XZ + VECTOR_ref::up()*(1.f*Scale_Rate);
+							auto EndPos = BGPos_XZ + VECTOR_ref::up()*(1.f*Scale_Rate);
+							bool CanLookTarget = true;
+							for (auto& C : this->m_BackGround->GetBuildData()) {
+								if (C.GetMeshSel() < 0) { continue; }
+								if (GetMinLenSegmentToPoint(StartPos, EndPos, C.GetMatrix().pos()) >= 8.f*Scale_Rate) { continue; }
+								auto ret = C.GetColLine(StartPos, EndPos);
+								if (ret.HitFlag == TRUE) {
+									CanLookTarget = false;
+									break;
+								}
+							}
+							if (!CanLookTarget) { break; }
 						}
 					}
+
+
 					pos_t = BGPos_XZ;
 					rad_t = deg2rad(GetRandf(180.f));
 				}
@@ -256,8 +271,10 @@ namespace FPS_n2 {
 						if (m_PreEndTimer < 0.f) {
 							m_PreEndTimer = 5.f;
 							ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "クリア +%4d", 100);
+							PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(100);
 							if (m_LastMan == 0) {
 								ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "ラッシュ対処ボーナス +%4d", 100);
+								PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(100);
 							}
 						}
 						else {
@@ -1309,7 +1326,7 @@ namespace FPS_n2 {
 				}
 				//
 				auto ScoreBuf = PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore();
-				if (ScoreBuf > prevScore) {
+				if (ScoreBuf > prevScore && (ScoreBuf - prevScore) >= 100) {
 					this->m_UIclass.SetIntParam(5, (ScoreBuf - prevScore));
 					ItemLogParts->AddLog(3.f, GetColor(206, 0, 0), "敵をキル +%4d", (ScoreBuf - prevScore));
 				}
@@ -1322,6 +1339,9 @@ namespace FPS_n2 {
 				prevScore = PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore();
 				//
 				this->m_UIclass.SetIntParam(6, PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
+
+				this->m_UIclass.SetIntParam(8, Chara->GetArmerStock());
+				this->m_UIclass.SetIntParam(9, Chara->GetMorphineStock());
 			}
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();

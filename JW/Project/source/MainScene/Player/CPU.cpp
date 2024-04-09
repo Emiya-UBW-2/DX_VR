@@ -459,7 +459,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				if (MyChara->IsAlive()) {
-					this->m_Phase = ENUM_AI_PHASE::Dead;
+					this->m_Phase = ENUM_AI_PHASE::Normal;
 				}
 			}
 		};

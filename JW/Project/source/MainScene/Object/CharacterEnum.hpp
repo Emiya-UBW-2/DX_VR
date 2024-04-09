@@ -31,8 +31,6 @@ namespace FPS_n2 {
 			Bottom_Squat_LeftStep,
 			Bottom_Squat_RightStep,
 			Bottom_Squat_Turn,//12
-			Bottom_Stand_LLern,
-			Bottom_Stand_RLern,
 			//
 			Upper_Ready,
 			Hand_Ready,

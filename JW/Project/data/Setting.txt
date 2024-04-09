@@ -18,4 +18,5 @@ MotionBlur=false
 Xsensing=0.500000
 Ysensing=0.500000
 HeadBobbing=true
+EnableCheck=true
 LightMode=false

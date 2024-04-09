@@ -114,6 +114,9 @@ namespace FPS_n2 {
 			if (GetIsSquat()) {
 				Power *= 0.5f;
 			}
+			if (m_ArmBreak) {
+				Power *= 1.5f;
+			}
 			this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power, 0.f);
 			//
 			if (this->m_MyID == 0) {
@@ -363,6 +366,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* ItemLogParts = GetItemLog::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
+			auto* OptionParts = OPTION::Instance();
 			//
 			auto PrevAction = m_CharaAction;
 			//開始演出
@@ -444,7 +448,7 @@ namespace FPS_n2 {
 								if (IsGun0Select() && MagStockControl::GetNeedAmmoLoad(GetGunPtrNow()->GetIsMagFull(), GetGunPtrNow()->GetIsMagEmpty())) {
 									m_CharaAction = CharaActionID::AmmoLoad;
 								}
-								else {
+								else if(OptionParts->Get_EnableCheck()){
 									m_CharaAction = CharaActionID::Watch;
 								}
 							}
@@ -467,7 +471,7 @@ namespace FPS_n2 {
 							if (!IsCheck) {
 								m_CharaAction = CharaActionID::Reload;
 							}
-							else {
+							else if (OptionParts->Get_EnableCheck()) {
 								m_CharaAction = CharaActionID::Check;
 							}
 						}
@@ -958,8 +962,9 @@ namespace FPS_n2 {
 			this->m_move.UpdatePosBuf(this->m_move.posbuf, 0.9f);
 			UpdateMove();
 			//スリング場所探索
-			if (GetGunPtr(0)) {
-				m_SlingMat[0] =
+			int GunSel = m_IsHardMode ? 1 : 0;
+			if (GetGunPtr(GunSel)) {
+				m_SlingMat[GunSel] =
 					MATRIX_ref::RotX(deg2rad(-90))*
 					GetFrameWorldMat(CharaFrame::Upper).GetRot()*
 					GetCharaDir().Inverse()*
@@ -969,10 +974,11 @@ namespace FPS_n2 {
 						GetFrameWorldMat(CharaFrame::Upper).xvec() * (-0.3f*Scale_Rate)
 					);
 			}
-			if (GetGunPtr(1)) {
+			GunSel = 1 - GunSel;
+			if (GetGunPtr(GunSel)) {
 				m_SlingZrad.Update();
 				m_SlingZrad.AddRad(((1.f - m_SlingPer.at(GetOtherGunSelect())) + 0.5f  * (KeyControl::GetRad().y() - KeyControl::GetYRadBottom())) / FPS);
-				m_SlingMat[1] =
+				m_SlingMat[GunSel] =
 					MATRIX_ref::RotX(deg2rad(-30)) * MATRIX_ref::RotY(deg2rad(-90)) *
 					(
 						MATRIX_ref::RotZ(-this->m_SlingZrad.GetRad()) *
@@ -1363,6 +1369,9 @@ namespace FPS_n2 {
 						isDirect = false;
 					}
 					(*GetGunPtrNow()->GetMagazinePtr())->SetHandMatrix(Mat, m_AmmoHand, isDirect);
+					if (GetGunPtrOther()) {
+						(*GetGunPtrOther()->GetMagazinePtr())->SetHandMatrix(Mat, 0.f, false);
+					}
 					Easing(&m_AmmoHand, m_AmmoHandR, 0.9f, EasingType::OutExpo);
 				}
 			}
@@ -1414,6 +1423,7 @@ namespace FPS_n2 {
 		void			CharacterClass::MovePoint(float pxRad, float pyRad, const VECTOR_ref& pPos, int GunSel) noexcept {
 			KeyControl::InitKey(pxRad, pyRad);
 			this->m_move.vec.clear();
+			this->m_move.repos = pPos;
 			SetMove(MATRIX_ref::RotY(KeyControl::GetRad().y()), pPos);
 			if (GetGunPtr(0)) {
 				MagStockControl::Init_MagStockControl(GetGunPtr(0)->GetAmmoNum(), GetGunPtr(0)->GetAmmoAll(), GetGunPtr(0)->GetMagUniqueID());
@@ -1431,7 +1441,7 @@ namespace FPS_n2 {
 			}
 			GunReadyControl::SetReady();
 			//
-			this->m_MorphineStock = 1;
+			this->m_MorphineStock = !m_IsHardMode ? 3 : 1;
 			this->m_ArmerStock = 0;
 		}
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {

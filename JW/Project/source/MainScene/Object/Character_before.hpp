@@ -558,7 +558,7 @@ namespace FPS_n2 {
 				if (this->m_Input.GetPADSPress(PADS::MOVE_S)) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
 				if (this->m_Input.GetPADSPress(PADS::MOVE_W)) { this->m_BottomAnimSelect = GetRun() ? CharaAnimeID::Bottom_Stand_Run : GetBottomWalkAnimSel(); }
 				//‰º”¼g
-				Easing(&GetCharaAnimeBufID(GetBottomTurnAnimSel()), (this->m_TurnBody) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
+				Easing(&GetCharaAnimeBufID(GetBottomTurnAnimSel()), (!GetIsSquat() && this->m_TurnBody) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
 				for (int i = 0; i < (int)CharaAnimeID::AnimeIDMax; i++) {
 					if (
 						i == (int)CharaAnimeID::Bottom_Stand ||
@@ -574,9 +574,7 @@ namespace FPS_n2 {
 						i == (int)CharaAnimeID::Bottom_Squat_Walk ||
 						i == (int)CharaAnimeID::Bottom_Squat_LeftStep ||
 						i == (int)CharaAnimeID::Bottom_Squat_RightStep ||
-						i == (int)CharaAnimeID::Bottom_Squat_WalkBack ||
-						i == (int)CharaAnimeID::Bottom_Stand_LLern ||
-						i == (int)CharaAnimeID::Bottom_Stand_RLern) {
+						i == (int)CharaAnimeID::Bottom_Squat_WalkBack) {
 						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 2.f : -2.f) / FPS, 0.f, 1.f);
 					}
 				}

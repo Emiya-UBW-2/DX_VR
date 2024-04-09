@@ -65,6 +65,8 @@ namespace FPS_n2 {
 			bool												m_AmmoLoadStart{false};
 			bool												m_AmmoLoadSwitch{false};
 			int													m_AmmoLoadCount{0};
+
+			bool											m_IsHardMode{false};
 		public:
 			bool												CanLookTarget{true};
 
@@ -72,6 +74,9 @@ namespace FPS_n2 {
 				auto prev = this->m_ArmerStock;
 				this->m_ArmerStock = 1;
 				return this->m_ArmerStock != prev;
+			}
+			void			SetPlayMode(bool value) noexcept {
+				m_IsHardMode = value;
 			}
 		private:
 			void			move_RightArm(const VECTOR_ref& GunPos, const VECTOR_ref& Gunyvec, const VECTOR_ref& Gunzvec) noexcept;
@@ -97,6 +102,8 @@ namespace FPS_n2 {
 				this->m_HeadShotSwitch = false;
 				return ret;
 			}
+			const auto&		GetArmerStock(void) const noexcept { return this->m_ArmerStock; }
+			const auto&		GetMorphineStock(void) const noexcept { return this->m_MorphineStock; }
 		public://セッター
 			bool			SetDamageEvent(const DamageEvent& value) noexcept;
 			void			Heal(HitPoint value, bool SwitchOn) noexcept {

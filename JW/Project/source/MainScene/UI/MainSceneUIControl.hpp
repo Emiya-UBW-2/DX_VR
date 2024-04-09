@@ -189,6 +189,10 @@ namespace FPS_n2 {
 			std::array<int, 23>				intParam{0};
 			std::array<float, 5>			floatParam{0};
 			std::array<std::string, 7>		strParam;
+
+			GraphHandle						Morphine_Graph;
+			GraphHandle						Armer_Graph;
+
 			GraphHandle						Gauge_Graph;
 			GraphHandle						Gauge_Aim_Graph;
 			GraphHandle						OIL_Graph;
@@ -207,8 +211,13 @@ namespace FPS_n2 {
 				this->Gauge_Aim_Graph = GraphHandle::Load("data/UI/Gauge_Aim.png");
 				this->OIL_Graph = GraphHandle::Load("data/UI/back.png");
 
+				this->Armer_Graph = GraphHandle::Load("data/UI/Armer.png");
+				this->Morphine_Graph = GraphHandle::Load("data/UI/Morphine.png");
 			}
 			void			Dispose(void) noexcept {
+				this->Armer_Graph.Dispose();
+				this->Morphine_Graph.Dispose();
+
 				this->Gauge_Graph.Dispose();
 				this->Gauge_Aim_Graph.Dispose();
 				this->OIL_Graph.Dispose();
@@ -305,14 +314,21 @@ namespace FPS_n2 {
 					xp1 = y_r(24);
 					yp1 = DrawParts->m_DispYSize - y_r(96);
 
-					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(36), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1 + y_r(300) + y_r(18), yp1 + y_r(6), White, Gray75, "HP");
-
 					m_GaugeParam[0].DrawGauge(
 						xp1, yp1, xp1 + y_r(300), yp1 + y_r(18),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
 					);
-					yp1 += y_r(10);
+					
+					xp1 += y_r(330);
+					if (intParam[9] > 0) {
+						SetDrawBright(0, 255, 0);
+						this->Morphine_Graph.DrawRotaGraph(xp1, yp1, (float)(y_r(50)) / 100.f, 0.f, true);
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+																			  xp1, yp1, White, Gray75,
+																			  "%d", intParam[9]);
+						SetDrawBright(255, 255, 255);
+					}
 				}
 				//‚“xA‘¬“x
 				{
@@ -327,6 +343,18 @@ namespace FPS_n2 {
 															GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(64, 64, 255, 255),
 															GetColorU8(0, 255, 0, 255), GetColorU8(255, 0, 0, 255),
 															&this->Gauge_Graph, deg, 32);
+
+						if (intParam[8]>0) {
+							SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*0.4f), 0, 255));
+							xp1 = DrawParts->m_DispXSize / 2 + intParam[0] - y_r(300.f*std::cos(deg2rad(-45) + rad));
+							yp1 = DrawParts->m_DispYSize / 2 + intParam[1] - y_r(300.f*std::sin(deg2rad(-45) + rad));
+
+							this->Armer_Graph.DrawRotaGraph(xp1, yp1, (float)(y_r(50)) / 100.f, 0.f, true);
+							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+																				  xp1, yp1, White, Gray75,
+																				  "+");
+						}
 					}
 					{
 						xp1 = DrawParts->m_DispXSize / 2 + intParam[0] + y_r(300.f*std::cos(rad));

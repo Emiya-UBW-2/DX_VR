@@ -513,6 +513,9 @@ namespace FPS_n2 {
 					this->m_UIclass.SetGaugeParam(5 + mags, M.AmmoNum, M.AmmoAll);
 					mags++;
 				}
+				this->m_UIclass.SetIntParam(8, Chara->GetArmerStock());
+				this->m_UIclass.SetIntParam(9, Chara->GetMorphineStock());
+
 				this->m_TutorialLog.Update();
 			}
 			//

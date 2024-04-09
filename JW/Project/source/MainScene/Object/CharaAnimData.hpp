@@ -46,6 +46,7 @@ namespace FPS_n2 {
 			M16_watch,
 			M16_ammoload,
 			M870_raload,
+			M870_ready,
 			Max,
 		};
 		static const char* EnumGunAnimName[(int)EnumGunAnim::Max] = {
@@ -76,6 +77,7 @@ namespace FPS_n2 {
 			"M16_watch",
 			"M16_ammoload",
 			"M870_raload",
+			"M870_ready",
 		};
 
 		class GunanimData {
@@ -294,7 +296,7 @@ namespace FPS_n2 {
 				EnumGunAnim::M16_reloadstart,
 				EnumGunAnim::M870_raload,
 				EnumGunAnim::M16_reloadend,
-				EnumGunAnim::M16_ready1,
+				EnumGunAnim::M870_ready,
 				EnumGunAnim::M16_check1,
 				EnumGunAnim::M16_watch,
 				EnumGunAnim::M1911_melee,
