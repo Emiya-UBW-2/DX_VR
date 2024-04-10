@@ -219,7 +219,7 @@ namespace FPS_n2 {
 		public://
 			//
 			void			Init_Sub(void) noexcept override {
-				MV1SetMaterialDrawAlphaTestAll(this->m_ObjGround.get(), TRUE, DX_CMP_GREATER, 216);
+				//MV1SetMaterialDrawAlphaTestAll(this->m_ObjGround.get(), TRUE, DX_CMP_GREATER, 216);
 			}
 			//
 			void			Execute_Sub(void) noexcept override {}

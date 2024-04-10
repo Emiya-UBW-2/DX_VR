@@ -228,17 +228,25 @@ namespace FPS_n2 {
 						}
 						else if (select == 1 || select == 2) {
 							Chara->SetADS();
-							Chara->GetGunPtrNow()->ChangeSightSel();
+							//Chara->GetGunPtrNow()->ChangeSightSel();
 						}
 						else if ((m_HardModeActive && (select == 3))) {
 							Chara->SetAimOrADS();
 							Chara->SelectGun(1);
 						}
 						else {
-							Chara->SetReady();
+							if (Chara->IsGun0Select()) {
+								Chara->SetAimOrADS();
+							}
+							else {
+								Chara->SetReady();
+							}
 						}
 					}
 				}
+			}
+			if (Chara->IsGun0Select()) {
+				Chara->SetAimOrADS();
 			}
 			//
 			m_PopUpDrawClass.Update(m_CreditActive);

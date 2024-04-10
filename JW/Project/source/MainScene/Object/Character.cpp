@@ -409,12 +409,12 @@ namespace FPS_n2 {
 				}
 			}
 			//
-			bool Press_Shot = KeyControl::GetInputControl().GetPADSPress(PADS::SHOT) && !m_IsChanging;
-			bool Press_Reload = KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && !m_IsChanging;
+			bool Press_Shot = KeyControl::GetInputControl().GetPADSPress(PADS::SHOT) && !m_IsChange;
+			bool Press_Reload = KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && !m_IsChange;
 			if (GetGunPtrNow()->GetAmmoNumTotal() == 0 && GetGunPtrNow()->GetGunAnime() == GunAnimeID::Base) {
 				Press_Reload |= Press_Shot;				//‘Å‚¿Ø‚è‚ÅŽ©“®ƒŠƒ[ƒh
 			}
-			bool Press_Aim = KeyControl::GetInputControl().GetPADSPress(PADS::AIM) && !m_IsChanging;
+			bool Press_Aim = KeyControl::GetInputControl().GetPADSPress(PADS::AIM) && !m_IsChange;
 			switch (GetGunPtrNow()->GetShotType()) {
 				case SHOTTYPE::BOLT:
 					if (GetGunPtrNow()->GetGunAnime() > GunAnimeID::Shot) {//Œ‚‚Ä‚È‚¢ó‘Ô
@@ -1097,8 +1097,8 @@ namespace FPS_n2 {
 							auto& Mat = this->m_SlingMat[index];
 							auto& Per = this->m_SlingPer[index];
 							Easing(&Per, IsSelGun ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
-							if (Per <= 0.01f) { Per = 0.f; }
-							if (Per >= 0.99f) { Per = 1.f; }
+							if (Per <= 0.001f) { Per = 0.f; }
+							if (Per >= 0.999f) { Per = 1.f; }
 
 							auto tmp_gunrat = MATRIX_ref::RotVec2(VECTOR_ref::front(), Lerp(Mat.zvec(), zVect0, Per));
 
@@ -1128,11 +1128,16 @@ namespace FPS_n2 {
 								}
 							}
 
+							float PAdd = 0.f;
+							if (!IsSelGun) {
+								PAdd = -1.f*Scale_Rate*Per;
+							}
+
 							tmp_gunrat *= MATRIX_ref::RotVec2(tmp_gunrat.yvec(), Lerp(Mat.yvec(), yVect0, Per));
 							tmp_gunrat *=
 								KeyControl::GetGunSwingMat() * GetCharaDir()*
 								MATRIX_ref::RotVec2(Lerp(p->GetMatrix().yvec(), p->GetEyeYVec(), GunReadyControl::GetADSPer()), p->GetMatrix().yvec())*
-								MATRIX_ref::Mtrans(Lerp(Mat.pos(), Post0, Per));
+								MATRIX_ref::Mtrans(Lerp(Mat.pos() + VECTOR_ref::up()*PAdd, Post0, Per));
 							p->SetGunMatrix(tmp_gunrat);
 						}
 					}
@@ -1340,23 +1345,22 @@ namespace FPS_n2 {
 							}
 							break;
 						case GunAnimeID::CheckStart:
-							if (GetGunPtrNow()->GetTimePer(GunAnimeID::CheckStart) > 0.8f) {
+							if (GetGunPtrNow()->GetTimePer(GunAnimeID::CheckStart) > 0.5f) {
 								m_AmmoHandR = 1.f;
 							}
 						case GunAnimeID::Checking:
-							if (GetGunPtrNow()->GetTimePer(GunAnimeID::Checking) < 0.8f) {
-								m_AmmoHandR = 1.f;
-								m_AmmoHand = 1.f;
-							}
-							if (GetGunPtrNow()->GetTimePer(GunAnimeID::Checking) > 0.8f) {
-								m_AmmoHandR = 0.f;
-								m_AmmoHand = 0.f;
-							}
+							m_AmmoHandR = 1.f;
+							break;
+						case GunAnimeID::CheckEnd:
+							m_AmmoHandR = 0.f;
 							break;
 						case GunAnimeID::AmmoLoading:
-						case GunAnimeID::AmmoLoadEnd:
 							m_AmmoHandR = 1.f;
 							m_AmmoHand = 1.f;
+							isDirect = true;
+							break;
+						case GunAnimeID::AmmoLoadEnd:
+							m_AmmoHandR = 0.f;
 							isDirect = true;
 							break;
 						default:
@@ -1401,6 +1405,7 @@ namespace FPS_n2 {
 			this->m_MagHand = false;
 			EyeSwingControl::InitEyeSwing();
 			this->m_IsChanging = false;
+			this->m_IsChange = false;
 			MorphinePtrControl::InitMorphinePtr();
 			ArmerPtrControl::InitArmerPtr();
 			//
@@ -1459,6 +1464,7 @@ namespace FPS_n2 {
 							m_ULTUp += 1.f / FPS;
 							if (ULTControl::IsULTActive() && KeyControl::GetULTKey()) {
 								m_IsChanging = true;
+								m_IsChange = true;
 								m_ULTActive = true;
 								m_ULTUp = 0.f;
 							}
@@ -1471,6 +1477,7 @@ namespace FPS_n2 {
 							m_ULTUp += 1.f / FPS;
 							if (ULTControl::GetULT() == 0 || (GetIsAim() && KeyControl::GetULTKey())) {
 								m_IsChanging = true;
+								m_IsChange = true;
 								m_ULTActive = false;
 								m_ULTUp = 0.f;
 								ULTControl::AddULT(-20, false);
@@ -1515,6 +1522,9 @@ namespace FPS_n2 {
 						}
 						m_IsChanging = false;
 					}
+				}
+				else if (this->m_SlingPer[GetNowGunSelect()] > 0.9f) {
+					m_IsChange = false;
 				}
 			}
 		}

@@ -42,6 +42,7 @@ namespace FPS_n2 {
 			int													m_ReadyAnimPhase{0};
 			float												m_ReadyAnim{-1.f};
 			bool												m_IsChanging{false};
+			bool												m_IsChange{false};
 			bool												m_HeadShotSwitch{false};
 			float												m_ULTUp{0.f};
 			bool												m_ULTActive{false};

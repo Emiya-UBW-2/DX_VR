@@ -425,6 +425,7 @@ namespace FPS_n2 {
 						else {
 							this->GetObj().get_anime((int)GetGunAnime()).Reset();
 							this->GetObj().get_anime((int)GetGunAnime()).per = 1.f;
+							this->m_boltSoundSequence = -1;
 						}
 					}
 					//ƒTƒEƒ“ƒh
