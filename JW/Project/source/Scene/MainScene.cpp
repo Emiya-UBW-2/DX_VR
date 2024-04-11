@@ -450,6 +450,10 @@ namespace FPS_n2 {
 				PostPassEffect::Instance()->SetLevelFilter(0, 255, 1.f);
 				DrawParts->SetAberrationPower(1.f);
 				DrawParts->SetIsUpdateShadow(0, true);
+				DrawParts->Set_is_Blackout(false);
+				DrawParts->Set_Per_Blackout(0.f);
+				DrawParts->Set_is_lens(false);
+				DrawParts->Set_zoom_lens(1.f);
 			}
 
 			m_MainLoopPauseControl.Dispose();

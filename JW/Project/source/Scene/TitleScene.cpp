@@ -24,6 +24,7 @@ namespace FPS_n2 {
 			select = 0;
 			m_MouseSelMode = false;
 			auto* SaveDataParts = SaveDataClass::Instance();
+			auto* DrawParts = DXDraw::Instance();
 			m_HardModeActive = (SaveDataParts->GetParam("UnlockHardMode") == 1);
 			GameFadeIn = 1.f;
 			GameStart = 0.f;
@@ -33,6 +34,19 @@ namespace FPS_n2 {
 			for (auto& y : ButtonSel) {
 				y.LoadCommon(&m_SelectBackImage);
 			}
+
+			VECTOR_ref LightVec = VECTOR_ref::vget(0.f, -1.f, 0.5f);
+			DrawParts->SetAmbientLight(LightVec, GetColorF(1.f, 1.f, 1.f, 0.0f));
+			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.5f, 10.f)*Scale_Rate, 0);
+			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.f, 10.f)*Scale_Rate, 1);
+			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-100.f, 0.f, -100.f)*Scale_Rate, VECTOR_ref::vget(100.f, 1.f, 100.f)*Scale_Rate, 2);
+			//
+			DeleteLightHandleAll();
+			SetLightEnable(TRUE);
+			ChangeLightTypeDir(LightVec.get());
+			SetLightDifColor(GetColorF(1.f, 1.f, 1.f, 1.f));
+			SetLightSpcColor(GetColorF(0.1f, 0.1f, 0.1f, 0.f));
+			SetLightAmbColor(GetColorF(0.1f, 0.1f, 0.1f, 1.f));
 
 			ButtonSel.at(0).Load_String(SelectName[0], y_r(64), true);
 			ButtonSel.at(0).Set(y_r(1920 / 2), y_r(1080 - 96), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM);
