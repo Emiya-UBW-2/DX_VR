@@ -589,6 +589,11 @@ namespace FPS_n2 {
 
 			void			DrawLaser() noexcept {
 				if (m_IsLaserActive) {
+					/*
+					auto P = LaserEndPos / Scale_Rate;
+					clsDx();
+					printfDx("(%5.2f,%5.2f,%5.2f)\n", P.x(), P.y(), P.z());
+					//*/
 					SetUseLighting(FALSE);
 					DrawSphere_3D(LaserEndPos, 0.01f*Scale_Rate, GetColor(255, 24, 24), Black);
 					DrawCapsule_3D(LaserStartPos, LaserEndPos, 0.0015f*Scale_Rate, GetColor(255, 24, 24), Black);

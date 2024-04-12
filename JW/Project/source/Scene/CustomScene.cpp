@@ -607,6 +607,7 @@ namespace FPS_n2 {
 
 		void			CustomScene::DrawCustomUI(void) noexcept {
 			auto* Fonts = FontPool::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
 
 			int xp1, yp1;
 
@@ -624,6 +625,20 @@ namespace FPS_n2 {
 				yp1 = y_r(540 - 270 + 48);
 				Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(18), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
 																	   xp1, yp1, White, Gray75, "%d/%d", select + 1, (int)SelMoveClass.size());
+			}
+			//
+			{
+				xp1 = y_r(1900);
+				yp1 = y_r(880);
+				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
+				if (GunPtr) {
+					auto& STR = GunPtr->GetModData()->GetInfo();
+					for (auto& s : STR) {
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
+																			  xp1, yp1, Green, DarkGreen, s.c_str());
+						yp1 += y_r(24);
+					}
+				}
 			}
 			//
 			{
@@ -652,7 +667,7 @@ namespace FPS_n2 {
 			}
 			//
 			{
-				xp1 = y_r(1760);
+				xp1 = y_r(160);
 				yp1 = y_r(840) - (y_r(28)*Data->ItemMaxCount()) / 2;
 
 				auto* SaveDataParts = SaveDataClass::Instance();
@@ -664,11 +679,11 @@ namespace FPS_n2 {
 					if (sel != (int)Data->m_ItemsUniqueID.size()) {
 						const char* Name = (*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[sel]))->GetName().c_str();
 						if (SaveDataParts->GetParam(Name) == 1) {
-							Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
+							Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																				xp1, yp1, Color, DarkGreen, Name);
 						}
 						else {
-							Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
+							Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																				xp1, yp1, GetColor(216, 143, 143), DarkGreen, "????");
 							int xsize = Fonts->Get(FontPool::FontType::Nomal_AA).GetStringWidth(y_r(24), "????");
 							int ysize = y_r(24);
@@ -678,13 +693,13 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
+						Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																			xp1, yp1, Color, DarkGreen, "None");
 					}
 					yp1 += y_r(28);
 				}
 				if (mouseover != -1) {
-					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 																		Pad->GetMS_X(), Pad->GetMS_Y(), White, Gray75, "ゲームをプレイする毎にアンロックされます");
 
 				}
@@ -709,6 +724,20 @@ namespace FPS_n2 {
 				if (GunPtr) {
 					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
 																		  xp1, yp1, Green, DarkGreen, GunPtr->GetModData()->GetName());
+				}
+			}
+			//
+			{
+				xp1 = y_r(1900);
+				yp1 = y_r(880);
+				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + (int)GunsModify::GetULTSelect()).GetGun(0);
+				if (GunPtr) {
+					auto& STR = GunPtr->GetModData()->GetInfo();
+					for (auto& s : STR) {
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
+																			xp1, yp1, Green, DarkGreen, s.c_str());
+						yp1 += y_r(24);
+					}
 				}
 			}
 			//

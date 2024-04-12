@@ -2,7 +2,7 @@ Name=FMG-9 Carbine Kit
 
 ReloadRate_Diff=-1
 
-usehumanAnim=0
+usehumanAnim=3
 
 Slot0Type=Sight
 Slot0IsNeed=true

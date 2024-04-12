@@ -41,6 +41,11 @@ namespace FPS_n2 {
 				SetAnimOnce(0, 1.f);
 				this->m_obj.work_anime();
 			}
+			void DrawShadow(void) noexcept override {
+				if (this->m_IsActive) {
+					this->GetObj().DrawModel();
+				}
+			}
 		};
 	};
 };

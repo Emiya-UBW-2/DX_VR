@@ -1249,19 +1249,14 @@ namespace FPS_n2 {
 								break;
 						}
 						if (GetCharaAction() == CharaActionID::Melee) {
-							m_MagHand = IsGun0Select();
+							m_MagHand = true;
 						}
 						if (GetCharaAction() == CharaActionID::Watch) {
 							if (m_ArmBreak) {
 								m_MagHand = true;
 							}
 							else {
-								if (this->IsGun0Select()) {
-									m_MagHand = true;
-								}
-								else {
-									m_MagHand = false;
-								}
+								m_MagHand = this->IsGun0Select();
 							}
 						}
 

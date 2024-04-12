@@ -82,6 +82,9 @@ namespace FPS_n2 {
 			else if (LEFT == "IronSight") {
 				this->m_IronSight = true;
 			}
+			else if (LEFT == "Info") {
+				m_Info.emplace_back(RIGHT);
+			}
 		}
 
 		const std::shared_ptr<ModDataClass>*	ModDataManager::AddData(const std::string& filepath, bool isMod) noexcept {

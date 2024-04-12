@@ -7,6 +7,18 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		const int PosNum = 9;
+		const VECTOR_ref TargetPositions[PosNum] = {
+			VECTOR_ref::vget(17.39f,0.0f,-7.65f),
+			VECTOR_ref::vget(24.16f,0.0f,-7.65f),
+			VECTOR_ref::vget(30.28f,0.0f,-7.65f),
+			VECTOR_ref::vget(17.39f,0.0f,-3.51f),
+			VECTOR_ref::vget(24.16f,0.0f,-3.51f),
+			VECTOR_ref::vget(30.28f,0.0f,-3.51f),
+			VECTOR_ref::vget(17.39f,0.0f, 0.85f),
+			VECTOR_ref::vget(24.16f,0.0f, 0.85f),
+			VECTOR_ref::vget(30.28f,0.0f, 0.85f),
+		};
 		//
 		void			TutorialScene::Load_Sub(void) noexcept {
 			//ÉçÅ[Éh
@@ -31,7 +43,7 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			//
-			VECTOR_ref LightVec = VECTOR_ref::vget(-0.5f, -1.f, 0.f);
+			VECTOR_ref LightVec = VECTOR_ref::vget(-0.1f, -1.f, 0.f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.f, 1.f, 1.f, 0.0f));
 			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.5f, 10.f)*Scale_Rate, 0);
 			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.f, 10.f)*Scale_Rate, 1);
@@ -60,7 +72,7 @@ namespace FPS_n2 {
 			//êlÇÃç¿ïWê›íË
 			{
 				VECTOR_ref pos_t;
-				pos_t = VECTOR_ref::vget(0.f, 0.f, 0.f);
+				pos_t = VECTOR_ref::vget(0.f, 0.f, Scale_Rate*9.f);
 
 				VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 10.f*Scale_Rate;
 				if (this->m_BackGround->CheckLinetoMap(pos_t + VECTOR_ref::up() * -10.f*Scale_Rate, &EndPos, false)) {
@@ -114,13 +126,28 @@ namespace FPS_n2 {
 			BGM->StopAll();
 
 			ScoreBoard = GraphHandle::Load("data/UI/Score.png");
+			ScoreBoard2 = GraphHandle::Load("data/UI/Score2.png");
 			//
+			//*
 			for (int j = 0; j < 5; j++) {
 				ObjMngr->MakeObject(ObjType::Target);
 				auto& t = *ObjMngr->GetObj(ObjType::Target, j);
 				ObjMngr->LoadObjectModel(t.get(), "data/model/Target/");
 				MV1::SetAnime(&t->GetObj(), t->GetObj());
-				t->SetMove(MATRIX_ref::RotY(deg2rad(-90)), VECTOR_ref::vget(Scale_Rate*-(5.f + 10.f*j), 0.f, Scale_Rate*((-2.f * 5 / 2) + 2.f*j)));
+				t->SetMove(MATRIX_ref::RotY(deg2rad(-90)), VECTOR_ref::vget(Scale_Rate*-(5.f + 10.f*j), 0.f, Scale_Rate*(9.f - 2.f*j)));
+			}
+			//*/
+
+			for (int j = 0; j < 9; j++) {
+				ObjMngr->MakeObject(ObjType::Target);
+				auto& t = *ObjMngr->GetObj(ObjType::Target, 5 + j);
+				ObjMngr->LoadObjectModel(t.get(), "data/model/Target2/");
+				MV1::SetAnime(&t->GetObj(), t->GetObj());
+
+				float rad = deg2rad(GetRand(360));
+				t->SetMove(MATRIX_ref::RotY(rad),
+					(TargetPositions[j] * Scale_Rate) +
+						   MATRIX_ref::RotY(rad).zvec() *(1.5f*Scale_Rate));
 			}
 			//UI
 			tgtSel = -1;
@@ -552,6 +579,7 @@ namespace FPS_n2 {
 			this->m_TutorialLog.Dispose();
 
 			ScoreBoard.Dispose();
+			ScoreBoard2.Dispose();
 		}
 		//
 		void			TutorialScene::BG_Draw_Sub(void) noexcept {
@@ -651,7 +679,12 @@ namespace FPS_n2 {
 					if (AlphaPer > 0.01f) {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*AlphaPer));
 						//îwåi
-						ScoreBoard.DrawExtendGraph(xp, yp, xp2, yp2, true);
+						if (tgtSel < 5) {
+							ScoreBoard.DrawExtendGraph(xp, yp, xp2, yp2, true);
+						}
+						else {
+							ScoreBoard2.DrawExtendGraph(xp, yp, xp2, yp2, true);
+						}
 						//ñΩíÜâ”èä
 						for (auto& r : t->GetHitPosRec()) {
 							float cos_t, sin_t;

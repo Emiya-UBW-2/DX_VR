@@ -52,11 +52,11 @@ namespace FPS_n2 {
 
 
 			SE->Add((int)SoundEnum::Near, 5, "data/Sound/SE/near.wav");
-			SE->Add((int)SoundEnum::Stim, 1, "data/Sound/SE/Stim.wav");
+			SE->Add((int)SoundEnum::Stim, 1, "data/Sound/SE/Stim.wav", false);
 
-			SE->Add((int)SoundEnum::Second, 1, "data/Sound/SE/second.wav");
-			SE->Add((int)SoundEnum::OneMunute, 1, "data/Sound/SE/OneMinute.wav");
-			SE->Add((int)SoundEnum::TimeUp, 1, "data/Sound/SE/TimeUp.wav");
+			SE->Add((int)SoundEnum::Second, 1, "data/Sound/SE/second.wav", false);
+			SE->Add((int)SoundEnum::OneMunute, 1, "data/Sound/SE/OneMinute.wav", false);
+			SE->Add((int)SoundEnum::TimeUp, 1, "data/Sound/SE/TimeUp.wav", false);
 		}
 		void			CommonBattleResource::Set(void) noexcept {
 			auto* SE = SoundPool::Instance();

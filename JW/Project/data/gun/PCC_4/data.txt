@@ -1,5 +1,9 @@
 Name=PCC-4 Carbine
 
+Info=拳銃弾を用いるピストルキャリバーカービン。
+Info=フルオートでの射撃ができるように改造されている。
+Info=取り回しは良いもののいささか弾の消費が激しい。
+
 ShotRate=800
 RecoilPower=50
 RecoilReturn=0.9

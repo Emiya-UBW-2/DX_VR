@@ -157,6 +157,7 @@ namespace FPS_n2 {
 			int tgtSel = 0;
 			float tgtTimer = 0.f;
 			GraphHandle ScoreBoard;
+			GraphHandle ScoreBoard2;
 		public:
 			TutorialScene(void) noexcept {}
 			~TutorialScene(void) noexcept {}

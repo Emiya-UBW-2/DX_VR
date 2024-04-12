@@ -123,10 +123,10 @@ namespace FPS_n2 {
 							auto StartPos = TgtPos_XZ + VECTOR_ref::up()*(1.f*Scale_Rate);
 							auto EndPos = BGPos_XZ + VECTOR_ref::up()*(1.f*Scale_Rate);
 							bool CanLookTarget = true;
-							for (auto& C : this->m_BackGround->GetBuildData()) {
-								if (C.GetMeshSel() < 0) { continue; }
-								if (GetMinLenSegmentToPoint(StartPos, EndPos, C.GetMatrix().pos()) >= 8.f*Scale_Rate) { continue; }
-								auto ret = C.GetColLine(StartPos, EndPos);
+							for (auto& C2 : this->m_BackGround->GetBuildData()) {
+								if (C2.GetMeshSel() < 0) { continue; }
+								if (GetMinLenSegmentToPoint(StartPos, EndPos, C2.GetMatrix().pos()) >= 8.f*Scale_Rate) { continue; }
+								auto ret = C2.GetColLine(StartPos, EndPos);
 								if (ret.HitFlag == TRUE) {
 									CanLookTarget = false;
 									break;
@@ -1660,7 +1660,7 @@ namespace FPS_n2 {
 						std::time_t t = Now.second;
 						std::tm now;
 						_localtime64_s(&now, &t);
-						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%04d/%02d/%02d %02d:%02d : ", 1900 + now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min);
+						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%04d/%02d/%02d %02d:%02d : ", 1900 + now.tm_year, 1 + now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min);
 						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%4d pts", Now.first);
 					}
 					else {
@@ -1688,7 +1688,7 @@ namespace FPS_n2 {
 						std::time_t t = m_StartTime;
 						std::tm now;
 						_localtime64_s(&now, &t);
-						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%04d/%02d/%02d %02d:%02d : ", 1900 + now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min);
+						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%04d/%02d/%02d %02d:%02d : ", 1900 + now.tm_year, 1 + now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min);
 						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%4d pts", PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
 					}
 					else {
