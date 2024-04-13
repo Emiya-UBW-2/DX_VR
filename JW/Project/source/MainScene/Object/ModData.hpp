@@ -37,7 +37,7 @@ namespace FPS_n2 {
 			int								m_HumanAnimType{-1};				//
 
 			int								m_ShootRate_Diff{0};
-			int								m_ReloadRate_Diff{0};
+			int								m_Recoil_Diff{0};
 
 
 			std::vector<std::shared_ptr<AmmoDataClass>>	m_AmmoSpec;
@@ -64,7 +64,7 @@ namespace FPS_n2 {
 			const auto&		GetAmmoSpecMagTop(void) const noexcept { return this->m_AmmoSpec[0]; }
 			//«”\Žü‚è
 			const auto&		GetShootRate_Diff(void) const noexcept { return this->m_ShootRate_Diff; }
-			const auto&		GetReloadRate_Diff(void) const noexcept { return this->m_ReloadRate_Diff; }
+			const auto&		GetRecoil_Diff(void) const noexcept { return this->m_Recoil_Diff; }
 		protected:
 			void				SetSlot(const std::string& LEFT, const std::string&RIGHT) noexcept;
 			virtual void		SetMod_Sub(const std::string&, const std::string&) noexcept {}

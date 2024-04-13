@@ -40,7 +40,7 @@ namespace FPS_n2 {
 			const std::shared_ptr<LowerClass>*		m_LowerPtr{nullptr};
 			const std::shared_ptr<MagazineClass>*	m_MagazinePtr{nullptr};
 			int										m_ShootRate_Diff{0};
-			int										m_ReloadRate_Diff{0};
+			int										m_Recoil_Diff{0};
 			int										m_Capacity{0};//’e”
 			float																			m_UpperAnim{0.f};
 		private:
@@ -74,7 +74,7 @@ namespace FPS_n2 {
 				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModData()->GetIsRecoilPower()) {
 					return (*this->m_UpperPtr)->GetModData()->GetRecoilPower();
 				}
-				return GetModData()->GetRecoilPower();
+				return GetModData()->GetRecoilPower()+ m_Recoil_Diff;
 			}
 			const auto& GetRecoilReturn(void) const noexcept {
 				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModData()->GetIsRecoilReturn()) {

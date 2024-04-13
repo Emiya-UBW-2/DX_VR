@@ -1,5 +1,5 @@
 Name=SBal PL LaserSight
 
-ReloadRate_Diff=-1
+Recoil_Diff=-1
 
 end

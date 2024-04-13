@@ -50,6 +50,8 @@ namespace FPS_n2 {
 
 			int Limit{0};
 		public:
+			const auto GetOffset() const noexcept { return Limit; }
+		public:
 			template <typename... Args>
 			void AddLog(const char* Mes, Args&&... args) noexcept {
 				for (int i = 0;i <= Limit;i++) {
@@ -141,13 +143,21 @@ namespace FPS_n2 {
 
 		class TutorialScene : public TEMPSCENE, public EffectControl, public GunsModify {
 		private:
+			float											m_FirstFade{0.f};
+			bool											m_IsFirstGame{false};
 			bool											m_PrevSSAO{true};
 			bool											m_IsFirstLoad{true};			//共通リソースをロードしたか
 			std::shared_ptr<BackGroundClassTutorial>		m_BackGround;					//BG
 			MainLoopPauseControl							m_MainLoopPauseControl;			//ポーズメニュー
 			UIClass											m_UIclass;						//UI関連
 
-			std::vector<std::string>						m_Tutorial{};
+			struct Msgs {
+				std::string m_Mes;
+				std::vector<PADS>m_PADS;
+			};
+
+			std::vector<Msgs>								m_Tutorial{};
+
 			TutorialLog										m_TutorialLog;
 			SoundHandle										m_TutorialVoice;
 			int												m_TutorialNow{0};

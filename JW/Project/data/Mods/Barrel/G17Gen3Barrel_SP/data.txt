@@ -1,7 +1,7 @@
 Name=G17 ThreadedBarrel
 
 ShootRate_Diff=-1
-ReloadRate_Diff=-1
+Recoil_Diff=-2
 
 Slot0Type=MuzzleAdapter
 Slot0IsNeed=false

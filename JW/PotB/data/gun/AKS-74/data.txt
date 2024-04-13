@@ -1,5 +1,9 @@
 Name=AKS-74N AssaultRifle
 
+Info=空挺部隊、搭乗員向けの突撃銃。
+Info=シンプルな構造により信頼性が高い。
+Info=ストックを折りたたむことで超至近での交戦にも対応できる。
+
 ShotRate=600
 RecoilPower=210
 RecoilReturn=0.8

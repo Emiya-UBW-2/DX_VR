@@ -9,7 +9,7 @@ namespace FPS_n2 {
 
 		static const char* SelectName[6] = {
 			"Ready",
-			"Customize Handgun",
+			"Customize",
 			"Shooting Range",
 			"Fire Party",
 			"",

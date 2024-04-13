@@ -1,6 +1,6 @@
 Name=FMG-9 Carbine Kit
 
-ReloadRate_Diff=-1
+Recoil_Diff=-10
 
 usehumanAnim=3
 

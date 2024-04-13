@@ -76,8 +76,8 @@ namespace FPS_n2 {
 			else if (LEFT == "ShootRate_Diff") {
 				m_ShootRate_Diff = std::stoi(RIGHT);
 			}
-			else if (LEFT == "ReloadRate_Diff") {
-				m_ReloadRate_Diff = std::stoi(RIGHT);
+			else if (LEFT == "Recoil_Diff") {
+				m_Recoil_Diff = std::stoi(RIGHT);
 			}
 			else if (LEFT == "IronSight") {
 				this->m_IronSight = true;

@@ -112,11 +112,20 @@ namespace FPS_n2 {
 						auto LEFT = getparams::getleft(ALL);
 						auto RIGHT = getparams::getright(ALL);
 						if (LEFT == "Voice") {
-							m_Tutorial.emplace_back(RIGHT + "\n");
+							m_Tutorial.resize(m_Tutorial.size() + 1);
+							m_Tutorial.back().m_Mes = RIGHT + "\n";
+						}
+						else if (LEFT == "Key") {
+							for (int i = 0; i < (int)PADS::MAX; i++) {
+								if (RIGHT == PADSStr[i]) {
+									m_Tutorial.back().m_PADS.emplace_back((PADS)i);
+									break;
+								}
+							}
 						}
 					}
 					else {
-						m_Tutorial.back() += ALL + "\n";
+						m_Tutorial.back().m_Mes += ALL + "\n";
 					}
 				}
 				FileRead_close(mdata);
@@ -177,6 +186,10 @@ namespace FPS_n2 {
 					mags++;
 				}
 			}
+
+			auto* SaveDataParts = SaveDataClass::Instance();
+			m_IsFirstGame = (SaveDataParts->GetParam("FirstGame") != 1);
+			m_FirstFade = 1.f;
 		}
 		bool			TutorialScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
@@ -257,7 +270,7 @@ namespace FPS_n2 {
 			}
 			if (Pad->GetKey(PADS::INTERACT).trigger()) {
 				if (m_TutorialNow < m_Tutorial.size()) {
-					this->m_TutorialLog.AddLog(m_Tutorial.at(m_TutorialNow).c_str());
+					this->m_TutorialLog.AddLog(m_Tutorial.at(m_TutorialNow).m_Mes.c_str());
 					SetCreate3DSoundFlag(FALSE);
 					m_TutorialVoice.stop();
 					m_TutorialVoice.Dispose();
@@ -555,6 +568,9 @@ namespace FPS_n2 {
 #ifdef DEBUG
 			DebugParts->SetPoint("update end");
 #endif // DEBUG
+			if (m_IsFirstGame) {
+				m_FirstFade = std::max(m_FirstFade - 1.f / FPS / 3.f, 0.f);
+			}
 			if (m_MainLoopPauseControl.GetIsRetireSelected()) {
 				return false;
 			}
@@ -580,6 +596,10 @@ namespace FPS_n2 {
 
 			ScoreBoard.Dispose();
 			ScoreBoard2.Dispose();
+
+			auto* SaveDataParts = SaveDataClass::Instance();
+			SaveDataParts->SetParam("FirstGame", 1);
+			SaveDataParts->Save();
 		}
 		//
 		void			TutorialScene::BG_Draw_Sub(void) noexcept {
@@ -647,7 +667,28 @@ namespace FPS_n2 {
 				if (!DrawParts->IsPause()) {
 					this->m_UIclass.Draw();
 				}
-				this->m_TutorialLog.Draw();
+				//チュートリアル
+				{
+					auto* Pad = PadControl::Instance();
+					auto* Fonts = FontPool::Instance();
+
+					this->m_TutorialLog.Draw();
+
+					int sel = m_TutorialNow - 1  - this->m_TutorialLog.GetOffset();
+
+					if (0 <= sel && sel < m_Tutorial.size()) {
+						int xp = y_r(512 + 96);
+						int yp = y_r(512);
+						for (auto& p : m_Tutorial.at(sel).m_PADS) {
+							std::string Assign = Pad->GetKeyStr(p);
+							if (Assign == "NONE") { continue; }
+							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
+																				  FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+																				  xp, yp, Green, Black, "[%s]", Assign.c_str());
+							yp += y_r(18 + 3);
+						}
+					}
+				}
 				//通信設定
 				/*
 				if (DrawParts->IsPause()) {
@@ -657,6 +698,9 @@ namespace FPS_n2 {
 			}
 		}
 		void			TutorialScene::DrawUI_In_Sub(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
+			auto* Pad = PadControl::Instance();
+			auto* Fonts = FontPool::Instance();
 			//ポーズ
 			if (DXDraw::Instance()->IsPause()) {
 				m_MainLoopPauseControl.Draw();
@@ -665,7 +709,6 @@ namespace FPS_n2 {
 				//的ヒット状況表示
 				if (tgtSel >= 0) {
 					auto* ObjMngr = ObjectManager::Instance();
-					auto* DrawParts = DXDraw::Instance();
 					auto& t = (std::shared_ptr<TargetClass>&)(*ObjMngr->GetObj(ObjType::Target, tgtSel));
 
 					int xp = DrawParts->m_DispXSize / 2 - y_r(300);
@@ -693,6 +736,19 @@ namespace FPS_n2 {
 						}
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 					}
+				}
+			}
+
+			if (m_IsFirstGame) {
+				if (!DXDraw::Instance()->IsPause()) {
+					//
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
+																		  FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP,
+																		  y_r(960), y_r(870), Red, Black, "押してメッセージを進める:%s", Pad->GetKeyStr(PADS::INTERACT).c_str());
+
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*m_FirstFade), 0, 255));
+					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Black, TRUE);
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
 			}
 		}

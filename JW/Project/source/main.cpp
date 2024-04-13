@@ -43,6 +43,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SaveDataParts->SetParam("ULT Unlock", std::max(static_cast<int>(SaveDataParts->GetParam("ULT Unlock")), 1));
 	SaveDataParts->SetParam("Glock Unlock", std::max(static_cast<int>(SaveDataParts->GetParam("Glock Unlock")), 1));
 	//SaveDataParts->SetParam("UnlockHardMode", 1);
+	bool IsFirstGame = (SaveDataParts->GetParam("FirstGame") != 1);
 	SaveDataParts->Save();
 	//BGM
 	BGM->Add(0, "data/Sound/BGM/Title.wav");
@@ -54,7 +55,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	auto Tutorialscene = std::make_shared<FPS_n2::Sceneclass::TutorialScene>();
 	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();
 	//シーンコントロール
-	auto scene = std::make_unique<SceneControl>(Titlescene);
+	auto scene = std::make_unique<SceneControl>(IsFirstGame ? (std::shared_ptr<TEMPSCENE>&)Tutorialscene : (std::shared_ptr<TEMPSCENE>&)Titlescene);
 	//遷移先指定
 	Titlescene->Set_Next(MAINLOOPscene);
 	Customscene->Set_Next(Titlescene);
@@ -121,7 +122,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	};
 
 	//最初の読み込み
-	TitleLoad();
+	if (IsFirstGame) {
+		TutorialLoad();
+	}
+	else {
+		TitleLoad();
+	}
 	//繰り返し
 	while (true) {
 		scene->StartScene();

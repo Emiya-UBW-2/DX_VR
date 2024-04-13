@@ -6,7 +6,7 @@ Info=パーツ交換によるカスタマイズ性に富む。
 
 ShotRate=1200
 RecoilPower=100
-RecoilReturn=0.9
+RecoilReturn=0.95
 shottype=SEMI
 usehumanAnim=1
 soundsel=1

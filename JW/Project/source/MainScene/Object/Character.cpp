@@ -757,7 +757,9 @@ namespace FPS_n2 {
 								this->m_Wear_MorphinePer += 1.f / FPS;
 								if (this->m_Wear_MorphinePer >= 0.f) {
 									this->m_Wear_MorphinePer -= 0.4f;
-									Heal(20, true);
+									if (IsAlive()) {//€‚ñ‚¾‚çƒ_ƒ
+										Heal(20, true);
+									}
 								}
 								break;
 							default:

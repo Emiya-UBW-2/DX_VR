@@ -1,7 +1,5 @@
 Name=GMag 33Round
 
-ReloadRate_Diff=-3
-
 capacity=33
 useammo0=9x19
 

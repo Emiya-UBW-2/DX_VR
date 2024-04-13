@@ -1,8 +1,6 @@
 Name=Glock18 Slide (for 17)
 
-ReloadRate_Diff=-3
-
-RecoilPower=100
+Recoil_Diff=20
 RecoilReturn=0.9
 shottype=FULL
 

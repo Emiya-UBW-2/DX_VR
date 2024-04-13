@@ -481,8 +481,6 @@ namespace FPS_n2 {
 				m_UpperPtr = nullptr;
 				m_LowerPtr = nullptr;
 				m_MagazinePtr = nullptr;
-				m_ShootRate_Diff = 0;
-				m_ReloadRate_Diff = 0;
 
 				int SightSel = 0;
 				for (auto& p : PartsList) {
@@ -505,14 +503,17 @@ namespace FPS_n2 {
 					if ((*p)->GetobjType() == ObjType::Magazine) {
 						m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(*p));
 					}
-
-					//性能周り
-					{
-						auto& d = ((std::shared_ptr<ModClass>&)(*p))->GetModData();
-						m_ShootRate_Diff += d->GetShootRate_Diff();
-						m_ReloadRate_Diff += d->GetReloadRate_Diff();
-					}
 				}
+
+				m_ShootRate_Diff = 0;
+				m_Recoil_Diff = 0;
+				for (auto& p : PartsList) {
+					//性能周り
+					auto& d = ((std::shared_ptr<ModClass>&)(*p))->GetModData();
+					m_ShootRate_Diff += d->GetShootRate_Diff();
+					m_Recoil_Diff += d->GetRecoil_Diff();
+				}
+
 				//2つ以上サイトがあるときアイアンサイトを省く
 				if (SightSel >= m_SightPtr.size()) {
 					for (int i = 0;i < m_SightPtr.size();i++) {
