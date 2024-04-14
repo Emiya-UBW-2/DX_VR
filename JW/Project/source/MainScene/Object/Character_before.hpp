@@ -129,7 +129,7 @@ namespace FPS_n2 {
 			//const auto&		GetHeartRateRad(void) const noexcept { return this->m_HeartRateRad; }
 			const auto		GetHeartRandVec(float SquatPer) const noexcept {
 				auto tmp2 = 0.2f * GetRandf(deg2rad(1.f));
-				auto tmp3 = Lerp(0.5f, 0.35f, SquatPer);
+				auto tmp3 = Lerp(0.5f, 0.15f, SquatPer);
 				VECTOR_ref tmpvec = VECTOR_ref::vget(
 					tmp2 + 0.00006f * sin(this->m_HeartRateRad) * powf(this->m_HeartRate / HeartRateMin, 3.f),
 					tmp2 + 0.00006f * sin(this->m_HeartRateRad * 3) * powf(this->m_HeartRate / HeartRateMin, 3.f),

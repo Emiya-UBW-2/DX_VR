@@ -1,47 +1,42 @@
-JW(仮称)　　　　　　笑也 知郎
+Phantom of the Bunker　　　　　　笑也 知郎
 
 このアプリケーションについて
-　　現在制作中のFPSです。ただただ敵を倒すだけです。
+　　1人向けFPSです。ひたすら敵を倒していきます。
+
+起動方法
+	ダウンロードしたZipを解凍し、exeを実行してください。
+	シェーダーバイナリによりウイルス警告が入る場合があります(お使いの環境に影響を及ぼすファイルはございません)
 
 キル判定について
 	敵味方ともに100HPを持っており、拳銃弾1発で1/3ほど削られます。手足だと減衰しますがヘッドショットは一撃です。
 
-！タイトル画面から進んだ際に「動作を停止しました」が出る場合！
-影の設定をDisableにすることで初回の起動にて通るかと思います。
-通らない場合は垂直同期以外のすべての設定を落としていただければと思います。
+！「DirectXのバージョンが適用していません」が出る場合！
+	お使いの環境がDirectX11に対応していません、設定からDirectX9.0cを選択してください。
+
+！挙動が重い場合！
+	設定からグラフィックを下げていただくことで解消されます。
+	(反映は再起動後にされます)と記載があるものを変更した際には手動で再起動を行ってください。
+	LightModeを指定すると読み込み周りを含めた最適化を行います。
+
+推奨動作環境(開発環境に同じ、最高のグラフィック設定でも快適に動作します)
+	Windows10
+	AMD Ryzen 7 2700X Eight-Core Processor
+	RAM 16GB
+	NVIDIA GeForce GTX 1660 Ti
+
+推奨動作環境(開発環境に同じ、動作を最低限確認できている環境です)
+	Windows7
+	Core-i7 2670QM
+	RAM 8GB
+	オンボードグラフィック
+
 
 操作
 　　PS4コンに対応しています。該当のパッドが刺さっている場合そちらでの操作が優先されます。
 　　詳しい操作は各画面左下のアイコンを参照ください。
-　　どんな場面でもESCキーで確認せず共生停止します。
+　　どんな場面でもESCキーで停止確認を行います。
 
 以下著作権表記です
-
-使用素材
-・「着せ替え用スーツver.1.01」フラン様
-・「着せ替え用スーツver.1.01」フラン様
-・「血のフレーム　ダメージエフェクト」ポクテ様
-・　SE全般　効果音ラボ様
-・　Oculus Audio Pack 1
-・　replicastudios
-
-武器パーツモデル群
-・https://sketchfab.com/3d-models/surefire-x400-ultra-flashlight-ed0c8530e4a6459d9affe7fe000cc0b3
-・https://sketchfab.com/3d-models/laser-sight-sbal-pl-0430b70e99974d1188b97372aeab8200
-・https://sketchfab.com/3d-models/ar15-9mm-9ef0990a450f40be8ca96fbbd83df691
-・https://sketchfab.com/3d-models/rifle-laser-sight-55d74d7d4f6a4071af856d2ffc2c429a
-・https://sketchfab.com/3d-models/silencers-pack-1-e96a019757a6440390edfef888f0867e
-・https://sketchfab.com/3d-models/universal-pistol-rail-d03caba7bc4b49709908dfba36f65ec7
-・https://sketchfab.com/3d-models/vortex-viper-red-dot-004ff239467941ca9eb83eb6f75b5ac3
-・https://sketchfab.com/3d-models/9mm-pistol-43bc09f5aace4346a8a2b6e1580fc03f
-・https://www.cgtrader.com/free-3d-models/military/gun/glock-17-gen-5
-・https://sketchfab.com/3d-models/12ga-85mm-buckshot-kinghunter-armory-4548952dfa874ae99b45d20be0811cad
-・https://sketchfab.com/3d-models/abandoned-warehouse-1e40d433ed6f48fb880a0d2172aff7ca
-・https://sketchfab.com/3d-models/interogation-room-6e9151ec29494469a74081ddc054d569
-・https://sketchfab.com/3d-models/russian-soldier-66df4b2856194d40a546afe2d1d77cfe
-・https://sketchfab.com/3d-models/remington-870-shotgun-6db0ad4764d14eee8f063eea3600071b
-
-以下DXライブラリ著作権表記です
 
     　libjpeg　Copyright (C) 1991-2013, Thomas G. Lane, Guido Vollbeding.
 　　　this software is based in part on the work of the Independent JPEG Group

@@ -1448,7 +1448,7 @@ namespace FPS_n2 {
 		}
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
 			auto* SE = SoundPool::Instance();
-			KeyControl::InputKey(pInput, pReady, StaminaControl::GetHeartRandVec(0.f));
+			KeyControl::InputKey(pInput, pReady, StaminaControl::GetHeartRandVec(KeyControl::GetIsSquat() ? 1.f : 0.f));
 			//AIM
 			if (GetGunPtrNow()) {
 				if (pReady) {

@@ -67,7 +67,17 @@ namespace FPS_n2 {
 			m_CreditCoulm = 0;
 			while (true) {
 				if (FileRead_eof(mdata) != 0) { break; }
-				FileRead_gets(m_CreditStr.at(m_CreditCoulm), CharMax, mdata);
+				auto ALL = getparams::Getstr(mdata);
+				if (ALL.find('=') != std::string::npos) {
+					auto LEFT = getparams::getleft(ALL);
+					auto RIGHT = getparams::getright(ALL);
+					sprintfDx(m_CreditStr.at(m_CreditCoulm).first, LEFT.c_str());
+					sprintfDx(m_CreditStr.at(m_CreditCoulm).second, RIGHT.c_str());
+				}
+				else {
+					sprintfDx(m_CreditStr.at(m_CreditCoulm).first, ALL.c_str());
+					sprintfDx(m_CreditStr.at(m_CreditCoulm).second, "");
+				}
 				m_CreditCoulm++;
 			}
 			FileRead_close(mdata);
@@ -84,7 +94,11 @@ namespace FPS_n2 {
 					int xpos = xp1 + y_r(6);
 					int ypos = yp1 + (yp1 + Height - yp1) / 2;
 					Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
-																		   xpos, ypos, White, Black, m_CreditStr.at(i));
+																		   xpos, ypos, White, Black, m_CreditStr.at(i).first);
+
+					xpos = xp1 + WinSizeX - y_r(48 * 2) - y_r(6);
+					Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
+																		   xpos, ypos, White, Black, m_CreditStr.at(i).second);
 					yp1 += Height;
 				}
 								 });

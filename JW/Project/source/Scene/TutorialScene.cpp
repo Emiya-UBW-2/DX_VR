@@ -158,6 +158,20 @@ namespace FPS_n2 {
 					(TargetPositions[j] * Scale_Rate) +
 						   MATRIX_ref::RotY(rad).zvec() *(1.5f*Scale_Rate));
 			}
+			{
+				auto& t = *ObjMngr->MakeObject(ObjType::MovieObj);
+				ObjMngr->LoadObjectModel(t.get(), "data/model/Radio/");
+
+				float rad = deg2rad(90);
+				t->SetMove(MATRIX_ref::RotY(rad),
+					(VECTOR_ref::vget(0,0,-5.f) * Scale_Rate));
+				m_Sound = true;
+
+				if (!BGM->Get(1).Check()) {
+					BGM->Get(1).Play_3D(t->GetMove().pos,5.f*Scale_Rate,DX_PLAYTYPE_LOOP);
+				}
+				BGM->Get(1).SetVol_Local(192);
+			}
 			//UI
 			tgtSel = -1;
 			tgtTimer = 0.f;
@@ -397,6 +411,23 @@ namespace FPS_n2 {
 								j++;
 							}
 
+							{
+								auto& target = *ObjMngr->GetObj(ObjType::MovieObj, 0);
+								if (target != nullptr) {
+									if (GetMinLenSegmentToPoint(repos_tmp, pos_tmp, target->GetMove().pos) <= 0.5f*Scale_Rate) {
+										SEGMENT_POINT_RESULT Res;
+										GetSegmenttoPoint(repos_tmp, pos_tmp, target->GetMove().pos, &Res);
+										//エフェクト
+										EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, Res.Seg_MinDist_Pos, (pos_tmp - repos_tmp).Norm(), a->GetCaliberSize() / 0.02f * Scale_Rate);
+										if (m_Sound) {
+											m_Sound = false;
+											auto* BGM = BGMPool::Instance();
+											BGM->Get(1).Stop();
+											SE->Get((int)SoundEnum::HitGround0 + GetRand(5 - 1)).Play_3D(0, pos_tmp, Scale_Rate * 10.f);
+										}
+									}
+								}
+							}
 							VECTOR_ref norm_tmp;
 							auto ColResGround = this->m_BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, true, &norm_tmp);
 							bool is_HitAll = false;

@@ -168,6 +168,7 @@ namespace FPS_n2 {
 			float tgtTimer = 0.f;
 			GraphHandle ScoreBoard;
 			GraphHandle ScoreBoard2;
+			bool											m_Sound{true};
 		public:
 			TutorialScene(void) noexcept {}
 			~TutorialScene(void) noexcept {}
