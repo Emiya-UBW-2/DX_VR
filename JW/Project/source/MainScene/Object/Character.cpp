@@ -700,7 +700,7 @@ namespace FPS_n2 {
 										GetGunPtrNow()->SetActiveAll(true);
 									}
 									if (m_IsMainGame) {
-										ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "アーマーを着用 +%4d", 10);
+										ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(200), 10);
 										PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(10);
 									}
 									GunReadyControl::SetAim();
@@ -749,7 +749,7 @@ namespace FPS_n2 {
 									}
 									GunReadyControl::SetAim();
 									if (m_IsMainGame) {
-										ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "モルヒネ注射 +%4d", 50);
+										ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(201), 50);
 										PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(50);
 									}
 								}

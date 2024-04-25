@@ -189,7 +189,7 @@ namespace FPS_n2 {
 			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override;
 		public:
-			void			Dispose_Load(void) noexcept;
+			void			Dispose_Load_Sub(void) noexcept override;
 		private:
 			void			LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept;
 		};

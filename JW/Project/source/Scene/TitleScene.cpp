@@ -82,7 +82,7 @@ namespace FPS_n2 {
 			}
 			FileRead_close(mdata);
 
-			m_PopUpDrawClass.Set("Credit", y_r(720), y_r(840), [&](int WinSizeX, int WinSizeY, bool) {
+			m_PopUpDrawClass.Set(LocalizePool::Instance()->Get(120), y_r(720), y_r(840), [&](int WinSizeX, int WinSizeY, bool) {
 				auto* Fonts = FontPool::Instance();
 
 				int xp1, yp1;
@@ -166,8 +166,8 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide(PADS::MOVE_S, "");
 					KeyGuide->AddGuide(PADS::MOVE_A, "");
 					KeyGuide->AddGuide(PADS::MOVE_D, "");
-					KeyGuide->AddGuide(PADS::MOVE_STICK, "選択");
-					KeyGuide->AddGuide(PADS::INTERACT, "決定");
+					KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9993));
+					KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9992));
 				}
 			);
 			m_CreditActive = false;
@@ -282,7 +282,7 @@ namespace FPS_n2 {
 				Pad->ChangeGuide(
 					[&]() {
 						auto* KeyGuide = PadControl::Instance();
-						KeyGuide->AddGuide(PADS::RELOAD, "戻る");
+						KeyGuide->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9991));
 					}
 				);
 			}
@@ -366,7 +366,7 @@ namespace FPS_n2 {
 			if ((select != -1) && (!OptionWindowClass::Instance()->IsActive() && !m_PopUpDrawClass.IsActive())) {
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
 																	  FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-																	  y_r(32), y_r(1080 - 32 - 32), White, Black, SelectInfoName[select]);
+																	  y_r(32), y_r(1080 - 32 - 32), White, Black, LocalizePool::Instance()->Get(9020 + select));
 			}
 			//
 			{
@@ -382,7 +382,7 @@ namespace FPS_n2 {
 			m_PopUpDrawClass.Draw();
 		}
 		//使い回しオブジェ系
-		void			TitleScene::Dispose_Load(void) noexcept {
+		void			TitleScene::Dispose_Load_Sub(void) noexcept {
 			if (!m_IsFirstLoad) {
 				m_IsFirstLoad = true;
 				auto* PlayerMngr = PlayerManager::Instance();

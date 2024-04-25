@@ -1,4 +1,4 @@
-Phantom of the Bunker　　　　　　笑也 知郎
+Phantom of the Bunker Ver 1.0.1　　　　　　笑也 知郎
 
 このアプリケーションについて
 　　1人向けFPSです。ひたすら敵を倒していきます。
@@ -24,7 +24,7 @@ Phantom of the Bunker　　　　　　笑也 知郎
 	RAM 16GB
 	NVIDIA GeForce GTX 1660 Ti
 
-推奨動作環境(開発環境に同じ、動作を最低限確認できている環境です)
+推奨動作環境(開発環境に同じ、最低のgraphic設定で動作を最低限確認できている環境です)
 	Windows7
 	Core-i7 2670QM
 	RAM 8GB
@@ -196,3 +196,10 @@ Phantom of the Bunker　　　　　　笑也 知郎
 
 
 　　　Bullet　Copyright (c) 2003-2006 Erwin Coumans.
+
+
+　　　The class is licensed under the MIT License:
+　　　Copyright c 2013-2022 Niels Lohmann
+　　　Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+　　　The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+　　　THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

@@ -221,42 +221,35 @@ namespace FPS_n2 {
 				[&]() {
 					auto* KeyGuide = PadControl::Instance();
 					if (DXDraw::Instance()->IsPause()) {
-						KeyGuide->AddGuide(PADS::INTERACT, "決定");
-						KeyGuide->AddGuide(PADS::RELOAD, "戻る");
+						KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9992));
+						KeyGuide->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9991));
 						KeyGuide->AddGuide(PADS::MOVE_W, "");
 						KeyGuide->AddGuide(PADS::MOVE_S, "");
-						KeyGuide->AddGuide(PADS::MOVE_STICK, "選択");
+						KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9993));
 					}
 					else {
 						KeyGuide->AddGuide(PADS::MOVE_W, "");
 						KeyGuide->AddGuide(PADS::MOVE_S, "");
 						KeyGuide->AddGuide(PADS::MOVE_A, "");
 						KeyGuide->AddGuide(PADS::MOVE_D, "");
-						KeyGuide->AddGuide(PADS::MOVE_STICK, "移動");
-
+						KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9900));
 						KeyGuide->AddGuide(PADS::LEAN_L, "");
-						KeyGuide->AddGuide(PADS::LEAN_R, "覗き");
-						KeyGuide->AddGuide(PADS::RUN, "走る");
-						KeyGuide->AddGuide(PADS::WALK, "歩く");
-						KeyGuide->AddGuide(PADS::SQUAT, "しゃがむ");
-						KeyGuide->AddGuide(PADS::JUMP, "スタンス切替");
-
-						KeyGuide->AddGuide(PADS::SHOT, "射撃");
-						KeyGuide->AddGuide(PADS::ULT, "武器切替");
-						KeyGuide->AddGuide(PADS::AIM, "エイム");
-						KeyGuide->AddGuide(PADS::MELEE, "殴打");
-
-						KeyGuide->AddGuide(PADS::RELOAD, "再装填");
-
-						KeyGuide->AddGuide(PADS::CHECK, "装備確認");
-
-						KeyGuide->AddGuide(PADS::THROW, "モルヒネ注射");
-
-						//KeyGuide->AddGuide(PADS::INTERACT, "取得");
-						KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
+						KeyGuide->AddGuide(PADS::LEAN_R, LocalizePool::Instance()->Get(9901));
+						KeyGuide->AddGuide(PADS::RUN, LocalizePool::Instance()->Get(9902));
+						KeyGuide->AddGuide(PADS::WALK, LocalizePool::Instance()->Get(9903));
+						KeyGuide->AddGuide(PADS::SQUAT, LocalizePool::Instance()->Get(9904));
+						KeyGuide->AddGuide(PADS::JUMP, LocalizePool::Instance()->Get(9905));
+						KeyGuide->AddGuide(PADS::SHOT, LocalizePool::Instance()->Get(9906));
+						KeyGuide->AddGuide(PADS::ULT, LocalizePool::Instance()->Get(9907));
+						KeyGuide->AddGuide(PADS::AIM, LocalizePool::Instance()->Get(9908));
+						KeyGuide->AddGuide(PADS::MELEE, LocalizePool::Instance()->Get(9909));
+						KeyGuide->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9910));
+						KeyGuide->AddGuide(PADS::CHECK, LocalizePool::Instance()->Get(9911));
+						KeyGuide->AddGuide(PADS::THROW, LocalizePool::Instance()->Get(9912));
+						KeyGuide->AddGuide(PADS::INVENTORY, LocalizePool::Instance()->Get(9913));
 
 						KeyGuide->AddGuide(PADS::INTERACT, "");
-						KeyGuide->AddGuide(PADS::THROW, "チュートリアルを進める/戻る");
+						KeyGuide->AddGuide(PADS::THROW, LocalizePool::Instance()->Get(9920));
 					}
 				});
 
@@ -775,7 +768,7 @@ namespace FPS_n2 {
 					//
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
 																		  FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP,
-																		  y_r(960), y_r(870), Red, Black, "押してメッセージを進める:%s", Pad->GetKeyStr(PADS::INTERACT).c_str());
+																		  y_r(960), y_r(870), Red, Black, "%s:%s", LocalizePool::Instance()->Get(300), Pad->GetKeyStr(PADS::INTERACT).c_str());
 
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*m_FirstFade), 0, 255));
 					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Black, TRUE);
@@ -784,7 +777,7 @@ namespace FPS_n2 {
 			}
 		}
 		//使い回しオブジェ系
-		void			TutorialScene::Dispose_Load(void) noexcept {
+		void			TutorialScene::Dispose_Load_Sub(void) noexcept {
 			if (!m_IsFirstLoad) {
 				m_IsFirstLoad = true;
 				auto* ObjMngr = ObjectManager::Instance();

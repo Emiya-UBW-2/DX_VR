@@ -20,3 +20,4 @@ Ysensing=0.500000
 HeadBobbing=true
 EnableCheck=true
 LightMode=false
+ControlType=PS4

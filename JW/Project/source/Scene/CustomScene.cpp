@@ -135,16 +135,16 @@ namespace FPS_n2 {
 				[&]() {
 					auto* KeyGuide = PadControl::Instance();
 					if (m_LookSel == LookSelect::FreeLook) {
-						KeyGuide->AddGuide(PADS::RELOAD, "フリールックをやめる");
+						KeyGuide->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9930));
 					}
 					else {
 						KeyGuide->AddGuide(PADS::MOVE_W, "");
 						KeyGuide->AddGuide(PADS::MOVE_S, "");
 						KeyGuide->AddGuide(PADS::MOVE_A, "");
 						KeyGuide->AddGuide(PADS::MOVE_D, "");
-						KeyGuide->AddGuide(PADS::MOVE_STICK, "スロット選択,パーツ変更");
-						KeyGuide->AddGuide(PADS::RELOAD, "セーブして終了");
-						KeyGuide->AddGuide(PADS::MELEE, "編集開始時に戻す");
+						KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9931));
+						KeyGuide->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9932));
+						KeyGuide->AddGuide(PADS::MELEE, LocalizePool::Instance()->Get(9933));
 					}
 				}
 			);
@@ -480,7 +480,7 @@ namespace FPS_n2 {
 			if (bselect != -1) {
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
 																	  FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-																	  y_r(32), y_r(1080 - 32 - 32), White, Black, LookSelectName[bselect]);
+																	  y_r(32), y_r(1080 - 32 - 32), White, Black, LocalizePool::Instance()->Get(9010 + bselect));
 			}
 			//
 			{
@@ -719,7 +719,7 @@ namespace FPS_n2 {
 				}
 				if (mouseover != -1) {
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-																		Pad->GetMS_X(), Pad->GetMS_Y(), White, Gray75, "ゲームをプレイする毎にアンロックされます");
+																		Pad->GetMS_X(), Pad->GetMS_Y(), White, Gray75, LocalizePool::Instance()->Get(9000));
 
 				}
 			}
@@ -733,7 +733,7 @@ namespace FPS_n2 {
 				xp1 = y_r(960 - 400);
 				yp1 = y_r(540 - 270);
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
-																	  xp1, yp1, White, Gray75, "プライマリウェポンの変更");
+																	  xp1, yp1, White, Gray75, LocalizePool::Instance()->Get(9001));
 			}
 			//
 			{
@@ -783,7 +783,7 @@ namespace FPS_n2 {
 			}
 		}
 		//使い回しオブジェ系
-		void			CustomScene::Dispose_Load(void) noexcept {
+		void			CustomScene::Dispose_Load_Sub(void) noexcept {
 			if (!m_IsFirstLoad) {
 				m_IsFirstLoad = true;
 				auto* PlayerMngr = PlayerManager::Instance();

@@ -15,14 +15,6 @@ namespace FPS_n2 {
 			"",
 			"",
 		};
-		static const char* SelectInfoName[6] = {
-			"戦闘を行います",
-			"使用する拳銃のカスタマイズをすることができます",
-			"射撃場で装備を試します",
-			"戦闘を行います(Hard Mode)",
-			"オプションを開きます",
-			"クレジットを開きます",
-		};
 
 		class TitleScene : public TEMPSCENE, public GunsModify {
 		private:
@@ -72,7 +64,7 @@ namespace FPS_n2 {
 			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override {}
 		public:
-			void			Dispose_Load(void) noexcept;
+			void			Dispose_Load_Sub(void) noexcept override;
 		};
 	};
 };

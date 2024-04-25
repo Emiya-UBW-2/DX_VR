@@ -199,6 +199,7 @@ namespace FPS_n2 {
 			m_StartTime = std::time(nullptr);
 		}
 		bool			MAINLOOP::Update_Sub(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* SE = SoundPool::Instance();
@@ -212,11 +213,11 @@ namespace FPS_n2 {
 				[&]() {
 					auto* KeyGuide = PadControl::Instance();
 					if (DXDraw::Instance()->IsPause()) {
-						KeyGuide->AddGuide(PADS::INTERACT, "決定");
-						KeyGuide->AddGuide(PADS::RELOAD, "戻る");
+						KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9992));
+						KeyGuide->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9991));
 						KeyGuide->AddGuide(PADS::MOVE_W, "");
 						KeyGuide->AddGuide(PADS::MOVE_S, "");
-						KeyGuide->AddGuide(PADS::MOVE_STICK, "選択");
+						KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9993));
 					}
 					else {
 						if (m_IsEnd) {
@@ -227,34 +228,29 @@ namespace FPS_n2 {
 							KeyGuide->AddGuide(PADS::MOVE_S, "");
 							KeyGuide->AddGuide(PADS::MOVE_A, "");
 							KeyGuide->AddGuide(PADS::MOVE_D, "");
-							KeyGuide->AddGuide(PADS::MOVE_STICK, "移動");
-
+							KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9900));
 							KeyGuide->AddGuide(PADS::LEAN_L, "");
-							KeyGuide->AddGuide(PADS::LEAN_R, "覗き");
-							KeyGuide->AddGuide(PADS::RUN, "走る");
-							KeyGuide->AddGuide(PADS::WALK, "歩く");
-							KeyGuide->AddGuide(PADS::SQUAT, "しゃがむ");
-							KeyGuide->AddGuide(PADS::JUMP, "スタンス切替");
-
-							KeyGuide->AddGuide(PADS::SHOT, "射撃");
-							KeyGuide->AddGuide(PADS::ULT, "武器切替");
-							KeyGuide->AddGuide(PADS::AIM, "エイム");
-							KeyGuide->AddGuide(PADS::MELEE, "殴打");
-
-							KeyGuide->AddGuide(PADS::RELOAD, "再装填");
-
-							KeyGuide->AddGuide(PADS::CHECK, "装備確認");
-
-							KeyGuide->AddGuide(PADS::THROW, "モルヒネ注射");
-							
-							//KeyGuide->AddGuide(PADS::INTERACT, "取得");
-							KeyGuide->AddGuide(PADS::INVENTORY, "ポーズ");
+							KeyGuide->AddGuide(PADS::LEAN_R, LocalizePool::Instance()->Get(9901));
+							KeyGuide->AddGuide(PADS::RUN, LocalizePool::Instance()->Get(9902));
+							KeyGuide->AddGuide(PADS::WALK, LocalizePool::Instance()->Get(9903));
+							KeyGuide->AddGuide(PADS::SQUAT, LocalizePool::Instance()->Get(9904));
+							KeyGuide->AddGuide(PADS::JUMP, LocalizePool::Instance()->Get(9905));
+							KeyGuide->AddGuide(PADS::SHOT, LocalizePool::Instance()->Get(9906));
+							KeyGuide->AddGuide(PADS::ULT, LocalizePool::Instance()->Get(9907));
+							KeyGuide->AddGuide(PADS::AIM, LocalizePool::Instance()->Get(9908));
+							KeyGuide->AddGuide(PADS::MELEE, LocalizePool::Instance()->Get(9909));
+							KeyGuide->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9910));
+							KeyGuide->AddGuide(PADS::CHECK, LocalizePool::Instance()->Get(9911));
+							KeyGuide->AddGuide(PADS::THROW, LocalizePool::Instance()->Get(9912));
+							KeyGuide->AddGuide(PADS::INVENTORY, LocalizePool::Instance()->Get(9913));
 						}
 					}
 				});
 
 			if (DXDraw::Instance()->IsPause()) {
-				m_MainLoopPauseControl.Execute();
+				if (!DrawParts->IsExit()) {
+					m_MainLoopPauseControl.Execute();
+				}
 #if FALSE
 				if (m_IsEnd && GetMovieStateToGraph(movie.get()) == 1) {
 					PauseMovieToGraph(movie.get());
@@ -270,10 +266,10 @@ namespace FPS_n2 {
 					if (m_LastMan == 0 || (m_Timer <= 0.f)) {
 						if (m_PreEndTimer < 0.f) {
 							m_PreEndTimer = 5.f;
-							ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "クリア +%4d", 100);
+							ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(202), 100);
 							PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(100);
 							if (m_LastMan == 0) {
-								ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "ラッシュ対処ボーナス +%4d", 100);
+								ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(203), 100);
 								PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(100);
 							}
 						}
@@ -316,10 +312,10 @@ namespace FPS_n2 {
 				SE->Get((int)SoundEnum::Env).Play(0, DX_PLAYTYPE_LOOP);
 				SE->Get((int)SoundEnum::Env2).Play(0, DX_PLAYTYPE_LOOP);
 				if (!m_IsHardMode) {
-					ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "3分間 敵の進攻から耐えろ");
+					ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(204));
 				}
 				else {
-					ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "命の続く限り敵を倒し続けろ");
+					ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(205));
 					m_Timer = 0.001f;
 				}
 			}
@@ -486,12 +482,14 @@ namespace FPS_n2 {
 			ObjMngr->DrawObject_Shadow();
 		}
 		void			MAINLOOP::MainDraw_Sub(void) noexcept {
-			/*
+			//*
 			SetVerticalFogEnable(TRUE);
-			SetVerticalFogMode(DX_FOGMODE_EXP2);
-			SetVerticalFogColor(255, 0, 0);
-			//SetVerticalFogStartEnd(1.5f*Scale_Rate, 0.8f*Scale_Rate);
-			SetVerticalFogDensity(0.3f*Scale_Rate, 0.2f);
+			SetVerticalFogMode(DX_FOGMODE_LINEAR);
+			//SetVerticalFogColor(55, 150, 255);
+			//SetVerticalFogStartEnd(1.5f*Scale_Rate, -10.f*Scale_Rate);
+			SetVerticalFogColor(16, 16, 16);
+			SetVerticalFogStartEnd(1.5f*Scale_Rate, -1.f*Scale_Rate);
+			//SetVerticalFogDensity(0.3f*Scale_Rate, 0.2f);
 			//*/
 			if (m_IsEnd) {
 				return;
@@ -547,8 +545,7 @@ namespace FPS_n2 {
 			}
 			//
 #endif
-			//SetVerticalFogEnable(FALSE);
-
+			SetVerticalFogEnable(FALSE);
 		}
 		void			MAINLOOP::MainDrawFront_Sub(void) noexcept {
 			if (m_IsEnd) {
@@ -609,12 +606,12 @@ namespace FPS_n2 {
 				}
 			}
 			//ポーズ
-			if (DrawParts->IsPause()) {
+			if (DrawParts->IsPause() && !DrawParts->IsExit()) {
 				m_MainLoopPauseControl.Draw();
 			}
 		}
 		//使い回しオブジェ系
-		void			MAINLOOP::Dispose_Load(void) noexcept {
+		void			MAINLOOP::Dispose_Load_Sub(void) noexcept {
 			if (!m_IsFirstLoad) {
 				m_IsFirstLoad = true;
 				auto* ObjMngr = ObjectManager::Instance();
@@ -681,15 +678,14 @@ namespace FPS_n2 {
 			auto* SaveDataParts = SaveDataClass::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			{
+				//自記録を追加
 				int ScoreNum = std::max(static_cast<int>(SaveDataParts->GetParam("ScoreNum")), 0);
 				SaveDataParts->SetParam("ScoreNum", ScoreNum + 1);
 				SaveDataParts->SetParam("Score" + std::to_string(ScoreNum), PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
 				SaveDataParts->SetParam("Time_" + std::to_string(ScoreNum), m_StartTime);
-			}
-			{
+
 				m_Ranking.clear();
-				int ScoreNum = static_cast<int>(SaveDataParts->GetParam("ScoreNum"));
-				for (int i = 0;i < ScoreNum;i++) {
+				for (int i = 0;i <= ScoreNum;i++) {
 					int Score = static_cast<int>(SaveDataParts->GetParam("Score" + std::to_string(i)));
 					int64_t Time = SaveDataParts->GetParam("Time_" + std::to_string(i));
 					m_Ranking.emplace_back(std::make_pair(Score, Time));
@@ -703,6 +699,15 @@ namespace FPS_n2 {
 						break;
 					}
 				}
+				//スコアの記録を並べ替え
+				{
+					for (auto& r : m_Ranking) {
+						int index = (int)(&r - &m_Ranking.front());
+						SaveDataParts->SetParam("Score" + std::to_string(index), r.first);
+						SaveDataParts->SetParam("Time_" + std::to_string(index), r.second);
+					}
+				}
+				SaveDataParts->SetParam("ScoreNum", std::min(ScoreNum, 20));
 			}
 		}
 		//update
@@ -851,7 +856,7 @@ namespace FPS_n2 {
 					else {
 						if (!m_RashStartLog) {
 							m_RashStartLog = true;
-							ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "敵の行動が活発になった、最後の一押しだ");
+							ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(206));
 						}
 						m_LastMan = 0;
 						for (int index = 0; index < Player_num; index++) {
@@ -862,7 +867,7 @@ namespace FPS_n2 {
 							}
 						}
 						if (m_LastMan != prevLastMan) {
-							ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "残り%d人", m_LastMan);
+							ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(207), m_LastMan);
 						}
 					}
 					prevLastMan = m_LastMan;
@@ -1063,14 +1068,14 @@ namespace FPS_n2 {
 											tgt->AddAmmoStock(Add);
 											isHit = true;
 											SE->Get((int)SoundEnum::GetAmmo).Play_3D(0, tgt->GetEyeMatrix().pos(), Scale_Rate * 10.f);
-											ItemLogParts->AddLog(3.f, GetColor(183, 143, 0), "弾薬を入手(+%d)", Add);
+											ItemLogParts->AddLog(3.f, GetColor(183, 143, 0), "%s +%d", LocalizePool::Instance()->Get(208), Add);
 										}
 										break;
 									case ItemType::ARMER:
 										if (tgt->GetArmer()) {
 											isHit = true;
 											SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, tgt->GetEyeMatrix().pos(), Scale_Rate * 10.f);
-											ItemLogParts->AddLog(3.f, GetColor(183, 143, 0), "アーマーを入手");
+											ItemLogParts->AddLog(3.f, GetColor(183, 143, 0), LocalizePool::Instance()->Get(209));
 										}
 										break;
 									default:
@@ -1332,13 +1337,13 @@ namespace FPS_n2 {
 				auto ScoreBuf = PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore();
 				if (ScoreBuf > prevScore && (ScoreBuf - prevScore) >= 100) {
 					this->m_UIclass.SetIntParam(5, (ScoreBuf - prevScore));
-					ItemLogParts->AddLog(3.f, GetColor(206, 0, 0), "敵をキル +%4d", (ScoreBuf - prevScore));
+					ItemLogParts->AddLog(3.f, GetColor(206, 0, 0), "%s +%4d", LocalizePool::Instance()->Get(210), (ScoreBuf - prevScore));
 				}
 				else {
 					this->m_UIclass.SetIntParam(5, 0);
 				}
 				if (Chara->ULTActiveSwitch()) {
-					ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "プライマリを使用可能");
+					ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(211));
 				}
 				prevScore = PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore();
 				//

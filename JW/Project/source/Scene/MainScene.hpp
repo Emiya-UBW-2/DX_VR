@@ -123,7 +123,7 @@ namespace FPS_n2 {
 			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override;
 		public:
-			void			Dispose_Load(void) noexcept;
+			void			Dispose_Load_Sub(void) noexcept override;
 		public:
 			const auto			SetPlayMode(bool value) noexcept {
 				bool ret = (m_IsHardMode != value);

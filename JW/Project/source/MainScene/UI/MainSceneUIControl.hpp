@@ -403,7 +403,7 @@ namespace FPS_n2 {
 						yp1 = DrawParts->m_DispYSize / 2 + y_r(100);
 
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1, Red, Gray75,
-																			 "c’e‚ª­‚È‚¢");
+																			  LocalizePool::Instance()->Get(301));
 
 					}
 				}

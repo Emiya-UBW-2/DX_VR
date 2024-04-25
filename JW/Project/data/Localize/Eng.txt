@@ -1,0 +1,101 @@
+0000=MS UI Gothic
+0001=MS UI Gothic
+
+0010=Your System does not support DirectX11 version. Working with old version.
+
+0020=Close
+
+0100=Exit
+0101=Return to Desktop?
+0102=Yes
+
+0120=Credit
+
+0110=Option
+1110=BGMボリュームを変更します
+1111=SEボリュームを変更します
+1120=軽量モードを指定します(反映は再起動後にされます)
+1121=ウィンドウ、ボーダーレスモードを選択します(反映は再起動後にされます)
+1122=垂直視野角を変更します
+1123=垂直同期の有効無効を指定します(反映は再起動後にされます)
+1124=垂直同期を切った際のFPS制限を指定します
+1125=DirectXのバージョンを変更します(反映は再起動後にされます)
+1126=FXAAの有効無効を指定します
+1127=画面ベースの環境遮蔽の有効無効を指定します
+1128=画面ベースの鏡面反射の有効無効を指定します DirectX11のみ有効
+1129=影の有効無効を指定します
+1130=オブジェクトの表示をするかを指定します
+1131=ブルームエフェクトの有効無効を指定します
+1132=画面エフェクトの有効無効を指定します
+1133=遠近のピンボケの有効無効を指定します
+1134=モーションブラーの有効無効を指定します
+
+1140=横方向の感度を変更します
+1140=縦方向の感度を変更します
+1140=視点の揺れの有効無効を指定します
+1140=追加で眺め/マガジン確認をするかを指定します
+1140=パッドの入力方式を変更します
+
+
+0200=Wear Armer
+0201=injected morphine
+0202=Game Clear
+0203=Bonus
+0204=Survive for 3 minutes
+0205=Kill Enemy until die
+0206=Last 1 minute
+0207=%d Enemy Left
+0208=Get Ammo
+0209=Get Armer
+0210=Kill
+0211=Can Use Primary Weapon!
+
+0300=Push:
+0301=Reload!
+
+9990=Exit
+9991=Return
+9992=Decision
+9993=Select
+9994=Change Tab
+
+9900=Move
+9901=Lean
+9902=Run
+9903=Walk
+9904=Squat
+9905=Change Sight
+9906=Shot
+9907=Change Gun
+9908=Aim
+9909=Punch
+9910=Reload
+9911=Check Equip
+9912=Injected Morphine
+9913=Pause
+
+9920=Tutorial
+
+9930=Stop FreeLook
+9931=Select
+9932=Save And Return
+9933=Return to the Custom Start
+
+9000=Unlock when Play MainMode
+9001=Change Primary Weapon
+
+9010=Customize Handgun
+9011=Change Primary Weapon
+9012=Free Look
+9013=
+9014=
+9015=
+9016=
+9017=Return to the Custom Start
+
+9020=Go to Combat
+9021=Go to Customize Equip
+9022=Go to Shooting Range
+9023=Go to Combat(Hard Mode)
+9024=Open Option
+9025=Open Credit

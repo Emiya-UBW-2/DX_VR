@@ -17,7 +17,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DrawParts->Init();
 	SetMainWindowText("Phantom of the Bunker");						//タイトル
 	//MV1SetLoadModelUsePackDraw(TRUE);
-	//SetUseHalfLambertLighting(TRUE);	//ハーフランバート化
+	SetUseHalfLambertLighting(TRUE);	//ハーフランバート化
 	//
 	FPS_n2::GetItemLog::Create();
 	FPS_n2::Sceneclass::ObjectManager::Create();
@@ -61,77 +61,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Customscene->Set_Next(Titlescene);
 	Tutorialscene->Set_Next(Titlescene);
 	MAINLOOPscene->Set_Next(Titlescene);
-	bool isTitleLoop = false;
-	auto TitleLoad = [&]() {
-		if (!isTitleLoop) {
-			isTitleLoop = true;
-			Titlescene->Load();
-		}
-	};
-	auto TitleUnLoad = [&]() {
-		if (isTitleLoop) {
-			isTitleLoop = false;
-			Titlescene->Dispose_Load();
-		}
-	};
-	bool isCustomLoop = false;
-	auto CustomLoad = [&]() {
-		if (!isCustomLoop) {
-			isCustomLoop = true;
-			Customscene->Load();
-		}
-	};
-	auto CustomUnLoad = [&]() {
-		if (isCustomLoop) {
-			isCustomLoop = false;
-			Customscene->Dispose_Load();
-		}
-	};
-	bool isTutorialLoop = false;
-	auto TutorialLoad = [&]() {
-		if (!isTutorialLoop) {
-			isTutorialLoop = true;
-			Tutorialscene->Load();
-		}
-	};
-	auto TutorialUnLoad = [&]() {
-		if (isTutorialLoop) {
-			isTutorialLoop = false;
-			Tutorialscene->Dispose_Load();
-		}
-	};
-	bool isMainLoop = false;
-	auto MainLoad = [&](bool IsHardMode) {
-		if (MAINLOOPscene->SetPlayMode(IsHardMode)) {
-			isMainLoop = true;
-			MAINLOOPscene->Dispose_Load();
-			MAINLOOPscene->Load();
-		}
-		else {
-			if (!isMainLoop) {
-				isMainLoop = true;
-				MAINLOOPscene->Load();
-			}
-		}
-	};
-	auto MainUnLoad = [&]() {
-		if (isMainLoop) {
-			isMainLoop = false;
-			MAINLOOPscene->Dispose_Load();
-		}
-	};
-
 	//最初の読み込み
-	if (IsFirstGame) {
-		TutorialLoad();
-	}
-	else {
-		TitleLoad();
-	}
+	scene->GetNowScene()->Load();
 	//繰り返し
 	while (true) {
 		scene->StartScene();
-		//SetUsePixelLighting(FALSE);									//ピクセルライティングの使用(DXLIBまち)
 
 		while (true) {
 			if (!DrawParts->FirstExecute()) {
@@ -180,37 +114,42 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		}
 		scene->NextScene();
 		if (IsGoTitle) {
-			TitleUnLoad();
+			Titlescene->Dispose_Load();
+			if (Titlescene->SelMode() != 1) {
+				Customscene->Dispose_Load();
+			}
+			if (Titlescene->SelMode() != 2) {
+				Tutorialscene->Dispose_Load();
+			}
 			switch (Titlescene->SelMode()) {
 				case 0:
-					CustomUnLoad();
-					TutorialUnLoad();
-					MainLoad(false);
+					if (MAINLOOPscene->SetPlayMode(false)) {
+						scene->GetNowScene()->Dispose_Load();
+					}
 					break;
 				case 1:
-					MainUnLoad();
-					TutorialUnLoad();
-					CustomLoad();
+					MAINLOOPscene->Dispose_Load();
 					break;
 				case 2:
-					MainUnLoad();
-					CustomUnLoad();
-					TutorialLoad();
+					MAINLOOPscene->Dispose_Load();
 					break;
 				case 3:
-					CustomUnLoad();
-					TutorialUnLoad();
-					MainLoad(true);
+					if (MAINLOOPscene->SetPlayMode(true)) {
+						scene->GetNowScene()->Dispose_Load();
+					}
 					break;
 				default:
 					break;
 			}
+			scene->GetNowScene()->Load();
 		}
 		else if (IsReturnTitle) {
-			MainUnLoad();
-			CustomUnLoad();
-			TutorialUnLoad();
-			TitleLoad();
+			MAINLOOPscene->Dispose_Load();
+			Customscene->Dispose_Load();
+			Tutorialscene->Dispose_Load();
+			if (!scene->GetNowScene()->isLoading) {
+				scene->GetNowScene()->Load();
+			}
 		}
 	}
 	return 0;

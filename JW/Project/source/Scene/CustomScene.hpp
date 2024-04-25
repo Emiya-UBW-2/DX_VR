@@ -11,16 +11,6 @@ namespace FPS_n2 {
 			FreeLook,
 			Max,
 		};
-		static const char* LookSelectName[8] = {
-			"ハンドガンのカスタマイズを行います",
-			"プライマリウェポンを変更します",
-			"銃を見まわします",
-			"",
-			"",
-			"",
-			"",
-			"カスタマイズを開いた際の状態にリセットします",
-		};
 
 		class CustomScene : public TEMPSCENE, public GunsModify {
 			class SlotMove {
@@ -141,7 +131,7 @@ namespace FPS_n2 {
 			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override {}
 		public:
-			void			Dispose_Load(void) noexcept;
+			void			Dispose_Load_Sub(void) noexcept override;
 		};
 	};
 };
