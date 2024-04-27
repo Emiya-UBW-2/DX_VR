@@ -4,6 +4,10 @@ Info=オーストリア製の大型自動拳銃。
 Info=装弾数の多さと低反動を兼ね備えている。
 Info=パーツ交換によるカスタマイズ性に富む。
 
+Info_Eng=Automatic pistol made in Austria.
+Info_Eng=It has a large number of bullets and low recoil.
+Info_Eng=Highly customizable by replacing parts.
+
 ShotRate=1200
 RecoilPower=100
 RecoilReturn=0.95

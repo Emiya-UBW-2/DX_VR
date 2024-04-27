@@ -42,6 +42,7 @@ namespace FPS_n2 {
 
 			std::vector<std::shared_ptr<AmmoDataClass>>	m_AmmoSpec;
 			std::vector<std::string>					m_Info;
+			std::vector<std::string>					m_InfoEng;
 			int											m_CapacityMax{0};
 		public://ゲッター
 			//性能
@@ -54,6 +55,8 @@ namespace FPS_n2 {
 			const auto& GetHumanAnimType(void) const noexcept { return this->m_HumanAnimType; }
 			const auto& GetIronSight(void) const noexcept { return this->m_IronSight; }
 			const auto&		GetInfo(void) const noexcept { return this->m_Info; }
+			const auto&		GetInfoEng(void) const noexcept { return this->m_InfoEng; }
+			
 			//銃声
 			const auto&	GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
 			//スコープ
@@ -89,6 +92,7 @@ namespace FPS_n2 {
 
 				this->m_AmmoSpec.clear();
 				this->m_Info.clear();
+				this->m_InfoEng.clear();
 			}
 			void		Set_Sub(const std::string& LEFT, const std::string&RIGHT) noexcept override {
 				SetSlot(LEFT, RIGHT);

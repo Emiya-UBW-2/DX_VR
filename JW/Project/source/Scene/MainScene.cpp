@@ -248,7 +248,7 @@ namespace FPS_n2 {
 				});
 
 			if (DXDraw::Instance()->IsPause()) {
-				if (!DrawParts->IsExit()) {
+				if (!DrawParts->IsExit() && !DrawParts->IsRestart()) {
 					m_MainLoopPauseControl.Execute();
 				}
 #if FALSE
@@ -606,7 +606,7 @@ namespace FPS_n2 {
 				}
 			}
 			//ƒ|[ƒY
-			if (DrawParts->IsPause() && !DrawParts->IsExit()) {
+			if (DrawParts->IsPause() && (!DrawParts->IsExit() && !DrawParts->IsRestart())) {
 				m_MainLoopPauseControl.Draw();
 			}
 		}

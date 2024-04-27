@@ -4,6 +4,10 @@ Info=拳銃弾を用いるピストルキャリバーカービン。
 Info=フルオートでの射撃ができるように改造されている。
 Info=取り回しは良いもののいささか弾の消費が激しい。
 
+Info_Eng=A pistol caliber carbine.
+Info_Eng=It has been modified to allow full automatic.
+Info_Eng=Although it has good handling, it consumes a lot of bullets.
+
 ShotRate=800
 RecoilPower=50
 RecoilReturn=0.9

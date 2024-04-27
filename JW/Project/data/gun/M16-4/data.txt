@@ -4,6 +4,10 @@ Info=競技用の機関部と軍用のバレルを組み合わせたカービン銃。
 Info=スコープとオフセットサイトを搭載し、精密な射撃が可能。
 Info=総じて中遠での戦闘を重視している。
 
+Info_Eng=A carbine that combines a sporter receiver and a army barrel.
+Info_Eng=Equipped with a scope and offset sight, allowing for precise shooting.
+Info_Eng=Focus is on mid-far range combat.
+
 ShotRate=800
 RecoilPower=120
 RecoilReturn=0.9

@@ -95,10 +95,14 @@ namespace FPS_n2 {
 			m_PrevSSAO = OptionParts->Get_SSAO();
 			OptionParts->Set_SSAO(false);
 
+			std::string Path = "data/Tutorial_";
+			Path += LanguageStr[OptionParts->Get_Language()];
+			Path += ".txt";
+
 			this->m_TutorialLog.Set();
 			this->m_Tutorial.clear();
 			{
-				int mdata = FileRead_open("data/Tutorial.txt", FALSE);
+				int mdata = FileRead_open(Path.c_str(), FALSE);
 				while (true) {
 					if (FileRead_eof(mdata) != 0) { break; }
 					auto ALL = getparams::Getstr(mdata);
@@ -624,6 +628,9 @@ namespace FPS_n2 {
 			auto* SaveDataParts = SaveDataClass::Instance();
 			SaveDataParts->SetParam("FirstGame", 1);
 			SaveDataParts->Save();
+
+			auto* BGM = BGMPool::Instance();
+			BGM->StopAll();
 		}
 		//
 		void			TutorialScene::BG_Draw_Sub(void) noexcept {

@@ -85,6 +85,9 @@ namespace FPS_n2 {
 			else if (LEFT == "Info") {
 				m_Info.emplace_back(RIGHT);
 			}
+			else if (LEFT == "Info_Eng") {
+				m_InfoEng.emplace_back(RIGHT);
+			}
 		}
 
 		const std::shared_ptr<ModDataClass>*	ModDataManager::AddData(const std::string& filepath, bool isMod) noexcept {
