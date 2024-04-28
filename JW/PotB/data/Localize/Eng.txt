@@ -1,0 +1,130 @@
+0000=MS UI Gothic
+0001=MS UI Gothic
+
+0010=Your System does not support DirectX11 version. Working with old version.
+
+0020=Close
+
+0100=Exit
+0101=Return to Desktop?
+0102=Yes
+2101=Restart Game?
+2102=Restart
+
+0120=Credit
+
+0110=Option
+1110=Change BGM volume
+1111=Change SE volume
+1120=Enable light mode(Need Restart)
+1121=Select Window or Borderless(Need Restart)
+1122=Change Vertical Fov
+1123=Enable VSync(Need Restart)
+1124=Change FPS Limit When Disable VSync
+1125=Change DirectX version(Need Restart)
+1126=Enable FXAA
+1127=Enable Screen Space AO
+1128=Enable Screen Space Reflection
+1129=Enable Shadow
+1130=Enable Draw Objects
+1131=Enable bloom Effect
+1132=Enable Screen Effect
+1133=Enable DoF
+1134=Enable Motion Blur
+1135=Window
+1136=Borderless
+
+1140=Change X Sensitivity
+1141=Change Y Sensitivity
+1142=Enable Head Bobbing
+1143=Enable Extend Action(MagCheck/ViewGun)
+1144=Change Pad Input System
+1145=Change Language(Need Restart)
+1146=Enable Extra UI(Hit,ScoreAdd)
+1147=Enable Extra UI(Sound Wave,Enemy Degree/Distance)
+
+1150=[Need Mouse]Reset Change
+1151=[Need Mouse]Over Pointer and Press Button to Set
+1152=[Need Mouse]Save Key Config
+1153=Go Front/Select Prev
+1154=Go Back/Select Next
+1155=Go Left/Select Left
+1156=Go Right/Select Right
+1157=Left Lean/Select Left Tab
+1158=Right Lean/Select Right Tab
+1159=Reload Gun/Return
+1160=Interact/Decision
+1161=Throw
+1162=Punch
+1163=Change Sight
+1164=Run
+1165=Walk
+1166=Shot
+1167=Aim
+1168=Change Gun
+1169=Squat
+1170=Prone
+1171=Check Equip
+
+0200=Wear Armer
+0201=injected morphine
+0202=Game Clear
+0203=Bonus
+0204=Survive for 3 minutes
+0205=Kill Enemy until die
+0206=Last 1 minute
+0207=%d Enemy Left
+0208=Get Ammo
+0209=Get Armer
+0210=Kill
+0211=Can Use Primary Weapon!
+
+0300=Push:
+0301=Reload!
+
+9990=Exit
+9991=Return
+9992=Decision
+9993=Select
+9994=Change Tab
+
+9900=Move
+9901=Lean
+9902=Run
+9903=Walk
+9904=Squat
+9905=Change Sight
+9906=Shot
+9907=Change Gun
+9908=Aim
+9909=Punch
+9910=Reload
+9911=Check Equip
+9912=Injected Morphine
+9913=Pause
+
+9920=Tutorial
+
+9930=Stop FreeLook
+9931=Select
+9932=Save And Return
+9933=Return to the Custom Start
+
+9000=Unlock when Play MainMode
+9001=Change Primary Weapon
+
+9010=Customize Handgun
+9011=Change Primary Weapon
+9012=Free Look
+9013=
+9014=
+9015=
+9016=
+9017=Return to the Custom Start
+
+9020=Go to Combat
+9021=Go to Customize Equip
+9022=Go to Shooting Range
+9023=Go to Combat(Hard Mode:Armed with M4A1 rifles and handguns, fight against enemies with various guns)
+9024=Open Option
+9025=Open Credit

@@ -296,16 +296,19 @@ namespace FPS_n2 {
 						ScoreAdd.at(m_ScoreAddSel) = std::make_pair(intParam[5], 2.f);
 						++m_ScoreAddSel %= (int)ScoreAdd.size();
 					}
-					for (int i = 0; i < (int)ScoreAdd.size(); i++) {
-						auto& s = ScoreAdd[i];
-						if (s.second > 0.f) {
-							float per = std::powf(2.f - s.second, 2.f);
-							SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - per)), 0, 255));
-							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_r(per*96.f), GetColor(206, 0, 0), Gray75, "+%d", s.first);
-							s.second = std::max(s.second - 1.f / FPS, 0.f);
+					auto* OptionParts = OPTION::Instance();
+					if (OptionParts->Get_EX_UI()) {
+						for (int i = 0; i < (int)ScoreAdd.size(); i++) {
+							auto& s = ScoreAdd[i];
+							if (s.second > 0.f) {
+								float per = std::powf(2.f - s.second, 2.f);
+								SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - per)), 0, 255));
+								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_r(per*96.f), GetColor(206, 0, 0), Gray75, "+%d", s.first);
+								s.second = std::max(s.second - 1.f / FPS, 0.f);
+							}
 						}
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 					}
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
 				//èÓïÒ
 				{

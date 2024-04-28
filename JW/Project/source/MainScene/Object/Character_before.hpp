@@ -595,9 +595,11 @@ namespace FPS_n2 {
 					printfDx("(%5.2f,%5.2f,%5.2f)\n", P.x(), P.y(), P.z());
 					//*/
 					SetUseLighting(FALSE);
+					SetUseHalfLambertLighting(FALSE);
 					DrawSphere_3D(LaserEndPos, 0.01f*Scale_Rate, GetColor(255, 24, 24), Black);
 					DrawCapsule_3D(LaserStartPos, LaserEndPos, 0.0015f*Scale_Rate, GetColor(255, 24, 24), Black);
 					SetUseLighting(TRUE);
+					SetUseHalfLambertLighting(TRUE);
 				}
 			}
 		public:

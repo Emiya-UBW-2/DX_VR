@@ -40,6 +40,8 @@
 1143=Enable Extend Action(MagCheck/ViewGun)
 1144=Change Pad Input System
 1145=Change Language(Need Restart)
+1146=Enable Extra UI(Hit,ScoreAdd)
+1147=Enable Extra UI(Sound Wave,Enemy Degree/Distance)
 
 1150=[Need Mouse]Reset Change
 1151=[Need Mouse]Over Pointer and Press Button to Set
@@ -123,6 +125,6 @@
 9020=Go to Combat
 9021=Go to Customize Equip
 9022=Go to Shooting Range
-9023=Go to Combat(Hard Mode)
+9023=Go to Combat(Hard Mode:Armed with M4A1 rifles and handguns, fight against enemies with various guns)
 9024=Open Option
 9025=Open Credit

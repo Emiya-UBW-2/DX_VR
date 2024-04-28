@@ -560,8 +560,13 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			if (!Chara->IsAlive()) { return; }
-			DrawHitGraph();			//着弾表示
-			DrawSoundGraph();		//サウンド表示
+			auto* OptionParts = OPTION::Instance();
+			if (OptionParts->Get_EX_UI()) {
+				DrawHitGraph();			//着弾表示
+			}
+			if (OptionParts->Get_EX_UI2()) {
+				DrawSoundGraph();		//サウンド表示
+			}
 			//レティクル表示
 			if (Chara->GetGunPtrNow()) {
 				if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&

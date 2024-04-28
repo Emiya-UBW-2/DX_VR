@@ -66,6 +66,7 @@ namespace FPS_n2 {
 			}
 			void		DrawMuzzleSmoke() noexcept {
 				SetUseLighting(FALSE);
+				SetUseHalfLambertLighting(FALSE);
 				int max = (int)(this->m_Line.size());
 				int min = 1 + (int)((1.f - m_LinePer) * (float)max);
 				for (int i = max - 1; i >= min; i--) {
@@ -85,6 +86,7 @@ namespace FPS_n2 {
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				SetUseLighting(TRUE);
+				SetUseHalfLambertLighting(TRUE);
 			}
 		};
 

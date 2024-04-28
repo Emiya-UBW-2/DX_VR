@@ -121,8 +121,10 @@ namespace FPS_n2 {
 					if (IsActive()) {
 						if (CheckCameraViewClip_Box(this->m_move.repos.get(), this->m_move.pos.get()) == FALSE) {
 							SetUseLighting(FALSE);
+							SetUseHalfLambertLighting(FALSE);
 							DrawCapsule_3D(this->m_move.pos, this->m_move.repos, 1.f * ((this->m_AmmoData->GetCaliber() - 0.00762f) * 0.1f + 0.00762f)*Scale_Rate, GetColor(255, 255, 172), Yellow);
 							SetUseLighting(TRUE);
+							SetUseHalfLambertLighting(TRUE);
 						}
 					}
 				}

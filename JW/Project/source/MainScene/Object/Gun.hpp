@@ -70,7 +70,7 @@ namespace FPS_n2 {
 			const MATRIX_ref GetFrameWorldMat(GunFrame frame, bool CheckSight = true) const noexcept;
 		public://ƒQƒbƒ^[
 			const auto& GetReloadType(void) const noexcept { return GetGunDataClass()->GetReloadType(); }
-			const auto& GetRecoilPower(void) const noexcept {
+			const auto GetRecoilPower(void) const noexcept {
 				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModData()->GetIsRecoilPower()) {
 					return (*this->m_UpperPtr)->GetModData()->GetRecoilPower();
 				}
