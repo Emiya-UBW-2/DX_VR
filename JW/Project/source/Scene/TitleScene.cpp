@@ -357,7 +357,13 @@ namespace FPS_n2 {
 			auto* Fonts = FontPool::Instance();
 
 			//
-			m_TitleImage.DrawGraph(y_r(64), y_r(64), true);
+			m_TitleImage.DrawExtendGraph(y_r(64), y_r(64), y_r(64+369), y_r(64 + 207), true);
+			//
+			{
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
+																	  FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
+																	  y_r(64 + 369), y_r(64 + 207), White, Black, "Ver 1.0.3");
+			}
 			//
 			for (auto& y : ButtonSel) {
 				y.Draw();

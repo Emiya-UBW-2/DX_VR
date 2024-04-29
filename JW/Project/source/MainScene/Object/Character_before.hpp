@@ -318,7 +318,7 @@ namespace FPS_n2 {
 		public://ゲッター
 			CharaAnimeID										m_BottomAnimSelect;
 		public://ゲッター
-			const auto		GetRun(void) const noexcept { return this->m_Input.GetPADSPress(PADS::RUN) && this->m_Input.GetPADSPress(PADS::MOVE_W); }
+			const auto		GetRun(void) const noexcept { return this->m_Input.GetPADSPress(PADS::RUN) && this->m_Input.GetPADSPress(PADS::MOVE_W) && !this->m_Input.GetPADSPress(PADS::MOVE_S); }
 			const auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }
 			const auto		GetLeanRad(void) const noexcept { return this->m_LeanRad; }
 			const auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
@@ -548,10 +548,10 @@ namespace FPS_n2 {
 				Easing(&m_UpperzVec, m_UpperzVecNormal, 0.8f, EasingType::OutExpo);
 
 				this->m_BottomAnimSelect = GetBottomStandAnimSel();
-				if (this->m_Input.GetPADSPress(PADS::MOVE_A)) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
-				if (this->m_Input.GetPADSPress(PADS::MOVE_D)) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
-				if (this->m_Input.GetPADSPress(PADS::MOVE_S)) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
-				if (this->m_Input.GetPADSPress(PADS::MOVE_W)) { this->m_BottomAnimSelect = GetRun() ? CharaAnimeID::Bottom_Stand_Run : GetBottomWalkAnimSel(); }
+				if (this->m_Input.GetPADSPress(PADS::MOVE_A) && !this->m_Input.GetPADSPress(PADS::MOVE_D)) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
+				if (this->m_Input.GetPADSPress(PADS::MOVE_D) && !this->m_Input.GetPADSPress(PADS::MOVE_A)) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
+				if (this->m_Input.GetPADSPress(PADS::MOVE_S) && !this->m_Input.GetPADSPress(PADS::MOVE_W)) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
+				if (this->m_Input.GetPADSPress(PADS::MOVE_W) && !this->m_Input.GetPADSPress(PADS::MOVE_S)) { this->m_BottomAnimSelect = GetRun() ? CharaAnimeID::Bottom_Stand_Run : GetBottomWalkAnimSel(); }
 				//下半身
 				Easing(&GetCharaAnimeBufID(GetBottomTurnAnimSel()), (!GetIsSquat() && this->m_TurnBody) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
 				for (int i = 0; i < (int)CharaAnimeID::AnimeIDMax; i++) {
