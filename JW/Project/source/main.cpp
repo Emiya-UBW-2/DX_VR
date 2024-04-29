@@ -66,7 +66,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//ŒJ‚è•Ô‚µ
 	while (true) {
 		scene->StartScene();
-
 		while (true) {
 			if (!DrawParts->FirstExecute()) {
 				SaveDataParts->Save();//ƒZ[ƒu
@@ -141,16 +140,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				default:
 					break;
 			}
-			scene->GetNowScene()->Load();
 		}
 		else if (IsReturnTitle) {
 			MAINLOOPscene->Dispose_Load();
 			Customscene->Dispose_Load();
 			Tutorialscene->Dispose_Load();
-			if (!scene->GetNowScene()->isLoading) {
-				scene->GetNowScene()->Load();
-			}
 		}
+		scene->GetNowScene()->Load();
 	}
 	return 0;
 }
