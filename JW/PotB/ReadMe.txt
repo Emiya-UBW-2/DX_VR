@@ -1,4 +1,4 @@
-Phantom of the Bunker Ver 1.0.1　　　　　　笑也 知郎
+Phantom of the Bunker Ver 1.0.3　　　　　　笑也 知郎
 
 このアプリケーションについて
 　　1人向けFPSです。ひたすら敵を倒していきます。
