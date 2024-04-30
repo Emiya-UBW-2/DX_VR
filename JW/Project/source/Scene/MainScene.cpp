@@ -195,6 +195,14 @@ namespace FPS_n2 {
 			m_ResultRankDrawTime = 0.f;
 			m_ResultRank = -1;
 			m_ResultPhase = 0;
+
+			m_SelectBackImage = GraphHandle::Load("data/UI/select.png");
+			ButtonSel.LoadCommon(&m_SelectBackImage);
+
+			ButtonSel.Load_Icon("data/UI/Right.png", true);
+			ButtonSel.Set(y_r(960), y_r(840), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+
+			ButtonSel.SetNone();
 			//ŠJŽnŽž
 			m_StartTime = std::time(nullptr);
 		}
@@ -451,6 +459,8 @@ namespace FPS_n2 {
 				DrawParts->Set_is_lens(false);
 				DrawParts->Set_zoom_lens(1.f);
 			}
+			m_SelectBackImage.Dispose();
+			ButtonSel.Dispose();
 
 			m_MainLoopPauseControl.Dispose();
 #if FALSE
@@ -763,7 +773,6 @@ namespace FPS_n2 {
 					}
 				}
 			}
-
 			if (m_EndTimer < 0.f) {
 				if (Pad->GetKey(PADS::INTERACT).trigger()) {
 					if (m_ResultPhase == 1) {
@@ -771,11 +780,24 @@ namespace FPS_n2 {
 					}
 					m_ResultPhase++;
 				}
+				if (ButtonSel.GetInto()) {
+					if (!ButtonSel.IsFocus()) {
+						ButtonSel.SetFocus();
+					}
+					if (Pad->GetMouseClick().trigger()) {
+						m_EndTimer = 1.f;
+						m_ResultPhase++;
+					}
+				}
+				else {
+					ButtonSel.SetNone();
+				}
 			}
 			else {
 				m_EndTimer = std::max(m_EndTimer - 1.f / FPS, 0.f);
 			}
 #endif
+			ButtonSel.Update();
 			return (m_EndTimer == 0.f);
 		}
 		void			MAINLOOP::UpdateInput(void) noexcept {
@@ -1708,6 +1730,8 @@ namespace FPS_n2 {
 					}
 				}
 			}
+
+			ButtonSel.Draw();
 
 			float per = (1.f - (16.f / 9.f) / 2.35f) / 2.f;
 			DrawBox(0, 0, DrawParts->m_DispXSize, (int)(DrawParts->m_DispYSize * per), Black, TRUE);

@@ -90,6 +90,9 @@ namespace FPS_n2 {
 			std::vector<std::pair<int, int64_t>>			m_Ranking{};
 			int64_t											m_StartTime{0};
 
+			GraphHandle										m_SelectBackImage;
+			ButtonClass										ButtonSel{};
+
 			float											Min = 0.f;
 			float											Gamma = 1.f;
 			float											AberrationPower{1.f};

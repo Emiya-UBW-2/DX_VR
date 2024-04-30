@@ -22,6 +22,7 @@ namespace FPS_n2 {
 				SE->Add((int)SoundEnum::Cocking1_0 + i, 4, "data/Sound/SE/gun/autoM870/" + std::to_string(i) + ".wav");
 				SE->Add((int)SoundEnum::Cocking2_0 + i, 4, "data/Sound/SE/gun/autoM16/" + std::to_string(i) + ".wav");
 				SE->Add((int)SoundEnum::Cocking3_0 + i, 4, "data/Sound/SE/gun/auto1911/" + std::to_string(i) + ".wav");
+				SE->Add((int)SoundEnum::Cocking4_0 + i, 4, "data/Sound/SE/gun/autoAK/" + std::to_string(i) + ".wav");
 			}
 			SE->Add((int)SoundEnum::StandUp, 1, "data/Sound/SE/move/sliding.wav", false);
 			SE->Add((int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
@@ -96,6 +97,7 @@ namespace FPS_n2 {
 				SE->Delete((int)SoundEnum::Cocking1_0 + i);
 				SE->Delete((int)SoundEnum::Cocking2_0 + i);
 				SE->Delete((int)SoundEnum::Cocking3_0 + i);
+				SE->Delete((int)SoundEnum::Cocking4_0 + i);
 			}
 			SE->Delete((int)SoundEnum::RunFoot);
 			SE->Delete((int)SoundEnum::SlideFoot);

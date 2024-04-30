@@ -81,6 +81,13 @@ namespace FPS_n2 {
 			Load3,
 			Shot3_Suppressor,
 			//
+			Cocking4_0,
+			Cocking4_1,
+			Shot4,
+			Unload4,
+			Load4,
+			Shot4_Suppressor,
+			//
 			CartFall,
 			MagFall,
 			Stim,

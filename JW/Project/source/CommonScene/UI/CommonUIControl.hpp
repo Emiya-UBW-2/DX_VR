@@ -65,6 +65,7 @@ namespace FPS_n2 {
 				m_Icon.Dispose();
 			}
 		public:
+			const auto		IsFocus() const noexcept { return m_ButtonStatus == ButtonStatus::Focus; }
 			void			SetNone() noexcept { m_ButtonStatus = ButtonStatus::None; }
 			void			SetReady() noexcept { m_ButtonStatus = ButtonStatus::Ready; }
 			void			SetFocus() noexcept {

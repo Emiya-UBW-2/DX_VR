@@ -13,7 +13,7 @@ RecoilPower=210
 RecoilReturn=0.8
 shottype=FULL
 usehumanAnim=0
-soundsel=0
+soundsel=3
 reloadType=MAG
 
 Slot0Type=Magazine

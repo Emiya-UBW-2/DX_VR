@@ -122,13 +122,22 @@ namespace FPS_n2 {
 				SoundEnum::Load3
 			},
 			{
-				//M4
+				//M870
 				SoundEnum::Cocking1_0,
 				SoundEnum::Cocking1_1,
 				SoundEnum::Shot1,
 				SoundEnum::Shot1_Suppressor,
 				SoundEnum::Unload1,
 				SoundEnum::Load1
+			},
+			{
+				//AK
+				SoundEnum::Cocking4_0,
+				SoundEnum::Cocking4_1,
+				SoundEnum::Shot4,
+				SoundEnum::Shot4_Suppressor,
+				SoundEnum::Unload4,
+				SoundEnum::Load4
 			},
 		};
 		enum class GunSlot {
