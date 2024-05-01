@@ -571,10 +571,10 @@ namespace FPS_n2 {
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			if (!Chara->IsAlive()) { return; }
 			auto* OptionParts = OPTION::Instance();
-			if (OptionParts->Get_EX_UI()) {
+			if (OptionParts->GetParamBoolean(EnumSaveParam::EX_UI)) {
 				DrawHitGraph();			//着弾表示
 			}
-			if (OptionParts->Get_EX_UI2()) {
+			if (OptionParts->GetParamBoolean(EnumSaveParam::EX_UI2)) {
 				DrawSoundGraph();		//サウンド表示
 			}
 			//レティクル表示
@@ -685,7 +685,7 @@ namespace FPS_n2 {
 #if FALSE
 			movie = GraphHandle::Load("data/Movie/end0.mp4");
 			PlayMovieToGraph(movie.get());
-			ChangeMovieVolumeToGraph(std::clamp((int)(255.f*OptionParts->Get_SE()), 0, 255), movie.get());
+			ChangeMovieVolumeToGraph(std::clamp((int)(255.f*OptionParts->GetParamFloat(EnumSaveParam::SE)), 0, 255), movie.get());
 			m_movieTotalFrame = GetMovieTotalFrameToGraph(movie.get());
 #endif
 			PadControl::Instance()->SetGuideUpdate();
@@ -1195,7 +1195,7 @@ namespace FPS_n2 {
 					}
 					//fov
 					{
-						float fov = deg2rad(OptionParts->Get_Fov());
+						float fov = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
 						if (Chara->GetIsADS()) {
 							fov -= deg2rad(15);
 							fov /= std::max(1.f, Chara->GetSightZoomSize() / 2.f);

@@ -172,7 +172,7 @@ namespace FPS_n2 {
 				MATRIX_ref::RotY(KeyControl::GetYRadBottomChange());
 
 			auto* OptionParts = OPTION::Instance();
-			bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->Get_HeadBobbing());
+			bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 			if (HeadBobbing) {
 				tmpUpperMatrix = WalkSwingControl::GetWalkSwingMat() * tmpUpperMatrix;
 			}
@@ -448,7 +448,7 @@ namespace FPS_n2 {
 								if (IsGun0Select() && MagStockControl::GetNeedAmmoLoad(GetGunPtrNow()->GetIsMagFull(), GetGunPtrNow()->GetIsMagEmpty())) {
 									m_CharaAction = CharaActionID::AmmoLoad;
 								}
-								else if(OptionParts->Get_EnableCheck()){
+								else if(OptionParts->GetParamBoolean(EnumSaveParam::EnableCheck)){
 									m_CharaAction = CharaActionID::Watch;
 								}
 							}
@@ -471,7 +471,7 @@ namespace FPS_n2 {
 							if (!IsCheck) {
 								m_CharaAction = CharaActionID::Reload;
 							}
-							else if (OptionParts->Get_EnableCheck()) {
+							else if (OptionParts->GetParamBoolean(EnumSaveParam::EnableCheck)) {
 								m_CharaAction = CharaActionID::Check;
 							}
 						}
@@ -796,7 +796,7 @@ namespace FPS_n2 {
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
 										auto* OptionParts = OPTION::Instance();
-										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->Get_HeadBobbing());
+										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 										if (HeadBobbing) {
 											DrawParts->SetCamShake(0.1f, 1.f);
 										}
@@ -816,7 +816,7 @@ namespace FPS_n2 {
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
 										auto* OptionParts = OPTION::Instance();
-										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->Get_HeadBobbing());
+										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 										if (HeadBobbing) {
 											DrawParts->SetCamShake(0.1f, 1.f);
 										}
@@ -839,7 +839,7 @@ namespace FPS_n2 {
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
 										auto* OptionParts = OPTION::Instance();
-										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->Get_HeadBobbing());
+										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 										if (HeadBobbing) {
 											DrawParts->SetCamShake(0.1f, 1.f);
 										}
@@ -860,7 +860,7 @@ namespace FPS_n2 {
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
 										auto* OptionParts = OPTION::Instance();
-										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->Get_HeadBobbing());
+										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 										if (HeadBobbing) {
 											DrawParts->SetCamShake(0.1f, 1.f);
 										}
@@ -959,7 +959,7 @@ namespace FPS_n2 {
 				this->m_move.vec = KeyControl::GetOverRideInfo().vec;
 			}
 			auto* OptionParts = OPTION::Instance();
-			bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->Get_HeadBobbing());
+			bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 			this->m_move.mat = MATRIX_ref::RotZ(HeadBobbing ? (KeyControl::GetRad().z() / 2.f) : 0.f) * MATRIX_ref::RotY(KeyControl::GetYRadBottom());
 			this->m_move.UpdatePosBuf(this->m_move.posbuf, 0.9f);
 			UpdateMove();

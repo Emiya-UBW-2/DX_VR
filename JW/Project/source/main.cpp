@@ -48,7 +48,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//BGM
 	BGM->Add(0, "data/Sound/BGM/Title.wav");
 	BGM->Add(1, "data/Sound/BGM/Vivaldi_Winter.wav",true);
-	BGM->SetVol(OptionParts->Get_BGM());
+	BGM->SetVol(OptionParts->GetParamFloat(EnumSaveParam::BGM));
 	//ƒV[ƒ“
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto Customscene = std::make_shared<FPS_n2::Sceneclass::CustomScene>();

@@ -92,11 +92,11 @@ namespace FPS_n2 {
 			//
 			m_MainLoopPauseControl.Init();
 
-			m_PrevSSAO = OptionParts->Get_SSAO();
-			OptionParts->Set_SSAO(false);
+			m_PrevSSAO = OptionParts->GetParamBoolean(EnumSaveParam::SSAO);
+			OptionParts->SetParamBoolean(EnumSaveParam::SSAO, false);
 
 			std::string Path = "data/Tutorial_";
-			Path += LanguageStr[OptionParts->Get_Language()];
+			Path += LanguageStr[OptionParts->GetParamInt(EnumSaveParam::Language)];
 			Path += ".txt";
 
 			this->m_TutorialLog.Set();
@@ -259,13 +259,13 @@ namespace FPS_n2 {
 
 			if (DXDraw::Instance()->IsPause()) {
 				m_MainLoopPauseControl.Execute();
-				m_PrevSSAO |= OptionParts->Get_SSAO();
-				OptionParts->Set_SSAO(m_PrevSSAO);
+				m_PrevSSAO |= OptionParts->GetParamBoolean(EnumSaveParam::SSAO);
+				OptionParts->SetParamBoolean(EnumSaveParam::SSAO, m_PrevSSAO);
 				return true;
 			}
 			else {
 				m_MainLoopPauseControl.Reset();
-				OptionParts->Set_SSAO(false);
+				OptionParts->SetParamBoolean(EnumSaveParam::SSAO, false);
 			}
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
@@ -291,7 +291,7 @@ namespace FPS_n2 {
 
 					m_TutorialVoice = SoundHandle::Load(Mes);
 					m_TutorialVoice.play(DX_PLAYTYPE_BACK, TRUE);
-					m_TutorialVoice.vol((int)(255 * OptionParts->Get_SE()));
+					m_TutorialVoice.vol((int)(255 * OptionParts->GetParamFloat(EnumSaveParam::SE)));
 
 					m_TutorialNow++;
 				}
@@ -473,7 +473,7 @@ namespace FPS_n2 {
 					}
 					//fov
 					{
-						float fov = deg2rad(OptionParts->Get_Fov());
+						float fov = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
 						if (Chara->GetIsADS()) {
 							fov -= deg2rad(15);
 							fov /= std::max(1.f, Chara->GetSightZoomSize() / 2.f);
@@ -619,7 +619,7 @@ namespace FPS_n2 {
 			//
 			EffectControl::Dispose();
 
-			OptionParts->Set_SSAO(m_PrevSSAO);
+			OptionParts->SetParamBoolean(EnumSaveParam::SSAO, m_PrevSSAO);
 			this->m_TutorialLog.Dispose();
 
 			ScoreBoard.Dispose();

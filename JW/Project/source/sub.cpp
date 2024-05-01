@@ -81,7 +81,7 @@ namespace FPS_n2 {
 			for (int i = 0; i < 5; i++) {
 				SE->Get((int)SoundEnum::HitGround0 + i).SetVol_Local(92);
 			}
-			SE->SetVol(OptionParts->Get_SE());
+			SE->SetVol(OptionParts->GetParamFloat(EnumSaveParam::SE));
 		}
 		void			CommonBattleResource::Dispose(void) noexcept {
 			auto* SE = SoundPool::Instance();

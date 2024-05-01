@@ -637,7 +637,7 @@ namespace FPS_n2 {
 				yp1 = y_r(1080 - 12 - 24 * 3);
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
 				if (GunPtr) {
-					auto& STR = OptionParts->Get_Language() ? GunPtr->GetModData()->GetInfoEng() : GunPtr->GetModData()->GetInfo();
+					auto& STR = OptionParts->GetParamInt(EnumSaveParam::Language) ? GunPtr->GetModData()->GetInfoEng() : GunPtr->GetModData()->GetInfo();
 					for (auto& s : STR) {
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
 																			  xp1, yp1, Green, DarkGreen, s.c_str());

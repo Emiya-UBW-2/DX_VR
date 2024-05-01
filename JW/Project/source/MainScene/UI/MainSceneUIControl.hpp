@@ -297,7 +297,7 @@ namespace FPS_n2 {
 						++m_ScoreAddSel %= (int)ScoreAdd.size();
 					}
 					auto* OptionParts = OPTION::Instance();
-					if (OptionParts->Get_EX_UI()) {
+					if (OptionParts->GetParamBoolean(EnumSaveParam::EX_UI)) {
 						for (int i = 0; i < (int)ScoreAdd.size(); i++) {
 							auto& s = ScoreAdd[i];
 							if (s.second > 0.f) {
