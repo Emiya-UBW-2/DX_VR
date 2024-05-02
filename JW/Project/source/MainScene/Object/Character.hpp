@@ -53,10 +53,10 @@ namespace FPS_n2 {
 			switchs												m_SightChange;
 			float												m_SoundPower{0.f};			//サウンド
 			int													m_CharaSound{-1};			//サウンド
-			VECTOR_ref											m_RecoilRadAdd;
+			Vector3DX											m_RecoilRadAdd;
 			Pendulum2D											m_SlingZrad;
 			std::array<float, 2>								m_SlingPer;
-			std::array<MATRIX_ref, 2>							m_SlingMat;
+			std::array<Matrix4x4DX, 2>							m_SlingMat;
 			ArmMovePerClass										m_ULTBar;
 			std::shared_ptr<BackGroundClassBase>				m_BackGround;				//BG
 			CharaTypeID											m_CharaType;
@@ -80,9 +80,9 @@ namespace FPS_n2 {
 				m_IsHardMode = value;
 			}
 		private:
-			void			move_RightArm(const VECTOR_ref& GunPos, const VECTOR_ref& Gunyvec, const VECTOR_ref& Gunzvec) noexcept;
-			void			move_LeftArm(const VECTOR_ref& GunPos, const VECTOR_ref& Gunyvec, const VECTOR_ref& Gunzvec) noexcept;
-			const MATRIX_ref GetCharaDir(void) const noexcept;
+			void			move_RightArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept;
+			void			move_LeftArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept;
+			const Matrix4x4DX GetCharaDir(void) const noexcept;
 
 			const auto		GetCharaPosition(void) const noexcept { return this->m_move.posbuf; }
 			const auto		IsAimPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() <= 0.1f); }
@@ -91,7 +91,7 @@ namespace FPS_n2 {
 			void			Shot_Start() noexcept;
 			void			Reload_Start() noexcept;
 		public://ゲッター
-			const MATRIX_ref GetEyeMatrix(void) const noexcept;
+			const Matrix4x4DX GetEyeMatrix(void) const noexcept;
 			const auto&		GetGunSelPer(void) const noexcept { return this->m_ULTBar.Per(); }
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
 			const auto&		GetCharaAction(void) const noexcept { return this->m_CharaAction; }
@@ -113,7 +113,7 @@ namespace FPS_n2 {
 					m_ArmBreak = false;
 				}
 			}
-			const bool		CheckDamageRay(HitPoint* Damage, ArmerPoint* ArmerDamage, bool CheckBodyParts, PlayerID AttackID, const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept;
+			const bool		CheckDamageRay(HitPoint* Damage, ArmerPoint* ArmerDamage, bool CheckBodyParts, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
 			void			LoadExtends() noexcept;
 		private: //更新関連
 			void			ExecuteInput(void) noexcept;
@@ -128,17 +128,17 @@ namespace FPS_n2 {
 		public:
 			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept { this->m_BackGround = backGround; }
 			void			ValueSet(PlayerID pID, bool IsMainGame, CharaTypeID value) noexcept;
-			void			MovePoint(float pxRad, float pyRad, const VECTOR_ref& pPos, int GunSel) noexcept;
+			void			MovePoint(float pxRad, float pyRad, const Vector3DX& pPos, int GunSel) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady) noexcept;
 		public: //継承
 			void			Init(void) noexcept override;
 			void			FirstExecute(void) noexcept override;
 			void			CheckDraw(void) noexcept override {
 				this->m_IsDraw = false;
-				this->m_DistanceToCam = (this->GetObj().GetMatrix().pos() - GetCameraPosition()).size();
+				this->m_DistanceToCam = (this->GetObj().GetMatrix().pos() - GetCameraPosition()).magnitude();
 				if (CheckCameraViewClip_Box(
-					(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-2.5f*Scale_Rate, -0.f*Scale_Rate, -2.5f*Scale_Rate)).get(),
-					(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(2.5f*Scale_Rate, 2.5f*Scale_Rate, 2.5f*Scale_Rate)).get()) == FALSE
+					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-2.5f*Scale_Rate, -0.f*Scale_Rate, -2.5f*Scale_Rate)).get(),
+					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(2.5f*Scale_Rate, 2.5f*Scale_Rate, 2.5f*Scale_Rate)).get()) == FALSE
 					) {
 					this->m_IsDraw |= true;
 				}

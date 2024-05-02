@@ -44,11 +44,11 @@ namespace FPS_n2 {
 			//
 			auto* DrawParts = DXDraw::Instance();
 
-			VECTOR_ref LightVec = VECTOR_ref::vget(-0.4f, -0.5f, 0.1f);
+			Vector3DX LightVec = Vector3DX::vget(-0.4f, -0.5f, 0.1f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.f, 1.f, 1.f, 0.0f));
-			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-6.f, -6.f, -6.f)*Scale_Rate, VECTOR_ref::vget(6.f, 0.5f, 6.f)*Scale_Rate, 0);
-			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-6.f, -6.f, -6.f)*Scale_Rate, VECTOR_ref::vget(6.f, 0.5f, 6.f)*Scale_Rate, 1);
-			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-6.f, -6.f, -6.f)*Scale_Rate, VECTOR_ref::vget(6.f, 0.5f, 6.f)*Scale_Rate, 2);
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-6.f, -6.f, -6.f)*Scale_Rate, Vector3DX::vget(6.f, 0.5f, 6.f)*Scale_Rate, 0);
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-6.f, -6.f, -6.f)*Scale_Rate, Vector3DX::vget(6.f, 0.5f, 6.f)*Scale_Rate, 1);
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-6.f, -6.f, -6.f)*Scale_Rate, Vector3DX::vget(6.f, 0.5f, 6.f)*Scale_Rate, 2);
 			//
 			//
 			DeleteLightHandleAll();
@@ -187,22 +187,22 @@ namespace FPS_n2 {
 			}
 			m_SelAlpha = std::max(m_SelAlpha - 1.f / FPS, 0.f);
 
-			m_UltMat[0] = MATRIX_ref::RotZ(deg2rad(90)) * MATRIX_ref::RotY(deg2rad(0)) *
-				MATRIX_ref::Mtrans(VECTOR_ref::vget(1.1f, 0.95f, 0.f)*Scale_Rate);
-			m_UltMat[1] = MATRIX_ref::RotZ(deg2rad(90)) * MATRIX_ref::RotY(deg2rad(190)) *
-				MATRIX_ref::Mtrans(VECTOR_ref::vget(0.7f, 0.95f, -0.3f)*Scale_Rate);
-			m_UltMat[2] = MATRIX_ref::RotZ(deg2rad(90)) * MATRIX_ref::RotY(deg2rad(-10)) *
-				MATRIX_ref::Mtrans(VECTOR_ref::vget(-0.5f, 0.95f, 0.3f)*Scale_Rate);
-			m_UltMat[3] = MATRIX_ref::RotZ(deg2rad(80)) * MATRIX_ref::RotY(deg2rad(190)) *
-				MATRIX_ref::Mtrans(VECTOR_ref::vget(-0.9f, 0.95f, 0.f)*Scale_Rate);
+			m_UltMat[0] = Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(90)) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(0)) *
+				Matrix4x4DX::Mtrans(Vector3DX::vget(1.1f, 0.95f, 0.f)*Scale_Rate);
+			m_UltMat[1] = Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(90)) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(190)) *
+				Matrix4x4DX::Mtrans(Vector3DX::vget(0.7f, 0.95f, -0.3f)*Scale_Rate);
+			m_UltMat[2] = Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(90)) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(-10)) *
+				Matrix4x4DX::Mtrans(Vector3DX::vget(-0.5f, 0.95f, 0.3f)*Scale_Rate);
+			m_UltMat[3] = Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(80)) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(190)) *
+				Matrix4x4DX::Mtrans(Vector3DX::vget(-0.9f, 0.95f, 0.f)*Scale_Rate);
 			{
 				for (int i = 0;i < (int)ULT_GUN::Max;i++) {
 					auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + i).GetGun(0);
 					auto Per = std::clamp(m_UltPer[i], 0.f, 1.f);
 					if (GunPtr) {
 						GunPtr->SetGunMatrix(
-							Lerp_Matrix(MATRIX_ref::RotY(deg2rad(90)) * MATRIX_ref::RotX(deg2rad(30)), m_UltMat[i].GetRot(), Per)*
-							MATRIX_ref::Mtrans(Lerp(VECTOR_ref::vget(-0.05f, 1.2f, -0.6f)*Scale_Rate, m_UltMat[i].pos(), Per)));
+							Lerp_Matrix(Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(90)) * Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(30)), m_UltMat[i].rotation(), Per)*
+							Matrix4x4DX::Mtrans(Lerp(Vector3DX::vget(-0.05f, 1.2f, -0.6f)*Scale_Rate, m_UltMat[i].pos(), Per)));
 					}
 				}
 			}
@@ -210,19 +210,19 @@ namespace FPS_n2 {
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
 				auto Per = 1.f - std::clamp(m_Range - 1.f, 0.f, 1.f);
 				GunPtr->SetGunMatrix(
-					Lerp_Matrix(MATRIX_ref::RotY(deg2rad(90)) * MATRIX_ref::RotX(deg2rad(30)), MATRIX_ref::RotY(deg2rad(0)), std::clamp(Per*2.f, 0.f, 1.f))*
-					MATRIX_ref::Mtrans(
+					Lerp_Matrix(Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(90)) * Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(30)), Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(0)), std::clamp(Per*2.f, 0.f, 1.f))*
+					Matrix4x4DX::Mtrans(
 						Lerp(
-							Lerp(VECTOR_ref::vget(0.1f, 1.05f, 0.f)*Scale_Rate, VECTOR_ref::vget(0.f, 1.2f, 0.f)*Scale_Rate, std::clamp(Per*2.f, 0.f, 1.f))
-							, VECTOR_ref::vget(0.f, 1.05f, 0.f)*Scale_Rate, std::clamp(Per*2.f - 1.f, 0.f, 1.f))
+							Lerp(Vector3DX::vget(0.1f, 1.05f, 0.f)*Scale_Rate, Vector3DX::vget(0.f, 1.2f, 0.f)*Scale_Rate, std::clamp(Per*2.f, 0.f, 1.f))
+							, Vector3DX::vget(0.f, 1.05f, 0.f)*Scale_Rate, std::clamp(Per*2.f - 1.f, 0.f, 1.f))
 					)
 				);
 				auto Mat = GunPtr->GetFrameWorldMat(GunFrame::Magpos);
 				(*GunPtr->GetMagazinePtr())->SetMove(
-					Lerp_Matrix(Mat.GetRot(), MATRIX_ref::RotZ(deg2rad(90)), std::clamp(Per*2.f - 1.f, 0.f, 1.f)),
+					Lerp_Matrix(Mat.rotation(), Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(90)), std::clamp(Per*2.f - 1.f, 0.f, 1.f)),
 					Lerp(
-						Lerp(Mat.pos(), Mat.pos() + MATRIX_ref::Vtrans(VECTOR_ref::vget(0.f, -0.15f, 0.05f)*Scale_Rate, Mat.GetRot()), std::clamp(Per*2.f, 0.f, 1.f))
-						, VECTOR_ref::vget(0.2f, 1.f, 0.f)*Scale_Rate, std::clamp(Per*2.f - 1.f, 0.f, 1.f))
+						Lerp(Mat.pos(), Mat.pos() + Matrix4x4DX::Vtrans(Vector3DX::vget(0.f, -0.15f, 0.05f)*Scale_Rate, Mat.rotation()), std::clamp(Per*2.f, 0.f, 1.f))
+						, Vector3DX::vget(0.2f, 1.f, 0.f)*Scale_Rate, std::clamp(Per*2.f - 1.f, 0.f, 1.f))
 
 				);
 				(*GunPtr->GetMagazinePtr())->UpdateMove();
@@ -376,11 +376,11 @@ namespace FPS_n2 {
 			ObjMngr->ExecuteObject();
 			ObjMngr->LateExecuteObject();
 
-			VECTOR_ref Pos = VECTOR_ref::vget(0.f, 1.f, 0.f)*Scale_Rate;
+			Vector3DX Pos = Vector3DX::vget(0.f, 1.f, 0.f)*Scale_Rate;
 			DrawParts->SetMainCamera().SetCamPos(
-				Pos + MATRIX_ref::Vtrans(VECTOR_ref::front()*(m_Range*Scale_Rate), MATRIX_ref::RotX(m_Xrad_R)*MATRIX_ref::RotY(m_Yrad_R + DX_PI_F)),
+				Pos + Matrix4x4DX::Vtrans(Vector3DX::forward()*(m_Range*Scale_Rate), Matrix4x4DX::RotAxis(Vector3DX::right(), m_Xrad_R)*Matrix4x4DX::RotAxis(Vector3DX::up(), m_Yrad_R + DX_PI_F)),
 				Pos,
-				VECTOR_ref::vget(0.f, 1.f, 0.f));
+				Vector3DX::vget(0.f, 1.f, 0.f));
 			float far_t = 20.f*Scale_Rate;
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(45), 0.5f*Scale_Rate, far_t);
 			PostPassEffect::Instance()->Set_DoFNearFar(1.f * Scale_Rate, far_t / 2, 0.5f*Scale_Rate, far_t);

@@ -133,9 +133,9 @@ namespace FPS_n2 {
 		private:
 			const auto			CalcCheckSum(void) noexcept {
 				return (
-					((int)(this->m_move.pos.x()*100.f) + (int)(this->m_move.pos.y()*100.f) + (int)(this->m_move.pos.z()*100.f)) +
-					((int)(this->m_move.vec.x()*100.f) + (int)(this->m_move.vec.y()*100.f) + (int)(this->m_move.vec.z()*100.f)) +
-					(int)(rad2deg(this->m_move.rad.y())) +
+					((int)(this->m_move.pos.x*100.f) + (int)(this->m_move.pos.y*100.f) + (int)(this->m_move.pos.z*100.f)) +
+					((int)(this->m_move.vec.x*100.f) + (int)(this->m_move.vec.y*100.f) + (int)(this->m_move.vec.z*100.f)) +
+					(int)(rad2deg(this->m_move.rad.y)) +
 					(int)(ID)
 					);
 			}
@@ -165,8 +165,8 @@ namespace FPS_n2 {
 				tmp.Frame = ServerData.Frame;
 				tmp.Input.SetKeyInputFlags(ServerData.Input);
 				if (isYradReset) {
-					auto radvec = Lerp(MATRIX_ref::RotY(PrevData.m_move.rad.y()).zvec(), MATRIX_ref::RotY(ServerData.m_move.rad.y()).zvec(), Per).Norm();
-					tmp.m_move.rad.y(-atan2f(radvec.x(), radvec.z()));
+					auto radvec = Lerp(Matrix4x4DX::RotAxis(Vector3DX::up(), PrevData.m_move.rad.y).zvec(), Matrix4x4DX::RotAxis(Vector3DX::up(), ServerData.m_move.rad.y).zvec(), Per).normalized();
+					tmp.m_move.rad.y = (-atan2f(radvec.x, radvec.z));
 				}
 				tmp.m_DamageEvents = ServerData.m_DamageEvents;
 				return tmp;
@@ -204,7 +204,7 @@ namespace FPS_n2 {
 				this->m_LeapFrame[pPlayerID] = std::clamp<int>(this->m_LeapFrame[pPlayerID] + 1, 0, Total);
 				return tmp;
 			}
-			virtual void	SetParam(int pPlayerID, const VECTOR_ref& pPos) noexcept {
+			virtual void	SetParam(int pPlayerID, const Vector3DX& pPos) noexcept {
 				this->m_ServerDataCommon.PlayerData[pPlayerID].m_move.pos = pPos;
 				this->m_ServerDataCommon.ServerFrame = 0;
 				this->m_PrevServerData.PlayerData[pPlayerID].m_move.pos = pPos;	// サーバーデータ
@@ -235,7 +235,7 @@ namespace FPS_n2 {
 			std::array<std::pair<NewWorkControl, int>, Player_num - 1>		m_NetWork;
 		public:
 			const auto&		GetServerData(void) const noexcept { return this->m_ServerData; }
-			void			SetParam(int pPlayerID, const VECTOR_ref& pPos) noexcept override {
+			void			SetParam(int pPlayerID, const Vector3DX& pPos) noexcept override {
 				NetWorkControl::SetParam(pPlayerID, pPos);
 				this->m_ServerData.PlayerData[pPlayerID].m_move.pos = this->m_ServerDataCommon.PlayerData[pPlayerID].m_move.pos;
 				this->m_ServerData.PlayerData[pPlayerID].IsActive = false;

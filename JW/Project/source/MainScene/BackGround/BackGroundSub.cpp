@@ -165,7 +165,7 @@ namespace FPS_n2 {
 				}
 			}
 			m_LightControl.Init(MaxCount);
-			VECTOR_ref BasePos;
+			Vector3DX BasePos;
 			int loop = 0;
 			int loopt = 0;
 			for (int y = 0; y < Size; y++) {
@@ -187,7 +187,7 @@ namespace FPS_n2 {
 						if (!isHit) { continue; }
 
 						BasePos = GetPos(x, y);
-						BasePos.yadd(2.65f*Scale_Rate);
+						BasePos.y += (2.65f*Scale_Rate);
 
 						m_LightControl.Set(loop, BasePos, ptr);
 						loop++;
@@ -214,7 +214,7 @@ namespace FPS_n2 {
 				}
 			}
 			m_DrumControl.Init(MaxCount);
-			VECTOR_ref BasePos;
+			Vector3DX BasePos;
 			int loop = 0;
 			int loopt = 0;
 			for (int y = 0; y < Size; y++) {
@@ -238,16 +238,16 @@ namespace FPS_n2 {
 						bool ZM = m_MazeControl.PosIsPath(x, y - 1);
 
 						if (!XP) {
-							BasePos = GetPos(x, y) + VECTOR_ref::vget(tileSize / 4.f, 0.f, 0.f);
+							BasePos = GetPos(x, y) + Vector3DX::vget(tileSize / 4.f, 0.f, 0.f);
 						}
 						if (!XM) {
-							BasePos = GetPos(x, y) + VECTOR_ref::vget(-tileSize / 4.f, 0.f, 0.f);
+							BasePos = GetPos(x, y) + Vector3DX::vget(-tileSize / 4.f, 0.f, 0.f);
 						}
 						if (!ZP) {
-							BasePos = GetPos(x, y) + VECTOR_ref::vget(0.f, 0.f, tileSize / 4.f);
+							BasePos = GetPos(x, y) + Vector3DX::vget(0.f, 0.f, tileSize / 4.f);
 						}
 						if (!ZM) {
-							BasePos = GetPos(x, y) + VECTOR_ref::vget(0.f, 0.f, -tileSize / 4.f);
+							BasePos = GetPos(x, y) + Vector3DX::vget(0.f, 0.f, -tileSize / 4.f);
 						}
 
 
@@ -265,24 +265,24 @@ namespace FPS_n2 {
 		//オクルージョンカリング
 		{
 			auto MyPos = DrawParts->GetMainCamera().GetCamPos();
-			auto MyVec = DrawParts->GetMainCamera().GetCamVec() - MyPos; MyVec.y(0.f); MyVec = MyVec.Norm();
-			auto MyMat = MATRIX_ref::RotY(atan2f(MyVec.x(), MyVec.z())).Inverse();
+			auto MyVec = DrawParts->GetMainCamera().GetCamVec() - MyPos; MyVec.y = (0.f); MyVec = MyVec.normalized();
+			auto MyMat = Matrix4x4DX::RotAxis(Vector3DX::up(), atan2f(MyVec.x, MyVec.z)).inverse();
 
-			auto MinMaxRad = [&](const VECTOR_ref& MaxPos, const VECTOR_ref& MinPos) {
+			auto MinMaxRad = [&](const Vector3DX& MaxPos, const Vector3DX& MinPos) {
 				auto MaxPosA = MaxPos - MyPos;
 				auto MinPosA = MinPos - MyPos;
 				float MinRadA = 10.f;
 				float MaxRadA = -10.f;
 				{
-					auto Pos1 = MATRIX_ref::Vtrans(VECTOR_ref::vget(MaxPosA.x(), 0.f, MaxPosA.z()), MyMat);
-					auto Pos2 = MATRIX_ref::Vtrans(VECTOR_ref::vget(MaxPosA.x(), 0.f, MinPosA.z()), MyMat);
-					auto Pos3 = MATRIX_ref::Vtrans(VECTOR_ref::vget(MinPosA.x(), 0.f, MaxPosA.z()), MyMat);
-					auto Pos4 = MATRIX_ref::Vtrans(VECTOR_ref::vget(MinPosA.x(), 0.f, MinPosA.z()), MyMat);
+					auto Pos1 = Matrix4x4DX::Vtrans(Vector3DX::vget(MaxPosA.x, 0.f, MaxPosA.z), MyMat);
+					auto Pos2 = Matrix4x4DX::Vtrans(Vector3DX::vget(MaxPosA.x, 0.f, MinPosA.z), MyMat);
+					auto Pos3 = Matrix4x4DX::Vtrans(Vector3DX::vget(MinPosA.x, 0.f, MaxPosA.z), MyMat);
+					auto Pos4 = Matrix4x4DX::Vtrans(Vector3DX::vget(MinPosA.x, 0.f, MinPosA.z), MyMat);
 
-					auto rad_1 = atan2f(Pos1.x(), Pos1.z());
-					auto rad_2 = atan2f(Pos2.x(), Pos2.z());
-					auto rad_3 = atan2f(Pos3.x(), Pos3.z());
-					auto rad_4 = atan2f(Pos4.x(), Pos4.z());
+					auto rad_1 = atan2f(Pos1.x, Pos1.z);
+					auto rad_2 = atan2f(Pos2.x, Pos2.z);
+					auto rad_3 = atan2f(Pos3.x, Pos3.z);
+					auto rad_4 = atan2f(Pos4.x, Pos4.z);
 					if (MinRadA > rad_1) { MinRadA = rad_1; }
 					if (MinRadA > rad_2) { MinRadA = rad_2; }
 					if (MinRadA > rad_3) { MinRadA = rad_3; }
@@ -297,24 +297,24 @@ namespace FPS_n2 {
 
 			for (auto& b : this->m_ObjBuilds) {
 				b.EnableChackCam();
-				auto VecB = (b.GetMatrix().pos() - MyPos); VecB.y(0);
-				auto LenB = VecB.Length();
+				auto VecB = (b.GetMatrix().pos() - MyPos); VecB.y = (0);
+				auto LenB = VecB.magnitude();
 				if (LenB > 50.f) {
-					if ((MyVec.dot(VecB.Norm()) > sin(deg2rad(0.f))) && (LenB < 60.f*Scale_Rate)) {
+					if ((Vector3DX::Dot(MyVec, VecB.normalized()) > sin(deg2rad(0.f))) && (LenB < 60.f*Scale_Rate)) {
 						auto RadB = MinMaxRad(b.GetMaxPos(), b.GetMinPos());
 						//壁との判定チェック
 						bool isHit = false;
 						for (int y = 0; y < Size; y++) {
 							for (int x = 0; x < Size; x++) {
 								if (!m_MazeControl.PosIsPath(x, y)) {
-									VECTOR_ref BasePos = GetPos(x, y);
+									Vector3DX BasePos = GetPos(x, y);
 									//
-									auto VecA = (BasePos - MyPos); VecA.y(0.f);
-									auto LenA = VecA.Length();
+									auto VecA = (BasePos - MyPos); VecA.y = (0.f);
+									auto LenA = VecA.magnitude();
 									if (LenA > 50.f) {
 										if (LenA < LenB) {
-											if ((MyVec.dot(VecA.Norm()) > sin(deg2rad(-10.f))) && (LenA < 60.f*Scale_Rate)) {
-												auto RadA = MinMaxRad(BasePos + VECTOR_ref::vget(17.f, 0.f, 17.f), BasePos - VECTOR_ref::vget(17.f, 0.f, 17.f));
+											if ((Vector3DX::Dot(MyVec, VecA.normalized()) > sin(deg2rad(-10.f))) && (LenA < 60.f*Scale_Rate)) {
+												auto RadA = MinMaxRad(BasePos + Vector3DX::vget(17.f, 0.f, 17.f), BasePos - Vector3DX::vget(17.f, 0.f, 17.f));
 
 												//範囲比較
 												if ((RadA.first >= RadB.first) || (RadB.second >= RadA.second)) {

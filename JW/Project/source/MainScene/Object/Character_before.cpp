@@ -100,7 +100,7 @@ namespace FPS_n2 {
 				c->SetItemType(type);
 			}
 		}
-		void ItemPopControl::ItemFallControl::SetFall(const VECTOR_ref& pPos, const VECTOR_ref& pVec) {
+		void ItemPopControl::ItemFallControl::SetFall(const Vector3DX& pPos, const Vector3DX& pVec) {
 			this->m_Ptr[this->m_Now]->SetFall(pPos, pVec);
 			++this->m_Now %= this->m_Ptr.size();
 		}
@@ -118,17 +118,17 @@ namespace FPS_n2 {
 				m_ItemFallControl.at(1).Init(backGround, "data/model/Armer/", ItemType::ARMER);
 			}
 		}
-		void ItemPopControl::SetPop(const VECTOR_ref & pPos) {
+		void ItemPopControl::SetPop(const Vector3DX & pPos) {
 			int Rand = GetRand(99);
 			if (Rand < 45) {
-				m_ItemFallControl.at(0).SetFall(pPos, VECTOR_ref::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
+				m_ItemFallControl.at(0).SetFall(pPos, Vector3DX::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
 			}
 			else if (Rand < 45 + 15) {
-				m_ItemFallControl.at(1).SetFall(pPos, VECTOR_ref::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
+				m_ItemFallControl.at(1).SetFall(pPos, Vector3DX::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
 			}
 			else if (Rand < 45 + 15 + 20) {
-				m_ItemFallControl.at(0).SetFall(pPos, VECTOR_ref::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
-				m_ItemFallControl.at(1).SetFall(pPos, VECTOR_ref::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
+				m_ItemFallControl.at(0).SetFall(pPos, Vector3DX::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
+				m_ItemFallControl.at(1).SetFall(pPos, Vector3DX::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
 			}
 		}
 		void ItemPopControl::DisposeItemPop() noexcept {

@@ -123,22 +123,22 @@ namespace FPS_n2 {
 			const auto& GetIsLoop() const noexcept { return this->m_IsLoop; }
 		};
 		class GunAnimNow {
-			VECTOR_ref		m_Rotate;
-			VECTOR_ref		m_Pos;
+			Vector3DX		m_Rotate;
+			Vector3DX		m_Pos;
 		public:
-			void Set(const VECTOR_ref& Rotate, const VECTOR_ref& Pos) {
+			void Set(const Vector3DX& Rotate, const Vector3DX& Pos) {
 				m_Rotate = Rotate;
 				m_Pos = Pos;
 			}
 		public:
-			const auto	GetRot() const noexcept {
-				return MATRIX_ref::RotY(deg2rad(this->m_Rotate.x())) * MATRIX_ref::RotX(deg2rad(this->m_Rotate.y())) * MATRIX_ref::RotZ(deg2rad(this->m_Rotate.z()));
+			const auto	rotation() const noexcept {
+				return Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(this->m_Rotate.x)) * Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(this->m_Rotate.y)) * Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(this->m_Rotate.z));
 			}
 			const auto GetPos() const noexcept { return this->m_Pos*Scale_Rate; }
 		};
 		class GunAnim {
-			VECTOR_ref		m_Rotate;
-			VECTOR_ref		m_Pos;
+			Vector3DX		m_Rotate;
+			Vector3DX		m_Pos;
 			int				m_Frame{1};
 		public:
 			void Set(const std::string& data) {
@@ -224,7 +224,7 @@ namespace FPS_n2 {
 			}
 
 			static GunAnimNow	GetAnimNow(const AnimDatas* data, float nowframe) noexcept {
-				GunAnimNow Ret; Ret.Set(VECTOR_ref::zero(), VECTOR_ref::zero());
+				GunAnimNow Ret; Ret.Set(Vector3DX::zero(), Vector3DX::zero());
 				if (data) {
 					float totalTime = (float)data->GetTotalTime();
 					if (data->first->GetIsLoop()) {

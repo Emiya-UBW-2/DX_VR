@@ -62,12 +62,12 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			//
-			VECTOR_ref LightVec = VECTOR_ref::vget(0.f, -1.f, 0.f);
+			Vector3DX LightVec = Vector3DX::vget(0.f, -1.f, 0.f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(0.92f, 0.91f, 0.90f, 0.0f));
 			DrawParts->SetIsUpdateShadow(0, false);
-			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-5.f, -3.f, -5.f)*Scale_Rate, VECTOR_ref::vget(5.f, 0.5f, 5.f)*Scale_Rate, 0);
-			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-5.f, -3.f, -5.f)*Scale_Rate, VECTOR_ref::vget(5.f, 0.5f, 5.f)*Scale_Rate, 1);
-			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.f, 10.f)*Scale_Rate, 2);
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-5.f, -3.f, -5.f)*Scale_Rate, Vector3DX::vget(5.f, 0.5f, 5.f)*Scale_Rate, 0);
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-5.f, -3.f, -5.f)*Scale_Rate, Vector3DX::vget(5.f, 0.5f, 5.f)*Scale_Rate, 1);
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.f, 10.f)*Scale_Rate, 2);
 
 			this->m_BackGround = std::make_shared<BackGroundClassMain>();
 			this->m_BackGround->Init("", "");//1.59秒
@@ -97,15 +97,15 @@ namespace FPS_n2 {
 			//人の座標設定
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-				VECTOR_ref pos_t;
+				Vector3DX pos_t;
 				float rad_t = 0.f;
 				if (index == 0) {
-					pos_t = VECTOR_ref::vget(0.f, 0.f, 0.f);
-					VECTOR_ref BGPos_XZ;
+					pos_t = Vector3DX::vget(0.f, 0.f, 0.f);
+					Vector3DX BGPos_XZ;
 					for (auto& C : this->m_BackGround->GetBuildData()) {
 						if (C.GetMeshSel() < 0) { continue; }
-						BGPos_XZ = C.GetMatrix().pos(); BGPos_XZ.y(0.f);
-						if (BGPos_XZ.Length() < 5.f*Scale_Rate) {
+						BGPos_XZ = C.GetMatrix().pos(); BGPos_XZ.y = (0.f);
+						if (BGPos_XZ.magnitude() < 5.f*Scale_Rate) {
 							pos_t = BGPos_XZ;
 							break;
 						}
@@ -114,14 +114,14 @@ namespace FPS_n2 {
 				}
 				else {
 					auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
-					auto TgtPos_XZ = TargetChara->GetMove().pos; TgtPos_XZ.y(0.f);
-					VECTOR_ref BGPos_XZ;
+					auto TgtPos_XZ = TargetChara->GetMove().pos; TgtPos_XZ.y = (0.f);
+					Vector3DX BGPos_XZ;
 					while (true) {
 						auto& C = this->m_BackGround->GetBuildData().at(GetRand((int)(this->m_BackGround->GetBuildData().size()) - 1));
-						BGPos_XZ = C.GetMatrix().pos(); BGPos_XZ.y(0.f);
-						if ((BGPos_XZ - TgtPos_XZ).Length() > 10.f*Scale_Rate) {
-							auto StartPos = TgtPos_XZ + VECTOR_ref::up()*(1.f*Scale_Rate);
-							auto EndPos = BGPos_XZ + VECTOR_ref::up()*(1.f*Scale_Rate);
+						BGPos_XZ = C.GetMatrix().pos(); BGPos_XZ.y = (0.f);
+						if ((BGPos_XZ - TgtPos_XZ).magnitude() > 10.f*Scale_Rate) {
+							auto StartPos = TgtPos_XZ + Vector3DX::up()*(1.f*Scale_Rate);
+							auto EndPos = BGPos_XZ + Vector3DX::up()*(1.f*Scale_Rate);
 							bool CanLookTarget = true;
 							for (auto& C2 : this->m_BackGround->GetBuildData()) {
 								if (C2.GetMeshSel() < 0) { continue; }
@@ -142,8 +142,8 @@ namespace FPS_n2 {
 				}
 
 				/*
-				VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 10.f*Scale_Rate;
-				if (this->m_BackGround->CheckLinetoMap(pos_t + VECTOR_ref::up() * -10.f*Scale_Rate, &EndPos, false)) {
+				Vector3DX EndPos = pos_t + Vector3DX::up() * 10.f*Scale_Rate;
+				if (this->m_BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * -10.f*Scale_Rate, &EndPos, false)) {
 					pos_t = EndPos;
 				}
 				*/
@@ -157,7 +157,7 @@ namespace FPS_n2 {
 			}
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(65), 1.f, 100.f);
-			DrawParts->SetMainCamera().SetCamPos(VECTOR_ref::vget(0, 15, -20), VECTOR_ref::vget(0, 15, 0), VECTOR_ref::vget(0, 1, 0));
+			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 			m_DeathCamYAdd = 0.f;
 			m_DeathPer = 0.f;
 			//サウンド
@@ -541,10 +541,10 @@ namespace FPS_n2 {
 				if (c->GetMyPlayerID() == GetMyPlayerID()) { continue; }
 				//auto pos = c->GetFrameWorldMat(CharaFrame::Upper).pos();
 				auto pos = c->GetMove().pos + c->GetMove().mat.zvec()*-1.f * 5.f*Scale_Rate;
-				VECTOR_ref campos = ConvWorldPosToScreenPos(pos.get());
-				if (0.f < campos.z() && campos.z() < 1.f) {
+				Vector3DX campos = ConvWorldPosToScreenPos(pos.get());
+				if (0.f < campos.z && campos.z < 1.f) {
 					c->SetCameraPosition(campos);
-					c->SetCameraSize(std::max(20.f / ((pos - GetCameraPosition()).size() / 2.f), 0.2f));
+					c->SetCameraSize(std::max(20.f / ((pos - GetCameraPosition()).magnitude() / 2.f), 0.2f));
 				}
 			}
 #ifdef DEBUG
@@ -823,8 +823,8 @@ namespace FPS_n2 {
 				pp_y /= 2.f;
 			}
 			if (Chara->GetGunPtrNow()) {
-				pp_x -= Chara->GetRecoilRadAdd().y();
-				pp_y -= Chara->GetRecoilRadAdd().x();
+				pp_x -= Chara->GetRecoilRadAdd().y;
+				pp_y -= Chara->GetRecoilRadAdd().x;
 			}
 			MyInput.SetInputStart(pp_x, pp_y, Chara->GetRadBuf());
 			MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
@@ -851,7 +851,7 @@ namespace FPS_n2 {
 			moves tmpmove;
 			tmpmove.pos = CharaPtr->GetMove().pos;
 			tmpmove.vec = CharaPtr->GetMove().vec;
-			tmpmove.vec.y(0);
+			tmpmove.vec.y = (0);
 			tmpmove.rad = CharaPtr->GetRadBuf();
 
 			//m_NetWorkBrowser.FirstExecute(MyInput, tmpmove, CharaPtr->GetDamageEvent());
@@ -1016,8 +1016,8 @@ namespace FPS_n2 {
 					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
 					if (a->IsActive()) {
 						//AmmoClass
-						VECTOR_ref repos_tmp = a->GetMove().repos;
-						VECTOR_ref pos_tmp = a->GetMove().pos;
+						Vector3DX repos_tmp = a->GetMove().repos;
+						Vector3DX pos_tmp = a->GetMove().pos;
 
 						if (GetMyPlayerID() != a->GetShootedID()) {
 							if (GetMinLenSegmentToPoint(repos_tmp, pos_tmp, DrawParts->GetMainCamera().GetCamPos()) < 1.f*Scale_Rate) {
@@ -1025,7 +1025,7 @@ namespace FPS_n2 {
 							}
 						}
 
-						VECTOR_ref norm_tmp;
+						Vector3DX norm_tmp;
 						auto ColResGround = this->m_BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, true, &norm_tmp);
 						bool is_HitAll = false;
 						for (int index = 0; index < Chara_num; index++) {
@@ -1075,12 +1075,12 @@ namespace FPS_n2 {
 				if (ammo != nullptr) {
 					auto& a = (std::shared_ptr<ItemObjClass>&)(*ammo);
 					if (a->IsActive()) {
-						VECTOR_ref pos_tmp = a->GetMove().pos;
+						Vector3DX pos_tmp = a->GetMove().pos;
 						bool isHit = false;
 						for (int index = 0; index < Chara_num; index++) {
 							if (index != 0) { break; }
 							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-							float Len = (tgt->GetMove().pos - pos_tmp).Length();
+							float Len = (tgt->GetMove().pos - pos_tmp).magnitude();
 							if (Len < 1.f*Scale_Rate) {
 								switch (a->GetItemType()) {
 									case ItemType::AMMO:
@@ -1129,8 +1129,8 @@ namespace FPS_n2 {
 			for (int index = 0; index < Player_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 				if (c->GetCharaAction() == CharaActionID::Melee) {
-					VECTOR_ref StartPos = c->GetEyeMatrix().pos();
-					VECTOR_ref EndPos = StartPos + c->GetEyeMatrix().zvec() * (-1.f*Scale_Rate);
+					Vector3DX StartPos = c->GetEyeMatrix().pos();
+					Vector3DX EndPos = StartPos + c->GetEyeMatrix().zvec() * (-1.f*Scale_Rate);
 					for (int index2 = 0; index2 < Player_num; index2++) {
 						if (index == index2) { continue; }
 						auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index2).GetChara();
@@ -1153,32 +1153,32 @@ namespace FPS_n2 {
 				{
 					//FPSカメラ
 					if (Chara->IsAlive()) {
-						VECTOR_ref CamPos = Chara->GetEyeMatrix().pos() + DrawParts->GetCamShake();
+						Vector3DX CamPos = Chara->GetEyeMatrix().pos() + DrawParts->GetCamShake();
 						DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeMatrix().zvec() * -1.f, Chara->GetEyeMatrix().yvec());
 						m_DeathCamYAdd = -0.2f;
 					}
 					else {
-						VECTOR_ref CamPos = DrawParts->SetMainCamera().GetCamPos();
-						VECTOR_ref CamVec = DrawParts->SetMainCamera().GetCamVec() - CamPos;
-						VECTOR_ref CamUp = DrawParts->SetMainCamera().GetCamUp();
-						CamPos.yadd(m_DeathCamYAdd);
+						Vector3DX CamPos = DrawParts->SetMainCamera().GetCamPos();
+						Vector3DX CamVec = DrawParts->SetMainCamera().GetCamVec() - CamPos;
+						Vector3DX CamUp = DrawParts->SetMainCamera().GetCamUp();
+						CamPos.y += (m_DeathCamYAdd);
 						if (std::abs(m_DeathCamYAdd) > 0.01f) {
 							m_DeathCamYAdd += (M_GR / (FPS * FPS)) / 2.f;
 						}
 						else {
 							m_DeathCamYAdd = 0.f;
 						}
-						if (CamPos.y() < 0.1f) {
-							CamPos.y(0.1f);
+						if (CamPos.y < 0.1f) {
+							CamPos.y = (0.1f);
 							m_DeathCamYAdd *= -0.2f;
 						}
-						float y = CamVec.y();
+						float y = CamVec.y;
 						Easing(&y, 0.9f, 0.95f, EasingType::OutExpo);
-						CamVec.y(y);
+						CamVec.y = (y);
 
-						float x = CamUp.y();
+						float x = CamUp.y;
 						Easing(&y, 0.2f, 0.95f, EasingType::OutExpo);
-						CamUp.x(x);
+						CamUp.x = (x);
 						DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + CamVec, CamUp);
 					}
 					//info
@@ -1226,7 +1226,7 @@ namespace FPS_n2 {
 				}
 			}
 			{
-				auto Len = (DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(0)).Length();
+				auto Len = (DrawParts->GetMainCamera().GetCamPos() - this->m_BackGround->GetNearestLight(0)).magnitude();
 				auto LenPer = std::clamp(Len / (5.f*Scale_Rate), 0.f, 1.f);
 				bool HPLow = Chara->IsLowHP();
 				Easing(&Min,
@@ -1276,8 +1276,8 @@ namespace FPS_n2 {
 				}
 				//
 				auto mat = c->GetGunPtrNow()->GetFrameWorldMat(GunFrame::LaserSight);
-				VECTOR_ref StartPos = mat.pos();
-				VECTOR_ref EndPos = StartPos + mat.zvec()*-1.f * 15.f*Scale_Rate;
+				Vector3DX StartPos = mat.pos();
+				Vector3DX EndPos = StartPos + mat.zvec()*-1.f * 15.f*Scale_Rate;
 				this->m_BackGround->CheckLinetoMap(StartPos, &EndPos, true);
 				for (int index2 = 0; index2 < Chara_num; index2++) {
 					auto& c2 = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index2).GetChara();
@@ -1287,7 +1287,7 @@ namespace FPS_n2 {
 					c2->CheckLineHitNearest(StartPos, &EndPos);
 				}
 				auto Vec = (EndPos - StartPos);
-				EndPos = StartPos + Vec.Norm()*std::max(Vec.Length() - 0.3f*Scale_Rate, 0.f);
+				EndPos = StartPos + Vec.normalized()*std::max(Vec.magnitude() - 0.3f*Scale_Rate, 0.f);
 				c->SetLaserStartPos(StartPos);
 				c->SetLaserEndPos(EndPos);
 				c->SetIsLaserActive(true);
@@ -1299,11 +1299,11 @@ namespace FPS_n2 {
 			auto* ItemLogParts = GetItemLog::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			{
-				VECTOR_ref StartPos = Chara->GetEyeMatrix().pos();
+				Vector3DX StartPos = Chara->GetEyeMatrix().pos();
 				for (int index = 0; index < Chara_num; index++) {
 					if (index == 0) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-					VECTOR_ref TgtPos = c->GetEyeMatrix().pos();
+					Vector3DX TgtPos = c->GetEyeMatrix().pos();
 					c->CanLookTarget = true;
 					for (auto& C : this->m_BackGround->GetBuildData()) {
 						if (C.GetMeshSel() < 0) { continue; }
@@ -1319,8 +1319,8 @@ namespace FPS_n2 {
 			}
 			{
 				//シェイク
-				this->m_UIclass.SetIntParam(0, (int)(DrawParts->GetCamShake().x()*100.f));
-				this->m_UIclass.SetIntParam(1, (int)(DrawParts->GetCamShake().y()*100.f));
+				this->m_UIclass.SetIntParam(0, (int)(DrawParts->GetCamShake().x*100.f));
+				this->m_UIclass.SetIntParam(1, (int)(DrawParts->GetCamShake().y*100.f));
 				this->m_UIclass.SetIntParam(2, (int)(rad2deg(Chara->GetLeanRad()*5.f)));
 				//AmmoStock
 				this->m_UIclass.SetIntParam(3, Chara->GetAmmoStock());
@@ -1381,7 +1381,7 @@ namespace FPS_n2 {
 			}
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-				VECTOR_ref campos; campos.z(-1.f);
+				Vector3DX campos; campos.z = (-1.f);
 				c->SetCameraPosition(campos);
 			}
 		}
@@ -1394,12 +1394,12 @@ namespace FPS_n2 {
 				int xp = y_r(128);
 				int yp = y_r(128);
 
-				int xp1 = -(int)(15.f + Chara->GetMove().pos.x());
-				int yp1 = (int)(15.f + Chara->GetMove().pos.z());
+				int xp1 = -(int)(15.f + Chara->GetMove().pos.x);
+				int yp1 = (int)(15.f + Chara->GetMove().pos.z);
 
 				float rad = std::atan2f(
-					(Chara->GetEyeMatrix().zvec() * -1.f).cross(VECTOR_ref::front()).y(),
-					(Chara->GetEyeMatrix().zvec() * -1.f).dot(VECTOR_ref::front())
+					Vector3DX::Cross((Chara->GetEyeMatrix().zvec() * -1.f), Vector3DX::forward()).y,
+					Vector3DX::Dot((Chara->GetEyeMatrix().zvec() * -1.f), Vector3DX::forward())
 				);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, 216);
 				this->m_BackGround->GetMapGraph().DrawRotaGraph3(
@@ -1411,14 +1411,14 @@ namespace FPS_n2 {
 					rad, true);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-				VECTOR_ref MyPos = Chara->GetMove().pos;
+				Vector3DX MyPos = Chara->GetMove().pos;
 				for (int index = 0; index < Chara_num; index++) {
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 					if (index == 0) { continue; }
 					if (!c->IsAlive()) { continue; }
 					if (!c->CanLookTarget) { continue; }
-					int xp2 = xp1 + (int)(15.f + c->GetMove().pos.x());
-					int yp2 = yp1 - (int)(15.f + c->GetMove().pos.z());
+					int xp2 = xp1 + (int)(15.f + c->GetMove().pos.x);
+					int yp2 = yp1 - (int)(15.f + c->GetMove().pos.z);
 					DrawCircle(
 						xp + (int)(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
 						yp + (int)(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
@@ -1433,8 +1433,8 @@ namespace FPS_n2 {
 						if (ammo != nullptr) {
 							auto& a = (std::shared_ptr<ItemObjClass>&)(*ammo);
 							if (a->IsActive()) {
-								int xp2 = xp1 + (int)(15.f + a->GetMove().pos.x());
-								int yp2 = yp1 - (int)(15.f + a->GetMove().pos.z());
+								int xp2 = xp1 + (int)(15.f + a->GetMove().pos.x);
+								int yp2 = yp1 - (int)(15.f + a->GetMove().pos.z);
 								DrawCircle(
 									xp + (int)(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
 									yp + (int)(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
@@ -1450,8 +1450,8 @@ namespace FPS_n2 {
 				}
 				{
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
-					int xp2 = xp1 + (int)(15.f + c->GetMove().pos.x());
-					int yp2 = yp1 - (int)(15.f + c->GetMove().pos.z());
+					int xp2 = xp1 + (int)(15.f + c->GetMove().pos.x);
+					int yp2 = yp1 - (int)(15.f + c->GetMove().pos.z);
 					DrawCircle(
 						xp + (int)(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
 						yp + (int)(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
@@ -1469,15 +1469,15 @@ namespace FPS_n2 {
 			int xp = y_r(960);
 			int yp = y_r(540);
 
-			int xp1 = -(int)(Chara->GetMove().pos.x());
-			int yp1 = (int)(Chara->GetMove().pos.z());
+			int xp1 = -(int)(Chara->GetMove().pos.x);
+			int yp1 = (int)(Chara->GetMove().pos.z);
 
 			float rad = std::atan2f(
-				(Chara->GetEyeMatrix().zvec() * -1.f).cross(VECTOR_ref::front()).y(),
-				(Chara->GetEyeMatrix().zvec() * -1.f).dot(VECTOR_ref::front())
+				Vector3DX::Cross((Chara->GetEyeMatrix().zvec() * -1.f), Vector3DX::forward()).y,
+				Vector3DX::Dot((Chara->GetEyeMatrix().zvec() * -1.f), Vector3DX::forward())
 			);
 
-			VECTOR_ref MyPos = Chara->GetMove().pos;
+			Vector3DX MyPos = Chara->GetMove().pos;
 			const int DegDiv = 360 / 5;
 			std::array<std::pair<float, int>, DegDiv> DegPers;
 			for (auto& d : DegPers) {
@@ -1488,9 +1488,9 @@ namespace FPS_n2 {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 				if (index == 0) { continue; }
 				if (!c->IsAlive()) { continue; }
-				float length = (MyPos - c->GetMove().pos).Length() / (50.f*Scale_Rate);
-				float xp2 = (float)(xp1 + (int)(c->GetMove().pos.x()));
-				float yp2 = (float)(yp1 - (int)(c->GetMove().pos.z()));
+				float length = (MyPos - c->GetMove().pos).magnitude() / (50.f*Scale_Rate);
+				float xp2 = (float)(xp1 + (int)(c->GetMove().pos.x));
+				float yp2 = (float)(yp1 - (int)(c->GetMove().pos.z));
 				float len = std::hypotf(xp2, yp2);
 				if (len > 0.f) {
 					xp2 = (xp2 / len);
@@ -1526,10 +1526,10 @@ namespace FPS_n2 {
 				if (index == 0) { continue; }
 				if (!c->IsAlive()) { continue; }
 				if (c->CanLookTarget) {
-					float length = std::max(1.f, 0.5f / std::max((MyPos - c->GetMove().pos).Length() / (100.f*Scale_Rate), 0.1f));
+					float length = std::max(1.f, 0.5f / std::max((MyPos - c->GetMove().pos).magnitude() / (100.f*Scale_Rate), 0.1f));
 
-					float xp2 = (float)(xp1 + (int)(c->GetMove().pos.x()));
-					float yp2 = (float)(yp1 - (int)(c->GetMove().pos.z()));
+					float xp2 = (float)(xp1 + (int)(c->GetMove().pos.x));
+					float yp2 = (float)(yp1 - (int)(c->GetMove().pos.z));
 					float xp3 = (xp2 * std::cos(rad) - yp2 * std::sin(rad));
 					float yp3 = (yp2 * std::cos(rad) + xp2 * std::sin(rad));
 					int rad_3 = (((int)rad2deg(std::atan2f(yp3, xp3)) + 360) % 360);
@@ -1579,30 +1579,30 @@ namespace FPS_n2 {
 					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
 					if (a->m_IsDrawHitUI && a->GetShootedID() == 0) {
 						int			Alpha = (int)(a->m_Hit_alpha * 255.f);
-						VECTOR_ref	DispPos = a->m_Hit_DispPos;
-						if ((Alpha >= 10) && (DispPos.z() >= 0.f && DispPos.z() <= 1.f)) {
+						Vector3DX	DispPos = a->m_Hit_DispPos;
+						if ((Alpha >= 10) && (DispPos.z >= 0.f && DispPos.z <= 1.f)) {
 							SetDrawBlendMode(DX_BLENDMODE_ALPHA, Alpha);
 							//
 							int r = (int)(255 * std::clamp((float)a->m_Damage / 100.f*2.f, 0.f, 1.f));
 							int g = 255 - r;
 							if (a->m_Damage > 0) {
 								SetDrawBright(r, g, 0);
-								hit_Graph.DrawRotaGraph((int)DispPos.x(), (int)DispPos.y(), (float)y_r((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+								hit_Graph.DrawRotaGraph((int)DispPos.x, (int)DispPos.y, (float)y_r((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
 							}
 							if (a->m_ArmerDamage > 0) {
 								SetDrawBright(128, 128, 128);
-								guard_Graph.DrawRotaGraph((int)DispPos.x(), (int)DispPos.y(), (float)y_r((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+								guard_Graph.DrawRotaGraph((int)DispPos.x, (int)DispPos.y, (float)y_r((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
 							}
 							SetDrawBright(255, 255, 255);
 							//
 							if (a->m_Damage > 0) {
 								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-									(int)DispPos.x() + a->m_Hit_AddX, (int)DispPos.y() + a->m_Hit_AddY, GetColor(r, g, 0), Black, "%d", a->m_Damage);
+									(int)DispPos.x + a->m_Hit_AddX, (int)DispPos.y + a->m_Hit_AddY, GetColor(r, g, 0), Black, "%d", a->m_Damage);
 							}
 							//防いだダメージ
 							if (a->m_ArmerDamage > 0) {
 								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(20), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-									(int)DispPos.x() + a->m_Hit_AddX - y_r(10), (int)DispPos.y() + a->m_Hit_AddY, Gray50, Black, "%d", a->m_ArmerDamage);
+									(int)DispPos.x + a->m_Hit_AddX - y_r(10), (int)DispPos.y + a->m_Hit_AddY, Gray50, Black, "%d", a->m_ArmerDamage);
 							}
 						}
 					}

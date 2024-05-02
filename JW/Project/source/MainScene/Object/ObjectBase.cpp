@@ -90,7 +90,7 @@ namespace FPS_n2 {
 					if (compare) {
 						//‚»‚ÌƒtƒŒ[ƒ€‚ð“o˜^
 						this->m_Frames[count].first = frameNum;
-						this->m_Frames[count].second = MATRIX_ref::Mtrans(this->GetObj().GetFrameLocalMatrix(this->m_Frames[count].first).pos());
+						this->m_Frames[count].second = Matrix4x4DX::Mtrans(this->GetObj().GetFrameLocalMatrix(this->m_Frames[count].first).pos());
 					}
 					else if (frameNum < this->GetObj().frame_num() - 1) {
 						continue;//”ò‚Î‚·
@@ -232,8 +232,8 @@ namespace FPS_n2 {
 					}
 					for (int i = 0; i < Max; i++) {
 						this->GetObj().SetMatrix(
-							Lerp_Matrix(this->m_PrevMat.GetRot(), NowMat.GetRot(), (float)(i + 1) / (float)Max)
-							* MATRIX_ref::Mtrans(Lerp(this->m_PrevMat.pos(), NowMat.pos(), (float)(i + 1) / (float)Max)));
+							Lerp_Matrix(this->m_PrevMat.rotation(), NowMat.rotation(), (float)(i + 1) / (float)Max)
+							* Matrix4x4DX::Mtrans(Lerp(this->m_PrevMat.pos(), NowMat.pos(), (float)(i + 1) / (float)Max)));
 						this->GetObj().PhysicsCalculation(1000.0f *60.f / FPS / Max);
 					}
 				}
@@ -249,10 +249,10 @@ namespace FPS_n2 {
 		}
 		void			ObjectBaseClass::CheckDraw(void) noexcept {
 			this->m_IsDraw = false;
-			this->m_DistanceToCam = (this->GetObj().GetMatrix().pos() - GetCameraPosition()).size();
+			this->m_DistanceToCam = (this->GetObj().GetMatrix().pos() - GetCameraPosition()).magnitude();
 			if (CheckCameraViewClip_Box(
-				(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-1.f*Scale_Rate, -0.f*Scale_Rate, -1.f*Scale_Rate)).get(),
-				(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(1.f*Scale_Rate, 1.f*Scale_Rate, 1.f*Scale_Rate)).get()) == FALSE
+				(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-1.f*Scale_Rate, -0.f*Scale_Rate, -1.f*Scale_Rate)).get(),
+				(this->GetObj().GetMatrix().pos() + Vector3DX::vget(1.f*Scale_Rate, 1.f*Scale_Rate, 1.f*Scale_Rate)).get()) == FALSE
 				) {
 				this->m_IsDraw |= true;
 			}
@@ -260,8 +260,8 @@ namespace FPS_n2 {
 		void			ObjectBaseClass::Draw(bool isDrawSemiTrans) noexcept {
 			if (this->m_IsActive && this->m_IsDraw) {
 				if (CheckCameraViewClip_Box(
-					(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-1.f*Scale_Rate, -0.f*Scale_Rate, -1.f*Scale_Rate)).get(),
-					(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(1.f*Scale_Rate, 1.f*Scale_Rate, 1.f*Scale_Rate)).get()) == FALSE
+					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-1.f*Scale_Rate, -0.f*Scale_Rate, -1.f*Scale_Rate)).get(),
+					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(1.f*Scale_Rate, 1.f*Scale_Rate, 1.f*Scale_Rate)).get()) == FALSE
 					) {
 					for (int i = 0; i < this->GetObj().mesh_num(); i++) {
 						if ((MV1GetMeshSemiTransState(this->GetObj().get(), i) == TRUE) == isDrawSemiTrans) {

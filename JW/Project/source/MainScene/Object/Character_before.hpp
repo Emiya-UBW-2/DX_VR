@@ -58,11 +58,11 @@ namespace FPS_n2 {
 			Leg,
 		};
 		class HitBox {
-			VECTOR_ref	m_pos;
+			Vector3DX	m_pos;
 			float		m_radius{0.f};
 			HitType		m_HitType{HitType::Body};
 		public:
-			void	Execute(const VECTOR_ref&pos, float radius, HitType pHitType) {
+			void	Execute(const Vector3DX&pos, float radius, HitType pHitType) {
 				m_pos = pos;
 				m_radius = radius;
 				m_HitType = pHitType;
@@ -88,7 +88,7 @@ namespace FPS_n2 {
 				DrawSphere_3D(m_pos, m_radius, color, color);
 			}
 
-			bool	Colcheck(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
+			bool	Colcheck(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
 				if (HitCheck_Sphere_Capsule(
 					m_pos.get(), m_radius,
 					StartPos.get(), pEndPos->get(), 0.001f*Scale_Rate
@@ -130,7 +130,7 @@ namespace FPS_n2 {
 			const auto		GetHeartRandVec(float SquatPer) const noexcept {
 				auto tmp2 = 0.2f * GetRandf(deg2rad(1.f));
 				auto tmp3 = Lerp(0.5f, 0.15f, SquatPer);
-				VECTOR_ref tmpvec = VECTOR_ref::vget(
+				Vector3DX tmpvec = Vector3DX::vget(
 					tmp2 + 0.00006f * sin(this->m_HeartRateRad) * powf(this->m_HeartRate / HeartRateMin, 3.f),
 					tmp2 + 0.00006f * sin(this->m_HeartRateRad * 3) * powf(this->m_HeartRate / HeartRateMin, 3.f),
 					0.f
@@ -294,7 +294,7 @@ namespace FPS_n2 {
 			float												m_LateLeanRad{0.f};
 			float												m_HeadShotPer{0.f};
 			float												m_MoverPer{0.f};
-			VECTOR_ref											m_VecTotal;
+			Vector3DX											m_VecTotal;
 			std::array<float, 4>								m_Vec{0,0,0,0};
 			InputControl										m_Input;
 			switchs												m_ULTKey;
@@ -303,13 +303,13 @@ namespace FPS_n2 {
 			bool												m_LeanSwitch{false};
 			switchs												m_QKey;
 			switchs												m_EKey;
-			VECTOR_ref											m_rad_Buf, m_rad, m_radAdd;
+			Vector3DX											m_rad_Buf, m_rad, m_radAdd;
 			float												m_yrad_Upper{0.f}, m_yrad_Bottom{0.f};
 			float												m_yrad_UpperChange{0.f}, m_yrad_BottomChange{0.f};
-			VECTOR_ref											m_UpperPrevRad;
-			VECTOR_ref											m_UpperRad;
-			VECTOR_ref											m_UpperyVecNormal, m_UpperzVecNormal;
-			VECTOR_ref											m_UpperyVec, m_UpperzVec, m_UpperPos;
+			Vector3DX											m_UpperPrevRad;
+			Vector3DX											m_UpperRad;
+			Vector3DX											m_UpperyVecNormal, m_UpperzVecNormal;
+			Vector3DX											m_UpperyVec, m_UpperzVec, m_UpperPos;
 			std::array<float, (int)CharaAnimeID::AnimeIDMax>	m_AnimPerBuf{0};
 			bool												m_TurnBody{false};
 
@@ -338,15 +338,15 @@ namespace FPS_n2 {
 			const auto		GetFrontP(void) const noexcept {
 				auto wkey = this->m_Input.GetPADSPress(PADS::MOVE_W);
 				auto skey = this->m_Input.GetPADSPress(PADS::MOVE_S);
-				auto FrontP = (wkey && !skey) ? (atan2f(m_VecTotal.x(), -m_VecTotal.z()) * -m_VecTotal.z()) : 0.f;
-				FrontP += (!wkey && skey) ? (atan2f(-m_VecTotal.x(), m_VecTotal.z()) * m_VecTotal.z()) : 0.f;
+				auto FrontP = (wkey && !skey) ? (atan2f(m_VecTotal.x, -m_VecTotal.z) * -m_VecTotal.z) : 0.f;
+				FrontP += (!wkey && skey) ? (atan2f(-m_VecTotal.x, m_VecTotal.z) * m_VecTotal.z) : 0.f;
 				return FrontP;
 			}
 			const auto		GetLeanRate(void) const noexcept { return this->m_LeanRate; }
 			const auto		GetLeanSwitch(void) const noexcept { return this->m_LeanSwitch; }
 			const auto		GetULTKey(void) const noexcept { return this->m_ULTKey.trigger(); }
 			const auto		GetSquatSwitch(void) const noexcept { return this->m_Squat.trigger(); }
-			const auto		GetGunSwingMat(void) const noexcept { return MATRIX_ref::Axis1_YZ(m_UpperyVec.Norm(), m_UpperzVec.Norm()); }
+			const auto		GetGunSwingMat(void) const noexcept { return Matrix4x4DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
 			auto&			GetCharaAnimeBufID(CharaAnimeID value) noexcept { return this->m_AnimPerBuf.at((int)value); }
 			const auto&			GetOverRideInfo() const noexcept { return this->m_OverRideInfo; }
 			//
@@ -372,11 +372,11 @@ namespace FPS_n2 {
 				}
 			}
 			const auto		GetVec(void) const noexcept {
-				VECTOR_ref vecBuf = m_VecTotal;
+				Vector3DX vecBuf = m_VecTotal;
 				if (m_MoverPer > 0.f) {
-					vecBuf = vecBuf.Norm() * (GetSpeedPer() * 60.f / FPS);
+					vecBuf = vecBuf.normalized() * (GetSpeedPer() * 60.f / FPS);
 				}
-				vecBuf = MATRIX_ref::Vtrans(vecBuf, MATRIX_ref::RotY(this->m_yrad_Upper));
+				vecBuf = Matrix4x4DX::Vtrans(vecBuf, Matrix4x4DX::RotAxis(Vector3DX::up(), this->m_yrad_Upper));
 				return vecBuf;
 			}
 			const auto		GetVecFront(void) const noexcept { return 1.15f * this->m_Vec[0] * std::clamp(GetSpeedPer() / 0.65f, 0.5f, 1.f); }
@@ -389,15 +389,15 @@ namespace FPS_n2 {
 				for (int i = 0; i < 4; i++) {
 					this->m_Vec[i] = 0.f;
 				}
-				this->m_Input.SetInputStart(0.f, 0.f, VECTOR_ref::zero());
-				this->m_radAdd.clear();
-				this->m_rad_Buf.x(pxRad);
-				this->m_rad_Buf.y(pyRad);
+				this->m_Input.SetInputStart(0.f, 0.f, Vector3DX::zero());
+				this->m_radAdd.Set(0, 0, 0);
+				this->m_rad_Buf.x = (pxRad);
+				this->m_rad_Buf.y = (pyRad);
 				this->m_rad = this->m_rad_Buf;
 
 				SetIsSquat(false);
-				this->m_yrad_Upper = this->m_rad.y();
-				this->m_yrad_Bottom = this->m_rad.y();
+				this->m_yrad_Upper = this->m_rad.y;
+				this->m_yrad_Bottom = this->m_rad.y;
 				this->m_yrad_BottomChange = 0.f;
 				this->m_LateLeanRad = 0.f;
 				this->m_LeanRad = 0.f;
@@ -414,17 +414,17 @@ namespace FPS_n2 {
 				if (this->m_PosBufOverRideFlag) {
 					this->m_PosBufOverRideFlag = false;
 
-					float X = this->m_rad_Buf.x();
-					Easing(&X, this->m_OverRideInfo.rad.x(), 0.9f, EasingType::OutExpo);
-					this->m_rad_Buf.x(X);
-					this->m_rad_Buf.y(this->m_OverRideInfo.rad.y());
-					this->m_rad.y(this->m_OverRideInfo.rad.y());
+					float X = this->m_rad_Buf.x;
+					Easing(&X, this->m_OverRideInfo.rad.x, 0.9f, EasingType::OutExpo);
+					this->m_rad_Buf.x = (X);
+					this->m_rad_Buf.y = (this->m_OverRideInfo.rad.y);
+					this->m_rad.y = (this->m_OverRideInfo.rad.y);
 
 					return true;
 				}
 				return false;
 			}
-			void		InputKey(const InputControl& pInput, bool pReady, const VECTOR_ref& pAddRadvec) {
+			void		InputKey(const InputControl& pInput, bool pReady, const Vector3DX& pAddRadvec) {
 				this->m_Input = pInput;
 				if (!pReady) {
 					this->m_Input.ResetKeyInput();
@@ -437,23 +437,23 @@ namespace FPS_n2 {
 				{
 					Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
 
-					this->m_rad_Buf.x(
+					this->m_rad_Buf.x = (
 						std::clamp(
-							this->m_rad_Buf.x() + (this->m_Input.GetAddxRad()*(this->m_Input.GetPADSPress(PADS::RUN) ? 0.5f : 1.f)),
+							this->m_rad_Buf.x + (this->m_Input.GetAddxRad()*(this->m_Input.GetPADSPress(PADS::RUN) ? 0.5f : 1.f)),
 							deg2rad(-70.f), deg2rad(24.f))
-						+ this->m_radAdd.x()
+						+ this->m_radAdd.x
 					);
-					this->m_rad_Buf.y(
-						this->m_rad_Buf.y() + (this->m_Input.GetAddyRad()*(this->m_Input.GetPADSPress(PADS::RUN) ? 0.5f : 1.f))
-						+ this->m_radAdd.y()
+					this->m_rad_Buf.y = (
+						this->m_rad_Buf.y + (this->m_Input.GetAddyRad()*(this->m_Input.GetPADSPress(PADS::RUN) ? 0.5f : 1.f))
+						+ this->m_radAdd.y
 					);
 
-					float X = this->m_rad.x();
-					float Y = this->m_rad.y();
-					float Z = this->m_rad.z();
-					Easing(&X, m_rad_Buf.x(), 0.5f, EasingType::OutExpo);
-					Easing(&Y, m_rad_Buf.y(), 0.8f, EasingType::OutExpo);
-					Easing(&Z, m_rad_Buf.z(), 0.5f, EasingType::OutExpo);
+					float X = this->m_rad.x;
+					float Y = this->m_rad.y;
+					float Z = this->m_rad.z;
+					Easing(&X, m_rad_Buf.x, 0.5f, EasingType::OutExpo);
+					Easing(&Y, m_rad_Buf.y, 0.8f, EasingType::OutExpo);
+					Easing(&Z, m_rad_Buf.z, 0.5f, EasingType::OutExpo);
 					this->m_rad.Set(X, Y, Z);
 				}
 				//à⁄ìÆ
@@ -461,8 +461,8 @@ namespace FPS_n2 {
 				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (this->m_Input.GetPADSPress(PADS::MOVE_A) ? 5.f : -15.f) / FPS, 0.f, 1.f);
 				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (this->m_Input.GetPADSPress(PADS::MOVE_S) ? 5.f : -15.f) / FPS, 0.f, 1.f);
 				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (this->m_Input.GetPADSPress(PADS::MOVE_D) ? 5.f : -15.f) / FPS, 0.f, 1.f);
-				m_VecTotal = VECTOR_ref::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
-				m_MoverPer = m_VecTotal.Length();
+				m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
+				m_MoverPer = m_VecTotal.magnitude();
 				//ÉäÅ[Éì
 				m_LeanSwitch = false;
 				auto Prev = this->m_LeanRate;
@@ -526,22 +526,22 @@ namespace FPS_n2 {
 					m_LeanSwitch = (this->m_LeanRate != 0);
 					this->m_LeanRate = 0;
 				}
-				if (this->m_TurnBody || IsMove()) { Easing(&this->m_yrad_Upper, this->m_rad.y(), 0.85f, EasingType::OutExpo); }
+				if (this->m_TurnBody || IsMove()) { Easing(&this->m_yrad_Upper, this->m_rad.y, 0.85f, EasingType::OutExpo); }
 				auto YradChange = this->m_yrad_Bottom;
 				Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - GetFrontP(), 0.85f, EasingType::OutExpo);
 				YradChange = this->m_yrad_Bottom - YradChange;
-				float Z = this->m_rad_Buf.z();
+				float Z = this->m_rad_Buf.z;
 				Easing(&Z, (abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f, EasingType::OutExpo);
-				this->m_rad_Buf.z(Z);
-				this->m_yrad_UpperChange = this->m_rad.y() - this->m_yrad_Upper;
-				this->m_yrad_BottomChange = this->m_rad.y() - this->m_yrad_Bottom;
+				this->m_rad_Buf.z = (Z);
+				this->m_yrad_UpperChange = this->m_rad.y - this->m_yrad_Upper;
+				this->m_yrad_BottomChange = this->m_rad.y - this->m_yrad_Bottom;
 				Easing(&this->m_LateLeanRad, this->m_LeanRad, 0.9f, EasingType::OutExpo);
 				Easing(&this->m_LeanRad, ((float)(-this->m_LeanRate) + this->m_HeadShotPer)*deg2rad(25), 0.9f, EasingType::OutExpo);
 				Easing(&this->m_HeadShotPer, 0.f, 0.9f, EasingType::OutExpo);
 				//èeÇÃóhÇÍ
 				Easing(&m_UpperRad, (this->m_rad - this->m_UpperPrevRad)*-1.f, 0.9f, EasingType::OutExpo);
 				m_UpperPrevRad = this->m_rad;
-				auto mat = MATRIX_ref::RotX(m_UpperRad.x()) * MATRIX_ref::RotY(m_UpperRad.y());
+				auto mat = Matrix4x4DX::RotAxis(Vector3DX::right(), m_UpperRad.x) * Matrix4x4DX::RotAxis(Vector3DX::up(), m_UpperRad.y);
 				Easing(&m_UpperyVecNormal, mat.yvec(), 0.8f, EasingType::OutExpo);
 				Easing(&m_UpperzVecNormal, mat.zvec(), 0.8f, EasingType::OutExpo);
 				Easing(&m_UpperyVec, m_UpperyVecNormal, 0.8f, EasingType::OutExpo);
@@ -579,20 +579,20 @@ namespace FPS_n2 {
 		class LaserSightClass {
 		private:
 			bool												m_IsLaserActive{false};
-			VECTOR_ref											LaserStartPos;
-			VECTOR_ref											LaserEndPos;
+			Vector3DX											LaserStartPos;
+			Vector3DX											LaserEndPos;
 		public://ÉQÉbÉ^Å[
 			const auto&			GetIsLaserActive() const noexcept { return this->m_IsLaserActive; }
 			void			SetIsLaserActive(bool value) noexcept { m_IsLaserActive = value; }
-			void			SetLaserStartPos(const VECTOR_ref& value) noexcept { LaserStartPos = value; }
-			void			SetLaserEndPos(const VECTOR_ref& value) noexcept { LaserEndPos = value; }
+			void			SetLaserStartPos(const Vector3DX& value) noexcept { LaserStartPos = value; }
+			void			SetLaserEndPos(const Vector3DX& value) noexcept { LaserEndPos = value; }
 
 			void			DrawLaser() noexcept {
 				if (m_IsLaserActive) {
 					/*
 					auto P = LaserEndPos / Scale_Rate;
 					clsDx();
-					printfDx("(%5.2f,%5.2f,%5.2f)\n", P.x(), P.y(), P.z());
+					printfDx("(%5.2f,%5.2f,%5.2f)\n", P.x, P.y, P.z);
 					//*/
 					SetUseLighting(FALSE);
 					SetUseHalfLambertLighting(FALSE);
@@ -612,7 +612,7 @@ namespace FPS_n2 {
 		private:
 			std::vector<HitBox>									m_HitBox;
 		protected:
-			const HitBox*		GetLineHit(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
+			const HitBox*		GetLineHit(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
 				for (auto& h : this->m_HitBox) {
 					if (h.Colcheck(StartPos, pEndPos)) {
 						return &h;
@@ -621,7 +621,7 @@ namespace FPS_n2 {
 				return nullptr;
 			}
 		public:
-			void		CheckLineHitNearest(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) const noexcept {
+			void		CheckLineHitNearest(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
 				for (auto& h : this->m_HitBox) {
 					h.Colcheck(StartPos, pEndPos);
 				}
@@ -651,54 +651,54 @@ namespace FPS_n2 {
 		//ï‡Ç≠éûÇÃóhÇÍ
 		class WalkSwingControl {
 		private:
-			VECTOR_ref											m_WalkSwingRad;
-			VECTOR_ref											m_WalkSwing;
-			VECTOR_ref											m_WalkSwing_p;
-			VECTOR_ref											m_WalkSwing_t;
-			VECTOR_ref											m_PrevPos;
+			Vector3DX											m_WalkSwingRad;
+			Vector3DX											m_WalkSwing;
+			Vector3DX											m_WalkSwing_p;
+			Vector3DX											m_WalkSwing_t;
+			Vector3DX											m_PrevPos;
 		public://ÉQÉbÉ^Å[
 			const auto		GetWalkSwingMat(void) const noexcept {
-				return MATRIX_ref::RotZ(deg2rad(m_WalkSwing.z()*m_WalkSwingRad.z()))*
-					MATRIX_ref::RotX(deg2rad(m_WalkSwing.x()*m_WalkSwingRad.x()));
+				return Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(m_WalkSwing.z*m_WalkSwingRad.z))*
+					Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(m_WalkSwing.x*m_WalkSwingRad.x));
 			}
 		public:
 			WalkSwingControl(void) noexcept {}
 			~WalkSwingControl(void) noexcept {}
 		public:
-			void UpdateWalkSwing(const VECTOR_ref& Pos, float SwingPer)noexcept {
+			void UpdateWalkSwing(const Vector3DX& Pos, float SwingPer)noexcept {
 				m_WalkSwingRad.Set(5.f, 0.f, 10.f);
 				//X
 				{
-					if (m_PrevPos.y() > Pos.y()) {
-						m_WalkSwing_t.x(1.f);
+					if (m_PrevPos.y > Pos.y) {
+						m_WalkSwing_t.x = (1.f);
 					}
 					else {
-						m_WalkSwing_t.x(std::max(m_WalkSwing_t.x() - 15.f / FPS, 0.f));
+						m_WalkSwing_t.x = (std::max(m_WalkSwing_t.x - 15.f / FPS, 0.f));
 					}
 				}
 				//Z
 				{
-					if (m_WalkSwing_t.x() == 1.f) {
-						if (m_WalkSwing_t.z() >= 0.f) {
-							m_WalkSwing_t.z(-1.f);
+					if (m_WalkSwing_t.x == 1.f) {
+						if (m_WalkSwing_t.z >= 0.f) {
+							m_WalkSwing_t.z = (-1.f);
 						}
 						else {
-							m_WalkSwing_t.z(1.f);
+							m_WalkSwing_t.z = (1.f);
 						}
 					}
 				}
 				auto WS_tmp = m_WalkSwing_t * SwingPer;
 				//X
 				{
-					auto tmp = m_WalkSwing_p.x();
-					Easing(&tmp, WS_tmp.x(), (m_WalkSwing_p.x() > WS_tmp.x()) ? 0.6f : 0.9f, EasingType::OutExpo);
-					m_WalkSwing_p.x(tmp);
+					auto tmp = m_WalkSwing_p.x;
+					Easing(&tmp, WS_tmp.x, (m_WalkSwing_p.x > WS_tmp.x) ? 0.6f : 0.9f, EasingType::OutExpo);
+					m_WalkSwing_p.x = (tmp);
 				}
 				//Z
 				{
-					auto tmp = m_WalkSwing_p.z();
-					Easing(&tmp, WS_tmp.z(), 0.95f, EasingType::OutExpo);
-					m_WalkSwing_p.z(tmp);
+					auto tmp = m_WalkSwing_p.z;
+					Easing(&tmp, WS_tmp.z, 0.95f, EasingType::OutExpo);
+					m_WalkSwing_p.z = (tmp);
 				}
 				//
 				m_PrevPos = Pos;
@@ -709,7 +709,7 @@ namespace FPS_n2 {
 		class EyeSwingControl {
 		private:
 			float												m_MoveEyePosTimer{0.f};
-			VECTOR_ref											m_MoveEyePos;
+			Vector3DX											m_MoveEyePos;
 		public://ÉQÉbÉ^Å[
 			const auto&		GetEyeSwingPos(void) const noexcept { return this->m_MoveEyePos; }
 		public:
@@ -719,16 +719,16 @@ namespace FPS_n2 {
 			void InitEyeSwing() noexcept {
 				this->m_MoveEyePosTimer = 0.f;
 			}
-			void UpdateEyeSwing(const MATRIX_ref& pCharaMat, float SwingPer, float SwingSpeed)noexcept {
+			void UpdateEyeSwing(const Matrix4x4DX& pCharaMat, float SwingPer, float SwingSpeed)noexcept {
 				if (SwingPer > 0.f) {
 					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed)*60.f / FPS;
 				}
 				else {
 					this->m_MoveEyePosTimer = 0.f;
 				}
-				auto EyePos = MATRIX_ref::Vtrans(VECTOR_ref::up()*(0.25f*SwingPer), MATRIX_ref::RotZ(this->m_MoveEyePosTimer));
-				EyePos.y(-std::abs(EyePos.y()));
-				Easing(&this->m_MoveEyePos, MATRIX_ref::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
+				auto EyePos = Matrix4x4DX::Vtrans(Vector3DX::up()*(0.25f*SwingPer), Matrix4x4DX::RotAxis(Vector3DX::forward(), this->m_MoveEyePosTimer));
+				EyePos.y = (-std::abs(EyePos.y));
+				Easing(&this->m_MoveEyePos, Matrix4x4DX::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
 			}
 		};
 		//
@@ -759,7 +759,7 @@ namespace FPS_n2 {
 			GunPtrControl(void) noexcept {}
 			~GunPtrControl(void) noexcept {}
 		public:
-			//void UpdateEyeSwing(const MATRIX_ref& pCharaMat, float SwingPer, float SwingSpeed)noexcept {}
+			//void UpdateEyeSwing(const Matrix4x4DX& pCharaMat, float SwingPer, float SwingSpeed)noexcept {}
 			void DisposeGunPtr() noexcept {
 				auto* ObjMngr = ObjectManager::Instance();
 				for (auto& g : m_Gun_Ptr) {
@@ -849,10 +849,10 @@ namespace FPS_n2 {
 			float												m_IsStuckLeftHandTimer{0.f};
 			bool												m_IsStuckLeftHand{false};
 			ArmMovePerClass										m_StuckLeftHand;
-			VECTOR_ref											m_StuckLeftHandPos;
-			VECTOR_ref											m_StuckLeftHandNormal;
-			VECTOR_ref											m_StuckLeftHandPos_R;
-			VECTOR_ref											m_StuckLeftHandYVec;
+			Vector3DX											m_StuckLeftHandPos;
+			Vector3DX											m_StuckLeftHandNormal;
+			Vector3DX											m_StuckLeftHandPos_R;
+			Vector3DX											m_StuckLeftHandYVec;
 		public://ÉQÉbÉ^Å[
 			const auto&		GetStuckLeftHandPos(void) const noexcept { return m_StuckLeftHandPos_R; }
 			const auto&		GetStuckLeftHandYVec(void) const noexcept { return m_StuckLeftHandYVec; }
@@ -876,7 +876,7 @@ namespace FPS_n2 {
 				m_IsStuckLeftHand = false;
 				m_IsStuckLeftHandTimer = 0.f;
 			}
-			void SetStackLeftHand(const VECTOR_ref& Pos, const VECTOR_ref& Normal) {
+			void SetStackLeftHand(const Vector3DX& Pos, const Vector3DX& Normal) {
 				if (m_IsStuckLeftHandTimer >= 0.5f) {
 					if (!m_IsStuckLeftHand) {
 						m_StuckLeftHandPos = Pos;
@@ -885,11 +885,11 @@ namespace FPS_n2 {
 						m_StuckLeftHandYVec = Normal;
 					}
 					else {
-						if ((m_StuckLeftHandPos - Pos).Length() > 0.3f*Scale_Rate) {
+						if ((m_StuckLeftHandPos - Pos).magnitude() > 0.3f*Scale_Rate) {
 							m_StuckLeftHandPos = Pos;
 							m_StuckLeftHandNormal = Normal;
 						}
-						m_StuckLeftHandPos.y(Pos.y());
+						m_StuckLeftHandPos.y = (Pos.y);
 					}
 					m_IsStuckLeftHand = true;
 				}
@@ -941,7 +941,7 @@ namespace FPS_n2 {
 		//
 		class HitReactionControl {
 		private:
-			VECTOR_ref											m_HitAxis{VECTOR_ref::front()};
+			Vector3DX											m_HitAxis{Vector3DX::forward()};
 			float												m_HitPower{0.f};
 			float												m_HitPowerR{0.f};
 		private:
@@ -949,10 +949,10 @@ namespace FPS_n2 {
 			HitReactionControl(void) noexcept {}
 			~HitReactionControl(void) noexcept {}
 		public:
-			const auto GetHitReactionMat() const noexcept { return MATRIX_ref::RotAxis(m_HitAxis, m_HitPowerR*deg2rad(90.f)); }
+			const auto GetHitReactionMat() const noexcept { return Matrix4x4DX::RotAxis(m_HitAxis, m_HitPowerR*deg2rad(90.f)); }
 			const auto IsDamaging(void) const noexcept { return m_HitPower > 0.f; }
 		public:
-			void SetHit(const VECTOR_ref& Axis) noexcept {
+			void SetHit(const Vector3DX& Axis) noexcept {
 				m_HitAxis = Axis;
 				m_HitPower = 1.f;
 			}
@@ -1040,7 +1040,7 @@ namespace FPS_n2 {
 						}
 						else if (p.find("ì™") != std::string::npos && p.find("êÊ") == std::string::npos) {
 							this->head_f.Set(i, obj_);
-							//head_hight = obj_.frame(this->head_f.first).y();
+							//head_hight = obj_.frame(this->head_f.first).y;
 						}
 
 						else if (p.find("âEòr") != std::string::npos && p.find("ùÄ") == std::string::npos) {
@@ -1154,14 +1154,14 @@ namespace FPS_n2 {
 				int												m_Now{0};
 			public:
 				void		Init(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath, ItemType type);
-				void		SetFall(const VECTOR_ref& pPos, const VECTOR_ref& pVec);
+				void		SetFall(const Vector3DX& pPos, const Vector3DX& pVec);
 				void		Dispose() noexcept;
 			};
 		private:
 			std::array<ItemFallControl, 2>						m_ItemFallControl;
 		public:
 			void		RepopItem(const std::shared_ptr<BackGroundClassBase>& backGround);
-			void		SetPop(const VECTOR_ref& pPos);
+			void		SetPop(const Vector3DX& pPos);
 			void		DisposeItemPop() noexcept;
 		};
 	};

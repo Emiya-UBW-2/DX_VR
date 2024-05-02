@@ -108,7 +108,7 @@ namespace FPS_n2 {
 			}
 			return false;
 		}
-		const bool	ModSlotControl::GetPartsFrameLocalMatBySlot(GunFrame frame, MATRIX_ref* pRet) const noexcept {
+		const bool	ModSlotControl::GetPartsFrameLocalMatBySlot(GunFrame frame, Matrix4x4DX* pRet) const noexcept {
 			bool Ret = false;
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
@@ -126,7 +126,7 @@ namespace FPS_n2 {
 			}
 			return Ret;
 		}
-		const bool	ModSlotControl::GetPartsFrameWorldMat(GunFrame frame, MATRIX_ref* pRet) const noexcept {
+		const bool	ModSlotControl::GetPartsFrameWorldMat(GunFrame frame, Matrix4x4DX* pRet) const noexcept {
 			bool Ret = false;
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
@@ -134,9 +134,9 @@ namespace FPS_n2 {
 					*pRet = m->GetFrameWorldMat(frame);
 					if (frame == GunFrame::Sight) {
 						if (m->GetChildFramesNum(frame) > 0) {
-							VECTOR_ref vec = (m->GetChildFrameWorldMat(frame, 0).pos() - pRet->pos()).Norm();
-							//pRet->xvec().cross(vec)
-							*pRet *= MATRIX_ref::RotVec2(pRet->yvec(), vec);
+							Vector3DX vec = (m->GetChildFrameWorldMat(frame, 0).pos() - pRet->pos()).normalized();
+							//Vector3DX::Cross(pRet->xvec(), vec)
+							*pRet *= Matrix4x4DX::RotVec2(pRet->yvec(), vec);
 						}
 					}
 					Ret = true;
@@ -179,7 +179,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		ModSlotControl::SetPartsFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept {
+		void		ModSlotControl::SetPartsFrameLocalMat(GunFrame frame, const Matrix4x4DX&value) noexcept {
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
 					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->SetFrameLocalMat(frame, value);
@@ -225,11 +225,11 @@ namespace FPS_n2 {
 					}
 					Obj->ResetFrameLocalMat(GunFrame::Center);
 					Obj->GetObj().work_anime();
-					Obj->SetFrameLocalMat(GunFrame::Center, Obj->GetFrameLocalMat(GunFrame::Center).GetRot());//1のフレーム移動量を無視する
+					Obj->SetFrameLocalMat(GunFrame::Center, Obj->GetFrameLocalMat(GunFrame::Center).rotation());//1のフレーム移動量を無視する
 				}
 			}
 		}
-		void		ModSlotControl::UpdatePartsMove(const MATRIX_ref& pMat, GunSlot Slot) {
+		void		ModSlotControl::UpdatePartsMove(const Matrix4x4DX& pMat, GunSlot Slot) {
 			if (this->m_Parts_Ptr[(int)Slot]) {
 				auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[(int)Slot]);
 				Obj->SetModMatrix(pMat);

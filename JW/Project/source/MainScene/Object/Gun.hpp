@@ -50,7 +50,7 @@ namespace FPS_n2 {
 			const auto&	GetGunDataClass(void) const noexcept { return (std::shared_ptr<GunDataClass>&)this->GetModData(); }
 			const auto	GetGunSoundSet(void) const noexcept { return GunSoundSets[GetGunDataClass()->GetSoundSel()]; }
 			const auto	GetCartMat(void) noexcept { return GetFrameWorldMat(GunFrame::Cart); }
-			const auto	GetCartVec(void) noexcept { return (GetFrameWorldMat(GunFrame::CartVec).pos() - GetCartMat().pos()).Norm(); }
+			const auto	GetCartVec(void) noexcept { return (GetFrameWorldMat(GunFrame::CartVec).pos() - GetCartMat().pos()).normalized(); }
 			const auto& GetNowAnime(void) noexcept { return GetObj().get_anime((size_t)this->m_GunAnime); }
 			const auto&	GetHumanAnimType(void) const noexcept {
 				if (this->m_LowerPtr && (*this->m_LowerPtr)->GetModData()->GetHumanAnimType() != -1) {
@@ -66,8 +66,8 @@ namespace FPS_n2 {
 			const auto	GetTimePer(GunAnimeID ID) { return  GetAnime(ID).GetTimePer(); }
 
 			const bool	HasFrame(GunFrame frame) const noexcept;
-			const MATRIX_ref GetFrameLocalMat(GunFrame frame) const noexcept;
-			const MATRIX_ref GetFrameWorldMat(GunFrame frame, bool CheckSight = true) const noexcept;
+			const Matrix4x4DX GetFrameLocalMat(GunFrame frame) const noexcept;
+			const Matrix4x4DX GetFrameWorldMat(GunFrame frame, bool CheckSight = true) const noexcept;
 		public://ゲッター
 			const auto& GetReloadType(void) const noexcept { return GetGunDataClass()->GetReloadType(); }
 			const auto GetRecoilPower(void) const noexcept {
@@ -137,7 +137,7 @@ namespace FPS_n2 {
 			const auto	GetReloading(void) const noexcept { return (GunAnimeID::ReloadStart_Empty <= GetGunAnime()) && (GetGunAnime() <= GunAnimeID::ReloadEnd); }
 			const auto	GetChecking(void) const noexcept { return (GunAnimeID::CheckStart <= GetGunAnime()) && (GetGunAnime() <= GunAnimeID::CheckEnd); }
 			const auto	GetEyePos(void) const noexcept {
-				VECTOR_ref Pos;
+				Vector3DX Pos;
 				if (this->m_SightPtr.at(1)) {
 					int Prev = (m_GunSightSel - 1);
 					if (Prev < 0) { Prev = GetSightMax() - 1; }
@@ -165,7 +165,7 @@ namespace FPS_n2 {
 				return Pos;
 			}
 			const auto	GetEyeYVec(void) const noexcept {
-				VECTOR_ref Pos;
+				Vector3DX Pos;
 				if (this->m_SightPtr.at(1)) {
 					int Prev = (m_GunSightSel - 1);
 					if (Prev < 0) { Prev = GetSightMax() - 1; }
@@ -182,9 +182,9 @@ namespace FPS_n2 {
 						Pos = (*m_SightPtr.at(0))->GetFrameWorldMat(GunFrame::Eyepos).yvec();
 					}
 					if (HasFrame(GunFrame::EyeOffsetPos)) {
-						VECTOR_ref vec = GetFrameWorldMat(GunFrame::EyeOffsetPos).yvec();
+						Vector3DX vec = GetFrameWorldMat(GunFrame::EyeOffsetPos).yvec();
 						if (GetChildFramesNum(GunFrame::EyeOffsetPos) > 0) {
-							vec = (GetChildFrameWorldMat(GunFrame::EyeOffsetPos, 0).pos() - GetFrameWorldMat(GunFrame::EyeOffsetPos).pos()).Norm();
+							vec = (GetChildFrameWorldMat(GunFrame::EyeOffsetPos, 0).pos() - GetFrameWorldMat(GunFrame::EyeOffsetPos).pos()).normalized();
 						}
 						if (m_GunSightSel == 0) {
 							Pos = Lerp(vec, Pos, m_GunChangePer);
@@ -242,8 +242,8 @@ namespace FPS_n2 {
 			void		CockByMag() noexcept { this->m_ChamberAmmoData = (*m_MagazinePtr)->GetModData()->GetAmmoSpecMagTop(); }//マガジンの一番上の弾データをチャンバーイン
 			void		UnloadChamber() noexcept { this->m_ChamberAmmoData.reset(); }
 			void		SetShotSwitchOff() noexcept { this->m_ShotSwitch = false; }
-			void		SetGunMatrix(const MATRIX_ref& value) noexcept {
-				SetMove(value.GetRot(), value.pos());
+			void		SetGunMatrix(const Matrix4x4DX& value) noexcept {
+				SetMove(value.rotation(), value.pos());
 				ModSlotControl::UpdatePartsAnim(GetObj());
 				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::UnderRail), GunSlot::UnderRail);
 				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::Lower), GunSlot::Lower);
@@ -255,7 +255,7 @@ namespace FPS_n2 {
 			void		SetMagFall() noexcept {
 				m_MagFall.SetFall(
 					GetFrameWorldMat(GunFrame::Magpos).pos(),
-					GetFrameWorldMat(GunFrame::Magpos).GetRot(),
+					GetFrameWorldMat(GunFrame::Magpos).rotation(),
 					GetFrameWorldMat(GunFrame::Magpos).yvec()*-1.f*(Scale_Rate * 3.f / 60.f),
 					12.f, SoundEnum::MagFall);
 			}
@@ -274,7 +274,7 @@ namespace FPS_n2 {
 				SetGunAnime((!GetIsMagEmpty()) ? GunAnimeID::ReloadStart : GunAnimeID::ReloadStart_Empty);
 			}
 			void		ResetFrameLocalMat(GunFrame frame) noexcept;
-			void		SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept;
+			void		SetFrameLocalMat(GunFrame frame, const Matrix4x4DX&value) noexcept;
 			void		SetActiveAll(bool value) noexcept;
 			void		SetBullet(void) noexcept;//発砲
 			void		UpdateGunAnims(void) noexcept;

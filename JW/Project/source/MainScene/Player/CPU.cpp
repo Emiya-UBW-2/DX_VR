@@ -26,7 +26,7 @@ namespace FPS_n2 {
 					auto& Unit = m_BackGround->GetBuildData().at(PUnit->PolyIndex);
 
 					auto trisdistance = PUnit->TotalDistance +
-						(m_BackGround->GetBuildData().at(Unit.GetLinkPolyIndex(tris)).GetMatrix().pos() + Unit.GetMatrix().pos()).Length();
+						(m_BackGround->GetBuildData().at(Unit.GetLinkPolyIndex(tris)).GetMatrix().pos() + Unit.GetMatrix().pos()).magnitude();
 
 					if (this->TotalDistance > trisdistance) {
 						this->TotalDistance = trisdistance;		// 隣接するポリゴンにここに到達するまでの距離を代入する
@@ -68,7 +68,7 @@ namespace FPS_n2 {
 				}
 			};
 		private:
-			VECTOR_ref GoalPosition;					// 目標位置
+			Vector3DX GoalPosition;					// 目標位置
 			std::vector<PATHPLANNING_UNIT>UnitArray;	// 経路探索処理で使用する全ポリゴンの情報配列が格納されたメモリ領域の先頭メモリアドレスを格納する変数
 			PATHPLANNING_UNIT *StartUnit{nullptr};			// 経路のスタート地点にあるポリゴン情報へのメモリアドレスを格納する変数
 			PATHPLANNING_UNIT *GoalUnit{nullptr};				// 経路のゴール地点にあるポリゴン情報へのメモリアドレスを格納する変数
@@ -76,7 +76,7 @@ namespace FPS_n2 {
 			void		SetBackGround(const std::shared_ptr<BackGroundClassMain>& BackBround_t) noexcept { m_BackGround = BackBround_t; }
 			const auto& GetStartUnit() const noexcept { return this->StartUnit; }
 		public:
-			VECTOR_ref GetNextPoint(const VECTOR_ref& NowPosition, int *TargetPathPlanningIndex) const {
+			Vector3DX GetNextPoint(const Vector3DX& NowPosition, int *TargetPathPlanningIndex) const {
 				int NowIndex = m_BackGround->GetNearestBuilds(NowPosition);
 				if (NowIndex != this->GoalUnit->GetPolyIndex()) {																	// 現在乗っているポリゴンがゴール地点にあるポリゴンの場合は処理を分岐
 					if (NowIndex == *TargetPathPlanningIndex) {													// 現在乗っているポリゴンが移動中間地点のポリゴンの場合は次の中間地点を決定する処理を行う
@@ -98,7 +98,7 @@ namespace FPS_n2 {
 				}
 			}
 		public:
-			bool Init(VECTOR_ref StartPos, VECTOR_ref GoalPos) {
+			bool Init(Vector3DX StartPos, Vector3DX GoalPos) {
 				// 指定の２点の経路を探索する( 戻り値 true:経路構築成功 false:経路構築失敗( スタート地点とゴール地点を繋ぐ経路が無かった等 ) )
 				this->GoalPosition = GoalPos;			// ゴール位置を保存
 
@@ -186,7 +186,7 @@ namespace FPS_n2 {
 		private:
 			bool									IsGotLengthToTarget{true};
 			float									LengthToTarget{0.f};
-			VECTOR_ref								VectorToTarget;
+			Vector3DX								VectorToTarget;
 			float					GetLengthToTarget() {
 				if (IsGotLengthToTarget) {
 					return LengthToTarget;
@@ -199,12 +199,12 @@ namespace FPS_n2 {
 
 				auto MyPos = MyChara->GetEyeMatrix().pos();
 
-				LengthToTarget = (TgtPos - MyPos).Length();
-				VectorToTarget = (TgtPos - MyPos).Norm();
+				LengthToTarget = (TgtPos - MyPos).magnitude();
+				VectorToTarget = (TgtPos - MyPos).normalized();
 
 				return LengthToTarget;
 			}
-			const VECTOR_ref&		GetVectorToTarget() {
+			const Vector3DX&		GetVectorToTarget() {
 				if (IsGotLengthToTarget) {
 					return VectorToTarget;
 				}
@@ -216,8 +216,8 @@ namespace FPS_n2 {
 
 				auto MyPos = MyChara->GetEyeMatrix().pos();
 
-				LengthToTarget = (TgtPos - MyPos).Length();
-				VectorToTarget = (TgtPos - MyPos).Norm();
+				LengthToTarget = (TgtPos - MyPos).magnitude();
+				VectorToTarget = (TgtPos - MyPos).normalized();
 
 				return VectorToTarget;
 			}
@@ -239,16 +239,16 @@ namespace FPS_n2 {
 					std::vector<int> SelList;
 					for (auto& C : this->m_BackGround->GetBuildData()) {
 						if (C.GetMeshSel() < 0) { continue; }
-						auto Vec = C.GetMatrix().pos() - Target; Vec.y(0.f);
-						if (Vec.Length() < 10.f*Scale_Rate) {
+						auto Vec = C.GetMatrix().pos() - Target; Vec.y = (0.f);
+						if (Vec.magnitude() < 10.f*Scale_Rate) {
 							SelList.emplace_back((int)(&C - &this->m_BackGround->GetBuildData().front()));
 						}
 					}
 					Target = this->m_BackGround->GetBuildData().at(SelList.at(GetRand((int)SelList.size() - 1))).GetMatrix().pos();
 				}
 				m_PathChecker.Dispose();
-				auto MyPos_XZ = MyPos; MyPos_XZ.y(0.f);
-				Target.y(0.f);
+				auto MyPos_XZ = MyPos; MyPos_XZ.y = (0.f);
+				Target.y = (0.f);
 				m_PathChecker.Init(MyPos_XZ, Target);	// 指定の２点の経路情報を探索する
 				this->TargetPathPlanningIndex = m_PathChecker.GetStartUnit()->GetPolyIndex();	// 移動開始時点の移動中間地点の経路探索情報もスタート地点にあるポリゴンの情報
 			}
@@ -258,16 +258,16 @@ namespace FPS_n2 {
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
 				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 
-				VECTOR_ref pos_t;
+				Vector3DX pos_t;
 				while (true) {
 					pos_t = this->m_BackGround->GetBuildData().at(GetRand((int)(this->m_BackGround->GetBuildData().size()) - 1)).GetMatrix().pos();
 
-					VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 1.f*Scale_Rate;
+					Vector3DX EndPos = pos_t + Vector3DX::up() * 1.f*Scale_Rate;
 					if (CanRepop) {
-						if ((TgtPos - EndPos).Length() <= 10.f*Scale_Rate) { continue; }
+						if ((TgtPos - EndPos).magnitude() <= 10.f*Scale_Rate) { continue; }
 					}
 					else {
-						if ((TgtPos - EndPos).Length() >= 15.f*Scale_Rate) { continue; }
+						if ((TgtPos - EndPos).magnitude() >= 15.f*Scale_Rate) { continue; }
 					}
 					if (this->m_BackGround->CheckLinetoMap(TgtPos, &EndPos, false)) {
 						break;
@@ -275,8 +275,8 @@ namespace FPS_n2 {
 				}
 
 				/*
-				VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 10.f*Scale_Rate;
-				if (this->m_BackGround->CheckLinetoMap(pos_t + VECTOR_ref::up() * -10.f*Scale_Rate, &EndPos, false)) {
+				Vector3DX EndPos = pos_t + Vector3DX::up() * 10.f*Scale_Rate;
+				if (this->m_BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * -10.f*Scale_Rate, &EndPos, false)) {
 					pos_t = EndPos;
 				}
 				//*/
@@ -285,24 +285,24 @@ namespace FPS_n2 {
 				MyChara->Heal(100, true);
 				this->Reset();
 			}
-			void		AimDir(const VECTOR_ref& VEC) {
+			void		AimDir(const Vector3DX& VEC) {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 
-				auto Vec = VEC; Vec.y(0.f);
+				auto Vec = VEC; Vec.y = (0.f);
 
 				auto Dir = MyChara->GetEyeMatrix().zvec() * -1.f;
-				auto Dir_XZ = Dir; Dir_XZ.y(0.f);
+				auto Dir_XZ = Dir; Dir_XZ.y = (0.f);
 				{
-					VECTOR_ref DirHY; DirHY.Set(Dir_XZ.Length(), 0.f, Dir.y());
-					VECTOR_ref VecHY; VecHY.Set(Vec.Length(), 0.f, VEC.y());
-					auto IsFront = ((DirHY.Norm().dot(VecHY.Norm())) > 0.f);
-					auto cross = DirHY.Norm().cross(VecHY.Norm()).y();
+					Vector3DX DirHY; DirHY.Set(Dir_XZ.magnitude(), 0.f, Dir.y);
+					Vector3DX VecHY; VecHY.Set(Vec.magnitude(), 0.f, VEC.y);
+					auto IsFront = ((Vector3DX::Dot(DirHY.normalized(),VecHY.normalized())) > 0.f);
+					auto cross = Vector3DX::Cross(DirHY.normalized(), VecHY.normalized()).y;
 					m_MyInput.SetAddxRad(IsFront ? (-0.04f*cross) : 0.f);
 				}
 				{
-					auto IsFront = ((Dir_XZ.Norm().dot(Vec.Norm())) > 0.f);
-					auto cross = Dir_XZ.Norm().cross(Vec.Norm()).y();
+					auto IsFront = ((Vector3DX::Dot(Dir_XZ.normalized(),Vec.normalized())) > 0.f);
+					auto cross = Vector3DX::Cross(Dir_XZ.normalized(), Vec.normalized()).y;
 					if (IsFront) {
 						if (abs(cross) < 0.4f) {
 							m_MyInput.SetAddyRad(cross * 0.07f);
@@ -346,7 +346,7 @@ namespace FPS_n2 {
 			//
 			void		Execute_Before(bool CanRepop) noexcept {
 				//初期化
-				m_MyInput.SetInputStart(0, 0, VECTOR_ref::zero());
+				m_MyInput.SetInputStart(0, 0, Vector3DX::zero());
 				IsGotLengthToTarget = false;
 				//前準備
 				m_PathUpdateTimer = std::max(m_PathUpdateTimer - 1.f / FPS, 0.f);
@@ -397,8 +397,8 @@ namespace FPS_n2 {
 				m_MyInput.SetInputPADS(PADS::MOVE_A, GetRand(100) > 50);
 				m_MyInput.SetInputPADS(PADS::MOVE_D, GetRand(100) > 50);
 				//エイム
-				VECTOR_ref Vec = m_PathChecker.GetNextPoint(MyPos, &this->TargetPathPlanningIndex) - MyPos; Vec.y(0.f);
-				AimDir(MATRIX_ref::Vtrans(Vec, MATRIX_ref::RotX(deg2rad(GetRandf(15.f))) * MATRIX_ref::RotY(deg2rad(GetRandf(15.f)))));
+				Vector3DX Vec = m_PathChecker.GetNextPoint(MyPos, &this->TargetPathPlanningIndex) - MyPos; Vec.y = (0.f);
+				AimDir(Matrix4x4DX::Vtrans(Vec, Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(15.f))) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(15.f)))));
 				//
 				if (MyChara->CanLookTarget) {
 					this->m_CheckAgain = 0.f;
@@ -418,7 +418,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				//エイム
-				AimDir(MATRIX_ref::Vtrans(GetVectorToTarget(), MATRIX_ref::RotX(deg2rad(GetRandf(15.f))) * MATRIX_ref::RotY(deg2rad(GetRandf(15.f)))));
+				AimDir(Matrix4x4DX::Vtrans(GetVectorToTarget(), Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(15.f))) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(15.f)))));
 				//リーン
 				m_MyInput.SetInputPADS(PADS::LEAN_L, (this->m_LeanLR == 1));
 				m_MyInput.SetInputPADS(PADS::LEAN_R, (this->m_LeanLR == -1));

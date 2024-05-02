@@ -19,7 +19,7 @@ namespace FPS_n2 {
 			const auto		GetChildFrameWorldMat(GunFrame frame, int ID) const noexcept { return ObjectBaseClass::GetChildFrameWorldMatrix(GetFrame(frame), ID); }
 			const auto		GetFrameWorldMat(GunFrame frame) const noexcept {
 				//ŠY“–ƒtƒŒ[ƒ€‚ª‚ ‚é‚Ì‚È‚çã‘‚«
-				MATRIX_ref Ret;
+				Matrix4x4DX Ret;
 				if (ModSlotControl::GetPartsFrameWorldMat(frame, &Ret)) {
 					return Ret;
 				}
@@ -27,19 +27,19 @@ namespace FPS_n2 {
 					Ret = GetFrameWorldMatrix(GetFrame(frame));
 					if (frame == GunFrame::Sight) {
 						if (GetChildFramesNum(frame) > 0) {
-							VECTOR_ref vec = (GetChildFrameWorldMat(frame, 0).pos() - Ret.pos()).Norm();
-							//pRet->xvec().cross(vec)
-							Ret = (Ret.GetRot()*MATRIX_ref::RotVec2(Ret.yvec(), vec)) * MATRIX_ref::Mtrans(Ret.pos());
+							Vector3DX vec = (GetChildFrameWorldMat(frame, 0).pos() - Ret.pos()).normalized();
+							//Vector3DX::Cross(pRet->xvec(), vec)
+							Ret = (Ret.rotation()*Matrix4x4DX::RotVec2(Ret.yvec(), vec)) * Matrix4x4DX::Mtrans(Ret.pos());
 						}
 					}
 					return Ret;
 				}
-				return MATRIX_ref::zero();
+				return Matrix4x4DX::identity();
 			}
 			void			ResetFrameLocalMat(GunFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }
 			
 
-			void			SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * GetFrameBaseLocalMat(frame)); }
+			void			SetFrameLocalMat(GunFrame frame, const Matrix4x4DX&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * GetFrameBaseLocalMat(frame)); }
 		public:
 			void			Init(void) noexcept override;
 
@@ -47,8 +47,8 @@ namespace FPS_n2 {
 				UpdateMove();
 				FirstExecute_Mod();
 			}
-			void			SetModMatrix(const MATRIX_ref& value) noexcept {
-				SetMove(value.GetRot(), value.pos());
+			void			SetModMatrix(const Matrix4x4DX& value) noexcept {
+				SetMove(value.rotation(), value.pos());
 				ModSlotControl::UpdatePartsAnim(GetObj());
 				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::UnderRail), GunSlot::UnderRail);
 				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::Sight), GunSlot::Sight);
@@ -57,7 +57,7 @@ namespace FPS_n2 {
 			void			DrawShadow(void) noexcept override {
 				if (this->m_IsActive && this->m_IsDraw) {
 					auto* DrawParts = DXDraw::Instance();
-					if ((GetMove().pos - DrawParts->GetMainCamera().GetCamPos()).Length() > 10.f*Scale_Rate) { return; }
+					if ((GetMove().pos - DrawParts->GetMainCamera().GetCamPos()).magnitude() > 10.f*Scale_Rate) { return; }
 					this->m_obj.DrawModel();
 				}
 			}
@@ -65,12 +65,12 @@ namespace FPS_n2 {
 				Draw_Mod(isDrawSemiTrans);
 				if (this->m_IsActive && this->m_IsDraw) {
 					if (CheckCameraViewClip_Box(
-						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-1.f*Scale_Rate, -1.f*Scale_Rate, -1.f*Scale_Rate)).get(),
-						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(1.f*Scale_Rate, 1.f*Scale_Rate, 1.f*Scale_Rate)).get()) == FALSE
+						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-1.f*Scale_Rate, -1.f*Scale_Rate, -1.f*Scale_Rate)).get(),
+						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(1.f*Scale_Rate, 1.f*Scale_Rate, 1.f*Scale_Rate)).get()) == FALSE
 						) {
 						if (!isDrawSemiTrans) {
 							auto* DrawParts = DXDraw::Instance();
-							if ((GetMove().pos - DrawParts->GetMainCamera().GetCamPos()).Length() > 10.f*Scale_Rate) { return; }
+							if ((GetMove().pos - DrawParts->GetMainCamera().GetCamPos()).magnitude() > 10.f*Scale_Rate) { return; }
 							this->m_obj.DrawModel();
 						}
 					}
@@ -92,7 +92,7 @@ namespace FPS_n2 {
 
 		class MagazineClass : public ModClass {
 		private:
-			MATRIX_ref									HandMatrix;
+			Matrix4x4DX									HandMatrix;
 			float										HandPer{0.f};
 			bool										m_isDirect{false};
 		public:
@@ -101,15 +101,15 @@ namespace FPS_n2 {
 		public:
 			void			FirstExecute_Mod(void) noexcept override {
 				if (this->m_isDirect) {
-					SetMove(this->HandMatrix.GetRot(), this->HandMatrix.pos());
+					SetMove(this->HandMatrix.rotation(), this->HandMatrix.pos());
 				}
 				else if (this->HandPer > 0.f) {
-					SetMove(MATRIX_ref::RotX(deg2rad(-30.f*this->HandPer))*GetMove().mat.GetRot(), Lerp(GetMove().pos, this->HandMatrix.pos(), this->HandPer));
+					SetMove(Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(-30.f*this->HandPer))*GetMove().mat.rotation(), Lerp(GetMove().pos, this->HandMatrix.pos(), this->HandPer));
 				}
 			}
 			void			Dispose_Mod(void) noexcept override {}
 		public:
-			void			SetHandMatrix(const MATRIX_ref& value, float pPer, bool isDirect) noexcept {
+			void			SetHandMatrix(const Matrix4x4DX& value, float pPer, bool isDirect) noexcept {
 				this->HandMatrix = value;
 				this->HandPer = pPer;
 				this->m_isDirect = isDirect;
