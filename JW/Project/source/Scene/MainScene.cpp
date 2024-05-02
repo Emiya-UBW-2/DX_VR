@@ -894,7 +894,7 @@ namespace FPS_n2 {
 							}
 						}
 						if (m_LastMan != prevLastMan) {
-							ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(207), m_LastMan);
+							ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "%s %d", LocalizePool::Instance()->Get(207), m_LastMan);
 						}
 					}
 					prevLastMan = m_LastMan;
