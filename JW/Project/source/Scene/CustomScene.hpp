@@ -39,7 +39,7 @@ namespace FPS_n2 {
 			std::array<ButtonClass, 8>	ButtonSel{};
 			int							bselect{0};
 			bool						m_MouseSelMode{false};
-			std::array<MATRIX_ref, (int)ULT_GUN::Max>	m_UltMat;
+			std::array<Matrix4x4DX, (int)ULT_GUN::Max>	m_UltMat;
 			std::array<float, (int)ULT_GUN::Max>	m_UltPer;
 		private:
 

@@ -21,8 +21,8 @@ namespace FPS_n2 {
 			MV1											m_col;
 
 			moves										m_move;
-			MATRIX_ref									m_PrevMat;//物理更新のため
-			std::vector<std::pair<int, MATRIX_ref>>		m_Frames;
+			Matrix4x4DX									m_PrevMat;//物理更新のため
+			std::vector<std::pair<int, Matrix4x4DX>>		m_Frames;
 			std::vector<std::pair<int, float>>			m_Shapes;
 			ObjType										m_objType{(ObjType)0};
 			std::string									m_FilePath;
@@ -37,7 +37,7 @@ namespace FPS_n2 {
 			bool										m_IsDraw{true};
 			float										m_DistanceToCam{0.f};
 			bool										m_IsBaseModel{false};
-			VECTOR_ref									m_CameraPosition;
+			Vector3DX									m_CameraPosition;
 			float										m_CameraSize{0.f};
 			PlayerID									m_MyID{0};									//
 
@@ -71,7 +71,7 @@ namespace FPS_n2 {
 			const auto		GetParentFrameWorldMat(CharaFrame frame) const noexcept { return GetParentFrameWorldMatrix(GetFrame(frame)); }
 		public://セッター キャラ
 			void			ResetFrameLocalMat(CharaFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }
-			void			SetFrameLocalMat(CharaFrame frame, const MATRIX_ref&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * GetFrameBaseLocalMat(frame)); }
+			void			SetFrameLocalMat(CharaFrame frame, const Matrix4x4DX&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * GetFrameBaseLocalMat(frame)); }
 			void			SetShapePer(CharaShape pShape, float Per) noexcept { this->m_Shapes[(int)pShape].second = Per; }
 
 		public:
@@ -95,7 +95,7 @@ namespace FPS_n2 {
 			void			SetActive(bool value) noexcept { this->m_IsActive = value; }
 			void			SetIsDelete(bool value) noexcept { this->m_IsDelete = value; }
 			void			SetResetP(bool value) { this->m_IsResetPhysics = value; }
-			void			SetCameraPosition(const VECTOR_ref& value) { this->m_CameraPosition = value; }
+			void			SetCameraPosition(const Vector3DX& value) { this->m_CameraPosition = value; }
 			void			SetCameraSize(float value) { this->m_CameraSize = value; }
 			void			SetUseShader(ShaderUseClass* value) noexcept { this->m_UseShader = value; }
 			void			SetShaderTexHandle(int id, int value) noexcept { this->m_ShaderTex[id] = value; }
@@ -107,15 +107,15 @@ namespace FPS_n2 {
 				this->GetObj().get_anime(ID).time += 30.f / FPS * speed;
 				if (this->GetObj().get_anime(ID).TimeEnd()) { this->GetObj().get_anime(ID).GoStart(); }
 			}
-			void			ResetMove(const MATRIX_ref& mat, const VECTOR_ref& pos) noexcept {
-				this->m_move.vec.clear();
+			void			ResetMove(const Matrix4x4DX& mat, const Vector3DX& pos) noexcept {
+				this->m_move.vec.Set(0, 0, 0);
 				SetMove(mat, pos);
 			}
 			void			SetMove(const moves& movs) noexcept {
 				this->m_move = movs;
 				UpdateMove();
 			}
-			void			SetMove(const MATRIX_ref& mat, const VECTOR_ref& pos) noexcept {
+			void			SetMove(const Matrix4x4DX& mat, const Vector3DX& pos) noexcept {
 				this->m_move.mat = mat;
 				this->m_move.pos = pos;
 				this->m_move.posbuf = pos;
@@ -130,7 +130,7 @@ namespace FPS_n2 {
 				}
 			}
 			//判定起動
-			const auto		RefreshCol(const VECTOR_ref& StartPos, const VECTOR_ref& EndPos, float pRange) noexcept {
+			const auto		RefreshCol(const Vector3DX& StartPos, const Vector3DX& EndPos, float pRange) noexcept {
 				if (this->m_ColActive) { return true; }				//すでに起動しているなら無視
 				if (GetMinLenSegmentToPoint(StartPos, EndPos, m_move.pos) <= pRange) {
 					//判定起動
@@ -143,8 +143,8 @@ namespace FPS_n2 {
 				return false;
 			}
 			//判定取得
-			const auto		GetColLine(const VECTOR_ref& StartPos, const VECTOR_ref& EndPos, const int sel = 0) const noexcept { return this->m_col.CollCheck_Line(StartPos, EndPos, -1, sel); }
-			void			GetColNearestInAllMesh(const VECTOR_ref& StartPos, VECTOR_ref* EndPos) const noexcept {
+			const auto		GetColLine(const Vector3DX& StartPos, const Vector3DX& EndPos, const int sel = 0) const noexcept { return this->m_col.CollCheck_Line(StartPos, EndPos, -1, sel); }
+			void			GetColNearestInAllMesh(const Vector3DX& StartPos, Vector3DX* EndPos) const noexcept {
 				MV1_COLL_RESULT_POLY colres;
 				for (int i = 0; i < this->m_col.mesh_num(); ++i) {
 					colres = GetColLine(StartPos, *EndPos, i);

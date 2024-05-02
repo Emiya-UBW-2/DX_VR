@@ -45,7 +45,7 @@ namespace FPS_n2 {
 						break;
 				}
 				if (this->m_IsEject && (this->m_IsEject != Prev)) {
-					m_CartFall.SetFall(GetCartMat().pos(), GetFrameWorldMat(GunFrame::Muzzle).GetRot(), GetCartVec()*(Scale_Rate * 2.f / 60.f), 2.f, SoundEnum::CartFall);
+					m_CartFall.SetFall(GetCartMat().pos(), GetFrameWorldMat(GunFrame::Muzzle).rotation(), GetCartVec()*(Scale_Rate * 2.f / 60.f), 2.f, SoundEnum::CartFall);
 				}
 			}
 		}
@@ -206,7 +206,7 @@ namespace FPS_n2 {
 			}
 			return false;
 		}
-		const MATRIX_ref	GunClass::GetFrameLocalMat(GunFrame frame) const noexcept {
+		const Matrix4x4DX	GunClass::GetFrameLocalMat(GunFrame frame) const noexcept {
 			//該当フレームがあるのなら上書き
 			if (m_SightPtr.at(m_GunSightSel)) {
 				switch (frame) {
@@ -218,16 +218,16 @@ namespace FPS_n2 {
 						break;
 				}
 			}
-			MATRIX_ref Ret;
+			Matrix4x4DX Ret;
 			if (ModSlotControl::GetPartsFrameLocalMatBySlot(frame, &Ret)) {
 				return Ret;
 			}
 			if (HaveFrame(frame)) {
 				return GetFrameLocalMatrix(GetFrame(frame));
 			}
-			return MATRIX_ref::zero();
+			return Matrix4x4DX::identity();
 		}
-		const MATRIX_ref	GunClass::GetFrameWorldMat(GunFrame frame, bool CheckSight) const noexcept {
+		const Matrix4x4DX	GunClass::GetFrameWorldMat(GunFrame frame, bool CheckSight) const noexcept {
 			//該当フレームがあるのなら上書き
 			if (m_SightPtr.at(m_GunSightSel) && CheckSight) {
 				switch (frame) {
@@ -239,14 +239,14 @@ namespace FPS_n2 {
 						break;
 				}
 			}
-			MATRIX_ref Ret;
+			Matrix4x4DX Ret;
 			if (ModSlotControl::GetPartsFrameWorldMat(frame, &Ret)) {
 				return Ret;
 			}
 			if (HaveFrame(frame)) {
 				return GetFrameWorldMatrix(GetFrame(frame));
 			}
-			return MATRIX_ref::zero();
+			return Matrix4x4DX::identity();
 		}
 
 		void				GunClass::ResetFrameLocalMat(GunFrame frame) noexcept {
@@ -255,7 +255,7 @@ namespace FPS_n2 {
 				GetObj().frame_Reset(GetFrame(frame));
 			}
 		}
-		void				GunClass::SetFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept {
+		void				GunClass::SetFrameLocalMat(GunFrame frame, const Matrix4x4DX&value) noexcept {
 			ModSlotControl::SetPartsFrameLocalMat(frame, value);
 			if (HaveFrame(frame)) {
 				GetObj().SetFrameLocalMatrix(GetFrame(frame), value * this->GetFrameBaseLocalMat(frame));
@@ -295,8 +295,8 @@ namespace FPS_n2 {
 				auto& LastAmmo = (std::shared_ptr<AmmoClass>&)(*ObjMngr->MakeObject(ObjType::Ammo));
 				LastAmmo->Init();
 				auto mat =
-					MATRIX_ref::RotY(deg2rad(GetRandf(this->m_ChamberAmmoData->GetAccuracy()))) *
-					MATRIX_ref::RotX(deg2rad(GetRandf(this->m_ChamberAmmoData->GetAccuracy()))) *
+					Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(this->m_ChamberAmmoData->GetAccuracy()))) *
+					Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(this->m_ChamberAmmoData->GetAccuracy()))) *
 					GetFrameWorldMat(GunFrame::Muzzle);
 				LastAmmo->Put(this->m_ChamberAmmoData, mat.pos(), mat.zvec() * -1.f, m_MyID);
 			}
@@ -463,7 +463,7 @@ namespace FPS_n2 {
 			ReticleControl::UpdateReticleControl(
 				LensPos,
 				GetFrameWorldMat(GunFrame::LensSize).pos(),
-				LensPos + (LensPos - GetEyePos()).Norm()*(5.f*Scale_Rate));
+				LensPos + (LensPos - GetEyePos()).normalized()*(5.f*Scale_Rate));
 		}
 
 		void				GunClass::Init(void) noexcept {
@@ -590,7 +590,7 @@ namespace FPS_n2 {
 			{
 				ResetFrameLocalMat(GunFrame::Center);
 				GetObj().work_anime();
-				SetFrameLocalMat(GunFrame::Center, GetFrameLocalMat(GunFrame::Center).GetRot());//1のフレーム移動量を無視する
+				SetFrameLocalMat(GunFrame::Center, GetFrameLocalMat(GunFrame::Center).rotation());//1のフレーム移動量を無視する
 			}
 			//
 			Easing(&m_GunChangePer, 1.f, 0.8f, EasingType::OutExpo);
@@ -600,15 +600,15 @@ namespace FPS_n2 {
 		void				GunClass::DrawShadow(void) noexcept {
 			if (this->m_IsActive && this->m_IsDraw) {
 				auto* DrawParts = DXDraw::Instance();
-				if ((GetMove().pos - DrawParts->GetMainCamera().GetCamPos()).Length() > 10.f*Scale_Rate) { return; }
+				if ((GetMove().pos - DrawParts->GetMainCamera().GetCamPos()).magnitude() > 10.f*Scale_Rate) { return; }
 				this->GetObj().DrawModel();
 			}
 		}
 		void				GunClass::Draw(bool isDrawSemiTrans) noexcept {
 			if (this->m_IsActive && this->m_IsDraw) {
 				if (CheckCameraViewClip_Box(
-					(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-0.5f*Scale_Rate, -0.5f*Scale_Rate, -0.5f*Scale_Rate)).get(),
-					(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(0.5f*Scale_Rate, 0.5f*Scale_Rate, 0.5f*Scale_Rate)).get()) == FALSE
+					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-0.5f*Scale_Rate, -0.5f*Scale_Rate, -0.5f*Scale_Rate)).get(),
+					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(0.5f*Scale_Rate, 0.5f*Scale_Rate, 0.5f*Scale_Rate)).get()) == FALSE
 					) {
 					if (isDrawSemiTrans) {
 #if HIGH_FPS_ROM

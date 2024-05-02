@@ -25,7 +25,7 @@ namespace FPS_n2 {
 					(*Ptr)->Init();
 				}
 			}
-			void		SetFall(const VECTOR_ref& pPos, const MATRIX_ref& pMat, const VECTOR_ref& pVec, float time, SoundEnum sound) {
+			void		SetFall(const Vector3DX& pPos, const Matrix4x4DX& pMat, const Vector3DX& pVec, float time, SoundEnum sound) {
 				this->m_Ptr[this->m_Now]->SetFall(pPos, pMat, pVec, time, sound);
 				++this->m_Now %= this->m_Ptr.size();
 			}
@@ -41,21 +41,21 @@ namespace FPS_n2 {
 		//
 		class MuzzleSmokeControl {
 		private://キャラパラメーター
-			std::array<VECTOR_ref, 8>		m_Line;
+			std::array<Vector3DX, 8>		m_Line;
 			int								m_LineSel = 0;
 			float							m_LinePer{0.f};
 		private:
 		public://ゲッター
 			void			AddMuzzleSmokePower() noexcept { m_LinePer = std::clamp(m_LinePer + 0.1f, 0.f, 1.f); }
 		protected:
-			void		InitMuzzleSmoke(const VECTOR_ref& pPos) {
+			void		InitMuzzleSmoke(const Vector3DX& pPos) {
 				for (auto& l : this->m_Line) {
 					l = pPos;
 				}
 			}
-			void		ExecuteMuzzleSmoke(const VECTOR_ref& pPos) {
+			void		ExecuteMuzzleSmoke(const Vector3DX& pPos) {
 				for (auto& l : this->m_Line) {
-					l += VECTOR_ref::vget(
+					l += Vector3DX::vget(
 						GetRandf(0.1f*Scale_Rate / FPS),
 						0.4f*Scale_Rate / FPS + GetRandf(0.1f*Scale_Rate / FPS),
 						GetRandf(0.1f*Scale_Rate) / FPS);
@@ -115,16 +115,16 @@ namespace FPS_n2 {
 		public:
 			const auto&	GetPartsPtr(GunSlot Slot) const noexcept { return this->m_Parts_Ptr[(int)Slot]; }
 			const bool	HasFrameBySlot(GunFrame frame) const noexcept;
-			const bool	GetPartsFrameLocalMatBySlot(GunFrame frame, MATRIX_ref* pRet) const noexcept;
-			const bool	GetPartsFrameWorldMat(GunFrame frame, MATRIX_ref* pRet) const noexcept;
+			const bool	GetPartsFrameLocalMatBySlot(GunFrame frame, Matrix4x4DX* pRet) const noexcept;
+			const bool	GetPartsFrameWorldMat(GunFrame frame, Matrix4x4DX* pRet) const noexcept;
 
 			void		ResetPartsFrameLocalMat(GunFrame frame) noexcept;
-			void		SetPartsFrameLocalMat(GunFrame frame, const MATRIX_ref&value) noexcept;
+			void		SetPartsFrameLocalMat(GunFrame frame, const Matrix4x4DX&value) noexcept;
 			void		GetChildPartsList(std::vector<const SharedObj*>* Ret) const noexcept;
 			void		SetActiveBySlot(bool value) noexcept;
 		public:
 			void		UpdatePartsAnim(const MV1& pParent);
-			void		UpdatePartsMove(const MATRIX_ref& pMat, GunSlot Slot);
+			void		UpdatePartsMove(const Matrix4x4DX& pMat, GunSlot Slot);
 		};
 
 		class ReticleControl {
@@ -138,21 +138,21 @@ namespace FPS_n2 {
 			ReticleControl() {}
 			~ReticleControl() {}
 		public:
-			void UpdateReticleControl(const VECTOR_ref& LensPos, const VECTOR_ref& LensPos2, const VECTOR_ref& ReticlePos) noexcept {
-				VECTOR_ref LensPosBuf = ConvWorldPosToScreenPos(LensPos.get());
-				if (!(0.f < LensPosBuf.z() && LensPosBuf.z() < 1.f)) {
+			void UpdateReticleControl(const Vector3DX& LensPos, const Vector3DX& LensPos2, const Vector3DX& ReticlePos) noexcept {
+				Vector3DX LensPosBuf = ConvWorldPosToScreenPos(LensPos.get());
+				if (!(0.f < LensPosBuf.z && LensPosBuf.z < 1.f)) {
 					return;
 				}
-				Lens_xpos = LensPosBuf.x();
-				Lens_ypos = LensPosBuf.y();
-				VECTOR_ref LensSizeBuf = ConvWorldPosToScreenPos(LensPos2.get());
-				if (0.f < LensSizeBuf.z() && LensSizeBuf.z() < 1.f) {
-					LensSize = std::hypotf(Lens_xpos - LensSizeBuf.x(), Lens_ypos - LensSizeBuf.y());
+				Lens_xpos = LensPosBuf.x;
+				Lens_ypos = LensPosBuf.y;
+				Vector3DX LensSizeBuf = ConvWorldPosToScreenPos(LensPos2.get());
+				if (0.f < LensSizeBuf.z && LensSizeBuf.z < 1.f) {
+					LensSize = std::hypotf(Lens_xpos - LensSizeBuf.x, Lens_ypos - LensSizeBuf.y);
 				}
-				VECTOR_ref ReticlePosBuf = ConvWorldPosToScreenPos(ReticlePos.get());
-				if (0.f < ReticlePosBuf.z() && ReticlePosBuf.z() < 1.f) {
-					Reticle_xpos = ReticlePosBuf.x();
-					Reticle_ypos = ReticlePosBuf.y();
+				Vector3DX ReticlePosBuf = ConvWorldPosToScreenPos(ReticlePos.get());
+				if (0.f < ReticlePosBuf.z && ReticlePosBuf.z < 1.f) {
+					Reticle_xpos = ReticlePosBuf.x;
+					Reticle_ypos = ReticlePosBuf.y;
 					Reticle_on = (LensSize > std::hypotf(Lens_xpos - Reticle_xpos, Lens_ypos - Reticle_ypos));
 				}
 			}

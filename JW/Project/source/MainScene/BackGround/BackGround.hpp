@@ -24,10 +24,10 @@ namespace FPS_n2 {
 			virtual void			DrawFront_Sub(void) noexcept {}
 			//
 			virtual void			Dispose_Sub(void) noexcept {}
-			virtual bool			CheckLinetoMap_Sub(const VECTOR_ref&, VECTOR_ref*, bool, VECTOR_ref*, MV1_COLL_RESULT_POLY*) const noexcept { return false; }
+			virtual bool			CheckLinetoMap_Sub(const Vector3DX&, Vector3DX*, bool, Vector3DX*, MV1_COLL_RESULT_POLY*) const noexcept { return false; }
 		public://
 			const auto&		GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
-			const auto		CheckLinetoMap(const VECTOR_ref& StartPos, VECTOR_ref* EndPos, bool isNearest, VECTOR_ref* Normal = nullptr, MV1_COLL_RESULT_POLY* Ret = nullptr) const noexcept {
+			const auto		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, bool isNearest, Vector3DX* Normal = nullptr, MV1_COLL_RESULT_POLY* Ret = nullptr) const noexcept {
 				bool isHit = false;
 				if (this->m_ObjGroundCol.IsActive()) {
 					auto col_p = this->m_ObjGroundCol.CollCheck_Line(StartPos, *EndPos);
@@ -80,7 +80,7 @@ namespace FPS_n2 {
 				if (path != "") {
 					path += "model.mv1";
 					MV1::Load(path, &this->m_ObjSky, DX_LOADMODEL_PHYSICS_DISABLE);
-					this->m_ObjSky.SetScale(VECTOR_ref::vget(10.f, 10.f, 10.f));
+					this->m_ObjSky.SetScale(Vector3DX::vget(10.f, 10.f, 10.f));
 					MV1SetDifColorScale(this->m_ObjSky.get(), GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
 				}
 				//
@@ -145,14 +145,14 @@ namespace FPS_n2 {
 			const auto&		GetMapGraph(void) noexcept { return this->m_BuildControl.GetMapGraph(); }
 			const auto&		GetMapGraphXSize(void) noexcept { return this->m_BuildControl.GetMapGraphXSize(); }
 			const auto&		GetMapGraphYSize(void) noexcept { return this->m_BuildControl.GetMapGraphYSize(); }
-			const int		GetNearestBuilds(const VECTOR_ref& NowPosition) noexcept {
+			const int		GetNearestBuilds(const Vector3DX& NowPosition) noexcept {
 				return this->m_BuildControl.GetNearestBuilds(NowPosition);
 			}
 
-			bool			HitLightCheck(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept {
+			bool			HitLightCheck(const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
 				return this->m_BuildControl.HitLightCheck(StartPos, pEndPos);
 			}
-			bool CheckPolyMoveWidth(VECTOR_ref StartPos, int TargetIndex, float Width) const {
+			bool CheckPolyMoveWidth(Vector3DX StartPos, int TargetIndex, float Width) const {
 				return this->m_BuildControl.CheckPolyMoveWidth(StartPos, TargetIndex, Width);
 			}
 		public://
@@ -181,7 +181,7 @@ namespace FPS_n2 {
 				this->m_BuildControl.Dispose();
 			}
 
-			bool			CheckLinetoMap_Sub(const VECTOR_ref& StartPos, VECTOR_ref* EndPos, bool isNearest, VECTOR_ref* Normal, MV1_COLL_RESULT_POLY* Ret) const noexcept override {
+			bool			CheckLinetoMap_Sub(const Vector3DX& StartPos, Vector3DX* EndPos, bool isNearest, Vector3DX* Normal, MV1_COLL_RESULT_POLY* Ret) const noexcept override {
 				bool isHit = false;
 				for (const auto& bu : this->m_BuildControl.GetBuildDatas()) {
 					if (bu.GetMeshSel() < 0) { continue; }

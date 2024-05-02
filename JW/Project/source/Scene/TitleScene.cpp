@@ -35,11 +35,11 @@ namespace FPS_n2 {
 				y.LoadCommon(&m_SelectBackImage);
 			}
 
-			VECTOR_ref LightVec = VECTOR_ref::vget(0.f, -1.f, 0.5f);
+			Vector3DX LightVec = Vector3DX::vget(0.f, -1.f, 0.5f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.f, 1.f, 1.f, 0.0f));
-			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.5f, 10.f)*Scale_Rate, 0);
-			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.f, 10.f)*Scale_Rate, 1);
-			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-100.f, 0.f, -100.f)*Scale_Rate, VECTOR_ref::vget(100.f, 1.f, 100.f)*Scale_Rate, 2);
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.5f, 10.f)*Scale_Rate, 0);
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.f, 10.f)*Scale_Rate, 1);
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-100.f, 0.f, -100.f)*Scale_Rate, Vector3DX::vget(100.f, 1.f, 100.f)*Scale_Rate, 2);
 			//
 			DeleteLightHandleAll();
 			SetLightEnable(TRUE);
@@ -129,7 +129,7 @@ namespace FPS_n2 {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer((PlayerID)(0)).GetChara();
 				c->ValueSet((PlayerID)(0), false, CharaTypeID::Team);
 
-				VECTOR_ref pos_t = VECTOR_ref::vget(-0.6f, 0.0f, 0.2f)*Scale_Rate;
+				Vector3DX pos_t = Vector3DX::vget(-0.6f, 0.0f, 0.2f)*Scale_Rate;
 				float rad_t = 0.f;
 				c->MovePoint(deg2rad(0.f), rad_t, pos_t, 0);
 				c->Heal(100, true);
@@ -299,11 +299,11 @@ namespace FPS_n2 {
 			Easing(&m_Xrad_R, m_Xrad, 0.95f, EasingType::OutExpo);
 			Easing(&m_Yrad_R, m_Yrad, 0.95f, EasingType::OutExpo);
 
-			VECTOR_ref Pos = VECTOR_ref::vget(0.f, 1.25f, 0.0f)*Scale_Rate;
+			Vector3DX Pos = Vector3DX::vget(0.f, 1.25f, 0.0f)*Scale_Rate;
 			DrawParts->SetMainCamera().SetCamPos(
-				Pos + MATRIX_ref::Vtrans(VECTOR_ref::front()*(3.f*Scale_Rate), MATRIX_ref::RotX(m_Xrad_R)*MATRIX_ref::RotY(m_Yrad_R + DX_PI_F)),
+				Pos + Matrix4x4DX::Vtrans(Vector3DX::forward()*(3.f*Scale_Rate), Matrix4x4DX::RotAxis(Vector3DX::right(), m_Xrad_R)*Matrix4x4DX::RotAxis(Vector3DX::up(), m_Yrad_R + DX_PI_F)),
 				Pos,
-				VECTOR_ref::vget(0.f, 1.f, 0.f));
+				Vector3DX::vget(0.f, 1.f, 0.f));
 			float far_t = 20.f*Scale_Rate;
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(45), 0.5f*Scale_Rate, far_t);
 			PostPassEffect::Instance()->Set_DoFNearFar(1.f * Scale_Rate, far_t / 2, 0.5f*Scale_Rate, far_t);
@@ -362,7 +362,7 @@ namespace FPS_n2 {
 			{
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
 																	  FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-																	  y_r(64 + 369), y_r(64 + 207), White, Black, "Ver 1.0.3");
+																	  y_r(64 + 369), y_r(64 + 207), White, Black, "Ver 1.0.4");
 			}
 			//
 			for (auto& y : ButtonSel) {

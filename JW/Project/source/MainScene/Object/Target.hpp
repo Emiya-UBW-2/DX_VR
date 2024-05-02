@@ -6,28 +6,28 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class TargetClass : public ObjectBaseClass {
-			std::vector<VECTOR_ref> HitPosRec;
+			std::vector<Vector3DX> HitPosRec;
 		public:
 			TargetClass(void) noexcept { this->m_objType = ObjType::Target; }
 			~TargetClass(void) noexcept {}
 		public:
 			const auto& GetHitPosRec() const noexcept { return this->HitPosRec; }
 			const auto GetCenterPos() const noexcept { return this->m_col.frame(2); }
-			const auto GetHitPoint(const VECTOR_ref& value, float* x = nullptr, float* y = nullptr) noexcept {
+			const auto GetHitPoint(const Vector3DX& value, float* x = nullptr, float* y = nullptr) noexcept {
 				auto vecx = this->m_col.frame(3) - GetCenterPos();
 				auto vecy = this->m_col.frame(4) - GetCenterPos();
-				auto vecsize = (vecx.size() + vecy.size()) / 2;
+				auto vecsize = (vecx.magnitude() + vecy.magnitude()) / 2;
 				auto vec2 = value - GetCenterPos();
 
 				if (x != nullptr) {
-					*x = (vec2.size() / vecsize) * (-vecx.Norm().dot(vec2.Norm()));
+					*x = (vec2.magnitude() / vecsize) * (-Vector3DX::Dot(vecx.normalized(), vec2.normalized()));
 				}
 				if (y != nullptr) {
-					*y = (vec2.size() / vecsize) * (-vecy.Norm().dot(vec2.Norm()));
+					*y = (vec2.magnitude() / vecsize) * (-Vector3DX::Dot(vecy.normalized(), vec2.normalized()));
 				}
-				return ((1.f - (vec2.size() / vecsize)) * 11.f);
+				return ((1.f - (vec2.magnitude() / vecsize)) * 11.f);
 			}
-			const auto SetHitPos(const VECTOR_ref& value) noexcept {
+			const auto SetHitPos(const Vector3DX& value) noexcept {
 				this->m_obj.get_anime(0).GoStart();
 				HitPosRec.emplace_back(value);
 				return GetHitPoint(HitPosRec.back());

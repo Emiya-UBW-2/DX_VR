@@ -19,7 +19,7 @@ namespace FPS_n2 {
 			ItemObjClass(void) noexcept { this->m_objType = ObjType::ItemObj; }
 			~ItemObjClass(void) noexcept {}
 		public:
-			void			SetFall(const VECTOR_ref& pos, const VECTOR_ref& vec) noexcept;
+			void			SetFall(const Vector3DX& pos, const Vector3DX& vec) noexcept;
 			void			SetItemType(ItemType item) noexcept { this->m_ItemType = item; }
 			const auto&		GetItemType(void) const noexcept { return this->m_ItemType; }
 		public:
@@ -32,8 +32,8 @@ namespace FPS_n2 {
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				if (this->m_IsActive && this->m_IsDraw) {
 					if (CheckCameraViewClip_Box(
-						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-0.1f*Scale_Rate, -0.1f*Scale_Rate, -0.1f*Scale_Rate)).get(),
-						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(0.1f*Scale_Rate, 0.1f*Scale_Rate, 0.1f*Scale_Rate)).get()) == FALSE
+						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-0.1f*Scale_Rate, -0.1f*Scale_Rate, -0.1f*Scale_Rate)).get(),
+						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(0.1f*Scale_Rate, 0.1f*Scale_Rate, 0.1f*Scale_Rate)).get()) == FALSE
 						) {
 						if (!isDrawSemiTrans) {
 							this->m_obj.DrawModel();

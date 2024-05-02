@@ -22,11 +22,11 @@ namespace FPS_n2 {
 			this->m_yRad = 0.f;
 			this->m_Flags = 0;
 		}
-		void			SetInputStart(float pAddxRad, float pAddyRad, const VECTOR_ref& pRad) {
+		void			SetInputStart(float pAddxRad, float pAddyRad, const Vector3DX& pRad) {
 			this->m_AddxRad = pAddxRad;
 			this->m_AddyRad = pAddyRad;
-			this->m_xRad = pRad.x();
-			this->m_yRad = pRad.y();
+			this->m_xRad = pRad.x;
+			this->m_yRad = pRad.y;
 			this->m_Flags = 0;
 		}
 		void			SetInputPADS(PADS select, bool value) {
@@ -87,28 +87,28 @@ namespace FPS_n2 {
 #define PLAYER_HIT_TRYNUM			(16)					// 壁押し出し処理の最大試行回数
 #define PLAYER_HIT_SLIDE_LENGTH		(0.015f * Scale_Rate)	// 一度の壁押し出し処理でスライドさせる距離
 	//壁判定ユニバーサル
-	static bool col_wall(const VECTOR_ref& OldPos, VECTOR_ref* NowPos, const std::vector<std::pair<MV1*, int>>& col_obj_t) noexcept {
+	static bool col_wall(const Vector3DX& OldPos, Vector3DX* NowPos, const std::vector<std::pair<MV1*, int>>& col_obj_t) noexcept {
 		if (col_obj_t.size() == 0) { return false; }
 		auto MoveVector = *NowPos - OldPos;
-		//MoveVector.y(0);
+		//MoveVector.y = (0);
 		// プレイヤーの周囲にあるステージポリゴンを取得する( 検出する範囲は移動距離も考慮する )
 		std::vector<MV1_COLL_RESULT_POLY> kabe_;// 壁ポリゴンと判断されたポリゴンの構造体のアドレスを保存しておく
 		for (const auto& objs : col_obj_t) {
 			if ((&objs - &col_obj_t.front()) != 0) {
-				if (GetMinLenSegmentToPoint(OldPos, OldPos + VECTOR_ref::up(), objs.first->GetMatrix().pos()) >=
-					(20.f*Scale_Rate + PLAYER_ENUM_DEFAULT_SIZE + MoveVector.size())) {
+				if (GetMinLenSegmentToPoint(OldPos, OldPos + Vector3DX::up(), objs.first->GetMatrix().pos()) >=
+					(20.f*Scale_Rate + PLAYER_ENUM_DEFAULT_SIZE + MoveVector.magnitude())) {
 					continue;
 				}
 			}
-			auto HitDim = objs.first->CollCheck_Sphere(OldPos, PLAYER_ENUM_DEFAULT_SIZE + MoveVector.size(), objs.second);
+			auto HitDim = objs.first->CollCheck_Sphere(OldPos, PLAYER_ENUM_DEFAULT_SIZE + MoveVector.magnitude(), objs.second);
 			// 検出されたポリゴンが壁ポリゴン( ＸＺ平面に垂直なポリゴン )か床ポリゴン( ＸＺ平面に垂直ではないポリゴン )かを判断する
 			for (int i = 0; i < HitDim.HitNum; ++i) {
 				auto& h_d = HitDim.Dim[i];
 				//壁ポリゴンと判断された場合でも、プレイヤーのＹ座標＋PLAYER_ENUM_MIN_SIZEより高いポリゴンのみ当たり判定を行う
 				if (
 					(abs(atan2f(h_d.Normal.y, std::hypotf(h_d.Normal.x, h_d.Normal.z))) <= deg2rad(30))
-					&& (h_d.Position[0].y > OldPos.y() + PLAYER_ENUM_MIN_SIZE || h_d.Position[1].y > OldPos.y() + PLAYER_ENUM_MIN_SIZE || h_d.Position[2].y > OldPos.y() + PLAYER_ENUM_MIN_SIZE)
-					&& (h_d.Position[0].y < OldPos.y() + PLAYER_ENUM_DEFAULT_SIZE || h_d.Position[1].y < OldPos.y() + PLAYER_ENUM_DEFAULT_SIZE || h_d.Position[2].y < OldPos.y() + PLAYER_ENUM_DEFAULT_SIZE)
+					&& (h_d.Position[0].y > OldPos.y + PLAYER_ENUM_MIN_SIZE || h_d.Position[1].y > OldPos.y + PLAYER_ENUM_MIN_SIZE || h_d.Position[2].y > OldPos.y + PLAYER_ENUM_MIN_SIZE)
+					&& (h_d.Position[0].y < OldPos.y + PLAYER_ENUM_DEFAULT_SIZE || h_d.Position[1].y < OldPos.y + PLAYER_ENUM_DEFAULT_SIZE || h_d.Position[2].y < OldPos.y + PLAYER_ENUM_DEFAULT_SIZE)
 					) {
 					kabe_.emplace_back(h_d);// ポリゴンの構造体のアドレスを壁ポリゴンポインタ配列に保存する
 				}
@@ -120,15 +120,15 @@ namespace FPS_n2 {
 		if (kabe_.size() > 0) {
 			HitFlag = false;
 			for (auto& h_d : kabe_) {
-				if (GetHitCapsuleToTriangle(*NowPos + VECTOR_ref::up()*(PLAYER_HIT_WIDTH + 0.1f), *NowPos + VECTOR_ref::up()*(PLAYER_HIT_HEIGHT), PLAYER_HIT_WIDTH, h_d.Position[0], h_d.Position[1], h_d.Position[2])) {				// ポリゴンとプレイヤーが当たっていなかったら次のカウントへ
+				if (GetHitCapsuleToTriangle(*NowPos + Vector3DX::up()*(PLAYER_HIT_WIDTH + 0.1f), *NowPos + Vector3DX::up()*(PLAYER_HIT_HEIGHT), PLAYER_HIT_WIDTH, h_d.Position[0], h_d.Position[1], h_d.Position[2])) {				// ポリゴンとプレイヤーが当たっていなかったら次のカウントへ
 					HitFlag = true;// ここにきたらポリゴンとプレイヤーが当たっているということなので、ポリゴンに当たったフラグを立てる
-					if (MoveVector.size() >= 0.001f) {	// x軸かz軸方向に 0.001f 以上移動した場合は移動したと判定
+					if (MoveVector.magnitude() >= 0.001f) {	// x軸かz軸方向に 0.001f 以上移動した場合は移動したと判定
 						// 壁に当たったら壁に遮られない移動成分分だけ移動する
-						*NowPos = VECTOR_ref(h_d.Normal).cross(MoveVector.cross(h_d.Normal)) + OldPos;
-						//NowPos->y(OldPos.y());
+						*NowPos = Vector3DX::Cross(h_d.Normal, Vector3DX::Cross(MoveVector, h_d.Normal)) + OldPos;
+						//NowPos->y(OldPos.y);
 						bool j = false;
 						for (auto& h_d2 : kabe_) {
-							if (GetHitCapsuleToTriangle(*NowPos + VECTOR_ref::up()*(PLAYER_HIT_WIDTH + 0.1f), *NowPos + VECTOR_ref::up()*(PLAYER_HIT_HEIGHT), PLAYER_HIT_WIDTH, h_d2.Position[0], h_d2.Position[1], h_d2.Position[2])) {
+							if (GetHitCapsuleToTriangle(*NowPos + Vector3DX::up()*(PLAYER_HIT_WIDTH + 0.1f), *NowPos + Vector3DX::up()*(PLAYER_HIT_HEIGHT), PLAYER_HIT_WIDTH, h_d2.Position[0], h_d2.Position[1], h_d2.Position[2])) {
 								j = true;
 								break;// 当たっていたらループから抜ける
 							}
@@ -147,12 +147,12 @@ namespace FPS_n2 {
 				for (int k = 0; k < PLAYER_HIT_TRYNUM; ++k) {			// 壁からの押し出し処理を試みる最大数だけ繰り返し
 					bool HitF = false;
 					for (auto& h_d : kabe_) {
-						if (GetHitCapsuleToTriangle(*NowPos + VECTOR_ref::up()*(PLAYER_HIT_WIDTH + 0.1f), *NowPos + VECTOR_ref::up()*(PLAYER_HIT_HEIGHT), PLAYER_HIT_WIDTH, h_d.Position[0], h_d.Position[1], h_d.Position[2])) {// プレイヤーと当たっているかを判定
-							*NowPos += VECTOR_ref(h_d.Normal) * PLAYER_HIT_SLIDE_LENGTH;					// 当たっていたら規定距離分プレイヤーを壁の法線方向に移動させる
-							//NowPos->y(OldPos.y());
+						if (GetHitCapsuleToTriangle(*NowPos + Vector3DX::up()*(PLAYER_HIT_WIDTH + 0.1f), *NowPos + Vector3DX::up()*(PLAYER_HIT_HEIGHT), PLAYER_HIT_WIDTH, h_d.Position[0], h_d.Position[1], h_d.Position[2])) {// プレイヤーと当たっているかを判定
+							*NowPos += Vector3DX(h_d.Normal) * PLAYER_HIT_SLIDE_LENGTH;					// 当たっていたら規定距離分プレイヤーを壁の法線方向に移動させる
+							//NowPos->y(OldPos.y);
 							bool j = false;
 							for (auto& h_d2 : kabe_) {
-								if (GetHitCapsuleToTriangle(*NowPos + VECTOR_ref::up()*(PLAYER_HIT_WIDTH + 0.1f), *NowPos + VECTOR_ref::up()*(PLAYER_HIT_HEIGHT), PLAYER_HIT_WIDTH, h_d2.Position[0], h_d2.Position[1], h_d2.Position[2])) {// 当たっていたらループを抜ける
+								if (GetHitCapsuleToTriangle(*NowPos + Vector3DX::up()*(PLAYER_HIT_WIDTH + 0.1f), *NowPos + Vector3DX::up()*(PLAYER_HIT_HEIGHT), PLAYER_HIT_WIDTH, h_d2.Position[0], h_d2.Position[1], h_d2.Position[2])) {// 当たっていたらループを抜ける
 									j = true;
 									break;
 								}
@@ -218,14 +218,14 @@ namespace FPS_n2 {
 			this->m_Index.clear();								//頂点データとインデックスデータを格納するメモリ領域の確保
 			this->m_Index.reserve(2000);						//頂点データとインデックスデータを格納するメモリ領域の確保
 		}
-		void			Set(const float& caliber, const VECTOR_ref& Position, const VECTOR_ref& Normal, const VECTOR_ref& Zvec) {
+		void			Set(const float& caliber, const Vector3DX& Position, const Vector3DX& Normal, const Vector3DX& Zvec) {
 			this->m_Count++;
 			Set_start(this->m_Count);
 			float asize = 200.f * caliber;
 			const auto& y_vec = Normal;
-			auto z_vec = y_vec.cross(Zvec).Norm();
-			auto scale = VECTOR_ref::vget(asize / std::abs(y_vec.dot(Zvec)), asize, asize);
-			MATRIX_ref mat = MATRIX_ref::GetScale(scale) * MATRIX_ref::Axis1_YZ(y_vec, z_vec) * MATRIX_ref::Mtrans(Position + y_vec * 0.02f);
+			auto z_vec = Vector3DX::Cross(y_vec, Zvec).normalized();
+			auto scale = Vector3DX::vget(asize / std::abs(Vector3DX::Dot(y_vec, Zvec)), asize, asize);
+			Matrix4x4DX mat = Matrix4x4DX::GetScale(scale) * Matrix4x4DX::Axis1(y_vec, z_vec) * Matrix4x4DX::Mtrans(Position + y_vec * 0.02f);
 			Set_one(mat);
 		}
 		void			Set_start(int value) noexcept {
@@ -235,7 +235,7 @@ namespace FPS_n2 {
 			Num = this->m_RefMesh.PolygonNum * 3 * this->m_Count;
 			this->m_Index.resize(Num);		//頂点データとインデックスデータを格納するメモリ領域の確保
 		}
-		void			Set_one(const MATRIX_ref& mat) noexcept {
+		void			Set_one(const Matrix4x4DX& mat) noexcept {
 			this->m_obj.SetMatrix(mat);
 			Init_one();
 			for (size_t j = 0; j < size_t(this->m_RefMesh.VertexNum); ++j) {
@@ -307,7 +307,7 @@ namespace FPS_n2 {
 			this->m_inst.Reset();
 		}
 
-		void			Set(const float& caliber, const VECTOR_ref& Position, const VECTOR_ref& Normal, const VECTOR_ref& Zvec) {
+		void			Set(const float& caliber, const Vector3DX& Position, const Vector3DX& Normal, const Vector3DX& Zvec) {
 			this->m_inst.Set(caliber, Position, Normal, Zvec);
 			this->m_IsUpdate = true;
 		}

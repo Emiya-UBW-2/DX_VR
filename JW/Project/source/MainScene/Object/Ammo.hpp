@@ -10,7 +10,7 @@ namespace FPS_n2 {
 		public:
 			bool			m_IsDrawHitUI{false};
 			float			m_Hit_alpha{0.f};
-			VECTOR_ref		m_Hit_DispPos;
+			Vector3DX		m_Hit_DispPos;
 			int				m_Hit_AddX{0};
 			int				m_Hit_AddY{0};
 			HitPoint		m_Damage{0};
@@ -30,7 +30,7 @@ namespace FPS_n2 {
 			const auto&		GetDamage(void) const noexcept { return this->m_AmmoData->GetDamage(); }
 			const auto&		GetCaliberSize(void) const noexcept { return this->m_AmmoData->GetCaliber(); }//0.00762f
 		public:
-			void			Put(std::shared_ptr<AmmoDataClass> pAmmoData, const VECTOR_ref& pos_t, const VECTOR_ref& pVec, int pMyID) {
+			void			Put(std::shared_ptr<AmmoDataClass> pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, int pMyID) {
 				SetActive(true);
 				this->m_RicochetCnt = 0;
 				this->m_IsHit = false;
@@ -46,7 +46,7 @@ namespace FPS_n2 {
 				this->m_Timer = 0.f;
 				this->m_ShootCheraID = pMyID;
 			}
-			const auto		PenetrationCheck(float pArmer, const VECTOR_ref& normal) const noexcept { return (this->m_penetration > (pArmer * (1.0f / std::abs(this->m_move.vec.Norm().dot(normal))))); }
+			const auto		PenetrationCheck(float pArmer, const Vector3DX& normal) const noexcept { return (this->m_penetration > (pArmer * (1.0f / std::abs(Vector3DX::Dot(this->m_move.vec.normalized(), normal))))); }
 			void			Penetrate(HitPoint Damage, ArmerPoint ArmerDamage) noexcept {
 				SetActive(false);
 				this->m_IsHit = true;
@@ -54,16 +54,16 @@ namespace FPS_n2 {
 				this->m_Damage = Damage;
 				this->m_ArmerDamage = ArmerDamage;
 			}
-			void			Ricochet(const VECTOR_ref& position, const VECTOR_ref& normal) {
+			void			Ricochet(const Vector3DX& position, const Vector3DX& normal) {
 				this->m_IsHit = true;
 				this->m_IsDrawHitUI = false;
 				//this->m_penetration *= 0.8f;
 				this->m_RicochetCnt++;
-				this->m_move.vec = (this->m_move.vec + normal * ((this->m_move.vec.dot(normal)) * -2.0f)).Norm();
+				this->m_move.vec = (this->m_move.vec + normal * ((Vector3DX::Dot(this->m_move.vec, normal)) * -2.0f)).normalized();
 				this->m_move.pos = this->m_move.vec * (0.1f) + position;
 				this->m_yAdd = 0.f;
 			}
-			void			HitGround(const VECTOR_ref& position) {
+			void			HitGround(const Vector3DX& position) {
 				SetActive(false);
 				this->m_move.pos = position;
 				this->m_IsHit = true;
@@ -96,7 +96,7 @@ namespace FPS_n2 {
 				}
 				if (IsActive()) {
 					//移動確定
-					this->m_move.UpdatePos(this->m_move.pos + (this->m_move.vec * (this->m_speed / FPS)) + VECTOR_ref::up()*this->m_yAdd);
+					this->m_move.UpdatePos(this->m_move.pos + (this->m_move.vec * (this->m_speed / FPS)) + Vector3DX::up()*this->m_yAdd);
 					this->m_yAdd += (M_GR / (FPS*FPS));
 
 					//消す(スピードが0以下、貫通が0以下、5回反射する)

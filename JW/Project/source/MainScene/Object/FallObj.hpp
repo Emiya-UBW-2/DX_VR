@@ -17,7 +17,7 @@ namespace FPS_n2 {
 			FallObjClass(void) noexcept { this->m_objType = ObjType::FallObj; }
 			~FallObjClass(void) noexcept {}
 		public:
-			void			SetFall(const VECTOR_ref& pos, const MATRIX_ref& mat, const VECTOR_ref& vec, float timer, SoundEnum sound) noexcept;
+			void			SetFall(const Vector3DX& pos, const Matrix4x4DX& mat, const Vector3DX& vec, float timer, SoundEnum sound) noexcept;
 		public:
 			void			Init(void) noexcept override {
 				ObjectBaseClass::Init();
@@ -27,8 +27,8 @@ namespace FPS_n2 {
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				if (this->m_IsActive && this->m_IsDraw) {
 					if (CheckCameraViewClip_Box(
-						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(-0.1f*Scale_Rate, -0.1f*Scale_Rate, -0.1f*Scale_Rate)).get(),
-						(this->GetObj().GetMatrix().pos() + VECTOR_ref::vget(0.1f*Scale_Rate, 0.1f*Scale_Rate, 0.1f*Scale_Rate)).get()) == FALSE
+						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-0.1f*Scale_Rate, -0.1f*Scale_Rate, -0.1f*Scale_Rate)).get(),
+						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(0.1f*Scale_Rate, 0.1f*Scale_Rate, 0.1f*Scale_Rate)).get()) == FALSE
 						) {
 						if (!isDrawSemiTrans) {
 							this->m_obj.DrawModel();

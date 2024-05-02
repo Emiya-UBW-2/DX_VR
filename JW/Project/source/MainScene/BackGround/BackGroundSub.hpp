@@ -114,9 +114,9 @@ namespace FPS_n2 {
 			int						m_mesh{-1};
 			MV1						m_Obj;
 			MV1						m_Col;
-			MATRIX_ref				m_mat;
-			VECTOR_ref				m_MinPos;
-			VECTOR_ref				m_MaxPos;
+			Matrix4x4DX				m_mat;
+			Vector3DX				m_MinPos;
+			Vector3DX				m_MaxPos;
 
 			bool checkDraw{true};
 
@@ -135,7 +135,7 @@ namespace FPS_n2 {
 			const auto&		GetMatrix(void) const noexcept { return m_mat; }
 			const auto&		IsDraw(void) const noexcept { return checkDraw; }
 
-			const auto		GetColLine(const VECTOR_ref& repos, const VECTOR_ref& pos) const noexcept { return this->m_Col.CollCheck_Line(repos, pos, m_mesh); }
+			const auto		GetColLine(const Vector3DX& repos, const Vector3DX& pos) const noexcept { return this->m_Col.CollCheck_Line(repos, pos, m_mesh); }
 		public:
 			void		Set(int index, const MV1& ObjModel, const MV1& ColModel, int frame) {
 				this->MyIndex = index;
@@ -154,8 +154,8 @@ namespace FPS_n2 {
 					this->m_mesh = frame;
 				}
 			}
-			void		SetPosition(VECTOR_ref pos, float rad) {
-				this->m_mat = MATRIX_ref::RotY(rad)*MATRIX_ref::Mtrans(pos);
+			void		SetPosition(Vector3DX pos, float rad) {
+				this->m_mat = Matrix4x4DX::RotAxis(Vector3DX::up(), rad)*Matrix4x4DX::Mtrans(pos);
 				this->m_Obj.SetMatrix(this->m_mat);
 				this->m_Col.SetMatrix(this->m_mat);
 				this->m_Col.RefreshCollInfo(this->m_mesh);
@@ -181,7 +181,7 @@ namespace FPS_n2 {
 				Pendulum2D	m_SlingZrad;
 
 				float		m_Yadd{0.f};
-				VECTOR_ref	m_Pos;
+				Vector3DX	m_Pos;
 				float		m_length{0.f};
 				MV1			m_Obj;
 
@@ -195,7 +195,7 @@ namespace FPS_n2 {
 		public:
 			const auto&		GetNearestLight(int No) const noexcept { return this->m_LightPoiont[No].m_Pos; }
 		public:
-			bool			HitLightCheck(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept {
+			bool			HitLightCheck(const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
 				for (int i = 0; i < this->m_LightPoiont.size(); i++) {
 					auto& o = this->m_LightPoiont[i];
 
@@ -212,7 +212,7 @@ namespace FPS_n2 {
 				return false;
 			}
 		public:
-			void			Set(int No, const VECTOR_ref& BasePos, Builds* ptr) {
+			void			Set(int No, const Vector3DX& BasePos, Builds* ptr) {
 				this->m_LightPoiont[No].m_Pos = BasePos;
 				this->m_LightPoiont[No].m_Obj = this->m_ObjLightBase.Duplicate();
 				this->m_LightPoiont[No].m_SlingZrad.Init(0.05f*Scale_Rate, 3.f, deg2rad(0));
@@ -264,7 +264,7 @@ namespace FPS_n2 {
 					o.m_SlingPower = 0.f;
 
 					if (o.m_isHit) {
-						o.m_Pos.yadd(o.m_Yadd);
+						o.m_Pos.y += (o.m_Yadd);
 						o.m_Yadd += M_GR / (FPS * FPS);
 						o.m_EraseTimer -= 1.f / FPS;
 					}
@@ -273,8 +273,8 @@ namespace FPS_n2 {
 					o.m_SlingZrad.GetRad();
 
 					auto Vec = (o.m_Pos - DrawParts->GetMainCamera().GetCamPos());
-					o.m_Obj.SetMatrix(MATRIX_ref::RotAxis(Vec.Norm(), o.m_SlingZrad.GetRad()) * MATRIX_ref::Mtrans(o.m_Pos));
-					o.m_length = Vec.Length();
+					o.m_Obj.SetMatrix(Matrix4x4DX::RotAxis(Vec.normalized(), o.m_SlingZrad.GetRad()) * Matrix4x4DX::Mtrans(o.m_Pos));
+					o.m_length = Vec.magnitude();
 
 					if (o.m_EraseTimer <= 0.f) {
 						std::swap(o, this->m_LightPoiont.back());
@@ -300,11 +300,11 @@ namespace FPS_n2 {
 					if (b.m_NearPath->IsDraw()) {
 						auto Pos = b.m_Pos;
 
-						auto vec1 = (DrawParts->GetMainCamera().GetCamVec() - DrawParts->GetMainCamera().GetCamPos()).Norm();
-						auto vec2 = (Pos - DrawParts->GetMainCamera().GetCamPos()).Norm();
-						auto vec2_XZ = vec2; vec2_XZ.y(0.f);
-						if (vec1.dot(vec2_XZ) > std::sin(deg2rad(-60))) {
-							auto Vec = MATRIX_ref::Vtrans(VECTOR_ref::up()*-1.f, MATRIX_ref::RotAxis(vec2, b.m_SlingZrad.GetRad()));
+						auto vec1 = (DrawParts->GetMainCamera().GetCamVec() - DrawParts->GetMainCamera().GetCamPos()).normalized();
+						auto vec2 = (Pos - DrawParts->GetMainCamera().GetCamPos()).normalized();
+						auto vec2_XZ = vec2; vec2_XZ.y = (0.f);
+						if (Vector3DX::Dot(vec1, vec2_XZ) > std::sin(deg2rad(-60))) {
+							auto Vec = Matrix4x4DX::Vtrans(Vector3DX::up()*-1.f, Matrix4x4DX::RotAxis(vec2, b.m_SlingZrad.GetRad()));
 							if (count <= 1) {//01
 								SetLightEnableHandle(m_LightHandle[count], TRUE);
 								SetLightPositionHandle(m_LightHandle[count], Pos.get());
@@ -332,8 +332,8 @@ namespace FPS_n2 {
 				for (auto& b : this->m_LightPoiont) {
 					if (b.m_NearPath->IsDraw()) {
 						if (CheckCameraViewClip_Box(
-							(b.m_Pos + VECTOR_ref::vget(-1.5f*Scale_Rate, -0.5f*Scale_Rate, -1.5f*Scale_Rate)).get(),
-							(b.m_Pos + VECTOR_ref::vget(1.5f*Scale_Rate, 3.f*Scale_Rate, 1.5f*Scale_Rate)).get()) == FALSE
+							(b.m_Pos + Vector3DX::vget(-1.5f*Scale_Rate, -0.5f*Scale_Rate, -1.5f*Scale_Rate)).get(),
+							(b.m_Pos + Vector3DX::vget(1.5f*Scale_Rate, 3.f*Scale_Rate, 1.5f*Scale_Rate)).get()) == FALSE
 							) {
 							b.m_Obj.DrawModel();
 						}
@@ -343,18 +343,18 @@ namespace FPS_n2 {
 			void			DrawFront() {
 				auto* DrawParts = DXDraw::Instance();
 				SetUseLighting(FALSE);
-				float rad = -(DrawParts->GetMainCamera().GetCamVec() - DrawParts->GetMainCamera().GetCamPos()).cross(VECTOR_ref::up()).dot(DrawParts->GetMainCamera().GetCamUp());
+				float rad = -Vector3DX::Dot(Vector3DX::Cross((DrawParts->GetMainCamera().GetCamVec() - DrawParts->GetMainCamera().GetCamPos()), Vector3DX::up()), DrawParts->GetMainCamera().GetCamUp());
 				int max = (int)this->m_LightPoiont.size();
 				for (int i = max - 1; i >= 0; i--) {
 					auto& b = this->m_LightPoiont[i];
 					if (!b.m_isHit) {
 						if (b.m_NearPath->IsDraw()) {
 							if (CheckCameraViewClip_Box(
-								(b.m_Pos + VECTOR_ref::vget(-1.5f*Scale_Rate, -0.5f*Scale_Rate, -1.5f*Scale_Rate)).get(),
-								(b.m_Pos + VECTOR_ref::vget(1.5f*Scale_Rate, 3.f*Scale_Rate, 1.5f*Scale_Rate)).get()) == FALSE
+								(b.m_Pos + Vector3DX::vget(-1.5f*Scale_Rate, -0.5f*Scale_Rate, -1.5f*Scale_Rate)).get(),
+								(b.m_Pos + Vector3DX::vget(1.5f*Scale_Rate, 3.f*Scale_Rate, 1.5f*Scale_Rate)).get()) == FALSE
 								) {
-								auto Vec = (b.m_Pos - DrawParts->GetMainCamera().GetCamPos()); Vec.y(0.f);
-								auto Len = Vec.Length();
+								auto Vec = (b.m_Pos - DrawParts->GetMainCamera().GetCamPos()); Vec.y = (0.f);
+								auto Len = Vec.magnitude();
 								auto Min = 4.f*Scale_Rate;
 								auto Max = 20.f*Scale_Rate;
 								float per = 0.5f*std::clamp((Len - Min) / 30.f, 0.f, 1.f);
@@ -387,7 +387,7 @@ namespace FPS_n2 {
 				bool IsChanged{false};
 				float m_Rad{0.f};
 				float m_PrevRad{0.f};
-				VECTOR_ref m_Pos;
+				Vector3DX m_Pos;
 			};
 		private:
 			MV1									m_Base;
@@ -401,13 +401,13 @@ namespace FPS_n2 {
 					o.m_Obj = m_Base.Duplicate();
 				}
 			}
-			void		Execute(const VECTOR_ref& CamPos) {
+			void		Execute(const Vector3DX& CamPos) {
 				auto* OptionParts = OPTION::Instance();
 				if (OptionParts->GetParamInt(EnumSaveParam::grass_level)==0) {
 					return;
 				}
-				int x = (int)(CamPos.x() / 100.f*2.f);
-				int z = (int)(CamPos.z() / 100.f*2.f);
+				int x = (int)(CamPos.x / 100.f*2.f);
+				int z = (int)(CamPos.z / 100.f*2.f);
 				{
 					int abx = abs(x);
 					if (abx > 0) {
@@ -449,7 +449,7 @@ namespace FPS_n2 {
 							o.IsChanged = false;
 							o.m_Rad = deg2rad(GetRandf(180.f));
 						}
-						o.m_Pos = VECTOR_ref::vget((float)(xp * 100), 0.f, (float)(zp * 100));
+						o.m_Pos = Vector3DX::vget((float)(xp * 100), 0.f, (float)(zp * 100));
 					}
 				}
 				for (auto& o : m_Obj) {
@@ -458,7 +458,7 @@ namespace FPS_n2 {
 				xprev = x;
 				zprev = z;
 				for (auto& o : m_Obj) {
-					o.m_Obj.SetMatrix(MATRIX_ref::RotY(o.m_Rad) * MATRIX_ref::Mtrans(o.m_Pos));
+					o.m_Obj.SetMatrix(Matrix4x4DX::RotAxis(Vector3DX::up(), o.m_Rad) * Matrix4x4DX::Mtrans(o.m_Pos));
 				}
 			}
 			void		ShadowDraw() {
@@ -487,7 +487,7 @@ namespace FPS_n2 {
 		class DrumControl {
 		private:
 			struct Drums {
-				VECTOR_ref	m_Pos;
+				Vector3DX	m_Pos;
 				MV1			m_Obj;
 				MV1			m_Col;
 				Builds*		m_NearPath{nullptr};
@@ -499,7 +499,7 @@ namespace FPS_n2 {
 		public:
 			const auto&		GetDrum() const noexcept { return this->m_DrumPoiont; }
 		public:
-			void			Set(int No, const VECTOR_ref& BasePos, Builds* ptr) {
+			void			Set(int No, const Vector3DX& BasePos, Builds* ptr) {
 				this->m_DrumPoiont[No].m_Pos = BasePos;
 				this->m_DrumPoiont[No].m_Obj = this->m_ObjDrumBase.Duplicate();
 				this->m_DrumPoiont[No].m_Col = this->m_ColBase.Duplicate();
@@ -518,8 +518,8 @@ namespace FPS_n2 {
 			void			Update() {
 				for (int i = 0; i < this->m_DrumPoiont.size(); i++) {
 					auto& o = this->m_DrumPoiont[i];
-					o.m_Obj.SetMatrix(MATRIX_ref::Mtrans(o.m_Pos));
-					o.m_Col.SetMatrix(MATRIX_ref::Mtrans(o.m_Pos));
+					o.m_Obj.SetMatrix(Matrix4x4DX::Mtrans(o.m_Pos));
+					o.m_Col.SetMatrix(Matrix4x4DX::Mtrans(o.m_Pos));
 					o.m_Col.RefreshCollInfo();
 				}
 			}
@@ -527,8 +527,8 @@ namespace FPS_n2 {
 				for (auto& b : this->m_DrumPoiont) {
 					if (b.m_NearPath->IsDraw()) {
 						if (CheckCameraViewClip_Box(
-							(b.m_Pos + VECTOR_ref::vget(-1.5f*Scale_Rate, -0.5f*Scale_Rate, -1.5f*Scale_Rate)).get(),
-							(b.m_Pos + VECTOR_ref::vget(1.5f*Scale_Rate, 3.f*Scale_Rate, 1.5f*Scale_Rate)).get()) == FALSE
+							(b.m_Pos + Vector3DX::vget(-1.5f*Scale_Rate, -0.5f*Scale_Rate, -1.5f*Scale_Rate)).get(),
+							(b.m_Pos + Vector3DX::vget(1.5f*Scale_Rate, 3.f*Scale_Rate, 1.5f*Scale_Rate)).get()) == FALSE
 							) {
 							b.m_Obj.DrawModel();
 						}
@@ -579,40 +579,40 @@ namespace FPS_n2 {
 		const auto&		GetDrumControl(void) const noexcept { return this->m_DrumControl; }
 		const auto&		GetNearestLight(int No) const noexcept { return m_LightControl.GetNearestLight(No); }
 
-		const auto		HitLightCheck(const VECTOR_ref& StartPos, VECTOR_ref* pEndPos) noexcept { return m_LightControl.HitLightCheck(StartPos, pEndPos); }
-		const int		GetNearestBuilds(const VECTOR_ref& NowPosition) const noexcept {
+		const auto		HitLightCheck(const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept { return m_LightControl.HitLightCheck(StartPos, pEndPos); }
+		const int		GetNearestBuilds(const Vector3DX& NowPosition) const noexcept {
 			for (auto& bu : this->GetBuildDatas()) {
 				if (bu.GetMeshSel() < 0) { continue; }
 				if (
-					(bu.GetMaxPos().x() > NowPosition.x() && NowPosition.x() > bu.GetMinPos().x()) &&
-					(bu.GetMaxPos().z() > NowPosition.z() && NowPosition.z() > bu.GetMinPos().z())
+					(bu.GetMaxPos().x > NowPosition.x && NowPosition.x > bu.GetMinPos().x) &&
+					(bu.GetMaxPos().z > NowPosition.z && NowPosition.z > bu.GetMinPos().z)
 					) {
 					return (int)(&bu - &this->GetBuildDatas().front());
 				}
 			}
 			return -1;
 		}
-		bool CheckPolyMoveWidth(VECTOR_ref StartPos, int TargetIndex, float Width) const {
+		bool CheckPolyMoveWidth(Vector3DX StartPos, int TargetIndex, float Width) const {
 			// ポリゴン同士の連結情報を使用して指定の二つの座標間を直線的に移動できるかどうかをチェックする( 戻り値 true:直線的に移動できる false:直線的に移動できない )( 幅指定版 )
-			VECTOR_ref TargetPos = GetBuildDatas().at(TargetIndex).GetMatrix().pos();
+			Vector3DX TargetPos = GetBuildDatas().at(TargetIndex).GetMatrix().pos();
 			// 最初に開始座標から目標座標に直線的に移動できるかどうかをチェック
 			if (CheckPolyMove(StartPos, TargetPos) == false) { return false; }
 
-			VECTOR_ref Direction = TargetPos - StartPos;		// 開始座標から目標座標に向かうベクトルを算出
-			Direction.y(0.0f);		// y座標を 0.0f にして平面的なベクトルにする
+			Vector3DX Direction = TargetPos - StartPos;		// 開始座標から目標座標に向かうベクトルを算出
+			Direction.y = (0.0f);		// y座標を 0.0f にして平面的なベクトルにする
 
 			// 開始座標から目標座標に向かうベクトルに直角な正規化ベクトルを算出
-			VECTOR_ref SideDirection = Direction.cross(VECTOR_ref::up()).Norm();
+			Vector3DX SideDirection = Vector3DX::Cross(Direction, Vector3DX::up()).normalized();
 			{
 				// 開始座標と目標座標を Width / 2.0f 分だけ垂直方向にずらして、再度直線的に移動できるかどうかをチェック
-				VECTOR_ref TempVec = SideDirection * (Width / 2.0f);
+				Vector3DX TempVec = SideDirection * (Width / 2.0f);
 				if (CheckPolyMove(StartPos + TempVec, TargetPos + TempVec) == false) {
 					return false;
 				}
 			}
 			{
 				// 開始座標と目標座標を Width / 2.0f 分だけ一つ前とは逆方向の垂直方向にずらして、再度直線的に移動できるかどうかをチェック
-				VECTOR_ref TempVec = SideDirection * (-Width / 2.0f);
+				Vector3DX TempVec = SideDirection * (-Width / 2.0f);
 				if (CheckPolyMove(StartPos + TempVec, TargetPos + TempVec) == false) {
 					return false;
 				}
@@ -621,15 +621,15 @@ namespace FPS_n2 {
 		}
 	private:
 		// ポリゴン同士の連結情報を使用して指定の二つの座標間を直線的に移動できるかどうかをチェックする( 戻り値 true:直線的に移動できる false:直線的に移動できない )
-		bool CheckPolyMove(VECTOR_ref StartPos, VECTOR_ref TargetPos) const {
+		bool CheckPolyMove(Vector3DX StartPos, Vector3DX TargetPos) const {
 			int CheckPoly[4];
 			int CheckPolyPrev[4];
 			int NextCheckPoly[4];
 			int NextCheckPolyPrev[4];
 
 			// 開始座標と目標座標の y座標値を 0.0f にして、平面上の判定にする
-			StartPos.y(0.0f);
-			TargetPos.y(0.0f);
+			StartPos.y = (0.0f);
+			TargetPos.y = (0.0f);
 
 			// 開始座標と目標座標の直上、若しくは直下に存在するポリゴンを検索する
 			int StartPoly = this->GetNearestBuilds(StartPos);
@@ -652,20 +652,20 @@ namespace FPS_n2 {
 				for (int i = 0; i < CheckPolyNum; i++) {
 					int Index = CheckPoly[i];
 					// チェック対象のポリゴンの３座標を取得 y座標を0.0にして、平面的な判定を行うようにする
-					VECTOR_ref Pos = this->GetBuildDatas().at(Index).GetMatrix().pos(); Pos.y(0.f);
+					Vector3DX Pos = this->GetBuildDatas().at(Index).GetMatrix().pos(); Pos.y = (0.f);
 
 					for (int K = 0; K < 4; K++) {
 						int LinkIndex = this->GetBuildDatas().at(Index).GetLinkPolyIndex(K);
 
 						;
 
-						VECTOR_ref PolyPos = Pos;
-						PolyPos.xadd((tileSize / 2.f)*((K == 0 || K == 1) ? 1.f : -1.f));
-						PolyPos.zadd((tileSize / 2.f)*((K == 1 || K == 2) ? 1.f : -1.f));
+						Vector3DX PolyPos = Pos;
+						PolyPos.x += ((tileSize / 2.f)*((K == 0 || K == 1) ? 1.f : -1.f));
+						PolyPos.z += ((tileSize / 2.f)*((K == 1 || K == 2) ? 1.f : -1.f));
 						int K2 = (K + 1) % 4;
-						VECTOR_ref PolyPos2 = Pos;
-						PolyPos2.xadd((tileSize / 2.f)*((K2 == 0 || K2 == 1) ? 1.f : -1.f));
-						PolyPos2.zadd((tileSize / 2.f)*((K2 == 1 || K2 == 2) ? 1.f : -1.f));
+						Vector3DX PolyPos2 = Pos;
+						PolyPos2.x += ((tileSize / 2.f)*((K2 == 0 || K2 == 1) ? 1.f : -1.f));
+						PolyPos2.z += ((tileSize / 2.f)*((K2 == 1 || K2 == 2) ? 1.f : -1.f));
 						// ポリゴンの頂点番号0と1の辺に隣接するポリゴンが存在する場合で、
 						// 且つ辺の線分と移動開始点、終了点で形成する線分が接していたら if 文が真になる
 						if (LinkIndex != -1 && GetMinLenSegmentToSegment(StartPos, TargetPos, PolyPos, PolyPos2) < 0.01f) {
@@ -727,9 +727,9 @@ namespace FPS_n2 {
 		}
 
 		const auto		GetPos(int x, int y) const noexcept {
-			VECTOR_ref BasePos;
+			Vector3DX BasePos;
 			BasePos.Set(tileSize * (float)x, 0.f, tileSize * (float)y);
-			BasePos -= VECTOR_ref::vget(tileSize * (float)Size / 2.f, 0.f, tileSize * (float)Size / 2.f);
+			BasePos -= Vector3DX::vget(tileSize * (float)Size / 2.f, 0.f, tileSize * (float)Size / 2.f);
 			return BasePos;
 		}
 	};

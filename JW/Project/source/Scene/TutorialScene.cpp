@@ -8,16 +8,16 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		const int PosNum = 9;
-		const VECTOR_ref TargetPositions[PosNum] = {
-			VECTOR_ref::vget(17.39f,0.0f,-7.65f),
-			VECTOR_ref::vget(24.16f,0.0f,-7.65f),
-			VECTOR_ref::vget(30.28f,0.0f,-7.65f),
-			VECTOR_ref::vget(17.39f,0.0f,-3.51f),
-			VECTOR_ref::vget(24.16f,0.0f,-3.51f),
-			VECTOR_ref::vget(30.28f,0.0f,-3.51f),
-			VECTOR_ref::vget(17.39f,0.0f, 0.85f),
-			VECTOR_ref::vget(24.16f,0.0f, 0.85f),
-			VECTOR_ref::vget(30.28f,0.0f, 0.85f),
+		const Vector3DX TargetPositions[PosNum] = {
+			Vector3DX::vget(17.39f,0.0f,-7.65f),
+			Vector3DX::vget(24.16f,0.0f,-7.65f),
+			Vector3DX::vget(30.28f,0.0f,-7.65f),
+			Vector3DX::vget(17.39f,0.0f,-3.51f),
+			Vector3DX::vget(24.16f,0.0f,-3.51f),
+			Vector3DX::vget(30.28f,0.0f,-3.51f),
+			Vector3DX::vget(17.39f,0.0f, 0.85f),
+			Vector3DX::vget(24.16f,0.0f, 0.85f),
+			Vector3DX::vget(30.28f,0.0f, 0.85f),
 		};
 		//
 		void			TutorialScene::Load_Sub(void) noexcept {
@@ -43,11 +43,11 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			//
-			VECTOR_ref LightVec = VECTOR_ref::vget(-0.1f, -1.f, 0.f);
+			Vector3DX LightVec = Vector3DX::vget(-0.1f, -1.f, 0.f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.f, 1.f, 1.f, 0.0f));
-			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.5f, 10.f)*Scale_Rate, 0);
-			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-10.f, -3.f, -10.f)*Scale_Rate, VECTOR_ref::vget(10.f, 0.f, 10.f)*Scale_Rate, 1);
-			DrawParts->SetShadow(LightVec, VECTOR_ref::vget(-100.f, 0.f, -100.f)*Scale_Rate, VECTOR_ref::vget(100.f, 1.f, 100.f)*Scale_Rate, 2);
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.5f, 10.f)*Scale_Rate, 0);
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.f, 10.f)*Scale_Rate, 1);
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-100.f, 0.f, -100.f)*Scale_Rate, Vector3DX::vget(100.f, 1.f, 100.f)*Scale_Rate, 2);
 			//
 			DeleteLightHandleAll();
 			SetLightEnable(TRUE);
@@ -71,11 +71,11 @@ namespace FPS_n2 {
 			c->SetMapCol(this->m_BackGround);
 			//人の座標設定
 			{
-				VECTOR_ref pos_t;
-				pos_t = VECTOR_ref::vget(0.f, 0.f, Scale_Rate*9.f);
+				Vector3DX pos_t;
+				pos_t = Vector3DX::vget(0.f, 0.f, Scale_Rate*9.f);
 
-				VECTOR_ref EndPos = pos_t + VECTOR_ref::up() * 10.f*Scale_Rate;
-				if (this->m_BackGround->CheckLinetoMap(pos_t + VECTOR_ref::up() * -10.f*Scale_Rate, &EndPos, false)) {
+				Vector3DX EndPos = pos_t + Vector3DX::up() * 10.f*Scale_Rate;
+				if (this->m_BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * -10.f*Scale_Rate, &EndPos, false)) {
 					pos_t = EndPos;
 				}
 				c->ValueSet((PlayerID)0, false, CharaTypeID::Team);
@@ -84,7 +84,7 @@ namespace FPS_n2 {
 			}
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(65), 1.f, 100.f);
-			DrawParts->SetMainCamera().SetCamPos(VECTOR_ref::vget(0, 15, -20), VECTOR_ref::vget(0, 15, 0), VECTOR_ref::vget(0, 1, 0));
+			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 			//サウンド
 			BattleResourceMngr->Set();
 			//UI
@@ -147,7 +147,7 @@ namespace FPS_n2 {
 				auto& t = *ObjMngr->GetObj(ObjType::Target, j);
 				ObjMngr->LoadObjectModel(t.get(), "data/model/Target/");
 				MV1::SetAnime(&t->GetObj(), t->GetObj());
-				t->SetMove(MATRIX_ref::RotY(deg2rad(-90)), VECTOR_ref::vget(Scale_Rate*-(5.f + 10.f*j), 0.f, Scale_Rate*(9.f - 2.f*j)));
+				t->SetMove(Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(-90)), Vector3DX::vget(Scale_Rate*-(5.f + 10.f*j), 0.f, Scale_Rate*(9.f - 2.f*j)));
 			}
 			//*/
 
@@ -158,17 +158,17 @@ namespace FPS_n2 {
 				MV1::SetAnime(&t->GetObj(), t->GetObj());
 
 				float rad = deg2rad(GetRand(360));
-				t->SetMove(MATRIX_ref::RotY(rad),
+				t->SetMove(Matrix4x4DX::RotAxis(Vector3DX::up(), rad),
 					(TargetPositions[j] * Scale_Rate) +
-						   MATRIX_ref::RotY(rad).zvec() *(1.5f*Scale_Rate));
+						   Matrix4x4DX::RotAxis(Vector3DX::up(), rad).zvec() *(1.5f*Scale_Rate));
 			}
 			{
 				auto& t = *ObjMngr->MakeObject(ObjType::MovieObj);
 				ObjMngr->LoadObjectModel(t.get(), "data/model/Radio/");
 
 				float rad = deg2rad(90);
-				t->SetMove(MATRIX_ref::RotY(rad),
-					(VECTOR_ref::vget(0,0,-5.f) * Scale_Rate));
+				t->SetMove(Matrix4x4DX::RotAxis(Vector3DX::up(), rad),
+					(Vector3DX::vget(0,0,-5.f) * Scale_Rate));
 				m_Sound = true;
 
 				if (!BGM->Get(1).Check()) {
@@ -327,8 +327,8 @@ namespace FPS_n2 {
 					pp_y /= 2.f;
 				}
 				if (Chara->GetGunPtrNow()) {
-					pp_x -= Chara->GetRecoilRadAdd().y();
-					pp_y -= Chara->GetRecoilRadAdd().x();
+					pp_x -= Chara->GetRecoilRadAdd().y;
+					pp_y -= Chara->GetRecoilRadAdd().x;
 				}
 				MyInput.SetInputStart(pp_x, pp_y, Chara->GetRadBuf());
 				MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
@@ -379,8 +379,8 @@ namespace FPS_n2 {
 						auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
 						if (a->IsActive()) {
 							//AmmoClass
-							VECTOR_ref repos_tmp = a->GetMove().repos;
-							VECTOR_ref pos_tmp = a->GetMove().pos;
+							Vector3DX repos_tmp = a->GetMove().repos;
+							Vector3DX pos_tmp = a->GetMove().pos;
 
 							int j = 0;
 							while (true) {
@@ -415,7 +415,7 @@ namespace FPS_n2 {
 										SEGMENT_POINT_RESULT Res;
 										GetSegmenttoPoint(repos_tmp, pos_tmp, target->GetMove().pos, &Res);
 										//エフェクト
-										EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, Res.Seg_MinDist_Pos, (pos_tmp - repos_tmp).Norm(), a->GetCaliberSize() / 0.02f * Scale_Rate);
+										EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, Res.Seg_MinDist_Pos, (pos_tmp - repos_tmp).normalized(), a->GetCaliberSize() / 0.02f * Scale_Rate);
 										if (m_Sound) {
 											m_Sound = false;
 											auto* BGM = BGMPool::Instance();
@@ -425,7 +425,7 @@ namespace FPS_n2 {
 									}
 								}
 							}
-							VECTOR_ref norm_tmp;
+							Vector3DX norm_tmp;
 							auto ColResGround = this->m_BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, true, &norm_tmp);
 							bool is_HitAll = false;
 							if (ColResGround && !is_HitAll) {
@@ -452,11 +452,11 @@ namespace FPS_n2 {
 			{
 				{
 					//FPSカメラ
-					VECTOR_ref CamPos = Chara->GetEyeMatrix().pos() + DrawParts->GetCamShake();
+					Vector3DX CamPos = Chara->GetEyeMatrix().pos() + DrawParts->GetCamShake();
 					DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeMatrix().zvec() * -1.f, Chara->GetEyeMatrix().yvec());
 
-					//VECTOR_ref CamPos = VECTOR_ref::vget(0.f, 1.5f, 0.f)*Scale_Rate;
-					//VECTOR_ref CamVec = VECTOR_ref::vget(1.f, 1.5f, 0.f)*Scale_Rate;
+					//Vector3DX CamPos = Vector3DX::vget(0.f, 1.5f, 0.f)*Scale_Rate;
+					//Vector3DX CamVec = Vector3DX::vget(1.f, 1.5f, 0.f)*Scale_Rate;
 					//DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, Chara->GetEyeMatrix().yvec());
 
 					//info
@@ -529,11 +529,11 @@ namespace FPS_n2 {
 				}
 				//
 				auto mat = Chara->GetGunPtrNow()->GetFrameWorldMat(GunFrame::LaserSight);
-				VECTOR_ref StartPos = mat.pos();
-				VECTOR_ref EndPos = StartPos + mat.zvec()*-1.f * 15.f*Scale_Rate;
+				Vector3DX StartPos = mat.pos();
+				Vector3DX EndPos = StartPos + mat.zvec()*-1.f * 15.f*Scale_Rate;
 				this->m_BackGround->CheckLinetoMap(StartPos, &EndPos, true);
 				auto Vec = (EndPos - StartPos);
-				EndPos = StartPos + Vec.Norm()*std::max(Vec.Length() - 0.3f*Scale_Rate, 0.f);
+				EndPos = StartPos + Vec.normalized()*std::max(Vec.magnitude() - 0.3f*Scale_Rate, 0.f);
 				Chara->SetLaserStartPos(StartPos);
 				Chara->SetLaserEndPos(EndPos);
 				Chara->SetIsLaserActive(true);
@@ -545,8 +545,8 @@ namespace FPS_n2 {
 			//UIパラメーター
 			{
 				//シェイク
-				this->m_UIclass.SetIntParam(0, (int)(DrawParts->GetCamShake().x()*100.f));
-				this->m_UIclass.SetIntParam(1, (int)(DrawParts->GetCamShake().y()*100.f));
+				this->m_UIclass.SetIntParam(0, (int)(DrawParts->GetCamShake().x*100.f));
+				this->m_UIclass.SetIntParam(1, (int)(DrawParts->GetCamShake().y*100.f));
 				this->m_UIclass.SetIntParam(2, (int)(rad2deg(Chara->GetLeanRad()*5.f)));
 				//AmmoStock
 				this->m_UIclass.SetIntParam(3, Chara->GetAmmoStock());
@@ -590,7 +590,7 @@ namespace FPS_n2 {
 			EffectControl::Execute();
 			//
 			{
-				VECTOR_ref campos; campos.z(-1.f);
+				Vector3DX campos; campos.z = (-1.f);
 				Chara->SetCameraPosition(campos);
 			}
 #ifdef DEBUG
