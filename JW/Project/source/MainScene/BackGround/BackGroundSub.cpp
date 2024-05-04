@@ -401,7 +401,7 @@ namespace FPS_n2 {
 
 		m_LightControl.DrawFront();
 	}
-	
+
 	void			BuildControl::Dispose(void) noexcept {
 		this->m_ObjBuildBase.Dispose();
 		this->m_ColBuildBase.Dispose();

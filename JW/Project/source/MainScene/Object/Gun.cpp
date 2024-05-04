@@ -201,31 +201,10 @@ namespace FPS_n2 {
 			if (HasFrameBySlot(frame)) {
 				return true;
 			}
-			if (HaveFrame(frame)) {
+			if (HaveFrame((int)frame)) {
 				return true;
 			}
 			return false;
-		}
-		const Matrix4x4DX	GunClass::GetFrameLocalMat(GunFrame frame) const noexcept {
-			//該当フレームがあるのなら上書き
-			if (m_SightPtr.at(m_GunSightSel)) {
-				switch (frame) {
-					case GunFrame::Eyepos:
-					case GunFrame::Lens:
-					case GunFrame::LensSize:
-						return (*m_SightPtr.at(m_GunSightSel))->GetFrameLocalMat(frame);
-					default:
-						break;
-				}
-			}
-			Matrix4x4DX Ret;
-			if (ModSlotControl::GetPartsFrameLocalMatBySlot(frame, &Ret)) {
-				return Ret;
-			}
-			if (HaveFrame(frame)) {
-				return GetFrameLocalMatrix(GetFrame(frame));
-			}
-			return Matrix4x4DX::identity();
 		}
 		const Matrix4x4DX	GunClass::GetFrameWorldMat(GunFrame frame, bool CheckSight) const noexcept {
 			//該当フレームがあるのなら上書き
@@ -243,23 +222,10 @@ namespace FPS_n2 {
 			if (ModSlotControl::GetPartsFrameWorldMat(frame, &Ret)) {
 				return Ret;
 			}
-			if (HaveFrame(frame)) {
-				return GetFrameWorldMatrix(GetFrame(frame));
+			if (HaveFrame((int)frame)) {
+				return GetFrameWorldMatrix(GetFrame((int)frame));
 			}
 			return Matrix4x4DX::identity();
-		}
-
-		void				GunClass::ResetFrameLocalMat(GunFrame frame) noexcept {
-			ModSlotControl::ResetPartsFrameLocalMat(frame);
-			if (HaveFrame(frame)) {
-				GetObj().frame_Reset(GetFrame(frame));
-			}
-		}
-		void				GunClass::SetFrameLocalMat(GunFrame frame, const Matrix4x4DX&value) noexcept {
-			ModSlotControl::SetPartsFrameLocalMat(frame, value);
-			if (HaveFrame(frame)) {
-				GetObj().SetFrameLocalMatrix(GetFrame(frame), value * this->GetFrameBaseLocalMat(frame));
-			}
 		}
 		void				GunClass::SetActiveAll(bool value) noexcept {
 			bool isActive = this->IsActive();
@@ -292,7 +258,8 @@ namespace FPS_n2 {
 					break;
 			}
 			for (int i = 0; i < this->m_ChamberAmmoData->GetPellet(); i++) {
-				auto& LastAmmo = (std::shared_ptr<AmmoClass>&)(*ObjMngr->MakeObject(ObjType::Ammo));
+				auto LastAmmo = std::make_shared<AmmoClass>();
+				ObjMngr->AddObject(LastAmmo);
 				LastAmmo->Init();
 				auto mat =
 					Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(this->m_ChamberAmmoData->GetAccuracy()))) *
@@ -345,10 +312,10 @@ namespace FPS_n2 {
 					if (GetGunAnimePer(EnumGunAnimType::Reload) >= 1.f) {
 						switch (this->GetGunDataClass()->GetReloadType()) {
 							case RELOADTYPE::MAG:
-								//ユニークIDが異なる場合登録するオブジェと切り替える
-								if (this->m_NextMagUniqueID != (*m_MagazinePtr)->GetModData()->GetUniqueID()) {
-									m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(ModSlotControl::SetMod(GunSlot::Magazine, this->m_NextMagUniqueID, this->GetObj())));
-								}
+								//ユニークIDが異なる場合登録するオブジェと切り替える(現状不要なのでいったんオフ)
+								//if (this->m_NextMagUniqueID != (*m_MagazinePtr)->GetModData()->GetUniqueID()) {
+								//	m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(ModSlotControl::SetMod(GunSlot::Magazine, this->m_NextMagUniqueID, this->m_obj)));
+								//}
 								SetAmmo(m_NextMagNum);
 								SetGunAnime(GunAnimeID::ReloadEnd);
 								break;
@@ -588,9 +555,17 @@ namespace FPS_n2 {
 			ExecuteSound();
 			//
 			{
-				ResetFrameLocalMat(GunFrame::Center);
+				//1のフレーム移動量を無視する
+				ModSlotControl::ResetPartsFrameLocalMat(GunFrame::Center);
+				if (HaveFrame((int)GunFrame::Center)) {
+					GetObj().frame_Reset(GetFrame((int)GunFrame::Center));
+				}
 				GetObj().work_anime();
-				SetFrameLocalMat(GunFrame::Center, GetFrameLocalMat(GunFrame::Center).rotation());//1のフレーム移動量を無視する
+				auto Rot = GetFrameLocalMatrix(GetFrame((int)GunFrame::Center)).rotation();
+				ModSlotControl::SetPartsFrameLocalMat(GunFrame::Center, Rot);
+				if (HaveFrame((int)GunFrame::Center)) {
+					GetObj().SetFrameLocalMatrix(GetFrame((int)GunFrame::Center), Rot * GetFrameBaseLocalMat((int)GunFrame::Center));
+				}
 			}
 			//
 			Easing(&m_GunChangePer, 1.f, 0.8f, EasingType::OutExpo);

@@ -337,7 +337,7 @@ namespace FPS_n2 {
 						m_Timer = m_Timer + 1.f / FPS;
 					}
 				}
-				if (m_ReadyTimer>0.f) {
+				if (m_ReadyTimer > 0.f) {
 					BGM->Get(0).SetVol_Local((int)(255.f*m_ReadyTimer / 6.f));
 				}
 				else {
@@ -431,7 +431,6 @@ namespace FPS_n2 {
 			}
 			auto* SE = SoundPool::Instance();
 			auto* BGM = BGMPool::Instance();
-			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 
 			BGM->Get(0).Stop();
@@ -439,8 +438,7 @@ namespace FPS_n2 {
 			SE->Get((int)SoundEnum::Env).StopAll(0);
 			SE->Get((int)SoundEnum::Env2).StopAll(0);
 			//使い回しオブジェ系
-			auto* Ptr = &PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
-			ObjMngr->DelObj(Ptr);
+			ObjectManager::Instance()->DelObj(&PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara());
 			PlayerMngr->GetPlayer(GetMyPlayerID()).Dispose();
 			this->m_BackGround->Dispose();
 			this->m_BackGround.reset();
@@ -480,16 +478,14 @@ namespace FPS_n2 {
 				return;
 			}
 			this->m_BackGround->Shadow_Draw();
-			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DrawObject_Shadow();
+			ObjectManager::Instance()->Draw_Shadow();
 		}
 		void			MAINLOOP::ShadowDraw_Sub(void) noexcept {
 			if (m_IsEnd) {
 				return;
 			}
 			this->m_BackGround->Shadow_Draw();
-			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DrawObject_Shadow();
+			ObjectManager::Instance()->Draw_Shadow();
 		}
 		void			MAINLOOP::MainDraw_Sub(void) noexcept {
 			//*
@@ -511,14 +507,14 @@ namespace FPS_n2 {
 			SetFogStartEnd(Scale_Rate * 1200.f, Scale_Rate * 1600.f);
 
 			this->m_BackGround->Draw();
-			ObjMngr->DrawObject();
+			ObjMngr->Draw();
 			//レーザー
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 				c->DrawLaser();
 			}
 
-			//ObjMngr->DrawDepthObject();
+			//ObjMngr->Draw_Depth();
 			//シェーダー描画用パラメーターセット
 			if (Chara->GetGunPtrNow()) {
 				Chara->GetGunPtrNow()->UpdateReticle();
@@ -535,17 +531,6 @@ namespace FPS_n2 {
 			else {
 				DrawParts->Set_is_lens(false);
 				DrawParts->Set_zoom_lens(1.f);
-			}
-			for (int index = 0; index < Chara_num; index++) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-				if (c->GetMyPlayerID() == GetMyPlayerID()) { continue; }
-				//auto pos = c->GetFrameWorldMat(CharaFrame::Upper).pos();
-				auto pos = c->GetMove().pos + c->GetMove().mat.zvec()*-1.f * 5.f*Scale_Rate;
-				Vector3DX campos = ConvWorldPosToScreenPos(pos.get());
-				if (0.f < campos.z && campos.z < 1.f) {
-					c->SetCameraPosition(campos);
-					c->SetCameraSize(std::max(20.f / ((pos - GetCameraPosition()).magnitude() / 2.f), 0.2f));
-				}
 			}
 #ifdef DEBUG
 			if (false) {
@@ -565,7 +550,7 @@ namespace FPS_n2 {
 		}
 		//UI表示
 		void			MAINLOOP::DrawUI_Base_Sub(void) noexcept {
-			if (m_PreEndTimer != -1.f) {				return;			}
+			if (m_PreEndTimer != -1.f) { return; }
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
@@ -629,7 +614,6 @@ namespace FPS_n2 {
 		void			MAINLOOP::Dispose_Load_Sub(void) noexcept {
 			if (!m_IsFirstLoad) {
 				m_IsFirstLoad = true;
-				auto* ObjMngr = ObjectManager::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto* BattleResourceMngr = CommonBattleResource::Instance();
 				BattleResourceMngr->Dispose();
@@ -639,7 +623,7 @@ namespace FPS_n2 {
 				this->guard_Graph.Dispose();
 				this->m_MiniMapScreen.Dispose();
 				PlayerMngr->Dispose();
-				ObjMngr->DisposeObject();
+				ObjectManager::Instance()->DeleteAll();
 			}
 		}
 		//load
@@ -1114,7 +1098,7 @@ namespace FPS_n2 {
 							}
 						}
 						if (isHit) {
-							a->SetIsDelete(true);
+							a->SetDelete();
 						}
 					}
 				}
@@ -1378,11 +1362,6 @@ namespace FPS_n2 {
 
 				this->m_UIclass.SetIntParam(8, Chara->GetArmerStock());
 				this->m_UIclass.SetIntParam(9, Chara->GetMorphineStock());
-			}
-			for (int index = 0; index < Chara_num; index++) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-				Vector3DX campos; campos.z = (-1.f);
-				c->SetCameraPosition(campos);
 			}
 		}
 		void			MAINLOOP::UpdateMiniMap(void) noexcept {

@@ -442,11 +442,11 @@ namespace FPS_n2 {
 							this->m_rad_Buf.x + (this->m_Input.GetAddxRad()*(this->m_Input.GetPADSPress(PADS::RUN) ? 0.5f : 1.f)),
 							deg2rad(-70.f), deg2rad(24.f))
 						+ this->m_radAdd.x
-					);
+						);
 					this->m_rad_Buf.y = (
 						this->m_rad_Buf.y + (this->m_Input.GetAddyRad()*(this->m_Input.GetPADSPress(PADS::RUN) ? 0.5f : 1.f))
 						+ this->m_radAdd.y
-					);
+						);
 
 					float X = this->m_rad.x;
 					float Y = this->m_rad.y;

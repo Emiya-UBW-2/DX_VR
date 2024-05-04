@@ -96,9 +96,9 @@ namespace FPS_n2 {
 				}
 				//SelMoveClass‚ğGunsModify::GetSelData()‚É‡‚í‚¹‚Äƒ\[ƒg
 				std::sort(SelMoveClass.begin(), SelMoveClass.end(),
-						 [](const SlotMove& a, const SlotMove& b) {
-							 return a.index < b.index;
-						 }
+						  [](const SlotMove& a, const SlotMove& b) {
+							  return a.index < b.index;
+						  }
 				);
 			}
 			void			DrawCustomUI(void) noexcept;

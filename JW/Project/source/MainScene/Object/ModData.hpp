@@ -56,7 +56,7 @@ namespace FPS_n2 {
 			const auto& GetIronSight(void) const noexcept { return this->m_IronSight; }
 			const auto&		GetInfo(void) const noexcept { return this->m_Info; }
 			const auto&		GetInfoEng(void) const noexcept { return this->m_InfoEng; }
-			
+
 			//銃声
 			const auto&	GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
 			//スコープ

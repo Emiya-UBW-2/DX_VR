@@ -130,7 +130,7 @@ namespace FPS_n2 {
 			Second,
 			OneMunute,
 			TimeUp,
-			
+
 		};
 		enum class CharaTypeID {
 			Team,

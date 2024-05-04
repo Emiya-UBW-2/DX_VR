@@ -403,7 +403,7 @@ namespace FPS_n2 {
 			}
 			void		Execute(const Vector3DX& CamPos) {
 				auto* OptionParts = OPTION::Instance();
-				if (OptionParts->GetParamInt(EnumSaveParam::grass_level)==0) {
+				if (OptionParts->GetParamInt(EnumSaveParam::grass_level) == 0) {
 					return;
 				}
 				int x = (int)(CamPos.x / 100.f*2.f);

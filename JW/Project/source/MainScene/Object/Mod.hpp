@@ -16,18 +16,17 @@ namespace FPS_n2 {
 			~ModClass(void) noexcept {}
 		public:
 			auto&			GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
-			const auto		GetChildFrameWorldMat(GunFrame frame, int ID) const noexcept { return ObjectBaseClass::GetChildFrameWorldMatrix(GetFrame(frame), ID); }
 			const auto		GetFrameWorldMat(GunFrame frame) const noexcept {
 				//ŠY“–ƒtƒŒ[ƒ€‚ª‚ ‚é‚Ì‚È‚çã‘‚«
 				Matrix4x4DX Ret;
 				if (ModSlotControl::GetPartsFrameWorldMat(frame, &Ret)) {
 					return Ret;
 				}
-				if (HaveFrame(frame)) {
-					Ret = GetFrameWorldMatrix(GetFrame(frame));
+				if (HaveFrame((int)frame)) {
+					Ret = GetFrameWorldMatrix(GetFrame((int)frame));
 					if (frame == GunFrame::Sight) {
-						if (GetChildFramesNum(frame) > 0) {
-							Vector3DX vec = (GetChildFrameWorldMat(frame, 0).pos() - Ret.pos()).normalized();
+						if (GetChildFrameNum(GetFrame((int)frame)) > 0) {
+							Vector3DX vec = (GetChildFrameWorldMatrix(GetFrame((int)frame), 0).pos() - Ret.pos()).normalized();
 							//Vector3DX::Cross(pRet->xvec(), vec)
 							Ret = (Ret.rotation()*Matrix4x4DX::RotVec2(Ret.yvec(), vec)) * Matrix4x4DX::Mtrans(Ret.pos());
 						}
@@ -36,10 +35,6 @@ namespace FPS_n2 {
 				}
 				return Matrix4x4DX::identity();
 			}
-			void			ResetFrameLocalMat(GunFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }
-			
-
-			void			SetFrameLocalMat(GunFrame frame, const Matrix4x4DX&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * GetFrameBaseLocalMat(frame)); }
 		public:
 			void			Init(void) noexcept override;
 

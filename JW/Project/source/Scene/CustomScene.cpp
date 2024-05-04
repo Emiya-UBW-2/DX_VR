@@ -3,6 +3,7 @@
 #include "../sub.hpp"
 
 #include "../MainScene/Player/Player.hpp"
+#include "../MainScene/Object/MovieObj.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -34,7 +35,7 @@ namespace FPS_n2 {
 			ButtonSel.at(3).Set(y_r(960 - 100), y_r(920), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			ButtonSel.at(4).Load_Icon("data/UI/Right.png", true);
 			ButtonSel.at(4).Set(y_r(960 + 100), y_r(920), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			
+
 			ButtonSel.at(5).Load_Icon("data/UI/Left.png", true);
 			ButtonSel.at(5).Set(y_r(960 - 400 - 48), y_r(540 - 270 + 48), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			ButtonSel.at(6).Load_Icon("data/UI/Right.png", true);
@@ -83,9 +84,10 @@ namespace FPS_n2 {
 				GunPtr->Init_Gun();
 			}
 			{
-				auto* Ptr = ObjMngr->MakeObject(ObjType::MovieObj);
-				ObjMngr->LoadObjectModel((*Ptr).get(), "data/model/table/");
-				(*Ptr)->Init();
+				auto Obj = std::make_shared<MovieObjClass>();
+				ObjMngr->AddObject(Obj);
+				ObjMngr->LoadModel(Obj, nullptr, "data/model/table/");
+				Obj->Init();
 			}
 			m_Yrad = deg2rad(-45);
 			m_Xrad = 0.f;
@@ -371,7 +373,7 @@ namespace FPS_n2 {
 			for (int i = 0;i < (int)ULT_GUN::Max;i++) {
 				Easing(&m_UltPer[i], ((i == (int)GunsModify::GetULTSelect()) && (m_LookSel == LookSelect::ULTSet)) ? 0.f : 1.f, 0.9f, EasingType::OutExpo);
 			}
-			Pad->SetMouseMoveEnable(m_LookSel==LookSelect::FreeLook);
+			Pad->SetMouseMoveEnable(m_LookSel == LookSelect::FreeLook);
 
 			ObjMngr->ExecuteObject();
 			ObjMngr->LateExecuteObject();
@@ -398,14 +400,12 @@ namespace FPS_n2 {
 			GunsModify::SaveSlots("Save/gundata.svf");
 
 			for (int i = 0;i < (int)ULT_GUN::Max;i++) {
-				auto* Ptr = &PlayerMngr->GetPlayer(0).GetGun(1 + i);
-				ObjMngr->DelObj(Ptr);
+				ObjMngr->DelObj(&PlayerMngr->GetPlayer(0).GetGun(1 + i));
 			}
-			auto* Ptr = &PlayerMngr->GetPlayer(0).GetGun(0);
-			ObjMngr->DelObj(Ptr);
+			ObjMngr->DelObj(&PlayerMngr->GetPlayer(0).GetGun(0));
 			PlayerMngr->GetPlayer(0).Dispose();
 			for (int i = 0;i < (int)ULT_GUN::Max;i++) {
-				PlayerMngr->GetPlayer(1+i).Dispose();
+				PlayerMngr->GetPlayer(1 + i).Dispose();
 			}
 			GunsModify::DisposeSlots();
 			//
@@ -415,12 +415,10 @@ namespace FPS_n2 {
 			}
 		}
 		void			CustomScene::ShadowDraw_Sub(void) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DrawObject();
+			ObjectManager::Instance()->Draw_Shadow();
 		}
 		void			CustomScene::MainDraw_Sub(void) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DrawObject();
+			ObjectManager::Instance()->Draw();
 
 			ClearDrawScreenZBuffer();
 			switch (m_LookSel) {
@@ -465,7 +463,7 @@ namespace FPS_n2 {
 			//
 			for (auto& y : ButtonSel) {
 				if (m_LookSel == LookSelect::FreeLook) {
-					if ((int)(&y - &ButtonSel.front())>=3) {
+					if ((int)(&y - &ButtonSel.front()) >= 3) {
 						break;
 					}
 				}
@@ -651,10 +649,10 @@ namespace FPS_n2 {
 				yp1 = y_r(540);
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																	xp1, yp1, Green, DarkGreen, "ShotMode : %s", SHOTTYPEName[(int)GunPtr->GetShotType()]);
+																	  xp1, yp1, Green, DarkGreen, "ShotMode : %s", SHOTTYPEName[(int)GunPtr->GetShotType()]);
 				yp1 += y_r(24 + 4);
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																	xp1, yp1, Green, DarkGreen, "ShotSound : %s", GunShootSoundName[(int)GunPtr->GetGunShootSound()]);
+																	  xp1, yp1, Green, DarkGreen, "ShotSound : %s", GunShootSoundName[(int)GunPtr->GetGunShootSound()]);
 				yp1 += y_r(24 + 4);
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																	  xp1, yp1, Green, DarkGreen, "RecoilPower : %d", (int)(GunPtr->GetRecoilPower()*GunPtr->GetRecoilReturn()));
@@ -700,11 +698,11 @@ namespace FPS_n2 {
 						const char* Name = (*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[sel]))->GetName().c_str();
 						if (SaveDataParts->GetParam(Name) == 1) {
 							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																				xp1, yp1, Color, DarkGreen, Name);
+																				  xp1, yp1, Color, DarkGreen, Name);
 						}
 						else {
 							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																				xp1, yp1, GetColor(216, 143, 143), DarkGreen, "????");
+																				  xp1, yp1, GetColor(216, 143, 143), DarkGreen, "????");
 							int xsize = Fonts->Get(FontPool::FontType::Nomal_Edge).GetStringWidth(y_r(24), "????");
 							int ysize = y_r(24);
 							if (in2_(Pad->GetMS_X(), Pad->GetMS_Y(), xp1, yp1, xp1 + xsize, yp1 + ysize)) {
@@ -714,13 +712,13 @@ namespace FPS_n2 {
 					}
 					else {
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																			xp1, yp1, Color, DarkGreen, "None");
+																			  xp1, yp1, Color, DarkGreen, "None");
 					}
 					yp1 += y_r(28);
 				}
 				if (mouseover != -1) {
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-																		Pad->GetMS_X(), Pad->GetMS_Y(), White, Gray75, LocalizePool::Instance()->Get(9000));
+																		  Pad->GetMS_X(), Pad->GetMS_Y(), White, Gray75, LocalizePool::Instance()->Get(9000));
 
 				}
 			}
@@ -743,7 +741,7 @@ namespace FPS_n2 {
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + (int)GunsModify::GetULTSelect()).GetGun(0);
 				if (GunPtr) {
 					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-																		  xp1, yp1, Green, DarkGreen, GunPtr->GetModData()->GetName());
+																		xp1, yp1, Green, DarkGreen, GunPtr->GetModData()->GetName());
 				}
 			}
 			//
@@ -755,7 +753,7 @@ namespace FPS_n2 {
 					auto& STR = GunPtr->GetModData()->GetInfo();
 					for (auto& s : STR) {
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
-																			xp1, yp1, Green, DarkGreen, s.c_str());
+																			  xp1, yp1, Green, DarkGreen, s.c_str());
 						yp1 += y_r(24);
 					}
 				}
@@ -787,11 +785,8 @@ namespace FPS_n2 {
 		void			CustomScene::Dispose_Load_Sub(void) noexcept {
 			if (!m_IsFirstLoad) {
 				m_IsFirstLoad = true;
-				auto* PlayerMngr = PlayerManager::Instance();
-				auto* ObjMngr = ObjectManager::Instance();
-
-				PlayerMngr->Dispose();
-				ObjMngr->DisposeObject();
+				PlayerManager::Instance()->Dispose();
+				ObjectManager::Instance()->DeleteAll();
 			}
 		}
 		//

@@ -195,7 +195,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
+				auto TgtPos = TargetChara->GetFrameWorldMatrix(TargetChara->GetFrame((int)CharaFrame::Upper2)).pos();
 
 				auto MyPos = MyChara->GetEyeMatrix().pos();
 
@@ -212,7 +212,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
+				auto TgtPos = TargetChara->GetFrameWorldMatrix(TargetChara->GetFrame((int)CharaFrame::Upper2)).pos();
 
 				auto MyPos = MyChara->GetEyeMatrix().pos();
 
@@ -231,7 +231,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
+				auto TgtPos = TargetChara->GetFrameWorldMatrix(TargetChara->GetFrame((int)CharaFrame::Upper2)).pos();
 				auto MyPos = MyChara->GetEyeMatrix().pos();
 
 				auto Target = TgtPos;
@@ -256,7 +256,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
+				auto TgtPos = TargetChara->GetFrameWorldMatrix(TargetChara->GetFrame((int)CharaFrame::Upper2)).pos();
 
 				Vector3DX pos_t;
 				while (true) {
@@ -296,12 +296,12 @@ namespace FPS_n2 {
 				{
 					Vector3DX DirHY; DirHY.Set(Dir_XZ.magnitude(), 0.f, Dir.y);
 					Vector3DX VecHY; VecHY.Set(Vec.magnitude(), 0.f, VEC.y);
-					auto IsFront = ((Vector3DX::Dot(DirHY.normalized(),VecHY.normalized())) > 0.f);
+					auto IsFront = ((Vector3DX::Dot(DirHY.normalized(), VecHY.normalized())) > 0.f);
 					auto cross = Vector3DX::Cross(DirHY.normalized(), VecHY.normalized()).y;
 					m_MyInput.SetAddxRad(IsFront ? (-0.04f*cross) : 0.f);
 				}
 				{
-					auto IsFront = ((Vector3DX::Dot(Dir_XZ.normalized(),Vec.normalized())) > 0.f);
+					auto IsFront = ((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized())) > 0.f);
 					auto cross = Vector3DX::Cross(Dir_XZ.normalized(), Vec.normalized()).y;
 					if (IsFront) {
 						if (abs(cross) < 0.4f) {

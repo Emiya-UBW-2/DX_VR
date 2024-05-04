@@ -344,12 +344,10 @@ namespace FPS_n2 {
 		}
 
 		void			TitleScene::ShadowDraw_Sub(void) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DrawObject();
+			ObjectManager::Instance()->Draw_Shadow();
 		}
 		void			TitleScene::MainDraw_Sub(void) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DrawObject();
+			ObjectManager::Instance()->Draw();
 		}
 		//
 		void			TitleScene::DrawUI_Base_Sub(void) noexcept {
@@ -357,7 +355,7 @@ namespace FPS_n2 {
 			auto* Fonts = FontPool::Instance();
 
 			//
-			m_TitleImage.DrawExtendGraph(y_r(64), y_r(64), y_r(64+369), y_r(64 + 207), true);
+			m_TitleImage.DrawExtendGraph(y_r(64), y_r(64), y_r(64 + 369), y_r(64 + 207), true);
 			//
 			{
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
@@ -391,11 +389,8 @@ namespace FPS_n2 {
 		void			TitleScene::Dispose_Load_Sub(void) noexcept {
 			if (!m_IsFirstLoad) {
 				m_IsFirstLoad = true;
-				auto* PlayerMngr = PlayerManager::Instance();
-				auto* ObjMngr = ObjectManager::Instance();
-
-				PlayerMngr->Dispose();
-				ObjMngr->DisposeObject();
+				PlayerManager::Instance()->Dispose();
+				ObjectManager::Instance()->DeleteAll();
 			}
 		}
 		//

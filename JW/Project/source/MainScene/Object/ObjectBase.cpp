@@ -1,10 +1,12 @@
 #include "ObjectBase.hpp"
 
+#include "CharacterEnum.hpp"
+#include "GunEnum.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			ObjectBaseClass::LoadModel(PHYSICS_SETUP TYPE, const char* filepath, const char* objfilename, const char* colfilename) noexcept {
 			this->m_IsBaseModel = true;
-			this->m_objActive = true;
 			this->m_PHYSICS_SETUP = TYPE;
 			this->m_FilePath = filepath;
 			this->m_ObjFileName = objfilename;
@@ -123,7 +125,6 @@ namespace FPS_n2 {
 		}
 		void			ObjectBaseClass::CopyModel(const std::shared_ptr<ObjectBaseClass>& pBase) noexcept {
 			this->m_IsBaseModel = false;
-			this->m_objActive = true;
 			this->m_PHYSICS_SETUP = pBase->m_PHYSICS_SETUP;
 			this->m_FilePath = pBase->m_FilePath;
 			this->m_ObjFileName = pBase->m_ObjFileName;
@@ -249,12 +250,18 @@ namespace FPS_n2 {
 		}
 		void			ObjectBaseClass::CheckDraw(void) noexcept {
 			this->m_IsDraw = false;
-			this->m_DistanceToCam = (this->GetObj().GetMatrix().pos() - GetCameraPosition()).magnitude();
+			this->m_DistanceToCam = (this->GetObj().GetMatrix().pos() - GetScreenPosition()).magnitude();
 			if (CheckCameraViewClip_Box(
 				(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-1.f*Scale_Rate, -0.f*Scale_Rate, -1.f*Scale_Rate)).get(),
 				(this->GetObj().GetMatrix().pos() + Vector3DX::vget(1.f*Scale_Rate, 1.f*Scale_Rate, 1.f*Scale_Rate)).get()) == FALSE
 				) {
 				this->m_IsDraw |= true;
+			}
+
+			auto pos = this->GetMove().pos;
+			Vector3DX campos = ConvWorldPosToScreenPos(pos.get());
+			if (0.f < campos.z && campos.z < 1.f) {
+				this->SetScreenPosition(campos, std::max(20.f / ((pos - GetCameraPosition()).magnitude() / 2.f), 0.2f));
 			}
 		}
 		void			ObjectBaseClass::Draw(bool isDrawSemiTrans) noexcept {

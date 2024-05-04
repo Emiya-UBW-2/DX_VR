@@ -17,8 +17,7 @@ namespace FPS_n2 {
 			public ObjectBaseClass,
 			public MuzzleSmokeControl,
 			public ModSlotControl,
-			public ReticleControl
-		{
+			public ReticleControl {
 		private:
 			std::shared_ptr<AmmoDataClass>			m_ChamberAmmoData{nullptr};		//
 			bool									m_GunAnimeFirst{false};
@@ -66,7 +65,6 @@ namespace FPS_n2 {
 			const auto	GetTimePer(GunAnimeID ID) { return  GetAnime(ID).GetTimePer(); }
 
 			const bool	HasFrame(GunFrame frame) const noexcept;
-			const Matrix4x4DX GetFrameLocalMat(GunFrame frame) const noexcept;
 			const Matrix4x4DX GetFrameWorldMat(GunFrame frame, bool CheckSight = true) const noexcept;
 		public://ƒQƒbƒ^[
 			const auto& GetReloadType(void) const noexcept { return GetGunDataClass()->GetReloadType(); }
@@ -74,7 +72,7 @@ namespace FPS_n2 {
 				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModData()->GetIsRecoilPower()) {
 					return (*this->m_UpperPtr)->GetModData()->GetRecoilPower();
 				}
-				return GetModData()->GetRecoilPower()+ m_Recoil_Diff;
+				return GetModData()->GetRecoilPower() + m_Recoil_Diff;
 			}
 			const auto& GetRecoilReturn(void) const noexcept {
 				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModData()->GetIsRecoilReturn()) {
@@ -183,8 +181,8 @@ namespace FPS_n2 {
 					}
 					if (HasFrame(GunFrame::EyeOffsetPos)) {
 						Vector3DX vec = GetFrameWorldMat(GunFrame::EyeOffsetPos).yvec();
-						if (GetChildFramesNum(GunFrame::EyeOffsetPos) > 0) {
-							vec = (GetChildFrameWorldMat(GunFrame::EyeOffsetPos, 0).pos() - GetFrameWorldMat(GunFrame::EyeOffsetPos).pos()).normalized();
+						if (GetChildFrameNum(GetFrame((int)GunFrame::EyeOffsetPos)) > 0) {
+							vec = (GetChildFrameWorldMatrix(GetFrame((int)GunFrame::EyeOffsetPos), 0).pos() - GetFrameWorldMat(GunFrame::EyeOffsetPos).pos()).normalized();
 						}
 						if (m_GunSightSel == 0) {
 							Pos = Lerp(vec, Pos, m_GunChangePer);
@@ -273,8 +271,6 @@ namespace FPS_n2 {
 				}
 				SetGunAnime((!GetIsMagEmpty()) ? GunAnimeID::ReloadStart : GunAnimeID::ReloadStart_Empty);
 			}
-			void		ResetFrameLocalMat(GunFrame frame) noexcept;
-			void		SetFrameLocalMat(GunFrame frame, const Matrix4x4DX&value) noexcept;
 			void		SetActiveAll(bool value) noexcept;
 			void		SetBullet(void) noexcept;//”­–C
 			void		UpdateGunAnims(void) noexcept;

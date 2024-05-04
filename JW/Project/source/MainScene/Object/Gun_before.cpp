@@ -86,7 +86,7 @@ namespace FPS_n2 {
 			}
 			if (Ret) {
 				auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[(int)Slot]);
-				if (Obj->HaveFrame(frame)) {
+				if (Obj->HaveFrame((int)frame)) {
 					return true;
 				}
 			}
@@ -112,7 +112,8 @@ namespace FPS_n2 {
 			bool Ret = false;
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
-					*pRet = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetFrameLocalMat(frame);
+					auto& Ptr = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
+					*pRet = Ptr->GetFrameLocalMatrix(Ptr->GetFrame((int)frame));
 					Ret = true;
 				}
 			}
@@ -133,8 +134,8 @@ namespace FPS_n2 {
 					auto& m = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
 					*pRet = m->GetFrameWorldMat(frame);
 					if (frame == GunFrame::Sight) {
-						if (m->GetChildFramesNum(frame) > 0) {
-							Vector3DX vec = (m->GetChildFrameWorldMat(frame, 0).pos() - pRet->pos()).normalized();
+						if (m->GetChildFrameNum(m->GetFrame((int)frame)) > 0) {
+							Vector3DX vec = (m->GetChildFrameWorldMatrix(m->GetFrame((int)frame), 0).pos() - pRet->pos()).normalized();
 							//Vector3DX::Cross(pRet->xvec(), vec)
 							*pRet *= Matrix4x4DX::RotVec2(pRet->yvec(), vec);
 						}
@@ -169,7 +170,8 @@ namespace FPS_n2 {
 		void		ModSlotControl::ResetPartsFrameLocalMat(GunFrame frame) noexcept {
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
-					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->ResetFrameLocalMat(frame);
+					auto& Ptr = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
+					Ptr->GetObj().frame_Reset(Ptr->GetFrame((int)frame));
 				}
 			}
 			//孫があればそちらも
@@ -182,7 +184,8 @@ namespace FPS_n2 {
 		void		ModSlotControl::SetPartsFrameLocalMat(GunFrame frame, const Matrix4x4DX&value) noexcept {
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
-					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->SetFrameLocalMat(frame, value);
+					auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
+					Obj->GetObj().SetFrameLocalMatrix(Obj->GetFrame((int)frame), value * Obj->GetFrameBaseLocalMat((int)frame));
 				}
 			}
 			//孫があればそちらも
@@ -209,7 +212,6 @@ namespace FPS_n2 {
 		void		ModSlotControl::RemoveMod(GunSlot Slot) noexcept {
 			if (this->m_Parts_Ptr[(int)Slot]) {
 				auto* ObjMngr = ObjectManager::Instance();
-				this->m_Parts_Ptr[(int)Slot]->Dispose();
 				ObjMngr->DelObj(&this->m_Parts_Ptr[(int)Slot]);
 				this->m_Parts_Ptr[(int)Slot].reset();
 			}
@@ -218,14 +220,16 @@ namespace FPS_n2 {
 		void		ModSlotControl::UpdatePartsAnim(const MV1& pParent) {
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (this->m_Parts_Ptr[loop]) {
+					//1のフレーム移動量を無視する
 					auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
 					for (int i = 0; i < Obj->GetObj().get_anime().size(); i++) {
 						Obj->GetAnime((GunAnimeID)i).per = pParent.getanime(i).per;
 						Obj->GetAnime((GunAnimeID)i).time = pParent.getanime(i).time;
 					}
-					Obj->ResetFrameLocalMat(GunFrame::Center);
+					Obj->GetObj().frame_Reset(Obj->GetFrame((int)GunFrame::Center));
 					Obj->GetObj().work_anime();
-					Obj->SetFrameLocalMat(GunFrame::Center, Obj->GetFrameLocalMat(GunFrame::Center).rotation());//1のフレーム移動量を無視する
+					auto Rot = Obj->GetFrameLocalMatrix(Obj->GetFrame((int)GunFrame::Center)).rotation();
+					Obj->GetObj().SetFrameLocalMatrix(Obj->GetFrame((int)GunFrame::Center), Rot * Obj->GetFrameBaseLocalMat((int)GunFrame::Center));
 				}
 			}
 		}
@@ -236,31 +240,45 @@ namespace FPS_n2 {
 			}
 		}
 
-		const SharedObj&		ModSlotControl::SetMod(GunSlot Slot, int ID, const MV1& BaseModel) noexcept {
+		const SharedObj&		ModSlotControl::SetMod(GunSlot Slot, int ID, const SharedObj& BaseModel) noexcept {
 			RemoveMod(Slot);
 			auto* Slots = this->m_ModDataClass->GetPartsSlot(Slot);
 			if (Slots) {
 				if (this->m_Parts_Ptr[(int)Slot] == nullptr) {
-					auto* ObjMngr = ObjectManager::Instance();
+					auto AddObj = [&](const SharedObj& NewObj) {
+						this->m_Parts_Ptr[(int)Slot] = NewObj;
+						auto& Data = *ModDataManager::Instance()->GetData(Slots->m_ItemsUniqueID.at(ID));
 
-					ObjType Type = ObjType::Magazine;
+						auto* ObjMngr = ObjectManager::Instance();
+						ObjMngr->AddObject(NewObj);
+						ObjMngr->LoadModel(NewObj, BaseModel, Data->GetPath().c_str());
+						NewObj->Init();
+					};
 					switch (Slot) {
-						case GunSlot::Magazine:				Type = ObjType::Magazine;			break;
-						case GunSlot::Upper:				Type = ObjType::Upper;				break;
-						case GunSlot::Lower:				Type = ObjType::Lower;				break;
-						case GunSlot::Barrel:				Type = ObjType::Barrel;				break;
-						case GunSlot::UnderRail:			Type = ObjType::UnderRail;			break;
-						case GunSlot::Sight:				Type = ObjType::Sight;				break;
-						case GunSlot::MuzzleAdapter:		Type = ObjType::MuzzleAdapter;		break;
-						default: break;
+						case GunSlot::Magazine:
+							AddObj(std::make_shared<MagazineClass>());
+							break;
+						case GunSlot::Lower:
+							AddObj(std::make_shared<LowerClass>());
+							break;
+						case GunSlot::Upper:
+							AddObj(std::make_shared<UpperClass>());
+							break;
+						case GunSlot::Barrel:
+							AddObj(std::make_shared<BarrelClass>());
+							break;
+						case GunSlot::UnderRail:
+							AddObj(std::make_shared<UnderRailClass>());
+							break;
+						case GunSlot::Sight:
+							AddObj(std::make_shared<SightClass>());
+							break;
+						case GunSlot::MuzzleAdapter:
+							AddObj(std::make_shared<MuzzleClass>());
+							break;
+						default:
+							break;
 					}
-
-					auto* Ptr = ObjMngr->MakeObject(Type);
-					auto& Data = *ModDataManager::Instance()->GetData(Slots->m_ItemsUniqueID.at(ID));
-					ObjMngr->LoadObjectModel((*Ptr).get(), Data->GetPath().c_str());
-					MV1::SetAnime(&(*Ptr)->GetObj(), BaseModel);
-					this->m_Parts_Ptr[(int)Slot] = (std::shared_ptr<ModClass>&)(*Ptr);
-					(*Ptr)->Init();
 				}
 			}
 

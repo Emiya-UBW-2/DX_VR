@@ -17,12 +17,11 @@ namespace FPS_n2 {
 				auto* ObjMngr = ObjectManager::Instance();
 				m_Ptr.resize(count);
 				for (auto& c : m_Ptr) {
-					auto* Ptr = ObjMngr->MakeObject(ObjType::FallObj);
-					ObjMngr->LoadObjectModel((*Ptr).get(), pPath.c_str());
-					MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
-					c = (std::shared_ptr<FallObjClass>&)(*Ptr);
+					c = std::make_shared<FallObjClass>();
+					ObjMngr->AddObject(c);
+					ObjMngr->LoadModel(c, c, pPath.c_str());
 					c->SetMapCol(backGround);
-					(*Ptr)->Init();
+					c->Init();
 				}
 			}
 			void		SetFall(const Vector3DX& pPos, const Matrix4x4DX& pMat, const Vector3DX& pVec, float time, SoundEnum sound) {
@@ -79,9 +78,9 @@ namespace FPS_n2 {
 						this->m_Line[p2].get()) == FALSE
 						) {
 						DrawCapsule3D(this->m_Line[p1].get(), this->m_Line[p2].get(), (0.00762f)*Scale_Rate*1.f*((float)(i - min) / max), 3,
-									 GetColor(216, 216, 216),
-									 GetColor(96, 96, 64),
-									 TRUE);
+									  GetColor(216, 216, 216),
+									  GetColor(96, 96, 64),
+									  TRUE);
 					}
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
@@ -108,7 +107,7 @@ namespace FPS_n2 {
 				m_ModDataClass.reset();
 			}
 		public:
-			const SharedObj&			SetMod(GunSlot Slot, int ID, const MV1& BaseModel) noexcept;
+			const SharedObj&			SetMod(GunSlot Slot, int ID, const SharedObj& BaseModel) noexcept;
 			void			RemoveMod(GunSlot Slot) noexcept;
 		private:
 			const bool	IsEffectParts(GunSlot Slot, GunFrame frame) const noexcept;

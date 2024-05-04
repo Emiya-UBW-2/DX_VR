@@ -83,7 +83,7 @@ namespace FPS_n2 {
 					return false;
 				}
 			};
-			std::array<ResultFlips,3>						m_ResultFlip{};
+			std::array<ResultFlips, 3>						m_ResultFlip{};
 			float											m_ResultRankingPer{0.f};
 			float											m_ResultRankDrawTime{0.f};
 			int												m_ResultRank{0};

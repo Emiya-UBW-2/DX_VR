@@ -11,7 +11,7 @@ namespace FPS_n2 {
 					if (Data && y->m_sel < (int)Data->m_ItemsUniqueID.size()) {
 						if (y->m_selectSwitch) {
 							y->m_selectSwitch = false;
-							ModPtr->SetMod(y->SlotType, y->m_sel, *m_BaseObj);
+							ModPtr->SetMod(y->SlotType, y->m_sel, m_BaseObj);
 						}
 					}
 					else {
@@ -61,7 +61,7 @@ namespace FPS_n2 {
 		}
 		//
 		void			GunsModify::CreateSelData(const std::shared_ptr<GunClass>& GunPtr, bool isPreset) {
-			m_BaseObj = &GunPtr->GetObj();
+			m_BaseObj = GunPtr;
 			UpdateMods(GunPtr.get(), nullptr, isPreset);
 		}
 		bool			GunsModify::ChangeSelData(const Slot* SlotPtr, int sel, bool isDeleteSlot) {
@@ -120,7 +120,7 @@ namespace FPS_n2 {
 			SlotSaveData Tmp;
 			std::ofstream outputfile(path, std::ios::binary);
 			{
-				int ULTSel =(int)m_ULTSelect;
+				int ULTSel = (int)m_ULTSelect;
 				outputfile.write(reinterpret_cast<char *>(&ULTSel), sizeof(ULTSel));
 			}
 			for (auto& y : SelData) {

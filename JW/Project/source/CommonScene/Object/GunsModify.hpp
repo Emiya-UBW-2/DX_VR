@@ -29,7 +29,7 @@ namespace FPS_n2 {
 			std::vector<std::shared_ptr<Slot>>	SelData;
 			ULT_GUN						m_ULTSelect{ULT_GUN::PCC_4};
 			std::vector<SlotSaveData>	SlotSave;
-			MV1*						m_BaseObj{nullptr};
+			SharedObj		 			m_BaseObj{nullptr};
 		public:
 			const auto&		GetSelData() const noexcept { return SelData; }
 			const auto&		GetULTSelect() const noexcept { return m_ULTSelect; }
@@ -50,6 +50,7 @@ namespace FPS_n2 {
 					y.reset();
 				}
 				SelData.clear();
+				m_BaseObj.reset();
 			}
 		};
 	};

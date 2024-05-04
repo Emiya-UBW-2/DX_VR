@@ -39,7 +39,7 @@ namespace FPS_n2 {
 			}
 		public:
 			const float GetFlip() { return m_Flip_Y; }
-			const float ActivePer() { return (m_Time > 0.2f) ? std::clamp((10.f - m_Time)/ 0.2f + 0.1f, 0.f, 1.f) : std::clamp(m_Time / 0.2f, 0.f, 1.f); }
+			const float ActivePer() { return (m_Time > 0.2f) ? std::clamp((10.f - m_Time) / 0.2f + 0.1f, 0.f, 1.f) : std::clamp(m_Time / 0.2f, 0.f, 1.f); }
 			const char* GetMsg() { return m_Message; }
 		};
 		class TutorialLog {
@@ -120,14 +120,14 @@ namespace FPS_n2 {
 												 std::clamp(yp * 255 / y_r(255), 0, 255)
 											 )
 										 )
-						
+
 						);
 						this->m_tutorialGraph.DrawExtendGraph(
 							xp, yp,
 							xp + y_r(xs), yp + y_r(ys),
 							true);
 						Fonts->Get(FontPool::FontType::Gothic_AA, y_r(24)).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																			  xp + y_r(69), yp + y_r(14), Gray75, Black, d.GetMsg());
+																					  xp + y_r(69), yp + y_r(14), Gray75, Black, d.GetMsg());
 					}
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);

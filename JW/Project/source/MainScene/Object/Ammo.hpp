@@ -91,7 +91,7 @@ namespace FPS_n2 {
 					Easing(&this->m_Hit_alpha, (this->m_HitTimer > 0.f) ? 2.f : 0.f, 0.95f, EasingType::OutExpo);
 					if (this->m_Hit_alpha <= 0.01f) {
 						this->m_Hit_alpha = 0;
-						SetIsDelete(true);
+						SetDelete();
 					}
 				}
 				if (IsActive()) {

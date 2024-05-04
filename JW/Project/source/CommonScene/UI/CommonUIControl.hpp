@@ -23,7 +23,7 @@ namespace FPS_n2 {
 			FontHandle::FontYCenter TMB;
 
 			float SelYadd{0.f};
-			
+
 			ButtonStatus m_ButtonStatus{ButtonStatus::Ready};
 			ButtonMode m_ButtonMode{ButtonMode::String};
 			bool m_EnableSelect{false};

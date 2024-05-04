@@ -1,8 +1,6 @@
 #pragma once
 #include	"../../Header.hpp"
 #include	"../../MainScene/BackGround/BackGround.hpp"
-#include "CharacterEnum.hpp"
-#include "GunEnum.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -15,37 +13,32 @@ namespace FPS_n2 {
 		class ObjectBaseClass {
 		protected:
 			PHYSICS_SETUP								m_PHYSICS_SETUP{PHYSICS_SETUP::DISABLE};
-			bool										m_objActive{false};							//
-			bool										m_ColActive{false};							//
+			bool										m_ColActive{false};
 			MV1											m_obj;
 			MV1											m_col;
-
 			moves										m_move;
 			Matrix4x4DX									m_PrevMat;//物理更新のため
-			std::vector<std::pair<int, Matrix4x4DX>>		m_Frames;
+			std::vector<std::pair<int, Matrix4x4DX>>	m_Frames;
 			std::vector<std::pair<int, float>>			m_Shapes;
 			ObjType										m_objType{(ObjType)0};
 			std::string									m_FilePath;
 			std::string									m_ObjFileName;
 			std::string									m_ColFileName;
-
 			bool										m_IsActive{true};
 			bool										m_IsDelete{false};
-
 			bool										m_IsResetPhysics{true};
 			bool										m_IsFirstLoop{true};
 			bool										m_IsDraw{true};
 			float										m_DistanceToCam{0.f};
 			bool										m_IsBaseModel{false};
-			Vector3DX									m_CameraPosition;
+			Vector3DX									m_ScreenPosition;
 			float										m_CameraSize{0.f};
-			PlayerID									m_MyID{0};									//
-
+			PlayerID									m_MyID{0};
 			ShaderUseClass*								m_UseShader{nullptr};
 			std::array<int, 2>							m_ShaderTex{-1 , -1};
 		public:
 			auto&			GetObj(void) noexcept { return this->m_obj; }
-			//const auto&		GetObj_const(void) const noexcept { return this->m_obj; }
+			const auto&		GetObj_const(void) const noexcept { return this->m_obj; }
 			const auto		GetMatrix(void) const noexcept { return this->m_obj.GetMatrix(); }
 			const auto		GetFrameLocalMatrix(int frame) const noexcept { return this->m_obj.GetFrameLocalMatrix(frame); }
 			const auto		GetFrameWorldMatrix(int frame) const noexcept { return this->m_obj.GetFrameLocalWorldMatrix(frame); }
@@ -53,37 +46,17 @@ namespace FPS_n2 {
 			const auto		GetChildFrameNum(int frame) const noexcept { return (int)this->m_obj.frame_child_num(frame); }
 			const auto		GetChildFrameWorldMatrix(int frame, int ID) const noexcept { return GetFrameWorldMatrix((int)this->m_obj.frame_child(frame, ID)); }
 
-
-		public://ゲッター ガン
-			const bool		HaveFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first != -1; }
-			const auto&		GetFrame(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].first; }
-			const auto&		GetFrameBaseLocalMat(GunFrame frame) const noexcept { return this->m_Frames[(int)frame].second; }
-			const auto		GetFrameLocalMat(GunFrame frame) const noexcept { return GetFrameLocalMatrix(GetFrame(frame)); }
-			const auto		GetChildFramesNum(GunFrame frame) const noexcept { return GetChildFrameNum(GetFrame(frame)); }
-			const auto		GetChildFrameWorldMat(GunFrame frame, int ID) const noexcept { return GetChildFrameWorldMatrix(GetFrame(frame), ID); }
-
-		public://ゲッター キャラ
-			const bool		HaveFrame(CharaFrame frame) const noexcept { return this->m_Frames[(int)frame].first != -1; }
-			const auto&		GetFrame(CharaFrame frame) const noexcept { return m_Frames[(int)frame].first; }
-			const auto&		GetFrameBaseLocalMat(CharaFrame frame) const noexcept { return this->m_Frames[(int)frame].second; }
-			const auto		GetFrameLocalMat(CharaFrame frame) const noexcept { return GetFrameLocalMatrix(GetFrame(frame)); }
-			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetFrameWorldMatrix(GetFrame(frame)); }
-			const auto		GetParentFrameWorldMat(CharaFrame frame) const noexcept { return GetParentFrameWorldMatrix(GetFrame(frame)); }
-		public://セッター キャラ
-			void			ResetFrameLocalMat(CharaFrame frame) noexcept { GetObj().frame_Reset(GetFrame(frame)); }
-			void			SetFrameLocalMat(CharaFrame frame, const Matrix4x4DX&value) noexcept { GetObj().SetFrameLocalMatrix(GetFrame(frame), value * GetFrameBaseLocalMat(frame)); }
-			void			SetShapePer(CharaShape pShape, float Per) noexcept { this->m_Shapes[(int)pShape].second = Per; }
+			const bool		HaveFrame(int frame) const noexcept { return this->m_Frames[frame].first != -1; }
+			const auto&		GetFrame(int frame) const noexcept { return this->m_Frames[frame].first; }
+			const auto&		GetFrameBaseLocalMat(int frame) const noexcept { return this->m_Frames[frame].second; }
 
 		public:
 			const auto&		GetIsBaseModel(void) const noexcept { return this->m_IsBaseModel; }
 			const auto		GetPathCompare(const char* filepath, const char* objfilename, const char* colfilename) const noexcept {
-				return (
-					(this->m_FilePath == filepath) &&
-					(this->m_ObjFileName == objfilename) &&
-					(this->m_ColFileName == colfilename));
+				return ((this->m_FilePath == filepath) && (this->m_ObjFileName == objfilename) && (this->m_ColFileName == colfilename));
 			}
 			const auto&		GetobjType(void) const noexcept { return this->m_objType; }
-			const auto&		GetCameraPosition(void) const noexcept { return this->m_CameraPosition; }
+			const auto&		GetScreenPosition(void) const noexcept { return this->m_ScreenPosition; }
 			const auto&		GetCameraSize(void) const noexcept { return this->m_CameraSize; }
 			const auto&		GetMove(void) const noexcept { return this->m_move; }
 			const auto&		IsActive(void) const noexcept { return this->m_IsActive; }
@@ -91,12 +64,15 @@ namespace FPS_n2 {
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
 			const auto&		GetFilePath(void) const noexcept { return this->m_FilePath; }
 		public:
+			void			SetShapePer(int pShape, float Per) noexcept { this->m_Shapes[(int)pShape].second = Per; }
 			void			SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
 			void			SetActive(bool value) noexcept { this->m_IsActive = value; }
-			void			SetIsDelete(bool value) noexcept { this->m_IsDelete = value; }
+			void			SetDelete() noexcept { this->m_IsDelete = true; }
 			void			SetResetP(bool value) { this->m_IsResetPhysics = value; }
-			void			SetCameraPosition(const Vector3DX& value) { this->m_CameraPosition = value; }
-			void			SetCameraSize(float value) { this->m_CameraSize = value; }
+			void			SetScreenPosition(const Vector3DX& value, float size) {
+				this->m_ScreenPosition = value;
+				this->m_CameraSize = size;
+			}
 			void			SetUseShader(ShaderUseClass* value) noexcept { this->m_UseShader = value; }
 			void			SetShaderTexHandle(int id, int value) noexcept { this->m_ShaderTex[id] = value; }
 			void			SetAnimOnce(int ID, float speed) {
@@ -121,6 +97,14 @@ namespace FPS_n2 {
 				this->m_move.posbuf = pos;
 				UpdateMove();
 			}
+			void			SetMove(const Matrix4x4DX& mat, const Vector3DX& pos, const Vector3DX& vec) {
+				this->m_move.mat = mat;
+				this->m_move.pos = pos;
+				this->m_move.posbuf = pos;
+				this->m_move.vec = vec;
+				UpdateMove();
+			}
+
 			void			UpdateMove(void) noexcept {
 				this->m_PrevMat = this->GetObj().GetMatrix();
 				this->GetObj().SetMatrix(this->m_move.MatIn());
@@ -143,6 +127,7 @@ namespace FPS_n2 {
 				return false;
 			}
 			//判定取得
+			const auto		GetColCapsule(const Vector3DX& StartPos, const Vector3DX& EndPos, float range, const int sel = 0) const noexcept { return this->m_col.CollCheck_Capsule(StartPos, EndPos, range, -1, sel); }
 			const auto		GetColLine(const Vector3DX& StartPos, const Vector3DX& EndPos, const int sel = 0) const noexcept { return this->m_col.CollCheck_Line(StartPos, EndPos, -1, sel); }
 			void			GetColNearestInAllMesh(const Vector3DX& StartPos, Vector3DX* EndPos) const noexcept {
 				MV1_COLL_RESULT_POLY colres;

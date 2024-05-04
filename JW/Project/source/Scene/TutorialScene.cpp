@@ -4,6 +4,7 @@
 
 #include "../MainScene/Player/Player.hpp"
 #include "../MainScene/Object/Target.hpp"
+#include "../MainScene/Object/MovieObj.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -57,7 +58,7 @@ namespace FPS_n2 {
 			SetLightAmbColor(GetColorF(0.1f, 0.1f, 0.1f, 1.f));
 			//
 			this->m_BackGround = std::make_shared<BackGroundClassTutorial>();
-			this->m_BackGround->Init("data/model/map/","");
+			this->m_BackGround->Init("data/model/map/", "");
 			//ロード
 			BattleResourceMngr->LoadChara("Suit", 0);
 			GunsModify::LoadSlots("Save/gundata.svf");//プリセット読み込み
@@ -141,38 +142,30 @@ namespace FPS_n2 {
 			ScoreBoard = GraphHandle::Load("data/UI/Score.png");
 			ScoreBoard2 = GraphHandle::Load("data/UI/Score2.png");
 			//
-			//*
 			for (int j = 0; j < 5; j++) {
-				ObjMngr->MakeObject(ObjType::Target);
-				auto& t = *ObjMngr->GetObj(ObjType::Target, j);
-				ObjMngr->LoadObjectModel(t.get(), "data/model/Target/");
-				MV1::SetAnime(&t->GetObj(), t->GetObj());
-				t->SetMove(Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(-90)), Vector3DX::vget(Scale_Rate*-(5.f + 10.f*j), 0.f, Scale_Rate*(9.f - 2.f*j)));
+				auto Obj = std::make_shared<TargetClass>();
+				ObjMngr->AddObject(Obj);
+				ObjMngr->LoadModel(Obj, Obj, "data/model/Target/");
+				Obj->SetMove(Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(-90)), Vector3DX::vget(Scale_Rate*-(5.f + 10.f*j), 0.f, Scale_Rate*(9.f - 2.f*j)));
 			}
-			//*/
-
 			for (int j = 0; j < 9; j++) {
-				ObjMngr->MakeObject(ObjType::Target);
-				auto& t = *ObjMngr->GetObj(ObjType::Target, 5 + j);
-				ObjMngr->LoadObjectModel(t.get(), "data/model/Target2/");
-				MV1::SetAnime(&t->GetObj(), t->GetObj());
+				auto Obj = std::make_shared<TargetClass>();
+				ObjMngr->AddObject(Obj);
+				ObjMngr->LoadModel(Obj, Obj, "data/model/Target2/");
 
-				float rad = deg2rad(GetRand(360));
-				t->SetMove(Matrix4x4DX::RotAxis(Vector3DX::up(), rad),
-					(TargetPositions[j] * Scale_Rate) +
-						   Matrix4x4DX::RotAxis(Vector3DX::up(), rad).zvec() *(1.5f*Scale_Rate));
+				auto Rot = Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRand(360)));
+				Obj->SetMove(Rot, (TargetPositions[j] * Scale_Rate) + Rot.zvec() * (1.5f*Scale_Rate));
 			}
 			{
-				auto& t = *ObjMngr->MakeObject(ObjType::MovieObj);
-				ObjMngr->LoadObjectModel(t.get(), "data/model/Radio/");
+				auto Obj = std::make_shared<MovieObjClass>();
+				ObjMngr->AddObject(Obj);
+				ObjMngr->LoadModel(Obj, nullptr, "data/model/Radio/");
 
-				float rad = deg2rad(90);
-				t->SetMove(Matrix4x4DX::RotAxis(Vector3DX::up(), rad),
-					(Vector3DX::vget(0,0,-5.f) * Scale_Rate));
+				Obj->SetMove(Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(90)), (Vector3DX::vget(0, 0, -5.f) * Scale_Rate));
+
 				m_Sound = true;
-
 				if (!BGM->Get(1).Check()) {
-					BGM->Get(1).Play_3D(t->GetMove().pos,5.f*Scale_Rate,DX_PLAYTYPE_LOOP);
+					BGM->Get(1).Play_3D(Obj->GetMove().pos, 5.f*Scale_Rate, DX_PLAYTYPE_LOOP);
 				}
 				BGM->Get(1).SetVol_Local(192);
 			}
@@ -588,11 +581,6 @@ namespace FPS_n2 {
 			}
 			//
 			EffectControl::Execute();
-			//
-			{
-				Vector3DX campos; campos.z = (-1.f);
-				Chara->SetCameraPosition(campos);
-			}
 #ifdef DEBUG
 			DebugParts->SetPoint("update end");
 #endif // DEBUG
@@ -605,13 +593,12 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			TutorialScene::Dispose_Sub(void) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
 			auto* OptionParts = OPTION::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 
 			//使い回しオブジェ系
 			auto* Ptr = &PlayerMngr->GetPlayer(0).GetChara();
-			ObjMngr->DelObj(Ptr);
+			ObjectManager::Instance()->DelObj(Ptr);
 			PlayerMngr->GetPlayer(0).Dispose();
 			this->m_BackGround->Dispose();
 			this->m_BackGround.reset();
@@ -641,8 +628,7 @@ namespace FPS_n2 {
 		}
 
 		void			TutorialScene::ShadowDraw_Sub(void) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DrawObject_Shadow();
+			ObjectManager::Instance()->Draw_Shadow();
 		}
 		void			TutorialScene::MainDraw_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -653,11 +639,11 @@ namespace FPS_n2 {
 
 			SetFogEnable(FALSE);
 			this->m_BackGround->Draw();
-			ObjMngr->DrawObject();
+			ObjMngr->Draw();
 			//レーザー
 			Chara->DrawLaser();
 
-			//ObjMngr->DrawDepthObject();
+			//ObjMngr->Draw_Depth();
 			//シェーダー描画用パラメーターセット
 			if (Chara->GetGunPtrNow()) {
 				Chara->GetGunPtrNow()->UpdateReticle();
@@ -705,7 +691,7 @@ namespace FPS_n2 {
 
 					this->m_TutorialLog.Draw();
 
-					int sel = m_TutorialNow - 1  - this->m_TutorialLog.GetOffset();
+					int sel = m_TutorialNow - 1 - this->m_TutorialLog.GetOffset();
 
 					if (0 <= sel && sel < m_Tutorial.size()) {
 						int xp = y_r(512 + 96);
@@ -739,8 +725,7 @@ namespace FPS_n2 {
 			else {
 				//的ヒット状況表示
 				if (tgtSel >= 0) {
-					auto* ObjMngr = ObjectManager::Instance();
-					auto& t = (std::shared_ptr<TargetClass>&)(*ObjMngr->GetObj(ObjType::Target, tgtSel));
+					auto& t = (std::shared_ptr<TargetClass>&)(*ObjectManager::Instance()->GetObj(ObjType::Target, tgtSel));
 
 					int xp = DrawParts->m_DispXSize / 2 - y_r(300);
 					int yp = DrawParts->m_DispYSize / 2 + y_r(100);
@@ -787,13 +772,12 @@ namespace FPS_n2 {
 		void			TutorialScene::Dispose_Load_Sub(void) noexcept {
 			if (!m_IsFirstLoad) {
 				m_IsFirstLoad = true;
-				auto* ObjMngr = ObjectManager::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto* BattleResourceMngr = CommonBattleResource::Instance();
 				BattleResourceMngr->Dispose();
 				this->m_UIclass.Dispose();
 				PlayerMngr->Dispose();
-				ObjMngr->DisposeObject();
+				ObjectManager::Instance()->DeleteAll();
 			}
 		}
 		//

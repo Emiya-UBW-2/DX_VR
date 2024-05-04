@@ -38,37 +38,37 @@ namespace FPS_n2 {
 			int ID = 0;
 			auto headpos = Ptr->GetEyeMatrix().pos();
 			m_HitBox[ID].Execute(headpos, 0.13f*Scale_Rate*SizeRate, HitType::Head); ID++;
-			m_HitBox[ID].Execute((headpos + Ptr->GetFrameWorldMat(CharaFrame::Upper).pos()) / 2.f, 0.16f*Scale_Rate*SizeRate, HitType::Body); ID++;
-			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::Upper).pos(), 0.13f*Scale_Rate*SizeRate, HitType::Body); ID++;
+			m_HitBox[ID].Execute((headpos + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::Upper)).pos()) / 2.f, 0.16f*Scale_Rate*SizeRate, HitType::Body); ID++;
+			m_HitBox[ID].Execute(Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::Upper)).pos(), 0.13f*Scale_Rate*SizeRate, HitType::Body); ID++;
 
-			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::Upper).pos() + Ptr->GetFrameWorldMat(CharaFrame::RightFoot1).pos()) / 2.f, 0.13f*Scale_Rate*SizeRate, HitType::Body); ID++;
-			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::Upper).pos() + Ptr->GetFrameWorldMat(CharaFrame::LeftFoot1).pos()) / 2.f, 0.13f*Scale_Rate*SizeRate, HitType::Body); ID++;
+			m_HitBox[ID].Execute((Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::Upper)).pos() + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightFoot1)).pos()) / 2.f, 0.13f*Scale_Rate*SizeRate, HitType::Body); ID++;
+			m_HitBox[ID].Execute((Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::Upper)).pos() + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftFoot1)).pos()) / 2.f, 0.13f*Scale_Rate*SizeRate, HitType::Body); ID++;
 
-			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::RightArm).pos() + Ptr->GetFrameWorldMat(CharaFrame::RightArm2).pos()) / 2.f, 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
-			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::RightArm2).pos(), 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
-			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::RightWrist).pos() + Ptr->GetFrameWorldMat(CharaFrame::RightArm2).pos()) / 2.f, 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
-			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::RightWrist).pos(), 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
+			m_HitBox[ID].Execute((Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightArm)).pos() + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightArm2)).pos()) / 2.f, 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
+			m_HitBox[ID].Execute(Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightArm2)).pos(), 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
+			m_HitBox[ID].Execute((Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightWrist)).pos() + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightArm2)).pos()) / 2.f, 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
+			m_HitBox[ID].Execute(Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightWrist)).pos(), 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
 
-			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::LeftArm).pos() + Ptr->GetFrameWorldMat(CharaFrame::LeftArm2).pos()) / 2.f, 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
-			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::LeftArm2).pos(), 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
-			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::LeftWrist).pos() + Ptr->GetFrameWorldMat(CharaFrame::LeftArm2).pos()) / 2.f, 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
-			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::LeftWrist).pos(), 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
+			m_HitBox[ID].Execute((Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftArm)).pos() + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftArm2)).pos()) / 2.f, 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
+			m_HitBox[ID].Execute(Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftArm2)).pos(), 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
+			m_HitBox[ID].Execute((Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftWrist)).pos() + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftArm2)).pos()) / 2.f, 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
+			m_HitBox[ID].Execute(Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftWrist)).pos(), 0.06f*Scale_Rate*SizeRate, HitType::Arm); ID++;
 
-			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::RightFoot1).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
-			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::RightFoot1).pos() + Ptr->GetFrameWorldMat(CharaFrame::RightFoot2).pos()) / 2.f, 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
-			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::RightFoot2).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
-			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::RightFoot).pos()*0.25f + Ptr->GetFrameWorldMat(CharaFrame::RightFoot2).pos()*0.75f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
-			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::RightFoot).pos()*0.5f + Ptr->GetFrameWorldMat(CharaFrame::RightFoot2).pos()*0.5f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
-			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::RightFoot).pos()*0.75f + Ptr->GetFrameWorldMat(CharaFrame::RightFoot2).pos()*0.25f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
-			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::RightFoot).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
+			m_HitBox[ID].Execute(Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightFoot1)).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
+			m_HitBox[ID].Execute((Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightFoot1)).pos() + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightFoot2)).pos()) / 2.f, 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
+			m_HitBox[ID].Execute(Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightFoot2)).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
+			m_HitBox[ID].Execute((Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightFoot)).pos()*0.25f + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightFoot2)).pos()*0.75f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
+			m_HitBox[ID].Execute((Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightFoot)).pos()*0.5f + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightFoot2)).pos()*0.5f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
+			m_HitBox[ID].Execute((Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightFoot)).pos()*0.75f + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightFoot2)).pos()*0.25f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
+			m_HitBox[ID].Execute(Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::RightFoot)).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
 
-			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::LeftFoot1).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
-			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::LeftFoot1).pos() + Ptr->GetFrameWorldMat(CharaFrame::LeftFoot2).pos()) / 2.f, 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
-			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::LeftFoot2).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
-			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::LeftFoot).pos()*0.25f + Ptr->GetFrameWorldMat(CharaFrame::LeftFoot2).pos()*0.75f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
-			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::LeftFoot).pos()*0.5f + Ptr->GetFrameWorldMat(CharaFrame::LeftFoot2).pos()*0.5f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
-			m_HitBox[ID].Execute((Ptr->GetFrameWorldMat(CharaFrame::LeftFoot).pos()*0.75f + Ptr->GetFrameWorldMat(CharaFrame::LeftFoot2).pos()*0.25f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
-			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::LeftFoot).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
+			m_HitBox[ID].Execute(Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftFoot1)).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
+			m_HitBox[ID].Execute((Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftFoot1)).pos() + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftFoot2)).pos()) / 2.f, 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
+			m_HitBox[ID].Execute(Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftFoot2)).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
+			m_HitBox[ID].Execute((Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftFoot)).pos()*0.25f + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftFoot2)).pos()*0.75f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
+			m_HitBox[ID].Execute((Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftFoot)).pos()*0.5f + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftFoot2)).pos()*0.5f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
+			m_HitBox[ID].Execute((Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftFoot)).pos()*0.75f + Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftFoot2)).pos()*0.25f), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
+			m_HitBox[ID].Execute(Ptr->GetFrameWorldMatrix(Ptr->GetFrame((int)CharaFrame::LeftFoot)).pos(), 0.095f*Scale_Rate*SizeRate, HitType::Leg); ID++;
 		}
 
 		void AutoAimControl::UpdateAutoAim(bool isActive) noexcept {
@@ -91,13 +91,14 @@ namespace FPS_n2 {
 		void ItemPopControl::ItemFallControl::Init(const std::shared_ptr<BackGroundClassBase>& backGround, const std::string& pPath, ItemType type) {
 			auto* ObjMngr = ObjectManager::Instance();
 			for (auto& c : m_Ptr) {
-				auto* Ptr = ObjMngr->MakeObject(ObjType::ItemObj);
-				ObjMngr->LoadObjectModel((*Ptr).get(), pPath.c_str());
-				MV1::SetAnime(&(*Ptr)->GetObj(), (*Ptr)->GetObj());
-				c = (std::shared_ptr<ItemObjClass>&)(*Ptr);
+				c = std::make_shared<ItemObjClass>();
+				ObjMngr->AddObject(c);
+				ObjMngr->LoadModel(c, c, pPath.c_str());
+
 				c->SetMapCol(backGround);
-				c->Init();
 				c->SetItemType(type);
+
+				c->Init();
 			}
 		}
 		void ItemPopControl::ItemFallControl::SetFall(const Vector3DX& pPos, const Vector3DX& pVec) {

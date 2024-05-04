@@ -21,7 +21,7 @@ namespace FPS_n2 {
 					this->m_Buffer += std::clamp((float)(this->m_Now - this->m_Buffer)*(float)(this->m_Max / 5), -Limit, Limit) / FPS;
 				}
 				void			DrawGauge(int xp1, int yp1, int xp2, int yp2,
-										 COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) {
+										  COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) {
 					//return;
 					int ParamBuf = (int)(this->m_Buffer + 0.5f);
 					DrawBox(xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White, FALSE);
@@ -177,10 +177,10 @@ namespace FPS_n2 {
 					}
 					SetDrawScreen(Prev);
 					GraphBlend(UltGauge.get(), UltGaugeMask.get(), 255, DX_GRAPH_BLEND_RGBA_SELECT_MIX,
-							  DX_RGBA_SELECT_SRC_R,
-							  DX_RGBA_SELECT_SRC_G,
-							  DX_RGBA_SELECT_SRC_B,
-							  DX_RGBA_SELECT_BLEND_R
+							   DX_RGBA_SELECT_SRC_R,
+							   DX_RGBA_SELECT_SRC_G,
+							   DX_RGBA_SELECT_SRC_B,
+							   DX_RGBA_SELECT_BLEND_R
 					);
 				}
 			};
@@ -279,7 +279,7 @@ namespace FPS_n2 {
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Gray75, "TIME");
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + y_r(240), yp1, White, Gray75, "%d:%05.2f",
 						(int)(floatParam[0] / 60.f),
-																		 (float)((int)(floatParam[0]) % 60) + (floatParam[0] - (float)((int)(floatParam[0])))
+																		  (float)((int)(floatParam[0]) % 60) + (floatParam[0] - (float)((int)(floatParam[0])))
 					);
 
 					yp1 += y_r(25);
@@ -322,7 +322,7 @@ namespace FPS_n2 {
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
 					);
-					
+
 					xp1 += y_r(330);
 					if (intParam[9] > 0) {
 						SetDrawBright(0, 255, 0);
@@ -347,7 +347,7 @@ namespace FPS_n2 {
 															GetColorU8(0, 255, 0, 255), GetColorU8(255, 0, 0, 255),
 															&this->Gauge_Graph, deg, 32);
 
-						if (intParam[8]>0) {
+						if (intParam[8] > 0) {
 							SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*0.4f), 0, 255));
 							xp1 = DrawParts->m_DispXSize / 2 + intParam[0] - y_r(300.f*std::cos(deg2rad(-45) + rad));
 							yp1 = DrawParts->m_DispYSize / 2 + intParam[1] - y_r(300.f*std::sin(deg2rad(-45) + rad));
@@ -417,7 +417,7 @@ namespace FPS_n2 {
 					yp1 = DrawParts->m_DispYSize / 2 - y_r(64);
 					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(48), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, White, Gray75, "%d:%05.2f",
 						(int)(floatParam[1] / 60.f),
-																		  (float)((int)(floatParam[1]) % 60) + (floatParam[1] - (float)((int)(floatParam[1])))
+																		   (float)((int)(floatParam[1]) % 60) + (floatParam[1] - (float)((int)(floatParam[1])))
 					);
 				}
 				float UltPer = 1.f - floatParam[3];
@@ -429,7 +429,7 @@ namespace FPS_n2 {
 							GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 							GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
 						);
-											 });
+											  });
 					//
 					int xp1, yp1;
 					float rad = deg2rad(-90)*UltPer;
@@ -502,7 +502,7 @@ namespace FPS_n2 {
 								GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 								GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
 							);
-								 });
+								  });
 						//
 						//Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_r(12), White, Gray75, "%d", m_GaugeParam[i + 5].GetGauge());
 

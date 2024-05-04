@@ -1,100 +1,28 @@
 #include	"ObjectManager.hpp"
-#include "MainScene/Object/Ammo.hpp"
-#include "MainScene/Object/Gun.hpp"
-#include "MainScene/Object/Armer.hpp"
-#include "MainScene/Object/Morphine.hpp"
-#include "MainScene/Object/Mod.hpp"
-#include "MainScene/Object/Character.hpp"
-#include "MainScene/Object/FallObj.hpp"
-#include "MainScene/Object/MovieObj.hpp"
-#include "MainScene/Object/ItemObj.hpp"
-#include "MainScene/Object/Target.hpp"
 
 const FPS_n2::Sceneclass::ObjectManager* SingletonBase<FPS_n2::Sceneclass::ObjectManager>::m_Singleton = nullptr;
 namespace FPS_n2 {
 	namespace Sceneclass {
-		SharedObj*		ObjectManager::MakeObject(ObjType ModelType) noexcept {
-			switch (ModelType) {
-				case ObjType::Human:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<CharacterClass>();
-					break;
-				case ObjType::Ammo:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<AmmoClass>();
-					break;
-				case ObjType::FallObj:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<FallObjClass>();
-					break;
-				case ObjType::ItemObj:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<ItemObjClass>();
-					break;
-				case ObjType::Armer:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<ArmerClass>();
-					break;
-				case ObjType::Morphine:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<MorphineClass>();
-					break;
-				case ObjType::Gun:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<GunClass>();
-					break;
-				case ObjType::Magazine:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<MagazineClass>();
-					break;
-				case ObjType::Lower:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<LowerClass>();
-					break;
-				case ObjType::Upper:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<UpperClass>();
-					break;
-				case ObjType::Barrel:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<BarrelClass>();
-					break;
-				case ObjType::UnderRail:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<UnderRailClass>();
-					break;
-				case ObjType::Sight:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<SightClass>();
-					break;
-				case ObjType::MuzzleAdapter:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<MuzzleClass>();
-					break;
-				case ObjType::MovieObj:
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<MovieObjClass>();
-					break;
-				case ObjType::Target://human
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back() = std::make_shared<TargetClass>();
-					break;
-				default:
-					break;
-			}
-			return &(this->m_Object[this->m_Object.size() - 1]);
+		void			ObjectManager::AddObject(const SharedObj& NewObj) noexcept {
+			this->m_Object.resize(this->m_Object.size() + 1);
+			this->m_Object.back() = NewObj;
 		}
-		void			ObjectManager::LoadObjectModel(ObjectBaseClass* pObj, const char* filepath, const char* objfilename, const char* colfilename) const noexcept {
+		void			ObjectManager::LoadModel(const SharedObj& pObj, const SharedObj& pAnim, const char* filepath, const char* objfilename, const char* colfilename) const noexcept {
 			for (auto& o : this->m_Object) {
 				if (!o->GetIsBaseModel()) { continue; }
 				if (!o->GetPathCompare(filepath, objfilename, colfilename)) { continue; }
 				pObj->CopyModel(o);
+				if (pAnim) {
+					MV1::SetAnime(&pObj->GetObj(), pAnim->GetObj());
+				}
 				return;
 			}
-			pObj->LoadModel(m_DefaultType, filepath, objfilename, colfilename);
-			pObj->SaveModel(m_UseToonWhenCreateFile);
+			pObj->LoadModel(PHYSICS_SETUP::DISABLE, filepath, objfilename, colfilename);
+			pObj->SaveModel(false);
+			if (pAnim) {
+				MV1::SetAnime(&pObj->GetObj(), pAnim->GetObj());
+			}
 		}
-		//
 		SharedObj*		ObjectManager::GetObj(ObjType ModelType, int num) noexcept {
 			int cnt = 0;
 			for (auto&o : this->m_Object) {
@@ -107,22 +35,6 @@ namespace FPS_n2 {
 			}
 			return nullptr;
 		}
-		//
-		void			ObjectManager::DelObj(ObjType ModelType, int num) noexcept {
-			int cnt = 0;
-			for (auto&o : this->m_Object) {
-				if (o->GetobjType() == ModelType) {
-					if (cnt == num) {
-						//順番の維持のためここはerase
-						o->Dispose();
-						this->m_Object.erase(this->m_Object.begin() + (&o - &this->m_Object.front()));
-						break;
-					}
-					cnt++;
-				}
-			}
-		}
-		//
 		void			ObjectManager::DelObj(SharedObj* ptr) noexcept {
 			for (auto&o : this->m_Object) {
 				if (o == *ptr) {
@@ -133,14 +45,75 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		//
-		void			ObjectManager::DelObjAll(ObjType ModelType) noexcept {
-			for (auto&o : this->m_Object) {
-				if (o->GetobjType() == ModelType) {
-					o->Dispose();
-					this->m_Object.erase(this->m_Object.begin() + (&o - &this->m_Object.front()));
+
+		void			ObjectManager::ExecuteObject(void) noexcept {
+			//オブジェクトが増えた場合に備えて範囲forは使わない
+			for (int i = 0; i < this->m_Object.size(); i++) {
+				auto& o = this->m_Object[i];
+				if (!o->GetIsDelete()) {
+					/*
+	#ifdef DEBUG
+							printfDx("OBJ:[%s]\n", ObjTypeName[(int)o->GetobjType()]);
+	#endif // DEBUG
+					//*/
+					o->FirstExecute();
 				}
 			}
+			//物理アップデート
+			this->m_ResetP.Execute(CheckHitKeyWithCheck(KEY_INPUT_P) != 0);
+			for (int i = 0; i < this->m_Object.size(); i++) {
+				auto& o = this->m_Object[i];
+				if (!o->GetIsDelete()) {
+					if (this->m_ResetP.trigger()) { o->SetResetP(true); }
+					o->ExecuteCommon();
+				}
+			}
+			//オブジェクトの排除チェック
+			for (int i = 0; i < this->m_Object.size(); i++) {
+				auto& o = this->m_Object[i];
+				if (o->GetIsDelete()) {
+					//順番の維持のためここはerase
+					o->Dispose();
+					this->m_Object.erase(this->m_Object.begin() + i);
+					i--;
+				}
+			}
+		}
+		void			ObjectManager::LateExecuteObject(void) noexcept {
+			for (auto&o : this->m_Object) {
+				o->LateExecute();
+				Vector3DX campos; campos.z = (-1.f);
+				o->SetScreenPosition(campos, -1.f);
+			}
+		}
+
+		void			ObjectManager::Draw_Depth(void) noexcept {
+			for (auto& o : this->m_Object) {
+				o->Depth_Draw();
+			}
+		}
+		void			ObjectManager::Draw() noexcept {
+			for (auto& o : this->m_Object) {
+				o->CheckDraw();
+				o->Draw(false);
+			}
+			for (auto& o : this->m_Object) {
+				o->Draw(true);
+			}
+		}
+		void			ObjectManager::Draw_Shadow(void) noexcept {
+			for (auto& o : this->m_Object) {
+				o->DrawShadow();
+			}
+		}
+
+		void			ObjectManager::DeleteAll(void) noexcept {
+			for (auto& o : this->m_Object) {
+				if (o) {
+					o->Dispose();
+				}
+			}
+			this->m_Object.clear();
 		}
 	};
 };

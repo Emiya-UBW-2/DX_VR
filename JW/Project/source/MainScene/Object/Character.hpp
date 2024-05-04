@@ -27,8 +27,7 @@ namespace FPS_n2 {
 			public AutoAimControl,
 			public ArmerPtrControl,
 			public MorphinePtrControl,
-			public ItemPopControl
-		{
+			public ItemPopControl {
 		private:
 			bool												m_ActionFirstFrame{false};
 			CharaActionID										m_CharaAction{CharaActionID::Ready};
@@ -135,7 +134,7 @@ namespace FPS_n2 {
 			void			FirstExecute(void) noexcept override;
 			void			CheckDraw(void) noexcept override {
 				this->m_IsDraw = false;
-				this->m_DistanceToCam = (this->GetObj().GetMatrix().pos() - GetCameraPosition()).magnitude();
+				this->m_DistanceToCam = (this->GetObj().GetMatrix().pos() - GetScreenPosition()).magnitude();
 				if (CheckCameraViewClip_Box(
 					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-2.5f*Scale_Rate, -0.f*Scale_Rate, -2.5f*Scale_Rate)).get(),
 					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(2.5f*Scale_Rate, 2.5f*Scale_Rate, 2.5f*Scale_Rate)).get()) == FALSE
