@@ -24,7 +24,7 @@ namespace FPS_n2 {
 			std::shared_ptr<BackGroundClassMain>			m_BackGround;					//BG
 
 			UIClass											m_UIclass;						//UIŠÖ˜A
-			GetItemLog										m_GetItemLog;
+			SideLog										m_GetItemLog;
 			int												prevScore{0};
 			int												prevLastMan{0};
 

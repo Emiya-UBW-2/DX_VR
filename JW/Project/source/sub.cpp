@@ -3,7 +3,6 @@
 #include "MainScene/Player/Player.hpp"
 #include "MainScene/Object/Character.hpp"
 
-const FPS_n2::GetItemLog* SingletonBase<FPS_n2::GetItemLog>::m_Singleton = nullptr;
 const FPS_n2::Sceneclass::CommonBattleResource* SingletonBase<FPS_n2::Sceneclass::CommonBattleResource>::m_Singleton = nullptr;
 
 namespace FPS_n2 {

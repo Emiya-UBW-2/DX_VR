@@ -212,7 +212,7 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* BGM = BGMPool::Instance();
-			auto* ItemLogParts = GetItemLog::Instance();
+			auto* ItemLogParts = SideLog::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 
 			auto* Pad = PadControl::Instance();
@@ -374,7 +374,7 @@ namespace FPS_n2 {
 			{
 				//
 				auto* SaveDataParts = SaveDataClass::Instance();
-				auto* ItemLogParts = FPS_n2::GetItemLog::Instance();
+				auto* ItemLogParts = SideLog::Instance();
 
 				//ÉNÉäÉA
 				if (m_IsEnd) {
@@ -788,7 +788,7 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
-			auto* ItemLogParts = GetItemLog::Instance();
+			auto* ItemLogParts = SideLog::Instance();
 			auto* Pad = PadControl::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 
@@ -1051,7 +1051,7 @@ namespace FPS_n2 {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* SE = SoundPool::Instance();
-			auto* ItemLogParts = GetItemLog::Instance();
+			auto* ItemLogParts = SideLog::Instance();
 
 			int loop = 0;
 			while (true) {
@@ -1280,7 +1280,7 @@ namespace FPS_n2 {
 		void			MAINLOOP::UpdateUIParam(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
-			auto* ItemLogParts = GetItemLog::Instance();
+			auto* ItemLogParts = SideLog::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			{
 				Vector3DX StartPos = Chara->GetEyeMatrix().pos();

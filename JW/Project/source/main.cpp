@@ -19,7 +19,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//MV1SetLoadModelUsePackDraw(TRUE);
 	SetUseHalfLambertLighting(TRUE);	//ハーフランバート化
 	//
-	FPS_n2::GetItemLog::Create();
 	FPS_n2::Sceneclass::ObjectManager::Create();
 	FPS_n2::Sceneclass::PlayerManager::Create();
 	FPS_n2::Sceneclass::GunAnimManager::Create();
@@ -27,7 +26,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::Sceneclass::AmmoDataManager::Create();
 	FPS_n2::Sceneclass::CommonBattleResource::Create();
 	//
-	auto* ItemLogParts = FPS_n2::GetItemLog::Instance();
 	auto* SaveDataParts = SaveDataClass::Instance();
 	auto* BGM = BGMPool::Instance();
 	auto* OptionParts = OPTION::Instance();
@@ -78,10 +76,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			DebugParts->SetPoint("Execute start");
 #endif // DEBUG
 			if (scene->Execute()) { break; }
-			ItemLogParts->Update();
 			//描画
 			scene->Draw();
-			ItemLogParts->Draw();
 			//デバッグ
 #ifdef DEBUG
 			DebugParts->DebugWindow(y_r(1920 - 250), y_r(150));

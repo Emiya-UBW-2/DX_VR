@@ -361,7 +361,7 @@ namespace FPS_n2 {
 		void			CharacterClass::ExecuteInput(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* SE = SoundPool::Instance();
-			auto* ItemLogParts = GetItemLog::Instance();
+			auto* ItemLogParts = SideLog::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* OptionParts = OPTION::Instance();
 			//
