@@ -73,7 +73,7 @@
 0204=Survive for 3 minutes
 0205=Kill Enemy until die
 0206=Last 1 minute
-0207=%d Enemy Left
+0207=Enemy Left:
 0208=Get Ammo
 0209=Get Armer
 0210=Kill
