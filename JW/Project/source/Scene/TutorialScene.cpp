@@ -504,7 +504,7 @@ namespace FPS_n2 {
 			//ŽËŒ‚Œõ
 			if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetShotSwitch()) {// 
 				/*
-				auto mat = Chara->GetGunPtrNow()->GetFrameWorldMat(GunFrame::Muzzle);
+				auto mat = Chara->GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Muzzle);
 				SetLightEnable(TRUE);
 				ChangeLightTypePoint(mat.pos().get(),
 					4.0f*Scale_Rate,
@@ -521,7 +521,7 @@ namespace FPS_n2 {
 					break;
 				}
 				//
-				auto mat = Chara->GetGunPtrNow()->GetFrameWorldMat(GunFrame::LaserSight);
+				auto mat = Chara->GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::LaserSight);
 				Vector3DX StartPos = mat.pos();
 				Vector3DX EndPos = StartPos + mat.zvec()*-1.f * 15.f*Scale_Rate;
 				this->m_BackGround->CheckLinetoMap(StartPos, &EndPos, true);

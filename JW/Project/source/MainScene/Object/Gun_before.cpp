@@ -113,7 +113,7 @@ namespace FPS_n2 {
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
 					auto& Ptr = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
-					*pRet = Ptr->GetFrameLocalMatrix(Ptr->GetFrame((int)frame));
+					*pRet = Ptr->GetFrameLocalMat(Ptr->GetFrame((int)frame));
 					Ret = true;
 				}
 			}
@@ -132,7 +132,7 @@ namespace FPS_n2 {
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
 					auto& m = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
-					*pRet = m->GetFrameWorldMat(frame);
+					*pRet = m->GetFrameWorldMat_P(frame);
 					if (frame == GunFrame::Sight) {
 						if (m->GetChildFrameNum(m->GetFrame((int)frame)) > 0) {
 							Vector3DX vec = (m->GetChildFrameWorldMatrix(m->GetFrame((int)frame), 0).pos() - pRet->pos()).normalized();
@@ -223,12 +223,12 @@ namespace FPS_n2 {
 					//1‚ÌƒtƒŒ[ƒ€ˆÚ“®—Ê‚ğ–³‹‚·‚é
 					auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
 					for (int i = 0; i < Obj->GetObj().get_anime().size(); i++) {
-						Obj->GetAnime((GunAnimeID)i).per = pParent.getanime(i).per;
-						Obj->GetAnime((GunAnimeID)i).time = pParent.getanime(i).time;
+						Obj->GetObj().get_anime((int)(GunAnimeID)i).per = pParent.getanime(i).per;
+						Obj->GetObj().get_anime((int)(GunAnimeID)i).time = pParent.getanime(i).time;
 					}
 					Obj->GetObj().frame_Reset(Obj->GetFrame((int)GunFrame::Center));
 					Obj->GetObj().work_anime();
-					auto Rot = Obj->GetFrameLocalMatrix(Obj->GetFrame((int)GunFrame::Center)).rotation();
+					auto Rot = Obj->GetFrameLocalMat(Obj->GetFrame((int)GunFrame::Center)).rotation();
 					Obj->GetObj().SetFrameLocalMatrix(Obj->GetFrame((int)GunFrame::Center), Rot * Obj->GetFrameBaseLocalMat((int)GunFrame::Center));
 				}
 			}

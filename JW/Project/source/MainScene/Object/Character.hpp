@@ -130,7 +130,7 @@ namespace FPS_n2 {
 			void			MovePoint(float pxRad, float pyRad, const Vector3DX& pPos, int GunSel) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady) noexcept;
 		public: //Œp³
-			void			Init(void) noexcept override;
+			void			Init_Sub(void) noexcept override;
 			void			FirstExecute(void) noexcept override;
 			void			CheckDraw(void) noexcept override {
 				this->m_IsDraw = false;
@@ -144,7 +144,7 @@ namespace FPS_n2 {
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override;
 			void			DrawShadow(void) noexcept override;
-			void			Dispose(void) noexcept override;
+			void			Dispose_Sub(void) noexcept override;
 		};
 	};
 };

@@ -5,9 +5,7 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		void MorphineClass::Init(void) noexcept {
-			ObjectBaseClass::Init();
-		}
+		void MorphineClass::Init_Sub(void) noexcept {		}
 		void MorphineClass::FirstExecute(void) noexcept {
 			if (this->m_IsFirstLoop) {
 			}
@@ -28,8 +26,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void MorphineClass::Dispose(void) noexcept {
-			ObjectBaseClass::Dispose();
+		void MorphineClass::Dispose_Sub(void) noexcept {
 		}
 	};
 };

@@ -5,9 +5,7 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		void ArmerClass::Init(void) noexcept {
-			ObjectBaseClass::Init();
-		}
+		void ArmerClass::Init_Sub(void) noexcept {}
 		void ArmerClass::FirstExecute(void) noexcept {
 			if (this->m_IsFirstLoop) {
 			}
@@ -28,8 +26,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void ArmerClass::Dispose(void) noexcept {
-			ObjectBaseClass::Dispose();
+		void ArmerClass::Dispose_Sub(void) noexcept {
 		}
 	};
 };

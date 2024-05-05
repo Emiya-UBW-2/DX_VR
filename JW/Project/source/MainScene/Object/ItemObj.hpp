@@ -23,8 +23,7 @@ namespace FPS_n2 {
 			void			SetItemType(ItemType item) noexcept { this->m_ItemType = item; }
 			const auto&		GetItemType(void) const noexcept { return this->m_ItemType; }
 		public:
-			void			Init(void) noexcept override {
-				ObjectBaseClass::Init();
+			void			Init_Sub(void) noexcept override {
 				this->m_IsActive = false;
 				this->m_ItemType = ItemType::ARMER;
 			}
@@ -41,10 +40,8 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			void			Dispose(void) noexcept override {
+			void			Dispose_Sub(void) noexcept override {
 				this->m_BackGround.reset();
-				this->GetObj().Dispose();
-				this->m_col.Dispose();
 			}
 		};
 	};

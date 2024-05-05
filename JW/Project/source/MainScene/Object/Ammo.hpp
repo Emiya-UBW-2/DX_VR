@@ -73,8 +73,7 @@ namespace FPS_n2 {
 			AmmoClass(void) noexcept { this->m_objType = ObjType::Ammo; }
 			~AmmoClass(void) noexcept { m_AmmoData.reset(); }
 		public: //åpè≥
-			void			Init() noexcept override {
-				ObjectBaseClass::Init();
+			void			Init_Sub() noexcept override {
 				SetActive(false);
 			}
 			//

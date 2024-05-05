@@ -12,16 +12,16 @@ namespace FPS_n2 {
 		public:
 		public:
 		public://ƒQƒbƒ^[
-			const auto GetLeftHandMat() const noexcept { return this->GetFrameWorldMatrix(2); }
-			const auto GetRightHandMat() const noexcept { return this->GetFrameWorldMatrix(3); }
+			const auto GetLeftHandMat() const noexcept { return this->GetFrameWorldMat(2); }
+			const auto GetRightHandMat() const noexcept { return this->GetFrameWorldMat(3); }
 		public:
 			ArmerClass(void) noexcept { this->m_objType = ObjType::Armer; }
 			~ArmerClass(void) noexcept {}
 		public:
-			void			Init(void) noexcept override;
+			void			Init_Sub(void) noexcept override;
 			void			FirstExecute(void) noexcept override;
 			void			Draw(bool isDrawSemiTrans) noexcept override;
-			void			Dispose(void) noexcept override;
+			void			Dispose_Sub(void) noexcept override;
 		};
 	};
 };

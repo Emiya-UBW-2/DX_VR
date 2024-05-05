@@ -219,7 +219,7 @@ namespace FPS_n2 {
 							, Vector3DX::vget(0.f, 1.05f, 0.f)*Scale_Rate, std::clamp(Per*2.f - 1.f, 0.f, 1.f))
 					)
 				);
-				auto Mat = GunPtr->GetFrameWorldMat(GunFrame::Magpos);
+				auto Mat = GunPtr->GetFrameWorldMat_P(GunFrame::Magpos);
 				(*GunPtr->GetMagazinePtr())->SetMove(
 					Lerp_Matrix(Mat.rotation(), Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(90)), std::clamp(Per*2.f - 1.f, 0.f, 1.f)),
 					Lerp(

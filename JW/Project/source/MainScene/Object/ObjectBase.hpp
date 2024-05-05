@@ -38,13 +38,13 @@ namespace FPS_n2 {
 			std::array<int, 2>							m_ShaderTex{-1 , -1};
 		public:
 			auto&			GetObj(void) noexcept { return this->m_obj; }
-			const auto&		GetObj_const(void) const noexcept { return this->m_obj; }
-			const auto		GetMatrix(void) const noexcept { return this->m_obj.GetMatrix(); }
-			const auto		GetFrameLocalMatrix(int frame) const noexcept { return this->m_obj.GetFrameLocalMatrix(frame); }
-			const auto		GetFrameWorldMatrix(int frame) const noexcept { return this->m_obj.GetFrameLocalWorldMatrix(frame); }
-			const auto		GetParentFrameWorldMatrix(int frame) const noexcept { return GetFrameWorldMatrix((int)this->m_obj.frame_parent(frame)); }
+			//const auto&		GetObj_const(void) const noexcept { return this->m_obj; }
+			//const auto		GetMatrix(void) const noexcept { return this->m_obj.GetMatrix(); }
+			const auto		GetFrameLocalMat(int frame) const noexcept { return this->m_obj.GetFrameLocalMatrix(frame); }
+			const auto		GetFrameWorldMat(int frame) const noexcept { return this->m_obj.GetFrameLocalWorldMatrix(frame); }
+			const auto		GetParentFrameWorldMatrix(int frame) const noexcept { return GetFrameWorldMat((int)this->m_obj.frame_parent(frame)); }
 			const auto		GetChildFrameNum(int frame) const noexcept { return (int)this->m_obj.frame_child_num(frame); }
-			const auto		GetChildFrameWorldMatrix(int frame, int ID) const noexcept { return GetFrameWorldMatrix((int)this->m_obj.frame_child(frame, ID)); }
+			const auto		GetChildFrameWorldMatrix(int frame, int ID) const noexcept { return GetFrameWorldMat((int)this->m_obj.frame_child(frame, ID)); }
 
 			const bool		HaveFrame(int frame) const noexcept { return this->m_Frames[frame].first != -1; }
 			const auto&		GetFrame(int frame) const noexcept { return this->m_Frames[frame].first; }
@@ -143,7 +143,7 @@ namespace FPS_n2 {
 			void			CopyModel(const std::shared_ptr<ObjectBaseClass>& pBase) noexcept;
 			void			SaveModel(bool UseToonWhenCreateFile) noexcept;
 		public:
-			virtual void	Init(void) noexcept;
+			void			Init(void) noexcept;
 			virtual void	FirstExecute(void) noexcept {}
 			void			ExecuteCommon(void) noexcept;
 			virtual void	LateExecute(void) noexcept {}
@@ -151,8 +151,10 @@ namespace FPS_n2 {
 			virtual void	DrawShadow(void) noexcept;
 			virtual void	CheckDraw(void) noexcept;
 			virtual void	Draw(bool isDrawSemiTrans) noexcept;
-			//
-			virtual void	Dispose(void) noexcept;
+			void			Dispose(void) noexcept;
+		protected:
+			virtual void	Init_Sub(void) noexcept{}
+			virtual void	Dispose_Sub(void) noexcept{}
 		};
 	};
 };

@@ -8,22 +8,19 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class ModClass :
-			public ObjectBaseClass,
-			public ModSlotControl {
+		class ModClass : public ObjectBaseClass, public ModSlotControl {
 		public:
 			ModClass(void) noexcept {}
 			~ModClass(void) noexcept {}
 		public:
-			auto&			GetAnime(GunAnimeID anim) noexcept { return GetObj().get_anime((int)anim); }
-			const auto		GetFrameWorldMat(GunFrame frame) const noexcept {
+			const auto		GetFrameWorldMat_P(GunFrame frame) const noexcept {
 				//ŠY“–ƒtƒŒ[ƒ€‚ª‚ ‚é‚Ì‚È‚çã‘‚«
 				Matrix4x4DX Ret;
 				if (ModSlotControl::GetPartsFrameWorldMat(frame, &Ret)) {
 					return Ret;
 				}
 				if (HaveFrame((int)frame)) {
-					Ret = GetFrameWorldMatrix(GetFrame((int)frame));
+					Ret = GetFrameWorldMat(GetFrame((int)frame));
 					if (frame == GunFrame::Sight) {
 						if (GetChildFrameNum(GetFrame((int)frame)) > 0) {
 							Vector3DX vec = (GetChildFrameWorldMatrix(GetFrame((int)frame), 0).pos() - Ret.pos()).normalized();
@@ -36,7 +33,9 @@ namespace FPS_n2 {
 				return Matrix4x4DX::identity();
 			}
 		public:
-			void			Init(void) noexcept override;
+			void			Init_Sub(void) noexcept override {
+				ModSlotControl::InitModSlotControl(this->m_FilePath);
+			}
 
 			void			FirstExecute(void) noexcept override {
 				UpdateMove();
@@ -45,9 +44,9 @@ namespace FPS_n2 {
 			void			SetModMatrix(const Matrix4x4DX& value) noexcept {
 				SetMove(value.rotation(), value.pos());
 				ModSlotControl::UpdatePartsAnim(GetObj());
-				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::UnderRail), GunSlot::UnderRail);
-				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::Sight), GunSlot::Sight);
-				ModSlotControl::UpdatePartsMove(GetFrameWorldMat(GunFrame::MuzzleAdapter), GunSlot::MuzzleAdapter);
+				ModSlotControl::UpdatePartsMove(GetFrameWorldMat_P(GunFrame::UnderRail), GunSlot::UnderRail);
+				ModSlotControl::UpdatePartsMove(GetFrameWorldMat_P(GunFrame::Sight), GunSlot::Sight);
+				ModSlotControl::UpdatePartsMove(GetFrameWorldMat_P(GunFrame::MuzzleAdapter), GunSlot::MuzzleAdapter);
 			}
 			void			DrawShadow(void) noexcept override {
 				if (this->m_IsActive && this->m_IsDraw) {
@@ -71,17 +70,12 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			void			Dispose(void) noexcept override {
-				Dispose_Mod();
-				DisposeModSlotControl();
-				this->GetObj().Dispose();
-				this->m_col.Dispose();
+			void			Dispose_Sub(void) noexcept override {
+				ModSlotControl::DisposeModSlotControl();
 			}
 		public:
-			virtual void	Init_Mod(void) noexcept {}
 			virtual void	FirstExecute_Mod(void) noexcept {}
 			virtual void	Draw_Mod(bool) noexcept {}
-			virtual void	Dispose_Mod(void) noexcept {}
 		};
 
 
@@ -102,7 +96,6 @@ namespace FPS_n2 {
 					SetMove(Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(-30.f*this->HandPer))*GetMove().mat.rotation(), Lerp(GetMove().pos, this->HandMatrix.pos(), this->HandPer));
 				}
 			}
-			void			Dispose_Mod(void) noexcept override {}
 		public:
 			void			SetHandMatrix(const Matrix4x4DX& value, float pPer, bool isDirect) noexcept {
 				this->HandMatrix = value;

@@ -97,8 +97,8 @@ namespace FPS_n2 {
 			auto&			GetModData() noexcept { return this->m_ModDataClass; }
 			const auto&		GetModData() const noexcept { return this->m_ModDataClass; }
 		protected:
-			void			InitModSlotControl(const std::string& PilePath, bool ismod) noexcept {
-				m_ModDataClass = *ModDataManager::Instance()->AddData(PilePath, ismod);
+			void			InitModSlotControl(const std::string& PilePath) noexcept {
+				m_ModDataClass = *ModDataManager::Instance()->AddData(PilePath);
 			}
 			void			DisposeModSlotControl(void) noexcept {
 				for (int loop = 0; loop < (int)GunSlot::Max; loop++) {

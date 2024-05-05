@@ -1,5 +1,4 @@
 #include	"ModData.hpp"
-#include	"GunData.hpp"
 
 const FPS_n2::Sceneclass::ModDataManager* SingletonBase<FPS_n2::Sceneclass::ModDataManager>::m_Singleton = nullptr;
 namespace FPS_n2 {
@@ -21,7 +20,7 @@ namespace FPS_n2 {
 					Path = "data/Mods/";
 					Path += GunSlotName[(int)this->m_PartsSlot.back().m_GunSlot];
 					Path += "/" + RIGHT + "/";
-					this->m_PartsSlot.back().m_ItemsUniqueID.emplace_back((*ModDataManager::Instance()->AddData(Path, true))->GetUniqueID());
+					this->m_PartsSlot.back().m_ItemsUniqueID.emplace_back((*ModDataManager::Instance()->AddData(Path))->GetUniqueID());
 				}
 				else if (LEFT.find("Conflict") != std::string::npos) {
 					this->m_PartsSlot.back().m_Conflicts.emplace_back(RIGHT);
@@ -31,7 +30,10 @@ namespace FPS_n2 {
 				}
 			}
 
-			if (LEFT == "RecoilPower") {
+			if (LEFT == "Name") {
+				this->m_name = RIGHT;
+			}
+			else if (LEFT == "RecoilPower") {
 				this->m_RecoilPower = std::stoi(RIGHT);
 				this->m_IsRecoilPower = true;
 			}
@@ -88,21 +90,30 @@ namespace FPS_n2 {
 			else if (LEFT == "Info_Eng") {
 				m_InfoEng.emplace_back(RIGHT);
 			}
+
+			else if (LEFT == "ShotRate") {
+				this->m_ShotRate = std::stoi(RIGHT);
+			}
+			else if (LEFT == "soundsel") {
+				this->m_SoundSel = std::stoi(RIGHT);
+			}
+			else if (LEFT == "reloadType") {
+				if (RIGHT == "MAG") {
+					this->m_ReloadType = RELOADTYPE::MAG;
+				}
+				else if (RIGHT == "AMMO") {
+					this->m_ReloadType = RELOADTYPE::AMMO;
+				}
+			}
 		}
 
-		const std::shared_ptr<ModDataClass>*	ModDataManager::AddData(const std::string& filepath, bool isMod) noexcept {
+		const std::shared_ptr<ModDataClass>*	ModDataManager::AddData(const std::string& filepath) noexcept {
 			for (auto& o : m_Object) {
 				if (o->GetPath() == filepath) {
 					return &o;
 				}
 			}
-			std::shared_ptr<ModDataClass> tmp;
-			if (isMod) {
-				tmp = std::make_shared<ModDataClass>();
-			}
-			else {
-				tmp = std::make_shared<GunDataClass>();
-			}
+			auto tmp = std::make_shared<ModDataClass>();
 			auto UniqueID = m_LastUniqueID;
 			tmp->SetUniqueID(UniqueID);
 			m_LastUniqueID++;

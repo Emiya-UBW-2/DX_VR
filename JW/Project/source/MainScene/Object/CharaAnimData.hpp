@@ -86,42 +86,6 @@ namespace FPS_n2 {
 			"FMG9_ads",
 		};
 
-		class GunanimData {
-			EnumGunAnim		m_EnumGunAnim{EnumGunAnim::M16_ready1};
-			bool			m_IsLoop{true};
-		public:
-			void Set(const std::string& data, EnumGunAnim EnumSel) {
-				std::vector<std::string> Args;
-				std::string RIGHTBuf = data;
-				//タブけし
-				while (true) {
-					auto RIGHTBufLen = RIGHTBuf.find("\t");
-					if (RIGHTBufLen != std::string::npos) {
-						RIGHTBuf = RIGHTBuf.substr(0, RIGHTBufLen) + RIGHTBuf.substr(RIGHTBufLen + 1);
-					}
-					else {
-						break;
-					}
-				}
-				while (true) {
-					auto div = RIGHTBuf.find(",");
-					if (div != std::string::npos) {
-						Args.emplace_back(RIGHTBuf.substr(0, div));
-						RIGHTBuf = RIGHTBuf.substr(div + 1);
-					}
-					else {
-						Args.emplace_back(RIGHTBuf);
-						break;
-					}
-				}
-
-				m_EnumGunAnim = EnumSel;
-				m_IsLoop = (Args[0] == "Loop");
-			}
-		public:
-			const auto& GetEnumGunAnim() const noexcept { return this->m_EnumGunAnim; }
-			const auto& GetIsLoop() const noexcept { return this->m_IsLoop; }
-		};
 		class GunAnimNow {
 			Vector3DX		m_Rotate;
 			Vector3DX		m_Pos;
@@ -131,54 +95,97 @@ namespace FPS_n2 {
 				m_Pos = Pos;
 			}
 		public:
-			const auto	rotation() const noexcept {
-				return Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(this->m_Rotate.x)) * Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(this->m_Rotate.y)) * Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(this->m_Rotate.z));
+			const auto	GetMatrix() const noexcept {
+				return 
+					Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(this->m_Rotate.x)) *
+					Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(this->m_Rotate.y)) *
+					Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(this->m_Rotate.z)) *
+					Matrix4x4DX::Mtrans(this->m_Pos*Scale_Rate);
 			}
-			const auto GetPos() const noexcept { return this->m_Pos*Scale_Rate; }
-		};
-		class GunAnim {
-			Vector3DX		m_Rotate;
-			Vector3DX		m_Pos;
-			int				m_Frame{1};
-		public:
-			void Set(const std::string& data) {
-				std::vector<std::string> Args;
-				std::string RIGHTBuf = data;
-				//タブけし
-				while (true) {
-					auto RIGHTBufLen = RIGHTBuf.find("\t");
-					if (RIGHTBufLen != std::string::npos) {
-						RIGHTBuf = RIGHTBuf.substr(0, RIGHTBufLen) + RIGHTBuf.substr(RIGHTBufLen + 1);
-					}
-					else {
-						break;
-					}
-				}
-				while (true) {
-					auto div = RIGHTBuf.find(",");
-					if (div != std::string::npos) {
-						Args.emplace_back(RIGHTBuf.substr(0, div));
-						RIGHTBuf = RIGHTBuf.substr(div + 1);
-					}
-					else {
-						Args.emplace_back(RIGHTBuf);
-						break;
-					}
-				}
-				m_Rotate.Set(std::stof(Args[0]), std::stof(Args[1]), std::stof(Args[2]));
-				m_Pos.Set(std::stof(Args[3]), std::stof(Args[4]), -std::stof(Args[5]));
-				m_Frame = std::stoi(Args[6]);
-			}
-		public:
-			const auto& GetRotate() const noexcept { return this->m_Rotate; }
-			const auto& GetPos() const noexcept { return this->m_Pos; }
-			const auto& GetFrame() const noexcept { return this->m_Frame; }
 		};
 
 		class GunAnimManager : public SingletonBase<GunAnimManager> {
 		private:
 			friend class SingletonBase<GunAnimManager>;
+		private:
+			class GunanimData {
+				EnumGunAnim		m_EnumGunAnim{EnumGunAnim::M16_ready1};
+				bool			m_IsLoop{true};
+			public:
+				void Set(const std::string& data, EnumGunAnim EnumSel) {
+					std::vector<std::string> Args;
+					std::string RIGHTBuf = data;
+					//タブけし
+					while (true) {
+						auto RIGHTBufLen = RIGHTBuf.find("\t");
+						if (RIGHTBufLen != std::string::npos) {
+							RIGHTBuf = RIGHTBuf.substr(0, RIGHTBufLen) + RIGHTBuf.substr(RIGHTBufLen + 1);
+						}
+						else {
+							break;
+						}
+					}
+					while (true) {
+						auto div = RIGHTBuf.find(",");
+						if (div != std::string::npos) {
+							Args.emplace_back(RIGHTBuf.substr(0, div));
+							RIGHTBuf = RIGHTBuf.substr(div + 1);
+						}
+						else {
+							Args.emplace_back(RIGHTBuf);
+							break;
+						}
+					}
+
+					m_EnumGunAnim = EnumSel;
+					m_IsLoop = (Args[0] == "Loop");
+				}
+			public:
+				const auto& GetEnumGunAnim() const noexcept { return this->m_EnumGunAnim; }
+				const auto& GetIsLoop() const noexcept { return this->m_IsLoop; }
+			};
+
 			struct AnimDatas {
+			public:
+				class GunAnim {
+					Vector3DX		m_Rotate;
+					Vector3DX		m_Pos;
+					int				m_Frame{1};
+				public:
+					void Set(const std::string& data) {
+						std::vector<std::string> Args;
+						std::string RIGHTBuf = data;
+						//タブけし
+						while (true) {
+							auto RIGHTBufLen = RIGHTBuf.find("\t");
+							if (RIGHTBufLen != std::string::npos) {
+								RIGHTBuf = RIGHTBuf.substr(0, RIGHTBufLen) + RIGHTBuf.substr(RIGHTBufLen + 1);
+							}
+							else {
+								break;
+							}
+						}
+						while (true) {
+							auto div = RIGHTBuf.find(",");
+							if (div != std::string::npos) {
+								Args.emplace_back(RIGHTBuf.substr(0, div));
+								RIGHTBuf = RIGHTBuf.substr(div + 1);
+							}
+							else {
+								Args.emplace_back(RIGHTBuf);
+								break;
+							}
+						}
+						m_Rotate.Set(std::stof(Args[0]), std::stof(Args[1]), std::stof(Args[2]));
+						m_Pos.Set(std::stof(Args[3]), std::stof(Args[4]), -std::stof(Args[5]));
+						m_Frame = std::stoi(Args[6]);
+					}
+				public:
+					const auto& GetRotate() const noexcept { return this->m_Rotate; }
+					const auto& GetPos() const noexcept { return this->m_Pos; }
+					const auto& GetFrame() const noexcept { return this->m_Frame; }
+				};
+			public:
 				std::shared_ptr<GunanimData> first;
 				std::vector<std::shared_ptr<GunAnim>> second;
 
@@ -209,7 +216,7 @@ namespace FPS_n2 {
 				m_Object.back().first->Set(getparams::Getstr(mdata), EnumSel);
 				while (true) {
 					if (FileRead_eof(mdata) != 0) { break; }
-					m_Object.back().second.emplace_back(std::make_shared<GunAnim>());
+					m_Object.back().second.emplace_back(std::make_shared<AnimDatas::GunAnim>());
 					m_Object.back().second.back()->Set(getparams::Getstr(mdata));
 				}
 				FileRead_close(mdata);

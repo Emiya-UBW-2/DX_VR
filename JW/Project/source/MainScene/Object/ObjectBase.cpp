@@ -203,6 +203,7 @@ namespace FPS_n2 {
 			this->m_IsResetPhysics = true;
 			this->m_IsFirstLoop = true;
 			this->m_IsDraw = false;
+			Init_Sub();
 		}
 		//
 		void			ObjectBaseClass::ExecuteCommon(void) noexcept {
@@ -282,6 +283,7 @@ namespace FPS_n2 {
 		void			ObjectBaseClass::Dispose(void) noexcept {
 			this->GetObj().Dispose();
 			this->m_col.Dispose();
+			Dispose_Sub();
 		}
 	};
 };

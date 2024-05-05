@@ -138,7 +138,7 @@ namespace FPS_n2 {
 			Path += FolderName;
 			Path += "/";
 
-			auto Ptr = std::make_shared<CharacterClass>();
+			std::shared_ptr<ObjectBaseClass> Ptr = std::make_shared<CharacterClass>();
 			ObjMngr->AddObject(Ptr);
 			ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
 			Ptr->Init();

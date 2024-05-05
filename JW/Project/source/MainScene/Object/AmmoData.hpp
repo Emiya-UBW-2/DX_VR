@@ -1,11 +1,12 @@
 #pragma once
 #include	"../../Header.hpp"
-#include "ObjectBase_before.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class AmmoDataClass : public ItemData {
+		class AmmoDataClass {
 		private:
+			std::string		m_path;
+			std::string		m_name;
 			float			m_caliber{0.f};
 			float			m_speed{100.f};				//弾速
 			float			m_penetration{10.f};			//貫通
@@ -14,6 +15,8 @@ namespace FPS_n2 {
 			float			m_Accuracy{0.f};
 			int				m_FallSound{0};
 		public://getter
+			const auto&		GetPath(void) const noexcept { return this->m_path; }
+			const auto&		GetName(void) const noexcept { return this->m_name; }
 			const auto&		GetCaliber(void) const noexcept { return this->m_caliber; }
 			const auto&		GetSpeed(void) const noexcept { return this->m_speed; }
 			const auto&		GetPenetration(void) const noexcept { return this->m_penetration; }
@@ -21,32 +24,56 @@ namespace FPS_n2 {
 			const auto&		GetPellet(void) const noexcept { return this->m_Pellet; }
 			const auto&		GetAccuracy(void) const noexcept { return this->m_Accuracy; }
 			const auto&		GetFallSound(void) const noexcept { return this->m_FallSound; }
-		protected:
-			void		Set_Sub(const std::string& LEFT, const std::string&RIGHT) noexcept override {
-				if (LEFT == "ammo_cal(mm)") {
+		public:
+			void			Set(std::string path_) {
+				this->m_path = path_;
+
+				//Load_Sub(this->m_path);
+
+				int mdata = FileRead_open((this->m_path + "data.txt").c_str(), FALSE);
+				while (true) {
+					if (FileRead_eof(mdata) != 0) { break; }
+					auto ALL = getparams::Getstr(mdata);
+					//コメントアウト
+					if (ALL.find("//") != std::string::npos) {
+						ALL = ALL.substr(0, ALL.find("//"));
+					}
+					//
+					if (ALL == "") { continue; }
+					auto LEFT = getparams::getleft(ALL);
+					auto RIGHT = getparams::getright(ALL);
+					//アイテムデータ読みとり
+					Set_Sub(LEFT, RIGHT);
+				}
+				FileRead_close(mdata);
+			}
+		private:
+			void		Set_Sub(const std::string& LEFT, const std::string&RIGHT) noexcept {
+				if (LEFT == "Name") {
+					this->m_name = RIGHT;
+				}
+				else if (LEFT == "ammo_cal(mm)") {
 					this->m_caliber = std::stof(RIGHT)* 0.001f;		//口径
 				}
-				if (LEFT == "ammo_speed(m/s)") {
+				else if (LEFT == "ammo_speed(m/s)") {
 					this->m_speed = std::stof(RIGHT);				//弾速
 				}
-				if (LEFT == "ammo_pene(mm)") {
+				else if (LEFT == "ammo_pene(mm)") {
 					this->m_penetration = std::stof(RIGHT);			//貫通
 				}
-				if (LEFT == "ammo_damage") {
+				else if (LEFT == "ammo_damage") {
 					this->m_damage = (HitPoint)std::stoi(RIGHT);		//ダメージ
 				}
-				if (LEFT == "Pellets") {
+				else if (LEFT == "Pellets") {
 					this->m_Pellet = std::stoi(RIGHT);				//ペレットの数
 				}
-				if (LEFT == "Accuracy") {
+				else if (LEFT == "Accuracy") {
 					this->m_Accuracy = std::stof(RIGHT);				//ペレットの数
 				}
-				if (LEFT == "FallSound") {
+				else if (LEFT == "FallSound") {
 					this->m_FallSound = std::stoi(RIGHT);				//ペレットの数
 				}
-
 			}
-		public:
 		};
 
 		class AmmoDataManager : public SingletonBase<AmmoDataManager> {

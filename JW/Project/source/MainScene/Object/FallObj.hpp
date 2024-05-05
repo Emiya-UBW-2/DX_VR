@@ -19,8 +19,7 @@ namespace FPS_n2 {
 		public:
 			void			SetFall(const Vector3DX& pos, const Matrix4x4DX& mat, const Vector3DX& vec, float timer, SoundEnum sound) noexcept;
 		public:
-			void			Init(void) noexcept override {
-				ObjectBaseClass::Init();
+			void			Init_Sub(void) noexcept override {
 				this->m_IsActive = false;
 			}
 			void			FirstExecute(void) noexcept override;
@@ -36,10 +35,8 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			void			Dispose(void) noexcept override {
+			void			Dispose_Sub(void) noexcept override {
 				this->m_BackGround.reset();
-				this->GetObj().Dispose();
-				this->m_col.Dispose();
 			}
 		};
 	};

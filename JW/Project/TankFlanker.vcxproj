@@ -29,7 +29,6 @@
     <ClInclude Include="source\MainScene\Object\CharacterEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\Character_before.hpp" />
     <ClInclude Include="source\MainScene\Object\Gun.hpp" />
-    <ClInclude Include="source\MainScene\Object\GunData.hpp" />
     <ClInclude Include="source\MainScene\Object\GunEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\Gun_before.hpp" />
     <ClInclude Include="source\MainScene\Object\ItemObj.hpp" />
@@ -39,7 +38,6 @@
     <ClInclude Include="source\MainScene\Object\Morphine.hpp" />
     <ClInclude Include="source\MainScene\Object\MovieObj.hpp" />
     <ClInclude Include="source\MainScene\Object\ObjectBase.hpp" />
-    <ClInclude Include="source\MainScene\Object\ObjectBase_before.hpp" />
     <ClInclude Include="source\MainScene\Object\Target.hpp" />
     <ClInclude Include="source\MainScene\Player\CPU.hpp" />
     <ClInclude Include="source\MainScene\Player\Player.hpp" />
@@ -64,7 +62,6 @@
     <ClCompile Include="source\MainScene\Object\Character.cpp" />
     <ClCompile Include="source\MainScene\Object\Character_before.cpp" />
     <ClCompile Include="source\MainScene\Object\Gun.cpp" />
-    <ClCompile Include="source\MainScene\Object\GunData.cpp" />
     <ClCompile Include="source\MainScene\Object\Gun_before.cpp" />
     <ClCompile Include="source\MainScene\Object\ItemObj.cpp" />
     <ClCompile Include="source\MainScene\Object\Mod.cpp" />
