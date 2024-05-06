@@ -5,7 +5,6 @@
 #include "../../CommonScene/NetWork.hpp"
 #include "CharaAnimData.hpp"
 #include "CharacterEnum.hpp"
-#include "ObjectBase.hpp"
 #include "ItemObj.hpp"
 
 #include "Gun.hpp"

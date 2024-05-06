@@ -1,6 +1,5 @@
 #include	"Gun.hpp"
 
-#include "../../ObjectManager.hpp"
 #include "../../MainScene/BackGround/BackGround.hpp"
 
 namespace FPS_n2 {
@@ -447,23 +446,23 @@ namespace FPS_n2 {
 
 				int SightSel = 0;
 				for (auto& p : PartsList) {
-					if ((*p)->GetobjType() == ObjType::Sight) {
+					if ((*p)->GetobjType() == (int)ObjType::Sight) {
 						if (SightSel < m_SightPtr.size()) {
 							const auto* Ptr = &((std::shared_ptr<SightClass>&)(*p));
 							m_SightPtr.at(SightSel) = Ptr;
 							SightSel++;
 						}
 					}
-					if ((*p)->GetobjType() == ObjType::MuzzleAdapter) {
+					if ((*p)->GetobjType() == (int)ObjType::MuzzleAdapter) {
 						m_MuzzlePtr = &((std::shared_ptr<MuzzleClass>&)(*p));
 					}
-					if ((*p)->GetobjType() == ObjType::Upper) {
+					if ((*p)->GetobjType() == (int)ObjType::Upper) {
 						m_UpperPtr = &((std::shared_ptr<UpperClass>&)(*p));
 					}
-					if ((*p)->GetobjType() == ObjType::Lower) {
+					if ((*p)->GetobjType() == (int)ObjType::Lower) {
 						m_LowerPtr = &((std::shared_ptr<LowerClass>&)(*p));
 					}
-					if ((*p)->GetobjType() == ObjType::Magazine) {
+					if ((*p)->GetobjType() == (int)ObjType::Magazine) {
 						m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(*p));
 					}
 				}

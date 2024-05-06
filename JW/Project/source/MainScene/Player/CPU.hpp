@@ -2,7 +2,6 @@
 #include	"../../Header.hpp"
 #include	"../../MainScene/BackGround/BackGround.hpp"
 #include	"../../sub.hpp"
-#include "../../ObjectManager.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {

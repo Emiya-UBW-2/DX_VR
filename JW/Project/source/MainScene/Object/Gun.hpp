@@ -7,7 +7,6 @@
 #include "CharaAnimData.hpp"
 
 #include "../../sub.hpp"
-#include "ObjectBase.hpp"
 #include "Ammo.hpp"
 #include "Mod.hpp"
 
@@ -38,6 +37,11 @@ namespace FPS_n2 {
 			int										m_Recoil_Diff{0};
 			int										m_Capacity{0};//’e”
 			float																			m_UpperAnim{0.f};
+		private:
+			PlayerID											m_MyID{0};
+		public:
+			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
+			void			SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
 		private:
 			void		ExecuteCartInChamber(void) noexcept;//ƒ`ƒƒƒ“ƒo[‚Ö‚Ì‘•’eA”ro
 			void		ExecuteSound(void) noexcept;//ƒ`ƒƒƒ“ƒo[‚Ö‚Ì‘•’eA”ro
@@ -255,22 +259,26 @@ namespace FPS_n2 {
 			void		SetBullet(void) noexcept;//”­–C
 			void		UpdateGunAnims(void) noexcept;
 		public:
-			GunClass(void) noexcept { this->m_objType = ObjType::Gun; }
+			GunClass(void) noexcept { this->m_objType = (int)ObjType::Gun; }
 			~GunClass(void) noexcept {}
 		public:
 			void			SetFallObject(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept;
 			void			UpdateReticle() noexcept;
-		public:
+		private:
+			int	GetFrameNum() noexcept override { return (int)GunFrame::Max; }
+			const char*	GetFrameStr(int id) noexcept override { return GunFrameName[id]; }
+		private: //Œp³
 			void			Init_Sub(void) noexcept override {
 				ModSlotControl::InitModSlotControl(this->m_FilePath);
 			}
-			void			Init_Gun(void) noexcept;
 			void			FirstExecute(void) noexcept override;
 			void			DrawShadow(void) noexcept override;
 			void			Draw(bool isDrawSemiTrans) noexcept override;
 			void			Dispose_Sub(void) noexcept override {
 				ModSlotControl::DisposeModSlotControl();
 			}
+		public:
+			void			Init_Gun(void) noexcept;
 		};
 	};
 };

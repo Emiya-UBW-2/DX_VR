@@ -1,6 +1,5 @@
 #include	"MainScene.hpp"
 #include "../sub.hpp"
-#include "../ObjectManager.hpp"
 #include "../MainScene/Player/Player.hpp"
 #include "../MainScene/Player/CPU.hpp"
 #include "../MainScene/Object/Character.hpp"
@@ -995,7 +994,7 @@ namespace FPS_n2 {
 
 			int loop = 0;
 			while (true) {
-				auto ammo = ObjMngr->GetObj(ObjType::Ammo, loop);
+				auto ammo = ObjMngr->GetObj((int)ObjType::Ammo, loop);
 				if (ammo != nullptr) {
 					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
 					if (a->IsActive()) {
@@ -1055,7 +1054,7 @@ namespace FPS_n2 {
 
 			int loop = 0;
 			while (true) {
-				auto ammo = ObjMngr->GetObj(ObjType::ItemObj, loop);
+				auto ammo = ObjMngr->GetObj((int)ObjType::ItemObj, loop);
 				if (ammo != nullptr) {
 					auto& a = (std::shared_ptr<ItemObjClass>&)(*ammo);
 					if (a->IsActive()) {
@@ -1408,7 +1407,7 @@ namespace FPS_n2 {
 					auto* ObjMngr = ObjectManager::Instance();
 					int loop = 0;
 					while (true) {
-						auto ammo = ObjMngr->GetObj(ObjType::ItemObj, loop);
+						auto ammo = ObjMngr->GetObj((int)ObjType::ItemObj, loop);
 						if (ammo != nullptr) {
 							auto& a = (std::shared_ptr<ItemObjClass>&)(*ammo);
 							if (a->IsActive()) {
@@ -1553,7 +1552,7 @@ namespace FPS_n2 {
 			auto* Fonts = FontPool::Instance();
 			int loop = 0;
 			while (true) {
-				auto ammo = ObjMngr->GetObj(ObjType::Ammo, loop);
+				auto ammo = ObjMngr->GetObj((int)ObjType::Ammo, loop);
 				if (ammo != nullptr) {
 					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
 					if (a->m_IsDrawHitUI && a->GetShootedID() == 0) {

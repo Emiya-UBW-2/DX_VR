@@ -1,6 +1,6 @@
 #pragma once
 #include	"../../Header.hpp"
-#include "ObjectBase.hpp"
+#include	"../../MainScene/BackGround/BackGround.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -16,7 +16,7 @@ namespace FPS_n2 {
 		public:
 			void			SetMapCol(const std::shared_ptr<BackGroundClassBase>& backGround) noexcept { this->m_BackGround = backGround; }
 		public:
-			ItemObjClass(void) noexcept { this->m_objType = ObjType::ItemObj; }
+			ItemObjClass(void) noexcept { this->m_objType = (int)ObjType::ItemObj; }
 			~ItemObjClass(void) noexcept {}
 		public:
 			void			SetFall(const Vector3DX& pos, const Vector3DX& vec) noexcept;

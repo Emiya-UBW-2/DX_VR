@@ -1,14 +1,12 @@
 #pragma once
 #include	"../../Header.hpp"
 
-#include "ObjectBase.hpp"
-
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class TargetClass : public ObjectBaseClass {
 			std::vector<Vector3DX> HitPosRec;
 		public:
-			TargetClass(void) noexcept { this->m_objType = ObjType::Target; }
+			TargetClass(void) noexcept { this->m_objType = (int)ObjType::Target; }
 			~TargetClass(void) noexcept {}
 		public:
 			const auto& GetHitPosRec() const noexcept { return this->HitPosRec; }

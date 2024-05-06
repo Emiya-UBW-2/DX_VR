@@ -251,7 +251,9 @@ namespace FPS_n2 {
 				});
 
 			if (DXDraw::Instance()->IsPause()) {
-				m_MainLoopPauseControl.Execute();
+				if (!DrawParts->IsExit() && !DrawParts->IsRestart()) {
+					m_MainLoopPauseControl.Execute();
+				}
 				m_PrevSSAO |= OptionParts->GetParamBoolean(EnumSaveParam::SSAO);
 				OptionParts->SetParamBoolean(EnumSaveParam::SSAO, m_PrevSSAO);
 				return true;
@@ -367,7 +369,7 @@ namespace FPS_n2 {
 			{
 				int loop = 0;
 				while (true) {
-					auto ammo = ObjMngr->GetObj(ObjType::Ammo, loop);
+					auto ammo = ObjMngr->GetObj((int)ObjType::Ammo, loop);
 					if (ammo != nullptr) {
 						auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
 						if (a->IsActive()) {
@@ -377,7 +379,7 @@ namespace FPS_n2 {
 
 							int j = 0;
 							while (true) {
-								auto target = ObjMngr->GetObj(ObjType::Target, j);
+								auto target = ObjMngr->GetObj((int)ObjType::Target, j);
 								if (target != nullptr) {
 									auto& t = (std::shared_ptr<TargetClass>&)(*target);
 									auto Res = t->GetColLine(repos_tmp, pos_tmp, -1);
@@ -386,7 +388,7 @@ namespace FPS_n2 {
 										EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, Res.HitPosition, Res.Normal, a->GetCaliberSize() / 0.02f * Scale_Rate);
 										//ヒット演算
 										if (tgtSel != -1 && tgtSel != j) {
-											auto& tOLD = (std::shared_ptr<TargetClass>&)(*ObjMngr->GetObj(ObjType::Target, tgtSel));
+											auto& tOLD = (std::shared_ptr<TargetClass>&)(*ObjMngr->GetObj((int)ObjType::Target, tgtSel));
 											tOLD->ResetHit();
 										}
 										tgtSel = j;
@@ -402,7 +404,7 @@ namespace FPS_n2 {
 							}
 
 							{
-								auto& target = *ObjMngr->GetObj(ObjType::MovieObj, 0);
+								auto& target = *ObjMngr->GetObj((int)ObjType::MovieObj, 0);
 								if (target != nullptr) {
 									if (GetMinLenSegmentToPoint(repos_tmp, pos_tmp, target->GetMove().pos) <= 0.5f*Scale_Rate) {
 										SEGMENT_POINT_RESULT Res;
@@ -720,12 +722,14 @@ namespace FPS_n2 {
 			auto* Fonts = FontPool::Instance();
 			//ポーズ
 			if (DXDraw::Instance()->IsPause()) {
-				m_MainLoopPauseControl.Draw();
+				if (!DrawParts->IsExit() && !DrawParts->IsRestart()) {
+					m_MainLoopPauseControl.Draw();
+				}
 			}
 			else {
 				//的ヒット状況表示
 				if (tgtSel >= 0) {
-					auto& t = (std::shared_ptr<TargetClass>&)(*ObjectManager::Instance()->GetObj(ObjType::Target, tgtSel));
+					auto& t = (std::shared_ptr<TargetClass>&)(*ObjectManager::Instance()->GetObj((int)ObjType::Target, tgtSel));
 
 					int xp = DrawParts->m_DispXSize / 2 - y_r(300);
 					int yp = DrawParts->m_DispYSize / 2 + y_r(100);

@@ -1,11 +1,9 @@
 #include	"Morphine.hpp"
 
-#include "../../ObjectManager.hpp"
 #include "../../MainScene/BackGround/BackGround.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		void MorphineClass::Init_Sub(void) noexcept {		}
 		void MorphineClass::FirstExecute(void) noexcept {
 			if (this->m_IsFirstLoop) {
 			}
@@ -25,8 +23,6 @@ namespace FPS_n2 {
 					}
 				}
 			}
-		}
-		void MorphineClass::Dispose_Sub(void) noexcept {
 		}
 	};
 };

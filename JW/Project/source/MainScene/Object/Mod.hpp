@@ -4,8 +4,6 @@
 #include "ModData.hpp"
 #include "Gun_before.hpp"
 
-#include "ObjectBase.hpp"
-
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class ModClass : public ObjectBaseClass, public ModSlotControl {
@@ -56,7 +54,6 @@ namespace FPS_n2 {
 				}
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {
-				Draw_Mod(isDrawSemiTrans);
 				if (this->m_IsActive && this->m_IsDraw) {
 					if (CheckCameraViewClip_Box(
 						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-1.f*Scale_Rate, -1.f*Scale_Rate, -1.f*Scale_Rate)).get(),
@@ -73,9 +70,11 @@ namespace FPS_n2 {
 			void			Dispose_Sub(void) noexcept override {
 				ModSlotControl::DisposeModSlotControl();
 			}
+		private:
+			int	GetFrameNum() noexcept override { return (int)GunFrame::Max; }
+			const char*	GetFrameStr(int id) noexcept override { return GunFrameName[id]; }
 		public:
 			virtual void	FirstExecute_Mod(void) noexcept {}
-			virtual void	Draw_Mod(bool) noexcept {}
 		};
 
 
@@ -85,7 +84,7 @@ namespace FPS_n2 {
 			float										HandPer{0.f};
 			bool										m_isDirect{false};
 		public:
-			MagazineClass(void) noexcept { this->m_objType = ObjType::Magazine; }
+			MagazineClass(void) noexcept { this->m_objType = (int)ObjType::Magazine; }
 			~MagazineClass(void) noexcept {}
 		public:
 			void			FirstExecute_Mod(void) noexcept override {
@@ -108,14 +107,14 @@ namespace FPS_n2 {
 		private:
 		public://ゲッター
 		public:
-			LowerClass(void) noexcept { this->m_objType = ObjType::Lower; }
+			LowerClass(void) noexcept { this->m_objType = (int)ObjType::Lower; }
 			~LowerClass(void) noexcept {}
 		public:
 		};
 
 		class UpperClass : public ModClass {
 		public:
-			UpperClass(void) noexcept { this->m_objType = ObjType::Upper; }
+			UpperClass(void) noexcept { this->m_objType = (int)ObjType::Upper; }
 			~UpperClass(void) noexcept {}
 		};
 
@@ -123,7 +122,7 @@ namespace FPS_n2 {
 		private:
 		public://ゲッター
 		public:
-			BarrelClass(void) noexcept { this->m_objType = ObjType::Barrel; }
+			BarrelClass(void) noexcept { this->m_objType = (int)ObjType::Barrel; }
 			~BarrelClass(void) noexcept {}
 		public:
 		};
@@ -132,20 +131,20 @@ namespace FPS_n2 {
 		private:
 		public://ゲッター
 		public:
-			UnderRailClass(void) noexcept { this->m_objType = ObjType::UnderRail; }
+			UnderRailClass(void) noexcept { this->m_objType = (int)ObjType::UnderRail; }
 			~UnderRailClass(void) noexcept {}
 		public:
 		};
 
 		class SightClass : public ModClass {
 		public:
-			SightClass(void) noexcept { this->m_objType = ObjType::Sight; }
+			SightClass(void) noexcept { this->m_objType = (int)ObjType::Sight; }
 			~SightClass(void) noexcept {}
 		};
 
 		class MuzzleClass : public ModClass {
 		public:
-			MuzzleClass(void) noexcept { this->m_objType = ObjType::MuzzleAdapter; }
+			MuzzleClass(void) noexcept { this->m_objType = (int)ObjType::MuzzleAdapter; }
 			~MuzzleClass(void) noexcept {}
 		};
 	};

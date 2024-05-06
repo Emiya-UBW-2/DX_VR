@@ -2,7 +2,6 @@
 #include	"../../Header.hpp"
 
 #include "../../sub.hpp"
-#include "ObjectBase.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -10,13 +9,11 @@ namespace FPS_n2 {
 			public ObjectBaseClass {
 		private:
 		public:
-			MorphineClass(void) noexcept { this->m_objType = ObjType::Morphine; }
+			MorphineClass(void) noexcept { this->m_objType = (int)ObjType::Morphine; }
 			~MorphineClass(void) noexcept {}
 		public:
-			void			Init_Sub(void) noexcept override;
 			void			FirstExecute(void) noexcept override;
 			void			Draw(bool isDrawSemiTrans) noexcept override;
-			void			Dispose_Sub(void) noexcept override;
 		};
 	};
 };

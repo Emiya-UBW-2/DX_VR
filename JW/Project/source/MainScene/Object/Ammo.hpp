@@ -70,7 +70,7 @@ namespace FPS_n2 {
 				this->m_IsDrawHitUI = false;
 			}
 		public: //コンストラクタ、デストラクタ
-			AmmoClass(void) noexcept { this->m_objType = ObjType::Ammo; }
+			AmmoClass(void) noexcept { this->m_objType = (int)ObjType::Ammo; }
 			~AmmoClass(void) noexcept { m_AmmoData.reset(); }
 		public: //継承
 			void			Init_Sub() noexcept override {

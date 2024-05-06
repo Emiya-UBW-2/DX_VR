@@ -108,7 +108,7 @@ namespace FPS_n2 {
 			Max,
 		};
 		static const char* CharaShapeName[(int)CharaShape::Max] = {
-			"",
+			"None",
 			"‚ ",
 			"‚¢",
 			"‚¤",

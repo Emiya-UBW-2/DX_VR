@@ -102,7 +102,7 @@ namespace FPS_n2 {
 		void			CharacterClass::Shot_Start() noexcept {
 			if (this->m_MyID == 0) {
 				auto* PlayerMngr = PlayerManager::Instance();
-				PlayerMngr->GetPlayer(GetMyPlayerID()).AddShot(GetGunPtrNow()->GetPelletNum());
+				PlayerMngr->GetPlayer(this->m_MyID).AddShot(GetGunPtrNow()->GetPelletNum());
 			}
 			GetGunPtrNow()->SetBullet();
 			if (IsULTSelect()) {
@@ -171,7 +171,7 @@ namespace FPS_n2 {
 				Matrix4x4DX::RotAxis(Vector3DX::up(), KeyControl::GetYRadBottomChange());
 
 			auto* OptionParts = OPTION::Instance();
-			bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
+			bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 			if (HeadBobbing) {
 				tmpUpperMatrix = WalkSwingControl::GetWalkSwingMat() * tmpUpperMatrix;
 			}
@@ -698,7 +698,7 @@ namespace FPS_n2 {
 									}
 									if (m_IsMainGame) {
 										ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(200), 10);
-										PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(10);
+										PlayerMngr->GetPlayer(this->m_MyID).AddScore(10);
 									}
 									GunReadyControl::SetAim();
 									LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, 0, LifeControl::GetAPMax());
@@ -747,7 +747,7 @@ namespace FPS_n2 {
 									GunReadyControl::SetAim();
 									if (m_IsMainGame) {
 										ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(201), 50);
-										PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(50);
+										PlayerMngr->GetPlayer(this->m_MyID).AddScore(50);
 									}
 								}
 
@@ -793,7 +793,7 @@ namespace FPS_n2 {
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
 										auto* OptionParts = OPTION::Instance();
-										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
+										bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 										if (HeadBobbing) {
 											DrawParts->SetCamShake(0.1f, 1.f);
 										}
@@ -813,7 +813,7 @@ namespace FPS_n2 {
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
 										auto* OptionParts = OPTION::Instance();
-										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
+										bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 										if (HeadBobbing) {
 											DrawParts->SetCamShake(0.1f, 1.f);
 										}
@@ -836,7 +836,7 @@ namespace FPS_n2 {
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
 										auto* OptionParts = OPTION::Instance();
-										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
+										bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 										if (HeadBobbing) {
 											DrawParts->SetCamShake(0.1f, 1.f);
 										}
@@ -857,7 +857,7 @@ namespace FPS_n2 {
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
 										auto* OptionParts = OPTION::Instance();
-										bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
+										bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 										if (HeadBobbing) {
 											DrawParts->SetCamShake(0.1f, 1.f);
 										}
@@ -956,7 +956,7 @@ namespace FPS_n2 {
 				this->m_move.vec = KeyControl::GetOverRideInfo().vec;
 			}
 			auto* OptionParts = OPTION::Instance();
-			bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
+			bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 			this->m_move.mat = Matrix4x4DX::RotAxis(Vector3DX::forward(), HeadBobbing ? (KeyControl::GetRad().z / 2.f) : 0.f) * Matrix4x4DX::RotAxis(Vector3DX::up(), KeyControl::GetYRadBottom());
 			this->m_move.UpdatePosBuf(this->m_move.posbuf, 0.9f);
 			UpdateMove();

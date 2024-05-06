@@ -67,6 +67,11 @@ namespace FPS_n2 {
 			int													m_AmmoLoadCount{0};
 
 			bool											m_IsHardMode{false};
+		private:
+			PlayerID											m_MyID{0};
+		public:
+			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
+			void			SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
 		public:
 			bool												CanLookTarget{true};
 
@@ -120,7 +125,7 @@ namespace FPS_n2 {
 			void			ExecuteMatrix(void) noexcept;
 		public: //コンストラクタ、デストラクタ
 			CharacterClass(void) noexcept {
-				this->m_objType = ObjType::Human;
+				this->m_objType = (int)ObjType::Human;
 				this->m_IsDraw = true;
 			}
 			~CharacterClass(void) noexcept {}
@@ -129,7 +134,13 @@ namespace FPS_n2 {
 			void			ValueSet(PlayerID pID, bool IsMainGame, CharaTypeID value) noexcept;
 			void			MovePoint(float pxRad, float pyRad, const Vector3DX& pPos, int GunSel) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady) noexcept;
-		public: //継承
+		private:
+			int	GetFrameNum() noexcept override { return (int)CharaFrame::Max; }
+			const char*	GetFrameStr(int id) noexcept override { return CharaFrameName[id]; }
+
+			int	GetShapeNum() noexcept override { return (int)CharaShape::Max; }
+			const char*	GetShapeStr(int id) noexcept override { return CharaShapeName[id]; }
+		private: //継承
 			void			Init_Sub(void) noexcept override;
 			void			FirstExecute(void) noexcept override;
 			void			CheckDraw(void) noexcept override {
