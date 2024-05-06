@@ -79,6 +79,9 @@
 0210=Kill
 0211=Can Use Primary Weapon!
 
+0298=Game Pad detected. Please change "PadType" from the "Else" "option" to the appropriate one.
+0299=If you want to play with the keyboard, please remove Game Pad.
+
 0300=Push:
 0301=Reload!
 
@@ -124,7 +127,7 @@
 
 9020=Go to Combat
 9021=Go to Customize Equip
-9022=Go to Shooting Range
+9022=Go to Shooting Range/Tutorial
 9023=Go to Combat(Hard Mode:Armed with M4A1 rifles and handguns, fight against enemies with various guns)
 9024=Open Option
 9025=Open Credit

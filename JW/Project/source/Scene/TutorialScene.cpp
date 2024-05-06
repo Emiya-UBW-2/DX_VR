@@ -243,7 +243,6 @@ namespace FPS_n2 {
 						KeyGuide->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9910));
 						KeyGuide->AddGuide(PADS::CHECK, LocalizePool::Instance()->Get(9911));
 						KeyGuide->AddGuide(PADS::THROW, LocalizePool::Instance()->Get(9912));
-						KeyGuide->AddGuide(PADS::INVENTORY, LocalizePool::Instance()->Get(9913));
 
 						KeyGuide->AddGuide(PADS::INTERACT, "");
 						KeyGuide->AddGuide(PADS::THROW, LocalizePool::Instance()->Get(9920));

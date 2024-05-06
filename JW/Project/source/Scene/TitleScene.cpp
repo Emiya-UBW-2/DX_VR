@@ -359,7 +359,7 @@ namespace FPS_n2 {
 			{
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
 																	  FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-																	  y_r(64 + 369), y_r(64 + 207), White, Black, "Ver 1.0.4");
+																	  y_r(64 + 369), y_r(64 + 207), White, Black, "Ver 1.0.5");
 			}
 			//
 			for (auto& y : ButtonSel) {
