@@ -1,10 +1,10 @@
 #include "Inventory.hpp"
 
-#include "../MainScene/Player/Player.hpp"
-
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void InventoryClass::Draw(const Vector3DX& MyPos) noexcept {
+			auto* Pad = PadControl::Instance();
+			auto* DrawParts = DXDraw::Instance();
 			Easing(&m_Alpha, DXDraw::Instance()->IsPause() ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 			if (m_Alpha >= 0.1f) {
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(192.f*m_Alpha));
@@ -146,7 +146,7 @@ namespace FPS_n2 {
 														item->SetMove(
 															Matrix4x4DX::RotVec2(Vector3DX::up(), Vec.normalized()),
 															Player.GetVehicle()->GetObj().GetMatrix().pos() + Vec * 6.f,
-															Vec*25.f / FPS * (1.0f*GetRandf(0.5f)));
+															Vec*25.f / DrawParts->GetFps() * (1.0f*GetRandf(0.5f)));
 														item->SetData((*Ptr)->GetItemData(), (*Ptr)->GetCount());
 														Player.DeleteInventory(*Ptr);
 														if (loop == 2) {
@@ -164,7 +164,7 @@ namespace FPS_n2 {
 															}
 														}
 													}
-													else if (this->m_LeftClick.trigger()) {
+													else if (Pad->GetMouseClick().trigger()) {
 														m_Drag = &(*Ptr)->GetItemData();
 														m_DragIn = Ptr;
 														Is90 = (*m_DragIn)->GetIs90();
@@ -180,7 +180,7 @@ namespace FPS_n2 {
 											if (Player.CanPutInventory(loop, x, y, xsize, ysize, m_Drag, m_DragIn)) {
 												isHit = true;
 												DrawBox(xp + x * size, yp + y * size, xp + (x + xsize) * size, yp + (y + ysize) * size, Green, TRUE);
-												if (!this->m_LeftClick.press()) {
+												if (!Pad->GetMouseClick().press()) {
 													if (m_DragIn && (*m_DragIn).get() && (yo != (*m_DragIn))) {
 														Player.PutInventory(loop, x, y, *m_Drag, (*m_DragIn)->GetCount(), Is90);
 														if (loop == 2) {
@@ -237,7 +237,7 @@ namespace FPS_n2 {
 							}
 						}
 					}
-					if (!isHit && !this->m_LeftClick.press()) {
+					if (!isHit && !Pad->GetMouseClick().press()) {
 						m_DragIn = nullptr;
 						m_DragOut = nullptr;
 						m_Drag = nullptr;
@@ -312,7 +312,7 @@ namespace FPS_n2 {
 								DrawBox(xp + 2, yp + 2, xp + xs - 2, yp + ys - 2, Red, FALSE);
 								M_In = true;
 								InfoStr = (*n.Ptr[0])->GetItemData()->GetInfo();
-								if (this->m_LeftClick.trigger()) {
+								if (Pad->GetMouseClick().trigger()) {
 									const std::shared_ptr<ItemClass>* Buff = n.Ptr[0];//ˆê”ÔƒLƒƒƒp‚ª‘½‚¢‚à‚Ì‚ğ‘I‚Ô
 									for (auto& p : n.Ptr) {
 										if ((*Buff)->GetCount() < (*p)->GetCount()) {

@@ -18,6 +18,7 @@ namespace FPS_n2 {
 				m_Per = 0.f;
 			}
 			void Update() noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				if (m_Timer > 0.9f) {
 					Easing(&m_Per, 1.f, 0.1f, EasingType::OutExpo);
 				}
@@ -32,7 +33,7 @@ namespace FPS_n2 {
 				else {
 					Easing(&m_Per, 0.f, 0.8f, EasingType::OutExpo);
 				}
-				m_Timer = std::max(m_Timer - 1.f / FPS, 0.f);
+				m_Timer = std::max(m_Timer - 1.f / DrawParts->GetFps(), 0.f);
 			}
 		public:
 			void SetActive() noexcept { m_Timer = 1.f; }

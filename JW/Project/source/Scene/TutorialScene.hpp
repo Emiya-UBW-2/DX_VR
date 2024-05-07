@@ -25,7 +25,8 @@ namespace FPS_n2 {
 			}
 			void UpdateActive() noexcept {
 				if (m_Time > 5.f) {
-					m_Time -= 1.f / FPS;
+					auto* DrawParts = DXDraw::Instance();
+					m_Time -= 1.f / DrawParts->GetFps();
 				}
 				else if (m_Time <= 0.f) {
 					m_Time = -1.f;
@@ -146,7 +147,6 @@ namespace FPS_n2 {
 			float											m_FirstFade{0.f};
 			bool											m_IsFirstGame{false};
 			bool											m_PrevSSAO{true};
-			bool											m_IsFirstLoad{true};			//共通リソースをロードしたか
 			std::shared_ptr<BackGroundClassTutorial>		m_BackGround;					//BG
 			MainLoopPauseControl							m_MainLoopPauseControl;			//ポーズメニュー
 			UIClass											m_UIclass;						//UI関連

@@ -10,11 +10,8 @@ namespace FPS_n2 {
 		//
 		void			CustomScene::Load_Sub(void) noexcept {
 			//ロード
-			if (m_IsFirstLoad) {
-				m_IsFirstLoad = false;
 				auto* PlayerMngr = PlayerManager::Instance();
 				PlayerMngr->Init(1 + (int)ULT_GUN::Max);
-			}
 		}
 		void			CustomScene::Set_Sub(void) noexcept {
 			//
@@ -187,7 +184,7 @@ namespace FPS_n2 {
 				Easing(&y.Xadd, 0.f, 0.9f, EasingType::OutExpo);
 				Easing(&y.Yadd, 0.f, 0.95f, EasingType::OutExpo);
 			}
-			m_SelAlpha = std::max(m_SelAlpha - 1.f / FPS, 0.f);
+			m_SelAlpha = std::max(m_SelAlpha - 1.f / DrawParts->GetFps(), 0.f);
 
 			m_UltMat[0] = Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(90)) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(0)) *
 				Matrix4x4DX::Mtrans(Vector3DX::vget(1.1f, 0.95f, 0.f)*Scale_Rate);
@@ -387,7 +384,7 @@ namespace FPS_n2 {
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(45), 0.5f*Scale_Rate, far_t);
 			PostPassEffect::Instance()->Set_DoFNearFar(1.f * Scale_Rate, far_t / 2, 0.5f*Scale_Rate, far_t);
 
-			m_Alpha = std::clamp(m_Alpha + (m_IsEnd ? 1.f : -1.f) / 60, 0.f, 1.f);//一旦FPS使わない
+			m_Alpha = std::clamp(m_Alpha + (m_IsEnd ? 1.f : -1.f) / 60, 0.f, 1.f);//一旦DrawParts->GetFps()使わない
 			if (m_IsEnd && m_Alpha == 1.f) {
 				return false;
 			}
@@ -484,7 +481,7 @@ namespace FPS_n2 {
 			{
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*m_Alpha), 0, 255));
 
-				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Black, TRUE);
+				DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Black, TRUE);
 
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
@@ -783,11 +780,8 @@ namespace FPS_n2 {
 		}
 		//使い回しオブジェ系
 		void			CustomScene::Dispose_Load_Sub(void) noexcept {
-			if (!m_IsFirstLoad) {
-				m_IsFirstLoad = true;
 				PlayerManager::Instance()->Dispose();
 				ObjectManager::Instance()->DeleteAll();
-			}
 		}
 		//
 	};

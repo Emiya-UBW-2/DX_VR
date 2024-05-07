@@ -21,8 +21,6 @@ namespace FPS_n2 {
 				int					index{0};
 			};
 		private:
-			bool											m_IsFirstLoad{true};			//共通リソースをロードしたか
-
 			int							select{0};
 			float						m_SelAlpha{0.f};
 			float						m_Yrad{0.f};

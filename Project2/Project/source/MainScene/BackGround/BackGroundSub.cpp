@@ -399,6 +399,7 @@ namespace FPS_n2 {
 		this->m_PlayerCol.RefreshCollInfo();
 	}
 	void	BreakWall::WallObj::Execute(void) noexcept {
+		auto* DrawParts = DXDraw::Instance();
 		if (this->m_WallCalc.get() != nullptr) {
 			if (this->m_isThreadEnd) {
 				//m_WallCalc->join();
@@ -408,7 +409,7 @@ namespace FPS_n2 {
 			}
 		}
 		if ((this->m_Bigcount > 3) || (this->m_WallIndex[0].size() > 5000)) {
-			this->m_BreakTimer = std::max(this->m_BreakTimer - 1.f / FPS / 2.f, 0.f);
+			this->m_BreakTimer = std::max(this->m_BreakTimer - 1.f / DrawParts->GetFps() / 2.f, 0.f);
 		}
 		else {
 			this->m_BreakTimer = 1.f;

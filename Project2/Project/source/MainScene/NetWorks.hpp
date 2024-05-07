@@ -75,8 +75,9 @@ namespace FPS_n2 {
 				}
 			}
 			void LateExecute(void) noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				if (this->m_Sequence == SequenceEnum::MainGame) {
-					this->m_ClientFrame += 1.0 / (double)FPS;
+					this->m_ClientFrame += 1.0 / (double)DrawParts->GetFps();
 				}
 				else {
 					this->m_ClientFrame = 0.0;
@@ -85,7 +86,7 @@ namespace FPS_n2 {
 			void Draw(void) noexcept {
 				//auto* ObjMngr = ObjectManager::Instance();
 				//auto* PlayerMngr = PlayerManager::Instance();
-				//auto* DrawParts = DXDraw::Instance();
+				auto* DrawParts = DXDraw::Instance();
 				auto* Fonts = FontPool::Instance();
 				unsigned int color = Red;
 
@@ -98,7 +99,7 @@ namespace FPS_n2 {
 				int y_h = y_r(30);
 				//bool Mid_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_MIDDLE) != 0);
 				//bool Right_key = ((GetMouseInputWithCheck() & MOUSE_INPUT_RIGHT) != 0);
-				int mx = DXDraw::Instance()->m_DispXSize / 2, my = DXDraw::Instance()->m_DispYSize / 2;
+				int mx = DXDraw::Instance()->GetDispXSize() / 2, my = DXDraw::Instance()->GetDispYSize() / 2;
 				GetMousePoint(&mx, &my);
 				//ƒ‰ƒ€ƒ_
 				auto MsgBox = [&](int xp1, int yp1, int xp2, int yp2, std::string String, auto&&... args) {
@@ -127,7 +128,7 @@ namespace FPS_n2 {
 								UpFunc();
 							}
 							if (this->m_LeftClick.press()) {
-								this->m_LeftPressTimer += 1.f / FPS;
+								this->m_LeftPressTimer += 1.f / DrawParts->GetFps();
 								if (this->m_LeftPressTimer > 0.5f) {
 									UpFunc();
 								}
@@ -146,7 +147,7 @@ namespace FPS_n2 {
 								DownFunc();
 							}
 							if (this->m_LeftClick.press()) {
-								this->m_LeftPressTimer += 1.f / FPS;
+								this->m_LeftPressTimer += 1.f / DrawParts->GetFps();
 								if (this->m_LeftPressTimer > 0.5f) {
 									DownFunc();
 								}

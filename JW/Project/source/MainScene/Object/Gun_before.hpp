@@ -52,15 +52,16 @@ namespace FPS_n2 {
 				}
 			}
 			void		ExecuteMuzzleSmoke(const Vector3DX& pPos) {
+				auto* DrawParts = DXDraw::Instance();
 				for (auto& l : this->m_Line) {
 					l += Vector3DX::vget(
-						GetRandf(0.1f*Scale_Rate / FPS),
-						0.4f*Scale_Rate / FPS + GetRandf(0.1f*Scale_Rate / FPS),
-						GetRandf(0.1f*Scale_Rate) / FPS);
+						GetRandf(0.1f*Scale_Rate / DrawParts->GetFps()),
+						0.4f*Scale_Rate / DrawParts->GetFps() + GetRandf(0.1f*Scale_Rate / DrawParts->GetFps()),
+						GetRandf(0.1f*Scale_Rate) / DrawParts->GetFps());
 				}
 				this->m_Line[this->m_LineSel] = pPos;
 				++this->m_LineSel %= this->m_Line.size();
-				m_LinePer = std::clamp(m_LinePer - 1.f / FPS / 10.f, 0.f, 1.f);
+				m_LinePer = std::clamp(m_LinePer - 1.f / DrawParts->GetFps() / 10.f, 0.f, 1.f);
 			}
 			void		DrawMuzzleSmoke() noexcept {
 				SetUseLighting(FALSE);

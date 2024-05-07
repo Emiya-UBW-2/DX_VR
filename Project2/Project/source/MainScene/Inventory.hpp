@@ -3,23 +3,13 @@
 
 #include "../MainScene/Object/ItemData.hpp"
 #include "../MainScene/Object/Item.hpp"
+#include "../MainScene/Player/Player.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		//’ÊM
-		enum class InventoryEnum {
-			SelMode,
-			CheckPreset,
-			Set_Port,
-			SetIP,
-			SetTick,
-			Matching,
-			MainGame,
-		};
 		class InventoryClass {
 			int						m_mousex{0};
 			int						m_mousey{0};
-			switchs					m_LeftClick;
 			switchs					m_Rkey;
 			switchs					m_Deletekey;
 			switchs					m_LCtrlkey;
@@ -39,7 +29,6 @@ namespace FPS_n2 {
 				m_Alpha = 0.f;
 			}
 			void FirstExecute(void) {
-				this->m_LeftClick.Execute((GetMouseInputWithCheck() & MOUSE_INPUT_LEFT) != 0);
 				this->m_Rkey.Execute(CheckHitKeyWithCheck(KEY_INPUT_R) != 0);
 				this->m_Deletekey.Execute(CheckHitKeyWithCheck(KEY_INPUT_DELETE) != 0);
 				this->m_LCtrlkey.Execute(CheckHitKeyWithCheck(KEY_INPUT_LCONTROL) != 0);

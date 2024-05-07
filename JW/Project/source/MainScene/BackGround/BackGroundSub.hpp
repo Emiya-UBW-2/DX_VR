@@ -260,13 +260,13 @@ namespace FPS_n2 {
 
 					o.m_SlingZrad.Update();
 
-					o.m_SlingZrad.AddRad(1.f / FPS * o.m_SlingPower);
+					o.m_SlingZrad.AddRad(1.f / DrawParts->GetFps() * o.m_SlingPower);
 					o.m_SlingPower = 0.f;
 
 					if (o.m_isHit) {
 						o.m_Pos.y += (o.m_Yadd);
-						o.m_Yadd += M_GR / (FPS * FPS);
-						o.m_EraseTimer -= 1.f / FPS;
+						o.m_Yadd += M_GR / (DrawParts->GetFps() * DrawParts->GetFps());
+						o.m_EraseTimer -= 1.f / DrawParts->GetFps();
 					}
 
 

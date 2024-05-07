@@ -61,7 +61,7 @@ namespace FPS_n2 {
 					//名前、体力、魔力
 					{
 						xp1 = y_r(50);
-						yp1 = DrawParts->m_DispYSize - y_r(160);
+						yp1 = DrawParts->GetDispYSize() - y_r(160);
 
 						Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(20), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1 + y_r(100), yp1, Green, Black, "%s", strParam[0].c_str());
 						yp1 += y_r(40);
@@ -88,8 +88,8 @@ namespace FPS_n2 {
 					}
 					//魔法、クールタイム
 					{
-						xp1 = DrawParts->m_DispXSize - y_r(275);
-						yp1 = DrawParts->m_DispYSize - y_r(48) - y_r(84);
+						xp1 = DrawParts->GetDispXSize() - y_r(275);
+						yp1 = DrawParts->GetDispYSize() - y_r(48) - y_r(84);
 						if (strParam[1].length() > 0) {
 							auto per = (float)(100 * intParam.at(14) / intParam.at(15)) / 100.f;
 
@@ -147,18 +147,18 @@ namespace FPS_n2 {
 
 						int xp1, yp1;
 						int xs1, ys1;
-						xp1 = DrawParts->m_DispXSize / 2;
-						yp1 = DrawParts->m_DispYSize / 20;
+						xp1 = DrawParts->GetDispXSize() / 2;
+						yp1 = DrawParts->GetDispYSize() / 20;
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(28), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, color, White, "<%s>", Mes.c_str());
 
 
 
-						int picx = std::max(DrawParts->m_DispXSize / 8, Fonts->Get(FontPool::FontType::Nomal_Edge).GetStringWidth(y_r(28), "<%s>", Mes.c_str()) / 2 + y_r(20));
+						int picx = std::max(DrawParts->GetDispXSize() / 8, Fonts->Get(FontPool::FontType::Nomal_Edge).GetStringWidth(y_r(28), "<%s>", Mes.c_str()) / 2 + y_r(20));
 
 						xs1 = y_r(40);
 						ys1 = y_r(40);
-						xp1 = DrawParts->m_DispXSize / 2 + picx + xs1;
-						yp1 = DrawParts->m_DispYSize / 20 - y_r(28) + ys1;
+						xp1 = DrawParts->GetDispXSize() / 2 + picx + xs1;
+						yp1 = DrawParts->GetDispYSize() / 20 - y_r(28) + ys1;
 
 						DrawBox((int)(xp1 - xs1), (int)(yp1 - ys1), (int)(xp1 + xs1), (int)(yp1 + ys1), GetColor(0, 0, 0), TRUE);
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(20), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1 + ys1, color, White, "%s", strParam[5].c_str());

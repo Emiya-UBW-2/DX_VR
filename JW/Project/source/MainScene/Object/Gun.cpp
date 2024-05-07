@@ -273,6 +273,7 @@ namespace FPS_n2 {
 			this->m_ShotSwitch = true;
 		}
 		void				GunClass::UpdateGunAnims() noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto prev = this->m_GunAnimeFirst;
 			switch (GetGunAnime()) {
 				case GunAnimeID::Base:
@@ -413,7 +414,7 @@ namespace FPS_n2 {
 					break;
 			}
 			//
-			m_UpperAnim += 60.f / FPS;
+			m_UpperAnim += 60.f / DrawParts->GetFps();
 			if (prev) {
 				this->m_GunAnimeFirst = false;
 			}
@@ -496,6 +497,7 @@ namespace FPS_n2 {
 			SetGunAnime(GunAnimeID::Base);
 		}
 		void				GunClass::FirstExecute(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			if (this->m_IsFirstLoop) {
 				InitMuzzleSmoke(GetFrameWorldMat_P(GunFrame::Muzzle).pos());
 			}
@@ -522,7 +524,7 @@ namespace FPS_n2 {
 						if (m_GunSightSel == 1) {
 							isHit = true;
 						}
-						GetObj().get_anime(i).per = std::clamp(GetObj().get_anime(i).per + 1.f / FPS * (isHit ? 1.f : -1.f), 0.f, 1.f);
+						GetObj().get_anime(i).per = std::clamp(GetObj().get_anime(i).per + 1.f / DrawParts->GetFps() * (isHit ? 1.f : -1.f), 0.f, 1.f);
 					}
 					else if ((GunAnimeID)i == GunAnimeID::Open) {
 						bool isHit = false;
@@ -539,7 +541,7 @@ namespace FPS_n2 {
 								isHit = true;
 							}
 						}
-						GetObj().get_anime(i).per = std::clamp(GetObj().get_anime(i).per + 10.f / FPS * (isHit ? 1.f : -1.f), 0.f, 1.f);
+						GetObj().get_anime(i).per = std::clamp(GetObj().get_anime(i).per + 10.f / DrawParts->GetFps() * (isHit ? 1.f : -1.f), 0.f, 1.f);
 					}
 					else {
 						GetObj().get_anime(i).Reset();

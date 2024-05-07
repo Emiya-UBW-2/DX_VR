@@ -260,6 +260,7 @@ namespace FPS_n2 {
 				this->m_TickRate = pTick;
 			}
 			bool			Execute(void) noexcept override {
+				auto* DrawParts = DXDraw::Instance();
 				bool canMatch = true;
 				bool canSend = false;
 				for (auto & n : this->m_NetWork) {
@@ -270,7 +271,7 @@ namespace FPS_n2 {
 				}
 				if (canMatch) {
 					// ティックレート用演算
-					this->m_TickCnt += 60.f / FPS;
+					this->m_TickCnt += 60.f / DrawParts->GetFps();
 					if (this->m_TickCnt > this->m_TickRate) {
 						this->m_TickCnt -= this->m_TickRate;
 						canSend = true;
@@ -357,13 +358,14 @@ namespace FPS_n2 {
 				this->m_PlayerData.ID = 1;
 			}
 			bool			Execute(void) noexcept override {
+				auto* DrawParts = DXDraw::Instance();
 				ServerNetData tmpData;
 				bool canMatch = true;
 				bool canSend = false;
 				canMatch = (this->m_NetWork.second >= 2);
 				if (canMatch) {
 					// ティックレート用演算
-					this->m_TickCnt += 60.f / FPS;
+					this->m_TickCnt += 60.f / DrawParts->GetFps();
 					if (this->m_TickCnt > this->m_TickRate) {
 						this->m_TickCnt -= this->m_TickRate;
 						canSend = true;
@@ -382,7 +384,7 @@ namespace FPS_n2 {
 							}
 						}
 						else {
-							m_CannotConnectTimer += 1.f / FPS;
+							m_CannotConnectTimer += 1.f / DrawParts->GetFps();
 							if (this->m_CannotConnectTimer > 1.f) {
 								m_CannotConnectTimer = 0.f;
 								this->m_NetWork.first.Dispose();

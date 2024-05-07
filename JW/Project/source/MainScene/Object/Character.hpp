@@ -101,7 +101,10 @@ namespace FPS_n2 {
 			const auto&		GetCharaAction(void) const noexcept { return this->m_CharaAction; }
 			auto&			GetSoundPower(void) noexcept { return this->m_SoundPower; }
 			const auto		GetMeleeSwitch(void) const noexcept { return m_MeleeCoolDown == 1.f; }
-			const auto		GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd*(60.f / FPS); }
+			const auto		GetRecoilRadAdd(void) const noexcept {
+				auto* DrawParts = DXDraw::Instance();
+				return this->m_RecoilRadAdd*(60.f / DrawParts->GetFps());
+			}
 			const auto		PopHeadShotSwitch() noexcept {
 				auto ret = this->m_HeadShotSwitch;
 				this->m_HeadShotSwitch = false;

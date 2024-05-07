@@ -81,9 +81,6 @@
     <ClInclude Include="source\MainScene\Object\VehicleData.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
-    <ClInclude Include="source\MainScene\Object\AmmoData.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
     <ClInclude Include="source\MainScene\Object\ItemData.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
@@ -133,6 +130,15 @@
     </ClCompile>
     <ClCompile Include="source\MainScene\Player\Player.cpp">
       <Filter>ソース ファイル\MainScene\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\Item.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\VehicleData.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\ItemData.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

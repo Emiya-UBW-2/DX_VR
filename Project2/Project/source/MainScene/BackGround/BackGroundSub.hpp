@@ -976,6 +976,7 @@ namespace FPS_n2 {
 			const Vector3DX& cornerLF, const Vector3DX& cornerRF, const Vector3DX& cornerRR, const Vector3DX& cornerLR
 			, const Vector3DX& center, float speed
 		) {
+			auto* DrawParts = DXDraw::Instance();
 			for (auto& l : tree) {
 				if (!l.fall_flag) {
 					auto p0 = cornerLF;
@@ -995,7 +996,7 @@ namespace FPS_n2 {
 					if (cnt == 4) {
 						l.fall_vec = VGet((l.pos - center).z, 0.f, -(l.pos - center).x);
 						l.fall_flag = true;
-						l.fall_speed = std::clamp(speed*2.f, 0.1f, 6.f) * deg2rad(30.f / FPS);
+						l.fall_speed = std::clamp(speed*2.f, 0.1f, 6.f) * deg2rad(30.f / DrawParts->GetFps());
 					}
 				}
 			}
@@ -1037,6 +1038,7 @@ namespace FPS_n2 {
 			}
 		}
 		void	Execute(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			//–ØƒZƒbƒg
 			for (auto& l : tree) {
 				if (l.fall_flag) {
@@ -1044,7 +1046,7 @@ namespace FPS_n2 {
 					if (l.fall_rad == deg2rad(80.f)) {
 						l.fall_speed = -l.fall_speed / 5.f;
 					}
-					l.fall_speed += deg2rad(1.f / FPS);
+					l.fall_speed += deg2rad(1.f / DrawParts->GetFps());
 				}
 				l.obj.SetMatrix(Matrix4x4DX::RotAxis(l.fall_vec, l.fall_rad) * l.mat * Matrix4x4DX::Mtrans(l.pos));
 			}

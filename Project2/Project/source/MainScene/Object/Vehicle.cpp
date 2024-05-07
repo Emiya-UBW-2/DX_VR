@@ -52,6 +52,7 @@ namespace FPS_n2 {
 			}
 		}
 		const bool		VehicleClass::SetDamageEvent(const DamageEvent& value) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			if (this->m_MyID == value.ID && this->m_objType == (int)value.CharaType) {
 				SubHP(value.Damage, value.rad);
 				if (this->m_HP == 0) {
@@ -74,7 +75,7 @@ namespace FPS_n2 {
 									Ptr->SetMove(
 										Matrix4x4DX::RotVec2(Vector3DX::up(), Vec.normalized()),
 										this->m_move.pos + Vec * 6.f,
-										Vec*25.f / FPS * (1.0f*GetRandf(0.5f)));
+										Vec*25.f / DrawParts->GetFps() * (1.0f*GetRandf(0.5f)));
 									Ptr->SetData(yo->GetItemData(), yo->GetCount());
 									PlayerMngr->GetPlayer(this->m_MyID).DeleteInventory(yo);
 								}
@@ -89,10 +90,11 @@ namespace FPS_n2 {
 			return false;
 		}
 		//
-		void			VehicleClass::ValueInit(const VehDataControl::VhehicleData* pVeh_data, const MV1& hit_pic, const std::shared_ptr<b2World>& pB2World, PlayerID pID) noexcept {
+		void			VehicleClass::ValueInit(const VehDataControl::VhehicleData* pVeh_data, const std::shared_ptr<b2World>& pB2World, PlayerID pID) noexcept {
+			MV1::Load("data/model/hit/model.mv1", &this->m_hit_pic);
 			this->m_MyID = pID;
 			this->m_VecData = pVeh_data;
-			this->m_Hit_active.Init(hit_pic);														//弾痕
+			this->m_Hit_active.Init(this->m_hit_pic);														//弾痕
 
 			GetObj().material_AlphaTestAll(true, DX_CMP_GREATER, 128);								//本体
 			this->hitres.resize(this->m_col.mesh_num());											//モジュールごとの当たり判定結果を確保
@@ -336,6 +338,7 @@ namespace FPS_n2 {
 		}
 		//その他
 		void			VehicleClass::ExecuteElse(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto* SE = SoundPool::Instance();
 			//エンジン音
 			if (this->Get_alive()) {
@@ -349,7 +352,7 @@ namespace FPS_n2 {
 					}
 				}
 				else {
-					this->m_engine_time = std::max(this->m_engine_time - 1.f / FPS, 0.f);
+					this->m_engine_time = std::max(this->m_engine_time - 1.f / DrawParts->GetFps(), 0.f);
 				}
 			}
 			else {
@@ -365,6 +368,7 @@ namespace FPS_n2 {
 		}
 		//操作
 		void			VehicleClass::ExecuteInput(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			if (!this->m_view_override) {
 				float	view_YradAdd{ 0.f };							//
 				float	view_XradAdd{ 0.f };							//
@@ -398,11 +402,11 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						view_XradAdd = 0.1f / FPS;
+						view_XradAdd = 0.1f / DrawParts->GetFps();
 						view_YradAdd = 0.f;
 					}
 
-					float limit = this->m_VecData->GetMaxTurretRad() / FPS;
+					float limit = this->m_VecData->GetMaxTurretRad() / DrawParts->GetFps();
 					if (i > 0) {
 						limit *= 2.f;
 					}
@@ -451,6 +455,7 @@ namespace FPS_n2 {
 		}
 		//操作共通
 		void			VehicleClass::ExecuteMove(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();//todo:GetMyPlayerID()
@@ -508,35 +513,35 @@ namespace FPS_n2 {
 					//前進後退
 					{
 						const auto spdold = this->m_speed_add + this->m_speed_sub;
-						this->m_speed_add = (this->m_key[2]) ? std::min(this->m_speed_add + (0.15f / 3.6f) * (60.f / FPS), (this->m_VecData->GetMaxFrontSpeed() / 3.6f)) : std::max(this->m_speed_add - (0.7f / 3.6f) * (60.f / FPS), 0.f);
-						this->m_speed_sub = (this->m_key[3]) ? std::max(this->m_speed_sub - (0.15f / 3.6f) * (60.f / FPS), (this->m_VecData->GetMaxBackSpeed() / 3.6f)) : std::min(this->m_speed_sub + (0.7f / 3.6f) * (60.f / FPS), 0.f);
-						this->m_speed = (spdold + ((this->m_speed_add + this->m_speed_sub) - spdold) * 0.1f) / FPS;
+						this->m_speed_add = (this->m_key[2]) ? std::min(this->m_speed_add + (0.15f / 3.6f) * (60.f / DrawParts->GetFps()), (this->m_VecData->GetMaxFrontSpeed() / 3.6f)) : std::max(this->m_speed_add - (0.7f / 3.6f) * (60.f / DrawParts->GetFps()), 0.f);
+						this->m_speed_sub = (this->m_key[3]) ? std::max(this->m_speed_sub - (0.15f / 3.6f) * (60.f / DrawParts->GetFps()), (this->m_VecData->GetMaxBackSpeed() / 3.6f)) : std::min(this->m_speed_sub + (0.7f / 3.6f) * (60.f / DrawParts->GetFps()), 0.f);
+						this->m_speed = (spdold + ((this->m_speed_add + this->m_speed_sub) - spdold) * 0.1f) / DrawParts->GetFps();
 						auto vec = this->m_move.mat.zvec() * -1.f * (this->m_speed*Scale_Rate);
 						this->m_move.vec.x = (vec.x);
 						if ((cnt_t - cnt_sq) >= 3) {
 							this->m_move.vec.y = (vec.y);
 						}
 						else {
-							this->m_move.vec.y += (M_GR / (FPS * FPS));
+							this->m_move.vec.y += (M_GR / (DrawParts->GetFps() * DrawParts->GetFps()));
 						}
 						this->m_move.vec.z = (vec.z);
 					}
 					//旋回
 					{
 						const auto radold = this->m_radAdd;
-						this->m_yradadd_left = (this->m_key[4]) ? std::max(this->m_yradadd_left - deg2rad(1.f * (60.f / FPS)), deg2rad(-this->m_VecData->GetMaxBodyRad())) : std::min(this->m_yradadd_left + deg2rad(2.f * (60.f / FPS)), 0.f);
-						this->m_yradadd_right = (this->m_key[5]) ? std::min(this->m_yradadd_right + deg2rad(1.f * (60.f / FPS)), deg2rad(this->m_VecData->GetMaxBodyRad())) : std::max(this->m_yradadd_right - deg2rad(2.f * (60.f / FPS)), 0.f);
-						this->m_radAdd.y = ((this->m_yradadd_left + this->m_yradadd_right) / FPS);
+						this->m_yradadd_left = (this->m_key[4]) ? std::max(this->m_yradadd_left - deg2rad(1.f * (60.f / DrawParts->GetFps())), deg2rad(-this->m_VecData->GetMaxBodyRad())) : std::min(this->m_yradadd_left + deg2rad(2.f * (60.f / DrawParts->GetFps())), 0.f);
+						this->m_yradadd_right = (this->m_key[5]) ? std::min(this->m_yradadd_right + deg2rad(1.f * (60.f / DrawParts->GetFps())), deg2rad(this->m_VecData->GetMaxBodyRad())) : std::max(this->m_yradadd_right - deg2rad(2.f * (60.f / DrawParts->GetFps())), 0.f);
+						this->m_radAdd.y = ((this->m_yradadd_left + this->m_yradadd_right) / DrawParts->GetFps());
 						//慣性
-						this->m_radAdd.x = (deg2rad(-(this->m_speed / (60.f / FPS)) / (0.1f / 3.6f) * 50.f));
-						this->m_radAdd.z = (deg2rad(-this->m_radAdd.y / (deg2rad(5.f) / FPS) * 5.f));
+						this->m_radAdd.x = (deg2rad(-(this->m_speed / (60.f / DrawParts->GetFps())) / (0.1f / 3.6f) * 50.f));
+						this->m_radAdd.z = (deg2rad(-this->m_radAdd.y / (deg2rad(5.f) / DrawParts->GetFps()) * 5.f));
 						Easing(&this->m_Tilt, Vector3DX::vget(std::clamp(this->m_radAdd.x - radold.x, deg2rad(-30.f), deg2rad(30.f)), 0.f, std::clamp(this->m_radAdd.z - radold.z, deg2rad(-15.f), deg2rad(15.f))), 0.95f, EasingType::OutExpo);
 						this->m_move.mat *= Matrix4x4DX::RotAxis(this->m_move.mat.xvec(), -this->m_Tilt.x) * Matrix4x4DX::RotAxis(this->m_move.mat.zvec(), this->m_Tilt.z);
 					}
 					//
 				}
 				else {
-					this->m_move.vec.y += (M_GR / (FPS * FPS));
+					this->m_move.vec.y += (M_GR / (DrawParts->GetFps() * DrawParts->GetFps()));
 				}
 			}
 			//射撃反動
@@ -614,6 +619,7 @@ namespace FPS_n2 {
 		}
 		//SetMat指示更新
 		void			VehicleClass::ExecuteMatrix(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto OldPos = this->m_move.pos;
 			//戦車座標反映
 			this->m_move.mat *= Matrix4x4DX::RotAxis(Vector3DX::up(), -this->m_b2mine.Rad() - Get_body_yrad());
@@ -624,13 +630,13 @@ namespace FPS_n2 {
 
 			//転輪
 			b2Vec2 Gravity2D = b2Vec2(
-				(M_GR / FPS / 2.f) * (Vector3DX::Dot(this->m_move.mat.zvec(), Vector3DX::up())),
-				(M_GR / FPS / 2.f) * (Vector3DX::Dot(this->m_move.mat.yvec(), Vector3DX::up())));
+				(M_GR / DrawParts->GetFps() / 2.f) * (Vector3DX::Dot(this->m_move.mat.zvec(), Vector3DX::up())),
+				(M_GR / DrawParts->GetFps() / 2.f) * (Vector3DX::Dot(this->m_move.mat.yvec(), Vector3DX::up())));
 			for (auto& f : this->m_b2Foot) {
 				f.LateExecute(
 					&f == &this->m_b2Foot.front(), this->m_VecData, &GetObj(),
 					Gravity2D, (&f == &this->m_b2Foot.front()) ? this->m_wheel_Left : this->m_wheel_Right,
-					(this->m_move.pos - this->m_move.repos).magnitude() * 60.f / FPS);
+					(this->m_move.pos - this->m_move.repos).magnitude() * 60.f / DrawParts->GetFps());
 			}
 			UpdateMove();
 			this->m_add_vec_real = this->m_move.pos - this->m_move.repos;

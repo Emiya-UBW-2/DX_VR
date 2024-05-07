@@ -70,8 +70,9 @@ namespace FPS_n2 {
 				}
 			}
 			void LateExecute(void) noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				if (this->m_Sequence == SequenceEnum::MainGame) {
-					this->m_ClientFrame += 1.0 / (double)FPS;
+					this->m_ClientFrame += 1.0 / (double)DrawParts->GetFps();
 				}
 				else {
 					this->m_ClientFrame = 0.0;

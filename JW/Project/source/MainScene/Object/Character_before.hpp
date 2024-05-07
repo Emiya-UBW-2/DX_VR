@@ -127,6 +127,7 @@ namespace FPS_n2 {
 			//const auto&		GetHeartRate(void) const noexcept { return this->m_HeartRate; }
 			//const auto&		GetHeartRateRad(void) const noexcept { return this->m_HeartRateRad; }
 			const auto		GetHeartRandVec(float SquatPer) const noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				auto tmp2 = 0.2f * GetRandf(deg2rad(1.f));
 				auto tmp3 = Lerp(0.5f, 0.15f, SquatPer);
 				Vector3DX tmpvec = Vector3DX::vget(
@@ -134,7 +135,7 @@ namespace FPS_n2 {
 					tmp2 + 0.00006f * sin(this->m_HeartRateRad * 3) * powf(this->m_HeartRate / HeartRateMin, 3.f),
 					0.f
 				);
-				return tmpvec * tmp3 * (60.f / FPS);
+				return tmpvec * tmp3 * (60.f / DrawParts->GetFps());
 			}
 		public:
 			void		InitStamina() {
@@ -144,24 +145,25 @@ namespace FPS_n2 {
 				this->m_HeartSoundFlag = false;
 			}
 			bool		ExcuteStamina(float addRun, float HeartRateUp, bool IsSquat) {
+				auto* DrawParts = DXDraw::Instance();
 				if (addRun > 0.f) {
-					this->m_HeartRate_r += (10.f + GetRandf(10.f)) / FPS;
+					this->m_HeartRate_r += (10.f + GetRandf(10.f)) / DrawParts->GetFps();
 				}
 				else if (addRun < 0.f) {
-					this->m_HeartRate_r -= (5.f + GetRandf(5.f)) / FPS;
+					this->m_HeartRate_r -= (5.f + GetRandf(5.f)) / DrawParts->GetFps();
 				}
 				this->m_HeartRate_r += HeartRateUp;
-				this->m_HeartRate_r -= (2.f + GetRandf(4.f)) / FPS;
+				this->m_HeartRate_r -= (2.f + GetRandf(4.f)) / DrawParts->GetFps();
 				this->m_HeartRate_r = std::clamp(this->m_HeartRate_r, HeartRateMin, HeartRateMax);
 
 				if (this->m_HeartRate < this->m_HeartRate_r) {
-					this->m_HeartRate += 5.f / FPS;
+					this->m_HeartRate += 5.f / DrawParts->GetFps();
 				}
 				else if (this->m_HeartRate >= this->m_HeartRate_r) {
-					this->m_HeartRate -= 5.f / FPS;
+					this->m_HeartRate -= 5.f / DrawParts->GetFps();
 				}
 				//this->m_HeartRate = this->m_HeartRate_r;
-				this->m_HeartRateRad += deg2rad(this->m_HeartRate) / FPS;
+				this->m_HeartRateRad += deg2rad(this->m_HeartRate) / DrawParts->GetFps();
 				if (this->m_HeartRateRad >= DX_PI_F * 2) { this->m_HeartRateRad -= DX_PI_F * 2; }
 				if (
 					(deg2rad(0) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(10)) ||
@@ -177,10 +179,10 @@ namespace FPS_n2 {
 				}
 
 
-				this->m_Stamina += std::clamp((100.f - this->m_HeartRate) / 40.f, -2.5f, 2.5f) / FPS;
+				this->m_Stamina += std::clamp((100.f - this->m_HeartRate) / 40.f, -2.5f, 2.5f) / DrawParts->GetFps();
 
 				if (IsSquat) {
-					this->m_Stamina += 1.0f / FPS;
+					this->m_Stamina += 1.0f / DrawParts->GetFps();
 				}
 
 				this->m_Stamina = std::clamp(this->m_Stamina, 0.f, StaminaMax);
@@ -279,8 +281,9 @@ namespace FPS_n2 {
 			void			SetAim(void) noexcept { this->m_ReadyTimer = 0.1f; }
 			void			SetADS(void) noexcept { this->m_ReadyTimer = 0.f; }
 			void			UpdateReady(void) noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				Easing(&this->m_ADSPer, this->GetIsADS() ? 1.f : 0.f, 0.9f, EasingType::OutExpo);//
-				this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / FPS, 0.f, UpperTimerLimit);
+				this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / DrawParts->GetFps(), 0.f, UpperTimerLimit);
 			}
 			void			SetAimOrADS(void) noexcept {
 				this->m_ReadyTimer = std::min(this->m_ReadyTimer, 0.1f);
@@ -371,9 +374,10 @@ namespace FPS_n2 {
 				}
 			}
 			const auto		GetVec(void) const noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				Vector3DX vecBuf = m_VecTotal;
 				if (m_MoverPer > 0.f) {
-					vecBuf = vecBuf.normalized() * (GetSpeedPer() * 60.f / FPS);
+					vecBuf = vecBuf.normalized() * (GetSpeedPer() * 60.f / DrawParts->GetFps());
 				}
 				vecBuf = Matrix4x4DX::Vtrans(vecBuf, Matrix4x4DX::RotAxis(Vector3DX::up(), this->m_yrad_Upper));
 				return vecBuf;
@@ -388,7 +392,7 @@ namespace FPS_n2 {
 				for (int i = 0; i < 4; i++) {
 					this->m_Vec[i] = 0.f;
 				}
-				this->m_Input.SetInputStart(0.f, 0.f, Vector3DX::zero());
+				this->m_Input.ResetAllInput();
 				this->m_radAdd.Set(0, 0, 0);
 				this->m_rad_Buf.x = (pxRad);
 				this->m_rad_Buf.y = (pyRad);
@@ -424,6 +428,7 @@ namespace FPS_n2 {
 				return false;
 			}
 			void		InputKey(const InputControl& pInput, bool pReady, const Vector3DX& pAddRadvec) {
+				auto* DrawParts = DXDraw::Instance();
 				this->m_Input = pInput;
 				if (!pReady) {
 					this->m_Input.ResetKeyInput();
@@ -456,10 +461,10 @@ namespace FPS_n2 {
 					this->m_rad.Set(X, Y, Z);
 				}
 				//移動
-				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (this->m_Input.GetPADSPress(PADS::MOVE_W) ? 5.f : -15.f) / FPS, 0.f, 1.f);
-				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (this->m_Input.GetPADSPress(PADS::MOVE_A) ? 5.f : -15.f) / FPS, 0.f, 1.f);
-				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (this->m_Input.GetPADSPress(PADS::MOVE_S) ? 5.f : -15.f) / FPS, 0.f, 1.f);
-				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (this->m_Input.GetPADSPress(PADS::MOVE_D) ? 5.f : -15.f) / FPS, 0.f, 1.f);
+				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (this->m_Input.GetPADSPress(PADS::MOVE_W) ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
+				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (this->m_Input.GetPADSPress(PADS::MOVE_A) ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
+				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (this->m_Input.GetPADSPress(PADS::MOVE_S) ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
+				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (this->m_Input.GetPADSPress(PADS::MOVE_D) ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
 				m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
 				m_MoverPer = m_VecTotal.magnitude();
 				//リーン
@@ -508,6 +513,7 @@ namespace FPS_n2 {
 				m_LeanSwitch = (Prev != this->m_LeanRate);
 			}
 			void		UpdateKeyRad() {
+				auto* DrawParts = DXDraw::Instance();
 				//
 				if (!KeyControl::IsMove()) {
 					if (deg2rad(50.f) < abs(KeyControl::GetYRadUpperChange())) {
@@ -561,7 +567,7 @@ namespace FPS_n2 {
 						i == (int)CharaAnimeID::Bottom_Stand_LeftStep ||
 						i == (int)CharaAnimeID::Bottom_Stand_RightStep ||
 						i == (int)CharaAnimeID::Bottom_Stand_WalkBack) {
-						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 6.f : -2.f) / FPS, 0.f, 1.f);
+						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 6.f : -2.f) / DrawParts->GetFps(), 0.f, 1.f);
 					}
 					if (
 						i == (int)CharaAnimeID::Bottom_Squat ||
@@ -569,7 +575,7 @@ namespace FPS_n2 {
 						i == (int)CharaAnimeID::Bottom_Squat_LeftStep ||
 						i == (int)CharaAnimeID::Bottom_Squat_RightStep ||
 						i == (int)CharaAnimeID::Bottom_Squat_WalkBack) {
-						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 2.f : -2.f) / FPS, 0.f, 1.f);
+						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 2.f : -2.f) / DrawParts->GetFps(), 0.f, 1.f);
 					}
 				}
 			}
@@ -665,6 +671,7 @@ namespace FPS_n2 {
 			~WalkSwingControl(void) noexcept {}
 		public:
 			void UpdateWalkSwing(const Vector3DX& Pos, float SwingPer)noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				m_WalkSwingRad.Set(5.f, 0.f, 10.f);
 				//X
 				{
@@ -672,7 +679,7 @@ namespace FPS_n2 {
 						m_WalkSwing_t.x = (1.f);
 					}
 					else {
-						m_WalkSwing_t.x = (std::max(m_WalkSwing_t.x - 15.f / FPS, 0.f));
+						m_WalkSwing_t.x = (std::max(m_WalkSwing_t.x - 15.f / DrawParts->GetFps(), 0.f));
 					}
 				}
 				//Z
@@ -719,8 +726,9 @@ namespace FPS_n2 {
 				this->m_MoveEyePosTimer = 0.f;
 			}
 			void UpdateEyeSwing(const Matrix4x4DX& pCharaMat, float SwingPer, float SwingSpeed)noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				if (SwingPer > 0.f) {
-					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed)*60.f / FPS;
+					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed)*60.f / DrawParts->GetFps();
 				}
 				else {
 					this->m_MoveEyePosTimer = 0.f;
@@ -876,6 +884,7 @@ namespace FPS_n2 {
 				m_IsStuckLeftHandTimer = 0.f;
 			}
 			void SetStackLeftHand(const Vector3DX& Pos, const Vector3DX& Normal) {
+				auto* DrawParts = DXDraw::Instance();
 				if (m_IsStuckLeftHandTimer >= 0.5f) {
 					if (!m_IsStuckLeftHand) {
 						m_StuckLeftHandPos = Pos;
@@ -892,7 +901,7 @@ namespace FPS_n2 {
 					}
 					m_IsStuckLeftHand = true;
 				}
-				m_IsStuckLeftHandTimer = std::min(m_IsStuckLeftHandTimer + 1.f / FPS, 0.5f);
+				m_IsStuckLeftHandTimer = std::min(m_IsStuckLeftHandTimer + 1.f / DrawParts->GetFps(), 0.5f);
 			}
 		};
 		//
@@ -956,8 +965,9 @@ namespace FPS_n2 {
 				m_HitPower = 1.f;
 			}
 			void Execute_HitReactionControl() noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				Easing(&this->m_HitPowerR, this->m_HitPower, 0.8f, EasingType::OutExpo);
-				this->m_HitPower = std::max(this->m_HitPower - 1.f / FPS / 0.3f, 0.f);
+				this->m_HitPower = std::max(this->m_HitPower - 1.f / DrawParts->GetFps() / 0.3f, 0.f);
 			}
 		};
 		//ラグドール
@@ -1126,11 +1136,12 @@ namespace FPS_n2 {
 				this->lagframe_.Get_frame(m_RagDoll);
 			}
 			void Execute_RagDollControl(MV1& obj_body_t, bool isAlive) noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				if (isAlive) {
 					this->m_RagDollTimer = 0.f;
 				}
 				else {
-					this->m_RagDollTimer = std::min(this->m_RagDollTimer + 1.f / FPS, 3.f);
+					this->m_RagDollTimer = std::min(this->m_RagDollTimer + 1.f / DrawParts->GetFps(), 3.f);
 				}
 				if (this->m_RagDollTimer < 3.f) {
 					MV1SetPrioritizePhysicsOverAnimFlag(this->m_RagDoll.get(), TRUE);
@@ -1140,7 +1151,7 @@ namespace FPS_n2 {
 						this->m_RagDoll.PhysicsResetState();
 					}
 					else {
-						this->m_RagDoll.PhysicsCalculation(1000.f / FPS);
+						this->m_RagDoll.PhysicsCalculation(1000.f / DrawParts->GetFps());
 					}
 				}
 			}

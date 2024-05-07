@@ -15,11 +15,12 @@ namespace FPS_n2 {
 			this->m_CallSound = sound;
 		}
 		void			FallObjClass::FirstExecute(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			if (this->m_IsActive) {
 				this->m_move.repos = this->m_move.pos;
-				this->m_move.pos += this->m_move.vec*60.f / FPS + Vector3DX::up()*this->m_yAdd;
+				this->m_move.pos += this->m_move.vec*60.f / DrawParts->GetFps() + Vector3DX::up()*this->m_yAdd;
 				if (this->m_yAdd != 0.f) {
-					this->m_yAdd += (M_GR / (FPS*FPS));
+					this->m_yAdd += (M_GR / (DrawParts->GetFps()*DrawParts->GetFps()));
 				}
 				if ((this->GetMove().pos - this->GetMove().repos).y < 0.f) {
 					Vector3DX EndPos = this->GetMove().pos;
@@ -43,14 +44,14 @@ namespace FPS_n2 {
 					if ((this->m_move.pos - this->m_move.repos).y <= 0.f) {
 						BB *= -1.f;
 					}
-					this->m_move.mat = Matrix4x4DX::RotAxis(Vector3DX::Cross(BB, this->m_move.mat.zvec()), deg2rad(-50.f*60.f / FPS))*this->m_move.mat;
+					this->m_move.mat = Matrix4x4DX::RotAxis(Vector3DX::Cross(BB, this->m_move.mat.zvec()), deg2rad(-50.f*60.f / DrawParts->GetFps()))*this->m_move.mat;
 				}
 
 				UpdateMove();
 				if (this->m_Timer < 0.f) {
 					this->m_IsActive = false;
 				}
-				this->m_Timer -= 1.f / FPS;
+				this->m_Timer -= 1.f / DrawParts->GetFps();
 				//‹¤’Ê
 				UpdateMove();
 			}

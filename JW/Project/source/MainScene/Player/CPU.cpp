@@ -345,11 +345,12 @@ namespace FPS_n2 {
 			}
 			//
 			void		Execute_Before(bool CanRepop) noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				//‰Šú‰»
-				m_MyInput.SetInputStart(0, 0, Vector3DX::zero());
+				m_MyInput.ResetAllInput();
 				IsGotLengthToTarget = false;
 				//‘O€”õ
-				m_PathUpdateTimer = std::max(m_PathUpdateTimer - 1.f / FPS, 0.f);
+				m_PathUpdateTimer = std::max(m_PathUpdateTimer - 1.f / DrawParts->GetFps(), 0.f);
 				if (m_PathUpdateTimer <= 0.f) {
 					m_PathUpdateTimer += 1.f;
 					this->ChangePoint();
@@ -365,7 +366,7 @@ namespace FPS_n2 {
 						(CanRepop && !MyChara->CanLookTarget && (GetLengthToTarget() > 10.f*Scale_Rate)) ||
 						(!CanRepop && !MyChara->IsAlive())
 						) {
-						this->m_RepopTimer += 1.f / FPS;
+						this->m_RepopTimer += 1.f / DrawParts->GetFps();
 						if (this->m_RepopTimer > 10.f) {
 							this->m_RepopTimer -= 10.f;
 							Repop(CanRepop);
@@ -385,6 +386,7 @@ namespace FPS_n2 {
 				}
 			}
 			void		Execute_Normal() noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto MyPos = MyChara->GetEyeMatrix().pos();
@@ -392,7 +394,7 @@ namespace FPS_n2 {
 				if (this->m_MoveFrontTimer > 6.f) {
 					this->m_MoveFrontTimer -= 6.f;
 				}
-				this->m_MoveFrontTimer += 1.f / FPS;
+				this->m_MoveFrontTimer += 1.f / DrawParts->GetFps();
 				m_MyInput.SetInputPADS(PADS::MOVE_W, this->m_MoveFrontTimer > 4.f);
 				m_MyInput.SetInputPADS(PADS::MOVE_A, GetRand(100) > 50);
 				m_MyInput.SetInputPADS(PADS::MOVE_D, GetRand(100) > 50);
@@ -415,6 +417,7 @@ namespace FPS_n2 {
 				}
 			}
 			void		Execute_Shot() noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				//ƒGƒCƒ€
@@ -424,7 +427,7 @@ namespace FPS_n2 {
 				m_MyInput.SetInputPADS(PADS::LEAN_R, (this->m_LeanLR == -1));
 				//Œã‘Þ
 				if (MyChara->CanLookTarget) {
-					this->m_BackTimer = std::max(this->m_BackTimer - 1.f / FPS, 0.f);
+					this->m_BackTimer = std::max(this->m_BackTimer - 1.f / DrawParts->GetFps(), 0.f);
 					if (this->m_BackTimer == 0.f) {
 						this->m_BackTimer = 3.f + GetRandf(2.f);
 					}
@@ -436,7 +439,7 @@ namespace FPS_n2 {
 					this->m_BackTimer = 3.f + GetRandf(2.f);
 				}
 				//
-				this->m_ShotTimer = std::max(this->m_ShotTimer - 1.f / FPS, 0.f);
+				this->m_ShotTimer = std::max(this->m_ShotTimer - 1.f / DrawParts->GetFps(), 0.f);
 				if (this->m_ShotTimer == 0.f) {
 					m_MyInput.SetInputPADS(PADS::SHOT, true);
 					this->m_ShotTimer = MyChara->CanLookTarget ? ((float)(10 + GetRand(100)) / 100.f) : ((float)(50 + GetRand(400)) / 100.f);
@@ -449,7 +452,7 @@ namespace FPS_n2 {
 						) {
 						this->m_Phase = ENUM_AI_PHASE::Normal;
 					}
-					this->m_CheckAgain = std::max(this->m_CheckAgain - 1.f / FPS, 0.f);
+					this->m_CheckAgain = std::max(this->m_CheckAgain - 1.f / DrawParts->GetFps(), 0.f);
 				}
 				else {
 					this->m_CheckAgain = 5.f;

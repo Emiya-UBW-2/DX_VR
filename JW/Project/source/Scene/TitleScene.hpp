@@ -18,8 +18,6 @@ namespace FPS_n2 {
 
 		class TitleScene : public TEMPSCENE, public GunsModify {
 		private:
-			bool						m_IsFirstLoad{true};			//共通リソースをロードしたか
-
 			GraphHandle					m_TitleImage;
 			GraphHandle					m_SelectBackImage;
 			std::array<ButtonClass, 6>	ButtonSel{};

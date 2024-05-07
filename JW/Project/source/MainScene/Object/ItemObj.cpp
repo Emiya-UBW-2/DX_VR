@@ -12,15 +12,16 @@ namespace FPS_n2 {
 			this->m_move.mat = Matrix4x4DX::identity();
 		}
 		void			ItemObjClass::FirstExecute(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			if (this->m_IsActive) {
 				if (this->m_yAdd != 0.f) {
 					this->m_move.repos = this->m_move.pos;
-					this->m_move.pos += this->m_move.vec*60.f / FPS + Vector3DX::up()*this->m_yAdd;
+					this->m_move.pos += this->m_move.vec*60.f / DrawParts->GetFps() + Vector3DX::up()*this->m_yAdd;
 					auto Y = this->m_move.vec.y;
 					Easing(&this->m_move.vec, Vector3DX::zero(), 0.95f, EasingType::OutExpo);
 					this->m_move.vec.y = (Y);
 
-					this->m_yAdd += (M_GR / (FPS*FPS));
+					this->m_yAdd += (M_GR / (DrawParts->GetFps()*DrawParts->GetFps()));
 
 					Vector3DX EndPos = this->GetMove().pos;
 					Vector3DX Normal;
@@ -37,7 +38,7 @@ namespace FPS_n2 {
 					}
 				}
 
-				this->m_move.mat = Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(1.f*60.f / FPS))*this->m_move.mat;
+				this->m_move.mat = Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(1.f*60.f / DrawParts->GetFps()))*this->m_move.mat;
 				UpdateMove();
 			}
 		}

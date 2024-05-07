@@ -23,8 +23,6 @@ namespace FPS_n2 {
 		//
 		void			TutorialScene::Load_Sub(void) noexcept {
 			//ロード
-			if (m_IsFirstLoad) {
-				m_IsFirstLoad = false;
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto* BattleResourceMngr = CommonBattleResource::Instance();
 				//BG
@@ -35,7 +33,6 @@ namespace FPS_n2 {
 				this->m_UIclass.Load();
 
 				PlayerMngr->Init(1);
-			}
 		}
 		void			TutorialScene::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -270,7 +267,7 @@ namespace FPS_n2 {
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
-				SetMousePoint(DXDraw::Instance()->m_DispXSize / 2, DXDraw::Instance()->m_DispYSize / 2);
+				SetMousePoint(DXDraw::Instance()->GetDispXSize() / 2, DXDraw::Instance()->GetDispYSize() / 2);
 				m_TutorialNow = 0;
 			}
 			if (Pad->GetKey(PADS::INTERACT).trigger()) {
@@ -300,7 +297,7 @@ namespace FPS_n2 {
 				/*
 				m_GameEnd |= (!(Chara->IsAlive() && (Timer <= TotalTime)));
 				if (m_GameEnd) {
-					EndTimer = std::max(EndTimer - 1.f / FPS, 0.f);
+					EndTimer = std::max(EndTimer - 1.f / DrawParts->GetFps(), 0.f);
 				}
 				//*/
 			}
@@ -324,7 +321,7 @@ namespace FPS_n2 {
 					pp_x -= Chara->GetRecoilRadAdd().y;
 					pp_y -= Chara->GetRecoilRadAdd().x;
 				}
-				MyInput.SetInputStart(pp_x, pp_y, Chara->GetRadBuf());
+				MyInput.SetInputStart(pp_x, pp_y);
 				MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
 				MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
 				MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
@@ -435,7 +432,7 @@ namespace FPS_n2 {
 					loop++;
 				}
 			}
-			tgtTimer = std::max(tgtTimer - 1.f / FPS, 0.f);
+			tgtTimer = std::max(tgtTimer - 1.f / DrawParts->GetFps(), 0.f);
 			//近接攻撃
 			{
 			}
@@ -445,7 +442,7 @@ namespace FPS_n2 {
 			//視点
 			{
 				{
-					//FPSカメラ
+					//DrawParts->GetFps()カメラ
 					Vector3DX CamPos = Chara->GetEyeMatrix().pos() + DrawParts->GetCamShake();
 					DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeMatrix().zvec() * -1.f, Chara->GetEyeMatrix().yvec());
 
@@ -586,7 +583,7 @@ namespace FPS_n2 {
 			DebugParts->SetPoint("update end");
 #endif // DEBUG
 			if (m_IsFirstGame) {
-				m_FirstFade = std::max(m_FirstFade - 1.f / FPS / 3.f, 0.f);
+				m_FirstFade = std::max(m_FirstFade - 1.f / DrawParts->GetFps() / 3.f, 0.f);
 			}
 			if (m_MainLoopPauseControl.GetIsRetireSelected()) {
 				return false;
@@ -730,8 +727,8 @@ namespace FPS_n2 {
 				if (tgtSel >= 0) {
 					auto& t = (std::shared_ptr<TargetClass>&)(*ObjectManager::Instance()->GetObj((int)ObjType::Target, tgtSel));
 
-					int xp = DrawParts->m_DispXSize / 2 - y_r(300);
-					int yp = DrawParts->m_DispYSize / 2 + y_r(100);
+					int xp = DrawParts->GetDispXSize() / 2 - y_r(300);
+					int yp = DrawParts->GetDispYSize() / 2 + y_r(100);
 					int size = y_r(100);
 					int xs = size / 2;
 					int ys = size / 2;
@@ -766,22 +763,19 @@ namespace FPS_n2 {
 																		  y_r(960), y_r(870), Red, Black, "%s:%s", LocalizePool::Instance()->Get(300), Pad->GetKeyStr(PADS::INTERACT).c_str());
 
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*m_FirstFade), 0, 255));
-					DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Black, TRUE);
+					DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Black, TRUE);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
 			}
 		}
 		//使い回しオブジェ系
 		void			TutorialScene::Dispose_Load_Sub(void) noexcept {
-			if (!m_IsFirstLoad) {
-				m_IsFirstLoad = true;
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto* BattleResourceMngr = CommonBattleResource::Instance();
 				BattleResourceMngr->Dispose();
 				this->m_UIclass.Dispose();
 				PlayerMngr->Dispose();
 				ObjectManager::Instance()->DeleteAll();
-			}
 		}
 		//
 		void			TutorialScene::LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept {

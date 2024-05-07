@@ -8,6 +8,7 @@ namespace FPS_n2 {
 		//戦車
 		class VehicleClass : public ObjectBaseClass, public EffectControl {
 		private:
+			MV1													m_hit_pic;						//弾痕  
 			//操作
 			bool												m_ReadySwitch{ false };							//
 			bool												m_KeyActive{ true };							//
@@ -130,7 +131,7 @@ namespace FPS_n2 {
 				this->m_RadOverRide = rad;
 			}
 		public:
-			void			ValueInit(const VehDataControl::VhehicleData* pVeh_data, const MV1& hit_pic, const std::shared_ptr<b2World>& pB2World, PlayerID pID) noexcept;
+			void			ValueInit(const VehDataControl::VhehicleData* pVeh_data, const std::shared_ptr<b2World>& pB2World, PlayerID pID) noexcept;
 			void			ValueSet(float pxRad, float pyRad, const Vector3DX& pos_t) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady, bool isOverrideView) noexcept;													//
 			void			Setcamera(Camera3DInfo& m_MainCamera, const float fov_base) noexcept;																	//カメラ設定出力
@@ -159,6 +160,7 @@ namespace FPS_n2 {
 				this->m_IsDraw = true;
 			}
 			void			FirstExecute(void) noexcept override {
+				auto* DrawParts = DXDraw::Instance();
 				auto* SE = SoundPool::Instance();
 				//初回のみ更新する内容
 				if (this->m_IsFirstLoop) {
@@ -175,7 +177,7 @@ namespace FPS_n2 {
 				ExecuteMove();				//移動操作
 				this->m_PosBufOverRideFlag = false;
 				if (Get_alive()) {
-					this->m_Fuel -= 1.f / FPS * (0.6f + (std::abs(this->m_move.vec.magnitude() / Scale_Rate) * 0.75f + std::abs(this->m_radAdd.y) * 8.f)*3.5f);
+					this->m_Fuel -= 1.f / DrawParts->GetFps() * (0.6f + (std::abs(this->m_move.vec.magnitude() / Scale_Rate) * 0.75f + std::abs(this->m_radAdd.y) * 8.f)*3.5f);
 				}
 			}
 			void			LateExecute(void) noexcept override {

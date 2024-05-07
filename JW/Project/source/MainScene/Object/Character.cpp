@@ -368,7 +368,7 @@ namespace FPS_n2 {
 			auto PrevAction = m_CharaAction;
 			//開始演出
 			if (GetGunPtrNow() && m_ReadyAnim > 0.f) {
-				m_ReadyAnim = std::max(m_ReadyAnim - 1.f / FPS, 0.f);
+				m_ReadyAnim = std::max(m_ReadyAnim - 1.f / DrawParts->GetFps(), 0.f);
 				switch (m_ReadyAnimPhase) {
 					case 0:
 						GunReadyControl::SetAim();
@@ -732,7 +732,7 @@ namespace FPS_n2 {
 								GunReadyControl::SetReady();
 								break;
 							case MorphinePhase::Wear:
-								this->m_Wear_MorphineFrame += 1.f / FPS;
+								this->m_Wear_MorphineFrame += 1.f / DrawParts->GetFps();
 								this->m_Wear_Morphine.Execute((this->m_Wear_MorphineFrame < 1.5f), 0.1f, 0.1f, 0.8f);
 								if (this->m_Wear_MorphineFrame > 2.f) {
 									this->m_MorphinePhase = MorphinePhase::Have;
@@ -751,7 +751,7 @@ namespace FPS_n2 {
 									}
 								}
 
-								this->m_Wear_MorphinePer += 1.f / FPS;
+								this->m_Wear_MorphinePer += 1.f / DrawParts->GetFps();
 								if (this->m_Wear_MorphinePer >= 0.f) {
 									this->m_Wear_MorphinePer -= 0.4f;
 									if (IsAlive()) {//死んだらダメ
@@ -880,7 +880,7 @@ namespace FPS_n2 {
 			}
 			//心拍音
 			if (this->m_MyID == 0) {
-				if (StaminaControl::ExcuteStamina(0.f, this->m_move.Speed / FPS, KeyControl::GetIsSquat())) {
+				if (StaminaControl::ExcuteStamina(0.f, this->m_move.Speed / DrawParts->GetFps(), KeyControl::GetIsSquat())) {
 					if (this->m_BackGround) {//todo:タイトル用仮
 						SE->Get((int)SoundEnum::Heart).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 0.5f);
 					}
@@ -889,6 +889,7 @@ namespace FPS_n2 {
 		}
 		//SetMat指示更新
 		void			CharacterClass::ExecuteMatrix(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			//vector
 			bool IsHitGround = (this->m_move.posbuf.y <= 0.f); //高度0なら止まる
@@ -909,7 +910,7 @@ namespace FPS_n2 {
 			else {
 				float Y = this->m_move.vec.y;
 				this->m_move.vec = KeyControl::GetVec();
-				this->m_move.vec.y = (Y + (M_GR / (FPS * FPS)));
+				this->m_move.vec.y = (Y + (M_GR / (DrawParts->GetFps() * DrawParts->GetFps())));
 			}
 			this->m_move.posbuf += this->m_move.vec;
 			//壁判定
@@ -976,7 +977,7 @@ namespace FPS_n2 {
 			GunSel = 1 - GunSel;
 			if (GetGunPtr(GunSel)) {
 				m_SlingZrad.Update();
-				m_SlingZrad.AddRad(((1.f - m_SlingPer.at(GetOtherGunSelect())) + 0.5f  * (KeyControl::GetRad().y - KeyControl::GetYRadBottom())) / FPS);
+				m_SlingZrad.AddRad(((1.f - m_SlingPer.at(GetOtherGunSelect())) + 0.5f  * (KeyControl::GetRad().y - KeyControl::GetYRadBottom())) / DrawParts->GetFps());
 				m_SlingMat[GunSel] =
 					Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(-30)) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(-90)) *
 					(
@@ -1071,7 +1072,7 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						m_StuckGunTimer = std::max(m_StuckGunTimer - 1.f / FPS, 0.f);
+						m_StuckGunTimer = std::max(m_StuckGunTimer - 1.f / DrawParts->GetFps(), 0.f);
 					}
 					if (m_IsStuckGun) {
 						GunReadyControl::SetReady();
@@ -1443,6 +1444,7 @@ namespace FPS_n2 {
 			this->m_ArmerStock = 0;
 		}
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto* SE = SoundPool::Instance();
 			KeyControl::InputKey(pInput, pReady, StaminaControl::GetHeartRandVec(KeyControl::GetIsSquat() ? 1.f : 0.f));
 			//AIM
@@ -1454,7 +1456,7 @@ namespace FPS_n2 {
 								m_ULTUp -= 0.5f;
 								ULTControl::AddULT(1, true);
 							}
-							m_ULTUp += 1.f / FPS;
+							m_ULTUp += 1.f / DrawParts->GetFps();
 							if (ULTControl::IsULTActive() && KeyControl::GetULTKey()) {
 								m_IsChanging = true;
 								m_IsChange = true;
@@ -1467,7 +1469,7 @@ namespace FPS_n2 {
 								m_ULTUp -= 0.25f;
 								ULTControl::AddULT(-1, true);
 							}
-							m_ULTUp += 1.f / FPS;
+							m_ULTUp += 1.f / DrawParts->GetFps();
 							if (ULTControl::GetULT() == 0 || (GetIsAim() && KeyControl::GetULTKey())) {
 								m_IsChanging = true;
 								m_IsChange = true;
@@ -1486,7 +1488,7 @@ namespace FPS_n2 {
 									SE->Get((int)SoundEnum::Man_breathing).Play(0, DX_PLAYTYPE_BACK);
 								}
 							}
-							m_HPRec += 1.f / FPS;
+							m_HPRec += 1.f / DrawParts->GetFps();
 						}
 						else {
 							if (m_HPRec != 0.f) {
@@ -1529,11 +1531,12 @@ namespace FPS_n2 {
 			this->SetMorphine(nullptr);
 		}
 		void			CharacterClass::FirstExecute(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			//初回のみ更新する内容
 			if (this->m_IsFirstLoop) {}
-			this->m_SoundPower = std::max(this->m_SoundPower - 1.f / FPS, 0.f);
+			this->m_SoundPower = std::max(this->m_SoundPower - 1.f / DrawParts->GetFps(), 0.f);
 			GunReadyControl::UpdateReady();
-			m_MeleeCoolDown = std::max(m_MeleeCoolDown - 1.f / FPS, 0.f);
+			m_MeleeCoolDown = std::max(m_MeleeCoolDown - 1.f / DrawParts->GetFps(), 0.f);
 			if (GetGunPtrNow()) {
 				GetGunPtrNow()->SetShotSwitchOff();
 				//リコイルの演算

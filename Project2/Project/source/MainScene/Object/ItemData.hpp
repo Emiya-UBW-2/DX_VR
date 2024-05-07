@@ -68,48 +68,72 @@ namespace FPS_n2 {
 				FileRead_close(mdata);
 			}
 		};
-
-		class CellItem {
-			int							m_Count{ 1 };
-			std::shared_ptr<ItemData>	Data{ nullptr };
-			bool						Is90{ false };
-			int							SlotID{ 0 };
-		public:
-			const auto& GetItemData(void) const noexcept { return this->Data; }
-			const auto&	GetXsize(void) const noexcept { return this->Is90 ? this->Data->GetYsize() : this->Data->GetXsize(); }
-			const auto&	GetYsize(void) const noexcept { return this->Is90 ? this->Data->GetXsize() : this->Data->GetYsize(); }
-			const auto&	GetCount(void) const noexcept { return this->m_Count; }
-			const auto& GetIs90(void) const noexcept { return this->Is90; }
-			const auto& GetSlotID(void) const noexcept { return this->SlotID; }
-			void Rotate() { this->Is90 ^= 1; }
-		public:
-			void Set(const std::shared_ptr<ItemData>& data, int cap, int Slot) {
-				this->Data = data;
-				if (cap < 0) {
-					this->m_Count = this->Data->GetCapacity();
+		class AmmoData : public ItemData {
+		private:
+			float			m_caliber{0.f};
+			float			m_speed{100.f};				//弾速
+			float			m_penetration{10.f};			//貫通
+			HitPoint		m_damage{10};					//ダメージ
+		public://getter
+			const auto&		GetCaliber(void) const noexcept { return this->m_caliber; }
+			const auto&		GetSpeed(void) const noexcept { return this->m_speed; }
+			const auto&		GetPenetration(void) const noexcept { return this->m_penetration; }
+			const auto&		GetDamage(void) const noexcept { return this->m_damage; }
+		protected:
+			void		Set_Sub(const std::string& LEFT, const std::string&RIGHT) noexcept override {
+				if (LEFT == "ammo_cal(mm)") {
+					this->m_caliber = std::stof(RIGHT)* 0.001f;	//口径
 				}
-				else {
-					this->m_Count = cap;
+				if (LEFT == "ammo_speed(m/s)") {
+					this->m_speed = std::stof(RIGHT);				//弾速
 				}
-				SlotID = Slot;
+				if (LEFT == "ammo_pene(mm)") {
+					this->m_penetration = std::stof(RIGHT);			//貫通
+				}
+				if (LEFT == "ammo_damage") {
+					this->m_damage = (HitPoint)std::stoi(RIGHT);		//ダメージ
+				}
 			}
-			bool Sub(HitPoint* value) {
-				auto prev = this->m_Count;
-				this->m_Count = std::max(this->m_Count - *value, 0);
-				*value -= (HitPoint)(prev - this->m_Count);
-				return (prev != this->m_Count && this->m_Count == 0);//0になったとき
-			}
+		public:
+		};
 
-			void Dispose() {
-				this->Data.reset();
+		class ItemDataControl : public SingletonBase<ItemDataControl> {
+		private:
+			friend class SingletonBase<ItemDataControl>;
+		private:
+		private:
+			std::vector<std::shared_ptr<ItemData>>		m_ItemData;						//アイテムデータ
+		public:
+			const auto&		GetData(void) const noexcept { return this->m_ItemData; }
+		public:
+			void	Load() noexcept {
+				{
+					std::vector<WIN32_FIND_DATA> data_t;
+					std::string Path = "data/item/";
+					GetFileNamesInDirectory("data/item/*", &data_t);
+					for (auto& d : data_t) {
+						if (d.cFileName[0] != '.') {
+							m_ItemData.emplace_back(std::make_shared<ItemData>());
+							m_ItemData.back()->Set(Path + d.cFileName + "/");
+						}
+					}
+					data_t.clear();
+				}
+				{
+					std::vector<WIN32_FIND_DATA> data_t;
+					std::string Path = "data/ammo/";
+					GetFileNamesInDirectory("data/ammo/*", &data_t);
+					for (auto& d : data_t) {
+						if (d.cFileName[0] != '.') {
+							m_ItemData.emplace_back(std::make_shared<AmmoData>());
+							m_ItemData.back()->Set(Path + d.cFileName + "/");
+						}
+					}
+					data_t.clear();
+				}
 			}
-			void Draw(int xp, int yp) {
-				auto* Fonts = FontPool::Instance();
-
-				this->Data->GetSlotPic().DrawRotaGraph(xp + GetXsize()*y_r(64) / 2, yp + GetYsize()*y_r(64) / 2, (float)y_r(64) / 64.f, deg2rad(this->Is90 ? 90.f : 0.f), false);
-				Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(12), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
-					xp + GetXsize()*y_r(64), yp + GetYsize()*y_r(64),
-					((100 * this->m_Count / this->Data->GetCapacity()) > 34) ? White : Red, Black, "%d/%d", this->m_Count, this->Data->GetCapacity());
+			void	Dispose() noexcept {
+				this->m_ItemData.clear();
 			}
 		};
 	};

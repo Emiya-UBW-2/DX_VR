@@ -68,7 +68,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				SaveDataParts->Save();//ƒZ[ƒu
 				return 0;
 			}
-			FPS = GetFrameRate();
 #ifdef DEBUG
 			clsDx();
 			DebugParts->SetStartPoint();

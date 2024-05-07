@@ -72,9 +72,10 @@ namespace FPS_n2 {
 		}
 
 		void AutoAimControl::UpdateAutoAim(bool isActive) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto prev = m_AutoAimTimer;
-			m_AutoAimTimer = std::max(m_AutoAimTimer - 1.f / FPS, 0.f);
+			m_AutoAimTimer = std::max(m_AutoAimTimer - 1.f / DrawParts->GetFps(), 0.f);
 			if (prev > 0.f && m_AutoAimTimer == 0.f) {
 				m_AutoAim = -1;
 			}
@@ -120,16 +121,17 @@ namespace FPS_n2 {
 			}
 		}
 		void ItemPopControl::SetPop(const Vector3DX & pPos) {
+			auto* DrawParts = DXDraw::Instance();
 			int Rand = GetRand(99);
 			if (Rand < 45) {
-				m_ItemFallControl.at(0).SetFall(pPos, Vector3DX::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
+				m_ItemFallControl.at(0).SetFall(pPos, Vector3DX::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / DrawParts->GetFps());
 			}
 			else if (Rand < 45 + 15) {
-				m_ItemFallControl.at(1).SetFall(pPos, Vector3DX::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
+				m_ItemFallControl.at(1).SetFall(pPos, Vector3DX::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / DrawParts->GetFps());
 			}
 			else if (Rand < 45 + 15 + 20) {
-				m_ItemFallControl.at(0).SetFall(pPos, Vector3DX::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
-				m_ItemFallControl.at(1).SetFall(pPos, Vector3DX::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / FPS);
+				m_ItemFallControl.at(0).SetFall(pPos, Vector3DX::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / DrawParts->GetFps());
+				m_ItemFallControl.at(1).SetFall(pPos, Vector3DX::vget(GetRandf(2.f), 0.f, GetRandf(2.f))*Scale_Rate / DrawParts->GetFps());
 			}
 		}
 		void ItemPopControl::DisposeItemPop() noexcept {

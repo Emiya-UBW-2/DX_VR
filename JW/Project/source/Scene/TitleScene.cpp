@@ -10,14 +10,11 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		void			TitleScene::Load_Sub(void) noexcept {
 			//ロード
-			if (m_IsFirstLoad) {
-				m_IsFirstLoad = false;
 				auto* PlayerMngr = PlayerManager::Instance();
 				//BG
 				GunAnimManager::Instance()->Load("data/CharaAnime/");
 				//
 				PlayerMngr->Init(1);
-			}
 		}
 		void			TitleScene::Set_Sub(void) noexcept {
 			select = 0;
@@ -311,8 +308,8 @@ namespace FPS_n2 {
 			for (auto& y : ButtonSel) {
 				y.Update();
 			}
-			GameFadeIn = std::max(GameFadeIn - 1.f / FPS / 0.5f, 0.f);
-			if (GameStart != 0.f) { GameStart += 1.f / FPS / 0.5f; }
+			GameFadeIn = std::max(GameFadeIn - 1.f / DrawParts->GetFps() / 0.5f, 0.f);
+			if (GameStart != 0.f) { GameStart += 1.f / DrawParts->GetFps() / 0.5f; }
 			return  (GameStart < 1.f);
 		}
 		void			TitleScene::Dispose_Sub(void) noexcept {
@@ -339,7 +336,7 @@ namespace FPS_n2 {
 		void			TitleScene::BG_Draw_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			//
-			DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Gray65, TRUE);
+			DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Gray65, TRUE);
 		}
 
 		void			TitleScene::ShadowDraw_Sub(void) noexcept {
@@ -374,10 +371,10 @@ namespace FPS_n2 {
 			//
 			{
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(GameFadeIn, 0.f, 1.f)), 0, 255));
-				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Black, TRUE);
+				DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Black, TRUE);
 
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(GameStart, 0.f, 1.f)), 0, 255));
-				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, White, TRUE);
+				DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), White, TRUE);
 
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
@@ -386,11 +383,8 @@ namespace FPS_n2 {
 		}
 		//使い回しオブジェ系
 		void			TitleScene::Dispose_Load_Sub(void) noexcept {
-			if (!m_IsFirstLoad) {
-				m_IsFirstLoad = true;
 				PlayerManager::Instance()->Dispose();
 				ObjectManager::Instance()->DeleteAll();
-			}
 		}
 		//
 	};

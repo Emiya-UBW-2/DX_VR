@@ -2,6 +2,151 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		void			MAINLOOP::Load_Sub(void) noexcept {
+			//BG
+			this->m_BackGround->Load();
+			//
+			this->m_hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
+			this->m_aim_Graph = GraphHandle::Load("data/UI/battle_aim.bmp");
+			this->m_scope_Graph = GraphHandle::Load("data/UI/battle_scope.png");
+			//
+			auto* BattleResourceMngr = CommonBattleResource::Instance();
+			BattleResourceMngr->Load();
+		}
+		void			MAINLOOP::Set_Sub(void) noexcept {
+			auto* ObjMngr = ObjectManager::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto* DrawParts = DXDraw::Instance();
+			auto* OptionParts = OPTION::Instance();
+
+			this->m_BackGround->Init();
+			PlayerMngr->Init(Player_num);
+
+			Vector3DX LightVec = Vector3DX::vget(-0.8f, -0.5f, -0.1f);
+			DrawParts->SetAmbientLight(LightVec, GetColorF(0.92f, 0.91f, 0.90f, 1.0f));
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-300.f, -10.f, -300.f)*Scale_Rate, Vector3DX::vget(300.f, 50.f, 300.f)*Scale_Rate, 0);
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-300.f, -10.f, -300.f)*Scale_Rate, Vector3DX::vget(300.f, 50.f, 300.f)*Scale_Rate, 1);
+			DrawParts->SetShadow(LightVec, Vector3DX::vget(-300.f, -10.f, -300.f)*Scale_Rate, Vector3DX::vget(300.f, 50.f, 300.f)*Scale_Rate, 2);
+
+			for (int i = 0; i < Vehicle_num; i++) {
+				PlayerMngr->GetPlayer(i).SetVehicle(std::make_shared<VehicleClass>());
+				ObjMngr->AddObject(PlayerMngr->GetPlayer(i).GetVehicle());
+				PlayerMngr->GetPlayer(i).GetVehicle()->SetMapCol(this->m_BackGround);
+				PlayerMngr->GetPlayer(i).GetVehicle()->ObjectBaseClass::Init();
+
+			}
+			{
+				auto Hind = std::make_shared<HindDClass>();
+				ObjMngr->AddObject(Hind);
+				ObjMngr->LoadModel(Hind, Hind, "data/model/hindD/");
+
+				Hind->Init();
+
+				Hind->SetMove(Matrix4x4DX::identity(), Vector3DX::vget(0.f, 30.f*Scale_Rate, 0.f));
+				Hind->GetObj().get_anime(0).per = 1.f;
+			}
+			VehDataControl::Instance()->Set();
+			//UI
+			this->m_UIclass.Set();
+			//Set
+			//戦車
+			{
+				Vector3DX BasePos;
+
+				std::vector<int> OtherSelect;
+				for (int i = 0; i < Vehicle_num; i++) {
+					int ID = 0;
+					while (true) {
+						ID = GetRand(this->m_BackGround->GetRoadPointNum() - 1);
+						bool Hit = (std::find_if(OtherSelect.begin(), OtherSelect.end(), [&](int tmp) { return tmp == ID; }) != OtherSelect.end());
+
+						if (i != 0) {
+							auto LEN = (BasePos - this->m_BackGround->GetRoadPoint(ID)->pos()); LEN.y = (0.f);
+							if (LEN.magnitude() <= 100.f*Scale_Rate) {
+								Hit = true;
+							}
+						}
+						if (!Hit) {
+							auto Mat = *this->m_BackGround->GetRoadPoint(ID);
+							Vector3DX pos_t = Mat.pos();
+							if (
+								(-280.f*Scale_Rate / 2.f < pos_t.x && pos_t.x < 290.f*Scale_Rate / 2.f) &&
+								(-280.f*Scale_Rate / 2.f < pos_t.z && pos_t.z < 280.f*Scale_Rate / 2.f)
+								) {
+								OtherSelect.emplace_back(ID);
+								break;
+							}
+						}
+					}
+
+					auto Mat = *this->m_BackGround->GetRoadPoint(ID);
+					Vector3DX pos_t = Mat.pos();
+					float rad_t = std::atan2f(Mat.zvec().x, -Mat.zvec().z);
+					auto pos_t1 = pos_t + Vector3DX::up() * 1250.f;
+					auto pos_t2 = pos_t + Vector3DX::up() * -1250.f;
+					if (this->m_BackGround->CheckLinetoMap(pos_t1, &pos_t2, true, false)) {
+						pos_t = pos_t2;
+					}
+					if (i == 0) {
+						BasePos = pos_t;
+					}
+
+					auto& vehc_datas = VehDataControl::Instance()->GetVehData();
+					auto* vehc_data = &vehc_datas[
+						GetRand((int)vehc_datas.size() - 1)
+							//i != 0 ? GetRand((int)vehc_datas.size() - 1) : 0
+					];
+
+					ObjMngr->LoadModel(PlayerMngr->GetPlayer(i).GetVehicle(), nullptr, ("data/tank/" + vehc_data->GetName() + "/").c_str());
+
+					PlayerMngr->GetPlayer(i).GetVehicle()->ValueInit(vehc_data, this->m_BackGround->GetBox2Dworld(), (PlayerID)i);
+					PlayerMngr->GetPlayer(i).GetVehicle()->ValueSet(deg2rad(0), rad_t, pos_t);
+				}
+			}
+			//player
+			for (int i = 0; i < Player_num; i++) {
+				auto& Vehicle = PlayerMngr->GetPlayer(i).GetVehicle();
+				for (int loop = 0; loop < 5; loop++) {
+					PlayerMngr->GetPlayer(i).SetInventory(loop, Vehicle->GetInventoryXSize(loop), Vehicle->GetInventoryYSize(loop));
+				}
+				{
+					if (Vehicle->Get_Gunsize() >= 2) {
+						PlayerMngr->GetPlayer(i).FillInventory(0, Vehicle->GetGun()[0].GetAmmoSpec(0), 0, 0, PlayerMngr->GetPlayer(i).GetInventoryXSize(0) / 2, PlayerMngr->GetPlayer(i).GetInventoryYSize(0));
+						PlayerMngr->GetPlayer(i).FillInventory(0, Vehicle->GetGun()[1].GetAmmoSpec(0), PlayerMngr->GetPlayer(i).GetInventoryXSize(0) / 2, 0, PlayerMngr->GetPlayer(i).GetInventoryXSize(0), PlayerMngr->GetPlayer(i).GetInventoryYSize(0));
+					}
+					else {
+						PlayerMngr->GetPlayer(i).FillInventory(0, Vehicle->GetGun()[0].GetAmmoSpec(0), 0, 0, PlayerMngr->GetPlayer(i).GetInventoryXSize(0), PlayerMngr->GetPlayer(i).GetInventoryYSize(0));
+					}
+					PlayerMngr->GetPlayer(i).FillInventory(1, Vehicle->GetGun()[0].GetAmmoSpec(0), 0, 0, PlayerMngr->GetPlayer(i).GetInventoryXSize(1), 6);
+				}
+				{
+					PlayerMngr->GetPlayer(i).FillInventory(2, Vehicle->GetTrackPtr(), 0, 0, PlayerMngr->GetPlayer(i).GetInventoryXSize(2), PlayerMngr->GetPlayer(i).GetInventoryYSize(2));
+					PlayerMngr->GetPlayer(i).FillInventory(3, Vehicle->GetTrackPtr(), 0, 0, PlayerMngr->GetPlayer(i).GetInventoryXSize(3), PlayerMngr->GetPlayer(i).GetInventoryYSize(3));
+				}
+				{
+					auto& iData = ItemDataControl::Instance()->GetData();
+					auto Select = std::find_if(iData.begin(), iData.end(), [&](const std::shared_ptr<ItemData>& d) {return (d->GetPath().find("DieselMiniTank") != std::string::npos); });
+					if (Select != iData.end()) {
+						for (int x = 0; x < 5; x++) {
+							PlayerMngr->GetPlayer(i).PutInventory(4, x * 2, 0, *Select, -1, false);
+						}
+					}
+				}
+				this->m_AICtrl[i]->Init(this->m_BackGround, (PlayerID)i);
+			}
+			this->m_HPBuf = (float)PlayerMngr->GetPlayer(0).GetVehicle()->GetHP();
+			this->m_ScoreBuf = PlayerMngr->GetPlayer(0).GetScore();
+			//Cam
+			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
+			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
+			//サウンド
+			auto* BattleResourceMngr = CommonBattleResource::Instance();
+			BattleResourceMngr->Set();
+			//
+			this->m_DamageEvents.clear();
+			this->m_NetWorkBrowser.Init();
+			this->m_InventoryClass.Init();
+		}
 		bool			MAINLOOP::Update_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
@@ -57,7 +202,7 @@ namespace FPS_n2 {
 #endif // DEBUG
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
-				SetMousePoint(DXDraw::Instance()->m_DispXSize / 2, DXDraw::Instance()->m_DispYSize / 2);
+				SetMousePoint(DXDraw::Instance()->GetDispXSize() / 2, DXDraw::Instance()->GetDispYSize() / 2);
 				SE->Get((int)SoundEnum::Environment).Play(0, DX_PLAYTYPE_LOOP, TRUE);
 				this->m_fov_base = DrawParts->GetMainCamera().GetCamFov();
 			}
@@ -72,7 +217,7 @@ namespace FPS_n2 {
 
 				pp_x = std::clamp(Pad->GetLS_Y() * cam_per*0.5f, -0.2f, 0.2f);
 				pp_y = std::clamp(Pad->GetLS_X() * cam_per*0.5f, -0.2f, 0.2f);
-				MyInput.SetInputStart(pp_x, pp_y, Vector3DX::zero());
+				MyInput.SetInputStart(pp_x, pp_y);
 				MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
 				MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
 				MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
@@ -105,7 +250,8 @@ namespace FPS_n2 {
 				this->m_NetWorkBrowser.FirstExecute(MyInput, ans);
 				//クライアント
 				if (this->m_NetWorkBrowser.GetIsClient()) {
-					for (auto& v : this->m_vehicle_Pool) {
+					for (int i = 0; i < Vehicle_num; i++) {
+						auto& v = PlayerMngr->GetPlayer(i).GetVehicle();
 						if (v->GetMyPlayerID() == GetMyPlayerID()) {
 							v->SetCharaType(CharaTypeID::Mine);
 						}
@@ -131,7 +277,8 @@ namespace FPS_n2 {
 							}
 							v->SetInput(tmp.Input, isready, true);
 							bool override_true = true;
-							for (auto& v2 : this->m_vehicle_Pool) {
+							for (int i2 = 0; i2 < Player_num; i2++) {
+								auto& v2 = PlayerMngr->GetPlayer(i2).GetVehicle();
 								if ((v != v2) && ((v->GetMove().pos - v2->GetMove().pos).magnitude() <= 10.f*Scale_Rate)) {
 									override_true = false;
 									break;
@@ -171,7 +318,8 @@ namespace FPS_n2 {
 				this->m_NetWorkBrowser.LateExecute();
 				this->m_InventoryClass.LateExecute();
 				//ダメージイベント
-				for (auto& v : this->m_vehicle_Pool) {
+				for (int i = 0; i < Player_num; i++) {
+					auto& v = PlayerMngr->GetPlayer(i).GetVehicle();
 					for (int j = 0; j < this->m_DamageEvents.size(); j++) {
 						if (v->SetDamageEvent(this->m_DamageEvents[j])) {
 							std::swap(this->m_DamageEvents.back(), this->m_DamageEvents[j]);
@@ -186,7 +334,8 @@ namespace FPS_n2 {
 				auto StartPos = Vehicle->GetGunMuzzlePos(0);
 				auto EndPos = StartPos + Vehicle->GetGunMuzzleVec(0) * 100.f*Scale_Rate;
 				this->m_BackGround->CheckLinetoMap(StartPos, &EndPos, true, false);
-				for (auto& v : this->m_vehicle_Pool) {
+				for (int i = 0; i < Player_num; i++) {
+					auto& v = PlayerMngr->GetPlayer(i).GetVehicle();
 					if (v->GetMyPlayerID() == GetMyPlayerID()) { continue; }
 					if (v->RefreshCol(StartPos, EndPos, 10.f*Scale_Rate)) {
 						v->GetColNearestInAllMesh(StartPos, &EndPos);
@@ -202,7 +351,6 @@ namespace FPS_n2 {
 					if (item) {
 						auto& ip = (std::shared_ptr<ItemClass>&)(*item);
 						if (!ip->IsActive()) {
-							ip->SetVehPool(&m_vehicle_Pool);
 							ip->SetActive(true);
 						}
 					}
@@ -216,7 +364,7 @@ namespace FPS_n2 {
 			ObjMngr->ExecuteObject();
 			//弾の更新
 			{
-				m_Concussion = std::max(m_Concussion - 1.f / FPS, 0.f);
+				m_Concussion = std::max(m_Concussion - 1.f / DrawParts->GetFps(), 0.f);
 
 				int loop = 0;
 				while (true) {
@@ -239,7 +387,8 @@ namespace FPS_n2 {
 							ColRes |= this->m_BackGround->GetWallCol(repos_tmp, &pos_tmp, &norm_tmp, a->GetCaliberSize());
 							bool is_HitAll = false;
 							auto& v = *ObjMngr->GetObj((int)ObjType::Vehicle, a->GetShootedID());
-							for (auto& tgt : this->m_vehicle_Pool) {
+							for (int i = 0; i < Player_num; i++) {
+								auto& tgt = PlayerMngr->GetPlayer(i).GetVehicle();
 								if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }
 								auto res = tgt->CheckAmmoHit(a.get(), v->GetMove().pos);
 								is_HitAll |= res.first;
@@ -291,9 +440,10 @@ namespace FPS_n2 {
 			}
 			//木の更新
 			{
-				for (auto& v : this->m_vehicle_Pool) {
+				for (int i = 0; i < Player_num; i++) {
+					auto& v = PlayerMngr->GetPlayer(i).GetVehicle();
 					this->m_BackGround->CheckTreetoSquare(v->GetSquarePos(0), v->GetSquarePos(2), v->GetSquarePos(3), v->GetSquarePos(1), v->GetMove().pos,
-						(v->GetMove().pos - v->GetMove().repos).magnitude() * 60.f / FPS);
+						(v->GetMove().pos - v->GetMove().repos).magnitude() * 60.f / DrawParts->GetFps());
 				}
 			}
 			//ハインド
@@ -329,7 +479,7 @@ namespace FPS_n2 {
 			//UIパラメーター
 			{
 				this->m_UIclass.SetIntParam(1, (int)this->m_ScoreBuf);
-				this->m_ScoreBuf += std::clamp((PlayerMngr->GetPlayer(0).GetScore() - this->m_ScoreBuf)*100.f, -5.f, 5.f) / FPS;
+				this->m_ScoreBuf += std::clamp((PlayerMngr->GetPlayer(0).GetScore() - this->m_ScoreBuf)*100.f, -5.f, 5.f) / DrawParts->GetFps();
 
 				this->m_UIclass.SetIntParam(2, 1);
 
@@ -337,7 +487,7 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(3, (int)Vehicle->GetHP());
 				this->m_UIclass.SetIntParam(4, (int)Vehicle->GetHPMax());
 				this->m_UIclass.SetIntParam(5, (int)(this->m_HPBuf + 0.5f));
-				this->m_HPBuf += std::clamp((Vehicle->GetHP() - this->m_HPBuf)*100.f, -500.f, 500.f) / FPS;
+				this->m_HPBuf += std::clamp((Vehicle->GetHP() - this->m_HPBuf)*100.f, -500.f, 500.f) / DrawParts->GetFps();
 
 				this->m_UIclass.SetIntParam(6, (int)Vehicle->GetFuel());
 				this->m_UIclass.SetIntParam(7, (int)Vehicle->GetFuelMax());
@@ -364,6 +514,19 @@ namespace FPS_n2 {
 			DebugParts->SetPoint("Execute=0.7ms");
 #endif // DEBUG
 			return true;
+		}
+		void			MAINLOOP::Dispose_Sub(void) noexcept {
+			auto* ObjMngr = ObjectManager::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto* BattleResourceMngr = CommonBattleResource::Instance();
+			BattleResourceMngr->Dispose();
+
+			this->m_NetWorkBrowser.Dispose();
+			this->m_InventoryClass.Dispose();
+			EffectControl::Dispose();
+			PlayerMngr->Dispose();
+			ObjMngr->DeleteAll();
+			this->m_BackGround->Dispose();
 		}
 	};
 };

@@ -4,9 +4,7 @@
 #include "Scene/MainSceneLoader.hpp"
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
-	//SetValidMousePointerWindowOutClientAreaMoveFlag(FALSE);
 	DXDraw::Create();						//汎用
-	//MV1SetLoadModelUsePackDraw(TRUE);
 #ifdef DEBUG
 	auto* DebugParts = DebugClass::Instance();		//デバッグ
 #endif // DEBUG
@@ -14,7 +12,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	DrawParts->Init();
 	SetMainWindowText("Phantom of the Bunker");						//タイトル
+	//
 	FPS_n2::Sceneclass::PlayerManager::Create();
+	FPS_n2::Sceneclass::CommonBattleResource::Create();
+
+	FPS_n2::Sceneclass::VehDataControl::Create();
+	FPS_n2::Sceneclass::ItemDataControl::Create();
 	//シーン
 	auto MAINLOOPLOADERscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOPLOADER>();
 	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();
@@ -32,7 +35,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			if (!DrawParts->FirstExecute()) {
 				return 0;
 			}
-			FPS = GetFrameRate();
 #ifdef DEBUG
 			clsDx();
 			DebugParts->SetStartPoint();

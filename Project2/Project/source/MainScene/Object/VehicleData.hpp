@@ -1,6 +1,6 @@
 #pragma once
 #include	"../../Header.hpp"
-#include "../../MainScene/Object/AmmoData.hpp"
+#include "../../MainScene/Object/ItemData.hpp"
 #include "../../MainScene/BackGround/BackGround.hpp"
 
 namespace FPS_n2 {
@@ -55,7 +55,7 @@ namespace FPS_n2 {
 					this->m_frame[2].Set(child2_num, obj);
 				}
 			}
-			void			Set(int mdata, const std::vector<std::shared_ptr<ItemData>>& ItemDatas) noexcept {
+			void			Set(int mdata) noexcept {
 				this->m_name = getparams::_str(mdata);
 				this->m_loadTime = getparams::_float(mdata);
 				this->m_Shot_Sound = getparams::_int(mdata);//サウンド
@@ -69,7 +69,8 @@ namespace FPS_n2 {
 						break;
 					}
 					auto RIGHT = getparams::getright(stp);
-					for (const auto& d : ItemDatas) {
+					auto& iData = ItemDataControl::Instance()->GetData();
+					for (const auto& d : iData) {
 						if (d->GetPath().find(RIGHT) != std::string::npos) {
 							this->m_AmmoSpec.emplace_back((const std::shared_ptr<AmmoData>&)d);
 							break;
@@ -79,7 +80,10 @@ namespace FPS_n2 {
 			}
 		};
 		//戦車データ
-		class VehDataControl {
+		class VehDataControl : public SingletonBase<VehDataControl> {
+		private:
+			friend class SingletonBase<VehDataControl>;
+		private:
 		public:
 			class VhehicleData {
 				typedef std::pair<std::shared_ptr<GraphHandle>, int> ViewAndModule;
@@ -198,7 +202,7 @@ namespace FPS_n2 {
 					MV1::Load("data/tank/" + this->m_name + "/col.mv1", &this->m_DataCol);
 				}
 				//メイン読み込み
-				void			Set(const std::vector<std::shared_ptr<ItemData>>& ItemDatas) noexcept {
+				void			Set() noexcept {
 					//固有
 					this->m_DownInWater = 0.f;
 					for (int i = 0; i < this->m_DataObj.mesh_num(); i++) {
@@ -341,7 +345,8 @@ namespace FPS_n2 {
 						this->m_MaxTurretRad = deg2rad(getparams::_float(mdata));
 						{
 							auto RIGHT = getparams::_str(mdata);
-							for (const auto& d : ItemDatas) {
+							auto& iData = ItemDataControl::Instance()->GetData();
+							for (const auto& d : iData) {
 								if (d->GetPath().find(RIGHT) != std::string::npos) {
 									m_TrackPtr = d;
 									break;
@@ -358,7 +363,7 @@ namespace FPS_n2 {
 						}
 						{
 							for (auto& g : this->m_GunFrameData) {
-								g.Set(mdata, ItemDatas);
+								g.Set(mdata);
 							}
 						}
 						FileRead_close(mdata);
@@ -388,9 +393,9 @@ namespace FPS_n2 {
 				}
 				DirNames.clear();
 			}
-			void	Set(const std::vector<std::shared_ptr<ItemData>>& ItemDatas) noexcept {
+			void	Set() noexcept {
 				for (auto& t : this->vehc_data) {
-					t.Set(ItemDatas);
+					t.Set();
 				}
 			}
 			void	Dispose() noexcept {
@@ -459,6 +464,7 @@ namespace FPS_n2 {
 				this->m_ShotRadAdd.Set(0, 0, 0);
 			}
 			bool		Execute(bool key, bool ammoIn, float timeMul, bool playSound) noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				auto* SE = SoundPool::Instance();
 				bool isshot = (key && ammoIn && this->m_loadtimer == 0);
 				//射撃
@@ -474,13 +480,13 @@ namespace FPS_n2 {
 					if (playSound) { SE->Get((int)SoundEnum::Tank_Reload).Play(GetReloadSound()); }
 				}
 				if (ammoIn) {
-					this->m_loadtimer = std::max(this->m_loadtimer - 1.f / FPS, 0.f);
+					this->m_loadtimer = std::max(this->m_loadtimer - 1.f / DrawParts->GetFps(), 0.f);
 				}
 				else {
 					this->m_loadtimer = this->m_GunSpec->GetLoadTime()*timeMul;
 				}
-				this->m_Recoil = std::max(this->m_Recoil - 1.f / FPS, 0.f);
-				this->m_React = std::max(this->m_React - 1.f / FPS, 0.f);
+				this->m_Recoil = std::max(this->m_Recoil - 1.f / DrawParts->GetFps(), 0.f);
+				this->m_React = std::max(this->m_React - 1.f / DrawParts->GetFps(), 0.f);
 				return isshot;
 			}
 			void		Dispose(void) noexcept {

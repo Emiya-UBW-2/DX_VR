@@ -20,7 +20,6 @@ namespace FPS_n2 {
 		private:
 			bool											m_IsHardMode{false};
 
-			bool											m_IsFirstLoad{true};			//共通リソースをロードしたか
 			std::shared_ptr<BackGroundClassMain>			m_BackGround;					//BG
 
 			UIClass											m_UIclass;						//UI関連
@@ -60,18 +59,19 @@ namespace FPS_n2 {
 				}
 
 				bool Update(int Aim, bool skip) {
+					auto* DrawParts = DXDraw::Instance();
 					float diff = ((float)Aim - m_Point);
 					if (skip) { diff = 0.f; }
 					if (diff <= 0.f) {
 						m_Point = (float)Aim;
 					}
 					else {
-						m_Point += 1.f / FPS * ((float)Aim / 4.f);
+						m_Point += 1.f / DrawParts->GetFps() * ((float)Aim / 4.f);
 					}
 
 					Easing(&m_Up, 0.f, 0.9f, EasingType::OutExpo);
 					if (abs((float)Aim - m_Point) > 1.f) {
-						m_Timer += 1.f / FPS;
+						m_Timer += 1.f / DrawParts->GetFps();
 						if (m_Timer > 0.4f) {
 							m_Timer -= 0.4f;
 							m_Up = 1.f;

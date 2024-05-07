@@ -15,10 +15,11 @@ namespace FPS_n2 {
 					this->m_Buffer = (float)this->m_Now;
 				}
 				void			SetGaugeParam(int value, int Max) {
+					auto* DrawParts = DXDraw::Instance();
 					this->m_Now = value;
 					this->m_Max = Max;
 					float Limit = (float)(this->m_Max / 5)*1.5f;
-					this->m_Buffer += std::clamp((float)(this->m_Now - this->m_Buffer)*(float)(this->m_Max / 5), -Limit, Limit) / FPS;
+					this->m_Buffer += std::clamp((float)(this->m_Now - this->m_Buffer)*(float)(this->m_Max / 5), -Limit, Limit) / DrawParts->GetFps();
 				}
 				void			DrawGauge(int xp1, int yp1, int xp2, int yp2,
 										  COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) {
@@ -81,19 +82,19 @@ namespace FPS_n2 {
 									50.0 + ((50.0 - 15.0*2.0)*1.0) + 15.0 + deg,
 									CircleObj->get(),
 									50.0 + 15.0 + deg,
-									((double)(DrawParts->m_DispYSize) / 1080.0));
+									((double)(DrawParts->GetDispYSize()) / 1080.0));
 					SetDrawBright(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
 					DrawCircleGauge(xp1 + y_r(256), yp1,
 									50.0 + ((50.0 - 15.0*2.0)*(double)std::max(per, perbuf)) + 15.0 + deg,
 									CircleObj->get(),
 									50.0 + ((50.0 - 15.0*2.0)*(double)std::min(per, perbuf)) + 15.0 + deg,
-									((double)(DrawParts->m_DispYSize) / 1080.0));
+									((double)(DrawParts->GetDispYSize()) / 1080.0));
 					SetDrawBright(Color.r, Color.g, Color.b);
 					DrawCircleGauge(xp1 + y_r(256), yp1,
 									50.0 + ((50.0 - 15.0*2.0)*(double)std::min(per, perbuf)) + 15.0 + deg,
 									CircleObj->get(),
 									50.0 + 15.0 + deg,
-									((double)(DrawParts->m_DispYSize) / 1080.0));
+									((double)(DrawParts->GetDispYSize()) / 1080.0));
 					SetDrawBright(255, 255, 255);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
@@ -112,19 +113,19 @@ namespace FPS_n2 {
 						(50.0 - 15.0*2.0) + 15.0 + deg,
 									CircleObj->get(),
 									(double)((50.0 - 15.0*2.0)*(1.0 - 1.0)) + 15.0 + deg,
-									((double)(DrawParts->m_DispYSize) / 1080.0));
+									((double)(DrawParts->GetDispYSize()) / 1080.0));
 					SetDrawBright(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
 					DrawCircleGauge(xp1 - y_r(256), yp1,
 						(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
 									CircleObj->get(),
 									(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::max(per, perbuf))) + 15.0 + deg,
-									((double)(DrawParts->m_DispYSize) / 1080.0));
+									((double)(DrawParts->GetDispYSize()) / 1080.0));
 					SetDrawBright(Color.r, Color.g, Color.b);
 					DrawCircleGauge(xp1 - y_r(256), yp1,
 						(50.0 - 15.0*2.0) + 15.0 + deg,
 									CircleObj->get(),
 									(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
-									((double)(DrawParts->m_DispYSize) / 1080.0));
+									((double)(DrawParts->GetDispYSize()) / 1080.0));
 					SetDrawBright(255, 255, 255);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
@@ -266,7 +267,7 @@ namespace FPS_n2 {
 					if (per > 0.f) {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(192.f*per), 0, 96));
 
-						OIL_Graph.DrawExtendGraph(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, true);
+						OIL_Graph.DrawExtendGraph(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), true);
 
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 					}
@@ -289,8 +290,8 @@ namespace FPS_n2 {
 				//ポイント増加
 				{
 					int xp1, yp1;
-					xp1 = DrawParts->m_DispXSize / 2;
-					yp1 = DrawParts->m_DispYSize / 2;
+					xp1 = DrawParts->GetDispXSize() / 2;
+					yp1 = DrawParts->GetDispYSize() / 2;
 
 					if (intParam[5] > 0) {
 						ScoreAdd.at(m_ScoreAddSel) = std::make_pair(intParam[5], 2.f);
@@ -304,7 +305,7 @@ namespace FPS_n2 {
 								float per = std::powf(2.f - s.second, 2.f);
 								SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - per)), 0, 255));
 								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_r(per*96.f), GetColor(206, 0, 0), Gray75, "+%d", s.first);
-								s.second = std::max(s.second - 1.f / FPS, 0.f);
+								s.second = std::max(s.second - 1.f / DrawParts->GetFps(), 0.f);
 							}
 						}
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
@@ -315,7 +316,7 @@ namespace FPS_n2 {
 					int xp1, yp1;
 					//体力
 					xp1 = y_r(24);
-					yp1 = DrawParts->m_DispYSize - y_r(96);
+					yp1 = DrawParts->GetDispYSize() - y_r(96);
 
 					m_GaugeParam[0].DrawGauge(
 						xp1, yp1, xp1 + y_r(300), yp1 + y_r(18),
@@ -339,8 +340,8 @@ namespace FPS_n2 {
 					float rad = deg2rad(deg);
 					int xp1, yp1;
 					{
-						xp1 = DrawParts->m_DispXSize / 2 + intParam[0] - y_r(300.f*std::cos(rad));
-						yp1 = DrawParts->m_DispYSize / 2 + intParam[1] - y_r(300.f*std::sin(rad)) - y_r(18) / 2;
+						xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] - y_r(300.f*std::cos(rad));
+						yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] - y_r(300.f*std::sin(rad)) - y_r(18) / 2;
 						m_GaugeParam[1].DrawGaugeCircleLeft(xp1, yp1,
 															GetColorU8(255, 255, 255, 255),
 															GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(64, 64, 255, 255),
@@ -349,8 +350,8 @@ namespace FPS_n2 {
 
 						if (intParam[8] > 0) {
 							SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*0.4f), 0, 255));
-							xp1 = DrawParts->m_DispXSize / 2 + intParam[0] - y_r(300.f*std::cos(deg2rad(-45) + rad));
-							yp1 = DrawParts->m_DispYSize / 2 + intParam[1] - y_r(300.f*std::sin(deg2rad(-45) + rad));
+							xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] - y_r(300.f*std::cos(deg2rad(-45) + rad));
+							yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] - y_r(300.f*std::sin(deg2rad(-45) + rad));
 
 							this->Armer_Graph.DrawRotaGraph(xp1, yp1, (float)(y_r(50)) / 100.f, 0.f, true);
 							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
@@ -360,8 +361,8 @@ namespace FPS_n2 {
 						}
 					}
 					{
-						xp1 = DrawParts->m_DispXSize / 2 + intParam[0] + y_r(300.f*std::cos(rad));
-						yp1 = DrawParts->m_DispYSize / 2 + intParam[1] + y_r(300.f*std::sin(rad)) - y_r(18) / 2;
+						xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] + y_r(300.f*std::cos(rad));
+						yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] + y_r(300.f*std::sin(rad)) - y_r(18) / 2;
 						m_GaugeParam[2].DrawGaugeCircleRight(xp1, yp1,
 															 GetColorU8(255, 255, 255, 255),
 															 GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(64, 64, 255, 255),
@@ -378,8 +379,8 @@ namespace FPS_n2 {
 						float rad = deg2rad(deg);
 						int xp1, yp1;
 						{
-							xp1 = DrawParts->m_DispXSize / 2 + intParam[0] - y_r(300.f*std::cos(rad));
-							yp1 = DrawParts->m_DispYSize / 2 + intParam[1] - y_r(300.f*std::sin(rad)) - y_r(18) / 2;
+							xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] - y_r(300.f*std::cos(rad));
+							yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] - y_r(300.f*std::sin(rad)) - y_r(18) / 2;
 							m_GaugeParam[5 + 3].DrawGaugeCircleLeft(xp1, yp1,
 																	GetColorU8(255, 255, 255, 64),
 																	GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255),
@@ -387,8 +388,8 @@ namespace FPS_n2 {
 																	&this->Gauge_Aim_Graph, deg, Per);
 						}
 						{
-							xp1 = DrawParts->m_DispXSize / 2 + intParam[0] + y_r(300.f*std::cos(rad));
-							yp1 = DrawParts->m_DispYSize / 2 + intParam[1] + y_r(300.f*std::sin(rad)) - y_r(18) / 2;
+							xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] + y_r(300.f*std::cos(rad));
+							yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] + y_r(300.f*std::sin(rad)) - y_r(18) / 2;
 							m_GaugeParam[5 + 3 + 1].DrawGaugeCircleRight(xp1, yp1,
 																		 GetColorU8(255, 255, 255, 64),
 																		 GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255),
@@ -402,8 +403,8 @@ namespace FPS_n2 {
 					if (m_GaugeParam[2].GetGauge() < m_GaugeParam[2].GetGaugeMax() * 3 / 10) {
 						int xp1, yp1;
 						//体力
-						xp1 = DrawParts->m_DispXSize / 2;
-						yp1 = DrawParts->m_DispYSize / 2 + y_r(100);
+						xp1 = DrawParts->GetDispXSize() / 2;
+						yp1 = DrawParts->GetDispYSize() / 2 + y_r(100);
 
 						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1, Red, Gray75,
 																			  LocalizePool::Instance()->Get(301));
@@ -413,8 +414,8 @@ namespace FPS_n2 {
 				//タイム
 				if (floatParam[1] > 0) {
 					int xp1, yp1;
-					xp1 = DrawParts->m_DispXSize / 2;
-					yp1 = DrawParts->m_DispYSize / 2 - y_r(64);
+					xp1 = DrawParts->GetDispXSize() / 2;
+					yp1 = DrawParts->GetDispYSize() / 2 - y_r(64);
 					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(48), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, White, Gray75, "%d:%05.2f",
 						(int)(floatParam[1] / 60.f),
 																		   (float)((int)(floatParam[1]) % 60) + (floatParam[1] - (float)((int)(floatParam[1])))
@@ -447,7 +448,7 @@ namespace FPS_n2 {
 						SetDrawBlendMode(DX_BLENDMODE_ADD, std::clamp((int)(255.f*sin(deg2rad(ULTTimer))), 0, 255));
 						ULT_Graph.DrawRotaGraph(xp1, yp1, 0.6f *(float)y_r(100) / 100.f, rad, true);
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-						ULTTimer += 15.f * 60.f / FPS;
+						ULTTimer += 15.f * 60.f / DrawParts->GetFps();
 					}
 				}
 				//ゲージ

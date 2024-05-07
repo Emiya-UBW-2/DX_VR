@@ -22,7 +22,8 @@ namespace FPS_n2 {
 			bool ai_reload{ false };
 			int ai_phase{ 0 };
 			std::vector<int> wayp_pre{ 0 };
-			int ai_AimTarget{ 0 };
+			PlayerID ai_AimTarget{0};
+			PlayerID ai_MyID{0};
 
 			AI(void) noexcept {
 				wayp_pre.resize(6);
@@ -72,9 +73,6 @@ namespace FPS_n2 {
 
 		class AIControl {
 			AI									cpu_do;								//AI用
-			std::shared_ptr<VehicleClass>		MyVeh;
-
-			std::vector<std::shared_ptr<VehicleClass>>* vehicle_Pool{ nullptr };
 			std::shared_ptr<BackGroundClass>			m_BackGround;				//BG
 			float								m_RepairCnt{ 0.f };
 			float								m_RepairCnt2{ 0.f };
@@ -109,12 +107,17 @@ namespace FPS_n2 {
 		public:
 			//AI操作
 			void SetNextWaypoint(const Vector3DX& vec_z) {
-				int now = Get_next_waypoint(this->cpu_do.wayp_pre, this->MyVeh->GetMove().pos, vec_z);
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& MyVeh = PlayerMngr->GetPlayer(this->cpu_do.ai_MyID).GetVehicle();
+				int now = Get_next_waypoint(this->cpu_do.wayp_pre, MyVeh->GetMove().pos, vec_z);
 				if (now != -1) {
 					this->cpu_do.Set_wayp_pre(now);
 				}
 			}
 			void AI_move(InputControl* MyInput) noexcept {
+				auto* DrawParts = DXDraw::Instance();
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& MyVeh = PlayerMngr->GetPlayer(this->cpu_do.ai_MyID).GetVehicle();
 				bool W_key{ false };
 				bool A_key{ false };
 				bool S_key{ false };
@@ -160,14 +163,15 @@ namespace FPS_n2 {
 
 					bool ans = false;
 					if (this->cpu_do.ai_phase == 0) {
-						for (auto& tgt : *vehicle_Pool) {
+						for (int i = 0; i < Player_num; i++) {
+							auto& tgt = PlayerMngr->GetPlayer(i).GetVehicle();
 							if (MyVeh == tgt) { continue; }
 							Vector3DX vec_tmp;
 							if (CheckCanLookTarget(tgt, &vec_tmp)) {
 								if (vec_to == Vector3DX::zero()) { vec_to = vec_tmp; } //基準の作成
 								if (vec_to.magnitude() >= vec_tmp.magnitude()) {
 									vec_to = vec_tmp;
-									this->cpu_do.ai_AimTarget = (int)(&tgt - &vehicle_Pool->front());
+									this->cpu_do.ai_AimTarget = (PlayerID)i;
 									this->cpu_do.LastFindPoint = tgt->GetMove().pos;
 									ans = true;
 								}
@@ -176,19 +180,19 @@ namespace FPS_n2 {
 					}
 					else {
 						{
-							auto& tgt = vehicle_Pool->at(this->cpu_do.ai_AimTarget);
+							auto& tgt = PlayerMngr->GetPlayer(this->cpu_do.ai_AimTarget).GetVehicle();
 							Vector3DX StartPos = MyVeh->Get_EyePos_Base();
 							Vector3DX vec_to2 = tgt->GetMove().pos - StartPos;
-							for (auto& tgt2 : *vehicle_Pool) {
+							for (int i = 0; i < Player_num; i++) {
+								auto& tgt2 = PlayerMngr->GetPlayer(i).GetVehicle();
 								if (MyVeh == tgt2) { continue; }
-								auto Index = (int)(&tgt2 - &vehicle_Pool->front());
-								if (Index == this->cpu_do.ai_AimTarget) { continue; }
+								if (i == this->cpu_do.ai_AimTarget) { continue; }
 								Vector3DX vec_tmp;
 								if (CheckCanLookTarget(tgt2, &vec_tmp)) {
 									if (vec_to2 == Vector3DX::zero()) { vec_to2 = vec_tmp; } //基準の作成
 									if (vec_to2.magnitude() > vec_tmp.magnitude()) {
 										vec_to2 = vec_tmp;
-										this->cpu_do.ai_AimTarget = Index;
+										this->cpu_do.ai_AimTarget = (PlayerID)i;
 										this->cpu_do.LastFindPoint = tgt2->GetMove().pos;
 										ans = true;
 									}
@@ -197,7 +201,7 @@ namespace FPS_n2 {
 						}
 
 
-						auto& tgt = vehicle_Pool->at(this->cpu_do.ai_AimTarget);
+						auto& tgt = PlayerMngr->GetPlayer(this->cpu_do.ai_AimTarget).GetVehicle();
 						Vector3DX vec_tmp;
 						if (CheckCanLookTarget(tgt, &vec_tmp)) {
 							this->cpu_do.LastFindPoint = tgt->GetMove().pos;
@@ -216,7 +220,7 @@ namespace FPS_n2 {
 						}
 					}
 					if (!ans) {
-						this->cpu_do.ai_time_find = std::max(this->cpu_do.ai_time_find - 1.f / FPS, 0.f);
+						this->cpu_do.ai_time_find = std::max(this->cpu_do.ai_time_find - 1.f / DrawParts->GetFps(), 0.f);
 						if (this->cpu_do.ai_time_find == 0.f) {
 							this->cpu_do.ai_AimTarget = -1;
 							this->cpu_do.ai_phase = 0;
@@ -229,7 +233,7 @@ namespace FPS_n2 {
 						}
 						this->cpu_do.ai_time_find = 10.f;
 					}
-					this->cpu_do.ai_time_turn = std::max(this->cpu_do.ai_time_turn - 1.f / FPS, 0.f);
+					this->cpu_do.ai_time_turn = std::max(this->cpu_do.ai_time_turn - 1.f / DrawParts->GetFps(), 0.f);
 				}
 				//this->cpu_do.ai_phase = 0;
 				//
@@ -239,7 +243,7 @@ namespace FPS_n2 {
 					W_key = true;
 
 					//向き指定
-					vec_to = m_BackGround->GetWayPoint()[this->cpu_do.wayp_pre.front()] - this->MyVeh->GetMove().pos;
+					vec_to = m_BackGround->GetWayPoint()[this->cpu_do.wayp_pre.front()] - MyVeh->GetMove().pos;
 					vec_to.y = (0.f);
 
 					vec_z = MyVeh->GetMove().mat.zvec();
@@ -276,7 +280,7 @@ namespace FPS_n2 {
 					auto view_yrad = std::atan2f(cost, sint); //cos取得2D
 
 					if (this->cpu_do.ai_time_tankback_ing > 0.f && true) {//無効化x
-						this->cpu_do.ai_time_tankback_ing -= 1.f / FPS;
+						this->cpu_do.ai_time_tankback_ing -= 1.f / DrawParts->GetFps();
 						W_key = false;
 						S_key = true;
 						A_key = (GetRand(100) > 50);
@@ -291,7 +295,7 @@ namespace FPS_n2 {
 							}
 						}
 						if (MyVeh->Getvec_real().magnitude() <= MyVeh->GetMove().vec.magnitude() *(0.5f)) {
-							this->cpu_do.ai_time_tankback += 1.f / FPS;
+							this->cpu_do.ai_time_tankback += 1.f / DrawParts->GetFps();
 						}
 						else {
 							this->cpu_do.ai_time_tankback = 0.f;
@@ -409,7 +413,7 @@ namespace FPS_n2 {
 					}
 					//
 					{
-						auto& tgt = vehicle_Pool->at(this->cpu_do.ai_AimTarget);
+						auto& tgt = PlayerMngr->GetPlayer(this->cpu_do.ai_AimTarget).GetVehicle();
 						Vector3DX StartPos = MyVeh->Get_EyePos_Base();
 						Vector3DX vec_to2 = tgt->GetMove().pos - StartPos;
 						if (vec_to2.magnitude() <= 8.f*Scale_Rate) {
@@ -420,7 +424,7 @@ namespace FPS_n2 {
 
 					//スタック回避
 					if (this->cpu_do.ai_time_tankback_ing > 0.f && true) {//無効化x
-						this->cpu_do.ai_time_tankback_ing -= 1.f / FPS;
+						this->cpu_do.ai_time_tankback_ing -= 1.f / DrawParts->GetFps();
 						W_key = !W_key;
 						S_key = !W_key;
 						A_key = (GetRand(100) > 50);
@@ -429,7 +433,7 @@ namespace FPS_n2 {
 					else {
 						this->cpu_do.ai_time_tankback_ing = 0.f;
 						if (MyVeh->Getvec_real().magnitude() <= MyVeh->GetMove().vec.magnitude() *(0.5f)) {
-							this->cpu_do.ai_time_tankback += 1.f / FPS;
+							this->cpu_do.ai_time_tankback += 1.f / DrawParts->GetFps();
 						}
 						else {
 							this->cpu_do.ai_time_tankback = 0.f;
@@ -506,7 +510,7 @@ namespace FPS_n2 {
 					}
 
 					//向き指定
-					vec_to = m_BackGround->GetWayPoint()[this->cpu_do.wayp_pre.front()] - this->MyVeh->GetMove().pos;
+					vec_to = m_BackGround->GetWayPoint()[this->cpu_do.wayp_pre.front()] - MyVeh->GetMove().pos;
 					vec_to.y = (0.f);
 
 					vec_z = MyVeh->GetMove().mat.zvec();
@@ -528,7 +532,7 @@ namespace FPS_n2 {
 					auto view_yrad = std::atan2f(cost, sint); //cos取得2D
 
 					if (this->cpu_do.ai_time_tankback_ing > 0.f && true) {//無効化x
-						this->cpu_do.ai_time_tankback_ing -= 1.f / FPS;
+						this->cpu_do.ai_time_tankback_ing -= 1.f / DrawParts->GetFps();
 						W_key = false;
 						S_key = true;
 						A_key = (GetRand(100) > 50);
@@ -543,7 +547,7 @@ namespace FPS_n2 {
 							}
 						}
 						if (MyVeh->Getvec_real().magnitude() <= MyVeh->GetMove().vec.magnitude() *(0.5f)) {
-							this->cpu_do.ai_time_tankback += 1.f / FPS;
+							this->cpu_do.ai_time_tankback += 1.f / DrawParts->GetFps();
 						}
 						else {
 							this->cpu_do.ai_time_tankback = 0.f;
@@ -577,7 +581,7 @@ namespace FPS_n2 {
 				//shotMain_Key = false;
 				//shotSub_Key = false;
 
-				MyInput->SetInputStart((float)x_m / 100.f, (float)y_m / 100.f, Vector3DX::zero());
+				MyInput->SetInputStart((float)x_m / 100.f, (float)y_m / 100.f);
 				MyInput->SetInputPADS(PADS::MOVE_W, W_key);
 				MyInput->SetInputPADS(PADS::MOVE_S, S_key);
 				MyInput->SetInputPADS(PADS::MOVE_A, A_key);
@@ -585,7 +589,6 @@ namespace FPS_n2 {
 				MyInput->SetInputPADS(PADS::SHOT, shotMain_Key);
 				MyInput->SetInputPADS(PADS::JUMP, shotSub_Key);
 				//生き返り
-				auto* PlayerMngr = PlayerManager::Instance();//todo:GetMyPlayerID()
 				if (!MyVeh->Get_alive()) {
 					if (m_RepairCnt > 30.f) {
 						m_RepairCnt = 0.f;
@@ -621,7 +624,7 @@ namespace FPS_n2 {
 
 					}
 					else {
-						m_RepairCnt += 1.f / FPS;
+						m_RepairCnt += 1.f / DrawParts->GetFps();
 					}
 					m_RepairCnt2 = 0;
 				}
@@ -635,13 +638,14 @@ namespace FPS_n2 {
 				}
 			}
 		public:
-			void Init(std::vector<std::shared_ptr<VehicleClass>>* vehiclePool_t, std::shared_ptr<BackGroundClass>& BackBround_t, const std::shared_ptr<VehicleClass>& MyVeh_t) noexcept {
-				vehicle_Pool = vehiclePool_t;
-				MyVeh = MyVeh_t;
+			void Init(std::shared_ptr<BackGroundClass>& BackBround_t, PlayerID ID) noexcept {
+				auto* PlayerMngr = PlayerManager::Instance();
+				this->cpu_do.ai_MyID = ID;
 				this->m_BackGround = BackBround_t;
+				auto& MyVeh = PlayerMngr->GetPlayer(this->cpu_do.ai_MyID).GetVehicle();
 
 				//AIの選択をリセット
-				int now = Get_next_waypoint(this->cpu_do.wayp_pre, this->MyVeh->GetMove().pos);
+				int now = Get_next_waypoint(this->cpu_do.wayp_pre, MyVeh->GetMove().pos);
 				this->cpu_do.Spawn((now != -1) ? now : 0);
 				m_RepairCnt = 0.f;
 			}
@@ -651,11 +655,13 @@ namespace FPS_n2 {
 			void Draw() noexcept {
 #ifdef DEBUG
 				return;
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& MyVeh = PlayerMngr->GetPlayer(this->cpu_do.ai_MyID).GetVehicle();
 				if (!MyVeh->Get_alive()) { return; }
-				if (MyVeh == vehicle_Pool->at(0)) { return; }
+				if (MyVeh->GetMyPlayerID() == 0) { return; }
 				cpu_do.Draw_Debug(&m_BackGround->GetWayPoint());
 				if (this->cpu_do.ai_phase == 1) {
-					auto& tgt = vehicle_Pool->at(this->cpu_do.ai_AimTarget);
+					auto& tgt = PlayerMngr->GetPlayer(this->cpu_do.ai_AimTarget).GetVehicle();
 					Vector3DX StartPos = MyVeh->Get_EyePos_Base() + Vector3DX::vget(0.f, 5.f*Scale_Rate, 0.f);
 					Vector3DX EndPos = tgt->GetMove().pos + Vector3DX::vget(0.f, 5.f*Scale_Rate, 0.f);
 

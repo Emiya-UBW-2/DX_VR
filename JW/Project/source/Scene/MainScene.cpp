@@ -10,50 +10,47 @@ namespace FPS_n2 {
 		//
 		void			MAINLOOP::Load_Sub(void) noexcept {
 			//ロード
-			if (m_IsFirstLoad) {
-				m_IsFirstLoad = false;
-				auto* PlayerMngr = PlayerManager::Instance();
-				auto* BattleResourceMngr = CommonBattleResource::Instance();
-				//BG
-				GunAnimManager::Instance()->Load("data/CharaAnime/");
-				//
-				BattleResourceMngr->Load();
-				//
-				this->m_AICtrl.resize(Chara_num);
-				for (int i = 1; i < Chara_num; i++) {
-					this->m_AICtrl[i] = std::make_shared<AIControl>();
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto* BattleResourceMngr = CommonBattleResource::Instance();
+			//BG
+			GunAnimManager::Instance()->Load("data/CharaAnime/");
+			//
+			BattleResourceMngr->Load();
+			//
+			this->m_AICtrl.resize(Chara_num);
+			for (int i = 1; i < Chara_num; i++) {
+				this->m_AICtrl[i] = std::make_shared<AIControl>();
+			}
+			//
+			this->m_UIclass.Load();
+			this->hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
+			this->guard_Graph = GraphHandle::Load("data/UI/battle_guard.bmp");
+			this->m_MiniMapScreen = GraphHandle::Make(y_r(128) * 2, y_r(128) * 2, true);
+			PlayerMngr->Init(Chara_num);
+			for (int i = 1; i < Chara_num; i++) {
+				BattleResourceMngr->LoadChara("Soldier", (PlayerID)i);
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
+				if (i == 1) {
+					MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME, -1.f);//身体ラグドール
+					MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
 				}
-				//
-				this->m_UIclass.Load();
-				this->hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
-				this->guard_Graph = GraphHandle::Load("data/UI/battle_guard.bmp");
-				this->m_MiniMapScreen = GraphHandle::Make(y_r(128) * 2, y_r(128) * 2, true);
-				PlayerMngr->Init(Chara_num);
-				for (int i = 1; i < Chara_num; i++) {
-					BattleResourceMngr->LoadChara("Soldier", (PlayerID)i);
-					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
-					if (i == 1) {
-						MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME, -1.f);//身体ラグドール
-						MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
-					}
-					else {
-						auto& Base = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1).GetChara();
-						c->GetRagDoll() = Base->GetRagDoll().Duplicate();
-						MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
-					}
-					c->Init_RagDollControl(c->GetObj());
+				else {
+					auto& Base = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1).GetChara();
+					c->GetRagDoll() = Base->GetRagDoll().Duplicate();
+					MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
 				}
+				c->Init_RagDollControl(c->GetObj());
+			}
 
-				std::string GunName;
-				for (int i = 1; i < gun_num; i++) {
-					if (!m_IsHardMode) {
-						GunName = "PCC_4";
-					}
-					else {
-						GunName = ULT_GUNName[GetRand((int)ULT_GUN::Max - 1)];
-					}
-					LoadGun(GunName.c_str(), (PlayerID)i, false, 0);
+			std::string GunName;
+			for (int i = 1; i < gun_num; i++) {
+				if (!m_IsHardMode) {
+					GunName = "PCC_4";
 				}
+				else {
+					GunName = ULT_GUNName[GetRand((int)ULT_GUN::Max - 1)];
+				}
+				LoadGun(GunName.c_str(), (PlayerID)i, false, 0);
 			}
 		}
 		void			MAINLOOP::Set_Sub(void) noexcept {
@@ -280,7 +277,7 @@ namespace FPS_n2 {
 							}
 						}
 						else {
-							m_PreEndTimer = std::max(m_PreEndTimer - 1.f / FPS, 0.f);
+							m_PreEndTimer = std::max(m_PreEndTimer - 1.f / DrawParts->GetFps(), 0.f);
 						}
 						if (m_PreEndTimer == 0.f) {
 							StartResult();
@@ -313,7 +310,7 @@ namespace FPS_n2 {
 #endif // DEBUG
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
-				SetMousePoint(DXDraw::Instance()->m_DispXSize / 2, DXDraw::Instance()->m_DispYSize / 2);
+				SetMousePoint(DXDraw::Instance()->GetDispXSize() / 2, DXDraw::Instance()->GetDispYSize() / 2);
 				m_ReadyTimer = 6.f;
 				SE->Get((int)SoundEnum::Env).Play(0, DX_PLAYTYPE_LOOP);
 				SE->Get((int)SoundEnum::Env2).Play(0, DX_PLAYTYPE_LOOP);
@@ -326,13 +323,13 @@ namespace FPS_n2 {
 				}
 			}
 			else {
-				m_ReadyTimer = std::max(m_ReadyTimer - 1.f / FPS, 0.f);
+				m_ReadyTimer = std::max(m_ReadyTimer - 1.f / DrawParts->GetFps(), 0.f);
 				if (m_ReadyTimer == 0.f && Chara->IsAlive()) {
 					if (!m_IsHardMode) {
-						m_Timer = std::max(m_Timer - 1.f / FPS, 0.f);
+						m_Timer = std::max(m_Timer - 1.f / DrawParts->GetFps(), 0.f);
 					}
 					else {
-						m_Timer = m_Timer + 1.f / FPS;
+						m_Timer = m_Timer + 1.f / DrawParts->GetFps();
 					}
 				}
 				if (m_ReadyTimer > 0.f) {
@@ -610,8 +607,6 @@ namespace FPS_n2 {
 		}
 		//使い回しオブジェ系
 		void			MAINLOOP::Dispose_Load_Sub(void) noexcept {
-			if (!m_IsFirstLoad) {
-				m_IsFirstLoad = true;
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto* BattleResourceMngr = CommonBattleResource::Instance();
 				BattleResourceMngr->Dispose();
@@ -622,7 +617,6 @@ namespace FPS_n2 {
 				this->m_MiniMapScreen.Dispose();
 				PlayerMngr->Dispose();
 				ObjectManager::Instance()->DeleteAll();
-			}
 		}
 		//load
 		void			MAINLOOP::LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept {
@@ -711,6 +705,7 @@ namespace FPS_n2 {
 		bool			MAINLOOP::UpdateResult(void) noexcept {
 			auto* Pad = PadControl::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
+			auto* DrawParts = DXDraw::Instance();
 #if FALSE
 			if (GetMovieStateToGraph(movie.get()) == 0) {
 				PlayMovieToGraph(movie.get());
@@ -724,7 +719,7 @@ namespace FPS_n2 {
 				}
 			}
 			else {
-				m_EndTimer = std::max(m_EndTimer - 1.f / FPS, 0.f);
+				m_EndTimer = std::max(m_EndTimer - 1.f / DrawParts->GetFps(), 0.f);
 			}
 #else
 			{
@@ -740,7 +735,7 @@ namespace FPS_n2 {
 				m_ResultFlip.at(1).Update(PlayerMngr->GetPlayer(GetMyPlayerID()).GetKill(), m_ResultPhase != 0);
 				if (m_ResultFlip.at(2).Update(PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore(), m_ResultPhase != 0)) {
 					if (m_ResultRankingPer > 0.5f) {
-						m_ResultRankingPer = std::max(m_ResultRankingPer - 1.f / FPS, 0.f);
+						m_ResultRankingPer = std::max(m_ResultRankingPer - 1.f / DrawParts->GetFps(), 0.f);
 					}
 					else {
 						Easing(&m_ResultRankingPer, 0.f, 0.95f, EasingType::OutExpo);
@@ -749,7 +744,7 @@ namespace FPS_n2 {
 						m_ResultPhase = 1;
 					}
 
-					m_ResultRankDrawTime += 1.f / FPS;
+					m_ResultRankDrawTime += 1.f / DrawParts->GetFps();
 					if (m_ResultRankDrawTime > 1.f) {
 						m_ResultRankDrawTime -= 1.f;
 					}
@@ -776,7 +771,7 @@ namespace FPS_n2 {
 				}
 			}
 			else {
-				m_EndTimer = std::max(m_EndTimer - 1.f / FPS, 0.f);
+				m_EndTimer = std::max(m_EndTimer - 1.f / DrawParts->GetFps(), 0.f);
 			}
 #endif
 			ButtonSel.Update();
@@ -808,7 +803,7 @@ namespace FPS_n2 {
 				pp_x -= Chara->GetRecoilRadAdd().y;
 				pp_y -= Chara->GetRecoilRadAdd().x;
 			}
-			MyInput.SetInputStart(pp_x, pp_y, Chara->GetRadBuf());
+			MyInput.SetInputStart(pp_x, pp_y);
 			MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
 			MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
 			MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
@@ -1133,7 +1128,7 @@ namespace FPS_n2 {
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			{
 				{
-					//FPSカメラ
+					//DrawParts->GetFps()カメラ
 					if (Chara->IsAlive()) {
 						Vector3DX CamPos = Chara->GetEyeMatrix().pos() + DrawParts->GetCamShake();
 						DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeMatrix().zvec() * -1.f, Chara->GetEyeMatrix().yvec());
@@ -1145,7 +1140,7 @@ namespace FPS_n2 {
 						Vector3DX CamUp = DrawParts->SetMainCamera().GetCamUp();
 						CamPos.y += (m_DeathCamYAdd);
 						if (std::abs(m_DeathCamYAdd) > 0.01f) {
-							m_DeathCamYAdd += (M_GR / (FPS * FPS)) / 2.f;
+							m_DeathCamYAdd += (M_GR / (DrawParts->GetFps() * DrawParts->GetFps())) / 2.f;
 						}
 						else {
 							m_DeathCamYAdd = 0.f;
@@ -1596,9 +1591,9 @@ namespace FPS_n2 {
 			auto* Fonts = FontPool::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 #if FALSE
-			movie.DrawExtendGraph(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, FALSE);
+			movie.DrawExtendGraph(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), FALSE);
 #else
-			DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Gray75, TRUE);
+			DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Gray75, TRUE);
 #endif
 			auto DrawScore = [&](int xp, int yp, bool isFront) {
 				unsigned int Color = isFront ? White : Gray50;
@@ -1711,8 +1706,8 @@ namespace FPS_n2 {
 			ButtonSel.Draw();
 
 			float per = (1.f - (16.f / 9.f) / 2.35f) / 2.f;
-			DrawBox(0, 0, DrawParts->m_DispXSize, (int)(DrawParts->m_DispYSize * per), Black, TRUE);
-			DrawBox(0, DrawParts->m_DispYSize - (int)(DrawParts->m_DispYSize * per), DrawParts->m_DispXSize, DrawParts->m_DispYSize, Black, TRUE);
+			DrawBox(0, 0, DrawParts->GetDispXSize(), (int)(DrawParts->GetDispYSize() * per), Black, TRUE);
+			DrawBox(0, DrawParts->GetDispYSize() - (int)(DrawParts->GetDispYSize() * per), DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Black, TRUE);
 			if (m_EndTimer > 0) {
 				DrawBlackOut((1.f - m_EndTimer) * 2.f);
 			}
@@ -1721,7 +1716,7 @@ namespace FPS_n2 {
 			if (per > 0.f) {
 				auto* DrawParts = DXDraw::Instance();
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
-				DrawBox(0, 0, DrawParts->m_DispXSize, DrawParts->m_DispYSize, Black, TRUE);
+				DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Black, TRUE);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 		}

@@ -7,6 +7,51 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+
+		class CellItem {
+			int							m_Count{1};
+			std::shared_ptr<ItemData>	Data{nullptr};
+			bool						Is90{false};
+			int							SlotID{0};
+		public:
+			const auto& GetItemData(void) const noexcept { return this->Data; }
+			const auto&	GetXsize(void) const noexcept { return this->Is90 ? this->Data->GetYsize() : this->Data->GetXsize(); }
+			const auto&	GetYsize(void) const noexcept { return this->Is90 ? this->Data->GetXsize() : this->Data->GetYsize(); }
+			const auto&	GetCount(void) const noexcept { return this->m_Count; }
+			const auto& GetIs90(void) const noexcept { return this->Is90; }
+			const auto& GetSlotID(void) const noexcept { return this->SlotID; }
+			void Rotate() { this->Is90 ^= 1; }
+		public:
+			void Set(const std::shared_ptr<ItemData>& data, int cap, int Slot) {
+				this->Data = data;
+				if (cap < 0) {
+					this->m_Count = this->Data->GetCapacity();
+				}
+				else {
+					this->m_Count = cap;
+				}
+				SlotID = Slot;
+			}
+			bool Sub(HitPoint* value) {
+				auto prev = this->m_Count;
+				this->m_Count = std::max(this->m_Count - *value, 0);
+				*value -= (HitPoint)(prev - this->m_Count);
+				return (prev != this->m_Count && this->m_Count == 0);//0‚É‚È‚Á‚½‚Æ‚«
+			}
+
+			void Dispose() {
+				this->Data.reset();
+			}
+			void Draw(int xp, int yp) {
+				auto* Fonts = FontPool::Instance();
+
+				this->Data->GetSlotPic().DrawRotaGraph(xp + GetXsize()*y_r(64) / 2, yp + GetYsize()*y_r(64) / 2, (float)y_r(64) / 64.f, deg2rad(this->Is90 ? 90.f : 0.f), false);
+				Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(12), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
+																	   xp + GetXsize()*y_r(64), yp + GetYsize()*y_r(64),
+																	   ((100 * this->m_Count / this->Data->GetCapacity()) > 34) ? White : Red, Black, "%d/%d", this->m_Count, this->Data->GetCapacity());
+			}
+		};
+
 		class PlayerControl {
 		private:
 			std::shared_ptr<VehicleClass>										m_Vehicle{ nullptr };
