@@ -153,14 +153,14 @@ namespace FPS_n2 {
 															const auto* Ptrt = Player.GetInventory(loop, [&](const std::shared_ptr<CellItem>& tgt) { return tgt.get(); });
 															if (!Ptrt) {
 																auto& Vehicle = Player.GetVehicle();
-																Vehicle->ClashParts(Vehicle->Get_module_mesh()[0]);
+																Vehicle->ClashParts(Vehicle->GetData().Get_module_mesh()[0]);
 															}
 														}
 														else if (loop == 3) {
 															const auto* Ptrt = Player.GetInventory(loop, [&](const std::shared_ptr<CellItem>& tgt) { return tgt.get(); });
 															if (!Ptrt) {
 																auto& Vehicle = Player.GetVehicle();
-																Vehicle->ClashParts(Vehicle->Get_module_mesh()[1]);
+																Vehicle->ClashParts(Vehicle->GetData().Get_module_mesh()[1]);
 															}
 														}
 													}
@@ -185,11 +185,11 @@ namespace FPS_n2 {
 														Player.PutInventory(loop, x, y, *m_Drag, (*m_DragIn)->GetCount(), Is90);
 														if (loop == 2) {
 															auto& Vehicle = Player.GetVehicle();
-															Vehicle->RepairParts(Vehicle->Get_module_mesh()[0]);
+															Vehicle->RepairParts(Vehicle->GetData().Get_module_mesh()[0]);
 														}
 														else if (loop == 3) {
 															auto& Vehicle = Player.GetVehicle();
-															Vehicle->RepairParts(Vehicle->Get_module_mesh()[1]);
+															Vehicle->RepairParts(Vehicle->GetData().Get_module_mesh()[1]);
 														}
 
 														auto IDDel = (*m_DragIn)->GetSlotID();
@@ -200,14 +200,14 @@ namespace FPS_n2 {
 															const auto* Ptrt = Player.GetInventory(IDDel, [&](const std::shared_ptr<CellItem>& tgt) { return tgt.get(); });
 															if (!Ptrt) {
 																auto& Vehicle = Player.GetVehicle();
-																Vehicle->ClashParts(Vehicle->Get_module_mesh()[0]);
+																Vehicle->ClashParts(Vehicle->GetData().Get_module_mesh()[0]);
 															}
 														}
 														else if (IDDel == 3) {
 															const auto* Ptrt = Player.GetInventory(IDDel, [&](const std::shared_ptr<CellItem>& tgt) { return tgt.get(); });
 															if (!Ptrt) {
 																auto& Vehicle = Player.GetVehicle();
-																Vehicle->ClashParts(Vehicle->Get_module_mesh()[1]);
+																Vehicle->ClashParts(Vehicle->GetData().Get_module_mesh()[1]);
 															}
 														}
 
@@ -218,11 +218,11 @@ namespace FPS_n2 {
 														Player.PutInventory(loop, x, y, *m_Drag, (*m_DragOut)->GetCount(), Is90);
 														if (loop == 2) {
 															auto& Vehicle = Player.GetVehicle();
-															Vehicle->RepairParts(Vehicle->Get_module_mesh()[0]);
+															Vehicle->RepairParts(Vehicle->GetData().Get_module_mesh()[0]);
 														}
 														else if (loop == 3) {
 															auto& Vehicle = Player.GetVehicle();
-															Vehicle->RepairParts(Vehicle->Get_module_mesh()[1]);
+															Vehicle->RepairParts(Vehicle->GetData().Get_module_mesh()[1]);
 														}
 														(*m_DragOut)->SetDelete();
 														m_DragOut = nullptr;

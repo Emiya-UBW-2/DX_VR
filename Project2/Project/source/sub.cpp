@@ -1,6 +1,6 @@
 #include	"sub.hpp"
 
-#include "MainScene/NetWorks.hpp"
+#include "MainScene/NetworkBrowser.hpp"
 
 #include "MainScene/Object/VehicleData.hpp"
 
@@ -45,6 +45,7 @@ namespace FPS_n2 {
 			SE->Get((int)SoundEnum::Tank_Eject).SetVol(0.25f);
 			SE->Get((int)SoundEnum::Tank_Reload).SetVol(0.25f);
 			SE->Get((int)SoundEnum::Tank_near).SetVol(1.f);
+			VehDataControl::Instance()->Set();
 		}
 		void			CommonBattleResource::Dispose(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -63,7 +64,7 @@ namespace FPS_n2 {
 		}
 		//
 		void			CommonBattleResource::LoadTank(const std::string&FolderName, PlayerID ID) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
+			//auto* ObjMngr = ObjectManager::Instance();
 
 			std::string Path = "data/Charactor/";
 			Path += FolderName;

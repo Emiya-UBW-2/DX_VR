@@ -629,7 +629,7 @@ namespace FPS_n2 {
 		}
 		void			Init(const MV1* MapCol) noexcept {
 
-			this->m_ObjBuilds.resize((4 * 30 + 1) + (15 * 4) * 5 + 15 * (14 - 5 - 1) + 5);
+			this->m_ObjBuilds.resize((4 * 25 + 1) + (15 * 4) * 5 + 15 * (14 - 5 - 1) + 5);
 			this->m_Inst.resize(15);
 			{
 				std::vector<Builds*> CrossPoints;
@@ -767,7 +767,7 @@ namespace FPS_n2 {
 				};
 				int mini = 0;
 				{
-					int adds = 30;
+					int adds = 25;
 					float radBase = deg2rad(GetRandf(180.f));
 					float rad = radBase;
 					Vector3DX BasePos;

@@ -91,15 +91,13 @@ namespace FPS_n2 {
 
 	//ダメージイベント
 	struct DamageEvent {
-		PlayerID				ID{ 127 };
-		Sceneclass::ObjType		CharaType{ Sceneclass::ObjType::Vehicle };
-		HitPoint				Damage{ 0 };
-		float					rad{ 0.f };
-		void SetEvent(PlayerID pID, Sceneclass::ObjType pCharaType, HitPoint pDamage, float pRad) {
-			this->ID = pID;
-			this->CharaType = pCharaType;
+		PlayerID				ShotID{127};
+		PlayerID				DamageID{127};
+		HitPoint				Damage{0};
+		void SetEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint pDamage) {
+			this->ShotID = ShotID_t;
+			this->DamageID = DamageID_t;
 			this->Damage = pDamage;
-			this->rad = pRad;
 		}
 	};
 

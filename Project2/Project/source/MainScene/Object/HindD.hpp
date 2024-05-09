@@ -10,8 +10,7 @@ namespace FPS_n2 {
 			HindDClass(void) noexcept { this->m_objType = (int)ObjType::HindD; }
 			~HindDClass(void) noexcept { }
 		public:
-			void			FirstExecute(void) noexcept override {
-			}
+			void			FirstExecute(void) noexcept override {}
 		};
 	};
 };

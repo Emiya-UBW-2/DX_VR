@@ -4,7 +4,9 @@
 
 #include "../MainScene/BackGround/BackGround.hpp"
 
-#include "../MainScene/NetWorks.hpp"
+
+#include "../MainScene/NetWork.hpp"
+#include "../MainScene/NetworkBrowser.hpp"
 
 #include "../MainScene/Object/Vehicle.hpp"
 #include "../MainScene/Object/HindD.hpp"
@@ -93,15 +95,11 @@ namespace FPS_n2 {
 				this->m_BackGround->Draw();
 				ObjectManager::Instance()->Draw();
 				//ObjectManager::Instance()->Draw_Depth();
-				auto EndPos = Vehicle->GetGunMuzzlePos(0) + Vehicle->GetGunMuzzleVec(0) * Vehicle->GetAimingDistance();
-				Vector3DX LensPos = ConvWorldPosToScreenPos(EndPos.get());
+				Vector3DX LensPos = ConvWorldPosToScreenPos(Vehicle->GetAimPoint().get());
 				if (0.f < LensPos.z && LensPos.z < 1.f) {
 					this->m_Reticle_xpos = LensPos.x;
 					this->m_Reticle_ypos = LensPos.y;
 					this->m_Reticle_on = true;
-					//if (!this->m_InputClass->GetMouseActive().on()) {
-					//	this->m_Reticle_on = false;
-					//}
 				}
 				for (int i = 0; i < Player_num; i++) {
 					m_AICtrl[i]->Draw();
@@ -172,7 +170,7 @@ namespace FPS_n2 {
 				m_VehRadAdd = Vehicle->GetRadAdd();
 				m_IsChangeView = Vehicle->is_ADS();
 
-				if (Vehicle->Get_alive()) {
+				if (Vehicle->IsAlive()) {
 					this->m_UIclass.Draw();
 					Vehicle->DrawModuleView(y_r(50 + 100), DrawParts->GetDispYSize() - y_r(100 + 150), y_r(200));
 				}
@@ -182,7 +180,7 @@ namespace FPS_n2 {
 				//}
 				//Pause
 				this->m_InventoryClass.Draw(Vehicle->GetMove().pos);
-				if (Vehicle->Get_alive()) {
+				if (Vehicle->IsAlive()) {
 					if (this->m_Reticle_on) {
 						this->m_aim_Graph.DrawRotaGraph((int)this->m_Reticle_xpos, (int)this->m_Reticle_ypos, (float)(y_r(100)) / 100.f, 0.f, true);
 

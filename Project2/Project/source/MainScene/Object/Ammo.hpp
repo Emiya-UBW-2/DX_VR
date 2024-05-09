@@ -15,7 +15,7 @@ namespace FPS_n2 {
 			float			m_penetration{ 0.f };
 			float			m_Hit_alpha{ 0.f };
 			Vector3DX		m_Hit_DispPos;
-			int				m_ShootCheraID{ -1 };
+			PlayerID		m_ShootCheraID{ -1 };
 			std::array<Vector3DX, 5> m_Line;
 			int				m_LineSel = 0;
 			float			m_yAdd{ 0.f };
@@ -35,7 +35,7 @@ namespace FPS_n2 {
 			const auto&		GetCaliberSize(void) const noexcept { return this->m_AmmoData->GetCaliber(); }//0.00762f
 			const auto		GetEffectSize(void) const noexcept { return ((this->m_AmmoData->GetCaliber() >= 0.020f) ? this->m_AmmoData->GetCaliber() : 0.025f) / 0.1f; }
 		public:
-			void			Put(std::shared_ptr<AmmoData> pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, int pMyID) {
+			void			Put(std::shared_ptr<AmmoData> pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, PlayerID pMyID) {
 				SetActive(true);
 				this->m_RicochetCnt = 0;
 				this->m_IsHit = false;

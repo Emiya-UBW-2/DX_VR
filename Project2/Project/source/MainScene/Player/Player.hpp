@@ -1,9 +1,11 @@
 #pragma once
 #include	"../../Header.hpp"
-#include "../../MainScene/Object/ItemData.hpp"
-#include "../../MainScene/NetWorks.hpp"
 
+#include "../../MainScene/Object/ItemData.hpp"
 #include "../../MainScene/Object/Vehicle.hpp"
+
+#include "../../MainScene/NetWork.hpp"
+#include "../../MainScene/NetworkBrowser.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -85,7 +87,7 @@ namespace FPS_n2 {
 				//©‹@‚Ì—š‘ÑˆÈŠO‚Íæ‚ç‚È‚¢
 				if (Drag) {
 					if (ID == 2 || ID == 3) {
-						if ((*Drag) != m_Vehicle->GetTrackPtr()) {
+						if ((*Drag) != m_Vehicle->GetData().GetTrackPtr()) {
 							return false;
 						}
 					}

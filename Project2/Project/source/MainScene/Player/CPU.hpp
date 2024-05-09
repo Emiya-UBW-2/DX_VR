@@ -141,7 +141,7 @@ namespace FPS_n2 {
 					auto CheckCanLookTarget = [&](const std::shared_ptr<VehicleClass>& tgt, Vector3DX* Res) {
 
 
-						if (!tgt->Get_alive()) { return false; }
+						if (!tgt->IsAlive()) { return false; }
 						Vector3DX StartPos = MyVeh->Get_EyePos_Base();
 						Vector3DX EndPos = tgt->GetMove().pos + Vector3DX::vget(0.f, 1.5f*Scale_Rate, 0.f);
 						Vector3DX vec_tmp = EndPos - StartPos;
@@ -215,7 +215,7 @@ namespace FPS_n2 {
 						vec_to = vec_tmp + Vector3DX::vget(GetRandf(2.f*Scale_Rate), GetRandf(2.f*Scale_Rate), GetRandf(2.f*Scale_Rate));
 
 
-						if (!tgt->Get_alive()) {
+						if (!tgt->IsAlive()) {
 							this->cpu_do.ai_time_find = 0.f;
 						}
 					}
@@ -589,7 +589,7 @@ namespace FPS_n2 {
 				MyInput->SetInputPADS(PADS::SHOT, shotMain_Key);
 				MyInput->SetInputPADS(PADS::JUMP, shotSub_Key);
 				//¶‚«•Ô‚è
-				if (!MyVeh->Get_alive()) {
+				if (!MyVeh->IsAlive()) {
 					if (m_RepairCnt > 30.f) {
 						m_RepairCnt = 0.f;
 						auto& Player = PlayerMngr->GetPlayer(MyVeh->GetMyPlayerID());
@@ -597,29 +597,29 @@ namespace FPS_n2 {
 						{
 							const auto* Ptr = Player.GetInventory(2, [&](const std::shared_ptr<CellItem>& tgt) { return tgt.get(); });
 							if (!Ptr) {
-								Player.FillInventory(2, MyVeh->GetTrackPtr(), 0, 0, Player.GetInventoryXSize(2), Player.GetInventoryYSize(2));
-								MyVeh->RepairParts(MyVeh->Get_module_mesh()[0]);
+								Player.FillInventory(2, MyVeh->GetData().GetTrackPtr(), 0, 0, Player.GetInventoryXSize(2), Player.GetInventoryYSize(2));
+								MyVeh->RepairParts(MyVeh->GetData().Get_module_mesh()[0]);
 							}
 						}
 						{
 							const auto* Ptr = Player.GetInventory(3, [&](const std::shared_ptr<CellItem>& tgt) { return tgt.get(); });
 							if (!Ptr) {
-								Player.FillInventory(3, MyVeh->GetTrackPtr(), 0, 0, Player.GetInventoryXSize(3), Player.GetInventoryYSize(3));
-								MyVeh->RepairParts(MyVeh->Get_module_mesh()[1]);
+								Player.FillInventory(3, MyVeh->GetData().GetTrackPtr(), 0, 0, Player.GetInventoryXSize(3), Player.GetInventoryYSize(3));
+								MyVeh->RepairParts(MyVeh->GetData().Get_module_mesh()[1]);
 							}
 						}
 						//’e
 						{
 							const auto* Ptr = Player.GetInventory(0, [&](const std::shared_ptr<CellItem>& tgt) { return tgt.get(); });
 							if (!Ptr) {
-								Player.FillInventory(0, MyVeh->GetGun()[0].GetAmmoSpec(0), 0, 0, Player.GetInventoryXSize(0) / 2, Player.GetInventoryYSize(0), 3);
+								Player.FillInventory(0, MyVeh->GetGun()[0].GetData()->GetAmmoSpec().at(0), 0, 0, Player.GetInventoryXSize(0) / 2, Player.GetInventoryYSize(0), 3);
 								if (MyVeh->Get_Gunsize() >= 2) {
-									Player.FillInventory(0, MyVeh->GetGun()[1].GetAmmoSpec(0), Player.GetInventoryXSize(0) / 2, 0, Player.GetInventoryXSize(0), Player.GetInventoryYSize(0), 3);
+									Player.FillInventory(0, MyVeh->GetGun()[1].GetData()->GetAmmoSpec().at(0), Player.GetInventoryXSize(0) / 2, 0, Player.GetInventoryXSize(0), Player.GetInventoryYSize(0), 3);
 								}
 							}
 						}
 						//
-						MyVeh->SubHP(-MyVeh->GetHPMax() / 3, 0);
+						MyVeh->SubHP(-MyVeh->GetHPMax() / 3);
 
 
 					}
@@ -633,7 +633,7 @@ namespace FPS_n2 {
 
 					if (m_RepairCnt2 > 30.f) {
 						m_RepairCnt2 = 0.f;
-						MyVeh->SubHP(-MyVeh->GetHPMax() / 3, 0);
+						MyVeh->SubHP(-MyVeh->GetHPMax() / 3);
 					}
 				}
 			}
@@ -657,7 +657,7 @@ namespace FPS_n2 {
 				return;
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyVeh = PlayerMngr->GetPlayer(this->cpu_do.ai_MyID).GetVehicle();
-				if (!MyVeh->Get_alive()) { return; }
+				if (!MyVeh->IsAlive()) { return; }
 				if (MyVeh->GetMyPlayerID() == 0) { return; }
 				cpu_do.Draw_Debug(&m_BackGround->GetWayPoint());
 				if (this->cpu_do.ai_phase == 1) {

@@ -1,12 +1,15 @@
 #pragma once
 #include	"../../Header.hpp"
 #include "../../MainScene/Object/VehicleData.hpp"
+#include "../../MainScene/Object/Vehicle_before.hpp"
 #include "../../MainScene/Object/Ammo.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//戦車
-		class VehicleClass : public ObjectBaseClass, public EffectControl {
+		class VehicleClass : public ObjectBaseClass, public EffectControl,
+			public LifeControl
+		{
 		private:
 			MV1													m_hit_pic;						//弾痕  
 			//操作
@@ -18,7 +21,6 @@ namespace FPS_n2 {
 			Vector3DX											m_ShakePos;
 			float												m_AimingDistance{ 100.f*Scale_Rate };			//
 			bool												m_view_override{ false };						//
-			std::vector<Vector3DX>								m_view_rad;										//
 			float												m_range{ 6.0f };								//
 			float												m_range_r{ this->m_range };						//
 			float												m_range_change{ this->m_range / 10.f };			//
@@ -27,7 +29,7 @@ namespace FPS_n2 {
 			//プレイヤー周り
 			CharaTypeID											m_CharaType{ CharaTypeID::Enemy };				//
 			//車体
-			const VehDataControl::VhehicleData*									m_VecData{ nullptr };							//固有値
+			int													m_VehDataID{0};
 			std::vector<Guns>									m_Gun;											//
 			float												m_speed{ 0.f };									//移動速度
 			float												m_spd_rec{ 0.f };								//
@@ -55,11 +57,7 @@ namespace FPS_n2 {
 			std::vector<float>									m_wheel_frameYpos{ 0.f };						//転輪のY方向保持
 			//ダメージ
 			float												m_Fuel{ 100.f };
-			HitPoint											m_HP{ 100 };
 			std::vector<HitPoint>								m_HP_parts;
-			DamageEvent											m_DamageEvent;									//
-			unsigned long long									m_DamageSwitch{ 0 };							//
-			unsigned long long									m_DamageSwitchRec{ 0 };							//
 			//box2d
 			b2Pats												m_b2mine;										//BOX2D
 			float												m_spd_buf{ 0.f };								//BOX2D
@@ -72,56 +70,44 @@ namespace FPS_n2 {
 			void			SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
 		public:
 			void			SetMapCol(const std::shared_ptr<BackGroundClass>& backGround) { this->m_BackGround = backGround; }
-		public:			//setter,getter
-			void			ShakePer(float value) noexcept { this->m_ShakePer = value; }
-			const bool		SetDamageEvent(const DamageEvent& value) noexcept;
-			void			ClashParts(int ID) noexcept { this->m_HP_parts[ID] = 0; }
-			void			RepairParts(int ID) noexcept { this->m_HP_parts[ID] = this->m_VecData->GetMaxHP() / 2; }
-			void			SetCharaType(CharaTypeID value) noexcept { this->m_CharaType = value; }
-			void			SetDamageSwitchRec(unsigned long long value) noexcept { this->m_DamageSwitchRec = value; }
-			void			SetAimingDistance(float value) noexcept { this->m_AimingDistance = value; }
-			void			SubHP(HitPoint damage_t, float)  noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, this->m_VecData->GetMaxHP()); }
-			void			SubHP_Parts(HitPoint damage_t, int parts_Set_t) noexcept;
-			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
-			const auto&		GetDamageSwitch(void) const noexcept { return this->m_DamageSwitch; }
-			const auto&		GetDamageSwitchRec(void) const noexcept { return this->m_DamageSwitchRec; }
-			const auto&		GetHP(void) const noexcept { return this->m_HP; }
+		public:			//getter
+			const auto&		GetData(void) const noexcept { return VehDataControl::Instance()->GetVehData()[this->m_VehDataID]; }
 			const auto&		Get_HP_parts(void) const noexcept { return this->m_HP_parts; }
-			const auto&		GetHPMax(void) const noexcept { return this->m_VecData->GetMaxHP(); }
-			auto&			SetFuel(void) noexcept { return this->m_Fuel; }
+
 			const auto&		GetFuel(void) const noexcept { return this->m_Fuel; }
-			const auto&		GetFuelMax(void) const noexcept { return this->m_VecData->GetMaxFuel(); }
+			const auto&		GetFuelMax(void) const noexcept { return GetData().GetMaxFuel(); }
+
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
-			const auto&		GetName(void) const noexcept { return this->m_VecData->GetName(); }
-			const auto&		GetTrackPtr(void) const noexcept { return this->m_VecData->GetTrackPtr(); }
-			const auto&		Get_module_mesh(void) const noexcept { return this->m_VecData->Get_module_mesh(); }
 			const auto&		GetLookVec(void) const noexcept { return this->m_MouseVec; }
 			const auto&		Getvec_real(void) const noexcept { return this->m_add_vec_real; }
-			const auto		Get_pseed_per(void) const noexcept { return this->m_add_vec_real.magnitude() / (this->m_VecData->GetMaxFrontSpeed() / 3.6f); }			//移動速度のパーセンテージ
+			const auto		Get_pseed_per(void) const noexcept { return this->m_add_vec_real.magnitude() / (GetData().GetMaxFrontSpeed() / 3.6f); }			//移動速度のパーセンテージ
+			const auto&		Get_changeview(void) const noexcept { return this->m_changeview; }																	//照準変更時
+			const auto&		Get_ratio(void) const noexcept { return this->m_ratio; }																			//UI用
+			const auto		Get_body_yrad(void) const noexcept { auto pp = this->m_move.mat.zvec()*-1.f; return std::atan2f(pp.x, pp.z); }
+			const auto		is_ADS(void) const noexcept { return this->m_range == 0.f; }																		//ADS中
+			const auto&		GetRadAdd(void) const noexcept { return this->m_radAdd; }
+
 			const auto&		Gunloadtime(size_t id_t) const noexcept { return this->m_Gun[id_t].Getloadtime(); }
 			const auto&		GetTotalloadtime(size_t id_t) const noexcept { return this->m_Gun[id_t].GetTotalloadtime(); }
 			const auto&		GetGun(void) const noexcept { return this->m_Gun; }
 			const auto		Get_Gunsize(void) const noexcept { return this->m_Gun.size(); }
-			const auto&		Get_changeview(void) const noexcept { return this->m_changeview; }																	//照準変更時
-			const auto&		GetViewRad(void) const noexcept { return this->m_view_rad[0]; }
-			const auto&		Get_ratio(void) const noexcept { return this->m_ratio; }																			//UI用
-			const auto&		GetAimingDistance(void) const noexcept { return this->m_AimingDistance; }
-			const auto		GetInventoryXSize(int ID) const noexcept { return this->m_VecData->GetInventoryXSize(ID); }
-			const auto		GetInventoryYSize(int ID) const noexcept { return this->m_VecData->GetInventoryYSize(ID); }
-			const auto		Get_alive(void) const noexcept { return this->m_HP != 0; }																			//生きているか
-			const auto		Get_body_yrad(void) const noexcept { auto pp = this->m_move.mat.zvec()*-1.f; return std::atan2f(pp.x, pp.z); }
-			const auto		is_ADS(void) const noexcept { return this->m_range == 0.f; }																		//ADS中
-			const auto		GetGunMuzzleMatrix(int ID) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix(this->m_Gun[ID].GetGunTrunnionFrameID()).rotation(); }
-			const auto		GetGunMuzzleBase(int ID) const noexcept { return GetObj_const().frame(this->m_Gun[ID].GetGunTrunnionFrameID()); }
-			const auto		GetGunMuzzlePos(int ID) const noexcept { return GetObj_const().frame(this->m_Gun[ID].GetGunMuzzleFrameID()); }
+			const auto		GetGunMuzzleMatrix(int ID) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix(this->m_Gun[ID].GetGunTrunnion().GetFrameID()).rotation(); }
+			const auto		GetGunMuzzleBase(int ID) const noexcept { return GetObj_const().frame(this->m_Gun[ID].GetGunTrunnion().GetFrameID()); }
+			const auto		GetGunMuzzlePos(int ID) const noexcept { return GetObj_const().frame(this->m_Gun[ID].GetGunMuzzle().GetFrameID()); }
 			const auto		GetGunMuzzleVec(int ID) const noexcept { return (GetGunMuzzlePos(ID) - GetGunMuzzleBase(ID)).normalized(); }
-
-			const auto		GetSquarePos(int ID) const noexcept { return GetObj_const().frame(this->m_VecData->Get_square(ID)); }
-
-			const auto&		GetRadAdd(void) const noexcept { return this->m_radAdd; }
-
 			const auto		Get_EyePos_Base(void) const noexcept { return (is_ADS()) ? GetGunMuzzleBase(0) : (this->m_move.pos + (this->m_move.mat.yvec() * 3.f * Scale_Rate)); }
-			const auto		Set_MidPos(void) noexcept { return (this->m_move.pos + (this->m_move.mat.yvec() * 1.5f * Scale_Rate)); }							//HPバーを表示する場所
+			const auto&		GetViewRad(void) const noexcept { return this->m_Gun[0].GetGunViewVec(); }
+
+			const auto		GetAimPoint(void) const noexcept {
+				return GetGunMuzzlePos(0) + GetGunMuzzleVec(0) * this->m_AimingDistance;
+			}
+		public:			//setter
+			void			ShakePer(float value) noexcept { this->m_ShakePer = value; }
+			const bool		SetDamageEvent(const DamageEvent& value) noexcept;
+			void			ClashParts(int ID) noexcept { this->m_HP_parts[ID] = 0; }
+			void			RepairParts(int ID) noexcept { this->m_HP_parts[ID] = GetHPMax() / 2; }
+			void			SetAimingDistance(float value) noexcept { this->m_AimingDistance = value; }
+			void			SubHP_Parts(HitPoint damage_t, int parts_Set_t) noexcept;
 			//
 			void			ReSet_range(void) noexcept { this->m_range = 6.f; }
 			void			SetPosBufOverRide(const Vector3DX& pos_t, const Vector3DX& pVec, const Vector3DX& rad) noexcept {
@@ -131,11 +117,11 @@ namespace FPS_n2 {
 				this->m_RadOverRide = rad;
 			}
 		public:
-			void			ValueInit(const VehDataControl::VhehicleData* pVeh_data, const std::shared_ptr<b2World>& pB2World, PlayerID pID) noexcept;
+			void			ValueInit(int VhehID, const std::shared_ptr<b2World>& pB2World, PlayerID pID) noexcept;
 			void			ValueSet(float pxRad, float pyRad, const Vector3DX& pos_t) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady, bool isOverrideView) noexcept;													//
 			void			Setcamera(Camera3DInfo& m_MainCamera, const float fov_base) noexcept;																	//カメラ設定出力
-			const std::pair<bool, bool>		CheckAmmoHit(AmmoClass* pAmmo, const Vector3DX& pShooterPos) noexcept;
+			const std::pair<bool, bool>		CheckAmmoHit(AmmoClass* pAmmo) noexcept;
 			void			HitGround(const Vector3DX& pos_t, const Vector3DX& pNorm, const Vector3DX& pVec) noexcept;
 			void			DrawModuleView(int xp, int yp, int size) noexcept;																					//被弾チェック
 
@@ -143,7 +129,7 @@ namespace FPS_n2 {
 
 		private://更新関連
 			const auto		CheckAmmoHited(const AmmoClass& pAmmo) noexcept;																					//被弾チェック
-			const auto		CalcAmmoHited(AmmoClass* pAmmo, const Vector3DX& pShooterPos) noexcept;															//被弾処理
+			const auto		CalcAmmoHited(AmmoClass* pAmmo) noexcept;															//被弾処理
 
 			void			ExecuteSavePrev(void) noexcept;																										//以前の状態保持
 			void			ExecuteElse(void) noexcept;																											//その他
@@ -176,7 +162,7 @@ namespace FPS_n2 {
 				ExecuteFrame();				//フレーム操作
 				ExecuteMove();				//移動操作
 				this->m_PosBufOverRideFlag = false;
-				if (Get_alive()) {
+				if (IsAlive()) {
 					this->m_Fuel -= 1.f / DrawParts->GetFps() * (0.6f + (std::abs(this->m_move.vec.magnitude() / Scale_Rate) * 0.75f + std::abs(this->m_radAdd.y) * 8.f)*3.5f);
 				}
 			}
@@ -227,7 +213,6 @@ namespace FPS_n2 {
 				}
 				this->m_Gun.clear();
 				this->m_Hit_active.Dispose();
-				this->m_HP = 0;
 				this->m_HP_parts.clear();
 				this->hitres.clear();
 				this->hitssort.clear();
