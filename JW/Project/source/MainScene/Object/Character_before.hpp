@@ -452,13 +452,9 @@ namespace FPS_n2 {
 						+ this->m_radAdd.y
 						);
 
-					float X = this->m_rad.x;
-					float Y = this->m_rad.y;
-					float Z = this->m_rad.z;
-					Easing(&X, m_rad_Buf.x, 0.5f, EasingType::OutExpo);
-					Easing(&Y, m_rad_Buf.y, 0.8f, EasingType::OutExpo);
-					Easing(&Z, m_rad_Buf.z, 0.5f, EasingType::OutExpo);
-					this->m_rad.Set(X, Y, Z);
+					Easing(&this->m_rad.x, m_rad_Buf.x, 0.5f, EasingType::OutExpo);
+					Easing(&this->m_rad.y, m_rad_Buf.y, 0.8f, EasingType::OutExpo);
+					Easing(&this->m_rad.z, m_rad_Buf.z, 0.5f, EasingType::OutExpo);
 				}
 				//ˆÚ“®
 				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (this->m_Input.GetPADSPress(PADS::MOVE_W) ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
@@ -515,11 +511,11 @@ namespace FPS_n2 {
 			void		UpdateKeyRad() {
 				auto* DrawParts = DXDraw::Instance();
 				//
-				if (!KeyControl::IsMove()) {
-					if (deg2rad(50.f) < abs(KeyControl::GetYRadUpperChange())) {
+				if (!IsMove()) {
+					if (deg2rad(50.f) < abs(GetYRadUpperChange())) {
 						this->m_TurnBody = true;
 					}
-					if (abs(KeyControl::GetYRadUpperChange()) < deg2rad(0.5f)) {
+					if (abs(GetYRadUpperChange()) < deg2rad(0.5f)) {
 						this->m_TurnBody = false;
 					}
 				}

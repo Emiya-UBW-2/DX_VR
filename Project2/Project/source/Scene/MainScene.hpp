@@ -33,14 +33,18 @@ namespace FPS_n2 {
 			std::shared_ptr<BackGroundClass>			m_BackGround;					//BG
 			std::vector<std::shared_ptr<AIControl>>		m_AICtrl;						//AI
 			//‘€ìŠÖ˜A
-			Matrix4x4DX									m_FreeLookMat;
 			float										m_Concussion{ 0.f };
 			float										m_ConcussionPer{ 0.f };
-			float										m_XScope{ 0.f };
-			float										m_YScope{ 0.f };
+			//‘€ìŠÖ˜A
+			int											m_TPSLen{6};
+			float										m_range_r{(float)this->m_TPSLen};
+			float										m_zoom{1.f};
+			bool										m_changeview{false};
+			bool										m_IsChangeView{false};
+			float										m_XScope{0.f};
+			float										m_YScope{0.f};
 			Vector3DX									m_VehRadAdd;
-			bool										m_IsChangeView{ false };
-			float										m_ChangeViewPer{ 0.f };
+			float										m_ChangeViewPer{0.f};
 			//UIŠÖ˜A
 			UIClass										m_UIclass;
 			float										m_HPBuf{ 0.f };
@@ -132,18 +136,8 @@ namespace FPS_n2 {
 				auto* Fonts = FontPool::Instance();
 				auto* DrawParts = DXDraw::Instance();
 				auto& Vehicle = PlayerMngr->GetPlayer(GetMyPlayerID()).GetVehicle();
-				auto* Pad = PadControl::Instance();
 				//UI
-				if (Vehicle->is_ADS()) {
-					auto RadAdd = Vehicle->GetRadAdd() - m_VehRadAdd;
-					{
-						auto Base = Pad->GetLS_X()*1.f + RadAdd.z*1000.f;
-						Easing(&this->m_XScope, Base, 0.95f, EasingType::OutExpo);
-					}
-					{
-						auto Base = Pad->GetLS_Y()*1.f + RadAdd.x*1000.f;
-						Easing(&this->m_YScope, -Base, 0.9f, EasingType::OutExpo);
-					}
+				if (this->m_TPSLen == 0) {
 					int xpos = (int)(this->m_XScope);
 					int ypos = (int)(this->m_YScope);
 					int xsize = DrawParts->GetDispXSize();
@@ -154,22 +148,11 @@ namespace FPS_n2 {
 					DrawBox(0, ypos + ysize, xpos + xsize, DrawParts->GetDispYSize(), Black, TRUE);
 					this->m_scope_Graph.DrawExtendGraph(xpos, ypos, xpos + xsize, ypos + ysize, true);
 				}
-				{
-					if (m_IsChangeView != Vehicle->is_ADS()) {
-						this->m_ChangeViewPer = 1.f;
-					}
-					else {
-						Easing(&this->m_ChangeViewPer, 0.f, 0.95f, EasingType::OutExpo);
-					}
-					if ((this->m_ChangeViewPer*255.f) > 1.f) {
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*this->m_ChangeViewPer), 0, 255));
-						DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Black, TRUE);
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-					}
+				if ((this->m_ChangeViewPer*255.f) > 1.f) {
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*this->m_ChangeViewPer), 0, 255));
+					DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Black, TRUE);
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				}
-				m_VehRadAdd = Vehicle->GetRadAdd();
-				m_IsChangeView = Vehicle->is_ADS();
-
 				if (Vehicle->IsAlive()) {
 					this->m_UIclass.Draw();
 					Vehicle->DrawModuleView(y_r(50 + 100), DrawParts->GetDispYSize() - y_r(100 + 150), y_r(200));

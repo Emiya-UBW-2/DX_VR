@@ -264,7 +264,6 @@ namespace FPS_n2 {
 			SetFogEnable(TRUE);
 			SetFogColor(184, 187, 118);
 			SetDrawAlphaTest(DX_CMP_GREATER, 128);
-			//SetUseLighting(FALSE);
 			SetUseLightAngleAttenuation(FALSE);
 			//auto dir=GetLightDirection();
 			//Vector3DX vec = (Vector3DX)GetCameraPosition() - GetCameraTarget();
@@ -282,7 +281,6 @@ namespace FPS_n2 {
 			//SetLightDirection(dir);
 
 			SetUseLightAngleAttenuation(TRUE);
-			//SetUseLighting(TRUE);
 			SetDrawAlphaTest(-1, 0);
 			SetFogEnable(FALSE);
 		}
@@ -1088,12 +1086,10 @@ namespace FPS_n2 {
 					(l.pos + Vector3DX::vget(20, 20, 20)*Scale_Rate).get()) == FALSE
 					) {
 					if (LengthtoCam.magnitude() > Farlimit && isSetFog) {
-						SetUseLighting(FALSE);
 						LengthtoCam.y = (0.f); LengthtoCam = LengthtoCam.normalized();
 						float rad = std::atan2f(Vector3DX::Cross(Vector3DX::forward(), LengthtoCam).y, Vector3DX::Dot(Vector3DX::forward(), LengthtoCam));
 						l.obj_far.SetMatrix(Matrix4x4DX::RotAxis(Vector3DX::up(), rad) * l.mat * Matrix4x4DX::Mtrans(l.pos));
 						l.obj_far.DrawModel();
-						SetUseLighting(TRUE);
 					}
 					else {
 						if (isSetFog) {

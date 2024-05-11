@@ -6,13 +6,15 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class AmmoClass : public ObjectBaseClass {
 		private:
+			HitPoint		m_Damage{0};
+			float			m_Caliber{0.f};
+			float			m_speed{0.f};
+			float			m_penetration{0.f};
+
 			bool			m_IsHit{ false };
 			bool			m_IsDrawHitUI{ false };
 			float			m_HitTimer{ 0.f };
 			int				m_RicochetCnt{ 0 };
-			std::shared_ptr<AmmoData>	m_AmmoData{ nullptr };
-			float			m_speed{ 0.f };
-			float			m_penetration{ 0.f };
 			float			m_Hit_alpha{ 0.f };
 			Vector3DX		m_Hit_DispPos;
 			PlayerID		m_ShootCheraID{ -1 };
@@ -21,36 +23,37 @@ namespace FPS_n2 {
 			float			m_yAdd{ 0.f };
 			float			m_Timer{ 0.f };
 
-			std::shared_ptr<BackGroundClass>			m_BackGround;				//BG
 		private:
 			PlayerID											m_MyID{0};
 		public:
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
 			void			SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
-		public:
-			void			SetMapCol(const std::shared_ptr<BackGroundClass>& backGround) { this->m_BackGround = backGround; }
 		public://getter
 			const auto&		GetShootedID(void) const noexcept { return this->m_ShootCheraID; }
-			const auto&		GetDamage(void) const noexcept { return this->m_AmmoData->GetDamage(); }
-			const auto&		GetCaliberSize(void) const noexcept { return this->m_AmmoData->GetCaliber(); }//0.00762f
-			const auto		GetEffectSize(void) const noexcept { return ((this->m_AmmoData->GetCaliber() >= 0.020f) ? this->m_AmmoData->GetCaliber() : 0.025f) / 0.1f; }
+			const auto&		GetDamage(void) const noexcept { return this->m_Damage; }
+			const auto&		GetCaliberSize(void) const noexcept { return this->m_Caliber; }
+			const auto		GetEffectSize(void) const noexcept { return ((GetCaliberSize() >= 0.020f) ? GetCaliberSize() : 0.025f) / 0.1f; }
 		public:
-			void			Put(std::shared_ptr<AmmoData> pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, PlayerID pMyID) {
+			void			Put(const std::shared_ptr<AmmoData>& pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, PlayerID pMyID) {
+				this->m_Damage = pAmmoData->GetDamage();
+				this->m_Caliber = pAmmoData->GetCaliber();//0.00762f
+				this->m_speed = pAmmoData->GetSpeed() * Scale_Rate;
+				this->m_penetration = pAmmoData->GetPenetration();
+
+				this->m_move.pos = pos_t;
+				this->m_move.vec = pVec;
+				this->m_ShootCheraID = pMyID;
+
+				this->m_move.repos = this->m_move.pos;
+				for (auto& l : this->m_Line) { l = this->m_move.pos; }
+
 				SetActive(true);
 				this->m_RicochetCnt = 0;
 				this->m_IsHit = false;
 				this->m_IsDrawHitUI = false;
 				this->m_HitTimer = 0.f;
-				this->m_move.pos = pos_t;
-				this->m_move.repos = this->m_move.pos;
-				this->m_move.vec = pVec;
-				this->m_AmmoData = pAmmoData;
-				this->m_speed = this->m_AmmoData->GetSpeed() * Scale_Rate;
-				this->m_penetration = this->m_AmmoData->GetPenetration();
 				this->m_yAdd = 0.f;
 				this->m_Timer = 0.f;
-				this->m_ShootCheraID = pMyID;
-				for (auto& l : this->m_Line) { l = this->m_move.pos; }
 			}
 			void			Draw_Hit_UI(GraphHandle& Hit_Graph) {
 				if (this->m_IsDrawHitUI) {
@@ -60,12 +63,6 @@ namespace FPS_n2 {
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 					}
 				}
-			}
-			const auto		ColCheckGround(Vector3DX* Normal = nullptr) {
-				if (IsActive()) {
-					return this->m_BackGround->CheckLinetoMap(this->m_move.repos, &this->m_move.pos, true, Normal);
-				}
-				return false;
 			}
 			const auto		PenetrationCheck(float pArmer, const Vector3DX& normal) const noexcept { return (this->m_penetration > (pArmer * (1.0f / std::abs(Vector3DX::Dot(this->m_move.vec.normalized(), normal))))); }
 			void			Penetrate(void) noexcept {
@@ -90,7 +87,7 @@ namespace FPS_n2 {
 			}
 		public: //コンストラクタ、デストラクタ
 			AmmoClass(void) noexcept { this->m_objType = (int)ObjType::Ammo; }
-			~AmmoClass(void) noexcept { m_AmmoData.reset(); }
+			~AmmoClass(void) noexcept {}
 		public: //継承
 			void			Init_Sub() noexcept override {
 				SetActive(false);
@@ -138,7 +135,7 @@ namespace FPS_n2 {
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				if (isDrawSemiTrans) { return; }
-				SetUseLighting(FALSE);
+				SetUseLightAngleAttenuation(FALSE);
 
 				float per = 0.5f;
 				if (!IsActive()) {
@@ -152,16 +149,16 @@ namespace FPS_n2 {
 					auto p2 = LS % max;
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per*((float)(i) / max)), 0, 255));
 					if (CheckCameraViewClip_Box(this->m_Line[p1].get(), this->m_Line[p2].get()) == FALSE) {
-						DrawCapsule3D(this->m_Line[p1].get(), this->m_Line[p2].get(), this->m_AmmoData->GetCaliber()*Scale_Rate*2.f*((float)(i) / max), 3, GetColor(192, 192, 192), GetColor(192, 192, 192), TRUE);
+						DrawCapsule3D(this->m_Line[p1].get(), this->m_Line[p2].get(), GetCaliberSize()*Scale_Rate*2.f*((float)(i) / max), 3, GetColor(192, 192, 192), GetColor(192, 192, 192), TRUE);
 					}
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				if (IsActive()) {
 					if (CheckCameraViewClip_Box(this->m_move.repos.get(), this->m_move.pos.get()) == FALSE) {
-						DrawCapsule_3D(this->m_move.pos, this->m_move.repos, ((this->m_AmmoData->GetCaliber() - 0.00762f) * 0.1f + 0.00762f)*Scale_Rate, GetColor(255, 255, 172), GetColor(255, 255, 255));
+						DrawCapsule_3D(this->m_move.pos, this->m_move.repos, ((GetCaliberSize() - 0.00762f) * 0.1f + 0.00762f)*Scale_Rate, GetColor(255, 255, 172), GetColor(255, 255, 255));
 					}
 				}
-				SetUseLighting(TRUE);
+				SetUseLightAngleAttenuation(TRUE);
 			}
 		};
 	};

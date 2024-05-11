@@ -26,7 +26,7 @@ namespace FPS_n2 {
 						auto& tgt = PlayerMngr->GetPlayer(i).GetVehicle();
 						if (tgt->CheckLine(repos_tmp, &pos_tmp, &norm_tmp)) {
 							ColVeh |= true;
-							this->m_move.vec = tgt->Getvec_real()*4.5f;
+							this->m_move.vec.Set(0.f, 0.f, 0.f);
 							this->m_move.vec.x += (GetRandf(2.5f*Scale_Rate / DrawParts->GetFps()));
 							this->m_move.vec.z += (GetRandf(2.5f*Scale_Rate / DrawParts->GetFps()));
 

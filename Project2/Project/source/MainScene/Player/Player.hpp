@@ -73,7 +73,6 @@ namespace FPS_n2 {
 			void		SetScore(float value) { this->m_Score = value; }
 			auto&		GetVehicle(void) noexcept { return m_Vehicle; }
 			const auto&	GetScore(void) const noexcept { return this->m_Score; }
-			const auto	IsRide(void) const noexcept { return (bool)m_Vehicle; }
 		public:
 			auto&			GetInventorys(void) noexcept { return this->m_Inventorys; }
 			const auto		GetInventoryXSize(int ID) const noexcept { return (int)this->m_Inventorys[ID].size(); }

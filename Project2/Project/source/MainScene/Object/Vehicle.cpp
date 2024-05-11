@@ -84,7 +84,6 @@ namespace FPS_n2 {
 					}
 
 				}
-				m_ShakePer = 1.f;
 				return true;
 			}
 			return false;
@@ -99,25 +98,53 @@ namespace FPS_n2 {
 			GetObj().material_AlphaTestAll(true, DX_CMP_GREATER, 128);								//本体
 			this->hitres.resize(this->m_col.mesh_num());											//モジュールごとの当たり判定結果を確保
 			this->hitssort.resize(this->m_col.mesh_num());											//モジュールごとの当たり判定順序を確保
+			//シェイプをボディに追加
 			b2PolygonShape dynamicBox = GetData().GetDynamicBox();
-			this->m_b2mine.Set(CreateB2Body((std::shared_ptr<b2World>&)pB2World, b2_dynamicBody, 0.f, 0.f, 0.f), &dynamicBox);	//シェイプをボディに追加
+			this->m_b2mine.Set(
+				CreateB2Body((std::shared_ptr<b2World>&)pB2World, b2_dynamicBody, 0.f, 0.f, 0.f),
+				&dynamicBox
+			);
+			//
+			for (auto& f : this->m_CatFoot) {
+				const auto& w = GetData().Get_b2downsideframe()[(((&f == &this->m_CatFoot.front()) != 0) ? 0 : 1)];
+				f.resize(w.size());
+				for (auto& t : f) {
+					t.Init(w[&t - &f.front()]);
+				}
+			}
 			for (auto& f : this->m_b2Foot) {
 				f.Init(&f == &this->m_b2Foot.front(), &GetData(), &GetObj());
 			}
-			this->m_wheel_frameYpos.resize(GetData().Get_wheelframe().size());
+			for (int i = 0;i < 2;i++) {
+				int cnt = 0;
+				for (auto& f : GetData().Get_wheelframe()) {
+					auto localmatBase = f.GetFrameWorldPosition().pos();
+					bool IsLeft = (localmatBase.x >= 0);
+					if (i == 0) {
+						if (!IsLeft) { continue; }
+					}
+					else {
+						if (IsLeft) { continue; }
+					}
+					this->m_Wheel[i].resize(this->m_Wheel[i].size() + 1);
+					this->m_Wheel[i].back().Init(f);
+					cnt++;
+				}
+			}
 			//砲
 			this->m_Gun.resize(GetData().Get_gunframe().size());
 			for (const auto& g : GetData().Get_gunframe()) {
 				int index = (int)(&g - &GetData().Get_gunframe().front());
 				this->m_Gun[index].Init(this->m_VehDataID, index);
 			}
+			KeyControl::InitOverride();
 		}
 		//
-		void			VehicleClass::ValueSet(float pxRad, float pyRad, const Vector3DX& pos_t) noexcept {
+		void			VehicleClass::MovePoint(float pxRad, float pyRad, const Vector3DX& pos_t) noexcept {
 			this->m_move.mat = Matrix4x4DX::RotAxis(Vector3DX::right(), pxRad) * Matrix4x4DX::RotAxis(Vector3DX::up(), pyRad);
 			this->m_move.pos = pos_t;
+			this->m_move.repos = pos_t;
 			this->m_move.vec.Set(0, 0, 0);
-			for (auto& w : this->m_wheel_frameYpos) { w = 0.f; }
 			//砲
 			//ヒットポイント
 			{
@@ -129,13 +156,14 @@ namespace FPS_n2 {
 
 			//戦車スポーン
 			this->m_b2mine.SetTransform(b2Vec2(this->m_move.pos.x, this->m_move.pos.z), Get_body_yrad());
-			this->m_PosBufOverRideFlag = false;
 
-			this->m_MouseVec = this->m_move.mat.inverse();
+			KeyControl::InitKey(this->m_move.mat.inverse().zvec());
 
+			this->m_speedBase = 0.f;
 			this->m_speed = 0.f;
 			this->m_speed_add = 0.f;
 			this->m_speed_sub = 0.f;
+
 			this->m_wheel_Left = 0.f;
 			this->m_wheel_Right = 0.f;
 			this->m_Tilt.Set(0, 0, 0);
@@ -145,84 +173,12 @@ namespace FPS_n2 {
 		}
 		//
 		void			VehicleClass::SetInput(const InputControl& pInput, bool pReady, bool isOverrideView) noexcept {
-			this->m_ReadySwitch = (this->m_KeyActive != pReady);
-			this->m_KeyActive = pReady;
-			//エイム
-			auto y_mouse = std::atan2f(this->m_MouseVec.zvec().x, this->m_MouseVec.zvec().z);
-			auto x_mouse = std::atan2f(-this->m_MouseVec.zvec().y, std::hypotf(this->m_MouseVec.zvec().x, this->m_MouseVec.zvec().z));
-
-			//y_mouse += 0.01f;
-			this->m_MouseVec = Matrix4x4DX::RotAxis(Vector3DX::right(), std::clamp(x_mouse + pInput.GetAddxRad(), -deg2rad(40.f), deg2rad(40.f))) * Matrix4x4DX::RotAxis(Vector3DX::up(), y_mouse + pInput.GetAddyRad());
-
-			Easing(&this->m_ShakePos, Vector3DX::vget(GetRandf(10.f*Scale_Rate*m_ShakePer), GetRandf(10.f*Scale_Rate*m_ShakePer), GetRandf(10.f*Scale_Rate*m_ShakePer)), 0.9f, EasingType::OutExpo);
-			Easing(&this->m_ShakePer, 0.f, 0.9f, EasingType::OutExpo);
-			//
+			KeyControl::InputKey(pInput, pReady);
 			if (isOverrideView) {
-				this->m_view_override = true;
 				//this->m_view_rad[0].x = (pInput.GetxRad());
 				//this->m_view_rad[0].y = (pInput.GetyRad());
 			}
-			this->m_key[0] = pInput.GetPADSPress(PADS::SHOT) && pReady && this->IsAlive();			//射撃
-			this->m_key[1] = pInput.GetPADSPress(PADS::JUMP) && pReady && this->IsAlive();			//マシンガン
-			this->m_key[2] = pInput.GetPADSPress(PADS::MOVE_W) && pReady && this->IsAlive() && (this->m_HP_parts[GetData().Get_module_mesh()[0]] > 0) && (this->m_HP_parts[GetData().Get_module_mesh()[1]] > 0);		//前進
-			this->m_key[3] = pInput.GetPADSPress(PADS::MOVE_S) && pReady && this->IsAlive() && (this->m_HP_parts[GetData().Get_module_mesh()[0]] > 0) && (this->m_HP_parts[GetData().Get_module_mesh()[1]] > 0);		//後退
-			this->m_key[4] = pInput.GetPADSPress(PADS::MOVE_D) && pReady && this->IsAlive() && ((this->m_HP_parts[GetData().Get_module_mesh()[0]] > 0) || (this->m_HP_parts[GetData().Get_module_mesh()[1]] > 0));		//右
-			this->m_key[5] = pInput.GetPADSPress(PADS::MOVE_A) && pReady && this->IsAlive() && ((this->m_HP_parts[GetData().Get_module_mesh()[0]] > 0) || (this->m_HP_parts[GetData().Get_module_mesh()[1]] > 0));		//左
-			this->m_key[6] = pInput.GetPADSPress(PADS::AIM) && pReady && this->IsAlive();			//左
-
-			//this->m_key[6] = true;
 		}
-		//カメラ設定出力
-		void			VehicleClass::Setcamera(Camera3DInfo& MainCamera_t, const float fov_base) noexcept {
-			auto fov_t = MainCamera_t.GetCamFov();
-			auto near_t = MainCamera_t.GetCamNear();
-			auto far_t = MainCamera_t.GetCamFar();
-
-			Vector3DX eyepos = Get_EyePos_Base();
-			auto OLD = this->m_range;
-
-			if (!this->IsAlive()) {
-				ReSet_range();
-			}
-
-			if (is_ADS()) {
-				this->m_ratio = std::clamp(this->m_ratio + float(GetMouseWheelRotVolWithCheck()) * 2.0f, 0.0f, 30.f);
-				if (this->m_ratio == 0.f) {
-					this->m_range = 0.f + this->m_range_change;
-					this->m_range_r = this->m_range;
-				}
-				else {
-					Easing(&fov_t, fov_base / this->m_ratio, 0.9f, EasingType::OutExpo);
-				}
-			}
-			else {
-				eyepos += this->m_MouseVec.zvec() * this->m_range_r*Scale_Rate;
-				Vector3DX eyepos2 = eyepos + this->m_MouseVec.zvec() * -1.f * (this->m_range_r * Scale_Rate);
-				if (this->m_BackGround->CheckLinetoMap(eyepos, &eyepos2, true, false)) { eyepos = eyepos2; }
-
-				this->m_ratio = 2.0f;
-				if (this->IsAlive()) {
-					this->m_range = std::clamp(this->m_range - float(GetMouseWheelRotVolWithCheck()) * this->m_range_change, 0.f, 8.f);
-				}
-				Easing(&this->m_range_r, this->m_range, 0.8f, EasingType::OutExpo);
-
-				Easing(&fov_t, fov_base, 0.9f, EasingType::OutExpo);
-			}
-			Vector3DX eyetgt = Get_EyePos_Base() + this->m_MouseVec.zvec() * -1.f * std::max(this->m_range_r*Scale_Rate, 1.f);
-
-			this->m_changeview = ((this->m_range != OLD) && (this->m_range == 0.f || OLD == 0.f));
-
-			MainCamera_t.SetCamPos(
-				eyepos + m_ShakePos * (is_ADS() ? 0.05f : 1.f),
-				eyetgt + m_ShakePos * (is_ADS() ? 0.f : 2.f),
-				Lerp(this->m_move.mat.yvec(), Vector3DX::up(), std::clamp(this->m_range_r / 3.f, 0.f, 1.f))
-			);
-
-			Easing(&near_t, 1.f + 2.f*((is_ADS()) ? this->m_ratio : 2.f), 0.9f, EasingType::OutExpo);
-			Easing(&far_t, std::max(this->m_AimingDistance, Scale_Rate * 50.f) + Scale_Rate * 50.f, 0.9f, EasingType::OutExpo);
-			MainCamera_t.SetCamInfo(fov_t, near_t, far_t);
-		}
-
 		//----------------------------------------------------------
 		//更新関連
 		//----------------------------------------------------------
@@ -270,6 +226,7 @@ namespace FPS_n2 {
 		//被弾処理
 		const auto		VehicleClass::CalcAmmoHited(AmmoClass* pAmmo) noexcept {
 			auto* SE = SoundPool::Instance();
+			auto* DrawParts = DXDraw::Instance();
 			std::sort(this->hitssort.begin(), this->hitssort.end(), [](const HitSortInfo& x, const HitSortInfo& y) { return x < y; });	//当たり判定を近い順にソート
 			bool isDamage = false;
 			//ダメージ面に届くまで判定
@@ -308,11 +265,16 @@ namespace FPS_n2 {
 								LifeControl::SetSubHPEvent(pAmmo->GetShootedID(), this->m_MyID, pAmmo->GetDamage());
 								this->SubHP_Parts(pAmmo->GetDamage(), (HitPoint)tt.GetHitMesh());
 								isDamage = true;
+								if (GetMyPlayerID() == 0) {
+									DrawParts->SetCamShake(0.5f, 1.f*Scale_Rate);
+								}
 							}
 							else {
 								pAmmo->Ricochet(HitPos, HitNormal);	//跳弾
-								SE->Get((int)SoundEnum::Tank_Ricochet).Play_3D(GetRand(16), HitPos, 100.f*Scale_Rate, 216);
-								m_ShakePer = 0.1f*pAmmo->GetCaliberSize() / 0.10f;
+								if (GetMyPlayerID() == 0) {
+									SE->Get((int)SoundEnum::Tank_Ricochet).Play_3D(GetRand(16), HitPos, 100.f*Scale_Rate, 216);
+									DrawParts->SetCamShake(0.3f, 0.1f*pAmmo->GetCaliberSize() / 0.10f*Scale_Rate);
+								}
 							}
 							//エフェクトセット
 							EffectControl::SetOnce(EffectResource::Effect::ef_reco, HitPos, HitNormal, pAmmo->GetEffectSize()*Scale_Rate*10.f);
@@ -331,8 +293,8 @@ namespace FPS_n2 {
 
 		//以前の状態保持
 		void			VehicleClass::ExecuteSavePrev(void) noexcept {
-			this->m_spd_rec = this->m_speed;
 			this->m_ColActive = false;
+			this->m_move.repos = this->m_move.pos;
 		}
 		//その他
 		void			VehicleClass::ExecuteElse(void) noexcept {
@@ -367,70 +329,69 @@ namespace FPS_n2 {
 		//操作
 		void			VehicleClass::ExecuteInput(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
-			if (!this->m_view_override) {
-				float	view_YradAdd{ 0.f };							//
-				float	view_XradAdd{ 0.f };							//
-				for (auto& g : this->m_Gun) {
-					auto ID = (int)(&g - &this->m_Gun.front());
-					if (this->IsAlive()) {
-						if (this->m_key[6]) { //砲塔ロック
-							view_XradAdd = 0.f;
-							view_YradAdd = 0.f;
-						}
-						else {
-							//狙い
-							Vector3DX MuzPos = GetGunMuzzlePos(ID);
-							Vector3DX EndPos = MuzPos + (this->m_MouseVec.zvec() * -1.f).normalized() * (500.f*Scale_Rate);
-							this->m_BackGround->CheckLinetoMap(MuzPos, &EndPos, true, false);
-
-							Vector3DX BasePos = GetGunMuzzleBase(ID);
-							//反映
-							auto vec_a = (EndPos - BasePos).normalized();
-							auto vec_z = (MuzPos - BasePos).normalized();
-							float a_hyp = std::hypotf(vec_a.x, vec_a.z);
-							float z_hyp = std::hypotf(vec_z.x, vec_z.z);
-							{
-								float cost = Vector3DX::Cross(vec_z, vec_a).y / z_hyp;
-								float sint = sqrtf(std::abs(1.f - cost * cost));
-								view_YradAdd = (std::atan2f(cost, sint)) / 5.f;
-							}
-							view_XradAdd = (std::atan2f(vec_a.y, a_hyp) - std::atan2f(vec_z.y, z_hyp)) / 1.f;
-						}
-					}
-					else {
-						view_XradAdd = 0.1f / 60.f;
+			auto* SE = SoundPool::Instance();
+			for (auto& cg : this->m_Gun) {
+				auto ID = (int)(&cg - &this->m_Gun.front());
+				auto Pos = GetGunMuzzlePos(ID);
+				auto Vec = GetGunMuzzleVec(ID);
+				float	view_YradAdd{0.f};							//
+				float	view_XradAdd{0.f};							//
+				if (this->IsAlive()) {
+					if (GetInputControl().GetPADSPress(PADS::AIM)) { //砲塔ロック
+						view_XradAdd = 0.f;
 						view_YradAdd = 0.f;
 					}
-
-					float limit = GetData().GetMaxTurretRad() / 60.f;
-					if (ID > 0) {
-						limit *= 2.f;
+					else {
+						//狙い
+						Vector3DX EndPos = Pos - this->GetRadBuf() * (500.f*Scale_Rate);
+						this->m_BackGround->CheckLinetoMap(Pos, &EndPos, true, false);
+						auto vec_a = (EndPos - GetGunMuzzleBase(ID)).normalized();
+						float a_hyp = std::hypotf(vec_a.x, vec_a.z);
+						float z_hyp = std::hypotf(Vec.x, Vec.z);
+						{
+							float cost = Vector3DX::Cross(Vec, vec_a).y / z_hyp;
+							float sint = sqrtf(std::abs(1.f - cost * cost));
+							view_YradAdd = (std::atan2f(cost, sint)) / 5.f;
+						}
+						view_XradAdd = (std::atan2f(vec_a.y, a_hyp) - std::atan2f(Vec.y, z_hyp)) / 1.f;
 					}
-					g.UpdateGunVec(
-						std::clamp(view_XradAdd, -limit / 5.f, limit / 5.f)*60.f / DrawParts->GetFps(),
-						std::clamp(view_YradAdd, -limit, limit)*60.f / DrawParts->GetFps()
-					);
+				}
+				else {
+					view_XradAdd = 0.1f / 60.f;
+					view_YradAdd = 0.f;
+				}
+
+				float limit = GetData().GetMaxTurretRad() / 60.f;
+				if (ID > 0) {
+					limit *= 2.f;
+				}
+				cg.UpdateGunVec(
+					std::clamp(view_XradAdd, -limit / 5.f, limit / 5.f)*60.f / DrawParts->GetFps(),
+					std::clamp(view_YradAdd, -limit, limit)*60.f / DrawParts->GetFps()
+				);
+				//射撃
+				if (cg.Update(
+					(ID == 0) ? GetInputControl().GetPADSPress(PADS::SHOT) : GetInputControl().GetPADSPress(PADS::JUMP)
+					, this->m_MyID, Pos, Vec)) {
+					SE->Get((int)SoundEnum::Tank_Shot).Play_3D(cg.GetData()->GetShotSound(), this->m_move.pos, 250.f*Scale_Rate);//サウンド
+					EffectControl::SetOnce(EffectResource::Effect::ef_fire, Pos, Vec, cg.GetCaliberSize() / 0.1f * Scale_Rate);//銃発砲エフェクトのセット
 				}
 			}
-			this->m_view_override = false;
 		}
 		//フレーム操作
 		void			VehicleClass::ExecuteFrame(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			//砲塔旋回
 			for (auto& g : this->m_Gun) {
-				auto ID = &g - &this->m_Gun.front();
-				float Xrad = g.GetGunViewVec().x;
-				float Yrad = (ID == 0) ? g.GetGunViewVec().y : (g.GetGunViewVec().y - GetViewRad().y);
-
-				float xrad = std::clamp(Xrad, deg2rad(g.GetData()->GetDownRadLimit()), deg2rad(g.GetData()->GetUpRadLimit()));
-
 				if (g.GetGunBase().GetFrameID() >= 0) {
-					auto Mat = Matrix4x4DX::RotAxis(Vector3DX::up(), Yrad) * Matrix4x4DX::Mtrans(g.GetGunBase().GetFrameLocalPosition().pos());
+					auto Mat = Matrix4x4DX::RotAxis(Vector3DX::up(), g.GetGunViewVec().y) *
+						GetObj().GetFrameLocalMatrix(GetObj().frame_parent(g.GetGunBase().GetFrameID())).rotation().inverse() *
+						Matrix4x4DX::Mtrans(g.GetGunBase().GetFrameLocalPosition().pos());
 					GetObj().SetFrameLocalMatrix(g.GetGunBase().GetFrameID(), Mat);
 					this->m_col.SetFrameLocalMatrix(g.GetGunBase().GetFrameID(), Mat);
 				}
 				if (g.GetGunTrunnion().GetFrameID() >= 0) {
-					auto Mat = Matrix4x4DX::RotAxis(Vector3DX::right(), xrad) * Matrix4x4DX::Mtrans(g.GetGunTrunnion().GetFrameLocalPosition().pos());
+					auto Mat = Matrix4x4DX::RotAxis(Vector3DX::right(), g.GetGunViewVec().x) * Matrix4x4DX::Mtrans(g.GetGunTrunnion().GetFrameLocalPosition().pos());
 					GetObj().SetFrameLocalMatrix(g.GetGunTrunnion().GetFrameID(), Mat);
 					this->m_col.SetFrameLocalMatrix(g.GetGunTrunnion().GetFrameID(), Mat);
 				}
@@ -439,56 +400,116 @@ namespace FPS_n2 {
 					GetObj().SetFrameLocalMatrix(g.GetGunMuzzle().GetFrameID(), Mat);
 					this->m_col.SetFrameLocalMatrix(g.GetGunMuzzle().GetFrameID(), Mat);
 				}
-				g.UpdateFireReaction_(Yrad);
+				if (g.GetGunBase().GetFrameID() >= 0) {
+					auto v1 = Vector3DX::forward();
+					auto v2 = GetObj().GetFrameLocalMatrix(g.GetGunBase().GetFrameID()).rotation().zvec();v2.y = 0.f;
+					g.UpdateFireReaction_(std::atan2f(Vector3DX::Cross(v1, v2).y, Vector3DX::Dot(v1, v2)));
+				}
 			}
 			//転輪
-			auto y_vec = GetObj().GetMatrix().yvec();
-			for (auto& f : GetData().Get_wheelframe()) {
-				if (f.GetFrameID() >= 0) {
-					auto ID = &f - &GetData().Get_wheelframe().front();
-					GetObj().frame_Reset(f.GetFrameID());
+			{
+				if (CanLookTarget) {
+					float Len = (DrawParts->GetMainCamera().GetCamPos() - this->m_move.pos).magnitude();
+					if (Len < 10.f*Scale_Rate) {
+						DIV = 1;
+					}
+					else if (Len < 20.f*Scale_Rate) {
+						DIV = 3;
+					}
+					else if (Len < 30.f*Scale_Rate) {
+						DIV = 5;
+					}
+					else if (Len < 40.f*Scale_Rate) {
+						DIV = 7;
+					}
+					else {
+						DIV = 9;
+					}
+				}
+				else {
+					DIV = 11;
+				}
+				auto y_vec = GetObj().GetMatrix().yvec();
+				for (auto& f : this->m_Wheel) {
+					float Res_y = 0.f;
+					bool IsHit = false;
+					int max = (int)f.size();
+					for (auto& t : f) {
+						auto ID = (int)(&t - &f.front());
 
-					auto startpos = GetObj().frame(f.GetFrameID());
-					auto pos_t1 = startpos + y_vec * ((-f.GetFrameWorldPosition().pos().y) + 2.f*Scale_Rate);
-					auto pos_t2 = startpos + y_vec * ((-f.GetFrameWorldPosition().pos().y) - 0.3f*Scale_Rate);
-					auto ColRes = this->m_BackGround->CheckLinetoMap(pos_t1, &pos_t2, true, !(this->m_MyID == 0));//CheckOnlyGround
-					Easing(&this->m_wheel_frameYpos[ID], (ColRes) ? (pos_t2.y + y_vec.y * f.GetFrameWorldPosition().pos().y - startpos.y) : -0.3f*Scale_Rate, 0.9f, EasingType::OutExpo);
-					GetObj().SetFrameLocalMatrix(f.GetFrameID(),
-						Matrix4x4DX::RotAxis(Vector3DX::right(), (f.GetFrameWorldPosition().pos().x >= 0) ? this->m_wheel_Left : this->m_wheel_Right) *
-						Matrix4x4DX::Mtrans(Vector3DX::up() * this->m_wheel_frameYpos[ID]) *
-						Matrix4x4DX::Mtrans(f.GetFrameWorldPosition().pos())
-					);
+						auto localmatBase = t.GetFrame().GetFrameWorldPosition().pos();
+						GetObj().frame_Reset(t.GetFrame().GetFrameID());
+
+						auto startpos = GetObj().frame(t.GetFrame().GetFrameID());
+						if ((ID % DIV == 0) || (ID == (max - 1))) {
+							auto pos_t = startpos - y_vec * localmatBase.y;
+							auto pos_t1 = pos_t + y_vec * (2.f*Scale_Rate);
+							auto pos_t2 = pos_t + y_vec * (-0.3f*Scale_Rate);
+							IsHit = this->m_BackGround->CheckLinetoMap(pos_t1, &pos_t2, true, this->m_MyID != 0);
+							if (IsHit) {
+								Res_y = pos_t2.y - pos_t.y;
+							}
+							else {
+								Res_y = -0.3f*Scale_Rate;
+							}
+							t.SetYpos(Res_y);
+						}
+						t.Update();
+					}
+				}
+				for (auto& f : this->m_Wheel) {
+					int max = (int)f.size();
+					for (auto& t : f) {
+						auto localmatBase = t.GetFrame().GetFrameWorldPosition().pos();
+
+						auto ID = (int)(&t - &f.front());
+
+						GetObj().frame_Reset(t.GetFrame().GetFrameID());
+						bool IsLeft = (localmatBase.x >= 0);
+
+						auto startpos = GetObj().frame(t.GetFrame().GetFrameID());
+						if (ID != (max - 1)) {
+							int Now = (ID / DIV) * DIV;
+							int Next = Now + DIV;
+							if (Next >= max) {
+								Next = max - 1;
+							}
+							if (Next > Now) {
+								t.SetYpos(Lerp(f.at(Now).GetYPos(), f.at(Next).GetYPos(), (float)(ID - Now) / (float)(Next - Now)));
+							}
+						}
+						GetObj().SetFrameLocalMatrix(t.GetFrame().GetFrameID(),
+													 Matrix4x4DX::RotAxis(Vector3DX::right(), IsLeft ? this->m_wheel_Left : this->m_wheel_Right) *
+													 Matrix4x4DX::Mtrans(localmatBase + Vector3DX::up() * t.GetYPosR())
+						);
+					}
 				}
 			}
 			for (const auto& f : GetData().Get_wheelframe_nospring()) {
-				if (f.GetFrameID() >= 0) {
-					GetObj().SetFrameLocalMatrix(f.GetFrameID(), Matrix4x4DX::RotAxis(Vector3DX::right(), (f.GetFrameWorldPosition().pos().x >= 0) ? this->m_wheel_Left : this->m_wheel_Right) * Matrix4x4DX::Mtrans(f.GetFrameWorldPosition().pos()));
-				}
+				if (f.GetFrameID() < 0) { continue; }
+				GetObj().SetFrameLocalMatrix(f.GetFrameID(), Matrix4x4DX::RotAxis(Vector3DX::right(), (f.GetFrameWorldPosition().pos().x >= 0) ? this->m_wheel_Left : this->m_wheel_Right) * Matrix4x4DX::Mtrans(f.GetFrameWorldPosition().pos()));
 			}
 		}
 		//操作共通
 		void			VehicleClass::ExecuteMove(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
-			auto* ObjMngr = ObjectManager::Instance();
-			auto* SE = SoundPool::Instance();
-			auto* PlayerMngr = PlayerManager::Instance();//todo:GetMyPlayerID()
 			bool isfloat = GetData().GetIsFloat() && (this->m_move.pos.y == -GetData().GetDownInWater());
+			bool isOverride = PutOverride();
 			//傾きの取得
 			{
 				const auto bNormal = (isfloat) ? Vector3DX::up() : this->m_BodyNormal;
 				float yradBody = 0.f;
-				if (this->m_PosBufOverRideFlag) {
-					yradBody = this->m_RadOverRide.y;
+				if (isOverride) {
+					yradBody = GetOverRideInfo().rad.y;
 				}
 				else {
 					auto pp = (this->m_move.mat * Matrix4x4DX::RotVec2(Vector3DX::up(), bNormal).inverse()).zvec() * -1.f;
 					yradBody = std::atan2f(pp.x, pp.z);
 				}
 				this->m_move.mat = Matrix4x4DX::Axis1(bNormal, (Matrix4x4DX::RotAxis(Vector3DX::up(), yradBody)*Matrix4x4DX::RotVec2(Vector3DX::up(), bNormal)).zvec() * -1.f);
-				if (this->m_PosBufOverRideFlag) {
+				if (isOverride) {
 					//一旦その場で地形判定
-					this->m_move.pos = this->m_PosBufOverRide;
-					GetObj().SetMatrix(this->m_move.MatIn());
+					this->m_move.pos = GetOverRideInfo().pos;
 				}
 				Easing(&this->m_BodyNormal, (Vector3DX::Cross((GetObj().frame(GetData().Get_square(0)) - GetObj().frame(GetData().Get_square(3))), GetObj().frame(GetData().Get_square(1)) - GetObj().frame(GetData().Get_square(2)))).normalized(), 0.8f, EasingType::OutExpo);
 			}
@@ -498,13 +519,52 @@ namespace FPS_n2 {
 				float hight_t = 0.f;
 				int cnt_t = 0;
 				//履帯
-				for (auto& f : this->m_b2Foot) {
-					f.FirstExecute(&GetObj(), m_BackGround, !(this->m_MyID == 0));//CheckOnlyGround
-					for (const auto& t : f.Getdownsideframe()) {
-						if (t.GetColResult_Y() != (std::numeric_limits<float>::max)()) {
-							hight_t += t.GetColResult_Y();
-							cnt_t++;
+				auto y_vec = GetObj().GetMatrix().yvec();
+				for (auto& f : this->m_CatFoot) {
+					float Res_y = 0.f;
+					bool IsHit = false;
+					int max = (int)f.size();
+					for (auto& t : f) {
+						auto ID = (int)(&t - &f.front());
+
+						if ((ID % DIV == 0) || (ID == (max - 1))) {
+							GetObj().frame_Reset(t.GetFrame().GetFrameID());
+							auto startpos = GetObj().frame(t.GetFrame().GetFrameID());
+							auto localmatBase = t.GetFrame().GetFrameWorldPosition().pos();
+							auto pos_t = startpos - y_vec * localmatBase.y;
+							auto pos_t1 = pos_t + y_vec * (2.f*Scale_Rate);
+							auto pos_t2 = pos_t + y_vec * (-0.3f*Scale_Rate);
+							IsHit = m_BackGround->CheckLinetoMap(pos_t1, &pos_t2, true, (this->m_MyID != 0));
+							if (IsHit) {
+								Res_y = pos_t2.y - pos_t.y;
+								hight_t += pos_t2.y;
+								cnt_t++;
+							}
+							else {
+								Res_y = -0.4f*Scale_Rate;
+							}
+							t.SetYpos(Res_y);
 						}
+						t.Update(&GetObj(), (IsHit) ? this->m_speed : 0.f);
+					}
+				}
+				for (auto& f : this->m_CatFoot) {
+					int max = (int)f.size();
+					for (auto& t : f) {
+						auto localmatBase = t.GetFrame().GetFrameWorldPosition().pos();
+
+						auto ID = (int)(&t - &f.front());
+						if (ID != (max - 1)) {
+							int Now = (ID / DIV) * DIV;
+							int Next = Now + DIV;
+							if (Next >= max) {
+								Next = max - 1;
+							}
+							if (Next > Now) {
+								t.SetYpos(Lerp(f.at(Now).GetYPos(), f.at(Next).GetYPos(), (float)(ID - Now) / (float)(Next - Now)));
+							}
+						}
+						GetObj().SetFrameLocalMatrix(t.GetFrame().GetFrameID(), Matrix4x4DX::Mtrans(localmatBase + Vector3DX::up() * t.GetYPosR()));
 					}
 				}
 				int cnt_sq = cnt_t;
@@ -523,30 +583,37 @@ namespace FPS_n2 {
 				this->m_move.pos.y = (pos_ytmp);
 				//地面or水面にいるかどうか
 				if ((cnt_t > 0) || isfloat) {
+					bool CanMove = (this->m_HP_parts[GetData().Get_module_mesh()[0]] > 0) && (this->m_HP_parts[GetData().Get_module_mesh()[1]] > 0);
+					bool CanTurn = (this->m_HP_parts[GetData().Get_module_mesh()[0]] > 0) || (this->m_HP_parts[GetData().Get_module_mesh()[1]] > 0);
 					//前進後退
 					{
-						const auto spdold = this->m_speed_add + this->m_speed_sub;
-						this->m_speed_add = (this->m_key[2]) ? std::min(this->m_speed_add + (0.15f / 3.6f) * (60.f / DrawParts->GetFps()), (GetData().GetMaxFrontSpeed() / 3.6f)) : std::max(this->m_speed_add - (0.7f / 3.6f) * (60.f / DrawParts->GetFps()), 0.f);
-						this->m_speed_sub = (this->m_key[3]) ? std::max(this->m_speed_sub - (0.15f / 3.6f) * (60.f / DrawParts->GetFps()), (GetData().GetMaxBackSpeed() / 3.6f)) : std::min(this->m_speed_sub + (0.7f / 3.6f) * (60.f / DrawParts->GetFps()), 0.f);
-						this->m_speed = (spdold + ((this->m_speed_add + this->m_speed_sub) - spdold) * 0.1f) / DrawParts->GetFps();
-						auto vec = this->m_move.mat.zvec() * -1.f * (this->m_speed*Scale_Rate);
-						this->m_move.vec.x = (vec.x);
+						this->m_speed_add = std::clamp(
+							this->m_speed_add + ((GetInputControl().GetPADSPress(PADS::MOVE_W) && CanMove) ? 0.05f : -0.3f) / DrawParts->GetFps(),
+							0.f, GetData().GetMaxFrontSpeed());
+
+						this->m_speed_sub = std::clamp(
+							this->m_speed_sub + ((GetInputControl().GetPADSPress(PADS::MOVE_S) && CanMove) ? -0.15f : 0.3f) / DrawParts->GetFps(),
+							GetData().GetMaxBackSpeed(), 0.f);
+
+						Easing(&this->m_speedBase, this->m_speed_add + this->m_speed_sub, 0.9f, EasingType::OutExpo);
+						auto vec = this->m_move.mat.zvec() * (-1.f * this->m_speedBase*Scale_Rate);
+						this->m_move.vec.x = vec.x;
 						if ((cnt_t - cnt_sq) >= 3) {
-							this->m_move.vec.y = (vec.y);
+							this->m_move.vec.y = vec.y;
 						}
 						else {
 							this->m_move.vec.y += (M_GR / (DrawParts->GetFps() * DrawParts->GetFps()));
 						}
-						this->m_move.vec.z = (vec.z);
+						this->m_move.vec.z = vec.z;
 					}
 					//旋回
 					{
 						const auto radold = this->m_radAdd;
-						this->m_yradadd_left = (this->m_key[4]) ? std::max(this->m_yradadd_left - deg2rad(1.f * (60.f / DrawParts->GetFps())), deg2rad(-GetData().GetMaxBodyRad())) : std::min(this->m_yradadd_left + deg2rad(2.f * (60.f / DrawParts->GetFps())), 0.f);
-						this->m_yradadd_right = (this->m_key[5]) ? std::min(this->m_yradadd_right + deg2rad(1.f * (60.f / DrawParts->GetFps())), deg2rad(GetData().GetMaxBodyRad())) : std::max(this->m_yradadd_right - deg2rad(2.f * (60.f / DrawParts->GetFps())), 0.f);
+						this->m_yradadd_left = (GetInputControl().GetPADSPress(PADS::MOVE_D) && CanTurn) ? std::max(this->m_yradadd_left - deg2rad(1.f * (60.f / DrawParts->GetFps())), deg2rad(-GetData().GetMaxBodyRad())) : std::min(this->m_yradadd_left + deg2rad(2.f * (60.f / DrawParts->GetFps())), 0.f);
+						this->m_yradadd_right = (GetInputControl().GetPADSPress(PADS::MOVE_A) && CanTurn) ? std::min(this->m_yradadd_right + deg2rad(1.f * (60.f / DrawParts->GetFps())), deg2rad(GetData().GetMaxBodyRad())) : std::max(this->m_yradadd_right - deg2rad(2.f * (60.f / DrawParts->GetFps())), 0.f);
 						this->m_radAdd.y = ((this->m_yradadd_left + this->m_yradadd_right) / DrawParts->GetFps());
 						//慣性
-						this->m_radAdd.x = (deg2rad(-(this->m_speed / (60.f / DrawParts->GetFps())) / (0.1f / 3.6f) * 50.f));
+						this->m_radAdd.x = (deg2rad(-this->m_speed * 1800.f));
 						this->m_radAdd.z = (deg2rad(-this->m_radAdd.y / (deg2rad(5.f) / DrawParts->GetFps()) * 5.f));
 						Easing(&this->m_Tilt, Vector3DX::vget(std::clamp(this->m_radAdd.x - radold.x, deg2rad(-30.f), deg2rad(30.f)), 0.f, std::clamp(this->m_radAdd.z - radold.z, deg2rad(-15.f), deg2rad(15.f))), 0.95f, EasingType::OutExpo);
 						this->m_move.mat *= Matrix4x4DX::RotAxis(this->m_move.mat.xvec(), -this->m_Tilt.x) * Matrix4x4DX::RotAxis(this->m_move.mat.zvec(), this->m_Tilt.z);
@@ -559,64 +626,14 @@ namespace FPS_n2 {
 			}
 			//射撃反動
 			for (auto& cg : this->m_Gun) {
-				auto index = &cg - &this->m_Gun.front();
 				this->m_move.mat *=
 					Matrix4x4DX::RotAxis(this->m_move.mat.xvec(), cg.GetFireReactionVec().x) *
 					Matrix4x4DX::RotAxis(this->m_move.mat.zvec(), cg.GetFireReactionVec().z);
-				//射撃
-				const std::shared_ptr<CellItem>* PtrBuf = nullptr;
-				int Check = -1;
-				float Time = 1.f;
-				for (int i = 0; i < (int)cg.GetData()->GetAmmoSpec().size(); i++) {
-					const auto* Ptr = PlayerMngr->GetPlayer(this->GetMyPlayerID()).GetInventory(0, [&](const std::shared_ptr<CellItem>& tgt) {
-						return tgt->GetItemData() == cg.GetData()->GetAmmoSpec().at(i);
-																								});
-					if (Ptr) {
-						PtrBuf = Ptr;
-						Check = i;
-						Time = 1.f;
-						break;
-					}
-				}
-				if (!PtrBuf) {
-					for (int i = 0; i < (int)cg.GetData()->GetAmmoSpec().size(); i++) {
-						const auto* Ptr = PlayerMngr->GetPlayer(this->GetMyPlayerID()).GetInventory(1, [&](const std::shared_ptr<CellItem>& tgt) {
-							return tgt->GetItemData() == cg.GetData()->GetAmmoSpec().at(i);
-																									});
-						if (Ptr) {
-							PtrBuf = Ptr;
-							Check = i;
-							Time = 2.5f;
-							break;
-						}
-					}
-				}
-
-				if (cg.Execute_(this->m_key[(index == 0) ? 0 : 1], (Check >= 0), Time, this->m_MyID == 0)) {
-					HitPoint AmmoC = 1;
-					if ((*PtrBuf)->Sub(&AmmoC)) {
-						PlayerMngr->GetPlayer(this->GetMyPlayerID()).DeleteInventory(*PtrBuf);
-					}
-					SE->Get((int)SoundEnum::Tank_Shot).Play_3D(cg.GetData()->GetShotSound(), this->m_move.pos, 250.f*Scale_Rate);													//サウンド
-
-					EffectControl::SetOnce(EffectResource::Effect::ef_fire, GetGunMuzzlePos((int)index), GetGunMuzzleVec((int)index), cg.GetCaliberSize() / 0.1f * Scale_Rate);	//銃発砲エフェクトのセット
-
-					auto LastAmmo = std::make_shared<AmmoClass>();
-					ObjMngr->AddObject(LastAmmo);
-
-					LastAmmo->SetMapCol(this->m_BackGround);
-					LastAmmo->Init();
-
-					LastAmmo->Put(cg.GetData()->GetAmmoSpec().at(Check), GetGunMuzzlePos((int)index), GetGunMuzzleVec((int)index), this->m_MyID);
-					if (this->m_MyID == 0) {
-						SE->Get((int)SoundEnum::Tank_Eject).Play(cg.GetData()->GetEjectSound());
-					}
-				}
 			}
 			//移動
-			if (this->m_PosBufOverRideFlag) {
-				this->m_move.pos = this->m_PosBufOverRide;
-				this->m_move.vec = this->m_VecBufOverRide;
+			if (isOverride) {
+				this->m_move.pos = GetOverRideInfo().pos;
+				this->m_move.vec = GetOverRideInfo().vec;
 			}
 			else {
 				this->m_move.pos += this->m_move.vec;
@@ -626,10 +643,10 @@ namespace FPS_n2 {
 				}
 			}
 			//転輪
-			this->m_wheel_Left += (-(this->m_speed * 2.f - this->m_radAdd.y * 5.f));
-			this->m_wheel_Right += (-(this->m_speed * 2.f + this->m_radAdd.y * 5.f));
+			this->m_wheel_Left += (-(this->m_speedBase * 2.f - this->m_radAdd.y * 5.f));
+			this->m_wheel_Right += (-(this->m_speedBase * 2.f + this->m_radAdd.y * 5.f));
 			//戦車壁判定
-			if (this->m_PosBufOverRideFlag) {
+			if (isOverride) {
 				this->m_b2mine.SetTransform(b2Vec2(this->m_move.pos.x, this->m_move.pos.z), Get_body_yrad());
 			}
 			else {
@@ -638,64 +655,25 @@ namespace FPS_n2 {
 		}
 		//SetMat指示更新
 		void			VehicleClass::ExecuteMatrix(void) noexcept {
-			auto* DrawParts = DXDraw::Instance();
-			auto OldPos = this->m_move.pos;
 			//戦車座標反映
 			this->m_move.mat *= Matrix4x4DX::RotAxis(Vector3DX::up(), -this->m_b2mine.Rad() - Get_body_yrad());
 			this->m_move.pos = Vector3DX::vget(this->m_b2mine.Pos().x, this->m_move.pos.y, this->m_b2mine.Pos().y);
-			float spdrec = this->m_spd_buf;
-			Easing(&this->m_spd_buf, this->m_b2mine.Speed() * ((this->m_spd_buf > 0) ? 1.f : -1.f), 0.99f, EasingType::OutExpo);
-			this->m_speed = this->m_spd_buf - spdrec;
-
+			UpdateMove();
+			this->m_speed = (this->m_move.pos - this->m_move.repos).magnitude() / Scale_Rate;
+			if (this->m_speedBase < 0.f) {
+				this->m_speed *= -1.f;
+			}
 			//転輪
 			b2Vec2 Gravity2D = b2Vec2(
-				(M_GR / DrawParts->GetFps() / 2.f) * (Vector3DX::Dot(this->m_move.mat.zvec(), Vector3DX::up())),
-				(M_GR / DrawParts->GetFps() / 2.f) * (Vector3DX::Dot(this->m_move.mat.yvec(), Vector3DX::up())));
-			for (auto& f : this->m_b2Foot) {
-				f.LateExecute(
-					&f == &this->m_b2Foot.front(), &GetData(), &GetObj(),
-					Gravity2D, (&f == &this->m_b2Foot.front()) ? this->m_wheel_Left : this->m_wheel_Right,
-					(this->m_move.pos - this->m_move.repos).magnitude() * 60.f / DrawParts->GetFps());
-			}
-			UpdateMove();
-			this->m_add_vec_real = this->m_move.pos - this->m_move.repos;
-			this->m_Hit_active.Execute(GetObj());
-			this->m_move.repos = this->m_move.pos;
-		}
-		//描画共通
-		void			VehicleClass::DrawCommon(void) noexcept {
-			if (!is_ADS()) {
-				if (CheckCameraViewClip_Box(
-					(this->GetMove().pos + Vector3DX::vget(-5, -5, -5)*Scale_Rate).get(),
-					(this->GetMove().pos + Vector3DX::vget(5, 5, 5)*Scale_Rate).get()) == FALSE
-					) {
+				(-9.8f / 60.f) * (Vector3DX::Dot(this->m_move.mat.zvec(), Vector3DX::up())),
+				(-9.8f / 60.f) * (Vector3DX::Dot(this->m_move.mat.yvec(), Vector3DX::up())));
 
-					//this->m_col.DrawModel();
-					//this->m_Hit_active.Draw();
-					//return;
-
-					if (true) {
-						if (this->m_HP_parts[GetData().Get_module_mesh()[0]] > 0) {
-							MV1SetFrameTextureAddressTransform(GetObj().get(), 0, -this->m_wheel_Left * 0.1f, 0.f, 1.f, 1.f, 0.5f, 0.5f, 0.f);
-							GetObj().DrawMesh(0);
-						}
-						if (this->m_HP_parts[GetData().Get_module_mesh()[1]] > 0) {
-							MV1SetFrameTextureAddressTransform(GetObj().get(), 0, -this->m_wheel_Right * 0.1f, 0.f, 1.f, 1.f, 0.5f, 0.5f, 0.f);
-							GetObj().DrawMesh(1);
-						}
-						MV1ResetFrameTextureAddressTransform(GetObj().get(), 0);
-						GetObj().DrawMesh(2);
-						for (int i = 2; i < GetObj().mesh_num(); i++) {
-							GetObj().DrawMesh(i);
-						}
-						//this->m_col.DrawModel();
-						this->m_Hit_active.Draw();
-					}
-					else {
-						GetObj().DrawModel();
-					}
+			if (CanLookTarget) {
+				for (auto& f : this->m_b2Foot) {
+					f.LateExecute(&f == &this->m_b2Foot.front(), &GetData(), &GetObj(), Gravity2D);
 				}
 			}
+			this->m_Hit_active.Execute(GetObj());
 		}
 		//
 		const bool		VehicleClass::CheckLine(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) noexcept {
@@ -735,7 +713,7 @@ namespace FPS_n2 {
 		}
 		//
 		void			VehicleClass::DrawModuleView(int xp, int yp, int size) noexcept {
-			auto base = GetLookVec().zvec()*-1.f;
+			auto base = KeyControl::GetRadBuf()*-1.f;
 			base.y = (0.f);
 			base = base.normalized();
 

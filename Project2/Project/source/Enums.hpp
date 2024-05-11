@@ -16,7 +16,7 @@ namespace FPS_n2 {
 			Item,
 		};
 		enum class SoundEnum {
-			Environment,
+			Environment = (int)SoundEnumCommon::Num,
 
 			Tank_Shot,
 			Tank_Ricochet,

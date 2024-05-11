@@ -338,8 +338,8 @@ namespace FPS_n2 {
 						this->m_MaxHP = (HitPoint)getparams::_int(mdata);
 						this->m_MaxFuel = getparams::_int(mdata);
 						this->m_IsFloat = getparams::_bool(mdata);
-						this->m_MaxFrontSpeed = getparams::_float(mdata);
-						this->m_MaxBackSpeed = getparams::_float(mdata);
+						this->m_MaxFrontSpeed = getparams::_float(mdata) / 3.6f / 60.f;
+						this->m_MaxBackSpeed = getparams::_float(mdata) / 3.6f / 60.f;
 						this->m_MaxBodyRad = getparams::_float(mdata);
 						this->m_MaxTurretRad = deg2rad(getparams::_float(mdata));
 						{

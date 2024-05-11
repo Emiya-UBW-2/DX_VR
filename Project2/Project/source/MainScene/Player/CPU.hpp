@@ -131,10 +131,7 @@ namespace FPS_n2 {
 				Vector3DX vec_to = Vector3DX::zero();
 				//
 				auto vec_mat = MyVeh->GetMove().mat;
-				auto vec_gunmat = MyVeh->GetLookVec();
-				auto vec_x = vec_gunmat.xvec();
-				auto vec_y = vec_gunmat.yvec();
-				auto vec_zp = vec_gunmat.zvec() * -1.f;
+				auto vec_zp = MyVeh->GetRadBuf() * -1.f;
 				auto vec_z = vec_mat.zvec() * -1.f;
 				//狙うキャラを探索+AIのフェーズ選択
 				{
@@ -294,7 +291,7 @@ namespace FPS_n2 {
 								//this->S_key = true;
 							}
 						}
-						if (MyVeh->Getvec_real().magnitude() <= MyVeh->GetMove().vec.magnitude() *(0.5f)) {
+						if (MyVeh->GetSpeed() <= MyVeh->GetMove().vec.magnitude() *(0.5f)) {
 							this->cpu_do.ai_time_tankback += 1.f / DrawParts->GetFps();
 						}
 						else {
@@ -432,7 +429,7 @@ namespace FPS_n2 {
 					}
 					else {
 						this->cpu_do.ai_time_tankback_ing = 0.f;
-						if (MyVeh->Getvec_real().magnitude() <= MyVeh->GetMove().vec.magnitude() *(0.5f)) {
+						if (MyVeh->GetSpeed() <= MyVeh->GetMove().vec.magnitude() *(0.5f)) {
 							this->cpu_do.ai_time_tankback += 1.f / DrawParts->GetFps();
 						}
 						else {
@@ -546,7 +543,7 @@ namespace FPS_n2 {
 								//this->S_key = true;
 							}
 						}
-						if (MyVeh->Getvec_real().magnitude() <= MyVeh->GetMove().vec.magnitude() *(0.5f)) {
+						if (MyVeh->GetSpeed() <= MyVeh->GetMove().vec.magnitude() *(0.5f)) {
 							this->cpu_do.ai_time_tankback += 1.f / DrawParts->GetFps();
 						}
 						else {
