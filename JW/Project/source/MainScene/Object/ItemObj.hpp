@@ -25,7 +25,7 @@ namespace FPS_n2 {
 		public:
 			void			Init_Sub(void) noexcept override {
 				this->m_IsActive = false;
-				this->m_ItemType = ItemType::ARMER;
+				//this->m_ItemType = ItemType::ARMER;
 			}
 			void			FirstExecute(void) noexcept override;
 			void			Draw(bool isDrawSemiTrans) noexcept override {

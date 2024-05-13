@@ -421,6 +421,16 @@ namespace FPS_n2 {
 				default:
 					break;
 			}
+			//ターゲットが見える場合かまえっぱなし
+			if (m_IsMainGame) {
+				for (int i = 0; i < Player_num; i++) {
+					if (i == this->m_MyID) { continue; }
+					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
+					if (!Chara->CanLookTarget) { continue; }
+					GunReadyControl::SetAimOrADS();
+					break;
+				}
+			}
 			//
 			if (PrevAction == m_CharaAction) {
 				switch (m_CharaAction) {

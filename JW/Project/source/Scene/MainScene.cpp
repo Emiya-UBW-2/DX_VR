@@ -698,7 +698,7 @@ namespace FPS_n2 {
 						SaveDataParts->SetParam("Time_" + std::to_string(index), r.second);
 					}
 				}
-				SaveDataParts->SetParam("ScoreNum", std::min(ScoreNum, 20));
+				SaveDataParts->SetParam("ScoreNum", std::min(ScoreNum + 1, 20));
 			}
 		}
 		//update

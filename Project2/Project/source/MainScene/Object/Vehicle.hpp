@@ -148,9 +148,10 @@ namespace FPS_n2 {
 					return;
 				}
 				if (isDrawSemiTrans) { return; }
-				if (CheckCameraViewClip_Box(
-					(this->GetMove().pos + Vector3DX::vget(-5, -5, -5)*Scale_Rate).get(),
-					(this->GetMove().pos + Vector3DX::vget(5, 5, 5)*Scale_Rate).get()) == FALSE
+				if ((CheckCameraViewClip_Box(
+					(this->GetMove().pos + Vector3DX::vget(-5, 0, -5)*Scale_Rate).get(),
+					(this->GetMove().pos + Vector3DX::vget(5, 5, 5)*Scale_Rate).get()) == FALSE) ||
+					 CanLookTarget
 					) {
 					int fog_enable;
 					int fog_mode;
@@ -172,11 +173,11 @@ namespace FPS_n2 {
 					//this->m_Hit_active.Draw();
 					if (true) {
 						if (this->m_HP_parts[GetData().Get_module_mesh()[0]] > 0) {
-							MV1SetFrameTextureAddressTransform(GetObj().get(), 0, -this->m_wheel_Left * 0.1f, 0.f, 1.f, 1.f, 0.5f, 0.5f, 0.f);
+							MV1SetFrameTextureAddressTransform(GetObj().get(), 0, 0.f, -this->m_wheel_Left * 0.1f, 1.f, 1.f, 0.5f, 0.5f, 0.f);
 							GetObj().DrawMesh(0);
 						}
 						if (this->m_HP_parts[GetData().Get_module_mesh()[1]] > 0) {
-							MV1SetFrameTextureAddressTransform(GetObj().get(), 0, -this->m_wheel_Right * 0.1f, 0.f, 1.f, 1.f, 0.5f, 0.5f, 0.f);
+							MV1SetFrameTextureAddressTransform(GetObj().get(), 0, 0.f, -this->m_wheel_Right * 0.1f, 1.f, 1.f, 0.5f, 0.5f, 0.f);
 							GetObj().DrawMesh(1);
 						}
 						MV1ResetFrameTextureAddressTransform(GetObj().get(), 0);
