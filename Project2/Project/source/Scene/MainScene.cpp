@@ -54,7 +54,7 @@ namespace FPS_n2 {
 				Vehicle->ObjectBaseClass::Init();
 				//ポジション指定
 				int ID = 0;
-				for (int i = 0;i < 10;i++) {
+				for (int i2 = 0;i2 < 10;i2++) {
 					ID = GetRand(this->m_BackGround->GetRoadPointNum() - 1);
 					auto* Mat = this->m_BackGround->GetRoadPoint(ID);
 					Vector3DX pos_t = Mat->pos(); pos_t.y = 0.f;

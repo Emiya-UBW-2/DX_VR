@@ -200,7 +200,7 @@ namespace FPS_n2 {
 					auto Per = std::clamp(m_UltPer[i], 0.f, 1.f);
 					if (GunPtr) {
 						GunPtr->SetGunMatrix(
-							Lerp_Matrix(Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(90)) * Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(30)), m_UltMat[i].rotation(), Per)*
+							Lerp(Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(90)) * Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(30)), m_UltMat[i].rotation(), Per)*
 							Matrix4x4DX::Mtrans(Lerp(Vector3DX::vget(-0.05f, 1.2f, -0.6f)*Scale_Rate, m_UltMat[i].pos(), Per)));
 					}
 				}
@@ -209,7 +209,7 @@ namespace FPS_n2 {
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
 				auto Per = 1.f - std::clamp(m_Range - 1.f, 0.f, 1.f);
 				GunPtr->SetGunMatrix(
-					Lerp_Matrix(Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(90)) * Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(30)), Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(0)), std::clamp(Per*2.f, 0.f, 1.f))*
+					Lerp(Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(90)) * Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(30)), Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(0)), std::clamp(Per*2.f, 0.f, 1.f))*
 					Matrix4x4DX::Mtrans(
 						Lerp(
 							Lerp(Vector3DX::vget(0.1f, 1.05f, 0.f)*Scale_Rate, Vector3DX::vget(0.f, 1.2f, 0.f)*Scale_Rate, std::clamp(Per*2.f, 0.f, 1.f))
@@ -218,7 +218,7 @@ namespace FPS_n2 {
 				);
 				auto Mat = GunPtr->GetFrameWorldMat_P(GunFrame::Magpos);
 				(*GunPtr->GetMagazinePtr())->SetMove(
-					Lerp_Matrix(Mat.rotation(), Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(90)), std::clamp(Per*2.f - 1.f, 0.f, 1.f)),
+					Lerp(Mat.rotation(), Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(90)), std::clamp(Per*2.f - 1.f, 0.f, 1.f)),
 					Lerp(
 						Lerp(Mat.pos(), Mat.pos() + Matrix4x4DX::Vtrans(Vector3DX::vget(0.f, -0.15f, 0.05f)*Scale_Rate, Mat.rotation()), std::clamp(Per*2.f, 0.f, 1.f))
 						, Vector3DX::vget(0.2f, 1.f, 0.f)*Scale_Rate, std::clamp(Per*2.f - 1.f, 0.f, 1.f))

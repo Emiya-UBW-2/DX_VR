@@ -1097,7 +1097,7 @@ namespace FPS_n2 {
 					for (int i = 0; i < (int)EnumGunAnimType::Max; i++) {
 						Matrix4x4DX AnimData;
 						if (!GetGunPtrNow()->GetGunAnime((EnumGunAnimType)i, &AnimData)) { continue; }
-						AnimMat = Lerp_Matrix(AnimMat, AnimData, this->m_Arm[i].Per());
+						AnimMat = Lerp(AnimMat, AnimData, this->m_Arm[i].Per());
 					}
 					Vector3DX Post0 = GetFrameWorldMat(GetFrame((int)CharaFrame::Head)).pos() + Matrix4x4DX::Vtrans(AnimMat.pos(), GetCharaDir());
 					//
