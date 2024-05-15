@@ -238,7 +238,12 @@ namespace FPS_n2 {
 				{
 					std::string Path = "data/gun/";
 					Path += ULTName;
-					Path += "/Gauge.png";
+					if (strcmpDx(ULTName, "M4A1") == 0) {
+						Path += "/Gauge2.png";
+					}
+					else {
+						Path += "/Gauge.png";
+					}
 					m_GaugeMask.at(0).Dispose();
 					m_GaugeMask.at(0).Load(Path.c_str());
 					ULT_Graph = GraphHandle::Load(Path);

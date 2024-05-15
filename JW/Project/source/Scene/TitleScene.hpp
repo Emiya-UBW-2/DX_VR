@@ -31,8 +31,6 @@ namespace FPS_n2 {
 			static const int			CharMax = 256;
 			int							m_CreditCoulm{0};
 			std::array<std::pair<char[CharMax], char[CharMax]>, 64> m_CreditStr{};
-			bool						m_CreditActive{false};
-			PopUpDrawClass				m_PopUpDrawClass;
 			bool						m_HardModeActive{false};
 
 			float						m_Yrad{0.f};

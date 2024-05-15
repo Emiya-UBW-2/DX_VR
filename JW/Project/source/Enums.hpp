@@ -142,6 +142,7 @@ namespace FPS_n2 {
 			AKS_74,
 			Mod870,
 			M16_4,
+			M4A1,
 			Max,
 		};
 		static const char* ULT_GUNName[(int)ULT_GUN::Max] = {
@@ -149,6 +150,7 @@ namespace FPS_n2 {
 			"AKS-74",
 			"Mod870",
 			"M16-4",
+			"M4A1",
 		};
 	};
 

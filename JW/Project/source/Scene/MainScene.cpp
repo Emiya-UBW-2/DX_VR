@@ -1269,6 +1269,29 @@ namespace FPS_n2 {
 				c->SetLaserEndPos(EndPos);
 				c->SetIsLaserActive(true);
 			}
+			//ƒ‰ƒCƒg
+			for (int index = 0; index < Chara_num; index++) {
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+				if (!c->GetGunPtrNow()) { continue; }
+				if (!c->GetGunPtrNow()->HasFrame(GunFrame::Light) || !c->GetGunPtrNow()->IsActive()) {
+					continue;
+				}
+				//
+				auto mat = c->GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Light);
+				Vector3DX StartPos = mat.pos();
+				SetLightEnable(TRUE);
+				ChangeLightTypeSpot(mat.pos().get(),
+					(mat.zvec()*-1.f).get(),
+									DX_PI_F / 8.0f,
+									DX_PI_F / 12.0f,
+									35.0f*Scale_Rate,
+									0.0f,
+									0.006f,
+									0.0f);
+				SetLightDifColor(GetColorF(1.f, 1.f, 1.f, 1.f));
+				SetLightSpcColor(GetColorF(0.01f, 0.01f, 0.01f, 0.f));
+				SetLightAmbColor(GetColorF(0.1f, 0.1f, 0.1f, 1.f));
+			}
 		}
 		void			MAINLOOP::UpdateUIParam(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();

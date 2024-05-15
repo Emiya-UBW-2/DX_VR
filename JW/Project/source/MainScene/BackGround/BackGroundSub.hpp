@@ -240,17 +240,6 @@ namespace FPS_n2 {
 					SetLightSpcColorHandle(m_LightHandle[i], GetColorF(0.01f, 0.01f, 0.01f, 0.f));
 					SetLightAmbColorHandle(m_LightHandle[i], GetColorF(0.1f, 0.1f, 0.1f, 1.f));
 				}
-				ChangeLightTypeSpot(GetNearestLight(2).get(),
-									VGet(0.0f, -1.0f, 0.0f),
-									DX_PI_F / 4.0f,
-									DX_PI_F / 6.0f,
-									5.0f*Scale_Rate,
-									0.0f,
-									0.006f,
-									0.0f);
-				SetLightDifColor(GetColorF(1.f, 1.f, 1.f, 1.f));
-				SetLightSpcColor(GetColorF(0.01f, 0.01f, 0.01f, 0.f));
-				SetLightAmbColor(GetColorF(0.1f, 0.1f, 0.1f, 1.f));
 			}
 
 			void			Update() {
@@ -305,25 +294,11 @@ namespace FPS_n2 {
 						auto vec2_XZ = vec2; vec2_XZ.y = (0.f);
 						if (Vector3DX::Dot(vec1, vec2_XZ) > std::sin(deg2rad(-60))) {
 							auto Vec = Matrix4x4DX::Vtrans(Vector3DX::up()*-1.f, Matrix4x4DX::RotAxis(vec2, b.m_SlingZrad.GetRad()));
-							if (count <= 1) {//01
-								SetLightEnableHandle(m_LightHandle[count], TRUE);
-								SetLightPositionHandle(m_LightHandle[count], Pos.get());
-								SetLightDirectionHandle(m_LightHandle[count], Vec.get());
-							}
-							else {//2
-								ChangeLightTypeSpot(Pos.get(),
-													Vec.get(),
-													DX_PI_F / 4.0f,
-													DX_PI_F / 6.0f,
-													5.0f*Scale_Rate,
-													0.0f,
-													0.006f,
-													0.0f);
-								//SetLightPosition(Pos.get());
-								//SetLightDirection(Vec.get());
-							}
+							SetLightEnableHandle(m_LightHandle[count], TRUE);
+							SetLightPositionHandle(m_LightHandle[count], Pos.get());
+							SetLightDirectionHandle(m_LightHandle[count], Vec.get());
 							count++;
-							if (count > 2) { break; }
+							if (count >= 2) { break; }
 						}
 					}
 				}

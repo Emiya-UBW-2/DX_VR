@@ -77,27 +77,6 @@ namespace FPS_n2 {
 				m_CreditCoulm++;
 			}
 			FileRead_close(mdata);
-
-			m_PopUpDrawClass.Set(LocalizePool::Instance()->Get(120), y_r(720), y_r(840), [&](int WinSizeX, int WinSizeY, bool) {
-				auto* Fonts = FontPool::Instance();
-
-				int xp1, yp1;
-
-				xp1 = y_r(960) - WinSizeX / 2 + y_r(48);
-				yp1 = y_r(540) - WinSizeY / 2 + y_r(18) * 3 + y_r(18);
-				int Height = y_r(12);
-				for (int i = 0;i < m_CreditCoulm;i++) {
-					int xpos = xp1 + y_r(6);
-					int ypos = yp1 + (yp1 + Height - yp1) / 2;
-					Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
-																		   xpos, ypos, White, Black, m_CreditStr.at(i).first);
-
-					xpos = xp1 + WinSizeX - y_r(48 * 2) - y_r(6);
-					Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
-																		   xpos, ypos, White, Black, m_CreditStr.at(i).second);
-					yp1 += Height;
-				}
-								 });
 			//
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
@@ -151,6 +130,7 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
+			auto* PopUpParts = PopUp::Instance();
 
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
 
@@ -166,8 +146,7 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9992));
 				}
 			);
-			m_CreditActive = false;
-			if (!OptionWindowClass::Instance()->IsActive() && !m_PopUpDrawClass.IsActive()) {
+			if (!PopUpParts->IsActivePop()) {
 				if ((GameFadeIn == 0.f) && (GameStart == 0.f)) {
 					int preselect = select;
 					bool preMouseSel = m_MouseSelMode;
@@ -224,7 +203,31 @@ namespace FPS_n2 {
 								SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 								break;
 							case 5:
-								m_CreditActive = true;
+								PopUpParts->AddLog(LocalizePool::Instance()->Get(120), y_r(720), y_r(840),
+												   [&](int WinSizeX, int WinSizeY, bool) {
+									auto* Fonts = FontPool::Instance();
+
+									int xp1, yp1;
+
+									xp1 = y_r(960) - WinSizeX / 2 + y_r(48);
+									yp1 = y_r(540) - WinSizeY / 2 + y_r(18) * 3 + y_r(18);
+									int Height = y_r(12);
+									for (int i = 0;i < m_CreditCoulm;i++) {
+										int xpos = xp1 + y_r(6);
+										int ypos = yp1 + (yp1 + Height - yp1) / 2;
+										Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
+																							   xpos, ypos, White, Black, m_CreditStr.at(i).first);
+
+										xpos = xp1 + WinSizeX - y_r(48 * 2) - y_r(6);
+										Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
+																							   xpos, ypos, White, Black, m_CreditStr.at(i).second);
+										yp1 += Height;
+									}
+												   },
+												   [&]() {},
+													   [&]() {},
+													   true
+													   );
 								SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 								break;
 							default:
@@ -271,16 +274,6 @@ namespace FPS_n2 {
 			}
 			if (Chara->IsGun0Select()) {
 				Chara->SetAimOrADS();
-			}
-			//
-			m_PopUpDrawClass.Update(m_CreditActive);
-			if (m_PopUpDrawClass.IsActive()) {
-				Pad->ChangeGuide(
-					[&]() {
-						auto* KeyGuide = PadControl::Instance();
-						KeyGuide->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9991));
-					}
-				);
 			}
 			//
 			if (select == 1 || select == 2) {
@@ -349,6 +342,7 @@ namespace FPS_n2 {
 		void			TitleScene::DrawUI_Base_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* Fonts = FontPool::Instance();
+			auto* PopUpParts = PopUp::Instance();
 
 			//
 			m_TitleImage.DrawExtendGraph(y_r(64), y_r(64), y_r(64 + 369), y_r(64 + 207), true);
@@ -356,14 +350,14 @@ namespace FPS_n2 {
 			{
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
 																	  FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-																	  y_r(64 + 369), y_r(64 + 207), White, Black, "Ver 1.0.6");
+																	  y_r(64 + 369), y_r(64 + 207), White, Black, "Ver 1.1.0");
 			}
 			//
 			for (auto& y : ButtonSel) {
 				y.Draw();
 			}
 			//
-			if ((select != -1) && (!OptionWindowClass::Instance()->IsActive() && !m_PopUpDrawClass.IsActive())) {
+			if ((select != -1) && !PopUpParts->IsActivePop()) {
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
 																	  FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 																	  y_r(32), y_r(1080 - 32 - 32), White, Black, LocalizePool::Instance()->Get(9020 + select));
@@ -378,8 +372,6 @@ namespace FPS_n2 {
 
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
-			//クレジット
-			m_PopUpDrawClass.Draw();
 		}
 		//使い回しオブジェ系
 		void			TitleScene::Dispose_Load_Sub(void) noexcept {

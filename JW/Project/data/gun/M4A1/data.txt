@@ -1,5 +1,11 @@
 Name=M4A1  AssaultRifle
 
+Info=軍用のアサルトライフル。
+Info=なぜか落ちていた。強い。
+
+Info_Eng=A military assault rifle.
+Info_Eng=I don't know why, but I fell into that position.SO STRONG.
+
 ShotRate=800
 RecoilPower=90
 RecoilReturn=0.9

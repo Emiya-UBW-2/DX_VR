@@ -194,6 +194,8 @@ namespace FPS_n2 {
 				Matrix4x4DX::Mtrans(Vector3DX::vget(-0.5f, 0.95f, 0.3f)*Scale_Rate);
 			m_UltMat[3] = Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(80)) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(190)) *
 				Matrix4x4DX::Mtrans(Vector3DX::vget(-0.9f, 0.95f, 0.f)*Scale_Rate);
+			m_UltMat[4] = Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(-5)) * Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(100)) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(90)) *
+				Matrix4x4DX::Mtrans(Vector3DX::vget(0.f, 1.01f, -0.4f)*Scale_Rate);
 			{
 				for (int i = 0;i < (int)ULT_GUN::Max;i++) {
 					auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + i).GetGun(0);

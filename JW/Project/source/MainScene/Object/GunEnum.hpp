@@ -48,6 +48,7 @@ namespace FPS_n2 {
 			Sight,
 			MuzzleAdapter,
 			LaserSight,
+			Light,
 			EyeOffsetPos,
 			Max,
 		};
@@ -76,6 +77,7 @@ namespace FPS_n2 {
 			"Sight",
 			"MuzzleAdapter",
 			"LaserSight",
+			"Light",
 			"EyeOffsetPos",
 		};
 

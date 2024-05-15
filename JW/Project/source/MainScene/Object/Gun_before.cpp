@@ -54,6 +54,7 @@ namespace FPS_n2 {
 						case GunFrame::Lens:
 						case GunFrame::LensSize:
 						case GunFrame::LaserSight:
+						case GunFrame::Light:
 							Ret = true;
 							break;
 						default:

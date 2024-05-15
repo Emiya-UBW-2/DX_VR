@@ -422,10 +422,11 @@ namespace FPS_n2 {
 					break;
 			}
 			//ターゲットが見える場合かまえっぱなし
-			if (m_IsMainGame) {
+			if (m_IsMainGame && !m_IsChanging) {
 				for (int i = 0; i < Player_num; i++) {
 					if (i == this->m_MyID) { continue; }
 					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
+					if (!Chara->IsAlive()) { continue; }
 					if (!Chara->CanLookTarget) { continue; }
 					GunReadyControl::SetAimOrADS();
 					break;
