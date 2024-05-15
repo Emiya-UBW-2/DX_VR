@@ -12,8 +12,6 @@ namespace FPS_n2 {
 			Vehicle,
 			Ammo,
 			Gun,
-			HindD,
-			Item,
 		};
 		enum class SoundEnum {
 			Environment = (int)SoundEnumCommon::Num,

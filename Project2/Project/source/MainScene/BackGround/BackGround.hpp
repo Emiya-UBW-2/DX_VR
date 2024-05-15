@@ -12,28 +12,13 @@ namespace FPS_n2 {
 			MV1							m_ObjGroundCol_Box2D;
 
 			std::vector<Vector3DX>		m_WayPoint;
-
-			int							m_softimage{ -1 };
-
 			BuildControl				m_BuildControl;
-			Grass						m_grass;
-			TreeControl					m_Tree;
 			Box2DWall					m_Box2DWall;
-			//BreakWall					m_BreakWall;
 		public://getter
-			//const auto&		GetBuildCol(void) noexcept { return this->m_BuildControl.GetBuildCol(); }
 			const auto&		GetWayPoint(void) noexcept { return this->m_WayPoint; }
 			const std::shared_ptr<b2World>&	GetBox2Dworld(void) noexcept {
 				return this->m_Box2DWall.GetBox2Dworld();
 				return nullptr;
-			}
-
-			const auto		GetWallCol(const Vector3DX&, Vector3DX*, Vector3DX*, float) noexcept {//const Vector3DX& repos, Vector3DX* pos, Vector3DX* norm, float radius
-				//return this->m_BreakWall.GetWallCol(repos, pos, norm, radius);
-				return false;
-			}
-			void			CheckTreetoSquare(const Vector3DX& cornerLF, const Vector3DX& cornerRF, const Vector3DX& cornerRR, const Vector3DX& cornerLR, const Vector3DX& center, float speed) {
-				this->m_Tree.CheckTreetoSquare(cornerLF, cornerRF, cornerRR, cornerLR, center, speed);
 			}
 			const auto		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, bool isNearest, bool isOnlyGround, Vector3DX* Normal = nullptr) {
 				bool isHit = false;
@@ -101,7 +86,6 @@ namespace FPS_n2 {
 				MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
 
 				this->m_BuildControl.Load();
-				this->m_Tree.Load();
 			}
 			//
 			void			Init(void) noexcept {
@@ -135,48 +119,6 @@ namespace FPS_n2 {
 					}
 					this->m_Box2DWall.Init();
 				}
-				//–Ø
-				this->m_Tree.Init(&this->m_ObjGroundCol, this->m_BuildControl.GetBuildCol());
-				//‘
-				{
-					float MAPX = 300.f*Scale_Rate;
-					float MAPZ = 300.f*Scale_Rate;
-					float SIZX = 10.f*Scale_Rate;
-					float SIZZ = 10.f*Scale_Rate;
-					int x, y;
-					GraphHandle BaseGrass = GraphHandle::Load("data/grass.png");
-					BaseGrass.GetSize(&x, &y);
-					m_softimage = MakeSoftImage(x, y);
-					GraphHandle BlackScreen = GraphHandle::Make((int)((float)x*SIZX / MAPX), (int)((float)y*SIZZ / MAPZ));
-					BlackScreen.SetDraw_Screen(false);
-					{
-						DrawBox(0, 0, (int)((float)x*SIZX / MAPX), (int)((float)y*SIZZ / MAPZ), GetColor(0, 0, 0), TRUE);
-					}
-					GraphHandle BaseScreen = GraphHandle::Make(x, y);
-					BaseScreen.SetDraw_Screen(false);
-					{
-						BaseGrass.DrawGraph(0, 0, false);
-						for (auto& b : this->m_BuildControl.GetBuildCol()) {
-							if (b.GetMeshSel() >= 0) {
-								auto pos = b.GetMatrix().pos();
-								BlackScreen.DrawRotaGraph(
-									(int)((float)x*(pos.x + MAPX / 2.f) / MAPX),
-									(int)((float)y*(pos.z + MAPZ / 2.f) / MAPZ),
-									1.f,
-									std::atan2f(b.GetMatrix().zvec().x, b.GetMatrix().zvec().z),
-									false
-								);
-							}
-						}
-						GetDrawScreenSoftImage(0, 0, x, y, m_softimage);
-					}
-					this->m_grass.Init(&this->m_ObjGroundCol, m_softimage);
-					DeleteSoftImage(m_softimage);
-				}
-				//•Ç
-				{
-					//this->m_BreakWall.Init();
-				}
 			}
 			//
 			void			FirstExecute(void) noexcept {
@@ -185,7 +127,6 @@ namespace FPS_n2 {
 			//
 			void			Execute(void) noexcept {
 				//this->m_BreakWall.Execute();
-				this->m_Tree.Execute();
 			}
 			//
 			void			BG_Draw(void) noexcept {
@@ -198,18 +139,12 @@ namespace FPS_n2 {
 				this->m_BuildControl.Draw();
 			}
 			void			Shadow_Draw_NearFar(void) noexcept {
-				this->m_Tree.Draw(false);
 			}
 			void			Shadow_Draw(void) noexcept {
-				this->m_grass.DrawShadow();
 			}
 			void			Draw(void) noexcept {
 				this->m_ObjGround.DrawModel();
 				this->m_BuildControl.Draw();
-				this->m_Tree.Draw(true);
-				this->m_grass.Draw();
-
-				//DrawSoftImage(0,0,m_softimage);
 			}
 			//
 			void			Dispose(void) noexcept {
@@ -218,10 +153,7 @@ namespace FPS_n2 {
 				this->m_ObjGroundCol.Dispose();
 
 				this->m_BuildControl.Dispose();
-				this->m_grass.Dispose();
 				this->m_Box2DWall.Dispose();
-				//this->m_BreakWall.Dispose();
-				this->m_Tree.Dispose();
 			}
 		};
 	};

@@ -9,15 +9,12 @@
 #include "../MainScene/NetworkBrowser.hpp"
 
 #include "../MainScene/Object/Vehicle.hpp"
-#include "../MainScene/Object/HindD.hpp"
-#include "../MainScene/Object/Item.hpp"
 #include "../MainScene/Object/Ammo.hpp"
 
 #include "../MainScene/Object/ItemData.hpp"
 #include "../MainScene/Player/CPU.hpp"
 
 #include "../MainScene/UI/MainSceneUIControl.hpp"
-#include "../MainScene/Inventory.hpp"
 
 #include "../MainScene/Player/Player.hpp"
 
@@ -56,7 +53,6 @@ namespace FPS_n2 {
 			float										m_Reticle_xpos = 0;
 			float										m_Reticle_ypos = 0;
 			NetWorkBrowser								m_NetWorkBrowser;
-			InventoryClass								m_InventoryClass;
 			//
 			std::vector<DamageEvent>					m_DamageEvents;
 			float										m_fov_base{ deg2rad(45.f) };
@@ -146,7 +142,7 @@ namespace FPS_n2 {
 					DrawBox(xpos, 0, DrawParts->GetDispXSize(), ypos, Black, TRUE);
 					DrawBox(xpos + xsize, ypos, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Black, TRUE);
 					DrawBox(0, ypos + ysize, xpos + xsize, DrawParts->GetDispYSize(), Black, TRUE);
-					this->m_scope_Graph.DrawExtendGraph(xpos, ypos, xpos + xsize, ypos + ysize, true);
+					//this->m_scope_Graph.DrawExtendGraph(xpos, ypos, xpos + xsize, ypos + ysize, true);
 				}
 				if ((this->m_ChangeViewPer*255.f) > 1.f) {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*this->m_ChangeViewPer), 0, 255));
@@ -162,7 +158,6 @@ namespace FPS_n2 {
 				//	this->m_NetWorkBrowser.Draw();
 				//}
 				//Pause
-				this->m_InventoryClass.Draw(Vehicle->GetMove().pos);
 				if (Vehicle->IsAlive()) {
 					if (this->m_Reticle_on) {
 						this->m_aim_Graph.DrawRotaGraph((int)this->m_Reticle_xpos, (int)this->m_Reticle_ypos, (float)(y_r(100)) / 100.f, 0.f, true);

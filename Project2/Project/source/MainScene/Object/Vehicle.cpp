@@ -1,8 +1,6 @@
 #pragma once
 #include	"Vehicle.hpp"
 #include "../../MainScene/Player/Player.hpp"
-#include "../../MainScene/Object/Item.hpp"
-
 #include "../../MainScene/Object/Ammo.hpp"
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -10,79 +8,13 @@ namespace FPS_n2 {
 		//‰Šú‰»ŠÖ˜A
 		//----------------------------------------------------------
 		void			VehicleClass::SubHP_Parts(HitPoint damage_t, int parts_Set_t) noexcept {
-			auto* PlayerMngr = PlayerManager::Instance();//todo:GetMyPlayerID()
-			if (GetData().Get_module_mesh()[0] == parts_Set_t) {
-				while (true) {
-					const auto* Ptr = PlayerMngr->GetPlayer(this->GetMyPlayerID()).GetInventory(2, [&](const std::shared_ptr<CellItem>& tgt) { return tgt.get(); });
-					if (Ptr) {
-						if ((*Ptr)->Sub(&damage_t)) {
-							PlayerMngr->GetPlayer(this->GetMyPlayerID()).DeleteInventory(*Ptr);
-						}
-						RepairParts(parts_Set_t);
-					}
-					else {
-						ClashParts(parts_Set_t);
-						break;
-					}
-					if (damage_t == 0) {
-						break;
-					}
-				}
-			}
-			else if (GetData().Get_module_mesh()[1] == parts_Set_t) {
-				while (true) {
-					const auto* Ptr = PlayerMngr->GetPlayer(this->GetMyPlayerID()).GetInventory(3, [&](const std::shared_ptr<CellItem>& tgt) { return tgt.get(); });
-					if (Ptr) {
-						if ((*Ptr)->Sub(&damage_t)) {
-							PlayerMngr->GetPlayer(this->GetMyPlayerID()).DeleteInventory(*Ptr);
-						}
-						RepairParts(parts_Set_t);
-					}
-					else {
-						ClashParts(parts_Set_t);
-						break;
-					}
-					if (damage_t == 0) {
-						break;
-					}
-				}
-			}
-			else {
-				this->m_HP_parts[parts_Set_t] = std::max<HitPoint>(this->m_HP_parts[parts_Set_t] - damage_t, 0);
-			}
+			this->m_HP_parts[parts_Set_t] = std::max<HitPoint>(this->m_HP_parts[parts_Set_t] - damage_t, 0);
 		}
 		const bool		VehicleClass::SetDamageEvent(const DamageEvent& value) noexcept {
-			auto* DrawParts = DXDraw::Instance();
 			if (this->m_MyID == value.DamageID) {
 				SubHP(value.Damage);
 				if (!IsAlive()) {
 					EffectControl::SetOnce(EffectResource::Effect::ef_greexp2, this->m_move.pos, this->m_move.mat.zvec(), Scale_Rate*2.f);
-					auto* ObjMngr = ObjectManager::Instance();
-					auto* PlayerMngr = PlayerManager::Instance();//todo:GetMyPlayerID()
-
-					for (auto& I : PlayerMngr->GetPlayer(this->m_MyID).GetInventorys()) {
-						for (auto& xo : I) {
-							for (auto& yo : xo) {
-								if (yo.get() && (GetRand(100) < 33)) {
-									auto Ptr = std::make_shared<ItemClass>();
-									ObjMngr->AddObject(Ptr);
-									ObjMngr->LoadModel(Ptr, Ptr, "data/model/item/");
-
-									Ptr->SetMapCol(this->m_BackGround);
-									Ptr->Init();
-
-									auto Vec = (Matrix4x4DX::RotAxis(Vector3DX::right(), GetRandf(deg2rad(90)))*Matrix4x4DX::RotAxis(Vector3DX::up(), GetRandf(deg2rad(360)))).yvec()*Scale_Rate;
-									Ptr->SetMove(
-										Matrix4x4DX::RotVec2(Vector3DX::up(), Vec.normalized()),
-										this->m_move.pos + Vec * 6.f,
-										Vec*25.f / DrawParts->GetFps() * (1.0f*GetRandf(0.5f)));
-									Ptr->SetData(yo->GetItemData(), yo->GetCount());
-									PlayerMngr->GetPlayer(this->m_MyID).DeleteInventory(yo);
-								}
-							}
-						}
-					}
-
 				}
 				return true;
 			}

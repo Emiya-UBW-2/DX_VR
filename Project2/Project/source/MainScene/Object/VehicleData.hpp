@@ -96,11 +96,11 @@ namespace FPS_n2 {
 				float								m_MaxBackSpeed{ 0.f };			//後退速度(km/h)
 				float								m_MaxBodyRad{ 0.f };			//旋回速度(度/秒)
 				float								m_MaxTurretRad{ 0.f };			//砲塔駆動速度(度/秒)
-				std::shared_ptr<ItemData>			m_TrackPtr{ nullptr };
 				std::vector<GunData>				m_GunFrameData;					//
 				b2PolygonShape						m_DynamicBox;					//
 				MV1									m_DataObj;						//
 				MV1									m_DataCol;						//
+				frames m_Viewframe;
 				std::vector<frames>					m_wheelframe;					//転輪
 				std::vector<frames>					m_wheelframe_nospring;			//誘導輪回転
 				std::vector<std::pair<int, float>>	m_armer_mesh;					//装甲ID
@@ -110,7 +110,6 @@ namespace FPS_n2 {
 				std::array<std::vector<frames>, 2>	m_b2upsideframe;				//履帯上
 				std::array<std::vector<frames>, 2>	m_downsideframe;				//履帯
 				std::array<std::vector<ViewAndModule>, 2>	m_TankViewPic;				//モジュール表示
-				std::vector<std::pair<int, int>>	m_Inventory;
 			private:
 				const auto		GetSide(bool isLeft, bool isFront) const noexcept {
 					int ans = 0;
@@ -152,9 +151,9 @@ namespace FPS_n2 {
 				const auto&		GetMaxBackSpeed(void) const noexcept { return this->m_MaxBackSpeed; }
 				const auto&		GetMaxBodyRad(void) const noexcept { return this->m_MaxBodyRad; }
 				const auto&		GetMaxTurretRad(void) const noexcept { return this->m_MaxTurretRad; }
-				const auto&		GetTrackPtr(void) const noexcept { return this->m_TrackPtr; }
 				const auto&		Get_gunframe(void) const noexcept { return this->m_GunFrameData; }
 				const auto&		GetDynamicBox(void) const noexcept { return this->m_DynamicBox; }
+				const auto&		Get_ViewFrame(void) const noexcept { return this->m_Viewframe; }
 				const auto&		Get_wheelframe(void) const noexcept { return this->m_wheelframe; }
 				const auto&		Get_wheelframe_nospring(void) const noexcept { return this->m_wheelframe_nospring; }
 				const auto&		Get_armer_mesh(void) const noexcept { return this->m_armer_mesh; }
@@ -166,8 +165,6 @@ namespace FPS_n2 {
 				const auto&		Get_b2upsideframe(size_t ID_t)const noexcept { return this->m_b2upsideframe[ID_t]; }
 				const auto&		Get_b2upsideframe(void) const noexcept { return this->m_b2upsideframe; }
 				const auto&		Get_b2downsideframe(void) const noexcept { return this->m_downsideframe; }
-				const auto		GetInventoryXSize(int ID) const noexcept { return this->m_Inventory[ID].first; }
-				const auto		GetInventoryYSize(int ID) const noexcept { return this->m_Inventory[ID].second; }
 			public: //コンストラクタ、デストラクタ
 				VhehicleData(void) noexcept { }
 				VhehicleData(const VhehicleData& o) noexcept {
@@ -182,6 +179,7 @@ namespace FPS_n2 {
 					this->m_MaxTurretRad = o.m_MaxTurretRad;
 					this->m_GunFrameData = o.m_GunFrameData;
 					this->m_DynamicBox = o.m_DynamicBox;
+					this->m_Viewframe = o.m_Viewframe;
 					this->m_wheelframe = o.m_wheelframe;
 					this->m_wheelframe_nospring = o.m_wheelframe_nospring;
 					this->m_armer_mesh = o.m_armer_mesh;
@@ -197,7 +195,7 @@ namespace FPS_n2 {
 				//事前読み込み
 				void		Set_Pre(const char* name) noexcept {
 					this->m_name = name;
-					MV1::Load("data/tank/" + this->m_name + "/model_DISABLE.mv1", &this->m_DataObj);//model.pmx//model_DISABLE.mv1
+					MV1::Load("data/tank/" + this->m_name + "/model.pmx", &this->m_DataObj);//model.pmx//model_DISABLE.mv1
 					MV1::Load("data/tank/" + this->m_name + "/col.mv1", &this->m_DataCol);
 				}
 				//メイン読み込み
@@ -214,7 +212,10 @@ namespace FPS_n2 {
 					Vector3DX minpos, maxpos;							//
 					for (int i = 0; i < this->m_DataObj.frame_num(); i++) {
 						std::string p = this->m_DataObj.frame_name(i);
-						if (p.find("転輪", 0) != std::string::npos) {
+						if (p == "into") {
+							this->m_Viewframe.Set(i, this->m_DataObj);
+						}
+						else if (p.find("転輪", 0) != std::string::npos) {
 							this->m_wheelframe.resize(this->m_wheelframe.size() + 1);
 							this->m_wheelframe.back().Set(i, this->m_DataObj);
 						}
@@ -342,24 +343,6 @@ namespace FPS_n2 {
 						this->m_MaxBackSpeed = getparams::_float(mdata) / 3.6f / 60.f;
 						this->m_MaxBodyRad = getparams::_float(mdata);
 						this->m_MaxTurretRad = deg2rad(getparams::_float(mdata));
-						{
-							auto RIGHT = getparams::_str(mdata);
-							auto& iData = ItemDataControl::Instance()->GetData();
-							for (const auto& d : iData) {
-								if (d->GetPath().find(RIGHT) != std::string::npos) {
-									m_TrackPtr = d;
-									break;
-								}
-							}
-						}
-						//インベントリ
-						{
-							this->m_Inventory.resize(5);
-							for (auto& I : this->m_Inventory) {
-								I.first = getparams::_int(mdata);
-								I.second = getparams::_int(mdata);
-							}
-						}
 						{
 							for (auto& g : this->m_GunFrameData) {
 								g.Set(mdata);

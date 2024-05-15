@@ -16,13 +16,10 @@
     <ClInclude Include="source\MainScene\BackGround\BackGround.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGroundSub.hpp" />
     <ClInclude Include="source\MainScene\Input.hpp" />
-    <ClInclude Include="source\MainScene\Inventory.hpp" />
     <ClInclude Include="source\MainScene\NetWork.hpp" />
     <ClInclude Include="source\MainScene\NetworkBrowser.hpp" />
     <ClInclude Include="source\MainScene\Object\Ammo.hpp" />
-    <ClInclude Include="source\MainScene\Object\Item.hpp" />
     <ClInclude Include="source\MainScene\Object\ItemData.hpp" />
-    <ClInclude Include="source\MainScene\Object\ItemEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\Vehicle.hpp" />
     <ClInclude Include="source\MainScene\Object\VehicleData.hpp" />
     <ClInclude Include="source\MainScene\Object\Vehicle_before.hpp" />
@@ -38,9 +35,7 @@
     <ClCompile Include="source\MainScene\BackGround\BackGround.cpp" />
     <ClCompile Include="source\MainScene\BackGround\BackGroundSub.cpp" />
     <ClCompile Include="source\MainScene\Input.cpp" />
-    <ClCompile Include="source\MainScene\Inventory.cpp" />
     <ClCompile Include="source\MainScene\NetworkBrowser.cpp" />
-    <ClCompile Include="source\MainScene\Object\Item.cpp" />
     <ClCompile Include="source\MainScene\Object\ItemData.cpp" />
     <ClCompile Include="source\MainScene\Object\Vehicle.cpp" />
     <ClCompile Include="source\MainScene\Object\VehicleData.cpp" />

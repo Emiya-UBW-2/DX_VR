@@ -145,6 +145,11 @@ namespace FPS_n2 {
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				if (!(this->m_IsActive && this->m_IsDraw)) {
+					if (GetMyPlayerID() == 0) {
+						for (int i = 3; i < GetObj().mesh_num(); i++) {
+							GetObj().DrawMesh(i);
+						}
+					}
 					return;
 				}
 				if (isDrawSemiTrans) { return; }
@@ -182,8 +187,14 @@ namespace FPS_n2 {
 						}
 						MV1ResetFrameTextureAddressTransform(GetObj().get(), 0);
 						GetObj().DrawMesh(2);
-						for (int i = 2; i < GetObj().mesh_num(); i++) {
-							GetObj().DrawMesh(i);
+						if (GetMyPlayerID() == 0) {
+							for (int i = 2; i < GetObj().mesh_num(); i++) {
+								GetObj().DrawMesh(i);
+							}
+						}
+						else {
+							GetObj().DrawMesh(2);
+							GetObj().DrawMesh(3);
 						}
 						//this->m_col.DrawModel();
 						this->m_Hit_active.Draw();

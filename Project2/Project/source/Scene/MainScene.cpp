@@ -34,17 +34,6 @@ namespace FPS_n2 {
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
-			//
-			{
-				auto Hind = std::make_shared<HindDClass>();
-				ObjMngr->AddObject(Hind);
-				ObjMngr->LoadModel(Hind, Hind, "data/model/hindD/");
-
-				Hind->Init();
-
-				Hind->SetMove(Matrix4x4DX::identity(), Vector3DX::vget(0.f, 30.f*Scale_Rate, 0.f));
-				Hind->GetObj().get_anime(0).per = 1.f;
-			}
 			//player
 			for (int i = 0; i < Vehicle_num; i++) {
 				PlayerMngr->GetPlayer(i).SetVehicle(std::make_shared<VehicleClass>());
@@ -77,33 +66,6 @@ namespace FPS_n2 {
 
 				Vehicle->ValueInit(dataID, this->m_BackGround->GetBox2Dworld(), (PlayerID)i);
 				Vehicle->MovePoint(deg2rad(0), rad_t, pos_t);
-				//インベントリ
-				for (int loop = 0; loop < 5; loop++) {
-					PlayerMngr->GetPlayer(i).SetInventory(loop, Vehicle->GetData().GetInventoryXSize(loop), Vehicle->GetData().GetInventoryYSize(loop));
-				}
-				{
-					if (Vehicle->Get_Gunsize() >= 2) {
-						PlayerMngr->GetPlayer(i).FillInventory(0, Vehicle->GetGun()[0].GetData()->GetAmmoSpec().at(0), 0, 0, PlayerMngr->GetPlayer(i).GetInventoryXSize(0) / 2, PlayerMngr->GetPlayer(i).GetInventoryYSize(0));
-						PlayerMngr->GetPlayer(i).FillInventory(0, Vehicle->GetGun()[1].GetData()->GetAmmoSpec().at(0), PlayerMngr->GetPlayer(i).GetInventoryXSize(0) / 2, 0, PlayerMngr->GetPlayer(i).GetInventoryXSize(0), PlayerMngr->GetPlayer(i).GetInventoryYSize(0));
-					}
-					else {
-						PlayerMngr->GetPlayer(i).FillInventory(0, Vehicle->GetGun()[0].GetData()->GetAmmoSpec().at(0), 0, 0, PlayerMngr->GetPlayer(i).GetInventoryXSize(0), PlayerMngr->GetPlayer(i).GetInventoryYSize(0));
-					}
-					PlayerMngr->GetPlayer(i).FillInventory(1, Vehicle->GetGun()[0].GetData()->GetAmmoSpec().at(0), 0, 0, PlayerMngr->GetPlayer(i).GetInventoryXSize(1), 6);
-				}
-				{
-					PlayerMngr->GetPlayer(i).FillInventory(2, Vehicle->GetData().GetTrackPtr(), 0, 0, PlayerMngr->GetPlayer(i).GetInventoryXSize(2), PlayerMngr->GetPlayer(i).GetInventoryYSize(2));
-					PlayerMngr->GetPlayer(i).FillInventory(3, Vehicle->GetData().GetTrackPtr(), 0, 0, PlayerMngr->GetPlayer(i).GetInventoryXSize(3), PlayerMngr->GetPlayer(i).GetInventoryYSize(3));
-				}
-				{
-					auto& iData = ItemDataControl::Instance()->GetData();
-					auto Select = std::find_if(iData.begin(), iData.end(), [&](const std::shared_ptr<ItemData>& d) {return (d->GetPath().find("DieselMiniTank") != std::string::npos); });
-					if (Select != iData.end()) {
-						for (int x = 0; x < 5; x++) {
-							PlayerMngr->GetPlayer(i).PutInventory(4, x * 2, 0, *Select, -1, false);
-						}
-					}
-				}
 				//AI
 				this->m_AICtrl[i]->Init(this->m_BackGround, (PlayerID)i);
 			}
@@ -114,7 +76,6 @@ namespace FPS_n2 {
 			//
 			this->m_DamageEvents.clear();
 			this->m_NetWorkBrowser.Init();
-			this->m_InventoryClass.Init();
 		}
 		bool			MAINLOOP::Update_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -157,7 +118,6 @@ namespace FPS_n2 {
 						KeyGuide->AddGuide(PADS::INVENTORY, LocalizePool::Instance()->Get(9913));
 					}
 				});
-			this->m_InventoryClass.FirstExecute();
 			if (DXDraw::Instance()->IsPause()) {
 				return true;
 			}
@@ -226,7 +186,7 @@ namespace FPS_n2 {
 						else {
 							this->m_TPSLen = std::clamp(this->m_TPSLen - GetMouseWheelRotVolWithCheck(), 0, 6);
 							if (this->m_TPSLen == 0) {
-								this->m_zoom = 2.0f;
+								this->m_zoom = 1.0f;
 								this->m_changeview = true;
 							}
 						}
@@ -330,7 +290,6 @@ namespace FPS_n2 {
 					}
 				}
 				this->m_NetWorkBrowser.LateExecute();
-				this->m_InventoryClass.LateExecute();
 				//ダメージイベント
 				for (int i = 0; i < Vehicle_num; i++) {
 					auto& v = PlayerMngr->GetPlayer(i).GetVehicle();
@@ -356,23 +315,6 @@ namespace FPS_n2 {
 				}
 				Vehicle->SetAimingDistance((StartPos - EndPos).magnitude());
 			}
-			//アイテムのアタッチ
-			{
-				int loop = 0;
-				while (true) {
-					auto item = ObjMngr->GetObj((int)ObjType::Item, loop);
-					if (item) {
-						auto& ip = (std::shared_ptr<ItemClass>&)(*item);
-						if (!ip->IsActive()) {
-							ip->SetActive(true);
-						}
-					}
-					else {
-						break;
-					}
-					loop++;
-				}
-			}
 			//Execute
 			ObjMngr->ExecuteObject();
 			//弾の更新
@@ -397,7 +339,6 @@ namespace FPS_n2 {
 
 							Vector3DX norm_tmp;
 							bool ColRes = this->m_BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, true, false, &norm_tmp);
-							ColRes |= this->m_BackGround->GetWallCol(repos_tmp, &pos_tmp, &norm_tmp, a->GetCaliberSize());
 							bool is_HitAll = false;
 							//auto& v = *ObjMngr->GetObj((int)ObjType::Vehicle, a->GetShootedID());
 							for (int i = 0; i < Vehicle_num; i++) {
@@ -451,31 +392,16 @@ namespace FPS_n2 {
 				//Set_size_lens(y_r(300));
 				//Set_zoom_lens(3.f);
 			}
-			//木の更新
-			{
-				for (int i = 0; i < Vehicle_num; i++) {
-					auto& v = PlayerMngr->GetPlayer(i).GetVehicle();
-					this->m_BackGround->CheckTreetoSquare(
-						v->GetObj_const().frame(v->GetData().Get_square(0)),
-						v->GetObj_const().frame(v->GetData().Get_square(2)),
-						v->GetObj_const().frame(v->GetData().Get_square(3)),
-						v->GetObj_const().frame(v->GetData().Get_square(1)),
-						v->GetMove().pos,
-						(v->GetMove().pos - v->GetMove().repos).magnitude() * 60.f / DrawParts->GetFps());
-				}
-			}
-			//ハインド
-			{
-				auto& Hind = *ObjMngr->GetObj((int)ObjType::HindD, 0);
-				Hind->SetAnimLoop(0, 1.f);
-				Hind->GetObj().work_anime();
-			}
 			this->m_BackGround->FirstExecute();
 			ObjMngr->LateExecuteObject();
 			//視点
 			{
 				bool IsADS = (this->m_TPSLen == 0);
 				Vector3DX CamPos = IsADS ? Vehicle->GetGunMuzzleBase(0) : Vehicle->Get_EyePos_Base();
+
+				if (IsADS) {
+					CamPos = Vehicle->GetFrameWorldMat(Vehicle->GetData().Get_ViewFrame().GetFrameID()).pos();
+				}
 				//
 				Vector3DX eyepos = CamPos;
 				if (!IsADS) {
@@ -498,8 +424,8 @@ namespace FPS_n2 {
 				auto near_t = DrawParts->GetMainCamera().GetCamNear();
 				auto far_t = DrawParts->GetMainCamera().GetCamFar();
 				Easing(&fov_t, (IsADS && (this->m_zoom != 0.f)) ? (this->m_fov_base / this->m_zoom) : this->m_fov_base, 0.9f, EasingType::OutExpo);
-				Easing(&near_t, 1.f + 2.f*((IsADS) ? this->m_zoom : 2.f), 0.9f, EasingType::OutExpo);
-				Easing(&far_t, std::max(Vehicle->GetAimingDistance(), Scale_Rate * 50.f) + Scale_Rate * 50.f, 0.9f, EasingType::OutExpo);
+				Easing(&near_t, 1.f + 2.f*((IsADS) ? 0.f : 2.f), 0.9f, EasingType::OutExpo);
+				Easing(&far_t, std::max(Vehicle->GetAimingDistance(), Scale_Rate * 50.f) + Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
 				DrawParts->SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
 				PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.5f, far_t / 2, near_t, far_t);
 			}
@@ -563,7 +489,6 @@ namespace FPS_n2 {
 			BattleResourceMngr->Dispose();
 
 			this->m_NetWorkBrowser.Dispose();
-			this->m_InventoryClass.Dispose();
 			EffectControl::Dispose();
 			PlayerMngr->Dispose();
 			ObjMngr->DeleteAll();

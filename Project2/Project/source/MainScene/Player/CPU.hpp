@@ -589,36 +589,7 @@ namespace FPS_n2 {
 				if (!MyVeh->IsAlive()) {
 					if (m_RepairCnt > 30.f) {
 						m_RepairCnt = 0.f;
-						auto& Player = PlayerMngr->GetPlayer(MyVeh->GetMyPlayerID());
-						//—š‘Ñ
-						{
-							const auto* Ptr = Player.GetInventory(2, [&](const std::shared_ptr<CellItem>& tgt) { return tgt.get(); });
-							if (!Ptr) {
-								Player.FillInventory(2, MyVeh->GetData().GetTrackPtr(), 0, 0, Player.GetInventoryXSize(2), Player.GetInventoryYSize(2));
-								MyVeh->RepairParts(MyVeh->GetData().Get_module_mesh()[0]);
-							}
-						}
-						{
-							const auto* Ptr = Player.GetInventory(3, [&](const std::shared_ptr<CellItem>& tgt) { return tgt.get(); });
-							if (!Ptr) {
-								Player.FillInventory(3, MyVeh->GetData().GetTrackPtr(), 0, 0, Player.GetInventoryXSize(3), Player.GetInventoryYSize(3));
-								MyVeh->RepairParts(MyVeh->GetData().Get_module_mesh()[1]);
-							}
-						}
-						//’e
-						{
-							const auto* Ptr = Player.GetInventory(0, [&](const std::shared_ptr<CellItem>& tgt) { return tgt.get(); });
-							if (!Ptr) {
-								Player.FillInventory(0, MyVeh->GetGun()[0].GetData()->GetAmmoSpec().at(0), 0, 0, Player.GetInventoryXSize(0) / 2, Player.GetInventoryYSize(0), 3);
-								if (MyVeh->Get_Gunsize() >= 2) {
-									Player.FillInventory(0, MyVeh->GetGun()[1].GetData()->GetAmmoSpec().at(0), Player.GetInventoryXSize(0) / 2, 0, Player.GetInventoryXSize(0), Player.GetInventoryYSize(0), 3);
-								}
-							}
-						}
-						//
 						MyVeh->SubHP(-MyVeh->GetHPMax() / 3);
-
-
 					}
 					else {
 						m_RepairCnt += 1.f / DrawParts->GetFps();
