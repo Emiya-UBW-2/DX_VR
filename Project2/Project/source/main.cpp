@@ -5,12 +5,15 @@
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DXDraw::Create();						//汎用
-#ifdef DEBUG
-	auto* DebugParts = DebugClass::Instance();		//デバッグ
-#endif // DEBUG
 	auto* DrawParts = DXDraw::Instance();
 
 	DrawParts->Init();
+	if (DrawParts->IsFirstBoot()) {
+		return 0;
+	}
+#ifdef DEBUG
+	auto* DebugParts = DebugClass::Instance();		//デバッグ
+#endif // DEBUG
 	SetMainWindowText("Phantom of the Bunker");						//タイトル
 	//
 	FPS_n2::Sceneclass::PlayerManager::Create();
