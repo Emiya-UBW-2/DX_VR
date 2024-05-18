@@ -18,9 +18,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//
 	FPS_n2::Sceneclass::PlayerManager::Create();
 	FPS_n2::Sceneclass::CommonBattleResource::Create();
-
-	FPS_n2::Sceneclass::VehDataControl::Create();
-	FPS_n2::Sceneclass::ItemDataControl::Create();
 	//ÉVÅ[Éì
 	auto MAINLOOPLOADERscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOPLOADER>();
 	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();

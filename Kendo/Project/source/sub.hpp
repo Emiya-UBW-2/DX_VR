@@ -5,24 +5,31 @@ namespace FPS_n2 {
 	// プレイヤー関係の定義
 #define PLAYER_ENUM_MIN_SIZE		(0.1f * Scale_Rate)		// 周囲のポリゴン検出に使用する球の初期サイズ
 #define PLAYER_ENUM_DEFAULT_SIZE	(1.6f * Scale_Rate)		// 周囲のポリゴン検出に使用する球の初期サイズ
-#define PLAYER_HIT_WIDTH			(0.4f * Scale_Rate)		// 当たり判定カプセルの半径
+#define PLAYER_HIT_WIDTH			(0.6f * Scale_Rate)		// 当たり判定カプセルの半径
 #define PLAYER_HIT_HEIGHT			(1.6f * Scale_Rate)		// 当たり判定カプセルの高さ
 #define PLAYER_HIT_TRYNUM			(16)					// 壁押し出し処理の最大試行回数
 #define PLAYER_HIT_SLIDE_LENGTH		(0.015f * Scale_Rate)	// 一度の壁押し出し処理でスライドさせる距離
 	//壁判定ユニバーサル
-	static bool col_wall(const Vector3DX& OldPos, Vector3DX* NowPos, const std::vector<MV1*>& col_obj_t) noexcept {
+	static bool col_wall(const Vector3DX& OldPos, Vector3DX* NowPos, const std::vector<std::pair<MV1*, int>>& col_obj_t) noexcept {
+		if (col_obj_t.size() == 0) { return false; }
 		auto MoveVector = *NowPos - OldPos;
 		//MoveVector.y = (0);
 		// プレイヤーの周囲にあるステージポリゴンを取得する( 検出する範囲は移動距離も考慮する )
 		std::vector<MV1_COLL_RESULT_POLY> kabe_;// 壁ポリゴンと判断されたポリゴンの構造体のアドレスを保存しておく
 		for (const auto& objs : col_obj_t) {
-			auto HitDim = objs->CollCheck_Sphere(OldPos, PLAYER_ENUM_DEFAULT_SIZE + MoveVector.magnitude());
+			if ((&objs - &col_obj_t.front()) != 0) {
+				if (GetMinLenSegmentToPoint(OldPos, OldPos + Vector3DX::up(), objs.first->GetMatrix().pos()) >=
+					(20.f*Scale_Rate + PLAYER_ENUM_DEFAULT_SIZE + MoveVector.magnitude())) {
+					continue;
+				}
+			}
+			auto HitDim = objs.first->CollCheck_Sphere(OldPos, PLAYER_ENUM_DEFAULT_SIZE + MoveVector.magnitude(), objs.second);
 			// 検出されたポリゴンが壁ポリゴン( ＸＺ平面に垂直なポリゴン )か床ポリゴン( ＸＺ平面に垂直ではないポリゴン )かを判断する
 			for (int i = 0; i < HitDim.HitNum; ++i) {
 				auto& h_d = HitDim.Dim[i];
 				//壁ポリゴンと判断された場合でも、プレイヤーのＹ座標＋PLAYER_ENUM_MIN_SIZEより高いポリゴンのみ当たり判定を行う
 				if (
-					(abs(std::atan2f(h_d.Normal.y, std::hypotf(h_d.Normal.x, h_d.Normal.z))) <= deg2rad(30))
+					(abs(atan2f(h_d.Normal.y, std::hypotf(h_d.Normal.x, h_d.Normal.z))) <= deg2rad(30))
 					&& (h_d.Position[0].y > OldPos.y + PLAYER_ENUM_MIN_SIZE || h_d.Position[1].y > OldPos.y + PLAYER_ENUM_MIN_SIZE || h_d.Position[2].y > OldPos.y + PLAYER_ENUM_MIN_SIZE)
 					&& (h_d.Position[0].y < OldPos.y + PLAYER_ENUM_DEFAULT_SIZE || h_d.Position[1].y < OldPos.y + PLAYER_ENUM_DEFAULT_SIZE || h_d.Position[2].y < OldPos.y + PLAYER_ENUM_DEFAULT_SIZE)
 					) {
@@ -246,7 +253,7 @@ namespace FPS_n2 {
 			void			Set(void) noexcept;
 			void			Dispose(void) noexcept;
 		public:
-			void			LoadTank(const std::string&FolderName, PlayerID ID) noexcept;
+			void			LoadChara(const std::string&FolderName, PlayerID ID) noexcept;
 		};
 	};
 };

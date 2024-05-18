@@ -14,13 +14,14 @@ namespace FPS_n2 {
 			//
 			BattleResourceMngr->Load();
 			PlayerMngr->Init(Vehicle_num);
+
+			BattleResourceMngr->LoadChara("Chara", (PlayerID)1);
 		}
 		void			MAINLOOP::Set_Sub(void) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
-			auto* PlayerMngr = PlayerManager::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			auto* OptionParts = OPTION::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
 			//
 			BattleResourceMngr->Set();
 			//
@@ -34,45 +35,29 @@ namespace FPS_n2 {
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
-			//player
-			for (int i = 0; i < Vehicle_num; i++) {
-				PlayerMngr->GetPlayer(i).SetVehicle(std::make_shared<VehicleClass>());
-				auto& Vehicle = PlayerMngr->GetPlayer(i).GetVehicle();
-				ObjMngr->AddObject(Vehicle);
-				Vehicle->SetMapCol(this->m_BackGround);
-				Vehicle->ObjectBaseClass::Init();
-				//ポジション指定
-				int ID = 0;
-				for (int i2 = 0;i2 < 10;i2++) {
-					ID = GetRand(this->m_BackGround->GetRoadPointNum() - 1);
-					auto* Mat = this->m_BackGround->GetRoadPoint(ID);
-					Vector3DX pos_t = Mat->pos(); pos_t.y = 0.f;
-					if (abs(pos_t.x) < 150.f*Scale_Rate && abs(pos_t.z) < 150.f*Scale_Rate) {
-						break;
+
+			BattleResourceMngr->LoadChara("Chara", (PlayerID)0);
+
+			for (int index = 0; index < Player_num; index++) {
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+				//BGをオブジェに登録
+				c->SetMapCol(this->m_BackGround);
+				//人の座標設定
+				{
+					Vector3DX pos_t;
+					pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f*Scale_Rate)*(float)(index*2-1));
+
+					Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f*Scale_Rate;
+					if (this->m_BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f*Scale_Rate, &EndPos, true)) {
+						pos_t = EndPos;
 					}
+					c->ValueSet((PlayerID)index, false, CharaTypeID::Team);
+					c->MovePoint(deg2rad(0.f), deg2rad(180.f*(float)index), pos_t);
+					c->Heal(100, true);
 				}
-				auto* Mat = this->m_BackGround->GetRoadPoint(ID);
-				Vector3DX pos_t = Mat->pos(); pos_t.y = 0.f;
-				float rad_t = std::atan2f(Mat->zvec().x, -Mat->zvec().z);
-				auto pos_t2 = pos_t - Vector3DX::up() * (100.f * Scale_Rate);
-				if (this->m_BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * (100.f * Scale_Rate), &pos_t2, true, false)) {
-					pos_t = pos_t2;
-				}
-
-				auto& vehc_datas = VehDataControl::Instance()->GetVehData();
-				int dataID = GetRand((int)vehc_datas.size() - 1);
-
-				ObjMngr->LoadModel(Vehicle, nullptr, ("data/tank/" + vehc_datas[dataID].GetName() + "/").c_str());
-
-				Vehicle->ValueInit(dataID, this->m_BackGround->GetBox2Dworld(), (PlayerID)i);
-				Vehicle->MovePoint(deg2rad(0), rad_t, pos_t);
-				//AI
-				this->m_AICtrl[i]->Init(this->m_BackGround, (PlayerID)i);
 			}
 			//UI
 			this->m_UIclass.Set();
-			this->m_HPBuf = (float)PlayerMngr->GetPlayer(0).GetVehicle()->GetHP();
-			this->m_ScoreBuf = PlayerMngr->GetPlayer(0).GetScore();
 			//
 			this->m_DamageEvents.clear();
 			this->m_NetWorkBrowser.Init();
@@ -81,11 +66,9 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
-			auto* SE = SoundPool::Instance();
-			auto& Vehicle = PlayerMngr->GetPlayer(GetMyPlayerID()).GetVehicle();
 
 			auto* Pad = PadControl::Instance();
-			Pad->SetMouseMoveEnable(!DXDraw::Instance()->IsPause());
+			Pad->SetMouseMoveEnable(false);
 			Pad->ChangeGuide(
 				[&]() {
 					auto* KeyGuide = PadControl::Instance();
@@ -102,20 +85,16 @@ namespace FPS_n2 {
 						KeyGuide->AddGuide(PADS::MOVE_A, "");
 						KeyGuide->AddGuide(PADS::MOVE_D, "");
 						KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9900));
-						KeyGuide->AddGuide(PADS::LEAN_L, "");
-						KeyGuide->AddGuide(PADS::LEAN_R, LocalizePool::Instance()->Get(9901));
-						KeyGuide->AddGuide(PADS::RUN, LocalizePool::Instance()->Get(9902));
-						KeyGuide->AddGuide(PADS::WALK, LocalizePool::Instance()->Get(9903));
-						KeyGuide->AddGuide(PADS::SQUAT, LocalizePool::Instance()->Get(9904));
-						KeyGuide->AddGuide(PADS::JUMP, LocalizePool::Instance()->Get(9905));
+
 						KeyGuide->AddGuide(PADS::SHOT, LocalizePool::Instance()->Get(9906));
-						KeyGuide->AddGuide(PADS::ULT, LocalizePool::Instance()->Get(9907));
 						KeyGuide->AddGuide(PADS::AIM, LocalizePool::Instance()->Get(9908));
-						KeyGuide->AddGuide(PADS::MELEE, LocalizePool::Instance()->Get(9909));
-						KeyGuide->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9910));
-						KeyGuide->AddGuide(PADS::CHECK, LocalizePool::Instance()->Get(9911));
-						KeyGuide->AddGuide(PADS::THROW, LocalizePool::Instance()->Get(9912));
-						KeyGuide->AddGuide(PADS::INVENTORY, LocalizePool::Instance()->Get(9913));
+						KeyGuide->AddGuide(PADS::ULT, LocalizePool::Instance()->Get(9907));
+
+						KeyGuide->AddGuide(PADS::WALK, LocalizePool::Instance()->Get(9903));
+						KeyGuide->AddGuide(PADS::JUMP, LocalizePool::Instance()->Get(9905));
+
+						KeyGuide->AddGuide(PADS::RUN, LocalizePool::Instance()->Get(9902));
+						KeyGuide->AddGuide(PADS::SQUAT, LocalizePool::Instance()->Get(9904));
 					}
 				});
 			if (DXDraw::Instance()->IsPause()) {
@@ -135,7 +114,7 @@ namespace FPS_n2 {
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
 				SetMousePoint(DXDraw::Instance()->GetDispXSize() / 2, DXDraw::Instance()->GetDispYSize() / 2);
-				SE->Get((int)SoundEnum::Environment).Play(0, DX_PLAYTYPE_LOOP, TRUE);
+				//SE->Get((int)SoundEnum::Environment).Play(0, DX_PLAYTYPE_LOOP, TRUE);
 				this->m_fov_base = DrawParts->GetMainCamera().GetCamFov();
 			}
 			//Input,AI
@@ -146,69 +125,37 @@ namespace FPS_n2 {
 				InputControl MyInput;
 				//
 				//cam_per /= std::max(1.f, std::hypotf(Pad->GetLS_Y(), Pad->GetLS_X()));
-
+				/*
 				pp_x = std::clamp(Pad->GetLS_Y() * cam_per*0.5f, -0.2f, 0.2f);
 				pp_y = std::clamp(Pad->GetLS_X() * cam_per*0.5f, -0.2f, 0.2f);
 				MyInput.SetInputStart(pp_x, pp_y);
+				//*/
+				//
+				MyInput.SetInputStart(0.f, 0.f);
 				MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
 				MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
 				MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
 				MyInput.SetInputPADS(PADS::MOVE_D, Pad->GetKey(PADS::MOVE_D).press());
-				MyInput.SetInputPADS(PADS::RUN, Pad->GetKey(PADS::RUN).press());
-				MyInput.SetInputPADS(PADS::LEAN_L, Pad->GetKey(PADS::LEAN_L).press());
-				MyInput.SetInputPADS(PADS::LEAN_R, Pad->GetKey(PADS::LEAN_R).press());
-				MyInput.SetInputPADS(PADS::MELEE, Pad->GetKey(PADS::MELEE).press());
-				MyInput.SetInputPADS(PADS::RELOAD, Pad->GetKey(PADS::RELOAD).press());
-				MyInput.SetInputPADS(PADS::INTERACT, Pad->GetKey(PADS::INTERACT).press());
-				MyInput.SetInputPADS(PADS::SQUAT, Pad->GetKey(PADS::SQUAT).press());
-				MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press() && !DXDraw::Instance()->IsPause());
-				MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press() && !DXDraw::Instance()->IsPause());
+
+				MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press());
+				MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press());
 				MyInput.SetInputPADS(PADS::ULT, Pad->GetKey(PADS::ULT).press());
-				MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
-				MyInput.SetInputPADS(PADS::CHECK, Pad->GetKey(PADS::CHECK).press());
+
 				MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 				MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
+
+				MyInput.SetInputPADS(PADS::RUN, Pad->GetKey(PADS::RUN).press());
+				MyInput.SetInputPADS(PADS::SQUAT, Pad->GetKey(PADS::SQUAT).press());
 				//スコープ
 				{
-					if (!Vehicle->IsAlive()) {
-						auto OLD = this->m_TPSLen;
-						this->m_zoom = 2.0f;
-						this->m_TPSLen = 8;
-						this->m_changeview = ((this->m_TPSLen != OLD) && (this->m_TPSLen == 0));
-					}
-					else {
-						this->m_changeview = false;
-						if (this->m_TPSLen == 0) {
-							this->m_zoom = std::clamp(this->m_zoom + float(GetMouseWheelRotVolWithCheck()) * 2.0f, 0.0f, 30.f);
-							if (this->m_zoom == 0.f) {
-								this->m_TPSLen = 1;
-								this->m_range_r = (float)this->m_TPSLen;
-								this->m_changeview = true;
-							}
-						}
-						else {
-							this->m_TPSLen = std::clamp(this->m_TPSLen - GetMouseWheelRotVolWithCheck(), 0, 6);
-							if (this->m_TPSLen == 0) {
-								this->m_zoom = 1.0f;
-								this->m_changeview = true;
-							}
-						}
-					}
+					auto OLD = this->m_TPSLen;
+					this->m_zoom = 2.0f;
+					this->m_TPSLen = 8;
+					this->m_changeview = ((this->m_TPSLen != OLD) && (this->m_TPSLen == 0));
 					Easing(&this->m_range_r, (float)this->m_TPSLen *8.f / 6.f, 0.8f, EasingType::OutExpo);
 
 					bool IsADS = (this->m_TPSLen == 0);
-					Vehicle->SetActive(!IsADS);
 					{
-						auto RadAdd = Vehicle->GetRadAdd() - m_VehRadAdd;
-						m_VehRadAdd = Vehicle->GetRadAdd();
-						{
-							auto Base = Pad->GetLS_X()*1.f + RadAdd.z*1000.f;
-							Easing(&this->m_XScope, Base, 0.95f, EasingType::OutExpo);
-						}
-						{
-							auto Base = Pad->GetLS_Y()*1.f + RadAdd.x*1000.f;
-							Easing(&this->m_YScope, -Base, 0.9f, EasingType::OutExpo);
-						}
 						if (m_IsChangeView != IsADS) {
 							this->m_ChangeViewPer = 1.f;
 						}
@@ -244,30 +191,24 @@ namespace FPS_n2 {
 				}
 				//
 				bool isready = true;
-				for (int i = 0; i < Vehicle_num; i++) {
-					auto& v = PlayerMngr->GetPlayer(i).GetVehicle();
-					if (this->m_NetWorkBrowser.GetSequence() == SequenceEnum::MainGame) {
-						auto tmp = m_NetWorkBrowser.GetNowServerPlayerData(i, true);
-						if (i == GetMyPlayerID()) {
+				for (int index = 0; index < Player_num; index++) {
+					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+					if (m_NetWorkBrowser.GetSequence() == SequenceEnum::MainGame) {
+						auto tmp = this->m_NetWorkBrowser.GetNowServerPlayerData(index, false);
+						if (index == GetMyPlayerID()) {
 							MyInput.SetKeyInputFlags(tmp.Input);//キーフレームだけサーバーに合わせる
-							v->SetInput(MyInput, isready && v->IsAlive());
-							this->m_NetWorkBrowser.GetRecvData(i, tmp.GetFrame());
+							c->SetInput(MyInput, isready && c->IsAlive());
+							m_NetWorkBrowser.GetRecvData(index, tmp.GetFrame());
 						}
 						else {
 							if (!m_NetWorkBrowser.GetClient()) {
-								m_AICtrl[i]->AI_move(&tmp.Input);
+								//m_AICtrl[index]->Execute(&tmp.Input, (!m_IsHardMode && (m_Timer > 60.f)) || m_IsHardMode);
 							}
-							v->SetInput(tmp.Input, isready && v->IsAlive(), true);
+							c->SetInput(tmp.Input, isready && c->IsAlive());
 							bool override_true = true;
-							for (int i2 = 0; i2 < Vehicle_num; i2++) {
-								auto& v2 = PlayerMngr->GetPlayer(i2).GetVehicle();
-								if ((v != v2) && ((v->GetMove().pos - v2->GetMove().pos).magnitude() <= 10.f*Scale_Rate)) {
-									override_true = false;
-									break;
-								}
-							}
+							override_true = tmp.GetIsActive();
 							if (override_true) {
-								v->SetPosBufOverRide(tmp.m_move);
+								c->SetPosBufOverRide(tmp.m_move);
 							}
 
 						}
@@ -277,101 +218,42 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						if (i == GetMyPlayerID()) {
-							v->SetInput(MyInput, isready && v->IsAlive());
+						if (index == GetMyPlayerID()) {
+							c->SetInput(MyInput, isready && c->IsAlive());
 						}
 						else {
 							InputControl OtherInput;
-							m_AICtrl[i]->AI_move(&OtherInput);//めっちゃ重い
-							v->SetInput(OtherInput, isready && v->IsAlive());
+							//m_AICtrl[index]->Execute(&OtherInput, (!m_IsHardMode && (m_Timer > 60.f)) || m_IsHardMode);
+							c->SetInput(OtherInput, isready && c->IsAlive());
 						}
 						//ダメージイベント処理
-						for (const auto& e : v->GetDamageEvent()) {
+						for (const auto& e : c->GetDamageEvent()) {
 							this->m_DamageEvents.emplace_back(e);
 						}
-						v->GetDamageEvent().clear();
+						c->GetDamageEvent().clear();
 					}
 				}
-				this->m_NetWorkBrowser.LateExecute();
+				m_NetWorkBrowser.LateExecute();
 				//ダメージイベント
-				for (int i = 0; i < Vehicle_num; i++) {
-					auto& v = PlayerMngr->GetPlayer(i).GetVehicle();
+				for (int index = 0; index < Player_num; index++) {
+					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 					for (int j = 0; j < this->m_DamageEvents.size(); j++) {
-						if (v->SetDamageEvent(this->m_DamageEvents[j])) {
-							std::swap(this->m_DamageEvents.back(), this->m_DamageEvents[j]);
+						if (c->SetDamageEvent(this->m_DamageEvents[j])) {
+							std::swap(this->m_DamageEvents.back(), m_DamageEvents[j]);
 							this->m_DamageEvents.pop_back();
 							j--;
 						}
 					}
 				}
 			}
-			//レーザーサイト
-			{
-				auto StartPos = Vehicle->GetGunMuzzlePos(0);
-				auto EndPos = StartPos + Vehicle->GetGunMuzzleVec(0) * 100.f*Scale_Rate;
-				this->m_BackGround->CheckLinetoMap(StartPos, &EndPos, true, false);
-				for (int i = 0; i < Vehicle_num; i++) {
-					auto& v = PlayerMngr->GetPlayer(i).GetVehicle();
-					if (v->GetMyPlayerID() == GetMyPlayerID()) { continue; }
-					if (!v->RefreshCol(StartPos, EndPos, 10.f*Scale_Rate)) { continue; }
-					v->GetColNearestInAllMesh(StartPos, &EndPos);
-				}
-				Vehicle->SetAimingDistance((StartPos - EndPos).magnitude());
-			}
 			//Execute
 			ObjMngr->ExecuteObject();
-			//弾の更新
+			//コンカッション
 			{
-				m_Concussion = std::max(m_Concussion - 1.f / DrawParts->GetFps(), 0.f);
-
-				int loop = 0;
-				while (true) {
-					auto ammo = ObjMngr->GetObj((int)ObjType::Ammo, loop);
-					if (ammo != nullptr) {
-						auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
-
-						if (a->IsActive()) {
-							//AmmoClass
-							Vector3DX repos_tmp = a->GetMove().repos;
-							Vector3DX pos_tmp = a->GetMove().pos;
-							if (GetMyPlayerID() != a->GetShootedID()) {
-								if (GetMinLenSegmentToPoint(repos_tmp, pos_tmp, DrawParts->GetMainCamera().GetCamPos()) < 5.f*Scale_Rate) {
-									m_Concussion = 1.f;
-								}
-							}
-
-							Vector3DX norm_tmp;
-							bool ColRes = this->m_BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, true, false, &norm_tmp);
-							bool is_HitAll = false;
-							//auto& v = *ObjMngr->GetObj((int)ObjType::Vehicle, a->GetShootedID());
-							for (int i = 0; i < Vehicle_num; i++) {
-								auto& tgt = PlayerMngr->GetPlayer(i).GetVehicle();
-								if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }
-								auto res = tgt->CheckAmmoHit(a.get());
-								is_HitAll |= res.first;
-								if (res.second) { break; }
-							}
-							if (ColRes && !is_HitAll) {
-								a->HitGround(pos_tmp);
-								EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.1f * Scale_Rate);
-								/*
-								if (ObjMngr->GetObj((int)ObjType::Vehicle, a->GetShootedID())) {
-									((std::shared_ptr<VehicleClass>&)v)->HitGround(pos_tmp, (pos_tmp - repos_tmp).normalized(), a->GetMove().vec);
-								}
-								//*/
-							}
-						}
-					}
-					else {
-						break;
-					}
-					loop++;
-				}
-				//コンカッション
 				DrawParts->Set_is_Blackout(m_Concussion > 0.f);
 				if (m_Concussion == 1.f) {
 					DrawParts->SetCamShake(0.5f, 0.05f*Scale_Rate);
-					SE->Get((int)SoundEnum::Tank_near).Play_3D(0, DrawParts->GetMainCamera().GetCamPos(), 10.f*Scale_Rate, 128);//, DX_PLAYTYPE_LOOP
+					//SE->Get((int)SoundEnum::Tank_near).Play_3D(0, DrawParts->GetMainCamera().GetCamPos(), 10.f*Scale_Rate, 128);//, DX_PLAYTYPE_LOOP
 				}
 				if (m_Concussion > 0.9f) {
 					Easing(&m_ConcussionPer, 1.f, 0.1f, EasingType::OutExpo);
@@ -388,95 +270,42 @@ namespace FPS_n2 {
 					Easing(&m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
 				}
 				DrawParts->Set_Per_Blackout(m_ConcussionPer * 1.5f);
-
-				//Set_is_lens(true);
-				//Set_xp_lens(y_r(960));
-				//Set_yp_lens(y_r(540));
-				//Set_size_lens(y_r(300));
-				//Set_zoom_lens(3.f);
+				m_Concussion = std::max(m_Concussion - 1.f / DrawParts->GetFps(), 0.f);
 			}
 			this->m_BackGround->FirstExecute();
 			ObjMngr->LateExecuteObject();
 			//視点
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
 			{
-				bool IsADS = (this->m_TPSLen == 0);
-				Vector3DX CamPos = IsADS ? Vehicle->GetGunMuzzleBase(0) : Vehicle->Get_EyePos_Base();
+				auto* OptionParts = OPTION::Instance();
 
-				if (IsADS) {
-					CamPos = Vehicle->GetFrameWorldMat(Vehicle->GetData().Get_ViewFrame().GetFrameID()).pos();
-				}
-				//
-				Vector3DX eyepos = CamPos;
-				if (!IsADS) {
-					Vector3DX eyepos2 = eyepos;
-					eyepos += Vehicle->GetRadBuf() * (this->m_range_r*Scale_Rate);
-					if (this->m_BackGround->CheckLinetoMap(eyepos, &eyepos2, true, false)) { eyepos = eyepos2; }
-				}
-				eyepos += DrawParts->GetCamShake() * (IsADS ? 0.05f : 1.f);
-				//
-				Vector3DX eyetgt = CamPos - Vehicle->GetRadBuf() * std::max(this->m_range_r*Scale_Rate, 1.f) + DrawParts->GetCamShake() * (IsADS ? 0.f : 2.f);
-				//
-				Vector3DX BaseVec = (eyetgt - eyepos).normalized();
-				//
-				DrawParts->SetMainCamera().SetCamPos(
-					eyepos,
-					eyetgt,
-					Lerp(Vehicle->GetMove().mat.yvec(), Vector3DX::up(), std::clamp(this->m_range_r / 3.f, 0.f, 1.f)));
-				//
+				//DrawParts->GetFps()カメラ
+				Vector3DX CamPos = Chara->GetEyeMatrix().pos() + DrawParts->GetCamShake();
+				DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeMatrix().zvec() * -1.f, Chara->GetEyeMatrix().yvec());
+
+				//Vector3DX CamPos = Vector3DX::vget(0.f, 1.5f, 0.f)*Scale_Rate;
+				//Vector3DX CamVec = Vector3DX::vget(1.f, 1.5f, 0.f)*Scale_Rate;
+				//DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, Chara->GetEyeMatrix().yvec());
+
+				//info
 				auto fov_t = DrawParts->GetMainCamera().GetCamFov();
 				auto near_t = DrawParts->GetMainCamera().GetCamNear();
 				auto far_t = DrawParts->GetMainCamera().GetCamFar();
-				Easing(&fov_t, (IsADS && (this->m_zoom != 0.f)) ? (this->m_fov_base / this->m_zoom) : this->m_fov_base, 0.9f, EasingType::OutExpo);
-				Easing(&near_t, 1.f + 2.f*((IsADS) ? 0.f : 2.f), 0.9f, EasingType::OutExpo);
-				Easing(&far_t, std::max(Vehicle->GetAimingDistance(), Scale_Rate * 50.f) + Scale_Rate * 20.f, 0.9f, EasingType::OutExpo);
+				Easing(&near_t, Scale_Rate * 0.03f, 0.9f, EasingType::OutExpo);
+				Easing(&far_t, Scale_Rate * 10.f, 0.5f, EasingType::OutExpo);
+				//fov
+				{
+					float fov = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
+					Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
+				}
 				DrawParts->SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
-				PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.5f, far_t / 2, near_t, far_t);
+				//DoF
+				PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.5f, Scale_Rate * 5.f, near_t, far_t);
 			}
 			this->m_BackGround->Execute();
-			{
-				Vector3DX StartPos = DrawParts->GetMainCamera().GetCamPos();
-				for (int index = 0; index < Chara_num; index++) {
-					auto& v = PlayerMngr->GetPlayer(index).GetVehicle();
-					if (index == 0) {
-						v->CanLookTarget = !(this->m_TPSLen == 0);
-						continue;
-					}
-					Vector3DX TgtPos = v->Get_EyePos_Base();
-					v->CanLookTarget = !this->m_BackGround->CheckLinetoMap(StartPos, &TgtPos, true, false);
-				}
-			}
 			//UIパラメーター
 			{
-				this->m_UIclass.SetIntParam(1, (int)this->m_ScoreBuf);
-				this->m_ScoreBuf += std::clamp((PlayerMngr->GetPlayer(0).GetScore() - this->m_ScoreBuf)*100.f, -5.f, 5.f) / DrawParts->GetFps();
-
-				this->m_UIclass.SetIntParam(2, 1);
-
-				this->m_UIclass.SetStrParam(0, Vehicle->GetData().GetName());
-				this->m_UIclass.SetIntParam(3, (int)Vehicle->GetHP());
-				this->m_UIclass.SetIntParam(4, (int)Vehicle->GetHPMax());
-				this->m_UIclass.SetIntParam(5, (int)(this->m_HPBuf + 0.5f));
-				this->m_HPBuf += std::clamp((Vehicle->GetHP() - this->m_HPBuf)*100.f, -500.f, 500.f) / DrawParts->GetFps();
-
-				this->m_UIclass.SetIntParam(6, (int)Vehicle->GetFuel());
-				this->m_UIclass.SetIntParam(7, (int)Vehicle->GetFuelMax());
-				this->m_UIclass.SetIntParam(8, (int)Vehicle->GetFuel());
-
-
-				this->m_UIclass.SetIntParam(12, (int)0);//現在選択
-				this->m_UIclass.SetIntParam(13, (int)Vehicle->Get_Gunsize());//銃の総数
-
-
-				this->m_UIclass.SetStrParam(1, Vehicle->GetGun()[0].GetData()->GetName());
-				this->m_UIclass.SetIntParam(14, (int)1);//現在選択
-				this->m_UIclass.SetIntParam(15, (int)1);//銃の総数
 				this->m_UIclass.SetItemGraph(0, &m_aim_Graph);
-				if (Vehicle->Get_Gunsize() >= 2) {
-					this->m_UIclass.SetStrParam(2, Vehicle->GetGun()[1].GetData()->GetName());
-					this->m_UIclass.SetIntParam(16, (int)1);//現在選択
-					this->m_UIclass.SetIntParam(17, (int)1);//銃の総数
-					this->m_UIclass.SetItemGraph(1, &m_aim_Graph);
-				}
 			}
 			EffectControl::Execute();
 #ifdef DEBUG
@@ -485,17 +314,38 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			MAINLOOP::Dispose_Sub(void) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
+			auto* SE = SoundPool::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
+
+			SE->Get((int)SoundEnum::Env).StopAll(0);
+			SE->Get((int)SoundEnum::Env2).StopAll(0);
+			//使い回しオブジェ系
+			ObjectManager::Instance()->DelObj(&PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara());
+			PlayerMngr->GetPlayer(GetMyPlayerID()).Dispose();
+			this->m_BackGround->Dispose();
+			this->m_BackGround.reset();
+			//
+			m_NetWorkBrowser.Dispose();
+			EffectControl::Dispose();
+
+			{
+				auto* DrawParts = DXDraw::Instance();
+				PostPassEffect::Instance()->SetLevelFilter(0, 255, 1.f);
+				DrawParts->SetAberrationPower(1.f);
+				DrawParts->Set_is_Blackout(false);
+				DrawParts->Set_Per_Blackout(0.f);
+				DrawParts->Set_is_lens(false);
+				DrawParts->Set_zoom_lens(1.f);
+			}
+		}
+		void			MAINLOOP::Dispose_Load_Sub(void) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
-
 			BattleResourceMngr->Dispose();
-
-			this->m_NetWorkBrowser.Dispose();
-			EffectControl::Dispose();
+			m_AICtrl.clear();
+			this->m_UIclass.Dispose();
 			PlayerMngr->Dispose();
-			ObjMngr->DeleteAll();
-			this->m_BackGround->Dispose();
+			ObjectManager::Instance()->DeleteAll();
 		}
 	};
 };
