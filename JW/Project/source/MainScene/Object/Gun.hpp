@@ -186,7 +186,7 @@ namespace FPS_n2 {
 				float totalTime = (float)Ptr->GetTotalTime();
 				return (totalTime > 0.f) ? (this->m_UpperAnim / totalTime) : 1.f;
 			}
-			const auto	GetGunAnime(EnumGunAnimType ID, Matrix4x4DX* Ret) {
+			const auto	GetGunAnimeNow(EnumGunAnimType ID, Matrix4x4DX* Ret) {
 				//銃の位置を指定するアニメ
 				auto* AnimMngr = GunAnimManager::Instance();
 				auto* Ptr = AnimMngr->GetAnimData(GunAnimeSets[GetHumanAnimType()].Anim.at((int)ID));

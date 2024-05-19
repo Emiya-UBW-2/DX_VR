@@ -16,6 +16,7 @@ namespace FPS_n2 {
 			PlayerMngr->Init(Vehicle_num);
 
 			BattleResourceMngr->LoadChara("Chara", (PlayerID)1);
+			BattleResourceMngr->LoadGun("Bamboo", (PlayerID)1);
 		}
 		void			MAINLOOP::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -37,6 +38,7 @@ namespace FPS_n2 {
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 
 			BattleResourceMngr->LoadChara("Chara", (PlayerID)0);
+			BattleResourceMngr->LoadGun("Bamboo", (PlayerID)0);
 
 			for (int index = 0; index < Player_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
@@ -53,7 +55,6 @@ namespace FPS_n2 {
 					}
 					c->ValueSet((PlayerID)index, false, CharaTypeID::Team);
 					c->MovePoint(deg2rad(0.f), deg2rad(180.f*(float)index), pos_t);
-					c->Heal(100, true);
 				}
 			}
 			//UI
@@ -92,18 +93,28 @@ namespace FPS_n2 {
 
 						KeyGuide->AddGuide(PADS::WALK, LocalizePool::Instance()->Get(9903));
 						KeyGuide->AddGuide(PADS::JUMP, LocalizePool::Instance()->Get(9905));
-
-						KeyGuide->AddGuide(PADS::RUN, LocalizePool::Instance()->Get(9902));
-						KeyGuide->AddGuide(PADS::SQUAT, LocalizePool::Instance()->Get(9904));
 					}
 				});
 			if (DXDraw::Instance()->IsPause()) {
 				if (Pad->GetKey(PADS::JUMP).trigger()) {
 					OptionWindowClass::Instance()->SetActive();
 				}
+				SetValidMousePointerWindowOutClientAreaMoveFlag(TRUE);
 				return true;
 			}
 			else {
+				if (GetMainWindowHandle() != GetForegroundWindow()) {//次画面が最前ではないよん
+					SetMouseDispFlag(TRUE);
+					SetValidMousePointerWindowOutClientAreaMoveFlag(TRUE);
+				}
+				else {
+					SetMouseDispFlag(FALSE);
+					SetValidMousePointerWindowOutClientAreaMoveFlag(FALSE);
+					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
+					if (Chara->ResetMouse) {
+						SetMousePoint(DrawParts->GetDispXSize() / 2, DrawParts->GetDispYSize() / 2);
+					}
+				}
 			}
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
@@ -113,25 +124,17 @@ namespace FPS_n2 {
 #endif // DEBUG
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
-				SetMousePoint(DXDraw::Instance()->GetDispXSize() / 2, DXDraw::Instance()->GetDispYSize() / 2);
+				SetMousePoint(DrawParts->GetDispXSize() / 2, DrawParts->GetDispYSize() / 2);
 				//SE->Get((int)SoundEnum::Environment).Play(0, DX_PLAYTYPE_LOOP, TRUE);
 				this->m_fov_base = DrawParts->GetMainCamera().GetCamFov();
 			}
 			//Input,AI
 			{
-				float cam_per = ((DrawParts->GetMainCamera().GetCamFov() / deg2rad(75)) / (DrawParts->is_lens() ? DrawParts->zoom_lens() : 1.f)) / 100.f;
-				cam_per *= 0.6f;
 				float pp_x = 0.f, pp_y = 0.f;
 				InputControl MyInput;
-				//
-				//cam_per /= std::max(1.f, std::hypotf(Pad->GetLS_Y(), Pad->GetLS_X()));
-				/*
-				pp_x = std::clamp(Pad->GetLS_Y() * cam_per*0.5f, -0.2f, 0.2f);
-				pp_y = std::clamp(Pad->GetLS_X() * cam_per*0.5f, -0.2f, 0.2f);
+				pp_x = Pad->GetLS_Y();
+				pp_y = Pad->GetLS_X();
 				MyInput.SetInputStart(pp_x, pp_y);
-				//*/
-				//
-				MyInput.SetInputStart(0.f, 0.f);
 				MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
 				MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
 				MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
@@ -143,9 +146,6 @@ namespace FPS_n2 {
 
 				MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 				MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
-
-				MyInput.SetInputPADS(PADS::RUN, Pad->GetKey(PADS::RUN).press());
-				MyInput.SetInputPADS(PADS::SQUAT, Pad->GetKey(PADS::SQUAT).press());
 				//スコープ
 				{
 					auto OLD = this->m_TPSLen;
@@ -197,14 +197,14 @@ namespace FPS_n2 {
 						auto tmp = this->m_NetWorkBrowser.GetNowServerPlayerData(index, false);
 						if (index == GetMyPlayerID()) {
 							MyInput.SetKeyInputFlags(tmp.Input);//キーフレームだけサーバーに合わせる
-							c->SetInput(MyInput, isready && c->IsAlive());
+							c->SetInput(MyInput, isready);
 							m_NetWorkBrowser.GetRecvData(index, tmp.GetFrame());
 						}
 						else {
 							if (!m_NetWorkBrowser.GetClient()) {
 								//m_AICtrl[index]->Execute(&tmp.Input, (!m_IsHardMode && (m_Timer > 60.f)) || m_IsHardMode);
 							}
-							c->SetInput(tmp.Input, isready && c->IsAlive());
+							c->SetInput(tmp.Input, isready);
 							bool override_true = true;
 							override_true = tmp.GetIsActive();
 							if (override_true) {
@@ -219,18 +219,20 @@ namespace FPS_n2 {
 					}
 					else {
 						if (index == GetMyPlayerID()) {
-							c->SetInput(MyInput, isready && c->IsAlive());
+							c->SetInput(MyInput, isready);
 						}
 						else {
 							InputControl OtherInput;
 							//m_AICtrl[index]->Execute(&OtherInput, (!m_IsHardMode && (m_Timer > 60.f)) || m_IsHardMode);
-							c->SetInput(OtherInput, isready && c->IsAlive());
+							c->SetInput(OtherInput, isready);
 						}
 						//ダメージイベント処理
+						/*
 						for (const auto& e : c->GetDamageEvent()) {
 							this->m_DamageEvents.emplace_back(e);
 						}
 						c->GetDamageEvent().clear();
+						//*/
 					}
 				}
 				m_NetWorkBrowser.LateExecute();
@@ -281,7 +283,50 @@ namespace FPS_n2 {
 
 				//DrawParts->GetFps()カメラ
 				Vector3DX CamPos = Chara->GetEyeMatrix().pos() + DrawParts->GetCamShake();
-				DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeMatrix().zvec() * -1.f, Chara->GetEyeMatrix().yvec());
+				Vector3DX CamVec = CamPos + Chara->GetEyeMatrix().zvec() * -1.f;
+#ifdef DEBUG
+				if (CheckHitKeyWithCheck(KEY_INPUT_F1) != 0) {
+					DBG_CamSel = 0;
+				}
+				if (CheckHitKeyWithCheck(KEY_INPUT_F2) != 0) {
+					DBG_CamSel = 1;
+				}
+				if (CheckHitKeyWithCheck(KEY_INPUT_F3) != 0) {
+					DBG_CamSel = 2;
+				}
+				if (CheckHitKeyWithCheck(KEY_INPUT_F4) != 0) {
+					DBG_CamSel = 3;
+				}
+				if (CheckHitKeyWithCheck(KEY_INPUT_F5) != 0) {
+					DBG_CamSel = 4;
+				}
+				if (CheckHitKeyWithCheck(KEY_INPUT_F6) != 0) {
+					DBG_CamSel = 5;
+				}
+				if (CheckHitKeyWithCheck(KEY_INPUT_F7) != 0) {
+					DBG_CamSel = -1;
+				}
+				switch (DBG_CamSel) {
+					case 0:
+					case 3:
+						CamVec = CamPos;
+						CamPos += Chara->GetEyeMatrix().xvec()*(2.f*Scale_Rate);
+						break;
+					case 1:
+					case 4:
+						CamVec = CamPos;
+						CamPos += Chara->GetEyeMatrix().yvec()*(2.f*Scale_Rate) + Chara->GetEyeMatrix().zvec() * 0.1f;
+						break;
+					case 2:
+					case 5:
+						CamVec = CamPos;
+						CamPos += Chara->GetEyeMatrix().zvec()*(-2.f*Scale_Rate);
+						break;
+					default:
+						break;
+				}
+#endif
+				DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, Chara->GetEyeMatrix().yvec());
 
 				//Vector3DX CamPos = Vector3DX::vget(0.f, 1.5f, 0.f)*Scale_Rate;
 				//Vector3DX CamVec = Vector3DX::vget(1.f, 1.5f, 0.f)*Scale_Rate;
@@ -307,18 +352,13 @@ namespace FPS_n2 {
 			{
 				this->m_UIclass.SetItemGraph(0, &m_aim_Graph);
 			}
-			EffectControl::Execute();
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=0.7ms");
 #endif // DEBUG
 			return true;
 		}
 		void			MAINLOOP::Dispose_Sub(void) noexcept {
-			auto* SE = SoundPool::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
-
-			SE->Get((int)SoundEnum::Env).StopAll(0);
-			SE->Get((int)SoundEnum::Env2).StopAll(0);
 			//使い回しオブジェ系
 			ObjectManager::Instance()->DelObj(&PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara());
 			PlayerMngr->GetPlayer(GetMyPlayerID()).Dispose();
@@ -326,8 +366,6 @@ namespace FPS_n2 {
 			this->m_BackGround.reset();
 			//
 			m_NetWorkBrowser.Dispose();
-			EffectControl::Dispose();
-
 			{
 				auto* DrawParts = DXDraw::Instance();
 				PostPassEffect::Instance()->SetLevelFilter(0, 255, 1.f);

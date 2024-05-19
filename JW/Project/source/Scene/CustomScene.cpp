@@ -44,9 +44,9 @@ namespace FPS_n2 {
 
 			Vector3DX LightVec = Vector3DX::vget(-0.4f, -0.5f, 0.1f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.f, 1.f, 1.f, 0.0f));
-			DrawParts->SetShadow(LightVec, Vector3DX::vget(-6.f, -6.f, -6.f)*Scale_Rate, Vector3DX::vget(6.f, 0.5f, 6.f)*Scale_Rate, 0);
-			DrawParts->SetShadow(LightVec, Vector3DX::vget(-6.f, -6.f, -6.f)*Scale_Rate, Vector3DX::vget(6.f, 0.5f, 6.f)*Scale_Rate, 1);
-			DrawParts->SetShadow(LightVec, Vector3DX::vget(-6.f, -6.f, -6.f)*Scale_Rate, Vector3DX::vget(6.f, 0.5f, 6.f)*Scale_Rate, 2);
+			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-6.f, -6.f, -6.f)*Scale_Rate, Vector3DX::vget(6.f, 0.5f, 6.f)*Scale_Rate, 0);
+			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-6.f, -6.f, -6.f)*Scale_Rate, Vector3DX::vget(6.f, 0.5f, 6.f)*Scale_Rate, 1);
+			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-6.f, -6.f, -6.f)*Scale_Rate, Vector3DX::vget(6.f, 0.5f, 6.f)*Scale_Rate, 2);
 			//
 			//
 			DeleteLightHandleAll();

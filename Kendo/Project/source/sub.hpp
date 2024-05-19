@@ -254,6 +254,7 @@ namespace FPS_n2 {
 			void			Dispose(void) noexcept;
 		public:
 			void			LoadChara(const std::string&FolderName, PlayerID ID) noexcept;
+			void			LoadGun(const std::string&FolderName, PlayerID ID) noexcept;
 		};
 	};
 };

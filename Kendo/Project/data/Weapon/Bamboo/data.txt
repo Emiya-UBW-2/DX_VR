@@ -1,4 +1,0 @@
-Name=Excalibur
-soundsel=0
-animsel=0
-end

@@ -708,7 +708,7 @@ namespace FPS_n2 {
 										GetGunPtrNow()->SetActiveAll(true);
 									}
 									if (m_IsMainGame) {
-										ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(200), 10);
+										ItemLogParts->Add(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(200), 10);
 										PlayerMngr->GetPlayer(this->m_MyID).AddScore(10);
 									}
 									GunReadyControl::SetAim();
@@ -757,7 +757,7 @@ namespace FPS_n2 {
 									}
 									GunReadyControl::SetAim();
 									if (m_IsMainGame) {
-										ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(201), 50);
+										ItemLogParts->Add(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(201), 50);
 										PlayerMngr->GetPlayer(this->m_MyID).AddScore(50);
 									}
 								}
@@ -1097,7 +1097,7 @@ namespace FPS_n2 {
 					Matrix4x4DX AnimMat;
 					for (int i = 0; i < (int)EnumGunAnimType::Max; i++) {
 						Matrix4x4DX AnimData;
-						if (!GetGunPtrNow()->GetGunAnime((EnumGunAnimType)i, &AnimData)) { continue; }
+						if (!GetGunPtrNow()->GetGunAnimeNow((EnumGunAnimType)i, &AnimData)) { continue; }
 						AnimMat = Lerp(AnimMat, AnimData, this->m_Arm[i].Per());
 					}
 					Vector3DX Post0 = GetFrameWorldMat(GetFrame((int)CharaFrame::Head)).pos() + Matrix4x4DX::Vtrans(AnimMat.pos(), GetCharaDir());

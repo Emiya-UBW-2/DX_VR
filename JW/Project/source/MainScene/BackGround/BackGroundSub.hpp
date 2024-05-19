@@ -378,7 +378,7 @@ namespace FPS_n2 {
 			}
 			void		Execute(const Vector3DX& CamPos) {
 				auto* OptionParts = OPTION::Instance();
-				if (OptionParts->GetParamInt(EnumSaveParam::grass_level) == 0) {
+				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) == 0) {
 					return;
 				}
 				int x = (int)(CamPos.x / 100.f*2.f);
@@ -438,14 +438,14 @@ namespace FPS_n2 {
 			}
 			void		ShadowDraw() {
 				auto* OptionParts = OPTION::Instance();
-				if (OptionParts->GetParamInt(EnumSaveParam::grass_level) == 0) {
+				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) == 0) {
 					return;
 				}
 				m_Obj.at(Blocks * Blocks / 2).m_Obj.DrawModel();
 			}
 			void		Draw() {
 				auto* OptionParts = OPTION::Instance();
-				if (OptionParts->GetParamInt(EnumSaveParam::grass_level) == 0) {
+				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) == 0) {
 					return;
 				}
 				for (auto& o : m_Obj) {

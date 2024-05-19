@@ -43,9 +43,9 @@ namespace FPS_n2 {
 			//
 			Vector3DX LightVec = Vector3DX::vget(-0.1f, -1.f, 0.f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.f, 1.f, 1.f, 0.0f));
-			DrawParts->SetShadow(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.5f, 10.f)*Scale_Rate, 0);
-			DrawParts->SetShadow(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.f, 10.f)*Scale_Rate, 1);
-			DrawParts->SetShadow(LightVec, Vector3DX::vget(-100.f, 0.f, -100.f)*Scale_Rate, Vector3DX::vget(100.f, 1.f, 100.f)*Scale_Rate, 2);
+			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.5f, 10.f)*Scale_Rate, 0);
+			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.f, 10.f)*Scale_Rate, 1);
+			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-100.f, 0.f, -100.f)*Scale_Rate, Vector3DX::vget(100.f, 1.f, 100.f)*Scale_Rate, 2);
 			//
 			DeleteLightHandleAll();
 			SetLightEnable(TRUE);
@@ -272,7 +272,7 @@ namespace FPS_n2 {
 			}
 			if (Pad->GetKey(PADS::INTERACT).trigger()) {
 				if (m_TutorialNow < m_Tutorial.size()) {
-					this->m_TutorialLog.AddLog(m_Tutorial.at(m_TutorialNow).m_Mes.c_str());
+					this->m_TutorialLog.Add(m_Tutorial.at(m_TutorialNow).m_Mes.c_str());
 					SetCreate3DSoundFlag(FALSE);
 					m_TutorialVoice.stop();
 					m_TutorialVoice.Dispose();
@@ -287,7 +287,7 @@ namespace FPS_n2 {
 					m_TutorialNow++;
 				}
 				else {
-					this->m_TutorialLog.AddLog();
+					this->m_TutorialLog.Add();
 				}
 			}
 			if (Pad->GetKey(PADS::THROW).trigger()) {

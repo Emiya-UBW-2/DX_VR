@@ -60,10 +60,9 @@ namespace FPS_n2 {
 			//
 			Vector3DX LightVec = Vector3DX::vget(0.f, -1.f, 0.f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(0.92f, 0.91f, 0.90f, 0.0f));
-			DrawParts->SetIsUpdateShadow(0, false);
-			DrawParts->SetShadow(LightVec, Vector3DX::vget(-5.f, -3.f, -5.f)*Scale_Rate, Vector3DX::vget(5.f, 0.5f, 5.f)*Scale_Rate, 0);
-			DrawParts->SetShadow(LightVec, Vector3DX::vget(-5.f, -3.f, -5.f)*Scale_Rate, Vector3DX::vget(5.f, 0.5f, 5.f)*Scale_Rate, 1);
-			DrawParts->SetShadow(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.f, 10.f)*Scale_Rate, 2);
+			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-5.f, -3.f, -5.f)*Scale_Rate, Vector3DX::vget(5.f, 0.5f, 5.f)*Scale_Rate, 0);
+			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-5.f, -3.f, -5.f)*Scale_Rate, Vector3DX::vget(5.f, 0.5f, 5.f)*Scale_Rate, 1);
+			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.f, 10.f)*Scale_Rate, 2);
 
 			this->m_BackGround = std::make_shared<BackGroundClassMain>();
 			this->m_BackGround->Init("", "");//1.59秒
@@ -269,10 +268,10 @@ namespace FPS_n2 {
 					if (m_LastMan == 0 || (m_Timer <= 0.f)) {
 						if (m_PreEndTimer < 0.f) {
 							m_PreEndTimer = 5.f;
-							ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(202), 100);
+							ItemLogParts->Add(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(202), 100);
 							PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(100);
 							if (m_LastMan == 0) {
-								ItemLogParts->AddLog(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(203), 100);
+								ItemLogParts->Add(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(203), 100);
 								PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(100);
 							}
 						}
@@ -315,10 +314,10 @@ namespace FPS_n2 {
 				SE->Get((int)SoundEnum::Env).Play(0, DX_PLAYTYPE_LOOP);
 				SE->Get((int)SoundEnum::Env2).Play(0, DX_PLAYTYPE_LOOP);
 				if (!m_IsHardMode) {
-					ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(204));
+					ItemLogParts->Add(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(204));
 				}
 				else {
-					ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(205));
+					ItemLogParts->Add(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(205));
 					m_Timer = 0.001f;
 				}
 			}
@@ -376,7 +375,7 @@ namespace FPS_n2 {
 					//ハードモードアンロック
 					if (SaveDataParts->GetParam("UnlockHardMode") != 1) {
 						SaveDataParts->SetParam("UnlockHardMode", 1);
-						ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "Fire Party モード");
+						ItemLogParts->Add(10.f, GetColor(50, 255, 50), "%s が開放されました！", "Fire Party モード");
 					}
 				}
 				//
@@ -384,7 +383,7 @@ namespace FPS_n2 {
 					int bases = std::clamp(static_cast<int>(SaveDataParts->GetParam("ULT Unlock")), 1, (int)ULT_GUN::Max);
 					SaveDataParts->SetParam("ULT Unlock", std::clamp(bases + 1, 1, (int)ULT_GUN::Max));
 					if (bases != static_cast<int>(SaveDataParts->GetParam("ULT Unlock"))) {
-						ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", ULT_GUNName[SaveDataParts->GetParam("ULT Unlock") - 1]);
+						ItemLogParts->Add(10.f, GetColor(50, 255, 50), "%s が開放されました！", ULT_GUNName[SaveDataParts->GetParam("ULT Unlock") - 1]);
 					}
 				}
 				//
@@ -398,7 +397,7 @@ namespace FPS_n2 {
 								{
 									SaveDataParts->SetParam("G17 ThreadedBarrel", 1);
 									SaveDataParts->SetParam("9x19 Suppressor", 1);
-									ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "サプレッサーキット");
+									ItemLogParts->Add(10.f, GetColor(50, 255, 50), "%s が開放されました！", "サプレッサーキット");
 								}
 								break;
 							case 2:
@@ -406,7 +405,7 @@ namespace FPS_n2 {
 									SaveDataParts->SetParam("G-High IronSight", 1);
 									SaveDataParts->SetParam("Glock17 Gen2 Frame", 1);
 									SaveDataParts->SetParam("SBal PL LaserSight", 1);
-									ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "スポーターキット");
+									ItemLogParts->Add(10.f, GetColor(50, 255, 50), "%s が開放されました！", "スポーターキット");
 								}
 								break;
 							case 3:
@@ -414,7 +413,7 @@ namespace FPS_n2 {
 									SaveDataParts->SetParam("FMG-9 Carbine Kit", 1);
 									SaveDataParts->SetParam("Glock18 Slide (for 17)", 1);
 									SaveDataParts->SetParam("ACOG TA31 Scope", 1);
-									ItemLogParts->AddLog(10.f, GetColor(50, 255, 50), "%s が開放されました！", "FMG-9キット");
+									ItemLogParts->Add(10.f, GetColor(50, 255, 50), "%s が開放されました！", "FMG-9キット");
 								}
 								break;
 							default:
@@ -446,7 +445,6 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				PostPassEffect::Instance()->SetLevelFilter(0, 255, 1.f);
 				DrawParts->SetAberrationPower(1.f);
-				DrawParts->SetIsUpdateShadow(0, true);
 				DrawParts->Set_is_Blackout(false);
 				DrawParts->Set_Per_Blackout(0.f);
 				DrawParts->Set_is_lens(false);
@@ -860,7 +858,7 @@ namespace FPS_n2 {
 					else {
 						if (!m_RashStartLog) {
 							m_RashStartLog = true;
-							ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(206));
+							ItemLogParts->Add(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(206));
 						}
 						m_LastMan = 0;
 						for (int index = 0; index < Player_num; index++) {
@@ -871,7 +869,7 @@ namespace FPS_n2 {
 							}
 						}
 						if (m_LastMan != prevLastMan) {
-							ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), "%s %d", LocalizePool::Instance()->Get(207), m_LastMan);
+							ItemLogParts->Add(3.f, GetColor(251, 91, 1), "%s %d", LocalizePool::Instance()->Get(207), m_LastMan);
 						}
 					}
 					prevLastMan = m_LastMan;
@@ -1072,14 +1070,14 @@ namespace FPS_n2 {
 											tgt->AddAmmoStock(Add);
 											isHit = true;
 											SE->Get((int)SoundEnum::GetAmmo).Play_3D(0, tgt->GetEyeMatrix().pos(), Scale_Rate * 10.f);
-											ItemLogParts->AddLog(3.f, GetColor(183, 143, 0), "%s +%d", LocalizePool::Instance()->Get(208), Add);
+											ItemLogParts->Add(3.f, GetColor(183, 143, 0), "%s +%d", LocalizePool::Instance()->Get(208), Add);
 										}
 										break;
 									case ItemType::ARMER:
 										if (tgt->GetArmer()) {
 											isHit = true;
 											SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, tgt->GetEyeMatrix().pos(), Scale_Rate * 10.f);
-											ItemLogParts->AddLog(3.f, GetColor(183, 143, 0), LocalizePool::Instance()->Get(209));
+											ItemLogParts->Add(3.f, GetColor(183, 143, 0), LocalizePool::Instance()->Get(209));
 										}
 										break;
 									default:
@@ -1364,13 +1362,13 @@ namespace FPS_n2 {
 				auto ScoreBuf = PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore();
 				if (ScoreBuf > prevScore && (ScoreBuf - prevScore) >= 100) {
 					this->m_UIclass.SetIntParam(5, (ScoreBuf - prevScore));
-					ItemLogParts->AddLog(3.f, GetColor(206, 0, 0), "%s +%4d", LocalizePool::Instance()->Get(210), (ScoreBuf - prevScore));
+					ItemLogParts->Add(3.f, GetColor(206, 0, 0), "%s +%4d", LocalizePool::Instance()->Get(210), (ScoreBuf - prevScore));
 				}
 				else {
 					this->m_UIclass.SetIntParam(5, 0);
 				}
 				if (Chara->ULTActiveSwitch()) {
-					ItemLogParts->AddLog(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(211));
+					ItemLogParts->Add(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(211));
 				}
 				prevScore = PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore();
 				//

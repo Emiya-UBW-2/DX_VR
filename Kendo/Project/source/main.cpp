@@ -3,6 +3,10 @@
 #include "Scene/MainScene.hpp"
 #include "Scene/MainSceneLoader.hpp"
 
+#ifdef DEBUG
+int DBG_CamSel = -1;
+#endif
+
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DXDraw::Create();						//汎用
 	auto* DrawParts = DXDraw::Instance();
@@ -16,8 +20,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 #endif // DEBUG
 	SetMainWindowText("Phantom of the Bunker");						//タイトル
 	//
+	FPS_n2::Sceneclass::WeaponAnimManager::Create();
 	FPS_n2::Sceneclass::PlayerManager::Create();
 	FPS_n2::Sceneclass::CommonBattleResource::Create();
+	//BG
+	FPS_n2::Sceneclass::WeaponAnimManager::Instance()->Load("data/CharaAnime/");
 	//シーン
 	auto MAINLOOPLOADERscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOPLOADER>();
 	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();

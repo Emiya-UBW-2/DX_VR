@@ -43,65 +43,6 @@ namespace FPS_n2 {
 		public:
 			const auto& Per() const noexcept { return m_ArmPer; }
 		};
-
-		//
-		enum class HitType {
-			Head,
-			Body,
-			Arm,
-			Leg,
-		};
-		class HitBox {
-			Vector3DX	m_pos;
-			float		m_radius{0.f};
-			HitType		m_HitType{HitType::Body};
-		public:
-			void	Execute(const Vector3DX&pos, float radius, HitType pHitType) {
-				m_pos = pos;
-				m_radius = radius;
-				m_HitType = pHitType;
-			}
-			void	Draw() {
-				unsigned int color;
-				switch (m_HitType) {
-					case HitType::Head:
-						color = Red;
-						break;
-					case HitType::Body:
-						color = Green;
-						break;
-					case HitType::Arm:
-						color = Blue;
-						break;
-					case HitType::Leg:
-						color = Blue;
-						break;
-					default:
-						break;
-				}
-				DrawSphere_3D(m_pos, m_radius, color, color);
-			}
-
-			bool	Colcheck(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
-				if (HitCheck_Sphere_Capsule(
-					m_pos.get(), m_radius,
-					StartPos.get(), pEndPos->get(), 0.001f*Scale_Rate
-				) == TRUE) {
-					VECTOR pos1 = StartPos.get();
-					VECTOR pos2 = pEndPos->get();
-					VECTOR pos3 = m_pos.get();
-					SEGMENT_POINT_RESULT Res;
-					Segment_Point_Analyse(&pos1, &pos2, &pos3, &Res);
-
-					*pEndPos = Res.Seg_MinDist_Pos;
-
-					return TRUE;
-				}
-				return FALSE;
-			}
-			const auto GetColType()const noexcept { return this->m_HitType; }
-		};
-
 		//キャラのうち特定機能だけ抜き出したもの
 		class StaminaControl {
 		private://キャラパラメーター
@@ -116,22 +57,6 @@ namespace FPS_n2 {
 			bool												m_CannotRun{false};//スタミナ切れ
 			bool												m_HeartSoundFlag{false};
 		public://ゲッター
-			//const auto&		GetStamina(void) const noexcept { return this->m_Stamina; }
-			//const auto&		GetStaminaMax(void) const noexcept { return this->StaminaMax; }
-			//const auto&		GetCannotRun(void) const noexcept { return this->m_CannotRun; }
-			//const auto&		GetHeartRate(void) const noexcept { return this->m_HeartRate; }
-			//const auto&		GetHeartRateRad(void) const noexcept { return this->m_HeartRateRad; }
-			const auto		GetHeartRandVec(float SquatPer) const noexcept {
-				auto* DrawParts = DXDraw::Instance();
-				auto tmp2 = 0.2f * GetRandf(deg2rad(1.f));
-				auto tmp3 = Lerp(0.5f, 0.15f, SquatPer);
-				Vector3DX tmpvec = Vector3DX::vget(
-					tmp2 + 0.00006f * sin(this->m_HeartRateRad) * powf(this->m_HeartRate / HeartRateMin, 3.f),
-					tmp2 + 0.00006f * sin(this->m_HeartRateRad * 3) * powf(this->m_HeartRate / HeartRateMin, 3.f),
-					0.f
-				);
-				return tmpvec * tmp3 * (60.f / DrawParts->GetFps());
-			}
 		public:
 			void		InitStamina() {
 				this->m_HeartRate = HeartRateMin;
@@ -193,52 +118,14 @@ namespace FPS_n2 {
 				return this->m_HeartSoundFlag;
 			}
 		};
-		//
-		class LifeControl {
-		private://キャラパラメーター
-			const HitPoint										HPMax = 100;
-		private:
-			HitPoint											m_HP{0};							//スコア
-			std::vector<DamageEvent>							m_DamageEvent;						//ダメージイベント
-		protected:
-			void			SetHealEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint value) noexcept {
-				this->m_DamageEvent.resize(this->m_DamageEvent.size() + 1);
-				this->m_DamageEvent.back().SetEvent(ShotID_t, DamageID_t, -value);
-			}
-			void			SetSubHPEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint value) noexcept {
-				this->m_DamageEvent.resize(this->m_DamageEvent.size() + 1);
-				this->m_DamageEvent.back().SetEvent(ShotID_t, DamageID_t, value);
-			}
-		public://ゲッター
-			const auto		IsAlive(void) const noexcept { return this->m_HP != 0; }
-			const auto&		GetHP(void) const noexcept { return this->m_HP; }
-			const auto&		GetHPMax(void) const noexcept { return HPMax; }
-			void			SubHP(HitPoint damage_t) noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, HPMax); }
-
-			const auto		IsLowHP(void) const noexcept { return GetHP() < (GetHPMax() * 35 / 100); }
-
-			auto&			GetDamageEvent(void) noexcept { return this->m_DamageEvent; }
-		public:
-			void		InitLife() {
-				this->m_HP = HPMax;
-			}
-		};
 		//キャラ入力
 		class KeyControl {
 		private://キャラパラメーター
-			float												m_LeanRad{0.f};
-			float												m_LateLeanRad{0.f};
-			float												m_HeadShotPer{0.f};
 			float												m_MoverPer{0.f};
 			Vector3DX											m_VecTotal;
 			std::array<float, 4>								m_Vec{0,0,0,0};
 			InputControl										m_Input;
-			switchs												m_ULTKey;
 			switchs												m_Squat;
-			int													m_LeanRate{0};
-			bool												m_LeanSwitch{false};
-			switchs												m_QKey;
-			switchs												m_EKey;
 			Vector3DX											m_rad_Buf, m_rad, m_radAdd;
 			float												m_yrad_Upper{0.f}, m_yrad_Bottom{0.f};
 			float												m_yrad_UpperChange{0.f}, m_yrad_BottomChange{0.f};
@@ -251,18 +138,25 @@ namespace FPS_n2 {
 
 			bool												m_PosBufOverRideFlag{false};
 			moves												m_OverRideInfo;
+
+			bool												m_IsRunning{false};
+			bool												m_IsFrontAttacking{false};
+			bool												m_IsDouAttacking{false};
+			bool												m_IsBackAttacking{false};
 		public://ゲッター
 			CharaAnimeID										m_BottomAnimSelect;
 		public://ゲッター
-			const auto		GetRun(void) const noexcept { return this->m_Input.GetPADSPress(PADS::RUN) && this->m_Input.GetPADSPress(PADS::MOVE_W) && !this->m_Input.GetPADSPress(PADS::MOVE_S); }
+			const auto		GetRun(void) const noexcept { return this->m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking; }
 			const auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }
-			const auto		GetLeanRad(void) const noexcept { return this->m_LeanRad; }
 			const auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
 		public://セッター
 			auto&			SetRadBuf(void) noexcept { return this->m_rad_Buf; }
 			auto&			SetRad(void) noexcept { return this->m_rad; }
 			void			SetIsSquat(bool value) noexcept { this->m_Squat.Set(value); }
-			void			SetHeadShot(void) noexcept { m_HeadShotPer = 1.f; }
+			void			SetIsRunning(bool value) noexcept { this->m_IsRunning = value; }
+			void			SetIsFrontAttacking(bool value) noexcept { this->m_IsFrontAttacking = value; }
+			void			SetIsDouAttacking(bool value) noexcept { this->m_IsDouAttacking = value; }
+			void			SetIsBackAttacking(bool value) noexcept { this->m_IsBackAttacking = value; }
 		protected:
 			const auto		GetInputControl(void) const noexcept { return this->m_Input; }
 			const auto		GetRad(void) const noexcept { return this->m_rad; }
@@ -272,19 +166,16 @@ namespace FPS_n2 {
 			const auto		GetMoverPer(void) const noexcept { return m_MoverPer; }
 			const auto		IsMove(void) const noexcept { return m_MoverPer > 0.1f; }
 			const auto		GetFrontP(void) const noexcept {
-				auto wkey = this->m_Input.GetPADSPress(PADS::MOVE_W);
-				auto skey = this->m_Input.GetPADSPress(PADS::MOVE_S);
+				auto wkey = (this->m_Input.GetPADSPress(PADS::MOVE_W) || (m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking)) && !m_IsBackAttacking;
+				auto skey = (this->m_Input.GetPADSPress(PADS::MOVE_S) && !(m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking)) || m_IsBackAttacking;
 				auto FrontP = (wkey && !skey) ? (atan2f(m_VecTotal.x, -m_VecTotal.z) * -m_VecTotal.z) : 0.f;
 				FrontP += (!wkey && skey) ? (atan2f(-m_VecTotal.x, m_VecTotal.z) * m_VecTotal.z) : 0.f;
 				return FrontP;
 			}
-			const auto		GetLeanRate(void) const noexcept { return this->m_LeanRate; }
-			const auto		GetLeanSwitch(void) const noexcept { return this->m_LeanSwitch; }
-			const auto		GetULTKey(void) const noexcept { return this->m_ULTKey.trigger(); }
 			const auto		GetSquatSwitch(void) const noexcept { return this->m_Squat.trigger(); }
 			const auto		GetGunSwingMat(void) const noexcept { return Matrix4x4DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
 			auto&			GetCharaAnimeBufID(CharaAnimeID value) noexcept { return this->m_AnimPerBuf.at((int)value); }
-			const auto&			GetOverRideInfo() const noexcept { return this->m_OverRideInfo; }
+			const auto&		GetOverRideInfo() const noexcept { return this->m_OverRideInfo; }
 			//
 			const auto		GetBottomStandAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
 			const auto		GetBottomWalkAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_Walk : CharaAnimeID::Bottom_Stand_Walk; }
@@ -300,8 +191,11 @@ namespace FPS_n2 {
 				if (GetIsSquat()) {
 					return 0.45f;
 				}
-				else if (GetRun()) {
+				else if (m_IsRunning) {
 					return 0.975f;
+				}
+				else if (m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking) {
+					return 1.175f;
 				}
 				else {
 					return 0.45f;
@@ -336,8 +230,6 @@ namespace FPS_n2 {
 				this->m_yrad_Upper = this->m_rad.y;
 				this->m_yrad_Bottom = this->m_rad.y;
 				this->m_yrad_BottomChange = 0.f;
-				this->m_LateLeanRad = 0.f;
-				this->m_LeanRad = 0.f;
 				this->m_TurnBody = false;
 				//
 				for (auto& a : this->m_AnimPerBuf) { a = 0.f; }
@@ -366,78 +258,33 @@ namespace FPS_n2 {
 					this->m_Input.ResetKeyInput();
 				}
 				//入力
-				this->m_ULTKey.Execute(this->m_Input.GetPADSPress(PADS::ULT));
-				this->m_Squat.Execute(this->m_Input.GetPADSPress(PADS::SQUAT));
-				if (this->GetRun()) { SetIsSquat(false); }
+				this->m_Squat.Execute(false);
 				//回転
 				{
 					Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
-					this->m_rad_Buf.x = (
-						std::clamp(
-							this->m_rad_Buf.x + (this->m_Input.GetAddxRad()*(this->m_Input.GetPADSPress(PADS::RUN) ? 0.5f : 1.f)),
-							deg2rad(-12.f), deg2rad(12.f))
-						+ this->m_radAdd.x
-						);
-					this->m_rad_Buf.y = (
-						this->m_rad_Buf.y + (this->m_Input.GetAddyRad()*(this->m_Input.GetPADSPress(PADS::RUN) ? 0.5f : 1.f))
-						+ this->m_radAdd.y
-						);
+					this->m_rad_Buf.x = (std::clamp(this->m_rad_Buf.x + this->m_Input.GetAddxRad(), deg2rad(-12.f), deg2rad(12.f)) + this->m_radAdd.x);
+					this->m_rad_Buf.y = (this->m_rad_Buf.y + this->m_Input.GetAddyRad() + this->m_radAdd.y);
 
 					Easing(&this->m_rad.x, m_rad_Buf.x, 0.5f, EasingType::OutExpo);
 					Easing(&this->m_rad.y, m_rad_Buf.y, 0.8f, EasingType::OutExpo);
 					Easing(&this->m_rad.z, m_rad_Buf.z, 0.5f, EasingType::OutExpo);
 				}
 				//移動
-				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (this->m_Input.GetPADSPress(PADS::MOVE_W) ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
-				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (this->m_Input.GetPADSPress(PADS::MOVE_A) ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
-				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (this->m_Input.GetPADSPress(PADS::MOVE_S) ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
-				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (this->m_Input.GetPADSPress(PADS::MOVE_D) ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
+				auto wkey = (this->m_Input.GetPADSPress(PADS::MOVE_W) || (m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking)) && !m_IsBackAttacking;
+				auto skey = (this->m_Input.GetPADSPress(PADS::MOVE_S) && !(m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking)) || m_IsBackAttacking;
+
+				auto akey = this->m_Input.GetPADSPress(PADS::MOVE_A) && !(m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking);
+				auto dkey = this->m_Input.GetPADSPress(PADS::MOVE_D) && !(m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking);
+
+				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (wkey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
+				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (akey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
+				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (skey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
+				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (dkey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
+				if (m_IsDouAttacking) {
+					this->m_Vec[3] = std::clamp(this->m_Vec[3] + 5.f / DrawParts->GetFps(), 0.f, 1.f);
+				}
 				m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
 				m_MoverPer = m_VecTotal.magnitude();
-				//リーン
-				m_LeanSwitch = false;
-				auto Prev = this->m_LeanRate;
-				if (true) {//トグル式
-					this->m_QKey.Execute(this->m_Input.GetPADSPress(PADS::LEAN_L));
-					if (this->m_QKey.trigger()) {
-						if (this->m_LeanRate == -1) {
-							this->m_LeanRate = 1;
-						}
-						else {
-							if (this->m_LeanRate < 1) {
-								this->m_LeanRate++;
-							}
-							else {
-								this->m_LeanRate--;
-							}
-						}
-					}
-					this->m_EKey.Execute(this->m_Input.GetPADSPress(PADS::LEAN_R));
-					if (this->m_EKey.trigger()) {
-						if (this->m_LeanRate == 1) {
-							this->m_LeanRate = -1;
-						}
-						else {
-							if (this->m_LeanRate > -1) {
-								this->m_LeanRate--;
-							}
-							else {
-								this->m_LeanRate++;
-							}
-						}
-					}
-				}
-				else {
-					this->m_LeanRate = 0;
-					if (this->m_Input.GetPADSPress(PADS::LEAN_L)) {
-						this->m_LeanRate = 1;
-					}
-					if (this->m_Input.GetPADSPress(PADS::LEAN_R)) {
-						this->m_LeanRate = -1;
-					}
-				}
-				this->m_LeanRate = std::clamp(this->m_LeanRate, -1, 1);
-				m_LeanSwitch = (Prev != this->m_LeanRate);
 			}
 			void		UpdateKeyRad() {
 				auto* DrawParts = DXDraw::Instance();
@@ -454,10 +301,6 @@ namespace FPS_n2 {
 					this->m_TurnBody = false;
 				}
 
-				if (GetRun()) {//リーンをリセット
-					m_LeanSwitch = (this->m_LeanRate != 0);
-					this->m_LeanRate = 0;
-				}
 				if (this->m_TurnBody || IsMove()) { Easing(&this->m_yrad_Upper, this->m_rad.y, 0.85f, EasingType::OutExpo); }
 				auto YradChange = this->m_yrad_Bottom;
 				Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - GetFrontP(), 0.85f, EasingType::OutExpo);
@@ -467,9 +310,6 @@ namespace FPS_n2 {
 				this->m_rad_Buf.z = (Z);
 				this->m_yrad_UpperChange = this->m_rad.y - this->m_yrad_Upper;
 				this->m_yrad_BottomChange = this->m_rad.y - this->m_yrad_Bottom;
-				Easing(&this->m_LateLeanRad, this->m_LeanRad, 0.9f, EasingType::OutExpo);
-				Easing(&this->m_LeanRad, ((float)(-this->m_LeanRate) + this->m_HeadShotPer)*deg2rad(25), 0.9f, EasingType::OutExpo);
-				Easing(&this->m_HeadShotPer, 0.f, 0.9f, EasingType::OutExpo);
 				//銃の揺れ
 				Easing(&m_UpperRad, (this->m_rad - this->m_UpperPrevRad)*-1.f, 0.9f, EasingType::OutExpo);
 				m_UpperPrevRad = this->m_rad;
@@ -480,15 +320,23 @@ namespace FPS_n2 {
 				Easing(&m_UpperzVec, m_UpperzVecNormal, 0.8f, EasingType::OutExpo);
 
 				this->m_BottomAnimSelect = GetBottomStandAnimSel();
-				if (this->m_Input.GetPADSPress(PADS::MOVE_A) && !this->m_Input.GetPADSPress(PADS::MOVE_D)) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
-				if (this->m_Input.GetPADSPress(PADS::MOVE_D) && !this->m_Input.GetPADSPress(PADS::MOVE_A)) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
-				if (this->m_Input.GetPADSPress(PADS::MOVE_S) && !this->m_Input.GetPADSPress(PADS::MOVE_W)) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
-				if (this->m_Input.GetPADSPress(PADS::MOVE_W) && !this->m_Input.GetPADSPress(PADS::MOVE_S)) { this->m_BottomAnimSelect = GetRun() ? CharaAnimeID::Bottom_Stand_Run : GetBottomWalkAnimSel(); }
+				auto wkey = this->m_Input.GetPADSPress(PADS::MOVE_W) || m_IsRunning;
+				auto skey = this->m_Input.GetPADSPress(PADS::MOVE_S) && !m_IsRunning;
+
+				auto akey = this->m_Input.GetPADSPress(PADS::MOVE_A) && !(m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking);
+				auto dkey = this->m_Input.GetPADSPress(PADS::MOVE_D) && !(m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking);
+
+				if (akey && !dkey) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
+				if (dkey && !akey) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
+				if (skey && !wkey) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
+				if (wkey && !skey) { this->m_BottomAnimSelect = m_IsRunning ? CharaAnimeID::Bottom_Stand_Run : GetBottomWalkAnimSel(); }
+				if (m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking) { this->m_BottomAnimSelect = CharaAnimeID::Bottom_Stand_Attack; }
 				//下半身
 				Easing(&GetCharaAnimeBufID(GetBottomTurnAnimSel()), (!GetIsSquat() && this->m_TurnBody) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
 				for (int i = 0; i < (int)CharaAnimeID::AnimeIDMax; i++) {
 					if (
 						i == (int)CharaAnimeID::Bottom_Stand ||
+						i == (int)CharaAnimeID::Bottom_Stand_Attack ||
 						i == (int)CharaAnimeID::Bottom_Stand_Run ||
 						i == (int)CharaAnimeID::Bottom_Stand_Walk ||
 						i == (int)CharaAnimeID::Bottom_Stand_LeftStep ||
@@ -502,79 +350,6 @@ namespace FPS_n2 {
 						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 2.f : -2.f) / DrawParts->GetFps(), 0.f, 1.f);
 					}
 				}
-			}
-		};
-		//
-		class LaserSightClass {
-		private:
-			bool												m_IsLaserActive{false};
-			Vector3DX											LaserStartPos;
-			Vector3DX											LaserEndPos;
-		public://ゲッター
-			const auto&			GetIsLaserActive() const noexcept { return this->m_IsLaserActive; }
-			void			SetIsLaserActive(bool value) noexcept { m_IsLaserActive = value; }
-			void			SetLaserStartPos(const Vector3DX& value) noexcept { LaserStartPos = value; }
-			void			SetLaserEndPos(const Vector3DX& value) noexcept { LaserEndPos = value; }
-
-			void			DrawLaser() noexcept {
-				if (m_IsLaserActive) {
-					/*
-					auto P = LaserEndPos / Scale_Rate;
-					clsDx();
-					printfDx("(%5.2f,%5.2f,%5.2f)\n", P.x, P.y, P.z);
-					//*/
-					SetUseLighting(FALSE);
-					SetUseHalfLambertLighting(FALSE);
-					DrawSphere_3D(LaserEndPos, 0.01f*Scale_Rate, GetColor(255, 24, 24), Black);
-					DrawCapsule_3D(LaserStartPos, LaserEndPos, 0.0015f*Scale_Rate, GetColor(255, 24, 24), Black);
-					SetUseLighting(TRUE);
-					SetUseHalfLambertLighting(TRUE);
-				}
-			}
-		public:
-			LaserSightClass(void) noexcept {}
-			~LaserSightClass(void) noexcept {}
-		public:
-		};
-		//
-		class HitBoxControl {
-		private:
-			std::vector<HitBox>									m_HitBox;
-		protected:
-			const HitBox*		GetLineHit(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
-				for (auto& h : this->m_HitBox) {
-					if (h.Colcheck(StartPos, pEndPos)) {
-						return &h;
-					}
-				}
-				return nullptr;
-			}
-		public:
-			void		CheckLineHitNearest(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
-				for (auto& h : this->m_HitBox) {
-					h.Colcheck(StartPos, pEndPos);
-				}
-			}
-		public:
-			HitBoxControl(void) noexcept {}
-			~HitBoxControl(void) noexcept {}
-		protected:
-			void InitHitBox() noexcept {
-				m_HitBox.resize(27);
-			}
-			void UpdataHitBox(const ObjectBaseClass* ptr, float SizeRate) noexcept;
-			void DrawHitBox() noexcept {
-				//this->GetObj().SetOpacityRate(0.5f);
-				SetFogEnable(FALSE);
-				SetUseLighting(FALSE);
-				//SetUseZBuffer3D(FALSE);
-
-				for (auto& h : this->m_HitBox) {
-					h.Draw();
-				}
-
-				//SetUseZBuffer3D(TRUE);
-				SetUseLighting(TRUE);
 			}
 		};
 		//歩く時の揺れ
@@ -654,30 +429,6 @@ namespace FPS_n2 {
 				auto EyePos = Matrix4x4DX::Vtrans(Vector3DX::up()*(0.25f*SwingPer), Matrix4x4DX::RotAxis(Vector3DX::forward(), this->m_MoveEyePosTimer));
 				EyePos.y = (-std::abs(EyePos.y));
 				Easing(&this->m_MoveEyePos, Matrix4x4DX::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
-			}
-		};
-		//
-		class HitReactionControl {
-		private:
-			Vector3DX											m_HitAxis{Vector3DX::forward()};
-			float												m_HitPower{0.f};
-			float												m_HitPowerR{0.f};
-		private:
-		public:
-			HitReactionControl(void) noexcept {}
-			~HitReactionControl(void) noexcept {}
-		public:
-			const auto GetHitReactionMat() const noexcept { return Matrix4x4DX::RotAxis(m_HitAxis, m_HitPowerR*deg2rad(90.f)); }
-			const auto IsDamaging(void) const noexcept { return m_HitPower > 0.f; }
-		public:
-			void SetHit(const Vector3DX& Axis) noexcept {
-				m_HitAxis = Axis;
-				m_HitPower = 1.f;
-			}
-			void Execute_HitReactionControl() noexcept {
-				auto* DrawParts = DXDraw::Instance();
-				Easing(&this->m_HitPowerR, this->m_HitPower, 0.8f, EasingType::OutExpo);
-				this->m_HitPower = std::max(this->m_HitPower - 1.f / DrawParts->GetFps() / 0.3f, 0.f);
 			}
 		};
 	};

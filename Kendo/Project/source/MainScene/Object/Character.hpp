@@ -5,35 +5,38 @@
 #include "CharaAnimData.hpp"
 #include "../../MainScene/BackGround/BackGround.hpp"
 
+#include "Weapon.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 
 		class CharacterClass :
 			public ObjectBaseClass,
 			public StaminaControl,
-			public LifeControl,
 			public KeyControl,
-			public EffectControl,
-			public LaserSightClass,
-			public HitBoxControl,
 			public WalkSwingControl,
-			public EyeSwingControl,
-			public HitReactionControl
+			public EyeSwingControl
 		{
 		private:
 			bool												m_ActionFirstFrame{false};
-			CharaActionID										m_CharaAction{CharaActionID::Ready};
-			std::array<ArmMovePerClass, (int)EnumGunAnimType::Max>	m_Arm;
-			float												m_AmmoHandR{0.f};
-			float												m_AmmoHand{0.f};
-			float												m_HPRec{0.f};
+			EnumWeaponAnimType									m_CharaAction{EnumWeaponAnimType::Ready};
+			std::array<ArmMovePerClass, (int)EnumWeaponAnimType::Max>	m_Arm;
 			//入力
 			float												m_MeleeCoolDown{0.f};
-			float												m_SoundPower{0.f};			//サウンド
 			int													m_CharaSound{-1};			//サウンド
-			std::shared_ptr<BackGroundClass>				m_BackGround;				//BG
+			std::shared_ptr<BackGroundClass>					m_BackGround;				//BG
 			CharaTypeID											m_CharaType;
-			int													m_ArmerStock{0};
+			std::shared_ptr<WeaponClass>						m_Weapon_Ptr{nullptr};			//銃
+
+			float												m_RunTime{0.f};
+			float												m_NormalActionTime{0.f};
+
+			Vector3DX											m_MouseVec, m_MouseVecR;
+		public:
+			auto&			GetWeaponPtrNow(void) noexcept { return this->m_Weapon_Ptr; }
+			void			SetWeaponPtr(std::shared_ptr<WeaponClass>& pWeaponPtr0) noexcept {
+				this->m_Weapon_Ptr = pWeaponPtr0;
+			}
 		private:
 			PlayerID											m_MyID{0};
 		public:
@@ -42,38 +45,42 @@ namespace FPS_n2 {
 		public:
 			bool												CanLookTarget{true};
 
-			bool			GetArmer() noexcept {
-				auto prev = this->m_ArmerStock;
-				this->m_ArmerStock = 1;
-				return this->m_ArmerStock != prev;
-			}
+			bool												ResetMouse{true};
 		private:
 			void			move_RightArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept;
 			void			move_LeftArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept;
 			const Matrix4x4DX GetCharaDir(void) const noexcept;
 
 			const auto		GetCharaPosition(void) const noexcept { return this->m_move.posbuf; }
-			const auto		IsAimPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() <= 0.1f); }
-			const auto		IsLowReadyPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() >= 0.95f); }
+			const auto		IsAimPer(void) const noexcept { return (this->m_Arm[(int)EnumWeaponAnimType::Ready].Per() <= 0.1f); }
+			const auto		IsLowReadyPer(void) const noexcept { return (this->m_Arm[(int)EnumWeaponAnimType::Ready].Per() >= 0.95f); }
 		private:
-			void			Shot_Start() noexcept;
-			void			Reload_Start() noexcept;
+			void			OverrideReady() noexcept;
+
+			void			FrontAttack_Start() noexcept;
+			void			FrontAttack_End() noexcept;
+
+			void			Do_Start() noexcept;
+			void			Do_End() noexcept;
+
+			void			Tsuba_Start() noexcept;
+			void			Tsuba_End() noexcept;
+
+			void			OverrideTsuba() noexcept;
+
+			void			BackAttack_Start() noexcept;
+			void			BackAttack_End() noexcept;
 		public://ゲッター
 			const Matrix4x4DX GetEyeMatrix(void) const noexcept;
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
 			const auto&		GetCharaAction(void) const noexcept { return this->m_CharaAction; }
-			auto&			GetSoundPower(void) noexcept { return this->m_SoundPower; }
 			const auto		GetMeleeSwitch(void) const noexcept { return m_MeleeCoolDown == 1.f; }
-			const auto&		GetArmerStock(void) const noexcept { return this->m_ArmerStock; }
 		public://セッター
 			bool			SetDamageEvent(const DamageEvent& value) noexcept;
-			void			Heal(HitPoint value, bool) noexcept {
-				LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, value);
-			}
-			const bool		CheckDamageRay(HitPoint* Damage, bool CheckBodyParts, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
-			void			LoadExtends() noexcept;
 		private: //更新関連
 			void			ExecuteInput(void) noexcept;
+			void			ExecuteAction(void) noexcept;
+			void			ExecuteAnim(void) noexcept;
 			void			ExecuteSound(void) noexcept;
 			void			ExecuteMatrix(void) noexcept;
 		public: //コンストラクタ、デストラクタ

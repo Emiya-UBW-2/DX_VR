@@ -54,7 +54,7 @@ namespace FPS_n2 {
 			const auto GetOffset() const noexcept { return Limit; }
 		public:
 			template <typename... Args>
-			void AddLog(const char* Mes, Args&&... args) noexcept {
+			void Add(const char* Mes, Args&&... args) noexcept {
 				for (int i = 0;i <= Limit;i++) {
 					for (auto& d : data) {
 						d.AddFlip(1.f);
@@ -64,7 +64,7 @@ namespace FPS_n2 {
 				data.at(LastSel).SetData(Mes, args...);
 				++LastSel %= ((int)data.size());
 			}
-			void AddLog() noexcept {
+			void Add() noexcept {
 				if (Limit > 0) {
 					for (auto& d : data) {
 						d.AddFlip(1.f);
