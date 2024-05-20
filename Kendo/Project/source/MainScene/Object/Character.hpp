@@ -28,10 +28,14 @@ namespace FPS_n2 {
 			CharaTypeID											m_CharaType;
 			std::shared_ptr<WeaponClass>						m_Weapon_Ptr{nullptr};			//e
 
+			float												m_YaTimer{0.f};
+
 			float												m_RunTime{0.f};
 			float												m_NormalActionTime{0.f};
 
-			Vector3DX											m_MouseVec, m_MouseVecR;
+			Vector3DX											m_MouseVecR;
+
+			Vector3DX											m_BambooVec;
 		public:
 			auto&			GetWeaponPtrNow(void) noexcept { return this->m_Weapon_Ptr; }
 			void			SetWeaponPtr(std::shared_ptr<WeaponClass>& pWeaponPtr0) noexcept {

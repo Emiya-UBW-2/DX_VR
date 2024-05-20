@@ -193,6 +193,12 @@ namespace FPS_n2 {
 					IsOutArea = true;
 				}
 			}
+			//ä|ÇØê∫
+			if (KeyControl::GetInputControl().GetPADSPress(PADS::JUMP) && m_YaTimer<=0.f) {
+				SE->Get((int)SoundEnum::Voice_Ya).Play_3D(0, GetFrameWorldMat(GetFrame((int)CharaFrame::Head)).pos(), Scale_Rate * 35.f);
+				m_YaTimer = 15.f;
+			}
+			m_YaTimer = std::max(m_YaTimer - 1.f / DrawParts->GetFps(), 0.f);
 			//
 			switch (m_CharaAction) {
 				case EnumWeaponAnimType::Ready:
@@ -530,7 +536,6 @@ namespace FPS_n2 {
 			}
 			this->m_move.posbuf += this->m_move.vec;
 			if (m_CharaAction == EnumWeaponAnimType::Tsuba) {
-				auto* PlayerMngr = PlayerManager::Instance();
 				auto& Target = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1 - GetMyPlayerID()).GetChara();
 
 				auto TgtPos = Target->GetMove().posbuf;
@@ -598,18 +603,65 @@ namespace FPS_n2 {
 						Matrix4x4DX::RotVec2(GetWeaponPtrNow()->GetObj().GetMatrix().yvec(), GetWeaponPtrNow()->GetObj().GetMatrix().yvec())*
 						Matrix4x4DX::Mtrans(Post0);
 
-					m_MouseVec.x = std::clamp(m_MouseVec.x*deg2rad(0.1), deg2rad(-60), deg2rad(60));
-					m_MouseVec.y = std::clamp(m_MouseVec.y*deg2rad(0.1), deg2rad(-60), deg2rad(60));
-					Easing(&m_MouseVecR, m_MouseVec, 0.9f, EasingType::OutExpo);
-
-					tmp_gunmat = 
-						Matrix4x4DX::RotAxis(Vector3DX::right(), m_MouseVecR.x)*
-						Matrix4x4DX::RotAxis(Vector3DX::forward(), m_MouseVecR.y)*
+					//
+					Easing(&m_BambooVec, m_MouseVecR, 0.9f, EasingType::OutExpo);
+					auto tmp_gunmat2 =
+						Matrix4x4DX::RotAxis(Vector3DX::right(), m_BambooVec.x)*
+						Matrix4x4DX::RotAxis(Vector3DX::forward(), m_BambooVec.y)*
 						tmp_gunmat.rotation() *
-						Matrix4x4DX::Mtrans(tmp_gunmat.pos())
-						;
+						Matrix4x4DX::Mtrans(tmp_gunmat.pos());
+					GetWeaponPtrNow()->SetMove(tmp_gunmat2.rotation(), tmp_gunmat2.pos());
 
-					GetWeaponPtrNow()->SetMove(tmp_gunmat.rotation(), tmp_gunmat.pos());
+					Vector3DX StartPos = GetWeaponPtrNow()->GetFrameWorldMat(WeaponFrame::Start).pos();
+					Vector3DX EndPos = GetWeaponPtrNow()->GetFrameWorldMat(WeaponFrame::End).pos();
+					Vector3DX VecA = (EndPos - StartPos).normalized();
+
+					float Radius = 0.025f*Scale_Rate*2.f;
+					for (int i = 0; i < Player_num; i++) {
+						if (i == this->m_MyID) { continue; }
+						auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
+						//é©ï™Ç™ìñÇΩÇ¡ÇΩÇÁâüÇµñﬂÇ∑
+						Vector3DX StartPosB = Chara->GetWeaponPtrNow()->GetFrameWorldMat(WeaponFrame::Start).pos();
+						Vector3DX EndPosB = Chara->GetWeaponPtrNow()->GetFrameWorldMat(WeaponFrame::End).pos();
+						Vector3DX VecB = (EndPosB - StartPosB).normalized();
+
+						SEGMENT_SEGMENT_RESULT Ret;
+						GetSegmenttoSegment(StartPos, EndPos, StartPosB, EndPosB, &Ret);
+						float Len = std::sqrtf(Ret.SegA_SegB_MinDist_Square);
+
+						Vector3DX Vec0 = Ret.SegA_MinDist_Pos;
+						Vector3DX Vec1 = Ret.SegB_MinDist_Pos;
+
+						if (Len <= Radius &&
+							(0.f < Ret.SegA_MinDist_Pos1_Pos2_t && Ret.SegA_MinDist_Pos1_Pos2_t < 1.f) &&
+							(0.f < Ret.SegB_MinDist_Pos1_Pos2_t && Ret.SegB_MinDist_Pos1_Pos2_t < 1.f)
+							) {
+								//*
+								{
+									Vector3DX Vec2 = Vec0 + (Vec1 - Vec0).normalized() * (Len - Radius);
+									auto RetMat = Matrix4x4DX::RotVec2(VecA, (Vec2 - StartPos).normalized());//*tmp_gunmat2.rotation().inverse();
+									auto ZVec = RetMat.zvec();
+									auto XZ = std::hypotf(ZVec.x, ZVec.z);
+									m_BambooVec.y += atan2f(ZVec.x, ZVec.z);
+									m_BambooVec.x += atan2f(ZVec.y, XZ);
+								}
+								//*/
+								{
+									Vector3DX Vec2 = Vec1 + (Vec0 - Vec1).normalized() * (Len - Radius);
+									auto RetMat = Matrix4x4DX::RotVec2(VecB, (Vec2 - StartPosB).normalized());//*tmp_gunmat2.rotation().inverse();
+									auto ZVec = RetMat.zvec();
+									auto XZ = std::hypotf(ZVec.x, ZVec.z);
+									Chara->m_BambooVec.y += atan2f(ZVec.x, ZVec.z);
+									Chara->m_BambooVec.x += atan2f(ZVec.y, XZ);
+								}
+						}
+					}
+					tmp_gunmat2 =
+						Matrix4x4DX::RotAxis(Vector3DX::right(), m_BambooVec.x)*
+						Matrix4x4DX::RotAxis(Vector3DX::forward(), m_BambooVec.y)*
+						tmp_gunmat.rotation() *
+						Matrix4x4DX::Mtrans(tmp_gunmat.pos());
+					GetWeaponPtrNow()->SetMove(tmp_gunmat2.rotation(), tmp_gunmat2.pos());
 				}
 				//éËÇÃà íuÇêßå‰
 				if ((m_MyID == 0) || this->CanLookTarget) {
@@ -659,7 +711,11 @@ namespace FPS_n2 {
 			SetMove(Matrix4x4DX::RotAxis(Vector3DX::up(), KeyControl::GetRad().y), pPos);
 		}
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
-			m_MouseVec.Set(pInput.GetAddxRad(), pInput.GetAddyRad(), 0.f);
+			Vector3DX m_MouseVec; m_MouseVec.Set(
+				std::clamp(pInput.GetAddxRad()*deg2rad(0.1), deg2rad(-60), deg2rad(60)),
+				std::clamp(pInput.GetAddyRad()*deg2rad(0.1), deg2rad(-60), deg2rad(60)),
+				0.f);
+			Easing(&m_MouseVecR, m_MouseVec, 0.7f, EasingType::OutExpo);
 			InputControl Input = pInput;
 			{
 				float pp_y = 0.f;
