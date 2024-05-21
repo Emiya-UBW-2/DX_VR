@@ -48,8 +48,6 @@ namespace FPS_n2 {
 			void			SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
 		public:
 			bool												CanLookTarget{true};
-
-			bool												ResetMouse{true};
 		private:
 			void			move_RightArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept;
 			void			move_LeftArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept;
@@ -79,6 +77,7 @@ namespace FPS_n2 {
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
 			const auto&		GetCharaAction(void) const noexcept { return this->m_CharaAction; }
 			const auto		GetMeleeSwitch(void) const noexcept { return m_MeleeCoolDown == 1.f; }
+			const auto&		GetBambooVec(void) const noexcept { return m_BambooVec; }
 		public://セッター
 			bool			SetDamageEvent(const DamageEvent& value) noexcept;
 		private: //更新関連

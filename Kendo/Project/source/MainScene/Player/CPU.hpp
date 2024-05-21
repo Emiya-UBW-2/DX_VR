@@ -6,32 +6,36 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		//AIóp
 		class AIControl {
+			PlayerID m_MyID{0};
 		public:
-			//AIëÄçÏ
-			void SetNextWaypoint(const Vector3DX&) {
+			void Init(std::shared_ptr<BackGroundClass>&, PlayerID MyID) noexcept {
+				m_MyID = MyID;
 			}
-			void AI_move(InputControl* MyInput) noexcept {
-				bool W_key{ false };
-				bool A_key{ false };
-				bool S_key{ false };
-				bool D_key{ false };
+			void Execute(InputControl* MyInput) noexcept {
+				bool W_key{false};
+				bool A_key{false};
+				bool S_key{false};
+				bool D_key{false};
 
-				bool shotMain_Key{ false };
-				bool shotSub_Key{ false };
-				int32_t x_m{ 0 }, y_m{ 0 };
+				bool shotMain_Key{false};
+				bool shotSub_Key{false};
+				float pp_x{0.f}, pp_y{0.f};
+				auto* PlayerMngr = PlayerManager::Instance();
+				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(m_MyID).GetChara();
+
+				if (Chara->GetBambooVec().magnitude() > deg2rad(1)) {
+					pp_x = std::clamp(-100.f * Chara->GetBambooVec().x / deg2rad(60.f), -30.f, 30.f);
+					pp_y = std::clamp(-100.f * Chara->GetBambooVec().y / deg2rad(60.f), -30.f, 30.f);
+				}
+				printfDx("[%5.2f,%5.2f]\n", pp_x, pp_y);
 				//AI
-				MyInput->SetInputStart((float)x_m / 100.f, (float)y_m / 100.f);
+				MyInput->SetInputStart(pp_x, pp_y);
 				MyInput->SetInputPADS(PADS::MOVE_W, W_key);
 				MyInput->SetInputPADS(PADS::MOVE_S, S_key);
 				MyInput->SetInputPADS(PADS::MOVE_A, A_key);
 				MyInput->SetInputPADS(PADS::MOVE_D, D_key);
 				MyInput->SetInputPADS(PADS::SHOT, shotMain_Key);
 				MyInput->SetInputPADS(PADS::JUMP, shotSub_Key);
-			}
-		public:
-			void Init(std::shared_ptr<BackGroundClass>&, PlayerID) noexcept {
-			}
-			void Execute() noexcept {
 			}
 			void Draw() noexcept {
 			}

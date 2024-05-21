@@ -56,6 +56,7 @@ namespace FPS_n2 {
 					c->ValueSet((PlayerID)index, false, CharaTypeID::Team);
 					c->MovePoint(deg2rad(0.f), deg2rad(180.f*(float)index), pos_t);
 				}
+				m_AICtrl[index]->Init(this->m_BackGround, (PlayerID)index);
 			}
 			//UI
 			this->m_UIclass.Set();
@@ -69,7 +70,7 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 
 			auto* Pad = PadControl::Instance();
-			Pad->SetMouseMoveEnable(false);
+			Pad->SetMouseMoveEnable(true);
 			Pad->ChangeGuide(
 				[&]() {
 					auto* KeyGuide = PadControl::Instance();
@@ -99,22 +100,9 @@ namespace FPS_n2 {
 				if (Pad->GetKey(PADS::JUMP).trigger()) {
 					OptionWindowClass::Instance()->SetActive();
 				}
-				SetValidMousePointerWindowOutClientAreaMoveFlag(TRUE);
 				return true;
 			}
 			else {
-				if (GetMainWindowHandle() != GetForegroundWindow()) {//次画面が最前ではないよん
-					SetMouseDispFlag(TRUE);
-					SetValidMousePointerWindowOutClientAreaMoveFlag(TRUE);
-				}
-				else {
-					SetMouseDispFlag(FALSE);
-					SetValidMousePointerWindowOutClientAreaMoveFlag(FALSE);
-					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
-					if (Chara->ResetMouse) {
-						SetMousePoint(DrawParts->GetDispXSize() / 2, DrawParts->GetDispYSize() / 2);
-					}
-				}
 			}
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
@@ -134,6 +122,8 @@ namespace FPS_n2 {
 				InputControl MyInput;
 				pp_x = Pad->GetLS_Y();
 				pp_y = Pad->GetLS_X();
+
+				printfDx("[%5.2f,%5.2f]\n", pp_x, pp_y);
 				MyInput.SetInputStart(pp_x, pp_y);
 				MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
 				MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
@@ -202,7 +192,7 @@ namespace FPS_n2 {
 						}
 						else {
 							if (!m_NetWorkBrowser.GetClient()) {
-								//m_AICtrl[index]->Execute(&tmp.Input, (!m_IsHardMode && (m_Timer > 60.f)) || m_IsHardMode);
+								m_AICtrl[index]->Execute(&tmp.Input);
 							}
 							c->SetInput(tmp.Input, isready);
 							bool override_true = true;
@@ -223,7 +213,7 @@ namespace FPS_n2 {
 						}
 						else {
 							InputControl OtherInput;
-							//m_AICtrl[index]->Execute(&OtherInput, (!m_IsHardMode && (m_Timer > 60.f)) || m_IsHardMode);
+							m_AICtrl[index]->Execute(&OtherInput);
 							c->SetInput(OtherInput, isready);
 						}
 						//ダメージイベント処理

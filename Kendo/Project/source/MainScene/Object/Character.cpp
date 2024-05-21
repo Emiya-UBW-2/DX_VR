@@ -262,7 +262,6 @@ namespace FPS_n2 {
 						m_RunTime = std::max(m_RunTime - 1.f / DrawParts->GetFps(), 0.f);
 						//SetIsRunning(false);
 					}
-					ResetMouse = true;
 					break;
 				case EnumWeaponAnimType::Men:
 				case EnumWeaponAnimType::Kote:
@@ -604,59 +603,70 @@ namespace FPS_n2 {
 						Matrix4x4DX::Mtrans(Post0);
 
 					//
-					Easing(&m_BambooVec, m_MouseVecR, 0.9f, EasingType::OutExpo);
-					auto tmp_gunmat2 =
-						Matrix4x4DX::RotAxis(Vector3DX::right(), m_BambooVec.x)*
-						Matrix4x4DX::RotAxis(Vector3DX::forward(), m_BambooVec.y)*
-						tmp_gunmat.rotation() *
-						Matrix4x4DX::Mtrans(tmp_gunmat.pos());
-					GetWeaponPtrNow()->SetMove(tmp_gunmat2.rotation(), tmp_gunmat2.pos());
+					bool IsHit = false;
+					for (int index = 0; index < 10; index++) {
+						m_BambooVec += m_MouseVecR / 10.f;
+						m_BambooVec.Set(std::clamp(m_BambooVec.x, deg2rad(-10), deg2rad(10)), std::clamp(m_BambooVec.y, deg2rad(-30), deg2rad(30)), 0.f);
 
-					Vector3DX StartPos = GetWeaponPtrNow()->GetFrameWorldMat(WeaponFrame::Start).pos();
-					Vector3DX EndPos = GetWeaponPtrNow()->GetFrameWorldMat(WeaponFrame::End).pos();
-					Vector3DX VecA = (EndPos - StartPos).normalized();
+						Vector3DX StartPosP = GetWeaponPtrNow()->GetMove().pos;
+						Vector3DX EndPosP = GetWeaponPtrNow()->GetFrameWorldMat(WeaponFrame::End).pos();
 
-					float Radius = 0.025f*Scale_Rate*2.f;
-					for (int i = 0; i < Player_num; i++) {
-						if (i == this->m_MyID) { continue; }
-						auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
-						//Ž©•ª‚ª“–‚½‚Á‚½‚ç‰Ÿ‚µ–ß‚·
-						Vector3DX StartPosB = Chara->GetWeaponPtrNow()->GetFrameWorldMat(WeaponFrame::Start).pos();
-						Vector3DX EndPosB = Chara->GetWeaponPtrNow()->GetFrameWorldMat(WeaponFrame::End).pos();
-						Vector3DX VecB = (EndPosB - StartPosB).normalized();
+						auto tmp_gunmat2 =
+							Matrix4x4DX::RotAxis(Vector3DX::right(), m_BambooVec.x)*
+							Matrix4x4DX::RotAxis(Vector3DX::forward(), m_BambooVec.y)*
+							tmp_gunmat.rotation() *
+							Matrix4x4DX::Mtrans(tmp_gunmat.pos());
+						GetWeaponPtrNow()->SetMove(tmp_gunmat2.rotation(), tmp_gunmat2.pos());
 
-						SEGMENT_SEGMENT_RESULT Ret;
-						GetSegmenttoSegment(StartPos, EndPos, StartPosB, EndPosB, &Ret);
-						float Len = std::sqrtf(Ret.SegA_SegB_MinDist_Square);
+						Vector3DX StartPos = GetWeaponPtrNow()->GetMove().pos;
+						Vector3DX EndPos = GetWeaponPtrNow()->GetFrameWorldMat(WeaponFrame::End).pos();
+						Vector3DX VecA = (EndPos - StartPos).normalized();
 
-						Vector3DX Vec0 = Ret.SegA_MinDist_Pos;
-						Vector3DX Vec1 = Ret.SegB_MinDist_Pos;
+						float Radius = 0.025f*Scale_Rate*2.f;
+						for (int i = 0; i < Player_num; i++) {
+							if (i == this->m_MyID) { continue; }
+							auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
+							//Ž©•ª‚ª“–‚½‚Á‚½‚ç‰Ÿ‚µ–ß‚·
+							Vector3DX StartPosB = Chara->GetWeaponPtrNow()->GetMove().pos;;
+							Vector3DX EndPosB = Chara->GetWeaponPtrNow()->GetFrameWorldMat(WeaponFrame::End).pos();
+							Vector3DX VecB = (EndPosB - StartPosB).normalized();
 
-						if (Len <= Radius &&
-							(0.f < Ret.SegA_MinDist_Pos1_Pos2_t && Ret.SegA_MinDist_Pos1_Pos2_t < 1.f) &&
-							(0.f < Ret.SegB_MinDist_Pos1_Pos2_t && Ret.SegB_MinDist_Pos1_Pos2_t < 1.f)
-							) {
+							SEGMENT_SEGMENT_RESULT Ret;
+							GetSegmenttoSegment(StartPos, EndPos, StartPosB, EndPosB, &Ret);
+							float Len = std::sqrtf(Ret.SegA_SegB_MinDist_Square);
+
+							Vector3DX Vec0 = Ret.SegA_MinDist_Pos;
+							Vector3DX Vec1 = Ret.SegB_MinDist_Pos;
+
+							if (Len <= Radius &&
+								(0.f < Ret.SegA_MinDist_Pos1_Pos2_t && Ret.SegA_MinDist_Pos1_Pos2_t < 1.f) &&
+								(0.f < Ret.SegB_MinDist_Pos1_Pos2_t && Ret.SegB_MinDist_Pos1_Pos2_t < 1.f)
+								) {
 								//*
-								{
-									Vector3DX Vec2 = Vec0 + (Vec1 - Vec0).normalized() * (Len - Radius);
-									auto RetMat = Matrix4x4DX::RotVec2(VecA, (Vec2 - StartPos).normalized());//*tmp_gunmat2.rotation().inverse();
-									auto ZVec = RetMat.zvec();
-									auto XZ = std::hypotf(ZVec.x, ZVec.z);
-									m_BambooVec.y += atan2f(ZVec.x, ZVec.z);
-									m_BambooVec.x += atan2f(ZVec.y, XZ);
-								}
-								//*/
-								{
-									Vector3DX Vec2 = Vec1 + (Vec0 - Vec1).normalized() * (Len - Radius);
-									auto RetMat = Matrix4x4DX::RotVec2(VecB, (Vec2 - StartPosB).normalized());//*tmp_gunmat2.rotation().inverse();
-									auto ZVec = RetMat.zvec();
-									auto XZ = std::hypotf(ZVec.x, ZVec.z);
-									Chara->m_BambooVec.y += atan2f(ZVec.x, ZVec.z);
-									Chara->m_BambooVec.x += atan2f(ZVec.y, XZ);
-								}
+									{
+										Vector3DX Vec2 = Vec0 + (Vec1 - Vec0).normalized() * (Len - Radius);
+										auto RetMat = Matrix4x4DX::RotVec2(VecA, (Vec2 - StartPos).normalized());//*tmp_gunmat2.rotation().inverse();
+										auto ZVec = RetMat.zvec();
+										auto XZ = std::hypotf(ZVec.x, ZVec.z);
+										m_BambooVec.y += atan2f(ZVec.x, ZVec.z)*0.5f;
+										m_BambooVec.x += atan2f(ZVec.y, XZ)*0.5f;
+										m_BambooVec.Set(std::clamp(m_BambooVec.x, deg2rad(-10), deg2rad(10)), std::clamp(m_BambooVec.y, deg2rad(-30), deg2rad(30)), 0.f);
+									}
+									//*/
+									{
+										Vector3DX Vec2 = Vec1 + (Vec0 - Vec1).normalized() * (Len - Radius);
+										auto RetMat = Matrix4x4DX::RotVec2(VecB, (Vec2 - StartPosB).normalized());//*tmp_gunmat2.rotation().inverse();
+										auto ZVec = RetMat.zvec();
+										auto XZ = std::hypotf(ZVec.x, ZVec.z);
+										Chara->m_BambooVec.y += atan2f(ZVec.x, ZVec.z)*1.5f;
+										Chara->m_BambooVec.x += atan2f(ZVec.y, XZ)*1.5f;
+									}
+									IsHit = true;
+							}
 						}
+						if (IsHit) { break; }
 					}
-					tmp_gunmat2 =
+					auto tmp_gunmat2 =
 						Matrix4x4DX::RotAxis(Vector3DX::right(), m_BambooVec.x)*
 						Matrix4x4DX::RotAxis(Vector3DX::forward(), m_BambooVec.y)*
 						tmp_gunmat.rotation() *
@@ -711,11 +721,9 @@ namespace FPS_n2 {
 			SetMove(Matrix4x4DX::RotAxis(Vector3DX::up(), KeyControl::GetRad().y), pPos);
 		}
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
-			Vector3DX m_MouseVec; m_MouseVec.Set(
-				std::clamp(pInput.GetAddxRad()*deg2rad(0.1), deg2rad(-60), deg2rad(60)),
-				std::clamp(pInput.GetAddyRad()*deg2rad(0.1), deg2rad(-60), deg2rad(60)),
-				0.f);
-			Easing(&m_MouseVecR, m_MouseVec, 0.7f, EasingType::OutExpo);
+			Vector3DX m_MouseVec; m_MouseVec.Set(pInput.GetAddxRad()*deg2rad(0.1f), pInput.GetAddyRad()*deg2rad(0.1f), 0.f);
+			Easing(&m_MouseVecR, m_MouseVec, 0.8f, EasingType::OutExpo);
+			
 			InputControl Input = pInput;
 			{
 				float pp_y = 0.f;
@@ -760,8 +768,9 @@ namespace FPS_n2 {
 				if (GetMyPlayerID() == 0) {
 					this->GetObj().SetOpacityRate(0.25f);
 				}
+				m_BambooVec.Set(0.f, 0.f, 0.f);
+				m_MouseVecR.Set(0.f, 0.f, 0.f);
 			}
-			ResetMouse = false;
 			m_MeleeCoolDown = std::max(m_MeleeCoolDown - 1.f / DrawParts->GetFps(), 0.f);
 			//
 			ExecuteInput();

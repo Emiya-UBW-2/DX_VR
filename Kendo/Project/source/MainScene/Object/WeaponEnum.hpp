@@ -12,7 +12,6 @@ namespace FPS_n2 {
 			RightHandYvec,
 			RightHandZvec,
 			Move,
-			Start,
 			End,
 			Max,
 		};
@@ -25,7 +24,6 @@ namespace FPS_n2 {
 			"righthand_yvec",
 			"righthand_zvec",
 			"ˆÚ“®",
-			"Start",
 			"End",
 		};
 	};
