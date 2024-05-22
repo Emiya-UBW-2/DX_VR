@@ -80,9 +80,6 @@ namespace FPS_n2 {
 				this->m_BackGround->Shadow_Draw_Far();
 			}
 
-			void			ShadowDraw_NearFar_Sub(void) noexcept override {
-				this->m_BackGround->Shadow_Draw_NearFar();
-			}
 			void			ShadowDraw_Sub(void) noexcept override {
 				this->m_BackGround->Shadow_Draw();
 				ObjectManager::Instance()->Draw_Shadow();
