@@ -30,9 +30,6 @@ namespace FPS_n2 {
 			//
 			Vector3DX LightVec = Vector3DX::vget(-0.8f, -0.5f, -0.1f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(0.92f, 0.91f, 0.90f, 1.0f));
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-300.f, -10.f, -300.f)*Scale_Rate, Vector3DX::vget(300.f, 50.f, 300.f)*Scale_Rate, 0);
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-300.f, -10.f, -300.f)*Scale_Rate, Vector3DX::vget(300.f, 50.f, 300.f)*Scale_Rate, 1);
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-300.f, -10.f, -300.f)*Scale_Rate, Vector3DX::vget(300.f, 50.f, 300.f)*Scale_Rate, 2);
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));

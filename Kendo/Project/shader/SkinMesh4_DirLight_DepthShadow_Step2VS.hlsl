@@ -18,6 +18,7 @@ struct VS_OUTPUT
 	float4 Specular        : COLOR1 ;
 	float2 TexCoords0      : TEXCOORD0 ;
 	float4 LPPosition      : TEXCOORD1 ;    // ライトからみた座標( ライトの射影空間 )
+	float4 LPPosition2     : TEXCOORD2 ;    // ライトからみた座標( ライトの射影空間 )
 	float4 Position        : SV_POSITION ;	// 座標( プロジェクション空間 )
 } ;
 
@@ -73,6 +74,11 @@ cbuffer cbLIGHTCAMERA_MATRIX						: register( b4 )
 	matrix		g_LightViewMatrix ;			// ライトのワールド　→　ビュー行列
 	matrix		g_LightProjectionMatrix ;	// ライトのビュー　　→　射影行列
 } ;
+
+cbuffer cbLIGHTCAMERA_MATRIX2						: register(b5) {
+	matrix		g_LightViewMatrix2;			// ライトのワールド　→　ビュー行列
+	matrix		g_LightProjectionMatrix2;	// ライトのビュー　　→　射影行列
+};
 
 
 // main関数
@@ -141,6 +147,15 @@ VS_OUTPUT main( VS_INPUT VSInput )
 
 	// Ｚ値だけはライトのビュー座標にする
 	VSOutput.LPPosition.z = lLViewPosition.z ;
+
+	// ワールド座標をライトのビュー座標に変換
+	lLViewPosition = mul(g_LightViewMatrix2, lWorldPosition);
+
+	// ライトのビュー座標をライトの射影座標に変換
+	VSOutput.LPPosition2 = mul(g_LightProjectionMatrix2, lLViewPosition);
+
+	// Ｚ値だけはライトのビュー座標にする
+	VSOutput.LPPosition2.z = lLViewPosition.z;
 
 	// 深度影用のライトから見た射影座標を算出 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++( 終了 )
 

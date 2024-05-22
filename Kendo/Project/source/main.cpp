@@ -19,6 +19,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	auto* DebugParts = DebugClass::Instance();		//デバッグ
 #endif // DEBUG
 	SetMainWindowText("Phantom of the Bunker");						//タイトル
+	SetUseHalfLambertLighting(TRUE);
 	//
 	FPS_n2::Sceneclass::WeaponAnimManager::Create();
 	FPS_n2::Sceneclass::PlayerManager::Create();

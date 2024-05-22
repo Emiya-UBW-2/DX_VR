@@ -140,7 +140,7 @@ namespace FPS_n2 {
 		}
 		void			CharacterClass::BackAttack_Start() noexcept {
 			GetWeaponPtrNow()->ResetAnim();
-			m_NormalActionTime = std::max(0.5f, GetWeaponPtrNow()->GetGunTotalTime(m_CharaAction));
+			m_NormalActionTime = std::max(0.75f, GetWeaponPtrNow()->GetGunTotalTime(m_CharaAction));
 			SetIsBackAttacking(true);
 			this->GetObj().get_anime((int)CharaAnimeID::Bottom_Stand_Attack).GoStart();
 			this->m_CharaSound = -1;
@@ -287,6 +287,7 @@ namespace FPS_n2 {
 						}
 					}
 					else {
+						Easing(&m_BambooVec, Vector3DX::zero(), 0.9f, EasingType::OutExpo);
 						if (m_NormalActionTime <= 0.f) {
 							FrontAttack_End();
 							auto Action = m_CharaAction;
@@ -389,6 +390,7 @@ namespace FPS_n2 {
 						}
 					}
 					else {
+						Easing(&m_BambooVec, Vector3DX::zero(), 0.9f, EasingType::OutExpo);
 						if (IsOutArea || m_NormalActionTime <= 0.f) {
 							BackAttack_End();
 							m_CharaAction = EnumWeaponAnimType::Ready;
@@ -760,13 +762,15 @@ namespace FPS_n2 {
 			KeyControl::InputKey(Input, pReady, Vector3DX::zero());
 		}
 		//
-		void			CharacterClass::Init_Sub(void) noexcept {}
+		void			CharacterClass::Init_Sub(void) noexcept {
+		}
 		void			CharacterClass::FirstExecute(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			//初回のみ更新する内容
 			if (this->m_IsFirstLoop) {
 				if (GetMyPlayerID() == 0) {
-					this->GetObj().SetOpacityRate(0.25f);
+					//this->GetObj().SetOpacityRate(0.25f);
+					GetObj().material_AlphaTestAll(true, DX_CMP_GREATER, 0);								//本体
 				}
 				m_BambooVec.Set(0.f, 0.f, 0.f);
 				m_MouseVecR.Set(0.f, 0.f, 0.f);

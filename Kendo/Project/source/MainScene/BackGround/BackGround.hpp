@@ -59,8 +59,6 @@ namespace FPS_n2 {
 			void			Shadow_Draw_Far(void) noexcept {
 				//this->m_ObjGround.DrawModel();
 			}
-			void			Shadow_Draw_NearFar(void) noexcept {
-			}
 			void			Shadow_Draw(void) noexcept {
 			}
 			void			Draw(void) noexcept {
