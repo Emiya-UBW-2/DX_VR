@@ -22,7 +22,7 @@ namespace FPS_n2 {
 				{
 					xp2 = xp1 + y_r(50);
 					yp2 = yp1 + y_h;
-					bool into = in2_(Pad->GetMS_X(), Pad->GetMS_Y(), xp1, yp1, xp2, yp2);
+					bool into = IntoMouse(xp1, yp1, xp2, yp2);
 					color = (into) ? Black : Gray75;
 					DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_h, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1 + (xp2 - xp1) / 2, yp1, White, Black, "+");
@@ -35,7 +35,7 @@ namespace FPS_n2 {
 				{
 					yp1 += y_r(50);
 					yp2 += y_r(50);
-					bool into = in2_(Pad->GetMS_X(), Pad->GetMS_Y(), xp1, yp1, xp2, yp2);
+					bool into = IntoMouse(xp1, yp1, xp2, yp2);
 					color = (into) ? Black : Gray75;
 					DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
 					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_h, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1 + (xp2 - xp1) / 2, yp1, White, Black, "-");

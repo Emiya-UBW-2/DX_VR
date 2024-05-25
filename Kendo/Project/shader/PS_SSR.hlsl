@@ -37,6 +37,17 @@ cbuffer cbMULTIPLYCOLOR_CBUFFER2 : register(b3) {
 	float4 caminfo;
 }
 
+cbuffer cbLIGHTCAMERA_MATRIX : register(b4) {
+	matrix		g_LightViewMatrix;			// ライトのワールド　→　ビュー行列
+	matrix		g_LightProjectionMatrix;	// ライトのビュー　　→　射影行列
+};
+
+// プログラムとのやり取りのために使うレジスタ2
+cbuffer cbMULTIPLYCOLOR_CBUFFER3 : register(b5) {
+	float4	g_param;
+}
+
+
 //テクスチャ
 SamplerState g_Register0MapSampler : register(s0); // ディフューズマップサンプラ
 Texture2D g_Register0MapTexture : register(t0); // ディフューズマップテクスチャ
@@ -46,6 +57,9 @@ Texture2D g_Register1MapTexture : register(t1); // 法線マップテクスチャ
 
 SamplerState g_Register2MapSampler : register(s2); // 深度マップサンプラ
 Texture2D g_Register2MapTexture : register(t2); // 深度マップテクスチャ
+
+SamplerState dynamicCubeMapSampler     : register(s3);
+TextureCube  dynamicCubeMapTexture     : register(t3);
 
 //関数
 float4 GetTexColor0(float2 texCoord, int2 offset = int2(0, 0)) {
@@ -58,8 +72,7 @@ float4 GetTexColor2(float2 texCoord, int2 offset = int2(0, 0)) {
 	return g_Register2MapTexture.Sample(g_Register2MapSampler, texCoord, offset);
 }
 
-
-float3 DisptoProj(float2 screenUV) {
+float3 DisptoProjNorm(float2 screenUV) {
 	float2 pos = screenUV;
 
 	pos /= 0.5f;
@@ -71,7 +84,10 @@ float3 DisptoProj(float2 screenUV) {
 	position.y = pos.y * caminfo.z;
 	position.z = 1.f;
 
-	return position * (GetTexColor2(screenUV).r / (caminfo.y * 0.005f)); //距離
+	return position;
+}
+float3 DisptoProj(float2 screenUV) {
+	return DisptoProjNorm(screenUV) * (GetTexColor2(screenUV).r / (caminfo.y * 0.005f)); //距離
 }
 
 float2 ProjtoDisp(float3 position) {
@@ -166,10 +182,37 @@ PS_OUTPUT main(PS_INPUT PSInput) {
 	normal.y = normal.y * 2.f - 1.f;
 	normal.z = normal.z * 2.f - 1.f;
 
-	PSOutput.color0 = applySSR(normal, PSInput.texCoords0);
-	if (PSOutput.color0.a > 0.f) {
-		PSOutput.color0 = lerp(float4(0.f, 0.f, 0.f, 0.f), PSOutput.color0, GetTexColor2(PSInput.texCoords0).g);
+	//キューブマップからの反射
+	float4 lWorldPosition;
+	lWorldPosition.xyz = DisptoProjNorm(PSInput.texCoords0);
+	lWorldPosition.w = 0.f;
+
+	lWorldPosition.z *= -1.f;
+	// ワールド座標を射影座標に変換
+	float4 LPPosition1 = mul(g_LightProjectionMatrix, mul(g_LightViewMatrix, lWorldPosition));
+	LPPosition1.x *= -1.f;
+
+	lWorldPosition.xyz = normal;
+	lWorldPosition.w = 0.f;
+
+	lWorldPosition.z *= -1.f;
+	// ワールド座標を射影座標に変換
+	float4 LPPosition2 = mul(g_LightProjectionMatrix, mul(g_LightViewMatrix, lWorldPosition));
+	LPPosition2.x *= -1.f;
+
+	PSOutput.color0 = dynamicCubeMapTexture.Sample(dynamicCubeMapSampler, reflect(LPPosition1.xyz, LPPosition2.xyz));
+
+	if (g_param.x >= 2) {
+		float4 color = applySSR(normal, PSInput.texCoords0);
+		if (color.a > 0.f) {
+			PSOutput.color0 = color;
+		}
+		else {
+			PSOutput.color0.a *= 0.5f;
+		}
 	}
+	PSOutput.color0 = lerp(float4(0.f, 0.f, 0.f, 0.f), PSOutput.color0, GetTexColor2(PSInput.texCoords0).g);
+
 	//戻り値
 	//return PSOutput;
 	//差分だけを出力する場合はこちら

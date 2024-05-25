@@ -66,7 +66,6 @@ namespace FPS_n2 {
 			void			Dispose_Sub(void) noexcept override;
 			void			Dispose_Load_Sub(void) noexcept override;
 			//
-			void			Depth_Draw_Sub(void) noexcept override {}
 			void			BG_Draw_Sub(void) noexcept override {
 				this->m_BackGround->BG_Draw();
 			}
@@ -77,6 +76,10 @@ namespace FPS_n2 {
 				this->m_BackGround->Shadow_Draw();
 				ObjectManager::Instance()->Draw_Shadow();
 			}
+			void			CubeMap_Sub(void) noexcept override {
+				this->m_BackGround->Draw();
+			}
+			
 			void			MainDraw_Sub(void) noexcept override {
 				auto* DrawParts = DXDraw::Instance();
 				SetFogStartEnd(DrawParts->GetMainCamera().GetCamNear(), DrawParts->GetMainCamera().GetCamFar()*2.f);
@@ -88,16 +91,14 @@ namespace FPS_n2 {
 				}
 
 			}
-			void			MainDrawbyDepth_Sub(void) noexcept override {}
 			//UI•\Ž¦
 			void			DrawUI_Base_Sub(void) noexcept override {
 			}
 			void			DrawUI_In_Sub(void) noexcept override {
-				auto* DrawParts = DXDraw::Instance();
 				//UI
 				if ((this->m_ChangeViewPer*255.f) > 1.f) {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*this->m_ChangeViewPer), 0, 255));
-					DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Black, TRUE);
+					DrawBox(0, 0, y_r(1920), y_r(1080), Black, TRUE);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				}
 				this->m_UIclass.Draw();
