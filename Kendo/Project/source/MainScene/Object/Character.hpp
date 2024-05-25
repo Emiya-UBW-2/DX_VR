@@ -36,6 +36,9 @@ namespace FPS_n2 {
 			Vector3DX											m_MouseVecR;
 
 			Vector3DX											m_BambooVec;
+
+			float												m_HeartUp{0.f};
+			float												m_HeartUpR{0.f};
 		public:
 			auto&			GetWeaponPtrNow(void) noexcept { return this->m_Weapon_Ptr; }
 			void			SetWeaponPtr(std::shared_ptr<WeaponClass>& pWeaponPtr0) noexcept {

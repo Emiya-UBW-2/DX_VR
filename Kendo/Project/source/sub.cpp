@@ -13,7 +13,7 @@ namespace FPS_n2 {
 			SE->Add((int)SoundEnum::Sliding, 2, "data/Sound/SE/move/sliding.wav");
 			SE->Add((int)SoundEnum::RunFoot, 4, "data/Sound/SE/move/runfoot.wav");
 			SE->Add((int)SoundEnum::StandupFoot, 2, "data/Sound/SE/move/standup.wav");
-			SE->Add((int)SoundEnum::Heart, 2, "data/Sound/SE/move/heart.wav");
+			SE->Add((int)SoundEnum::Heart, 2, "data/Sound/SE/move/heart.wav", false);
 			//
 			SE->Add((int)SoundEnum::Kendo_Swing, 2, "data/Sound/SE/Kendo/Swing.wav");
 			SE->Add((int)SoundEnum::Kendo_Hit, 2, "data/Sound/SE/Kendo/Hit.wav");

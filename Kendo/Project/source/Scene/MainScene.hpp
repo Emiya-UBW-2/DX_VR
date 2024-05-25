@@ -39,12 +39,7 @@ namespace FPS_n2 {
 			float										m_ChangeViewPer{0.f};
 			//UIŠÖ˜A
 			UIClass										m_UIclass;
-			GraphHandle									m_hit_Graph;
-			GraphHandle									m_aim_Graph;
-			GraphHandle									m_scope_Graph;
-			bool										m_Reticle_on = false;
-			float										m_Reticle_xpos = 0;
-			float										m_Reticle_ypos = 0;
+
 			NetWorkBrowser								m_NetWorkBrowser;
 			//
 			std::vector<DamageEvent>					m_DamageEvents;
@@ -101,7 +96,9 @@ namespace FPS_n2 {
 					DrawBox(0, 0, y_r(1920), y_r(1080), Black, TRUE);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				}
-				this->m_UIclass.Draw();
+				if (!DXDraw::Instance()->IsPause()) {
+					this->m_UIclass.Draw();
+				}
 				//’ÊMÝ’è
 				//if (!this->m_MouseActive.on()) {
 				//	this->m_NetWorkBrowser.Draw();

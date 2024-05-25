@@ -43,20 +43,28 @@ namespace FPS_n2 {
 		public:
 			const auto& Per() const noexcept { return m_ArmPer; }
 		};
+
 		//キャラのうち特定機能だけ抜き出したもの
 		class StaminaControl {
 		private://キャラパラメーター
 			const float											HeartRateMin{60.f};//心拍数最小
-			const float											HeartRateMax{180.f};//心拍数最大
-			const float											StaminaMax{100.f};
+			const float											HeartRateStamona{100.f};//心拍数削れるライン
+			const float											HeartRateMax{150.f};//心拍数最大
+			const float											StaminaMax{30.f};
 		private:
 			float												m_HeartRate{HeartRateMin};//心拍数
 			float												m_HeartRate_r{HeartRateMin};//心拍数
 			float												m_HeartRateRad{0.f};//呼吸Sin渡し
-			float												m_Stamina{StaminaMax};//スタミナ
-			bool												m_CannotRun{false};//スタミナ切れ
+			float												m_HeartRatePow{0.f};//心拍数
 			bool												m_HeartSoundFlag{false};
+
+			float												m_Stamina{StaminaMax};//スタミナ
+			bool												m_StaminaLoss{false};//スタミナ切れ
 		public://ゲッター
+			const auto&		GetHeartRate(void) const noexcept { return m_HeartRate; }
+			const auto&		GetHeartRatePow(void) const noexcept { return m_HeartRatePow; }
+			const auto&		GetStamina(void) const noexcept { return m_Stamina; }
+			const auto&		GetStaminaMax(void) const noexcept { return StaminaMax; }
 		public:
 			void		InitStamina() {
 				this->m_HeartRate = HeartRateMin;
@@ -64,25 +72,18 @@ namespace FPS_n2 {
 				this->m_Stamina = StaminaMax;
 				this->m_HeartSoundFlag = false;
 			}
-			bool		ExcuteStamina(float addRun, float HeartRateUp, bool IsSquat) {
+			bool		ExcuteStamina(float HeartRateUp) {
 				auto* DrawParts = DXDraw::Instance();
-				if (addRun > 0.f) {
-					this->m_HeartRate_r += (10.f + GetRandf(10.f)) / DrawParts->GetFps();
-				}
-				else if (addRun < 0.f) {
-					this->m_HeartRate_r -= (5.f + GetRandf(5.f)) / DrawParts->GetFps();
-				}
-				this->m_HeartRate_r += HeartRateUp;
-				this->m_HeartRate_r -= (2.f + GetRandf(4.f)) / DrawParts->GetFps();
+				this->m_HeartRate_r += HeartRateUp * ((HeartRateUp > 0.f) ? std::clamp((1.f - (this->m_HeartRate - HeartRateMin) / (HeartRateMax - HeartRateMin)), 0.f, 1.f) : 1.f);
 				this->m_HeartRate_r = std::clamp(this->m_HeartRate_r, HeartRateMin, HeartRateMax);
-
 				if (this->m_HeartRate < this->m_HeartRate_r) {
 					this->m_HeartRate += 5.f / DrawParts->GetFps();
 				}
 				else if (this->m_HeartRate >= this->m_HeartRate_r) {
 					this->m_HeartRate -= 5.f / DrawParts->GetFps();
 				}
-				//this->m_HeartRate = this->m_HeartRate_r;
+				this->m_HeartRate = std::clamp(this->m_HeartRate, HeartRateMin, HeartRateMax);
+
 				this->m_HeartRateRad += deg2rad(this->m_HeartRate) / DrawParts->GetFps();
 				if (this->m_HeartRateRad >= DX_PI_F * 2) { this->m_HeartRateRad -= DX_PI_F * 2; }
 				if (
@@ -92,27 +93,25 @@ namespace FPS_n2 {
 					) {
 					if (!this->m_HeartSoundFlag) {
 						this->m_HeartSoundFlag = true;
+						this->m_HeartRatePow = 1.f;
 					}
 				}
 				else {
 					this->m_HeartSoundFlag = false;
 				}
-
-
-				this->m_Stamina += std::clamp((100.f - this->m_HeartRate) / 40.f, -2.5f, 2.5f) / DrawParts->GetFps();
-
-				if (IsSquat) {
-					this->m_Stamina += 1.0f / DrawParts->GetFps();
+				if (!this->m_HeartSoundFlag) {
+					Easing(&this->m_HeartRatePow, 0.f, 0.95f, EasingType::OutExpo);
 				}
 
+				this->m_Stamina += std::clamp((HeartRateStamona - this->m_HeartRate) / (HeartRateStamona - HeartRateMin), -2.5f, 2.5f) / DrawParts->GetFps();
 				this->m_Stamina = std::clamp(this->m_Stamina, 0.f, StaminaMax);
 
 				if (this->m_Stamina <= 0.f) {
-					this->m_CannotRun = true;
+					this->m_StaminaLoss = true;
 				}
-				if (this->m_CannotRun) {
+				if (this->m_StaminaLoss) {
 					if (this->m_Stamina > StaminaMax * 0.3f) {
-						this->m_CannotRun = false;
+						this->m_StaminaLoss = false;
 					}
 				}
 				return this->m_HeartSoundFlag;

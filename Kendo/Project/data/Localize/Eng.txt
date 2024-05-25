@@ -49,37 +49,25 @@
 1154=Go Back/Select Next
 1155=Go Left/Select Left
 1156=Go Right/Select Right
-1157=Left Lean/Select Left Tab
-1158=Right Lean/Select Right Tab
-1159=Reload Gun/Return
-1160=Interact/Decision
-1161=Throw
-1162=Punch
-1163=Change Sight
-1164=Run
-1165=Walk
-1166=Shot
-1167=Aim
-1168=Change Gun
-1169=Squat
-1170=Prone
-1171=Check Equip
+1157=Select Left Tab
+1158=Select Right Tab
+1159=Return
+1160=Decision
+1161=(Not Use)
+1162=(Not Use)
+1163=Fire Up
+1164=(Not Use)
+1165=Slow Walk
+1166=Men(Head)
+1167=Dou(Torso)
+1168=Kote(Right Arm)
+1169=(Not Use)
+1170=(Not Use)
+1171=(Not Use)
 
-0200=Wear Armer
-0201=injected morphine
-0202=Game Clear
-0203=Bonus
-0204=Survive for 3 minutes
-0205=Kill Enemy until die
-0206=Last 1 minute
-0207=Enemy Left:
-0208=Get Ammo
-0209=Get Armer
-0210=Kill
-0211=Can Use Primary Weapon!
+0200=(アイテムログ)
 
-0300=Push:
-0301=Reload!
+0300=(注意表示)
 
 9990=Exit
 9991=Return
@@ -88,42 +76,9 @@
 9994=Change Tab
 
 9900=Move
-9901=Lean
-9902=Run
 9903=Walk
-9904=Squat
-9905=Change Sight
-9906=Shot
-9907=Change Gun
-9908=Aim
-9909=Punch
-9910=Reload
-9911=Check Equip
-9912=Injected Morphine
+9905=Fire Up
+9906=Men(Head)
+9907=Dou(Torso)
+9908=Kote(Right Arm)
 9913=Pause
-
-9920=Tutorial
-
-9930=Stop FreeLook
-9931=Select
-9932=Save And Return
-9933=Return to the Custom Start
-
-9000=Unlock when Play MainMode
-9001=Change Primary Weapon
-
-9010=Customize Handgun
-9011=Change Primary Weapon
-9012=Free Look
-9013=
-9014=
-9015=
-9016=
-9017=Return to the Custom Start
-
-9020=Go to Combat
-9021=Go to Customize Equip
-9022=Go to Shooting Range
-9023=Go to Combat(Hard Mode:Armed with M4A1 rifles and handguns, fight against enemies with various guns)
-9024=Open Option
-9025=Open Credit

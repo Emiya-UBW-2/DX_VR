@@ -213,6 +213,7 @@ namespace FPS_n2 {
 							m_CharaAction = EnumWeaponAnimType::Dou;
 						}
 					}
+					m_HeartUp = std::max(m_HeartUp - 30.f / DrawParts->GetFps(), -5.f);
 					break;
 				case EnumWeaponAnimType::Run:
 					if (m_ActionFirstFrame) {
@@ -262,6 +263,7 @@ namespace FPS_n2 {
 						m_RunTime = std::max(m_RunTime - 1.f / DrawParts->GetFps(), 0.f);
 						//SetIsRunning(false);
 					}
+					m_HeartUp = std::max(m_HeartUp, 2.f);
 					break;
 				case EnumWeaponAnimType::Men:
 				case EnumWeaponAnimType::Kote:
@@ -327,6 +329,7 @@ namespace FPS_n2 {
 						}
 						m_NormalActionTime = std::max(m_NormalActionTime - 1.f / DrawParts->GetFps(), 0.f);
 					}
+					m_HeartUp = std::max(m_HeartUp, 10.f);
 					break;
 				case EnumWeaponAnimType::Dou:
 					if (m_ActionFirstFrame) {
@@ -344,6 +347,7 @@ namespace FPS_n2 {
 						}
 						m_NormalActionTime = std::max(m_NormalActionTime - 1.f / DrawParts->GetFps(), 0.f);
 					}
+					m_HeartUp = std::max(m_HeartUp, 10.f);
 					break;
 				case EnumWeaponAnimType::Tsuba:
 					if (m_ActionFirstFrame) {
@@ -363,6 +367,7 @@ namespace FPS_n2 {
 						}
 						m_NormalActionTime = std::max(m_NormalActionTime - 1.f / DrawParts->GetFps(), 0.f);
 					}
+					m_HeartUp = std::max(m_HeartUp - 30.f / DrawParts->GetFps(), -5.f);
 					break;
 				case EnumWeaponAnimType::HikiMen:
 				case EnumWeaponAnimType::HikiKote:
@@ -397,6 +402,7 @@ namespace FPS_n2 {
 						}
 						m_NormalActionTime = std::max(m_NormalActionTime - 1.f / DrawParts->GetFps(), 0.f);
 					}
+					m_HeartUp = std::max(m_HeartUp, 10.f);
 					break;
 				default:
 					break;
@@ -502,10 +508,12 @@ namespace FPS_n2 {
 				SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetFrameWorldMat(GetFrame((int)CharaFrame::Upper)).pos(), Scale_Rate * 3.f);
 			}
 			//心拍音
-			if (this->m_MyID == 0) {
-				if (StaminaControl::ExcuteStamina(0.f, this->m_move.Speed / DrawParts->GetFps(), KeyControl::GetIsSquat())) {
+			printfDx("HEART : %f\n", m_HeartUp);
+			Easing(&m_HeartUpR, m_HeartUp, 0.99f, EasingType::OutExpo);
+			if (StaminaControl::ExcuteStamina(m_HeartUpR / DrawParts->GetFps())) {
+				if (this->m_MyID == 0) {
 					if (this->m_BackGround) {//todo:タイトル用仮
-						SE->Get((int)SoundEnum::Heart).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 0.5f);
+						SE->Get((int)SoundEnum::Heart).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					}
 				}
 			}
@@ -763,6 +771,8 @@ namespace FPS_n2 {
 		}
 		//
 		void			CharacterClass::Init_Sub(void) noexcept {
+			m_HeartUp = 0.f;
+			m_HeartUpR = 0.f;
 		}
 		void			CharacterClass::FirstExecute(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -793,7 +803,7 @@ namespace FPS_n2 {
 			//
 			ExecuteAnim();
 			//移動の際の視点制御
-			EyeSwingControl::UpdateEyeSwing(GetCharaDir(), KeyControl::GetRun() ? 0.5f : (KeyControl::GetVec().magnitude() / 0.65f), KeyControl::GetRun() ? 12.f : 5.f);
+			EyeSwingControl::UpdateEyeSwing(GetCharaDir(), KeyControl::GetRun() ? 0.5f : ((KeyControl::GetVec().magnitude()*DrawParts->GetFps() / 60.f) / 0.65f), KeyControl::GetRun() ? 12.f : 5.f);
 			//
 			ExecuteSound();
 			//

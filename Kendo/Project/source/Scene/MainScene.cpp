@@ -8,15 +8,13 @@ namespace FPS_n2 {
 			//BG
 			this->m_BackGround->Load();
 			//
-			this->m_hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
-			this->m_aim_Graph = GraphHandle::Load("data/UI/battle_aim.bmp");
-			this->m_scope_Graph = GraphHandle::Load("data/UI/battle_scope.png");
-			//
 			BattleResourceMngr->Load();
 			PlayerMngr->Init(Vehicle_num);
 
 			BattleResourceMngr->LoadChara("Chara", (PlayerID)1);
 			BattleResourceMngr->LoadGun("Bamboo", (PlayerID)1);
+			//UI
+			this->m_UIclass.Load();
 		}
 		void			MAINLOOP::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -337,7 +335,19 @@ namespace FPS_n2 {
 			this->m_BackGround->Execute();
 			//UIパラメーター
 			{
-				this->m_UIclass.SetItemGraph(0, &m_aim_Graph);
+				if (GetIsFirstLoop()) {
+					this->m_UIclass.InitGaugeParam(0, (int)Chara->GetStamina(), (int)Chara->GetStaminaMax());
+					this->m_UIclass.InitGaugeParam(1, (int)Chara->GetStamina(), (int)Chara->GetStaminaMax());
+				}
+				this->m_UIclass.SetIntParam(0, 0);
+				this->m_UIclass.SetIntParam(1, 0);
+
+				this->m_UIclass.SetfloatParam(0, 0.f);
+
+				this->m_UIclass.SetIntParam(2, (int)Chara->GetHeartRate());
+				this->m_UIclass.SetfloatParam(1, Chara->GetHeartRatePow());
+				this->m_UIclass.SetGaugeParam(0, 100,100, 15);
+				this->m_UIclass.SetGaugeParam(1, (int)Chara->GetStamina(), (int)Chara->GetStaminaMax(), 15);
 			}
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=0.7ms");
