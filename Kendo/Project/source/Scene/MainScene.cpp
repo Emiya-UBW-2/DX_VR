@@ -273,25 +273,25 @@ namespace FPS_n2 {
 				Vector3DX CamVec = CamPos + Chara->GetEyeMatrix().zvec() * -1.f;
 #ifdef DEBUG
 				if (CheckHitKeyWithCheck(KEY_INPUT_F1) != 0) {
-					DBG_CamSel = 0;
+					DBG_CamSel = -1;
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_F2) != 0) {
-					DBG_CamSel = 1;
+					DBG_CamSel = 0;
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_F3) != 0) {
-					DBG_CamSel = 2;
+					DBG_CamSel = 1;
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_F4) != 0) {
-					DBG_CamSel = 3;
+					DBG_CamSel = 2;
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_F5) != 0) {
-					DBG_CamSel = 4;
+					DBG_CamSel = 3;
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_F6) != 0) {
-					DBG_CamSel = 5;
+					DBG_CamSel = 4;
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_F7) != 0) {
-					DBG_CamSel = -1;
+					DBG_CamSel = 5;
 				}
 				switch (DBG_CamSel) {
 					case 0:
