@@ -87,17 +87,17 @@ namespace FPS_n2 {
 
 			}
 			//UI•\Ž¦
-			void			DrawUI_Base_Sub(void) noexcept override {
+			void			DrawUI_Base_Sub(float) noexcept override {
 			}
-			void			DrawUI_In_Sub(void) noexcept override {
+			void			DrawUI_In_Sub(float scale) noexcept override {
 				//UI
 				if ((this->m_ChangeViewPer*255.f) > 1.f) {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*this->m_ChangeViewPer), 0, 255));
-					DrawBox(0, 0, y_r(1920), y_r(1080), Black, TRUE);
+					DrawBox(0, 0, y_r(1920.f*scale), y_r(1080.f*scale), Black, TRUE);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				}
 				if (!DXDraw::Instance()->IsPause()) {
-					this->m_UIclass.Draw();
+					this->m_UIclass.Draw(scale);
 				}
 				//’ÊMÝ’è
 				//if (!this->m_MouseActive.on()) {

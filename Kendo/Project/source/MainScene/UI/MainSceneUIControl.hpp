@@ -203,52 +203,52 @@ namespace FPS_n2 {
 			}
 			void			Set() noexcept {
 			}
-			void			Draw(void) noexcept {
+			void			Draw(float scale) noexcept {
 				auto* Fonts = FontPool::Instance();
 				int xp1, yp1;
 				//タイム,スコア
 				{
-					xp1 = y_r(30);
-					yp1 = y_r(10);
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(32), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(32), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + y_r(240), yp1, White, Black, "%d:%05.2f",
+					xp1 = y_r(30.f*scale);
+					yp1 = y_r(10.f*scale);
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(32.f*scale), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(32.f*scale), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + y_r(240.f*scale), yp1, White, Black, "%d:%05.2f",
 						(int)(floatParam[0] / 60.f), (float)((int)(floatParam[0]) % 60) + (floatParam[0] - (float)((int)(floatParam[0]))));
 
-					xp1 = y_r(1920 / 2);
-					yp1 = y_r(10);
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "%d : %d", intParam[0], intParam[1]);
+					xp1 = y_r((1920 / 2)*scale);
+					yp1 = y_r(10.f*scale);
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(32.f*scale), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "%d : %d", intParam[0], intParam[1]);
 				}
 				//情報
 				{
 					//心拍数
-					xp1 = y_r(24 + 300 + 8 + 32);
-					yp1 = y_r(1080 - 96 + 30 / 2);
+					xp1 = y_r((24 + 300 + 8 + 32)*scale);
+					yp1 = y_r((1080 - 96 + 30 / 2)*scale);
 					float per = Lerp(0.4f, 0.6f, floatParam[1]);
 					if ((per *255.f) > 1.f) {
-						int radius = (int)Lerp((float)y_r(24), (float)y_r(32), floatParam[1]);
+						int radius = (int)Lerp((float)y_r(24.f*scale), (float)y_r(32.f*scale), floatParam[1]);
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
 						SetDrawBright(255, 0, 0);
 						m_HeartIcon.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
 						SetDrawBright(255, 255, 255);
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 					}
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(24.f*scale), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
 
 					//気合
-					xp1 = y_r(24);
-					yp1 = y_r(1080 - 96);
+					xp1 = y_r(24.f*scale);
+					yp1 = y_r((1080 - 96)*scale);
 
 					m_GaugeParam[0].DrawGauge(
-						xp1, yp1, xp1 + y_r(300), yp1 + y_r(12),
+						xp1, yp1, xp1 + y_r(300.f*scale), yp1 + y_r(12.f*scale),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 128, 0, 255), GetColorU8(255, 255, 0, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
 					//スタミナ
-					xp1 = y_r(24);
-					yp1 = y_r(1080 - 96 + 18);
+					xp1 = y_r(24.f*scale);
+					yp1 = y_r((1080 - 96 + 18)*scale);
 
 					m_GaugeParam[1].DrawGauge(
-						xp1, yp1, xp1 + y_r(300), yp1 + y_r(12),
+						xp1, yp1, xp1 + y_r(300.f*scale), yp1 + y_r(12.f*scale),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);

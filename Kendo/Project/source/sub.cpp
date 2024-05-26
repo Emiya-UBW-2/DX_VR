@@ -10,7 +10,6 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		void			CommonBattleResource::Load(void) noexcept {
 			auto* SE = SoundPool::Instance();
-			SE->Add((int)SoundEnum::Sliding, 2, "data/Sound/SE/move/sliding.wav");
 			SE->Add((int)SoundEnum::RunFoot, 4, "data/Sound/SE/move/runfoot.wav");
 			SE->Add((int)SoundEnum::StandupFoot, 2, "data/Sound/SE/move/standup.wav");
 			SE->Add((int)SoundEnum::Heart, 2, "data/Sound/SE/move/heart.wav", false);
@@ -43,7 +42,6 @@ namespace FPS_n2 {
 		}
 		void			CommonBattleResource::Dispose(void) noexcept {
 			auto* SE = SoundPool::Instance();
-			SE->Delete((int)SoundEnum::Sliding);
 			SE->Delete((int)SoundEnum::RunFoot);
 
 			SE->Delete((int)SoundEnum::Kendo_Swing);

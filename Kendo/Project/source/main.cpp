@@ -8,6 +8,7 @@ int DBG_CamSel = -1;
 #endif
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
+	SetEnableXAudioFlag(FALSE);//Xaudio(ロードが長いとロストするので必要に応じて)
 	DXDraw::Create();						//汎用
 	auto* DrawParts = DXDraw::Instance();
 	DrawParts->Init();

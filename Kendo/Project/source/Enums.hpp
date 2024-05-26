@@ -14,7 +14,6 @@ namespace FPS_n2 {
 		};
 		enum class SoundEnum {
 			RunFoot = (int)SoundEnumCommon::Num,
-			Sliding,
 			StandupFoot,
 			Heart,
 			//

@@ -41,7 +41,9 @@ namespace FPS_n2 {
 				if ((this->m_IsClient) ? this->m_ClientCtrl.GetRecvData(ID) : this->m_ServerCtrl.GetRecvData(ID)) {
 					this->m_Ping = (float)(this->m_ClientFrame - ServerFrame)*1000.f;
 				}
+#ifdef DEBUG
 				printfDx("ping %lf \n", this->m_Ping);
+#endif
 			}
 		public:
 			void Init(void) noexcept {

@@ -118,7 +118,9 @@ namespace FPS_n2 {
 				pp_x = Pad->GetLS_Y();
 				pp_y = Pad->GetLS_X();
 
+#ifdef DEBUG
 				printfDx("[%5.2f,%5.2f]\n", pp_x, pp_y);
+#endif
 				MyInput.SetInputStart(pp_x, pp_y);
 				MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
 				MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());

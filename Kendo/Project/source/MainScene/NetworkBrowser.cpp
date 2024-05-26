@@ -5,6 +5,7 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		//’ÊM
 		void NetWorkBrowser::Draw(void) noexcept {
+			/*
 			auto* Pad = PadControl::Instance();
 			auto* Fonts = FontPool::Instance();
 			unsigned int color = Red;
@@ -161,6 +162,7 @@ namespace FPS_n2 {
 					break;
 			}
 			m_SeqFirst = (Prev != this->m_Sequence);
+			//*/
 		}
 	};
 };
