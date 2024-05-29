@@ -14,6 +14,9 @@ namespace FPS_n2 {
 			HikiMen,
 			HikiKote,
 			HikiDou,
+
+			GuardStart,
+			GuardSuriage,
 			Max,
 		};
 		enum class EnumWeaponAnim {
@@ -24,6 +27,7 @@ namespace FPS_n2 {
 			Saber_Dou,
 			Saber_Tsuki,
 			Saber_Tsuba,
+			Saber_G_Suriage,
 			Max,
 		};
 		static const char* EnumWeaponAnimName[(int)EnumWeaponAnim::Max] = {
@@ -34,6 +38,7 @@ namespace FPS_n2 {
 			"Saber_Dou",
 			"Saber_Tsuki",
 			"Saber_Tsuba",
+			"Saber_G_Suriage",
 		};
 		//Berserker
 
@@ -313,6 +318,8 @@ namespace FPS_n2 {
 				EnumWeaponAnim::Saber_Men,
 				EnumWeaponAnim::Saber_Kote,
 				EnumWeaponAnim::Saber_Dou,
+				EnumWeaponAnim::Saber_Ready,
+				EnumWeaponAnim::Saber_G_Suriage,
 			},
 		};
 	};

@@ -209,9 +209,12 @@ namespace FPS_n2 {
 						if (KeyControl::GetInputControl().GetPADSPress(PADS::ULT)) {
 							m_CharaAction = EnumWeaponAnimType::Kote;
 						}
-						if (KeyControl::GetInputControl().GetPADSPress(PADS::AIM)) {
+						if (false) {
 							m_CharaAction = EnumWeaponAnimType::Dou;
 						}
+					}
+					if ((m_CharaAction== EnumWeaponAnimType::Ready) && KeyControl::GetInputControl().GetPADSPress(PADS::AIM)) {
+						m_CharaAction = EnumWeaponAnimType::GuardStart;
 					}
 					m_HeartUp = std::max(m_HeartUp - 30.f / DrawParts->GetFps(), -5.f);
 					break;
@@ -297,7 +300,7 @@ namespace FPS_n2 {
 							m_CharaAction = EnumWeaponAnimType::Run;
 							switch (Action) {
 								case EnumWeaponAnimType::Men:
-									if (KeyControl::GetInputControl().GetPADSPress(PADS::AIM)) {
+									if (false) {
 										m_CharaAction = EnumWeaponAnimType::Dou;//–Ê“·
 									}
 									//¬Žè–ÊŒã”h¶
@@ -305,7 +308,7 @@ namespace FPS_n2 {
 										if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
 											m_CharaAction = EnumWeaponAnimType::Men;//¬Žè–Ê–Ê
 										}
-										if (KeyControl::GetInputControl().GetPADSPress(PADS::AIM)) {
+										if (false) {
 											m_CharaAction = EnumWeaponAnimType::Dou;//¬Žè–Ê“·
 										}
 									}
@@ -314,7 +317,7 @@ namespace FPS_n2 {
 									if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
 										m_CharaAction = EnumWeaponAnimType::Men;//¬Žè–Ê
 									}
-									if (KeyControl::GetInputControl().GetPADSPress(PADS::AIM)) {
+									if (false) {
 										m_CharaAction = EnumWeaponAnimType::Dou;//¬Žè“·
 									}
 									break;
@@ -361,7 +364,7 @@ namespace FPS_n2 {
 							if (KeyControl::GetInputControl().GetPADSPress(PADS::ULT)) {
 								m_CharaAction = EnumWeaponAnimType::HikiKote;
 							}
-							if (KeyControl::GetInputControl().GetPADSPress(PADS::AIM)) {
+							if (false) {
 								m_CharaAction = EnumWeaponAnimType::HikiDou;
 							}
 						}
@@ -404,6 +407,51 @@ namespace FPS_n2 {
 					}
 					m_HeartUp = std::max(m_HeartUp, 10.f);
 					break;
+				case EnumWeaponAnimType::GuardStart:
+					if (m_ActionFirstFrame) {
+						m_GuardTimer = 0.f;
+						m_GuardVec.Set(0.f, 0.f, 0.f);
+						m_GuardVecR.Set(0.f, 0.f, 0.f);
+					}
+					else {
+						Easing(&m_BambooVec, Vector3DX::zero(), 0.9f, EasingType::OutExpo);
+						m_GuardTimer = std::min(m_GuardTimer + 1.f / DrawParts->GetFps(), 1.f);
+
+						bool suriage = false;
+						float length = std::hypotf(m_GuardVecR.x, m_GuardVecR.y);
+						if (length > 0.8f) {
+							if (m_GuardVecR.x > 0.7f) {
+								suriage = true;//ãƒK[ƒh
+							}
+						}
+
+						if ((m_GuardTimer >= 0.1f && !KeyControl::GetInputControl().GetPADSPress(PADS::AIM)) || (m_GuardTimer == 1.f) || suriage) {
+							if (suriage) {
+								m_BambooVec = Vector3DX::zero();
+								m_CharaAction = EnumWeaponAnimType::GuardSuriage;//ãƒK[ƒh
+							}
+							else {
+								m_CharaAction = EnumWeaponAnimType::Ready;
+							}
+						}
+					}
+					break;
+				case EnumWeaponAnimType::GuardSuriage:
+					if (m_ActionFirstFrame) {
+						m_GuardTimer = 1.f;
+					}
+					else {
+						m_GuardTimer = std::max(m_GuardTimer - 1.f / DrawParts->GetFps(), 0.f);
+						if (m_GuardTimer == 0.f) {
+							m_CharaAction = EnumWeaponAnimType::Ready;
+						}
+						else {
+							if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
+								m_CharaAction = EnumWeaponAnimType::Men;
+							}
+						}
+					}
+					break;
 				default:
 					break;
 			}
@@ -411,8 +459,16 @@ namespace FPS_n2 {
 			m_ActionFirstFrame = (PrevAction != m_CharaAction);
 		}
 		void			CharacterClass::ExecuteAction(void) noexcept {
+			auto IsGuardAction = [](EnumWeaponAnimType value) {
+				switch (value) {
+					case  EnumWeaponAnimType::GuardSuriage:
+						return true;
+					default:
+						return false;
+				}
+			};
 			for (int index = 0; index < (int)EnumWeaponAnimType::Max; index++) {
-				this->m_Arm[index].Execute((m_CharaAction == (EnumWeaponAnimType)index), 0.1f, 0.1f, 0.9f);
+				this->m_Arm[index].Execute((m_CharaAction == (EnumWeaponAnimType)index), 0.1f, 0.1f, IsGuardAction((EnumWeaponAnimType)index) ? 0.75f : 0.9f);
 				//this->m_Arm[index].Init((m_CharaAction == (EnumWeaponAnimType)index));
 			}
 		}
@@ -734,6 +790,12 @@ namespace FPS_n2 {
 		}
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
 			Vector3DX m_MouseVec; m_MouseVec.Set(pInput.GetAddxRad()*deg2rad(0.1f), pInput.GetAddyRad()*deg2rad(0.1f), 0.f);
+
+			m_GuardVec += m_MouseVec;
+			m_GuardVec.x = std::clamp(m_GuardVec.x, deg2rad(-30), deg2rad(30));
+			m_GuardVec.y = std::clamp(m_GuardVec.y, deg2rad(-30), deg2rad(30));
+			Easing(&m_GuardVecR, m_GuardVec / deg2rad(30*2/3), 0.9f, EasingType::OutExpo);
+
 			Easing(&m_MouseVecR, m_MouseVec, 0.8f, EasingType::OutExpo);
 			
 			InputControl Input = pInput;
@@ -787,7 +849,6 @@ namespace FPS_n2 {
 				m_BambooVec.Set(0.f, 0.f, 0.f);
 				m_MouseVecR.Set(0.f, 0.f, 0.f);
 			}
-			m_MeleeCoolDown = std::max(m_MeleeCoolDown - 1.f / DrawParts->GetFps(), 0.f);
 			//
 			ExecuteInput();
 			//

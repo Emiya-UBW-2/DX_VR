@@ -22,7 +22,6 @@ namespace FPS_n2 {
 			EnumWeaponAnimType									m_CharaAction{EnumWeaponAnimType::Ready};
 			std::array<ArmMovePerClass, (int)EnumWeaponAnimType::Max>	m_Arm;
 			//入力
-			float												m_MeleeCoolDown{0.f};
 			int													m_CharaSound{-1};			//サウンド
 			std::shared_ptr<BackGroundClass>					m_BackGround;				//BG
 			CharaTypeID											m_CharaType;
@@ -36,9 +35,12 @@ namespace FPS_n2 {
 			Vector3DX											m_MouseVecR;
 
 			Vector3DX											m_BambooVec;
+			Vector3DX											m_GuardVec, m_GuardVecR;
 
 			float												m_HeartUp{0.f};
 			float												m_HeartUpR{0.f};
+
+			float												m_GuardTimer{0.f};
 		public:
 			auto&			GetWeaponPtrNow(void) noexcept { return this->m_Weapon_Ptr; }
 			void			SetWeaponPtr(std::shared_ptr<WeaponClass>& pWeaponPtr0) noexcept {
@@ -79,8 +81,11 @@ namespace FPS_n2 {
 			const Matrix4x4DX GetEyeMatrix(void) const noexcept;
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
 			const auto&		GetCharaAction(void) const noexcept { return this->m_CharaAction; }
-			const auto		GetMeleeSwitch(void) const noexcept { return m_MeleeCoolDown == 1.f; }
 			const auto&		GetBambooVec(void) const noexcept { return m_BambooVec; }
+			const auto&		GetGuardVec(void) const noexcept { return m_GuardVecR; }
+			const auto		IsGuardStarting(void) const noexcept { return m_CharaAction == EnumWeaponAnimType::GuardStart; }
+			const auto		GetGuardStartPer(void) const noexcept { return (IsGuardStarting()) ? (m_GuardTimer / 1.f) : 0.f; }
+
 		public://セッター
 			bool			SetDamageEvent(const DamageEvent& value) noexcept;
 		private: //更新関連

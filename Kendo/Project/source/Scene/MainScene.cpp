@@ -341,15 +341,23 @@ namespace FPS_n2 {
 					this->m_UIclass.InitGaugeParam(0, (int)Chara->GetStamina(), (int)Chara->GetStaminaMax());
 					this->m_UIclass.InitGaugeParam(1, (int)Chara->GetStamina(), (int)Chara->GetStaminaMax());
 				}
+				//NvsN
 				this->m_UIclass.SetIntParam(0, 0);
 				this->m_UIclass.SetIntParam(1, 0);
-
+				//timer
 				this->m_UIclass.SetfloatParam(0, 0.f);
-
+				//S””
 				this->m_UIclass.SetIntParam(2, (int)Chara->GetHeartRate());
 				this->m_UIclass.SetfloatParam(1, Chara->GetHeartRatePow());
+				//ƒQ[ƒW
 				this->m_UIclass.SetGaugeParam(0, 100,100, 15);
 				this->m_UIclass.SetGaugeParam(1, (int)Chara->GetStamina(), (int)Chara->GetStaminaMax(), 15);
+				//ƒK[ƒh‰~
+				Easing(&m_GuardStart, Chara->IsGuardStarting() ? 1.f : 0.f, Chara->IsGuardStarting() ? 0.8f : 0.5f, EasingType::OutExpo);
+				this->m_UIclass.SetfloatParam(2, m_GuardStart);
+				this->m_UIclass.SetfloatParam(3, Chara->GetGuardVec().y);
+				this->m_UIclass.SetfloatParam(4, -Chara->GetGuardVec().x);
+				this->m_UIclass.SetfloatParam(5, Chara->GetGuardStartPer());
 			}
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=0.7ms");

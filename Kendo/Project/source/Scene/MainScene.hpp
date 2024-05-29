@@ -39,6 +39,7 @@ namespace FPS_n2 {
 			float										m_ChangeViewPer{0.f};
 			//UIŠÖ˜A
 			UIClass										m_UIclass;
+			float m_GuardStart{0.f};
 
 			NetWorkBrowser								m_NetWorkBrowser;
 			//

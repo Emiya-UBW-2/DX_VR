@@ -188,18 +188,30 @@ namespace FPS_n2 {
 		private:
 			std::array<GaugeParam, 2>		m_GaugeParam;
 			std::array<int, 2>				intParam{0};
-			std::array<float, 1>			floatParam{0};
+			std::array<float, 6>			floatParam{0};
 			std::array<std::string, 1>		strParam;
 			//std::array<GaugeMask, 2 + 3>	m_GaugeMask;
 
 			GraphHandle						m_HeartIcon;
+			GraphHandle						m_GuardScreen;
+			GraphHandle						m_GuardGraph;
+			GraphHandle						m_GuardPGraph;
+			GraphHandle						m_CursorGraph;
 		private:
 		public:
 			void			Load() noexcept {
 				m_HeartIcon = GraphHandle::Load("data/UI/Heart.png");
+				m_GuardGraph = GraphHandle::Load("data/UI/Guard.png");
+				m_GuardPGraph = GraphHandle::Load("data/UI/GuardP.png");
+				m_CursorGraph = GraphHandle::Load("data/UI/Cursor.png");
+
+				m_GuardScreen = GraphHandle::Make(512, 512, false);
 			}
 			void			Dispose(void) noexcept {
 				m_HeartIcon.Dispose();
+				m_GuardGraph.Dispose();
+				m_GuardPGraph.Dispose();
+				m_CursorGraph.Dispose();
 			}
 			void			Set() noexcept {
 			}
@@ -252,6 +264,68 @@ namespace FPS_n2 {
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
+				}
+				//ƒK[ƒh
+				{
+					if ((floatParam[2] * 255.f) > 1.f) {
+						auto Prev = GetDrawScreen();
+						m_GuardScreen.SetDraw_Screen();
+						{
+							{
+								xp1 = 255;
+								yp1 = 255;
+								int radius = 128;
+								float length = std::hypotf(floatParam[3], floatParam[4]);
+								if (length > 0.f) {
+									xp1 += (int)((float)(256 - 32) * floatParam[3] / length);
+									yp1 += (int)((float)(256 - 32) * floatParam[4] / length);
+								}
+								float per = std::clamp(length, 0.f, 1.f)*floatParam[2];
+								SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
+								SetDrawBright(100, 255, 100);
+								m_GuardPGraph.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
+								SetDrawBright(255, 255, 255);
+								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+							}
+							{
+								xp1 = 255;
+								yp1 = 255;
+								int radius = 258;
+								SetDrawBlendMode(DX_BLENDMODE_MUL, 255);
+								m_GuardGraph.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
+								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+							}
+
+						}
+						GraphHandle::SetDraw_Screen(Prev, false);
+						{
+							{
+								xp1 = y_r((1920 / 2)*scale);
+								yp1 = y_r((1080 / 2)*scale);
+								int radius = (int)Lerp((float)y_r(0.f*scale), (float)y_r(256.f*scale), floatParam[2]);
+								SetDrawBlendMode(DX_BLENDMODE_ADD, (int)Lerp(128.f, 32.f, floatParam[5]));
+								m_GuardGraph.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
+								SetDrawBlendMode(DX_BLENDMODE_ADD, 255);
+								m_GuardScreen.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
+								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+							}
+							{
+								xp1 = y_r((1920 / 2)*scale);
+								yp1 = y_r((1080 / 2)*scale);
+								xp1 += (int)((float)y_r(256.f*scale) * floatParam[3]);
+								yp1 += (int)((float)y_r(256.f*scale) * floatParam[4]);
+
+								int radius = (int)Lerp((float)y_r(0.f*scale), (float)y_r(32.f*scale), floatParam[2]);
+								float length = std::hypotf(floatParam[3], floatParam[4]);
+								if (length > 1.f) {
+									radius = (int)Lerp((float)radius, (float)y_r(0.f*scale), length - 1.f);
+								}
+								SetDrawBlendMode(DX_BLENDMODE_ADD, 128);
+								m_CursorGraph.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
+								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+							}
+						}
+					}
 				}
 			}
 
