@@ -178,6 +178,13 @@ namespace FPS_n2 {
 		}
 		//‘€ì
 		void			CharacterClass::ExecuteInput(void) noexcept {
+
+			int num = MV1GetMaterialNum(GetObj().get());
+			for (int i = 0; i < num; i++) {
+				MV1SetMaterialDifColor(GetObj().get(), i, GetColorF(1.f, 1.f, 1.f, 1.f));
+				MV1SetMaterialAmbColor(GetObj().get(), i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
+			}
+
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* SE = SoundPool::Instance();

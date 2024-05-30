@@ -43,6 +43,12 @@ namespace FPS_n2 {
 				//‹ó
 				this->m_ObjSky.SetScale(Vector3DX::vget(10.f, 10.f, 10.f));
 				MV1SetDifColorScale(this->m_ObjSky.get(), GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
+
+				int num = MV1GetMaterialNum(this->m_ObjGround.get());
+				for (int i = 0; i < num; i++) {
+					MV1SetMaterialDifColor(this->m_ObjGround.get(), i, GetColorF(1.f, 1.f, 1.f, 1.f));
+					MV1SetMaterialAmbColor(this->m_ObjGround.get(), i, GetColorF(0.15f, 0.15f, 0.15f, 1.f));
+				}
 			}
 			//
 			void			FirstExecute(void) noexcept {

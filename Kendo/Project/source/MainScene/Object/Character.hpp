@@ -41,6 +41,12 @@ namespace FPS_n2 {
 			float												m_HeartUpR{0.f};
 
 			float												m_GuardTimer{0.f};
+
+
+			float												m_D1{1.f};
+			float												m_D2{0.f};
+			float												m_D3{0.1f};
+			float												m_D4{0.f};
 		public:
 			auto&			GetWeaponPtrNow(void) noexcept { return this->m_Weapon_Ptr; }
 			void			SetWeaponPtr(std::shared_ptr<WeaponClass>& pWeaponPtr0) noexcept {

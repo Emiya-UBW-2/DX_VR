@@ -26,8 +26,9 @@ namespace FPS_n2 {
 			//
 			this->m_BackGround->Init();
 			//
-			Vector3DX LightVec = Vector3DX::vget(-0.8f, -0.5f, -0.1f);
-			DrawParts->SetAmbientLight(LightVec, GetColorF(0.92f, 0.91f, 0.90f, 1.0f));
+			Vector3DX LightVec = Vector3DX::vget(-0.3f, -0.5f, 0.f);LightVec = LightVec.normalized();
+			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
+			SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
@@ -60,6 +61,36 @@ namespace FPS_n2 {
 			this->m_NetWorkBrowser.Init();
 		}
 		bool			MAINLOOP::Update_Sub(void) noexcept {
+#ifdef DEBUG
+			{
+				auto* DrawParts = DXDraw::Instance();
+				if (CheckHitKeyWithCheck(KEY_INPUT_1) != 0) {
+					m_D1 = std::clamp(m_D1 - 0.1f * 1.f / DrawParts->GetFps(), 0.f, 1.f);
+				}
+				if (CheckHitKeyWithCheck(KEY_INPUT_2) != 0) {
+					m_D1 = std::clamp(m_D1 + 0.1f * 1.f / DrawParts->GetFps(), 0.f, 1.f);
+				}
+				if (CheckHitKeyWithCheck(KEY_INPUT_3) != 0) {
+					m_D2 = std::clamp(m_D2 - 0.1f * 1.f / DrawParts->GetFps(), 0.f, 1.f);
+				}
+				if (CheckHitKeyWithCheck(KEY_INPUT_4) != 0) {
+					m_D2 = std::clamp(m_D2 + 0.1f * 1.f / DrawParts->GetFps(), 0.f, 1.f);
+				}
+				if (CheckHitKeyWithCheck(KEY_INPUT_5) != 0) {
+					m_D3 = std::clamp(m_D3 - 0.1f * 1.f / DrawParts->GetFps(), 1.f, 10.f);
+				}
+				if (CheckHitKeyWithCheck(KEY_INPUT_6) != 0) {
+					m_D3 = std::clamp(m_D3 + 0.1f * 1.f / DrawParts->GetFps(), 1.f, 10.f);
+				}
+				printfDx("Dif[%5.2f]\n", m_D1*255.f);
+				printfDx("Spc[%5.2f]\n", m_D2*255.f);
+				printfDx("Amb[%5.2f]\n", m_D3);
+				printfDx("\n");
+			}
+			auto* PostPassParts = PostPassEffect::Instance();
+			PostPassParts->SetLevelFilter(m_D1*255.f, m_D2*255.f, m_D3);
+#endif
+
 			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();

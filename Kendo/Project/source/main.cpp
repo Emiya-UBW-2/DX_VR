@@ -17,7 +17,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	}
 	//í«â¡ê›íË
 	SetMainWindowText("Phantom of the Bunker");						//É^ÉCÉgÉã
-	SetUseHalfLambertLighting(TRUE);
+	//SetUseHalfLambertLighting(TRUE);
 	//
 	FPS_n2::Sceneclass::WeaponAnimManager::Create();
 	FPS_n2::Sceneclass::PlayerManager::Create();

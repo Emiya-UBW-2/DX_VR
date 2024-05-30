@@ -45,6 +45,8 @@ namespace FPS_n2 {
 			//
 			std::vector<DamageEvent>					m_DamageEvents;
 			float										m_fov_base{ deg2rad(45.f) };
+
+			float m_D1{38.f / 255.f}, m_D2{192.f / 255.f}, m_D3{1.f};
 		private:
 			const auto&		GetMyPlayerID(void) const noexcept { return m_NetWorkBrowser.GetMyPlayerID(); }
 		public:
