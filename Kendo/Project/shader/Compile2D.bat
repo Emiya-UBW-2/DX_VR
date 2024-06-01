@@ -16,6 +16,9 @@ ShaderCompiler.exe /Tps_4_0 DepthPS.fx
 ShaderCompiler.exe /Tvs_4_0 FXAA_VS.hlsl
 ShaderCompiler.exe /Tps_4_0 FXAA_PS.hlsl
 
+ShaderCompiler.exe /Tvs_4_0 GodRay_VS.hlsl
+ShaderCompiler.exe /Tps_4_0 GodRay_PS.hlsl
+
 pause
 
 cd %NowDir%
