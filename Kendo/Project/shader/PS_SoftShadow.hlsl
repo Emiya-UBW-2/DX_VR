@@ -27,7 +27,7 @@ Texture2D g_DepthMapTexture2 : register(t2); // 深度バッファテクスチャ
 
 float GetAlpha(float LightDepth, float TextureDepth2) {
 	// テクスチャに記録されている深度よりＺ値が大きかったら奥にある
-	return (LightDepth > (TextureDepth2 + 0.1f) && TextureDepth2 > 0.f) ? 1.f : 0.f;
+	return (LightDepth > (TextureDepth2 + 1.f) && TextureDepth2 > 0.f) ? 1.f : 0.f;
 }
 // main関数
 PS_OUTPUT main(PS_INPUT PSInput)

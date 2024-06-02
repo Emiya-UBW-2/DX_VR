@@ -26,9 +26,12 @@ namespace FPS_n2 {
 			//
 			this->m_BackGround->Init();
 			//
-			Vector3DX LightVec = Vector3DX::vget(-0.3f, -0.5f, 0.f);LightVec = LightVec.normalized();
+			Vector3DX LightVec = Vector3DX::vget(-0.9f, -0.5f, 0.f);LightVec = LightVec.normalized();
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
 			SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
+
+			auto& SecondLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec*-1.f);
+			SetLightDifColorHandle(SecondLight.get(), GetColorF(0.5f, 0.5f, 0.3f, 0.1f));
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
@@ -61,7 +64,9 @@ namespace FPS_n2 {
 			this->m_NetWorkBrowser.Init();
 		}
 		bool			MAINLOOP::Update_Sub(void) noexcept {
+			auto* PostPassParts = PostPassEffect::Instance();
 #ifdef DEBUG
+			/*
 			{
 				auto* DrawParts = DXDraw::Instance();
 				if (CheckHitKeyWithCheck(KEY_INPUT_1) != 0) {
@@ -87,8 +92,11 @@ namespace FPS_n2 {
 				printfDx("Amb[%5.2f]\n", m_D3);
 				printfDx("\n");
 			}
-			auto* PostPassParts = PostPassEffect::Instance();
 			PostPassParts->SetLevelFilter(m_D1*255.f, m_D2*255.f, m_D3);
+			//*/
+			PostPassParts->SetLevelFilter(38, 154, 1.f);
+#else
+			PostPassParts->SetLevelFilter(38, 154, 1.f);
 #endif
 
 			auto* DrawParts = DXDraw::Instance();

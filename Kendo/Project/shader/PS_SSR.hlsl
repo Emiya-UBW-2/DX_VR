@@ -87,7 +87,8 @@ float3 DisptoProjNorm(float2 screenUV) {
 	return position;
 }
 float3 DisptoProj(float2 screenUV) {
-	return DisptoProjNorm(screenUV) * (GetTexColor2(screenUV).r / (caminfo.y * 0.005f)); //‹——£
+	float depth = GetTexColor2(screenUV).r;
+	return DisptoProjNorm(screenUV) * (depth / (caminfo.y * 0.005f)); //‹——£
 }
 
 float2 ProjtoDisp(float3 position) {
@@ -113,11 +114,13 @@ float2 ProjtoDisp(float3 position) {
 bool Hitcheck(float3 position) {
 	float2 screenUV = ProjtoDisp(position);
 
+	float depth = GetTexColor2(screenUV).r;
+
 	if (
 		(-1.f <= screenUV.x && screenUV.x <= 1.f) &&
 		(-1.f <= screenUV.y && screenUV.y <= 1.f)
 		) {
-		float z = GetTexColor2(screenUV).r / (caminfo.y * 0.005f);
+		float z = depth / (caminfo.y * 0.005f);
 		return (position.z < z && z < position.z + caminfo.w);
 	}
 	else {
@@ -129,19 +132,22 @@ float4 applySSR(float3 normal, float2 screenUV) {
 	float3 position = DisptoProj(screenUV);
 
 	float4 color;
+
 	color.r = 0.f;
 	color.g = 0.f;
 	color.b = 0.f;
 	color.a = 0.f;
-
 	float3 reflectVec = normalize(reflect(normalize(position), normal)); // ”½ŽËƒxƒNƒgƒ‹
 	int iteration = (int)(caminfo.x); // ŒJ‚è•Ô‚µ”
-	float maxLength = 2500.f; // ”½ŽËÅ‘å‹——£
-	int BinarySearchIterations = 6; //2•ª’TõÅ‘å”
+	float maxLength = 5000.f; // ”½ŽËÅ‘å‹——£
+	int BinarySearchIterations = 4; //2•ª’TõÅ‘å”
 
 	float pixelStride = maxLength / (float)iteration;
 	float3 delta = reflectVec * pixelStride; // ‚P‰ñ‚Åi‚Þ‹——£
 	int isend = 0;
+	if (position.z <= 0.f) {
+		isend = 1;
+	}
 	for (int i = 0; i < iteration; i++) {
 		if (isend == 0) {
 			position += delta;
@@ -208,7 +214,7 @@ PS_OUTPUT main(PS_INPUT PSInput) {
 			PSOutput.color0 = color;
 		}
 		else {
-			PSOutput.color0.a *= 0.5f;
+			PSOutput.color0 = float4(0.f, 0.f, 0.f, 0.f);
 		}
 	}
 	PSOutput.color0 = lerp(float4(0.f, 0.f, 0.f, 0.f), PSOutput.color0, GetTexColor2(PSInput.texCoords0).g);

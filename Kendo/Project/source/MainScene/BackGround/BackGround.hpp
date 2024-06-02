@@ -63,7 +63,7 @@ namespace FPS_n2 {
 				SetUseLighting(TRUE);
 			}
 			void			Shadow_Draw_Far(void) noexcept {
-				//this->m_ObjGround.DrawModel();
+				this->m_ObjGround.DrawModel();
 			}
 			void			Shadow_Draw(void) noexcept {
 			}

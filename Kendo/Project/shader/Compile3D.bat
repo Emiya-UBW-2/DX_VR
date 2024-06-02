@@ -4,8 +4,8 @@ cd %~dp0
 ShaderCompiler.exe /Tvs_4_0 VS_SoftShadow.hlsl
 ShaderCompiler.exe /Tps_4_0 PS_SoftShadow.hlsl
 
-ShaderCompiler.exe /Tvs_4_0 PBR3D_VS.hlsl
-ShaderCompiler.exe /Tps_4_0 PBR3D_PS.hlsl
+ShaderCompiler.exe /Tvs_4_0 VS_PBR3D.hlsl
+ShaderCompiler.exe /Tps_4_0 PS_PBR3D.hlsl
 
 pause
 
