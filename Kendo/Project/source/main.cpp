@@ -9,12 +9,9 @@ int DBG_CamSel = -1;
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetEnableXAudioFlag(TRUE);//Xaudio(ロードが長いとロストするので必要に応じて)
-	DXDraw::Create();						//汎用
-	auto* DrawParts = DXDraw::Instance();
-	DrawParts->Init();
-	if (DrawParts->IsFirstBoot()) {
-		return 0;
-	}
+	DXLib_ref::Create();
+	auto* DXLib_refParts = DXLib_ref::Instance();
+	if (!DXLib_refParts->StartLogic()) { return 0; }
 	//追加設定
 	SetMainWindowText("Phantom of the Bunker");						//タイトル
 	//SetUseHalfLambertLighting(TRUE);
@@ -26,21 +23,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//シーン
 	auto MAINLOOPLOADERscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOPLOADER>();
 	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();
-	//シーンコントロール
-	auto scene = std::make_unique<SceneControl>(MAINLOOPLOADERscene);
+	SceneControl::Instance()->AddList(MAINLOOPLOADERscene);
+	SceneControl::Instance()->AddList(MAINLOOPscene);
 	//遷移先指定
 	MAINLOOPLOADERscene->Set_Next(MAINLOOPscene);
 	MAINLOOPscene->Set_Next(MAINLOOPLOADERscene);
 	//最初の読み込み
-	scene->GetNowScene()->Load();
-	//繰り返し
-	while (true) {
-		scene->StartScene();
-		while (true) {
-			if (!scene->FirstExecute()) { return 0; }
-			if (scene->Execute()) { break; }
-		}
-		scene->NextScene();							//次のシーンへ移行
-	}
+	if (!DXLib_refParts->MainLogic()) { return 0; }
 	return 0;
 }

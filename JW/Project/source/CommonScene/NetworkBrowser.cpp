@@ -72,7 +72,7 @@ namespace FPS_n2 {
 			auto Prev = this->m_Sequence;
 			switch (this->m_Sequence) {
 				case SequenceEnum::SelMode:
-					if (WindowSystem::SetMsgClickBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, Gray75, "クライアントになる")) {
+					if (WindowSystem::SetMsgClickBox(xp, yp + y_r(50), xp + xs, yp + y_r(50) + y_h, 1.f, Gray75, "クライアントになる")) {
 						this->m_IsClient = true;
 						this->m_Tick = 1.f;
 						this->m_Sequence = SequenceEnum::CheckPreset;

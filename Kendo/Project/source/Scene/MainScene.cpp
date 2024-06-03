@@ -26,7 +26,7 @@ namespace FPS_n2 {
 			//
 			this->m_BackGround->Init();
 			//
-			Vector3DX LightVec = Vector3DX::vget(-0.9f, -0.5f, 0.f);LightVec = LightVec.normalized();
+			Vector3DX LightVec = Vector3DX::vget(1.3f, -0.5f, 0.f);LightVec = LightVec.normalized();
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
 			SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 
@@ -359,19 +359,9 @@ namespace FPS_n2 {
 				//DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, Chara->GetEyeMatrix().yvec());
 
 				//info
-				auto fov_t = DrawParts->GetMainCamera().GetCamFov();
-				auto near_t = DrawParts->GetMainCamera().GetCamNear();
-				auto far_t = DrawParts->GetMainCamera().GetCamFar();
-				Easing(&near_t, Scale_Rate * 0.03f, 0.9f, EasingType::OutExpo);
-				Easing(&far_t, Scale_Rate * 10.f, 0.5f, EasingType::OutExpo);
-				//fov
-				{
-					float fov = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
-					Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
-				}
-				DrawParts->SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
+				DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 0.3f, Scale_Rate * 20.f);
 				//DoF
-				PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.5f, Scale_Rate * 5.f, near_t, far_t);
+				PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.3f, Scale_Rate * 5.f, Scale_Rate * 0.1f, Scale_Rate * 20.f);
 			}
 			this->m_BackGround->Execute();
 			//UIパラメーター
