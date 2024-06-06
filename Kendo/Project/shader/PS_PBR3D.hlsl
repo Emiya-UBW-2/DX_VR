@@ -114,6 +114,8 @@ cbuffer cbD3D11_CONST_BUFFER_PS_BASE				: register( b1 )
 SamplerState g_DiffuseMapSampler            : register( s0 ) ;		// ディフューズマップテクスチャ
 Texture2D    g_DiffuseMapTexture            : register( t0 ) ;		// ディフューズマップテクスチャ
 
+SamplerState g_NormalMapSampler             : register(s1);		// 法線マップテクスチャ
+Texture2D    g_NormalMapTexture             : register(t1);		// 法線マップテクスチャ
 
 SamplerState g_SpecularMapSampler           : register(s2);		// スペキュラマップテクスチャ
 Texture2D    g_SpecularMapTexture           : register(t2);		// スペキュラマップテクスチャ
@@ -285,6 +287,9 @@ void RE_Direct(const in IncidentLight directLight, const in GeometricContext geo
 
 PS_OUTPUT main(PS_INPUT PSInput)
 {
+	float3 NormalMap = (g_NormalMapTexture.Sample(g_NormalMapSampler, PSInput.TexCoords0).rgb - float3(0.5f, 0.5f, 0.5f)) * 2.0f;
+
+
 	float metallic = 0.f;
     float roughness = 0.f; //仮
     float4 albedo = g_DiffuseMapTexture.Sample(g_DiffuseMapSampler, PSInput.TexCoords0);

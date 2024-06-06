@@ -61,6 +61,9 @@ Texture2D g_Register2MapTexture : register(t2); // 深度マップテクスチャ
 SamplerState dynamicCubeMapSampler     : register(s3);
 TextureCube  dynamicCubeMapTexture     : register(t3);
 
+SamplerState FilterSampler		: register(s4);
+Texture2D  FilterTexture		: register(t4);
+
 //関数
 float4 GetTexColor0(float2 texCoord, int2 offset = int2(0, 0)) {
 	return g_Register0MapTexture.Sample(g_Register0MapSampler, texCoord, offset);
@@ -86,10 +89,6 @@ float3 DisptoProjNorm(float2 screenUV) {
 
 	return position;
 }
-float3 DisptoProj(float2 screenUV) {
-	float depth = GetTexColor2(screenUV).r;
-	return DisptoProjNorm(screenUV) * (depth / (caminfo.y * 0.005f)); //距離
-}
 
 float2 ProjtoDisp(float3 position) {
 	position = position / position.z;
@@ -102,24 +101,15 @@ float2 ProjtoDisp(float3 position) {
 	screenUV.y = 1.f - screenUV.y;
 	screenUV *= 0.5f;
 	return screenUV;
-
-	/*
-	float4 projectPosition = mul(gProjectionMatrix, float4(position, 1.0));
-	float2 screenUV = projectPosition.xy / projectPosition.w * 0.5f + 0.5f;
-	screenUV.y = 1.0f - screenUV.y;
-	return screenUV;
-	//*/
 }
 
 bool Hitcheck(float3 position) {
 	float2 screenUV = ProjtoDisp(position);
-
-	float depth = GetTexColor2(screenUV).r;
-
 	if (
-		(-1.f <= screenUV.x && screenUV.x <= 1.f) &&
-		(-1.f <= screenUV.y && screenUV.y <= 1.f)
+		(abs(screenUV.x) <= 1.f) &&
+		(abs(screenUV.y) <= 1.f)
 		) {
+		float depth = GetTexColor2(screenUV).r;
 		float z = depth / (caminfo.y * 0.005f);
 		return (position.z < z && z < position.z + caminfo.w);
 	}
@@ -128,49 +118,49 @@ bool Hitcheck(float3 position) {
 	}
 }
 
-float4 applySSR(float3 normal, float2 screenUV) {
-	float3 position = DisptoProj(screenUV);
+static float maxLength = 5000.f; // 反射最大距離
+static int BinarySearchIterations = 8; //2分探索最大数
 
-	float4 color;
+float4 applySSR(float3 normal, float2 screenUV,bool Skip) {
+	float pixelStride;
+	float3 delta;
+	float3 position;
 
-	color.r = 0.f;
-	color.g = 0.f;
-	color.b = 0.f;
-	color.a = 0.f;
-	float3 reflectVec = normalize(reflect(normalize(position), normal)); // 反射ベクトル
-	int iteration = (int)(caminfo.x); // 繰り返し数
-	float maxLength = 5000.f; // 反射最大距離
-	int BinarySearchIterations = 4; //2分探索最大数
+	float depth = GetTexColor2(screenUV).r;
 
-	float pixelStride = maxLength / (float)iteration;
-	float3 delta = reflectVec * pixelStride; // １回で進む距離
-	int isend = 0;
-	if (position.z <= 0.f) {
-		isend = 1;
+	float4 color = float4(0.f, 0.f, 0.f, 0.f);
+
+	bool isend = (depth <= 0.f || Skip);
+	if (!isend) {
+		float3 NormPos = DisptoProjNorm(screenUV);
+		pixelStride = maxLength / caminfo.x;
+		delta = reflect(NormPos, normal); // 反射ベクトル*１回で進む距離
+		position = NormPos * (depth / (caminfo.y * 0.005f)); //距離
 	}
-	for (int i = 0; i < iteration; i++) {
-		if (isend == 0) {
-			position += delta;
-			if (Hitcheck(position)) {
-				//交差したので二分探索
-				position -= delta; //元に戻し
-				delta /= BinarySearchIterations; //進む量を下げる
-				for (int j = 0; j < BinarySearchIterations; j++) {
-					if (isend == 0) {
-						pixelStride *= 0.5f;
-						position += delta * pixelStride;
-						if (Hitcheck(position)) {
-							pixelStride = -pixelStride;
-						}
-						if (length(pixelStride) < 10.f) {
-							isend = 1;
+	[fastopt]
+	for (int i = 0; i < caminfo.x; i++) {
+		if (!isend) {
+			position += delta * pixelStride;
+
+				if (Hitcheck(position)) { //交差したので二分探索
+					position -= delta * pixelStride; //元に戻し
+					delta /= BinarySearchIterations; //進む量を下げる
+					[unroll] // attribute
+					for (int j = 0; j < BinarySearchIterations; j++) {
+						if (!isend) {
+							pixelStride *= 0.5f;
+							position += delta * pixelStride;
+							if (Hitcheck(position)) {
+								pixelStride = -pixelStride;
+							}
+							if (length(pixelStride) < 1.f) {
+								isend = true;
+							}
 						}
 					}
+					color = GetTexColor0(ProjtoDisp(position));// 交差したので色をブレンドする
+					isend = true;
 				}
-				// 交差したので色をブレンドする
-				color = GetTexColor0(ProjtoDisp(position));
-				isend = 1;
-			}
 		}
 	}
 	return color;
@@ -181,43 +171,40 @@ PS_OUTPUT main(PS_INPUT PSInput) {
 	PS_OUTPUT PSOutput;
 	//画面サイズを取得しておく
 	g_Register0MapTexture.GetDimensions(dispsize.x, dispsize.y);
-
+	//反射をどれだけ見せるか
+	float Per = GetTexColor2(PSInput.texCoords0).g * FilterTexture.Sample(FilterSampler, PSInput.texCoords0).r;
 	//処理
-	float3 normal = GetTexColor1(PSInput.texCoords0).xyz;
-	normal.x = normal.x * 2.f - 1.f;
-	normal.y = normal.y * 2.f - 1.f;
-	normal.z = normal.z * 2.f - 1.f;
+	float4 lWorldPosition;
+
+	//ノーマル座標取得
+	float3 normal = GetTexColor1(PSInput.texCoords0).xyz * 2.f - 1.f;
 
 	//キューブマップからの反射
-	float4 lWorldPosition;
 	lWorldPosition.xyz = DisptoProjNorm(PSInput.texCoords0);
+	lWorldPosition.x *= -1.f;
 	lWorldPosition.w = 0.f;
-
-	lWorldPosition.z *= -1.f;
+	
 	// ワールド座標を射影座標に変換
-	float4 LPPosition1 = mul(g_LightProjectionMatrix, mul(g_LightViewMatrix, lWorldPosition));
-	LPPosition1.x *= -1.f;
+	float4 LPPosition1 = mul(g_LightViewMatrix, lWorldPosition);
+	LPPosition1.z *= -1.f;
 
 	lWorldPosition.xyz = normal;
 	lWorldPosition.w = 0.f;
 
-	lWorldPosition.z *= -1.f;
 	// ワールド座標を射影座標に変換
-	float4 LPPosition2 = mul(g_LightProjectionMatrix, mul(g_LightViewMatrix, lWorldPosition));
-	LPPosition2.x *= -1.f;
+	float4 LPPosition2 = mul(g_LightViewMatrix, lWorldPosition);
 
-	PSOutput.color0 = dynamicCubeMapTexture.Sample(dynamicCubeMapSampler, reflect(LPPosition1.xyz, LPPosition2.xyz));
+	float3 LPPosition3 = reflect(LPPosition1.xyz, LPPosition2.xyz);
+	LPPosition3.xz *= -1.f;
+	PSOutput.color0 = dynamicCubeMapTexture.Sample(dynamicCubeMapSampler, LPPosition3);
 
 	if (g_param.x >= 2) {
-		float4 color = applySSR(normal, PSInput.texCoords0);
+		float4 color = applySSR(normal, PSInput.texCoords0, (Per <= 0.f));
 		if (color.a > 0.f) {
 			PSOutput.color0 = color;
 		}
-		else {
-			PSOutput.color0 = float4(0.f, 0.f, 0.f, 0.f);
-		}
 	}
-	PSOutput.color0 = lerp(float4(0.f, 0.f, 0.f, 0.f), PSOutput.color0, GetTexColor2(PSInput.texCoords0).g);
+	PSOutput.color0 = lerp(float4(0.f, 0.f, 0.f, 0.f), PSOutput.color0, Per);
 
 	//戻り値
 	//return PSOutput;

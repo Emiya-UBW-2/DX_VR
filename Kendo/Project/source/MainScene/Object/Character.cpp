@@ -181,7 +181,7 @@ namespace FPS_n2 {
 
 			int num = MV1GetMaterialNum(GetObj().get());
 			for (int i = 0; i < num; i++) {
-				MV1SetMaterialDifColor(GetObj().get(), i, GetColorF(1.f, 1.f, 1.f, 1.f));
+				MV1SetMaterialDifColor(GetObj().get(), i, GetColorF(0.8f, 0.8f, 0.8f, 1.f));
 				MV1SetMaterialAmbColor(GetObj().get(), i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
 			}
 
