@@ -7,6 +7,8 @@ struct VS_INPUT
 	float4 Specular        : COLOR1;           // スペキュラカラー
 	float4 TexCoords0      : TEXCOORD0;        // テクスチャ座標
 	float4 TexCoords1      : TEXCOORD1;		// サブテクスチャ座標
+	float3 Tan             : TANGENT0;		// 接線( ローカル空間 )
+	float3 Bin             : BINORMAL0;		// 従法線( ローカル空間 )
 	int4   BlendIndices0   : BLENDINDICES0;    // スキニング処理用 Float型定数配列インデックス
 	float4 BlendWeight0    : BLENDWEIGHT0;     // スキニング処理用ウエイト値
 } ;
@@ -14,11 +16,11 @@ struct VS_INPUT
 // 頂点シェーダーの出力
 struct VS_OUTPUT
 {
-	float2 TexCoords0      : TEXCOORD0 ;    // テクスチャ座標
-	float3 VPosition       : TEXCOORD1 ;    // 座標( ビュー空間 )
-	float3 VNormal         : TEXCOORD2 ;    // 法線( ビュー空間 )
+	float2 TexCoords0      : TEXCOORD0;    // テクスチャ座標
+	float3 VPosition       : TEXCOORD1;    // 座標( ビュー空間 )
+	float4x4 VMat          : TEXCOORD2;    // 接線( ビュー空間 )
 	float4 Specular        : COLOR1;		// スペキュラカラー
-	float4 Position        : SV_POSITION ;	// 座標( プロジェクション空間 )
+	float4 Position        : SV_POSITION;	// 座標( プロジェクション空間 )
 } ;
 
 
@@ -127,7 +129,6 @@ cbuffer cbD3D11_CONST_BUFFER_VS_LOCALWORLDMATRIX	: register(b3) {
 };
 
 
-
 // main関数
 VS_OUTPUT main( VS_INPUT VSInput )
 {
@@ -138,6 +139,10 @@ VS_OUTPUT main( VS_INPUT VSInput )
 	float3 lViewNrm ;
 	float4 lLocalWorldMatrix[3];
 
+	float3		lWorldTan;
+	float3		lWorldBin;
+	float3		lViewTan;
+	float3		lViewBin;
 
 	// 複数のフレームのブレンド行列の作成
 	lLocalWorldMatrix[0] = g_LocalWorldMatrix.Matrix[VSInput.BlendIndices0.x + 0] * VSInput.BlendWeight0.x;
@@ -202,8 +207,30 @@ VS_OUTPUT main( VS_INPUT VSInput )
 	// 頂点座標を保存
 	VSOutput.VPosition = lViewPosition.xyz ;
 
-	// 法線を保存
-	VSOutput.VNormal = lViewNrm ;
+	// 従法線、接線、法線をもとに接空間行列を作成
+	lWorldTan.x = dot(VSInput.Tan, lLocalWorldMatrix[0].xyz);
+	lWorldTan.y = dot(VSInput.Tan, lLocalWorldMatrix[1].xyz);
+	lWorldTan.z = dot(VSInput.Tan, lLocalWorldMatrix[2].xyz);
+
+	lWorldBin.x = dot(VSInput.Bin, lLocalWorldMatrix[0].xyz);
+	lWorldBin.y = dot(VSInput.Bin, lLocalWorldMatrix[1].xyz);
+	lWorldBin.z = dot(VSInput.Bin, lLocalWorldMatrix[2].xyz);
+
+	lViewTan.x = dot(lWorldTan, g_Base.ViewMatrix[0].xyz);
+	lViewTan.y = dot(lWorldTan, g_Base.ViewMatrix[1].xyz);
+	lViewTan.z = dot(lWorldTan, g_Base.ViewMatrix[2].xyz);
+
+	lViewBin.x = dot(lWorldBin, g_Base.ViewMatrix[0].xyz);
+	lViewBin.y = dot(lWorldBin, g_Base.ViewMatrix[1].xyz);
+	lViewBin.z = dot(lWorldBin, g_Base.ViewMatrix[2].xyz);
+
+	float4x4 mat = {
+		float4(normalize(lViewTan), 0.0f),
+		float4(normalize(lViewBin), 0.0f),
+		float4(normalize(lViewNrm), 0.0f),
+		{0,0,0,1}
+	};
+	VSOutput.VMat = mat;
 
 	// テクスチャ座標変換行列による変換を行った結果のテクスチャ座標をセット
 	VSOutput.TexCoords0.x = dot( VSInput.TexCoords0, g_OtherMatrix.TextureMatrix[ 0 ][ 0 ] ) ;

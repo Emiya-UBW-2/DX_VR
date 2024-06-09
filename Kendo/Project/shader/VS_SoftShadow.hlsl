@@ -7,6 +7,8 @@ struct VS_INPUT
 	float4 Specular        : COLOR1 ;           // スペキュラカラー
 	float4 TexCoords0      : TEXCOORD0 ;        // テクスチャ座標
 	float4 TexCoords1      : TEXCOORD1 ;		// サブテクスチャ座標
+	float3 Tan             : TANGENT0;		// 接線( ローカル空間 )
+	float3 Bin             : BINORMAL0;		// 従法線( ローカル空間 )
 	int4   BlendIndices0   : BLENDINDICES0 ;    // スキニング処理用 Float型定数配列インデックス
 	float4 BlendWeight0    : BLENDWEIGHT0 ;     // スキニング処理用ウエイト値
 } ;

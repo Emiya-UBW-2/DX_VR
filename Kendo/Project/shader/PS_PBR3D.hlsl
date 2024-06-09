@@ -11,7 +11,7 @@ struct PS_INPUT
 {
 	float2 TexCoords0      : TEXCOORD0 ;    // テクスチャ座標
 	float3 VPosition       : TEXCOORD1 ;    // 座標( ビュー空間 )
-	float3 VNormal         : TEXCOORD2 ;    // 法線( ビュー空間 )
+	float4x4 VMat          : TEXCOORD2;	    // 接線( ビュー空間 )
 	float4 Specular        : COLOR1;		// スペキュラカラー
 } ;
 
@@ -169,7 +169,7 @@ float punctualLightIntensityToIrradianceFactor(const in float lightDistance, con
 void getDirectionalDirectLightIrradiance(const in DX_D3D11_CONST_LIGHT Light, const in GeometricContext geometry, out IncidentLight directLight)
 {
 	directLight.color = Light.Diffuse;// +Light.Ambient.xyz;
-    directLight.direction = Light.Direction*-1.f;
+    directLight.direction = -Light.Direction;
     directLight.visible = true;
 }
 
@@ -285,10 +285,23 @@ void RE_Direct(const in IncidentLight directLight, const in GeometricContext geo
     reflectedLight.directSpecular += irradiance * SpecularBRDF(directLight, geometry, material);
 }
 
+float4x4 InvTangentMatrix(
+	float3 tangent,
+	float3 binormal,
+	float3 normal) {
+	float4x4 mat = {float4(tangent , 0.0f),
+					 float4(binormal, 0.0f),
+					 float4(normal  , 0.0f),
+					{0,0,0,1}
+	};
+	return mat;   // 転置
+}
+
 PS_OUTPUT main(PS_INPUT PSInput)
 {
-	float3 NormalMap = (g_NormalMapTexture.Sample(g_NormalMapSampler, PSInput.TexCoords0).rgb - float3(0.5f, 0.5f, 0.5f)) * 2.0f;
-
+	float3 Normal = (g_NormalMapTexture.Sample(g_NormalMapSampler, PSInput.TexCoords0).rgb - 0.5f) * 2.0f;
+	//接空間行列でローカル法線に変換
+	Normal = mul(Normal, PSInput.VMat);
 
 	float metallic = 0.f;
     float roughness = 0.f; //仮
@@ -298,7 +311,7 @@ PS_OUTPUT main(PS_INPUT PSInput)
 
     GeometricContext geometry;
     geometry.position = -PSInput.VPosition;
-    geometry.normal = normalize(PSInput.VNormal);
+    geometry.normal = Normal;
     geometry.viewDir = normalize(PSInput.VPosition);
   
     Material material;
@@ -321,7 +334,7 @@ PS_OUTPUT main(PS_INPUT PSInput)
     {
         if (g_Common.Light[i].Type == DX_LIGHTTYPE_DIRECTIONAL)
         {
-            getDirectionalDirectLightIrradiance(g_Common.Light[i], geometry, directLight);
+			getDirectionalDirectLightIrradiance(g_Common.Light[i], geometry, directLight);
             RE_Direct(directLight, geometry, material, reflectedLight);
         }
         else if (g_Common.Light[i].Type == DX_LIGHTTYPE_SPOT)
@@ -358,9 +371,6 @@ PS_OUTPUT main(PS_INPUT PSInput)
 
 
 
-
-
-	float3 Normal = normalize(PSInput.VNormal);
 
 
 	PSOutput.Normal.x = (Normal.x + 1.0) / 2.0;

@@ -20,7 +20,7 @@ namespace FPS_n2 {
 			}
 		public:
 			//UI•\Ž¦
-			void DrawUI_Base_Sub(float) noexcept override {
+			void DrawUI_Base_Sub() noexcept override {
 			}
 		};
 	};
