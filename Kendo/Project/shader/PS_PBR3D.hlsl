@@ -303,9 +303,14 @@ PS_OUTPUT main(PS_INPUT PSInput)
 	//接空間行列でローカル法線に変換
 	Normal = mul(Normal, PSInput.VMat);
 
+	//視差マッピング
+	float P = g_NormalMapTexture.Sample(g_NormalMapSampler, PSInput.TexCoords0).a;
+	if (P < 0.1f) { P = 0.f; }
+	float2 TexCoords = PSInput.TexCoords0 + (0.015*12.5) * P * Normal.xy;
+
 	float metallic = 0.f;
     float roughness = 0.f; //仮
-    float4 albedo = g_DiffuseMapTexture.Sample(g_DiffuseMapSampler, PSInput.TexCoords0);
+    float4 albedo = g_DiffuseMapTexture.Sample(g_DiffuseMapSampler, TexCoords);
 
     PS_OUTPUT PSOutput;
 
@@ -381,7 +386,7 @@ PS_OUTPUT main(PS_INPUT PSInput)
 	float4		TextureSpecularColor;
 	TextureSpecularColor.xyzw = 0.0;
 
-	TextureSpecularColor.xyz = g_SpecularMapTexture.Sample(g_SpecularMapSampler, PSInput.TexCoords0).xyz * PSInput.Specular.xyz;
+	TextureSpecularColor.xyz = g_SpecularMapTexture.Sample(g_SpecularMapSampler, TexCoords).xyz * PSInput.Specular.xyz;
 
 	PSOutput.Depth.x = PSInput.VPosition.z;
 	PSOutput.Depth.y = TextureSpecularColor.r * 0.299 + TextureSpecularColor.g * 0.587 + TextureSpecularColor.b * 0.114;

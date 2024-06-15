@@ -1,24 +1,42 @@
 {
-	"Parts":[
-		{
-			"Name":"ID1",
-			"Type":"Box",
-			"Layer":0,
-			"MouseClickActive":true,
-			"XPos":140,
-			"YPos":140,
-			"XSize":240,
-			"YSize":480,
-			"ZRotate":0.0,
-			"XCenter":"Left",
-			"YCenter":"Top",
-			"PressColor":"Gray50",
-			"IntoColor":"White",
-			"BaseColor":"Gray25",
-			"EdgeColor":"Gray75",
-			"TextID":1
-		}
-	],
+  "Parts": [
+    {
+      "Name": "ID1",
+      "Type": "Box",
+      "Layer": 0,
+      "MouseClickActive": true,
+      "XPos": 140,
+      "YPos": 140,
+      "XSize": 240,
+      "YSize": 24,
+      "ZRotate": 0.0,
+      "XCenter": "Left",
+      "YCenter": "Top",
+      "PressColor": "Gray50",
+      "IntoColor": "White",
+      "BaseColor": "Gray25",
+      "EdgeColor": "Gray75",
+      "TextID": 1
+    },
+    {
+      "Name": "ID2",
+      "Type": "Msg",
+      "Layer": 0,
+      "MouseClickActive": true,
+      "XPos": 140,
+      "YPos": 140,
+      "XSize": 240,
+      "YSize": 24,
+      "ZRotate": 0.0,
+      "XCenter": "Left",
+      "YCenter": "Top",
+      "PressColor": "Gray50",
+      "IntoColor": "White",
+      "BaseColor": "White",
+      "EdgeColor": "Gray75",
+      "TextID": 1
+    }
+  ],
 	"TotalAnim":[
 		{
 			"Target":["ID1"],

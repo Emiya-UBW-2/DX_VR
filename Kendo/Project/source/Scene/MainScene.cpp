@@ -59,7 +59,7 @@ namespace FPS_n2 {
 			}
 			//UI
 			this->m_UIclass.Set();
-			//this->m_UILayer = UISystem::Instance()->AddUI("data/UI/MainLoop.json");
+			this->m_UILayer = UISystem::Instance()->AddUI("data/UI/MainLoop.json");
 			//
 			this->m_DamageEvents.clear();
 			this->m_NetWorkBrowser.Init();
@@ -412,7 +412,7 @@ namespace FPS_n2 {
 				DrawParts->Set_is_lens(false);
 				DrawParts->Set_zoom_lens(1.f);
 			}
-			//UISystem::Instance()->DelUI(m_UILayer);
+			UISystem::Instance()->DelUI(m_UILayer);
 		}
 		void			MAINLOOP::Dispose_Load_Sub(void) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
