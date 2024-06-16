@@ -21,6 +21,7 @@ struct VS_OUTPUT
 	float4x4 VMat          : TEXCOORD2;    // 接線( ビュー空間 )
 	float4 Specular        : COLOR1;		// スペキュラカラー
 	float4 Position        : SV_POSITION;	// 座標( プロジェクション空間 )
+	float3 V_to_Eye        : TEXCOORD9;
 } ;
 
 
@@ -240,6 +241,14 @@ VS_OUTPUT main( VS_INPUT VSInput )
 
 		// スペキュラカラーをセット
 	VSOutput.Specular = (g_Base.SpecularSource > 0.5f ? VSInput.Specular : g_Common.Material.Specular) * g_Base.MulSpecularColor;
+
+
+	float3 TempF3;
+	// 頂点座標から視点へのベクトルを接底空間に投影した後正規化して保存
+	TempF3.x = dot(normalize(lViewTan), -VSOutput.VPosition.xyz);
+	TempF3.y = dot(normalize(lViewBin), -VSOutput.VPosition.xyz);
+	TempF3.z = dot(normalize(lViewNrm), -VSOutput.VPosition.xyz);
+	VSOutput.V_to_Eye = normalize(TempF3);
 
 
 	// 出力パラメータを返す

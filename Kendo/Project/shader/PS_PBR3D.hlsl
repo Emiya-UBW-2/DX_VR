@@ -13,6 +13,8 @@ struct PS_INPUT
 	float3 VPosition       : TEXCOORD1 ;    // 座標( ビュー空間 )
 	float4x4 VMat          : TEXCOORD2;	    // 接線( ビュー空間 )
 	float4 Specular        : COLOR1;		// スペキュラカラー
+	float4 Position        : SV_POSITION;	// 座標( プロジェクション空間 )
+	float3 V_to_Eye        : TEXCOORD9;
 } ;
 
 // ピクセルシェーダーの出力
@@ -297,16 +299,78 @@ float4x4 InvTangentMatrix(
 	return mat;   // 転置
 }
 
+//--------------------------------------------------------------------------------------
+// Global variables
+//--------------------------------------------------------------------------------------
+
+int      g_nMinSamples=1;             // 高さフィールドプロファイルをサンプリングするための最小サンプル数
+int      g_nMaxSamples=1;             // 高さフィールドプロファイルをサンプリングするためのサンプルの最大数
+
+// Parallax occlusion mapping pixel shader
+float2 GetParallaxOcclusionMapping(float2 TexCoords, float3 Normal, float3 V_to_Eye) {
+	float2 vParallaxOffsetTS = V_to_Eye.xy*(0.015);
+
+	const int nNumSteps = 150;
+	float fStepSize = 1.0 / (float)nNumSteps;
+	float fPrevHeight = 1.0;
+
+	
+
+	float  fCurrentBound = 1.0;
+
+	float2 dx, dy;
+	dx = ddx(TexCoords);
+	dy = ddy(TexCoords);
+
+	bool IsEnd = false;
+	[unroll]
+	for (int nStepIndex = 0;nStepIndex < nNumSteps;nStepIndex++) {
+		if (!IsEnd) {
+			fCurrentBound -= fStepSize;
+			// サンプルの高さマップ。この場合、法線マップのアルファ チャネルに保存されます。
+			float fCurrHeight = g_NormalMapTexture.SampleGrad(g_NormalMapSampler, TexCoords - fCurrentBound * vParallaxOffsetTS, dx, dy).a;
+			//float fCurrHeight = g_NormalMapTexture.Sample(g_NormalMapSampler, TexCoords - fCurrentBound * vParallaxOffsetTS).a;
+			if (fCurrHeight < 0.1f) { fCurrHeight = 0.f; }
+
+			//潜ったので
+			if (fCurrHeight > fCurrentBound) {
+				/*
+				float fDenominator = fStepSize + fCurrHeight - fPrevHeight;
+				if (fDenominator == 0.0f) {
+					fCurrentBound = 0.f;
+				}
+				else {
+					fCurrentBound = 1.f - (fCurrentBound * (fCurrHeight - fPrevHeight) + fStepSize * fCurrHeight) / fDenominator;
+				}
+				//*/
+				IsEnd = true;
+			}
+			fPrevHeight = fCurrHeight;
+		}
+	}
+
+	// 擬似押し出しサーフェス上の変位点の計算されたテクスチャ オフセット :
+	return TexCoords - fCurrentBound * vParallaxOffsetTS;
+}
+
 PS_OUTPUT main(PS_INPUT PSInput)
 {
 	float3 Normal = (g_NormalMapTexture.Sample(g_NormalMapSampler, PSInput.TexCoords0).rgb - 0.5f) * 2.0f;
 	//接空間行列でローカル法線に変換
 	Normal = mul(Normal, PSInput.VMat);
 
+	//視差遮蔽マッピング
+#if false
+	float2 TexCoords = GetParallaxOcclusionMapping(PSInput.TexCoords0, Normal, PSInput.V_to_Eye);
+#else
 	//視差マッピング
 	float P = g_NormalMapTexture.Sample(g_NormalMapSampler, PSInput.TexCoords0).a;
 	if (P < 0.1f) { P = 0.f; }
-	float2 TexCoords = PSInput.TexCoords0 + (0.015*12.5) * P * Normal.xy;
+	float2 TexCoords = PSInput.TexCoords0 + 0.015 * P * PSInput.V_to_Eye.xy;
+	Normal = (g_NormalMapTexture.Sample(g_NormalMapSampler, TexCoords).rgb - 0.5f) * 2.0f;
+	//接空間行列でローカル法線に変換
+	Normal = mul(Normal, PSInput.VMat);
+#endif
 
 	float metallic = 0.f;
     float roughness = 0.f; //仮
@@ -396,3 +460,4 @@ PS_OUTPUT main(PS_INPUT PSInput)
 	// 出力パラメータを返す
     return PSOutput;
 }
+
