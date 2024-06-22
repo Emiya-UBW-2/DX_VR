@@ -9,13 +9,13 @@
 // ピクセルシェーダーの入力
 struct PS_INPUT
 {
-	float2 TexCoords0      : TEXCOORD0 ;    // テクスチャ座標
-	float3 VPosition       : TEXCOORD1 ;    // 座標( ビュー空間 )
-	float4x4 VMat          : TEXCOORD2;	    // 接線( ビュー空間 )
-	float4 Specular        : COLOR1;		// スペキュラカラー
-	float4 Position        : SV_POSITION;	// 座標( プロジェクション空間 )
-	float3 V_to_Eye        : TEXCOORD9;
-} ;
+    float2 TexCoords0 : TEXCOORD0; // テクスチャ座標
+    float3 VPosition : TEXCOORD1; // 座標( ビュー空間 )
+    float3 VTan : TEXCOORD2; // 接線( ビュー空間 )
+    float3 VBin : TEXCOORD3; // 従法線( ビュー空間 )
+    float3 VNormal : TEXCOORD4; // 法線( ビュー空間 )
+    float4 Specular : COLOR1; // スペキュラカラー
+};
 
 // ピクセルシェーダーの出力
 struct PS_OUTPUT
@@ -355,21 +355,35 @@ float2 GetParallaxOcclusionMapping(float2 TexCoords, float3 Normal, float3 V_to_
 
 PS_OUTPUT main(PS_INPUT PSInput)
 {
+    float3x4 mat =
+    {
+        normalize(PSInput.VTan),
+		normalize(PSInput.VBin),
+		normalize(PSInput.VNormal),
+        { 0, 0, 0 }
+    };
+    float3 V_to_Eye;
+	// 頂点座標から視点へのベクトルを接底空間に投影した後正規化して保存
+    V_to_Eye.x = dot(normalize(PSInput.VTan), -PSInput.VPosition.xyz);
+    V_to_Eye.y = dot(normalize(PSInput.VBin), -PSInput.VPosition.xyz);
+    V_to_Eye.z = dot(normalize(PSInput.VNormal), -PSInput.VPosition.xyz);
+    V_to_Eye = normalize(V_to_Eye);
+
 	float3 Normal = (g_NormalMapTexture.Sample(g_NormalMapSampler, PSInput.TexCoords0).rgb - 0.5f) * 2.0f;
 	//接空間行列でローカル法線に変換
-	Normal = mul(Normal, PSInput.VMat);
+    Normal = mul(Normal, mat);
 
 	//視差遮蔽マッピング
 #if false
-	float2 TexCoords = GetParallaxOcclusionMapping(PSInput.TexCoords0, Normal, PSInput.V_to_Eye);
+	float2 TexCoords = GetParallaxOcclusionMapping(PSInput.TexCoords0, Normal, V_to_Eye);
 #else
 	//視差マッピング
 	float P = g_NormalMapTexture.Sample(g_NormalMapSampler, PSInput.TexCoords0).a;
 	if (P < 0.1f) { P = 0.f; }
-	float2 TexCoords = PSInput.TexCoords0 + 0.015 * P * PSInput.V_to_Eye.xy;
+    float2 TexCoords = PSInput.TexCoords0 + 0.015 * P * V_to_Eye.xy;
 	Normal = (g_NormalMapTexture.Sample(g_NormalMapSampler, TexCoords).rgb - 0.5f) * 2.0f;
 	//接空間行列でローカル法線に変換
-	Normal = mul(Normal, PSInput.VMat);
+    Normal = mul(Normal, mat);
 #endif
 
 	float metallic = 0.f;

@@ -14,14 +14,14 @@ struct VS_INPUT
 } ;
 
 // 頂点シェーダーの出力
-struct VS_OUTPUT
+struct GS_INPUT
 {
-	float2 TexCoords0      : TEXCOORD0;    // テクスチャ座標
-	float3 VPosition       : TEXCOORD1;    // 座標( ビュー空間 )
-	float4x4 VMat          : TEXCOORD2;    // 接線( ビュー空間 )
-	float4 Specular        : COLOR1;		// スペキュラカラー
-	float4 Position        : SV_POSITION;	// 座標( プロジェクション空間 )
-	float3 V_to_Eye        : TEXCOORD9;
+	float2 TexCoords0	 : TEXCOORD0;    // テクスチャ座標
+	float4 WPosition	 : TEXCOORD1;    // 座標(ワールド)
+    float3 WTan			 : TEXCOORD2; // 接線( ワールド )
+    float3 WBin			 : TEXCOORD3; // 従法線( ワールド )
+    float3 WNormal		 : TEXCOORD4; // 法線( ワールド )
+    float4 Specular		 : COLOR1; // スペキュラカラー
 } ;
 
 
@@ -104,7 +104,7 @@ struct DX_D3D11_VS_CONST_BUFFER_OTHERMATRIX
 
 // スキニングメッシュ用の　ローカル　→　ワールド行列
 struct DX_D3D11_VS_CONST_BUFFER_LOCALWORLDMATRIX {
-	float4		Matrix[54 * 3];					// ローカル　→　ワールド行列
+	float4		LWMatrix[54 * 3];					// ローカル　→　ワールド行列
 };
 
 // 頂点シェーダー・ピクセルシェーダー共通パラメータ
@@ -129,129 +129,60 @@ cbuffer cbD3D11_CONST_BUFFER_VS_LOCALWORLDMATRIX	: register(b3) {
 	DX_D3D11_VS_CONST_BUFFER_LOCALWORLDMATRIX	g_LocalWorldMatrix;
 };
 
-
-// main関数
-VS_OUTPUT main( VS_INPUT VSInput )
+float2 SetTexCoords0(float4 TexCoords0)
 {
-	VS_OUTPUT VSOutput ;
-	float4 lWorldPosition ;
-	float4 lViewPosition ;
-	float3 lWorldNrm ;
-	float3 lViewNrm ;
+    float2 Ret;
+	// テクスチャ座標変換行列による変換を行った結果のテクスチャ座標をセット
+    Ret.x = dot(TexCoords0, g_OtherMatrix.TextureMatrix[0][0]);
+    Ret.y = dot(TexCoords0, g_OtherMatrix.TextureMatrix[0][1]);
+    return Ret;
+}
+// main関数
+GS_INPUT main(VS_INPUT VSInput)
+{
+    GS_INPUT VSOutput;
 	float4 lLocalWorldMatrix[3];
 
-	float3		lWorldTan;
-	float3		lWorldBin;
-	float3		lViewTan;
-	float3		lViewBin;
-
 	// 複数のフレームのブレンド行列の作成
-	lLocalWorldMatrix[0] = g_LocalWorldMatrix.Matrix[VSInput.BlendIndices0.x + 0] * VSInput.BlendWeight0.x;
-	lLocalWorldMatrix[1] = g_LocalWorldMatrix.Matrix[VSInput.BlendIndices0.x + 1] * VSInput.BlendWeight0.x;
-	lLocalWorldMatrix[2] = g_LocalWorldMatrix.Matrix[VSInput.BlendIndices0.x + 2] * VSInput.BlendWeight0.x;
+	lLocalWorldMatrix[0] = g_LocalWorldMatrix.LWMatrix[VSInput.BlendIndices0.x + 0] * VSInput.BlendWeight0.x;
+	lLocalWorldMatrix[1] = g_LocalWorldMatrix.LWMatrix[VSInput.BlendIndices0.x + 1] * VSInput.BlendWeight0.x;
+	lLocalWorldMatrix[2] = g_LocalWorldMatrix.LWMatrix[VSInput.BlendIndices0.x + 2] * VSInput.BlendWeight0.x;
 
-	lLocalWorldMatrix[0] += g_LocalWorldMatrix.Matrix[VSInput.BlendIndices0.y + 0] * VSInput.BlendWeight0.y;
-	lLocalWorldMatrix[1] += g_LocalWorldMatrix.Matrix[VSInput.BlendIndices0.y + 1] * VSInput.BlendWeight0.y;
-	lLocalWorldMatrix[2] += g_LocalWorldMatrix.Matrix[VSInput.BlendIndices0.y + 2] * VSInput.BlendWeight0.y;
+	lLocalWorldMatrix[0] += g_LocalWorldMatrix.LWMatrix[VSInput.BlendIndices0.y + 0] * VSInput.BlendWeight0.y;
+	lLocalWorldMatrix[1] += g_LocalWorldMatrix.LWMatrix[VSInput.BlendIndices0.y + 1] * VSInput.BlendWeight0.y;
+	lLocalWorldMatrix[2] += g_LocalWorldMatrix.LWMatrix[VSInput.BlendIndices0.y + 2] * VSInput.BlendWeight0.y;
 
-	lLocalWorldMatrix[0] += g_LocalWorldMatrix.Matrix[VSInput.BlendIndices0.z + 0] * VSInput.BlendWeight0.z;
-	lLocalWorldMatrix[1] += g_LocalWorldMatrix.Matrix[VSInput.BlendIndices0.z + 1] * VSInput.BlendWeight0.z;
-	lLocalWorldMatrix[2] += g_LocalWorldMatrix.Matrix[VSInput.BlendIndices0.z + 2] * VSInput.BlendWeight0.z;
+	lLocalWorldMatrix[0] += g_LocalWorldMatrix.LWMatrix[VSInput.BlendIndices0.z + 0] * VSInput.BlendWeight0.z;
+	lLocalWorldMatrix[1] += g_LocalWorldMatrix.LWMatrix[VSInput.BlendIndices0.z + 1] * VSInput.BlendWeight0.z;
+	lLocalWorldMatrix[2] += g_LocalWorldMatrix.LWMatrix[VSInput.BlendIndices0.z + 2] * VSInput.BlendWeight0.z;
 
-	lLocalWorldMatrix[0] += g_LocalWorldMatrix.Matrix[VSInput.BlendIndices0.w + 0] * VSInput.BlendWeight0.w;
-	lLocalWorldMatrix[1] += g_LocalWorldMatrix.Matrix[VSInput.BlendIndices0.w + 1] * VSInput.BlendWeight0.w;
-	lLocalWorldMatrix[2] += g_LocalWorldMatrix.Matrix[VSInput.BlendIndices0.w + 2] * VSInput.BlendWeight0.w;
-
-
-	// 頂点座標変換 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++( 開始 )
-
-	// ローカル座標をワールド座標に変換
-	lWorldPosition.x = dot(VSInput.Position, lLocalWorldMatrix[0]);
-	lWorldPosition.y = dot(VSInput.Position, lLocalWorldMatrix[1]);
-	lWorldPosition.z = dot(VSInput.Position, lLocalWorldMatrix[2]);
-	lWorldPosition.w = 1.0f ;
-
-	// ワールド座標をビュー座標に変換
-	lViewPosition.x = dot(lWorldPosition, g_Base.ViewMatrix[0]);
-	lViewPosition.y = dot(lWorldPosition, g_Base.ViewMatrix[1]);
-	lViewPosition.z = dot(lWorldPosition, g_Base.ViewMatrix[2]);
-	lViewPosition.w = 1.0f;
-
-	// ビュー座標を射影座標に変換
-	VSOutput.Position.x = dot(lViewPosition, g_Base.ProjectionMatrix[0]);
-	VSOutput.Position.y = dot(lViewPosition, g_Base.ProjectionMatrix[1]);
-	VSOutput.Position.z = dot(lViewPosition, g_Base.ProjectionMatrix[2]);
-	VSOutput.Position.w = dot(lViewPosition, g_Base.ProjectionMatrix[3]);
-
-	// 頂点座標変換 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++( 終了 )
+	lLocalWorldMatrix[0] += g_LocalWorldMatrix.LWMatrix[VSInput.BlendIndices0.w + 0] * VSInput.BlendWeight0.w;
+	lLocalWorldMatrix[1] += g_LocalWorldMatrix.LWMatrix[VSInput.BlendIndices0.w + 1] * VSInput.BlendWeight0.w;
+	lLocalWorldMatrix[2] += g_LocalWorldMatrix.LWMatrix[VSInput.BlendIndices0.w + 2] * VSInput.BlendWeight0.w;
 
 
+    VSOutput.WPosition.x = dot(VSInput.Position, lLocalWorldMatrix[0]);
+    VSOutput.WPosition.y = dot(VSInput.Position, lLocalWorldMatrix[1]);
+    VSOutput.WPosition.z = dot(VSInput.Position, lLocalWorldMatrix[2]);
+    VSOutput.WPosition.w = 1.0f;
 
-	// 法線をビュー空間の角度に変換 =========================================( 開始 )
+    VSOutput.WTan.x = dot(VSInput.Tan, lLocalWorldMatrix[0].xyz);
+    VSOutput.WTan.y = dot(VSInput.Tan, lLocalWorldMatrix[1].xyz);
+    VSOutput.WTan.z = dot(VSInput.Tan, lLocalWorldMatrix[2].xyz);
 
-	// ローカルベクトルをワールドベクトルに変換
-	lWorldNrm.x = dot(VSInput.Normal, lLocalWorldMatrix[0].xyz);
-	lWorldNrm.y = dot(VSInput.Normal, lLocalWorldMatrix[1].xyz);
-	lWorldNrm.z = dot(VSInput.Normal, lLocalWorldMatrix[2].xyz);
+    VSOutput.WBin.x = dot(VSInput.Bin, lLocalWorldMatrix[0].xyz);
+    VSOutput.WBin.y = dot(VSInput.Bin, lLocalWorldMatrix[1].xyz);
+    VSOutput.WBin.z = dot(VSInput.Bin, lLocalWorldMatrix[2].xyz);
 
-	// ワールドベクトルをビューベクトルに変換
-	lViewNrm.x = dot(lWorldNrm, g_Base.ViewMatrix[0].xyz);
-	lViewNrm.y = dot(lWorldNrm, g_Base.ViewMatrix[1].xyz);
-	lViewNrm.z = dot(lWorldNrm, g_Base.ViewMatrix[2].xyz);
+    VSOutput.WNormal.x = dot(VSInput.Normal, lLocalWorldMatrix[0].xyz);
+    VSOutput.WNormal.y = dot(VSInput.Normal, lLocalWorldMatrix[1].xyz);
+    VSOutput.WNormal.z = dot(VSInput.Normal, lLocalWorldMatrix[2].xyz);
 
-	// 法線をビュー空間の角度に変換 =========================================( 終了 )
-
-
-
-	// 出力パラメータセット ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++( 開始 )
-
-	// 頂点座標を保存
-	VSOutput.VPosition = lViewPosition.xyz ;
-
-	// 従法線、接線、法線をもとに接空間行列を作成
-	lWorldTan.x = dot(VSInput.Tan, lLocalWorldMatrix[0].xyz);
-	lWorldTan.y = dot(VSInput.Tan, lLocalWorldMatrix[1].xyz);
-	lWorldTan.z = dot(VSInput.Tan, lLocalWorldMatrix[2].xyz);
-
-	lWorldBin.x = dot(VSInput.Bin, lLocalWorldMatrix[0].xyz);
-	lWorldBin.y = dot(VSInput.Bin, lLocalWorldMatrix[1].xyz);
-	lWorldBin.z = dot(VSInput.Bin, lLocalWorldMatrix[2].xyz);
-
-	lViewTan.x = dot(lWorldTan, g_Base.ViewMatrix[0].xyz);
-	lViewTan.y = dot(lWorldTan, g_Base.ViewMatrix[1].xyz);
-	lViewTan.z = dot(lWorldTan, g_Base.ViewMatrix[2].xyz);
-
-	lViewBin.x = dot(lWorldBin, g_Base.ViewMatrix[0].xyz);
-	lViewBin.y = dot(lWorldBin, g_Base.ViewMatrix[1].xyz);
-	lViewBin.z = dot(lWorldBin, g_Base.ViewMatrix[2].xyz);
-
-	float4x4 mat = {
-		float4(normalize(lViewTan), 0.0f),
-		float4(normalize(lViewBin), 0.0f),
-		float4(normalize(lViewNrm), 0.0f),
-		{0,0,0,1}
-	};
-	VSOutput.VMat = mat;
-
-	// テクスチャ座標変換行列による変換を行った結果のテクスチャ座標をセット
-	VSOutput.TexCoords0.x = dot( VSInput.TexCoords0, g_OtherMatrix.TextureMatrix[ 0 ][ 0 ] ) ;
-	VSOutput.TexCoords0.y = dot( VSInput.TexCoords0, g_OtherMatrix.TextureMatrix[ 0 ][ 1 ] ) ;
-
-	// 出力パラメータセット ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++( 終了 )
-
-		// スペキュラカラーをセット
-	VSOutput.Specular = (g_Base.SpecularSource > 0.5f ? VSInput.Specular : g_Common.Material.Specular) * g_Base.MulSpecularColor;
-
-
-	float3 TempF3;
-	// 頂点座標から視点へのベクトルを接底空間に投影した後正規化して保存
-	TempF3.x = dot(normalize(lViewTan), -VSOutput.VPosition.xyz);
-	TempF3.y = dot(normalize(lViewBin), -VSOutput.VPosition.xyz);
-	TempF3.z = dot(normalize(lViewNrm), -VSOutput.VPosition.xyz);
-	VSOutput.V_to_Eye = normalize(TempF3);
+    VSOutput.TexCoords0 = SetTexCoords0(VSInput.TexCoords0);
+    VSOutput.Specular = (g_Base.SpecularSource > 0.5f ? VSInput.Specular : g_Common.Material.Specular) * g_Base.MulSpecularColor;
 
 
 	// 出力パラメータを返す
-	return VSOutput ;
+    return VSOutput;
 }
 
