@@ -37,8 +37,8 @@ namespace FPS_n2 {
 			void			Load_Icon(const char* IconPath, bool IsEnableSelect) noexcept {
 				m_Icon = GraphHandle::Load(IconPath);
 				m_Icon.GetSize(&xsize, &ysize);
-				xsize = y_r(xsize);
-				ysize = y_r(ysize);
+				xsize = y_UI(xsize);
+				ysize = y_UI(ysize);
 				m_ButtonMode = ButtonMode::Icon;
 				m_EnableSelect = IsEnableSelect;
 			}
@@ -74,36 +74,35 @@ namespace FPS_n2 {
 			}
 		public:
 			bool			GetInto() {
-				auto* Pad = PadControl::Instance();
 				int xp = xp1;
 				int yp = yp1;
 				switch (LMR) {
-					case DXLib_ref::FontHandle::FontXCenter::LEFT:
+					case DXLibRef::FontHandle::FontXCenter::LEFT:
 						xp = xp1;
 						break;
-					case DXLib_ref::FontHandle::FontXCenter::MIDDLE:
+					case DXLibRef::FontHandle::FontXCenter::MIDDLE:
 						xp = xp1 - xsize / 2;
 						break;
-					case DXLib_ref::FontHandle::FontXCenter::RIGHT:
+					case DXLibRef::FontHandle::FontXCenter::RIGHT:
 						xp = xp1 - xsize;
 						break;
 					default:
 						break;
 				}
 				switch (TMB) {
-					case DXLib_ref::FontHandle::FontYCenter::TOP:
+					case DXLibRef::FontHandle::FontYCenter::TOP:
 						yp = yp1;
 						break;
-					case DXLib_ref::FontHandle::FontYCenter::MIDDLE:
+					case DXLibRef::FontHandle::FontYCenter::MIDDLE:
 						yp = yp1 - ysize / 2;
 						break;
-					case DXLib_ref::FontHandle::FontYCenter::BOTTOM:
+					case DXLibRef::FontHandle::FontYCenter::BOTTOM:
 						yp = yp1 - ysize;
 						break;
 					default:
 						break;
 				}
-				return in2_(Pad->GetMS_X(), Pad->GetMS_Y(), xp, yp, xp + xsize, yp + ysize);
+				return IntoMouse(xp, yp, xp + xsize, yp + ysize);
 			}
 			void			Draw() {
 				switch (m_ButtonMode) {
@@ -114,26 +113,26 @@ namespace FPS_n2 {
 								int xp = xp1;
 								int yp = yp1;
 								switch (LMR) {
-									case DXLib_ref::FontHandle::FontXCenter::LEFT:
+									case DXLibRef::FontHandle::FontXCenter::LEFT:
 										xp = xp1;
 										break;
-									case DXLib_ref::FontHandle::FontXCenter::MIDDLE:
+									case DXLibRef::FontHandle::FontXCenter::MIDDLE:
 										xp = xp1 - xsize / 2;
 										break;
-									case DXLib_ref::FontHandle::FontXCenter::RIGHT:
+									case DXLibRef::FontHandle::FontXCenter::RIGHT:
 										xp = xp1 - xsize;
 										break;
 									default:
 										break;
 								}
 								switch (TMB) {
-									case DXLib_ref::FontHandle::FontYCenter::TOP:
+									case DXLibRef::FontHandle::FontYCenter::TOP:
 										yp = yp1;
 										break;
-									case DXLib_ref::FontHandle::FontYCenter::MIDDLE:
+									case DXLibRef::FontHandle::FontYCenter::MIDDLE:
 										yp = yp1 - ysize / 2;
 										break;
-									case DXLib_ref::FontHandle::FontYCenter::BOTTOM:
+									case DXLibRef::FontHandle::FontYCenter::BOTTOM:
 										yp = yp1 - ysize;
 										break;
 									default:
@@ -144,13 +143,13 @@ namespace FPS_n2 {
 								float per2 = 1.f - std::clamp(SelYadd / 10.f, 0.f, 1.f);
 								SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(128.f*per), 0, 255));
 								m_SelectBackImage->DrawExtendGraph(
-									xp + xsize / 2 - (int)((float)(xsize / 2 + y_r(300))*per2), yp + ysize - y_r(12) - (int)((float)(ysize / 6) * per),
-									xp + xsize / 2 + (int)((float)(xsize / 2 + y_r(300))*per2), yp + ysize - y_r(12) + (int)((float)(ysize / 6) * per),
+									xp + xsize / 2 - (int)((float)(xsize / 2 + y_UI(300))*per2), yp + ysize - y_UI(12) - (int)((float)(ysize / 6) * per),
+									xp + xsize / 2 + (int)((float)(xsize / 2 + y_UI(300))*per2), yp + ysize - y_UI(12) + (int)((float)(ysize / 6) * per),
 									true);
 								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 							}
 							unsigned int Color = Black;
-							if (ysize > y_r(50)) {
+							if (ysize > y_UI(50)) {
 								switch (m_ButtonStatus) {
 									case ButtonStatus::None:
 										Color = Gray75;
@@ -190,7 +189,7 @@ namespace FPS_n2 {
 								}
 							}
 							Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(ysize, LMR, TMB,
-																				xp1, yp1 + y_r(SelYadd), Color, Black, m_String);
+																				xp1, yp1 + y_UI(SelYadd), Color, Black, m_String);
 						}
 						break;
 					case ButtonMode::Icon:
@@ -218,7 +217,7 @@ namespace FPS_n2 {
 								default:
 									break;
 							}
-							m_Icon.DrawRotaGraph(xp1, yp1, (float)y_r(100) / 100.f*(1.f + SelYadd / 50.f), 0.f, true);
+							m_Icon.DrawRotaGraph(xp1, yp1, (float)y_UI(100) / 100.f*(1.f + SelYadd / 50.f), 0.f, true);
 							SetDrawBright(255, 255, 255);
 						}
 						break;

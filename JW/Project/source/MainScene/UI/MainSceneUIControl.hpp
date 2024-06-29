@@ -78,19 +78,19 @@ namespace FPS_n2 {
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
 					SetDrawBlendMode(DX_BLENDMODE_ADD, Add);
 					SetDrawBright(ColorBase.r, ColorBase.g, ColorBase.b);
-					DrawCircleGauge(xp1 + y_r(256), yp1,
+					DrawCircleGauge(xp1 + y_UI(256), yp1,
 									50.0 + ((50.0 - 15.0*2.0)*1.0) + 15.0 + deg,
 									CircleObj->get(),
 									50.0 + 15.0 + deg,
 									((double)(DrawParts->GetDispYSize()) / 1080.0));
 					SetDrawBright(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
-					DrawCircleGauge(xp1 + y_r(256), yp1,
+					DrawCircleGauge(xp1 + y_UI(256), yp1,
 									50.0 + ((50.0 - 15.0*2.0)*(double)std::max(per, perbuf)) + 15.0 + deg,
 									CircleObj->get(),
 									50.0 + ((50.0 - 15.0*2.0)*(double)std::min(per, perbuf)) + 15.0 + deg,
 									((double)(DrawParts->GetDispYSize()) / 1080.0));
 					SetDrawBright(Color.r, Color.g, Color.b);
-					DrawCircleGauge(xp1 + y_r(256), yp1,
+					DrawCircleGauge(xp1 + y_UI(256), yp1,
 									50.0 + ((50.0 - 15.0*2.0)*(double)std::min(per, perbuf)) + 15.0 + deg,
 									CircleObj->get(),
 									50.0 + 15.0 + deg,
@@ -109,19 +109,19 @@ namespace FPS_n2 {
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
 					SetDrawBlendMode(DX_BLENDMODE_ADD, Add);
 					SetDrawBright(ColorBase.r, ColorBase.g, ColorBase.b);
-					DrawCircleGauge(xp1 - y_r(256), yp1,
+					DrawCircleGauge(xp1 - y_UI(256), yp1,
 						(50.0 - 15.0*2.0) + 15.0 + deg,
 									CircleObj->get(),
 									(double)((50.0 - 15.0*2.0)*(1.0 - 1.0)) + 15.0 + deg,
 									((double)(DrawParts->GetDispYSize()) / 1080.0));
 					SetDrawBright(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
-					DrawCircleGauge(xp1 - y_r(256), yp1,
+					DrawCircleGauge(xp1 - y_UI(256), yp1,
 						(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
 									CircleObj->get(),
 									(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::max(per, perbuf))) + 15.0 + deg,
 									((double)(DrawParts->GetDispYSize()) / 1080.0));
 					SetDrawBright(Color.r, Color.g, Color.b);
-					DrawCircleGauge(xp1 - y_r(256), yp1,
+					DrawCircleGauge(xp1 - y_UI(256), yp1,
 						(50.0 - 15.0*2.0) + 15.0 + deg,
 									CircleObj->get(),
 									(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
@@ -280,17 +280,17 @@ namespace FPS_n2 {
 				//タイム,スコア
 				{
 					int xp1, yp1;
-					xp1 = y_r(30);
-					yp1 = y_r(10);
-					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Gray75, "TIME");
-					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + y_r(240), yp1, White, Gray75, "%d:%05.2f",
+					xp1 = y_UI(30);
+					yp1 = y_UI(10);
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Gray75, "TIME");
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + y_UI(240), yp1, White, Gray75, "%d:%05.2f",
 						(int)(floatParam[0] / 60.f),
 																		  (float)((int)(floatParam[0]) % 60) + (floatParam[0] - (float)((int)(floatParam[0])))
 					);
 
-					yp1 += y_r(25);
-					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Gray75, "KILL");
-					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + y_r(240), yp1, White, Gray75, "%d", intParam[6]);
+					yp1 += y_UI(25);
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Gray75, "KILL");
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + y_UI(240), yp1, White, Gray75, "%d", intParam[6]);
 				}
 				//ポイント増加
 				{
@@ -302,14 +302,13 @@ namespace FPS_n2 {
 						ScoreAdd.at(m_ScoreAddSel) = std::make_pair(intParam[5], 2.f);
 						++m_ScoreAddSel %= (int)ScoreAdd.size();
 					}
-					auto* OptionParts = OPTION::Instance();
-					if (OptionParts->GetParamBoolean(EnumSaveParam::EX_UI)) {
+					if (true) {
 						for (int i = 0; i < (int)ScoreAdd.size(); i++) {
 							auto& s = ScoreAdd[i];
 							if (s.second > 0.f) {
 								float per = std::powf(2.f - s.second, 2.f);
 								SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - per)), 0, 255));
-								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_r(per*96.f), GetColor(206, 0, 0), Gray75, "+%d", s.first);
+								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_UI(per*96.f), GetColor(206, 0, 0), Gray75, "+%d", s.first);
 								s.second = std::max(s.second - 1.f / DrawParts->GetFps(), 0.f);
 							}
 						}
@@ -320,20 +319,20 @@ namespace FPS_n2 {
 				{
 					int xp1, yp1;
 					//体力
-					xp1 = y_r(24);
-					yp1 = DrawParts->GetDispYSize() - y_r(96);
+					xp1 = y_UI(24);
+					yp1 = DrawParts->GetDispYSize() - y_UI(96);
 
 					m_GaugeParam[0].DrawGauge(
-						xp1, yp1, xp1 + y_r(300), yp1 + y_r(18),
+						xp1, yp1, xp1 + y_UI(300), yp1 + y_UI(18),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
 					);
 
-					xp1 += y_r(330);
+					xp1 += y_UI(330);
 					if (intParam[9] > 0) {
 						SetDrawBright(0, 255, 0);
-						this->Morphine_Graph.DrawRotaGraph(xp1, yp1, (float)(y_r(50)) / 100.f, 0.f, true);
-						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+						this->Morphine_Graph.DrawRotaGraph(xp1, yp1, (float)(y_UI(50)) / 100.f, 0.f, true);
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																			  xp1, yp1, White, Gray75,
 																			  "%d", intParam[9]);
 						SetDrawBright(255, 255, 255);
@@ -345,8 +344,8 @@ namespace FPS_n2 {
 					float rad = deg2rad(deg);
 					int xp1, yp1;
 					{
-						xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] - y_r(300.f*std::cos(rad));
-						yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] - y_r(300.f*std::sin(rad)) - y_r(18) / 2;
+						xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] - y_UI(300.f*std::cos(rad));
+						yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] - y_UI(300.f*std::sin(rad)) - y_UI(18) / 2;
 						m_GaugeParam[1].DrawGaugeCircleLeft(xp1, yp1,
 															GetColorU8(255, 255, 255, 255),
 															GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(64, 64, 255, 255),
@@ -355,19 +354,19 @@ namespace FPS_n2 {
 
 						if (intParam[8] > 0) {
 							SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*0.4f), 0, 255));
-							xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] - y_r(300.f*std::cos(deg2rad(-45) + rad));
-							yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] - y_r(300.f*std::sin(deg2rad(-45) + rad));
+							xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] - y_UI(300.f*std::cos(deg2rad(-45) + rad));
+							yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] - y_UI(300.f*std::sin(deg2rad(-45) + rad));
 
-							this->Armer_Graph.DrawRotaGraph(xp1, yp1, (float)(y_r(50)) / 100.f, 0.f, true);
+							this->Armer_Graph.DrawRotaGraph(xp1, yp1, (float)(y_UI(50)) / 100.f, 0.f, true);
 							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																				  xp1, yp1, White, Gray75,
 																				  "+");
 						}
 					}
 					{
-						xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] + y_r(300.f*std::cos(rad));
-						yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] + y_r(300.f*std::sin(rad)) - y_r(18) / 2;
+						xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] + y_UI(300.f*std::cos(rad));
+						yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] + y_UI(300.f*std::sin(rad)) - y_UI(18) / 2;
 						m_GaugeParam[2].DrawGaugeCircleRight(xp1, yp1,
 															 GetColorU8(255, 255, 255, 255),
 															 GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(64, 64, 255, 255),
@@ -384,8 +383,8 @@ namespace FPS_n2 {
 						float rad = deg2rad(deg);
 						int xp1, yp1;
 						{
-							xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] - y_r(300.f*std::cos(rad));
-							yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] - y_r(300.f*std::sin(rad)) - y_r(18) / 2;
+							xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] - y_UI(300.f*std::cos(rad));
+							yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] - y_UI(300.f*std::sin(rad)) - y_UI(18) / 2;
 							m_GaugeParam[5 + 3].DrawGaugeCircleLeft(xp1, yp1,
 																	GetColorU8(255, 255, 255, 64),
 																	GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255),
@@ -393,8 +392,8 @@ namespace FPS_n2 {
 																	&this->Gauge_Aim_Graph, deg, Per);
 						}
 						{
-							xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] + y_r(300.f*std::cos(rad));
-							yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] + y_r(300.f*std::sin(rad)) - y_r(18) / 2;
+							xp1 = DrawParts->GetDispXSize() / 2 + intParam[0] + y_UI(300.f*std::cos(rad));
+							yp1 = DrawParts->GetDispYSize() / 2 + intParam[1] + y_UI(300.f*std::sin(rad)) - y_UI(18) / 2;
 							m_GaugeParam[5 + 3 + 1].DrawGaugeCircleRight(xp1, yp1,
 																		 GetColorU8(255, 255, 255, 64),
 																		 GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255),
@@ -409,9 +408,9 @@ namespace FPS_n2 {
 						int xp1, yp1;
 						//体力
 						xp1 = DrawParts->GetDispXSize() / 2;
-						yp1 = DrawParts->GetDispYSize() / 2 + y_r(100);
+						yp1 = DrawParts->GetDispYSize() / 2 + y_UI(100);
 
-						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1, Red, Gray75,
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1, Red, Gray75,
 																			  LocalizePool::Instance()->Get(301));
 
 					}
@@ -420,8 +419,8 @@ namespace FPS_n2 {
 				if (floatParam[1] > 0) {
 					int xp1, yp1;
 					xp1 = DrawParts->GetDispXSize() / 2;
-					yp1 = DrawParts->GetDispYSize() / 2 - y_r(64);
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(48), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, White, Gray75, "%d:%05.2f",
+					yp1 = DrawParts->GetDispYSize() / 2 - y_UI(64);
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(48), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, White, Gray75, "%d:%05.2f",
 						(int)(floatParam[1] / 60.f),
 																		   (float)((int)(floatParam[1]) % 60) + (floatParam[1] - (float)((int)(floatParam[1])))
 					);
@@ -439,19 +438,19 @@ namespace FPS_n2 {
 					//
 					int xp1, yp1;
 					float rad = deg2rad(-90)*UltPer;
-					xp1 = y_r(1920 - 20 - m_GaugeMask.at(0).GetXSize() * 3 / 10);
-					yp1 = y_r(555 + m_GaugeMask.at(0).GetYSize() * 3 / 10);
-					xp1 = (int)Lerp((float)xp1, (float)y_r(1920 - 20 - m_GaugeMask.at(0).GetYSize() * 3 / 10), UltPer);
-					yp1 = (int)Lerp((float)yp1, (float)y_r(960 + m_GaugeMask.at(0).GetXSize() * 3 / 10), UltPer);
+					xp1 = y_UI(1920 - 20 - m_GaugeMask.at(0).GetXSize() * 3 / 10);
+					yp1 = y_UI(555 + m_GaugeMask.at(0).GetYSize() * 3 / 10);
+					xp1 = (int)Lerp((float)xp1, (float)y_UI(1920 - 20 - m_GaugeMask.at(0).GetYSize() * 3 / 10), UltPer);
+					yp1 = (int)Lerp((float)yp1, (float)y_UI(960 + m_GaugeMask.at(0).GetXSize() * 3 / 10), UltPer);
 					if (intParam[7] == -1) {
-						xp1 = y_r(1920 - 20 - m_GaugeMask.at(0).GetXSize() * 3 / 10);
-						yp1 = y_r(800 + m_GaugeMask.at(0).GetYSize() * 3 / 10) + y_r(150.f* UltPer);
+						xp1 = y_UI(1920 - 20 - m_GaugeMask.at(0).GetXSize() * 3 / 10);
+						yp1 = y_UI(800 + m_GaugeMask.at(0).GetYSize() * 3 / 10) + y_UI(150.f* UltPer);
 						rad = 0.f;
 					}
-					m_GaugeMask.at(0).GetGraph().DrawRotaGraph(xp1, yp1, 0.6f *(float)y_r(100) / 100.f, rad, true);
+					m_GaugeMask.at(0).GetGraph().DrawRotaGraph(xp1, yp1, 0.6f *(float)y_UI(100) / 100.f, rad, true);
 					if (intParam[7] == 1) {
 						SetDrawBlendMode(DX_BLENDMODE_ADD, std::clamp((int)(255.f*sin(deg2rad(ULTTimer))), 0, 255));
-						ULT_Graph.DrawRotaGraph(xp1, yp1, 0.6f *(float)y_r(100) / 100.f, rad, true);
+						ULT_Graph.DrawRotaGraph(xp1, yp1, 0.6f *(float)y_UI(100) / 100.f, rad, true);
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 						ULTTimer += 15.f * 60.f / DrawParts->GetFps();
 					}
@@ -467,24 +466,24 @@ namespace FPS_n2 {
 											  });
 					//
 					int xp1, yp1;
-					xp1 = y_r(1500 - 20 - m_GaugeMask.at(1).GetXSize() * 3 / 10);
-					yp1 = y_r(960 + m_GaugeMask.at(1).GetYSize() * 3 / 10) + y_r(300.f* UltPer);
+					xp1 = y_UI(1500 - 20 - m_GaugeMask.at(1).GetXSize() * 3 / 10);
+					yp1 = y_UI(960 + m_GaugeMask.at(1).GetYSize() * 3 / 10) + y_UI(300.f* UltPer);
 					if (intParam[7] == -1) {
-						xp1 += y_r(280);
-						yp1 -= y_r(40);
+						xp1 += y_UI(280);
+						yp1 -= y_UI(40);
 					}
-					m_GaugeMask.at(1).GetGraph().DrawRotaGraph(xp1, yp1, 0.6f *(float)y_r(100) / 100.f, 0.f, true);
+					m_GaugeMask.at(1).GetGraph().DrawRotaGraph(xp1, yp1, 0.6f *(float)y_UI(100) / 100.f, 0.f, true);
 
 					if (UltPer > 0.f && (intParam[7] != -1)) {
-						xp1 += y_r(150);
-						yp1 = y_r(980);
+						xp1 += y_UI(150);
+						yp1 = y_UI(980);
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*UltPer), 0, 255));
 						//弾ストック表示
-						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-																			  xp1, yp1 + y_r(80), White, Gray75,
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+																			  xp1, yp1 + y_UI(80), White, Gray75,
 																			  "sec");
-						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
-																			  xp1, yp1 + y_r(80), White, Gray75,
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
+																			  xp1, yp1 + y_UI(80), White, Gray75,
 																			  "%04.2f",
 																			  floatParam[4]
 						);
@@ -494,11 +493,11 @@ namespace FPS_n2 {
 				//ゲージ
 				{
 					int xp1, yp1;
-					xp1 = y_r(1500);
-					yp1 = y_r(970) + y_r(300.f* UltPer);
+					xp1 = y_UI(1500);
+					yp1 = y_UI(970) + y_UI(300.f* UltPer);
 					if (intParam[7] == -1) {
-						xp1 += y_r(280);
-						yp1 -= y_r(50);
+						xp1 += y_UI(280);
+						yp1 -= y_UI(50);
 					}
 					for (size_t i = 0; i < 3; i++) {
 						auto& g = m_GaugeMask.at((size_t)(i + 2));
@@ -510,28 +509,28 @@ namespace FPS_n2 {
 							);
 								  });
 						//
-						//Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_r(12), White, Gray75, "%d", m_GaugeParam[i + 5].GetGauge());
+						//Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - y_UI(12), White, Gray75, "%d", m_GaugeParam[i + 5].GetGauge());
 
-						g.GetGraph().DrawExtendGraph(xp1, yp1, xp1 + y_r(g.GetXSize() * 6 / 10), yp1 + y_r(g.GetYSize() * 6 / 10), true);
-						xp1 += y_r(g.GetXSize() * 6 / 10 + 6);
+						g.GetGraph().DrawExtendGraph(xp1, yp1, xp1 + y_UI(g.GetXSize() * 6 / 10), yp1 + y_UI(g.GetYSize() * 6 / 10), true);
+						xp1 += y_UI(g.GetXSize() * 6 / 10 + 6);
 					}
 
 					if ((1.f - UltPer) > 0.f) {
 						if (intParam[7] == -1) {
-							xp1 = y_r(1760);
-							yp1 = y_r(980);
+							xp1 = y_UI(1760);
+							yp1 = y_UI(980);
 						}
 						else {
-							xp1 = y_r(1500);
-							yp1 = y_r(990);
+							xp1 = y_UI(1500);
+							yp1 = y_UI(990);
 						}
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - UltPer)), 0, 255));
 						//弾ストック表示
-						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-																			  xp1, yp1 + y_r(80), White, Gray75,
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+																			  xp1, yp1 + y_UI(80), White, Gray75,
 																			  "AmmoStock");
-						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-																			  xp1 + y_r(110), yp1 + y_r(80), White, Gray75,
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+																			  xp1 + y_UI(110), yp1 + y_UI(80), White, Gray75,
 																			  "%03d", intParam[3]);
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 					}

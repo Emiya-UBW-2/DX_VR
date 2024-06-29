@@ -64,12 +64,12 @@ namespace FPS_n2 {
 					y.LoadCommon(&m_SelectBackImage);
 				}
 
-				ButtonSel.at(0).Load_String("Retire", y_r(48), true);
-				ButtonSel.at(0).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-				ButtonSel.at(1).Load_String("Option", y_r(48), true);
-				ButtonSel.at(1).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 1), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-				ButtonSel.at(2).Load_String("Return Game", y_r(48), true);
-				ButtonSel.at(2).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 0), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+				ButtonSel.at(0).Load_String("Retire", y_UI(48), true);
+				ButtonSel.at(0).Set(y_UI(1920 - 64), y_UI(1080 - 84 - 64 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+				ButtonSel.at(1).Load_String("Option", y_UI(48), true);
+				ButtonSel.at(1).Set(y_UI(1920 - 64), y_UI(1080 - 84 - 64 * 1), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+				ButtonSel.at(2).Load_String("Return Game", y_UI(48), true);
+				ButtonSel.at(2).Set(y_UI(1920 - 64), y_UI(1080 - 84 - 64 * 0), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 			}
 			void Execute() noexcept {
 				auto* Pad = PadControl::Instance();
@@ -113,16 +113,16 @@ namespace FPS_n2 {
 						switch (select) {
 							case 0:
 								m_IsRetire = true;
-								DXDraw::Instance()->PauseExit();
+								DXDraw::Instance()->SetPause(false);
 								break;
 							case 1:
 								OptionWindowClass::Instance()->SetActive();
 								break;
 							case 2:
-								DXDraw::Instance()->PauseExit();
+								DXDraw::Instance()->SetPause(false);
 								break;
 							default:
-								DXDraw::Instance()->PauseExit();
+								DXDraw::Instance()->SetPause(false);
 								break;
 						}
 						SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
@@ -144,7 +144,7 @@ namespace FPS_n2 {
 
 					if (Pad->GetKey(PADS::RELOAD).trigger()) {
 						SE->Get((int)SoundEnumCommon::UI_CANCEL).Play(0, DX_PLAYTYPE_BACK, TRUE);
-						DXDraw::Instance()->PauseExit();
+						DXDraw::Instance()->SetPause(false);
 					}
 
 					for (auto& y : ButtonSel) {

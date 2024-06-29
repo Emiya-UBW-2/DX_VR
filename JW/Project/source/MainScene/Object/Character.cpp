@@ -456,7 +456,7 @@ namespace FPS_n2 {
 								if (IsGun0Select() && MagStockControl::GetNeedAmmoLoad(GetGunPtrNow()->GetIsMagFull(), GetGunPtrNow()->GetIsMagEmpty())) {
 									m_CharaAction = CharaActionID::AmmoLoad;
 								}
-								else if (OptionParts->GetParamBoolean(EnumSaveParam::EnableCheck)) {
+								else if (true) {
 									m_CharaAction = CharaActionID::Watch;
 								}
 							}
@@ -479,7 +479,7 @@ namespace FPS_n2 {
 							if (!IsCheck) {
 								m_CharaAction = CharaActionID::Reload;
 							}
-							else if (OptionParts->GetParamBoolean(EnumSaveParam::EnableCheck)) {
+							else if (true) {
 								m_CharaAction = CharaActionID::Check;
 							}
 						}
@@ -1544,7 +1544,13 @@ namespace FPS_n2 {
 		void			CharacterClass::FirstExecute(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			//‰‰ñ‚Ì‚ÝXV‚·‚é“à—e
-			if (this->m_IsFirstLoop) {}
+			if (this->m_IsFirstLoop) {
+			}
+			int num = MV1GetMaterialNum(GetObj().get());
+			for (int i = 0; i < num; i++) {
+				MV1SetMaterialDifColor(GetObj().get(), i, GetColorF(0.8f, 0.8f, 0.8f, 1.f));
+				MV1SetMaterialAmbColor(GetObj().get(), i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
+			}
 			this->m_SoundPower = std::max(this->m_SoundPower - 1.f / DrawParts->GetFps(), 0.f);
 			GunReadyControl::UpdateReady();
 			m_MeleeCoolDown = std::max(m_MeleeCoolDown - 1.f / DrawParts->GetFps(), 0.f);

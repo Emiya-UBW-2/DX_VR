@@ -33,9 +33,6 @@ namespace FPS_n2 {
 
 			Vector3DX LightVec = Vector3DX::vget(0.f, -1.f, 0.5f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.f, 1.f, 1.f, 0.0f));
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.5f, 10.f)*Scale_Rate, 0);
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.f, 10.f)*Scale_Rate, 1);
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-100.f, 0.f, -100.f)*Scale_Rate, Vector3DX::vget(100.f, 1.f, 100.f)*Scale_Rate, 2);
 			//
 			DeleteLightHandleAll();
 			SetLightEnable(TRUE);
@@ -44,20 +41,20 @@ namespace FPS_n2 {
 			SetLightSpcColor(GetColorF(0.1f, 0.1f, 0.1f, 0.f));
 			SetLightAmbColor(GetColorF(0.1f, 0.1f, 0.1f, 1.f));
 
-			ButtonSel.at(0).Load_String(SelectName[0], y_r(64), true);
-			ButtonSel.at(0).Set(y_r(1920 / 2), y_r(1080 - 96), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM);
-			ButtonSel.at(1).Load_String(SelectName[1], y_r(48), true);
-			ButtonSel.at(1).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonSel.at(2).Load_String(SelectName[2], y_r(48), true);
-			ButtonSel.at(2).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 1), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonSel.at(0).Load_String(SelectName[0], y_UI(64), true);
+			ButtonSel.at(0).Set(y_UI(1920 / 2), y_UI(1080 - 96), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM);
+			ButtonSel.at(1).Load_String(SelectName[1], y_UI(48), true);
+			ButtonSel.at(1).Set(y_UI(1920 - 64), y_UI(1080 - 84 - 64 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonSel.at(2).Load_String(SelectName[2], y_UI(48), true);
+			ButtonSel.at(2).Set(y_UI(1920 - 64), y_UI(1080 - 84 - 64 * 1), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 
-			ButtonSel.at(3).Load_String(SelectName[3], y_r(48), m_HardModeActive);
-			ButtonSel.at(3).Set(y_r(1920 - 64), y_r(1080 - 84 - 64 * 0), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonSel.at(3).Load_String(SelectName[3], y_UI(48), m_HardModeActive);
+			ButtonSel.at(3).Set(y_UI(1920 - 64), y_UI(1080 - 84 - 64 * 0), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 
 			ButtonSel.at(4).Load_Icon("data/UI/setting.png", true);
-			ButtonSel.at(4).Set(y_r(1920 - 96 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(4).Set(y_UI(1920 - 96 - 64), y_UI(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			ButtonSel.at(5).Load_Icon("data/UI/credit.png", true);
-			ButtonSel.at(5).Set(y_r(1920 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(5).Set(y_UI(1920 - 64), y_UI(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			//クレジット
 			int mdata = FileRead_open("data/Credit.txt", FALSE);
 			m_CreditCoulm = 0;
@@ -203,31 +200,31 @@ namespace FPS_n2 {
 								SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 								break;
 							case 5:
-								PopUpParts->Add(LocalizePool::Instance()->Get(120), y_r(720), y_r(840),
-												   [&](int WinSizeX, int WinSizeY, bool) {
-									auto* Fonts = FontPool::Instance();
+								PopUpParts->Add(LocalizePool::Instance()->Get(120), y_UI(720), y_UI(840),
+												[&](int xmin, int ymin, int xmax, int, bool) {
+													auto* Fonts = FontPool::Instance();
 
-									int xp1, yp1;
+													int xp1, yp1;
 
-									xp1 = y_r(960) - WinSizeX / 2 + y_r(48);
-									yp1 = y_r(540) - WinSizeY / 2 + y_r(18) * 3 + y_r(18);
-									int Height = y_r(12);
-									for (int i = 0;i < m_CreditCoulm;i++) {
-										int xpos = xp1 + y_r(6);
-										int ypos = yp1 + (yp1 + Height - yp1) / 2;
-										Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
-																							   xpos, ypos, White, Black, m_CreditStr.at(i).first);
+													xp1 = xmin + y_UI(24);
+													yp1 = ymin + LineHeight;
+													int Height = y_UI(12);
+													for (int i = 0;i < m_CreditCoulm;i++) {
+														int xpos = xp1 + y_UI(6);
+														int ypos = yp1 + (yp1 + Height - yp1) / 2;
+														Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
+																											   xpos, ypos, White, Black, m_CreditStr.at(i).first);
 
-										xpos = xp1 + WinSizeX - y_r(48 * 2) - y_r(6);
-										Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
-																							   xpos, ypos, White, Black, m_CreditStr.at(i).second);
-										yp1 += Height;
-									}
-												   },
-												   [&]() {},
-													   [&]() {},
-													   true
-													   );
+														xpos = xmax - y_UI(24);
+														Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
+																											   xpos, ypos, White, Black, m_CreditStr.at(i).second);
+														yp1 += Height;
+													}
+												},
+												[&]() {},
+													[&]() {},
+													true
+													);
 								SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 								break;
 							default:
@@ -325,6 +322,10 @@ namespace FPS_n2 {
 			}
 			//
 			m_TitleImage.Dispose();
+			auto* SaveDataParts = SaveDataClass::Instance();
+			SaveDataParts->Save();//セーブ
+			//次シーン決定
+			Set_Next(Next_ptr.at(select));
 		}
 		void			TitleScene::BG_Draw_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -345,12 +346,12 @@ namespace FPS_n2 {
 			auto* PopUpParts = PopUp::Instance();
 
 			//
-			m_TitleImage.DrawExtendGraph(y_r(64), y_r(64), y_r(64 + 369), y_r(64 + 207), true);
+			m_TitleImage.DrawExtendGraph(y_UI(64), y_UI(64), y_UI(64 + 369), y_UI(64 + 207), true);
 			//
 			{
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18),
 																	  FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-																	  y_r(64 + 369), y_r(64 + 207), White, Black, "Ver 1.1.0");
+																	  y_UI(64 + 369), y_UI(64 + 207), White, Black, "Ver 1.1.0");
 			}
 			//
 			for (auto& y : ButtonSel) {
@@ -358,9 +359,9 @@ namespace FPS_n2 {
 			}
 			//
 			if ((select != -1) && !PopUpParts->IsActivePop()) {
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18),
 																	  FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-																	  y_r(32), y_r(1080 - 32 - 32), White, Black, LocalizePool::Instance()->Get(9020 + select));
+																	  y_UI(32), y_UI(1080 - 32 - 32), White, Black, LocalizePool::Instance()->Get(9020 + select));
 			}
 			//
 			{

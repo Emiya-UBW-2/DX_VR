@@ -105,30 +105,30 @@ namespace FPS_n2 {
 				auto* Fonts = FontPool::Instance();
 
 				int xp1, yp1;
-				xp1 = y_r(64);
-				yp1 = y_r(512);
+				xp1 = y_UI(64);
+				yp1 = y_UI(512);
 
 				for (auto& d : data) {
 					if (d.ActivePer() > 0.f) {
-						int xp = xp1 - y_r((xs + 128) * (1.f - d.ActivePer()));
-						int yp = yp1 - y_r((ys + 5) * d.GetFlip());
+						int xp = xp1 - y_UI((xs + 128) * (1.f - d.ActivePer()));
+						int yp = yp1 - y_UI((ys + 5) * d.GetFlip());
 
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA,
 										 std::min(
 											 std::clamp((int)(255.f*d.ActivePer()), 0, 255),
 											 std::min(
-												 std::clamp((y_r(960) - yp) * 255 / y_r(255), 0, 255),
-												 std::clamp(yp * 255 / y_r(255), 0, 255)
+												 std::clamp((y_UI(960) - yp) * 255 / y_UI(255), 0, 255),
+												 std::clamp(yp * 255 / y_UI(255), 0, 255)
 											 )
 										 )
 
 						);
 						this->m_tutorialGraph.DrawExtendGraph(
 							xp, yp,
-							xp + y_r(xs), yp + y_r(ys),
+							xp + y_UI(xs), yp + y_UI(ys),
 							true);
-						Fonts->Get(FontPool::FontType::Gothic_AA, y_r(24)).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																					  xp + y_r(69), yp + y_r(14), Gray75, Black, d.GetMsg());
+						Fonts->Get(FontPool::FontType::Gothic_AA, y_UI(24)).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+																					  xp + y_UI(69), yp + y_UI(14), Gray75, Black, d.GetMsg());
 					}
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
@@ -178,13 +178,10 @@ namespace FPS_n2 {
 			bool			Update_Sub(void) noexcept override;
 			void			Dispose_Sub(void) noexcept override;
 			//
-			void			Depth_Draw_Sub(void) noexcept override {}
 			void			BG_Draw_Sub(void) noexcept override;
 			void			ShadowDraw_Far_Sub(void) noexcept override;
-			void			ShadowDraw_NearFar_Sub(void) noexcept override {}
 			void			ShadowDraw_Sub(void) noexcept override;
 			void			MainDraw_Sub(void) noexcept override;
-			void			MainDrawbyDepth_Sub(void) noexcept override {}
 			//UI•\Ž¦
 			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override;

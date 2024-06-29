@@ -25,7 +25,7 @@ namespace FPS_n2 {
 			this->m_UIclass.Load();
 			this->hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
 			this->guard_Graph = GraphHandle::Load("data/UI/battle_guard.bmp");
-			this->m_MiniMapScreen = GraphHandle::Make(y_r(128) * 2, y_r(128) * 2, true);
+			this->m_MiniMapScreen = GraphHandle::Make(y_UI(128) * 2, y_UI(128) * 2, true);
 			PlayerMngr->Init(Chara_num);
 			for (int i = 1; i < Chara_num; i++) {
 				BattleResourceMngr->LoadChara("Soldier", (PlayerID)i);
@@ -60,10 +60,7 @@ namespace FPS_n2 {
 			//
 			Vector3DX LightVec = Vector3DX::vget(0.f, -1.f, 0.f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(0.92f, 0.91f, 0.90f, 0.0f));
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-5.f, -3.f, -5.f)*Scale_Rate, Vector3DX::vget(5.f, 0.5f, 5.f)*Scale_Rate, 0);
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-5.f, -3.f, -5.f)*Scale_Rate, Vector3DX::vget(5.f, 0.5f, 5.f)*Scale_Rate, 1);
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.f, 10.f)*Scale_Rate, 2);
-
+			//
 			this->m_BackGround = std::make_shared<BackGroundClassMain>();
 			this->m_BackGround->Init("", "");//1.59秒
 			//ロード
@@ -195,7 +192,7 @@ namespace FPS_n2 {
 			ButtonSel.LoadCommon(&m_SelectBackImage);
 
 			ButtonSel.Load_Icon("data/UI/Right.png", true);
-			ButtonSel.Set(y_r(960), y_r(840), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.Set(y_UI(960), y_UI(840), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 
 			ButtonSel.SetNone();
 			//開始時刻
@@ -466,13 +463,6 @@ namespace FPS_n2 {
 			}
 			this->m_BackGround->BG_Draw();
 		}
-		void			MAINLOOP::ShadowDraw_NearFar_Sub(void) noexcept {
-			if (m_IsEnd) {
-				return;
-			}
-			this->m_BackGround->Shadow_Draw();
-			ObjectManager::Instance()->Draw_Shadow();
-		}
 		void			MAINLOOP::ShadowDraw_Sub(void) noexcept {
 			if (m_IsEnd) {
 				return;
@@ -548,20 +538,16 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 			if (!Chara->IsAlive()) { return; }
-			auto* OptionParts = OPTION::Instance();
-			if (OptionParts->GetParamBoolean(EnumSaveParam::EX_UI)) {
-				DrawHitGraph();			//着弾表示
-			}
-			if (OptionParts->GetParamBoolean(EnumSaveParam::EX_UI2)) {
-				DrawSoundGraph();		//サウンド表示
-			}
+			//auto* OptionParts = OPTION::Instance();
+			DrawHitGraph();			//着弾表示
+			DrawSoundGraph();		//サウンド表示
 			//レティクル表示
 			if (Chara->GetGunPtrNow()) {
 				if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&
 					!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
 					(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph().DrawRotaGraph(
-						(int)Chara->GetGunPtrNow()->GetReticleXPos(),
-						(int)Chara->GetGunPtrNow()->GetReticleYPos(),
+						Chara->GetGunPtrNow()->GetReticleXPos()*y_UI(1980) / y_r(1980),
+						Chara->GetGunPtrNow()->GetReticleYPos()*y_UI(1080) / y_r(1080),
 						1.f, Chara->GetLeanRad(), true);
 				}
 			}
@@ -594,7 +580,7 @@ namespace FPS_n2 {
 					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 					if (Chara->IsAlive()) {
 						//ミニマップ
-						m_MiniMapScreen.DrawRotaGraph(y_r(960), y_r(840), 1.f, 0.f, true);
+						m_MiniMapScreen.DrawRotaGraph(y_UI(960), y_UI(840), 1.f, 0.f, true);
 					}
 				}
 			}
@@ -1384,8 +1370,8 @@ namespace FPS_n2 {
 			m_MiniMapScreen.SetDraw_Screen();
 			{
 				float size = 0.7f;
-				int xp = y_r(128);
-				int yp = y_r(128);
+				int xp = y_UI(128);
+				int yp = y_UI(128);
 
 				int xp1 = -(int)(15.f + Chara->GetMove().pos.x);
 				int yp1 = (int)(15.f + Chara->GetMove().pos.z);
@@ -1459,8 +1445,8 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 
-			int xp = y_r(960);
-			int yp = y_r(540);
+			int xp = y_UI(960);
+			int yp = y_UI(540);
 
 			int xp1 = -(int)(Chara->GetMove().pos.x);
 			int yp1 = (int)(Chara->GetMove().pos.z);
@@ -1530,21 +1516,21 @@ namespace FPS_n2 {
 					int rad_2 = rad_3 - 10;
 					int rad_4 = rad_3 + 10;
 
-					float Len = y_r(180) - (float)y_r(10) *length;
+					float Len = y_UI(180) - (float)y_UI(10) *length;
 					//(int)(std::max(1.f, 3.f / length))
 					DrawTriangle(
 						xp + (int)(cos(deg2rad(rad_2))*(Len)),
 						yp + (int)(sin(deg2rad(rad_2))*(Len)),
-						xp + (int)(cos(deg2rad(rad_3))*(y_r(180))),
-						yp + (int)(sin(deg2rad(rad_3))*(y_r(180))),
+						xp + (int)(cos(deg2rad(rad_3))*(y_UI(180))),
+						yp + (int)(sin(deg2rad(rad_3))*(y_UI(180))),
 						xp + (int)(cos(deg2rad(rad_3))*(Len)),
 						yp + (int)(sin(deg2rad(rad_3))*(Len)),
 						GetColor(255, std::clamp(255 - (int)(25.f*length), 0, 255), 0), TRUE);
 					DrawTriangle(
 						xp + (int)(cos(deg2rad(rad_3))*(Len)),
 						yp + (int)(sin(deg2rad(rad_3))*(Len)),
-						xp + (int)(cos(deg2rad(rad_3))*(y_r(180))),
-						yp + (int)(sin(deg2rad(rad_3))*(y_r(180))),
+						xp + (int)(cos(deg2rad(rad_3))*(y_UI(180))),
+						yp + (int)(sin(deg2rad(rad_3))*(y_UI(180))),
 						xp + (int)(cos(deg2rad(rad_4))*(Len)),
 						yp + (int)(sin(deg2rad(rad_4))*(Len)),
 						GetColor(255, std::clamp(255 - (int)(25.f*length), 0, 255), 0), TRUE);
@@ -1553,10 +1539,10 @@ namespace FPS_n2 {
 			for (int index = 0; index < DegDiv; index++) {
 				int next = (index + 1) % DegDiv;
 				DrawLine_2D(
-					xp + y_r(cos(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f)),
-					yp + y_r(sin(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f)),
-					xp + y_r(cos(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f)),
-					yp + y_r(sin(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f)),
+					xp + y_UI(cos(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f)),
+					yp + y_UI(sin(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f)),
+					xp + y_UI(cos(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f)),
+					yp + y_UI(sin(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f)),
 					White,
 					3);
 			}
@@ -1574,28 +1560,29 @@ namespace FPS_n2 {
 						int			Alpha = (int)(a->m_Hit_alpha * 255.f);
 						Vector3DX	DispPos = a->m_Hit_DispPos;
 						if ((Alpha >= 10) && (DispPos.z >= 0.f && DispPos.z <= 1.f)) {
+							DispPos = DispPos *((float)y_UI(1080) / (float)y_r(1080));
 							SetDrawBlendMode(DX_BLENDMODE_ALPHA, Alpha);
 							//
 							int r = (int)(255 * std::clamp((float)a->m_Damage / 100.f*2.f, 0.f, 1.f));
 							int g = 255 - r;
 							if (a->m_Damage > 0) {
 								SetDrawBright(r, g, 0);
-								hit_Graph.DrawRotaGraph((int)DispPos.x, (int)DispPos.y, (float)y_r((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+								hit_Graph.DrawRotaGraph((int)DispPos.x, (int)DispPos.y, (float)y_UI((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
 							}
 							if (a->m_ArmerDamage > 0) {
 								SetDrawBright(128, 128, 128);
-								guard_Graph.DrawRotaGraph((int)DispPos.x, (int)DispPos.y, (float)y_r((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+								guard_Graph.DrawRotaGraph((int)DispPos.x, (int)DispPos.y, (float)y_UI((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
 							}
 							SetDrawBright(255, 255, 255);
 							//
 							if (a->m_Damage > 0) {
-								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 									(int)DispPos.x + a->m_Hit_AddX, (int)DispPos.y + a->m_Hit_AddY, GetColor(r, g, 0), Black, "%d", a->m_Damage);
 							}
 							//防いだダメージ
 							if (a->m_ArmerDamage > 0) {
-								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(20), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-									(int)DispPos.x + a->m_Hit_AddX - y_r(10), (int)DispPos.y + a->m_Hit_AddY, Gray50, Black, "%d", a->m_ArmerDamage);
+								Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(20), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
+									(int)DispPos.x + a->m_Hit_AddX - y_UI(10), (int)DispPos.y + a->m_Hit_AddY, Gray50, Black, "%d", a->m_ArmerDamage);
 							}
 						}
 					}
@@ -1623,11 +1610,11 @@ namespace FPS_n2 {
 					auto& r = m_ResultFlip[sel];
 					if (r.m_Flip > 0.f) {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*r.m_Flip), 0, 255));
-						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_r(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
-																				  xp + y_r(8.f * sel), yp + y_r(64.f * sel - r.m_Flip * 128.f), Color, Black, "Hits : ");
+						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
+																				  xp + y_UI(8.f * sel), yp + y_UI(64.f * sel - r.m_Flip * 128.f), Color, Black, "Hits : ");
 
-						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_r(48.f + 4.f* r.m_Up), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
-																				  xp + y_r(112 + 8.f * sel), yp + y_r(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f), Color, Black, "%5.2f %%", r.m_Point / 100.f);
+						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI(48.f + 4.f* r.m_Up), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
+																				  xp + y_UI(112 + 8.f * sel), yp + y_UI(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f), Color, Black, "%5.2f %%", r.m_Point / 100.f);
 					}
 				}
 				{
@@ -1635,11 +1622,11 @@ namespace FPS_n2 {
 					auto& r = m_ResultFlip[sel];
 					if (r.m_Flip > 0.f) {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*r.m_Flip), 0, 255));
-						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_r(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
-																				  xp + y_r(8.f * sel), yp + y_r(64.f * sel - r.m_Flip * 128.f), Color, Black, "Kill : ");
+						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
+																				  xp + y_UI(8.f * sel), yp + y_UI(64.f * sel - r.m_Flip * 128.f), Color, Black, "Kill : ");
 
-						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_r(48.f + 4.f* r.m_Up), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
-																				  xp + y_r(112 + 8.f * sel), yp + y_r(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f), Color, Black, "%4d", (int)r.m_Point);
+						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI(48.f + 4.f* r.m_Up), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
+																				  xp + y_UI(112 + 8.f * sel), yp + y_UI(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f), Color, Black, "%4d", (int)r.m_Point);
 					}
 				}
 				{
@@ -1647,24 +1634,24 @@ namespace FPS_n2 {
 					auto& r = m_ResultFlip[sel];
 					if (r.m_Flip > 0.f) {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*r.m_Flip), 0, 255));
-						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_r(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
-																				  xp + y_r(8.f * sel), yp + y_r(64.f * sel - r.m_Flip * 128.f), Color, Black, "Score : ");
+						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
+																				  xp + y_UI(8.f * sel), yp + y_UI(64.f * sel - r.m_Flip * 128.f), Color, Black, "Score : ");
 
-						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_r(48.f + 4.f* r.m_Up), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
-																				  xp + y_r(112 + 8.f * sel), yp + y_r(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f), Color, Black, "%4d pts", (int)r.m_Point);
+						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI(48.f + 4.f* r.m_Up), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
+																				  xp + y_UI(112 + 8.f * sel), yp + y_UI(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f), Color, Black, "%4d pts", (int)r.m_Point);
 					}
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			};
 
-			DrawScore(y_r(400 + 8), y_r(512 + 8), false);
-			DrawScore(y_r(400), y_r(512), true);
+			DrawScore(y_UI(400 + 8), y_UI(512 + 8), false);
+			DrawScore(y_UI(400), y_UI(512), true);
 
 			int xp1, yp1;
 			{
 				int size = 20;
-				xp1 = y_r(1440.f + 1920.f * m_ResultRankingPer);
-				yp1 = y_r(540) - y_r(36) * (size / 2);
+				xp1 = y_UI(1440.f + 1920.f * m_ResultRankingPer);
+				yp1 = y_UI(540) - y_UI(36) * (size / 2);
 
 				unsigned int Color = White;
 				for (int i = 0;i < size;i++) {
@@ -1678,29 +1665,29 @@ namespace FPS_n2 {
 						}
 					}
 
-					Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1 - y_r(300), yp1, Color, Black, "%02d", i + 1);
+					Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1 - y_UI(300), yp1, Color, Black, "%02d", i + 1);
 					if (i < m_Ranking.size()) {
 						auto& Now = m_Ranking.at(i);
 
 						std::time_t t = Now.second;
 						std::tm now;
 						_localtime64_s(&now, &t);
-						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%04d/%02d/%02d %02d:%02d : ", 1900 + now.tm_year, 1 + now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min);
-						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%4d pts", Now.first);
+						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%04d/%02d/%02d %02d:%02d : ", 1900 + now.tm_year, 1 + now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min);
+						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%4d pts", Now.first);
 					}
 					else {
-						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "----/--/-- --:-- : ");
-						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "---- pts");
+						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "----/--/-- --:-- : ");
+						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "---- pts");
 					}
 					if (i == m_ResultRank && m_ResultRank == 0) {
 						if (m_ResultRankingPer < 1.f) {
 							SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - m_ResultRankingPer)*2.f), 0, 255));
-							Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
-																				   y_r(1440) - y_r(340), yp1, Color, Black, "HIGH SCORE!");
+							Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_UI(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
+																				   y_UI(1440) - y_UI(340), yp1, Color, Black, "HIGH SCORE!");
 							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 						}
 					}
-					yp1 += y_r(36);
+					yp1 += y_UI(36);
 				}
 				{
 					if (m_ResultRank >= size) {
@@ -1713,13 +1700,13 @@ namespace FPS_n2 {
 						std::time_t t = m_StartTime;
 						std::tm now;
 						_localtime64_s(&now, &t);
-						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%04d/%02d/%02d %02d:%02d : ", 1900 + now.tm_year, 1 + now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min);
-						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%4d pts", PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
+						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%04d/%02d/%02d %02d:%02d : ", 1900 + now.tm_year, 1 + now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min);
+						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%4d pts", PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
 					}
 					else {
 						Color = White;
-						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "----/--/-- --:-- : ");
-						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "---- pts");
+						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "----/--/-- --:-- : ");
+						Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "---- pts");
 					}
 				}
 			}

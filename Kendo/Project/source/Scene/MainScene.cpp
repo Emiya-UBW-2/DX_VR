@@ -59,7 +59,7 @@ namespace FPS_n2 {
 			}
 			//UI
 			this->m_UIclass.Set();
-			this->m_UILayer = UISystem::Instance()->AddUI("data/UI/MainLoop.json");
+			//this->m_UILayer = UISystem::Instance()->AddUI("data/UI/MainLoop.json");
 			//
 			this->m_DamageEvents.clear();
 			this->m_NetWorkBrowser.Init();

@@ -851,7 +851,7 @@ namespace FPS_n2 {
 			if (this->m_IsFirstLoop) {
 				if (GetMyPlayerID() == 0) {
 					//this->GetObj().SetOpacityRate(0.25f);
-					GetObj().material_AlphaTestAll(true, DX_CMP_GREATER, 0);								//–{‘Ì
+					//GetObj().material_AlphaTestAll(true, DX_CMP_GREATER, 0);								//–{‘Ì
 				}
 				m_BambooVec.Set(0.f, 0.f, 0.f);
 				m_MouseVecR.Set(0.f, 0.f, 0.f);

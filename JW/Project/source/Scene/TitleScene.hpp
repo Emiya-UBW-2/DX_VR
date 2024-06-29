@@ -37,8 +37,11 @@ namespace FPS_n2 {
 			float						m_Xrad{0.f};
 			float						m_Yrad_R{0.f};
 			float						m_Xrad_R{0.f};
+
+			std::array<std::shared_ptr<TEMPSCENE>,10> Next_ptr{nullptr};
 		public:
 			const auto SelMode() const noexcept { return select; }
+			void		SetNextSceneList(int index, const std::shared_ptr<TEMPSCENE>& Next_scenes_ptr_t) noexcept { Next_ptr.at(index) = Next_scenes_ptr_t; }
 		public:
 			TitleScene(void) noexcept {}
 			~TitleScene(void) noexcept {}
@@ -49,13 +52,10 @@ namespace FPS_n2 {
 			bool			Update_Sub(void) noexcept override;
 			void			Dispose_Sub(void) noexcept override;
 			//
-			void			Depth_Draw_Sub(void) noexcept override {}
 			void			BG_Draw_Sub(void) noexcept override;
 			void			ShadowDraw_Far_Sub(void) noexcept override {}
-			void			ShadowDraw_NearFar_Sub(void) noexcept override {}
 			void			ShadowDraw_Sub(void) noexcept override;
 			void			MainDraw_Sub(void) noexcept override;
-			void			MainDrawbyDepth_Sub(void) noexcept override {}
 			//UI•\Ž¦
 			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override {}

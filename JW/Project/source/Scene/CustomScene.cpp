@@ -22,32 +22,28 @@ namespace FPS_n2 {
 				y.LoadCommon(&m_SelectBackImage);
 			}
 			ButtonSel.at(0).Load_Icon("data/UI/Customs.png", true);
-			ButtonSel.at(0).Set(y_r(1920 - 96 * 2 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(0).Set(y_UI(1920 - 96 * 2 - 64), y_UI(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			ButtonSel.at(1).Load_Icon("data/UI/WeaponChange.png", true);
-			ButtonSel.at(1).Set(y_r(1920 - 96 * 1 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(1).Set(y_UI(1920 - 96 * 1 - 64), y_UI(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			ButtonSel.at(2).Load_Icon("data/UI/FreeLook.png", true);
-			ButtonSel.at(2).Set(y_r(1920 - 96 * 0 - 64), y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(2).Set(y_UI(1920 - 96 * 0 - 64), y_UI(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 
 			ButtonSel.at(3).Load_Icon("data/UI/Left.png", true);
-			ButtonSel.at(3).Set(y_r(960 - 100), y_r(920), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(3).Set(y_UI(960 - 100), y_UI(920), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			ButtonSel.at(4).Load_Icon("data/UI/Right.png", true);
-			ButtonSel.at(4).Set(y_r(960 + 100), y_r(920), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(4).Set(y_UI(960 + 100), y_UI(920), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 
 			ButtonSel.at(5).Load_Icon("data/UI/Left.png", true);
-			ButtonSel.at(5).Set(y_r(960 - 400 - 48), y_r(540 - 270 + 48), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(5).Set(y_UI(960 - 400 - 48), y_UI(540 - 270 + 48), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			ButtonSel.at(6).Load_Icon("data/UI/Right.png", true);
-			ButtonSel.at(6).Set(y_r(960 - 400 + 48), y_r(540 - 270 + 48), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(6).Set(y_UI(960 - 400 + 48), y_UI(540 - 270 + 48), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			ButtonSel.at(7).Load_Icon("data/UI/Reset.png", true);
-			ButtonSel.at(7).Set(y_r(1920 - 96 * 2 - 64), y_r(64 + 64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(7).Set(y_UI(1920 - 96 * 2 - 64), y_UI(64 + 64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			//
 			auto* DrawParts = DXDraw::Instance();
 
 			Vector3DX LightVec = Vector3DX::vget(-0.4f, -0.5f, 0.1f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.f, 1.f, 1.f, 0.0f));
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-6.f, -6.f, -6.f)*Scale_Rate, Vector3DX::vget(6.f, 0.5f, 6.f)*Scale_Rate, 0);
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-6.f, -6.f, -6.f)*Scale_Rate, Vector3DX::vget(6.f, 0.5f, 6.f)*Scale_Rate, 1);
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-6.f, -6.f, -6.f)*Scale_Rate, Vector3DX::vget(6.f, 0.5f, 6.f)*Scale_Rate, 2);
-			//
 			//
 			DeleteLightHandleAll();
 			SetLightEnable(TRUE);
@@ -412,6 +408,8 @@ namespace FPS_n2 {
 			for (auto& y : ButtonSel) {
 				y.Dispose();
 			}
+			auto* SaveDataParts = SaveDataClass::Instance();
+			SaveDataParts->Save();//ƒZ[ƒu
 		}
 		void			CustomScene::ShadowDraw_Sub(void) noexcept {
 			ObjectManager::Instance()->Draw_Shadow();
@@ -450,9 +448,9 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* Fonts = FontPool::Instance();
 			//
-			Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(96),
+			Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_UI(96),
 																FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																y_r(64), y_r(64), White, Black, "Customize");
+																y_UI(64), y_UI(64), White, Black, "Customize");
 			//
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(ButtonAlpha[(int)LookSelect::ModSet], 0.f, 1.f)), 0, 255));
 			DrawCustomUI();
@@ -475,9 +473,9 @@ namespace FPS_n2 {
 			}
 			//
 			if (bselect != -1) {
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18),
 																	  FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-																	  y_r(32), y_r(1080 - 32 - 32), White, Black, LocalizePool::Instance()->Get(9010 + bselect));
+																	  y_UI(32), y_UI(1080 - 32 - 32), White, Black, LocalizePool::Instance()->Get(9010 + bselect));
 			}
 			//
 			{
@@ -616,76 +614,76 @@ namespace FPS_n2 {
 			const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
 			//
 			{
-				xp1 = y_r(960 - 400) + y_r(SelMoveClass[select].Yadd*64.f);
-				yp1 = y_r(540 - 270);
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
+				xp1 = y_UI(960 - 400) + y_UI(SelMoveClass[select].Yadd*64.f);
+				yp1 = y_UI(540 - 270);
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
 																	  xp1, yp1, White, Gray75, GunSlotName[(int)Data->m_GunSlot]);
 			}
 			{
-				xp1 = y_r(960 - 400);
-				yp1 = y_r(540 - 270 + 48);
-				Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(18), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
+				xp1 = y_UI(960 - 400);
+				yp1 = y_UI(540 - 270 + 48);
+				Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(18), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
 																	   xp1, yp1, White, Gray75, "%d/%d", select + 1, (int)SelMoveClass.size());
 			}
 			//
 			{
 				auto* OptionParts = OPTION::Instance();
-				xp1 = y_r(1900);
-				yp1 = y_r(1080 - 12 - 24 * 3);
+				xp1 = y_UI(1900);
+				yp1 = y_UI(1080 - 12 - 24 * 3);
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
 				if (GunPtr) {
 					auto& STR = OptionParts->GetParamInt(EnumSaveParam::Language) ? GunPtr->GetModData()->GetInfoEng() : GunPtr->GetModData()->GetInfo();
 					for (auto& s : STR) {
-						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
 																			  xp1, yp1, Green, DarkGreen, s.c_str());
-						yp1 += y_r(24);
+						yp1 += y_UI(24);
 					}
 				}
 			}
 			//
 			{
-				xp1 = y_r(160);
-				yp1 = y_r(540);
+				xp1 = y_UI(160);
+				yp1 = y_UI(540);
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																	  xp1, yp1, Green, DarkGreen, "ShotMode : %s", SHOTTYPEName[(int)GunPtr->GetShotType()]);
-				yp1 += y_r(24 + 4);
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+				yp1 += y_UI(24 + 4);
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																	  xp1, yp1, Green, DarkGreen, "ShotSound : %s", GunShootSoundName[(int)GunPtr->GetGunShootSound()]);
-				yp1 += y_r(24 + 4);
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+				yp1 += y_UI(24 + 4);
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																	  xp1, yp1, Green, DarkGreen, "RecoilPower : %d", (int)(GunPtr->GetRecoilPower()*GunPtr->GetRecoilReturn()));
-				yp1 += y_r(24 + 4);
+				yp1 += y_UI(24 + 4);
 			}
 			//
 			{
-				xp1 = y_r(960);
-				yp1 = y_r(840);
+				xp1 = y_UI(960);
+				yp1 = y_UI(840);
 
 				if (y->m_sel != (int)Data->m_ItemsUniqueID.size()) {
-					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-																		xp1 + y_r(SelMoveClass[select].Xadd*100.f), yp1 + y_r(SelMoveClass[select].Yadd*64.f), Green, DarkGreen,
+					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_UI(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
+																		xp1 + y_UI(SelMoveClass[select].Xadd*100.f), yp1 + y_UI(SelMoveClass[select].Yadd*64.f), Green, DarkGreen,
 																		(*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[y->m_sel]))->GetName().c_str()
 					);
 				}
 				else {
-					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-																		xp1 + y_r(SelMoveClass[select].Xadd*100.f), yp1 + y_r(SelMoveClass[select].Yadd*64.f), Green, DarkGreen,
+					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_UI(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
+																		xp1 + y_UI(SelMoveClass[select].Xadd*100.f), yp1 + y_UI(SelMoveClass[select].Yadd*64.f), Green, DarkGreen,
 																		"None"
 					);
 				}
 			}
 			//
 			{
-				xp1 = y_r(960);
-				yp1 = y_r(920);
-				Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
+				xp1 = y_UI(960);
+				yp1 = y_UI(920);
+				Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
 																	   xp1, yp1, Green, DarkGreen, "%d / %d", y->m_sel + 1, Data->ItemMaxCount() + 1);
 			}
 			//
 			{
-				xp1 = y_r(160);
-				yp1 = y_r(840) - (y_r(28)*Data->ItemMaxCount()) / 2;
+				xp1 = y_UI(160);
+				yp1 = y_UI(840) - (y_UI(28)*Data->ItemMaxCount()) / 2;
 
 				auto* SaveDataParts = SaveDataClass::Instance();
 				auto* Pad = PadControl::Instance();
@@ -696,27 +694,27 @@ namespace FPS_n2 {
 					if (sel != (int)Data->m_ItemsUniqueID.size()) {
 						const char* Name = (*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[sel]))->GetName().c_str();
 						if (SaveDataParts->GetParam(Name) == 1) {
-							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																				  xp1, yp1, Color, DarkGreen, Name);
 						}
 						else {
-							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																				  xp1, yp1, GetColor(216, 143, 143), DarkGreen, "????");
-							int xsize = Fonts->Get(FontPool::FontType::Nomal_Edge).GetStringWidth(y_r(24), "????");
-							int ysize = y_r(24);
-							if (in2_(Pad->GetMS_X(), Pad->GetMS_Y(), xp1, yp1, xp1 + xsize, yp1 + ysize)) {
+							int xsize = Fonts->Get(FontPool::FontType::Nomal_Edge).GetStringWidth(y_UI(24), "????");
+							int ysize = y_UI(24);
+							if (IntoMouse(xp1, yp1, xp1 + xsize, yp1 + ysize)) {
 								mouseover = sel;
 							}
 						}
 					}
 					else {
-						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																			  xp1, yp1, Color, DarkGreen, "None");
 					}
-					yp1 += y_r(28);
+					yp1 += y_UI(28);
 				}
 				if (mouseover != -1) {
-					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 																		  Pad->GetMS_X(), Pad->GetMS_Y(), White, Gray75, LocalizePool::Instance()->Get(9000));
 
 				}
@@ -728,55 +726,55 @@ namespace FPS_n2 {
 
 			int xp1, yp1;
 			{
-				xp1 = y_r(960 - 400);
-				yp1 = y_r(540 - 270);
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
+				xp1 = y_UI(960 - 400);
+				yp1 = y_UI(540 - 270);
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
 																	  xp1, yp1, White, Gray75, LocalizePool::Instance()->Get(9001));
 			}
 			//
 			{
-				xp1 = y_r(960);
-				yp1 = y_r(840);
+				xp1 = y_UI(960);
+				yp1 = y_UI(840);
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + (int)GunsModify::GetULTSelect()).GetGun(0);
 				if (GunPtr) {
-					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_r(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
+					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_UI(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
 																		xp1, yp1, Green, DarkGreen, GunPtr->GetModData()->GetName());
 				}
 			}
 			//
 			{
-				xp1 = y_r(1900);
-				yp1 = y_r(1080 - 12 - 24 * 3);
+				xp1 = y_UI(1900);
+				yp1 = y_UI(1080 - 12 - 24 * 3);
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + (int)GunsModify::GetULTSelect()).GetGun(0);
 				if (GunPtr) {
 					auto& STR = GunPtr->GetModData()->GetInfo();
 					for (auto& s : STR) {
-						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
+						Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
 																			  xp1, yp1, Green, DarkGreen, s.c_str());
-						yp1 += y_r(24);
+						yp1 += y_UI(24);
 					}
 				}
 			}
 			//
 			{
-				xp1 = y_r(160);
-				yp1 = y_r(540);
+				xp1 = y_UI(160);
+				yp1 = y_UI(540);
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + (int)GunsModify::GetULTSelect()).GetGun(0);
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																	  xp1, yp1, Green, DarkGreen, "ShotMode : %s", SHOTTYPEName[(int)GunPtr->GetShotType()]);
-				yp1 += y_r(24 + 4);
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+				yp1 += y_UI(24 + 4);
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																	  xp1, yp1, Green, DarkGreen, "ShotSound : %s", GunShootSoundName[(int)GunPtr->GetGunShootSound()]);
-				yp1 += y_r(24 + 4);
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+				yp1 += y_UI(24 + 4);
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																	  xp1, yp1, Green, DarkGreen, "RecoilPower : %d", (int)(GunPtr->GetRecoilPower()*GunPtr->GetRecoilReturn()));
-				yp1 += y_r(24 + 4);
+				yp1 += y_UI(24 + 4);
 			}
 			//
 			{
-				xp1 = y_r(960);
-				yp1 = y_r(920);
-				Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_r(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
+				xp1 = y_UI(960);
+				yp1 = y_UI(920);
+				Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
 																	   xp1, yp1, Green, DarkGreen, "%d / %d", (int)GunsModify::GetULTSelect() + 1, (int)ULT_GUN::Max);
 			}
 		}

@@ -43,9 +43,6 @@ namespace FPS_n2 {
 			//
 			Vector3DX LightVec = Vector3DX::vget(-0.1f, -1.f, 0.f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.f, 1.f, 1.f, 0.0f));
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.5f, 10.f)*Scale_Rate, 0);
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-10.f, -3.f, -10.f)*Scale_Rate, Vector3DX::vget(10.f, 0.f, 10.f)*Scale_Rate, 1);
-			DrawParts->SetupShadowDir(LightVec, Vector3DX::vget(-100.f, 0.f, -100.f)*Scale_Rate, Vector3DX::vget(100.f, 1.f, 100.f)*Scale_Rate, 2);
 			//
 			DeleteLightHandleAll();
 			SetLightEnable(TRUE);
@@ -697,8 +694,8 @@ namespace FPS_n2 {
 					if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&
 						!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
 						(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph().DrawRotaGraph(
-							(int)Chara->GetGunPtrNow()->GetReticleXPos(),
-							(int)Chara->GetGunPtrNow()->GetReticleYPos(),
+							Chara->GetGunPtrNow()->GetReticleXPos()*y_UI(1980) / y_r(1980),
+							Chara->GetGunPtrNow()->GetReticleYPos()*y_UI(1080) / y_r(1080),
 							1.f, Chara->GetLeanRad(), true);
 					}
 				}
@@ -716,15 +713,15 @@ namespace FPS_n2 {
 					int sel = m_TutorialNow - 1 - this->m_TutorialLog.GetOffset();
 
 					if (0 <= sel && sel < m_Tutorial.size()) {
-						int xp = y_r(512 + 96);
-						int yp = y_r(512);
+						int xp = y_UI(512 + 96);
+						int yp = y_UI(512);
 						for (auto& p : m_Tutorial.at(sel).m_PADS) {
 							std::string Assign = Pad->GetKeyStr(p);
 							if (Assign == "NONE") { continue; }
-							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
+							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18),
 																				  FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																				  xp, yp, Green, Black, "[%s]", Assign.c_str());
-							yp += y_r(18 + 3);
+							yp += y_UI(18 + 3);
 						}
 					}
 				}
@@ -751,9 +748,9 @@ namespace FPS_n2 {
 				if (tgtSel >= 0) {
 					auto& t = (std::shared_ptr<TargetClass>&)(*ObjectManager::Instance()->GetObj((int)ObjType::Target, tgtSel));
 
-					int xp = DrawParts->GetDispXSize() / 2 - y_r(300);
-					int yp = DrawParts->GetDispYSize() / 2 + y_r(100);
-					int size = y_r(100);
+					int xp = DrawParts->GetDispXSize() / 2 - y_UI(300);
+					int yp = DrawParts->GetDispYSize() / 2 + y_UI(100);
+					int size = y_UI(100);
 					int xs = size / 2;
 					int ys = size / 2;
 					int xp2 = xp + ys * 2;
@@ -782,9 +779,9 @@ namespace FPS_n2 {
 			if (m_IsFirstGame) {
 				if (!DXDraw::Instance()->IsPause()) {
 					//
-					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_r(18),
+					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18),
 																		  FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP,
-																		  y_r(960), y_r(870), Red, Black, "%s:%s", LocalizePool::Instance()->Get(300), Pad->GetKeyStr(PADS::INTERACT).c_str());
+																		  y_UI(960), y_UI(870), Red, Black, "%s:%s", LocalizePool::Instance()->Get(300), Pad->GetKeyStr(PADS::INTERACT).c_str());
 
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*m_FirstFade), 0, 255));
 					DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Black, TRUE);

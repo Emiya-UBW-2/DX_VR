@@ -8,13 +8,11 @@
 #include "Scene/MainScene.hpp"
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
-	DXDraw::Create();								//汎用
-#ifdef DEBUG
-	auto* DebugParts = DebugClass::Instance();		//デバッグ
-#endif // DEBUG
-	auto* DrawParts = DXDraw::Instance();
-
-	DrawParts->Init();
+	SetEnableXAudioFlag(TRUE);//Xaudio(ロードが長いとロストするので必要に応じて)
+	DXLib_ref::Create();
+	auto* DXLib_refParts = DXLib_ref::Instance();
+	if (!DXLib_refParts->StartLogic()) { return 0; }
+	//追加設定
 	SetMainWindowText("Phantom of the Bunker");						//タイトル
 	//MV1SetLoadModelUsePackDraw(TRUE);
 	SetUseHalfLambertLighting(TRUE);	//ハーフランバート化
@@ -52,95 +50,30 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	auto Tutorialscene = std::make_shared<FPS_n2::Sceneclass::TutorialScene>();
 	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();
 	//シーンコントロール
-	auto scene = std::make_unique<SceneControl>(IsFirstGame ? (std::shared_ptr<TEMPSCENE>&)Tutorialscene : (std::shared_ptr<TEMPSCENE>&)Titlescene);
+	//auto scene = std::make_unique<SceneControl>(IsFirstGame ? (std::shared_ptr<TEMPSCENE>&)Tutorialscene : (std::shared_ptr<TEMPSCENE>&)Titlescene);
 	//遷移先指定
 	Titlescene->Set_Next(MAINLOOPscene);
 	Customscene->Set_Next(Titlescene);
 	Tutorialscene->Set_Next(Titlescene);
 	MAINLOOPscene->Set_Next(Titlescene);
-	//最初の読み込み
-	scene->GetNowScene()->Load();
-	//繰り返し
-	while (true) {
-		scene->StartScene();
-		while (true) {
-			if (!DrawParts->FirstExecute()) {
-				SaveDataParts->Save();//セーブ
-				return 0;
-			}
-#ifdef DEBUG
-			clsDx();
-			DebugParts->SetStartPoint();
-			DebugParts->SetPoint("Execute start");
-#endif // DEBUG
-			if (scene->Execute()) { break; }
-			//描画
-			scene->Draw();
-			//デバッグ
-#ifdef DEBUG
-			DebugParts->DebugWindow(y_r(1920 - 250), y_r(150));
-			//TestDrawShadowMap(DrawParts->m_Shadow[0].GetHandle(), 0, 0, 960, 540);
-#endif // DEBUG
-			DrawParts->Screen_Flip();//画面の反映
-		}
-		SaveDataParts->Save();//セーブ
-		bool IsGoTitle = (scene->GetNowScene() == Titlescene);
-		bool IsReturnTitle = (scene->GetNowScene()->Get_Next() == Titlescene);
-		if (IsGoTitle) {
-			switch (Titlescene->SelMode()) {
-				case 0:
-					Titlescene->Set_Next(MAINLOOPscene);
-					break;
-				case 1:
-					Titlescene->Set_Next(Customscene);
-					break;
-				case 2:
-					Titlescene->Set_Next(Tutorialscene);
-					break;
-				case 3:
-					Titlescene->Set_Next(MAINLOOPscene);
-					break;
-				default:
-					Titlescene->Set_Next(MAINLOOPscene);//戻しとく
-					break;
-			}
-		}
-		scene->NextScene();
-		if (IsGoTitle) {
-			Titlescene->Dispose_Load();
-			if (Titlescene->SelMode() != 1) {
-				Customscene->Dispose_Load();
-			}
-			if (Titlescene->SelMode() != 2) {
-				Tutorialscene->Dispose_Load();
-			}
-			switch (Titlescene->SelMode()) {
-				case 0:
-					if (MAINLOOPscene->SetPlayMode(false)) {
-						scene->GetNowScene()->Dispose_Load();
-					}
-					break;
-				case 1:
-					MAINLOOPscene->Dispose_Load();
-					break;
-				case 2:
-					MAINLOOPscene->Dispose_Load();
-					break;
-				case 3:
-					if (MAINLOOPscene->SetPlayMode(true)) {
-						scene->GetNowScene()->Dispose_Load();
-					}
-					break;
-				default:
-					break;
-			}
-		}
-		else if (IsReturnTitle) {
-			MAINLOOPscene->Dispose_Load();
-			Customscene->Dispose_Load();
-			Tutorialscene->Dispose_Load();
-		}
-		scene->GetNowScene()->Load();
+
+	Titlescene->SetNextSceneList(0, MAINLOOPscene);
+	Titlescene->SetNextSceneList(1, Customscene);
+	Titlescene->SetNextSceneList(2, Tutorialscene);
+	Titlescene->SetNextSceneList(3, MAINLOOPscene);
+	if (IsFirstGame) {
+		SceneControl::Instance()->AddList(Tutorialscene);
+		SceneControl::Instance()->AddList(Titlescene);
+		SceneControl::Instance()->AddList(Customscene);
+		SceneControl::Instance()->AddList(MAINLOOPscene);
 	}
+	else {
+		SceneControl::Instance()->AddList(Titlescene);
+		SceneControl::Instance()->AddList(Customscene);
+		SceneControl::Instance()->AddList(Tutorialscene);
+		SceneControl::Instance()->AddList(MAINLOOPscene);
+	}
+	//最初の読み込み
+	if (!DXLib_refParts->MainLogic()) { return 0; }
 	return 0;
 }
