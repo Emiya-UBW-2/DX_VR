@@ -64,12 +64,12 @@ namespace FPS_n2 {
 					y.LoadCommon(&m_SelectBackImage);
 				}
 
-				ButtonSel.at(0).Load_String("Retire", y_UI(48), true);
-				ButtonSel.at(0).Set(y_UI(1920 - 64), y_UI(1080 - 84 - 64 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-				ButtonSel.at(1).Load_String("Option", y_UI(48), true);
-				ButtonSel.at(1).Set(y_UI(1920 - 64), y_UI(1080 - 84 - 64 * 1), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-				ButtonSel.at(2).Load_String("Return Game", y_UI(48), true);
-				ButtonSel.at(2).Set(y_UI(1920 - 64), y_UI(1080 - 84 - 64 * 0), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+				ButtonSel.at(0).Load_String("Retire", (48), true);
+				ButtonSel.at(0).Set((1920 - 64), (1080 - 84 - 64 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+				ButtonSel.at(1).Load_String("Option", (48), true);
+				ButtonSel.at(1).Set((1920 - 64), (1080 - 84 - 64 * 1), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+				ButtonSel.at(2).Load_String("Return Game", (48), true);
+				ButtonSel.at(2).Set((1920 - 64), (1080 - 84 - 64 * 0), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 			}
 			void Execute() noexcept {
 				auto* Pad = PadControl::Instance();

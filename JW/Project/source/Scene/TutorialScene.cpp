@@ -694,8 +694,8 @@ namespace FPS_n2 {
 					if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&
 						!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
 						(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph().DrawRotaGraph(
-							Chara->GetGunPtrNow()->GetReticleXPos()*y_UI(1980) / y_r(1980),
-							Chara->GetGunPtrNow()->GetReticleYPos()*y_UI(1080) / y_r(1080),
+							(int)(Chara->GetGunPtrNow()->GetReticleXPos()*y_UI(1980) / y_r(1980)),
+							(int)(Chara->GetGunPtrNow()->GetReticleYPos()*y_UI(1080) / y_r(1080)),
 							1.f, Chara->GetLeanRad(), true);
 					}
 				}
@@ -784,7 +784,7 @@ namespace FPS_n2 {
 																		  y_UI(960), y_UI(870), Red, Black, "%s:%s", LocalizePool::Instance()->Get(300), Pad->GetKeyStr(PADS::INTERACT).c_str());
 
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*m_FirstFade), 0, 255));
-					DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Black, TRUE);
+					DrawBox(0, 0, y_r(1920), y_r(1080), Black, TRUE);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
 			}

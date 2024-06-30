@@ -363,7 +363,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* ItemLogParts = SideLog::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
-			auto* OptionParts = OPTION::Instance();
+			//auto* OptionParts = OPTION::Instance();
 			//
 			auto PrevAction = m_CharaAction;
 			//äJénââèo

@@ -37,11 +37,6 @@ namespace FPS_n2 {
 			float						m_Xrad{0.f};
 			float						m_Yrad_R{0.f};
 			float						m_Xrad_R{0.f};
-
-			std::array<std::shared_ptr<TEMPSCENE>,10> Next_ptr{nullptr};
-		public:
-			const auto SelMode() const noexcept { return select; }
-			void		SetNextSceneList(int index, const std::shared_ptr<TEMPSCENE>& Next_scenes_ptr_t) noexcept { Next_ptr.at(index) = Next_scenes_ptr_t; }
 		public:
 			TitleScene(void) noexcept {}
 			~TitleScene(void) noexcept {}

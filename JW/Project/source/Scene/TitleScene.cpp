@@ -41,20 +41,20 @@ namespace FPS_n2 {
 			SetLightSpcColor(GetColorF(0.1f, 0.1f, 0.1f, 0.f));
 			SetLightAmbColor(GetColorF(0.1f, 0.1f, 0.1f, 1.f));
 
-			ButtonSel.at(0).Load_String(SelectName[0], y_UI(64), true);
-			ButtonSel.at(0).Set(y_UI(1920 / 2), y_UI(1080 - 96), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM);
-			ButtonSel.at(1).Load_String(SelectName[1], y_UI(48), true);
-			ButtonSel.at(1).Set(y_UI(1920 - 64), y_UI(1080 - 84 - 64 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonSel.at(2).Load_String(SelectName[2], y_UI(48), true);
-			ButtonSel.at(2).Set(y_UI(1920 - 64), y_UI(1080 - 84 - 64 * 1), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonSel.at(0).Load_String(SelectName[0], (64), true);
+			ButtonSel.at(0).Set((1920 / 2), (1080 - 96), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM);
+			ButtonSel.at(1).Load_String(SelectName[1], (48), true);
+			ButtonSel.at(1).Set((1920 - 64), (1080 - 84 - 64 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonSel.at(2).Load_String(SelectName[2], (48), true);
+			ButtonSel.at(2).Set((1920 - 64), (1080 - 84 - 64 * 1), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 
-			ButtonSel.at(3).Load_String(SelectName[3], y_UI(48), m_HardModeActive);
-			ButtonSel.at(3).Set(y_UI(1920 - 64), y_UI(1080 - 84 - 64 * 0), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonSel.at(3).Load_String(SelectName[3], (48), m_HardModeActive);
+			ButtonSel.at(3).Set((1920 - 64), (1080 - 84 - 64 * 0), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 
 			ButtonSel.at(4).Load_Icon("data/UI/setting.png", true);
-			ButtonSel.at(4).Set(y_UI(1920 - 96 - 64), y_UI(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(4).Set((1920 - 96 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			ButtonSel.at(5).Load_Icon("data/UI/credit.png", true);
-			ButtonSel.at(5).Set(y_UI(1920 - 64), y_UI(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(5).Set((1920 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			//クレジット
 			int mdata = FileRead_open("data/Credit.txt", FALSE);
 			m_CreditCoulm = 0;
@@ -325,12 +325,10 @@ namespace FPS_n2 {
 			auto* SaveDataParts = SaveDataClass::Instance();
 			SaveDataParts->Save();//セーブ
 			//次シーン決定
-			Set_Next(Next_ptr.at(select));
+			SetNextSelect(select);
 		}
 		void			TitleScene::BG_Draw_Sub(void) noexcept {
-			auto* DrawParts = DXDraw::Instance();
-			//
-			DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Gray65, TRUE);
+			DrawBox(0, 0, y_r(1920), y_r(1080), Gray65, TRUE);
 		}
 
 		void			TitleScene::ShadowDraw_Sub(void) noexcept {
@@ -341,7 +339,6 @@ namespace FPS_n2 {
 		}
 		//
 		void			TitleScene::DrawUI_Base_Sub(void) noexcept {
-			auto* DrawParts = DXDraw::Instance();
 			auto* Fonts = FontPool::Instance();
 			auto* PopUpParts = PopUp::Instance();
 
@@ -366,10 +363,10 @@ namespace FPS_n2 {
 			//
 			{
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(GameFadeIn, 0.f, 1.f)), 0, 255));
-				DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Black, TRUE);
+				DrawBox(0, 0, y_r(1920), y_r(1080), Black, TRUE);
 
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(GameStart, 0.f, 1.f)), 0, 255));
-				DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), White, TRUE);
+				DrawBox(0, 0, y_r(1920), y_r(1080), White, TRUE);
 
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}

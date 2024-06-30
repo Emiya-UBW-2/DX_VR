@@ -192,7 +192,7 @@ namespace FPS_n2 {
 			ButtonSel.LoadCommon(&m_SelectBackImage);
 
 			ButtonSel.Load_Icon("data/UI/Right.png", true);
-			ButtonSel.Set(y_UI(960), y_UI(840), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.Set((960), (840), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 
 			ButtonSel.SetNone();
 			//ŠJŽnŽž
@@ -546,8 +546,8 @@ namespace FPS_n2 {
 				if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&
 					!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
 					(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph().DrawRotaGraph(
-						Chara->GetGunPtrNow()->GetReticleXPos()*y_UI(1980) / y_r(1980),
-						Chara->GetGunPtrNow()->GetReticleYPos()*y_UI(1080) / y_r(1080),
+						(int)(Chara->GetGunPtrNow()->GetReticleXPos()*y_UI(1980) / y_r(1980)),
+						(int)(Chara->GetGunPtrNow()->GetReticleYPos()*y_UI(1080) / y_r(1080)),
 						1.f, Chara->GetLeanRad(), true);
 				}
 			}
@@ -1539,10 +1539,10 @@ namespace FPS_n2 {
 			for (int index = 0; index < DegDiv; index++) {
 				int next = (index + 1) % DegDiv;
 				DrawLine_2D(
-					xp + y_UI(cos(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f)),
-					yp + y_UI(sin(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f)),
-					xp + y_UI(cos(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f)),
-					yp + y_UI(sin(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f)),
+					xp + y_UI((int)(cos(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f))),
+					yp + y_UI((int)(sin(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f))),
+					xp + y_UI((int)(cos(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f))),
+					yp + y_UI((int)(sin(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f))),
 					White,
 					3);
 			}
@@ -1567,11 +1567,11 @@ namespace FPS_n2 {
 							int g = 255 - r;
 							if (a->m_Damage > 0) {
 								SetDrawBright(r, g, 0);
-								hit_Graph.DrawRotaGraph((int)DispPos.x, (int)DispPos.y, (float)y_UI((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+								hit_Graph.DrawRotaGraph((int)DispPos.x, (int)DispPos.y, (float)y_UI((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
 							}
 							if (a->m_ArmerDamage > 0) {
 								SetDrawBright(128, 128, 128);
-								guard_Graph.DrawRotaGraph((int)DispPos.x, (int)DispPos.y, (float)y_UI((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+								guard_Graph.DrawRotaGraph((int)DispPos.x, (int)DispPos.y, (float)y_UI((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
 							}
 							SetDrawBright(255, 255, 255);
 							//
@@ -1599,9 +1599,9 @@ namespace FPS_n2 {
 			auto* Fonts = FontPool::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 #if FALSE
-			movie.DrawExtendGraph(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), FALSE);
+			movie.DrawExtendGraph(0, 0, y_r(1920), y_r(1080), FALSE);
 #else
-			DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Gray75, TRUE);
+			DrawBox(0, 0, y_r(1920), y_r(1080), Gray75, TRUE);
 #endif
 			auto DrawScore = [&](int xp, int yp, bool isFront) {
 				unsigned int Color = isFront ? White : Gray50;
@@ -1611,10 +1611,10 @@ namespace FPS_n2 {
 					if (r.m_Flip > 0.f) {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*r.m_Flip), 0, 255));
 						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
-																				  xp + y_UI(8.f * sel), yp + y_UI(64.f * sel - r.m_Flip * 128.f), Color, Black, "Hits : ");
+																				  xp + y_UI((int)(8.f * sel)), yp + y_UI((int)(64.f * sel - r.m_Flip * 128.f)), Color, Black, "Hits : ");
 
-						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI(48.f + 4.f* r.m_Up), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
-																				  xp + y_UI(112 + 8.f * sel), yp + y_UI(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f), Color, Black, "%5.2f %%", r.m_Point / 100.f);
+						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI((int)(48.f + 4.f* r.m_Up)), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
+																				  xp + y_UI((int)(112 + 8.f * sel)), yp + y_UI((int)(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f)), Color, Black, "%5.2f %%", r.m_Point / 100.f);
 					}
 				}
 				{
@@ -1623,10 +1623,10 @@ namespace FPS_n2 {
 					if (r.m_Flip > 0.f) {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*r.m_Flip), 0, 255));
 						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
-																				  xp + y_UI(8.f * sel), yp + y_UI(64.f * sel - r.m_Flip * 128.f), Color, Black, "Kill : ");
+																				  xp + y_UI((int)(8.f * sel)), yp + y_UI((int)(64.f * sel - r.m_Flip * 128.f)), Color, Black, "Kill : ");
 
-						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI(48.f + 4.f* r.m_Up), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
-																				  xp + y_UI(112 + 8.f * sel), yp + y_UI(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f), Color, Black, "%4d", (int)r.m_Point);
+						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI((int)(48.f + 4.f* r.m_Up)), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
+																				  xp + y_UI((int)(112 + 8.f * sel)), yp + y_UI((int)(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f)), Color, Black, "%4d", (int)r.m_Point);
 					}
 				}
 				{
@@ -1635,10 +1635,10 @@ namespace FPS_n2 {
 					if (r.m_Flip > 0.f) {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*r.m_Flip), 0, 255));
 						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
-																				  xp + y_UI(8.f * sel), yp + y_UI(64.f * sel - r.m_Flip * 128.f), Color, Black, "Score : ");
+																				  xp + y_UI((int)(8.f * sel)), yp + y_UI((int)(64.f * sel - r.m_Flip * 128.f)), Color, Black, "Score : ");
 
-						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI(48.f + 4.f* r.m_Up), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
-																				  xp + y_UI(112 + 8.f * sel), yp + y_UI(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f), Color, Black, "%4d pts", (int)r.m_Point);
+						Fonts->Get(FontPool::FontType::Nomal_ItalicAA).DrawString(y_UI((int)(48.f + 4.f* r.m_Up)), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
+																				  xp + y_UI((int)(112 + 8.f * sel)), yp + y_UI((int)(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f)), Color, Black, "%4d pts", (int)r.m_Point);
 					}
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
@@ -1650,7 +1650,7 @@ namespace FPS_n2 {
 			int xp1, yp1;
 			{
 				int size = 20;
-				xp1 = y_UI(1440.f + 1920.f * m_ResultRankingPer);
+				xp1 = y_UI((int)(1440.f + 1920.f * m_ResultRankingPer));
 				yp1 = y_UI(540) - y_UI(36) * (size / 2);
 
 				unsigned int Color = White;
@@ -1715,7 +1715,7 @@ namespace FPS_n2 {
 
 			float per = (1.f - (16.f / 9.f) / 2.35f) / 2.f;
 			DrawBox(0, 0, DrawParts->GetDispXSize(), (int)(DrawParts->GetDispYSize() * per), Black, TRUE);
-			DrawBox(0, DrawParts->GetDispYSize() - (int)(DrawParts->GetDispYSize() * per), DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Black, TRUE);
+			DrawBox(0, DrawParts->GetDispYSize() - (int)(DrawParts->GetDispYSize() * per), y_r(1920), y_r(1080), Black, TRUE);
 			if (m_EndTimer > 0) {
 				DrawBlackOut((1.f - m_EndTimer) * 2.f);
 			}
@@ -1724,7 +1724,7 @@ namespace FPS_n2 {
 			if (per > 0.f) {
 				auto* DrawParts = DXDraw::Instance();
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
-				DrawBox(0, 0, DrawParts->GetDispXSize(), DrawParts->GetDispYSize(), Black, TRUE);
+				DrawBox(0, 0, y_r(1920), y_r(1080), Black, TRUE);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 		}

@@ -27,8 +27,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SceneControl::Instance()->AddList(MAINLOOPLOADERscene);
 	SceneControl::Instance()->AddList(MAINLOOPscene);
 	//‘JˆÚæw’è
-	MAINLOOPLOADERscene->Set_Next(MAINLOOPscene);
-	MAINLOOPscene->Set_Next(MAINLOOPLOADERscene);
+	MAINLOOPLOADERscene->SetNextSceneList(0, MAINLOOPscene);
+	MAINLOOPscene->SetNextSceneList(0, MAINLOOPLOADERscene);
 	//Å‰‚Ì“Ç‚İ‚İ
 	if (!DXLib_refParts->MainLogic()) { return 0; }
 	return 0;

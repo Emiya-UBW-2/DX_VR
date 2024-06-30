@@ -110,8 +110,8 @@ namespace FPS_n2 {
 
 				for (auto& d : data) {
 					if (d.ActivePer() > 0.f) {
-						int xp = xp1 - y_UI((xs + 128) * (1.f - d.ActivePer()));
-						int yp = yp1 - y_UI((ys + 5) * d.GetFlip());
+						int xp = xp1 - y_UI((int)((xs + 128) * (1.f - d.ActivePer())));
+						int yp = yp1 - y_UI((int)((ys + 5) * d.GetFlip()));
 
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA,
 										 std::min(

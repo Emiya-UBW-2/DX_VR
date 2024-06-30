@@ -52,15 +52,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//シーンコントロール
 	//auto scene = std::make_unique<SceneControl>(IsFirstGame ? (std::shared_ptr<TEMPSCENE>&)Tutorialscene : (std::shared_ptr<TEMPSCENE>&)Titlescene);
 	//遷移先指定
-	Titlescene->Set_Next(MAINLOOPscene);
-	Customscene->Set_Next(Titlescene);
-	Tutorialscene->Set_Next(Titlescene);
-	MAINLOOPscene->Set_Next(Titlescene);
-
 	Titlescene->SetNextSceneList(0, MAINLOOPscene);
 	Titlescene->SetNextSceneList(1, Customscene);
 	Titlescene->SetNextSceneList(2, Tutorialscene);
 	Titlescene->SetNextSceneList(3, MAINLOOPscene);
+	Customscene->SetNextSceneList(0, Titlescene);
+	Tutorialscene->SetNextSceneList(0, Titlescene);
+	MAINLOOPscene->SetNextSceneList(0, Titlescene);
+
 	if (IsFirstGame) {
 		SceneControl::Instance()->AddList(Tutorialscene);
 		SceneControl::Instance()->AddList(Titlescene);
