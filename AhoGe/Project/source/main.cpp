@@ -1,0 +1,45 @@
+#include"Header.hpp"
+
+#include "sub.hpp"
+#include "MainScene/Player/Player.hpp"
+//
+#include "Scene/TitleScene.hpp"
+#include "Scene/CustomScene.hpp"
+
+int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
+	SetEnableXAudioFlag(TRUE);//Xaudio(ロードが長いとロストするので必要に応じて)
+	DXLib_ref::Create();
+	auto* DXLib_refParts = DXLib_ref::Instance();
+	if (!DXLib_refParts->StartLogic()) { return 0; }
+	//追加設定
+	SetMainWindowText("Phantom of the Bunker");						//タイトル
+	//MV1SetLoadModelUsePackDraw(TRUE);
+	SetUseHalfLambertLighting(TRUE);	//ハーフランバート化
+	//
+	FPS_n2::Sceneclass::PlayerManager::Create();
+	FPS_n2::Sceneclass::CommonBattleResource::Create();
+	//
+	auto* SaveDataParts = SaveDataClass::Instance();
+	auto* BGM = BGMPool::Instance();
+	auto* OptionParts = OPTION::Instance();
+	//初期開放
+	//SaveDataParts->SetParam("UnlockHardMode", 1);
+	//bool IsFirstGame = (SaveDataParts->GetParam("FirstGame") != 1);
+	SaveDataParts->Save();
+	//BGM
+	BGM->Add(0, "data/Sound/BGM/Title.wav");
+	BGM->Add(1, "data/Sound/BGM/Vivaldi_Winter.wav", true);
+	BGM->SetVol(OptionParts->GetParamFloat(EnumSaveParam::BGM));
+	//シーン
+	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
+	auto Customscene = std::make_shared<FPS_n2::Sceneclass::CustomScene>();
+	//遷移先指定
+	Titlescene->SetNextSceneList(0, Customscene);
+	Customscene->SetNextSceneList(0, Titlescene);
+
+	SceneControl::Instance()->AddList(Titlescene);
+	SceneControl::Instance()->AddList(Customscene);
+	//最初の読み込み
+	if (!DXLib_refParts->MainLogic()) { return 0; }
+	return 0;
+}
