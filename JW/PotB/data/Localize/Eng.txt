@@ -13,19 +13,50 @@
 
 0120=Credit
 
+0109=initial settings. Please check gamepad input system or graphics.
+
+2000=Check PC
+2001=Check CPU
+2002=Good
+2003=Enough
+2004=Not Good
+2005=CPU Not Found
+
+2011=Check RAM(ÅÜ2GB)
+2012=Enough
+2013=Not Good
+
+2021=Check GPU
+2022=Good
+2023=Enough
+2024=Not Good
+2025=GPU Not Found
+
+2035=égópíÜÇÃDirectX
+
+2040=You can get enough FPS.
+2041=Have to Set Middle Graphics Preset.
+2042=Have to Set Low Graphics Preset.
+2043=There is enough memory so no need to change any settings.
+2044=FPS may drop due to lack of memory.
+2045=You can get enough FPS.
+2046=Have to Set Middle Graphics Preset.
+2047=Have to Set Low Graphics Preset.
+2048=If DirectX11 is not available, screen effects cannot be used.
+
 0110=Option
 1110=Change BGM volume
 1111=Change SE volume
-1120=Enable light mode(Need Restart)
-1121=Select Window or Borderless(Need Restart)
+1120=Select Graphics Preset
+1121=Select Window or Borderless
 1122=Change Vertical Fov
-1123=Enable VSync(Need Restart)
+1123=Enable VSync
 1124=Change FPS Limit When Disable VSync
 1125=Change DirectX version(Need Restart)
 1126=Enable FXAA
 1127=Enable Screen Space AO
-1128=Enable Screen Space Reflection
-1129=Enable Shadow
+1128=Change Reflection Level
+1129=Change Shadow Level
 1130=Enable Draw Objects
 1131=Enable bloom Effect
 1132=Enable Screen Effect
@@ -33,15 +64,13 @@
 1134=Enable Motion Blur
 1135=Window
 1136=Borderless
+1137=Change Render Scale(Need Restart)
 
 1140=Change X Sensitivity
 1141=Change Y Sensitivity
 1142=Enable Head Bobbing
-1143=Enable Extend Action(MagCheck/ViewGun)
 1144=Change Pad Input System
 1145=Change Language(Need Restart)
-1146=Enable Extra UI(Hit,ScoreAdd)
-1147=Enable Extra UI(Sound Wave,Enemy Degree/Distance)
 
 1150=[Need Mouse]Reset Change
 1151=[Need Mouse]Over Pointer and Press Button to Set
