@@ -220,15 +220,15 @@ namespace FPS_n2 {
 				int xp1, yp1;
 				//タイム,スコア
 				{
-					xp1 = y_UI(30.f);
-					yp1 = y_UI(10.f);
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(32.f), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(32.f), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + y_UI(240.f), yp1, White, Black, "%d:%05.2f",
+					xp1 = y_UI(30);
+					yp1 = y_UI(10);
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(32), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(32), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + y_UI(240), yp1, White, Black, "%d:%05.2f",
 						(int)(floatParam[0] / 60.f), (float)((int)(floatParam[0]) % 60) + (floatParam[0] - (float)((int)(floatParam[0]))));
 
-					xp1 = y_UI((1920 / 2));
-					yp1 = y_UI(10.f);
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(32.f), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "%d : %d", intParam[0], intParam[1]);
+					xp1 = y_UI(1920 / 2);
+					yp1 = y_UI(10);
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "%d : %d", intParam[0], intParam[1]);
 				}
 				//情報
 				{
@@ -237,30 +237,30 @@ namespace FPS_n2 {
 					yp1 = y_UI((1080 - 96 + 30 / 2));
 					float per = Lerp(0.4f, 0.6f, floatParam[1]);
 					if ((per *255.f) > 1.f) {
-						int radius = (int)Lerp((float)y_UI(24.f), (float)y_UI(32.f), floatParam[1]);
+						int radius = (int)Lerp((float)y_UI(24), (float)y_UI(32), floatParam[1]);
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
 						SetDrawBright(255, 0, 0);
 						m_HeartIcon.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
 						SetDrawBright(255, 255, 255);
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 					}
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(24.f), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
 
 					//気合
-					xp1 = y_UI(24.f);
-					yp1 = y_UI((1080 - 96));
+					xp1 = y_UI(24);
+					yp1 = y_UI(1080 - 96);
 
 					m_GaugeParam[0].DrawGauge(
-						xp1, yp1, xp1 + y_UI(300.f), yp1 + y_UI(12.f),
+						xp1, yp1, xp1 + y_UI(300), yp1 + y_UI(12),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 128, 0, 255), GetColorU8(255, 255, 0, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
 					//スタミナ
-					xp1 = y_UI(24.f);
-					yp1 = y_UI((1080 - 96 + 18));
+					xp1 = y_UI(24);
+					yp1 = y_UI(1080 - 96 + 18);
 
 					m_GaugeParam[1].DrawGauge(
-						xp1, yp1, xp1 + y_UI(300.f), yp1 + y_UI(12.f),
+						xp1, yp1, xp1 + y_UI(300), yp1 + y_UI(12),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
@@ -302,7 +302,7 @@ namespace FPS_n2 {
 							{
 								xp1 = y_UI((1920 / 2));
 								yp1 = y_UI((1080 / 2));
-								int radius = (int)Lerp((float)y_UI(0.f), (float)y_UI(256.f), floatParam[2]);
+								int radius = (int)Lerp((float)y_UI(0), (float)y_UI(256), floatParam[2]);
 								SetDrawBlendMode(DX_BLENDMODE_ADD, (int)Lerp(128.f, 32.f, floatParam[5]));
 								m_GuardGraph.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
 								SetDrawBlendMode(DX_BLENDMODE_ADD, 255);
@@ -312,13 +312,13 @@ namespace FPS_n2 {
 							{
 								xp1 = y_UI((1920 / 2));
 								yp1 = y_UI((1080 / 2));
-								xp1 += (int)((float)y_UI(256.f) * floatParam[3]);
-								yp1 += (int)((float)y_UI(256.f) * floatParam[4]);
+								xp1 += (int)((float)y_UI(256) * floatParam[3]);
+								yp1 += (int)((float)y_UI(256) * floatParam[4]);
 
-								int radius = (int)Lerp((float)y_UI(0.f), (float)y_UI(32.f), floatParam[2]);
+								int radius = (int)Lerp((float)y_UI(0), (float)y_UI(32), floatParam[2]);
 								float length = std::hypotf(floatParam[3], floatParam[4]);
 								if (length > 1.f) {
-									radius = (int)Lerp((float)radius, (float)y_UI(0.f), length - 1.f);
+									radius = (int)Lerp((float)radius, (float)y_UI(0), length - 1.f);
 								}
 								SetDrawBlendMode(DX_BLENDMODE_ADD, 128);
 								m_CursorGraph.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
