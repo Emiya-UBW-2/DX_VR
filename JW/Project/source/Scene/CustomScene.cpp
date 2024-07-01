@@ -357,10 +357,11 @@ namespace FPS_n2 {
 			for (auto& y : ButtonAlpha) {
 				Easing(&y, ((int)m_LookSel == (int)(&y - &ButtonAlpha.front())) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
 			}
-
-			m_Yrad += Pad->GetLS_X() / 1000.f;
+			if (m_LookSel == LookSelect::FreeLook) {
+				m_Yrad += Pad->GetLS_X() / 1000.f;
+				m_Xrad += Pad->GetLS_Y() / 1000.f;
+			}
 			m_Yrad = std::clamp(m_Yrad, deg2rad(-100), deg2rad(100));
-			m_Xrad += Pad->GetLS_Y() / 1000.f;
 			m_Xrad = std::clamp(m_Xrad, deg2rad(-20), deg2rad(-20));
 			Easing(&m_Xrad_R, m_Xrad, 0.95f, EasingType::OutExpo);
 			Easing(&m_Yrad_R, m_Yrad, 0.95f, EasingType::OutExpo);
@@ -445,7 +446,6 @@ namespace FPS_n2 {
 		}
 
 		void			CustomScene::DrawUI_Base_Sub(void) noexcept {
-			auto* DrawParts = DXDraw::Instance();
 			auto* Fonts = FontPool::Instance();
 			//
 			Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_UI(96),

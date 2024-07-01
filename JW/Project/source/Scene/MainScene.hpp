@@ -125,11 +125,7 @@ namespace FPS_n2 {
 		public:
 			void			Dispose_Load_Sub(void) noexcept override;
 		public:
-			const auto			SetPlayMode(bool value) noexcept {
-				bool ret = (m_IsHardMode != value);
-				m_IsHardMode = value;
-				return ret;
-			}
+			void			SetPlayMode(bool value) noexcept { m_IsHardMode = value; }
 		private:
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_NetWorkBrowser.GetMyPlayerID(); }
 		private:

@@ -1722,7 +1722,6 @@ namespace FPS_n2 {
 		}
 		void			MAINLOOP::DrawBlackOut(float per) noexcept {
 			if (per > 0.f) {
-				auto* DrawParts = DXDraw::Instance();
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
 				DrawBox(0, 0, y_r(1920), y_r(1080), Black, TRUE);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);

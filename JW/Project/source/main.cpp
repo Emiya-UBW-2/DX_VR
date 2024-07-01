@@ -49,16 +49,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	auto Customscene = std::make_shared<FPS_n2::Sceneclass::CustomScene>();
 	auto Tutorialscene = std::make_shared<FPS_n2::Sceneclass::TutorialScene>();
 	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();
-	//シーンコントロール
-	//auto scene = std::make_unique<SceneControl>(IsFirstGame ? (std::shared_ptr<TEMPSCENE>&)Tutorialscene : (std::shared_ptr<TEMPSCENE>&)Titlescene);
+	auto MAINLOOPscene_HardMode = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();
+	MAINLOOPscene_HardMode->SetPlayMode(true);
 	//遷移先指定
 	Titlescene->SetNextSceneList(0, MAINLOOPscene);
 	Titlescene->SetNextSceneList(1, Customscene);
 	Titlescene->SetNextSceneList(2, Tutorialscene);
-	Titlescene->SetNextSceneList(3, MAINLOOPscene);
+	Titlescene->SetNextSceneList(3, MAINLOOPscene_HardMode);
 	Customscene->SetNextSceneList(0, Titlescene);
 	Tutorialscene->SetNextSceneList(0, Titlescene);
 	MAINLOOPscene->SetNextSceneList(0, Titlescene);
+	MAINLOOPscene_HardMode->SetNextSceneList(0, Titlescene);
 
 	if (IsFirstGame) {
 		SceneControl::Instance()->AddList(Tutorialscene);
@@ -70,7 +71,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		SceneControl::Instance()->AddList(Titlescene);
 		SceneControl::Instance()->AddList(Customscene);
 		SceneControl::Instance()->AddList(Tutorialscene);
-		SceneControl::Instance()->AddList(MAINLOOPscene);
+		SceneControl::Instance()->AddList(MAINLOOPscene_HardMode);
 	}
 	//最初の読み込み
 	if (!DXLib_refParts->MainLogic()) { return 0; }

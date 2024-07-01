@@ -80,9 +80,7 @@ namespace FPS_n2 {
 				this->m_ArmerStock = 1;
 				return this->m_ArmerStock != prev;
 			}
-			void			SetPlayMode(bool value) noexcept {
-				m_IsHardMode = value;
-			}
+			void			SetPlayMode(bool value) noexcept { m_IsHardMode = value; }
 		private:
 			void			move_RightArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept;
 			void			move_LeftArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept;
