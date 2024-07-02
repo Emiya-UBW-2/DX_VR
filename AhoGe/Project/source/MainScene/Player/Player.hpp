@@ -1,5 +1,6 @@
 #pragma once
 #include	"../../Header.hpp"
+#include	"../Object/Character.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -9,7 +10,7 @@ namespace FPS_n2 {
 		private:
 			class PlayerControl {
 			private:
-				std::shared_ptr<ObjectBaseClass>				m_Chara{nullptr};
+				std::shared_ptr<CharacterObject>				m_Chara{nullptr};
 				int												m_Score{0};							//ƒXƒRƒA
 			public:
 				PlayerControl(void) noexcept {
@@ -19,7 +20,7 @@ namespace FPS_n2 {
 					this->Dispose();
 				}
 			public:
-				void		SetChara(const std::shared_ptr<ObjectBaseClass>& pChara) noexcept { this->m_Chara = pChara; }
+				void		SetChara(const std::shared_ptr<CharacterObject>& pChara) noexcept { this->m_Chara = pChara; }
 				auto&		GetChara(void) noexcept { return this->m_Chara; }
 
 				void		AddScore(int value) noexcept { this->m_Score += value; }

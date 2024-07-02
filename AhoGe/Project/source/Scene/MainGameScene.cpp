@@ -10,12 +10,21 @@ namespace FPS_n2 {
 		void			MainGameScene::Load_Sub(void) noexcept {
 			//ロード
 			PlayerManager::Instance()->Init(Player_Num);
-
+			for (int i = 0;i < Player_Num;i++) {
+				auto& p = PlayerManager::Instance()->GetPlayer(i);
+				p.SetChara(std::make_shared<CharacterObject>());
+			}
 			CommonBattleResource::Instance()->Load();
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			CommonBattleResource::Instance()->Set();
 			m_MainLoopPauseControl.Init();
+			for (int i = 0;i < Player_Num;i++) {
+				auto& p = PlayerManager::Instance()->GetPlayer(i);
+				if (p.GetChara()) {
+					p.GetChara()->Init((PlayerID)i);
+				}
+			}
 			m_Range = 10.f;
 			m_SelAlpha = 0.f;
 			m_IsEnd = false;
@@ -72,7 +81,9 @@ namespace FPS_n2 {
 			//
 			for (int i = 0;i < Player_Num;i++) {
 				auto& p = PlayerManager::Instance()->GetPlayer(i);
-				//p.GetChara();
+				if (p.GetChara()) {
+					p.GetChara()->Execute();
+				}
 			}
 			return true;
 		}
@@ -83,8 +94,13 @@ namespace FPS_n2 {
 		}
 		void			MainGameScene::MainDraw_Sub(void) noexcept {
 			DrawBox(0, 0, y_r(1920), y_r(1080), Gray75, TRUE);
+			for (int i = 0;i < Player_Num;i++) {
+				auto& p = PlayerManager::Instance()->GetPlayer(i);
+				if (p.GetChara()) {
+					p.GetChara()->Draw();
+				}
+			}
 		}
-
 		void			MainGameScene::DrawUI_Base_Sub(void) noexcept {
 			auto* Fonts = FontPool::Instance();
 			//
@@ -108,6 +124,13 @@ namespace FPS_n2 {
 		}
 		//使い回しオブジェ系
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
+			for (int i = 0;i < Player_Num;i++) {
+				auto& p = PlayerManager::Instance()->GetPlayer(i);
+				if (p.GetChara()) {
+					p.GetChara()->Dispose();
+				}
+				p.Dispose();
+			}
 			PlayerManager::Instance()->Dispose();
 			CommonBattleResource::Instance()->Dispose();
 		}
