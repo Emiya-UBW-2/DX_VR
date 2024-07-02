@@ -14,26 +14,20 @@
     <ClInclude Include="source\CommonScene\UI\CommonUIControl.hpp" />
     <ClInclude Include="source\Enums.hpp" />
     <ClInclude Include="source\Header.hpp" />
-    <ClInclude Include="source\MainScene\BackGround\BackGround.hpp" />
-    <ClInclude Include="source\MainScene\BackGround\BackGroundSub.hpp" />
     <ClInclude Include="source\MainScene\MainSceneSub.hpp" />
-    <ClInclude Include="source\MainScene\Object\FallObj.hpp" />
-    <ClInclude Include="source\MainScene\Object\MovieObj.hpp" />
     <ClInclude Include="source\MainScene\Player\CPU.hpp" />
     <ClInclude Include="source\MainScene\Player\Player.hpp" />
-    <ClInclude Include="source\Scene\CustomScene.hpp" />
+    <ClInclude Include="source\Scene\MainGameScene.hpp" />
+    <ClInclude Include="source\Scene\TestGameScene.hpp" />
     <ClInclude Include="source\Scene\TitleScene.hpp" />
     <ClInclude Include="source\sub.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp" />
-    <ClCompile Include="source\MainScene\BackGround\BackGround.cpp" />
-    <ClCompile Include="source\MainScene\BackGround\BackGroundSub.cpp" />
-    <ClCompile Include="source\MainScene\Object\FallObj.cpp" />
-    <ClCompile Include="source\MainScene\Object\MovieObj.cpp" />
     <ClCompile Include="source\MainScene\Player\CPU.cpp" />
     <ClCompile Include="source\MainScene\Player\Player.cpp" />
-    <ClCompile Include="source\Scene\CustomScene.cpp" />
+    <ClCompile Include="source\Scene\MainGameScene.cpp" />
+    <ClCompile Include="source\Scene\TestGameScene.cpp" />
     <ClCompile Include="source\Scene\TitleScene.cpp" />
     <ClCompile Include="source\sub.cpp" />
   </ItemGroup>

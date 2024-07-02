@@ -7,13 +7,11 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		void			TitleScene::Load_Sub(void) noexcept {
-		}
+		void			TitleScene::Load_Sub(void) noexcept {}
 		void			TitleScene::Set_Sub(void) noexcept {
+
 			select = 0;
 			m_MouseSelMode = false;
-			auto* SaveDataParts = SaveDataClass::Instance();
-			auto* DrawParts = DXDraw::Instance();
 			GameFadeIn = 1.f;
 			GameStart = 0.f;
 
@@ -22,28 +20,16 @@ namespace FPS_n2 {
 			for (auto& y : ButtonSel) {
 				y.LoadCommon(&m_SelectBackImage);
 			}
-
-			Vector3DX LightVec = Vector3DX::vget(0.f, -1.f, 0.5f);
-			DrawParts->SetAmbientLight(LightVec, GetColorF(1.f, 1.f, 1.f, 0.0f));
 			//
-			DeleteLightHandleAll();
-			SetLightEnable(TRUE);
-			ChangeLightTypeDir(LightVec.get());
-			SetLightDifColor(GetColorF(1.f, 1.f, 1.f, 1.f));
-			SetLightSpcColor(GetColorF(0.1f, 0.1f, 0.1f, 0.f));
-			SetLightAmbColor(GetColorF(0.1f, 0.1f, 0.1f, 1.f));
+			ButtonSel.at(0).Load_String("Let's Go!", (52), true);
+			ButtonSel.at(0).Set((1920 - 64-48), (1080 - 84 - 64 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonSel.at(1).Load_String("Test Stage", (48), true);
+			ButtonSel.at(1).Set((1920 - 64), (1080 - 84 - 64 * 1), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 
-			ButtonSel.at(0).Load_String("Ready", (64), true);
-			ButtonSel.at(0).Set((1920 / 2), (1080 - 96), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM);
-			ButtonSel.at(1).Load_String("Customize", (48), true);
-			ButtonSel.at(1).Set((1920 - 64), (1080 - 84 - 64 * 2), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonSel.at(2).Load_String("Shooting Range", (48), true);
-			ButtonSel.at(2).Set((1920 - 64), (1080 - 84 - 64 * 1), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-
-			ButtonSel.at(3).Load_Icon("data/UI/setting.png", true);
-			ButtonSel.at(3).Set((1920 - 96 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonSel.at(4).Load_Icon("data/UI/credit.png", true);
-			ButtonSel.at(4).Set((1920 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(2).Load_Icon("data/UI/setting.png", true);
+			ButtonSel.at(2).Set((1920 - 96 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonSel.at(3).Load_Icon("data/UI/credit.png", true);
+			ButtonSel.at(3).Set((1920 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			//クレジット
 			int mdata = FileRead_open("data/Credit.txt", FALSE);
 			m_CreditCoulm = 0;
@@ -69,18 +55,12 @@ namespace FPS_n2 {
 				BGM->Get(0).Play(DX_PLAYTYPE_LOOP, TRUE);
 			}
 			BGM->Get(0).SetVol_Local(255);
-
-			m_Yrad = deg2rad(45);
-			m_Xrad = 0.f;
-			m_Yrad_R = m_Yrad;
-			m_Xrad_R = m_Xrad;
 		}
 		bool			TitleScene::Update_Sub(void) noexcept {
 			if (DXDraw::Instance()->IsPause()) {
 				return true;
 			}
 			auto* Pad = PadControl::Instance();
-			auto* ObjMngr = ObjectManager::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* PopUpParts = PopUp::Instance();
@@ -136,15 +116,14 @@ namespace FPS_n2 {
 						switch (select) {
 							case 0:
 							case 1:
-							case 2:
 								GameStart += 0.0001f;
 								SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 								break;
-							case 3:
+							case 2:
 								OptionWindowClass::Instance()->SetActive();
 								SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 								break;
-							case 4:
+							case 3:
 								PopUpParts->Add(LocalizePool::Instance()->Get(120), y_UI(720), y_UI(840),
 												[&](int xmin, int ymin, int xmax, int, bool) {
 													auto* Fonts = FontPool::Instance();
@@ -193,24 +172,6 @@ namespace FPS_n2 {
 				}
 			}
 			//
-			ObjMngr->ExecuteObject();
-			ObjMngr->LateExecuteObject();
-
-			Easing(&m_Xrad, deg2rad(0.f + GetRandf(10.f)), 0.95f, EasingType::OutExpo);
-			Easing(&m_Yrad, deg2rad(45.f + GetRandf(10.f)), 0.95f, EasingType::OutExpo);
-			Easing(&m_Xrad_R, m_Xrad, 0.95f, EasingType::OutExpo);
-			Easing(&m_Yrad_R, m_Yrad, 0.95f, EasingType::OutExpo);
-
-			Vector3DX Pos = Vector3DX::vget(0.f, 1.25f, 0.0f)*Scale_Rate;
-			DrawParts->SetMainCamera().SetCamPos(
-				Pos + Matrix4x4DX::Vtrans(Vector3DX::forward()*(3.f*Scale_Rate), Matrix4x4DX::RotAxis(Vector3DX::right(), m_Xrad_R)*Matrix4x4DX::RotAxis(Vector3DX::up(), m_Yrad_R + DX_PI_F)),
-				Pos,
-				Vector3DX::vget(0.f, 1.f, 0.f));
-			float far_t = 20.f*Scale_Rate;
-			DrawParts->SetMainCamera().SetCamInfo(deg2rad(45), 0.5f*Scale_Rate, far_t);
-			PostPassEffect::Instance()->Set_DoFNearFar(1.f * Scale_Rate, far_t / 2, 0.5f*Scale_Rate, far_t);
-
-			//
 			for (auto& y : ButtonSel) {
 				y.Update();
 			}
@@ -231,15 +192,10 @@ namespace FPS_n2 {
 			//次シーン決定
 			SetNextSelect(select);
 		}
-		void			TitleScene::BG_Draw_Sub(void) noexcept {
-			DrawBox(0, 0, y_r(1920), y_r(1080), Gray65, TRUE);
-		}
-
-		void			TitleScene::ShadowDraw_Sub(void) noexcept {
-			ObjectManager::Instance()->Draw_Shadow();
-		}
 		void			TitleScene::MainDraw_Sub(void) noexcept {
-			ObjectManager::Instance()->Draw();
+			//背景
+			DrawBox(0, 0, y_r(1920), y_r(1080), Gray75, TRUE);
+			//描画
 		}
 		//
 		void			TitleScene::DrawUI_Base_Sub(void) noexcept {
@@ -249,19 +205,15 @@ namespace FPS_n2 {
 			//
 			m_TitleImage.DrawExtendGraph(y_UI(64), y_UI(64), y_UI(64 + 369), y_UI(64 + 207), true);
 			//
-			{
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18),
-																	  FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-																	  y_UI(64 + 369), y_UI(64 + 207), White, Black, "Ver 1.0.0");
-			}
+			Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
+																  y_UI(64 + 369), y_UI(64 + 207), White, Black, "Ver 1.0.0");
 			//
 			for (auto& y : ButtonSel) {
 				y.Draw();
 			}
 			//
 			if ((select != -1) && !PopUpParts->IsActivePop()) {
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18),
-																	  FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 																	  y_UI(32), y_UI(1080 - 32 - 32), White, Black, LocalizePool::Instance()->Get(9020 + select));
 			}
 			//
@@ -276,10 +228,7 @@ namespace FPS_n2 {
 			}
 		}
 		//使い回しオブジェ系
-		void			TitleScene::Dispose_Load_Sub(void) noexcept {
-				PlayerManager::Instance()->Dispose();
-				ObjectManager::Instance()->DeleteAll();
-		}
+		void			TitleScene::Dispose_Load_Sub(void) noexcept {}
 		//
 	};
 };

@@ -20,7 +20,7 @@ namespace FPS_n2 {
 			AIControl();
 			~AIControl();
 		public:
-			void Init(const std::shared_ptr<BackGroundClassMain>& BackBround_t, PlayerID MyCharaID) noexcept;
+			void Init(PlayerID MyCharaID) noexcept;
 			void Execute(InputControl* MyInput) noexcept;
 			void Draw() noexcept {}
 			void Dispose() noexcept {}

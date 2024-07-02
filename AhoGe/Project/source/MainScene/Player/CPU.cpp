@@ -33,7 +33,7 @@ namespace FPS_n2 {
 			delete m_Param;
 		}
 		//
-		void AIControl::Init(const std::shared_ptr<BackGroundClassMain>& BackBround_t, PlayerID MyCharaID) noexcept {
+		void AIControl::Init(PlayerID MyCharaID) noexcept {
 			this->GetParam()->Init();
 		}
 		void AIControl::Execute(InputControl* MyInput) noexcept {

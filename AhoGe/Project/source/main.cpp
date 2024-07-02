@@ -4,7 +4,8 @@
 #include "MainScene/Player/Player.hpp"
 //
 #include "Scene/TitleScene.hpp"
-#include "Scene/CustomScene.hpp"
+#include "Scene/MainGameScene.hpp"
+#include "Scene/TestGameScene.hpp"
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetEnableXAudioFlag(TRUE);//Xaudio(ロードが長いとロストするので必要に応じて)
@@ -32,13 +33,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	BGM->SetVol(OptionParts->GetParamFloat(EnumSaveParam::BGM));
 	//シーン
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
-	auto Customscene = std::make_shared<FPS_n2::Sceneclass::CustomScene>();
+	auto MainGamescene = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
+	auto TestGamescene = std::make_shared<FPS_n2::Sceneclass::TestGameScene>();
 	//遷移先指定
-	Titlescene->SetNextSceneList(0, Customscene);
-	Customscene->SetNextSceneList(0, Titlescene);
+	Titlescene->SetNextSceneList(0, MainGamescene);
+	Titlescene->SetNextSceneList(1, TestGamescene);
+	MainGamescene->SetNextSceneList(0, Titlescene);
+	TestGamescene->SetNextSceneList(0, Titlescene);
 
 	SceneControl::Instance()->AddList(Titlescene);
-	SceneControl::Instance()->AddList(Customscene);
+	SceneControl::Instance()->AddList(MainGamescene);
+	SceneControl::Instance()->AddList(TestGamescene);
 	//最初の読み込み
 	if (!DXLib_refParts->MainLogic()) { return 0; }
 	return 0;
