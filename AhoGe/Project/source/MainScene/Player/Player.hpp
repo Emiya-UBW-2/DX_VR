@@ -39,12 +39,15 @@ namespace FPS_n2 {
 		private:
 			std::vector<PlayerControl>	m_Player;
 		public:
-			auto&		GetPlayer(int ID) noexcept { return this->m_Player[ID]; }
+			auto&		GetPlayer(PlayerID ID) noexcept { return this->m_Player[(int)ID]; }
 		public:
 			void Init(int playerNum) noexcept {
 				m_Player.resize(playerNum);
 			}
 			void Dispose(void) noexcept {
+				for (auto& p : m_Player) {
+					p.Dispose();
+				}
 				m_Player.clear();
 			}
 		};
