@@ -2,6 +2,7 @@
 
 #include "sub.hpp"
 #include "MainScene/Player/Player.hpp"
+#include "MainScene/BackGround/BackGround.hpp"
 //
 #include "Scene/TitleScene.hpp"
 #include "Scene/MainGameScene.hpp"
@@ -19,6 +20,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//
 	FPS_n2::Sceneclass::PlayerManager::Create();
 	FPS_n2::Sceneclass::CommonBattleResource::Create();
+	FPS_n2::Sceneclass::Cam2DControl::Create();
+	FPS_n2::Sceneclass::BackGroundClassBase::Create();
 	//
 	auto* SaveDataParts = SaveDataClass::Instance();
 	auto* BGM = BGMPool::Instance();

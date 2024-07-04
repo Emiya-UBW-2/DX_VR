@@ -14,6 +14,7 @@
     <ClInclude Include="source\CommonScene\UI\CommonUIControl.hpp" />
     <ClInclude Include="source\Enums.hpp" />
     <ClInclude Include="source\Header.hpp" />
+    <ClInclude Include="source\MainScene\BackGround\BackGround.hpp" />
     <ClInclude Include="source\MainScene\MainSceneSub.hpp" />
     <ClInclude Include="source\MainScene\Object\Character.hpp" />
     <ClInclude Include="source\MainScene\Player\CPU.hpp" />
@@ -25,6 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\MainScene\BackGround\BackGround.cpp" />
     <ClCompile Include="source\MainScene\Object\Character.cpp" />
     <ClCompile Include="source\MainScene\Player\CPU.cpp" />
     <ClCompile Include="source\MainScene\Player\Player.cpp" />

@@ -1,167 +1,37 @@
 #pragma once
 #include	"../../Header.hpp"
-#include	"../../MainScene/BackGround/BackGroundSub.hpp"
+#include	"../../sub.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class BackGroundClassBase {
-		protected:
-			MV1							m_ObjSky;
-			MV1							m_ObjGround;
-			MV1							m_ObjGroundCol;
-		protected:
-			virtual void			Init_Sub(void) noexcept {}
-			//
-			virtual void			FirstExecute_Sub(void) noexcept {}
-			//
-			virtual void			Execute_Sub(void) noexcept {}
-			//
-			virtual void			BG_Draw_Sub(void) noexcept {}
-			virtual void			Shadow_Draw_Far_Sub(void) noexcept {}
-			virtual void			Shadow_Draw_NearFar_Sub(void) noexcept {}
-			virtual void			Shadow_Draw_Sub(void) noexcept {}
-			virtual void			Draw_Sub(void) noexcept {}
-			virtual void			DrawFront_Sub(void) noexcept {}
-			//
-			virtual void			Dispose_Sub(void) noexcept {}
-			virtual bool			CheckLinetoMap_Sub(const Vector3DX&, Vector3DX*, bool, Vector3DX*, MV1_COLL_RESULT_POLY*) const noexcept { return false; }
-		public://
-			const auto&		GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
-			const auto		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, bool isNearest, Vector3DX* Normal = nullptr, MV1_COLL_RESULT_POLY* Ret = nullptr) const noexcept {
-				bool isHit = false;
-				if (this->m_ObjGroundCol.IsActive()) {
-					auto col_p = this->m_ObjGroundCol.CollCheck_Line(StartPos, *EndPos);
-					if (col_p.HitFlag == TRUE) {
-						isHit = true;
-						*EndPos = col_p.HitPosition;
-						if (Ret) { *Ret = col_p; }
-						if (Normal) { *Normal = col_p.Normal; }
-						if (!isNearest) {
-							return isHit;
-						}
-					}
-				}
-				isHit |= CheckLinetoMap_Sub(StartPos, EndPos, isNearest, Normal, Ret);
-				return isHit;
-			}
-		protected:
-			void			DrawCommon() noexcept {
-				if (this->m_ObjGround.IsActive()) {
-					SetFogEnable(TRUE);
-					auto* DrawParts = DXDraw::Instance();
-					auto far_t = DrawParts->GetMainCamera().GetCamFar();
-					SetFogStartEnd(far_t / 3.f, far_t);
-					SetFogColor(26, 29, 20);
-
-					this->m_ObjGround.DrawModel();
-
-					SetUseBackCulling(TRUE);
-					SetFogEnable(FALSE);
-				}
-			}
-		public://
-			//
-			void			Init(const char* MapPath, const char* SkyPath) noexcept {
-				//’nŒ`
-				std::string path;
-				path = MapPath;
-				if (path != "") {
-					path += "model.mv1";
-					MV1::Load(path, &this->m_ObjGround, DX_LOADMODEL_PHYSICS_DISABLE);
-				}
-				path = MapPath;
-				if (path != "") {
-					path += "col.mv1";
-					MV1::Load(path, &this->m_ObjGroundCol, DX_LOADMODEL_PHYSICS_DISABLE);
-					this->m_ObjGroundCol.SetupCollInfo(64, 16, 64);
-				}
-				//‹ó
-				path = SkyPath;
-				if (path != "") {
-					path += "model.mv1";
-					MV1::Load(path, &this->m_ObjSky, DX_LOADMODEL_PHYSICS_DISABLE);
-					this->m_ObjSky.SetScale(Vector3DX::vget(10.f, 10.f, 10.f));
-					MV1SetDifColorScale(this->m_ObjSky.get(), GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
-				}
-				//
-				Init_Sub();
-			}
-			//
-			void			FirstExecute(void) noexcept {
-				FirstExecute_Sub();
-			}
-			//
-			void			Execute(void) noexcept {
-				Execute_Sub();
-			}
-			//
-			void			BG_Draw(void) noexcept {
-				if (this->m_ObjSky.IsActive()) {
-					SetUseLighting(FALSE);
-					this->m_ObjSky.DrawModel();
-					SetUseLighting(TRUE);
-				}
-				BG_Draw_Sub();
-			}
-			void			Shadow_Draw_Far(void) noexcept {
-				if (this->m_ObjGround.IsActive()) {
-					this->m_ObjGround.DrawModel();
-				}
-				Shadow_Draw_Far_Sub();
-			}
-			void			Shadow_Draw_NearFar(void) noexcept {
-				DrawCommon();
-				Shadow_Draw_NearFar_Sub();
-			}
-			void			Shadow_Draw(void) noexcept {
-				//DrawCommon();
-				Shadow_Draw_Sub();
-			}
-			void			Draw(void) noexcept {
-				DrawCommon();
-				Draw_Sub();
-			}
-			void			DrawFront(void) noexcept {
-				DrawFront_Sub();
-			}
-			//
-			void			Dispose(void) noexcept {
-				this->m_ObjSky.Dispose();
-				this->m_ObjGround.Dispose();
-				this->m_ObjGroundCol.Dispose();
-				Dispose_Sub();
-			}
-		};
-		//
-		class BackGroundClassMain : public BackGroundClassBase {
+		class BackGroundClassBase : public SingletonBase<BackGroundClassBase> {
 		private:
-			BuildControl				m_BuildControl;
+			friend class SingletonBase<BackGroundClassBase>;
+		private:
+			struct Blick {
+				Vector3DX m_Pos;
+				bool IsWall{false};
+			public:
+				Blick(int x, int y) noexcept {
+					m_Pos.x = (float)x;
+					m_Pos.y = (float)y;
+				}
+			};
+		private:
+			std::vector<std::vector<std::shared_ptr<Blick>>> m_Blick;
+		public://
+			const bool		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius, Vector3DX* Normal = nullptr) const noexcept;
 		public://
 			//
-			void			Init_Sub(void) noexcept override {
-				this->m_BuildControl.Load();//1.13•b
-				this->m_BuildControl.Init();//0.4•b
-			}
+			void			Init(const char* MapPath) noexcept;
 			//
-			void			Execute_Sub(void) noexcept override {
-				this->m_BuildControl.Execute();
-			}
+			void			Execute(void) noexcept;
 			//
-			void			Shadow_Draw_Far_Sub(void) noexcept override {}
-			void			Shadow_Draw_Sub(void) noexcept override {
-				this->m_BuildControl.ShadowDraw();
-			}
-			void			Draw_Sub(void) noexcept override {
-				this->m_BuildControl.Draw();
-			}
-			void			DrawFront_Sub(void) noexcept override {
-				this->m_BuildControl.DrawFront();
-			}
+			void			BG_Draw(void) noexcept;
+			void			Draw(void) noexcept;
+			void			DrawFront(void) noexcept;
 			//
-			void			Dispose_Sub(void) noexcept override {
-				this->m_BuildControl.Dispose();
-			}
+			void			Dispose(void) noexcept;
 		};
-		//
 	};
 };

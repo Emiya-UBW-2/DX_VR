@@ -3,37 +3,46 @@
 #include "../sub.hpp"
 
 #include "../MainScene/Player/Player.hpp"
+#include "../MainScene/BackGround/BackGround.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//
 		void			MainGameScene::Load_Sub(void) noexcept {
+			auto* PlayerMngr = PlayerManager::Instance();
 			//ロード
-			PlayerManager::Instance()->Init(Player_Num);
+			PlayerMngr->Init(Player_Num);
 			for (int i = 0;i < Player_Num;i++) {
-				auto& p = PlayerManager::Instance()->GetPlayer(i);
+				auto& p = PlayerMngr->GetPlayer(i);
 				p.SetChara(std::make_shared<CharacterObject>());
 			}
 			CommonBattleResource::Instance()->Load();
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
+			auto* PlayerMngr = PlayerManager::Instance();
 			CommonBattleResource::Instance()->Set();
+			Cam2DControl::Instance()->Set();
 			m_MainLoopPauseControl.Init();
 			for (int i = 0;i < Player_Num;i++) {
-				auto& p = PlayerManager::Instance()->GetPlayer(i);
+				auto& p = PlayerMngr->GetPlayer(i);
 				if (p.GetChara()) {
 					p.GetChara()->Init((PlayerID)i);
 				}
 			}
+			Vector3DX CamPos;CamPos.Set(0.f, 0.f, 64.f);
+			Cam2DControl::Instance()->SetCamPos(CamPos);
+			BackGroundClassBase::Instance()->Init("");
 			m_Range = 10.f;
 			m_SelAlpha = 0.f;
 			m_IsEnd = false;
 			m_Alpha = 1.f;
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
-			auto* SE = SoundPool::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
+			//auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();
 			auto* DrawParts = DXDraw::Instance();
+			auto& Chara = PlayerMngr->GetPlayer(0).GetChara();
 			if (GetIsFirstLoop()) {
 				m_Range = 10.f;
 				m_SelAlpha = 2.f;
@@ -79,27 +88,54 @@ namespace FPS_n2 {
 				return false;
 			}
 			//
+			BackGroundClassBase::Instance()->Execute();
+			//
 			for (int i = 0;i < Player_Num;i++) {
-				auto& p = PlayerManager::Instance()->GetPlayer(i);
+				auto& p = PlayerMngr->GetPlayer(i);
 				if (p.GetChara()) {
+					if (i == 0) {
+						InputControl MyInput;
+						MyInput.SetInputStart(0.f, 0.f);
+						MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
+						MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
+						MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
+						MyInput.SetInputPADS(PADS::MOVE_D, Pad->GetKey(PADS::MOVE_D).press());
+						MyInput.SetInputPADS(PADS::RUN, Pad->GetKey(PADS::RUN).press());
+						MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
+						MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press());
+						//
+						p.GetChara()->ExecuteInput(&MyInput);
+					}
+					else {
+
+					}
 					p.GetChara()->Execute();
 				}
 			}
+			//
+			Cam2DControl::Instance()->SetCamAim(Chara->GetPos());
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
 			m_MainLoopPauseControl.Dispose();
 			auto* SaveDataParts = SaveDataClass::Instance();
 			SaveDataParts->Save();//セーブ
+			BackGroundClassBase::Instance()->Dispose();
 		}
 		void			MainGameScene::MainDraw_Sub(void) noexcept {
-			DrawBox(0, 0, y_r(1920), y_r(1080), Gray75, TRUE);
+			auto* PlayerMngr = PlayerManager::Instance();
+			DrawBox(0, 0, y_r(1920), y_r(1080), Black, TRUE);
+
+			BackGroundClassBase::Instance()->BG_Draw();
+
+			BackGroundClassBase::Instance()->Draw();
 			for (int i = 0;i < Player_Num;i++) {
-				auto& p = PlayerManager::Instance()->GetPlayer(i);
+				auto& p = PlayerMngr->GetPlayer(i);
 				if (p.GetChara()) {
 					p.GetChara()->Draw();
 				}
 			}
+			BackGroundClassBase::Instance()->DrawFront();
 		}
 		void			MainGameScene::DrawUI_Base_Sub(void) noexcept {
 			auto* Fonts = FontPool::Instance();
@@ -124,14 +160,15 @@ namespace FPS_n2 {
 		}
 		//使い回しオブジェ系
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
+			auto* PlayerMngr = PlayerManager::Instance();
 			for (int i = 0;i < Player_Num;i++) {
-				auto& p = PlayerManager::Instance()->GetPlayer(i);
+				auto& p = PlayerMngr->GetPlayer(i);
 				if (p.GetChara()) {
 					p.GetChara()->Dispose();
 				}
 				p.Dispose();
 			}
-			PlayerManager::Instance()->Dispose();
+			PlayerMngr->Dispose();
 			CommonBattleResource::Instance()->Dispose();
 		}
 		//

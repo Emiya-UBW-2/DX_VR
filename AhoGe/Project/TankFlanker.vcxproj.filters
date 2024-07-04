@@ -34,6 +34,9 @@
     <Filter Include="ソース ファイル\CommonScene\UI">
       <UniqueIdentifier>{7aaa1d2a-1d70-4d92-9079-12f1474a38f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\MainScene\BackGround">
+      <UniqueIdentifier>{5cade50c-ff66-48e8-a813-f9ae5cff43fb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\sub.hpp">
@@ -69,6 +72,9 @@
     <ClInclude Include="source\MainScene\Object\Character.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
+    <ClInclude Include="source\MainScene\BackGround\BackGround.hpp">
+      <Filter>ソース ファイル\MainScene\BackGround</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -94,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="source\MainScene\Object\Character.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\BackGround\BackGround.cpp">
+      <Filter>ソース ファイル\MainScene\BackGround</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

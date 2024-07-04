@@ -3,6 +3,7 @@
 #include "MainScene/Player/Player.hpp"
 
 const FPS_n2::Sceneclass::CommonBattleResource* SingletonBase<FPS_n2::Sceneclass::CommonBattleResource>::m_Singleton = nullptr;
+const FPS_n2::Sceneclass::Cam2DControl* SingletonBase<FPS_n2::Sceneclass::Cam2DControl>::m_Singleton = nullptr;
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -37,5 +38,19 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::TimeUp);
 		}
 		//
+		void Cam2DControl::Set(void) noexcept {}
+		void Cam2DControl::Update(void) noexcept {}
+		void Cam2DControl::Dispose(void) noexcept {}
+		//
+		const Vector3DX Convert2DtoDisp(const Vector3DX& Pos2D) {
+			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
+			Vector3DX Ret;
+
+			Ret.x = y_r(1920 / 2 + (1080 / 2) * (Pos2D.x - CamPos.x) / CamPos.z);
+			Ret.y = y_r(1080 / 2 - (1080 / 2) * (Pos2D.y - CamPos.y) / CamPos.z);
+			Ret.z = Pos2D.z;
+
+			return Ret;
+		}
 	};
 };
