@@ -17,6 +17,7 @@ namespace FPS_n2 {
 			int				m_ObjType{ 0 };
 			bool			m_IsDraw{ true };
 			bool			m_IsDelete{ false };
+			Vector3DX		m_PrevPos{};//前フレームの座標
 			Vector3DX		m_Pos{};//座標
 			Vector3DX		m_Vec{};//移動ベクトル
 			float			m_Radius{ 1.f };//オブジェクトの半径
@@ -26,12 +27,16 @@ namespace FPS_n2 {
 		public:
 			void SetObjName(std::string_view value) noexcept { this->m_ObjName = value; }
 			void SetObjType(int value) noexcept { this->m_ObjType = value; }
+			void SetPos(const Vector3DX& value) noexcept { this->m_Pos = value; }
 		public:
 			const auto& GetObjName(void) const noexcept { return this->m_ObjName; }
 			const auto& GetObjType(void) const noexcept { return this->m_ObjType; }
 			const auto& GetIsDraw(void) const noexcept { return this->m_IsDraw; }
 			const auto& GetIsDelete(void) const noexcept { return this->m_IsDelete; }
 			const auto& GetPos(void) const noexcept { return this->m_Pos; }
+
+			const auto& GetPrevPos(void) const noexcept { return this->m_PrevPos; }
+
 			const auto& GetRadius(void) const noexcept { return this->m_Radius; }
 		protected:
 			void SetVec(const Vector3DX& value) noexcept { this->m_Vec = value; }

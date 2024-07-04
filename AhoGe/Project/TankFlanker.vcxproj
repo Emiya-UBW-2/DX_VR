@@ -11,6 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\CommonScene\Object\Base2DObject.hpp" />
+    <ClInclude Include="source\CommonScene\Object\Object2DManager.hpp" />
     <ClInclude Include="source\CommonScene\UI\CommonUIControl.hpp" />
     <ClInclude Include="source\Enums.hpp" />
     <ClInclude Include="source\Header.hpp" />
@@ -25,6 +27,9 @@
     <ClInclude Include="source\sub.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\CommonScene\Object\Base2DObject.cpp" />
+    <ClCompile Include="source\CommonScene\Object\Object2DManager.cpp" />
+    <ClCompile Include="source\CommonScene\UI\CommonUIControl.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\MainScene\BackGround\BackGround.cpp" />
     <ClCompile Include="source\MainScene\Object\Character.cpp" />

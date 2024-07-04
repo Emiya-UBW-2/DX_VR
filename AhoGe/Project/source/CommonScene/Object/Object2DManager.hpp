@@ -6,8 +6,6 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class Base2DObject;
-
 		typedef std::shared_ptr<Base2DObject> SharedObj2D;
 
 		class Object2DManager : public SingletonBase<Object2DManager> {
@@ -27,7 +25,12 @@ namespace FPS_n2 {
 			void			AddObject(const SharedObj2D& NewObj) noexcept;
 			SharedObj2D*	GetObj(int ModelType, int num) noexcept;
 			void			DelObj(const SharedObj2D& ptr) noexcept;
+
 		public:
+			void CheckColObject(const Base2DObject* ptr) noexcept;
+
+		public:
+			void			ExecuteBeforeObject(void) noexcept;
 			void			ExecuteObject(void) noexcept;
 			void			Draw() noexcept;
 			void			DeleteAll(void) noexcept;

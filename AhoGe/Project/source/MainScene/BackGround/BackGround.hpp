@@ -11,6 +11,8 @@ namespace FPS_n2 {
 			struct Blick {
 				Vector3DX m_Pos;
 				bool IsWall{false};
+
+				bool HIT[4]{};
 			public:
 				Blick(int x, int y) noexcept {
 					m_Pos.x = (float)x;

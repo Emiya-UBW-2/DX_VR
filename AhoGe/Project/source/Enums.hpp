@@ -3,29 +3,30 @@
 
 namespace FPS_n2 {
 	//íËêî
-	static const float Frame_Rate{60.f};
+	static const float Frame_Rate{ 60.f };
 
-	static const float Scale_Rate{12.5f};
+	static const float Scale_Rate{ 12.5f };
 
 	namespace Sceneclass {
 		enum class SoundEnum {
 			RunFoot = (int)SoundEnumCommon::Num,
 			//
-			Env,
-			Env2,
-			//
 			CountDown,
 			Second,
 			OneMunute,
 			TimeUp,
-
+			//
 		};
 		enum class CharaTypeID {
 			Team,
 			Enemy,
 		};
 
-		static const int Player_Num{16};
+		enum class Object2DType {
+			Human,
+			Stone,
+		};
+		static const int Player_Num{ 16 };
 	};
 
 	typedef char PlayerID;

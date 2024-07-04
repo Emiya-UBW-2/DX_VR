@@ -6,13 +6,11 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class MainGameScene : public TEMPSCENE {
+			const PlayerID				m_MyPlayerID{ 0 };
 		private:
-			MainLoopPauseControl							m_MainLoopPauseControl;			//ポーズメニュー
-
-			float						m_SelAlpha{0.f};
-			float						m_Range{1.f};
-			bool						m_IsEnd{false};
-			float						m_Alpha{0.f};
+			bool						m_IsEnd{ false };
+			float						m_Alpha{ 0.f };
+			bool						m_IsRetire{ false };
 		private:
 		public:
 			MainGameScene(void) noexcept { Set3DActive(false); }

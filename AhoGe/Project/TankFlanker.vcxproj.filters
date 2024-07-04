@@ -75,6 +75,12 @@
     <ClInclude Include="source\MainScene\BackGround\BackGround.hpp">
       <Filter>ソース ファイル\MainScene\BackGround</Filter>
     </ClInclude>
+    <ClInclude Include="source\CommonScene\Object\Object2DManager.hpp">
+      <Filter>ソース ファイル\CommonScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\CommonScene\Object\Base2DObject.hpp">
+      <Filter>ソース ファイル\CommonScene\Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -103,6 +109,15 @@
     </ClCompile>
     <ClCompile Include="source\MainScene\BackGround\BackGround.cpp">
       <Filter>ソース ファイル\MainScene\BackGround</Filter>
+    </ClCompile>
+    <ClCompile Include="source\CommonScene\Object\Object2DManager.cpp">
+      <Filter>ソース ファイル\CommonScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\CommonScene\Object\Base2DObject.cpp">
+      <Filter>ソース ファイル\CommonScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\CommonScene\UI\CommonUIControl.cpp">
+      <Filter>ソース ファイル\CommonScene\UI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

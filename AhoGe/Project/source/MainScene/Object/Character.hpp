@@ -1,26 +1,22 @@
 #pragma once
 #include	"../../Header.hpp"
 #include	"../../sub.hpp"
+#include "../../CommonScene/Object/Base2DObject.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class CharacterObject {
-		private:
-			class Impl;
-			Impl *m_Param;
-			Impl* GetParam() noexcept { return m_Param; }
-			const Impl* GetParam() const noexcept { return m_Param; }
+		class CharacterObject : public Base2DObject {
+			Vector3DX m_InputVec{};
+
 		public:
 			CharacterObject();
 			~CharacterObject();
 		public:
-			const Vector3DX& GetPos() const noexcept;
+			void		ExecuteInput(InputControl* MyInput) noexcept;
 		public:
-			void Init(PlayerID MyCharaID) noexcept;
-			void ExecuteInput(InputControl* MyInput) noexcept;
-			void Execute() noexcept;
-			void Draw() noexcept;
-			void Dispose() noexcept;
+			void Execute_Sub() noexcept override;
+			void Draw_Sub() noexcept override;
+			void Dispose_Sub() noexcept override;
 		};
 	};
 };

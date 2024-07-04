@@ -9,9 +9,6 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		void			CommonBattleResource::Load(void) noexcept {
 			auto* SE = SoundPool::Instance();
-			SE->Add((int)SoundEnum::Env, 1, "data/Sound/SE/envi.wav", false);
-			SE->Add((int)SoundEnum::Env2, 1, "data/Sound/SE/envi2.wav", false);
-
 			SE->Add((int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
 			SE->Add((int)SoundEnum::CountDown, 2, "data/Sound/SE/CountDown.wav", false);
 
@@ -29,8 +26,6 @@ namespace FPS_n2 {
 		}
 		void			CommonBattleResource::Dispose(void) noexcept {
 			auto* SE = SoundPool::Instance();
-			SE->Delete((int)SoundEnum::Env);
-			SE->Delete((int)SoundEnum::Env2);
 			SE->Delete((int)SoundEnum::RunFoot);
 			SE->Delete((int)SoundEnum::CountDown);
 			SE->Delete((int)SoundEnum::Second);
@@ -46,8 +41,8 @@ namespace FPS_n2 {
 			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
 			Vector3DX Ret;
 
-			Ret.x = y_r(1920 / 2 + (1080 / 2) * (Pos2D.x - CamPos.x) / CamPos.z);
-			Ret.y = y_r(1080 / 2 - (1080 / 2) * (Pos2D.y - CamPos.y) / CamPos.z);
+			Ret.x = (float)y_r(1920 / 2 + (1080 / 2) * (Pos2D.x - CamPos.x) / CamPos.z);
+			Ret.y = (float)y_r(1080 / 2 - (1080 / 2) * (Pos2D.y - CamPos.y) / CamPos.z);
 			Ret.z = Pos2D.z;
 
 			return Ret;

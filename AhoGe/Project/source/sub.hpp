@@ -23,7 +23,7 @@ namespace FPS_n2 {
 		public:
 			const auto& GetCamPos() const noexcept { return m_Pos; }
 
-			void			SetCamPos(const Vector3DX& Pos) noexcept{
+			void			SetCamPos(const Vector3DX& Pos) noexcept {
 				m_Pos = Pos;
 			}
 			void			SetCamAim(const Vector3DX& Pos) noexcept {
