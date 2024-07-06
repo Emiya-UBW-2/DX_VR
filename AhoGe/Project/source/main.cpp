@@ -46,10 +46,16 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Titlescene->SetNextSceneList(1, TestGamescene);
 	MainGamescene->SetNextSceneList(0, Titlescene);
 	TestGamescene->SetNextSceneList(0, Titlescene);
-
+	//*
 	SceneControl::Instance()->AddList(Titlescene);
 	SceneControl::Instance()->AddList(MainGamescene);
 	SceneControl::Instance()->AddList(TestGamescene);
+	//*/
+	/*
+	SceneControl::Instance()->AddList(MainGamescene);
+	SceneControl::Instance()->AddList(Titlescene);
+	SceneControl::Instance()->AddList(TestGamescene);
+	//*/
 	//Å‰‚Ì“Ç‚İ‚İ
 	if (!DXLib_refParts->MainLogic()) { return 0; }
 	return 0;

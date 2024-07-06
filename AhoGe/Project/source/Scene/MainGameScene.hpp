@@ -2,6 +2,7 @@
 #include	"../Header.hpp"
 #include "../CommonScene/UI/CommonUIControl.hpp"
 #include "../MainScene/MainSceneSub.hpp"
+#include "../MainScene/Player/CPU.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -11,6 +12,7 @@ namespace FPS_n2 {
 			bool						m_IsEnd{ false };
 			float						m_Alpha{ 0.f };
 			bool						m_IsRetire{ false };
+			std::array<std::shared_ptr<AIControl>, Player_Num> m_AI;
 		private:
 		public:
 			MainGameScene(void) noexcept { Set3DActive(false); }

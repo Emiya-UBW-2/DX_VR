@@ -15,7 +15,8 @@ namespace FPS_n2 {
 			Impl(void) noexcept {}
 			~Impl(void) noexcept {}
 		public:
-			void		Init() noexcept {
+			void		Init(PlayerID MyCharaID) noexcept {
+				m_MyCharaID = MyCharaID;
 			}
 			//
 			void		Execute_Before() noexcept {
@@ -34,7 +35,7 @@ namespace FPS_n2 {
 		}
 		//
 		void AIControl::Init(PlayerID MyCharaID) noexcept {
-			this->GetParam()->Init();
+			this->GetParam()->Init(MyCharaID);
 		}
 		void AIControl::Execute(InputControl* MyInput) noexcept {
 			//return;

@@ -11,16 +11,20 @@ namespace FPS_n2 {
 			Execute_Sub();
 
 			//Õ“Ëž‚Ý‚Ì‰‰ŽZ
-			m_Pos += m_Vec / DrawParts->GetFps();
 			float HalfLen = 0.5f * ((64.f * 64.f) / (1080 / 2));
 
-			if ((m_ColTarget == ColTarget::All) || (m_ColTarget == ColTarget::Wall)) {
-				BackGroundClassBase::Instance()->CheckLinetoMap(m_PrevPos, &m_Pos, HalfLen);
+			int Max = (int)std::max(1.f, 240.f / std::max(30.f, DrawParts->GetFps()));
+			for (int i = 0;i < Max;i++) {
+				m_PrevPos = m_Pos;
+				m_Pos += m_Vec * ((1.f / (float)Max) / DrawParts->GetFps());
+				if ((m_ColTarget == ColTarget::All) || (m_ColTarget == ColTarget::Wall)) {
+					BackGroundClassBase::Instance()->CheckLinetoMap(m_PrevPos, &m_Pos, HalfLen);
+				}
 			}
-			if ((m_ColTarget == ColTarget::All) || (m_ColTarget == ColTarget::None)) {
+
+			if ((m_ColTarget == ColTarget::All) || (m_ColTarget == ColTarget::Object)) {
 				Obj2DParts->CheckColObject(this);
 			}
-			m_PrevPos = m_Pos;
 		}
 	};
 };

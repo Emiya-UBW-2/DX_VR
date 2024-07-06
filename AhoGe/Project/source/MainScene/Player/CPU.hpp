@@ -23,8 +23,6 @@ namespace FPS_n2 {
 			void Execute(InputControl* MyInput) noexcept;
 			void Draw() noexcept {}
 			void Dispose() noexcept {}
-		public:
-			const bool CannotRepop() noexcept;
 		};
 	};
 };

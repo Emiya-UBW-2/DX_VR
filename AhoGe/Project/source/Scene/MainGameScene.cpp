@@ -19,6 +19,8 @@ namespace FPS_n2 {
 				p.SetChara(std::make_shared<CharacterObject>());
 				Obj2DParts->AddObject(p.GetChara());
 				p.GetChara()->SetObjType((int)Object2DType::Human);
+
+				m_AI[i] = std::make_shared<AIControl>();
 			}
 			//
 			CommonBattleResource::Instance()->Load();
@@ -31,7 +33,7 @@ namespace FPS_n2 {
 			Cam2DControl::Instance()->Set();
 			Vector3DX CamPos;CamPos.Set(0.f, 0.f, 64.f);
 			Cam2DControl::Instance()->SetCamPos(CamPos);
-			BackGroundClassBase::Instance()->Init("");
+			BackGroundClassBase::Instance()->Init("map1");
 			//ƒ|[ƒY
 			m_IsRetire = false;
 			ButtonParts->ResetSel();
@@ -51,10 +53,15 @@ namespace FPS_n2 {
 				Obj2DParts->AddObject(p.GetChara());
 				p.GetChara()->SetObjType((int)Object2DType::Human);
 			}
-			for (int i = 1; i < Player_Num; i++) {
+			for (int i = 0; i < Player_Num; i++) {
 				Vector3DX Pos;Pos.Set((float)i*10.f, (float)i*10.f, 0.f);
 				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
 				p.GetChara()->SetPos(Pos);
+
+				if (i != 0) {
+					m_AI[i]->Init((PlayerID)i);
+				}
+				p.GetChara()->SetPlayerID((PlayerID)i);
 			}
 			//
 			m_IsEnd = false;
@@ -127,7 +134,8 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide(PADS::MOVE_A, "");
 					KeyGuide->AddGuide(PADS::MOVE_D, "");
 					KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizeParts->Get(9900));
-					KeyGuide->AddGuide(PADS::RUN, LocalizeParts->Get(9902));
+					KeyGuide->AddGuide(PADS::RUN, LocalizePool::Instance()->Get(9902));
+					KeyGuide->AddGuide(PADS::WALK, LocalizePool::Instance()->Get(9903));
 					KeyGuide->AddGuide(PADS::JUMP, LocalizeParts->Get(9905));
 					KeyGuide->AddGuide(PADS::SHOT, LocalizeParts->Get(9906));
 				});
@@ -142,7 +150,7 @@ namespace FPS_n2 {
 			BackGroundClassBase::Instance()->Execute();
 			//
 			for (int i = 0;i < Player_Num;i++) {
-				auto& p = PlayerMngr->GetPlayer(i);
+				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
 				if (p.GetChara()) {
 					if (i == 0) {
 						InputControl MyInput;
@@ -152,19 +160,27 @@ namespace FPS_n2 {
 						MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
 						MyInput.SetInputPADS(PADS::MOVE_D, Pad->GetKey(PADS::MOVE_D).press());
 						MyInput.SetInputPADS(PADS::RUN, Pad->GetKey(PADS::RUN).press());
+						MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 						MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
 						MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press());
 						//
 						p.GetChara()->ExecuteInput(&MyInput);
 					}
 					else {
-
+						InputControl MyInput;
+						m_AI[i]->Execute(&MyInput);
+						//
+						p.GetChara()->ExecuteInput(&MyInput);
 					}
 				}
 			}
 			Obj2DParts->ExecuteObject();
 			//
 			Cam2DControl::Instance()->SetCamAim(Chara->GetPos());
+			//
+			BackGroundClassBase::Instance()->SetPointLight(Chara->GetPos());
+			BackGroundClassBase::Instance()->SetAmbientLight(120.f, deg2rad(30));
+			BackGroundClassBase::Instance()->SetupShadow();
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
@@ -183,13 +199,7 @@ namespace FPS_n2 {
 		}
 		void			MainGameScene::MainDraw_Sub(void) noexcept {
 			auto Obj2DParts = Object2DManager::Instance();
-			auto* PlayerMngr = PlayerManager::Instance();
-			DrawBox(0, 0, y_r(1920), y_r(1080), Black, TRUE);
-
-			BackGroundClassBase::Instance()->BG_Draw();
-
 			BackGroundClassBase::Instance()->Draw();
-
 			Obj2DParts->Draw();
 			BackGroundClassBase::Instance()->DrawFront();
 		}
