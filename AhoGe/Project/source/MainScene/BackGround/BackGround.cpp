@@ -1,48 +1,61 @@
 #include	"BackGround.hpp"
 
-#include "BackGround.hpp"
 const FPS_n2::Sceneclass::BackGroundClassBase* SingletonBase<FPS_n2::Sceneclass::BackGroundClassBase>::m_Singleton = nullptr;
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		const float BackGroundClassBase::CheckHideShadow(const Vector3DX & Pos, float Radius) noexcept {
+		const float BackGroundClassBase::CheckHideShadow(const Vector3DX & PosA, const Vector3DX & PosB, float Radius) noexcept {
+			float HalfLen = 0.5f * ((64.f * 64.f) / (1080 / 2));
+
 			float Ret = 1.f;
-			for (auto& s : m_ShadowBoxes) {
-				if (Ret <= 0.f) { break; }
-				auto GetPer = [&]() {
-					if (GetHitSphereToTriangle(Pos, Radius, s.Position[0], s.Position[1], s.Position[3]) ||
-						GetHitSphereToTriangle(Pos, Radius, s.Position[1], s.Position[2], s.Position[3])) {
+			for (auto& b : m_Blick) {
+				for (auto& y : b) {
+					//•Ç‚Å‚Í‚È‚¢
+					if (!y->IsWall) { continue; }
+					//•Ó‚ð“o˜^
+					Vector3DX Box[4];
+					Box[0].Set(y->m_Pos.x - HalfLen, y->m_Pos.y - HalfLen, 0.f);
+					Box[1].Set(y->m_Pos.x + HalfLen, y->m_Pos.y - HalfLen, 0.f);
+					Box[2].Set(y->m_Pos.x + HalfLen, y->m_Pos.y + HalfLen, 0.f);
+					Box[3].Set(y->m_Pos.x - HalfLen, y->m_Pos.y + HalfLen, 0.f);
+					auto GetPer = [&]() {
+						if (GetHitCapsuleToTriangle(PosA, PosB, Radius, Box[0], Box[1], Box[3]) ||
+							GetHitCapsuleToTriangle(PosA, PosB, Radius, Box[1], Box[2], Box[3])) {
 
-						if (GetHitSphereToTriangle(Pos, 1.f, s.Position[0], s.Position[1], s.Position[3]) ||
-							GetHitSphereToTriangle(Pos, 1.f, s.Position[1], s.Position[2], s.Position[3])) {
-							return 0.0f;
-						}
+							if (GetHitCapsuleToTriangle(PosA, PosB, 1.f, Box[0], Box[1], Box[3]) ||
+								GetHitCapsuleToTriangle(PosA, PosB, 1.f, Box[1], Box[2], Box[3])) {
+								return 0.0f;
+							}
 
-						SEGMENT_POINT_RESULT Result;
-						float P = 2.f;
-						for (int i = 0;i < 4;i++) {
-							VECTOR Pos1t = s.Position[i].get();
-							VECTOR Pos2t = s.Position[(i + 1) % 4].get();
-							VECTOR PosAt = Pos.get();
-							Segment_Point_Analyse(&Pos1t, &Pos2t, &PosAt, &Result);
-							float ret = (std::sqrt(Result.Seg_Point_MinDist_Square) / Radius);
-							if (ret < 1.f) {
-								if (P > ret) {
-									P = ret;
+							SEGMENT_SEGMENT_RESULT Result;
+							float P = 2.f;
+							for (int i = 0;i < 4;i++) {
+								VECTOR Pos1t = Box[i].get();
+								VECTOR Pos2t = Box[(i + 1) % 4].get();
+								VECTOR PosAt = PosA.get();
+								VECTOR PosBt = PosB.get();
+								Segment_Segment_Analyse(&Pos1t, &Pos2t, &PosAt, &PosBt, &Result);
+								float ret = (std::sqrt(Result.SegA_SegB_MinDist_Square) / Radius);
+								if (ret < 1.f) {
+									if (P > ret) {
+										P = ret;
+									}
 								}
 							}
+							if (P <= 1.f) {
+								return P;
+							}
+							return 0.0f;
 						}
-						if (P <= 1.f) {
-							return P;
-						}
-						return 0.0f;
+						return 1.0f;
+					};
+					float tmp = GetPer();
+					if (Ret > tmp) {
+						Ret = tmp;
 					}
-					return 1.0f;
-				};
-				float tmp = GetPer();
-				if (Ret > tmp) {
-					Ret = tmp;
+					if (Ret <= 0.f) { break; }
 				}
+				if (Ret <= 0.f) { break; }
 			}
 			return Ret;
 		}
@@ -399,7 +412,6 @@ namespace FPS_n2 {
 		void BackGroundClassBase::SetupShadow(void) noexcept {
 			auto* OptionParts = OPTION::Instance();
 			if (OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) { return; }
-			m_ShadowBoxes.clear();
 			m_ShadowHandle.SetDraw_Screen(false);
 			{
 				DrawBox_2D(0, 0, y_r(1920.f*ShadowPer), y_r(1080.f*ShadowPer), White, true);
@@ -569,21 +581,17 @@ namespace FPS_n2 {
 		//ƒ|ƒCƒ“ƒg‰e‚ð•`‰æ
 		void BackGroundClassBase::DrawPointShadow(int x, int y) noexcept {
 			auto DispPos = Convert2DtoDisp(m_Blick.at(x).at(y)->m_Pos);
-
-
-			//ƒxƒNƒgƒ‹‚ÌxyŠÔ‚ÌŠp“x‚ðŽæ“¾
-			auto GetRadVec2Vec = [](const Vector3DX& vec1, const Vector3DX& vec2) { return std::atan2f(vec1.x - vec2.x, vec1.y - vec2.y); };
 			auto Draw = [&](const Vector3DX& sidePos, const Vector3DX& postmp1, const Vector3DX& postmp2, float radsub) {
 				if (std::cos(GetRadVec2Vec(sidePos, m_PointLightPos) - radsub) > 0.f) {
 					auto length = 1920.f;
 					float lightrad1 = GetRadVec2Vec(postmp1, m_PointLightPos);
 					float lightrad2 = GetRadVec2Vec(postmp2, m_PointLightPos);
+					Vector3DX Position[4]{ };
 
-					m_ShadowBoxes.resize(m_ShadowBoxes.size() + 1);
-					m_ShadowBoxes.back().Position[0].Set(postmp1.x + std::sin(lightrad1)*length, postmp1.y + std::cos(lightrad1)*length, 0.f);
-					m_ShadowBoxes.back().Position[1].Set(postmp2.x + std::sin(lightrad2)*length, postmp2.y + std::cos(lightrad2)*length, 0.f);
-					m_ShadowBoxes.back().Position[2] = postmp2;
-					m_ShadowBoxes.back().Position[3] = postmp1;
+					Position[0].Set(postmp1.x + std::sin(lightrad1)*length, postmp1.y + std::cos(lightrad1)*length, 0.f);
+					Position[1].Set(postmp2.x + std::sin(lightrad2)*length, postmp2.y + std::cos(lightrad2)*length, 0.f);
+					Position[2] = postmp2;
+					Position[3] = postmp1;
 
 					float XMax = -1000000.f;
 					float XMin = 1000000.f;
@@ -594,7 +602,7 @@ namespace FPS_n2 {
 					int ymin = -1;
 					int ymax = -1;
 					for (int i = 0;i < 4;i++) {
-						auto& p = m_ShadowBoxes.back().Position[i];
+						auto& p = Position[i];
 						if (XMax <= p.x) {
 							XMax = p.x;
 							xmax = i;
@@ -613,16 +621,16 @@ namespace FPS_n2 {
 							ymin = i;
 						}
 					}
-					m_ShadowBoxes.back().Position[xmin].x -= 3;
-					m_ShadowBoxes.back().Position[ymin].y -= 3;
-					m_ShadowBoxes.back().Position[xmax].x += 3;
-					m_ShadowBoxes.back().Position[ymax].y += 3;
+					Position[xmin].x -= 3;
+					Position[ymin].y -= 3;
+					Position[xmax].x += 3;
+					Position[ymax].y += 3;
 
 					DrawModiGraph(
-						m_ShadowBoxes.back().Position[0].x*ShadowPer, m_ShadowBoxes.back().Position[0].y*ShadowPer,
-						m_ShadowBoxes.back().Position[1].x*ShadowPer, m_ShadowBoxes.back().Position[1].y*ShadowPer,
-						m_ShadowBoxes.back().Position[2].x*ShadowPer, m_ShadowBoxes.back().Position[2].y*ShadowPer,
-						m_ShadowBoxes.back().Position[3].x*ShadowPer, m_ShadowBoxes.back().Position[3].y*ShadowPer,
+						Position[0].x*ShadowPer, Position[0].y*ShadowPer,
+						Position[1].x*ShadowPer, Position[1].y*ShadowPer,
+						Position[2].x*ShadowPer, Position[2].y*ShadowPer,
+						Position[3].x*ShadowPer, Position[3].y*ShadowPer,
 						m_MapChip.at(0).get(), FALSE);
 				}
 			};

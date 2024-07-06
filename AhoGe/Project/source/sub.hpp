@@ -37,7 +37,9 @@ namespace FPS_n2 {
 			void			Dispose(void) noexcept;
 		public:
 		};
-
+		//空間上から画面上への変換
 		extern const Vector3DX Convert2DtoDisp(const Vector3DX& Pos2D);
+		//ベクトルのxy間の角度を取得
+		extern const float GetRadVec2Vec(const Vector3DX& vec1, const Vector3DX& vec2);
 	};
 };

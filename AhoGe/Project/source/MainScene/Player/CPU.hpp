@@ -4,20 +4,20 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		enum class ENUM_AI_PHASE {
-			Normal,
-			Shot,
-			Dead,
-		};
-
 		class AIControl {
 		private:
 			class Impl;
 			Impl *m_Param;
+			const Impl* GetParam() const noexcept { return m_Param; }
 			Impl* GetParam() noexcept { return m_Param; }
 		public:
 			AIControl();
 			~AIControl();
+		public:
+			const float& GetViewRad() const noexcept;
+
+			const bool IsCaution() const noexcept;
+			const bool IsAlert() const noexcept;
 		public:
 			void Init(PlayerID MyCharaID) noexcept;
 			void Execute(InputControl* MyInput) noexcept;

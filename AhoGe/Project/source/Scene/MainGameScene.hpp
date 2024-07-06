@@ -13,6 +13,8 @@ namespace FPS_n2 {
 			float						m_Alpha{ 0.f };
 			bool						m_IsRetire{ false };
 			std::array<std::shared_ptr<AIControl>, Player_Num> m_AI;
+			GraphHandle					m_Watch;
+			Vector3DX					m_CamAddPos;
 		private:
 		public:
 			MainGameScene(void) noexcept { Set3DActive(false); }

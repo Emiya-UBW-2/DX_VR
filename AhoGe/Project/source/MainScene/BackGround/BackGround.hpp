@@ -61,7 +61,7 @@ namespace FPS_n2 {
 			float ShadowPer = 0.5f;
 			GraphHandle m_ShadowHandle;
 		public://
-			const float		CheckHideShadow(const Vector3DX& Pos, float Radius) noexcept;
+			const float		CheckHideShadow(const Vector3DX & PosA, const Vector3DX & PosB, float Radius) noexcept;
 
 			const bool		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius) noexcept;
 

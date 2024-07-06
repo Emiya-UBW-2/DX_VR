@@ -47,5 +47,7 @@ namespace FPS_n2 {
 
 			return Ret;
 		}
+
+		const float GetRadVec2Vec(const Vector3DX& vec1, const Vector3DX& vec2) { return std::atan2f(vec1.x - vec2.x, vec1.y - vec2.y); }
 	};
 };

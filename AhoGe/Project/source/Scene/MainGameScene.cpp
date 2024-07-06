@@ -24,6 +24,7 @@ namespace FPS_n2 {
 			}
 			//
 			CommonBattleResource::Instance()->Load();
+			m_Watch = GraphHandle::Load("data/UI/Watch.png");
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
@@ -134,10 +135,11 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide(PADS::MOVE_A, "");
 					KeyGuide->AddGuide(PADS::MOVE_D, "");
 					KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizeParts->Get(9900));
-					KeyGuide->AddGuide(PADS::RUN, LocalizePool::Instance()->Get(9902));
-					KeyGuide->AddGuide(PADS::WALK, LocalizePool::Instance()->Get(9903));
+					KeyGuide->AddGuide(PADS::RUN, LocalizeParts->Get(9902));
+					KeyGuide->AddGuide(PADS::WALK, LocalizeParts->Get(9903));
 					KeyGuide->AddGuide(PADS::JUMP, LocalizeParts->Get(9905));
 					KeyGuide->AddGuide(PADS::SHOT, LocalizeParts->Get(9906));
+					KeyGuide->AddGuide(PADS::AIM, LocalizeParts->Get(9908));
 				});
 			if (this->m_IsRetire) {
 				m_IsEnd = true;
@@ -165,18 +167,30 @@ namespace FPS_n2 {
 						MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press());
 						//
 						p.GetChara()->ExecuteInput(&MyInput);
+						//
+						auto DispPos = Convert2DtoDisp(p.GetChara()->GetPos());
+						p.GetChara()->SetViewRad(-GetRadVec2Vec(DispPos*((float)y_UIMs(1080) / (float)y_r(1080)), Vector3DX::vget((float)Pad->GetMS_X(), (float)Pad->GetMS_Y(), 0.f)));
 					}
 					else {
 						InputControl MyInput;
 						m_AI[i]->Execute(&MyInput);
 						//
 						p.GetChara()->ExecuteInput(&MyInput);
+
+						p.GetChara()->SetViewRad(m_AI[i]->GetViewRad());
 					}
 				}
 			}
 			Obj2DParts->ExecuteObject();
 			//
-			Cam2DControl::Instance()->SetCamAim(Chara->GetPos());
+			Vector3DX CamPos = Vector3DX::zero();
+			if (Pad->GetKey(PADS::AIM).press()) {
+				float ViewLimit = 10.f * ((64.f * 64.f) / (1080 / 2));
+				CamPos.Set(std::sin(Chara->GetBodyRad()), std::cos(Chara->GetBodyRad()), 0.f);
+				CamPos *= ViewLimit;
+			}
+			Easing(&m_CamAddPos, CamPos, 0.9f, EasingType::OutExpo);
+			Cam2DControl::Instance()->SetCamAim(Chara->GetPos() + m_CamAddPos);
 			//
 			BackGroundClassBase::Instance()->SetPointLight(Chara->GetPos());
 			BackGroundClassBase::Instance()->SetAmbientLight(120.f, deg2rad(30));
@@ -198,10 +212,43 @@ namespace FPS_n2 {
 			BackGroundClassBase::Instance()->Dispose();
 		}
 		void			MainGameScene::MainDraw_Sub(void) noexcept {
+			auto* PlayerMngr = PlayerManager::Instance();
 			auto Obj2DParts = Object2DManager::Instance();
+			//
 			BackGroundClassBase::Instance()->Draw();
+			//
+			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
+			//
+			for (int i = 0;i < Player_Num;i++) {
+				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
+				if (p.GetChara() && (p.GetChara()->CanLookPlayer0())) {
+					auto DispPos = Convert2DtoDisp(p.GetChara()->GetPos());
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(92.f), 0, 255));
+					double Deg = (double)p.GetChara()->GetViewRad() / (DX_PI*2.0)*100.0;
+					double Watch;
+					if (i == 0) {
+						SetDrawBright(0, 0, 255);
+						Watch = 15.0 / 360.0*100.0;
+					}
+					else {
+						if (m_AI[i]->IsCaution()) {
+							SetDrawBright(255, 255, 0);//
+						}
+						else {
+							SetDrawBright(0, 255, 0);//
+						}
+						Watch = 45.0 / 360.0*100.0;
+					}
+					DrawCircleGauge((int)DispPos.x, (int)DispPos.y, Deg + Watch, m_Watch.get(), Deg - Watch, (double)y_r(5.f*128.f* 64.f / CamPos.z) / 128.0);
+				}
+			}
+			SetDrawBright(255, 255, 255);
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+			//
 			Obj2DParts->Draw();
+			//
 			BackGroundClassBase::Instance()->DrawFront();
+			//
 		}
 		void			MainGameScene::DrawUI_Base_Sub(void) noexcept {
 			auto* Fonts = FontPool::Instance();
@@ -232,6 +279,7 @@ namespace FPS_n2 {
 			PlayerMngr->Dispose();
 			Obj2DParts->DeleteAll();
 			CommonBattleResource::Instance()->Dispose();
+			m_Watch.Dispose();
 		}
 		//
 	};

@@ -7,6 +7,7 @@
 			void			Object2DManager::AddObject(const SharedObj2D& NewObj) noexcept {
 				this->m_Object.resize(this->m_Object.size() + 1);
 				this->m_Object.back() = NewObj;
+				this->m_Object.back()->Init();
 			}
 			SharedObj2D* Object2DManager::GetObj(int ModelType, int num) noexcept {
 				int cnt = 0;
