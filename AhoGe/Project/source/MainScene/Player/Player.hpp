@@ -11,10 +11,8 @@ namespace FPS_n2 {
 			class PlayerControl {
 			private:
 				std::shared_ptr<CharacterObject>				m_Chara{nullptr};
-				int												m_Score{0};							//ƒXƒRƒA
 			public:
 				PlayerControl(void) noexcept {
-					this->m_Score = 0;
 				}
 				~PlayerControl(void) noexcept {
 					this->Dispose();
@@ -22,18 +20,12 @@ namespace FPS_n2 {
 			public:
 				void		SetChara(const std::shared_ptr<CharacterObject>& pChara) noexcept { this->m_Chara = pChara; }
 				auto&		GetChara(void) noexcept { return this->m_Chara; }
-
-				void		AddScore(int value) noexcept { this->m_Score += value; }
-				void		SetScore(int value) noexcept { this->m_Score = value; }
-				const auto&	GetScore(void) const noexcept { return this->m_Score; }
 			public:
 				void Init(void) noexcept {
 					m_Chara = nullptr;
 				}
-
 				void Dispose(void) noexcept {
 					m_Chara.reset();
-					m_Score = 0;
 				}
 			};
 		private:

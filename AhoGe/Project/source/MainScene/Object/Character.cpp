@@ -20,33 +20,33 @@ namespace FPS_n2 {
 			if (MyInput->GetPADSPress(PADS::WALK)) {
 				Speed = 16.f;
 			}
-			Easing(&m_MoveSpeed, Speed, 0.9f, EasingType::OutExpo);
+			Easing(&m_SpeedLimit, Speed, 0.9f, EasingType::OutExpo);
 
 			bool WKey = MyInput->GetPADSPress(PADS::MOVE_W);
 			bool SKey = MyInput->GetPADSPress(PADS::MOVE_S);
 			bool AKey = MyInput->GetPADSPress(PADS::MOVE_A);
 			bool DKey = MyInput->GetPADSPress(PADS::MOVE_D);
-			float scal = 0.f;
+			m_Speed = 0.f;
 			//移動演算
 			if (DKey && !AKey) {
-				m_InputVec.x = std::clamp(m_InputVec.x + 256.f / DrawParts->GetFps(), -m_MoveSpeed, m_MoveSpeed);
+				m_InputVec.x = std::clamp(m_InputVec.x + 256.f / DrawParts->GetFps(), -m_SpeedLimit, m_SpeedLimit);
 			}
 			else if (AKey && !DKey) {
-				m_InputVec.x = std::clamp(m_InputVec.x - 256.f / DrawParts->GetFps(), -m_MoveSpeed, m_MoveSpeed);
+				m_InputVec.x = std::clamp(m_InputVec.x - 256.f / DrawParts->GetFps(), -m_SpeedLimit, m_SpeedLimit);
 			}
 			else {
 				Easing(&m_InputVec.x, 0.f, 0.95f, EasingType::OutExpo);
 			}
 			if (WKey && !SKey) {
-				m_InputVec.y = std::clamp(m_InputVec.y + 256.f / DrawParts->GetFps(), -m_MoveSpeed, m_MoveSpeed);
+				m_InputVec.y = std::clamp(m_InputVec.y + 256.f / DrawParts->GetFps(), -m_SpeedLimit, m_SpeedLimit);
 			}
 			else if (SKey && !WKey) {
-				m_InputVec.y = std::clamp(m_InputVec.y - 256.f / DrawParts->GetFps(), -m_MoveSpeed, m_MoveSpeed);
+				m_InputVec.y = std::clamp(m_InputVec.y - 256.f / DrawParts->GetFps(), -m_SpeedLimit, m_SpeedLimit);
 			}
 			else {
 				Easing(&m_InputVec.y, 0.f, 0.95f, EasingType::OutExpo);
 			}
-			scal = std::max(std::abs(m_InputVec.x), std::abs(m_InputVec.y));
+			m_Speed = std::max(std::abs(m_InputVec.x), std::abs(m_InputVec.y));
 			//ローリング(移動押下中にスペース)
 			if (m_DodgeCoolTime == 0.f) {
 				if ((DKey || AKey || WKey || SKey) && MyInput->GetPADSPress(PADS::JUMP)) {
@@ -56,14 +56,33 @@ namespace FPS_n2 {
 			else {
 				m_DodgeCoolTime = std::max(m_DodgeCoolTime - 1.f / DrawParts->GetFps(), 0.f);
 				if (m_DodgeCoolTime > 0.75f) {
-					scal = 128.f;
+					m_Speed = 128.f;
 				}
 				else {
-					scal = 24.f;
+					m_Speed = 24.f;
 				}
 			}
 			//
-			SetVec(m_InputVec.normalized() * scal);
+			SetVec(m_InputVec.normalized() * m_Speed);
+			//
+			for (auto& b : m_Blur) {
+				b.Per = std::max(b.Per - 1.f / DrawParts->GetFps(), 0.f);
+			}
+			{
+				float Blur = 0.f;
+				if (m_DodgeCoolTime > 0.75f) {
+					Blur = 0.3f;
+				}
+				if (MyInput->GetPADSPress(PADS::RUN)) {
+					Blur = 0.1f;
+				}
+				if (Blur > 0.f) {
+					m_Blur.at(m_BlurNow).Pos = GetPos();
+					m_Blur.at(m_BlurNow).PerMax = Blur;
+					m_Blur.at(m_BlurNow).Per = m_Blur.at(m_BlurNow).PerMax;
+					++m_BlurNow %= (int)m_Blur.size();
+				}
+			}
 		}
 		//
 		void CharacterObject::Init_Sub() noexcept {}
@@ -99,9 +118,16 @@ namespace FPS_n2 {
 		void CharacterObject::Draw_Sub() noexcept {
 			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
 			int Radius = y_r(64.f * 64.f / CamPos.z) / 2;
-			auto DispPos = Convert2DtoDisp(GetPos());
 
+			for (auto& b : m_Blur) {
+				if (b.Per > 0.f) {
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(16.f * m_Alpha * (b.Per / b.PerMax)), 0, 255));
+					auto DispPos = Convert2DtoDisp(b.Pos);
+					DrawCircle((int)DispPos.x, (int)DispPos.y, (int)(Radius * std::pow(b.Per / b.PerMax, 0.5f)), (m_PlayerID == 0) ? GetColor(37, 68, 141) : GetColor(92, 84, 50));
+				}
+			}
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f * m_Alpha), 0, 255));
+			auto DispPos = Convert2DtoDisp(GetPos());
 			DrawCircle((int)DispPos.x, (int)DispPos.y, Radius, (m_PlayerID == 0) ? GetColor(37, 68, 141) : GetColor(92, 84, 50));
 
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);

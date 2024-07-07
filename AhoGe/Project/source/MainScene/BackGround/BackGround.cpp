@@ -5,33 +5,26 @@ const FPS_n2::Sceneclass::BackGroundClassBase* SingletonBase<FPS_n2::Sceneclass:
 namespace FPS_n2 {
 	namespace Sceneclass {
 		const float BackGroundClassBase::CheckHideShadow(const Vector3DX & PosA, const Vector3DX & PosB, float Radius) noexcept {
-			float HalfLen = 0.5f * ((64.f * 64.f) / (1080 / 2));
-
 			float Ret = 1.f;
 			for (auto& b : m_Blick) {
 				for (auto& y : b) {
 					//•Ç‚Å‚Í‚È‚¢
 					if (!y->IsWall) { continue; }
 					//•Ó‚ð“o˜^
-					Vector3DX Box[4];
-					Box[0].Set(y->m_Pos.x - HalfLen, y->m_Pos.y - HalfLen, 0.f);
-					Box[1].Set(y->m_Pos.x + HalfLen, y->m_Pos.y - HalfLen, 0.f);
-					Box[2].Set(y->m_Pos.x + HalfLen, y->m_Pos.y + HalfLen, 0.f);
-					Box[3].Set(y->m_Pos.x - HalfLen, y->m_Pos.y + HalfLen, 0.f);
 					auto GetPer = [&]() {
-						if (GetHitCapsuleToTriangle(PosA, PosB, Radius, Box[0], Box[1], Box[3]) ||
-							GetHitCapsuleToTriangle(PosA, PosB, Radius, Box[1], Box[2], Box[3])) {
+						if (GetHitCapsuleToTriangle(PosA, PosB, Radius, y->BoxSide[0], y->BoxSide[1], y->BoxSide[3]) ||
+							GetHitCapsuleToTriangle(PosA, PosB, Radius, y->BoxSide[1], y->BoxSide[2], y->BoxSide[3])) {
 
-							if (GetHitCapsuleToTriangle(PosA, PosB, 1.f, Box[0], Box[1], Box[3]) ||
-								GetHitCapsuleToTriangle(PosA, PosB, 1.f, Box[1], Box[2], Box[3])) {
+							if (GetHitCapsuleToTriangle(PosA, PosB, 1.f, y->BoxSide[0], y->BoxSide[1], y->BoxSide[3]) ||
+								GetHitCapsuleToTriangle(PosA, PosB, 1.f, y->BoxSide[1], y->BoxSide[2], y->BoxSide[3])) {
 								return 0.0f;
 							}
 
 							SEGMENT_SEGMENT_RESULT Result;
 							float P = 2.f;
 							for (int i = 0;i < 4;i++) {
-								VECTOR Pos1t = Box[i].get();
-								VECTOR Pos2t = Box[(i + 1) % 4].get();
+								VECTOR Pos1t = y->BoxSide[i].get();
+								VECTOR Pos2t = y->BoxSide[(i + 1) % 4].get();
 								VECTOR PosAt = PosA.get();
 								VECTOR PosBt = PosB.get();
 								Segment_Segment_Analyse(&Pos1t, &Pos2t, &PosAt, &PosBt, &Result);
@@ -64,8 +57,6 @@ namespace FPS_n2 {
 			Vector3DX EndPt = *EndPos; EndPt.z = 0.f;
 			Vector3DX StartPt = StartPos; StartPt.z = 0.f;
 			Vector3DX VecPt = EndPt - StartPt;
-			float HalfLen = 0.5f * ((64.f * 64.f) / (1080 / 2));
-
 			WallList.clear();// •Çƒ|ƒŠƒSƒ“‚Æ”»’f‚³‚ê‚½ƒ|ƒŠƒSƒ“‚Ì\‘¢‘Ì‚ÌƒAƒhƒŒƒX‚ð•Û‘¶‚µ‚Ä‚¨‚­
 			Vector3DX Min, Max;
 			Min.x = std::min(EndPt.x, StartPt.x) - (Radius * 6);
@@ -78,22 +69,11 @@ namespace FPS_n2 {
 					//•Ç‚Å‚Í‚È‚¢
 					if (!y->IsWall) { continue; }
 					//”ÍˆÍŠO
-					Vector3DX bMin, bMax;
-					bMin.x = y->m_Pos.x - HalfLen;
-					bMin.y = y->m_Pos.y - HalfLen;
-					bMax.x = y->m_Pos.x + HalfLen;
-					bMax.y = y->m_Pos.y + HalfLen;
-					if (!((Min.x < bMin.x && bMax.x < Max.x) && (Min.y < bMin.y && bMax.y < Max.y))) { continue; }
+					if (!((Min.x < y->m_MinPos.x && y->m_MaxPos.x < Max.x) && (Min.y < y->m_MaxPos.y && y->m_MinPos.y < Max.y))) { continue; }
 					//•Ó‚ð“o˜^
-					Vector3DX Box[4];
-					Box[0].Set(bMin.x, bMin.y, 0.f);
-					Box[1].Set(bMax.x, bMin.y, 0.f);
-					Box[2].Set(bMax.x, bMax.y, 0.f);
-					Box[3].Set(bMin.x, bMax.y, 0.f);
-
 					for (int i = 0; i < 4; i++) {
-						Vector3DX StartP = Box[i];
-						Vector3DX EndP = Box[(i + 1) % 4];
+						Vector3DX StartP = y->BoxSide[i];
+						Vector3DX EndP = y->BoxSide[(i + 1) % 4];
 						//Š®‘S‚Éd‚È‚Á‚Ä‚¢‚é‚à‚Ì‚ÍÁ‚·
 						bool IsSame = false;
 						for (auto& w : WallList) {
@@ -109,7 +89,7 @@ namespace FPS_n2 {
 							WallList.resize(WallList.size() + 1);
 							WallList.back().Position[0] = StartP;
 							WallList.back().Position[1] = EndP;
-							WallList.back().Position[2] = Box[(i + 2) % 4];
+							WallList.back().Position[2] = y->BoxSide[(i + 2) % 4];
 							WallList.back().CalcNormal();
 							WallList.back().canuse = true;
 						}
@@ -297,30 +277,44 @@ namespace FPS_n2 {
 			}
 			//
 			m_Blick.resize(xsize);
-			{
-				int x = 0;
-				for (auto& B : m_Blick) {
-					for (int y = 0; y < ysize; y++) {
-						B.emplace_back(std::make_shared<Blick>(x - xsize / 2, y - ysize / 2));
-						//
-						GetPixelSoftImage(MapImage, x, ysize - 1 - y, &r, &g, &b, NULL);
-						for (auto& p : ChipInfoDatas) {
-							if ((p.Color[0] == r) && (p.Color[1] == g) && (p.Color[2] == b)) {
-								//Žg—p‚·‚é‘fÞ‚ðÝ’è
-								B.back()->palletNum = (int)(&p - &ChipInfoDatas.front());
-								B.back()->ZRad = 0.f;
-								for (int i = 0;i < 4;i++) {
-									B.back()->AddpalletNum[i] = -1;
-									B.back()->AddZRad[i] = 0.f;
-								}
-								B.back()->IsWall = p.IsWall;
-								break;
+			for (int x = 0; x < xsize; x++) {
+				auto& B = m_Blick.at(x);
+				for (int y = 0; y < ysize; y++) {
+					B.emplace_back(std::make_shared<Blick>(x - xsize / 2, y - ysize / 2));
+					//
+					GetPixelSoftImage(MapImage, x, ysize - 1 - y, &r, &g, &b, NULL);
+					for (auto& p : ChipInfoDatas) {
+						if ((p.Color[0] == r) && (p.Color[1] == g) && (p.Color[2] == b)) {
+							//Žg—p‚·‚é‘fÞ‚ðÝ’è
+							B.back()->palletNum = (int)(&p - &ChipInfoDatas.front());
+							B.back()->ZRad = 0.f;
+							for (int i = 0;i < 4;i++) {
+								B.back()->AddpalletNum[i] = -1;
+								B.back()->AddZRad[i] = 0.f;
 							}
+							B.back()->IsWall = p.IsWall;
+							break;
 						}
-						//
-						B.back()->m_Pos = B.back()->m_Pos * ((64.f * 64.f) / (1080 / 2));
 					}
-					x++;
+				}
+			}
+			for (int x = 0; x < xsize; x++) {
+				for (int y = 0; y < ysize; y++) {
+					auto& B = m_Blick.at(x).at(y);
+					if (!B->IsWall) {
+						if (!m_Blick.at(x - 1).at(y)->IsWall) {
+							B->SetLink(0, GetXYToNum(x - 1, y));
+						}
+						if (!m_Blick.at(x).at(y + 1)->IsWall) {
+							B->SetLink(1, GetXYToNum(x, y + 1));
+						}
+						if (!m_Blick.at(x + 1).at(y)->IsWall) {
+							B->SetLink(2, GetXYToNum(x + 1, y));
+						}
+						if (!m_Blick.at(x).at(y - 1)->IsWall) {
+							B->SetLink(3, GetXYToNum(x, y - 1));
+						}
+					}
 				}
 			}
 			for (int x = 0; x < xsize; x++) {
