@@ -7,8 +7,8 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class TitleScene : public TEMPSCENE {
 		private:
-			float						GameFadeIn{ 0.f };
-			float						GameStart{ 0.f };
+			float						GameFadeIn{0.f};
+			float						GameStart{0.f};
 			GraphHandle					m_TitleImage;
 			//
 			CreditControl				m_CreditControl;

@@ -23,14 +23,13 @@ namespace FPS_n2 {
 			}
 		public:
 			void			AddObject(const SharedObj2D& NewObj) noexcept;
-			SharedObj2D*	GetObj(int ModelType, int num) noexcept;
+			SharedObj2D* 	GetObj(int ModelType, int num) noexcept;
 			void			DelObj(const SharedObj2D& ptr) noexcept;
 
 		public:
 			void CheckColObject(const Base2DObject* ptr) noexcept;
 
 		public:
-			void			ExecuteBeforeObject(void) noexcept;
 			void			ExecuteObject(void) noexcept;
 			void			Draw() noexcept;
 			void			DeleteAll(void) noexcept;

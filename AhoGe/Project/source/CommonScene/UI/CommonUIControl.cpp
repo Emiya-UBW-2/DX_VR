@@ -4,23 +4,19 @@ const FPS_n2::Sceneclass::ButtonControl* SingletonBase<FPS_n2::Sceneclass::Butto
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//
-		const bool ButtonControl::GetTriggerButton() const noexcept
-		{
+		const bool ButtonControl::GetTriggerButton() const noexcept {
 			auto* Pad = PadControl::Instance();
 			return (select != -1) && (m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetKey(PADS::INTERACT).trigger());
 		}
-		ButtonControl::ButtonControl() noexcept
-		{
+		ButtonControl::ButtonControl() noexcept {
 			m_SelectBackImage = GraphHandle::Load("data/UI/select.png");
 			ResetSel();
 		}
-		ButtonControl::~ButtonControl() noexcept
-		{
+		ButtonControl::~ButtonControl() noexcept {
 			Dispose();
 			m_SelectBackImage.Dispose();
 		}
-		void ButtonControl::UpdateInput() noexcept
-		{
+		void ButtonControl::UpdateInput() noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();
 
@@ -72,14 +68,12 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void ButtonControl::Update() noexcept
-		{
+		void ButtonControl::Update() noexcept {
 			for (auto& y : ButtonSel) {
 				y->Update();
 			}
 		}
-		void ButtonControl::Draw() noexcept
-		{
+		void ButtonControl::Draw() noexcept {
 			for (auto& y : ButtonSel) {
 				y->Draw();
 			}
@@ -112,8 +106,7 @@ namespace FPS_n2 {
 			}
 			FileRead_close(mdata);
 		}
-		void CreditControl::Draw(int xmin, int ymin, int xmax) noexcept
-		{
+		void CreditControl::Draw(int xmin, int ymin, int xmax) noexcept {
 			auto* Fonts = FontPool::Instance();
 
 			int xp1, yp1;
@@ -125,16 +118,15 @@ namespace FPS_n2 {
 				int xpos = xp1 + y_UI(6);
 				int ypos = yp1 + (yp1 + Height - yp1) / 2;
 				Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
-					xpos, ypos, White, Black, m_CreditStr.at(i).first);
+																	   xpos, ypos, White, Black, m_CreditStr.at(i).first);
 
 				xpos = xmax - y_UI(24);
 				Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
-					xpos, ypos, White, Black, m_CreditStr.at(i).second);
+																	   xpos, ypos, White, Black, m_CreditStr.at(i).second);
 				yp1 += Height;
 			}
 		}
-		void CreditControl::Dispose() noexcept
-		{
+		void CreditControl::Dispose() noexcept {
 			m_CreditCoulm = 0;
 			for (auto& c : m_CreditStr) {
 				sprintfDx(c.first, "");

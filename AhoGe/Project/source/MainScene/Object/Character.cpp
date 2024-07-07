@@ -7,8 +7,7 @@ namespace FPS_n2 {
 		CharacterObject::CharacterObject() {
 			m_InputVec.Set(0.f, 0.f, 0.f);
 		}
-		CharacterObject::~CharacterObject() {
-		}
+		CharacterObject::~CharacterObject() {}
 		//
 		void		CharacterObject::ExecuteInput(InputControl* MyInput) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -67,8 +66,7 @@ namespace FPS_n2 {
 			SetVec(m_InputVec.normalized() * scal);
 		}
 		//
-		void CharacterObject::Init_Sub() noexcept {
-		}
+		void CharacterObject::Init_Sub() noexcept {}
 		void CharacterObject::Execute_Sub() noexcept {
 			if (m_PlayerID != 0) {
 				auto* PlayerMngr = PlayerManager::Instance();
@@ -88,7 +86,7 @@ namespace FPS_n2 {
 
 			//‘_‚¢
 			{
-				Vector3DX Vec;Vec.Set(std::sin(m_Rad_R), std::cos(m_Rad_R),0.f);
+				Vector3DX Vec;Vec.Set(std::sin(m_Rad_R), std::cos(m_Rad_R), 0.f);
 				Vector3DX vec_a;vec_a.Set(std::sin(m_Rad), std::cos(m_Rad), 0.f);
 				float cost = Vector3DX::Cross(vec_a, Vec).z;
 				float sint = sqrtf(std::abs(1.f - cost * cost));
@@ -100,7 +98,7 @@ namespace FPS_n2 {
 		}
 		void CharacterObject::Draw_Sub() noexcept {
 			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
-			int Radius = y_r(64.f* 64.f / CamPos.z) / 2;
+			int Radius = y_r(64.f * 64.f / CamPos.z) / 2;
 			auto DispPos = Convert2DtoDisp(GetPos());
 
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f * m_Alpha), 0, 255));
@@ -108,7 +106,6 @@ namespace FPS_n2 {
 
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 		}
-		void CharacterObject::Dispose_Sub() noexcept {
-		}
+		void CharacterObject::Dispose_Sub() noexcept {}
 	};
 };

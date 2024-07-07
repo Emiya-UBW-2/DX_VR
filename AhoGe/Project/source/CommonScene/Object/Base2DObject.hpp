@@ -14,16 +14,16 @@ namespace FPS_n2 {
 		class Base2DObject {
 		private:
 			std::string		m_ObjName;
-			int				m_ObjType{ 0 };
-			bool			m_IsDraw{ true };
-			bool			m_IsDelete{ false };
+			int				m_ObjType{0};
+			bool			m_IsDraw{true};
+			bool			m_IsDelete{false};
 			Vector3DX		m_PrevPos{};//前フレームの座標
 			Vector3DX		m_Pos{};//座標
 			Vector3DX		m_Vec{};//移動ベクトル
-			float			m_Radius{ 1.f };//オブジェクトの半径
-			ColTarget		m_ColTarget{ ColTarget::All };
+			float			m_Radius{1.f};//オブジェクトの半径
+			ColTarget		m_ColTarget{ColTarget::All};
 		protected:
-			bool			m_IsFirstLoop{ true };
+			bool			m_IsFirstLoop{true};
 		public:
 			void SetObjName(std::string_view value) noexcept { this->m_ObjName = value; }
 			void SetObjType(int value) noexcept { this->m_ObjType = value; }
@@ -44,7 +44,7 @@ namespace FPS_n2 {
 		protected:
 			const auto& GetVec(void) const noexcept { return this->m_Vec; }
 		protected:
-			virtual void Init_Sub() noexcept{}
+			virtual void Init_Sub() noexcept {}
 			virtual void Execute_Sub() noexcept {}
 			virtual void Draw_Sub() noexcept {}
 			virtual void Dispose_Sub() noexcept {}

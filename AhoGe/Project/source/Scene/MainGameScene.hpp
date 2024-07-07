@@ -7,14 +7,17 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class MainGameScene : public TEMPSCENE {
-			const PlayerID				m_MyPlayerID{ 0 };
+			const PlayerID				m_MyPlayerID{0};
 		private:
-			bool						m_IsEnd{ false };
-			float						m_Alpha{ 0.f };
-			bool						m_IsRetire{ false };
+			bool						m_IsEnd{false};
+			float						m_Alpha{0.f};
+			bool						m_IsRetire{false};
 			std::array<std::shared_ptr<AIControl>, Player_Num> m_AI;
 			GraphHandle					m_Watch;
 			Vector3DX					m_CamAddPos;
+
+			GraphHandle					m_Caution;
+			GraphHandle					m_Alert;
 		private:
 		public:
 			MainGameScene(void) noexcept { Set3DActive(false); }

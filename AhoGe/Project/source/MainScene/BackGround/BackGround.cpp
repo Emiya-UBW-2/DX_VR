@@ -283,7 +283,7 @@ namespace FPS_n2 {
 				unsigned char Color[3]{};
 				int IsWall{0};
 			};
-			std::vector<ChipInfo>  ChipInfoDatas;
+			std::vector<ChipInfo> ChipInfoDatas;
 			{
 				ChipInfoDatas.resize(ChipNum);
 				for (int x = 0; x < ChipNum; x++) {
@@ -404,7 +404,7 @@ namespace FPS_n2 {
 			DeleteSoftImage(MapImage);
 			DeleteSoftImage(PalImage);
 
-			m_ShadowHandle = GraphHandle::Make(y_r(1920.f*ShadowPer), y_r(1080.f*ShadowPer), false);
+			m_ShadowHandle = GraphHandle::Make(y_r(1920.f * ShadowPer), y_r(1080.f * ShadowPer), false);
 		}
 		//
 		void BackGroundClassBase::Execute(void) noexcept {}
@@ -414,7 +414,7 @@ namespace FPS_n2 {
 			if (OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) { return; }
 			m_ShadowHandle.SetDraw_Screen(false);
 			{
-				DrawBox_2D(0, 0, y_r(1920.f*ShadowPer), y_r(1080.f*ShadowPer), White, true);
+				DrawBox_2D(0, 0, y_r(1920.f * ShadowPer), y_r(1080.f * ShadowPer), White, true);
 
 				auto& CamPos = Cam2DControl::Instance()->GetCamPos();
 				float Radius = (float)y_r(64.f * 64.f / CamPos.z) / 2;
@@ -468,8 +468,8 @@ namespace FPS_n2 {
 				if (std::cos(m_AmbientLightRad - radsub) > 0.f) {
 					Vector3DX Position[4]{ };
 
-					Position[0].Set(postmp1.x + std::sin(m_AmbientLightRad)*m_AmbientShadowLength, postmp1.y + std::cos(m_AmbientLightRad)*m_AmbientShadowLength, 0.f);
-					Position[1].Set(postmp2.x + std::sin(m_AmbientLightRad)*m_AmbientShadowLength, postmp2.y + std::cos(m_AmbientLightRad)*m_AmbientShadowLength, 0.f);
+					Position[0].Set(postmp1.x + std::sin(m_AmbientLightRad) * m_AmbientShadowLength, postmp1.y + std::cos(m_AmbientLightRad) * m_AmbientShadowLength, 0.f);
+					Position[1].Set(postmp2.x + std::sin(m_AmbientLightRad) * m_AmbientShadowLength, postmp2.y + std::cos(m_AmbientLightRad) * m_AmbientShadowLength, 0.f);
 					Position[2] = postmp2;
 					Position[3] = postmp1;
 
@@ -549,10 +549,10 @@ namespace FPS_n2 {
 					if (y2max != -1) { Position[y2max].y += 3; }
 
 					DrawModiGraph(
-						Position[0].x*ShadowPer, Position[0].y*ShadowPer,
-						Position[1].x*ShadowPer, Position[1].y*ShadowPer,
-						Position[2].x*ShadowPer, Position[2].y*ShadowPer,
-						Position[3].x*ShadowPer, Position[3].y*ShadowPer,
+						(int)(Position[0].x * ShadowPer), (int)(Position[0].y * ShadowPer),
+						(int)(Position[1].x * ShadowPer), (int)(Position[1].y * ShadowPer),
+						(int)(Position[2].x * ShadowPer), (int)(Position[2].y * ShadowPer),
+						(int)(Position[3].x * ShadowPer), (int)(Position[3].y * ShadowPer),
 						m_MapChip.at(0).get(), FALSE);
 				}
 			};
@@ -588,8 +588,8 @@ namespace FPS_n2 {
 					float lightrad2 = GetRadVec2Vec(postmp2, m_PointLightPos);
 					Vector3DX Position[4]{ };
 
-					Position[0].Set(postmp1.x + std::sin(lightrad1)*length, postmp1.y + std::cos(lightrad1)*length, 0.f);
-					Position[1].Set(postmp2.x + std::sin(lightrad2)*length, postmp2.y + std::cos(lightrad2)*length, 0.f);
+					Position[0].Set(postmp1.x + std::sin(lightrad1) * length, postmp1.y + std::cos(lightrad1) * length, 0.f);
+					Position[1].Set(postmp2.x + std::sin(lightrad2) * length, postmp2.y + std::cos(lightrad2) * length, 0.f);
 					Position[2] = postmp2;
 					Position[3] = postmp1;
 
@@ -627,10 +627,10 @@ namespace FPS_n2 {
 					Position[ymax].y += 3;
 
 					DrawModiGraph(
-						Position[0].x*ShadowPer, Position[0].y*ShadowPer,
-						Position[1].x*ShadowPer, Position[1].y*ShadowPer,
-						Position[2].x*ShadowPer, Position[2].y*ShadowPer,
-						Position[3].x*ShadowPer, Position[3].y*ShadowPer,
+						(int)(Position[0].x * ShadowPer), (int)(Position[0].y * ShadowPer),
+						(int)(Position[1].x * ShadowPer), (int)(Position[1].y * ShadowPer),
+						(int)(Position[2].x * ShadowPer), (int)(Position[2].y * ShadowPer),
+						(int)(Position[3].x * ShadowPer), (int)(Position[3].y * ShadowPer),
 						m_MapChip.at(0).get(), FALSE);
 				}
 			};
@@ -660,7 +660,7 @@ namespace FPS_n2 {
 		void BackGroundClassBase::Draw(void) noexcept {
 			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
 			float Radius = (float)y_r(64.f * 64.f / CamPos.z) / 2;
-			float Size = (float)(Radius*2.f) / (32 - 1);
+			float Size = (float)(Radius * 2.f) / (32 - 1);
 			//è∞
 			for (auto& b : m_Blick) {
 				for (auto& y : b) {
@@ -733,7 +733,7 @@ namespace FPS_n2 {
 				}
 				{
 					auto DispPos1 = Convert2DtoDisp((w.Position[0] + w.Position[1]) / 2.f);
-					auto DispPos2 = Convert2DtoDisp((w.Position[0] + w.Position[1]) / 2.f + w.Normal*10.f);
+					auto DispPos2 = Convert2DtoDisp((w.Position[0] + w.Position[1]) / 2.f + w.Normal * 10.f);
 					DrawLine(
 						(int)(DispPos1.x), (int)(DispPos1.y),
 						(int)(DispPos2.x), (int)(DispPos2.y),

@@ -67,25 +67,25 @@ namespace FPS_n2 {
 				//‘I‘ðŽž‚Ì‹““®
 				if (ButtonParts->GetTriggerButton()) {
 					switch (ButtonParts->GetSelect()) {
-					case 0:
-					case 1:
-						GameStart += 0.0001f;
-						break;
-					case 2:
-						OptionWindowClass::Instance()->SetActive();
-						break;
-					case 3:
-						PopUpParts->Add(LocalizeParts->Get(120), y_UI(720), y_UI(840),
-							[&](int xmin, int ymin, int xmax, int, bool) {
-								m_CreditControl.Draw(xmin, ymin, xmax);
-							},
-							[&]() {},
-							[&]() {},
-							true
-						);
-						break;
-					default:
-						break;
+						case 0:
+						case 1:
+							GameStart += 0.0001f;
+							break;
+						case 2:
+							OptionWindowClass::Instance()->SetActive();
+							break;
+						case 3:
+							PopUpParts->Add(LocalizeParts->Get(120), y_UI(720), y_UI(840),
+											[&](int xmin, int ymin, int xmax, int, bool) {
+												m_CreditControl.Draw(xmin, ymin, xmax);
+											},
+											[&]() {},
+												[&]() {},
+												true
+												);
+							break;
+						default:
+							break;
 					}
 					SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 				}
@@ -95,7 +95,7 @@ namespace FPS_n2 {
 			//
 			GameFadeIn = std::max(GameFadeIn - 1.f / DrawParts->GetFps() / 0.5f, 0.f);
 			if (GameStart != 0.f) { GameStart += 1.f / DrawParts->GetFps() / 0.5f; }
-			return  (GameStart <= 1.f);
+			return (GameStart <= 1.f);
 		}
 		void			TitleScene::Dispose_Sub(void) noexcept {
 			auto* SaveDataParts = SaveDataClass::Instance();
@@ -129,13 +129,13 @@ namespace FPS_n2 {
 			m_TitleImage.DrawExtendGraph(y_UI(64), y_UI(64), y_UI(64 + 369), y_UI(64 + 207), true);
 			//
 			Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-				y_UI(64 + 369), y_UI(64 + 207), White, Black, "Ver 1.0.0");
+																  y_UI(64 + 369), y_UI(64 + 207), White, Black, "Ver 1.0.0");
 			//
 			ButtonParts->Draw();
 			//
 			if ((ButtonParts->GetSelect() != -1) && !PopUpParts->IsActivePop()) {
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-					y_UI(32), y_UI(1080 - 32 - 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
+																	  y_UI(32), y_UI(1080 - 32 - 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
 			}
 			//
 			{

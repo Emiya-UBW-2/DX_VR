@@ -32,7 +32,7 @@ namespace FPS_n2 {
 			struct CheckLines {
 				Vector3DX Position[3]{ };
 				Vector3DX Normal{};
-				bool canuse{ true };
+				bool canuse{true};
 			public:
 				void CalcNormal() {
 					Vector3DX StartP = this->Position[0];

@@ -7,7 +7,7 @@ namespace FPS_n2 {
 		class AIControl {
 		private:
 			class Impl;
-			Impl *m_Param;
+			Impl* m_Param;
 			const Impl* GetParam() const noexcept { return m_Param; }
 			Impl* GetParam() noexcept { return m_Param; }
 		public:
@@ -15,6 +15,7 @@ namespace FPS_n2 {
 			~AIControl();
 		public:
 			const float& GetViewRad() const noexcept;
+			const float& GetGraphTimer() const noexcept;
 
 			const bool IsCaution() const noexcept;
 			const bool IsAlert() const noexcept;

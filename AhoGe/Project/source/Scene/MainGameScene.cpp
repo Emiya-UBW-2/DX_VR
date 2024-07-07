@@ -25,6 +25,8 @@ namespace FPS_n2 {
 			//
 			CommonBattleResource::Instance()->Load();
 			m_Watch = GraphHandle::Load("data/UI/Watch.png");
+			m_Caution = GraphHandle::Load("data/UI/Caution.png");
+			m_Alert = GraphHandle::Load("data/UI/Alert.png");
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
@@ -55,7 +57,7 @@ namespace FPS_n2 {
 				p.GetChara()->SetObjType((int)Object2DType::Human);
 			}
 			for (int i = 0; i < Player_Num; i++) {
-				Vector3DX Pos;Pos.Set((float)i*10.f, (float)i*10.f, 0.f);
+				Vector3DX Pos;Pos.Set((float)i * 10.f, (float)i * 10.f, 0.f);
 				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
 				p.GetChara()->SetPos(Pos);
 
@@ -169,7 +171,7 @@ namespace FPS_n2 {
 						p.GetChara()->ExecuteInput(&MyInput);
 						//
 						auto DispPos = Convert2DtoDisp(p.GetChara()->GetPos());
-						p.GetChara()->SetViewRad(-GetRadVec2Vec(DispPos*((float)y_UIMs(1080) / (float)y_r(1080)), Vector3DX::vget((float)Pad->GetMS_X(), (float)Pad->GetMS_Y(), 0.f)));
+						p.GetChara()->SetViewRad(-GetRadVec2Vec(DispPos * ((float)y_UIMs(1080) / (float)y_r(1080)), Vector3DX::vget((float)Pad->GetMS_X(), (float)Pad->GetMS_Y(), 0.f)));
 					}
 					else {
 						InputControl MyInput;
@@ -224,28 +226,68 @@ namespace FPS_n2 {
 				if (p.GetChara() && (p.GetChara()->CanLookPlayer0())) {
 					auto DispPos = Convert2DtoDisp(p.GetChara()->GetPos());
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(92.f), 0, 255));
-					double Deg = (double)p.GetChara()->GetViewRad() / (DX_PI*2.0)*100.0;
+					double Deg = (double)p.GetChara()->GetViewRad() / (DX_PI * 2.0) * 100.0;
 					double Watch;
 					if (i == 0) {
 						SetDrawBright(0, 0, 255);
-						Watch = 15.0 / 360.0*100.0;
+						Watch = 15.0 / 360.0 * 100.0;
 					}
 					else {
-						if (m_AI[i]->IsCaution()) {
+						if (m_AI[i]->IsAlert()) {
+							SetDrawBright(255, 0, 0);//
+						}
+						else if (m_AI[i]->IsCaution()) {
 							SetDrawBright(255, 255, 0);//
 						}
 						else {
 							SetDrawBright(0, 255, 0);//
 						}
-						Watch = 45.0 / 360.0*100.0;
+						Watch = 45.0 / 360.0 * 100.0;
 					}
-					DrawCircleGauge((int)DispPos.x, (int)DispPos.y, Deg + Watch, m_Watch.get(), Deg - Watch, (double)y_r(5.f*128.f* 64.f / CamPos.z) / 128.0);
+					DrawCircleGauge((int)DispPos.x, (int)DispPos.y, Deg + Watch, m_Watch.get(), Deg - Watch, (double)y_r(5.f * 128.f * 64.f / CamPos.z) / 128.0);
 				}
 			}
 			SetDrawBright(255, 255, 255);
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			//
 			Obj2DParts->Draw();
+			//
+			for (int i = 1;i < Player_Num;i++) {
+				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
+				if (p.GetChara() && (p.GetChara()->CanLookPlayer0())) {
+					float Timer = m_AI[i]->GetGraphTimer();
+					if (Timer <= 0.f) { continue; }
+					auto DispPos = Convert2DtoDisp(p.GetChara()->GetPos());
+
+					float Per = 1.f;
+					if (Timer > 2.f - 0.25f) {
+						Per = 1.f - (Timer - (2.f - 0.25f)) / 0.25f;
+					}
+					if (Timer < 0.25f) {
+						Per = (Timer - (0.25f - 0.25f)) / 0.25f;
+					}
+
+
+					if (m_AI[i]->IsAlert()) {
+						SetDrawBright(0, 0, 0);//
+						m_Alert.DrawRotaGraph((int)DispPos.x + y_r(3), (int)DispPos.y - y_r(32) + y_r(3), (float)y_r(128) / 128.0f * Per, 0.f, true);
+						SetDrawBright(255, 0, 0);//
+						m_Alert.DrawRotaGraph((int)DispPos.x, (int)DispPos.y - y_r(32), (float)y_r(128) / 128.0f * Per, 0.f, true);
+					}
+					else {
+						SetDrawBright(0, 0, 0);//
+						m_Caution.DrawRotaGraph((int)DispPos.x + y_r(3), (int)DispPos.y - y_r(32) + y_r(3), (float)y_r(128) / 128.0f * Per, 0.f, true);
+						if (m_AI[i]->IsCaution()) {
+							SetDrawBright(255, 255, 0);//
+						}
+						else {
+							SetDrawBright(0, 255, 0);//
+						}
+						m_Caution.DrawRotaGraph((int)DispPos.x, (int)DispPos.y - y_r(32), (float)y_r(128) / 128.0f * Per, 0.f, true);
+					}
+				}
+			}
+			SetDrawBright(255, 255, 255);
 			//
 			BackGroundClassBase::Instance()->DrawFront();
 			//
@@ -280,6 +322,8 @@ namespace FPS_n2 {
 			Obj2DParts->DeleteAll();
 			CommonBattleResource::Instance()->Dispose();
 			m_Watch.Dispose();
+			m_Caution.Dispose();
+			m_Alert.Dispose();
 		}
 		//
 	};
