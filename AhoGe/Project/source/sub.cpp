@@ -1,6 +1,7 @@
 #include	"sub.hpp"
 
-#include "MainScene/Player/Player.hpp"
+#include	"MainScene/Player/Player.hpp"
+#include	"CommonScene/Object/Object2DManager.hpp"
 
 const FPS_n2::Sceneclass::CommonBattleResource* SingletonBase<FPS_n2::Sceneclass::CommonBattleResource>::m_Singleton = nullptr;
 const FPS_n2::Sceneclass::Cam2DControl* SingletonBase<FPS_n2::Sceneclass::Cam2DControl>::m_Singleton = nullptr;
@@ -32,22 +33,47 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::OneMunute);
 			SE->Delete((int)SoundEnum::TimeUp);
 		}
-		//
-		void Cam2DControl::Set(void) noexcept {}
-		void Cam2DControl::Update(void) noexcept {}
-		void Cam2DControl::Dispose(void) noexcept {}
-		//
+		void CommonBattleResource::AddCharacter(PlayerID value) noexcept
+		{
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto* Obj2DParts = Object2DManager::Instance();
+			auto& p = PlayerMngr->GetPlayer(value);
+			p.SetChara(std::make_shared<CharacterObject>());
+			Obj2DParts->AddObject(p.GetChara());
+			p.GetChara()->SetObjType((int)Object2DType::Human);
+			p.GetChara()->SetPlayerID(value);
+			p.SetAI(std::make_shared<AIControl>());
+			p.GetAI()->SetPlayerID(value);
+		}
+		void CommonBattleResource::DelCharacter(PlayerID value) noexcept
+		{
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto* Obj2DParts = Object2DManager::Instance();
+			auto& p = PlayerMngr->GetPlayer(value);
+			Obj2DParts->DelObj(p.GetChara());
+			p.Dispose();
+		}
+		// 
 		const Vector3DX Convert2DtoDisp(const Vector3DX& Pos2D) {
 			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
 			Vector3DX Ret;
 
-			Ret.x = (float)y_r(1920 / 2 + (1080 / 2) * (Pos2D.x - CamPos.x) / CamPos.z);
-			Ret.y = (float)y_r(1080 / 2 - (1080 / 2) * (Pos2D.y - CamPos.y) / CamPos.z);
+			Ret.x = (float)y_r(1920 / 2 + (1080 / 2) * (Pos2D.x - CamPos.x) / Base_CamScale);
+			Ret.y = (float)y_r(1080 / 2 - (1080 / 2) * (Pos2D.y - CamPos.y) / Base_CamScale);
 			Ret.z = Pos2D.z;
 
 			return Ret;
 		}
 
 		const float GetRadVec2Vec(const Vector3DX& vec1, const Vector3DX& vec2) { return std::atan2f(vec1.x - vec2.x, vec1.y - vec2.y); }
+
+		// 空間上のタイルごとのサイズを取得(タイルvalue個ぶん)
+		const float Get2DSize(float value) {
+			return (value * Tile_DispSize) * Base_CamScale / (1080 / 2);
+		}
+		// 画面上のタイルごとのサイズを取得(タイルvalue個ぶん)
+		const int GetDispSize(float value) {
+			return y_r(value * Tile_DispSize);
+		}
 	};
 };

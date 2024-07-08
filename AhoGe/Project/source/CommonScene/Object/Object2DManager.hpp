@@ -2,7 +2,7 @@
 #include	"../../Header.hpp"
 #include	"../../sub.hpp"
 
-#include "Base2DObject.hpp"
+#include	"Base2DObject.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -27,7 +27,7 @@ namespace FPS_n2 {
 			void			DelObj(const SharedObj2D& ptr) noexcept;
 
 		public:
-			void CheckColObject(const Base2DObject* ptr) noexcept;
+			void CheckColObject(Base2DObject* ptr) noexcept;
 
 		public:
 			void			ExecuteObject(void) noexcept;

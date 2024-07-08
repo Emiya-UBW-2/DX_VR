@@ -1,7 +1,7 @@
 #pragma once
 #include	"../Header.hpp"
 
-#include "../CommonScene/UI/CommonUIControl.hpp"
+#include	"../CommonScene/UI/CommonUIControl.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -10,7 +10,7 @@ namespace FPS_n2 {
 			float						GameFadeIn{0.f};
 			float						GameStart{0.f};
 			GraphHandle					m_TitleImage;
-			//
+			// 
 			CreditControl				m_CreditControl;
 		public:
 			TitleScene(void) noexcept { Set3DActive(false); }
@@ -19,9 +19,9 @@ namespace FPS_n2 {
 			void			Set_Sub(void) noexcept override;
 			bool			Update_Sub(void) noexcept override;
 			void			Dispose_Sub(void) noexcept override;
-			//
+			// 
 			void			MainDraw_Sub(void) noexcept override;
-			//UI•\Ž¦
+			// UI•\Ž¦
 			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override {}
 		};

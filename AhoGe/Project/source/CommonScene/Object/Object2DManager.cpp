@@ -24,7 +24,7 @@ namespace FPS_n2 {
 		void			Object2DManager::DelObj(const SharedObj2D& ptr) noexcept {
 			for (auto& o : this->m_Object) {
 				if (o == ptr) {
-					//順番の維持のためここはerase
+					// 順番の維持のためここはerase
 					o->Dispose();
 					this->m_Object.erase(this->m_Object.begin() + (&o - &this->m_Object.front()));
 					break;
@@ -32,39 +32,38 @@ namespace FPS_n2 {
 			}
 		}
 
-		void 	Object2DManager::CheckColObject(const Base2DObject* ptr) noexcept {
-
-			VECTOR SegmentPos1 = ptr->GetPos().get();SegmentPos1.z = 0.f;
-			VECTOR SegmentPos2 = ptr->GetPos().get();SegmentPos2.z = 0.f;
-			SEGMENT_POINT_RESULT Result;
-			float HalfLen = 0.5f * ((64.f * 64.f) / (1080 / 2));
+		void 	Object2DManager::CheckColObject(Base2DObject* ptr) noexcept {
+			float Len = Get2DSize(0.5f + 0.5f);
 			for (auto& o : this->m_Object) {
 				if (o.get() == ptr) { continue; }
-				//自分が当たったら押し出し
-				VECTOR PointPos = VGet(o->GetPos().x, o->GetPos().y, 0.f);PointPos.z = 0.f;
-				Segment_Point_Analyse(&SegmentPos1, &SegmentPos2, &PointPos, &Result);
-				if (Result.Seg_Point_MinDist_Square < ((HalfLen + HalfLen) * (HalfLen + HalfLen))) {
-					Vector3DX vec = o->GetPos() - Result.Seg_MinDist_Pos;
-					float Len = vec.magnitude();
-
-					o->SetPos(o->GetPos() - vec.normalized() * (Len - (HalfLen + HalfLen)));
+				// 自分が当たったら押し出し
+				Vector3DX vec = o->GetPos() - ptr->GetPos();
+				if (vec.sqrMagnitude() < (Len * Len)) {
+					Vector3DX vec = o->GetPos() - ptr->GetPos();
+					o->SetPos(o->GetPos() - vec.normalized() * (vec.magnitude() - Len) / 2.f);
+					ptr->SetPos(ptr->GetPos() + vec.normalized() * (vec.magnitude() - Len) / 2.f);
 				}
 			}
 		};
 
 		void			Object2DManager::ExecuteObject(void) noexcept {
-			//アップデート
-			for (int i = 0; i < this->m_Object.size(); i++) {
-				auto& o = this->m_Object[i];
+			// アップデート
+			for (auto& o : this->m_Object) {
 				if (!o->GetIsDelete()) {
 					o->Execute();
 				}
 			}
-			//オブジェクトの排除チェック
+			// アップデート
+			for (auto& o : this->m_Object) {
+				if (!o->GetIsDelete()) {
+					o->ExecuteAfter();
+				}
+			}
+			// オブジェクトの排除チェック
 			for (int i = 0; i < this->m_Object.size(); i++) {
-				auto& o = this->m_Object[i];
+				auto& o = this->m_Object.at(i);
 				if (o->GetIsDelete()) {
-					//順番の維持のためここはerase
+					// 順番の維持のためここはerase
 					o->Dispose();
 					this->m_Object.erase(this->m_Object.begin() + i);
 					i--;

@@ -2,7 +2,7 @@
 #include	"../../Header.hpp"
 #include	"../../sub.hpp"
 
-#include "../../MainScene/BackGround/BackGround.hpp"
+#include	"../../MainScene/BackGround/BackGround.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -22,10 +22,11 @@ namespace FPS_n2 {
 			const bool IsCaution() const noexcept;
 			const bool IsAlert() const noexcept;
 		public:
-			void Init(PlayerID MyCharaID) noexcept;
+			void SetPlayerID(PlayerID MyCharaID) noexcept;
+			void Init() noexcept;
 			void Execute(InputControl* MyInput) noexcept;
-			void Draw() noexcept {}
-			void Dispose() noexcept {}
+			void Draw() noexcept;
+			void Dispose() noexcept;
 		};
 	};
 };

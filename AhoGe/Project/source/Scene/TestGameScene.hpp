@@ -12,12 +12,12 @@ namespace FPS_n2 {
 			void			Set_Sub(void) noexcept override;
 			bool			Update_Sub(void) noexcept override;
 			void			Dispose_Sub(void) noexcept override;
-			//
+			// 
 			void			MainDraw_Sub(void) noexcept override;
-			//UI•\Ž¦
+			// UI•\Ž¦
 			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override;
-			//
+			// 
 			void			Dispose_Load_Sub(void) noexcept override;
 		};
 	};

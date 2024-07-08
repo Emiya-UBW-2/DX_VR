@@ -5,10 +5,10 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		enum class ColTarget {
-			All,	//すべて判定
-			Wall,	//地形のみ判定
-			Object,	//オブジェクトのみ判定
-			None,	//すべてすり抜け
+			All,	// すべて判定
+			Wall,	// 地形のみ判定
+			Object,	// オブジェクトのみ判定
+			None,	// すべてすり抜け
 		};
 
 		class Base2DObject {
@@ -17,10 +17,10 @@ namespace FPS_n2 {
 			int				m_ObjType{0};
 			bool			m_IsDraw{true};
 			bool			m_IsDelete{false};
-			Vector3DX		m_PrevPos{};//前フレームの座標
-			Vector3DX		m_Pos{};//座標
-			Vector3DX		m_Vec{};//移動ベクトル
-			float			m_Radius{1.f};//オブジェクトの半径
+			Vector3DX		m_PrevPos{};// 前フレームの座標
+			Vector3DX		m_Pos{};// 座標
+			Vector3DX		m_Vec{};// 移動ベクトル
+			float			m_Radius{1.f};// オブジェクトの半径
 			ColTarget		m_ColTarget{ColTarget::All};
 		protected:
 			bool			m_IsFirstLoop{true};
@@ -51,6 +51,7 @@ namespace FPS_n2 {
 		public:
 			void Init() noexcept { Init_Sub(); }
 			void Execute() noexcept;
+			void ExecuteAfter() noexcept;
 			void Draw() noexcept { Draw_Sub(); }
 			void Dispose() noexcept { Dispose_Sub(); }
 		};

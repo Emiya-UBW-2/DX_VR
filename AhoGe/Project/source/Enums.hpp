@@ -2,7 +2,7 @@
 #include	"Header.hpp"
 
 namespace FPS_n2 {
-	//’è”
+	// ’è”
 	static const float Frame_Rate{60.f};
 
 	static const float Scale_Rate{12.5f};
@@ -10,12 +10,12 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		enum class SoundEnum {
 			RunFoot = (int)SoundEnumCommon::Num,
-			//
+			// 
 			CountDown,
 			Second,
 			OneMunute,
 			TimeUp,
-			//
+			// 
 		};
 		enum class CharaTypeID {
 			Team,
@@ -26,7 +26,11 @@ namespace FPS_n2 {
 			Human,
 			Stone,
 		};
-		static const int Player_Num{2};
+		static const int Player_Num{16};
+
+		static const float Tile_DispSize{ 64.f };
+
+		static const float Base_CamScale{ 64.f };//‹óŠÔã‚Ì¸“x
 	};
 
 	typedef char PlayerID;

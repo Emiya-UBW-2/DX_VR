@@ -1,85 +1,28 @@
 #include	"MainGameScene.hpp"
 
-#include "../sub.hpp"
+#include	"../sub.hpp"
 
-#include "../MainScene/Player/Player.hpp"
-#include "../MainScene/BackGround/BackGround.hpp"
-#include "../CommonScene/Object/Object2DManager.hpp"
+#include	"../MainScene/Player/Player.hpp"
+#include	"../MainScene/BackGround/BackGround.hpp"
+#include	"../CommonScene/Object/Object2DManager.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		//
-		void			MainGameScene::Load_Sub(void) noexcept {
-			auto* PlayerMngr = PlayerManager::Instance();
-			auto Obj2DParts = Object2DManager::Instance();
-			//ロード
-			PlayerMngr->Init(Player_Num);
-			for (int i = 1; i < Player_Num; i++) {
-				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
-				p.SetChara(std::make_shared<CharacterObject>());
-				Obj2DParts->AddObject(p.GetChara());
-				p.GetChara()->SetObjType((int)Object2DType::Human);
-
-				m_AI[i] = std::make_shared<AIControl>();
-			}
-			//
-			CommonBattleResource::Instance()->Load();
-			m_Watch = GraphHandle::Load("data/UI/Watch.png");
-			m_Caution = GraphHandle::Load("data/UI/Caution.png");
-			m_Alert = GraphHandle::Load("data/UI/Alert.png");
-		}
-		void			MainGameScene::Set_Sub(void) noexcept {
-			auto* PlayerMngr = PlayerManager::Instance();
+		//ポーズ画面
+		void MainGameScene::SetPause(void) noexcept
+		{
 			auto* ButtonParts = ButtonControl::Instance();
-			auto Obj2DParts = Object2DManager::Instance();
-			CommonBattleResource::Instance()->Set();
-			Cam2DControl::Instance()->Set();
-			Vector3DX CamPos;CamPos.Set(0.f, 0.f, 64.f);
-			Cam2DControl::Instance()->SetCamPos(CamPos);
-			BackGroundClassBase::Instance()->Init("map1");
-			//ポーズ
-			m_IsRetire = false;
 			ButtonParts->ResetSel();
-			ButtonParts->AddStringButton(
-				"Retire", 48, true,
-				1920 - 64, 1080 - 84 - 64 * 2, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton(
-				"Option", 48, true,
-				1920 - 64, 1080 - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton(
-				"Return Game", 48, true,
-				1920 - 64, 1080 - 84 - 64 * 0, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			//自機
-			{
-				auto& p = PlayerMngr->GetPlayer(m_MyPlayerID);
-				p.SetChara(std::make_shared<CharacterObject>());
-				Obj2DParts->AddObject(p.GetChara());
-				p.GetChara()->SetObjType((int)Object2DType::Human);
-			}
-			for (int i = 0; i < Player_Num; i++) {
-				Vector3DX Pos;Pos.Set((float)i * 10.f, (float)i * 10.f, 0.f);
-				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
-				p.GetChara()->SetPos(Pos);
-
-				if (i != 0) {
-					m_AI[i]->Init((PlayerID)i);
-				}
-				p.GetChara()->SetPlayerID((PlayerID)i);
-			}
-			//
-			m_IsEnd = false;
-			m_Alpha = 1.f;
+			ButtonParts->AddStringButton("Retire", 48, true, 1920 - 64, 1080 - 84 - 64 * 2, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton("Option", 48, true, 1920 - 64, 1080 - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton("Return Game", 48, true, 1920 - 64, 1080 - 84 - 64 * 0, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 		}
-		bool			MainGameScene::Update_Sub(void) noexcept {
-			auto* PlayerMngr = PlayerManager::Instance();
+		void MainGameScene::UpdatePause(void) noexcept
+		{
 			auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
-			auto Obj2DParts = Object2DManager::Instance();
-
-			auto& Chara = PlayerMngr->GetPlayer(0).GetChara();
-
 			if (DrawParts->IsPause()) {
 				if (!DrawParts->IsExit() && !DrawParts->IsRestart()) {
 					Pad->SetMouseMoveEnable(false);
@@ -95,37 +38,188 @@ namespace FPS_n2 {
 						});
 					if (!OptionWindowClass::Instance()->IsActive()) {
 						ButtonParts->UpdateInput();
-						//選択時の挙動
+						// 選択時の挙動
 						if (ButtonParts->GetTriggerButton()) {
 							switch (ButtonParts->GetSelect()) {
-								case 0:
-									m_IsRetire = true;
-									DXDraw::Instance()->SetPause(false);
-									break;
-								case 1:
-									OptionWindowClass::Instance()->SetActive();
-									break;
-								case 2:
-									DXDraw::Instance()->SetPause(false);
-									break;
-								default:
-									DXDraw::Instance()->SetPause(false);
-									break;
+							case 0:
+								m_IsEnd = true;
+								DrawParts->SetPause(false);
+								break;
+							case 1:
+								OptionWindowClass::Instance()->SetActive();
+								break;
+							case 2:
+								DrawParts->SetPause(false);
+								break;
+							default:
+								DrawParts->SetPause(false);
+								break;
 							}
 							SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						}
 						if (Pad->GetKey(PADS::RELOAD).trigger()) {
 							SE->Get((int)SoundEnumCommon::UI_CANCEL).Play(0, DX_PLAYTYPE_BACK, TRUE);
-							DXDraw::Instance()->SetPause(false);
+							DrawParts->SetPause(false);
 						}
-						//
+						// 
 						ButtonParts->Update();
 					}
 				}
-				return true;
 			}
 			else {
 				ButtonParts->ResetSel();
+			}
+		}
+		void MainGameScene::DrawPause(void) noexcept
+		{
+			auto* DrawParts = DXDraw::Instance();
+			auto* ButtonParts = ButtonControl::Instance();
+			// ポーズ
+			if (DrawParts->IsPause() && (!DrawParts->IsExit() && !DrawParts->IsRestart())) {
+				ButtonParts->Draw();
+			}
+		}
+		void MainGameScene::DisposePause(void) noexcept
+		{
+			auto* ButtonParts = ButtonControl::Instance();
+			ButtonParts->Dispose();
+		}
+		//UI
+		void MainGameScene::LoadUI(void) noexcept {
+			m_Watch = GraphHandle::Load("data/UI/Watch.png");
+			m_Caution = GraphHandle::Load("data/UI/Caution.png");
+			m_Alert = GraphHandle::Load("data/UI/Alert.png");
+			m_ViewHandle = GraphHandle::Make(y_r(1920), y_r(1080), true);
+		}
+		void MainGameScene::DrawCharaUI_Back(PlayerID value) noexcept
+		{
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto& p = PlayerMngr->GetPlayer(value);
+			if (p.GetChara()) {
+				auto DispPos = Convert2DtoDisp(p.GetChara()->GetPos());
+				double Deg = (double)p.GetChara()->GetViewRad() / (DX_PI * 2.0) * 100.0;
+				double Watch;
+				if (value == m_MyPlayerID) {
+					SetDrawBright(0, 0, 216);
+					Watch = 15.0 / 360.0 * 100.0;
+				}
+				else {
+					if (p.GetAI()->IsAlert()) {
+						SetDrawBright(216, 0, 0);// 
+					}
+					else if (p.GetAI()->IsCaution()) {
+						SetDrawBright(216, 216, 0);// 
+					}
+					else {
+						SetDrawBright(0, 216, 0);// 
+					}
+					Watch = 45.0 / 360.0 * 100.0;
+				}
+				DrawCircleGauge((int)DispPos.x, (int)DispPos.y, Deg + Watch, m_Watch.get(), Deg - Watch, (double)GetDispSize(5.f) / 64.0);
+			}
+		}
+		void MainGameScene::DrawCharaUI_Front(PlayerID value) noexcept
+		{
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto& p = PlayerMngr->GetPlayer(value);
+			if (p.GetChara() && p.GetChara()->CanLookPlayer0()) {
+				float Timer = p.GetAI()->GetGraphTimer();
+				if (Timer <= 0.f) { return; }
+				auto DispPos = Convert2DtoDisp(p.GetChara()->GetPos());
+
+				float Per = 1.f;
+				if (Timer > 2.f - 0.25f) {
+					Per = 1.f - (Timer - (2.f - 0.25f)) / 0.25f;
+				}
+				if (Timer < 0.25f) {
+					Per = (Timer - (0.25f - 0.25f)) / 0.25f;
+				}
+
+
+				if (p.GetAI()->IsAlert()) {
+					SetDrawBright(0, 0, 0);// 
+					m_Alert.DrawRotaGraph((int)DispPos.x + y_r(3), (int)DispPos.y - y_r(32) + y_r(3), (float)y_r(128) / 128.0f * Per, 0.f, true);
+					SetDrawBright(255, 0, 0);// 
+					m_Alert.DrawRotaGraph((int)DispPos.x, (int)DispPos.y - y_r(32), (float)y_r(128) / 128.0f * Per, 0.f, true);
+				}
+				else {
+					SetDrawBright(0, 0, 0);// 
+					m_Caution.DrawRotaGraph((int)DispPos.x + y_r(3), (int)DispPos.y - y_r(32) + y_r(3), (float)y_r(128) / 128.0f * Per, 0.f, true);
+					if (p.GetAI()->IsCaution()) {
+						SetDrawBright(255, 255, 0);// 
+					}
+					else {
+						SetDrawBright(0, 255, 0);// 
+					}
+					m_Caution.DrawRotaGraph((int)DispPos.x, (int)DispPos.y - y_r(32), (float)y_r(128) / 128.0f * Per, 0.f, true);
+				}
+			}
+		}
+		void MainGameScene::Dispose_LoadUI(void) noexcept {
+			m_ViewHandle.Dispose();
+			m_Watch.Dispose();
+			m_Caution.Dispose();
+			m_Alert.Dispose();
+		}
+		// ロード
+		void			MainGameScene::Load_Sub(void) noexcept {
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto* ResourceParts = CommonBattleResource::Instance();
+			// 共通リソース
+			ResourceParts->Load();
+			// 全プレイヤー
+			PlayerMngr->Init(Player_Num);
+			for (int i = 1; i < Player_Num; i++) {
+				ResourceParts->AddCharacter((PlayerID)i);
+			}
+			// UI
+			LoadUI();
+		}
+		void			MainGameScene::Set_Sub(void) noexcept {
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto* BackGround = BackGroundClassBase::Instance();
+			auto* Cam2D = Cam2DControl::Instance();
+			auto* ResourceParts = CommonBattleResource::Instance();
+			//リソースセット
+			ResourceParts->Set();
+			//ステージ
+			BackGround->Init("map1");
+			// ポーズ
+			SetPause();
+			// 自機
+			ResourceParts->AddCharacter(m_MyPlayerID);
+			// 全キャラの設定
+			for (int i = 0; i < Player_Num; i++) {
+				Vector3DX Pos;Pos.Set((float)i * 10.f, (float)i * 10.f, 0.f);
+				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
+				p.GetChara()->SetPos(Pos);
+				p.GetAI()->Init();
+			}
+			auto& Chara = PlayerMngr->GetPlayer(m_MyPlayerID).GetChara();
+			//カメラ
+			Cam2D->SetCamPos(Chara->GetPos());
+			// 
+			m_IsEnd = false;
+			m_Alpha = 1.f;
+		}
+		bool			MainGameScene::Update_Sub(void) noexcept {
+#ifdef DEBUG
+			auto* DebugParts = DebugClass::Instance();		//デバッグ
+#endif // DEBUG
+
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto* Pad = PadControl::Instance();
+			auto* DrawParts = DXDraw::Instance();
+			auto* Obj2DParts = Object2DManager::Instance();
+			auto* BackGround = BackGroundClassBase::Instance();
+			auto* Cam2D = Cam2DControl::Instance();
+			auto* OptionParts = OPTION::Instance();
+
+			auto& Chara = PlayerMngr->GetPlayer(m_MyPlayerID).GetChara();
+
+			UpdatePause();
+			if (DrawParts->IsPause()) {
+				return true;
 			}
 			Pad->SetMouseMoveEnable(false);
 			Pad->ChangeGuide(
@@ -143,162 +237,145 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide(PADS::SHOT, LocalizeParts->Get(9906));
 					KeyGuide->AddGuide(PADS::AIM, LocalizeParts->Get(9908));
 				});
-			if (this->m_IsRetire) {
-				m_IsEnd = true;
-			}
 			m_Alpha = std::clamp(m_Alpha + (m_IsEnd ? 1.f : -1.f) / DrawParts->GetFps(), 0.f, 1.f);
 			if (m_IsEnd && m_Alpha >= 1.f) {
 				return false;
 			}
-			//
-			BackGroundClassBase::Instance()->Execute();
-			//
+			// 
+			BackGround->Execute();
+			// 
+			InputControl MyInput;
+			float InputRad = 0.f;
 			for (int i = 0;i < Player_Num;i++) {
 				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
 				if (p.GetChara()) {
-					if (i == 0) {
-						InputControl MyInput;
-						MyInput.SetInputStart(0.f, 0.f);
-						MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
-						MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
-						MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
-						MyInput.SetInputPADS(PADS::MOVE_D, Pad->GetKey(PADS::MOVE_D).press());
-						MyInput.SetInputPADS(PADS::RUN, Pad->GetKey(PADS::RUN).press());
-						MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
-						MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
-						MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press());
-						//
-						p.GetChara()->ExecuteInput(&MyInput);
-						//
-						auto DispPos = Convert2DtoDisp(p.GetChara()->GetPos());
-						p.GetChara()->SetViewRad(-GetRadVec2Vec(DispPos * ((float)y_UIMs(1080) / (float)y_r(1080)), Vector3DX::vget((float)Pad->GetMS_X(), (float)Pad->GetMS_Y(), 0.f)));
+					MyInput.ResetAllInput();
+					InputRad = 0.f;
+					if (m_Alpha == 0.f) {
+						if (i == m_MyPlayerID) {
+							MyInput.SetInputStart(0.f, 0.f);
+							MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
+							MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
+							MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
+							MyInput.SetInputPADS(PADS::MOVE_D, Pad->GetKey(PADS::MOVE_D).press());
+							MyInput.SetInputPADS(PADS::RUN, Pad->GetKey(PADS::RUN).press());
+							MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
+							MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
+							MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press());
+							auto DispPos = Convert2DtoDisp(p.GetChara()->GetPos());
+							InputRad = -GetRadVec2Vec(DispPos * ((float)y_UIMs(1080) / (float)y_r(1080)), Vector3DX::vget((float)Pad->GetMS_X(), (float)Pad->GetMS_Y(), 0.f));
+						}
+						else {
+							p.GetAI()->Execute(&MyInput);
+							InputRad = p.GetAI()->GetViewRad();
+						}
 					}
-					else {
-						InputControl MyInput;
-						m_AI[i]->Execute(&MyInput);
-						//
-						p.GetChara()->ExecuteInput(&MyInput);
-
-						p.GetChara()->SetViewRad(m_AI[i]->GetViewRad());
-					}
+					p.GetChara()->ExecuteInput(&MyInput);
+					p.GetChara()->SetViewRad(InputRad);
 				}
 			}
+#ifdef DEBUG
+			DebugParts->SetPoint("-----2-----");
+#endif // DEBUG
 			Obj2DParts->ExecuteObject();
-			//
+#ifdef DEBUG
+			DebugParts->SetPoint("-----3-----");
+#endif // DEBUG
+			// 
 			Vector3DX CamPos = Vector3DX::zero();
 			if (Pad->GetKey(PADS::AIM).press()) {
-				float ViewLimit = 10.f * ((64.f * 64.f) / (1080 / 2));
-				CamPos.Set(std::sin(Chara->GetBodyRad()), std::cos(Chara->GetBodyRad()), 0.f);
-				CamPos *= ViewLimit;
+				float ViewLimit = Get2DSize(10.f);
+				CamPos.Set(std::sin(Chara->GetBodyRad())* ViewLimit, std::cos(Chara->GetBodyRad())* ViewLimit, 0.f);
 			}
 			Easing(&m_CamAddPos, CamPos, 0.9f, EasingType::OutExpo);
-			Cam2DControl::Instance()->SetCamAim(Chara->GetPos() + m_CamAddPos);
-			//
-			BackGroundClassBase::Instance()->SetPointLight(Chara->GetPos());
-			BackGroundClassBase::Instance()->SetAmbientLight(120.f, deg2rad(30));
-			BackGroundClassBase::Instance()->SetupShadow();
+			Cam2D->SetCamAim(Chara->GetPos() + m_CamAddPos);
+			// 
+			BackGround->SetPointLight(Chara->GetPos());
+			BackGround->SetAmbientLight(120.f, deg2rad(30));
+			BackGround->SetupShadow();
+
+			m_ViewHandle.SetDraw_Screen();
+			{
+				DrawBox_2D(0, 0, y_r(1920), y_r(1080), White, true);
+				// 視界
+				for (int loop = 0;loop < 4;loop++) {
+					for (int i = 0;i < Player_Num;i++) {
+						auto& p = PlayerMngr->GetPlayer((PlayerID)i);
+						if (i == m_MyPlayerID) {
+							if (loop == 3) {
+								DrawCharaUI_Back((PlayerID)i);
+							}
+						}
+						else {
+							if (p.GetAI()->IsAlert()) {
+								if (loop == 2) {
+									DrawCharaUI_Back((PlayerID)i);
+								}
+							}
+							else if (p.GetAI()->IsCaution()) {
+								if (loop == 1) {
+									DrawCharaUI_Back((PlayerID)i);
+								}
+							}
+							else {
+								if (loop == 0) {
+									DrawCharaUI_Back((PlayerID)i);
+								}
+							}
+						}
+					}
+				}
+				SetDrawBright(255, 255, 255);
+				if (OptionParts->GetParamInt(EnumSaveParam::shadow) > 0) {
+					SetDrawBlendMode(DX_BLENDMODE_MULA, 255);
+					BackGround->GetShadowGraph().DrawExtendGraph(0, 0, y_r(1920), y_r(1080), false);
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+				}
+			}
+			//GraphBlend(m_ViewHandle.get(), BackGround->GetShadowGraph().get(), 255, DX_GRAPH_BLEND_MULTIPLE_A_ONLY);
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
 			auto* SaveDataParts = SaveDataClass::Instance();
-			auto* ButtonParts = ButtonControl::Instance();
-			auto Obj2DParts = Object2DManager::Instance();
-			auto* PlayerMngr = PlayerManager::Instance();
-			//自機
-			auto& p = PlayerMngr->GetPlayer(m_MyPlayerID);
-			Obj2DParts->DelObj(p.GetChara());
-			p.Dispose();
-			//
-			ButtonParts->Dispose();
-			SaveDataParts->Save();//セーブ
-			BackGroundClassBase::Instance()->Dispose();
+			auto* BackGround = BackGroundClassBase::Instance();
+			auto* ResourceParts = CommonBattleResource::Instance();
+			// 自機
+			ResourceParts->DelCharacter(m_MyPlayerID);
+			BackGround->Dispose();
+			// ポーズ
+			DisposePause();
+			// セーブ
+			SaveDataParts->Save();
 		}
 		void			MainGameScene::MainDraw_Sub(void) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
-			auto Obj2DParts = Object2DManager::Instance();
+			auto* BackGround = BackGroundClassBase::Instance();
+			auto* Obj2DParts = Object2DManager::Instance();
+			// 
+			BackGround->Draw();
 			//
-			BackGroundClassBase::Instance()->Draw();
-			//
-			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
-			//
-			for (int i = 0;i < Player_Num;i++) {
-				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
-				if (p.GetChara() && (p.GetChara()->CanLookPlayer0())) {
-					auto DispPos = Convert2DtoDisp(p.GetChara()->GetPos());
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(92.f), 0, 255));
-					double Deg = (double)p.GetChara()->GetViewRad() / (DX_PI * 2.0) * 100.0;
-					double Watch;
-					if (i == 0) {
-						SetDrawBright(0, 0, 255);
-						Watch = 15.0 / 360.0 * 100.0;
-					}
-					else {
-						if (m_AI[i]->IsAlert()) {
-							SetDrawBright(255, 0, 0);//
-						}
-						else if (m_AI[i]->IsCaution()) {
-							SetDrawBright(255, 255, 0);//
-						}
-						else {
-							SetDrawBright(0, 255, 0);//
-						}
-						Watch = 45.0 / 360.0 * 100.0;
-					}
-					DrawCircleGauge((int)DispPos.x, (int)DispPos.y, Deg + Watch, m_Watch.get(), Deg - Watch, (double)y_r(5.f * 128.f * 64.f / CamPos.z) / 128.0);
-				}
-			}
-			SetDrawBright(255, 255, 255);
+			SetDrawBlendMode(DX_BLENDMODE_MULA, 92);
+			m_ViewHandle.DrawGraph(0, 0, false);
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-			//
+			// 
 			Obj2DParts->Draw();
-			//
 			for (int i = 1;i < Player_Num;i++) {
+				// !マーク
+				DrawCharaUI_Front((PlayerID)i);
+				//ID用デバッグ描画
 				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
-				if (p.GetChara() && (p.GetChara()->CanLookPlayer0())) {
-					float Timer = m_AI[i]->GetGraphTimer();
-					if (Timer <= 0.f) { continue; }
-					auto DispPos = Convert2DtoDisp(p.GetChara()->GetPos());
-
-					float Per = 1.f;
-					if (Timer > 2.f - 0.25f) {
-						Per = 1.f - (Timer - (2.f - 0.25f)) / 0.25f;
-					}
-					if (Timer < 0.25f) {
-						Per = (Timer - (0.25f - 0.25f)) / 0.25f;
-					}
-
-
-					if (m_AI[i]->IsAlert()) {
-						SetDrawBright(0, 0, 0);//
-						m_Alert.DrawRotaGraph((int)DispPos.x + y_r(3), (int)DispPos.y - y_r(32) + y_r(3), (float)y_r(128) / 128.0f * Per, 0.f, true);
-						SetDrawBright(255, 0, 0);//
-						m_Alert.DrawRotaGraph((int)DispPos.x, (int)DispPos.y - y_r(32), (float)y_r(128) / 128.0f * Per, 0.f, true);
-					}
-					else {
-						SetDrawBright(0, 0, 0);//
-						m_Caution.DrawRotaGraph((int)DispPos.x + y_r(3), (int)DispPos.y - y_r(32) + y_r(3), (float)y_r(128) / 128.0f * Per, 0.f, true);
-						if (m_AI[i]->IsCaution()) {
-							SetDrawBright(255, 255, 0);//
-						}
-						else {
-							SetDrawBright(0, 255, 0);//
-						}
-						m_Caution.DrawRotaGraph((int)DispPos.x, (int)DispPos.y - y_r(32), (float)y_r(128) / 128.0f * Per, 0.f, true);
-					}
-				}
+				p.GetAI()->Draw();
 			}
 			SetDrawBright(255, 255, 255);
-			//
-			BackGroundClassBase::Instance()->DrawFront();
-			//
+			// 
+			BackGround->DrawFront();
 		}
 		void			MainGameScene::DrawUI_Base_Sub(void) noexcept {
 			auto* Fonts = FontPool::Instance();
-			//
-			Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_UI(96),
-																FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+			// 
+			Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_UI(96), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																y_UI(64), y_UI(64), White, Black, "MainScene");
-			//
+			// 
 			{
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f * m_Alpha), 0, 255));
 				DrawBox(0, 0, y_r(1920), y_r(1080), Black, TRUE);
@@ -307,24 +384,18 @@ namespace FPS_n2 {
 		}
 
 		void			MainGameScene::DrawUI_In_Sub(void) noexcept {
-			auto* DrawParts = DXDraw::Instance();
-			auto* ButtonParts = ButtonControl::Instance();
-			//ポーズ
-			if (DrawParts->IsPause() && (!DrawParts->IsExit() && !DrawParts->IsRestart())) {
-				ButtonParts->Draw();
-			}
+			// ポーズ
+			DrawPause();
 		}
-		//使い回しオブジェ系
+		// 使い回しオブジェ系
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
-			auto Obj2DParts = Object2DManager::Instance();
+			auto* Obj2DParts = Object2DManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
+			auto* ResourceParts = CommonBattleResource::Instance();
 			PlayerMngr->Dispose();
 			Obj2DParts->DeleteAll();
-			CommonBattleResource::Instance()->Dispose();
-			m_Watch.Dispose();
-			m_Caution.Dispose();
-			m_Alert.Dispose();
+			ResourceParts->Dispose();
+			Dispose_LoadUI();
 		}
-		//
 	};
 };

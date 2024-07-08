@@ -3,7 +3,7 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		//
+		// 
 		class ButtonControl : public SingletonBase<ButtonControl> {
 		private:
 			friend class SingletonBase<ButtonControl>;
@@ -269,7 +269,7 @@ namespace FPS_n2 {
 				ButtonSel.back()->Set(xp, yp, FontX, FontY);
 			}
 		};
-		//
+		// 
 		class CreditControl {
 			static const int			CharMax = 256;
 			int							m_CreditCoulm{0};
@@ -279,6 +279,6 @@ namespace FPS_n2 {
 			void Draw(int xmin, int ymin, int xmax) noexcept;
 			void Dispose() noexcept;
 		};
-		//
+		// 
 	};
 };

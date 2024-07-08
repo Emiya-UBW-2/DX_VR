@@ -3,7 +3,7 @@
 const FPS_n2::Sceneclass::ButtonControl* SingletonBase<FPS_n2::Sceneclass::ButtonControl>::m_Singleton = nullptr;
 namespace FPS_n2 {
 	namespace Sceneclass {
-		//
+		// 
 		const bool ButtonControl::GetTriggerButton() const noexcept {
 			auto* Pad = PadControl::Instance();
 			return (select != -1) && (m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetKey(PADS::INTERACT).trigger());
@@ -46,7 +46,7 @@ namespace FPS_n2 {
 			if (m_MouseSelMode) {
 				select = -1;
 			}
-			//
+			// 
 			for (auto& y : ButtonSel) {
 				if (y->GetInto()) {
 					m_MouseSelMode = true;
@@ -85,7 +85,7 @@ namespace FPS_n2 {
 			}
 			ButtonSel.clear();
 		}
-		//
+		// 
 		void CreditControl::Init() noexcept {
 			int mdata = FileRead_open("data/Credit.txt", FALSE);
 			m_CreditCoulm = 0;
@@ -118,11 +118,11 @@ namespace FPS_n2 {
 				int xpos = xp1 + y_UI(6);
 				int ypos = yp1 + (yp1 + Height - yp1) / 2;
 				Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
-																	   xpos, ypos, White, Black, m_CreditStr.at(i).first);
+																	 xpos, ypos, White, Black, m_CreditStr.at(i).first);
 
 				xpos = xmax - y_UI(24);
 				Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
-																	   xpos, ypos, White, Black, m_CreditStr.at(i).second);
+																	 xpos, ypos, White, Black, m_CreditStr.at(i).second);
 				yp1 += Height;
 			}
 		}

@@ -1,8 +1,8 @@
 #include	"TestGameScene.hpp"
 
-#include "../sub.hpp"
+#include	"../sub.hpp"
 
-#include "../MainScene/Player/Player.hpp"
+#include	"../MainScene/Player/Player.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
