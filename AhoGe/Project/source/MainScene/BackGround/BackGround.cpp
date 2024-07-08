@@ -236,6 +236,11 @@ namespace FPS_n2 {
 			Path += "_col.bmp";
 			int MapImage = LoadSoftImage(Path.c_str());
 			GetSoftImageSize(MapImage, &xsize, &ysize);
+			// マップ
+			Path = "data/map/";
+			Path += MapPath;
+			Path += "_evt.bmp";
+			int EvtImage = LoadSoftImage(Path.c_str());
 			// パレット
 			Path = "data/map/";
 			Path += MapPath;
@@ -271,6 +276,9 @@ namespace FPS_n2 {
 					ChipInfoDatas.at(x).IsWall = (r < 128);
 				}
 			}
+			//
+			m_PlayerSpawn.resize(8);
+			int SPawnCount = 1;
 			// 
 			m_Blick.resize(xsize);
 			for (int x = 0; x < xsize; x++) {
@@ -292,6 +300,15 @@ namespace FPS_n2 {
 							B->IsWall = p.IsWall;
 							break;
 						}
+					}
+					GetPixelSoftImage(EvtImage, x, ysize - 1 - y, &r, &g, &b, NULL);
+					if (r == 255 && g == 0 && b == 0) {
+						m_PlayerSpawn.at(SPawnCount) = B->m_Pos;
+						SPawnCount++;
+						if (SPawnCount >= m_PlayerSpawn.size()) { SPawnCount = 1; }
+					}
+					else if (r == 0 && g == 255 && b == 0) {
+						m_PlayerSpawn.at(0) = B->m_Pos;
 					}
 				}
 			}
@@ -388,6 +405,7 @@ namespace FPS_n2 {
 				}
 			}
 			DeleteSoftImage(MapImage);
+			DeleteSoftImage(EvtImage);
 			DeleteSoftImage(PalImage);
 
 			m_PointShadowHandle = GraphHandle::Make(y_r(1920.f * ShadowPer), y_r(1080.f * ShadowPer), true);

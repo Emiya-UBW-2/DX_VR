@@ -27,7 +27,11 @@ namespace FPS_n2 {
 		public:
 			void SetObjName(std::string_view value) noexcept { this->m_ObjName = value; }
 			void SetObjType(int value) noexcept { this->m_ObjType = value; }
-			void SetPos(const Vector3DX& value) noexcept { this->m_Pos = value; }
+			void SetPos(const Vector3DX& value) noexcept {
+				this->m_Pos = value;
+				this->m_PrevPos = this->m_Pos;
+				
+			}
 		public:
 			const auto& GetObjName(void) const noexcept { return this->m_ObjName; }
 			const auto& GetObjType(void) const noexcept { return this->m_ObjType; }

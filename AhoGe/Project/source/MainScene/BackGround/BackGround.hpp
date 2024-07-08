@@ -70,6 +70,7 @@ namespace FPS_n2 {
 			std::vector<CheckLines> WallList;// 壁と判断された構造体のアドレスを保存しておく
 			std::vector<ShadowBoxes> m_ShadowBoxes;
 			std::vector<std::vector<std::shared_ptr<Blick>>> m_Blick;
+			std::vector<Vector3DX>		m_PlayerSpawn;
 			std::vector<GraphHandle>	m_MapChip;
 			std::vector<GraphHandle>	m_WallChip;
 
@@ -82,6 +83,7 @@ namespace FPS_n2 {
 			GraphHandle m_AmbientShadowHandle;
 		public:// 
 			const auto&		GetShadowGraph(void) const noexcept { return this->m_PointShadowHandle; }
+			const auto&		GetPlayerSpawn(void) const noexcept { return this->m_PlayerSpawn; }
 			const auto		GetXSize(void) const noexcept { return this->m_Blick.size(); }
 			const auto		GetYSize(void) const noexcept { return this->m_Blick.back().size(); }
 			const auto		GetXYToNum(int x, int y) const noexcept { return x * (int)GetXSize() + y; }

@@ -190,9 +190,8 @@ namespace FPS_n2 {
 			ResourceParts->AddCharacter(m_MyPlayerID);
 			// ‘SƒLƒƒƒ‰‚Ìİ’è
 			for (int i = 0; i < Player_Num; i++) {
-				Vector3DX Pos;Pos.Set((float)i * 10.f, (float)i * 10.f, 0.f);
 				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
-				p.GetChara()->SetPos(Pos);
+				p.GetChara()->SetPos(BackGround->GetPlayerSpawn().at(i));
 				p.GetAI()->Init();
 			}
 			auto& Chara = PlayerMngr->GetPlayer(m_MyPlayerID).GetChara();

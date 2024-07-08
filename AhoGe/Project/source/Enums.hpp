@@ -26,9 +26,9 @@ namespace FPS_n2 {
 			Human,
 			Stone,
 		};
-		static const int Player_Num{16};
+		static const int Player_Num{8};
 
-		static const float Tile_DispSize{ 64.f };
+		static const float Tile_DispSize{ 48.f };
 
 		static const float Base_CamScale{ 64.f };//‹óŠÔã‚Ì¸“x
 	};
