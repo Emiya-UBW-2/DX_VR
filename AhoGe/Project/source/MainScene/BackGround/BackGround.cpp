@@ -9,21 +9,17 @@ namespace FPS_n2 {
 			for (auto& b : m_Blick) {
 				for (auto& B : b) {
 					// 壁ではない
-					if (!B->IsWall) { continue; }
+					if (!B->IsCheckWall) { continue; }
 					auto DispPos = Convert2DtoDisp(B->m_Pos);
-					if (!HitPointToRectangle((int)DispPos.x, (int)DispPos.y, -Radius, -Radius, y_r(1920) + Radius, y_r(1080) + Radius)) { continue; }
+					if (!HitPointToRectangle((int)DispPos.x, (int)DispPos.y, (int)-Radius, (int)-Radius, (int)(y_r(1920) + Radius), (int)(y_r(1080) + Radius))) { continue; }
 					// 辺を登録
 					auto GetPer = [&]() {
-						if (GetHitCapsuleToTriangle(PosA, PosB, Radius, B->BoxSide.at(0), B->BoxSide.at(1), B->BoxSide.at(3)) ||
-							GetHitCapsuleToTriangle(PosA, PosB, Radius, B->BoxSide.at(1), B->BoxSide.at(2), B->BoxSide.at(3))) {
-
-							if (GetHitCapsuleToTriangle(PosA, PosB, 1.f, B->BoxSide.at(0), B->BoxSide.at(1), B->BoxSide.at(3)) ||
-								GetHitCapsuleToTriangle(PosA, PosB, 1.f, B->BoxSide.at(1), B->BoxSide.at(2), B->BoxSide.at(3))) {
-								return 0.0f;
-							}
-
+						if (!B->CheckCapsuleHit(PosA, PosB, Radius)) {
+							return 1.0f;
+						}
+						if (!B->CheckLineHit(PosA, PosB)) {
 							float P = 2.f;
-							for (int i = 0;i < 4;i++) {
+							for (int i = 0; i < 4; i++) {
 								float ret = (GetMinLenSegmentToSegment(B->BoxSide.at(i), B->BoxSide.at((i + 1) % 4), PosA, PosB) / Radius);
 								if (ret < 1.f) {
 									if (P > ret) {
@@ -34,10 +30,9 @@ namespace FPS_n2 {
 							if (P <= 1.f) {
 								return P;
 							}
-							return 0.0f;
 						}
-						return 1.0f;
-					};
+						return 0.0f;
+						};
 					float tmp = GetPer();
 					if (Ret > tmp) {
 						Ret = tmp;
@@ -49,21 +44,18 @@ namespace FPS_n2 {
 			return Ret;
 		}
 		// 壁判定ユニバーサル
-		const bool BackGroundClassBase::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius) noexcept {
-			Vector3DX EndPt = *EndPos; EndPt.z = 0.f;
-			Vector3DX StartPt = StartPos; StartPt.z = 0.f;
-			Vector3DX VecPt = EndPt - StartPt;
+		const bool BackGroundClassBase::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius, bool IsPhysical) noexcept {
 			WallList.clear();
 			Vector3DX Min, Max;
-			Min.x = std::min(EndPt.x, StartPt.x) - (Radius * 6);
-			Min.y = std::min(EndPt.y, StartPt.y) - (Radius * 6);
-			Max.x = std::max(EndPt.x, StartPt.x) + (Radius * 6);
-			Max.y = std::max(EndPt.y, StartPt.y) + (Radius * 6);
+			Min.x = std::min(EndPos->x, StartPos.x) - (Radius * 4);
+			Min.y = std::min(EndPos->y, StartPos.y) - (Radius * 4);
+			Max.x = std::max(EndPos->x, StartPos.x) + (Radius * 4);
+			Max.y = std::max(EndPos->y, StartPos.y) + (Radius * 4);
 			// 線のリストを出す
 			for (auto& b : m_Blick) {
 				for (auto& B : b) {
 					// 壁ではない
-					if (!B->IsWall) { continue; }
+					if (!B->IsCheckWall) { continue; }
 					// 範囲外
 					if (!B->CheckRectangleHit(Min, Max)) { continue; }
 					// 辺を登録
@@ -152,36 +144,45 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			// 外向きなのでノーヒット
+
+			Vector3DX VecPt = *EndPos - StartPos;
+			int WallCount = 0;
 			for (auto& w : WallList) {
 				if (!w.canuse) { continue; }
-				Vector3DX StartP = w.Position.at(0);
-				Vector3DX EndP = w.Position.at(1);
-				if (Vector3DX::Dot(Vector3DX::Cross(EndP - StartP, VecPt), Vector3DX::Cross(EndP - StartP, w.Normal * -1.f)) < 0.f) {
+				// 外向きなのでノーヒット
+				Vector3DX VecP = w.Position.at(1) - w.Position.at(0);
+				if (Vector3DX::Dot(Vector3DX::Cross(VecP, VecPt), Vector3DX::Cross(VecP, w.Normal * -1.f)) < 0.f) {
 					w.canuse = false;
 				}
+				//ヒット加算
+				if (w.canuse) { WallCount++; }
 			}
-			// 使わないものを削除
-			for (int i = 0; i < WallList.size(); i++) {
-				if (!WallList.at(i).canuse) {
-					std::swap(WallList.at(i), WallList.back());
-					WallList.pop_back();
-					i--;
-				}
-			}
-			bool HitFlag = false;
+			if (WallCount == 0) { return false; }
 			// 壁との当たり判定処理
-			if (WallList.size() > 0) {
-				for (auto& w : WallList) {
-					// 壁とプレイヤーが当たっていなかったら次のカウントへ
-					if (GetHitCheckToCapsule(StartPt, EndPt, Radius, w.Position.at(0), w.Position.at(1), 0.f)) {
+			bool HitFlag = false;
+			for (auto& w : WallList) {
+				if (!w.canuse) { continue; }
+				// 壁とプレイヤーが当たっていなかったら次のカウントへ
+				if (GetHitCheckToCapsule(StartPos, *EndPos, Radius, w.Position.at(0), w.Position.at(1), 0.f)) {
+					if (!IsPhysical) {
+						SEGMENT_SEGMENT_RESULT Result;
+						GetSegmenttoSegment(StartPos, *EndPos, w.Position.at(0), w.Position.at(1), &Result);
+						Vector3DX pos;
+						pos += Result.SegA_MinDist_Pos;
+						pos += Result.SegB_MinDist_Pos;
+						pos /= 2.f;
+						*EndPos = pos;
+						return true;
+					}
+					else {
 						HitFlag = true;// ここにきたら壁とプレイヤーが当たっているということなので、壁に当たったフラグを立てる
-						if (VecPt.sqrMagnitude() >= 0.00001f) {	// x軸かz軸方向に 0.001f 以上移動した場合は移動したと判定
-							// 壁に当たったら壁に遮られない移動成分分だけ移動する
-							EndPt = StartPt + Vector3DX::Cross(w.Normal, Vector3DX::Cross(VecPt, w.Normal));
+						if (VecPt.sqrMagnitude() >= 0.00001f) {
+							// x軸かz軸方向に 0.001f 以上移動した場合は移動したと判定 壁に当たったら壁に遮られない移動成分分だけ移動する
+							*EndPos = StartPos + Vector3DX::Cross(w.Normal, Vector3DX::Cross(VecPt, w.Normal));
 							bool IsHit = false;
 							for (auto& w2 : WallList) {
-								if (GetHitCheckToCapsule(StartPt, EndPt, Radius, w2.Position.at(0), w2.Position.at(1), 0.f)) {
+								if (!w2.canuse) { continue; }
+								if (GetHitCheckToCapsule(StartPos, *EndPos, Radius, w2.Position.at(0), w2.Position.at(1), 0.f)) {
 									IsHit = true;
 									break;
 								}
@@ -196,68 +197,52 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				// 上記を経ても壁に当たっていたら壁から押し出す処理を行う
-				if (HitFlag) {
-					for (int i = 0; i < 16; ++i) {			// 壁からの押し出し処理を試みる最大数だけ繰り返し
-						bool HitF = false;
-						for (auto& w : WallList) {
-							if (!GetHitCheckToCapsule(StartPt, EndPt, Radius, w.Position.at(0), w.Position.at(1), 0.f)) { continue; }
-							EndPt += w.Normal * 0.0015f;					// 当たっていたら規定距離分プレイヤーを壁の法線方向に移動させる
-							bool IsHit = false;
-							for (auto& w2 : WallList) {
-								if (GetHitCheckToCapsule(StartPt, EndPt, Radius, w2.Position.at(0), w2.Position.at(1), 0.f)) {// 当たっていたらループを抜ける
-									IsHit = true;
-									break;
-								}
-							}
-							if (!IsHit) {// 全ての壁と当たっていなかったらここでループ終了
+			}
+			if (!IsPhysical) {
+				return false;
+			}
+			// 上記を経ても壁に当たっていたら壁から押し出す処理を行う
+			if (HitFlag) {
+				for (int i = 0; i < 8; ++i) {			// 壁からの押し出し処理を試みる最大数だけ繰り返し
+					bool HitF = false;
+					for (auto& w : WallList) {
+						if (!w.canuse) { continue; }
+						if (!GetHitCheckToCapsule(StartPos, *EndPos, Radius, w.Position.at(0), w.Position.at(1), 0.f)) { continue; }
+						*EndPos += w.Normal * 0.0015f;					// 当たっていたら規定距離分プレイヤーを壁の法線方向に移動させる
+						bool IsHit = false;
+						for (auto& w2 : WallList) {
+							if (!w2.canuse) { continue; }
+							if (GetHitCheckToCapsule(StartPos, *EndPos, Radius, w2.Position.at(0), w2.Position.at(1), 0.f)) {// 当たっていたらループを抜ける
+								IsHit = true;
 								break;
 							}
-							HitF = true;
 						}
-						if (!HitF) {// 全部の壁で押し出しを試みる前に全ての壁壁と接触しなくなったということなのでループから抜ける
+						if (!IsHit) {// 全ての壁と当たっていなかったらここでループ終了
 							break;
 						}
+						HitF = true;
+					}
+					if (!HitF) {// 全部の壁で押し出しを試みる前に全ての壁壁と接触しなくなったということなのでループから抜ける
+						break;
 					}
 				}
-				// WallList.clear();
 			}
-			*EndPos = EndPt;
+			EndPos->z = 0.f;
 			return HitFlag;
 		}
 
-		void BackGroundClassBase::Init(const char* MapPath) noexcept {
+		void BackGroundClassBase::Init(const std::string& MapPath) noexcept {
 			int xsize = 64;
 			int ysize = 64;
-			std::string Path;
-			// マップ
-			Path = "data/map/";
-			Path += MapPath;
-			Path += "_col.bmp";
-			int MapImage = LoadSoftImage(Path.c_str());
-			GetSoftImageSize(MapImage, &xsize, &ysize);
-			// マップ
-			Path = "data/map/";
-			Path += MapPath;
-			Path += "_evt.bmp";
-			int EvtImage = LoadSoftImage(Path.c_str());
-			// パレット
-			Path = "data/map/";
-			Path += MapPath;
-			Path += "_chp.bmp";
-			int PalImage = LoadSoftImage(Path.c_str());
 			int ChipNum = 12;
+			// マップ
+			int MapImage = LoadSoftImage(("data/map/" + MapPath + "/col.bmp").c_str());
+			GetSoftImageSize(MapImage, &xsize, &ysize);
+			int EvtImage = LoadSoftImage(("data/map/" + MapPath + "/evt.bmp").c_str());
+			int PalImage = LoadSoftImage(("data/map/" + MapPath + "/chp.bmp").c_str());
 			GetSoftImageSize(PalImage, &ChipNum, NULL);
-			// イメージ
-			Path = "data/map/";
-			Path += MapPath;
-			Path += "_img.bmp";
-			GraphHandle::LoadDiv(Path, ChipNum, ChipNum, 1, 32, 32, &m_MapChip);
-			// イメージ
-			Path = "data/map/";
-			Path += MapPath;
-			Path += "_wal.bmp";
-			GraphHandle::LoadDiv(Path, 5 * 2, 5, 2, 32, 32, &m_WallChip);
+			GraphHandle::LoadDiv("data/map/" + MapPath + "/img.bmp", ChipNum, ChipNum, 1, 32, 32, &m_MapChip);//床マップチップ
+			GraphHandle::LoadDiv("data/map/" + MapPath + "/wal.bmp", 5 * 2, 5, 2, 32, 32, &m_WallChip);//壁マップチップ
 			// 
 			struct ChipInfo {
 				std::array<unsigned char,3> Color{};
@@ -277,8 +262,7 @@ namespace FPS_n2 {
 				}
 			}
 			//
-			m_PlayerSpawn.resize(8);
-			int SPawnCount = 1;
+			m_PlayerSpawn.resize(1);
 			// 
 			m_Blick.resize(xsize);
 			for (int x = 0; x < xsize; x++) {
@@ -298,17 +282,63 @@ namespace FPS_n2 {
 								B->AddZRad.at(i) = 0.f;
 							}
 							B->IsWall = p.IsWall;
+							B->IsCheckWall = B->IsWall;
 							break;
 						}
 					}
 					GetPixelSoftImage(EvtImage, x, ysize - 1 - y, &r, &g, &b, NULL);
 					if (r == 255 && g == 0 && b == 0) {
-						m_PlayerSpawn.at(SPawnCount) = B->m_Pos;
-						SPawnCount++;
-						if (SPawnCount >= m_PlayerSpawn.size()) { SPawnCount = 1; }
+						PlayerPatrol tmp;tmp.m_index = GetXYToNum(x, y);
+						m_PlayerSpawn.emplace_back(tmp);
 					}
 					else if (r == 0 && g == 255 && b == 0) {
-						m_PlayerSpawn.at(0) = B->m_Pos;
+						m_PlayerSpawn.at(0).m_index = GetXYToNum(x, y);
+					}
+				}
+			}
+			//巡回ルート
+			//巡回ルート
+			{
+				std::array<std::pair<int, int>, 4> Dir;
+				Dir.at(0) = std::make_pair(-1, 0);
+				Dir.at(1) = std::make_pair(0, -1);
+				Dir.at(2) = std::make_pair(1, 0);
+				Dir.at(3) = std::make_pair(0, 1);
+				int r, g, b;
+				for (auto& s : m_PlayerSpawn) {
+					int index = (int)(&s - &m_PlayerSpawn.front());
+					if (index == 0) { continue; }
+					s.m_Patrol.clear();
+					s.m_Patrol.emplace_back(s.m_index);
+					while (true) {
+						auto Now = s.m_Patrol.back();
+						bool isHitNext = false;
+						for (int i = 0;i < 4;i++) {
+							auto XY = GetNumToXY(Now);
+							int x = XY.first + Dir.at(i).first;
+							int y = XY.second + Dir.at(i).second;
+							if (HitPointToRectangle(x, y, 0, 0, GetXSize() - 1, GetYSize() - 1)) {
+								int index = GetXYToNum(x, y);
+								GetPixelSoftImage(EvtImage, x, ysize - 1 - y, &r, &g, &b, NULL);
+								if (r == 255 && g == 192 && b == 192) {
+									bool isHit = false;
+									for (auto& p : s.m_Patrol) {
+										if (p == index) {
+											isHit = true;
+											break;
+										}
+									}
+									if (!isHit) {
+										s.m_Patrol.emplace_back(index);
+										isHitNext = true;
+										break;
+									}
+								}
+							}
+						}
+						if (!isHitNext) {
+							break;
+						}
 					}
 				}
 			}
@@ -391,6 +421,7 @@ namespace FPS_n2 {
 					case 4:
 						B->palletNum = 4;
 						B->ZRad = 0.f;
+						B->IsCheckWall = false;
 						break;
 					default:
 						break;
@@ -408,22 +439,23 @@ namespace FPS_n2 {
 			DeleteSoftImage(EvtImage);
 			DeleteSoftImage(PalImage);
 
-			m_PointShadowHandle = GraphHandle::Make(y_r(1920.f * ShadowPer), y_r(1080.f * ShadowPer), true);
-			m_AmbientShadowHandle = GraphHandle::Make(y_r(1920.f * ShadowPer), y_r(1080.f * ShadowPer), true);
+			m_PointShadowHandle = GraphHandle::Make(y_r(1920), y_r(1080), true);
+			m_AmbientShadowHandle = GraphHandle::Make(y_r(1920), y_r(1080), true);
 		}
 		// 
 		void BackGroundClassBase::Execute(void) noexcept {}
 		// 
-		void BackGroundClassBase::SetupShadow(void) noexcept {
+		void BackGroundClassBase::SetupShadow(std::function<void()> AddAmbShadow) noexcept {
 			auto* OptionParts = OPTION::Instance();
-			if (OptionParts->GetParamInt(EnumSaveParam::shadow) > 0) {
+			if (OptionParts->GetParamInt(EnumSaveParam::shadow) > 0 || (GetUseDirect3DVersion() == DX_DIRECT3D_11)) {
 				m_AmbientShadowHandle.SetDraw_Screen(false);
 				{
-					DrawBox_2D(0, 0, y_r(1920.f * ShadowPer), y_r(1080.f * ShadowPer), White, true);
+					DrawBox_2D(0, 0, y_r(1920), y_r(1080), White, true);
+					AddAmbShadow();
 					int Radius = GetDispSize(0.5f) + y_r(m_AmbientShadowLength);
 					for (auto& b : m_Blick) {
 						for (auto& B : b) {
-							if (!B->IsWall) { continue; }
+							if (!B->IsCheckWall) { continue; }
 							auto DispPos = Convert2DtoDisp(B->m_Pos);
 							if (!HitPointToRectangle((int)DispPos.x, (int)DispPos.y, -Radius, -Radius, y_r(1920) + Radius, y_r(1080) + Radius)) { continue; }
 							int x = (int)(&b - &m_Blick.front());
@@ -436,11 +468,11 @@ namespace FPS_n2 {
 			}
 			m_PointShadowHandle.SetDraw_Screen(false);
 			{
-				DrawBox_2D(0, 0, y_r(1920.f * ShadowPer), y_r(1080.f * ShadowPer), White, true);
+				DrawBox_2D(0, 0, y_r(1920), y_r(1080), White, true);
 				int Radius = GetDispSize(0.5f) + y_r(255.f);
 				for (auto& b : m_Blick) {
 					for (auto& B : b) {
-						if (!B->IsWall) { continue; }
+						if (!B->IsCheckWall) { continue; }
 						auto DispPos = Convert2DtoDisp(B->m_Pos);
 						if (!HitPointToRectangle((int)DispPos.x, (int)DispPos.y, -Radius, -Radius, y_r(1920) + Radius, y_r(1080) + Radius)) { continue; }
 						int x = (int)(&b - &m_Blick.front());
@@ -456,9 +488,8 @@ namespace FPS_n2 {
 			auto Draw = [&](const Vector3DX& postmp1, const Vector3DX& postmp2, float radsub) {
 				if (std::cos(m_AmbientLightRad - radsub) > 0.f) {
 					std::array<Vector3DX, 4> Position{ };
-					float Radius = (float)y_r(m_AmbientShadowLength);
-					Position.at(0).Set(postmp1.x + std::sin(m_AmbientLightRad) * Radius, postmp1.y + std::cos(m_AmbientLightRad) * Radius, 0.f);
-					Position.at(1).Set(postmp2.x + std::sin(m_AmbientLightRad) * Radius, postmp2.y + std::cos(m_AmbientLightRad) * Radius, 0.f);
+					Position.at(0).Set(postmp1.x + m_AmbientLightVec.x, postmp1.y + m_AmbientLightVec.y, 0.f);
+					Position.at(1).Set(postmp2.x + m_AmbientLightVec.x, postmp2.y + m_AmbientLightVec.y, 0.f);
 					Position.at(2) = postmp2;
 					Position.at(3) = postmp1;
 
@@ -537,10 +568,6 @@ namespace FPS_n2 {
 					if (x2max != -1) { Position.at(x2max).x += 3; }
 					if (y2max != -1) { Position.at(y2max).y += 3; }
 
-					Position.at(0) *= ShadowPer;
-					Position.at(1) *= ShadowPer;
-					Position.at(2) *= ShadowPer;
-					Position.at(3) *= ShadowPer;
 					DrawModiGraph(
 						(int)Position.at(0).x, (int)Position.at(0).y,
 						(int)Position.at(1).x, (int)Position.at(1).y,
@@ -603,10 +630,6 @@ namespace FPS_n2 {
 					Position.at(xmax).x += 3;
 					Position.at(ymax).y += 3;
 
-					Position.at(0) *= ShadowPer;
-					Position.at(1) *= ShadowPer;
-					Position.at(2) *= ShadowPer;
-					Position.at(3) *= ShadowPer;
 					DrawModiGraph(
 						(int)Position.at(0).x, (int)Position.at(0).y,
 						(int)Position.at(1).x, (int)Position.at(1).y,
@@ -637,7 +660,7 @@ namespace FPS_n2 {
 			}
 			// 影
 			auto* OptionParts = OPTION::Instance();
-			if (OptionParts->GetParamInt(EnumSaveParam::shadow) > 0) {
+			if (OptionParts->GetParamInt(EnumSaveParam::shadow) > 0 || (GetUseDirect3DVersion() == DX_DIRECT3D_11)) {
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, 64);
 				m_AmbientShadowHandle.DrawExtendGraph(0, 0, y_r(1920), y_r(1080), false);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
@@ -680,6 +703,7 @@ namespace FPS_n2 {
 			// デバッグ描画
 			/*
 			for (auto& w : WallList) {
+				if (!w.canuse) { continue; }
 				{
 					auto DispPos1 = Convert2DtoDisp(w.Position.at(0));
 					auto DispPos2 = Convert2DtoDisp(w.Position.at(1));

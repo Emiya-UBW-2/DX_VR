@@ -19,7 +19,7 @@ namespace FPS_n2 {
 			GraphHandle					m_Caution;
 			GraphHandle					m_Alert;
 		private:
-			void			SetPause(void) noexcept;
+			void			LoadPause(void) noexcept;
 			void			UpdatePause(void) noexcept;
 			void			DrawPause(void) noexcept;
 			void			DisposePause(void) noexcept;

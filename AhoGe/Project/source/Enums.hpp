@@ -24,12 +24,9 @@ namespace FPS_n2 {
 
 		enum class Object2DType {
 			Human,
-			Stone,
+			Bullet,
 		};
-		static const int Player_Num{8};
-
 		static const float Tile_DispSize{ 48.f };
-
 		static const float Base_CamScale{ 64.f };//ãÛä‘è„ÇÃê∏ìx
 	};
 

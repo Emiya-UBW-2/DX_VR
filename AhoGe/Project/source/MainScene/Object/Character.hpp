@@ -20,23 +20,7 @@ namespace FPS_n2 {
 			float						m_Rad_R{0.f};
 			float						m_DodgeCoolTime{ 0.f };
 
-			struct BlurParts {
-				Vector3DX	Pos;
-				float		Time{};
-				float		TimeMax{};
-			public:
-				const auto IsActive() const noexcept { return Time > 0.f; }
-				const auto GetPer() const noexcept { return Time / TimeMax; }
-			};
-			std::array<BlurParts, 60>	m_Blur{};
-			int							m_BlurNow{0};
-		private:
-			void AddBlur(float Blur) noexcept {
-				m_Blur.at(m_BlurNow).Pos = GetPos();
-				m_Blur.at(m_BlurNow).TimeMax = Blur;
-				m_Blur.at(m_BlurNow).Time = m_Blur.at(m_BlurNow).TimeMax;
-				++m_BlurNow %= (int)m_Blur.size();
-			}
+			float						m_ShotCoolTime{ 0.f };
 		public:
 			CharacterObject();
 			~CharacterObject();
@@ -52,6 +36,7 @@ namespace FPS_n2 {
 		public:
 			void Init_Sub() noexcept override;
 			void Execute_Sub() noexcept override;
+			void DrawShadow_Sub() noexcept override;
 			void Draw_Sub() noexcept override;
 			void Dispose_Sub() noexcept override;
 		};

@@ -13,6 +13,7 @@ namespace FPS_n2 {
 			friend class SingletonBase<Object2DManager>;
 		private:
 			std::vector<SharedObj2D>		m_Object;
+			int								m_LastUniqueID{ 0 };
 		private:
 			Object2DManager() {
 				m_Object.reserve(256);
@@ -31,6 +32,7 @@ namespace FPS_n2 {
 
 		public:
 			void			ExecuteObject(void) noexcept;
+			void			DrawShadow() noexcept;
 			void			Draw() noexcept;
 			void			DeleteAll(void) noexcept;
 		};

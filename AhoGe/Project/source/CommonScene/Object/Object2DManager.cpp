@@ -7,7 +7,9 @@ namespace FPS_n2 {
 		void			Object2DManager::AddObject(const SharedObj2D& NewObj) noexcept {
 			this->m_Object.resize(this->m_Object.size() + 1);
 			this->m_Object.back() = NewObj;
+			this->m_Object.back()->SetObjectID(m_LastUniqueID);
 			this->m_Object.back()->Init();
+			this->m_LastUniqueID = 0;
 		}
 		SharedObj2D* Object2DManager::GetObj(int ModelType, int num) noexcept {
 			int cnt = 0;
@@ -33,32 +35,69 @@ namespace FPS_n2 {
 		}
 
 		void 	Object2DManager::CheckColObject(Base2DObject* ptr) noexcept {
-			float Len = Get2DSize(0.5f + 0.5f);
 			for (auto& o : this->m_Object) {
 				if (o.get() == ptr) { continue; }
 				// 自分が当たったら押し出し
-				Vector3DX vec = o->GetPos() - ptr->GetPos();
-				if (vec.sqrMagnitude() < (Len * Len)) {
-					Vector3DX vec = o->GetPos() - ptr->GetPos();
-					o->SetPos(o->GetPos() - vec.normalized() * (vec.magnitude() - Len) / 2.f);
-					ptr->SetPos(ptr->GetPos() + vec.normalized() * (vec.magnitude() - Len) / 2.f);
+				SEGMENT_SEGMENT_RESULT Result;
+				GetSegmenttoSegment(ptr->GetPrevPos(), ptr->GetPos(), o->GetPrevPos(), o->GetPos(), &Result);
+
+				float Mag = std::sqrt(Result.SegA_SegB_MinDist_Square);
+				float Len = Get2DSize(ptr->GetSize() / 2.f + o->GetSize() / 2.f);
+				if (Mag < Len) {
+					bool ptr_p = ptr->GetHitTarget() == HitTarget::Physical;
+					bool o_p = o->GetHitTarget() == HitTarget::Physical;
+					if (ptr_p || o_p) {
+						Vector3DX pos;
+						pos += Result.SegA_MinDist_Pos;
+						pos += Result.SegB_MinDist_Pos;
+						pos /= 2.f;
+						Vector3DX vec = o->GetPos() - pos; vec.z = 0.f;
+						float Per = 0.5f;
+						if (ptr_p && !o_p) {
+							Per = 0.f;
+						}
+						else if (!ptr_p && o_p) {
+							Per = 1.f;
+						}
+						o->SetPos(o->GetPos() - vec.normalized() * (Mag - Len) * Per);
+						ptr->SetPos(ptr->GetPos() + vec.normalized() * (Mag - Len) * (1.f - Per));
+					}
+					if (!ptr_p) {
+						ptr->SetHitObjectID(o->GetObjectID());
+					}
+					if (!o_p) {
+						o->SetHitObjectID(ptr->GetObjectID());
+					}
 				}
 			}
 		};
 
 		void			Object2DManager::ExecuteObject(void) noexcept {
+#ifdef DEBUG
+			auto* DebugParts = DebugClass::Instance();		//デバッグ
+#endif // DEBUG
+
+#ifdef DEBUG
+			DebugParts->SetPoint("-----1-----");
+#endif // DEBUG
 			// アップデート
 			for (auto& o : this->m_Object) {
 				if (!o->GetIsDelete()) {
 					o->Execute();
 				}
 			}
+#ifdef DEBUG
+			DebugParts->SetPoint("-----2-----");
+#endif // DEBUG
 			// アップデート
 			for (auto& o : this->m_Object) {
 				if (!o->GetIsDelete()) {
 					o->ExecuteAfter();
 				}
 			}
+#ifdef DEBUG
+			DebugParts->SetPoint("-----3-----");
+#endif // DEBUG
 			// オブジェクトの排除チェック
 			for (int i = 0; i < this->m_Object.size(); i++) {
 				auto& o = this->m_Object.at(i);
@@ -67,6 +106,16 @@ namespace FPS_n2 {
 					o->Dispose();
 					this->m_Object.erase(this->m_Object.begin() + i);
 					i--;
+				}
+			}
+#ifdef DEBUG
+			DebugParts->SetPoint("-----4-----");
+#endif // DEBUG
+		}
+		void			Object2DManager::DrawShadow() noexcept {
+			for (auto& o : this->m_Object) {
+				if (o->GetIsDraw()) {
+					o->DrawShadow();
 				}
 			}
 		}
@@ -84,6 +133,7 @@ namespace FPS_n2 {
 				}
 			}
 			this->m_Object.clear();
+			this->m_LastUniqueID = 0;//一旦ユニークIDもリセット
 		}
 	};
 };

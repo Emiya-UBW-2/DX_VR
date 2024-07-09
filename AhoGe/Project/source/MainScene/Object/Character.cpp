@@ -2,6 +2,10 @@
 #include	"../../MainScene/BackGround/BackGround.hpp"
 #include	"../../MainScene/Player/Player.hpp"
 
+#include	"../../CommonScene/Object/Object2DManager.hpp"
+
+#include	"Bullet.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		CharacterObject::CharacterObject() {
@@ -14,6 +18,9 @@ namespace FPS_n2 {
 
 			// 移動速度
 			float Speed = 0.75f;
+			if (m_PlayerID != 0) {
+				Speed = 0.5f;
+			}
 			if (MyInput->GetPADSPress(PADS::RUN)) {
 				Speed = 1.25f;
 			}
@@ -65,14 +72,29 @@ namespace FPS_n2 {
 			// 
 			SetVec(m_InputVec.normalized() * m_Speed);
 			// ブラー
-			for (auto& b : m_Blur) {
-				b.Time = std::max(b.Time - 1.f / DrawParts->GetFps(), 0.f);
-			}
 			if (m_DodgeCoolTime > 0.75f) {
 				AddBlur(0.3f);
 			}
 			else if (MyInput->GetPADSPress(PADS::RUN)) {
 				AddBlur(0.1f);
+			}
+			//弾
+			if (m_ShotCoolTime == 0.f) {
+				if (MyInput->GetPADSPress(PADS::SHOT)) {
+					auto* Obj2DParts = Object2DManager::Instance();
+					const auto& Obj = std::make_shared<BulletObject>();
+					Obj2DParts->AddObject(Obj);
+					Obj->SetObjType((int)Object2DType::Bullet);
+					Obj->SetPlayerID(m_PlayerID);
+					Vector3DX Vec; Vec.Set(std::sin(m_Rad_R), std::cos(m_Rad_R), 0.f);
+					Obj->SetPos(GetPos() + Vec*Get2DSize(1.2f));
+					Obj->SetVec(Vec * 3.f);
+					Obj->SetSize(0.5f);
+					m_ShotCoolTime = 0.1f;
+				}
+			}
+			else {
+				m_ShotCoolTime = std::max(m_ShotCoolTime - 1.f / DrawParts->GetFps(), 0.f);
 			}
 		}
 		// 
@@ -82,10 +104,9 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto* BackGround = BackGroundClassBase::Instance();
 				auto& Chara = PlayerMngr->GetPlayer(0).GetChara();
-				float HalfLen = Get2DSize(0.5f);
-				float ViewLimit = Get2DSize(30.f);
+				float ViewLimit = Get2DSize(20.f);
 				if ((Chara->GetPos() - GetPos()).sqrMagnitude() < ViewLimit* ViewLimit) {
-					Easing(&m_Alpha, BackGround->CheckHideShadow(Chara->GetPos(), GetPos(), HalfLen), 0.5f, EasingType::OutExpo);
+					Easing(&m_Alpha, BackGround->CheckHideShadow(Chara->GetPos(), GetPos(), Get2DSize(GetSize() / 2.f)), 0.5f, EasingType::OutExpo);
 				}
 				else {
 					Easing(&m_Alpha, 0.f, 0.5f, EasingType::OutExpo);
@@ -109,16 +130,25 @@ namespace FPS_n2 {
 				if (m_Rad_R > DX_PI_F * 2.f) { m_Rad_R -= DX_PI_F * 2.f; }
 			}
 		}
+		void CharacterObject::DrawShadow_Sub() noexcept {
+			float Radius = (float)GetDispSize(GetSize() / 2.f);
+			auto* BackGround = BackGroundClassBase::Instance();
+			if (m_Alpha > 0.f) {
+				auto DispPos = Convert2DtoDisp(GetPos()) + BackGround->GetAmbientLightVec() * 0.25f;
+				DrawCircle((int)DispPos.x, (int)DispPos.y, (int)Radius, Black);
+			}
+		}
 		void CharacterObject::Draw_Sub() noexcept {
-			float Radius = (float)GetDispSize(0.5f);
-
-			for (auto& b : m_Blur) {
+			float Radius = (float)GetDispSize(GetSize() / 2.f);
+			//ブラー
+			for (auto& b : GetBlur()) {
 				if (b.IsActive()) {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(16.f * m_Alpha * b.GetPer()), 0, 255));
 					auto DispPos = Convert2DtoDisp(b.Pos);
 					DrawCircle((int)DispPos.x, (int)DispPos.y, (int)(Radius * std::pow(b.GetPer(), 0.5f)), (m_PlayerID == 0) ? GetColor(37, 68, 141) : GetColor(92, 84, 50));
 				}
 			}
+			//本体
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f * m_Alpha), 0, 255));
 			auto DispPos = Convert2DtoDisp(GetPos());
 			DrawCircle((int)DispPos.x, (int)DispPos.y, (int)Radius, (m_PlayerID == 0) ? GetColor(37, 68, 141) : GetColor(92, 84, 50));

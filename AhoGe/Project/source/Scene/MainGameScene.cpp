@@ -9,7 +9,7 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//ポーズ画面
-		void MainGameScene::SetPause(void) noexcept
+		void MainGameScene::LoadPause(void) noexcept
 		{
 			auto* ButtonParts = ButtonControl::Instance();
 			ButtonParts->ResetSel();
@@ -163,17 +163,13 @@ namespace FPS_n2 {
 		}
 		// ロード
 		void			MainGameScene::Load_Sub(void) noexcept {
-			auto* PlayerMngr = PlayerManager::Instance();
 			auto* ResourceParts = CommonBattleResource::Instance();
 			// 共通リソース
 			ResourceParts->Load();
-			// 全プレイヤー
-			PlayerMngr->Init(Player_Num);
-			for (int i = 1; i < Player_Num; i++) {
-				ResourceParts->AddCharacter((PlayerID)i);
-			}
 			// UI
 			LoadUI();
+			// ポーズ
+			LoadPause();
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
@@ -183,16 +179,12 @@ namespace FPS_n2 {
 			//リソースセット
 			ResourceParts->Set();
 			//ステージ
-			BackGround->Init("map1");
-			// ポーズ
-			SetPause();
-			// 自機
-			ResourceParts->AddCharacter(m_MyPlayerID);
+			BackGround->Init("map0");
+			// キャラマネ
+			PlayerMngr->Init((int)BackGround->GetPlayerSpawn().size());
 			// 全キャラの設定
-			for (int i = 0; i < Player_Num; i++) {
-				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
-				p.GetChara()->SetPos(BackGround->GetPlayerSpawn().at(i));
-				p.GetAI()->Init();
+			for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
+				ResourceParts->AddCharacter((PlayerID)i);
 			}
 			auto& Chara = PlayerMngr->GetPlayer(m_MyPlayerID).GetChara();
 			//カメラ
@@ -245,7 +237,7 @@ namespace FPS_n2 {
 			// 
 			InputControl MyInput;
 			float InputRad = 0.f;
-			for (int i = 0;i < Player_Num;i++) {
+			for (int i = 0;i < PlayerMngr->GetPlayerNum();i++) {
 				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
 				if (p.GetChara()) {
 					MyInput.ResetAllInput();
@@ -261,8 +253,16 @@ namespace FPS_n2 {
 							MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 							MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
 							MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press());
-							auto DispPos = Convert2DtoDisp(p.GetChara()->GetPos());
-							InputRad = -GetRadVec2Vec(DispPos * ((float)y_UIMs(1080) / (float)y_r(1080)), Vector3DX::vget((float)Pad->GetMS_X(), (float)Pad->GetMS_Y(), 0.f));
+							//視点操作
+							if (abs(Pad->GetLS_X()) > 0.1f || abs(Pad->GetLS_Y()) > 0.1f) {
+								InputRad = std::atan2f(Pad->GetLS_X(), Pad->GetLS_Y());
+							}
+							else if (abs(p.GetChara()->GetVec().x) > 0.1f || abs(p.GetChara()->GetVec().y) > 0.1f) {
+								InputRad = std::atan2f(p.GetChara()->GetVec().x, p.GetChara()->GetVec().y);
+							}
+							else {
+								InputRad = p.GetChara()->GetViewRad();
+							}
 						}
 						else {
 							p.GetAI()->Execute(&MyInput);
@@ -274,11 +274,11 @@ namespace FPS_n2 {
 				}
 			}
 #ifdef DEBUG
-			DebugParts->SetPoint("-----2-----");
+			DebugParts->SetPoint("----------");
 #endif // DEBUG
 			Obj2DParts->ExecuteObject();
 #ifdef DEBUG
-			DebugParts->SetPoint("-----3-----");
+			DebugParts->SetPoint("----------");
 #endif // DEBUG
 			// 
 			Vector3DX CamPos = Vector3DX::zero();
@@ -291,14 +291,16 @@ namespace FPS_n2 {
 			// 
 			BackGround->SetPointLight(Chara->GetPos());
 			BackGround->SetAmbientLight(120.f, deg2rad(30));
-			BackGround->SetupShadow();
-
+			BackGround->SetupShadow([&]() {
+				auto* Obj2DParts = Object2DManager::Instance();
+				Obj2DParts->DrawShadow();
+									});
 			m_ViewHandle.SetDraw_Screen();
 			{
 				DrawBox_2D(0, 0, y_r(1920), y_r(1080), White, true);
 				// 視界
 				for (int loop = 0;loop < 4;loop++) {
-					for (int i = 0;i < Player_Num;i++) {
+					for (int i = 0;i < PlayerMngr->GetPlayerNum();i++) {
 						auto& p = PlayerMngr->GetPlayer((PlayerID)i);
 						if (i == m_MyPlayerID) {
 							if (loop == 3) {
@@ -325,7 +327,7 @@ namespace FPS_n2 {
 					}
 				}
 				SetDrawBright(255, 255, 255);
-				if (OptionParts->GetParamInt(EnumSaveParam::shadow) > 0) {
+				if (OptionParts->GetParamInt(EnumSaveParam::shadow) > 0 || (GetUseDirect3DVersion() == DX_DIRECT3D_11)) {
 					SetDrawBlendMode(DX_BLENDMODE_MULA, 255);
 					BackGround->GetShadowGraph().DrawExtendGraph(0, 0, y_r(1920), y_r(1080), false);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
@@ -337,9 +339,13 @@ namespace FPS_n2 {
 		void			MainGameScene::Dispose_Sub(void) noexcept {
 			auto* SaveDataParts = SaveDataClass::Instance();
 			auto* BackGround = BackGroundClassBase::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
 			auto* ResourceParts = CommonBattleResource::Instance();
-			// 自機
-			ResourceParts->DelCharacter(m_MyPlayerID);
+			// リソース
+			for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
+				ResourceParts->DelCharacter((PlayerID)i);
+			}
+			PlayerMngr->Dispose();
 			BackGround->Dispose();
 			// ポーズ
 			DisposePause();
@@ -358,7 +364,7 @@ namespace FPS_n2 {
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			// 
 			Obj2DParts->Draw();
-			for (int i = 1;i < Player_Num;i++) {
+			for (int i = 1;i < PlayerMngr->GetPlayerNum();i++) {
 				// !マーク
 				DrawCharaUI_Front((PlayerID)i);
 				//ID用デバッグ描画
@@ -389,9 +395,7 @@ namespace FPS_n2 {
 		// 使い回しオブジェ系
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
 			auto* Obj2DParts = Object2DManager::Instance();
-			auto* PlayerMngr = PlayerManager::Instance();
 			auto* ResourceParts = CommonBattleResource::Instance();
-			PlayerMngr->Dispose();
 			Obj2DParts->DeleteAll();
 			ResourceParts->Dispose();
 			Dispose_LoadUI();

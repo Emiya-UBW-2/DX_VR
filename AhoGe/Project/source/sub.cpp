@@ -35,6 +35,7 @@ namespace FPS_n2 {
 		}
 		void CommonBattleResource::AddCharacter(PlayerID value) noexcept
 		{
+			auto* BackGround = BackGroundClassBase::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* Obj2DParts = Object2DManager::Instance();
 			auto& p = PlayerMngr->GetPlayer(value);
@@ -44,6 +45,8 @@ namespace FPS_n2 {
 			p.GetChara()->SetPlayerID(value);
 			p.SetAI(std::make_shared<AIControl>());
 			p.GetAI()->SetPlayerID(value);
+			p.GetChara()->SetPos(BackGround->GetFloorData(BackGround->GetPlayerSpawn().at(value).m_index)->m_Pos);
+			p.GetAI()->Init();
 		}
 		void CommonBattleResource::DelCharacter(PlayerID value) noexcept
 		{

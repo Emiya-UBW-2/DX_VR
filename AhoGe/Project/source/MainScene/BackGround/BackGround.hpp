@@ -17,11 +17,12 @@ namespace FPS_n2 {
 				Vector3DX					m_Pos;
 				int							palletNum{0};
 				bool						IsWall{false};
+				bool						IsCheckWall{ false };//壁で尚且つチェック対象かどうか
 				float						ZRad{0};
 				std::array<int, 4>			AddpalletNum{};
 				std::array<float, 4>		AddZRad{0};
 				std::array<int, 4>			LinkIndex{-1,-1,-1,-1};
-				std::array < Vector3DX, 4>	BoxSide;
+				std::array<Vector3DX, 4>	BoxSide;
 			public:
 				Blick(int x, int y) noexcept {
 					m_Pos.x = Get2DSize((float)x);
@@ -37,14 +38,28 @@ namespace FPS_n2 {
 				}
 			public:
 				bool CheckPointHit(const Vector3DX& Pos) {
-					float HalfLen = Get2DSize(0.5f);
-					return HitPointToRectangle((int)Pos.x, (int)Pos.y, (int)(this->m_Pos.x - HalfLen), (int)(this->m_Pos.y - HalfLen), (int)(this->m_Pos.x + HalfLen), (int)(this->m_Pos.y + HalfLen));
+					return HitPointToRectangle(
+						(int)Pos.x, (int)Pos.y, 
+						(int)(this->BoxSide.at(0).x), (int)(this->BoxSide.at(0).y),
+						(int)(this->BoxSide.at(2).x), (int)(this->BoxSide.at(2).y));
 				}
 				bool CheckRectangleHit(const Vector3DX& Min, const Vector3DX& Max) {
-					float HalfLen = Get2DSize(0.5f);
-					return ((int)Min.x < this->m_Pos.x + HalfLen && this->m_Pos.x - HalfLen < (int)Max.x) && ((int)Min.y < this->m_Pos.y + HalfLen && this->m_Pos.y - HalfLen < (int)Max.y);
+					return 
+						((int)Min.x < this->BoxSide.at(2).x && this->BoxSide.at(0).x < (int)Max.x) &&
+						((int)Min.y < this->BoxSide.at(2).y && this->BoxSide.at(0).y < (int)Max.y);
 				}
 
+				bool CheckCapsuleHit(const Vector3DX& Pos1, const Vector3DX& Pos2, float Radius) {
+					for (int i = 0; i < 4; i++) {
+						if (GetHitCheckToCapsule(Pos1, Pos2, Radius, this->BoxSide.at(i), this->BoxSide.at((i + 1) % 4), 0.f)) {
+							return true;
+						}
+					}
+					return false;
+				}
+				bool CheckLineHit(const Vector3DX& Pos1, const Vector3DX& Pos2) {
+					return CheckCapsuleHit(Pos1, Pos2, 0.001f);
+				}
 			};
 
 			// プレイヤーの周囲にあるステージ壁を取得する( 検出する範囲は移動距離も考慮する )
@@ -66,23 +81,28 @@ namespace FPS_n2 {
 			struct ShadowBoxes {
 				std::array<Vector3DX,4> Position{ };
 			};
+			struct PlayerPatrol {
+				int					m_index{};
+				std::vector<int>	m_Patrol{};
+			};
 		private:
 			std::vector<CheckLines> WallList;// 壁と判断された構造体のアドレスを保存しておく
 			std::vector<ShadowBoxes> m_ShadowBoxes;
 			std::vector<std::vector<std::shared_ptr<Blick>>> m_Blick;
-			std::vector<Vector3DX>		m_PlayerSpawn;
+			std::vector<PlayerPatrol>	m_PlayerSpawn;
 			std::vector<GraphHandle>	m_MapChip;
 			std::vector<GraphHandle>	m_WallChip;
 
 			float m_AmbientShadowLength{36.f};
 			float m_AmbientLightRad = deg2rad(45);
+			Vector3DX m_AmbientLightVec;
 			Vector3DX m_PointLightPos;
 
-			float ShadowPer = 0.5f;
 			GraphHandle m_PointShadowHandle;
 			GraphHandle m_AmbientShadowHandle;
 		public:// 
 			const auto&		GetShadowGraph(void) const noexcept { return this->m_PointShadowHandle; }
+			const auto&		GetAmbientLightVec(void) const noexcept { return this->m_AmbientLightVec; }
 			const auto&		GetPlayerSpawn(void) const noexcept { return this->m_PlayerSpawn; }
 			const auto		GetXSize(void) const noexcept { return this->m_Blick.size(); }
 			const auto		GetYSize(void) const noexcept { return this->m_Blick.back().size(); }
@@ -133,24 +153,26 @@ namespace FPS_n2 {
 			}
 			// 
 			const float		CheckHideShadow(const Vector3DX& PosA, const Vector3DX& PosB, float Radius) noexcept;
-			const bool		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius) noexcept;
+			const bool		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius, bool IsPhysical) noexcept;
 			void DrawAmbientShadow(int x, int y) const noexcept;
 			void DrawPointShadow(int x, int y) noexcept;
 		public:// 
 			void		SetAmbientLight(float ShadowLen, float Rad) noexcept {
 				m_AmbientShadowLength = ShadowLen;
 				m_AmbientLightRad = Rad;
+				float Radius = (float)y_r(m_AmbientShadowLength);
+				m_AmbientLightVec.Set(std::sin(m_AmbientLightRad) * Radius, std::cos(m_AmbientLightRad) * Radius, 0.f);
 			}
 			void		SetPointLight(const Vector3DX& Pos) noexcept {
 				m_PointLightPos = Convert2DtoDisp(Pos);
 			}
 		public:// 
 			// 
-			void			Init(const char* MapPath) noexcept;
+			void			Init(const std::string& MapPath) noexcept;
 			// 
 			void			Execute(void) noexcept;
 			// 
-			void			SetupShadow(void) noexcept;
+			void			SetupShadow(std::function<void()> AddAmbShadow) noexcept;
 			// 
 			void			Draw(void) noexcept;
 			void			DrawFront(void) noexcept;

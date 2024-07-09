@@ -81,6 +81,9 @@
     <ClInclude Include="source\CommonScene\Object\Base2DObject.hpp">
       <Filter>ソース ファイル\CommonScene\Object</Filter>
     </ClInclude>
+    <ClInclude Include="source\MainScene\Object\Bullet.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -118,6 +121,9 @@
     </ClCompile>
     <ClCompile Include="source\CommonScene\UI\CommonUIControl.cpp">
       <Filter>ソース ファイル\CommonScene\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\Bullet.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
