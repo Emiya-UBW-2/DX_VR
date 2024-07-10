@@ -112,14 +112,14 @@ namespace FPS_n2 {
 			DebugParts->SetPoint("-----4-----");
 #endif // DEBUG
 		}
-		void			Object2DManager::DrawShadow() noexcept {
+		void			Object2DManager::DrawShadow(void) noexcept {
 			for (auto& o : this->m_Object) {
 				if (o->GetIsDraw()) {
 					o->DrawShadow();
 				}
 			}
 		}
-		void			Object2DManager::Draw() noexcept {
+		void			Object2DManager::Draw(void) noexcept {
 			for (auto& o : this->m_Object) {
 				if (o->GetIsDraw()) {
 					o->Draw();

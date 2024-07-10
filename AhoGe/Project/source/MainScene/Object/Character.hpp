@@ -21,24 +21,27 @@ namespace FPS_n2 {
 			float						m_DodgeCoolTime{ 0.f };
 
 			float						m_ShotCoolTime{ 0.f };
+			float						m_GraphTimer{ 0.f };
 		public:
-			CharacterObject();
-			~CharacterObject();
+			CharacterObject(void) noexcept;
+			~CharacterObject(void) noexcept;
 		public:
-			void		ExecuteInput(InputControl* MyInput) noexcept;
+			void		ExecuteInput(InputControl* MyInput) noexcept ;
 			void		SetPlayerID(PlayerID value) noexcept { this->m_PlayerID = value; }
 			void		SetViewRad(float value) noexcept { this->m_Rad = value; }
+			void		SetGraphTimer(float value) noexcept { this->m_GraphTimer = value; }
 		public:
-			const auto CanLookPlayer0() const noexcept { return m_Alpha > 0.5f; }
-			const auto& GetBodyRad() const noexcept { return m_Rad; }
-			const auto& GetViewRad() const noexcept { return m_Rad_R; }
-			const auto GetSpeedPer() const noexcept { return m_Speed / m_SpeedLimit; }
+			const auto CanLookPlayer0(void) const noexcept { return m_Alpha > 0.5f; }
+			const auto& GetBodyRad(void) const noexcept { return m_Rad; }
+			const auto& GetViewRad(void) const noexcept { return m_Rad_R; }
+			const auto GetSpeedPer(void) const noexcept { return m_Speed / m_SpeedLimit; }
+			const auto& GetGraphTimer(void) const noexcept { return m_GraphTimer; }
 		public:
-			void Init_Sub() noexcept override;
-			void Execute_Sub() noexcept override;
-			void DrawShadow_Sub() noexcept override;
-			void Draw_Sub() noexcept override;
-			void Dispose_Sub() noexcept override;
+			void Init_Sub(void) noexcept override;
+			void Execute_Sub(void) noexcept override;
+			void DrawShadow_Sub(void) noexcept override;
+			void Draw_Sub(void) noexcept override;
+			void Dispose_Sub(void) noexcept override;
 		};
 	};
 };

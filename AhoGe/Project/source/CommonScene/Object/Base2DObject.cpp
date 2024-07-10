@@ -4,22 +4,24 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		void Base2DObject::BlurParts::Update(void) noexcept
+		{
+			auto* DrawParts = DXDraw::Instance();
+			this->Time = std::max(this->Time - 1.f / DrawParts->GetFps(), 0.f);
+		}
 		void Base2DObject::AddBlur(float Blur) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			int Max = (int)std::max(1.f, 300.f / std::max(30.f, DrawParts->GetFps()));
 			for (int i = 0; i < Max; i++) {
-				m_Blur.at(m_BlurNow).Pos = Lerp(this->m_Pos-this->m_Vec * (Tile_DispSize / DrawParts->GetFps()), this->m_Pos, ((float)i / (float)Max));
-				m_Blur.at(m_BlurNow).TimeMax = Blur;
-				m_Blur.at(m_BlurNow).Time = m_Blur.at(m_BlurNow).TimeMax;
+				m_Blur.at(m_BlurNow).Set(Lerp(this->m_Pos - this->m_Vec * (Tile_DispSize / DrawParts->GetFps()), this->m_Pos, ((float)i / (float)Max)), Blur);
 				++m_BlurNow %= (int)m_Blur.size();
 			}
 		}
-		void Base2DObject::Execute() noexcept {
+		void Base2DObject::Execute(void) noexcept {
 			auto* Obj2DParts = Object2DManager::Instance();
-			auto* DrawParts = DXDraw::Instance();
 			// ƒuƒ‰[
 			for (auto& b : m_Blur) {
-				b.Time = std::max(b.Time - 1.f / DrawParts->GetFps(), 0.f);
+				b.Update();
 			}
 			//
 			Execute_Sub();
@@ -33,7 +35,7 @@ namespace FPS_n2 {
 				this->m_HitObjectID = -1;
 			}
 		}
-		void Base2DObject::ExecuteAfter() noexcept {
+		void Base2DObject::ExecuteAfter(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* BackGround = BackGroundClassBase::Instance();
 			// Õ“Ë‚İ‚Ì‰‰Z

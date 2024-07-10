@@ -45,6 +45,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Titlescene->SetNextSceneList(0, MainGamescene);
 	Titlescene->SetNextSceneList(1, TestGamescene);
 	MainGamescene->SetNextSceneList(0, Titlescene);
+	MainGamescene->SetNextSceneList(1, MainGamescene);
 	TestGamescene->SetNextSceneList(0, Titlescene);
 
 	auto* SceneParts = SceneControl::Instance();

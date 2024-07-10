@@ -4,19 +4,19 @@ const FPS_n2::Sceneclass::ButtonControl* SingletonBase<FPS_n2::Sceneclass::Butto
 namespace FPS_n2 {
 	namespace Sceneclass {
 		// 
-		const bool ButtonControl::GetTriggerButton() const noexcept {
+		const bool ButtonControl::GetTriggerButton(void) const noexcept {
 			auto* Pad = PadControl::Instance();
 			return (select != -1) && (m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetKey(PADS::INTERACT).trigger());
 		}
-		ButtonControl::ButtonControl() noexcept {
+		ButtonControl::ButtonControl(void) noexcept {
 			m_SelectBackImage = GraphHandle::Load("data/UI/select.png");
 			ResetSel();
 		}
-		ButtonControl::~ButtonControl() noexcept {
+		ButtonControl::~ButtonControl(void) noexcept {
 			Dispose();
 			m_SelectBackImage.Dispose();
 		}
-		void ButtonControl::UpdateInput() noexcept {
+		void ButtonControl::UpdateInput(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();
 
@@ -68,17 +68,17 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void ButtonControl::Update() noexcept {
+		void ButtonControl::Update(void) noexcept {
 			for (auto& y : ButtonSel) {
 				y->Update();
 			}
 		}
-		void ButtonControl::Draw() noexcept {
+		void ButtonControl::Draw(void) noexcept {
 			for (auto& y : ButtonSel) {
 				y->Draw();
 			}
 		}
-		void ButtonControl::Dispose() noexcept {
+		void ButtonControl::Dispose(void) noexcept {
 			for (auto& y : ButtonSel) {
 				y->Dispose();
 				y.reset();
@@ -86,7 +86,7 @@ namespace FPS_n2 {
 			ButtonSel.clear();
 		}
 		// 
-		void CreditControl::Init() noexcept {
+		void CreditControl::Init(void) noexcept {
 			int mdata = FileRead_open("data/Credit.txt", FALSE);
 			m_CreditCoulm = 0;
 			while (true) {
@@ -126,7 +126,7 @@ namespace FPS_n2 {
 				yp1 += Height;
 			}
 		}
-		void CreditControl::Dispose() noexcept {
+		void CreditControl::Dispose(void) noexcept {
 			m_CreditCoulm = 0;
 			for (auto& c : m_CreditStr) {
 				sprintfDx(c.first, "");

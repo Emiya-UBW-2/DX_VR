@@ -8,10 +8,10 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		CharacterObject::CharacterObject() {
+		CharacterObject::CharacterObject(void) noexcept {
 			m_InputVec.Set(0.f, 0.f, 0.f);
 		}
-		CharacterObject::~CharacterObject() {}
+		CharacterObject::~CharacterObject(void) noexcept {}
 		// 
 		void		CharacterObject::ExecuteInput(InputControl* MyInput) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -22,7 +22,7 @@ namespace FPS_n2 {
 				Speed = 0.5f;
 			}
 			if (MyInput->GetPADSPress(PADS::RUN)) {
-				Speed = 1.25f;
+				Speed = 0.95f;
 			}
 			if (MyInput->GetPADSPress(PADS::WALK)) {
 				Speed = 0.25f;
@@ -98,13 +98,15 @@ namespace FPS_n2 {
 			}
 		}
 		// 
-		void CharacterObject::Init_Sub() noexcept {}
-		void CharacterObject::Execute_Sub() noexcept {
+		void CharacterObject::Init_Sub(void) noexcept {}
+		void CharacterObject::Execute_Sub(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto* BackGround = BackGroundClassBase::Instance();
+
 			if (m_PlayerID != 0) {
-				auto* PlayerMngr = PlayerManager::Instance();
-				auto* BackGround = BackGroundClassBase::Instance();
 				auto& Chara = PlayerMngr->GetPlayer(0).GetChara();
-				float ViewLimit = Get2DSize(20.f);
+				float ViewLimit = Get2DSize(40.f);
 				if ((Chara->GetPos() - GetPos()).sqrMagnitude() < ViewLimit* ViewLimit) {
 					Easing(&m_Alpha, BackGround->CheckHideShadow(Chara->GetPos(), GetPos(), Get2DSize(GetSize() / 2.f)), 0.5f, EasingType::OutExpo);
 				}
@@ -115,11 +117,10 @@ namespace FPS_n2 {
 			else {
 				m_Alpha = 1.f;
 			}
-
+			//
+			this->m_GraphTimer = std::max(this->m_GraphTimer - 1.f / DrawParts->GetFps(), 0.f);
 			// ë_Ç¢
 			{
-				auto* DrawParts = DXDraw::Instance();
-
 				Vector3DX Vec;Vec.Set(std::sin(m_Rad_R), std::cos(m_Rad_R), 0.f);
 				Vector3DX vec_a;vec_a.Set(std::sin(m_Rad), std::cos(m_Rad), 0.f);
 				float cost = Vector3DX::Cross(vec_a, Vec).z;
@@ -130,21 +131,21 @@ namespace FPS_n2 {
 				if (m_Rad_R > DX_PI_F * 2.f) { m_Rad_R -= DX_PI_F * 2.f; }
 			}
 		}
-		void CharacterObject::DrawShadow_Sub() noexcept {
+		void CharacterObject::DrawShadow_Sub(void) noexcept {
 			float Radius = (float)GetDispSize(GetSize() / 2.f);
 			auto* BackGround = BackGroundClassBase::Instance();
-			if (m_Alpha > 0.f) {
+			if (m_Alpha > 1.f / 255.f) {
 				auto DispPos = Convert2DtoDisp(GetPos()) + BackGround->GetAmbientLightVec() * 0.25f;
 				DrawCircle((int)DispPos.x, (int)DispPos.y, (int)Radius, Black);
 			}
 		}
-		void CharacterObject::Draw_Sub() noexcept {
+		void CharacterObject::Draw_Sub(void) noexcept {
 			float Radius = (float)GetDispSize(GetSize() / 2.f);
 			//ÉuÉâÅ[
 			for (auto& b : GetBlur()) {
 				if (b.IsActive()) {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(16.f * m_Alpha * b.GetPer()), 0, 255));
-					auto DispPos = Convert2DtoDisp(b.Pos);
+					auto DispPos = Convert2DtoDisp(b.GetPos());
 					DrawCircle((int)DispPos.x, (int)DispPos.y, (int)(Radius * std::pow(b.GetPer(), 0.5f)), (m_PlayerID == 0) ? GetColor(37, 68, 141) : GetColor(92, 84, 50));
 				}
 			}
@@ -155,6 +156,6 @@ namespace FPS_n2 {
 
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 		}
-		void CharacterObject::Dispose_Sub() noexcept {}
+		void CharacterObject::Dispose_Sub(void) noexcept {}
 	};
 };

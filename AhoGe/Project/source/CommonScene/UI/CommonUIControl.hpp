@@ -61,22 +61,22 @@ namespace FPS_n2 {
 					SelYadd = 0.f;
 					m_ButtonStatus = ButtonStatus::Ready;
 				}
-				void			Update() noexcept {
+				void			Update(void) noexcept {
 					Easing(&SelYadd, 0.f, 0.93f, EasingType::OutExpo);
 				}
 				void			Dispose(void) noexcept {
 					m_Icon.Dispose();
 				}
 			public:
-				const auto		IsFocus() const noexcept { return m_ButtonStatus == ButtonStatus::Focus; }
-				void			SetNone() noexcept { m_ButtonStatus = ButtonStatus::None; }
-				void			SetReady() noexcept { m_ButtonStatus = ButtonStatus::Ready; }
-				void			SetFocus() noexcept {
+				const auto		IsFocus(void) const noexcept { return m_ButtonStatus == ButtonStatus::Focus; }
+				void			SetNone(void) noexcept { m_ButtonStatus = ButtonStatus::None; }
+				void			SetReady(void) noexcept { m_ButtonStatus = ButtonStatus::Ready; }
+				void			SetFocus(void) noexcept {
 					SelYadd = 10.f;
 					m_ButtonStatus = ButtonStatus::Focus;
 				}
 			public:
-				bool			GetInto() {
+				bool			GetInto(void) noexcept {
 					int xp = y_UI(xp1);
 					int yp = y_UI(yp1);
 					switch (LMR) {
@@ -107,7 +107,7 @@ namespace FPS_n2 {
 					}
 					return IntoMouse(xp, yp, xp + y_UI(xsize), yp + y_UI(ysize));
 				}
-				void			Draw() {
+				void			Draw(void) noexcept {
 					switch (m_ButtonMode) {
 						case ButtonMode::String:
 							{
@@ -235,20 +235,20 @@ namespace FPS_n2 {
 			int							select{0};
 			bool						m_MouseSelMode{false};
 		public:
-			const auto& GetSelect() const noexcept { return select; }
-			const bool		GetTriggerButton() const noexcept;
+			const auto& GetSelect(void) const noexcept { return select; }
+			const bool		GetTriggerButton(void) const noexcept ;
 		private:
-			ButtonControl() noexcept;
-			virtual ~ButtonControl() noexcept;
+			ButtonControl(void) noexcept ;
+			virtual ~ButtonControl(void) noexcept ;
 		public:
-			void ResetSel() noexcept {
+			void ResetSel(void) noexcept {
 				select = 0;
 				m_MouseSelMode = false;
 			}
-			void UpdateInput() noexcept;
-			void Update() noexcept;
-			void Draw() noexcept;
-			void Dispose() noexcept;
+			void UpdateInput(void) noexcept ;
+			void Update(void) noexcept ;
+			void Draw(void) noexcept ;
+			void Dispose(void) noexcept ;
 		public:
 			void AddStringButton(
 				const char* String, int fontsize, bool IsEnableSelect,
@@ -275,9 +275,9 @@ namespace FPS_n2 {
 			int							m_CreditCoulm{0};
 			std::array<std::pair<char[CharMax], char[CharMax]>, 64> m_CreditStr{};
 		public:
-			void Init() noexcept;
-			void Draw(int xmin, int ymin, int xmax) noexcept;
-			void Dispose() noexcept;
+			void Init(void) noexcept ;
+			void Draw(int xmin, int ymin, int xmax) noexcept ;
+			void Dispose(void) noexcept ;
 		};
 		// 
 	};

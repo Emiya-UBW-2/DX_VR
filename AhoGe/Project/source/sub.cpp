@@ -33,7 +33,7 @@ namespace FPS_n2 {
 			SE->Delete((int)SoundEnum::OneMunute);
 			SE->Delete((int)SoundEnum::TimeUp);
 		}
-		void CommonBattleResource::AddCharacter(PlayerID value) noexcept
+		void CommonBattleResource::AddCharacter(PlayerID value) noexcept 
 		{
 			auto* BackGround = BackGroundClassBase::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
@@ -45,10 +45,9 @@ namespace FPS_n2 {
 			p.GetChara()->SetPlayerID(value);
 			p.SetAI(std::make_shared<AIControl>());
 			p.GetAI()->SetPlayerID(value);
-			p.GetChara()->SetPos(BackGround->GetFloorData(BackGround->GetPlayerSpawn().at(value).m_index)->m_Pos);
 			p.GetAI()->Init();
 		}
-		void CommonBattleResource::DelCharacter(PlayerID value) noexcept
+		void CommonBattleResource::DelCharacter(PlayerID value) noexcept 
 		{
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* Obj2DParts = Object2DManager::Instance();
@@ -57,7 +56,7 @@ namespace FPS_n2 {
 			p.Dispose();
 		}
 		// 
-		const Vector3DX Convert2DtoDisp(const Vector3DX& Pos2D) {
+		const Vector3DX Convert2DtoDisp(const Vector3DX& Pos2D) noexcept {
 			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
 			Vector3DX Ret;
 
@@ -68,14 +67,14 @@ namespace FPS_n2 {
 			return Ret;
 		}
 
-		const float GetRadVec2Vec(const Vector3DX& vec1, const Vector3DX& vec2) { return std::atan2f(vec1.x - vec2.x, vec1.y - vec2.y); }
+		const float GetRadVec2Vec(const Vector3DX& vec1, const Vector3DX& vec2) noexcept { return std::atan2f(vec1.x - vec2.x, vec1.y - vec2.y); }
 
 		// 空間上のタイルごとのサイズを取得(タイルvalue個ぶん)
-		const float Get2DSize(float value) {
+		const float Get2DSize(float value) noexcept {
 			return (value * Tile_DispSize) * Base_CamScale / (1080 / 2);
 		}
 		// 画面上のタイルごとのサイズを取得(タイルvalue個ぶん)
-		const int GetDispSize(float value) {
+		const int GetDispSize(float value) noexcept {
 			return y_r(value * Tile_DispSize);
 		}
 	};

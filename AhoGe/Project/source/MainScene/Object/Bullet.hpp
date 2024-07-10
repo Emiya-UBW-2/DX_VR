@@ -13,19 +13,19 @@ namespace FPS_n2 {
 			float						m_Speed{ 1.f };
 			float						m_Rad{ 0.f };
 		public:
-			BulletObject();
-			~BulletObject();
+			BulletObject(void) noexcept;
+			~BulletObject(void) noexcept;
 		public:
 			void		SetPlayerID(PlayerID value) noexcept { this->m_ShotPlayerID = value; }
 		public:
-			void Execute_OnHitObject() noexcept override;
-			void Execute_OnHitWall() noexcept override;
+			void Execute_OnHitObject(void) noexcept override;
+			void Execute_OnHitWall(void) noexcept override;
 		public:
-			void Init_Sub() noexcept override;
-			void Execute_Sub() noexcept override;
-			void DrawShadow_Sub() noexcept override;
-			void Draw_Sub() noexcept override;
-			void Dispose_Sub() noexcept override;
+			void Init_Sub(void) noexcept override;
+			void Execute_Sub(void) noexcept override;
+			void DrawShadow_Sub(void) noexcept override;
+			void Draw_Sub(void) noexcept override;
+			void Dispose_Sub(void) noexcept override;
 		};
 	};
 };

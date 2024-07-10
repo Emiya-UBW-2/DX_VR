@@ -10,23 +10,24 @@ namespace FPS_n2 {
 		private:
 			class Impl;
 			Impl* m_Param;
-			const Impl* GetParam() const noexcept { return m_Param; }
-			Impl* GetParam() noexcept { return m_Param; }
+			const Impl* GetParam(void) const noexcept { return m_Param; }
+			Impl* GetParam(void) noexcept { return m_Param; }
 		public:
-			AIControl();
-			~AIControl();
+			AIControl(void) noexcept;
+			~AIControl(void) noexcept;
 		public:
-			const float& GetViewRad() const noexcept;
-			const float& GetGraphTimer() const noexcept;
+			const float&	GetViewRad(void) const noexcept ;
+			const bool&		GetGraphSwitch(void) const noexcept ;
 
-			const bool IsCaution() const noexcept;
-			const bool IsAlert() const noexcept;
+			const bool		IsCaution(void) const noexcept ;
+			const bool		IsAlert(void) const noexcept ;
 		public:
-			void SetPlayerID(PlayerID MyCharaID) noexcept;
-			void Init() noexcept;
-			void Execute(InputControl* MyInput) noexcept;
-			void Draw() noexcept;
-			void Dispose() noexcept;
+			void			SetPlayerID(PlayerID MyCharaID) noexcept ;
+		public:
+			void			Init(void) noexcept ;
+			void			Execute(InputControl* MyInput) noexcept ;
+			void			Draw(void) noexcept ;
+			void			Dispose(void) noexcept ;
 		};
 	};
 };

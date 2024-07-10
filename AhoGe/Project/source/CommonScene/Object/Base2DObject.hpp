@@ -31,18 +31,27 @@ namespace FPS_n2 {
 			HitTarget		m_HitTarget{ HitTarget::Physical };
 			int				m_HitObjectID{ -1 };
 		private:
-			struct BlurParts {
+			class BlurParts {
 				Vector3DX	Pos;
 				float		Time{};
 				float		TimeMax{};
 			public:
-				const auto IsActive() const noexcept { return Time > 0.f; }
-				const auto GetPer() const noexcept { return Time / TimeMax; }
+				void Set(const Vector3DX& pos, float time) noexcept {
+					this->Pos = pos;
+					this->TimeMax = time;
+					this->Time = this->TimeMax;
+				}
+			public:
+				const auto IsActive(void) const noexcept { return Time > 0.f; }
+				const auto GetPer(void) const noexcept { return Time / TimeMax; }
+				const auto& GetPos(void) const noexcept { return Pos; }
+			public:
+				void Update(void) noexcept;
 			};
 			std::array<BlurParts, 60>	m_Blur{};
 			int							m_BlurNow{ 0 };
 		protected:
-			void AddBlur(float Blur) noexcept;
+			void AddBlur(float Blur) noexcept ;
 			const auto& GetBlur(void) const noexcept { return this->m_Blur; }
 		protected:
 			bool			m_IsFirstLoop{true};
@@ -81,22 +90,22 @@ namespace FPS_n2 {
 			void SetHitTarget(HitTarget value) noexcept { this->m_HitTarget = value; }
 			void SetDelete(void) noexcept { this->m_IsDelete = true; }
 		protected:
-			virtual void Init_Sub() noexcept {}
-			virtual void Execute_Sub() noexcept {}
-			virtual void DrawShadow_Sub() noexcept {}
-			virtual void Draw_Sub() noexcept {}
-			virtual void Dispose_Sub() noexcept {}
+			virtual void Init_Sub(void) noexcept {}
+			virtual void Execute_Sub(void) noexcept {}
+			virtual void DrawShadow_Sub(void) noexcept {}
+			virtual void Draw_Sub(void) noexcept {}
+			virtual void Dispose_Sub(void) noexcept {}
 		public:
 			//ÉqÉbÉgÇµÇΩèuä‘Ç…åƒÇ‘ånÇÃÇ‡ÇÃ
-			virtual void Execute_OnHitObject() noexcept {}
-			virtual void Execute_OnHitWall() noexcept {}
+			virtual void Execute_OnHitObject(void) noexcept {}
+			virtual void Execute_OnHitWall(void) noexcept {}
 		public:
-			void Init() noexcept { Init_Sub(); }
-			void Execute() noexcept;
-			void ExecuteAfter() noexcept;
-			void DrawShadow() noexcept { DrawShadow_Sub(); }
-			void Draw() noexcept { Draw_Sub(); }
-			void Dispose() noexcept { Dispose_Sub(); }
+			void Init(void) noexcept { Init_Sub(); }
+			void Execute(void) noexcept ;
+			void ExecuteAfter(void) noexcept ;
+			void DrawShadow(void) noexcept { DrawShadow_Sub(); }
+			void Draw(void) noexcept { Draw_Sub(); }
+			void Dispose(void) noexcept { Dispose_Sub(); }
 		};
 	};
 };
