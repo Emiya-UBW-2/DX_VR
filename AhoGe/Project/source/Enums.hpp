@@ -15,6 +15,8 @@ namespace FPS_n2 {
 			Second,
 			OneMunute,
 			TimeUp,
+
+			Normal,
 			// 
 		};
 		enum class CharaTypeID {

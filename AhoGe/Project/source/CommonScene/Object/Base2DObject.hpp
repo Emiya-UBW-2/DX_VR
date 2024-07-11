@@ -82,10 +82,8 @@ namespace FPS_n2 {
 			const auto& GetHitObjectID(void) const noexcept { return this->m_HitObjectID; }
 		public:
 			void SetObjectID(int value) noexcept { this->m_ObjectID = value; }
-
 			void SetHitObjectID(int value) noexcept { this->m_HitObjectID = value; }
 			void SetSize(float value) noexcept { this->m_Size = value; }
-		protected:
 			void SetColTarget(ColTarget value) noexcept { this->m_ColTarget = value; }
 			void SetHitTarget(HitTarget value) noexcept { this->m_HitTarget = value; }
 			void SetDelete(void) noexcept { this->m_IsDelete = true; }

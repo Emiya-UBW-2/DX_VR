@@ -73,31 +73,18 @@ namespace FPS_n2 {
 		};
 
 		void			Object2DManager::ExecuteObject(void) noexcept {
-#ifdef DEBUG
-			auto* DebugParts = DebugClass::Instance();		//デバッグ
-#endif // DEBUG
-
-#ifdef DEBUG
-			DebugParts->SetPoint("-----1-----");
-#endif // DEBUG
 			// アップデート
 			for (auto& o : this->m_Object) {
 				if (!o->GetIsDelete()) {
 					o->Execute();
 				}
 			}
-#ifdef DEBUG
-			DebugParts->SetPoint("-----2-----");
-#endif // DEBUG
 			// アップデート
 			for (auto& o : this->m_Object) {
 				if (!o->GetIsDelete()) {
 					o->ExecuteAfter();
 				}
 			}
-#ifdef DEBUG
-			DebugParts->SetPoint("-----3-----");
-#endif // DEBUG
 			// オブジェクトの排除チェック
 			for (int i = 0; i < this->m_Object.size(); i++) {
 				auto& o = this->m_Object.at(i);
@@ -108,9 +95,6 @@ namespace FPS_n2 {
 					i--;
 				}
 			}
-#ifdef DEBUG
-			DebugParts->SetPoint("-----4-----");
-#endif // DEBUG
 		}
 		void			Object2DManager::DrawShadow(void) noexcept {
 			for (auto& o : this->m_Object) {

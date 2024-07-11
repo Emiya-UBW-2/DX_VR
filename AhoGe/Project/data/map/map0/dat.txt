@@ -3,3 +3,5 @@ Name=8000
 000_NextStage=001_map0
 001_EvtType=Entry
 001_NextStage=000_map0
+002_EvtType=CutScene
+002_CutSelect=000

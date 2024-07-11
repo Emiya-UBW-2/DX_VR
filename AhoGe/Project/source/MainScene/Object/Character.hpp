@@ -22,6 +22,8 @@ namespace FPS_n2 {
 
 			float						m_ShotCoolTime{ 0.f };
 			float						m_GraphTimer{ 0.f };
+
+			float						m_RunFootPer{0.f};
 		public:
 			CharacterObject(void) noexcept;
 			~CharacterObject(void) noexcept;

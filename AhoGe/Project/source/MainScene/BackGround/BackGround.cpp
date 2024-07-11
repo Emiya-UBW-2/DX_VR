@@ -92,6 +92,7 @@ namespace FPS_n2 {
 		void BackGroundClassBase::Blick::DrawAmbientShadow(const Vector3DX& AmbientLightVec, float AmbientLightRad, const GraphHandle& ShadowChip) const noexcept {
 			std::array<Vector3DX, 4> Position{ };
 			for (int i = 0; i < 4; i++) {
+				if (GetLinkIndex().at((i + 1) % 4) == -1) { continue; }//todo:方向直す
 				Vector3DX postmp1 = Convert2DtoDisp(this->GetBoxSide(i));
 				Vector3DX postmp2 = Convert2DtoDisp(this->GetBoxSide((i + 1) % 4));
 				float radsub = deg2rad(90 * i);
@@ -107,6 +108,7 @@ namespace FPS_n2 {
 		void BackGroundClassBase::Blick::DrawPointShadow(const Vector3DX& PointLightPos, const GraphHandle& ShadowChip) noexcept {
 			std::array<Vector3DX, 4> Position{ };
 			for (int i = 0; i < 4; i++) {
+				if (GetLinkIndex().at((i + 1) % 4) == -1) { continue; }//todo:方向直す
 				Vector3DX postmp1 = Convert2DtoDisp(this->GetBoxSide(i));
 				Vector3DX postmp2 = Convert2DtoDisp(this->GetBoxSide((i + 1) % 4));
 				float radsub = deg2rad(90 * i);
@@ -135,21 +137,21 @@ namespace FPS_n2 {
 				if (!HitPointToRectangle((int)DispPos.x, (int)DispPos.y, (int)-Radius, (int)-Radius, (int)(y_r(1920) + Radius), (int)(y_r(1080) + Radius))) { continue; }
 				//ヒットするかとヒットした場合の透明度を指定
 				float tmp = 1.f;
-				if (B->CheckCapsuleHit(PosA, PosB, Radius)) {
+				if (B->CheckLineHit(PosA, PosB)) {
 					tmp = 0.f;
-					if (!B->CheckLineHit(PosA, PosB)) {
-						float P = 2.f;
-						for (int i = 0; i < 4; i++) {
-							float ret = (GetMinLenSegmentToSegment(B->GetBoxSide(i), B->GetBoxSide((i + 1) % 4), PosA, PosB) / Radius);
-							if (ret < 1.f) {
-								if (P > ret) {
-									P = ret;
-								}
+				}
+				else if (B->CheckCapsuleHit(PosA, PosB, Radius)) {
+					float P = 2.f;
+					for (int i = 0; i < 4; i++) {
+						float ret = (GetMinLenSegmentToSegment(B->GetBoxSide(i), B->GetBoxSide((i + 1) % 4), PosA, PosB) / Radius);
+						if (ret < 1.f) {
+							if (P > ret) {
+								P = ret;
 							}
 						}
-						if (P <= 1.f) {
-							tmp = P;
-						}
+					}
+					if (P <= 1.f) {
+						tmp = P;
 					}
 				}
 				if (Ret > tmp) {
@@ -160,8 +162,9 @@ namespace FPS_n2 {
 			return Ret;
 		}
 		// 壁判定
-		const bool BackGroundClassBase::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius, bool IsPhysical) noexcept {
-			WallList.clear();
+		const bool BackGroundClassBase::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius, bool IsPhysical) const noexcept {
+			std::vector<CheckLines>				WallList;
+			WallList.reserve(256);
 			Vector3DX Min, Max;
 			Min.x = std::min(EndPos->x, StartPos.x) - (Radius * 4);
 			Min.y = std::min(EndPos->y, StartPos.y) - (Radius * 4);
@@ -476,24 +479,33 @@ namespace FPS_n2 {
 					if (ALL == "") { continue; }
 					auto LEFT = getparams::getleft(ALL);
 					auto RIGHT = getparams::getright(ALL);
-					int targetID = std::atoi(LEFT.substr(0, 3).c_str());
-					for (auto& e : m_EventChip) {
-						if (e.m_EventID == targetID) {
-							//イベントタイプ
-							if (LEFT.find("EvtType") != std::string::npos) {
-								for (int i = 0;i < (int)EventType::Max;i++) {
-									if (RIGHT.find(g_EventStr[i]) != std::string::npos) {
-										e.m_EventType = (EventType)i;
-										break;
+					if (LEFT == "Name") {
+						m_GetMapTextID = std::stoi(RIGHT);
+					}
+					else {
+						int targetID = std::stoi(LEFT.substr(0, 3));
+						for (auto& e : m_EventChip) {
+							if (e.m_EventID == targetID) {
+								//イベントタイプ
+								if (LEFT.find("EvtType") != std::string::npos) {
+									for (int i = 0; i < (int)EventType::Max; i++) {
+										if (RIGHT.find(g_EventStr[i]) != std::string::npos) {
+											e.m_EventType = (EventType)i;
+											break;
+										}
 									}
 								}
+								//遷移用設定
+								else if (LEFT.find("NextStage") != std::string::npos) {
+									e.m_EntryID = std::stoi(RIGHT.substr(0, 3));
+									e.m_MapName = RIGHT.substr(4);
+								}
+								//カットシーン用設定
+								else if (LEFT.find("CutSelect") != std::string::npos) {
+									e.m_CutSceneID = std::stoi(RIGHT);
+								}
+								break;
 							}
-							//イベントタイプ
-							else if (LEFT.find("NextStage") != std::string::npos) {
-								e.m_EntryID = std::atoi(RIGHT.substr(0, 3).c_str());
-								e.m_MapName = RIGHT.substr(4);
-							}
-							break;
 						}
 					}
 				}
@@ -587,7 +599,35 @@ namespace FPS_n2 {
 					}
 				}
 			}
+			/*
 			// デバッグ描画
+			for (auto& B : m_Blick) {
+				if (!B->GetIsWall()) { continue; }
+				auto DispPos1 = Convert2DtoDisp(B->GetPos());
+				for (int i = 0; i < 4; i++) {
+					auto& L = B->GetLinkIndex().at(i);
+					if (L != -1) {
+						auto DispPos2 = Convert2DtoDisp(GetFloorData(L)->GetPos());
+						DrawLine(
+							(int)(DispPos1.x), (int)(DispPos1.y),
+							(int)(DispPos2.x), (int)(DispPos2.y),
+							GetColor((i < 2) ? 255 : 0, (i % 2) ? 255 : 0, 0), 10);
+					}//上1左0下3右2
+				}
+			}
+			// デバッグ描画
+			for (auto& B : m_Blick) {
+				if (!B->GetIsWall()) { continue; }
+				auto DispPos1 = Convert2DtoDisp(B->GetPos());
+				for (int i = 0; i < 4; i++) {
+					auto DispPos2 = Convert2DtoDisp(B->GetBoxSide(i));
+					DrawLine(
+						(int)(DispPos1.x), (int)(DispPos1.y),
+						(int)(DispPos2.x), (int)(DispPos2.y),
+						GetColor((i < 2) ? 255 : 0, (i % 2) ? 255 : 0, 0), 10);
+				}//下右上左
+			}
+			//*/
 			/*
 			for (auto& w : WallList) {
 				if (!w.IsActive()) { continue; }

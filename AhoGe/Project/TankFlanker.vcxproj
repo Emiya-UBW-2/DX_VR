@@ -33,6 +33,7 @@
     <ClCompile Include="source\CommonScene\UI\CommonUIControl.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\MainScene\BackGround\BackGround.cpp" />
+    <ClCompile Include="source\MainScene\MainSceneSub.cpp" />
     <ClCompile Include="source\MainScene\Object\Bullet.cpp" />
     <ClCompile Include="source\MainScene\Object\Character.cpp" />
     <ClCompile Include="source\MainScene\Player\CPU.cpp" />

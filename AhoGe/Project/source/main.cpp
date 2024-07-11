@@ -35,7 +35,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// bool IsFirstGame = (SaveDataParts->GetParam("FirstGame") != 1);
 	SaveDataParts->Save();
 	// BGM
-	// BGM->Add(0, "data/Sound/BGM/Title.wav");
+	BGM->Add(0, "data/Sound/BGM/Caution.wav");
+	BGM->Add(1, "data/Sound/BGM/Alert.wav");
 	BGM->SetVol(OptionParts->GetParamFloat(EnumSaveParam::BGM));
 	// ƒV[ƒ“
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();

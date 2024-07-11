@@ -51,7 +51,7 @@ namespace FPS_n2 {
 			}
 			Pad->SetMouseMoveEnable(false);
 			Pad->ChangeGuide(
-				[&]() {
+				[]() {
 					auto* KeyGuide = PadControl::Instance();
 					auto* LocalizeParts = LocalizePool::Instance();
 					KeyGuide->AddGuide(PADS::MOVE_W, "");
@@ -79,10 +79,10 @@ namespace FPS_n2 {
 											[&](int xmin, int ymin, int xmax, int, bool) {
 												m_CreditControl.Draw(xmin, ymin, xmax);
 											},
-											[&]() {},
-												[&]() {},
-												true
-												);
+											[]() {},
+											[]() {},
+											true
+											);
 							break;
 						default:
 							break;

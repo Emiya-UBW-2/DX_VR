@@ -98,11 +98,15 @@ namespace FPS_n2 {
 			}
 		}
 		// 
-		void CharacterObject::Init_Sub(void) noexcept {}
+		void CharacterObject::Init_Sub(void) noexcept {
+			m_RunFootPer = 0.f;
+		}
 		void CharacterObject::Execute_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* BackGround = BackGroundClassBase::Instance();
+			auto* SE = SoundPool::Instance();
+			auto* Cam2D = Cam2DControl::Instance();
 
 			if (m_PlayerID != 0) {
 				auto& Chara = PlayerMngr->GetPlayer(0).GetChara();
@@ -129,6 +133,18 @@ namespace FPS_n2 {
 
 				if (m_Rad_R < 0.f) { m_Rad_R += DX_PI_F * 2.f; }
 				if (m_Rad_R > DX_PI_F * 2.f) { m_Rad_R -= DX_PI_F * 2.f; }
+			}
+			//ƒTƒEƒ“ƒh
+			{
+				m_RunFootPer += GetSpeedPer() * 500.f / DrawParts->GetFps();
+				if (m_RunFootPer > 1.f) {
+					m_RunFootPer -= 1.f;
+					float Len = Get2DSize(30.f);
+					auto Length = Cam2D->GetCamPos() - GetPos(); Length.z = 0.f;
+					if (Length.sqrMagnitude() < Len*Len) {
+						SE->Get((int)SoundEnum::RunFoot).Play(0, DX_PLAYTYPE_BACK, TRUE);
+					}
+				}
 			}
 		}
 		void CharacterObject::DrawShadow_Sub(void) noexcept {

@@ -31,8 +31,12 @@ namespace FPS_n2 {
 					m_AI = nullptr;
 				}
 				void Dispose(void) noexcept {
-					m_Chara.reset();
-					m_AI.reset();
+					if (m_Chara) {
+						m_Chara.reset();
+					}
+					if (m_AI) {
+						m_AI.reset();
+					}
 				}
 			};
 		private:

@@ -6,10 +6,12 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		enum class EventType {
 			Entry,
+			CutScene,
 			Max,
 		};
 		static const char* g_EventStr[(int)EventType::Max] = {
 			"Entry",
+			"CutScene",
 		};
 
 
@@ -202,12 +204,13 @@ namespace FPS_n2 {
 				int					m_index{};
 				int					m_EventID{ 0 };
 				EventType			m_EventType{};
-				//Entry用
+				//遷移用設定
 				std::string			m_MapName;//行先マップ
 				int					m_EntryID{};//行先マップのイベントID
+				//カットシーン用設定
+				int					m_CutSceneID{};//カットシーンID
 			};
 		private:
-			std::vector<CheckLines>				WallList;
 			int									m_Xsize{};
 			int									m_Ysize{};
 			std::vector<std::shared_ptr<Blick>>	m_Blick;
@@ -221,15 +224,17 @@ namespace FPS_n2 {
 			Vector3DX							m_PointLightPos;
 			GraphHandle							m_PointShadowHandle;
 			GraphHandle							m_AmbientShadowHandle;
+			int									m_GetMapTextID{};
 		public:
+			const auto&		GetMapTextID(void) const noexcept { return this->m_GetMapTextID; }
 			const auto&		GetShadowGraph(void) const noexcept { return this->m_PointShadowHandle; }
 			const auto&		GetAmbientLightVec(void) const noexcept { return this->m_AmbientLightVec; }
 			const auto&		GetPlayerSpawn(void) const noexcept { return this->m_PlayerSpawn; }
 			const auto&		GetEventChip(void) const noexcept { return this->m_EventChip; }
 			const auto		GetXSize(void) const noexcept { return this->m_Xsize; }
 			const auto		GetYSize(void) const noexcept { return this->m_Ysize; }
-			const auto		GetXYToNum(int x, int y) const noexcept { return x * this->m_Xsize + y; }
-			const auto		GetNumToXY(int num) const noexcept { return std::make_pair<int,int>(num / this->m_Xsize, num % this->m_Xsize); }
+			const auto		GetXYToNum(int x, int y) const noexcept { return std::min(x, this->m_Xsize - 1) * this->m_Ysize + std::min(y, this->m_Ysize - 1); }
+			const auto		GetNumToXY(int num) const noexcept { return std::make_pair<int,int>(num / this->m_Ysize, num % this->m_Ysize); }
 			const auto&		GetFloorData(int num) const noexcept { return this->m_Blick.at(num); }
 			const auto&		GetFloorData(int x, int y) const noexcept { return GetFloorData(GetXYToNum(x, y)); }
 			const auto		GetNearestFloors(const Vector3DX& Pos) const noexcept {
@@ -252,7 +257,7 @@ namespace FPS_n2 {
 				return SelList;
 			}
 			const float		CheckHideShadow(const Vector3DX& PosA, const Vector3DX& PosB, float Radius) noexcept ;
-			const bool		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius, bool IsPhysical) noexcept ;
+			const bool		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius, bool IsPhysical) const noexcept ;
 		public:
 			void			SetAmbientLight(float ShadowLen, float Rad) noexcept {
 				m_AmbientShadowLength = ShadowLen;

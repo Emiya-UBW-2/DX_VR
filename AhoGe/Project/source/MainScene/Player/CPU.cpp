@@ -350,15 +350,17 @@ namespace FPS_n2 {
 				//
 				m_PathUpdateTimer -= 1.f / DrawParts->GetFps();
 				if (m_PathUpdateTimer <= 0.f) {
-					m_PathUpdateTimer += 1.f;
 					if (this->m_Phase == ENUM_AI_PHASE::Normal || this->m_Phase == ENUM_AI_PHASE::Caution) {
 						PatrolPoint();
+						m_PathUpdateTimer += 5.f;
 					}
 					if (this->m_Phase == ENUM_AI_PHASE::Check) {
 						this->m_PathChecker.UpdatePath(Chara->GetPos(), m_LastFindPos);
+						m_PathUpdateTimer += 1.f;
 					}
 					if(this->m_Phase == ENUM_AI_PHASE::Alert) {
 						this->m_PathChecker.UpdatePath(Chara->GetPos(), Target->GetPos());
+						m_PathUpdateTimer += 1.f;
 					}
 				}
 			}
@@ -528,22 +530,22 @@ namespace FPS_n2 {
 				// return;
 				this->Execute_Before();
 				switch (this->m_Phase) {
-				case ENUM_AI_PHASE::Normal:
-					this->Execute_Normal();
-					break;
-				case ENUM_AI_PHASE::Check:
-					this->Execute_Check();
-					break;
-				case ENUM_AI_PHASE::Caution:
-					this->Execute_Caution();
-					break;
-				case ENUM_AI_PHASE::Alert:
-					this->Execute_Alert();
-					break;
-				case ENUM_AI_PHASE::Dead:
-					break;
-				default:
-					break;
+					case ENUM_AI_PHASE::Normal:
+						this->Execute_Normal();
+						break;
+					case ENUM_AI_PHASE::Check:
+						this->Execute_Check();
+						break;
+					case ENUM_AI_PHASE::Caution:
+						this->Execute_Caution();
+						break;
+					case ENUM_AI_PHASE::Alert:
+						this->Execute_Alert();
+						break;
+					case ENUM_AI_PHASE::Dead:
+						break;
+					default:
+						break;
 				}
 				*MyInput = this->m_MyInput;
 			}

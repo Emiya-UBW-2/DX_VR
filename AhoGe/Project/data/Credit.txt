@@ -1,6 +1,8 @@
 サウンド素材(Oculus Audio Pack 1)=Meta様
 サウンド素材=効果音ラボ様
 
+BGM「タイムチェイス」=かずち様
+BGM「逃走」=GANO様
 UI用アイコン=icooon-mono.com様
 キーボードのアイコン=Digipot様
 DXライブラリ=山田巧様
