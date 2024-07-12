@@ -31,7 +31,13 @@ namespace FPS_n2 {
 			void			DrawCharaUI_Back(PlayerID value) noexcept;
 			void			DrawCharaUI_Front(PlayerID value) noexcept;
 		protected:
-			void			SetMapTextID(int value) noexcept { m_MapTextID = value; }
+			void			SetMapTextID(int value) noexcept { this->m_MapTextID = value; }
+		public:
+			InGameUIControl(void) {}
+			InGameUIControl(const InGameUIControl&) = delete;
+			InGameUIControl(InGameUIControl&& o) = delete;
+			InGameUIControl& operator=(const InGameUIControl&) = delete;
+			InGameUIControl& operator=(InGameUIControl&& o) = delete;
 		protected:
 			void			LoadUI(void) noexcept;
 			void			SetUI(void) noexcept;
@@ -50,7 +56,7 @@ namespace FPS_n2 {
 			End,
 			Max,
 		};
-		static const char* g_CutSceneStr[(int)CutSceneType::Max] = {
+		static const char* g_CutSceneStr[static_cast<int>(CutSceneType::Max)] = {
 			"MsgBox",
 			"ViewPoint",
 			"WaitMilSec",
@@ -97,10 +103,10 @@ namespace FPS_n2 {
 			bool						m_IsBlackOut{ false };//カットシーン中フラグ
 			float						m_BlackOutAlpha{ 0.f };
 		protected:
-			const auto		IsFadeClear(void) const noexcept { return this->m_BlackOutAlpha == 0.f; }
-			const auto		IsFadeAll(void) const noexcept { return this ->m_BlackOutAlpha >= 1.f; }
+			auto		IsFadeClear(void) const noexcept { return this->m_BlackOutAlpha == 0.f; }
+			auto		IsFadeAll(void) const noexcept { return this ->m_BlackOutAlpha >= 1.f; }
 		protected:
-			void			SetBlackOut(bool value) noexcept { m_IsBlackOut = value; }
+			void			SetBlackOut(bool value) noexcept { this->m_IsBlackOut = value; }
 		protected:
 			void			SetFade(void) noexcept;
 			void			UpdateFade(void) noexcept;

@@ -19,6 +19,7 @@ namespace FPS_n2 {
 			bool						m_IsPlayable{ false };//ëÄçÏâ¬î\
 			// 
 			Vector3DX					m_CamAddPos;
+			Vector3DX					m_CamAddPosR;
 			//
 			std::string					m_MapName;
 			int							m_EntryID{};
@@ -31,7 +32,12 @@ namespace FPS_n2 {
 			float						m_AlertBGM{0.f};
 		public:
 			MainGameScene(void) noexcept { Set3DActive(false); }
-			~MainGameScene(void) noexcept {}
+			MainGameScene(const MainGameScene&) = delete;
+			MainGameScene(MainGameScene&& o) = delete;
+			MainGameScene& operator=(const MainGameScene&) = delete;
+			MainGameScene& operator=(MainGameScene&& o) = delete;
+
+			virtual ~MainGameScene(void) noexcept {}
 		public:
 			void			Load_Sub(void) noexcept override;
 			void			Set_Sub(void) noexcept override;

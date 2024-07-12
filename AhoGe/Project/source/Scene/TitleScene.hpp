@@ -7,14 +7,19 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class TitleScene : public TEMPSCENE {
 		private:
-			float						GameFadeIn{0.f};
-			float						GameStart{0.f};
+			float						m_GameFadeIn{0.f};
+			float						m_GameStart{0.f};
 			GraphHandle					m_TitleImage;
 			// 
-			CreditControl				m_CreditControl;
+			std::unique_ptr<CreditControl>	m_CreditControl;
 		public:
 			TitleScene(void) noexcept { Set3DActive(false); }
-			~TitleScene(void) noexcept {}
+			TitleScene(const TitleScene&) = delete;
+			TitleScene(TitleScene&& o) = delete;
+			TitleScene& operator=(const TitleScene&) = delete;
+			TitleScene& operator=(TitleScene&& o) = delete;
+
+			virtual ~TitleScene(void) noexcept {}
 		public:
 			void			Set_Sub(void) noexcept override;
 			bool			Update_Sub(void) noexcept override;

@@ -9,7 +9,7 @@ namespace FPS_n2 {
 			CutScene,
 			Max,
 		};
-		static const char* g_EventStr[(int)EventType::Max] = {
+		static const char* g_EventStr[static_cast<int>(EventType::Max)] = {
 			"Entry",
 			"CutScene",
 		};
@@ -19,29 +19,28 @@ namespace FPS_n2 {
 		private:
 			friend class SingletonBase<BackGroundClassBase>;
 		private:
-			static const int tile_pic_size = 32;	// 画像のタイルサイズ
-		private:
 			//
 			class Blick {
 			private:
 				class BlickPalette {
-					int							m_paletteNum{ -1 };
+					int							m_paletteNum{ INVALID_ID };
 					float						m_ZRad{ 0.f };
 				public:
 					void Set(int pal, float ZRad) noexcept {
-						m_paletteNum = pal;
-						m_ZRad = ZRad;
+						this->m_paletteNum = pal;
+						this->m_ZRad = ZRad;
 					}
 					void Reset() noexcept {
-						m_paletteNum = -1;
-						m_ZRad = 0.f;
+						this->m_paletteNum = INVALID_ID;
+						this->m_ZRad = 0.f;
 					}
 				public:
-					const auto IsActive(void) const noexcept { return this->m_paletteNum != -1; }
+					auto IsActive(void) const noexcept { return this->m_paletteNum != INVALID_ID; }
 					const auto& GetpaletteNum(void) const noexcept { return this->m_paletteNum; }
 					const auto& GetZRad(void) const noexcept { return this->m_ZRad; }
 				};
 			private:
+				int							m_Index{};
 				Vector3DX					m_Pos;
 				bool						m_IsWall{ false };
 				bool						m_IsCheckWall{ false };//壁で尚且つチェック対象かどうか
@@ -49,30 +48,32 @@ namespace FPS_n2 {
 				std::array<Vector3DX, 4>	m_BoxSide;
 				std::array<int, 8>			m_LinkIndex{};//CPUが斜め方向も探索するようにしたいなら8に指定
 			public:
+				const auto& GetIndex(void) const noexcept { return this->m_Index; }
 				const auto& GetPos(void) const noexcept { return this->m_Pos; }
 				const auto& GetIsWall(void) const noexcept { return this->m_IsWall; }
 				const auto& GetIsCheckWall(void) const noexcept { return this->m_IsCheckWall; }
 				const auto& GetPalette(void) const noexcept { return this->m_Palette; }
-				const auto& GetBoxSide(int num) const noexcept { return this->m_BoxSide.at(num); }
+				const auto& GetBoxSide(int num) const noexcept { return this->m_BoxSide.at(static_cast<size_t>(num)); }
 				const auto& GetLinkIndex(void) const noexcept { return this->m_LinkIndex; }
 			public://コンストラクタ
-				Blick(int x, int y) noexcept {
-					m_Pos.x = Get2DSize((float)x);
-					m_Pos.y = Get2DSize((float)y);
-					for (auto& index : m_LinkIndex) {
-						index = -1;
+				Blick(int x, int y, int index) noexcept {
+					this->m_Pos.x = Get2DSize(static_cast<float>(x));
+					this->m_Pos.y = Get2DSize(static_cast<float>(y));
+					this->m_Index = index;
+					for (auto& Lindex : this->m_LinkIndex) {
+						Lindex = INVALID_ID;
 					}
 					float HalfLen = Get2DSize(0.5f);
-					m_BoxSide.at(0).Set(m_Pos.x - HalfLen, m_Pos.y - HalfLen, 0.f);
-					m_BoxSide.at(1).Set(m_Pos.x + HalfLen, m_Pos.y - HalfLen, 0.f);
-					m_BoxSide.at(2).Set(m_Pos.x + HalfLen, m_Pos.y + HalfLen, 0.f);
-					m_BoxSide.at(3).Set(m_Pos.x - HalfLen, m_Pos.y + HalfLen, 0.f);
+					this->m_BoxSide.at(0).Set(this->m_Pos.x - HalfLen, this->m_Pos.y - HalfLen, 0.f);
+					this->m_BoxSide.at(1).Set(this->m_Pos.x + HalfLen, this->m_Pos.y - HalfLen, 0.f);
+					this->m_BoxSide.at(2).Set(this->m_Pos.x + HalfLen, this->m_Pos.y + HalfLen, 0.f);
+					this->m_BoxSide.at(3).Set(this->m_Pos.x - HalfLen, this->m_Pos.y + HalfLen, 0.f);
 				}
 			public:
 				void SetBasePalette(int pal, bool IsWall) noexcept {
 					this->m_Palette.at(0).Set(pal, 0.f);
 					for (int i = 0; i < 4; i++) {
-						this->m_Palette.at(i + 1).Reset();
+						this->m_Palette.at(static_cast<size_t>(i + 1)).Reset();
 					}
 					this->m_IsWall = IsWall;
 					this->m_IsCheckWall = this->m_IsWall;
@@ -80,14 +81,14 @@ namespace FPS_n2 {
 				void SetWallPallet(std::array<bool, 8> LURN) noexcept {
 					if (!this->m_IsWall) { return; }
 					int WayCount = 0;
-					for (int i = 0; i < 4; i++) { if (LURN.at(i)) { WayCount++; } }
+					for (int i = 0; i < 4; i++) { if (LURN.at(static_cast<size_t>(i))) { WayCount++; } }
 					switch (WayCount) {
 					case 0:
 						this->m_Palette.at(0).Set(0, 0.f);
 						break;
 					case 1:
 						for (int i = 0; i < 4; i++) {
-							if (LURN.at(i)) {
+							if (LURN.at(static_cast<size_t>(i))) {
 								this->m_Palette.at(0).Set(1, deg2rad(-90 * i + 90));
 								break;
 							}
@@ -97,7 +98,7 @@ namespace FPS_n2 {
 					{
 						bool IsHit = false;
 						for (int i = 0; i < 4; i++) {
-							if (!LURN.at(i) && !LURN.at((i + 1) % 4)) {
+							if (!LURN.at(static_cast<size_t>(i)) && !LURN.at(static_cast<size_t>((i + 1) % 4))) {
 								this->m_Palette.at(0).Set(2 + 5, deg2rad(-90 * i));
 								IsHit = true;
 								break;
@@ -105,7 +106,7 @@ namespace FPS_n2 {
 						}
 						if (!IsHit) {
 							for (int i = 0; i < 4; i++) {
-								if (!LURN.at(i)) {
+								if (!LURN.at(static_cast<size_t>(i))) {
 									this->m_Palette.at(0).Set(2, deg2rad(90 * i - 90));
 									break;
 								}
@@ -115,7 +116,7 @@ namespace FPS_n2 {
 					break;
 					case 3:
 						for (int i = 0; i < 4; i++) {
-							if (!LURN.at(i)) {
+							if (!LURN.at(static_cast<size_t>(i))) {
 								this->m_Palette.at(0).Set(3, deg2rad(-90 * i + 90));
 								break;
 							}
@@ -130,40 +131,41 @@ namespace FPS_n2 {
 					}
 
 					for (int i = 0; i < 4; i++) {
-						if (LURN.at(i) && LURN.at((i + 1) % 4) && !LURN.at((i + 4) % 8)) {
-							this->m_Palette.at(i + 1).Set(9, deg2rad(-90 * i));
+						if (LURN.at(static_cast<size_t>(i)) && LURN.at(static_cast<size_t>((i + 1) % 4)) && !LURN.at(static_cast<size_t>((i + 4) % 8))) {
+							this->m_Palette.at(static_cast<size_t>(i + 1)).Set(9, deg2rad(-90 * i));
 						}
 					}
 				}
-				void SetLinkIndex(int num, int index) noexcept { this->m_LinkIndex.at(num) = index; }
+				void SetLinkIndex(int num, int index) noexcept { this->m_LinkIndex.at(static_cast<size_t>(num)) = index; }
 			public://当たり判定
-				bool CheckPointHit(const Vector3DX& Pos) {
+				bool CheckPointHit(const Vector3DX& Pos) const noexcept {
 					return HitPointToRectangle(
-						(int)Pos.x, (int)Pos.y, 
-						(int)(this->GetBoxSide(0).x), (int)(this->GetBoxSide(0).y),
-						(int)(this->GetBoxSide(2).x), (int)(this->GetBoxSide(2).y));
+						static_cast<int>(Pos.x), static_cast<int>(Pos.y),
+						static_cast<int>(this->GetBoxSide(0).x), static_cast<int>(this->GetBoxSide(0).y),
+						static_cast<int>(this->GetBoxSide(2).x), static_cast<int>(this->GetBoxSide(2).y));
 				}
-				bool CheckRectangleHit(const Vector3DX& Min, const Vector3DX& Max) {
+				bool CheckRectangleHit(const Vector3DX& Min, const Vector3DX& Max) const noexcept {
 					return 
-						((int)Min.x < this->GetBoxSide(2).x && this->GetBoxSide(0).x < (int)Max.x) &&
-						((int)Min.y < this->GetBoxSide(2).y && this->GetBoxSide(0).y < (int)Max.y);
+						(Min.x < this->GetBoxSide(2).x && this->GetBoxSide(0).x < Max.x) &&
+						(Min.y < this->GetBoxSide(2).y && this->GetBoxSide(0).y < Max.y);
 				}
-				bool CheckCapsuleHit(const Vector3DX& Pos1, const Vector3DX& Pos2, float Radius) {
+				bool CheckCapsuleHit(const Vector3DX& Pos1, const Vector3DX& Pos2, float Radius) const noexcept {
 					for (int i = 0; i < 4; i++) {
+						if (GetLinkIndex().at(static_cast<size_t>((i + 1) % 4)) == INVALID_ID) { continue; }
 						if (GetHitCheckToCapsule(Pos1, Pos2, Radius, this->GetBoxSide(i), this->GetBoxSide((i + 1) % 4), 0.f)) {
 							return true;
 						}
 					}
 					return false;
 				}
-				bool CheckLineHit(const Vector3DX& Pos1, const Vector3DX& Pos2) {
+				bool CheckLineHit(const Vector3DX& Pos1, const Vector3DX& Pos2) const noexcept {
 					return CheckCapsuleHit(Pos1, Pos2, 0.001f);
 				}
 			public:
 				// 環境影を描画
-				void			DrawAmbientShadow(const Vector3DX& AmbientLightVec, float AmbientLightRad, const GraphHandle& ShadowChip) const noexcept ;
+				void			DrawAmbientShadow(const Vector3DX& AmbientLightVec, float AmbientLightRad, const GraphHandle& ShadowChip) const noexcept;
 				// ポイント影を描画
-				void			DrawPointShadow(const Vector3DX& PointLightPos, const GraphHandle& ShadowChip) noexcept ;
+				void			DrawPointShadow(const Vector3DX& PointLightPos, const GraphHandle& ShadowChip)  const noexcept;
 			};
 			// プレイヤーの周囲にあるステージ壁を取得する( 検出する範囲は移動距離も考慮する )
 			class CheckLines {
@@ -171,9 +173,9 @@ namespace FPS_n2 {
 				Vector3DX					m_Normal{};
 				bool						m_Active{true};
 			public:
-				void			SetActive(bool value) noexcept { m_Active = value; }
+				void			SetActive(bool value) noexcept { this->m_Active = value; }
 			public:
-				const auto&		GetPos(int num) const noexcept { return this->m_Position.at(num); }
+				const auto&		GetPos(int num) const noexcept { return this->m_Position.at(static_cast<size_t>(num)); }
 				const auto&		GetNormal(void) const noexcept { return this->m_Normal; }
 				const auto&		IsActive(void) const noexcept { return this->m_Active; }
 			public:
@@ -214,6 +216,12 @@ namespace FPS_n2 {
 			int									m_Xsize{};
 			int									m_Ysize{};
 			std::vector<std::shared_ptr<Blick>>	m_Blick;
+
+			//ループ高速化のための保持変数
+			std::vector<std::shared_ptr<Blick>>	m_FloorBlick;
+			std::vector<std::shared_ptr<Blick>>	m_WallBlick;
+			std::vector<std::shared_ptr<Blick>>	m_CheckWallBlick;
+
 			std::vector<PlayerPatrol>			m_PlayerSpawn;
 			std::vector<EventChip>				m_EventChip;
 			std::vector<GraphHandle>			m_MapChip;
@@ -231,50 +239,60 @@ namespace FPS_n2 {
 			const auto&		GetAmbientLightVec(void) const noexcept { return this->m_AmbientLightVec; }
 			const auto&		GetPlayerSpawn(void) const noexcept { return this->m_PlayerSpawn; }
 			const auto&		GetEventChip(void) const noexcept { return this->m_EventChip; }
-			const auto		GetXSize(void) const noexcept { return this->m_Xsize; }
-			const auto		GetYSize(void) const noexcept { return this->m_Ysize; }
-			const auto		GetXYToNum(int x, int y) const noexcept { return std::min(x, this->m_Xsize - 1) * this->m_Ysize + std::min(y, this->m_Ysize - 1); }
-			const auto		GetNumToXY(int num) const noexcept { return std::make_pair<int,int>(num / this->m_Ysize, num % this->m_Ysize); }
-			const auto&		GetFloorData(int num) const noexcept { return this->m_Blick.at(num); }
+			auto			GetXSize(void) const noexcept { return this->m_Xsize; }
+			auto			GetYSize(void) const noexcept { return this->m_Ysize; }
+			auto			GetXYToNum(int x, int y) const noexcept { return std::min(x, this->m_Xsize - 1) * this->m_Ysize + std::min(y, this->m_Ysize - 1); }
+			auto			GetNumToXY(int num) const noexcept { return std::make_pair<int,int>(num / this->m_Ysize, num % this->m_Ysize); }
+			const auto&		GetFloorData(int num) const noexcept { return this->m_Blick.at(static_cast<size_t>(num)); }
 			const auto&		GetFloorData(int x, int y) const noexcept { return GetFloorData(GetXYToNum(x, y)); }
-			const auto		GetNearestFloors(const Vector3DX& Pos) const noexcept {
-				for (auto& B : m_Blick) {
-					if (B->GetIsWall()) { continue; }
+			auto			GetNearestFloors(const Vector3DX& Pos) const noexcept {
+				//軽量版
+				int x = static_cast<int>(Get2DSizetoTile(Pos.x) + 0.5f);
+				int y = static_cast<int>(Get2DSizetoTile(Pos.y) + 0.5f);
+				return GetXYToNum(x, y);
+				/*
+				for (auto& B : this->m_FloorBlick) {
 					if (!B->CheckPointHit(Pos)) { continue; }
-					return (int)(&B - &m_Blick.front());
+					return B->GetIndex();
 				}
-				return -1;
+				return INVALID_ID;
+				//*/
 			}
-			const auto		GetNearFloorsList(const Vector3DX& Pos) const noexcept {
+			auto			GetNearFloorsList(const Vector3DX& Pos) const noexcept {
 				std::vector<int> SelList;
 				float ViewLimit = Get2DSize(5.f);
-				for (auto& B : m_Blick) {
-					if (B->GetIsWall()) { continue; }
+				for (auto& B : this->m_FloorBlick) {
 					if ((B->GetPos() - Pos).sqrMagnitude() < ViewLimit * ViewLimit) {
-						SelList.emplace_back((int)(&B - &m_Blick.front()));
+						SelList.emplace_back(B->GetIndex());
 					}
 				}
 				return SelList;
 			}
-			const float		CheckHideShadow(const Vector3DX& PosA, const Vector3DX& PosB, float Radius) noexcept ;
-			const bool		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius, bool IsPhysical) const noexcept ;
+			float			CheckHideShadow(const Vector3DX& PosA, const Vector3DX& PosB, float Radius) noexcept;
+			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius, bool IsPhysical) const noexcept;
 		public:
 			void			SetAmbientLight(float ShadowLen, float Rad) noexcept {
-				m_AmbientShadowLength = ShadowLen;
-				m_AmbientLightRad = Rad;
-				float Radius = (float)y_r(m_AmbientShadowLength);
-				m_AmbientLightVec.Set(std::sin(m_AmbientLightRad) * Radius, std::cos(m_AmbientLightRad) * Radius, 0.f);
+				this->m_AmbientShadowLength = ShadowLen;
+				this->m_AmbientLightRad = Rad;
+				float Radius = static_cast<float>(y_r(this->m_AmbientShadowLength));
+				this->m_AmbientLightVec.Set(std::sin(this->m_AmbientLightRad) * Radius, std::cos(this->m_AmbientLightRad) * Radius, 0.f);
 			}
 			void			SetPointLight(const Vector3DX& Pos) noexcept {
-				m_PointLightPos = Convert2DtoDisp(Pos);
+				Convert2DtoDisp(Pos,&this->m_PointLightPos);
 			}
+		private:
+			BackGroundClassBase(void) {}
+			BackGroundClassBase(const BackGroundClassBase&) = delete;
+			BackGroundClassBase(BackGroundClassBase&& o) = delete;
+			BackGroundClassBase& operator=(const BackGroundClassBase&) = delete;
+			BackGroundClassBase& operator=(BackGroundClassBase&& o) = delete;
 		public:
-			void			Init(const std::string& MapPath) noexcept ;
+			void			Init(const std::string& MapPath) noexcept;
 			void			Execute(void) noexcept {}
-			void			SetupShadow(std::function<void()> AddAmbShadow) noexcept ;
-			void			Draw(void) noexcept ;
-			void			DrawFront(void) noexcept ;
-			void			Dispose(void) noexcept ;
+			void			SetupShadow(std::function<void()> AddAmbShadow) noexcept;
+			void			Draw(void) noexcept;
+			void			DrawFront(void) noexcept;
+			void			Dispose(void) noexcept;
 		};
 	};
 };

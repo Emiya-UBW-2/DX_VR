@@ -11,9 +11,9 @@ namespace FPS_n2 {
 			// auto* BGM = BGMPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
-			GameFadeIn = 1.f;
-			GameStart = 0.f;
-			m_TitleImage = GraphHandle::Load("data/UI/Title.png");
+			this->m_GameFadeIn = 1.f;
+			this->m_GameStart = 0.f;
+			this->m_TitleImage = GraphHandle::Load("data/UI/Title.png");
 			// 
 			ButtonParts->ResetSel();
 			// 
@@ -30,13 +30,14 @@ namespace FPS_n2 {
 				"data/UI/credit.png", true,
 				(1920 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			// クレジット
-			m_CreditControl.Init();
+			this->m_CreditControl = std::make_unique<CreditControl>();
+			this->m_CreditControl->Init();
 			// 
 			/*
-			if (!BGM->Get(0).Check()) {
-				BGM->Get(0).Play(DX_PLAYTYPE_LOOP, TRUE);
+			if (!BGM->Get(2).Check()) {
+				BGM->Get(2).Play(DX_PLAYTYPE_LOOP, TRUE);
 			}
-			BGM->Get(0).SetVol_Local(255);
+			BGM->Get(2).SetVol_Local(255);
 			// */
 		}
 		bool			TitleScene::Update_Sub(void) noexcept {
@@ -62,14 +63,14 @@ namespace FPS_n2 {
 					KeyGuide->AddGuide(PADS::INTERACT, LocalizeParts->Get(9992));
 				}
 			);
-			if (!PopUpParts->IsActivePop() && (GameFadeIn == 0.f) && (GameStart == 0.f)) {
+			if (!PopUpParts->IsActivePop() && (this->m_GameFadeIn == 0.f) && (this->m_GameStart == 0.f)) {
 				ButtonParts->UpdateInput();
 				// 選択時の挙動
 				if (ButtonParts->GetTriggerButton()) {
 					switch (ButtonParts->GetSelect()) {
 						case 0:
 						case 1:
-							GameStart += 0.0001f;
+							this->m_GameStart += 0.0001f;
 							break;
 						case 2:
 							OptionWindowClass::Instance()->SetActive();
@@ -77,7 +78,7 @@ namespace FPS_n2 {
 						case 3:
 							PopUpParts->Add(LocalizeParts->Get(120), y_UI(720), y_UI(840),
 											[&](int xmin, int ymin, int xmax, int, bool) {
-												m_CreditControl.Draw(xmin, ymin, xmax);
+												this->m_CreditControl->Draw(xmin, ymin, xmax);
 											},
 											[]() {},
 											[]() {},
@@ -87,28 +88,29 @@ namespace FPS_n2 {
 						default:
 							break;
 					}
-					SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
+					SE->Get(static_cast<int>(SoundEnumCommon::UI_OK)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 				}
 			}
 			// 
 			ButtonParts->Update();
 			// 
-			GameFadeIn = std::max(GameFadeIn - 1.f / DrawParts->GetFps() / 0.5f, 0.f);
-			if (GameStart != 0.f) { GameStart += 1.f / DrawParts->GetFps() / 0.5f; }
-			return (GameStart <= 1.f);
+			this->m_GameFadeIn = std::max(this->m_GameFadeIn - 1.f / DrawParts->GetFps() / 0.5f, 0.f);
+			if (this->m_GameStart != 0.f) { this->m_GameStart += 1.f / DrawParts->GetFps() / 0.5f; }
+			return (this->m_GameStart <= 1.f);
 		}
 		void			TitleScene::Dispose_Sub(void) noexcept {
 			auto* SaveDataParts = SaveDataClass::Instance();
 			// auto* BGM = BGMPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
-			// BGM->Get(0).Stop();
+			// BGM->Get(2).Stop();
 			// 
-			m_CreditControl.Dispose();
+			this->m_CreditControl->Dispose();
+			this->m_CreditControl.reset();
 			// 
 			ButtonParts->Dispose();
 			// 
-			m_TitleImage.Dispose();
+			this->m_TitleImage.Dispose();
 			// セーブ
 			SaveDataParts->Save();
 			// 次シーン決定
@@ -126,23 +128,23 @@ namespace FPS_n2 {
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
-			m_TitleImage.DrawExtendGraph(y_UI(64), y_UI(64), y_UI(64 + 369), y_UI(64 + 207), true);
+			this->m_TitleImage.DrawExtendGraph(y_UI(64), y_UI(64), y_UI(64 + 369), y_UI(64 + 207), true);
 			// 
 			Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
 																 y_UI(64 + 369), y_UI(64 + 207), White, Black, "Ver 1.0.0");
 			// 
 			ButtonParts->Draw();
 			// 
-			if ((ButtonParts->GetSelect() != -1) && !PopUpParts->IsActivePop()) {
+			if ((ButtonParts->GetSelect() != INVALID_ID) && !PopUpParts->IsActivePop()) {
 				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 																	 y_UI(32), y_UI(1080 - 32 - 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
 			}
 			// 
 			{
-				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f * std::clamp(GameFadeIn, 0.f, 1.f)), 0, 255));
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameFadeIn, 0.f, 1.f)), 0, 255));
 				DrawBox(0, 0, y_r(1920), y_r(1080), Black, TRUE);
 
-				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f * std::clamp(GameStart, 0.f, 1.f)), 0, 255));
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameStart, 0.f, 1.f)), 0, 255));
 				DrawBox(0, 0, y_r(1920), y_r(1080), White, TRUE);
 
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);

@@ -14,8 +14,12 @@ namespace FPS_n2 {
 				std::shared_ptr<CharacterObject>				m_Chara{nullptr};
 				std::shared_ptr<AIControl>						m_AI{ nullptr };
 			public:
-				PlayerControl(void) noexcept {
-				}
+				PlayerControl(void) {}
+				PlayerControl(const PlayerControl&) = delete;
+				PlayerControl(PlayerControl&& o) = delete;
+				PlayerControl& operator=(const PlayerControl&) = delete;
+				PlayerControl& operator=(PlayerControl&& o) = delete;
+
 				~PlayerControl(void) noexcept {
 					this->Dispose();
 				}
@@ -27,34 +31,44 @@ namespace FPS_n2 {
 				auto&		GetAI(void) noexcept { return this->m_AI; }
 			public:
 				void Init(void) noexcept {
-					m_Chara = nullptr;
-					m_AI = nullptr;
+					this->m_Chara = nullptr;
+					this->m_AI = nullptr;
 				}
 				void Dispose(void) noexcept {
-					if (m_Chara) {
-						m_Chara.reset();
+					if (this->m_Chara) {
+						this->m_Chara.reset();
 					}
-					if (m_AI) {
-						m_AI.reset();
+					if (this->m_AI) {
+						this->m_AI.reset();
 					}
 				}
 			};
 		private:
-			std::vector<PlayerControl>	m_Player;
-			int							m_PlayerNum{ 0 };
+			std::vector<std::unique_ptr<PlayerControl>>	m_Player;
+			int											m_PlayerNum{ 0 };
 		public:
-			auto&		GetPlayer(PlayerID ID) noexcept { return this->m_Player.at((int)ID); }
-			const auto&	GetPlayerNum(void) noexcept { return this->m_PlayerNum; }
+			auto&		GetPlayer(PlayerID ID) noexcept { return this->m_Player.at(static_cast<size_t>(ID)); }
+			const auto&	GetPlayerNum(void) const noexcept { return this->m_PlayerNum; }
+		private:
+			PlayerManager(void) {}
+			PlayerManager(const PlayerManager&) = delete;
+			PlayerManager(PlayerManager&& o) = delete;
+			PlayerManager& operator=(const PlayerManager&) = delete;
+			PlayerManager& operator=(PlayerManager&& o) = delete;
 		public:
 			void Init(int playerNum) noexcept {
-				m_Player.resize(playerNum);
-				m_PlayerNum = playerNum;
+				this->m_Player.clear();
+				for (int i = 0; i < playerNum; i++) {
+					this->m_Player.emplace_back(std::make_unique<PlayerControl>());
+				}
+				this->m_PlayerNum = playerNum;
 			}
 			void Dispose(void) noexcept {
-				for (auto& p : m_Player) {
-					p.Dispose();
+				for (auto& p : this->m_Player) {
+					p->Dispose();
+					p.reset();
 				}
-				m_Player.clear();
+				this->m_Player.clear();
 			}
 		};
 

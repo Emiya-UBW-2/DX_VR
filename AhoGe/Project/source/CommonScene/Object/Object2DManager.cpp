@@ -7,7 +7,7 @@ namespace FPS_n2 {
 		void			Object2DManager::AddObject(const SharedObj2D& NewObj) noexcept {
 			this->m_Object.resize(this->m_Object.size() + 1);
 			this->m_Object.back() = NewObj;
-			this->m_Object.back()->SetObjectID(m_LastUniqueID);
+			this->m_Object.back()->SetObjectID(this->m_LastUniqueID);
 			this->m_Object.back()->Init();
 			this->m_LastUniqueID = 0;
 		}
@@ -86,13 +86,14 @@ namespace FPS_n2 {
 				}
 			}
 			// オブジェクトの排除チェック
-			for (int i = 0; i < this->m_Object.size(); i++) {
-				auto& o = this->m_Object.at(i);
+			for (int i = 0, Max = static_cast<int>(this->m_Object.size()); i < Max; i++) {
+				auto& o = this->m_Object.at(static_cast<size_t>(i));
 				if (o->GetIsDelete()) {
 					// 順番の維持のためここはerase
 					o->Dispose();
 					this->m_Object.erase(this->m_Object.begin() + i);
 					i--;
+					Max--;
 				}
 			}
 		}

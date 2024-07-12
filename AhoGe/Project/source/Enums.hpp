@@ -3,13 +3,13 @@
 
 namespace FPS_n2 {
 	// íËêî
-	static const float Frame_Rate{60.f};
-
-	static const float Scale_Rate{12.5f};
+	constexpr int INVALID_ID = -1;
+	constexpr float Frame_Rate{60.f};
+	constexpr float Scale_Rate{12.5f};
 
 	namespace Sceneclass {
 		enum class SoundEnum {
-			RunFoot = (int)SoundEnumCommon::Num,
+			RunFoot = static_cast<int>(SoundEnumCommon::Num),
 			// 
 			CountDown,
 			Second,
@@ -28,11 +28,11 @@ namespace FPS_n2 {
 			Human,
 			Bullet,
 		};
-		static const float Tile_DispSize{ 48.f };
-		static const float Base_CamScale{ 64.f };//ãÛä‘è„ÇÃê∏ìx
+		constexpr float Tile_DispSize{ 48.f };
+		constexpr float Base_CamScale{ 64.f };//ãÛä‘è„ÇÃê∏ìx
 	};
 
-	typedef char PlayerID;
-	typedef short HitPoint;
-	typedef short ArmerPoint;
+	using PlayerID = char;
+	using HitPoint = short;
+	using ArmerPoint = short;
 };

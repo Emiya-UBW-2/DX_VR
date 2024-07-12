@@ -6,7 +6,7 @@ namespace FPS_n2 {
 		class TestGameScene : public TEMPSCENE {
 		public:
 			TestGameScene(void) noexcept {}
-			~TestGameScene(void) noexcept {}
+			virtual ~TestGameScene(void) noexcept {}
 		public:
 			void			Load_Sub(void) noexcept override;
 			void			Set_Sub(void) noexcept override;

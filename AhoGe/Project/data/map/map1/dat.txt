@@ -1,0 +1,5 @@
+Name=8001
+000_EvtType=Entry
+000_NextStage=000_map2
+001_EvtType=Entry
+001_NextStage=001_map0

@@ -14,7 +14,12 @@ namespace FPS_n2 {
 			float						m_Rad{ 0.f };
 		public:
 			BulletObject(void) noexcept;
-			~BulletObject(void) noexcept;
+			BulletObject(const BulletObject&) = delete;
+			BulletObject(BulletObject&& o) = delete;
+			BulletObject& operator=(const BulletObject&) = delete;
+			BulletObject& operator=(BulletObject&& o) = delete;
+
+			virtual ~BulletObject(void) noexcept;
 		public:
 			void		SetPlayerID(PlayerID value) noexcept { this->m_ShotPlayerID = value; }
 		public:

@@ -24,8 +24,8 @@ namespace FPS_n2 {
 				int yp1{0};
 				int xsize{0};
 				int ysize{0};
-				FontHandle::FontXCenter LMR;
-				FontHandle::FontYCenter TMB;
+				FontHandle::FontXCenter LMR{ FontHandle::FontXCenter::LEFT };
+				FontHandle::FontYCenter TMB{ FontHandle::FontYCenter::TOP };
 
 				float SelYadd{0.f};
 
@@ -33,25 +33,32 @@ namespace FPS_n2 {
 				ButtonMode m_ButtonMode{ButtonMode::String};
 				bool m_EnableSelect{false};
 			private:
-				char m_String[64];
+				char m_String[64]{};
 				GraphHandle m_Icon;
+
+			public:
+				ButtonClass(void) {}
+				ButtonClass(const ButtonClass&) = delete;
+				ButtonClass(ButtonClass&& o) = delete;
+				ButtonClass& operator=(const ButtonClass&) = delete;
+				ButtonClass& operator=(ButtonClass&& o) = delete;
 			public:
 				void			LoadCommon(GraphHandle* BGPath) noexcept {
-					m_SelectBackImage = BGPath;
+					this->m_SelectBackImage = BGPath;
 				}
 				void			Load_Icon(const char* IconPath, bool IsEnableSelect) noexcept {
-					m_Icon = GraphHandle::Load(IconPath);
-					m_Icon.GetSize(&xsize, &ysize);
-					m_ButtonMode = ButtonMode::Icon;
-					m_EnableSelect = IsEnableSelect;
+					this->m_Icon = GraphHandle::Load(IconPath);
+					this->m_Icon.GetSize(&xsize, &ysize);
+					this->m_ButtonMode = ButtonMode::Icon;
+					this->m_EnableSelect = IsEnableSelect;
 				}
 				void			Load_String(const char* String, int fontsize, bool IsEnableSelect) noexcept {
 					auto* Fonts = FontPool::Instance();
-					snprintfDx(m_String, 64, String);
-					xsize = Fonts->Get(FontPool::FontType::Nomal_AA).GetStringWidth(fontsize, m_String);
+					snprintfDx(this->m_String, 64, String);
+					xsize = Fonts->Get(FontPool::FontType::Nomal_AA).GetStringWidth(fontsize, this->m_String);
 					ysize = fontsize;
-					m_ButtonMode = ButtonMode::String;
-					m_EnableSelect = IsEnableSelect;
+					this->m_ButtonMode = ButtonMode::String;
+					this->m_EnableSelect = IsEnableSelect;
 				}
 				void			Set(int xp, int yp, FontHandle::FontXCenter FontX, FontHandle::FontYCenter FontY) noexcept {
 					xp1 = xp;
@@ -59,47 +66,47 @@ namespace FPS_n2 {
 					LMR = FontX;
 					TMB = FontY;
 					SelYadd = 0.f;
-					m_ButtonStatus = ButtonStatus::Ready;
+					this->m_ButtonStatus = ButtonStatus::Ready;
 				}
 				void			Update(void) noexcept {
 					Easing(&SelYadd, 0.f, 0.93f, EasingType::OutExpo);
 				}
 				void			Dispose(void) noexcept {
-					m_Icon.Dispose();
+					this->m_Icon.Dispose();
 				}
 			public:
-				const auto		IsFocus(void) const noexcept { return m_ButtonStatus == ButtonStatus::Focus; }
-				void			SetNone(void) noexcept { m_ButtonStatus = ButtonStatus::None; }
-				void			SetReady(void) noexcept { m_ButtonStatus = ButtonStatus::Ready; }
+				auto			IsFocus(void) const noexcept { return this->m_ButtonStatus == ButtonStatus::Focus; }
+				void			SetNone(void) noexcept { this->m_ButtonStatus = ButtonStatus::None; }
+				void			SetReady(void) noexcept { this->m_ButtonStatus = ButtonStatus::Ready; }
 				void			SetFocus(void) noexcept {
 					SelYadd = 10.f;
-					m_ButtonStatus = ButtonStatus::Focus;
+					this->m_ButtonStatus = ButtonStatus::Focus;
 				}
 			public:
 				bool			GetInto(void) noexcept {
 					int xp = y_UI(xp1);
 					int yp = y_UI(yp1);
 					switch (LMR) {
-						case DXLibRef::FontHandle::FontXCenter::LEFT:
+						case FontHandle::FontXCenter::LEFT:
 							xp = y_UI(xp1);
 							break;
-						case DXLibRef::FontHandle::FontXCenter::MIDDLE:
+						case FontHandle::FontXCenter::MIDDLE:
 							xp = y_UI(xp1) - y_UI(xsize) / 2;
 							break;
-						case DXLibRef::FontHandle::FontXCenter::RIGHT:
+						case FontHandle::FontXCenter::RIGHT:
 							xp = y_UI(xp1) - y_UI(xsize);
 							break;
 						default:
 							break;
 					}
 					switch (TMB) {
-						case DXLibRef::FontHandle::FontYCenter::TOP:
+						case FontHandle::FontYCenter::TOP:
 							yp = y_UI(yp1);
 							break;
-						case DXLibRef::FontHandle::FontYCenter::MIDDLE:
+						case FontHandle::FontYCenter::MIDDLE:
 							yp = y_UI(yp1) - y_UI(ysize) / 2;
 							break;
-						case DXLibRef::FontHandle::FontYCenter::BOTTOM:
+						case FontHandle::FontYCenter::BOTTOM:
 							yp = y_UI(yp1) - y_UI(ysize);
 							break;
 						default:
@@ -108,7 +115,7 @@ namespace FPS_n2 {
 					return IntoMouse(xp, yp, xp + y_UI(xsize), yp + y_UI(ysize));
 				}
 				void			Draw(void) noexcept {
-					switch (m_ButtonMode) {
+					switch (this->m_ButtonMode) {
 						case ButtonMode::String:
 							{
 								auto* Fonts = FontPool::Instance();
@@ -116,26 +123,26 @@ namespace FPS_n2 {
 									int xp = y_UI(xp1);
 									int yp = y_UI(yp1);
 									switch (LMR) {
-										case DXLibRef::FontHandle::FontXCenter::LEFT:
+										case FontHandle::FontXCenter::LEFT:
 											xp = y_UI(xp1);
 											break;
-										case DXLibRef::FontHandle::FontXCenter::MIDDLE:
+										case FontHandle::FontXCenter::MIDDLE:
 											xp = y_UI(xp1) - y_UI(xsize) / 2;
 											break;
-										case DXLibRef::FontHandle::FontXCenter::RIGHT:
+										case FontHandle::FontXCenter::RIGHT:
 											xp = y_UI(xp1) - y_UI(xsize);
 											break;
 										default:
 											break;
 									}
 									switch (TMB) {
-										case DXLibRef::FontHandle::FontYCenter::TOP:
+										case FontHandle::FontYCenter::TOP:
 											yp = y_UI(yp1);
 											break;
-										case DXLibRef::FontHandle::FontYCenter::MIDDLE:
+										case FontHandle::FontYCenter::MIDDLE:
 											yp = y_UI(yp1) - y_UI(ysize) / 2;
 											break;
-										case DXLibRef::FontHandle::FontYCenter::BOTTOM:
+										case FontHandle::FontYCenter::BOTTOM:
 											yp = y_UI(yp1) - y_UI(ysize);
 											break;
 										default:
@@ -144,16 +151,16 @@ namespace FPS_n2 {
 
 									float per = std::clamp(SelYadd / 5.f, 0.f, 1.f);
 									float per2 = 1.f - std::clamp(SelYadd / 10.f, 0.f, 1.f);
-									SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(128.f * per), 0, 255));
-									m_SelectBackImage->DrawExtendGraph(
-										xp + y_UI(xsize) / 2 - (int)((float)(y_UI(xsize) / 2 + y_UI(300)) * per2), yp + y_UI(ysize) - y_UI(12) - (int)((float)(y_UI(ysize) / 6) * per),
-										xp + y_UI(xsize) / 2 + (int)((float)(y_UI(xsize) / 2 + y_UI(300)) * per2), yp + y_UI(ysize) - y_UI(12) + (int)((float)(y_UI(ysize) / 6) * per),
+									SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(128.f * per), 0, 255));
+									this->m_SelectBackImage->DrawExtendGraph(
+										xp + y_UI(xsize) / 2 - static_cast<int>(static_cast<float>(y_UI(xsize) / 2 + y_UI(300)) * per2), yp + y_UI(ysize) - y_UI(12) - static_cast<int>(static_cast<float>(y_UI(ysize) / 6) * per),
+										xp + y_UI(xsize) / 2 + static_cast<int>(static_cast<float>(y_UI(xsize) / 2 + y_UI(300)) * per2), yp + y_UI(ysize) - y_UI(12) + static_cast<int>(static_cast<float>(y_UI(ysize) / 6) * per),
 										true);
 									SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 								}
 								unsigned int Color = Black;
 								if (y_UI(ysize) > y_UI(50)) {
-									switch (m_ButtonStatus) {
+									switch (this->m_ButtonStatus) {
 										case ButtonStatus::None:
 											Color = Gray75;
 											break;
@@ -168,22 +175,22 @@ namespace FPS_n2 {
 									}
 								}
 								else {
-									switch (m_ButtonStatus) {
+									switch (this->m_ButtonStatus) {
 										case ButtonStatus::None:
 											Color = Gray75;
-											if (!m_EnableSelect) {
+											if (!this->m_EnableSelect) {
 												Color = GetColor(64, 48, 48);
 											}
 											break;
 										case ButtonStatus::Ready:
 											Color = Gray15;
-											if (!m_EnableSelect) {
+											if (!this->m_EnableSelect) {
 												Color = Gray65;
 											}
 											break;
 										case ButtonStatus::Focus:
 											Color = WhiteSel;
-											if (!m_EnableSelect) {
+											if (!this->m_EnableSelect) {
 												Color = GetColor(216, 143, 143);
 											}
 											break;
@@ -192,7 +199,7 @@ namespace FPS_n2 {
 									}
 								}
 								Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_UI(ysize), LMR, TMB,
-																					y_UI(xp1), y_UI(yp1 + (int)(SelYadd)), Color, Black, m_String);
+																					y_UI(xp1), y_UI(yp1 + static_cast<int>(SelYadd)), Color, Black, this->m_String);
 							}
 							break;
 						case ButtonMode::Icon:
@@ -200,14 +207,14 @@ namespace FPS_n2 {
 								if (SelYadd > 0.f) {
 									float per1 = std::clamp(SelYadd / 5.f, 0.f, 1.f);
 									float per2 = 1.f - std::clamp(SelYadd / 10.f, 0.f, 1.f);
-									SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(128.f * per1), 0, 255));
-									m_SelectBackImage->DrawExtendGraph(
-										y_UI(xp1) - (int)((float)y_UI(xsize) * per2), y_UI(yp1) - (int)((float)y_UI(ysize) * per2),
-										y_UI(xp1) + (int)((float)y_UI(xsize) * per2), y_UI(yp1) + (int)((float)y_UI(ysize) * per2),
+									SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(128.f * per1), 0, 255));
+									this->m_SelectBackImage->DrawExtendGraph(
+										y_UI(xp1) - static_cast<int>(static_cast<float>(y_UI(xsize)) * per2), y_UI(yp1) - static_cast<int>(static_cast<float>(y_UI(ysize)) * per2),
+										y_UI(xp1) + static_cast<int>(static_cast<float>(y_UI(xsize)) * per2), y_UI(yp1) + static_cast<int>(static_cast<float>(y_UI(ysize)) * per2),
 										true);
 									SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 								}
-								switch (m_ButtonStatus) {
+								switch (this->m_ButtonStatus) {
 									case ButtonStatus::None:
 										SetDrawBright(128, 128, 128);
 										break;
@@ -220,7 +227,7 @@ namespace FPS_n2 {
 									default:
 										break;
 								}
-								m_Icon.DrawRotaGraph(y_UI(xp1), y_UI(yp1), (float)y_UI(100) / 100.f * (1.f + SelYadd / 50.f), 0.f, true);
+								this->m_Icon.DrawRotaGraph(y_UI(xp1), y_UI(yp1), static_cast<float>(y_UI(100)) / 100.f * (1.f + SelYadd / 50.f), 0.f, true);
 								SetDrawBright(255, 255, 255);
 							}
 							break;
@@ -236,26 +243,31 @@ namespace FPS_n2 {
 			bool						m_MouseSelMode{false};
 		public:
 			const auto& GetSelect(void) const noexcept { return select; }
-			const bool		GetTriggerButton(void) const noexcept ;
+			bool		GetTriggerButton(void) const noexcept;
 		private:
-			ButtonControl(void) noexcept ;
-			virtual ~ButtonControl(void) noexcept ;
+			ButtonControl(void) noexcept;
+			ButtonControl(const ButtonControl&) = delete;
+			ButtonControl(ButtonControl&& o) = delete;
+			ButtonControl& operator=(const ButtonControl&) = delete;
+			ButtonControl& operator=(ButtonControl&& o) = delete;
+				
+			virtual ~ButtonControl(void) noexcept;
 		public:
 			void ResetSel(void) noexcept {
 				select = 0;
-				m_MouseSelMode = false;
+				this->m_MouseSelMode = false;
 			}
-			void UpdateInput(void) noexcept ;
-			void Update(void) noexcept ;
-			void Draw(void) noexcept ;
-			void Dispose(void) noexcept ;
+			void UpdateInput(void) noexcept;
+			void Update(void) noexcept;
+			void Draw(void) noexcept;
+			void Dispose(void) noexcept;
 		public:
 			void AddStringButton(
 				const char* String, int fontsize, bool IsEnableSelect,
 				int xp, int yp, FontHandle::FontXCenter FontX, FontHandle::FontYCenter FontY
 			) noexcept {
 				ButtonSel.emplace_back(std::make_shared<ButtonClass>());
-				ButtonSel.back()->LoadCommon(&m_SelectBackImage);
+				ButtonSel.back()->LoadCommon(&this->m_SelectBackImage);
 				ButtonSel.back()->Load_String(String, fontsize, IsEnableSelect);
 				ButtonSel.back()->Set(xp, yp, FontX, FontY);
 			}
@@ -264,7 +276,7 @@ namespace FPS_n2 {
 				int xp, int yp, FontHandle::FontXCenter FontX, FontHandle::FontYCenter FontY
 			) noexcept {
 				ButtonSel.emplace_back(std::make_shared<ButtonClass>());
-				ButtonSel.back()->LoadCommon(&m_SelectBackImage);
+				ButtonSel.back()->LoadCommon(&this->m_SelectBackImage);
 				ButtonSel.back()->Load_Icon(IconPath, IsEnableSelect);
 				ButtonSel.back()->Set(xp, yp, FontX, FontY);
 			}
@@ -275,9 +287,15 @@ namespace FPS_n2 {
 			int							m_CreditCoulm{0};
 			std::array<std::pair<char[CharMax], char[CharMax]>, 64> m_CreditStr{};
 		public:
-			void Init(void) noexcept ;
-			void Draw(int xmin, int ymin, int xmax) noexcept ;
-			void Dispose(void) noexcept ;
+			CreditControl(void) {}
+			CreditControl(const CreditControl&) = delete;
+			CreditControl(CreditControl&& o) = delete;
+			CreditControl& operator=(const CreditControl&) = delete;
+			CreditControl& operator=(CreditControl&& o) = delete;
+		public:
+			void Init(void) noexcept;
+			void Draw(int xmin, int ymin, int xmax) const noexcept;
+			void Dispose(void) noexcept;
 		};
 		// 
 	};

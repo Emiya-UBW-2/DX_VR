@@ -1,5 +1,5 @@
 #include	"CPU.hpp"
-#include	"../../MainScene/Player/Player.hpp"
+#include	"Player.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -51,9 +51,9 @@ namespace FPS_n2 {
 								//逆向きに
 								for (auto i = Link.rbegin(), e = Link.rend(); i != e; ++i) {
 									int Index = *i;
-									if (Index == -1) { continue; }								// 辺に隣接する地点が無い場合は何もしない
+									if (Index == INVALID_ID) { continue; }								// 辺に隣接する地点が無い場合は何もしない
 									if (Index == pStart->GetIndex()) { continue; }				// スタート地点の地点だった場合は何もしない
-									PathplanningUnit* NowUnit = (PathplanningUnit*)&UnitArray.at(Index);
+									PathplanningUnit* NowUnit = (PathplanningUnit*)&UnitArray.at(static_cast<size_t>(Index));
 									//Prev決定
 									{
 										auto trisdistance = PUnit->m_TotalDistance + (BackGround->GetFloorData(Index)->GetPos() + BackGround->GetFloorData(PUnit->GetIndex())->GetPos()).magnitude();
@@ -102,18 +102,18 @@ namespace FPS_n2 {
 					}
 					static void		SetByPatrol(const std::vector<PathplanningUnit>& UnitArray, int StartPoint, PlayerID MyID) noexcept {
 						auto* BackGround = BackGroundClassBase::Instance();
-						auto& PatList = BackGround->GetPlayerSpawn().at(MyID).m_Patrol;
-						PathplanningUnit* Now = (PathplanningUnit*)&UnitArray.at(PatList.at(StartPoint));
-						int ListNum = (int)PatList.size();
+						auto& PatList = BackGround->GetPlayerSpawn().at(static_cast<size_t>(MyID)).m_Patrol;
+						PathplanningUnit* Now = (PathplanningUnit*)&UnitArray.at(static_cast<size_t>(PatList.at(static_cast<size_t>(StartPoint))));
+						int ListNum = static_cast<int>(PatList.size());
 						for (int i = 0; i < ListNum; i++) {
 							++StartPoint %= ListNum;
-							Now->m_NextUnit = (PathplanningUnit*)&UnitArray.at(PatList.at(StartPoint));
+							Now->m_NextUnit = (PathplanningUnit*)&UnitArray.at(static_cast<size_t>(PatList.at(static_cast<size_t>(StartPoint))));
 							Now = Now->m_NextUnit;
 						}
 					}
 					static bool		GetNextUnit(const std::vector<PathplanningUnit>& UnitArray, int*NowIndex) noexcept {//該当ユニットの次の進路を確認
 						auto* BackGround = BackGroundClassBase::Instance();
-						auto* NextPtr = UnitArray.at(*NowIndex).GetNextUnit();
+						auto* NextPtr = UnitArray.at(static_cast<size_t>(*NowIndex)).GetNextUnit();
 						if (!NextPtr) { return false; }
 						bool IsHit = false;
 						for (const auto& Index : BackGround->GetFloorData(*NowIndex)->GetLinkIndex()) {
@@ -135,24 +135,24 @@ namespace FPS_n2 {
 				PathplanningUnit*				m_pGoalUnit{ nullptr };			// 経路のゴール地点にある地点情報へのメモリアドレスを格納する変数
 				int								m_TargetPathPlanningIndex{ 0 };	// 次の中間地点となる経路上の地点の経路探索情報が格納されているメモリアドレスを格納する変数
 			public:
-				const auto	CalcNextPosition(const Vector3DX& NowPosition, bool* IsGoal = nullptr) noexcept {
+				auto	CalcNextPosition(const Vector3DX& NowPosition, bool* IsGoal = nullptr) noexcept {
 					auto* BackGround = BackGroundClassBase::Instance();
 					int NowIndex = BackGround->GetNearestFloors(NowPosition);
 					if (!this->m_pGoalUnit || NowIndex != this->m_pGoalUnit->GetIndex()) {						// 現在乗っている地点がゴール地点にある地点の場合は処理を分岐
 						if (IsGoal) { *IsGoal = false; }
-						if (NowIndex == m_TargetPathPlanningIndex) {											// 現在乗っている地点が移動中間地点の地点の場合は次の中間地点を決定する処理を行う
-							PathplanningUnit::GetNextUnit(m_UnitArray, &NowIndex);
+						if (NowIndex == this->m_TargetPathPlanningIndex) {											// 現在乗っている地点が移動中間地点の地点の場合は次の中間地点を決定する処理を行う
+							PathplanningUnit::GetNextUnit(this->m_UnitArray, &NowIndex);
 							/*
 							// 次の中間地点が決定するまでループし続ける
 							while (true) {
-								if (!PathplanningUnit::GetNextUnit(m_UnitArray, &NowIndex)) { break; }			// 次の中間地点が見つからないなら終了
+								if (!PathplanningUnit::GetNextUnit(this->m_UnitArray, &NowIndex)) { break; }			// 次の中間地点が見つからないなら終了
 								if (!this->m_pGoalUnit || NowIndex == this->m_pGoalUnit->GetIndex()) { break; }	// 見つかった地点がゴールだったら終了
 							}
 							//*/
-							m_TargetPathPlanningIndex = NowIndex;
+							this->m_TargetPathPlanningIndex = NowIndex;
 						}
 						// 移動方向を決定する、移動方向は現在の座標から中間地点の地点の中心座標に向かう方向
-						return BackGround->GetFloorData(m_TargetPathPlanningIndex)->GetPos();
+						return BackGround->GetFloorData(this->m_TargetPathPlanningIndex)->GetPos();
 					}
 					else {
 						if (IsGoal) {
@@ -164,26 +164,26 @@ namespace FPS_n2 {
 					}
 				}
 			public:
-				const auto	UpdatePath(const Vector3DX& StartPos, const Vector3DX& GoalPos) noexcept {
+				auto	UpdatePath(const Vector3DX& StartPos, const Vector3DX& GoalPos) noexcept {
 					// 指定の２点の経路を探索する( 戻り値 true:経路構築成功 false:経路構築失敗( スタート地点とゴール地点を繋ぐ経路が無かった等 ) )
 					auto* BackGround = BackGroundClassBase::Instance();
 					this->m_GoalPosition = GoalPos;			// ゴール位置を保存
 					// 経路探索用の地点情報を格納するメモリ領域を確保、初期化
 					for (auto& p : this->m_UnitArray) {
-						p.Reset((int)(&p - &this->m_UnitArray.front()));
+						p.Reset(static_cast<int>(&p - &this->m_UnitArray.front()));
 					}
 					//スタート地点を決定
 					int StartIndex = BackGround->GetNearestFloors(StartPos);
-					if (StartIndex == -1) { return false; }
-					this->m_pStartUnit = &this->m_UnitArray.at(StartIndex);
+					if (StartIndex == INVALID_ID) { return false; }
+					this->m_pStartUnit = &this->m_UnitArray.at(static_cast<size_t>(StartIndex));
 					//ゴール地点を決定
 					int GoalIndex = BackGround->GetNearestFloors(this->m_GoalPosition);
-					if (GoalIndex == -1) { return false; }
-					this->m_pGoalUnit = &this->m_UnitArray.at(GoalIndex);
+					if (GoalIndex == INVALID_ID) { return false; }
+					this->m_pGoalUnit = &this->m_UnitArray.at(static_cast<size_t>(GoalIndex));
 					// ゴール地点にある地点とスタート地点にある地点が同じだったら false を返す
 					if (GoalIndex == StartIndex) { return false; }
 					// 経路を探索
-					if (!PathplanningUnit::SetStartToGoal(m_UnitArray, this->m_pStartUnit, this->m_pGoalUnit)) { return false; }
+					if (!PathplanningUnit::SetStartToGoal(this->m_UnitArray, this->m_pStartUnit, this->m_pGoalUnit)) { return false; }
 					this->m_TargetPathPlanningIndex = this->m_pStartUnit->GetIndex();	// 移動開始時点の移動中間地点の経路探索情報もスタート地点にある地点の情報
 					return true;
 				}
@@ -191,19 +191,19 @@ namespace FPS_n2 {
 					auto* BackGround = BackGroundClassBase::Instance();
 					// 経路探索用の地点情報を格納するメモリ領域を確保、初期化
 					for (auto& p : this->m_UnitArray) {
-						p.Reset((int)(&p - &this->m_UnitArray.front()));
+						p.Reset(static_cast<int>(&p - &this->m_UnitArray.front()));
 					}
 					//スタート地点を決定
-					this->m_pStartUnit = (PathplanningUnit*)&m_UnitArray.at(BackGround->GetPlayerSpawn().at(MyID).m_Patrol.at(StartPoint));
+					this->m_pStartUnit = (PathplanningUnit*)&this->m_UnitArray.at(static_cast<size_t>(BackGround->GetPlayerSpawn().at(static_cast<size_t>(MyID)).m_Patrol.at(static_cast<size_t>(StartPoint))));
 					this->m_pGoalUnit = nullptr;
 					// 経路を探索
-					PathplanningUnit::SetByPatrol(m_UnitArray, StartPoint, MyID);
+					PathplanningUnit::SetByPatrol(this->m_UnitArray, StartPoint, MyID);
 					this->m_TargetPathPlanningIndex = this->m_pStartUnit->GetIndex();	// 移動開始時点の移動中間地点の経路探索情報もスタート地点にある地点の情報
 				}
 			public:
 				void		Init(void) noexcept {
 					auto* BackGround = BackGroundClassBase::Instance();
-					this->m_UnitArray.resize(BackGround->GetXSize() * BackGround->GetYSize());
+					this->m_UnitArray.resize(static_cast<size_t>(BackGround->GetXSize() * BackGround->GetYSize()));
 				}
 				void		Draw(void) noexcept {
 					//経路を示す
@@ -213,21 +213,24 @@ namespace FPS_n2 {
 						auto* PUnit = this->m_pStartUnit;
 						for (int i = 0; i < 100; i++) {
 							if (!PUnit) { break; }
-							auto DispPos = Convert2DtoDisp(BackGround->GetFloorData(PUnit->GetIndex())->GetPos());
-							DrawCircle((int)DispPos.x, (int)DispPos.y, Radius, Red);
+							Vector3DX DispPos;
+							Convert2DtoDisp(BackGround->GetFloorData(PUnit->GetIndex())->GetPos(), &DispPos);
+							DrawCircle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), Radius, Red);
 							PUnit = PUnit->GetNextUnit();
 						}
 					}
 					{
-						auto DispPos = Convert2DtoDisp(BackGround->GetFloorData(this->m_TargetPathPlanningIndex)->GetPos());
-						DrawCircle((int)DispPos.x, (int)DispPos.y, (int)(Radius * 1.5f), Yellow);
+						Vector3DX DispPos;
+						Convert2DtoDisp(BackGround->GetFloorData(this->m_TargetPathPlanningIndex)->GetPos(), &DispPos);
+						DrawCircle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), static_cast<int>(static_cast<float>(Radius) * 1.5f), Yellow);
 					}
 					//巡回ルート
 					/*
 					{
-						for (auto& p : BackGround->GetPlayerSpawn().at(m_MyCharaID).m_Patrol) {
-							auto DispPos = Convert2DtoDisp(BackGround->GetFloorData(p)->GetPos());
-							DrawCircle((int)DispPos.x, (int)DispPos.y, Radius, Red);
+						Vector3DX DispPos;
+						for (auto& p : BackGround->GetPlayerSpawn().at(this->m_MyCharaID).m_Patrol) {
+							Convert2DtoDisp(BackGround->GetFloorData(p)->GetPos(),&DispPos);
+							DrawCircle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), Radius, Red);
 						}
 					}
 					//*/
@@ -253,22 +256,27 @@ namespace FPS_n2 {
 			PathChecker								m_PathChecker;
 			float									m_PathUpdateTimer{ 0.f };
 		public:
-			const float&	GetViewRad(void) const noexcept { return this->m_Rad; }
-			const bool&		GetGraphSwitch(void) const noexcept { return this->m_GraphSwitch; }
-			const bool		IsCaution(void) const noexcept { return this->m_Phase == ENUM_AI_PHASE::Check || this->m_Phase == ENUM_AI_PHASE::Caution; }
-			const bool		IsAlert(void) const noexcept { return this->m_Phase == ENUM_AI_PHASE::Alert; }
+			const float&			GetViewRad(void) const noexcept { return this->m_Rad; }
+			const bool&			GetGraphSwitch(void) const noexcept { return this->m_GraphSwitch; }
+			inline bool			IsCaution(void) const noexcept { return this->m_Phase == ENUM_AI_PHASE::Check || this->m_Phase == ENUM_AI_PHASE::Caution; }
+			inline bool			IsAlert(void) const noexcept { return this->m_Phase == ENUM_AI_PHASE::Alert; }
 			//
 			void			SetPlayerID(PlayerID MyCharaID) noexcept { this->m_MyCharaID = MyCharaID; }
 		public:
 			Impl(void) noexcept {}
+			Impl(const Impl&) = delete;
+			Impl(Impl&& o) = delete;
+			Impl& operator=(const Impl&) = delete;
+			Impl& operator=(Impl&& o) = delete;
+
 			~Impl(void) noexcept {}
 		private:
-			const auto	GetIsSeeTarget(void) const noexcept {
+			auto	GetIsSeeTarget(void) const noexcept {
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& Chara = PlayerMngr->GetPlayer((PlayerID)m_MyCharaID).GetChara();
-				auto& Target = PlayerMngr->GetPlayer((PlayerID)m_TargetCharaID).GetChara();
+				auto& Chara = PlayerMngr->GetPlayer((PlayerID)this->m_MyCharaID)->GetChara();
+				auto& Target = PlayerMngr->GetPlayer((PlayerID)this->m_TargetCharaID)->GetChara();
 				if (Chara->CanLookPlayer0()) {
-					if (m_TargetDistance < Get2DSize(10.f)) {
+					if (this->m_TargetDistance < Get2DSize(15.f)) {
 						Vector3DX Vec;Vec.Set(std::sin(Chara->GetViewRad()), std::cos(Chara->GetViewRad()), 0.f);
 						Vector3DX vec_a;vec_a = (Chara->GetPos() - Target->GetPos()).normalized();
 						if (-Vector3DX::Dot(vec_a, Vec) > std::cos(deg2rad(45))) {
@@ -282,14 +290,14 @@ namespace FPS_n2 {
 			void		PatrolPoint(void) noexcept {
 				auto* BackGround = BackGroundClassBase::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& Chara = PlayerMngr->GetPlayer((PlayerID)m_MyCharaID).GetChara();
+				auto& Chara = PlayerMngr->GetPlayer((PlayerID)this->m_MyCharaID)->GetChara();
 				int StartIndex = BackGround->GetNearestFloors(Chara->GetPos());
-				auto& PatList = BackGround->GetPlayerSpawn().at(m_MyCharaID).m_Patrol;
+				auto& PatList = BackGround->GetPlayerSpawn().at(static_cast<size_t>(this->m_MyCharaID)).m_Patrol;
 				float Length = 1000000.f;
-				int NearestID = -1;
+				int NearestID = INVALID_ID;
 				for (auto& p : PatList) {
 					if (StartIndex == p) {
-						m_PathChecker.UpdateByPatrol((int)(&p - &PatList.front()), m_MyCharaID);
+						this->m_PathChecker.UpdateByPatrol(static_cast<int>(&p - &PatList.front()), this->m_MyCharaID);
 						return;
 					}
 					float sqrLen = (BackGround->GetFloorData(p)->GetPos() - Chara->GetPos()).sqrMagnitude();
@@ -299,7 +307,7 @@ namespace FPS_n2 {
 					}
 				}
 				//目標値天井にいないので一番近いところに戻るよう軌道修正
-				m_PathChecker.UpdatePath(Chara->GetPos(), BackGround->GetFloorData(NearestID)->GetPos());
+				this->m_PathChecker.UpdatePath(Chara->GetPos(), BackGround->GetFloorData(NearestID)->GetPos());
 			}
 			//
 			void		ChangeNormalPhase(void) noexcept {
@@ -325,20 +333,20 @@ namespace FPS_n2 {
 			void		Execute_Before(void) noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& Chara = PlayerMngr->GetPlayer((PlayerID)m_MyCharaID).GetChara();
-				auto& Target = PlayerMngr->GetPlayer((PlayerID)m_TargetCharaID).GetChara();
-				m_TargetDistance = (Chara->GetPos() - Target->GetPos()).magnitude();
+				auto& Chara = PlayerMngr->GetPlayer((PlayerID)this->m_MyCharaID)->GetChara();
+				auto& Target = PlayerMngr->GetPlayer((PlayerID)this->m_TargetCharaID)->GetChara();
+				this->m_TargetDistance = (Chara->GetPos() - Target->GetPos()).magnitude();
 				// 初期化
-				m_MyInput.ResetAllInput();
+				this->m_MyInput.ResetAllInput();
 				this->m_GraphSwitch = false;
 				// 近くの味方も巻き込む
 				if (this->m_Phase == ENUM_AI_PHASE::Normal) {
 					for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
 						auto& p = PlayerMngr->GetPlayer((PlayerID)i);
-						if (i != m_MyCharaID && i != m_TargetCharaID) {
-							if (p.GetAI()->IsAlert()) {
+						if (i != this->m_MyCharaID && i != this->m_TargetCharaID) {
+							if (p->GetAI()->IsAlert()) {
 								float Len = Get2DSize(10.f);
-								auto Vec = p.GetChara()->GetPos() - Chara->GetPos();
+								auto Vec = p->GetChara()->GetPos() - Chara->GetPos();
 								if (Vec.sqrMagnitude() < Len * Len) {
 									ChangeAlertPhase();
 									break;
@@ -348,76 +356,76 @@ namespace FPS_n2 {
 					}
 				}
 				//
-				m_PathUpdateTimer -= 1.f / DrawParts->GetFps();
-				if (m_PathUpdateTimer <= 0.f) {
+				this->m_PathUpdateTimer -= 1.f / DrawParts->GetFps();
+				if (this->m_PathUpdateTimer <= 0.f) {
 					if (this->m_Phase == ENUM_AI_PHASE::Normal || this->m_Phase == ENUM_AI_PHASE::Caution) {
 						PatrolPoint();
-						m_PathUpdateTimer += 5.f;
+						this->m_PathUpdateTimer += 5.f;
 					}
 					if (this->m_Phase == ENUM_AI_PHASE::Check) {
-						this->m_PathChecker.UpdatePath(Chara->GetPos(), m_LastFindPos);
-						m_PathUpdateTimer += 1.f;
+						this->m_PathChecker.UpdatePath(Chara->GetPos(), this->m_LastFindPos);
+						this->m_PathUpdateTimer += 1.f;
 					}
 					if(this->m_Phase == ENUM_AI_PHASE::Alert) {
 						this->m_PathChecker.UpdatePath(Chara->GetPos(), Target->GetPos());
-						m_PathUpdateTimer += 1.f;
+						this->m_PathUpdateTimer += 1.f;
 					}
 				}
 			}
 			void		Execute_Normal(void) noexcept {
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& Chara = PlayerMngr->GetPlayer((PlayerID)m_MyCharaID).GetChara();
-				auto& Target = PlayerMngr->GetPlayer((PlayerID)m_TargetCharaID).GetChara();
+				auto& Chara = PlayerMngr->GetPlayer((PlayerID)this->m_MyCharaID)->GetChara();
+				auto& Target = PlayerMngr->GetPlayer((PlayerID)this->m_TargetCharaID)->GetChara();
 				// 探索
 				{
-					m_LastFindPos = m_PathChecker.CalcNextPosition(Chara->GetPos());
+					this->m_LastFindPos = this->m_PathChecker.CalcNextPosition(Chara->GetPos());
 					float Len = Get2DSize(0.1f);
-					auto Vec = m_LastFindPos - Chara->GetPos();
+					auto Vec = this->m_LastFindPos - Chara->GetPos();
 					if (Vec.sqrMagnitude() > Len * Len) {
-						m_MyInput.SetInputPADS(PADS::MOVE_W, Vec.y > Len / 3.f);
-						m_MyInput.SetInputPADS(PADS::MOVE_S, Vec.y < -Len / 3.f);
-						m_MyInput.SetInputPADS(PADS::MOVE_A, Vec.x < -Len / 3.f);
-						m_MyInput.SetInputPADS(PADS::MOVE_D, Vec.x > Len / 3.f);
-						m_MyInput.SetInputPADS(PADS::WALK, true);
+						this->m_MyInput.SetInputPADS(PADS::MOVE_W, Vec.y > Len / 3.f);
+						this->m_MyInput.SetInputPADS(PADS::MOVE_S, Vec.y < -Len / 3.f);
+						this->m_MyInput.SetInputPADS(PADS::MOVE_A, Vec.x < -Len / 3.f);
+						this->m_MyInput.SetInputPADS(PADS::MOVE_D, Vec.x > Len / 3.f);
+						this->m_MyInput.SetInputPADS(PADS::WALK, true);
 					}
 				}
 				// 
 				if (GetIsSeeTarget()) {
-					if (m_TargetDistance < Get2DSize(5.f)) {
+					if (this->m_TargetDistance < Get2DSize(10.f)) {
 						ChangeAlertPhase();
 					}
 					else {
 						ChangeCheckPhase();
 					}
 				}
-				else if (m_TargetDistance < Get2DSize(1.5f + 1.f * Target->GetSpeedPer())) {
+				else if (this->m_TargetDistance < Get2DSize(2.f + 5.f * Target->GetSpeedPer())) {
 					ChangeCheckPhase();
 				}
 				// 
-				m_Rad = -GetRadVec2Vec(Convert2DtoDisp(Chara->GetPos()), Convert2DtoDisp(m_LastFindPos));
+				this->m_Rad = DX_PI_F + GetRadVec2Vec(Chara->GetPos(), this->m_LastFindPos);
 			}
 			void		Execute_Check(void) noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& Chara = PlayerMngr->GetPlayer((PlayerID)m_MyCharaID).GetChara();
-				auto& Target = PlayerMngr->GetPlayer((PlayerID)m_TargetCharaID).GetChara();
+				auto& Chara = PlayerMngr->GetPlayer((PlayerID)this->m_MyCharaID)->GetChara();
+				auto& Target = PlayerMngr->GetPlayer((PlayerID)this->m_TargetCharaID)->GetChara();
 				//
-				Vector3DX GoingPoint = m_LastFindPos;
+				Vector3DX GoingPoint = this->m_LastFindPos;
 				// 
-				m_LostTimer = std::min(m_LostTimer + 1.f / DrawParts->GetFps(), 5.f);
-				if (m_LostTimer == 5.f) {
+				this->m_LostTimer = std::min(this->m_LostTimer + 1.f / DrawParts->GetFps(), 5.f);
+				if (this->m_LostTimer == 5.f) {
 					// 探索
 					{
 						bool IsGoal = false;
-						GoingPoint = m_PathChecker.CalcNextPosition(Chara->GetPos(),&IsGoal);
+						GoingPoint = this->m_PathChecker.CalcNextPosition(Chara->GetPos(),&IsGoal);
 						float Len = Get2DSize(0.1f);
 						auto Vec = GoingPoint- Chara->GetPos();
 						if (Vec.sqrMagnitude() > Len * Len) {
-							m_MyInput.SetInputPADS(PADS::MOVE_W, Vec.y > Len / 3.f);
-							m_MyInput.SetInputPADS(PADS::MOVE_S, Vec.y < -Len / 3.f);
-							m_MyInput.SetInputPADS(PADS::MOVE_A, Vec.x < -Len / 3.f);
-							m_MyInput.SetInputPADS(PADS::MOVE_D, Vec.x > Len / 3.f);
-							m_MyInput.SetInputPADS(PADS::WALK, true);
+							this->m_MyInput.SetInputPADS(PADS::MOVE_W, Vec.y > Len / 3.f);
+							this->m_MyInput.SetInputPADS(PADS::MOVE_S, Vec.y < -Len / 3.f);
+							this->m_MyInput.SetInputPADS(PADS::MOVE_A, Vec.x < -Len / 3.f);
+							this->m_MyInput.SetInputPADS(PADS::MOVE_D, Vec.x > Len / 3.f);
+							this->m_MyInput.SetInputPADS(PADS::WALK, true);
 						}
 						if (IsGoal) {
 							ChangeNormalPhase();
@@ -425,106 +433,106 @@ namespace FPS_n2 {
 					}
 				}
 				if (GetIsSeeTarget()) {
-					if (m_TargetDistance < Get2DSize(5.f)) {
+					if (this->m_TargetDistance < Get2DSize(10.f)) {
 						ChangeAlertPhase();
 					}
-					m_LastFindPos = Target->GetPos();
+					this->m_LastFindPos = Target->GetPos();
 				}
-				else if (m_TargetDistance < Get2DSize(1.5f + 1.f * Target->GetSpeedPer())) {
-					m_LastFindPos = Target->GetPos();
+				else if (this->m_TargetDistance < Get2DSize(1.5f + 1.f * Target->GetSpeedPer())) {
+					this->m_LastFindPos = Target->GetPos();
 				}
 				// 
-				m_Rad = -GetRadVec2Vec(Convert2DtoDisp(Chara->GetPos()), Convert2DtoDisp(GoingPoint));
+				this->m_Rad = DX_PI_F + GetRadVec2Vec(Chara->GetPos(), GoingPoint);
 			}
 			void		Execute_Caution(void) noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& Chara = PlayerMngr->GetPlayer((PlayerID)m_MyCharaID).GetChara();
-				auto& Target = PlayerMngr->GetPlayer((PlayerID)m_TargetCharaID).GetChara();
+				auto& Chara = PlayerMngr->GetPlayer((PlayerID)this->m_MyCharaID)->GetChara();
+				auto& Target = PlayerMngr->GetPlayer((PlayerID)this->m_TargetCharaID)->GetChara();
 				// 探索
 				{
-					m_LastFindPos = m_PathChecker.CalcNextPosition(Chara->GetPos());
+					this->m_LastFindPos = this->m_PathChecker.CalcNextPosition(Chara->GetPos());
 					float Len = Get2DSize(0.1f);
-					auto Vec = m_LastFindPos - Chara->GetPos();
+					auto Vec = this->m_LastFindPos - Chara->GetPos();
 					if (Vec.sqrMagnitude() > Len * Len) {
-						m_MyInput.SetInputPADS(PADS::MOVE_W, Vec.y > Len / 3.f);
-						m_MyInput.SetInputPADS(PADS::MOVE_S, Vec.y < -Len / 3.f);
-						m_MyInput.SetInputPADS(PADS::MOVE_A, Vec.x < -Len / 3.f);
-						m_MyInput.SetInputPADS(PADS::MOVE_D, Vec.x > Len / 3.f);
-						//m_MyInput.SetInputPADS(PADS::WALK, true);
+						this->m_MyInput.SetInputPADS(PADS::MOVE_W, Vec.y > Len / 3.f);
+						this->m_MyInput.SetInputPADS(PADS::MOVE_S, Vec.y < -Len / 3.f);
+						this->m_MyInput.SetInputPADS(PADS::MOVE_A, Vec.x < -Len / 3.f);
+						this->m_MyInput.SetInputPADS(PADS::MOVE_D, Vec.x > Len / 3.f);
+						//this->m_MyInput.SetInputPADS(PADS::WALK, true);
 					}
 				}
 				// 
 				if (GetIsSeeTarget()) {
-					if (m_TargetDistance < Get2DSize(5.f)) {
+					if (this->m_TargetDistance < Get2DSize(10.f)) {
 						ChangeAlertPhase();
 					}
-					m_LostTimer = 10.f;
+					this->m_LostTimer = 10.f;
 				}
-				else if (m_TargetDistance < Get2DSize(1.5f + 1.f * Target->GetSpeedPer())) {
+				else if (this->m_TargetDistance < Get2DSize(1.5f + 1.f * Target->GetSpeedPer())) {
 					ChangeAlertPhase();
-					m_LostTimer = 10.f;
+					this->m_LostTimer = 10.f;
 				}
 				else {
-					m_LostTimer = std::max(m_LostTimer - 1.f / DrawParts->GetFps(), 0.f);
-					if (m_LostTimer == 0.f) {
+					this->m_LostTimer = std::max(this->m_LostTimer - 1.f / DrawParts->GetFps(), 0.f);
+					if (this->m_LostTimer == 0.f) {
 						ChangeNormalPhase();
 					}
 				}
 				// 
-				m_Rad = -GetRadVec2Vec(Convert2DtoDisp(Chara->GetPos()), Convert2DtoDisp(m_LastFindPos));
+				this->m_Rad = DX_PI_F + GetRadVec2Vec(Chara->GetPos(), this->m_LastFindPos);
 			}
 			void		Execute_Alert(void) noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& Chara = PlayerMngr->GetPlayer((PlayerID)m_MyCharaID).GetChara();
-				auto& Target = PlayerMngr->GetPlayer((PlayerID)m_TargetCharaID).GetChara();
+				auto& Chara = PlayerMngr->GetPlayer((PlayerID)this->m_MyCharaID)->GetChara();
+				auto& Target = PlayerMngr->GetPlayer((PlayerID)this->m_TargetCharaID)->GetChara();
 
 				// 探索
-				if (m_TargetDistance > Get2DSize(8.5f)) {
-					m_LastFindPos = m_PathChecker.CalcNextPosition(Chara->GetPos());
+				if (this->m_TargetDistance > Get2DSize(8.5f)) {
+					this->m_LastFindPos = this->m_PathChecker.CalcNextPosition(Chara->GetPos());
 
 					float Len = Get2DSize(0.1f);
-					auto Vec = m_LastFindPos - Chara->GetPos();
+					auto Vec = this->m_LastFindPos - Chara->GetPos();
 					if (Vec.sqrMagnitude() > Len * Len) {
-						m_MyInput.SetInputPADS(PADS::MOVE_W, Vec.y > 0.f);
-						m_MyInput.SetInputPADS(PADS::MOVE_S, Vec.y < 0.f);
-						m_MyInput.SetInputPADS(PADS::MOVE_A, Vec.x < 0.f);
-						m_MyInput.SetInputPADS(PADS::MOVE_D, Vec.x > 0.f);
+						this->m_MyInput.SetInputPADS(PADS::MOVE_W, Vec.y > 0.f);
+						this->m_MyInput.SetInputPADS(PADS::MOVE_S, Vec.y < 0.f);
+						this->m_MyInput.SetInputPADS(PADS::MOVE_A, Vec.x < 0.f);
+						this->m_MyInput.SetInputPADS(PADS::MOVE_D, Vec.x > 0.f);
 					}
 				}
 				else {
-					m_LastFindPos = Target->GetPos();
-					if (m_ShotTimer == 0.f) {
-						m_ShotTimer = 0.5f + (float)GetRand(100) / 100.f;
-						m_MyInput.SetInputPADS(PADS::SHOT, true);
+					this->m_LastFindPos = Target->GetPos();
+					if (this->m_ShotTimer == 0.f) {
+						this->m_ShotTimer = 0.5f + static_cast<float>(GetRand(100)) / 100.f;
+						this->m_MyInput.SetInputPADS(PADS::SHOT, true);
 					}
 					else {
-						m_ShotTimer = std::max(m_ShotTimer - 1.f / DrawParts->GetFps(), 0.f);
+						this->m_ShotTimer = std::max(this->m_ShotTimer - 1.f / DrawParts->GetFps(), 0.f);
 					}
 				}
 				// 
 				// 
 				if (GetIsSeeTarget()) {
-					m_LostTimer = 10.f;
+					this->m_LostTimer = 10.f;
 				}
-				else if (m_TargetDistance < Get2DSize(1.5f + 1.f * Target->GetSpeedPer())) {
-					m_LostTimer = 10.f;
+				else if (this->m_TargetDistance < Get2DSize(1.5f + 1.f * Target->GetSpeedPer())) {
+					this->m_LostTimer = 10.f;
 				}
 				else {
-					m_LostTimer = std::max(m_LostTimer - 1.f / DrawParts->GetFps(), 0.f);
-					if (m_LostTimer == 0.f) {
+					this->m_LostTimer = std::max(this->m_LostTimer - 1.f / DrawParts->GetFps(), 0.f);
+					if (this->m_LostTimer == 0.f) {
 						ChangeCautionPhase();
 					}
 				}
 				// 
-				m_Rad = -GetRadVec2Vec(Convert2DtoDisp(Chara->GetPos()), Convert2DtoDisp(m_LastFindPos));
+				this->m_Rad = DX_PI_F + GetRadVec2Vec(Chara->GetPos(), this->m_LastFindPos);
 			}
 		public:
 			void		Init(void) noexcept {
 				auto* PlayerMngr = PlayerManager::Instance();
-				this->m_PathUpdateTimer = -(float)m_MyCharaID / (float)PlayerMngr->GetPlayerNum() * 1.f;
-				m_PathChecker.Init();
+				this->m_PathUpdateTimer = -static_cast<float>(this->m_MyCharaID) / static_cast<float>(PlayerMngr->GetPlayerNum()) * 1.f;
+				this->m_PathChecker.Init();
 			}
 			void		Execute(InputControl* MyInput) noexcept {
 				// return;
@@ -556,29 +564,30 @@ namespace FPS_n2 {
 				//視線を示す
 				{
 					int Radius = GetDispSize(0.25f);
-					auto DispPos = Convert2DtoDisp(this->m_LastFindPos);
-					DrawCircle((int)DispPos.x, (int)DispPos.y, Radius, Red);
+					Vector3DX DispPos;
+					Convert2DtoDisp(this->m_LastFindPos, &DispPos);
+					DrawCircle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), Radius, Red);
 				}
 			}
 			void		Dispose(void) noexcept {
-				m_PathChecker.Dispose();
+				this->m_PathChecker.Dispose();
 			}
 		};
 		//
 		AIControl::AIControl(void) noexcept {
-			m_Param = new Impl;
+			this->m_Param = new Impl;
 		}
 		AIControl::~AIControl(void) noexcept {
-			if (m_Param) {
-				delete m_Param;
-				m_Param = nullptr;
+			if (this->m_Param) {
+				delete this->m_Param;
+				this->m_Param = nullptr;
 			}
 		}
 		//
-		const float&	AIControl::GetViewRad(void) const noexcept { return this->GetParam()->GetViewRad(); }
-		const bool&		AIControl::GetGraphSwitch(void) const noexcept { return this->GetParam()->GetGraphSwitch(); }
-		const bool		AIControl::IsCaution(void) const noexcept { return this->GetParam()->IsCaution(); }
-		const bool		AIControl::IsAlert(void) const noexcept { return this->GetParam()->IsAlert(); }
+		const float&			AIControl::GetViewRad(void) const noexcept { return this->GetParam()->GetViewRad(); }
+		const bool&			AIControl::GetGraphSwitch(void) const noexcept { return this->GetParam()->GetGraphSwitch(); }
+		bool			AIControl::IsCaution(void) const noexcept { return this->GetParam()->IsCaution(); }
+		bool			AIControl::IsAlert(void) const noexcept { return this->GetParam()->IsAlert(); }
 		//
 		void			AIControl::SetPlayerID(PlayerID MyCharaID) noexcept { this->GetParam()->SetPlayerID(MyCharaID); }
 		// 
