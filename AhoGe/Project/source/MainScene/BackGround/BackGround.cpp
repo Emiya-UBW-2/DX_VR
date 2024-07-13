@@ -394,6 +394,9 @@ namespace FPS_n2 {
 						EventChip tmp;
 						tmp.m_index = GetXYToNum(x, y);
 						tmp.m_EventID = b;//青色部分にイベントIDを埋め込む
+						tmp.m_CutSceneID = -1;
+						tmp.m_ActiveDelaySec = 0;
+						tmp.m_WinCutSceneID = -1;
 						this->m_EventChip.emplace_back(tmp);
 					}
 				}
@@ -482,6 +485,9 @@ namespace FPS_n2 {
 					if (LEFT == "Name") {
 						this->m_GetMapTextID = std::stoi(RIGHT);
 					}
+					else if (LEFT == "CamSize") {
+						this->m_CamScale = std::stof(RIGHT);
+					}
 					else {
 						int targetID = std::stoi(LEFT.substr(0, 3));
 						for (auto& e : this->m_EventChip) {
@@ -495,14 +501,29 @@ namespace FPS_n2 {
 										}
 									}
 								}
+								else if (LEFT.find("EntryCutScene") != std::string::npos) {
+									e.m_CutSceneID = std::stoi(RIGHT);
+								}
 								//遷移用設定
 								else if (LEFT.find("NextStage") != std::string::npos) {
-									e.m_EntryID = std::stoi(RIGHT.substr(0, 3));
-									e.m_MapName = RIGHT.substr(4);
+									if (RIGHT == "None") {
+										e.m_EntryID = -1;
+									}
+									else {
+										e.m_EntryID = std::stoi(RIGHT.substr(0, 3));
+										e.m_MapName = RIGHT.substr(4);
+									}
 								}
 								//カットシーン用設定
 								else if (LEFT.find("CutSelect") != std::string::npos) {
 									e.m_CutSceneID = std::stoi(RIGHT);
+								}
+								else if (LEFT.find("ActiveDelaySec") != std::string::npos) {
+									e.m_ActiveDelaySec = std::stoi(RIGHT);
+								}
+								//
+								else if (LEFT.find("WinCut") != std::string::npos) {
+									e.m_WinCutSceneID = std::stoi(RIGHT);
 								}
 								break;
 							}

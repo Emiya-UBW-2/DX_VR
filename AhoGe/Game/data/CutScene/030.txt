@@ -1,0 +1,13 @@
+000_Type=MsgBox
+    Name=4000
+    Msg=5135
+000_Type=MsgBox
+    Name=4000
+    Msg=5136
+000_Type=MsgBox
+    Name=4000
+    Msg=5137
+000_Type=MsgBox
+    Name=4000
+    Msg=5138
+999_Type=End

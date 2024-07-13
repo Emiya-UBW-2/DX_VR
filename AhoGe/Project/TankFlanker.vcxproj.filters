@@ -66,9 +66,6 @@
     <ClInclude Include="source\Scene\MainGameScene.hpp">
       <Filter>ソース ファイル\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="source\Scene\TestGameScene.hpp">
-      <Filter>ソース ファイル\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="source\MainScene\Object\Character.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
@@ -82,6 +79,9 @@
       <Filter>ソース ファイル\CommonScene\Object</Filter>
     </ClInclude>
     <ClInclude Include="source\MainScene\Object\Bullet.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\Object\Metal.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
   </ItemGroup>
@@ -104,9 +104,6 @@
     <ClCompile Include="source\Scene\MainGameScene.cpp">
       <Filter>ソース ファイル\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="source\Scene\TestGameScene.cpp">
-      <Filter>ソース ファイル\Scene</Filter>
-    </ClCompile>
     <ClCompile Include="source\MainScene\Object\Character.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
@@ -127,6 +124,9 @@
     </ClCompile>
     <ClCompile Include="source\MainScene\MainSceneSub.cpp">
       <Filter>ソース ファイル\MainScene</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\Metal.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

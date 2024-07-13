@@ -10,6 +10,7 @@ namespace FPS_n2 {
 			float						m_GameFadeIn{0.f};
 			float						m_GameStart{0.f};
 			GraphHandle					m_TitleImage;
+			bool						m_CloseResetSave{false};
 			// 
 			std::unique_ptr<CreditControl>	m_CreditControl;
 		public:

@@ -7,7 +7,6 @@
 #include	"CommonScene/Object/Object2DManager.hpp"
 #include	"Scene/TitleScene.hpp"
 #include	"Scene/MainGameScene.hpp"
-#include	"Scene/TestGameScene.hpp"
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// SetEnableXAudioFlag(TRUE);// Xaudio(ロードが長いとロストするので必要に応じて)
@@ -25,7 +24,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::Sceneclass::Cam2DControl::Create();
 	FPS_n2::Sceneclass::BackGroundClassBase::Create();
 	FPS_n2::Sceneclass::ButtonControl::Create();
-
+	FPS_n2::Sceneclass::Effect2DControl::Create();
 	// 
 	auto* SaveDataParts = SaveDataClass::Instance();
 	auto* BGM = BGMPool::Instance();
@@ -35,30 +34,27 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// bool IsFirstGame = (SaveDataParts->GetParam("FirstGame") != 1);
 	SaveDataParts->Save();
 	// BGM
-	BGM->Add(0, "data/Sound/BGM/Caution.wav");
-	BGM->Add(1, "data/Sound/BGM/Alert.wav");
+	BGM->Add(0, "data/Sound/BGM/title.wav");
+	BGM->Add(1, "data/Sound/BGM/normal.wav");
+	BGM->Add(2, "data/Sound/BGM/Caution.wav");
+	BGM->Add(3, "data/Sound/BGM/Alert.wav");
 	BGM->SetVol(OptionParts->GetParamFloat(EnumSaveParam::BGM));
 	// シーン
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto MainGamescene = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
-	auto TestGamescene = std::make_shared<FPS_n2::Sceneclass::TestGameScene>();
 	// 遷移先指定
 	Titlescene->SetNextSceneList(0, MainGamescene);
-	Titlescene->SetNextSceneList(1, TestGamescene);
 	MainGamescene->SetNextSceneList(0, Titlescene);
 	MainGamescene->SetNextSceneList(1, MainGamescene);
-	TestGamescene->SetNextSceneList(0, Titlescene);
 
 	auto* SceneParts = SceneControl::Instance();
-	/*
+	//*
 	SceneParts->AddList(Titlescene);
 	SceneParts->AddList(MainGamescene);
-	SceneParts->AddList(TestGamescene);
 	// */
-	// *
+	/*
 	SceneParts->AddList(MainGamescene);
 	SceneParts->AddList(Titlescene);
-	SceneParts->AddList(TestGamescene);
 	// */
 	// 最初の読み込み
 	if (!DXLib_refParts->MainLogic()) { return 0; }

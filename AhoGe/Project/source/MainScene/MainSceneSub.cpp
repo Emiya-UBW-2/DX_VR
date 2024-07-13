@@ -152,6 +152,8 @@ namespace FPS_n2 {
 			this->m_Watch = GraphHandle::Load("data/UI/Watch.png");
 			this->m_Caution = GraphHandle::Load("data/UI/Caution.png");
 			this->m_Alert = GraphHandle::Load("data/UI/Alert.png");
+			this->m_Goal = GraphHandle::Load("data/UI/baserad.png");
+			
 			this->m_ViewHandle = GraphHandle::Make(y_r(1920), y_r(1080), true);
 		}
 		void InGameUIControl::SetUI(void) noexcept {
@@ -189,25 +191,27 @@ namespace FPS_n2 {
 				for (int loop = 0; loop < 4; loop++) {
 					for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
 						auto& p = PlayerMngr->GetPlayer((PlayerID)i);
-						if (i == 0) {
-							if (loop == 3) {
-								DrawCharaUI_Back((PlayerID)i);
-							}
-						}
-						else {
-							if (p->GetAI()->IsAlert()) {
-								if (loop == 2) {
-									DrawCharaUI_Back((PlayerID)i);
-								}
-							}
-							else if (p->GetAI()->IsCaution()) {
-								if (loop == 1) {
+						if (p->GetChara()) {
+							if (i == 0) {
+								if (loop == 3) {
 									DrawCharaUI_Back((PlayerID)i);
 								}
 							}
 							else {
-								if (loop == 0) {
-									DrawCharaUI_Back((PlayerID)i);
+								if (p->GetAI()->IsAlert()) {
+									if (loop == 2) {
+										DrawCharaUI_Back((PlayerID)i);
+									}
+								}
+								else if (p->GetAI()->IsCaution()) {
+									if (loop == 1) {
+										DrawCharaUI_Back((PlayerID)i);
+									}
+								}
+								else {
+									if (loop == 0) {
+										DrawCharaUI_Back((PlayerID)i);
+									}
 								}
 							}
 						}
@@ -227,18 +231,97 @@ namespace FPS_n2 {
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 		}
 		void InGameUIControl::DrawUI_Front(void) noexcept {
+			auto* BackGround = BackGroundClassBase::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
-			for (int i = 1; i < PlayerMngr->GetPlayerNum(); i++) {
-				// !マーク
-				DrawCharaUI_Front((PlayerID)i);
-				//ID用デバッグ描画
-				if (false) {
-					SetDrawBright(255, 255, 255);
-					auto& p = PlayerMngr->GetPlayer((PlayerID)i);
-					p->GetAI()->Draw();
+			for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
+				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
+				if (p->GetChara()) {
+					if (p->GetChara()->CanLookPlayer0()) {
+						SetDrawBright(255, 255, 255);
+						Vector3DX DispPos;
+						Convert2DtoDisp(p->GetChara()->GetPos(), &DispPos);
+						int xmin = y_r(-50);
+						int ymin = y_r(-50);
+						int xmax = y_r(50);
+
+						int xper = xmin + (xmax - xmin) * p->GetChara()->GetHitPoint() / p->GetChara()->GetHitPointMax();
+						DrawLine(static_cast<int>(DispPos.x + xmin), static_cast<int>(DispPos.y + ymin), static_cast<int>(DispPos.x + xmax), static_cast<int>(DispPos.y + ymin), Gray75, 10);
+						DrawLine(static_cast<int>(DispPos.x + xmin), static_cast<int>(DispPos.y + ymin), static_cast<int>(DispPos.x + xper), static_cast<int>(DispPos.y + ymin), Green, 10);
+					}
+					// !マーク
+					if (i != 0) {
+						DrawCharaUI_Front((PlayerID)i);
+					}
+					//ID用デバッグ描画
+					if (false) {
+						SetDrawBright(255, 255, 255);
+						auto& p = PlayerMngr->GetPlayer((PlayerID)i);
+						p->GetAI()->Draw();
+					}
 				}
 			}
 			SetDrawBright(255, 255, 255);
+			//
+			if(this->m_GoalPos.x != -1.f &&this->m_GoalPos.y != -1.f &&this->m_GoalPos.z != -1.f){
+				int ShadowOfset = y_r(3);
+				auto& p = PlayerMngr->GetPlayer((PlayerID)0);
+				if (p->GetChara()) {
+					float Len = (this->m_GoalPos - p->GetChara()->GetPos()).magnitude() / Get2DSize(1.f);
+					float Rad = GetRadVec2Vec(this->m_GoalPos, p->GetChara()->GetPos());
+					if (Len > 1.f / 255.f) {
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * Len), 0, 255));
+						SetDrawBright(0, 0, 0);
+						this->m_Goal.DrawRotaGraph(y_r(1920 / 2) + ShadowOfset, y_r(1080 / 2) + ShadowOfset, static_cast<float>(y_r(1024)) / 400.f, Rad, true);
+						SetDrawBright(255, 255, 255);
+						this->m_Goal.DrawRotaGraph(y_r(1920 / 2), y_r(1080 / 2), static_cast<float>(y_r(1024)) / 400.f, Rad, true);
+						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+					}
+				}
+			}
+			for (auto& e : BackGround->GetEventChip()) {
+				//次マップへの遷移
+				if (e.m_EventType == EventType::CutScene) {
+					if (static_cast<int>(m_StartTime) < e.m_ActiveDelaySec) {
+						continue;
+					}
+					auto* SaveDataParts = SaveDataClass::Instance();
+					std::string SaveStr = "Cut_" + std::to_string(e.m_CutSceneID);
+					if (SaveDataParts->GetParam(SaveStr) == -1) {
+						int ShadowOfset = y_r(3);
+						auto& p = PlayerMngr->GetPlayer((PlayerID)0);
+
+						Vector3DX Pos = BackGround->GetFloorData(e.m_index)->GetPos();
+
+						Vector3DX DispPos;
+						Convert2DtoDisp(Pos, &DispPos);
+
+						if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), 0, 0, y_r(1920), y_r(1080))) {
+							if (p->GetChara()) {
+								float Len = (Pos - p->GetChara()->GetPos()).magnitude() / Get2DSize(1.f);
+								float Rad = GetRadVec2Vec(Pos, p->GetChara()->GetPos());
+								if (Len > 1.f / 255.f) {
+									SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(128.f * std::clamp(Len, 0.f, 1.f)), 0, 255));
+									SetDrawBright(0, 0, 0);
+									this->m_Goal.DrawRotaGraph(y_r(1920 / 2) + ShadowOfset, y_r(1080 / 2) + ShadowOfset, static_cast<float>(y_r(768)) / 400.f, Rad, true);
+									SetDrawBright(255, 255, 255);
+									this->m_Goal.DrawRotaGraph(y_r(1920 / 2), y_r(1080 / 2), static_cast<float>(y_r(768)) / 400.f, Rad, true);
+									SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+								}
+							}
+						}
+						else {
+							float Scale = static_cast<float>(y_r(64)) / 128.0f;
+
+							SetDrawBright(0, 0, 0);// 
+							this->m_Caution.DrawRotaGraph(static_cast<int>(DispPos.x) + ShadowOfset, static_cast<int>(DispPos.y) - y_r(32) + ShadowOfset, Scale, 0.f, true);
+							SetDrawBright(255, 128, 0);// 
+							this->m_Caution.DrawRotaGraph(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y) - y_r(32), Scale, 0.f, true);
+							SetDrawBright(255, 255, 255);
+						}
+					}
+				}
+			}
+
 		}
 		void InGameUIControl::DrawUI_MapName(void) noexcept {
 			if (this->m_MapDrawPer > 1.f / 255.f) {
@@ -267,6 +350,7 @@ namespace FPS_n2 {
 				//イベントタイプ
 				if (LEFT.find("Type") != std::string::npos) {
 					this->m_CutSceneData.resize(this->m_CutSceneData.size() + 1);
+					this->m_CutSceneData.back().m_CGSel = -1;
 					for (int i = 0; i < static_cast<int>(CutSceneType::Max); i++) {
 						if (RIGHT.find(g_CutSceneStr[i]) != std::string::npos) {
 							this->m_CutSceneData.back().m_Type = (CutSceneType)i;
@@ -292,6 +376,10 @@ namespace FPS_n2 {
 				else if (LEFT.find("WaitMilSec") != std::string::npos) {
 					this->m_CutSceneData.back().m_WatiMS = std::stoi(RIGHT);
 				}
+				//CG
+				if (LEFT.find("CG") != std::string::npos) {
+					this->m_CutSceneData.back().m_CGSel = std::stoi(RIGHT);
+				}
 			}
 			FileRead_close(mdata);
 			this->m_IsCutScene = true;
@@ -302,6 +390,7 @@ namespace FPS_n2 {
 			this->m_CutSceneAlpha = 0.f;
 			this->m_MsgBoxSeek = 0.f;
 			this->m_WaitMS = 0.f;
+			this->m_CGFade = 0.f;
 		}
 		void CutSceneControl::UpdateCut(void) noexcept {
 			auto* Pad = PadControl::Instance();
@@ -313,7 +402,7 @@ namespace FPS_n2 {
 					[]() {
 						auto* KeyGuide = PadControl::Instance();
 						auto* LocalizeParts = LocalizePool::Instance();
-						KeyGuide->AddGuide(PADS::INTERACT, LocalizeParts->Get(9902));//todo
+						KeyGuide->AddGuide(PADS::INTERACT, LocalizeParts->Get(9995));
 					});
 			}
 			//カットシーン全体
@@ -323,6 +412,7 @@ namespace FPS_n2 {
 			if (this->m_MsgBoxAlpha >= 1.f) {
 				this->m_MsgBoxSeek += 1.f / DrawParts->GetFps() / 0.1f;
 			}
+			this->m_CGFade = std::clamp(this->m_CGFade + ((this->m_CGSel != INVALID_ID) ? 1.f : -1.f) / DrawParts->GetFps() / 1.f, 0.f, 1.f);
 			//カットシーン中のボタン制御
 			if (this->m_CutSceneAlpha >= 1.f) {
 				if (0 <= this->m_CutSceneSeek && this->m_CutSceneSeek < static_cast<int>(this->m_CutSceneData.size())) {
@@ -345,11 +435,26 @@ namespace FPS_n2 {
 						IsGoNext = static_cast<int>(this->m_WaitMS * 1000.f) > Data.m_WatiMS;
 						this->m_WaitMS += 1.f / DrawParts->GetFps();
 						break;
+					case CutSceneType::CG:
+						this->m_CGSel = Data.m_CGSel;
+						if (this->m_CGSel != INVALID_ID) {
+							std::string Str = "data/UI/CG";
+							Str += std::to_string(this->m_CGSel);
+							Str += ".png";
+							m_CGGraph.Dispose();
+							m_CGGraph = GraphHandle::Load(Str);
+						}
+						IsGoNext = true;
+						break;
 					case CutSceneType::Max:
 					default:
 						break;
 					}
 					if (Pad->GetKey(PADS::INTERACT).trigger() || (IsGoNext)) {
+						if (!IsGoNext) {
+							auto* SE = SoundPool::Instance();
+							SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
+						}
 						for (auto& m : this->m_MsgString) {
 							m = "";
 						}
@@ -369,6 +474,12 @@ namespace FPS_n2 {
 			}
 		}
 		void CutSceneControl::DrawCut(void) noexcept {
+
+			if (this->m_CGFade > 1.f / 255.f) {
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(128.f * this->m_CGFade), 0, 255));
+				DrawBox(0, 0, y_UI(1920), y_UI(1080), Black, TRUE);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+			}
 			if (this->m_CutSceneAlpha > 1.f / 255.f) {
 				auto Color = GetColor(16, 16, 16);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * this->m_CutSceneAlpha), 0, 255));
@@ -386,77 +497,90 @@ namespace FPS_n2 {
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * this->m_MsgBoxAlpha), 0, 255));
 				DrawBox(x1, y1, x2, y2, Gray50, TRUE);
 				if (this->m_MsgBoxAlpha >= 1.f) {
-					int NameID{};
-					int MsgID{};
+					int NameID = 0;
+					int MsgID = 0;
 					if (0 <= this->m_CutSceneSeek && this->m_CutSceneSeek < static_cast<int>(this->m_CutSceneData.size())) {
 						auto& Data = this->m_CutSceneData.at(static_cast<size_t>(this->m_CutSceneSeek));
 						NameID = Data.m_NameID;
 						MsgID = Data.m_MsgID;
 					}
-					auto* Fonts = FontPool::Instance();
-					auto* LocalizeParts = LocalizePool::Instance();
-					Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_UI(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-						x1 + y_UI(32), y1 + y_UI(32), White, Black, LocalizeParts->Get(NameID));
+					if (MsgID != 0) {
+						auto* Fonts = FontPool::Instance();
+						auto* LocalizeParts = LocalizePool::Instance();
+						Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_UI(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+																			x1 + y_UI(32), y1 + y_UI(32), White, Black, LocalizeParts->Get(NameID));
 
-					int NowC = static_cast<int>(this->m_MsgBoxSeek);
-					if(this->m_PrevMsgBoxSeek!= NowC){
-						this->m_PrevMsgBoxSeek = NowC;
-						std::string Msg = LocalizeParts->Get(MsgID);
-						std::string NowMsg; NowMsg.reserve(512);
-						strncpy2_sDx(NowMsg.data(), 512, LocalizeParts->Get(MsgID), std::min(512, NowC));
-						NowMsg = NowMsg.c_str();
-						for (auto& m : this->m_MsgString) {
-							m = "";
-						}
-						for (int i = 0; i < 10; i++) {
-							if (NowMsg == "") { break; }
-							std::string Tmp; Tmp.reserve(512);
-
-							int Limit = ((x2 - x1) - y_UI(64) * 2);
-							int column = Limit / y_UI(32);//超えない範囲
-							while (true) {
-								if (NowC <= column) {
-									column = NowC;
-									break;
-								}
-								strncpy2_sDx(Tmp.data(), 512, NowMsg.c_str(), column); Tmp = Tmp.c_str();
-								if (Fonts->Get(FontPool::FontType::Nomal_AA, y_UI(32)).GetStringWidth(-1, Tmp) < Limit) {
-									column++;
-								}
-								else {
-									column--;
-									break;
-								}
+						int NowC = static_cast<int>(this->m_MsgBoxSeek);
+						if (this->m_PrevMsgBoxSeek != NowC) {
+							this->m_PrevMsgBoxSeek = NowC;
+							std::string Msg = LocalizeParts->Get(MsgID);
+							std::string NowMsg; NowMsg.reserve(512);
+							strncpy2_sDx(NowMsg.data(), 512, LocalizeParts->Get(MsgID), std::min(512, NowC));
+							NowMsg = NowMsg.c_str();
+							for (auto& m : this->m_MsgString) {
+								m = "";
 							}
-							NowC -= column;
-							strncpy2_sDx(Tmp.data(), 512, NowMsg.c_str(), column); Tmp = Tmp.c_str();
-							this->m_MsgString.at(static_cast<size_t>(i)) = Tmp;
-							{
+							for (int i = 0; i < 10; i++) {
+								if (NowMsg == "") { break; }
+								std::string Tmp; Tmp.reserve(512);
+
+								int Limit = ((x2 - x1) - y_UI(64) * 2);
+								int column = Limit / y_UI(32);//超えない範囲
 								while (true) {
-									if (strchrDx(Tmp.c_str(), '\n')) {
-										i++;
-										strpncpy2_sDx(Tmp.data(), 512, Tmp.c_str(), strchr2Dx(Tmp.c_str(), '\n') + 1, static_cast<int>(strlen2Dx(Tmp.c_str()))); Tmp = Tmp.c_str();
+									if (NowC <= column) {
+										column = NowC;
+										break;
+									}
+									strncpy2_sDx(Tmp.data(), 512, NowMsg.c_str(), column); Tmp = Tmp.c_str();
+									if (Fonts->Get(FontPool::FontType::Nomal_AA, y_UI(32)).GetStringWidth(-1, Tmp) < Limit) {
+										column++;
 									}
 									else {
+										column--;
 										break;
 									}
 								}
-							}
-							if (static_cast<int>(strlen2Dx(NowMsg.c_str())) > column) {
-								strpncpy2_sDx(NowMsg.data(), 512, NowMsg.c_str(), column + 1, static_cast<int>(strlen2Dx(NowMsg.c_str()))); NowMsg = NowMsg.c_str();
-							}
-							else {
-								NowMsg = "";
+								NowC -= column;
+								strncpy2_sDx(Tmp.data(), 512, NowMsg.c_str(), column); Tmp = Tmp.c_str();
+								this->m_MsgString.at(static_cast<size_t>(i)) = Tmp;
+								{
+									while (true) {
+										if (strchrDx(Tmp.c_str(), '\n')) {
+											i++;
+											strpncpy2_sDx(Tmp.data(), 512, Tmp.c_str(), strchr2Dx(Tmp.c_str(), '\n') + 1, static_cast<int>(strlen2Dx(Tmp.c_str()))); Tmp = Tmp.c_str();
+										}
+										else {
+											break;
+										}
+									}
+								}
+								if (static_cast<int>(strlen2Dx(NowMsg.c_str())) > column) {
+									strpncpy2_sDx(NowMsg.data(), 512, NowMsg.c_str(), column + 1, static_cast<int>(strlen2Dx(NowMsg.c_str()))); NowMsg = NowMsg.c_str();
+								}
+								else {
+									NowMsg = "";
+								}
 							}
 						}
-					}
-					for(auto& m : this->m_MsgString){
-						if (m == "") { continue; }
-						int i = static_cast<int>(&m - &this->m_MsgString.front());
-						Fonts->Get(FontPool::FontType::Nomal_AA, y_UI(32)).DrawString(-1, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-							x1 + y_UI(64), y1 + y_UI(64) + y_UI(32 * i), White, Black, m);
+						for (auto& m : this->m_MsgString) {
+							if (m == "") { continue; }
+							int i = static_cast<int>(&m - &this->m_MsgString.front());
+							Fonts->Get(FontPool::FontType::Nomal_AA, y_UI(32)).DrawString(-1, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+																						  x1 + y_UI(64), y1 + y_UI(64) + y_UI(32 * i), White, Black, m);
+						}
 					}
 				}
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+			}
+
+			if (this->m_CGFade > 1.f / 255.f) {
+				int x1 = y_UI(960 - 960 / 2);
+				int y1 = y_UI(400 - 540 / 2);
+				int x2 = y_UI(960 + 960 / 2);
+				int y2 = y_UI(400 + 540 / 2);
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * this->m_CGFade), 0, 255));
+				DrawBox(x1, y1, x2, y2, Gray50, TRUE);
+				m_CGGraph.DrawExtendGraph(x1, y1, x2, y2, false);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 		}

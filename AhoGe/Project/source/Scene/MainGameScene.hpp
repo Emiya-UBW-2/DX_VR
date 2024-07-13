@@ -14,6 +14,11 @@ namespace FPS_n2 {
 		{
 			const PlayerID				m_MyPlayerID{0};
 		private:
+			bool						m_IsPrologue{false};//シーン全体の終了フラグ
+			bool						m_IsGoodEnd{false};//シーン全体の終了フラグ
+
+			bool						m_IsBadEnd{false};//シーン全体の終了フラグ
+
 			bool						m_IsGoNext{ false };//次シーンに行くフラグ
 			bool						m_IsEnd{false};//シーン全体の終了フラグ
 			bool						m_IsPlayable{ false };//操作可能
@@ -23,13 +28,21 @@ namespace FPS_n2 {
 			//
 			std::string					m_MapName;
 			int							m_EntryID{};
+			int							m_CutSceneID{};//カットシーンID
+
+			int							m_BossID{};
+			int							m_WinCutSceneID{};//カットシーンID
 			//
 			std::pair<int, int>			m_PrevXY{};
 			//
+			bool						m_IsNormalBGM{false};
+			float						m_NormalBGM{0.f};
 			bool						m_IsCautionBGM{false};
 			float						m_CautionBGM{0.f};
 			bool						m_IsAlertBGM{false};
 			float						m_AlertBGM{0.f};
+
+			float						m_StartTime{0.f};
 		public:
 			MainGameScene(void) noexcept { Set3DActive(false); }
 			MainGameScene(const MainGameScene&) = delete;

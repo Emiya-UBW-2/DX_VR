@@ -7,11 +7,13 @@ namespace FPS_n2 {
 		enum class EventType {
 			Entry,
 			CutScene,
+			Boss,
 			Max,
 		};
 		static const char* g_EventStr[static_cast<int>(EventType::Max)] = {
 			"Entry",
 			"CutScene",
+			"Boss",
 		};
 
 
@@ -211,6 +213,9 @@ namespace FPS_n2 {
 				int					m_EntryID{};//行先マップのイベントID
 				//カットシーン用設定
 				int					m_CutSceneID{};//カットシーンID
+				int					m_ActiveDelaySec{};
+				//
+				int					m_WinCutSceneID{};//カットシーンID
 			};
 		private:
 			int									m_Xsize{};
@@ -233,8 +238,10 @@ namespace FPS_n2 {
 			GraphHandle							m_PointShadowHandle;
 			GraphHandle							m_AmbientShadowHandle;
 			int									m_GetMapTextID{};
+			float								m_CamScale{1.f};
 		public:
 			const auto&		GetMapTextID(void) const noexcept { return this->m_GetMapTextID; }
+			const auto&		GetCamScale(void) const noexcept { return this->m_CamScale; }
 			const auto&		GetShadowGraph(void) const noexcept { return this->m_PointShadowHandle; }
 			const auto&		GetAmbientLightVec(void) const noexcept { return this->m_AmbientLightVec; }
 			const auto&		GetPlayerSpawn(void) const noexcept { return this->m_PlayerSpawn; }

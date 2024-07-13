@@ -100,7 +100,7 @@ namespace FPS_n2 {
 			Base2DObject() noexcept {}
 			virtual ~Base2DObject() noexcept {}
 		public:
-			void			Init(void) noexcept { Init_Sub(); }
+			void			Init(void) noexcept { Init_Sub(); m_IsFirstLoop = true; }
 			void			Execute(void) noexcept;
 			void			ExecuteAfter(void) noexcept;
 			void			DrawShadow(void) noexcept { DrawShadow_Sub(); }

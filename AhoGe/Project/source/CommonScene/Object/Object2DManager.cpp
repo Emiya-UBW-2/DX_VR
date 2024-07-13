@@ -9,16 +9,12 @@ namespace FPS_n2 {
 			this->m_Object.back() = NewObj;
 			this->m_Object.back()->SetObjectID(this->m_LastUniqueID);
 			this->m_Object.back()->Init();
-			this->m_LastUniqueID = 0;
+			this->m_LastUniqueID++;
 		}
-		SharedObj2D* Object2DManager::GetObj(int ModelType, int num) noexcept {
-			int cnt = 0;
+		SharedObj2D* Object2DManager::GetObj(int ID) noexcept {
 			for (auto& o : this->m_Object) {
-				if (o->GetObjType() == ModelType) {
-					if (cnt == num) {
-						return &o;
-					}
-					cnt++;
+				if (o->GetObjectID() == ID) {
+					return &o;
 				}
 			}
 			return nullptr;
@@ -62,9 +58,7 @@ namespace FPS_n2 {
 						o->SetPos(o->GetPos() - vec.normalized() * (Mag - Len) * Per);
 						ptr->SetPos(ptr->GetPos() + vec.normalized() * (Mag - Len) * (1.f - Per));
 					}
-					if (!ptr_p) {
-						ptr->SetHitObjectID(o->GetObjectID());
-					}
+					ptr->SetHitObjectID(o->GetObjectID());
 					if (!o_p) {
 						o->SetHitObjectID(ptr->GetObjectID());
 					}

@@ -21,12 +21,57 @@ namespace FPS_n2 {
 			void			AddCharacter(PlayerID value) noexcept;
 			void			DelCharacter(PlayerID value) noexcept;
 		};
+		//
+		enum class EffectType {
+			Damage,
+			Guard,
+			WallHit,
+		};
+		class Effect2DControl : public SingletonBase<Effect2DControl> {
+		private:
+			friend class SingletonBase<Effect2DControl>;
+		private:
+			struct GuardPos {
+				Vector3DX					m_Pos{};
+				float						m_Per{};
+				float						m_PerMax{};
+				EffectType					m_EffectType{};
+			};
+		private:
+			std::array<GuardPos, 8>		m_GuardPos;
+			int							m_GuardPosNum{};
+		private:
+			Effect2DControl(void) {}
+			Effect2DControl(const Effect2DControl&) = delete;
+			Effect2DControl(Effect2DControl&& o) = delete;
+			Effect2DControl& operator=(const Effect2DControl&) = delete;
+			Effect2DControl& operator=(Effect2DControl&& o) = delete;
+		public:
+			void			Set(const Vector3DX& Pos2D, EffectType Type,float Per) noexcept {
+				m_GuardPos.at(m_GuardPosNum).m_Pos = Pos2D;
+				m_GuardPos.at(m_GuardPosNum).m_EffectType = Type;
+				m_GuardPos.at(m_GuardPosNum).m_Per = Per;
+				m_GuardPos.at(m_GuardPosNum).m_PerMax = Per;
+				++m_GuardPosNum %= static_cast<int>(m_GuardPos.size());
+			}
+		public:
+			void			Init() noexcept;
+			void			Update() noexcept;
+			void			Draw() noexcept;
+		};
 		// 
 		class Cam2DControl : public SingletonBase<Cam2DControl> {
 		private:
 			friend class SingletonBase<Cam2DControl>;
 		private:
 			Vector3DX	m_Pos{};
+			//カメラシェイク
+			bool						m_SendCamShake{false};
+			float						m_SendCamShakeTime{1.f};
+			float						m_SendCamShakePower{1.f};
+			float						m_CamShake{0.f};
+			Vector3DX					m_CamShake1;
+			Vector3DX					m_CamShake2;
 		private:
 			Cam2DControl(void) {}
 			Cam2DControl(const Cam2DControl&) = delete;
@@ -34,14 +79,32 @@ namespace FPS_n2 {
 			Cam2DControl& operator=(const Cam2DControl&) = delete;
 			Cam2DControl& operator=(Cam2DControl&& o) = delete;
 		public:
-			const auto& GetCamPos(void) const noexcept { return this->m_Pos; }
+			const auto GetCamPos(void) const noexcept { return this->m_Pos+this->m_CamShake2; }
 		public:
-			void			SetCamPos(const Vector3DX& Pos) noexcept { this->m_Pos = Pos; }
+			void			SetCamPos(const Vector3DX& Pos) noexcept {
+				float z = this->m_Pos.z;
+				this->m_Pos = Pos;
+				this->m_Pos.z = z;
+			}
 			void			SetCamAim(const Vector3DX& Pos) noexcept {
 				float z = this->m_Pos.z;
 				Easing(&this->m_Pos, Pos, 0.9f, EasingType::OutExpo);
 				this->m_Pos.z = z;
 			}
+			void			SetCamRangePos(float Z) noexcept {
+				this->m_Pos.z = Z;
+			}
+			void			SetCamRangeAim(float Z) noexcept {
+				Easing(&this->m_Pos.z, Z, 0.9f, EasingType::OutExpo);
+			}
+		public:
+			void			UpdateShake() noexcept;
+			void			SetCamShake(float time, float power) noexcept {
+				this->m_SendCamShake = true;
+				this->m_SendCamShakeTime = time;
+				this->m_SendCamShakePower = power;
+			}
+			const auto&		GetCamShake(void) const noexcept { return m_CamShake2; }
 		};
 		// 空間上から画面上への変換
 		extern inline void Convert2DtoDisp(const Vector3DX& Pos2D, Vector3DX* pRet) noexcept;

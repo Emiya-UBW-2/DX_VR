@@ -5,34 +5,46 @@
 
 const FPS_n2::Sceneclass::CommonBattleResource* SingletonBase<FPS_n2::Sceneclass::CommonBattleResource>::m_Singleton = nullptr;
 const FPS_n2::Sceneclass::Cam2DControl* SingletonBase<FPS_n2::Sceneclass::Cam2DControl>::m_Singleton = nullptr;
+const FPS_n2::Sceneclass::Effect2DControl* SingletonBase<FPS_n2::Sceneclass::Effect2DControl>::m_Singleton = nullptr;
 
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			CommonBattleResource::Load(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			SE->Add(static_cast<int>(SoundEnum::RunFoot), 6, "data/Sound/SE/move/runfoot.wav", false);
+			SE->Add(static_cast<int>(SoundEnum::Shot1), 6, "data/Sound/SE/move/shot1.wav", false);
+			SE->Add(static_cast<int>(SoundEnum::Shot2), 6, "data/Sound/SE/move/shot2.wav", false);
+			SE->Add(static_cast<int>(SoundEnum::Shot3), 6, "data/Sound/SE/move/shot3.wav", false);
+			SE->Add(static_cast<int>(SoundEnum::Bomb), 1, "data/Sound/SE/move/bomb.wav", false);
+			SE->Add(static_cast<int>(SoundEnum::Hit), 6, "data/Sound/SE/move/hit.wav", false);
+			SE->Add(static_cast<int>(SoundEnum::Guard), 6, "data/Sound/SE/move/guard.wav", false);
 			SE->Add(static_cast<int>(SoundEnum::Normal), 2, "data/Sound/SE/Normal.wav", false);
-			SE->Add(static_cast<int>(SoundEnum::CountDown), 2, "data/Sound/SE/CountDown.wav", false);
-			SE->Add(static_cast<int>(SoundEnum::Second), 1, "data/Sound/SE/second.wav", false);
-			SE->Add(static_cast<int>(SoundEnum::OneMunute), 1, "data/Sound/SE/OneMinute.wav", false);
-			SE->Add(static_cast<int>(SoundEnum::TimeUp), 1, "data/Sound/SE/TimeUp.wav", false);
 		}
 		void			CommonBattleResource::Set(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* OptionParts = OPTION::Instance();
 			SE->Get(static_cast<int>(SoundEnum::RunFoot)).SetVol_Local(128);
-			SE->Get(static_cast<int>(SoundEnum::CountDown)).SetVol_Local(128);
+			SE->Get(static_cast<int>(SoundEnum::Normal)).SetVol_Local(128);
+
+			SE->Get(static_cast<int>(SoundEnum::Shot1)).SetVol_Local(64);
+			SE->Get(static_cast<int>(SoundEnum::Shot2)).SetVol_Local(64);
+			SE->Get(static_cast<int>(SoundEnum::Shot3)).SetVol_Local(64);
+			SE->Get(static_cast<int>(SoundEnum::Bomb)).SetVol_Local(64);
+			SE->Get(static_cast<int>(SoundEnum::Hit)).SetVol_Local(64);
+			SE->Get(static_cast<int>(SoundEnum::Guard)).SetVol_Local(64);
 
 			SE->SetVol(OptionParts->GetParamFloat(EnumSaveParam::SE));
 		}
 		void			CommonBattleResource::Dispose(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			SE->Delete(static_cast<int>(SoundEnum::RunFoot));
+			SE->Delete(static_cast<int>(SoundEnum::Shot1));
+			SE->Delete(static_cast<int>(SoundEnum::Shot2));
+			SE->Delete(static_cast<int>(SoundEnum::Shot3));
+			SE->Delete(static_cast<int>(SoundEnum::Bomb));
+			SE->Delete(static_cast<int>(SoundEnum::Hit));
+			SE->Delete(static_cast<int>(SoundEnum::Guard));
 			SE->Delete(static_cast<int>(SoundEnum::Normal));
-			SE->Delete(static_cast<int>(SoundEnum::CountDown));
-			SE->Delete(static_cast<int>(SoundEnum::Second));
-			SE->Delete(static_cast<int>(SoundEnum::OneMunute));
-			SE->Delete(static_cast<int>(SoundEnum::TimeUp));
 		}
 		void CommonBattleResource::AddCharacter(PlayerID value) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
@@ -56,11 +68,25 @@ namespace FPS_n2 {
 			p->GetAI()->Dispose();
 			p->Dispose();
 		}
+		//
+		void Cam2DControl::UpdateShake() noexcept {
+			auto* DrawParts = DXDraw::Instance();
+			if (m_SendCamShakeTime > 0.f) {
+				if (m_SendCamShake) {
+					m_SendCamShake = false;
+					this->m_CamShake = m_SendCamShakeTime;
+				}
+				auto RandRange = this->m_CamShake / m_SendCamShakeTime * m_SendCamShakePower;
+				Easing(&this->m_CamShake1, Vector3DX::vget(GetRandf(RandRange), GetRandf(RandRange), 0.f), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_CamShake2, this->m_CamShake1, 0.8f, EasingType::OutExpo);
+				this->m_CamShake = std::max(this->m_CamShake - 1.f / DrawParts->GetFps(), 0.f);
+			}
+		}
 		// 
 		void Convert2DtoDisp(const Vector3DX& Pos2D, Vector3DX* pRet) noexcept {
 			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
-			pRet->x = static_cast<float>(y_r(1920 / 2 + (1080 / 2) * (Pos2D.x - CamPos.x) / Base_CamScale));
-			pRet->y = static_cast<float>(y_r(1080 / 2 - (1080 / 2) * (Pos2D.y - CamPos.y) / Base_CamScale));
+			pRet->x = static_cast<float>(y_r(1920 / 2 + (1080 / 2) * (Pos2D.x - CamPos.x) * CamPos.z / Base_CamScale));
+			pRet->y = static_cast<float>(y_r(1080 / 2 - (1080 / 2) * (Pos2D.y - CamPos.y) * CamPos.z / Base_CamScale));
 			pRet->z = Pos2D.z;
 		}
 
@@ -76,7 +102,45 @@ namespace FPS_n2 {
 		}
 		// 画面上のタイルごとのサイズを取得(タイルvalue個ぶん)
 		int GetDispSize(float value) noexcept {
-			return y_r(value * Tile_DispSize);
+			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
+			return y_r(value * Tile_DispSize * CamPos.z);
+		}
+		void Effect2DControl::Init() noexcept {
+			for (auto& g : m_GuardPos) {
+				g.m_Per = 0.f;
+			}
+			m_GuardPosNum = 0;
+		}
+		void Effect2DControl::Update() noexcept {
+			auto* DrawParts = DXDraw::Instance();
+			for (auto& g : m_GuardPos) {
+				g.m_Per = std::max(g.m_Per - 1.f / DrawParts->GetFps() / 0.5f, 0.f);
+			}
+		}
+		void Effect2DControl::Draw() noexcept {
+			float Radius = static_cast<float>(GetDispSize(5.f));
+			Vector3DX DispPos;
+			for (auto& g : m_GuardPos) {
+				if (g.m_Per <= 0.f) { continue; }
+				Convert2DtoDisp(g.m_Pos, &DispPos);
+				switch (g.m_EffectType) {
+					case EffectType::Damage:
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(128.f * (g.m_Per / g.m_PerMax)), 0, 255));
+						DrawCircleAA(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), static_cast<int>(Radius * g.m_PerMax * std::pow(1.f - (g.m_Per / g.m_PerMax), 0.5f)), 8, GetColor(192, 0, 0), TRUE, 1.f, static_cast<double>(deg2rad(360.f*g.m_Per)));
+						break;
+					case EffectType::Guard:
+						SetDrawBlendMode(DX_BLENDMODE_ADD, std::clamp(static_cast<int>(128.f * (g.m_Per / g.m_PerMax)), 0, 255));
+						DrawCircle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), static_cast<int>(Radius * g.m_PerMax * std::pow(1.f - (g.m_Per / g.m_PerMax), 0.5f)), GetColor(150, 150, 255));
+						break;
+					case EffectType::WallHit:
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(128.f * (g.m_Per / g.m_PerMax)), 0, 255));
+						DrawCircleAA(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), static_cast<int>(Radius * g.m_PerMax * std::pow(1.f - (g.m_Per / g.m_PerMax), 0.5f)), 5, GetColor(255, 192, 0), TRUE, 1.f, static_cast<double>(deg2rad(360.f*g.m_Per)));
+						break;
+					default:
+						break;
+				}
+			}
+			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 		}
 	};
 };

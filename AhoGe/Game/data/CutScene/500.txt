@@ -1,0 +1,17 @@
+000_Type=CG
+000_CG=000
+001_Type=MsgBox
+    Name=4000
+    Msg=4500
+002_Type=MsgBox
+    Name=4000
+    Msg=4501
+003_Type=MsgBox
+    Name=4000
+    Msg=4502
+004_Type=MsgBox
+    Name=4000
+    Msg=4503
+000_Type=CG
+005_CG=-1
+999_Type=End

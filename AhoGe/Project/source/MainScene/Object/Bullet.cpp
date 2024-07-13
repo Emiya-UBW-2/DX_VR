@@ -12,6 +12,7 @@ namespace FPS_n2 {
 		}
 		void BulletObject::Execute_OnHitWall(void) noexcept {
 			SetDelete();
+			Effect2DControl::Instance()->Set(GetPos(), EffectType::WallHit, 0.5f);
 		}
 		// 
 		void BulletObject::Init_Sub(void) noexcept {
@@ -28,7 +29,9 @@ namespace FPS_n2 {
 			auto* BackGround = BackGroundClassBase::Instance();
 			Vector3DX DispPos;
 			Convert2DtoDisp(GetPos(), &DispPos);
-			DispPos += BackGround->GetAmbientLightVec() * 0.25f;
+			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
+
+			DispPos += BackGround->GetAmbientLightVec() * 0.25f*CamPos.z;
 			DrawCircle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), static_cast<int>(Radius), Black);
 		}
 		void BulletObject::Draw_Sub(void) noexcept {

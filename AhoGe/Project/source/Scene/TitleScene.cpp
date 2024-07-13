@@ -8,7 +8,7 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			TitleScene::Set_Sub(void) noexcept {
-			// auto* BGM = BGMPool::Instance();
+			auto* BGM = BGMPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
 			this->m_GameFadeIn = 1.f;
@@ -33,12 +33,13 @@ namespace FPS_n2 {
 			this->m_CreditControl = std::make_unique<CreditControl>();
 			this->m_CreditControl->Init();
 			// 
-			/*
-			if (!BGM->Get(2).Check()) {
-				BGM->Get(2).Play(DX_PLAYTYPE_LOOP, TRUE);
+			//*
+			if (!BGM->Get(0).Check()) {
+				BGM->Get(0).Play(DX_PLAYTYPE_LOOP, TRUE);
 			}
-			BGM->Get(2).SetVol_Local(255);
+			BGM->Get(0).SetVol_Local(255);
 			// */
+			m_CloseResetSave = false;
 		}
 		bool			TitleScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
@@ -69,8 +70,41 @@ namespace FPS_n2 {
 				if (ButtonParts->GetTriggerButton()) {
 					switch (ButtonParts->GetSelect()) {
 						case 0:
-						case 1:
 							this->m_GameStart += 0.0001f;
+							break;
+						case 1:
+							PopUpParts->Add(LocalizeParts->Get(3100), y_UI(480), y_UI(240),
+											[&](int xmin, int ymin, int xmax, int ymax, bool) {
+												auto* LocalizeParts = LocalizePool::Instance();
+												int xp1, yp1;
+												//ƒ^ƒCƒgƒ‹
+												{
+													xp1 = xmin + y_UI(24);
+													yp1 = ymin + LineHeight;
+
+													WindowSystem::SetMsgWW(xp1, yp1, xp1, yp1 + LineHeight, LineHeight, FontHandle::FontXCenter::LEFT, White, Black, LocalizeParts->Get(3101));
+												}
+												//
+												{
+													xp1 = (xmax + xmin) / 2 - y_UI(54);
+													yp1 = ymax - LineHeight * 3;
+
+													auto* Pad = PadControl::Instance();
+													bool ret = WindowSystem::SetMsgClickBox(xp1, yp1, xp1 + y_UI(108), yp1 + LineHeight * 2, Gray15, LocalizeParts->Get(3102));
+													if (Pad->GetKey(PADS::INTERACT).trigger() || ret) {
+														auto* SaveDataParts = SaveDataClass::Instance();
+														SaveDataParts->Reset();
+														SaveDataParts->Save();
+														auto* DrawParts = DXDraw::Instance();
+														DrawParts->SetPause(false);
+														m_CloseResetSave = true;
+													}
+												}
+											},
+											[&]() {},
+												[&]() {},
+												true
+												);
 							break;
 						case 2:
 							OptionWindowClass::Instance()->SetActive();
@@ -91,6 +125,10 @@ namespace FPS_n2 {
 					SE->Get(static_cast<int>(SoundEnumCommon::UI_OK)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 				}
 			}
+			if (m_CloseResetSave && PopUpParts->IsActivePop()) {
+				m_CloseResetSave = false;
+				PopUpParts->EndAll();
+			}
 			// 
 			ButtonParts->Update();
 			// 
@@ -100,10 +138,10 @@ namespace FPS_n2 {
 		}
 		void			TitleScene::Dispose_Sub(void) noexcept {
 			auto* SaveDataParts = SaveDataClass::Instance();
-			// auto* BGM = BGMPool::Instance();
+			auto* BGM = BGMPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
-			// BGM->Get(2).Stop();
+			BGM->Get(0).Stop();
 			// 
 			this->m_CreditControl->Dispose();
 			this->m_CreditControl.reset();

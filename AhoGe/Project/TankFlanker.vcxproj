@@ -20,10 +20,10 @@
     <ClInclude Include="source\MainScene\MainSceneSub.hpp" />
     <ClInclude Include="source\MainScene\Object\Bullet.hpp" />
     <ClInclude Include="source\MainScene\Object\Character.hpp" />
+    <ClInclude Include="source\MainScene\Object\Metal.hpp" />
     <ClInclude Include="source\MainScene\Player\CPU.hpp" />
     <ClInclude Include="source\MainScene\Player\Player.hpp" />
     <ClInclude Include="source\Scene\MainGameScene.hpp" />
-    <ClInclude Include="source\Scene\TestGameScene.hpp" />
     <ClInclude Include="source\Scene\TitleScene.hpp" />
     <ClInclude Include="source\sub.hpp" />
   </ItemGroup>
@@ -36,10 +36,10 @@
     <ClCompile Include="source\MainScene\MainSceneSub.cpp" />
     <ClCompile Include="source\MainScene\Object\Bullet.cpp" />
     <ClCompile Include="source\MainScene\Object\Character.cpp" />
+    <ClCompile Include="source\MainScene\Object\Metal.cpp" />
     <ClCompile Include="source\MainScene\Player\CPU.cpp" />
     <ClCompile Include="source\MainScene\Player\Player.cpp" />
     <ClCompile Include="source\Scene\MainGameScene.cpp" />
-    <ClCompile Include="source\Scene\TestGameScene.cpp" />
     <ClCompile Include="source\Scene\TitleScene.cpp" />
     <ClCompile Include="source\sub.cpp" />
   </ItemGroup>

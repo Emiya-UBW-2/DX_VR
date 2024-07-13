@@ -24,6 +24,10 @@ namespace FPS_n2 {
 			float						m_GraphTimer{ 0.f };
 
 			float						m_RunFootPer{0.f};
+
+			HitPoint					m_HitPoint{0};
+
+			float						m_ShootTimer{1.f};
 		public:
 			CharacterObject(void) noexcept;
 			CharacterObject(const CharacterObject&) = delete;
@@ -37,12 +41,18 @@ namespace FPS_n2 {
 			void		SetPlayerID(PlayerID value) noexcept { this->m_PlayerID = value; }
 			void		SetViewRad(float value) noexcept { this->m_Rad = value; }
 			void		SetGraphTimer(float value) noexcept { this->m_GraphTimer = value; }
+			void		SetShootTimer(float value) noexcept { this->m_ShootTimer = value; }
+
+			const auto& GetHitPoint(void) const noexcept { return this->m_HitPoint; }
+			auto GetHitPointMax(void) const noexcept { return 3; }
 		public:
 			auto CanLookPlayer0(void) const noexcept { return this->m_Alpha > 0.5f; }
 			const auto& GetBodyRad(void) const noexcept { return this->m_Rad; }
 			const auto& GetViewRad(void) const noexcept { return this->m_Rad_R; }
 			auto GetSpeedPer(void) const noexcept { return this->m_Speed / this->m_SpeedLimit; }
 			const auto& GetGraphTimer(void) const noexcept { return this->m_GraphTimer; }
+		public:
+			void Execute_OnHitObject(void) noexcept override;
 		public:
 			void Init_Sub(void) noexcept override;
 			void Execute_Sub(void) noexcept override;

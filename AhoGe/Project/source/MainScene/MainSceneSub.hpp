@@ -23,15 +23,23 @@ namespace FPS_n2 {
 			GraphHandle					m_Watch;
 			GraphHandle					m_Caution;
 			GraphHandle					m_Alert;
+			GraphHandle					m_Goal;
 
 			float						m_MapDrawTime{ 0.f };
 			float						m_MapDrawPer{ 0.f };
 			int							m_MapTextID{ 0 };
+
+			Vector3DX					m_GoalPos;
+			float						m_StartTime{0.f};
 		private:
 			void			DrawCharaUI_Back(PlayerID value) noexcept;
 			void			DrawCharaUI_Front(PlayerID value) noexcept;
 		protected:
-			void			SetMapTextID(int value) noexcept { this->m_MapTextID = value; }
+			void			SetMap(int value, const Vector3DX& GoalPos) noexcept {
+				this->m_MapTextID = value;
+				this->m_GoalPos = GoalPos;
+			}
+			void			SetStartTime(float value) noexcept { this->m_StartTime = value; }
 		public:
 			InGameUIControl(void) {}
 			InGameUIControl(const InGameUIControl&) = delete;
@@ -53,6 +61,7 @@ namespace FPS_n2 {
 			MsgBox,
 			ViewPoint,
 			WaitMilSec,
+			CG,
 			End,
 			Max,
 		};
@@ -60,6 +69,7 @@ namespace FPS_n2 {
 			"MsgBox",
 			"ViewPoint",
 			"WaitMilSec",
+			"CG",
 			"End",
 		};
 
@@ -71,6 +81,7 @@ namespace FPS_n2 {
 				int m_PointX{};
 				int m_PointY{};
 				int m_WatiMS{};
+				int m_CGSel{};
 			};
 		private:
 			bool						m_IsCutScene{ false };//カットシーン中フラグ
@@ -87,6 +98,9 @@ namespace FPS_n2 {
 			int							m_PointX{};
 			int							m_PointY{};
 			float						m_WaitMS{ 0.f };
+			int							m_CGSel{-1};
+			float						m_CGFade{0.f};
+			GraphHandle					m_CGGraph;
 		protected:
 			const auto& IsCutScene(void) const noexcept { return this->m_IsCutScene; }
 			const auto& GetAddViewPointX(void) const noexcept { return this->m_PointX; }

@@ -29,7 +29,7 @@ namespace FPS_n2 {
 			}
 		public:
 			void			AddObject(const SharedObj2D& NewObj) noexcept;
-			SharedObj2D* 	GetObj(int ModelType, int num) noexcept;
+			SharedObj2D* 	GetObj(int ID) noexcept;
 			void			DelObj(const SharedObj2D& ptr) noexcept;
 
 		public:

@@ -275,6 +275,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& Chara = PlayerMngr->GetPlayer((PlayerID)this->m_MyCharaID)->GetChara();
 				auto& Target = PlayerMngr->GetPlayer((PlayerID)this->m_TargetCharaID)->GetChara();
+				if (!Target) { return false; }
 				if (Chara->CanLookPlayer0()) {
 					if (this->m_TargetDistance < Get2DSize(15.f)) {
 						Vector3DX Vec;Vec.Set(std::sin(Chara->GetViewRad()), std::cos(Chara->GetViewRad()), 0.f);
@@ -335,6 +336,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& Chara = PlayerMngr->GetPlayer((PlayerID)this->m_MyCharaID)->GetChara();
 				auto& Target = PlayerMngr->GetPlayer((PlayerID)this->m_TargetCharaID)->GetChara();
+				if (!Target) { return; }
 				this->m_TargetDistance = (Chara->GetPos() - Target->GetPos()).magnitude();
 				// ‰Šú‰»
 				this->m_MyInput.ResetAllInput();
@@ -343,13 +345,15 @@ namespace FPS_n2 {
 				if (this->m_Phase == ENUM_AI_PHASE::Normal) {
 					for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
 						auto& p = PlayerMngr->GetPlayer((PlayerID)i);
-						if (i != this->m_MyCharaID && i != this->m_TargetCharaID) {
-							if (p->GetAI()->IsAlert()) {
-								float Len = Get2DSize(10.f);
-								auto Vec = p->GetChara()->GetPos() - Chara->GetPos();
-								if (Vec.sqrMagnitude() < Len * Len) {
-									ChangeAlertPhase();
-									break;
+						if (p->GetChara()) {
+							if (i != this->m_MyCharaID && i != this->m_TargetCharaID) {
+								if (p->GetAI()->IsAlert()) {
+									float Len = Get2DSize(10.f);
+									auto Vec = p->GetChara()->GetPos() - Chara->GetPos();
+									if (Vec.sqrMagnitude() < Len * Len) {
+										ChangeAlertPhase();
+										break;
+									}
 								}
 							}
 						}
@@ -376,6 +380,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& Chara = PlayerMngr->GetPlayer((PlayerID)this->m_MyCharaID)->GetChara();
 				auto& Target = PlayerMngr->GetPlayer((PlayerID)this->m_TargetCharaID)->GetChara();
+				if (!Target) { return; }
 				// ’Tõ
 				{
 					this->m_LastFindPos = this->m_PathChecker.CalcNextPosition(Chara->GetPos());
@@ -409,6 +414,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& Chara = PlayerMngr->GetPlayer((PlayerID)this->m_MyCharaID)->GetChara();
 				auto& Target = PlayerMngr->GetPlayer((PlayerID)this->m_TargetCharaID)->GetChara();
+				if (!Target) { return; }
 				//
 				Vector3DX GoingPoint = this->m_LastFindPos;
 				// 
@@ -449,6 +455,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& Chara = PlayerMngr->GetPlayer((PlayerID)this->m_MyCharaID)->GetChara();
 				auto& Target = PlayerMngr->GetPlayer((PlayerID)this->m_TargetCharaID)->GetChara();
+				if (!Target) { return; }
 				// ’Tõ
 				{
 					this->m_LastFindPos = this->m_PathChecker.CalcNextPosition(Chara->GetPos());
@@ -487,6 +494,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& Chara = PlayerMngr->GetPlayer((PlayerID)this->m_MyCharaID)->GetChara();
 				auto& Target = PlayerMngr->GetPlayer((PlayerID)this->m_TargetCharaID)->GetChara();
+				if (!Target) { return; }
 
 				// ’Tõ
 				if (this->m_TargetDistance > Get2DSize(8.5f)) {

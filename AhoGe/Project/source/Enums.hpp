@@ -10,12 +10,12 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		enum class SoundEnum {
 			RunFoot = static_cast<int>(SoundEnumCommon::Num),
-			// 
-			CountDown,
-			Second,
-			OneMunute,
-			TimeUp,
-
+			Shot1,
+			Shot2,
+			Shot3,
+			Hit,
+			Guard,
+			Bomb,
 			Normal,
 			// 
 		};
@@ -27,6 +27,7 @@ namespace FPS_n2 {
 		enum class Object2DType {
 			Human,
 			Bullet,
+			Metal,
 		};
 		constexpr float Tile_DispSize{ 48.f };
 		constexpr float Base_CamScale{ 64.f };//ãÛä‘è„ÇÃê∏ìx
