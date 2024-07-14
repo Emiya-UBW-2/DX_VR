@@ -159,8 +159,14 @@ namespace FPS_n2 {
 				if (Obj) {
 					auto& P = (std::shared_ptr<MetalObject>&)(*Obj);
 					P->SetCanMove(this->m_IsPlayable);
+					if (this->m_IsPlayable) {
+						P->SetColTarget(ColTarget::Object);
+					}
+					else {
+						P->SetColTarget(ColTarget::None);
+					}
 				}
-				else if(m_WinCutSceneID != INVALID_ID){
+				else if(m_WinCutSceneID != INVALID_ID && !m_IsBadEnd){
 					CutSceneControl::StartCutScene(m_WinCutSceneID);
 					m_WinCutSceneID = INVALID_ID;
 				}
@@ -185,10 +191,25 @@ namespace FPS_n2 {
 						}
 					}
 				}
+				if (m_BossID != INVALID_ID) {
+				}
 				if (this->m_IsAlertBGM) {
 					this->m_IsCautionBGM = false;
 				}
 				this->m_IsNormalBGM = !(this->m_IsCautionBGM || this->m_IsAlertBGM);
+
+				if (m_BossID != INVALID_ID) {
+					auto* Obj = Obj2DParts->GetObj(m_BossID);
+					if (Obj) {
+						this->m_IsAlertBGM = true;
+					}
+					else {
+						this->m_IsNormalBGM = false;
+						this->m_IsCautionBGM = false;
+						this->m_IsAlertBGM = false;
+					}
+				}
+
 				if (Prev && Prev != (this->m_IsCautionBGM || this->m_IsAlertBGM)) {
 					SE->Get(static_cast<int>(SoundEnum::Normal)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 				}

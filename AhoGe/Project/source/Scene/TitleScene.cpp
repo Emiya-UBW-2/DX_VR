@@ -21,7 +21,7 @@ namespace FPS_n2 {
 				"Let's Go!", 52, true,
 				1920 - 64 - 48, 1080 - 84 - 64 * 2, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 			ButtonParts->AddStringButton(
-				"Test Stage", 48, true,
+				"Reset SaveData", 48, true,
 				1920 - 64, 1080 - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 			ButtonParts->AddIconButton(
 				"data/UI/setting.png", true,
@@ -169,7 +169,7 @@ namespace FPS_n2 {
 			this->m_TitleImage.DrawExtendGraph(y_UI(64), y_UI(64), y_UI(64 + 369), y_UI(64 + 207), true);
 			// 
 			Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-																 y_UI(64 + 369), y_UI(64 + 207), White, Black, "Ver 1.0.0");
+																 y_UI(64 + 369), y_UI(64 + 207), White, Black, "Ver 1.0.1");
 			// 
 			ButtonParts->Draw();
 			// 
