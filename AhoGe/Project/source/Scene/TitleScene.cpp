@@ -34,10 +34,10 @@ namespace FPS_n2 {
 			this->m_CreditControl->Init();
 			// 
 			//*
-			if (!BGM->Get(0).Check()) {
-				BGM->Get(0).Play(DX_PLAYTYPE_LOOP, TRUE);
+			if (!BGM->Get(0)->Check()) {
+				BGM->Get(0)->Play(DX_PLAYTYPE_LOOP, TRUE);
 			}
-			BGM->Get(0).SetVol_Local(255);
+			BGM->Get(0)->SetVol_Local(255);
 			// */
 			m_CloseResetSave = false;
 		}
@@ -73,29 +73,28 @@ namespace FPS_n2 {
 							this->m_GameStart += 0.0001f;
 							break;
 						case 1:
-							PopUpParts->Add(LocalizeParts->Get(3100), y_UI(480), y_UI(240),
+							PopUpParts->Add(LocalizeParts->Get(3100), DrawParts->GetUIY(480), DrawParts->GetUIY(240),
 											[&](int xmin, int ymin, int xmax, int ymax, bool) {
 												auto* LocalizeParts = LocalizePool::Instance();
 												int xp1, yp1;
 												//ƒ^ƒCƒgƒ‹
 												{
-													xp1 = xmin + y_UI(24);
+													xp1 = xmin + DrawParts->GetUIY(24);
 													yp1 = ymin + LineHeight;
 
-													WindowSystem::SetMsgWW(xp1, yp1, xp1, yp1 + LineHeight, LineHeight, FontHandle::FontXCenter::LEFT, White, Black, LocalizeParts->Get(3101));
+													WindowSystem::SetMsgWW(xp1, yp1 + LineHeight/2, LineHeight, FontHandle::FontXCenter::LEFT, White, Black, LocalizeParts->Get(3101));
 												}
 												//
 												{
-													xp1 = (xmax + xmin) / 2 - y_UI(54);
+													xp1 = (xmax + xmin) / 2 - DrawParts->GetUIY(54);
 													yp1 = ymax - LineHeight * 3;
 
 													auto* Pad = PadControl::Instance();
-													bool ret = WindowSystem::SetMsgClickBox(xp1, yp1, xp1 + y_UI(108), yp1 + LineHeight * 2, Gray15, LocalizeParts->Get(3102));
+													bool ret = WindowSystem::SetMsgClickBox(xp1, yp1, xp1 + DrawParts->GetUIY(108), yp1 + LineHeight * 2, Gray15, LocalizeParts->Get(3102));
 													if (Pad->GetKey(PADS::INTERACT).trigger() || ret) {
 														auto* SaveDataParts = SaveDataClass::Instance();
 														SaveDataParts->Reset();
 														SaveDataParts->Save();
-														auto* DrawParts = DXDraw::Instance();
 														DrawParts->SetPause(false);
 														m_CloseResetSave = true;
 													}
@@ -110,7 +109,7 @@ namespace FPS_n2 {
 							OptionWindowClass::Instance()->SetActive();
 							break;
 						case 3:
-							PopUpParts->Add(LocalizeParts->Get(120), y_UI(720), y_UI(840),
+							PopUpParts->Add(LocalizeParts->Get(120), DrawParts->GetUIY(720), DrawParts->GetUIY(840),
 											[&](int xmin, int ymin, int xmax, int, bool) {
 												this->m_CreditControl->Draw(xmin, ymin, xmax);
 											},
@@ -141,7 +140,7 @@ namespace FPS_n2 {
 			auto* BGM = BGMPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
-			BGM->Get(0).Stop();
+			BGM->Get(0)->Stop();
 			// 
 			this->m_CreditControl->Dispose();
 			this->m_CreditControl.reset();
@@ -156,34 +155,36 @@ namespace FPS_n2 {
 		}
 		// 
 		void			TitleScene::MainDraw_Sub(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			// ”wŒi
-			DrawBox(0, 0, y_r(1920), y_r(1080), Gray75, TRUE);
+			DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Gray75, TRUE);
 			// •`‰æ
 		}
 		void			TitleScene::DrawUI_Base_Sub(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto* Fonts = FontPool::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
-			this->m_TitleImage.DrawExtendGraph(y_UI(64), y_UI(64), y_UI(64 + 369), y_UI(64 + 207), true);
+			this->m_TitleImage.DrawExtendGraph(DrawParts->GetUIY(64), DrawParts->GetUIY(64), DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), true);
 			// 
-			Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-																 y_UI(64 + 369), y_UI(64 + 207), White, Black, "Ver 1.0.1");
+			Fonts->Get(FontPool::FontType::Nomal_Edge)->DrawString(DrawParts->GetUIY(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
+																 DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), White, Black, "Ver 1.0.1");
 			// 
 			ButtonParts->Draw();
 			// 
 			if ((ButtonParts->GetSelect() != INVALID_ID) && !PopUpParts->IsActivePop()) {
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-																	 y_UI(32), y_UI(1080 - 32 - 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
+				Fonts->Get(FontPool::FontType::Nomal_Edge)->DrawString(DrawParts->GetUIY(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+																	 DrawParts->GetUIY(32), DrawParts->GetUIY(1080 - 32 - 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
 			}
 			// 
 			{
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameFadeIn, 0.f, 1.f)), 0, 255));
-				DrawBox(0, 0, y_r(1920), y_r(1080), Black, TRUE);
+				DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Black, TRUE);
 
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameStart, 0.f, 1.f)), 0, 255));
-				DrawBox(0, 0, y_r(1920), y_r(1080), White, TRUE);
+				DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), White, TRUE);
 
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}

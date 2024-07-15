@@ -68,25 +68,16 @@ namespace FPS_n2 {
 			p->GetAI()->Dispose();
 			p->Dispose();
 		}
-		//
-		void Cam2DControl::UpdateShake() noexcept {
-			auto* DrawParts = DXDraw::Instance();
-			if (m_SendCamShakeTime > 0.f) {
-				if (m_SendCamShake) {
-					m_SendCamShake = false;
-					this->m_CamShake = m_SendCamShakeTime;
-				}
-				auto RandRange = this->m_CamShake / m_SendCamShakeTime * m_SendCamShakePower;
-				Easing(&this->m_CamShake1, Vector3DX::vget(GetRandf(RandRange), GetRandf(RandRange), 0.f), 0.8f, EasingType::OutExpo);
-				Easing(&this->m_CamShake2, this->m_CamShake1, 0.8f, EasingType::OutExpo);
-				this->m_CamShake = std::max(this->m_CamShake - 1.f / DrawParts->GetFps(), 0.f);
-			}
+		const Vector3DX Cam2DControl::GetCamPos(void) const noexcept {
+			auto Shake = CameraShake::Instance()->GetCamShake();Shake.z = 0.f;
+			return this->m_Pos + Shake;
 		}
 		// 
 		void Convert2DtoDisp(const Vector3DX& Pos2D, Vector3DX* pRet) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
-			pRet->x = static_cast<float>(y_r(1920 / 2 + (1080 / 2) * (Pos2D.x - CamPos.x) * CamPos.z / Base_CamScale));
-			pRet->y = static_cast<float>(y_r(1080 / 2 - (1080 / 2) * (Pos2D.y - CamPos.y) * CamPos.z / Base_CamScale));
+			pRet->x = static_cast<float>(DrawParts->GetScreenY(static_cast<int>(1920 / 2 + (1080 / 2) * (Pos2D.x - CamPos.x) * CamPos.z / Base_CamScale)));
+			pRet->y = static_cast<float>(DrawParts->GetScreenY(static_cast<int>(1080 / 2 - (1080 / 2) * (Pos2D.y - CamPos.y) * CamPos.z / Base_CamScale)));
 			pRet->z = Pos2D.z;
 		}
 
@@ -102,8 +93,9 @@ namespace FPS_n2 {
 		}
 		// 画面上のタイルごとのサイズを取得(タイルvalue個ぶん)
 		int GetDispSize(float value) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
-			return y_r(value * Tile_DispSize * CamPos.z);
+			return DrawParts->GetScreenY(static_cast<int>(value * Tile_DispSize * CamPos.z));
 		}
 		void Effect2DControl::Init() noexcept {
 			for (auto& g : m_GuardPos) {
@@ -126,7 +118,7 @@ namespace FPS_n2 {
 				switch (g.m_EffectType) {
 					case EffectType::Damage:
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(128.f * (g.m_Per / g.m_PerMax)), 0, 255));
-						DrawCircleAA(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), static_cast<int>(Radius * g.m_PerMax * std::pow(1.f - (g.m_Per / g.m_PerMax), 0.5f)), 8, GetColor(192, 0, 0), TRUE, 1.f, static_cast<double>(deg2rad(360.f*g.m_Per)));
+						DrawCircleAA(DispPos.x, DispPos.y, Radius * g.m_PerMax * std::pow(1.f - (g.m_Per / g.m_PerMax), 0.5f), 8, GetColor(192, 0, 0), TRUE, 1.f, static_cast<double>(deg2rad(360.f*g.m_Per)));
 						break;
 					case EffectType::Guard:
 						SetDrawBlendMode(DX_BLENDMODE_ADD, std::clamp(static_cast<int>(128.f * (g.m_Per / g.m_PerMax)), 0, 255));
@@ -134,7 +126,7 @@ namespace FPS_n2 {
 						break;
 					case EffectType::WallHit:
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(128.f * (g.m_Per / g.m_PerMax)), 0, 255));
-						DrawCircleAA(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), static_cast<int>(Radius * g.m_PerMax * std::pow(1.f - (g.m_Per / g.m_PerMax), 0.5f)), 5, GetColor(255, 192, 0), TRUE, 1.f, static_cast<double>(deg2rad(360.f*g.m_Per)));
+						DrawCircleAA(DispPos.x, DispPos.y, Radius * g.m_PerMax * std::pow(1.f - (g.m_Per / g.m_PerMax), 0.5f), 5, GetColor(255, 192, 0), TRUE, 1.f, static_cast<double>(deg2rad(360.f*g.m_Per)));
 						break;
 					default:
 						break;

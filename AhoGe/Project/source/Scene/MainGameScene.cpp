@@ -217,19 +217,19 @@ namespace FPS_n2 {
 				if (this->m_IsNormalBGM) {
 					if (this->m_NormalBGM < 1.f) {
 						this->m_NormalBGM = 1.f;
-						BGM->Get(1).Play(DX_PLAYTYPE_LOOP, TRUE);
-						BGM->Get(1).SetVol_Local(static_cast<int>(255 * this->m_NormalBGM));
+						BGM->Get(1)->Play(DX_PLAYTYPE_LOOP, TRUE);
+						BGM->Get(1)->SetVol_Local(static_cast<int>(255 * this->m_NormalBGM));
 					}
 				}
 				else {
 					bool IsPlay = (this->m_NormalBGM > 0.f);
 					this->m_NormalBGM = std::max(this->m_NormalBGM - 1.f / DrawParts->GetFps(), 0.f);
 					if (this->m_NormalBGM > 0.f) {
-						BGM->Get(1).SetVol_Local(static_cast<int>(255 * this->m_NormalBGM));
+						BGM->Get(1)->SetVol_Local(static_cast<int>(255 * this->m_NormalBGM));
 					}
 					else {
 						if (IsPlay) {
-							BGM->Get(1).Stop();
+							BGM->Get(1)->Stop();
 						}
 					}
 				}
@@ -237,19 +237,19 @@ namespace FPS_n2 {
 				if (this->m_IsCautionBGM) {
 					if (this->m_CautionBGM < 1.f) {
 						this->m_CautionBGM = 1.f;
-						BGM->Get(2).Play(DX_PLAYTYPE_LOOP, TRUE);
-						BGM->Get(2).SetVol_Local(static_cast<int>(255 * this->m_CautionBGM));
+						BGM->Get(2)->Play(DX_PLAYTYPE_LOOP, TRUE);
+						BGM->Get(2)->SetVol_Local(static_cast<int>(255 * this->m_CautionBGM));
 					}
 				}
 				else {
 					bool IsPlay = (this->m_CautionBGM > 0.f);
 					this->m_CautionBGM = std::max(this->m_CautionBGM - 1.f / DrawParts->GetFps(), 0.f);
 					if (this->m_CautionBGM > 0.f) {
-						BGM->Get(2).SetVol_Local(static_cast<int>(255 * this->m_CautionBGM));
+						BGM->Get(2)->SetVol_Local(static_cast<int>(255 * this->m_CautionBGM));
 					}
 					else {
 						if (IsPlay) {
-							BGM->Get(2).Stop();
+							BGM->Get(2)->Stop();
 						}
 					}
 				}
@@ -257,19 +257,19 @@ namespace FPS_n2 {
 				if (this->m_IsAlertBGM) {
 					if (this->m_AlertBGM < 1.f) {
 						this->m_AlertBGM = 1.f;
-						BGM->Get(3).Play(DX_PLAYTYPE_LOOP, TRUE);
-						BGM->Get(3).SetVol_Local(static_cast<int>(255 * this->m_AlertBGM));
+						BGM->Get(3)->Play(DX_PLAYTYPE_LOOP, TRUE);
+						BGM->Get(3)->SetVol_Local(static_cast<int>(255 * this->m_AlertBGM));
 					}
 				}
 				else {
 					bool IsPlay = (this->m_AlertBGM > 0.f);
 					this->m_AlertBGM = std::max(this->m_AlertBGM - 1.f / DrawParts->GetFps(), 0.f);
 					if (this->m_AlertBGM > 0.f) {
-						BGM->Get(3).SetVol_Local(static_cast<int>(255 * this->m_AlertBGM));
+						BGM->Get(3)->SetVol_Local(static_cast<int>(255 * this->m_AlertBGM));
 					}
 					else {
 						if (IsPlay) {
-							BGM->Get(3).Stop();
+							BGM->Get(3)->Stop();
 						}
 					}
 				}
@@ -407,7 +407,6 @@ namespace FPS_n2 {
 				Cam2D->SetCamAim(Chara->GetPos() + this->m_CamAddPosR);
 			}
 			Cam2D->SetCamRangeAim(BackGround->GetCamScale());
-			Cam2D->UpdateShake();
 			// 
 			if (Chara) {
 				BackGround->SetPointLight(Chara->GetPos());
@@ -443,7 +442,6 @@ namespace FPS_n2 {
 								//
 								if (e.m_EventType == EventType::CutScene) {
 									if (static_cast<int>(m_StartTime) > e.m_ActiveDelaySec) {
-										auto* SaveDataParts = SaveDataClass::Instance();
 										std::string SaveStr = "Cut_" + std::to_string(e.m_CutSceneID);
 										if (SaveDataParts->GetParam(SaveStr) == -1) {
 											SaveDataParts->SetParam(SaveStr, 0);
@@ -466,9 +464,9 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* ResourceParts = CommonBattleResource::Instance();
 			auto* BGM = BGMPool::Instance();
-			BGM->Get(1).Stop();
-			BGM->Get(2).Stop();
-			BGM->Get(3).Stop();
+			BGM->Get(1)->Stop();
+			BGM->Get(2)->Stop();
+			BGM->Get(3)->Stop();
 			// ÉäÉ\Å[ÉX
 			for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
 				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
@@ -502,6 +500,7 @@ namespace FPS_n2 {
 		}
 		//
 		void			MainGameScene::MainDraw_Sub(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto* BackGround = BackGroundClassBase::Instance();
 			auto* Obj2DParts = Object2DManager::Instance();
 			BackGround->Draw();
@@ -517,9 +516,9 @@ namespace FPS_n2 {
 					auto& P = (std::shared_ptr<MetalObject>&)(*Obj);
 					Vector3DX DispPos;
 					Convert2DtoDisp(P->GetPos(), &DispPos);
-					int xmin = y_r(-50);
-					int ymin = y_r(-50);
-					int xmax = y_r(50);
+					int xmin = DrawParts->GetScreenY(-50);
+					int ymin = DrawParts->GetScreenY(-50);
+					int xmax = DrawParts->GetScreenY(50);
 
 					int xper = xmin + (xmax - xmin) * P->GetHitPoint() / P->GetHitPointMax();
 					DrawLine(static_cast<int>(DispPos.x + xmin), static_cast<int>(DispPos.y + ymin), static_cast<int>(DispPos.x + xmax), static_cast<int>(DispPos.y + ymin), Gray75, 10);

@@ -107,22 +107,23 @@ namespace FPS_n2 {
 			FileRead_close(mdata);
 		}
 		void CreditControl::Draw(int xmin, int ymin, int xmax) const noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto* Fonts = FontPool::Instance();
 
 			int xp1, yp1;
 
-			xp1 = xmin + y_UI(24);
+			xp1 = xmin + DrawParts->GetUIY(24);
 			yp1 = ymin + LineHeight;
-			int Height = y_UI(12);
+			int Height = DrawParts->GetUIY(12);
 			for (auto& c : this->m_CreditStr) {
 				if (this->m_CreditCoulm >= (&c - &this->m_CreditStr.front())) { break; }
-				int xpos = xp1 + y_UI(6);
+				int xpos = xp1 + DrawParts->GetUIY(6);
 				int ypos = yp1 + Height / 2;
-				Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
+				Fonts->Get(FontPool::FontType::Gothic_Edge)->DrawString(Height, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
 																	 xpos, ypos, White, Black, c.first);
 
-				xpos = xmax - y_UI(24);
-				Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
+				xpos = xmax - DrawParts->GetUIY(24);
+				Fonts->Get(FontPool::FontType::Gothic_Edge)->DrawString(Height, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
 																	 xpos, ypos, White, Black, c.second);
 				yp1 += Height;
 			}

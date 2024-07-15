@@ -107,6 +107,7 @@ namespace FPS_n2 {
 			}
 		}
 		void InGameUIControl::DrawCharaUI_Front(PlayerID value) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& p = PlayerMngr->GetPlayer(value);
 			if (p->GetChara() && p->GetChara()->CanLookPlayer0()) {
@@ -126,35 +127,36 @@ namespace FPS_n2 {
 				}
 				Vector3DX DispPos;
 				Convert2DtoDisp(p->GetChara()->GetPos(), &DispPos);
-				int ShadowOfset = y_r(3);
-				float Scale = static_cast<float>(y_r(128)) / 128.0f * Per;
+				int ShadowOfset = DrawParts->GetScreenY(3);
+				float Scale = static_cast<float>(DrawParts->GetScreenY(128)) / 128.0f * Per;
 				if (p->GetAI()->IsAlert()) {
 					SetDrawBright(0, 0, 0);// 
-					this->m_Alert.DrawRotaGraph(static_cast<int>(DispPos.x) + ShadowOfset, static_cast<int>(DispPos.y) - y_r(32) + ShadowOfset, Scale, 0.f, true);
+					this->m_Alert.DrawRotaGraph(static_cast<int>(DispPos.x) + ShadowOfset, static_cast<int>(DispPos.y) - DrawParts->GetScreenY(32) + ShadowOfset, Scale, 0.f, true);
 					SetDrawBright(255, 0, 0);// 
-					this->m_Alert.DrawRotaGraph(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y) - y_r(32), Scale, 0.f, true);
+					this->m_Alert.DrawRotaGraph(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y) - DrawParts->GetScreenY(32), Scale, 0.f, true);
 				}
 				else if (p->GetAI()->IsCaution()) {
 					SetDrawBright(0, 0, 0);// 
-					this->m_Caution.DrawRotaGraph(static_cast<int>(DispPos.x) + ShadowOfset, static_cast<int>(DispPos.y) - y_r(32) + ShadowOfset, Scale, 0.f, true);
+					this->m_Caution.DrawRotaGraph(static_cast<int>(DispPos.x) + ShadowOfset, static_cast<int>(DispPos.y) - DrawParts->GetScreenY(32) + ShadowOfset, Scale, 0.f, true);
 					SetDrawBright(255, 255, 0);// 
-					this->m_Caution.DrawRotaGraph(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y) - y_r(32), Scale, 0.f, true);
+					this->m_Caution.DrawRotaGraph(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y) - DrawParts->GetScreenY(32), Scale, 0.f, true);
 				}
 				else {
 					SetDrawBright(0, 0, 0);// 
-					this->m_Caution.DrawRotaGraph(static_cast<int>(DispPos.x) + ShadowOfset, static_cast<int>(DispPos.y) - y_r(32) + ShadowOfset, Scale, 0.f, true);
+					this->m_Caution.DrawRotaGraph(static_cast<int>(DispPos.x) + ShadowOfset, static_cast<int>(DispPos.y) - DrawParts->GetScreenY(32) + ShadowOfset, Scale, 0.f, true);
 					SetDrawBright(0, 255, 0);// 
-					this->m_Caution.DrawRotaGraph(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y) - y_r(32), Scale, 0.f, true);
+					this->m_Caution.DrawRotaGraph(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y) - DrawParts->GetScreenY(32), Scale, 0.f, true);
 				}
 			}
 		}
 		void InGameUIControl::LoadUI(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			this->m_Watch = GraphHandle::Load("data/UI/Watch.png");
 			this->m_Caution = GraphHandle::Load("data/UI/Caution.png");
 			this->m_Alert = GraphHandle::Load("data/UI/Alert.png");
 			this->m_Goal = GraphHandle::Load("data/UI/baserad.png");
 			
-			this->m_ViewHandle = GraphHandle::Make(y_r(1920), y_r(1080), true);
+			this->m_ViewHandle = GraphHandle::Make(DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), true);
 		}
 		void InGameUIControl::SetUI(void) noexcept {
 			this->m_MapDrawTime = 5.f;
@@ -181,12 +183,13 @@ namespace FPS_n2 {
 			this->m_Alert.Dispose();
 		}
 		void InGameUIControl::SetupWatchScreen(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto* BackGround = BackGroundClassBase::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* OptionParts = OPTION::Instance();
 			this->m_ViewHandle.SetDraw_Screen(false);
 			{
-				DrawBox_2D(0, 0, y_r(1920), y_r(1080), White, true);
+				DrawBox_2D(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), White, true);
 				// 視界
 				for (int loop = 0; loop < 4; loop++) {
 					for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
@@ -220,7 +223,7 @@ namespace FPS_n2 {
 				SetDrawBright(255, 255, 255);
 				if (OptionParts->GetParamInt(EnumSaveParam::shadow) > 0 || (GetUseDirect3DVersion() == DX_DIRECT3D_11)) {
 					SetDrawBlendMode(DX_BLENDMODE_MULA, 255);
-					BackGround->GetShadowGraph().DrawExtendGraph(0, 0, y_r(1920), y_r(1080), false);
+					BackGround->GetShadowGraph().DrawExtendGraph(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), false);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
 			}
@@ -231,6 +234,7 @@ namespace FPS_n2 {
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 		}
 		void InGameUIControl::DrawUI_Front(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto* BackGround = BackGroundClassBase::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
@@ -240,9 +244,9 @@ namespace FPS_n2 {
 						SetDrawBright(255, 255, 255);
 						Vector3DX DispPos;
 						Convert2DtoDisp(p->GetChara()->GetPos(), &DispPos);
-						int xmin = y_r(-50);
-						int ymin = y_r(-50);
-						int xmax = y_r(50);
+						int xmin = DrawParts->GetScreenY(-50);
+						int ymin = DrawParts->GetScreenY(-50);
+						int xmax = DrawParts->GetScreenY(50);
 
 						int xper = xmin + (xmax - xmin) * p->GetChara()->GetHitPoint() / p->GetChara()->GetHitPointMax();
 						DrawLine(static_cast<int>(DispPos.x + xmin), static_cast<int>(DispPos.y + ymin), static_cast<int>(DispPos.x + xmax), static_cast<int>(DispPos.y + ymin), Gray75, 10);
@@ -255,15 +259,14 @@ namespace FPS_n2 {
 					//ID用デバッグ描画
 					if (false) {
 						SetDrawBright(255, 255, 255);
-						auto& p = PlayerMngr->GetPlayer((PlayerID)i);
-						p->GetAI()->Draw();
+						PlayerMngr->GetPlayer((PlayerID)i)->GetAI()->Draw();
 					}
 				}
 			}
 			SetDrawBright(255, 255, 255);
 			//
 			if(this->m_GoalPos.x != -1.f &&this->m_GoalPos.y != -1.f &&this->m_GoalPos.z != -1.f){
-				int ShadowOfset = y_r(3);
+				int ShadowOfset = DrawParts->GetScreenY(3);
 				auto& p = PlayerMngr->GetPlayer((PlayerID)0);
 				if (p->GetChara()) {
 					float Len = (this->m_GoalPos - p->GetChara()->GetPos()).magnitude() / Get2DSize(1.f);
@@ -271,9 +274,9 @@ namespace FPS_n2 {
 					if (Len > 1.f / 255.f) {
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * Len), 0, 255));
 						SetDrawBright(0, 0, 0);
-						this->m_Goal.DrawRotaGraph(y_r(1920 / 2) + ShadowOfset, y_r(1080 / 2) + ShadowOfset, static_cast<float>(y_r(1024)) / 400.f, Rad, true);
+						this->m_Goal.DrawRotaGraph(DrawParts->GetScreenY(1920 / 2) + ShadowOfset, DrawParts->GetScreenY(1080 / 2) + ShadowOfset, static_cast<float>(DrawParts->GetScreenY(1024)) / 400.f, Rad, true);
 						SetDrawBright(255, 255, 255);
-						this->m_Goal.DrawRotaGraph(y_r(1920 / 2), y_r(1080 / 2), static_cast<float>(y_r(1024)) / 400.f, Rad, true);
+						this->m_Goal.DrawRotaGraph(DrawParts->GetScreenY(1920 / 2), DrawParts->GetScreenY(1080 / 2), static_cast<float>(DrawParts->GetScreenY(1024)) / 400.f, Rad, true);
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 					}
 				}
@@ -287,7 +290,7 @@ namespace FPS_n2 {
 					auto* SaveDataParts = SaveDataClass::Instance();
 					std::string SaveStr = "Cut_" + std::to_string(e.m_CutSceneID);
 					if (SaveDataParts->GetParam(SaveStr) == -1) {
-						int ShadowOfset = y_r(3);
+						int ShadowOfset = DrawParts->GetScreenY(3);
 						auto& p = PlayerMngr->GetPlayer((PlayerID)0);
 
 						Vector3DX Pos = BackGround->GetFloorData(e.m_index)->GetPos();
@@ -295,27 +298,27 @@ namespace FPS_n2 {
 						Vector3DX DispPos;
 						Convert2DtoDisp(Pos, &DispPos);
 
-						if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), 0, 0, y_r(1920), y_r(1080))) {
+						if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), 0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080))) {
 							if (p->GetChara()) {
 								float Len = (Pos - p->GetChara()->GetPos()).magnitude() / Get2DSize(1.f);
 								float Rad = GetRadVec2Vec(Pos, p->GetChara()->GetPos());
 								if (Len > 1.f / 255.f) {
 									SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(128.f * std::clamp(Len, 0.f, 1.f)), 0, 255));
 									SetDrawBright(0, 0, 0);
-									this->m_Goal.DrawRotaGraph(y_r(1920 / 2) + ShadowOfset, y_r(1080 / 2) + ShadowOfset, static_cast<float>(y_r(768)) / 400.f, Rad, true);
+									this->m_Goal.DrawRotaGraph(DrawParts->GetScreenY(1920 / 2) + ShadowOfset, DrawParts->GetScreenY(1080 / 2) + ShadowOfset, static_cast<float>(DrawParts->GetScreenY(768)) / 400.f, Rad, true);
 									SetDrawBright(255, 255, 255);
-									this->m_Goal.DrawRotaGraph(y_r(1920 / 2), y_r(1080 / 2), static_cast<float>(y_r(768)) / 400.f, Rad, true);
+									this->m_Goal.DrawRotaGraph(DrawParts->GetScreenY(1920 / 2), DrawParts->GetScreenY(1080 / 2), static_cast<float>(DrawParts->GetScreenY(768)) / 400.f, Rad, true);
 									SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 								}
 							}
 						}
 						else {
-							float Scale = static_cast<float>(y_r(64)) / 128.0f;
+							float Scale = static_cast<float>(DrawParts->GetScreenY(64)) / 128.0f;
 
 							SetDrawBright(0, 0, 0);// 
-							this->m_Caution.DrawRotaGraph(static_cast<int>(DispPos.x) + ShadowOfset, static_cast<int>(DispPos.y) - y_r(32) + ShadowOfset, Scale, 0.f, true);
+							this->m_Caution.DrawRotaGraph(static_cast<int>(DispPos.x) + ShadowOfset, static_cast<int>(DispPos.y) - DrawParts->GetScreenY(32) + ShadowOfset, Scale, 0.f, true);
 							SetDrawBright(255, 128, 0);// 
-							this->m_Caution.DrawRotaGraph(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y) - y_r(32), Scale, 0.f, true);
+							this->m_Caution.DrawRotaGraph(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y) - DrawParts->GetScreenY(32), Scale, 0.f, true);
 							SetDrawBright(255, 255, 255);
 						}
 					}
@@ -324,12 +327,13 @@ namespace FPS_n2 {
 
 		}
 		void InGameUIControl::DrawUI_MapName(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			if (this->m_MapDrawPer > 1.f / 255.f) {
 				auto* Fonts = FontPool::Instance();
 				auto* LocalizeParts = LocalizePool::Instance();
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * this->m_MapDrawPer), 0, 255));
-				Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_UI(64), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-					y_UI(64), y_UI(128), White, Black, LocalizeParts->Get(this->m_MapTextID));
+				Fonts->Get(FontPool::FontType::Nomal_AA)->DrawString(DrawParts->GetUIY(64), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+					DrawParts->GetUIY(64), DrawParts->GetUIY(128), White, Black, LocalizeParts->Get(this->m_MapTextID));
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 		}
@@ -474,25 +478,26 @@ namespace FPS_n2 {
 			}
 		}
 		void CutSceneControl::DrawCut(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 
 			if (this->m_CGFade > 1.f / 255.f) {
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(128.f * this->m_CGFade), 0, 255));
-				DrawBox(0, 0, y_UI(1920), y_UI(1080), Black, TRUE);
+				DrawBox(0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 			if (this->m_CutSceneAlpha > 1.f / 255.f) {
 				auto Color = GetColor(16, 16, 16);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * this->m_CutSceneAlpha), 0, 255));
-				DrawBox(0, 0, y_UI(1920), y_UI(120), Color, TRUE);
-				DrawBox(0, y_UI(1080 - 120), y_UI(1920), y_UI(1080), Color, TRUE);
+				DrawBox(0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(120), Color, TRUE);
+				DrawBox(0, DrawParts->GetUIY(1080 - 120), DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Color, TRUE);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 			if (this->m_MsgBoxAlpha > 1.f / 255.f) {
 				float Per = Lerp(0.5f, 1.f, this->m_MsgBoxAlpha);
-				int x1 = y_UI(64);
-				int y1 = y_UI((1080 - 64) - static_cast<int>((320 - 64) * Per));
-				int x2 = y_UI(1920 - 48);
-				int y2 = y_UI(1080 - 64 - static_cast<int>((320 - 64) * (1.f - Per)));
+				int x1 = DrawParts->GetUIY(64);
+				int y1 = DrawParts->GetUIY((1080 - 64) - static_cast<int>((320 - 64) * Per));
+				int x2 = DrawParts->GetUIY(1920 - 48);
+				int y2 = DrawParts->GetUIY(1080 - 64 - static_cast<int>((320 - 64) * (1.f - Per)));
 
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * this->m_MsgBoxAlpha), 0, 255));
 				DrawBox(x1, y1, x2, y2, Gray50, TRUE);
@@ -507,8 +512,8 @@ namespace FPS_n2 {
 					if (MsgID != 0) {
 						auto* Fonts = FontPool::Instance();
 						auto* LocalizeParts = LocalizePool::Instance();
-						Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_UI(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																			x1 + y_UI(32), y1 + y_UI(32), White, Black, LocalizeParts->Get(NameID));
+						Fonts->Get(FontPool::FontType::Nomal_AA)->DrawString(DrawParts->GetUIY(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+																			x1 + DrawParts->GetUIY(32), y1 + DrawParts->GetUIY(32), White, Black, LocalizeParts->Get(NameID));
 
 						int NowC = static_cast<int>(this->m_MsgBoxSeek);
 						if (this->m_PrevMsgBoxSeek != NowC) {
@@ -524,15 +529,15 @@ namespace FPS_n2 {
 								if (NowMsg == "") { break; }
 								std::string Tmp; Tmp.reserve(512);
 
-								int Limit = ((x2 - x1) - y_UI(64) * 2);
-								int column = Limit / y_UI(32);//超えない範囲
+								int Limit = ((x2 - x1) - DrawParts->GetUIY(64) * 2);
+								int column = Limit / DrawParts->GetUIY(32);//超えない範囲
 								while (true) {
 									if (NowC <= column) {
 										column = NowC;
 										break;
 									}
 									strncpy2_sDx(Tmp.data(), 512, NowMsg.c_str(), column); Tmp = Tmp.c_str();
-									if (Fonts->Get(FontPool::FontType::Nomal_AA, y_UI(32)).GetStringWidth(-1, Tmp) < Limit) {
+									if (Fonts->Get(FontPool::FontType::Nomal_AA, DrawParts->GetUIY(32))->GetStringWidth(-1, Tmp) < Limit) {
 										column++;
 									}
 									else {
@@ -565,8 +570,8 @@ namespace FPS_n2 {
 						for (auto& m : this->m_MsgString) {
 							if (m == "") { continue; }
 							int i = static_cast<int>(&m - &this->m_MsgString.front());
-							Fonts->Get(FontPool::FontType::Nomal_AA, y_UI(32)).DrawString(-1, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																						  x1 + y_UI(64), y1 + y_UI(64) + y_UI(32 * i), White, Black, m);
+							Fonts->Get(FontPool::FontType::Nomal_AA, DrawParts->GetUIY(32))->DrawString(-1, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+																						  x1 + DrawParts->GetUIY(64), y1 + DrawParts->GetUIY(64) + DrawParts->GetUIY(32 * i), White, Black, m);
 						}
 					}
 				}
@@ -574,10 +579,10 @@ namespace FPS_n2 {
 			}
 
 			if (this->m_CGFade > 1.f / 255.f) {
-				int x1 = y_UI(960 - 960 / 2);
-				int y1 = y_UI(400 - 540 / 2);
-				int x2 = y_UI(960 + 960 / 2);
-				int y2 = y_UI(400 + 540 / 2);
+				int x1 = DrawParts->GetUIY(960 - 960 / 2);
+				int y1 = DrawParts->GetUIY(400 - 540 / 2);
+				int x2 = DrawParts->GetUIY(960 + 960 / 2);
+				int y2 = DrawParts->GetUIY(400 + 540 / 2);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * this->m_CGFade), 0, 255));
 				DrawBox(x1, y1, x2, y2, Gray50, TRUE);
 				m_CGGraph.DrawExtendGraph(x1, y1, x2, y2, false);
@@ -594,8 +599,9 @@ namespace FPS_n2 {
 			this->m_BlackOutAlpha = std::clamp(this->m_BlackOutAlpha + (this->m_IsBlackOut ? 1.f : -1.f) / DrawParts->GetFps() / 0.5f, 0.f, 1.f);
 		}
 		void FadeControl::DrawFade(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * this->m_BlackOutAlpha), 0, 255));
-			DrawBox(0, 0, y_UI(1920), y_UI(1080), Black, TRUE);
+			DrawBox(0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 		}
 };

@@ -279,9 +279,10 @@ namespace FPS_n2 {
 			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius, bool IsPhysical) const noexcept;
 		public:
 			void			SetAmbientLight(float ShadowLen, float Rad) noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				this->m_AmbientShadowLength = ShadowLen;
 				this->m_AmbientLightRad = Rad;
-				float Radius = static_cast<float>(y_r(this->m_AmbientShadowLength));
+				float Radius = static_cast<float>(DrawParts->GetScreenY(static_cast<int>(this->m_AmbientShadowLength)));
 				this->m_AmbientLightVec.Set(std::sin(this->m_AmbientLightRad) * Radius, std::cos(this->m_AmbientLightRad) * Radius, 0.f);
 			}
 			void			SetPointLight(const Vector3DX& Pos) noexcept {

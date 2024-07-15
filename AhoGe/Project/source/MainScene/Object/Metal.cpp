@@ -41,7 +41,7 @@ namespace FPS_n2 {
 			SetHitTarget(HitTarget::HitOnly);
 			m_Foot = 0.f;
 			for (auto& g : m_MissileID) {
-				g = 0.f;
+				g = 0;
 			}
 			m_MissileIDNum = 0;
 			m_HitPoint = 1200;
@@ -56,7 +56,6 @@ namespace FPS_n2 {
 				SetVec(Vector3DX::zero());
 				return;
 			}
-			auto* Cam2D = Cam2DControl::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* Obj2DParts = Object2DManager::Instance();
@@ -171,7 +170,7 @@ namespace FPS_n2 {
 				else {
 					if (m_FootDown) {
 						if (Length < Get2DSize(30.f)) {
-							Cam2D->SetCamShake(0.1f, 50.f*Get2DSize(5.f) / std::max(Length, Get2DSize(1.f)));
+							CameraShake::Instance()->SetCamShake(0.1f, 50.f*Get2DSize(5.f) / std::max(Length, Get2DSize(1.f)));
 						}
 					}
 					m_FootDown = false;
@@ -193,7 +192,7 @@ namespace FPS_n2 {
 				else {
 					if (m_FootDown) {
 						if (Length < Get2DSize(30.f)) {
-							Cam2D->SetCamShake(0.1f, 50.f*Get2DSize(5.f) / std::max(Length, Get2DSize(1.f)));
+							CameraShake::Instance()->SetCamShake(0.1f, 50.f*Get2DSize(5.f) / std::max(Length, Get2DSize(1.f)));
 						}
 					}
 					m_FootDown = false;
@@ -248,7 +247,6 @@ namespace FPS_n2 {
 					this->m_ShotCoolTime = std::max(this->m_ShotCoolTime - 1.f / DrawParts->GetFps(), 0.f);
 				}
 				for (auto& g : m_MissileID) {
-					auto* Obj2DParts = Object2DManager::Instance();
 					auto* Obj = Obj2DParts->GetObj(g);
 					if (Obj) {
 						Vector3DX Vec; Vec = (Chara->GetPos() - (*Obj)->GetPos()).normalized();

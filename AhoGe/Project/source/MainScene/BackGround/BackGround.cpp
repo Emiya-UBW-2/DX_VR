@@ -130,6 +130,7 @@ namespace FPS_n2 {
 		}
 		// 線分の間で壁に当たっているか
 		float BackGroundClassBase::CheckHideShadow(const Vector3DX& PosA, const Vector3DX& PosB, float Radius) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			float Ret = 1.f;
 			for (auto& B : this->m_CheckWallBlick) {
 				// 範囲外
@@ -138,7 +139,7 @@ namespace FPS_n2 {
 				if (!HitPointToRectangle(
 					static_cast<int>(DispPos.x), static_cast<int>(DispPos.y),
 					static_cast<int>(-Radius), static_cast<int>(-Radius),
-					y_r(1920) + static_cast<int>(Radius), y_r(1080) + static_cast<int>(Radius))) { continue; }
+					DrawParts->GetScreenY(1920) + static_cast<int>(Radius), DrawParts->GetScreenY(1080) + static_cast<int>(Radius))) { continue; }
 				//ヒットするかとヒットした場合の透明度を指定
 				float tmp = 1.f;
 				if (B->CheckLineHit(PosA, PosB)) {
@@ -330,6 +331,8 @@ namespace FPS_n2 {
 		}
 
 		void BackGroundClassBase::Init(const std::string& MapPath) noexcept {
+			auto* DrawParts = DXDraw::Instance();
+
 			std::string CommonPath = "data/map/" + MapPath + "/";
 			std::array<std::pair<int, int>, 8> Dir;
 			Dir.at(0) = std::make_pair(-1, 0);
@@ -533,22 +536,23 @@ namespace FPS_n2 {
 				FileRead_close(mdata);
 			}
 			//
-			this->m_PointShadowHandle = GraphHandle::Make(y_r(1920), y_r(1080), true);
-			this->m_AmbientShadowHandle = GraphHandle::Make(y_r(1920), y_r(1080), true);
+			this->m_PointShadowHandle = GraphHandle::Make(DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), true);
+			this->m_AmbientShadowHandle = GraphHandle::Make(DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), true);
 		}
 		// 
 		void BackGroundClassBase::SetupShadow(std::function<void()> AddAmbShadow) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			auto* OptionParts = OPTION::Instance();
 			if (OptionParts->GetParamInt(EnumSaveParam::shadow) > 0 || (GetUseDirect3DVersion() == DX_DIRECT3D_11)) {
 				this->m_AmbientShadowHandle.SetDraw_Screen(false);
 				{
-					DrawBox_2D(0, 0, y_r(1920), y_r(1080), White, true);
+					DrawBox_2D(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), White, true);
 					AddAmbShadow();
-					int Radius = GetDispSize(0.5f) + y_r(this->m_AmbientShadowLength);
+					int Radius = GetDispSize(0.5f) + DrawParts->GetScreenY(static_cast<int>(this->m_AmbientShadowLength));
 					for (auto& B : this->m_CheckWallBlick) {
 						Vector3DX DispPos;
 						Convert2DtoDisp(B->GetPos(), &DispPos);
-						if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), -Radius, -Radius, y_r(1920) + Radius, y_r(1080) + Radius)) { continue; }
+						if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), -Radius, -Radius, DrawParts->GetScreenY(1920) + Radius, DrawParts->GetScreenY(1080) + Radius)) { continue; }
 						B->DrawAmbientShadow(this->m_AmbientLightVec, this->m_AmbientLightRad, this->m_MapChip.at(0));
 					}
 				}
@@ -558,12 +562,12 @@ namespace FPS_n2 {
 			}
 			this->m_PointShadowHandle.SetDraw_Screen(false);
 			{
-				DrawBox_2D(0, 0, y_r(1920), y_r(1080), White, true);
-				int Radius = GetDispSize(0.5f) + y_r(255.f);
+				DrawBox_2D(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), White, true);
+				int Radius = GetDispSize(0.5f) + DrawParts->GetScreenY(255);
 				for (auto& B : this->m_CheckWallBlick) {
 					Vector3DX DispPos;
 					Convert2DtoDisp(B->GetPos(), &DispPos);
-					if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), -Radius, -Radius, y_r(1920) + Radius, y_r(1080) + Radius)) { continue; }
+					if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), -Radius, -Radius, DrawParts->GetScreenY(1920) + Radius, DrawParts->GetScreenY(1080) + Radius)) { continue; }
 					B->DrawPointShadow(this->m_PointLightPos, this->m_MapChip.at(0));
 				}
 			}
@@ -571,24 +575,26 @@ namespace FPS_n2 {
 		}
 		// 
 		void BackGroundClassBase::Draw(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			int Radius = GetDispSize(0.5f);
 			float Size = static_cast<float>(Radius * 2) / (32 - 1);
 			// 床
 			for (auto& B : this->m_FloorBlick) {
 				Vector3DX DispPos;
 				Convert2DtoDisp(B->GetPos(), &DispPos);
-				if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), -Radius, -Radius, y_r(1920) + Radius, y_r(1080) + Radius)) { continue; }
+				if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), -Radius, -Radius, DrawParts->GetScreenY(1920) + Radius, DrawParts->GetScreenY(1080) + Radius)) { continue; }
 				this->m_MapChip.at(static_cast<size_t>(B->GetPalette().at(0).GetpaletteNum())).DrawRotaGraph(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), Size, B->GetPalette().at(0).GetZRad(), FALSE);
 			}
 			// 影
 			auto* OptionParts = OPTION::Instance();
 			if (OptionParts->GetParamInt(EnumSaveParam::shadow) > 0 || (GetUseDirect3DVersion() == DX_DIRECT3D_11)) {
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, 64);
-				this->m_AmbientShadowHandle.DrawExtendGraph(0, 0, y_r(1920), y_r(1080), false);
+				this->m_AmbientShadowHandle.DrawExtendGraph(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), false);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 		}
 		void BackGroundClassBase::DrawFront(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			int Radius = GetDispSize(0.5f);
 			float Size = static_cast<float>(Radius * 2) / (32 - 1);
 			// 
@@ -605,15 +611,15 @@ namespace FPS_n2 {
 					DrawBox(p1x, p1y, p2x, p2y, color, IsFill);
 				};
 				DrawBE(0, 0, xmin, ymax, Black, TRUE);
-				DrawBE(xmin, 0, y_r(1920), ymin, Black, TRUE);
-				DrawBE(xmax, ymin, y_r(1920), y_r(1080), Black, TRUE);
-				DrawBE(0, ymax, xmax, y_r(1080), Black, TRUE);
+				DrawBE(xmin, 0, DrawParts->GetScreenY(1920), ymin, Black, TRUE);
+				DrawBE(xmax, ymin, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Black, TRUE);
+				DrawBE(0, ymax, xmax, DrawParts->GetScreenY(1080), Black, TRUE);
 			}
 			// 壁
 			for (auto& B : this->m_WallBlick) {
 				Vector3DX DispPos;
 				Convert2DtoDisp(B->GetPos(), &DispPos);
-				if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), -Radius, -Radius, y_r(1920) + Radius, y_r(1080) + Radius)) { continue; }
+				if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), -Radius, -Radius, DrawParts->GetScreenY(1920) + Radius, DrawParts->GetScreenY(1080) + Radius)) { continue; }
 				for (int i = 0; i < 5; i++) {
 					if (B->GetPalette().at(static_cast<size_t>(i)).IsActive()) {
 						this->m_WallChip.at(static_cast<size_t>(B->GetPalette().at(static_cast<size_t>(i)).GetpaletteNum())).DrawRotaGraph(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y),Size, B->GetPalette().at(static_cast<size_t>(i)).GetZRad(), i != 0);
