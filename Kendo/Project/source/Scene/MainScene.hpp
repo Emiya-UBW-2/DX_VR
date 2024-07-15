@@ -94,10 +94,11 @@ namespace FPS_n2 {
 			void			DrawUI_Base_Sub() noexcept override {
 			}
 			void			DrawUI_In_Sub() noexcept override {
+				auto* DrawParts = DXDraw::Instance();
 				//UI
 				if ((this->m_ChangeViewPer*255.f) > 1.f) {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*this->m_ChangeViewPer), 0, 255));
-					DrawBox(0, 0, y_UI(1920), y_UI(1080), Black, TRUE);
+					DrawBox(0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				}
 				if (!DXDraw::Instance()->IsPause()) {

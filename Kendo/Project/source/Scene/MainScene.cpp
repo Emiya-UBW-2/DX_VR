@@ -147,7 +147,6 @@ namespace FPS_n2 {
 #endif // DEBUG
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
-				SetMousePoint(DrawParts->GetDispXSize() / 2, DrawParts->GetDispYSize() / 2);
 				//SE->Get((int)SoundEnum::Environment).Play(0, DX_PLAYTYPE_LOOP, TRUE);
 				this->m_fov_base = DrawParts->GetMainCamera().GetCamFov();
 			}
@@ -281,7 +280,7 @@ namespace FPS_n2 {
 			{
 				DrawParts->Set_is_Blackout(m_Concussion > 0.f);
 				if (m_Concussion == 1.f) {
-					DrawParts->SetCamShake(0.5f, 0.05f*Scale_Rate);
+					CameraShake::Instance()->SetCamShake(0.5f, 0.05f*Scale_Rate);
 					//SE->Get((int)SoundEnum::Tank_near).Play_3D(0, DrawParts->GetMainCamera().GetCamPos(), 10.f*Scale_Rate, 128);//, DX_PLAYTYPE_LOOP
 				}
 				if (m_Concussion > 0.9f) {
@@ -309,7 +308,7 @@ namespace FPS_n2 {
 				auto* OptionParts = OPTION::Instance();
 
 				//DrawParts->GetFps()ƒJƒƒ‰
-				Vector3DX CamPos = Chara->GetEyeMatrix().pos() + DrawParts->GetCamShake();
+				Vector3DX CamPos = Chara->GetEyeMatrix().pos() + CameraShake::Instance()->GetCamShake();
 				Vector3DX CamVec = CamPos + Chara->GetEyeMatrix().zvec() * -1.f;
 #ifdef DEBUG
 				if (CheckHitKeyWithCheck(KEY_INPUT_F1) != 0) {

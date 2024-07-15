@@ -78,23 +78,23 @@ namespace FPS_n2 {
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
 					SetDrawBlendMode(DX_BLENDMODE_ADD, Add);
 					SetDrawBright(ColorBase.r, ColorBase.g, ColorBase.b);
-					DrawCircleGauge(xp1 + y_r(256), yp1,
+					DrawCircleGauge(xp1 + DrawParts->GetScreenY(256), yp1,
 									50.0 + ((50.0 - 15.0*2.0)*1.0) + 15.0 + deg,
 									CircleObj->get(),
 									50.0 + 15.0 + deg,
-									((double)(DrawParts->GetDispYSize()) / 1080.0));
+									((double)(DrawParts->GetUIY(1080)) / 1080.0));
 					SetDrawBright(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
-					DrawCircleGauge(xp1 + y_r(256), yp1,
+					DrawCircleGauge(xp1 + DrawParts->GetScreenY(256), yp1,
 									50.0 + ((50.0 - 15.0*2.0)*(double)std::max(per, perbuf)) + 15.0 + deg,
 									CircleObj->get(),
 									50.0 + ((50.0 - 15.0*2.0)*(double)std::min(per, perbuf)) + 15.0 + deg,
-									((double)(DrawParts->GetDispYSize()) / 1080.0));
+									((double)(DrawParts->GetUIY(1080)) / 1080.0));
 					SetDrawBright(Color.r, Color.g, Color.b);
-					DrawCircleGauge(xp1 + y_r(256), yp1,
+					DrawCircleGauge(xp1 + DrawParts->GetScreenY(256), yp1,
 									50.0 + ((50.0 - 15.0*2.0)*(double)std::min(per, perbuf)) + 15.0 + deg,
 									CircleObj->get(),
 									50.0 + 15.0 + deg,
-									((double)(DrawParts->GetDispYSize()) / 1080.0));
+									((double)(DrawParts->GetUIY(1080)) / 1080.0));
 					SetDrawBright(255, 255, 255);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
@@ -109,23 +109,23 @@ namespace FPS_n2 {
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
 					SetDrawBlendMode(DX_BLENDMODE_ADD, Add);
 					SetDrawBright(ColorBase.r, ColorBase.g, ColorBase.b);
-					DrawCircleGauge(xp1 - y_r(256), yp1,
+					DrawCircleGauge(xp1 - DrawParts->GetScreenY(256), yp1,
 						(50.0 - 15.0*2.0) + 15.0 + deg,
 									CircleObj->get(),
 									(double)((50.0 - 15.0*2.0)*(1.0 - 1.0)) + 15.0 + deg,
-									((double)(DrawParts->GetDispYSize()) / 1080.0));
+									((double)(DrawParts->GetUIY(1080)) / 1080.0));
 					SetDrawBright(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
-					DrawCircleGauge(xp1 - y_r(256), yp1,
+					DrawCircleGauge(xp1 - DrawParts->GetScreenY(256), yp1,
 						(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
 									CircleObj->get(),
 									(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::max(per, perbuf))) + 15.0 + deg,
-									((double)(DrawParts->GetDispYSize()) / 1080.0));
+									((double)(DrawParts->GetUIY(1080)) / 1080.0));
 					SetDrawBright(Color.r, Color.g, Color.b);
-					DrawCircleGauge(xp1 - y_r(256), yp1,
+					DrawCircleGauge(xp1 - DrawParts->GetScreenY(256), yp1,
 						(50.0 - 15.0*2.0) + 15.0 + deg,
 									CircleObj->get(),
 									(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
-									((double)(DrawParts->GetDispYSize()) / 1080.0));
+									((double)(DrawParts->GetUIY(1080)) / 1080.0));
 					SetDrawBright(255, 255, 255);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
@@ -216,51 +216,52 @@ namespace FPS_n2 {
 			void			Set() noexcept {
 			}
 			void			Draw() noexcept {
+				auto* DrawParts = DXDraw::Instance();
 				auto* Fonts = FontPool::Instance();
 				int xp1, yp1;
 				//タイム,スコア
 				{
-					xp1 = y_UI(30);
-					yp1 = y_UI(10);
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(32), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(32), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + y_UI(240), yp1, White, Black, "%d:%05.2f",
+					xp1 = DrawParts->GetUIY(30);
+					yp1 = DrawParts->GetUIY(10);
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL)->DrawString(DrawParts->GetUIY(32), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL)->DrawString(DrawParts->GetUIY(32), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + DrawParts->GetUIY(240), yp1, White, Black, "%d:%05.2f",
 						(int)(floatParam[0] / 60.f), (float)((int)(floatParam[0]) % 60) + (floatParam[0] - (float)((int)(floatParam[0]))));
 
-					xp1 = y_UI(1920 / 2);
-					yp1 = y_UI(10);
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "%d : %d", intParam[0], intParam[1]);
+					xp1 = DrawParts->GetUIY(1920 / 2);
+					yp1 = DrawParts->GetUIY(10);
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL)->DrawString(DrawParts->GetUIY(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "%d : %d", intParam[0], intParam[1]);
 				}
 				//情報
 				{
 					//心拍数
-					xp1 = y_UI((24 + 300 + 8 + 32));
-					yp1 = y_UI((1080 - 96 + 30 / 2));
+					xp1 = DrawParts->GetUIY((24 + 300 + 8 + 32));
+					yp1 = DrawParts->GetUIY((1080 - 96 + 30 / 2));
 					float per = Lerp(0.4f, 0.6f, floatParam[1]);
 					if ((per *255.f) > 1.f) {
-						int radius = (int)Lerp((float)y_UI(24), (float)y_UI(32), floatParam[1]);
+						int radius = (int)Lerp((float)DrawParts->GetUIY(24), (float)DrawParts->GetUIY(32), floatParam[1]);
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
 						SetDrawBright(255, 0, 0);
 						m_HeartIcon.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
 						SetDrawBright(255, 255, 255);
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 					}
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL).DrawString(y_UI(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL)->DrawString(DrawParts->GetUIY(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
 
 					//気合
-					xp1 = y_UI(24);
-					yp1 = y_UI(1080 - 96);
+					xp1 = DrawParts->GetUIY(24);
+					yp1 = DrawParts->GetUIY(1080 - 96);
 
 					m_GaugeParam[0].DrawGauge(
-						xp1, yp1, xp1 + y_UI(300), yp1 + y_UI(12),
+						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(12),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 128, 0, 255), GetColorU8(255, 255, 0, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
 					//スタミナ
-					xp1 = y_UI(24);
-					yp1 = y_UI(1080 - 96 + 18);
+					xp1 = DrawParts->GetUIY(24);
+					yp1 = DrawParts->GetUIY(1080 - 96 + 18);
 
 					m_GaugeParam[1].DrawGauge(
-						xp1, yp1, xp1 + y_UI(300), yp1 + y_UI(12),
+						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(12),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
@@ -300,9 +301,9 @@ namespace FPS_n2 {
 						GraphHandle::SetDraw_Screen(Prev, false);
 						{
 							{
-								xp1 = y_UI((1920 / 2));
-								yp1 = y_UI((1080 / 2));
-								int radius = (int)Lerp((float)y_UI(0), (float)y_UI(256), floatParam[2]);
+								xp1 = DrawParts->GetUIY((1920 / 2));
+								yp1 = DrawParts->GetUIY((1080 / 2));
+								int radius = (int)Lerp((float)DrawParts->GetUIY(0), (float)DrawParts->GetUIY(256), floatParam[2]);
 								SetDrawBlendMode(DX_BLENDMODE_ADD, (int)Lerp(128.f, 32.f, floatParam[5]));
 								m_GuardGraph.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
 								SetDrawBlendMode(DX_BLENDMODE_ADD, 255);
@@ -310,15 +311,15 @@ namespace FPS_n2 {
 								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 							}
 							{
-								xp1 = y_UI((1920 / 2));
-								yp1 = y_UI((1080 / 2));
-								xp1 += (int)((float)y_UI(256) * floatParam[3]);
-								yp1 += (int)((float)y_UI(256) * floatParam[4]);
+								xp1 = DrawParts->GetUIY((1920 / 2));
+								yp1 = DrawParts->GetUIY((1080 / 2));
+								xp1 += (int)((float)DrawParts->GetUIY(256) * floatParam[3]);
+								yp1 += (int)((float)DrawParts->GetUIY(256) * floatParam[4]);
 
-								int radius = (int)Lerp((float)y_UI(0), (float)y_UI(32), floatParam[2]);
+								int radius = (int)Lerp((float)DrawParts->GetUIY(0), (float)DrawParts->GetUIY(32), floatParam[2]);
 								float length = std::hypotf(floatParam[3], floatParam[4]);
 								if (length > 1.f) {
-									radius = (int)Lerp((float)radius, (float)y_UI(0), length - 1.f);
+									radius = (int)Lerp((float)radius, (float)DrawParts->GetUIY(0), length - 1.f);
 								}
 								SetDrawBlendMode(DX_BLENDMODE_ADD, 128);
 								m_CursorGraph.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
