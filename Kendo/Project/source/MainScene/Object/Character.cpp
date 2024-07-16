@@ -5,9 +5,9 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			CharacterClass::move_RightArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept {
-			GetObj().frame_Reset(GetFrame((int)CharaFrame::RightArm));
-			GetObj().frame_Reset(GetFrame((int)CharaFrame::RightArm2));
-			GetObj().frame_Reset(GetFrame((int)CharaFrame::RightWrist));
+			GetObj().ResetFrameUserLocalMatrix(GetFrame((int)CharaFrame::RightArm));
+			GetObj().ResetFrameUserLocalMatrix(GetFrame((int)CharaFrame::RightArm2));
+			GetObj().ResetFrameUserLocalMatrix(GetFrame((int)CharaFrame::RightWrist));
 			auto matBase = GetParentFrameWorldMatrix(GetFrame((int)CharaFrame::RightArm)).rotation().inverse();
 
 			Vector3DX Gunxvec = Vector3DX::Cross(Gunzvec, Gunyvec*-1.f)*-1.f;
@@ -46,9 +46,9 @@ namespace FPS_n2 {
 			GetObj().SetFrameLocalMatrix(GetFrame((int)CharaFrame::RightWrist), mat1 * GetFrameBaseLocalMat((int)CharaFrame::RightWrist));
 		}
 		void			CharacterClass::move_LeftArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept {
-			GetObj().frame_Reset(GetFrame((int)CharaFrame::LeftArm));
-			GetObj().frame_Reset(GetFrame((int)CharaFrame::LeftArm2));
-			GetObj().frame_Reset(GetFrame((int)CharaFrame::LeftWrist));
+			GetObj().ResetFrameUserLocalMatrix(GetFrame((int)CharaFrame::LeftArm));
+			GetObj().ResetFrameUserLocalMatrix(GetFrame((int)CharaFrame::LeftArm2));
+			GetObj().ResetFrameUserLocalMatrix(GetFrame((int)CharaFrame::LeftWrist));
 			auto matBase = GetParentFrameWorldMatrix(GetFrame((int)CharaFrame::LeftArm)).rotation().inverse();
 
 			Vector3DX Gunxvec = Vector3DX::Cross(Gunzvec, Gunyvec)*-1.f;
@@ -105,7 +105,7 @@ namespace FPS_n2 {
 			GetWeaponPtrNow()->ResetAnim();
 			m_NormalActionTime = GetWeaponPtrNow()->GetGunTotalTime(m_CharaAction);
 			SetIsFrontAttacking(true);
-			this->GetObj().get_anime((int)CharaAnimeID::Bottom_Stand_Attack).GoStart();
+			this->GetObj().SetAnim((int)CharaAnimeID::Bottom_Stand_Attack).GoStart();
 			this->m_CharaSound = -1;
 
 			auto* SE = SoundPool::Instance();
@@ -119,7 +119,7 @@ namespace FPS_n2 {
 			GetWeaponPtrNow()->ResetAnim();
 			m_NormalActionTime = GetWeaponPtrNow()->GetGunTotalTime(m_CharaAction);
 			SetIsDouAttacking(true);
-			this->GetObj().get_anime((int)CharaAnimeID::Bottom_Stand_Attack).GoStart();
+			this->GetObj().SetAnim((int)CharaAnimeID::Bottom_Stand_Attack).GoStart();
 			this->m_CharaSound = -1;
 		}
 		void CharacterClass::Do_End() noexcept {
@@ -142,7 +142,7 @@ namespace FPS_n2 {
 			GetWeaponPtrNow()->ResetAnim();
 			m_NormalActionTime = std::max(0.75f, GetWeaponPtrNow()->GetGunTotalTime(m_CharaAction));
 			SetIsBackAttacking(true);
-			this->GetObj().get_anime((int)CharaAnimeID::Bottom_Stand_Attack).GoStart();
+			this->GetObj().SetAnim((int)CharaAnimeID::Bottom_Stand_Attack).GoStart();
 			this->m_CharaSound = -1;
 		}
 		void CharacterClass::BackAttack_End() noexcept {
@@ -179,10 +179,10 @@ namespace FPS_n2 {
 		//ëÄçÏ
 		void			CharacterClass::ExecuteInput(void) noexcept {
 
-			int num = MV1GetMaterialNum(GetObj().get());
+			int num = MV1GetMaterialNum(GetObj().GetHandle());
 			for (int i = 0; i < num; i++) {
-				MV1SetMaterialDifColor(GetObj().get(), i, GetColorF(0.8f, 0.8f, 0.8f, 1.f));
-				MV1SetMaterialAmbColor(GetObj().get(), i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
+				MV1SetMaterialDifColor(GetObj().GetHandle(), i, GetColorF(0.8f, 0.8f, 0.8f, 1.f));
+				MV1SetMaterialAmbColor(GetObj().GetHandle(), i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
 			}
 
 			auto* DrawParts = DXDraw::Instance();
@@ -492,10 +492,10 @@ namespace FPS_n2 {
 			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomWalkBackAnimSel(), KeyControl::GetVecRear());
 			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomRightStepAnimSel(), KeyControl::GetVecRight());
 			//ÉAÉjÉÅîΩâf
-			for (int i = 0; i < GetObj().get_anime().size(); i++) {
-				this->GetObj().get_anime(i).per = GetCharaAnimeBufID((CharaAnimeID)i);
+			for (int i = 0; i < GetObj().GetAnimNum(); i++) {
+				this->GetObj().SetAnim(i).SetPer(GetCharaAnimeBufID((CharaAnimeID)i));
 			}
-			GetObj().work_anime();
+			GetObj().UpdateAnimAll();
 		}
 		//âπéwé¶
 		void			CharacterClass::ExecuteSound(void) noexcept {
@@ -503,7 +503,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			//ë´âπ
 			if (this->m_BottomAnimSelect != GetBottomStandAnimSel()) {
-				auto Time = this->GetObj().get_anime((int)this->m_BottomAnimSelect).time;
+				auto Time = this->GetObj().SetAnim((int)this->m_BottomAnimSelect).GetTime();
 				if (!GetRun()) {
 					//L
 					if ((9.f < Time && Time < 10.f)) {
@@ -862,11 +862,11 @@ namespace FPS_n2 {
 			ExecuteAction();
 			//
 			KeyControl::UpdateKeyRad();
-			GetObj().frame_Reset(GetFrame((int)CharaFrame::Upper));
+			GetObj().ResetFrameUserLocalMatrix(GetFrame((int)CharaFrame::Upper));
 			GetObj().SetFrameLocalMatrix(GetFrame((int)CharaFrame::Upper),
 										 GetFrameLocalMat(GetFrame((int)CharaFrame::Upper)).rotation() * Matrix4x4DX::RotAxis(Vector3DX::right(), -KeyControl::GetRad().x / 2.f) * (GetCharaDir()*this->m_move.mat.inverse()).rotation()
 										 * GetFrameBaseLocalMat((int)CharaFrame::Upper));
-			GetObj().frame_Reset(GetFrame((int)CharaFrame::Upper2));
+			GetObj().ResetFrameUserLocalMatrix(GetFrame((int)CharaFrame::Upper2));
 			GetObj().SetFrameLocalMatrix(GetFrame((int)CharaFrame::Upper2),
 										 GetFrameLocalMat(GetFrame((int)CharaFrame::Upper2)).rotation() * Matrix4x4DX::RotAxis(Vector3DX::right(), KeyControl::GetRad().x / 2.f)
 										 * GetFrameBaseLocalMat((int)CharaFrame::Upper2));
@@ -888,15 +888,15 @@ namespace FPS_n2 {
 					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(2.5f*Scale_Rate, 2.f*Scale_Rate, 2.5f*Scale_Rate)).get()) == FALSE)
 					) {
 					//ÉLÉÉÉâï`âÊ
-					//MV1SetMaterialTypeAll(this->GetObj().get(), DX_MATERIAL_TYPE_MAT_SPEC_LUMINANCE_CLIP_UNORM);
+					//MV1SetMaterialTypeAll(this->GetObj().GetHandle(), DX_MATERIAL_TYPE_MAT_SPEC_LUMINANCE_CLIP_UNORM);
 					if (GetMyPlayerID() == 0) {
 						if (isDrawSemiTrans) {
 							this->GetObj().DrawModel();
 						}
 					}
 					else {
-						for (int i = 0; i < this->GetObj().mesh_num(); i++) {
-							if ((MV1GetMeshSemiTransState(this->GetObj().get(), i) == TRUE) == isDrawSemiTrans) {
+						for (int i = 0; i < this->GetObj().GetMeshNum(); i++) {
+							if ((MV1GetMeshSemiTransState(this->GetObj().GetHandle(), i) == TRUE) == isDrawSemiTrans) {
 								this->GetObj().DrawMesh(i);
 							}
 						}

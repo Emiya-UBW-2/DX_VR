@@ -49,10 +49,10 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				m_UpperAnim += 60.f / DrawParts->GetFps();
 
-				int num = MV1GetMaterialNum(GetObj().get());
+				int num = MV1GetMaterialNum(GetObj().GetHandle());
 				for (int i = 0; i < num; i++) {
-					MV1SetMaterialDifColor(GetObj().get(), i, GetColorF(1.f, 1.f, 1.f, 1.f));
-					MV1SetMaterialAmbColor(GetObj().get(), i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
+					MV1SetMaterialDifColor(GetObj().GetHandle(), i, GetColorF(1.f, 1.f, 1.f, 1.f));
+					MV1SetMaterialAmbColor(GetObj().GetHandle(), i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
 				}
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {

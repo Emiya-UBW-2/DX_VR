@@ -125,8 +125,8 @@ namespace FPS_n2 {
 		int						m_Mesh{ 0 };			//
 	private:
 		void			Init_one(void) noexcept {
-			MV1RefreshReferenceMesh(this->m_obj.get(), -1, TRUE, FALSE, m_Mesh);				//参照用メッシュの更新
-			this->m_RefMesh = MV1GetReferenceMesh(this->m_obj.get(), -1, TRUE, FALSE, m_Mesh);	//参照用メッシュの取得
+			MV1RefreshReferenceMesh(this->m_obj.GetHandle(), -1, TRUE, FALSE, m_Mesh);				//参照用メッシュの更新
+			this->m_RefMesh = MV1GetReferenceMesh(this->m_obj.GetHandle(), -1, TRUE, FALSE, m_Mesh);	//参照用メッシュの取得
 		}
 	public:
 		//リセット
@@ -183,7 +183,7 @@ namespace FPS_n2 {
 		void			Init(MV1& mv1path, int MeshNum) noexcept {
 			SetUseASyncLoadFlag(FALSE);
 			this->m_Mesh = MeshNum;
-			auto path = MV1GetTextureGraphHandle(mv1path.get(), MV1GetMaterialDifMapTexture(mv1path.get(), MV1GetMeshMaterial(mv1path.get(), m_Mesh)));
+			auto path = MV1GetTextureGraphHandle(mv1path.GetHandle(), MV1GetMaterialDifMapTexture(mv1path.GetHandle(), MV1GetMeshMaterial(mv1path.GetHandle(), m_Mesh)));
 			this->m_pic = path;								 //grass
 			this->m_obj = mv1path.Duplicate();				//弾痕
 			Init_one();
