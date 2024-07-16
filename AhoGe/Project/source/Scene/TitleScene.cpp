@@ -69,57 +69,57 @@ namespace FPS_n2 {
 				// 選択時の挙動
 				if (ButtonParts->GetTriggerButton()) {
 					switch (ButtonParts->GetSelect()) {
-						case 0:
-							this->m_GameStart += 0.0001f;
-							break;
-						case 1:
-							PopUpParts->Add(LocalizeParts->Get(3100), DrawParts->GetUIY(480), DrawParts->GetUIY(240),
-											[&](int xmin, int ymin, int xmax, int ymax, bool) {
-												auto* LocalizeParts = LocalizePool::Instance();
-												int xp1, yp1;
-												//タイトル
-												{
-													xp1 = xmin + DrawParts->GetUIY(24);
-													yp1 = ymin + LineHeight;
+					case 0:
+						this->m_GameStart += 0.0001f;
+						break;
+					case 1:
+						PopUpParts->Add(LocalizeParts->Get(3100), DrawParts->GetUIY(480), DrawParts->GetUIY(240),
+							[&](int xmin, int ymin, int xmax, int ymax, bool) {
+								auto* LocalizeParts = LocalizePool::Instance();
+								int xp1, yp1;
+								//タイトル
+								{
+									xp1 = xmin + DrawParts->GetUIY(24);
+									yp1 = ymin + LineHeight;
 
-													WindowSystem::SetMsgWW(xp1, yp1 + LineHeight/2, LineHeight, FontHandle::FontXCenter::LEFT, White, Black, LocalizeParts->Get(3101));
-												}
-												//
-												{
-													xp1 = (xmax + xmin) / 2 - DrawParts->GetUIY(54);
-													yp1 = ymax - LineHeight * 3;
+									WindowSystem::SetMsgWW(xp1, yp1 + LineHeight / 2, LineHeight, FontHandle::FontXCenter::LEFT, White, Black, LocalizeParts->Get(3101));
+								}
+								//
+								{
+									xp1 = (xmax + xmin) / 2 - DrawParts->GetUIY(54);
+									yp1 = ymax - LineHeight * 3;
 
-													auto* Pad = PadControl::Instance();
-													bool ret = WindowSystem::SetMsgClickBox(xp1, yp1, xp1 + DrawParts->GetUIY(108), yp1 + LineHeight * 2, Gray15, LocalizeParts->Get(3102));
-													if (Pad->GetKey(PADS::INTERACT).trigger() || ret) {
-														auto* SaveDataParts = SaveDataClass::Instance();
-														SaveDataParts->Reset();
-														SaveDataParts->Save();
-														DrawParts->SetPause(false);
-														m_CloseResetSave = true;
-													}
-												}
-											},
-											[&]() {},
-												[&]() {},
-												true
-												);
-							break;
-						case 2:
-							OptionWindowClass::Instance()->SetActive();
-							break;
-						case 3:
-							PopUpParts->Add(LocalizeParts->Get(120), DrawParts->GetUIY(720), DrawParts->GetUIY(840),
-											[&](int xmin, int ymin, int xmax, int, bool) {
-												this->m_CreditControl->Draw(xmin, ymin, xmax);
-											},
-											[]() {},
-											[]() {},
-											true
-											);
-							break;
-						default:
-							break;
+									auto* Pad = PadControl::Instance();
+									bool ret = WindowSystem::SetMsgClickBox(xp1, yp1, xp1 + DrawParts->GetUIY(108), yp1 + LineHeight * 2, LineHeight, Gray15, LocalizeParts->Get(3102));
+									if (Pad->GetKey(PADS::INTERACT).trigger() || ret) {
+										auto* SaveDataParts = SaveDataClass::Instance();
+										SaveDataParts->Reset();
+										SaveDataParts->Save();
+										DrawParts->SetPause(false);
+										m_CloseResetSave = true;
+									}
+								}
+							},
+							[&]() {},
+							[&]() {},
+							true
+						);
+						break;
+					case 2:
+						OptionWindowClass::Instance()->SetActive();
+						break;
+					case 3:
+						PopUpParts->Add(LocalizeParts->Get(120), DrawParts->GetUIY(720), DrawParts->GetUIY(840),
+							[&](int xmin, int ymin, int xmax, int, bool) {
+								this->m_CreditControl->Draw(xmin, ymin, xmax);
+							},
+							[]() {},
+							[]() {},
+							true
+						);
+						break;
+					default:
+						break;
 					}
 					SE->Get(static_cast<int>(SoundEnumCommon::UI_OK)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 				}
@@ -169,14 +169,14 @@ namespace FPS_n2 {
 			// 
 			this->m_TitleImage.DrawExtendGraph(DrawParts->GetUIY(64), DrawParts->GetUIY(64), DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), true);
 			// 
-			Fonts->Get(FontPool::FontType::Nomal_Edge)->DrawString(DrawParts->GetUIY(18), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-																 DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), White, Black, "Ver 1.0.1");
+			Fonts->Get(FontPool::FontType::Nomal_Edge, DrawParts->GetUIY(18))->DrawString(-1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
+				DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), White, Black, "Ver 1.0.1");
 			// 
 			ButtonParts->Draw();
 			// 
 			if ((ButtonParts->GetSelect() != INVALID_ID) && !PopUpParts->IsActivePop()) {
-				Fonts->Get(FontPool::FontType::Nomal_Edge)->DrawString(DrawParts->GetUIY(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-																	 DrawParts->GetUIY(32), DrawParts->GetUIY(1080 - 32 - 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
+				Fonts->Get(FontPool::FontType::Nomal_Edge, DrawParts->GetUIY(18))->DrawString(-1, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+					DrawParts->GetUIY(32), DrawParts->GetUIY(1080 - 32 - 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
 			}
 			// 
 			{

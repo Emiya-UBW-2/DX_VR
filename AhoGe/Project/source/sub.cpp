@@ -81,6 +81,16 @@ namespace FPS_n2 {
 			pRet->z = Pos2D.z;
 		}
 
+		bool Is2DPositionInDisp(const Vector3DX& Pos2D, int Radius) noexcept
+		{
+			auto* DrawParts = DXDraw::Instance();
+			Radius = Radius * 100 / DrawParts->GetScreenY(100);
+			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
+			int x = 1920 / 2 + static_cast<int>((1080.f / 2.f) * (Pos2D.x - CamPos.x) * CamPos.z / Base_CamScale);
+			int y = 1080 / 2 - static_cast<int>((1080.f / 2.f) * (Pos2D.y - CamPos.y) * CamPos.z / Base_CamScale);
+			return HitPointToRectangle(x, y, -Radius, -Radius, 1920 + Radius, 1080 + Radius);
+		}
+
 		float GetRadVec2Vec(const Vector3DX& vec1, const Vector3DX& vec2) noexcept { return std::atan2f(vec1.x - vec2.x, vec1.y - vec2.y); }
 
 		// 空間上のタイルごとのサイズを取得(タイルvalue個ぶん)

@@ -147,9 +147,11 @@ namespace FPS_n2 {
 						static_cast<int>(this->GetBoxSide(2).x), static_cast<int>(this->GetBoxSide(2).y));
 				}
 				bool CheckRectangleHit(const Vector3DX& Min, const Vector3DX& Max) const noexcept {
-					return 
-						(Min.x < this->GetBoxSide(2).x && this->GetBoxSide(0).x < Max.x) &&
-						(Min.y < this->GetBoxSide(2).y && this->GetBoxSide(0).y < Max.y);
+					return  HitRectangleToRectangle(
+						static_cast<int>(Min.x), static_cast<int>(Min.y),
+						static_cast<int>(Max.x), static_cast<int>(Max.y),
+						static_cast<int>(this->GetBoxSide(0).x), static_cast<int>(this->GetBoxSide(0).y),
+						static_cast<int>(this->GetBoxSide(2).x), static_cast<int>(this->GetBoxSide(2).y));
 				}
 				bool CheckCapsuleHit(const Vector3DX& Pos1, const Vector3DX& Pos2, float Radius) const noexcept {
 					for (int i = 0; i < 4; i++) {

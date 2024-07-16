@@ -178,6 +178,7 @@ namespace FPS_n2 {
 		}
 		void CharacterObject::DrawShadow_Sub(void) noexcept {
 			float Radius = static_cast<float>(GetDispSize(GetSize() / 2.f));
+			if (!Is2DPositionInDisp(GetPos(), static_cast<int>(Radius))) { return; }
 			auto* BackGround = BackGroundClassBase::Instance();
 			if (this->m_Alpha > 1.f / 255.f) {
 				Vector3DX DispPos;
@@ -191,6 +192,7 @@ namespace FPS_n2 {
 		}
 		void CharacterObject::Draw_Sub(void) noexcept {
 			float Radius = static_cast<float>(GetDispSize(GetSize() / 2.f));
+			if (!Is2DPositionInDisp(GetPos(), static_cast<int>(Radius))) { return; }
 			//ÉuÉâÅ[
 			for (auto& b : GetBlur()) {
 				if (b.IsActive()) {

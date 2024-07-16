@@ -24,7 +24,8 @@ namespace FPS_n2 {
 			AddBlur(0.5f);
 		}
 		void BulletObject::DrawShadow_Sub(void) noexcept {
-			float Radius = static_cast<float>(GetDispSize(GetSize() / 2.f));
+			int Radius = GetDispSize(GetSize() / 2.f);
+			if (!Is2DPositionInDisp(GetPos(), Radius)) { return; }
 			//âe
 			auto* BackGround = BackGroundClassBase::Instance();
 			Vector3DX DispPos;
@@ -32,24 +33,25 @@ namespace FPS_n2 {
 			auto& CamPos = Cam2DControl::Instance()->GetCamPos();
 
 			DispPos += BackGround->GetAmbientLightVec() * 0.25f*CamPos.z;
-			DrawCircle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), static_cast<int>(Radius), Black);
+			DrawCircle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), Radius, Black);
 		}
 		void BulletObject::Draw_Sub(void) noexcept {
-			float Radius = static_cast<float>(GetDispSize(GetSize() / 2.f));
+			int Radius = GetDispSize(GetSize() / 2.f);
+			if (!Is2DPositionInDisp(GetPos(), Radius)) { return; }
 			//ÉuÉâÅ[
 			for (auto& b : GetBlur()) {
 				if (b.IsActive()) {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(16.f * b.GetPer()), 0, 255));
 					Vector3DX DispPos;
 					Convert2DtoDisp(b.GetPos(), &DispPos);
-					DrawCircle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), static_cast<int>(Radius * std::pow(b.GetPer(), 0.5f)), (this->m_ShotPlayerID == 0) ? Yellow : Green);
+					DrawCircle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), static_cast<int>(static_cast<float>(Radius) * std::pow(b.GetPer(), 0.5f)), (this->m_ShotPlayerID == 0) ? Yellow : Green);
 				}
 			}
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			//ñ{ëÃ
 			Vector3DX DispPos;
 			Convert2DtoDisp(GetPos(), &DispPos);
-			DrawCircle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), static_cast<int>(Radius), (this->m_ShotPlayerID == 0) ? Yellow : Green);
+			DrawCircle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), Radius, (this->m_ShotPlayerID == 0) ? Yellow : Green);
 		}
 		void BulletObject::Dispose_Sub(void) noexcept {}
 	};

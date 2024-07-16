@@ -83,8 +83,10 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& p = PlayerMngr->GetPlayer(value);
 			if (p->GetChara()) {
+				int Radius = GetDispSize(10.f);
+				if (!Is2DPositionInDisp(p->GetChara()->GetPos(), Radius)) { return; }
 				Vector3DX DispPos;
-				Convert2DtoDisp(p->GetChara()->GetPos(),&DispPos);
+				Convert2DtoDisp(p->GetChara()->GetPos(), &DispPos);
 				double Deg = (double)p->GetChara()->GetViewRad() / (DX_PI * 2.0) * 100.0;
 				double Watch;
 				if (value == 0) {
@@ -103,7 +105,7 @@ namespace FPS_n2 {
 					}
 					Watch = 45.0 / 360.0 * 100.0;
 				}
-				DrawCircleGauge(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), Deg + Watch, this->m_Watch.get(), Deg - Watch, (double)GetDispSize(10.f) / 64.0);
+				DrawCircleGauge(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), Deg + Watch, this->m_Watch.get(), Deg - Watch, (double)Radius / 64.0);
 			}
 		}
 		void InGameUIControl::DrawCharaUI_Front(PlayerID value) noexcept {
@@ -125,6 +127,8 @@ namespace FPS_n2 {
 				if (p->GetChara()->GetGraphTimer() < 0.25f) {
 					Per = (p->GetChara()->GetGraphTimer() - (0.25f - EndTimer)) / EndTimer;
 				}
+				int Radius = GetDispSize(1.f);
+				if (!Is2DPositionInDisp(p->GetChara()->GetPos(), Radius)) { return; }
 				Vector3DX DispPos;
 				Convert2DtoDisp(p->GetChara()->GetPos(), &DispPos);
 				int ShadowOfset = DrawParts->GetScreenY(3);
@@ -241,6 +245,8 @@ namespace FPS_n2 {
 				auto& p = PlayerMngr->GetPlayer((PlayerID)i);
 				if (p->GetChara()) {
 					if (p->GetChara()->CanLookPlayer0()) {
+						int Radius = GetDispSize(1.f);
+						if (!Is2DPositionInDisp(p->GetChara()->GetPos(), Radius)) { continue; }
 						SetDrawBright(255, 255, 255);
 						Vector3DX DispPos;
 						Convert2DtoDisp(p->GetChara()->GetPos(), &DispPos);
@@ -332,7 +338,7 @@ namespace FPS_n2 {
 				auto* Fonts = FontPool::Instance();
 				auto* LocalizeParts = LocalizePool::Instance();
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * this->m_MapDrawPer), 0, 255));
-				Fonts->Get(FontPool::FontType::Nomal_AA)->DrawString(DrawParts->GetUIY(64), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+				Fonts->Get(FontPool::FontType::Nomal_AA, DrawParts->GetUIY(64))->DrawString(-1, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 					DrawParts->GetUIY(64), DrawParts->GetUIY(128), White, Black, LocalizeParts->Get(this->m_MapTextID));
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
@@ -512,7 +518,7 @@ namespace FPS_n2 {
 					if (MsgID != 0) {
 						auto* Fonts = FontPool::Instance();
 						auto* LocalizeParts = LocalizePool::Instance();
-						Fonts->Get(FontPool::FontType::Nomal_AA)->DrawString(DrawParts->GetUIY(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+						Fonts->Get(FontPool::FontType::Nomal_AA, DrawParts->GetUIY(18))->DrawString(-1, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																			x1 + DrawParts->GetUIY(32), y1 + DrawParts->GetUIY(32), White, Black, LocalizeParts->Get(NameID));
 
 						int NowC = static_cast<int>(this->m_MsgBoxSeek);

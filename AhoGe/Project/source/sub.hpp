@@ -93,6 +93,8 @@ namespace FPS_n2 {
 		};
 		// 空間上から画面上への変換
 		extern inline void Convert2DtoDisp(const Vector3DX& Pos2D, Vector3DX* pRet) noexcept;
+		// 空間上から画面上への変換
+		extern inline bool Is2DPositionInDisp(const Vector3DX& Pos2D, int Radius) noexcept;
 		// ベクトルのxy間の角度を取得
 		extern inline float GetRadVec2Vec(const Vector3DX& vec1, const Vector3DX& vec2) noexcept;
 		// 空間上のタイルごとのサイズを取得

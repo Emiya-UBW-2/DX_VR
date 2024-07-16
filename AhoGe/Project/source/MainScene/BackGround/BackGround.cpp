@@ -130,16 +130,10 @@ namespace FPS_n2 {
 		}
 		// 線分の間で壁に当たっているか
 		float BackGroundClassBase::CheckHideShadow(const Vector3DX& PosA, const Vector3DX& PosB, float Radius) noexcept {
-			auto* DrawParts = DXDraw::Instance();
 			float Ret = 1.f;
 			for (auto& B : this->m_CheckWallBlick) {
 				// 範囲外
-				Vector3DX DispPos;
-				Convert2DtoDisp(B->GetPos(), &DispPos);
-				if (!HitPointToRectangle(
-					static_cast<int>(DispPos.x), static_cast<int>(DispPos.y),
-					static_cast<int>(-Radius), static_cast<int>(-Radius),
-					DrawParts->GetScreenY(1920) + static_cast<int>(Radius), DrawParts->GetScreenY(1080) + static_cast<int>(Radius))) { continue; }
+				if (!Is2DPositionInDisp(B->GetPos(), static_cast<int>(Radius))) { continue; }
 				//ヒットするかとヒットした場合の透明度を指定
 				float tmp = 1.f;
 				if (B->CheckLineHit(PosA, PosB)) {
@@ -550,9 +544,7 @@ namespace FPS_n2 {
 					AddAmbShadow();
 					int Radius = GetDispSize(0.5f) + DrawParts->GetScreenY(static_cast<int>(this->m_AmbientShadowLength));
 					for (auto& B : this->m_CheckWallBlick) {
-						Vector3DX DispPos;
-						Convert2DtoDisp(B->GetPos(), &DispPos);
-						if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), -Radius, -Radius, DrawParts->GetScreenY(1920) + Radius, DrawParts->GetScreenY(1080) + Radius)) { continue; }
+						if (!Is2DPositionInDisp(B->GetPos(), Radius)) { continue; }
 						B->DrawAmbientShadow(this->m_AmbientLightVec, this->m_AmbientLightRad, this->m_MapChip.at(0));
 					}
 				}
@@ -565,9 +557,7 @@ namespace FPS_n2 {
 				DrawBox_2D(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), White, true);
 				int Radius = GetDispSize(0.5f) + DrawParts->GetScreenY(255);
 				for (auto& B : this->m_CheckWallBlick) {
-					Vector3DX DispPos;
-					Convert2DtoDisp(B->GetPos(), &DispPos);
-					if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), -Radius, -Radius, DrawParts->GetScreenY(1920) + Radius, DrawParts->GetScreenY(1080) + Radius)) { continue; }
+					if (!Is2DPositionInDisp(B->GetPos(), Radius)) { continue; }
 					B->DrawPointShadow(this->m_PointLightPos, this->m_MapChip.at(0));
 				}
 			}
@@ -580,9 +570,9 @@ namespace FPS_n2 {
 			float Size = static_cast<float>(Radius * 2) / (32 - 1);
 			// 床
 			for (auto& B : this->m_FloorBlick) {
+				if (!Is2DPositionInDisp(B->GetPos(), Radius)) { continue; }
 				Vector3DX DispPos;
 				Convert2DtoDisp(B->GetPos(), &DispPos);
-				if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), -Radius, -Radius, DrawParts->GetScreenY(1920) + Radius, DrawParts->GetScreenY(1080) + Radius)) { continue; }
 				this->m_MapChip.at(static_cast<size_t>(B->GetPalette().at(0).GetpaletteNum())).DrawRotaGraph(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), Size, B->GetPalette().at(0).GetZRad(), FALSE);
 			}
 			// 影
@@ -617,9 +607,9 @@ namespace FPS_n2 {
 			}
 			// 壁
 			for (auto& B : this->m_WallBlick) {
+				if (!Is2DPositionInDisp(B->GetPos(), Radius)) { continue; }
 				Vector3DX DispPos;
 				Convert2DtoDisp(B->GetPos(), &DispPos);
-				if (!HitPointToRectangle(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y), -Radius, -Radius, DrawParts->GetScreenY(1920) + Radius, DrawParts->GetScreenY(1080) + Radius)) { continue; }
 				for (int i = 0; i < 5; i++) {
 					if (B->GetPalette().at(static_cast<size_t>(i)).IsActive()) {
 						this->m_WallChip.at(static_cast<size_t>(B->GetPalette().at(static_cast<size_t>(i)).GetpaletteNum())).DrawRotaGraph(static_cast<int>(DispPos.x), static_cast<int>(DispPos.y),Size, B->GetPalette().at(static_cast<size_t>(i)).GetZRad(), i != 0);
