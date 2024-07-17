@@ -116,14 +116,14 @@ namespace FPS_n2 {
 			yp1 = ymin + LineHeight;
 			int Height = DrawParts->GetUIY(12);
 			for (auto& c : this->m_CreditStr) {
-				if (this->m_CreditCoulm >= (&c - &this->m_CreditStr.front())) { break; }
+				if (this->m_CreditCoulm < static_cast<int>(&c - &this->m_CreditStr.front())) { break; }
 				int xpos = xp1 + DrawParts->GetUIY(6);
 				int ypos = yp1 + Height / 2;
-				Fonts->Get(FontPool::FontType::Gothic_Edge, Height)->DrawString(-1, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
+				Fonts->Get(FontPool::FontType::DIZ_UD_Gothic, Height, 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
 																	 xpos, ypos, White, Black, c.first);
 
 				xpos = xmax - DrawParts->GetUIY(24);
-				Fonts->Get(FontPool::FontType::Gothic_Edge, Height)->DrawString(-1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
+				Fonts->Get(FontPool::FontType::DIZ_UD_Gothic, Height, 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
 																	 xpos, ypos, White, Black, c.second);
 				yp1 += Height;
 			}

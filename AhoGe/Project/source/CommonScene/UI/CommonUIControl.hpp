@@ -55,7 +55,7 @@ namespace FPS_n2 {
 				void			Load_String(const char* String, int fontsize, bool IsEnableSelect) noexcept {
 					auto* Fonts = FontPool::Instance();
 					snprintfDx(this->m_String, 64, String);
-					xsize = Fonts->Get(FontPool::FontType::Nomal_AA, fontsize)->GetStringWidth(-1, this->m_String);
+					xsize = Fonts->Get(FontPool::FontType::MS_Gothic, fontsize, 0)->GetStringWidth(INVALID_ID, this->m_String);
 					ysize = fontsize;
 					this->m_ButtonMode = ButtonMode::String;
 					this->m_EnableSelect = IsEnableSelect;
@@ -200,8 +200,8 @@ namespace FPS_n2 {
 											break;
 									}
 								}
-								Fonts->Get(FontPool::FontType::Nomal_AA, DrawParts->GetUIY(ysize))->DrawString(-1, LMR, TMB,
-																					DrawParts->GetUIY(xp1), DrawParts->GetUIY(yp1 + static_cast<int>(SelYadd)), Color, Black, this->m_String);
+								Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(ysize), 0)->DrawString(INVALID_ID, LMR, TMB,
+																												   DrawParts->GetUIY(xp1), DrawParts->GetUIY(yp1 + static_cast<int>(SelYadd)), Color, Black, this->m_String);
 							}
 							break;
 						case ButtonMode::Icon:

@@ -3,7 +3,6 @@
 
 namespace FPS_n2 {
 	// ’è”
-	constexpr int INVALID_ID = -1;
 	constexpr float Frame_Rate{60.f};
 	constexpr float Scale_Rate{12.5f};
 

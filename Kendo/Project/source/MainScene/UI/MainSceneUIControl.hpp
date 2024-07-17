@@ -223,13 +223,13 @@ namespace FPS_n2 {
 				{
 					xp1 = DrawParts->GetUIY(30);
 					yp1 = DrawParts->GetUIY(10);
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL)->DrawString(DrawParts->GetUIY(32), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL)->DrawString(DrawParts->GetUIY(32), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + DrawParts->GetUIY(240), yp1, White, Black, "%d:%05.2f",
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL, DrawParts->GetUIY(32))->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL, DrawParts->GetUIY(32))->DrawString(INVALID_ID, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + DrawParts->GetUIY(240), yp1, White, Black, "%d:%05.2f",
 						(int)(floatParam[0] / 60.f), (float)((int)(floatParam[0]) % 60) + (floatParam[0] - (float)((int)(floatParam[0]))));
 
 					xp1 = DrawParts->GetUIY(1920 / 2);
 					yp1 = DrawParts->GetUIY(10);
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL)->DrawString(DrawParts->GetUIY(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "%d : %d", intParam[0], intParam[1]);
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL, DrawParts->GetUIY(32))->DrawString(INVALID_ID, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "%d : %d", intParam[0], intParam[1]);
 				}
 				//î•ñ
 				{
@@ -245,7 +245,7 @@ namespace FPS_n2 {
 						SetDrawBright(255, 255, 255);
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 					}
-					Fonts->Get(FontPool::FontType::Nomal_EdgeL)->DrawString(DrawParts->GetUIY(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
+					Fonts->Get(FontPool::FontType::Nomal_EdgeL, DrawParts->GetUIY(24))->DrawString(INVALID_ID, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
 
 					//‹C‡
 					xp1 = DrawParts->GetUIY(24);

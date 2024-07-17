@@ -11,6 +11,8 @@ namespace FPS_n2 {
 			float							m_UpperAnim{0.f};
 		public://ÉQÉbÉ^Å[
 			const auto GetFrameWorldMat(WeaponFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix(GetFrame((int)frame)); }
+			Vector3DX GetFramePosition(WeaponFrame frame) const noexcept { return MV1GetFramePosition(GetObj_const().GetHandle(), GetFrame((int)frame)); }
+			//
 		public:
 			void			ResetAnim(void) noexcept { m_UpperAnim = 0.f; }
 		public:

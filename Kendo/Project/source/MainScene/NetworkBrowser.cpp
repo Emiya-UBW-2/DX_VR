@@ -26,7 +26,7 @@ namespace FPS_n2 {
 					bool into = IntoMouse(xp1, yp1, xp2, yp2);
 					color = (into) ? Black : Gray75;
 					DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
-					Fonts->Get(FontPool::FontType::Nomal_Edge)->DrawString(y_h, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1 + (xp2 - xp1) / 2, yp1, White, Black, "+");
+					Fonts->Get(FontPool::FontType::Nomal_Edge, y_h)->DrawString(INVALID_ID, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1 + (xp2 - xp1) / 2, yp1, White, Black, "+");
 					if (into) {
 						if (Pad->GetMouseClick().repeat()) {
 							UpFunc();
@@ -39,7 +39,7 @@ namespace FPS_n2 {
 					bool into = IntoMouse(xp1, yp1, xp2, yp2);
 					color = (into) ? Black : Gray75;
 					DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
-					Fonts->Get(FontPool::FontType::Nomal_Edge)->DrawString(y_h, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1 + (xp2 - xp1) / 2, yp1, White, Black, "-");
+					Fonts->Get(FontPool::FontType::Nomal_Edge, y_h)->DrawString(INVALID_ID, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1 + (xp2 - xp1) / 2, yp1, White, Black, "-");
 					if (into) {
 						if (Pad->GetMouseClick().repeat()) {
 							DownFunc();
@@ -57,16 +57,16 @@ namespace FPS_n2 {
 					xp1 = xp;
 					yp1 = yp + ys + DrawParts->GetScreenY(10) + DrawParts->GetScreenY(10);
 					if (this->m_Sequence > SequenceEnum::SelMode) {
-						Fonts->Get(FontPool::FontType::Nomal_Edge)->DrawString(y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "種別[%s]", this->m_IsClient ? "クライアント" : "サーバー"); yp1 += y_h;
+						Fonts->Get(FontPool::FontType::Nomal_Edge, y_h)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "種別[%s]", this->m_IsClient ? "クライアント" : "サーバー"); yp1 += y_h;
 					}
 					if (this->m_Sequence > SequenceEnum::Set_Port) {
-						Fonts->Get(FontPool::FontType::Nomal_Edge)->DrawString(y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "使用ポート[%d-%d]", this->m_NewSetting.UsePort, this->m_NewSetting.UsePort + Player_num - 1); yp1 += y_h;
+						Fonts->Get(FontPool::FontType::Nomal_Edge, y_h)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "使用ポート[%d-%d]", this->m_NewSetting.UsePort, this->m_NewSetting.UsePort + Player_num - 1); yp1 += y_h;
 					}
 					if (this->m_Sequence > SequenceEnum::SetTick) {
-						Fonts->Get(FontPool::FontType::Nomal_Edge)->DrawString(y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "ティックレート[%4.1f]", Frame_Rate / this->m_Tick); yp1 += y_h;
+						Fonts->Get(FontPool::FontType::Nomal_Edge, y_h)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "ティックレート[%4.1f]", Frame_Rate / this->m_Tick); yp1 += y_h;
 					}
 					if (this->m_Sequence > SequenceEnum::SetIP) {
-						Fonts->Get(FontPool::FontType::Nomal_Edge)->DrawString(y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "IP=[%d,%d,%d,%d]", this->m_NewSetting.IP.d1, this->m_NewSetting.IP.d2, this->m_NewSetting.IP.d3, this->m_NewSetting.IP.d4); yp1 += y_h;
+						Fonts->Get(FontPool::FontType::Nomal_Edge, y_h)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "IP=[%d,%d,%d,%d]", this->m_NewSetting.IP.d1, this->m_NewSetting.IP.d2, this->m_NewSetting.IP.d3, this->m_NewSetting.IP.d4); yp1 += y_h;
 					}
 				}
 			}
@@ -151,8 +151,8 @@ namespace FPS_n2 {
 						int yp1 = yp + DrawParts->GetScreenY(50) + DrawParts->GetScreenY(35)*(i + 1);
 						color = isActive ? Black : Gray75;
 						DrawBox(DrawParts->GetScreenY(200), yp1, DrawParts->GetScreenY(200) + DrawParts->GetScreenY(300), yp1 + y_h, color, TRUE);
-						Fonts->Get(FontPool::FontType::Nomal_Edge)->DrawString(y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, DrawParts->GetScreenY(200), yp1, White, Black, "Player");
-						Fonts->Get(FontPool::FontType::Nomal_Edge)->DrawString(y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, DrawParts->GetScreenY(200) + DrawParts->GetScreenY(300), yp1, White, Black, (isActive ? "〇" : ""));
+						Fonts->Get(FontPool::FontType::Nomal_Edge, y_h)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, DrawParts->GetScreenY(200), yp1, White, Black, "Player");
+						Fonts->Get(FontPool::FontType::Nomal_Edge, y_h)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, DrawParts->GetScreenY(200) + DrawParts->GetScreenY(300), yp1, White, Black, (isActive ? "〇" : ""));
 					}
 					break;
 				case SequenceEnum::MainGame:

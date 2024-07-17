@@ -338,7 +338,7 @@ namespace FPS_n2 {
 				auto* Fonts = FontPool::Instance();
 				auto* LocalizeParts = LocalizePool::Instance();
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * this->m_MapDrawPer), 0, 255));
-				Fonts->Get(FontPool::FontType::Nomal_AA, DrawParts->GetUIY(64))->DrawString(-1, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+				Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(64), 0)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 					DrawParts->GetUIY(64), DrawParts->GetUIY(128), White, Black, LocalizeParts->Get(this->m_MapTextID));
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
@@ -360,7 +360,7 @@ namespace FPS_n2 {
 				//イベントタイプ
 				if (LEFT.find("Type") != std::string::npos) {
 					this->m_CutSceneData.resize(this->m_CutSceneData.size() + 1);
-					this->m_CutSceneData.back().m_CGSel = -1;
+					this->m_CutSceneData.back().m_CGSel = INVALID_ID;
 					for (int i = 0; i < static_cast<int>(CutSceneType::Max); i++) {
 						if (RIGHT.find(g_CutSceneStr[i]) != std::string::npos) {
 							this->m_CutSceneData.back().m_Type = (CutSceneType)i;
@@ -518,7 +518,7 @@ namespace FPS_n2 {
 					if (MsgID != 0) {
 						auto* Fonts = FontPool::Instance();
 						auto* LocalizeParts = LocalizePool::Instance();
-						Fonts->Get(FontPool::FontType::Nomal_AA, DrawParts->GetUIY(18))->DrawString(-1, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+						Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18),0)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																			x1 + DrawParts->GetUIY(32), y1 + DrawParts->GetUIY(32), White, Black, LocalizeParts->Get(NameID));
 
 						int NowC = static_cast<int>(this->m_MsgBoxSeek);
@@ -543,7 +543,7 @@ namespace FPS_n2 {
 										break;
 									}
 									strncpy2_sDx(Tmp.data(), 512, NowMsg.c_str(), column); Tmp = Tmp.c_str();
-									if (Fonts->Get(FontPool::FontType::Nomal_AA, DrawParts->GetUIY(32))->GetStringWidth(-1, Tmp) < Limit) {
+									if (Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),0)->GetStringWidth(INVALID_ID, Tmp) < Limit) {
 										column++;
 									}
 									else {
@@ -576,7 +576,7 @@ namespace FPS_n2 {
 						for (auto& m : this->m_MsgString) {
 							if (m == "") { continue; }
 							int i = static_cast<int>(&m - &this->m_MsgString.front());
-							Fonts->Get(FontPool::FontType::Nomal_AA, DrawParts->GetUIY(32))->DrawString(-1, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+							Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),0)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																						  x1 + DrawParts->GetUIY(64), y1 + DrawParts->GetUIY(64) + DrawParts->GetUIY(32 * i), White, Black, m);
 						}
 					}

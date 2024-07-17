@@ -92,6 +92,7 @@ namespace FPS_n2 {
 			const auto		IsGuardStarting(void) const noexcept { return m_CharaAction == EnumWeaponAnimType::GuardStart; }
 			const auto		GetGuardStartPer(void) const noexcept { return (IsGuardStarting()) ? (m_GuardTimer / 1.f) : 0.f; }
 
+			Vector3DX		GetFramePosition(CharaFrame frame) const noexcept { return MV1GetFramePosition(GetObj_const().GetHandle(), GetFrame((int)frame)); }
 		public://セッター
 			bool			SetDamageEvent(const DamageEvent& value) noexcept;
 		private: //更新関連

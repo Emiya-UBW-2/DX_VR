@@ -98,7 +98,7 @@ namespace FPS_n2 {
 			int							m_PointX{};
 			int							m_PointY{};
 			float						m_WaitMS{ 0.f };
-			int							m_CGSel{-1};
+			int							m_CGSel{INVALID_ID};
 			float						m_CGFade{0.f};
 			GraphHandle					m_CGGraph;
 		protected:

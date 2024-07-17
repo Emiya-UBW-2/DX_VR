@@ -391,9 +391,9 @@ namespace FPS_n2 {
 						EventChip tmp;
 						tmp.m_index = GetXYToNum(x, y);
 						tmp.m_EventID = b;//青色部分にイベントIDを埋め込む
-						tmp.m_CutSceneID = -1;
+						tmp.m_CutSceneID = INVALID_ID;
 						tmp.m_ActiveDelaySec = 0;
-						tmp.m_WinCutSceneID = -1;
+						tmp.m_WinCutSceneID = INVALID_ID;
 						this->m_EventChip.emplace_back(tmp);
 					}
 				}
@@ -504,7 +504,7 @@ namespace FPS_n2 {
 								//遷移用設定
 								else if (LEFT.find("NextStage") != std::string::npos) {
 									if (RIGHT == "None") {
-										e.m_EntryID = -1;
+										e.m_EntryID = INVALID_ID;
 									}
 									else {
 										e.m_EntryID = std::stoi(RIGHT.substr(0, 3));
