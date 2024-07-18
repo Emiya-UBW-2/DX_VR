@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning(disable:4464)
 #include	"../../Header.hpp"
 
 namespace FPS_n2 {
@@ -30,7 +31,7 @@ namespace FPS_n2 {
 			Saber_G_Suriage,
 			Max,
 		};
-		static const char* EnumWeaponAnimName[(int)EnumWeaponAnim::Max] = {
+		static const char* EnumWeaponAnimName[static_cast<int>(EnumWeaponAnim::Max)] = {
 			"Saber_Ready",
 			"Saber_Run",
 			"Saber_Men",
@@ -46,7 +47,7 @@ namespace FPS_n2 {
 			EnumWeaponAnim		m_EnumWeaponAnim{EnumWeaponAnim::Saber_Ready};
 			bool			m_IsLoop{true};
 		public:
-			void Set(const std::string& data, EnumWeaponAnim EnumSel) {
+			void Set(const std::string& data, EnumWeaponAnim EnumSel) noexcept {
 				std::vector<std::string> Args;
 				std::string RIGHTBuf = data;
 				//タブけし
@@ -75,25 +76,25 @@ namespace FPS_n2 {
 				m_IsLoop = (Args[0] == "Loop");
 			}
 		public:
-			const auto& GetEnumWeaponAnim() const noexcept { return this->m_EnumWeaponAnim; }
-			const auto& GetIsLoop() const noexcept { return this->m_IsLoop; }
+			const auto& GetEnumWeaponAnim(void) const noexcept { return this->m_EnumWeaponAnim; }
+			const auto& GetIsLoop(void) const noexcept { return this->m_IsLoop; }
 		};
 		class WeaponAnimNow {
 			Vector3DX		m_BodyRotate;
 			Vector3DX		m_Rotate;
 			Vector3DX		m_Pos;
 		public:
-			void Set(const Vector3DX& BodyRotate, const Vector3DX& Rotate, const Vector3DX& Pos) {
+			void Set(const Vector3DX& BodyRotate, const Vector3DX& Rotate, const Vector3DX& Pos) noexcept {
 				m_BodyRotate = BodyRotate;
 				m_Rotate = Rotate;
 				m_Pos = Pos;
 			}
 		public:
-			const auto& GetBodyRotate() const noexcept { return this->m_BodyRotate; }
-			const auto& GetRotate() const noexcept { return this->m_Rotate; }
-			const auto& GetPos() const noexcept { return this->m_Pos; }
+			const auto& GetBodyRotate(void) const noexcept { return this->m_BodyRotate; }
+			const auto& GetRotate(void) const noexcept { return this->m_Rotate; }
+			const auto& GetPos(void) const noexcept { return this->m_Pos; }
 
-			const auto	GetMatrix() const noexcept {
+			auto	GetMatrix(void) const noexcept {
 				return
 					Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(this->m_Rotate.x)) *
 					Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(this->m_Rotate.y)) *
@@ -107,7 +108,7 @@ namespace FPS_n2 {
 			Vector3DX		m_Pos;
 			int				m_Frame{1};
 		public:
-			void Set(const std::string& data) {
+			void Set(const std::string& data) noexcept {
 				std::vector<std::string> Args;
 				std::string RIGHTBuf = data;
 				//タブけし
@@ -146,10 +147,10 @@ namespace FPS_n2 {
 				m_Frame = std::stoi(Args[9]);
 			}
 		public:
-			const auto& GetBodyRotate() const noexcept { return this->m_BodyRotate; }
-			const auto& GetRotate() const noexcept { return this->m_Rotate; }
-			const auto& GetPos() const noexcept { return this->m_Pos; }
-			const auto& GetFrame() const noexcept { return this->m_Frame; }
+			const auto& GetBodyRotate(void) const noexcept { return this->m_BodyRotate; }
+			const auto& GetRotate(void) const noexcept { return this->m_Rotate; }
+			const auto& GetPos(void) const noexcept { return this->m_Pos; }
+			const auto& GetFrame(void) const noexcept { return this->m_Frame; }
 		};
 
 		class WeaponAnimManager : public SingletonBase<WeaponAnimManager> {
@@ -162,7 +163,7 @@ namespace FPS_n2 {
 				std::shared_ptr<WeaponanimData> first;
 				std::vector<std::shared_ptr<WeaponAnim>> second;
 
-				const auto GetTotalTime() const {
+				auto	GetTotalTime() const {
 					int total = 0;
 					for (auto& ani : second) {
 						total += ani->GetFrame();
@@ -178,9 +179,17 @@ namespace FPS_n2 {
 			Vector3DX DBG_AnimPos;
 
 #endif
+		private:
+			WeaponAnimManager(void) noexcept {}
+			WeaponAnimManager(const WeaponAnimManager&) = delete;
+			WeaponAnimManager(WeaponAnimManager&& o) = delete;
+			WeaponAnimManager& operator=(const WeaponAnimManager&) = delete;
+			WeaponAnimManager& operator=(WeaponAnimManager&& o) = delete;
+
+			virtual ~WeaponAnimManager(void) noexcept {}
 		public:
-			void	Load(const char* filepath) {
-				for (int loop = 0; loop < (int)EnumWeaponAnim::Max; loop++) {
+			void	Load(const char* filepath) noexcept {
+				for (int loop = 0; loop < static_cast<int>(EnumWeaponAnim::Max); loop++) {
 					std::string Path = filepath;
 					Path += EnumWeaponAnimName[loop];
 					Path += ".txt";
@@ -212,7 +221,7 @@ namespace FPS_n2 {
 			WeaponAnimNow	GetAnimNow(const AnimDatas* data, float nowframe) noexcept {
 				WeaponAnimNow Ret; Ret.Set(Vector3DX::zero(), Vector3DX::zero(), Vector3DX::zero());
 				if (data) {
-					float totalTime = (float)data->GetTotalTime();
+					float totalTime = static_cast<float>(data->GetTotalTime());
 					if (data->first->GetIsLoop()) {
 						while (true) {
 							if ((nowframe - totalTime) > 0.f) {
@@ -229,7 +238,7 @@ namespace FPS_n2 {
 						}
 					}
 					for (auto ani = data->second.begin(), e = data->second.end() - 1; ani != e; ++ani) {
-						float Frame = (float)(*ani)->GetFrame();
+						float Frame = static_cast<float>((*ani)->GetFrame());
 						if ((nowframe - Frame) <= 0.f) {
 							Ret.Set(
 								Vector3DX::zero(),
@@ -304,7 +313,7 @@ namespace FPS_n2 {
 
 
 		struct GunAnimSet {
-			std::array<EnumWeaponAnim, (int)EnumWeaponAnimType::Max> Anim;
+			std::array<EnumWeaponAnim, static_cast<int>(EnumWeaponAnimType::Max)> Anim;
 		};
 		const GunAnimSet GunAnimeSets[] = {
 			{

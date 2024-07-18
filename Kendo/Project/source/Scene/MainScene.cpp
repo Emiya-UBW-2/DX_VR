@@ -5,8 +5,9 @@ namespace FPS_n2 {
 		void			MAINLOOP::Load_Sub(void) noexcept {
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
+			auto* BackGround = BackGroundClass::Instance();
 			//BG
-			this->m_BackGround->Load();
+			BackGround->Load();
 			//
 			BattleResourceMngr->Load();
 			PlayerMngr->Init(Vehicle_num);
@@ -21,10 +22,11 @@ namespace FPS_n2 {
 			auto* OptionParts = OPTION::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
+			auto* BackGround = BackGroundClass::Instance();
 			//
 			BattleResourceMngr->Set();
 			//
-			this->m_BackGround->Init();
+			BackGround->Init();
 			//
 			Vector3DX LightVec = Vector3DX::vget(1.3f, -0.5f, 0.05f);LightVec = LightVec.normalized();
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
@@ -40,32 +42,34 @@ namespace FPS_n2 {
 			BattleResourceMngr->LoadGun("Bamboo", (PlayerID)0);
 
 			for (int index = 0; index < Player_num; index++) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-				//BGをオブジェに登録
-				c->SetMapCol(this->m_BackGround);
+				auto& p = PlayerMngr->GetPlayer(index);
+				auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
+				c->SetViewID(0);
 				//人の座標設定
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f*Scale_Rate)*(float)(index*2-1));
+					pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f*Scale_Rate)*static_cast<float>(index*2-1));
 
 					Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f*Scale_Rate;
-					if (this->m_BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f*Scale_Rate, &EndPos, true)) {
+					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f*Scale_Rate, &EndPos, true)) {
 						pos_t = EndPos;
 					}
 					c->ValueSet((PlayerID)index, false, CharaTypeID::Team);
-					c->MovePoint(deg2rad(0.f), deg2rad(180.f*(float)index), pos_t);
+					c->MovePoint(deg2rad(0.f), deg2rad(180.f* static_cast<float>(index)), pos_t);
 				}
-				m_AICtrl[index]->Init(this->m_BackGround, (PlayerID)index);
+				p->GetAI()->Init((PlayerID)index);
 			}
 			//UI
 			this->m_UIclass.Set();
 			//this->m_UILayer = UISystem::Instance()->AddUI("data/UI/MainLoop.json");
 			//
 			this->m_DamageEvents.clear();
-			this->m_NetWorkBrowser.Init();
+			m_NetWorkBrowser = std::make_unique<NetWorkBrowser>();
+			this->m_NetWorkBrowser->Init();
 		}
 		bool			MAINLOOP::Update_Sub(void) noexcept {
 			auto* PostPassParts = PostPassEffect::Instance();
+			auto* BackGround = BackGroundClass::Instance();
 #ifdef DEBUG
 			/*
 			{
@@ -103,6 +107,8 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
+
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 
 			auto* Pad = PadControl::Instance();
 			Pad->SetMouseMoveEnable(true);
@@ -147,7 +153,7 @@ namespace FPS_n2 {
 #endif // DEBUG
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
-				//SE->Get((int)SoundEnum::Environment).Play(0, DX_PLAYTYPE_LOOP, TRUE);
+				//SE->Get(static_cast<int>(SoundEnum::Environment)).Play(0, DX_PLAYTYPE_LOOP, TRUE);
 				this->m_fov_base = DrawParts->GetMainCamera().GetCamFov();
 			}
 			//Input,AI
@@ -172,84 +178,60 @@ namespace FPS_n2 {
 
 				MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 				MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
-				//スコープ
-				{
-					auto OLD = this->m_TPSLen;
-					this->m_zoom = 2.0f;
-					this->m_TPSLen = 8;
-					this->m_changeview = ((this->m_TPSLen != OLD) && (this->m_TPSLen == 0));
-					Easing(&this->m_range_r, (float)this->m_TPSLen *8.f / 6.f, 0.8f, EasingType::OutExpo);
-
-					bool IsADS = (this->m_TPSLen == 0);
-					{
-						if (m_IsChangeView != IsADS) {
-							this->m_ChangeViewPer = 1.f;
-						}
-						else {
-							Easing(&this->m_ChangeViewPer, 0.f, 0.95f, EasingType::OutExpo);
-						}
-						m_IsChangeView = IsADS;
-					}
-				}
-				/*
 				//ネットワーク
-				SendInfo ans;
-				ans.m_Pos = Vehicle->GetMove().pos;
-				ans.m_Vec = Vehicle->GetMove().vec;
-				ans.m_rad.y = (Vehicle->Get_body_yrad());
-				ans.m_Damage = &Vehicle->GetDamageEvent();
-				ans.m_DamageSwitch = (Vehicle->GetDamageSwitch() ? 1 : 0);
-				this->m_NetWorkBrowser.FirstExecute(MyInput, ans);
-				//*/
-				//クライアント
-				if (m_NetWorkBrowser.GetClient()) {
-					/*
-					for (int i = 0; i < Vehicle_num; i++) {
-						auto& v = PlayerMngr->GetPlayer(i).GetVehicle();
-						if (v->GetMyPlayerID() == GetMyPlayerID()) {
-							v->SetCharaType(CharaTypeID::Mine);
-						}
-						else {
-							v->SetCharaType(CharaTypeID::Enemy);
-						}
-					}
-					//*/
-				}
-				//
 				bool isready = true;
-				for (int index = 0; index < Player_num; index++) {
-					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-					if (m_NetWorkBrowser.GetSequence() == SequenceEnum::MainGame) {
-						auto tmp = this->m_NetWorkBrowser.GetNowServerPlayerData(index, false);
+
+				PlayerNetData ans;
+				ans.SetMyPlayer(
+					MyInput,
+					Chara->GetMove(),
+					Chara->GetDamageEvent());
+				this->m_NetWorkBrowser->FirstExecute(ans);
+				//
+				if (m_NetWorkBrowser->GetSequence() == SequenceEnum::MainGame) {
+					for (int index = 0; index < Player_num; index++) {
+						auto& p = PlayerMngr->GetPlayer(index);
+						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
+						auto tmp = this->m_NetWorkBrowser->GetNowServerPlayerData((PlayerID)index, false);
+						c->SetViewID(GetMyPlayerID());
 						if (index == GetMyPlayerID()) {
-							MyInput.SetKeyInputFlags(tmp.Input);//キーフレームだけサーバーに合わせる
+							MyInput.SetKeyInputFlags(tmp.GetInput());//キーフレームだけサーバーに合わせる
 							c->SetInput(MyInput, isready);
-							m_NetWorkBrowser.GetRecvData(index, tmp.GetFrame());
 						}
 						else {
-							if (!m_NetWorkBrowser.GetClient()) {
-								m_AICtrl[index]->Execute(&tmp.Input);
+							if (!m_NetWorkBrowser->GetClient()) {
+								//cpu
+								//p->GetAI()->Execute(&MyInput);
+								//player
+								//MyInput = tmp.GetInput();
 							}
-							c->SetInput(tmp.Input, isready);
+							c->SetInput(tmp.GetInput(), isready);
 							bool override_true = true;
 							override_true = tmp.GetIsActive();
 							if (override_true) {
-								c->SetPosBufOverRide(tmp.m_move);
+								c->SetPosBufOverRide(tmp.GetMove());
 							}
 
 						}
 						//ダメージイベント処理
-						for (auto& e : tmp.m_DamageEvents) {
+						/*
+						for (auto& e : tmp.GetDamageEvents()) {
 							this->m_DamageEvents.emplace_back(e);
 						}
+						//*/
 					}
-					else {
+				}
+				else {//オフライン
+					for (int index = 0; index < Player_num; index++) {
+						auto& p = PlayerMngr->GetPlayer(index);
+						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
+						c->SetViewID(GetMyPlayerID());
 						if (index == GetMyPlayerID()) {
 							c->SetInput(MyInput, isready);
 						}
 						else {
 							InputControl OtherInput;
-							m_AICtrl[index]->Execute(&OtherInput);
+							p->GetAI()->Execute(&OtherInput);
 							c->SetInput(OtherInput, isready);
 						}
 						//ダメージイベント処理
@@ -261,13 +243,14 @@ namespace FPS_n2 {
 						//*/
 					}
 				}
-				m_NetWorkBrowser.LateExecute();
+				m_NetWorkBrowser->LateExecute();
 				//ダメージイベント
 				for (int index = 0; index < Player_num; index++) {
-					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-					for (int j = 0; j < this->m_DamageEvents.size(); j++) {
-						if (c->SetDamageEvent(this->m_DamageEvents[j])) {
-							std::swap(this->m_DamageEvents.back(), m_DamageEvents[j]);
+					auto& p = PlayerMngr->GetPlayer(index);
+					auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
+					for (int j = 0; j < static_cast<int>(this->m_DamageEvents.size()); j++) {
+						if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)])) {
+							std::swap(this->m_DamageEvents.back(), m_DamageEvents[static_cast<size_t>(j)]);
 							this->m_DamageEvents.pop_back();
 							j--;
 						}
@@ -281,7 +264,7 @@ namespace FPS_n2 {
 				DrawParts->Set_is_Blackout(m_Concussion > 0.f);
 				if (m_Concussion == 1.f) {
 					CameraShake::Instance()->SetCamShake(0.5f, 0.05f*Scale_Rate);
-					//SE->Get((int)SoundEnum::Tank_near).Play_3D(0, DrawParts->GetMainCamera().GetCamPos(), 10.f*Scale_Rate, 128);//, DX_PLAYTYPE_LOOP
+					//SE->Get(static_cast<int>(SoundEnum::Tank_near)).Play_3D(0, DrawParts->GetMainCamera().GetCamPos(), 10.f*Scale_Rate, 128);//, DX_PLAYTYPE_LOOP
 				}
 				if (m_Concussion > 0.9f) {
 					Easing(&m_ConcussionPer, 1.f, 0.1f, EasingType::OutExpo);
@@ -300,10 +283,9 @@ namespace FPS_n2 {
 				DrawParts->Set_Per_Blackout(m_ConcussionPer * 1.5f);
 				m_Concussion = std::max(m_Concussion - 1.f / DrawParts->GetFps(), 0.f);
 			}
-			this->m_BackGround->FirstExecute();
+			BackGround->FirstExecute();
 			ObjMngr->LateExecuteObject();
 			//視点
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
 			{
 				auto* OptionParts = OPTION::Instance();
 
@@ -358,12 +340,12 @@ namespace FPS_n2 {
 				//DoF
 				PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.3f, Scale_Rate * 5.f, Scale_Rate * 0.1f, Scale_Rate * 20.f);
 			}
-			this->m_BackGround->Execute();
+			BackGround->Execute();
 			//UIパラメーター
 			{
 				if (GetIsFirstLoop()) {
-					this->m_UIclass.InitGaugeParam(0, (int)Chara->GetStamina(), (int)Chara->GetStaminaMax());
-					this->m_UIclass.InitGaugeParam(1, (int)Chara->GetStamina(), (int)Chara->GetStaminaMax());
+					this->m_UIclass.InitGaugeParam(0, static_cast<int>(Chara->GetStamina()), static_cast<int>(Chara->GetStaminaMax()));
+					this->m_UIclass.InitGaugeParam(1, static_cast<int>(Chara->GetStamina()), static_cast<int>(Chara->GetStaminaMax()));
 				}
 				//NvsN
 				this->m_UIclass.SetIntParam(0, 0);
@@ -371,11 +353,11 @@ namespace FPS_n2 {
 				//timer
 				this->m_UIclass.SetfloatParam(0, 0.f);
 				//心拍数
-				this->m_UIclass.SetIntParam(2, (int)Chara->GetHeartRate());
+				this->m_UIclass.SetIntParam(2, static_cast<int>(Chara->GetHeartRate()));
 				this->m_UIclass.SetfloatParam(1, Chara->GetHeartRatePow());
 				//ゲージ
 				this->m_UIclass.SetGaugeParam(0, 100,100, 15);
-				this->m_UIclass.SetGaugeParam(1, (int)Chara->GetStamina(), (int)Chara->GetStaminaMax(), 15);
+				this->m_UIclass.SetGaugeParam(1, static_cast<int>(Chara->GetStamina()), static_cast<int>(Chara->GetStaminaMax()), 15);
 				//ガード円
 				Easing(&m_GuardStart, Chara->IsGuardStarting() ? 1.f : 0.f, Chara->IsGuardStarting() ? 0.8f : 0.5f, EasingType::OutExpo);
 				this->m_UIclass.SetfloatParam(2, m_GuardStart);
@@ -390,13 +372,14 @@ namespace FPS_n2 {
 		}
 		void			MAINLOOP::Dispose_Sub(void) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
+			auto* BackGround = BackGroundClass::Instance();
 			//使い回しオブジェ系
-			ObjectManager::Instance()->DelObj(&PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara());
-			PlayerMngr->GetPlayer(GetMyPlayerID()).Dispose();
-			this->m_BackGround->Dispose();
-			this->m_BackGround.reset();
+			ObjectManager::Instance()->DelObj(&PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara());
+			PlayerMngr->GetPlayer(GetMyPlayerID())->Dispose();
+			BackGround->Dispose();
 			//
-			m_NetWorkBrowser.Dispose();
+			m_NetWorkBrowser->Dispose();
+			m_NetWorkBrowser.reset();
 			{
 				auto* DrawParts = DXDraw::Instance();
 				PostPassEffect::Instance()->SetLevelFilter(0, 255, 1.f);
@@ -412,10 +395,53 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			BattleResourceMngr->Dispose();
-			m_AICtrl.clear();
 			this->m_UIclass.Dispose();
 			PlayerMngr->Dispose();
 			ObjectManager::Instance()->DeleteAll();
+		}
+
+		//
+		void			MAINLOOP::BG_Draw_Sub(void) noexcept {
+			auto* BackGround = BackGroundClass::Instance();
+			BackGround->BG_Draw();
+		}
+		void			MAINLOOP::ShadowDraw_Far_Sub(void) noexcept {
+			auto* BackGround = BackGroundClass::Instance();
+			BackGround->Shadow_Draw_Far();
+		}
+		void			MAINLOOP::ShadowDraw_Sub(void) noexcept {
+			auto* BackGround = BackGroundClass::Instance();
+			BackGround->Shadow_Draw();
+			ObjectManager::Instance()->Draw_Shadow();
+		}
+		void			MAINLOOP::CubeMap_Sub(void) noexcept {
+			auto* BackGround = BackGroundClass::Instance();
+			BackGround->Draw();
+		}
+
+		void			MAINLOOP::MainDraw_Sub(void) noexcept {
+			auto* BackGround = BackGroundClass::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto* DrawParts = DXDraw::Instance();
+			SetFogStartEnd(DrawParts->GetMainCamera().GetCamNear(), DrawParts->GetMainCamera().GetCamFar() * 2.f);
+			BackGround->Draw();
+			ObjectManager::Instance()->Draw();
+			//ObjectManager::Instance()->Draw_Depth();
+			for (int i = 0; i < Player_num; i++) {
+				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
+			}
+
+		}
+		//UI表示
+		void			MAINLOOP::DrawUI_Base_Sub(void) noexcept {
+		}
+		void			MAINLOOP::DrawUI_In_Sub(void) noexcept {
+			//UI
+			if (!DXDraw::Instance()->IsPause()) {
+				this->m_UIclass.Draw();
+			}
+			//通信設定
+			//this->m_NetWorkBrowser->Draw();
 		}
 	};
 };

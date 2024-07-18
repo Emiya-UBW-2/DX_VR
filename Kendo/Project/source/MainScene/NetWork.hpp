@@ -1,57 +1,50 @@
 #pragma once
+#pragma warning(disable:4464)
 #include "../Header.hpp"
 #include "../sub.hpp"
 
-class NewWorkControl {
-	//通信関連
-	int NetUDPHandle{-1};			// ネットワークハンドル
-	IPDATA IP{127,0,0,1};			// 送信用ＩＰアドレスデータ
-	int UsePort{-1};				// 通信用ポート
-	//サーバー専用
-	IPDATA RecvIp{127,0,0,1};		// 受信用ＩＰアドレスデータ
-	int RecvPort{0};				// 受信用ポート
+class UDPDX {
+	int			m_Handle{-1};				// ネットワークハンドル
+	IPDATA		m_SendIP{127,0,0,1};		// 送信用ＩＰアドレスデータ
+	int			m_SendPort{-1};				// 通信用ポート
+	IPDATA		RecvIp{127,0,0,1};			// 受信用ＩＰアドレスデータ
+	int			RecvPort{0};				// 受信用ポート
 public:
-	void			InitClient() {
-		// 送信用ソケットを作って初送信
-		if (NetUDPHandle == -1) {
-			NetUDPHandle = MakeUDPSocket(-1);
-		}
-	}
-	void			InitServer() {
-		// ＵＤＰ通信用のソケットハンドルを作成
-		if (NetUDPHandle == -1) {
-			NetUDPHandle = MakeUDPSocket(UsePort);
-		}
-	}
-	void			Dispose() {
-		if (NetUDPHandle != -1) {
-			DeleteUDPSocket(NetUDPHandle);	// ＵＤＰソケットハンドルの削除
-			NetUDPHandle = -1;
-			UsePort = -1;
-		}
-	}
+	auto			IsActive(void) const noexcept { return (m_Handle != -1); }
 public:
-	void			SetIP(const IPDATA& pIP) { IP = pIP; }
-	void			Set_Port(int PORT) { UsePort = PORT; }
-
+	void			SetServerIP(const IPDATA& pIP) noexcept { m_SendIP = pIP; }//クライアントは必ず行う
+	void			Init(bool IsServer, int PORT = -1) noexcept {
+		if (!IsActive()) {
+			m_SendPort = PORT;
+			m_Handle = MakeUDPSocket(IsServer ? m_SendPort : -1);
+		}
+	}
+	void			Dispose(void) noexcept {
+		if (IsActive()) {
+			DeleteUDPSocket(m_Handle);	// ＵＤＰソケットハンドルの削除
+			m_Handle = -1;
+			m_SendPort = -1;
+		}
+	}
+private:
 	template<class T>
-	void			SendtoServer(const T& Data) { Send(IP, UsePort, Data); }
-	template<class T>
-	void			SendtoClient(const T& Data) { Send(RecvIp, RecvPort, Data); }
-	template<class T>
-	void			Send(IPDATA& Ip, int SendPort, const T& Data) {
-		if (NetUDPHandle != -1) {
-			NetWorkSendUDP(NetUDPHandle, Ip, SendPort, &Data, sizeof(T));
+	void			SendData(IPDATA& Ip, int SendPort, const T& Data) noexcept {
+		if (IsActive()) {
+			NetWorkSendUDP(m_Handle, Ip, SendPort, &Data, sizeof(T));
 			//printfDx("送信:[%d,%d,%d,%d][%d]\n", Ip.d1, Ip.d2, Ip.d3, Ip.d4, SendPort);
 		}
 	}
+public:
+	//送信
 	template<class T>
-	bool Recv(T* Data) {
-		switch (CheckNetWorkRecvUDP(NetUDPHandle)) {
+	void			SendData(const T& Data) noexcept { SendData(m_SendIP, m_SendPort, Data); }
+	//受信
+	template<class T>
+	bool			RecvData(T* Data) noexcept {
+		switch (CheckNetWorkRecvUDP(m_Handle)) {
 			case TRUE:
-				NetWorkRecvUDP(NetUDPHandle, &RecvIp, &RecvPort, Data, sizeof(T), FALSE);		// 受信
+				NetWorkRecvUDP(m_Handle, &RecvIp, &RecvPort, Data, sizeof(T), FALSE);		// 受信
 				return true;
-				break;
 			case FALSE://待機
 				break;
 			default://error
@@ -59,107 +52,71 @@ public:
 		}
 		return false;
 	}
+	//返送
+	template<class T>
+	void			ReturnData(const T& Data) noexcept { SendData(RecvIp, RecvPort, Data); }
 };
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		//通信
 		static const int		Player_num = 2;
-		struct NewSetting {
-			IPDATA					IP{127,0,0,1};
-			int						UsePort{10850};
-		};
-		class NewWorkSetting {
-			std::vector<NewSetting>	m_NewWorkSetting;
-		public:
-			void Load(void) noexcept {
-				SetOutApplicationLogValidFlag(FALSE);
-				int mdata = FileRead_open("data/NetWorkSetting.txt", FALSE);
-				while (true) {
-					m_NewWorkSetting.resize(this->m_NewWorkSetting.size() + 1);
-					m_NewWorkSetting.back().UsePort = std::clamp<int>(getparams::_int(mdata), 0, 50000);
-					m_NewWorkSetting.back().IP.d1 = (unsigned char)std::clamp((int)getparams::_int(mdata), 0, 255);
-					m_NewWorkSetting.back().IP.d2 = (unsigned char)std::clamp((int)getparams::_int(mdata), 0, 255);
-					m_NewWorkSetting.back().IP.d3 = (unsigned char)std::clamp((int)getparams::_int(mdata), 0, 255);
-					m_NewWorkSetting.back().IP.d4 = (unsigned char)std::clamp((int)getparams::_int(mdata), 0, 255);
-					if (FileRead_eof(mdata) != 0) {
-						break;
-					}
-				}
-				FileRead_close(mdata);
-				SetOutApplicationLogValidFlag(TRUE);
-			}
-			void Save(void) noexcept {
-				std::ofstream outputfile("data/NetWorkSetting.txt");
-				for (auto& n : this->m_NewWorkSetting) {
-					int ID = (int)(&n - &this->m_NewWorkSetting.front());
-					outputfile << "Setting" + std::to_string(ID) + "_Port=" + std::to_string(n.UsePort) + "\n";
-					outputfile << "Setting" + std::to_string(ID) + "_IP1=" + std::to_string(n.IP.d1) + "\n";
-					outputfile << "Setting" + std::to_string(ID) + "_IP2=" + std::to_string(n.IP.d2) + "\n";
-					outputfile << "Setting" + std::to_string(ID) + "_IP3=" + std::to_string(n.IP.d3) + "\n";
-					outputfile << "Setting" + std::to_string(ID) + "_IP4=" + std::to_string(n.IP.d4) + "\n";
-				}
-				outputfile.close();
-			}
 
-			const auto		GetSize(void) const noexcept { return (int)m_NewWorkSetting.size(); }
-			const auto&		Get(int ID) const noexcept { return this->m_NewWorkSetting[ID]; }
-			const auto		Add(void) noexcept {
-				m_NewWorkSetting.resize(this->m_NewWorkSetting.size() + 1);
-				m_NewWorkSetting.back().UsePort = 10850;
-				m_NewWorkSetting.back().IP.d1 = 127;
-				m_NewWorkSetting.back().IP.d2 = 0;
-				m_NewWorkSetting.back().IP.d3 = 0;
-				m_NewWorkSetting.back().IP.d4 = 1;
-				return (int)m_NewWorkSetting.size() - 1;;
-			}
-			void Set(int ID, const NewSetting& per)noexcept { this->m_NewWorkSetting[ID] = per; }
-		};
-
+		using NetTime = LONGLONG;
+		//クライアントが送信するデータ
 		class PlayerNetData {
 		private:
-			size_t						CheckSum{0};
-			double						Frame{0.0};
-		public:
-			bool						IsActive{false};
-			PlayerID					ID{0};
-			InputControl				Input;
+			bool						m_IsActive{ false };
+			size_t						m_CheckSum{};			//チェックサム
+			NetTime						m_Frame{};			//そのプレイヤーのインゲーム時間
+			PlayerID					m_ID{0};
+			InputControl				m_Input;
 			moves						m_move;
-			std::vector<DamageEvent>	m_DamageEvents;
+			std::array<DamageEvent,64>	m_DamageEvents;
 		private:
-			const auto			CalcCheckSum(void) noexcept {
+			auto			CalcCheckSum(void) const noexcept {
 				return (
-					((int)(this->m_move.pos.x*100.f) + (int)(this->m_move.pos.y*100.f) + (int)(this->m_move.pos.z*100.f)) +
-					((int)(this->m_move.vec.x*100.f) + (int)(this->m_move.vec.y*100.f) + (int)(this->m_move.vec.z*100.f)) +
-					(int)(rad2deg(this->m_move.rad.y)) +
-					(int)(ID)
+					(static_cast<int>(this->m_move.pos.x*100.f) + static_cast<int>(this->m_move.pos.y*100.f) + static_cast<int>(this->m_move.pos.z*100.f)) +
+					(static_cast<int>(this->m_move.vec.x*100.f) + static_cast<int>(this->m_move.vec.y*100.f) + static_cast<int>(this->m_move.vec.z*100.f)) +
+					static_cast<int>(rad2deg(this->m_move.rad.y)) +
+					static_cast<int>(m_ID)
 					);
 			}
 		public:
-			const auto			GetIsActive(void) noexcept { return this->CalcCheckSum() != 0; }
-			const auto			IsCheckSum(void) noexcept { return CheckSum == (size_t)this->CalcCheckSum(); }
-
-			const auto&			GetID(void) const noexcept { return this->ID; }
-			const auto&			GetFrame(void) const noexcept { return this->Frame; }
-
-			void				SetMyPlayer(const InputControl& pInput, const moves & move_t, const std::vector<DamageEvent>& Damage_t, double pFrame) noexcept {
-				this->Input = pInput;
+			auto			GetIsActive(void) const noexcept { return this->CalcCheckSum() != 0; }
+			auto			IsCheckSum(void) const noexcept { return m_CheckSum == (size_t)this->CalcCheckSum(); }
+			const auto&		GetID(void) const noexcept { return this->m_ID; }
+			const auto&		GetFrame(void) const noexcept { return this->m_Frame; }
+			const auto&		GetInput(void) const noexcept { return this->m_Input; }
+			const auto&		GetMove(void) const noexcept { return this->m_move; }
+			const auto&		GetDamageEvents(void) const noexcept { return this->m_DamageEvents; }
+		public:
+			void			SetActive(bool value) noexcept { m_IsActive = value; }
+			void			SetID(PlayerID value) noexcept { m_ID = value; }
+			void			SetMove(const moves& value) noexcept { m_move = value; }
+		public:
+			void			SetMyPlayer(const InputControl& pInput, const moves & move_t, const std::array<DamageEvent, 64>& Damage_t) noexcept {
+				this->m_Input = pInput;
 				this->m_move = move_t;
 				this->m_DamageEvents = Damage_t;
-				this->Frame = pFrame;
-				this->CheckSum = (size_t)this->CalcCheckSum();
+			}
+			void			SetData(const PlayerNetData& o, NetTime pFrame) noexcept {
+				this->m_Input = o.m_Input;
+				this->m_move = o.m_move;
+				this->m_DamageEvents = o.m_DamageEvents;
+				this->m_Frame = pFrame;
+				this->m_CheckSum = (size_t)this->CalcCheckSum();
 			}
 		public:
-			static const auto	GetLerpData(const PlayerNetData&PrevData, const PlayerNetData& ServerData, float Per, bool isYradReset) {
+			static auto		GetLerpData(const PlayerNetData&PrevData, const PlayerNetData& ServerData, float Per, bool isYradReset) noexcept {
 				PlayerNetData tmp;
 				//
-				tmp.Input = Lerp(PrevData.Input, ServerData.Input, Per);
-				tmp.m_move = Lerp(PrevData.m_move, ServerData.m_move, Per);
+				tmp.m_Input = Lerp(PrevData.m_Input, ServerData.m_Input, Per);
+				tmp.m_move = PrevData.m_move.LerpMove(ServerData.m_move, Per);
 				//
-				tmp.ID = ServerData.ID;
-				tmp.IsActive = ServerData.IsActive;
-				tmp.Frame = ServerData.Frame;
-				tmp.Input.SetKeyInputFlags(ServerData.Input);
+				tmp.m_ID = ServerData.m_ID;
+				tmp.m_IsActive = ServerData.m_IsActive;
+				tmp.m_Frame = ServerData.m_Frame;
+				tmp.m_Input.SetKeyInputFlags(ServerData.m_Input);
 				if (isYradReset) {
 					auto radvec = Lerp(Matrix4x4DX::RotAxis(Vector3DX::up(), PrevData.m_move.rad.y).zvec(), Matrix4x4DX::RotAxis(Vector3DX::up(), ServerData.m_move.rad.y).zvec(), Per).normalized();
 					tmp.m_move.rad.y = (-atan2f(radvec.x, radvec.z));
@@ -168,52 +125,62 @@ namespace FPS_n2 {
 				return tmp;
 			}
 		};
-		struct ServerNetData {
-			int					Tmp1{0};				//4
+		//サーバーが管理するデータ
+		class ServerNetData {
+		private:
+		public:
+			int					PlayerID{0};			//4
 			int					StartFlag{0};			//4
-			size_t				ServerFrame{0};		//8
+			size_t				ServerFrame{0};			//8
 			PlayerNetData		PlayerData[Player_num];	//37 * 3
 		};
-		class NetWorkControl {
-		protected:
+		//通信
+		class PlayerNetWork {
+		private:
+		//protected:
 			size_t											m_ServerFrame{0};
-			std::array<int, Player_num>						m_LeapFrame{0};
-			ServerNetData									m_ServerDataCommon, m_PrevServerData;
-			PlayerNetData									m_PlayerData;
-			float											m_TickCnt{0.f};
-			float											m_TickRate{10.f};
+			std::array<int, Player_num>						m_LeapFrame{};
+			ServerNetData									m_ServerDataCommon;	//最新の受信データ
+			ServerNetData									m_PrevServerData;	//前回の受信データ
+			PlayerNetData									m_PlayerData;		//ローカルのプレイヤーデータ
 		public:
-			const auto		GetRecvData(int pPlayerID) const noexcept { return this->m_LeapFrame[pPlayerID] <= 1; }
+			PlayerNetWork(void) noexcept {}
+			PlayerNetWork(const PlayerNetWork&) = delete;
+			PlayerNetWork(PlayerNetWork&& o) = delete;
+			PlayerNetWork& operator=(const PlayerNetWork&) = delete;
+			PlayerNetWork& operator=(PlayerNetWork&& o) = delete;
+
+			~PlayerNetWork(void) noexcept {}
+		public:
+			auto			CanGetRecvData(int pPlayerID) const noexcept { return this->m_LeapFrame[static_cast<size_t>(pPlayerID)] <= 1; }
 			const auto&		GetServerDataCommon(void) const noexcept { return this->m_ServerDataCommon; }
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_PlayerData.GetID(); }
-			void			SetMyPlayer(const InputControl& pInput, const moves & move_t, const std::vector<DamageEvent>& Damage_t, double pFrame) noexcept {
-				this->m_PlayerData.SetMyPlayer(pInput, move_t, Damage_t, pFrame);
-			}
 
-			const auto		GetNowServerPlayerData(int pPlayerID, bool isyradReset) noexcept {
-				auto Total = (int)this->m_ServerDataCommon.ServerFrame - (int)this->m_PrevServerData.ServerFrame;
+			auto&			SetPlayerData(void) noexcept { return this->m_PlayerData; }
+		public:
+			void			SetPlayerID(PlayerID ID) noexcept { this->m_PlayerData.SetID(ID); }
+			void			SetData(const PlayerNetData& pdata, NetTime pFrame) noexcept { this->m_PlayerData.SetData(pdata, pFrame); }
+		public:
+			auto			GetNowServerPlayerData(PlayerID pPlayerID, bool isyradReset) noexcept {
+				size_t ID = static_cast<size_t>(pPlayerID);
+				auto Total = static_cast<int>(this->m_ServerDataCommon.ServerFrame) - static_cast<int>(this->m_PrevServerData.ServerFrame);
 				if (Total <= 0) { Total = 20; }
 				PlayerNetData tmp;
 				tmp = PlayerNetData::GetLerpData(
-					this->m_PrevServerData.PlayerData[pPlayerID], this->m_ServerDataCommon.PlayerData[pPlayerID],
-					(float)this->m_LeapFrame[pPlayerID] / (float)Total, isyradReset);
-				this->m_LeapFrame[pPlayerID] = std::clamp<int>(this->m_LeapFrame[pPlayerID] + 1, 0, Total);
+					this->m_PrevServerData.PlayerData[ID], this->m_ServerDataCommon.PlayerData[ID],
+					static_cast<float>(this->m_LeapFrame[ID]) / static_cast<float>(Total), isyradReset);
+				this->m_LeapFrame[ID] = std::clamp<int>(this->m_LeapFrame[ID] + 1, 0, Total);
 				return tmp;
 			}
-			virtual void	SetParam(int pPlayerID, const Vector3DX& pPos) noexcept {
-				this->m_ServerDataCommon.PlayerData[pPlayerID].m_move.pos = pPos;
-				this->m_ServerDataCommon.ServerFrame = 0;
-				this->m_PrevServerData.PlayerData[pPlayerID].m_move.pos = pPos;	// サーバーデータ
-				this->m_PrevServerData.ServerFrame = 0;
-			}
-		protected:
-			void			CommonInit(void) noexcept {
+		public:
+			void			Int() noexcept {
 				this->m_ServerFrame = 0;
+				this->m_ServerDataCommon.ServerFrame = 0;
 			}
-			void			NetCommonExecute(const ServerNetData& pData) {
+			void			UpdateDataCommon(const ServerNetData& pData) noexcept {
 				auto& tmpData = pData;
 				if (this->m_ServerFrame <= tmpData.ServerFrame && ((tmpData.ServerFrame - this->m_ServerFrame) < 60)) {
-					for (int i = 0; i < Player_num; i++) {
+					for (size_t i = 0; i < static_cast<size_t>(Player_num); i++) {
 						this->m_LeapFrame[i] = 0;
 					}
 					this->m_PrevServerData = this->m_ServerDataCommon;
@@ -221,205 +188,193 @@ namespace FPS_n2 {
 					this->m_ServerDataCommon = tmpData;
 				}
 			}
-		public:
-			virtual void	Init(int, float, const IPDATA&) noexcept {}
-			virtual bool	Execute(void) noexcept { return false; }
-			virtual void	Dispose(void) noexcept {}
 		};
-		class ServerControl : public NetWorkControl {
+		//
+		enum class ClientPhase {
+			WaitConnect = 0,
+			GetNumber,
+			Ready,
+		};
+		struct UDPS {
+			UDPDX					m_NetWork;
+			ClientPhase				m_Phase{};
+
+		public:
+			bool IsReady() { return m_Phase == ClientPhase::Ready; }
+		};
+		//サーバー専用
+		class ServerControl {
 			ServerNetData			m_ServerData;
-			std::array<std::pair<NewWorkControl, int>, Player_num - 1>		m_NetWork;
+			std::array<UDPS, Player_num - 1>		m_Net;
 		public:
-			const auto&		GetServerData(void) const noexcept { return this->m_ServerData; }
-			void			SetParam(int pPlayerID, const Vector3DX& pPos) noexcept override {
-				NetWorkControl::SetParam(pPlayerID, pPos);
-				this->m_ServerData.PlayerData[pPlayerID].m_move.pos = this->m_ServerDataCommon.PlayerData[pPlayerID].m_move.pos;
-				this->m_ServerData.PlayerData[pPlayerID].IsActive = false;
-			}
-		public:
-			void			Init(int pPort, float pTick, const IPDATA&) noexcept override {
-				CommonInit();
-				int i = 0;
-				for (auto & n : this->m_NetWork) {
-					n.first.Set_Port(pPort + i); i++;
-					n.first.InitServer();
-					n.second = 0;
-				}
-				this->m_ServerDataCommon.ServerFrame = 0;
+			ServerControl(void) noexcept {}
+			ServerControl(const ServerControl&) = delete;
+			ServerControl(ServerControl&& o) = delete;
+			ServerControl& operator=(const ServerControl&) = delete;
+			ServerControl& operator=(ServerControl&& o) = delete;
 
-				this->m_ServerData.Tmp1 = 0;
-				this->m_ServerData.StartFlag = 0;
-				this->m_ServerData.PlayerData[0].IsActive = true;
-				this->m_ServerData.ServerFrame = 0;
-
-				this->m_PlayerData.ID = 0;
-				this->m_TickRate = pTick;
-			}
-			bool			Execute(void) noexcept override {
-				auto* DrawParts = DXDraw::Instance();
+			~ServerControl(void) noexcept {}
+		private:
+			bool AllReady() {
 				bool canMatch = true;
-				bool canSend = false;
-				for (auto & n : this->m_NetWork) {
-					if (!(n.second >= 2)) {
+				for (auto& n : this->m_Net) {
+					if (!n.IsReady()) {
 						canMatch = false;
 						break;
 					}
 				}
-				if (canMatch) {
-					// ティックレート用演算
-					this->m_TickCnt += 60.f / DrawParts->GetFps();
-					if (this->m_TickCnt > this->m_TickRate) {
-						this->m_TickCnt -= this->m_TickRate;
-						canSend = true;
-					}
-					//サーバーデータの更新
-					this->m_ServerData.StartFlag = 1;
-					this->m_ServerData.PlayerData[this->m_PlayerData.ID] = this->m_PlayerData;		// サーバープレイヤーののプレイヤーデータ
-					this->m_ServerData.ServerFrame++;											// サーバーフレーム更新
+				return canMatch;
+			}
+		public:
+			const auto&		GetServerData(void) const noexcept { return this->m_ServerData; }
+		public:
+			void SetPlayerData(const PlayerNetData& value) { this->m_ServerData.PlayerData[value.GetID()] = value; }
+		public:
+			void			Init(int pPort) noexcept {
+				int i = 0;
+				for (auto & n : this->m_Net) {
+					n.m_NetWork.Init(true, pPort + i); i++;
+					n.m_Phase = ClientPhase::WaitConnect;
 				}
-				for (auto & n : this->m_NetWork) {
-					size_t index = (&n - &this->m_NetWork.front()) + 1;
-					int tmpData = -1;
-					switch (n.second) {
-						case 0:										//無差別受付
-							if (n.first.Recv(&tmpData)) {			// 該当ソケットにクライアントからなにか受信したら
-								n.second++;
+				this->m_ServerData.PlayerID = 0;
+				this->m_ServerData.StartFlag = FALSE;
+				this->m_ServerData.ServerFrame = 0;
+			}
+			bool			Execute(PlayerNetData* MyPlayerData, bool IsUpdateTick) noexcept {
+				PlayerNetData tmpData;
+				for (auto & n : this->m_Net) {
+					size_t index = static_cast<size_t>(&n - &this->m_Net.front());
+					switch (n.m_Phase) {
+						case ClientPhase::WaitConnect:						//無差別受付
+							if (n.m_NetWork.RecvData(&tmpData)) {			// 該当ソケットにクライアントからなにか受信したら
+								n.m_Phase = ClientPhase::GetNumber;
 							}
 							break;
-						case 1:
-							this->m_ServerData.Tmp1 = (int)index;
-							this->m_ServerData.StartFlag = 0;
-							this->m_ServerData.PlayerData[index].IsActive = true;
+						case ClientPhase::GetNumber:
+							this->m_ServerData.PlayerID = static_cast<int>(index) + 1;
+							n.m_NetWork.ReturnData(this->m_ServerData);					//クライアント全員に送る
 
-							n.first.SendtoClient(this->m_ServerData);					//クライアント全員に送る
-
-							if (n.first.Recv(&tmpData)) {
-								if (tmpData == 1) {					// ID取れたと識別出来たら
-									n.second++;
+							if (n.m_NetWork.RecvData(&tmpData)) {
+								if (tmpData.GetIsActive()) {					// ID取れたと識別出来たら
+									n.m_Phase = ClientPhase::Ready;
 								}
 							}
 							break;
-						case 2://揃い待ち
-							if (canMatch) { n.second++; }
-							break;
-						case 3:
-							{
-								PlayerNetData tmpPData;
-								if (n.first.Recv(&tmpPData)) {							// クライアントから受信したら
-									if (tmpPData.IsCheckSum()) {
-										this->m_ServerData.PlayerData[tmpPData.ID] = tmpPData;	// 更新
-									}
-								}
-							}
-							if (canSend) {
-								n.first.SendtoClient(this->m_ServerData);						//クライアント全員に送る
-							}
+						case ClientPhase::Ready://揃い待ち
 							break;
 						default:
 							break;
 					}
 				}
-				if (canSend) {
-					NetCommonExecute(this->m_ServerData);			// 更新
+				if (AllReady()) {
+					//サーバーデータの更新
+					this->m_ServerData.StartFlag = TRUE;
+					SetPlayerData(*MyPlayerData);// サーバープレイヤーののプレイヤーデータ
+					this->m_ServerData.ServerFrame++; // サーバーフレーム更新
+					for (auto & n : this->m_Net) {
+						if (n.m_NetWork.RecvData(&tmpData)) {	// クライアントから受信したら
+							if (tmpData.IsCheckSum()) {		// チェックサムののち
+								SetPlayerData(tmpData);		// 更新
+							}
+						}
+						if (IsUpdateTick) {
+							n.m_NetWork.ReturnData(this->m_ServerData);						//クライアント全員に送る
+						}
+					}
+					return true;
 				}
-				return canMatch;
+				return false;
 			}
-			void			Dispose(void) noexcept override {
-				for (auto & n : this->m_NetWork) {
-					n.first.Dispose();
+			void			Dispose(void) noexcept {
+				for (auto & n : this->m_Net) {
+					n.m_NetWork.Dispose();
 				}
 			}
 		};
-		class ClientControl : public NetWorkControl {
+		class ClientControl {
 			int						m_NetWorkSel{0};
 			float					m_CannotConnectTimer{0.f};
 			int						m_Port{0};
 			IPDATA					m_IP{127,0,0,1};
-			std::pair<NewWorkControl, int>	m_NetWork;
+			UDPS					m_Net;
+			PlayerID				m_MyID{};
+			bool					m_IsServerDataUpdated{};
+			ServerNetData			m_ServerData;
 		public:
-			void			Init(int pPort, float pTick, const IPDATA& pIP) noexcept override {
-				CommonInit();
+			ClientControl(void) noexcept {}
+			ClientControl(const ClientControl&) = delete;
+			ClientControl(ClientControl&& o) = delete;
+			ClientControl& operator=(const ClientControl&) = delete;
+			ClientControl& operator=(ClientControl&& o) = delete;
 
+			~ClientControl(void) noexcept {}
+		public:
+			const auto&		IsServerDataUpdated(void) const noexcept { return this->m_IsServerDataUpdated; }
+			const auto&		GetServerData(void) const noexcept { return this->m_ServerData; }
+			const auto&		GetMyID(void) const noexcept { return this->m_MyID; }
+			auto			CanGetMyID(void) const noexcept { return this->m_Net.m_Phase != ClientPhase::WaitConnect; }
+		public:
+			void			Init(int pPort, const IPDATA& pIP) noexcept {
 				this->m_CannotConnectTimer = 0.f;
 				this->m_Port = pPort;
-				this->m_TickRate = pTick;
 				this->m_IP = pIP;
-
 				this->m_NetWorkSel = 0;
-				this->m_NetWork.first.Set_Port(this->m_Port + this->m_NetWorkSel);
-				this->m_NetWork.first.SetIP(pIP);
-				this->m_NetWork.first.InitClient();
-				this->m_NetWork.second = 0;
-
-				this->m_PlayerData.ID = 1;
+				this->m_Net.m_NetWork.SetServerIP(pIP);
+				this->m_Net.m_NetWork.Init(false, this->m_Port + this->m_NetWorkSel);
+				this->m_Net.m_Phase = ClientPhase::WaitConnect;
 			}
-			bool			Execute(void) noexcept override {
+			bool			Execute(PlayerNetData* MyPlayerData, bool IsUpdateTick) noexcept {
 				auto* DrawParts = DXDraw::Instance();
-				ServerNetData tmpData;
-				bool canMatch = true;
-				bool canSend = false;
-				canMatch = (this->m_NetWork.second >= 2);
-				if (canMatch) {
-					// ティックレート用演算
-					this->m_TickCnt += 60.f / DrawParts->GetFps();
-					if (this->m_TickCnt > this->m_TickRate) {
-						this->m_TickCnt -= this->m_TickRate;
-						canSend = true;
-					}
-				}
-				switch (this->m_NetWork.second) {
-					case 0:
-						this->m_NetWork.first.SendtoServer(0);			// 通信リクエスト
+				m_IsServerDataUpdated = this->m_Net.m_NetWork.RecvData(&m_ServerData);
+				switch (this->m_Net.m_Phase) {
+					case ClientPhase::WaitConnect:
+						MyPlayerData->SetActive(false);
+						this->m_Net.m_NetWork.SendData(*MyPlayerData);			// 通信リクエスト
 						//サーバーからの自分のIDを受信
-						if (this->m_NetWork.first.Recv(&tmpData)) {
-							NetCommonExecute(tmpData);								//更新
+						if (m_IsServerDataUpdated) {
 							m_CannotConnectTimer = 0.f;
-							if (tmpData.Tmp1 > 0) {
-								this->m_PlayerData.ID = (PlayerID)tmpData.Tmp1;
-								this->m_NetWork.second++;
+							if (m_ServerData.PlayerID > 0) {
+								m_MyID = (PlayerID)m_ServerData.PlayerID;
+								this->m_Net.m_Phase = ClientPhase::GetNumber;
 							}
 						}
 						else {
 							m_CannotConnectTimer += 1.f / DrawParts->GetFps();
 							if (this->m_CannotConnectTimer > 1.f) {
-								m_CannotConnectTimer = 0.f;
-								this->m_NetWork.first.Dispose();
+								m_CannotConnectTimer -= 1.f;
 								this->m_NetWorkSel++;
-								this->m_NetWork.first.Set_Port(this->m_Port + this->m_NetWorkSel);
-								this->m_NetWork.first.SetIP(this->m_IP);
-								this->m_NetWork.first.InitClient();
-								this->m_NetWork.second = 0;
+								this->m_Net.m_NetWork.Dispose();
+								this->m_Net.m_NetWork.SetServerIP(this->m_IP);
+								this->m_Net.m_NetWork.Init(false, this->m_Port + this->m_NetWorkSel);
+								this->m_Net.m_Phase = ClientPhase::WaitConnect;
 								if (this->m_NetWorkSel >= Player_num) {
 									//満タン
 								}
 							}
 						}
 						break;
-					case 1:
-						this->m_NetWork.first.SendtoServer(1);			// ID取れたよ
+					case ClientPhase::GetNumber:
+						MyPlayerData->SetActive(true);
+						this->m_Net.m_NetWork.SendData(*MyPlayerData);								// ID取れたよ
 						//サーバーからのデータを受信したら次へ
-						if (this->m_NetWork.first.Recv(&tmpData)) {
-							NetCommonExecute(tmpData);								//更新
-							if (tmpData.StartFlag == 1) {
-								this->m_NetWork.second++;
+						if (m_IsServerDataUpdated) {
+							if (m_ServerData.StartFlag == 1) {
+								this->m_Net.m_Phase = ClientPhase::Ready;
 							}
 						}
 						break;
-					case 2:
-						if (canSend) {
-							this->m_NetWork.first.SendtoServer(this->m_PlayerData);				//自身のデータを送信
-						}
-						if (this->m_NetWork.first.Recv(&tmpData)) {					//サーバーからのデータを受信したら
-							NetCommonExecute(tmpData);								//更新
+					case ClientPhase::Ready:
+						if (IsUpdateTick) {
+							this->m_Net.m_NetWork.SendData(*MyPlayerData);			// 自身のデータを送信
 						}
 						break;
 					default:
 						break;
 				}
-				return canMatch;
+				return this->m_Net.IsReady();
 			}
-			void			Dispose(void) noexcept override {
-				this->m_NetWork.first.Dispose();
+			void			Dispose(void) noexcept {
+				this->m_Net.m_NetWork.Dispose();
 			}
 		};
 	};

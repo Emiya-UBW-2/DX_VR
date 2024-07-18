@@ -13,7 +13,7 @@ namespace FPS_n2 {
 			Weapon,
 		};
 		enum class SoundEnum {
-			RunFoot = (int)SoundEnumCommon::Num,
+			RunFoot = static_cast<int>(SoundEnumCommon::Num),
 			StandupFoot,
 			Heart,
 			//

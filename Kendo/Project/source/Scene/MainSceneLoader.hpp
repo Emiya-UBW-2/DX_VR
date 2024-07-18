@@ -7,6 +7,12 @@ namespace FPS_n2 {
 		private:
 		public:
 			MAINLOOPLOADER(void) noexcept {}
+			MAINLOOPLOADER(const MAINLOOPLOADER&) = delete;
+			MAINLOOPLOADER(MAINLOOPLOADER&& o) = delete;
+			MAINLOOPLOADER& operator=(const MAINLOOPLOADER&) = delete;
+			MAINLOOPLOADER& operator=(MAINLOOPLOADER&& o) = delete;
+
+			virtual ~MAINLOOPLOADER(void) noexcept {}
 		public:
 			void Set_Sub(void) noexcept override {
 				SetUseASyncLoadFlag(TRUE);

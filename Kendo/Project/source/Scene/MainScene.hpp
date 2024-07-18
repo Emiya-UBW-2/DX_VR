@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning(disable:4464)
 #include	"../Header.hpp"
 #include "../MainScene/Input.hpp"
 
@@ -10,54 +11,42 @@
 
 #include "../MainScene/Object/Character.hpp"
 
-#include "../MainScene/Player/CPU.hpp"
-
 #include "../MainScene/UI/MainSceneUIControl.hpp"
 
 #include "../MainScene/Player/Player.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class MAINLOOP : public TEMPSCENE, public EffectControl {
+		class MAINLOOP : public TEMPSCENE {
 		private:
 			static const int		Chara_num = 0;
 			static const int		Vehicle_num = Player_num;
 			static const int		gun_num = Chara_num;
 		private:
-			//リソース関連
-			std::shared_ptr<BackGroundClass>			m_BackGround;					//BG
-			std::vector<std::shared_ptr<AIControl>>		m_AICtrl;						//AI
 			//操作関連
 			float										m_Concussion{ 0.f };
 			float										m_ConcussionPer{ 0.f };
-			//操作関連
-			int											m_TPSLen{6};
-			float										m_range_r{(float)this->m_TPSLen};
-			float										m_zoom{1.f};
-			bool										m_changeview{false};
-			bool										m_IsChangeView{false};
-			float										m_ChangeViewPer{0.f};
 			//UI関連
 			UIClass										m_UIclass;
 			float m_GuardStart{0.f};
 			int											m_UILayer{0};
 
-			NetWorkBrowser								m_NetWorkBrowser;
+			std::unique_ptr<NetWorkBrowser>				m_NetWorkBrowser;
 			//
 			std::vector<DamageEvent>					m_DamageEvents;
 			float										m_fov_base{ deg2rad(45.f) };
 
 			float m_D1{38.f / 255.f}, m_D2{192.f / 255.f}, m_D3{1.f};
 		private:
-			const auto&		GetMyPlayerID(void) const noexcept { return m_NetWorkBrowser.GetMyPlayerID(); }
+			const auto&		GetMyPlayerID(void) const noexcept { return m_NetWorkBrowser->GetMyPlayerID(); }
 		public:
-			MAINLOOP(void) noexcept {
-				this->m_BackGround = std::make_shared<BackGroundClass>();
-				for (int i = 0; i < Player_num; i++) {
-					this->m_AICtrl.emplace_back(std::make_shared<AIControl>());
-				}
-			}
-			~MAINLOOP(void) noexcept {}
+			MAINLOOP(void) noexcept {}
+			MAINLOOP(const MAINLOOP&) = delete;
+			MAINLOOP(MAINLOOP&& o) = delete;
+			MAINLOOP& operator=(const MAINLOOP&) = delete;
+			MAINLOOP& operator=(MAINLOOP&& o) = delete;
+
+			virtual ~MAINLOOP(void) noexcept {}
 		public:
 			void			Load_Sub(void) noexcept override;
 			void			Set_Sub(void) noexcept override;
@@ -65,50 +54,15 @@ namespace FPS_n2 {
 			void			Dispose_Sub(void) noexcept override;
 			void			Dispose_Load_Sub(void) noexcept override;
 			//
-			void			BG_Draw_Sub(void) noexcept override {
-				this->m_BackGround->BG_Draw();
-			}
-			void			ShadowDraw_Far_Sub(void) noexcept override {
-				this->m_BackGround->Shadow_Draw_Far();
-			}
-			void			ShadowDraw_Sub(void) noexcept override {
-				this->m_BackGround->Shadow_Draw();
-				ObjectManager::Instance()->Draw_Shadow();
-			}
-			void			CubeMap_Sub(void) noexcept override {
-				this->m_BackGround->Draw();
-			}
+			void			BG_Draw_Sub(void) noexcept override;
+			void			ShadowDraw_Far_Sub(void) noexcept override;
+			void			ShadowDraw_Sub(void) noexcept override;
+			void			CubeMap_Sub(void) noexcept override;
 			
-			void			MainDraw_Sub(void) noexcept override {
-				auto* DrawParts = DXDraw::Instance();
-				SetFogStartEnd(DrawParts->GetMainCamera().GetCamNear(), DrawParts->GetMainCamera().GetCamFar()*2.f);
-				this->m_BackGround->Draw();
-				ObjectManager::Instance()->Draw();
-				//ObjectManager::Instance()->Draw_Depth();
-				for (int i = 0; i < Player_num; i++) {
-					m_AICtrl[i]->Draw();
-				}
-
-			}
+			void			MainDraw_Sub(void) noexcept override;
 			//UI表示
-			void			DrawUI_Base_Sub() noexcept override {
-			}
-			void			DrawUI_In_Sub() noexcept override {
-				auto* DrawParts = DXDraw::Instance();
-				//UI
-				if ((this->m_ChangeViewPer*255.f) > 1.f) {
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*this->m_ChangeViewPer), 0, 255));
-					DrawBox(0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-				}
-				if (!DXDraw::Instance()->IsPause()) {
-					this->m_UIclass.Draw();
-				}
-				//通信設定
-				//if (!this->m_MouseActive.on()) {
-				//	this->m_NetWorkBrowser.Draw();
-				//}
-			}
+			void			DrawUI_Base_Sub(void) noexcept override;
+			void			DrawUI_In_Sub(void) noexcept override;
 		};
 	};
 };

@@ -4,15 +4,26 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class BackGroundClass {
+		class BackGroundClass : public SingletonBase<BackGroundClass> {
+		private:
+			friend class SingletonBase<BackGroundClass>;
+		private:
 		private:
 			MV1							m_ObjSky;
 			MV1							m_ObjGround;
 			MV1							m_ObjGroundCol;
 
+		public:
+			BackGroundClass(void) noexcept {}
+			BackGroundClass(const BackGroundClass&) = delete;
+			BackGroundClass(BackGroundClass&& o) = delete;
+			BackGroundClass& operator=(const BackGroundClass&) = delete;
+			BackGroundClass& operator=(BackGroundClass&& o) = delete;
+
+			virtual ~BackGroundClass(void) noexcept {}
 		public://getter
 			const auto&		GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
-			const auto		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, bool isNearest, Vector3DX* Normal = nullptr) {
+			auto		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, bool isNearest, Vector3DX* Normal = nullptr) const noexcept {
 				bool isHit = false;
 				{
 					auto col_p = this->m_ObjGroundCol.CollCheck_Line(StartPos, *EndPos);
@@ -30,6 +41,8 @@ namespace FPS_n2 {
 				return isHit;
 			}
 
+		public:
+			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius) const noexcept;
 		public://
 			void			Load(void) noexcept {
 				MV1::Load("data/model/map/model_DISABLE.mv1", &this->m_ObjGround);

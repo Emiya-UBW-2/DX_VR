@@ -15,7 +15,7 @@ namespace FPS_n2 {
 			End,
 			Max,
 		};
-		static const char* WeaponFrameName[(int)WeaponFrame::Max] = {
+		static const char* WeaponFrameName[static_cast<int>(WeaponFrame::Max)] = {
 			"ÉZÉìÉ^Å[",
 			"lefthand",
 			"lefthand_yvec",

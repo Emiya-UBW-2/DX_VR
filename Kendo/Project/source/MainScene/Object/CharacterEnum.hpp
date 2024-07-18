@@ -52,7 +52,7 @@ namespace FPS_n2 {
 			Holster,
 			Max,
 		};
-		static const char* CharaFrameName[(int)CharaFrame::Max] = {
+		static const char* CharaFrameName[static_cast<int>(CharaFrame::Max)] = {
 			"センター",
 			"上半身",
 			"上半身2",
@@ -92,7 +92,7 @@ namespace FPS_n2 {
 			EYECLOSE,
 			Max,
 		};
-		static const char* CharaShapeName[(int)CharaShape::Max] = {
+		static const char* CharaShapeName[static_cast<int>(CharaShape::Max)] = {
 			"None",
 			"あ",
 			"い",
