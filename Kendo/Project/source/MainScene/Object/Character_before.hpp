@@ -250,11 +250,7 @@ namespace FPS_n2 {
 			bool		PutOverride() {
 				if (this->m_PosBufOverRideFlag) {
 					this->m_PosBufOverRideFlag = false;
-
-					Easing(&this->m_rad_Buf.x, this->m_OverRideInfo.rad.x, 0.9f, EasingType::OutExpo);
-					this->m_rad_Buf.y = (this->m_OverRideInfo.rad.y);
-					this->m_rad.y = (this->m_OverRideInfo.rad.y);
-
+					//this->m_OverRideInfo;
 					return true;
 				}
 				return false;

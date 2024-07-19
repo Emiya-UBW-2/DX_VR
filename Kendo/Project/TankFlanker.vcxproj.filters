@@ -131,5 +131,8 @@
     <ClCompile Include="source\MainScene\Player\CPU.cpp">
       <Filter>ソース ファイル\MainScene\Player</Filter>
     </ClCompile>
+    <ClCompile Include="source\MainScene\NetWork.cpp">
+      <Filter>ソース ファイル\MainScene</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

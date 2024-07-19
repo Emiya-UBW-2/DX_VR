@@ -14,6 +14,9 @@ namespace FPS_n2 {
 
 			BattleResourceMngr->LoadChara("Chara", (PlayerID)1);
 			BattleResourceMngr->LoadGun("Bamboo", (PlayerID)1);
+
+			BattleResourceMngr->LoadChara("Chara", (PlayerID)0);
+			BattleResourceMngr->LoadGun("Bamboo", (PlayerID)0);
 			//UI
 			this->m_UIclass.Load();
 		}
@@ -37,9 +40,6 @@ namespace FPS_n2 {
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
-
-			BattleResourceMngr->LoadChara("Chara", (PlayerID)0);
-			BattleResourceMngr->LoadGun("Bamboo", (PlayerID)0);
 
 			for (int index = 0; index < Player_num; index++) {
 				auto& p = PlayerMngr->GetPlayer(index);
@@ -65,7 +65,7 @@ namespace FPS_n2 {
 			//
 			this->m_DamageEvents.clear();
 			m_NetWorkBrowser = std::make_unique<NetWorkBrowser>();
-			this->m_NetWorkBrowser->Init();
+			m_NetWorkBrowser->Init();
 		}
 		bool			MAINLOOP::Update_Sub(void) noexcept {
 			auto* PostPassParts = PostPassEffect::Instance();
@@ -138,12 +138,13 @@ namespace FPS_n2 {
 					}
 				});
 			if (DXDraw::Instance()->IsPause()) {
+				Pad->SetMouseMoveEnable(false);
 				if (Pad->GetKey(PADS::JUMP).trigger()) {
 					OptionWindowClass::Instance()->SetActive();
 				}
-				return true;
-			}
-			else {
+				if (m_NetWorkController && !m_NetWorkController->IsInGame()) {
+					//return true;
+				}
 			}
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
@@ -158,64 +159,66 @@ namespace FPS_n2 {
 			}
 			//Input,AI
 			{
-				float pp_x = 0.f, pp_y = 0.f;
 				InputControl MyInput;
-				pp_x = Pad->GetLS_Y();
-				pp_y = Pad->GetLS_X();
+				if (DXDraw::Instance()->IsPause()) {
+					MyInput.ResetAllInput();
+				}
+				else {
+					MyInput.SetInputStart(Pad->GetLS_Y(), Pad->GetLS_X());
+					MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
+					MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
+					MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
+					MyInput.SetInputPADS(PADS::MOVE_D, Pad->GetKey(PADS::MOVE_D).press());
 
-#ifdef DEBUG
-				printfDx("[%5.2f,%5.2f]\n", pp_x, pp_y);
-#endif
-				MyInput.SetInputStart(pp_x, pp_y);
-				MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
-				MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
-				MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
-				MyInput.SetInputPADS(PADS::MOVE_D, Pad->GetKey(PADS::MOVE_D).press());
+					MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press());
+					MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press());
+					MyInput.SetInputPADS(PADS::ULT, Pad->GetKey(PADS::ULT).press());
 
-				MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press());
-				MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press());
-				MyInput.SetInputPADS(PADS::ULT, Pad->GetKey(PADS::ULT).press());
-
-				MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
-				MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
+					MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
+					MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
+				}
 				//ネットワーク
-				bool isready = true;
-
-				PlayerNetData ans;
-				ans.SetMyPlayer(
-					MyInput,
-					Chara->GetMove(),
-					Chara->GetDamageEvent());
-				this->m_NetWorkBrowser->FirstExecute(ans);
+				if (this->m_NetWorkBrowser->IsDataReady() && !m_NetWorkController) {
+					m_NetWorkController = std::make_unique<NetWorkController>();
+					this->m_NetWorkController->Init(m_NetWorkBrowser->GetClient(), m_NetWorkBrowser->GetNetSetting().UsePort, m_NetWorkBrowser->GetNetSetting().IP);
+				}
+				if (m_NetWorkController) {
+					m_LocalData.SetMyPlayer(MyInput, Chara->GetMove(), Chara->GetDamageEvent());
+					if (!m_NetWorkController->IsInGame()) {
+						m_LocalData.InitTime();
+					}
+					else {
+						m_LocalData.UpdateTime();
+					}
+					this->m_NetWorkController->Update(m_LocalData);
+				}
 				//
-				if (m_NetWorkBrowser->GetSequence() == SequenceEnum::MainGame) {
+				if (m_NetWorkController && m_NetWorkController->IsInGame()) {
 					for (int index = 0; index < Player_num; index++) {
 						auto& p = PlayerMngr->GetPlayer(index);
 						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
-						auto tmp = this->m_NetWorkBrowser->GetNowServerPlayerData((PlayerID)index, false);
+						PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)index);
 						c->SetViewID(GetMyPlayerID());
 						if (index == GetMyPlayerID()) {
-							MyInput.SetKeyInputFlags(tmp.GetInput());//キーフレームだけサーバーに合わせる
-							c->SetInput(MyInput, isready);
+							c->SetInput(Ret.GetInput(), true);
 						}
 						else {
-							if (!m_NetWorkBrowser->GetClient()) {
+							//サーバーがCPUを動かす
+							if (!m_NetWorkController->GetClient()) {
 								//cpu
 								//p->GetAI()->Execute(&MyInput);
-								//player
-								//MyInput = tmp.GetInput();
 							}
-							c->SetInput(tmp.GetInput(), isready);
+							c->SetInput(Ret.GetInput(), true);
 							bool override_true = true;
-							override_true = tmp.GetIsActive();
+							//override_true = Ret.GetIsActive();
 							if (override_true) {
-								c->SetPosBufOverRide(tmp.GetMove());
+								c->SetPosBufOverRide(Ret.GetMove());
 							}
 
 						}
 						//ダメージイベント処理
 						/*
-						for (auto& e : tmp.GetDamageEvents()) {
+						for (auto& e : Ret.GetDamageEvents()) {
 							this->m_DamageEvents.emplace_back(e);
 						}
 						//*/
@@ -227,12 +230,12 @@ namespace FPS_n2 {
 						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
 						c->SetViewID(GetMyPlayerID());
 						if (index == GetMyPlayerID()) {
-							c->SetInput(MyInput, isready);
+							c->SetInput(MyInput, true);
 						}
 						else {
 							InputControl OtherInput;
 							p->GetAI()->Execute(&OtherInput);
-							c->SetInput(OtherInput, isready);
+							c->SetInput(OtherInput, true);
 						}
 						//ダメージイベント処理
 						/*
@@ -243,7 +246,6 @@ namespace FPS_n2 {
 						//*/
 					}
 				}
-				m_NetWorkBrowser->LateExecute();
 				//ダメージイベント
 				for (int index = 0; index < Player_num; index++) {
 					auto& p = PlayerMngr->GetPlayer(index);
@@ -371,15 +373,13 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			MAINLOOP::Dispose_Sub(void) noexcept {
-			auto* PlayerMngr = PlayerManager::Instance();
 			auto* BackGround = BackGroundClass::Instance();
 			//使い回しオブジェ系
-			ObjectManager::Instance()->DelObj(&PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara());
-			PlayerMngr->GetPlayer(GetMyPlayerID())->Dispose();
 			BackGround->Dispose();
 			//
-			m_NetWorkBrowser->Dispose();
 			m_NetWorkBrowser.reset();
+			m_NetWorkController->Dispose();
+			m_NetWorkController.reset();
 			{
 				auto* DrawParts = DXDraw::Instance();
 				PostPassEffect::Instance()->SetLevelFilter(0, 255, 1.f);
@@ -441,7 +441,11 @@ namespace FPS_n2 {
 				this->m_UIclass.Draw();
 			}
 			//通信設定
-			//this->m_NetWorkBrowser->Draw();
+			this->m_NetWorkBrowser->Draw();
+			if (m_NetWorkController) {
+				auto* DrawParts = DXDraw::Instance();
+				WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%2dms", static_cast<int>(m_NetWorkController->GetPing()));
+			}
 		}
 	};
 };

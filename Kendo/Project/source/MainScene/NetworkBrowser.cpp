@@ -5,12 +5,77 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//通信
+		void NetWorkController::Init(bool IsClient, int Port, const IPDATA& ip) noexcept {
+			m_PlayerNet.Int(static_cast<NetTime>((this->m_Tick*1000.f / Frame_Rate)*1000.f));
+			this->m_IsClient = IsClient;
+			if (this->m_IsClient) {
+				m_ClientCtrl.Init(Port, ip);
+			}
+			else {
+				m_ServerCtrl.Init(Port);
+			}
+			this->m_Sequence = NetWorkSequence::Matching;
+		}
+		void NetWorkController::Update(const PlayerSendData& pdata) noexcept {
+			m_PlayerNet.SetData(pdata);
+			if (this->m_Sequence == NetWorkSequence::Matching) {
+				//自分のPlayerID決定
+				if (this->m_IsClient) {
+					if (m_ClientCtrl.CanGetMyID()) {
+						m_PlayerNet.SetPlayerID(m_ClientCtrl.GetMyID());
+					}
+				}
+				else {
+					m_PlayerNet.SetPlayerID((PlayerID)0);
+				}
+			}
+			if (this->m_Sequence >= NetWorkSequence::Matching) {
+				bool IsUpdateTick = m_PlayerNet.UpdateTick();
+				if (this->m_IsClient) {
+					if (this->m_ClientCtrl.Execute(&m_PlayerNet.SetPlayerData(), IsUpdateTick)) {
+						this->m_Sequence = NetWorkSequence::MainGame;
+					}
+					//サーバーからもらった情報が最新の物ならば適用
+					if (this->m_ClientCtrl.IsServerDataUpdated()) {
+						LONGLONG Ping = m_PlayerNet.Update(this->m_ClientCtrl.GetServerData());
+						if (Ping != MAXLONGLONG && Ping != 0) {
+							this->m_Pings.at(m_PingNow) = std::max(0.f, static_cast<float>(Ping) / 1000.f - (this->m_Tick*1000.f / Frame_Rate));//ティック分引く
+							++m_PingNow %= static_cast<int>(this->m_Pings.size());
+							m_Ping = 0.f;
+							for (auto& p : this->m_Pings) {
+								m_Ping += p;
+							}
+							m_Ping /= static_cast<float>(this->m_Pings.size());
+						}
+					}
+				}
+				else {
+					//サーバーとしてのふるまい
+					if (this->m_ServerCtrl.Execute(&m_PlayerNet.SetPlayerData(), IsUpdateTick)) {
+						this->m_Sequence = NetWorkSequence::MainGame;
+					}
+					//サーバーの持つ情報をtidkに合わせて適用
+					if (IsUpdateTick) {
+						LONGLONG Ping = m_PlayerNet.Update(this->m_ServerCtrl.GetServerData());
+						if (Ping != MAXLONGLONG && Ping != 0) {
+							this->m_Pings.at(m_PingNow) = std::max(0.f, static_cast<float>(Ping) / 1000.f - (this->m_Tick*1000.f / Frame_Rate));//ティック分引く
+							++m_PingNow %= static_cast<int>(this->m_Pings.size());
+							m_Ping = 0.f;
+							for (auto& p : this->m_Pings) {
+								m_Ping += p;
+							}
+							m_Ping /= static_cast<float>(this->m_Pings.size());
+						}
+					}
+				}
+			}
+		}
+		//
+		void NetWorkBrowser::Init(void) noexcept {
+			this->m_Sequence = BrowserSequence::SelMode;
+		}
 		void NetWorkBrowser::Draw(void) noexcept {
-			//*
 			auto* DrawParts = DXDraw::Instance();
-			auto* Pad = PadControl::Instance();
-			auto* Fonts = FontPool::Instance();
-			unsigned int color = Red;
 
 			int xp, yp, xs, ys;
 			xp = DrawParts->GetUIY(100);
@@ -18,17 +83,21 @@ namespace FPS_n2 {
 			xs = DrawParts->GetUIY(500);
 			ys = DrawParts->GetUIY(300);
 
-			int y_h = DrawParts->GetUIY(30);
 			//ラムダ
-			auto AddSubBox = [&](int xp1, int yp1, std::function<void()> UpFunc, std::function<void()> DownFunc) {
+			auto AddSubBox = [&](int xp, int yp, std::function<void()> UpFunc, std::function<void()> DownFunc) {
+				auto* Pad = PadControl::Instance();
+				unsigned int color = Red;
+				int xp1, yp1;
 				int xp2, yp2;
 				{
-					xp2 = xp1 + DrawParts->GetUIY(50);
-					yp2 = yp1 + y_h;
+					xp1 = xp - DrawParts->GetUIY(25);
+					yp1 = yp - DrawParts->GetUIY(25) - LineHeight / 2;
+					xp2 = xp + DrawParts->GetUIY(25);
+					yp2 = yp1 + LineHeight;
 					bool into = IntoMouse(xp1, yp1, xp2, yp2);
 					color = (into) ? Black : Gray75;
 					DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
-					Fonts->Get(FontPool::FontType::MS_Gothic, y_h, 1)->DrawString(INVALID_ID, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1 + (xp2 - xp1) / 2, yp1, White, Black, "+");
+					WindowSystem::SetMsg(xp1 + (xp2 - xp1) / 2, yp1 + LineHeight / 2, LineHeight, FontHandle::FontXCenter::MIDDLE, White, Black, "+");
 					if (into) {
 						if (Pad->GetMouseClick().repeat()) {
 							UpFunc();
@@ -41,7 +110,7 @@ namespace FPS_n2 {
 					bool into = IntoMouse(xp1, yp1, xp2, yp2);
 					color = (into) ? Black : Gray75;
 					DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
-					Fonts->Get(FontPool::FontType::MS_Gothic, y_h, 1)->DrawString(INVALID_ID, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1 + (xp2 - xp1) / 2, yp1, White, Black, "-");
+					WindowSystem::SetMsg(xp1 + (xp2 - xp1) / 2, yp1 + LineHeight / 2, LineHeight, FontHandle::FontXCenter::MIDDLE, White, Black, "-");
 					if (into) {
 						if (Pad->GetMouseClick().repeat()) {
 							DownFunc();
@@ -52,124 +121,96 @@ namespace FPS_n2 {
 			//
 			{
 				DrawBox(xp - DrawParts->GetUIY(10), yp - DrawParts->GetUIY(10), xp + xs + DrawParts->GetUIY(10), yp + ys + DrawParts->GetUIY(10), Gray25, TRUE);//背景
-				WindowSystem::SetMsgBox(xp, yp, xp + xs, yp + y_h, LineHeight, Black, " %d/%d", static_cast<int>(this->m_Sequence), static_cast<int>(SequenceEnum::MainGame));
-				//ログ
-				{
-					int xp1, yp1;
-					xp1 = xp;
-					yp1 = yp + ys + DrawParts->GetUIY(10) + DrawParts->GetUIY(10);
-					if (this->m_Sequence > SequenceEnum::SelMode) {
-						Fonts->Get(FontPool::FontType::MS_Gothic, y_h, 1)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "種別[%s]", this->m_IsClient ? "クライアント" : "サーバー"); yp1 += y_h;
-					}
-					if (this->m_Sequence > SequenceEnum::Set_Port) {
-						Fonts->Get(FontPool::FontType::MS_Gothic, y_h, 1)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "使用ポート[%d-%d]", this->m_NewSetting.UsePort, this->m_NewSetting.UsePort + Player_num - 1); yp1 += y_h;
-					}
-					if (this->m_Sequence > SequenceEnum::SetTick) {
-						Fonts->Get(FontPool::FontType::MS_Gothic, y_h, 1)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "ティックレート[%4.1f]", Frame_Rate / this->m_Tick); yp1 += y_h;
-					}
-					if (this->m_Sequence > SequenceEnum::SetIP) {
-						Fonts->Get(FontPool::FontType::MS_Gothic, y_h, 1)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "IP=[%d,%d,%d,%d]", this->m_NewSetting.IP.d1, this->m_NewSetting.IP.d2, this->m_NewSetting.IP.d3, this->m_NewSetting.IP.d4); yp1 += y_h;
-					}
-				}
+				WindowSystem::SetMsg(xp + xs, yp + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, " %d/%d", static_cast<int>(this->m_Sequence), static_cast<int>(NetWorkSequence::MainGame));
 			}
 			auto Prev = this->m_Sequence;
+
+			int y1p = yp + DrawParts->GetUIY(50);
 			switch (this->m_Sequence) {
-				case SequenceEnum::SelMode:
-					if (WindowSystem::SetMsgClickBox(xp, yp + DrawParts->GetUIY(50), xp + xs, yp + DrawParts->GetUIY(50) + y_h, LineHeight, Gray75, "クライアントになる")) {
+				case BrowserSequence::SelMode:
+					if (WindowSystem::SetMsgClickBox(xp, y1p, xp + xs, y1p + LineHeight * 2, LineHeight, Gray75, "クライアントになる")) {
 						this->m_IsClient = true;
-						this->m_Tick = 1.f;
-						this->m_Sequence = SequenceEnum::CheckPreset;
+						this->m_Sequence = BrowserSequence::CheckPreset;
 					}
-					if (WindowSystem::SetMsgClickBox(xp, yp + DrawParts->GetUIY(100), xp + xs, yp + DrawParts->GetUIY(100) + y_h, LineHeight, Gray75, "サーバーになる")) {
+					if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(50), xp + xs, y1p + DrawParts->GetUIY(50) + LineHeight * 2, LineHeight, Gray75, "サーバーになる")) {
 						this->m_IsClient = false;
-						this->m_Tick = 1.f;
-						this->m_Sequence = SequenceEnum::CheckPreset;
+						this->m_Sequence = BrowserSequence::CheckPreset;
 					}
 					break;
-				case SequenceEnum::CheckPreset:
-					WindowSystem::SetMsgBox(xp, yp + DrawParts->GetUIY(50), xp + xs, yp + DrawParts->GetUIY(50) + y_h, LineHeight, Black, "プリセット設定");
-					for (int i = 0; i < this->m_NewWorkSetting.GetSize(); i++) {
-						auto n = this->m_NewWorkSetting.Get(i);
-						if (WindowSystem::SetMsgClickBox(xp, yp + DrawParts->GetUIY(50)*(i + 2), xp + xs, yp + DrawParts->GetUIY(50)*(i + 2) + y_h, LineHeight, Gray75, "[%d][%d,%d,%d,%d]", n.UsePort, n.IP.d1, n.IP.d2, n.IP.d3, n.IP.d4)) {
-							this->m_NewSetting.UsePort = n.UsePort;
-							this->m_NewSetting.IP = n.IP;
-							this->m_Sequence = SequenceEnum::SetTick;
-							m_NewWorkSelect = i;
-							break;
+				case BrowserSequence::CheckPreset:
+					WindowSystem::SetMsg(xp, yp + LineHeight / 2, LineHeight, FontHandle::FontXCenter::LEFT, White, Black, "プリセット設定");
+					if (m_SeqFirst) {
+						m_NewWorkSettings.Load();
+					}
+					for (int i = 0; i <= this->m_NewWorkSettings.GetSize(); i++) {
+						if (i < this->m_NewWorkSettings.GetSize()) {
+							auto& n = this->m_NewWorkSettings.Get(i);
+							if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(50)*i, xp + xs, y1p + DrawParts->GetUIY(50)*i + LineHeight * 2, LineHeight, Gray75, "[%d][%d,%d,%d,%d]", n.UsePort, n.IP.d1, n.IP.d2, n.IP.d3, n.IP.d4)) {
+								this->m_NetSetting = n;
+								this->m_Sequence = BrowserSequence::Ready;
+								break;
+							}
+						}
+						else {
+							if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(50)*i, xp + xs, y1p + DrawParts->GetUIY(50)*i + LineHeight * 2, LineHeight, Gray75, "設定を追加する")) {
+								this->m_Sequence = BrowserSequence::SetNewData;
+								break;
+							}
+						}
+					}
+					break;
+				case BrowserSequence::SetNewData:
+					WindowSystem::SetMsg(xp, yp + LineHeight / 2, LineHeight, FontHandle::FontXCenter::LEFT, White, Black, "新規設定");
+					if (m_SeqFirst) {
+						m_NewWorkSettings.AddBack();
+					}
+					{
+						WindowSystem::SetMsg(xp + xs / 2, y1p + LineHeight / 2, LineHeight, FontHandle::FontXCenter::MIDDLE, White, Black, "ポート=[%d-%d]", this->m_NetSetting.UsePort, this->m_NetSetting.UsePort + Player_num - 1);
+						AddSubBox(xp + xs / 2, y1p + LineHeight / 2, [&]() { this->m_NetSetting.UsePort++; }, [&]() { this->m_NetSetting.UsePort--; });
+					}
+					if (this->m_IsClient) {//サーバ-はいらない
+						int yp1 = y1p + DrawParts->GetUIY(100);
+						WindowSystem::SetMsg(xp + xs / 2, yp1 + LineHeight / 2, LineHeight, FontHandle::FontXCenter::MIDDLE, White, Black, "IP=[%d,%d,%d,%d]", this->m_NetSetting.IP.d1, this->m_NetSetting.IP.d2, this->m_NetSetting.IP.d3, this->m_NetSetting.IP.d4);
+						for (int i = 0; i < 4; i++) {
+							auto* ip_tmp = &this->m_NetSetting.IP.d1;
+							switch (i) {
+								case 0:ip_tmp = &this->m_NetSetting.IP.d1; break;
+								case 1:ip_tmp = &this->m_NetSetting.IP.d2; break;
+								case 2:ip_tmp = &this->m_NetSetting.IP.d3; break;
+								case 3:ip_tmp = &this->m_NetSetting.IP.d4; break;
+							}
+							AddSubBox(xp + xs / 2 + DrawParts->GetUIY(70 * (i - 2) + 35), yp1 + LineHeight / 2,
+									  [&]() {
+										  if (*ip_tmp == 255) { *ip_tmp = 0; }
+										  else { (*ip_tmp)++; }
+									  }, [&]() {
+										  if (*ip_tmp == 0) { *ip_tmp = 255; }
+										  else { (*ip_tmp)--; }
+									  });
 						}
 					}
 					{
-						int i = this->m_NewWorkSetting.GetSize();
-						if (WindowSystem::SetMsgClickBox(xp, yp + DrawParts->GetUIY(50)*(i + 2), xp + xs, yp + DrawParts->GetUIY(50)*(i + 2) + y_h, LineHeight, Gray75, "設定を追加する")) {
-							m_NewWorkSetting.Add();
-							m_NewWorkSelect = i;
-							this->m_Sequence = SequenceEnum::Set_Port;
+						int yp1 = y1p + DrawParts->GetUIY(200);
+						if (WindowSystem::SetMsgClickBox(xp + xs - DrawParts->GetUIY(120), yp1, xp + xs, yp1 + LineHeight * 2, LineHeight, Gray75, "Set")) {
+							m_NewWorkSettings.SetBack(this->m_NetSetting);
+							m_NewWorkSettings.Save();
+							this->m_Sequence = BrowserSequence::Ready;
 						}
 					}
 					break;
-				case SequenceEnum::Set_Port://ポート
-					WindowSystem::SetMsgBox(xp, yp + DrawParts->GetUIY(50), xp + xs, yp + DrawParts->GetUIY(50) + y_h, LineHeight, Black, "ポート=[%d-%d]", this->m_NewSetting.UsePort, this->m_NewSetting.UsePort + Player_num - 1);
-					AddSubBox(xp, yp + DrawParts->GetUIY(100), [&]() { this->m_NewSetting.UsePort++; }, [&]() { this->m_NewSetting.UsePort--; });
-					if (WindowSystem::SetMsgClickBox(DrawParts->GetUIY(380), yp + DrawParts->GetUIY(100), DrawParts->GetUIY(380) + DrawParts->GetUIY(120), yp + DrawParts->GetUIY(100) + y_h, LineHeight, Gray75, "Set")) {
-						this->m_Sequence = SequenceEnum::SetIP;//サーバ-は一応いらない
+				case BrowserSequence::Ready:
+					WindowSystem::SetMsg(xp, yp + LineHeight / 2, LineHeight, FontHandle::FontXCenter::LEFT, White, Black, "通信中!");
+					{
+						int yp1 = y1p;
+						WindowSystem::SetMsg(xp, yp1 + LineHeight / 2, LineHeight, FontHandle::FontXCenter::LEFT, White, Black, "種別[%s]", this->m_IsClient ? "クライアント" : "サーバー"); yp1 += LineHeight;
+						WindowSystem::SetMsg(xp, yp1 + LineHeight / 2, LineHeight, FontHandle::FontXCenter::LEFT, White, Black, "使用ポート[%d-%d]", this->m_NetSetting.UsePort, this->m_NetSetting.UsePort + Player_num - 1); yp1 += LineHeight;
+						WindowSystem::SetMsg(xp, yp1 + LineHeight / 2, LineHeight, FontHandle::FontXCenter::LEFT, White, Black, "IP=[%d,%d,%d,%d]", this->m_NetSetting.IP.d1, this->m_NetSetting.IP.d2, this->m_NetSetting.IP.d3, this->m_NetSetting.IP.d4); yp1 += LineHeight;
 					}
-					break;
-				case SequenceEnum::SetIP://IP
-					WindowSystem::SetMsgBox(xp, yp + DrawParts->GetUIY(50), xp + xs, yp + DrawParts->GetUIY(50) + y_h, LineHeight, Black, "IP=[%d,%d,%d,%d]", this->m_NewSetting.IP.d1, this->m_NewSetting.IP.d2, this->m_NewSetting.IP.d3, this->m_NewSetting.IP.d4);
-					for (int i = 0; i < 4; i++) {
-						auto* ip_tmp = &this->m_NewSetting.IP.d1;
-						switch (i) {
-							case 0:ip_tmp = &this->m_NewSetting.IP.d1; break;
-							case 1:ip_tmp = &this->m_NewSetting.IP.d2; break;
-							case 2:ip_tmp = &this->m_NewSetting.IP.d3; break;
-							case 3:ip_tmp = &this->m_NewSetting.IP.d4; break;
-						}
-						AddSubBox(DrawParts->GetUIY(100 + 70 * i), yp + DrawParts->GetUIY(100),
-								 [&]() {
-									 if (*ip_tmp == 255) { *ip_tmp = 0; }
-									 else { (*ip_tmp)++; }
-								 }, [&]() {
-									 if (*ip_tmp == 0) { *ip_tmp = 255; }
-									 else { (*ip_tmp)--; }
-								 });
-					}
-					if (WindowSystem::SetMsgClickBox(DrawParts->GetUIY(380), yp + DrawParts->GetUIY(100), DrawParts->GetUIY(380) + DrawParts->GetUIY(120), yp + DrawParts->GetUIY(100) + y_h, LineHeight, Gray75, "Set")) {
-						this->m_Sequence = SequenceEnum::SetTick;
-						m_NewWorkSetting.Set(this->m_NewWorkSelect, this->m_NewSetting);
-						m_NewWorkSetting.Save();
-					}
-					break;
-				case SequenceEnum::SetTick:
-					WindowSystem::SetMsgBox(xp, yp + DrawParts->GetUIY(50), xp + xs, yp + DrawParts->GetUIY(50) + y_h, LineHeight, Black, "ティック=[%4.1f]", Frame_Rate / this->m_Tick);
-					AddSubBox(xp, yp + DrawParts->GetUIY(100), [&]() { this->m_Tick = std::clamp(this->m_Tick - 1.f, 1.f, 20.f); }, [&]() { this->m_Tick = std::clamp(this->m_Tick + 1.f, 1.f, 20.f); });
-					if (WindowSystem::SetMsgClickBox(DrawParts->GetUIY(380), yp + DrawParts->GetUIY(100), DrawParts->GetUIY(380) + DrawParts->GetUIY(120), yp + DrawParts->GetUIY(100) + y_h, LineHeight, Gray75, "Set")) {
-						this->m_Sequence = SequenceEnum::Matching;
-					}
-					break;
-				case SequenceEnum::Matching:
-					WindowSystem::SetMsgBox(xp, yp + DrawParts->GetUIY(50), xp + xs, yp + DrawParts->GetUIY(50) + y_h, LineHeight, Black, "他プレイヤー待機中…");
-					for (int i = 0; i < Player_num; i++) {
-						bool isActive = (this->m_IsClient) ? this->m_ClientCtrl.GetServerData().PlayerData[i].GetIsActive() : this->m_ServerCtrl.GetServerData().PlayerData[i].GetIsActive();
-						int yp1 = yp + DrawParts->GetUIY(50) + DrawParts->GetUIY(35)*(i + 1);
-						color = isActive ? Black : Gray75;
-						DrawBox(DrawParts->GetUIY(200), yp1, DrawParts->GetUIY(200) + DrawParts->GetUIY(300), yp1 + y_h, color, TRUE);
-						Fonts->Get(FontPool::FontType::MS_Gothic, y_h, 1)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, DrawParts->GetUIY(200), yp1, White, Black, "Player");
-						Fonts->Get(FontPool::FontType::MS_Gothic, y_h, 1)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, DrawParts->GetUIY(200) + DrawParts->GetUIY(300), yp1, White, Black, (isActive ? "〇" : ""));
-					}
-					break;
-				case SequenceEnum::MainGame:
-					WindowSystem::SetMsgBox(xp, yp + DrawParts->GetUIY(50), xp + xs, yp + DrawParts->GetUIY(50) + y_h, LineHeight, Black, "通信中!");
 					break;
 				default:
 					break;
 			}
 			m_SeqFirst = (Prev != this->m_Sequence);
-
-			Fonts->Get(FontPool::FontType::MS_Gothic, y_h, 1)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, DrawParts->GetUIY(0), DrawParts->GetUIY(64),
-																		  White, Black, "Ping[%f]", GetPing());
-
-			Fonts->Get(FontPool::FontType::MS_Gothic, y_h, 1)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, DrawParts->GetUIY(0), DrawParts->GetUIY(64) + y_h,
-																		  White, Black, "MyID[%d]", m_PlayerNet.GetMyPlayerID());
 		}
 	};
 };

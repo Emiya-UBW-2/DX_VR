@@ -1,19 +1,15 @@
 #pragma once
 #pragma warning(disable:4464)
 #include	"../Header.hpp"
-#include "../MainScene/Input.hpp"
 
 #include "../MainScene/BackGround/BackGround.hpp"
-
+#include "../MainScene/Object/Character.hpp"
+#include "../MainScene/Player/Player.hpp"
 
 #include "../MainScene/NetWork.hpp"
 #include "../MainScene/NetworkBrowser.hpp"
 
-#include "../MainScene/Object/Character.hpp"
-
 #include "../MainScene/UI/MainSceneUIControl.hpp"
-
-#include "../MainScene/Player/Player.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -32,13 +28,21 @@ namespace FPS_n2 {
 			int											m_UILayer{0};
 
 			std::unique_ptr<NetWorkBrowser>				m_NetWorkBrowser;
+			std::unique_ptr<NetWorkController>				m_NetWorkController{nullptr};
 			//
 			std::vector<DamageEvent>					m_DamageEvents;
 			float										m_fov_base{ deg2rad(45.f) };
 
 			float m_D1{38.f / 255.f}, m_D2{192.f / 255.f}, m_D3{1.f};
+			//
+			PlayerSendData								m_LocalData;
 		private:
-			const auto&		GetMyPlayerID(void) const noexcept { return m_NetWorkBrowser->GetMyPlayerID(); }
+			auto		GetMyPlayerID(void) const noexcept {
+				if (m_NetWorkController) {
+					return m_NetWorkController->GetMyPlayerID();
+				}
+				return (PlayerID)0;
+			}
 		public:
 			MAINLOOP(void) noexcept {}
 			MAINLOOP(const MAINLOOP&) = delete;
