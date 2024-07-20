@@ -102,8 +102,8 @@ namespace FPS_n2 {
 		//クライアントが送信するデータ　通信版
 		class PlayerNetData {
 		private:
-			bool						m_IsActive{ false };
 			size_t						m_CheckSum{};			//チェックサム
+			bool						m_IsActive{ false };
 			NetTime						m_ClientTime{ 0 };		//そのプレイヤーのインゲーム時間
 			PlayerID					m_ID{ 0 };
 			InputControl				m_Input;

@@ -13,6 +13,7 @@ namespace FPS_n2 {
 		class NetWorkController {
 			bool					m_IsClient{true};
 			float					m_Tick{2.f};
+			PlayerSendData			m_LocalData;
 			PlayerNetWork			m_PlayerNet;
 			ServerControl			m_ServerCtrl;			//サーバー専用
 			ClientControl			m_ClientCtrl;			//クライアント専用
@@ -34,9 +35,11 @@ namespace FPS_n2 {
 			const auto&		GetClient(void) const noexcept { return this->m_IsClient; }
 			const auto&		GetPing(void) const noexcept { return this->m_Ping; }
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_PlayerNet.GetMyPlayerID(); }
+
+			auto&			SetLocalData(void) noexcept { return this->m_LocalData; }
 		public:
 			void Init(bool IsClient, int Port, const IPDATA& ip) noexcept;
-			void Update(const PlayerSendData& pdata) noexcept;
+			void Update(void) noexcept;
 			void Dispose(void) noexcept {
 				m_ServerCtrl.Dispose();
 				m_ClientCtrl.Dispose();

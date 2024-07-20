@@ -16,8 +16,14 @@ namespace FPS_n2 {
 			}
 			this->m_Sequence = NetWorkSequence::Matching;
 		}
-		void NetWorkController::Update(const PlayerSendData& pdata) noexcept {
-			m_PlayerNet.SetData(pdata);
+		void NetWorkController::Update(void) noexcept {
+			if (this->m_Sequence == NetWorkSequence::Matching) {
+				m_LocalData.InitTime();
+			}
+			else {
+				m_LocalData.UpdateTime();
+			}
+			m_PlayerNet.SetData(m_LocalData);
 			if (this->m_Sequence == NetWorkSequence::Matching) {
 				//Ž©•ª‚ÌPlayerIDŒˆ’è
 				if (this->m_IsClient) {

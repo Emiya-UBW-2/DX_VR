@@ -183,14 +183,8 @@ namespace FPS_n2 {
 					this->m_NetWorkController->Init(m_NetWorkBrowser->GetClient(), m_NetWorkBrowser->GetNetSetting().UsePort, m_NetWorkBrowser->GetNetSetting().IP);
 				}
 				if (m_NetWorkController) {
-					m_LocalData.SetMyPlayer(MyInput, Chara->GetMove(), Chara->GetDamageEvent());
-					if (!m_NetWorkController->IsInGame()) {
-						m_LocalData.InitTime();
-					}
-					else {
-						m_LocalData.UpdateTime();
-					}
-					this->m_NetWorkController->Update(m_LocalData);
+					this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, Chara->GetMove(), Chara->GetDamageEvent());
+					this->m_NetWorkController->Update();
 				}
 				//
 				if (m_NetWorkController && m_NetWorkController->IsInGame()) {
