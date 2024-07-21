@@ -8,12 +8,12 @@ namespace FPS_n2 {
 	static const float Scale_Rate{ 12.5f };
 
 	namespace Sceneclass {
-		enum class ObjType {
+		enum class ObjType : uint8_t {
 			Human,
 			Weapon,
 		};
-		enum class SoundEnum {
-			RunFoot = static_cast<int>(SoundEnumCommon::Num),
+		enum class SoundEnum : uint8_t {
+			RunFoot = static_cast<uint8_t>(SoundEnumCommon::Num),
 			StandupFoot,
 			Heart,
 			//
@@ -34,13 +34,13 @@ namespace FPS_n2 {
 
 			Num,
 		};
-		enum class CharaTypeID {
+		enum class CharaTypeID : uint8_t {
 			Mine,
 			Team,
 			Enemy,
 		};
 	};
 
-	typedef char PlayerID;
+	typedef uint8_t PlayerID;
 	typedef short HitPoint;
 };

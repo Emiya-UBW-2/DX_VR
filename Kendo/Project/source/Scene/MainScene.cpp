@@ -211,11 +211,7 @@ namespace FPS_n2 {
 
 						}
 						//ダメージイベント処理
-						/*
-						for (auto& e : Ret.GetDamageEvents()) {
-							this->m_DamageEvents.emplace_back(e);
-						}
-						//*/
+						Ret.GetDamageEvent().AddDamageEvent(&this->m_DamageEvents);
 					}
 				}
 				else {//オフライン
@@ -232,12 +228,7 @@ namespace FPS_n2 {
 							c->SetInput(OtherInput, true);
 						}
 						//ダメージイベント処理
-						/*
-						for (const auto& e : c->GetDamageEvent()) {
-							this->m_DamageEvents.emplace_back(e);
-						}
-						c->GetDamageEvent().clear();
-						//*/
+						c->GetDamageEvent().AddDamageEvent(&this->m_DamageEvents);
 					}
 				}
 				//ダメージイベント

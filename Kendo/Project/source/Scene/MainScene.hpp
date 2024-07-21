@@ -25,7 +25,7 @@ namespace FPS_n2 {
 			//UIŠÖ˜A
 			UIClass										m_UIclass;
 			float m_GuardStart{0.f};
-			int											m_UILayer{0};
+			int											m_UILayer{ 0 };
 
 			std::unique_ptr<NetWorkBrowser>				m_NetWorkBrowser;
 			std::unique_ptr<NetWorkController>				m_NetWorkController{nullptr};

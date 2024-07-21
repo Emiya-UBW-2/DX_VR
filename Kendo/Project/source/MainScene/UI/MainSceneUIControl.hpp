@@ -5,7 +5,7 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class UIClass {
 			class GaugeParam {
-				int m_Now{0};
+				int m_Now{ 0 };
 				int m_Max{100};
 				float m_Buffer{0.f};
 			public:
@@ -152,7 +152,7 @@ namespace FPS_n2 {
 
 			class GaugeMask {
 			private:
-				int ultxp{0}, ultyp{0};
+				int ultxp{ 0 }, ultyp{ 0 };
 				GraphHandle UltGaugeMask;
 				GraphHandle UltGauge;
 			public:

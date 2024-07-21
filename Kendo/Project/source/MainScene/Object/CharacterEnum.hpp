@@ -3,7 +3,7 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		enum class CharaAnimeID : int {
+		enum class CharaAnimeID : uint8_t {
 			Bottom_Stand,
 			Bottom_Stand_Walk,
 			Bottom_Stand_WalkBack,
@@ -22,7 +22,7 @@ namespace FPS_n2 {
 			//
 			AnimeIDMax,
 		};
-		enum class CharaFrame {
+		enum class CharaFrame : uint8_t {
 			Center,
 			Upper,
 			Upper2,
@@ -81,7 +81,7 @@ namespace FPS_n2 {
 			"Gun",
 			"Holster",
 		};
-		enum class CharaShape {
+		enum class CharaShape : uint8_t {
 			None,
 			A,
 			I,

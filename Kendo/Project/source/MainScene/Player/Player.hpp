@@ -15,7 +15,7 @@ namespace FPS_n2 {
 			private:
 				std::shared_ptr<ObjectBaseClass>				m_Chara{nullptr};
 				std::shared_ptr<AIControl>						m_AI{ nullptr };
-				int												m_Score{0};							//スコア
+				int												m_Score{ 0 };							//スコア
 			public:
 				PlayerControl(void) noexcept {
 					this->m_Score = 0;

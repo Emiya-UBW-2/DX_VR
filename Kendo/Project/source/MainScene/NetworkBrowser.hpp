@@ -6,7 +6,7 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//通信
-		enum class NetWorkSequence {
+		enum class NetWorkSequence : uint8_t {
 			Matching,
 			MainGame,
 		};
@@ -18,8 +18,8 @@ namespace FPS_n2 {
 			ServerControl			m_ServerCtrl;			//サーバー専用
 			ClientControl			m_ClientCtrl;			//クライアント専用
 			std::array<float, 60>	m_Pings{};
-			float					m_Ping{0};
-			int						m_PingNow{0};
+			float					m_Ping{ 0 };
+			int						m_PingNow{ 0 };
 			NetWorkSequence			m_Sequence{NetWorkSequence::Matching};
 		public:
 			NetWorkController(void) noexcept {}
@@ -46,7 +46,7 @@ namespace FPS_n2 {
 			}
 		};
 
-		enum class BrowserSequence {
+		enum class BrowserSequence : uint8_t {
 			SelMode,
 			CheckPreset,
 			SetNewData,

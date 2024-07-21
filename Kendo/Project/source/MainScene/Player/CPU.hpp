@@ -5,7 +5,7 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		//AI—p
 		class AIControl {
-			PlayerID m_MyID{0};
+			PlayerID m_MyID{ 0 };
 		public:
 			void Init(PlayerID MyID) noexcept {
 				m_MyID = MyID;

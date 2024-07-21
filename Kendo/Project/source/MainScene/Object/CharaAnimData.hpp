@@ -4,7 +4,7 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		enum class EnumWeaponAnimType {
+		enum class EnumWeaponAnimType : uint8_t {
 			Ready,
 			Run,
 			Men,
@@ -20,7 +20,7 @@ namespace FPS_n2 {
 			GuardSuriage,
 			Max,
 		};
-		enum class EnumWeaponAnim {
+		enum class EnumWeaponAnim : uint8_t {
 			Saber_Ready,
 			Saber_Run,
 			Saber_Men,

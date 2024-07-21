@@ -10,10 +10,10 @@ namespace FPS_n2 {
 			tmp.m_Input = Lerp(PrevData.m_Input, ServerData.m_Input, Per);
 			tmp.m_Input.SetKeyInputFlags(ServerData.m_Input);
 			tmp.m_move = PrevData.m_move.LerpMove(ServerData.m_move, Per);
-			tmp.m_DamageEvents = ServerData.m_DamageEvents;
+			tmp.m_DamageEvent = ServerData.m_DamageEvent;
 			//
 			tmp.m_ID = ServerData.m_ID;
-			tmp.m_IsActive = ServerData.m_IsActive;
+			tmp.m_Attribute = ServerData.m_Attribute;
 			tmp.m_ClientTime = ServerData.m_ClientTime;
 			return tmp;
 		}
@@ -121,7 +121,7 @@ namespace FPS_n2 {
 					break;
 				case ClientPhase::GetNumber:
 					if (IsDataUpdated) {
-						if (tmpData.GetIsActive()) {				// ID取れたと識別出来たら
+						if (tmpData.GetFlag(NetAttribute::IsActive)) {				// ID取れたと識別出来たら
 							n.m_Phase = ClientPhase::Ready;
 						}
 					}
@@ -197,7 +197,7 @@ namespace FPS_n2 {
 				break;
 			case ClientPhase::WaitConnect:
 				IsSendData = true;
-				MyPlayerData->SetActive(false);
+				MyPlayerData->SetFlag(NetAttribute::IsActive, false);
 				if (m_IsServerDataUpdated) {
 					m_CannotConnectTimer = 0.f;
 					if (m_ServerData.m_PlayerID > 0) {
@@ -228,7 +228,7 @@ namespace FPS_n2 {
 				break;
 			case ClientPhase::GetNumber:
 				IsSendData = true;
-				MyPlayerData->SetActive(true);
+				MyPlayerData->SetFlag(NetAttribute::IsActive, true);
 				if (m_IsServerDataUpdated) {
 					if (m_ServerData.IsInGame()) {
 						//マッチ済なので次へ
