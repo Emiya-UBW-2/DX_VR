@@ -134,18 +134,18 @@ namespace FPS_n2 {
 			std::array<float, 4>								m_Vec{};
 			InputControl										m_Input;
 			switchs												m_Squat;
-			Vector3DX											m_rad_Buf, m_rad, m_radAdd;
+			Vector3DX											m_rad_Buf, m_radAdd;
+			float												m_ZRad{};
 			float												m_yrad_Upper{0.f}, m_yrad_Bottom{0.f};
-			float												m_yrad_UpperChange{0.f}, m_yrad_BottomChange{0.f};
-			Vector3DX											m_UpperPrevRad;
-			Vector3DX											m_UpperRad;
+			float												m_yrad_UpperChange{ 0.f }, m_yrad_BottomChange{ 0.f };
+			float												m_PrevRadX;
+			float												m_PrevRadY;
+			float												m_UpperRadX;
+			float												m_UpperRadY;
 			Vector3DX											m_UpperyVecNormal, m_UpperzVecNormal;
 			Vector3DX											m_UpperyVec, m_UpperzVec, m_UpperPos;
 			std::array<float, static_cast<int>(CharaAnimeID::AnimeIDMax)>	m_AnimPerBuf{};
 			bool												m_TurnBody{false};
-
-			bool												m_PosBufOverRideFlag{false};
-			moves												m_OverRideInfo;
 
 			bool												m_IsRunning{false};
 			bool												m_IsFrontAttacking{false};
@@ -157,9 +157,8 @@ namespace FPS_n2 {
 			auto		GetRun(void) const noexcept { return this->m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking; }
 			auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }
 			auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
+			const auto& GetZRad(void) const noexcept { return this->m_ZRad; }
 		public://ƒZƒbƒ^[
-			auto&			SetRadBuf(void) noexcept { return this->m_rad_Buf; }
-			auto&			SetRad(void) noexcept { return this->m_rad; }
 			void			SetIsSquat(bool value) noexcept { this->m_Squat.Set(value); }
 			void			SetIsRunning(bool value) noexcept { this->m_IsRunning = value; }
 			void			SetIsFrontAttacking(bool value) noexcept { this->m_IsFrontAttacking = value; }
@@ -167,9 +166,7 @@ namespace FPS_n2 {
 			void			SetIsBackAttacking(bool value) noexcept { this->m_IsBackAttacking = value; }
 		protected:
 			auto		GetInputControl(void) const noexcept { return this->m_Input; }
-			auto		GetRad(void) const noexcept { return this->m_rad; }
 			auto		GetYRadBottom(void) const noexcept { return this->m_yrad_Bottom; }
-			auto		GetYRadUpperChange(void) const noexcept { return this->m_yrad_UpperChange; }
 			auto		GetYRadBottomChange(void) const noexcept { return this->m_yrad_BottomChange; }
 			auto		GetMoverPer(void) const noexcept { return m_MoverPer; }
 			auto		IsMove(void) const noexcept { return m_MoverPer > 0.1f; }
@@ -182,8 +179,7 @@ namespace FPS_n2 {
 			}
 			auto		GetSquatSwitch(void) const noexcept { return this->m_Squat.trigger(); }
 			auto		GetGunSwingMat(void) const noexcept { return Matrix4x4DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
-			auto&			GetCharaAnimeBufID(CharaAnimeID value) noexcept { return this->m_AnimPerBuf.at(static_cast<size_t>(value)); }
-			const auto&		GetOverRideInfo(void) const noexcept { return this->m_OverRideInfo; }
+			auto&		GetCharaAnimeBufID(CharaAnimeID value) noexcept { return this->m_AnimPerBuf.at(static_cast<size_t>(value)); }
 			//
 			auto		GetBottomStandAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
 			auto		GetBottomWalkAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_Walk : CharaAnimeID::Bottom_Stand_Walk; }
@@ -223,7 +219,6 @@ namespace FPS_n2 {
 			auto		GetVecLeft(void) const noexcept { return 1.15f * this->m_Vec[1] * std::clamp(GetSpeedPer() / 0.45f, 0.5f, 1.f); }
 			auto		GetVecRight(void) const noexcept { return 1.15f * this->m_Vec[3] * std::clamp(GetSpeedPer() / 0.45f, 0.5f, 1.f); }
 		public:
-			void		InitOverride() { this->m_PosBufOverRideFlag = false; }
 			void		InitKey(float pxRad, float pyRad) {
 				for (size_t i = 0; i < 4; i++) {
 					this->m_Vec[i] = 0.f;
@@ -232,29 +227,18 @@ namespace FPS_n2 {
 				this->m_radAdd.Set(0, 0, 0);
 				this->m_rad_Buf.x = (pxRad);
 				this->m_rad_Buf.y = (pyRad);
-				this->m_rad = this->m_rad_Buf;
 
 				SetIsSquat(false);
-				this->m_yrad_Upper = this->m_rad.y;
-				this->m_yrad_Bottom = this->m_rad.y;
+				this->m_yrad_Upper = this->m_rad_Buf.y;
+				this->m_yrad_Bottom = this->m_rad_Buf.y;
+				this->m_PrevRadX = this->m_rad_Buf.x;
+				this->m_PrevRadY = this->m_rad_Buf.y;
 				this->m_yrad_BottomChange = 0.f;
 				this->m_TurnBody = false;
 				//
 				for (auto& a : this->m_AnimPerBuf) { a = 0.f; }
 			}
 			//
-			void		SetPosBufOverRide(const moves& o) noexcept {
-				this->m_PosBufOverRideFlag = true;
-				this->m_OverRideInfo = o;
-			}
-			bool		PutOverride() {
-				if (this->m_PosBufOverRideFlag) {
-					this->m_PosBufOverRideFlag = false;
-					//this->m_OverRideInfo;
-					return true;
-				}
-				return false;
-			}
 			void		InputKey(const InputControl& pInput, bool pReady, const Vector3DX& pAddRadvec) {
 				auto* DrawParts = DXDraw::Instance();
 				this->m_Input = pInput;
@@ -268,10 +252,6 @@ namespace FPS_n2 {
 					Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
 					this->m_rad_Buf.x = (std::clamp(this->m_rad_Buf.x + this->m_Input.GetAddxRad(), deg2rad(-12.f), deg2rad(12.f)) + this->m_radAdd.x);
 					this->m_rad_Buf.y = (this->m_rad_Buf.y + this->m_Input.GetAddyRad() + this->m_radAdd.y);
-
-					Easing(&this->m_rad.x, m_rad_Buf.x, 0.5f, EasingType::OutExpo);
-					Easing(&this->m_rad.y, m_rad_Buf.y, 0.8f, EasingType::OutExpo);
-					Easing(&this->m_rad.z, m_rad_Buf.z, 0.5f, EasingType::OutExpo);
 				}
 				//ˆÚ“®
 				auto wkey = (this->m_Input.GetPADSPress(PADS::MOVE_W) || (m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking)) && !m_IsBackAttacking;
@@ -290,14 +270,18 @@ namespace FPS_n2 {
 				m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
 				m_MoverPer = m_VecTotal.magnitude();
 			}
-			void		UpdateKeyRad() {
+			void		UpdateKeyRad(const moves& move_t) {
+				float XRad = 0.f;
+				float YRad = 0.f;
+				move_t.GetMatBuf().GetRadian(&XRad, &YRad, nullptr);
 				auto* DrawParts = DXDraw::Instance();
 				//
 				if (!IsMove()) {
-					if (deg2rad(50.f) < abs(GetYRadUpperChange())) {
+					float yrad_UpperChange = YRad - this->m_yrad_Upper;
+					if (deg2rad(50.f) < abs(yrad_UpperChange)) {
 						this->m_TurnBody = true;
 					}
-					if (abs(GetYRadUpperChange()) < deg2rad(0.5f)) {
+					if (abs(yrad_UpperChange) < deg2rad(0.5f)) {
 						this->m_TurnBody = false;
 					}
 				}
@@ -305,19 +289,30 @@ namespace FPS_n2 {
 					this->m_TurnBody = false;
 				}
 
-				if (this->m_TurnBody || IsMove()) { Easing(&this->m_yrad_Upper, this->m_rad.y, 0.85f, EasingType::OutExpo); }
-				auto YradChange = this->m_yrad_Bottom;
-				Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - GetFrontP(), 0.85f, EasingType::OutExpo);
-				YradChange = this->m_yrad_Bottom - YradChange;
-				float Z = this->m_rad_Buf.z;
-				Easing(&Z, (abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f, EasingType::OutExpo);
-				this->m_rad_Buf.z = (Z);
-				this->m_yrad_UpperChange = this->m_rad.y - this->m_yrad_Upper;
-				this->m_yrad_BottomChange = this->m_rad.y - this->m_yrad_Bottom;
+				if (this->m_TurnBody || IsMove()) { this->m_yrad_Upper = YRad; }
+				auto Prev = this->m_yrad_Bottom;
+				{
+					auto bottom = (this->m_yrad_Upper - GetFrontP());
+					// ‘_‚¢
+					{
+						Vector3DX Vec; Vec.Set(std::sin(this->m_yrad_Bottom), std::cos(this->m_yrad_Bottom), 0.f);
+						Vector3DX vec_a; vec_a.Set(std::sin(bottom), std::cos(bottom), 0.f);
+						float cost = Vector3DX::Cross(vec_a, Vec).z;
+						float sint = sqrtf(std::abs(1.f - cost * cost));
+						this->m_yrad_Bottom += (std::atan2f(cost, sint)) * 10.f / DrawParts->GetFps();
+
+						if (this->m_yrad_Bottom < 0.f) { this->m_yrad_Bottom += DX_PI_F * 2.f; }
+						if (this->m_yrad_Bottom > DX_PI_F * 2.f) { this->m_yrad_Bottom -= DX_PI_F * 2.f; }
+					}
+				}
+				auto YradChange = this->m_yrad_Bottom - Prev;
+				Easing(&this->m_rad_Buf.z, (abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f, EasingType::OutExpo);
+				Easing(&m_ZRad, this->m_rad_Buf.z, 0.5f, EasingType::OutExpo);
+				this->m_yrad_BottomChange = YRad - this->m_yrad_Bottom;
 				//e‚Ì—h‚ê
-				Easing(&m_UpperRad, (this->m_rad - this->m_UpperPrevRad)*-1.f, 0.9f, EasingType::OutExpo);
-				m_UpperPrevRad = this->m_rad;
-				auto mat = Matrix4x4DX::RotAxis(Vector3DX::right(), m_UpperRad.x) * Matrix4x4DX::RotAxis(Vector3DX::up(), m_UpperRad.y);
+				auto mat = Matrix4x4DX::RotAxis(Vector3DX::right(), (XRad - this->m_PrevRadX) * -1.f) * Matrix4x4DX::RotAxis(Vector3DX::up(), (YRad - this->m_PrevRadY) * -1.f);
+				this->m_PrevRadX = XRad;
+				this->m_PrevRadY = YRad;
 				Easing(&m_UpperyVecNormal, mat.yvec(), 0.8f, EasingType::OutExpo);
 				Easing(&m_UpperzVecNormal, mat.zvec(), 0.8f, EasingType::OutExpo);
 				Easing(&m_UpperyVec, m_UpperyVecNormal, 0.8f, EasingType::OutExpo);
@@ -357,58 +352,6 @@ namespace FPS_n2 {
 			}
 		};
 		//•à‚­Žž‚Ì—h‚ê
-		class WalkSwingControl {
-		private:
-			Vector3DX											m_WalkSwingRad;
-			Vector3DX											m_WalkSwing;
-			Vector3DX											m_WalkSwing_p;
-			Vector3DX											m_WalkSwing_t;
-			Vector3DX											m_PrevPos;
-		public://ƒQƒbƒ^[
-			auto		GetWalkSwingMat(void) const noexcept {
-				return Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(m_WalkSwing.z*m_WalkSwingRad.z))*
-					Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(m_WalkSwing.x*m_WalkSwingRad.x));
-			}
-		public:
-			WalkSwingControl(void) noexcept {}
-			~WalkSwingControl(void) noexcept {}
-		public:
-			void UpdateWalkSwing(const Vector3DX& Pos, float SwingPer) noexcept {
-				auto* DrawParts = DXDraw::Instance();
-				m_WalkSwingRad.Set(5.f, 0.f, 10.f);
-				m_WalkSwingRad *= SwingPer;
-				//X
-				{
-					if (m_PrevPos.y > Pos.y) {
-						m_WalkSwing_t.x = (1.f);
-					}
-					else {
-						m_WalkSwing_t.x = (std::max(m_WalkSwing_t.x - 15.f / DrawParts->GetFps(), 0.f));
-					}
-				}
-				//Z
-				{
-					if (m_WalkSwing_t.x == 1.f) {
-						if (m_WalkSwing_t.z >= 0.f) {
-							m_WalkSwing_t.z = (-1.f);
-						}
-						else {
-							m_WalkSwing_t.z = (1.f);
-						}
-					}
-				}
-				auto WS_tmp = m_WalkSwing_t * SwingPer;
-				//XZ
-				{
-					Easing(&m_WalkSwing_p.x, WS_tmp.x, (m_WalkSwing_p.x > WS_tmp.x) ? 0.6f : 0.9f, EasingType::OutExpo);
-					Easing(&m_WalkSwing_p.z, WS_tmp.z, 0.95f, EasingType::OutExpo);
-				}
-				//
-				m_PrevPos = Pos;
-				//
-				Easing(&m_WalkSwing, m_WalkSwing_p, 0.5f, EasingType::OutExpo);
-			}
-		};
 		class EyeSwingControl {
 		private:
 			float												m_MoveEyePosTimer{0.f};

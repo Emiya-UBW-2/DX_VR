@@ -15,7 +15,6 @@ namespace FPS_n2 {
 			public ObjectBaseClass,
 			public StaminaControl,
 			public KeyControl,
-			public WalkSwingControl,
 			public EyeSwingControl
 		{
 		private:
@@ -48,15 +47,18 @@ namespace FPS_n2 {
 			float												m_D3{0.1f};
 			float												m_D4{0.f};
 
-			std::array<DamageEvent, 64>							m_Damage;
+			DamageEventControl									m_Damage;
+			bool												m_PosBufOverRideFlag{ false };
+			moves												m_OverRideInfo;
+			Matrix4x4DX											m_BaseMatrix;
 		public:
 			auto&			GetWeaponPtrNow(void) noexcept { return this->m_Weapon_Ptr; }
 			void			SetWeaponPtr(std::shared_ptr<WeaponClass>& pWeaponPtr0) noexcept {
 				this->m_Weapon_Ptr = pWeaponPtr0;
 			}
 		private:
-			PlayerID											m_MyID{0};
-			PlayerID											m_ViewID{0};
+			PlayerID											m_MyID{ 0 };
+			PlayerID											m_ViewID{ 0 };
 		public:
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_Damage; }
@@ -69,7 +71,7 @@ namespace FPS_n2 {
 			void			move_LeftArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept ;
 			const Matrix4x4DX GetCharaDir(void) const noexcept ;
 
-			auto		GetCharaPosition(void) const noexcept { return this->m_move.posbuf; }
+			auto		GetCharaPosition(void) const noexcept { return this->m_move.GetPos(); }
 			auto		IsAimPer(void) const noexcept { return (this->m_Arm[static_cast<size_t>(EnumWeaponAnimType::Ready)].Per() <= 0.1f); }
 			auto		IsLowReadyPer(void) const noexcept { return (this->m_Arm[static_cast<size_t>(EnumWeaponAnimType::Ready)].Per() >= 0.95f); }
 		private:
@@ -100,6 +102,10 @@ namespace FPS_n2 {
 			Vector3DX		GetFramePosition(CharaFrame frame) const noexcept { return MV1GetFramePosition(GetObj_const().GetHandle(), GetFrame(static_cast<int>(frame))); }
 		public://セッター
 			bool			SetDamageEvent(const DamageEvent& value) noexcept ;
+			void			SetPosBufOverRide(const moves& o) noexcept {
+				this->m_PosBufOverRideFlag = true;
+				this->m_OverRideInfo = o;
+			}
 		private: //更新関連
 			void			ExecuteInput(void) noexcept ;
 			void			ExecuteAction(void) noexcept ;
