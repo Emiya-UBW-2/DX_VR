@@ -56,7 +56,7 @@ namespace FPS_n2 {
 			moves						m_move;
 			DamageEventControl			m_DamageEvent;
 			PlayerID					m_ID{ 0 };
-			uint8_t						m_Attribute{ 0 };
+			uint8_t						m_Attribute{ 0 };	//フラグ
 		private:
 			int			CalcCheckSum(void) const noexcept {
 				return (
@@ -101,9 +101,24 @@ namespace FPS_n2 {
 		class ServerNetData {
 		private:
 		public:
-			int					m_PlayerID{ 0 };			//
+			size_t				m_CheckSum{};			//チェックサム
 			size_t				ServerFrame{ 0 };			//サーバーフレーム
-			PlayerNetData		PlayerData[Player_num];	//
+			PlayerNetData		PlayerData[Player_num];
+			PlayerID			m_PlayerID{ 0 };
+		private:
+			int				CalcCheckSum(void) const noexcept {
+				int Players = 0;
+				for (int i = 0; i < Player_num; i++) {
+					Players += (PlayerData[i].IsCheckSum() ? 100 : 0);
+				}
+				return (
+					static_cast<int>(m_PlayerID) +
+					static_cast<int>(ServerFrame) +
+					Players
+					);
+			}
+		public:
+			auto			IsCheckSum(void) const noexcept { return m_CheckSum == (size_t)this->CalcCheckSum(); }
 		public:
 			void			SetInGame(void) noexcept { m_PlayerID = -1; }
 			auto			IsInGame(void) const noexcept { return m_PlayerID == -1; }//インゲーム中です
@@ -116,7 +131,7 @@ namespace FPS_n2 {
 			size_t											m_LeapFrameMax{};
 			ServerNetData									m_ServerDataCommon;	//最新の受信データ
 			ServerNetData									m_PrevServerData;	//前回の受信データ
-			PlayerNetData									m_PlayerData;		//ローカルのプレイヤーデータ
+			PlayerNetData									m_LocalData;		//ローカルのプレイヤーデータ
 			NetTime											m_TickCnt{ 0 };
 			NetTime											m_TickRate{ 0 };
 			NetTime											m_PrevFrame{ 0 };
@@ -130,11 +145,12 @@ namespace FPS_n2 {
 			~PlayerNetWork(void) noexcept {}
 		public:
 			const auto&		GetServerDataCommon(void) const noexcept { return this->m_ServerDataCommon; }
-			const auto&		GetMyPlayerID(void) const noexcept { return this->m_PlayerData.GetID(); }
+			const auto&		GetMyLocalPlayerID(void) const noexcept { return this->m_LocalData.GetID(); }
+			const auto&		GetLocalPlayerData(void) const noexcept { return this->m_LocalData; }
 		public:
-			void			SetPlayerID(PlayerID ID) noexcept { this->m_PlayerData.SetID(ID); }
-			void			SetData(const PlayerSendData& pdata) noexcept { this->m_PlayerData.SetData(pdata); }
-			auto&			SetPlayerData(void) noexcept { return this->m_PlayerData; }
+			void			SetLocalPlayerID(PlayerID ID) noexcept { this->m_LocalData.SetID(ID); }
+			void			SetLocalPlayerFlag(NetAttribute flag, bool value) noexcept { this->m_LocalData.SetFlag(flag, value); }
+			void			SetLocalData(const PlayerSendData& pdata) noexcept { this->m_LocalData.SetData(pdata); }
 		public:
 			PlayerNetData 	GetLerpServerPlayerData(PlayerID pPlayerID) const noexcept;
 		public:
@@ -160,8 +176,9 @@ namespace FPS_n2 {
 		};
 		//サーバー専用
 		class ServerControl {
-			ServerNetData			m_ServerData;
-			std::array<UDPS, Player_num - 1>			m_Net;
+			ServerNetData							m_ServerData;
+			std::array<UDPS, Player_num>			m_Net;
+			bool									m_IsServerPlay{ false };//サーバーもプレイヤーとして参戦するか
 		public:
 			ServerControl(void) noexcept {}
 			ServerControl(const ServerControl&) = delete;
@@ -174,9 +191,10 @@ namespace FPS_n2 {
 			bool AllReady() const noexcept;
 		public:
 			const auto&		GetServerData(void) const noexcept { return this->m_ServerData; }
+			const auto&		GetIsServerPlayer(void) const noexcept { return this->m_IsServerPlay; }
 		public:
-			void			Init(int pPort) noexcept;
-			bool			Execute(PlayerNetData* MyPlayerData, bool IsUpdateTick) noexcept;
+			void			Init(int pPort,bool IsServerPlay) noexcept;
+			bool			Execute(const PlayerNetData& MyLocalPlayerData, bool IsUpdateTick) noexcept;
 			void			Dispose(void) noexcept;
 		};
 		//クライアント専用
@@ -188,9 +206,9 @@ namespace FPS_n2 {
 			UDPS					m_Net;
 
 			PlayerID				m_MyID{};
-			bool					m_IsServerDataUpdated{};
 			ServerNetData			m_ServerData;
-			ServerNetData			m_BufferData[30];
+			ServerNetData			m_BufferDataOnce;
+			ServerNetData			m_BufferData[10];
 		public:
 			ClientControl(void) noexcept {}
 			ClientControl(const ClientControl&) = delete;
@@ -199,14 +217,15 @@ namespace FPS_n2 {
 			ClientControl& operator=(ClientControl&& o) = delete;
 
 			~ClientControl(void) noexcept {}
+		private:
+			auto&	SetServerData(void) noexcept { return this->m_ServerData; }
 		public:
-			const auto&		IsServerDataUpdated(void) const noexcept { return this->m_IsServerDataUpdated; }
 			const auto&		GetServerData(void) const noexcept { return this->m_ServerData; }
 			const auto&		GetMyID(void) const noexcept { return this->m_MyID; }
 			auto			CanGetMyID(void) const noexcept { return (this->m_Net.m_Phase == ClientPhase::GetNumber) || (this->m_Net.m_Phase == ClientPhase::Ready); }
 		public:
 			void			Init(int pPort, const IPDATA& pIP) noexcept;
-			bool			Execute(PlayerNetData* MyPlayerData, bool IsUpdateTick) noexcept;
+			bool			Execute(const PlayerNetData& MyLocalPlayerData, bool IsUpdateTick) noexcept;
 			void			Dispose(void) noexcept;
 		};
 	};

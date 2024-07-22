@@ -12,66 +12,73 @@ namespace FPS_n2 {
 				m_ClientCtrl.Init(Port, ip);
 			}
 			else {
-				m_ServerCtrl.Init(Port);
+				m_ServerCtrl.Init(Port, true);
 			}
 			this->m_Sequence = NetWorkSequence::Matching;
 		}
 		void NetWorkController::Update(void) noexcept {
-			if (this->m_Sequence == NetWorkSequence::Matching) {
-				m_LocalData.InitTime();
-			}
-			else {
-				m_LocalData.UpdateTime();
-			}
-			m_PlayerNet.SetData(m_LocalData);
-			if (this->m_Sequence == NetWorkSequence::Matching) {
-				//自分のPlayerID決定
+			//ローカルデータ更新
+			{
 				if (this->m_IsClient) {
-					if (m_ClientCtrl.CanGetMyID()) {
-						m_PlayerNet.SetPlayerID(m_ClientCtrl.GetMyID());
+					//更新間隔
+					if (this->m_Sequence == NetWorkSequence::Matching) {
+						m_LocalData.InitTime();
+					}
+					else {
+						m_LocalData.UpdateTime();
+					}
+					m_PlayerNet.SetLocalData(m_LocalData);
+					if (this->m_Sequence == NetWorkSequence::Matching) {
+						//自分のPlayerID決定
+						if (m_ClientCtrl.CanGetMyID()) {
+							m_PlayerNet.SetLocalPlayerID(m_ClientCtrl.GetMyID());
+						}
+					}
+					m_PlayerNet.SetLocalPlayerFlag(NetAttribute::IsActive, m_ClientCtrl.CanGetMyID());
+				}
+				else if (this->m_ServerCtrl.GetIsServerPlayer()) {
+					//更新間隔
+					if (this->m_Sequence == NetWorkSequence::Matching) {
+						m_LocalData.InitTime();
+					}
+					else {
+						m_LocalData.UpdateTime();
+					}
+					m_PlayerNet.SetLocalData(m_LocalData);
+					if (this->m_Sequence == NetWorkSequence::Matching) {
+						//自分のPlayerID決定
+						m_PlayerNet.SetLocalPlayerID((PlayerID)0);
 					}
 				}
-				else {
-					m_PlayerNet.SetPlayerID((PlayerID)0);
-				}
 			}
+			//
 			if (this->m_Sequence >= NetWorkSequence::Matching) {
 				bool IsUpdateTick = m_PlayerNet.UpdateTick();
+				LONGLONG Ping = MAXLONGLONG;
 				if (this->m_IsClient) {
-					if (this->m_ClientCtrl.Execute(&m_PlayerNet.SetPlayerData(), IsUpdateTick)) {
+					if (this->m_ClientCtrl.Execute(m_PlayerNet.GetLocalPlayerData(), IsUpdateTick)) {
 						this->m_Sequence = NetWorkSequence::MainGame;
 					}
-					//サーバーからもらった情報が最新の物ならば適用
-					if (this->m_ClientCtrl.IsServerDataUpdated()) {
-						LONGLONG Ping = m_PlayerNet.Update(this->m_ClientCtrl.GetServerData());
-						if (Ping != MAXLONGLONG && Ping != 0) {
-							this->m_Pings.at(m_PingNow) = std::max(0.f, static_cast<float>(Ping) / 1000.f - (this->m_Tick*1000.f / Frame_Rate));//ティック分引く
-							++m_PingNow %= static_cast<int>(this->m_Pings.size());
-							m_Ping = 0.f;
-							for (auto& p : this->m_Pings) {
-								m_Ping += p;
-							}
-							m_Ping /= static_cast<float>(this->m_Pings.size());
-						}
+					if (IsUpdateTick) {
+						Ping = m_PlayerNet.Update(this->m_ClientCtrl.GetServerData());
 					}
 				}
 				else {
-					//サーバーとしてのふるまい
-					if (this->m_ServerCtrl.Execute(&m_PlayerNet.SetPlayerData(), IsUpdateTick)) {
+					if (this->m_ServerCtrl.Execute(m_PlayerNet.GetLocalPlayerData(), IsUpdateTick)) {
 						this->m_Sequence = NetWorkSequence::MainGame;
 					}
-					//サーバーの持つ情報をtidkに合わせて適用
 					if (IsUpdateTick) {
-						LONGLONG Ping = m_PlayerNet.Update(this->m_ServerCtrl.GetServerData());
-						if (Ping != MAXLONGLONG && Ping != 0) {
-							this->m_Pings.at(m_PingNow) = std::max(0.f, static_cast<float>(Ping) / 1000.f - (this->m_Tick*1000.f / Frame_Rate));//ティック分引く
-							++m_PingNow %= static_cast<int>(this->m_Pings.size());
-							m_Ping = 0.f;
-							for (auto& p : this->m_Pings) {
-								m_Ping += p;
-							}
-							m_Ping /= static_cast<float>(this->m_Pings.size());
+						Ping = m_PlayerNet.Update(this->m_ServerCtrl.GetServerData());
+					}
+				}
+				if (IsUpdateTick) {
+					if (Ping != MAXLONGLONG) {
+						if (Ping != 0) {
+							CalcPing(Ping);
 						}
+					}
+					else {
+						//ロスト
 					}
 				}
 			}

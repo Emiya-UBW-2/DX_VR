@@ -29,12 +29,22 @@ namespace FPS_n2 {
 			NetWorkController& operator=(NetWorkController&& o) = delete;
 
 			~NetWorkController(void) noexcept {}
+		private:
+			void			CalcPing(LONGLONG microsec) noexcept {
+				this->m_Pings.at(m_PingNow) = std::max(0.f, static_cast<float>(microsec) / 1000.f - (this->m_Tick * 1000.f / Frame_Rate));//ティック分引く
+				++m_PingNow %= static_cast<int>(this->m_Pings.size());
+				m_Ping = 0.f;
+				for (auto& p : this->m_Pings) {
+					m_Ping += p;
+				}
+				m_Ping /= static_cast<float>(this->m_Pings.size());
+			}
 		public:
 			auto			IsInGame(void) const noexcept { return this->m_Sequence == NetWorkSequence::MainGame; }
 			PlayerNetData 	GetLerpServerPlayerData(PlayerID ID) noexcept { return this->m_PlayerNet.GetLerpServerPlayerData(ID); }
 			const auto&		GetClient(void) const noexcept { return this->m_IsClient; }
 			const auto&		GetPing(void) const noexcept { return this->m_Ping; }
-			const auto&		GetMyPlayerID(void) const noexcept { return this->m_PlayerNet.GetMyPlayerID(); }
+			const auto&		GetMyPlayerID(void) const noexcept { return this->m_PlayerNet.GetMyLocalPlayerID(); }
 
 			auto&			SetLocalData(void) noexcept { return this->m_LocalData; }
 		public:

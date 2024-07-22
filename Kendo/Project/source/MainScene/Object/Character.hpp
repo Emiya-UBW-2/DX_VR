@@ -48,9 +48,9 @@ namespace FPS_n2 {
 			float												m_D4{0.f};
 
 			DamageEventControl									m_Damage;
-			bool												m_PosBufOverRideFlag{ false };
+			bool												m_MoveOverRideFlag{ false };
 			moves												m_OverRideInfo;
-			Matrix4x4DX											m_BaseMatrix;
+			Matrix3x3DX											m_BaseMatrix;
 		public:
 			auto&			GetWeaponPtrNow(void) noexcept { return this->m_Weapon_Ptr; }
 			void			SetWeaponPtr(std::shared_ptr<WeaponClass>& pWeaponPtr0) noexcept {
@@ -69,7 +69,7 @@ namespace FPS_n2 {
 		private:
 			void			move_RightArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept ;
 			void			move_LeftArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept ;
-			const Matrix4x4DX GetCharaDir(void) const noexcept ;
+			const Matrix3x3DX GetCharaDir(void) const noexcept ;
 
 			auto		GetCharaPosition(void) const noexcept { return this->m_move.GetPos(); }
 			auto		IsAimPer(void) const noexcept { return (this->m_Arm[static_cast<size_t>(EnumWeaponAnimType::Ready)].Per() <= 0.1f); }
@@ -102,8 +102,8 @@ namespace FPS_n2 {
 			Vector3DX		GetFramePosition(CharaFrame frame) const noexcept { return MV1GetFramePosition(GetObj_const().GetHandle(), GetFrame(static_cast<int>(frame))); }
 		public://セッター
 			bool			SetDamageEvent(const DamageEvent& value) noexcept ;
-			void			SetPosBufOverRide(const moves& o) noexcept {
-				this->m_PosBufOverRideFlag = true;
+			void			SetMoveOverRide(const moves& o) noexcept {
+				this->m_MoveOverRideFlag = true;
 				this->m_OverRideInfo = o;
 			}
 		private: //更新関連

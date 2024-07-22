@@ -206,7 +206,7 @@ namespace FPS_n2 {
 							bool override_true = true;
 							//override_true = Ret.GetIsActive();
 							if (override_true) {
-								c->SetPosBufOverRide(Ret.GetMove());
+								c->SetMoveOverRide(Ret.GetMove());
 							}
 
 						}

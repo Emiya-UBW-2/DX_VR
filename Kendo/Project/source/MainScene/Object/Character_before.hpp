@@ -138,10 +138,10 @@ namespace FPS_n2 {
 			float												m_ZRad{};
 			float												m_yrad_Upper{0.f}, m_yrad_Bottom{0.f};
 			float												m_yrad_UpperChange{ 0.f }, m_yrad_BottomChange{ 0.f };
-			float												m_PrevRadX;
-			float												m_PrevRadY;
-			float												m_UpperRadX;
-			float												m_UpperRadY;
+			float												m_PrevRadX{ 0.f };
+			float												m_PrevRadY{ 0.f };
+			float												m_UpperRadX{ 0.f };
+			float												m_UpperRadY{ 0.f };
 			Vector3DX											m_UpperyVecNormal, m_UpperzVecNormal;
 			Vector3DX											m_UpperyVec, m_UpperzVec, m_UpperPos;
 			std::array<float, static_cast<int>(CharaAnimeID::AnimeIDMax)>	m_AnimPerBuf{};
@@ -178,7 +178,7 @@ namespace FPS_n2 {
 				return FrontP;
 			}
 			auto		GetSquatSwitch(void) const noexcept { return this->m_Squat.trigger(); }
-			auto		GetGunSwingMat(void) const noexcept { return Matrix4x4DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
+			auto		GetGunSwingMat(void) const noexcept { return Matrix3x3DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
 			auto&		GetCharaAnimeBufID(CharaAnimeID value) noexcept { return this->m_AnimPerBuf.at(static_cast<size_t>(value)); }
 			//
 			auto		GetBottomStandAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
@@ -365,7 +365,7 @@ namespace FPS_n2 {
 			void InitEyeSwing(void) noexcept {
 				this->m_MoveEyePosTimer = 0.f;
 			}
-			void UpdateEyeSwing(const Matrix4x4DX& pCharaMat, float SwingPer, float SwingSpeed) noexcept {
+			void UpdateEyeSwing(const Matrix3x3DX& pCharaMat, float SwingPer, float SwingSpeed) noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				if (SwingPer > 0.f) {
 					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed)*60.f / DrawParts->GetFps();
@@ -373,9 +373,9 @@ namespace FPS_n2 {
 				else {
 					this->m_MoveEyePosTimer = 0.f;
 				}
-				auto EyePos = Matrix4x4DX::Vtrans(Vector3DX::up()*(0.25f*SwingPer), Matrix4x4DX::RotAxis(Vector3DX::forward(), this->m_MoveEyePosTimer));
+				auto EyePos = Matrix3x3DX::Vtrans(Vector3DX::up()*(0.25f*SwingPer), Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_MoveEyePosTimer));
 				EyePos.y = (-std::abs(EyePos.y));
-				Easing(&this->m_MoveEyePos, Matrix4x4DX::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
+				Easing(&this->m_MoveEyePos, Matrix3x3DX::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
 			}
 		};
 	};

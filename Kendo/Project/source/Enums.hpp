@@ -41,6 +41,6 @@ namespace FPS_n2 {
 		};
 	};
 
-	typedef uint8_t PlayerID;
-	typedef short HitPoint;
+	typedef int8_t	PlayerID;
+	typedef short	HitPoint;
 };
