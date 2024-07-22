@@ -47,6 +47,8 @@ namespace FPS_n2 {
 			float												m_D3{0.1f};
 			float												m_D4{0.f};
 
+			float												pp_yR{ 0.f };
+
 			DamageEventControl									m_Damage;
 			bool												m_MoveOverRideFlag{ false };
 			moves												m_OverRideInfo;

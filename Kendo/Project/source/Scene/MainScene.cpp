@@ -68,6 +68,7 @@ namespace FPS_n2 {
 			m_NetWorkBrowser->Init();
 		}
 		bool			MAINLOOP::Update_Sub(void) noexcept {
+			clsDx();
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* BackGround = BackGroundClass::Instance();
 #ifdef DEBUG

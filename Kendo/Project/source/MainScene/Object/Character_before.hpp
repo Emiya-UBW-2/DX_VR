@@ -134,7 +134,7 @@ namespace FPS_n2 {
 			std::array<float, 4>								m_Vec{};
 			InputControl										m_Input;
 			switchs												m_Squat;
-			Vector3DX											m_rad_Buf, m_radAdd;
+			Vector3DX											m_rad_Buf;
 			float												m_ZRad{};
 			float												m_yrad_Upper{0.f}, m_yrad_Bottom{0.f};
 			float												m_yrad_UpperChange{ 0.f }, m_yrad_BottomChange{ 0.f };
@@ -224,7 +224,6 @@ namespace FPS_n2 {
 					this->m_Vec[i] = 0.f;
 				}
 				this->m_Input.ResetAllInput();
-				this->m_radAdd.Set(0, 0, 0);
 				this->m_rad_Buf.x = (pxRad);
 				this->m_rad_Buf.y = (pyRad);
 
@@ -239,7 +238,7 @@ namespace FPS_n2 {
 				for (auto& a : this->m_AnimPerBuf) { a = 0.f; }
 			}
 			//
-			void		InputKey(const InputControl& pInput, bool pReady, const Vector3DX& pAddRadvec) {
+			void		InputKey(const InputControl& pInput, bool pReady) {
 				auto* DrawParts = DXDraw::Instance();
 				this->m_Input = pInput;
 				if (!pReady) {
@@ -249,9 +248,8 @@ namespace FPS_n2 {
 				this->m_Squat.Execute(false);
 				//‰ñ“]
 				{
-					Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
-					this->m_rad_Buf.x = (std::clamp(this->m_rad_Buf.x + this->m_Input.GetAddxRad(), deg2rad(-12.f), deg2rad(12.f)) + this->m_radAdd.x);
-					this->m_rad_Buf.y = (this->m_rad_Buf.y + this->m_Input.GetAddyRad() + this->m_radAdd.y);
+					this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + this->m_Input.GetAddxRad(), deg2rad(-12.f), deg2rad(12.f));
+					this->m_rad_Buf.y = this->m_rad_Buf.y + this->m_Input.GetAddyRad();
 				}
 				//ˆÚ“®
 				auto wkey = (this->m_Input.GetPADSPress(PADS::MOVE_W) || (m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking)) && !m_IsBackAttacking;
@@ -290,7 +288,7 @@ namespace FPS_n2 {
 				}
 
 				if (this->m_TurnBody || IsMove()) { this->m_yrad_Upper = YRad; }
-				auto Prev = this->m_yrad_Bottom;
+				float YradChange = 0.f;
 				{
 					auto bottom = (this->m_yrad_Upper - GetFrontP());
 					// ‘_‚¢
@@ -298,17 +296,23 @@ namespace FPS_n2 {
 						Vector3DX Vec; Vec.Set(std::sin(this->m_yrad_Bottom), std::cos(this->m_yrad_Bottom), 0.f);
 						Vector3DX vec_a; vec_a.Set(std::sin(bottom), std::cos(bottom), 0.f);
 						float cost = Vector3DX::Cross(vec_a, Vec).z;
-						float sint = sqrtf(std::abs(1.f - cost * cost));
-						this->m_yrad_Bottom += (std::atan2f(cost, sint)) * 10.f / DrawParts->GetFps();
+						float sint = Vector3DX::Dot(vec_a, Vec);
+						YradChange = std::clamp(std::atan2f(cost, sint),deg2rad(-10), deg2rad(10)) * 10.f / DrawParts->GetFps();
+						this->m_yrad_Bottom += YradChange;
 
 						if (this->m_yrad_Bottom < 0.f) { this->m_yrad_Bottom += DX_PI_F * 2.f; }
 						if (this->m_yrad_Bottom > DX_PI_F * 2.f) { this->m_yrad_Bottom -= DX_PI_F * 2.f; }
 					}
 				}
-				auto YradChange = this->m_yrad_Bottom - Prev;
 				Easing(&this->m_rad_Buf.z, (abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f, EasingType::OutExpo);
 				Easing(&m_ZRad, this->m_rad_Buf.z, 0.5f, EasingType::OutExpo);
-				this->m_yrad_BottomChange = YRad - this->m_yrad_Bottom;
+				{
+					Vector3DX Vec; Vec.Set(std::sin(this->m_yrad_Bottom), std::cos(this->m_yrad_Bottom), 0.f);
+					Vector3DX vec_a; vec_a.Set(std::sin(YRad), std::cos(YRad), 0.f);
+					float cost = Vector3DX::Cross(vec_a, Vec).z;
+					float sint = Vector3DX::Dot(vec_a, Vec);
+					this->m_yrad_BottomChange = std::atan2f(cost, sint);
+				}
 				//e‚Ì—h‚ê
 				auto mat = Matrix4x4DX::RotAxis(Vector3DX::right(), (XRad - this->m_PrevRadX) * -1.f) * Matrix4x4DX::RotAxis(Vector3DX::up(), (YRad - this->m_PrevRadY) * -1.f);
 				this->m_PrevRadX = XRad;

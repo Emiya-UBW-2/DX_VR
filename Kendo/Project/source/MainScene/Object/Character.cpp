@@ -246,7 +246,7 @@ namespace FPS_n2 {
 							auto IsFront = ((Vector3DX::Dot(Dir_XZ, Vec.normalized())) > 0.f);
 							auto cross = Vector3DX::Cross(Dir_XZ, Vec.normalized()).y;
 
-							float Radius = (0.5f+ 0.25f)*Scale_Rate;
+							float Radius = (0.5f+ 0.5f)*Scale_Rate;
 							float Len = Vec.magnitude();
 							if (Len < Radius) {
 								if (IsFront) {
@@ -702,12 +702,11 @@ namespace FPS_n2 {
 			m_BaseMatrix = Matrix3x3DX::RotAxis(Vector3DX::forward(), HeadBobbing ? (KeyControl::GetZRad() / 2.f) : 0.f) * Matrix3x3DX::RotAxis(Vector3DX::up(), KeyControl::GetYRadBottom());
 
 			this->m_move.SetPos(pos);
-			this->m_move.Update(0.9f, 0.5f);
+			this->m_move.Update(0.9f, 0.f);
 			UpdateObjMatrix(m_BaseMatrix, this->m_move.GetPos());
 
 			Matrix3x3DX Prev = this->m_move.GetMat();
-			Matrix3x3DX Mat; Mat.SetRadian(KeyControl::GetRadBuf().x, KeyControl::GetRadBuf().y, 0.f);
-			Easing(&Prev, Mat, 0.8f, EasingType::OutExpo);
+			Prev.SetRadian(KeyControl::GetRadBuf().x, KeyControl::GetRadBuf().y, 0.f);
 			this->m_move.SetMat(Prev);
 
 			if (GetWeaponPtrNow()) {
@@ -854,6 +853,7 @@ namespace FPS_n2 {
 			ResetMove(Mat, pPos);
 		}
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			Vector3DX m_MouseVec; m_MouseVec.Set(pInput.GetAddxRad()*deg2rad(0.1f), pInput.GetAddyRad()*deg2rad(0.1f), 0.f);
 
 			m_GuardVec += m_MouseVec;
@@ -865,38 +865,33 @@ namespace FPS_n2 {
 			
 			InputControl Input = pInput;
 			{
-				float pp_y = 0.f;
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& Target = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1 - this->m_MyID)->GetChara();
 
 				auto& TgtPos = Target->GetMove().GetPos();
 				auto& MyPos = this->GetMove().GetPos();
 
-				auto Dir = this->GetEyeMatrix().zvec() * -1.f;
-				auto Dir_XZ = Dir; Dir_XZ.y = (0.f);Dir_XZ = Dir_XZ.normalized();
-
-				auto Vec = (TgtPos - MyPos); Vec.y = (0.f);Vec = Vec.normalized();
-
-				auto IsFront = ((Vector3DX::Dot(Dir_XZ, Vec)) > 0.f);
-				auto cross = Vector3DX::Cross(Dir_XZ, Vec).y;
-				if (IsFront) {
-					if (abs(cross) < 0.4f) {
-						pp_y = (cross * 0.14f);
+				auto Dir_XZ = this->GetEyeMatrix().zvec() * -1.f; Dir_XZ.y = (0.f);Dir_XZ = Dir_XZ.normalized();
+				float Len = 0.f;
+				auto Vec = (TgtPos - MyPos); Vec.y = (0.f); Len = Vec.magnitude(); Vec = Vec.normalized();
+				float pp_y = 0.f;
+				if ((Len > 1.5f * Scale_Rate) && !KeyControl::GetRun()) {
+					float sint = Vector3DX::Cross(Vec, Dir_XZ).y;
+					float cost = Vector3DX::Dot(Vec, Dir_XZ);
+					auto IsFront = (cost > cos(deg2rad(40)));
+					if (IsFront) {
+						pp_y = std::clamp(-std::atan2f(sint, cost), -deg2rad(60), deg2rad(60)) * 5.f / 60.f;
 					}
 					else {
-						pp_y = (cross * 0.35f);
+						pp_y = -deg2rad(60) * 5.f / 60.f;
 					}
 				}
-				else {
-					pp_y = -0.5f;
-				}
-				pp_y *= (KeyControl::GetRun() ? 0.f : 1.f);
-				pp_y = std::clamp(pp_y*0.5f, -0.2f, 0.2f);
+				Easing(&pp_yR, pp_y, 0.8f, EasingType::OutExpo);
 				Input.SetAddxRad(0.f);
 				Input.SetAddyRad(pp_y);
 			}
 			//
-			KeyControl::InputKey(Input, pReady, Vector3DX::zero());
+			KeyControl::InputKey(Input, pReady);
 		}
 		//
 		void			CharacterClass::Init_Sub(void) noexcept {
