@@ -1,88 +1,10 @@
 #pragma warning(disable:4464)
 #include	"NetworkBrowser.hpp"
-#include	"../Header.hpp"
+
+const FPS_n2::Sceneclass::NetWorkBrowser* SingletonBase<FPS_n2::Sceneclass::NetWorkBrowser>::m_Singleton = nullptr;
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		//通信
-		void NetWorkController::Init(bool IsClient, int Port, const IPDATA& ip) noexcept {
-			m_PlayerNet.Int(static_cast<NetTime>((this->m_Tick*1000.f / Frame_Rate)*1000.f));
-			this->m_IsClient = IsClient;
-			if (this->m_IsClient) {
-				m_ClientCtrl.Init(Port, ip);
-			}
-			else {
-				m_ServerCtrl.Init(Port, true);
-			}
-			this->m_Sequence = NetWorkSequence::Matching;
-		}
-		void NetWorkController::Update(void) noexcept {
-			//ローカルデータ更新
-			{
-				if (this->m_IsClient) {
-					//更新間隔
-					if (this->m_Sequence == NetWorkSequence::Matching) {
-						m_LocalData.InitTime();
-					}
-					else {
-						m_LocalData.UpdateTime();
-					}
-					m_PlayerNet.SetLocalData(m_LocalData);
-					if (this->m_Sequence == NetWorkSequence::Matching) {
-						//自分のPlayerID決定
-						if (m_ClientCtrl.CanGetMyID()) {
-							m_PlayerNet.SetLocalPlayerID(m_ClientCtrl.GetMyID());
-						}
-					}
-					m_PlayerNet.SetLocalPlayerFlag(NetAttribute::IsActive, m_ClientCtrl.CanGetMyID());
-				}
-				else if (this->m_ServerCtrl.GetIsServerPlayer()) {
-					//更新間隔
-					if (this->m_Sequence == NetWorkSequence::Matching) {
-						m_LocalData.InitTime();
-					}
-					else {
-						m_LocalData.UpdateTime();
-					}
-					m_PlayerNet.SetLocalData(m_LocalData);
-					if (this->m_Sequence == NetWorkSequence::Matching) {
-						//自分のPlayerID決定
-						m_PlayerNet.SetLocalPlayerID((PlayerID)0);
-					}
-				}
-			}
-			//
-			if (this->m_Sequence >= NetWorkSequence::Matching) {
-				bool IsUpdateTick = m_PlayerNet.UpdateTick();
-				LONGLONG Ping = MAXLONGLONG;
-				if (this->m_IsClient) {
-					if (this->m_ClientCtrl.Execute(m_PlayerNet.GetLocalPlayerData(), IsUpdateTick)) {
-						this->m_Sequence = NetWorkSequence::MainGame;
-					}
-					if (IsUpdateTick) {
-						Ping = m_PlayerNet.Update(this->m_ClientCtrl.GetServerData());
-					}
-				}
-				else {
-					if (this->m_ServerCtrl.Execute(m_PlayerNet.GetLocalPlayerData(), IsUpdateTick)) {
-						this->m_Sequence = NetWorkSequence::MainGame;
-					}
-					if (IsUpdateTick) {
-						Ping = m_PlayerNet.Update(this->m_ServerCtrl.GetServerData());
-					}
-				}
-				if (IsUpdateTick) {
-					if (Ping != MAXLONGLONG) {
-						if (Ping != 0) {
-							CalcPing(Ping);
-						}
-					}
-					else {
-						//ロスト
-					}
-				}
-			}
-		}
 		//
 		void NetWorkBrowser::Init(void) noexcept {
 			this->m_Sequence = BrowserSequence::SelMode;
@@ -142,12 +64,27 @@ namespace FPS_n2 {
 			switch (this->m_Sequence) {
 				case BrowserSequence::SelMode:
 					if (WindowSystem::SetMsgClickBox(xp, y1p, xp + xs, y1p + LineHeight * 2, LineHeight, Gray75, "クライアントになる")) {
-						this->m_IsClient = true;
+						BeClient();
 						this->m_Sequence = BrowserSequence::CheckPreset;
 					}
 					if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(50), xp + xs, y1p + DrawParts->GetUIY(50) + LineHeight * 2, LineHeight, Gray75, "サーバーになる")) {
-						this->m_IsClient = false;
+						BeServerPlayer();
 						this->m_Sequence = BrowserSequence::CheckPreset;
+					}
+					if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(100), xp + xs, y1p + DrawParts->GetUIY(100) + LineHeight * 2, LineHeight, Gray75, "サーバーになる(非プレイヤー)")) {
+						BeServer();
+						this->m_Sequence = BrowserSequence::CheckPreset;
+					}
+					//
+					if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(150), xp + xs, y1p + DrawParts->GetUIY(150) + LineHeight * 2, LineHeight, Gray75, "クライアントで即プレイ")) {
+						BeClient();
+						m_NewWorkSettings.Load();
+						ReadyConnect(m_NewWorkSettings.Get(0));
+					}
+					if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(200), xp + xs, y1p + DrawParts->GetUIY(200) + LineHeight * 2, LineHeight, Gray75, "サーバーで即プレイ")) {
+						BeServerPlayer();
+						m_NewWorkSettings.Load();
+						ReadyConnect(m_NewWorkSettings.Get(0));
 					}
 					break;
 				case BrowserSequence::CheckPreset:
@@ -159,8 +96,7 @@ namespace FPS_n2 {
 						if (i < this->m_NewWorkSettings.GetSize()) {
 							auto& n = this->m_NewWorkSettings.Get(i);
 							if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(50)*i, xp + xs, y1p + DrawParts->GetUIY(50)*i + LineHeight * 2, LineHeight, Gray75, "[%d][%d,%d,%d,%d]", n.UsePort, n.IP.d1, n.IP.d2, n.IP.d3, n.IP.d4)) {
-								this->m_NetSetting = n;
-								this->m_Sequence = BrowserSequence::Ready;
+								ReadyConnect(n);
 								break;
 							}
 						}
@@ -207,7 +143,7 @@ namespace FPS_n2 {
 						if (WindowSystem::SetMsgClickBox(xp + xs - DrawParts->GetUIY(120), yp1, xp + xs, yp1 + LineHeight * 2, LineHeight, Gray75, "Set")) {
 							m_NewWorkSettings.SetBack(this->m_NetSetting);
 							m_NewWorkSettings.Save();
-							this->m_Sequence = BrowserSequence::Ready;
+							ReadyConnect(m_NewWorkSettings.Get(this->m_NewWorkSettings.GetSize() - 1));
 						}
 					}
 					break;

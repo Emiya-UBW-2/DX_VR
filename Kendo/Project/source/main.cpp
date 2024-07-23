@@ -3,6 +3,8 @@
 #include "Scene/MainScene.hpp"
 #include "Scene/MainSceneLoader.hpp"
 
+#include "MainScene/NetworkBrowser.hpp"
+
 #ifdef DEBUG
 int DBG_CamSel = -1;
 #endif
@@ -24,6 +26,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::Sceneclass::CommonBattleResource::Create();
 	FPS_n2::Sceneclass::WeaponAnimManager::Instance()->Load("data/CharaAnime/");
 	FPS_n2::Sceneclass::BackGroundClass::Create();
+	FPS_n2::Sceneclass::NetWorkBrowser::Create();
 	//ÉVÅ[Éì
 	auto MAINLOOPLOADERscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOPLOADER>();
 	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();

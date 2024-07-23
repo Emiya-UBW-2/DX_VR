@@ -12,26 +12,26 @@ namespace FPS_n2 {
 		//クライアントが送信するデータ ローカル版
 		class PlayerSendData {
 		private:
-			PlayerID					m_ID{ 0 };
 			InputControl				m_Input;
 			moves						m_move;
 			DamageEventControl			m_DamageEvent;
+			int32_t						m_FreeData[10]{};
 			NetTime						m_ClientTime{ 0 };	//そのプレイヤーのインゲーム時間
 			NetTime						m_PrevTime{ 0 };
 		public:
-			const auto&		GetID(void) const noexcept { return this->m_ID; }
 			const auto&		GetInput(void) const noexcept { return this->m_Input; }
 			const auto&		GetMove(void) const noexcept { return this->m_move; }
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
+			const auto&		GetFreeData(void) const noexcept { return this->m_FreeData; }
 			const auto&		GetClientTime(void) const noexcept { return this->m_ClientTime; }
 		public:
-			void			SetID(PlayerID value) noexcept { m_ID = value; }
-			void			SetMove(const moves& value) noexcept { m_move = value; }
-		public:
-			void			SetMyPlayer(const InputControl& pInput, const moves& move_t, const DamageEventControl& Damage_t) noexcept {
+			void			SetMyPlayer(const InputControl& pInput, const moves& move_t, const DamageEventControl& Damage_t, int32_t* pFreeData) noexcept {
 				this->m_Input = pInput;
 				this->m_move = move_t;
 				this->m_DamageEvent = Damage_t;
+				for (int i = 0; i < 10; i++) {
+					m_FreeData[i] = pFreeData[i];
+				}
 			}
 		public:
 			void			InitTime(void) noexcept {
@@ -55,11 +55,13 @@ namespace FPS_n2 {
 			InputControl				m_Input;
 			moves						m_move;
 			DamageEventControl			m_DamageEvent;
+			int32_t						m_FreeData[10]{};
 			PlayerID					m_ID{ 0 };
 			uint8_t						m_Attribute{ 0 };	//フラグ
 		private:
 			int			CalcCheckSum(void) const noexcept {
 				return (
+					500+
 					static_cast<int>(m_ID) +
 					static_cast<int>(m_Attribute) +
 					static_cast<int>(m_ClientTime) +
@@ -73,8 +75,9 @@ namespace FPS_n2 {
 			const auto&		GetClientTime(void) const noexcept { return this->m_ClientTime; }
 			const auto&		GetID(void) const noexcept { return this->m_ID; }
 			const auto&		GetInput(void) const noexcept { return this->m_Input; }
-			const auto&		GetMove(void) const noexcept { return this->m_move; }
+			moves			GetMove(void) const noexcept { return this->m_move; }
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
+			const auto& GetFreeData(void) const noexcept { return this->m_FreeData; }
 		public:
 			void			SetFlag(NetAttribute flag, bool value) noexcept {
 				if (value) {
@@ -85,7 +88,6 @@ namespace FPS_n2 {
 				}
 			}
 			void			SetID(PlayerID value) noexcept { m_ID = value; }
-			void			SetMove(const moves& value) noexcept { m_move = value; }
 		public:
 			void			SetData(const PlayerSendData& o) noexcept {
 				this->m_Input = o.GetInput();
@@ -93,6 +95,9 @@ namespace FPS_n2 {
 				this->m_DamageEvent = o.GetDamageEvent();
 				this->m_ClientTime = o.GetClientTime();
 				this->m_CheckSum = (size_t)this->CalcCheckSum();
+				for (int i = 0; i < 10; i++) {
+					m_FreeData[i] = o.GetFreeData()[i];
+				}
 			}
 		public:
 			static PlayerNetData	GetLerpData(const PlayerNetData& PrevData, const PlayerNetData& ServerData, float Per) noexcept;
@@ -112,6 +117,7 @@ namespace FPS_n2 {
 					Players += (PlayerData[i].IsCheckSum() ? 100 : 0);
 				}
 				return (
+					500 +
 					static_cast<int>(m_PlayerID) +
 					static_cast<int>(ServerFrame) +
 					Players
@@ -120,6 +126,7 @@ namespace FPS_n2 {
 		public:
 			auto			IsCheckSum(void) const noexcept { return m_CheckSum == (size_t)this->CalcCheckSum(); }
 		public:
+			void			CalcCheckSun(void) noexcept { this->m_CheckSum = (size_t)this->CalcCheckSum(); }
 			void			SetInGame(void) noexcept { m_PlayerID = -1; }
 			auto			IsInGame(void) const noexcept { return m_PlayerID == -1; }//インゲーム中です
 		};
@@ -157,7 +164,7 @@ namespace FPS_n2 {
 		public:
 			void			Int(NetTime Tick) noexcept;
 			bool			UpdateTick(void) noexcept;
-			NetTime			Update(const ServerNetData& UpdateData) noexcept;
+			NetTime			Update(const ServerNetData& UpdateData, bool IsUpdateTick) noexcept;
 		};
 		//
 		enum class ClientPhase : int8_t {
@@ -177,6 +184,7 @@ namespace FPS_n2 {
 		//サーバー専用
 		class ServerControl {
 			ServerNetData							m_ServerData;
+			std::array<PlayerNetData, Player_num>	m_LastPlayerData;
 			std::array<UDPS, Player_num>			m_Net;
 			bool									m_IsServerPlay{ false };//サーバーもプレイヤーとして参戦するか
 		public:
@@ -227,6 +235,60 @@ namespace FPS_n2 {
 			void			Init(int pPort, const IPDATA& pIP) noexcept;
 			bool			Execute(const PlayerNetData& MyLocalPlayerData, bool IsUpdateTick) noexcept;
 			void			Dispose(void) noexcept;
+		};
+
+
+		//通信
+		enum class NetWorkSequence : uint8_t {
+			Matching,
+			MainGame,
+		};
+		class NetWorkController {
+			bool					m_IsClient{ true };
+			bool					m_IsServerPlayer{ true };
+			float					m_Tick{ 2.f };
+			PlayerSendData			m_LocalData;
+			PlayerNetWork			m_PlayerNet;
+			ServerControl			m_ServerCtrl;			//サーバー専用
+			ClientControl			m_ClientCtrl;			//クライアント専用
+			std::array<float, 60>	m_Pings{};
+			float					m_Ping{ 0 };
+			size_t					m_PingNow{ 0 };
+			NetWorkSequence			m_Sequence{ NetWorkSequence::Matching };
+		public:
+			NetWorkController(void) noexcept {}
+			NetWorkController(const NetWorkController&) = delete;
+			NetWorkController(NetWorkController&& o) = delete;
+			NetWorkController& operator=(const NetWorkController&) = delete;
+			NetWorkController& operator=(NetWorkController&& o) = delete;
+
+			~NetWorkController(void) noexcept {}
+		private:
+			void			CalcPing(LONGLONG microsec) noexcept {
+				this->m_Pings.at(m_PingNow) = std::max(0.f, static_cast<float>(microsec) / 1000.f - (this->m_Tick * 1000.f / Frame_Rate));//ティック分引く
+				++m_PingNow %= this->m_Pings.size();
+				m_Ping = 0.f;
+				for (auto& p : this->m_Pings) {
+					m_Ping += p;
+				}
+				m_Ping /= static_cast<float>(this->m_Pings.size());
+			}
+		public:
+			auto			IsInGame(void) const noexcept { return this->m_Sequence == NetWorkSequence::MainGame; }
+			PlayerNetData 	GetLerpServerPlayerData(PlayerID ID) noexcept { return this->m_PlayerNet.GetLerpServerPlayerData(ID); }
+			const auto& GetClient(void) const noexcept { return this->m_IsClient; }
+			const auto& GetServerPlayer(void) const noexcept { return this->m_IsServerPlayer; }
+			const auto& GetPing(void) const noexcept { return this->m_Ping; }
+			const auto& GetMyPlayerID(void) const noexcept { return this->m_PlayerNet.GetMyLocalPlayerID(); }
+
+			auto& SetLocalData(void) noexcept { return this->m_LocalData; }
+		public:
+			void Init(bool IsClient, int Port, const IPDATA& ip, bool IsServerPlayer) noexcept;
+			void Update(void) noexcept;
+			void Dispose(void) noexcept {
+				m_ServerCtrl.Dispose();
+				m_ClientCtrl.Dispose();
+			}
 		};
 	};
 };

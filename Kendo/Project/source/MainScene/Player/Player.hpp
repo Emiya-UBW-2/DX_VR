@@ -1,7 +1,6 @@
 #pragma once
 #pragma warning(disable:4464)
 #include "../../MainScene/NetWork.hpp"
-#include "../../MainScene/NetworkBrowser.hpp"
 #include	"CPU.hpp"
 
 namespace FPS_n2 {

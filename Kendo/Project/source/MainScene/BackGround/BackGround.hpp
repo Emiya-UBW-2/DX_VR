@@ -1,5 +1,6 @@
 #pragma once
-#include	"../../Header.hpp"
+#pragma warning(disable:4464)
+#include "../../Header.hpp"
 #include "../../MainScene/BackGround/BackGroundSub.hpp"
 
 namespace FPS_n2 {

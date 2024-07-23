@@ -5,64 +5,16 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		//通信
-		enum class NetWorkSequence : uint8_t {
-			Matching,
-			MainGame,
-		};
-		class NetWorkController {
-			bool					m_IsClient{true};
-			float					m_Tick{2.f};
-			PlayerSendData			m_LocalData;
-			PlayerNetWork			m_PlayerNet;
-			ServerControl			m_ServerCtrl;			//サーバー専用
-			ClientControl			m_ClientCtrl;			//クライアント専用
-			std::array<float, 60>	m_Pings{};
-			float					m_Ping{ 0 };
-			int						m_PingNow{ 0 };
-			NetWorkSequence			m_Sequence{NetWorkSequence::Matching};
-		public:
-			NetWorkController(void) noexcept {}
-			NetWorkController(const NetWorkController&) = delete;
-			NetWorkController(NetWorkController&& o) = delete;
-			NetWorkController& operator=(const NetWorkController&) = delete;
-			NetWorkController& operator=(NetWorkController&& o) = delete;
-
-			~NetWorkController(void) noexcept {}
-		private:
-			void			CalcPing(LONGLONG microsec) noexcept {
-				this->m_Pings.at(m_PingNow) = std::max(0.f, static_cast<float>(microsec) / 1000.f - (this->m_Tick * 1000.f / Frame_Rate));//ティック分引く
-				++m_PingNow %= static_cast<int>(this->m_Pings.size());
-				m_Ping = 0.f;
-				for (auto& p : this->m_Pings) {
-					m_Ping += p;
-				}
-				m_Ping /= static_cast<float>(this->m_Pings.size());
-			}
-		public:
-			auto			IsInGame(void) const noexcept { return this->m_Sequence == NetWorkSequence::MainGame; }
-			PlayerNetData 	GetLerpServerPlayerData(PlayerID ID) noexcept { return this->m_PlayerNet.GetLerpServerPlayerData(ID); }
-			const auto&		GetClient(void) const noexcept { return this->m_IsClient; }
-			const auto&		GetPing(void) const noexcept { return this->m_Ping; }
-			const auto&		GetMyPlayerID(void) const noexcept { return this->m_PlayerNet.GetMyLocalPlayerID(); }
-
-			auto&			SetLocalData(void) noexcept { return this->m_LocalData; }
-		public:
-			void Init(bool IsClient, int Port, const IPDATA& ip) noexcept;
-			void Update(void) noexcept;
-			void Dispose(void) noexcept {
-				m_ServerCtrl.Dispose();
-				m_ClientCtrl.Dispose();
-			}
-		};
-
 		enum class BrowserSequence : uint8_t {
 			SelMode,
 			CheckPreset,
 			SetNewData,
 			Ready,
 		};
-		class NetWorkBrowser {
+		class NetWorkBrowser : public SingletonBase<NetWorkBrowser> {
+		private:
+			friend class SingletonBase<NetWorkBrowser>;
+		private:
 			struct NewSetting {
 				IPDATA					IP{127,0,0,1};
 				int						UsePort{10850};
@@ -114,12 +66,13 @@ namespace FPS_n2 {
 			};
 		private:
 			bool					m_IsClient{true};
+			bool					m_IsServerPlayer{ true };
 			NewSetting				m_NetSetting;
 			//共通
 			BrowserSequence			m_Sequence{BrowserSequence::SelMode};
 			bool					m_SeqFirst{false};
 			NewWorkSetting			m_NewWorkSettings;
-		public:
+		private:
 			NetWorkBrowser(void) noexcept {}
 			NetWorkBrowser(const NetWorkBrowser&) = delete;
 			NetWorkBrowser(NetWorkBrowser&& o) = delete;
@@ -130,7 +83,24 @@ namespace FPS_n2 {
 		public:
 			auto			IsDataReady(void) const noexcept { return this->m_Sequence == BrowserSequence::Ready; }
 			const auto&		GetClient(void) const noexcept { return this->m_IsClient; }
+			const auto&		GetServerPlayer(void) const noexcept { return this->m_IsServerPlayer; }
 			const auto&		GetNetSetting(void) const noexcept { return this->m_NetSetting; }
+		public:
+			void			BeClient(void) noexcept {
+				this->m_IsClient = true;
+			}
+			void			BeServerPlayer(void) noexcept {
+				this->m_IsClient = false;
+				this->m_IsServerPlayer = true;
+			}
+			void			BeServer(void) noexcept {
+				this->m_IsClient = false;
+				this->m_IsServerPlayer = false;
+			}
+			void			ReadyConnect(const NewSetting& n) noexcept {
+				this->m_NetSetting = n;
+				this->m_Sequence = BrowserSequence::Ready;
+			}
 		public:
 			void Init(void) noexcept;
 			void Draw(void) noexcept;

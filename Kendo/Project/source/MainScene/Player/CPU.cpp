@@ -1,4 +1,5 @@
 #include	"CPU.hpp"
+#pragma warning(disable:4464)
 #include "../../MainScene/Object/Character.hpp"
 #include "../../MainScene/Player/Player.hpp"
 
@@ -18,8 +19,8 @@ namespace FPS_n2 {
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(m_MyID)->GetChara();
 
 			if (Chara->GetBambooVec().magnitude() > deg2rad(1)) {
-				pp_x = std::clamp(-100.f * Chara->GetBambooVec().x / deg2rad(60.f), -3.f, 3.f);
-				pp_y = std::clamp(-100.f * Chara->GetBambooVec().y / deg2rad(60.f), -3.f, 3.f);
+				pp_x = std::clamp(-100.f * Chara->GetBambooVec().x / deg2rad(150.f), -3.f, 3.f);
+				pp_y = std::clamp(-100.f * Chara->GetBambooVec().y / deg2rad(150.f), -3.f, 3.f);
 			}
 #ifdef DEBUG
 			printfDx("[%5.2f,%5.2f]\n", pp_x, pp_y);

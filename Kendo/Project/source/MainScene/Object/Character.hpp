@@ -18,7 +18,6 @@ namespace FPS_n2 {
 			public EyeSwingControl
 		{
 		private:
-			bool												m_ActionFirstFrame{false};
 			EnumWeaponAnimType									m_CharaAction{EnumWeaponAnimType::Ready};
 			std::array<ArmMovePerClass, static_cast<int>(EnumWeaponAnimType::Max)>	m_Arm;
 			//入力
@@ -31,14 +30,15 @@ namespace FPS_n2 {
 			float												m_RunTime{0.f};
 			float												m_NormalActionTime{0.f};
 
-			Vector3DX											m_MouseVecR;
+			Vector2DX											m_MouseVecR;
 
-			Vector3DX											m_BambooVec;
-			Vector3DX											m_GuardVec, m_GuardVecR;
+			Vector2DX											m_BambooVec;
+			Vector2DX											m_GuardVec, m_GuardVecR;
 
 			float												m_HeartUp{0.f};
 			float												m_HeartUpR{0.f};
 
+			float												m_GuardStartTimer{ 0.f };
 			float												m_GuardTimer{0.f};
 
 
@@ -52,7 +52,7 @@ namespace FPS_n2 {
 			DamageEventControl									m_Damage;
 			bool												m_MoveOverRideFlag{ false };
 			moves												m_OverRideInfo;
-			Matrix3x3DX											m_BaseMatrix;
+			Vector3DX											m_EyePosition;
 		public:
 			auto&			GetWeaponPtrNow(void) noexcept { return this->m_Weapon_Ptr; }
 			void			SetWeaponPtr(std::shared_ptr<WeaponClass>& pWeaponPtr0) noexcept {
@@ -71,35 +71,32 @@ namespace FPS_n2 {
 		private:
 			void			move_RightArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept ;
 			void			move_LeftArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept ;
-			const Matrix3x3DX GetCharaDir(void) const noexcept ;
-
-			auto		GetCharaPosition(void) const noexcept { return this->m_move.GetPos(); }
-			auto		IsAimPer(void) const noexcept { return (this->m_Arm[static_cast<size_t>(EnumWeaponAnimType::Ready)].Per() <= 0.1f); }
-			auto		IsLowReadyPer(void) const noexcept { return (this->m_Arm[static_cast<size_t>(EnumWeaponAnimType::Ready)].Per() >= 0.95f); }
 		private:
+			void			PlayVoice() noexcept;
+			void			StopVoice() noexcept;
+
+			void			Do_End() noexcept;
+			void			FrontAttack_End() noexcept;
+			void			BackAttack_End() noexcept;
+
+			void			OverrideAction() noexcept;
 			void			OverrideReady() noexcept ;
-
-			void			FrontAttack_Start() noexcept ;
-			void			FrontAttack_End() noexcept ;
-
-			void			Do_Start() noexcept ;
-			void			Do_End() noexcept ;
-
-			void			Tsuba_Start() noexcept ;
-			void			Tsuba_End() noexcept ;
-
+			void			OverrideRun() noexcept;
+			void			OverrideFrontAttack() noexcept ;
+			void			OverrideDo() noexcept ;
 			void			OverrideTsuba() noexcept ;
-
-			void			BackAttack_Start() noexcept ;
-			void			BackAttack_End() noexcept ;
+			void			OverrideBackAttack() noexcept ;
+			void			OverrideGuardStart() noexcept;
+			void			OverrideGuardSuriage() noexcept;
 		public://ゲッター
-			const Matrix4x4DX GetEyeMatrix(void) const noexcept ;
+			const auto&		GetEyePosition(void) const noexcept { return this->m_EyePosition; }
+			Matrix3x3DX		GetEyeMatrix(void) const noexcept ;
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
 			const auto&		GetCharaAction(void) const noexcept { return this->m_CharaAction; }
 			const auto&		GetBambooVec(void) const noexcept { return m_BambooVec; }
 			const auto&		GetGuardVec(void) const noexcept { return m_GuardVecR; }
-			auto		IsGuardStarting(void) const noexcept { return m_CharaAction == EnumWeaponAnimType::GuardStart; }
-			auto		GetGuardStartPer(void) const noexcept { return (IsGuardStarting()) ? (m_GuardTimer / 1.f) : 0.f; }
+			auto			IsGuardStarting(void) const noexcept { return m_CharaAction == EnumWeaponAnimType::GuardStart; }
+			auto			GetGuardStartPer(void) const noexcept { return (IsGuardStarting()) ? (m_GuardStartTimer / 1.f) : 0.f; }
 
 			Vector3DX		GetFramePosition(CharaFrame frame) const noexcept { return MV1GetFramePosition(GetObj_const().GetHandle(), GetFrame(static_cast<int>(frame))); }
 		public://セッター

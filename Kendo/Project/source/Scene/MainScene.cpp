@@ -1,4 +1,6 @@
+#pragma warning(disable:4464)
 #include "MainScene.hpp"
+#include "../MainScene/NetworkBrowser.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -10,13 +12,11 @@ namespace FPS_n2 {
 			BackGround->Load();
 			//
 			BattleResourceMngr->Load();
-			PlayerMngr->Init(Vehicle_num);
-
-			BattleResourceMngr->LoadChara("Chara", (PlayerID)1);
-			BattleResourceMngr->LoadGun("Bamboo", (PlayerID)1);
-
-			BattleResourceMngr->LoadChara("Chara", (PlayerID)0);
-			BattleResourceMngr->LoadGun("Bamboo", (PlayerID)0);
+			PlayerMngr->Init(Player_num);
+			for (int index = 0; index < Player_num; index++) {
+				BattleResourceMngr->LoadChara("Chara", (PlayerID)index);
+				BattleResourceMngr->LoadGun("Bamboo", (PlayerID)index);
+			}
 			//UI
 			this->m_UIclass.Load();
 		}
@@ -64,11 +64,10 @@ namespace FPS_n2 {
 			//this->m_UILayer = UISystem::Instance()->AddUI("data/UI/MainLoop.json");
 			//
 			this->m_DamageEvents.clear();
-			m_NetWorkBrowser = std::make_unique<NetWorkBrowser>();
-			m_NetWorkBrowser->Init();
+			auto* NetBrowser = NetWorkBrowser::Instance();
+			NetBrowser->Init();
 		}
 		bool			MAINLOOP::Update_Sub(void) noexcept {
-			clsDx();
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* BackGround = BackGroundClass::Instance();
 #ifdef DEBUG
@@ -143,9 +142,9 @@ namespace FPS_n2 {
 				if (Pad->GetKey(PADS::JUMP).trigger()) {
 					OptionWindowClass::Instance()->SetActive();
 				}
-				if (m_NetWorkController && !m_NetWorkController->IsInGame()) {
+				//if (!m_NetWorkController) {
 					//return true;
-				}
+				//}
 			}
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
@@ -156,7 +155,6 @@ namespace FPS_n2 {
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
 				//SE->Get(static_cast<int>(SoundEnum::Environment)).Play(0, DX_PLAYTYPE_LOOP, TRUE);
-				this->m_fov_base = DrawParts->GetMainCamera().GetCamFov();
 			}
 			//Input,AI
 			{
@@ -177,14 +175,27 @@ namespace FPS_n2 {
 
 					MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 					MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
+					{
+						Vector2DX MSVec = Chara->GetBambooVec();
+						MSVec.Set(
+							std::clamp(MSVec.x + Pad->GetLS_Y() * deg2rad(0.1f), deg2rad(-10), deg2rad(10)),
+							std::clamp(MSVec.y + Pad->GetLS_X() * deg2rad(0.1f), deg2rad(-30), deg2rad(30))
+							);
+						MyInput.SetxRad(MSVec.x);
+						MyInput.SetyRad(MSVec.y);
+					}
 				}
+				clsDx();
 				//ネットワーク
-				if (this->m_NetWorkBrowser->IsDataReady() && !m_NetWorkController) {
+				auto* NetBrowser = NetWorkBrowser::Instance();
+				if (NetBrowser->IsDataReady() && !m_NetWorkController) {
 					m_NetWorkController = std::make_unique<NetWorkController>();
-					this->m_NetWorkController->Init(m_NetWorkBrowser->GetClient(), m_NetWorkBrowser->GetNetSetting().UsePort, m_NetWorkBrowser->GetNetSetting().IP);
+					this->m_NetWorkController->Init(NetBrowser->GetClient(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
 				}
 				if (m_NetWorkController) {
-					this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, Chara->GetMove(), Chara->GetDamageEvent());
+					int32_t FreeData[10]{};
+					FreeData[0] = static_cast<int>(Chara->GetCharaAction());
+					this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, Chara->GetMove(), Chara->GetDamageEvent(), FreeData);
 					this->m_NetWorkController->Update();
 				}
 				//
@@ -226,6 +237,15 @@ namespace FPS_n2 {
 						else {
 							InputControl OtherInput;
 							p->GetAI()->Execute(&OtherInput);
+							{
+								Vector2DX MSVec;
+								MSVec.Set(
+									std::clamp(c->GetBambooVec().x + Pad->GetLS_Y() * deg2rad(0.1f), deg2rad(-10), deg2rad(10)),
+									std::clamp(c->GetBambooVec().y + Pad->GetLS_X() * deg2rad(0.1f), deg2rad(-30), deg2rad(30))
+									);
+								MyInput.SetxRad(MSVec.x);
+								MyInput.SetyRad(MSVec.y);
+							}
 							c->SetInput(OtherInput, true);
 						}
 						//ダメージイベント処理
@@ -278,7 +298,7 @@ namespace FPS_n2 {
 				auto* OptionParts = OPTION::Instance();
 
 				//DrawParts->GetFps()カメラ
-				Vector3DX CamPos = Chara->GetEyeMatrix().pos() + CameraShake::Instance()->GetCamShake();
+				Vector3DX CamPos = Chara->GetEyePosition() + CameraShake::Instance()->GetCamShake();
 				Vector3DX CamVec = CamPos + Chara->GetEyeMatrix().zvec() * -1.f;
 #ifdef DEBUG
 				if (CheckHitKeyWithCheck(KEY_INPUT_F1) != 0) {
@@ -363,7 +383,6 @@ namespace FPS_n2 {
 			//使い回しオブジェ系
 			BackGround->Dispose();
 			//
-			m_NetWorkBrowser.reset();
 			m_NetWorkController->Dispose();
 			m_NetWorkController.reset();
 			{
@@ -427,7 +446,8 @@ namespace FPS_n2 {
 				this->m_UIclass.Draw();
 			}
 			//通信設定
-			this->m_NetWorkBrowser->Draw();
+			auto* NetBrowser = NetWorkBrowser::Instance();
+			NetBrowser->Draw();
 			if (m_NetWorkController) {
 				auto* DrawParts = DXDraw::Instance();
 				WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%2dms", static_cast<int>(m_NetWorkController->GetPing()));

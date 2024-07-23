@@ -15,7 +15,7 @@ namespace FPS_n2 {
 	};
 
 	class DamageEventControl {
-		std::array<DamageEvent, 32>							m_Damage;
+		std::array<DamageEvent, 16>							m_Damage;
 		uint8_t												m_DamageCount{0};
 	public:
 		const auto&		GetDamageEvent(void) const noexcept { return this->m_Damage; }

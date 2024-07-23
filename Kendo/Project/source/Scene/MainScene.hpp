@@ -7,7 +7,6 @@
 #include "../MainScene/Player/Player.hpp"
 
 #include "../MainScene/NetWork.hpp"
-#include "../MainScene/NetworkBrowser.hpp"
 
 #include "../MainScene/UI/MainSceneUIControl.hpp"
 
@@ -15,25 +14,19 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class MAINLOOP : public TEMPSCENE {
 		private:
-			static const int		Chara_num = 0;
-			static const int		Vehicle_num = Player_num;
-			static const int		gun_num = Chara_num;
-		private:
-			//ëÄçÏä÷òA
+			//UIä÷òA
+			float										m_GuardStart{ 0.f };
 			float										m_Concussion{ 0.f };
 			float										m_ConcussionPer{ 0.f };
-			//UIä÷òA
 			UIClass										m_UIclass;
-			float m_GuardStart{0.f};
 			int											m_UILayer{ 0 };
-
-			std::unique_ptr<NetWorkBrowser>				m_NetWorkBrowser;
-			std::unique_ptr<NetWorkController>				m_NetWorkController{nullptr};
-			//
+			//NetWork
+			std::unique_ptr<NetWorkController>			m_NetWorkController{nullptr};
 			std::vector<DamageEvent>					m_DamageEvents;
-			float										m_fov_base{ deg2rad(45.f) };
-
-			float m_D1{38.f / 255.f}, m_D2{192.f / 255.f}, m_D3{1.f};
+			//
+#ifdef DEBUG
+			float m_D1{ 38.f / 255.f }, m_D2{ 192.f / 255.f }, m_D3{ 1.f };
+#endif
 		private:
 			auto		GetMyPlayerID(void) const noexcept {
 				if (m_NetWorkController) {

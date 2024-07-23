@@ -151,13 +151,20 @@ namespace FPS_n2 {
 			bool												m_IsFrontAttacking{false};
 			bool												m_IsDouAttacking{false};
 			bool												m_IsBackAttacking{false};
+
+			Matrix3x3DX											m_EyeMatrix;
+			Matrix3x3DX											m_UpperMatrix;
+			Matrix3x3DX											m_BaseMatrix;
 		public://ゲッター
 			CharaAnimeID										m_BottomAnimSelect{};
 		public://ゲッター
 			auto		GetRun(void) const noexcept { return this->m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking; }
 			auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }
 			auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
-			const auto& GetZRad(void) const noexcept { return this->m_ZRad; }
+		protected:
+			const auto& GetEyeRotMatrix(void) const noexcept { return this->m_EyeMatrix; }
+			const auto& GetUpperRotMatrix(void) const noexcept { return this->m_UpperMatrix; }
+			const auto& GetBaseRotMatrix(void) const noexcept { return this->m_BaseMatrix; }
 		public://セッター
 			void			SetIsSquat(bool value) noexcept { this->m_Squat.Set(value); }
 			void			SetIsRunning(bool value) noexcept { this->m_IsRunning = value; }
@@ -165,10 +172,8 @@ namespace FPS_n2 {
 			void			SetIsDouAttacking(bool value) noexcept { this->m_IsDouAttacking = value; }
 			void			SetIsBackAttacking(bool value) noexcept { this->m_IsBackAttacking = value; }
 		protected:
-			auto		GetInputControl(void) const noexcept { return this->m_Input; }
-			auto		GetYRadBottom(void) const noexcept { return this->m_yrad_Bottom; }
-			auto		GetYRadBottomChange(void) const noexcept { return this->m_yrad_BottomChange; }
-			auto		GetMoverPer(void) const noexcept { return m_MoverPer; }
+			const auto&		GetInputControl(void) const noexcept { return this->m_Input; }
+			const auto& GetMoverPer(void) const noexcept { return m_MoverPer; }
 			auto		IsMove(void) const noexcept { return m_MoverPer > 0.1f; }
 			auto		GetFrontP(void) const noexcept {
 				auto wkey = (this->m_Input.GetPADSPress(PADS::MOVE_W) || (m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking)) && !m_IsBackAttacking;
@@ -353,6 +358,10 @@ namespace FPS_n2 {
 						this->m_AnimPerBuf[static_cast<size_t>(i)] = std::clamp(this->m_AnimPerBuf[static_cast<size_t>(i)] + ((i == static_cast<int>(this->m_BottomAnimSelect)) ? 2.f : -2.f) / DrawParts->GetFps(), 0.f, 1.f);
 					}
 				}
+				//
+				m_BaseMatrix = Matrix3x3DX::RotAxis(Vector3DX::forward(), (this->m_ZRad / 2.f)) * Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_yrad_Bottom);
+				m_UpperMatrix = Matrix3x3DX::RotAxis(Vector3DX::right(), XRad) * Matrix3x3DX::RotAxis(Vector3DX::up(), Lerp(this->m_yrad_BottomChange, 0.f, m_IsRunning ? 1.f : 0.f));
+				m_EyeMatrix = Matrix3x3DX::RotAxis(Vector3DX::right(), XRad) * Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_yrad_BottomChange);
 			}
 		};
 		//歩く時の揺れ
