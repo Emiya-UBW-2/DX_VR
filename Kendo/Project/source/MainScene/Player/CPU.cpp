@@ -7,16 +7,31 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		void AIControl::Execute(InputControl* MyInput) noexcept
 		{
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(m_MyID)->GetChara();
+
 			bool W_key{ false };
 			bool A_key{ false };
 			bool S_key{ false };
 			bool D_key{ false };
 
+			bool IsOutArea = false;
+			{
+				Vector3DX Vec = Chara->GetMove().GetPos() - Vector3DX::zero();
+				float Len = 11.f / 2.f * Scale_Rate;
+				if ((Vec.x < -Len || Len < Vec.x) ||
+					(Vec.z < -Len || Len < Vec.z)) {
+					IsOutArea = true;
+				}
+			}
+
+			if (IsOutArea) {
+				W_key = true;
+			}
+
 			bool shotMain_Key{ false };
 			bool shotSub_Key{ false };
 			float pp_x{ 0.f }, pp_y{ 0.f };
-			auto* PlayerMngr = PlayerManager::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(m_MyID)->GetChara();
 
 			if (Chara->GetBambooVec().magnitude() > deg2rad(1)) {
 				pp_x = std::clamp(-100.f * Chara->GetBambooVec().x / deg2rad(150.f), -3.f, 3.f);

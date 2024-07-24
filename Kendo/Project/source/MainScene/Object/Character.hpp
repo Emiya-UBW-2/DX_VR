@@ -30,7 +30,7 @@ namespace FPS_n2 {
 			float												m_RunTime{0.f};
 			float												m_NormalActionTime{0.f};
 
-			Vector2DX											m_MouseVecR;
+			Vector2DX											m_BambooVecBase;
 
 			Vector2DX											m_BambooVec;
 			Vector2DX											m_GuardVec, m_GuardVecR;
@@ -75,6 +75,8 @@ namespace FPS_n2 {
 			void			PlayVoice() noexcept;
 			void			StopVoice() noexcept;
 
+			void			CheckTsuba() noexcept;
+
 			void			Do_End() noexcept;
 			void			FrontAttack_End() noexcept;
 			void			BackAttack_End() noexcept;
@@ -104,6 +106,10 @@ namespace FPS_n2 {
 			void			SetMoveOverRide(const moves& o) noexcept {
 				this->m_MoveOverRideFlag = true;
 				this->m_OverRideInfo = o;
+			}
+			void			SetActionOverRide(EnumWeaponAnimType o) noexcept {
+				this->m_CharaAction = o;
+				OverrideAction();
 			}
 		private: //XVŠÖ˜A
 			void			ExecuteInput(void) noexcept ;

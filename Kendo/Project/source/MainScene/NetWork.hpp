@@ -16,14 +16,11 @@ namespace FPS_n2 {
 			moves						m_move;
 			DamageEventControl			m_DamageEvent;
 			int32_t						m_FreeData[10]{};
-			NetTime						m_ClientTime{ 0 };	//そのプレイヤーのインゲーム時間
-			NetTime						m_PrevTime{ 0 };
 		public:
 			const auto&		GetInput(void) const noexcept { return this->m_Input; }
 			const auto&		GetMove(void) const noexcept { return this->m_move; }
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
 			const auto&		GetFreeData(void) const noexcept { return this->m_FreeData; }
-			const auto&		GetClientTime(void) const noexcept { return this->m_ClientTime; }
 		public:
 			void			SetMyPlayer(const InputControl& pInput, const moves& move_t, const DamageEventControl& Damage_t, int32_t* pFreeData) noexcept {
 				this->m_Input = pInput;
@@ -32,16 +29,6 @@ namespace FPS_n2 {
 				for (int i = 0; i < 10; i++) {
 					m_FreeData[i] = pFreeData[i];
 				}
-			}
-		public:
-			void			InitTime(void) noexcept {
-				this->m_ClientTime = 0;
-				this->m_PrevTime = GetNowHiPerformanceCount();
-			}
-			void			UpdateTime(void) noexcept {
-				LONGLONG NowTime = GetNowHiPerformanceCount();
-				this->m_ClientTime += NowTime - this->m_PrevTime;
-				this->m_PrevTime = NowTime;
 			}
 		};
 		enum class NetAttribute : uint8_t {
@@ -89,11 +76,11 @@ namespace FPS_n2 {
 			}
 			void			SetID(PlayerID value) noexcept { m_ID = value; }
 		public:
-			void			SetData(const PlayerSendData& o) noexcept {
+			void			SetData(const PlayerSendData& o,NetTime ClientTime) noexcept {
 				this->m_Input = o.GetInput();
 				this->m_move = o.GetMove();
 				this->m_DamageEvent = o.GetDamageEvent();
-				this->m_ClientTime = o.GetClientTime();
+				this->m_ClientTime = ClientTime;
 				this->m_CheckSum = (size_t)this->CalcCheckSum();
 				for (int i = 0; i < 10; i++) {
 					m_FreeData[i] = o.GetFreeData()[i];
@@ -136,12 +123,16 @@ namespace FPS_n2 {
 			size_t											m_LastServerFrame{ 0 };//最後にサーバーから受信したサーバーフレーム
 			size_t											m_LeapFrame{};
 			size_t											m_LeapFrameMax{};
+			ServerNetData									m_GetServerData;	//それぞれのコントローラーからもらったデータ
 			ServerNetData									m_ServerDataCommon;	//最新の受信データ
 			ServerNetData									m_PrevServerData;	//前回の受信データ
 			PlayerNetData									m_LocalData;		//ローカルのプレイヤーデータ
 			NetTime											m_TickCnt{ 0 };
 			NetTime											m_TickRate{ 0 };
 			NetTime											m_PrevFrame{ 0 };
+
+			NetTime						m_ClientTime{ 0 };	//そのプレイヤーのインゲーム時間
+			NetTime						m_PrevTime{ 0 };
 		public:
 			PlayerNetWork(void) noexcept {}
 			PlayerNetWork(const PlayerNetWork&) = delete;
@@ -151,20 +142,32 @@ namespace FPS_n2 {
 
 			~PlayerNetWork(void) noexcept {}
 		public:
+			auto&			SetGetServerData(void) noexcept { return this->m_GetServerData; }
 			const auto&		GetServerDataCommon(void) const noexcept { return this->m_ServerDataCommon; }
 			const auto&		GetMyLocalPlayerID(void) const noexcept { return this->m_LocalData.GetID(); }
 			const auto&		GetLocalPlayerData(void) const noexcept { return this->m_LocalData; }
 		public:
 			void			SetLocalPlayerID(PlayerID ID) noexcept { this->m_LocalData.SetID(ID); }
 			void			SetLocalPlayerFlag(NetAttribute flag, bool value) noexcept { this->m_LocalData.SetFlag(flag, value); }
-			void			SetLocalData(const PlayerSendData& pdata) noexcept { this->m_LocalData.SetData(pdata); }
+			void			UpdateLocalData(const PlayerSendData& pdata, bool TimerStart) noexcept {
+				//更新間隔
+				if (!TimerStart) {
+					this->m_ClientTime = 0;
+					this->m_PrevTime = GetNowHiPerformanceCount();
+				}
+				else {
+					LONGLONG NowTime = GetNowHiPerformanceCount();
+					this->m_ClientTime += NowTime - this->m_PrevTime;
+					this->m_PrevTime = NowTime;
+				}
+				this->m_LocalData.SetData(pdata, m_ClientTime);
+			}
 		public:
 			PlayerNetData 	GetLerpServerPlayerData(PlayerID pPlayerID) const noexcept;
 		public:
-		public:
 			void			Int(NetTime Tick) noexcept;
 			bool			UpdateTick(void) noexcept;
-			NetTime			Update(const ServerNetData& UpdateData, bool IsUpdateTick) noexcept;
+			NetTime			Update(bool IsUpdateTick) noexcept;
 		};
 		//
 		enum class ClientPhase : int8_t {
@@ -183,7 +186,6 @@ namespace FPS_n2 {
 		};
 		//サーバー専用
 		class ServerControl {
-			ServerNetData							m_ServerData;
 			std::array<PlayerNetData, Player_num>	m_LastPlayerData;
 			std::array<UDPS, Player_num>			m_Net;
 			bool									m_IsServerPlay{ false };//サーバーもプレイヤーとして参戦するか
@@ -198,11 +200,10 @@ namespace FPS_n2 {
 		private:
 			bool AllReady() const noexcept;
 		public:
-			const auto&		GetServerData(void) const noexcept { return this->m_ServerData; }
 			const auto&		GetIsServerPlayer(void) const noexcept { return this->m_IsServerPlay; }
 		public:
 			void			Init(int pPort,bool IsServerPlay) noexcept;
-			bool			Execute(const PlayerNetData& MyLocalPlayerData, bool IsUpdateTick) noexcept;
+			bool			Update(ServerNetData* pServerCtrl, const PlayerNetData& MyLocalPlayerData, bool IsUpdateTick) noexcept;
 			void			Dispose(void) noexcept;
 		};
 		//クライアント専用
@@ -214,7 +215,6 @@ namespace FPS_n2 {
 			UDPS					m_Net;
 
 			PlayerID				m_MyID{};
-			ServerNetData			m_ServerData;
 			ServerNetData			m_BufferDataOnce;
 			ServerNetData			m_BufferData[10];
 		public:
@@ -225,15 +225,12 @@ namespace FPS_n2 {
 			ClientControl& operator=(ClientControl&& o) = delete;
 
 			~ClientControl(void) noexcept {}
-		private:
-			auto&	SetServerData(void) noexcept { return this->m_ServerData; }
 		public:
-			const auto&		GetServerData(void) const noexcept { return this->m_ServerData; }
 			const auto&		GetMyID(void) const noexcept { return this->m_MyID; }
 			auto			CanGetMyID(void) const noexcept { return (this->m_Net.m_Phase == ClientPhase::GetNumber) || (this->m_Net.m_Phase == ClientPhase::Ready); }
 		public:
 			void			Init(int pPort, const IPDATA& pIP) noexcept;
-			bool			Execute(const PlayerNetData& MyLocalPlayerData, bool IsUpdateTick) noexcept;
+			bool			Update(ServerNetData* pServerCtrl, const PlayerNetData& MyLocalPlayerData, bool IsUpdateTick) noexcept;
 			void			Dispose(void) noexcept;
 		};
 
@@ -246,7 +243,7 @@ namespace FPS_n2 {
 		class NetWorkController {
 			bool					m_IsClient{ true };
 			bool					m_IsServerPlayer{ true };
-			float					m_Tick{ 2.f };
+			float					m_Tick{ 30.f };//ティックレート　プレイヤーのFPSより低いと詰まる
 			PlayerSendData			m_LocalData;
 			PlayerNetWork			m_PlayerNet;
 			ServerControl			m_ServerCtrl;			//サーバー専用
@@ -265,7 +262,11 @@ namespace FPS_n2 {
 			~NetWorkController(void) noexcept {}
 		private:
 			void			CalcPing(LONGLONG microsec) noexcept {
-				this->m_Pings.at(m_PingNow) = std::max(0.f, static_cast<float>(microsec) / 1000.f - (this->m_Tick * 1000.f / Frame_Rate));//ティック分引く
+				if (microsec == -1) {
+					m_Ping = -1.f;
+					return;
+				}
+				this->m_Pings.at(m_PingNow) = std::max(0.f, static_cast<float>(microsec) / 1000.f - (1000.f / this->m_Tick));//ティック分引く
 				++m_PingNow %= this->m_Pings.size();
 				m_Ping = 0.f;
 				for (auto& p : this->m_Pings) {

@@ -185,7 +185,6 @@ namespace FPS_n2 {
 						MyInput.SetyRad(MSVec.y);
 					}
 				}
-				clsDx();
 				//ネットワーク
 				auto* NetBrowser = NetWorkBrowser::Instance();
 				if (NetBrowser->IsDataReady() && !m_NetWorkController) {
@@ -200,16 +199,17 @@ namespace FPS_n2 {
 				}
 				//
 				if (m_NetWorkController && m_NetWorkController->IsInGame()) {
+					bool IsServerNotPlayer = !m_NetWorkController->GetClient() && !m_NetWorkController->GetServerPlayer();
 					for (int index = 0; index < Player_num; index++) {
 						auto& p = PlayerMngr->GetPlayer(index);
 						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
 						PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)index);
 						c->SetViewID(GetMyPlayerID());
-						if (index == GetMyPlayerID()) {
-							c->SetInput(Ret.GetInput(), true);
+						if (index == GetMyPlayerID() && !IsServerNotPlayer) {
+							c->SetInput(Ret.GetInput(), true);//自身が動かすもの
 						}
-						else {
-							//サーバーがCPUを動かす
+						else {//サーバーからのデータで動くもの
+							//サーバーがCPUを動かす場合
 							if (!m_NetWorkController->GetClient()) {
 								//cpu
 								//p->GetAI()->Execute(&MyInput);
@@ -219,6 +219,10 @@ namespace FPS_n2 {
 							//override_true = Ret.GetIsActive();
 							if (override_true) {
 								c->SetMoveOverRide(Ret.GetMove());
+								//アクションが違う場合には上書き
+								if (Ret.GetFreeData()[0] != static_cast<int>(c->GetCharaAction())) {
+									c->SetActionOverRide(static_cast<EnumWeaponAnimType>(Ret.GetFreeData()[0]));
+								}
 							}
 
 						}
@@ -450,7 +454,12 @@ namespace FPS_n2 {
 			NetBrowser->Draw();
 			if (m_NetWorkController) {
 				auto* DrawParts = DXDraw::Instance();
-				WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%2dms", static_cast<int>(m_NetWorkController->GetPing()));
+				if (m_NetWorkController->GetPing() >= 0.f) {
+					WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
+				}
+				else {
+					WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
+				}
 			}
 		}
 	};

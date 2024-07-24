@@ -134,6 +134,40 @@ namespace FPS_n2 {
 			SE->Get(static_cast<int>(SoundEnum::Voice_Dou)).StopAll(0);
 			SE->Get(static_cast<int>(SoundEnum::Voice_Tsuki)).StopAll(0);
 		}
+
+		void CharacterClass::CheckTsuba() noexcept {
+			bool IsGuard = false;
+
+
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto& Target = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1 - this->m_MyID)->GetChara();
+
+			auto& TgtPos = Target->GetMove().GetPos();
+			auto& MyPos = this->GetMove().GetPos();
+
+			float Len = 0.f;
+			auto Vec = (TgtPos - MyPos); Vec.y = (0.f); Len = Vec.magnitude(); Vec = Vec.normalized();
+
+			auto Dir = this->GetEyeMatrix().zvec() * -1.f; Dir.y = (0.f); Dir = Dir.normalized();
+
+			auto IsFront = ((Vector3DX::Dot(Dir, Vec)) > 0.f);
+			auto cross = Vector3DX::Cross(Dir, Vec).y;
+
+			float Radius = (0.25f + 0.25f) * Scale_Rate;
+			if (Len < Radius) {
+				if (IsFront) {
+					if (abs(cross) < 0.4f) {
+						IsGuard = true;
+					}
+				}
+			}
+
+			if (IsGuard) {
+				OverrideTsuba();
+				//ëäéËÇ‡Ç¬ÇŒÇ∫ÇËçáÇ¢Ç…Ç∑ÇÈ
+				Target->OverrideTsuba();
+			}
+		}
 		//
 		void			CharacterClass::Do_End(void) noexcept {
 			SetIsDouAttacking(false);
@@ -185,51 +219,16 @@ namespace FPS_n2 {
 			}
 		}
 		void			CharacterClass::OverrideReady(void) noexcept {
+			m_CharaAction = EnumWeaponAnimType::Ready;
 			FrontAttack_End();
 			Do_End();
 			BackAttack_End();
 			KeyControl::SetIsRunning(false);
-			m_CharaAction = EnumWeaponAnimType::Ready;
 		}
 		void			CharacterClass::OverrideRun() noexcept {
-			auto* PlayerMngr = PlayerManager::Instance();
 			Do_End();
 			KeyControl::SetIsRunning(true);
-			m_RunTime = 2.f;
-			m_CharaAction = EnumWeaponAnimType::Run;
-			//Ç¬ÇŒÇ∫ÇËîªíË
-			{
-				bool IsGuard = false;
-
-				auto& Target = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetChara();
-
-				auto& TgtPos = Target->GetMove().GetPos();
-				auto& MyPos = this->GetMove().GetPos();
-
-				auto Dir = this->GetEyeMatrix().zvec() * -1.f;
-				auto Dir_XZ = Dir; Dir_XZ.y = (0.f); Dir_XZ = Dir_XZ.normalized();
-
-				auto Vec = (TgtPos - MyPos); Vec.y = (0.f);
-
-				auto IsFront = ((Vector3DX::Dot(Dir_XZ, Vec.normalized())) > 0.f);
-				auto cross = Vector3DX::Cross(Dir_XZ, Vec.normalized()).y;
-
-				float Radius = (0.5f + 0.25f) * Scale_Rate;
-				float Len = Vec.magnitude();
-				if (Len < Radius) {
-					if (IsFront) {
-						if (abs(cross) < 0.4f) {
-							IsGuard = true;
-						}
-					}
-				}
-
-				if (IsGuard) {
-					OverrideTsuba();
-					//ëäéËÇ‡Ç¬ÇŒÇ∫ÇËçáÇ¢Ç…Ç∑ÇÈ
-					Target->OverrideTsuba();
-				}
-			}
+			m_RunTime = 0.f;
 		}
 		void			CharacterClass::OverrideFrontAttack(void) noexcept {
 			GetWeaponPtrNow()->ResetAnim();
@@ -253,11 +252,11 @@ namespace FPS_n2 {
 			PlayVoice();
 		}
 		void			CharacterClass::OverrideTsuba(void) noexcept {
+			m_CharaAction = EnumWeaponAnimType::Tsuba;
 			FrontAttack_End();
 			Do_End();
 			BackAttack_End();
 			KeyControl::SetIsRunning(false);
-			m_CharaAction = EnumWeaponAnimType::Tsuba;
 			m_NormalActionTime = 0.5f;
 		}
 		void			CharacterClass::OverrideBackAttack(void) noexcept {
@@ -273,15 +272,13 @@ namespace FPS_n2 {
 			PlayVoice();
 		}
 		void			CharacterClass::OverrideGuardStart() noexcept {
-			m_CharaAction = EnumWeaponAnimType::GuardStart;
 			m_GuardStartTimer = 0.f;
 			m_GuardVec.Set(0.f, 0.f);
 			m_GuardVecR.Set(0.f, 0.f);
 		}
 		void			CharacterClass::OverrideGuardSuriage() noexcept {
-			m_BambooVec = Vector2DX::zero();
+			m_BambooVecBase = Vector2DX::zero();
 			m_GuardTimer = 1.f;
-			m_CharaAction = EnumWeaponAnimType::GuardSuriage;//è„ÉKÅ[Éh
 		}
 		//
 		Matrix3x3DX		CharacterClass::GetEyeMatrix(void) const noexcept { return KeyControl::GetEyeRotMatrix() * KeyControl::GetBaseRotMatrix(); }
@@ -294,13 +291,6 @@ namespace FPS_n2 {
 		}
 		//ëÄçÏ
 		void			CharacterClass::ExecuteInput(void) noexcept {
-
-			int num = MV1GetMaterialNum(GetObj().GetHandle());
-			for (int i = 0; i < num; i++) {
-				MV1SetMaterialDifColor(GetObj().GetHandle(), i, GetColorF(0.8f, 0.8f, 0.8f, 1.f));
-				MV1SetMaterialAmbColor(GetObj().GetHandle(), i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
-			}
-
 			auto* DrawParts = DXDraw::Instance();
 			auto* SE = SoundPool::Instance();
 			//
@@ -313,6 +303,16 @@ namespace FPS_n2 {
 					IsOutArea = true;
 				}
 			}
+
+			auto* PlayerMngr = PlayerManager::Instance();
+			auto& Target = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1 - this->m_MyID)->GetChara();
+
+			auto& TgtPos = Target->GetMove().GetPos();
+			auto& MyPos = this->GetMove().GetPos();
+
+			float Len = 0.f;
+			auto Vec = (TgtPos - MyPos); Vec.y = (0.f); Len = Vec.magnitude(); Vec = Vec.normalized();
+
 			//ä|ÇØê∫
 			if (KeyControl::GetInputControl().GetPADSPress(PADS::JUMP) && m_YaTimer<=0.f) {
 				SE->Get(static_cast<int>(SoundEnum::Voice_Ya)).Play_3D(0, GetFramePosition(CharaFrame::Head), Scale_Rate * 35.f);
@@ -324,10 +324,15 @@ namespace FPS_n2 {
 			switch (m_CharaAction) {
 			case EnumWeaponAnimType::Ready:
 			{
+				//Ç¬ÇŒÇ∫ÇËîªíË
+				{
+					CheckTsuba();
+				}
 				if (KeyControl::GetInputControl().GetPADSPress(PADS::AIM)) {
 					m_CharaAction = EnumWeaponAnimType::GuardStart;
 				}
-				if (!IsOutArea) {
+				float Radius = 3.5f * Scale_Rate;
+				if (!IsOutArea && (Len < Radius)) {
 					if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
 						m_CharaAction = EnumWeaponAnimType::Men;
 					}
@@ -343,10 +348,16 @@ namespace FPS_n2 {
 				break;
 			case EnumWeaponAnimType::Run:
 			{
-				if (IsOutArea || m_RunTime <= 0.f) {
+				if (IsOutArea || m_RunTime >= 2.f) {
 					m_CharaAction = EnumWeaponAnimType::Ready;
 				}
-				m_RunTime = std::max(m_RunTime - 1.f / DrawParts->GetFps(), 0.f);
+
+				//Ç¬ÇŒÇ∫ÇËîªíË
+				if (m_RunTime <= 0.025f) {
+					CheckTsuba();
+				}
+
+				m_RunTime = std::max(m_RunTime + 1.f / DrawParts->GetFps(), 0.f);
 				m_HeartUp = std::max(m_HeartUp, 2.f);
 			}
 				break;
@@ -354,7 +365,7 @@ namespace FPS_n2 {
 			case EnumWeaponAnimType::Kote:
 			case EnumWeaponAnimType::Tsuki:
 			{
-				Easing(&m_BambooVec, Vector2DX::zero(), 0.9f, EasingType::OutExpo);
+				Easing(&m_BambooVecBase, Vector2DX::zero(), 0.9f, EasingType::OutExpo);
 				if (m_NormalActionTime <= 0.f) {
 					FrontAttack_End();
 					//ãZîhê∂
@@ -438,7 +449,7 @@ namespace FPS_n2 {
 			case EnumWeaponAnimType::HikiKote:
 			case EnumWeaponAnimType::HikiDou:
 				{
-					Easing(&m_BambooVec, Vector2DX::zero(), 0.9f, EasingType::OutExpo);
+					Easing(&m_BambooVecBase, Vector2DX::zero(), 0.9f, EasingType::OutExpo);
 					if (IsOutArea || m_NormalActionTime <= 0.f) {
 						m_CharaAction = EnumWeaponAnimType::Ready;
 					}
@@ -448,7 +459,7 @@ namespace FPS_n2 {
 				break;
 			case EnumWeaponAnimType::GuardStart:
 			{
-				Easing(&m_BambooVec, Vector2DX::zero(), 0.9f, EasingType::OutExpo);
+				Easing(&m_BambooVecBase, Vector2DX::zero(), 0.9f, EasingType::OutExpo);
 				//
 				bool suriage = false;
 				float length = std::hypotf(m_GuardVecR.x, m_GuardVecR.y);
@@ -487,6 +498,25 @@ namespace FPS_n2 {
 				break;
 			}
 			if (Prev != m_CharaAction) {
+
+				if (
+					(
+						Prev == EnumWeaponAnimType::Men ||
+						Prev == EnumWeaponAnimType::Kote ||
+						Prev == EnumWeaponAnimType::Tsuki
+						) &&
+					(
+						m_CharaAction == EnumWeaponAnimType::Men ||
+						m_CharaAction == EnumWeaponAnimType::Kote ||
+						m_CharaAction == EnumWeaponAnimType::Dou ||
+						m_CharaAction == EnumWeaponAnimType::Tsuki
+						)
+					) {
+					this->m_Arm[static_cast<size_t>(Prev)].Init(false);
+					this->m_Arm[static_cast<size_t>(m_CharaAction)].Init(true);
+				}
+
+
 				OverrideAction();
 			}
 		}
@@ -722,7 +752,7 @@ namespace FPS_n2 {
 					bool IsHit = false;
 					Vector2DX Prev = m_BambooVec;
 					for (int index = 0; index < 10; index++) {
-						m_BambooVec = Lerp(Prev, m_MouseVecR, static_cast<float>(index + 1) / 10.f);
+						m_BambooVec = Lerp(Prev, m_BambooVecBase, static_cast<float>(index + 1) / 10.f);
 
 						Vector3DX StartPosP = GetWeaponPtrNow()->GetMove().GetPos();
 						Vector3DX EndPosP = GetWeaponPtrNow()->GetFramePosition(WeaponFrame::End);
@@ -841,7 +871,8 @@ namespace FPS_n2 {
 			m_GuardVec.y = std::clamp(m_GuardVec.y, deg2rad(-30), deg2rad(30));
 			Easing(&m_GuardVecR, m_GuardVec / deg2rad(30*2/3), 0.9f, EasingType::OutExpo);
 
-			m_MouseVecR.Set(pInput.GetxRad(), pInput.GetyRad());
+			auto TargetVec = Vector2DX::vget(pInput.GetxRad(), pInput.GetyRad());
+			Easing(&m_BambooVecBase, TargetVec, 0.7f, EasingType::OutExpo);
 			
 			InputControl Input = pInput;
 			{
@@ -851,13 +882,13 @@ namespace FPS_n2 {
 				auto& TgtPos = Target->GetMove().GetPos();
 				auto& MyPos = this->GetMove().GetPos();
 
-				auto Dir_XZ = this->GetEyeMatrix().zvec() * -1.f; Dir_XZ.y = (0.f);Dir_XZ = Dir_XZ.normalized();
+				auto Dir = this->GetEyeMatrix().zvec() * -1.f; Dir.y = (0.f); Dir = Dir.normalized();
 				float Len = 0.f;
 				auto Vec = (TgtPos - MyPos); Vec.y = (0.f); Len = Vec.magnitude(); Vec = Vec.normalized();
 				float pp_y = 0.f;
 				if (!KeyControl::GetRun()) {
-					float sint = Vector3DX::Cross(Vec, Dir_XZ).y;
-					float cost = Vector3DX::Dot(Vec, Dir_XZ);
+					float sint = Vector3DX::Cross(Vec, Dir).y;
+					float cost = Vector3DX::Dot(Vec, Dir);
 					auto IsFront = (cost > cos(deg2rad(40)));
 					if (IsFront) {
 						pp_y = std::clamp(-std::atan2f(sint, cost), -deg2rad(60), deg2rad(60)) * 5.f / 60.f;
@@ -882,12 +913,13 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			//èââÒÇÃÇ›çXêVÇ∑ÇÈì‡óe
 			if (this->m_IsFirstLoop) {
-				if (GetMyPlayerID() == 0) {
-					//this->GetObj().SetOpacityRate(0.25f);
-					//GetObj().material_AlphaTestAll(true, DX_CMP_GREATER, 0);								//ñ{ëÃ
-				}
 				m_BambooVec.Set(0.f, 0.f);
-				m_MouseVecR.Set(0.f, 0.f);
+				m_BambooVecBase.Set(0.f, 0.f);
+				int num = MV1GetMaterialNum(GetObj().GetHandle());
+				for (int i = 0; i < num; i++) {
+					MV1SetMaterialDifColor(GetObj().GetHandle(), i, GetColorF(0.8f, 0.8f, 0.8f, 1.f));
+					MV1SetMaterialAmbColor(GetObj().GetHandle(), i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
+				}
 			}
 			//
 			ExecuteInput();

@@ -147,6 +147,7 @@ namespace FPS_n2 {
 			std::array<float, static_cast<int>(CharaAnimeID::AnimeIDMax)>	m_AnimPerBuf{};
 			bool												m_TurnBody{false};
 
+			float												m_RunPer{};
 			bool												m_IsRunning{false};
 			bool												m_IsFrontAttacking{false};
 			bool												m_IsDouAttacking{false};
@@ -256,6 +257,7 @@ namespace FPS_n2 {
 					this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + this->m_Input.GetAddxRad(), deg2rad(-12.f), deg2rad(12.f));
 					this->m_rad_Buf.y = this->m_rad_Buf.y + this->m_Input.GetAddyRad();
 				}
+				Easing(&m_RunPer, m_IsRunning ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 				//ˆÚ“®
 				auto wkey = (this->m_Input.GetPADSPress(PADS::MOVE_W) || (m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking)) && !m_IsBackAttacking;
 				auto skey = (this->m_Input.GetPADSPress(PADS::MOVE_S) && !(m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking)) || m_IsBackAttacking;
@@ -267,7 +269,7 @@ namespace FPS_n2 {
 				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (akey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
 				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (skey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
 				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (dkey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
-				if (m_IsDouAttacking) {
+				if (m_IsRunning || m_IsDouAttacking) {
 					this->m_Vec[3] = std::clamp(this->m_Vec[3] + 5.f / DrawParts->GetFps(), 0.f, 1.f);
 				}
 				m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
@@ -360,7 +362,7 @@ namespace FPS_n2 {
 				}
 				//
 				m_BaseMatrix = Matrix3x3DX::RotAxis(Vector3DX::forward(), (this->m_ZRad / 2.f)) * Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_yrad_Bottom);
-				m_UpperMatrix = Matrix3x3DX::RotAxis(Vector3DX::right(), XRad) * Matrix3x3DX::RotAxis(Vector3DX::up(), Lerp(this->m_yrad_BottomChange, 0.f, m_IsRunning ? 1.f : 0.f));
+				m_UpperMatrix = Matrix3x3DX::RotAxis(Vector3DX::right(), XRad) * Matrix3x3DX::RotAxis(Vector3DX::up(), Lerp(this->m_yrad_BottomChange, 0.f, m_RunPer));
 				m_EyeMatrix = Matrix3x3DX::RotAxis(Vector3DX::right(), XRad) * Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_yrad_BottomChange);
 			}
 		};

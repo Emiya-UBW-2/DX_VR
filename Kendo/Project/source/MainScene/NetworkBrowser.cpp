@@ -31,7 +31,7 @@ namespace FPS_n2 {
 					yp2 = yp1 + LineHeight;
 					bool into = IntoMouse(xp1, yp1, xp2, yp2);
 					color = (into) ? Black : Gray75;
-					DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+					WindowSystem::SetBox(xp1, yp1, xp2, yp2, color);
 					WindowSystem::SetMsg(xp1 + (xp2 - xp1) / 2, yp1 + LineHeight / 2, LineHeight, FontHandle::FontXCenter::MIDDLE, White, Black, "+");
 					if (into) {
 						if (Pad->GetMouseClick().repeat()) {
@@ -44,7 +44,7 @@ namespace FPS_n2 {
 					yp2 += DrawParts->GetUIY(50);
 					bool into = IntoMouse(xp1, yp1, xp2, yp2);
 					color = (into) ? Black : Gray75;
-					DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+					WindowSystem::SetBox(xp1, yp1, xp2, yp2, color);
 					WindowSystem::SetMsg(xp1 + (xp2 - xp1) / 2, yp1 + LineHeight / 2, LineHeight, FontHandle::FontXCenter::MIDDLE, White, Black, "-");
 					if (into) {
 						if (Pad->GetMouseClick().repeat()) {
@@ -55,7 +55,7 @@ namespace FPS_n2 {
 			};
 			//
 			{
-				DrawBox(xp - DrawParts->GetUIY(10), yp - DrawParts->GetUIY(10), xp + xs + DrawParts->GetUIY(10), yp + ys + DrawParts->GetUIY(10), Gray25, TRUE);//îwåi
+				WindowSystem::SetBox(xp - DrawParts->GetUIY(10), yp - DrawParts->GetUIY(10), xp + xs + DrawParts->GetUIY(10), yp + ys + DrawParts->GetUIY(10), Gray25);//îwåi
 				WindowSystem::SetMsg(xp + xs, yp + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, " %d/%d", static_cast<int>(this->m_Sequence), static_cast<int>(NetWorkSequence::MainGame));
 			}
 			auto Prev = this->m_Sequence;
