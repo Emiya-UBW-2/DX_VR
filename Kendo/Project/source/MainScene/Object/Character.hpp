@@ -96,7 +96,7 @@ namespace FPS_n2 {
 			void			OverrideTsuba(void) noexcept;
 			void			OverrideBackAttack(void) noexcept;
 			void			OverrideGuardStart(void) noexcept;
-			void			OverrideGuardSuriage(void) noexcept;
+			void			OverrideGuard(void) noexcept;
 		private: //çXêVä÷òA
 			void			ExecuteInput(void) noexcept;
 			void			ExecuteAction(void) noexcept;

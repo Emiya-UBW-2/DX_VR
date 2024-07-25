@@ -157,7 +157,7 @@ namespace FPS_n2 {
 		void			TitleScene::MainDraw_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			// ”wŒi
-			DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Gray75, TRUE);
+			DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), GetColor(12, 12, 12), TRUE);
 			// •`‰æ
 		}
 		void			TitleScene::DrawUI_Base_Sub(void) noexcept {

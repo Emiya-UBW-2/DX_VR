@@ -32,6 +32,10 @@ namespace FPS_n2 {
 				break;
 			case EnumWeaponAnimType::GuardSuriage:
 				break;
+			case EnumWeaponAnimType::GuardLeft:
+				break;
+			case EnumWeaponAnimType::GuardRight:
+				break;
 			case EnumWeaponAnimType::Max:
 				break;
 			default:
@@ -53,8 +57,8 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto& Target = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1 - this->m_MyID)->GetChara();
 
-			auto& TgtPos = Target->GetMove().GetPos();
-			auto& MyPos = this->GetMove().GetPos();
+			auto TgtPos = Target->GetFramePosition(CharaFrame::LeftWrist);
+			auto MyPos = this->GetFramePosition(CharaFrame::LeftWrist);
 
 			float Len = 0.f;
 			auto Vec = (TgtPos - MyPos); Vec.y = (0.f); Len = Vec.magnitude(); Vec = Vec.normalized();
@@ -64,7 +68,7 @@ namespace FPS_n2 {
 			auto IsFront = ((Vector3DX::Dot(Dir, Vec)) > 0.f);
 			auto cross = Vector3DX::Cross(Dir, Vec).y;
 
-			float Radius = (0.25f + 0.25f) * Scale_Rate;
+			float Radius = (0.15f + 0.15f) * Scale_Rate;
 			if (Len < Radius) {
 				if (IsFront) {
 					if (abs(cross) < 0.4f) {
@@ -110,7 +114,9 @@ namespace FPS_n2 {
 				OverrideGuardStart();
 				break;
 			case EnumWeaponAnimType::GuardSuriage:
-				OverrideGuardSuriage();
+			case EnumWeaponAnimType::GuardLeft:
+			case EnumWeaponAnimType::GuardRight:
+				OverrideGuard();
 				break;
 			case EnumWeaponAnimType::Max:
 				break;
@@ -186,7 +192,7 @@ namespace FPS_n2 {
 			m_GuardVec.Set(0.f, 0.f);
 			m_GuardVecR.Set(0.f, 0.f);
 		}
-		void			CharacterClass::OverrideGuardSuriage(void) noexcept {
+		void			CharacterClass::OverrideGuard(void) noexcept {
 			m_BambooVecBase = Vector2DX::zero();
 			m_GuardTimer = 1.f;
 		}
@@ -351,7 +357,7 @@ namespace FPS_n2 {
 			{
 				Easing(&m_BambooVecBase, Vector2DX::zero(), 0.9f, EasingType::OutExpo);
 				//‹Z”h¶
-				if (m_FrontAttackActionTime <= 0.25f) {//Žó•tŠJŽn
+				if (m_FrontAttackActionTime <= 0.12f) {//Žó•tŠJŽn
 					auto Action = m_CharaAction;
 					if (m_FrontAttackActionTime <= 0.f) {//”h¶æ‚ª‚È‚­0•b‚É‚È‚Á‚½
 						m_CharaAction = EnumWeaponAnimType::Run;
@@ -395,6 +401,8 @@ namespace FPS_n2 {
 					case EnumWeaponAnimType::HikiDou:
 					case EnumWeaponAnimType::GuardStart:
 					case EnumWeaponAnimType::GuardSuriage:
+					case EnumWeaponAnimType::GuardLeft:
+					case EnumWeaponAnimType::GuardRight:
 					case EnumWeaponAnimType::Max:
 					default:
 						break;
@@ -447,16 +455,32 @@ namespace FPS_n2 {
 				Easing(&m_BambooVecBase, Vector2DX::zero(), 0.9f, EasingType::OutExpo);
 				//
 				bool suriage = false;
+				bool Gleft = false;
+				bool Gright = false;
 				float length = m_GuardVecR.magnitude();
 				if (length > 0.8f) {
-					if (m_GuardVecR.y > 0.7f) {
+					if (m_GuardVecR.y > 0.25f) {
 						suriage = true;//ãƒK[ƒh
+					}
+					else {
+						if (m_GuardVecR.x > 0.f) {
+							Gright = true;
+						}
+						else {
+							Gleft = true;
+						}
 					}
 				}
 				//
-				if ((m_GuardStartTimer >= 0.1f && !KeyControl::GetInputControl().GetPADSPress(PADS::AIM)) || (m_GuardStartTimer == 1.f) || suriage) {
+				if ((m_GuardStartTimer >= 0.1f && !KeyControl::GetInputControl().GetPADSPress(PADS::AIM)) || (m_GuardStartTimer == 1.f) || suriage || Gleft || Gright) {
 					if (suriage) {
 						m_CharaAction = EnumWeaponAnimType::GuardSuriage;//ãƒK[ƒh
+					}
+					else if (Gleft) {
+						m_CharaAction = EnumWeaponAnimType::GuardLeft;//¶ƒK[ƒh
+					}
+					else if (Gright) {
+						m_CharaAction = EnumWeaponAnimType::GuardRight;//‰EƒK[ƒh
 					}
 					else {
 						m_CharaAction = EnumWeaponAnimType::Ready;
@@ -474,6 +498,15 @@ namespace FPS_n2 {
 					if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
 						m_CharaAction = EnumWeaponAnimType::Men;
 					}
+				}
+				m_GuardTimer = std::max(m_GuardTimer - 1.f / DrawParts->GetFps(), 0.f);
+			}
+			break;
+			case EnumWeaponAnimType::GuardLeft:
+			case EnumWeaponAnimType::GuardRight:
+			{
+				if (m_GuardTimer == 0.f) {
+					m_CharaAction = EnumWeaponAnimType::Ready;
 				}
 				m_GuardTimer = std::max(m_GuardTimer - 1.f / DrawParts->GetFps(), 0.f);
 			}
@@ -510,6 +543,8 @@ namespace FPS_n2 {
 			auto IsGuardAction = [](EnumWeaponAnimType value) {
 				switch (value) {
 				case EnumWeaponAnimType::GuardSuriage:
+				case EnumWeaponAnimType::GuardLeft:
+				case EnumWeaponAnimType::GuardRight:
 					return true;
 				case EnumWeaponAnimType::Ready:
 				case EnumWeaponAnimType::Run:
@@ -522,7 +557,6 @@ namespace FPS_n2 {
 				case EnumWeaponAnimType::HikiKote:
 				case EnumWeaponAnimType::HikiDou:
 				case EnumWeaponAnimType::GuardStart:
-					//case EnumWeaponAnimType::GuardSuriage:
 				case EnumWeaponAnimType::Max:
 				default:
 					return false;
@@ -771,7 +805,7 @@ namespace FPS_n2 {
 										auto ZVec = Matrix4x4DX::RotVec2(VecA, (Vec2 - StartPos).normalized()).zvec();
 										m_BambooVec.y += atan2f(ZVec.x, ZVec.z) * 0.5f;
 										m_BambooVec.x += atan2f(ZVec.y, std::hypotf(ZVec.x, ZVec.z)) * 0.5f;
-										//m_BambooVec.Set(std::clamp(m_BambooVec.x, deg2rad(-10), deg2rad(10)), std::clamp(m_BambooVec.y, deg2rad(-30), deg2rad(30)));
+										m_BambooVec.Set(std::clamp(m_BambooVec.x, deg2rad(-10), deg2rad(10)), std::clamp(m_BambooVec.y, deg2rad(-30), deg2rad(30)));
 									}
 									{
 										Vector3DX Vec2 = Vec1 + (Vec0 - Vec1).normalized() * (Len - Radius);
