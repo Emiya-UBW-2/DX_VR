@@ -1,9 +1,0 @@
-Name=8001
-CamSize=1.0
-000_EvtType=Entry
-000_NextStage=000_map2
-000_EntryCutScene=002
-001_EvtType=Entry
-001_NextStage=None
-002_EvtType=CutScene
-002_CutSelect=020
