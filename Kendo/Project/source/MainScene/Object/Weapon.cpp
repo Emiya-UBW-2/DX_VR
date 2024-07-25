@@ -3,6 +3,6 @@
 #include	"../../Header.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
-	};
-};
+	namespace WeaponObject {
+	}
+}

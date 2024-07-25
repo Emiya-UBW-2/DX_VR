@@ -1,8 +1,9 @@
 #pragma once
+#pragma warning(disable:4464)
 #include	"../../Header.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace CharacterObject {
 		enum class CharaAnimeID : uint8_t {
 			Bottom_Stand,
 			Bottom_Stand_Walk,
@@ -102,5 +103,5 @@ namespace FPS_n2 {
 			"^–Ê–Ú",
 			"‚Ü‚Î‚½‚«",
 		};
-	};
-};
+	}
+}

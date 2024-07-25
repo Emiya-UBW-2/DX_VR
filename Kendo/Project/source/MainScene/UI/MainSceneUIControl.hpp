@@ -6,8 +6,8 @@ namespace FPS_n2 {
 		class UIClass {
 			class GaugeParam {
 				int m_Now{ 0 };
-				int m_Max{100};
-				float m_Buffer{0.f};
+				int m_Max{ 100 };
+				float m_Buffer{ 0.f };
 			public:
 				void			InitGaugeParam(int value, int Max) noexcept {
 					this->m_Now = value;
@@ -18,11 +18,11 @@ namespace FPS_n2 {
 					auto* DrawParts = DXDraw::Instance();
 					this->m_Now = value;
 					this->m_Max = Max;
-					float Limit = static_cast<float>(this->m_Max / Rate)*1.5f;
-					this->m_Buffer += std::clamp(static_cast<float>(static_cast<float>(this->m_Now) - this->m_Buffer)*static_cast<float>(this->m_Max / Rate), -Limit, Limit) / DrawParts->GetFps();
+					float Limit = static_cast<float>(this->m_Max / Rate) * 1.5f;
+					this->m_Buffer += std::clamp(static_cast<float>(static_cast<float>(this->m_Now) - this->m_Buffer) * static_cast<float>(this->m_Max / Rate), -Limit, Limit) / DrawParts->GetFps();
 				}
 				void			DrawGauge(int xp1, int yp1, int xp2, int yp2,
-										 COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
+					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
 					//return;
 					int ParamBuf = static_cast<int>(this->m_Buffer + 0.5f);
 					DrawBoxLine_2D(xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White);
@@ -45,7 +45,7 @@ namespace FPS_n2 {
 						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b));
 				}
 				void			DrawGaugeUp(int xp1, int yp1, int xp2, int yp2,
-											COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
+					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
 					//return;
 					int ParamBuf = static_cast<int>(this->m_Buffer + 0.5f);
 					DrawBoxLine_2D(xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White);
@@ -68,8 +68,8 @@ namespace FPS_n2 {
 						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b));
 				}
 				void			DrawGaugeCircleLeft(int xp1, int yp1,
-													COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
-													GraphHandle* CircleObj, float deg, int Add) noexcept {
+					COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
+					GraphHandle* CircleObj, float deg, int Add) noexcept {
 					//return;
 					auto* DrawParts = DXDraw::Instance();
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
@@ -79,28 +79,28 @@ namespace FPS_n2 {
 					SetDrawBlendMode(DX_BLENDMODE_ADD, Add);
 					SetDrawBright(ColorBase.r, ColorBase.g, ColorBase.b);
 					DrawCircleGauge(xp1 + DrawParts->GetScreenY(256), yp1,
-									50.0 + ((50.0 - 15.0*2.0)*1.0) + 15.0 + deg,
-									CircleObj->get(),
-									50.0 + 15.0 + deg,
-									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+						50.0 + ((50.0 - 15.0 * 2.0) * 1.0) + 15.0 + deg,
+						CircleObj->get(),
+						50.0 + 15.0 + deg,
+						((double)(DrawParts->GetUIY(1080)) / 1080.0));
 					SetDrawBright(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
 					DrawCircleGauge(xp1 + DrawParts->GetScreenY(256), yp1,
-									50.0 + ((50.0 - 15.0*2.0)*(double)std::max(per, perbuf)) + 15.0 + deg,
-									CircleObj->get(),
-									50.0 + ((50.0 - 15.0*2.0)*(double)std::min(per, perbuf)) + 15.0 + deg,
-									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+						50.0 + ((50.0 - 15.0 * 2.0) * (double)std::max(per, perbuf)) + 15.0 + deg,
+						CircleObj->get(),
+						50.0 + ((50.0 - 15.0 * 2.0) * (double)std::min(per, perbuf)) + 15.0 + deg,
+						((double)(DrawParts->GetUIY(1080)) / 1080.0));
 					SetDrawBright(Color.r, Color.g, Color.b);
 					DrawCircleGauge(xp1 + DrawParts->GetScreenY(256), yp1,
-									50.0 + ((50.0 - 15.0*2.0)*(double)std::min(per, perbuf)) + 15.0 + deg,
-									CircleObj->get(),
-									50.0 + 15.0 + deg,
-									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+						50.0 + ((50.0 - 15.0 * 2.0) * (double)std::min(per, perbuf)) + 15.0 + deg,
+						CircleObj->get(),
+						50.0 + 15.0 + deg,
+						((double)(DrawParts->GetUIY(1080)) / 1080.0));
 					SetDrawBright(255, 255, 255);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
 				void			DrawGaugeCircleRight(int xp1, int yp1,
-													 COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
-													 GraphHandle* CircleObj, float deg, int Add) noexcept {
+					COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
+					GraphHandle* CircleObj, float deg, int Add) noexcept {
 					//return;
 					auto* DrawParts = DXDraw::Instance();
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
@@ -110,28 +110,28 @@ namespace FPS_n2 {
 					SetDrawBlendMode(DX_BLENDMODE_ADD, Add);
 					SetDrawBright(ColorBase.r, ColorBase.g, ColorBase.b);
 					DrawCircleGauge(xp1 - DrawParts->GetScreenY(256), yp1,
-						(50.0 - 15.0*2.0) + 15.0 + deg,
-									CircleObj->get(),
-									(double)((50.0 - 15.0*2.0)*(1.0 - 1.0)) + 15.0 + deg,
-									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+						(50.0 - 15.0 * 2.0) + 15.0 + deg,
+						CircleObj->get(),
+						(double)((50.0 - 15.0 * 2.0) * (1.0 - 1.0)) + 15.0 + deg,
+						((double)(DrawParts->GetUIY(1080)) / 1080.0));
 					SetDrawBright(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
 					DrawCircleGauge(xp1 - DrawParts->GetScreenY(256), yp1,
-						(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
-									CircleObj->get(),
-									(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::max(per, perbuf))) + 15.0 + deg,
-									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+						(double)((50.0 - 15.0 * 2.0) * (1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
+						CircleObj->get(),
+						(double)((50.0 - 15.0 * 2.0) * (1.0 - (double)std::max(per, perbuf))) + 15.0 + deg,
+						((double)(DrawParts->GetUIY(1080)) / 1080.0));
 					SetDrawBright(Color.r, Color.g, Color.b);
 					DrawCircleGauge(xp1 - DrawParts->GetScreenY(256), yp1,
-						(50.0 - 15.0*2.0) + 15.0 + deg,
-									CircleObj->get(),
-									(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
-									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+						(50.0 - 15.0 * 2.0) + 15.0 + deg,
+						CircleObj->get(),
+						(double)((50.0 - 15.0 * 2.0) * (1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
+						((double)(DrawParts->GetUIY(1080)) / 1080.0));
 					SetDrawBright(255, 255, 255);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
 				auto			GetGaugeDiff(void) const noexcept { return static_cast<float>(this->m_Now) - std::min(static_cast<float>(this->m_Max), this->m_Buffer); }
-				const auto&		GetGauge(void) const noexcept { return this->m_Now; }
-				const auto&		GetGaugeMax(void) const noexcept { return this->m_Max; }
+				const auto& GetGauge(void) const noexcept { return this->m_Now; }
+				const auto& GetGaugeMax(void) const noexcept { return this->m_Max; }
 
 			private:
 				int Blend3Int(int pInt1, int pInt2, int pInt3, float per) noexcept {
@@ -156,9 +156,9 @@ namespace FPS_n2 {
 				GraphHandle UltGaugeMask;
 				GraphHandle UltGauge;
 			public:
-				const auto&		GetXSize(void) const noexcept { return this->ultxp; }
-				const auto&		GetYSize(void) const noexcept { return this->ultyp; }
-				const auto&		GetGraph(void) const noexcept { return this->UltGauge; }
+				const auto& GetXSize(void) const noexcept { return this->ultxp; }
+				const auto& GetYSize(void) const noexcept { return this->ultyp; }
+				const auto& GetGraph(void) const noexcept { return this->UltGauge; }
 			public:
 				GaugeMask(void) noexcept {}
 				GaugeMask(const GaugeMask&) = delete;
@@ -186,10 +186,10 @@ namespace FPS_n2 {
 					}
 					SetDrawScreen(Prev);
 					GraphBlend(UltGauge.get(), UltGaugeMask.get(), 255, DX_GRAPH_BLEND_RGBA_SELECT_MIX,
-							  DX_RGBA_SELECT_SRC_R,
-							  DX_RGBA_SELECT_SRC_G,
-							  DX_RGBA_SELECT_SRC_B,
-							  DX_RGBA_SELECT_BLEND_R
+						DX_RGBA_SELECT_SRC_R,
+						DX_RGBA_SELECT_SRC_G,
+						DX_RGBA_SELECT_SRC_B,
+						DX_RGBA_SELECT_BLEND_R
 					);
 				}
 			};
@@ -252,9 +252,9 @@ namespace FPS_n2 {
 					xp1 = DrawParts->GetUIY((24 + 300 + 8 + 32));
 					yp1 = DrawParts->GetUIY((1080 - 96 + 30 / 2));
 					float per = Lerp(0.4f, 0.6f, floatParam[1]);
-					if ((per *255.f) > 1.f) {
+					if ((per * 255.f) > 1.f) {
 						int radius = static_cast<int>(Lerp(static_cast<float>(DrawParts->GetUIY(24)), static_cast<float>(DrawParts->GetUIY(32)), floatParam[1]));
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f*per), 0, 255));
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * per), 0, 255));
 						SetDrawBright(255, 0, 0);
 						m_HeartIcon.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
 						SetDrawBright(255, 255, 255);
@@ -296,8 +296,8 @@ namespace FPS_n2 {
 									xp1 += static_cast<int>(static_cast<float>(256 - 32) * floatParam[3] / length);
 									yp1 += static_cast<int>(static_cast<float>(256 - 32) * floatParam[4] / length);
 								}
-								float per = std::clamp(length, 0.f, 1.f)*floatParam[2];
-								SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f*per), 0, 255));
+								float per = std::clamp(length, 0.f, 1.f) * floatParam[2];
+								SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * per), 0, 255));
 								SetDrawBright(100, 255, 100);
 								m_GuardPGraph.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
 								SetDrawBright(255, 255, 255);
@@ -352,5 +352,5 @@ namespace FPS_n2 {
 			void			SetfloatParam(int ID, float value) noexcept { floatParam[static_cast<size_t>(ID)] = value; }
 			void			SetStrParam(int ID, std::string_view value) noexcept { strParam[static_cast<size_t>(ID)] = value; }
 		};
-	};
-};
+	}
+}

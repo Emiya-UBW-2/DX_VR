@@ -4,7 +4,7 @@
 #include "../../MainScene/BackGround/BackGroundSub.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace BackGround {
 		class BackGroundClass : public SingletonBase<BackGroundClass> {
 		private:
 			friend class SingletonBase<BackGroundClass>;
@@ -23,7 +23,7 @@ namespace FPS_n2 {
 
 			virtual ~BackGroundClass(void) noexcept {}
 		public://getter
-			const auto&		GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
+			const auto& GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
 			auto		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, bool isNearest, Vector3DX* Normal = nullptr) const noexcept {
 				bool isHit = false;
 				{
@@ -99,5 +99,5 @@ namespace FPS_n2 {
 				this->m_ObjGroundCol.Dispose();
 			}
 		};
-	};
-};
+	}
+}

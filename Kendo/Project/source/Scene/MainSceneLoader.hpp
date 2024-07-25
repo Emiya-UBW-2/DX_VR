@@ -3,16 +3,16 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class MAINLOOPLOADER : public TEMPSCENE {
+		class LoadScene : public TEMPSCENE {
 		private:
 		public:
-			MAINLOOPLOADER(void) noexcept {}
-			MAINLOOPLOADER(const MAINLOOPLOADER&) = delete;
-			MAINLOOPLOADER(MAINLOOPLOADER&& o) = delete;
-			MAINLOOPLOADER& operator=(const MAINLOOPLOADER&) = delete;
-			MAINLOOPLOADER& operator=(MAINLOOPLOADER&& o) = delete;
+			LoadScene(void) noexcept {}
+			LoadScene(const LoadScene&) = delete;
+			LoadScene(LoadScene&& o) = delete;
+			LoadScene& operator=(const LoadScene&) = delete;
+			LoadScene& operator=(LoadScene&& o) = delete;
 
-			virtual ~MAINLOOPLOADER(void) noexcept {}
+			virtual ~LoadScene(void) noexcept {}
 		public:
 			void Set_Sub(void) noexcept override {
 				SetUseASyncLoadFlag(TRUE);
@@ -26,8 +26,8 @@ namespace FPS_n2 {
 			}
 		public:
 			//UI•\Ž¦
-			void DrawUI_Base_Sub() noexcept override {
+			void DrawUI_Base_Sub(void) noexcept override {
 			}
 		};
-	};
-};
+	}
+}

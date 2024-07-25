@@ -4,58 +4,59 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		void			MAINLOOP::Load_Sub(void) noexcept {
+		void			MainGameScene::Load_Sub(void) noexcept {
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
-			auto* PlayerMngr = PlayerManager::Instance();
-			auto* BackGround = BackGroundClass::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto* BackGround = BackGround::BackGroundClass::Instance();
 			//BG
 			BackGround->Load();
 			//
 			BattleResourceMngr->Load();
-			PlayerMngr->Init(Player_num);
-			for (int index = 0; index < Player_num; index++) {
+			PlayerMngr->Init(NetWork::Player_num);
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 				BattleResourceMngr->LoadChara("Chara", (PlayerID)index);
-				BattleResourceMngr->LoadGun("Bamboo", (PlayerID)index);
+				BattleResourceMngr->LoadWeapon("Bamboo", (PlayerID)index);
 			}
 			//UI
 			this->m_UIclass.Load();
+			PauseMenuControl::LoadPause();
 		}
-		void			MAINLOOP::Set_Sub(void) noexcept {
+		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* OptionParts = OPTION::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
-			auto* PlayerMngr = PlayerManager::Instance();
-			auto* BackGround = BackGroundClass::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto* BackGround = BackGround::BackGroundClass::Instance();
 			//
 			BattleResourceMngr->Set();
 			//
 			BackGround->Init();
 			//
-			Vector3DX LightVec = Vector3DX::vget(1.3f, -0.5f, 0.05f);LightVec = LightVec.normalized();
+			Vector3DX LightVec = Vector3DX::vget(1.3f, -0.5f, 0.05f); LightVec = LightVec.normalized();
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
 			SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 
-			auto& SecondLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec*-1.f);
+			auto& SecondLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec * -1.f);
 			SetLightDifColorHandle(SecondLight.get(), GetColorF(0.5f, 0.5f, 0.3f, 0.1f));
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 
-			for (int index = 0; index < Player_num; index++) {
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 				auto& p = PlayerMngr->GetPlayer(index);
-				auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
+				auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 				c->SetViewID(0);
 				//人の座標設定
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f*Scale_Rate)*static_cast<float>(index*2-1));
+					pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale_Rate) * static_cast<float>(index * 2 - 1));
 
-					Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f*Scale_Rate;
-					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f*Scale_Rate, &EndPos, true)) {
+					Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale_Rate;
+					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale_Rate, &EndPos, true)) {
 						pos_t = EndPos;
 					}
-					c->ValueSet((PlayerID)index, false, CharaTypeID::Team);
-					c->MovePoint(deg2rad(0.f), deg2rad(180.f* static_cast<float>(index)), pos_t);
+					c->ValueSet((PlayerID)index, CharaTypeID::Team);
+					c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
 				}
 				p->GetAI()->Init((PlayerID)index);
 			}
@@ -66,10 +67,13 @@ namespace FPS_n2 {
 			this->m_DamageEvents.clear();
 			auto* NetBrowser = NetWorkBrowser::Instance();
 			NetBrowser->Init();
+			PauseMenuControl::SetPause();
+			FadeControl::SetFade();
+			this->m_IsEnd = false;
 		}
-		bool			MAINLOOP::Update_Sub(void) noexcept {
+		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* PostPassParts = PostPassEffect::Instance();
-			auto* BackGround = BackGroundClass::Instance();
+			auto* BackGround = BackGround::BackGroundClass::Instance();
 #ifdef DEBUG
 			/*
 			{
@@ -103,12 +107,21 @@ namespace FPS_n2 {
 #else
 			PostPassParts->SetLevelFilter(38, 154, 1.f);
 #endif
+			PauseMenuControl::UpdatePause();
+			if (PauseMenuControl::IsRetire()) {
+				this->m_IsEnd = true;
+			}
+			if (this->m_IsEnd && FadeControl::IsFadeAll()) {
+				return false;
+			}
+			FadeControl::SetBlackOut(this->m_IsEnd);
 
+			FadeControl::UpdateFade();
 			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
-			auto* PlayerMngr = PlayerManager::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
 
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+			auto& Chara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 
 			auto* Pad = PadControl::Instance();
 			Pad->SetMouseMoveEnable(true);
@@ -139,12 +152,9 @@ namespace FPS_n2 {
 				});
 			if (DXDraw::Instance()->IsPause()) {
 				Pad->SetMouseMoveEnable(false);
-				if (Pad->GetKey(PADS::JUMP).trigger()) {
-					OptionWindowClass::Instance()->SetActive();
+				if (!m_NetWorkController) {
+					return true;
 				}
-				//if (!m_NetWorkController) {
-					//return true;
-				//}
 			}
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
@@ -159,7 +169,7 @@ namespace FPS_n2 {
 			//Input,AI
 			{
 				InputControl MyInput;
-				if (DXDraw::Instance()->IsPause()) {
+				if (DXDraw::Instance()->IsPause() || !FadeControl::IsFadeClear()) {
 					MyInput.ResetAllInput();
 				}
 				else {
@@ -180,7 +190,7 @@ namespace FPS_n2 {
 						MSVec.Set(
 							std::clamp(MSVec.x + Pad->GetLS_Y() * deg2rad(0.1f), deg2rad(-10), deg2rad(10)),
 							std::clamp(MSVec.y + Pad->GetLS_X() * deg2rad(0.1f), deg2rad(-30), deg2rad(30))
-							);
+						);
 						MyInput.SetxRad(MSVec.x);
 						MyInput.SetyRad(MSVec.y);
 					}
@@ -188,7 +198,7 @@ namespace FPS_n2 {
 				//ネットワーク
 				auto* NetBrowser = NetWorkBrowser::Instance();
 				if (NetBrowser->IsDataReady() && !m_NetWorkController) {
-					m_NetWorkController = std::make_unique<NetWorkController>();
+					m_NetWorkController = std::make_unique<NetWork::NetWorkController>();
 					this->m_NetWorkController->Init(NetBrowser->GetClient(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
 				}
 				if (m_NetWorkController) {
@@ -200,10 +210,10 @@ namespace FPS_n2 {
 				//
 				if (m_NetWorkController && m_NetWorkController->IsInGame()) {
 					bool IsServerNotPlayer = !m_NetWorkController->GetClient() && !m_NetWorkController->GetServerPlayer();
-					for (int index = 0; index < Player_num; index++) {
+					for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 						auto& p = PlayerMngr->GetPlayer(index);
-						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
-						PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)index);
+						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)index);
 						c->SetViewID(GetMyPlayerID());
 						if (index == GetMyPlayerID() && !IsServerNotPlayer) {
 							c->SetInput(Ret.GetInput(), true);//自身が動かすもの
@@ -231,9 +241,9 @@ namespace FPS_n2 {
 					}
 				}
 				else {//オフライン
-					for (int index = 0; index < Player_num; index++) {
+					for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 						auto& p = PlayerMngr->GetPlayer(index);
-						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
+						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 						c->SetViewID(GetMyPlayerID());
 						if (index == GetMyPlayerID()) {
 							c->SetInput(MyInput, true);
@@ -246,7 +256,7 @@ namespace FPS_n2 {
 								MSVec.Set(
 									std::clamp(c->GetBambooVec().x + Pad->GetLS_Y() * deg2rad(0.1f), deg2rad(-10), deg2rad(10)),
 									std::clamp(c->GetBambooVec().y + Pad->GetLS_X() * deg2rad(0.1f), deg2rad(-30), deg2rad(30))
-									);
+								);
 								MyInput.SetxRad(MSVec.x);
 								MyInput.SetyRad(MSVec.y);
 							}
@@ -257,9 +267,9 @@ namespace FPS_n2 {
 					}
 				}
 				//ダメージイベント
-				for (int index = 0; index < Player_num; index++) {
+				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 					auto& p = PlayerMngr->GetPlayer(index);
-					auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
+					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 					for (int j = 0; j < static_cast<int>(this->m_DamageEvents.size()); j++) {
 						if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)])) {
 							std::swap(this->m_DamageEvents.back(), m_DamageEvents[static_cast<size_t>(j)]);
@@ -275,7 +285,7 @@ namespace FPS_n2 {
 			{
 				DrawParts->Set_is_Blackout(m_Concussion > 0.f);
 				if (m_Concussion == 1.f) {
-					CameraShake::Instance()->SetCamShake(0.5f, 0.05f*Scale_Rate);
+					CameraShake::Instance()->SetCamShake(0.5f, 0.05f * Scale_Rate);
 					//SE->Get(static_cast<int>(SoundEnum::Tank_near)).Play_3D(0, DrawParts->GetMainCamera().GetCamPos(), 10.f*Scale_Rate, 128);//, DX_PLAYTYPE_LOOP
 				}
 				if (m_Concussion > 0.9f) {
@@ -327,23 +337,23 @@ namespace FPS_n2 {
 					DBG_CamSel = 5;
 				}
 				switch (DBG_CamSel) {
-					case 0:
-					case 3:
-						CamVec = CamPos;
-						CamPos += Chara->GetEyeMatrix().xvec()*(2.f*Scale_Rate);
-						break;
-					case 1:
-					case 4:
-						CamVec = CamPos;
-						CamPos += Chara->GetEyeMatrix().yvec()*(2.f*Scale_Rate) + Chara->GetEyeMatrix().zvec() * 0.1f;
-						break;
-					case 2:
-					case 5:
-						CamVec = CamPos;
-						CamPos += Chara->GetEyeMatrix().zvec()*(-2.f*Scale_Rate);
-						break;
-					default:
-						break;
+				case 0:
+				case 3:
+					CamVec = CamPos;
+					CamPos += Chara->GetEyeMatrix().xvec() * (2.f * Scale_Rate);
+					break;
+				case 1:
+				case 4:
+					CamVec = CamPos;
+					CamPos += Chara->GetEyeMatrix().yvec() * (2.f * Scale_Rate) + Chara->GetEyeMatrix().zvec() * 0.1f;
+					break;
+				case 2:
+				case 5:
+					CamVec = CamPos;
+					CamPos += Chara->GetEyeMatrix().zvec() * (-2.f * Scale_Rate);
+					break;
+				default:
+					break;
 				}
 #endif
 				DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, Chara->GetEyeMatrix().yvec());
@@ -368,13 +378,13 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(2, static_cast<int>(Chara->GetHeartRate()));
 				this->m_UIclass.SetfloatParam(1, Chara->GetHeartRatePow());
 				//ゲージ
-				this->m_UIclass.SetGaugeParam(0, 100,100, 15);
+				this->m_UIclass.SetGaugeParam(0, 100, 100, 15);
 				this->m_UIclass.SetGaugeParam(1, static_cast<int>(Chara->GetStamina()), static_cast<int>(Chara->GetStaminaMax()), 15);
 				//ガード円
 				Easing(&m_GuardStart, Chara->IsGuardStarting() ? 1.f : 0.f, Chara->IsGuardStarting() ? 0.8f : 0.5f, EasingType::OutExpo);
 				this->m_UIclass.SetfloatParam(2, m_GuardStart);
-				this->m_UIclass.SetfloatParam(3, Chara->GetGuardVec().y);
-				this->m_UIclass.SetfloatParam(4, -Chara->GetGuardVec().x);
+				this->m_UIclass.SetfloatParam(3, Chara->GetGuardVec().x);
+				this->m_UIclass.SetfloatParam(4, -Chara->GetGuardVec().y);
 				this->m_UIclass.SetfloatParam(5, Chara->GetGuardStartPer());
 			}
 #ifdef DEBUG
@@ -382,13 +392,15 @@ namespace FPS_n2 {
 #endif // DEBUG
 			return true;
 		}
-		void			MAINLOOP::Dispose_Sub(void) noexcept {
-			auto* BackGround = BackGroundClass::Instance();
+		void			MainGameScene::Dispose_Sub(void) noexcept {
+			auto* BackGround = BackGround::BackGroundClass::Instance();
 			//使い回しオブジェ系
 			BackGround->Dispose();
 			//
-			m_NetWorkController->Dispose();
-			m_NetWorkController.reset();
+			if (m_NetWorkController) {
+				m_NetWorkController->Dispose();
+				m_NetWorkController.reset();
+			}
 			{
 				auto* DrawParts = DXDraw::Instance();
 				PostPassEffect::Instance()->SetLevelFilter(0, 255, 1.f);
@@ -399,55 +411,64 @@ namespace FPS_n2 {
 				DrawParts->Set_zoom_lens(1.f);
 			}
 			UISystem::Instance()->DelUI(m_UILayer);
+			if (this->m_IsEnd) {//タイトルに戻る
+				SetNextSelect(0);
+			}
+			else {//次のシーンへ
+				SetNextSelect(1);
+			}
 		}
-		void			MAINLOOP::Dispose_Load_Sub(void) noexcept {
-			auto* PlayerMngr = PlayerManager::Instance();
+		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
+			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			BattleResourceMngr->Dispose();
 			this->m_UIclass.Dispose();
 			PlayerMngr->Dispose();
 			ObjectManager::Instance()->DeleteAll();
+			PauseMenuControl::DisposePause();
 		}
 
 		//
-		void			MAINLOOP::BG_Draw_Sub(void) noexcept {
-			auto* BackGround = BackGroundClass::Instance();
+		void			MainGameScene::BG_Draw_Sub(void) noexcept {
+			auto* BackGround = BackGround::BackGroundClass::Instance();
 			BackGround->BG_Draw();
 		}
-		void			MAINLOOP::ShadowDraw_Far_Sub(void) noexcept {
-			auto* BackGround = BackGroundClass::Instance();
+		void			MainGameScene::ShadowDraw_Far_Sub(void) noexcept {
+			auto* BackGround = BackGround::BackGroundClass::Instance();
 			BackGround->Shadow_Draw_Far();
 		}
-		void			MAINLOOP::ShadowDraw_Sub(void) noexcept {
-			auto* BackGround = BackGroundClass::Instance();
+		void			MainGameScene::ShadowDraw_Sub(void) noexcept {
+			auto* BackGround = BackGround::BackGroundClass::Instance();
 			BackGround->Shadow_Draw();
 			ObjectManager::Instance()->Draw_Shadow();
 		}
-		void			MAINLOOP::CubeMap_Sub(void) noexcept {
-			auto* BackGround = BackGroundClass::Instance();
+		void			MainGameScene::CubeMap_Sub(void) noexcept {
+			auto* BackGround = BackGround::BackGroundClass::Instance();
 			BackGround->Draw();
 		}
 
-		void			MAINLOOP::MainDraw_Sub(void) noexcept {
-			auto* BackGround = BackGroundClass::Instance();
-			auto* PlayerMngr = PlayerManager::Instance();
+		void			MainGameScene::MainDraw_Sub(void) noexcept {
+			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			SetFogStartEnd(DrawParts->GetMainCamera().GetCamNear(), DrawParts->GetMainCamera().GetCamFar() * 2.f);
 			BackGround->Draw();
 			ObjectManager::Instance()->Draw();
 			//ObjectManager::Instance()->Draw_Depth();
-			for (int i = 0; i < Player_num; i++) {
+			for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 			}
 
 		}
 		//UI表示
-		void			MAINLOOP::DrawUI_Base_Sub(void) noexcept {
-		}
-		void			MAINLOOP::DrawUI_In_Sub(void) noexcept {
+		void			MainGameScene::DrawUI_In_Sub(void) noexcept {
+			FadeControl::DrawFade();
 			//UI
 			if (!DXDraw::Instance()->IsPause()) {
 				this->m_UIclass.Draw();
+			}
+			else {
+				PauseMenuControl::DrawPause();
 			}
 			//通信設定
 			auto* NetBrowser = NetWorkBrowser::Instance();
@@ -462,5 +483,5 @@ namespace FPS_n2 {
 				}
 			}
 		}
-	};
-};
+	}
+}

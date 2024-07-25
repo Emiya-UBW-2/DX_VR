@@ -2,7 +2,7 @@
 #include	"../../Header.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace WeaponObject {
 		enum class WeaponFrame : uint8_t {
 			Center,
 			LeftHandPos,
@@ -26,5 +26,5 @@ namespace FPS_n2 {
 			"ˆÚ“®",
 			"End",
 		};
-	};
-};
+	}
+}

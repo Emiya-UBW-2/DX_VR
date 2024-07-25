@@ -2,7 +2,7 @@
 #include "NetWork.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace NetWork {
 		//クライアントが送信するデータ
 		PlayerNetData PlayerNetData::GetLerpData(const PlayerNetData& PrevData, const PlayerNetData& ServerData, float Per) noexcept {
 			PlayerNetData tmp;
@@ -21,7 +21,7 @@ namespace FPS_n2 {
 			return tmp;
 		}
 		//通信
-		PlayerNetData  PlayerNetWork::GetLerpServerPlayerData(PlayerID pPlayerID) const noexcept {
+		PlayerNetData PlayerNetWork::GetLerpServerPlayerData(PlayerID pPlayerID) const noexcept {
 			return PlayerNetData::GetLerpData(
 				this->m_PrevServerData.PlayerData[static_cast<size_t>(pPlayerID)], this->m_ServerDataCommon.PlayerData[static_cast<size_t>(pPlayerID)],
 				std::clamp(static_cast<float>(this->m_LeapFrame) / static_cast<float>(this->m_LeapFrameMax), 0.f, 1.f));
@@ -67,7 +67,7 @@ namespace FPS_n2 {
 			}
 		}
 		//サーバー専用
-		bool ServerControl::AllReady() const noexcept {
+		bool ServerControl::AllReady(void) const noexcept {
 			for (auto& n : this->m_Net) {
 				int index = static_cast<int>(&n - &this->m_Net.front());
 				if (this->m_IsServerPlay) {
@@ -113,7 +113,7 @@ namespace FPS_n2 {
 				auto IsDataUpdated = n.m_NetWork.RecvData(&tmpData, &recvRet, false);
 				if (IsDataUpdated) {
 					if (tmpData.IsCheckSum()) {
-						m_LastPlayerData[index] = tmpData;
+						m_LastPlayerData[static_cast<size_t>(index)] = tmpData;
 					}
 				}
 				bool IsSendData = false;
@@ -128,15 +128,15 @@ namespace FPS_n2 {
 					pServerCtrl->m_PlayerID = static_cast<PlayerID>(index);//ID受付中ですわ
 					IsSendData = true;
 					if (IsDataUpdated) {
-						if (m_LastPlayerData[index].GetFlag(NetAttribute::IsActive)) {				// ID取れたと識別出来たら
+						if (m_LastPlayerData[static_cast<size_t>(index)].GetFlag(NetAttribute::IsActive)) {				// ID取れたと識別出来たら
 							n.m_Phase = ClientPhase::Ready;
 						}
 					}
 					break;
 				case ClientPhase::Ready:						//他プレイヤーの揃い待ち
 					if (IsDataUpdated) {						// クライアントから受信したら
-						if (m_LastPlayerData[index].IsCheckSum()) {				// チェックサムののち
-							FlipPlayerData(m_LastPlayerData[index]);			// 更新
+						if (m_LastPlayerData[static_cast<size_t>(index)].IsCheckSum()) {				// チェックサムののち
+							FlipPlayerData(m_LastPlayerData[static_cast<size_t>(index)]);			// 更新
 						}
 					}
 					pServerCtrl->SetInGame();								//ID受付終了に指定を変更
@@ -321,5 +321,5 @@ namespace FPS_n2 {
 				}
 			}
 		}
-	};
-};
+	}
+}

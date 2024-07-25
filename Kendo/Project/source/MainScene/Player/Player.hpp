@@ -4,15 +4,14 @@
 #include	"CPU.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
-
+	namespace Player {
 		class PlayerManager : public SingletonBase<PlayerManager> {
 		private:
 			friend class SingletonBase<PlayerManager>;
 		private:
 			class PlayerControl {
 			private:
-				std::shared_ptr<ObjectBaseClass>				m_Chara{nullptr};
+				std::shared_ptr<ObjectBaseClass>				m_Chara{ nullptr };
 				std::shared_ptr<AIControl>						m_AI{ nullptr };
 				int												m_Score{ 0 };							//ÉXÉRÉA
 			public:
@@ -30,14 +29,14 @@ namespace FPS_n2 {
 				}
 			public:
 				void		SetChara(const std::shared_ptr<ObjectBaseClass>& pChara) noexcept { this->m_Chara = pChara; }
-				auto&		GetChara(void) noexcept { return this->m_Chara; }
+				auto& GetChara(void) noexcept { return this->m_Chara; }
 
 				void		SetAI(const std::shared_ptr<AIControl>& pAI) noexcept { this->m_AI = pAI; }
-				auto&		GetAI(void) noexcept { return this->m_AI; }
+				auto& GetAI(void) noexcept { return this->m_AI; }
 
 				void		AddScore(int value) noexcept { this->m_Score += value; }
 				void		SetScore(int value) noexcept { this->m_Score = value; }
-				const auto&	GetScore(void) const noexcept { return this->m_Score; }
+				const auto& GetScore(void) const noexcept { return this->m_Score; }
 			public:
 				void Init(void) noexcept {
 					m_Chara = nullptr;
@@ -57,6 +56,7 @@ namespace FPS_n2 {
 			};
 		private:
 			std::vector<std::unique_ptr<PlayerControl>>	m_Player;
+			int											m_PlayerNum{};
 		private:
 			PlayerManager(void) noexcept {}
 			PlayerManager(const PlayerManager&) = delete;
@@ -66,9 +66,11 @@ namespace FPS_n2 {
 
 			virtual ~PlayerManager(void) noexcept {}
 		public:
-			auto&		GetPlayer(int ID) noexcept { return this->m_Player[static_cast<size_t>(ID)]; }
+			const auto& GetPlayerNum(void) const noexcept { return this->m_PlayerNum; }
+			auto& GetPlayer(int ID) noexcept { return this->m_Player[static_cast<size_t>(ID)]; }
 		public:
 			void Init(int playerNum) noexcept {
+				m_PlayerNum = playerNum;
 				m_Player.resize(static_cast<size_t>(playerNum));
 				for (auto& p : m_Player) {
 					p = std::make_unique<PlayerControl>();
@@ -81,6 +83,5 @@ namespace FPS_n2 {
 				m_Player.clear();
 			}
 		};
-
-	};
+	}
 };

@@ -31,6 +31,12 @@
     <Filter Include="ソース ファイル\MainScene\Player">
       <UniqueIdentifier>{22770e4f-967e-4eff-a117-222b572d8adf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\CommonScene">
+      <UniqueIdentifier>{8c91c61d-f664-4a89-8b93-710de3e1f1b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\CommonScene\UI">
+      <UniqueIdentifier>{7b8a29fa-fcc4-4dec-9d1a-d5e860f21f7a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\sub.hpp">
@@ -90,6 +96,15 @@
     <ClInclude Include="source\MainScene\Object\WeaponEnum.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
+    <ClInclude Include="source\CommonScene\UI\CommonUIControl.hpp">
+      <Filter>ソース ファイル\CommonScene\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Scene\TitleScene.hpp">
+      <Filter>ソース ファイル\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\MainSceneSub.hpp">
+      <Filter>ソース ファイル\MainScene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -132,6 +147,15 @@
       <Filter>ソース ファイル\MainScene\Player</Filter>
     </ClCompile>
     <ClCompile Include="source\MainScene\NetWork.cpp">
+      <Filter>ソース ファイル\MainScene</Filter>
+    </ClCompile>
+    <ClCompile Include="source\CommonScene\UI\CommonUIControl.cpp">
+      <Filter>ソース ファイル\CommonScene\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Scene\TitleScene.cpp">
+      <Filter>ソース ファイル\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\MainSceneSub.cpp">
       <Filter>ソース ファイル\MainScene</Filter>
     </ClCompile>
   </ItemGroup>

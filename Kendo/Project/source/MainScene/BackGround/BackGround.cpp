@@ -1,8 +1,8 @@
 #include	"BackGround.hpp"
 
-const FPS_n2::Sceneclass::BackGroundClass* SingletonBase<FPS_n2::Sceneclass::BackGroundClass>::m_Singleton = nullptr;
+const FPS_n2::BackGround::BackGroundClass* SingletonBase<FPS_n2::BackGround::BackGroundClass>::m_Singleton = nullptr;
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace BackGround {
 #define PLAYER_HIT_HEIGHT			(1.6f * Scale_Rate)		// ìñÇΩÇËîªíËÉJÉvÉZÉãÇÃçÇÇ≥
 		bool BackGroundClass::CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius) const noexcept
 		{
@@ -92,6 +92,5 @@ namespace FPS_n2 {
 			}
 			return HitFlag;
 		}
-	};
-};
-
+	}
+}

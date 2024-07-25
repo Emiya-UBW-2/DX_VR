@@ -4,11 +4,11 @@
 #include "../../MainScene/Player/Player.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace Player {
 		void AIControl::Execute(InputControl* MyInput) noexcept
 		{
-			auto* PlayerMngr = PlayerManager::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(m_MyID)->GetChara();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto& Chara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(m_MyID)->GetChara();
 
 			bool W_key{ false };
 			bool A_key{ false };
@@ -49,5 +49,5 @@ namespace FPS_n2 {
 			MyInput->SetInputPADS(PADS::SHOT, shotMain_Key);
 			MyInput->SetInputPADS(PADS::JUMP, shotSub_Key);
 		}
-	};
+	}
 };

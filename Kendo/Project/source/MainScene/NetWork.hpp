@@ -5,7 +5,7 @@
 
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace NetWork {
 		static const int		Player_num = 2;
 
 		using NetTime = LONGLONG;
@@ -17,10 +17,10 @@ namespace FPS_n2 {
 			DamageEventControl			m_DamageEvent;
 			int32_t						m_FreeData[10]{};
 		public:
-			const auto&		GetInput(void) const noexcept { return this->m_Input; }
-			const auto&		GetMove(void) const noexcept { return this->m_move; }
-			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
-			const auto&		GetFreeData(void) const noexcept { return this->m_FreeData; }
+			const auto& GetInput(void) const noexcept { return this->m_Input; }
+			const auto& GetMove(void) const noexcept { return this->m_move; }
+			const auto& GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
+			const auto& GetFreeData(void) const noexcept { return this->m_FreeData; }
 		public:
 			void			SetMyPlayer(const InputControl& pInput, const moves& move_t, const DamageEventControl& Damage_t, int32_t* pFreeData) noexcept {
 				this->m_Input = pInput;
@@ -48,7 +48,7 @@ namespace FPS_n2 {
 		private:
 			int			CalcCheckSum(void) const noexcept {
 				return (
-					500+
+					500 +
 					static_cast<int>(m_ID) +
 					static_cast<int>(m_Attribute) +
 					static_cast<int>(m_ClientTime) +
@@ -59,11 +59,11 @@ namespace FPS_n2 {
 		public:
 			auto			IsCheckSum(void) const noexcept { return m_CheckSum == (size_t)this->CalcCheckSum(); }
 			auto		 	GetFlag(NetAttribute flag) const noexcept { return this->m_Attribute & (1 << static_cast<int>(flag)); }
-			const auto&		GetClientTime(void) const noexcept { return this->m_ClientTime; }
-			const auto&		GetID(void) const noexcept { return this->m_ID; }
-			const auto&		GetInput(void) const noexcept { return this->m_Input; }
+			const auto& GetClientTime(void) const noexcept { return this->m_ClientTime; }
+			const auto& GetID(void) const noexcept { return this->m_ID; }
+			const auto& GetInput(void) const noexcept { return this->m_Input; }
 			moves			GetMove(void) const noexcept { return this->m_move; }
-			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
+			const auto& GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
 			const auto& GetFreeData(void) const noexcept { return this->m_FreeData; }
 		public:
 			void			SetFlag(NetAttribute flag, bool value) noexcept {
@@ -76,7 +76,7 @@ namespace FPS_n2 {
 			}
 			void			SetID(PlayerID value) noexcept { m_ID = value; }
 		public:
-			void			SetData(const PlayerSendData& o,NetTime ClientTime) noexcept {
+			void			SetData(const PlayerSendData& o, NetTime ClientTime) noexcept {
 				this->m_Input = o.GetInput();
 				this->m_move = o.GetMove();
 				this->m_DamageEvent = o.GetDamageEvent();
@@ -142,10 +142,10 @@ namespace FPS_n2 {
 
 			~PlayerNetWork(void) noexcept {}
 		public:
-			auto&			SetGetServerData(void) noexcept { return this->m_GetServerData; }
-			const auto&		GetServerDataCommon(void) const noexcept { return this->m_ServerDataCommon; }
-			const auto&		GetMyLocalPlayerID(void) const noexcept { return this->m_LocalData.GetID(); }
-			const auto&		GetLocalPlayerData(void) const noexcept { return this->m_LocalData; }
+			auto& SetGetServerData(void) noexcept { return this->m_GetServerData; }
+			const auto& GetServerDataCommon(void) const noexcept { return this->m_ServerDataCommon; }
+			const auto& GetMyLocalPlayerID(void) const noexcept { return this->m_LocalData.GetID(); }
+			const auto& GetLocalPlayerData(void) const noexcept { return this->m_LocalData; }
 		public:
 			void			SetLocalPlayerID(PlayerID ID) noexcept { this->m_LocalData.SetID(ID); }
 			void			SetLocalPlayerFlag(NetAttribute flag, bool value) noexcept { this->m_LocalData.SetFlag(flag, value); }
@@ -182,7 +182,7 @@ namespace FPS_n2 {
 			UDPNetWorkDX			m_NetWork;
 			ClientPhase				m_Phase{};
 		public:
-			bool IsReady() const noexcept { return m_Phase == ClientPhase::Ready; }
+			bool IsReady(void) const noexcept { return m_Phase == ClientPhase::Ready; }
 		};
 		//サーバー専用
 		class ServerControl {
@@ -198,19 +198,19 @@ namespace FPS_n2 {
 
 			~ServerControl(void) noexcept {}
 		private:
-			bool AllReady() const noexcept;
+			bool AllReady(void) const noexcept;
 		public:
-			const auto&		GetIsServerPlayer(void) const noexcept { return this->m_IsServerPlay; }
+			const auto& GetIsServerPlayer(void) const noexcept { return this->m_IsServerPlay; }
 		public:
-			void			Init(int pPort,bool IsServerPlay) noexcept;
+			void			Init(int pPort, bool IsServerPlay) noexcept;
 			bool			Update(ServerNetData* pServerCtrl, const PlayerNetData& MyLocalPlayerData, bool IsUpdateTick) noexcept;
 			void			Dispose(void) noexcept;
 		};
 		//クライアント専用
 		class ClientControl {
-			float					m_CannotConnectTimer{0.f};
+			float					m_CannotConnectTimer{ 0.f };
 			int						m_Port{ 0 };
-			IPDATA					m_IP{127,0,0,1};
+			IPDATA					m_IP{ 127,0,0,1 };
 			int						m_NetWorkSel{ 0 };
 			UDPS					m_Net;
 
@@ -226,7 +226,7 @@ namespace FPS_n2 {
 
 			~ClientControl(void) noexcept {}
 		public:
-			const auto&		GetMyID(void) const noexcept { return this->m_MyID; }
+			const auto& GetMyID(void) const noexcept { return this->m_MyID; }
 			auto			CanGetMyID(void) const noexcept { return (this->m_Net.m_Phase == ClientPhase::GetNumber) || (this->m_Net.m_Phase == ClientPhase::Ready); }
 		public:
 			void			Init(int pPort, const IPDATA& pIP) noexcept;
@@ -291,5 +291,5 @@ namespace FPS_n2 {
 				m_ClientCtrl.Dispose();
 			}
 		};
-	};
-};
+	}
+}

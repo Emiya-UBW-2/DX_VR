@@ -8,10 +8,10 @@
 #include "CharacterEnum.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace CharacterObject {
 		class ArmMovePerClass {
-			float												m_ArmPer{0.f};
-			bool												m_Armon{false};
+			float												m_ArmPer{ 0.f };
+			bool												m_Armon{ false };
 		public:
 			void Init(bool isOn) noexcept {
 				m_Armon = isOn;
@@ -48,19 +48,19 @@ namespace FPS_n2 {
 		//キャラのうち特定機能だけ抜き出したもの
 		class StaminaControl {
 		private://キャラパラメーター
-			const float											HeartRateMin{60.f};//心拍数最小
-			const float											HeartRateStamona{100.f};//心拍数削れるライン
-			const float											HeartRateMax{150.f};//心拍数最大
-			const float											StaminaMax{30.f};
+			const float											HeartRateMin{ 60.f };//心拍数最小
+			const float											HeartRateStamona{ 100.f };//心拍数削れるライン
+			const float											HeartRateMax{ 150.f };//心拍数最大
+			const float											StaminaMax{ 30.f };
 		private:
-			float												m_HeartRate{HeartRateMin};//心拍数
-			float												m_HeartRate_r{HeartRateMin};//心拍数
-			float												m_HeartRateRad{0.f};//呼吸Sin渡し
-			float												m_HeartRatePow{0.f};//心拍数
-			bool												m_HeartSoundFlag{false};
+			float												m_HeartRate{ HeartRateMin };//心拍数
+			float												m_HeartRate_r{ HeartRateMin };//心拍数
+			float												m_HeartRateRad{ 0.f };//呼吸Sin渡し
+			float												m_HeartRatePow{ 0.f };//心拍数
+			bool												m_HeartSoundFlag{ false };
 
-			float												m_Stamina{StaminaMax};//スタミナ
-			bool												m_StaminaLoss{false};//スタミナ切れ
+			float												m_Stamina{ StaminaMax };//スタミナ
+			bool												m_StaminaLoss{ false };//スタミナ切れ
 		public:
 			StaminaControl(void) noexcept {}
 			StaminaControl(const StaminaControl&) = delete;
@@ -70,10 +70,10 @@ namespace FPS_n2 {
 
 			virtual ~StaminaControl(void) noexcept {}
 		public://ゲッター
-			const auto&		GetHeartRate(void) const noexcept { return m_HeartRate; }
-			const auto&		GetHeartRatePow(void) const noexcept { return m_HeartRatePow; }
-			const auto&		GetStamina(void) const noexcept { return m_Stamina; }
-			const auto&		GetStaminaMax(void) const noexcept { return StaminaMax; }
+			const auto& GetHeartRate(void) const noexcept { return m_HeartRate; }
+			const auto& GetHeartRatePow(void) const noexcept { return m_HeartRatePow; }
+			const auto& GetStamina(void) const noexcept { return m_Stamina; }
+			const auto& GetStaminaMax(void) const noexcept { return StaminaMax; }
 		public:
 			void		InitStamina(void) noexcept {
 				this->m_HeartRate = HeartRateMin;
@@ -129,14 +129,14 @@ namespace FPS_n2 {
 		//キャラ入力
 		class KeyControl {
 		private://キャラパラメーター
-			float												m_MoverPer{0.f};
+			float												m_MoverPer{ 0.f };
 			Vector3DX											m_VecTotal;
 			std::array<float, 4>								m_Vec{};
 			InputControl										m_Input;
 			switchs												m_Squat;
 			Vector3DX											m_rad_Buf;
 			float												m_ZRad{};
-			float												m_yrad_Upper{0.f}, m_yrad_Bottom{0.f};
+			float												m_yrad_Upper{ 0.f }, m_yrad_Bottom{ 0.f };
 			float												m_yrad_UpperChange{ 0.f }, m_yrad_BottomChange{ 0.f };
 			float												m_PrevRadX{ 0.f };
 			float												m_PrevRadY{ 0.f };
@@ -145,17 +145,20 @@ namespace FPS_n2 {
 			Vector3DX											m_UpperyVecNormal, m_UpperzVecNormal;
 			Vector3DX											m_UpperyVec, m_UpperzVec, m_UpperPos;
 			std::array<float, static_cast<int>(CharaAnimeID::AnimeIDMax)>	m_AnimPerBuf{};
-			bool												m_TurnBody{false};
+			bool												m_TurnBody{ false };
 
 			float												m_RunPer{};
-			bool												m_IsRunning{false};
-			bool												m_IsFrontAttacking{false};
-			bool												m_IsDouAttacking{false};
-			bool												m_IsBackAttacking{false};
+			bool												m_IsRunning{ false };
+			bool												m_IsFrontAttacking{ false };
+			bool												m_IsDouAttacking{ false };
+			bool												m_IsBackAttacking{ false };
 
 			Matrix3x3DX											m_EyeMatrix;
 			Matrix3x3DX											m_UpperMatrix;
 			Matrix3x3DX											m_BaseMatrix;
+
+			float												m_MoveEyePosTimer{ 0.f };
+			Vector3DX											m_MoveEyePos;
 		public://ゲッター
 			CharaAnimeID										m_BottomAnimSelect{};
 		public://ゲッター
@@ -163,6 +166,7 @@ namespace FPS_n2 {
 			auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }
 			auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
 		protected:
+			const auto& GetEyeSwingPos(void) const noexcept { return this->m_MoveEyePos; }
 			const auto& GetEyeRotMatrix(void) const noexcept { return this->m_EyeMatrix; }
 			const auto& GetUpperRotMatrix(void) const noexcept { return this->m_UpperMatrix; }
 			const auto& GetBaseRotMatrix(void) const noexcept { return this->m_BaseMatrix; }
@@ -173,7 +177,7 @@ namespace FPS_n2 {
 			void			SetIsDouAttacking(bool value) noexcept { this->m_IsDouAttacking = value; }
 			void			SetIsBackAttacking(bool value) noexcept { this->m_IsBackAttacking = value; }
 		protected:
-			const auto&		GetInputControl(void) const noexcept { return this->m_Input; }
+			const auto& GetInputControl(void) const noexcept { return this->m_Input; }
 			const auto& GetMoverPer(void) const noexcept { return m_MoverPer; }
 			auto		IsMove(void) const noexcept { return m_MoverPer > 0.1f; }
 			auto		GetFrontP(void) const noexcept {
@@ -184,8 +188,8 @@ namespace FPS_n2 {
 				return FrontP;
 			}
 			auto		GetSquatSwitch(void) const noexcept { return this->m_Squat.trigger(); }
-			auto		GetGunSwingMat(void) const noexcept { return Matrix3x3DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
-			auto&		GetCharaAnimeBufID(CharaAnimeID value) noexcept { return this->m_AnimPerBuf.at(static_cast<size_t>(value)); }
+			auto		GetWeaponSwingMat(void) const noexcept { return Matrix3x3DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
+			auto& GetCharaAnimeBufID(CharaAnimeID value) noexcept { return this->m_AnimPerBuf.at(static_cast<size_t>(value)); }
 			//
 			auto		GetBottomStandAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
 			auto		GetBottomWalkAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_Walk : CharaAnimeID::Bottom_Stand_Walk; }
@@ -242,14 +246,12 @@ namespace FPS_n2 {
 				this->m_TurnBody = false;
 				//
 				for (auto& a : this->m_AnimPerBuf) { a = 0.f; }
+				this->m_MoveEyePosTimer = 0.f;
 			}
 			//
-			void		InputKey(const InputControl& pInput, bool pReady) {
+			void		InputKey(const InputControl& pInput) {
 				auto* DrawParts = DXDraw::Instance();
 				this->m_Input = pInput;
-				if (!pReady) {
-					this->m_Input.ResetKeyInput();
-				}
 				//入力
 				this->m_Squat.Execute(false);
 				//回転
@@ -304,7 +306,7 @@ namespace FPS_n2 {
 						Vector3DX vec_a; vec_a.Set(std::sin(bottom), std::cos(bottom), 0.f);
 						float cost = Vector3DX::Cross(vec_a, Vec).z;
 						float sint = Vector3DX::Dot(vec_a, Vec);
-						YradChange = std::clamp(std::atan2f(cost, sint),deg2rad(-10), deg2rad(10)) * 10.f / DrawParts->GetFps();
+						YradChange = std::clamp(std::atan2f(cost, sint), deg2rad(-10), deg2rad(10)) * 10.f / DrawParts->GetFps();
 						this->m_yrad_Bottom += YradChange;
 
 						if (this->m_yrad_Bottom < 0.f) { this->m_yrad_Bottom += DX_PI_F * 2.f; }
@@ -364,34 +366,18 @@ namespace FPS_n2 {
 				m_BaseMatrix = Matrix3x3DX::RotAxis(Vector3DX::forward(), (this->m_ZRad / 2.f)) * Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_yrad_Bottom);
 				m_UpperMatrix = Matrix3x3DX::RotAxis(Vector3DX::right(), XRad) * Matrix3x3DX::RotAxis(Vector3DX::up(), Lerp(this->m_yrad_BottomChange, 0.f, m_RunPer));
 				m_EyeMatrix = Matrix3x3DX::RotAxis(Vector3DX::right(), XRad) * Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_yrad_BottomChange);
-			}
-		};
-		//歩く時の揺れ
-		class EyeSwingControl {
-		private:
-			float												m_MoveEyePosTimer{0.f};
-			Vector3DX											m_MoveEyePos;
-		public://ゲッター
-			const auto&		GetEyeSwingPos(void) const noexcept { return this->m_MoveEyePos; }
-		public:
-			EyeSwingControl(void) noexcept {}
-			~EyeSwingControl(void) noexcept {}
-		public:
-			void InitEyeSwing(void) noexcept {
-				this->m_MoveEyePosTimer = 0.f;
-			}
-			void UpdateEyeSwing(const Matrix3x3DX& pCharaMat, float SwingPer, float SwingSpeed) noexcept {
-				auto* DrawParts = DXDraw::Instance();
+				//移動の際の視点の揺れ
+				float SwingPer = GetRun() ? 0.5f : ((GetVec().magnitude() * DrawParts->GetFps() / 60.f) / 0.65f);
 				if (SwingPer > 0.f) {
-					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed)*60.f / DrawParts->GetFps();
+					this->m_MoveEyePosTimer += SwingPer * deg2rad(GetRun() ? 12.f : 5.f) * 60.f / DrawParts->GetFps();
 				}
 				else {
 					this->m_MoveEyePosTimer = 0.f;
 				}
-				auto EyePos = Matrix3x3DX::Vtrans(Vector3DX::up()*(0.25f*SwingPer), Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_MoveEyePosTimer));
+				auto EyePos = Matrix3x3DX::Vtrans(Vector3DX::up() * (0.25f * SwingPer), Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_MoveEyePosTimer));
 				EyePos.y = (-std::abs(EyePos.y));
-				Easing(&this->m_MoveEyePos, Matrix3x3DX::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
+				Easing(&this->m_MoveEyePos, Matrix3x3DX::Vtrans(EyePos, (this->m_UpperMatrix * this->m_BaseMatrix)), 0.9f, EasingType::OutExpo);
 			}
 		};
-	};
-};
+	}
+}

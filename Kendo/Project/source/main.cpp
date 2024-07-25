@@ -1,5 +1,6 @@
 #include"Header.hpp"
 
+#include "Scene/TitleScene.hpp"
 #include "Scene/MainScene.hpp"
 #include "Scene/MainSceneLoader.hpp"
 
@@ -50,20 +51,29 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//SetUseHalfLambertLighting(TRUE);
 	MV1SetLoadModelReMakeNormal(TRUE);
 	//
-	FPS_n2::Sceneclass::WeaponAnimManager::Create();
-	FPS_n2::Sceneclass::PlayerManager::Create();
-	FPS_n2::Sceneclass::CommonBattleResource::Create();
-	FPS_n2::Sceneclass::WeaponAnimManager::Instance()->Load("data/CharaAnime/");
-	FPS_n2::Sceneclass::BackGroundClass::Create();
-	FPS_n2::Sceneclass::NetWorkBrowser::Create();
+	FPS_n2::WeaponAnimManager::Create();
+	FPS_n2::Player::PlayerManager::Create();
+	FPS_n2::CommonBattleResource::Create();
+	FPS_n2::WeaponAnimManager::Instance()->Load("data/CharaAnime/");
+	FPS_n2::BackGround::BackGroundClass::Create();
+	FPS_n2::NetWorkBrowser::Create();
+	FPS_n2::Sceneclass::ButtonControl::Create();
 	//ÉVÅ[Éì
-	auto MAINLOOPLOADERscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOPLOADER>();
-	auto MAINLOOPscene = std::make_shared<FPS_n2::Sceneclass::MAINLOOP>();
-	SceneControl::Instance()->AddList(MAINLOOPLOADERscene);
-	SceneControl::Instance()->AddList(MAINLOOPscene);
+	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
+	auto LoadScenePtr = std::make_shared<FPS_n2::Sceneclass::LoadScene>();
+	auto MainGameScenePtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
+
+
 	//ëJà⁄êÊéwíË
-	MAINLOOPLOADERscene->SetNextSceneList(0, MAINLOOPscene);
-	MAINLOOPscene->SetNextSceneList(0, MAINLOOPLOADERscene);
+	Titlescene->SetNextSceneList(0, MainGameScenePtr);
+	LoadScenePtr->SetNextSceneList(0, MainGameScenePtr);
+	MainGameScenePtr->SetNextSceneList(0, Titlescene);
+	MainGameScenePtr->SetNextSceneList(1, MainGameScenePtr);
+
+	auto* SceneParts = SceneControl::Instance();
+	SceneParts->AddList(Titlescene);
+	SceneParts->AddList(LoadScenePtr);
+	SceneParts->AddList(MainGameScenePtr);
 	//ç≈èâÇÃì«Ç›çûÇ›
 	if (!DXLib_refParts->MainLogic()) { return 0; }
 	return 0;

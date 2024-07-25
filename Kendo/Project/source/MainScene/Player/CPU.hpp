@@ -3,7 +3,7 @@
 #include	"../../Header.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace Player {
 		//AI—p
 		class AIControl {
 			PlayerID m_MyID{ 0 };
@@ -17,5 +17,5 @@ namespace FPS_n2 {
 			void Dispose(void) noexcept {
 			}
 		};
-	};
-};
+	}
+}

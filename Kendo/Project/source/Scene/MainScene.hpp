@@ -9,10 +9,15 @@
 #include "../MainScene/NetWork.hpp"
 
 #include "../MainScene/UI/MainSceneUIControl.hpp"
+#include	"../CommonScene/UI/CommonUIControl.hpp"
+#include	"../MainScene/MainSceneSub.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class MAINLOOP : public TEMPSCENE {
+		class MainGameScene : public TEMPSCENE ,
+			public PauseMenuControl,
+			public FadeControl
+		{
 		private:
 			//UI関連
 			float										m_GuardStart{ 0.f };
@@ -21,9 +26,10 @@ namespace FPS_n2 {
 			UIClass										m_UIclass;
 			int											m_UILayer{ 0 };
 			//NetWork
-			std::unique_ptr<NetWorkController>			m_NetWorkController{nullptr};
+			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };
 			std::vector<DamageEvent>					m_DamageEvents;
 			//
+			bool										m_IsEnd{ false };//シーン全体の終了フラグ
 #ifdef DEBUG
 			float m_D1{ 38.f / 255.f }, m_D2{ 192.f / 255.f }, m_D3{ 1.f };
 #endif
@@ -35,13 +41,13 @@ namespace FPS_n2 {
 				return (PlayerID)0;
 			}
 		public:
-			MAINLOOP(void) noexcept {}
-			MAINLOOP(const MAINLOOP&) = delete;
-			MAINLOOP(MAINLOOP&& o) = delete;
-			MAINLOOP& operator=(const MAINLOOP&) = delete;
-			MAINLOOP& operator=(MAINLOOP&& o) = delete;
+			MainGameScene(void) noexcept {}
+			MainGameScene(const MainGameScene&) = delete;
+			MainGameScene(MainGameScene&& o) = delete;
+			MainGameScene& operator=(const MainGameScene&) = delete;
+			MainGameScene& operator=(MainGameScene&& o) = delete;
 
-			virtual ~MAINLOOP(void) noexcept {}
+			virtual ~MainGameScene(void) noexcept {}
 		public:
 			void			Load_Sub(void) noexcept override;
 			void			Set_Sub(void) noexcept override;
@@ -53,11 +59,11 @@ namespace FPS_n2 {
 			void			ShadowDraw_Far_Sub(void) noexcept override;
 			void			ShadowDraw_Sub(void) noexcept override;
 			void			CubeMap_Sub(void) noexcept override;
-			
+
 			void			MainDraw_Sub(void) noexcept override;
 			//UI表示
-			void			DrawUI_Base_Sub(void) noexcept override;
+			void			DrawUI_Base_Sub(void) noexcept override{}
 			void			DrawUI_In_Sub(void) noexcept override;
 		};
-	};
-};
+	}
+}
