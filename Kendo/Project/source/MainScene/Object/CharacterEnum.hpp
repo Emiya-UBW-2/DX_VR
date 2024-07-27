@@ -4,7 +4,7 @@
 
 namespace FPS_n2 {
 	namespace CharacterObject {
-		enum class CharaAnimeID : uint8_t {
+		enum class CharaObjAnimeID : uint8_t {
 			Bottom_Stand,
 			Bottom_Stand_Walk,
 			Bottom_Stand_WalkBack,

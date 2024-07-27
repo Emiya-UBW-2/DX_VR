@@ -13,11 +13,11 @@ namespace FPS_n2 {
 		class CharacterClass :
 			public ObjectBaseClass,
 			public StaminaControl,
-			public KeyControl
+			public CharaMove
 		{
 		private:
-			EnumWeaponAnimType									m_CharaAction{ EnumWeaponAnimType::Ready };
-			std::array<ArmMovePerClass, static_cast<int>(EnumWeaponAnimType::Max)>	m_Arm;
+			EnumArmAnimType									m_CharaAction{ EnumArmAnimType::Ready };
+			std::array<ArmMovePerClass, static_cast<int>(EnumArmAnimType::Max)>	m_Arm;
 			//入力
 			int													m_CharaSound{ -1 };			//サウンド
 			CharaTypeID											m_CharaType{};
@@ -58,9 +58,10 @@ namespace FPS_n2 {
 			const auto& GetCharaAction(void) const noexcept { return this->m_CharaAction; }
 			const auto& GetBambooVec(void) const noexcept { return m_BambooVec; }
 			const auto& GetGuardVec(void) const noexcept { return m_GuardVecR; }
-			auto			IsGuardStarting(void) const noexcept { return m_CharaAction == EnumWeaponAnimType::GuardStart; }
+			const auto& GetYaTimer(void) const noexcept { return m_YaTimer; }
+			auto			GetYaTimerMax(void) const noexcept { return 15.f; }
+			auto			IsGuardStarting(void) const noexcept { return m_CharaAction == EnumArmAnimType::GuardStart; }
 			auto			GetGuardStartPer(void) const noexcept { return (IsGuardStarting()) ? (m_GuardStartTimer / 1.f) : 0.f; }
-			Matrix3x3DX		GetEyeMatrix(void) const noexcept;
 			Vector3DX		GetFramePosition(CharaFrame frame) const noexcept { return MV1GetFramePosition(GetObj_const().GetHandle(), GetFrame(static_cast<int>(frame))); }
 		public://セッター
 			void			ValueSet(PlayerID pID, CharaTypeID value) noexcept {
@@ -75,7 +76,7 @@ namespace FPS_n2 {
 				this->m_MoveOverRideFlag = true;
 				this->m_OverRideInfo = o;
 			}
-			void			SetActionOverRide(EnumWeaponAnimType o) noexcept {
+			void			SetActionOverRide(EnumArmAnimType o) noexcept {
 				this->m_CharaAction = o;
 				OverrideAction();
 			}
@@ -87,6 +88,7 @@ namespace FPS_n2 {
 			void			StopVoice(void) const noexcept;
 
 			void			CheckTsuba(void) noexcept;
+			void			SetFumikomi(void) noexcept;
 
 			void			OverrideAction(void) noexcept;
 			void			OverrideReady(void) noexcept;
@@ -141,7 +143,7 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						for (int i = 0; i < this->GetObj().GetMeshNum(); i++) {
+						for (int i = 0, Num = this->GetObj().GetMeshNum(); i < Num; ++i) {
 							if ((MV1GetMeshSemiTransState(this->GetObj().GetHandle(), i) == TRUE) == isDrawSemiTrans) {
 								this->GetObj().DrawMesh(i);
 							}

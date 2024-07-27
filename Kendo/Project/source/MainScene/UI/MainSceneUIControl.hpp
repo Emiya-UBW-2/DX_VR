@@ -31,18 +31,18 @@ namespace FPS_n2 {
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
 					COLOR_U8 ColorAddSub = (ParamBuf > this->m_Now) ? ColorSub : ColorAdd;
 
-					WindowSystem::SetBox(
+					DrawBox_2D(
 						xp1 + 1 + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + 1,
 						xp2 - 1, yp2 - 1,
-						Black);
-					WindowSystem::SetBox(
+						Black, true);
+					DrawBox_2D(
 						xp1 + 1, yp1 + 1,
 						xp1 + 1 + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - 1,
-						GetColor(Color.r, Color.g, Color.b));
-					WindowSystem::SetBox(
+						GetColor(Color.r, Color.g, Color.b), true);
+					DrawBox_2D(
 						xp1 + 1 + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + 1,
 						xp1 + 1 + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - 1,
-						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b));
+						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), true);
 				}
 				void			DrawGaugeUp(int xp1, int yp1, int xp2, int yp2,
 					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
@@ -54,18 +54,18 @@ namespace FPS_n2 {
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
 					COLOR_U8 ColorAddSub = (ParamBuf > this->m_Now) ? ColorSub : ColorAdd;
 
-					WindowSystem::SetBox(
+					DrawBox_2D(
 						xp1 + 1, yp1 + 1,
 						xp2 - 1, yp2 - 1 - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
-						Black);
-					WindowSystem::SetBox(
+						Black, true);
+					DrawBox_2D(
 						xp1 + 1, yp2 - 1 - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
 						xp2 + 1, yp2 - 1,
-						GetColor(Color.r, Color.g, Color.b));
-					WindowSystem::SetBox(
+						GetColor(Color.r, Color.g, Color.b), true);
+					DrawBox_2D(
 						xp1 + 1, yp2 - 1 - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
 						xp2 + 1, yp2 - 1 - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
-						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b));
+						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), true);
 				}
 				void			DrawGaugeCircleLeft(int xp1, int yp1,
 					COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
@@ -268,7 +268,7 @@ namespace FPS_n2 {
 
 					m_GaugeParam[0].DrawGauge(
 						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(12),
-						GetColorU8(255, 0, 0, 255), GetColorU8(255, 128, 0, 255), GetColorU8(255, 255, 0, 255),
+						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
 					//スタミナ

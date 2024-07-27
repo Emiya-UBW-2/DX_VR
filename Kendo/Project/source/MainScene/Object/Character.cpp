@@ -7,36 +7,36 @@ namespace FPS_n2 {
 		void			CharacterClass::PlayVoice(void) const noexcept {
 			auto* SE = SoundPool::Instance();
 			switch (m_CharaAction) {
-			case EnumWeaponAnimType::Ready:
+			case EnumArmAnimType::Ready:
 				break;
-			case EnumWeaponAnimType::Run:
+			case EnumArmAnimType::Run:
 				break;
-			case EnumWeaponAnimType::Men:
-			case EnumWeaponAnimType::HikiMen:
+			case EnumArmAnimType::Men:
+			case EnumArmAnimType::HikiMen:
 				SE->Get(static_cast<int>(SoundEnum::Voice_Men)).Play_3D(0, GetEyePosition(), Scale_Rate * 35.f);
 				break;
-			case EnumWeaponAnimType::Kote:
-			case EnumWeaponAnimType::HikiKote:
+			case EnumArmAnimType::Kote:
+			case EnumArmAnimType::HikiKote:
 				SE->Get(static_cast<int>(SoundEnum::Voice_Kote)).Play_3D(0, GetEyePosition(), Scale_Rate * 35.f);
 				break;
-			case EnumWeaponAnimType::Dou:
-			case EnumWeaponAnimType::HikiDou:
+			case EnumArmAnimType::Dou:
+			case EnumArmAnimType::HikiDou:
 				SE->Get(static_cast<int>(SoundEnum::Voice_Dou)).Play_3D(0, GetEyePosition(), Scale_Rate * 35.f);
 				break;
-			case EnumWeaponAnimType::Tsuki:
+			case EnumArmAnimType::Tsuki:
 				SE->Get(static_cast<int>(SoundEnum::Voice_Tsuki)).Play_3D(0, GetEyePosition(), Scale_Rate * 35.f);
 				break;
-			case EnumWeaponAnimType::Tsuba:
+			case EnumArmAnimType::Tsuba:
 				break;
-			case EnumWeaponAnimType::GuardStart:
+			case EnumArmAnimType::GuardStart:
 				break;
-			case EnumWeaponAnimType::GuardSuriage:
+			case EnumArmAnimType::GuardSuriage:
 				break;
-			case EnumWeaponAnimType::GuardLeft:
+			case EnumArmAnimType::GuardLeft:
 				break;
-			case EnumWeaponAnimType::GuardRight:
+			case EnumArmAnimType::GuardRight:
 				break;
-			case EnumWeaponAnimType::Max:
+			case EnumArmAnimType::Max:
 				break;
 			default:
 				break;
@@ -63,7 +63,7 @@ namespace FPS_n2 {
 			float Len = 0.f;
 			auto Vec = (TgtPos - MyPos); Vec.y = (0.f); Len = Vec.magnitude(); Vec = Vec.normalized();
 
-			auto Dir = this->GetEyeMatrix().zvec() * -1.f; Dir.y = (0.f); Dir = Dir.normalized();
+			auto Dir = CharaMove::GetEyeMatrix().zvec() * -1.f; Dir.y = (0.f); Dir = Dir.normalized();
 
 			auto IsFront = ((Vector3DX::Dot(Dir, Vec)) > 0.f);
 			auto cross = Vector3DX::Cross(Dir, Vec).y;
@@ -83,103 +83,100 @@ namespace FPS_n2 {
 				Target->OverrideTsuba();
 			}
 		}
+		void			CharacterClass::SetFumikomi(void) noexcept {
+			this->GetObj().SetAnim(static_cast<int>(CharaObjAnimeID::Bottom_Stand_Attack)).GoStart();
+
+			this->m_CharaSound = -1;
+			auto* SE = SoundPool::Instance();
+			SE->Get(static_cast<int>(SoundEnum::Kendo_Swing)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale_Rate * 5.f);
+		}
 		//
 		void			CharacterClass::OverrideAction(void) noexcept {
 			this->m_Weapon_Ptr->ResetAnim();
 			//this->m_Weapon_Ptr->SetAnim();
 			switch (m_CharaAction) {
-			case EnumWeaponAnimType::Ready:
+			case EnumArmAnimType::Ready:
 				OverrideReady();
 				break;
-			case EnumWeaponAnimType::Run:
+			case EnumArmAnimType::Run:
 				OverrideRun();
 				break;
-			case EnumWeaponAnimType::Men:
-			case EnumWeaponAnimType::Kote:
-			case EnumWeaponAnimType::Tsuki:
+			case EnumArmAnimType::Men:
+			case EnumArmAnimType::Kote:
+			case EnumArmAnimType::Tsuki:
 				OverrideFrontAttack();
 				break;
-			case EnumWeaponAnimType::Dou:
+			case EnumArmAnimType::Dou:
 				OverrideDo();
 				break;
-			case EnumWeaponAnimType::Tsuba:
+			case EnumArmAnimType::Tsuba:
 				OverrideTsuba();
 				break;
-			case EnumWeaponAnimType::HikiMen:
-			case EnumWeaponAnimType::HikiKote:
-			case EnumWeaponAnimType::HikiDou:
+			case EnumArmAnimType::HikiMen:
+			case EnumArmAnimType::HikiKote:
+			case EnumArmAnimType::HikiDou:
 				OverrideBackAttack();
 				break;
-			case EnumWeaponAnimType::GuardStart:
+			case EnumArmAnimType::GuardStart:
 				OverrideGuardStart();
 				break;
-			case EnumWeaponAnimType::GuardSuriage:
-			case EnumWeaponAnimType::GuardLeft:
-			case EnumWeaponAnimType::GuardRight:
+			case EnumArmAnimType::GuardSuriage:
+			case EnumArmAnimType::GuardLeft:
+			case EnumArmAnimType::GuardRight:
 				OverrideGuard();
 				break;
-			case EnumWeaponAnimType::Max:
+			case EnumArmAnimType::Max:
 				break;
 			default:
 				break;
 			}
 		}
 		void			CharacterClass::OverrideReady(void) noexcept {
-			SetIsFrontAttacking(false);
-			SetIsDouAttacking(false);
-			SetIsBackAttacking(false);
-			KeyControl::SetIsRunning(false);
-			m_CharaAction = EnumWeaponAnimType::Ready;
+			m_CharaAction = EnumArmAnimType::Ready;
+			CharaMove::SetIsFrontAttacking(false);
+			CharaMove::SetIsDouAttacking(false);
+			CharaMove::SetIsBackAttacking(false);
+			CharaMove::SetIsRunning(false);
 		}
 		void			CharacterClass::OverrideRun(void) noexcept {
-			SetIsFrontAttacking(false);
-			SetIsDouAttacking(false);
-			SetIsBackAttacking(false);
-			KeyControl::SetIsRunning(true);
 			m_RunTime = 0.f;
+			CharaMove::SetIsFrontAttacking(false);
+			CharaMove::SetIsDouAttacking(false);
+			CharaMove::SetIsBackAttacking(false);
+			CharaMove::SetIsRunning(true);
 		}
 		void			CharacterClass::OverrideFrontAttack(void) noexcept {
-			m_FrontAttackActionTime = this->m_Weapon_Ptr->GetWeaponAnimeTotalTime(m_CharaAction);
-			SetIsFrontAttacking(true);
-			SetIsDouAttacking(false);
-			SetIsBackAttacking(false);
-			this->GetObj().SetAnim(static_cast<int>(CharaAnimeID::Bottom_Stand_Attack)).GoStart();
-
-			this->m_CharaSound = -1;
-			auto* SE = SoundPool::Instance();
-			SE->Get(static_cast<int>(SoundEnum::Kendo_Swing)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale_Rate * 5.f);
+			m_FrontAttackActionTime = this->m_Weapon_Ptr->GetArmAnimeTotalTime(m_CharaAction);
+			CharaMove::SetIsFrontAttacking(true);
+			CharaMove::SetIsDouAttacking(false);
+			CharaMove::SetIsBackAttacking(false);
+			SetFumikomi();
 			StopVoice();
 			PlayVoice();
 		}
 		void			CharacterClass::OverrideDo(void) noexcept {
-			m_FrontAttackActionTime = this->m_Weapon_Ptr->GetWeaponAnimeTotalTime(m_CharaAction);
-			SetIsFrontAttacking(false);
-			SetIsDouAttacking(true);
-			SetIsBackAttacking(false);
-			this->GetObj().SetAnim(static_cast<int>(CharaAnimeID::Bottom_Stand_Attack)).GoStart();
-
-			this->m_CharaSound = -1;
-			auto* SE = SoundPool::Instance();
-			SE->Get(static_cast<int>(SoundEnum::Kendo_Swing)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale_Rate * 5.f);
+			m_FrontAttackActionTime = this->m_Weapon_Ptr->GetArmAnimeTotalTime(m_CharaAction);
+			CharaMove::SetIsFrontAttacking(false);
+			CharaMove::SetIsDouAttacking(true);
+			CharaMove::SetIsBackAttacking(false);
+			SetFumikomi();
 			StopVoice();
 			PlayVoice();
 		}
 		void			CharacterClass::OverrideTsuba(void) noexcept {
-			SetIsFrontAttacking(false);
-			SetIsDouAttacking(false);
-			SetIsBackAttacking(false);
-			KeyControl::SetIsRunning(false);
 			m_TsubaCoolDown = 0.5f;
-			m_CharaAction = EnumWeaponAnimType::Tsuba;
+			m_CharaAction = EnumArmAnimType::Tsuba;
+			CharaMove::SetIsFrontAttacking(false);
+			CharaMove::SetIsDouAttacking(false);
+			CharaMove::SetIsBackAttacking(false);
+			CharaMove::SetIsRunning(false);
 		}
 		void			CharacterClass::OverrideBackAttack(void) noexcept {
-			m_BackAttackActionTime = std::max(0.75f, this->m_Weapon_Ptr->GetWeaponAnimeTotalTime(m_CharaAction));
-			SetIsFrontAttacking(false);
-			SetIsDouAttacking(true);
-			SetIsBackAttacking(true);
-			this->GetObj().SetAnim(static_cast<int>(CharaAnimeID::Bottom_Stand_Attack)).GoStart();
-
-			this->m_CharaSound = -1;
+			m_BackAttackActionTime = std::max(0.75f, this->m_Weapon_Ptr->GetArmAnimeTotalTime(m_CharaAction));
+			CharaMove::SetIsFrontAttacking(false);
+			CharaMove::SetIsDouAttacking(true);
+			CharaMove::SetIsBackAttacking(true);
+			SetFumikomi();
 			StopVoice();
 			PlayVoice();
 
@@ -197,7 +194,6 @@ namespace FPS_n2 {
 			m_GuardTimer = 1.f;
 		}
 		//
-		Matrix3x3DX		CharacterClass::GetEyeMatrix(void) const noexcept { return KeyControl::GetEyeRotMatrix() * KeyControl::GetBaseRotMatrix(); }
 		bool			CharacterClass::SetDamageEvent(const DamageEvent& value) noexcept {
 			if (this->m_MyID == value.DamageID) {
 				//ダメージ
@@ -207,12 +203,12 @@ namespace FPS_n2 {
 		}
 		//
 		void			CharacterClass::MovePoint(float pxRad, float pyRad, const Vector3DX& pPos) noexcept {
-			KeyControl::InitKey(pxRad, pyRad);
-			Matrix3x3DX Mat; Mat.SetRadian(KeyControl::GetRadBuf().x, KeyControl::GetRadBuf().y, 0.f);
+			CharaMove::InitKey(pxRad, pyRad);
+			Matrix3x3DX Mat; Mat.SetRadian(CharaMove::GetRadBuf().x, CharaMove::GetRadBuf().y, 0.f);
 			ResetMove(Mat, pPos);
-			m_CharaAction = EnumWeaponAnimType::Ready;
+			m_CharaAction = EnumArmAnimType::Ready;
 			for (auto& a : this->m_Arm) { a.Init(false); }
-			this->m_Arm[static_cast<int>(EnumWeaponAnimType::Ready)].Init(true);
+			this->m_Arm[static_cast<int>(EnumArmAnimType::Ready)].Init(true);
 			this->m_CharaSound = -1;
 		}
 		void			CharacterClass::Init_Sub(void) noexcept {
@@ -237,11 +233,11 @@ namespace FPS_n2 {
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto& Target = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1 - this->m_MyID)->GetChara();
 
-				auto Dir = this->GetEyeMatrix().zvec() * -1.f; Dir.y = (0.f); Dir = Dir.normalized();
+				auto Dir = CharaMove::GetEyeMatrix().zvec() * -1.f; Dir.y = (0.f); Dir = Dir.normalized();
 				float Len = 0.f;
 				auto Vec = (Target->GetMove().GetPos() - this->GetEyePosition()); Vec.y = (0.f); Len = Vec.magnitude(); Vec = Vec.normalized();
 				float pp_y = 0.f;
-				if (!KeyControl::GetRun()) {
+				if (!CharaMove::GetRun()) {
 					float sint = Vector3DX::Cross(Vec, Dir).y;
 					float cost = Vector3DX::Dot(Vec, Dir);
 					auto IsFront = (cost > cos(deg2rad(40)));
@@ -259,12 +255,12 @@ namespace FPS_n2 {
 			if (!pReady) {
 				Input.ResetKeyInput();
 			}
-			KeyControl::InputKey(Input);
+			CharaMove::InputKey(Input);
 		}
 		void			CharacterClass::FirstExecute(void) noexcept {
 			//初回のみ更新する内容
 			if (this->m_IsFirstLoop) {
-				for (int i = 0, num = MV1GetMaterialNum(GetObj().GetHandle()); i < num; i++) {
+				for (int i = 0, num = MV1GetMaterialNum(GetObj().GetHandle()); i < num; ++i) {
 					MV1SetMaterialDifColor(GetObj().GetHandle(), i, GetColorF(0.8f, 0.8f, 0.8f, 1.f));
 					MV1SetMaterialAmbColor(GetObj().GetHandle(), i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
 				}
@@ -293,22 +289,22 @@ namespace FPS_n2 {
 			}
 
 			//掛け声
-			if ((m_CharaAction == EnumWeaponAnimType::Ready) && m_YaTimer <= 0.f && KeyControl::GetInputControl().GetPADSPress(PADS::JUMP)) {
+			if ((m_CharaAction == EnumArmAnimType::Ready) && m_YaTimer <= 0.f && CharaMove::GetInputControl().GetPADSPress(PADS::JUMP)) {
 				SE->Get(static_cast<int>(SoundEnum::Voice_Ya)).Play_3D(0, GetEyePosition(), Scale_Rate * 35.f);
-				m_YaTimer = 15.f;
+				m_YaTimer = GetYaTimerMax();
 			}
 			m_YaTimer = std::max(m_YaTimer - 1.f / DrawParts->GetFps(), 0.f);
 			//
 			auto Prev = m_CharaAction;
 			switch (m_CharaAction) {
-			case EnumWeaponAnimType::Ready:
+			case EnumArmAnimType::Ready:
 			{
 				//つばぜり判定
 				{
 					CheckTsuba();
 				}
-				if (KeyControl::GetInputControl().GetPADSPress(PADS::AIM)) {
-					m_CharaAction = EnumWeaponAnimType::GuardStart;
+				if (CharaMove::GetInputControl().GetPADSPress(PADS::AIM)) {
+					m_CharaAction = EnumArmAnimType::GuardStart;
 				}
 				{
 					auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -322,24 +318,24 @@ namespace FPS_n2 {
 
 					float Radius = 3.5f * Scale_Rate;
 					if (!IsOutArea && (Len < Radius)) {
-						if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
-							m_CharaAction = EnumWeaponAnimType::Men;
+						if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
+							m_CharaAction = EnumArmAnimType::Men;
 						}
-						else if (KeyControl::GetInputControl().GetPADSPress(PADS::ULT)) {
-							m_CharaAction = EnumWeaponAnimType::Kote;
+						else if (CharaMove::GetInputControl().GetPADSPress(PADS::ULT)) {
+							m_CharaAction = EnumArmAnimType::Kote;
 						}
 						else if (false) {
-							m_CharaAction = EnumWeaponAnimType::Dou;
+							m_CharaAction = EnumArmAnimType::Dou;
 						}
 					}
 				}
 				m_HeartUp = std::max(m_HeartUp - 30.f / DrawParts->GetFps(), -5.f);
 			}
 			break;
-			case EnumWeaponAnimType::Run:
+			case EnumArmAnimType::Run:
 			{
 				if (IsOutArea || m_RunTime >= 2.f) {
-					m_CharaAction = EnumWeaponAnimType::Ready;
+					m_CharaAction = EnumArmAnimType::Ready;
 				}
 
 				//つばぜり判定
@@ -351,59 +347,59 @@ namespace FPS_n2 {
 				m_HeartUp = std::max(m_HeartUp, 2.f);
 			}
 			break;
-			case EnumWeaponAnimType::Men:
-			case EnumWeaponAnimType::Kote:
-			case EnumWeaponAnimType::Tsuki:
+			case EnumArmAnimType::Men:
+			case EnumArmAnimType::Kote:
+			case EnumArmAnimType::Tsuki:
 			{
 				Easing(&m_BambooVecBase, Vector2DX::zero(), 0.9f, EasingType::OutExpo);
 				//技派生
 				if (m_FrontAttackActionTime <= 0.12f) {//受付開始
 					auto Action = m_CharaAction;
 					if (m_FrontAttackActionTime <= 0.f) {//派生先がなく0秒になった
-						m_CharaAction = EnumWeaponAnimType::Run;
+						m_CharaAction = EnumArmAnimType::Run;
 					}
 					switch (Action) {
-					case EnumWeaponAnimType::Ready:
-					case EnumWeaponAnimType::Run:
+					case EnumArmAnimType::Ready:
+					case EnumArmAnimType::Run:
 						break;
-					case EnumWeaponAnimType::Men:
+					case EnumArmAnimType::Men:
 						if (false) {
-							m_CharaAction = EnumWeaponAnimType::Dou;//面胴
+							m_CharaAction = EnumArmAnimType::Dou;//面胴
 						}
 						//小手面後派生
 						if (false) {
-							if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
-								m_CharaAction = EnumWeaponAnimType::Men;//小手面面
+							if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
+								m_CharaAction = EnumArmAnimType::Men;//小手面面
 							}
 							if (false) {
-								m_CharaAction = EnumWeaponAnimType::Dou;//小手面胴
+								m_CharaAction = EnumArmAnimType::Dou;//小手面胴
 							}
 						}
 						break;
-					case EnumWeaponAnimType::Kote:
-						if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
-							m_CharaAction = EnumWeaponAnimType::Men;//小手面
+					case EnumArmAnimType::Kote:
+						if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
+							m_CharaAction = EnumArmAnimType::Men;//小手面
 						}
 						if (false) {
-							m_CharaAction = EnumWeaponAnimType::Dou;//小手胴
+							m_CharaAction = EnumArmAnimType::Dou;//小手胴
 						}
 						break;
-					case EnumWeaponAnimType::Dou:
+					case EnumArmAnimType::Dou:
 						break;
-					case EnumWeaponAnimType::Tsuki:
-						if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
-							m_CharaAction = EnumWeaponAnimType::Men;//突き面
+					case EnumArmAnimType::Tsuki:
+						if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
+							m_CharaAction = EnumArmAnimType::Men;//突き面
 						}
 						break;
-					case EnumWeaponAnimType::Tsuba:
-					case EnumWeaponAnimType::HikiMen:
-					case EnumWeaponAnimType::HikiKote:
-					case EnumWeaponAnimType::HikiDou:
-					case EnumWeaponAnimType::GuardStart:
-					case EnumWeaponAnimType::GuardSuriage:
-					case EnumWeaponAnimType::GuardLeft:
-					case EnumWeaponAnimType::GuardRight:
-					case EnumWeaponAnimType::Max:
+					case EnumArmAnimType::Tsuba:
+					case EnumArmAnimType::HikiMen:
+					case EnumArmAnimType::HikiKote:
+					case EnumArmAnimType::HikiDou:
+					case EnumArmAnimType::GuardStart:
+					case EnumArmAnimType::GuardSuriage:
+					case EnumArmAnimType::GuardLeft:
+					case EnumArmAnimType::GuardRight:
+					case EnumArmAnimType::Max:
 					default:
 						break;
 					}
@@ -412,45 +408,45 @@ namespace FPS_n2 {
 				m_HeartUp = std::max(m_HeartUp, 10.f);
 			}
 			break;
-			case EnumWeaponAnimType::Dou:
+			case EnumArmAnimType::Dou:
 			{
 				if (m_FrontAttackActionTime <= 0.f) {
-					m_CharaAction = EnumWeaponAnimType::Run;
+					m_CharaAction = EnumArmAnimType::Run;
 				}
 				m_FrontAttackActionTime = std::max(m_FrontAttackActionTime - 1.f / DrawParts->GetFps(), 0.f);
 				m_HeartUp = std::max(m_HeartUp, 10.f);
 			}
 			break;
-			case EnumWeaponAnimType::Tsuba:
+			case EnumArmAnimType::Tsuba:
 			{
 				if (m_TsubaCoolDown <= 0.f) {
-					if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
-						m_CharaAction = EnumWeaponAnimType::HikiMen;
+					if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
+						m_CharaAction = EnumArmAnimType::HikiMen;
 					}
-					else if (KeyControl::GetInputControl().GetPADSPress(PADS::ULT)) {
-						m_CharaAction = EnumWeaponAnimType::HikiKote;
+					else if (CharaMove::GetInputControl().GetPADSPress(PADS::ULT)) {
+						m_CharaAction = EnumArmAnimType::HikiKote;
 					}
 					else if (false) {
-						m_CharaAction = EnumWeaponAnimType::HikiDou;
+						m_CharaAction = EnumArmAnimType::HikiDou;
 					}
 				}
 				m_TsubaCoolDown = std::max(m_TsubaCoolDown - 1.f / DrawParts->GetFps(), 0.f);
 				m_HeartUp = std::max(m_HeartUp - 30.f / DrawParts->GetFps(), -5.f);
 			}
 			break;
-			case EnumWeaponAnimType::HikiMen:
-			case EnumWeaponAnimType::HikiKote:
-			case EnumWeaponAnimType::HikiDou:
+			case EnumArmAnimType::HikiMen:
+			case EnumArmAnimType::HikiKote:
+			case EnumArmAnimType::HikiDou:
 			{
 				Easing(&m_BambooVecBase, Vector2DX::zero(), 0.9f, EasingType::OutExpo);
 				if (IsOutArea || m_BackAttackActionTime <= 0.f) {
-					m_CharaAction = EnumWeaponAnimType::Ready;
+					m_CharaAction = EnumArmAnimType::Ready;
 				}
 				m_BackAttackActionTime = std::max(m_BackAttackActionTime - 1.f / DrawParts->GetFps(), 0.f);
 				m_HeartUp = std::max(m_HeartUp, 10.f);
 			}
 			break;
-			case EnumWeaponAnimType::GuardStart:
+			case EnumArmAnimType::GuardStart:
 			{
 				Easing(&m_BambooVecBase, Vector2DX::zero(), 0.9f, EasingType::OutExpo);
 				//
@@ -472,46 +468,46 @@ namespace FPS_n2 {
 					}
 				}
 				//
-				if ((m_GuardStartTimer >= 0.1f && !KeyControl::GetInputControl().GetPADSPress(PADS::AIM)) || (m_GuardStartTimer == 1.f) || suriage || Gleft || Gright) {
+				if ((m_GuardStartTimer >= 0.1f && !CharaMove::GetInputControl().GetPADSPress(PADS::AIM)) || (m_GuardStartTimer == 1.f) || suriage || Gleft || Gright) {
 					if (suriage) {
-						m_CharaAction = EnumWeaponAnimType::GuardSuriage;//上ガード
+						m_CharaAction = EnumArmAnimType::GuardSuriage;//上ガード
 					}
 					else if (Gleft) {
-						m_CharaAction = EnumWeaponAnimType::GuardLeft;//左ガード
+						m_CharaAction = EnumArmAnimType::GuardLeft;//左ガード
 					}
 					else if (Gright) {
-						m_CharaAction = EnumWeaponAnimType::GuardRight;//右ガード
+						m_CharaAction = EnumArmAnimType::GuardRight;//右ガード
 					}
 					else {
-						m_CharaAction = EnumWeaponAnimType::Ready;
+						m_CharaAction = EnumArmAnimType::Ready;
 					}
 				}
 				m_GuardStartTimer = std::min(m_GuardStartTimer + 1.f / DrawParts->GetFps(), 1.f);
 			}
 			break;
-			case EnumWeaponAnimType::GuardSuriage:
+			case EnumArmAnimType::GuardSuriage:
 			{
 				if (m_GuardTimer == 0.f) {
-					m_CharaAction = EnumWeaponAnimType::Ready;
+					m_CharaAction = EnumArmAnimType::Ready;
 				}
 				else {
-					if (KeyControl::GetInputControl().GetPADSPress(PADS::SHOT)) {
-						m_CharaAction = EnumWeaponAnimType::Men;
+					if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
+						m_CharaAction = EnumArmAnimType::Men;
 					}
 				}
 				m_GuardTimer = std::max(m_GuardTimer - 1.f / DrawParts->GetFps(), 0.f);
 			}
 			break;
-			case EnumWeaponAnimType::GuardLeft:
-			case EnumWeaponAnimType::GuardRight:
+			case EnumArmAnimType::GuardLeft:
+			case EnumArmAnimType::GuardRight:
 			{
 				if (m_GuardTimer == 0.f) {
-					m_CharaAction = EnumWeaponAnimType::Ready;
+					m_CharaAction = EnumArmAnimType::Ready;
 				}
 				m_GuardTimer = std::max(m_GuardTimer - 1.f / DrawParts->GetFps(), 0.f);
 			}
 			break;
-			case EnumWeaponAnimType::Max:
+			case EnumArmAnimType::Max:
 			default:
 				break;
 			}
@@ -519,15 +515,15 @@ namespace FPS_n2 {
 				//派生なので即切り替え
 				if (
 					(
-						Prev == EnumWeaponAnimType::Men ||
-						Prev == EnumWeaponAnimType::Kote ||
-						Prev == EnumWeaponAnimType::Tsuki
+						Prev == EnumArmAnimType::Men ||
+						Prev == EnumArmAnimType::Kote ||
+						Prev == EnumArmAnimType::Tsuki
 						) &&
 					(
-						m_CharaAction == EnumWeaponAnimType::Men ||
-						m_CharaAction == EnumWeaponAnimType::Kote ||
-						m_CharaAction == EnumWeaponAnimType::Dou ||
-						m_CharaAction == EnumWeaponAnimType::Tsuki
+						m_CharaAction == EnumArmAnimType::Men ||
+						m_CharaAction == EnumArmAnimType::Kote ||
+						m_CharaAction == EnumArmAnimType::Dou ||
+						m_CharaAction == EnumArmAnimType::Tsuki
 						)
 					) {
 					this->m_Arm[static_cast<size_t>(Prev)].Init(false);
@@ -537,51 +533,51 @@ namespace FPS_n2 {
 
 				OverrideAction();
 			}
-			KeyControl::UpdateKeyRad(this->m_move);
+			CharaMove::UpdateKeyRad(this->m_move);
 		}
 		void			CharacterClass::ExecuteAction(void) noexcept {
-			auto IsGuardAction = [](EnumWeaponAnimType value) {
+			auto IsGuardAction = [](EnumArmAnimType value) {
 				switch (value) {
-				case EnumWeaponAnimType::GuardSuriage:
-				case EnumWeaponAnimType::GuardLeft:
-				case EnumWeaponAnimType::GuardRight:
+				case EnumArmAnimType::GuardSuriage:
+				case EnumArmAnimType::GuardLeft:
+				case EnumArmAnimType::GuardRight:
 					return true;
-				case EnumWeaponAnimType::Ready:
-				case EnumWeaponAnimType::Run:
-				case EnumWeaponAnimType::Men:
-				case EnumWeaponAnimType::Kote:
-				case EnumWeaponAnimType::Dou:
-				case EnumWeaponAnimType::Tsuki:
-				case EnumWeaponAnimType::Tsuba:
-				case EnumWeaponAnimType::HikiMen:
-				case EnumWeaponAnimType::HikiKote:
-				case EnumWeaponAnimType::HikiDou:
-				case EnumWeaponAnimType::GuardStart:
-				case EnumWeaponAnimType::Max:
+				case EnumArmAnimType::Ready:
+				case EnumArmAnimType::Run:
+				case EnumArmAnimType::Men:
+				case EnumArmAnimType::Kote:
+				case EnumArmAnimType::Dou:
+				case EnumArmAnimType::Tsuki:
+				case EnumArmAnimType::Tsuba:
+				case EnumArmAnimType::HikiMen:
+				case EnumArmAnimType::HikiKote:
+				case EnumArmAnimType::HikiDou:
+				case EnumArmAnimType::GuardStart:
+				case EnumArmAnimType::Max:
 				default:
 					return false;
 				}
 				};
-			for (size_t index = 0; index < static_cast<size_t>(EnumWeaponAnimType::Max); index++) {
-				this->m_Arm[index].Execute((m_CharaAction == (EnumWeaponAnimType)index), 0.1f, 0.1f, IsGuardAction((EnumWeaponAnimType)index) ? 0.75f : 0.9f);
-				//this->m_Arm[index].Init((m_CharaAction == (EnumWeaponAnimType)index));
+			for (size_t index = 0; index < static_cast<size_t>(EnumArmAnimType::Max); ++index) {
+				this->m_Arm[index].Execute((m_CharaAction == (EnumArmAnimType)index), 0.1f, 0.1f, IsGuardAction((EnumArmAnimType)index) ? 0.75f : 0.9f);
+				//this->m_Arm[index].Init((m_CharaAction == (EnumArmAnimType)index));
 			}
 		}
 		void			CharacterClass::ExecuteAnim(void) noexcept {
 			//上半身アニメ演算
-			GetCharaAnimeBufID(CharaAnimeID::Upper_Ready) = 1.f;
-			GetCharaAnimeBufID(CharaAnimeID::Hand_Ready) = 1.f;
+			CharaMove::SetCharaAnimeBufID(CharaObjAnimeID::Upper_Ready) = 1.f;
+			CharaMove::SetCharaAnimeBufID(CharaObjAnimeID::Hand_Ready) = 1.f;
 			//下半身アニメ演算
-			ObjectBaseClass::SetAnimLoop(static_cast<int>(KeyControl::GetBottomTurnAnimSel()), 0.5f);
-			ObjectBaseClass::SetAnimOnce(static_cast<int>(CharaAnimeID::Bottom_Stand_Attack), KeyControl::GetSpeedPer());
-			ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaAnimeID::Bottom_Stand_Run), KeyControl::GetSpeedPer());
-			ObjectBaseClass::SetAnimLoop(static_cast<int>(KeyControl::GetBottomWalkAnimSel()), KeyControl::GetVecFront());
-			ObjectBaseClass::SetAnimLoop(static_cast<int>(KeyControl::GetBottomLeftStepAnimSel()), KeyControl::GetVecLeft());
-			ObjectBaseClass::SetAnimLoop(static_cast<int>(KeyControl::GetBottomWalkBackAnimSel()), KeyControl::GetVecRear());
-			ObjectBaseClass::SetAnimLoop(static_cast<int>(KeyControl::GetBottomRightStepAnimSel()), KeyControl::GetVecRight());
+			ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaObjAnimeID::Bottom_Stand_Turn), 0.5f);
+			ObjectBaseClass::SetAnimOnce(static_cast<int>(CharaObjAnimeID::Bottom_Stand_Attack), CharaMove::GetSpeedPer());
+			ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaObjAnimeID::Bottom_Stand_Run), CharaMove::GetSpeedPer());
+			ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaMove::GetBottomWalkAnimSel()), CharaMove::GetVecFront());
+			ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaObjAnimeID::Bottom_Stand_LeftStep), CharaMove::GetVecLeft());
+			ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaObjAnimeID::Bottom_Stand_WalkBack), CharaMove::GetVecRear());
+			ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaObjAnimeID::Bottom_Stand_RightStep), CharaMove::GetVecRight());
 			//アニメ反映
-			for (int i = 0; i < static_cast<int>(GetObj().GetAnimNum()); i++) {
-				this->GetObj().SetAnim(i).SetPer(GetCharaAnimeBufID((CharaAnimeID)i));
+			for (int i = 0, Num = static_cast<int>(GetObj().GetAnimNum()); i < Num; ++i) {
+				this->GetObj().SetAnim(i).SetPer(CharaMove::GetCharaAnimeBufID((CharaObjAnimeID)i));
 			}
 			GetObj().UpdateAnimAll();
 		}
@@ -614,7 +610,7 @@ namespace FPS_n2 {
 					}
 				}
 				else {
-					if (GetCharaAnimeBufID(CharaAnimeID::Bottom_Stand_Attack) > 0.5f) {
+					if (CharaMove::GetCharaAnimeBufID(CharaObjAnimeID::Bottom_Stand_Attack) > 0.5f) {
 						if ((9.f < Time && Time < 10.f)) {
 							if (this->m_CharaSound != 7) {
 								this->m_CharaSound = 7;
@@ -626,9 +622,7 @@ namespace FPS_n2 {
 					}
 					else {
 						//L
-						if (
-							(3.f < Time && Time < 4.f)
-							) {
+						if ((3.f < Time && Time < 4.f)) {
 							if (this->m_CharaSound != 5) {
 								this->m_CharaSound = 5;
 								if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::LeftFoot)).magnitude() < Scale_Rate * 5.f * 1.5f) {
@@ -637,9 +631,7 @@ namespace FPS_n2 {
 							}
 						}
 						//R
-						if (
-							(10.f < Time && Time < 11.f)
-							) {
+						if ((10.f < Time && Time < 11.f)							) {
 							if (this->m_CharaSound != 6) {
 								this->m_CharaSound = 6;
 								if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::RightFoot)).magnitude() < Scale_Rate * 5.f * 1.5f) {
@@ -654,7 +646,7 @@ namespace FPS_n2 {
 				this->m_CharaSound = -1;
 			}
 			//しゃがみ音
-			if (KeyControl::GetSquatSwitch()) {
+			if (CharaMove::GetSquatSwitch()) {
 				SE->Get(static_cast<int>(SoundEnum::StandupFoot)).Play_3D(0, GetFramePosition(CharaFrame::Upper), Scale_Rate * 3.f);
 			}
 			//心拍音
@@ -676,10 +668,10 @@ namespace FPS_n2 {
 			float XRad = 0.f;
 			this->m_move.GetMat().GetRadian(&XRad, nullptr, nullptr);
 			GetObj().SetFrameLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Upper)),
-				Matrix4x4DX::RotAxis(Vector3DX::right(), -XRad / 2.f) * KeyControl::GetUpperRotMatrix().Get44DX() *
+				(Matrix3x3DX::RotAxis(Vector3DX::right(), -XRad / 2.f) * CharaMove::GetUpperRotMatrix()).Get44DX() *
 				GetFrameBaseLocalMat(static_cast<int>(CharaFrame::Upper)));
 			GetObj().SetFrameLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Upper2)),
-				Matrix4x4DX::RotAxis(Vector3DX::right(), XRad / 2.f) *
+				Matrix3x3DX::RotAxis(Vector3DX::right(), XRad / 2.f).Get44DX() *
 				GetFrameBaseLocalMat(static_cast<int>(CharaFrame::Upper2)));
 			//
 			Vector3DX pos = this->m_move.GetPosBuf();
@@ -691,22 +683,19 @@ namespace FPS_n2 {
 				IsHitGround = BackGround->CheckLinetoMap(pos + Vector3DX::up() * 20.f, &EndPos, true);
 				groundYpos = EndPos.y;
 			}
-			Vector3DX vec = KeyControl::GetVec();
+			Vector3DX vec = CharaMove::GetVec();
 			if (IsHitGround) {
 				auto yPos = pos.y;
 				Easing(&yPos, groundYpos, 0.8f, EasingType::OutExpo);
 				pos.y = (yPos);
-
-				vec = KeyControl::GetVec();
 				vec.y = (0.f);
 			}
 			else {
-				vec = KeyControl::GetVec();
 				vec.y = (this->m_move.GetVec().y + (M_GR / (DrawParts->GetFps() * DrawParts->GetFps())));
 			}
 			this->m_move.SetVec(vec);
 			pos += this->m_move.GetVec();
-			if (m_CharaAction == EnumWeaponAnimType::Tsuba) {
+			if (m_CharaAction == EnumArmAnimType::Tsuba) {
 				auto& Target = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetChara();
 
 				auto& TgtPos = Target->GetMove().GetPos();
@@ -720,9 +709,9 @@ namespace FPS_n2 {
 			//壁判定
 			BackGround->CheckMapWall(this->m_move.GetRePos(), &pos, 0.6f * Scale_Rate);
 			//ほかプレイヤーとの判定
-			if (true) {
+			{
 				float Radius = 0.5f * Scale_Rate;
-				for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
+				for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 					if (i == this->m_MyID) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
 					//自分が当たったら押し戻す
@@ -741,16 +730,16 @@ namespace FPS_n2 {
 
 			this->m_move.SetPos(pos);
 			this->m_move.Update(0.9f, 0.f);
-			UpdateObjMatrix(KeyControl::GetBaseRotMatrix(), this->m_move.GetPos());
+			UpdateObjMatrix(CharaMove::GetBaseRotMatrix(), this->m_move.GetPos());
 			{
-				Matrix3x3DX Mat; Mat.SetRadian(KeyControl::GetRadBuf().x, KeyControl::GetRadBuf().y, 0.f);
+				Matrix3x3DX Mat; Mat.SetRadian(CharaMove::GetRadBuf().x, CharaMove::GetRadBuf().y, 0.f);
 				this->m_move.SetMat(Mat);
 			}
-			m_EyePosition = (GetFramePosition(CharaFrame::LeftEye) + GetFramePosition(CharaFrame::RightEye)) / 2.f + (KeyControl::GetEyeRotMatrix() * KeyControl::GetBaseRotMatrix()).zvec() * (-0.04f * Scale_Rate);
+			m_EyePosition = (GetFramePosition(CharaFrame::LeftEye) + GetFramePosition(CharaFrame::RightEye)) / 2.f + (CharaMove::GetEyeRotMatrix() * CharaMove::GetBaseRotMatrix()).zvec() * (-0.04f * Scale_Rate);
 			auto* OptionParts = OPTION::Instance();
 			bool HeadBobbing = ((this->m_MyID != this->m_ViewID) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 			if (HeadBobbing) {
-				m_EyePosition += KeyControl::GetEyeSwingPos();
+				m_EyePosition += CharaMove::GetEyeSwingPos();
 			}
 			//銃座標指定
 			if (this->m_Weapon_Ptr) {
@@ -758,20 +747,20 @@ namespace FPS_n2 {
 				//銃の位置を指定するアニメ
 				{
 					//
-					Matrix4x4DX AnimMat;
-					for (size_t i = 0; i < static_cast<size_t>(EnumWeaponAnimType::Max); i++) {
+					Matrix4x4DX WeaponBaseMat;
+					for (size_t i = 0; i < static_cast<size_t>(EnumArmAnimType::Max); ++i) {
 						Matrix4x4DX AnimData;
-						if (!this->m_Weapon_Ptr->GetWeaponAnime((EnumWeaponAnimType)i, &AnimData)) { continue; }
-						AnimMat = Lerp(AnimMat, AnimData, this->m_Arm[i].Per());
+						if (!this->m_Weapon_Ptr->GetArmAnimeNowMatrix((EnumArmAnimType)i, &AnimData)) { continue; }
+						WeaponBaseMat = Lerp(WeaponBaseMat, AnimData, this->m_Arm[i].Per());
 					}
-					Vector3DX WeaponBasePos = GetFramePosition(CharaFrame::Head) + Matrix3x3DX::Vtrans(AnimMat.pos(), (KeyControl::GetUpperRotMatrix() * KeyControl::GetBaseRotMatrix()));
-					auto WeaponBaseRotMat = Matrix3x3DX::RotVec2(Vector3DX::forward(), AnimMat.zvec());
-					WeaponBaseRotMat *= Matrix3x3DX::RotVec2(WeaponBaseRotMat.yvec(), AnimMat.yvec());
-					WeaponBaseRotMat *= KeyControl::GetWeaponSwingMat() * (KeyControl::GetUpperRotMatrix() * KeyControl::GetBaseRotMatrix());
+					Vector3DX WeaponBasePos = GetFramePosition(CharaFrame::Head) + Matrix3x3DX::Vtrans(WeaponBaseMat.pos(), (CharaMove::GetUpperRotMatrix() * CharaMove::GetBaseRotMatrix()));
+					auto WeaponBaseRotMat = Matrix3x3DX::RotVec2(Vector3DX::forward(), WeaponBaseMat.zvec());
+					WeaponBaseRotMat *= Matrix3x3DX::RotVec2(WeaponBaseRotMat.yvec(), WeaponBaseMat.yvec());
+					WeaponBaseRotMat *= CharaMove::GetWeaponSwingMat() * (CharaMove::GetUpperRotMatrix() * CharaMove::GetBaseRotMatrix());
 					//竹刀同士の判定
 					Matrix3x3DX WeaponAddRotMat;
 					Vector2DX Prev = m_BambooVec;
-					for (int index = 0; index < 10; index++) {
+					for (int index = 0; index < 10; ++index) {
 						m_BambooVec = Lerp(Prev, m_BambooVecBase, static_cast<float>(index + 1) / 10.f);
 						WeaponAddRotMat = Matrix3x3DX::RotAxis(Vector3DX::right(), m_BambooVec.x) * Matrix3x3DX::RotAxis(Vector3DX::forward(), m_BambooVec.y);
 						this->m_Weapon_Ptr->UpdateObjMatrix(WeaponAddRotMat * WeaponBaseRotMat, WeaponBasePos);
@@ -781,7 +770,7 @@ namespace FPS_n2 {
 						Vector3DX VecA = (EndPos - StartPos).normalized();
 						bool IsHit = false;
 						float Radius = 0.025f * Scale_Rate * 2.f;
-						for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
+						for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 							if (i == this->m_MyID) { continue; }
 							auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
 							//自分が当たったら押し戻す
@@ -802,14 +791,14 @@ namespace FPS_n2 {
 								) {
 									{
 										Vector3DX Vec2 = Vec0 + (Vec1 - Vec0).normalized() * (Len - Radius);
-										auto ZVec = Matrix4x4DX::RotVec2(VecA, (Vec2 - StartPos).normalized()).zvec();
+										auto ZVec = Matrix3x3DX::RotVec2(VecA, (Vec2 - StartPos).normalized()).zvec();
 										m_BambooVec.y += atan2f(ZVec.x, ZVec.z) * 0.5f;
 										m_BambooVec.x += atan2f(ZVec.y, std::hypotf(ZVec.x, ZVec.z)) * 0.5f;
 										m_BambooVec.Set(std::clamp(m_BambooVec.x, deg2rad(-10), deg2rad(10)), std::clamp(m_BambooVec.y, deg2rad(-30), deg2rad(30)));
 									}
 									{
 										Vector3DX Vec2 = Vec1 + (Vec0 - Vec1).normalized() * (Len - Radius);
-										auto ZVec = Matrix4x4DX::RotVec2(VecB, (Vec2 - StartPosB).normalized()).zvec();
+										auto ZVec = Matrix3x3DX::RotVec2(VecB, (Vec2 - StartPosB).normalized()).zvec();
 										c->m_BambooVec.y += atan2f(ZVec.x, ZVec.z) * 1.5f;
 										c->m_BambooVec.x += atan2f(ZVec.y, std::hypotf(ZVec.x, ZVec.z)) * 1.5f;
 									}

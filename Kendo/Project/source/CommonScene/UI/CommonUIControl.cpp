@@ -102,7 +102,7 @@ namespace FPS_n2 {
 					sprintfDx(this->m_CreditStr.at(static_cast<size_t>(this->m_CreditCoulm)).first, ALL.c_str());
 					sprintfDx(this->m_CreditStr.at(static_cast<size_t>(this->m_CreditCoulm)).second, "");
 				}
-				this->m_CreditCoulm++;
+				++this->m_CreditCoulm;
 			}
 			FileRead_close(mdata);
 		}

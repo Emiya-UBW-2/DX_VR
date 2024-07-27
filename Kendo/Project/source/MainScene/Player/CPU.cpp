@@ -7,6 +7,7 @@ namespace FPS_n2 {
 	namespace Player {
 		void AIControl::Execute(InputControl* MyInput) noexcept
 		{
+			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(m_MyID)->GetChara();
 
@@ -32,6 +33,14 @@ namespace FPS_n2 {
 			bool shotMain_Key{ false };
 			bool shotSub_Key{ false };
 			float pp_x{ 0.f }, pp_y{ 0.f };
+
+			m_Counter += 1.f / DrawParts->GetFps();
+			if (m_Counter > 5.f) {
+				m_Counter -= 5.f;
+			}
+			if (m_Counter > 3.f) {
+				//shotMain_Key = true;
+			}
 
 			if (Chara->GetBambooVec().magnitude() > deg2rad(1)) {
 				pp_x = std::clamp(-100.f * Chara->GetBambooVec().x / deg2rad(150.f), -3.f, 3.f);

@@ -15,7 +15,7 @@ namespace FPS_n2 {
 			tmp.m_ID = ServerData.m_ID;
 			tmp.m_Attribute = ServerData.m_Attribute;
 			tmp.m_ClientTime = ServerData.m_ClientTime;
-			for (int i = 0; i < 10; i++) {
+			for (int i = 0; i < 10; ++i) {
 				tmp.m_FreeData[i] = ServerData.GetFreeData()[i];
 			}
 			return tmp;
@@ -87,7 +87,7 @@ namespace FPS_n2 {
 				if (this->m_IsServerPlay) {
 					if (index == 0) { continue; }//サーバープレイヤーは絶対0を使うので
 				}
-				n.m_NetWork.Init(true, pPort + i); i++;
+				n.m_NetWork.Init(true, pPort + i); ++i;
 				n.m_Phase = ClientPhase::WaitConnect;
 			}
 		}
@@ -100,7 +100,7 @@ namespace FPS_n2 {
 				pServerCtrl->ServerFrame = 0;
 			}
 			else {
-				pServerCtrl->ServerFrame++;	// サーバーフレーム更新
+				++pServerCtrl->ServerFrame;	// サーバーフレーム更新
 				pServerCtrl->SetInGame();		// インゲームです
 			}
 			for (auto& n : this->m_Net) {
@@ -205,7 +205,7 @@ namespace FPS_n2 {
 					m_CannotConnectTimer += 1.f / DrawParts->GetFps();
 					if (this->m_CannotConnectTimer > 1.f) {
 						m_CannotConnectTimer -= 1.f;
-						this->m_NetWorkSel++;
+						++this->m_NetWorkSel;
 						if (this->m_NetWorkSel < Player_num) {
 							this->m_Net.m_NetWork.Dispose();
 							this->m_Net.m_NetWork.SetServerIP(this->m_IP);
@@ -288,7 +288,7 @@ namespace FPS_n2 {
 					KEY_INPUT_NUMPAD9,
 				};
 				//サーバー兼観戦者
-				for (int index = 0; index < Player_num; index++) {
+				for (int index = 0; index < Player_num; ++index) {
 					if (CheckHitKeyWithCheck(KeyInputs[index]) != 0) {
 						this->m_PlayerNet.SetLocalPlayerID((PlayerID)index);
 						break;

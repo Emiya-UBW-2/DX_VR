@@ -13,7 +13,7 @@ namespace FPS_n2 {
 			//
 			BattleResourceMngr->Load();
 			PlayerMngr->Init(NetWork::Player_num);
-			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 				BattleResourceMngr->LoadChara("Chara", (PlayerID)index);
 				BattleResourceMngr->LoadWeapon("Bamboo", (PlayerID)index);
 			}
@@ -42,7 +42,7 @@ namespace FPS_n2 {
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 
-			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 				auto& p = PlayerMngr->GetPlayer(index);
 				auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 				c->SetViewID(0);
@@ -210,7 +210,7 @@ namespace FPS_n2 {
 				//
 				if (m_NetWorkController && m_NetWorkController->IsInGame()) {
 					bool IsServerNotPlayer = !m_NetWorkController->GetClient() && !m_NetWorkController->GetServerPlayer();
-					for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 						auto& p = PlayerMngr->GetPlayer(index);
 						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)index);
@@ -231,7 +231,7 @@ namespace FPS_n2 {
 								c->SetMoveOverRide(Ret.GetMove());
 								//アクションが違う場合には上書き
 								if (Ret.GetFreeData()[0] != static_cast<int>(c->GetCharaAction())) {
-									c->SetActionOverRide(static_cast<EnumWeaponAnimType>(Ret.GetFreeData()[0]));
+									c->SetActionOverRide(static_cast<EnumArmAnimType>(Ret.GetFreeData()[0]));
 								}
 							}
 
@@ -241,7 +241,7 @@ namespace FPS_n2 {
 					}
 				}
 				else {//オフライン
-					for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 						auto& p = PlayerMngr->GetPlayer(index);
 						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 						c->SetViewID(GetMyPlayerID());
@@ -267,14 +267,15 @@ namespace FPS_n2 {
 					}
 				}
 				//ダメージイベント
-				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+				for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 					auto& p = PlayerMngr->GetPlayer(index);
 					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
-					for (int j = 0; j < static_cast<int>(this->m_DamageEvents.size()); j++) {
+					for (int j = 0, Num = static_cast<int>(this->m_DamageEvents.size()); j < Num; ++j) {
 						if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)])) {
 							std::swap(this->m_DamageEvents.back(), m_DamageEvents[static_cast<size_t>(j)]);
 							this->m_DamageEvents.pop_back();
-							j--;
+							--Num;
+							--j;
 						}
 					}
 				}
@@ -286,7 +287,6 @@ namespace FPS_n2 {
 				DrawParts->Set_is_Blackout(m_Concussion > 0.f);
 				if (m_Concussion == 1.f) {
 					CameraShake::Instance()->SetCamShake(0.5f, 0.05f * Scale_Rate);
-					//SE->Get(static_cast<int>(SoundEnum::Tank_near)).Play_3D(0, DrawParts->GetMainCamera().GetCamPos(), 10.f*Scale_Rate, 128);//, DX_PLAYTYPE_LOOP
 				}
 				if (m_Concussion > 0.9f) {
 					Easing(&m_ConcussionPer, 1.f, 0.1f, EasingType::OutExpo);
@@ -310,8 +310,7 @@ namespace FPS_n2 {
 			//視点
 			{
 				auto* OptionParts = OPTION::Instance();
-
-				//DrawParts->GetFps()カメラ
+				//カメラ
 				Vector3DX CamPos = Chara->GetEyePosition() + CameraShake::Instance()->GetCamShake();
 				Vector3DX CamVec = CamPos + Chara->GetEyeMatrix().zvec() * -1.f;
 #ifdef DEBUG
@@ -366,7 +365,7 @@ namespace FPS_n2 {
 			//UIパラメーター
 			{
 				if (GetIsFirstLoop()) {
-					this->m_UIclass.InitGaugeParam(0, static_cast<int>(Chara->GetStamina()), static_cast<int>(Chara->GetStaminaMax()));
+					this->m_UIclass.InitGaugeParam(0, static_cast<int>(Chara->GetYaTimer()), static_cast<int>(Chara->GetYaTimerMax()));
 					this->m_UIclass.InitGaugeParam(1, static_cast<int>(Chara->GetStamina()), static_cast<int>(Chara->GetStaminaMax()));
 				}
 				//NvsN
@@ -378,8 +377,8 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(2, static_cast<int>(Chara->GetHeartRate()));
 				this->m_UIclass.SetfloatParam(1, Chara->GetHeartRatePow());
 				//ゲージ
-				this->m_UIclass.SetGaugeParam(0, 100, 100, 15);
-				this->m_UIclass.SetGaugeParam(1, static_cast<int>(Chara->GetStamina()), static_cast<int>(Chara->GetStaminaMax()), 15);
+				this->m_UIclass.SetGaugeParam(0, static_cast<int>((Chara->GetYaTimerMax() - Chara->GetYaTimer()) * 10000.f), static_cast<int>(Chara->GetYaTimerMax() * 10000.f), 1);
+				this->m_UIclass.SetGaugeParam(1, static_cast<int>(Chara->GetStamina() * 10000.f), static_cast<int>(Chara->GetStaminaMax() * 10000.f), 15);
 				//ガード円
 				Easing(&m_GuardStart, Chara->IsGuardStarting() ? 1.f : 0.f, Chara->IsGuardStarting() ? 0.8f : 0.5f, EasingType::OutExpo);
 				this->m_UIclass.SetfloatParam(2, m_GuardStart);
@@ -455,7 +454,7 @@ namespace FPS_n2 {
 			BackGround->Draw();
 			ObjectManager::Instance()->Draw();
 			//ObjectManager::Instance()->Draw_Depth();
-			for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
+			for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 			}
 
@@ -479,7 +478,12 @@ namespace FPS_n2 {
 					WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
 				}
 				else {
-					WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
+					if (m_NetWorkController->GetClient()) {
+						WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, Red, Black, "Lost Connection");
+					}
+					else {
+						WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
+					}
 				}
 			}
 		}

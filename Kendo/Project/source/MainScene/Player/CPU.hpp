@@ -7,6 +7,8 @@ namespace FPS_n2 {
 		//AI—p
 		class AIControl {
 			PlayerID m_MyID{ 0 };
+
+			float m_Counter{ 0 };
 		public:
 			void Init(PlayerID MyID) noexcept {
 				m_MyID = MyID;

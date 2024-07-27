@@ -17,17 +17,17 @@ namespace FPS_n2 {
 			void			ResetAnim(void) noexcept { m_UpperAnim = 0.f; }
 			void			SetAnim(float value) noexcept { m_UpperAnim = value; }
 		public:
-			auto	GetWeaponAnimeTotalTime(EnumWeaponAnimType ID) const noexcept {
+			auto	GetArmAnimeTotalTime(EnumArmAnimType ID) const noexcept {
 				//銃の位置を指定するアニメ
-				auto* AnimMngr = WeaponAnimManager::Instance();
-				auto* Ptr = AnimMngr->GetAnimData(WeaponAnimeSets[0].at(static_cast<size_t>(ID)));
+				auto* AnimMngr = ArmAnimManager::Instance();
+				auto* Ptr = AnimMngr->GetAnimData(ArmAnimeSets[0].at(static_cast<size_t>(ID)));
 				if (!Ptr) { return 0.f; }
 				return static_cast<float>(Ptr->GetTotalTime()) / 60.f;
 			}
-			auto	GetWeaponAnime(EnumWeaponAnimType ID, Matrix4x4DX* Ret) const noexcept {
+			auto	GetArmAnimeNowMatrix(EnumArmAnimType ID, Matrix4x4DX* Ret) const noexcept {
 				//銃の位置を指定するアニメ
-				auto* AnimMngr = WeaponAnimManager::Instance();
-				auto* Ptr = AnimMngr->GetAnimData(WeaponAnimeSets[0].at(static_cast<size_t>(ID)));
+				auto* AnimMngr = ArmAnimManager::Instance();
+				auto* Ptr = AnimMngr->GetAnimData(ArmAnimeSets[0].at(static_cast<size_t>(ID)));
 				if (!Ptr) { return false; }
 				*Ret = AnimMngr->GetAnimNow(Ptr, this->m_UpperAnim * 60.f).GetMatrix();
 				return true;
@@ -49,8 +49,7 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				m_UpperAnim += 1.f / DrawParts->GetFps();
 
-				int num = MV1GetMaterialNum(GetObj().GetHandle());
-				for (int i = 0; i < num; i++) {
+				for (int i = 0, num = MV1GetMaterialNum(GetObj().GetHandle()); i < num; ++i) {
 					MV1SetMaterialDifColor(GetObj().GetHandle(), i, GetColorF(1.f, 1.f, 1.f, 1.f));
 					MV1SetMaterialAmbColor(GetObj().GetHandle(), i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
 				}
