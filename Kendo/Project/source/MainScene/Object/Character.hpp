@@ -13,6 +13,7 @@ namespace FPS_n2 {
 		class CharacterClass :
 			public ObjectBaseClass,
 			public StaminaControl,
+			public HitBoxControl,
 			public CharaMove
 		{
 		private:
@@ -59,8 +60,54 @@ namespace FPS_n2 {
 			const auto& GetBambooVec(void) const noexcept { return m_BambooVec; }
 			const auto& GetGuardVec(void) const noexcept { return m_GuardVecR; }
 			const auto& GetYaTimer(void) const noexcept { return m_YaTimer; }
+			const auto& GetWeaponPtr(void) const noexcept { return m_Weapon_Ptr; }
 			auto			GetYaTimerMax(void) const noexcept { return 15.f; }
 			auto			IsGuardStarting(void) const noexcept { return m_CharaAction == EnumArmAnimType::GuardStart; }
+			auto			IsAttackAction(EnumArmAnimType value) const noexcept {
+				switch (value) {
+				case EnumArmAnimType::Men:
+				case EnumArmAnimType::Kote:
+				case EnumArmAnimType::Dou:
+				case EnumArmAnimType::Tsuki:
+				case EnumArmAnimType::HikiMen:
+				case EnumArmAnimType::HikiKote:
+				case EnumArmAnimType::HikiDou:
+					return true;
+				case EnumArmAnimType::Ready:
+				case EnumArmAnimType::Run:
+				case EnumArmAnimType::Tsuba:
+				case EnumArmAnimType::GuardStart:
+				case EnumArmAnimType::GuardSuriage:
+				case EnumArmAnimType::GuardLeft:
+				case EnumArmAnimType::GuardRight:
+				case EnumArmAnimType::Max:
+				default:
+					return false;
+				}
+			}
+			auto			IsGuardAction(EnumArmAnimType value) const noexcept {
+				switch (value) {
+				case EnumArmAnimType::GuardSuriage:
+				case EnumArmAnimType::GuardLeft:
+				case EnumArmAnimType::GuardRight:
+					return true;
+				case EnumArmAnimType::Ready:
+				case EnumArmAnimType::Run:
+				case EnumArmAnimType::Men:
+				case EnumArmAnimType::Kote:
+				case EnumArmAnimType::Dou:
+				case EnumArmAnimType::Tsuki:
+				case EnumArmAnimType::Tsuba:
+				case EnumArmAnimType::HikiMen:
+				case EnumArmAnimType::HikiKote:
+				case EnumArmAnimType::HikiDou:
+				case EnumArmAnimType::GuardStart:
+				case EnumArmAnimType::Max:
+				default:
+					return false;
+				}
+			}
+			auto			IsAttacking(void) const noexcept { return IsAttackAction(m_CharaAction); }
 			auto			GetGuardStartPer(void) const noexcept { return (IsGuardStarting()) ? (m_GuardStartTimer / 1.f) : 0.f; }
 			Vector3DX		GetFramePosition(CharaFrame frame) const noexcept { return MV1GetFramePosition(GetObj_const().GetHandle(), GetFrame(static_cast<int>(frame))); }
 		public://セッター
@@ -68,6 +115,7 @@ namespace FPS_n2 {
 				this->m_CharaType = value;
 				this->m_MyID = pID;
 			}
+			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.AddDamageEvent(pRet); }
 			void			SetWeaponPtr(std::shared_ptr<WeaponObject::WeaponClass>& pWeaponPtr0) noexcept { this->m_Weapon_Ptr = pWeaponPtr0; }
 			void			SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
 			void			SetViewID(PlayerID value) noexcept { this->m_ViewID = value; }
@@ -81,6 +129,7 @@ namespace FPS_n2 {
 				OverrideAction();
 			}
 		public: //更新関連
+			const bool		CheckDamageRay(HitPoint* Damage, bool CheckBodyParts, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
 			void			MovePoint(float pxRad, float pyRad, const Vector3DX& pPos) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady) noexcept;
 		private:
@@ -137,7 +186,7 @@ namespace FPS_n2 {
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				if (this->m_IsActive && this->m_IsDraw) {
-					if (GetMyPlayerID() == 0) {
+					if (m_MyID == m_ViewID) {
 						if (isDrawSemiTrans) {
 							this->GetObj().DrawModel();
 						}
@@ -148,6 +197,8 @@ namespace FPS_n2 {
 								this->GetObj().DrawMesh(i);
 							}
 						}
+						//hitbox描画
+						//HitBoxControl::DrawHitBox();
 					}
 				}
 			}

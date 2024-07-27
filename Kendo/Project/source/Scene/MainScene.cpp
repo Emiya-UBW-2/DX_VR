@@ -237,7 +237,7 @@ namespace FPS_n2 {
 
 						}
 						//ダメージイベント処理
-						Ret.GetDamageEvent().AddDamageEvent(&this->m_DamageEvents);
+						Ret.AddDamageEvent(&this->m_DamageEvents);
 					}
 				}
 				else {//オフライン
@@ -263,7 +263,7 @@ namespace FPS_n2 {
 							c->SetInput(OtherInput, true);
 						}
 						//ダメージイベント処理
-						c->GetDamageEvent().AddDamageEvent(&this->m_DamageEvents);
+						c->AddDamageEvent(&this->m_DamageEvents);
 					}
 				}
 				//ダメージイベント
@@ -360,6 +360,24 @@ namespace FPS_n2 {
 				DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 0.3f, Scale_Rate * 20.f);
 				//DoF
 				PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.3f, Scale_Rate * 5.f, Scale_Rate * 0.1f, Scale_Rate * 20.f);
+			}
+			{
+				for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
+					auto& p = PlayerMngr->GetPlayer(index);
+					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+					if (!c->IsAttacking()) { continue; }
+					//if (c->GetWeaponPtr()->GetMoveSpeed() < 5.f) { continue; }
+					printfDx("[%f]\n", c->GetWeaponPtr()->GetMoveSpeed());
+					Vector3DX StartPos = c->GetWeaponPtr()->GetMove().GetPos();
+					Vector3DX EndPos = c->GetWeaponPtr()->GetFramePosition(WeaponObject::WeaponFrame::End);
+					for (int index2 = 0; index2 < PlayerMngr->GetPlayerNum(); ++index2) {
+						if (index == index2) { continue; }
+						auto& p2 = PlayerMngr->GetPlayer(index2);
+						auto& tgt = (std::shared_ptr<CharacterObject::CharacterClass>&)p2->GetChara();
+						HitPoint Damage = 100;
+						tgt->CheckDamageRay(&Damage, false, c->GetMyPlayerID(), StartPos, &EndPos);
+					}
+				}
 			}
 			BackGround->Execute();
 			//UIパラメーター

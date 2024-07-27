@@ -75,6 +75,7 @@ namespace FPS_n2 {
 				}
 			}
 			void			SetID(PlayerID value) noexcept { m_ID = value; }
+			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_DamageEvent.AddDamageEvent(pRet); }
 		public:
 			void			SetData(const PlayerSendData& o, NetTime ClientTime) noexcept {
 				this->m_Input = o.GetInput();

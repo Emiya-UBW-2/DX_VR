@@ -196,12 +196,62 @@ namespace FPS_n2 {
 		//
 		bool			CharacterClass::SetDamageEvent(const DamageEvent& value) noexcept {
 			if (this->m_MyID == value.DamageID) {
+				//コンカッション
+				if (value.ShotID == this->m_ViewID) {
+					printfDx("AA\n");
+					CameraShake::Instance()->SetCamShake(0.5f, 0.05f * Scale_Rate);
+				}
 				//ダメージ
 				return true;
 			}
 			return false;
 		}
 		//
+		const bool		CharacterClass::CheckDamageRay(HitPoint* Damage, bool CheckBodyParts, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
+			if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, GetMove().GetPos()) <= 2.0f * Scale_Rate)) { return false; }
+
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto* SE = SoundPool::Instance();
+			//被弾処理
+			auto* HitPtr = HitBoxControl::GetLineHit(StartPos, pEndPos);
+			if (HitPtr) {
+				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(AttackID)->GetChara();
+				//部位ダメージ演算
+				if (CheckBodyParts) {
+					switch (HitPtr->GetColType()) {
+					case HitType::Head:
+						*Damage = *Damage * 100 / 10;
+						break;
+					case HitType::Body:
+							*Damage = *Damage;
+						break;
+					case HitType::Arm:
+						*Damage = *Damage * 5 / 10;
+						break;
+					case HitType::Leg:
+						*Damage = *Damage * 7 / 10;
+						break;
+					default:
+						break;
+					}
+					*Damage = std::min<HitPoint>(*Damage, 100);
+				}
+				//ダメージ登録
+				{
+					//auto v1 = GetEyeMatrix().zvec() * -1.f;
+					//auto v2 = (Chara->GetCharaPosition() - this->GetCharaPosition()).normalized(); v2.y = (0);
+					//atan2f(Vector3DX::Cross(v1, v2).y, Vector3DX::Dot(v1, v2))
+					m_Damage.Add(AttackID, this->m_MyID, *Damage);
+				}
+				//SE
+				if (AttackID == 0) {
+					//SE->Get((int)SoundEnum::Hit).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
+				}
+				//todo : ヒットした部分に近い頂点を赤くする
+				return true;
+			}
+			return false;
+		}
 		void			CharacterClass::MovePoint(float pxRad, float pyRad, const Vector3DX& pPos) noexcept {
 			CharaMove::InitKey(pxRad, pyRad);
 			Matrix3x3DX Mat; Mat.SetRadian(CharaMove::GetRadBuf().x, CharaMove::GetRadBuf().y, 0.f);
@@ -217,6 +267,7 @@ namespace FPS_n2 {
 			m_BambooVec.Set(0.f, 0.f);
 			m_BambooVecBase.Set(0.f, 0.f);
 			StaminaControl::InitStamina();
+			HitBoxControl::InitHitBox();
 			this->m_MoveOverRideFlag = false;
 		}
 		//
@@ -272,6 +323,7 @@ namespace FPS_n2 {
 			ExecuteAnim();
 			ExecuteSound();
 			ExecuteMatrix();
+			HitBoxControl::UpdataHitBox(this, 1.f);									//ヒットボックス
 		}
 		//
 		void			CharacterClass::ExecuteInput(void) noexcept {
@@ -536,28 +588,6 @@ namespace FPS_n2 {
 			CharaMove::UpdateKeyRad(this->m_move);
 		}
 		void			CharacterClass::ExecuteAction(void) noexcept {
-			auto IsGuardAction = [](EnumArmAnimType value) {
-				switch (value) {
-				case EnumArmAnimType::GuardSuriage:
-				case EnumArmAnimType::GuardLeft:
-				case EnumArmAnimType::GuardRight:
-					return true;
-				case EnumArmAnimType::Ready:
-				case EnumArmAnimType::Run:
-				case EnumArmAnimType::Men:
-				case EnumArmAnimType::Kote:
-				case EnumArmAnimType::Dou:
-				case EnumArmAnimType::Tsuki:
-				case EnumArmAnimType::Tsuba:
-				case EnumArmAnimType::HikiMen:
-				case EnumArmAnimType::HikiKote:
-				case EnumArmAnimType::HikiDou:
-				case EnumArmAnimType::GuardStart:
-				case EnumArmAnimType::Max:
-				default:
-					return false;
-				}
-				};
 			for (size_t index = 0; index < static_cast<size_t>(EnumArmAnimType::Max); ++index) {
 				this->m_Arm[index].Execute((m_CharaAction == (EnumArmAnimType)index), 0.1f, 0.1f, IsGuardAction((EnumArmAnimType)index) ? 0.75f : 0.9f);
 				//this->m_Arm[index].Init((m_CharaAction == (EnumArmAnimType)index));
@@ -753,6 +783,8 @@ namespace FPS_n2 {
 						if (!this->m_Weapon_Ptr->GetArmAnimeNowMatrix((EnumArmAnimType)i, &AnimData)) { continue; }
 						WeaponBaseMat = Lerp(WeaponBaseMat, AnimData, this->m_Arm[i].Per());
 					}
+					Vector3DX PrevPos = this->m_Weapon_Ptr->GetFramePosition(WeaponObject::WeaponFrame::End);
+
 					Vector3DX WeaponBasePos = GetFramePosition(CharaFrame::Head) + Matrix3x3DX::Vtrans(WeaponBaseMat.pos(), (CharaMove::GetUpperRotMatrix() * CharaMove::GetBaseRotMatrix()));
 					auto WeaponBaseRotMat = Matrix3x3DX::RotVec2(Vector3DX::forward(), WeaponBaseMat.zvec());
 					WeaponBaseRotMat *= Matrix3x3DX::RotVec2(WeaponBaseRotMat.yvec(), WeaponBaseMat.yvec());
@@ -812,6 +844,8 @@ namespace FPS_n2 {
 						}
 					}
 					this->m_Weapon_Ptr->ResetMove(WeaponAddRotMat * WeaponBaseRotMat, WeaponBasePos);
+
+					this->m_Weapon_Ptr->SetMoveSpeed((PrevPos - this->m_Weapon_Ptr->GetFramePosition(WeaponObject::WeaponFrame::End)).magnitude()* DrawParts->GetFps() / 60.f);
 				}
 				//手の位置を制御
 				if ((m_MyID == this->m_ViewID) || this->CanLookTarget) {

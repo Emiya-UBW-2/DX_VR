@@ -373,5 +373,104 @@ namespace FPS_n2 {
 				Easing(&this->m_MoveEyePos, Matrix3x3DX::Vtrans(EyePos, (this->m_UpperMatrix * this->m_BaseMatrix)), 0.9f, EasingType::OutExpo);
 			}
 		};
+
+		//
+		enum class HitType {
+			Head,
+			Body,
+			Arm,
+			Leg,
+		};
+		class HitBox {
+			Vector3DX	m_pos;
+			float		m_radius{ 0.f };
+			HitType		m_HitType{ HitType::Body };
+		public:
+			void	Execute(const Vector3DX& pos, float radius, HitType pHitType) {
+				m_pos = pos;
+				m_radius = radius;
+				m_HitType = pHitType;
+			}
+			void	Draw() {
+				unsigned int color;
+				switch (m_HitType) {
+				case HitType::Head:
+					color = Red;
+					break;
+				case HitType::Body:
+					color = Green;
+					break;
+				case HitType::Arm:
+					color = Blue;
+					break;
+				case HitType::Leg:
+					color = Blue;
+					break;
+				default:
+					break;
+				}
+				DrawSphere_3D(m_pos, m_radius, color, color);
+			}
+
+			bool	Colcheck(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
+				if (HitCheck_Sphere_Capsule(
+					m_pos.get(), m_radius,
+					StartPos.get(), pEndPos->get(), 0.001f * Scale_Rate
+				) == TRUE) {
+					VECTOR pos1 = StartPos.get();
+					VECTOR pos2 = pEndPos->get();
+					VECTOR pos3 = m_pos.get();
+					SEGMENT_POINT_RESULT Res;
+					Segment_Point_Analyse(&pos1, &pos2, &pos3, &Res);
+
+					*pEndPos = Res.Seg_MinDist_Pos;
+
+					return TRUE;
+				}
+				return FALSE;
+			}
+			const auto GetColType()const noexcept { return this->m_HitType; }
+		};
+		//
+		class HitBoxControl {
+		private:
+			std::vector<HitBox>									m_HitBox;
+		protected:
+			const HitBox* GetLineHit(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
+				for (auto& h : this->m_HitBox) {
+					if (h.Colcheck(StartPos, pEndPos)) {
+						return &h;
+					}
+				}
+				return nullptr;
+			}
+		public:
+			void		CheckLineHitNearest(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
+				for (auto& h : this->m_HitBox) {
+					h.Colcheck(StartPos, pEndPos);
+				}
+			}
+		public:
+			HitBoxControl(void) noexcept {}
+			~HitBoxControl(void) noexcept {}
+		protected:
+			void InitHitBox() noexcept {
+				m_HitBox.resize(6);
+			}
+			void UpdataHitBox(const ObjectBaseClass* ptr, float SizeRate) noexcept;
+			void DrawHitBox() noexcept {
+				//this->GetObj().SetOpacityRate(0.5f);
+				SetFogEnable(FALSE);
+				SetUseLighting(FALSE);
+				//SetUseZBuffer3D(FALSE);
+
+				for (auto& h : this->m_HitBox) {
+					h.Draw();
+				}
+
+				//SetUseZBuffer3D(TRUE);
+				SetUseLighting(TRUE);
+			}
+		};
 	}
 }

@@ -9,13 +9,16 @@ namespace FPS_n2 {
 		class WeaponClass : public ObjectBaseClass {
 		private:
 			float							m_UpperAnim{ 0.f };
+			float							m_Speed{ 0.f };
 		public://ゲッター
 			auto	GetFrameWorldMat(WeaponFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
 			Vector3DX GetFramePosition(WeaponFrame frame) const noexcept { return MV1GetFramePosition(GetObj_const().GetHandle(), GetFrame(static_cast<int>(frame))); }
+			const auto& GetMoveSpeed(void) const noexcept { return this->m_Speed; }
 			//
 		public:
 			void			ResetAnim(void) noexcept { m_UpperAnim = 0.f; }
 			void			SetAnim(float value) noexcept { m_UpperAnim = value; }
+			void			SetMoveSpeed(float value) noexcept { m_Speed = value; }
 		public:
 			auto	GetArmAnimeTotalTime(EnumArmAnimType ID) const noexcept {
 				//銃の位置を指定するアニメ
