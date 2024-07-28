@@ -15,6 +15,9 @@ namespace FPS_n2 {
 			public StaminaControl,
 			public HitBoxControl,
 			public CharaMove
+#ifdef _USE_EFFEKSEER_
+			, public EffectControl
+#endif
 		{
 		private:
 			EnumArmAnimType									m_CharaAction{ EnumArmAnimType::Ready };
@@ -23,8 +26,12 @@ namespace FPS_n2 {
 			int													m_CharaSound{ -1 };			//サウンド
 			CharaTypeID											m_CharaType{};
 			std::shared_ptr<WeaponObject::WeaponClass>			m_Weapon_Ptr{ nullptr };		//銃
-
+			bool												m_ConcussionSwitch{ false };
 			float												m_YaTimer{ 0.f };
+
+			float												m_DamageCoolTime{ 0.f };
+			float												m_TsubaSoundCoolTime{ 0.f };
+			float												m_GuardHit{ 0.f };
 
 			float												m_RunTime{ 0.f };
 			float												m_FrontAttackActionTime{ 0.f };
@@ -61,6 +68,12 @@ namespace FPS_n2 {
 			const auto& GetGuardVec(void) const noexcept { return m_GuardVecR; }
 			const auto& GetYaTimer(void) const noexcept { return m_YaTimer; }
 			const auto& GetWeaponPtr(void) const noexcept { return m_Weapon_Ptr; }
+			auto			PopConcussionSwitch(void) noexcept {
+				auto Prev = m_ConcussionSwitch;
+				m_ConcussionSwitch = false;
+				return Prev;
+			}
+			auto			GetGuardOn(void) const noexcept { return m_GuardHit>0.f; }//ガードで竹刀を抑えた
 			auto			GetYaTimerMax(void) const noexcept { return 15.f; }
 			auto			IsGuardStarting(void) const noexcept { return m_CharaAction == EnumArmAnimType::GuardStart; }
 			auto			IsAttackAction(EnumArmAnimType value) const noexcept {
@@ -129,7 +142,7 @@ namespace FPS_n2 {
 				OverrideAction();
 			}
 		public: //更新関連
-			const bool		CheckDamageRay(HitPoint* Damage, bool CheckBodyParts, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
+			const bool		CheckDamageRay(HitPoint* Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
 			void			MovePoint(float pxRad, float pyRad, const Vector3DX& pPos) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady) noexcept;
 		private:
@@ -209,6 +222,9 @@ namespace FPS_n2 {
 			}
 			void			Dispose_Sub(void) noexcept override {
 				m_Weapon_Ptr.reset();
+#ifdef _USE_EFFEKSEER_
+				EffectControl::Dispose();
+#endif
 			}
 		};
 	}

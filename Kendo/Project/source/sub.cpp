@@ -5,17 +5,19 @@
 #include "MainScene/Object/Weapon.hpp"
 
 const FPS_n2::CommonBattleResource* SingletonBase<FPS_n2::CommonBattleResource>::m_Singleton = nullptr;
+const FPS_n2::HitMark* SingletonBase<FPS_n2::HitMark>::m_Singleton = nullptr;
 
 namespace FPS_n2 {
 	void			CommonBattleResource::Load(void) noexcept {
 		auto* SE = SoundPool::Instance();
 		SE->Add(static_cast<int>(SoundEnum::RunFoot), 4, "data/Sound/SE/move/runfoot.wav");
 		SE->Add(static_cast<int>(SoundEnum::StandupFoot), 2, "data/Sound/SE/move/standup.wav");
-		SE->Add(static_cast<int>(SoundEnum::Heart), 2, "data/Sound/SE/move/heart.wav", false);
+		SE->Add(static_cast<int>(SoundEnum::Heart), 5, "data/Sound/SE/move/heart.wav", false);
 		//
 		SE->Add(static_cast<int>(SoundEnum::Kendo_Swing), 2, "data/Sound/SE/Kendo/Swing.wav");
 		SE->Add(static_cast<int>(SoundEnum::Kendo_Hit), 2, "data/Sound/SE/Kendo/Hit.wav");
 		SE->Add(static_cast<int>(SoundEnum::Kendo_Foot), 2, "data/Sound/SE/Kendo/Foot.wav");
+		SE->Add(static_cast<int>(SoundEnum::Kendo_Tsuba), 2, "data/Sound/SE/Kendo/Tsuba.wav");
 		//
 		SE->Add(static_cast<int>(SoundEnum::Voice_Ya), 2, "data/Sound/SE/voice/Ya.wav");
 		SE->Add(static_cast<int>(SoundEnum::Voice_Men), 2, "data/Sound/SE/voice/Men.wav");
@@ -46,6 +48,7 @@ namespace FPS_n2 {
 		SE->Delete(static_cast<int>(SoundEnum::Kendo_Swing));
 		SE->Delete(static_cast<int>(SoundEnum::Kendo_Hit));
 		SE->Delete(static_cast<int>(SoundEnum::Kendo_Foot));
+		SE->Delete(static_cast<int>(SoundEnum::Kendo_Tsuba));
 
 		SE->Delete(static_cast<int>(SoundEnum::Voice_Ya));
 		SE->Delete(static_cast<int>(SoundEnum::Voice_Men));
@@ -95,5 +98,42 @@ namespace FPS_n2 {
 		Ptr->Init();
 		auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(ID)->GetChara();
 		c->SetWeaponPtr(Ptr);
+	}
+	void HitMark::Load(void) noexcept {
+		this->hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
+	}
+	void HitMark::Set(void) noexcept {
+		for (auto& h : m_HitPos) {
+			h.Time = -1.f;
+		}
+	}
+	void HitMark::Update(void) noexcept {
+		auto* DrawParts = DXDraw::Instance();
+		for (auto& h: m_HitPos) {
+			if (h.Time <= 0.f) { continue; }
+			h.Time = std::max(h.Time - 1.f / DrawParts->GetFps(), 0.f);
+			auto tmp = ConvWorldPosToScreenPos(h.m_Pos.get());
+			if (tmp.z >= 0.f && tmp.z <= 1.f) {
+				h.m_Pos2D = tmp;
+				h.m_Pos2D = h.m_Pos2D * ((float)DrawParts->GetUIY(1080) / (float)DrawParts->GetScreenY(1080));
+			}
+		}
+	}
+	void HitMark::Draw(void) noexcept {
+		auto* DrawParts = DXDraw::Instance();
+		for (auto& h : m_HitPos) {
+			if (h.Time <= 0.f) { continue; }
+			if (h.m_Pos2D.z >= 0.f && h.m_Pos2D.z <= 1.f) {
+				SetDrawBright(h.m_Color.r, h.m_Color.g, h.m_Color.b);
+				int			Alpha = (int)(std::clamp(h.Time * h.m_Per, 0.f, 1.f) * 255.f);
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, Alpha);
+				hit_Graph.DrawRotaGraph((int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
+			}
+		}
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+		SetDrawBright(255, 255, 255);
+	}
+	void HitMark::Dispose(void) noexcept {
+		this->hit_Graph.Dispose();
 	}
 };

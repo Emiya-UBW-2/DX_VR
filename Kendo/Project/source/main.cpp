@@ -58,6 +58,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::BackGround::BackGroundClass::Create();
 	FPS_n2::NetWorkBrowser::Create();
 	FPS_n2::Sceneclass::ButtonControl::Create();
+	FPS_n2::HitMark::Create();
 	//ÉVÅ[Éì
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto LoadScenePtr = std::make_shared<FPS_n2::Sceneclass::LoadScene>();

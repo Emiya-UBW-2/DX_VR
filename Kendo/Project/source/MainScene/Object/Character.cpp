@@ -153,6 +153,7 @@ namespace FPS_n2 {
 			SetFumikomi();
 			StopVoice();
 			PlayVoice();
+			m_BambooVecBase.Set(0.f, 0.f);
 		}
 		void			CharacterClass::OverrideDo(void) noexcept {
 			m_FrontAttackActionTime = this->m_Weapon_Ptr->GetArmAnimeTotalTime(m_CharaAction);
@@ -162,6 +163,7 @@ namespace FPS_n2 {
 			SetFumikomi();
 			StopVoice();
 			PlayVoice();
+			m_BambooVecBase.Set(0.f, 0.f);
 		}
 		void			CharacterClass::OverrideTsuba(void) noexcept {
 			m_TsubaCoolDown = 0.5f;
@@ -183,6 +185,7 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto& Target = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetChara();
 			Target->OverrideReady();
+			m_BambooVecBase.Set(0.f, 0.f);
 		}
 		void			CharacterClass::OverrideGuardStart(void) noexcept {
 			m_GuardStartTimer = 0.f;
@@ -196,10 +199,47 @@ namespace FPS_n2 {
 		//
 		bool			CharacterClass::SetDamageEvent(const DamageEvent& value) noexcept {
 			if (this->m_MyID == value.DamageID) {
+				if (m_DamageCoolTime == 0.f && (GetRand(100) <= 30)) {
+					auto* SE = SoundPool::Instance();
+					SE->Get(static_cast<int>(SoundEnum::Kendo_Hit)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale_Rate * 15.f);
+					m_DamageCoolTime = static_cast<float>(SE->Get(static_cast<int>(SoundEnum::Kendo_Hit)).GetTotalTIme(0, 0)) / 1000.f;
+				}
 				//コンカッション
-				if (value.ShotID == this->m_ViewID) {
-					printfDx("AA\n");
-					CameraShake::Instance()->SetCamShake(0.5f, 0.05f * Scale_Rate);
+				if (this->m_MyID == this->m_ViewID) {
+					switch (value.GetHitType()) {
+					case HitType::Head://面
+						m_ConcussionSwitch = true;
+						break;
+					case HitType::Body://胴
+						m_ConcussionSwitch = true;
+						break;
+					case HitType::Arm://小手
+						m_ConcussionSwitch = true;
+						break;
+					default:
+						break;
+					}
+				}
+				else {
+					COLOR_U8 Color{};
+					float Per = 1.f;
+					switch (value.GetHitType()) {
+					case HitType::Head://面
+						Color = GetColorU8(255, 0, 0, 255);
+						Per = static_cast<float>(value.Damage) / 100.f;
+						break;
+					case HitType::Arm://小手
+						Color = GetColorU8(255, 128, 0, 255);
+						Per = static_cast<float>(value.Damage) / 100.f;
+						break;
+					case HitType::Body://胴
+						Color = GetColorU8(255, 255, 0, 255);
+						Per = static_cast<float>(value.Damage) / 100.f;
+						break;
+					default:
+						break;
+					}
+					HitMark::Instance()->Add(value.m_Pos, Color, Per);
 				}
 				//ダメージ
 				return true;
@@ -207,47 +247,15 @@ namespace FPS_n2 {
 			return false;
 		}
 		//
-		const bool		CharacterClass::CheckDamageRay(HitPoint* Damage, bool CheckBodyParts, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
+		const bool		CharacterClass::CheckDamageRay(HitPoint* Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
 			if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, GetMove().GetPos()) <= 2.0f * Scale_Rate)) { return false; }
-
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* SE = SoundPool::Instance();
 			//被弾処理
 			auto* HitPtr = HitBoxControl::GetLineHit(StartPos, pEndPos);
 			if (HitPtr) {
-				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(AttackID)->GetChara();
-				//部位ダメージ演算
-				if (CheckBodyParts) {
-					switch (HitPtr->GetColType()) {
-					case HitType::Head:
-						*Damage = *Damage * 100 / 10;
-						break;
-					case HitType::Body:
-							*Damage = *Damage;
-						break;
-					case HitType::Arm:
-						*Damage = *Damage * 5 / 10;
-						break;
-					case HitType::Leg:
-						*Damage = *Damage * 7 / 10;
-						break;
-					default:
-						break;
-					}
-					*Damage = std::min<HitPoint>(*Damage, 100);
-				}
 				//ダメージ登録
 				{
-					//auto v1 = GetEyeMatrix().zvec() * -1.f;
-					//auto v2 = (Chara->GetCharaPosition() - this->GetCharaPosition()).normalized(); v2.y = (0);
-					//atan2f(Vector3DX::Cross(v1, v2).y, Vector3DX::Dot(v1, v2))
-					m_Damage.Add(AttackID, this->m_MyID, *Damage);
+					m_Damage.Add(AttackID, this->m_MyID, *Damage, HitPtr->GetColType(), *pEndPos);
 				}
-				//SE
-				if (AttackID == 0) {
-					//SE->Get((int)SoundEnum::Hit).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
-				}
-				//todo : ヒットした部分に近い頂点を赤くする
 				return true;
 			}
 			return false;
@@ -269,6 +277,9 @@ namespace FPS_n2 {
 			StaminaControl::InitStamina();
 			HitBoxControl::InitHitBox();
 			this->m_MoveOverRideFlag = false;
+#ifdef _USE_EFFEKSEER_
+			EffectControl::Init();				//
+#endif
 		}
 		//
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
@@ -278,7 +289,9 @@ namespace FPS_n2 {
 			m_GuardVec.y = std::clamp(m_GuardVec.y + Input.GetAddxRad() / 200.f, -1.5f, 1.5f);
 			Easing(&m_GuardVecR, m_GuardVec, 0.9f, EasingType::OutExpo);
 			//竹刀の回転を反映
-			Easing(&m_BambooVecBase, Vector2DX::vget(Input.GetxRad(), Input.GetyRad()), 0.7f, EasingType::OutExpo);
+			if (!IsAttacking()) {
+				Easing(&m_BambooVecBase, Vector2DX::vget(Input.GetxRad(), Input.GetyRad()), 0.7f, EasingType::OutExpo);
+			}
 			//自動で相手を向く
 			{
 				auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -293,10 +306,10 @@ namespace FPS_n2 {
 					float cost = Vector3DX::Dot(Vec, Dir);
 					auto IsFront = (cost > cos(deg2rad(40)));
 					if (IsFront) {
-						pp_y = std::clamp(-std::atan2f(sint, cost), -deg2rad(60), deg2rad(60)) * 5.f / 60.f;
+						pp_y = std::clamp(-std::atan2f(sint, cost), -deg2rad(60), deg2rad(60)) * 9.f / Frame_Rate;
 					}
 					else {
-						pp_y = -deg2rad(60) * 5.f / 60.f;
+						pp_y = -deg2rad(60) * 9.f / Frame_Rate;
 					}
 				}
 				Input.SetAddxRad(0.f);
@@ -324,6 +337,9 @@ namespace FPS_n2 {
 			ExecuteSound();
 			ExecuteMatrix();
 			HitBoxControl::UpdataHitBox(this, 1.f);									//ヒットボックス
+#ifdef _USE_EFFEKSEER_
+			EffectControl::Execute();				//
+#endif
 		}
 		//
 		void			CharacterClass::ExecuteInput(void) noexcept {
@@ -346,30 +362,32 @@ namespace FPS_n2 {
 				m_YaTimer = GetYaTimerMax();
 			}
 			m_YaTimer = std::max(m_YaTimer - 1.f / DrawParts->GetFps(), 0.f);
+			m_DamageCoolTime = std::max(m_DamageCoolTime - 1.f / DrawParts->GetFps(), 0.f);
+			m_TsubaSoundCoolTime = std::max(m_TsubaSoundCoolTime - 1.f / DrawParts->GetFps(), 0.f);
+			m_GuardHit = std::max(m_GuardHit - 1.f / DrawParts->GetFps(), 0.f);
 			//
 			auto Prev = m_CharaAction;
 			switch (m_CharaAction) {
 			case EnumArmAnimType::Ready:
 			{
+				auto* PlayerMngr = Player::PlayerManager::Instance();
+				auto& Target = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1 - this->m_MyID)->GetChara();
 				//つばぜり判定
-				{
+				if(Target->GetCharaAction()==GetCharaAction()){
 					CheckTsuba();
 				}
 				if (CharaMove::GetInputControl().GetPADSPress(PADS::AIM)) {
 					m_CharaAction = EnumArmAnimType::GuardStart;
 				}
 				{
-					auto* PlayerMngr = Player::PlayerManager::Instance();
-					auto& Target = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1 - this->m_MyID)->GetChara();
-
-					auto& TgtPos = Target->GetMove().GetPos();
-					auto& MyPos = this->GetMove().GetPos();
-
+					auto Dir = CharaMove::GetEyeMatrix().zvec() * -1.f; Dir.y = (0.f); Dir = Dir.normalized();
 					float Len = 0.f;
-					auto Vec = (TgtPos - MyPos); Vec.y = (0.f); Len = Vec.magnitude(); Vec = Vec.normalized();
+					auto Vec = (Target->GetMove().GetPos() - this->GetEyePosition()); Vec.y = (0.f); Len = Vec.magnitude(); Vec = Vec.normalized();
 
+					float cost = Vector3DX::Dot(Vec, Dir);
+					auto IsFront = (cost > cos(deg2rad(40)));
 					float Radius = 3.5f * Scale_Rate;
-					if (!IsOutArea && (Len < Radius)) {
+					if (!IsOutArea && (Len < Radius) && IsFront) {
 						if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
 							m_CharaAction = EnumArmAnimType::Men;
 						}
@@ -386,7 +404,7 @@ namespace FPS_n2 {
 			break;
 			case EnumArmAnimType::Run:
 			{
-				if (IsOutArea || m_RunTime >= 2.f) {
+				if (IsOutArea || m_RunTime >= 1.25f) {
 					m_CharaAction = EnumArmAnimType::Ready;
 				}
 
@@ -396,16 +414,15 @@ namespace FPS_n2 {
 				}
 
 				m_RunTime = std::max(m_RunTime + 1.f / DrawParts->GetFps(), 0.f);
-				m_HeartUp = std::max(m_HeartUp, 2.f);
+				m_HeartUp = std::max(m_HeartUp + 0.5f * 30.f / DrawParts->GetFps(), 3.f);
 			}
 			break;
 			case EnumArmAnimType::Men:
 			case EnumArmAnimType::Kote:
 			case EnumArmAnimType::Tsuki:
 			{
-				Easing(&m_BambooVecBase, Vector2DX::zero(), 0.9f, EasingType::OutExpo);
 				//技派生
-				if (m_FrontAttackActionTime <= 0.12f) {//受付開始
+				if (m_FrontAttackActionTime <= 0.06f) {//受付開始
 					auto Action = m_CharaAction;
 					if (m_FrontAttackActionTime <= 0.f) {//派生先がなく0秒になった
 						m_CharaAction = EnumArmAnimType::Run;
@@ -457,7 +474,7 @@ namespace FPS_n2 {
 					}
 				}
 				m_FrontAttackActionTime = std::max(m_FrontAttackActionTime - 1.f / DrawParts->GetFps(), 0.f);
-				m_HeartUp = std::max(m_HeartUp, 10.f);
+				m_HeartUp = std::max(m_HeartUp + 0.1f * 30.f / DrawParts->GetFps(), 10.f);
 			}
 			break;
 			case EnumArmAnimType::Dou:
@@ -466,7 +483,7 @@ namespace FPS_n2 {
 					m_CharaAction = EnumArmAnimType::Run;
 				}
 				m_FrontAttackActionTime = std::max(m_FrontAttackActionTime - 1.f / DrawParts->GetFps(), 0.f);
-				m_HeartUp = std::max(m_HeartUp, 10.f);
+				m_HeartUp = std::max(m_HeartUp + 0.1f * 30.f / DrawParts->GetFps(), 10.f);
 			}
 			break;
 			case EnumArmAnimType::Tsuba:
@@ -490,12 +507,11 @@ namespace FPS_n2 {
 			case EnumArmAnimType::HikiKote:
 			case EnumArmAnimType::HikiDou:
 			{
-				Easing(&m_BambooVecBase, Vector2DX::zero(), 0.9f, EasingType::OutExpo);
-				if (IsOutArea || m_BackAttackActionTime <= 0.f) {
+				if (m_BackAttackActionTime <= 0.f) {
 					m_CharaAction = EnumArmAnimType::Ready;
 				}
 				m_BackAttackActionTime = std::max(m_BackAttackActionTime - 1.f / DrawParts->GetFps(), 0.f);
-				m_HeartUp = std::max(m_HeartUp, 10.f);
+				m_HeartUp = std::max(m_HeartUp + 0.1f * 30.f / DrawParts->GetFps(), 10.f);
 			}
 			break;
 			case EnumArmAnimType::GuardStart:
@@ -802,6 +818,7 @@ namespace FPS_n2 {
 						Vector3DX VecA = (EndPos - StartPos).normalized();
 						bool IsHit = false;
 						float Radius = 0.025f * Scale_Rate * 2.f;
+						Vector3DX HitPos;
 						for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 							if (i == this->m_MyID) { continue; }
 							auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
@@ -821,6 +838,7 @@ namespace FPS_n2 {
 								(0.f < Ret.SegA_MinDist_Pos1_Pos2_t && Ret.SegA_MinDist_Pos1_Pos2_t < 1.f) &&
 								(0.f < Ret.SegB_MinDist_Pos1_Pos2_t && Ret.SegB_MinDist_Pos1_Pos2_t < 1.f)
 								) {
+									HitPos = Vec0;
 									{
 										Vector3DX Vec2 = Vec0 + (Vec1 - Vec0).normalized() * (Len - Radius);
 										auto ZVec = Matrix3x3DX::RotVec2(VecA, (Vec2 - StartPos).normalized()).zvec();
@@ -835,17 +853,31 @@ namespace FPS_n2 {
 										c->m_BambooVec.x += atan2f(ZVec.y, std::hypotf(ZVec.x, ZVec.z)) * 1.5f;
 									}
 									IsHit = true;
+
+									if (m_TsubaSoundCoolTime == 0.f && (this->m_Weapon_Ptr->GetMoveSpeed() > 1.f)) {
+										auto* SE = SoundPool::Instance();
+										SE->Get(static_cast<int>(SoundEnum::Kendo_Tsuba)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale_Rate * 15.f, static_cast<int>(128.f * this->m_Weapon_Ptr->GetMoveSpeed()));
+										m_TsubaSoundCoolTime = static_cast<float>(SE->Get(static_cast<int>(SoundEnum::Kendo_Tsuba)).GetTotalTIme(0, 0)) / 1000.f * 0.5f;
+									}
+									WeaponAddRotMat = Matrix3x3DX::RotAxis(Vector3DX::right(), m_BambooVec.x) * Matrix3x3DX::RotAxis(Vector3DX::forward(), m_BambooVec.y);
+									if (IsGuardAction(m_CharaAction) || IsAttacking()) {
+										if (m_GuardHit == 0.f) {
+#ifdef _USE_EFFEKSEER_
+											EffectControl::SetOnce(EffectResource::Effect::ef_gndsmoke, HitPos, (c->GetEyePosition() - GetEyePosition()).normalized(), 0.1f * Scale_Rate);
+#endif
+										}
+										m_GuardHit = 3.f / Frame_Rate;
+									}
 									break;
 							}
 						}
 						if (IsHit) {
-							WeaponAddRotMat = Matrix3x3DX::RotAxis(Vector3DX::right(), m_BambooVec.x) * Matrix3x3DX::RotAxis(Vector3DX::forward(), m_BambooVec.y);
 							break;
 						}
 					}
 					this->m_Weapon_Ptr->ResetMove(WeaponAddRotMat * WeaponBaseRotMat, WeaponBasePos);
 
-					this->m_Weapon_Ptr->SetMoveSpeed((PrevPos - this->m_Weapon_Ptr->GetFramePosition(WeaponObject::WeaponFrame::End)).magnitude()* DrawParts->GetFps() / 60.f);
+					this->m_Weapon_Ptr->SetMoveSpeed((PrevPos - this->m_Weapon_Ptr->GetFramePosition(WeaponObject::WeaponFrame::End)).magnitude()* DrawParts->GetFps() / Frame_Rate);
 				}
 				//手の位置を制御
 				if ((m_MyID == this->m_ViewID) || this->CanLookTarget) {

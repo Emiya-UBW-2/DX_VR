@@ -97,7 +97,9 @@ namespace FPS_n2 {
 				if (this->m_HeartRateRad >= DX_PI_F * 2) { this->m_HeartRateRad -= DX_PI_F * 2; }
 				if (
 					(deg2rad(0) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(10)) ||
+					(deg2rad(60) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(70)) ||
 					(deg2rad(120) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(130)) ||
+					(deg2rad(180) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(190)) ||
 					(deg2rad(240) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(250))
 					) {
 					if (!this->m_HeartSoundFlag) {
@@ -202,7 +204,7 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				Vector3DX vecBuf = Matrix3x3DX::Vtrans(m_VecTotal, Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_yrad_Upper));
 				if (m_MoverPer > 0.f) {
-					vecBuf = vecBuf.normalized() * (GetSpeedPer() * 60.f / DrawParts->GetFps());
+					vecBuf = vecBuf.normalized() * (GetSpeedPer() * Frame_Rate / DrawParts->GetFps());
 				}
 				return vecBuf;
 			}
@@ -361,9 +363,9 @@ namespace FPS_n2 {
 				m_UpperMatrix = Matrix3x3DX::RotAxis(Vector3DX::right(), XRad) * Matrix3x3DX::RotAxis(Vector3DX::up(), Lerp(this->m_yrad_BottomChange, 0.f, m_RunPer));
 				m_EyeMatrix = Matrix3x3DX::RotAxis(Vector3DX::right(), XRad) * Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_yrad_BottomChange);
 				//ˆÚ“®‚ÌÛ‚ÌŽ‹“_‚Ì—h‚ê
-				float SwingPer = GetRun() ? 0.5f : ((GetVec().magnitude() * DrawParts->GetFps() / 60.f) / 0.65f);
+				float SwingPer = GetRun() ? 0.5f : ((GetVec().magnitude() * DrawParts->GetFps() / Frame_Rate) / 0.65f);
 				if (SwingPer > 0.f) {
-					this->m_MoveEyePosTimer += SwingPer * deg2rad(GetRun() ? 12.f : 5.f) * 60.f / DrawParts->GetFps();
+					this->m_MoveEyePosTimer += SwingPer * deg2rad(GetRun() ? 12.f : 5.f) * Frame_Rate / DrawParts->GetFps();
 				}
 				else {
 					this->m_MoveEyePosTimer = 0.f;
@@ -375,12 +377,6 @@ namespace FPS_n2 {
 		};
 
 		//
-		enum class HitType {
-			Head,
-			Body,
-			Arm,
-			Leg,
-		};
 		class HitBox {
 			Vector3DX	m_pos;
 			float		m_radius{ 0.f };

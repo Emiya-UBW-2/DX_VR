@@ -19,6 +19,7 @@ namespace FPS_n2 {
 		Kendo_Swing,
 		Kendo_Hit,
 		Kendo_Foot,
+		Kendo_Tsuba,
 		//
 		Voice_Ya,
 		Voice_Men,
@@ -41,4 +42,11 @@ namespace FPS_n2 {
 
 	typedef int8_t	PlayerID;
 	typedef short	HitPoint;
+
+	enum class HitType {
+		Head,
+		Body,
+		Arm,
+		Leg,
+	};
 };

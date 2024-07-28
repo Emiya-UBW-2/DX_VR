@@ -20,6 +20,7 @@ namespace FPS_n2 {
 			//UI
 			this->m_UIclass.Load();
 			PauseMenuControl::LoadPause();
+			HitMark::Instance()->Load();
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -70,6 +71,7 @@ namespace FPS_n2 {
 			PauseMenuControl::SetPause();
 			FadeControl::SetFade();
 			this->m_IsEnd = false;
+			HitMark::Instance()->Set();
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* PostPassParts = PostPassEffect::Instance();
@@ -282,37 +284,17 @@ namespace FPS_n2 {
 			}
 			//Execute
 			ObjMngr->ExecuteObject();
-			//コンカッション
-			{
-				DrawParts->Set_is_Blackout(m_Concussion > 0.f);
-				if (m_Concussion == 1.f) {
-					CameraShake::Instance()->SetCamShake(0.5f, 0.05f * Scale_Rate);
-				}
-				if (m_Concussion > 0.9f) {
-					Easing(&m_ConcussionPer, 1.f, 0.1f, EasingType::OutExpo);
-				}
-				else if (m_Concussion > 0.25f) {
-					if (m_ConcussionPer > 0.25f) {
-						Easing(&m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
-					}
-					else {
-						m_ConcussionPer = 0.25f;
-					}
-				}
-				else {
-					Easing(&m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
-				}
-				DrawParts->Set_Per_Blackout(m_ConcussionPer * 1.5f);
-				m_Concussion = std::max(m_Concussion - 1.f / DrawParts->GetFps(), 0.f);
-			}
 			BackGround->FirstExecute();
 			ObjMngr->LateExecuteObject();
 			//視点
 			{
+				auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 				auto* OptionParts = OPTION::Instance();
 				//カメラ
-				Vector3DX CamPos = Chara->GetEyePosition() + CameraShake::Instance()->GetCamShake();
-				Vector3DX CamVec = CamPos + Chara->GetEyeMatrix().zvec() * -1.f;
+				Vector3DX CamPos = ViewChara->GetEyePosition();
+				Vector3DX CamVec = CamPos + ViewChara->GetEyeMatrix().zvec() * -1.f;
+				CamVec += CameraShake::Instance()->GetCamShake();
+				CamPos += CameraShake::Instance()->GetCamShake()*2.f;
 #ifdef DEBUG
 				if (CheckHitKeyWithCheck(KEY_INPUT_F1) != 0) {
 					DBG_CamSel = -1;
@@ -339,52 +321,81 @@ namespace FPS_n2 {
 				case 0:
 				case 3:
 					CamVec = CamPos;
-					CamPos += Chara->GetEyeMatrix().xvec() * (2.f * Scale_Rate);
+					CamPos += ViewChara->GetEyeMatrix().xvec() * (2.f * Scale_Rate);
 					break;
 				case 1:
 				case 4:
 					CamVec = CamPos;
-					CamPos += Chara->GetEyeMatrix().yvec() * (2.f * Scale_Rate) + Chara->GetEyeMatrix().zvec() * 0.1f;
+					CamPos += ViewChara->GetEyeMatrix().yvec() * (2.f * Scale_Rate) + ViewChara->GetEyeMatrix().zvec() * 0.1f;
 					break;
 				case 2:
 				case 5:
 					CamVec = CamPos;
-					CamPos += Chara->GetEyeMatrix().zvec() * (-2.f * Scale_Rate);
+					CamPos += ViewChara->GetEyeMatrix().zvec() * (-2.f * Scale_Rate);
 					break;
 				default:
 					break;
 				}
 #endif
-				DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, Chara->GetEyeMatrix().yvec());
+				DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
 				//info
 				DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 0.3f, Scale_Rate * 20.f);
 				//DoF
 				PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.3f, Scale_Rate * 5.f, Scale_Rate * 0.1f, Scale_Rate * 20.f);
 			}
+			//竹刀判定
 			{
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 					auto& p = PlayerMngr->GetPlayer(index);
 					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 					if (!c->IsAttacking()) { continue; }
-					//if (c->GetWeaponPtr()->GetMoveSpeed() < 5.f) { continue; }
+					if (c->GetGuardOn()) { continue; }
 					printfDx("[%f]\n", c->GetWeaponPtr()->GetMoveSpeed());
 					Vector3DX StartPos = c->GetWeaponPtr()->GetMove().GetPos();
 					Vector3DX EndPos = c->GetWeaponPtr()->GetFramePosition(WeaponObject::WeaponFrame::End);
+					StartPos = StartPos + (EndPos - StartPos) * 0.5f;
+
 					for (int index2 = 0; index2 < PlayerMngr->GetPlayerNum(); ++index2) {
 						if (index == index2) { continue; }
 						auto& p2 = PlayerMngr->GetPlayer(index2);
 						auto& tgt = (std::shared_ptr<CharacterObject::CharacterClass>&)p2->GetChara();
-						HitPoint Damage = 100;
-						tgt->CheckDamageRay(&Damage, false, c->GetMyPlayerID(), StartPos, &EndPos);
+						HitPoint Damage = static_cast<HitPoint>(100.f * c->GetWeaponPtr()->GetMoveSpeed() / 5.f);
+						tgt->CheckDamageRay(&Damage, c->GetMyPlayerID(), StartPos, &EndPos);
 					}
 				}
+			}
+			//コンカッション
+			{
+				if (Chara->PopConcussionSwitch()) {
+					m_Concussion = 1.f;
+				}
+				DrawParts->Set_is_Blackout(m_Concussion > 0.f);
+				if (m_Concussion == 1.f) {
+					CameraShake::Instance()->SetCamShake(0.5f, 0.01f * Scale_Rate);
+				}
+				if (m_Concussion > 0.9f) {
+					Easing(&m_ConcussionPer, 1.f, 0.1f, EasingType::OutExpo);
+				}
+				else if (m_Concussion > 0.25f) {
+					if (m_ConcussionPer > 0.25f) {
+						Easing(&m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
+					}
+					else {
+						m_ConcussionPer = 0.25f;
+					}
+				}
+				else {
+					Easing(&m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
+				}
+				DrawParts->Set_Per_Blackout(m_ConcussionPer * 2.f);
+				m_Concussion = std::max(m_Concussion - 1.f / DrawParts->GetFps(), 0.f);
 			}
 			BackGround->Execute();
 			//UIパラメーター
 			{
 				if (GetIsFirstLoop()) {
-					this->m_UIclass.InitGaugeParam(0, static_cast<int>(Chara->GetYaTimer()), static_cast<int>(Chara->GetYaTimerMax()));
-					this->m_UIclass.InitGaugeParam(1, static_cast<int>(Chara->GetStamina()), static_cast<int>(Chara->GetStaminaMax()));
+					this->m_UIclass.InitGaugeParam(0, static_cast<int>(0.f), static_cast<int>(Chara->GetYaTimerMax()));
+					this->m_UIclass.InitGaugeParam(1, static_cast<int>(Chara->GetStaminaMax()), static_cast<int>(Chara->GetStaminaMax()));
 				}
 				//NvsN
 				this->m_UIclass.SetIntParam(0, 0);
@@ -395,7 +406,7 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(2, static_cast<int>(Chara->GetHeartRate()));
 				this->m_UIclass.SetfloatParam(1, Chara->GetHeartRatePow());
 				//ゲージ
-				this->m_UIclass.SetGaugeParam(0, static_cast<int>((Chara->GetYaTimerMax() - Chara->GetYaTimer()) * 10000.f), static_cast<int>(Chara->GetYaTimerMax() * 10000.f), 1);
+				this->m_UIclass.SetGaugeParam(0, static_cast<int>((Chara->GetYaTimerMax() - Chara->GetYaTimer()) * 10000.f), static_cast<int>(Chara->GetYaTimerMax() * 10000.f), 15);
 				this->m_UIclass.SetGaugeParam(1, static_cast<int>(Chara->GetStamina() * 10000.f), static_cast<int>(Chara->GetStaminaMax() * 10000.f), 15);
 				//ガード円
 				Easing(&m_GuardStart, Chara->IsGuardStarting() ? 1.f : 0.f, Chara->IsGuardStarting() ? 0.8f : 0.5f, EasingType::OutExpo);
@@ -443,6 +454,7 @@ namespace FPS_n2 {
 			PlayerMngr->Dispose();
 			ObjectManager::Instance()->DeleteAll();
 			PauseMenuControl::DisposePause();
+			HitMark::Instance()->Dispose();
 		}
 
 		//
@@ -475,10 +487,11 @@ namespace FPS_n2 {
 			for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 			}
-
+			HitMark::Instance()->Update();
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_In_Sub(void) noexcept {
+			HitMark::Instance()->Draw();
 			FadeControl::DrawFade();
 			//UI
 			if (!DXDraw::Instance()->IsPause()) {
