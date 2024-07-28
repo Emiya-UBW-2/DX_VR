@@ -100,7 +100,9 @@ namespace FPS_n2 {
 		c->SetWeaponPtr(Ptr);
 	}
 	void HitMark::Load(void) noexcept {
-		this->hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
+		this->MenGraph = GraphHandle::Load("data/UI/hit_Men.bmp");
+		this->KoteGraph = GraphHandle::Load("data/UI/hit_Kote.bmp");
+		this->DoGraph = GraphHandle::Load("data/UI/hit_Do.bmp");
 	}
 	void HitMark::Set(void) noexcept {
 		for (auto& h : m_HitPos) {
@@ -124,16 +126,33 @@ namespace FPS_n2 {
 		for (auto& h : m_HitPos) {
 			if (h.Time <= 0.f) { continue; }
 			if (h.m_Pos2D.z >= 0.f && h.m_Pos2D.z <= 1.f) {
-				SetDrawBright(h.m_Color.r, h.m_Color.g, h.m_Color.b);
-				int			Alpha = (int)(std::clamp(h.Time * h.m_Per, 0.f, 1.f) * 255.f);
+				int			Alpha = std::clamp((int)(std::clamp(h.Time, 0.f, 1.f) * h.m_Per * 255.f), 0, 255);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, Alpha);
-				hit_Graph.DrawRotaGraph((int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
+				switch (h.m_Color) {
+				case HitType::Head://–Ê
+					SetDrawBright(255, 0, 0);
+					MenGraph.DrawRotaGraph((int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
+					break;
+				case HitType::Arm://¬Žè
+					SetDrawBright(255, 128, 0);
+					KoteGraph.DrawRotaGraph((int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
+					break;
+				case HitType::Body://“·
+					SetDrawBright(255, 255, 0);
+					DoGraph.DrawRotaGraph((int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
+					break;
+				default:
+					break;
+				}
+
 			}
 		}
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 		SetDrawBright(255, 255, 255);
 	}
 	void HitMark::Dispose(void) noexcept {
-		this->hit_Graph.Dispose();
+		this->MenGraph.Dispose();
+		this->KoteGraph.Dispose();
+		this->DoGraph.Dispose();
 	}
 };

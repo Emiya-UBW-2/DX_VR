@@ -76,11 +76,13 @@ namespace FPS_n2 {
 			float Time{};
 			Vector3DX	m_Pos2D;
 			Vector3DX	m_Pos;
-			COLOR_U8	m_Color{};
+			HitType		m_Color{};
 			float		m_Per{};
 		};
 	private:
-		GraphHandle										hit_Graph;
+		GraphHandle										MenGraph;
+		GraphHandle										KoteGraph;
+		GraphHandle										DoGraph;
 		std::array<HitPos, 16>							m_HitPos;
 		size_t											m_HitNow{ 0 };
 	private:
@@ -98,14 +100,12 @@ namespace FPS_n2 {
 		void			Draw(void) noexcept;
 		void			Dispose(void) noexcept;
 	public:
-		void			Add(const Vector3DX& Pos, COLOR_U8 color, float Per) noexcept {
+		void			Add(const Vector3DX& Pos, HitType color, float Per) noexcept {
 			m_HitPos.at(m_HitNow).m_Pos = Pos;
 			m_HitPos.at(m_HitNow).m_Color = color;
 			m_HitPos.at(m_HitNow).m_Per = Per;
-			m_HitPos.at(m_HitNow).Time = 1.f;
+			m_HitPos.at(m_HitNow).Time = 5.f;
 			++m_HitNow %= m_HitPos.size();
 		}
 	};
-	//			GraphHandle										hit_Graph;
-
 };

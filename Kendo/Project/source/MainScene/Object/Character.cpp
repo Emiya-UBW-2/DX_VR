@@ -221,25 +221,7 @@ namespace FPS_n2 {
 					}
 				}
 				else {
-					COLOR_U8 Color{};
-					float Per = 1.f;
-					switch (value.GetHitType()) {
-					case HitType::Head://ñ 
-						Color = GetColorU8(255, 0, 0, 255);
-						Per = static_cast<float>(value.Damage) / 100.f;
-						break;
-					case HitType::Arm://è¨éË
-						Color = GetColorU8(255, 128, 0, 255);
-						Per = static_cast<float>(value.Damage) / 100.f;
-						break;
-					case HitType::Body://ì∑
-						Color = GetColorU8(255, 255, 0, 255);
-						Per = static_cast<float>(value.Damage) / 100.f;
-						break;
-					default:
-						break;
-					}
-					HitMark::Instance()->Add(value.m_Pos, Color, Per);
+					HitMark::Instance()->Add(value.m_Pos, value.GetHitType(), static_cast<float>(value.Damage) / 100.f);
 				}
 				//É_ÉÅÅ[ÉW
 				return true;
