@@ -113,12 +113,14 @@ namespace FPS_n2 {
 		auto* DrawParts = DXDraw::Instance();
 		for (auto& h: m_HitPos) {
 			if (h.Time <= 0.f) { continue; }
-			h.Time = std::max(h.Time - 1.f / DrawParts->GetFps(), 0.f);
-			auto tmp = ConvWorldPosToScreenPos(h.m_Pos.get());
-			if (tmp.z >= 0.f && tmp.z <= 1.f) {
-				h.m_Pos2D = tmp;
-				h.m_Pos2D = h.m_Pos2D * ((float)DrawParts->GetUIY(1080) / (float)DrawParts->GetScreenY(1080));
+			if (h.Time == h.TimeMax) {
+				auto tmp = ConvWorldPosToScreenPos(h.m_Pos.get());
+				if (tmp.z >= 0.f && tmp.z <= 1.f) {
+					h.m_Pos2D = tmp;
+					h.m_Pos2D = h.m_Pos2D * ((float)DrawParts->GetUIY(1080) / (float)DrawParts->GetScreenY(1080));
+				}
 			}
+			h.Time = std::max(h.Time - 1.f / DrawParts->GetFps(), 0.f);
 		}
 	}
 	void HitMark::Draw(void) noexcept {
@@ -126,21 +128,24 @@ namespace FPS_n2 {
 		for (auto& h : m_HitPos) {
 			if (h.Time <= 0.f) { continue; }
 			if (h.m_Pos2D.z >= 0.f && h.m_Pos2D.z <= 1.f) {
-				int			Alpha = std::clamp((int)(std::clamp(h.Time, 0.f, 1.f) * h.m_Per * 255.f), 0, 255);
+				float		Per = std::clamp(1.f - h.Time / h.TimeMax, 0.f, 1.f);
+				int			Alpha = std::clamp((int)(std::sin(Per * 2.f * DX_PI_F) * h.m_Per * 255.f), 0, 255);
+				float		Scale = Per * 10.f * h.m_Per;
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, Alpha);
 				switch (h.m_Color) {
 				case HitType::Head://–Ê
 					SetDrawBright(255, 0, 0);
-					MenGraph.DrawRotaGraph((int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
+					MenGraph.DrawRotaGraph((int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
 					break;
 				case HitType::Arm://¬Žè
 					SetDrawBright(255, 128, 0);
-					KoteGraph.DrawRotaGraph((int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
+					KoteGraph.DrawRotaGraph((int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
 					break;
 				case HitType::Body://“·
 					SetDrawBright(255, 255, 0);
-					DoGraph.DrawRotaGraph((int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
+					DoGraph.DrawRotaGraph((int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
 					break;
+				case HitType::Leg:
 				default:
 					break;
 				}

@@ -216,6 +216,7 @@ namespace FPS_n2 {
 					case HitType::Arm://è¨éË
 						m_ConcussionSwitch = true;
 						break;
+					case HitType::Leg:
 					default:
 						break;
 					}
@@ -229,7 +230,7 @@ namespace FPS_n2 {
 			return false;
 		}
 		//
-		const bool		CharacterClass::CheckDamageRay(HitPoint* Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
+		bool		CharacterClass::CheckDamageRay(HitPoint* Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
 			if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, GetMove().GetPos()) <= 2.0f * Scale_Rate)) { return false; }
 			//îÌíeèàóù
 			auto* HitPtr = HitBoxControl::GetLineHit(StartPos, pEndPos);

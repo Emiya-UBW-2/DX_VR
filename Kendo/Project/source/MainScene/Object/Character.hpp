@@ -142,7 +142,7 @@ namespace FPS_n2 {
 				OverrideAction();
 			}
 		public: //çXêVä÷òA
-			const bool		CheckDamageRay(HitPoint* Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
+			bool			CheckDamageRay(HitPoint* Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
 			void			MovePoint(float pxRad, float pyRad, const Vector3DX& pPos) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady) noexcept;
 		private:

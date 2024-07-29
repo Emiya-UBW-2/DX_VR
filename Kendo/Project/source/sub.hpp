@@ -20,7 +20,7 @@ namespace FPS_n2 {
 			this->m_Pos = pPos;
 		}
 	public:
-		HitType GetHitType() const noexcept { return static_cast<HitType>(m_HitType); }
+		HitType GetHitType(void) const noexcept { return static_cast<HitType>(m_HitType); }
 	};
 	class DamageEventControl {
 		std::array<DamageEvent, 16>							m_Damage;
@@ -74,6 +74,7 @@ namespace FPS_n2 {
 		struct HitPos
 		{
 			float Time{};
+			float TimeMax{};
 			Vector3DX	m_Pos2D;
 			Vector3DX	m_Pos;
 			HitType		m_Color{};
@@ -104,7 +105,8 @@ namespace FPS_n2 {
 			m_HitPos.at(m_HitNow).m_Pos = Pos;
 			m_HitPos.at(m_HitNow).m_Color = color;
 			m_HitPos.at(m_HitNow).m_Per = Per;
-			m_HitPos.at(m_HitNow).Time = 5.f;
+			m_HitPos.at(m_HitNow).TimeMax = 2.f;
+			m_HitPos.at(m_HitNow).Time = m_HitPos.at(m_HitNow).TimeMax;
 			++m_HitNow %= m_HitPos.size();
 		}
 	};

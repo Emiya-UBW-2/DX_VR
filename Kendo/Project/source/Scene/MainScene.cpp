@@ -128,7 +128,7 @@ namespace FPS_n2 {
 			auto* Pad = PadControl::Instance();
 			Pad->SetMouseMoveEnable(true);
 			Pad->ChangeGuide(
-				[&]() {
+				[]() {
 					auto* KeyGuide = PadControl::Instance();
 					if (DXDraw::Instance()->IsPause()) {
 						KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9992));
@@ -350,7 +350,9 @@ namespace FPS_n2 {
 					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 					if (!c->IsAttacking()) { continue; }
 					if (c->GetGuardOn()) { continue; }
+#ifdef DEBUG
 					printfDx("[%f]\n", c->GetWeaponPtr()->GetMoveSpeed());
+#endif
 					Vector3DX StartPos = c->GetWeaponPtr()->GetMove().GetPos();
 					Vector3DX EndPos = c->GetWeaponPtr()->GetFramePosition(WeaponObject::WeaponFrame::End);
 					StartPos = StartPos + (EndPos - StartPos) * 0.5f;

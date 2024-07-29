@@ -225,7 +225,7 @@ namespace FPS_n2 {
 				return FrontP;
 			}
 		protected:
-			void		InitKey(float pxRad, float pyRad) {
+			void		InitKey(float pxRad, float pyRad) noexcept {
 				for (size_t i = 0; i < 4; ++i) {
 					this->m_Vec[i] = 0.f;
 				}
@@ -245,7 +245,7 @@ namespace FPS_n2 {
 				this->m_MoveEyePosTimer = 0.f;
 			}
 			//
-			void		InputKey(const InputControl& pInput) {
+			void		InputKey(const InputControl& pInput) noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				this->m_Input = pInput;
 				//“ü—Í
@@ -273,7 +273,7 @@ namespace FPS_n2 {
 				m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
 				m_MoverPer = m_VecTotal.magnitude();
 			}
-			void		UpdateKeyRad(const moves& move_t) {
+			void		UpdateKeyRad(const moves& move_t) noexcept {
 				float XRad = 0.f;
 				float YRad = 0.f;
 				move_t.GetMatBuf().GetRadian(&XRad, &YRad, nullptr);
@@ -382,12 +382,12 @@ namespace FPS_n2 {
 			float		m_radius{ 0.f };
 			HitType		m_HitType{ HitType::Body };
 		public:
-			void	Execute(const Vector3DX& pos, float radius, HitType pHitType) {
+			void	Execute(const Vector3DX& pos, float radius, HitType pHitType) noexcept {
 				m_pos = pos;
 				m_radius = radius;
 				m_HitType = pHitType;
 			}
-			void	Draw() {
+			void	Draw(void) const noexcept {
 				unsigned int color;
 				switch (m_HitType) {
 				case HitType::Head:
@@ -425,7 +425,7 @@ namespace FPS_n2 {
 				}
 				return FALSE;
 			}
-			const auto GetColType()const noexcept { return this->m_HitType; }
+			const auto& GetColType()const noexcept { return this->m_HitType; }
 		};
 		//
 		class HitBoxControl {
@@ -450,11 +450,11 @@ namespace FPS_n2 {
 			HitBoxControl(void) noexcept {}
 			~HitBoxControl(void) noexcept {}
 		protected:
-			void InitHitBox() noexcept {
+			void InitHitBox(void) noexcept {
 				m_HitBox.resize(6);
 			}
 			void UpdataHitBox(const ObjectBaseClass* ptr, float SizeRate) noexcept;
-			void DrawHitBox() noexcept {
+			void DrawHitBox(void) noexcept {
 				//this->GetObj().SetOpacityRate(0.5f);
 				SetFogEnable(FALSE);
 				SetUseLighting(FALSE);

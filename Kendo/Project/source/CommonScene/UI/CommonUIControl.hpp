@@ -1,4 +1,5 @@
 #pragma once
+#pragma warning(disable:4464)
 #include	"../../Header.hpp"
 
 namespace FPS_n2 {
@@ -37,7 +38,7 @@ namespace FPS_n2 {
 				GraphHandle m_Icon;
 
 			public:
-				ButtonClass(void) {}
+				ButtonClass(void) noexcept {}
 				ButtonClass(const ButtonClass&) = delete;
 				ButtonClass(ButtonClass&& o) = delete;
 				ButtonClass& operator=(const ButtonClass&) = delete;
@@ -83,7 +84,7 @@ namespace FPS_n2 {
 					this->m_ButtonStatus = ButtonStatus::Focus;
 				}
 			public:
-				bool			GetInto(void) noexcept {
+				bool			GetInto(void) const noexcept {
 					auto* DrawParts = DXDraw::Instance();
 					int xp = DrawParts->GetUIY(xp1);
 					int yp = DrawParts->GetUIY(yp1);
@@ -289,7 +290,7 @@ namespace FPS_n2 {
 			int							m_CreditCoulm{0};
 			std::array<std::pair<char[CharMax], char[CharMax]>, 64> m_CreditStr{};
 		public:
-			CreditControl(void) {}
+			CreditControl(void) noexcept {}
 			CreditControl(const CreditControl&) = delete;
 			CreditControl(CreditControl&& o) = delete;
 			CreditControl& operator=(const CreditControl&) = delete;

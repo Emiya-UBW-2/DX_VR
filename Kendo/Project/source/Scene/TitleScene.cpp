@@ -100,8 +100,8 @@ namespace FPS_n2 {
 									}
 								}
 							},
-							[&]() {},
-							[&]() {},
+							[]() {},
+							[]() {},
 							true
 						);
 						break;
@@ -151,7 +151,7 @@ namespace FPS_n2 {
 			// セーブ
 			SaveDataParts->Save();
 			// 次シーン決定
-			SetNextSelect(ButtonParts->GetSelect());
+			SetNextSelect(static_cast<size_t>(ButtonParts->GetSelect()));
 		}
 		// 
 		void			TitleScene::MainDraw_Sub(void) noexcept {
