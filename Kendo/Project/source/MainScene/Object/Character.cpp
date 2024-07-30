@@ -28,13 +28,7 @@ namespace FPS_n2 {
 				break;
 			case EnumArmAnimType::Tsuba:
 				break;
-			case EnumArmAnimType::GuardStart:
-				break;
 			case EnumArmAnimType::GuardSuriage:
-				break;
-			case EnumArmAnimType::GuardLeft:
-				break;
-			case EnumArmAnimType::GuardRight:
 				break;
 			case EnumArmAnimType::Max:
 				break;
@@ -117,12 +111,7 @@ namespace FPS_n2 {
 			case EnumArmAnimType::HikiDou:
 				OverrideBackAttack();
 				break;
-			case EnumArmAnimType::GuardStart:
-				OverrideGuardStart();
-				break;
 			case EnumArmAnimType::GuardSuriage:
-			case EnumArmAnimType::GuardLeft:
-			case EnumArmAnimType::GuardRight:
 				OverrideGuard();
 				break;
 			case EnumArmAnimType::Max:
@@ -187,12 +176,9 @@ namespace FPS_n2 {
 			Target->OverrideReady();
 			m_BambooVecBase.Set(0.f, 0.f);
 		}
-		void			CharacterClass::OverrideGuardStart(void) noexcept {
-			m_GuardStartTimer = 0.f;
+		void			CharacterClass::OverrideGuard(void) noexcept {
 			m_GuardVec.Set(0.f, 0.f);
 			m_GuardVecR.Set(0.f, 0.f);
-		}
-		void			CharacterClass::OverrideGuard(void) noexcept {
 			m_BambooVecBase = Vector2DX::zero();
 			m_GuardTimer = 1.f;
 		}
@@ -360,7 +346,7 @@ namespace FPS_n2 {
 					CheckTsuba();
 				}
 				if (CharaMove::GetInputControl().GetPADSPress(PADS::AIM)) {
-					m_CharaAction = EnumArmAnimType::GuardStart;
+					m_CharaAction = EnumArmAnimType::GuardSuriage;//上ガード
 				}
 				{
 					auto Dir = CharaMove::GetEyeMatrix().zvec() * -1.f; Dir.y = (0.f); Dir = Dir.normalized();
@@ -447,10 +433,7 @@ namespace FPS_n2 {
 					case EnumArmAnimType::HikiMen:
 					case EnumArmAnimType::HikiKote:
 					case EnumArmAnimType::HikiDou:
-					case EnumArmAnimType::GuardStart:
 					case EnumArmAnimType::GuardSuriage:
-					case EnumArmAnimType::GuardLeft:
-					case EnumArmAnimType::GuardRight:
 					case EnumArmAnimType::Max:
 					default:
 						break;
@@ -497,45 +480,6 @@ namespace FPS_n2 {
 				m_HeartUp = std::max(m_HeartUp + 0.1f * 30.f / DrawParts->GetFps(), 10.f);
 			}
 			break;
-			case EnumArmAnimType::GuardStart:
-			{
-				Easing(&m_BambooVecBase, Vector2DX::zero(), 0.9f, EasingType::OutExpo);
-				//
-				bool suriage = false;
-				bool Gleft = false;
-				bool Gright = false;
-				float length = m_GuardVecR.magnitude();
-				if (length > 0.8f) {
-					if (m_GuardVecR.y > 0.25f) {
-						suriage = true;//上ガード
-					}
-					else {
-						if (m_GuardVecR.x > 0.f) {
-							Gright = true;
-						}
-						else {
-							Gleft = true;
-						}
-					}
-				}
-				//
-				if ((m_GuardStartTimer >= 0.1f && !CharaMove::GetInputControl().GetPADSPress(PADS::AIM)) || (m_GuardStartTimer == 1.f) || suriage || Gleft || Gright) {
-					if (suriage) {
-						m_CharaAction = EnumArmAnimType::GuardSuriage;//上ガード
-					}
-					else if (Gleft) {
-						m_CharaAction = EnumArmAnimType::GuardLeft;//左ガード
-					}
-					else if (Gright) {
-						m_CharaAction = EnumArmAnimType::GuardRight;//右ガード
-					}
-					else {
-						m_CharaAction = EnumArmAnimType::Ready;
-					}
-				}
-				m_GuardStartTimer = std::min(m_GuardStartTimer + 1.f / DrawParts->GetFps(), 1.f);
-			}
-			break;
 			case EnumArmAnimType::GuardSuriage:
 			{
 				if (m_GuardTimer == 0.f) {
@@ -545,15 +489,9 @@ namespace FPS_n2 {
 					if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
 						m_CharaAction = EnumArmAnimType::Men;
 					}
-				}
-				m_GuardTimer = std::max(m_GuardTimer - 1.f / DrawParts->GetFps(), 0.f);
-			}
-			break;
-			case EnumArmAnimType::GuardLeft:
-			case EnumArmAnimType::GuardRight:
-			{
-				if (m_GuardTimer == 0.f) {
-					m_CharaAction = EnumArmAnimType::Ready;
+					else if (CharaMove::GetInputControl().GetPADSPress(PADS::ULT)) {
+						m_CharaAction = EnumArmAnimType::Dou;
+					}
 				}
 				m_GuardTimer = std::max(m_GuardTimer - 1.f / DrawParts->GetFps(), 0.f);
 			}

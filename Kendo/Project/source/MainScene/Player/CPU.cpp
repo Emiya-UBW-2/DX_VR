@@ -39,7 +39,7 @@ namespace FPS_n2 {
 				m_Counter -= 5.f;
 			}
 			if (m_Counter > 3.f) {
-				//shotMain_Key = true;
+				shotMain_Key = true;
 			}
 
 			if (Chara->GetBambooVec().magnitude() > deg2rad(1)) {

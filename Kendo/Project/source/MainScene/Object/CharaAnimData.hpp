@@ -16,10 +16,7 @@ namespace FPS_n2 {
 		HikiKote,
 		HikiDou,
 
-		GuardStart,
 		GuardSuriage,
-		GuardLeft,
-		GuardRight,
 		Max,
 	};
 	//ÉAÉjÉÅ
@@ -328,10 +325,7 @@ namespace FPS_n2 {
 			EnumArmAnim::Saber_Men,
 			EnumArmAnim::Saber_Kote,
 			EnumArmAnim::Saber_Dou,
-			EnumArmAnim::Saber_Ready,
 			EnumArmAnim::Saber_G_Suriage,
-			EnumArmAnim::Saber_G_Left,
-			EnumArmAnim::Saber_G_Right,
 		},
 	};
 };

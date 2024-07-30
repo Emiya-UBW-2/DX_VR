@@ -46,7 +46,6 @@ namespace FPS_n2 {
 			float												m_HeartUp{ 0.f };
 			float												m_HeartUpR{ 0.f };
 
-			float												m_GuardStartTimer{ 0.f };
 			float												m_GuardTimer{ 0.f };
 
 			DamageEventControl									m_Damage;
@@ -75,7 +74,7 @@ namespace FPS_n2 {
 			}
 			auto			GetGuardOn(void) const noexcept { return m_GuardHit>0.f; }//ガードで竹刀を抑えた
 			auto			GetYaTimerMax(void) const noexcept { return 15.f; }
-			auto			IsGuardStarting(void) const noexcept { return m_CharaAction == EnumArmAnimType::GuardStart; }
+			auto			IsGuardStarting(void) const noexcept { return false; }
 			auto			IsAttackAction(EnumArmAnimType value) const noexcept {
 				switch (value) {
 				case EnumArmAnimType::Men:
@@ -89,10 +88,7 @@ namespace FPS_n2 {
 				case EnumArmAnimType::Ready:
 				case EnumArmAnimType::Run:
 				case EnumArmAnimType::Tsuba:
-				case EnumArmAnimType::GuardStart:
 				case EnumArmAnimType::GuardSuriage:
-				case EnumArmAnimType::GuardLeft:
-				case EnumArmAnimType::GuardRight:
 				case EnumArmAnimType::Max:
 				default:
 					return false;
@@ -101,8 +97,6 @@ namespace FPS_n2 {
 			auto			IsGuardAction(EnumArmAnimType value) const noexcept {
 				switch (value) {
 				case EnumArmAnimType::GuardSuriage:
-				case EnumArmAnimType::GuardLeft:
-				case EnumArmAnimType::GuardRight:
 					return true;
 				case EnumArmAnimType::Ready:
 				case EnumArmAnimType::Run:
@@ -114,14 +108,13 @@ namespace FPS_n2 {
 				case EnumArmAnimType::HikiMen:
 				case EnumArmAnimType::HikiKote:
 				case EnumArmAnimType::HikiDou:
-				case EnumArmAnimType::GuardStart:
 				case EnumArmAnimType::Max:
 				default:
 					return false;
 				}
 			}
 			auto			IsAttacking(void) const noexcept { return IsAttackAction(m_CharaAction); }
-			auto			GetGuardStartPer(void) const noexcept { return (IsGuardStarting()) ? (m_GuardStartTimer / 1.f) : 0.f; }
+			auto			GetGuardStartPer(void) const noexcept { return 0.f; }
 			Vector3DX		GetFramePosition(CharaFrame frame) const noexcept { return MV1GetFramePosition(GetObj_const().GetHandle(), GetFrame(static_cast<int>(frame))); }
 		public://セッター
 			void			ValueSet(PlayerID pID, CharaTypeID value) noexcept {
@@ -159,7 +152,6 @@ namespace FPS_n2 {
 			void			OverrideDo(void) noexcept;
 			void			OverrideTsuba(void) noexcept;
 			void			OverrideBackAttack(void) noexcept;
-			void			OverrideGuardStart(void) noexcept;
 			void			OverrideGuard(void) noexcept;
 		private: //更新関連
 			void			ExecuteInput(void) noexcept;
