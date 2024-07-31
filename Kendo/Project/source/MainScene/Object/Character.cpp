@@ -293,11 +293,11 @@ namespace FPS_n2 {
 		void			CharacterClass::FirstExecute(void) noexcept {
 			//‰‰ñ‚Ì‚ÝXV‚·‚é“à—e
 			if (this->m_IsFirstLoop) {
-				for (int i = 0, num = MV1GetMaterialNum(GetObj().GetHandle()); i < num; ++i) {
-					MV1SetMaterialDifColor(GetObj().GetHandle(), i, GetColorF(0.8f, 0.8f, 0.8f, 1.f));
-					MV1SetMaterialAmbColor(GetObj().GetHandle(), i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
+				for (int i = 0, num = GetObj().GetMaterialNum(); i < num; ++i) {
+					GetObj().SetMaterialDifColor(i, GetColorF(0.8f, 0.8f, 0.8f, 1.f));
+					GetObj().SetMaterialAmbColor(i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
 				}
-				//MV1SetMaterialTypeAll(this->GetObj().GetHandle(), DX_MATERIAL_TYPE_MAT_SPEC_LUMINANCE_CLIP_UNORM);
+				//this->GetObj().SetMaterialTypeAll(DX_MATERIAL_TYPE_MAT_SPEC_LUMINANCE_CLIP_UNORM);
 			}
 			//
 			ExecuteInput();

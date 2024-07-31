@@ -115,7 +115,7 @@ namespace FPS_n2 {
 			}
 			auto			IsAttacking(void) const noexcept { return IsAttackAction(m_CharaAction); }
 			auto			GetGuardStartPer(void) const noexcept { return 0.f; }
-			Vector3DX		GetFramePosition(CharaFrame frame) const noexcept { return MV1GetFramePosition(GetObj_const().GetHandle(), GetFrame(static_cast<int>(frame))); }
+			Vector3DX		GetFramePosition(CharaFrame frame) const noexcept { return GetObj_const().GetFramePosition(GetFrame(static_cast<int>(frame))); }
 		public://セッター
 			void			ValueSet(PlayerID pID, CharaTypeID value) noexcept {
 				this->m_CharaType = value;
@@ -197,8 +197,8 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						for (int i = 0, Num = this->GetObj().GetMeshNum(); i < Num; ++i) {
-							if ((MV1GetMeshSemiTransState(this->GetObj().GetHandle(), i) == TRUE) == isDrawSemiTrans) {
+						for (int i = 0, Num = this->GetObj_const().GetMeshNum(); i < Num; ++i) {
+							if (this->GetObj_const().GetMeshSemiTransState(i) == isDrawSemiTrans) {
 								this->GetObj().DrawMesh(i);
 							}
 						}

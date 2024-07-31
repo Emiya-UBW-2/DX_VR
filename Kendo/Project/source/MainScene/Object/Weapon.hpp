@@ -12,7 +12,7 @@ namespace FPS_n2 {
 			float							m_Speed{ 0.f };
 		public://ÉQÉbÉ^Å[
 			auto	GetFrameWorldMat(WeaponFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
-			Vector3DX GetFramePosition(WeaponFrame frame) const noexcept { return MV1GetFramePosition(GetObj_const().GetHandle(), GetFrame(static_cast<int>(frame))); }
+			Vector3DX GetFramePosition(WeaponFrame frame) const noexcept { return GetObj_const().GetFramePosition(GetFrame(static_cast<int>(frame))); }
 			const auto& GetMoveSpeed(void) const noexcept { return this->m_Speed; }
 			//
 		public:
@@ -52,9 +52,9 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				m_UpperAnim += 1.f / DrawParts->GetFps();
 
-				for (int i = 0, num = MV1GetMaterialNum(GetObj().GetHandle()); i < num; ++i) {
-					MV1SetMaterialDifColor(GetObj().GetHandle(), i, GetColorF(1.f, 1.f, 1.f, 1.f));
-					MV1SetMaterialAmbColor(GetObj().GetHandle(), i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
+				for (int i = 0, num = GetObj().GetMaterialNum(); i < num; ++i) {
+					GetObj().SetMaterialDifColor(i, GetColorF(1.f, 1.f, 1.f, 1.f));
+					GetObj().SetMaterialAmbColor(i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
 				}
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {
