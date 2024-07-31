@@ -47,6 +47,7 @@ namespace FPS_n2 {
 			float												m_HeartUpR{ 0.f };
 
 			float												m_GuardTimer{ 0.f };
+			float												m_GuardCoolDownTimer{ 0.f };
 
 			DamageEventControl									m_Damage;
 			bool												m_MoveOverRideFlag{ false };
@@ -66,6 +67,8 @@ namespace FPS_n2 {
 			const auto& GetBambooVec(void) const noexcept { return m_BambooVec; }
 			const auto& GetGuardVec(void) const noexcept { return m_GuardVecR; }
 			const auto& GetYaTimer(void) const noexcept { return m_YaTimer; }
+			const auto& GetGuardCoolDownTimer(void) const noexcept { return m_GuardCoolDownTimer; }
+			const auto& GetGuardCoolDownTimerMax(void) const noexcept { return 2.f; }
 			const auto& GetWeaponPtr(void) const noexcept { return m_Weapon_Ptr; }
 			auto			PopConcussionSwitch(void) noexcept {
 				auto Prev = m_ConcussionSwitch;

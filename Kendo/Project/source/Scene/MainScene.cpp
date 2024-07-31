@@ -398,6 +398,7 @@ namespace FPS_n2 {
 				if (GetIsFirstLoop()) {
 					this->m_UIclass.InitGaugeParam(0, static_cast<int>(0.f), static_cast<int>(Chara->GetYaTimerMax()));
 					this->m_UIclass.InitGaugeParam(1, static_cast<int>(Chara->GetStaminaMax()), static_cast<int>(Chara->GetStaminaMax()));
+					this->m_UIclass.InitGaugeParam(0, static_cast<int>(0.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax()));
 				}
 				//NvsN
 				this->m_UIclass.SetIntParam(0, 0);
@@ -410,6 +411,7 @@ namespace FPS_n2 {
 				//ƒQ[ƒW
 				this->m_UIclass.SetGaugeParam(0, static_cast<int>((Chara->GetYaTimerMax() - Chara->GetYaTimer()) * 10000.f), static_cast<int>(Chara->GetYaTimerMax() * 10000.f), 15);
 				this->m_UIclass.SetGaugeParam(1, static_cast<int>(Chara->GetStamina() * 10000.f), static_cast<int>(Chara->GetStaminaMax() * 10000.f), 15);
+				this->m_UIclass.SetGaugeParam(2, static_cast<int>((Chara->GetGuardCoolDownTimer()) * 100.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f), 0);
 				//ƒK[ƒh‰~
 				Easing(&m_GuardStart, Chara->IsGuardStarting() ? 1.f : 0.f, Chara->IsGuardStarting() ? 0.8f : 0.5f, EasingType::OutExpo);
 				this->m_UIclass.SetfloatParam(2, m_GuardStart);

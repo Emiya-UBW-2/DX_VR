@@ -18,8 +18,13 @@ namespace FPS_n2 {
 					auto* DrawParts = DXDraw::Instance();
 					this->m_Now = value;
 					this->m_Max = Max;
-					float Limit = static_cast<float>(this->m_Max / Rate) * 1.5f;
-					this->m_Buffer += std::clamp(static_cast<float>(static_cast<float>(this->m_Now) - this->m_Buffer) * static_cast<float>(this->m_Max / Rate), -Limit, Limit) / DrawParts->GetFps();
+					if (Rate > 0) {
+						float Limit = static_cast<float>(this->m_Max / Rate) * 1.5f;
+						this->m_Buffer += std::clamp(static_cast<float>(static_cast<float>(this->m_Now) - this->m_Buffer) * static_cast<float>(this->m_Max / Rate), -Limit, Limit) / DrawParts->GetFps();
+					}
+					else {
+						this->m_Buffer = static_cast<float>(this->m_Now);
+					}
 				}
 				void			DrawGauge(int xp1, int yp1, int xp2, int yp2,
 					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
@@ -194,7 +199,7 @@ namespace FPS_n2 {
 				}
 			};
 		private:
-			std::array<GaugeParam, 2>		m_GaugeParam;
+			std::array<GaugeParam, 3>		m_GaugeParam;
 			std::array<int, 6>				intParam{};
 			std::array<float, 6>			floatParam{};
 			std::array<std::string, 1>		strParam;
@@ -276,6 +281,16 @@ namespace FPS_n2 {
 					yp1 = DrawParts->GetUIY(1080 - 96 + 18);
 
 					m_GaugeParam[1].DrawGauge(
+						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(12),
+						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
+						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
+					);
+
+					//スタミナ
+					xp1 = DrawParts->GetUIY(24);
+					yp1 = DrawParts->GetUIY(1080 - 96 + 18*2);
+
+					m_GaugeParam[2].DrawGauge(
 						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(12),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)

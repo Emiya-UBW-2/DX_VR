@@ -345,7 +345,7 @@ namespace FPS_n2 {
 				if(Target->GetCharaAction()==GetCharaAction()){
 					CheckTsuba();
 				}
-				if (CharaMove::GetInputControl().GetPADSPress(PADS::AIM)) {
+				if ((m_GuardCoolDownTimer == 0.f) && CharaMove::GetInputControl().GetPADSPress(PADS::AIM)) {
 					m_CharaAction = EnumArmAnimType::GuardSuriage;//ãƒK[ƒh
 				}
 				{
@@ -494,6 +494,9 @@ namespace FPS_n2 {
 					}
 				}
 				m_GuardTimer = std::max(m_GuardTimer - 1.f / DrawParts->GetFps(), 0.f);
+				if (m_CharaAction != EnumArmAnimType::GuardSuriage) {
+					m_GuardCoolDownTimer = GetGuardCoolDownTimerMax();
+				}
 			}
 			break;
 			case EnumArmAnimType::Max:
@@ -523,6 +526,9 @@ namespace FPS_n2 {
 				OverrideAction();
 			}
 			CharaMove::UpdateKeyRad(this->m_move);
+			if (m_CharaAction != EnumArmAnimType::Run && m_CharaAction != EnumArmAnimType::GuardSuriage) {
+				m_GuardCoolDownTimer = std::max(m_GuardCoolDownTimer - 1.f / DrawParts->GetFps(), 0.f);
+			}
 		}
 		void			CharacterClass::ExecuteAction(void) noexcept {
 			for (size_t index = 0; index < static_cast<size_t>(EnumArmAnimType::Max); ++index) {
