@@ -1,0 +1,67 @@
+{
+  "Parts": [
+    {
+      "Name": "ID1",
+      "Type": "Box",
+      "Layer": 0,
+      "MouseClickActive": true,
+      "XPos": 140,
+      "YPos": 140,
+      "XSize": 240,
+      "YSize": 24,
+      "ZRotate": 0.0,
+      "XCenter": "Left",
+      "YCenter": "Top",
+      "PressColor": "Gray50",
+      "IntoColor": "White",
+      "BaseColor": "Gray25",
+      "EdgeColor": "Gray75",
+      "TextID": 1
+    },
+    {
+      "Name": "ID2",
+      "Type": "Msg",
+      "Layer": 0,
+      "MouseClickActive": true,
+      "XPos": 140,
+      "YPos": 140,
+      "XSize": 240,
+      "YSize": 24,
+      "ZRotate": 0.0,
+      "XCenter": "Left",
+      "YCenter": "Top",
+      "PressColor": "Gray50",
+      "IntoColor": "White",
+      "BaseColor": "White",
+      "EdgeColor": "Gray75",
+      "TextID": 1
+    }
+  ],
+	"TotalAnim":[
+		{
+			"Target":["ID1"],
+			"Anime":[
+				{
+					"Frame":0,
+					"Alpha":1.0,
+					"XScale":1.0,
+					"YScale":1.0,
+					"XOffset":0.0,
+					"YOffset":0.0,
+					"ZRotOfs":0.0,
+					"LerpType":"linear"
+				},
+				{
+					"Frame":5,
+					"Alpha":0.5,
+					"XScale":1.0,
+					"YScale":1.0,
+					"XOffset":0.0,
+					"YOffset":0.0,
+					"ZRotOfs":0.0,
+					"LerpType":"linear"
+				}
+			]
+		}
+	]
+}
