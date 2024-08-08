@@ -41,11 +41,10 @@ namespace FPS_n2 {
 		bool		CharacterClass::CheckDamageRay(HitPoint* Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
 			if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, GetMove().GetPos()) <= 2.0f * Scale_Rate)) { return false; }
 			//被弾処理
-			auto* HitPtr = HitBoxControl::GetLineHit(StartPos, pEndPos);
-			if (HitPtr) {
+			if (false) {
 				//ダメージ登録
 				{
-					m_Damage.Add(AttackID, this->m_MyID, *Damage, HitPtr->GetColType(), *pEndPos);
+					//m_Damage.Add(AttackID, this->m_MyID, *Damage, HitPtr->GetColType(), *pEndPos);
 				}
 				return true;
 			}
@@ -60,7 +59,6 @@ namespace FPS_n2 {
 		void			CharacterClass::Init_Sub(void) noexcept {
 			m_BambooVec.Set(0.f, 0.f);
 			m_BambooVecBase.Set(0.f, 0.f);
-			HitBoxControl::InitHitBox();
 			this->m_MoveOverRideFlag = false;
 #ifdef _USE_EFFEKSEER_
 			EffectControl::Init();				//
@@ -84,11 +82,6 @@ namespace FPS_n2 {
 		void			CharacterClass::FirstExecute(void) noexcept {
 			//初回のみ更新する内容
 			if (this->m_IsFirstLoop) {
-				for (int i = 0, num = GetObj().GetMaterialNum(); i < num; ++i) {
-					GetObj().SetMaterialDifColor(i, GetColorF(0.8f, 0.8f, 0.8f, 1.f));
-					GetObj().SetMaterialAmbColor(i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
-				}
-				//this->GetObj().SetMaterialTypeAll(DX_MATERIAL_TYPE_MAT_SPEC_LUMINANCE_CLIP_UNORM);
 			}
 			//
 			ExecuteInput();
@@ -96,7 +89,6 @@ namespace FPS_n2 {
 			ExecuteAnim();
 			ExecuteSound();
 			ExecuteMatrix();
-			HitBoxControl::UpdataHitBox(this, 1.f);									//ヒットボックス
 #ifdef _USE_EFFEKSEER_
 			EffectControl::Execute();				//
 #endif

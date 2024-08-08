@@ -32,7 +32,7 @@ namespace FPS_n2 {
 			//
 			BackGround->Init();
 			//
-			Vector3DX LightVec = Vector3DX::vget(0.1f, -0.8f, 0.05f); LightVec = LightVec.normalized();
+			Vector3DX LightVec = Vector3DX::vget(0.9f, -0.8f, 0.05f); LightVec = LightVec.normalized();
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
 			SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 			//Cam
@@ -273,15 +273,15 @@ namespace FPS_n2 {
 				auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 				auto* OptionParts = OPTION::Instance();
 				//カメラ
-				Vector3DX CamPos = ViewChara->GetEyePosition() + ViewChara->GetEyeMatrix().zvec() * (30.f * Scale_Rate);
+				Vector3DX CamPos = ViewChara->GetEyePosition() + ViewChara->GetEyeMatrix().zvec() * (60.f * Scale_Rate);
 				Vector3DX CamVec = ViewChara->GetEyePosition();
 				CamVec += CameraShake::Instance()->GetCamShake();
 				CamPos += CameraShake::Instance()->GetCamShake()*2.f;
 				DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
 				//info
-				DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 10.f, Scale_Rate * 600.f);
+				DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 10.f, Scale_Rate * 1200.f);
 				//DoF
-				PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 15.f, Scale_Rate * 500.f, Scale_Rate * 10.f, Scale_Rate * 600.f);
+				PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 15.f, Scale_Rate * 600.f, Scale_Rate * 10.f, Scale_Rate * 1200.f);
 			}
 			/*
 			//竹刀判定
@@ -414,13 +414,19 @@ namespace FPS_n2 {
 			BackGround->Draw();
 		}
 
+		void MainGameScene::SetShadowDraw_Sub(void) noexcept {
+			auto* BackGround = BackGround::BackGroundClass::Instance();
+			BackGround->Shadow_Draw();
+			ObjectManager::Instance()->Draw_Shadow();
+		}
+
 		void			MainGameScene::MainDraw_Sub(void) noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			SetFogStartEnd(DrawParts->GetMainCamera().GetCamNear(), DrawParts->GetMainCamera().GetCamFar() * 2.f);
-			BackGround->Draw();
 			ObjectManager::Instance()->Draw();
+			BackGround->Draw();
 			//ObjectManager::Instance()->Draw_Depth();
 			for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
@@ -440,7 +446,7 @@ namespace FPS_n2 {
 			}
 			//通信設定
 			auto* NetBrowser = NetWorkBrowser::Instance();
-			NetBrowser->Draw();
+			//NetBrowser->Draw();
 			if (m_NetWorkController) {
 				auto* DrawParts = DXDraw::Instance();
 				if (m_NetWorkController->GetPing() >= 0.f) {

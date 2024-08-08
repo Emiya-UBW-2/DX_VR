@@ -100,6 +100,7 @@ namespace FPS_n2 {
 			auto&		SetCharaAnimeBufID(CharaObjAnimeID value) noexcept { return this->m_AnimPerBuf.at(static_cast<size_t>(value)); }
 			auto		GetWeaponSwingMat(void) const noexcept { return Matrix3x3DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
 			auto		GetSpeedPer(void) const noexcept {
+				return 10.f;
 				if (this->m_Input.GetPADSPress(PADS::WALK)) {
 					return 0.15f;
 				}
@@ -166,7 +167,7 @@ namespace FPS_n2 {
 				this->m_Squat.Execute(false);
 				//‰ñ“]
 				{
-					this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + this->m_Input.GetAddxRad(), deg2rad(-12.f), deg2rad(12.f));
+					this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + this->m_Input.GetAddxRad(), deg2rad(-15.f), deg2rad(0.f));
 					this->m_rad_Buf.y = this->m_rad_Buf.y + this->m_Input.GetAddyRad();
 				}
 				Easing(&m_RunPer, m_IsRunning ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
@@ -209,14 +210,14 @@ namespace FPS_n2 {
 				if (this->m_TurnBody || IsMove()) { this->m_yrad_Upper = YRad; }
 				float YradChange = 0.f;
 				{
-					auto bottom = (this->m_yrad_Upper - GetFrontP());
+					auto bottom = 0.f;// (this->m_yrad_Upper - GetFrontP());
 					// ‘_‚¢
 					{
 						Vector3DX Vec; Vec.Set(std::sin(this->m_yrad_Bottom), std::cos(this->m_yrad_Bottom), 0.f);
 						Vector3DX vec_a; vec_a.Set(std::sin(bottom), std::cos(bottom), 0.f);
 						float cost = Vector3DX::Cross(vec_a, Vec).z;
 						float sint = Vector3DX::Dot(vec_a, Vec);
-						YradChange = std::clamp(std::atan2f(cost, sint), deg2rad(-10), deg2rad(10)) * 10.f / DrawParts->GetFps();
+						YradChange = std::clamp(std::atan2f(cost, sint), deg2rad(-10), deg2rad(10)) * 1.f / DrawParts->GetFps();
 						this->m_yrad_Bottom += YradChange;
 
 						if (this->m_yrad_Bottom < 0.f) { this->m_yrad_Bottom += DX_PI_F * 2.f; }
@@ -269,97 +270,5 @@ namespace FPS_n2 {
 			}
 		};
 
-		//
-		class HitBox {
-			Vector3DX	m_pos;
-			float		m_radius{ 0.f };
-			HitType		m_HitType{ HitType::Body };
-		public:
-			void	Execute(const Vector3DX& pos, float radius, HitType pHitType) noexcept {
-				m_pos = pos;
-				m_radius = radius;
-				m_HitType = pHitType;
-			}
-			void	Draw(void) const noexcept {
-				unsigned int color;
-				switch (m_HitType) {
-				case HitType::Head:
-					color = Red;
-					break;
-				case HitType::Body:
-					color = Green;
-					break;
-				case HitType::Arm:
-					color = Blue;
-					break;
-				case HitType::Leg:
-					color = Blue;
-					break;
-				default:
-					break;
-				}
-				DrawSphere_3D(m_pos, m_radius, color, color);
-			}
-
-			bool	Colcheck(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
-				if (HitCheck_Sphere_Capsule(
-					m_pos.get(), m_radius,
-					StartPos.get(), pEndPos->get(), 0.001f * Scale_Rate
-				) == TRUE) {
-					VECTOR pos1 = StartPos.get();
-					VECTOR pos2 = pEndPos->get();
-					VECTOR pos3 = m_pos.get();
-					SEGMENT_POINT_RESULT Res;
-					Segment_Point_Analyse(&pos1, &pos2, &pos3, &Res);
-
-					*pEndPos = Res.Seg_MinDist_Pos;
-
-					return TRUE;
-				}
-				return FALSE;
-			}
-			const auto& GetColType()const noexcept { return this->m_HitType; }
-		};
-		//
-		class HitBoxControl {
-		private:
-			std::vector<HitBox>									m_HitBox;
-		protected:
-			const HitBox* GetLineHit(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
-				for (auto& h : this->m_HitBox) {
-					if (h.Colcheck(StartPos, pEndPos)) {
-						return &h;
-					}
-				}
-				return nullptr;
-			}
-		public:
-			void		CheckLineHitNearest(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
-				for (auto& h : this->m_HitBox) {
-					h.Colcheck(StartPos, pEndPos);
-				}
-			}
-		public:
-			HitBoxControl(void) noexcept {}
-			~HitBoxControl(void) noexcept {}
-		protected:
-			void InitHitBox(void) noexcept {
-				m_HitBox.resize(6);
-			}
-			void UpdataHitBox(const ObjectBaseClass* ptr, float SizeRate) noexcept;
-			void DrawHitBox(void) noexcept {
-				//this->GetObj().SetOpacityRate(0.5f);
-				SetFogEnable(FALSE);
-				SetUseLighting(FALSE);
-				//SetUseZBuffer3D(FALSE);
-
-				for (auto& h : this->m_HitBox) {
-					h.Draw();
-				}
-
-				//SetUseZBuffer3D(TRUE);
-				SetUseLighting(TRUE);
-			}
-		};
 	}
 }

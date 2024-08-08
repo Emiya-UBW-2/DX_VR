@@ -9,7 +9,6 @@ namespace FPS_n2 {
 	namespace CharacterObject {
 		class CharacterClass :
 			public ObjectBaseClass,
-			public HitBoxControl,
 			public CharaMove
 #ifdef _USE_EFFEKSEER_
 			, public EffectControl
@@ -57,7 +56,7 @@ namespace FPS_n2 {
 			const auto& GetGuardVec(void) const noexcept { return m_GuardVecR; }
 			const auto& GetYaTimer(void) const noexcept { return m_YaTimer; }
 			const auto& GetGuardCoolDownTimer(void) const noexcept { return m_GuardCoolDownTimer; }
-			const auto& GetGuardCoolDownTimerMax(void) const noexcept { return 2.f; }
+			const auto GetGuardCoolDownTimerMax(void) const noexcept { return 2.f; }
 			auto			PopConcussionSwitch(void) noexcept {
 				auto Prev = m_ConcussionSwitch;
 				m_ConcussionSwitch = false;
@@ -125,13 +124,9 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						for (int i = 0, Num = this->GetObj_const().GetMeshNum(); i < Num; ++i) {
-							if (this->GetObj_const().GetMeshSemiTransState(i) == isDrawSemiTrans) {
-								this->GetObj().DrawMesh(i);
-							}
+						if (!isDrawSemiTrans) {
+							this->GetObj().DrawModel();
 						}
-						//hitbox•`‰æ
-						//HitBoxControl::DrawHitBox();
 					}
 				}
 			}

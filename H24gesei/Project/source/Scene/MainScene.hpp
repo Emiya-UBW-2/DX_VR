@@ -60,6 +60,8 @@ namespace FPS_n2 {
 			void			ShadowDraw_Sub(void) noexcept override;
 			void			CubeMap_Sub(void) noexcept override;
 
+			void			SetShadowDraw_Sub(void) noexcept override;
+
 			void			MainDraw_Sub(void) noexcept override;
 			//UI•\Ž¦
 			void			DrawUI_Base_Sub(void) noexcept override{}
