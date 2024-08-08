@@ -276,25 +276,6 @@ namespace FPS_n2 {
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
-					//スタミナ
-					xp1 = DrawParts->GetUIY(24);
-					yp1 = DrawParts->GetUIY(1080 - 96 + 18);
-
-					m_GaugeParam[1].DrawGauge(
-						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(12),
-						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
-						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
-					);
-
-					//スタミナ
-					xp1 = DrawParts->GetUIY(24);
-					yp1 = DrawParts->GetUIY(1080 - 96 + 18*2);
-
-					m_GaugeParam[2].DrawGauge(
-						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(12),
-						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
-						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
-					);
 				}
 				//ガード
 				{

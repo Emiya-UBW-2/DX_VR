@@ -23,5 +23,5 @@ ControlType=PC
 Language=Jpn
 AA=true
 DrawScale=1.000000
-GodRay=true
-PBR=true
+GodRay=false
+PBR=false

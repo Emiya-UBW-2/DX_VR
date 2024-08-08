@@ -14,8 +14,7 @@ namespace FPS_n2 {
 			BattleResourceMngr->Load();
 			PlayerMngr->Init(NetWork::Player_num);
 			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-				BattleResourceMngr->LoadChara("Chara", (PlayerID)index);
-				BattleResourceMngr->LoadWeapon("Bamboo", (PlayerID)index);
+				BattleResourceMngr->LoadShip("data/Ship/Allied/DD/", (PlayerID)index);
 			}
 			//UI
 			this->m_UIclass.Load();
@@ -33,12 +32,9 @@ namespace FPS_n2 {
 			//
 			BackGround->Init();
 			//
-			Vector3DX LightVec = Vector3DX::vget(1.3f, -0.5f, 0.05f); LightVec = LightVec.normalized();
+			Vector3DX LightVec = Vector3DX::vget(0.1f, -0.8f, 0.05f); LightVec = LightVec.normalized();
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
 			SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
-
-			auto& SecondLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec * -1.f);
-			SetLightDifColorHandle(SecondLight.get(), GetColorF(0.5f, 0.5f, 0.3f, 0.1f));
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
@@ -50,12 +46,12 @@ namespace FPS_n2 {
 				//人の座標設定
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale_Rate) * static_cast<float>(index * 2 - 1));
+					pos_t = Vector3DX::vget(0.f, 0.f, (-200.f * Scale_Rate) * static_cast<float>(index * 2 - 1));
 
 					Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale_Rate;
-					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale_Rate, &EndPos, true)) {
-						pos_t = EndPos;
-					}
+					//if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale_Rate, &EndPos, true)) {
+					//	pos_t = EndPos;
+					//}
 					c->ValueSet((PlayerID)index, CharaTypeID::Team);
 					c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
 				}
@@ -175,7 +171,7 @@ namespace FPS_n2 {
 					MyInput.ResetAllInput();
 				}
 				else {
-					MyInput.SetInputStart(Pad->GetLS_Y(), Pad->GetLS_X());
+					MyInput.SetInputStart(Pad->GetLS_Y() / 300.f, Pad->GetLS_X() / 300.f);
 					MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
 					MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
 					MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
@@ -187,15 +183,6 @@ namespace FPS_n2 {
 
 					MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 					MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
-					{
-						Vector2DX MSVec = Chara->GetBambooVec();
-						MSVec.Set(
-							std::clamp(MSVec.x + Pad->GetLS_Y() * deg2rad(0.1f), deg2rad(-10), deg2rad(10)),
-							std::clamp(MSVec.y + Pad->GetLS_X() * deg2rad(0.1f), deg2rad(-30), deg2rad(30))
-						);
-						MyInput.SetxRad(MSVec.x);
-						MyInput.SetyRad(MSVec.y);
-					}
 				}
 				//ネットワーク
 				auto* NetBrowser = NetWorkBrowser::Instance();
@@ -205,7 +192,6 @@ namespace FPS_n2 {
 				}
 				if (m_NetWorkController) {
 					int32_t FreeData[10]{};
-					FreeData[0] = static_cast<int>(Chara->GetCharaAction());
 					this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, Chara->GetMove(), Chara->GetDamageEvent(), FreeData);
 					this->m_NetWorkController->Update();
 				}
@@ -231,10 +217,6 @@ namespace FPS_n2 {
 							//override_true = Ret.GetIsActive();
 							if (override_true) {
 								c->SetMoveOverRide(Ret.GetMove());
-								//アクションが違う場合には上書き
-								if (Ret.GetFreeData()[0] != static_cast<int>(c->GetCharaAction())) {
-									c->SetActionOverRide(static_cast<EnumArmAnimType>(Ret.GetFreeData()[0]));
-								}
 							}
 
 						}
@@ -291,58 +273,17 @@ namespace FPS_n2 {
 				auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 				auto* OptionParts = OPTION::Instance();
 				//カメラ
-				Vector3DX CamPos = ViewChara->GetEyePosition();
-				Vector3DX CamVec = CamPos + ViewChara->GetEyeMatrix().zvec() * -1.f;
+				Vector3DX CamPos = ViewChara->GetEyePosition() + ViewChara->GetEyeMatrix().zvec() * (30.f * Scale_Rate);
+				Vector3DX CamVec = ViewChara->GetEyePosition();
 				CamVec += CameraShake::Instance()->GetCamShake();
 				CamPos += CameraShake::Instance()->GetCamShake()*2.f;
-#ifdef DEBUG
-				if (CheckHitKeyWithCheck(KEY_INPUT_F1) != 0) {
-					DBG_CamSel = -1;
-				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_F2) != 0) {
-					DBG_CamSel = 0;
-				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_F3) != 0) {
-					DBG_CamSel = 1;
-				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_F4) != 0) {
-					DBG_CamSel = 2;
-				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_F5) != 0) {
-					DBG_CamSel = 3;
-				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_F6) != 0) {
-					DBG_CamSel = 4;
-				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_F7) != 0) {
-					DBG_CamSel = 5;
-				}
-				switch (DBG_CamSel) {
-				case 0:
-				case 3:
-					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().xvec() * (2.f * Scale_Rate);
-					break;
-				case 1:
-				case 4:
-					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().yvec() * (2.f * Scale_Rate) + ViewChara->GetEyeMatrix().zvec() * 0.1f;
-					break;
-				case 2:
-				case 5:
-					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().zvec() * (-2.f * Scale_Rate);
-					break;
-				default:
-					break;
-				}
-#endif
 				DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
 				//info
-				DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 0.3f, Scale_Rate * 20.f);
+				DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 10.f, Scale_Rate * 600.f);
 				//DoF
-				PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.3f, Scale_Rate * 5.f, Scale_Rate * 0.1f, Scale_Rate * 20.f);
+				PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 15.f, Scale_Rate * 500.f, Scale_Rate * 10.f, Scale_Rate * 600.f);
 			}
+			/*
 			//竹刀判定
 			{
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
@@ -366,6 +307,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
+			//*/
 			//コンカッション
 			{
 				if (Chara->PopConcussionSwitch()) {
@@ -396,8 +338,6 @@ namespace FPS_n2 {
 			//UIパラメーター
 			{
 				if (GetIsFirstLoop()) {
-					this->m_UIclass.InitGaugeParam(0, static_cast<int>(0.f), static_cast<int>(Chara->GetYaTimerMax()));
-					this->m_UIclass.InitGaugeParam(1, static_cast<int>(Chara->GetStaminaMax()), static_cast<int>(Chara->GetStaminaMax()));
 					this->m_UIclass.InitGaugeParam(0, static_cast<int>(0.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax()));
 				}
 				//NvsN
@@ -405,19 +345,13 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(1, 0);
 				//timer
 				this->m_UIclass.SetfloatParam(0, 0.f);
-				//心拍数
-				this->m_UIclass.SetIntParam(2, static_cast<int>(Chara->GetHeartRate()));
-				this->m_UIclass.SetfloatParam(1, Chara->GetHeartRatePow());
 				//ゲージ
-				this->m_UIclass.SetGaugeParam(0, static_cast<int>((Chara->GetYaTimerMax() - Chara->GetYaTimer()) * 10000.f), static_cast<int>(Chara->GetYaTimerMax() * 10000.f), 15);
-				this->m_UIclass.SetGaugeParam(1, static_cast<int>(Chara->GetStamina() * 10000.f), static_cast<int>(Chara->GetStaminaMax() * 10000.f), 15);
-				this->m_UIclass.SetGaugeParam(2, static_cast<int>((Chara->GetGuardCoolDownTimer()) * 100.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f), 0);
+				this->m_UIclass.SetGaugeParam(0, static_cast<int>((Chara->GetGuardCoolDownTimer()) * 100.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f), 0);
 				//ガード円
-				Easing(&m_GuardStart, Chara->IsGuardStarting() ? 1.f : 0.f, Chara->IsGuardStarting() ? 0.8f : 0.5f, EasingType::OutExpo);
-				this->m_UIclass.SetfloatParam(2, m_GuardStart);
+				this->m_UIclass.SetfloatParam(2, 0.f);
 				this->m_UIclass.SetfloatParam(3, Chara->GetGuardVec().x);
 				this->m_UIclass.SetfloatParam(4, -Chara->GetGuardVec().y);
-				this->m_UIclass.SetfloatParam(5, Chara->GetGuardStartPer());
+				this->m_UIclass.SetfloatParam(5, 0.f);
 			}
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=0.7ms");

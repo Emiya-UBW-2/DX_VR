@@ -46,8 +46,8 @@ namespace FPS_n2 {
 			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius) const noexcept;
 		public://
 			void			Load(void) noexcept {
-				MV1::Load("data/model/map/model_DISABLE.mv1", &this->m_ObjGround);
-				MV1::Load("data/model/map/col.mv1", &this->m_ObjGroundCol);
+				MV1::Load("data/model/sea/model.mv1", &this->m_ObjGround);
+				//MV1::Load("data/model/map/col.mv1", &this->m_ObjGroundCol);
 				MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
 			}
 			//
@@ -65,6 +65,7 @@ namespace FPS_n2 {
 					this->m_ObjGround.SetMaterialDifColor(i, GetColorF(1.f, 1.f, 1.f, 1.f));
 					this->m_ObjGround.SetMaterialAmbColor(i, GetColorF(0.15f, 0.15f, 0.15f, 1.f));
 				}
+				m_ObjGround.SetScale(Vector3DX::vget(100.f, 100.f, 100.f));
 			}
 			//
 			void			FirstExecute(void) noexcept {

@@ -2,7 +2,6 @@
 
 #include "MainScene/Player/Player.hpp"
 #include "MainScene/Object/Character.hpp"
-#include "MainScene/Object/Weapon.hpp"
 
 const FPS_n2::CommonBattleResource* SingletonBase<FPS_n2::CommonBattleResource>::m_Singleton = nullptr;
 const FPS_n2::HitMark* SingletonBase<FPS_n2::HitMark>::m_Singleton = nullptr;
@@ -64,18 +63,14 @@ namespace FPS_n2 {
 		SE->Delete(static_cast<int>(SoundEnum::TimeUp));
 	}
 	//
-	void			CommonBattleResource::LoadChara(const std::string& FolderName, PlayerID ID) noexcept {
+	void			CommonBattleResource::LoadShip(const std::string& FolderPath, PlayerID ID) noexcept {
 		auto* PlayerMngr = Player::PlayerManager::Instance();
 		auto* ObjMngr = ObjectManager::Instance();
 		auto& p = PlayerMngr->GetPlayer(ID);
 
-		std::string Path = "data/Charactor/";
-		Path += FolderName;
-		Path += "/";
-
 		std::shared_ptr<ObjectBaseClass> Ptr = std::make_shared<CharacterObject::CharacterClass>();
 		ObjMngr->AddObject(Ptr);
-		ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
+		ObjMngr->LoadModel(Ptr, Ptr, FolderPath.c_str());
 		Ptr->Init();
 		p->SetChara(Ptr);
 		auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
@@ -83,21 +78,6 @@ namespace FPS_n2 {
 		p->SetAI(std::make_shared<Player::AIControl>());
 		//p->GetAI()->SetPlayerID(value);
 		//p->GetAI()->Init();
-	}
-	void			CommonBattleResource::LoadWeapon(const std::string& FolderName, PlayerID ID) noexcept {
-		auto* ObjMngr = ObjectManager::Instance();
-		auto* PlayerMngr = Player::PlayerManager::Instance();
-
-		std::string Path = "data/Weapon/";
-		Path += FolderName;
-		Path += "/";
-
-		auto Ptr = std::make_shared<WeaponObject::WeaponClass>();
-		ObjMngr->AddObject(Ptr);
-		ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
-		Ptr->Init();
-		auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(ID)->GetChara();
-		c->SetWeaponPtr(Ptr);
 	}
 	void HitMark::Load(void) noexcept {
 		this->MenGraph = GraphHandle::Load("data/UI/hit_Men.bmp");

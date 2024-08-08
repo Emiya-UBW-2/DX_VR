@@ -20,12 +20,9 @@
     <ClInclude Include="source\MainScene\MainSceneSub.hpp" />
     <ClInclude Include="source\MainScene\NetWork.hpp" />
     <ClInclude Include="source\MainScene\NetworkBrowser.hpp" />
-    <ClInclude Include="source\MainScene\Object\CharaAnimData.hpp" />
     <ClInclude Include="source\MainScene\Object\Character.hpp" />
     <ClInclude Include="source\MainScene\Object\CharacterEnum.hpp" />
     <ClInclude Include="source\MainScene\Object\Character_before.hpp" />
-    <ClInclude Include="source\MainScene\Object\Weapon.hpp" />
-    <ClInclude Include="source\MainScene\Object\WeaponEnum.hpp" />
     <ClInclude Include="source\MainScene\Player\CPU.hpp" />
     <ClInclude Include="source\MainScene\Player\Player.hpp" />
     <ClInclude Include="source\MainScene\UI\MainSceneUIControl.hpp" />
@@ -43,10 +40,8 @@
     <ClCompile Include="source\MainScene\MainSceneSub.cpp" />
     <ClCompile Include="source\MainScene\NetWork.cpp" />
     <ClCompile Include="source\MainScene\NetworkBrowser.cpp" />
-    <ClCompile Include="source\MainScene\Object\CharaAnimData.cpp" />
     <ClCompile Include="source\MainScene\Object\Character.cpp" />
     <ClCompile Include="source\MainScene\Object\Character_before.cpp" />
-    <ClCompile Include="source\MainScene\Object\Weapon.cpp" />
     <ClCompile Include="source\MainScene\Player\CPU.cpp" />
     <ClCompile Include="source\MainScene\Player\Player.cpp" />
     <ClCompile Include="source\Scene\MainScene.cpp" />
