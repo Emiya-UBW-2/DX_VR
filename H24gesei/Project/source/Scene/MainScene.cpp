@@ -13,9 +13,7 @@ namespace FPS_n2 {
 			//
 			BattleResourceMngr->Load();
 			PlayerMngr->Init(NetWork::Player_num);
-			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-				BattleResourceMngr->LoadShip("data/Ship/Allied/DD/", (PlayerID)index);
-			}
+			BattleResourceMngr->LoadShip("data/Ship/Allied/DD/", (PlayerID)0);
 			//UI
 			this->m_UIclass.Load();
 			PauseMenuControl::LoadPause();
@@ -55,7 +53,28 @@ namespace FPS_n2 {
 					c->ValueSet((PlayerID)index, CharaTypeID::Team);
 					c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
 				}
-				p->GetAI()->Init((PlayerID)index);
+				p->GetAI()->Init(c->GetMyPlayerID());
+			}
+
+			PlayerMngr->DisposeNPC();
+			for (int index = 0; index < 10; ++index) {
+				auto& p = PlayerMngr->AddNPC();
+				BattleResourceMngr->LoadShipNPC("data/Ship/Axis/DD/", index);
+				auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+				c->SetViewID(0);
+				//人の座標設定
+				{
+					Vector3DX pos_t;
+					pos_t = Vector3DX::vget(50.f * Scale_Rate, 0.f, (-200.f * Scale_Rate) * static_cast<float>(index));
+
+					Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale_Rate;
+					//if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale_Rate, &EndPos, true)) {
+					//	pos_t = EndPos;
+					//}
+					c->ValueSet((PlayerID)(index + PlayerMngr->GetPlayerNum()), CharaTypeID::Team);
+					c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
+				}
+				p->GetAI()->Init(c->GetMyPlayerID());
 			}
 			//UI
 			this->m_UIclass.Set();
@@ -249,10 +268,45 @@ namespace FPS_n2 {
 						//ダメージイベント処理
 						c->AddDamageEvent(&this->m_DamageEvents);
 					}
+					//NPC
+					for (int index = 0; index < PlayerMngr->GetNPCNum(); ++index) {
+						auto& p = PlayerMngr->GetNPC(index);
+						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+						c->SetViewID(GetMyPlayerID());
+						{
+							InputControl OtherInput;
+							p->GetAI()->Execute(&OtherInput);
+							{
+								Vector2DX MSVec;
+								MSVec.Set(
+									std::clamp(c->GetBambooVec().x + Pad->GetLS_Y() * deg2rad(0.1f), deg2rad(-10), deg2rad(10)),
+									std::clamp(c->GetBambooVec().y + Pad->GetLS_X() * deg2rad(0.1f), deg2rad(-30), deg2rad(30))
+								);
+								MyInput.SetxRad(MSVec.x);
+								MyInput.SetyRad(MSVec.y);
+							}
+							c->SetInput(OtherInput, true);
+						}
+						//ダメージイベント処理
+						c->AddDamageEvent(&this->m_DamageEvents);
+					}
 				}
 				//ダメージイベント
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 					auto& p = PlayerMngr->GetPlayer(index);
+					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+					for (int j = 0, Num = static_cast<int>(this->m_DamageEvents.size()); j < Num; ++j) {
+						if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)])) {
+							std::swap(this->m_DamageEvents.back(), m_DamageEvents[static_cast<size_t>(j)]);
+							this->m_DamageEvents.pop_back();
+							--Num;
+							--j;
+						}
+					}
+				}
+				//ダメージイベント
+				for (int index = 0; index < PlayerMngr->GetNPCNum(); ++index) {
+					auto& p = PlayerMngr->GetNPC(index);
 					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 					for (int j = 0, Num = static_cast<int>(this->m_DamageEvents.size()); j < Num; ++j) {
 						if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)])) {
@@ -428,8 +482,8 @@ namespace FPS_n2 {
 			ObjectManager::Instance()->Draw();
 			BackGround->Draw();
 			//ObjectManager::Instance()->Draw_Depth();
-			for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
-				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
+			for (int i = 0; i < PlayerMngr->GetNPCNum(); ++i) {
+				PlayerMngr->GetNPC(i)->GetAI()->Draw();
 			}
 			HitMark::Instance()->Update();
 		}
@@ -445,7 +499,7 @@ namespace FPS_n2 {
 				PauseMenuControl::DrawPause();
 			}
 			//通信設定
-			auto* NetBrowser = NetWorkBrowser::Instance();
+			//auto* NetBrowser = NetWorkBrowser::Instance();
 			//NetBrowser->Draw();
 			if (m_NetWorkController) {
 				auto* DrawParts = DXDraw::Instance();

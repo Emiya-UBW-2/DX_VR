@@ -45,6 +45,23 @@ namespace FPS_n2 {
 
 			PlayerID											m_MyID{ 0 };
 			PlayerID											m_ViewID{ 0 };
+
+			struct TurretData
+			{
+				frames Rotate;
+				frames Elevate;
+				float MinusLimit{ -50.f };
+				float Rad{ 0.f };
+				float PlusLimit{ 50.f };
+
+				float AmmoSize{ 12.7f };
+				float LoadTime{ 1.f };
+
+				float NowRad{ 0.f };
+				float NowRadR{ 0.f };
+			};
+
+			std::vector<TurretData>								m_TurretData{};
 		public:
 			bool												CanLookTarget{ true };
 		public://ÉQÉbÉ^Å[

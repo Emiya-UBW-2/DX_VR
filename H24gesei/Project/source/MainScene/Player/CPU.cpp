@@ -9,26 +9,13 @@ namespace FPS_n2 {
 		{
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto& Chara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(m_MyID)->GetChara();
+			auto& MyPlayer = (m_MyID >= PlayerMngr->GetPlayerNum()) ? PlayerMngr->GetNPC(m_MyID - PlayerMngr->GetPlayerNum()) : PlayerMngr->GetPlayer(m_MyID);
+			auto& Chara = (std::shared_ptr<CharacterObject::CharacterClass>&)MyPlayer->GetChara();
 
 			bool W_key{ false };
 			bool A_key{ false };
 			bool S_key{ false };
 			bool D_key{ false };
-
-			bool IsOutArea = false;
-			{
-				Vector3DX Vec = Chara->GetMove().GetPos() - Vector3DX::zero();
-				float Len = 11.f / 2.f * Scale_Rate;
-				if ((Vec.x < -Len || Len < Vec.x) ||
-					(Vec.z < -Len || Len < Vec.z)) {
-					IsOutArea = true;
-				}
-			}
-
-			if (IsOutArea) {
-				W_key = true;
-			}
 
 			bool shotMain_Key{ false };
 			bool shotSub_Key{ false };
@@ -43,12 +30,9 @@ namespace FPS_n2 {
 			}
 
 			if (Chara->GetBambooVec().magnitude() > deg2rad(1)) {
-				pp_x = std::clamp(-100.f * Chara->GetBambooVec().x / deg2rad(150.f), -3.f, 3.f);
-				pp_y = std::clamp(-100.f * Chara->GetBambooVec().y / deg2rad(150.f), -3.f, 3.f);
+				//pp_x = std::clamp(-100.f * Chara->GetBambooVec().x / deg2rad(150.f), -3.f, 3.f);
+				//pp_y = std::clamp(-100.f * Chara->GetBambooVec().y / deg2rad(150.f), -3.f, 3.f);
 			}
-#ifdef DEBUG
-			printfDx("[%5.2f,%5.2f]\n", pp_x, pp_y);
-#endif
 			//AI
 			MyInput->SetInputStart(pp_x, pp_y);
 			MyInput->SetInputPADS(PADS::MOVE_W, W_key);

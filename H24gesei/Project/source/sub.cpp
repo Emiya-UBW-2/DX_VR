@@ -79,6 +79,21 @@ namespace FPS_n2 {
 		//p->GetAI()->SetPlayerID(value);
 		//p->GetAI()->Init();
 	}
+	void			CommonBattleResource::LoadShipNPC(const std::string& FolderPath, int Num) noexcept {
+		auto* PlayerMngr = Player::PlayerManager::Instance();
+		auto* ObjMngr = ObjectManager::Instance();
+		auto& p = PlayerMngr->GetNPC(Num);
+
+		std::shared_ptr<ObjectBaseClass> Ptr = std::make_shared<CharacterObject::CharacterClass>();
+		ObjMngr->AddObject(Ptr);
+		ObjMngr->LoadModel(Ptr, Ptr, FolderPath.c_str());
+		Ptr->Init();
+		p->SetChara(Ptr);
+		//auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+		p->SetAI(std::make_shared<Player::AIControl>());
+		//p->GetAI()->SetPlayerID(value);
+		//p->GetAI()->Init();
+	}
 	void HitMark::Load(void) noexcept {
 		this->MenGraph = GraphHandle::Load("data/UI/hit_Men.bmp");
 		this->KoteGraph = GraphHandle::Load("data/UI/hit_Kote.bmp");

@@ -64,6 +64,7 @@ namespace FPS_n2 {
 		void			Dispose(void) noexcept;
 	public:
 		void			LoadShip(const std::string& FolderPath, PlayerID ID) noexcept;
+		void			LoadShipNPC(const std::string& FolderPath, int Num) noexcept;
 	};
 
 	class HitMark : public SingletonBase<HitMark> {

@@ -63,6 +63,55 @@ namespace FPS_n2 {
 #ifdef _USE_EFFEKSEER_
 			EffectControl::Init();				//
 #endif
+			m_TurretData.clear();
+			int Max = GetObj().GetFrameNum();
+			for (int frameNum = 0; frameNum < Max; frameNum++) {
+				if ((GetObj().GetFrameName(frameNum).find("旋回") != std::string::npos) && (GetObj().GetFrameChildNum(frameNum) > 0)) {
+					m_TurretData.resize(m_TurretData.size() + 1);
+					m_TurretData.back().Rotate.Set(frameNum, GetObj());
+					m_TurretData.back().Elevate.Set(GetObj().GetFrameChild(frameNum, 0), GetObj());
+					m_TurretData.back().NowRad = 0.f;
+					m_TurretData.back().NowRadR = 0.f;
+				}
+			}
+			int mdata = FileRead_open((this->GetFilePath() + "data.txt").c_str(), FALSE);
+			size_t index = 0;
+			while (true) {
+				if (FileRead_eof(mdata) != 0) { break; }
+				auto ALL = getparams::Getstr(mdata);
+				if (ALL.find('//') != std::string::npos) {
+					auto div = ALL.find('//');
+					ALL = ALL.substr(0, div);
+				}
+				if (ALL.find('=') != std::string::npos) {
+					auto RIGHT = getparams::getright(ALL);
+					{
+						auto div = RIGHT.find(',');
+						m_TurretData.at(index).MinusLimit = deg2rad(std::stof(RIGHT.substr(0, div)));
+						RIGHT = RIGHT.substr(div + 1);
+					}
+					{
+						auto div = RIGHT.find(',');
+						m_TurretData.at(index).Rad = deg2rad(std::stof(RIGHT.substr(0, div)));
+						RIGHT = RIGHT.substr(div + 1);
+					}
+					{
+						auto div = RIGHT.find(',');
+						m_TurretData.at(index).PlusLimit = deg2rad(std::stof(RIGHT.substr(0, div)));
+						RIGHT = RIGHT.substr(div + 1);
+					}
+					{
+						auto div = RIGHT.find(',');
+						m_TurretData.at(index).AmmoSize = std::stof(RIGHT.substr(0, div));
+						RIGHT = RIGHT.substr(div + 1);
+					}
+					{
+						m_TurretData.at(index).LoadTime = std::stof(RIGHT);
+					}
+					index++;
+				}
+			}
+			FileRead_close(mdata);
 		}
 		//
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
@@ -98,16 +147,39 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			//auto* SE = SoundPool::Instance();
 			//
-			bool IsOutArea = false;
-			{
-				Vector3DX Vec = this->m_move.GetPos() - Vector3DX::zero();
-				float Len = 11.f / 2.f * Scale_Rate;
-				if ((Vec.x < -Len || Len < Vec.x) ||
-					(Vec.z < -Len || Len < Vec.z)) {
-					IsOutArea = true;
-				}
-			}
+			Vector3DX TargetVec = CharaMove::GetEyeMatrix().zvec() * -1.f;
+			for (auto& t: m_TurretData) {
+				{
+					Vector3DX Vec = Matrix3x3DX::Vtrans(CharaMove::GetBaseRotMatrix().zvec() * -1.f, Matrix3x3DX::RotAxis(Vector3DX::up(), t.Rad)); Vec.y = 0.f;
+					Vector3DX vec_a = TargetVec; vec_a.y = 0.f;
+					float cost = Vector3DX::Cross(vec_a, Vec).y;
+					float sint = Vector3DX::Dot(vec_a, Vec);
 
+					t.NowRad = -std::atan2f(cost, sint);
+					t.NowRad = std::clamp(t.NowRad, t.MinusLimit, t.PlusLimit);
+				}
+				if (abs(t.NowRadR - t.NowRad)<deg2rad(10.f)) {
+					Easing(&t.NowRadR, t.NowRad, 0.9f, EasingType::OutExpo);
+				}
+				else {
+					if (t.NowRadR > t.NowRad) {
+						t.NowRadR -= deg2rad(60) / DrawParts->GetFps();
+					}
+					else {
+						t.NowRadR += deg2rad(60) / DrawParts->GetFps();
+					}
+				}
+
+				//旋回
+				this->GetObj().SetFrameLocalMatrix(t.Rotate.GetFrameID(),
+					Matrix4x4DX::RotAxis(Vector3DX::up(), t.NowRadR)*
+					t.Rotate.GetFrameLocalPosition());
+
+				//仰俯角
+				this->GetObj().SetFrameLocalMatrix(t.Elevate.GetFrameID(),
+					Matrix4x4DX::RotAxis(Matrix3x3DX::RotAxis(Vector3DX::up(), t.Rad).xvec(), deg2rad(45)) *
+					t.Elevate.GetFrameLocalPosition());
+			}
 			//掛け声
 			m_YaTimer = std::max(m_YaTimer - 1.f / DrawParts->GetFps(), 0.f);
 			m_DamageCoolTime = std::max(m_DamageCoolTime - 1.f / DrawParts->GetFps(), 0.f);
@@ -170,6 +242,7 @@ namespace FPS_n2 {
 			//BackGround->CheckMapWall(this->m_move.GetRePos(), &pos, 0.6f * Scale_Rate);
 			//ほかプレイヤーとの判定
 			{
+				/*
 				float Radius = 0.5f * Scale_Rate;
 				for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 					if (i == this->m_MyID) { continue; }
@@ -181,6 +254,17 @@ namespace FPS_n2 {
 						pos += Vec.normalized() * (Len - Radius);
 					}
 				}
+				for (int i = 0; i < PlayerMngr->GetNPCNum(); ++i) {
+					if (i == this->m_MyID) { continue; }
+					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetNPC(i)->GetChara();
+					//自分が当たったら押し戻す
+					Vector3DX Vec = (c->GetMove().GetPos() - this->GetMove().GetPos()); Vec.y = (0.f);
+					float Len = Vec.magnitude();
+					if (Len < Radius) {
+						pos += Vec.normalized() * (Len - Radius);
+					}
+				}
+				//*/
 			}
 			//座標オーバーライド
 			if (this->m_MoveOverRideFlag) {

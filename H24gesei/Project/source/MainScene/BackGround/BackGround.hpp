@@ -19,12 +19,11 @@ namespace FPS_n2 {
 			ShaderUseClass m_Shader;
 			ShaderUseClass m_Shader2;
 			ShaderUseClass m_Shader3;
-			int xsize = 4096;
-			int ysize = 4096;
+			int xsize = 2048;
+			int ysize = 2048;
 
 			std::array<GraphHandle, 3> m_PrevBufferHandle{};
 			GraphHandle m_WaveNormalHandle{};
-			GraphHandle m_WaveWallHandle{};
 			GraphHandle m_WaveObjHandle{};
 			int cubeTex{};
 			//
@@ -121,8 +120,6 @@ namespace FPS_n2 {
 				}
 				m_WaveNormalHandle = GraphHandle::Make(xsize, ysize, TRUE);
 
-				m_WaveWallHandle = GraphHandle::Make(xsize, ysize, TRUE);
-				m_WaveObjHandle = GraphHandle::Make(xsize, ysize, TRUE);
 				//
 				int DispX = DrawParts->GetScreenX(1920);
 				int DispY = DrawParts->GetScreenY(1080);
@@ -137,9 +134,27 @@ namespace FPS_n2 {
 			//
 			void			Execute(void) noexcept {
 				auto* DrawParts = DXDraw::Instance();
+				auto* OptionParts = OPTION::Instance();
 				//波シム
 				LONGLONG NowTime = GetNowHiPerformanceCount();
-				if (NowTime > Time + (LONGLONG)(1000 / 60 * 1000)) {
+				int SimPer = 30;
+				switch (OptionParts->GetParamInt(EnumSaveParam::ObjLevel)){
+				case 0:
+					SimPer = 10;
+					break;
+				case 1:
+					SimPer = 24;
+					break;
+				case 2:
+					SimPer = 30;
+					break;
+				case 3:
+					SimPer = 60;
+					break;
+				default:
+					break;
+				}
+				if (NowTime > Time + (LONGLONG)(1000 / SimPer * 1000)) {
 					Time = NowTime;
 					{
 						//前までの画面を保持
@@ -149,13 +164,13 @@ namespace FPS_n2 {
 								DrawGraph(0, 0, m_PrevBufferHandle[static_cast<size_t>(i + 1)].get(), TRUE);
 							}
 						}
+						/*
 						SetDrawScreen(m_WaveObjHandle.get());
 						ClearDrawScreen();
 						SetupCamera_Ortho(400.f);
 						SetCameraNearFar(1.f, 50.f);
 						SetCameraPositionAndTargetAndUpVec(VGet(0.0f, 50.0f, 0.0f), VGet(0.0f, 0.0f, 0.0f), VGet(0.0f, 0.0f, 1.0f));
 						{
-							/*
 							SetUseLighting(FALSE);
 
 							float Per = std::clamp(VSize(VSub(PrevPoint, MousPoint)) / 3.f, 0.f, 1.f);
@@ -163,19 +178,15 @@ namespace FPS_n2 {
 							DrawCapsule3D(MousPoint, PrevPoint, 0.25f, 8,
 								GetColor((int)(255.f * Per), 0, 0), GetColor((int)(255.f * Per), 0, 0), TRUE);
 							SetUseLighting(TRUE);
-							//*/
 						}
+						//*/
 						SetDrawScreen(m_PrevBufferHandle[1].get());
 						{
 							//オブジェクト書き込み
-							SetDrawBright(255, 0, 0);
-							DrawGraph(0, 0, m_WaveObjHandle.get(), TRUE);
+							//SetDrawBright(255, 0, 0);
+							//DrawGraph(0, 0, m_WaveObjHandle.get(), TRUE);
 
 							DrawBox(3, 3, xsize - 3, ysize - 3, GetColor(255, 0, 0), FALSE);
-							//地形を書き込み
-							SetDrawBright(0, 0, 0);
-							DrawGraph(0, 0, m_WaveWallHandle.get(), TRUE);
-							SetDrawBright(255, 255, 255);
 						}
 						m_PrevBufferHandle[2].SetDraw_Screen();
 						{
@@ -202,11 +213,9 @@ namespace FPS_n2 {
 						SaveDrawScreenToBMP(0, 0, xsize, ysize, "data/Wave/Preset.bmp");
 					}
 					//*/
-					timer += 1.f / 60.f;
+					timer += 1.f / SimPer;
 				}
 				{
-					auto* Pad = PadControl::Instance();
-
 					//海面以外の描画
 					SetDrawScreen(m_ScreenBufferHandle.get());
 					SetRenderTargetToShader(0, m_ScreenBufferHandle.get());
