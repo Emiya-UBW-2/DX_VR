@@ -70,7 +70,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	MainGameScenePtr->SetNextSceneList(1, MainGameScenePtr);
 
 	auto* SceneParts = SceneControl::Instance();
-	//SceneParts->AddList(Titlescene);
+	SceneParts->AddList(Titlescene);
 	SceneParts->AddList(LoadScenePtr);
 	SceneParts->AddList(MainGameScenePtr);
 	//Å‰‚Ì“Ç‚İ‚İ

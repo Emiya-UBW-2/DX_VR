@@ -75,6 +75,7 @@ namespace FPS_n2 {
 					case 1:
 						PopUpParts->Add(LocalizeParts->Get(3100), DrawParts->GetUIY(480), DrawParts->GetUIY(240),
 							[&](int xmin, int ymin, int xmax, int ymax, bool) {
+								auto* DrawParts = DXDraw::Instance();
 								auto* LocalizeParts = LocalizePool::Instance();
 								int xp1, yp1;
 								//ƒ^ƒCƒgƒ‹

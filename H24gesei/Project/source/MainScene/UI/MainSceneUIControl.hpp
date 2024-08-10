@@ -221,6 +221,15 @@ namespace FPS_n2 {
 			void			Set(void) noexcept {
 			}
 			void			Draw(void) noexcept {
+				auto* DrawParts = DXDraw::Instance();
+				auto* Fonts = FontPool::Instance();
+				int xp1, yp1;
+				//タイム,スコア
+				{
+					xp1 = DrawParts->GetUIY(1920 / 2);
+					yp1 = DrawParts->GetUIY(10);
+					Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24), 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "目標はない、とにかく自分以外の船を撃て！(リザルトもありません。ポーズ画面でタイトルへ戻れます/Escキーで終了できます。)");
+				}
 			}
 
 			void			InitGaugeParam(int ID, int value, int Max) noexcept { m_GaugeParam[static_cast<size_t>(ID)].InitGaugeParam(value, Max); }

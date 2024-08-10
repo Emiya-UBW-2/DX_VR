@@ -143,7 +143,7 @@ namespace FPS_n2 {
 			//’|“‚Ì‰ñ“]‚ð”½‰f
 			Easing(&m_BambooVecBase, Vector2DX::vget(Input.GetxRad(), Input.GetyRad()), 0.7f, EasingType::OutExpo);
 			//
-			if (!pReady) {
+			if (!pReady || (m_HP==0)) {
 				Input.ResetKeyInput();
 			}
 			CharaMove::InputKey(Input, m_MyID == m_ViewID);
@@ -278,8 +278,10 @@ namespace FPS_n2 {
 				groundYpos = EndPos.y;
 			}
 			else {
-				IsHitGround = true;
-				groundYpos = 0.f;
+				if (m_HP > 0) {
+					IsHitGround = true;
+					groundYpos = 0.f;
+				}
 			}
 			Vector3DX vec = CharaMove::GetVec();
 			if (IsHitGround) {
