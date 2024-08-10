@@ -19,11 +19,6 @@ namespace FPS_n2 {
 			int													m_CharaSound{ -1 };			//サウンド
 			CharaTypeID											m_CharaType{};
 			bool												m_ConcussionSwitch{ false };
-			float												m_YaTimer{ 0.f };
-
-			float												m_DamageCoolTime{ 0.f };
-			float												m_TsubaSoundCoolTime{ 0.f };
-			float												m_GuardHit{ 0.f };
 
 			float												m_RunTime{ 0.f };
 			float												m_FrontAttackActionTime{ 0.f };
@@ -46,6 +41,8 @@ namespace FPS_n2 {
 			PlayerID											m_MyID{ 0 };
 			PlayerID											m_ViewID{ 0 };
 
+			HitPoint											m_HP{ 1000 };
+
 			struct TurretData
 			{
 				frames Rotate;
@@ -54,24 +51,36 @@ namespace FPS_n2 {
 				float Rad{ 0.f };
 				float PlusLimit{ 50.f };
 
+				float RotateRate{ 1.f };
+
 				float AmmoSize{ 12.7f };
 				float LoadTime{ 1.f };
 
 				float NowRad{ 0.f };
 				float NowRadR{ 0.f };
+				float NowLoadTime{ 0.f };
+
+				bool CanShot{ false };
+				bool HitLimit{ false };
 			};
 
 			std::vector<TurretData>								m_TurretData{};
+			float												m_ShotCoolDown{ 0.f };
+
+			MV1													m_WaveObj{};
+			float												m_WaveScr{};
+			float												m_WaveAlpha{};
+			float												m_WaveFront{};
 		public:
 			bool												CanLookTarget{ true };
 		public://ゲッター
+			const auto& GetTurretData(void) const noexcept { return this->m_TurretData; }
 			const auto& GetMyPlayerID(void) const noexcept { return this->m_MyID; }
 			const auto& GetDamageEvent(void) const noexcept { return this->m_Damage; }
 			const auto& GetEyePosition(void) const noexcept { return this->m_EyePosition; }
 			const auto& GetCharaType(void) const noexcept { return this->m_CharaType; }
 			const auto& GetBambooVec(void) const noexcept { return m_BambooVec; }
 			const auto& GetGuardVec(void) const noexcept { return m_GuardVecR; }
-			const auto& GetYaTimer(void) const noexcept { return m_YaTimer; }
 			const auto& GetGuardCoolDownTimer(void) const noexcept { return m_GuardCoolDownTimer; }
 			const auto GetGuardCoolDownTimerMax(void) const noexcept { return 2.f; }
 			auto			PopConcussionSwitch(void) noexcept {
@@ -80,10 +89,15 @@ namespace FPS_n2 {
 				return Prev;
 			}
 			Vector3DX		GetFramePosition(CharaFrame frame) const noexcept { return GetObj_const().GetFramePosition(GetFrame(static_cast<int>(frame))); }
+			const auto&		GetHP(void) const noexcept { return m_HP; }
+			HitPoint		GetHPMax(void) noexcept {
+				return 1000;
+			}
 		public://セッター
 			void			ValueSet(PlayerID pID, CharaTypeID value) noexcept {
 				this->m_CharaType = value;
 				this->m_MyID = pID;
+				m_HP = GetHPMax();
 			}
 			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.AddDamageEvent(pRet); }
 			void			SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
@@ -137,11 +151,38 @@ namespace FPS_n2 {
 				if (this->m_IsActive && this->m_IsDraw) {
 					if (m_MyID == m_ViewID) {
 						if (isDrawSemiTrans) {
+							this->m_WaveObj.DrawModel();
 							this->GetObj().DrawModel();
+
+							SetUseLighting(FALSE);
+							for (auto& t : m_TurretData) {
+								Vector3DX Pos = GetObj().GetFramePosition(t.Elevate.GetFrameID());
+								Vector3DX Vec = GetObj().GetFrameLocalWorldMatrix(t.Rotate.GetFrameID()).zvec() * (-30.f * Scale_Rate);
+								Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::up(), t.Rad));
+								unsigned int Color = GetColor(255, 255, 0);
+								if (t.CanShot) {
+									Color = GetColor(0, 255, 0);
+								}
+								else if (t.HitLimit) {
+									Color = GetColor(255, 0, 0);
+								}
+								if (t.NowLoadTime > 0.f) {
+									Color = GetColor(255, 0, 0);
+								}
+
+								DrawCapsule3D((Pos).get(), (Pos + Vec).get(), 0.2f * Scale_Rate, 8, Color, Color, TRUE);
+							}
+							SetUseLighting(TRUE);
+
+							//DrawCapsule3D(
+							//	(GetMove().GetPos() + Matrix3x3DX::Vtrans(Vector3DX::vget(0.f, 10.0f * Scale_Rate, -100.0f * Scale_Rate), GetBaseRotMatrix())).get(),
+							//	(GetMove().GetPos() + Matrix3x3DX::Vtrans(Vector3DX::vget(0.f, 10.0f * Scale_Rate, 100.0f * Scale_Rate), GetBaseRotMatrix())).get(), 10.f * Scale_Rate, 8, White, White, TRUE);
+				
 						}
 					}
 					else {
 						if (!isDrawSemiTrans) {
+							this->m_WaveObj.DrawModel();
 							this->GetObj().DrawModel();
 						}
 					}

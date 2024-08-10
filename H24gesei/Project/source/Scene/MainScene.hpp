@@ -23,6 +23,7 @@ namespace FPS_n2 {
 			float										m_GuardStart{ 0.f };
 			float										m_Concussion{ 0.f };
 			float										m_ConcussionPer{ 0.f };
+			GraphHandle									m_RotateImage;
 			UIClass										m_UIclass;
 			int											m_UILayer{ 0 };
 			//NetWork
@@ -33,6 +34,12 @@ namespace FPS_n2 {
 #ifdef DEBUG
 			float m_D1{ 38.f / 255.f }, m_D2{ 192.f / 255.f }, m_D3{ 1.f };
 #endif
+			Vector3DX	m_CenterPos;
+			float		m_RotateRad{ 0.f };
+
+			float		m_WS{ 0.f };
+			float		m_AD{ 0.f };
+			float		m_Range{ 60.f };
 		private:
 			auto		GetMyPlayerID(void) const noexcept {
 				if (m_NetWorkController) {

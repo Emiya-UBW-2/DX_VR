@@ -73,10 +73,12 @@ namespace FPS_n2 {
 	private:
 		struct HitPos
 		{
+			bool IsFirstTime{ false };
 			float Time{};
 			float TimeMax{};
 			Vector3DX	m_Pos2D;
 			Vector3DX	m_Pos;
+			HitPoint	Damage{};
 			HitType		m_Color{};
 			float		m_Per{};
 		};
@@ -98,15 +100,18 @@ namespace FPS_n2 {
 		void			Load(void) noexcept;
 		void			Set(void) noexcept;
 		void			Update(void) noexcept;
+		void			CheckDraw(void) noexcept;
 		void			Draw(void) noexcept;
 		void			Dispose(void) noexcept;
 	public:
-		void			Add(const Vector3DX& Pos, HitType color, float Per) noexcept {
+		void			Add(const Vector3DX& Pos, HitType color, HitPoint Damage, float Per) noexcept {
+			m_HitPos.at(m_HitNow).Damage = Damage;
 			m_HitPos.at(m_HitNow).m_Pos = Pos;
 			m_HitPos.at(m_HitNow).m_Color = color;
 			m_HitPos.at(m_HitNow).m_Per = Per;
-			m_HitPos.at(m_HitNow).TimeMax = 2.f;
+			m_HitPos.at(m_HitNow).TimeMax = 0.5f;
 			m_HitPos.at(m_HitNow).Time = m_HitPos.at(m_HitNow).TimeMax;
+			m_HitPos.at(m_HitNow).IsFirstTime = true;
 			++m_HitNow %= m_HitPos.size();
 		}
 	};

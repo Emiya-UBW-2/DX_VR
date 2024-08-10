@@ -32,10 +32,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(PADS::INTERACT, true);//UI‚Ì‚Ý
 	Pad->SetIsUseButton(PADS::THROW, false);
 	Pad->SetIsUseButton(PADS::MELEE, false);
-	Pad->SetIsUseButton(PADS::JUMP, true);
+	Pad->SetIsUseButton(PADS::JUMP, false);
 	Pad->SetIsUseButton(PADS::INVENTORY, false);
 	Pad->SetIsUseButton(PADS::RUN, false);
-	Pad->SetIsUseButton(PADS::WALK, true);
+	Pad->SetIsUseButton(PADS::WALK, false);
 	Pad->SetIsUseButton(PADS::SHOT, true);
 	Pad->SetIsUseButton(PADS::AIM, true);
 	Pad->SetIsUseButton(PADS::ULT, true);

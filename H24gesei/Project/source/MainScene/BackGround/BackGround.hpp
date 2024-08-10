@@ -240,7 +240,7 @@ namespace FPS_n2 {
 						SetVerticalFogColor(27, 57, 77);
 						SetVerticalFogStartEnd(-25.f*Scale_Rate, -75.f * Scale_Rate);
 
-						ObjectManager::Instance()->Draw();
+						ObjectManager::Instance()->Draw_Shadow();
 
 						SetVerticalFogEnable(FALSE);
 
