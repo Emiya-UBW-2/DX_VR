@@ -81,9 +81,9 @@ namespace FPS_n2 {
 			const auto& GetYRadChange(void) const noexcept { return this->m_YRadChange; }
 			const auto& GetWSLevel(void) const noexcept { return this->m_WSLevel; }
 			const auto& GetADLevel(void) const noexcept { return this->m_ADLevel; }
+			const auto& GetEyeRad(void) const noexcept { return this->m_LookVec; }
 		public://セッター
 		protected:
-			const auto& GetEyeRad(void) const noexcept { return this->m_LookVec; }
 			const auto& GetUpperRotMatrix(void) const noexcept { return this->m_UpperMatrix; }
 			const auto& GetBaseRotMatrix(void) const noexcept { return this->m_BaseMatrix; }
 			const auto& GetInputControl(void) const noexcept { return this->m_Input; }

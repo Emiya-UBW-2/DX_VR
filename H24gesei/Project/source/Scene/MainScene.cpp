@@ -22,6 +22,7 @@ namespace FPS_n2 {
 			}
 			//UI
 			this->m_RotateImage = GraphHandle::Load("data/UI/Rotate.png");
+			this->m_EnemyImage = GraphHandle::Load("data/UI/enemyrad.png");
 			this->m_UIclass.Load();
 			PauseMenuControl::LoadPause();
 			HitMark::Instance()->Load();
@@ -473,11 +474,20 @@ namespace FPS_n2 {
 			{
 				if (GetIsFirstLoop()) {
 				}
+				//残り
+				int AliveNum = 0;
+				for (int index = 0; index < PlayerMngr->GetNPCNum(); ++index) {
+					auto& p = PlayerMngr->GetNPC(index);
+					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+					if (c->GetHP() > 0) {
+						AliveNum++;
+					}
+				}
+				if (AliveNum == 0) {
+					this->m_IsEnd = true;
+				}
 				//NvsN
-				this->m_UIclass.SetIntParam(0, 0);
-				this->m_UIclass.SetIntParam(1, 0);
-				//timer
-				this->m_UIclass.SetfloatParam(0, 0.f);
+				this->m_UIclass.SetIntParam(0, AliveNum);
 			}
 			m_CenterPos.z = -1.f;
 			{
@@ -529,6 +539,7 @@ namespace FPS_n2 {
 			PauseMenuControl::DisposePause();
 			HitMark::Instance()->Dispose();
 			m_RotateImage.Dispose();
+			m_EnemyImage.Dispose();
 		}
 
 		//
@@ -654,6 +665,39 @@ namespace FPS_n2 {
 							"%3.1f cm Cannon : %5.2fs", t.AmmoSize, (t.NowLoadTime == 0) ? t.LoadTime : t.NowLoadTime);
 
 						yp += DrawParts->GetUIY(16 +4);
+					}
+				}
+				{
+					//残り
+					int AliveNum = 0;
+					for (int index = 0; index < PlayerMngr->GetNPCNum(); ++index) {
+						auto& p = PlayerMngr->GetNPC(index);
+						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+						if (c->GetHP() > 0) {
+							AliveNum++;
+						}
+					}
+					if (AliveNum == 0) {
+						int xp = DrawParts->GetUIY(1920 / 2);
+						int yp = DrawParts->GetUIY(1080 / 2);
+						Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(72), 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp, yp, White, Black, "クリア！");
+					}
+				}
+				{
+					int xp = DrawParts->GetUIY(1920 / 2);
+					int yp = DrawParts->GetUIY(1080 / 2);
+					auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+
+					
+					for (int index = 0; index < PlayerMngr->GetNPCNum(); ++index) {
+						auto& p = PlayerMngr->GetNPC(index);
+						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+						if (c->GetHP() > 0) {
+							Vector3DX vec = c->GetMove().GetPos()-ViewChara->GetMove().GetPos();
+							m_EnemyImage.DrawRotaGraph(xp,yp, static_cast<float>(DrawParts->GetUIY(100)) / 100.f,
+								-ViewChara->GetEyeRad().y + atan2f(-vec.x, -vec.z)
+								,true);
+						}
 					}
 				}
 			}

@@ -16,10 +16,10 @@ namespace FPS_n2 {
 					SE->Get(static_cast<int>(SoundEnum::Damage)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 				}
 				else {
-					m_HP = std::clamp<HitPoint>(m_HP - value.Damage, 0, GetHPMax());
 					SE->Get(static_cast<int>(SoundEnum::Hit)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 				}
 				if (value.ShotID == this->m_ViewID) {//Ž©•ª‚Éƒqƒbƒg
+					m_HP = std::clamp<HitPoint>(m_HP - value.Damage, 0, GetHPMax());
 					if (m_HP == 0) {
 						type = HitType::Head;
 					}

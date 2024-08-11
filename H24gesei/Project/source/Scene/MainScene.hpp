@@ -24,6 +24,7 @@ namespace FPS_n2 {
 			float										m_Concussion{ 0.f };
 			float										m_ConcussionPer{ 0.f };
 			GraphHandle									m_RotateImage;
+			GraphHandle									m_EnemyImage;
 			UIClass										m_UIclass;
 			int											m_UILayer{ 0 };
 			//NetWork

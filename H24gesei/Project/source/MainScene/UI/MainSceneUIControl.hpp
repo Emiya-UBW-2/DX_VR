@@ -227,8 +227,14 @@ namespace FPS_n2 {
 				//タイム,スコア
 				{
 					xp1 = DrawParts->GetUIY(1920 / 2);
+					yp1 = DrawParts->GetUIY(10+32);
+					Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24), 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "とにかく自分以外の船を撃て！");
+				}
+				//タイム,スコア
+				{
+					xp1 = DrawParts->GetUIY(1920 / 2);
 					yp1 = DrawParts->GetUIY(10);
-					Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24), 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "目標はない、とにかく自分以外の船を撃て！(リザルトもありません。ポーズ画面でタイトルへ戻れます/Escキーで終了できます。)");
+					Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32), 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "残り%d隻", intParam[0]);
 				}
 			}
 
