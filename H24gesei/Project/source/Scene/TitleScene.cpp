@@ -134,7 +134,7 @@ namespace FPS_n2 {
 			this->m_TitleImage.DrawExtendGraph(DrawParts->GetUIY(64), DrawParts->GetUIY(64), DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), true);
 			// 
 			Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18), 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-				DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), White, Black, "Ver 0.9.0");
+				DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), White, Black, "Ver 0.9.2");
 			// 
 			ButtonParts->Draw();
 			// 

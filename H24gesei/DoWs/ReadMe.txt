@@ -1,4 +1,4 @@
-Decommissioned of Warships  Ver 0.9.1　　　　　　笑也 知郎
+Decommissioned of Warships  Ver 0.9.2　　　　　　笑也 知郎
 
 このアプリケーションについて
 　　某お船のゲームのタワーディフェンス的なものを作ろうとしましたが検討不足でした！
