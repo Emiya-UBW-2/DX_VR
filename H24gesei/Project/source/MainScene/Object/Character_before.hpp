@@ -47,37 +47,37 @@ namespace FPS_n2 {
 		//キャラ入力
 		class CharaMove {
 		private://キャラパラメーター
-			Vector3DX											m_VecTotal;
+			Vector3DX											m_VecTotal{};
 			std::array<float, 4>								m_Vec{};
-			InputControl										m_Input;
-			Vector3DX											m_rad_Buf;
-			Vector3DX											m_LookVec;
-			Vector3DX											m_TurretVec;
-			float												m_ZRad{};
-			float												m_ShipSwing;
-			float												m_ShipSwingSinR;
+			InputControl										m_Input{};
+			Vector3DX											m_rad_Buf{};
+			Vector3DX											m_LookVec{};
+			Vector3DX											m_TurretVec{};
+			float												m_ZRad{ 0.f };
+			float												m_ShipSwing{ 0.f };
+			float												m_ShipSwingSinR{ 0.f };
 
-			float												m_SpeedR{};
-			float												m_YRadAddR{};
-			float												m_YRadChange{};
+			float												m_SpeedR{ 0.f };
+			float												m_YRadAddR{ 0.f };
+			float												m_YRadChange{ 0.f };
 
-			Matrix3x3DX											m_EyeMatrix;
-			Matrix3x3DX											m_UpperMatrix;
-			Matrix3x3DX											m_BaseMatrix;
+			Matrix3x3DX											m_EyeMatrix{};
+			Matrix3x3DX											m_UpperMatrix{};
+			Matrix3x3DX											m_BaseMatrix{};
 
-			switchs												m_WKeyTrig;
-			switchs												m_SKeyTrig;
+			switchs												m_WKeyTrig{};
+			switchs												m_SKeyTrig{};
 			int													m_WSLevel{ 0 };
 
-			switchs												m_AKeyTrig;
-			switchs												m_DKeyTrig;
+			switchs												m_AKeyTrig{};
+			switchs												m_DKeyTrig{};
 			int													m_ADLevel{ 0 };
 		public://ゲッター
 			CharaObjAnimeID										m_BottomAnimSelect{};
 		public://ゲッター
 			auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }
 			auto		GetEyeMatrix(void) const noexcept { return this->m_EyeMatrix; }
-			const auto& GetGunMatrix(void) const noexcept { return Matrix3x3DX::RotAxis(Vector3DX::up(), m_TurretVec.y); }
+			auto GetGunMatrix(void) const noexcept { return Matrix3x3DX::RotAxis(Vector3DX::up(), m_TurretVec.y); }
 			const auto& GetYRadChange(void) const noexcept { return this->m_YRadChange; }
 			const auto& GetWSLevel(void) const noexcept { return this->m_WSLevel; }
 			const auto& GetADLevel(void) const noexcept { return this->m_ADLevel; }
@@ -88,9 +88,7 @@ namespace FPS_n2 {
 			const auto& GetBaseRotMatrix(void) const noexcept { return this->m_BaseMatrix; }
 			const auto& GetInputControl(void) const noexcept { return this->m_Input; }
 			auto		GetShipSwingMat(void) const noexcept { return Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(3) * this->m_ShipSwingSinR); }
-			auto		GetSpeedMax(void) const noexcept {
-				return 10.f;
-			}
+			auto		GetSpeedMax(void) const noexcept { return 10.f; }
 			auto		GetSpeedPer(void) const noexcept {
 				switch (m_WSLevel)
 				{
@@ -113,7 +111,7 @@ namespace FPS_n2 {
 				}
 			}
 			const auto& GetSpeedrPer(void) const noexcept { return this->m_SpeedR; }
-			const auto& GetMoverPer(void) const noexcept { return this->m_SpeedR / GetSpeedMax(); }
+			auto GetMoverPer(void) const noexcept { return this->m_SpeedR / GetSpeedMax(); }
 			auto		GetRotPer(void) const noexcept {
 				switch (m_ADLevel)
 				{
@@ -158,11 +156,11 @@ namespace FPS_n2 {
 				this->m_ShipSwing = 0.f;
 				this->m_ShipSwingSinR = 0.f;
 
-				m_WSLevel = 1.f;
+				m_WSLevel = 1;
 			}
 			//
 			void		InputKey(const InputControl& pInput,bool SEOn) noexcept {
-				auto* DrawParts = DXDraw::Instance();
+				//auto* DrawParts = DXDraw::Instance();
 				this->m_Input = pInput;
 				//回転
 				{
@@ -197,13 +195,13 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			void		UpdateKeyRad(const moves& move_t) noexcept {
+			void		UpdateKeyRad() noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				//
 				float YradChange = 0.f;
 				m_SpeedR += ((m_SpeedR < GetSpeedPer()) ? 1.f : -1.f) * 1.f / DrawParts->GetFps();
 				float GonePer = GetRotPer() * GetSpeedPer() / GetSpeedMax();
-				m_YRadAddR += ((m_YRadAddR < GonePer) ? 1.f : -1.f) * 0.1f / DrawParts->GetFps();
+				m_YRadAddR += ((m_YRadAddR < GonePer) ? 1.f : -1.f) * 0.25f / DrawParts->GetFps();
 
 				Easing(&m_YRadChange, (abs(m_YRadAddR - GonePer) > 0.1f) ?
 					((m_YRadAddR < GonePer) ? 1.f : -1.f)
@@ -226,6 +224,5 @@ namespace FPS_n2 {
 				Easing(&this->m_ShipSwingSinR, sin(this->m_ShipSwing), 0.9f, EasingType::OutExpo);
 			}
 		};
-
 	}
 }

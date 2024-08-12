@@ -49,6 +49,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	std::string Name = "AA"+std::to_string(GetNowHiPerformanceCount());
 	SetMainWindowText(Name.c_str());						//ƒ^ƒCƒgƒ‹
 	//SetUseHalfLambertLighting(TRUE);
+	//MV1SetLoadModelUsePackDraw(TRUE);
 	MV1SetLoadModelReMakeNormal(TRUE);
 	//
 	FPS_n2::Player::PlayerManager::Create();

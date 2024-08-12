@@ -87,8 +87,8 @@ namespace FPS_n2 {
 			while (true) {
 				if (FileRead_eof(mdata) != 0) { break; }
 				auto ALL = getparams::Getstr(mdata);
-				if (ALL.find('//') != std::string::npos) {
-					auto div = ALL.find('//');
+				if (ALL.find("//") != std::string::npos) {
+					auto div = ALL.find("//");
 					ALL = ALL.substr(0, div);
 				}
 				if (ALL.find('=') != std::string::npos) {
@@ -167,7 +167,26 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			//auto* SE = SoundPool::Instance();
 			//
-			Vector3DX TargetPos = (GetEyePosition() - CharaMove::GetGunMatrix().zvec() * (1000.f * Scale_Rate));
+			m_AimDistance = 1000.f;
+			Vector3DX StartPos = (GetMove().GetPos() + Vector3DX::up() * (10.f * Scale_Rate));
+			Vector3DX TargetPos = GetCamTarget();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			for (int i = 0; i < PlayerMngr->GetNPCNum(); ++i) {
+				if (i == this->m_MyID) { continue; }
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetNPC(i)->GetChara();
+				if (GetMinLenSegmentToSegment(StartPos, TargetPos,
+					c->GetMove().GetPos() + Matrix3x3DX::Vtrans(Vector3DX::vget(0.f, 10.0f * Scale_Rate, -100.0f * Scale_Rate), c->GetBaseRotMatrix()),
+					c->GetMove().GetPos() + Matrix3x3DX::Vtrans(Vector3DX::vget(0.f, 10.0f * Scale_Rate, 100.0f * Scale_Rate), c->GetBaseRotMatrix())
+				) <= 10.0f * Scale_Rate) {
+					SEGMENT_SEGMENT_RESULT Ret;
+					GetSegmenttoSegment(StartPos, TargetPos,
+						c->GetMove().GetPos() + Matrix3x3DX::Vtrans(Vector3DX::vget(0.f, 10.0f * Scale_Rate, -100.0f * Scale_Rate), c->GetBaseRotMatrix()),
+						c->GetMove().GetPos() + Matrix3x3DX::Vtrans(Vector3DX::vget(0.f, 10.0f * Scale_Rate, 100.0f * Scale_Rate), c->GetBaseRotMatrix()),
+						&Ret);
+					TargetPos = Ret.SegA_MinDist_Pos;
+					m_AimDistance = (TargetPos - StartPos).magnitude() / Scale_Rate;
+				}
+			}
 			for (auto& t: m_TurretData) {
 				{
 					Vector3DX Vec = Matrix3x3DX::Vtrans(this->m_move.GetMat().zvec() * -1.f, Matrix3x3DX::RotAxis(Vector3DX::up(), t.Rad)); Vec.y = 0.f;
@@ -213,6 +232,7 @@ namespace FPS_n2 {
 
 						Vector3DX Vec = GetObj().GetFrameLocalWorldMatrix(t.Rotate.GetFrameID()).zvec() * -1.f;
 						Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::up(), t.Rad));
+						Vec.y = 0.f;//óhÇÍñ≥éã
 						Vector3DX Pos = (Vec * (3.f * Scale_Rate)) + this->GetObj().GetFramePosition(t.Elevate.GetFrameID());
 						//
 						EffectControl::SetOnce_Any(EffectResource::Effect::ef_fire,
@@ -248,25 +268,17 @@ namespace FPS_n2 {
 			}
 			m_ShotCoolDown = std::max(m_ShotCoolDown - 1.f / DrawParts->GetFps(), 0.f);
 			//
-			CharaMove::UpdateKeyRad(this->m_move);
+			CharaMove::UpdateKeyRad();
 		}
 		void			CharacterClass::ExecuteAction(void) noexcept {
 		}
 		void			CharacterClass::ExecuteAnim(void) noexcept {
-			//ÉAÉjÉÅââéZ
-			//CharaMove::SetCharaAnimeBufID(CharaObjAnimeID::Upper_Ready) = 1.f;
-			//ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaObjAnimeID::Bottom_Stand_Turn), 0.5f);
 		}
 		void			CharacterClass::ExecuteSound(void) noexcept {
-			//auto* DrawParts = DXDraw::Instance();
-			//auto* SE = SoundPool::Instance();
-			//ÇµÇ·Ç™Ç›âπ
-			//SE->Get(static_cast<int>(SoundEnum::StandupFoot)).Play_3D(0, GetFramePosition(CharaFrame::Upper), Scale_Rate * 3.f);
 		}
 		void			CharacterClass::ExecuteMatrix(void) noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* DrawParts = DXDraw::Instance();
-			auto* PlayerMngr = Player::PlayerManager::Instance();
 			//
 			Vector3DX pos = this->m_move.GetPosBuf();
 			//vector

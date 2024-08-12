@@ -17,7 +17,7 @@ namespace FPS_n2 {
 			BattleResourceMngr->LoadShip("data/Ship/Allied/BB/", (PlayerID)0);
 			PlayerMngr->DisposeNPC();
 			for (int index = 0; index < 10; ++index) {
-				auto& p = PlayerMngr->AddNPC();
+				PlayerMngr->AddNPC();
 				BattleResourceMngr->LoadShipNPC("data/Ship/Axis/CA/", index);
 			}
 			//UI
@@ -33,9 +33,11 @@ namespace FPS_n2 {
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
-			auto* ObjMngr = ObjectManager::Instance();
+			//auto* ObjMngr = ObjectManager::Instance();
 			//
 			BattleResourceMngr->Set();
+			//
+			SetShadowScale(20.f);
 			//
 			BackGround->Init();
 			//
@@ -354,7 +356,7 @@ namespace FPS_n2 {
 			{
 				m_Range += static_cast<float>(GetMouseWheelRotVolWithCheck()*10.f);
 
-				m_Range = std::clamp(m_Range, 0.f, 240.f);
+				m_Range = std::clamp(m_Range, 0.f, 150.f);
 
 				auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 				auto* OptionParts = OPTION::Instance();
@@ -573,7 +575,7 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			{
 				auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
-				Vector3DX TargetPos = (ViewChara->GetEyePosition() - ViewChara->GetGunMatrix().zvec() * (1000.f * Scale_Rate));
+				Vector3DX TargetPos = ViewChara->GetCamTarget();
 				auto tmp = ConvWorldPosToScreenPos(TargetPos.get());
 				if (tmp.z >= 0.f && tmp.z <= 1.f) {
 					m_CenterPos = tmp;

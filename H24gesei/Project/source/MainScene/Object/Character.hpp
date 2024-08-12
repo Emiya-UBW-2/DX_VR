@@ -71,6 +71,8 @@ namespace FPS_n2 {
 			float												m_WaveScr{};
 			float												m_WaveAlpha{};
 			float												m_WaveFront{};
+
+			float												m_AimDistance{};
 		public:
 			bool												CanLookTarget{ true };
 		public://ゲッター
@@ -92,6 +94,9 @@ namespace FPS_n2 {
 			const auto&		GetHP(void) const noexcept { return m_HP; }
 			HitPoint		GetHPMax(void) noexcept {
 				return 1000;
+			}
+			auto			GetCamTarget() noexcept {
+				return (GetMove().GetPos() +Vector3DX::up()*(10.f*Scale_Rate) - CharaMove::GetGunMatrix().zvec() * (m_AimDistance * Scale_Rate));
 			}
 		public://セッター
 			void			ValueSet(PlayerID pID, CharaTypeID value) noexcept {
@@ -121,6 +126,9 @@ namespace FPS_n2 {
 			int				GetFrameNum(void) noexcept override { return static_cast<int>(CharaFrame::Max); }
 			const char* GetFrameStr(int id) noexcept override { return CharaFrameName[id]; }
 
+			int				GetMaterialNum(void) noexcept override { return static_cast<int>(CharaMaterial::Max); }
+			const char* GetMaterialStr(int id) noexcept override { return CharaMaterialName[id]; }
+
 			int				GetShapeNum(void) noexcept override { return static_cast<int>(CharaShape::Max); }
 			const char* GetShapeStr(int id) noexcept override { return CharaShapeName[id]; }
 		public: //コンストラクタ、デストラクタ
@@ -138,21 +146,35 @@ namespace FPS_n2 {
 			void			Init_Sub(void) noexcept override;
 			void			FirstExecute(void) noexcept override;
 			void			CheckDraw(void) noexcept override {
+				if (this->GetMove().GetPos().y < -50.f * Scale_Rate) { return; }
 				this->m_IsDraw = false;
-				this->m_DistanceToCam = (this->GetObj().GetMatrix().pos() - GetScreenPosition()).magnitude();
+				this->m_DistanceToCam = (this->GetMove().GetPos() - GetScreenPosition()).magnitude();
 				if (CheckCameraViewClip_Box(
-					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-800.f * Scale_Rate, -0.f * Scale_Rate, -800.f * Scale_Rate)).get(),
-					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(800.f * Scale_Rate, 370.f * Scale_Rate, 800.f * Scale_Rate)).get()) == FALSE
+					(this->GetMove().GetPos() + Vector3DX::vget(-800.f * Scale_Rate, -0.f * Scale_Rate, -800.f * Scale_Rate)).get(),
+					(this->GetMove().GetPos() + Vector3DX::vget(800.f * Scale_Rate, 370.f * Scale_Rate, 800.f * Scale_Rate)).get()) == FALSE
 					) {
 					this->m_IsDraw |= true;
 				}
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {
-				if (this->m_IsActive && this->m_IsDraw) {
+				auto* DrawParts = DXDraw::Instance();
+				float DistanceToCam = (this->GetMove().GetPos() - DrawParts->GetMainCamera().GetCamPos()).magnitude();
+				if (this->GetMove().GetPos().y < -50.f * Scale_Rate) { return; }
+				if (IsActive() && this->m_IsDraw) {
 					if (m_MyID == m_ViewID) {
 						if (isDrawSemiTrans) {
 							this->m_WaveObj.DrawModel();
-							this->GetObj().DrawModel();
+							for (int i = 0, num = this->GetObj().GetMaterialNum(); i < num; ++i) {
+								if (i != GetMaterial(static_cast<int>(CharaMaterial::Body))) {
+									if (m_HP == 0) {
+										continue;
+									}
+									if (DistanceToCam > 150.f * Scale_Rate) {
+										continue;
+									}
+								}
+								this->GetObj().DrawMesh(i);
+							}
 
 							SetUseLighting(FALSE);
 							for (auto& t : m_TurretData) {
@@ -183,14 +205,37 @@ namespace FPS_n2 {
 					else {
 						if (!isDrawSemiTrans) {
 							this->m_WaveObj.DrawModel();
-							this->GetObj().DrawModel();
+							for (int i = 0, num = this->GetObj().GetMaterialNum(); i < num; ++i) {
+								if (i != GetMaterial(static_cast<int>(CharaMaterial::Body))) {
+									if (m_HP == 0) {
+										continue;
+									}
+									if (DistanceToCam > 150.f * Scale_Rate) {
+										continue;
+									}
+								}
+								this->GetObj().DrawMesh(i);
+							}
 						}
 					}
 				}
 			}
 			void			DrawShadow(void) noexcept override {
-				if (this->m_IsActive) {
-					this->GetObj().DrawModel();
+				auto* DrawParts = DXDraw::Instance();
+				float DistanceToCam = (this->GetMove().GetPos() - DrawParts->GetMainCamera().GetCamPos()).magnitude();
+				if (this->GetMove().GetPos().y < -50.f * Scale_Rate) { return; }
+				if (IsActive()) {
+					for (int i = 0, num = this->GetObj().GetMaterialNum(); i < num; ++i) {
+						if (i != GetMaterial(static_cast<int>(CharaMaterial::Body))) {
+							if (m_HP == 0) {
+								continue;
+							}
+							if (DistanceToCam > 150.f * Scale_Rate) {
+								continue;
+							}
+						}
+						this->GetObj().DrawMesh(i);
+					}
 				}
 			}
 			void			Dispose_Sub(void) noexcept override {

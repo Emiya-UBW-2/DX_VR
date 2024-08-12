@@ -34,9 +34,7 @@ namespace FPS_n2 {
 
 			Vector3DX Vec = MyVec; Vec.y = 0.f;
 			Vector3DX vec_a = TgtVec; vec_a.y = 0.f;
-			float cost = Vector3DX::Cross(vec_a, Vec).y;
-			float sint = Vector3DX::Dot(vec_a, Vec);
-			if (cost > 0.f) {
+			if (Vector3DX::Cross(vec_a, Vec).y > 0.f) {
 				if (m_Counter > 1.f) {
 					D_key = true;
 				}

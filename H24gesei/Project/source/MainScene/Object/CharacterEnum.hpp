@@ -17,6 +17,13 @@ namespace FPS_n2 {
 			"Gun",
 			"Holster",
 		};
+		enum class CharaMaterial : uint8_t {
+			Body,
+			Max,
+		};
+		static const char* CharaMaterialName[static_cast<int>(CharaFrame::Max)] = {
+			"‘D‘Ì",
+		};
 		enum class CharaShape : uint8_t {
 			None,
 			Max,

@@ -136,118 +136,119 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				auto* OptionParts = OPTION::Instance();
 				//波シム
-				LONGLONG NowTime = GetNowHiPerformanceCount();
-				int SimPer = 30;
-				switch (OptionParts->GetParamInt(EnumSaveParam::ObjLevel)){
-				case 0:
-					SimPer = 10;
-					break;
-				case 1:
-					SimPer = 24;
-					break;
-				case 2:
-					SimPer = 30;
-					break;
-				case 3:
-					SimPer = 60;
-					break;
-				default:
-					break;
-				}
-				if (NowTime > Time + (LONGLONG)(1000 / SimPer * 1000)) {
-					Time = NowTime;
-					{
-						//前までの画面を保持
-						for (int i = 0; i < 2; i++) {
-							m_PrevBufferHandle[i].SetDraw_Screen();
+				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) != 0) {
+					LONGLONG NowTime = GetNowHiPerformanceCount();
+					int SimPer = 30;
+					switch (OptionParts->GetParamInt(EnumSaveParam::ObjLevel)) {
+					case 0:
+						break;
+					case 1:
+						SimPer = 24;
+						break;
+					case 2:
+						SimPer = 30;
+						break;
+					case 3:
+						SimPer = 60;
+						break;
+					default:
+						break;
+					}
+					if (NowTime > Time + (LONGLONG)(1000 / SimPer * 1000)) {
+						Time = NowTime;
+						{
+							//前までの画面を保持
+							for (int i = 0; i < 2; i++) {
+								m_PrevBufferHandle[i].SetDraw_Screen();
+								{
+									DrawGraph(0, 0, m_PrevBufferHandle[static_cast<size_t>(i + 1)].get(), TRUE);
+								}
+							}
+							/*
+							SetDrawScreen(m_WaveObjHandle.get());
+							ClearDrawScreen();
+							SetupCamera_Ortho(400.f);
+							SetCameraNearFar(1.f, 50.f);
+							SetCameraPositionAndTargetAndUpVec(VGet(0.0f, 50.0f, 0.0f), VGet(0.0f, 0.0f, 0.0f), VGet(0.0f, 0.0f, 1.0f));
 							{
-								DrawGraph(0, 0, m_PrevBufferHandle[static_cast<size_t>(i + 1)].get(), TRUE);
+								SetUseLighting(FALSE);
+
+								float Per = std::clamp(VSize(VSub(PrevPoint, MousPoint)) / 3.f, 0.f, 1.f);
+								Per = 1.f;
+								DrawCapsule3D(MousPoint, PrevPoint, 0.25f, 8,
+									GetColor((int)(255.f * Per), 0, 0), GetColor((int)(255.f * Per), 0, 0), TRUE);
+								SetUseLighting(TRUE);
+							}
+							//*/
+							SetDrawScreen(m_PrevBufferHandle[1].get());
+							{
+								//オブジェクト書き込み
+								//SetDrawBright(255, 0, 0);
+								//DrawGraph(0, 0, m_WaveObjHandle.get(), TRUE);
+
+								DrawBox(3, 3, xsize - 3, ysize - 3, GetColor(255, 0, 0), FALSE);
+							}
+							m_PrevBufferHandle[2].SetDraw_Screen();
+							{
+								SetUseTextureToShader(0, m_PrevBufferHandle[0].get());
+								SetUseTextureToShader(1, m_PrevBufferHandle[1].get());
+								m_Shader.Draw(m_ScreenVertex);
+								SetUseTextureToShader(0, -1);
+								SetUseTextureToShader(1, -1);
 							}
 						}
-						/*
-						SetDrawScreen(m_WaveObjHandle.get());
+						GraphFilter(m_PrevBufferHandle[2].get(), DX_GRAPH_FILTER_GAUSS, 8, 16);
+						//法線マップへの変換
+						SetDrawScreen(m_WaveNormalHandle.get());
 						ClearDrawScreen();
-						SetupCamera_Ortho(400.f);
-						SetCameraNearFar(1.f, 50.f);
-						SetCameraPositionAndTargetAndUpVec(VGet(0.0f, 50.0f, 0.0f), VGet(0.0f, 0.0f, 0.0f), VGet(0.0f, 0.0f, 1.0f));
 						{
-							SetUseLighting(FALSE);
-
-							float Per = std::clamp(VSize(VSub(PrevPoint, MousPoint)) / 3.f, 0.f, 1.f);
-							Per = 1.f;
-							DrawCapsule3D(MousPoint, PrevPoint, 0.25f, 8,
-								GetColor((int)(255.f * Per), 0, 0), GetColor((int)(255.f * Per), 0, 0), TRUE);
-							SetUseLighting(TRUE);
-						}
-						//*/
-						SetDrawScreen(m_PrevBufferHandle[1].get());
-						{
-							//オブジェクト書き込み
-							//SetDrawBright(255, 0, 0);
-							//DrawGraph(0, 0, m_WaveObjHandle.get(), TRUE);
-
-							DrawBox(3, 3, xsize - 3, ysize - 3, GetColor(255, 0, 0), FALSE);
-						}
-						m_PrevBufferHandle[2].SetDraw_Screen();
-						{
-							SetUseTextureToShader(0, m_PrevBufferHandle[0].get());
-							SetUseTextureToShader(1, m_PrevBufferHandle[1].get());
-							m_Shader.Draw(m_ScreenVertex);
+							SetUseTextureToShader(0, m_PrevBufferHandle[2].get());
+							m_Shader2.Draw(m_ScreenVertex);
 							SetUseTextureToShader(0, -1);
-							SetUseTextureToShader(1, -1);
 						}
-					}
-					GraphFilter(m_PrevBufferHandle[2].get(), DX_GRAPH_FILTER_GAUSS, 8, 16);
-					//法線マップへの変換
-					SetDrawScreen(m_WaveNormalHandle.get());
-					ClearDrawScreen();
-					{
-						SetUseTextureToShader(0, m_PrevBufferHandle[2].get());
-						m_Shader2.Draw(m_ScreenVertex);
-						SetUseTextureToShader(0, -1);
-					}
-					//現段階の波形の保存
-					/*
-					if (CheckHitKey(KEY_INPUT_SPACE) != 0) {
-						SetDrawScreen(m_PrevBufferHandle[2]);
-						SaveDrawScreenToBMP(0, 0, xsize, ysize, "data/Wave/Preset.bmp");
-					}
-					//*/
-					timer += 1.f / SimPer;
-				}
-				{
-					//海面以外の描画
-					SetDrawScreen(m_ScreenBufferHandle.get());
-					SetRenderTargetToShader(0, m_ScreenBufferHandle.get());
-					SetRenderTargetToShader(2, m_ScreenDepthBufferHandle.get());
-					ClearDrawScreen();
-					DrawParts->GetMainCamera().FlipCamInfo();
-					SetCameraNearFar(1000.0f, 50000.0f);
-					BG_Draw();
-					DrawParts->GetMainCamera().FlipCamInfo();
-					ClearDrawScreenZBuffer();
-					{
+						//現段階の波形の保存
 						/*
-						if (CameraPos.y < 0.f) {
-							SetFogEnable(TRUE);
-							SetFogMode(DX_FOGMODE_LINEAR);
-							SetFogColor(27, 57, 77);
-							SetFogStartEnd(10.f*Scale_Rate, 50.f*Scale_Rate);
+						if (CheckHitKey(KEY_INPUT_SPACE) != 0) {
+							SetDrawScreen(m_PrevBufferHandle[2]);
+							SaveDrawScreenToBMP(0, 0, xsize, ysize, "data/Wave/Preset.bmp");
 						}
 						//*/
-						//SetVerticalFogEnable(TRUE);
-						SetVerticalFogMode(DX_FOGMODE_LINEAR);
-						SetVerticalFogColor(27, 57, 77);
-						SetVerticalFogStartEnd(-25.f*Scale_Rate, -75.f * Scale_Rate);
-
-						ObjectManager::Instance()->Draw_Shadow();
-
-						SetVerticalFogEnable(FALSE);
-
-						SetFogEnable(FALSE);
+						timer += 1.f / SimPer;
 					}
-					SetRenderTargetToShader(0, -1);
-					SetRenderTargetToShader(2, -1);
+					{
+						//海面以外の描画
+						SetDrawScreen(m_ScreenBufferHandle.get());
+						SetRenderTargetToShader(0, m_ScreenBufferHandle.get());
+						SetRenderTargetToShader(2, m_ScreenDepthBufferHandle.get());
+						ClearDrawScreen();
+						DrawParts->GetMainCamera().FlipCamInfo();
+						SetCameraNearFar(1000.0f, 50000.0f);
+						BG_Draw();
+						DrawParts->GetMainCamera().FlipCamInfo();
+						ClearDrawScreenZBuffer();
+						{
+							/*
+							if (CameraPos.y < 0.f) {
+								SetFogEnable(TRUE);
+								SetFogMode(DX_FOGMODE_LINEAR);
+								SetFogColor(27, 57, 77);
+								SetFogStartEnd(10.f*Scale_Rate, 50.f*Scale_Rate);
+							}
+							//*/
+							//SetVerticalFogEnable(TRUE);
+							SetVerticalFogMode(DX_FOGMODE_LINEAR);
+							SetVerticalFogColor(27, 57, 77);
+							SetVerticalFogStartEnd(-25.f * Scale_Rate, -75.f * Scale_Rate);
+
+							ObjectManager::Instance()->Draw_Shadow();
+
+							SetVerticalFogEnable(FALSE);
+
+							SetFogEnable(FALSE);
+						}
+						SetRenderTargetToShader(0, -1);
+						SetRenderTargetToShader(2, -1);
+					}
 				}
 				Vector3DX pos = DrawParts->GetMainCamera().GetCamPos(); pos.y = 0.f;
 				this->m_ObjGroundFar.SetPosition(pos);
@@ -270,21 +271,27 @@ namespace FPS_n2 {
 			}
 			void			Draw(void) noexcept {
 				auto* DrawParts = DXDraw::Instance();
+				auto* OptionParts = OPTION::Instance();
 				this->m_ObjGroundFar.DrawModel();
-				SetUseTextureToShader(1, m_WaveNormalHandle.get());
-				SetUseTextureToShader(3, m_ScreenBufferHandle.get());
-				SetUseTextureToShader(4, m_ScreenDepthBufferHandle.get());
-				SetUseTextureToShader(5, cubeTex);
-				Vector3DX CameraPos = DrawParts->GetMainCamera().GetCamPos();
-				m_Shader3.SetVertexParam(4, CameraPos.x, CameraPos.y, CameraPos.z, timer);
-				m_Shader3.SetVertexWave();
-				m_Shader3.Draw_lamda([&]() {
+				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) != 0) {
+					SetUseTextureToShader(1, m_WaveNormalHandle.get());
+					SetUseTextureToShader(3, m_ScreenBufferHandle.get());
+					SetUseTextureToShader(4, m_ScreenDepthBufferHandle.get());
+					SetUseTextureToShader(5, cubeTex);
+					Vector3DX CameraPos = DrawParts->GetMainCamera().GetCamPos();
+					m_Shader3.SetVertexParam(4, CameraPos.x, CameraPos.y, CameraPos.z, timer);
+					m_Shader3.SetVertexWave();
+					m_Shader3.Draw_lamda([&]() {
+						this->m_ObjGround.DrawModel();
+						});
+					SetUseTextureToShader(1, -1);
+					SetUseTextureToShader(3, -1);
+					SetUseTextureToShader(4, -1);
+					SetUseTextureToShader(5, -1);
+				}
+				else {
 					this->m_ObjGround.DrawModel();
-					});
-				SetUseTextureToShader(1, -1);
-				SetUseTextureToShader(3, -1);
-				SetUseTextureToShader(4, -1);
-				SetUseTextureToShader(5, -1);
+				}
 			}
 			//
 			void			Dispose(void) noexcept {

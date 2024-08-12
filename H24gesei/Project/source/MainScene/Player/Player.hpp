@@ -71,7 +71,7 @@ namespace FPS_n2 {
 			const auto& GetPlayerNum(void) const noexcept { return this->m_PlayerNum; }
 			auto& GetPlayer(int ID) noexcept { return this->m_Player[static_cast<size_t>(ID)]; }
 		public:
-			const auto& GetNPCNum(void) const noexcept { return this->m_NPC.size(); }
+			auto GetNPCNum(void) const noexcept { return this->m_NPC.size(); }
 			auto& GetNPC(int ID) noexcept { return this->m_NPC[static_cast<size_t>(ID)]; }
 		public:
 			void Init(int playerNum) noexcept {
