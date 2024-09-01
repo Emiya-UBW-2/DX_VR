@@ -90,7 +90,7 @@ namespace FPS_n2 {
 									yp1 = ymax - LineHeight * 3;
 
 									auto* Pad = PadControl::Instance();
-									bool ret = WindowSystem::SetMsgClickBox(xp1, yp1, xp1 + DrawParts->GetUIY(108), yp1 + LineHeight * 2, LineHeight, Gray15, false, LocalizeParts->Get(3102));
+									bool ret = WindowSystem::SetMsgClickBox(xp1, yp1, xp1 + DrawParts->GetUIY(108), yp1 + LineHeight * 2, LineHeight, Gray15, false, true, LocalizeParts->Get(3102));
 									if (Pad->GetKey(PADS::INTERACT).trigger() || ret) {
 										auto* SaveDataParts = SaveDataClass::Instance();
 										SaveDataParts->Reset();

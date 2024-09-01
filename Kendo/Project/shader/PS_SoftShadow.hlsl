@@ -27,7 +27,7 @@ Texture2D g_DepthMapTexture2 : register(t2); // 深度バッファテクスチャ
 
 float GetAlpha(float LightDepth, float TextureDepth2) {
 	// テクスチャに記録されている深度よりＺ値が大きかったら奥にある
-	return (LightDepth > (TextureDepth2 + 1.f) && TextureDepth2 > 0.f) ? 1.f : 0.f;
+    return (LightDepth > (TextureDepth2 + 1.f) && TextureDepth2 > 0.f) ? 1.f : 0.f;
 }
 // main関数
 PS_OUTPUT main(PS_INPUT PSInput)
@@ -61,8 +61,11 @@ PS_OUTPUT main(PS_INPUT PSInput)
 				}
 			}
 		}
-		PSOutput.Color0.r = max(PSOutput.Color0.r, comp / total);
-	}
+        if (total > 0)
+        {
+            PSOutput.Color0.r = max(PSOutput.Color0.r, comp / total);
+        }
+    }
 
 	// 深度テクスチャの座標を算出
 	DepthTexCoord.x = (PSInput.LPPosition2.x + 1.0f) / 2.0f; // PSInput.LPPosition2.xy は -1.0f ～ 1.0f の値なので、これを 0.0f ～ 1.0f の値にする
@@ -81,9 +84,18 @@ PS_OUTPUT main(PS_INPUT PSInput)
 					total++;
 				}
 			}
-		}
-		PSOutput.Color0.r = max(PSOutput.Color0.r, comp / total);
-	}
+        }
+        if (total > 0)
+        {
+            PSOutput.Color0.r = max(PSOutput.Color0.r, comp / total);
+        }
+    }
+	
+    if ((int)g_param.x>2 && PSOutput.Color0.r < 128.f / 255.f)
+    {
+        PSOutput.Color0.r = 0.f;
+
+    }
 
 	// 出力パラメータを返す
     return PSOutput;
