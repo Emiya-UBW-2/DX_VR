@@ -8,7 +8,7 @@ namespace FPS_n2 {
 		class PlayerManager : public SingletonBase<PlayerManager> {
 		private:
 			friend class SingletonBase<PlayerManager>;
-		private:
+		public:
 			class PlayerControl {
 			private:
 				std::shared_ptr<ObjectBaseClass>				m_Chara{ nullptr };
@@ -57,6 +57,8 @@ namespace FPS_n2 {
 		private:
 			std::vector<std::unique_ptr<PlayerControl>>	m_Player;
 			int											m_PlayerNum{};
+
+			std::vector<std::unique_ptr<PlayerControl>>	m_NPC;
 		private:
 			PlayerManager(void) noexcept {}
 			PlayerManager(const PlayerManager&) = delete;
@@ -68,6 +70,9 @@ namespace FPS_n2 {
 		public:
 			const auto& GetPlayerNum(void) const noexcept { return this->m_PlayerNum; }
 			auto& GetPlayer(int ID) noexcept { return this->m_Player[static_cast<size_t>(ID)]; }
+		public:
+			auto GetNPCNum(void) const noexcept { return this->m_NPC.size(); }
+			auto& GetNPC(int ID) noexcept { return this->m_NPC[static_cast<size_t>(ID)]; }
 		public:
 			void Init(int playerNum) noexcept {
 				m_PlayerNum = playerNum;
@@ -81,6 +86,19 @@ namespace FPS_n2 {
 					p.reset();
 				}
 				m_Player.clear();
+
+				DisposeNPC();
+			}
+
+			const std::unique_ptr<PlayerControl>& AddNPC() noexcept {
+				m_NPC.emplace_back(std::make_unique<PlayerControl>());
+				return m_NPC.back();
+			}
+			void DisposeNPC(void) noexcept {
+				for (auto& p : m_NPC) {
+					p.reset();
+				}
+				m_NPC.clear();
 			}
 		};
 	}

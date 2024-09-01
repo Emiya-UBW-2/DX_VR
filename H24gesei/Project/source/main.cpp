@@ -32,10 +32,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(PADS::INTERACT, true);//UI‚Ì‚İ
 	Pad->SetIsUseButton(PADS::THROW, false);
 	Pad->SetIsUseButton(PADS::MELEE, false);
-	Pad->SetIsUseButton(PADS::JUMP, true);
+	Pad->SetIsUseButton(PADS::JUMP, false);
 	Pad->SetIsUseButton(PADS::INVENTORY, false);
 	Pad->SetIsUseButton(PADS::RUN, false);
-	Pad->SetIsUseButton(PADS::WALK, true);
+	Pad->SetIsUseButton(PADS::WALK, false);
 	Pad->SetIsUseButton(PADS::SHOT, true);
 	Pad->SetIsUseButton(PADS::AIM, true);
 	Pad->SetIsUseButton(PADS::ULT, true);
@@ -49,6 +49,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	std::string Name = "AA"+std::to_string(GetNowHiPerformanceCount());
 	SetMainWindowText(Name.c_str());						//ƒ^ƒCƒgƒ‹
 	//SetUseHalfLambertLighting(TRUE);
+	//MV1SetLoadModelUsePackDraw(TRUE);
 	MV1SetLoadModelReMakeNormal(TRUE);
 	//
 	FPS_n2::Player::PlayerManager::Create();
@@ -70,7 +71,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	MainGameScenePtr->SetNextSceneList(1, MainGameScenePtr);
 
 	auto* SceneParts = SceneControl::Instance();
-	//SceneParts->AddList(Titlescene);
+	SceneParts->AddList(Titlescene);
 	SceneParts->AddList(LoadScenePtr);
 	SceneParts->AddList(MainGameScenePtr);
 	//Å‰‚Ì“Ç‚İ‚İ

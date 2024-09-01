@@ -1,6 +1,7 @@
 #pragma warning(disable:4464)
 #include "MainScene.hpp"
 #include "../MainScene/NetworkBrowser.hpp"
+#include "../MainScene/Object/Ammo.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -13,10 +14,15 @@ namespace FPS_n2 {
 			//
 			BattleResourceMngr->Load();
 			PlayerMngr->Init(NetWork::Player_num);
-			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-				BattleResourceMngr->LoadShip("data/Ship/Allied/DD/", (PlayerID)index);
+			BattleResourceMngr->LoadShip("data/Ship/Allied/BB/", (PlayerID)0);
+			PlayerMngr->DisposeNPC();
+			for (int index = 0; index < 10; ++index) {
+				PlayerMngr->AddNPC();
+				BattleResourceMngr->LoadShipNPC("data/Ship/Axis/CA/", index);
 			}
 			//UI
+			this->m_RotateImage = GraphHandle::Load("data/UI/Rotate.png");
+			this->m_EnemyImage = GraphHandle::Load("data/UI/enemyrad.png");
 			this->m_UIclass.Load();
 			PauseMenuControl::LoadPause();
 			HitMark::Instance()->Load();
@@ -27,8 +33,11 @@ namespace FPS_n2 {
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
+			//auto* ObjMngr = ObjectManager::Instance();
 			//
 			BattleResourceMngr->Set();
+			//
+			SetShadowScale(20.f);
 			//
 			BackGround->Init();
 			//
@@ -46,7 +55,7 @@ namespace FPS_n2 {
 				//人の座標設定
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 0.f, (-200.f * Scale_Rate) * static_cast<float>(index * 2 - 1));
+					pos_t = Vector3DX::vget(0.f, 0.f, 0.f);
 
 					Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale_Rate;
 					//if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale_Rate, &EndPos, true)) {
@@ -55,7 +64,46 @@ namespace FPS_n2 {
 					c->ValueSet((PlayerID)index, CharaTypeID::Team);
 					c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
 				}
-				p->GetAI()->Init((PlayerID)index);
+				p->GetAI()->Init(c->GetMyPlayerID());
+			}
+
+			for (int index = 0; index < PlayerMngr->GetNPCNum(); ++index) {
+				auto& p = PlayerMngr->GetNPC(index);
+				auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+				c->SetViewID(0);
+				//人の座標設定
+				{
+					Vector3DX pos_t;
+					pos_t = Vector3DX::vget(0.f, 0.f, (1000.f * Scale_Rate));
+					pos_t = Matrix3x3DX::Vtrans(pos_t, Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRand(360))));
+					if (index > 0) {
+						for (int i = 0; i < 100; i++) {
+							bool IsHit = false;
+							for (int index2 = 0; index2 < index; ++index2) {
+								auto& p2 = PlayerMngr->GetNPC(index2);
+								auto& c2 = (std::shared_ptr<CharacterObject::CharacterClass>&)p2->GetChara();
+								if ((pos_t - c2->GetMove().GetPos()).magnitude() < (100.f * Scale_Rate)) {
+									IsHit = true;
+									break;
+								}
+							}
+							if (IsHit) {
+								pos_t = Matrix3x3DX::Vtrans(pos_t, Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRand(360))));
+							}
+							else {
+								break;
+							}
+						}
+					}
+
+					Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale_Rate;
+					//if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale_Rate, &EndPos, true)) {
+					//	pos_t = EndPos;
+					//}
+					c->ValueSet((PlayerID)(index + PlayerMngr->GetPlayerNum()), CharaTypeID::Team);
+					c->MovePoint(deg2rad(0.f), atan2f(pos_t.x, pos_t.z), pos_t);
+				}
+				p->GetAI()->Init(c->GetMyPlayerID());
 			}
 			//UI
 			this->m_UIclass.Set();
@@ -162,7 +210,8 @@ namespace FPS_n2 {
 #endif // DEBUG
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
-				//SE->Get(static_cast<int>(SoundEnum::Environment)).Play(0, DX_PLAYTYPE_LOOP, TRUE);
+				auto* SE = SoundPool::Instance();
+				SE->Get(static_cast<int>(SoundEnum::Env)).Play(0, DX_PLAYTYPE_LOOP, TRUE);
 			}
 			//Input,AI
 			{
@@ -171,7 +220,7 @@ namespace FPS_n2 {
 					MyInput.ResetAllInput();
 				}
 				else {
-					MyInput.SetInputStart(Pad->GetLS_Y() / 300.f, Pad->GetLS_X() / 300.f);
+					MyInput.SetInputStart(Pad->GetLS_Y() / 600.f, Pad->GetLS_X() / 600.f);
 					MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
 					MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
 					MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
@@ -249,10 +298,45 @@ namespace FPS_n2 {
 						//ダメージイベント処理
 						c->AddDamageEvent(&this->m_DamageEvents);
 					}
+					//NPC
+					for (int index = 0; index < PlayerMngr->GetNPCNum(); ++index) {
+						auto& p = PlayerMngr->GetNPC(index);
+						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+						c->SetViewID(GetMyPlayerID());
+						{
+							InputControl OtherInput;
+							p->GetAI()->Execute(&OtherInput);
+							{
+								Vector2DX MSVec;
+								MSVec.Set(
+									std::clamp(c->GetBambooVec().x + Pad->GetLS_Y() * deg2rad(0.1f), deg2rad(-10), deg2rad(10)),
+									std::clamp(c->GetBambooVec().y + Pad->GetLS_X() * deg2rad(0.1f), deg2rad(-30), deg2rad(30))
+								);
+								MyInput.SetxRad(MSVec.x);
+								MyInput.SetyRad(MSVec.y);
+							}
+							c->SetInput(OtherInput, true);
+						}
+						//ダメージイベント処理
+						c->AddDamageEvent(&this->m_DamageEvents);
+					}
 				}
 				//ダメージイベント
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 					auto& p = PlayerMngr->GetPlayer(index);
+					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+					for (int j = 0, Num = static_cast<int>(this->m_DamageEvents.size()); j < Num; ++j) {
+						if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)])) {
+							std::swap(this->m_DamageEvents.back(), m_DamageEvents[static_cast<size_t>(j)]);
+							this->m_DamageEvents.pop_back();
+							--Num;
+							--j;
+						}
+					}
+				}
+				//ダメージイベント
+				for (int index = 0; index < PlayerMngr->GetNPCNum(); ++index) {
+					auto& p = PlayerMngr->GetNPC(index);
 					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 					for (int j = 0, Num = static_cast<int>(this->m_DamageEvents.size()); j < Num; ++j) {
 						if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)])) {
@@ -270,13 +354,17 @@ namespace FPS_n2 {
 			ObjMngr->LateExecuteObject();
 			//視点
 			{
+				m_Range += static_cast<float>(GetMouseWheelRotVolWithCheck()*10.f);
+
+				m_Range = std::clamp(m_Range, 0.f, 150.f);
+
 				auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 				auto* OptionParts = OPTION::Instance();
 				//カメラ
-				Vector3DX CamPos = ViewChara->GetEyePosition() + ViewChara->GetEyeMatrix().zvec() * (60.f * Scale_Rate);
-				Vector3DX CamVec = ViewChara->GetEyePosition();
+				Vector3DX CamPos = ViewChara->GetEyePosition() + ViewChara->GetEyeMatrix().zvec() * (m_Range * Scale_Rate);
+				Vector3DX CamVec = CamPos - ViewChara->GetEyeMatrix().zvec() * (5.f * Scale_Rate);
 				CamVec += CameraShake::Instance()->GetCamShake();
-				CamPos += CameraShake::Instance()->GetCamShake()*2.f;
+				//CamPos += CameraShake::Instance()->GetCamShake()*2.f;
 				DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
 				//info
 				DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 10.f, Scale_Rate * 1200.f);
@@ -335,24 +423,83 @@ namespace FPS_n2 {
 				m_Concussion = std::max(m_Concussion - 1.f / DrawParts->GetFps(), 0.f);
 			}
 			BackGround->Execute();
+			//
+			{
+				int loop = 0;
+				while (true) {
+					auto ammo = ObjMngr->GetObj((int)ObjType::Ammo, loop);
+					if (ammo != nullptr) {
+						auto& a = (std::shared_ptr<CharacterObject::AmmoClass>&)(*ammo);
+
+						if (a->IsActive()) {
+							//AmmoClass
+							Vector3DX repos_tmp = a->GetMove().GetRePos();
+							Vector3DX pos_tmp = a->GetMove().GetPos();
+							if (GetMyPlayerID() != a->GetShootedID()) {
+								if (GetMinLenSegmentToPoint(repos_tmp, pos_tmp, DrawParts->GetMainCamera().GetCamPos()) < 5.f * Scale_Rate) {
+									m_Concussion = 1.f;
+								}
+							}
+
+							Vector3DX norm_tmp;
+							bool is_HitAll = false;
+							for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
+								auto& p = PlayerMngr->GetPlayer(index);
+								auto& tgt = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+								if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }
+								HitPoint Damage = a->GetDamage();
+								if (tgt->CheckDamageRay(&Damage, a->GetShootedID(), repos_tmp, &pos_tmp)) {
+									is_HitAll |= true;
+									a->Penetrate();
+								}
+							}
+
+							for (int index = 0; index < PlayerMngr->GetNPCNum(); ++index) {
+								auto& p = PlayerMngr->GetNPC(index);
+								auto& tgt = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+								if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }
+								HitPoint Damage = a->GetDamage();
+								if (tgt->CheckDamageRay(&Damage, a->GetShootedID(), repos_tmp, &pos_tmp)) {
+									is_HitAll |= true;
+									a->Penetrate();
+								}
+							}
+						}
+					}
+					else {
+						break;
+					}
+					loop++;
+				}
+			}
 			//UIパラメーター
 			{
 				if (GetIsFirstLoop()) {
-					this->m_UIclass.InitGaugeParam(0, static_cast<int>(0.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax()));
+				}
+				//残り
+				int AliveNum = 0;
+				for (int index = 0; index < PlayerMngr->GetNPCNum(); ++index) {
+					auto& p = PlayerMngr->GetNPC(index);
+					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+					if (c->GetHP() > 0) {
+						AliveNum++;
+					}
+				}
+				if (AliveNum == 0) {
+					this->m_IsEnd = true;
 				}
 				//NvsN
-				this->m_UIclass.SetIntParam(0, 0);
-				this->m_UIclass.SetIntParam(1, 0);
-				//timer
-				this->m_UIclass.SetfloatParam(0, 0.f);
-				//ゲージ
-				this->m_UIclass.SetGaugeParam(0, static_cast<int>((Chara->GetGuardCoolDownTimer()) * 100.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f), 0);
-				//ガード円
-				this->m_UIclass.SetfloatParam(2, 0.f);
-				this->m_UIclass.SetfloatParam(3, Chara->GetGuardVec().x);
-				this->m_UIclass.SetfloatParam(4, -Chara->GetGuardVec().y);
-				this->m_UIclass.SetfloatParam(5, 0.f);
+				this->m_UIclass.SetIntParam(0, AliveNum);
 			}
+			m_CenterPos.z = -1.f;
+			{
+				auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+				m_RotateRad += ViewChara->GetYRadChange()/DrawParts->GetFps();
+
+				Easing(&m_WS, static_cast<float>(ViewChara->GetWSLevel()), 0.9f, EasingType::OutExpo);
+				Easing(&m_AD, static_cast<float>(ViewChara->GetADLevel()), 0.9f, EasingType::OutExpo);
+			}
+			HitMark::Instance()->Update();
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=0.7ms");
 #endif // DEBUG
@@ -393,6 +540,8 @@ namespace FPS_n2 {
 			ObjectManager::Instance()->DeleteAll();
 			PauseMenuControl::DisposePause();
 			HitMark::Instance()->Dispose();
+			m_RotateImage.Dispose();
+			m_EnemyImage.Dispose();
 		}
 
 		//
@@ -424,31 +573,143 @@ namespace FPS_n2 {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* DrawParts = DXDraw::Instance();
-			SetFogStartEnd(DrawParts->GetMainCamera().GetCamNear(), DrawParts->GetMainCamera().GetCamFar() * 2.f);
-			ObjectManager::Instance()->Draw();
-			BackGround->Draw();
-			//ObjectManager::Instance()->Draw_Depth();
-			for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
-				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
+			{
+				auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+				Vector3DX TargetPos = ViewChara->GetCamTarget();
+				auto tmp = ConvWorldPosToScreenPos(TargetPos.get());
+				if (tmp.z >= 0.f && tmp.z <= 1.f) {
+					m_CenterPos = tmp;
+				}
 			}
-			HitMark::Instance()->Update();
+			SetFogStartEnd(DrawParts->GetMainCamera().GetCamNear(), DrawParts->GetMainCamera().GetCamFar() * 2.f);
+			BackGround->Draw();
+			ObjectManager::Instance()->Draw();
+			//ObjectManager::Instance()->Draw_Depth();
+			for (int i = 0; i < PlayerMngr->GetNPCNum(); ++i) {
+				PlayerMngr->GetNPC(i)->GetAI()->Draw();
+			}
+			HitMark::Instance()->CheckDraw();
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_In_Sub(void) noexcept {
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto* DrawParts = DXDraw::Instance();
+			auto* Fonts = FontPool::Instance();
 			HitMark::Instance()->Draw();
 			FadeControl::DrawFade();
 			//UI
 			if (!DXDraw::Instance()->IsPause()) {
 				this->m_UIclass.Draw();
+				if (m_CenterPos.z >= 0.f && m_CenterPos.z <= 1.f) {
+
+					m_CenterPos *= static_cast<float>(DrawParts->GetUIY(1080)) / static_cast<float>(DrawParts->GetScreenY(1080));
+
+					int x1{}, y1{}, x2{}, y2{};
+
+					x1 = static_cast<int>(m_CenterPos.x);
+					y1 = static_cast<int>(m_CenterPos.y);
+					x2 = static_cast<int>(m_CenterPos.x);
+					y2 = DrawParts->GetUIY(1080);
+					DrawLine(x1, y1, x2, y2, GetColor(0, 255, 0), 2);
+
+					x1 = static_cast<int>(m_CenterPos.x) - DrawParts->GetUIY(64);
+					y1 = static_cast<int>(m_CenterPos.y);
+					x2 = DrawParts->GetUIY(0);
+					y2 = static_cast<int>(m_CenterPos.y);
+					DrawLine(x1, y1, x2, y2, GetColor(0, 255, 0), 2);
+
+					x1 = static_cast<int>(m_CenterPos.x) + DrawParts->GetUIY(64);
+					y1 = static_cast<int>(m_CenterPos.y);
+					x2 = DrawParts->GetUIY(1920);
+					y2 = static_cast<int>(m_CenterPos.y);
+					DrawLine(x1, y1, x2, y2, GetColor(0, 255, 0), 2);
+				}
+				{
+					auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+
+					int xp = DrawParts->GetUIY(192);
+					int yp = DrawParts->GetUIY(1080 - 256);
+					m_RotateImage.DrawRotaGraph(xp, yp,
+						static_cast<float>(DrawParts->GetUIY(100)) / 100.f,
+						m_RotateRad, true
+					);
+
+					int x1{}, y1{}, x2{}, y2{};
+					x1 = xp + DrawParts->GetUIY(24 * -3);
+					y1 = yp - DrawParts->GetUIY(128 + 24);
+					x2 = xp + DrawParts->GetUIY(24 * 3);
+					y2 = yp - DrawParts->GetUIY(128 + 24);
+					DrawLine(x1, y1, x2, y2, GetColor(64, 64, 64), 6);
+					x1 = xp;
+					y1 = yp - DrawParts->GetUIY(128 + 24);
+					x2 = xp + DrawParts->GetUIY(static_cast<int>(24 * m_AD));
+					y2 = yp - DrawParts->GetUIY(128 + 24);
+					DrawLine(x1, y1, x2, y2, GetColor(0, 255, 0), 6);
+
+					x1 = xp + DrawParts->GetUIY(128 + 24);
+					y1 = yp - DrawParts->GetUIY(24 * 3);
+					x2 = xp + DrawParts->GetUIY(128 + 24);
+					y2 = yp - DrawParts->GetUIY(24 * -3);
+					DrawLine(x1, y1, x2, y2, GetColor(64, 64, 64), 6);
+					x1 = xp + DrawParts->GetUIY(128 + 24);
+					y1 = yp - DrawParts->GetUIY(static_cast<int>(24 * m_WS));
+					x2 = xp + DrawParts->GetUIY(128 + 24);
+					y2 = yp - DrawParts->GetUIY(24 * 0);
+					DrawLine(x1, y1, x2, y2, GetColor(0, 255, 0), 6);
+
+					xp = DrawParts->GetUIY(24);
+					yp = DrawParts->GetUIY(1080*1/3);
+					std::string String;
+					for (const auto& t : ViewChara->GetTurretData()) {
+						Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(16), 3)->DrawString(INVALID_ID,
+							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp, yp,
+							(t.NowLoadTime == 0) ? Green : Red, Black,
+							"%3.1f cm Cannon : %5.2fs", t.AmmoSize, (t.NowLoadTime == 0) ? t.LoadTime : t.NowLoadTime);
+
+						yp += DrawParts->GetUIY(16 +4);
+					}
+				}
+				{
+					//残り
+					int AliveNum = 0;
+					for (int index = 0; index < PlayerMngr->GetNPCNum(); ++index) {
+						auto& p = PlayerMngr->GetNPC(index);
+						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+						if (c->GetHP() > 0) {
+							AliveNum++;
+						}
+					}
+					if (AliveNum == 0) {
+						int xp = DrawParts->GetUIY(1920 / 2);
+						int yp = DrawParts->GetUIY(1080 / 2);
+						Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(72), 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp, yp, White, Black, "クリア！");
+					}
+				}
+				{
+					int xp = DrawParts->GetUIY(1920 / 2);
+					int yp = DrawParts->GetUIY(1080 / 2);
+					auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+
+					
+					for (int index = 0; index < PlayerMngr->GetNPCNum(); ++index) {
+						auto& p = PlayerMngr->GetNPC(index);
+						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+						if (c->GetHP() > 0) {
+							Vector3DX vec = c->GetMove().GetPos()-ViewChara->GetMove().GetPos();
+							m_EnemyImage.DrawRotaGraph(xp,yp, static_cast<float>(DrawParts->GetUIY(100)) / 100.f,
+								-ViewChara->GetEyeRad().y + atan2f(-vec.x, -vec.z)
+								,true);
+						}
+					}
+				}
 			}
 			else {
 				PauseMenuControl::DrawPause();
 			}
 			//通信設定
-			auto* NetBrowser = NetWorkBrowser::Instance();
+			//auto* NetBrowser = NetWorkBrowser::Instance();
 			//NetBrowser->Draw();
 			if (m_NetWorkController) {
-				auto* DrawParts = DXDraw::Instance();
 				if (m_NetWorkController->GetPing() >= 0.f) {
 					WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
 				}

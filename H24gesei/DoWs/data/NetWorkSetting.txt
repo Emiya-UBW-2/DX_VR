@@ -1,0 +1,4 @@
+Setting1_IP1=127
+Setting1_IP2=0
+Setting1_IP3=0
+Setting1_IP4=1

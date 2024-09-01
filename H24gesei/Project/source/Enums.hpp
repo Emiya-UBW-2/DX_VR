@@ -9,23 +9,22 @@ namespace FPS_n2 {
 
 	enum class ObjType : uint8_t {
 		Human,
-		Weapon,
+		Ammo,
 	};
 	enum class SoundEnum : uint8_t {
-		RunFoot = static_cast<uint8_t>(SoundEnumCommon::Num),
-		StandupFoot,
-		Heart,
+		Shot = static_cast<uint8_t>(SoundEnumCommon::Num),
+		ShotBig,
+		load,
 		//
-		Kendo_Swing,
-		Kendo_Hit,
-		Kendo_Foot,
-		Kendo_Tsuba,
+		Hit,
+		Near,
+		Damage,
 		//
-		Voice_Ya,
-		Voice_Men,
-		Voice_Kote,
-		Voice_Dou,
-		Voice_Tsuki,
+		Gear,
+		Rotate,
+		Engine,
+		//
+		Env,
 		//
 		CountDown,
 		Second,
