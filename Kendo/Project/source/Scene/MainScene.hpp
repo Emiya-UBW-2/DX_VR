@@ -20,7 +20,6 @@ namespace FPS_n2 {
 		{
 		private:
 			//UIŠÖ˜A
-			float										m_GuardStart{ 0.f };
 			float										m_Concussion{ 0.f };
 			float										m_ConcussionPer{ 0.f };
 			UIClass										m_UIclass;
@@ -59,6 +58,8 @@ namespace FPS_n2 {
 			void			ShadowDraw_Far_Sub(void) noexcept override;
 			void			ShadowDraw_Sub(void) noexcept override;
 			void			CubeMap_Sub(void) noexcept override;
+
+			void			SetShadowDraw_Sub(void) noexcept override;
 
 			void			MainDraw_Sub(void) noexcept override;
 			//UI•\Ž¦

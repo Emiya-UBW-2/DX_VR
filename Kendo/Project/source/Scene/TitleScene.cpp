@@ -157,36 +157,38 @@ namespace FPS_n2 {
 		void			TitleScene::MainDraw_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			// ”wŒi
-			DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), GetColor(12, 12, 12), TRUE);
+			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Gray50, TRUE);
 			// •`‰æ
 		}
 		void			TitleScene::DrawUI_Base_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
-			auto* Fonts = FontPool::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
-			this->m_TitleImage.DrawExtendGraph(DrawParts->GetUIY(64), DrawParts->GetUIY(64), DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), true);
+			WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, 
+				&this->m_TitleImage, DrawParts->GetUIY(64), DrawParts->GetUIY(64), DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), true);
 			// 
-			Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18), 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
+			WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18), 
+				FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
 				DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), White, Black, "Ver 1.0.1");
 			// 
 			ButtonParts->Draw();
 			// 
 			if ((ButtonParts->GetSelect() != INVALID_ID) && !PopUpParts->IsActivePop()) {
-				Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18), 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18), 
+					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 					DrawParts->GetUIY(32), DrawParts->GetUIY(1080 - 32 - 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
 			}
 			// 
 			{
-				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameFadeIn, 0.f, 1.f)), 0, 255));
-				DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Black, TRUE);
+				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameFadeIn, 0.f, 1.f)), 0, 255));
+				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Black, TRUE);
 
-				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameStart, 0.f, 1.f)), 0, 255));
-				DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), White, TRUE);
+				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameStart, 0.f, 1.f)), 0, 255));
+				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), White, TRUE);
 
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
 		}
 	};

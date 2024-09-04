@@ -89,9 +89,9 @@ namespace FPS_n2 {
 		}
 		void FadeControl::DrawFade(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * this->m_BlackOutAlpha), 0, 255));
-			DrawBox(0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
-			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * this->m_BlackOutAlpha), 0, 255));
+			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
+			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 		}
 };
 };

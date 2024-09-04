@@ -25,14 +25,14 @@ namespace FPS_n2 {
 				yp1 = yp - DrawParts->GetUIY(25) - LineHeight / 2;
 				xp2 = xp + DrawParts->GetUIY(25);
 				yp2 = yp1 + LineHeight;
-				if (WindowSystem::SetMsgClickBox(xp1, yp1, xp2, yp2, LineHeight, Gray75, true, "+")) {
+				if (WindowSystem::SetMsgClickBox(xp1, yp1, xp2, yp2, LineHeight, Gray75, true, true, "+")) {
 					UpFunc();
 				}
 			}
 			{
 				yp1 += DrawParts->GetUIY(50);
 				yp2 += DrawParts->GetUIY(50);
-				if (WindowSystem::SetMsgClickBox(xp1, yp1, xp2, yp2, LineHeight, Gray75, true, "-")) {
+				if (WindowSystem::SetMsgClickBox(xp1, yp1, xp2, yp2, LineHeight, Gray75, true, true, "-")) {
 					DownFunc();
 				}
 			}
@@ -47,25 +47,25 @@ namespace FPS_n2 {
 		int y1p = yp + DrawParts->GetUIY(50);
 		switch (this->m_Sequence) {
 		case BrowserSequence::SelMode:
-			if (WindowSystem::SetMsgClickBox(xp, y1p, xp + xs, y1p + LineHeight * 2, LineHeight, Gray75, false, "クライアントになる")) {
+			if (WindowSystem::SetMsgClickBox(xp, y1p, xp + xs, y1p + LineHeight * 2, LineHeight, Gray75, false, true, "クライアントになる")) {
 				BeClient();
 				this->m_Sequence = BrowserSequence::CheckPreset;
 			}
-			if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(50), xp + xs, y1p + DrawParts->GetUIY(50) + LineHeight * 2, LineHeight, Gray75, false, "サーバーになる")) {
+			if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(50), xp + xs, y1p + DrawParts->GetUIY(50) + LineHeight * 2, LineHeight, Gray75, false, true, "サーバーになる")) {
 				BeServerPlayer();
 				this->m_Sequence = BrowserSequence::CheckPreset;
 			}
-			if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(100), xp + xs, y1p + DrawParts->GetUIY(100) + LineHeight * 2, LineHeight, Gray75, false, "サーバーになる(非プレイヤー)")) {
+			if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(100), xp + xs, y1p + DrawParts->GetUIY(100) + LineHeight * 2, LineHeight, Gray75, false, true, "サーバーになる(非プレイヤー)")) {
 				BeServer();
 				this->m_Sequence = BrowserSequence::CheckPreset;
 			}
 			//
-			if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(150), xp + xs, y1p + DrawParts->GetUIY(150) + LineHeight * 2, LineHeight, Gray75, false, "クライアントで即プレイ")) {
+			if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(150), xp + xs, y1p + DrawParts->GetUIY(150) + LineHeight * 2, LineHeight, Gray75, false, true, "クライアントで即プレイ")) {
 				BeClient();
 				m_NewWorkSettings.Load();
 				ReadyConnect(m_NewWorkSettings.Get(0));
 			}
-			if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(200), xp + xs, y1p + DrawParts->GetUIY(200) + LineHeight * 2, LineHeight, Gray75, false, "サーバーで即プレイ")) {
+			if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(200), xp + xs, y1p + DrawParts->GetUIY(200) + LineHeight * 2, LineHeight, Gray75, false, true, "サーバーで即プレイ")) {
 				BeServerPlayer();
 				m_NewWorkSettings.Load();
 				ReadyConnect(m_NewWorkSettings.Get(0));
@@ -79,13 +79,13 @@ namespace FPS_n2 {
 			for (int i = 0, Num = this->m_NewWorkSettings.GetSize(); i < Num + 1; ++i) {
 				if (i < Num) {
 					auto& n = this->m_NewWorkSettings.Get(i);
-					if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(50) * i, xp + xs, y1p + DrawParts->GetUIY(50) * i + LineHeight * 2, LineHeight, Gray75, false, "[%d][%d,%d,%d,%d]", n.UsePort, n.IP.d1, n.IP.d2, n.IP.d3, n.IP.d4)) {
+					if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(50) * i, xp + xs, y1p + DrawParts->GetUIY(50) * i + LineHeight * 2, LineHeight, Gray75, false, true, "[%d][%d,%d,%d,%d]", n.UsePort, n.IP.d1, n.IP.d2, n.IP.d3, n.IP.d4)) {
 						ReadyConnect(n);
 						break;
 					}
 				}
 				else {
-					if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(50) * i, xp + xs, y1p + DrawParts->GetUIY(50) * i + LineHeight * 2, LineHeight, Gray75, false, "設定を追加する")) {
+					if (WindowSystem::SetMsgClickBox(xp, y1p + DrawParts->GetUIY(50) * i, xp + xs, y1p + DrawParts->GetUIY(50) * i + LineHeight * 2, LineHeight, Gray75, false, true, "設定を追加する")) {
 						this->m_Sequence = BrowserSequence::SetNewData;
 						break;
 					}
@@ -124,7 +124,7 @@ namespace FPS_n2 {
 			}
 			{
 				int yp1 = y1p + DrawParts->GetUIY(200);
-				if (WindowSystem::SetMsgClickBox(xp + xs - DrawParts->GetUIY(120), yp1, xp + xs, yp1 + LineHeight * 2, LineHeight, Gray75, false, "Set")) {
+				if (WindowSystem::SetMsgClickBox(xp + xs - DrawParts->GetUIY(120), yp1, xp + xs, yp1 + LineHeight * 2, LineHeight, Gray75, false, true, "Set")) {
 					m_NewWorkSettings.SetBack(this->m_NetSetting);
 					m_NewWorkSettings.Save();
 					ReadyConnect(m_NewWorkSettings.Get(this->m_NewWorkSettings.GetSize() - 1));

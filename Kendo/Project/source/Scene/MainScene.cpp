@@ -21,6 +21,7 @@ namespace FPS_n2 {
 			this->m_UIclass.Load();
 			PauseMenuControl::LoadPause();
 			HitMark::Instance()->Load();
+			//
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -30,6 +31,8 @@ namespace FPS_n2 {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			//
 			BattleResourceMngr->Set();
+
+			SetShadowScale(1.f);
 			//
 			BackGround->Init();
 			//
@@ -412,12 +415,6 @@ namespace FPS_n2 {
 				this->m_UIclass.SetGaugeParam(0, static_cast<int>((Chara->GetYaTimerMax() - Chara->GetYaTimer()) * 10000.f), static_cast<int>(Chara->GetYaTimerMax() * 10000.f), 15);
 				this->m_UIclass.SetGaugeParam(1, static_cast<int>(Chara->GetStamina() * 10000.f), static_cast<int>(Chara->GetStaminaMax() * 10000.f), 15);
 				this->m_UIclass.SetGaugeParam(2, static_cast<int>((Chara->GetGuardCoolDownTimer()) * 100.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f), 0);
-				//ƒK[ƒh‰~
-				Easing(&m_GuardStart, Chara->IsGuardStarting() ? 1.f : 0.f, Chara->IsGuardStarting() ? 0.8f : 0.5f, EasingType::OutExpo);
-				this->m_UIclass.SetfloatParam(2, m_GuardStart);
-				this->m_UIclass.SetfloatParam(3, Chara->GetGuardVec().x);
-				this->m_UIclass.SetfloatParam(4, -Chara->GetGuardVec().y);
-				this->m_UIclass.SetfloatParam(5, Chara->GetGuardStartPer());
 			}
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=0.7ms");
@@ -478,6 +475,12 @@ namespace FPS_n2 {
 		void			MainGameScene::CubeMap_Sub(void) noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			BackGround->Draw();
+		}
+
+		void MainGameScene::SetShadowDraw_Sub(void) noexcept {
+			auto* BackGround = BackGround::BackGroundClass::Instance();
+			BackGround->Draw();
+			ObjectManager::Instance()->Draw();
 		}
 
 		void			MainGameScene::MainDraw_Sub(void) noexcept {

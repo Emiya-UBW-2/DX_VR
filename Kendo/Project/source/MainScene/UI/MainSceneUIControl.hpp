@@ -81,27 +81,27 @@ namespace FPS_n2 {
 					COLOR_U8 ColorAddSub = (this->m_Buffer > static_cast<float>(this->m_Now)) ? ColorSub : ColorAdd;
 					float per = std::clamp(static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max), 0.f, 1.f);
 					float perbuf = std::clamp(this->m_Buffer / static_cast<float>(this->m_Max), 0.f, 1.f);
-					SetDrawBlendMode(DX_BLENDMODE_ADD, Add);
-					SetDrawBright(ColorBase.r, ColorBase.g, ColorBase.b);
+					//SetDrawBlendMode(DX_BLENDMODE_ADD, Add);
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, ColorBase.r, ColorBase.g, ColorBase.b);
 					DrawCircleGauge(xp1 + DrawParts->GetScreenY(256), yp1,
 						50.0 + ((50.0 - 15.0 * 2.0) * 1.0) + 15.0 + deg,
 						CircleObj->get(),
 						50.0 + 15.0 + deg,
 						((double)(DrawParts->GetUIY(1080)) / 1080.0));
-					SetDrawBright(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
 					DrawCircleGauge(xp1 + DrawParts->GetScreenY(256), yp1,
 						50.0 + ((50.0 - 15.0 * 2.0) * (double)std::max(per, perbuf)) + 15.0 + deg,
 						CircleObj->get(),
 						50.0 + ((50.0 - 15.0 * 2.0) * (double)std::min(per, perbuf)) + 15.0 + deg,
 						((double)(DrawParts->GetUIY(1080)) / 1080.0));
-					SetDrawBright(Color.r, Color.g, Color.b);
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, Color.r, Color.g, Color.b);
 					DrawCircleGauge(xp1 + DrawParts->GetScreenY(256), yp1,
 						50.0 + ((50.0 - 15.0 * 2.0) * (double)std::min(per, perbuf)) + 15.0 + deg,
 						CircleObj->get(),
 						50.0 + 15.0 + deg,
 						((double)(DrawParts->GetUIY(1080)) / 1080.0));
-					SetDrawBright(255, 255, 255);
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
 				void			DrawGaugeCircleRight(int xp1, int yp1,
 					COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
@@ -112,27 +112,27 @@ namespace FPS_n2 {
 					COLOR_U8 ColorAddSub = (this->m_Buffer > static_cast<float>(this->m_Now)) ? ColorSub : ColorAdd;
 					float per = std::clamp(static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max), 0.f, 1.f);
 					float perbuf = std::clamp(this->m_Buffer / static_cast<float>(this->m_Max), 0.f, 1.f);
-					SetDrawBlendMode(DX_BLENDMODE_ADD, Add);
-					SetDrawBright(ColorBase.r, ColorBase.g, ColorBase.b);
+					//SetDrawBlendMode(DX_BLENDMODE_ADD, Add);
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, ColorBase.r, ColorBase.g, ColorBase.b);
 					DrawCircleGauge(xp1 - DrawParts->GetScreenY(256), yp1,
 						(50.0 - 15.0 * 2.0) + 15.0 + deg,
 						CircleObj->get(),
 						(double)((50.0 - 15.0 * 2.0) * (1.0 - 1.0)) + 15.0 + deg,
 						((double)(DrawParts->GetUIY(1080)) / 1080.0));
-					SetDrawBright(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
 					DrawCircleGauge(xp1 - DrawParts->GetScreenY(256), yp1,
 						(double)((50.0 - 15.0 * 2.0) * (1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
 						CircleObj->get(),
 						(double)((50.0 - 15.0 * 2.0) * (1.0 - (double)std::max(per, perbuf))) + 15.0 + deg,
 						((double)(DrawParts->GetUIY(1080)) / 1080.0));
-					SetDrawBright(Color.r, Color.g, Color.b);
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, Color.r, Color.g, Color.b);
 					DrawCircleGauge(xp1 - DrawParts->GetScreenY(256), yp1,
 						(50.0 - 15.0 * 2.0) + 15.0 + deg,
 						CircleObj->get(),
 						(double)((50.0 - 15.0 * 2.0) * (1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
 						((double)(DrawParts->GetUIY(1080)) / 1080.0));
-					SetDrawBright(255, 255, 255);
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
 				auto			GetGaugeDiff(void) const noexcept { return static_cast<float>(this->m_Now) - std::min(static_cast<float>(this->m_Max), this->m_Buffer); }
 				const auto& GetGauge(void) const noexcept { return this->m_Now; }
@@ -206,10 +206,6 @@ namespace FPS_n2 {
 			//std::array<std::unique_ptr<GaugeMask>, 2 + 3>	m_GaugeMask;
 
 			GraphHandle						m_HeartIcon;
-			GraphHandle						m_GuardScreen;
-			GraphHandle						m_GuardGraph;
-			GraphHandle						m_GuardPGraph;
-			GraphHandle						m_CursorGraph;
 		public:
 			UIClass(void) noexcept {}
 			UIClass(const UIClass&) = delete;
@@ -221,35 +217,29 @@ namespace FPS_n2 {
 		public:
 			void			Load(void) noexcept {
 				m_HeartIcon = GraphHandle::Load("data/UI/Heart.png");
-				m_GuardGraph = GraphHandle::Load("data/UI/Guard.png");
-				m_GuardPGraph = GraphHandle::Load("data/UI/GuardP.png");
-				m_CursorGraph = GraphHandle::Load("data/UI/Cursor.png");
-
-				m_GuardScreen = GraphHandle::Make(512, 512, false);
 			}
 			void			Dispose(void) noexcept {
 				m_HeartIcon.Dispose();
-				m_GuardGraph.Dispose();
-				m_GuardPGraph.Dispose();
-				m_CursorGraph.Dispose();
 			}
 			void			Set(void) noexcept {
 			}
 			void			Draw(void) noexcept {
 				auto* DrawParts = DXDraw::Instance();
-				auto* Fonts = FontPool::Instance();
 				int xp1, yp1;
 				//タイム,スコア
 				{
 					xp1 = DrawParts->GetUIY(30);
 					yp1 = DrawParts->GetUIY(10);
-					Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32), 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
-					Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32), 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + DrawParts->GetUIY(240), yp1, White, Black, "%d:%05.2f",
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32), 
+						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32), 
+						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + DrawParts->GetUIY(240), yp1, White, Black, "%d:%05.2f",
 						static_cast<int>(floatParam[0] / 60.f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
 
 					xp1 = DrawParts->GetUIY(1920 / 2);
 					yp1 = DrawParts->GetUIY(10);
-					Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32), 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "%d : %d", intParam[0], intParam[1]);
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32), 
+						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "%d : %d", intParam[0], intParam[1]);
 				}
 				//情報
 				{
@@ -259,13 +249,17 @@ namespace FPS_n2 {
 					float per = Lerp(0.4f, 0.6f, floatParam[1]);
 					if ((per * 255.f) > 1.f) {
 						int radius = static_cast<int>(Lerp(static_cast<float>(DrawParts->GetUIY(24)), static_cast<float>(DrawParts->GetUIY(32)), floatParam[1]));
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * per), 0, 255));
-						SetDrawBright(255, 0, 0);
-						m_HeartIcon.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
-						SetDrawBright(255, 255, 255);
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
+						WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
+							255, 0, 0);
+						WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
+							&m_HeartIcon, xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
+						WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 
+							255, 255, 255);
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
-					Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24), 3)->DrawString(INVALID_ID, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24), 
+						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
 
 					//気合
 					xp1 = DrawParts->GetUIY(24);
@@ -295,68 +289,6 @@ namespace FPS_n2 {
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
-				}
-				//ガード
-				{
-					if ((floatParam[2] * 255.f) > 1.f) {
-						auto Prev = GetDrawScreen();
-						m_GuardScreen.SetDraw_Screen();
-						{
-							{
-								xp1 = 255;
-								yp1 = 255;
-								int radius = 128;
-								float length = std::hypotf(floatParam[3], floatParam[4]);
-								if (length > 0.f) {
-									xp1 += static_cast<int>(static_cast<float>(256 - 32) * floatParam[3] / length);
-									yp1 += static_cast<int>(static_cast<float>(256 - 32) * floatParam[4] / length);
-								}
-								float per = std::clamp(length, 0.f, 1.f) * floatParam[2];
-								SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f * per), 0, 255));
-								SetDrawBright(100, 255, 100);
-								m_GuardPGraph.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
-								SetDrawBright(255, 255, 255);
-								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-							}
-							{
-								xp1 = 255;
-								yp1 = 255;
-								int radius = 258;
-								SetDrawBlendMode(DX_BLENDMODE_MUL, 255);
-								m_GuardGraph.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
-								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-							}
-
-						}
-						GraphHandle::SetDraw_Screen(Prev, false);
-						{
-							{
-								xp1 = DrawParts->GetUIY((1920 / 2));
-								yp1 = DrawParts->GetUIY((1080 / 2));
-								int radius = static_cast<int>(Lerp(static_cast<float>(DrawParts->GetUIY(0)), static_cast<float>(DrawParts->GetUIY(256)), floatParam[2]));
-								SetDrawBlendMode(DX_BLENDMODE_ADD, static_cast<int>(Lerp(128.f, 32.f, floatParam[5])));
-								m_GuardGraph.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
-								SetDrawBlendMode(DX_BLENDMODE_ADD, 255);
-								m_GuardScreen.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
-								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-							}
-							{
-								xp1 = DrawParts->GetUIY((1920 / 2));
-								yp1 = DrawParts->GetUIY((1080 / 2));
-								xp1 += static_cast<int>(static_cast<float>(DrawParts->GetUIY(256)) * floatParam[3]);
-								yp1 += static_cast<int>(static_cast<float>(DrawParts->GetUIY(256)) * floatParam[4]);
-
-								int radius = static_cast<int>(Lerp(static_cast<float>(DrawParts->GetUIY(0)), static_cast<float>(DrawParts->GetUIY(32)), floatParam[2]));
-								float length = std::hypotf(floatParam[3], floatParam[4]);
-								if (length > 1.f) {
-									radius = static_cast<int>(Lerp(static_cast<float>(radius), static_cast<float>(DrawParts->GetUIY(0)), length - 1.f));
-								}
-								SetDrawBlendMode(DX_BLENDMODE_ADD, 128);
-								m_CursorGraph.DrawExtendGraph(xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
-								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
-							}
-						}
-					}
 				}
 			}
 
