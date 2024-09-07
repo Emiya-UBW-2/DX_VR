@@ -224,6 +224,7 @@ namespace FPS_n2 {
 
 				);
 				(*GunPtr->GetMagazinePtr())->SetMove().Update(0.f, 0.f);
+				(*GunPtr->GetMagazinePtr())->UpdateObjMatrix((*GunPtr->GetMagazinePtr())->SetMove().GetMat(), (*GunPtr->GetMagazinePtr())->SetMove().GetPos());
 			}
 			int preselect = bselect;
 			bool preMouseSel = m_MouseSelMode;

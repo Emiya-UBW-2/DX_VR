@@ -10,7 +10,7 @@ namespace FPS_n2 {
 			tmpUpperMatrix *=
 				Matrix4x4DX::RotAxis(Vector3DX::right(), KeyControl::GetRad().x) *
 				Matrix4x4DX::RotAxis(Vector3DX::up(), Lerp(KeyControl::GetYRadBottomChange(), 0.f, this->m_Arm[(int)EnumGunAnimType::Run].Per()));
-			return tmpUpperMatrix * this->m_move.GetMat().Get44DX();
+			return tmpUpperMatrix * this->GetMove().GetMat().Get44DX();
 		}
 		//
 		void			CharacterClass::Shot_Start() noexcept {
@@ -88,7 +88,7 @@ namespace FPS_n2 {
 			if (HeadBobbing) {
 				tmpUpperMatrix = WalkSwingControl::GetWalkSwingMat() * tmpUpperMatrix;
 			}
-			tmpUpperMatrix *= this->m_move.GetMat().Get44DX();
+			tmpUpperMatrix *= this->GetMove().GetMat().Get44DX();
 
 			auto EyePosition = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f + tmpUpperMatrix.zvec()*(-0.04f*Scale_Rate);
 
@@ -804,7 +804,7 @@ namespace FPS_n2 {
 			}
 			//心拍音
 			if (this->m_MyID == 0) {
-				if (StaminaControl::ExcuteStamina(0.f, this->m_move.GetVec().magnitude() / DrawParts->GetFps(), KeyControl::GetIsSquat())) {
+				if (StaminaControl::ExcuteStamina(0.f, this->GetMove().GetVec().magnitude() / DrawParts->GetFps(), KeyControl::GetIsSquat())) {
 					if (this->m_BackGround) {//todo:タイトル用仮
 						SE->Get((int)SoundEnum::Heart).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 0.5f);
 					}
@@ -816,27 +816,29 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			//vector
-			bool IsHitGround = (this->m_move.GetPos().y <= 0.f); //高度0なら止まる
+			bool IsHitGround = (this->GetMove().GetPos().y <= 0.f); //高度0なら止まる
 			float groundYpos = 0.f;
 			if (!m_IsMainGame && this->m_BackGround) {
-				Vector3DX EndPos = this->m_move.GetPos() + Vector3DX::up() * 20.f;
-				IsHitGround = this->m_BackGround->CheckLinetoMap(this->m_move.GetPos() + Vector3DX::up() * -1.f, &EndPos, false);
+				Vector3DX EndPos = this->GetMove().GetPos() + Vector3DX::up() * 20.f;
+				IsHitGround = this->m_BackGround->CheckLinetoMap(this->GetMove().GetPos() + Vector3DX::up() * -1.f, &EndPos, false);
 				groundYpos = EndPos.y;
 			}
 			if (IsHitGround) {
-				Vector3DX pos = this->m_move.GetPos();
+				Vector3DX pos = this->GetMove().GetPos();
 				Easing(&pos.y, groundYpos, 0.8f, EasingType::OutExpo);
-				this->m_move.SetPos(pos);
+				this->SetMove().SetPos(pos);
 
 				Vector3DX vec = KeyControl::GetVec(); vec.y = 0.f;
-				this->m_move.SetVec(vec);
+				this->SetMove().SetVec(vec);
+				this->SetMove().Update(0.f, 0.f);
+				UpdateObjMatrix(SetMove().GetMat(), SetMove().GetPos());
 			}
 			else {
 				float Y = this->GetMove().GetVec().y;
 				Vector3DX vec = KeyControl::GetVec(); vec.y = (Y + (M_GR / (DrawParts->GetFps() * DrawParts->GetFps())));
-				this->m_move.SetVec(vec);
+				this->SetMove().SetVec(vec);
 			}
-			this->m_move.SetPos(this->m_move.GetPos() + this->GetMove().GetVec());
+			this->SetMove().SetPos(this->GetMove().GetPos() + this->GetMove().GetVec());
 			//壁判定
 			std::vector<std::pair<MV1*, int>> cols;
 			if (this->m_BackGround) {
@@ -860,9 +862,9 @@ namespace FPS_n2 {
 				}
 			}
 			{
-				Vector3DX pos = this->m_move.GetPos();
-				col_wall(this->m_move.GetRePos(), &pos, cols);
-				this->m_move.SetPos(pos);
+				Vector3DX pos = this->GetMove().GetPos();
+				col_wall(this->GetMove().GetRePos(), &pos, cols);
+				this->SetMove().SetPos(pos);
 			}
 			//ほかプレイヤーとの判定
 			if (m_IsMainGame) {
@@ -875,20 +877,20 @@ namespace FPS_n2 {
 					Vector3DX Vec = (Chara->GetCharaPosition() - this->GetCharaPosition()); Vec.y = (0.f);
 					float Len = Vec.magnitude();
 					if (Len < Radius) {
-						this->m_move.SetPos(this->m_move.GetPos() + Vec.normalized() * (Len - Radius));
+						this->SetMove().SetPos(this->GetMove().GetPos() + Vec.normalized() * (Len - Radius));
 					}
 				}
 			}
 			//座標オーバーライド
 			if (KeyControl::PutOverride()) {
-				this->m_move.SetPos(KeyControl::GetOverRideInfo().GetPos());
-				this->m_move.SetVec(KeyControl::GetOverRideInfo().GetVec());
+				this->SetMove().SetPos(KeyControl::GetOverRideInfo().GetPos());
+				this->SetMove().SetVec(KeyControl::GetOverRideInfo().GetVec());
 			}
 			auto* OptionParts = OPTION::Instance();
 			bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
-			this->m_move.SetMat(Matrix3x3DX::RotAxis(Vector3DX::forward(), HeadBobbing ? (KeyControl::GetRad().z / 2.f) : 0.f) * Matrix3x3DX::RotAxis(Vector3DX::up(), KeyControl::GetYRadBottom()));
-			this->m_move.Update(0.9f, 0.f);
-			SetMove().Update(0.f, 0.f);
+			this->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::forward(), HeadBobbing ? (KeyControl::GetRad().z / 2.f) : 0.f) * Matrix3x3DX::RotAxis(Vector3DX::up(), KeyControl::GetYRadBottom()));
+			this->SetMove().Update(0.9f, 0.f);
+			UpdateObjMatrix(SetMove().GetMat(), SetMove().GetPos());
 			//スリング場所探索
 			int GunSel = m_IsHardMode ? 1 : 0;
 			if (GetGunPtr(GunSel)) {
@@ -917,8 +919,8 @@ namespace FPS_n2 {
 						GetFrameWorldMat(CharaFrame::Head).pos() +
 						GetFrameWorldMat(CharaFrame::Head).zvec() * (-0.3f*Scale_Rate) +
 						(
-							this->m_move.GetMat().xvec() * sin(m_SlingZrad.GetRad()) +
-							this->m_move.GetMat().yvec() * cos(m_SlingZrad.GetRad())
+							this->GetMove().GetMat().xvec() * sin(m_SlingZrad.GetRad()) +
+							this->GetMove().GetMat().yvec() * cos(m_SlingZrad.GetRad())
 							) * -(0.5f*Scale_Rate)
 					);
 			}
@@ -941,6 +943,7 @@ namespace FPS_n2 {
 					this->m_Armer_Ptr->SetMove().SetMat(Matrix3x3DX::Get33DX(tmp_gunmat.rotation()));
 					this->m_Armer_Ptr->SetMove().SetPos(tmp_gunmat.pos());
 					this->m_Armer_Ptr->SetMove().Update(0.f, 0.f);
+					this->m_Armer_Ptr->UpdateObjMatrix(this->m_Armer_Ptr->SetMove().GetMat(), this->m_Armer_Ptr->SetMove().GetPos());
 
 					GunPos = this->m_Armer_Ptr->GetRightHandMat().pos();
 					Gunyvec = this->m_Armer_Ptr->GetRightHandMat().rotation().xvec()*-1.f;
@@ -1000,6 +1003,7 @@ namespace FPS_n2 {
 					this->m_Morphine_Ptr->SetMove().SetMat(Matrix3x3DX::Get33DX(tmp_gunmat.rotation()));
 					this->m_Morphine_Ptr->SetMove().SetPos(tmp_gunmat.pos());
 					this->m_Morphine_Ptr->SetMove().Update(0.f, 0.f);
+					this->m_Morphine_Ptr->UpdateObjMatrix(this->m_Morphine_Ptr->SetMove().GetMat(), this->m_Morphine_Ptr->SetMove().GetPos());
 				}
 			}
 			else if (GetGunPtrNow()) {
@@ -1305,6 +1309,7 @@ namespace FPS_n2 {
 							if (GetGunPtrNow()->GetObj().SetAnim((int)GunAnimeID::CheckStart).GetTimePer() > 0.5f) {
 								m_AmmoHandR = 1.f;
 							}
+							break;
 						case GunAnimeID::Checking:
 							m_AmmoHandR = 1.f;
 							break;
@@ -1539,7 +1544,7 @@ namespace FPS_n2 {
 			KeyControl::UpdateKeyRad();
 			GetObj().ResetFrameUserLocalMatrix(GetFrame((int)CharaFrame::Upper));
 			GetObj().SetFrameLocalMatrix(GetFrame((int)CharaFrame::Upper),
-										 GetFrameLocalMat(CharaFrame::Upper).rotation() * Matrix4x4DX::RotAxis(Vector3DX::right(), -KeyControl::GetRad().x / 2.f) * (GetCharaDir()*this->m_move.GetMat().Get44DX().inverse()).rotation()
+										 GetFrameLocalMat(CharaFrame::Upper).rotation() * Matrix4x4DX::RotAxis(Vector3DX::right(), -KeyControl::GetRad().x / 2.f) * (GetCharaDir()*this->GetMove().GetMat().Get44DX().inverse()).rotation()
 										 * GetFrameBaseLocalMat((int)CharaFrame::Upper));
 			GetObj().ResetFrameUserLocalMatrix(GetFrame((int)CharaFrame::Upper2));
 			GetObj().SetFrameLocalMatrix(GetFrame((int)CharaFrame::Upper2),
@@ -1574,7 +1579,7 @@ namespace FPS_n2 {
 			//
 			RagDollControl::Execute_RagDollControl(this->GetObj(), LifeControl::IsAlive());													//ラグドール
 			HitBoxControl::UpdataHitBox(this, (this->GetCharaType() == CharaTypeID::Enemy) ? 1.1f : 1.f);									//ヒットボックス
-			WalkSwingControl::UpdateWalkSwing(GetEyeMatrix().pos() - GetCharaPosition(), std::clamp(this->m_move.GetVec().magnitude() / 2.f, 0.f, 1.f));
+			WalkSwingControl::UpdateWalkSwing(GetEyeMatrix().pos() - GetCharaPosition(), std::clamp(this->GetMove().GetVec().magnitude() / 2.f, 0.f, 1.f));
 			EffectControl::Execute();
 		}
 		void			CharacterClass::Draw(bool isDrawSemiTrans) noexcept {

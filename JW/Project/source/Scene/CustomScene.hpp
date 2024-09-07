@@ -38,7 +38,7 @@ namespace FPS_n2 {
 			int							bselect{0};
 			bool						m_MouseSelMode{false};
 			std::array<Matrix4x4DX, (int)ULT_GUN::Max>	m_UltMat;
-			std::array<float, (int)ULT_GUN::Max>	m_UltPer;
+			std::array<float, (int)ULT_GUN::Max>	m_UltPer{};
 		private:
 
 			bool			IsG17Parts(const Slot& S) {

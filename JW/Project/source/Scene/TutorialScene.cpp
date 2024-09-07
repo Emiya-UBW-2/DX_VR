@@ -142,6 +142,8 @@ namespace FPS_n2 {
 				ObjMngr->LoadModel(Obj, Obj, "data/model/Target/");
 				Obj->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(-90)));
 				Obj->SetMove().SetPos(Vector3DX::vget(Scale_Rate * -(5.f + 10.f * j), 0.f, Scale_Rate * (9.f - 2.f * j)));
+				Obj->SetMove().Update(0.f, 0.f);
+				Obj->UpdateObjMatrix(Obj->SetMove().GetMat(), Obj->SetMove().GetPos());
 			}
 			for (int j = 0; j < 9; j++) {
 				auto Obj = std::make_shared<TargetClass>();
@@ -151,6 +153,8 @@ namespace FPS_n2 {
 				auto Rot = Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRand(360)));
 				Obj->SetMove().SetMat(Rot);
 				Obj->SetMove().SetPos((TargetPositions[j] * Scale_Rate) + Rot.zvec() * (1.5f*Scale_Rate));
+				Obj->SetMove().Update(0.f, 0.f);
+				Obj->UpdateObjMatrix(Obj->SetMove().GetMat(), Obj->SetMove().GetPos());
 			}
 			{
 				auto Obj = std::make_shared<MovieObjClass>();
@@ -159,6 +163,8 @@ namespace FPS_n2 {
 
 				Obj->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(90)));
 				Obj->SetMove().SetPos((Vector3DX::vget(0, 0, -5.f) * Scale_Rate));
+				Obj->SetMove().Update(0.f, 0.f);
+				Obj->UpdateObjMatrix(Obj->SetMove().GetMat(), Obj->SetMove().GetPos());
 
 				m_Sound = true;
 			}

@@ -318,7 +318,7 @@ namespace FPS_n2 {
 			bool												m_PosBufOverRideFlag{false};
 			moves												m_OverRideInfo;
 		public://ゲッター
-			CharaAnimeID										m_BottomAnimSelect;
+			CharaAnimeID										m_BottomAnimSelect{};
 		public://ゲッター
 			const auto		GetRun(void) const noexcept { return this->m_Input.GetPADSPress(PADS::RUN) && this->m_Input.GetPADSPress(PADS::MOVE_W) && !this->m_Input.GetPADSPress(PADS::MOVE_S); }
 			const auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }

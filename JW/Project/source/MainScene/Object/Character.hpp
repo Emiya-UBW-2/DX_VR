@@ -54,11 +54,11 @@ namespace FPS_n2 {
 			int													m_CharaSound{-1};			//ƒTƒEƒ“ƒh
 			Vector3DX											m_RecoilRadAdd;
 			Pendulum2D											m_SlingZrad;
-			std::array<float, 2>								m_SlingPer;
+			std::array<float, 2>								m_SlingPer{};
 			std::array<Matrix4x4DX, 2>							m_SlingMat;
 			ArmMovePerClass										m_ULTBar;
 			std::shared_ptr<BackGroundClassBase>				m_BackGround;				//BG
-			CharaTypeID											m_CharaType;
+			CharaTypeID											m_CharaType{};
 			bool												m_IsMainGame{false};
 			int													m_ArmerStock{0};
 			int													m_MorphineStock{0};
@@ -87,7 +87,7 @@ namespace FPS_n2 {
 		private:
 			const Matrix4x4DX GetCharaDir(void) const noexcept;
 
-			const auto		GetCharaPosition(void) const noexcept { return this->m_move.GetPos(); }
+			const auto		GetCharaPosition(void) const noexcept { return this->GetMove().GetPos(); }
 			const auto		IsAimPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() <= 0.1f); }
 			const auto		IsLowReadyPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() >= 0.95f); }
 		private:

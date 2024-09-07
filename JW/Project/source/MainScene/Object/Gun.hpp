@@ -230,6 +230,9 @@ namespace FPS_n2 {
 			void		SetGunMatrix(const Matrix4x4DX& value) noexcept {
 				SetMove().SetMat(Matrix3x3DX::Get33DX(value.rotation()));
 				SetMove().SetPos(value.pos());
+				SetMove().Update(0.f, 0.f);
+				UpdateObjMatrix(SetMove().GetMat(), SetMove().GetPos());
+
 				ModSlotControl::UpdatePartsAnim(GetObj());
 				ModSlotControl::UpdatePartsMove(GetFrameWorldMat_P(GunFrame::UnderRail), GunSlot::UnderRail);
 				ModSlotControl::UpdatePartsMove(GetFrameWorldMat_P(GunFrame::Lower), GunSlot::Lower);

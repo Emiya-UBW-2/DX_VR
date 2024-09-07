@@ -19,8 +19,8 @@ namespace FPS_n2 {
 			int yp1{0};
 			int xsize{0};
 			int ysize{0};
-			FontHandle::FontXCenter LMR;
-			FontHandle::FontYCenter TMB;
+			FontHandle::FontXCenter LMR{};
+			FontHandle::FontYCenter TMB{};
 
 			float SelYadd{0.f};
 
@@ -28,7 +28,7 @@ namespace FPS_n2 {
 			ButtonMode m_ButtonMode{ButtonMode::String};
 			bool m_EnableSelect{false};
 		private:
-			char m_String[64];
+			char m_String[64]{};
 			GraphHandle m_Icon;
 		public:
 			void			LoadCommon(GraphHandle* BGPath) noexcept {
