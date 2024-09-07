@@ -250,7 +250,7 @@ namespace FPS_n2 {
 						}
 					}
 					for (auto ani = data->second.begin(), e = data->second.end() - 1; ani != e; ++ani) {
-						float Frame = static_cast<float>(*ani)->GetFrame();
+						float Frame = static_cast<float>((*ani)->GetFrame());
 						if ((nowframe - Frame) <= 0.f) {
 							Ret.Set(
 								Lerp((*ani)->GetRotate(), (*(ani + 1))->GetRotate(), nowframe / Frame),
