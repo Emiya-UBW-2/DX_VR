@@ -62,7 +62,7 @@ namespace FPS_n2 {
 				}
 				Limit = 0;
 				data.at(LastSel).SetData(Mes, args...);
-				++LastSel %= ((int)data.size());
+				++LastSel %= static_cast<int>(data.size());
 			}
 			void Add() noexcept {
 				if (Limit > 0) {
@@ -103,6 +103,7 @@ namespace FPS_n2 {
 			}
 			void Draw() noexcept {
 				auto* DrawParts = DXDraw::Instance();
+				auto* WindowParts = WindowSystem::DrawControl::Instance();
 
 				int xp1, yp1;
 				xp1 = DrawParts->GetUIY(64);
@@ -110,12 +111,12 @@ namespace FPS_n2 {
 
 				for (auto& d : data) {
 					if (d.ActivePer() > 0.f) {
-						int xp = xp1 - DrawParts->GetUIY((int)((xs + 128) * (1.f - d.ActivePer())));
-						int yp = yp1 - DrawParts->GetUIY((int)((ys + 5) * d.GetFlip()));
+						int xp = xp1 - DrawParts->GetUIY(static_cast<int>((xs + 128) * (1.f - d.ActivePer())));
+						int yp = yp1 - DrawParts->GetUIY(static_cast<int>((ys + 5) * d.GetFlip()));
 
-						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal,
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal,
 										 std::min(
-											 std::clamp((int)(255.f*d.ActivePer()), 0, 255),
+											 std::clamp(static_cast<int>(255.f*d.ActivePer()), 0, 255),
 											 std::min(
 												 std::clamp((DrawParts->GetUIY(960) - yp) * 255 / DrawParts->GetUIY(255), 0, 255),
 												 std::clamp(yp * 255 / DrawParts->GetUIY(255), 0, 255)
@@ -123,16 +124,16 @@ namespace FPS_n2 {
 										 )
 
 						);
-						WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &this->m_tutorialGraph,
+						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &this->m_tutorialGraph,
 							xp, yp,
 							xp + DrawParts->GetUIY(xs), yp + DrawParts->GetUIY(ys),
 							true);
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																					  xp + DrawParts->GetUIY(69), yp + DrawParts->GetUIY(14), Gray75, Black, d.GetMsg());
 					}
 				}
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
 			void Dispose() noexcept {
 				this->m_tutorialGraph.Dispose();

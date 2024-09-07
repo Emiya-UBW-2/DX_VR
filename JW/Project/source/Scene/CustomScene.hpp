@@ -75,7 +75,7 @@ namespace FPS_n2 {
 				//‘¶İ‚·‚é‚à‚Ì‚ğ’Ç‰Á+‡”Ô‚ğw’è
 				for (const auto& S : GunsModify::GetSelData()) {
 					if (!IsG17Parts(*S)) { continue; }
-					int index = (int)(&S - &GunsModify::GetSelData().front());
+					int index = static_cast<int>(&S - &GunsModify::GetSelData().front());
 					bool isHit = false;
 					for (int loop = 0; loop < SelMoveClass.size(); loop++) {
 						if (S.get() == SelMoveClass[loop].Ptr) {

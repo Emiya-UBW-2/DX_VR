@@ -11,12 +11,12 @@ namespace FPS_n2 {
 					case SHOTTYPE::FULL:
 					case SHOTTYPE::SEMI:
 						this->m_IsChamberOn = false;
-						this->m_IsChamberOn |= ((GetGunAnime() == GunAnimeID::Shot) && (GetObj().SetAnim((size_t)GetGunAnime()).GetTime() >= 3.f));
-						this->m_IsChamberOn |= ((GetGunAnime() == GunAnimeID::Cocking) && (GetObj().SetAnim((size_t)GetGunAnime()).GetTime() >= 25.f));
+						this->m_IsChamberOn |= ((GetGunAnime() == GunAnimeID::Shot) && (GetObj().SetAnim(static_cast<size_t>(GetGunAnime())).GetTime() >= 3.f));
+						this->m_IsChamberOn |= ((GetGunAnime() == GunAnimeID::Cocking) && (GetObj().SetAnim(static_cast<size_t>(GetGunAnime())).GetTime() >= 25.f));
 						break;
 					case SHOTTYPE::BOLT:
 						this->m_IsChamberOn = false;
-						this->m_IsChamberOn |= ((GetGunAnime() == GunAnimeID::Cocking) && (GetObj().SetAnim((size_t)GetGunAnime()).GetTime() >= 25.f));
+						this->m_IsChamberOn |= ((GetGunAnime() == GunAnimeID::Cocking) && (GetObj().SetAnim(static_cast<size_t>(GetGunAnime())).GetTime() >= 25.f));
 						break;
 					default:
 						break;
@@ -37,8 +37,8 @@ namespace FPS_n2 {
 						break;
 					case SHOTTYPE::BOLT:
 						this->m_IsEject = false;
-						this->m_IsEject |= ((GetGunAnime() == GunAnimeID::ReloadStart_Empty || GetGunAnime() == GunAnimeID::ReloadStart) && (GetObj().SetAnim((size_t)GetGunAnime()).GetTime() >= 19.f && !GetObj().SetAnim((size_t)GetGunAnime()).TimeEnd()));
-						this->m_IsEject |= ((GetGunAnime() == GunAnimeID::Cocking) && (GetObj().SetAnim((size_t)GetGunAnime()).GetTime() >= 19.f && !GetObj().SetAnim((size_t)GetGunAnime()).TimeEnd()));
+						this->m_IsEject |= ((GetGunAnime() == GunAnimeID::ReloadStart_Empty || GetGunAnime() == GunAnimeID::ReloadStart) && (GetObj().SetAnim(static_cast<size_t>(GetGunAnime())).GetTime() >= 19.f && !GetObj().SetAnim(static_cast<size_t>(GetGunAnime())).TimeEnd()));
+						this->m_IsEject |= ((GetGunAnime() == GunAnimeID::Cocking) && (GetObj().SetAnim(static_cast<size_t>(GetGunAnime())).GetTime() >= 19.f && !GetObj().SetAnim(static_cast<size_t>(GetGunAnime())).TimeEnd()));
 						break;
 					default:
 						break;
@@ -485,7 +485,7 @@ namespace FPS_n2 {
 						if (m_SightPtr.at(i)) {
 							if ((*m_SightPtr.at(i))->GetModData()->GetIronSight()) {
 								for (int k = i;k < m_SightPtr.size() - 1;k++) {
-									m_SightPtr.at(k) = m_SightPtr.at((size_t)(k + 1));
+									m_SightPtr.at(k) = m_SightPtr.at(static_cast<size_t>(k + 1));
 								}
 								m_SightPtr.back() = nullptr;
 							}

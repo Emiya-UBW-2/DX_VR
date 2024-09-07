@@ -175,7 +175,7 @@ namespace FPS_n2 {
 					for (auto& y : ButtonSel) {
 						if (y.GetInto()) {
 							m_MouseSelMode = true;
-							select = (int)(&y - &ButtonSel.front());
+							select = static_cast<int>(&y - &ButtonSel.front());
 						}
 					}
 					if ((select != -1) && (m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetKey(PADS::INTERACT).trigger())) {
@@ -202,19 +202,20 @@ namespace FPS_n2 {
 							case 5:
 								PopUpParts->Add(LocalizePool::Instance()->Get(120), DrawParts->GetUIY(720), DrawParts->GetUIY(840),
 												[&](int xmin, int ymin, int xmax, int, bool) {
-													int xp1, yp1;
+										auto* WindowParts = WindowSystem::DrawControl::Instance();
+										int xp1, yp1;
 													xp1 = xmin + DrawParts->GetUIY(24);
 													yp1 = ymin + LineHeight;
 													int Height = DrawParts->GetUIY(12);
 													for (int i = 0;i < m_CreditCoulm;i++) {
 														int xpos = xp1 + DrawParts->GetUIY(6);
 														int ypos = yp1 + (yp1 + Height - yp1) / 2;
-														WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+														WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 															Height, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
 																											   xpos, ypos, White, Black, m_CreditStr.at(i).first);
 
 														xpos = xmax - DrawParts->GetUIY(24);
-														WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+														WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 															Height, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
 																											   xpos, ypos, White, Black, m_CreditStr.at(i).second);
 														yp1 += Height;
@@ -339,13 +340,14 @@ namespace FPS_n2 {
 		}
 		//
 		void			TitleScene::DrawUI_Base_Sub(void) noexcept {
+			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			//
-			WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_TitleImage, DrawParts->GetUIY(64), DrawParts->GetUIY(64), DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), true);
+			WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_TitleImage, DrawParts->GetUIY(64), DrawParts->GetUIY(64), DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), true);
 			//
 			{
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 					DrawParts->GetUIY(18),
 																	  FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
 																	  DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), White, Black, "Ver 1.1.1");
@@ -356,20 +358,20 @@ namespace FPS_n2 {
 			}
 			//
 			if ((select != -1) && !PopUpParts->IsActivePop()) {
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 					DrawParts->GetUIY(18),
 																	  FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 																	  DrawParts->GetUIY(32), DrawParts->GetUIY(1080 - 32 - 32), White, Black, LocalizePool::Instance()->Get(9020 + select));
 			}
 			//
 			{
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*std::clamp(GameFadeIn, 0.f, 1.f)), 0, 255));
-				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
+				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*std::clamp(GameFadeIn, 0.f, 1.f)), 0, 255));
+				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
 
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*std::clamp(GameStart, 0.f, 1.f)), 0, 255));
-				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), White, TRUE);
+				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*std::clamp(GameStart, 0.f, 1.f)), 0, 255));
+				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), White, TRUE);
 
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
 		}
 		//使い回しオブジェ系

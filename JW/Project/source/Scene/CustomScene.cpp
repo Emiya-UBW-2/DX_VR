@@ -94,8 +94,8 @@ namespace FPS_n2 {
 
 			m_LookSel = LookSelect::ModSet;
 			for (auto& y : ButtonSel) {
-				if ((int)(&y - &ButtonSel.front()) < 3) {
-					if ((int)m_LookSel == (int)(&y - &ButtonSel.front())) {
+				if (static_cast<int>(&y - &ButtonSel.front()) < 3) {
+					if ((int)m_LookSel == static_cast<int>(&y - &ButtonSel.front())) {
 						y.SetReady();
 					}
 					else {
@@ -259,7 +259,7 @@ namespace FPS_n2 {
 			for (auto& y : ButtonSel) {
 				if (y.GetInto()) {
 					m_MouseSelMode = true;
-					bselect = (int)(&y - &ButtonSel.front());
+					bselect = static_cast<int>(&y - &ButtonSel.front());
 				}
 			}
 
@@ -333,8 +333,8 @@ namespace FPS_n2 {
 
 			if (preselect != bselect || preMouseSel != m_MouseSelMode || preLookSel != m_LookSel) {
 				for (auto& y : ButtonSel) {
-					if ((int)(&y - &ButtonSel.front()) < 3) {
-						if ((int)m_LookSel == (int)(&y - &ButtonSel.front())) {
+					if (static_cast<int>(&y - &ButtonSel.front()) < 3) {
+						if ((int)m_LookSel == static_cast<int>(&y - &ButtonSel.front())) {
 							y.SetReady();
 						}
 						else {
@@ -357,7 +357,7 @@ namespace FPS_n2 {
 				y.Update();
 			}
 			for (auto& y : ButtonAlpha) {
-				Easing(&y, ((int)m_LookSel == (int)(&y - &ButtonAlpha.front())) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
+				Easing(&y, ((int)m_LookSel == static_cast<int>(&y - &ButtonAlpha.front())) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
 			}
 			if (m_LookSel == LookSelect::FreeLook) {
 				m_Yrad += Pad->GetLS_X() / 1000.f;
@@ -448,27 +448,28 @@ namespace FPS_n2 {
 		}
 
 		void			CustomScene::DrawUI_Base_Sub(void) noexcept {
+			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			//
-			WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+			WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 				DrawParts->GetUIY(96),
 																FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																DrawParts->GetUIY(64), DrawParts->GetUIY(64), White, Black, "Customize");
 			//
-			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*std::clamp(ButtonAlpha[(int)LookSelect::ModSet], 0.f, 1.f)), 0, 255));
+			WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*std::clamp(ButtonAlpha[(int)LookSelect::ModSet], 0.f, 1.f)), 0, 255));
 			DrawCustomUI();
-			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*std::clamp(ButtonAlpha[(int)LookSelect::ULTSet], 0.f, 1.f)), 0, 255));
+			WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*std::clamp(ButtonAlpha[(int)LookSelect::ULTSet], 0.f, 1.f)), 0, 255));
 			DrawULTUI();
-			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+			WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			//
 			for (auto& y : ButtonSel) {
 				if (m_LookSel == LookSelect::FreeLook) {
-					if ((int)(&y - &ButtonSel.front()) >= 3) {
+					if (static_cast<int>(&y - &ButtonSel.front()) >= 3) {
 						break;
 					}
 				}
 				if (m_LookSel != LookSelect::ModSet) {
-					if ((int)(&y - &ButtonSel.front()) >= 5) {
+					if (static_cast<int>(&y - &ButtonSel.front()) >= 5) {
 						break;
 					}
 				}
@@ -476,18 +477,18 @@ namespace FPS_n2 {
 			}
 			//
 			if (bselect != -1) {
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 					DrawParts->GetUIY(18),
 																	  FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 																	  DrawParts->GetUIY(32), DrawParts->GetUIY(1080 - 32 - 32), White, Black, LocalizePool::Instance()->Get(9010 + bselect));
 			}
 			//
 			{
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*m_Alpha), 0, 255));
+				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*m_Alpha), 0, 255));
 
-				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
+				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
 
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
 		}
 
@@ -612,6 +613,7 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* Fonts = FontPool::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
+			auto* WindowParts = WindowSystem::DrawControl::Instance();
 
 			int xp1, yp1;
 
@@ -619,16 +621,16 @@ namespace FPS_n2 {
 			const auto& Data = y->m_Data->GetModData()->GetPartsSlot(y->SlotType);
 			//
 			{
-				xp1 = DrawParts->GetUIY(960 - 400 + (int)(SelMoveClass[select].Yadd*64.f));
+				xp1 = DrawParts->GetUIY(960 - 400 + static_cast<int>(SelMoveClass[select].Yadd*64.f));
 				yp1 = DrawParts->GetUIY(540 - 270);
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 					DrawParts->GetUIY(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
 																	  xp1, yp1, White, Gray75, GunSlotName[(int)Data->m_GunSlot]);
 			}
 			{
 				xp1 = DrawParts->GetUIY(960 - 400);
 				yp1 = DrawParts->GetUIY(540 - 270 + 48);
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 					DrawParts->GetUIY(18), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
 																	   xp1, yp1, White, Gray75, "%d/%d", select + 1, (int)SelMoveClass.size());
 			}
@@ -641,7 +643,7 @@ namespace FPS_n2 {
 				if (GunPtr) {
 					auto& STR = OptionParts->GetParamInt(EnumSaveParam::Language) ? GunPtr->GetModData()->GetInfoEng() : GunPtr->GetModData()->GetInfo();
 					for (auto& s : STR) {
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
 																			  xp1, yp1, Green, DarkGreen, s.c_str());
 						yp1 += DrawParts->GetUIY(24);
@@ -653,17 +655,17 @@ namespace FPS_n2 {
 				xp1 = DrawParts->GetUIY(160);
 				yp1 = DrawParts->GetUIY(540);
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 					DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																	  xp1, yp1, Green, DarkGreen, "ShotMode : %s", SHOTTYPEName[(int)GunPtr->GetShotType()]);
 				yp1 += DrawParts->GetUIY(24 + 4);
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 					DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																	  xp1, yp1, Green, DarkGreen, "ShotSound : %s", GunShootSoundName[(int)GunPtr->GetGunShootSound()]);
 				yp1 += DrawParts->GetUIY(24 + 4);
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 					DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																	  xp1, yp1, Green, DarkGreen, "RecoilPower : %d", (int)(GunPtr->GetRecoilPower()*GunPtr->GetRecoilReturn()));
+																	  xp1, yp1, Green, DarkGreen, "RecoilPower : %d", static_cast<int>(GunPtr->GetRecoilPower()*GunPtr->GetRecoilReturn()));
 				yp1 += DrawParts->GetUIY(24 + 4);
 			}
 			//
@@ -672,16 +674,16 @@ namespace FPS_n2 {
 				yp1 = DrawParts->GetUIY(840);
 
 				if (y->m_sel != (int)Data->m_ItemsUniqueID.size()) {
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						DrawParts->GetUIY(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-																		xp1 + DrawParts->GetUIY((int)(SelMoveClass[select].Xadd*100.f)), yp1 + DrawParts->GetUIY((int)(SelMoveClass[select].Yadd*64.f)), Green, DarkGreen,
+																		xp1 + DrawParts->GetUIY(static_cast<int>(SelMoveClass[select].Xadd*100.f)), yp1 + DrawParts->GetUIY(static_cast<int>(SelMoveClass[select].Yadd*64.f)), Green, DarkGreen,
 																		(*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[y->m_sel]))->GetName().c_str()
 					);
 				}
 				else {
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						DrawParts->GetUIY(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
-																		xp1 + DrawParts->GetUIY((int)(SelMoveClass[select].Xadd*100.f)), yp1 + DrawParts->GetUIY((int)(SelMoveClass[select].Yadd*64.f)), Green, DarkGreen,
+																		xp1 + DrawParts->GetUIY(static_cast<int>(SelMoveClass[select].Xadd*100.f)), yp1 + DrawParts->GetUIY(static_cast<int>(SelMoveClass[select].Yadd*64.f)), Green, DarkGreen,
 																		"None"
 					);
 				}
@@ -690,7 +692,7 @@ namespace FPS_n2 {
 			{
 				xp1 = DrawParts->GetUIY(960);
 				yp1 = DrawParts->GetUIY(920);
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 					DrawParts->GetUIY(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
 																	   xp1, yp1, Green, DarkGreen, "%d / %d", y->m_sel + 1, Data->ItemMaxCount() + 1);
 			}
@@ -708,12 +710,12 @@ namespace FPS_n2 {
 					if (sel != (int)Data->m_ItemsUniqueID.size()) {
 						const char* Name = (*ModDataManager::Instance()->GetData(Data->m_ItemsUniqueID[sel]))->GetName().c_str();
 						if (SaveDataParts->GetParam(Name) == 1) {
-							WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+							WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 								DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																				  xp1, yp1, Color, DarkGreen, Name);
 						}
 						else {
-							WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+							WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 								DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																				  xp1, yp1, GetColor(216, 143, 143), DarkGreen, "????");
 							int xsize = Fonts->Get(FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24), 3)->GetStringWidth(DrawParts->GetUIY(24), "????");
@@ -724,14 +726,14 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																			  xp1, yp1, Color, DarkGreen, "None");
 					}
 					yp1 += DrawParts->GetUIY(28);
 				}
 				if (mouseover != -1) {
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 																		  Pad->GetMS_X(), Pad->GetMS_Y(), White, Gray75, LocalizePool::Instance()->Get(9000));
 
@@ -739,6 +741,7 @@ namespace FPS_n2 {
 			}
 		}
 		void			CustomScene::DrawULTUI(void) noexcept {
+			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* DrawParts = DXDraw::Instance();
 
@@ -746,7 +749,7 @@ namespace FPS_n2 {
 			{
 				xp1 = DrawParts->GetUIY(960 - 400);
 				yp1 = DrawParts->GetUIY(540 - 270);
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 					DrawParts->GetUIY(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
 																	  xp1, yp1, White, Gray75, LocalizePool::Instance()->Get(9001));
 			}
@@ -756,7 +759,7 @@ namespace FPS_n2 {
 				yp1 = DrawParts->GetUIY(840);
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + (int)GunsModify::GetULTSelect()).GetGun(0);
 				if (GunPtr) {
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						DrawParts->GetUIY(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
 																		xp1, yp1, Green, DarkGreen, GunPtr->GetModData()->GetName());
 				}
@@ -769,7 +772,7 @@ namespace FPS_n2 {
 				if (GunPtr) {
 					auto& STR = GunPtr->GetModData()->GetInfo();
 					for (auto& s : STR) {
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
 																			  xp1, yp1, Green, DarkGreen, s.c_str());
 						yp1 += DrawParts->GetUIY(24);
@@ -782,17 +785,17 @@ namespace FPS_n2 {
 				yp1 = DrawParts->GetUIY(540);
 				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + (int)GunsModify::GetULTSelect()).GetGun(0);
 				if (GunPtr) {
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																		  xp1, yp1, Green, DarkGreen, "ShotMode : %s", SHOTTYPEName[(int)GunPtr->GetShotType()]);
 					yp1 += DrawParts->GetUIY(24 + 4);
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																		  xp1, yp1, Green, DarkGreen, "ShotSound : %s", GunShootSoundName[(int)GunPtr->GetGunShootSound()]);
 					yp1 += DrawParts->GetUIY(24 + 4);
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																		  xp1, yp1, Green, DarkGreen, "RecoilPower : %d", (int)(GunPtr->GetRecoilPower()*GunPtr->GetRecoilReturn()));
+																		  xp1, yp1, Green, DarkGreen, "RecoilPower : %d", static_cast<int>(GunPtr->GetRecoilPower()*GunPtr->GetRecoilReturn()));
 					yp1 += DrawParts->GetUIY(24 + 4);
 				}
 			}
@@ -800,7 +803,7 @@ namespace FPS_n2 {
 			{
 				xp1 = DrawParts->GetUIY(960);
 				yp1 = DrawParts->GetUIY(920);
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 					DrawParts->GetUIY(32), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
 																	   xp1, yp1, Green, DarkGreen, "%d / %d", (int)GunsModify::GetULTSelect() + 1, (int)ULT_GUN::Max);
 			}

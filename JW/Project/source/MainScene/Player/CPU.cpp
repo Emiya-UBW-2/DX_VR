@@ -104,7 +104,7 @@ namespace FPS_n2 {
 
 				this->UnitArray.resize(m_BackGround->GetBuildData().size());			// 経路探索用のポリゴン情報を格納するメモリ領域を確保、初期化
 				for (auto& p : this->UnitArray) {
-					p.Init((int)(&p - &this->UnitArray.front()));
+					p.Init(static_cast<int>(&p - &this->UnitArray.front()));
 				}
 
 				int StartIndex = m_BackGround->GetNearestBuilds(StartPos);	// スタート地点にあるポリゴンの番号を取得し、ポリゴンの経路探索処理用の構造体のアドレスを保存
@@ -243,7 +243,7 @@ namespace FPS_n2 {
 							if (C.GetMeshSel() < 0) { continue; }
 							auto Vec = C.GetMatrix().pos() - MyPos; Vec.y = (0.f);
 							if (Vec.magnitude() < 10.f * Scale_Rate) {
-								SelList.emplace_back((int)(&C - &this->m_BackGround->GetBuildData().front()));
+								SelList.emplace_back(static_cast<int>(&C - &this->m_BackGround->GetBuildData().front()));
 							}
 						}
 					}
@@ -251,7 +251,7 @@ namespace FPS_n2 {
 					};
 				auto CheckPathToTarget = [&]() {
 					m_PathChecker.Dispose();
-					auto MyPos_XZ = MyPos; MyPos_XZ.y = (0.f);
+					Vector3DX MyPos_XZ = MyPos; MyPos_XZ.y = (0.f);
 					Target.y = (0.f);
 					return m_PathChecker.Init(MyPos_XZ, Target);	// 指定の２点の経路情報を探索する
 					};
@@ -262,7 +262,7 @@ namespace FPS_n2 {
 							if (C.GetMeshSel() < 0) { continue; }
 							auto Vec = C.GetMatrix().pos() - Target; Vec.y = (0.f);
 							if (Vec.magnitude() < 10.f * Scale_Rate) {
-								SelList.emplace_back((int)(&C - &this->m_BackGround->GetBuildData().front()));
+								SelList.emplace_back(static_cast<int>(&C - &this->m_BackGround->GetBuildData().front()));
 							}
 						}
 					}
@@ -287,7 +287,7 @@ namespace FPS_n2 {
 
 				Vector3DX pos_t;
 				while (true) {
-					pos_t = this->m_BackGround->GetBuildData().at(GetRand((int)(this->m_BackGround->GetBuildData().size()) - 1)).GetMatrix().pos();
+					pos_t = this->m_BackGround->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(this->m_BackGround->GetBuildData().size()) - 1))).GetMatrix().pos();
 
 					Vector3DX EndPos = pos_t + Vector3DX::up() * 1.f*Scale_Rate;
 					if (CanRepop) {
@@ -316,7 +316,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 
-				auto Vec = VEC; Vec.y = (0.f);
+				Vector3DX Vec = VEC; Vec.y = (0.f);
 
 				auto Dir = MyChara->GetEyeMatrix().zvec() * -1.f;
 				auto Dir_XZ = Dir; Dir_XZ.y = (0.f);
@@ -367,7 +367,7 @@ namespace FPS_n2 {
 			void		Init() noexcept {
 				this->Reset();
 				this->m_PathUpdateTimer = 0.f;
-				this->m_MoveFrontTimer = (float)(GetRand(6));
+				this->m_MoveFrontTimer = static_cast<float>(GetRand(6));
 				this->m_CanRepop = true;
 			}
 			//
@@ -469,7 +469,7 @@ namespace FPS_n2 {
 				this->m_ShotTimer = std::max(this->m_ShotTimer - 1.f / DrawParts->GetFps(), 0.f);
 				if (this->m_ShotTimer == 0.f) {
 					m_MyInput.SetInputPADS(PADS::SHOT, true);
-					this->m_ShotTimer = MyChara->CanLookTarget ? ((float)(10 + GetRand(100)) / 100.f) : ((float)(50 + GetRand(400)) / 100.f);
+					this->m_ShotTimer = MyChara->CanLookTarget ? (static_cast<float>(10 + GetRand(100)) / 100.f) : (static_cast<float>(50 + GetRand(400)) / 100.f);
 				}
 				//
 				if (!MyChara->CanLookTarget) {

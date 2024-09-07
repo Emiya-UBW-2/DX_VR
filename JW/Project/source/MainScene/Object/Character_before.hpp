@@ -537,7 +537,7 @@ namespace FPS_n2 {
 				this->m_yrad_UpperChange = this->m_rad.y - this->m_yrad_Upper;
 				this->m_yrad_BottomChange = this->m_rad.y - this->m_yrad_Bottom;
 				Easing(&this->m_LateLeanRad, this->m_LeanRad, 0.9f, EasingType::OutExpo);
-				Easing(&this->m_LeanRad, ((float)(-this->m_LeanRate) + this->m_HeadShotPer)*deg2rad(25), 0.9f, EasingType::OutExpo);
+				Easing(&this->m_LeanRad, (static_cast<float>(-this->m_LeanRate) + this->m_HeadShotPer)*deg2rad(25), 0.9f, EasingType::OutExpo);
 				Easing(&this->m_HeadShotPer, 0.f, 0.9f, EasingType::OutExpo);
 				//e‚Ì—h‚ê
 				Easing(&m_UpperRad, (this->m_rad - this->m_UpperPrevRad)*-1.f, 0.9f, EasingType::OutExpo);

@@ -264,7 +264,7 @@ namespace FPS_n2 {
 		auto* DrawParts = DXDraw::Instance();
 		//オクルージョンカリング
 		{
-			auto MyPos = DrawParts->GetMainCamera().GetCamPos();
+			Vector3DX MyPos = DrawParts->GetMainCamera().GetCamPos();
 			auto MyVec = DrawParts->GetMainCamera().GetCamVec() - MyPos; MyVec.y = (0.f); MyVec = MyVec.normalized();
 			auto MyMat = Matrix4x4DX::RotAxis(Vector3DX::up(), atan2f(MyVec.x, MyVec.z)).inverse();
 

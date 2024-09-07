@@ -110,7 +110,7 @@ namespace FPS_n2 {
 					Vector3DX TgtPos_XZ = TargetChara->GetMove().GetPos(); TgtPos_XZ.y = (0.f);
 					Vector3DX BGPos_XZ;
 					while (true) {
-						auto& C = this->m_BackGround->GetBuildData().at((size_t)(GetRand((int)(this->m_BackGround->GetBuildData().size()) - 1)));
+						auto& C = this->m_BackGround->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(this->m_BackGround->GetBuildData().size()) - 1)));
 						BGPos_XZ = C.GetMatrix().pos(); BGPos_XZ.y = (0.f);
 						if ((BGPos_XZ - TgtPos_XZ).magnitude() > 10.f*Scale_Rate) {
 							auto StartPos = TgtPos_XZ + Vector3DX::up()*(1.f*Scale_Rate);
@@ -331,7 +331,7 @@ namespace FPS_n2 {
 					}
 				}
 				if (m_ReadyTimer > 0.f) {
-					BGM->Get(0)->SetVol_Local((int)(255.f*m_ReadyTimer / 6.f));
+					BGM->Get(0)->SetVol_Local(static_cast<int>(255.f*m_ReadyTimer / 6.f));
 				}
 				else {
 					BGM->Get(0)->Stop();
@@ -547,9 +547,10 @@ namespace FPS_n2 {
 			if (Chara->GetGunPtrNow()) {
 				if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&
 					!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
-					WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph(),
-						(int)(Chara->GetGunPtrNow()->GetReticleXPos()*DrawParts->GetUIY(1980) / DrawParts->GetScreenY(1980)),
-						(int)(Chara->GetGunPtrNow()->GetReticleYPos()*DrawParts->GetUIY(1080) / DrawParts->GetScreenY(1080)),
+					auto* WindowParts = WindowSystem::DrawControl::Instance();
+					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph(),
+						static_cast<int>(Chara->GetGunPtrNow()->GetReticleXPos()*DrawParts->GetUIY(1980) / DrawParts->GetScreenY(1980)),
+						static_cast<int>(Chara->GetGunPtrNow()->GetReticleYPos()*DrawParts->GetUIY(1080) / DrawParts->GetScreenY(1080)),
 						1.f, Chara->GetLeanRad(), true);
 				}
 			}
@@ -582,7 +583,8 @@ namespace FPS_n2 {
 					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 					if (Chara->IsAlive()) {
 						//ミニマップ
-						WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &m_MiniMapScreen, DrawParts->GetUIY(960), DrawParts->GetUIY(840), 1.f, 0.f, true);
+						auto* WindowParts = WindowSystem::DrawControl::Instance();
+						WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &m_MiniMapScreen, DrawParts->GetUIY(960), DrawParts->GetUIY(840), 1.f, 0.f, true);
 					}
 				}
 			}
@@ -647,7 +649,7 @@ namespace FPS_n2 {
 #if FALSE
 			movie = GraphHandle::Load("data/Movie/end0.mp4");
 			PlayMovieToGraph(movie.get());
-			ChangeMovieVolumeToGraph(std::clamp((int)(255.f*OptionParts->GetParamFloat(EnumSaveParam::SE)), 0, 255), movie.get());
+			ChangeMovieVolumeToGraph(std::clamp(static_cast<int>(255.f*OptionParts->GetParamFloat(EnumSaveParam::SE)), 0, 255), movie.get());
 			m_movieTotalFrame = GetMovieTotalFrameToGraph(movie.get());
 #endif
 			PadControl::Instance()->SetGuideUpdate();
@@ -672,14 +674,14 @@ namespace FPS_n2 {
 				m_ResultRank = (int)m_Ranking.size();
 				for (auto& r : m_Ranking) {
 					if (r.first == PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore() && r.second == m_StartTime) {
-						m_ResultRank = (int)(&r - &m_Ranking.front());
+						m_ResultRank = static_cast<int>(&r - &m_Ranking.front());
 						break;
 					}
 				}
 				//スコアの記録を並べ替え
 				{
 					for (auto& r : m_Ranking) {
-						int index = (int)(&r - &m_Ranking.front());
+						int index = static_cast<int>(&r - &m_Ranking.front());
 						SaveDataParts->SetParam("Score" + std::to_string(index), r.first);
 						SaveDataParts->SetParam("Time_" + std::to_string(index), r.second);
 					}
@@ -1304,17 +1306,17 @@ namespace FPS_n2 {
 			}
 			{
 				//シェイク
-				this->m_UIclass.SetIntParam(0, (int)(CameraShake::Instance()->GetCamShake().x*100.f));
-				this->m_UIclass.SetIntParam(1, (int)(CameraShake::Instance()->GetCamShake().y*100.f));
-				this->m_UIclass.SetIntParam(2, (int)(rad2deg(Chara->GetLeanRad()*5.f)));
+				this->m_UIclass.SetIntParam(0, static_cast<int>(CameraShake::Instance()->GetCamShake().x*100.f));
+				this->m_UIclass.SetIntParam(1, static_cast<int>(CameraShake::Instance()->GetCamShake().y*100.f));
+				this->m_UIclass.SetIntParam(2, static_cast<int>(rad2deg(Chara->GetLeanRad()*5.f)));
 				//AmmoStock
 				this->m_UIclass.SetIntParam(3, Chara->GetAmmoStock());
 				//Time
 				this->m_UIclass.SetfloatParam(0, m_Timer);
 				this->m_UIclass.SetfloatParam(1, m_ReadyTimer);
 				//
-				this->m_UIclass.SetGaugeParam(5 + 3, (int)(Chara->GetAutoAimPer()*20.f), 20);
-				this->m_UIclass.SetGaugeParam(5 + 3 + 1, (int)(Chara->GetAutoAimPer()*20.f), 20);
+				this->m_UIclass.SetGaugeParam(5 + 3, static_cast<int>(Chara->GetAutoAimPer()*20.f), 20);
+				this->m_UIclass.SetGaugeParam(5 + 3 + 1, static_cast<int>(Chara->GetAutoAimPer()*20.f), 20);
 				this->m_UIclass.SetIntParam(4, Chara->GetAutoAimID());
 				this->m_UIclass.SetfloatParam(2, Chara->GetAutoAimOn());
 				//HP
@@ -1369,14 +1371,14 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
-			m_MiniMapScreen.SetDraw_Screen();//WindowSystem::DrawControl::Instance()->Set つかうな
+			m_MiniMapScreen.SetDraw_Screen();//WindowParts->Set つかうな
 			{
 				float size = 0.7f;
 				int xp = DrawParts->GetUIY(128);
 				int yp = DrawParts->GetUIY(128);
 
-				int xp1 = -(int)(15.f + Chara->GetMove().GetPos().x);
-				int yp1 = (int)(15.f + Chara->GetMove().GetPos().z);
+				int xp1 = -static_cast<int>(15.f + Chara->GetMove().GetPos().x);
+				int yp1 = static_cast<int>(15.f + Chara->GetMove().GetPos().z);
 
 				float rad = std::atan2f(
 					Vector3DX::Cross((Chara->GetEyeMatrix().zvec() * -1.f), Vector3DX::forward()).y,
@@ -1384,8 +1386,8 @@ namespace FPS_n2 {
 				);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, 216);
 				this->m_BackGround->GetMapGraph().DrawRotaGraph3(
-					xp + (int)(((float)xp1*std::cos(rad) - (float)yp1 * std::sin(rad))*size),
-					yp + (int)(((float)yp1*std::cos(rad) + (float)xp1 * std::sin(rad))*size),
+					xp + static_cast<int>(((float)xp1*std::cos(rad) - (float)yp1 * std::sin(rad))*size),
+					yp + static_cast<int>(((float)yp1*std::cos(rad) + (float)xp1 * std::sin(rad))*size),
 					this->m_BackGround->GetMapGraphXSize() / 2,
 					this->m_BackGround->GetMapGraphYSize() / 2,
 					size, -size,
@@ -1398,11 +1400,11 @@ namespace FPS_n2 {
 					if (index == 0) { continue; }
 					if (!c->IsAlive()) { continue; }
 					if (!c->CanLookTarget) { continue; }
-					int xp2 = xp1 + (int)(15.f + c->GetMove().GetPos().x);
-					int yp2 = yp1 - (int)(15.f + c->GetMove().GetPos().z);
+					int xp2 = xp1 + static_cast<int>(15.f + c->GetMove().GetPos().x);
+					int yp2 = yp1 - static_cast<int>(15.f + c->GetMove().GetPos().z);
 					DrawCircle(
-						xp + (int)(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
-						yp + (int)(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
+						xp + static_cast<int>(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
+						yp + static_cast<int>(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
 						5, Red, TRUE);
 				}
 				//アイテム入手
@@ -1414,11 +1416,11 @@ namespace FPS_n2 {
 						if (ammo != nullptr) {
 							auto& a = (std::shared_ptr<ItemObjClass>&)(*ammo);
 							if (a->IsActive()) {
-								int xp2 = xp1 + (int)(15.f + a->GetMove().GetPos().x);
-								int yp2 = yp1 - (int)(15.f + a->GetMove().GetPos().z);
+								int xp2 = xp1 + static_cast<int>(15.f + a->GetMove().GetPos().x);
+								int yp2 = yp1 - static_cast<int>(15.f + a->GetMove().GetPos().z);
 								DrawCircle(
-									xp + (int)(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
-									yp + (int)(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
+									xp + static_cast<int>(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
+									yp + static_cast<int>(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
 									2, Yellow, TRUE);
 
 							}
@@ -1431,17 +1433,18 @@ namespace FPS_n2 {
 				}
 				{
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
-					int xp2 = xp1 + (int)(15.f + c->GetMove().GetPos().x);
-					int yp2 = yp1 - (int)(15.f + c->GetMove().GetPos().z);
+					int xp2 = xp1 + static_cast<int>(15.f + c->GetMove().GetPos().x);
+					int yp2 = yp1 - static_cast<int>(15.f + c->GetMove().GetPos().z);
 					DrawCircle(
-						xp + (int)(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
-						yp + (int)(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
+						xp + static_cast<int>(((float)xp2 * std::cos(rad) - (float)yp2 * std::sin(rad))*size),
+						yp + static_cast<int>(((float)yp2 * std::cos(rad) + (float)xp2 * std::sin(rad))*size),
 						5, Green, TRUE);
 				}
 			}
 		}
 		//UI
 		void			MAINLOOP::DrawSoundGraph(void) noexcept {
+			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			if (DrawParts->IsPause()) { return; }
 			auto* PlayerMngr = PlayerManager::Instance();
@@ -1450,8 +1453,8 @@ namespace FPS_n2 {
 			int xp = DrawParts->GetUIY(960);
 			int yp = DrawParts->GetUIY(540);
 
-			int xp1 = -(int)(Chara->GetMove().GetPos().x);
-			int yp1 = (int)(Chara->GetMove().GetPos().z);
+			int xp1 = -static_cast<int>(Chara->GetMove().GetPos().x);
+			int yp1 = static_cast<int>(Chara->GetMove().GetPos().z);
 
 			float rad = std::atan2f(
 				Vector3DX::Cross((Chara->GetEyeMatrix().zvec() * -1.f), Vector3DX::forward()).y,
@@ -1470,8 +1473,8 @@ namespace FPS_n2 {
 				if (index == 0) { continue; }
 				if (!c->IsAlive()) { continue; }
 				float length = (MyPos - c->GetMove().GetPos()).magnitude() / (50.f*Scale_Rate);
-				float xp2 = (float)(xp1 + (int)(c->GetMove().GetPos().x));
-				float yp2 = (float)(yp1 - (int)(c->GetMove().GetPos().z));
+				float xp2 = static_cast<float>(xp1 + static_cast<int>(c->GetMove().GetPos().x));
+				float yp2 = static_cast<float>(yp1 - static_cast<int>(c->GetMove().GetPos().z));
 				float len = std::hypotf(xp2, yp2);
 				if (len > 0.f) {
 					xp2 = (xp2 / len);
@@ -1488,7 +1491,7 @@ namespace FPS_n2 {
 					if (rad_2 > DegDiv - 1) {
 						rad_2 -= DegDiv;
 					}
-					DegPers.at(rad_2).first += GetRandf(c->GetSoundPower() * 0.1f / length) * (float)(5 - std::abs(loop)) / 5.f;
+					DegPers.at(rad_2).first += GetRandf(c->GetSoundPower() * 0.1f / length) * static_cast<float>(5 - std::abs(loop)) / 5.f;
 					DegPers.at(rad_2).second++;
 				}
 			}
@@ -1501,7 +1504,7 @@ namespace FPS_n2 {
 				}
 			}
 			//
-			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 128);
+			WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 128);
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 				if (index == 0) { continue; }
@@ -1509,8 +1512,8 @@ namespace FPS_n2 {
 				if (c->CanLookTarget) {
 					float length = std::max(1.f, 0.5f / std::max((MyPos - c->GetMove().GetPos()).magnitude() / (100.f*Scale_Rate), 0.1f));
 
-					float xp2 = (float)(xp1 + (int)(c->GetMove().GetPos().x));
-					float yp2 = (float)(yp1 - (int)(c->GetMove().GetPos().z));
+					float xp2 = static_cast<float>(xp1 + static_cast<int>(c->GetMove().GetPos().x));
+					float yp2 = static_cast<float>(yp1 - static_cast<int>(c->GetMove().GetPos().z));
 					float xp3 = (xp2 * std::cos(rad) - yp2 * std::sin(rad));
 					float yp3 = (yp2 * std::cos(rad) + xp2 * std::sin(rad));
 					int rad_3 = (((int)rad2deg(std::atan2f(yp3, xp3)) + 360) % 360);
@@ -1519,38 +1522,39 @@ namespace FPS_n2 {
 					int rad_4 = rad_3 + 10;
 
 					float Len = DrawParts->GetUIY(180) - (float)DrawParts->GetUIY(10) *length;
-					//(int)(std::max(1.f, 3.f / length))
+					//static_cast<int>(std::max(1.f, 3.f / length))
 					DrawTriangle(
-						xp + (int)(cos(deg2rad(rad_2))*(Len)),
-						yp + (int)(sin(deg2rad(rad_2))*(Len)),
-						xp + (int)(cos(deg2rad(rad_3))*(DrawParts->GetUIY(180))),
-						yp + (int)(sin(deg2rad(rad_3))*(DrawParts->GetUIY(180))),
-						xp + (int)(cos(deg2rad(rad_3))*(Len)),
-						yp + (int)(sin(deg2rad(rad_3))*(Len)),
-						GetColor(255, std::clamp(255 - (int)(25.f*length), 0, 255), 0), TRUE);
+						xp + static_cast<int>(cos(deg2rad(rad_2))*(Len)),
+						yp + static_cast<int>(sin(deg2rad(rad_2))*(Len)),
+						xp + static_cast<int>(cos(deg2rad(rad_3))*(DrawParts->GetUIY(180))),
+						yp + static_cast<int>(sin(deg2rad(rad_3))*(DrawParts->GetUIY(180))),
+						xp + static_cast<int>(cos(deg2rad(rad_3))*(Len)),
+						yp + static_cast<int>(sin(deg2rad(rad_3))*(Len)),
+						GetColor(255, std::clamp(255 - static_cast<int>(25.f*length), 0, 255), 0), TRUE);
 					DrawTriangle(
-						xp + (int)(cos(deg2rad(rad_3))*(Len)),
-						yp + (int)(sin(deg2rad(rad_3))*(Len)),
-						xp + (int)(cos(deg2rad(rad_3))*(DrawParts->GetUIY(180))),
-						yp + (int)(sin(deg2rad(rad_3))*(DrawParts->GetUIY(180))),
-						xp + (int)(cos(deg2rad(rad_4))*(Len)),
-						yp + (int)(sin(deg2rad(rad_4))*(Len)),
-						GetColor(255, std::clamp(255 - (int)(25.f*length), 0, 255), 0), TRUE);
+						xp + static_cast<int>(cos(deg2rad(rad_3))*(Len)),
+						yp + static_cast<int>(sin(deg2rad(rad_3))*(Len)),
+						xp + static_cast<int>(cos(deg2rad(rad_3))*(DrawParts->GetUIY(180))),
+						yp + static_cast<int>(sin(deg2rad(rad_3))*(DrawParts->GetUIY(180))),
+						xp + static_cast<int>(cos(deg2rad(rad_4))*(Len)),
+						yp + static_cast<int>(sin(deg2rad(rad_4))*(Len)),
+						GetColor(255, std::clamp(255 - static_cast<int>(25.f*length), 0, 255), 0), TRUE);
 				}
 			}
 			for (int index = 0; index < DegDiv; index++) {
 				int next = (index + 1) % DegDiv;
 				DrawLine_2D(
-					xp + DrawParts->GetUIY((int)(cos(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f))),
-					yp + DrawParts->GetUIY((int)(sin(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f))),
-					xp + DrawParts->GetUIY((int)(cos(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f))),
-					yp + DrawParts->GetUIY((int)(sin(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f))),
+					xp + DrawParts->GetUIY(static_cast<int>(cos(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f))),
+					yp + DrawParts->GetUIY(static_cast<int>(sin(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f))),
+					xp + DrawParts->GetUIY(static_cast<int>(cos(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f))),
+					yp + DrawParts->GetUIY(static_cast<int>(sin(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f))),
 					White,
 					3);
 			}
-			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+			WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 		}
-		void			MAINLOOP::DrawHitGraph(void) noexcept {
+		void			MAINLOOP::DrawHitGraph(void) const noexcept {
+			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			int loop = 0;
@@ -1559,32 +1563,32 @@ namespace FPS_n2 {
 				if (ammo != nullptr) {
 					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
 					if (a->m_IsDrawHitUI && a->GetShootedID() == 0) {
-						int			Alpha = (int)(a->m_Hit_alpha * 255.f);
+						int			Alpha = static_cast<int>(a->m_Hit_alpha * 255.f);
 						Vector3DX	DispPos = a->m_Hit_DispPos;
 						if ((Alpha >= 10) && (DispPos.z >= 0.f && DispPos.z <= 1.f)) {
 							DispPos = DispPos *((float)DrawParts->GetUIY(1080) / (float)DrawParts->GetScreenY(1080));
-							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, Alpha);
+							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, Alpha);
 							//
-							int r = (int)(255 * std::clamp((float)a->m_Damage / 100.f*2.f, 0.f, 1.f));
+							int r = static_cast<int>(255 * std::clamp((float)a->m_Damage / 100.f*2.f, 0.f, 1.f));
 							int g = 255 - r;
 							if (a->m_Damage > 0) {
-								WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, r, g, 0);
-								WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &hit_Graph, (int)DispPos.x, (int)DispPos.y, (float)DrawParts->GetUIY((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
+								WindowParts->SetBright(WindowSystem::DrawLayer::Normal, r, g, 0);
+								WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &hit_Graph, (int)DispPos.x, (int)DispPos.y, (float)DrawParts->GetUIY(static_cast<int>((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
 							}
 							if (a->m_ArmerDamage > 0) {
-								WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 128, 128, 128);
-								WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &guard_Graph, (int)DispPos.x, (int)DispPos.y, (float)DrawParts->GetUIY((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
+								WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 128, 128, 128);
+								WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &guard_Graph, (int)DispPos.x, (int)DispPos.y, (float)DrawParts->GetUIY(static_cast<int>((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
 							}
-							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 							//
 							if (a->m_Damage > 0) {
-								WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+								WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 									DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 									(int)DispPos.x + a->m_Hit_AddX, (int)DispPos.y + a->m_Hit_AddY, GetColor(r, g, 0), Black, "%d", a->m_Damage);
 							}
 							//防いだダメージ
 							if (a->m_ArmerDamage > 0) {
-								WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+								WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 									DrawParts->GetUIY(20), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
 									(int)DispPos.x + a->m_Hit_AddX - DrawParts->GetUIY(10), (int)DispPos.y + a->m_Hit_AddY, Gray50, Black, "%d", a->m_ArmerDamage);
 							}
@@ -1596,15 +1600,16 @@ namespace FPS_n2 {
 				}
 				loop++;
 			}
-			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+			WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 		}
 		void			MAINLOOP::DrawResult(void) noexcept {
+			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 #if FALSE
-			WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &movie, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), FALSE);
+			WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &movie, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), FALSE);
 #else
-			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Gray75, TRUE);
+			WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Gray75, TRUE);
 #endif
 			auto DrawScore = [&](int xp, int yp, bool isFront) {
 				unsigned int Color = isFront ? White : Gray50;
@@ -1612,45 +1617,45 @@ namespace FPS_n2 {
 					int sel = 0;
 					auto& r = m_ResultFlip[sel];
 					if (r.m_Flip > 0.f) {
-						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*r.m_Flip), 0, 255));
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*r.m_Flip), 0, 255));
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
-																				  xp + DrawParts->GetUIY((int)(8.f * sel)), yp + DrawParts->GetUIY((int)(64.f * sel - r.m_Flip * 128.f)), Color, Black, "Hits : ");
+																				  xp + DrawParts->GetUIY(static_cast<int>(8.f * sel)), yp + DrawParts->GetUIY(static_cast<int>(64.f * sel - r.m_Flip * 128.f)), Color, Black, "Hits : ");
 
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
-							DrawParts->GetUIY((int)(48.f + 4.f* r.m_Up)), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
-																				  xp + DrawParts->GetUIY((int)(112 + 8.f * sel)), yp + DrawParts->GetUIY((int)(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f)), Color, Black, "%5.2f %%", r.m_Point / 100.f);
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+							DrawParts->GetUIY(static_cast<int>(48.f + 4.f* r.m_Up)), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
+																				  xp + DrawParts->GetUIY(static_cast<int>(112 + 8.f * sel)), yp + DrawParts->GetUIY(static_cast<int>(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f)), Color, Black, "%5.2f %%", r.m_Point / 100.f);
 					}
 				}
 				{
 					int sel = 1;
 					auto& r = m_ResultFlip[sel];
 					if (r.m_Flip > 0.f) {
-						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*r.m_Flip), 0, 255));
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*r.m_Flip), 0, 255));
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
-																				  xp + DrawParts->GetUIY((int)(8.f * sel)), yp + DrawParts->GetUIY((int)(64.f * sel - r.m_Flip * 128.f)), Color, Black, "Kill : ");
+																				  xp + DrawParts->GetUIY(static_cast<int>(8.f * sel)), yp + DrawParts->GetUIY(static_cast<int>(64.f * sel - r.m_Flip * 128.f)), Color, Black, "Kill : ");
 
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
-							DrawParts->GetUIY((int)(48.f + 4.f* r.m_Up)), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
-																				  xp + DrawParts->GetUIY((int)(112 + 8.f * sel)), yp + DrawParts->GetUIY((int)(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f)), Color, Black, "%4d", (int)r.m_Point);
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+							DrawParts->GetUIY(static_cast<int>(48.f + 4.f* r.m_Up)), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
+																				  xp + DrawParts->GetUIY(static_cast<int>(112 + 8.f * sel)), yp + DrawParts->GetUIY(static_cast<int>(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f)), Color, Black, "%4d", (int)r.m_Point);
 					}
 				}
 				{
 					int sel = 2;
 					auto& r = m_ResultFlip[sel];
 					if (r.m_Flip > 0.f) {
-						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*r.m_Flip), 0, 255));
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*r.m_Flip), 0, 255));
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
-																				  xp + DrawParts->GetUIY((int)(8.f * sel)), yp + DrawParts->GetUIY((int)(64.f * sel - r.m_Flip * 128.f)), Color, Black, "Score : ");
+																				  xp + DrawParts->GetUIY(static_cast<int>(8.f * sel)), yp + DrawParts->GetUIY(static_cast<int>(64.f * sel - r.m_Flip * 128.f)), Color, Black, "Score : ");
 
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
-							DrawParts->GetUIY((int)(48.f + 4.f* r.m_Up)), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
-																				  xp + DrawParts->GetUIY((int)(112 + 8.f * sel)), yp + DrawParts->GetUIY((int)(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f)), Color, Black, "%4d pts", (int)r.m_Point);
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+							DrawParts->GetUIY(static_cast<int>(48.f + 4.f* r.m_Up)), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM,
+																				  xp + DrawParts->GetUIY(static_cast<int>(112 + 8.f * sel)), yp + DrawParts->GetUIY(static_cast<int>(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f)), Color, Black, "%4d pts", (int)r.m_Point);
 					}
 				}
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			};
 
 			DrawScore(DrawParts->GetUIY(400 + 8), DrawParts->GetUIY(512 + 8), false);
@@ -1659,7 +1664,7 @@ namespace FPS_n2 {
 			int xp1, yp1;
 			{
 				int size = 20;
-				xp1 = DrawParts->GetUIY((int)(1440.f + 1920.f * m_ResultRankingPer));
+				xp1 = DrawParts->GetUIY(static_cast<int>(1440.f + 1920.f * m_ResultRankingPer));
 				yp1 = DrawParts->GetUIY(540) - DrawParts->GetUIY(36) * (size / 2);
 
 				unsigned int Color = White;
@@ -1674,7 +1679,7 @@ namespace FPS_n2 {
 						}
 					}
 
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						DrawParts->GetUIY(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1 - DrawParts->GetUIY(300), yp1, Color, Black, "%02d", i + 1);
 					if (i < m_Ranking.size()) {
 						auto& Now = m_Ranking.at(i);
@@ -1682,24 +1687,24 @@ namespace FPS_n2 {
 						std::time_t t = Now.second;
 						std::tm now;
 						_localtime64_s(&now, &t);
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%04d/%02d/%02d %02d:%02d : ", 1900 + now.tm_year, 1 + now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min);
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%4d pts", Now.first);
 					}
 					else {
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "----/--/-- --:-- : ");
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "---- pts");
 					}
 					if (i == m_ResultRank && m_ResultRank == 0) {
 						if (m_ResultRankingPer < 1.f) {
-							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*(1.f - m_ResultRankingPer)*2.f), 0, 255));
-							WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*(1.f - m_ResultRankingPer)*2.f), 0, 255));
+							WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 								DrawParts->GetUIY(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
 																				   DrawParts->GetUIY(1440) - DrawParts->GetUIY(340), yp1, Color, Black, "HIGH SCORE!");
-							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						}
 					}
 					yp1 += DrawParts->GetUIY(36);
@@ -1715,16 +1720,16 @@ namespace FPS_n2 {
 						std::time_t t = m_StartTime;
 						std::tm now;
 						_localtime64_s(&now, &t);
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%04d/%02d/%02d %02d:%02d : ", 1900 + now.tm_year, 1 + now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min);
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%4d pts", PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
 					}
 					else {
 						Color = White;
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "----/--/-- --:-- : ");
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "---- pts");
 					}
 				}
@@ -1733,18 +1738,19 @@ namespace FPS_n2 {
 			ButtonSel.Draw();
 
 			float per = (1.f - (16.f / 9.f) / 2.35f) / 2.f;
-			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), (int)(DrawParts->GetUIY(1080) * per), Black, TRUE);
-			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, DrawParts->GetUIY(1080) - (int)(DrawParts->GetUIY(1080) * per), DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
+			WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), static_cast<int>(DrawParts->GetUIY(1080) * per), Black, TRUE);
+			WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, DrawParts->GetUIY(1080) - static_cast<int>(DrawParts->GetUIY(1080) * per), DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
 			if (m_EndTimer > 0) {
 				DrawBlackOut((1.f - m_EndTimer) * 2.f);
 			}
 		}
 		void			MAINLOOP::DrawBlackOut(float per) noexcept {
+			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			if (per > 0.f) {
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*per), 0, 255));
-				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*per), 0, 255));
+				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
+				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
 		}
 	};

@@ -39,7 +39,7 @@ namespace FPS_n2 {
 			const auto		GetNowServerPlayerData(int ID, bool isYradReset) noexcept { return (this->m_IsClient) ? this->m_ClientCtrl.GetNowServerPlayerData(ID, isYradReset) : this->m_ServerCtrl.GetNowServerPlayerData(ID, isYradReset); }
 			void			GetRecvData(int ID, double ServerFrame) noexcept {
 				if ((this->m_IsClient) ? this->m_ClientCtrl.GetRecvData(ID) : this->m_ServerCtrl.GetRecvData(ID)) {
-					this->m_Ping = (float)(this->m_ClientFrame - ServerFrame)*1000.f;
+					this->m_Ping = static_cast<float>(this->m_ClientFrame - ServerFrame)*1000.f;
 				}
 				printfDx("ping %lf \n", this->m_Ping);
 			}

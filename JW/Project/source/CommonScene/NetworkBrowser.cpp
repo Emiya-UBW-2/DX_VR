@@ -7,6 +7,7 @@ namespace FPS_n2 {
 		void NetWorkBrowser::Draw(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* Pad = PadControl::Instance();
+			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			unsigned int color = Red;
 
 			int xp, yp, xs, ys;
@@ -24,8 +25,8 @@ namespace FPS_n2 {
 					yp2 = yp1 + y_h;
 					bool into = IntoMouse(xp1, yp1, xp2, yp2);
 					color = (into) ? Black : Gray75;
-					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, color, TRUE);
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, color, TRUE);
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						y_h, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1 + (xp2 - xp1) / 2, yp1, White, Black, "+");
 					if (into) {
 						if (Pad->GetMouseClick().repeat()) {
@@ -38,8 +39,8 @@ namespace FPS_n2 {
 					yp2 += DrawParts->GetUIY(50);
 					bool into = IntoMouse(xp1, yp1, xp2, yp2);
 					color = (into) ? Black : Gray75;
-					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, color, TRUE);
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, color, TRUE);
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						y_h, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1 + (xp2 - xp1) / 2, yp1, White, Black, "-");
 					if (into) {
 						if (Pad->GetMouseClick().repeat()) {
@@ -50,27 +51,27 @@ namespace FPS_n2 {
 			};
 			//
 			{
-				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, xp - DrawParts->GetUIY(10), yp - DrawParts->GetUIY(10), xp + xs + DrawParts->GetUIY(10), yp + ys + DrawParts->GetUIY(10), Gray25, TRUE);//背景
-				WindowSystem::SetMsgBox(xp, yp, xp + xs, yp + y_h, y_h, Black, " %d/%d", (int)this->m_Sequence, (int)SequenceEnum::MainGame);
+				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, xp - DrawParts->GetUIY(10), yp - DrawParts->GetUIY(10), xp + xs + DrawParts->GetUIY(10), yp + ys + DrawParts->GetUIY(10), Gray25, TRUE);//背景
+				WindowSystem::SetMsgBox(xp, yp, xp + xs, yp + y_h, y_h, Black, " %d/%d", static_cast<int>(this->m_Sequence), static_cast<int>(SequenceEnum::MainGame));
 				//ログ
 				{
 					int xp1, yp1;
 					xp1 = xp;
 					yp1 = yp + ys + DrawParts->GetUIY(10) + DrawParts->GetUIY(10);
 					if (this->m_Sequence > SequenceEnum::SelMode) {
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "種別[%s]", this->m_IsClient ? "クライアント" : "サーバー"); yp1 += y_h;
 					}
 					if (this->m_Sequence > SequenceEnum::Set_Port) {
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "使用ポート[%d-%d]", this->m_NewSetting.UsePort, this->m_NewSetting.UsePort + Player_num - 1); yp1 += y_h;
 					}
 					if (this->m_Sequence > SequenceEnum::SetTick) {
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "ティックレート[%4.1f]", Frame_Rate / this->m_Tick); yp1 += y_h;
 					}
 					if (this->m_Sequence > SequenceEnum::SetIP) {
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "IP=[%d,%d,%d,%d]", this->m_NewSetting.IP.d1, this->m_NewSetting.IP.d2, this->m_NewSetting.IP.d3, this->m_NewSetting.IP.d4); yp1 += y_h;
 					}
 				}
@@ -155,10 +156,10 @@ namespace FPS_n2 {
 						bool isActive = (this->m_IsClient) ? this->m_ClientCtrl.GetServerDataCommon().PlayerData[i].IsActive : this->m_ServerCtrl.GetServerData().PlayerData[i].IsActive;
 						int yp1 = yp + DrawParts->GetUIY(50) + DrawParts->GetUIY(35)*(i + 1);
 						color = isActive ? Black : Gray75;
-						WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, DrawParts->GetUIY(200), yp1, DrawParts->GetUIY(200) + DrawParts->GetUIY(300), yp1 + y_h, color, TRUE);
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, DrawParts->GetUIY(200), yp1, DrawParts->GetUIY(200) + DrawParts->GetUIY(300), yp1 + y_h, color, TRUE);
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, DrawParts->GetUIY(200), yp1, White, Black, "Player");
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, DrawParts->GetUIY(200) + DrawParts->GetUIY(300), yp1, White, Black, (isActive ? "〇" : ""));
 					}
 					break;

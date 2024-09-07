@@ -66,18 +66,18 @@ namespace FPS_n2 {
 			void		DrawMuzzleSmoke() noexcept {
 				SetUseLighting(FALSE);
 				SetUseHalfLambertLighting(FALSE);
-				int max = (int)(this->m_Line.size());
-				int min = 1 + (int)((1.f - m_LinePer) * (float)max);
+				int max = static_cast<int>(this->m_Line.size());
+				int min = 1 + static_cast<int>((1.f - m_LinePer) * (float)max);
 				for (int i = max - 1; i >= min; i--) {
 					int LS = (i + this->m_LineSel);
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*((float)(i - min) / max)));
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255.f*(static_cast<float>(i - min) / max)));
 					auto p1 = (LS - 1) % max;
 					auto p2 = LS % max;
 					if (CheckCameraViewClip_Box(
 						this->m_Line[p1].get(),
 						this->m_Line[p2].get()) == FALSE
 						) {
-						DrawCapsule3D(this->m_Line[p1].get(), this->m_Line[p2].get(), (0.00762f)*Scale_Rate*1.f*((float)(i - min) / max), 3,
+						DrawCapsule3D(this->m_Line[p1].get(), this->m_Line[p2].get(), (0.00762f)*Scale_Rate*1.f*(static_cast<float>(i - min) / max), 3,
 									  GetColor(216, 216, 216),
 									  GetColor(96, 96, 64),
 									  TRUE);

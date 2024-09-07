@@ -285,7 +285,7 @@ namespace FPS_n2 {
 
 					m_TutorialVoice = SoundHandle::Load(Mes);
 					m_TutorialVoice.play(DX_PLAYTYPE_BACK, TRUE);
-					m_TutorialVoice.vol((int)(255 * OptionParts->GetParamFloat(EnumSaveParam::SE)));
+					m_TutorialVoice.vol(static_cast<int>(255 * OptionParts->GetParamFloat(EnumSaveParam::SE)));
 
 					m_TutorialNow++;
 				}
@@ -545,17 +545,17 @@ namespace FPS_n2 {
 			//UIパラメーター
 			{
 				//シェイク
-				this->m_UIclass.SetIntParam(0, (int)(CameraShake::Instance()->GetCamShake().x*100.f));
-				this->m_UIclass.SetIntParam(1, (int)(CameraShake::Instance()->GetCamShake().y*100.f));
-				this->m_UIclass.SetIntParam(2, (int)(rad2deg(Chara->GetLeanRad()*5.f)));
+				this->m_UIclass.SetIntParam(0, static_cast<int>(CameraShake::Instance()->GetCamShake().x*100.f));
+				this->m_UIclass.SetIntParam(1, static_cast<int>(CameraShake::Instance()->GetCamShake().y*100.f));
+				this->m_UIclass.SetIntParam(2, static_cast<int>(rad2deg(Chara->GetLeanRad()*5.f)));
 				//AmmoStock
 				this->m_UIclass.SetIntParam(3, Chara->GetAmmoStock());
 				//Time
 				this->m_UIclass.SetfloatParam(0, 0);
 				this->m_UIclass.SetfloatParam(1, 0);
 				//
-				this->m_UIclass.SetGaugeParam(5 + 3, (int)(Chara->GetAutoAimPer()*20.f), 20);
-				this->m_UIclass.SetGaugeParam(5 + 3 + 1, (int)(Chara->GetAutoAimPer()*20.f), 20);
+				this->m_UIclass.SetGaugeParam(5 + 3, static_cast<int>(Chara->GetAutoAimPer()*20.f), 20);
+				this->m_UIclass.SetGaugeParam(5 + 3 + 1, static_cast<int>(Chara->GetAutoAimPer()*20.f), 20);
 				this->m_UIclass.SetIntParam(4, Chara->GetAutoAimID());
 				this->m_UIclass.SetfloatParam(2, Chara->GetAutoAimOn());
 				//Score
@@ -681,9 +681,10 @@ namespace FPS_n2 {
 				if (Chara->GetGunPtrNow()) {
 					if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&
 						!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
-						WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph(),
-							(int)(Chara->GetGunPtrNow()->GetReticleXPos()*DrawParts->GetUIY(1980) / DrawParts->GetScreenY(1980)),
-							(int)(Chara->GetGunPtrNow()->GetReticleYPos()*DrawParts->GetUIY(1080) / DrawParts->GetScreenY(1080)),
+						auto* WindowParts = WindowSystem::DrawControl::Instance();
+						WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph(),
+							static_cast<int>(Chara->GetGunPtrNow()->GetReticleXPos()*DrawParts->GetUIY(1980) / DrawParts->GetScreenY(1980)),
+							static_cast<int>(Chara->GetGunPtrNow()->GetReticleYPos()*DrawParts->GetUIY(1080) / DrawParts->GetScreenY(1080)),
 							1.f, Chara->GetLeanRad(), true);
 					}
 				}
@@ -694,6 +695,7 @@ namespace FPS_n2 {
 				//チュートリアル
 				{
 					auto* Pad = PadControl::Instance();
+					auto* WindowParts = WindowSystem::DrawControl::Instance();
 
 					this->m_TutorialLog.Draw();
 
@@ -705,7 +707,7 @@ namespace FPS_n2 {
 						for (auto& p : m_Tutorial.at(sel).m_PADS) {
 							std::string Assign = Pad->GetKeyStr(p);
 							if (Assign == "NONE") { continue; }
-							WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+							WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 								DrawParts->GetUIY(18),
 																				  FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																				  xp, yp, Green, Black, "[%s]", Assign.c_str());
@@ -722,6 +724,7 @@ namespace FPS_n2 {
 			}
 		}
 		void			TutorialScene::DrawUI_In_Sub(void) noexcept {
+			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			auto* Pad = PadControl::Instance();
 			//ポーズ
@@ -744,21 +747,21 @@ namespace FPS_n2 {
 					int yp2 = yp + ys * 2;
 					float AlphaPer = std::clamp(tgtTimer, 0.f, 1.f);
 					if (AlphaPer > 0.01f) {
-						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, (int)(255.f*AlphaPer));
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f*AlphaPer));
 						//背景
 						if (tgtSel < 5) {
-							WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &ScoreBoard, xp, yp, xp2, yp2, true);
+							WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &ScoreBoard, xp, yp, xp2, yp2, true);
 						}
 						else {
-							WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &ScoreBoard2, xp, yp, xp2, yp2, true);
+							WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &ScoreBoard2, xp, yp, xp2, yp2, true);
 						}
 						//命中箇所
 						for (auto& r : t->GetHitPosRec()) {
 							float cos_t, sin_t;
 							t->GetHitPoint(r, &cos_t, &sin_t);
-							DrawCircle(xp + xs + (int)((float)xs * cos_t), yp + ys + (int)((float)ys * sin_t), 2, Green);
+							DrawCircle(xp + xs + static_cast<int>((float)xs * cos_t), yp + ys + static_cast<int>((float)ys * sin_t), 2, Green);
 						}
-						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
 				}
 			}
@@ -766,14 +769,14 @@ namespace FPS_n2 {
 			if (m_IsFirstGame) {
 				if (!DXDraw::Instance()->IsPause()) {
 					//
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						DrawParts->GetUIY(18),
 																		  FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP,
 																		  DrawParts->GetUIY(960), DrawParts->GetUIY(870), Red, Black, "%s:%s", LocalizePool::Instance()->Get(300), Pad->GetKeyStr(PADS::INTERACT).c_str());
 
-					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*m_FirstFade), 0, 255));
-					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
-					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*m_FirstFade), 0, 255));
+					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
+					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
 			}
 		}

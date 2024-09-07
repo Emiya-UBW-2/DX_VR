@@ -82,10 +82,10 @@ namespace FPS_n2 {
 				while (true) {
 					m_NewWorkSetting.resize(this->m_NewWorkSetting.size() + 1);
 					m_NewWorkSetting.back().UsePort = std::clamp<int>(getparams::_int(mdata), 0, 50000);
-					m_NewWorkSetting.back().IP.d1 = (unsigned char)std::clamp((int)getparams::_int(mdata), 0, 255);
-					m_NewWorkSetting.back().IP.d2 = (unsigned char)std::clamp((int)getparams::_int(mdata), 0, 255);
-					m_NewWorkSetting.back().IP.d3 = (unsigned char)std::clamp((int)getparams::_int(mdata), 0, 255);
-					m_NewWorkSetting.back().IP.d4 = (unsigned char)std::clamp((int)getparams::_int(mdata), 0, 255);
+					m_NewWorkSetting.back().IP.d1 = (unsigned char)std::clamp(static_cast<int>(getparams::_int(mdata)), 0, 255);
+					m_NewWorkSetting.back().IP.d2 = (unsigned char)std::clamp(static_cast<int>(getparams::_int(mdata)), 0, 255);
+					m_NewWorkSetting.back().IP.d3 = (unsigned char)std::clamp(static_cast<int>(getparams::_int(mdata)), 0, 255);
+					m_NewWorkSetting.back().IP.d4 = (unsigned char)std::clamp(static_cast<int>(getparams::_int(mdata)), 0, 255);
 					if (FileRead_eof(mdata) != 0) {
 						break;
 					}
@@ -96,7 +96,7 @@ namespace FPS_n2 {
 			void Save(void) noexcept {
 				std::ofstream outputfile("data/NetWorkSetting.txt");
 				for (auto& n : this->m_NewWorkSetting) {
-					int ID = (int)(&n - &this->m_NewWorkSetting.front());
+					int ID = static_cast<int>(&n - &this->m_NewWorkSetting.front());
 					outputfile << "Setting" + std::to_string(ID) + "_Port=" + std::to_string(n.UsePort) + "\n";
 					outputfile << "Setting" + std::to_string(ID) + "_IP1=" + std::to_string(n.IP.d1) + "\n";
 					outputfile << "Setting" + std::to_string(ID) + "_IP2=" + std::to_string(n.IP.d2) + "\n";
@@ -106,7 +106,7 @@ namespace FPS_n2 {
 				outputfile.close();
 			}
 
-			const auto		GetSize(void) const noexcept { return (int)m_NewWorkSetting.size(); }
+			const auto		GetSize(void) const noexcept { return static_cast<int>(m_NewWorkSetting.size()); }
 			const auto&		Get(int ID) const noexcept { return this->m_NewWorkSetting[ID]; }
 			const auto		Add(void) noexcept {
 				m_NewWorkSetting.resize(this->m_NewWorkSetting.size() + 1);
@@ -115,7 +115,7 @@ namespace FPS_n2 {
 				m_NewWorkSetting.back().IP.d2 = 0;
 				m_NewWorkSetting.back().IP.d3 = 0;
 				m_NewWorkSetting.back().IP.d4 = 1;
-				return (int)m_NewWorkSetting.size() - 1;;
+				return static_cast<int>(m_NewWorkSetting.size()) - 1;
 			}
 			void Set(int ID, const NewSetting& per)noexcept { this->m_NewWorkSetting[ID] = per; }
 		};
@@ -133,14 +133,14 @@ namespace FPS_n2 {
 		private:
 			const auto			CalcCheckSum(void) const noexcept {
 				return (
-					((int)(this->m_move.GetPos().x * 100.f) + (int)(this->m_move.GetPos().y * 100.f) + (int)(this->m_move.GetPos().z * 100.f)) +
-					((int)(this->m_move.GetVec().x*100.f) + (int)(this->m_move.GetVec().y*100.f) + (int)(this->m_move.GetVec().z*100.f)) +
-					(int)(ID)
+					(static_cast<int>(this->m_move.GetPos().x * 100.f) + static_cast<int>(this->m_move.GetPos().y * 100.f) + static_cast<int>(this->m_move.GetPos().z * 100.f)) +
+					(static_cast<int>(this->m_move.GetVec().x*100.f) + static_cast<int>(this->m_move.GetVec().y*100.f) + static_cast<int>(this->m_move.GetVec().z*100.f)) +
+					static_cast<int>(ID)
 					);
 			}
 		public:
 			const auto			GetIsActive(void) noexcept { return this->CalcCheckSum() != 0; }
-			const auto			IsCheckSum(void) noexcept { return CheckSum == (size_t)this->CalcCheckSum(); }
+			const auto			IsCheckSum(void) noexcept { return CheckSum == static_cast<size_t>(this->CalcCheckSum()); }
 
 			const auto&			GetID(void) const noexcept { return this->ID; }
 			const auto&			GetFrame(void) const noexcept { return this->Frame; }
@@ -150,7 +150,7 @@ namespace FPS_n2 {
 				this->m_move = move_t;
 				this->m_DamageEvents = Damage_t;
 				this->Frame = pFrame;
-				this->CheckSum = (size_t)this->CalcCheckSum();
+				this->CheckSum = static_cast<size_t>(this->CalcCheckSum());
 			}
 		public:
 			static const auto	GetLerpData(const PlayerNetData&PrevData, const PlayerNetData& ServerData, float Per, bool isYradReset) {
@@ -192,7 +192,7 @@ namespace FPS_n2 {
 			}
 
 			const auto		GetNowServerPlayerData(int pPlayerID, bool isyradReset) noexcept {
-				auto Total = (int)this->m_ServerDataCommon.ServerFrame - (int)this->m_PrevServerData.ServerFrame;
+				auto Total = static_cast<int>(this->m_ServerDataCommon.ServerFrame) - static_cast<int>(this->m_PrevServerData.ServerFrame);
 				if (Total <= 0) { Total = 20; }
 				PlayerNetData tmp;
 				tmp = PlayerNetData::GetLerpData(
@@ -288,7 +288,7 @@ namespace FPS_n2 {
 							}
 							break;
 						case 1:
-							this->m_ServerData.Tmp1 = (int)index;
+							this->m_ServerData.Tmp1 = static_cast<int>(index);
 							this->m_ServerData.StartFlag = 0;
 							this->m_ServerData.PlayerData[index].IsActive = true;
 

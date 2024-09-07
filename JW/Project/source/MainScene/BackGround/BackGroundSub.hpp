@@ -25,11 +25,11 @@ namespace FPS_n2 {
 					int Dir = GetRand(3) % 4;
 					ok |= (1 << Dir);
 					float rad = deg2rad(Dir * 90);
-					int next_x = x + (int)(sin(rad)*2.f);//0 2 0 -2
-					int next_y = y + (int)(cos(rad)*2.f);//2 0 -2 0
+					int next_x = x + static_cast<int>(sin(rad)*2.f);//0 2 0 -2
+					int next_y = y + static_cast<int>(cos(rad)*2.f);//2 0 -2 0
 					if ((0 <= next_x && next_x < m_Width) && (0 <= next_y && next_y < m_Height)) {
 						if (m_Maze[next_x][next_y] == MAZETYPE::WALL) {
-							m_Maze[(size_t)((next_x + x) / 2)][(size_t)((next_y + y) / 2)] = MAZETYPE::PATH;
+							m_Maze[static_cast<size_t>((next_x + x) / 2)][static_cast<size_t>((next_y + y) / 2)] = MAZETYPE::PATH;
 							//その場から次の穴掘り
 							dig(next_x, next_y);
 						}
@@ -337,7 +337,7 @@ namespace FPS_n2 {
 									per = 0.5f*std::clamp(1.f - (Len - Max) / 30.f, 0.f, 1.f);
 								}
 								if (per > 1.f / 255.f) {
-									SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
+									SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp(static_cast<int>(255.f*per), 0, 255));
 									DrawBillboard3D(b.m_Pos.get(), 0.5f, 1.f, 2.2f*Scale_Rate, rad + b.m_SlingZrad.GetRad(), Light_Graph.get(), TRUE);
 								}
 							}
@@ -381,8 +381,8 @@ namespace FPS_n2 {
 				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) == 0) {
 					return;
 				}
-				int x = (int)(CamPos.x / 100.f*2.f);
-				int z = (int)(CamPos.z / 100.f*2.f);
+				int x = static_cast<int>(CamPos.x / 100.f*2.f);
+				int z = static_cast<int>(CamPos.z / 100.f*2.f);
 				{
 					int abx = abs(x);
 					if (abx > 0) {
@@ -405,13 +405,13 @@ namespace FPS_n2 {
 				}
 				for (auto& o : m_Obj) {
 					if (xprev != x || zprev != z) {
-						int index = (int)(&o - &m_Obj.front());
+						int index = static_cast<int>(&o - &m_Obj.front());
 						int xp = (x + (index % Blocks) - 2);
 						int zp = (z + (index / Blocks) - 2);
 						//前のフレームでの同じ場所を参照
 						o.IsChanged = true;
 						for (auto& o2 : m_Obj) {
-							int index2 = (int)(&o2 - &m_Obj.front());
+							int index2 = static_cast<int>(&o2 - &m_Obj.front());
 							int xp2 = (xprev + (index2 % Blocks) - 2);
 							int zp2 = (zprev + (index2 / Blocks) - 2);
 							if (xp == xp2 && zp == zp2) {
@@ -424,7 +424,7 @@ namespace FPS_n2 {
 							o.IsChanged = false;
 							o.m_Rad = deg2rad(GetRandf(180.f));
 						}
-						o.m_Pos = Vector3DX::vget((float)(xp * 100), 0.f, (float)(zp * 100));
+						o.m_Pos = Vector3DX::vget(static_cast<float>(xp * 100), 0.f, static_cast<float>(zp * 100));
 					}
 				}
 				for (auto& o : m_Obj) {
@@ -562,7 +562,7 @@ namespace FPS_n2 {
 					(bu.GetMaxPos().x > NowPosition.x && NowPosition.x > bu.GetMinPos().x) &&
 					(bu.GetMaxPos().z > NowPosition.z && NowPosition.z > bu.GetMinPos().z)
 					) {
-					return (int)(&bu - &this->GetBuildDatas().front());
+					return static_cast<int>(&bu - &this->GetBuildDatas().front());
 				}
 			}
 			return -1;

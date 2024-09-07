@@ -106,7 +106,7 @@ namespace FPS_n2 {
 					for (auto& y : ButtonSel) {
 						if (y.GetInto()) {
 							m_MouseSelMode = true;
-							select = (int)(&y - &ButtonSel.front());
+							select = static_cast<int>(&y - &ButtonSel.front());
 						}
 					}
 					if ((select != -1) && (m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetKey(PADS::INTERACT).trigger())) {

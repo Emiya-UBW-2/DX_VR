@@ -145,7 +145,7 @@ namespace FPS_n2 {
 			void			UpdateMiniMap(void) noexcept;
 		private:
 			void			DrawSoundGraph(void) noexcept;
-			void			DrawHitGraph(void) noexcept;
+			void			DrawHitGraph(void) const noexcept;
 
 			void			DrawResult(void) noexcept;
 			void			DrawBlackOut(float per) noexcept;
