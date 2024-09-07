@@ -455,11 +455,11 @@ namespace FPS_n2 {
 																FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																DrawParts->GetUIY(64), DrawParts->GetUIY(64), White, Black, "Customize");
 			//
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(ButtonAlpha[(int)LookSelect::ModSet], 0.f, 1.f)), 0, 255));
+			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*std::clamp(ButtonAlpha[(int)LookSelect::ModSet], 0.f, 1.f)), 0, 255));
 			DrawCustomUI();
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(ButtonAlpha[(int)LookSelect::ULTSet], 0.f, 1.f)), 0, 255));
+			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*std::clamp(ButtonAlpha[(int)LookSelect::ULTSet], 0.f, 1.f)), 0, 255));
 			DrawULTUI();
-			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			//
 			for (auto& y : ButtonSel) {
 				if (m_LookSel == LookSelect::FreeLook) {
@@ -483,11 +483,11 @@ namespace FPS_n2 {
 			}
 			//
 			{
-				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*m_Alpha), 0, 255));
+				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*m_Alpha), 0, 255));
 
-				DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Black, TRUE);
+				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
 
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
 		}
 

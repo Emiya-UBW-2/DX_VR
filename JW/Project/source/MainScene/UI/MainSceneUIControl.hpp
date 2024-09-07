@@ -25,6 +25,52 @@ namespace FPS_n2 {
 										  COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) {
 					//return;
 					int ParamBuf = (int)(this->m_Buffer + 0.5f);
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White, FALSE);
+					int length = (xp2 - 1) - (xp1 + 1);
+
+					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, (float)this->m_Now / (float)this->m_Max);
+					COLOR_U8 ColorAddSub = (ParamBuf > this->m_Now) ? ColorSub : ColorAdd;
+
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
+						xp1 + 1 + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + 1,
+						xp2 - 1, yp2 - 1,
+						Black, TRUE);
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
+						xp1 + 1, yp1 + 1,
+						xp1 + 1 + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - 1,
+						GetColor(Color.r, Color.g, Color.b), TRUE);
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
+						xp1 + 1 + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + 1,
+						xp1 + 1 + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - 1,
+						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), TRUE);
+				}
+				void			DrawGaugeUp(int xp1, int yp1, int xp2, int yp2,
+											COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) {
+					//return;
+					int ParamBuf = (int)(this->m_Buffer + 0.5f);
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White, FALSE);
+					int length = (yp2 - 1) - (yp1 + 1);
+
+					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, (float)this->m_Now / (float)this->m_Max);
+					COLOR_U8 ColorAddSub = (ParamBuf > this->m_Now) ? ColorSub : ColorAdd;
+
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
+						xp1 + 1, yp1 + 1,
+						xp2 - 1, yp2 - 1 - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
+						Black, TRUE);
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
+						xp1 + 1, yp2 - 1 - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
+						xp2 + 1, yp2 - 1,
+						GetColor(Color.r, Color.g, Color.b), TRUE);
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
+						xp1 + 1, yp2 - 1 - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
+						xp2 + 1, yp2 - 1 - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
+						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), TRUE);
+				}
+				void			DrawGaugeMask(int xp1, int yp1, int xp2, int yp2,
+					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) {
+					//return;
+					int ParamBuf = (int)(this->m_Buffer + 0.5f);
 					DrawBox(xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White, FALSE);
 					int length = (xp2 - 1) - (xp1 + 1);
 
@@ -44,8 +90,8 @@ namespace FPS_n2 {
 						xp1 + 1 + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - 1,
 						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), TRUE);
 				}
-				void			DrawGaugeUp(int xp1, int yp1, int xp2, int yp2,
-											COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) {
+				void			DrawGaugeUpMask(int xp1, int yp1, int xp2, int yp2,
+					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) {
 					//return;
 					int ParamBuf = (int)(this->m_Buffer + 0.5f);
 					DrawBox(xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White, FALSE);
@@ -76,27 +122,27 @@ namespace FPS_n2 {
 					COLOR_U8 ColorAddSub = (this->m_Buffer > this->m_Now) ? ColorSub : ColorAdd;
 					float per = std::clamp((float)this->m_Now / this->m_Max, 0.f, 1.f);
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
-					SetDrawBlendMode(DX_BLENDMODE_ADD, Add);
-					SetDrawBright(ColorBase.r, ColorBase.g, ColorBase.b);
+					WindowSystem::DrawControl::Instance()->SetAdd(WindowSystem::DrawLayer::Normal, Add);
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, ColorBase.r, ColorBase.g, ColorBase.b);
 					DrawCircleGauge(xp1 + DrawParts->GetUIY(256), yp1,
 									50.0 + ((50.0 - 15.0*2.0)*1.0) + 15.0 + deg,
 									CircleObj->get(),
 									50.0 + 15.0 + deg,
-									((double)(DrawParts->GetScreenY(1080)) / 1080.0));
-					SetDrawBright(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
+									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
 					DrawCircleGauge(xp1 + DrawParts->GetUIY(256), yp1,
 									50.0 + ((50.0 - 15.0*2.0)*(double)std::max(per, perbuf)) + 15.0 + deg,
 									CircleObj->get(),
 									50.0 + ((50.0 - 15.0*2.0)*(double)std::min(per, perbuf)) + 15.0 + deg,
-									((double)(DrawParts->GetScreenY(1080)) / 1080.0));
-					SetDrawBright(Color.r, Color.g, Color.b);
+									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, Color.r, Color.g, Color.b);
 					DrawCircleGauge(xp1 + DrawParts->GetUIY(256), yp1,
 									50.0 + ((50.0 - 15.0*2.0)*(double)std::min(per, perbuf)) + 15.0 + deg,
 									CircleObj->get(),
 									50.0 + 15.0 + deg,
-									((double)(DrawParts->GetScreenY(1080)) / 1080.0));
-					SetDrawBright(255, 255, 255);
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
 				void			DrawGaugeCircleRight(int xp1, int yp1,
 													 COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
@@ -107,27 +153,27 @@ namespace FPS_n2 {
 					COLOR_U8 ColorAddSub = (this->m_Buffer > this->m_Now) ? ColorSub : ColorAdd;
 					float per = std::clamp((float)this->m_Now / this->m_Max, 0.f, 1.f);
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
-					SetDrawBlendMode(DX_BLENDMODE_ADD, Add);
-					SetDrawBright(ColorBase.r, ColorBase.g, ColorBase.b);
+					WindowSystem::DrawControl::Instance()->SetAdd(WindowSystem::DrawLayer::Normal, Add);
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, ColorBase.r, ColorBase.g, ColorBase.b);
 					DrawCircleGauge(xp1 - DrawParts->GetUIY(256), yp1,
 						(50.0 - 15.0*2.0) + 15.0 + deg,
 									CircleObj->get(),
 									(double)((50.0 - 15.0*2.0)*(1.0 - 1.0)) + 15.0 + deg,
-									((double)(DrawParts->GetScreenY(1080)) / 1080.0));
-					SetDrawBright(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
+									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
 					DrawCircleGauge(xp1 - DrawParts->GetUIY(256), yp1,
 						(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
 									CircleObj->get(),
 									(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::max(per, perbuf))) + 15.0 + deg,
-									((double)(DrawParts->GetScreenY(1080)) / 1080.0));
-					SetDrawBright(Color.r, Color.g, Color.b);
+									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, Color.r, Color.g, Color.b);
 					DrawCircleGauge(xp1 - DrawParts->GetUIY(256), yp1,
 						(50.0 - 15.0*2.0) + 15.0 + deg,
 									CircleObj->get(),
 									(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
-									((double)(DrawParts->GetScreenY(1080)) / 1080.0));
-					SetDrawBright(255, 255, 255);
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
 				const auto		GetGaugeDiff() const noexcept { return (float)this->m_Now - std::min((float)this->m_Max, this->m_Buffer); }
 				const auto&		GetGauge() const noexcept { return this->m_Now; }
@@ -269,11 +315,11 @@ namespace FPS_n2 {
 				{
 					auto per = std::clamp(-(m_GaugeParam[0].GetGaugeDiff())*1.f, 0.f, 1.f);
 					if (per > 0.f) {
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(192.f*per), 0, 96));
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(192.f*per), 0, 96));
 
-						OIL_Graph.DrawExtendGraph(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), true);
+						WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &OIL_Graph, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), true);
 
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
 				}
 				//タイム,スコア
@@ -298,8 +344,8 @@ namespace FPS_n2 {
 				//ポイント増加
 				{
 					int xp1, yp1;
-					xp1 = DrawParts->GetScreenX(1920) / 2;
-					yp1 = DrawParts->GetScreenY(1080) / 2;
+					xp1 = DrawParts->GetUIY(1920) / 2;
+					yp1 = DrawParts->GetUIY(1080) / 2;
 
 					if (intParam[5] > 0) {
 						ScoreAdd.at(m_ScoreAddSel) = std::make_pair(intParam[5], 2.f);
@@ -310,13 +356,13 @@ namespace FPS_n2 {
 							auto& s = ScoreAdd[i];
 							if (s.second > 0.f) {
 								float per = std::powf(2.f - s.second, 2.f);
-								SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - per)), 0, 255));
+								WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*(1.f - per)), 0, 255));
 								WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 									DrawParts->GetUIY(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - DrawParts->GetUIY((int)(per*96.f)), GetColor(206, 0, 0), Gray75, "+%d", s.first);
 								s.second = std::max(s.second - 1.f / DrawParts->GetFps(), 0.f);
 							}
 						}
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
 				}
 				//情報
@@ -324,7 +370,7 @@ namespace FPS_n2 {
 					int xp1, yp1;
 					//体力
 					xp1 = DrawParts->GetUIY(24);
-					yp1 = DrawParts->GetScreenY(1080) - DrawParts->GetUIY(96);
+					yp1 = DrawParts->GetUIY(1080) - DrawParts->GetUIY(96);
 
 					m_GaugeParam[0].DrawGauge(
 						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(18),
@@ -334,13 +380,13 @@ namespace FPS_n2 {
 
 					xp1 += DrawParts->GetUIY(330);
 					if (intParam[9] > 0) {
-						SetDrawBright(0, 255, 0);
-						this->Morphine_Graph.DrawRotaGraph(xp1, yp1, (float)(DrawParts->GetUIY(50)) / 100.f, 0.f, true);
+						WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 0, 255, 0);
+						WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &this->Morphine_Graph, xp1, yp1, (float)(DrawParts->GetUIY(50)) / 100.f, 0.f, true);
 						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																			  xp1, yp1, White, Gray75,
 																			  "%d", intParam[9]);
-						SetDrawBright(255, 255, 255);
+						WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 					}
 				}
 				//高度、速度
@@ -349,8 +395,8 @@ namespace FPS_n2 {
 					float rad = deg2rad(deg);
 					int xp1, yp1;
 					{
-						xp1 = DrawParts->GetScreenX(1920) / 2 + intParam[0] - DrawParts->GetUIY((int)(300.f*std::cos(rad)));
-						yp1 = DrawParts->GetScreenY(1080) / 2 + intParam[1] - DrawParts->GetUIY((int)(300.f*std::sin(rad))) - DrawParts->GetUIY(18) / 2;
+						xp1 = DrawParts->GetUIY(1920) / 2 + intParam[0] - DrawParts->GetUIY((int)(300.f*std::cos(rad)));
+						yp1 = DrawParts->GetUIY(1080) / 2 + intParam[1] - DrawParts->GetUIY((int)(300.f*std::sin(rad))) - DrawParts->GetUIY(18) / 2;
 						m_GaugeParam[1].DrawGaugeCircleLeft(xp1, yp1,
 															GetColorU8(255, 255, 255, 255),
 															GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(64, 64, 255, 255),
@@ -358,12 +404,12 @@ namespace FPS_n2 {
 															&this->Gauge_Graph, deg, 32);
 
 						if (intParam[8] > 0) {
-							SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*0.4f), 0, 255));
-							xp1 = DrawParts->GetScreenX(1920) / 2 + intParam[0] - DrawParts->GetUIY((int)(300.f*std::cos(deg2rad(-45) + rad)));
-							yp1 = DrawParts->GetScreenY(1080) / 2 + intParam[1] - DrawParts->GetUIY((int)(300.f*std::sin(deg2rad(-45) + rad)));
+							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*0.4f), 0, 255));
+							xp1 = DrawParts->GetUIY(1920) / 2 + intParam[0] - DrawParts->GetUIY((int)(300.f*std::cos(deg2rad(-45) + rad)));
+							yp1 = DrawParts->GetUIY(1080) / 2 + intParam[1] - DrawParts->GetUIY((int)(300.f*std::sin(deg2rad(-45) + rad)));
 
-							this->Armer_Graph.DrawRotaGraph(xp1, yp1, (float)(DrawParts->GetUIY(50)) / 100.f, 0.f, true);
-							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+							WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &this->Armer_Graph, xp1, yp1, (float)(DrawParts->GetUIY(50)) / 100.f, 0.f, true);
+							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 							WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 								DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																				  xp1, yp1, White, Gray75,
@@ -371,8 +417,8 @@ namespace FPS_n2 {
 						}
 					}
 					{
-						xp1 = DrawParts->GetScreenX(1920) / 2 + intParam[0] + DrawParts->GetUIY((int)(300.f*std::cos(rad)));
-						yp1 = DrawParts->GetScreenY(1080) / 2 + intParam[1] + DrawParts->GetUIY((int)(300.f*std::sin(rad))) - DrawParts->GetUIY(18) / 2;
+						xp1 = DrawParts->GetUIY(1920) / 2 + intParam[0] + DrawParts->GetUIY((int)(300.f*std::cos(rad)));
+						yp1 = DrawParts->GetUIY(1080) / 2 + intParam[1] + DrawParts->GetUIY((int)(300.f*std::sin(rad))) - DrawParts->GetUIY(18) / 2;
 						m_GaugeParam[2].DrawGaugeCircleRight(xp1, yp1,
 															 GetColorU8(255, 255, 255, 255),
 															 GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(64, 64, 255, 255),
@@ -389,8 +435,8 @@ namespace FPS_n2 {
 						float rad = deg2rad(deg);
 						int xp1, yp1;
 						{
-							xp1 = DrawParts->GetScreenX(1920) / 2 + intParam[0] - DrawParts->GetUIY((int)(300.f*std::cos(rad)));
-							yp1 = DrawParts->GetScreenY(1080) / 2 + intParam[1] - DrawParts->GetUIY((int)(300.f*std::sin(rad))) - DrawParts->GetUIY(18) / 2;
+							xp1 = DrawParts->GetUIY(1920) / 2 + intParam[0] - DrawParts->GetUIY((int)(300.f*std::cos(rad)));
+							yp1 = DrawParts->GetUIY(1080) / 2 + intParam[1] - DrawParts->GetUIY((int)(300.f*std::sin(rad))) - DrawParts->GetUIY(18) / 2;
 							m_GaugeParam[(size_t)(5 + 3)].DrawGaugeCircleLeft(xp1, yp1,
 																	GetColorU8(255, 255, 255, 64),
 																	GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255),
@@ -398,8 +444,8 @@ namespace FPS_n2 {
 																	&this->Gauge_Aim_Graph, deg, Per);
 						}
 						{
-							xp1 = DrawParts->GetScreenX(1920) / 2 + intParam[0] + DrawParts->GetUIY((int)(300.f*std::cos(rad)));
-							yp1 = DrawParts->GetScreenY(1080) / 2 + intParam[1] + DrawParts->GetUIY((int)(300.f*std::sin(rad))) - DrawParts->GetUIY(18) / 2;
+							xp1 = DrawParts->GetUIY(1920) / 2 + intParam[0] + DrawParts->GetUIY((int)(300.f*std::cos(rad)));
+							yp1 = DrawParts->GetUIY(1080) / 2 + intParam[1] + DrawParts->GetUIY((int)(300.f*std::sin(rad))) - DrawParts->GetUIY(18) / 2;
 							m_GaugeParam[(size_t)(5 + 3 + 1)].DrawGaugeCircleRight(xp1, yp1,
 																		 GetColorU8(255, 255, 255, 64),
 																		 GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255), GetColorU8(255, 0, 0, 255),
@@ -413,8 +459,8 @@ namespace FPS_n2 {
 					if (m_GaugeParam[2].GetGauge() < m_GaugeParam[2].GetGaugeMax() * 3 / 10) {
 						int xp1, yp1;
 						//体力
-						xp1 = DrawParts->GetScreenX(1920) / 2;
-						yp1 = DrawParts->GetScreenY(1080) / 2 + DrawParts->GetUIY(100);
+						xp1 = DrawParts->GetUIY(1920) / 2;
+						yp1 = DrawParts->GetUIY(1080) / 2 + DrawParts->GetUIY(100);
 
 						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, xp1, yp1, Red, Gray75,
@@ -425,8 +471,8 @@ namespace FPS_n2 {
 				//タイム
 				if (floatParam[1] > 0) {
 					int xp1, yp1;
-					xp1 = DrawParts->GetScreenX(1920) / 2;
-					yp1 = DrawParts->GetScreenY(1080) / 2 - DrawParts->GetUIY(64);
+					xp1 = DrawParts->GetUIY(1920) / 2;
+					yp1 = DrawParts->GetUIY(1080) / 2 - DrawParts->GetUIY(64);
 					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						DrawParts->GetUIY(48), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, White, Gray75, "%d:%05.2f",
 						(int)(floatParam[1] / 60.f),
@@ -437,7 +483,7 @@ namespace FPS_n2 {
 				//ゲージ
 				{
 					m_GaugeMask.at(0).SetDraw([&]() {
-						m_GaugeParam[3].DrawGaugeUp(
+						m_GaugeParam[3].DrawGaugeUpMask(
 							-1, -1, 1 + m_GaugeMask.at(0).GetXSize(), 1 + m_GaugeMask.at(0).GetYSize(),
 							GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 							GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
@@ -455,18 +501,18 @@ namespace FPS_n2 {
 						yp1 = DrawParts->GetUIY(800 + m_GaugeMask.at(0).GetYSize() * 3 / 10 + (int)(150.f* UltPer));
 						rad = 0.f;
 					}
-					m_GaugeMask.at(0).GetGraph().DrawRotaGraph(xp1, yp1, 0.6f *(float)DrawParts->GetUIY(100) / 100.f, rad, true);
+					WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &m_GaugeMask.at(0).GetGraph(), xp1, yp1, 0.6f *(float)DrawParts->GetUIY(100) / 100.f, rad, true);
 					if (intParam[7] == 1) {
-						SetDrawBlendMode(DX_BLENDMODE_ADD, std::clamp((int)(255.f*sin(deg2rad(ULTTimer))), 0, 255));
-						ULT_Graph.DrawRotaGraph(xp1, yp1, 0.6f *(float)DrawParts->GetUIY(100) / 100.f, rad, true);
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+						WindowSystem::DrawControl::Instance()->SetAdd(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*sin(deg2rad(ULTTimer))), 0, 255));
+						WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &ULT_Graph, xp1, yp1, 0.6f *(float)DrawParts->GetUIY(100) / 100.f, rad, true);
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						ULTTimer += 15.f * 60.f / DrawParts->GetFps();
 					}
 				}
 				//ゲージ
 				{
 					m_GaugeMask.at(1).SetDraw([&]() {
-						m_GaugeParam[4].DrawGaugeUp(
+						m_GaugeParam[4].DrawGaugeUpMask(
 							-1, -1, 1 + m_GaugeMask.at(1).GetXSize(), 1 + m_GaugeMask.at(1).GetYSize(),
 							GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 							GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
@@ -480,12 +526,12 @@ namespace FPS_n2 {
 						xp1 += DrawParts->GetUIY(280);
 						yp1 -= DrawParts->GetUIY(40);
 					}
-					m_GaugeMask.at(1).GetGraph().DrawRotaGraph(xp1, yp1, 0.6f *(float)DrawParts->GetUIY(100) / 100.f, 0.f, true);
+					WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &m_GaugeMask.at(1).GetGraph(), xp1, yp1, 0.6f *(float)DrawParts->GetUIY(100) / 100.f, 0.f, true);
 
 					if (UltPer > 0.f && (intParam[7] != -1)) {
 						xp1 += DrawParts->GetUIY(150);
 						yp1 = DrawParts->GetUIY(980);
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*UltPer), 0, 255));
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*UltPer), 0, 255));
 						//弾ストック表示
 						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
@@ -497,7 +543,7 @@ namespace FPS_n2 {
 																			  "%04.2f",
 																			  floatParam[4]
 						);
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
 				}
 				//ゲージ
@@ -512,7 +558,7 @@ namespace FPS_n2 {
 					for (size_t i = 0; i < 3; i++) {
 						auto& g = m_GaugeMask.at((size_t)(i + 2));
 						g.SetDraw([&]() {
-							m_GaugeParam[(size_t)(i + 5)].DrawGaugeUp(
+							m_GaugeParam[(size_t)(i + 5)].DrawGaugeUpMask(
 								-1, -1, 1 + g.GetXSize(), 1 + g.GetYSize(),
 								GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 								GetColorU8(0, 0, 255, 255), GetColorU8(255, 0, 0, 255)
@@ -522,7 +568,7 @@ namespace FPS_n2 {
 						//WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						//	DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - DrawParts->GetUIY(12), White, Gray75, "%d", m_GaugeParam[i + 5].GetGauge());
 
-						g.GetGraph().DrawExtendGraph(xp1, yp1, xp1 + DrawParts->GetUIY(g.GetXSize() * 6 / 10), yp1 + DrawParts->GetUIY(g.GetYSize() * 6 / 10), true);
+						WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &g.GetGraph(), xp1, yp1, xp1 + DrawParts->GetUIY(g.GetXSize() * 6 / 10), yp1 + DrawParts->GetUIY(g.GetYSize() * 6 / 10), true);
 						xp1 += DrawParts->GetUIY(g.GetXSize() * 6 / 10 + 6);
 					}
 
@@ -535,7 +581,7 @@ namespace FPS_n2 {
 							xp1 = DrawParts->GetUIY(1500);
 							yp1 = DrawParts->GetUIY(990);
 						}
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - UltPer)), 0, 255));
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*(1.f - UltPer)), 0, 255));
 						//弾ストック表示
 						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
@@ -545,7 +591,7 @@ namespace FPS_n2 {
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 																			  xp1 + DrawParts->GetUIY(110), yp1 + DrawParts->GetUIY(80), White, Gray75,
 																			  "%03d", intParam[3]);
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
 				}
 			}

@@ -24,7 +24,7 @@ namespace FPS_n2 {
 					yp2 = yp1 + y_h;
 					bool into = IntoMouse(xp1, yp1, xp2, yp2);
 					color = (into) ? Black : Gray75;
-					DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, color, TRUE);
 					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						y_h, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1 + (xp2 - xp1) / 2, yp1, White, Black, "+");
 					if (into) {
@@ -38,7 +38,7 @@ namespace FPS_n2 {
 					yp2 += DrawParts->GetUIY(50);
 					bool into = IntoMouse(xp1, yp1, xp2, yp2);
 					color = (into) ? Black : Gray75;
-					DrawBox(xp1, yp1, xp2, yp2, color, TRUE);
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, color, TRUE);
 					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						y_h, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1 + (xp2 - xp1) / 2, yp1, White, Black, "-");
 					if (into) {
@@ -50,7 +50,7 @@ namespace FPS_n2 {
 			};
 			//
 			{
-				DrawBox(xp - DrawParts->GetUIY(10), yp - DrawParts->GetUIY(10), xp + xs + DrawParts->GetUIY(10), yp + ys + DrawParts->GetUIY(10), Gray25, TRUE);//”wŒi
+				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, xp - DrawParts->GetUIY(10), yp - DrawParts->GetUIY(10), xp + xs + DrawParts->GetUIY(10), yp + ys + DrawParts->GetUIY(10), Gray25, TRUE);//”wŒi
 				WindowSystem::SetMsgBox(xp, yp, xp + xs, yp + y_h, y_h, Black, " %d/%d", (int)this->m_Sequence, (int)SequenceEnum::MainGame);
 				//ƒƒO
 				{
@@ -155,7 +155,7 @@ namespace FPS_n2 {
 						bool isActive = (this->m_IsClient) ? this->m_ClientCtrl.GetServerDataCommon().PlayerData[i].IsActive : this->m_ServerCtrl.GetServerData().PlayerData[i].IsActive;
 						int yp1 = yp + DrawParts->GetUIY(50) + DrawParts->GetUIY(35)*(i + 1);
 						color = isActive ? Black : Gray75;
-						DrawBox(DrawParts->GetUIY(200), yp1, DrawParts->GetUIY(200) + DrawParts->GetUIY(300), yp1 + y_h, color, TRUE);
+						WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, DrawParts->GetUIY(200), yp1, DrawParts->GetUIY(200) + DrawParts->GetUIY(300), yp1 + y_h, color, TRUE);
 						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							y_h, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, DrawParts->GetUIY(200), yp1, White, Black, "Player");
 						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,

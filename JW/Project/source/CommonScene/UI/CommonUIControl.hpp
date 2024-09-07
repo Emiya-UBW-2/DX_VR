@@ -140,12 +140,12 @@ namespace FPS_n2 {
 
 								float per = std::clamp(SelYadd / 5.f, 0.f, 1.f);
 								float per2 = 1.f - std::clamp(SelYadd / 10.f, 0.f, 1.f);
-								SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(128.f*per), 0, 255));
-								m_SelectBackImage->DrawExtendGraph(
+								WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(128.f*per), 0, 255));
+								WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, m_SelectBackImage,
 									xp + DrawParts->GetUIY(xsize) / 2 - (int)((float)(DrawParts->GetUIY(xsize) / 2 + DrawParts->GetUIY(300))*per2), yp + DrawParts->GetUIY(ysize) - DrawParts->GetUIY(12) - (int)((float)(DrawParts->GetUIY(ysize) / 6) * per),
 									xp + DrawParts->GetUIY(xsize) / 2 + (int)((float)(DrawParts->GetUIY(xsize) / 2 + DrawParts->GetUIY(300))*per2), yp + DrawParts->GetUIY(ysize) - DrawParts->GetUIY(12) + (int)((float)(DrawParts->GetUIY(ysize) / 6) * per),
 									true);
-								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+								WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 							}
 							unsigned int Color = Black;
 							if (DrawParts->GetUIY(ysize) > DrawParts->GetUIY(50)) {
@@ -197,28 +197,28 @@ namespace FPS_n2 {
 							if (SelYadd > 0.f) {
 								float per1 = std::clamp(SelYadd / 5.f, 0.f, 1.f);
 								float per2 = 1.f - std::clamp(SelYadd / 10.f, 0.f, 1.f);
-								SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(128.f*per1), 0, 255));
-								m_SelectBackImage->DrawExtendGraph(
+								WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(128.f*per1), 0, 255));
+								WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, m_SelectBackImage,
 									DrawParts->GetUIY(xp1) - (int)((float)DrawParts->GetUIY(xsize)*per2), DrawParts->GetUIY(yp1) - (int)((float)DrawParts->GetUIY(ysize)*per2),
 									DrawParts->GetUIY(xp1) + (int)((float)DrawParts->GetUIY(xsize)*per2), DrawParts->GetUIY(yp1) + (int)((float)DrawParts->GetUIY(ysize)*per2),
 									true);
-								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+								WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 							}
 							switch (m_ButtonStatus) {
 								case ButtonStatus::None:
-									SetDrawBright(128, 128, 128);
+									WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 128, 128, 128);
 									break;
 								case ButtonStatus::Ready:
-									SetDrawBright(216, 216, 216);
+									WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 216, 216, 216);
 									break;
 								case ButtonStatus::Focus:
-									SetDrawBright(216, 255, 216);
+									WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 216, 255, 216);
 									break;
 								default:
 									break;
 							}
-							m_Icon.DrawRotaGraph(DrawParts->GetUIY(xp1), DrawParts->GetUIY(yp1), (float)DrawParts->GetUIY(100) / 100.f*(1.f + SelYadd / 50.f), 0.f, true);
-							SetDrawBright(255, 255, 255);
+							WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &m_Icon, DrawParts->GetUIY(xp1), DrawParts->GetUIY(yp1), (float)DrawParts->GetUIY(100) / 100.f*(1.f + SelYadd / 50.f), 0.f, true);
+							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 						}
 						break;
 					default:

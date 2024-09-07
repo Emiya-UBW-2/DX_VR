@@ -547,7 +547,7 @@ namespace FPS_n2 {
 			if (Chara->GetGunPtrNow()) {
 				if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&
 					!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
-					(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph().DrawRotaGraph(
+					WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph(),
 						(int)(Chara->GetGunPtrNow()->GetReticleXPos()*DrawParts->GetUIY(1980) / DrawParts->GetScreenY(1980)),
 						(int)(Chara->GetGunPtrNow()->GetReticleYPos()*DrawParts->GetUIY(1080) / DrawParts->GetScreenY(1080)),
 						1.f, Chara->GetLeanRad(), true);
@@ -582,7 +582,7 @@ namespace FPS_n2 {
 					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
 					if (Chara->IsAlive()) {
 						//ミニマップ
-						m_MiniMapScreen.DrawRotaGraph(DrawParts->GetUIY(960), DrawParts->GetUIY(840), 1.f, 0.f, true);
+						WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &m_MiniMapScreen, DrawParts->GetUIY(960), DrawParts->GetUIY(840), 1.f, 0.f, true);
 					}
 				}
 			}
@@ -1369,7 +1369,7 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
-			m_MiniMapScreen.SetDraw_Screen();
+			m_MiniMapScreen.SetDraw_Screen();//WindowSystem::DrawControl::Instance()->Set つかうな
 			{
 				float size = 0.7f;
 				int xp = DrawParts->GetUIY(128);
@@ -1501,7 +1501,7 @@ namespace FPS_n2 {
 				}
 			}
 			//
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, 128);
+			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 128);
 			for (int index = 0; index < Chara_num; index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
 				if (index == 0) { continue; }
@@ -1548,7 +1548,7 @@ namespace FPS_n2 {
 					White,
 					3);
 			}
-			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 		}
 		void			MAINLOOP::DrawHitGraph(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
@@ -1563,19 +1563,19 @@ namespace FPS_n2 {
 						Vector3DX	DispPos = a->m_Hit_DispPos;
 						if ((Alpha >= 10) && (DispPos.z >= 0.f && DispPos.z <= 1.f)) {
 							DispPos = DispPos *((float)DrawParts->GetUIY(1080) / (float)DrawParts->GetScreenY(1080));
-							SetDrawBlendMode(DX_BLENDMODE_ALPHA, Alpha);
+							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, Alpha);
 							//
 							int r = (int)(255 * std::clamp((float)a->m_Damage / 100.f*2.f, 0.f, 1.f));
 							int g = 255 - r;
 							if (a->m_Damage > 0) {
-								SetDrawBright(r, g, 0);
-								hit_Graph.DrawRotaGraph((int)DispPos.x, (int)DispPos.y, (float)DrawParts->GetUIY((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
+								WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, r, g, 0);
+								WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &hit_Graph, (int)DispPos.x, (int)DispPos.y, (float)DrawParts->GetUIY((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
 							}
 							if (a->m_ArmerDamage > 0) {
-								SetDrawBright(128, 128, 128);
-								guard_Graph.DrawRotaGraph((int)DispPos.x, (int)DispPos.y, (float)DrawParts->GetUIY((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
+								WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 128, 128, 128);
+								WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &guard_Graph, (int)DispPos.x, (int)DispPos.y, (float)DrawParts->GetUIY((int)((float)Alpha / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
 							}
-							SetDrawBright(255, 255, 255);
+							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 							//
 							if (a->m_Damage > 0) {
 								WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
@@ -1596,15 +1596,15 @@ namespace FPS_n2 {
 				}
 				loop++;
 			}
-			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 		}
 		void			MAINLOOP::DrawResult(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 #if FALSE
-			movie.DrawExtendGraph(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), FALSE);
+			WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &movie, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), FALSE);
 #else
-			DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Gray75, TRUE);
+			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Gray75, TRUE);
 #endif
 			auto DrawScore = [&](int xp, int yp, bool isFront) {
 				unsigned int Color = isFront ? White : Gray50;
@@ -1612,7 +1612,7 @@ namespace FPS_n2 {
 					int sel = 0;
 					auto& r = m_ResultFlip[sel];
 					if (r.m_Flip > 0.f) {
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*r.m_Flip), 0, 255));
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*r.m_Flip), 0, 255));
 						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
 																				  xp + DrawParts->GetUIY((int)(8.f * sel)), yp + DrawParts->GetUIY((int)(64.f * sel - r.m_Flip * 128.f)), Color, Black, "Hits : ");
@@ -1626,7 +1626,7 @@ namespace FPS_n2 {
 					int sel = 1;
 					auto& r = m_ResultFlip[sel];
 					if (r.m_Flip > 0.f) {
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*r.m_Flip), 0, 255));
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*r.m_Flip), 0, 255));
 						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
 																				  xp + DrawParts->GetUIY((int)(8.f * sel)), yp + DrawParts->GetUIY((int)(64.f * sel - r.m_Flip * 128.f)), Color, Black, "Kill : ");
@@ -1640,7 +1640,7 @@ namespace FPS_n2 {
 					int sel = 2;
 					auto& r = m_ResultFlip[sel];
 					if (r.m_Flip > 0.f) {
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*r.m_Flip), 0, 255));
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*r.m_Flip), 0, 255));
 						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM,
 																				  xp + DrawParts->GetUIY((int)(8.f * sel)), yp + DrawParts->GetUIY((int)(64.f * sel - r.m_Flip * 128.f)), Color, Black, "Score : ");
@@ -1650,7 +1650,7 @@ namespace FPS_n2 {
 																				  xp + DrawParts->GetUIY((int)(112 + 8.f * sel)), yp + DrawParts->GetUIY((int)(64.f * sel - r.m_Flip * 128.f - r.m_Up * 15.f)), Color, Black, "%4d pts", (int)r.m_Point);
 					}
 				}
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			};
 
 			DrawScore(DrawParts->GetUIY(400 + 8), DrawParts->GetUIY(512 + 8), false);
@@ -1695,11 +1695,11 @@ namespace FPS_n2 {
 					}
 					if (i == m_ResultRank && m_ResultRank == 0) {
 						if (m_ResultRankingPer < 1.f) {
-							SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*(1.f - m_ResultRankingPer)*2.f), 0, 255));
+							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*(1.f - m_ResultRankingPer)*2.f), 0, 255));
 							WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 								DrawParts->GetUIY(36), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
 																				   DrawParts->GetUIY(1440) - DrawParts->GetUIY(340), yp1, Color, Black, "HIGH SCORE!");
-							SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						}
 					}
 					yp1 += DrawParts->GetUIY(36);
@@ -1733,8 +1733,8 @@ namespace FPS_n2 {
 			ButtonSel.Draw();
 
 			float per = (1.f - (16.f / 9.f) / 2.35f) / 2.f;
-			DrawBox(0, 0, DrawParts->GetScreenX(1920), (int)(DrawParts->GetScreenY(1080) * per), Black, TRUE);
-			DrawBox(0, DrawParts->GetScreenY(1080) - (int)(DrawParts->GetScreenY(1080) * per), DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Black, TRUE);
+			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), (int)(DrawParts->GetUIY(1080) * per), Black, TRUE);
+			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, DrawParts->GetUIY(1080) - (int)(DrawParts->GetUIY(1080) * per), DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
 			if (m_EndTimer > 0) {
 				DrawBlackOut((1.f - m_EndTimer) * 2.f);
 			}
@@ -1742,9 +1742,9 @@ namespace FPS_n2 {
 		void			MAINLOOP::DrawBlackOut(float per) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			if (per > 0.f) {
-				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*per), 0, 255));
-				DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Black, TRUE);
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*per), 0, 255));
+				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
+				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
 		}
 	};

@@ -235,22 +235,49 @@ namespace FPS_n2 {
 				auto MyPos = MyChara->GetEyeMatrix().pos();
 
 				auto Target = TgtPos;
+				std::vector<int> SelList;
+				SelList.clear();
+				auto GetRandomMyPos = [&]() {
+					if (SelList.size() == 0) {
+						for (auto& C : this->m_BackGround->GetBuildData()) {
+							if (C.GetMeshSel() < 0) { continue; }
+							auto Vec = C.GetMatrix().pos() - MyPos; Vec.y = (0.f);
+							if (Vec.magnitude() < 10.f * Scale_Rate) {
+								SelList.emplace_back((int)(&C - &this->m_BackGround->GetBuildData().front()));
+							}
+						}
+					}
+					MyPos = this->m_BackGround->GetBuildData().at(SelList.at(GetRand((int)SelList.size() - 1))).GetMatrix().pos();
+					};
+				auto CheckPathToTarget = [&]() {
+					m_PathChecker.Dispose();
+					auto MyPos_XZ = MyPos; MyPos_XZ.y = (0.f);
+					Target.y = (0.f);
+					return m_PathChecker.Init(MyPos_XZ, Target);	// 指定の２点の経路情報を探索する
+					};
+
 				if (GetLengthToTarget() > 20.f*Scale_Rate) {
-					std::vector<int> SelList;
-					for (auto& C : this->m_BackGround->GetBuildData()) {
-						if (C.GetMeshSel() < 0) { continue; }
-						auto Vec = C.GetMatrix().pos() - Target; Vec.y = (0.f);
-						if (Vec.magnitude() < 10.f*Scale_Rate) {
-							SelList.emplace_back((int)(&C - &this->m_BackGround->GetBuildData().front()));
+					if (SelList.size() == 0) {
+						for (auto& C : this->m_BackGround->GetBuildData()) {
+							if (C.GetMeshSel() < 0) { continue; }
+							auto Vec = C.GetMatrix().pos() - Target; Vec.y = (0.f);
+							if (Vec.magnitude() < 10.f * Scale_Rate) {
+								SelList.emplace_back((int)(&C - &this->m_BackGround->GetBuildData().front()));
+							}
 						}
 					}
 					Target = this->m_BackGround->GetBuildData().at(SelList.at(GetRand((int)SelList.size() - 1))).GetMatrix().pos();
 				}
-				m_PathChecker.Dispose();
-				auto MyPos_XZ = MyPos; MyPos_XZ.y = (0.f);
-				Target.y = (0.f);
-				m_PathChecker.Init(MyPos_XZ, Target);	// 指定の２点の経路情報を探索する
-				this->TargetPathPlanningIndex = m_PathChecker.GetStartUnit()->GetPolyIndex();	// 移動開始時点の移動中間地点の経路探索情報もスタート地点にあるポリゴンの情報
+				this->TargetPathPlanningIndex = -1;
+				for (int i = 0; i < 10; i++) {
+					if (CheckPathToTarget()) {
+						this->TargetPathPlanningIndex = m_PathChecker.GetStartUnit()->GetPolyIndex();	// 移動開始時点の移動中間地点の経路探索情報もスタート地点にあるポリゴンの情報
+						break;
+					}
+					else {
+						GetRandomMyPos();//再選定
+					}
+				}
 			}
 			void		Repop(bool CanRepop) noexcept {
 				auto* PlayerMngr = PlayerManager::Instance();

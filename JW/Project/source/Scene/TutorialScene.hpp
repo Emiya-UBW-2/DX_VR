@@ -113,7 +113,7 @@ namespace FPS_n2 {
 						int xp = xp1 - DrawParts->GetUIY((int)((xs + 128) * (1.f - d.ActivePer())));
 						int yp = yp1 - DrawParts->GetUIY((int)((ys + 5) * d.GetFlip()));
 
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA,
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal,
 										 std::min(
 											 std::clamp((int)(255.f*d.ActivePer()), 0, 255),
 											 std::min(
@@ -123,7 +123,7 @@ namespace FPS_n2 {
 										 )
 
 						);
-						this->m_tutorialGraph.DrawExtendGraph(
+						WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &this->m_tutorialGraph,
 							xp, yp,
 							xp + DrawParts->GetUIY(xs), yp + DrawParts->GetUIY(ys),
 							true);
@@ -132,7 +132,7 @@ namespace FPS_n2 {
 																					  xp + DrawParts->GetUIY(69), yp + DrawParts->GetUIY(14), Gray75, Black, d.GetMsg());
 					}
 				}
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
 			void Dispose() noexcept {
 				this->m_tutorialGraph.Dispose();

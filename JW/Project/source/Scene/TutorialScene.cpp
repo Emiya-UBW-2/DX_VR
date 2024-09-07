@@ -681,7 +681,7 @@ namespace FPS_n2 {
 				if (Chara->GetGunPtrNow()) {
 					if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&
 						!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
-						(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph().DrawRotaGraph(
+						WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph(),
 							(int)(Chara->GetGunPtrNow()->GetReticleXPos()*DrawParts->GetUIY(1980) / DrawParts->GetScreenY(1980)),
 							(int)(Chara->GetGunPtrNow()->GetReticleYPos()*DrawParts->GetUIY(1080) / DrawParts->GetScreenY(1080)),
 							1.f, Chara->GetLeanRad(), true);
@@ -735,8 +735,8 @@ namespace FPS_n2 {
 				if (tgtSel >= 0) {
 					auto& t = (std::shared_ptr<TargetClass>&)(*ObjectManager::Instance()->GetObj((int)ObjType::Target, tgtSel));
 
-					int xp = DrawParts->GetScreenX(1920) / 2 - DrawParts->GetUIY(300);
-					int yp = DrawParts->GetScreenY(1080) / 2 + DrawParts->GetUIY(100);
+					int xp = DrawParts->GetUIY(1920) / 2 - DrawParts->GetUIY(300);
+					int yp = DrawParts->GetUIY(1080) / 2 + DrawParts->GetUIY(100);
 					int size = DrawParts->GetUIY(100);
 					int xs = size / 2;
 					int ys = size / 2;
@@ -744,13 +744,13 @@ namespace FPS_n2 {
 					int yp2 = yp + ys * 2;
 					float AlphaPer = std::clamp(tgtTimer, 0.f, 1.f);
 					if (AlphaPer > 0.01f) {
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f*AlphaPer));
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, (int)(255.f*AlphaPer));
 						//îwåi
 						if (tgtSel < 5) {
-							ScoreBoard.DrawExtendGraph(xp, yp, xp2, yp2, true);
+							WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &ScoreBoard, xp, yp, xp2, yp2, true);
 						}
 						else {
-							ScoreBoard2.DrawExtendGraph(xp, yp, xp2, yp2, true);
+							WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &ScoreBoard2, xp, yp, xp2, yp2, true);
 						}
 						//ñΩíÜâ”èä
 						for (auto& r : t->GetHitPosRec()) {
@@ -758,7 +758,7 @@ namespace FPS_n2 {
 							t->GetHitPoint(r, &cos_t, &sin_t);
 							DrawCircle(xp + xs + (int)((float)xs * cos_t), yp + ys + (int)((float)ys * sin_t), 2, Green);
 						}
-						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
 				}
 			}
@@ -771,9 +771,9 @@ namespace FPS_n2 {
 																		  FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP,
 																		  DrawParts->GetUIY(960), DrawParts->GetUIY(870), Red, Black, "%s:%s", LocalizePool::Instance()->Get(300), Pad->GetKeyStr(PADS::INTERACT).c_str());
 
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*m_FirstFade), 0, 255));
-					DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Black, TRUE);
-					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp((int)(255.f*m_FirstFade), 0, 255));
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
+					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
 			}
 		}
