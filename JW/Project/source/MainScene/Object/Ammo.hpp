@@ -25,10 +25,15 @@ namespace FPS_n2 {
 			int				m_ShootCheraID{-1};
 			float			m_yAdd{0.f};
 			float			m_Timer{0.f};
+
+			Vector3DX		repos;
+
 		public://getter
 			const auto&		GetShootedID(void) const noexcept { return this->m_ShootCheraID; }
 			const auto&		GetDamage(void) const noexcept { return this->m_AmmoData->GetDamage(); }
 			const auto&		GetCaliberSize(void) const noexcept { return this->m_AmmoData->GetCaliber(); }//0.00762f
+
+			const auto& GetRePos(void) const noexcept { return repos; }
 		public:
 			void			Put(std::shared_ptr<AmmoDataClass> pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, int pMyID) {
 				SetActive(true);
@@ -60,14 +65,14 @@ namespace FPS_n2 {
 				this->SetMove().SetVec((this->GetMove().GetVec() + normal * ((Vector3DX::Dot(this->GetMove().GetVec(), normal)) * -2.0f)).normalized());
 				this->SetMove().SetPos(this->GetMove().GetVec() * (0.1f) + position);
 				this->SetMove().Update(0.f, 0.f);
-				UpdateObjMatrix(SetMove().GetMat(), SetMove().GetPos());
+				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 				this->m_yAdd = 0.f;
 			}
 			void			HitGround(const Vector3DX& position) {
 				SetActive(false);
 				this->SetMove().SetPos(position);
 				this->SetMove().Update(0.f, 0.f);
-				UpdateObjMatrix(SetMove().GetMat(), SetMove().GetPos());
+				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 				this->m_IsHit = true;
 				this->m_IsDrawHitUI = false;
 			}
@@ -96,11 +101,11 @@ namespace FPS_n2 {
 						SetDelete();
 					}
 				}
+				repos = this->GetMove().GetRePos();//弾だけ外で判定してるので
 				if (IsActive()) {
 					//移動確定
-					this->SetMove().SetPos(this->GetMove().GetPos() + (this->GetMove().GetVec() * (this->m_speed / DrawParts->GetFps())) + Vector3DX::up()*this->m_yAdd);
+					this->SetMove().SetPos(this->GetMove().GetPos() + (this->GetMove().GetVec() * (this->m_speed / DrawParts->GetFps())) + Vector3DX::up() * this->m_yAdd);
 					this->SetMove().Update(0.f, 0.f);
-					UpdateObjMatrix(SetMove().GetMat(), SetMove().GetPos());
 					this->m_yAdd += (M_GR / (DrawParts->GetFps()*DrawParts->GetFps()));
 
 					//消す(スピードが0以下、貫通が0以下、5回反射する)
@@ -110,6 +115,7 @@ namespace FPS_n2 {
 					//this->m_speed -= 5.f / DrawParts->GetFps();
 					//this->m_penetration -= 5.f / DrawParts->GetFps();
 				}
+
 				this->m_Timer += 1.f / DrawParts->GetFps();
 			}
 			//
@@ -123,10 +129,10 @@ namespace FPS_n2 {
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				if (!isDrawSemiTrans) {
 					if (IsActive()) {
-						if (CheckCameraViewClip_Box(this->GetMove().GetRePos().get(), this->GetMove().GetPos().get()) == FALSE) {
+						if (CheckCameraViewClip_Box(this->GetRePos().get(), this->GetMove().GetPos().get()) == FALSE) {
 							SetUseLighting(FALSE);
 							SetUseHalfLambertLighting(FALSE);
-							DrawCapsule_3D(this->GetMove().GetPos(), this->GetMove().GetRePos(), 1.f * ((this->m_AmmoData->GetCaliber() - 0.00762f) * 0.1f + 0.00762f)*Scale_Rate, GetColor(255, 255, 172), Yellow);
+							DrawCapsule_3D(this->GetMove().GetPos(), this->GetRePos(), 1.f * ((this->m_AmmoData->GetCaliber() - 0.00762f) * 0.1f + 0.00762f)*Scale_Rate, GetColor(255, 255, 172), Yellow);
 							SetUseLighting(TRUE);
 							SetUseHalfLambertLighting(TRUE);
 						}

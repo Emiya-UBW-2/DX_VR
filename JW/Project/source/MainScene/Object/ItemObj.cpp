@@ -40,7 +40,7 @@ namespace FPS_n2 {
 
 				this->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(1.f * 60.f / DrawParts->GetFps())) * this->GetMove().GetMat());
 				SetMove().Update(0.f, 0.f);
-				UpdateObjMatrix(SetMove().GetMat(), SetMove().GetPos());
+				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}
 		}
 	};

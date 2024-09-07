@@ -816,29 +816,28 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			//vector
-			bool IsHitGround = (this->GetMove().GetPos().y <= 0.f); //高度0なら止まる
+			Vector3DX PosBuf = this->GetMove().GetPos();
+			bool IsHitGround = (PosBuf.y <= 0.f); //高度0なら止まる
 			float groundYpos = 0.f;
 			if (!m_IsMainGame && this->m_BackGround) {
-				Vector3DX EndPos = this->GetMove().GetPos() + Vector3DX::up() * 20.f;
-				IsHitGround = this->m_BackGround->CheckLinetoMap(this->GetMove().GetPos() + Vector3DX::up() * -1.f, &EndPos, false);
+				Vector3DX EndPos = PosBuf + Vector3DX::up() * 20.f;
+				IsHitGround = this->m_BackGround->CheckLinetoMap(PosBuf + Vector3DX::up() * -1.f, &EndPos, false);
 				groundYpos = EndPos.y;
 			}
 			if (IsHitGround) {
-				Vector3DX pos = this->GetMove().GetPos();
-				Easing(&pos.y, groundYpos, 0.8f, EasingType::OutExpo);
-				this->SetMove().SetPos(pos);
+				Easing(&PosBuf.y, groundYpos, 0.8f, EasingType::OutExpo);
 
 				Vector3DX vec = KeyControl::GetVec(); vec.y = 0.f;
 				this->SetMove().SetVec(vec);
 				this->SetMove().Update(0.f, 0.f);
-				UpdateObjMatrix(SetMove().GetMat(), SetMove().GetPos());
+				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}
 			else {
 				float Y = this->GetMove().GetVec().y;
 				Vector3DX vec = KeyControl::GetVec(); vec.y = (Y + (M_GR / (DrawParts->GetFps() * DrawParts->GetFps())));
 				this->SetMove().SetVec(vec);
 			}
-			this->SetMove().SetPos(this->GetMove().GetPos() + this->GetMove().GetVec());
+			PosBuf += this->GetMove().GetVec();
 			//壁判定
 			std::vector<std::pair<MV1*, int>> cols;
 			if (this->m_BackGround) {
@@ -862,9 +861,7 @@ namespace FPS_n2 {
 				}
 			}
 			{
-				Vector3DX pos = this->GetMove().GetPos();
-				col_wall(this->GetMove().GetRePos(), &pos, cols);
-				this->SetMove().SetPos(pos);
+				col_wall(this->GetMove().GetRePos(), &PosBuf, cols);
 			}
 			//ほかプレイヤーとの判定
 			if (m_IsMainGame) {
@@ -877,20 +874,21 @@ namespace FPS_n2 {
 					Vector3DX Vec = (Chara->GetCharaPosition() - this->GetCharaPosition()); Vec.y = (0.f);
 					float Len = Vec.magnitude();
 					if (Len < Radius) {
-						this->SetMove().SetPos(this->GetMove().GetPos() + Vec.normalized() * (Len - Radius));
+						PosBuf = PosBuf + Vec.normalized() * (Len - Radius);
 					}
 				}
 			}
 			//座標オーバーライド
 			if (KeyControl::PutOverride()) {
-				this->SetMove().SetPos(KeyControl::GetOverRideInfo().GetPos());
+				PosBuf = KeyControl::GetOverRideInfo().GetPos();
 				this->SetMove().SetVec(KeyControl::GetOverRideInfo().GetVec());
 			}
 			auto* OptionParts = OPTION::Instance();
 			bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
+			this->SetMove().SetPos(PosBuf);
 			this->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::forward(), HeadBobbing ? (KeyControl::GetRad().z / 2.f) : 0.f) * Matrix3x3DX::RotAxis(Vector3DX::up(), KeyControl::GetYRadBottom()));
 			this->SetMove().Update(0.9f, 0.f);
-			UpdateObjMatrix(SetMove().GetMat(), SetMove().GetPos());
+			UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			//スリング場所探索
 			int GunSel = m_IsHardMode ? 1 : 0;
 			if (GetGunPtr(GunSel)) {
@@ -943,7 +941,7 @@ namespace FPS_n2 {
 					this->m_Armer_Ptr->SetMove().SetMat(Matrix3x3DX::Get33DX(tmp_gunmat.rotation()));
 					this->m_Armer_Ptr->SetMove().SetPos(tmp_gunmat.pos());
 					this->m_Armer_Ptr->SetMove().Update(0.f, 0.f);
-					this->m_Armer_Ptr->UpdateObjMatrix(this->m_Armer_Ptr->SetMove().GetMat(), this->m_Armer_Ptr->SetMove().GetPos());
+					this->m_Armer_Ptr->UpdateObjMatrix(this->m_Armer_Ptr->GetMove().GetMat(), this->m_Armer_Ptr->GetMove().GetPos());
 
 					GunPos = this->m_Armer_Ptr->GetRightHandMat().pos();
 					Gunyvec = this->m_Armer_Ptr->GetRightHandMat().rotation().xvec()*-1.f;
@@ -1003,7 +1001,7 @@ namespace FPS_n2 {
 					this->m_Morphine_Ptr->SetMove().SetMat(Matrix3x3DX::Get33DX(tmp_gunmat.rotation()));
 					this->m_Morphine_Ptr->SetMove().SetPos(tmp_gunmat.pos());
 					this->m_Morphine_Ptr->SetMove().Update(0.f, 0.f);
-					this->m_Morphine_Ptr->UpdateObjMatrix(this->m_Morphine_Ptr->SetMove().GetMat(), this->m_Morphine_Ptr->SetMove().GetPos());
+					this->m_Morphine_Ptr->UpdateObjMatrix(this->m_Morphine_Ptr->GetMove().GetMat(), this->m_Morphine_Ptr->GetMove().GetPos());
 				}
 			}
 			else if (GetGunPtrNow()) {

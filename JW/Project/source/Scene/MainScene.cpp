@@ -979,7 +979,7 @@ namespace FPS_n2 {
 					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
 					if (a->IsActive()) {
 						//AmmoClass
-						Vector3DX repos_tmp = a->GetMove().GetRePos();
+						Vector3DX repos_tmp = a->GetRePos();
 						Vector3DX pos_tmp = a->GetMove().GetPos();
 
 						if (GetMyPlayerID() != a->GetShootedID()) {

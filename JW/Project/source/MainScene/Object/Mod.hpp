@@ -40,14 +40,14 @@ namespace FPS_n2 {
 
 			void			FirstExecute(void) noexcept override {
 				SetMove().Update(0.f, 0.f);
-				UpdateObjMatrix(SetMove().GetMat(), SetMove().GetPos());
+				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 				FirstExecute_Mod();
 			}
 			void			SetModMatrix(const Matrix4x4DX& value) noexcept {
 				SetMove().SetMat(Matrix3x3DX::Get33DX(value.rotation()));
 				SetMove().SetPos(value.pos());
 				SetMove().Update(0.f, 0.f);
-				UpdateObjMatrix(SetMove().GetMat(), SetMove().GetPos());
+				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 				ModSlotControl::UpdatePartsAnim(GetObj());
 				ModSlotControl::UpdatePartsMove(GetFrameWorldMat_P(GunFrame::UnderRail), GunSlot::UnderRail);
 				ModSlotControl::UpdatePartsMove(GetFrameWorldMat_P(GunFrame::Sight), GunSlot::Sight);
@@ -104,7 +104,7 @@ namespace FPS_n2 {
 					SetMove().SetPos(Lerp(GetMove().GetPos(), this->HandMatrix.pos(), this->HandPer));
 				}
 				SetMove().Update(0.f, 0.f);
-				UpdateObjMatrix(SetMove().GetMat(), SetMove().GetPos());
+				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}
 		public:
 			void			SetHandMatrix(const Matrix4x4DX& value, float pPer, bool isDirect) noexcept {

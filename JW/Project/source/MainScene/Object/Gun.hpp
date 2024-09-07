@@ -231,7 +231,7 @@ namespace FPS_n2 {
 				SetMove().SetMat(Matrix3x3DX::Get33DX(value.rotation()));
 				SetMove().SetPos(value.pos());
 				SetMove().Update(0.f, 0.f);
-				UpdateObjMatrix(SetMove().GetMat(), SetMove().GetPos());
+				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 
 				ModSlotControl::UpdatePartsAnim(GetObj());
 				ModSlotControl::UpdatePartsMove(GetFrameWorldMat_P(GunFrame::UnderRail), GunSlot::UnderRail);
