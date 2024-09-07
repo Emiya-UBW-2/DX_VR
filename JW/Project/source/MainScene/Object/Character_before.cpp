@@ -80,7 +80,7 @@ namespace FPS_n2 {
 				m_AutoAim = -1;
 			}
 			if (m_AutoAim != -1) {
-				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(m_AutoAim).GetChara();
+				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(m_AutoAim)->GetChara();
 				if (!Chara->IsAlive()) {
 					m_AutoAim = -1;
 				}

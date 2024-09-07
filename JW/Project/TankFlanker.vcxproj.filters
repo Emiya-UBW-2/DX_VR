@@ -227,5 +227,8 @@
     <ClCompile Include="source\CommonScene\NetworkBrowser.cpp">
       <Filter>ソース ファイル\CommonScene</Filter>
     </ClCompile>
+    <ClCompile Include="source\CommonScene\NetWork.cpp">
+      <Filter>ソース ファイル\CommonScene</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

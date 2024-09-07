@@ -15,9 +15,6 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class MAINLOOP : public TEMPSCENE, public EffectControl, public GunsModify {
 		private:
-			static const int		Chara_num = Player_num;
-			static const int		gun_num = Chara_num;
-		private:
 			bool											m_IsHardMode{false};
 
 			std::shared_ptr<BackGroundClassMain>			m_BackGround;					//BG
@@ -25,15 +22,15 @@ namespace FPS_n2 {
 			UIClass											m_UIclass;						//UI関連
 			int												prevScore{0};
 			int												prevLastMan{0};
+			//NetWork
+			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };
 
-			NetWorkBrowser									m_NetWorkBrowser;				//ネットワーク
 			ConcussionControl								m_ConcussionControl;			//コンカッション
 			MainLoopPauseControl							m_MainLoopPauseControl;			//ポーズメニュー
 			//共通
 			GraphHandle										m_MiniMapScreen;
 			GraphHandle										hit_Graph;
 			GraphHandle										guard_Graph;
-			std::vector<std::shared_ptr<AIControl>>			m_AICtrl;					//AI
 			std::vector<DamageEvent>						m_DamageEvents;				//ダメージ
 			float											m_ReadyTimer{0.f};
 			int												m_LastMan{0};
@@ -126,7 +123,12 @@ namespace FPS_n2 {
 		public:
 			void			SetPlayMode(bool value) noexcept { m_IsHardMode = value; }
 		private:
-			const auto&		GetMyPlayerID(void) const noexcept { return this->m_NetWorkBrowser.GetMyPlayerID(); }
+			auto			GetMyPlayerID(void) const noexcept {
+				if (m_NetWorkController) {
+					return m_NetWorkController->GetMyPlayerID();
+				}
+				return (PlayerID)0;
+			}
 		private:
 			void			LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept;
 		private:

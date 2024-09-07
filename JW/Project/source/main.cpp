@@ -7,6 +7,8 @@
 #include "Scene/TutorialScene.hpp"
 #include "Scene/MainScene.hpp"
 
+#include "CommonScene/NetworkBrowser.hpp"
+
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetEnableXAudioFlag(TRUE);//Xaudio(ロードが長いとロストするので必要に応じて)
 	DXLib_ref::Create();
@@ -17,6 +19,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//MV1SetLoadModelUsePackDraw(TRUE);
 	SetUseHalfLambertLighting(TRUE);	//ハーフランバート化
 	//
+	FPS_n2::NetWorkBrowser::Create();
 	FPS_n2::Sceneclass::PlayerManager::Create();
 	FPS_n2::Sceneclass::GunAnimManager::Create();
 	FPS_n2::Sceneclass::ModDataManager::Create();

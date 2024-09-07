@@ -206,15 +206,13 @@ namespace FPS_n2 {
 		private:
 			HitPoint											m_HP{0};							//スコア
 			ArmerPoint											m_AP{0};							//スコア
-			std::vector<DamageEvent>							m_DamageEvent;						//ダメージイベント
+			DamageEventControl									m_Damage;
 		protected:
 			void			SetHealEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint value, ArmerPoint Armervalue) noexcept {
-				this->m_DamageEvent.resize(this->m_DamageEvent.size() + 1);
-				this->m_DamageEvent.back().SetEvent(ShotID_t, DamageID_t, -value, -Armervalue);
+				m_Damage.Add(ShotID_t, DamageID_t, -value, -Armervalue, Vector3DX::up());
 			}
 			void			SetSubHPEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint value, ArmerPoint Armervalue) noexcept {
-				this->m_DamageEvent.resize(this->m_DamageEvent.size() + 1);
-				this->m_DamageEvent.back().SetEvent(ShotID_t, DamageID_t, value, Armervalue);
+				m_Damage.Add(ShotID_t, DamageID_t, value, Armervalue, Vector3DX::up());
 			}
 		public://ゲッター
 			const auto		IsAlive(void) const noexcept { return this->m_HP != 0; }
@@ -229,7 +227,8 @@ namespace FPS_n2 {
 			const auto&		GetAPMax(void) const noexcept { return APMax; }
 			void			SubAP(ArmerPoint damage_t) noexcept { this->m_AP = std::clamp<ArmerPoint>(this->m_AP - damage_t, 0, APMax); }
 
-			auto&			GetDamageEvent(void) noexcept { return this->m_DamageEvent; }
+			const auto& GetDamageEvent(void) const noexcept { return this->m_Damage; }
+			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.AddDamageEvent(pRet); }
 		public:
 			void		InitLife() {
 				this->m_HP = HPMax;
@@ -314,9 +313,6 @@ namespace FPS_n2 {
 			Vector3DX											m_UpperyVec, m_UpperzVec, m_UpperPos;
 			std::array<float, (int)CharaAnimeID::AnimeIDMax>	m_AnimPerBuf{0};
 			bool												m_TurnBody{false};
-
-			bool												m_PosBufOverRideFlag{false};
-			moves												m_OverRideInfo;
 		public://ゲッター
 			CharaAnimeID										m_BottomAnimSelect{};
 		public://ゲッター
@@ -350,7 +346,6 @@ namespace FPS_n2 {
 			const auto		GetSquatSwitch(void) const noexcept { return this->m_Squat.trigger(); }
 			const auto		GetGunSwingMat(void) const noexcept { return Matrix4x4DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
 			auto&			GetCharaAnimeBufID(CharaAnimeID value) noexcept { return this->m_AnimPerBuf.at((int)value); }
-			const auto&			GetOverRideInfo() const noexcept { return this->m_OverRideInfo; }
 			//
 			const auto		GetBottomStandAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
 			const auto		GetBottomWalkAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_Walk : CharaAnimeID::Bottom_Stand_Walk; }
@@ -387,7 +382,6 @@ namespace FPS_n2 {
 			const auto		GetVecLeft(void) const noexcept { return 1.15f * this->m_Vec[1] * std::clamp(GetSpeedPer() / 0.65f, 0.5f, 1.f); }
 			const auto		GetVecRight(void) const noexcept { return 1.15f * this->m_Vec[3] * std::clamp(GetSpeedPer() / 0.65f, 0.5f, 1.f); }
 		public:
-			void		InitOverride() { this->m_PosBufOverRideFlag = false; }
 			void		InitKey(float pxRad, float pyRad) {
 				for (int i = 0; i < 4; i++) {
 					this->m_Vec[i] = 0.f;
@@ -407,25 +401,6 @@ namespace FPS_n2 {
 				this->m_TurnBody = false;
 				//
 				for (auto& a : this->m_AnimPerBuf) { a = 0.f; }
-			}
-			//
-			void		SetPosBufOverRide(const moves& o) noexcept {
-				this->m_PosBufOverRideFlag = true;
-				this->m_OverRideInfo = o;
-			}
-			bool		PutOverride() {
-				if (this->m_PosBufOverRideFlag) {
-					this->m_PosBufOverRideFlag = false;
-					/*
-					float X = this->m_rad_Buf.x;
-					Easing(&X, this->m_OverRideInfo.rad.x, 0.9f, EasingType::OutExpo);
-					this->m_rad_Buf.x = (X);
-					this->m_rad_Buf.y = (this->m_OverRideInfo.rad.y);
-					this->m_rad.y = (this->m_OverRideInfo.rad.y);
-					//*/
-					return true;
-				}
-				return false;
 			}
 			void		InputKey(const InputControl& pInput, bool pReady, const Vector3DX& pAddRadvec) {
 				auto* DrawParts = DXDraw::Instance();

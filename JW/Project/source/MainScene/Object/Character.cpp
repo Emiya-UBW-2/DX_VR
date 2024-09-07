@@ -16,7 +16,7 @@ namespace FPS_n2 {
 		void			CharacterClass::Shot_Start() noexcept {
 			if (this->m_MyID == 0) {
 				auto* PlayerMngr = PlayerManager::Instance();
-				PlayerMngr->GetPlayer(this->m_MyID).AddShot(GetGunPtrNow()->GetPelletNum());
+				PlayerMngr->GetPlayer(this->m_MyID)->AddShot(GetGunPtrNow()->GetPelletNum());
 			}
 			GetGunPtrNow()->SetBullet();
 			if (IsULTSelect()) {
@@ -110,7 +110,7 @@ namespace FPS_n2 {
 				LifeControl::SubAP(value.ArmerDamage);
 				if (value.ShotID == 0) {
 					if ((value.Damage >= 0) && (value.ArmerDamage >= 0)) {
-						PlayerMngr->GetPlayer(value.ShotID).AddHit(1);
+						PlayerMngr->GetPlayer(value.ShotID)->AddHit(1);
 					}
 				}
 				if (LifeControl::IsAlive()) {
@@ -138,10 +138,10 @@ namespace FPS_n2 {
 
 					SE->Get((int)SoundEnum::Man_Death1 + GetRand(8 - 1)).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
 					if (value.ShotID == 0) {
-						PlayerMngr->GetPlayer(value.ShotID).AddScore(100 + ((IsGun0Select() && (value.Damage >= 100)) ? 20 : 0));
-						PlayerMngr->GetPlayer(value.ShotID).AddKill(1);
+						PlayerMngr->GetPlayer(value.ShotID)->AddScore(100 + ((IsGun0Select() && (value.Damage >= 100)) ? 20 : 0));
+						PlayerMngr->GetPlayer(value.ShotID)->AddKill(1);
 
-						auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(value.ShotID).GetChara();
+						auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(value.ShotID)->GetChara();
 						if (Chara->GetAutoAimActive()) {
 
 							Chara->AddULT(IsULTSelect() ? 1 : 6, Chara->IsGun0Select());
@@ -166,7 +166,7 @@ namespace FPS_n2 {
 			//被弾処理
 			auto* HitPtr = HitBoxControl::GetLineHit(StartPos, pEndPos);
 			if (HitPtr) {
-				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(AttackID).GetChara();
+				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(AttackID)->GetChara();
 				//部位ダメージ演算
 				if (CheckBodyParts) {
 					switch (HitPtr->GetColType()) {
@@ -336,9 +336,9 @@ namespace FPS_n2 {
 			}
 			//ターゲットが見える場合かまえっぱなし
 			if (m_IsMainGame && !m_IsChanging) {
-				for (int i = 0; i < Player_num; i++) {
+				for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
 					if (i == this->m_MyID) { continue; }
-					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
+					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
 					if (!Chara->IsAlive()) { continue; }
 					if (!Chara->CanLookTarget) { continue; }
 					GunReadyControl::SetAimOrADS();
@@ -622,7 +622,7 @@ namespace FPS_n2 {
 									}
 									if (m_IsMainGame) {
 										ItemLogParts->Add(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(200), 10);
-										PlayerMngr->GetPlayer(this->m_MyID).AddScore(10);
+										PlayerMngr->GetPlayer(this->m_MyID)->AddScore(10);
 									}
 									GunReadyControl::SetAim();
 									LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, 0, LifeControl::GetAPMax());
@@ -671,7 +671,7 @@ namespace FPS_n2 {
 									GunReadyControl::SetAim();
 									if (m_IsMainGame) {
 										ItemLogParts->Add(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(201), 50);
-										PlayerMngr->GetPlayer(this->m_MyID).AddScore(50);
+										PlayerMngr->GetPlayer(this->m_MyID)->AddScore(50);
 									}
 								}
 
@@ -866,9 +866,9 @@ namespace FPS_n2 {
 			//ほかプレイヤーとの判定
 			if (m_IsMainGame) {
 				float Radius = 2.f*0.5f*Scale_Rate;
-				for (int i = 0; i < Player_num; i++) {
+				for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
 					if (i == this->m_MyID) { continue; }
-					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
+					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
 					if (!Chara->IsAlive()) { continue; }
 					//自分が当たったら押し戻す
 					Vector3DX Vec = (Chara->GetCharaPosition() - this->GetCharaPosition()); Vec.y = (0.f);
@@ -879,9 +879,9 @@ namespace FPS_n2 {
 				}
 			}
 			//座標オーバーライド
-			if (KeyControl::PutOverride()) {
-				PosBuf = KeyControl::GetOverRideInfo().GetPos();
-				this->SetMove().SetVec(KeyControl::GetOverRideInfo().GetVec());
+			if (this->m_MoveOverRideFlag) {
+				this->m_MoveOverRideFlag = false;
+				this->m_move = this->m_OverRideInfo;
 			}
 			auto* OptionParts = OPTION::Instance();
 			bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
@@ -1059,9 +1059,9 @@ namespace FPS_n2 {
 								Vector3DX BasePos = p->GetFrameWorldMat_P(GunFrame::Muzzle).pos();
 								float Range = GetIsLaserActive() ? 13.f : 7.f;
 
-								for (int i = 0; i < Player_num; i++) {
+								for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
 									if (i == this->m_MyID) { continue; }
-									auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
+									auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
 									if (!Chara->IsAlive()) { continue; }
 									if (!Chara->CanLookTarget) { continue; }
 									Vector3DX Vec = (Chara->GetEyeMatrix().pos() - BasePos);
@@ -1073,7 +1073,7 @@ namespace FPS_n2 {
 								}
 
 								if (GetAutoAimActive()) {
-									auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetAutoAimID()).GetChara();
+									auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetAutoAimID())->GetChara();
 									Vector3DX Vec = (Chara->GetEyeMatrix().pos() - BasePos);
 									tmp_gunmat = Matrix4x4DX::RotVec2(GetEyeMatrix().zvec() * -1.f, Vec.normalized()) * tmp_gunmat;
 
@@ -1372,7 +1372,7 @@ namespace FPS_n2 {
 			//サウンド
 			this->m_CharaSound = -1;
 			//動作にかかわる操作
-			KeyControl::InitOverride();
+			this->m_MoveOverRideFlag = false;
 			//銃のIDセットアップ
 			if (GetGunPtr(0)) {
 				GetGunPtr(0)->SetPlayerID(this->m_MyID);

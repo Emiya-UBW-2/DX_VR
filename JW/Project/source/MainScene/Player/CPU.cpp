@@ -193,8 +193,8 @@ namespace FPS_n2 {
 				}
 				IsGotLengthToTarget = true;
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
-				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
+				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 
 				auto MyPos = MyChara->GetEyeMatrix().pos();
@@ -210,8 +210,8 @@ namespace FPS_n2 {
 				}
 				IsGotLengthToTarget = true;
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
-				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
+				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 
 				auto MyPos = MyChara->GetEyeMatrix().pos();
@@ -229,8 +229,8 @@ namespace FPS_n2 {
 			}
 			void		ChangePoint() noexcept {
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
-				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
+				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 				auto MyPos = MyChara->GetEyeMatrix().pos();
 
@@ -281,8 +281,8 @@ namespace FPS_n2 {
 			}
 			void		Repop(bool CanRepop) noexcept {
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
-				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
+				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 
 				Vector3DX pos_t;
@@ -314,7 +314,7 @@ namespace FPS_n2 {
 			}
 			void		AimDir(const Vector3DX& VEC) {
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 
 				Vector3DX Vec = VEC; Vec.y = (0.f);
 
@@ -360,7 +360,7 @@ namespace FPS_n2 {
 
 			const bool CannotRepop() const noexcept {
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 				return (!m_CanRepop && !MyChara->IsAlive());
 			}
 		public:
@@ -384,7 +384,7 @@ namespace FPS_n2 {
 				}
 
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 
 				m_MyInput.SetInputPADS(PADS::SQUAT, MyChara->GetIsSquat() && (GetRand(100) < 1));
 
@@ -415,7 +415,7 @@ namespace FPS_n2 {
 			void		Execute_Normal() noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 				auto MyPos = MyChara->GetEyeMatrix().pos();
 				//
 				if (this->m_MoveFrontTimer > 6.f) {
@@ -446,7 +446,7 @@ namespace FPS_n2 {
 			void		Execute_Shot() noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 				//ÉGÉCÉÄ
 				AimDir(Matrix4x4DX::Vtrans(GetVectorToTarget(), Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(15.f))) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(15.f)))));
 				//ÉäÅ[Éì
@@ -487,7 +487,7 @@ namespace FPS_n2 {
 			}
 			void		Execute_Dead() noexcept {
 				auto* PlayerMngr = PlayerManager::Instance();
-				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
+				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 				if (MyChara->IsAlive()) {
 					this->m_Phase = ENUM_AI_PHASE::Normal;
 				}

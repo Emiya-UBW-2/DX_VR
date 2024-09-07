@@ -32,7 +32,7 @@ namespace FPS_n2 {
 				//
 				this->m_UIclass.Load();
 
-				PlayerMngr->Init(1);
+				PlayerMngr->Init(1, 0);
 		}
 		void			TutorialScene::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -62,7 +62,7 @@ namespace FPS_n2 {
 
 			LoadGun(ULTName.c_str(), 0, false, 1);
 			//BGをオブジェに登録
-			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
+			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0)->GetChara();
 			c->SetMapCol(this->m_BackGround);
 			//人の座標設定
 			{
@@ -267,7 +267,7 @@ namespace FPS_n2 {
 #ifdef DEBUG
 			DebugParts->SetPoint("update start");
 #endif // DEBUG
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0)->GetChara();
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
 				SetMousePoint(DXDraw::Instance()->GetScreenX(1920) / 2, DXDraw::Instance()->GetScreenY(1080) / 2);
@@ -347,16 +347,14 @@ namespace FPS_n2 {
 				bool isready = true;
 				Chara->SetInput(MyInput, isready && Chara->IsAlive());
 				//ダメージイベント処理
-				for (auto& e : Chara->GetDamageEvent()) {
-					this->m_DamageEvents.emplace_back(e);
-				}
-				Chara->GetDamageEvent().clear();
+				Chara->AddDamageEvent(&this->m_DamageEvents);
 				//ダメージイベント
-				for (int j = 0; j < this->m_DamageEvents.size(); j++) {
-					if (Chara->SetDamageEvent(this->m_DamageEvents[j])) {
-						std::swap(this->m_DamageEvents.back(), m_DamageEvents[j]);
+				for (int j = 0, Num = static_cast<int>(this->m_DamageEvents.size()); j < Num; ++j) {
+					if (Chara->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)])) {
+						std::swap(this->m_DamageEvents.back(), m_DamageEvents[static_cast<size_t>(j)]);
 						this->m_DamageEvents.pop_back();
-						j--;
+						--Num;
+						--j;
 					}
 				}
 				Chara->AddULT(100, true);
@@ -604,9 +602,9 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 
 			//使い回しオブジェ系
-			auto* Ptr = &PlayerMngr->GetPlayer(0).GetChara();
+			auto* Ptr = &PlayerMngr->GetPlayer(0)->GetChara();
 			ObjectManager::Instance()->DelObj(Ptr);
-			PlayerMngr->GetPlayer(0).Dispose();
+			PlayerMngr->GetPlayer(0)->Dispose();
 			this->m_BackGround->Dispose();
 			this->m_BackGround.reset();
 			GunsModify::DisposeSlots();
@@ -642,7 +640,7 @@ namespace FPS_n2 {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0)->GetChara();
 
 			SetFogEnable(FALSE);
 			this->m_BackGround->Draw();
@@ -674,7 +672,7 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0)->GetChara();
 			//着弾表示
 			if (Chara->IsAlive()) {
 				//レティクル表示
@@ -793,10 +791,8 @@ namespace FPS_n2 {
 		void			TutorialScene::LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
-			BattleResourceMngr->LoadGun(FolderName, ID, Sel);
-			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID).GetChara();
-			auto& g = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(ID).GetGun(Sel);
-			c->SetGunPtr(Sel, g);
+			BattleResourceMngr->LoadCharaGun(FolderName, ID, Sel);
+			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID)->GetChara();
 			GunsModify::CreateSelData(c->GetGunPtr(Sel), IsPreset);
 			c->GetGunPtr(Sel)->Init_Gun();
 		}

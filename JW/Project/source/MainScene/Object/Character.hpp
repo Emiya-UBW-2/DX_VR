@@ -67,6 +67,9 @@ namespace FPS_n2 {
 			int													m_AmmoLoadCount{0};
 
 			bool											m_IsHardMode{false};
+
+			bool												m_MoveOverRideFlag{ false };
+			moves												m_OverRideInfo;
 		private:
 			PlayerID											m_MyID{0};
 		public:
@@ -75,6 +78,11 @@ namespace FPS_n2 {
 
 			auto	GetFrameWorldMat(CharaFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
 			auto	GetFrameLocalMat(CharaFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix(GetFrame(static_cast<int>(frame))); }
+
+			void			SetMoveOverRide(const moves& o) noexcept {
+				this->m_MoveOverRideFlag = true;
+				this->m_OverRideInfo = o;
+			}
 		public:
 			bool												CanLookTarget{true};
 

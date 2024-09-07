@@ -14,7 +14,7 @@ namespace FPS_n2 {
 				//BG
 				GunAnimManager::Instance()->Load("data/CharaAnime/");
 				//
-				PlayerMngr->Init(1);
+				PlayerMngr->Init(1, 0);
 		}
 		void			TitleScene::Set_Sub(void) noexcept {
 			select = 0;
@@ -82,23 +82,23 @@ namespace FPS_n2 {
 			//
 			GunsModify::LoadSlots("Save/gundata.svf");
 			{
-				BattleResourceMngr->LoadGun("G17Gen3", (PlayerID)(0), 0);
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer((PlayerID)(0)).GetChara();
-				auto& g = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer((PlayerID)(0)).GetGun(0);
+				BattleResourceMngr->LoadCharaGun("G17Gen3", (PlayerID)(0), 0);
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer((PlayerID)(0))->GetChara();
+				auto& g = c->GetGunPtr(0);
 				c->SetGunPtr(0, g);
 				GunsModify::CreateSelData(c->GetGunPtr(0), true);
 				c->GetGunPtr(0)->Init_Gun();
 			}
 			{
-				BattleResourceMngr->LoadGun(ULT_GUNName[(int)GunsModify::GetULTSelect()], (PlayerID)(0), 1);
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer((PlayerID)(0)).GetChara();
-				auto& g = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer((PlayerID)(0)).GetGun(1);
+				BattleResourceMngr->LoadCharaGun(ULT_GUNName[(int)GunsModify::GetULTSelect()], (PlayerID)(0), 1);
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer((PlayerID)(0))->GetChara();
+				auto& g = c->GetGunPtr(1);
 				c->SetGunPtr(1, g);
 				GunsModify::CreateSelData(c->GetGunPtr(1), false);
 				c->GetGunPtr(1)->Init_Gun();
 			}
 			{
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer((PlayerID)(0)).GetChara();
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer((PlayerID)(0))->GetChara();
 				c->ValueSet((PlayerID)(0), false, CharaTypeID::Team);
 
 				Vector3DX pos_t = Vector3DX::vget(-0.6f, 0.0f, 0.2f)*Scale_Rate;
@@ -129,7 +129,7 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* PopUpParts = PopUp::Instance();
 
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0)->GetChara();
 
 			Pad->SetMouseMoveEnable(false);
 			Pad->ChangeGuide(
@@ -306,14 +306,10 @@ namespace FPS_n2 {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			{
-				auto* Ptr = &PlayerMngr->GetPlayer((PlayerID)(0)).GetChara();
+				auto* Ptr = &PlayerMngr->GetPlayer((PlayerID)(0))->GetChara();
 				ObjMngr->DelObj(Ptr);
 			}
-			{
-				auto* Ptr = &PlayerMngr->GetPlayer((PlayerID)(0)).GetGun(0);
-				ObjMngr->DelObj(Ptr);
-			}
-			PlayerMngr->GetPlayer(0).Dispose();
+			PlayerMngr->GetPlayer(0)->Dispose();
 			GunsModify::DisposeSlots();
 			//
 			m_SelectBackImage.Dispose();

@@ -1,88 +1,107 @@
 #pragma once
+#pragma warning(disable:4464)
 #include	"../Header.hpp"
 #include	"NetWork.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
-		//通信
-		enum class SequenceEnum {
-			SelMode,
-			CheckPreset,
-			Set_Port,
-			SetIP,
-			SetTick,
-			Matching,
-			MainGame,
+	enum class BrowserSequence : uint8_t {
+		SelMode,
+		CheckPreset,
+		SetNewData,
+		Ready,
+	};
+	class NetWorkBrowser : public SingletonBase<NetWorkBrowser> {
+	private:
+		friend class SingletonBase<NetWorkBrowser>;
+	private:
+		struct NewSetting {
+			IPDATA					IP{ 127,0,0,1 };
+			int						UsePort{ 10850 };
 		};
-		class NetWorkBrowser {
-			//サーバー専用
-			ServerControl			m_ServerCtrl;																//
-			//クライアント専用
-			ClientControl			m_ClientCtrl;																//
-			//共通
-			bool					m_IsClient{true};															//
-			SequenceEnum			m_Sequence{SequenceEnum::SelMode};										//
-			bool					m_SeqFirst{false};														//
-			float					m_Tick{1.f};																//
-			NewWorkSetting			m_NewWorkSetting;															//
-			int						m_NewWorkSelect{0};														//
-			NewSetting				m_NewSetting;																//
-			double					m_ClientFrame{0.0};
-			float					m_Ping{0.f};
+		class NewWorkSetting {
+			std::vector<NewSetting>	m_NewWorkSetting;
+		public:
+			void Load(void) noexcept {
+				SetOutApplicationLogValidFlag(FALSE);
+				int mdata = FileRead_open("data/NetWorkSetting.txt", FALSE);
+				while (true) {
+					m_NewWorkSetting.resize(this->m_NewWorkSetting.size() + 1);
+					m_NewWorkSetting.back().UsePort = std::clamp<int>(getparams::_int(mdata), 0, 50000);
+					m_NewWorkSetting.back().IP.d1 = (unsigned char)std::clamp<int>(getparams::_int(mdata), 0, 255);
+					m_NewWorkSetting.back().IP.d2 = (unsigned char)std::clamp<int>(getparams::_int(mdata), 0, 255);
+					m_NewWorkSetting.back().IP.d3 = (unsigned char)std::clamp<int>(getparams::_int(mdata), 0, 255);
+					m_NewWorkSetting.back().IP.d4 = (unsigned char)std::clamp<int>(getparams::_int(mdata), 0, 255);
+					if (FileRead_eof(mdata) != 0) {
+						break;
+					}
+				}
+				FileRead_close(mdata);
+				SetOutApplicationLogValidFlag(TRUE);
+			}
+			void Save(void) noexcept {
+				std::ofstream outputfile("data/NetWorkSetting.txt");
+				for (auto& n : this->m_NewWorkSetting) {
+					int ID = static_cast<int>(&n - &this->m_NewWorkSetting.front());
+					outputfile << "Setting" + std::to_string(ID) + "_Port=" + std::to_string(n.UsePort) + "\n";
+					outputfile << "Setting" + std::to_string(ID) + "_IP1=" + std::to_string(n.IP.d1) + "\n";
+					outputfile << "Setting" + std::to_string(ID) + "_IP2=" + std::to_string(n.IP.d2) + "\n";
+					outputfile << "Setting" + std::to_string(ID) + "_IP3=" + std::to_string(n.IP.d3) + "\n";
+					outputfile << "Setting" + std::to_string(ID) + "_IP4=" + std::to_string(n.IP.d4) + "\n";
+				}
+				outputfile.close();
+			}
 
-			switchs					m_LeftClick;
-		public:
-			const auto& GetClient(void) const noexcept { return this->m_IsClient; }
-			const auto& GetSequence(void) const noexcept { return this->m_Sequence; }
-		public:
-			const auto&		GetMyPlayerID(void) const noexcept { return (this->m_IsClient) ? this->m_ClientCtrl.GetMyPlayerID() : this->m_ServerCtrl.GetMyPlayerID(); }
-			const auto		GetNowServerPlayerData(int ID, bool isYradReset) noexcept { return (this->m_IsClient) ? this->m_ClientCtrl.GetNowServerPlayerData(ID, isYradReset) : this->m_ServerCtrl.GetNowServerPlayerData(ID, isYradReset); }
-			void			GetRecvData(int ID, double ServerFrame) noexcept {
-				if ((this->m_IsClient) ? this->m_ClientCtrl.GetRecvData(ID) : this->m_ServerCtrl.GetRecvData(ID)) {
-					this->m_Ping = static_cast<float>(this->m_ClientFrame - ServerFrame)*1000.f;
-				}
-				printfDx("ping %lf \n", this->m_Ping);
+			auto		GetSize(void) const noexcept { return static_cast<int>(m_NewWorkSetting.size()); }
+			const auto& Get(int ID) const noexcept { return this->m_NewWorkSetting[static_cast<size_t>(ID)]; }
+			void		AddBack(void) noexcept {
+				m_NewWorkSetting.resize(this->m_NewWorkSetting.size() + 1);
+				m_NewWorkSetting.back().UsePort = 10850;
+				m_NewWorkSetting.back().IP.d1 = 127;
+				m_NewWorkSetting.back().IP.d2 = 0;
+				m_NewWorkSetting.back().IP.d3 = 0;
+				m_NewWorkSetting.back().IP.d4 = 1;
 			}
-		public:
-			void Init(void) noexcept {
-				m_NewWorkSetting.Load();
-				m_NewWorkSelect = 0;
-			}
-			void FirstExecute(const InputControl& MyInput, const moves & move_t, const std::vector<DamageEvent>& Damage_t) noexcept {
-				if (this->m_IsClient) {
-					m_ClientCtrl.SetMyPlayer(MyInput, move_t, Damage_t, this->m_ClientFrame);
-					if ((this->m_Sequence == SequenceEnum::Matching) && m_SeqFirst) {
-						m_ClientCtrl.Init(this->m_NewSetting.UsePort, this->m_Tick, this->m_NewSetting.IP);
-					}
-					if ((this->m_Sequence >= SequenceEnum::Matching) && this->m_ClientCtrl.Execute()) {
-						this->m_Sequence = SequenceEnum::MainGame;
-					}
-				}
-				//サーバー
-				else {
-					m_ServerCtrl.SetMyPlayer(MyInput, move_t, Damage_t, this->m_ClientFrame);
-					if ((this->m_Sequence == SequenceEnum::Matching) && m_SeqFirst) {
-						m_ServerCtrl.Init(this->m_NewSetting.UsePort, this->m_Tick, IPDATA());
-					}
-					if ((this->m_Sequence >= SequenceEnum::Matching) && this->m_ServerCtrl.Execute()) {
-						this->m_Sequence = SequenceEnum::MainGame;
-					}
-				}
-			}
-			void LateExecute(void) noexcept {
-				auto* DrawParts = DXDraw::Instance();
-				if (this->m_Sequence == SequenceEnum::MainGame) {
-					this->m_ClientFrame += 1.0 / (double)DrawParts->GetFps();
-				}
-				else {
-					this->m_ClientFrame = 0.0;
-				}
-			}
-			void Draw(void) noexcept;
-			void Dispose(void) noexcept {
-				m_ServerCtrl.Dispose();
-				m_ClientCtrl.Dispose();
-			}
+			void		SetBack(const NewSetting& per) noexcept { this->m_NewWorkSetting.back() = per; }
 		};
+	private:
+		bool					m_IsClient{ true };
+		bool					m_IsServerPlayer{ true };
+		NewSetting				m_NetSetting;
+		//共通
+		BrowserSequence			m_Sequence{ BrowserSequence::SelMode };
+		bool					m_SeqFirst{ false };
+		NewWorkSetting			m_NewWorkSettings;
+	private:
+		NetWorkBrowser(void) noexcept {}
+		NetWorkBrowser(const NetWorkBrowser&) = delete;
+		NetWorkBrowser(NetWorkBrowser&& o) = delete;
+		NetWorkBrowser& operator=(const NetWorkBrowser&) = delete;
+		NetWorkBrowser& operator=(NetWorkBrowser&& o) = delete;
+
+		~NetWorkBrowser(void) noexcept {}
+	public:
+		auto			IsDataReady(void) const noexcept { return this->m_Sequence == BrowserSequence::Ready; }
+		const auto& GetClient(void) const noexcept { return this->m_IsClient; }
+		const auto& GetServerPlayer(void) const noexcept { return this->m_IsServerPlayer; }
+		const auto& GetNetSetting(void) const noexcept { return this->m_NetSetting; }
+	public:
+		void			BeClient(void) noexcept {
+			this->m_IsClient = true;
+		}
+		void			BeServerPlayer(void) noexcept {
+			this->m_IsClient = false;
+			this->m_IsServerPlayer = true;
+		}
+		void			BeServer(void) noexcept {
+			this->m_IsClient = false;
+			this->m_IsServerPlayer = false;
+		}
+		void			ReadyConnect(const NewSetting& n) noexcept {
+			this->m_NetSetting = n;
+			this->m_Sequence = BrowserSequence::Ready;
+		}
+	public:
+		void Init(void) noexcept;
+		void Draw(void) noexcept;
 	};
 };

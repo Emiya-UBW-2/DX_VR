@@ -48,6 +48,7 @@
     <ClInclude Include="source\sub.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\CommonScene\NetWork.cpp" />
     <ClCompile Include="source\CommonScene\NetworkBrowser.cpp" />
     <ClCompile Include="source\CommonScene\Object\GunsModify.cpp" />
     <ClCompile Include="source\main.cpp" />

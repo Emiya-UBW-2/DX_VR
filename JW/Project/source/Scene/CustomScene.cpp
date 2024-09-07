@@ -11,7 +11,7 @@ namespace FPS_n2 {
 		void			CustomScene::Load_Sub(void) noexcept {
 			//ƒ[ƒh
 				auto* PlayerMngr = PlayerManager::Instance();
-				PlayerMngr->Init(1 + (int)ULT_GUN::Max);
+				PlayerMngr->Init(0, 1 + (int)ULT_GUN::Max);
 		}
 		void			CustomScene::Set_Sub(void) noexcept {
 			//
@@ -59,10 +59,12 @@ namespace FPS_n2 {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
-
+			for (int i = 0; i < 1 + (int)ULT_GUN::Max; i++) {
+				PlayerMngr->SetGun(i, nullptr);
+			}
 			{
-				BattleResourceMngr->LoadGun("G17Gen3", (PlayerID)(0), 0);
-				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
+				BattleResourceMngr->LoadOnlyGun("G17Gen3", 0);
+				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetGun(0);
 				GunsModify::CreateSelData(GunPtr, true);
 				UpdateSlotMove();
 				GunPtr->Init_Gun();
@@ -71,8 +73,8 @@ namespace FPS_n2 {
 			auto* SaveDataParts = SaveDataClass::Instance();
 			int max = std::clamp(static_cast<int>(SaveDataParts->GetParam("ULT Unlock")), 1, (int)ULT_GUN::Max);
 			for (int i = 0;i < max;i++) {
-				BattleResourceMngr->LoadGun(ULT_GUNName[i], (PlayerID)(1 + i), 0);
-				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + i).GetGun(0);
+				BattleResourceMngr->LoadOnlyGun(ULT_GUNName[i], 1 + i);
+				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetGun(1 + i);
 				GunsModify::CreateSelData(GunPtr, false);
 				GunPtr->Init_Gun();
 			}
@@ -194,7 +196,7 @@ namespace FPS_n2 {
 				Matrix4x4DX::Mtrans(Vector3DX::vget(0.f, 1.01f, -0.4f)*Scale_Rate);
 			{
 				for (int i = 0;i < (int)ULT_GUN::Max;i++) {
-					auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + i).GetGun(0);
+					auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetGun(1 + i);
 					auto Per = std::clamp(m_UltPer[i], 0.f, 1.f);
 					if (GunPtr) {
 						GunPtr->SetGunMatrix(
@@ -204,7 +206,7 @@ namespace FPS_n2 {
 				}
 			}
 			{
-				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
+				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetGun(0);
 				auto Per = 1.f - std::clamp(m_Range - 1.f, 0.f, 1.f);
 				GunPtr->SetGunMatrix(
 					Lerp(Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(90)) * Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(30)), Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(0)), std::clamp(Per*2.f, 0.f, 1.f))*
@@ -398,13 +400,10 @@ namespace FPS_n2 {
 			GunsModify::SaveSlots("Save/gundata.svf");
 
 			for (int i = 0;i < (int)ULT_GUN::Max;i++) {
-				ObjMngr->DelObj(&PlayerMngr->GetPlayer(1 + i).GetGun(0));
+				ObjMngr->DelObj(&PlayerMngr->GetGun(1 + i));
 			}
-			ObjMngr->DelObj(&PlayerMngr->GetPlayer(0).GetGun(0));
-			PlayerMngr->GetPlayer(0).Dispose();
-			for (int i = 0;i < (int)ULT_GUN::Max;i++) {
-				PlayerMngr->GetPlayer(1 + i).Dispose();
-			}
+			ObjMngr->DelObj(&PlayerMngr->GetGun(0));
+			PlayerMngr->Dispose();
 			GunsModify::DisposeSlots();
 			//
 			m_SelectBackImage.Dispose();
@@ -533,7 +532,7 @@ namespace FPS_n2 {
 		void			CustomScene::ResetMod() noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
-			auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
+			auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetGun(0);
 			GunsModify::DisposeSlots();
 			GunsModify::CreateSelData(GunPtr, true);
 			UpdateSlotMove();
@@ -567,7 +566,7 @@ namespace FPS_n2 {
 				}
 				if (prev != y->m_sel) {
 					SelMoveClass[select].Xadd = (add > 0) ? 1.f : -1.f;
-					auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
+					auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetGun(0);
 					GunsModify::ChangeSelData(y.get(), y->m_sel, false);
 					UpdateSlotMove();
 					GunPtr->Init_Gun();
@@ -639,7 +638,7 @@ namespace FPS_n2 {
 				auto* OptionParts = OPTION::Instance();
 				xp1 = DrawParts->GetUIY(1900);
 				yp1 = DrawParts->GetUIY(1080 - 12 - 24 * 3);
-				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
+				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetGun(0);
 				if (GunPtr) {
 					auto& STR = OptionParts->GetParamInt(EnumSaveParam::Language) ? GunPtr->GetModData()->GetInfoEng() : GunPtr->GetModData()->GetInfo();
 					for (auto& s : STR) {
@@ -654,7 +653,7 @@ namespace FPS_n2 {
 			{
 				xp1 = DrawParts->GetUIY(160);
 				yp1 = DrawParts->GetUIY(540);
-				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(0).GetGun(0);
+				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetGun(0);
 				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 					DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																	  xp1, yp1, Green, DarkGreen, "ShotMode : %s", SHOTTYPEName[(int)GunPtr->GetShotType()]);
@@ -757,7 +756,7 @@ namespace FPS_n2 {
 			{
 				xp1 = DrawParts->GetUIY(960);
 				yp1 = DrawParts->GetUIY(840);
-				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + (int)GunsModify::GetULTSelect()).GetGun(0);
+				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetGun(1 + (int)GunsModify::GetULTSelect());
 				if (GunPtr) {
 					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						DrawParts->GetUIY(64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE,
@@ -768,7 +767,7 @@ namespace FPS_n2 {
 			{
 				xp1 = DrawParts->GetUIY(1900);
 				yp1 = DrawParts->GetUIY(1080 - 12 - 24 * 3);
-				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + (int)GunsModify::GetULTSelect()).GetGun(0);
+				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetGun(1 + (int)GunsModify::GetULTSelect());
 				if (GunPtr) {
 					auto& STR = GunPtr->GetModData()->GetInfo();
 					for (auto& s : STR) {
@@ -783,7 +782,7 @@ namespace FPS_n2 {
 			{
 				xp1 = DrawParts->GetUIY(160);
 				yp1 = DrawParts->GetUIY(540);
-				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(1 + (int)GunsModify::GetULTSelect()).GetGun(0);
+				auto& GunPtr = (std::shared_ptr<GunClass>&)PlayerMngr->GetGun(1 + (int)GunsModify::GetULTSelect());
 				if (GunPtr) {
 					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,

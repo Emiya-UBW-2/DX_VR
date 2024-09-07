@@ -132,7 +132,9 @@ namespace FPS_n2 {
 		}
 		//
 		void			CommonBattleResource::LoadChara(const std::string&FolderName, PlayerID ID) noexcept {
+			auto* PlayerMngr = PlayerManager::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
+			auto& p = PlayerMngr->GetPlayer(ID);
 
 			std::string Path = "data/Charactor/";
 			Path += FolderName;
@@ -142,10 +144,16 @@ namespace FPS_n2 {
 			ObjMngr->AddObject(Ptr);
 			ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
 			Ptr->Init();
-			PlayerManager::Instance()->GetPlayer(ID).SetChara(Ptr);
+			p->SetChara(Ptr);
+			auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
+			c->SetPlayerID(ID);
+			p->SetAI(std::make_shared<AIControl>());
+			//p->GetAI()->SetPlayerID(value);
+			//p->GetAI()->Init();
 		}
-		void			CommonBattleResource::LoadGun(const std::string&FolderName, PlayerID ID, int Sel) noexcept {
+		void			CommonBattleResource::LoadCharaGun(const std::string& FolderName, PlayerID ID, int Sel) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
 
 			std::string Path = "data/gun/";
 			Path += FolderName;
@@ -155,7 +163,22 @@ namespace FPS_n2 {
 			ObjMngr->AddObject(Ptr);
 			ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
 			Ptr->Init();
-			PlayerManager::Instance()->GetPlayer(ID).SetGun(Sel, Ptr);
+			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID)->GetChara();
+			c->SetGunPtr(Sel, Ptr);
+		}
+		void			CommonBattleResource::LoadOnlyGun(const std::string& FolderName, int Sel) noexcept {
+			auto* ObjMngr = ObjectManager::Instance();
+			auto* PlayerMngr = PlayerManager::Instance();
+
+			std::string Path = "data/gun/";
+			Path += FolderName;
+			Path += "/";
+
+			auto Ptr = std::make_shared<GunClass>();
+			ObjMngr->AddObject(Ptr);
+			ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
+			Ptr->Init();
+			PlayerMngr->SetGun(Sel, Ptr);
 		}
 	};
 };

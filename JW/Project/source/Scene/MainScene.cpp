@@ -18,25 +18,20 @@ namespace FPS_n2 {
 			//
 			BattleResourceMngr->Load();
 			//
-			this->m_AICtrl.resize(Chara_num);
-			for (int i = 1; i < Chara_num; i++) {
-				this->m_AICtrl[i] = std::make_shared<AIControl>();
-			}
-			//
 			this->m_UIclass.Load();
 			this->hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
 			this->guard_Graph = GraphHandle::Load("data/UI/battle_guard.bmp");
 			this->m_MiniMapScreen = GraphHandle::Make(DrawParts->GetUIY(128) * 2, DrawParts->GetUIY(128) * 2, true);
-			PlayerMngr->Init(Chara_num);
-			for (int i = 1; i < Chara_num; i++) {
+			PlayerMngr->Init(11, 0);
+			for (int i = 1; i < PlayerMngr->GetPlayerNum(); i++) {
 				BattleResourceMngr->LoadChara("Soldier", (PlayerID)i);
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i).GetChara();
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
 				if (i == 1) {
 					MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME, -1.f);//身体ラグドール
 					MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
 				}
 				else {
-					auto& Base = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1).GetChara();
+					auto& Base = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1)->GetChara();
 					c->GetRagDoll() = Base->GetRagDoll().Duplicate();
 					MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
 				}
@@ -44,7 +39,7 @@ namespace FPS_n2 {
 			}
 
 			std::string GunName;
-			for (int i = 1; i < gun_num; i++) {
+			for (int i = 1; i < PlayerMngr->GetPlayerNum(); i++) {
 				if (!m_IsHardMode) {
 					GunName = "PCC_4";
 				}
@@ -67,7 +62,7 @@ namespace FPS_n2 {
 			//ロード
 			BattleResourceMngr->LoadChara("Suit", GetMyPlayerID());
 			{
-				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 				Chara->LoadExtends();
 				Chara->SetPlayMode(m_IsHardMode);
 			}
@@ -83,13 +78,14 @@ namespace FPS_n2 {
 			}
 
 			//BGをオブジェに登録
-			for (int index = 0; index < Chara_num; index++) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 				c->SetMapCol(this->m_BackGround);
 			}
 			//人の座標設定
-			for (int index = 0; index < Chara_num; index++) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+				auto& p = PlayerMngr->GetPlayer(index);
+				auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
 				Vector3DX pos_t;
 				float rad_t = 0.f;
 				if (index == 0) {
@@ -106,7 +102,7 @@ namespace FPS_n2 {
 					rad_t = deg2rad(GetRandf(180.f));
 				}
 				else {
-					auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
+					auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0)->GetChara();
 					Vector3DX TgtPos_XZ = TargetChara->GetMove().GetPos(); TgtPos_XZ.y = (0.f);
 					Vector3DX BGPos_XZ;
 					while (true) {
@@ -145,7 +141,7 @@ namespace FPS_n2 {
 				c->MovePoint(deg2rad(0.f), rad_t, pos_t, (index == 0) ? 1 : 0);
 				c->Heal(100, true);
 				if (index != 0) {
-					this->m_AICtrl[index]->Init(this->m_BackGround, (PlayerID)index);
+					p->GetAI()->Init(m_BackGround, (PlayerID)index);
 				}
 			}
 			//Cam
@@ -167,7 +163,8 @@ namespace FPS_n2 {
 			prevLastMan = -1;
 			//入力
 			this->m_DamageEvents.clear();
-			m_NetWorkBrowser.Init();
+			auto* NetBrowser = NetWorkBrowser::Instance();
+			NetBrowser->Init();
 			m_ReadyTimer = 6.f;
 			m_Timer = 180.f;//61.f;
 			m_RashStartLog = false;
@@ -207,7 +204,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* BGM = BGMPool::Instance();
 			auto* ItemLogParts = SideLog::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 
 			auto* Pad = PadControl::Instance();
 			Pad->SetMouseMoveEnable(!m_IsEnd);
@@ -259,7 +256,9 @@ namespace FPS_n2 {
 #else
 #endif
 				m_CountDownBGMTimer = (int)m_ReadyTimer;
-				return true;
+				if (!m_NetWorkController) {
+					return true;
+				}
 			}
 			else {
 				m_MainLoopPauseControl.Reset();
@@ -268,10 +267,10 @@ namespace FPS_n2 {
 						if (m_PreEndTimer < 0.f) {
 							m_PreEndTimer = 5.f;
 							ItemLogParts->Add(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(202), 100);
-							PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(100);
+							PlayerMngr->GetPlayer(GetMyPlayerID())->AddScore(100);
 							if (m_LastMan == 0) {
 								ItemLogParts->Add(3.f, GetColor(25, 122, 75), "%s +%4d", LocalizePool::Instance()->Get(203), 100);
-								PlayerMngr->GetPlayer(GetMyPlayerID()).AddScore(100);
+								PlayerMngr->GetPlayer(GetMyPlayerID())->AddScore(100);
 							}
 						}
 						else {
@@ -431,15 +430,18 @@ namespace FPS_n2 {
 			SE->Get((int)SoundEnum::Env).StopAll(0);
 			SE->Get((int)SoundEnum::Env2).StopAll(0);
 			//使い回しオブジェ系
-			ObjectManager::Instance()->DelObj(&PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara());
-			PlayerMngr->GetPlayer(GetMyPlayerID()).Dispose();
+			ObjectManager::Instance()->DelObj(&PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara());
+			PlayerMngr->GetPlayer(GetMyPlayerID())->Dispose();
 			this->m_BackGround->Dispose();
 			this->m_BackGround.reset();
 			GunsModify::DisposeSlots();
 			//
-			m_NetWorkBrowser.Dispose();
 			EffectControl::Dispose();
 
+			if (m_NetWorkController) {
+				m_NetWorkController->Dispose();
+				m_NetWorkController.reset();
+			}
 			{
 				auto* DrawParts = DXDraw::Instance();
 				PostPassEffect::Instance()->SetLevelFilter(0, 255, 1.f);
@@ -488,14 +490,14 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 			SetFogStartEnd(Scale_Rate * 1200.f, Scale_Rate * 1600.f);
 
 			this->m_BackGround->Draw();
 			ObjMngr->Draw();
 			//レーザー
-			for (int index = 0; index < Chara_num; index++) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 				c->DrawLaser();
 			}
 
@@ -519,8 +521,8 @@ namespace FPS_n2 {
 			}
 #ifdef DEBUG
 			if (false) {
-				for (int i = 1; i < Chara_num; i++) {
-					m_AICtrl[i]->Draw();
+				for (int i = 1; i < PlayerMngr->GetPlayerNum(); i++) {
+					PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 				}
 			}
 			//
@@ -538,7 +540,7 @@ namespace FPS_n2 {
 			if (m_PreEndTimer != -1.f) { return; }
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 			if (!Chara->IsAlive()) { return; }
 			//auto* OptionParts = OPTION::Instance();
 			DrawHitGraph();			//着弾表示
@@ -560,8 +562,21 @@ namespace FPS_n2 {
 			}
 			//通信設定
 			/*
-			if (DrawParts->IsPause()) {
-				m_NetWorkBrowser.Draw();
+			auto* NetBrowser = NetWorkBrowser::Instance();
+			NetBrowser->Draw();
+			if (m_NetWorkController) {
+				auto* DrawParts = DXDraw::Instance();
+				if (m_NetWorkController->GetPing() >= 0.f) {
+					WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
+				}
+				else {
+					if (m_NetWorkController->GetClient()) {
+						WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, Red, Black, "Lost Connection");
+					}
+					else {
+						WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
+					}
+				}
 			}
 			//*/
 
@@ -580,7 +595,7 @@ namespace FPS_n2 {
 			else if (m_PreEndTimer == -1.f) {
 				if (!DrawParts->IsPause()) {
 					auto* PlayerMngr = PlayerManager::Instance();
-					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 					if (Chara->IsAlive()) {
 						//ミニマップ
 						auto* WindowParts = WindowSystem::DrawControl::Instance();
@@ -598,7 +613,6 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto* BattleResourceMngr = CommonBattleResource::Instance();
 				BattleResourceMngr->Dispose();
-				m_AICtrl.clear();
 				this->m_UIclass.Dispose();
 				this->hit_Graph.Dispose();
 				this->guard_Graph.Dispose();
@@ -610,17 +624,15 @@ namespace FPS_n2 {
 		void			MAINLOOP::LoadGun(const std::string&FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
-			BattleResourceMngr->LoadGun(FolderName, ID, Sel);
-			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID).GetChara();
-			auto& g = (std::shared_ptr<GunClass>&)PlayerMngr->GetPlayer(ID).GetGun(Sel);
-			c->SetGunPtr(Sel, g);
+			BattleResourceMngr->LoadCharaGun(FolderName, ID, Sel);
+			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID)->GetChara();
 			GunsModify::CreateSelData(c->GetGunPtr(Sel), IsPreset);
 			c->GetGunPtr(Sel)->Init_Gun();
 		}
 		//start
 		void			MAINLOOP::StartUIParam(void) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 			this->m_UIclass.InitGaugeParam(4 + 4, 0, 20);
 			this->m_UIclass.InitGaugeParam(4 + 4 + 1, 0, 20);
 			//HP
@@ -660,7 +672,7 @@ namespace FPS_n2 {
 				//自記録を追加
 				int ScoreNum = std::max(static_cast<int>(SaveDataParts->GetParam("ScoreNum")), 0);
 				SaveDataParts->SetParam("ScoreNum", (int64_t)(ScoreNum + 1));
-				SaveDataParts->SetParam("Score" + std::to_string(ScoreNum), PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
+				SaveDataParts->SetParam("Score" + std::to_string(ScoreNum), PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore());
 				SaveDataParts->SetParam("Time_" + std::to_string(ScoreNum), m_StartTime);
 
 				m_Ranking.clear();
@@ -673,7 +685,7 @@ namespace FPS_n2 {
 
 				m_ResultRank = (int)m_Ranking.size();
 				for (auto& r : m_Ranking) {
-					if (r.first == PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore() && r.second == m_StartTime) {
+					if (r.first == PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore() && r.second == m_StartTime) {
 						m_ResultRank = static_cast<int>(&r - &m_Ranking.front());
 						break;
 					}
@@ -718,10 +730,10 @@ namespace FPS_n2 {
 					}
 				}
 				m_ResultFlip.at(0).Update(
-					(PlayerMngr->GetPlayer(GetMyPlayerID()).GetShot() > 0) ? 100 * 100 * PlayerMngr->GetPlayer(GetMyPlayerID()).GetHit() / PlayerMngr->GetPlayer(GetMyPlayerID()).GetShot() : 0,
+					(PlayerMngr->GetPlayer(GetMyPlayerID())->GetShot() > 0) ? 100 * 100 * PlayerMngr->GetPlayer(GetMyPlayerID())->GetHit() / PlayerMngr->GetPlayer(GetMyPlayerID())->GetShot() : 0,
 					m_ResultPhase != 0);
-				m_ResultFlip.at(1).Update(PlayerMngr->GetPlayer(GetMyPlayerID()).GetKill(), m_ResultPhase != 0);
-				if (m_ResultFlip.at(2).Update(PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore(), m_ResultPhase != 0)) {
+				m_ResultFlip.at(1).Update(PlayerMngr->GetPlayer(GetMyPlayerID())->GetKill(), m_ResultPhase != 0);
+				if (m_ResultFlip.at(2).Update(PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore(), m_ResultPhase != 0)) {
 					if (m_ResultRankingPer > 0.5f) {
 						m_ResultRankingPer = std::max(m_ResultRankingPer - 1.f / DrawParts->GetFps(), 0.f);
 					}
@@ -771,7 +783,7 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* ItemLogParts = SideLog::Instance();
 			auto* Pad = PadControl::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 
 			float cam_per = ((DrawParts->GetMainCamera().GetCamFov() / deg2rad(75)) / (DrawParts->is_lens() ? DrawParts->zoom_lens() : 1.f)) / 100.f;
 			cam_per *= 0.6f;
@@ -811,33 +823,79 @@ namespace FPS_n2 {
 			MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 			MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
 			//ネットワーク
-			/*
-			auto& CharaPtr = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
-			moves tmpmove;
-			tmpmove.pos = CharaPtr->GetMove().GetPos();
-			Vector3DX vec = CharaPtr->GetMove().GetVec(); vec.y = 0.f;
-			tmpmove.SetVec(vec);
-			tmpmove.rad = CharaPtr->GetRadBuf();
-			//*/
-			//m_NetWorkBrowser.FirstExecute(MyInput, tmpmove, CharaPtr->GetDamageEvent());
-			//クライアント
-			if (m_NetWorkBrowser.GetClient()) {
-				/*
-				for (int index = 0; index < Chara_num; index++) {
-					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-					if (c->GetMyPlayerID() == GetMyPlayerID()) {
-						c->SetCharaType(CharaTypeID::Team);
+			auto* NetBrowser = NetWorkBrowser::Instance();
+			//*
+			if (NetBrowser->IsDataReady() && !m_NetWorkController) {
+				m_NetWorkController = std::make_unique<NetWork::NetWorkController>();
+				this->m_NetWorkController->Init(NetBrowser->GetClient(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
+			}
+			if (m_NetWorkController) {
+				int32_t FreeData[10]{};
+				FreeData[0] = static_cast<int>(Chara->GetCharaAction());
+				this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, Chara->GetMove(), Chara->GetDamageEvent(), FreeData);
+				this->m_NetWorkController->Update();
+			}
+			//
+			bool isready = (m_ReadyTimer == 0.f) && (m_PreEndTimer == -1.f);
+			if (m_NetWorkController && m_NetWorkController->IsInGame()) {
+				bool IsServerNotPlayer = !m_NetWorkController->GetClient() && !m_NetWorkController->GetServerPlayer();
+				for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
+					auto& p = PlayerMngr->GetPlayer(index);
+					auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
+					NetWork::PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)index);
+					if (index == GetMyPlayerID() && !IsServerNotPlayer) {
+						c->SetInput(Ret.GetInput(), isready);//自身が動かすもの
+					}
+					else {//サーバーからのデータで動くもの
+						//サーバーがCPUを動かす場合
+						if (!m_NetWorkController->GetClient()) {
+							//cpu
+							//p->GetAI()->Execute(&MyInput);
+						}
+						c->SetInput(Ret.GetInput(), isready);
+						bool override_true = true;
+						//override_true = Ret.GetIsActive();
+						if (override_true) {
+							c->SetMoveOverRide(Ret.GetMove());
+							//アクションが違う場合には上書き
+							if (Ret.GetFreeData()[0] != static_cast<int>(c->GetCharaAction())) {
+								//c->SetActionOverRide(static_cast<EnumArmAnimType>(Ret.GetFreeData()[0]));
+							}
+						}
+
+					}
+					//ダメージイベント処理
+					Ret.AddDamageEvent(&this->m_DamageEvents);
+				}
+			}
+			else {//オフライン
+				for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
+					auto& p = PlayerMngr->GetPlayer(index);
+					auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
+					if (index == GetMyPlayerID()) {
+						c->SetInput(MyInput, isready && c->IsAlive());
 					}
 					else {
-						if (c->GetMyPlayerID() < 1) {
-							c->SetCharaType(CharaTypeID::Team);
-						}
-						else {
-							c->SetCharaType(CharaTypeID::Enemy);
-						}
+						InputControl OtherInput;
+						p->GetAI()->Execute(&OtherInput, (!m_IsHardMode && (m_Timer > 60.f)) || m_IsHardMode);
+						c->SetInput(OtherInput, isready && c->IsAlive());
+					}
+					//ダメージイベント処理
+					c->AddDamageEvent(&this->m_DamageEvents);
+				}
+			}
+			//ダメージイベント
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
+				auto& p = PlayerMngr->GetPlayer(index);
+				auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
+				for (int j = 0, Num = static_cast<int>(this->m_DamageEvents.size()); j < Num; ++j) {
+					if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)])) {
+						std::swap(this->m_DamageEvents.back(), m_DamageEvents[static_cast<size_t>(j)]);
+						this->m_DamageEvents.pop_back();
+						--Num;
+						--j;
 					}
 				}
-				//*/
 			}
 			//
 			if (Chara->IsAlive()) {
@@ -851,9 +909,10 @@ namespace FPS_n2 {
 							ItemLogParts->Add(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(206));
 						}
 						m_LastMan = 0;
-						for (int index = 0; index < Player_num; index++) {
+						for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 							if (index != GetMyPlayerID()) {
-								if (!m_AICtrl[index]->CannotRepop()) {
+								auto& p = PlayerMngr->GetPlayer(index);
+								if (!p->GetAI()->CannotRepop()) {
 									m_LastMan++;
 								}
 							}
@@ -912,61 +971,6 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			bool isready = (m_ReadyTimer == 0.f) && (m_PreEndTimer == -1.f);
-			for (int index = 0; index < Player_num; index++) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-				if (m_NetWorkBrowser.GetSequence() == SequenceEnum::MainGame) {
-					auto tmp = this->m_NetWorkBrowser.GetNowServerPlayerData(index, false);
-					if (index == GetMyPlayerID()) {
-						MyInput.SetKeyInputFlags(tmp.Input);//キーフレームだけサーバーに合わせる
-						c->SetInput(MyInput, isready && c->IsAlive());
-						m_NetWorkBrowser.GetRecvData(index, tmp.GetFrame());
-					}
-					else {
-						if (!m_NetWorkBrowser.GetClient()) {
-							m_AICtrl[index]->Execute(&tmp.Input, (!m_IsHardMode && (m_Timer > 60.f)) || m_IsHardMode);
-						}
-						c->SetInput(tmp.Input, isready && c->IsAlive());
-						bool override_true = true;
-						override_true = tmp.GetIsActive();
-						if (override_true) {
-							c->SetPosBufOverRide(tmp.m_move);
-						}
-
-					}
-					//ダメージイベント処理
-					for (auto& e : tmp.m_DamageEvents) {
-						this->m_DamageEvents.emplace_back(e);
-					}
-				}
-				else {
-					if (index == GetMyPlayerID()) {
-						c->SetInput(MyInput, isready && c->IsAlive());
-					}
-					else {
-						InputControl OtherInput;
-						m_AICtrl[index]->Execute(&OtherInput, (!m_IsHardMode && (m_Timer > 60.f)) || m_IsHardMode);
-						c->SetInput(OtherInput, isready && c->IsAlive());
-					}
-					//ダメージイベント処理
-					for (const auto& e : c->GetDamageEvent()) {
-						this->m_DamageEvents.emplace_back(e);
-					}
-					c->GetDamageEvent().clear();
-				}
-			}
-			m_NetWorkBrowser.LateExecute();
-			//ダメージイベント
-			for (int index = 0; index < Chara_num; index++) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
-				for (int j = 0; j < this->m_DamageEvents.size(); j++) {
-					if (c->SetDamageEvent(this->m_DamageEvents[j])) {
-						std::swap(this->m_DamageEvents.back(), m_DamageEvents[j]);
-						this->m_DamageEvents.pop_back();
-						j--;
-					}
-				}
-			}
 		}
 		void			MAINLOOP::UpdateBullet(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
@@ -993,8 +997,8 @@ namespace FPS_n2 {
 						Vector3DX norm_tmp;
 						auto ColResGround = this->m_BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, true, &norm_tmp);
 						bool is_HitAll = false;
-						for (int index = 0; index < Chara_num; index++) {
-							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+						for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 							if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }
 							HitPoint Damage = a->GetDamage();
 							ArmerPoint ArmerDamage = 0;
@@ -1042,9 +1046,9 @@ namespace FPS_n2 {
 					if (a->IsActive()) {
 						Vector3DX pos_tmp = a->GetMove().GetPos();
 						bool isHit = false;
-						for (int index = 0; index < Chara_num; index++) {
+						for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 							if (index != 0) { break; }
-							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 							float Len = (tgt->GetMove().GetPos() - pos_tmp).magnitude();
 							if (Len < 1.f*Scale_Rate) {
 								switch (a->GetItemType()) {
@@ -1091,14 +1095,14 @@ namespace FPS_n2 {
 		}
 		void			MAINLOOP::UpdateMelee(void) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
-			for (int index = 0; index < Player_num; index++) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 				if (c->GetCharaAction() == CharaActionID::Melee) {
 					Vector3DX StartPos = c->GetEyeMatrix().pos();
 					Vector3DX EndPos = StartPos + c->GetEyeMatrix().zvec() * (-1.f*Scale_Rate);
-					for (int index2 = 0; index2 < Player_num; index2++) {
+					for (int index2 = 0; index2 < PlayerMngr->GetPlayerNum(); index2++) {
 						if (index == index2) { continue; }
-						auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index2).GetChara();
+						auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index2)->GetChara();
 						if (!tgt->IsAlive()) { continue; }
 						if (tgt->IsDamaging()) { continue; }
 						HitPoint Damage = 100;
@@ -1113,7 +1117,7 @@ namespace FPS_n2 {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* OptionParts = OPTION::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 			{
 				{
 					//DrawParts->GetFps()カメラ
@@ -1216,7 +1220,7 @@ namespace FPS_n2 {
 		}
 		void			MAINLOOP::UpdateLight(void) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 			if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetShotSwitch()) {// 
 #if HIGH_FPS_ROM
 #else
@@ -1232,8 +1236,8 @@ namespace FPS_n2 {
 		}
 		void			MAINLOOP::UpdateLaser(void) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
-			for (int index = 0; index < Chara_num; index++) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 				if (!c->GetGunPtrNow()) { continue; }
 				if (!c->GetGunPtrNow()->HasFrame(GunFrame::LaserSight) || !c->GetGunPtrNow()->IsActive()) {
 					c->SetIsLaserActive(false);
@@ -1244,8 +1248,8 @@ namespace FPS_n2 {
 				Vector3DX StartPos = mat.pos();
 				Vector3DX EndPos = StartPos + mat.zvec()*-1.f * 15.f*Scale_Rate;
 				this->m_BackGround->CheckLinetoMap(StartPos, &EndPos, true);
-				for (int index2 = 0; index2 < Chara_num; index2++) {
-					auto& c2 = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index2).GetChara();
+				for (int index2 = 0; index2 < PlayerMngr->GetPlayerNum(); index2++) {
+					auto& c2 = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index2)->GetChara();
 					if (c2->GetMyPlayerID() == c->GetMyPlayerID()) { continue; }
 					if (!c2->IsAlive()) { continue; }
 					if (!(GetMinLenSegmentToPoint(StartPos, EndPos, c2->GetMove().GetPos()) <= 2.0f*Scale_Rate)) { continue; }
@@ -1258,8 +1262,8 @@ namespace FPS_n2 {
 				c->SetIsLaserActive(true);
 			}
 			//ライト
-			for (int index = 0; index < Chara_num; index++) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 				if (!c->GetGunPtrNow()) { continue; }
 				if (!c->GetGunPtrNow()->HasFrame(GunFrame::Light) || !c->GetGunPtrNow()->IsActive()) {
 					continue;
@@ -1284,12 +1288,12 @@ namespace FPS_n2 {
 		void			MAINLOOP::UpdateUIParam(void) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto* ItemLogParts = SideLog::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 			{
 				Vector3DX StartPos = Chara->GetEyeMatrix().pos();
-				for (int index = 0; index < Chara_num; index++) {
+				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 					if (index == 0) { continue; }
-					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 					Vector3DX TgtPos = c->GetEyeMatrix().pos();
 					c->CanLookTarget = true;
 					for (auto& C : this->m_BackGround->GetBuildData()) {
@@ -1348,7 +1352,7 @@ namespace FPS_n2 {
 					mags++;
 				}
 				//
-				auto ScoreBuf = PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore();
+				auto ScoreBuf = PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore();
 				if (ScoreBuf > prevScore && (ScoreBuf - prevScore) >= 100) {
 					this->m_UIclass.SetIntParam(5, (ScoreBuf - prevScore));
 					ItemLogParts->Add(3.f, GetColor(206, 0, 0), "%s +%4d", LocalizePool::Instance()->Get(210), (ScoreBuf - prevScore));
@@ -1359,9 +1363,9 @@ namespace FPS_n2 {
 				if (Chara->ULTActiveSwitch()) {
 					ItemLogParts->Add(3.f, GetColor(251, 91, 1), LocalizePool::Instance()->Get(211));
 				}
-				prevScore = PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore();
+				prevScore = PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore();
 				//
-				this->m_UIclass.SetIntParam(6, PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
+				this->m_UIclass.SetIntParam(6, PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore());
 
 				this->m_UIclass.SetIntParam(8, Chara->GetArmerStock());
 				this->m_UIclass.SetIntParam(9, Chara->GetMorphineStock());
@@ -1370,7 +1374,7 @@ namespace FPS_n2 {
 		void			MAINLOOP::UpdateMiniMap(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 			m_MiniMapScreen.SetDraw_Screen();//WindowParts->Set つかうな
 			{
 				float size = 0.7f;
@@ -1395,8 +1399,8 @@ namespace FPS_n2 {
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 				Vector3DX MyPos = Chara->GetMove().GetPos();
-				for (int index = 0; index < Chara_num; index++) {
-					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 					if (index == 0) { continue; }
 					if (!c->IsAlive()) { continue; }
 					if (!c->CanLookTarget) { continue; }
@@ -1432,7 +1436,7 @@ namespace FPS_n2 {
 					}
 				}
 				{
-					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
+					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0)->GetChara();
 					int xp2 = xp1 + static_cast<int>(15.f + c->GetMove().GetPos().x);
 					int yp2 = yp1 - static_cast<int>(15.f + c->GetMove().GetPos().z);
 					DrawCircle(
@@ -1448,7 +1452,7 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			if (DrawParts->IsPause()) { return; }
 			auto* PlayerMngr = PlayerManager::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID()).GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 
 			int xp = DrawParts->GetUIY(960);
 			int yp = DrawParts->GetUIY(540);
@@ -1468,8 +1472,8 @@ namespace FPS_n2 {
 				d.first = 0.f;
 				d.second = 0;
 			}
-			for (int index = 0; index < Chara_num; index++) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 				if (index == 0) { continue; }
 				if (!c->IsAlive()) { continue; }
 				float length = (MyPos - c->GetMove().GetPos()).magnitude() / (50.f*Scale_Rate);
@@ -1505,8 +1509,8 @@ namespace FPS_n2 {
 			}
 			//
 			WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 128);
-			for (int index = 0; index < Chara_num; index++) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index).GetChara();
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 				if (index == 0) { continue; }
 				if (!c->IsAlive()) { continue; }
 				if (c->CanLookTarget) {
@@ -1723,7 +1727,7 @@ namespace FPS_n2 {
 						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 							DrawParts->GetUIY(24), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%04d/%02d/%02d %02d:%02d : ", 1900 + now.tm_year, 1 + now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min);
 						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
-							DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%4d pts", PlayerMngr->GetPlayer(GetMyPlayerID()).GetScore());
+							DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Color, Black, "%4d pts", PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore());
 					}
 					else {
 						Color = White;
