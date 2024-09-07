@@ -42,6 +42,9 @@ namespace FPS_n2 {
 		public:
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
 			void			SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
+
+			auto	GetFrameWorldMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
+			auto	GetFrameLocalMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix(GetFrame(static_cast<int>(frame))); }
 		private:
 			void		ExecuteCartInChamber(void) noexcept;//チャンバーへの装弾、排出
 			void		ExecuteSound(void) noexcept;//チャンバーへの装弾、排出
@@ -165,8 +168,8 @@ namespace FPS_n2 {
 					}
 					if (HasFrame(GunFrame::EyeOffsetPos)) {
 						Vector3DX vec = GetFrameWorldMat_P(GunFrame::EyeOffsetPos).yvec();
-						if (GetChildFrameNum(GetFrame((int)GunFrame::EyeOffsetPos)) > 0) {
-							vec = (GetChildFrameWorldMatrix(GetFrame((int)GunFrame::EyeOffsetPos), 0).pos() - GetFrameWorldMat_P(GunFrame::EyeOffsetPos).pos()).normalized();
+						if (GetObj_const().GetFrameChildNum(GetFrame((int)GunFrame::EyeOffsetPos)) > 0) {
+							vec = (GetObj_const().GetChildFrameWorldMatrix(GetFrame((int)GunFrame::EyeOffsetPos), 0).pos() - GetFrameWorldMat_P(GunFrame::EyeOffsetPos).pos()).normalized();
 						}
 						if (m_GunSightSel == 0) {
 							Pos = Lerp(vec, Pos, m_GunChangePer);
@@ -225,7 +228,8 @@ namespace FPS_n2 {
 			void		UnloadChamber() noexcept { this->m_ChamberAmmoData.reset(); }
 			void		SetShotSwitchOff() noexcept { this->m_ShotSwitch = false; }
 			void		SetGunMatrix(const Matrix4x4DX& value) noexcept {
-				SetMove(value.rotation(), value.pos());
+				SetMove().SetMat(Matrix3x3DX::Get33DX(value.rotation()));
+				SetMove().SetPos(value.pos());
 				ModSlotControl::UpdatePartsAnim(GetObj());
 				ModSlotControl::UpdatePartsMove(GetFrameWorldMat_P(GunFrame::UnderRail), GunSlot::UnderRail);
 				ModSlotControl::UpdatePartsMove(GetFrameWorldMat_P(GunFrame::Lower), GunSlot::Lower);
@@ -237,7 +241,7 @@ namespace FPS_n2 {
 			void		SetMagFall() noexcept {
 				m_MagFall.SetFall(
 					GetFrameWorldMat_P(GunFrame::Magpos).pos(),
-					GetFrameWorldMat_P(GunFrame::Magpos).rotation(),
+					Matrix3x3DX::Get33DX(GetFrameWorldMat_P(GunFrame::Magpos).rotation()),
 					GetFrameWorldMat_P(GunFrame::Magpos).yvec()*-1.f*(Scale_Rate * 3.f / 60.f),
 					12.f, SoundEnum::MagFall);
 			}

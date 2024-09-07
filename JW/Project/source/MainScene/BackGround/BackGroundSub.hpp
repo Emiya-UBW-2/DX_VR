@@ -29,7 +29,7 @@ namespace FPS_n2 {
 					int next_y = y + (int)(cos(rad)*2.f);//2 0 -2 0
 					if ((0 <= next_x && next_x < m_Width) && (0 <= next_y && next_y < m_Height)) {
 						if (m_Maze[next_x][next_y] == MAZETYPE::WALL) {
-							m_Maze[(next_x + x) / 2][(next_y + y) / 2] = MAZETYPE::PATH;
+							m_Maze[(size_t)((next_x + x) / 2)][(size_t)((next_y + y) / 2)] = MAZETYPE::PATH;
 							//その場から次の穴掘り
 							dig(next_x, next_y);
 						}
@@ -149,7 +149,7 @@ namespace FPS_n2 {
 			}
 			void		ChangeSel(int frame) {
 				if (this->m_Col.IsActive()) {
-					MV1TerminateCollInfo(this->m_Col.get(), m_mesh);
+					MV1TerminateCollInfo(this->m_Col.GetHandle(), m_mesh);
 					this->m_Col.SetupCollInfo(1, 1, 1, m_mesh);
 					this->m_mesh = frame;
 				}
@@ -159,8 +159,8 @@ namespace FPS_n2 {
 				this->m_Obj.SetMatrix(this->m_mat);
 				this->m_Col.SetMatrix(this->m_mat);
 				this->m_Col.RefreshCollInfo(this->m_mesh);
-				this->m_MinPos = this->m_mat.pos() + this->m_Col.mesh_minpos(this->m_mesh);
-				this->m_MaxPos = this->m_mat.pos() + this->m_Col.mesh_maxpos(this->m_mesh);
+				this->m_MinPos = this->m_mat.pos() + this->m_Col.GetMeshMinPosition(this->m_mesh);
+				this->m_MaxPos = this->m_mat.pos() + this->m_Col.GetMeshMaxPosition(this->m_mesh);
 			}
 
 			void		EnableChackCam() {
@@ -547,9 +547,9 @@ namespace FPS_n2 {
 		void			DrawFront() noexcept;
 		void			Dispose(void) noexcept;
 	public:
-		const auto&		GetMapGraph(void) noexcept { return this->m_MapGraph; }
-		const auto&		GetMapGraphXSize(void) noexcept { return this->m_MapGraphXSize; }
-		const auto&		GetMapGraphYSize(void) noexcept { return this->m_MapGraphYSize; }
+		const auto&		GetMapGraph(void) const noexcept { return this->m_MapGraph; }
+		const auto&		GetMapGraphXSize(void) const noexcept { return this->m_MapGraphXSize; }
+		const auto&		GetMapGraphYSize(void) const noexcept { return this->m_MapGraphYSize; }
 		const auto&		GetBuildDatas(void) const noexcept { return this->m_ObjBuilds; }
 		const auto&		GetDrumControl(void) const noexcept { return this->m_DrumControl; }
 		const auto&		GetNearestLight(int No) const noexcept { return m_LightControl.GetNearestLight(No); }
@@ -597,10 +597,10 @@ namespace FPS_n2 {
 	private:
 		// ポリゴン同士の連結情報を使用して指定の二つの座標間を直線的に移動できるかどうかをチェックする( 戻り値 true:直線的に移動できる false:直線的に移動できない )
 		bool CheckPolyMove(Vector3DX StartPos, Vector3DX TargetPos) const {
-			int CheckPoly[4];
-			int CheckPolyPrev[4];
-			int NextCheckPoly[4];
-			int NextCheckPolyPrev[4];
+			int CheckPoly[4]{};
+			int CheckPolyPrev[4]{};
+			int NextCheckPoly[4]{};
+			int NextCheckPolyPrev[4]{};
 
 			// 開始座標と目標座標の y座標値を 0.0f にして、平面上の判定にする
 			StartPos.y = (0.0f);

@@ -23,7 +23,7 @@ namespace FPS_n2 {
 					c->Init();
 				}
 			}
-			void		SetFall(const Vector3DX& pPos, const Matrix4x4DX& pMat, const Vector3DX& pVec, float time, SoundEnum sound) {
+			void		SetFall(const Vector3DX& pPos, const Matrix3x3DX& pMat, const Vector3DX& pVec, float time, SoundEnum sound) {
 				this->m_Ptr[this->m_Now]->SetFall(pPos, pMat, pVec, time, sound);
 				++this->m_Now %= this->m_Ptr.size();
 			}
@@ -122,7 +122,7 @@ namespace FPS_n2 {
 			void		GetChildPartsList(std::vector<const SharedObj*>* Ret) const noexcept;
 			void		SetActiveBySlot(bool value) noexcept;
 		public:
-			void		UpdatePartsAnim(const MV1& pParent);
+			void		UpdatePartsAnim(MV1& pParent);
 			void		UpdatePartsMove(const Matrix4x4DX& pMat, GunSlot Slot);
 		};
 

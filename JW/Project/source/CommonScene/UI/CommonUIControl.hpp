@@ -43,7 +43,7 @@ namespace FPS_n2 {
 			void			Load_String(const char* String, int fontsize, bool IsEnableSelect) noexcept {
 				auto* Fonts = FontPool::Instance();
 				snprintfDx(m_String, 64, String);
-				xsize = Fonts->Get(FontPool::FontType::Nomal_AA).GetStringWidth(fontsize, m_String);
+				xsize = Fonts->Get(FontPool::FontType::MS_Gothic, fontsize, 3)->GetStringWidth(fontsize, m_String);
 				ysize = fontsize;
 				m_ButtonMode = ButtonMode::String;
 				m_EnableSelect = IsEnableSelect;
@@ -71,67 +71,68 @@ namespace FPS_n2 {
 				m_ButtonStatus = ButtonStatus::Focus;
 			}
 		public:
-			bool			GetInto() {
-				int xp = y_UI(xp1);
-				int yp = y_UI(yp1);
+			bool			GetInto() const noexcept {
+				auto* DrawParts = DXDraw::Instance();
+				int xp = DrawParts->GetUIY(xp1);
+				int yp = DrawParts->GetUIY(yp1);
 				switch (LMR) {
 					case DXLibRef::FontHandle::FontXCenter::LEFT:
-						xp = y_UI(xp1);
+						xp = DrawParts->GetUIY(xp1);
 						break;
 					case DXLibRef::FontHandle::FontXCenter::MIDDLE:
-						xp = y_UI(xp1) - y_UI(xsize) / 2;
+						xp = DrawParts->GetUIY(xp1) - DrawParts->GetUIY(xsize) / 2;
 						break;
 					case DXLibRef::FontHandle::FontXCenter::RIGHT:
-						xp = y_UI(xp1) - y_UI(xsize);
+						xp = DrawParts->GetUIY(xp1) - DrawParts->GetUIY(xsize);
 						break;
 					default:
 						break;
 				}
 				switch (TMB) {
 					case DXLibRef::FontHandle::FontYCenter::TOP:
-						yp = y_UI(yp1);
+						yp = DrawParts->GetUIY(yp1);
 						break;
 					case DXLibRef::FontHandle::FontYCenter::MIDDLE:
-						yp = y_UI(yp1) - y_UI(ysize) / 2;
+						yp = DrawParts->GetUIY(yp1) - DrawParts->GetUIY(ysize) / 2;
 						break;
 					case DXLibRef::FontHandle::FontYCenter::BOTTOM:
-						yp = y_UI(yp1) - y_UI(ysize);
+						yp = DrawParts->GetUIY(yp1) - DrawParts->GetUIY(ysize);
 						break;
 					default:
 						break;
 				}
-				return IntoMouse(xp, yp, xp + y_UI(xsize), yp + y_UI(ysize));
+				return IntoMouse(xp, yp, xp + DrawParts->GetUIY(xsize), yp + DrawParts->GetUIY(ysize));
 			}
 			void			Draw() {
+				auto* DrawParts = DXDraw::Instance();
 				switch (m_ButtonMode) {
 					case ButtonMode::String:
 						{
-							auto* Fonts = FontPool::Instance();
 							if (SelYadd > 0.f) {
-								int xp = y_UI(xp1);
-								int yp = y_UI(yp1);
+								int xp = DrawParts->GetUIY(xp1);
+								int yp = DrawParts->GetUIY(yp1);
 								switch (LMR) {
 									case DXLibRef::FontHandle::FontXCenter::LEFT:
-										xp = y_UI(xp1);
+										xp = DrawParts->GetUIY(xp1);
 										break;
 									case DXLibRef::FontHandle::FontXCenter::MIDDLE:
-										xp = y_UI(xp1) - y_UI(xsize) / 2;
+										xp = DrawParts->GetUIY(xp1) - DrawParts->GetUIY(xsize) / 2;
 										break;
 									case DXLibRef::FontHandle::FontXCenter::RIGHT:
-										xp = y_UI(xp1) - y_UI(xsize);
+										xp = DrawParts->GetUIY(xp1) - DrawParts->GetUIY(xsize);
 										break;
 									default:
 										break;
 								}
 								switch (TMB) {
 									case DXLibRef::FontHandle::FontYCenter::TOP:
-										yp = y_UI(yp1);
+										yp = DrawParts->GetUIY(yp1);
 										break;
 									case DXLibRef::FontHandle::FontYCenter::MIDDLE:
-										yp = y_UI(yp1) - y_UI(ysize) / 2;
+										yp = DrawParts->GetUIY(yp1) - DrawParts->GetUIY(ysize) / 2;
 										break;
 									case DXLibRef::FontHandle::FontYCenter::BOTTOM:
-										yp = y_UI(yp1) - y_UI(ysize);
+										yp = DrawParts->GetUIY(yp1) - DrawParts->GetUIY(ysize);
 										break;
 									default:
 										break;
@@ -141,13 +142,13 @@ namespace FPS_n2 {
 								float per2 = 1.f - std::clamp(SelYadd / 10.f, 0.f, 1.f);
 								SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(128.f*per), 0, 255));
 								m_SelectBackImage->DrawExtendGraph(
-									xp + y_UI(xsize) / 2 - (int)((float)(y_UI(xsize) / 2 + y_UI(300))*per2), yp + y_UI(ysize) - y_UI(12) - (int)((float)(y_UI(ysize) / 6) * per),
-									xp + y_UI(xsize) / 2 + (int)((float)(y_UI(xsize) / 2 + y_UI(300))*per2), yp + y_UI(ysize) - y_UI(12) + (int)((float)(y_UI(ysize) / 6) * per),
+									xp + DrawParts->GetUIY(xsize) / 2 - (int)((float)(DrawParts->GetUIY(xsize) / 2 + DrawParts->GetUIY(300))*per2), yp + DrawParts->GetUIY(ysize) - DrawParts->GetUIY(12) - (int)((float)(DrawParts->GetUIY(ysize) / 6) * per),
+									xp + DrawParts->GetUIY(xsize) / 2 + (int)((float)(DrawParts->GetUIY(xsize) / 2 + DrawParts->GetUIY(300))*per2), yp + DrawParts->GetUIY(ysize) - DrawParts->GetUIY(12) + (int)((float)(DrawParts->GetUIY(ysize) / 6) * per),
 									true);
 								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 							}
 							unsigned int Color = Black;
-							if (y_UI(ysize) > y_UI(50)) {
+							if (DrawParts->GetUIY(ysize) > DrawParts->GetUIY(50)) {
 								switch (m_ButtonStatus) {
 									case ButtonStatus::None:
 										Color = Gray75;
@@ -186,8 +187,9 @@ namespace FPS_n2 {
 										break;
 								}
 							}
-							Fonts->Get(FontPool::FontType::Nomal_AA).DrawString(y_UI(ysize), LMR, TMB,
-																				y_UI(xp1), y_UI(yp1 + (int)(SelYadd)), Color, Black, m_String);
+							WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, 
+								DrawParts->GetUIY(ysize), LMR, TMB,
+																				DrawParts->GetUIY(xp1), DrawParts->GetUIY(yp1 + (int)(SelYadd)), Color, Black, m_String);
 						}
 						break;
 					case ButtonMode::Icon:
@@ -197,8 +199,8 @@ namespace FPS_n2 {
 								float per2 = 1.f - std::clamp(SelYadd / 10.f, 0.f, 1.f);
 								SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(128.f*per1), 0, 255));
 								m_SelectBackImage->DrawExtendGraph(
-									y_UI(xp1) - (int)((float)y_UI(xsize)*per2), y_UI(yp1) - (int)((float)y_UI(ysize)*per2),
-									y_UI(xp1) + (int)((float)y_UI(xsize)*per2), y_UI(yp1) + (int)((float)y_UI(ysize)*per2),
+									DrawParts->GetUIY(xp1) - (int)((float)DrawParts->GetUIY(xsize)*per2), DrawParts->GetUIY(yp1) - (int)((float)DrawParts->GetUIY(ysize)*per2),
+									DrawParts->GetUIY(xp1) + (int)((float)DrawParts->GetUIY(xsize)*per2), DrawParts->GetUIY(yp1) + (int)((float)DrawParts->GetUIY(ysize)*per2),
 									true);
 								SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 							}
@@ -215,7 +217,7 @@ namespace FPS_n2 {
 								default:
 									break;
 							}
-							m_Icon.DrawRotaGraph(y_UI(xp1), y_UI(yp1), (float)y_UI(100) / 100.f*(1.f + SelYadd / 50.f), 0.f, true);
+							m_Icon.DrawRotaGraph(DrawParts->GetUIY(xp1), DrawParts->GetUIY(yp1), (float)DrawParts->GetUIY(100) / 100.f*(1.f + SelYadd / 50.f), 0.f, true);
 							SetDrawBright(255, 255, 255);
 						}
 						break;

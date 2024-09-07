@@ -23,7 +23,6 @@ namespace FPS_n2 {
 			std::shared_ptr<BackGroundClassMain>			m_BackGround;					//BG
 
 			UIClass											m_UIclass;						//UIŠÖ˜A
-			SideLog										m_GetItemLog;
 			int												prevScore{0};
 			int												prevLastMan{0};
 
@@ -137,7 +136,7 @@ namespace FPS_n2 {
 			bool			UpdateResult(void) noexcept;
 			void			UpdateInput(void) noexcept;
 			void			UpdateBullet(void) noexcept;
-			void			UpdateItem(void) noexcept;
+			void			UpdateItem(void) const noexcept;
 			void			UpdateMelee(void) noexcept;
 			void			UpdateView(void) noexcept;
 			void			UpdateLight(void) noexcept;

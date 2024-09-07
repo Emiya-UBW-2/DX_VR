@@ -140,28 +140,27 @@ namespace FPS_n2 {
 				auto Obj = std::make_shared<TargetClass>();
 				ObjMngr->AddObject(Obj);
 				ObjMngr->LoadModel(Obj, Obj, "data/model/Target/");
-				Obj->SetMove(Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(-90)), Vector3DX::vget(Scale_Rate*-(5.f + 10.f*j), 0.f, Scale_Rate*(9.f - 2.f*j)));
+				Obj->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(-90)));
+				Obj->SetMove().SetPos(Vector3DX::vget(Scale_Rate * -(5.f + 10.f * j), 0.f, Scale_Rate * (9.f - 2.f * j)));
 			}
 			for (int j = 0; j < 9; j++) {
 				auto Obj = std::make_shared<TargetClass>();
 				ObjMngr->AddObject(Obj);
 				ObjMngr->LoadModel(Obj, Obj, "data/model/Target2/");
 
-				auto Rot = Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRand(360)));
-				Obj->SetMove(Rot, (TargetPositions[j] * Scale_Rate) + Rot.zvec() * (1.5f*Scale_Rate));
+				auto Rot = Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRand(360)));
+				Obj->SetMove().SetMat(Rot);
+				Obj->SetMove().SetPos((TargetPositions[j] * Scale_Rate) + Rot.zvec() * (1.5f*Scale_Rate));
 			}
 			{
 				auto Obj = std::make_shared<MovieObjClass>();
 				ObjMngr->AddObject(Obj);
 				ObjMngr->LoadModel(Obj, nullptr, "data/model/Radio/");
 
-				Obj->SetMove(Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(90)), (Vector3DX::vget(0, 0, -5.f) * Scale_Rate));
+				Obj->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(90)));
+				Obj->SetMove().SetPos((Vector3DX::vget(0, 0, -5.f) * Scale_Rate));
 
 				m_Sound = true;
-				if (!BGM->Get(1).Check()) {
-					BGM->Get(1).Play_3D(Obj->GetMove().pos, 5.f*Scale_Rate, DX_PLAYTYPE_LOOP);
-				}
-				BGM->Get(1).SetVol_Local(192);
 			}
 			//UI
 			tgtSel = -1;
@@ -195,6 +194,7 @@ namespace FPS_n2 {
 			auto* SaveDataParts = SaveDataClass::Instance();
 			m_IsFirstGame = (SaveDataParts->GetParam("FirstGame") != 1);
 			m_FirstFade = 1.f;
+			EffectControl::Init();
 		}
 		bool			TutorialScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
@@ -264,7 +264,7 @@ namespace FPS_n2 {
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0).GetChara();
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
-				SetMousePoint(DXDraw::Instance()->GetDispXSize() / 2, DXDraw::Instance()->GetDispYSize() / 2);
+				SetMousePoint(DXDraw::Instance()->GetScreenX(1920) / 2, DXDraw::Instance()->GetScreenY(1080) / 2);
 				m_TutorialNow = 0;
 			}
 			if (Pad->GetKey(PADS::INTERACT).trigger()) {
@@ -367,8 +367,8 @@ namespace FPS_n2 {
 						auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
 						if (a->IsActive()) {
 							//AmmoClass
-							Vector3DX repos_tmp = a->GetMove().repos;
-							Vector3DX pos_tmp = a->GetMove().pos;
+							Vector3DX repos_tmp = a->GetMove().GetRePos();
+							Vector3DX pos_tmp = a->GetMove().GetPos();
 
 							int j = 0;
 							while (true) {
@@ -394,24 +394,6 @@ namespace FPS_n2 {
 									break;
 								}
 								j++;
-							}
-
-							{
-								auto& target = *ObjMngr->GetObj((int)ObjType::MovieObj, 0);
-								if (target != nullptr) {
-									if (GetMinLenSegmentToPoint(repos_tmp, pos_tmp, target->GetMove().pos) <= 0.5f*Scale_Rate) {
-										SEGMENT_POINT_RESULT Res;
-										GetSegmenttoPoint(repos_tmp, pos_tmp, target->GetMove().pos, &Res);
-										//エフェクト
-										EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, Res.Seg_MinDist_Pos, (pos_tmp - repos_tmp).normalized(), a->GetCaliberSize() / 0.02f * Scale_Rate);
-										if (m_Sound) {
-											m_Sound = false;
-											auto* BGM = BGMPool::Instance();
-											BGM->Get(1).Stop();
-											SE->Get((int)SoundEnum::HitGround0 + GetRand(5 - 1)).Play_3D(0, pos_tmp, Scale_Rate * 10.f);
-										}
-									}
-								}
 							}
 							Vector3DX norm_tmp;
 							auto ColResGround = this->m_BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, true, &norm_tmp);
@@ -440,7 +422,7 @@ namespace FPS_n2 {
 			{
 				{
 					//DrawParts->GetFps()カメラ
-					Vector3DX CamPos = Chara->GetEyeMatrix().pos() + DrawParts->GetCamShake();
+					Vector3DX CamPos = Chara->GetEyeMatrix().pos() + CameraShake::Instance()->GetCamShake();
 					DrawParts->SetMainCamera().SetCamPos(CamPos, CamPos + Chara->GetEyeMatrix().zvec() * -1.f, Chara->GetEyeMatrix().yvec());
 
 					//Vector3DX CamPos = Vector3DX::vget(0.f, 1.5f, 0.f)*Scale_Rate;
@@ -557,8 +539,8 @@ namespace FPS_n2 {
 			//UIパラメーター
 			{
 				//シェイク
-				this->m_UIclass.SetIntParam(0, (int)(DrawParts->GetCamShake().x*100.f));
-				this->m_UIclass.SetIntParam(1, (int)(DrawParts->GetCamShake().y*100.f));
+				this->m_UIclass.SetIntParam(0, (int)(CameraShake::Instance()->GetCamShake().x*100.f));
+				this->m_UIclass.SetIntParam(1, (int)(CameraShake::Instance()->GetCamShake().y*100.f));
 				this->m_UIclass.SetIntParam(2, (int)(rad2deg(Chara->GetLeanRad()*5.f)));
 				//AmmoStock
 				this->m_UIclass.SetIntParam(3, Chara->GetAmmoStock());
@@ -694,8 +676,8 @@ namespace FPS_n2 {
 					if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&
 						!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
 						(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph().DrawRotaGraph(
-							(int)(Chara->GetGunPtrNow()->GetReticleXPos()*y_UI(1980) / y_r(1980)),
-							(int)(Chara->GetGunPtrNow()->GetReticleYPos()*y_UI(1080) / y_r(1080)),
+							(int)(Chara->GetGunPtrNow()->GetReticleXPos()*DrawParts->GetUIY(1980) / DrawParts->GetScreenY(1980)),
+							(int)(Chara->GetGunPtrNow()->GetReticleYPos()*DrawParts->GetUIY(1080) / DrawParts->GetScreenY(1080)),
 							1.f, Chara->GetLeanRad(), true);
 					}
 				}
@@ -706,22 +688,22 @@ namespace FPS_n2 {
 				//チュートリアル
 				{
 					auto* Pad = PadControl::Instance();
-					auto* Fonts = FontPool::Instance();
 
 					this->m_TutorialLog.Draw();
 
 					int sel = m_TutorialNow - 1 - this->m_TutorialLog.GetOffset();
 
 					if (0 <= sel && sel < m_Tutorial.size()) {
-						int xp = y_UI(512 + 96);
-						int yp = y_UI(512);
+						int xp = DrawParts->GetUIY(512 + 96);
+						int yp = DrawParts->GetUIY(512);
 						for (auto& p : m_Tutorial.at(sel).m_PADS) {
 							std::string Assign = Pad->GetKeyStr(p);
 							if (Assign == "NONE") { continue; }
-							Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18),
+							WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+								DrawParts->GetUIY(18),
 																				  FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 																				  xp, yp, Green, Black, "[%s]", Assign.c_str());
-							yp += y_UI(18 + 3);
+							yp += DrawParts->GetUIY(18 + 3);
 						}
 					}
 				}
@@ -736,7 +718,6 @@ namespace FPS_n2 {
 		void			TutorialScene::DrawUI_In_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* Pad = PadControl::Instance();
-			auto* Fonts = FontPool::Instance();
 			//ポーズ
 			if (DXDraw::Instance()->IsPause()) {
 				if (!DrawParts->IsExit() && !DrawParts->IsRestart()) {
@@ -748,9 +729,9 @@ namespace FPS_n2 {
 				if (tgtSel >= 0) {
 					auto& t = (std::shared_ptr<TargetClass>&)(*ObjectManager::Instance()->GetObj((int)ObjType::Target, tgtSel));
 
-					int xp = DrawParts->GetDispXSize() / 2 - y_UI(300);
-					int yp = DrawParts->GetDispYSize() / 2 + y_UI(100);
-					int size = y_UI(100);
+					int xp = DrawParts->GetScreenX(1920) / 2 - DrawParts->GetUIY(300);
+					int yp = DrawParts->GetScreenY(1080) / 2 + DrawParts->GetUIY(100);
+					int size = DrawParts->GetUIY(100);
 					int xs = size / 2;
 					int ys = size / 2;
 					int xp2 = xp + ys * 2;
@@ -779,12 +760,13 @@ namespace FPS_n2 {
 			if (m_IsFirstGame) {
 				if (!DXDraw::Instance()->IsPause()) {
 					//
-					Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18),
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+						DrawParts->GetUIY(18),
 																		  FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP,
-																		  y_UI(960), y_UI(870), Red, Black, "%s:%s", LocalizePool::Instance()->Get(300), Pad->GetKeyStr(PADS::INTERACT).c_str());
+																		  DrawParts->GetUIY(960), DrawParts->GetUIY(870), Red, Black, "%s:%s", LocalizePool::Instance()->Get(300), Pad->GetKeyStr(PADS::INTERACT).c_str());
 
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*m_FirstFade), 0, 255));
-					DrawBox(0, 0, y_r(1920), y_r(1080), Black, TRUE);
+					DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Black, TRUE);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				}
 			}

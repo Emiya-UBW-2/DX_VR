@@ -39,7 +39,7 @@ namespace FPS_n2 {
 				m_Flip_Y = 0.f;
 			}
 		public:
-			const float GetFlip() { return m_Flip_Y; }
+			const float GetFlip() const noexcept { return m_Flip_Y; }
 			const float ActivePer() { return (m_Time > 0.2f) ? std::clamp((10.f - m_Time) / 0.2f + 0.1f, 0.f, 1.f) : std::clamp(m_Time / 0.2f, 0.f, 1.f); }
 			const char* GetMsg() { return m_Message; }
 		};
@@ -102,33 +102,34 @@ namespace FPS_n2 {
 				}
 			}
 			void Draw() noexcept {
-				auto* Fonts = FontPool::Instance();
+				auto* DrawParts = DXDraw::Instance();
 
 				int xp1, yp1;
-				xp1 = y_UI(64);
-				yp1 = y_UI(512);
+				xp1 = DrawParts->GetUIY(64);
+				yp1 = DrawParts->GetUIY(512);
 
 				for (auto& d : data) {
 					if (d.ActivePer() > 0.f) {
-						int xp = xp1 - y_UI((int)((xs + 128) * (1.f - d.ActivePer())));
-						int yp = yp1 - y_UI((int)((ys + 5) * d.GetFlip()));
+						int xp = xp1 - DrawParts->GetUIY((int)((xs + 128) * (1.f - d.ActivePer())));
+						int yp = yp1 - DrawParts->GetUIY((int)((ys + 5) * d.GetFlip()));
 
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA,
 										 std::min(
 											 std::clamp((int)(255.f*d.ActivePer()), 0, 255),
 											 std::min(
-												 std::clamp((y_UI(960) - yp) * 255 / y_UI(255), 0, 255),
-												 std::clamp(yp * 255 / y_UI(255), 0, 255)
+												 std::clamp((DrawParts->GetUIY(960) - yp) * 255 / DrawParts->GetUIY(255), 0, 255),
+												 std::clamp(yp * 255 / DrawParts->GetUIY(255), 0, 255)
 											 )
 										 )
 
 						);
 						this->m_tutorialGraph.DrawExtendGraph(
 							xp, yp,
-							xp + y_UI(xs), yp + y_UI(ys),
+							xp + DrawParts->GetUIY(xs), yp + DrawParts->GetUIY(ys),
 							true);
-						Fonts->Get(FontPool::FontType::Gothic_AA, y_UI(24)).DrawString(y_UI(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																					  xp + y_UI(69), yp + y_UI(14), Gray75, Black, d.GetMsg());
+						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+							DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+																					  xp + DrawParts->GetUIY(69), yp + DrawParts->GetUIY(14), Gray75, Black, d.GetMsg());
 					}
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);

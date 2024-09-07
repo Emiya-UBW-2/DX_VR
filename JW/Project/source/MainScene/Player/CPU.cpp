@@ -195,7 +195,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(TargetChara->GetFrame((int)CharaFrame::Upper2)).pos();
+				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 
 				auto MyPos = MyChara->GetEyeMatrix().pos();
 
@@ -212,7 +212,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(TargetChara->GetFrame((int)CharaFrame::Upper2)).pos();
+				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 
 				auto MyPos = MyChara->GetEyeMatrix().pos();
 
@@ -231,7 +231,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(TargetChara->GetFrame((int)CharaFrame::Upper2)).pos();
+				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 				auto MyPos = MyChara->GetEyeMatrix().pos();
 
 				auto Target = TgtPos;
@@ -256,7 +256,7 @@ namespace FPS_n2 {
 				auto* PlayerMngr = PlayerManager::Instance();
 				auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID).GetChara();
 				auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID).GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(TargetChara->GetFrame((int)CharaFrame::Upper2)).pos();
+				auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
 
 				Vector3DX pos_t;
 				while (true) {

@@ -114,7 +114,7 @@ namespace FPS_n2 {
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
 					auto& Ptr = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
-					*pRet = Ptr->GetFrameLocalMat(Ptr->GetFrame((int)frame));
+					*pRet = Ptr->GetFrameLocalMat(frame);
 					Ret = true;
 				}
 			}
@@ -135,8 +135,8 @@ namespace FPS_n2 {
 					auto& m = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
 					*pRet = m->GetFrameWorldMat_P(frame);
 					if (frame == GunFrame::Sight) {
-						if (m->GetChildFrameNum(m->GetFrame((int)frame)) > 0) {
-							Vector3DX vec = (m->GetChildFrameWorldMatrix(m->GetFrame((int)frame), 0).pos() - pRet->pos()).normalized();
+						if (m->GetObj_const().GetFrameChildNum(m->GetFrame((int)frame)) > 0) {
+							Vector3DX vec = (m->GetObj_const().GetChildFrameWorldMatrix(m->GetFrame((int)frame), 0).pos() - pRet->pos()).normalized();
 							//Vector3DX::Cross(pRet->xvec(), vec)
 							*pRet *= Matrix4x4DX::RotVec2(pRet->yvec(), vec);
 						}
@@ -172,7 +172,7 @@ namespace FPS_n2 {
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
 					auto& Ptr = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
-					Ptr->GetObj().frame_Reset(Ptr->GetFrame((int)frame));
+					Ptr->GetObj().ResetFrameUserLocalMatrix(Ptr->GetFrame((int)frame));
 				}
 			}
 			//‘·‚ª‚ ‚ê‚Î‚»‚¿‚ç‚à
@@ -218,18 +218,18 @@ namespace FPS_n2 {
 			}
 		}
 
-		void		ModSlotControl::UpdatePartsAnim(const MV1& pParent) {
+		void		ModSlotControl::UpdatePartsAnim(MV1& pParent) {
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (this->m_Parts_Ptr[loop]) {
 					//1‚ÌƒtƒŒ[ƒ€ˆÚ“®—Ê‚ğ–³‹‚·‚é
 					auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
-					for (int i = 0; i < Obj->GetObj().get_anime().size(); i++) {
-						Obj->GetObj().get_anime((int)(GunAnimeID)i).per = pParent.getanime(i).per;
-						Obj->GetObj().get_anime((int)(GunAnimeID)i).time = pParent.getanime(i).time;
+					for (int i = 0; i < Obj->GetObj().GetAnimNum(); i++) {
+						Obj->GetObj().SetAnim((int)(GunAnimeID)i).SetPer(pParent.SetAnim(i).GetPer());
+						Obj->GetObj().SetAnim((int)(GunAnimeID)i).SetTime(pParent.SetAnim(i).GetTime());
 					}
-					Obj->GetObj().frame_Reset(Obj->GetFrame((int)GunFrame::Center));
-					Obj->GetObj().work_anime();
-					auto Rot = Obj->GetFrameLocalMat(Obj->GetFrame((int)GunFrame::Center)).rotation();
+					Obj->GetObj().ResetFrameUserLocalMatrix(Obj->GetFrame((int)GunFrame::Center));
+					Obj->GetObj().UpdateAnimAll();
+					auto Rot = Obj->GetFrameLocalMat(GunFrame::Center).rotation();
 					Obj->GetObj().SetFrameLocalMatrix(Obj->GetFrame((int)GunFrame::Center), Rot * Obj->GetFrameBaseLocalMat((int)GunFrame::Center));
 				}
 			}

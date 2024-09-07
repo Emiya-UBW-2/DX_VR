@@ -36,9 +36,7 @@ namespace FPS_n2 {
 				this->m_IsHit = false;
 				this->m_IsDrawHitUI = false;
 				this->m_HitTimer = 0.f;
-				this->m_move.pos = pos_t;
-				this->m_move.repos = this->m_move.pos;
-				this->m_move.vec = pVec;
+				this->m_move.SetAll(pos_t, pos_t, pos_t,pVec, Matrix3x3DX::identity(), Matrix3x3DX::identity());
 				this->m_AmmoData = pAmmoData;
 				this->m_speed = this->m_AmmoData->GetSpeed() * Scale_Rate;
 				this->m_penetration = this->m_AmmoData->GetPenetration();
@@ -46,7 +44,7 @@ namespace FPS_n2 {
 				this->m_Timer = 0.f;
 				this->m_ShootCheraID = pMyID;
 			}
-			const auto		PenetrationCheck(float pArmer, const Vector3DX& normal) const noexcept { return (this->m_penetration > (pArmer * (1.0f / std::abs(Vector3DX::Dot(this->m_move.vec.normalized(), normal))))); }
+			const auto		PenetrationCheck(float pArmer, const Vector3DX& normal) const noexcept { return (this->m_penetration > (pArmer * (1.0f / std::abs(Vector3DX::Dot(this->GetMove().GetVec().normalized(), normal))))); }
 			void			Penetrate(HitPoint Damage, ArmerPoint ArmerDamage) noexcept {
 				SetActive(false);
 				this->m_IsHit = true;
@@ -59,13 +57,13 @@ namespace FPS_n2 {
 				this->m_IsDrawHitUI = false;
 				//this->m_penetration *= 0.8f;
 				this->m_RicochetCnt++;
-				this->m_move.vec = (this->m_move.vec + normal * ((Vector3DX::Dot(this->m_move.vec, normal)) * -2.0f)).normalized();
-				this->m_move.pos = this->m_move.vec * (0.1f) + position;
+				this->m_move.SetVec((this->GetMove().GetVec() + normal * ((Vector3DX::Dot(this->GetMove().GetVec(), normal)) * -2.0f)).normalized());
+				this->m_move.SetPos(this->GetMove().GetVec() * (0.1f) + position);
 				this->m_yAdd = 0.f;
 			}
 			void			HitGround(const Vector3DX& position) {
 				SetActive(false);
-				this->m_move.pos = position;
+				this->m_move.SetPos(position);
 				this->m_IsHit = true;
 				this->m_IsDrawHitUI = false;
 			}
@@ -96,7 +94,7 @@ namespace FPS_n2 {
 				}
 				if (IsActive()) {
 					//移動確定
-					this->m_move.UpdatePos(this->m_move.pos + (this->m_move.vec * (this->m_speed / DrawParts->GetFps())) + Vector3DX::up()*this->m_yAdd);
+					this->m_move.SetPos(this->m_move.GetPos() + (this->GetMove().GetVec() * (this->m_speed / DrawParts->GetFps())) + Vector3DX::up()*this->m_yAdd);
 					this->m_yAdd += (M_GR / (DrawParts->GetFps()*DrawParts->GetFps()));
 
 					//消す(スピードが0以下、貫通が0以下、5回反射する)
@@ -111,7 +109,7 @@ namespace FPS_n2 {
 			//
 			void			DrawShadow(void) noexcept override {}
 			void			CheckDraw(void) noexcept override {
-				auto tmp = ConvWorldPosToScreenPos(this->m_move.pos.get());
+				auto tmp = ConvWorldPosToScreenPos(this->m_move.GetPos().get());
 				if (tmp.z >= 0.f && tmp.z <= 1.f) {
 					this->m_Hit_DispPos = tmp;
 				}
@@ -119,10 +117,10 @@ namespace FPS_n2 {
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				if (!isDrawSemiTrans) {
 					if (IsActive()) {
-						if (CheckCameraViewClip_Box(this->m_move.repos.get(), this->m_move.pos.get()) == FALSE) {
+						if (CheckCameraViewClip_Box(this->m_move.GetRePos().get(), this->m_move.GetPos().get()) == FALSE) {
 							SetUseLighting(FALSE);
 							SetUseHalfLambertLighting(FALSE);
-							DrawCapsule_3D(this->m_move.pos, this->m_move.repos, 1.f * ((this->m_AmmoData->GetCaliber() - 0.00762f) * 0.1f + 0.00762f)*Scale_Rate, GetColor(255, 255, 172), Yellow);
+							DrawCapsule_3D(this->m_move.GetPos(), this->m_move.GetRePos(), 1.f * ((this->m_AmmoData->GetCaliber() - 0.00762f) * 0.1f + 0.00762f)*Scale_Rate, GetColor(255, 255, 172), Yellow);
 							SetUseLighting(TRUE);
 							SetUseHalfLambertLighting(TRUE);
 						}

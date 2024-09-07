@@ -131,11 +131,10 @@ namespace FPS_n2 {
 			moves						m_move;
 			std::vector<DamageEvent>	m_DamageEvents;
 		private:
-			const auto			CalcCheckSum(void) noexcept {
+			const auto			CalcCheckSum(void) const noexcept {
 				return (
-					((int)(this->m_move.pos.x*100.f) + (int)(this->m_move.pos.y*100.f) + (int)(this->m_move.pos.z*100.f)) +
-					((int)(this->m_move.vec.x*100.f) + (int)(this->m_move.vec.y*100.f) + (int)(this->m_move.vec.z*100.f)) +
-					(int)(rad2deg(this->m_move.rad.y)) +
+					((int)(this->m_move.GetPos().x * 100.f) + (int)(this->m_move.GetPos().y * 100.f) + (int)(this->m_move.GetPos().z * 100.f)) +
+					((int)(this->m_move.GetVec().x*100.f) + (int)(this->m_move.GetVec().y*100.f) + (int)(this->m_move.GetVec().z*100.f)) +
 					(int)(ID)
 					);
 			}
@@ -158,15 +157,13 @@ namespace FPS_n2 {
 				PlayerNetData tmp;
 				//
 				tmp.Input = Lerp(PrevData.Input, ServerData.Input, Per);
-				tmp.m_move = Lerp(PrevData.m_move, ServerData.m_move, Per);
+				//tmp.m_move = Lerp(PrevData.m_move, ServerData.m_move, Per);
 				//
 				tmp.ID = ServerData.ID;
 				tmp.IsActive = ServerData.IsActive;
 				tmp.Frame = ServerData.Frame;
 				tmp.Input.SetKeyInputFlags(ServerData.Input);
 				if (isYradReset) {
-					auto radvec = Lerp(Matrix4x4DX::RotAxis(Vector3DX::up(), PrevData.m_move.rad.y).zvec(), Matrix4x4DX::RotAxis(Vector3DX::up(), ServerData.m_move.rad.y).zvec(), Per).normalized();
-					tmp.m_move.rad.y = (-atan2f(radvec.x, radvec.z));
 				}
 				tmp.m_DamageEvents = ServerData.m_DamageEvents;
 				return tmp;
@@ -205,9 +202,9 @@ namespace FPS_n2 {
 				return tmp;
 			}
 			virtual void	SetParam(int pPlayerID, const Vector3DX& pPos) noexcept {
-				this->m_ServerDataCommon.PlayerData[pPlayerID].m_move.pos = pPos;
+				this->m_ServerDataCommon.PlayerData[pPlayerID].m_move.SetPos(pPos);
 				this->m_ServerDataCommon.ServerFrame = 0;
-				this->m_PrevServerData.PlayerData[pPlayerID].m_move.pos = pPos;	// サーバーデータ
+				this->m_PrevServerData.PlayerData[pPlayerID].m_move.SetPos(pPos);	// サーバーデータ
 				this->m_PrevServerData.ServerFrame = 0;
 			}
 		protected:
@@ -237,7 +234,7 @@ namespace FPS_n2 {
 			const auto&		GetServerData(void) const noexcept { return this->m_ServerData; }
 			void			SetParam(int pPlayerID, const Vector3DX& pPos) noexcept override {
 				NetWorkControl::SetParam(pPlayerID, pPos);
-				this->m_ServerData.PlayerData[pPlayerID].m_move.pos = this->m_ServerDataCommon.PlayerData[pPlayerID].m_move.pos;
+				this->m_ServerData.PlayerData[pPlayerID].m_move.SetPos(this->m_ServerDataCommon.PlayerData[pPlayerID].m_move.GetPos());
 				this->m_ServerData.PlayerData[pPlayerID].IsActive = false;
 			}
 		public:

@@ -11,8 +11,8 @@ namespace FPS_n2 {
 		public:
 		public:
 		public://ƒQƒbƒ^[
-			const auto GetLeftHandMat() const noexcept { return this->GetFrameWorldMat(2); }
-			const auto GetRightHandMat() const noexcept { return this->GetFrameWorldMat(3); }
+			const auto GetLeftHandMat() const noexcept { return this->GetObj_const().GetFrameLocalWorldMatrix(2); }
+			const auto GetRightHandMat() const noexcept { return this->GetObj_const().GetFrameLocalWorldMatrix(3); }
 		public:
 			ArmerClass(void) noexcept { this->m_objType = (int)ObjType::Armer; }
 			~ArmerClass(void) noexcept {}

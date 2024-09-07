@@ -72,6 +72,9 @@ namespace FPS_n2 {
 		public:
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
 			void			SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
+
+			auto	GetFrameWorldMat(CharaFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
+			auto	GetFrameLocalMat(CharaFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix(GetFrame(static_cast<int>(frame))); }
 		public:
 			bool												CanLookTarget{true};
 
@@ -82,11 +85,9 @@ namespace FPS_n2 {
 			}
 			void			SetPlayMode(bool value) noexcept { m_IsHardMode = value; }
 		private:
-			void			move_RightArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept;
-			void			move_LeftArm(const Vector3DX& GunPos, const Vector3DX& Gunyvec, const Vector3DX& Gunzvec) noexcept;
 			const Matrix4x4DX GetCharaDir(void) const noexcept;
 
-			const auto		GetCharaPosition(void) const noexcept { return this->m_move.posbuf; }
+			const auto		GetCharaPosition(void) const noexcept { return this->m_move.GetPos(); }
 			const auto		IsAimPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() <= 0.1f); }
 			const auto		IsLowReadyPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() >= 0.95f); }
 		private:

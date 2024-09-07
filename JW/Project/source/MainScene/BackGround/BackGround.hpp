@@ -81,7 +81,7 @@ namespace FPS_n2 {
 					path += "model.mv1";
 					MV1::Load(path, &this->m_ObjSky, DX_LOADMODEL_PHYSICS_DISABLE);
 					this->m_ObjSky.SetScale(Vector3DX::vget(10.f, 10.f, 10.f));
-					MV1SetDifColorScale(this->m_ObjSky.get(), GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
+					MV1SetDifColorScale(this->m_ObjSky.GetHandle(), GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
 				}
 				//
 				Init_Sub();
@@ -219,12 +219,15 @@ namespace FPS_n2 {
 		public://
 			//
 			void			Init_Sub(void) noexcept override {
-				//MV1SetMaterialDrawAlphaTestAll(this->m_ObjGround.get(), TRUE, DX_CMP_GREATER, 216);
+				//MV1SetMaterialDrawAlphaTestAll(this->m_ObjGround.GetHandle(), TRUE, DX_CMP_GREATER, 216);
 			}
 			//
 			void			Execute_Sub(void) noexcept override {}
 			//
-			void			BG_Draw_Sub(void) noexcept override { DrawBox(0, 0, y_r(1920), y_r(1080), White, TRUE); }
+			void			BG_Draw_Sub(void) noexcept override {
+				auto* DrawParts = DXDraw::Instance();
+				DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), White, TRUE);
+			}
 			void			Shadow_Draw_Far_Sub(void) noexcept override {}
 			void			Shadow_Draw_Sub(void) noexcept override {
 				DrawCommon();

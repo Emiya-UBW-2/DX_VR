@@ -66,7 +66,7 @@ namespace FPS_n2 {
 				m_radius = radius;
 				m_HitType = pHitType;
 			}
-			void	Draw() {
+			void	Draw() const noexcept {
 				unsigned int color;
 				switch (m_HitType) {
 					case HitType::Head:
@@ -416,13 +416,13 @@ namespace FPS_n2 {
 			bool		PutOverride() {
 				if (this->m_PosBufOverRideFlag) {
 					this->m_PosBufOverRideFlag = false;
-
+					/*
 					float X = this->m_rad_Buf.x;
 					Easing(&X, this->m_OverRideInfo.rad.x, 0.9f, EasingType::OutExpo);
 					this->m_rad_Buf.x = (X);
 					this->m_rad_Buf.y = (this->m_OverRideInfo.rad.y);
 					this->m_rad.y = (this->m_OverRideInfo.rad.y);
-
+					//*/
 					return true;
 				}
 				return false;
@@ -588,7 +588,7 @@ namespace FPS_n2 {
 			void			SetLaserStartPos(const Vector3DX& value) noexcept { LaserStartPos = value; }
 			void			SetLaserEndPos(const Vector3DX& value) noexcept { LaserEndPos = value; }
 
-			void			DrawLaser() noexcept {
+			void			DrawLaser() const noexcept {
 				if (m_IsLaserActive) {
 					/*
 					auto P = LaserEndPos / Scale_Rate;
@@ -1003,8 +1003,8 @@ namespace FPS_n2 {
 			public:
 				//
 				void Get_frame(MV1& obj_) noexcept {
-					for (int i = 0; i < int(obj_.frame_num()); ++i) {
-						std::string p = obj_.frame_name(i);
+					for (int i = 0; i < int(obj_.GetFrameNum()); ++i) {
+						std::string p = obj_.GetFrameName(i);
 						if (p == std::string("ƒOƒ‹[ƒu")) {
 							this->bodyg_f.Set(i, obj_);
 						}
@@ -1105,9 +1105,9 @@ namespace FPS_n2 {
 					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTreg_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTreg_f.GetFrameID()));
 					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTfoot2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTfoot2_f.GetFrameID()));
 					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTfoot1_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTfoot1_f.GetFrameID()));
-					for (int i = 0; i < tgt->get_anime().size(); ++i) {
-						tgt->get_anime(i).per = mine.get_anime(i).per;
-						tgt->get_anime(i).time = mine.get_anime(i).time;
+					for (int i = 0; i < tgt->GetAnimNum(); ++i) {
+						tgt->SetAnim(i).SetPer(mine.SetAnim(i).GetPer());
+						tgt->SetAnim(i).SetTime(mine.SetAnim(i).GetTime());
 					}
 				}
 				//
@@ -1140,9 +1140,9 @@ namespace FPS_n2 {
 					this->m_RagDollTimer = std::min(this->m_RagDollTimer + 1.f / DrawParts->GetFps(), 3.f);
 				}
 				if (this->m_RagDollTimer < 3.f) {
-					MV1SetPrioritizePhysicsOverAnimFlag(this->m_RagDoll.get(), TRUE);
+					MV1SetPrioritizePhysicsOverAnimFlag(this->m_RagDoll.GetHandle(), TRUE);
 					this->frame_s.copy_frame(obj_body_t, this->lagframe_, &m_RagDoll);
-					this->m_RagDoll.work_anime();
+					this->m_RagDoll.UpdateAnimAll();
 					if (this->m_RagDollTimer == 0.f) {
 						this->m_RagDoll.PhysicsResetState();
 					}

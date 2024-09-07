@@ -17,7 +17,7 @@ namespace FPS_n2 {
 			FallObjClass(void) noexcept { this->m_objType = (int)ObjType::FallObj; }
 			~FallObjClass(void) noexcept {}
 		public:
-			void			SetFall(const Vector3DX& pos, const Matrix4x4DX& mat, const Vector3DX& vec, float timer, SoundEnum sound) noexcept;
+			void			SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float timer, SoundEnum sound) noexcept;
 		public:
 			void			Init_Sub(void) noexcept override {
 				this->m_IsActive = false;

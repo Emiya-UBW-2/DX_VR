@@ -108,10 +108,10 @@ namespace FPS_n2 {
 			}
 
 			auto* BGM = BGMPool::Instance();
-			if (!BGM->Get(0).Check()) {
-				BGM->Get(0).Play(DX_PLAYTYPE_LOOP, TRUE);
+			if (!BGM->Get(0)->Check()) {
+				BGM->Get(0)->Play(DX_PLAYTYPE_LOOP, TRUE);
 			}
-			BGM->Get(0).SetVol_Local(255);
+			BGM->Get(0)->SetVol_Local(255);
 
 			m_Yrad = deg2rad(45);
 			m_Xrad = 0.f;
@@ -200,23 +200,22 @@ namespace FPS_n2 {
 								SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
 								break;
 							case 5:
-								PopUpParts->Add(LocalizePool::Instance()->Get(120), y_UI(720), y_UI(840),
+								PopUpParts->Add(LocalizePool::Instance()->Get(120), DrawParts->GetUIY(720), DrawParts->GetUIY(840),
 												[&](int xmin, int ymin, int xmax, int, bool) {
-													auto* Fonts = FontPool::Instance();
-
 													int xp1, yp1;
-
-													xp1 = xmin + y_UI(24);
+													xp1 = xmin + DrawParts->GetUIY(24);
 													yp1 = ymin + LineHeight;
-													int Height = y_UI(12);
+													int Height = DrawParts->GetUIY(12);
 													for (int i = 0;i < m_CreditCoulm;i++) {
-														int xpos = xp1 + y_UI(6);
+														int xpos = xp1 + DrawParts->GetUIY(6);
 														int ypos = yp1 + (yp1 + Height - yp1) / 2;
-														Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
+														WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+															Height, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
 																											   xpos, ypos, White, Black, m_CreditStr.at(i).first);
 
-														xpos = xmax - y_UI(24);
-														Fonts->Get(FontPool::FontType::Gothic_Edge).DrawString(Height, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
+														xpos = xmax - DrawParts->GetUIY(24);
+														WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+															Height, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
 																											   xpos, ypos, White, Black, m_CreditStr.at(i).second);
 														yp1 += Height;
 													}
@@ -328,7 +327,8 @@ namespace FPS_n2 {
 			SetNextSelect(select);
 		}
 		void			TitleScene::BG_Draw_Sub(void) noexcept {
-			DrawBox(0, 0, y_r(1920), y_r(1080), Gray65, TRUE);
+			auto* DrawParts = DXDraw::Instance();
+			DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Gray65, TRUE);
 		}
 
 		void			TitleScene::ShadowDraw_Sub(void) noexcept {
@@ -339,16 +339,16 @@ namespace FPS_n2 {
 		}
 		//
 		void			TitleScene::DrawUI_Base_Sub(void) noexcept {
-			auto* Fonts = FontPool::Instance();
 			auto* PopUpParts = PopUp::Instance();
-
+			auto* DrawParts = DXDraw::Instance();
 			//
-			m_TitleImage.DrawExtendGraph(y_UI(64), y_UI(64), y_UI(64 + 369), y_UI(64 + 207), true);
+			m_TitleImage.DrawExtendGraph(DrawParts->GetUIY(64), DrawParts->GetUIY(64), DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), true);
 			//
 			{
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18),
+				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+					DrawParts->GetUIY(18),
 																	  FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-																	  y_UI(64 + 369), y_UI(64 + 207), White, Black, "Ver 1.1.1");
+																	  DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), White, Black, "Ver 1.1.1");
 			}
 			//
 			for (auto& y : ButtonSel) {
@@ -356,17 +356,18 @@ namespace FPS_n2 {
 			}
 			//
 			if ((select != -1) && !PopUpParts->IsActivePop()) {
-				Fonts->Get(FontPool::FontType::Nomal_Edge).DrawString(y_UI(18),
+				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+					DrawParts->GetUIY(18),
 																	  FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-																	  y_UI(32), y_UI(1080 - 32 - 32), White, Black, LocalizePool::Instance()->Get(9020 + select));
+																	  DrawParts->GetUIY(32), DrawParts->GetUIY(1080 - 32 - 32), White, Black, LocalizePool::Instance()->Get(9020 + select));
 			}
 			//
 			{
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(GameFadeIn, 0.f, 1.f)), 0, 255));
-				DrawBox(0, 0, y_r(1920), y_r(1080), Black, TRUE);
+				DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Black, TRUE);
 
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, std::clamp((int)(255.f*std::clamp(GameStart, 0.f, 1.f)), 0, 255));
-				DrawBox(0, 0, y_r(1920), y_r(1080), White, TRUE);
+				DrawBox(0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), White, TRUE);
 
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
