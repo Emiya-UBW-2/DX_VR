@@ -1569,7 +1569,7 @@ namespace FPS_n2 {
 			}
 			GetObj().UpdateAnimAll();
 			//移動の際の視点制御
-			EyeSwingControl::UpdateEyeSwing(GetCharaDir(), KeyControl::GetVec().magnitude() / 0.65f, KeyControl::GetRun() ? 8.f : 5.f);
+			EyeSwingControl::UpdateEyeSwing(GetCharaDir(), std::clamp(KeyControl::GetVec().magnitude() / 0.65f, 0.f, 0.85f / 0.65f), KeyControl::GetRun() ? 8.f : 5.f);
 			//
 			ExecuteSound();
 			//
@@ -1577,7 +1577,7 @@ namespace FPS_n2 {
 			//
 			RagDollControl::Execute_RagDollControl(this->GetObj(), LifeControl::IsAlive());													//ラグドール
 			HitBoxControl::UpdataHitBox(this, (this->GetCharaType() == CharaTypeID::Enemy) ? 1.1f : 1.f);									//ヒットボックス
-			WalkSwingControl::UpdateWalkSwing(GetEyeMatrix().pos() - GetCharaPosition(), std::clamp(this->GetMove().GetVec().magnitude() / 2.f, 0.f, 1.f));
+			WalkSwingControl::UpdateWalkSwing(GetEyeMatrix().pos() - GetCharaPosition(), std::clamp(this->GetMove().GetVec().magnitude() / 2.f, 0.f, 0.5f));
 			EffectControl::Execute();
 		}
 		void			CharacterClass::Draw(bool isDrawSemiTrans) noexcept {

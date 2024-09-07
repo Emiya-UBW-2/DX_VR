@@ -362,7 +362,7 @@ namespace FPS_n2 {
 					return 0.45f;
 				}
 				else if (GetRun()) {
-					return 0.875f;
+					return 1.275f;
 				}
 				else {
 					return 0.65f;
