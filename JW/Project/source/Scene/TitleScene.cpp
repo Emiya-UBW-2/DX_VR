@@ -180,55 +180,56 @@ namespace FPS_n2 {
 					}
 					if ((select != -1) && (m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetKey(PADS::INTERACT).trigger())) {
 						switch (select) {
-							case 0:
-							case 1:
-							case 2:
+						case 0:
+						case 1:
+						case 2:
+							GameStart += 0.0001f;
+							SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							break;
+						case 3:
+							if (m_HardModeActive) {
 								GameStart += 0.0001f;
 								SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
-								break;
-							case 3:
-								if (m_HardModeActive) {
-									GameStart += 0.0001f;
-									SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
-								}
-								else {
-									SE->Get((int)SoundEnumCommon::UI_NG).Play(0, DX_PLAYTYPE_BACK, TRUE);
-								}
-								break;
-							case 4:
-								OptionWindowClass::Instance()->SetActive();
-								SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
-								break;
-							case 5:
-								PopUpParts->Add(LocalizePool::Instance()->Get(120), DrawParts->GetUIY(720), DrawParts->GetUIY(840),
-												[&](int xmin, int ymin, int xmax, int, bool) {
-										auto* WindowParts = WindowSystem::DrawControl::Instance();
-										int xp1, yp1;
-													xp1 = xmin + DrawParts->GetUIY(24);
-													yp1 = ymin + LineHeight;
-													int Height = DrawParts->GetUIY(12);
-													for (int i = 0;i < m_CreditCoulm;i++) {
-														int xpos = xp1 + DrawParts->GetUIY(6);
-														int ypos = yp1 + (yp1 + Height - yp1) / 2;
-														WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
-															Height, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
-																											   xpos, ypos, White, Black, m_CreditStr.at(i).first);
+							}
+							else {
+								SE->Get((int)SoundEnumCommon::UI_NG).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							}
+							break;
+						case 4:
+							OptionWindowClass::Instance()->SetActive();
+							SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							break;
+						case 5:
+							PopUpParts->Add(LocalizePool::Instance()->Get(120), DrawParts->GetUIY(720), DrawParts->GetUIY(840),
+								[&](int xmin, int ymin, int xmax, int, bool) {
+									auto* DrawParts = DXDraw::Instance();
+									auto* WindowParts = WindowSystem::DrawControl::Instance();
+									int xp1, yp1;
+									xp1 = xmin + DrawParts->GetUIY(24);
+									yp1 = ymin + LineHeight;
+									int Height = DrawParts->GetUIY(12);
+									for (int i = 0; i < m_CreditCoulm; i++) {
+										int xpos = xp1 + DrawParts->GetUIY(6);
+										int ypos = yp1 + (yp1 + Height - yp1) / 2;
+										WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+											Height, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE,
+											xpos, ypos, White, Black, m_CreditStr.at(i).first);
 
-														xpos = xmax - DrawParts->GetUIY(24);
-														WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
-															Height, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
-																											   xpos, ypos, White, Black, m_CreditStr.at(i).second);
-														yp1 += Height;
-													}
-												},
-												[&]() {},
-													[&]() {},
-													true
-													);
-								SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
-								break;
-							default:
-								break;
+										xpos = xmax - DrawParts->GetUIY(24);
+										WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
+											Height, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE,
+											xpos, ypos, White, Black, m_CreditStr.at(i).second);
+										yp1 += Height;
+									}
+								},
+								[&]() {},
+								[&]() {},
+								true
+							);
+							SE->Get((int)SoundEnumCommon::UI_OK).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							break;
+						default:
+							break;
 						}
 					}
 					if (preselect != select || preMouseSel != m_MouseSelMode) {
