@@ -24,10 +24,10 @@ namespace FPS_n2 {
 				"Reset SaveData", 48, true,
 				1920 - 64, 1080 - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 			ButtonParts->AddIconButton(
-				"data/UI/setting.png", true,
+				"CommonData/UI/setting.png", true,
 				(1920 - 96 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			ButtonParts->AddIconButton(
-				"data/UI/credit.png", true,
+				"CommonData/UI/credit.png", true,
 				(1920 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			// クレジット
 			this->m_CreditControl = std::make_unique<CreditControl>();

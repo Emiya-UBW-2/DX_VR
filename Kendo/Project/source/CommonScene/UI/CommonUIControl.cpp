@@ -9,7 +9,7 @@ namespace FPS_n2 {
 			return (select != INVALID_ID) && (this->m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetKey(PADS::INTERACT).trigger());
 		}
 		ButtonControl::ButtonControl(void) noexcept {
-			this->m_SelectBackImage = GraphHandle::Load("data/UI/select.png");
+			this->m_SelectBackImage = GraphHandle::Load("CommonData/UI/select.png");
 			ResetSel();
 		}
 		ButtonControl::~ButtonControl(void) noexcept {

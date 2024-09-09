@@ -23,6 +23,3 @@ ControlType=XBox
 Language=Jpn
 AA=true
 DrawScale=1.000000
-GodRay=false
-Distortion=true
-PBR=false
