@@ -59,7 +59,7 @@ namespace FPS_n2 {
 				Reset();
 				m_IsRetire = false;
 
-				m_SelectBackImage = GraphHandle::Load("data/UI/select.png");
+				m_SelectBackImage = GraphHandle::Load("CommonData/UI/select.png");
 				for (auto& y : ButtonSel) {
 					y.LoadCommon(&m_SelectBackImage);
 				}

@@ -186,10 +186,10 @@ namespace FPS_n2 {
 			m_ResultRank = -1;
 			m_ResultPhase = 0;
 
-			m_SelectBackImage = GraphHandle::Load("data/UI/select.png");
+			m_SelectBackImage = GraphHandle::Load("CommonData/UI/select.png");
 			ButtonSel.LoadCommon(&m_SelectBackImage);
 
-			ButtonSel.Load_Icon("data/UI/Right.png", true);
+			ButtonSel.Load_Icon("CommonData/UI/Right.png", true);
 			ButtonSel.Set((960), (840), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 
 			ButtonSel.SetNone();

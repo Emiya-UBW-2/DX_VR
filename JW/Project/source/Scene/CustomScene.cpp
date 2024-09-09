@@ -17,7 +17,7 @@ namespace FPS_n2 {
 			//
 			bselect = 0;
 			m_MouseSelMode = false;
-			m_SelectBackImage = GraphHandle::Load("data/UI/select.png");
+			m_SelectBackImage = GraphHandle::Load("CommonData/UI/select.png");
 			for (auto& y : ButtonSel) {
 				y.LoadCommon(&m_SelectBackImage);
 			}
@@ -28,14 +28,14 @@ namespace FPS_n2 {
 			ButtonSel.at(2).Load_Icon("data/UI/FreeLook.png", true);
 			ButtonSel.at(2).Set((1920 - 96 * 0 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 
-			ButtonSel.at(3).Load_Icon("data/UI/Left.png", true);
+			ButtonSel.at(3).Load_Icon("CommonData/UI/Left.png", true);
 			ButtonSel.at(3).Set((960 - 100), (920), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonSel.at(4).Load_Icon("data/UI/Right.png", true);
+			ButtonSel.at(4).Load_Icon("CommonData/UI/Right.png", true);
 			ButtonSel.at(4).Set((960 + 100), (920), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 
-			ButtonSel.at(5).Load_Icon("data/UI/Left.png", true);
+			ButtonSel.at(5).Load_Icon("CommonData/UI/Left.png", true);
 			ButtonSel.at(5).Set((960 - 400 - 48), (540 - 270 + 48), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonSel.at(6).Load_Icon("data/UI/Right.png", true);
+			ButtonSel.at(6).Load_Icon("CommonData/UI/Right.png", true);
 			ButtonSel.at(6).Set((960 - 400 + 48), (540 - 270 + 48), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			ButtonSel.at(7).Load_Icon("data/UI/Reset.png", true);
 			ButtonSel.at(7).Set((1920 - 96 * 2 - 64), (64 + 64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);

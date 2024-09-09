@@ -26,7 +26,7 @@ namespace FPS_n2 {
 			GameStart = 0.f;
 
 			m_TitleImage = GraphHandle::Load("data/UI/Title.png");
-			m_SelectBackImage = GraphHandle::Load("data/UI/select.png");
+			m_SelectBackImage = GraphHandle::Load("CommonData/UI/select.png");
 			for (auto& y : ButtonSel) {
 				y.LoadCommon(&m_SelectBackImage);
 			}
@@ -51,9 +51,9 @@ namespace FPS_n2 {
 			ButtonSel.at(3).Load_String(SelectName[3], (48), m_HardModeActive);
 			ButtonSel.at(3).Set((1920 - 64), (1080 - 84 - 64 * 0), FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 
-			ButtonSel.at(4).Load_Icon("data/UI/setting.png", true);
+			ButtonSel.at(4).Load_Icon("CommonData/UI/setting.png", true);
 			ButtonSel.at(4).Set((1920 - 96 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonSel.at(5).Load_Icon("data/UI/credit.png", true);
+			ButtonSel.at(5).Load_Icon("CommonData/UI/credit.png", true);
 			ButtonSel.at(5).Set((1920 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			//クレジット
 			int mdata = FileRead_open("data/Credit.txt", FALSE);
