@@ -1,3 +1,0 @@
-GodRay=false
-Distortion=true
-PBR=false
