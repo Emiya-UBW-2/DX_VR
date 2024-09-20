@@ -372,7 +372,7 @@ namespace FPS_n2 {
 						if (a->IsActive()) {
 							//AmmoClass
 							Vector3DX repos_tmp = a->GetRePos();
-							Vector3DX pos_tmp = a->GetMove().GetPos();
+							Vector3DX pos_tmp = a->GetPos();
 
 							int j = 0;
 							while (true) {
@@ -757,7 +757,7 @@ namespace FPS_n2 {
 						for (auto& r : t->GetHitPosRec()) {
 							float cos_t, sin_t;
 							t->GetHitPoint(r, &cos_t, &sin_t);
-							DrawCircle(xp + xs + static_cast<int>((float)xs * cos_t), yp + ys + static_cast<int>((float)ys * sin_t), 2, Green);
+							WindowParts->SetDrawCircle(WindowSystem::DrawLayer::Normal, xp + xs + static_cast<int>((float)xs * cos_t), yp + ys + static_cast<int>((float)ys * sin_t), 2, Green);
 						}
 						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
