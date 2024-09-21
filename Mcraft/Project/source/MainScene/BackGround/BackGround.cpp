@@ -22,6 +22,11 @@ namespace FPS_n2 {
 			vert32.back().su = 0.0f;
 			vert32.back().sv = 0.0f;
 
+			//vert32.back().spos;
+			//vert32.back().tan;
+			//vert32.back().binorm;
+
+
 			vert32.resize(vert32.size() + 1);
 			vert32.back().pos = Matrix4x4DX::Vtrans(Vector3DX::vget(-0.5f, 0.0f, 0.5f), movement).get();
 			vert32.back().norm = Normal.get();

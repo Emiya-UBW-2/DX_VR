@@ -23,16 +23,38 @@ namespace FPS_n2 {
 				int selset = INVALID_ID;
 			};
 
-			std::vector<CellData> m_Cell;
-			int Xall = 1000;
-			int Yall = 200;
-			int Zall = 1000;
+			std::vector<CellData> m_CellBase;
+			int Xall = 500;
+			int Yall = 50;
+			int Zall = 500;
+
+			int total = 4;
+			int MulPer = 2;
+			float CellScale = Scale_Rate / 2.f / 2.f;
+			float Max = 15.f;
+
+			std::vector<std::vector<CellData>> m_CellxN;
 
 			const auto& GetCell(int x, int y, int z) const noexcept {
-				return m_Cell.at(std::clamp(x + Xall / 2, 0, Xall - 1) + Xall * std::clamp(y + Yall / 2, 0, Yall - 1) + Xall * Yall * std::clamp(z + Zall / 2, 0, Zall - 1));
+				return m_CellBase.at(std::clamp(x + Xall / 2, 0, Xall - 1) + Xall * std::clamp(y + Yall / 2, 0, Yall - 1) + Xall * Yall * std::clamp(z + Zall / 2, 0, Zall - 1));
 			}
 			auto& SetCell(int x, int y, int z) noexcept {
-				return m_Cell.at(std::clamp(x + Zall / 2, 0, Xall - 1) + Xall * std::clamp(y + Yall / 2, 0, Yall - 1) + Xall * Yall * std::clamp(z + Zall / 2, 0, Zall - 1));
+				return m_CellBase.at(std::clamp(x + Xall / 2, 0, Xall - 1) + Xall * std::clamp(y + Yall / 2, 0, Yall - 1) + Xall * Yall * std::clamp(z + Zall / 2, 0, Zall - 1));
+			}
+
+			const auto& GetCellxN(int sel, int x, int y, int z) const noexcept {
+				int scaleRate = (int)pow(MulPer, (total - 1 - sel));
+				int XA = Xall / scaleRate;
+				int YA = Yall / scaleRate;
+				int ZA = Zall / scaleRate;
+				return m_CellxN.at(sel).at(std::clamp(x + XA / 2, 0, XA - 1) + XA * std::clamp(y + YA / 2, 0, YA - 1) + XA * YA * std::clamp(z + ZA / 2, 0, ZA - 1));
+			}
+			auto& SetCellxN(int sel, int x, int y, int z) noexcept {
+				int scaleRate = (int)pow(MulPer, (total - 1 - sel));
+				int XA = Xall / scaleRate;
+				int YA = Yall / scaleRate;
+				int ZA = Zall / scaleRate;
+				return m_CellxN.at(sel).at(std::clamp(x + XA / 2, 0, XA - 1) + XA * std::clamp(y + YA / 2, 0, YA - 1) + XA * YA * std::clamp(z + ZA / 2, 0, ZA - 1));
 			}
 		public:
 			BackGroundClass(void) noexcept {}
@@ -92,15 +114,77 @@ namespace FPS_n2 {
 					this->m_ObjGround.SetMaterialAmbColor(i, GetColorF(0.15f, 0.15f, 0.15f, 1.f));
 				}
 				//*/
-				m_Cell.resize(Xall * Yall * Zall);
-				for (int x = -Xall / 2; x < Xall / 2; x++) {
-					for (int y = -Yall / 2; y < Yall / 2; y++) {
-						for (int z = -Zall / 2; z < Zall / 2; z++) {
-							int set = INVALID_ID;
-							if (y == -1) {
-								set = 0;
+				if (true) {
+					m_CellBase.resize(Xall * Yall * Zall);
+					for (int x = -Xall / 2; x < Xall / 2; x++) {
+						for (int y = -Yall / 2; y < Yall / 2; y++) {
+							for (int z = -Zall / 2; z < Zall / 2; z++) {
+								if (y == -1) {
+									SetCell(x, y, z).selset = 0;
+									continue;
+								}
+								if (y == 1) {
+									if (GetRand(100) <= 10) {
+										SetCell(x, y, z).selset = 0;
+										SetCell(x, y - 1, z).selset = 0;
+										continue;
+									}
+								}
+								SetCell(x, y, z).selset = INVALID_ID;
 							}
-							SetCell(x, y, z).selset = set;
+						}
+					}
+					std::ofstream fout;
+					fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
+					fout.write((char*)&Xall, sizeof(Xall));
+					fout.write((char*)&Yall, sizeof(Yall));
+					fout.write((char*)&Zall, sizeof(Zall));
+					fout.write((char*)&m_CellBase.at(0), sizeof(m_CellBase.at(0)) * m_CellBase.size());
+					fout.close();  //ƒtƒ@ƒCƒ‹‚ð•Â‚¶‚é
+				}
+				else {
+					std::ifstream fin;
+					fin.open("data/Map.txt", std::ios::in | std::ios::binary);
+					fin.read((char*)&Xall, sizeof(Xall));
+					fin.read((char*)&Yall, sizeof(Yall));
+					fin.read((char*)&Zall, sizeof(Zall));
+					m_CellBase.resize(Xall * Yall * Zall);
+					fin.read((char*)&m_CellBase.at(0), sizeof(m_CellBase.at(0)) * m_CellBase.size());
+					fin.close();
+				}
+				//ŠÈ—ª”Å‚ð§ì
+				{
+					m_CellxN.clear();
+					m_CellxN.resize(total);
+					for (int i = 0; i < total; i++) {
+						int scaleRate = (int)pow(MulPer, (total - 1 - i));
+						if (scaleRate == 1.0f) {
+							m_CellxN.at(i) = m_CellBase;
+							continue;
+						}
+						int XA = Xall / scaleRate;
+						int YA = Yall / scaleRate;
+						int ZA = Zall / scaleRate;
+						m_CellxN.at(i).resize(XA * YA * ZA);
+
+						for (int xm = -XA / 2; xm < XA / 2; xm++) {
+							for (int ym = -YA / 2; ym < YA / 2; ym++) {
+								for (int zm = -ZA / 2; zm < ZA / 2; zm++) {
+									int FillCount = 0;
+									int FillAll = 0;
+									for (int x2 = (int)(xm * scaleRate); x2 < (int)((xm + 1) * scaleRate); x2++) {
+										for (int y2 = (int)(ym * scaleRate); y2 < (int)((ym + 1) * scaleRate); y2++) {
+											for (int z2 = (int)(zm * scaleRate); z2 < (int)((zm + 1) * scaleRate); z2++) {
+												const auto& Cell = GetCell(x2, y2, z2);
+												FillAll++;
+												if (Cell.selset == INVALID_ID) { continue; }
+												FillCount++;
+											}
+										}
+									}
+									SetCellxN(i, xm, ym, zm).selset = ((FillAll != 0) && ((float)FillCount / FillAll >= ((float)1 / 8))) ? 0 : INVALID_ID;
+								}
+							}
 						}
 					}
 				}
@@ -124,13 +208,10 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				Vector3DX CamPos = DrawParts->GetMainCamera().GetCamPos();
 				Vector3DX CamVec = DrawParts->GetMainCamera().GetCamVec() - CamPos;
-				int total = 4;
-				float MulPer = 2.f;
-				float scale = Scale_Rate / 2.f * 0.5f * powf(MulPer, (float)(total - 1));
-				float Max = 15.f;
 				for (int i = 0; i < total; i++) {
+					int scaleRate = (int)pow(MulPer, (total - 1 - i));
 					bool IsLast = (i == (total - 1));
-					Vector3DX center = CamPos / scale;
+					Vector3DX center = CamPos / (CellScale * scaleRate);
 
 					for (int x = (int)(center.x - Max); x <= (int)(center.x + Max); x++) {
 						for (int y = (int)(center.y - Max); y <= (int)(center.y + Max); y++) {
@@ -142,7 +223,7 @@ namespace FPS_n2 {
 									) {
 									continue;
 								}
-								const auto& Cell = GetCell(x, y, z);
+								const auto& Cell = GetCellxN(i, x, y, z);
 								if (Cell.selset == INVALID_ID) { continue; }
 
 								Vector3DX Pos = Vector3DX::vget((float)x + 0.5f, (float)y + 0.5f, (float)z + 0.5f);
@@ -150,11 +231,10 @@ namespace FPS_n2 {
 
 								if (Vector3DX::Dot(Vec, CamVec) < 0.f) { continue; }
 
-								AddCube(x, y, z, scale, Colors[i]);
+								AddCube(x, y, z, (CellScale * scaleRate), Colors[i]);
 							}
 						}
 					}
-					scale /= MulPer;
 				}
 			}
 			//
