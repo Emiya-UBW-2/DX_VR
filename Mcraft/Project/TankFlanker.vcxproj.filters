@@ -78,9 +78,6 @@
     <ClInclude Include="source\MainScene\NetWork.hpp">
       <Filter>ソース ファイル\MainScene</Filter>
     </ClInclude>
-    <ClInclude Include="source\MainScene\Object\CharaAnimData.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
     <ClInclude Include="source\MainScene\Object\Character.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
@@ -88,12 +85,6 @@
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
     <ClInclude Include="source\MainScene\Object\CharacterEnum.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MainScene\Object\Weapon.hpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MainScene\Object\WeaponEnum.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
     <ClInclude Include="source\CommonScene\UI\CommonUIControl.hpp">
@@ -135,12 +126,6 @@
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
     <ClCompile Include="source\MainScene\Object\Character_before.cpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="source\MainScene\Object\CharaAnimData.cpp">
-      <Filter>ソース ファイル\MainScene\Object</Filter>
-    </ClCompile>
-    <ClCompile Include="source\MainScene\Object\Weapon.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
     <ClCompile Include="source\MainScene\Player\CPU.cpp">

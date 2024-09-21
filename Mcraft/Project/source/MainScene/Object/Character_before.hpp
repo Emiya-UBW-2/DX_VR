@@ -4,7 +4,6 @@
 
 #include "../../sub.hpp"
 #include "../../MainScene/NetWork.hpp"
-#include "CharaAnimData.hpp"
 #include "CharacterEnum.hpp"
 
 namespace FPS_n2 {
@@ -252,7 +251,7 @@ namespace FPS_n2 {
 				this->m_Squat.Execute(false);
 				//‰ñ“]
 				{
-					this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + this->m_Input.GetAddxRad(), deg2rad(-12.f), deg2rad(12.f));
+					this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + this->m_Input.GetAddxRad(), deg2rad(-60.f), deg2rad(12.f));
 					this->m_rad_Buf.y = this->m_rad_Buf.y + this->m_Input.GetAddyRad();
 				}
 				Easing(&m_RunPer, m_IsRunning ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
