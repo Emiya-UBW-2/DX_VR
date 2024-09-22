@@ -3,84 +3,187 @@
 const FPS_n2::BackGround::BackGroundClass* SingletonBase<FPS_n2::BackGround::BackGroundClass>::m_Singleton = nullptr;
 namespace FPS_n2 {
 	namespace BackGround {
-		void BackGroundClass::AddSquare(const Matrix4x4DX& movement, COLOR_U8 color) noexcept
-		{
+		void BackGroundClass::AddCube(const Vector3DX& Pos, float scale, COLOR_U8 color) noexcept {
 			auto* DrawParts = DXDraw::Instance();
-			Vector3DX CamPos = DrawParts->GetMainCamera().GetCamPos();
-			Vector3DX CamVec = DrawParts->GetMainCamera().GetCamVec() - CamPos;
-			Vector3DX Normal = Matrix4x4DX::Vtrans(Vector3DX::vget(0.0f, 1.0f, 0.0f), movement.rotation());
-			if (Vector3DX::Dot(movement.pos() - CamPos, Normal) > 0.f) { return; }
+			Vector3DX PosCamVec = Pos * scale - DrawParts->GetMainCamera().GetCamPos();
 
+			VECTOR Pos1F = ((Pos + Vector3DX::vget(-0.5f, -0.5f, -0.5f)) * scale).get();
+			VECTOR Pos2F = ((Pos + Vector3DX::vget(0.5f, 0.5f, 0.5f)) * scale).get();
+			//
+			// 頂点データの作成
+			Vector3DX Normal = Vector3DX::back();
+			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f) {
+				int Now = (int)vert32.size();
+				int Nowi = (int)index32.size();
+				vert32.resize(Now + 4);
+				index32.resize(Nowi + 6);
 
-			vert32.resize(vert32.size() + 1);
-			vert32.back().pos = Matrix4x4DX::Vtrans(Vector3DX::vget(0.5f, 0.0f, 0.5f), movement).get();
-			vert32.back().norm = Normal.get();
-			vert32.back().dif = color;
-			vert32.back().spc = GetColorU8(255, 255, 255, 255);
-			vert32.back().u = 0.0f;
-			vert32.back().v = 0.0f;
-			vert32.back().su = 0.0f;
-			vert32.back().sv = 0.0f;
+				index32.at(Nowi) = Now;
+				index32.at(Nowi + 1) = Now + 1;
+				index32.at(Nowi + 2) = Now + 2;
+				index32.at(Nowi + 3) = Now + 3;
+				index32.at(Nowi + 4) = index32.at(Nowi + 2);
+				index32.at(Nowi + 5) = index32.at(Nowi + 1);
 
-			//vert32.back().spos;
-			//vert32.back().tan;
-			//vert32.back().binorm;
+				vert32.at(index32.at(Nowi)).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos1F.z).get();
+				vert32.at(index32.at(Nowi + 1)).pos = Vector3DX::vget(Pos2F.x, Pos2F.y, Pos1F.z).get();
+				vert32.at(index32.at(Nowi + 2)).pos = Pos1F;
+				vert32.at(index32.at(Nowi + 3)).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos1F.z).get();
+				for (int i = 0; i < 4; i++) {
+					vert32.at(Now + i).norm = Normal.get();
+					vert32.at(Now + i).dif = color;
+					vert32.at(Now + i).spc = GetColorU8(255, 255, 255, 255);
+					vert32.at(Now + i).u = 0.0f;
+					vert32.at(Now + i).v = 0.0f;
+					vert32.at(Now + i).su = 0.0f;
+					vert32.at(Now + i).sv = 0.0f;
+				}
+			}
 
+			Normal = Vector3DX::forward();
+			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f) {
+				int Now = (int)vert32.size();
+				int Nowi = (int)index32.size();
+				vert32.resize(Now + 4);
+				index32.resize(Nowi + 6);
 
-			vert32.resize(vert32.size() + 1);
-			vert32.back().pos = Matrix4x4DX::Vtrans(Vector3DX::vget(-0.5f, 0.0f, 0.5f), movement).get();
-			vert32.back().norm = Normal.get();
-			vert32.back().dif = color;
-			vert32.back().spc = GetColorU8(255, 255, 255, 255);
-			vert32.back().u = 0.0f;
-			vert32.back().v = 0.0f;
-			vert32.back().su = 0.0f;
-			vert32.back().sv = 0.0f;
+				index32.at(Nowi) = Now;
+				index32.at(Nowi + 1) = Now + 1;
+				index32.at(Nowi + 2) = Now + 2;
+				index32.at(Nowi + 3) = Now + 3;
+				index32.at(Nowi + 4) = index32.at(Nowi + 2);
+				index32.at(Nowi + 5) = index32.at(Nowi + 1);
 
-			vert32.resize(vert32.size() + 1);
-			vert32.back().pos = Matrix4x4DX::Vtrans(Vector3DX::vget(-0.5f, 0.0f, -0.5f), movement).get();
-			vert32.back().norm = Normal.get();
-			vert32.back().dif = color;
-			vert32.back().spc = GetColorU8(255, 255, 255, 255);
-			vert32.back().u = 0.0f;
-			vert32.back().v = 0.0f;
-			vert32.back().su = 0.0f;
-			vert32.back().sv = 0.0f;
+				vert32.at(index32.at(Nowi)).pos = Pos2F;
+				vert32.at(index32.at(Nowi + 1)).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos2F.z).get();
+				vert32.at(index32.at(Nowi + 2)).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos2F.z).get();
+				vert32.at(index32.at(Nowi + 3)).pos = Vector3DX::vget(Pos1F.x, Pos1F.y, Pos2F.z).get();
+				for (int i = 0; i < 4; i++) {
+					vert32.at(Now + i).norm = Normal.get();
+					vert32.at(Now + i).dif = color;
+					vert32.at(Now + i).spc = GetColorU8(255, 255, 255, 255);
+					vert32.at(Now + i).u = 0.0f;
+					vert32.at(Now + i).v = 0.0f;
+					vert32.at(Now + i).su = 0.0f;
+					vert32.at(Now + i).sv = 0.0f;
+				}
+			}
 
-			vert32.resize(vert32.size() + 1);
-			vert32.back().pos = Matrix4x4DX::Vtrans(Vector3DX::vget(0.5f, 0.0f, -0.5f), movement).get();
-			vert32.back().norm = Normal.get();
-			vert32.back().dif = color;
-			vert32.back().spc = GetColorU8(255, 255, 255, 255);
-			vert32.back().u = 0.0f;
-			vert32.back().v = 0.0f;
-			vert32.back().su = 0.0f;
-			vert32.back().sv = 0.0f;
+			Normal = Vector3DX::left();
+			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f) {
+				int Now = (int)vert32.size();
+				int Nowi = (int)index32.size();
+				vert32.resize(Now + 4);
+				index32.resize(Nowi + 6);
 
-			int indexBase = (int)vert32.size() - 4;
-			//頂点インデックスの設定
-			index32.emplace_back(indexBase + 0);
-			index32.emplace_back(indexBase + 1);
-			index32.emplace_back(indexBase + 2);
-			index32.emplace_back(indexBase + 0);
-			index32.emplace_back(indexBase + 2);
-			index32.emplace_back(indexBase + 3);
-		}
+				index32.at(Nowi) = Now;
+				index32.at(Nowi + 1) = Now + 1;
+				index32.at(Nowi + 2) = Now + 2;
+				index32.at(Nowi + 3) = Now + 3;
+				index32.at(Nowi + 4) = index32.at(Nowi + 2);
+				index32.at(Nowi + 5) = index32.at(Nowi + 1);
 
-		void BackGroundClass::AddCube(const Matrix4x4DX& scaleMat, const Matrix4x4DX& movement, COLOR_U8 color) noexcept
-		{
-			AddSquare(Matrix4x4DX::Mtrans(Vector3DX::vget(0.f, 0.5f, 0.f)) * Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(0)) * scaleMat * movement, color);
-			AddSquare(Matrix4x4DX::Mtrans(Vector3DX::vget(0.f, 0.5f, 0.f)) * Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(90)) * scaleMat * movement, color);
-			AddSquare(Matrix4x4DX::Mtrans(Vector3DX::vget(0.f, 0.5f, 0.f)) * Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(-90)) * scaleMat * movement, color);
-			AddSquare(Matrix4x4DX::Mtrans(Vector3DX::vget(0.f, 0.5f, 0.f)) * Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(90)) * scaleMat * movement, color);
-			AddSquare(Matrix4x4DX::Mtrans(Vector3DX::vget(0.f, 0.5f, 0.f)) * Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(-90)) * scaleMat * movement, color);
-			AddSquare(Matrix4x4DX::Mtrans(Vector3DX::vget(0.f, 0.5f, 0.f)) * Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(180)) * scaleMat * movement, color);
-		}
+				vert32.at(index32.at(Nowi)).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos2F.z).get();
+				vert32.at(index32.at(Nowi + 1)).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos1F.z).get();
+				vert32.at(index32.at(Nowi + 2)).pos = Vector3DX::vget(Pos1F.x, Pos1F.y, Pos2F.z).get();
+				vert32.at(index32.at(Nowi + 3)).pos = Pos1F;
+				for (int i = 0; i < 4; i++) {
+					vert32.at(Now + i).norm = Normal.get();
+					vert32.at(Now + i).dif = color;
+					vert32.at(Now + i).spc = GetColorU8(255, 255, 255, 255);
+					vert32.at(Now + i).u = 0.0f;
+					vert32.at(Now + i).v = 0.0f;
+					vert32.at(Now + i).su = 0.0f;
+					vert32.at(Now + i).sv = 0.0f;
+				}
+			}
 
-		void BackGroundClass::AddCube(int x, int y, int z, float scale, COLOR_U8 color) noexcept
-		{
-			Vector3DX Pos = Vector3DX::vget((float)x + 0.5f, (float)y + 0.5f, (float)z + 0.5f) * scale;
-			AddCube(Matrix4x4DX::GetScale(Vector3DX::one() * scale), Matrix4x4DX::Mtrans(Pos), color);
+			Normal = Vector3DX::right();
+			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f) {
+				int Now = (int)vert32.size();
+				int Nowi = (int)index32.size();
+				vert32.resize(Now + 4);
+				index32.resize(Nowi + 6);
+
+				index32.at(Nowi) = Now;
+				index32.at(Nowi + 1) = Now + 1;
+				index32.at(Nowi + 2) = Now + 2;
+				index32.at(Nowi + 3) = Now + 3;
+				index32.at(Nowi + 4) = index32.at(Nowi + 2);
+				index32.at(Nowi + 5) = index32.at(Nowi + 1);
+
+				vert32.at(index32.at(Nowi)).pos = Vector3DX::vget(Pos2F.x, Pos2F.y, Pos1F.z).get();
+				vert32.at(index32.at(Nowi + 1)).pos = Pos2F;
+				vert32.at(index32.at(Nowi + 2)).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos1F.z).get();
+				vert32.at(index32.at(Nowi + 3)).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos2F.z).get();
+				for (int i = 0; i < 4; i++) {
+					vert32.at(Now + i).norm = Normal.get();
+					vert32.at(Now + i).dif = color;
+					vert32.at(Now + i).spc = GetColorU8(255, 255, 255, 255);
+					vert32.at(Now + i).u = 0.0f;
+					vert32.at(Now + i).v = 0.0f;
+					vert32.at(Now + i).su = 0.0f;
+					vert32.at(Now + i).sv = 0.0f;
+				}
+			}
+
+			Normal = Vector3DX::up();
+			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f) {
+				int Now = (int)vert32.size();
+				int Nowi = (int)index32.size();
+				vert32.resize(Now + 4);
+				index32.resize(Nowi + 6);
+
+				index32.at(Nowi) = Now;
+				index32.at(Nowi + 1) = Now + 1;
+				index32.at(Nowi + 2) = Now + 2;
+				index32.at(Nowi + 3) = Now + 3;
+				index32.at(Nowi + 4) = index32.at(Nowi + 2);
+				index32.at(Nowi + 5) = index32.at(Nowi + 1);
+
+				vert32.at(index32.at(Nowi)).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos2F.z).get();
+				vert32.at(index32.at(Nowi + 1)).pos = Pos2F;
+				vert32.at(index32.at(Nowi + 2)).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos1F.z).get();
+				vert32.at(index32.at(Nowi + 3)).pos = Vector3DX::vget(Pos2F.x, Pos2F.y, Pos1F.z).get();
+				for (int i = 0; i < 4; i++) {
+					vert32.at(Now + i).norm = Normal.get();
+					vert32.at(Now + i).dif = color;
+					vert32.at(Now + i).spc = GetColorU8(255, 255, 255, 255);
+					vert32.at(Now + i).u = 0.0f;
+					vert32.at(Now + i).v = 0.0f;
+					vert32.at(Now + i).su = 0.0f;
+					vert32.at(Now + i).sv = 0.0f;
+				}
+			}
+
+			Normal = Vector3DX::down();
+			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f) {
+				int Now = (int)vert32.size();
+				int Nowi = (int)index32.size();
+				vert32.resize(Now + 4);
+				index32.resize(Nowi + 6);
+
+				index32.at(Nowi) = Now;
+				index32.at(Nowi + 1) = Now + 1;
+				index32.at(Nowi + 2) = Now + 2;
+				index32.at(Nowi + 3) = Now + 3;
+				index32.at(Nowi + 4) = index32.at(Nowi + 2);
+				index32.at(Nowi + 5) = index32.at(Nowi + 1);
+
+				vert32.at(index32.at(Nowi)).pos = Pos1F;
+				vert32.at(index32.at(Nowi + 1)).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos1F.z).get();
+				vert32.at(index32.at(Nowi + 2)).pos = Vector3DX::vget(Pos1F.x, Pos1F.y, Pos2F.z).get();
+				vert32.at(index32.at(Nowi + 3)).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos2F.z).get();
+				for (int i = 0; i < 4; i++) {
+					vert32.at(Now + i).norm = Normal.get();
+					vert32.at(Now + i).dif = color;
+					vert32.at(Now + i).spc = GetColorU8(255, 255, 255, 255);
+					vert32.at(Now + i).u = 0.0f;
+					vert32.at(Now + i).v = 0.0f;
+					vert32.at(Now + i).su = 0.0f;
+					vert32.at(Now + i).sv = 0.0f;
+				}
+			}
 		}
 		// 当たり判定カプセルの高さ
 #define PLAYER_HIT_HEIGHT			(1.6f * Scale_Rate)		

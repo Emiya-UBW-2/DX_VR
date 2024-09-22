@@ -204,15 +204,14 @@ namespace FPS_n2 {
 			Vector3DX pos = this->m_move.GetPosBuf();
 			//vector
 			bool IsHitGround = false;//(pos.y <= 0.f); //‚“x0‚È‚çŽ~‚Ü‚é
-			float groundYpos = 0.f;
+			float groundYpos = 10.f;
 			if(false){
 				Vector3DX EndPos = pos - Vector3DX::up() * 5.f;
 				//IsHitGround = BackGround->CheckLinetoMap(pos + Vector3DX::up() * 20.f, &EndPos, true);
 				groundYpos = EndPos.y;
 			}
 			else {
-				IsHitGround = (pos.y <= 0.f);
-				groundYpos = 0.f;
+				IsHitGround = (pos.y <= groundYpos);
 			}
 			Vector3DX vec = CharaMove::GetVec();
 			if (IsHitGround) {
