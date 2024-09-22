@@ -192,12 +192,17 @@ PS_OUTPUT main(PS_INPUT PSInput) {
 	lWorldPosition.w = 0.f;
 
 	// ワールド座標を射影座標に変換
-	float4 LPPosition2 = mul(g_LightViewMatrix, lWorldPosition);
+    if (g_param.x > 0) {
+        float4 LPPosition2 = mul(g_LightViewMatrix, lWorldPosition);
 
-	float3 LPPosition3 = reflect(LPPosition1.xyz, LPPosition2.xyz);
-	LPPosition3.xz *= -1.f;
-	PSOutput.color0 = dynamicCubeMapTexture.Sample(dynamicCubeMapSampler, LPPosition3);
-
+        float3 LPPosition3 = reflect(LPPosition1.xyz, LPPosition2.xyz);
+        LPPosition3.xz *= -1.f;
+        PSOutput.color0 = dynamicCubeMapTexture.Sample(dynamicCubeMapSampler, LPPosition3);
+    }
+    else
+    {
+        PSOutput.color0 = float4(0.f, 0.f, 0.f, 0.f);
+    }
 	if (g_param.x >= 2) {
 		float4 color = applySSR(normal, PSInput.texCoords0, (Per <= 0.f));
 		if (color.a > 0.f) {
