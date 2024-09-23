@@ -124,10 +124,10 @@ namespace FPS_n2 {
 
 			CellsData m_CellBase;
 
-			const int total = 4;
+			const int total = 3;
 			const int MulPer = 3;
 			const float CellScale = Scale_Rate / 2.f / 2.f;
-			const float Max = 25.f;
+			const float Max = 30.f;
 
 			std::vector<CellsData> m_CellxN;
 		public:
@@ -326,9 +326,9 @@ namespace FPS_n2 {
 							int z2 = (int)(End.z + zm);
 							Bresenham3D(x1, y1, z1, x2, y2, z2, [&](int x, int y, int z) {
 								if (
-									((x < -cell.Xall / 2) || (cell.Xall / 2 < x)) ||
-									((y < -cell.Yall / 2) || (cell.Yall / 2 < y)) ||
-									((z < -cell.Zall / 2) || (cell.Zall / 2 < z))
+									((x <= -cell.Xall / 2) || (cell.Xall / 2 < x)) ||
+									((y <= -cell.Yall / 2) || (cell.Yall / 2 < y)) ||
+									((z <= -cell.Zall / 2) || (cell.Zall / 2 < z))
 									) {
 									return false;
 								}
@@ -381,13 +381,13 @@ namespace FPS_n2 {
 				}
 				//*/
 				if (true) {
-					if (false) {
+					if (true) {
 						PerlinNoise ns(GetRand(100));
-						m_CellBase.m_Cell.resize(m_CellBase.Xall * m_CellBase.Yall * m_CellBase.Zall);
-						m_CellBase.scaleRate = 1;
 						m_CellBase.Xall = 500;
 						m_CellBase.Yall = 160;
 						m_CellBase.Zall = 500;
+						m_CellBase.m_Cell.resize(m_CellBase.Xall * m_CellBase.Yall * m_CellBase.Zall);
+						m_CellBase.scaleRate = 1;
 						for (int x = -m_CellBase.Xall / 2; x < m_CellBase.Xall / 2; x++) {
 							for (int z = -m_CellBase.Zall / 2; z < m_CellBase.Zall / 2; z++) {
 								auto Height = (int)(ns.octaveNoise(2, ((float)(x + m_CellBase.Xall / 2)) / m_CellBase.Xall, ((float)(z + m_CellBase.Zall / 2)) / m_CellBase.Zall) * (m_CellBase.Yall * 4 / 5)) - (m_CellBase.Yall * 4 / 5) / 2;
@@ -402,11 +402,11 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						m_CellBase.m_Cell.resize(m_CellBase.Xall * m_CellBase.Yall * m_CellBase.Zall);
-						m_CellBase.scaleRate = 1;
 						m_CellBase.Xall = 50;
 						m_CellBase.Yall = 25;
 						m_CellBase.Zall = 50;
+						m_CellBase.m_Cell.resize(m_CellBase.Xall * m_CellBase.Yall * m_CellBase.Zall);
+						m_CellBase.scaleRate = 1;
 						for (int x = -m_CellBase.Xall / 2; x < m_CellBase.Xall / 2; x++) {
 							for (int z = -m_CellBase.Zall / 2; z < m_CellBase.Zall / 2; z++) {
 								for (int y = -m_CellBase.Yall / 2; y < m_CellBase.Yall / 2; y++) {

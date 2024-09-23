@@ -221,9 +221,9 @@ namespace FPS_n2 {
 						int z2 = (int)(End.z + zm);
 						Bresenham3D(x1, y1, z1, x2, y2, z2, [&](int x, int y, int z) {
 							if (
-								((x < -cell.Xall / 2) || (cell.Xall / 2 < x)) ||
-								((y < -cell.Yall / 2) || (cell.Yall / 2 < y)) ||
-								((z < -cell.Zall / 2) || (cell.Zall / 2 < z))
+								((x <= -cell.Xall / 2) || (cell.Xall / 2 < x)) ||
+								((y <= -cell.Yall / 2) || (cell.Yall / 2 < y)) ||
+								((z <= -cell.Zall / 2) || (cell.Zall / 2 < z))
 								) {
 								return false;
 							}
@@ -231,7 +231,7 @@ namespace FPS_n2 {
 							const auto& Cell = cell.GetCell(x, y, z);
 							if (Cell.selset == INVALID_ID) { return false; }
 							if (Cell.inRock) { return false; }
-							Vector3DX MinPos = (Vector3DX::vget((float)x, (float)y, (float)z) + (Vector3DX::one() * -d0.1f)) * (CellScale * cell.scaleRate);
+							Vector3DX MinPos = (Vector3DX::vget((float)x, (float)y, (float)z) + (Vector3DX::one() * -0.1f)) * (CellScale * cell.scaleRate);
 							Vector3DX MaxPos = (Vector3DX::vget((float)x, (float)y, (float)z) + (Vector3DX::one() * 1.1f)) * (CellScale * cell.scaleRate);
 
 							MV1_COLL_RESULT_POLY tmp;

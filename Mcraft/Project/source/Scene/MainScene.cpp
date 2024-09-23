@@ -51,8 +51,8 @@ namespace FPS_n2 {
 					Vector3DX pos_t;
 					pos_t = Vector3DX::vget(0.f, 0.f, (0.f * Scale_Rate) * static_cast<float>(index * 2 - 1));
 
-					Vector3DX EndPos = pos_t - Vector3DX::up() * 150.f * Scale_Rate;
-					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 150.f * Scale_Rate, &EndPos)) {
+					Vector3DX EndPos = pos_t - Vector3DX::up() * 500.f * Scale_Rate;
+					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 500.f * Scale_Rate, &EndPos)) {
 						pos_t = EndPos;
 					}
 					c->ValueSet((PlayerID)index, CharaTypeID::Team);
