@@ -16,27 +16,27 @@ namespace FPS_n2 {
 			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f) {
 				int Now = (int)vert32.size();
 				int Nowi = (int)index32.size();
-				vert32.resize(Now + 4);
-				index32.resize(Nowi + 6);
+				vert32.resize((size_t)(Now + 4));
+				index32.resize((size_t)(Nowi + 6));
 
-				index32.at(Nowi) = Now;
-				index32.at(Nowi + 1) = Now + 1;
-				index32.at(Nowi + 2) = Now + 2;
-				index32.at(Nowi + 3) = Now + 3;
-				index32.at(Nowi + 4) = index32.at(Nowi + 2);
-				index32.at(Nowi + 5) = index32.at(Nowi + 1);
+				index32.at((size_t)(Nowi)) = Now;
+				index32.at((size_t)(Nowi + 1)) = Now + 1;
+				index32.at((size_t)(Nowi + 2)) = Now + 2;
+				index32.at((size_t)(Nowi + 3)) = Now + 3;
+				index32.at((size_t)(Nowi + 4)) = index32.at((size_t)(Nowi + 2));
+				index32.at((size_t)(Nowi + 5)) = index32.at((size_t)(Nowi + 1));
 
-				vert32.at(index32.at(Nowi)).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos1F.z).get();
-				vert32.at(index32.at(Nowi + 1)).pos = Vector3DX::vget(Pos2F.x, Pos2F.y, Pos1F.z).get();
-				vert32.at(index32.at(Nowi + 2)).pos = Pos1F;
-				vert32.at(index32.at(Nowi + 3)).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos1F.z).get();
+				vert32.at(index32.at((size_t)(Nowi))).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos1F.z).get();
+				vert32.at(index32.at((size_t)(Nowi + 1))).pos = Vector3DX::vget(Pos2F.x, Pos2F.y, Pos1F.z).get();
+				vert32.at(index32.at((size_t)(Nowi + 2))).pos = Pos1F;
+				vert32.at(index32.at((size_t)(Nowi + 3))).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos1F.z).get();
 				for (int i = 0; i < 4; i++) {
-					vert32.at(Now + i).dif = color;
-					vert32.at(Now + i).spc = GetColorU8(255, 255, 255, 255);
-					vert32.at(Now + i).u = 0.0f;
-					vert32.at(Now + i).v = 0.0f;
-					vert32.at(Now + i).su = 0.0f;
-					vert32.at(Now + i).sv = 0.0f;
+					vert32.at((size_t)(Now + i)).dif = color;
+					vert32.at((size_t)(Now + i)).spc = GetColorU8(255, 255, 255, 255);
+					vert32.at((size_t)(Now + i)).u = 0.0f;
+					vert32.at((size_t)(Now + i)).v = 0.0f;
+					vert32.at((size_t)(Now + i)).su = 0.0f;
+					vert32.at((size_t)(Now + i)).sv = 0.0f;
 				}
 			}
 
@@ -44,28 +44,28 @@ namespace FPS_n2 {
 			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f) {
 				int Now = (int)vert32.size();
 				int Nowi = (int)index32.size();
-				vert32.resize(Now + 4);
-				index32.resize(Nowi + 6);
+				vert32.resize((size_t)(Now + 4));
+				index32.resize((size_t)(Nowi + 6));
 
-				index32.at(Nowi) = Now;
-				index32.at(Nowi + 1) = Now + 1;
-				index32.at(Nowi + 2) = Now + 2;
-				index32.at(Nowi + 3) = Now + 3;
-				index32.at(Nowi + 4) = index32.at(Nowi + 2);
-				index32.at(Nowi + 5) = index32.at(Nowi + 1);
+				index32.at((size_t)(Nowi)) = Now;
+				index32.at((size_t)(Nowi + 1)) = Now + 1;
+				index32.at((size_t)(Nowi + 2)) = Now + 2;
+				index32.at((size_t)(Nowi + 3)) = Now + 3;
+				index32.at((size_t)(Nowi + 4)) = index32.at((size_t)(Nowi + 2));
+				index32.at((size_t)(Nowi + 5)) = index32.at((size_t)(Nowi + 1));
 
-				vert32.at(index32.at(Nowi)).pos = Pos2F;
-				vert32.at(index32.at(Nowi + 1)).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos2F.z).get();
-				vert32.at(index32.at(Nowi + 2)).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos2F.z).get();
-				vert32.at(index32.at(Nowi + 3)).pos = Vector3DX::vget(Pos1F.x, Pos1F.y, Pos2F.z).get();
+				vert32.at(index32.at((size_t)(Nowi))).pos = Pos2F;
+				vert32.at(index32.at((size_t)(Nowi + 1))).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos2F.z).get();
+				vert32.at(index32.at((size_t)(Nowi + 2))).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos2F.z).get();
+				vert32.at(index32.at((size_t)(Nowi + 3))).pos = Vector3DX::vget(Pos1F.x, Pos1F.y, Pos2F.z).get();
 				for (int i = 0; i < 4; i++) {
-					vert32.at(Now + i).norm = Normal.get();
-					vert32.at(Now + i).dif = color;
-					vert32.at(Now + i).spc = GetColorU8(255, 255, 255, 255);
-					vert32.at(Now + i).u = 0.0f;
-					vert32.at(Now + i).v = 0.0f;
-					vert32.at(Now + i).su = 0.0f;
-					vert32.at(Now + i).sv = 0.0f;
+					vert32.at((size_t)(Now + i)).norm = Normal.get();
+					vert32.at((size_t)(Now + i)).dif = color;
+					vert32.at((size_t)(Now + i)).spc = GetColorU8(255, 255, 255, 255);
+					vert32.at((size_t)(Now + i)).u = 0.0f;
+					vert32.at((size_t)(Now + i)).v = 0.0f;
+					vert32.at((size_t)(Now + i)).su = 0.0f;
+					vert32.at((size_t)(Now + i)).sv = 0.0f;
 				}
 			}
 
@@ -73,28 +73,28 @@ namespace FPS_n2 {
 			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f) {
 				int Now = (int)vert32.size();
 				int Nowi = (int)index32.size();
-				vert32.resize(Now + 4);
-				index32.resize(Nowi + 6);
+				vert32.resize((size_t)(Now + 4));
+				index32.resize((size_t)(Nowi + 6));
 
-				index32.at(Nowi) = Now;
-				index32.at(Nowi + 1) = Now + 1;
-				index32.at(Nowi + 2) = Now + 2;
-				index32.at(Nowi + 3) = Now + 3;
-				index32.at(Nowi + 4) = index32.at(Nowi + 2);
-				index32.at(Nowi + 5) = index32.at(Nowi + 1);
+				index32.at((size_t)(Nowi)) = Now;
+				index32.at((size_t)(Nowi + 1)) = Now + 1;
+				index32.at((size_t)(Nowi + 2)) = Now + 2;
+				index32.at((size_t)(Nowi + 3)) = Now + 3;
+				index32.at((size_t)(Nowi + 4)) = index32.at((size_t)(Nowi + 2));
+				index32.at((size_t)(Nowi + 5)) = index32.at((size_t)(Nowi + 1));
 
-				vert32.at(index32.at(Nowi)).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos2F.z).get();
-				vert32.at(index32.at(Nowi + 1)).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos1F.z).get();
-				vert32.at(index32.at(Nowi + 2)).pos = Vector3DX::vget(Pos1F.x, Pos1F.y, Pos2F.z).get();
-				vert32.at(index32.at(Nowi + 3)).pos = Pos1F;
+				vert32.at(index32.at((size_t)(Nowi))).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos2F.z).get();
+				vert32.at(index32.at((size_t)(Nowi + 1))).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos1F.z).get();
+				vert32.at(index32.at((size_t)(Nowi + 2))).pos = Vector3DX::vget(Pos1F.x, Pos1F.y, Pos2F.z).get();
+				vert32.at(index32.at((size_t)(Nowi + 3))).pos = Pos1F;
 				for (int i = 0; i < 4; i++) {
-					vert32.at(Now + i).norm = Normal.get();
-					vert32.at(Now + i).dif = color;
-					vert32.at(Now + i).spc = GetColorU8(255, 255, 255, 255);
-					vert32.at(Now + i).u = 0.0f;
-					vert32.at(Now + i).v = 0.0f;
-					vert32.at(Now + i).su = 0.0f;
-					vert32.at(Now + i).sv = 0.0f;
+					vert32.at((size_t)(Now + i)).norm = Normal.get();
+					vert32.at((size_t)(Now + i)).dif = color;
+					vert32.at((size_t)(Now + i)).spc = GetColorU8(255, 255, 255, 255);
+					vert32.at((size_t)(Now + i)).u = 0.0f;
+					vert32.at((size_t)(Now + i)).v = 0.0f;
+					vert32.at((size_t)(Now + i)).su = 0.0f;
+					vert32.at((size_t)(Now + i)).sv = 0.0f;
 				}
 			}
 
@@ -102,28 +102,28 @@ namespace FPS_n2 {
 			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f) {
 				int Now = (int)vert32.size();
 				int Nowi = (int)index32.size();
-				vert32.resize(Now + 4);
-				index32.resize(Nowi + 6);
+				vert32.resize((size_t)(Now + 4));
+				index32.resize((size_t)(Nowi + 6));
 
-				index32.at(Nowi) = Now;
-				index32.at(Nowi + 1) = Now + 1;
-				index32.at(Nowi + 2) = Now + 2;
-				index32.at(Nowi + 3) = Now + 3;
-				index32.at(Nowi + 4) = index32.at(Nowi + 2);
-				index32.at(Nowi + 5) = index32.at(Nowi + 1);
+				index32.at((size_t)(Nowi)) = Now;
+				index32.at((size_t)(Nowi + 1)) = Now + 1;
+				index32.at((size_t)(Nowi + 2)) = Now + 2;
+				index32.at((size_t)(Nowi + 3)) = Now + 3;
+				index32.at((size_t)(Nowi + 4)) = index32.at((size_t)(Nowi + 2));
+				index32.at((size_t)(Nowi + 5)) = index32.at((size_t)(Nowi + 1));
 
-				vert32.at(index32.at(Nowi)).pos = Vector3DX::vget(Pos2F.x, Pos2F.y, Pos1F.z).get();
-				vert32.at(index32.at(Nowi + 1)).pos = Pos2F;
-				vert32.at(index32.at(Nowi + 2)).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos1F.z).get();
-				vert32.at(index32.at(Nowi + 3)).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos2F.z).get();
+				vert32.at(index32.at((size_t)(Nowi))).pos = Vector3DX::vget(Pos2F.x, Pos2F.y, Pos1F.z).get();
+				vert32.at(index32.at((size_t)(Nowi + 1))).pos = Pos2F;
+				vert32.at(index32.at((size_t)(Nowi + 2))).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos1F.z).get();
+				vert32.at(index32.at((size_t)(Nowi + 3))).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos2F.z).get();
 				for (int i = 0; i < 4; i++) {
-					vert32.at(Now + i).norm = Normal.get();
-					vert32.at(Now + i).dif = color;
-					vert32.at(Now + i).spc = GetColorU8(255, 255, 255, 255);
-					vert32.at(Now + i).u = 0.0f;
-					vert32.at(Now + i).v = 0.0f;
-					vert32.at(Now + i).su = 0.0f;
-					vert32.at(Now + i).sv = 0.0f;
+					vert32.at((size_t)(Now + i)).norm = Normal.get();
+					vert32.at((size_t)(Now + i)).dif = color;
+					vert32.at((size_t)(Now + i)).spc = GetColorU8(255, 255, 255, 255);
+					vert32.at((size_t)(Now + i)).u = 0.0f;
+					vert32.at((size_t)(Now + i)).v = 0.0f;
+					vert32.at((size_t)(Now + i)).su = 0.0f;
+					vert32.at((size_t)(Now + i)).sv = 0.0f;
 				}
 			}
 
@@ -131,28 +131,28 @@ namespace FPS_n2 {
 			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f) {
 				int Now = (int)vert32.size();
 				int Nowi = (int)index32.size();
-				vert32.resize(Now + 4);
-				index32.resize(Nowi + 6);
+				vert32.resize((size_t)(Now + 4));
+				index32.resize((size_t)(Nowi + 6));
 
-				index32.at(Nowi) = Now;
-				index32.at(Nowi + 1) = Now + 1;
-				index32.at(Nowi + 2) = Now + 2;
-				index32.at(Nowi + 3) = Now + 3;
-				index32.at(Nowi + 4) = index32.at(Nowi + 2);
-				index32.at(Nowi + 5) = index32.at(Nowi + 1);
+				index32.at((size_t)(Nowi)) = Now;
+				index32.at((size_t)(Nowi + 1)) = Now + 1;
+				index32.at((size_t)(Nowi + 2)) = Now + 2;
+				index32.at((size_t)(Nowi + 3)) = Now + 3;
+				index32.at((size_t)(Nowi + 4)) = index32.at((size_t)(Nowi + 2));
+				index32.at((size_t)(Nowi + 5)) = index32.at((size_t)(Nowi + 1));
 
-				vert32.at(index32.at(Nowi)).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos2F.z).get();
-				vert32.at(index32.at(Nowi + 1)).pos = Pos2F;
-				vert32.at(index32.at(Nowi + 2)).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos1F.z).get();
-				vert32.at(index32.at(Nowi + 3)).pos = Vector3DX::vget(Pos2F.x, Pos2F.y, Pos1F.z).get();
+				vert32.at(index32.at((size_t)(Nowi))).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos2F.z).get();
+				vert32.at(index32.at((size_t)(Nowi + 1))).pos = Pos2F;
+				vert32.at(index32.at((size_t)(Nowi + 2))).pos = Vector3DX::vget(Pos1F.x, Pos2F.y, Pos1F.z).get();
+				vert32.at(index32.at((size_t)(Nowi + 3))).pos = Vector3DX::vget(Pos2F.x, Pos2F.y, Pos1F.z).get();
 				for (int i = 0; i < 4; i++) {
-					vert32.at(Now + i).norm = Normal.get();
-					vert32.at(Now + i).dif = color;
-					vert32.at(Now + i).spc = GetColorU8(255, 255, 255, 255);
-					vert32.at(Now + i).u = 0.0f;
-					vert32.at(Now + i).v = 0.0f;
-					vert32.at(Now + i).su = 0.0f;
-					vert32.at(Now + i).sv = 0.0f;
+					vert32.at((size_t)(Now + i)).norm = Normal.get();
+					vert32.at((size_t)(Now + i)).dif = color;
+					vert32.at((size_t)(Now + i)).spc = GetColorU8(255, 255, 255, 255);
+					vert32.at((size_t)(Now + i)).u = 0.0f;
+					vert32.at((size_t)(Now + i)).v = 0.0f;
+					vert32.at((size_t)(Now + i)).su = 0.0f;
+					vert32.at((size_t)(Now + i)).sv = 0.0f;
 				}
 			}
 
@@ -160,28 +160,28 @@ namespace FPS_n2 {
 			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f) {
 				int Now = (int)vert32.size();
 				int Nowi = (int)index32.size();
-				vert32.resize(Now + 4);
-				index32.resize(Nowi + 6);
+				vert32.resize((size_t)(Now + 4));
+				index32.resize((size_t)(Nowi + 6));
 
-				index32.at(Nowi) = Now;
-				index32.at(Nowi + 1) = Now + 1;
-				index32.at(Nowi + 2) = Now + 2;
-				index32.at(Nowi + 3) = Now + 3;
-				index32.at(Nowi + 4) = index32.at(Nowi + 2);
-				index32.at(Nowi + 5) = index32.at(Nowi + 1);
+				index32.at((size_t)(Nowi)) = Now;
+				index32.at((size_t)(Nowi + 1)) = Now + 1;
+				index32.at((size_t)(Nowi + 2)) = Now + 2;
+				index32.at((size_t)(Nowi + 3)) = Now + 3;
+				index32.at((size_t)(Nowi + 4)) = index32.at((size_t)(Nowi + 2));
+				index32.at((size_t)(Nowi + 5)) = index32.at((size_t)(Nowi + 1));
 
-				vert32.at(index32.at(Nowi)).pos = Pos1F;
-				vert32.at(index32.at(Nowi + 1)).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos1F.z).get();
-				vert32.at(index32.at(Nowi + 2)).pos = Vector3DX::vget(Pos1F.x, Pos1F.y, Pos2F.z).get();
-				vert32.at(index32.at(Nowi + 3)).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos2F.z).get();
+				vert32.at(index32.at((size_t)(Nowi))).pos = Pos1F;
+				vert32.at(index32.at((size_t)(Nowi + 1))).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos1F.z).get();
+				vert32.at(index32.at((size_t)(Nowi + 2))).pos = Vector3DX::vget(Pos1F.x, Pos1F.y, Pos2F.z).get();
+				vert32.at(index32.at((size_t)(Nowi + 3))).pos = Vector3DX::vget(Pos2F.x, Pos1F.y, Pos2F.z).get();
 				for (int i = 0; i < 4; i++) {
-					vert32.at(Now + i).norm = Normal.get();
-					vert32.at(Now + i).dif = color;
-					vert32.at(Now + i).spc = GetColorU8(255, 255, 255, 255);
-					vert32.at(Now + i).u = 0.0f;
-					vert32.at(Now + i).v = 0.0f;
-					vert32.at(Now + i).su = 0.0f;
-					vert32.at(Now + i).sv = 0.0f;
+					vert32.at((size_t)(Now + i)).norm = Normal.get();
+					vert32.at((size_t)(Now + i)).dif = color;
+					vert32.at((size_t)(Now + i)).spc = GetColorU8(255, 255, 255, 255);
+					vert32.at((size_t)(Now + i)).u = 0.0f;
+					vert32.at((size_t)(Now + i)).v = 0.0f;
+					vert32.at((size_t)(Now + i)).su = 0.0f;
+					vert32.at((size_t)(Now + i)).sv = 0.0f;
 				}
 			}
 
@@ -234,7 +234,7 @@ namespace FPS_n2 {
 							Vector3DX MinPos = (Vector3DX::vget((float)x, (float)y, (float)z) + (Vector3DX::one() * -0.1f)) * (CellScale * cell.scaleRate);
 							Vector3DX MaxPos = (Vector3DX::vget((float)x, (float)y, (float)z) + (Vector3DX::one() * 1.1f)) * (CellScale * cell.scaleRate);
 
-							MV1_COLL_RESULT_POLY tmp;
+							MV1_COLL_RESULT_POLY tmp{};
 							// Left
 							tmp.Position[0] = Vector3DX::vget(MinPos.x, MinPos.y, MinPos.z).get();
 							tmp.Position[1] = Vector3DX::vget(MinPos.x, MaxPos.y, MinPos.z).get();
