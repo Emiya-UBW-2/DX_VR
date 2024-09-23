@@ -35,9 +35,9 @@ namespace FPS_n2 {
 			//
 			BackGround->Init();
 			//
-			Vector3DX LightVec = Vector3DX::vget(1.3f, -0.5f, 0.05f); LightVec = LightVec.normalized();
-			//DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
-			//SetLightDifColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
+			Vector3DX LightVec = Vector3DX::vget(0.3f, -0.5f, 0.05f); LightVec = LightVec.normalized();
+			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
+			SetLightDifColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
@@ -49,12 +49,12 @@ namespace FPS_n2 {
 				//人の座標設定
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale_Rate) * static_cast<float>(index * 2 - 1));
+					pos_t = Vector3DX::vget(0.f, 0.f, (0.f * Scale_Rate) * static_cast<float>(index * 2 - 1));
 
-					Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale_Rate;
-					//if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale_Rate, &EndPos, true)) {
-					//	pos_t = EndPos;
-					//}
+					Vector3DX EndPos = pos_t - Vector3DX::up() * 150.f * Scale_Rate;
+					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 150.f * Scale_Rate, &EndPos)) {
+						pos_t = EndPos;
+					}
 					c->ValueSet((PlayerID)index, CharaTypeID::Team);
 					c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
 				}
@@ -446,8 +446,8 @@ namespace FPS_n2 {
 				PauseMenuControl::DrawPause();
 			}
 			//通信設定
-			auto* NetBrowser = NetWorkBrowser::Instance();
-			NetBrowser->Draw();
+			//auto* NetBrowser = NetWorkBrowser::Instance();
+			//NetBrowser->Draw();
 			if (m_NetWorkController) {
 				auto* DrawParts = DXDraw::Instance();
 				if (m_NetWorkController->GetPing() >= 0.f) {

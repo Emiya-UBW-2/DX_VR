@@ -204,10 +204,10 @@ namespace FPS_n2 {
 			Vector3DX pos = this->m_move.GetPosBuf();
 			//vector
 			bool IsHitGround = false;//(pos.y <= 0.f); //‚“x0‚È‚çŽ~‚Ü‚é
-			float groundYpos = 10.f;
-			if(false){
-				Vector3DX EndPos = pos - Vector3DX::up() * 5.f;
-				//IsHitGround = BackGround->CheckLinetoMap(pos + Vector3DX::up() * 20.f, &EndPos, true);
+			float groundYpos = 0.f;
+			if(true){
+				Vector3DX EndPos = pos - Vector3DX::up() * (0.5f * Scale_Rate);
+				IsHitGround = BackGround->CheckLinetoMap(pos + Vector3DX::up() * (0.f * Scale_Rate), &EndPos);
 				groundYpos = EndPos.y;
 			}
 			else {

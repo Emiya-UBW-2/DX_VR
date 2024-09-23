@@ -142,23 +142,216 @@ namespace FPS_n2 {
 			void AddCube(const Vector3DX& Pos, float scale, COLOR_U8 color) noexcept;
 		public://getter
 			//const auto& GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
-			/*
-			auto		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, bool isNearest, Vector3DX* Normal = nullptr) const noexcept {
-				bool isHit = false;
-				{
-					auto col_p = this->m_ObjGroundCol.CollCheck_Line(StartPos, *EndPos);
-					if (col_p.HitFlag == TRUE) {
-						isHit = true;
-						if (isNearest) {
-							*EndPos = col_p.HitPosition;
-							if (Normal) { *Normal = col_p.Normal; }
+			//*
+			void Bresenham3D(const int x1, const int y1, const int z1, const int x2, const int y2, const int z2, const std::function<bool(int,int,int)>& OutPutLine) const noexcept {
+
+				int err_1, err_2;
+				int point[3];
+
+				point[0] = x1;
+				point[1] = y1;
+				point[2] = z1;
+				const int dx = x2 - x1;
+				const int dy = y2 - y1;
+				const int dz = z2 - z1;
+				const int x_inc = (dx < 0) ? -1 : 1;
+				const int l = std::abs(dx);
+				const int y_inc = (dy < 0) ? -1 : 1;
+				const int m = std::abs(dy);
+				const int z_inc = (dz < 0) ? -1 : 1;
+				const int n = std::abs(dz);
+				const int dx2 = l << 1;
+				const int dy2 = m << 1;
+				const int dz2 = n << 1;
+
+				if ((l >= m) && (l >= n)) {
+					err_1 = dy2 - l;
+					err_2 = dz2 - l;
+					for (int i = 0; i < l; i++) {
+						if (OutPutLine(point[0], point[1], point[2])) { return; }
+						if (err_1 > 0) {
+							point[1] += y_inc;
+							err_1 -= dx2;
 						}
-						else {
-							return isHit;
+						if (err_2 > 0) {
+							point[2] += z_inc;
+							err_2 -= dx2;
+						}
+						err_1 += dy2;
+						err_2 += dz2;
+						point[0] += x_inc;
+					}
+				}
+				else if ((m >= l) && (m >= n)) {
+					err_1 = dx2 - m;
+					err_2 = dz2 - m;
+					for (int i = 0; i < m; i++) {
+						if (OutPutLine(point[0], point[1], point[2])) { return; }
+						if (err_1 > 0) {
+							point[0] += x_inc;
+							err_1 -= dy2;
+						}
+						if (err_2 > 0) {
+							point[2] += z_inc;
+							err_2 -= dy2;
+						}
+						err_1 += dx2;
+						err_2 += dz2;
+						point[1] += y_inc;
+					}
+				}
+				else {
+					err_1 = dy2 - n;
+					err_2 = dx2 - n;
+					for (int i = 0; i < n; i++) {
+						if (OutPutLine(point[0], point[1], point[2])) { return; }
+						if (err_1 > 0) {
+							point[1] += y_inc;
+							err_1 -= dz2;
+						}
+						if (err_2 > 0) {
+							point[0] += x_inc;
+							err_2 -= dz2;
+						}
+						err_1 += dy2;
+						err_2 += dx2;
+						point[2] += z_inc;
+					}
+				}
+				OutPutLine(point[0], point[1], point[2]);
+			}
+
+			bool ColRayBox(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AABBMinPos, const Vector3DX& AABBMaxPos, Vector3DX* Normal = nullptr, int* NormalNum = nullptr) const noexcept {
+				Vector3DX Vec = (*EndPos - StartPos);
+				// 交差判定
+				float p[3], d[3], min[3], max[3];
+				p[0] = StartPos.x;
+				p[1] = StartPos.y;
+				p[2] = StartPos.z;
+				d[0] = Vec.x;
+				d[1] = Vec.y;
+				d[2] = Vec.z;
+
+				min[0] = AABBMinPos.x;
+				min[1] = AABBMinPos.y;
+				min[2] = AABBMinPos.z;
+
+				max[0] = AABBMaxPos.x;
+				max[1] = AABBMaxPos.y;
+				max[2] = AABBMaxPos.z;
+
+				float t = -FLT_MAX;
+				float t_max = FLT_MAX;
+
+				for (int i = 0; i < 3; ++i) {
+					if (abs(d[i]) < FLT_EPSILON) {
+						if (p[i] < min[i] || p[i] > max[i])
+							return false; // 交差していない
+					}
+					else {
+						// スラブとの距離を算出
+						// t1が近スラブ、t2が遠スラブとの距離
+						float odd = 1.0f / d[i];
+						float t1 = (min[i] - p[i]) * odd;
+						float t2 = (max[i] - p[i]) * odd;
+						if (t1 > t2) {
+							float tmp = t1;
+							t1 = t2;
+							t2 = tmp;
+						}
+
+						if (t1 > t) {
+							t = t1;
+							//どの向き？
+							switch (i) {
+							case 0:
+								if (Normal) {
+									*Normal = Vec.x > 0.f ? Vector3DX::left() : Vector3DX::right();
+								}
+								if (NormalNum) {
+									*NormalNum = Vec.x > 0.f ? 0 : 1;
+								}
+								break;
+							case 1:
+								if (Normal) {
+									*Normal = Vec.y > 0.f ? Vector3DX::down() : Vector3DX::up();
+								}
+								if (NormalNum) {
+									*NormalNum = Vec.y > 0.f ? 2 : 3;
+								}
+								break;
+							case 2:
+								if (Normal) {
+									*Normal = Vec.z > 0.f ? Vector3DX::back() : Vector3DX::forward();
+								}
+								if (NormalNum) {
+									*NormalNum = Vec.z > 0.f ? 4 : 5;
+								}
+								break;
+							default:
+								break;
+							}
+						}
+						if (t2 < t_max) {
+							t_max = t2;
+						}
+
+						// スラブ交差チェック
+						if (t >= t_max) {
+							return false;
 						}
 					}
 				}
-				return isHit;
+
+				// 交差している
+				if (EndPos) {
+					*EndPos = StartPos + Vec * t;
+				}
+				return true;
+			}
+			auto		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept {
+				auto& cell = m_CellxN.back();
+				Vector3DX Start = StartPos / (CellScale * cell.scaleRate);
+				Vector3DX End = StartPos / (CellScale * cell.scaleRate);
+
+				for (int xm = -1; xm <= 1; xm++) {
+					for (int ym = -1; ym <= 1; ym++) {
+						for (int zm = -1; zm <= 1; zm++) {
+							bool isHit = false;
+							int x1 = (int)(Start.x + xm);
+							int y1 = (int)(Start.y + ym);
+							int z1 = (int)(Start.z + zm);
+							int x2 = (int)(End.x + xm);
+							int y2 = (int)(End.y + ym);
+							int z2 = (int)(End.z + zm);
+							Bresenham3D(x1, y1, z1, x2, y2, z2, [&](int x, int y, int z) {
+								if (
+									((x < -cell.Xall / 2) || (cell.Xall / 2 < x)) ||
+									((y < -cell.Yall / 2) || (cell.Yall / 2 < y)) ||
+									((z < -cell.Zall / 2) || (cell.Zall / 2 < z))
+									) {
+									return false;
+								}
+
+								const auto& Cell = cell.GetCell(x, y, z);
+								if (Cell.selset == INVALID_ID) { return false; }
+								if (Cell.inRock) { return false; }
+								Vector3DX MinPos = (Vector3DX::vget((float)x, (float)y, (float)z) + (Vector3DX::one() * 0.0f)) * (CellScale * cell.scaleRate);
+								Vector3DX MaxPos = (Vector3DX::vget((float)x, (float)y, (float)z) + (Vector3DX::one() * 1.0f)) * (CellScale * cell.scaleRate);
+								int NormalNum = -1;
+								if (ColRayBox(StartPos, EndPos, MinPos, MaxPos, Normal, &NormalNum)) {
+									//if (NormalNum == 3) {
+										isHit = true;
+										return true;
+									//}
+								}
+								return false;
+								});
+							if (isHit) { return true; }
+						}
+					}
+				}
+				return false;
 			}
 			//*/
 		public:
@@ -188,18 +381,49 @@ namespace FPS_n2 {
 				}
 				//*/
 				if (true) {
-					PerlinNoise ns(GetRand(100));
-					m_CellBase.m_Cell.resize(m_CellBase.Xall * m_CellBase.Yall * m_CellBase.Zall);
-					m_CellBase.scaleRate = 1;
-					for (int x = -m_CellBase.Xall / 2; x < m_CellBase.Xall / 2; x++) {
-						for (int z = -m_CellBase.Zall / 2; z < m_CellBase.Zall / 2; z++) {
-							auto Height = (int)(ns.octaveNoise(2, ((float)(x + m_CellBase.Xall / 2)) / m_CellBase.Xall, ((float)(z + m_CellBase.Zall / 2)) / m_CellBase.Zall) * (m_CellBase.Yall * 4 / 5)) - (m_CellBase.Yall * 4 / 5) / 2;
-							for (int y = -m_CellBase.Yall / 2; y < m_CellBase.Yall / 2; y++) {
-								if (y <= Height) {
-									m_CellBase.SetCell(x, y, z).selset = 0;
-									continue;
+					if (false) {
+						PerlinNoise ns(GetRand(100));
+						m_CellBase.m_Cell.resize(m_CellBase.Xall * m_CellBase.Yall * m_CellBase.Zall);
+						m_CellBase.scaleRate = 1;
+						m_CellBase.Xall = 500;
+						m_CellBase.Yall = 160;
+						m_CellBase.Zall = 500;
+						for (int x = -m_CellBase.Xall / 2; x < m_CellBase.Xall / 2; x++) {
+							for (int z = -m_CellBase.Zall / 2; z < m_CellBase.Zall / 2; z++) {
+								auto Height = (int)(ns.octaveNoise(2, ((float)(x + m_CellBase.Xall / 2)) / m_CellBase.Xall, ((float)(z + m_CellBase.Zall / 2)) / m_CellBase.Zall) * (m_CellBase.Yall * 4 / 5)) - (m_CellBase.Yall * 4 / 5) / 2;
+								for (int y = -m_CellBase.Yall / 2; y < m_CellBase.Yall / 2; y++) {
+									if (y <= Height) {
+										m_CellBase.SetCell(x, y, z).selset = 0;
+										continue;
+									}
+									m_CellBase.SetCell(x, y, z).selset = INVALID_ID;
 								}
-								m_CellBase.SetCell(x, y, z).selset = INVALID_ID;
+							}
+						}
+					}
+					else {
+						m_CellBase.m_Cell.resize(m_CellBase.Xall * m_CellBase.Yall * m_CellBase.Zall);
+						m_CellBase.scaleRate = 1;
+						m_CellBase.Xall = 50;
+						m_CellBase.Yall = 25;
+						m_CellBase.Zall = 50;
+						for (int x = -m_CellBase.Xall / 2; x < m_CellBase.Xall / 2; x++) {
+							for (int z = -m_CellBase.Zall / 2; z < m_CellBase.Zall / 2; z++) {
+								for (int y = -m_CellBase.Yall / 2; y < m_CellBase.Yall / 2; y++) {
+									if (y <= 0) {
+										m_CellBase.SetCell(x, y, z).selset = 0;
+										continue;
+									}
+									if (-m_CellBase.Xall / 2 + 2 >= x || x >= m_CellBase.Xall / 2 - 2) {
+										m_CellBase.SetCell(x, y, z).selset = 0;
+										continue;
+									}
+									if (-m_CellBase.Zall / 2 + 2 >= z || z >= m_CellBase.Zall / 2 - 2) {
+										m_CellBase.SetCell(x, y, z).selset = 0;
+										continue;
+									}
+									m_CellBase.SetCell(x, y, z).selset = INVALID_ID;
+								}
 							}
 						}
 					}
@@ -353,7 +577,7 @@ namespace FPS_n2 {
 								if (Cell.selset == INVALID_ID) { continue; }
 								if (Cell.inRock) { continue; }
 
-								Vector3DX Pos = Vector3DX::vget((float)x + 0.5f, (float)y + 0.5f, (float)z + 0.5f);
+								Vector3DX Pos = Vector3DX::vget((float)x, (float)y, (float)z) + (Vector3DX::one() * 0.5f);
 								if (Vector3DX::Dot((Pos - center).normalized(), CamVec) < ViewCos) { continue; }
 
 								AddCube(Pos, (CellScale * cell.scaleRate), Colors[sel]);
@@ -375,6 +599,7 @@ namespace FPS_n2 {
 				if (vert32.size() > 0 && index32.size() > 0) {
 					DrawPolygon32bitIndexed3D(vert32.data(), (int)vert32.size(), index32.data(), (int)index32.size() / 3, DX_NONE_GRAPH, FALSE);
 				}
+				//this->m_ObjGround.DrawModel();
 			}
 			void			Draw(void) noexcept {
 				if (vert32.size() > 0 && index32.size() > 0) {
