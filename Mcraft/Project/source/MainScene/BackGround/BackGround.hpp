@@ -124,10 +124,10 @@ namespace FPS_n2 {
 
 			CellsData m_CellBase;
 
-			const int total = 4;
+			const int total = 3;
 			const int MulPer = 3;
 			const float CellScale = Scale_Rate / 2.f / 2.f;
-			const float Max = 15.f;
+			const float Max = 30.f;
 
 			std::vector<CellsData> m_CellxN;
 		public:
@@ -139,11 +139,31 @@ namespace FPS_n2 {
 
 			virtual ~BackGroundClass(void) noexcept {}
 		private:
-			void AddCube(const Vector3DX& Pos, float scale, COLOR_U8 color) noexcept;
+			void AddCube(int sel, int x,int y, int z, bool CheckFill, COLOR_U8 color) noexcept;
 		public://getter
 			//const auto& GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
 			//*
-			void Bresenham3D(const int x1, const int y1, const int z1, const int x2, const int y2, const int z2, const std::function<bool(int,int,int)>& OutPutLine) const noexcept {
+			bool CalcIntersectionPoint(
+				const Vector3DX& pointA, const Vector3DX& pointB,
+				const Vector3DX& planePos, const Vector3DX& planenormal,
+				Vector3DX* pointIntersection,
+				bool* pSameVecNormalToA,
+				bool* pOnFront)
+			{
+				// ê¸ï™Ç…ìñÇΩÇÁÇ»Ç¢
+				float dTa = Vector3DX::Dot(planenormal, (pointA - planePos).normalized());
+				float dTb = Vector3DX::Dot(planenormal, (pointB - planePos).normalized());
+				*pOnFront = !(dTa <= 0.f && dTb <= 0.f);
+				if ((dTa >= 0.f && dTb >= 0.f) || !*pOnFront) {
+					return false;
+				}
+
+				*pSameVecNormalToA = (dTa > 0.f);
+				*pointIntersection = pointA + (pointB - pointA) * (std::abs(dTa) / (std::abs(dTa) + std::abs(dTb)));
+				return true;
+			}
+
+			void		Bresenham3D(const int x1, const int y1, const int z1, const int x2, const int y2, const int z2, const std::function<bool(int,int,int)>& OutPutLine) const noexcept {
 
 				int err_1{}, err_2{};
 				int point[3]{};
@@ -221,7 +241,7 @@ namespace FPS_n2 {
 				OutPutLine(point[0], point[1], point[2]);
 			}
 
-			bool ColRayBox(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AABBMinPos, const Vector3DX& AABBMaxPos, Vector3DX* Normal = nullptr, int* NormalNum = nullptr) const noexcept {
+			bool		ColRayBox(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AABBMinPos, const Vector3DX& AABBMaxPos, Vector3DX* Normal = nullptr, int* NormalNum = nullptr) const noexcept {
 				Vector3DX Vec = (*EndPos - StartPos);
 				// åç∑îªíË
 				float p[3]{}, d[3]{}, min[3]{}, max[3]{};
@@ -546,7 +566,6 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				const Vector3DX CamPos = DrawParts->GetMainCamera().GetCamPos();
 				const Vector3DX CamVec = (DrawParts->GetMainCamera().GetCamVec() - CamPos).normalized();
-				const float ViewCos = std::cos(DrawParts->GetMainCamera().GetCamFov());
 				for (int sel = 0; auto & cell : m_CellxN) {
 					Vector3DX center = CamPos / (CellScale * cell.scaleRate);
 
@@ -554,36 +573,50 @@ namespace FPS_n2 {
 					int xMaxmax = std::min((int)(center.x + Max) + 1, cell.Xall / 2);
 					int yMaxmin = std::max((int)(center.y - Max), -cell.Yall / 2);
 					int yMaxmax = std::min((int)(center.y + Max) + 1, cell.Yall / 2);
-					int zMaxmin = std::max((int)(center.z - Max), -cell.Zall / 2);
-					int zMaxmax = std::min((int)(center.z + Max) + 1, cell.Zall / 2);
 
 					int xMinmin = (int)(center.x - Max / MulPer);
 					int xMinmax = (int)(center.x + Max / MulPer);
 					int yMinmin = (int)(center.y - Max / MulPer);
 					int yMinmax = (int)(center.y + Max / MulPer);
-					int zMinmin = (int)(center.z - Max / MulPer);
-					int zMinmax = (int)(center.z + Max / MulPer);
 
 					for (int x = xMaxmin; x < xMaxmax; x++) {
 						for (int y = yMaxmin; y < yMaxmax; y++) {
-							for (int z = zMaxmin; z < zMaxmax; z++) {
+							int zMaxmin = std::max((int)(center.z - Max), -cell.Zall / 2);
+							int zMaxmax = std::min((int)(center.z + Max) + 1, cell.Zall / 2);
+							int zMinmin = (int)(center.z - Max / MulPer);
+							int zMinmax = (int)(center.z + Max / MulPer);
 
-								if ((cell.scaleRate != 1)
-									&& ((xMinmin < x) && (x < xMinmax))
-									&& ((yMinmin < y) && (y < yMinmax))
-									&& ((zMinmin < z) && (z < zMinmax))
-									) {
-									continue;
+							Vector3DX ZMinPos = Vector3DX::vget((float)x, (float)y, (float)zMaxmin) + (Vector3DX::one() * 0.5f);
+							Vector3DX ZMaxPos = Vector3DX::vget((float)x, (float)y, (float)zMaxmax) + (Vector3DX::one() * 0.5f);
+							Vector3DX HitPos;
+							bool pSameVecNormalToA{};
+							bool OnFront{};
+							if (CalcIntersectionPoint(ZMinPos, ZMaxPos, center, CamVec, &HitPos, &pSameVecNormalToA,&OnFront)) {
+								float HitZ = HitPos.z - 0.5f;
+								if (!pSameVecNormalToA) {
+									zMaxmin = (int)HitZ;
 								}
+								else {
+									zMaxmax = (int)HitZ;
+								}
+							}
+							else {
+								if (!OnFront) { continue; }
+							}
 
+							for (int z = zMaxmin; z < zMaxmax; z++) {
+								bool checkFill = true;
+								if (cell.scaleRate != 1) {
+									if (((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax)) && ((zMinmin < z) && (z < zMinmax))) {
+										continue;
+									}
+									checkFill = !(((xMinmin <= x) && (x <= xMinmax)) && ((yMinmin <= y) && (y <= yMinmax)) && ((zMinmin <= z) && (z <= zMinmax)));
+								}
 								const auto& Cell = cell.GetCell(x, y, z);
 								if (Cell.selset == INVALID_ID) { continue; }
 								if (Cell.inRock) { continue; }
 
-								Vector3DX Pos = Vector3DX::vget((float)x, (float)y, (float)z) + (Vector3DX::one() * 0.5f);
-								if (Vector3DX::Dot((Pos - center).normalized(), CamVec) < ViewCos) { continue; }
-
-								AddCube(Pos, (CellScale * cell.scaleRate), Colors[sel]);
+								AddCube(sel, x, y, z, checkFill, Colors[sel]);
 							}
 						}
 					}

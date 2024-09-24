@@ -15,11 +15,13 @@ namespace FPS_n2 {
 
 			Bottom_Squat,
 			Bottom_Squat_Walk,
+			Bottom_Squat_WalkBack,
+			Bottom_Squat_LeftStep,
+			Bottom_Squat_RightStep,
+			Bottom_Squat_Turn,//12
 			//
 			Upper_Ready,
 			Hand_Ready,
-			//
-			Bottom_Stand_Attack,
 			//
 			AnimeIDMax,
 		};

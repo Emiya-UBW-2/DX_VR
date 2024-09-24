@@ -14,7 +14,7 @@ namespace FPS_n2 {
 			BattleResourceMngr->Load();
 			PlayerMngr->Init(NetWork::Player_num);
 			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-				BattleResourceMngr->LoadChara("Chara", (PlayerID)index);
+				BattleResourceMngr->LoadChara("Suit", (PlayerID)index);
 			}
 			//UI
 			this->m_UIclass.Load();

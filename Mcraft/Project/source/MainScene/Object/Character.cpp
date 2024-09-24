@@ -101,7 +101,6 @@ namespace FPS_n2 {
 			CharaMove::SetCharaAnimeBufID(CharaObjAnimeID::Hand_Ready) = 1.f;
 			//â∫îºêgÉAÉjÉÅââéZ
 			ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaObjAnimeID::Bottom_Stand_Turn), 0.5f);
-			ObjectBaseClass::SetAnimOnce(static_cast<int>(CharaObjAnimeID::Bottom_Stand_Attack), CharaMove::GetSpeedPer());
 			ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaObjAnimeID::Bottom_Stand_Run), CharaMove::GetSpeedPer());
 			ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaMove::GetBottomWalkAnimSel()), CharaMove::GetVecFront());
 			ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaObjAnimeID::Bottom_Stand_LeftStep), CharaMove::GetVecLeft());
@@ -142,33 +141,21 @@ namespace FPS_n2 {
 					}
 				}
 				else {
-					if (CharaMove::GetCharaAnimeBufID(CharaObjAnimeID::Bottom_Stand_Attack) > 0.5f) {
-						if ((9.f < Time && Time < 10.f)) {
-							if (this->m_CharaSound != 7) {
-								this->m_CharaSound = 7;
-								if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::RightFoot)).magnitude() < Scale_Rate * 5.f * 1.5f) {
-									SE->Get(static_cast<int>(SoundEnum::Kendo_Foot)).Play_3D(0, GetFramePosition(CharaFrame::RightFoot), Scale_Rate * 15.f);
-								}
+					//L
+					if ((3.f < Time && Time < 4.f)) {
+						if (this->m_CharaSound != 5) {
+							this->m_CharaSound = 5;
+							if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::LeftFoot)).magnitude() < Scale_Rate * 5.f * 1.5f) {
+								SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::LeftFoot), Scale_Rate * 15.f);
 							}
 						}
 					}
-					else {
-						//L
-						if ((3.f < Time && Time < 4.f)) {
-							if (this->m_CharaSound != 5) {
-								this->m_CharaSound = 5;
-								if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::LeftFoot)).magnitude() < Scale_Rate * 5.f * 1.5f) {
-									SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::LeftFoot), Scale_Rate * 15.f);
-								}
-							}
-						}
-						//R
-						if ((10.f < Time && Time < 11.f)							) {
-							if (this->m_CharaSound != 6) {
-								this->m_CharaSound = 6;
-								if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::RightFoot)).magnitude() < Scale_Rate * 5.f * 1.5f) {
-									SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::RightFoot), Scale_Rate * 15.f);
-								}
+					//R
+					if ((10.f < Time && Time < 11.f)) {
+						if (this->m_CharaSound != 6) {
+							this->m_CharaSound = 6;
+							if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::RightFoot)).magnitude() < Scale_Rate * 5.f * 1.5f) {
+								SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::RightFoot), Scale_Rate * 15.f);
 							}
 						}
 					}

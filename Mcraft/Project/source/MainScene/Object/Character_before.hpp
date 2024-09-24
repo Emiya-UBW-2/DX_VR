@@ -150,9 +150,6 @@ namespace FPS_n2 {
 
 			float												m_RunPer{};
 			bool												m_IsRunning{ false };
-			bool												m_IsFrontAttacking{ false };
-			bool												m_IsDouAttacking{ false };
-			bool												m_IsBackAttacking{ false };
 
 			Matrix3x3DX											m_EyeMatrix;
 			Matrix3x3DX											m_UpperMatrix;
@@ -163,16 +160,13 @@ namespace FPS_n2 {
 		public://ゲッター
 			CharaObjAnimeID										m_BottomAnimSelect{};
 		public://ゲッター
-			auto		GetRun(void) const noexcept { return this->m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking; }
+			auto		GetRun(void) const noexcept { return this->m_IsRunning; }
 			auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }
 			auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
 			auto		GetEyeMatrix(void) const noexcept { return this->m_EyeMatrix * this->m_BaseMatrix; }
 		public://セッター
 			void			SetIsSquat(bool value) noexcept { this->m_Squat.Set(value); }
 			void			SetIsRunning(bool value) noexcept { this->m_IsRunning = value; }
-			void			SetIsFrontAttacking(bool value) noexcept { this->m_IsFrontAttacking = value; }
-			void			SetIsDouAttacking(bool value) noexcept { this->m_IsDouAttacking = value; }
-			void			SetIsBackAttacking(bool value) noexcept { this->m_IsBackAttacking = value; }
 		protected:
 			const auto& GetEyeSwingPos(void) const noexcept { return this->m_MoveEyePos; }
 			const auto& GetEyeRotMatrix(void) const noexcept { return this->m_EyeMatrix; }
@@ -191,9 +185,6 @@ namespace FPS_n2 {
 				}
 				else if (m_IsRunning) {
 					return 0.975f;
-				}
-				else if (m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking) {
-					return 1.175f;
 				}
 				else {
 					return 0.45f;
@@ -217,8 +208,8 @@ namespace FPS_n2 {
 		private://キャラパラメーター
 			auto		IsMove(void) const noexcept { return m_MoverPer > 0.1f; }
 			auto		GetFrontP(void) const noexcept {
-				auto wkey = (this->m_Input.GetPADSPress(PADS::MOVE_W) || (m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking)) && !m_IsBackAttacking;
-				auto skey = (this->m_Input.GetPADSPress(PADS::MOVE_S) && !(m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking)) || m_IsBackAttacking;
+				auto wkey = (this->m_Input.GetPADSPress(PADS::MOVE_W) || (m_IsRunning));
+				auto skey = (this->m_Input.GetPADSPress(PADS::MOVE_S) && !(m_IsRunning));
 				auto FrontP = (wkey && !skey) ? (atan2f(m_VecTotal.x, -m_VecTotal.z) * -m_VecTotal.z) : 0.f;
 				FrontP += (!wkey && skey) ? (atan2f(-m_VecTotal.x, m_VecTotal.z) * m_VecTotal.z) : 0.f;
 				return FrontP;
@@ -256,17 +247,17 @@ namespace FPS_n2 {
 				}
 				Easing(&m_RunPer, m_IsRunning ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 				//移動
-				auto wkey = (this->m_Input.GetPADSPress(PADS::MOVE_W) || (m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking)) && !m_IsBackAttacking;
-				auto skey = (this->m_Input.GetPADSPress(PADS::MOVE_S) && !(m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking)) || m_IsBackAttacking;
+				auto wkey = (this->m_Input.GetPADSPress(PADS::MOVE_W) || (m_IsRunning));
+				auto skey = (this->m_Input.GetPADSPress(PADS::MOVE_S) && !(m_IsRunning));
 
-				auto akey = this->m_Input.GetPADSPress(PADS::MOVE_A) && !(m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking);
-				auto dkey = this->m_Input.GetPADSPress(PADS::MOVE_D) && !(m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking);
+				auto akey = this->m_Input.GetPADSPress(PADS::MOVE_A);
+				auto dkey = this->m_Input.GetPADSPress(PADS::MOVE_D);
 
 				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (wkey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
 				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (akey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
 				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (skey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
 				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (dkey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
-				if (m_IsRunning || m_IsDouAttacking) {
+				if (m_IsRunning) {
 					this->m_Vec[3] = std::clamp(this->m_Vec[3] + 5.f / DrawParts->GetFps(), 0.f, 1.f);
 				}
 				m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
@@ -330,20 +321,18 @@ namespace FPS_n2 {
 				auto wkey = this->m_Input.GetPADSPress(PADS::MOVE_W) || m_IsRunning;
 				auto skey = this->m_Input.GetPADSPress(PADS::MOVE_S) && !m_IsRunning;
 
-				auto akey = this->m_Input.GetPADSPress(PADS::MOVE_A) && !(m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking);
-				auto dkey = this->m_Input.GetPADSPress(PADS::MOVE_D) && !(m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking);
+				auto akey = this->m_Input.GetPADSPress(PADS::MOVE_A);
+				auto dkey = this->m_Input.GetPADSPress(PADS::MOVE_D);
 
 				if (akey && !dkey) { this->m_BottomAnimSelect = CharaObjAnimeID::Bottom_Stand_LeftStep; }
 				if (dkey && !akey) { this->m_BottomAnimSelect = CharaObjAnimeID::Bottom_Stand_RightStep; }
 				if (skey && !wkey) { this->m_BottomAnimSelect = CharaObjAnimeID::Bottom_Stand_WalkBack; }
 				if (wkey && !skey) { this->m_BottomAnimSelect = m_IsRunning ? CharaObjAnimeID::Bottom_Stand_Run : GetBottomWalkAnimSel(); }
-				if (m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking) { this->m_BottomAnimSelect = CharaObjAnimeID::Bottom_Stand_Attack; }
 				//下半身
 				Easing(&CharaMove::SetCharaAnimeBufID(CharaObjAnimeID::Bottom_Stand_Turn), (!GetIsSquat() && this->m_TurnBody) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
 				for (int i = 0; i < static_cast<int>(CharaObjAnimeID::AnimeIDMax); ++i) {
 					if (
 						i == static_cast<int>(CharaObjAnimeID::Bottom_Stand) ||
-						i == static_cast<int>(CharaObjAnimeID::Bottom_Stand_Attack) ||
 						i == static_cast<int>(CharaObjAnimeID::Bottom_Stand_Run) ||
 						i == static_cast<int>(CharaObjAnimeID::Bottom_Stand_Walk) ||
 						i == static_cast<int>(CharaObjAnimeID::Bottom_Stand_LeftStep) ||
@@ -353,7 +342,10 @@ namespace FPS_n2 {
 					}
 					if (
 						i == static_cast<int>(CharaObjAnimeID::Bottom_Squat) ||
-						i == static_cast<int>(CharaObjAnimeID::Bottom_Squat_Walk)) {
+						i == static_cast<int>(CharaObjAnimeID::Bottom_Squat_Walk) ||
+						i == static_cast<int>(CharaObjAnimeID::Bottom_Squat_LeftStep) ||
+						i == static_cast<int>(CharaObjAnimeID::Bottom_Squat_RightStep) ||
+						i == static_cast<int>(CharaObjAnimeID::Bottom_Squat_WalkBack)) {
 						this->m_AnimPerBuf[static_cast<size_t>(i)] = std::clamp(this->m_AnimPerBuf[static_cast<size_t>(i)] + ((i == static_cast<int>(this->m_BottomAnimSelect)) ? 2.f : -2.f) / DrawParts->GetFps(), 0.f, 1.f);
 					}
 				}
