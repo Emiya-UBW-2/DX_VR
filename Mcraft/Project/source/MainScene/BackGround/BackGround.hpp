@@ -95,13 +95,14 @@ namespace FPS_n2 {
 		private:
 		private:
 			MV1							m_ObjSky;
-			//MV1							m_ObjGround;
-			//MV1							m_ObjGroundCol;
 
 			//頂点データ
-			std::vector<VERTEX3D> vert32;
+			std::vector<VERTEX3D>			m_vert32;
+			std::vector<VERTEX3DSHADER>		m_vert32S;
+			size_t						m_vert32Num{ 0 };
 			//頂点インデックスデータ
-			std::vector<uint32_t> index32;
+			std::vector<uint32_t>		m_index32;
+			size_t						m_index32Num{ 0 };
 
 			struct CellData {
 				int8_t selset = INVALID_ID;
@@ -130,6 +131,9 @@ namespace FPS_n2 {
 			const float Max = 30.f;
 
 			std::vector<CellsData> m_CellxN;
+
+			GraphHandle		m_tex{};
+			GraphHandle		m_norm{};
 		public:
 			BackGroundClass(void) noexcept {}
 			BackGroundClass(const BackGroundClass&) = delete;
@@ -139,253 +143,31 @@ namespace FPS_n2 {
 
 			virtual ~BackGroundClass(void) noexcept {}
 		private:
-			void AddCube(int sel, int x,int y, int z, bool CheckFill, COLOR_U8 color) noexcept;
-		public://getter
-			//const auto& GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
-			//*
-			bool CalcIntersectionPoint(
-				const Vector3DX& pointA, const Vector3DX& pointB,
-				const Vector3DX& planePos, const Vector3DX& planenormal,
-				Vector3DX* pointIntersection,
-				bool* pSameVecNormalToA,
-				bool* pOnFront)
-			{
-				// 線分に当たらない
-				float dTa = Vector3DX::Dot(planenormal, (pointA - planePos).normalized());
-				float dTb = Vector3DX::Dot(planenormal, (pointB - planePos).normalized());
-				*pOnFront = !(dTa <= 0.f && dTb <= 0.f);
-				if ((dTa >= 0.f && dTb >= 0.f) || !*pOnFront) {
-					return false;
-				}
+			static bool		CalcIntersectionPoint(const Vector3DX& pointA, const Vector3DX& pointB, const Vector3DX& planePos, const Vector3DX& planenormal, Vector3DX* pointIntersection, bool* pSameVecNormalToA, bool* pOnFront) noexcept;
+			static void		Bresenham3D(const int x1, const int y1, const int z1, const int x2, const int y2, const int z2, const std::function<bool(int, int, int)>& OutPutLine) noexcept;
 
-				*pSameVecNormalToA = (dTa > 0.f);
-				*pointIntersection = pointA + (pointB - pointA) * (std::abs(dTa) / (std::abs(dTa) + std::abs(dTb)));
-				return true;
-			}
-
-			void		Bresenham3D(const int x1, const int y1, const int z1, const int x2, const int y2, const int z2, const std::function<bool(int,int,int)>& OutPutLine) const noexcept {
-
-				int err_1{}, err_2{};
-				int point[3]{};
-
-				point[0] = x1;
-				point[1] = y1;
-				point[2] = z1;
-				const int dx = x2 - x1;
-				const int dy = y2 - y1;
-				const int dz = z2 - z1;
-				const int x_inc = (dx < 0) ? -1 : 1;
-				const int l = std::abs(dx);
-				const int y_inc = (dy < 0) ? -1 : 1;
-				const int m = std::abs(dy);
-				const int z_inc = (dz < 0) ? -1 : 1;
-				const int n = std::abs(dz);
-				const int dx2 = l << 1;
-				const int dy2 = m << 1;
-				const int dz2 = n << 1;
-
-				if ((l >= m) && (l >= n)) {
-					err_1 = dy2 - l;
-					err_2 = dz2 - l;
-					for (int i = 0; i < l; i++) {
-						if (OutPutLine(point[0], point[1], point[2])) { return; }
-						if (err_1 > 0) {
-							point[1] += y_inc;
-							err_1 -= dx2;
-						}
-						if (err_2 > 0) {
-							point[2] += z_inc;
-							err_2 -= dx2;
-						}
-						err_1 += dy2;
-						err_2 += dz2;
-						point[0] += x_inc;
-					}
-				}
-				else if ((m >= l) && (m >= n)) {
-					err_1 = dx2 - m;
-					err_2 = dz2 - m;
-					for (int i = 0; i < m; i++) {
-						if (OutPutLine(point[0], point[1], point[2])) { return; }
-						if (err_1 > 0) {
-							point[0] += x_inc;
-							err_1 -= dy2;
-						}
-						if (err_2 > 0) {
-							point[2] += z_inc;
-							err_2 -= dy2;
-						}
-						err_1 += dx2;
-						err_2 += dz2;
-						point[1] += y_inc;
-					}
-				}
-				else {
-					err_1 = dy2 - n;
-					err_2 = dx2 - n;
-					for (int i = 0; i < n; i++) {
-						if (OutPutLine(point[0], point[1], point[2])) { return; }
-						if (err_1 > 0) {
-							point[1] += y_inc;
-							err_1 -= dz2;
-						}
-						if (err_2 > 0) {
-							point[0] += x_inc;
-							err_2 -= dz2;
-						}
-						err_1 += dy2;
-						err_2 += dx2;
-						point[2] += z_inc;
-					}
-				}
-				OutPutLine(point[0], point[1], point[2]);
-			}
-
-			bool		ColRayBox(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AABBMinPos, const Vector3DX& AABBMaxPos, Vector3DX* Normal = nullptr, int* NormalNum = nullptr) const noexcept {
-				Vector3DX Vec = (*EndPos - StartPos);
-				// 交差判定
-				float p[3]{}, d[3]{}, min[3]{}, max[3]{};
-				p[0] = StartPos.x;
-				p[1] = StartPos.y;
-				p[2] = StartPos.z;
-				d[0] = Vec.x;
-				d[1] = Vec.y;
-				d[2] = Vec.z;
-
-				min[0] = AABBMinPos.x;
-				min[1] = AABBMinPos.y;
-				min[2] = AABBMinPos.z;
-
-				max[0] = AABBMaxPos.x;
-				max[1] = AABBMaxPos.y;
-				max[2] = AABBMaxPos.z;
-
-				float t = -FLT_MAX;
-				float t_max = FLT_MAX;
-
-				for (int i = 0; i < 3; ++i) {
-					if (abs(d[i]) < FLT_EPSILON) {
-						if (p[i] < min[i] || p[i] > max[i])
-							return false; // 交差していない
-					}
-					else {
-						// スラブとの距離を算出
-						// t1が近スラブ、t2が遠スラブとの距離
-						float odd = 1.0f / d[i];
-						float t1 = (min[i] - p[i]) * odd;
-						float t2 = (max[i] - p[i]) * odd;
-						if (t1 > t2) {
-							float tmp = t1;
-							t1 = t2;
-							t2 = tmp;
-						}
-
-						if (t1 > t) {
-							t = t1;
-							//どの向き？
-							switch (i) {
-							case 0:
-								if (Normal) {
-									*Normal = Vec.x > 0.f ? Vector3DX::left() : Vector3DX::right();
-								}
-								if (NormalNum) {
-									*NormalNum = Vec.x > 0.f ? 0 : 1;
-								}
-								break;
-							case 1:
-								if (Normal) {
-									*Normal = Vec.y > 0.f ? Vector3DX::down() : Vector3DX::up();
-								}
-								if (NormalNum) {
-									*NormalNum = Vec.y > 0.f ? 2 : 3;
-								}
-								break;
-							case 2:
-								if (Normal) {
-									*Normal = Vec.z > 0.f ? Vector3DX::back() : Vector3DX::forward();
-								}
-								if (NormalNum) {
-									*NormalNum = Vec.z > 0.f ? 4 : 5;
-								}
-								break;
-							default:
-								break;
-							}
-						}
-						if (t2 < t_max) {
-							t_max = t2;
-						}
-
-						// スラブ交差チェック
-						if (t >= t_max) {
-							return false;
-						}
-					}
-				}
-
-				// 交差している
-				if (EndPos) {
-					*EndPos = StartPos + Vec * t;
-				}
-				return true;
-			}
-			auto		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept {
-				auto& cell = m_CellxN.back();
-				Vector3DX Start = StartPos / (CellScale * cell.scaleRate);
-				Vector3DX End = StartPos / (CellScale * cell.scaleRate);
-
-				for (int xm = -1; xm <= 1; xm++) {
-					for (int ym = -1; ym <= 1; ym++) {
-						for (int zm = -1; zm <= 1; zm++) {
-							bool isHit = false;
-							int x1 = (int)(Start.x + xm);
-							int y1 = (int)(Start.y + ym);
-							int z1 = (int)(Start.z + zm);
-							int x2 = (int)(End.x + xm);
-							int y2 = (int)(End.y + ym);
-							int z2 = (int)(End.z + zm);
-							Bresenham3D(x1, y1, z1, x2, y2, z2, [&](int x, int y, int z) {
-								if (
-									((x <= -cell.Xall / 2) || (cell.Xall / 2 < x)) ||
-									((y <= -cell.Yall / 2) || (cell.Yall / 2 < y)) ||
-									((z <= -cell.Zall / 2) || (cell.Zall / 2 < z))
-									) {
-									return false;
-								}
-
-								const auto& Cell = cell.GetCell(x, y, z);
-								if (Cell.selset == INVALID_ID) { return false; }
-								if (Cell.inRock) { return false; }
-								Vector3DX MinPos = (Vector3DX::vget((float)x, (float)y, (float)z) + (Vector3DX::one() * 0.0f)) * (CellScale * cell.scaleRate);
-								Vector3DX MaxPos = (Vector3DX::vget((float)x, (float)y, (float)z) + (Vector3DX::one() * 1.0f)) * (CellScale * cell.scaleRate);
-								int NormalNum = -1;
-								if (ColRayBox(StartPos, EndPos, MinPos, MaxPos, Normal, &NormalNum)) {
-									//if (NormalNum == 3) {
-										isHit = true;
-										return true;
-									//}
-								}
-								return false;
-								});
-							if (isHit) { return true; }
-						}
-					}
-				}
-				return false;
-			}
-			//*/
+			void			AddCube(const CellsData& cell, int x, int y, int z, bool CheckFill, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept;
 		public:
-			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius) const noexcept;
+			bool			ColRayBox(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AABBMinPos, const Vector3DX& AABBMaxPos, Vector3DX* Normal = nullptr, int* NormalNum = nullptr) const noexcept;
+			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
+		public:
+			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept;
+		private:
+			void			LoadCellsFile() noexcept;
+			void			SaveCellsFile() noexcept;
+		private:
+			//簡略版を制作
+			void			MakeSimple() noexcept;
+			//遮蔽検索
+			void			CalcOcclusion() noexcept;
 		public://
 			void			Load(void) noexcept {
-				//MV1::Load("data/model/map/model_DISABLE.mv1", &this->m_ObjGround);
-				//MV1::Load("data/model/map/col.mv1", &this->m_ObjGroundCol);
 				MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
+				m_tex = GraphHandle::Load("data/tex.png");
+				m_norm = GraphHandle::Load("data/nrm.png");
 			}
 			//
 			void			Init(void) noexcept {
-				//地形
-				//this->m_ObjGroundCol.SetupCollInfo(1, 1, 1);
 				//空
 				this->m_ObjSky.SetScale(Vector3DX::vget(10.f, 10.f, 10.f));
 				this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
@@ -394,14 +176,8 @@ namespace FPS_n2 {
 					this->m_ObjSky.SetMaterialDifColor(i, GetColorF(0.7f, 0.7f, 0.7f, 1.f));
 					this->m_ObjSky.SetMaterialAmbColor(i, GetColorF(0.f, 0.f, 0.f, 1.f));
 				}
-				/*
-				for (int i = 0, num = this->m_ObjGround.GetMaterialNum(); i < num; ++i) {
-					this->m_ObjGround.SetMaterialDifColor(i, GetColorF(1.f, 1.f, 1.f, 1.f));
-					this->m_ObjGround.SetMaterialAmbColor(i, GetColorF(0.15f, 0.15f, 0.15f, 1.f));
-				}
-				//*/
 				if (true) {
-					if (true) {
+					{
 						PerlinNoise ns(GetRand(100));
 						m_CellBase.Xall = 500;
 						m_CellBase.Yall = 160;
@@ -410,10 +186,10 @@ namespace FPS_n2 {
 						m_CellBase.scaleRate = 1;
 						for (int x = -m_CellBase.Xall / 2; x < m_CellBase.Xall / 2; x++) {
 							for (int z = -m_CellBase.Zall / 2; z < m_CellBase.Zall / 2; z++) {
-								auto Height = (int)(ns.octaveNoise(2, 
-									((float)(x + m_CellBase.Xall / 2)) / m_CellBase.Xall,
-									((float)(z + m_CellBase.Zall / 2)) / m_CellBase.Zall
-								) * (float)(m_CellBase.Yall * 4 / 5)) - (m_CellBase.Yall * 4 / 5) / 2;
+								auto Height = static_cast<int>(ns.octaveNoise(2,
+									(static_cast<float>(x + m_CellBase.Xall / 2)) / m_CellBase.Xall,
+									(static_cast<float>(z + m_CellBase.Zall / 2)) / m_CellBase.Zall
+								) * static_cast<float>(m_CellBase.Yall * 4 / 5)) - (m_CellBase.Yall * 4 / 5) / 2;
 								for (int y = -m_CellBase.Yall / 2; y < m_CellBase.Yall / 2; y++) {
 									if (y <= Height) {
 										m_CellBase.SetCell(x, y, z).selset = 0;
@@ -424,187 +200,82 @@ namespace FPS_n2 {
 							}
 						}
 					}
-					else {
-						m_CellBase.Xall = 50;
-						m_CellBase.Yall = 25;
-						m_CellBase.Zall = 50;
-						m_CellBase.m_Cell.resize((size_t)(m_CellBase.Xall * m_CellBase.Yall * m_CellBase.Zall));
-						m_CellBase.scaleRate = 1;
-						for (int x = -m_CellBase.Xall / 2; x < m_CellBase.Xall / 2; x++) {
-							for (int z = -m_CellBase.Zall / 2; z < m_CellBase.Zall / 2; z++) {
-								for (int y = -m_CellBase.Yall / 2; y < m_CellBase.Yall / 2; y++) {
-									if (y <= 0) {
-										m_CellBase.SetCell(x, y, z).selset = 0;
-										continue;
-									}
-									if (-m_CellBase.Xall / 2 + 2 >= x || x >= m_CellBase.Xall / 2 - 2) {
-										m_CellBase.SetCell(x, y, z).selset = 0;
-										continue;
-									}
-									if (-m_CellBase.Zall / 2 + 2 >= z || z >= m_CellBase.Zall / 2 - 2) {
-										m_CellBase.SetCell(x, y, z).selset = 0;
-										continue;
-									}
-									m_CellBase.SetCell(x, y, z).selset = INVALID_ID;
-								}
-							}
-						}
-					}
 
-
-
-					std::ofstream fout;
-					fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
-					fout.write((char*)&m_CellBase.Xall, sizeof(m_CellBase.Xall));
-					fout.write((char*)&m_CellBase.Yall, sizeof(m_CellBase.Yall));
-					fout.write((char*)&m_CellBase.Zall, sizeof(m_CellBase.Zall));
-					fout.write((char*)&m_CellBase.m_Cell.at(0), sizeof(m_CellBase.m_Cell.at(0)) * m_CellBase.m_Cell.size());
-					fout.close();  //ファイルを閉じる
+					SaveCellsFile();
 				}
 				else {
-					std::ifstream fin;
-					fin.open("data/Map.txt", std::ios::in | std::ios::binary);
-					fin.read((char*)&m_CellBase.Xall, sizeof(m_CellBase.Xall));
-					fin.read((char*)&m_CellBase.Yall, sizeof(m_CellBase.Yall));
-					fin.read((char*)&m_CellBase.Zall, sizeof(m_CellBase.Zall));
-					m_CellBase.scaleRate = 1;
-					m_CellBase.m_Cell.resize((size_t)(m_CellBase.Xall * m_CellBase.Yall * m_CellBase.Zall));
-					fin.read((char*)&m_CellBase.m_Cell.at(0), sizeof(m_CellBase.m_Cell.at(0)) * m_CellBase.m_Cell.size());
-					fin.close();
+					LoadCellsFile();
 				}
 				//簡略版を制作
-				{
-					m_CellxN.clear();
-					m_CellxN.resize(total);
-					m_CellxN.back() = m_CellBase;//等倍なのでそのままコピー1
-					for (int sel = total - 1 - 1; sel >= 0; sel--) {
-						auto& cell = m_CellxN.at(sel);
-						auto& cell2 = m_CellxN.at((size_t)(sel + 1));
-
-						cell.scaleRate = (int8_t)pow(MulPer, total - 1 - sel);
-						cell.Xall = m_CellBase.Xall / cell.scaleRate;
-						cell.Yall = m_CellBase.Yall / cell.scaleRate;
-						cell.Zall = m_CellBase.Zall / cell.scaleRate;
-						cell.m_Cell.resize((size_t)(cell.Xall * cell.Yall * cell.Zall));
-
-						for (int xm = -cell.Xall / 2; xm < cell.Xall / 2; xm++) {
-							for (int ym = -cell.Yall / 2; ym < cell.Yall / 2; ym++) {
-								for (int zm = -cell.Zall / 2; zm < cell.Zall / 2; zm++) {
-									int FillCount = 0;
-									int FillAll = 0;
-
-
-									int xMaxmin = std::max(xm * MulPer, -cell2.Xall / 2);
-									int xMaxmax = std::min((xm + 1) * MulPer, cell2.Xall / 2);
-									int yMaxmin = std::max(ym * MulPer, -cell2.Yall / 2);
-									int yMaxmax = std::min((ym + 1) * MulPer, cell2.Yall / 2);
-									int zMaxmin = std::max(zm * MulPer, -cell2.Zall / 2);
-									int zMaxmax = std::min((zm + 1) * MulPer, cell2.Zall / 2);
-
-									for (int x = xMaxmin; x < xMaxmax; x++) {
-										for (int y = yMaxmin; y < yMaxmax; y++) {
-											for (int z = zMaxmin; z < zMaxmax; z++) {
-												const auto& Cell = cell2.GetCell(x, y, z);
-												FillAll++;
-												if (Cell.selset == INVALID_ID) { continue; }
-												FillCount++;
-											}
-										}
-									}
-									cell.SetCell(xm, ym, zm).selset = ((FillAll != 0) && ((float)FillCount / FillAll >= ((float)1 / 2))) ? 0 : INVALID_ID;
-								}
-							}
-						}
-
-
-					}
-				}
+				MakeSimple();
 				//遮蔽検索
-				for (auto& cell : m_CellxN) {
-					for (int x = -cell.Xall / 2; x < cell.Xall / 2; x++) {
-						for (int y = -cell.Yall / 2; y < cell.Yall / 2; y++) {
-							for (int z = -cell.Zall / 2; z < cell.Zall / 2; z++) {
-								if (cell.GetCell(x, y, z).selset == INVALID_ID) { continue; }
-								//端は全て隠す
-								if (
-									((x == -cell.Xall / 2) || (x == cell.Xall / 2 - 1)) ||
-									((y == -cell.Yall / 2) || (y == cell.Yall / 2 - 1)) ||
-									((z == -cell.Zall / 2) || (z == cell.Zall / 2 - 1))
-									) {
-									cell.SetCell(x, y, z).inRock = true;
-									continue;
-								}
-								cell.SetCell(x, y, z).inRock = (
-									(cell.GetCell(x + 1, y, z).selset != INVALID_ID) &&
-									(cell.GetCell(x - 1, y, z).selset != INVALID_ID) &&
-									(cell.GetCell(x, y + 1, z).selset != INVALID_ID) &&
-									(cell.GetCell(x, y - 1, z).selset != INVALID_ID) &&
-									(cell.GetCell(x, y, z + 1).selset != INVALID_ID) &&
-									(cell.GetCell(x, y, z - 1).selset != INVALID_ID)
-									);
-							}
-						}
-					}
-				}
-			}
-			//
-			void			FirstExecute(void) noexcept {
+				CalcOcclusion();
 			}
 			//
 			void			Execute(void) noexcept {
-				vert32.clear();
-				index32.clear();
-				const COLOR_U8 Colors[] = {
-					GetColorU8(255,  0,  0, 255),
-					GetColorU8(255,255,  0, 255),
-					GetColorU8(0,255,  0, 255),
-					GetColorU8(0,255,255, 255),
-					GetColorU8(0,  0,255, 255),
-					GetColorU8(255,  0,255, 255),
-				};
+				m_vert32Num = 0;
+				m_index32Num = 0;
 
 				auto* DrawParts = DXDraw::Instance();
 				const Vector3DX CamPos = DrawParts->GetMainCamera().GetCamPos();
 				const Vector3DX CamVec = (DrawParts->GetMainCamera().GetCamVec() - CamPos).normalized();
-				for (int sel = 0; auto & cell : m_CellxN) {
+				for (auto& cell : m_CellxN) {
 					Vector3DX center = CamPos / (CellScale * cell.scaleRate);
 
-					int xMaxmin = std::max((int)(center.x - Max), -cell.Xall / 2);
-					int xMaxmax = std::min((int)(center.x + Max) + 1, cell.Xall / 2);
-					int yMaxmin = std::max((int)(center.y - Max), -cell.Yall / 2);
-					int yMaxmax = std::min((int)(center.y + Max) + 1, cell.Yall / 2);
+					int xMaxmin = std::max(static_cast<int>(center.x - Max), -cell.Xall / 2);
+					int xMaxmax = std::min(static_cast<int>(center.x + Max) + 1, cell.Xall / 2);
+					int yMaxmin = std::max(static_cast<int>(center.y - Max), -cell.Yall / 2);
+					int yMaxmax = std::min(static_cast<int>(center.y + Max) + 1, cell.Yall / 2);
+					int zMaxmin = std::max(static_cast<int>(center.z - Max), -cell.Zall / 2);
+					int zMaxmax = std::min(static_cast<int>(center.z + Max) + 1, cell.Zall / 2);
 
-					int xMinmin = (int)(center.x - Max / MulPer);
-					int xMinmax = (int)(center.x + Max / MulPer);
-					int yMinmin = (int)(center.y - Max / MulPer);
-					int yMinmax = (int)(center.y + Max / MulPer);
+					int xMinmin = static_cast<int>(center.x - Max / MulPer);
+					int xMinmax = static_cast<int>(center.x + Max / MulPer);
+					int yMinmin = static_cast<int>(center.y - Max / MulPer);
+					int yMinmax = static_cast<int>(center.y + Max / MulPer);
+					int zMinmin = static_cast<int>(center.z - Max / MulPer);
+					int zMinmax = static_cast<int>(center.z + Max / MulPer);
 
 					for (int x = xMaxmin; x < xMaxmax; x++) {
+						//*
+						//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
+						Vector3DX YZMinPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(yMaxmin), static_cast<float>(zMaxmin)) + (Vector3DX::one() * 0.5f);
+						Vector3DX YZMaxPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(zMaxmax), static_cast<float>(zMaxmax)) + (Vector3DX::one() * 0.5f);
+						Vector3DX YZPos2 = Vector3DX::vget(YZMinPos.x, YZMinPos.y, YZMaxPos.z);
+						Vector3DX YZPos3 = Vector3DX::vget(YZMinPos.x, YZMaxPos.y, YZMinPos.z);
+						bool IsHit = false;
+						while (true) {
+							if (Vector3DX::Dot(CamVec, (YZMinPos - center)) > 0.f) { IsHit = true; break; }
+							if (Vector3DX::Dot(CamVec, (YZMaxPos - center)) > 0.f) { IsHit = true; break; }
+							if (Vector3DX::Dot(CamVec, (YZPos2 - center)) > 0.f) { IsHit = true; break; }
+							if (Vector3DX::Dot(CamVec, (YZPos3 - center)) > 0.f) { IsHit = true; break; }
+							break;
+						}
+						if (!IsHit) {
+							continue;
+						}
+						//*/
 						for (int y = yMaxmin; y < yMaxmax; y++) {
-							int zMaxmin = std::max((int)(center.z - Max), -cell.Zall / 2);
-							int zMaxmax = std::min((int)(center.z + Max) + 1, cell.Zall / 2);
-							int zMinmin = (int)(center.z - Max / MulPer);
-							int zMinmax = (int)(center.z + Max / MulPer);
-
-							Vector3DX ZMinPos = Vector3DX::vget((float)x, (float)y, (float)zMaxmin) + (Vector3DX::one() * 0.5f);
-							Vector3DX ZMaxPos = Vector3DX::vget((float)x, (float)y, (float)zMaxmax) + (Vector3DX::one() * 0.5f);
+							int zMaxminT = zMaxmin;
+							int zMaxmaxT = zMaxmax;
+							Vector3DX ZMinPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(zMaxminT)) + (Vector3DX::one() * 0.5f);
+							Vector3DX ZMaxPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(zMaxmaxT)) + (Vector3DX::one() * 0.5f);
 							Vector3DX HitPos;
 							bool pSameVecNormalToA{};
 							bool OnFront{};
-							if (CalcIntersectionPoint(ZMinPos, ZMaxPos, center, CamVec, &HitPos, &pSameVecNormalToA,&OnFront)) {
-								float HitZ = HitPos.z - 0.5f;
+							if (CalcIntersectionPoint(ZMinPos, ZMaxPos, center, CamVec, &HitPos, &pSameVecNormalToA, &OnFront)) {
 								if (!pSameVecNormalToA) {
-									zMaxmin = (int)HitZ;
+									zMaxminT = static_cast<int>(HitPos.z - 0.5);
 								}
 								else {
-									zMaxmax = (int)HitZ;
+									zMaxmaxT = static_cast<int>(HitPos.z - 0.5);
 								}
 							}
 							else {
 								if (!OnFront) { continue; }
 							}
 
-							for (int z = zMaxmin; z < zMaxmax; z++) {
+							for (int z = zMaxminT; z < zMaxmaxT; z++) {
 								bool checkFill = true;
 								if (cell.scaleRate != 1) {
 									if (((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax)) && ((zMinmin < z) && (z < zMinmax))) {
@@ -616,11 +287,10 @@ namespace FPS_n2 {
 								if (Cell.selset == INVALID_ID) { continue; }
 								if (Cell.inRock) { continue; }
 
-								AddCube(sel, x, y, z, checkFill, Colors[sel]);
+								AddCube(cell, x, y, z, checkFill, GetColorU8(128, 128, 128, 255), GetColorU8(64, 64, 64, 255));
 							}
 						}
 					}
-					sel++;
 				}
 			}
 			//
@@ -629,25 +299,21 @@ namespace FPS_n2 {
 				this->m_ObjSky.DrawModel();
 				SetUseLighting(TRUE);
 			}
-			void			Shadow_Draw_Far(void) noexcept {
-			}
-			void			Shadow_Draw(void) noexcept {
-				if (vert32.size() > 0 && index32.size() > 0) {
-					DrawPolygon32bitIndexed3D(vert32.data(), (int)vert32.size(), index32.data(), (int)index32.size() / 3, DX_NONE_GRAPH, FALSE);
+			void			Shadow_Draw_Rigid(void) noexcept {
+				if (m_vert32Num > 0 && m_index32Num > 0) {
+					SetUseTextureToShader(0, m_tex.get());
+					DrawPolygon32bitIndexed3DToShader(m_vert32S.data(), static_cast<int>(m_vert32Num), m_index32.data(), static_cast<int>(m_index32Num / 3));
+					SetUseTextureToShader(0, INVALID_ID);
 				}
-				//this->m_ObjGround.DrawModel();
 			}
 			void			Draw(void) noexcept {
-				if (vert32.size() > 0 && index32.size() > 0) {
-					DrawPolygon32bitIndexed3D(vert32.data(), (int)vert32.size(), index32.data(), (int)index32.size() / 3, DX_NONE_GRAPH, FALSE);
+				if (m_vert32Num > 0 && m_index32Num > 0) {
+					DrawPolygon32bitIndexed3D(m_vert32.data(), static_cast<int>(m_vert32Num), m_index32.data(), static_cast<int>(m_index32Num / 3), m_tex.get(), TRUE);
 				}
-				//this->m_ObjGround.DrawModel();
 			}
 			//
 			void			Dispose(void) noexcept {
 				this->m_ObjSky.Dispose();
-				//this->m_ObjGround.Dispose();
-				//this->m_ObjGroundCol.Dispose();
 			}
 		};
 	}

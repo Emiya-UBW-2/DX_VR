@@ -213,7 +213,7 @@ namespace FPS_n2 {
 			this->m_move.SetVec(vec);
 			pos += this->m_move.GetVec();
 			//•Ç”»’è
-			BackGround->CheckMapWall(this->m_move.GetRePos(), &pos, 0.6f * Scale_Rate);
+			BackGround->CheckMapWall(this->m_move.GetRePos(), &pos, Vector3DX::up() * (0.6f * Scale_Rate + 0.1f), Vector3DX::up() * (1.6f * Scale_Rate), 0.6f * Scale_Rate);
 			//‚Ù‚©ƒvƒŒƒCƒ„[‚Æ‚Ì”»’è
 			{
 				float Radius = 0.5f * Scale_Rate;

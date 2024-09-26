@@ -260,7 +260,6 @@ namespace FPS_n2 {
 			}
 			//Execute
 			ObjMngr->ExecuteObject();
-			BackGround->FirstExecute();
 			ObjMngr->LateExecuteObject();
 			//Ž‹“_
 			{
@@ -402,12 +401,10 @@ namespace FPS_n2 {
 			BackGround->BG_Draw();
 		}
 		void			MainGameScene::ShadowDraw_Far_Sub(void) noexcept {
-			auto* BackGround = BackGround::BackGroundClass::Instance();
-			BackGround->Shadow_Draw_Far();
 		}
 		void			MainGameScene::ShadowDraw_Sub(void) noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
-			BackGround->Shadow_Draw();
+			BackGround->Draw();
 			ObjectManager::Instance()->Draw_Shadow();
 		}
 		void			MainGameScene::CubeMap_Sub(void) noexcept {
@@ -415,9 +412,12 @@ namespace FPS_n2 {
 			BackGround->Draw();
 		}
 
-		void MainGameScene::SetShadowDraw_Sub(void) noexcept {
+		void MainGameScene::SetShadowDraw_Rigid_Sub(void) noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
-			BackGround->Draw();
+			BackGround->Shadow_Draw_Rigid();
+		}
+
+		void MainGameScene::SetShadowDraw_Sub(void) noexcept {
 			ObjectManager::Instance()->Draw();
 		}
 

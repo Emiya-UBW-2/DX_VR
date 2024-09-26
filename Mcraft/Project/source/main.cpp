@@ -50,6 +50,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetMainWindowText(Name.c_str());						//ƒ^ƒCƒgƒ‹
 	//SetUseHalfLambertLighting(TRUE);
 	MV1SetLoadModelReMakeNormal(TRUE);
+	//SetUsePixelLighting(TRUE);
 	//
 	FPS_n2::Player::PlayerManager::Create();
 	FPS_n2::CommonBattleResource::Create();

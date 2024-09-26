@@ -3,228 +3,291 @@
 const FPS_n2::BackGround::BackGroundClass* SingletonBase<FPS_n2::BackGround::BackGroundClass>::m_Singleton = nullptr;
 namespace FPS_n2 {
 	namespace BackGround {
-		void BackGroundClass::AddCube(int sel, int x, int y, int z, bool CheckFill, COLOR_U8 color) noexcept {
-			auto& cell = m_CellxN.at(sel);
+		bool		BackGroundClass::CalcIntersectionPoint(const Vector3DX& pointA, const Vector3DX& pointB, const Vector3DX& planePos, const Vector3DX& planenormal, Vector3DX* pointIntersection, bool* pSameVecNormalToA, bool* pOnFront) noexcept {
+			// 線分に当たらない
+			float dTa = Vector3DX::Dot(planenormal, (pointA - planePos).normalized());
+			float dTb = Vector3DX::Dot(planenormal, (pointB - planePos).normalized());
+			*pOnFront = !(dTa <= 0.f && dTb <= 0.f);
+			if ((dTa >= 0.f && dTb >= 0.f) || !*pOnFront) {
+				return false;
+			}
 
+			*pSameVecNormalToA = (dTa > 0.f);
+			*pointIntersection = pointA + (pointB - pointA) * (std::abs(dTa) / (std::abs(dTa) + std::abs(dTb)));
+			return true;
+		}
+		void		BackGroundClass::Bresenham3D(const int x1, const int y1, const int z1, const int x2, const int y2, const int z2, const std::function<bool(int, int, int)>& OutPutLine) noexcept {
+
+			int err_1{}, err_2{};
+			int point[3]{};
+
+			point[0] = x1;
+			point[1] = y1;
+			point[2] = z1;
+			const int dx = x2 - x1;
+			const int dy = y2 - y1;
+			const int dz = z2 - z1;
+			const int x_inc = (dx < 0) ? -1 : 1;
+			const int l = std::abs(dx);
+			const int y_inc = (dy < 0) ? -1 : 1;
+			const int m = std::abs(dy);
+			const int z_inc = (dz < 0) ? -1 : 1;
+			const int n = std::abs(dz);
+			const int dx2 = l << 1;
+			const int dy2 = m << 1;
+			const int dz2 = n << 1;
+
+			if ((l >= m) && (l >= n)) {
+				err_1 = dy2 - l;
+				err_2 = dz2 - l;
+				for (int i = 0; i < l; i++) {
+					if (OutPutLine(point[0], point[1], point[2])) { return; }
+					if (err_1 > 0) {
+						point[1] += y_inc;
+						err_1 -= dx2;
+					}
+					if (err_2 > 0) {
+						point[2] += z_inc;
+						err_2 -= dx2;
+					}
+					err_1 += dy2;
+					err_2 += dz2;
+					point[0] += x_inc;
+				}
+			}
+			else if ((m >= l) && (m >= n)) {
+				err_1 = dx2 - m;
+				err_2 = dz2 - m;
+				for (int i = 0; i < m; i++) {
+					if (OutPutLine(point[0], point[1], point[2])) { return; }
+					if (err_1 > 0) {
+						point[0] += x_inc;
+						err_1 -= dy2;
+					}
+					if (err_2 > 0) {
+						point[2] += z_inc;
+						err_2 -= dy2;
+					}
+					err_1 += dx2;
+					err_2 += dz2;
+					point[1] += y_inc;
+				}
+			}
+			else {
+				err_1 = dy2 - n;
+				err_2 = dx2 - n;
+				for (int i = 0; i < n; i++) {
+					if (OutPutLine(point[0], point[1], point[2])) { return; }
+					if (err_1 > 0) {
+						point[1] += y_inc;
+						err_1 -= dz2;
+					}
+					if (err_2 > 0) {
+						point[0] += x_inc;
+						err_2 -= dz2;
+					}
+					err_1 += dy2;
+					err_2 += dx2;
+					point[2] += z_inc;
+				}
+			}
+			OutPutLine(point[0], point[1], point[2]);
+		}
+		void		BackGroundClass::AddCube(const CellsData& cell, int x, int y, int z, bool CheckFill, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept {
 			auto* DrawParts = DXDraw::Instance();
-			Vector3DX Pos = Vector3DX::vget((float)x, (float)y, (float)z);
+			Vector3DX Pos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
 			Vector3DX PosMin = Pos * (CellScale * cell.scaleRate);
 			Vector3DX PosMid = (Pos + Vector3DX::one() * 0.5f) * (CellScale * cell.scaleRate);
 			Vector3DX PosMax = (Pos + Vector3DX::one()) * (CellScale * cell.scaleRate);
 
 			Vector3DX PosCamVec = PosMid - DrawParts->GetMainCamera().GetCamPos();
 
-			//
-			//int Prev = (int)vert32.size();
+			auto GetPlane = [&](const Vector3DX& Pos1, const Vector3DX& Pos2, const Vector3DX& Pos3, const Vector3DX& Pos4, const Vector3DX& Normal) {
+				if ((!CheckFill || cell.GetCell(x + static_cast<int>(Normal.x), y + static_cast<int>(Normal.y), z + static_cast<int>(Normal.z)).selset == INVALID_ID) && (Vector3DX::Dot(PosCamVec, Normal) < 0.f)) {
+					size_t Now = m_vert32Num;
+					size_t Nowi = m_index32Num;
+					m_vert32Num += 4;
+					m_index32Num += 6;
+					if (m_vert32Num > m_vert32.size()) {
+						m_vert32.resize(m_vert32Num);
+						m_vert32S.resize(m_vert32Num);
+					}
+					if (m_index32Num > m_index32.size()) {
+						m_index32.resize(m_index32Num);
+					}
+
+					m_index32.at(Nowi) = (uint32_t)(Now);
+					m_index32.at(Nowi + 1) = (uint32_t)(Now + 1);
+					m_index32.at(Nowi + 2) = (uint32_t)(Now + 2);
+					m_index32.at(Nowi + 3) = (uint32_t)(Now + 3);
+					m_index32.at(Nowi + 4) = (uint32_t)(Now + 2);
+					m_index32.at(Nowi + 5) = (uint32_t)(Now + 1);
+
+					m_vert32.at(Now).pos = Pos1.get();
+					m_vert32.at(Now).u = 1.0f;
+					m_vert32.at(Now).v = 0.0f;
+					m_vert32.at(Now + 1).pos = Pos2.get();
+					m_vert32.at(Now + 1).u = 0.0f;
+					m_vert32.at(Now + 1).v = 0.0f;
+					m_vert32.at(Now + 2).pos = Pos3.get();
+					m_vert32.at(Now + 2).u = 1.0f;
+					m_vert32.at(Now + 2).v = 1.0f;
+					m_vert32.at(Now + 3).pos = Pos4.get();
+					m_vert32.at(Now + 3).u = 0.0f;
+					m_vert32.at(Now + 3).v = 1.0f;
+					for (size_t i = 0; i < 4; i++) {
+						m_vert32.at(Now + i).norm = Normal.get();
+						m_vert32.at(Now + i).dif = DifColor;
+						m_vert32.at(Now + i).spc = SpcColor;
+						m_vert32.at(Now + i).su = m_vert32.at(Now + i).u;
+						m_vert32.at(Now + i).sv = m_vert32.at(Now + i).v;
+						//*
+
+						m_vert32S.at(Now + i).pos = m_vert32.at(Now + i).pos;
+						m_vert32S.at(Now + i).u = m_vert32.at(Now + i).u;
+						m_vert32S.at(Now + i).v = m_vert32.at(Now + i).v;
+						m_vert32S.at(Now + i).norm = Normal.get();
+						m_vert32S.at(Now + i).dif = DifColor;
+						m_vert32S.at(Now + i).spc = SpcColor;
+						m_vert32S.at(Now + i).su = m_vert32.at(Now + i).u;
+						m_vert32S.at(Now + i).sv = m_vert32.at(Now + i).v;
+
+
+						m_vert32S.at(Now + i).spos.x = m_vert32.at(Now + i).pos.x;
+						m_vert32S.at(Now + i).spos.y = m_vert32.at(Now + i).pos.y;
+						m_vert32S.at(Now + i).spos.z = m_vert32.at(Now + i).pos.z;
+						m_vert32S.at(Now + i).spos.x = 1.0f;
+
+						m_vert32S.at(Now + i).binorm = Normal.get();
+						m_vert32S.at(Now + i).tan = Normal.get();
+						//*/
+					}
+				}
+				};
 			// 頂点データの作成
-			Vector3DX Normal = Vector3DX::back();
-			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f && (!CheckFill || cell.GetCell(x, y, z - 1).selset == INVALID_ID)) {
-				int Now = (int)vert32.size();
-				int Nowi = (int)index32.size();
-				vert32.resize((size_t)(Now + 4));
-				index32.resize((size_t)(Nowi + 6));
+			GetPlane(
+				Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z), Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z), PosMin, Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z),
+				Vector3DX::back());
 
-				index32.at((size_t)(Nowi)) = Now;
-				index32.at((size_t)(Nowi + 1)) = Now + 1;
-				index32.at((size_t)(Nowi + 2)) = Now + 2;
-				index32.at((size_t)(Nowi + 3)) = Now + 3;
-				index32.at((size_t)(Nowi + 4)) = index32.at((size_t)(Nowi + 2));
-				index32.at((size_t)(Nowi + 5)) = index32.at((size_t)(Nowi + 1));
+			GetPlane(
+				Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z), Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z), Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z), PosMax,
+				Vector3DX::forward());
 
-				vert32.at(index32.at((size_t)(Nowi))).pos = Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z).get();
-				vert32.at(index32.at((size_t)(Nowi + 1))).pos = Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z).get();
-				vert32.at(index32.at((size_t)(Nowi + 2))).pos = PosMin.get();
-				vert32.at(index32.at((size_t)(Nowi + 3))).pos = Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z).get();
-				for (int i = 0; i < 4; i++) {
-					vert32.at((size_t)(Now + i)).dif = color;
-					vert32.at((size_t)(Now + i)).spc = GetColorU8(255, 255, 255, 255);
-					vert32.at((size_t)(Now + i)).u = 0.0f;
-					vert32.at((size_t)(Now + i)).v = 0.0f;
-					vert32.at((size_t)(Now + i)).su = 0.0f;
-					vert32.at((size_t)(Now + i)).sv = 0.0f;
-				}
-			}
+			GetPlane(
+				Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z), Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z), Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z), PosMin,
+				Vector3DX::left());
 
-			Normal = Vector3DX::forward();
-			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f && (!CheckFill || cell.GetCell(x, y, z + 1).selset == INVALID_ID)) {
-				int Now = (int)vert32.size();
-				int Nowi = (int)index32.size();
-				vert32.resize((size_t)(Now + 4));
-				index32.resize((size_t)(Nowi + 6));
+			GetPlane(
+				Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z), PosMax, Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z), Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z),
+				Vector3DX::right());
 
-				index32.at((size_t)(Nowi)) = Now;
-				index32.at((size_t)(Nowi + 1)) = Now + 1;
-				index32.at((size_t)(Nowi + 2)) = Now + 2;
-				index32.at((size_t)(Nowi + 3)) = Now + 3;
-				index32.at((size_t)(Nowi + 4)) = index32.at((size_t)(Nowi + 2));
-				index32.at((size_t)(Nowi + 5)) = index32.at((size_t)(Nowi + 1));
+			GetPlane(
+				Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z), PosMax, Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z), Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z),
+				Vector3DX::up());
 
-				vert32.at(index32.at((size_t)(Nowi))).pos = PosMax.get();
-				vert32.at(index32.at((size_t)(Nowi + 1))).pos = Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z).get();
-				vert32.at(index32.at((size_t)(Nowi + 2))).pos = Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z).get();
-				vert32.at(index32.at((size_t)(Nowi + 3))).pos = Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z).get();
-				for (int i = 0; i < 4; i++) {
-					vert32.at((size_t)(Now + i)).norm = Normal.get();
-					vert32.at((size_t)(Now + i)).dif = color;
-					vert32.at((size_t)(Now + i)).spc = GetColorU8(255, 255, 255, 255);
-					vert32.at((size_t)(Now + i)).u = 0.0f;
-					vert32.at((size_t)(Now + i)).v = 0.0f;
-					vert32.at((size_t)(Now + i)).su = 0.0f;
-					vert32.at((size_t)(Now + i)).sv = 0.0f;
-				}
-			}
-
-			Normal = Vector3DX::left();
-			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f && (!CheckFill || cell.GetCell(x - 1, y, z).selset == INVALID_ID)) {
-				int Now = (int)vert32.size();
-				int Nowi = (int)index32.size();
-				vert32.resize((size_t)(Now + 4));
-				index32.resize((size_t)(Nowi + 6));
-
-				index32.at((size_t)(Nowi)) = Now;
-				index32.at((size_t)(Nowi + 1)) = Now + 1;
-				index32.at((size_t)(Nowi + 2)) = Now + 2;
-				index32.at((size_t)(Nowi + 3)) = Now + 3;
-				index32.at((size_t)(Nowi + 4)) = index32.at((size_t)(Nowi + 2));
-				index32.at((size_t)(Nowi + 5)) = index32.at((size_t)(Nowi + 1));
-
-				vert32.at(index32.at((size_t)(Nowi))).pos = Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z).get();
-				vert32.at(index32.at((size_t)(Nowi + 1))).pos = Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z).get();
-				vert32.at(index32.at((size_t)(Nowi + 2))).pos = Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z).get();
-				vert32.at(index32.at((size_t)(Nowi + 3))).pos = PosMin.get();
-				for (int i = 0; i < 4; i++) {
-					vert32.at((size_t)(Now + i)).norm = Normal.get();
-					vert32.at((size_t)(Now + i)).dif = color;
-					vert32.at((size_t)(Now + i)).spc = GetColorU8(255, 255, 255, 255);
-					vert32.at((size_t)(Now + i)).u = 0.0f;
-					vert32.at((size_t)(Now + i)).v = 0.0f;
-					vert32.at((size_t)(Now + i)).su = 0.0f;
-					vert32.at((size_t)(Now + i)).sv = 0.0f;
-				}
-			}
-
-			Normal = Vector3DX::right();
-			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f && (!CheckFill || cell.GetCell(x + 1, y, z).selset == INVALID_ID)) {
-				int Now = (int)vert32.size();
-				int Nowi = (int)index32.size();
-				vert32.resize((size_t)(Now + 4));
-				index32.resize((size_t)(Nowi + 6));
-
-				index32.at((size_t)(Nowi)) = Now;
-				index32.at((size_t)(Nowi + 1)) = Now + 1;
-				index32.at((size_t)(Nowi + 2)) = Now + 2;
-				index32.at((size_t)(Nowi + 3)) = Now + 3;
-				index32.at((size_t)(Nowi + 4)) = index32.at((size_t)(Nowi + 2));
-				index32.at((size_t)(Nowi + 5)) = index32.at((size_t)(Nowi + 1));
-
-				vert32.at(index32.at((size_t)(Nowi))).pos = Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z).get();
-				vert32.at(index32.at((size_t)(Nowi + 1))).pos = PosMax.get();
-				vert32.at(index32.at((size_t)(Nowi + 2))).pos = Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z).get();
-				vert32.at(index32.at((size_t)(Nowi + 3))).pos = Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z).get();
-				for (int i = 0; i < 4; i++) {
-					vert32.at((size_t)(Now + i)).norm = Normal.get();
-					vert32.at((size_t)(Now + i)).dif = color;
-					vert32.at((size_t)(Now + i)).spc = GetColorU8(255, 255, 255, 255);
-					vert32.at((size_t)(Now + i)).u = 0.0f;
-					vert32.at((size_t)(Now + i)).v = 0.0f;
-					vert32.at((size_t)(Now + i)).su = 0.0f;
-					vert32.at((size_t)(Now + i)).sv = 0.0f;
-				}
-			}
-
-			Normal = Vector3DX::up();
-			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f && (!CheckFill || cell.GetCell(x, y + 1, z).selset == INVALID_ID)) {
-				int Now = (int)vert32.size();
-				int Nowi = (int)index32.size();
-				vert32.resize((size_t)(Now + 4));
-				index32.resize((size_t)(Nowi + 6));
-
-				index32.at((size_t)(Nowi)) = Now;
-				index32.at((size_t)(Nowi + 1)) = Now + 1;
-				index32.at((size_t)(Nowi + 2)) = Now + 2;
-				index32.at((size_t)(Nowi + 3)) = Now + 3;
-				index32.at((size_t)(Nowi + 4)) = index32.at((size_t)(Nowi + 2));
-				index32.at((size_t)(Nowi + 5)) = index32.at((size_t)(Nowi + 1));
-
-				vert32.at(index32.at((size_t)(Nowi))).pos = Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z).get();
-				vert32.at(index32.at((size_t)(Nowi + 1))).pos = PosMax.get();
-				vert32.at(index32.at((size_t)(Nowi + 2))).pos = Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z).get();
-				vert32.at(index32.at((size_t)(Nowi + 3))).pos = Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z).get();
-				for (int i = 0; i < 4; i++) {
-					vert32.at((size_t)(Now + i)).norm = Normal.get();
-					vert32.at((size_t)(Now + i)).dif = color;
-					vert32.at((size_t)(Now + i)).spc = GetColorU8(255, 255, 255, 255);
-					vert32.at((size_t)(Now + i)).u = 0.0f;
-					vert32.at((size_t)(Now + i)).v = 0.0f;
-					vert32.at((size_t)(Now + i)).su = 0.0f;
-					vert32.at((size_t)(Now + i)).sv = 0.0f;
-				}
-			}
-
-			Normal = Vector3DX::down();
-			if (Vector3DX::Dot(PosCamVec, Normal) < 0.f && (!CheckFill || cell.GetCell(x, y - 1, z).selset == INVALID_ID)) {
-				int Now = (int)vert32.size();
-				int Nowi = (int)index32.size();
-				vert32.resize((size_t)(Now + 4));
-				index32.resize((size_t)(Nowi + 6));
-
-				index32.at((size_t)(Nowi)) = Now;
-				index32.at((size_t)(Nowi + 1)) = Now + 1;
-				index32.at((size_t)(Nowi + 2)) = Now + 2;
-				index32.at((size_t)(Nowi + 3)) = Now + 3;
-				index32.at((size_t)(Nowi + 4)) = index32.at((size_t)(Nowi + 2));
-				index32.at((size_t)(Nowi + 5)) = index32.at((size_t)(Nowi + 1));
-
-				vert32.at(index32.at((size_t)(Nowi))).pos = PosMin.get();
-				vert32.at(index32.at((size_t)(Nowi + 1))).pos = Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z).get();
-				vert32.at(index32.at((size_t)(Nowi + 2))).pos = Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z).get();
-				vert32.at(index32.at((size_t)(Nowi + 3))).pos = Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z).get();
-				for (int i = 0; i < 4; i++) {
-					vert32.at((size_t)(Now + i)).norm = Normal.get();
-					vert32.at((size_t)(Now + i)).dif = color;
-					vert32.at((size_t)(Now + i)).spc = GetColorU8(255, 255, 255, 255);
-					vert32.at((size_t)(Now + i)).u = 0.0f;
-					vert32.at((size_t)(Now + i)).v = 0.0f;
-					vert32.at((size_t)(Now + i)).su = 0.0f;
-					vert32.at((size_t)(Now + i)).sv = 0.0f;
-				}
-			}
-
-			/*
-			int NowMax = (int)vert32.size();
-			for (int i = Prev; i < NowMax; i++) {
-				vert32.at(i).spos.x = vert32.at(i).pos.x;
-				vert32.at(i).spos.y = vert32.at(i).pos.y;
-				vert32.at(i).spos.z = vert32.at(i).pos.z;
-				vert32.at(i).spos.x = 1.0f;
-
-				vert32.at(i).norm = Normal.get();
-				vert32.at(i).binorm = Normal.get();
-				vert32.at(i).tan = Normal.get();
-			}
-			//*/
+			GetPlane(
+				PosMin, Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z), Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z), Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z),
+				Vector3DX::down());
 		}
-		// 当たり判定カプセルの高さ
-#define PLAYER_HIT_HEIGHT			(1.6f * Scale_Rate)		
-		bool BackGroundClass::CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius) const noexcept
-		{
-			auto MoveVector = *EndPos - StartPos;
-			// プレイヤーの周囲にあるステージポリゴンを取得する( 検出する範囲は移動距離も考慮する )
-			std::vector<MV1_COLL_RESULT_POLY> kabes;// 壁ポリゴンと判断されたポリゴンの構造体のアドレスを保存しておく
+
+		bool		BackGroundClass::ColRayBox(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AABBMinPos, const Vector3DX& AABBMaxPos, Vector3DX* Normal, int* NormalNum) const noexcept {
+			Vector3DX Vec = (*EndPos - StartPos);
+			// 交差判定
+			float p[3]{}, d[3]{}, min[3]{}, max[3]{};
+			p[0] = StartPos.x;
+			p[1] = StartPos.y;
+			p[2] = StartPos.z;
+			d[0] = Vec.x;
+			d[1] = Vec.y;
+			d[2] = Vec.z;
+
+			min[0] = AABBMinPos.x;
+			min[1] = AABBMinPos.y;
+			min[2] = AABBMinPos.z;
+
+			max[0] = AABBMaxPos.x;
+			max[1] = AABBMaxPos.y;
+			max[2] = AABBMaxPos.z;
+
+			float t = -FLT_MAX;
+			float t_max = FLT_MAX;
+
+			for (int i = 0; i < 3; ++i) {
+				if (abs(d[i]) < FLT_EPSILON) {
+					if (p[i] < min[i] || p[i] > max[i])
+						return false; // 交差していない
+				}
+				else {
+					// スラブとの距離を算出
+					// t1が近スラブ、t2が遠スラブとの距離
+					float odd = 1.0f / d[i];
+					float t1 = (min[i] - p[i]) * odd;
+					float t2 = (max[i] - p[i]) * odd;
+					if (t1 > t2) {
+						float tmp = t1;
+						t1 = t2;
+						t2 = tmp;
+					}
+
+					if (t1 > t) {
+						t = t1;
+						//どの向き？
+						switch (i) {
+						case 0:
+							if (Normal) {
+								*Normal = Vec.x > 0.f ? Vector3DX::left() : Vector3DX::right();
+							}
+							if (NormalNum) {
+								*NormalNum = Vec.x > 0.f ? 0 : 1;
+							}
+							break;
+						case 1:
+							if (Normal) {
+								*Normal = Vec.y > 0.f ? Vector3DX::down() : Vector3DX::up();
+							}
+							if (NormalNum) {
+								*NormalNum = Vec.y > 0.f ? 2 : 3;
+							}
+							break;
+						case 2:
+							if (Normal) {
+								*Normal = Vec.z > 0.f ? Vector3DX::back() : Vector3DX::forward();
+							}
+							if (NormalNum) {
+								*NormalNum = Vec.z > 0.f ? 4 : 5;
+							}
+							break;
+						default:
+							break;
+						}
+					}
+					if (t2 < t_max) {
+						t_max = t2;
+					}
+
+					// スラブ交差チェック
+					if (t >= t_max) {
+						return false;
+					}
+				}
+			}
+
+			// 交差している
+			if (EndPos) {
+				*EndPos = StartPos + Vec * t;
+			}
+			return true;
+		}
+		bool		BackGroundClass::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
 			auto& cell = m_CellxN.back();
 			Vector3DX Start = StartPos / (CellScale * cell.scaleRate);
 			Vector3DX End = StartPos / (CellScale * cell.scaleRate);
 
-			for (int xm = -2; xm <= 2; xm++) {
-				for (int ym = 2; ym <= 2; ym++) {
-					for (int zm = -2; zm <= 2; zm++) {
-						int x1 = (int)(Start.x + xm);
-						int y1 = (int)(Start.y + ym);
-						int z1 = (int)(Start.z + zm);
-						int x2 = (int)(End.x + xm);
-						int y2 = (int)(End.y + ym);
-						int z2 = (int)(End.z + zm);
-						Bresenham3D(x1, y1, z1, x2, y2, z2, [&](int x, int y, int z) {
+			for (int xm = -1; xm <= 1; xm++) {
+				for (int ym = -1; ym <= 1; ym++) {
+					for (int zm = -1; zm <= 1; zm++) {
+						bool isHit = false;
+						Bresenham3D(static_cast<int>(Start.x + xm), static_cast<int>(Start.y + ym), static_cast<int>(Start.z + zm), static_cast<int>(End.x + xm), static_cast<int>(End.y + ym), static_cast<int>(End.z + zm), [&](int x, int y, int z) {
 							if (
 								((x <= -cell.Xall / 2) || (cell.Xall / 2 < x)) ||
 								((y <= -cell.Yall / 2) || (cell.Yall / 2 < y)) ||
@@ -236,8 +299,46 @@ namespace FPS_n2 {
 							const auto& Cell = cell.GetCell(x, y, z);
 							if (Cell.selset == INVALID_ID) { return false; }
 							if (Cell.inRock) { return false; }
-							Vector3DX MinPos = (Vector3DX::vget((float)x, (float)y, (float)z) + (Vector3DX::one() * -0.1f)) * (CellScale * cell.scaleRate);
-							Vector3DX MaxPos = (Vector3DX::vget((float)x, (float)y, (float)z) + (Vector3DX::one() * 1.1f)) * (CellScale * cell.scaleRate);
+							Vector3DX MinPos = (Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)) + (Vector3DX::one() * 0.0f)) * (CellScale * cell.scaleRate);
+							Vector3DX MaxPos = (Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)) + (Vector3DX::one() * 1.0f)) * (CellScale * cell.scaleRate);
+							if (ColRayBox(StartPos, EndPos, MinPos, MaxPos, Normal)) {
+								isHit = true;
+								return true;
+							}
+							return false;
+							});
+						if (isHit) { return true; }
+					}
+				}
+			}
+			return false;
+		}
+
+		bool		BackGroundClass::CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept {
+			auto MoveVector = *EndPos - StartPos;
+			// プレイヤーの周囲にあるステージポリゴンを取得する( 検出する範囲は移動距離も考慮する )
+			std::vector<MV1_COLL_RESULT_POLY> kabes;// 壁ポリゴンと判断されたポリゴンの構造体のアドレスを保存しておく
+			auto& cell = m_CellxN.back();
+			Vector3DX Start = StartPos / (CellScale * cell.scaleRate);
+			Vector3DX End = StartPos / (CellScale * cell.scaleRate);
+
+			for (int xm = -2; xm <= 2; xm++) {
+				for (int ym = 2; ym <= 2; ym++) {
+					for (int zm = -2; zm <= 2; zm++) {
+						Bresenham3D(static_cast<int>(Start.x + xm), static_cast<int>(Start.y + ym), static_cast<int>(Start.z + zm), static_cast<int>(End.x + xm), static_cast<int>(End.y + ym), static_cast<int>(End.z + zm), [&](int x, int y, int z) {
+							if (
+								((x <= -cell.Xall / 2) || (cell.Xall / 2 < x)) ||
+								((y <= -cell.Yall / 2) || (cell.Yall / 2 < y)) ||
+								((z <= -cell.Zall / 2) || (cell.Zall / 2 < z))
+								) {
+								return false;
+							}
+
+							const auto& Cell = cell.GetCell(x, y, z);
+							if (Cell.selset == INVALID_ID) { return false; }
+							if (Cell.inRock) { return false; }
+							Vector3DX MinPos = (Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)) + (Vector3DX::one() * -0.1f)) * (CellScale * cell.scaleRate);
+							Vector3DX MaxPos = (Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)) + (Vector3DX::one() * 1.1f)) * (CellScale * cell.scaleRate);
 
 							MV1_COLL_RESULT_POLY tmp{};
 							// Left
@@ -294,7 +395,8 @@ namespace FPS_n2 {
 			if (kabes.size() > 0) {
 				HitFlag = false;
 				for (auto& kabe : kabes) {
-					if (GetHitCapsuleToTriangle(*EndPos + Vector3DX::up() * (Radius + 0.1f), *EndPos + Vector3DX::up() * (PLAYER_HIT_HEIGHT), Radius, kabe.Position[0], kabe.Position[1], kabe.Position[2])) {				// ポリゴンとプレイヤーが当たっていなかったら次のカウントへ
+					// ポリゴンとプレイヤーが当たっていなかったら次のカウントへ
+					if (GetHitCapsuleToTriangle(*EndPos + AddCapsuleMin, *EndPos + AddCapsuleMax, Radius, kabe.Position[0], kabe.Position[1], kabe.Position[2])) {
 						HitFlag = true;// ここにきたらポリゴンとプレイヤーが当たっているということなので、ポリゴンに当たったフラグを立てる
 						if (MoveVector.magnitude() >= 0.001f) {	// x軸かz軸方向に 0.001f 以上移動した場合は移動したと判定
 							// 壁に当たったら壁に遮られない移動成分分だけ移動する
@@ -302,7 +404,7 @@ namespace FPS_n2 {
 							//EndPos->y(StartPos.y);
 							bool j = false;
 							for (auto& kabe2 : kabes) {
-								if (GetHitCapsuleToTriangle(*EndPos + Vector3DX::up() * (Radius + 0.1f), *EndPos + Vector3DX::up() * (PLAYER_HIT_HEIGHT), Radius, kabe2.Position[0], kabe2.Position[1], kabe2.Position[2])) {
+								if (GetHitCapsuleToTriangle(*EndPos + AddCapsuleMin, *EndPos + AddCapsuleMax, Radius, kabe2.Position[0], kabe2.Position[1], kabe2.Position[2])) {
 									j = true;
 									break;// 当たっていたらループから抜ける
 								}
@@ -321,12 +423,13 @@ namespace FPS_n2 {
 					for (int k = 0; k < 16; ++k) {			// 壁からの押し出し処理を試みる最大数だけ繰り返し
 						bool HitF = false;
 						for (auto& kabe : kabes) {
-							if (GetHitCapsuleToTriangle(*EndPos + Vector3DX::up() * (Radius + 0.1f), *EndPos + Vector3DX::up() * (PLAYER_HIT_HEIGHT), Radius, kabe.Position[0], kabe.Position[1], kabe.Position[2])) {// プレイヤーと当たっているかを判定
+							// プレイヤーと当たっているかを判定
+							if (GetHitCapsuleToTriangle(*EndPos + AddCapsuleMin, *EndPos + AddCapsuleMax, Radius, kabe.Position[0], kabe.Position[1], kabe.Position[2])) {
 								*EndPos += Vector3DX(kabe.Normal) * (0.015f * Scale_Rate);					// 当たっていたら規定距離分プレイヤーを壁の法線方向に移動させる
-								//EndPos->y(StartPos.y);
 								bool j = false;
 								for (auto& kabe2 : kabes) {
-									if (GetHitCapsuleToTriangle(*EndPos + Vector3DX::up() * (Radius + 0.1f), *EndPos + Vector3DX::up() * (PLAYER_HIT_HEIGHT), Radius, kabe2.Position[0], kabe2.Position[1], kabe2.Position[2])) {// 当たっていたらループを抜ける
+									// 当たっていたらループを抜ける
+									if (GetHitCapsuleToTriangle(*EndPos + AddCapsuleMin, *EndPos + AddCapsuleMax, Radius, kabe2.Position[0], kabe2.Position[1], kabe2.Position[2])) {
 										j = true;
 										break;
 									}
@@ -345,6 +448,103 @@ namespace FPS_n2 {
 				kabes.clear();
 			}
 			return HitFlag;
+		}
+
+
+		void		BackGroundClass::LoadCellsFile() noexcept {
+			std::ifstream fin;
+			fin.open("data/Map.txt", std::ios::in | std::ios::binary);
+			fin.read((char*)&m_CellBase.Xall, sizeof(m_CellBase.Xall));
+			fin.read((char*)&m_CellBase.Yall, sizeof(m_CellBase.Yall));
+			fin.read((char*)&m_CellBase.Zall, sizeof(m_CellBase.Zall));
+			m_CellBase.scaleRate = 1;
+			m_CellBase.m_Cell.resize((size_t)(m_CellBase.Xall * m_CellBase.Yall * m_CellBase.Zall));
+			fin.read((char*)&m_CellBase.m_Cell.at(0), sizeof(m_CellBase.m_Cell.at(0)) * m_CellBase.m_Cell.size());
+			fin.close();
+		}
+		void		BackGroundClass::SaveCellsFile() noexcept {
+			std::ofstream fout;
+			fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
+			fout.write((char*)&m_CellBase.Xall, sizeof(m_CellBase.Xall));
+			fout.write((char*)&m_CellBase.Yall, sizeof(m_CellBase.Yall));
+			fout.write((char*)&m_CellBase.Zall, sizeof(m_CellBase.Zall));
+			fout.write((char*)&m_CellBase.m_Cell.at(0), sizeof(m_CellBase.m_Cell.at(0)) * m_CellBase.m_Cell.size());
+			fout.close();  //ファイルを閉じる
+		}
+
+		//簡略版を制作
+		void		BackGroundClass::MakeSimple() noexcept {
+			m_CellxN.clear();
+			m_CellxN.resize(total);
+			m_CellxN.back() = m_CellBase;//等倍なのでそのままコピー1
+			for (int sel = total - 1 - 1; sel >= 0; sel--) {
+				auto& cell = m_CellxN.at(sel);
+				auto& cell2 = m_CellxN.at((size_t)(sel + 1));
+
+				cell.scaleRate = (int8_t)pow(MulPer, total - 1 - sel);
+				cell.Xall = m_CellBase.Xall / cell.scaleRate;
+				cell.Yall = m_CellBase.Yall / cell.scaleRate;
+				cell.Zall = m_CellBase.Zall / cell.scaleRate;
+				cell.m_Cell.resize((size_t)(cell.Xall * cell.Yall * cell.Zall));
+
+				for (int xm = -cell.Xall / 2; xm < cell.Xall / 2; xm++) {
+					for (int ym = -cell.Yall / 2; ym < cell.Yall / 2; ym++) {
+						for (int zm = -cell.Zall / 2; zm < cell.Zall / 2; zm++) {
+							int FillCount = 0;
+							int FillAll = 0;
+
+
+							int xMaxmin = std::max(xm * MulPer, -cell2.Xall / 2);
+							int xMaxmax = std::min((xm + 1) * MulPer, cell2.Xall / 2);
+							int yMaxmin = std::max(ym * MulPer, -cell2.Yall / 2);
+							int yMaxmax = std::min((ym + 1) * MulPer, cell2.Yall / 2);
+							int zMaxmin = std::max(zm * MulPer, -cell2.Zall / 2);
+							int zMaxmax = std::min((zm + 1) * MulPer, cell2.Zall / 2);
+
+							for (int x = xMaxmin; x < xMaxmax; x++) {
+								for (int y = yMaxmin; y < yMaxmax; y++) {
+									for (int z = zMaxmin; z < zMaxmax; z++) {
+										const auto& Cell = cell2.GetCell(x, y, z);
+										FillAll++;
+										if (Cell.selset == INVALID_ID) { continue; }
+										FillCount++;
+									}
+								}
+							}
+							cell.SetCell(xm, ym, zm).selset = ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f))) ? 0 : INVALID_ID;
+						}
+					}
+				}
+			}
+		}
+		//遮蔽検索
+		void		BackGroundClass::CalcOcclusion() noexcept {
+			for (auto& cell : m_CellxN) {
+				for (int x = -cell.Xall / 2; x < cell.Xall / 2; x++) {
+					for (int y = -cell.Yall / 2; y < cell.Yall / 2; y++) {
+						for (int z = -cell.Zall / 2; z < cell.Zall / 2; z++) {
+							if (cell.GetCell(x, y, z).selset == INVALID_ID) { continue; }
+							//端は全て隠す
+							if (
+								((x == -cell.Xall / 2) || (x == cell.Xall / 2 - 1)) ||
+								((y == -cell.Yall / 2) || (y == cell.Yall / 2 - 1)) ||
+								((z == -cell.Zall / 2) || (z == cell.Zall / 2 - 1))
+								) {
+								cell.SetCell(x, y, z).inRock = true;
+								continue;
+							}
+							cell.SetCell(x, y, z).inRock = (
+								(cell.GetCell(x + 1, y, z).selset != INVALID_ID) &&
+								(cell.GetCell(x - 1, y, z).selset != INVALID_ID) &&
+								(cell.GetCell(x, y + 1, z).selset != INVALID_ID) &&
+								(cell.GetCell(x, y - 1, z).selset != INVALID_ID) &&
+								(cell.GetCell(x, y, z + 1).selset != INVALID_ID) &&
+								(cell.GetCell(x, y, z - 1).selset != INVALID_ID)
+								);
+						}
+					}
+				}
+			}
 		}
 	}
 }
