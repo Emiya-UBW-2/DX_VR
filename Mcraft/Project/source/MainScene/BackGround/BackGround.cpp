@@ -110,7 +110,6 @@ namespace FPS_n2 {
 					m_index32Num += 6;
 					if (m_vert32Num > m_vert32.size()) {
 						m_vert32.resize(m_vert32Num);
-						m_vert32S.resize(m_vert32Num);
 					}
 					if (m_index32Num > m_index32.size()) {
 						m_index32.resize(m_index32Num);
@@ -123,44 +122,71 @@ namespace FPS_n2 {
 					m_index32.at(Nowi + 4) = (uint32_t)(Now + 2);
 					m_index32.at(Nowi + 5) = (uint32_t)(Now + 1);
 
+					float Xofs = 1.0f- Normal.y;
+					float uMin = (0.f + Xofs) / 8.f;
+					float vMin = 0.f / 8.f;
+					float uMax = uMin + 1.f / 8.f;
+					float vMax = vMin + 1.f / 8.f;
+
 					m_vert32.at(Now).pos = Pos1.get();
-					m_vert32.at(Now).u = 1.0f;
-					m_vert32.at(Now).v = 0.0f;
+					m_vert32.at(Now).u = uMax;
+					m_vert32.at(Now).v = vMin;
 					m_vert32.at(Now + 1).pos = Pos2.get();
-					m_vert32.at(Now + 1).u = 0.0f;
-					m_vert32.at(Now + 1).v = 0.0f;
+					m_vert32.at(Now + 1).u = uMin;
+					m_vert32.at(Now + 1).v = vMin;
 					m_vert32.at(Now + 2).pos = Pos3.get();
-					m_vert32.at(Now + 2).u = 1.0f;
-					m_vert32.at(Now + 2).v = 1.0f;
+					m_vert32.at(Now + 2).u = uMax;
+					m_vert32.at(Now + 2).v = vMax;
 					m_vert32.at(Now + 3).pos = Pos4.get();
-					m_vert32.at(Now + 3).u = 0.0f;
-					m_vert32.at(Now + 3).v = 1.0f;
+					m_vert32.at(Now + 3).u = uMin;
+					m_vert32.at(Now + 3).v = vMax;
 					for (size_t i = 0; i < 4; i++) {
 						m_vert32.at(Now + i).norm = Normal.get();
 						m_vert32.at(Now + i).dif = DifColor;
 						m_vert32.at(Now + i).spc = SpcColor;
 						m_vert32.at(Now + i).su = m_vert32.at(Now + i).u;
 						m_vert32.at(Now + i).sv = m_vert32.at(Now + i).v;
-						//*
+					}
 
-						m_vert32S.at(Now + i).pos = m_vert32.at(Now + i).pos;
-						m_vert32S.at(Now + i).u = m_vert32.at(Now + i).u;
-						m_vert32S.at(Now + i).v = m_vert32.at(Now + i).v;
-						m_vert32S.at(Now + i).norm = Normal.get();
-						m_vert32S.at(Now + i).dif = DifColor;
-						m_vert32S.at(Now + i).spc = SpcColor;
-						m_vert32S.at(Now + i).su = m_vert32.at(Now + i).u;
-						m_vert32S.at(Now + i).sv = m_vert32.at(Now + i).v;
+					auto* DrawParts = DXDraw::Instance();
+					auto* OptionParts = OPTION::Instance();
+					const Vector3DX CamPos = DrawParts->GetMainCamera().GetCamPos();
+					const Vector3DX CamVec = (DrawParts->GetMainCamera().GetCamVec() - CamPos).normalized();
 
+					int MaxRate = 100;
+					switch (OptionParts->GetParamInt(EnumSaveParam::ObjLevel)) {
+					case 0:
+					case 1:
+					case 2:
+						MaxRate = 1;
+						break;
+					case 3:
+						MaxRate = MulPer;
+						break;
+					default:
+						break;
+					};
 
-						m_vert32S.at(Now + i).spos.x = m_vert32.at(Now + i).pos.x;
-						m_vert32S.at(Now + i).spos.y = m_vert32.at(Now + i).pos.y;
-						m_vert32S.at(Now + i).spos.z = m_vert32.at(Now + i).pos.z;
-						m_vert32S.at(Now + i).spos.x = 1.0f;
-
-						m_vert32S.at(Now + i).binorm = Normal.get();
-						m_vert32S.at(Now + i).tan = Normal.get();
-						//*/
+					if (cell.scaleRate <= MaxRate) {
+						size_t NowS = m_vert32SNum;
+						size_t NowSi = m_index32SNum;
+						m_vert32SNum += 4;
+						m_index32SNum += 6;
+						if (m_vert32SNum > m_vert32S.size()) {
+							m_vert32S.resize(m_vert32SNum);
+						}
+						if (m_index32SNum > m_index32S.size()) {
+							m_index32S.resize(m_index32SNum);
+						}
+						for (size_t i = 0; i < 4; i++) {
+							m_vert32S.at(NowS + i).pos = m_vert32.at(Now + i).pos;
+						}
+						m_index32S.at(NowSi) = (uint32_t)(NowS);
+						m_index32S.at(NowSi + 1) = (uint32_t)(NowS + 1);
+						m_index32S.at(NowSi + 2) = (uint32_t)(NowS + 2);
+						m_index32S.at(NowSi + 3) = (uint32_t)(NowS + 3);
+						m_index32S.at(NowSi + 4) = (uint32_t)(NowS + 2);
+						m_index32S.at(NowSi + 5) = (uint32_t)(NowS + 1);
 					}
 				}
 				};

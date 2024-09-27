@@ -98,11 +98,14 @@ namespace FPS_n2 {
 
 			//頂点データ
 			std::vector<VERTEX3D>			m_vert32;
-			std::vector<VERTEX3DSHADER>		m_vert32S;
 			size_t						m_vert32Num{ 0 };
+			std::vector<VERTEX3DSHADER>		m_vert32S;
+			size_t						m_vert32SNum{ 0 };
 			//頂点インデックスデータ
 			std::vector<uint32_t>		m_index32;
 			size_t						m_index32Num{ 0 };
+			std::vector<uint32_t>		m_index32S;
+			size_t						m_index32SNum{ 0 };
 
 			struct CellData {
 				int8_t selset = INVALID_ID;
@@ -125,10 +128,10 @@ namespace FPS_n2 {
 
 			CellsData m_CellBase;
 
-			const int total = 3;
+			const int total = 4;
 			const int MulPer = 3;
 			const float CellScale = Scale_Rate / 2.f / 2.f;
-			const float Max = 30.f;
+			const float Max = 25.f;
 
 			std::vector<CellsData> m_CellxN;
 
@@ -215,11 +218,31 @@ namespace FPS_n2 {
 			void			Execute(void) noexcept {
 				m_vert32Num = 0;
 				m_index32Num = 0;
+				m_vert32SNum = 0;
+				m_index32SNum = 0;
 
 				auto* DrawParts = DXDraw::Instance();
+				auto* OptionParts = OPTION::Instance();
 				const Vector3DX CamPos = DrawParts->GetMainCamera().GetCamPos();
 				const Vector3DX CamVec = (DrawParts->GetMainCamera().GetCamVec() - CamPos).normalized();
-				for (auto& cell : m_CellxN) {
+
+				int MaxRate = 100;
+				switch (OptionParts->GetParamInt(EnumSaveParam::ObjLevel)) {
+				case 0:
+				case 1:
+					MaxRate = MulPer * MulPer;
+					break;
+				case 2:
+					MaxRate = MulPer * MulPer * MulPer;
+					break;
+				case 3:
+					MaxRate = MulPer * MulPer * MulPer * MulPer;
+					break;
+				default:
+					break;
+				};
+				for (auto & cell : m_CellxN) {
+					if (MaxRate < cell.scaleRate) { continue; }
 					Vector3DX center = CamPos / (CellScale * cell.scaleRate);
 
 					int xMaxmin = std::max(static_cast<int>(center.x - Max), -cell.Xall / 2);
@@ -291,6 +314,7 @@ namespace FPS_n2 {
 							}
 						}
 					}
+
 				}
 			}
 			//
@@ -300,9 +324,9 @@ namespace FPS_n2 {
 				SetUseLighting(TRUE);
 			}
 			void			Shadow_Draw_Rigid(void) noexcept {
-				if (m_vert32Num > 0 && m_index32Num > 0) {
+				if (m_vert32SNum > 0 && m_index32SNum > 0) {
 					SetUseTextureToShader(0, m_tex.get());
-					DrawPolygon32bitIndexed3DToShader(m_vert32S.data(), static_cast<int>(m_vert32Num), m_index32.data(), static_cast<int>(m_index32Num / 3));
+					DrawPolygon32bitIndexed3DToShader(m_vert32S.data(), static_cast<int>(m_vert32SNum), m_index32S.data(), static_cast<int>(m_index32SNum / 3));
 					SetUseTextureToShader(0, INVALID_ID);
 				}
 			}
