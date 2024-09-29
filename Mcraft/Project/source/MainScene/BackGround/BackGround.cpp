@@ -122,7 +122,7 @@ namespace FPS_n2 {
 					m_index32.at(Nowi + 4) = (uint32_t)(Now + 2);
 					m_index32.at(Nowi + 5) = (uint32_t)(Now + 1);
 
-					float Xofs = 1.0f- Normal.y;
+					float Xofs = 1.0f - Normal.y;
 					float uMin = (0.f + Xofs) / 8.f;
 					float vMin = 0.f / 8.f;
 					float uMax = uMin + 1.f / 8.f;
@@ -147,47 +147,77 @@ namespace FPS_n2 {
 						m_vert32.at(Now + i).su = m_vert32.at(Now + i).u;
 						m_vert32.at(Now + i).sv = m_vert32.at(Now + i).v;
 					}
+				}
+				};
+			// 頂点データの作成
+			GetPlane(
+				Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z), Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z), PosMin, Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z),
+				Vector3DX::back());
 
-					auto* DrawParts = DXDraw::Instance();
-					auto* OptionParts = OPTION::Instance();
-					const Vector3DX CamPos = DrawParts->GetMainCamera().GetCamPos();
-					const Vector3DX CamVec = (DrawParts->GetMainCamera().GetCamVec() - CamPos).normalized();
+			GetPlane(
+				Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z), Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z), Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z), PosMax,
+				Vector3DX::forward());
 
-					int MaxRate = 100;
-					switch (OptionParts->GetParamInt(EnumSaveParam::ObjLevel)) {
-					case 0:
-					case 1:
-					case 2:
-						MaxRate = 1;
-						break;
-					case 3:
-						MaxRate = MulPer;
-						break;
-					default:
-						break;
-					};
+			GetPlane(
+				Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z), Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z), Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z), PosMin,
+				Vector3DX::left());
 
-					if (cell.scaleRate <= MaxRate) {
-						size_t NowS = m_vert32SNum;
-						size_t NowSi = m_index32SNum;
-						m_vert32SNum += 4;
-						m_index32SNum += 6;
-						if (m_vert32SNum > m_vert32S.size()) {
-							m_vert32S.resize(m_vert32SNum);
-						}
-						if (m_index32SNum > m_index32S.size()) {
-							m_index32S.resize(m_index32SNum);
-						}
-						for (size_t i = 0; i < 4; i++) {
-							m_vert32S.at(NowS + i).pos = m_vert32.at(Now + i).pos;
-						}
-						m_index32S.at(NowSi) = (uint32_t)(NowS);
-						m_index32S.at(NowSi + 1) = (uint32_t)(NowS + 1);
-						m_index32S.at(NowSi + 2) = (uint32_t)(NowS + 2);
-						m_index32S.at(NowSi + 3) = (uint32_t)(NowS + 3);
-						m_index32S.at(NowSi + 4) = (uint32_t)(NowS + 2);
-						m_index32S.at(NowSi + 5) = (uint32_t)(NowS + 1);
+			GetPlane(
+				Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z), PosMax, Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z), Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z),
+				Vector3DX::right());
+
+			GetPlane(
+				Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z), PosMax, Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z), Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z),
+				Vector3DX::up());
+
+			GetPlane(
+				PosMin, Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z), Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z), Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z),
+				Vector3DX::down());
+		}
+
+		void BackGroundClass::AddShadowCube(const CellsData& cell, int x, int y, int z, bool CheckFill, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept
+		{
+			auto* DrawParts = DXDraw::Instance();
+			Vector3DX Pos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
+			Vector3DX PosMin = Pos * (CellScale * cell.scaleRate);
+			Vector3DX PosMid = (Pos + Vector3DX::one() * 0.5f) * (CellScale * cell.scaleRate);
+			Vector3DX PosMax = (Pos + Vector3DX::one()) * (CellScale * cell.scaleRate);
+
+			auto GetPlane = [&](const Vector3DX& Pos1, const Vector3DX& Pos2, const Vector3DX& Pos3, const Vector3DX& Pos4, const Vector3DX& Normal) {
+				if (cell.GetCell(x + static_cast<int>(Normal.x), y + static_cast<int>(Normal.y), z + static_cast<int>(Normal.z)).selset == INVALID_ID) {
+					size_t NowS = m_vert32SNum;
+					size_t NowSi = m_index32SNum;
+					m_vert32SNum += 4;
+					m_index32SNum += 6;
+					if (m_vert32SNum > m_vert32S.size()) {
+						m_vert32S.resize(m_vert32SNum);
+						m_vert32SB.resize(m_vert32SNum);
 					}
+					if (m_index32SNum > m_index32S.size()) {
+						m_index32S.resize(m_index32SNum);
+					}
+
+					m_vert32S.at(NowS).pos = Pos1.get();
+					m_vert32S.at(NowS + 1).pos = Pos2.get();
+					m_vert32S.at(NowS + 2).pos = Pos3.get();
+					m_vert32S.at(NowS + 3).pos = Pos4.get();
+
+					m_vert32SB.at(NowS).pos = Pos1.get();
+					m_vert32SB.at(NowS + 1).pos = Pos2.get();
+					m_vert32SB.at(NowS + 2).pos = Pos3.get();
+					m_vert32SB.at(NowS + 3).pos = Pos4.get();
+					for (size_t i = 0; i < 4; i++) {
+						m_vert32SB.at(NowS + i).norm = Normal.get();
+						m_vert32SB.at(NowS + i).dif = DifColor;
+						m_vert32SB.at(NowS + i).spc = SpcColor;
+					}
+
+					m_index32S.at(NowSi) = (uint32_t)(NowS);
+					m_index32S.at(NowSi + 1) = (uint32_t)(NowS + 1);
+					m_index32S.at(NowSi + 2) = (uint32_t)(NowS + 2);
+					m_index32S.at(NowSi + 3) = (uint32_t)(NowS + 3);
+					m_index32S.at(NowSi + 4) = (uint32_t)(NowS + 2);
+					m_index32S.at(NowSi + 5) = (uint32_t)(NowS + 1);
 				}
 				};
 			// 頂点データの作成
@@ -315,9 +345,9 @@ namespace FPS_n2 {
 						bool isHit = false;
 						Bresenham3D(static_cast<int>(Start.x + xm), static_cast<int>(Start.y + ym), static_cast<int>(Start.z + zm), static_cast<int>(End.x + xm), static_cast<int>(End.y + ym), static_cast<int>(End.z + zm), [&](int x, int y, int z) {
 							if (
-								((x <= -cell.Xall / 2) || (cell.Xall / 2 < x)) ||
-								((y <= -cell.Yall / 2) || (cell.Yall / 2 < y)) ||
-								((z <= -cell.Zall / 2) || (cell.Zall / 2 < z))
+								((x <= -cell.Xall / 2) || (cell.Xall / 2 - 1 < x)) ||
+								((y <= -cell.Yall / 2) || (cell.Yall / 2 - 1 < y)) ||
+								((z <= -cell.Zall / 2) || (cell.Zall / 2 - 1 < z))
 								) {
 								return false;
 							}
@@ -353,9 +383,9 @@ namespace FPS_n2 {
 					for (int zm = -2; zm <= 2; zm++) {
 						Bresenham3D(static_cast<int>(Start.x + xm), static_cast<int>(Start.y + ym), static_cast<int>(Start.z + zm), static_cast<int>(End.x + xm), static_cast<int>(End.y + ym), static_cast<int>(End.z + zm), [&](int x, int y, int z) {
 							if (
-								((x <= -cell.Xall / 2) || (cell.Xall / 2 < x)) ||
-								((y <= -cell.Yall / 2) || (cell.Yall / 2 < y)) ||
-								((z <= -cell.Zall / 2) || (cell.Zall / 2 < z))
+								((x <= -cell.Xall / 2) || (cell.Xall / 2 - 1 < x)) ||
+								((y <= -cell.Yall / 2) || (cell.Yall / 2 - 1 < y)) ||
+								((z <= -cell.Zall / 2) || (cell.Zall / 2 - 1 < z))
 								) {
 								return false;
 							}
@@ -480,37 +510,34 @@ namespace FPS_n2 {
 		void		BackGroundClass::LoadCellsFile() noexcept {
 			std::ifstream fin;
 			fin.open("data/Map.txt", std::ios::in | std::ios::binary);
-			fin.read((char*)&m_CellBase.Xall, sizeof(m_CellBase.Xall));
-			fin.read((char*)&m_CellBase.Yall, sizeof(m_CellBase.Yall));
-			fin.read((char*)&m_CellBase.Zall, sizeof(m_CellBase.Zall));
-			m_CellBase.scaleRate = 1;
-			m_CellBase.m_Cell.resize((size_t)(m_CellBase.Xall * m_CellBase.Yall * m_CellBase.Zall));
-			fin.read((char*)&m_CellBase.m_Cell.at(0), sizeof(m_CellBase.m_Cell.at(0)) * m_CellBase.m_Cell.size());
+			fin.read((char*)&m_CellxN.back().Xall, sizeof(m_CellxN.back().Xall));
+			fin.read((char*)&m_CellxN.back().Yall, sizeof(m_CellxN.back().Yall));
+			fin.read((char*)&m_CellxN.back().Zall, sizeof(m_CellxN.back().Zall));
+			m_CellxN.back().scaleRate = 1;
+			m_CellxN.back().m_Cell.resize((size_t)(m_CellxN.back().Xall * m_CellxN.back().Yall * m_CellxN.back().Zall));
+			fin.read((char*)&m_CellxN.back().m_Cell.at(0), sizeof(m_CellxN.back().m_Cell.at(0)) * m_CellxN.back().m_Cell.size());
 			fin.close();
 		}
 		void		BackGroundClass::SaveCellsFile() noexcept {
 			std::ofstream fout;
 			fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
-			fout.write((char*)&m_CellBase.Xall, sizeof(m_CellBase.Xall));
-			fout.write((char*)&m_CellBase.Yall, sizeof(m_CellBase.Yall));
-			fout.write((char*)&m_CellBase.Zall, sizeof(m_CellBase.Zall));
-			fout.write((char*)&m_CellBase.m_Cell.at(0), sizeof(m_CellBase.m_Cell.at(0)) * m_CellBase.m_Cell.size());
+			fout.write((char*)&m_CellxN.back().Xall, sizeof(m_CellxN.back().Xall));
+			fout.write((char*)&m_CellxN.back().Yall, sizeof(m_CellxN.back().Yall));
+			fout.write((char*)&m_CellxN.back().Zall, sizeof(m_CellxN.back().Zall));
+			fout.write((char*)&m_CellxN.back().m_Cell.at(0), sizeof(m_CellxN.back().m_Cell.at(0)) * m_CellxN.back().m_Cell.size());
 			fout.close();  //ファイルを閉じる
 		}
 
 		//簡略版を制作
 		void		BackGroundClass::MakeSimple() noexcept {
-			m_CellxN.clear();
-			m_CellxN.resize(total);
-			m_CellxN.back() = m_CellBase;//等倍なのでそのままコピー1
 			for (int sel = total - 1 - 1; sel >= 0; sel--) {
 				auto& cell = m_CellxN.at(sel);
 				auto& cell2 = m_CellxN.at((size_t)(sel + 1));
 
 				cell.scaleRate = (int8_t)pow(MulPer, total - 1 - sel);
-				cell.Xall = m_CellBase.Xall / cell.scaleRate;
-				cell.Yall = m_CellBase.Yall / cell.scaleRate;
-				cell.Zall = m_CellBase.Zall / cell.scaleRate;
+				cell.Xall = m_CellxN.back().Xall / cell.scaleRate;
+				cell.Yall = m_CellxN.back().Yall / cell.scaleRate;
+				cell.Zall = m_CellxN.back().Zall / cell.scaleRate;
 				cell.m_Cell.resize((size_t)(cell.Xall * cell.Yall * cell.Zall));
 
 				for (int xm = -cell.Xall / 2; xm < cell.Xall / 2; xm++) {
@@ -570,6 +597,89 @@ namespace FPS_n2 {
 						}
 					}
 				}
+			}
+		}
+		//
+		void BackGroundClass::SetBlick(int x, int y, int z, int8_t sel) noexcept {
+			if (
+				((x < -m_CellxN.back().Xall / 2) || (x > m_CellxN.back().Xall / 2 - 1)) ||
+				((y < -m_CellxN.back().Yall / 2) || (y > m_CellxN.back().Yall / 2 - 1)) ||
+				((z < -m_CellxN.back().Zall / 2) || (z > m_CellxN.back().Zall / 2 - 1))
+				) {
+				return;
+			}
+			m_CellxN.back().SetCell(x, y, z).selset = sel;
+			//簡易版を更新
+			for (int i = total - 1 - 1; i >= 0; i--) {
+				auto& cell = m_CellxN.at(i);
+				auto& cell2 = m_CellxN.at((size_t)(i + 1));
+
+				int FillCount = 0;
+				int FillAll = 0;
+
+				int xm = x / cell.scaleRate;
+				int ym = y / cell.scaleRate;
+				int zm = z / cell.scaleRate;
+
+				int xMaxmin = std::max(xm * MulPer, -cell2.Xall / 2);
+				int xMaxmax = std::min((xm + 1) * MulPer, cell2.Xall / 2);
+				int yMaxmin = std::max(ym * MulPer, -cell2.Yall / 2);
+				int yMaxmax = std::min((ym + 1) * MulPer, cell2.Yall / 2);
+				int zMaxmin = std::max(zm * MulPer, -cell2.Zall / 2);
+				int zMaxmax = std::min((zm + 1) * MulPer, cell2.Zall / 2);
+
+				for (int xt = xMaxmin; xt < xMaxmax; xt++) {
+					for (int yt = yMaxmin; yt < yMaxmax; yt++) {
+						for (int zt = zMaxmin; zt < zMaxmax; zt++) {
+							const auto& Cell = cell2.GetCell(xt, yt, zt);
+							FillAll++;
+							if (Cell.selset == INVALID_ID) { continue; }
+							FillCount++;
+						}
+					}
+				}
+				cell.SetCell(xm, ym, zm).selset = ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f))) ? 0 : INVALID_ID;
+			}
+			for (auto& cell : m_CellxN) {
+				int xm = x / cell.scaleRate;
+				int ym = y / cell.scaleRate;
+				int zm = z / cell.scaleRate;
+				auto CheckCell = [&](int xp, int yp, int zp) {
+					if (
+						((xp < -cell.Xall / 2) || (xp > cell.Xall / 2 - 1)) ||
+						((yp < -cell.Yall / 2) || (yp > cell.Yall / 2 - 1)) ||
+						((zp < -cell.Zall / 2) || (zp > cell.Zall / 2 - 1))
+						) {
+						return;
+					}
+					if (
+						((xp == -cell.Xall / 2) || (xp == cell.Xall / 2 - 1)) ||
+						((yp == -cell.Yall / 2) || (yp == cell.Yall / 2 - 1)) ||
+						((zp == -cell.Zall / 2) || (zp == cell.Zall / 2 - 1))
+						) {
+						cell.SetCell(xp, yp, zp).inRock = true;
+						return;
+					}
+					if (cell.GetCell(xm, ym, zm).selset == INVALID_ID) {
+						cell.SetCell(xp, yp, zp).inRock = false;//周りは石になれない
+					}
+					else if(!cell.SetCell(xp, yp, zp).inRock){
+						cell.SetCell(xp, yp, zp).inRock = (
+							(cell.GetCell(xp + 1, yp, zp).selset != INVALID_ID) &&
+							(cell.GetCell(xp - 1, yp, zp).selset != INVALID_ID) &&
+							(cell.GetCell(xp, yp + 1, zp).selset != INVALID_ID) &&
+							(cell.GetCell(xp, yp - 1, zp).selset != INVALID_ID) &&
+							(cell.GetCell(xp, yp, zp + 1).selset != INVALID_ID) &&
+							(cell.GetCell(xp, yp, zp - 1).selset != INVALID_ID)
+							);
+					}
+					};
+				CheckCell(xm + 1, ym, zm);
+				CheckCell(xm - 1, ym, zm);
+				CheckCell(xm, ym + 1, zm);
+				CheckCell(xm, ym - 1, zm);
+				CheckCell(xm, ym, zm + 1);
+				CheckCell(xm, ym, zm - 1);
 			}
 		}
 	}

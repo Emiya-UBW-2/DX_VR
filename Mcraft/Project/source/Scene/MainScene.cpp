@@ -31,7 +31,7 @@ namespace FPS_n2 {
 			//
 			BattleResourceMngr->Set();
 
-			SetShadowScale(1.f);
+			SetShadowScale(2.f);
 			//
 			BackGround->Init();
 			//
@@ -404,7 +404,7 @@ namespace FPS_n2 {
 		}
 		void			MainGameScene::ShadowDraw_Sub(void) noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
-			BackGround->Draw();
+			BackGround->Shadow_Draw();
 			ObjectManager::Instance()->Draw_Shadow();
 		}
 		void			MainGameScene::CubeMap_Sub(void) noexcept {
@@ -414,7 +414,7 @@ namespace FPS_n2 {
 
 		void MainGameScene::SetShadowDraw_Rigid_Sub(void) noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
-			BackGround->Shadow_Draw_Rigid();
+			BackGround->SetShadow_Draw_Rigid();
 		}
 
 		void MainGameScene::SetShadowDraw_Sub(void) noexcept {
@@ -433,6 +433,34 @@ namespace FPS_n2 {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 			}
 			HitMark::Instance()->Update();
+
+			auto* Pad = PadControl::Instance();
+
+			Vector3DX CamPos = DrawParts->GetMainCamera().GetCamPos();
+			Vector3DX CamVec = (DrawParts->GetMainCamera().GetCamVec() - CamPos).normalized()*(2.f * Scale_Rate);
+			const float CellScale = Scale_Rate / 2.f / 2.f;
+
+			Vector3DX PutPos = (CamPos + CamVec) / CellScale;
+			int x = (int)PutPos.x, y = (int)PutPos.y, z = (int)PutPos.z;
+			//y = 1;
+			int xm = 3, ym = 3, zm = 3;
+			DrawCube3D((Vector3DX::vget((float)(x + 0), (float)(y + 0), (float)(z + 0)) * CellScale).get(), (Vector3DX::vget((float)((x + xm)), (float)((y + ym)), (float)((z + zm))) * CellScale).get(), GetColor(255, 255, 255), GetColor(255, 255, 255), FALSE);
+			for (int xp = 0; xp < xm; xp++) {
+				for (int yp = 0; yp < ym; yp++) {
+					for (int zp = 0; zp < zm; zp++) {
+						//DrawCube3D((Vector3DX::vget((float)(x + xp), (float)(y + yp), (float)(z + zp)) * CellScale).get(), (Vector3DX::vget((float)((x + xp) + 1), (float)((y + yp) + 1), (float)((z + zp) + 1)) * CellScale).get(), GetColor(255, 255, 255), GetColor(255, 255, 255), FALSE);
+						if (Pad->GetKey(PADS::SHOT).trigger()) {
+							BackGround->SetBlick((x + xp), (y + yp), (z + zp), 0);
+						}
+						if (Pad->GetKey(PADS::AIM).trigger()) {
+							BackGround->SetBlick((x + xp), (y + yp), (z + zp), INVALID_ID);
+						}
+					}
+				}
+			}
+			if (Pad->GetKey(PADS::JUMP).trigger()) {
+				BackGround->SaveCellsFile();
+			}
 		}
 		//UI•\Ž¦
 		void			MainGameScene::DrawUI_In_Sub(void) noexcept {

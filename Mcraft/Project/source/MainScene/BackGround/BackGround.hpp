@@ -99,6 +99,7 @@ namespace FPS_n2 {
 			//頂点データ
 			std::vector<VERTEX3D>			m_vert32;
 			size_t						m_vert32Num{ 0 };
+			std::vector<VERTEX3D>			m_vert32SB;
 			std::vector<VERTEX3DSHADER>		m_vert32S;
 			size_t						m_vert32SNum{ 0 };
 			//頂点インデックスデータ
@@ -126,8 +127,6 @@ namespace FPS_n2 {
 				}
 			};
 
-			CellsData m_CellBase;
-
 			const int total = 4;
 			const int MulPer = 3;
 			const float CellScale = Scale_Rate / 2.f / 2.f;
@@ -150,12 +149,13 @@ namespace FPS_n2 {
 			static void		Bresenham3D(const int x1, const int y1, const int z1, const int x2, const int y2, const int z2, const std::function<bool(int, int, int)>& OutPutLine) noexcept;
 
 			void			AddCube(const CellsData& cell, int x, int y, int z, bool CheckFill, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept;
+			void			AddShadowCube(const CellsData& cell, int x, int y, int z, bool CheckFill, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept;
 		public:
 			bool			ColRayBox(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AABBMinPos, const Vector3DX& AABBMaxPos, Vector3DX* Normal = nullptr, int* NormalNum = nullptr) const noexcept;
 			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
 		public:
 			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept;
-		private:
+		public:
 			void			LoadCellsFile() noexcept;
 			void			SaveCellsFile() noexcept;
 		private:
@@ -163,6 +163,8 @@ namespace FPS_n2 {
 			void			MakeSimple() noexcept;
 			//遮蔽検索
 			void			CalcOcclusion() noexcept;
+		public://
+			void			SetBlick(int x, int y, int z, int8_t sel) noexcept;
 		public://
 			void			Load(void) noexcept {
 				MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
@@ -179,26 +181,61 @@ namespace FPS_n2 {
 					this->m_ObjSky.SetMaterialDifColor(i, GetColorF(0.7f, 0.7f, 0.7f, 1.f));
 					this->m_ObjSky.SetMaterialAmbColor(i, GetColorF(0.f, 0.f, 0.f, 1.f));
 				}
+				m_CellxN.clear();
+				m_CellxN.resize(total);
 				if (true) {
 					{
 						PerlinNoise ns(GetRand(100));
-						m_CellBase.Xall = 500;
-						m_CellBase.Yall = 160;
-						m_CellBase.Zall = 500;
-						m_CellBase.m_Cell.resize((size_t)(m_CellBase.Xall * m_CellBase.Yall * m_CellBase.Zall));
-						m_CellBase.scaleRate = 1;
-						for (int x = -m_CellBase.Xall / 2; x < m_CellBase.Xall / 2; x++) {
-							for (int z = -m_CellBase.Zall / 2; z < m_CellBase.Zall / 2; z++) {
+						m_CellxN.back().Xall = 500;
+						m_CellxN.back().Yall = 160;
+						m_CellxN.back().Zall = 500;
+						m_CellxN.back().m_Cell.resize((size_t)(m_CellxN.back().Xall * m_CellxN.back().Yall * m_CellxN.back().Zall));
+						m_CellxN.back().scaleRate = 1;
+						for (int x = -m_CellxN.back().Xall / 2; x < m_CellxN.back().Xall / 2; x++) {
+							for (int z = -m_CellxN.back().Zall / 2; z < m_CellxN.back().Zall / 2; z++) {
 								auto Height = static_cast<int>(ns.octaveNoise(2,
-									(static_cast<float>(x + m_CellBase.Xall / 2)) / m_CellBase.Xall,
-									(static_cast<float>(z + m_CellBase.Zall / 2)) / m_CellBase.Zall
-								) * static_cast<float>(m_CellBase.Yall * 4 / 5)) - (m_CellBase.Yall * 4 / 5) / 2;
-								for (int y = -m_CellBase.Yall / 2; y < m_CellBase.Yall / 2; y++) {
+									(static_cast<float>(x + m_CellxN.back().Xall / 2)) / m_CellxN.back().Xall,
+									(static_cast<float>(z + m_CellxN.back().Zall / 2)) / m_CellxN.back().Zall
+								) * static_cast<float>(m_CellxN.back().Yall * 4 / 5)) - (m_CellxN.back().Yall * 4 / 5) / 2;
+								for (int y = -m_CellxN.back().Yall / 2; y < m_CellxN.back().Yall / 2; y++) {
 									if (y <= Height) {
-										m_CellBase.SetCell(x, y, z).selset = 0;
+										m_CellxN.back().SetCell(x, y, z).selset = 0;
 										continue;
 									}
-									m_CellBase.SetCell(x, y, z).selset = INVALID_ID;
+									m_CellxN.back().SetCell(x, y, z).selset = INVALID_ID;
+								}
+							}
+						}
+					}
+
+					SaveCellsFile();
+				}
+				else if (true) {
+					{
+						PerlinNoise ns(GetRand(100));
+						m_CellxN.back().Xall = 100;
+						m_CellxN.back().Yall = 100;
+						m_CellxN.back().Zall = 100;
+						m_CellxN.back().m_Cell.resize((size_t)(m_CellxN.back().Xall * m_CellxN.back().Yall * m_CellxN.back().Zall));
+						m_CellxN.back().scaleRate = 1;
+						for (int x = -m_CellxN.back().Xall / 2; x < m_CellxN.back().Xall / 2; x++) {
+							for (int z = -m_CellxN.back().Zall / 2; z < m_CellxN.back().Zall / 2; z++) {
+								for (int y = -m_CellxN.back().Yall / 2; y < m_CellxN.back().Yall / 2; y++) {
+									if (y <= 0) {
+										m_CellxN.back().SetCell(x, y, z).selset = 0;
+										continue;
+									}
+									if (y <= 2 + MulPer * 4) {
+										if (x == -MulPer * 8 + 2 || x == -MulPer * 8 + 1 || x == -MulPer * 8) {
+											m_CellxN.back().SetCell(x, y, z).selset = 0;
+											continue;
+										}
+										if (x == MulPer * 8 - 2 || x == MulPer * 8 - 1 || x == MulPer * 8) {
+											m_CellxN.back().SetCell(x, y, z).selset = 0;
+											continue;
+										}
+									}
+									m_CellxN.back().SetCell(x, y, z).selset = INVALID_ID;
 								}
 							}
 						}
@@ -207,12 +244,21 @@ namespace FPS_n2 {
 					SaveCellsFile();
 				}
 				else {
+
 					LoadCellsFile();
 				}
 				//簡略版を制作
 				MakeSimple();
 				//遮蔽検索
 				CalcOcclusion();
+
+				MATERIALPARAM Param;
+				Param.Diffuse = GetColorF(0.0f, 0.0f, 0.0f, 1.0f);						// ディフューズカラー
+				Param.Ambient = GetColorF(0.5f, 0.5f, 0.5f, 1.0f);						// アンビエントカラー
+				Param.Specular = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// スペキュラカラー
+				Param.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// エミッシブカラー
+				Param.Power = 5.f;							// スペキュラハイライトの鮮明度
+				SetMaterialParam(Param);
 			}
 			//
 			void			Execute(void) noexcept {
@@ -226,95 +272,137 @@ namespace FPS_n2 {
 				const Vector3DX CamPos = DrawParts->GetMainCamera().GetCamPos();
 				const Vector3DX CamVec = (DrawParts->GetMainCamera().GetCamVec() - CamPos).normalized();
 
-				int MaxRate = 100;
+				int BaseRate = 100;
+				int ShadowRate = 100;
+				float ShadowMax = Max;
 				switch (OptionParts->GetParamInt(EnumSaveParam::ObjLevel)) {
 				case 0:
 				case 1:
-					MaxRate = MulPer * MulPer;
+					BaseRate = MulPer * MulPer;
+					ShadowRate = 1;
+					ShadowMax = 10.f;
 					break;
 				case 2:
-					MaxRate = MulPer * MulPer * MulPer;
+					BaseRate = MulPer * MulPer * MulPer;
+					ShadowRate = MulPer;
+					ShadowMax = 15.f;
 					break;
 				case 3:
-					MaxRate = MulPer * MulPer * MulPer * MulPer;
+					BaseRate = MulPer * MulPer * MulPer * MulPer;
+					ShadowRate = MulPer * MulPer;
+					ShadowMax = 25.f;
 					break;
 				default:
 					break;
 				};
 				for (auto & cell : m_CellxN) {
-					if (MaxRate < cell.scaleRate) { continue; }
 					Vector3DX center = CamPos / (CellScale * cell.scaleRate);
+					//
+					if (BaseRate >= cell.scaleRate) {
+						int xMaxmin = std::max(static_cast<int>(center.x - Max), -cell.Xall / 2);
+						int xMaxmax = std::min(static_cast<int>(center.x + Max) + 1, cell.Xall / 2);
+						int yMaxmin = std::max(static_cast<int>(center.y - Max), -cell.Yall / 2);
+						int yMaxmax = std::min(static_cast<int>(center.y + Max) + 1, cell.Yall / 2);
+						int zMaxmin = std::max(static_cast<int>(center.z - Max), -cell.Zall / 2);
+						int zMaxmax = std::min(static_cast<int>(center.z + Max) + 1, cell.Zall / 2);
 
-					int xMaxmin = std::max(static_cast<int>(center.x - Max), -cell.Xall / 2);
-					int xMaxmax = std::min(static_cast<int>(center.x + Max) + 1, cell.Xall / 2);
-					int yMaxmin = std::max(static_cast<int>(center.y - Max), -cell.Yall / 2);
-					int yMaxmax = std::min(static_cast<int>(center.y + Max) + 1, cell.Yall / 2);
-					int zMaxmin = std::max(static_cast<int>(center.z - Max), -cell.Zall / 2);
-					int zMaxmax = std::min(static_cast<int>(center.z + Max) + 1, cell.Zall / 2);
-
-					int xMinmin = static_cast<int>(center.x - Max / MulPer);
-					int xMinmax = static_cast<int>(center.x + Max / MulPer);
-					int yMinmin = static_cast<int>(center.y - Max / MulPer);
-					int yMinmax = static_cast<int>(center.y + Max / MulPer);
-					int zMinmin = static_cast<int>(center.z - Max / MulPer);
-					int zMinmax = static_cast<int>(center.z + Max / MulPer);
-
-					for (int x = xMaxmin; x < xMaxmax; x++) {
-						//*
-						//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
-						Vector3DX YZMinPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(yMaxmin), static_cast<float>(zMaxmin)) + (Vector3DX::one() * 0.5f);
-						Vector3DX YZMaxPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(zMaxmax), static_cast<float>(zMaxmax)) + (Vector3DX::one() * 0.5f);
-						Vector3DX YZPos2 = Vector3DX::vget(YZMinPos.x, YZMinPos.y, YZMaxPos.z);
-						Vector3DX YZPos3 = Vector3DX::vget(YZMinPos.x, YZMaxPos.y, YZMinPos.z);
-						bool IsHit = false;
-						while (true) {
-							if (Vector3DX::Dot(CamVec, (YZMinPos - center)) > 0.f) { IsHit = true; break; }
-							if (Vector3DX::Dot(CamVec, (YZMaxPos - center)) > 0.f) { IsHit = true; break; }
-							if (Vector3DX::Dot(CamVec, (YZPos2 - center)) > 0.f) { IsHit = true; break; }
-							if (Vector3DX::Dot(CamVec, (YZPos3 - center)) > 0.f) { IsHit = true; break; }
-							break;
-						}
-						if (!IsHit) {
-							continue;
-						}
-						//*/
-						for (int y = yMaxmin; y < yMaxmax; y++) {
-							int zMaxminT = zMaxmin;
-							int zMaxmaxT = zMaxmax;
-							Vector3DX ZMinPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(zMaxminT)) + (Vector3DX::one() * 0.5f);
-							Vector3DX ZMaxPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(zMaxmaxT)) + (Vector3DX::one() * 0.5f);
-							Vector3DX HitPos;
-							bool pSameVecNormalToA{};
-							bool OnFront{};
-							if (CalcIntersectionPoint(ZMinPos, ZMaxPos, center, CamVec, &HitPos, &pSameVecNormalToA, &OnFront)) {
-								if (!pSameVecNormalToA) {
-									zMaxminT = static_cast<int>(HitPos.z - 0.5);
+						int xMinmin = static_cast<int>(center.x - Max / MulPer);
+						int xMinmax = static_cast<int>(center.x + Max / MulPer);
+						int yMinmin = static_cast<int>(center.y - Max / MulPer);
+						int yMinmax = static_cast<int>(center.y + Max / MulPer);
+						int zMinmin = static_cast<int>(center.z - Max / MulPer);
+						int zMinmax = static_cast<int>(center.z + Max / MulPer);
+						for (int x = xMaxmin; x < xMaxmax; x++) {
+							//*
+							//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
+							Vector3DX YZMinPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(yMaxmin), static_cast<float>(zMaxmin)) + (Vector3DX::one() * 0.5f);
+							Vector3DX YZMaxPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(zMaxmax), static_cast<float>(zMaxmax)) + (Vector3DX::one() * 0.5f);
+							Vector3DX YZPos2 = Vector3DX::vget(YZMinPos.x, YZMinPos.y, YZMaxPos.z);
+							Vector3DX YZPos3 = Vector3DX::vget(YZMinPos.x, YZMaxPos.y, YZMinPos.z);
+							bool IsHit = false;
+							while (true) {
+								if (Vector3DX::Dot(CamVec, (YZMinPos - center)) > 0.f) { IsHit = true; break; }
+								if (Vector3DX::Dot(CamVec, (YZMaxPos - center)) > 0.f) { IsHit = true; break; }
+								if (Vector3DX::Dot(CamVec, (YZPos2 - center)) > 0.f) { IsHit = true; break; }
+								if (Vector3DX::Dot(CamVec, (YZPos3 - center)) > 0.f) { IsHit = true; break; }
+								break;
+							}
+							if (!IsHit) {
+								continue;
+							}
+							//*/
+							for (int y = yMaxmin; y < yMaxmax; y++) {
+								int zMaxminT = zMaxmin;
+								int zMaxmaxT = zMaxmax;
+								Vector3DX ZMinPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(zMaxminT)) + (Vector3DX::one() * 0.5f);
+								Vector3DX ZMaxPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(zMaxmaxT)) + (Vector3DX::one() * 0.5f);
+								Vector3DX HitPos;
+								bool pSameVecNormalToA{};
+								bool OnFront{};
+								if (CalcIntersectionPoint(ZMinPos, ZMaxPos, center, CamVec, &HitPos, &pSameVecNormalToA, &OnFront)) {
+									if (!pSameVecNormalToA) {
+										zMaxminT = static_cast<int>(HitPos.z - 0.5);
+									}
+									else {
+										zMaxmaxT = static_cast<int>(HitPos.z - 0.5)+1;
+									}
 								}
 								else {
-									zMaxmaxT = static_cast<int>(HitPos.z - 0.5);
+									if (!OnFront) { continue; }
 								}
-							}
-							else {
-								if (!OnFront) { continue; }
-							}
+								zMaxminT = std::max(zMaxminT, -cell.Zall / 2);
+								zMaxmaxT = std::min(zMaxmaxT, cell.Zall / 2);
 
-							for (int z = zMaxminT; z < zMaxmaxT; z++) {
-								bool checkFill = true;
-								if (cell.scaleRate != 1) {
-									if (((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax)) && ((zMinmin < z) && (z < zMinmax))) {
-										continue;
+								for (int z = zMaxminT; z < zMaxmaxT; z++) {
+									bool checkFill = true;
+									if (cell.scaleRate != 1) {
+										if (((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax)) && ((zMinmin < z) && (z < zMinmax))) {
+											continue;
+										}
+										checkFill = !(((xMinmin <= x) && (x <= xMinmax)) && ((yMinmin <= y) && (y <= yMinmax)) && ((zMinmin <= z) && (z <= zMinmax)));
 									}
-									checkFill = !(((xMinmin <= x) && (x <= xMinmax)) && ((yMinmin <= y) && (y <= yMinmax)) && ((zMinmin <= z) && (z <= zMinmax)));
-								}
-								const auto& Cell = cell.GetCell(x, y, z);
-								if (Cell.selset == INVALID_ID) { continue; }
-								if (Cell.inRock) { continue; }
+									const auto& Cell = cell.GetCell(x, y, z);
+									if (Cell.selset == INVALID_ID) { continue; }
+									if (Cell.inRock) { continue; }
 
-								AddCube(cell, x, y, z, checkFill, GetColorU8(128, 128, 128, 255), GetColorU8(64, 64, 64, 255));
+									AddCube(cell, x, y, z, checkFill, GetColorU8(128, 128, 128, 255), GetColorU8(64, 64, 64, 255));
+								}
 							}
 						}
 					}
+					//
+					if (ShadowRate >= cell.scaleRate) {
+						int xMaxmin = std::max(static_cast<int>(center.x - ShadowMax), -cell.Xall / 2);
+						int xMaxmax = std::min(static_cast<int>(center.x + ShadowMax) + 1, cell.Xall / 2);
+						int yMaxmin = std::max(static_cast<int>(center.y - ShadowMax), -cell.Yall / 2);
+						int yMaxmax = std::min(static_cast<int>(center.y + ShadowMax) + 1, cell.Yall / 2);
+						int zMaxmin = std::max(static_cast<int>(center.z - ShadowMax), -cell.Zall / 2);
+						int zMaxmax = std::min(static_cast<int>(center.z + ShadowMax) + 1, cell.Zall / 2);
 
+						int xMinmin = static_cast<int>(center.x - ShadowMax / MulPer);
+						int xMinmax = static_cast<int>(center.x + ShadowMax / MulPer);
+						int yMinmin = static_cast<int>(center.y - ShadowMax / MulPer);
+						int yMinmax = static_cast<int>(center.y + ShadowMax / MulPer);
+						int zMinmin = static_cast<int>(center.z - ShadowMax / MulPer);
+						int zMinmax = static_cast<int>(center.z + ShadowMax / MulPer);
+						for (int x = xMaxmin; x < xMaxmax; x++) {
+							for (int y = yMaxmin; y < yMaxmax; y++) {
+								for (int z = zMaxmin; z < zMaxmax; z++) {
+									bool checkFill = true;
+									if (cell.scaleRate != 1) {
+										if (((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax)) && ((zMinmin < z) && (z < zMinmax))) {
+											continue;
+										}
+										checkFill = !(((xMinmin <= x) && (x <= xMinmax)) && ((yMinmin <= y) && (y <= yMinmax)) && ((zMinmin <= z) && (z <= zMinmax)));
+									}
+									const auto& Cell = cell.GetCell(x, y, z);
+									if (Cell.selset == INVALID_ID) { continue; }
+									if (Cell.inRock) { continue; }
+									AddShadowCube(cell, x, y, z, checkFill, GetColorU8(128, 128, 128, 255), GetColorU8(64, 64, 64, 255));
+								}
+							}
+						}
+					}
 				}
 			}
 			//
@@ -323,7 +411,12 @@ namespace FPS_n2 {
 				this->m_ObjSky.DrawModel();
 				SetUseLighting(TRUE);
 			}
-			void			Shadow_Draw_Rigid(void) noexcept {
+			void			Shadow_Draw(void) noexcept {
+				if (m_vert32SNum > 0 && m_index32SNum > 0) {
+					DrawPolygon32bitIndexed3D(m_vert32SB.data(), static_cast<int>(m_vert32SNum), m_index32S.data(), static_cast<int>(m_index32SNum / 3), m_tex.get(), TRUE);
+				}
+			}
+			void			SetShadow_Draw_Rigid(void) noexcept {
 				if (m_vert32SNum > 0 && m_index32SNum > 0) {
 					SetUseTextureToShader(0, m_tex.get());
 					DrawPolygon32bitIndexed3DToShader(m_vert32S.data(), static_cast<int>(m_vert32SNum), m_index32S.data(), static_cast<int>(m_index32SNum / 3));
