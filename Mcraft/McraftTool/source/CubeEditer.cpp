@@ -78,7 +78,7 @@ void		CubeEditer::Bresenham3D(const int x1, const int y1, const int z1, const in
 	OutPutLine(point[0], point[1], point[2]);
 }
 
-void		CubeEditer::AddCube(int x, int y, int z) noexcept {
+void		CubeEditer::AddCube(int x, int y, int z, int select, bool DrawCheckPoint) noexcept {
 	if (
 		((x < -m_CellsData.Xall / 2) || (x > m_CellsData.Xall / 2 - 1)) ||
 		((y < -m_CellsData.Yall / 2) || (y > m_CellsData.Yall / 2 - 1)) ||
@@ -86,12 +86,13 @@ void		CubeEditer::AddCube(int x, int y, int z) noexcept {
 		) {
 		return;
 	}
-	if (m_CellsData.SetCell(x, y, z).selset != INVALID_ID) { return; }
+	if (m_CellsData.SetCellNum(x, y, z) != INVALID_ID) { return; }
 
-	m_CellsData.SetCell(x, y, z).selset = m_vert32.size() / (6 * 4);
+	m_CellsData.SetCellNum(x, y, z) = (int)(m_vert32.size()) / (6 * 4);
+	m_CellsData.SetCell(x, y, z).select = select;
 	VECTOR Pos = VGet(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
-	VECTOR PosMin = Pos;
-	VECTOR PosMax = VAdd(Pos, VGet(1.f, 1.f, 1.f));
+	VECTOR PosMin = VAdd(Pos, VGet(0.005f, 0.005f, 0.005f));
+	VECTOR PosMax = VAdd(Pos, VGet(0.995f, 0.995f, 0.995f));
 	auto GetPlane = [&](const VECTOR& Pos1, const VECTOR& Pos2, const VECTOR& Pos3, const VECTOR& Pos4, const VECTOR& Normal) {
 
 		size_t Now = m_vert32.size();
@@ -120,7 +121,7 @@ void		CubeEditer::AddCube(int x, int y, int z) noexcept {
 		m_vert32.at(Now + 3).v = 1.0f;
 		for (size_t i = 0; i < 4; i++) {
 			m_vert32.at(Now + i).norm = Normal;
-			m_vert32.at(Now + i).dif = GetColorU8(255, 0, 0, 255);
+			m_vert32.at(Now + i).dif = GetColorU8(std::clamp(255 - y * 25, 0, 255), 0, 0, 255);
 			m_vert32.at(Now + i).spc = GetColorU8(255, 255, 255, 255);
 			m_vert32.at(Now + i).su = m_vert32.at(Now + i).u;
 			m_vert32.at(Now + i).sv = m_vert32.at(Now + i).v;
@@ -142,8 +143,20 @@ void		CubeEditer::AddCube(int x, int y, int z) noexcept {
 	GetPlane(VGet(PosMax.x, PosMax.y, PosMin.z), PosMax, VGet(PosMax.x, PosMin.y, PosMin.z), VGet(PosMax.x, PosMin.y, PosMax.z), VGet(1, 0, 0));
 	GetPlane(VGet(PosMin.x, PosMax.y, PosMax.z), PosMax, VGet(PosMin.x, PosMax.y, PosMin.z), VGet(PosMax.x, PosMax.y, PosMin.z), VGet(0, 1, 0));
 	GetPlane(PosMin, VGet(PosMax.x, PosMin.y, PosMin.z), VGet(PosMin.x, PosMin.y, PosMax.z), VGet(PosMax.x, PosMin.y, PosMax.z), VGet(0, -1, 0));
+	if (DrawCheckPoint) {
+		if (m_SavePointDataNow != (int)m_SavePointData.size() - 1) {
+			CheckPoint();
+		}
+		SavePointData tmp;
+		tmp.x = x;
+		tmp.y = y;
+		tmp.z = z;
+		tmp.prevselect = INVALID_ID;
+		tmp.select = select;
+		m_SavePointData.back().emplace_back(tmp);
+	}
 }
-void		CubeEditer::DelCube(int x, int y, int z) noexcept {
+void		CubeEditer::DelCube(int x, int y, int z, bool DrawCheckPoint) noexcept {
 	if (
 		((x < -m_CellsData.Xall / 2) || (x > m_CellsData.Xall / 2 - 1)) ||
 		((y < -m_CellsData.Yall / 2) || (y > m_CellsData.Yall / 2 - 1)) ||
@@ -151,51 +164,142 @@ void		CubeEditer::DelCube(int x, int y, int z) noexcept {
 		) {
 		return;
 	}
-	int sel = m_CellsData.GetCell(x, y, z).selset;
-	if (sel == INVALID_ID) { return; }
+	if (m_CellsData.GetCell(x, y, z).select == INVALID_ID) { return; }
+	int num = m_CellsData.GetCellNum(x, y, z);
 	for (int i = 0; i < (6 * 4); i++) {
-		m_vert32.erase(m_vert32.begin() + (sel * (6 * 4)));
+		m_vert32.erase(m_vert32.begin() + (size_t)(num * (6 * 4)));
 	}
 	for (int i = 0; i < (6 * 6); i++) {
-		m_index32.erase(m_index32.begin() + (sel * (6 * 6)));
+		m_index32.erase(m_index32.begin() + (size_t)(num * (6 * 6)));
 	}
-	for (int i = (sel * (6 * 6)); i < m_index32.size(); i++) {
+	for (int i = (num * (6 * 6)); i < m_index32.size(); i++) {
 		m_index32.at(i) -= (6 * 4);
 	}
-
-	m_CellsData.SetCell(x, y, z).selset = INVALID_ID;
+	int sel = m_CellsData.GetCell(x, y, z).select;
+	m_CellsData.SetCell(x, y, z).select = INVALID_ID;
+	m_CellsData.SetCellNum(x, y, z) = INVALID_ID;
 	for (int xt = -m_CellsData.Xall / 2; xt < m_CellsData.Xall / 2; xt++) {
 		for (int zt = -m_CellsData.Zall / 2; zt < m_CellsData.Zall / 2; zt++) {
 			for (int yt = -m_CellsData.Yall / 2; yt < m_CellsData.Yall / 2; yt++) {
-				if (m_CellsData.GetCell(xt, yt, zt).selset == INVALID_ID) { continue; }
-				if (sel < m_CellsData.GetCell(xt, yt, zt).selset) {
-					m_CellsData.SetCell(xt, yt, zt).selset--;
+				if (m_CellsData.GetCell(xt, yt, zt).select == INVALID_ID) { continue; }
+				if (num < m_CellsData.GetCellNum(xt, yt, zt)) {
+					m_CellsData.SetCellNum(xt, yt, zt)--;
+				}
+			}
+		}
+	}
+	if (DrawCheckPoint) {
+		if (m_SavePointDataNow != (int)m_SavePointData.size() - 1) {
+			CheckPoint();
+		}
+		SavePointData tmp;
+		tmp.x = x;
+		tmp.y = y;
+		tmp.z = z;
+		tmp.prevselect = sel;
+		tmp.select = INVALID_ID;
+		m_SavePointData.back().emplace_back(tmp);
+	}
+}
+void CubeEditer::CheckPoint() noexcept {
+	//そもそもセーブできるデータがない
+	if (m_SavePointDataNow!=0 && m_SavePointData.at(m_SavePointDataNow).size()==0) {
+		return;
+	}
+	if (m_SavePointDataNow != (int)m_SavePointData.size() - 1) {
+		for (int i = m_SavePointDataNow, Max = (int)m_SavePointData.size(); i < Max; i++) {
+			m_SavePointData.pop_back();
+		}
+	}
+	std::vector<SavePointData> tmp;
+	m_SavePointData.emplace_back(tmp);
+	m_SavePointDataNow = (int)m_SavePointData.size() - 1;
+}
+void CubeEditer::UnDo() noexcept {
+	if (m_SavePointDataNow == 0) { return; }
+	m_SavePointDataNow--;
+	for (auto i = m_SavePointData.at(m_SavePointDataNow).rbegin(), e = m_SavePointData.at(m_SavePointDataNow).rend(); i != e; ++i) {
+		if (i->prevselect == INVALID_ID && i->select != INVALID_ID) {
+			DelCube(i->x, i->y, i->z, false);
+		}
+		else if (i->prevselect != INVALID_ID && i->select == INVALID_ID) {
+			AddCube(i->x, i->y, i->z, i->prevselect, false);
+		}
+	}
+}
+void CubeEditer::ReDo() noexcept {
+	if (m_SavePointDataNow == (int)m_SavePointData.size() - 1) { return; }
+	for (auto& i : m_SavePointData.at(m_SavePointDataNow)) {
+		if (i.prevselect == INVALID_ID && i.select != INVALID_ID) {
+			AddCube(i.x, i.y, i.z, i.select, false);
+		}
+		else if (i.prevselect != INVALID_ID && i.select == INVALID_ID) {
+			DelCube(i.x, i.y, i.z, false);
+		}
+	}
+	m_SavePointDataNow++;
+}
+
+void		CubeEditer::LoadCellsFile() noexcept {
+	if (!std::filesystem::is_regular_file("Save/Map.txt")) {
+		return;
+	}
+	m_vert32.clear();
+	m_index32.clear();
+	std::ifstream fin;
+	fin.open("Save/Map.txt", std::ios::in | std::ios::binary);
+	fin.read((char*)&m_CellsData.Xall, sizeof(m_CellsData.Xall));
+	fin.read((char*)&m_CellsData.Yall, sizeof(m_CellsData.Yall));
+	fin.read((char*)&m_CellsData.Zall, sizeof(m_CellsData.Zall));
+	m_CellsData.m_number.resize((size_t)(m_CellsData.Xall * m_CellsData.Yall * m_CellsData.Zall));
+	m_CellsData.m_Cell.resize((size_t)(m_CellsData.Xall * m_CellsData.Yall * m_CellsData.Zall));
+	fin.read((char*)&m_CellsData.m_Cell.at(0), sizeof(m_CellsData.m_Cell.at(0)) * m_CellsData.m_Cell.size());
+	fin.close();
+	for (int x = -m_CellsData.Xall / 2; x < m_CellsData.Xall / 2; x++) {
+		for (int z = -m_CellsData.Zall / 2; z < m_CellsData.Zall / 2; z++) {
+			for (int y = -m_CellsData.Yall / 2; y < m_CellsData.Yall / 2; y++) {
+				if (m_CellsData.SetCell(x, y, z).select != INVALID_ID) {
+					AddCube(x, y, z, m_CellsData.SetCell(x, y, z).select, false);
 				}
 			}
 		}
 	}
 }
+void		CubeEditer::SaveCellsFile() noexcept {
+	std::ofstream fout;
+	fout.open("Save/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
+	fout.write((char*)&m_CellsData.Xall, sizeof(m_CellsData.Xall));
+	fout.write((char*)&m_CellsData.Yall, sizeof(m_CellsData.Yall));
+	fout.write((char*)&m_CellsData.Zall, sizeof(m_CellsData.Zall));
+	fout.write((char*)&m_CellsData.m_Cell.at(0), sizeof(m_CellsData.m_Cell.at(0)) * m_CellsData.m_Cell.size());
+	fout.close();  //ファイルを閉じる
+}
+
 //-------------------------------------------------------------------------------------
 void		CubeEditer::Init() noexcept {
 	m_CellsData.Xall = 100;
 	m_CellsData.Yall = 100;
 	m_CellsData.Zall = 100;
+	m_CellsData.m_number.resize((size_t)(m_CellsData.Xall * m_CellsData.Yall * m_CellsData.Zall));
 	m_CellsData.m_Cell.resize((size_t)(m_CellsData.Xall * m_CellsData.Yall * m_CellsData.Zall));
 	for (int x = -m_CellsData.Xall / 2; x < m_CellsData.Xall / 2; x++) {
 		for (int z = -m_CellsData.Zall / 2; z < m_CellsData.Zall / 2; z++) {
 			for (int y = -m_CellsData.Yall / 2; y < m_CellsData.Yall / 2; y++) {
-				m_CellsData.SetCell(x, y, z).selset = INVALID_ID;
+				m_CellsData.SetCell(x, y, z).select = INVALID_ID;
+				m_CellsData.SetCellNum(x, y, z) = INVALID_ID;
 			}
 		}
 	}
 
-	MATERIALPARAM Param;
+	MATERIALPARAM Param{};
 	Param.Diffuse = GetColorF(1.0f, 1.0f, 1.0f, 1.0f);						// ディフューズカラー
 	Param.Ambient = GetColorF(0.15f, 0.15f, 0.15f, 1.0f);						// アンビエントカラー
 	Param.Specular = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// スペキュラカラー
 	Param.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// エミッシブカラー
 	Param.Power = 100.f;							// スペキュラハイライトの鮮明度
 	SetMaterialParam(Param);
+	
+	CheckPoint();
 }
 void		CubeEditer::DrawBG() noexcept {
 	for (int x = -50; x <= 50; x++) {

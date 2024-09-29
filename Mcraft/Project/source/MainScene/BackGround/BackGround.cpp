@@ -175,9 +175,7 @@ namespace FPS_n2 {
 				Vector3DX::down());
 		}
 
-		void BackGroundClass::AddShadowCube(const CellsData& cell, int x, int y, int z, bool CheckFill, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept
-		{
-			auto* DrawParts = DXDraw::Instance();
+		void BackGroundClass::AddShadowCube(const CellsData& cell, int x, int y, int z, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept {
 			Vector3DX Pos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
 			Vector3DX PosMin = Pos * (CellScale * cell.scaleRate);
 			Vector3DX PosMid = (Pos + Vector3DX::one() * 0.5f) * (CellScale * cell.scaleRate);

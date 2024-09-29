@@ -149,7 +149,7 @@ namespace FPS_n2 {
 			static void		Bresenham3D(const int x1, const int y1, const int z1, const int x2, const int y2, const int z2, const std::function<bool(int, int, int)>& OutPutLine) noexcept;
 
 			void			AddCube(const CellsData& cell, int x, int y, int z, bool CheckFill, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept;
-			void			AddShadowCube(const CellsData& cell, int x, int y, int z, bool CheckFill, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept;
+			void			AddShadowCube(const CellsData& cell, int x, int y, int z, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept;
 		public:
 			bool			ColRayBox(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AABBMinPos, const Vector3DX& AABBMaxPos, Vector3DX* Normal = nullptr, int* NormalNum = nullptr) const noexcept;
 			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
@@ -183,7 +183,7 @@ namespace FPS_n2 {
 				}
 				m_CellxN.clear();
 				m_CellxN.resize(total);
-				if (true) {
+				if (false) {
 					{
 						PerlinNoise ns(GetRand(100));
 						m_CellxN.back().Xall = 500;
@@ -210,7 +210,7 @@ namespace FPS_n2 {
 
 					SaveCellsFile();
 				}
-				else if (true) {
+				else if (false) {
 					{
 						PerlinNoise ns(GetRand(100));
 						m_CellxN.back().Xall = 100;
@@ -252,7 +252,7 @@ namespace FPS_n2 {
 				//遮蔽検索
 				CalcOcclusion();
 
-				MATERIALPARAM Param;
+				MATERIALPARAM Param{};
 				Param.Diffuse = GetColorF(0.0f, 0.0f, 0.0f, 1.0f);						// ディフューズカラー
 				Param.Ambient = GetColorF(0.5f, 0.5f, 0.5f, 1.0f);						// アンビエントカラー
 				Param.Specular = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// スペキュラカラー
@@ -388,17 +388,15 @@ namespace FPS_n2 {
 						for (int x = xMaxmin; x < xMaxmax; x++) {
 							for (int y = yMaxmin; y < yMaxmax; y++) {
 								for (int z = zMaxmin; z < zMaxmax; z++) {
-									bool checkFill = true;
 									if (cell.scaleRate != 1) {
 										if (((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax)) && ((zMinmin < z) && (z < zMinmax))) {
 											continue;
 										}
-										checkFill = !(((xMinmin <= x) && (x <= xMinmax)) && ((yMinmin <= y) && (y <= yMinmax)) && ((zMinmin <= z) && (z <= zMinmax)));
 									}
 									const auto& Cell = cell.GetCell(x, y, z);
 									if (Cell.selset == INVALID_ID) { continue; }
 									if (Cell.inRock) { continue; }
-									AddShadowCube(cell, x, y, z, checkFill, GetColorU8(128, 128, 128, 255), GetColorU8(64, 64, 64, 255));
+									AddShadowCube(cell, x, y, z, GetColorU8(128, 128, 128, 255), GetColorU8(64, 64, 64, 255));
 								}
 							}
 						}

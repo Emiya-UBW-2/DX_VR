@@ -4,8 +4,8 @@
 using namespace DXLibRef;
 
 // 画面のサイズ
-#define SCREEN_W		1920
-#define SCREEN_H		1080
+constexpr auto SCREEN_W = 1920;
+constexpr auto SCREEN_H = 1080;
 
 #include "source/CubeEditer.hpp"
 
@@ -32,8 +32,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	CubeEditer cubeEditer;
 
 	cubeEditer.Init();
+	cubeEditer.LoadCellsFile();
 
 	bool OnClick = false;
+	bool OnUndo = false;
+	bool OnRedo = false;
+	bool OnSave = false;
 	float OnDeleteTimer = 0.f;
 	float CamLength = 7.f;
 	// メインループ
@@ -59,12 +63,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			else {
 				if (0 < OnDeleteTimer && OnDeleteTimer <= 0.5f) {
 					IsDelete = true;
-					cubeEditer.DelCube((int)TargetPos.x, (int)TargetPos.y, (int)TargetPos.z);
 				}
 				OnDeleteTimer = 0.f;
 			}
 
-			if (0.5f <= OnDeleteTimer) {
+			if (0.f < OnDeleteTimer) {
 				Xrad = std::clamp(Xrad + (float)(my - YBase) * deg2rad(1.f), deg2rad(0), deg2rad(90));
 				Yrad += (float)(mx - XBase) * deg2rad(1.f);
 			}
@@ -88,23 +91,26 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 							for (int x = std::min((int)DragPos.x, (int)TargetPos.x); x <= std::max((int)DragPos.x, (int)TargetPos.x); x++) {
 								for (int y = std::min((int)DragPos.y, (int)TargetPos.y); y <= std::max((int)DragPos.y, (int)TargetPos.y); y++) {
 									for (int z = std::min((int)DragPos.z, (int)TargetPos.z); z <= std::max((int)DragPos.z, (int)TargetPos.z); z++) {
-										cubeEditer.AddCube(x, y, z);
+										cubeEditer.AddCube(x, y, z, 0);
 									}
 								}
 							}
+							cubeEditer.CheckPoint();
 						}
 						else {
 							CubeEditer::Bresenham3D((int)DragPos.x, (int)DragPos.y, (int)DragPos.z, (int)TargetPos.x, (int)TargetPos.y, (int)TargetPos.z,
 								[&](int x, int y, int z) {
-									cubeEditer.AddCube(x, y, z);
+									cubeEditer.AddCube(x, y, z, 0);
 									return false;
 								}
 							);
+							cubeEditer.CheckPoint();
 						}
 					}
 				}
 				if (IsDelete) {
 					cubeEditer.DelCube((int)TargetPos.x, (int)TargetPos.y, (int)TargetPos.z);
+					cubeEditer.CheckPoint();
 				}
 			}
 			int MouseWheelRot = GetMouseWheelRotVolWithCheck();
@@ -141,6 +147,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				}
 				TargetPos = NearPos + (FarPos - NearPos) * std::abs(NearPos.y / std::max(std::abs(FarPos.y - NearPos.y), 0.001f));
 				TargetPos.Set((float)((int)TargetPos.x), (float)(Yofs), (float)((int)TargetPos.z) - 1);
+				TargetPos.x = std::clamp(TargetPos.x, -50.f, 50.f);
+				TargetPos.z = std::clamp(TargetPos.z, -50.f, 50.f);
 				if (CheckHitKey(KEY_INPUT_LSHIFT) != 0) {
 					TargetPos.x = prev.x;
 				}
@@ -153,6 +161,36 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				}
 			}
 			CanPut = FarPos.y < 0.f;
+
+			if (CheckHitKey(KEY_INPUT_LCONTROL) != 0) {
+				if (CheckHitKey(KEY_INPUT_Z) != 0) {
+					if (!OnUndo) {
+						OnUndo = true;
+						cubeEditer.UnDo();
+					}
+				}
+				else {
+					OnUndo = false;
+				}
+				if (CheckHitKey(KEY_INPUT_Y) != 0) {
+					if (!OnRedo) {
+						OnRedo = true;
+						cubeEditer.ReDo();
+					}
+				}
+				else {
+					OnRedo = false;
+				}
+				if (CheckHitKey(KEY_INPUT_S) != 0) {
+					if (!OnSave) {
+						OnSave = true;
+						cubeEditer.SaveCellsFile();
+					}
+				}
+				else {
+					OnSave = false;
+				}
+			}
 		}
 		//
 		GraphHandle::SetDraw_Screen((int)DX_SCREEN_BACK);
@@ -178,7 +216,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 					for (int x = std::min((int)DragPos.x, (int)TargetPos.x); x <= std::max((int)DragPos.x, (int)TargetPos.x); x++) {
 						for (int y = std::min((int)DragPos.y, (int)TargetPos.y); y <= std::max((int)DragPos.y, (int)TargetPos.y); y++) {
 							for (int z = std::min((int)DragPos.z, (int)TargetPos.z); z <= std::max((int)DragPos.z, (int)TargetPos.z); z++) {
-								Vector3DX Target; Target.Set(x, y, z);
+								Vector3DX Target; Target.Set((float)x, (float)y, (float)z);
 								DrawCube3D(Target.get(), (Target + Vector3DX::one()).get(), Green, Green, TRUE);
 							}
 						}
@@ -187,7 +225,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 				else {
 					CubeEditer::Bresenham3D((int)DragPos.x, (int)DragPos.y, (int)DragPos.z, (int)TargetPos.x, (int)TargetPos.y, (int)TargetPos.z,
 						[&](int x, int y, int z) {
-							Vector3DX Target; Target.Set(x, y, z);
+							Vector3DX Target; Target.Set((float)x, (float)y, (float)z);
 							DrawCube3D(Target.get(), (Target + Vector3DX::one()).get(), Green, Green, TRUE);
 							return false;
 						}
@@ -200,6 +238,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			printfDx("LShift  X固定\n");
 			printfDx("LCtrl   Z固定\n");
 			printfDx("Tab     Y固定\n");
+			printfDx("%d / %d\n", cubeEditer.GetSavePointDataNow(), cubeEditer.GetSavePointDataMax());
 			printfDx("Esc  終了\n");
 		}
 
@@ -208,6 +247,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		LONGLONG StartTime = GetNowHiPerformanceCount();		//ScreenFlip前に現在の時間を取る
 		ScreenFlip();		// 裏画面の内容を表画面に反映
 	}
+	cubeEditer.SaveCellsFile();
 	DxLib_End();
 	return 0;
 }
