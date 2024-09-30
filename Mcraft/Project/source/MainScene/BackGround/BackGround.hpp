@@ -244,7 +244,6 @@ namespace FPS_n2 {
 					SaveCellsFile();
 				}
 				else {
-
 					LoadCellsFile();
 				}
 				//ŠÈ—ª”Å‚ð§ì
@@ -429,6 +428,7 @@ namespace FPS_n2 {
 			//
 			void			Dispose(void) noexcept {
 				this->m_ObjSky.Dispose();
+				SaveCellsFile();
 			}
 		};
 	}
