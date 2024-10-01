@@ -5,14 +5,14 @@ namespace FPS_n2 {
 	namespace BackGround {
 		bool		BackGroundClass::CalcIntersectionPoint(const Vector3DX& pointA, const Vector3DX& pointB, const Vector3DX& planePos, const Vector3DX& planenormal, Vector3DX* pointIntersection, bool* pSameVecNormalToA, bool* pOnFront) noexcept {
 			// ê¸ï™Ç…ìñÇΩÇÁÇ»Ç¢
-			float dTa = Vector3DX::Dot(planenormal, (pointA - planePos).normalized());
-			float dTb = Vector3DX::Dot(planenormal, (pointB - planePos).normalized());
-			*pOnFront = !(dTa <= 0.f && dTb <= 0.f);
+			float dTa = Vector3DX::Dot(planenormal, (pointA - planePos));
+			float dTb = Vector3DX::Dot(planenormal, (pointB - planePos));
+			*pOnFront = !(dTa < 0.f && dTb < 0.f);
 			if ((dTa >= 0.f && dTb >= 0.f) || !*pOnFront) {
 				return false;
 			}
 
-			*pSameVecNormalToA = (dTa > 0.f);
+			*pSameVecNormalToA = (dTa >= 0.f);
 			*pointIntersection = pointA + (pointB - pointA) * (std::abs(dTa) / (std::abs(dTa) + std::abs(dTb)));
 			return true;
 		}

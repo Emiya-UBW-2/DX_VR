@@ -433,8 +433,8 @@ namespace FPS_n2 {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 			}
 			HitMark::Instance()->Update();
-
 			auto* Pad = PadControl::Instance();
+			/*
 
 			Vector3DX CamPos = DrawParts->GetMainCamera().GetCamPos();
 			Vector3DX CamVec = (DrawParts->GetMainCamera().GetCamVec() - CamPos).normalized()*(2.f * Scale_Rate);
@@ -443,7 +443,7 @@ namespace FPS_n2 {
 			Vector3DX PutPos = (CamPos + CamVec) / CellScale;
 			int x = (int)PutPos.x, y = (int)PutPos.y, z = (int)PutPos.z;
 			//y = 1;
-			int xm = 3, ym = 3, zm = 3;
+			int xm = 1, ym = 3, zm = 1;
 			DrawCube3D((Vector3DX::vget((float)(x + 0), (float)(y + 0), (float)(z + 0)) * CellScale).get(), (Vector3DX::vget((float)((x + xm)), (float)((y + ym)), (float)((z + zm))) * CellScale).get(), GetColor(255, 255, 255), GetColor(255, 255, 255), FALSE);
 			for (int xp = 0; xp < xm; xp++) {
 				for (int yp = 0; yp < ym; yp++) {
@@ -458,6 +458,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
+			//*/
 			if (Pad->GetKey(PADS::JUMP).trigger()) {
 				BackGround->SaveCellsFile();
 			}

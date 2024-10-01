@@ -130,7 +130,7 @@ namespace FPS_n2 {
 			const int total = 4;
 			const int MulPer = 3;
 			const float CellScale = Scale_Rate / 2.f / 2.f;
-			const float Max = 25.f;
+			const float Max = 100.f;
 
 			std::vector<CellsData> m_CellxN;
 
@@ -296,6 +296,7 @@ namespace FPS_n2 {
 				};
 				for (auto & cell : m_CellxN) {
 					Vector3DX center = CamPos / (CellScale * cell.scaleRate);
+					center = Vector3DX::vget(static_cast<float>((int)center.x), static_cast<float>((int)center.y), static_cast<float>((int)center.z)) + (Vector3DX::one() * 0.5f);
 					//
 					if (BaseRate >= cell.scaleRate) {
 						int xMaxmin = std::max(static_cast<int>(center.x - Max), -cell.Xall / 2);
@@ -312,7 +313,7 @@ namespace FPS_n2 {
 						int zMinmin = static_cast<int>(center.z - Max / MulPer);
 						int zMinmax = static_cast<int>(center.z + Max / MulPer);
 						for (int x = xMaxmin; x < xMaxmax; x++) {
-							//*
+							/*
 							//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
 							Vector3DX YZMinPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(yMaxmin), static_cast<float>(zMaxmin)) + (Vector3DX::one() * 0.5f);
 							Vector3DX YZMaxPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(zMaxmax), static_cast<float>(zMaxmax)) + (Vector3DX::one() * 0.5f);
@@ -333,24 +334,26 @@ namespace FPS_n2 {
 							for (int y = yMaxmin; y < yMaxmax; y++) {
 								int zMaxminT = zMaxmin;
 								int zMaxmaxT = zMaxmax;
-								Vector3DX ZMinPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(zMaxminT)) + (Vector3DX::one() * 0.5f);
-								Vector3DX ZMaxPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(zMaxmaxT)) + (Vector3DX::one() * 0.5f);
+								//*
+								Vector3DX ZMinPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(zMaxmin)) + (Vector3DX::one() * 0.5f);
+								Vector3DX ZMaxPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(zMaxmax)) + (Vector3DX::one() * 0.5f);
 								Vector3DX HitPos;
 								bool pSameVecNormalToA{};
 								bool OnFront{};
 								if (CalcIntersectionPoint(ZMinPos, ZMaxPos, center, CamVec, &HitPos, &pSameVecNormalToA, &OnFront)) {
 									if (!pSameVecNormalToA) {
-										zMaxminT = static_cast<int>(HitPos.z - 0.5);
+										zMaxminT = static_cast<int>(HitPos.z - 0.5) - 1;
 									}
 									else {
-										zMaxmaxT = static_cast<int>(HitPos.z - 0.5)+1;
+										zMaxmaxT = static_cast<int>(HitPos.z - 0.5) + 1;
 									}
 								}
 								else {
 									if (!OnFront) { continue; }
 								}
-								zMaxminT = std::max(zMaxminT, -cell.Zall / 2);
-								zMaxmaxT = std::min(zMaxmaxT, cell.Zall / 2);
+								//*/
+								zMaxminT = std::max(zMaxminT, zMaxmin);
+								zMaxmaxT = std::min(zMaxmaxT, zMaxmax);
 
 								for (int z = zMaxminT; z < zMaxmaxT; z++) {
 									bool checkFill = true;
