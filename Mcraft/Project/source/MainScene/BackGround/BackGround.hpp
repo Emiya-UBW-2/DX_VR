@@ -108,12 +108,8 @@ namespace FPS_n2 {
 			std::vector<uint32_t>		m_index32S;
 			size_t						m_index32SNum{ 0 };
 
-			struct CellData {
-				int8_t selset = INVALID_ID;
-				int8_t inRock = false;
-			};
 			struct CellsData {
-				std::vector<CellData> m_Cell;
+				std::vector<int8_t> m_Cell;
 				int16_t Xall = 500;
 				int16_t Yall = 160;
 				int16_t Zall = 500;
@@ -127,10 +123,10 @@ namespace FPS_n2 {
 				}
 			};
 
-			const int total = 4;
+			const int total = 3;
 			const int MulPer = 3;
 			const float CellScale = Scale_Rate / 2.f / 2.f;
-			const float Max = 100.f;
+			const float Max = 50.f;
 
 			std::vector<CellsData> m_CellxN;
 
@@ -199,10 +195,10 @@ namespace FPS_n2 {
 								) * static_cast<float>(m_CellxN.back().Yall * 4 / 5)) - (m_CellxN.back().Yall * 4 / 5) / 2;
 								for (int y = -m_CellxN.back().Yall / 2; y < m_CellxN.back().Yall / 2; y++) {
 									if (y <= Height) {
-										m_CellxN.back().SetCell(x, y, z).selset = 0;
+										m_CellxN.back().SetCell(x, y, z) = 1;
 										continue;
 									}
-									m_CellxN.back().SetCell(x, y, z).selset = INVALID_ID;
+									m_CellxN.back().SetCell(x, y, z) = 0;
 								}
 							}
 						}
@@ -222,20 +218,20 @@ namespace FPS_n2 {
 							for (int z = -m_CellxN.back().Zall / 2; z < m_CellxN.back().Zall / 2; z++) {
 								for (int y = -m_CellxN.back().Yall / 2; y < m_CellxN.back().Yall / 2; y++) {
 									if (y <= 0) {
-										m_CellxN.back().SetCell(x, y, z).selset = 0;
+										m_CellxN.back().SetCell(x, y, z) = 1;
 										continue;
 									}
 									if (y <= 2 + MulPer * 4) {
 										if (x == -MulPer * 8 + 2 || x == -MulPer * 8 + 1 || x == -MulPer * 8) {
-											m_CellxN.back().SetCell(x, y, z).selset = 0;
+											m_CellxN.back().SetCell(x, y, z) = 1;
 											continue;
 										}
 										if (x == MulPer * 8 - 2 || x == MulPer * 8 - 1 || x == MulPer * 8) {
-											m_CellxN.back().SetCell(x, y, z).selset = 0;
+											m_CellxN.back().SetCell(x, y, z) = 1;
 											continue;
 										}
 									}
-									m_CellxN.back().SetCell(x, y, z).selset = INVALID_ID;
+									m_CellxN.back().SetCell(x, y, z) = 0;
 								}
 							}
 						}
@@ -358,14 +354,16 @@ namespace FPS_n2 {
 								for (int z = zMaxminT; z < zMaxmaxT; z++) {
 									bool checkFill = true;
 									if (cell.scaleRate != 1) {
-										if (((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax)) && ((zMinmin < z) && (z < zMinmax))) {
-											continue;
+										if (((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax))) {
+											if ((zMinmin < z) && (z < zMinmax)) {
+												z = zMinmax - 1;
+												continue;
+											}
 										}
 										checkFill = !(((xMinmin <= x) && (x <= xMinmax)) && ((yMinmin <= y) && (y <= yMinmax)) && ((zMinmin <= z) && (z <= zMinmax)));
 									}
 									const auto& Cell = cell.GetCell(x, y, z);
-									if (Cell.selset == INVALID_ID) { continue; }
-									if (Cell.inRock) { continue; }
+									if (Cell <= 0) { continue; }
 
 									AddCube(cell, x, y, z, checkFill, GetColorU8(128, 128, 128, 255), GetColorU8(64, 64, 64, 255));
 								}
@@ -396,8 +394,7 @@ namespace FPS_n2 {
 										}
 									}
 									const auto& Cell = cell.GetCell(x, y, z);
-									if (Cell.selset == INVALID_ID) { continue; }
-									if (Cell.inRock) { continue; }
+									if (Cell <= 0) { continue; }
 									AddShadowCube(cell, x, y, z, GetColorU8(128, 128, 128, 255), GetColorU8(64, 64, 64, 255));
 								}
 							}

@@ -102,8 +102,24 @@ namespace FPS_n2 {
 
 			Vector3DX PosCamVec = PosMid - DrawParts->GetMainCamera().GetCamPos();
 
+
+
+
 			auto GetPlane = [&](const Vector3DX& Pos1, const Vector3DX& Pos2, const Vector3DX& Pos3, const Vector3DX& Pos4, const Vector3DX& Normal) {
-				if ((!CheckFill || cell.GetCell(x + static_cast<int>(Normal.x), y + static_cast<int>(Normal.y), z + static_cast<int>(Normal.z)).selset == INVALID_ID) && (Vector3DX::Dot(PosCamVec, Normal) < 0.f)) {
+				//PosCamVec.x * Normal.x + PosCamVec.y * Normal.y + PosCamVec.z * Normal.z;
+				if (Normal.x != 0) {
+					if ((PosCamVec.x > 0.f && Normal.x > 0.f) || (PosCamVec.x < 0.f && Normal.x < 0.f)) { return; }
+				}
+				if (Normal.y != 0) {
+					if ((PosCamVec.y > 0.f && Normal.y > 0.f) || (PosCamVec.y < 0.f && Normal.y < 0.f)) { return; }
+				}
+				if (Normal.z != 0) {
+					if ((PosCamVec.z > 0.f && Normal.z > 0.f) || (PosCamVec.z < 0.f && Normal.z < 0.f)) { return; }
+				}
+				//if (Vector3DX::Dot(PosCamVec, Normal) >= 0.f) { return; }
+
+				if ((!CheckFill || cell.GetCell(x + static_cast<int>(Normal.x), y + static_cast<int>(Normal.y), z + static_cast<int>(Normal.z)) == 0)) {
+
 					size_t Now = m_vert32Num;
 					size_t Nowi = m_index32Num;
 					m_vert32Num += 4;
@@ -182,7 +198,7 @@ namespace FPS_n2 {
 			Vector3DX PosMax = (Pos + Vector3DX::one()) * (CellScale * cell.scaleRate);
 
 			auto GetPlane = [&](const Vector3DX& Pos1, const Vector3DX& Pos2, const Vector3DX& Pos3, const Vector3DX& Pos4, const Vector3DX& Normal) {
-				if (cell.GetCell(x + static_cast<int>(Normal.x), y + static_cast<int>(Normal.y), z + static_cast<int>(Normal.z)).selset == INVALID_ID) {
+				if (cell.GetCell(x + static_cast<int>(Normal.x), y + static_cast<int>(Normal.y), z + static_cast<int>(Normal.z)) == 0) {
 					size_t NowS = m_vert32SNum;
 					size_t NowSi = m_index32SNum;
 					m_vert32SNum += 4;
@@ -351,8 +367,7 @@ namespace FPS_n2 {
 							}
 
 							const auto& Cell = cell.GetCell(x, y, z);
-							if (Cell.selset == INVALID_ID) { return false; }
-							if (Cell.inRock) { return false; }
+							if (Cell <= 0) { return false; }
 							Vector3DX MinPos = (Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)) + (Vector3DX::one() * 0.0f)) * (CellScale * cell.scaleRate);
 							Vector3DX MaxPos = (Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)) + (Vector3DX::one() * 1.0f)) * (CellScale * cell.scaleRate);
 							if (ColRayBox(StartPos, EndPos, MinPos, MaxPos, Normal)) {
@@ -389,8 +404,7 @@ namespace FPS_n2 {
 							}
 
 							const auto& Cell = cell.GetCell(x, y, z);
-							if (Cell.selset == INVALID_ID) { return false; }
-							if (Cell.inRock) { return false; }
+							if (Cell <= 0) { return false; }
 							Vector3DX MinPos = (Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)) + (Vector3DX::one() * -0.1f)) * (CellScale * cell.scaleRate);
 							Vector3DX MaxPos = (Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)) + (Vector3DX::one() * 1.1f)) * (CellScale * cell.scaleRate);
 
@@ -557,12 +571,12 @@ namespace FPS_n2 {
 									for (int z = zMaxmin; z < zMaxmax; z++) {
 										const auto& Cell = cell2.GetCell(x, y, z);
 										FillAll++;
-										if (Cell.selset == INVALID_ID) { continue; }
+										if (Cell == 0) { continue; }
 										FillCount++;
 									}
 								}
 							}
-							cell.SetCell(xm, ym, zm).selset = ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f))) ? 0 : INVALID_ID;
+							cell.SetCell(xm, ym, zm) = ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f))) ? 1 : 0;
 						}
 					}
 				}
@@ -574,24 +588,24 @@ namespace FPS_n2 {
 				for (int x = -cell.Xall / 2; x < cell.Xall / 2; x++) {
 					for (int y = -cell.Yall / 2; y < cell.Yall / 2; y++) {
 						for (int z = -cell.Zall / 2; z < cell.Zall / 2; z++) {
-							if (cell.GetCell(x, y, z).selset == INVALID_ID) { continue; }
+							if (cell.GetCell(x, y, z) == 0) { continue; }
 							//端は全て隠す
 							if (
 								((x == -cell.Xall / 2) || (x == cell.Xall / 2 - 1)) ||
 								((y == -cell.Yall / 2) || (y == cell.Yall / 2 - 1)) ||
 								((z == -cell.Zall / 2) || (z == cell.Zall / 2 - 1))
 								) {
-								cell.SetCell(x, y, z).inRock = true;
+								cell.SetCell(x, y, z) = (int8_t)-std::abs(cell.SetCell(x, y, z));
 								continue;
 							}
-							cell.SetCell(x, y, z).inRock = (
-								(cell.GetCell(x + 1, y, z).selset != INVALID_ID) &&
-								(cell.GetCell(x - 1, y, z).selset != INVALID_ID) &&
-								(cell.GetCell(x, y + 1, z).selset != INVALID_ID) &&
-								(cell.GetCell(x, y - 1, z).selset != INVALID_ID) &&
-								(cell.GetCell(x, y, z + 1).selset != INVALID_ID) &&
-								(cell.GetCell(x, y, z - 1).selset != INVALID_ID)
-								);
+							cell.SetCell(x, y, z) = (int8_t)((
+								(cell.GetCell(x + 1, y, z) != 0) &&
+								(cell.GetCell(x - 1, y, z) != 0) &&
+								(cell.GetCell(x, y + 1, z) != 0) &&
+								(cell.GetCell(x, y - 1, z) != 0) &&
+								(cell.GetCell(x, y, z + 1) != 0) &&
+								(cell.GetCell(x, y, z - 1) != 0)
+								) ? -std::abs(cell.SetCell(x, y, z)) : std::abs(cell.SetCell(x, y, z)));
 						}
 					}
 				}
@@ -606,7 +620,7 @@ namespace FPS_n2 {
 				) {
 				return;
 			}
-			m_CellxN.back().SetCell(x, y, z).selset = sel;
+			m_CellxN.back().SetCell(x, y, z) = sel;
 			//簡易版を更新
 			for (int i = total - 1 - 1; i >= 0; i--) {
 				auto& cell = m_CellxN.at(i);
@@ -631,12 +645,12 @@ namespace FPS_n2 {
 						for (int zt = zMaxmin; zt < zMaxmax; zt++) {
 							const auto& Cell = cell2.GetCell(xt, yt, zt);
 							FillAll++;
-							if (Cell.selset == INVALID_ID) { continue; }
+							if (Cell == 0) { continue; }
 							FillCount++;
 						}
 					}
 				}
-				cell.SetCell(xm, ym, zm).selset = ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f))) ? 0 : INVALID_ID;
+				cell.SetCell(xm, ym, zm) = ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f))) ? 1 : 0;
 			}
 			for (auto& cell : m_CellxN) {
 				int xm = x / cell.scaleRate;
@@ -655,21 +669,21 @@ namespace FPS_n2 {
 						((yp == -cell.Yall / 2) || (yp == cell.Yall / 2 - 1)) ||
 						((zp == -cell.Zall / 2) || (zp == cell.Zall / 2 - 1))
 						) {
-						cell.SetCell(xp, yp, zp).inRock = true;
+						cell.SetCell(xp, yp, zp) = (int8_t)-std::abs(cell.SetCell(x, y, z));
 						return;
 					}
-					if (cell.GetCell(xm, ym, zm).selset == INVALID_ID) {
-						cell.SetCell(xp, yp, zp).inRock = false;//周りは石になれない
+					if (cell.GetCell(xm, ym, zm) == 0) {
+						cell.SetCell(xp, yp, zp) = (int8_t)std::abs(cell.SetCell(xp, yp, zp));
 					}
-					else if(!cell.SetCell(xp, yp, zp).inRock){
-						cell.SetCell(xp, yp, zp).inRock = (
-							(cell.GetCell(xp + 1, yp, zp).selset != INVALID_ID) &&
-							(cell.GetCell(xp - 1, yp, zp).selset != INVALID_ID) &&
-							(cell.GetCell(xp, yp + 1, zp).selset != INVALID_ID) &&
-							(cell.GetCell(xp, yp - 1, zp).selset != INVALID_ID) &&
-							(cell.GetCell(xp, yp, zp + 1).selset != INVALID_ID) &&
-							(cell.GetCell(xp, yp, zp - 1).selset != INVALID_ID)
-							);
+					else if(cell.SetCell(xp, yp, zp) < 0){
+						cell.SetCell(xp, yp, zp) = (int8_t)((
+							(cell.GetCell(xp + 1, yp, zp) != 0) &&
+							(cell.GetCell(xp - 1, yp, zp) != 0) &&
+							(cell.GetCell(xp, yp + 1, zp) != 0) &&
+							(cell.GetCell(xp, yp - 1, zp) != 0) &&
+							(cell.GetCell(xp, yp, zp + 1) != 0) &&
+							(cell.GetCell(xp, yp, zp - 1) != 0)
+							) ? -std::abs(cell.SetCell(xp, yp, zp)) : std::abs(cell.SetCell(xp, yp, zp)));
 					}
 					};
 				CheckCell(xm + 1, ym, zm);
