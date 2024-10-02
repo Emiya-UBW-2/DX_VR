@@ -292,7 +292,6 @@ namespace FPS_n2 {
 				};
 				for (auto & cell : m_CellxN) {
 					Vector3DX center = CamPos / (CellScale * cell.scaleRate);
-					center = Vector3DX::vget(static_cast<float>((int)center.x), static_cast<float>((int)center.y), static_cast<float>((int)center.z)) + (Vector3DX::one() * 0.5f);
 					//
 					if (BaseRate >= cell.scaleRate) {
 						int xMaxmin = std::max(static_cast<int>(center.x - Max), -cell.Xall / 2);
