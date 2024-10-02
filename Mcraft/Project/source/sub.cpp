@@ -4,7 +4,6 @@
 #include "MainScene/Object/Character.hpp"
 
 const FPS_n2::CommonBattleResource* SingletonBase<FPS_n2::CommonBattleResource>::m_Singleton = nullptr;
-const FPS_n2::HitMark* SingletonBase<FPS_n2::HitMark>::m_Singleton = nullptr;
 
 namespace FPS_n2 {
 	void			CommonBattleResource::Load(void) noexcept {
@@ -82,69 +81,5 @@ namespace FPS_n2 {
 		p->SetAI(std::make_shared<Player::AIControl>());
 		//p->GetAI()->SetPlayerID(value);
 		//p->GetAI()->Init();
-	}
-	void HitMark::Load(void) noexcept {
-		this->MenGraph = GraphHandle::Load("data/UI/hit_Men.bmp");
-		this->KoteGraph = GraphHandle::Load("data/UI/hit_Kote.bmp");
-		this->DoGraph = GraphHandle::Load("data/UI/hit_Do.bmp");
-	}
-	void HitMark::Set(void) noexcept {
-		for (auto& h : m_HitPos) {
-			h.Time = -1.f;
-		}
-	}
-	void HitMark::Update(void) noexcept {
-		auto* DrawParts = DXDraw::Instance();
-		for (auto& h: m_HitPos) {
-			if (h.Time <= 0.f) { continue; }
-			if (h.Time == h.TimeMax) {
-				auto tmp = ConvWorldPosToScreenPos(h.m_Pos.get());
-				if (tmp.z >= 0.f && tmp.z <= 1.f) {
-					h.m_Pos2D = tmp;
-					h.m_Pos2D = h.m_Pos2D * ((float)DrawParts->GetUIY(1080) / (float)DrawParts->GetScreenY(1080));
-				}
-			}
-			h.Time = std::max(h.Time - 1.f / DrawParts->GetFps(), 0.f);
-		}
-	}
-	void HitMark::Draw(void) noexcept {
-		auto* DrawParts = DXDraw::Instance();
-		for (auto& h : m_HitPos) {
-			if (h.Time <= 0.f) { continue; }
-			if (h.m_Pos2D.z >= 0.f && h.m_Pos2D.z <= 1.f) {
-				float		Per = std::clamp(1.f - h.Time / h.TimeMax, 0.f, 1.f);
-				int			Alpha = std::clamp((int)(std::sin(Per * 2.f * DX_PI_F) * h.m_Per * 255.f), 0, 255);
-				float		Scale = Per * 10.f * h.m_Per;
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, Alpha);
-				switch (h.m_Color) {
-				case HitType::Head://–Ê
-					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
-					WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, 
-						&MenGraph, (int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
-					break;
-				case HitType::Arm://¬Žè
-					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 128, 0);
-					WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, 
-						&KoteGraph, (int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
-					break;
-				case HitType::Body://“·
-					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
-					WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, 
-						&DoGraph, (int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
-					break;
-				case HitType::Leg:
-				default:
-					break;
-				}
-
-			}
-		}
-		WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-		WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-	}
-	void HitMark::Dispose(void) noexcept {
-		this->MenGraph.Dispose();
-		this->KoteGraph.Dispose();
-		this->DoGraph.Dispose();
 	}
 };

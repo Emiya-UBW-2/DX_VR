@@ -19,7 +19,6 @@ namespace FPS_n2 {
 			//UI
 			this->m_UIclass.Load();
 			PauseMenuControl::LoadPause();
-			HitMark::Instance()->Load();
 			//
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
@@ -70,7 +69,6 @@ namespace FPS_n2 {
 			PauseMenuControl::SetPause();
 			FadeControl::SetFade();
 			this->m_IsEnd = false;
-			HitMark::Instance()->Set();
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* PostPassParts = PostPassEffect::Instance();
@@ -392,7 +390,6 @@ namespace FPS_n2 {
 			PlayerMngr->Dispose();
 			ObjectManager::Instance()->DeleteAll();
 			PauseMenuControl::DisposePause();
-			HitMark::Instance()->Dispose();
 		}
 
 		//
@@ -432,7 +429,6 @@ namespace FPS_n2 {
 			for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 			}
-			HitMark::Instance()->Update();
 			auto* Pad = PadControl::Instance();
 			/*
 
@@ -465,7 +461,6 @@ namespace FPS_n2 {
 		}
 		//UI•\Ž¦
 		void			MainGameScene::DrawUI_In_Sub(void) noexcept {
-			HitMark::Instance()->Draw();
 			FadeControl::DrawFade();
 			//UI
 			if (!DXDraw::Instance()->IsPause()) {

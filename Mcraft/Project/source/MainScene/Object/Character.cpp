@@ -24,9 +24,6 @@ namespace FPS_n2 {
 						break;
 					}
 				}
-				else {
-					HitMark::Instance()->Add(value.m_Pos, value.GetHitType(), static_cast<float>(value.Damage) / 100.f);
-				}
 				//ƒ_ƒ[ƒW
 				return true;
 			}

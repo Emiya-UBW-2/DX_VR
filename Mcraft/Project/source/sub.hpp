@@ -65,48 +65,4 @@ namespace FPS_n2 {
 	public:
 		void			LoadChara(const std::string& FolderName, PlayerID ID) noexcept;
 	};
-
-	class HitMark : public SingletonBase<HitMark> {
-	private:
-		friend class SingletonBase<HitMark>;
-	private:
-		struct HitPos
-		{
-			float Time{};
-			float TimeMax{};
-			Vector3DX	m_Pos2D;
-			Vector3DX	m_Pos;
-			HitType		m_Color{};
-			float		m_Per{};
-		};
-	private:
-		GraphHandle										MenGraph;
-		GraphHandle										KoteGraph;
-		GraphHandle										DoGraph;
-		std::array<HitPos, 16>							m_HitPos;
-		size_t											m_HitNow{ 0 };
-	private:
-		HitMark(void) noexcept {}
-		HitMark(const HitMark&) = delete;
-		HitMark(HitMark&& o) = delete;
-		HitMark& operator=(const HitMark&) = delete;
-		HitMark& operator=(HitMark&& o) = delete;
-
-		virtual ~HitMark(void) noexcept {}
-	public:
-		void			Load(void) noexcept;
-		void			Set(void) noexcept;
-		void			Update(void) noexcept;
-		void			Draw(void) noexcept;
-		void			Dispose(void) noexcept;
-	public:
-		void			Add(const Vector3DX& Pos, HitType color, float Per) noexcept {
-			m_HitPos.at(m_HitNow).m_Pos = Pos;
-			m_HitPos.at(m_HitNow).m_Color = color;
-			m_HitPos.at(m_HitNow).m_Per = Per;
-			m_HitPos.at(m_HitNow).TimeMax = 2.f;
-			m_HitPos.at(m_HitNow).Time = m_HitPos.at(m_HitNow).TimeMax;
-			++m_HitNow %= m_HitPos.size();
-		}
-	};
 };
