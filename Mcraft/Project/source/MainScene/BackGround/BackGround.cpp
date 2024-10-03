@@ -95,111 +95,110 @@ namespace FPS_n2 {
 		}
 		void		BackGroundClass::AddCube(const CellsData& cell, int x, int y, int z, bool CheckFill, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept {
 			auto* DrawParts = DXDraw::Instance();
-			Vector3DX Pos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
-			Vector3DX PosMin = Pos * (CellScale * cell.scaleRate);
-			Vector3DX PosMid = (Pos + Vector3DX::one() * 0.5f) * (CellScale * cell.scaleRate);
-			Vector3DX PosMax = (Pos + Vector3DX::one()) * (CellScale * cell.scaleRate);
-
-			Vector3DX PosCamVec = PosMid - DrawParts->GetMainCamera().GetCamPos();
+			float scale = CellScale * cell.scaleRate;
+			Vector3DX camPos = DrawParts->GetMainCamera().GetCamPos() / scale;
 
 
+			auto GetPlane = [&](int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int xN, int yN, int zN) {
+				if (CheckFill && cell.IsActiveCell(x + xN, y + yN, z + zN)) { return; }
 
-
-			auto GetPlane = [&](const Vector3DX& Pos1, const Vector3DX& Pos2, const Vector3DX& Pos3, const Vector3DX& Pos4, const VECTOR& Normal) {
-				if (Normal.x != 0) {
-					if ((PosCamVec.x > 0.f && Normal.x > 0.f) || (PosCamVec.x < 0.f && Normal.x < 0.f)) { return; }
-				}
-				if (Normal.y != 0) {
-					if ((PosCamVec.y > 0.f && Normal.y > 0.f) || (PosCamVec.y < 0.f && Normal.y < 0.f)) { return; }
-				}
-				if (Normal.z != 0) {
-					if ((PosCamVec.z > 0.f && Normal.z > 0.f) || (PosCamVec.z < 0.f && Normal.z < 0.f)) { return; }
-				}
-				//if (Vector3DX::Dot(PosCamVec, Normal) >= 0.f) { return; }
-				if (CheckFill && cell.IsActiveCell(x + static_cast<int>(Normal.x), y + static_cast<int>(Normal.y), z + static_cast<int>(Normal.z))) {
-					return;
+				if (m_32Num + 1 > m_32Size) {
+					m_32Size = m_32Num + 1;
+					m_vert32.resize(m_32Size * 4);
+					m_index32.resize(m_32Size * 6);
 				}
 
-				size_t Now = m_32Num;
+				float Xofs = 1.0f - static_cast<float>(yN);
+				float uvAdd = 1.f / 8.f;
+				float uMin = Xofs * uvAdd;
+				float vMin = 0.f * uvAdd;
+
+				auto AddPointPos = [&](int xt, int yt, int u, int v, int sel) {
+					Vector3DX Pos;
+					if (xN != 0) {
+						Pos = Vector3DX::vget(static_cast<float>(x + (xN + 1) / 2), static_cast<float>(y + xt), static_cast<float>(z + yt)) * scale;
+					}
+					else if (yN != 0) {
+						Pos = Vector3DX::vget(static_cast<float>(x + xt), static_cast<float>(y + (yN + 1) / 2), static_cast<float>(z + yt)) * scale;
+					}
+					else if (zN != 0) {
+						Pos = Vector3DX::vget(static_cast<float>(x + xt), static_cast<float>(y + yt), static_cast<float>(z + (zN + 1) / 2)) * scale;
+					}
+
+					auto& V = m_vert32.at(m_32Num * 4 + sel);
+					V.pos = Pos.get();
+					V.u = uMin + uvAdd * static_cast<float>(u);
+					V.v = vMin + uvAdd * static_cast<float>(v);
+					V.norm = VGet(static_cast<float>(xN), static_cast<float>(yN), static_cast<float>(zN));
+					V.dif = DifColor;
+					V.spc = SpcColor;
+					};
+
+				AddPointPos(x1, y1, 1, 0, 0);
+				AddPointPos(x2, y2, 0, 0, 1);
+				AddPointPos(x3, y3, 1, 1, 2);
+				AddPointPos(x4, y4, 0, 1, 3);
+				m_index32.at(m_32Num * 6) = (uint32_t)(m_32Num * 4);
+				m_index32.at(m_32Num * 6 + 1) = (uint32_t)(m_32Num * 4 + 1);
+				m_index32.at(m_32Num * 6 + 2) = (uint32_t)(m_32Num * 4 + 2);
+				m_index32.at(m_32Num * 6 + 3) = (uint32_t)(m_32Num * 4 + 3);
+				m_index32.at(m_32Num * 6 + 4) = (uint32_t)(m_32Num * 4 + 2);
+				m_index32.at(m_32Num * 6 + 5) = (uint32_t)(m_32Num * 4 + 1);
 				m_32Num++;
-				if (m_32Num > m_32Size) {
-					m_vert32.resize(m_32Num * 4);
-					m_index32.resize(m_32Num * 6);
-					m_32Size = m_32Num;
-				}
-
-				float Xofs = 1.0f - Normal.y;
-				float uMin = (0.f + Xofs) / 8.f;
-				float vMin = 0.f / 8.f;
-				float uMax = uMin + 1.f / 8.f;
-				float vMax = vMin + 1.f / 8.f;
-				{
-					auto& v = m_vert32.at(Now * 4);
-					v.pos = Pos1.get();
-					v.u = uMax;
-					v.v = vMin;
-					v.norm = Normal;
-					v.dif = DifColor;
-					v.spc = SpcColor;
-				}
-				{
-					auto& v = m_vert32.at(Now * 4 + 1);
-					v.pos = Pos2.get();
-					v.u = uMin;
-					v.v = vMin;
-					v.norm = Normal;
-					v.dif = DifColor;
-					v.spc = SpcColor;
-				}
-				{
-					auto& v = m_vert32.at(Now * 4 + 2);
-					v.pos = Pos3.get();
-					v.u = uMax;
-					v.v = vMax;
-					v.norm = Normal;
-					v.dif = DifColor;
-					v.spc = SpcColor;
-				}
-				{
-					auto& v = m_vert32.at(Now * 4 + 3);
-					v.pos = Pos4.get();
-					v.u = uMin;
-					v.v = vMax;
-					v.norm = Normal;
-					v.dif = DifColor;
-					v.spc = SpcColor;
-				}
-				m_index32.at(Now * 6) = (uint32_t)(Now * 4);
-				m_index32.at(Now * 6 + 1) = (uint32_t)(Now * 4 + 1);
-				m_index32.at(Now * 6 + 2) = (uint32_t)(Now * 4 + 2);
-				m_index32.at(Now * 6 + 3) = (uint32_t)(Now * 4 + 3);
-				m_index32.at(Now * 6 + 4) = (uint32_t)(Now * 4 + 2);
-				m_index32.at(Now * 6 + 5) = (uint32_t)(Now * 4 + 1);
 				};
 			// 頂点データの作成
-			GetPlane(
-				Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z), Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z), PosMin, Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z),
-				Vector3DX::back().get());
+			if (z >= camPos.z) {
+				GetPlane(
+					0, 1,
+					1, 1,
+					0, 0,
+					1, 0,
+					0, 0, -1);
+			}
 
-			GetPlane(
-				Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z), Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z), Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z), PosMax,
-				Vector3DX::forward().get());
+			if (z + 1 <= camPos.z) {
+				GetPlane(
+					0, 0,
+					1, 0,
+					0, 1,
+					1, 1,
+					0, 0, 1);
+			}
 
-			GetPlane(
-				Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z), Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z), Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z), PosMin,
-				Vector3DX::left().get());
+			if (x >= camPos.x) {
+				GetPlane(
+					1, 1,
+					1, 0,
+					0, 1,
+					0, 0,
+					-1, 0, 0);
+			}
+			if (x + 1 <= camPos.x) {
+				GetPlane(
+					1, 0,
+					1, 1,
+					0, 0,
+					0, 1,
+					1, 0, 0);
+			}
 
-			GetPlane(
-				Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z), PosMax, Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z), Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z),
-				Vector3DX::right().get());
+			if (y + 1 <= camPos.y) {
+				GetPlane(
+					0, 1,
+					1, 1,
+					0, 0,
+					1, 0,
+					0, 1, 0);
+			}
 
-			GetPlane(
-				Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z), PosMax, Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z), Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z),
-				Vector3DX::up().get());
-
-			GetPlane(
-				PosMin, Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z), Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z), Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z),
-				Vector3DX::down().get());
+			if (y >= camPos.y) {
+				GetPlane(
+					0, 0,
+					1, 0,
+					0, 1,
+					1, 1,
+					0, -1, 0);
+			}
 		}
 
 		void BackGroundClass::AddShadowCube(const CellsData& cell, int x, int y, int z, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept {
@@ -368,9 +367,9 @@ namespace FPS_n2 {
 						bool isHit = false;
 						Bresenham3D(static_cast<int>(Start.x + xm), static_cast<int>(Start.y + ym), static_cast<int>(Start.z + zm), static_cast<int>(End.x + xm), static_cast<int>(End.y + ym), static_cast<int>(End.z + zm), [&](int x, int y, int z) {
 							if (
-								((x <= -cell.Xall / 2) || (cell.Xall / 2 - 1 < x)) ||
-								((y <= -cell.Yall / 2) || (cell.Yall / 2 - 1 < y)) ||
-								((z <= -cell.Zall / 2) || (cell.Zall / 2 - 1 < z))
+								((x <= -cell.Xharf) || (cell.Xharf - 1 < x)) ||
+								((y <= -cell.Yharf) || (cell.Yharf - 1 < y)) ||
+								((z <= -cell.Zharf) || (cell.Zharf - 1 < z))
 								) {
 								return false;
 							}
@@ -403,9 +402,9 @@ namespace FPS_n2 {
 					for (int zm = -2; zm <= 2; zm++) {
 						Bresenham3D(static_cast<int>(Start.x + xm), static_cast<int>(Start.y + ym), static_cast<int>(Start.z + zm), static_cast<int>(End.x + xm), static_cast<int>(End.y + ym), static_cast<int>(End.z + zm), [&](int x, int y, int z) {
 							if (
-								((x <= -cell.Xall / 2) || (cell.Xall / 2 - 1 < x)) ||
-								((y <= -cell.Yall / 2) || (cell.Yall / 2 - 1 < y)) ||
-								((z <= -cell.Zall / 2) || (cell.Zall / 2 - 1 < z))
+								((x <= -cell.Xharf) || (cell.Xharf - 1 < x)) ||
+								((y <= -cell.Yharf) || (cell.Yharf - 1 < y)) ||
+								((z <= -cell.Zharf) || (cell.Zharf - 1 < z))
 								) {
 								return false;
 							}
@@ -527,21 +526,54 @@ namespace FPS_n2 {
 		void		BackGroundClass::LoadCellsFile() noexcept {
 			std::ifstream fin;
 			fin.open("data/Map.txt", std::ios::in | std::ios::binary);
-			fin.read((char*)&m_CellxN.back().Xall, sizeof(m_CellxN.back().Xall));
-			fin.read((char*)&m_CellxN.back().Yall, sizeof(m_CellxN.back().Yall));
-			fin.read((char*)&m_CellxN.back().Zall, sizeof(m_CellxN.back().Zall));
-			m_CellxN.back().scaleRate = 1;
-			m_CellxN.back().m_Cell.resize((size_t)(m_CellxN.back().Xall * m_CellxN.back().Yall * m_CellxN.back().Zall));
-			fin.read((char*)&m_CellxN.back().m_Cell.at(0), sizeof(m_CellxN.back().m_Cell.at(0)) * m_CellxN.back().m_Cell.size());
+			auto& cell = m_CellxN.back();
+			fin.read((char*)&cell.Xall, sizeof(cell.Xall));
+			fin.read((char*)&cell.Yall, sizeof(cell.Yall));
+			fin.read((char*)&cell.Zall, sizeof(cell.Zall));
+			cell.Xharf = cell.Xall / 2;
+			cell.Yharf = cell.Yall / 2;
+			cell.Zharf = cell.Zall / 2;
+			cell.scaleRate = 1;
+			cell.m_Cell.resize((size_t)(cell.Xall * cell.Yall * cell.Zall));
+			fin.read((char*)&cell.m_Cell.at(0), sizeof(cell.m_Cell.at(0)) * cell.m_Cell.size());
+			/*
+			{
+				auto& cell = m_CellxN.back();
+				cell.Xall = 256;
+				cell.Yall = 256;
+				cell.Zall = 256;
+				cell.Xharf = cell.Xall / 2;
+				cell.Yharf = cell.Yall / 2;
+				cell.Zharf = cell.Zall / 2;
+				cell.scaleRate = 1;
+				cell.m_Cell.resize((size_t)(cell.Xall * cell.Yall * cell.Zall));
+
+				for (int x = -cell.Xharf; x < cell.Xharf; x++) {
+					for (int y = -cell.Yharf; y < cell.Yharf; y++) {
+						for (int z = -cell.Zharf; z < cell.Zharf; z++) {
+							cell.SetCell(x, y, z) = s_EmptyBlick;
+							if (
+								(-m_CellxN2.Xharf <= x && x < m_CellxN2.Xharf) &&
+								(-m_CellxN2.Yharf <= y && y < m_CellxN2.Yharf) &&
+								(-m_CellxN2.Zharf <= z && z < m_CellxN2.Zharf)
+								) {
+								cell.SetCell(x, y, z) = m_CellxN2.GetCell(x, y, z);
+							}
+						}
+					}
+				}
+			}
+			//*/
 			fin.close();
 		}
 		void		BackGroundClass::SaveCellsFile() noexcept {
 			std::ofstream fout;
 			fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
-			fout.write((char*)&m_CellxN.back().Xall, sizeof(m_CellxN.back().Xall));
-			fout.write((char*)&m_CellxN.back().Yall, sizeof(m_CellxN.back().Yall));
-			fout.write((char*)&m_CellxN.back().Zall, sizeof(m_CellxN.back().Zall));
-			fout.write((char*)&m_CellxN.back().m_Cell.at(0), sizeof(m_CellxN.back().m_Cell.at(0)) * m_CellxN.back().m_Cell.size());
+			auto& cell = m_CellxN.back();
+			fout.write((char*)&cell.Xall, sizeof(cell.Xall));
+			fout.write((char*)&cell.Yall, sizeof(cell.Yall));
+			fout.write((char*)&cell.Zall, sizeof(cell.Zall));
+			fout.write((char*)&cell.m_Cell.at(0), sizeof(cell.m_Cell.at(0)) * cell.m_Cell.size());
 			fout.close();  //ファイルを閉じる
 		}
 
@@ -555,21 +587,24 @@ namespace FPS_n2 {
 				cell.Xall = m_CellxN.back().Xall / cell.scaleRate;
 				cell.Yall = m_CellxN.back().Yall / cell.scaleRate;
 				cell.Zall = m_CellxN.back().Zall / cell.scaleRate;
+				cell.Xharf = cell.Xall / 2;
+				cell.Yharf = cell.Yall / 2;
+				cell.Zharf = cell.Zall / 2;
 				cell.m_Cell.resize((size_t)(cell.Xall * cell.Yall * cell.Zall));
 
-				for (int xm = -cell.Xall / 2; xm < cell.Xall / 2; xm++) {
-					for (int ym = -cell.Yall / 2; ym < cell.Yall / 2; ym++) {
-						for (int zm = -cell.Zall / 2; zm < cell.Zall / 2; zm++) {
+				for (int xm = -cell.Xharf; xm < cell.Xharf; xm++) {
+					for (int ym = -cell.Yharf; ym < cell.Yharf; ym++) {
+						for (int zm = -cell.Zharf; zm < cell.Zharf; zm++) {
 							int FillCount = 0;
 							int FillAll = 0;
 
 
-							int xMaxmin = std::max(xm * MulPer, -cell2.Xall / 2);
-							int xMaxmax = std::min((xm + 1) * MulPer, cell2.Xall / 2);
-							int yMaxmin = std::max(ym * MulPer, -cell2.Yall / 2);
-							int yMaxmax = std::min((ym + 1) * MulPer, cell2.Yall / 2);
-							int zMaxmin = std::max(zm * MulPer, -cell2.Zall / 2);
-							int zMaxmax = std::min((zm + 1) * MulPer, cell2.Zall / 2);
+							int xMaxmin = std::max(xm * MulPer, -cell2.Xharf);
+							int xMaxmax = std::min((xm + 1) * MulPer, cell2.Xharf);
+							int yMaxmin = std::max(ym * MulPer, -cell2.Yharf);
+							int yMaxmax = std::min((ym + 1) * MulPer, cell2.Yharf);
+							int zMaxmin = std::max(zm * MulPer, -cell2.Zharf);
+							int zMaxmax = std::min((zm + 1) * MulPer, cell2.Zharf);
 
 							for (int x = xMaxmin; x < xMaxmax; x++) {
 								for (int y = yMaxmin; y < yMaxmax; y++) {
@@ -589,15 +624,15 @@ namespace FPS_n2 {
 		//遮蔽検索
 		void		BackGroundClass::CalcOcclusion() noexcept {
 			for (auto& cell : m_CellxN) {
-				for (int x = -cell.Xall / 2; x < cell.Xall / 2; x++) {
-					for (int y = -cell.Yall / 2; y < cell.Yall / 2; y++) {
-						for (int z = -cell.Zall / 2; z < cell.Zall / 2; z++) {
+				for (int x = -cell.Xharf; x < cell.Xharf; x++) {
+					for (int y = -cell.Yharf; y < cell.Yharf; y++) {
+						for (int z = -cell.Zharf; z < cell.Zharf; z++) {
 							if (!cell.IsActiveCell(x, y, z)) { continue; }
 							//端は全て隠す
 							if (
-								((x == -cell.Xall / 2) || (x == cell.Xall / 2 - 1)) ||
-								((y == -cell.Yall / 2) || (y == cell.Yall / 2 - 1)) ||
-								((z == -cell.Zall / 2) || (z == cell.Zall / 2 - 1))
+								((x == -cell.Xharf) || (x == cell.Xharf - 1)) ||
+								((y == -cell.Yharf) || (y == cell.Yharf - 1)) ||
+								((z == -cell.Zharf) || (z == cell.Zharf - 1))
 								) {
 								cell.SetCellOnBlick(x, y, z, true);
 								continue;
@@ -617,14 +652,17 @@ namespace FPS_n2 {
 		}
 		//
 		void BackGroundClass::SetBlick(int x, int y, int z, int8_t sel) noexcept {
-			if (
-				((x < -m_CellxN.back().Xall / 2) || (x > m_CellxN.back().Xall / 2 - 1)) ||
-				((y < -m_CellxN.back().Yall / 2) || (y > m_CellxN.back().Yall / 2 - 1)) ||
-				((z < -m_CellxN.back().Zall / 2) || (z > m_CellxN.back().Zall / 2 - 1))
-				) {
-				return;
+			{
+				auto& cell = m_CellxN.back();
+				if (
+					((x < -cell.Xharf) || (x > cell.Xharf - 1)) ||
+					((y < -cell.Yharf) || (y > cell.Yharf - 1)) ||
+					((z < -cell.Zharf) || (z > cell.Zharf - 1))
+					) {
+					return;
+				}
+				cell.SetCell(x, y, z) = sel;
 			}
-			m_CellxN.back().SetCell(x, y, z) = sel;
 			//簡易版を更新
 			for (int i = total - 1 - 1; i >= 0; i--) {
 				auto& cell = m_CellxN.at(i);
@@ -637,12 +675,12 @@ namespace FPS_n2 {
 				int ym = y / cell.scaleRate;
 				int zm = z / cell.scaleRate;
 
-				int xMaxmin = std::max(xm * MulPer, -cell2.Xall / 2);
-				int xMaxmax = std::min((xm + 1) * MulPer, cell2.Xall / 2);
-				int yMaxmin = std::max(ym * MulPer, -cell2.Yall / 2);
-				int yMaxmax = std::min((ym + 1) * MulPer, cell2.Yall / 2);
-				int zMaxmin = std::max(zm * MulPer, -cell2.Zall / 2);
-				int zMaxmax = std::min((zm + 1) * MulPer, cell2.Zall / 2);
+				int xMaxmin = std::max(xm * MulPer, -cell2.Xharf);
+				int xMaxmax = std::min((xm + 1) * MulPer, cell2.Xharf);
+				int yMaxmin = std::max(ym * MulPer, -cell2.Yharf);
+				int yMaxmax = std::min((ym + 1) * MulPer, cell2.Yharf);
+				int zMaxmin = std::max(zm * MulPer, -cell2.Zharf);
+				int zMaxmax = std::min((zm + 1) * MulPer, cell2.Zharf);
 
 				for (int xt = xMaxmin; xt < xMaxmax; xt++) {
 					for (int yt = yMaxmin; yt < yMaxmax; yt++) {
@@ -661,16 +699,16 @@ namespace FPS_n2 {
 				int zm = z / cell.scaleRate;
 				auto CheckCell = [&](int xp, int yp, int zp) {
 					if (
-						((xp < -cell.Xall / 2) || (xp > cell.Xall / 2 - 1)) ||
-						((yp < -cell.Yall / 2) || (yp > cell.Yall / 2 - 1)) ||
-						((zp < -cell.Zall / 2) || (zp > cell.Zall / 2 - 1))
+						((xp < -cell.Xharf) || (xp > cell.Xharf - 1)) ||
+						((yp < -cell.Yharf) || (yp > cell.Yharf - 1)) ||
+						((zp < -cell.Zharf) || (zp > cell.Zharf - 1))
 						) {
 						return;
 					}
 					if (
-						((xp == -cell.Xall / 2) || (xp == cell.Xall / 2 - 1)) ||
-						((yp == -cell.Yall / 2) || (yp == cell.Yall / 2 - 1)) ||
-						((zp == -cell.Zall / 2) || (zp == cell.Zall / 2 - 1))
+						((xp == -cell.Xharf) || (xp == cell.Xharf - 1)) ||
+						((yp == -cell.Yharf) || (yp == cell.Yharf - 1)) ||
+						((zp == -cell.Zharf) || (zp == cell.Zharf - 1))
 						) {
 						cell.SetCellOnBlick(xp, yp, zp, true);
 						return;

@@ -3,22 +3,34 @@
 #include "DXLib_ref/DXLib_ref.h"
 using namespace DXLibRef;
 
-struct CellData {
-	int8_t select = INVALID_ID;
-	int8_t inRock = false;
-};
+static const int8_t s_EmptyBlick = 0;
+
 struct CellsData {
-	std::vector<int> m_number;
-	std::vector<CellData> m_Cell;
+	std::vector<int8_t> m_Cell;
 	int16_t Xall = 500;
 	int16_t Yall = 160;
 	int16_t Zall = 500;
+	int8_t scaleRate = 1;
+
 	const auto& GetCell(int x, int y, int z) const noexcept {
 		return m_Cell.at((size_t)((x + Xall / 2) + Xall * (y + Yall / 2) + Xall * Yall * (z + Zall / 2)));
 	}
 	auto& SetCell(int x, int y, int z) noexcept {
 		return m_Cell.at((size_t)((x + Xall / 2) + Xall * (y + Yall / 2) + Xall * Yall * (z + Zall / 2)));
 	}
+
+	void SetCellOnBlick(int x, int y, int z, bool value) noexcept {
+		SetCell(x, y, z) = (int8_t)(value ? -std::abs(GetCell(x, y, z)) : std::abs(GetCell(x, y, z)));
+	}
+	const bool IsActiveCell(int x, int y, int z) const noexcept {
+		return GetCell(x, y, z) != s_EmptyBlick;
+	}
+
+	const bool IsDrawCell(int x, int y, int z) const noexcept {
+		return GetCell(x, y, z) > s_EmptyBlick;
+	}
+
+	std::vector<int> m_number;
 	const auto& GetCellNum(int x, int y, int z) const noexcept {
 		return m_number.at((size_t)((x + Xall / 2) + Xall * (y + Yall / 2) + Xall * Yall * (z + Zall / 2)));
 	}
@@ -26,6 +38,8 @@ struct CellsData {
 		return m_number.at((size_t)((x + Xall / 2) + Xall * (y + Yall / 2) + Xall * Yall * (z + Zall / 2)));
 	}
 };
+
+
 struct SavePointData {
 	int x{};
 	int y{};

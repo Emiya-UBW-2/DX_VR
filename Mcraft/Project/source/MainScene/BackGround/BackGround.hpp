@@ -116,12 +116,15 @@ namespace FPS_n2 {
 				int16_t Yall = 160;
 				int16_t Zall = 500;
 				int8_t scaleRate = 1;
+				int Xharf = 500;
+				int Yharf = 160;
+				int Zharf = 500;
 
 				const auto& GetCell(int x, int y, int z) const noexcept {
-					return m_Cell.at((size_t)((x + Xall / 2) + Xall * (y + Yall / 2) + Xall * Yall * (z + Zall / 2)));
+					return m_Cell.at((size_t)((x + Xharf) + Xall * (y + Yharf) + Xall * Yall * (z + Zharf)));
 				}
 				auto& SetCell(int x, int y, int z) noexcept {
-					return m_Cell.at((size_t)((x + Xall / 2) + Xall * (y + Yall / 2) + Xall * Yall * (z + Zall / 2)));
+					return m_Cell.at((size_t)((x + Xharf) + Xall * (y + Yharf) + Xall * Yall * (z + Zharf)));
 				}
 
 				void SetCellOnBlick(int x, int y, int z, bool value) noexcept {
@@ -142,6 +145,7 @@ namespace FPS_n2 {
 			const int DrawMax = 50;
 
 			std::vector<CellsData> m_CellxN;
+			CellsData m_CellxN2;
 
 			GraphHandle		m_tex{};
 			GraphHandle		m_norm{};
@@ -198,15 +202,18 @@ namespace FPS_n2 {
 						m_CellxN.back().Xall = 500;
 						m_CellxN.back().Yall = 160;
 						m_CellxN.back().Zall = 500;
+						m_CellxN.back().Xharf = m_CellxN.back().Xall / 2;
+						m_CellxN.back().Yharf = m_CellxN.back().Yall / 2;
+						m_CellxN.back().Zharf = m_CellxN.back().Zall / 2;
 						m_CellxN.back().m_Cell.resize((size_t)(m_CellxN.back().Xall * m_CellxN.back().Yall * m_CellxN.back().Zall));
 						m_CellxN.back().scaleRate = 1;
-						for (int x = -m_CellxN.back().Xall / 2; x < m_CellxN.back().Xall / 2; x++) {
-							for (int z = -m_CellxN.back().Zall / 2; z < m_CellxN.back().Zall / 2; z++) {
+						for (int x = -m_CellxN.back().Xharf; x < m_CellxN.back().Xharf; x++) {
+							for (int z = -m_CellxN.back().Zharf; z < m_CellxN.back().Zharf; z++) {
 								auto Height = static_cast<int>(ns.octaveNoise(2,
-									(static_cast<float>(x + m_CellxN.back().Xall / 2)) / m_CellxN.back().Xall,
-									(static_cast<float>(z + m_CellxN.back().Zall / 2)) / m_CellxN.back().Zall
+									(static_cast<float>(x + m_CellxN.back().Xharf)) / m_CellxN.back().Xall,
+									(static_cast<float>(z + m_CellxN.back().Zharf)) / m_CellxN.back().Zall
 								) * static_cast<float>(m_CellxN.back().Yall * 4 / 5)) - (m_CellxN.back().Yall * 4 / 5) / 2;
-								for (int y = -m_CellxN.back().Yall / 2; y < m_CellxN.back().Yall / 2; y++) {
+								for (int y = -m_CellxN.back().Yharf; y < m_CellxN.back().Yharf; y++) {
 									if (y <= Height) {
 										m_CellxN.back().SetCell(x, y, z) = 1;
 										continue;
@@ -225,11 +232,14 @@ namespace FPS_n2 {
 						m_CellxN.back().Xall = 100;
 						m_CellxN.back().Yall = 100;
 						m_CellxN.back().Zall = 100;
+						m_CellxN.back().Xharf = m_CellxN.back().Xall / 2;
+						m_CellxN.back().Yharf = m_CellxN.back().Yall / 2;
+						m_CellxN.back().Zharf = m_CellxN.back().Zall / 2;
 						m_CellxN.back().m_Cell.resize((size_t)(m_CellxN.back().Xall * m_CellxN.back().Yall * m_CellxN.back().Zall));
 						m_CellxN.back().scaleRate = 1;
-						for (int x = -m_CellxN.back().Xall / 2; x < m_CellxN.back().Xall / 2; x++) {
-							for (int z = -m_CellxN.back().Zall / 2; z < m_CellxN.back().Zall / 2; z++) {
-								for (int y = -m_CellxN.back().Yall / 2; y < m_CellxN.back().Yall / 2; y++) {
+						for (int x = -m_CellxN.back().Xharf; x < m_CellxN.back().Xharf; x++) {
+							for (int z = -m_CellxN.back().Zharf; z < m_CellxN.back().Zharf; z++) {
+								for (int y = -m_CellxN.back().Yharf; y < m_CellxN.back().Yharf; y++) {
 									if (y <= 0) {
 										m_CellxN.back().SetCell(x, y, z) = 1;
 										continue;
@@ -326,12 +336,12 @@ namespace FPS_n2 {
 					Vector3DX center = CamPos / (CellScale * cell.scaleRate);
 					//
 					if (BaseRate >= cell.scaleRate) {
-						int xMaxmin = std::max(static_cast<int>(center.x) - DrawMax, -cell.Xall / 2);
-						int xMaxmax = std::min(static_cast<int>(center.x) + DrawMax + 1, cell.Xall / 2);
-						int yMaxmin = std::max(static_cast<int>(center.y) - DrawMax, -cell.Yall / 2);
-						int yMaxmax = std::min(static_cast<int>(center.y) + DrawMax + 1, cell.Yall / 2);
-						int zMaxmin = std::max(static_cast<int>(center.z) - DrawMax, -cell.Zall / 2);
-						int zMaxmax = std::min(static_cast<int>(center.z) + DrawMax + 1, cell.Zall / 2);
+						int xMaxmin = std::max(static_cast<int>(center.x) - DrawMax, -cell.Xharf);
+						int xMaxmax = std::min(static_cast<int>(center.x) + DrawMax + 1, cell.Xharf);
+						int yMaxmin = std::max(static_cast<int>(center.y) - DrawMax, -cell.Yharf);
+						int yMaxmax = std::min(static_cast<int>(center.y) + DrawMax + 1, cell.Yharf);
+						int zMaxmin = std::max(static_cast<int>(center.z) - DrawMax, -cell.Zharf);
+						int zMaxmax = std::min(static_cast<int>(center.z) + DrawMax + 1, cell.Zharf);
 
 						int xMinmin = static_cast<int>(center.x) - DrawMax / MulPer;
 						int xMinmax = static_cast<int>(center.x) + DrawMax / MulPer;
@@ -381,7 +391,6 @@ namespace FPS_n2 {
 								//*/
 
 								for (int z = zMaxminT; z < zMaxmaxT; z++) {
-									if (!cell.IsDrawCell(x, y, z)) { continue; }
 									if (cell.scaleRate != 1) {
 										if (((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax))) {
 											if ((zMinmin < z) && (z < zMinmax)) {
@@ -390,6 +399,7 @@ namespace FPS_n2 {
 											}
 										}
 									}
+									if (!cell.IsDrawCell(x, y, z)) { continue; }
 
 									bool checkFill = true;
 									if (cell.scaleRate != 1) {
@@ -403,12 +413,12 @@ namespace FPS_n2 {
 					}
 					//
 					if (ShadowRate >= cell.scaleRate) {
-						int xMaxmin = std::max(static_cast<int>(center.x) - ShadowMax, -cell.Xall / 2);
-						int xMaxmax = std::min(static_cast<int>(center.x) + ShadowMax + 1, cell.Xall / 2);
-						int yMaxmin = std::max(static_cast<int>(center.y) - ShadowMax, -cell.Yall / 2);
-						int yMaxmax = std::min(static_cast<int>(center.y) + ShadowMax + 1, cell.Yall / 2);
-						int zMaxmin = std::max(static_cast<int>(center.z) - ShadowMax, -cell.Zall / 2);
-						int zMaxmax = std::min(static_cast<int>(center.z) + ShadowMax + 1, cell.Zall / 2);
+						int xMaxmin = std::max(static_cast<int>(center.x) - ShadowMax, -cell.Xharf);
+						int xMaxmax = std::min(static_cast<int>(center.x) + ShadowMax + 1, cell.Xharf);
+						int yMaxmin = std::max(static_cast<int>(center.y) - ShadowMax, -cell.Yharf);
+						int yMaxmax = std::min(static_cast<int>(center.y) + ShadowMax + 1, cell.Yharf);
+						int zMaxmin = std::max(static_cast<int>(center.z) - ShadowMax, -cell.Zharf);
+						int zMaxmax = std::min(static_cast<int>(center.z) + ShadowMax + 1, cell.Zharf);
 
 						int xMinmin = static_cast<int>(center.x) - ShadowMax / MulPer;
 						int xMinmax = static_cast<int>(center.x) + ShadowMax / MulPer;
