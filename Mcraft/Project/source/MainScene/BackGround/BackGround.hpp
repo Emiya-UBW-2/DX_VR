@@ -89,6 +89,8 @@ namespace FPS_n2 {
 			}
 		};
 
+		static const int8_t s_EmptyBlick = 0;
+
 		class BackGroundClass : public SingletonBase<BackGroundClass> {
 		private:
 			friend class SingletonBase<BackGroundClass>;
@@ -98,15 +100,15 @@ namespace FPS_n2 {
 
 			//頂点データ
 			std::vector<VERTEX3D>			m_vert32;
-			size_t						m_vert32Num{ 0 };
+			size_t							m_32Num{ 0 };
+			size_t							m_32Size{ 0 };
 			std::vector<VERTEX3D>			m_vert32SB;
 			std::vector<VERTEX3DSHADER>		m_vert32S;
-			size_t						m_vert32SNum{ 0 };
+			size_t							m_S32Num{ 0 };
+			size_t							m_S32Size{ 0 };
 			//頂点インデックスデータ
 			std::vector<uint32_t>		m_index32;
-			size_t						m_index32Num{ 0 };
 			std::vector<uint32_t>		m_index32S;
-			size_t						m_index32SNum{ 0 };
 
 			struct CellsData {
 				std::vector<int8_t> m_Cell;
@@ -121,12 +123,23 @@ namespace FPS_n2 {
 				auto& SetCell(int x, int y, int z) noexcept {
 					return m_Cell.at((size_t)((x + Xall / 2) + Xall * (y + Yall / 2) + Xall * Yall * (z + Zall / 2)));
 				}
+
+				void SetCellOnBlick(int x, int y, int z, bool value) noexcept {
+					SetCell(x, y, z) = (int8_t)(value ? -std::abs(GetCell(x, y, z)) : std::abs(GetCell(x, y, z)));
+				}
+				const bool IsActiveCell(int x, int y, int z) const noexcept {
+					return GetCell(x, y, z) != s_EmptyBlick;
+				}
+
+				const bool IsDrawCell(int x, int y, int z) const noexcept {
+					return GetCell(x, y, z) > s_EmptyBlick;
+				}
 			};
 
 			const int total = 3;
 			const int MulPer = 3;
 			const float CellScale = Scale_Rate / 2.f / 2.f;
-			const float Max = 50.f;
+			const int DrawMax = 50;
 
 			std::vector<CellsData> m_CellxN;
 
@@ -198,7 +211,7 @@ namespace FPS_n2 {
 										m_CellxN.back().SetCell(x, y, z) = 1;
 										continue;
 									}
-									m_CellxN.back().SetCell(x, y, z) = 0;
+									m_CellxN.back().SetCell(x, y, z) = s_EmptyBlick;
 								}
 							}
 						}
@@ -231,7 +244,7 @@ namespace FPS_n2 {
 											continue;
 										}
 									}
-									m_CellxN.back().SetCell(x, y, z) = 0;
+									m_CellxN.back().SetCell(x, y, z) = s_EmptyBlick;
 								}
 							}
 						}
@@ -254,13 +267,23 @@ namespace FPS_n2 {
 				Param.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// エミッシブカラー
 				Param.Power = 5.f;							// スペキュラハイライトの鮮明度
 				SetMaterialParam(Param);
+
+				//頂点データ
+				m_vert32.clear();
+				m_32Num = 0;
+				m_32Size = 0;
+				m_vert32SB.clear();
+				m_vert32S.clear();
+				m_S32Num = 0;
+				m_S32Size = 0;
+				//頂点インデックスデータ
+				m_index32.clear();
+				m_index32S.clear();
 			}
 			//
 			void			Execute(void) noexcept {
-				m_vert32Num = 0;
-				m_index32Num = 0;
-				m_vert32SNum = 0;
-				m_index32SNum = 0;
+				m_32Num = 0;
+				m_S32Num = 0;
 
 				auto* DrawParts = DXDraw::Instance();
 				auto* OptionParts = OPTION::Instance();
@@ -269,49 +292,58 @@ namespace FPS_n2 {
 
 				int BaseRate = 100;
 				int ShadowRate = 100;
-				float ShadowMax = Max;
+				int ShadowMax = DrawMax;
 				switch (OptionParts->GetParamInt(EnumSaveParam::ObjLevel)) {
 				case 0:
 				case 1:
 					BaseRate = MulPer * MulPer;
 					ShadowRate = 1;
-					ShadowMax = 10.f;
+					ShadowMax = 10;
 					break;
 				case 2:
 					BaseRate = MulPer * MulPer * MulPer;
 					ShadowRate = MulPer;
-					ShadowMax = 15.f;
+					ShadowMax = 15;
 					break;
 				case 3:
 					BaseRate = MulPer * MulPer * MulPer * MulPer;
-					ShadowRate = MulPer * MulPer;
-					ShadowMax = 25.f;
+					ShadowRate = MulPer;
+					ShadowMax = 25;
 					break;
 				default:
 					break;
 				};
-				for (auto & cell : m_CellxN) {
+				if (!OptionParts->GetParamBoolean(EnumSaveParam::shadow)) {
+					ShadowRate = 0;
+				}
+#ifdef DEBUG
+				auto* DebugParts = DebugClass::Instance();					//デバッグ
+#endif // DEBUG
+				for (auto& cell : m_CellxN) {
+#ifdef DEBUG
+					DebugParts->SetPoint(("---" + std::to_string(cell.scaleRate)).c_str());
+#endif // DEBUG
 					Vector3DX center = CamPos / (CellScale * cell.scaleRate);
 					//
 					if (BaseRate >= cell.scaleRate) {
-						int xMaxmin = std::max(static_cast<int>(center.x - Max), -cell.Xall / 2);
-						int xMaxmax = std::min(static_cast<int>(center.x + Max) + 1, cell.Xall / 2);
-						int yMaxmin = std::max(static_cast<int>(center.y - Max), -cell.Yall / 2);
-						int yMaxmax = std::min(static_cast<int>(center.y + Max) + 1, cell.Yall / 2);
-						int zMaxmin = std::max(static_cast<int>(center.z - Max), -cell.Zall / 2);
-						int zMaxmax = std::min(static_cast<int>(center.z + Max) + 1, cell.Zall / 2);
+						int xMaxmin = std::max(static_cast<int>(center.x) - DrawMax, -cell.Xall / 2);
+						int xMaxmax = std::min(static_cast<int>(center.x) + DrawMax + 1, cell.Xall / 2);
+						int yMaxmin = std::max(static_cast<int>(center.y) - DrawMax, -cell.Yall / 2);
+						int yMaxmax = std::min(static_cast<int>(center.y) + DrawMax + 1, cell.Yall / 2);
+						int zMaxmin = std::max(static_cast<int>(center.z) - DrawMax, -cell.Zall / 2);
+						int zMaxmax = std::min(static_cast<int>(center.z) + DrawMax + 1, cell.Zall / 2);
 
-						int xMinmin = static_cast<int>(center.x - Max / MulPer);
-						int xMinmax = static_cast<int>(center.x + Max / MulPer);
-						int yMinmin = static_cast<int>(center.y - Max / MulPer);
-						int yMinmax = static_cast<int>(center.y + Max / MulPer);
-						int zMinmin = static_cast<int>(center.z - Max / MulPer);
-						int zMinmax = static_cast<int>(center.z + Max / MulPer);
+						int xMinmin = static_cast<int>(center.x) - DrawMax / MulPer;
+						int xMinmax = static_cast<int>(center.x) + DrawMax / MulPer;
+						int yMinmin = static_cast<int>(center.y) - DrawMax / MulPer;
+						int yMinmax = static_cast<int>(center.y) + DrawMax / MulPer;
+						int zMinmin = static_cast<int>(center.z) - DrawMax / MulPer;
+						int zMinmax = static_cast<int>(center.z) + DrawMax / MulPer;
 						for (int x = xMaxmin; x < xMaxmax; x++) {
-							/*
+							//*
 							//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
 							Vector3DX YZMinPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(yMaxmin), static_cast<float>(zMaxmin)) + (Vector3DX::one() * 0.5f);
-							Vector3DX YZMaxPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(zMaxmax), static_cast<float>(zMaxmax)) + (Vector3DX::one() * 0.5f);
+							Vector3DX YZMaxPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(yMaxmax), static_cast<float>(zMaxmax)) + (Vector3DX::one() * 0.5f);
 							Vector3DX YZPos2 = Vector3DX::vget(YZMinPos.x, YZMinPos.y, YZMaxPos.z);
 							Vector3DX YZPos3 = Vector3DX::vget(YZMinPos.x, YZMaxPos.y, YZMinPos.z);
 							bool IsHit = false;
@@ -337,21 +369,19 @@ namespace FPS_n2 {
 								bool OnFront{};
 								if (CalcIntersectionPoint(ZMinPos, ZMaxPos, center, CamVec, &HitPos, &pSameVecNormalToA, &OnFront)) {
 									if (!pSameVecNormalToA) {
-										zMaxminT = static_cast<int>(HitPos.z - 0.5) - 1;
+										zMaxminT = std::max(static_cast<int>(HitPos.z - 0.5), zMaxmin);
 									}
 									else {
-										zMaxmaxT = static_cast<int>(HitPos.z - 0.5) + 1;
+										zMaxmaxT = std::min(static_cast<int>(HitPos.z - 0.5) + 1, zMaxmax);
 									}
 								}
 								else {
 									if (!OnFront) { continue; }
 								}
 								//*/
-								zMaxminT = std::max(zMaxminT, zMaxmin);
-								zMaxmaxT = std::min(zMaxmaxT, zMaxmax);
 
 								for (int z = zMaxminT; z < zMaxmaxT; z++) {
-									bool checkFill = true;
+									if (!cell.IsDrawCell(x, y, z)) { continue; }
 									if (cell.scaleRate != 1) {
 										if (((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax))) {
 											if ((zMinmin < z) && (z < zMinmax)) {
@@ -359,10 +389,12 @@ namespace FPS_n2 {
 												continue;
 											}
 										}
+									}
+
+									bool checkFill = true;
+									if (cell.scaleRate != 1) {
 										checkFill = !(((xMinmin <= x) && (x <= xMinmax)) && ((yMinmin <= y) && (y <= yMinmax)) && ((zMinmin <= z) && (z <= zMinmax)));
 									}
-									const auto& Cell = cell.GetCell(x, y, z);
-									if (Cell <= 0) { continue; }
 
 									AddCube(cell, x, y, z, checkFill, GetColorU8(128, 128, 128, 255), GetColorU8(64, 64, 64, 255));
 								}
@@ -371,35 +403,40 @@ namespace FPS_n2 {
 					}
 					//
 					if (ShadowRate >= cell.scaleRate) {
-						int xMaxmin = std::max(static_cast<int>(center.x - ShadowMax), -cell.Xall / 2);
-						int xMaxmax = std::min(static_cast<int>(center.x + ShadowMax) + 1, cell.Xall / 2);
-						int yMaxmin = std::max(static_cast<int>(center.y - ShadowMax), -cell.Yall / 2);
-						int yMaxmax = std::min(static_cast<int>(center.y + ShadowMax) + 1, cell.Yall / 2);
-						int zMaxmin = std::max(static_cast<int>(center.z - ShadowMax), -cell.Zall / 2);
-						int zMaxmax = std::min(static_cast<int>(center.z + ShadowMax) + 1, cell.Zall / 2);
+						int xMaxmin = std::max(static_cast<int>(center.x) - ShadowMax, -cell.Xall / 2);
+						int xMaxmax = std::min(static_cast<int>(center.x) + ShadowMax + 1, cell.Xall / 2);
+						int yMaxmin = std::max(static_cast<int>(center.y) - ShadowMax, -cell.Yall / 2);
+						int yMaxmax = std::min(static_cast<int>(center.y) + ShadowMax + 1, cell.Yall / 2);
+						int zMaxmin = std::max(static_cast<int>(center.z) - ShadowMax, -cell.Zall / 2);
+						int zMaxmax = std::min(static_cast<int>(center.z) + ShadowMax + 1, cell.Zall / 2);
 
-						int xMinmin = static_cast<int>(center.x - ShadowMax / MulPer);
-						int xMinmax = static_cast<int>(center.x + ShadowMax / MulPer);
-						int yMinmin = static_cast<int>(center.y - ShadowMax / MulPer);
-						int yMinmax = static_cast<int>(center.y + ShadowMax / MulPer);
-						int zMinmin = static_cast<int>(center.z - ShadowMax / MulPer);
-						int zMinmax = static_cast<int>(center.z + ShadowMax / MulPer);
+						int xMinmin = static_cast<int>(center.x) - ShadowMax / MulPer;
+						int xMinmax = static_cast<int>(center.x) + ShadowMax / MulPer;
+						int yMinmin = static_cast<int>(center.y) - ShadowMax / MulPer;
+						int yMinmax = static_cast<int>(center.y) + ShadowMax / MulPer;
+						int zMinmin = static_cast<int>(center.z) - ShadowMax / MulPer;
+						int zMinmax = static_cast<int>(center.z) + ShadowMax / MulPer;
 						for (int x = xMaxmin; x < xMaxmax; x++) {
 							for (int y = yMaxmin; y < yMaxmax; y++) {
 								for (int z = zMaxmin; z < zMaxmax; z++) {
 									if (cell.scaleRate != 1) {
-										if (((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax)) && ((zMinmin < z) && (z < zMinmax))) {
-											continue;
+										if (((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax))) {
+											if ((zMinmin < z) && (z < zMinmax)) {
+												z = zMinmax - 1;
+												continue;
+											}
 										}
 									}
-									const auto& Cell = cell.GetCell(x, y, z);
-									if (Cell <= 0) { continue; }
+									if (!cell.IsDrawCell(x, y, z)) { continue; }
 									AddShadowCube(cell, x, y, z, GetColorU8(128, 128, 128, 255), GetColorU8(64, 64, 64, 255));
 								}
 							}
 						}
 					}
 				}
+#ifdef DEBUG
+				DebugParts->SetPoint("END");
+#endif // DEBUG
 			}
 			//
 			void			BG_Draw(void) noexcept {
@@ -408,20 +445,20 @@ namespace FPS_n2 {
 				SetUseLighting(TRUE);
 			}
 			void			Shadow_Draw(void) noexcept {
-				if (m_vert32SNum > 0 && m_index32SNum > 0) {
-					DrawPolygon32bitIndexed3D(m_vert32SB.data(), static_cast<int>(m_vert32SNum), m_index32S.data(), static_cast<int>(m_index32SNum / 3), m_tex.get(), TRUE);
+				if (m_S32Num > 0) {
+					DrawPolygon32bitIndexed3D(m_vert32SB.data(), static_cast<int>(m_S32Num * 4), m_index32S.data(), static_cast<int>(m_S32Num * 6 / 3), m_tex.get(), TRUE);
 				}
 			}
 			void			SetShadow_Draw_Rigid(void) noexcept {
-				if (m_vert32SNum > 0 && m_index32SNum > 0) {
+				if (m_S32Num > 0) {
 					SetUseTextureToShader(0, m_tex.get());
-					DrawPolygon32bitIndexed3DToShader(m_vert32S.data(), static_cast<int>(m_vert32SNum), m_index32S.data(), static_cast<int>(m_index32SNum / 3));
+					DrawPolygon32bitIndexed3DToShader(m_vert32S.data(), static_cast<int>(m_S32Num * 4), m_index32S.data(), static_cast<int>(m_S32Num * 6 / 3));
 					SetUseTextureToShader(0, INVALID_ID);
 				}
 			}
 			void			Draw(void) noexcept {
-				if (m_vert32Num > 0 && m_index32Num > 0) {
-					DrawPolygon32bitIndexed3D(m_vert32.data(), static_cast<int>(m_vert32Num), m_index32.data(), static_cast<int>(m_index32Num / 3), m_tex.get(), TRUE);
+				if (m_32Num > 0) {
+					DrawPolygon32bitIndexed3D(m_vert32.data(), static_cast<int>(m_32Num * 4), m_index32.data(), static_cast<int>(m_32Num * 6 / 3), m_tex.get(), TRUE);
 				}
 			}
 			//

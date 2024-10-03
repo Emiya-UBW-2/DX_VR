@@ -446,10 +446,10 @@ namespace FPS_n2 {
 					for (int zp = 0; zp < zm; zp++) {
 						//DrawCube3D((Vector3DX::vget((float)(x + xp), (float)(y + yp), (float)(z + zp)) * CellScale).get(), (Vector3DX::vget((float)((x + xp) + 1), (float)((y + yp) + 1), (float)((z + zp) + 1)) * CellScale).get(), GetColor(255, 255, 255), GetColor(255, 255, 255), FALSE);
 						if (Pad->GetKey(PADS::SHOT).trigger()) {
-							BackGround->SetBlick((x + xp), (y + yp), (z + zp), 0);
+							BackGround->SetBlick((x + xp), (y + yp), (z + zp), 1);
 						}
 						if (Pad->GetKey(PADS::AIM).trigger()) {
-							BackGround->SetBlick((x + xp), (y + yp), (z + zp), INVALID_ID);
+							BackGround->SetBlick((x + xp), (y + yp), (z + zp), s_EmptyBlick);
 						}
 					}
 				}

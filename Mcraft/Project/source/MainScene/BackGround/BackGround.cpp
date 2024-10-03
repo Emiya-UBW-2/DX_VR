@@ -105,8 +105,7 @@ namespace FPS_n2 {
 
 
 
-			auto GetPlane = [&](const Vector3DX& Pos1, const Vector3DX& Pos2, const Vector3DX& Pos3, const Vector3DX& Pos4, const Vector3DX& Normal) {
-				//PosCamVec.x * Normal.x + PosCamVec.y * Normal.y + PosCamVec.z * Normal.z;
+			auto GetPlane = [&](const Vector3DX& Pos1, const Vector3DX& Pos2, const Vector3DX& Pos3, const Vector3DX& Pos4, const VECTOR& Normal) {
 				if (Normal.x != 0) {
 					if ((PosCamVec.x > 0.f && Normal.x > 0.f) || (PosCamVec.x < 0.f && Normal.x < 0.f)) { return; }
 				}
@@ -117,122 +116,132 @@ namespace FPS_n2 {
 					if ((PosCamVec.z > 0.f && Normal.z > 0.f) || (PosCamVec.z < 0.f && Normal.z < 0.f)) { return; }
 				}
 				//if (Vector3DX::Dot(PosCamVec, Normal) >= 0.f) { return; }
-
-				if ((!CheckFill || cell.GetCell(x + static_cast<int>(Normal.x), y + static_cast<int>(Normal.y), z + static_cast<int>(Normal.z)) == 0)) {
-
-					size_t Now = m_vert32Num;
-					size_t Nowi = m_index32Num;
-					m_vert32Num += 4;
-					m_index32Num += 6;
-					if (m_vert32Num > m_vert32.size()) {
-						m_vert32.resize(m_vert32Num);
-					}
-					if (m_index32Num > m_index32.size()) {
-						m_index32.resize(m_index32Num);
-					}
-
-					m_index32.at(Nowi) = (uint32_t)(Now);
-					m_index32.at(Nowi + 1) = (uint32_t)(Now + 1);
-					m_index32.at(Nowi + 2) = (uint32_t)(Now + 2);
-					m_index32.at(Nowi + 3) = (uint32_t)(Now + 3);
-					m_index32.at(Nowi + 4) = (uint32_t)(Now + 2);
-					m_index32.at(Nowi + 5) = (uint32_t)(Now + 1);
-
-					float Xofs = 1.0f - Normal.y;
-					float uMin = (0.f + Xofs) / 8.f;
-					float vMin = 0.f / 8.f;
-					float uMax = uMin + 1.f / 8.f;
-					float vMax = vMin + 1.f / 8.f;
-
-					m_vert32.at(Now).pos = Pos1.get();
-					m_vert32.at(Now).u = uMax;
-					m_vert32.at(Now).v = vMin;
-					m_vert32.at(Now + 1).pos = Pos2.get();
-					m_vert32.at(Now + 1).u = uMin;
-					m_vert32.at(Now + 1).v = vMin;
-					m_vert32.at(Now + 2).pos = Pos3.get();
-					m_vert32.at(Now + 2).u = uMax;
-					m_vert32.at(Now + 2).v = vMax;
-					m_vert32.at(Now + 3).pos = Pos4.get();
-					m_vert32.at(Now + 3).u = uMin;
-					m_vert32.at(Now + 3).v = vMax;
-					for (size_t i = 0; i < 4; i++) {
-						m_vert32.at(Now + i).norm = Normal.get();
-						m_vert32.at(Now + i).dif = DifColor;
-						m_vert32.at(Now + i).spc = SpcColor;
-						m_vert32.at(Now + i).su = m_vert32.at(Now + i).u;
-						m_vert32.at(Now + i).sv = m_vert32.at(Now + i).v;
-					}
+				if (CheckFill && cell.IsActiveCell(x + static_cast<int>(Normal.x), y + static_cast<int>(Normal.y), z + static_cast<int>(Normal.z))) {
+					return;
 				}
+
+				size_t Now = m_32Num;
+				m_32Num++;
+				if (m_32Num > m_32Size) {
+					m_vert32.resize(m_32Num * 4);
+					m_index32.resize(m_32Num * 6);
+					m_32Size = m_32Num;
+				}
+
+				float Xofs = 1.0f - Normal.y;
+				float uMin = (0.f + Xofs) / 8.f;
+				float vMin = 0.f / 8.f;
+				float uMax = uMin + 1.f / 8.f;
+				float vMax = vMin + 1.f / 8.f;
+				{
+					auto& v = m_vert32.at(Now * 4);
+					v.pos = Pos1.get();
+					v.u = uMax;
+					v.v = vMin;
+					v.norm = Normal;
+					v.dif = DifColor;
+					v.spc = SpcColor;
+				}
+				{
+					auto& v = m_vert32.at(Now * 4 + 1);
+					v.pos = Pos2.get();
+					v.u = uMin;
+					v.v = vMin;
+					v.norm = Normal;
+					v.dif = DifColor;
+					v.spc = SpcColor;
+				}
+				{
+					auto& v = m_vert32.at(Now * 4 + 2);
+					v.pos = Pos3.get();
+					v.u = uMax;
+					v.v = vMax;
+					v.norm = Normal;
+					v.dif = DifColor;
+					v.spc = SpcColor;
+				}
+				{
+					auto& v = m_vert32.at(Now * 4 + 3);
+					v.pos = Pos4.get();
+					v.u = uMin;
+					v.v = vMax;
+					v.norm = Normal;
+					v.dif = DifColor;
+					v.spc = SpcColor;
+				}
+				m_index32.at(Now * 6) = (uint32_t)(Now * 4);
+				m_index32.at(Now * 6 + 1) = (uint32_t)(Now * 4 + 1);
+				m_index32.at(Now * 6 + 2) = (uint32_t)(Now * 4 + 2);
+				m_index32.at(Now * 6 + 3) = (uint32_t)(Now * 4 + 3);
+				m_index32.at(Now * 6 + 4) = (uint32_t)(Now * 4 + 2);
+				m_index32.at(Now * 6 + 5) = (uint32_t)(Now * 4 + 1);
 				};
 			// 頂点データの作成
 			GetPlane(
 				Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z), Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z), PosMin, Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z),
-				Vector3DX::back());
+				Vector3DX::back().get());
 
 			GetPlane(
 				Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z), Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z), Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z), PosMax,
-				Vector3DX::forward());
+				Vector3DX::forward().get());
 
 			GetPlane(
 				Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z), Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z), Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z), PosMin,
-				Vector3DX::left());
+				Vector3DX::left().get());
 
 			GetPlane(
 				Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z), PosMax, Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z), Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z),
-				Vector3DX::right());
+				Vector3DX::right().get());
 
 			GetPlane(
 				Vector3DX::vget(PosMin.x, PosMax.y, PosMax.z), PosMax, Vector3DX::vget(PosMin.x, PosMax.y, PosMin.z), Vector3DX::vget(PosMax.x, PosMax.y, PosMin.z),
-				Vector3DX::up());
+				Vector3DX::up().get());
 
 			GetPlane(
 				PosMin, Vector3DX::vget(PosMax.x, PosMin.y, PosMin.z), Vector3DX::vget(PosMin.x, PosMin.y, PosMax.z), Vector3DX::vget(PosMax.x, PosMin.y, PosMax.z),
-				Vector3DX::down());
+				Vector3DX::down().get());
 		}
 
 		void BackGroundClass::AddShadowCube(const CellsData& cell, int x, int y, int z, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept {
 			Vector3DX Pos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
 			Vector3DX PosMin = Pos * (CellScale * cell.scaleRate);
-			Vector3DX PosMid = (Pos + Vector3DX::one() * 0.5f) * (CellScale * cell.scaleRate);
 			Vector3DX PosMax = (Pos + Vector3DX::one()) * (CellScale * cell.scaleRate);
 
 			auto GetPlane = [&](const Vector3DX& Pos1, const Vector3DX& Pos2, const Vector3DX& Pos3, const Vector3DX& Pos4, const Vector3DX& Normal) {
-				if (cell.GetCell(x + static_cast<int>(Normal.x), y + static_cast<int>(Normal.y), z + static_cast<int>(Normal.z)) == 0) {
-					size_t NowS = m_vert32SNum;
-					size_t NowSi = m_index32SNum;
-					m_vert32SNum += 4;
-					m_index32SNum += 6;
-					if (m_vert32SNum > m_vert32S.size()) {
-						m_vert32S.resize(m_vert32SNum);
-						m_vert32SB.resize(m_vert32SNum);
-					}
-					if (m_index32SNum > m_index32S.size()) {
-						m_index32S.resize(m_index32SNum);
-					}
-
-					m_vert32S.at(NowS).pos = Pos1.get();
-					m_vert32S.at(NowS + 1).pos = Pos2.get();
-					m_vert32S.at(NowS + 2).pos = Pos3.get();
-					m_vert32S.at(NowS + 3).pos = Pos4.get();
-
-					m_vert32SB.at(NowS).pos = Pos1.get();
-					m_vert32SB.at(NowS + 1).pos = Pos2.get();
-					m_vert32SB.at(NowS + 2).pos = Pos3.get();
-					m_vert32SB.at(NowS + 3).pos = Pos4.get();
-					for (size_t i = 0; i < 4; i++) {
-						m_vert32SB.at(NowS + i).norm = Normal.get();
-						m_vert32SB.at(NowS + i).dif = DifColor;
-						m_vert32SB.at(NowS + i).spc = SpcColor;
-					}
-
-					m_index32S.at(NowSi) = (uint32_t)(NowS);
-					m_index32S.at(NowSi + 1) = (uint32_t)(NowS + 1);
-					m_index32S.at(NowSi + 2) = (uint32_t)(NowS + 2);
-					m_index32S.at(NowSi + 3) = (uint32_t)(NowS + 3);
-					m_index32S.at(NowSi + 4) = (uint32_t)(NowS + 2);
-					m_index32S.at(NowSi + 5) = (uint32_t)(NowS + 1);
+				if (cell.IsActiveCell(x + static_cast<int>(Normal.x), y + static_cast<int>(Normal.y), z + static_cast<int>(Normal.z))) {
+					return;
 				}
+
+				size_t NowS = m_S32Num;
+				m_S32Num++;
+				if (m_S32Num > m_S32Size) {
+					m_vert32S.resize(m_S32Num * 4);
+					m_vert32SB.resize(m_S32Num * 4);
+					m_index32S.resize(m_S32Num * 6);
+					m_S32Size = m_S32Num;
+				}
+
+				m_vert32S.at(NowS * 4).pos = Pos1.get();
+				m_vert32S.at(NowS * 4 + 1).pos = Pos2.get();
+				m_vert32S.at(NowS * 4 + 2).pos = Pos3.get();
+				m_vert32S.at(NowS * 4 + 3).pos = Pos4.get();
+
+				m_vert32SB.at(NowS * 4).pos = Pos1.get();
+				m_vert32SB.at(NowS * 4 + 1).pos = Pos2.get();
+				m_vert32SB.at(NowS * 4 + 2).pos = Pos3.get();
+				m_vert32SB.at(NowS * 4 + 3).pos = Pos4.get();
+				for (size_t i = 0; i < 4; i++) {
+					m_vert32SB.at(NowS * 4 + i).norm = Normal.get();
+					m_vert32SB.at(NowS * 4 + i).dif = DifColor;
+					m_vert32SB.at(NowS * 4 + i).spc = SpcColor;
+				}
+
+				m_index32S.at(NowS * 6) = (uint32_t)(NowS * 4);
+				m_index32S.at(NowS * 6 + 1) = (uint32_t)(NowS * 4 + 1);
+				m_index32S.at(NowS * 6 + 2) = (uint32_t)(NowS * 4 + 2);
+				m_index32S.at(NowS * 6 + 3) = (uint32_t)(NowS * 4 + 3);
+				m_index32S.at(NowS * 6 + 4) = (uint32_t)(NowS * 4 + 2);
+				m_index32S.at(NowS * 6 + 5) = (uint32_t)(NowS * 4 + 1);
 				};
 			// 頂点データの作成
 			GetPlane(
@@ -365,9 +374,7 @@ namespace FPS_n2 {
 								) {
 								return false;
 							}
-
-							const auto& Cell = cell.GetCell(x, y, z);
-							if (Cell <= 0) { return false; }
+							if (!cell.IsDrawCell(x, y, z)) { return false; }
 							Vector3DX MinPos = (Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)) + (Vector3DX::one() * 0.0f)) * (CellScale * cell.scaleRate);
 							Vector3DX MaxPos = (Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)) + (Vector3DX::one() * 1.0f)) * (CellScale * cell.scaleRate);
 							if (ColRayBox(StartPos, EndPos, MinPos, MaxPos, Normal)) {
@@ -402,9 +409,7 @@ namespace FPS_n2 {
 								) {
 								return false;
 							}
-
-							const auto& Cell = cell.GetCell(x, y, z);
-							if (Cell <= 0) { return false; }
+							if (!cell.IsDrawCell(x, y, z)) { return false; }
 							Vector3DX MinPos = (Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)) + (Vector3DX::one() * -0.1f)) * (CellScale * cell.scaleRate);
 							Vector3DX MaxPos = (Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)) + (Vector3DX::one() * 1.1f)) * (CellScale * cell.scaleRate);
 
@@ -569,14 +574,13 @@ namespace FPS_n2 {
 							for (int x = xMaxmin; x < xMaxmax; x++) {
 								for (int y = yMaxmin; y < yMaxmax; y++) {
 									for (int z = zMaxmin; z < zMaxmax; z++) {
-										const auto& Cell = cell2.GetCell(x, y, z);
 										FillAll++;
-										if (Cell == 0) { continue; }
+										if (!cell2.IsActiveCell(x, y, z)) { continue; }
 										FillCount++;
 									}
 								}
 							}
-							cell.SetCell(xm, ym, zm) = ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f))) ? 1 : 0;
+							cell.SetCell(xm, ym, zm) = ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f))) ? 1 : s_EmptyBlick;
 						}
 					}
 				}
@@ -588,24 +592,24 @@ namespace FPS_n2 {
 				for (int x = -cell.Xall / 2; x < cell.Xall / 2; x++) {
 					for (int y = -cell.Yall / 2; y < cell.Yall / 2; y++) {
 						for (int z = -cell.Zall / 2; z < cell.Zall / 2; z++) {
-							if (cell.GetCell(x, y, z) == 0) { continue; }
+							if (!cell.IsActiveCell(x, y, z)) { continue; }
 							//端は全て隠す
 							if (
 								((x == -cell.Xall / 2) || (x == cell.Xall / 2 - 1)) ||
 								((y == -cell.Yall / 2) || (y == cell.Yall / 2 - 1)) ||
 								((z == -cell.Zall / 2) || (z == cell.Zall / 2 - 1))
 								) {
-								cell.SetCell(x, y, z) = (int8_t)-std::abs(cell.SetCell(x, y, z));
+								cell.SetCellOnBlick(x, y, z, true);
 								continue;
 							}
-							cell.SetCell(x, y, z) = (int8_t)((
-								(cell.GetCell(x + 1, y, z) != 0) &&
-								(cell.GetCell(x - 1, y, z) != 0) &&
-								(cell.GetCell(x, y + 1, z) != 0) &&
-								(cell.GetCell(x, y - 1, z) != 0) &&
-								(cell.GetCell(x, y, z + 1) != 0) &&
-								(cell.GetCell(x, y, z - 1) != 0)
-								) ? -std::abs(cell.SetCell(x, y, z)) : std::abs(cell.SetCell(x, y, z)));
+							cell.SetCellOnBlick(x, y, z,
+								cell.IsActiveCell(x + 1, y, z) &&
+								cell.IsActiveCell(x - 1, y, z) &&
+								cell.IsActiveCell(x, y + 1, z) &&
+								cell.IsActiveCell(x, y - 1, z) &&
+								cell.IsActiveCell(x, y, z + 1) &&
+								cell.IsActiveCell(x, y, z - 1)
+							);
 						}
 					}
 				}
@@ -643,14 +647,13 @@ namespace FPS_n2 {
 				for (int xt = xMaxmin; xt < xMaxmax; xt++) {
 					for (int yt = yMaxmin; yt < yMaxmax; yt++) {
 						for (int zt = zMaxmin; zt < zMaxmax; zt++) {
-							const auto& Cell = cell2.GetCell(xt, yt, zt);
 							FillAll++;
-							if (Cell == 0) { continue; }
+							if (!cell2.IsActiveCell(xt, yt, zt)) { continue; }
 							FillCount++;
 						}
 					}
 				}
-				cell.SetCell(xm, ym, zm) = ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f))) ? 1 : 0;
+				cell.SetCell(xm, ym, zm) = ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f))) ? 1 : s_EmptyBlick;
 			}
 			for (auto& cell : m_CellxN) {
 				int xm = x / cell.scaleRate;
@@ -669,21 +672,21 @@ namespace FPS_n2 {
 						((yp == -cell.Yall / 2) || (yp == cell.Yall / 2 - 1)) ||
 						((zp == -cell.Zall / 2) || (zp == cell.Zall / 2 - 1))
 						) {
-						cell.SetCell(xp, yp, zp) = (int8_t)-std::abs(cell.SetCell(x, y, z));
+						cell.SetCellOnBlick(xp, yp, zp, true);
 						return;
 					}
-					if (cell.GetCell(xm, ym, zm) == 0) {
-						cell.SetCell(xp, yp, zp) = (int8_t)std::abs(cell.SetCell(xp, yp, zp));
+					if (!cell.IsActiveCell(xm, ym, zm)) {
+						cell.SetCellOnBlick(xp, yp, zp, false);
 					}
-					else if(cell.SetCell(xp, yp, zp) < 0){
-						cell.SetCell(xp, yp, zp) = (int8_t)((
-							(cell.GetCell(xp + 1, yp, zp) != 0) &&
-							(cell.GetCell(xp - 1, yp, zp) != 0) &&
-							(cell.GetCell(xp, yp + 1, zp) != 0) &&
-							(cell.GetCell(xp, yp - 1, zp) != 0) &&
-							(cell.GetCell(xp, yp, zp + 1) != 0) &&
-							(cell.GetCell(xp, yp, zp - 1) != 0)
-							) ? -std::abs(cell.SetCell(xp, yp, zp)) : std::abs(cell.SetCell(xp, yp, zp)));
+					else if (cell.GetCell(xp, yp, zp) < s_EmptyBlick) {
+						cell.SetCellOnBlick(xp, yp, zp,
+							cell.IsActiveCell(xp + 1, yp, zp) &&
+							cell.IsActiveCell(xp - 1, yp, zp) &&
+							cell.IsActiveCell(xp, yp + 1, zp) &&
+							cell.IsActiveCell(xp, yp - 1, zp) &&
+							cell.IsActiveCell(xp, yp, zp + 1) &&
+							cell.IsActiveCell(xp, yp, zp - 1)
+						);
 					}
 					};
 				CheckCell(xm + 1, ym, zm);
