@@ -6,149 +6,94 @@
 
 namespace FPS_n2 {
 	namespace BackGround {
-		class PerlinNoise {
-		private:
-			//メンバ変数
-			std::array<uint_fast8_t, 512> p{ 0 };
-
-			constexpr float getFade(const float t_) const noexcept {
-				return t_ * t_ * t_ * (t_ * (t_ * 6 - 15) + 10);
-			}
-			constexpr float getLerp(const float t_, const float a_, const float b_) const noexcept {
-				return a_ + t_ * (b_ - a_);
-			}
-			constexpr float makeGrad(const uint_fast8_t hash_, const float u_, const float v_) const noexcept {
-				return (((hash_ & 1) == 0) ? u_ : -u_) + (((hash_ & 2) == 0) ? v_ : -v_);
-			}
-			constexpr float makeGrad(const uint_fast8_t hash_, const float x_, const float y_, const float z_) const noexcept {
-				return this->makeGrad(hash_, hash_ < 8 ? x_ : y_, hash_ < 4 ? y_ : hash_ == 12 || hash_ == 14 ? x_ : z_);
-			}
-			constexpr float getGrad(const uint_fast8_t hash_, const float x_, const float y_, const float z_) const noexcept {
-				return this->makeGrad(hash_ & 15, x_, y_, z_);
-			}
-
-			float setNoise(float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) const noexcept {
-				const std::size_t x_int = static_cast<std::size_t>(static_cast<std::size_t>(std::floor(x_)) & 255);
-				const std::size_t y_int = static_cast<std::size_t>(static_cast<std::size_t>(std::floor(y_)) & 255);
-				const std::size_t z_int = static_cast<std::size_t>(static_cast<std::size_t>(std::floor(z_)) & 255);
-				x_ -= std::floor(x_);
-				y_ -= std::floor(y_);
-				z_ -= std::floor(z_);
-				const float u = this->getFade(x_);
-				const float v = this->getFade(y_);
-				const float w = this->getFade(z_);
-				const std::size_t a0 = static_cast<std::size_t>(this->p[x_int] + y_int);
-				const std::size_t a1 = static_cast<std::size_t>(this->p[a0] + z_int);
-				const std::size_t a2 = static_cast<std::size_t>(this->p[a0 + 1] + z_int);
-				const std::size_t b0 = static_cast<std::size_t>(this->p[x_int + 1] + y_int);
-				const std::size_t b1 = static_cast<std::size_t>(this->p[b0] + z_int);
-				const std::size_t b2 = static_cast<std::size_t>(this->p[b0 + 1] + z_int);
-
-				return this->getLerp(w,
-					this->getLerp(v,
-						this->getLerp(u, this->getGrad(this->p[a1], x_, y_, z_), this->getGrad(this->p[b1], x_ - 1, y_, z_)),
-						this->getLerp(u, this->getGrad(this->p[a2], x_, y_ - 1, z_), this->getGrad(this->p[b2], x_ - 1, y_ - 1, z_))),
-					this->getLerp(v,
-						this->getLerp(u, this->getGrad(this->p[a1 + 1], x_, y_, z_ - 1), this->getGrad(this->p[b1 + 1], x_ - 1, y_, z_ - 1)),
-						this->getLerp(u, this->getGrad(this->p[a2 + 1], x_, y_ - 1, z_ - 1), this->getGrad(this->p[b2 + 1], x_ - 1, y_ - 1, z_ - 1))));
-			}
-			float setOctaveNoise(const std::size_t octaves_, float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) const noexcept {
-				float noise_value = 0.f;
-				float amp = 1.0f;
-				for (std::size_t i = 0; i < octaves_; ++i) {
-					noise_value += this->setNoise(x_, y_, z_) * amp;
-					x_ *= 2.0f;
-					y_ *= 2.0f;
-					z_ *= 2.0f;
-					amp *= 0.5f;
-				}
-				return noise_value;
-			}
-		public:
-			constexpr PerlinNoise() = default;
-			explicit PerlinNoise(const std::uint_fast32_t seed_) {
-				this->setSeed(seed_);
-			}
-
-			//SEED値を設定する
-			void setSeed(const std::uint_fast32_t seed_) {
-				for (std::size_t i = 0; i < 256; ++i)
-					this->p[i] = static_cast<uint_fast8_t>(i);
-				std::shuffle(this->p.begin(), this->p.begin() + 256, std::default_random_engine(seed_));
-				for (std::size_t i = 0; i < 256; ++i) {
-					this->p[256 + i] = this->p[i];
-				}
-			}
-			//オクターブ無しノイズを取得する
-			float noise(float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) const noexcept {
-				return this->setNoise(x_, y_, z_) * 0.5f + 0.5f;
-			}
-			//オクターブ有りノイズを取得する
-			float octaveNoise(const std::size_t octaves_, float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) const noexcept {
-				return this->setOctaveNoise(octaves_, x_, y_, z_) * 0.5f + 0.5f;
-			}
-		};
-
-		static const int8_t s_EmptyBlick = 0;
+		static constexpr int8_t s_EmptyBlick = 0;
+		static constexpr int total = 3;
+		static constexpr int MulPer = 3;
+		static constexpr float CellScale = Scale_Rate / 2.f / 2.f;
+		static constexpr int DrawMax = 50;
 
 		class BackGroundClass : public SingletonBase<BackGroundClass> {
 		private:
 			friend class SingletonBase<BackGroundClass>;
 		private:
-		private:
-			MV1							m_ObjSky;
+			MV1								m_ObjSky;
 
-			//頂点データ
 			std::vector<VERTEX3D>			m_vert32;
+			std::vector<uint32_t>			m_index32;
 			size_t							m_32Num{ 0 };
 			size_t							m_32Size{ 0 };
 			std::vector<VERTEX3D>			m_vert32SB;
 			std::vector<VERTEX3DSHADER>		m_vert32S;
+			std::vector<uint32_t>			m_index32S;
 			size_t							m_S32Num{ 0 };
 			size_t							m_S32Size{ 0 };
-			//頂点インデックスデータ
-			std::vector<uint32_t>		m_index32;
-			std::vector<uint32_t>		m_index32S;
+
+			GraphHandle						m_tex{};
+			GraphHandle						m_norm{};
 
 			struct CellsData {
-				std::vector<int8_t> m_Cell;
-				int16_t Xall = 500;
-				int16_t Yall = 160;
-				int16_t Zall = 500;
-				int8_t scaleRate = 1;
-				int Xharf = 500;
-				int Yharf = 160;
-				int Zharf = 500;
+				std::array<int8_t, 256 * 256 * 256> m_Cell{};
+				std::array<int8_t, 256 * 256 * 256> m_FillInfo{};//周りの遮蔽データのbitフラグ
+				int Xall = 256;
+				int Yall = 256;
+				int Zall = 256;
+				int scaleRate = 1;
+				//
+				const auto& GetCell(int x, int y, int z) const noexcept { return m_Cell[static_cast<size_t>(x * Yall * Zall + y * Zall + z)]; }
+				const bool IsActiveCell(int x, int y, int z) const noexcept { return GetCell(x, y, z) != s_EmptyBlick; }
+				const bool isFill(int x, int y, int z) const noexcept {
+					int FillCount = 0;
+					int FillAll = 0;
 
-				const auto& GetCell(int x, int y, int z) const noexcept {
-					return m_Cell.at((size_t)((x + Xharf) + Xall * (y + Yharf) + Xall * Yall * (z + Zharf)));
-				}
-				auto& SetCell(int x, int y, int z) noexcept {
-					return m_Cell.at((size_t)((x + Xharf) + Xall * (y + Yharf) + Xall * Yall * (z + Zharf)));
-				}
+					int xMaxmin = x * MulPer + MulPer - 1;
+					int yMaxmin = y * MulPer + MulPer - 1;
+					int zMaxmin = z * MulPer + MulPer - 1;
 
-				void SetCellOnBlick(int x, int y, int z, bool value) noexcept {
-					SetCell(x, y, z) = (int8_t)(value ? -std::abs(GetCell(x, y, z)) : std::abs(GetCell(x, y, z)));
+					for (int xt = xMaxmin; xt < std::min(xMaxmin + MulPer, Xall); ++xt) {
+						for (int yt = yMaxmin; yt < std::min(yMaxmin + MulPer, Yall); ++yt) {
+							for (int zt = zMaxmin; zt < std::min(zMaxmin + MulPer, Zall); ++zt) {
+								++FillAll;
+								if (!IsActiveCell(xt, yt, zt)) { continue; }
+								++FillCount;
+							}
+						}
+					}
+					return (FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f));
 				}
-				const bool IsActiveCell(int x, int y, int z) const noexcept {
-					return GetCell(x, y, z) != s_EmptyBlick;
+				const bool isInside(int x, int y, int z) const noexcept {
+					return (
+						((0 <= x) && (x < Xall)) &&
+						((0 <= y) && (y < Yall)) &&
+						((0 <= z) && (z < Zall))
+						);
 				}
-
-				const bool IsDrawCell(int x, int y, int z) const noexcept {
-					return GetCell(x, y, z) > s_EmptyBlick;
+				const Vector3DX GetPos(int x, int y, int z) const noexcept {
+					return Vector3DX::vget(static_cast<float>(x - Xall / 2), static_cast<float>(y - Yall / 2), static_cast<float>(z - Zall / 2)) * (CellScale * scaleRate);
+				}
+				//
+				void SetScale(int scale, int baseX, int baseY, int baseZ) noexcept {
+					scaleRate = scale;
+					Xall = baseX / scaleRate;
+					Yall = baseY / scaleRate;
+					Zall = baseZ / scaleRate;
+				}
+				auto& SetCell(int x, int y, int z) noexcept { return m_Cell[static_cast<size_t>(x * Yall * Zall + y * Zall + z)]; }
+				//
+				const auto& GetOcclusionInfo(int x, int y, int z) const noexcept { return m_FillInfo[static_cast<size_t>(x * Yall * Zall + y * Zall + z)]; }
+				auto& SetOcclusionInfo(int x, int y, int z) noexcept { return m_FillInfo[static_cast<size_t>(x * Yall * Zall + y * Zall + z)]; }
+				void CalcOcclusion(int x, int y, int z) noexcept {
+					//端で端に面している面は隠す
+					SetOcclusionInfo(x, y, z) = 0;
+					SetOcclusionInfo(x, y, z) |= (1 << 0) * ((x == Xall - 1) ? 1 : IsActiveCell(x + 1, y, z));
+					SetOcclusionInfo(x, y, z) |= (1 << 1) * ((x == 0) ? 1 : IsActiveCell(x - 1, y, z));
+					SetOcclusionInfo(x, y, z) |= (1 << 2) * ((y == Yall - 1) ? 1 : IsActiveCell(x, y + 1, z));
+					SetOcclusionInfo(x, y, z) |= (1 << 3) * ((y == 0) ? 1 : IsActiveCell(x, y - 1, z));
+					SetOcclusionInfo(x, y, z) |= (1 << 4) * ((z == Zall - 1) ? 1 : IsActiveCell(x, y, z + 1));
+					SetOcclusionInfo(x, y, z) |= (1 << 5) * ((z == 0) ? 1 : IsActiveCell(x, y, z - 1));
 				}
 			};
 
-			const int total = 3;
-			const int MulPer = 3;
-			const float CellScale = Scale_Rate / 2.f / 2.f;
-			const int DrawMax = 50;
-
-			std::vector<CellsData> m_CellxN;
-			CellsData m_CellxN2;
-
-			GraphHandle		m_tex{};
-			GraphHandle		m_norm{};
+			std::array<CellsData, total>	m_CellxN;
 		public:
 			BackGroundClass(void) noexcept {}
 			BackGroundClass(const BackGroundClass&) = delete;
@@ -158,324 +103,198 @@ namespace FPS_n2 {
 
 			virtual ~BackGroundClass(void) noexcept {}
 		private:
-			static bool		CalcIntersectionPoint(const Vector3DX& pointA, const Vector3DX& pointB, const Vector3DX& planePos, const Vector3DX& planenormal, Vector3DX* pointIntersection, bool* pSameVecNormalToA, bool* pOnFront) noexcept;
-			static void		Bresenham3D(const int x1, const int y1, const int z1, const int x2, const int y2, const int z2, const std::function<bool(int, int, int)>& OutPutLine) noexcept;
+			inline static bool		CalcIntersectionPoint(const Vector3DX& pointA, const Vector3DX& pointB, const Vector3DX& planePos, const Vector3DX& planenormal, Vector3DX* pointIntersection, bool* pSameVecNormalToA, bool* pOnFront) noexcept {
+				// 線分に当たらない
+				float dTa = Vector3DX::Dot(planenormal, (pointA - planePos));
+				float dTb = Vector3DX::Dot(planenormal, (pointB - planePos));
+				*pOnFront = !(dTa < 0.f && dTb < 0.f);
+				if ((dTa >= 0.f && dTb >= 0.f) || !*pOnFront) {
+					return false;
+				}
 
-			void			AddCube(const CellsData& cell, int x, int y, int z, bool CheckFill, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept;
-			void			AddShadowCube(const CellsData& cell, int x, int y, int z, COLOR_U8 DifColor, COLOR_U8 SpcColor) noexcept;
-		public:
-			bool			ColRayBox(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AABBMinPos, const Vector3DX& AABBMaxPos, Vector3DX* Normal = nullptr, int* NormalNum = nullptr) const noexcept;
-			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
-		public:
-			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept;
-		public:
-			void			LoadCellsFile() noexcept;
-			void			SaveCellsFile() noexcept;
-		private:
-			//簡略版を制作
-			void			MakeSimple() noexcept;
-			//遮蔽検索
-			void			CalcOcclusion() noexcept;
-		public://
-			void			SetBlick(int x, int y, int z, int8_t sel) noexcept;
-		public://
-			void			Load(void) noexcept {
-				MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
-				m_tex = GraphHandle::Load("data/tex.png");
-				m_norm = GraphHandle::Load("data/nrm.png");
+				*pSameVecNormalToA = (dTa >= 0.f);
+				*pointIntersection = pointA + (pointB - pointA) * (std::abs(dTa) / (std::abs(dTa) + std::abs(dTb)));
+				return true;
 			}
-			//
-			void			Init(void) noexcept {
-				//空
-				this->m_ObjSky.SetScale(Vector3DX::vget(10.f, 10.f, 10.f));
-				this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
-				for (int i = 0, num = this->m_ObjSky.GetMaterialNum(); i < num; ++i) {
-					//this->m_ObjSky.SetMaterialDifColor(i, GetColorF(0.5f, 0.5f, 0.5f, 1.f));
-					this->m_ObjSky.SetMaterialDifColor(i, GetColorF(0.7f, 0.7f, 0.7f, 1.f));
-					this->m_ObjSky.SetMaterialAmbColor(i, GetColorF(0.f, 0.f, 0.f, 1.f));
-				}
-				m_CellxN.clear();
-				m_CellxN.resize(total);
-				if (false) {
-					{
-						PerlinNoise ns(GetRand(100));
-						m_CellxN.back().Xall = 500;
-						m_CellxN.back().Yall = 160;
-						m_CellxN.back().Zall = 500;
-						m_CellxN.back().Xharf = m_CellxN.back().Xall / 2;
-						m_CellxN.back().Yharf = m_CellxN.back().Yall / 2;
-						m_CellxN.back().Zharf = m_CellxN.back().Zall / 2;
-						m_CellxN.back().m_Cell.resize((size_t)(m_CellxN.back().Xall * m_CellxN.back().Yall * m_CellxN.back().Zall));
-						m_CellxN.back().scaleRate = 1;
-						for (int x = -m_CellxN.back().Xharf; x < m_CellxN.back().Xharf; x++) {
-							for (int z = -m_CellxN.back().Zharf; z < m_CellxN.back().Zharf; z++) {
-								auto Height = static_cast<int>(ns.octaveNoise(2,
-									(static_cast<float>(x + m_CellxN.back().Xharf)) / m_CellxN.back().Xall,
-									(static_cast<float>(z + m_CellxN.back().Zharf)) / m_CellxN.back().Zall
-								) * static_cast<float>(m_CellxN.back().Yall * 4 / 5)) - (m_CellxN.back().Yall * 4 / 5) / 2;
-								for (int y = -m_CellxN.back().Yharf; y < m_CellxN.back().Yharf; y++) {
-									if (y <= Height) {
-										m_CellxN.back().SetCell(x, y, z) = 1;
-										continue;
-									}
-									m_CellxN.back().SetCell(x, y, z) = s_EmptyBlick;
-								}
-							}
-						}
-					}
+			inline static void		Bresenham3D(int x1, int y1, int z1, int x2, int y2, int z2, const std::function<bool(int, int, int)>& OutPutLine) noexcept {
+				int err_1{}, err_2{};
+				int point[3]{};
 
-					SaveCellsFile();
-				}
-				else if (false) {
-					{
-						PerlinNoise ns(GetRand(100));
-						m_CellxN.back().Xall = 100;
-						m_CellxN.back().Yall = 100;
-						m_CellxN.back().Zall = 100;
-						m_CellxN.back().Xharf = m_CellxN.back().Xall / 2;
-						m_CellxN.back().Yharf = m_CellxN.back().Yall / 2;
-						m_CellxN.back().Zharf = m_CellxN.back().Zall / 2;
-						m_CellxN.back().m_Cell.resize((size_t)(m_CellxN.back().Xall * m_CellxN.back().Yall * m_CellxN.back().Zall));
-						m_CellxN.back().scaleRate = 1;
-						for (int x = -m_CellxN.back().Xharf; x < m_CellxN.back().Xharf; x++) {
-							for (int z = -m_CellxN.back().Zharf; z < m_CellxN.back().Zharf; z++) {
-								for (int y = -m_CellxN.back().Yharf; y < m_CellxN.back().Yharf; y++) {
-									if (y <= 0) {
-										m_CellxN.back().SetCell(x, y, z) = 1;
-										continue;
-									}
-									if (y <= 2 + MulPer * 4) {
-										if (x == -MulPer * 8 + 2 || x == -MulPer * 8 + 1 || x == -MulPer * 8) {
-											m_CellxN.back().SetCell(x, y, z) = 1;
-											continue;
-										}
-										if (x == MulPer * 8 - 2 || x == MulPer * 8 - 1 || x == MulPer * 8) {
-											m_CellxN.back().SetCell(x, y, z) = 1;
-											continue;
-										}
-									}
-									m_CellxN.back().SetCell(x, y, z) = s_EmptyBlick;
-								}
-							}
-						}
-					}
+				point[0] = x1;
+				point[1] = y1;
+				point[2] = z1;
+				const int dx = x2 - x1;
+				const int dy = y2 - y1;
+				const int dz = z2 - z1;
+				const int x_inc = (dx < 0) ? -1 : 1;
+				const int l = std::abs(dx);
+				const int y_inc = (dy < 0) ? -1 : 1;
+				const int m = std::abs(dy);
+				const int z_inc = (dz < 0) ? -1 : 1;
+				const int n = std::abs(dz);
+				const int dx2 = l << 1;
+				const int dy2 = m << 1;
+				const int dz2 = n << 1;
 
-					SaveCellsFile();
+				if ((l >= m) && (l >= n)) {
+					err_1 = dy2 - l;
+					err_2 = dz2 - l;
+					for (int i = 0; i < l; ++i) {
+						if (OutPutLine(point[0], point[1], point[2])) { return; }
+						if (err_1 > 0) {
+							point[1] += y_inc;
+							err_1 -= dx2;
+						}
+						if (err_2 > 0) {
+							point[2] += z_inc;
+							err_2 -= dx2;
+						}
+						err_1 += dy2;
+						err_2 += dz2;
+						point[0] += x_inc;
+					}
+				}
+				else if ((m >= l) && (m >= n)) {
+					err_1 = dx2 - m;
+					err_2 = dz2 - m;
+					for (int i = 0; i < m; ++i) {
+						if (OutPutLine(point[0], point[1], point[2])) { return; }
+						if (err_1 > 0) {
+							point[0] += x_inc;
+							err_1 -= dy2;
+						}
+						if (err_2 > 0) {
+							point[2] += z_inc;
+							err_2 -= dy2;
+						}
+						err_1 += dx2;
+						err_2 += dz2;
+						point[1] += y_inc;
+					}
 				}
 				else {
-					LoadCellsFile();
+					err_1 = dy2 - n;
+					err_2 = dx2 - n;
+					for (int i = 0; i < n; ++i) {
+						if (OutPutLine(point[0], point[1], point[2])) { return; }
+						if (err_1 > 0) {
+							point[1] += y_inc;
+							err_1 -= dz2;
+						}
+						if (err_2 > 0) {
+							point[0] += x_inc;
+							err_2 -= dz2;
+						}
+						err_1 += dy2;
+						err_2 += dx2;
+						point[2] += z_inc;
+					}
 				}
-				//簡略版を制作
-				MakeSimple();
-				//遮蔽検索
-				CalcOcclusion();
-
-				MATERIALPARAM Param{};
-				Param.Diffuse = GetColorF(0.0f, 0.0f, 0.0f, 1.0f);						// ディフューズカラー
-				Param.Ambient = GetColorF(0.5f, 0.5f, 0.5f, 1.0f);						// アンビエントカラー
-				Param.Specular = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// スペキュラカラー
-				Param.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// エミッシブカラー
-				Param.Power = 5.f;							// スペキュラハイライトの鮮明度
-				SetMaterialParam(Param);
-
-				//頂点データ
-				m_vert32.clear();
-				m_32Num = 0;
-				m_32Size = 0;
-				m_vert32SB.clear();
-				m_vert32S.clear();
-				m_S32Num = 0;
-				m_S32Size = 0;
-				//頂点インデックスデータ
-				m_index32.clear();
-				m_index32S.clear();
+				OutPutLine(point[0], point[1], point[2]);
 			}
-			//
-			void			Execute(void) noexcept {
-				m_32Num = 0;
-				m_S32Num = 0;
+			inline static bool		ColRayBox(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AABBMinPos, const Vector3DX& AABBMaxPos, Vector3DX* Normal = nullptr) noexcept {
+				Vector3DX Vec = (*EndPos - StartPos);
+				// 交差判定
+				float p[3]{}, d[3]{}, min[3]{}, max[3]{};
+				p[0] = StartPos.x;
+				p[1] = StartPos.y;
+				p[2] = StartPos.z;
+				d[0] = Vec.x;
+				d[1] = Vec.y;
+				d[2] = Vec.z;
 
-				auto* DrawParts = DXDraw::Instance();
-				auto* OptionParts = OPTION::Instance();
-				const Vector3DX CamPos = DrawParts->GetMainCamera().GetCamPos();
-				const Vector3DX CamVec = (DrawParts->GetMainCamera().GetCamVec() - CamPos).normalized();
+				min[0] = AABBMinPos.x;
+				min[1] = AABBMinPos.y;
+				min[2] = AABBMinPos.z;
 
-				int BaseRate = 100;
-				int ShadowRate = 100;
-				int ShadowMax = DrawMax;
-				switch (OptionParts->GetParamInt(EnumSaveParam::ObjLevel)) {
-				case 0:
-				case 1:
-					BaseRate = MulPer * MulPer;
-					ShadowRate = 1;
-					ShadowMax = 10;
-					break;
-				case 2:
-					BaseRate = MulPer * MulPer * MulPer;
-					ShadowRate = MulPer;
-					ShadowMax = 15;
-					break;
-				case 3:
-					BaseRate = MulPer * MulPer * MulPer * MulPer;
-					ShadowRate = MulPer;
-					ShadowMax = 25;
-					break;
-				default:
-					break;
-				};
-				if (!OptionParts->GetParamBoolean(EnumSaveParam::shadow)) {
-					ShadowRate = 0;
-				}
-#ifdef DEBUG
-				auto* DebugParts = DebugClass::Instance();					//デバッグ
-#endif // DEBUG
-				for (auto& cell : m_CellxN) {
-#ifdef DEBUG
-					DebugParts->SetPoint(("---" + std::to_string(cell.scaleRate)).c_str());
-#endif // DEBUG
-					Vector3DX center = CamPos / (CellScale * cell.scaleRate);
-					//
-					if (BaseRate >= cell.scaleRate) {
-						int xMaxmin = std::max(static_cast<int>(center.x) - DrawMax, -cell.Xharf);
-						int xMaxmax = std::min(static_cast<int>(center.x) + DrawMax + 1, cell.Xharf);
-						int yMaxmin = std::max(static_cast<int>(center.y) - DrawMax, -cell.Yharf);
-						int yMaxmax = std::min(static_cast<int>(center.y) + DrawMax + 1, cell.Yharf);
-						int zMaxmin = std::max(static_cast<int>(center.z) - DrawMax, -cell.Zharf);
-						int zMaxmax = std::min(static_cast<int>(center.z) + DrawMax + 1, cell.Zharf);
+				max[0] = AABBMaxPos.x;
+				max[1] = AABBMaxPos.y;
+				max[2] = AABBMaxPos.z;
 
-						int xMinmin = static_cast<int>(center.x) - DrawMax / MulPer;
-						int xMinmax = static_cast<int>(center.x) + DrawMax / MulPer;
-						int yMinmin = static_cast<int>(center.y) - DrawMax / MulPer;
-						int yMinmax = static_cast<int>(center.y) + DrawMax / MulPer;
-						int zMinmin = static_cast<int>(center.z) - DrawMax / MulPer;
-						int zMinmax = static_cast<int>(center.z) + DrawMax / MulPer;
-						for (int x = xMaxmin; x < xMaxmax; x++) {
-							//*
-							//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
-							Vector3DX YZMinPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(yMaxmin), static_cast<float>(zMaxmin)) + (Vector3DX::one() * 0.5f);
-							Vector3DX YZMaxPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(yMaxmax), static_cast<float>(zMaxmax)) + (Vector3DX::one() * 0.5f);
-							Vector3DX YZPos2 = Vector3DX::vget(YZMinPos.x, YZMinPos.y, YZMaxPos.z);
-							Vector3DX YZPos3 = Vector3DX::vget(YZMinPos.x, YZMaxPos.y, YZMinPos.z);
-							bool IsHit = false;
-							while (true) {
-								if (Vector3DX::Dot(CamVec, (YZMinPos - center)) > 0.f) { IsHit = true; break; }
-								if (Vector3DX::Dot(CamVec, (YZMaxPos - center)) > 0.f) { IsHit = true; break; }
-								if (Vector3DX::Dot(CamVec, (YZPos2 - center)) > 0.f) { IsHit = true; break; }
-								if (Vector3DX::Dot(CamVec, (YZPos3 - center)) > 0.f) { IsHit = true; break; }
+				float t = -FLT_MAX;
+				float t_max = FLT_MAX;
+
+				for (int i = 0; i < 3; ++i) {
+					if (abs(d[i]) < FLT_EPSILON) {
+						if (p[i] < min[i] || p[i] > max[i])
+							return false; // 交差していない
+					}
+					else {
+						// スラブとの距離を算出
+						// t1が近スラブ、t2が遠スラブとの距離
+						float odd = 1.0f / d[i];
+						float t1 = (min[i] - p[i]) * odd;
+						float t2 = (max[i] - p[i]) * odd;
+						if (t1 > t2) {
+							float tmp = t1;
+							t1 = t2;
+							t2 = tmp;
+						}
+
+						if (t1 > t) {
+							t = t1;
+							//どの向き？
+							switch (i) {
+							case 0:
+								if (Normal) {
+									*Normal = Vec.x > 0.f ? Vector3DX::left() : Vector3DX::right();
+								}
+								break;
+							case 1:
+								if (Normal) {
+									*Normal = Vec.y > 0.f ? Vector3DX::down() : Vector3DX::up();
+								}
+								break;
+							case 2:
+								if (Normal) {
+									*Normal = Vec.z > 0.f ? Vector3DX::back() : Vector3DX::forward();
+								}
+								break;
+							default:
 								break;
 							}
-							if (!IsHit) {
-								continue;
-							}
-							//*/
-							for (int y = yMaxmin; y < yMaxmax; y++) {
-								int zMaxminT = zMaxmin;
-								int zMaxmaxT = zMaxmax;
-								//*
-								Vector3DX ZMinPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(zMaxmin)) + (Vector3DX::one() * 0.5f);
-								Vector3DX ZMaxPos = Vector3DX::vget(static_cast<float>(x), static_cast<float>(y), static_cast<float>(zMaxmax)) + (Vector3DX::one() * 0.5f);
-								Vector3DX HitPos;
-								bool pSameVecNormalToA{};
-								bool OnFront{};
-								if (CalcIntersectionPoint(ZMinPos, ZMaxPos, center, CamVec, &HitPos, &pSameVecNormalToA, &OnFront)) {
-									if (!pSameVecNormalToA) {
-										zMaxminT = std::max(static_cast<int>(HitPos.z - 0.5), zMaxmin);
-									}
-									else {
-										zMaxmaxT = std::min(static_cast<int>(HitPos.z - 0.5) + 1, zMaxmax);
-									}
-								}
-								else {
-									if (!OnFront) { continue; }
-								}
-								//*/
-
-								for (int z = zMaxminT; z < zMaxmaxT; z++) {
-									if (cell.scaleRate != 1) {
-										if (((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax))) {
-											if ((zMinmin < z) && (z < zMinmax)) {
-												z = zMinmax - 1;
-												continue;
-											}
-										}
-									}
-									if (!cell.IsDrawCell(x, y, z)) { continue; }
-
-									bool checkFill = true;
-									if (cell.scaleRate != 1) {
-										checkFill = !(((xMinmin <= x) && (x <= xMinmax)) && ((yMinmin <= y) && (y <= yMinmax)) && ((zMinmin <= z) && (z <= zMinmax)));
-									}
-
-									AddCube(cell, x, y, z, checkFill, GetColorU8(128, 128, 128, 255), GetColorU8(64, 64, 64, 255));
-								}
-							}
 						}
-					}
-					//
-					if (ShadowRate >= cell.scaleRate) {
-						int xMaxmin = std::max(static_cast<int>(center.x) - ShadowMax, -cell.Xharf);
-						int xMaxmax = std::min(static_cast<int>(center.x) + ShadowMax + 1, cell.Xharf);
-						int yMaxmin = std::max(static_cast<int>(center.y) - ShadowMax, -cell.Yharf);
-						int yMaxmax = std::min(static_cast<int>(center.y) + ShadowMax + 1, cell.Yharf);
-						int zMaxmin = std::max(static_cast<int>(center.z) - ShadowMax, -cell.Zharf);
-						int zMaxmax = std::min(static_cast<int>(center.z) + ShadowMax + 1, cell.Zharf);
+						if (t2 < t_max) {
+							t_max = t2;
+						}
 
-						int xMinmin = static_cast<int>(center.x) - ShadowMax / MulPer;
-						int xMinmax = static_cast<int>(center.x) + ShadowMax / MulPer;
-						int yMinmin = static_cast<int>(center.y) - ShadowMax / MulPer;
-						int yMinmax = static_cast<int>(center.y) + ShadowMax / MulPer;
-						int zMinmin = static_cast<int>(center.z) - ShadowMax / MulPer;
-						int zMinmax = static_cast<int>(center.z) + ShadowMax / MulPer;
-						for (int x = xMaxmin; x < xMaxmax; x++) {
-							for (int y = yMaxmin; y < yMaxmax; y++) {
-								for (int z = zMaxmin; z < zMaxmax; z++) {
-									if (cell.scaleRate != 1) {
-										if (((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax))) {
-											if ((zMinmin < z) && (z < zMinmax)) {
-												z = zMinmax - 1;
-												continue;
-											}
-										}
-									}
-									if (!cell.IsDrawCell(x, y, z)) { continue; }
-									AddShadowCube(cell, x, y, z, GetColorU8(128, 128, 128, 255), GetColorU8(64, 64, 64, 255));
-								}
-							}
+						// スラブ交差チェック
+						if (t >= t_max) {
+							return false;
 						}
 					}
 				}
-#ifdef DEBUG
-				DebugParts->SetPoint("END");
-#endif // DEBUG
+
+				// 交差している
+				if (EndPos) {
+					*EndPos = StartPos + Vec * t;
+				}
+				return true;
 			}
+		private:
+			void			AddCube(const CellsData& cellx, int x, int y, int z, bool CheckFill, COLOR_U8 DifColor, COLOR_U8 SpcColor, int centerX, int centerY, int centerZ) noexcept;
+			void			AddShadowCube(const CellsData& cellx, int x, int y, int z, int centerX, int centerY, int centerZ) noexcept;
+		public:
+			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
+			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept;
+
+			void			LoadCellsFile() noexcept;
+			void			SaveCellsFile() noexcept;
+
+			void			SetBlick(int x, int y, int z, int8_t sel) noexcept;
+		public://
+			void			Load(void) noexcept;
 			//
-			void			BG_Draw(void) noexcept {
-				SetUseLighting(FALSE);
-				this->m_ObjSky.DrawModel();
-				SetUseLighting(TRUE);
-			}
-			void			Shadow_Draw(void) noexcept {
-				if (m_S32Num > 0) {
-					DrawPolygon32bitIndexed3D(m_vert32SB.data(), static_cast<int>(m_S32Num * 4), m_index32S.data(), static_cast<int>(m_S32Num * 6 / 3), m_tex.get(), TRUE);
-				}
-			}
-			void			SetShadow_Draw_Rigid(void) noexcept {
-				if (m_S32Num > 0) {
-					SetUseTextureToShader(0, m_tex.get());
-					DrawPolygon32bitIndexed3DToShader(m_vert32S.data(), static_cast<int>(m_S32Num * 4), m_index32S.data(), static_cast<int>(m_S32Num * 6 / 3));
-					SetUseTextureToShader(0, INVALID_ID);
-				}
-			}
-			void			Draw(void) noexcept {
-				if (m_32Num > 0) {
-					DrawPolygon32bitIndexed3D(m_vert32.data(), static_cast<int>(m_32Num * 4), m_index32.data(), static_cast<int>(m_32Num * 6 / 3), m_tex.get(), TRUE);
-				}
-			}
+			void			Init(void) noexcept;
 			//
-			void			Dispose(void) noexcept {
-				this->m_ObjSky.Dispose();
-				SaveCellsFile();
-			}
+			void			Execute(void) noexcept;
+			//
+			void			BG_Draw(void) const noexcept;
+			void			Shadow_Draw(void) const noexcept;
+			void			SetShadow_Draw_Rigid(void) const noexcept;
+			void			Draw(void) const noexcept;
+			//
+			void			Dispose(void) noexcept;
 		};
 	}
 }
