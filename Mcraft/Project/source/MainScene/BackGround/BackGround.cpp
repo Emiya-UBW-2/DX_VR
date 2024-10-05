@@ -788,13 +788,13 @@ namespace FPS_n2 {
 					break;
 				case 2:
 					BaseRate = MulPer * MulPer * MulPer;
-					ShadowRate = MulPer;
-					ShadowMax = DrawMax / 2;
+					ShadowRate = 1;
+					ShadowMax = DrawMax;
 					break;
 				case 3:
 					BaseRate = MulPer * MulPer * MulPer * MulPer;
 					ShadowRate = MulPer;
-					ShadowMax = DrawMax / 2;
+					ShadowMax = DrawMax;
 					break;
 				default:
 					break;
@@ -806,6 +806,20 @@ namespace FPS_n2 {
 				lightX = static_cast<int>(light.x);
 				lightY = static_cast<int>(light.y);
 				lightZ = static_cast<int>(light.z);
+				//
+				if (blicksel >= 0) {
+					auto& cell = m_CellxN.front();
+					Vector3DX PutPos = (CamPos + CamVec * (LenMouse * Scale_Rate)) / CellScale;
+					int x = (int)PutPos.x, y = (int)PutPos.y, z = (int)PutPos.z;
+					for (int xp = 0; xp < xput; xp++) {
+						for (int yp = 0; yp < yput; yp++) {
+							for (int zp = 0; zp < zput; zp++) {
+								SetBlick((x + xp - xput / 2 + cell.Xall / 2), (y + yp - yput / 2 + cell.Yall / 2), (z + zp - zput / 2 + cell.Zall / 2), blicksel);
+							}
+						}
+					}
+					blicksel = -1;
+				}
 				//
 				std::thread tmp([this]() {
 					m_32Num = 0;
@@ -827,6 +841,17 @@ namespace FPS_n2 {
 					m_JobEnd = true;
 					});
 				m_Job.swap(tmp);
+			}
+
+			auto* Pad = PadControl::Instance();
+			if (Pad->GetKey(PADS::SHOT).trigger()) {
+				blicksel = 1;
+			}
+			if (Pad->GetKey(PADS::AIM).trigger()) {
+				blicksel = 0;
+			}
+			if (Pad->GetKey(PADS::JUMP).trigger()) {
+				SaveCellsFile();
 			}
 		}
 		//
@@ -851,6 +876,14 @@ namespace FPS_n2 {
 			if (m_32NumOut > 0) {
 				DrawPolygon32bitIndexed3D(m_vert32Out.data(), static_cast<int>(m_32NumOut * 4), m_index32Out.data(), static_cast<int>(m_32NumOut * 6 / 3), m_tex.get(), TRUE);
 			}
+
+			//
+			Vector3DX PutPos = (CamPos + CamVec * (LenMouse * Scale_Rate)) / CellScale;
+			int x = (int)PutPos.x, y = (int)PutPos.y, z = (int)PutPos.z;
+			DrawCube3D(
+				(Vector3DX::vget((float)(x - xput / 2), (float)(y - yput / 2), (float)(z - zput / 2)) * CellScale).get(),
+				(Vector3DX::vget((float)(x + xput - xput / 2), (float)(y + yput - yput / 2), (float)(z + zput - zput / 2)) * CellScale).get(),
+				GetColor(255, 255, 255), GetColor(255, 255, 255), FALSE);
 		}
 		//
 		void		BackGroundClass::Dispose(void) noexcept {

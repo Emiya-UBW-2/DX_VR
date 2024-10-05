@@ -112,6 +112,11 @@ namespace FPS_n2 {
 			int lightZ{};
 			Vector3DX CamPos;
 			Vector3DX CamVec;
+
+			//Edit
+			float LenMouse = 2.f;
+			int xput = 3, yput = 3, zput = 3;
+			int8_t blicksel = -1;
 		public:
 			BackGroundClass(void) noexcept {}
 			BackGroundClass(const BackGroundClass&) = delete;

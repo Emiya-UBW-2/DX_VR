@@ -429,35 +429,6 @@ namespace FPS_n2 {
 			for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 			}
-			auto* Pad = PadControl::Instance();
-			/*
-
-			Vector3DX CamPos = DrawParts->GetMainCamera().GetCamPos();
-			Vector3DX CamVec = (DrawParts->GetMainCamera().GetCamVec() - CamPos).normalized()*(2.f * Scale_Rate);
-			const float CellScale = Scale_Rate / 2.f / 2.f;
-
-			Vector3DX PutPos = (CamPos + CamVec) / CellScale;
-			int x = (int)PutPos.x, y = (int)PutPos.y, z = (int)PutPos.z;
-			//y = 1;
-			int xm = 1, ym = 3, zm = 1;
-			DrawCube3D((Vector3DX::vget((float)(x + 0), (float)(y + 0), (float)(z + 0)) * CellScale).get(), (Vector3DX::vget((float)((x + xm)), (float)((y + ym)), (float)((z + zm))) * CellScale).get(), GetColor(255, 255, 255), GetColor(255, 255, 255), FALSE);
-			for (int xp = 0; xp < xm; xp++) {
-				for (int yp = 0; yp < ym; yp++) {
-					for (int zp = 0; zp < zm; zp++) {
-						//DrawCube3D((Vector3DX::vget((float)(x + xp), (float)(y + yp), (float)(z + zp)) * CellScale).get(), (Vector3DX::vget((float)((x + xp) + 1), (float)((y + yp) + 1), (float)((z + zp) + 1)) * CellScale).get(), GetColor(255, 255, 255), GetColor(255, 255, 255), FALSE);
-						if (Pad->GetKey(PADS::SHOT).trigger()) {
-							BackGround->SetBlick((x + xp), (y + yp), (z + zp), 1);
-						}
-						if (Pad->GetKey(PADS::AIM).trigger()) {
-							BackGround->SetBlick((x + xp), (y + yp), (z + zp), s_EmptyBlick);
-						}
-					}
-				}
-			}
-			//*/
-			if (Pad->GetKey(PADS::JUMP).trigger()) {
-				BackGround->SaveCellsFile();
-			}
 		}
 		//UI•\Ž¦
 		void			MainGameScene::DrawUI_In_Sub(void) noexcept {
