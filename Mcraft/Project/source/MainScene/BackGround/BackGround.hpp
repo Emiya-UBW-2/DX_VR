@@ -7,7 +7,7 @@
 namespace FPS_n2 {
 	namespace BackGround {
 		static constexpr int8_t s_EmptyBlick = 0;
-		static constexpr int total = 3;
+		static constexpr int total = 2;
 		static constexpr int MulPer = 3;
 		static constexpr float CellScale = Scale_Rate / 2.f / 2.f;
 		static constexpr int DrawMax = 50;
@@ -27,6 +27,9 @@ namespace FPS_n2 {
 			std::vector<uint32_t>			m_index32S;
 			size_t							m_S32Num{ 0 };
 			size_t							m_S32Size{ 0 };
+
+			std::thread						m_Job;
+			bool							m_JobEnd{};
 
 			GraphHandle						m_tex{};
 			GraphHandle						m_norm{};
@@ -92,8 +95,24 @@ namespace FPS_n2 {
 					SetOcclusionInfo(x, y, z) |= (1 << 5) * ((z == 0) ? 1 : IsActiveCell(x, y, z - 1));
 				}
 			};
-
 			std::array<CellsData, total>	m_CellxN;
+
+			std::vector<VERTEX3D>			m_vert32Out;
+			std::vector<uint32_t>			m_index32Out;
+			size_t							m_32NumOut{ 0 };
+			std::vector<VERTEX3D>			m_vert32SBOut;
+			std::vector<VERTEX3DSHADER>		m_vert32SOut;
+			std::vector<uint32_t>			m_index32SOut;
+			size_t							m_S32NumOut{ 0 };
+
+			int BaseRate = 100;
+			int ShadowRate = 100;
+			int ShadowMax = DrawMax;
+			int lightX{};
+			int lightY{};
+			int lightZ{};
+			Vector3DX CamPos;
+			Vector3DX CamVec;
 		public:
 			BackGroundClass(void) noexcept {}
 			BackGroundClass(const BackGroundClass&) = delete;
@@ -281,7 +300,7 @@ namespace FPS_n2 {
 			void			LoadCellsFile() noexcept;
 			void			SaveCellsFile() noexcept;
 
-			void			SetBlick(int x, int y, int z, int8_t sel) noexcept;
+			void			SetBlick(int x, int y, int z, int8_t select) noexcept;
 		public://
 			void			Load(void) noexcept;
 			//

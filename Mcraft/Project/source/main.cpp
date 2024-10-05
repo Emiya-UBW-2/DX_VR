@@ -51,6 +51,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//SetUseHalfLambertLighting(TRUE);
 	MV1SetLoadModelReMakeNormal(TRUE);
 	//SetUsePixelLighting(TRUE);
+	SetUseBackCulling(TRUE);
 	//
 	FPS_n2::Player::PlayerManager::Create();
 	FPS_n2::CommonBattleResource::Create();
