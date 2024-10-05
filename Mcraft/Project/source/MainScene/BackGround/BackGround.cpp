@@ -86,193 +86,374 @@ namespace FPS_n2 {
 			}
 		};
 		//
-		void		BackGroundClass::AddCube(const CellsData& cellx, int x, int y, int z, bool CheckFill, COLOR_U8 DifColor, COLOR_U8 SpcColor, int centerX, int centerY, int centerZ) noexcept {
-			auto& fillinfo = cellx.GetOcclusionInfo(x, y, z);
-			auto GetPlane = [&](int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int xN, int yN, int zN) {
-				if (m_32Num + 1 > m_32Size) {
-					m_32Size = m_32Num + 1;
-					m_vert32.resize(m_32Size * 4);
-					m_index32.resize(m_32Size * 6);
+		void		BackGroundClass::AddPlane(const CellsData& cellx, int x, int y, int z, COLOR_U8 DifColor, COLOR_U8 SpcColor, int xscale,
+			int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int xN, int yN, int zN) noexcept {
+			if (m_32Num + 1 > m_32Size) {
+				m_32Size = m_32Num + 1;
+				m_vert32.resize(m_32Size * 4);
+				m_index32.resize(m_32Size * 6);
+			}
+
+			float Xofs = static_cast<float>((z % 2 == 0));
+			float Yofs = static_cast<float>(1 - yN);
+			float uAdd = 1.f / 2.f;
+			float vAdd = 1.f / 4.f;
+			float uMin = Xofs * uAdd;
+			float vMin = Yofs * vAdd;
+
+			auto AddPointPos = [&](int xt, int yt, int u, int v, int sel) {
+				Vector3DX Pos;
+				if (xN > 0) {
+					Pos = cellx.GetPos(x + 1, y + xt, z + yt * xscale);//
+				}
+				else if (yN > 0) {
+					Pos = cellx.GetPos(x + xt, y + 1, z + yt * xscale);//
+				}
+				else if (zN > 0) {
+					Pos = cellx.GetPos(x + xt, y + yt, z + 1 * xscale);
+				}
+				else if (xN < 0) {
+					Pos = cellx.GetPos(x + 0, y + xt, z + yt * xscale);
+				}
+				else if (yN < 0) {
+					Pos = cellx.GetPos(x + xt, y + 0, z + yt * xscale);
+				}
+				else if (zN < 0) {
+					Pos = cellx.GetPos(x + xt, y + yt, z + 0 * xscale);
 				}
 
-				float Xofs = 1.0f - static_cast<float>(yN);
-				float uvAdd = 1.f / 8.f;
-				float uMin = Xofs * uvAdd;
-				float vMin = 0.f * uvAdd;
-
-				auto AddPointPos = [&](int xt, int yt, int u, int v, int sel) {
-					Vector3DX Pos;
-					if (xN != 0) {
-						Pos = cellx.GetPos(x + (xN + 1) / 2, y + xt, z + yt);
-					}
-					else if (yN != 0) {
-						Pos = cellx.GetPos(x + xt, y + (yN + 1) / 2, z + yt);
-					}
-					else if (zN != 0) {
-						Pos = cellx.GetPos(x + xt, y + yt, z + (zN + 1) / 2);
-					}
-
-					auto& V = m_vert32.at(m_32Num * 4 + sel);
-					V.pos = Pos.get();
-					V.u = uMin + uvAdd * static_cast<float>(u);
-					V.v = vMin + uvAdd * static_cast<float>(v);
-					V.norm = VGet(static_cast<float>(xN), static_cast<float>(yN), static_cast<float>(zN));
-					V.dif = DifColor;
-					V.spc = SpcColor;
-					};
-
-				AddPointPos(x1, y1, 1, 0, 0);
-				AddPointPos(x2, y2, 0, 0, 1);
-				AddPointPos(x3, y3, 1, 1, 2);
-				AddPointPos(x4, y4, 0, 1, 3);
-				m_index32.at(m_32Num * 6) = (uint32_t)(m_32Num * 4);
-				m_index32.at(m_32Num * 6 + 1) = (uint32_t)(m_32Num * 4 + 1);
-				m_index32.at(m_32Num * 6 + 2) = (uint32_t)(m_32Num * 4 + 2);
-				m_index32.at(m_32Num * 6 + 3) = (uint32_t)(m_32Num * 4 + 3);
-				m_index32.at(m_32Num * 6 + 4) = (uint32_t)(m_32Num * 4 + 2);
-				m_index32.at(m_32Num * 6 + 5) = (uint32_t)(m_32Num * 4 + 1);
-				++m_32Num;
+				auto& V = m_vert32.at(m_32Num * 4 + sel);
+				V.pos = Pos.get();
+				V.u = uMin + uAdd * static_cast<float>(u * cellx.scaleRate);
+				V.v = vMin + vAdd * static_cast<float>(v);// * cellx.scaleRate
+				V.norm = VGet(static_cast<float>(xN), static_cast<float>(yN), static_cast<float>(zN));
+				V.dif = DifColor;
+				V.spc = SpcColor;
 				};
-			// 頂点データの作成
-			if (x + 1 <= centerX && !(CheckFill && (fillinfo & (1 << 0)))) {
-				GetPlane(
-					1, 0,
-					1, 1,
-					0, 0,
-					0, 1,
-					1, 0, 0);
+
+			AddPointPos(x1, y1, xscale, 0, 0);
+			AddPointPos(x2, y2, 0, 0, 1);
+			AddPointPos(x3, y3, xscale, 1, 2);
+			AddPointPos(x4, y4, 0, 1, 3);
+			m_index32.at(m_32Num * 6) = (uint32_t)(m_32Num * 4);
+			m_index32.at(m_32Num * 6 + 1) = (uint32_t)(m_32Num * 4 + 1);
+			m_index32.at(m_32Num * 6 + 2) = (uint32_t)(m_32Num * 4 + 2);
+			m_index32.at(m_32Num * 6 + 3) = (uint32_t)(m_32Num * 4 + 3);
+			m_index32.at(m_32Num * 6 + 4) = (uint32_t)(m_32Num * 4 + 2);
+			m_index32.at(m_32Num * 6 + 5) = (uint32_t)(m_32Num * 4 + 1);
+			++m_32Num;
+		}
+		void BackGroundClass::AddCubeZ(const CellsData& cellx, int x, int y, int zmin, int zmax, int centerX, int centerY, int centerZ) noexcept {
+			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
+			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
+			bool isHit1 = false;
+			bool isHit2 = false;
+			bool isHit3 = false;
+			bool isHit4 = false;
+			for (int z = zmin; z <= zmax; ++z) {
+				bool checkFill = true;
+				if (cellx.scaleRate != 1) {
+					int xMinmin = centerX - DrawMax / MulPer;
+					int xMinmax = centerX + DrawMax / MulPer;
+					int yMinmin = centerY - DrawMax / MulPer;
+					int yMinmax = centerY + DrawMax / MulPer;
+					int zMinmin = centerZ - DrawMax / MulPer;
+					int zMinmax = centerZ + DrawMax / MulPer;
+					checkFill = !(((xMinmin <= x) && (x <= xMinmax)) && ((yMinmin <= y) && (y <= yMinmax)) && ((zMinmin <= z) && (z <= zMinmax)));
+				}
+				auto& fillinfo = cellx.GetOcclusionInfo(x, y, z);
+				// 頂点データの作成
+				if (!isHit1 && (x + 1 <= centerX) && !(checkFill && (fillinfo & (1 << 0)))) {
+					isHit1 = true;
+				}
+				if (!isHit2 && (x >= centerX) && !(checkFill && (fillinfo & (1 << 1)))) {
+					isHit2 = true;
+				}
+				if (!isHit3 && (y + 1 <= centerY) && !(checkFill && (fillinfo & (1 << 2)))) {
+					isHit3 = true;
+				}
+				if (!isHit4 && (y >= centerY) && !(checkFill && (fillinfo & (1 << 3)))) {
+					isHit4 = true;
+				}
+				if (z == zmax) {
+					if (isHit1) {
+						AddPlane(cellx, x, y, zmin, DifColor, SpcColor,
+							zmax - zmin + 1,
+							0, 1,
+							0, 0,
+							1, 1,
+							1, 0,
+							1, 0, 0);
+					}
+					if (isHit2) {
+						AddPlane(cellx, x, y, zmin, DifColor, SpcColor,
+							zmax - zmin + 1,
+							1, 1,
+							1, 0,
+							0, 1,
+							0, 0,
+							-1, 0, 0);
+					}
+					if (isHit3) {
+						AddPlane(cellx, x, y, zmin, DifColor, SpcColor,
+							zmax - zmin + 1,
+							1, 1,
+							1, 0,
+							0, 1,
+							0, 0,
+							0, 1, 0);
+					}
+					if (isHit4) {
+						AddPlane(cellx, x, y, zmin, DifColor, SpcColor,
+							zmax - zmin + 1,
+							0, 1,
+							0, 0,
+							1, 1,
+							1, 0,
+							0, -1, 0);
+					}
+				}
+				//こいつらはそのまま
+				if (z + 1 <= centerZ && !(checkFill && (fillinfo & (1 << 4)))) {
+					AddPlane(cellx, x, y, z, DifColor, SpcColor,
+						1,
+						0, 0,
+						1, 0,
+						0, 1,
+						1, 1,
+						0, 0, 1);
+				}
+				if (z >= centerZ && !(checkFill && (fillinfo & (1 << 5)))) {
+					AddPlane(cellx, x, y, z, DifColor, SpcColor,
+						1,
+						0, 1,
+						1, 1,
+						0, 0,
+						1, 0,
+						0, 0, -1);
+				}
 			}
-			if (x >= centerX && !(CheckFill && (fillinfo & (1 << 1)))) {
-				GetPlane(
-					1, 1,
-					1, 0,
-					0, 1,
-					0, 0,
-					-1, 0, 0);
-			}
-			if (y + 1 <= centerY && !(CheckFill && (fillinfo & (1 << 2)))) {
-				GetPlane(
-					0, 1,
-					1, 1,
-					0, 0,
-					1, 0,
-					0, 1, 0);
-			}
-			if (y >= centerY && !(CheckFill && (fillinfo & (1 << 3)))) {
-				GetPlane(
-					0, 0,
-					1, 0,
-					0, 1,
-					1, 1,
-					0, -1, 0);
-			}
-			if (z + 1 <= centerZ && !(CheckFill && (fillinfo & (1 << 4)))) {
-				GetPlane(
-					0, 0,
-					1, 0,
-					0, 1,
-					1, 1,
-					0, 0, 1);
-			}
-			if (z >= centerZ && !(CheckFill && (fillinfo & (1 << 5)))) {
-				GetPlane(
-					0, 1,
-					1, 1,
-					0, 0,
-					1, 0,
-					0, 0, -1);
+		}
+		void		BackGroundClass::AddCubes(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept {
+			float scale = CellScale * cellx.scaleRate;
+			Vector3DX mid = Vector3DX::one() * (0.5f * scale);
+			int xMaxmin = std::max(centerX - DrawMax, 0);
+			int xMaxmax = std::min(centerX + DrawMax + 1, cellx.Xall);
+			int yMaxmin = std::max(centerY - DrawMax, 0);
+			int yMaxmax = std::min(centerY + DrawMax + 1, cellx.Yall);
+			int zMaxmin = std::max(centerZ - DrawMax, 0);
+			int zMaxmax = std::min(centerZ + DrawMax + 1, cellx.Zall);
+
+			int xMinmin = centerX - DrawMax / MulPer;
+			int xMinmax = centerX + DrawMax / MulPer;
+			int yMinmin = centerY - DrawMax / MulPer;
+			int yMinmax = centerY + DrawMax / MulPer;
+			int zMinmin = centerZ - DrawMax / MulPer;
+			int zMinmax = centerZ + DrawMax / MulPer;
+			for (int x = xMaxmin; x < xMaxmax; ++x) {
+				if (!CalcYZActive(cellx, x, yMaxmin, yMaxmax, zMaxmin, zMaxmax)) { continue; }
+				for (int y = yMaxmin; y < yMaxmax; ++y) {
+					int zMaxminT = zMaxmin;
+					int zMaxmaxT = zMaxmax;
+					if (!CalcZMinMax(cellx, x, y, &zMaxminT, &zMaxmaxT)) { continue; }
+					bool OnNearestPoint = ((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax));
+					int zmin = zMaxminT;
+					int zmax = zMaxminT;
+					bool isHitmin = true;
+					for (int z = zMaxminT; z < zMaxmaxT; ++z) {
+						if ((cellx.scaleRate != 1) && OnNearestPoint && ((zMinmin < z) && (z < zMinmax))) {
+							//スキップ
+							z = zMinmax - 1;
+						}
+						else if (!cellx.IsActiveCell(x, y, z) || (cellx.GetOcclusionInfo(x, y, z) == 0b111111) || (z == zMaxmaxT - 1)) {}
+						else {
+							//ブロックが置ける部分
+							if (isHitmin) {
+								isHitmin = false;
+								zmin = z;
+							}
+							zmax = z;
+							continue;
+						}
+						if (!isHitmin) {
+							isHitmin = true;
+							AddCubeZ(cellx, x, y, zmin, zmax, centerX, centerY, centerZ);
+						}
+					}
+				}
 			}
 		}
 		//
-		void		BackGroundClass::AddShadowCube(const CellsData& cellx, int x, int y, int z, int lightX, int lightY, int lightZ) noexcept {
-			auto& fillinfo = cellx.GetOcclusionInfo(x, y, z);
-			auto GetPlane = [&](int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int xN, int yN, int zN) {
-				if (m_S32Num + 1 > m_S32Size) {
-					m_S32Size = m_S32Num + 1;
-					m_vert32S.resize(m_S32Size * 4);
-					m_vert32SB.resize(m_S32Size * 4);
-					m_index32S.resize(m_S32Size * 6);
+		void BackGroundClass::AddShadowPlane(const CellsData& cellx, int x, int y, int z, int xscale,
+			int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int xN, int yN, int zN) noexcept {
+			if (m_S32Num + 1 > m_S32Size) {
+				m_S32Size = m_S32Num + 1;
+				m_vert32S.resize(m_S32Size * 4);
+				m_vert32SB.resize(m_S32Size * 4);
+				m_index32S.resize(m_S32Size * 6);
+			}
+
+			auto AddPointPos = [&](int xt, int yt, int sel) {
+				Vector3DX Pos;
+				if (xN > 0) {
+					Pos = cellx.GetPos(x + 1, y + xt, z + yt * xscale);//
+				}
+				else if (yN > 0) {
+					Pos = cellx.GetPos(x + xt, y + 1, z + yt * xscale);//
+				}
+				else if (zN > 0) {
+					Pos = cellx.GetPos(x + xt, y + yt, z + 1 * xscale);
+				}
+				else if (xN < 0) {
+					Pos = cellx.GetPos(x + 0, y + xt, z + yt * xscale);
+				}
+				else if (yN < 0) {
+					Pos = cellx.GetPos(x + xt, y + 0, z + yt * xscale);
+				}
+				else if (zN < 0) {
+					Pos = cellx.GetPos(x + xt, y + yt, z + 0 * xscale);
 				}
 
-				auto AddPointPos = [&](int xt, int yt, int sel) {
-					Vector3DX Pos;
-					if (xN != 0) {
-						Pos = cellx.GetPos(x + (xN + 1) / 2, y + xt, z + yt);
-					}
-					else if (yN != 0) {
-						Pos = cellx.GetPos(x + xt, y + (yN + 1) / 2, z + yt);
-					}
-					else if (zN != 0) {
-						Pos = cellx.GetPos(x + xt, y + yt, z + (zN + 1) / 2);
-					}
-
-					m_vert32S.at(m_S32Num * 4 + sel).pos = Pos.get();
-					auto& V = m_vert32SB.at(m_S32Num * 4 + sel);
-					V.pos = Pos.get();
-					V.norm = VGet(static_cast<float>(xN), static_cast<float>(yN), static_cast<float>(zN));
-					V.dif = GetColorU8(128, 128, 128, 255);
+				m_vert32S.at(m_S32Num * 4 + sel).pos = Pos.get();
+				auto& V = m_vert32SB.at(m_S32Num * 4 + sel);
+				V.pos = Pos.get();
+				V.norm = VGet(static_cast<float>(xN), static_cast<float>(yN), static_cast<float>(zN));
+				V.dif = GetColorU8(128, 128, 128, 255);
 				};
 
-				AddPointPos(x1, y1, 0);
-				AddPointPos(x2, y2, 1);
-				AddPointPos(x3, y3, 2);
-				AddPointPos(x4, y4, 3);
-				m_index32S.at(m_S32Num * 6) = (uint32_t)(m_S32Num * 4);
-				m_index32S.at(m_S32Num * 6 + 1) = (uint32_t)(m_S32Num * 4 + 1);
-				m_index32S.at(m_S32Num * 6 + 2) = (uint32_t)(m_S32Num * 4 + 2);
-				m_index32S.at(m_S32Num * 6 + 3) = (uint32_t)(m_S32Num * 4 + 3);
-				m_index32S.at(m_S32Num * 6 + 4) = (uint32_t)(m_S32Num * 4 + 2);
-				m_index32S.at(m_S32Num * 6 + 5) = (uint32_t)(m_S32Num * 4 + 1);
-				++m_S32Num;
-				};
-			// 頂点データの作成
-			if (0 <= lightX && (fillinfo & (1 << 0)) == 0) {
-				GetPlane(
-					1, 0,
-					1, 1,
-					0, 0,
-					0, 1,
-					1, 0, 0);
+			AddPointPos(x1, y1, 0);
+			AddPointPos(x2, y2, 1);
+			AddPointPos(x3, y3, 2);
+			AddPointPos(x4, y4, 3);
+			m_index32S.at(m_S32Num * 6) = (uint32_t)(m_S32Num * 4);
+			m_index32S.at(m_S32Num * 6 + 1) = (uint32_t)(m_S32Num * 4 + 1);
+			m_index32S.at(m_S32Num * 6 + 2) = (uint32_t)(m_S32Num * 4 + 2);
+			m_index32S.at(m_S32Num * 6 + 3) = (uint32_t)(m_S32Num * 4 + 3);
+			m_index32S.at(m_S32Num * 6 + 4) = (uint32_t)(m_S32Num * 4 + 2);
+			m_index32S.at(m_S32Num * 6 + 5) = (uint32_t)(m_S32Num * 4 + 1);
+			++m_S32Num;
+		}
+		void BackGroundClass::AddShadowCubeZ(const CellsData& cellx, int x, int y, int zmin, int zmax, int centerX, int centerY, int centerZ) noexcept {
+			bool isHit1 = false;
+			bool isHit2 = false;
+			bool isHit3 = false;
+			bool isHit4 = false;
+			for (int z = zmin; z <= zmax; ++z) {
+				auto& fillinfo = cellx.GetOcclusionInfo(x, y, z);
+				// 頂点データの作成
+				if (!isHit1 && (0 <= lightX && (fillinfo & (1 << 0)) == 0)) {
+					isHit1 = true;
+				}
+				if (!isHit2 && (0 >= lightX && (fillinfo & (1 << 1)) == 0)) {
+					isHit2 = true;
+				}
+				if (!isHit3 && (0 <= lightY && (fillinfo & (1 << 2)) == 0)) {
+					isHit3 = true;
+				}
+				if (!isHit4 && (0 >= lightY && (fillinfo & (1 << 3)) == 0)) {
+					isHit4 = true;
+				}
+				if (z == zmax) {
+					if (isHit1) {
+						AddShadowPlane(cellx, x, y, zmin,
+							zmax - zmin + 1,
+							1, 0,
+							1, 1,
+							0, 0,
+							0, 1,
+							1, 0, 0);
+					}
+					if (isHit2) {
+						AddShadowPlane(cellx, x, y, zmin,
+							zmax - zmin + 1,
+							1, 1,
+							1, 0,
+							0, 1,
+							0, 0,
+							-1, 0, 0);
+					}
+					if (isHit3) {
+						AddShadowPlane(cellx, x, y, zmin,
+							zmax - zmin + 1,
+							0, 1,
+							1, 1,
+							0, 0,
+							1, 0,
+							0, 1, 0);
+					}
+					if (isHit4) {
+						AddShadowPlane(cellx, x, y, zmin,
+							zmax - zmin + 1,
+							0, 0,
+							1, 0,
+							0, 1,
+							1, 1,
+							0, -1, 0);
+					}
+				}
+				//こいつらはそのまま
+				if (0 <= lightZ && (fillinfo & (1 << 4)) == 0) {
+					AddShadowPlane(cellx, x, y, z,
+						1,
+						0, 0,
+						1, 0,
+						0, 1,
+						1, 1,
+						0, 0, 1);
+				}
+				if (0 >= lightZ && (fillinfo & (1 << 5)) == 0) {
+					AddShadowPlane(cellx, x, y, z,
+						1,
+						0, 1,
+						1, 1,
+						0, 0,
+						1, 0,
+						0, 0, -1);
+				}
 			}
-			if (0 >= lightX && (fillinfo & (1 << 1)) == 0) {
-				GetPlane(
-					1, 1,
-					1, 0,
-					0, 1,
-					0, 0,
-					-1, 0, 0);
-			}
-			if (0 <= lightY && (fillinfo & (1 << 2)) == 0) {
-				GetPlane(
-					0, 1,
-					1, 1,
-					0, 0,
-					1, 0,
-					0, 1, 0);
-			}
-			if (0 >= lightY && (fillinfo & (1 << 3)) == 0) {
-				GetPlane(
-					0, 0,
-					1, 0,
-					0, 1,
-					1, 1,
-					0, -1, 0);
-			}
-			if (0 <= lightZ && (fillinfo & (1 << 4)) == 0) {
-				GetPlane(
-					0, 0,
-					1, 0,
-					0, 1,
-					1, 1,
-					0, 0, 1);
-			}
-			if (0 >= lightZ && (fillinfo & (1 << 5)) == 0) {
-				GetPlane(
-					0, 1,
-					1, 1,
-					0, 0,
-					1, 0,
-					0, 0, -1);
+		}
+		void		BackGroundClass::AddShadowCubes(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept {
+			int xMaxmin = std::max(centerX - ShadowMax, 0);
+			int xMaxmax = std::min(centerX + ShadowMax + 1, cellx.Xall);
+			int yMaxmin = std::max(centerY - ShadowMax, 0);
+			int yMaxmax = std::min(centerY + ShadowMax + 1, cellx.Yall);
+			int zMaxmin = std::max(centerZ - ShadowMax, 0);
+			int zMaxmax = std::min(centerZ + ShadowMax + 1, cellx.Zall);
+
+			int xMinmin = centerX - ShadowMax / MulPer;
+			int xMinmax = centerX + ShadowMax / MulPer;
+			int yMinmin = centerY - ShadowMax / MulPer;
+			int yMinmax = centerY + ShadowMax / MulPer;
+			int zMinmin = centerZ - ShadowMax / MulPer;
+			int zMinmax = centerZ + ShadowMax / MulPer;
+			for (int x = xMaxmin; x < xMaxmax; ++x) {
+				for (int y = yMaxmin; y < yMaxmax; ++y) {
+					bool OnNearestPoint = ((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax));
+
+					int zmin = zMaxmin;
+					int zmax = zMaxmin;
+					bool isHitmin = true;
+					for (int z = zMaxmin; z < zMaxmax; ++z) {
+						if ((cellx.scaleRate != 1) && OnNearestPoint && ((zMinmin < z) && (z < zMinmax))) {
+							//スキップ
+							z = zMinmax - 1;
+						}
+						else if (!cellx.IsActiveCell(x, y, z) || (cellx.GetOcclusionInfo(x, y, z) == 0b111111) || (z == zMaxmax - 1)) {}
+						else {
+							//ブロックが置ける部分
+							if (isHitmin) {
+								isHitmin = false;
+								zmin = z;
+							}
+							zmax = z;
+							continue;
+						}
+						if (!isHitmin) {
+							isHitmin = true;
+							AddShadowCubeZ(cellx, x, y, zmin, zmax, centerX, centerY, centerZ);
+						}
+					}
+				}
 			}
 		}
 		//
@@ -577,13 +758,6 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundClass::Execute(void) noexcept {
-
-#ifdef DEBUG
-			auto* DebugParts = DebugClass::Instance();					//デバッグ
-#endif // DEBUG
-#ifdef DEBUG
-			DebugParts->SetPoint("START");
-#endif // DEBUG
 			if (m_JobEnd) {
 				m_JobEnd = false;
 				if (m_Job.joinable()) {
@@ -634,137 +808,26 @@ namespace FPS_n2 {
 				lightZ = static_cast<int>(light.z);
 				//
 				std::thread tmp([this]() {
-					{
-						m_32Num = 0;
-						m_S32Num = 0;
-						for (auto& cellx : m_CellxN) {
-							float scale = CellScale * cellx.scaleRate;
-							Vector3DX center = CamPos / scale;
-							int centerX = static_cast<int>(center.x) + cellx.Xall / 2;
-							int centerY = static_cast<int>(center.y) + cellx.Yall / 2;
-							int centerZ = static_cast<int>(center.z) + cellx.Zall / 2;
-							//
-							if (BaseRate >= cellx.scaleRate) {
-								Vector3DX mid = Vector3DX::one() * (0.5f * scale);
-								int xMaxmin = std::max(centerX - DrawMax, 0);
-								int xMaxmax = std::min(centerX + DrawMax + 1, cellx.Xall);
-								int yMaxmin = std::max(centerY - DrawMax, 0);
-								int yMaxmax = std::min(centerY + DrawMax + 1, cellx.Yall);
-								int zMaxmin = std::max(centerZ - DrawMax, 0);
-								int zMaxmax = std::min(centerZ + DrawMax + 1, cellx.Zall);
-
-								int xMinmin = centerX - DrawMax / MulPer;
-								int xMinmax = centerX + DrawMax / MulPer;
-								int yMinmin = centerY - DrawMax / MulPer;
-								int yMinmax = centerY + DrawMax / MulPer;
-								int zMinmin = centerZ - DrawMax / MulPer;
-								int zMinmax = centerZ + DrawMax / MulPer;
-								for (int x = xMaxmin; x < xMaxmax; ++x) {
-									//*
-									//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
-									Vector3DX YZPos0 = cellx.GetPos(x, yMaxmin, zMaxmin) + mid;
-									Vector3DX YZPos1 = cellx.GetPos(x, yMaxmax, zMaxmax) + mid;
-									Vector3DX YZPos2 = cellx.GetPos(x, yMaxmin, zMaxmax) + mid;
-									Vector3DX YZPos3 = cellx.GetPos(x, yMaxmax, zMaxmin) + mid;
-									bool IsHit = false;
-									while (true) {
-										if (Vector3DX::Dot(CamVec, (YZPos0 - CamPos)) > 0.f) { IsHit = true; break; }
-										if (Vector3DX::Dot(CamVec, (YZPos1 - CamPos)) > 0.f) { IsHit = true; break; }
-										if (Vector3DX::Dot(CamVec, (YZPos2 - CamPos)) > 0.f) { IsHit = true; break; }
-										if (Vector3DX::Dot(CamVec, (YZPos3 - CamPos)) > 0.f) { IsHit = true; break; }
-										break;
-									}
-									if (!IsHit) {
-										continue;
-									}
-									//*/
-									for (int y = yMaxmin; y < yMaxmax; ++y) {
-										int zMaxminT = zMaxmin;
-										int zMaxmaxT = zMaxmax;
-										//*
-										Vector3DX ZMinPos = cellx.GetPos(x, y, zMaxmin) + mid;
-										Vector3DX ZMaxPos = cellx.GetPos(x, y, zMaxmax) + mid;
-										Vector3DX HitPos;
-										bool pSameVecNormalToA{};
-										bool OnFront{};
-										if (CalcIntersectionPoint(ZMinPos, ZMaxPos, CamPos, CamVec, &HitPos, &pSameVecNormalToA, &OnFront)) {
-											if (!pSameVecNormalToA) {
-												zMaxminT = std::max(static_cast<int>((HitPos.z - 0.5) / scale) + cellx.Zall / 2, zMaxmin);
-											}
-											else {
-												zMaxmaxT = std::min(static_cast<int>((HitPos.z - 0.5) / scale) + cellx.Zall / 2 + 1, zMaxmax);
-											}
-										}
-										else {
-											if (!OnFront) { continue; }
-										}
-										//*/
-
-										bool OnNearestPoint = ((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax));
-										for (int z = zMaxminT; z < zMaxmaxT; ++z) {
-											if (cellx.scaleRate != 1) {
-												if (OnNearestPoint) {
-													if ((zMinmin < z) && (z < zMinmax)) {
-														z = zMinmax - 1;
-														continue;
-													}
-												}
-											}
-											if (!cellx.IsActiveCell(x, y, z)) { continue; }
-											if (!(cellx.GetOcclusionInfo(x, y, z) != 0b111111)) { continue; }
-
-											bool checkFill = true;
-											if (cellx.scaleRate != 1) {
-												checkFill = !(((xMinmin <= x) && (x <= xMinmax)) && ((yMinmin <= y) && (y <= yMinmax)) && ((zMinmin <= z) && (z <= zMinmax)));
-											}
-											AddCube(cellx, x, y, z, checkFill, GetColorU8(128, 128, 128, 255), GetColorU8(64, 64, 64, 255), centerX, centerY, centerZ);
-										}
-									}
-								}
-							}
-							//
-							if (ShadowRate >= cellx.scaleRate) {
-								int xMaxmin = std::max(centerX - ShadowMax, 0);
-								int xMaxmax = std::min(centerX + ShadowMax + 1, cellx.Xall);
-								int yMaxmin = std::max(centerY - ShadowMax, 0);
-								int yMaxmax = std::min(centerY + ShadowMax + 1, cellx.Yall);
-								int zMaxmin = std::max(centerZ - ShadowMax, 0);
-								int zMaxmax = std::min(centerZ + ShadowMax + 1, cellx.Zall);
-
-								int xMinmin = centerX - ShadowMax / MulPer;
-								int xMinmax = centerX + ShadowMax / MulPer;
-								int yMinmin = centerY - ShadowMax / MulPer;
-								int yMinmax = centerY + ShadowMax / MulPer;
-								int zMinmin = centerZ - ShadowMax / MulPer;
-								int zMinmax = centerZ + ShadowMax / MulPer;
-								for (int x = xMaxmin; x < xMaxmax; ++x) {
-									for (int y = yMaxmin; y < yMaxmax; ++y) {
-										bool OnNearestPoint = ((xMinmin < x) && (x < xMinmax)) && ((yMinmin < y) && (y < yMinmax));
-										for (int z = zMaxmin; z < zMaxmax; ++z) {
-											if (cellx.scaleRate != 1) {
-												if (OnNearestPoint) {
-													if ((zMinmin < z) && (z < zMinmax)) {
-														z = zMinmax - 1;
-														continue;
-													}
-												}
-											}
-											if (!cellx.IsActiveCell(x, y, z)) { continue; }
-											if (!(cellx.GetOcclusionInfo(x, y, z) != 0b111111)) { continue; }
-											AddShadowCube(cellx, x, y, z, lightX, lightY, lightZ);
-										}
-									}
-								}
-							}
+					m_32Num = 0;
+					m_S32Num = 0;
+					for (auto& cellx : m_CellxN) {
+						Vector3DX center = CamPos / (CellScale * cellx.scaleRate);
+						int centerX = static_cast<int>(center.x) + cellx.Xall / 2;
+						int centerY = static_cast<int>(center.y) + cellx.Yall / 2;
+						int centerZ = static_cast<int>(center.z) + cellx.Zall / 2;
+						//
+						if (BaseRate >= cellx.scaleRate) {
+							AddCubes(cellx, centerX, centerY, centerZ);
+						}
+						//
+						if (ShadowRate >= cellx.scaleRate) {
+							AddShadowCubes(cellx, centerX, centerY, centerZ);
 						}
 					}
 					m_JobEnd = true;
 					});
 				m_Job.swap(tmp);
 			}
-#ifdef DEBUG
-			DebugParts->SetPoint("END");
-#endif // DEBUG
 		}
 		//
 		void		BackGroundClass::BG_Draw(void) const noexcept {

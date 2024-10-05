@@ -28,9 +28,6 @@ namespace FPS_n2 {
 			size_t							m_S32Num{ 0 };
 			size_t							m_S32Size{ 0 };
 
-			std::thread						m_Job;
-			bool							m_JobEnd{};
-
 			GraphHandle						m_tex{};
 			GraphHandle						m_norm{};
 
@@ -97,6 +94,9 @@ namespace FPS_n2 {
 			};
 			std::array<CellsData, total>	m_CellxN;
 
+			//スレッド用
+			std::thread						m_Job;
+			bool							m_JobEnd{};
 			std::vector<VERTEX3D>			m_vert32Out;
 			std::vector<uint32_t>			m_index32Out;
 			size_t							m_32NumOut{ 0 };
@@ -104,7 +104,6 @@ namespace FPS_n2 {
 			std::vector<VERTEX3DSHADER>		m_vert32SOut;
 			std::vector<uint32_t>			m_index32SOut;
 			size_t							m_S32NumOut{ 0 };
-
 			int BaseRate = 100;
 			int ShadowRate = 100;
 			int ShadowMax = DrawMax;
@@ -291,8 +290,53 @@ namespace FPS_n2 {
 				return true;
 			}
 		private:
-			void			AddCube(const CellsData& cellx, int x, int y, int z, bool CheckFill, COLOR_U8 DifColor, COLOR_U8 SpcColor, int centerX, int centerY, int centerZ) noexcept;
-			void			AddShadowCube(const CellsData& cellx, int x, int y, int z, int centerX, int centerY, int centerZ) noexcept;
+			void			AddPlane(const CellsData& cellx, int x, int y, int z, COLOR_U8 DifColor, COLOR_U8 SpcColor, int xscale,
+				int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int xN, int yN, int zN) noexcept;
+			void			AddCubeZ(const CellsData& cellx, int x, int y, int zmin, int zmax, int centerX, int centerY, int centerZ) noexcept;
+			void			AddCubes(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
+			const bool CalcYZActive(const CellsData& cellx, int x, int yMaxmin, int yMaxmax, int zMaxmin, int zMaxmax) const noexcept {
+				float scale = CellScale * cellx.scaleRate;
+				Vector3DX mid = Vector3DX::one() * (0.5f * scale);
+				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
+				Vector3DX YZPos0 = cellx.GetPos(x, yMaxmin, zMaxmin) + mid;
+				Vector3DX YZPos1 = cellx.GetPos(x, yMaxmax, zMaxmax) + mid;
+				Vector3DX YZPos2 = cellx.GetPos(x, yMaxmin, zMaxmax) + mid;
+				Vector3DX YZPos3 = cellx.GetPos(x, yMaxmax, zMaxmin) + mid;
+				bool IsHit = false;
+				while (true) {
+					if (Vector3DX::Dot(CamVec, (YZPos0 - CamPos)) > 0.f) { IsHit = true; break; }
+					if (Vector3DX::Dot(CamVec, (YZPos1 - CamPos)) > 0.f) { IsHit = true; break; }
+					if (Vector3DX::Dot(CamVec, (YZPos2 - CamPos)) > 0.f) { IsHit = true; break; }
+					if (Vector3DX::Dot(CamVec, (YZPos3 - CamPos)) > 0.f) { IsHit = true; break; }
+					break;
+				}
+				return IsHit;
+			}
+			const bool CalcZMinMax(const CellsData& cellx, int x, int y, int* zMaxmin, int* zMaxmax) const noexcept {
+				bool pSameVecNormalToA{};
+				bool OnFront{};
+				//*
+				float scale = CellScale * cellx.scaleRate;
+				Vector3DX mid = Vector3DX::one() * (0.5f * scale);
+				Vector3DX ZMinPos = cellx.GetPos(x, y, *zMaxmin) + mid;
+				Vector3DX ZMaxPos = cellx.GetPos(x, y, *zMaxmax) + mid;
+				Vector3DX HitPos;
+				if (CalcIntersectionPoint(ZMinPos, ZMaxPos, CamPos, CamVec, &HitPos, &pSameVecNormalToA, &OnFront)) {
+					if (!pSameVecNormalToA) {
+						*zMaxmin = std::max(static_cast<int>((HitPos.z - 0.5) / scale) + cellx.Zall / 2, *zMaxmin);
+					}
+					else {
+						*zMaxmax = std::min(static_cast<int>((HitPos.z - 0.5) / scale) + cellx.Zall / 2 + 1, *zMaxmax);
+					}
+					return true;
+				}
+				return OnFront;
+			}
+
+			void			AddShadowPlane(const CellsData& cellx, int x, int y, int z, int xscale,
+				int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int xN, int yN, int zN) noexcept;
+			void			AddShadowCubeZ(const CellsData& cellx, int x, int y, int zmin, int zmax, int centerX, int centerY, int centerZ) noexcept;
+			void			AddShadowCubes(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
 		public:
 			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
 			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept;

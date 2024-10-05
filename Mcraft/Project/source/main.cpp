@@ -52,6 +52,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	MV1SetLoadModelReMakeNormal(TRUE);
 	//SetUsePixelLighting(TRUE);
 	SetUseBackCulling(TRUE);
+	SetTextureAddressMode(DX_TEXADDRESS_WRAP);
 	//
 	FPS_n2::Player::PlayerManager::Create();
 	FPS_n2::CommonBattleResource::Create();
