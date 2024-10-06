@@ -34,7 +34,7 @@ namespace FPS_n2 {
 			//
 			BackGround->Init();
 			//
-			Vector3DX LightVec = Vector3DX::vget(0.3f, -0.5f, 0.05f); LightVec = LightVec.normalized();
+			Vector3DX LightVec = Vector3DX::vget(-0.3f, -0.3f, -0.15f); LightVec = LightVec.normalized();
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
 			SetLightDifColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 			//Cam
@@ -48,7 +48,7 @@ namespace FPS_n2 {
 				//人の座標設定
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 0.f, (0.f * Scale_Rate) * static_cast<float>(index * 2 - 1));
+					pos_t = Vector3DX::vget(0.f, 0.f, 0.f);
 
 					Vector3DX EndPos = pos_t - Vector3DX::up() * 500.f * Scale_Rate;
 					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 500.f * Scale_Rate, &EndPos)) {

@@ -10,7 +10,7 @@ namespace FPS_n2 {
 		static constexpr int total = 2;
 		static constexpr int MulPer = 3;
 		static constexpr float CellScale = Scale_Rate / 2.f / 2.f;
-		static constexpr int DrawMax = 50;
+		static constexpr int DrawMax = 35;
 
 		class BackGroundClass : public SingletonBase<BackGroundClass> {
 		private:

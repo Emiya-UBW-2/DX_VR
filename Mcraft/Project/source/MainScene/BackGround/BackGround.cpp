@@ -844,6 +844,7 @@ namespace FPS_n2 {
 			}
 
 			auto* Pad = PadControl::Instance();
+			LenMouse += Pad->GetMouseWheelRot();
 			if (Pad->GetKey(PADS::SHOT).trigger()) {
 				blicksel = 1;
 			}
@@ -880,10 +881,12 @@ namespace FPS_n2 {
 			//
 			Vector3DX PutPos = (CamPos + CamVec * (LenMouse * Scale_Rate)) / CellScale;
 			int x = (int)PutPos.x, y = (int)PutPos.y, z = (int)PutPos.z;
+			SetUseLighting(FALSE);
 			DrawCube3D(
 				(Vector3DX::vget((float)(x - xput / 2), (float)(y - yput / 2), (float)(z - zput / 2)) * CellScale).get(),
 				(Vector3DX::vget((float)(x + xput - xput / 2), (float)(y + yput - yput / 2), (float)(z + zput - zput / 2)) * CellScale).get(),
-				GetColor(255, 255, 255), GetColor(255, 255, 255), FALSE);
+				GetColor(0, 64, 0), GetColor(0, 0, 0), FALSE);
+			SetUseLighting(TRUE);
 		}
 		//
 		void		BackGroundClass::Dispose(void) noexcept {
