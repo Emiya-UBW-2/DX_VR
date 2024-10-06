@@ -333,7 +333,7 @@ namespace FPS_n2 {
 			m_index32S.at(m_S32Num * 6 + 5) = (uint32_t)(m_S32Num * 4 + 1);
 			++m_S32Num;
 		}
-		void BackGroundClass::AddShadowCubeZ(const CellsData& cellx, int x, int y, int zmin, int zmax, int centerX, int centerY, int centerZ) noexcept {
+		void BackGroundClass::AddShadowCubeZ(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			bool isHit1 = false;
 			bool isHit2 = false;
 			bool isHit3 = false;
@@ -450,7 +450,7 @@ namespace FPS_n2 {
 						}
 						if (!isHitmin) {
 							isHitmin = true;
-							AddShadowCubeZ(cellx, x, y, zmin, zmax, centerX, centerY, centerZ);
+							AddShadowCubeZ(cellx, x, y, zmin, zmax);
 						}
 					}
 				}

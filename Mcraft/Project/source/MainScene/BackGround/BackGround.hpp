@@ -340,7 +340,7 @@ namespace FPS_n2 {
 
 			void			AddShadowPlane(const CellsData& cellx, int x, int y, int z, int xscale,
 				int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int xN, int yN, int zN) noexcept;
-			void			AddShadowCubeZ(const CellsData& cellx, int x, int y, int zmin, int zmax, int centerX, int centerY, int centerZ) noexcept;
+			void			AddShadowCubeZ(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
 			void			AddShadowCubes(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
 		public:
 			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;

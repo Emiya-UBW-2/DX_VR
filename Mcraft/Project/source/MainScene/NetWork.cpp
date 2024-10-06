@@ -108,12 +108,13 @@ namespace FPS_n2 {
 				if (this->m_IsServerPlay) {
 					if (index == 0) { continue; }//サーバープレイヤーは絶対0を使うので
 				}
+				auto& Player = m_LastPlayerData[static_cast<size_t>(index)];
 				PlayerNetData tmpData;
 				int recvRet = -1;
 				auto IsDataUpdated = n.m_NetWork.RecvData(&tmpData, &recvRet, false);
 				if (IsDataUpdated) {
 					if (tmpData.IsCheckSum()) {
-						m_LastPlayerData[static_cast<size_t>(index)] = tmpData;
+						Player = tmpData;
 					}
 				}
 				bool IsSendData = false;
@@ -128,15 +129,15 @@ namespace FPS_n2 {
 					pServerCtrl->m_PlayerID = static_cast<PlayerID>(index);//ID受付中ですわ
 					IsSendData = true;
 					if (IsDataUpdated) {
-						if (m_LastPlayerData[static_cast<size_t>(index)].GetFlag(NetAttribute::IsActive)) {				// ID取れたと識別出来たら
+						if (Player.GetFlag(NetAttribute::IsActive)) {				// ID取れたと識別出来たら
 							n.m_Phase = ClientPhase::Ready;
 						}
 					}
 					break;
 				case ClientPhase::Ready:						//他プレイヤーの揃い待ち
 					if (IsDataUpdated) {						// クライアントから受信したら
-						if (m_LastPlayerData[static_cast<size_t>(index)].IsCheckSum()) {				// チェックサムののち
-							FlipPlayerData(m_LastPlayerData[static_cast<size_t>(index)]);			// 更新
+						if (Player.IsCheckSum()) {				// チェックサムののち
+							FlipPlayerData(Player);				// 更新
 						}
 					}
 					pServerCtrl->SetInGame();								//ID受付終了に指定を変更

@@ -58,7 +58,7 @@ namespace FPS_n2 {
 			}
 		public:
 			auto			IsCheckSum(void) const noexcept { return m_CheckSum == (size_t)this->CalcCheckSum(); }
-			auto		 	GetFlag(NetAttribute flag) const noexcept { return this->m_Attribute & (1 << static_cast<int>(flag)); }
+			auto		 	GetFlag(NetAttribute flag) const noexcept { return (this->m_Attribute & (1 << static_cast<int>(flag))) != 0; }
 			const auto& GetClientTime(void) const noexcept { return this->m_ClientTime; }
 			const auto& GetID(void) const noexcept { return this->m_ID; }
 			const auto& GetInput(void) const noexcept { return this->m_Input; }
