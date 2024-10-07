@@ -48,7 +48,7 @@ namespace FPS_n2 {
 				//l‚ÌÀ•WÝ’è
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 0.f, 0.f);
+					pos_t = Vector3DX::vget(0.f, 1.f*Scale_Rate, 0.f);
 
 					Vector3DX EndPos = pos_t - Vector3DX::up() * 500.f * Scale_Rate;
 					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 500.f * Scale_Rate, &EndPos)) {
