@@ -87,9 +87,6 @@ namespace FPS_n2 {
 			//
 			m_MainLoopPauseControl.Init();
 
-			m_PrevSSAO = OptionParts->GetParamBoolean(EnumSaveParam::SSAO);
-			OptionParts->SetParamBoolean(EnumSaveParam::SSAO, false);
-
 			std::string Path = "data/Tutorial_";
 			Path += LanguageStr[OptionParts->GetParamInt(EnumSaveParam::Language)];
 			Path += ".txt";
@@ -253,13 +250,10 @@ namespace FPS_n2 {
 				if (!DrawParts->IsExit() && !DrawParts->IsRestart()) {
 					m_MainLoopPauseControl.Execute();
 				}
-				m_PrevSSAO |= OptionParts->GetParamBoolean(EnumSaveParam::SSAO);
-				OptionParts->SetParamBoolean(EnumSaveParam::SSAO, m_PrevSSAO);
 				return true;
 			}
 			else {
 				m_MainLoopPauseControl.Reset();
-				OptionParts->SetParamBoolean(EnumSaveParam::SSAO, false);
 			}
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
@@ -611,7 +605,6 @@ namespace FPS_n2 {
 			//
 			EffectControl::Dispose();
 
-			OptionParts->SetParamBoolean(EnumSaveParam::SSAO, m_PrevSSAO);
 			this->m_TutorialLog.Dispose();
 
 			ScoreBoard.Dispose();

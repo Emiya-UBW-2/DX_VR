@@ -7,6 +7,10 @@ ShaderCompiler.exe /Tps_4_0 PS_lens.hlsl
 ShaderCompiler.exe /Tvs_4_0 VS_SSR.hlsl
 ShaderCompiler.exe /Tps_4_0 PS_SSR.hlsl
 
+ShaderCompiler.exe /Tvs_4_0 VS_SSAO.hlsl
+ShaderCompiler.exe /Tps_4_0 PS_SSAO.hlsl
+ShaderCompiler.exe /Tps_4_0 PS_BilateralBlur.hlsl
+
 ShaderCompiler.exe /Tvs_4_0 VS_DoF.hlsl
 ShaderCompiler.exe /Tps_4_0 PS_DoF.hlsl
 

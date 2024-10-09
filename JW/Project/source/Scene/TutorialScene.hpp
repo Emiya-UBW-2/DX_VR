@@ -148,7 +148,6 @@ namespace FPS_n2 {
 		private:
 			float											m_FirstFade{0.f};
 			bool											m_IsFirstGame{false};
-			bool											m_PrevSSAO{true};
 			std::shared_ptr<BackGroundClassTutorial>		m_BackGround;					//BG
 			MainLoopPauseControl							m_MainLoopPauseControl;			//ポーズメニュー
 			UIClass											m_UIclass;						//UI関連
