@@ -36,7 +36,7 @@ namespace FPS_n2 {
 						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + DrawParts->GetUIY(240), yp1, White, Black, "%d:%05.2f",
 						static_cast<int>(floatParam[0] / 60.f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
 
-					xp1 = DrawParts->GetUIY(1920 / 2);
+					xp1 = UIWidth / 2;
 					yp1 = DrawParts->GetUIY(10);
 					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32), 
 						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "%d : %d", intParam[0], intParam[1]);

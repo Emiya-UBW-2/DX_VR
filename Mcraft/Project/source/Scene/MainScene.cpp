@@ -1,6 +1,6 @@
 #pragma warning(disable:4464)
-#include "MainScene.hpp"
 #include "../MainScene/NetworkBrowser.hpp"
+#include "MainScene.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -126,27 +126,27 @@ namespace FPS_n2 {
 			Pad->SetMouseMoveEnable(true);
 			Pad->ChangeGuide(
 				[]() {
-					auto* KeyGuide = PadControl::Instance();
+					auto* Pad = PadControl::Instance();
 					if (DXDraw::Instance()->IsPause()) {
-						KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9992));
-						KeyGuide->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9991));
-						KeyGuide->AddGuide(PADS::MOVE_W, "");
-						KeyGuide->AddGuide(PADS::MOVE_S, "");
-						KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9993));
+						Pad->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9992));
+						Pad->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9991));
+						Pad->AddGuide(PADS::MOVE_W, "");
+						Pad->AddGuide(PADS::MOVE_S, "");
+						Pad->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9993));
 					}
 					else {
-						KeyGuide->AddGuide(PADS::MOVE_W, "");
-						KeyGuide->AddGuide(PADS::MOVE_S, "");
-						KeyGuide->AddGuide(PADS::MOVE_A, "");
-						KeyGuide->AddGuide(PADS::MOVE_D, "");
-						KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9900));
+						Pad->AddGuide(PADS::MOVE_W, "");
+						Pad->AddGuide(PADS::MOVE_S, "");
+						Pad->AddGuide(PADS::MOVE_A, "");
+						Pad->AddGuide(PADS::MOVE_D, "");
+						Pad->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9900));
 
-						KeyGuide->AddGuide(PADS::SHOT, LocalizePool::Instance()->Get(9906));
-						KeyGuide->AddGuide(PADS::AIM, LocalizePool::Instance()->Get(9908));
-						KeyGuide->AddGuide(PADS::ULT, LocalizePool::Instance()->Get(9907));
+						Pad->AddGuide(PADS::SHOT, LocalizePool::Instance()->Get(9906));
+						Pad->AddGuide(PADS::AIM, LocalizePool::Instance()->Get(9908));
+						Pad->AddGuide(PADS::ULT, LocalizePool::Instance()->Get(9907));
 
-						KeyGuide->AddGuide(PADS::WALK, LocalizePool::Instance()->Get(9903));
-						KeyGuide->AddGuide(PADS::JUMP, LocalizePool::Instance()->Get(9905));
+						Pad->AddGuide(PADS::WALK, LocalizePool::Instance()->Get(9903));
+						Pad->AddGuide(PADS::JUMP, LocalizePool::Instance()->Get(9905));
 					}
 				});
 			if (DXDraw::Instance()->IsPause()) {
@@ -431,7 +431,7 @@ namespace FPS_n2 {
 			}
 		}
 		//UI•\Ž¦
-		void			MainGameScene::DrawUI_In_Sub(void) noexcept {
+		void			MainGameScene::DrawUI_Base_Sub(void) noexcept {
 			FadeControl::DrawFade();
 			//UI
 			if (!DXDraw::Instance()->IsPause()) {
@@ -446,14 +446,14 @@ namespace FPS_n2 {
 			if (m_NetWorkController) {
 				auto* DrawParts = DXDraw::Instance();
 				if (m_NetWorkController->GetPing() >= 0.f) {
-					WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
+					WindowSystem::SetMsg(UIWidth, DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
 				}
 				else {
 					if (m_NetWorkController->GetClient()) {
-						WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, Red, Black, "Lost Connection");
+						WindowSystem::SetMsg(UIWidth, DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, Red, Black, "Lost Connection");
 					}
 					else {
-						WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
+						WindowSystem::SetMsg(UIWidth, DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
 					}
 				}
 			}

@@ -30,7 +30,6 @@ namespace FPS_n2 {
 			void			MainDraw_Sub(void) noexcept override;
 			// UI•\Ž¦
 			void			DrawUI_Base_Sub(void) noexcept override;
-			void			DrawUI_In_Sub(void) noexcept override {}
 		};
 	};
 };

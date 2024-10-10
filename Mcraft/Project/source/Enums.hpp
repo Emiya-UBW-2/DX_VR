@@ -3,10 +3,6 @@
 
 namespace FPS_n2 {
 	//’è”
-	static constexpr float Frame_Rate{ 60.f };
-
-	static constexpr float Scale_Rate{ 12.5f };
-
 	enum class ObjType : uint8_t {
 		Human,
 		Weapon,

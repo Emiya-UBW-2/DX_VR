@@ -1,8 +1,8 @@
 #include"Header.hpp"
 
-#include "Scene/TitleScene.hpp"
 #include "Scene/MainScene.hpp"
 #include "Scene/MainSceneLoader.hpp"
+#include "Scene/TitleScene.hpp"
 
 #include "MainScene/NetworkBrowser.hpp"
 

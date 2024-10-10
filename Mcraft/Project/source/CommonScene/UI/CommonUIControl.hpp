@@ -54,9 +54,8 @@ namespace FPS_n2 {
 					this->m_EnableSelect = IsEnableSelect;
 				}
 				void			Load_String(const char* String, int fontsize, bool IsEnableSelect) noexcept {
-					auto* Fonts = FontPool::Instance();
 					snprintfDx(this->m_String, 64, String);
-					xsize = Fonts->Get(FontPool::FontType::MS_Gothic, fontsize, 0)->GetStringWidth(INVALID_ID, this->m_String);
+					xsize = WindowSystem::GetMsgLen(fontsize, this->m_String);
 					ysize = fontsize;
 					this->m_ButtonMode = ButtonMode::String;
 					this->m_EnableSelect = IsEnableSelect;

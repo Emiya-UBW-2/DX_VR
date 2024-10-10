@@ -1,5 +1,5 @@
-#include	"TitleScene.hpp"
 #include	"../sub.hpp"
+#include	"TitleScene.hpp"
 
 #include	"../Header.hpp"
 
@@ -17,18 +17,10 @@ namespace FPS_n2 {
 			// 
 			ButtonParts->ResetSel();
 			// 
-			ButtonParts->AddStringButton(
-				"Let's Go!", 52, true,
-				1920 - 64 - 48, 1080 - 84 - 64 * 2, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton(
-				"Reset SaveData", 48, true,
-				1920 - 64, 1080 - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddIconButton(
-				"CommonData/UI/setting.png", true,
-				(1920 - 96 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonParts->AddIconButton(
-				"CommonData/UI/credit.png", true,
-				(1920 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonParts->AddStringButton("Let's Go!", 52, true, basex - 64 - 48, basey - 84 - 64 * 2, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton("Reset SaveData", 48, true, basex - 64, basey - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, basex - 96 - 64, 64, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, basex - 64, 64, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			// ƒNƒŒƒWƒbƒg
 			this->m_CreditControl = std::make_unique<CreditControl>();
 			this->m_CreditControl->Init();
@@ -54,14 +46,14 @@ namespace FPS_n2 {
 			Pad->SetMouseMoveEnable(false);
 			Pad->ChangeGuide(
 				[]() {
-					auto* KeyGuide = PadControl::Instance();
+					auto* Pad = PadControl::Instance();
 					auto* LocalizeParts = LocalizePool::Instance();
-					KeyGuide->AddGuide(PADS::MOVE_W, "");
-					KeyGuide->AddGuide(PADS::MOVE_S, "");
-					KeyGuide->AddGuide(PADS::MOVE_A, "");
-					KeyGuide->AddGuide(PADS::MOVE_D, "");
-					KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizeParts->Get(9993));
-					KeyGuide->AddGuide(PADS::INTERACT, LocalizeParts->Get(9992));
+					Pad->AddGuide(PADS::MOVE_W, "");
+					Pad->AddGuide(PADS::MOVE_S, "");
+					Pad->AddGuide(PADS::MOVE_A, "");
+					Pad->AddGuide(PADS::MOVE_D, "");
+					Pad->AddGuide(PADS::MOVE_STICK, LocalizeParts->Get(9993));
+					Pad->AddGuide(PADS::INTERACT, LocalizeParts->Get(9992));
 				}
 			);
 			if (!PopUpParts->IsActivePop() && (this->m_GameFadeIn == 0.f) && (this->m_GameStart == 0.f)) {
@@ -155,10 +147,8 @@ namespace FPS_n2 {
 		}
 		// 
 		void			TitleScene::MainDraw_Sub(void) noexcept {
-			auto* DrawParts = DXDraw::Instance();
 			// ”wŒi
-			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Gray50, TRUE);
-			// •`‰æ
+			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, ScreenWidth, ScreenHeight, Gray50, TRUE);
 		}
 		void			TitleScene::DrawUI_Base_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -178,15 +168,15 @@ namespace FPS_n2 {
 			if ((ButtonParts->GetSelect() != INVALID_ID) && !PopUpParts->IsActivePop()) {
 				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18), 
 					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-					DrawParts->GetUIY(32), DrawParts->GetUIY(1080 - 32 - 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
+					DrawParts->GetUIY(32), UIHeight - DrawParts->GetUIY(32 + 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
 			}
 			// 
 			{
 				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameFadeIn, 0.f, 1.f)), 0, 255));
-				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Black, TRUE);
+				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, ScreenWidth, ScreenHeight, Black, TRUE);
 
 				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameStart, 0.f, 1.f)), 0, 255));
-				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), White, TRUE);
+				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, ScreenWidth, ScreenHeight, White, TRUE);
 
 				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}

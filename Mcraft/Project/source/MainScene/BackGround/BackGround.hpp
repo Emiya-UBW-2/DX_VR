@@ -10,7 +10,8 @@ namespace FPS_n2 {
 		static constexpr int total = 3;
 		static constexpr int MulPer = 3;
 		static constexpr float CellScale = Scale_Rate / 2.f / 2.f;
-		static constexpr int DrawMax = 50;
+		static constexpr int DrawMax = 65;
+		static constexpr int DrawMaxY = 30;
 
 		class BackGroundClass : public SingletonBase<BackGroundClass> {
 		private:
@@ -39,7 +40,12 @@ namespace FPS_n2 {
 				int Zall = 256;
 				int scaleRate = 1;
 				//
-				const auto& GetCell(int x, int y, int z) const noexcept { return m_Cell[static_cast<size_t>(x * Yall * Zall + y * Zall + z)]; }
+				const size_t GetCellNum(int x, int y, int z) const noexcept {
+					x = (x % Xall + Xall) % Xall;
+					z = (z % Zall + Zall) % Zall;
+					return static_cast<size_t>(x * Yall * Zall + y * Zall + z);
+				}
+				const auto& GetCell(int x, int y, int z) const noexcept { return m_Cell[GetCellNum(x, y, z)]; }
 				const bool IsActiveCell(int x, int y, int z) const noexcept { return GetCell(x, y, z) != s_EmptyBlick; }
 				const bool isFill(int x, int y, int z) const noexcept {
 					int FillCount = 0;
@@ -49,9 +55,9 @@ namespace FPS_n2 {
 					int yMaxmin = y * MulPer + MulPer - 1;
 					int zMaxmin = z * MulPer + MulPer - 1;
 
-					for (int xt = xMaxmin; xt < std::min(xMaxmin + MulPer, Xall); ++xt) {
+					for (int xt = xMaxmin; xt < xMaxmin + MulPer; ++xt) {
 						for (int yt = yMaxmin; yt < std::min(yMaxmin + MulPer, Yall); ++yt) {
-							for (int zt = zMaxmin; zt < std::min(zMaxmin + MulPer, Zall); ++zt) {
+							for (int zt = zMaxmin; zt < zMaxmin + MulPer; ++zt) {
 								++FillAll;
 								if (!IsActiveCell(xt, yt, zt)) { continue; }
 								++FillCount;
@@ -60,12 +66,8 @@ namespace FPS_n2 {
 					}
 					return (FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f));
 				}
-				const bool isInside(int x, int y, int z) const noexcept {
-					return (
-						((0 <= x) && (x < Xall)) &&
-						((0 <= y) && (y < Yall)) &&
-						((0 <= z) && (z < Zall))
-						);
+				const bool isInside(int y) const noexcept {
+					return ((0 <= y) && (y < Yall));
 				}
 				const Vector3DX GetPos(int x, int y, int z) const noexcept {
 					return Vector3DX::vget(static_cast<float>(x - Xall / 2), static_cast<float>(y - Yall / 2), static_cast<float>(z - Zall / 2)) * (CellScale * scaleRate);
@@ -77,19 +79,18 @@ namespace FPS_n2 {
 					Yall = baseY / scaleRate;
 					Zall = baseZ / scaleRate;
 				}
-				auto& SetCell(int x, int y, int z) noexcept { return m_Cell[static_cast<size_t>(x * Yall * Zall + y * Zall + z)]; }
+				auto& SetCell(int x, int y, int z) noexcept { return m_Cell[GetCellNum(x, y, z)]; }
 				//
-				const auto& GetOcclusionInfo(int x, int y, int z) const noexcept { return m_FillInfo[static_cast<size_t>(x * Yall * Zall + y * Zall + z)]; }
-				auto& SetOcclusionInfo(int x, int y, int z) noexcept { return m_FillInfo[static_cast<size_t>(x * Yall * Zall + y * Zall + z)]; }
+				const auto& GetOcclusionInfo(int x, int y, int z) const noexcept { return m_FillInfo[GetCellNum(x, y, z)]; }
+				auto& SetOcclusionInfo(int x, int y, int z) noexcept { return m_FillInfo[GetCellNum(x, y, z)]; }
 				void CalcOcclusion(int x, int y, int z) noexcept {
-					//端で端に面している面は隠す
 					SetOcclusionInfo(x, y, z) = 0;
-					SetOcclusionInfo(x, y, z) |= (1 << 0) * ((x == Xall - 1) ? 1 : IsActiveCell(x + 1, y, z));
-					SetOcclusionInfo(x, y, z) |= (1 << 1) * ((x == 0) ? 1 : IsActiveCell(x - 1, y, z));
+					SetOcclusionInfo(x, y, z) |= (1 << 0) * IsActiveCell(x + 1, y, z);
+					SetOcclusionInfo(x, y, z) |= (1 << 1) * IsActiveCell(x - 1, y, z);
 					SetOcclusionInfo(x, y, z) |= (1 << 2) * ((y == Yall - 1) ? 1 : IsActiveCell(x, y + 1, z));
 					SetOcclusionInfo(x, y, z) |= (1 << 3) * ((y == 0) ? 1 : IsActiveCell(x, y - 1, z));
-					SetOcclusionInfo(x, y, z) |= (1 << 4) * ((z == Zall - 1) ? 1 : IsActiveCell(x, y, z + 1));
-					SetOcclusionInfo(x, y, z) |= (1 << 5) * ((z == 0) ? 1 : IsActiveCell(x, y, z - 1));
+					SetOcclusionInfo(x, y, z) |= (1 << 4) * IsActiveCell(x, y, z + 1);
+					SetOcclusionInfo(x, y, z) |= (1 << 5) * IsActiveCell(x, y, z - 1);
 				}
 			};
 			std::array<CellsData, total>	m_CellxN;
@@ -97,6 +98,8 @@ namespace FPS_n2 {
 			//スレッド用
 			std::thread						m_Job;
 			bool							m_JobEnd{};
+			std::thread						m_ShadowJob;
+			bool							m_ShadowJobEnd{};
 			std::vector<VERTEX3D>			m_vert32Out;
 			std::vector<uint32_t>			m_index32Out;
 			size_t							m_32NumOut{ 0 };
@@ -106,13 +109,12 @@ namespace FPS_n2 {
 			size_t							m_S32NumOut{ 0 };
 			int								BaseRate = 100;
 			int								ShadowRate = 100;
-			int								ShadowMax = DrawMax;
 			int								lightX{};
 			int								lightY{};
 			int								lightZ{};
 			Vector3DX						CamPos;
+			Vector3DX						CamPosS;
 			Vector3DX						CamVec;
-			float							m_fov{};
 
 			//Edit
 			float							LenMouse = 2.f;
@@ -298,12 +300,10 @@ namespace FPS_n2 {
 				return true;
 			}
 		private:
-			bool			CheckFill(int x, int y, int z, int centerX, int centerY, int centerZ) const noexcept;
-
 			void			AddPlane(const CellsData& cellx, int xmin, int xmax, int y, int zmin, int zmax, 
 				int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int xN, int yN, int zN) noexcept;
-			void			AddCubeX(const CellsData& cellx, int xmin, int xmax, int y, int z, int centerX, int centerY, int centerZ) noexcept;
-			void			AddCubeZ(const CellsData& cellx, int x, int y, int zmin, int zmax, int centerX, int centerY, int centerZ) noexcept;
+			void			AddCubeX(const CellsData& cellx, int xmin, int xmax, int y, int z, int centerX, int centerY, int centerZ, bool CheckFillYZ) noexcept;
+			void			AddCubeZ(const CellsData& cellx, int x, int y, int zmin, int zmax, int centerX, int centerY, int centerZ, bool CheckFillXY) noexcept;
 			void			AddCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
 			void			AddCubesZ(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
 
@@ -328,7 +328,6 @@ namespace FPS_n2 {
 			const bool CalcZMinMax(const CellsData& cellx, int x, int y, int* zMaxmin, int* zMaxmax) const noexcept {
 				bool pSameVecNormalToA{};
 				bool OnFront{};
-				//*
 				float scale = CellScale * cellx.scaleRate;
 				Vector3DX mid = Vector3DX::one() * (0.5f * scale);
 				Vector3DX ZMinPos = cellx.GetPos(x, y, *zMaxmin) + mid;
