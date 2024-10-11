@@ -152,7 +152,7 @@ namespace FPS_n2 {
 			bool isHit2 = false;
 			for (int x = xmin; x <= xmax; ++x) {
 				// 頂点データの作成
-				if (!(cellx.scaleRate == 1) && CheckFillYZ && ((-DrawMax / MulPer <= x) && (x <= DrawMax / MulPer))) {
+				if (!(cellx.scaleRate == 1) && CheckFillYZ && ((-DrawMax / MulPer+1 == x) || (x == DrawMax / MulPer-1))) {
 					if (!isHit1 && (z < 0)) { isHit1 = true; }
 					if (!isHit2 && (z >= 0)) { isHit2 = true; }
 				}
@@ -188,7 +188,7 @@ namespace FPS_n2 {
 			bool isHit4 = false;
 			for (int z = zmin; z <= zmax; ++z) {
 				// 頂点データの作成
-				if (!(cellx.scaleRate == 1) && CheckFillXY && ((-DrawMax / MulPer <= z) && (z <= DrawMax / MulPer))) {
+				if (!(cellx.scaleRate == 1) && CheckFillXY && ((-DrawMax / MulPer+1 == z) || (z == DrawMax / MulPer-1))) {
 					if (!isHit1 && (x < 0)) { isHit1 = true; }
 					if (!isHit2 && (x >= 0)) { isHit2 = true; }
 					if (!isHit3 && (y < centerY)) { isHit3 = true; }
@@ -240,28 +240,29 @@ namespace FPS_n2 {
 		void		BackGroundClass::AddCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept {
 			int yMaxmin = std::max(centerY - DrawMaxY * 4 / 5, 0);
 			int yMaxmax = std::min(centerY + DrawMaxY * 6 / 5 + 1, cellx.Yall);
-
 			int yMinmin = centerY - DrawMaxY * 4 / 5 / MulPer;
 			int yMinmax = centerY + DrawMaxY * 6 / 5 / MulPer;
-			for (int z = -DrawMax; z <= DrawMax; ++z) {
-				if (!CalcXYActive(cellx, centerX + -DrawMax, centerX + DrawMax + 1, yMaxmin, yMaxmax, centerZ + z)) { continue; }
-				for (int y = yMaxmin; y < yMaxmax; ++y) {
-					int xMaxminT = centerX - DrawMax;
-					int xMaxmaxT = centerX + DrawMax + 1;
-					if (!CalcXMinMax(cellx, &xMaxminT, &xMaxmaxT, y, centerZ + z)) { continue; }
-					xMaxminT -= centerX;
-					xMaxmaxT -= centerX;
 
-					bool CheckFill = ((yMinmin <= y) && (y <= yMinmax)) && ((-DrawMax / MulPer <= z) && (z <= DrawMax / MulPer));
+			int insidemin = -DrawMax / MulPer;
+			int insidemax = DrawMax / MulPer;
+			for (int z = -DrawMax; z <= DrawMax; ++z) {
+				if (!CalcXYActive(-DrawMax, DrawMax + 1, yMaxmin - centerY, yMaxmax - centerY, z)) { continue; }
+				for (int y = yMaxmin; y < yMaxmax; ++y) {
+					int xMaxminT = -DrawMax;
+					int xMaxmaxT = DrawMax + 1;
+					if (!CalcXMinMax(&xMaxminT, &xMaxmaxT, y - centerY, z)) { continue; }
+
+					bool CheckFill = ((yMinmin <= y) && (y <= yMinmax)) && ((insidemin <= z) && (z <= insidemax));
+					bool CheckInside = ((yMinmin < y) && (y < yMinmax)) && ((insidemin < z) && (z < insidemax));
 
 					int xmin = 0;
 					int xmax = 0;
 					bool isHitmin = true;
 					for (int x = xMaxminT; x < xMaxmaxT; ++x) {
 						if (x == xMaxmaxT - 1) {}
-						else if ((cellx.scaleRate != 1) && ((-DrawMax / MulPer < x) && (x < DrawMax / MulPer)) && ((yMinmin < y) && (y < yMinmax)) && ((-DrawMax / MulPer < z) && (z < DrawMax / MulPer))) {
+						else if ((cellx.scaleRate != 1) && CheckInside && ((insidemin < x) && (x < insidemax))) {
 							//スキップ
-							x = DrawMax / MulPer - 1;
+							x = insidemax - 1;
 						}
 						else if (!cellx.IsActiveCell(centerX + x, y, centerZ + z)) {}
 						//else if (cellx.GetOcclusionInfo(centerX + x, y, centerZ + z) == 0b111111) {}
@@ -288,25 +289,27 @@ namespace FPS_n2 {
 			int yMaxmax = std::min(centerY + DrawMaxY * 6 / 5 + 1, cellx.Yall);
 			int yMinmin = centerY - DrawMaxY * 4 / 5 / MulPer;
 			int yMinmax = centerY + DrawMaxY * 6 / 5 / MulPer;
-			for (int x = -DrawMax; x <= DrawMax; ++x) {
-				if (!CalcYZActive(cellx, centerX + x, yMaxmin, yMaxmax, centerZ + -DrawMax, centerZ + DrawMax + 1)) { continue; }
-				for (int y = yMaxmin; y < yMaxmax; ++y) {
-					int zMaxminT = centerZ - DrawMax;
-					int zMaxmaxT = centerZ + DrawMax + 1;
-					if (!CalcZMinMax(cellx, centerX + x, y, &zMaxminT, &zMaxmaxT)) { continue; }
-					zMaxminT -= centerZ;
-					zMaxmaxT -= centerZ;
 
-					bool CheckFill = ((-DrawMax / MulPer <= x) && (x <= DrawMax / MulPer)) && ((yMinmin <= y) && (y <= yMinmax));
+			int insidemin = -DrawMax / MulPer;
+			int insidemax = DrawMax / MulPer;
+			for (int x = -DrawMax; x <= DrawMax; ++x) {
+				if (!CalcYZActive(x, yMaxmin - centerY, yMaxmax - centerY, -DrawMax, DrawMax + 1)) { continue; }
+				for (int y = yMaxmin; y < yMaxmax; ++y) {
+					int zMaxminT = -DrawMax;
+					int zMaxmaxT = DrawMax + 1;
+					if (!CalcZMinMax(x, y - centerY, &zMaxminT, &zMaxmaxT)) { continue; }
+
+					bool CheckFill = ((insidemin <= x) && (x <= insidemax)) && ((yMinmin <= y) && (y <= yMinmax));
+					bool CheckInside = ((insidemin < x) && (x < insidemax)) && ((yMinmin < y) && (y < yMinmax));
 
 					int zmin = 0;
 					int zmax = 0;
 					bool isHitmin = true;
 					for (int z = zMaxminT; z < zMaxmaxT; ++z) {
 						if (z == zMaxmaxT - 1) {}
-						else if ((cellx.scaleRate != 1) && ((-DrawMax / MulPer < x) && (x < DrawMax / MulPer)) && ((yMinmin < y) && (y < yMinmax)) && ((-DrawMax / MulPer < z) && (z < DrawMax / MulPer))) {
+						else if ((cellx.scaleRate != 1) && CheckInside && ((insidemin < z) && (z < insidemax))) {
 							//スキップ
-							z = DrawMax / MulPer - 1;
+							z = insidemax - 1;
 						}
 						else if (!cellx.IsActiveCell(centerX + x, y, centerZ + z)) {}
 						//else if (cellx.GetOcclusionInfo(centerX + x, y, centerZ + z) == 0b111111) {}
@@ -326,6 +329,21 @@ namespace FPS_n2 {
 						}
 					}
 				}
+			}
+		}
+		void BackGroundClass::AddCubes(void) noexcept {
+			m_32Num = 0;
+			for (auto& cellx : m_CellxN) {
+				if (BaseRate < cellx.scaleRate) {
+					continue;
+				}
+				Vector3DX center = CamPos / (CellScale * cellx.scaleRate);
+				int centerX = static_cast<int>(center.x) + cellx.Xall / 2;
+				int centerY = static_cast<int>(center.y) + cellx.Yall / 2;
+				int centerZ = static_cast<int>(center.z) + cellx.Zall / 2;
+				//
+				AddCubesX(cellx, centerX, centerY, centerZ);
+				AddCubesZ(cellx, centerX, centerY, centerZ);
 			}
 		}
 		//
@@ -468,23 +486,25 @@ namespace FPS_n2 {
 					int xmax = 0;
 					bool isHitmin = true;
 					for (int x = -DrawMax; x <= DrawMax; ++x) {
+						if (x == DrawMax) {}
 						if ((cellx.scaleRate != 1) && ((-DrawMax / MulPer < x) && (x < DrawMax / MulPer)) && ((yMinmin < y) && (y < yMinmax)) && ((-DrawMax / MulPer < z) && (z < DrawMax / MulPer))) {
 							//スキップ
 							x = DrawMax / MulPer - 1;
 						}
-						else if (!cellx.IsActiveCell(centerX + x, y, centerZ + z) || (cellx.GetOcclusionInfo(centerX + x, y, centerZ + z) == 0b111111) || (x == DrawMax)) {}
+						else if (!cellx.IsActiveCell(centerX + x, y, centerZ + z)) {}
+						//else if (cellx.GetOcclusionInfo(centerX + x, y, centerZ + z) == 0b111111) {}
 						else {
 							//ブロックが置ける部分
 							if (isHitmin) {
 								isHitmin = false;
-								xmin = centerX + x;
+								xmin = x;
 							}
-							xmax = centerX + x;
+							xmax = x;
 							continue;
 						}
 						if (!isHitmin) {
 							isHitmin = true;
-							AddShadowCubeX(cellx, xmin, xmax, y, centerZ + z);
+							AddShadowCubeX(cellx, centerX + xmin, centerX + xmax, y, centerZ + z);
 						}
 					}
 				}
@@ -502,26 +522,42 @@ namespace FPS_n2 {
 					int zmax = 0;
 					bool isHitmin = true;
 					for (int z = -DrawMax; z <= DrawMax; ++z) {
+						if (z == DrawMax) {}
 						if ((cellx.scaleRate != 1) && ((-DrawMax / MulPer < x) && (x < DrawMax / MulPer)) && ((yMinmin < y) && (y < yMinmax)) && ((-DrawMax / MulPer < z) && (z < DrawMax / MulPer))) {
 							//スキップ
 							z = DrawMax / MulPer - 1;
 						}
-						else if (!cellx.IsActiveCell(centerX + x, y, centerZ + z) || (cellx.GetOcclusionInfo(centerX + x, y, centerZ + z) == 0b111111) || (z == DrawMax)) {}
+						else if (!cellx.IsActiveCell(centerX + x, y, centerZ + z)) {}
+						//else if (cellx.GetOcclusionInfo(centerX + x, y, centerZ + z) == 0b111111) {}
 						else {
 							//ブロックが置ける部分
 							if (isHitmin) {
 								isHitmin = false;
-								zmin = centerZ + z;
+								zmin = z;
 							}
-							zmax = centerZ + z;
+							zmax = z;
 							continue;
 						}
 						if (!isHitmin) {
 							isHitmin = true;
-							AddShadowCubeZ(cellx, centerX + x, y, zmin, zmax);
+							AddShadowCubeZ(cellx, centerX + x, y, centerZ + zmin, centerZ + zmax);
 						}
 					}
 				}
+			}
+		}
+		void BackGroundClass::AddShadowCubes(void) noexcept {
+			m_S32Num = 0;
+			for (auto& cellx : m_CellxN) {
+				if (ShadowRate < cellx.scaleRate) {
+					continue;
+				}
+				Vector3DX center = CamPosS / (CellScale * cellx.scaleRate);
+				int centerX = static_cast<int>(center.x) + cellx.Xall / 2;
+				int centerY = static_cast<int>(center.y) + cellx.Yall / 2;
+				int centerZ = static_cast<int>(center.z) + cellx.Zall / 2;
+				AddShadowCubesX(cellx, centerX, centerY, centerZ);
+				AddShadowCubesZ(cellx, centerX, centerY, centerZ);
 			}
 		}
 		//
@@ -923,19 +959,7 @@ namespace FPS_n2 {
 				}
 				//
 				std::thread tmp([this]() {
-					m_32Num = 0;
-					for (auto& cellx : m_CellxN) {
-						if (BaseRate < cellx.scaleRate) {
-							continue;
-						}
-						Vector3DX center = CamPos / (CellScale * cellx.scaleRate);
-						int centerX = static_cast<int>(center.x) + cellx.Xall / 2;
-						int centerY = static_cast<int>(center.y) + cellx.Yall / 2;
-						int centerZ = static_cast<int>(center.z) + cellx.Zall / 2;
-						//
-						AddCubesX(cellx, centerX, centerY, centerZ);
-						AddCubesZ(cellx, centerX, centerY, centerZ);
-					}
+					AddCubes();
 					m_JobEnd = true;
 					});
 				m_Job.swap(tmp);
@@ -975,18 +999,7 @@ namespace FPS_n2 {
 					lightZ = static_cast<int>(light.z);
 					//
 					std::thread tmp([this]() {
-						m_S32Num = 0;
-						for (auto& cellx : m_CellxN) {
-							if (ShadowRate < cellx.scaleRate) {
-								continue;
-							}
-							Vector3DX center = CamPosS / (CellScale * cellx.scaleRate);
-							int centerX = static_cast<int>(center.x) + cellx.Xall / 2;
-							int centerY = static_cast<int>(center.y) + cellx.Yall / 2;
-							int centerZ = static_cast<int>(center.z) + cellx.Zall / 2;
-							AddShadowCubesX(cellx, centerX, centerY, centerZ);
-							AddShadowCubesZ(cellx, centerX, centerY, centerZ);
-						}
+						AddShadowCubes();
 						m_ShadowJobEnd = true;
 						});
 					m_ShadowJob.swap(tmp);

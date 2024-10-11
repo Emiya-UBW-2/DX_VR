@@ -306,78 +306,75 @@ namespace FPS_n2 {
 			void			AddCubeZ(const CellsData& cellx, int x, int y, int zmin, int zmax, int centerX, int centerY, int centerZ, bool CheckFillXY) noexcept;
 			void			AddCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
 			void			AddCubesZ(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
+			void			AddCubes(void) noexcept;
 
-			const bool CalcYZActive(const CellsData& cellx, int x, int yMaxmin, int yMaxmax, int zMaxmin, int zMaxmax) const noexcept {
-				float scale = CellScale * cellx.scaleRate;
-				Vector3DX mid = Vector3DX::one() * (0.5f * scale);
+			const bool CalcYZActive(int x, int yMaxmin, int yMaxmax, int zMaxmin, int zMaxmax) const noexcept {
 				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
-				Vector3DX YZPos0 = cellx.GetPos(x, yMaxmin, zMaxmin) + mid;
-				Vector3DX YZPos1 = cellx.GetPos(x, yMaxmax, zMaxmax) + mid;
-				Vector3DX YZPos2 = cellx.GetPos(x, yMaxmin, zMaxmax) + mid;
-				Vector3DX YZPos3 = cellx.GetPos(x, yMaxmax, zMaxmin) + mid;
+				Vector3DX YZPos0 = Vector3DX::vget(static_cast<float>(x) + 0.5f, static_cast<float>(yMaxmin) + 0.5f, static_cast<float>(zMaxmin) + 0.5f);
+				Vector3DX YZPos1 = Vector3DX::vget(static_cast<float>(x) + 0.5f, static_cast<float>(yMaxmax) + 0.5f, static_cast<float>(zMaxmax) + 0.5f);
+				Vector3DX YZPos2 = Vector3DX::vget(static_cast<float>(x) + 0.5f, static_cast<float>(yMaxmin) + 0.5f, static_cast<float>(zMaxmax) + 0.5f);
+				Vector3DX YZPos3 = Vector3DX::vget(static_cast<float>(x) + 0.5f, static_cast<float>(yMaxmax) + 0.5f, static_cast<float>(zMaxmin) + 0.5f);
 				bool IsHit = false;
 				while (true) {
-					if (Vector3DX::Dot(CamVec, (YZPos0 - CamPos)) > 0.f) { IsHit = true; break; }
-					if (Vector3DX::Dot(CamVec, (YZPos1 - CamPos)) > 0.f) { IsHit = true; break; }
-					if (Vector3DX::Dot(CamVec, (YZPos2 - CamPos)) > 0.f) { IsHit = true; break; }
-					if (Vector3DX::Dot(CamVec, (YZPos3 - CamPos)) > 0.f) { IsHit = true; break; }
+					if (Vector3DX::Dot(CamVec, YZPos0) > 0.f) { IsHit = true; break; }
+					if (Vector3DX::Dot(CamVec, YZPos1) > 0.f) { IsHit = true; break; }
+					if (Vector3DX::Dot(CamVec, YZPos2) > 0.f) { IsHit = true; break; }
+					if (Vector3DX::Dot(CamVec, YZPos3) > 0.f) { IsHit = true; break; }
 					break;
 				}
 				return IsHit;
 			}
-			const bool CalcZMinMax(const CellsData& cellx, int x, int y, int* zMaxmin, int* zMaxmax) const noexcept {
+			const bool CalcZMinMax(int x, int y, int* zMaxmin, int* zMaxmax) const noexcept {
 				bool pSameVecNormalToA{};
 				bool OnFront{};
-				float scale = CellScale * cellx.scaleRate;
-				Vector3DX mid = Vector3DX::one() * (0.5f * scale);
-				Vector3DX ZMinPos = cellx.GetPos(x, y, *zMaxmin) + mid;
-				Vector3DX ZMaxPos = cellx.GetPos(x, y, *zMaxmax) + mid;
 				Vector3DX HitPos;
-				if (CalcIntersectionPoint(ZMinPos, ZMaxPos, CamPos, CamVec, &HitPos, &pSameVecNormalToA, &OnFront)) {
+
+				Vector3DX ZMinPos = Vector3DX::vget(static_cast<float>(x) + 0.5f, static_cast<float>(y) + 0.5f, static_cast<float>(*zMaxmin) + 0.5f);
+				Vector3DX ZMaxPos = Vector3DX::vget(static_cast<float>(x) + 0.5f, static_cast<float>(y) + 0.5f, static_cast<float>(*zMaxmax) + 0.5f);
+
+				if (CalcIntersectionPoint(ZMinPos, ZMaxPos, Vector3DX::zero(), CamVec, &HitPos, &pSameVecNormalToA, &OnFront)) {
 					if (!pSameVecNormalToA) {
-						*zMaxmin = std::max(static_cast<int>((HitPos.z - 0.5) / scale) + cellx.Zall / 2, *zMaxmin);
+						*zMaxmin = std::max(static_cast<int>(HitPos.z - 0.5), *zMaxmin);
 					}
 					else {
-						*zMaxmax = std::min(static_cast<int>((HitPos.z - 0.5) / scale) + cellx.Zall / 2 + 1, *zMaxmax);
+						*zMaxmax = std::min(static_cast<int>(HitPos.z - 0.5) + 1, *zMaxmax);
 					}
 					return true;
 				}
 				return OnFront;
 			}
 
-			const bool CalcXYActive(const CellsData& cellx, int xMaxmin, int xMaxmax, int yMaxmin, int yMaxmax, int z) const noexcept {
-				float scale = CellScale * cellx.scaleRate;
-				Vector3DX mid = Vector3DX::one() * (0.5f * scale);
+			const bool CalcXYActive(int xMaxmin, int xMaxmax, int yMaxmin, int yMaxmax, int z) const noexcept {
 				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
-				Vector3DX YZPos0 = cellx.GetPos(xMaxmin, yMaxmin, z) + mid;
-				Vector3DX YZPos1 = cellx.GetPos(xMaxmax, yMaxmax, z) + mid;
-				Vector3DX YZPos2 = cellx.GetPos(xMaxmax, yMaxmin, z) + mid;
-				Vector3DX YZPos3 = cellx.GetPos(xMaxmin, yMaxmax, z) + mid;
+				Vector3DX YZPos0 = Vector3DX::vget(static_cast<float>(xMaxmin) + 0.5f, static_cast<float>(yMaxmin) + 0.5f, static_cast<float>(z) + 0.5f);
+				Vector3DX YZPos1 = Vector3DX::vget(static_cast<float>(xMaxmax) + 0.5f, static_cast<float>(yMaxmax) + 0.5f, static_cast<float>(z) + 0.5f);
+				Vector3DX YZPos2 = Vector3DX::vget(static_cast<float>(xMaxmax) + 0.5f, static_cast<float>(yMaxmin) + 0.5f, static_cast<float>(z) + 0.5f);
+				Vector3DX YZPos3 = Vector3DX::vget(static_cast<float>(xMaxmin) + 0.5f, static_cast<float>(yMaxmax) + 0.5f, static_cast<float>(z) + 0.5f);
+
 				bool IsHit = false;
 				while (true) {
-					if (Vector3DX::Dot(CamVec, (YZPos0 - CamPos)) > 0.f) { IsHit = true; break; }
-					if (Vector3DX::Dot(CamVec, (YZPos1 - CamPos)) > 0.f) { IsHit = true; break; }
-					if (Vector3DX::Dot(CamVec, (YZPos2 - CamPos)) > 0.f) { IsHit = true; break; }
-					if (Vector3DX::Dot(CamVec, (YZPos3 - CamPos)) > 0.f) { IsHit = true; break; }
+					if (Vector3DX::Dot(CamVec, YZPos0) > 0.f) { IsHit = true; break; }
+					if (Vector3DX::Dot(CamVec, YZPos1) > 0.f) { IsHit = true; break; }
+					if (Vector3DX::Dot(CamVec, YZPos2) > 0.f) { IsHit = true; break; }
+					if (Vector3DX::Dot(CamVec, YZPos3) > 0.f) { IsHit = true; break; }
 					break;
 				}
 				return IsHit;
 			}
-			const bool CalcXMinMax(const CellsData& cellx, int* xMaxmin, int* xMaxmax, int y, int z) const noexcept {
+			const bool CalcXMinMax(int* xMaxmin, int* xMaxmax, int y, int z) const noexcept {
 				bool pSameVecNormalToA{};
 				bool OnFront{};
-				//*
-				float scale = CellScale * cellx.scaleRate;
-				Vector3DX mid = Vector3DX::one() * (0.5f * scale);
-				Vector3DX XMinPos = cellx.GetPos(*xMaxmin, y, z) + mid;
-				Vector3DX XMaxPos = cellx.GetPos(*xMaxmax, y, z) + mid;
 				Vector3DX HitPos;
-				if (CalcIntersectionPoint(XMinPos, XMaxPos, CamPos, CamVec, &HitPos, &pSameVecNormalToA, &OnFront)) {
+
+				Vector3DX XMinPos = Vector3DX::vget(static_cast<float>(*xMaxmin) + 0.5f, static_cast<float>(y) + 0.5f, static_cast<float>(z) + 0.5f);
+				Vector3DX XMaxPos = Vector3DX::vget(static_cast<float>(*xMaxmax) + 0.5f, static_cast<float>(y) + 0.5f, static_cast<float>(z) + 0.5f);
+
+				if (CalcIntersectionPoint(XMinPos, XMaxPos, Vector3DX::zero(), CamVec, &HitPos, &pSameVecNormalToA, &OnFront)) {
 					if (!pSameVecNormalToA) {
-						*xMaxmin = std::max(static_cast<int>((HitPos.x - 0.5) / scale) + cellx.Xall / 2, *xMaxmin);
+						*xMaxmin = std::max(static_cast<int>(HitPos.x - 0.5f), *xMaxmin);
 					}
 					else {
-						*xMaxmax = std::min(static_cast<int>((HitPos.x - 0.5) / scale) + cellx.Xall / 2 + 1, *xMaxmax);
+						*xMaxmax = std::min(static_cast<int>(HitPos.x - 0.5f) + 1, *xMaxmax);
 					}
 					return true;
 				}
@@ -390,6 +387,7 @@ namespace FPS_n2 {
 			void			AddShadowCubeZ(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
 			void			AddShadowCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
 			void			AddShadowCubesZ(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
+			void			AddShadowCubes(void) noexcept;
 		public:
 			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
 			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept;
