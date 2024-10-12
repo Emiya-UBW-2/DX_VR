@@ -151,6 +151,7 @@ namespace FPS_n2 {
 				});
 			if (DXDraw::Instance()->IsPause()) {
 				Pad->SetMouseMoveEnable(false);
+				BackGround->SettingChange();
 				if (!m_NetWorkController) {
 					return true;
 				}
