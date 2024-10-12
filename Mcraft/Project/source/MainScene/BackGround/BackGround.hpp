@@ -79,12 +79,11 @@ namespace FPS_n2 {
 
 			struct CellsData {
 				std::vector<CellBuffer> m_CellBuffer;
-				int All = 256;
 				int scaleRate = 1;
+				int All = 256 / scaleRate;
 				//éZèpï‚èïån
 				int Half = All / 2;
 				int AllPow2 = All * All;
-				int AllPow3 = All * All * All;
 				float Scale = (CellScale * scaleRate);
 				//
 				const int	GetIndex(int t) const noexcept { return (t % All + All) % All; }
@@ -128,14 +127,14 @@ namespace FPS_n2 {
 				}
 
 				//
-				void			SetScale(int scale, int base) noexcept {
+				void			SetScale(int scale) noexcept {
 					scaleRate = scale;
-					All = base / scaleRate;
-
+					All = 256 / scaleRate;
+					//éZèpï‚èïån
 					Half = All / 2;
 					AllPow2 = All * All;
-					AllPow3 = All * All * All;
 					Scale = (CellScale * scaleRate);
+					m_CellBuffer.resize((size_t)(All * All * All));
 				}
 				//
 				void			CalcOcclusion(int x, int y, int z) noexcept {
@@ -410,8 +409,8 @@ namespace FPS_n2 {
 				return true;
 			}
 		private:
-			bool			AddCubeX_CanAddPlane(const CellsData& cellx, int xmin, int xmax, int cy, int cz, int centerX, bool CheckFillYZ, int id) noexcept;
-			bool			AddCubeZ_CanAddPlane(const CellsData& cellx, int cx, int cy, int zmin, int zmax, int centerZ, bool CheckFillXY, int id) noexcept;
+			bool			AddCubeX_CanAddPlane(const CellsData& cellx, int xmin, int xmax, int cy, int cz, int id) noexcept;
+			bool			AddCubeZ_CanAddPlane(const CellsData& cellx, int cx, int cy, int zmin, int zmax, int id) noexcept;
 			//
 			void			AllocatePlane(void) noexcept;
 			void			AddPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;

@@ -87,12 +87,7 @@ namespace FPS_n2 {
 			}
 		};
 		//
-		bool		BackGroundClass::AddCubeX_CanAddPlane(const CellsData& cellx, int xmin, int xmax, int cy, int cz, int centerX, bool CheckFillYZ, int id) noexcept {
-			if (CheckFillYZ) {
-				if (((xmin <= centerX + DrawMinXMinus + 1) && (centerX + DrawMinXMinus + 1 <= xmax)) || ((xmin <= centerX + DrawMinXPlus - 1) && (centerX + DrawMinXPlus - 1 <= xmax))) {
-					return true;
-				}
-			}
+		bool		BackGroundClass::AddCubeX_CanAddPlane(const CellsData& cellx, int xmin, int xmax, int cy, int cz, int id) noexcept {
 			for (int x = xmin; x <= xmax; ++x) {
 				if ((cellx.GetSellBuf(x, cy, cz).m_FillInfo & (1 << id)) == 0) {
 					return true;
@@ -100,12 +95,7 @@ namespace FPS_n2 {
 			}
 			return false;
 		}
-		bool		BackGroundClass::AddCubeZ_CanAddPlane(const CellsData& cellx, int cx, int cy, int zmin, int zmax, int centerZ, bool CheckFillXY, int id) noexcept {
-			if (CheckFillXY) {
-				if (((zmin <= centerZ + DrawMinZMinus + 1) && (centerZ + DrawMinZMinus + 1 <= zmax)) || ((zmin <= centerZ + DrawMinZPlus - 1) && (centerZ + DrawMinZPlus - 1 <= zmax))) {
-					return true;
-				}
-			}
+		bool		BackGroundClass::AddCubeZ_CanAddPlane(const CellsData& cellx, int cx, int cy, int zmin, int zmax, int id) noexcept {
 			for (int z = zmin; z <= zmax; ++z) {
 				if ((cellx.GetSellBuf(cx, cy, z).m_FillInfo & (1 << id)) == 0) {
 					return true;
@@ -132,7 +122,7 @@ namespace FPS_n2 {
 		void		BackGroundClass::AddPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			AllocatePlane();
 
-			int zscale = zmax - zmin + 1;
+			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
 
 			int Xofs = zmin % 2 == 0;
 			int Yofs = 1;
@@ -147,7 +137,7 @@ namespace FPS_n2 {
 			{
 				auto& V = m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
-				V.u = uAdd * static_cast<float>(Xofs + zscale * cellx.scaleRate);
+				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::right().get();
 				V.dif = DifColor;
@@ -165,7 +155,7 @@ namespace FPS_n2 {
 			{
 				auto& V = m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
-				V.u = uAdd * static_cast<float>(Xofs + zscale * cellx.scaleRate);
+				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::right().get();
 				V.dif = DifColor;
@@ -184,7 +174,7 @@ namespace FPS_n2 {
 		void		BackGroundClass::AddPlaneXMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			AllocatePlane();
 
-			int zscale = zmax - zmin + 1;
+			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
 
 			int Xofs = zmin % 2 == 0;
 			int Yofs = 1;
@@ -198,7 +188,7 @@ namespace FPS_n2 {
 			{
 				auto& V = m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
-				V.u = uAdd * static_cast<float>(Xofs + zscale * cellx.scaleRate);
+				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::left().get();
 				V.dif = DifColor;
@@ -216,7 +206,7 @@ namespace FPS_n2 {
 			{
 				auto& V = m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
-				V.u = uAdd * static_cast<float>(Xofs + zscale * cellx.scaleRate);
+				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::left().get();
 				V.dif = DifColor;
@@ -235,7 +225,7 @@ namespace FPS_n2 {
 		void		BackGroundClass::AddPlaneYPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			AllocatePlane();
 
-			int zscale = zmax - zmin + 1;
+			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
 
 			int Xofs = zmin % 2 == 0;
 			int Yofs = 0;
@@ -249,7 +239,7 @@ namespace FPS_n2 {
 			{
 				auto& V = m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
-				V.u = uAdd * static_cast<float>(Xofs + zscale * cellx.scaleRate);
+				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::up().get();
 				V.dif = DifColor;
@@ -267,7 +257,7 @@ namespace FPS_n2 {
 			{
 				auto& V = m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
-				V.u = uAdd * static_cast<float>(Xofs + zscale * cellx.scaleRate);
+				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::up().get();
 				V.dif = DifColor;
@@ -286,7 +276,7 @@ namespace FPS_n2 {
 		void		BackGroundClass::AddPlaneYMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			AllocatePlane();
 
-			int zscale = zmax - zmin + 1;
+			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
 
 			int Xofs = zmin % 2 == 0;
 			int Yofs = 2;
@@ -300,7 +290,7 @@ namespace FPS_n2 {
 			{
 				auto& V = m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
-				V.u = uAdd * static_cast<float>(Xofs + zscale * cellx.scaleRate);
+				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::down().get();
 				V.dif = DifColor;
@@ -318,7 +308,7 @@ namespace FPS_n2 {
 			{
 				auto& V = m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
-				V.u = uAdd * static_cast<float>(Xofs + zscale * cellx.scaleRate);
+				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::down().get();
 				V.dif = DifColor;
@@ -337,7 +327,7 @@ namespace FPS_n2 {
 		void		BackGroundClass::AddPlaneZPlus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
 			AllocatePlane();
 
-			int xscale = xmax - xmin + 1;
+			int xscale = (xmax - xmin + 1) * cellx.scaleRate;
 
 			int Xofs = xmax % 2 == 0;
 			int Yofs = 1;
@@ -351,7 +341,7 @@ namespace FPS_n2 {
 			{
 				auto& V = m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b001).get();
-				V.u = uAdd * static_cast<float>(Xofs + xscale * cellx.scaleRate);
+				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::forward().get();
 				V.dif = DifColor;
@@ -369,7 +359,7 @@ namespace FPS_n2 {
 			{
 				auto& V = m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b011).get();
-				V.u = uAdd * static_cast<float>(Xofs + xscale * cellx.scaleRate);
+				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::forward().get();
 				V.dif = DifColor;
@@ -388,7 +378,7 @@ namespace FPS_n2 {
 		void		BackGroundClass::AddPlaneZMinus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
 			AllocatePlane();
 
-			int xscale = xmax - xmin + 1;
+			int xscale = (xmax - xmin + 1) * cellx.scaleRate;
 
 			int Xofs = xmax % 2 == 0;
 			int Yofs = 1;
@@ -402,7 +392,7 @@ namespace FPS_n2 {
 			{
 				auto& V = m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b010).get();
-				V.u = uAdd * static_cast<float>(Xofs + xscale * cellx.scaleRate);
+				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::back().get();
 				V.dif = DifColor;
@@ -420,7 +410,7 @@ namespace FPS_n2 {
 			{
 				auto& V = m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b000).get();
-				V.u = uAdd * static_cast<float>(Xofs + xscale * cellx.scaleRate);
+				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::back().get();
 				V.dif = DifColor;
@@ -459,7 +449,7 @@ namespace FPS_n2 {
 					bool isHitmin = true;
 					for (int x = centerX + xMaxminT, XMax = centerX + xMaxmaxT; x <= XMax; ++x) {
 						if (
-							(x == centerX + xMaxmaxT) ||
+							(x == XMax) ||
 							(CheckInside && ((centerX + DrawMinXMinus < x) && (x < centerX + DrawMinXPlus))) ||
 							(!cellx.IsActiveCell(x, y, z))
 							//|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
@@ -467,13 +457,14 @@ namespace FPS_n2 {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
 								isHitmin = true;
+								bool Fill = CheckFill && (((xmin <= centerX + DrawMinXMinus + 1) && (centerX + DrawMinXMinus + 1 <= xmax)) || ((xmin <= centerX + DrawMinXPlus - 1) && (centerX + DrawMinXPlus - 1 <= xmax)));
 								if (z >= centerZ) {
-									if (AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, centerX, CheckFill, 5)) {
+									if (Fill || AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, 5)) {
 										AddPlaneZMinus(cellx, xmin, xmax, y, z);
 									}
 								}
 								else {
-									if (AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, centerX, CheckFill, 4)) {
+									if (Fill || AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, 4)) {
 										AddPlaneZPlus(cellx, xmin, xmax, y, z);
 									}
 								}
@@ -521,23 +512,24 @@ namespace FPS_n2 {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
 								isHitmin = true;
+								bool Fill = CheckFill && (((zmin <= centerZ + DrawMinZMinus + 1) && (centerZ + DrawMinZMinus + 1 <= zmax)) || ((zmin <= centerZ + DrawMinZPlus - 1) && (centerZ + DrawMinZPlus - 1 <= zmax)));
 								if (x >= centerX) {
-									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, centerZ, CheckFill, 1)) {
+									if (Fill || AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 1)) {
 										AddPlaneXMinus(cellx, x, y, zmin, zmax);
 									}
 								}
 								else {
-									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, centerZ, CheckFill, 0)) {
+									if (Fill || AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 0)) {
 										AddPlaneXPlus(cellx, x, y, zmin, zmax);
 									}
 								}
 								if (y >= centerY) {
-									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, centerZ, CheckFill, 3)) {
+									if (Fill || AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 3)) {
 										AddPlaneYMinus(cellx, x, y, zmin, zmax);
 									}
 								}
 								else {
-									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, centerZ, CheckFill, 2)) {
+									if (Fill || AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 2)) {
 										AddPlaneYPlus(cellx, x, y, zmin, zmax);
 									}
 								}
@@ -781,12 +773,12 @@ namespace FPS_n2 {
 							if (!isHitmin) {
 								isHitmin = true;
 								if (light.z > 0.f) {
-									if (AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, centerX, false, 5)) {
+									if (AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, 5)) {
 										AddShadowPlaneZMinus(cellx, xmin, xmax, y, z);
 									}
 								}
 								else {
-									if (AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, centerX, false, 4)) {
+									if (AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, 4)) {
 										AddShadowPlaneZPlus(cellx, xmin, xmax, y, z);
 									}
 								}
@@ -828,22 +820,22 @@ namespace FPS_n2 {
 							if (!isHitmin) {
 								isHitmin = true;
 								if (light.x > 0.f) {
-									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, centerZ, false, 1)) {
+									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 1)) {
 										AddShadowPlaneXMinus(cellx, x, y, zmin, zmax);
 									}
 								}
 								else {
-									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, centerZ, false, 0)) {
+									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 0)) {
 										AddShadowPlaneXPlus(cellx, x, y, zmin, zmax);
 									}
 								}
 								if (light.y > 0.f) {
-									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, centerZ, false, 3)) {
+									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 3)) {
 										AddShadowPlaneYMinus(cellx, x, y, zmin, zmax);
 									}
 								}
 								else {
-									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, centerZ, false, 2)) {
+									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 2)) {
 										AddShadowPlaneYPlus(cellx, x, y, zmin, zmax);
 									}
 								}
@@ -969,7 +961,7 @@ namespace FPS_n2 {
 					bool isHitmin = true;
 					for (int x = centerX + xMaxminT, XMax = centerX + xMaxmaxT; x <= XMax; ++x) {
 						if (
-							(x == centerX + xMaxmaxT) ||
+							(x == XMax) ||
 							(CheckInside && ((centerX + DrawMinXMinus < x) && (x < centerX + DrawMinXPlus))) ||
 							(!cellx.IsActiveCell(x, y, z))
 							//|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
@@ -977,13 +969,14 @@ namespace FPS_n2 {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
 								isHitmin = true;
+								bool Fill = CheckFill && (((xmin <= centerX + DrawMinXMinus + 1) && (centerX + DrawMinXMinus + 1 <= xmax)) || ((xmin <= centerX + DrawMinXPlus - 1) && (centerX + DrawMinXPlus - 1 <= xmax)));
 								if (z >= centerZ) {
-									if (AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, centerX, CheckFill, 5)) {
+									if (Fill || AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, 5)) {
 										AddSetShadowPlaneZMinus(cellx, xmin, xmax, y, z);
 									}
 								}
 								else {
-									if (AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, centerX, CheckFill, 4)) {
+									if (Fill || AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, 4)) {
 										AddSetShadowPlaneZPlus(cellx, xmin, xmax, y, z);
 									}
 								}
@@ -1031,23 +1024,24 @@ namespace FPS_n2 {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
 								isHitmin = true;
+								bool Fill = CheckFill && (((zmin <= centerZ + DrawMinZMinus + 1) && (centerZ + DrawMinZMinus + 1 <= zmax)) || ((zmin <= centerZ + DrawMinZPlus - 1) && (centerZ + DrawMinZPlus - 1 <= zmax)));
 								if (x >= centerX) {
-									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, centerZ, CheckFill, 1)) {
+									if (Fill || AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 1)) {
 										AddSetShadowPlaneXMinus(cellx, x, y, zmin, zmax);
 									}
 								}
 								else {
-									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, centerZ, CheckFill, 0)) {
+									if (Fill || AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 0)) {
 										AddSetShadowPlaneXPlus(cellx, x, y, zmin, zmax);
 									}
 								}
 								if (y >= centerY) {
-									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, centerZ, CheckFill, 3)) {
+									if (Fill || AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 3)) {
 										AddSetShadowPlaneYMinus(cellx, x, y, zmin, zmax);
 									}
 								}
 								else {
-									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, centerZ, CheckFill, 2)) {
+									if (Fill || AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 2)) {
 										AddSetShadowPlaneYPlus(cellx, x, y, zmin, zmax);
 									}
 								}
@@ -1241,12 +1235,12 @@ namespace FPS_n2 {
 		//
 		void		BackGroundClass::LoadCellsFile() noexcept {
 			auto& cell = m_CellxN.front();
+			cell.SetScale(static_cast<int>(pow(MulPer, 0)));
 
 			std::ifstream fin{};
 			fin.open("data/Map.txt", std::ios::in | std::ios::binary);
-			fin.read((char*)&m_CellBase, sizeof(m_CellBase) * (size_t)(cell.AllPow3));
+			fin.read((char*)&m_CellBase, sizeof(m_CellBase) * (size_t)(cell.m_CellBuffer.size()));
 			fin.close();
-			cell.m_CellBuffer.resize((size_t)(cell.AllPow3));
 			for (int xm = 0; xm < cell.All; ++xm) {
 				for (int ym = 0; ym < cell.All; ++ym) {
 					for (int zm = 0; zm < cell.All; ++zm) {
@@ -1268,7 +1262,7 @@ namespace FPS_n2 {
 
 			std::ofstream fout{};
 			fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
-			fout.write((char*)&m_CellBase, sizeof(m_CellBase) * (size_t)(cell.AllPow3));
+			fout.write((char*)&m_CellBase, sizeof(m_CellBase) * (size_t)(cell.m_CellBuffer.size()));
 			fout.close();  //ファイルを閉じる
 		}
 		//
@@ -1348,7 +1342,7 @@ namespace FPS_n2 {
 			if (false) {
 				PerlinNoise ns(GetRand(100));
 				auto& cell = m_CellxN.front();
-				cell.m_CellBuffer.resize((size_t)(cell.AllPow3));
+				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
 				for (int x = 0; x < cell.All; ++x) {
 					for (int z = 0; z < cell.All; ++z) {
 						auto Height = static_cast<int>(ns.octaveNoise(2, (static_cast<float>(x)) / cell.All, (static_cast<float>(z)) / cell.All) * static_cast<float>(cell.All * 4 / 5));
@@ -1370,8 +1364,7 @@ namespace FPS_n2 {
 			auto& cell = m_CellxN.front();
 			for (int sel = 1; sel < total; ++sel) {
 				auto& cell1 = m_CellxN.at(sel);
-				cell1.SetScale(static_cast<int>(pow(MulPer, sel)), cell.All);
-				cell1.m_CellBuffer.resize((size_t)(cell1.AllPow3));
+				cell1.SetScale(static_cast<int>(pow(MulPer, sel)));
 				for (int xm = 0; xm < cell1.All; ++xm) {
 					for (int ym = 0; ym < cell1.All; ++ym) {
 						for (int zm = 0; zm < cell1.All; ++zm) {
@@ -1430,7 +1423,7 @@ namespace FPS_n2 {
 			{
 				printfDx("%5.2fms \n", (float)(m_TotalTime) / 1000.f);
 				auto& cell = m_CellxN.front();
-				auto Put = cell.GetPoint(CamPos);
+				auto Put = cell.GetPoint(PutPos);
 				printfDx("%d,%d,%d\n", Put.x, Put.y, Put.z);
 			}
 #endif
@@ -1450,7 +1443,7 @@ namespace FPS_n2 {
 				CamVec = (DrawParts->GetMainCamera().GetCamVec() - CamPos).normalized();
 				//
 #if EDITBLICK
-				PutPos = (CamPos + CamVec * (LenMouse * Scale_Rate)) / CellScale;
+				PutPos = (CamPos + CamVec * (LenMouse * Scale_Rate));
 				if (blicksel >= 0) {
 					auto& cell = m_CellxN.front();
 					auto Put = cell.GetPoint(PutPos);
@@ -1557,7 +1550,7 @@ namespace FPS_n2 {
 				DrawPolygon32bitIndexed3D(m_vert32Out.data(), static_cast<int>(m_32NumOut * 4), m_index32Out.data(), static_cast<int>(m_32NumOut * 6 / 3), m_tex.get(), TRUE);
 			}
 #if EDITBLICK
-			int x = (int)PutPos.x, y = (int)PutPos.y, z = (int)PutPos.z;
+			int x = (int)(PutPos.x / CellScale), y = (int)(PutPos.y / CellScale), z = (int)(PutPos.z / CellScale);
 			SetUseLighting(FALSE);
 			DrawCube3D(
 				(Vector3DX::vget((float)(x - xput / 2), (float)(y - yput / 2), (float)(z - zput / 2)) * CellScale).get(),
