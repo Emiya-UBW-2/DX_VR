@@ -8,8 +8,8 @@
 namespace FPS_n2 {
 	namespace BackGround {
 		static constexpr int8_t s_EmptyBlick = 0;
-		static constexpr int total = 3;
-		static constexpr int MulPer = 3;
+		static constexpr int total = 4;
+		static constexpr int MulPer = 2;
 		static constexpr float CellScale = Scale_Rate / 2.f / 2.f;
 
 		static constexpr int DrawMax = 65;
@@ -44,6 +44,10 @@ namespace FPS_n2 {
 			size_t							m_32Num{ 0 };
 			size_t							m_32Size{ 0 };
 			std::vector<VERTEX3D>			m_vert32SB;
+			std::vector<uint32_t>			m_index32SB;
+			size_t							m_SB32Num{ 0 };
+			size_t							m_SB32Size{ 0 };
+
 			std::vector<VERTEX3DSHADER>		m_vert32S;
 			std::vector<uint32_t>			m_index32S;
 			size_t							m_S32Num{ 0 };
@@ -131,10 +135,19 @@ namespace FPS_n2 {
 			std::thread						m_ShadowJob;
 			bool							m_ShadowJobEnd{};
 			std::vector<VERTEX3D>			m_vert32SBOut;
+			std::vector<uint32_t>			m_index32SBOut;
+			size_t							m_SB32NumOut{ 0 };
+			Vector3DX						CamPosSB;
+			Vector3DX 						light{};
+
+			std::thread						m_SetShadowJob;
+			bool							m_SetShadowJobEnd{};
 			std::vector<VERTEX3DSHADER>		m_vert32SOut;
 			std::vector<uint32_t>			m_index32SOut;
 			size_t							m_S32NumOut{ 0 };
 			Vector3DX						CamPosS;
+			Vector3DX						CamVecS;
+
 			int								ShadowRate = 100;
 			//
 #if EDITBLICK
@@ -323,35 +336,19 @@ namespace FPS_n2 {
 				}
 				return true;
 			}
-		private:
-			void			AllocatePlane(void) noexcept;
-			void			AddPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddPlaneXMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddPlaneYPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddPlaneYMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddPlaneZPlus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
-			void			AddPlaneZMinus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
-
-			bool			AddCubeX_CanAddPlane(const CellsData& cellx, int xmin, int xmax, int cy, int cz, int centerX, bool CheckFillYZ, int id) noexcept;
-			bool			AddCubeZ_CanAddPlane(const CellsData& cellx, int cx, int cy, int zmin, int zmax, int centerZ, bool CheckFillXY, int id) noexcept;
-
-			void			AddCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
-			void			AddCubesZ(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
-			void			AddCubes(void) noexcept;
-
-			const bool CalcYZActive(int x, int yMaxmin, int yMaxmax, int zMaxmin, int zMaxmax) const noexcept {
+			inline static bool		CalcYZActive(const Vector3DX& Vec, int x, int yMaxmin, int yMaxmax, int zMaxmin, int zMaxmax) noexcept {
 				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
 				Vector3DX YZPos0 = Vector3DX::vget(static_cast<float>(x) + 0.5f, static_cast<float>(yMaxmin) + 0.5f, static_cast<float>(zMaxmin) + 0.5f);
-				if (Vector3DX::Dot(CamVec, YZPos0) > 0.f) { return true; }
+				if (Vector3DX::Dot(Vec, YZPos0) > 0.f) { return true; }
 				Vector3DX YZPos1 = Vector3DX::vget(static_cast<float>(x) + 0.5f, static_cast<float>(yMaxmax) + 0.5f, static_cast<float>(zMaxmax) + 0.5f);
-				if (Vector3DX::Dot(CamVec, YZPos1) > 0.f) { return true; }
+				if (Vector3DX::Dot(Vec, YZPos1) > 0.f) { return true; }
 				Vector3DX YZPos2 = Vector3DX::vget(static_cast<float>(x) + 0.5f, static_cast<float>(yMaxmin) + 0.5f, static_cast<float>(zMaxmax) + 0.5f);
-				if (Vector3DX::Dot(CamVec, YZPos2) > 0.f) { return true; }
+				if (Vector3DX::Dot(Vec, YZPos2) > 0.f) { return true; }
 				Vector3DX YZPos3 = Vector3DX::vget(static_cast<float>(x) + 0.5f, static_cast<float>(yMaxmax) + 0.5f, static_cast<float>(zMaxmin) + 0.5f);
-				if (Vector3DX::Dot(CamVec, YZPos3) > 0.f) { return true; }
+				if (Vector3DX::Dot(Vec, YZPos3) > 0.f) { return true; }
 				return false;
 			}
-			const bool CalcZMinMax(int x, int y, int* zMaxmin, int* zMaxmax) const noexcept {
+			inline static bool		CalcZMinMax(const Vector3DX& Vec, int x, int y, int* zMaxmin, int* zMaxmax) noexcept {
 				bool pSameVecNormalToA{};
 				bool OnFront{};
 				Vector3DX HitPos;
@@ -359,7 +356,7 @@ namespace FPS_n2 {
 				Vector3DX ZMinPos = Vector3DX::vget(static_cast<float>(x) + 0.5f, static_cast<float>(y) + 0.5f, static_cast<float>(*zMaxmin) + 0.5f);
 				Vector3DX ZMaxPos = Vector3DX::vget(static_cast<float>(x) + 0.5f, static_cast<float>(y) + 0.5f, static_cast<float>(*zMaxmax) + 0.5f);
 
-				if (CalcIntersectionPoint(ZMinPos, ZMaxPos, Vector3DX::zero(), CamVec, &HitPos, &pSameVecNormalToA, &OnFront)) {
+				if (CalcIntersectionPoint(ZMinPos, ZMaxPos, Vector3DX::zero(), Vec, &HitPos, &pSameVecNormalToA, &OnFront)) {
 					if (!pSameVecNormalToA) {
 						*zMaxmin = std::max(static_cast<int>(HitPos.z - 0.5), *zMaxmin);
 					}
@@ -370,20 +367,19 @@ namespace FPS_n2 {
 				}
 				return OnFront;
 			}
-
-			const bool CalcXYActive(int xMaxmin, int xMaxmax, int yMaxmin, int yMaxmax, int z) const noexcept {
+			inline static bool		CalcXYActive(const Vector3DX& Vec, int xMaxmin, int xMaxmax, int yMaxmin, int yMaxmax, int z) noexcept {
 				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
 				Vector3DX YZPos0 = Vector3DX::vget(static_cast<float>(xMaxmin) + 0.5f, static_cast<float>(yMaxmin) + 0.5f, static_cast<float>(z) + 0.5f);
-				if (Vector3DX::Dot(CamVec, YZPos0) > 0.f) { return true; }
+				if (Vector3DX::Dot(Vec, YZPos0) > 0.f) { return true; }
 				Vector3DX YZPos1 = Vector3DX::vget(static_cast<float>(xMaxmax) + 0.5f, static_cast<float>(yMaxmax) + 0.5f, static_cast<float>(z) + 0.5f);
-				if (Vector3DX::Dot(CamVec, YZPos1) > 0.f) { return true; }
+				if (Vector3DX::Dot(Vec, YZPos1) > 0.f) { return true; }
 				Vector3DX YZPos2 = Vector3DX::vget(static_cast<float>(xMaxmax) + 0.5f, static_cast<float>(yMaxmin) + 0.5f, static_cast<float>(z) + 0.5f);
-				if (Vector3DX::Dot(CamVec, YZPos2) > 0.f) { return true; }
+				if (Vector3DX::Dot(Vec, YZPos2) > 0.f) { return true; }
 				Vector3DX YZPos3 = Vector3DX::vget(static_cast<float>(xMaxmin) + 0.5f, static_cast<float>(yMaxmax) + 0.5f, static_cast<float>(z) + 0.5f);
-				if (Vector3DX::Dot(CamVec, YZPos3) > 0.f) { return true; }
+				if (Vector3DX::Dot(Vec, YZPos3) > 0.f) { return true; }
 				return false;
 			}
-			const bool CalcXMinMax(int* xMaxmin, int* xMaxmax, int y, int z) const noexcept {
+			inline static bool		CalcXMinMax(const Vector3DX& Vec, int* xMaxmin, int* xMaxmax, int y, int z) noexcept {
 				bool pSameVecNormalToA{};
 				bool OnFront{};
 				Vector3DX HitPos;
@@ -391,7 +387,7 @@ namespace FPS_n2 {
 				Vector3DX XMinPos = Vector3DX::vget(static_cast<float>(*xMaxmin) + 0.5f, static_cast<float>(y) + 0.5f, static_cast<float>(z) + 0.5f);
 				Vector3DX XMaxPos = Vector3DX::vget(static_cast<float>(*xMaxmax) + 0.5f, static_cast<float>(y) + 0.5f, static_cast<float>(z) + 0.5f);
 
-				if (CalcIntersectionPoint(XMinPos, XMaxPos, Vector3DX::zero(), CamVec, &HitPos, &pSameVecNormalToA, &OnFront)) {
+				if (CalcIntersectionPoint(XMinPos, XMaxPos, Vector3DX::zero(), Vec, &HitPos, &pSameVecNormalToA, &OnFront)) {
 					if (!pSameVecNormalToA) {
 						*xMaxmin = std::max(static_cast<int>(HitPos.x - 0.5f), *xMaxmin);
 					}
@@ -402,7 +398,22 @@ namespace FPS_n2 {
 				}
 				return OnFront;
 			}
+		private:
+			bool			AddCubeX_CanAddPlane(const CellsData& cellx, int xmin, int xmax, int cy, int cz, int centerX, bool CheckFillYZ, int id) noexcept;
+			bool			AddCubeZ_CanAddPlane(const CellsData& cellx, int cx, int cy, int zmin, int zmax, int centerZ, bool CheckFillXY, int id) noexcept;
+			//
+			void			AllocatePlane(void) noexcept;
+			void			AddPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddPlaneXMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddPlaneYPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddPlaneYMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddPlaneZPlus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
+			void			AddPlaneZMinus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
 
+			void			AddCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
+			void			AddCubesZ(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
+			void			AddCubes(void) noexcept;
+			//
 			void			AllocateShadowPlane(void) noexcept;
 			void			AddShadowPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
 			void			AddShadowPlaneXMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
@@ -414,6 +425,18 @@ namespace FPS_n2 {
 			void			AddShadowCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
 			void			AddShadowCubesZ(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
 			void			AddShadowCubes(void) noexcept;
+			//
+			void			AllocateSetShadowPlane(void) noexcept;
+			void			AddSetShadowPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddSetShadowPlaneXMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddSetShadowPlaneYPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddSetShadowPlaneYMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddSetShadowPlaneZPlus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
+			void			AddSetShadowPlaneZMinus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
+
+			void			AddSetShadowCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
+			void			AddSetShadowCubesZ(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
+			void			AddSetShadowCubes(void) noexcept;
 		public:
 			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
 			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept;
