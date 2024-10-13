@@ -258,9 +258,9 @@ namespace FPS_n2 {
 #if defined(DEBUG) & EDITBLICK
 			//Edit
 			float							LenMouse = 2.f;
-			int								xput = 3;
-			int								yput = 3;
-			int								zput = 3;
+			int								xput = 5;
+			int								yput = 25;
+			int								zput = 5;
 			int8_t							blicksel = -1;
 			Vector3DX						PutPos;
 #endif
