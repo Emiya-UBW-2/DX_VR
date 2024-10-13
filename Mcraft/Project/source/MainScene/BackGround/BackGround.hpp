@@ -74,7 +74,7 @@ namespace FPS_n2 {
 				}
 				//
 				const bool		IsActiveCell(int x, int y, int z) const noexcept { return GetSellBuf(x, y, z).m_Cell != s_EmptyBlick; }
-				const int8_t	isFill(int x, int y, int z, int mul) const noexcept {
+				const int8_t	isFill(int x, int y, int z, int mul) noexcept {
 					mul /= scaleRate;
 					int FillCount = 0;
 					int FillAll = 0;
@@ -82,18 +82,32 @@ namespace FPS_n2 {
 					int xMaxmin = x * mul + mul - 1;
 					int yMaxmin = y * mul + mul - 1;
 					int zMaxmin = z * mul + mul - 1;
-
+					std::vector<int> IDCount;
 					for (int xt = xMaxmin; xt < xMaxmin + mul; ++xt) {
 						for (int yt = yMaxmin; yt < std::min(yMaxmin + mul, All); ++yt) {
 							for (int zt = zMaxmin; zt < zMaxmin + mul; ++zt) {
 								++FillAll;
 								if (!IsActiveCell(xt, yt, zt)) { continue; }
 								++FillCount;
+								auto cell = GetSellBuf(xt, yt, zt).m_Cell + 1;
+								if (cell > IDCount.size()) {
+									IDCount.resize(cell);
+								}
+								IDCount.at(cell - 1)++;
 							}
 						}
 					}
 					if ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 4.f))) {
-						return 1;
+						int max = -1;
+						int id = 1;
+						for (int index = 0; auto & i : IDCount) {
+							if (max < i) {
+								max = i;
+								id = index;
+							}
+							index++;
+						}
+						return id;
 					}
 					else {
 						return s_EmptyBlick;

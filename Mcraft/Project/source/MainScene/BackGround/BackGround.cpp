@@ -1324,7 +1324,7 @@ namespace FPS_n2 {
 			auto& cell = m_CellxN.front();
 			if (!cell.isInside(y)) { return; }
 			//テクスチャだけ変える
-			//*
+			/*
 			if (cell.SetSellBuf(x, y, z).m_Cell == s_EmptyBlick) { return; }
 			cell.SetSellBuf(x, y, z).m_Cell = select;
 			return;
@@ -1660,10 +1660,10 @@ namespace FPS_n2 {
 				auto* Pad = PadControl::Instance();
 				LenMouse += Pad->GetMouseWheelRot();
 				if (Pad->GetKey(PADS::SHOT).trigger()) {
-					blicksel = 2;
+					blicksel = 1;
 				}
 				if (Pad->GetKey(PADS::AIM).trigger()) {
-					blicksel = 1;
+					blicksel = 0;
 				}
 				if (Pad->GetKey(PADS::JUMP).trigger()) {
 					SaveCellsFile();
