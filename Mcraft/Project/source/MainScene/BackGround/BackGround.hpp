@@ -74,7 +74,7 @@ namespace FPS_n2 {
 				}
 				//
 				const bool		IsActiveCell(int x, int y, int z) const noexcept { return GetSellBuf(x, y, z).m_Cell != s_EmptyBlick; }
-				const bool		isFill(int x, int y, int z, int mul) const noexcept {
+				const int8_t	isFill(int x, int y, int z, int mul) const noexcept {
 					mul /= scaleRate;
 					int FillCount = 0;
 					int FillAll = 0;
@@ -92,7 +92,12 @@ namespace FPS_n2 {
 							}
 						}
 					}
-					return (FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f));
+					if ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f))) {
+						return 1;
+					}
+					else {
+						return s_EmptyBlick;
+					}
 				}
 				const bool		isInside(int y) const noexcept { return ((0 <= y) && (y < All)); }
 				const Vector3DX	GetPos(int x, int y, int z) const noexcept {
@@ -217,6 +222,9 @@ namespace FPS_n2 {
 					this->m_index32Out = this->m_index32;
 					this->m_32NumOut = this->m_32Num;
 				}
+				void		Disable(void) noexcept {
+					this->m_32NumOut = 0;
+				}
 				void		Draw(const GraphHandle& GrHandle) const noexcept {
 					if (this->m_32NumOut > 0) {
 						DrawPolygon32bitIndexed3D(this->m_vert32Out.data(), static_cast<int>(this->m_32NumOut * 4), this->m_index32Out.data(), static_cast<int>(this->m_32NumOut * 6 / 3), GrHandle.get(), TRUE);
@@ -229,22 +237,23 @@ namespace FPS_n2 {
 			GraphHandle						m_norm{};
 			std::array<int8_t, 256 * 256 * 256> m_CellBase{};
 			std::array<CellsData, total>	m_CellxN;
-			std::array<ThreadJobs, 3>		m_Jobs;
-			//表示ポリゴンスレッド用
-			std::array<vert32<VERTEX3D>, 1>	m_vert32s;
-			Vector3DX						CamPos;
-			Vector3DX						CamVec;
+			std::array<ThreadJobs, total + total + total>	m_Jobs;
+			//
 			int								BaseRate = 100;
-			//影スレッド用
-			std::array<vert32<VERTEX3D>, 1>	m_vert32sSB;
-			Vector3DX						CamPosSB;
-			Vector3DX 						light{};
-
-			std::array<vert32<VERTEX3DSHADER>, 1>	m_vert32sS;
-			Vector3DX						CamPosS;
-			Vector3DX						CamVecS;
-
 			int								ShadowRate = 100;
+			int								ThreadCounter = 0;
+			//表示ポリゴンスレッド用
+			std::array<vert32<VERTEX3D>, total>	m_vert32s;
+			std::array<Vector3DX, total>	CamPos;
+			std::array<Vector3DX, total>	CamVec;
+			//影スレッド用
+			std::array<vert32<VERTEX3D>, total>	m_vert32sSB;
+			std::array<Vector3DX, total>	CamPosSB;
+			std::array<Vector3DX, total>	light;
+
+			std::array<vert32<VERTEX3DSHADER>, total>	m_vert32sS;
+			std::array<Vector3DX, total>	CamPosS;
+			std::array<Vector3DX, total>	CamVecS;
 			//
 #if defined(DEBUG) & EDITBLICK
 			//Edit
@@ -477,35 +486,35 @@ namespace FPS_n2 {
 			bool			AddCubeX_CanAddPlane(const CellsData& cellx, int xmin, int xmax, int cy, int cz, int id) noexcept;
 			bool			AddCubeZ_CanAddPlane(const CellsData& cellx, int cx, int cy, int zmin, int zmax, int id) noexcept;
 			//
-			void			AddPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddPlaneXMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddPlaneYPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddPlaneYMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddPlaneZPlus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
-			void			AddPlaneZMinus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
+			void			AddPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
+			void			AddPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
 
-			void			AddCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
-			void			AddCubesZ(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
+			void			AddCubesX(size_t id) noexcept;
+			void			AddCubesZ(size_t id) noexcept;
 			//
-			void			AddShadowPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddShadowPlaneXMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddShadowPlaneYPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddShadowPlaneYMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddShadowPlaneZPlus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
-			void			AddShadowPlaneZMinus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
+			void			AddShadowPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddShadowPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddShadowPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddShadowPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddShadowPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
+			void			AddShadowPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
 
-			void			AddShadowCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
-			void			AddShadowCubesZ(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
+			void			AddShadowCubesX(size_t id) noexcept;
+			void			AddShadowCubesZ(size_t id) noexcept;
 			//
-			void			AddSetShadowPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddSetShadowPlaneXMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddSetShadowPlaneYPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddSetShadowPlaneYMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddSetShadowPlaneZPlus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
-			void			AddSetShadowPlaneZMinus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
+			void			AddSetShadowPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddSetShadowPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddSetShadowPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddSetShadowPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddSetShadowPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
+			void			AddSetShadowPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
 
-			void			AddSetShadowCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
-			void			AddSetShadowCubesZ(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
+			void			AddSetShadowCubesX(size_t id) noexcept;
+			void			AddSetShadowCubesZ(size_t id) noexcept;
 		public:
 			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
 			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept;
