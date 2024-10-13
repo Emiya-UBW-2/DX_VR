@@ -37,25 +37,6 @@ namespace FPS_n2 {
 		private:
 			friend class SingletonBase<BackGroundClass>;
 		private:
-			MV1								m_ObjSky;
-
-			std::vector<VERTEX3D>			m_vert32;
-			std::vector<uint32_t>			m_index32;
-			size_t							m_32Num{ 0 };
-			size_t							m_32Size{ 0 };
-			std::vector<VERTEX3D>			m_vert32SB;
-			std::vector<uint32_t>			m_index32SB;
-			size_t							m_SB32Num{ 0 };
-			size_t							m_SB32Size{ 0 };
-
-			std::vector<VERTEX3DSHADER>		m_vert32S;
-			std::vector<uint32_t>			m_index32S;
-			size_t							m_S32Num{ 0 };
-			size_t							m_S32Size{ 0 };
-
-			GraphHandle						m_tex{};
-			GraphHandle						m_norm{};
-
 			struct Vector3Int {
 				int x{};
 				int y{};
@@ -68,15 +49,11 @@ namespace FPS_n2 {
 					this->z = Z;
 				}
 			};
-
 			struct CellBuffer
 			{
 				int8_t m_Cell{};
 				int8_t m_FillInfo{};//周りの遮蔽データのbitフラグ
 			};
-
-			std::array<int8_t, 256 * 256 * 256> m_CellBase{};
-
 			struct CellsData {
 				std::vector<CellBuffer> m_CellBuffer;
 				int scaleRate = 1;
@@ -147,41 +124,129 @@ namespace FPS_n2 {
 					m_CellBuffer[GetCellNum(x, y, z)].m_FillInfo |= (1 << 5) * IsActiveCell(x, y, z - 1);
 				}
 			};
+			//
+			struct ThreadJobs {
+				std::thread						m_Job;
+				bool							m_JobEnd{};
+				LONGLONG						m_StartTime{};
+				LONGLONG						m_TotalTime{};
+				std::function<void()>			m_Doing{ nullptr };
+				std::function<void()>			m_EndDoing{ nullptr };
+			public:
+				void Init(std::function<void()> Doing, std::function<void()> EndDoing) noexcept {
+					m_JobEnd = true;
+					m_Doing = Doing;
+					m_EndDoing = EndDoing;
+				}
+
+				void Execute(void) noexcept {
+					if (m_JobEnd) {
+						m_JobEnd = false;
+						m_TotalTime = GetNowHiPerformanceCount() - m_StartTime;
+						m_StartTime = GetNowHiPerformanceCount();
+						if (m_Job.joinable()) {
+							m_Job.detach();
+						}
+						//
+						if (m_EndDoing) {
+							m_EndDoing();
+						}
+						//
+						{
+							std::thread tmp([&]() {
+								if (m_Doing) {
+									m_Doing();
+								}
+								m_JobEnd = true;
+								});
+							m_Job.swap(tmp);
+							//強制待機
+							//m_Job.join();
+						}
+					}
+#if defined(DEBUG)
+					printfDx("%5.2fms \n", (float)(m_TotalTime) / 1000.f);
+#endif
+				}
+
+				void Dispose(void) noexcept {
+					if (m_Job.joinable()) {
+						m_Job.detach();
+					}
+					m_Doing = nullptr;
+					m_EndDoing = nullptr;
+				}
+			};
+			//
+			template<class T>
+			struct vert32 {
+				std::vector<T>					m_vert32;
+				std::vector<uint32_t>			m_index32;
+				size_t							m_32Num{ 0 };
+				size_t							m_32Size{ 0 };
+				std::vector<T>					m_vert32Out;
+				std::vector<uint32_t>			m_index32Out;
+				size_t							m_32NumOut{ 0 };
+			public:
+				void		Init(size_t size) noexcept {
+					this->m_vert32.resize(size * 4);
+					this->m_index32.resize(size * 6);
+					this->m_32Num = 0;
+					this->m_32Size = size;
+				}
+				void		ResetNum(void) noexcept {
+					this->m_32Num = 0;
+				}
+				void		AllocatePlane(void) noexcept {
+					++this->m_32Num;
+					if (this->m_32Num > this->m_32Size) {
+						this->m_32Size = this->m_32Num;
+						this->m_vert32.resize(this->m_32Size * 4);
+						this->m_index32.resize(this->m_32Size * 6);
+					}
+					auto ZERO = (uint32_t)(this->m_32Num * 4 - 4);
+					this->m_index32[this->m_32Num * 6 - 6] = ZERO;
+					this->m_index32[this->m_32Num * 6 - 5] = ZERO + 1;
+					this->m_index32[this->m_32Num * 6 - 4] = ZERO + 2;
+					this->m_index32[this->m_32Num * 6 - 3] = ZERO + 3;
+					this->m_index32[this->m_32Num * 6 - 2] = ZERO + 2;
+					this->m_index32[this->m_32Num * 6 - 1] = ZERO + 1;
+				}
+				void		FlipVerts(void) noexcept {
+					this->m_vert32Out = this->m_vert32;
+					this->m_index32Out = this->m_index32;
+					this->m_32NumOut = this->m_32Num;
+				}
+				void		Draw(const GraphHandle& GrHandle) const noexcept {
+					if (this->m_32NumOut > 0) {
+						DrawPolygon32bitIndexed3D(this->m_vert32Out.data(), static_cast<int>(this->m_32NumOut * 4), this->m_index32Out.data(), static_cast<int>(this->m_32NumOut * 6 / 3), GrHandle.get(), TRUE);
+					}
+				}
+			};
+			//
+			MV1								m_ObjSky;
+			GraphHandle						m_tex{};
+			GraphHandle						m_norm{};
+			std::array<int8_t, 256 * 256 * 256> m_CellBase{};
 			std::array<CellsData, total>	m_CellxN;
-
+			std::array<ThreadJobs, 3>		m_Jobs;
 			//表示ポリゴンスレッド用
-			std::thread						m_Job;
-			bool							m_JobEnd{};
-			LONGLONG						m_StartTime{};
-			LONGLONG						m_TotalTime{};
-
-			std::vector<VERTEX3D>			m_vert32Out;
-			std::vector<uint32_t>			m_index32Out;
-			size_t							m_32NumOut{ 0 };
+			std::array<vert32<VERTEX3D>, 1>	m_vert32s;
 			Vector3DX						CamPos;
 			Vector3DX						CamVec;
-
 			int								BaseRate = 100;
 			//影スレッド用
-			std::thread						m_ShadowJob;
-			bool							m_ShadowJobEnd{};
-			std::vector<VERTEX3D>			m_vert32SBOut;
-			std::vector<uint32_t>			m_index32SBOut;
-			size_t							m_SB32NumOut{ 0 };
+			std::array<vert32<VERTEX3D>, 1>	m_vert32sSB;
 			Vector3DX						CamPosSB;
 			Vector3DX 						light{};
 
-			std::thread						m_SetShadowJob;
-			bool							m_SetShadowJobEnd{};
-			std::vector<VERTEX3DSHADER>		m_vert32SOut;
-			std::vector<uint32_t>			m_index32SOut;
-			size_t							m_S32NumOut{ 0 };
+			std::array<vert32<VERTEX3DSHADER>, 1>	m_vert32sS;
 			Vector3DX						CamPosS;
 			Vector3DX						CamVecS;
 
 			int								ShadowRate = 100;
 			//
-#if EDITBLICK
+#if defined(DEBUG) & EDITBLICK
 			//Edit
 			float							LenMouse = 2.f;
 			int								xput = 3;
@@ -412,7 +477,6 @@ namespace FPS_n2 {
 			bool			AddCubeX_CanAddPlane(const CellsData& cellx, int xmin, int xmax, int cy, int cz, int id) noexcept;
 			bool			AddCubeZ_CanAddPlane(const CellsData& cellx, int cx, int cy, int zmin, int zmax, int id) noexcept;
 			//
-			void			AllocatePlane(void) noexcept;
 			void			AddPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
 			void			AddPlaneXMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
 			void			AddPlaneYPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
@@ -422,9 +486,7 @@ namespace FPS_n2 {
 
 			void			AddCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
 			void			AddCubesZ(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
-			void			AddCubes(void) noexcept;
 			//
-			void			AllocateShadowPlane(void) noexcept;
 			void			AddShadowPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
 			void			AddShadowPlaneXMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
 			void			AddShadowPlaneYPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
@@ -434,9 +496,7 @@ namespace FPS_n2 {
 
 			void			AddShadowCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
 			void			AddShadowCubesZ(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
-			void			AddShadowCubes(void) noexcept;
 			//
-			void			AllocateSetShadowPlane(void) noexcept;
 			void			AddSetShadowPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
 			void			AddSetShadowPlaneXMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
 			void			AddSetShadowPlaneYPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
@@ -446,7 +506,6 @@ namespace FPS_n2 {
 
 			void			AddSetShadowCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
 			void			AddSetShadowCubesZ(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept;
-			void			AddSetShadowCubes(void) noexcept;
 		public:
 			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
 			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept;
@@ -456,7 +515,7 @@ namespace FPS_n2 {
 
 			void			SettingChange() noexcept;
 
-#if EDITBLICK
+#if defined(DEBUG) & EDITBLICK
 			void			SetBlick(int x, int y, int z, int8_t select) noexcept;
 #endif
 		public://

@@ -104,23 +104,9 @@ namespace FPS_n2 {
 			return false;
 		}
 		//
-		void		BackGroundClass::AllocatePlane(void) noexcept {
-			++m_32Num;
-			if (m_32Num > m_32Size) {
-				m_32Size = m_32Num;
-				m_vert32.resize(m_32Size * 4);
-				m_index32.resize(m_32Size * 6);
-			}
-			auto ZERO = (uint32_t)(m_32Num * 4 - 4);
-			m_index32[m_32Num * 6 - 6] = ZERO;
-			m_index32[m_32Num * 6 - 5] = ZERO + 1;
-			m_index32[m_32Num * 6 - 4] = ZERO + 2;
-			m_index32[m_32Num * 6 - 3] = ZERO + 3;
-			m_index32[m_32Num * 6 - 2] = ZERO + 2;
-			m_index32[m_32Num * 6 - 1] = ZERO + 1;
-		}
 		void		BackGroundClass::AddPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			AllocatePlane();
+			auto& Verts = m_vert32s.at(0);
+			Verts.AllocatePlane();
 
 			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
 
@@ -132,10 +118,10 @@ namespace FPS_n2 {
 			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
-			auto ZERO = m_32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 
 			{
-				auto& V = m_vert32[ZERO + 0];
+				auto& V = Verts.m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -144,7 +130,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 1];
+				auto& V = Verts.m_vert32[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -153,7 +139,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 2];
+				auto& V = Verts.m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -162,7 +148,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 3];
+				auto& V = Verts.m_vert32[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -172,7 +158,8 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddPlaneXMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			AllocatePlane();
+			auto& Verts = m_vert32s.at(0);
+			Verts.AllocatePlane();
 
 			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
 
@@ -184,9 +171,9 @@ namespace FPS_n2 {
 			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
-			auto ZERO = m_32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 			{
-				auto& V = m_vert32[ZERO + 0];
+				auto& V = Verts.m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -195,7 +182,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 1];
+				auto& V = Verts.m_vert32[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -204,7 +191,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 2];
+				auto& V = Verts.m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -213,7 +200,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 3];
+				auto& V = Verts.m_vert32[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -223,7 +210,8 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddPlaneYPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			AllocatePlane();
+			auto& Verts = m_vert32s.at(0);
+			Verts.AllocatePlane();
 
 			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
 
@@ -235,9 +223,9 @@ namespace FPS_n2 {
 			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
-			auto ZERO = m_32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 			{
-				auto& V = m_vert32[ZERO + 0];
+				auto& V = Verts.m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -246,7 +234,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 1];
+				auto& V = Verts.m_vert32[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -255,7 +243,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 2];
+				auto& V = Verts.m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -264,7 +252,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 3];
+				auto& V = Verts.m_vert32[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -274,7 +262,8 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddPlaneYMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			AllocatePlane();
+			auto& Verts = m_vert32s.at(0);
+			Verts.AllocatePlane();
 
 			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
 
@@ -286,9 +275,9 @@ namespace FPS_n2 {
 			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
-			auto ZERO = m_32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 			{
-				auto& V = m_vert32[ZERO + 0];
+				auto& V = Verts.m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -297,7 +286,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 1];
+				auto& V = Verts.m_vert32[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -306,7 +295,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 2];
+				auto& V = Verts.m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -315,7 +304,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 3];
+				auto& V = Verts.m_vert32[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -325,7 +314,8 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddPlaneZPlus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
-			AllocatePlane();
+			auto& Verts = m_vert32s.at(0);
+			Verts.AllocatePlane();
 
 			int xscale = (xmax - xmin + 1) * cellx.scaleRate;
 
@@ -337,9 +327,9 @@ namespace FPS_n2 {
 			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
-			auto ZERO = m_32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 			{
-				auto& V = m_vert32[ZERO + 0];
+				auto& V = Verts.m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b001).get();
 				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -348,7 +338,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 1];
+				auto& V = Verts.m_vert32[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b101).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -357,7 +347,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 2];
+				auto& V = Verts.m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b011).get();
 				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -366,7 +356,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 3];
+				auto& V = Verts.m_vert32[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b111).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -376,7 +366,8 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddPlaneZMinus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
-			AllocatePlane();
+			auto& Verts = m_vert32s.at(0);
+			Verts.AllocatePlane();
 
 			int xscale = (xmax - xmin + 1) * cellx.scaleRate;
 
@@ -388,9 +379,9 @@ namespace FPS_n2 {
 			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
-			auto ZERO = m_32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 			{
-				auto& V = m_vert32[ZERO + 0];
+				auto& V = Verts.m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b010).get();
 				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -399,7 +390,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 1];
+				auto& V = Verts.m_vert32[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b110).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -408,7 +399,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 2];
+				auto& V = Verts.m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b000).get();
 				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -417,7 +408,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = m_vert32[ZERO + 3];
+				auto& V = Verts.m_vert32[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b100).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -547,202 +538,182 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		BackGroundClass::AddCubes(void) noexcept {
-			m_32Num = 0;
-			for (auto& cellx : m_CellxN) {
-				if (BaseRate < cellx.scaleRate) {
-					continue;
-				}
-				auto center = cellx.GetPoint(CamPos);
-				AddCubesX(cellx, center.x, center.y, center.z);
-				AddCubesZ(cellx, center.x, center.y, center.z);
-			}
-		}
 		//
-		void		BackGroundClass::AllocateShadowPlane(void) noexcept {
-			++m_SB32Num;
-			if (m_SB32Num > m_SB32Size) {
-				m_SB32Size = m_SB32Num;
-				m_vert32SB.resize(m_SB32Size * 4);
-				m_index32SB.resize(m_SB32Size * 6);
-			}
-			auto ZERO = (uint32_t)(m_SB32Num * 4 - 4);
-			m_index32SB[m_SB32Num * 6 - 6] = ZERO;
-			m_index32SB[m_SB32Num * 6 - 5] = ZERO + 1;
-			m_index32SB[m_SB32Num * 6 - 4] = ZERO + 2;
-			m_index32SB[m_SB32Num * 6 - 3] = ZERO + 3;
-			m_index32SB[m_SB32Num * 6 - 2] = ZERO + 2;
-			m_index32SB[m_SB32Num * 6 - 1] = ZERO + 1;
-		}
 		void		BackGroundClass::AddShadowPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			AllocateShadowPlane();
+			auto& Verts = m_vert32sSB.at(0);
+			Verts.AllocatePlane();
 
-			auto ZERO = m_SB32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 			{
-				auto& V = m_vert32SB[ZERO + 0];
+				auto& V = Verts.m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
 				V.norm = Vector3DX::right().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 1];
+				auto& V = Verts.m_vert32[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
 				V.norm = Vector3DX::right().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 2];
+				auto& V = Verts.m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
 				V.norm = Vector3DX::right().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 3];
+				auto& V = Verts.m_vert32[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 				V.norm = Vector3DX::right().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 		}
 		void		BackGroundClass::AddShadowPlaneXMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			AllocateShadowPlane();
+			auto& Verts = m_vert32sSB.at(0);
+			Verts.AllocatePlane();
 
-			auto ZERO = m_SB32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 			{
-				auto& V = m_vert32SB[ZERO + 0];
+				auto& V = Verts.m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
 				V.norm = Vector3DX::left().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 1];
+				auto& V = Verts.m_vert32[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
 				V.norm = Vector3DX::left().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 2];
+				auto& V = Verts.m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
 				V.norm = Vector3DX::left().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 3];
+				auto& V = Verts.m_vert32[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
 				V.norm = Vector3DX::left().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 		}
 		void		BackGroundClass::AddShadowPlaneYPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			AllocateShadowPlane();
+			auto& Verts = m_vert32sSB.at(0);
+			Verts.AllocatePlane();
 
-			auto ZERO = m_SB32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 			{
-				auto& V = m_vert32SB[ZERO + 0];
+				auto& V = Verts.m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
 				V.norm = Vector3DX::up().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 1];
+				auto& V = Verts.m_vert32[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
 				V.norm = Vector3DX::up().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 2];
+				auto& V = Verts.m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
 				V.norm = Vector3DX::up().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 3];
+				auto& V = Verts.m_vert32[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
 				V.norm = Vector3DX::up().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 		}
 		void		BackGroundClass::AddShadowPlaneYMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			AllocateShadowPlane();
+			auto& Verts = m_vert32sSB.at(0);
+			Verts.AllocatePlane();
 
-			auto ZERO = m_SB32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 			{
-				auto& V = m_vert32SB[ZERO + 0];
+				auto& V = Verts.m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
 				V.norm = Vector3DX::down().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 1];
+				auto& V = Verts.m_vert32[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
 				V.norm = Vector3DX::down().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 2];
+				auto& V = Verts.m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
 				V.norm = Vector3DX::down().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 3];
+				auto& V = Verts.m_vert32[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 				V.norm = Vector3DX::down().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 		}
 		void		BackGroundClass::AddShadowPlaneZPlus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
-			AllocateShadowPlane();
+			auto& Verts = m_vert32sSB.at(0);
+			Verts.AllocatePlane();
 
-			auto ZERO = m_SB32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 			{
-				auto& V = m_vert32SB[ZERO + 0];
+				auto& V = Verts.m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b001).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 1];
+				auto& V = Verts.m_vert32[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b101).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 2];
+				auto& V = Verts.m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b011).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 3];
+				auto& V = Verts.m_vert32[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b111).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 		}
 		void		BackGroundClass::AddShadowPlaneZMinus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
-			AllocateShadowPlane();
+			auto& Verts = m_vert32sSB.at(0);
+			Verts.AllocatePlane();
 
-			auto ZERO = m_SB32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 			{
-				auto& V = m_vert32SB[ZERO + 0];
+				auto& V = Verts.m_vert32[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b011).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 1];
+				auto& V = Verts.m_vert32[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b111).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 2];
+				auto& V = Verts.m_vert32[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b001).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = m_vert32SB[ZERO + 3];
+				auto& V = Verts.m_vert32[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b101).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
@@ -853,90 +824,72 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		BackGroundClass::AddShadowCubes(void) noexcept {
-			m_SB32Num = 0;
-			for (auto& cellx : m_CellxN) {
-				if (ShadowRate < cellx.scaleRate) {
-					continue;
-				}
-				auto center = cellx.GetPoint(CamPosSB);
-				AddShadowCubesX(cellx, center.x, center.y, center.z);
-				AddShadowCubesZ(cellx, center.x, center.y, center.z);
-			}
-		}
 		//
-		void		BackGroundClass::AllocateSetShadowPlane(void) noexcept {
-			++m_S32Num;
-			if (m_S32Num > m_S32Size) {
-				m_S32Size = m_S32Num;
-				m_vert32S.resize(m_S32Size * 4);
-				m_index32S.resize(m_S32Size * 6);
-			}
-			auto ZERO = (uint32_t)(m_S32Num * 4 - 4);
-			m_index32S[m_S32Num * 6 - 6] = ZERO;
-			m_index32S[m_S32Num * 6 - 5] = ZERO + 1;
-			m_index32S[m_S32Num * 6 - 4] = ZERO + 2;
-			m_index32S[m_S32Num * 6 - 3] = ZERO + 3;
-			m_index32S[m_S32Num * 6 - 2] = ZERO + 2;
-			m_index32S[m_S32Num * 6 - 1] = ZERO + 1;
-		}
 		void		BackGroundClass::AddSetShadowPlaneXPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			AllocateSetShadowPlane();
-			auto ZERO = m_S32Num * 4 - 4;
-			m_vert32S[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
-			m_vert32S[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
-			m_vert32S[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
-			m_vert32S[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
+			auto& Verts = m_vert32sS.at(0);
+			Verts.AllocatePlane();
+
+			auto ZERO = Verts.m_32Num * 4 - 4;
+
+			Verts.m_vert32[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
+			Verts.m_vert32[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
+			Verts.m_vert32[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
+			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneXMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			AllocateSetShadowPlane();
+			auto& Verts = m_vert32sS.at(0);
+			Verts.AllocatePlane();
 
-			auto ZERO = m_S32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 
-			m_vert32S[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
-			m_vert32S[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
-			m_vert32S[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
-			m_vert32S[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
+			Verts.m_vert32[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
+			Verts.m_vert32[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
+			Verts.m_vert32[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
+			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneYPlus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			AllocateSetShadowPlane();
+			auto& Verts = m_vert32sS.at(0);
+			Verts.AllocatePlane();
 
-			auto ZERO = m_S32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 
-			m_vert32S[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
-			m_vert32S[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
-			m_vert32S[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
-			m_vert32S[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
+			Verts.m_vert32[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
+			Verts.m_vert32[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
+			Verts.m_vert32[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
+			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneYMinus(const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			AllocateSetShadowPlane();
+			auto& Verts = m_vert32sS.at(0);
+			Verts.AllocatePlane();
 
-			auto ZERO = m_S32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 
-			m_vert32S[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
-			m_vert32S[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
-			m_vert32S[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
-			m_vert32S[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
+			Verts.m_vert32[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
+			Verts.m_vert32[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
+			Verts.m_vert32[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
+			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneZPlus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
-			AllocateSetShadowPlane();
+			auto& Verts = m_vert32sS.at(0);
+			Verts.AllocatePlane();
 
-			auto ZERO = m_S32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 
-			m_vert32S[ZERO + 0].pos = cellx.GetPosBuffer(xmin, y, z, 0b001).get();
-			m_vert32S[ZERO + 1].pos = cellx.GetPosBuffer(xmax, y, z, 0b101).get();
-			m_vert32S[ZERO + 2].pos = cellx.GetPosBuffer(xmin, y, z, 0b011).get();
-			m_vert32S[ZERO + 3].pos = cellx.GetPosBuffer(xmax, y, z, 0b111).get();
+			Verts.m_vert32[ZERO + 0].pos = cellx.GetPosBuffer(xmin, y, z, 0b001).get();
+			Verts.m_vert32[ZERO + 1].pos = cellx.GetPosBuffer(xmax, y, z, 0b101).get();
+			Verts.m_vert32[ZERO + 2].pos = cellx.GetPosBuffer(xmin, y, z, 0b011).get();
+			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(xmax, y, z, 0b111).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneZMinus(const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
-			AllocateSetShadowPlane();
+			auto& Verts = m_vert32sS.at(0);
+			Verts.AllocatePlane();
 
-			auto ZERO = m_S32Num * 4 - 4;
+			auto ZERO = Verts.m_32Num * 4 - 4;
 
-			m_vert32S[ZERO + 0].pos = cellx.GetPosBuffer(xmin, y, z, 0b010).get();
-			m_vert32S[ZERO + 1].pos = cellx.GetPosBuffer(xmax, y, z, 0b110).get();
-			m_vert32S[ZERO + 2].pos = cellx.GetPosBuffer(xmin, y, z, 0b000).get();
-			m_vert32S[ZERO + 3].pos = cellx.GetPosBuffer(xmax, y, z, 0b100).get();
+			Verts.m_vert32[ZERO + 0].pos = cellx.GetPosBuffer(xmin, y, z, 0b010).get();
+			Verts.m_vert32[ZERO + 1].pos = cellx.GetPosBuffer(xmax, y, z, 0b110).get();
+			Verts.m_vert32[ZERO + 2].pos = cellx.GetPosBuffer(xmin, y, z, 0b000).get();
+			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(xmax, y, z, 0b100).get();
 		}
 
 		void		BackGroundClass::AddSetShadowCubesX(const CellsData& cellx, int centerX, int centerY, int centerZ) noexcept {
@@ -1057,17 +1010,6 @@ namespace FPS_n2 {
 						}
 					}
 				}
-			}
-		}
-		void		BackGroundClass::AddSetShadowCubes(void) noexcept {
-			m_S32Num = 0;
-			for (auto& cellx : m_CellxN) {
-				if (ShadowRate < cellx.scaleRate) {
-					continue;
-				}
-				auto center = cellx.GetPoint(CamPosS);
-				AddSetShadowCubesX(cellx, center.x, center.y, center.z);
-				AddSetShadowCubesZ(cellx, center.x, center.y, center.z);
 			}
 		}
 		//
@@ -1289,7 +1231,7 @@ namespace FPS_n2 {
 			};
 		}
 		//
-#if EDITBLICK
+#if defined(DEBUG) & EDITBLICK
 		void		BackGroundClass::SetBlick(int x, int y, int z, int8_t select) noexcept {
 			auto& cell = m_CellxN.front();
 			if (!cell.isInside(y)) { return; }
@@ -1395,137 +1337,114 @@ namespace FPS_n2 {
 
 			constexpr size_t size = (DrawMax + DrawMax) * (DrawMax + DrawMax) * (DrawMax + DrawMax) / 2 * 3 / 100;
 
-			m_vert32.resize(size * 4);
-			m_index32.resize(size * 6);
-			m_32Num = 0;
-			m_32Size = size;
+			m_vert32s.at(0).Init(size);
+			m_vert32sSB.at(0).Init(size);
+			m_vert32sS.at(0).Init(size);
 
-			m_vert32SB.resize(size * 4);
-			m_index32SB.resize(size * 6);
-			m_SB32Num = 0;
-			m_SB32Size = size;
-
-			m_vert32S.resize(size * 4);
-			m_index32S.resize(size * 6);
-			m_S32Num = 0;
-			m_S32Size = size;
-
-			m_JobEnd = true;
-			m_ShadowJobEnd = true;
-			m_SetShadowJobEnd = true;
+			m_Jobs.at(0).Init(
+				[&]() {
+					m_vert32s.at(0).ResetNum();
+					for (auto& cellx : m_CellxN) {
+						if (BaseRate < cellx.scaleRate) {
+							continue;
+						}
+						auto center = cellx.GetPoint(CamPos);
+						AddCubesX(cellx, center.x, center.y, center.z);
+						AddCubesZ(cellx, center.x, center.y, center.z);
+					}
+				},
+				[&]() {
+					m_vert32s.at(0).FlipVerts();
+					//
+					auto* DrawParts = DXDraw::Instance();
+					CamPos = DrawParts->GetMainCamera().GetCamPos();
+					CamVec = (DrawParts->GetMainCamera().GetCamVec() - CamPos).normalized();
+					//
+#if defined(DEBUG) & EDITBLICK
+					PutPos = (CamPos + CamVec * (LenMouse * Scale_Rate));
+					if (blicksel >= 0) {
+						auto& cell = m_CellxN.front();
+						auto Put = cell.GetPoint(PutPos);
+						for (int xp = 0; xp < xput; xp++) {
+							for (int yp = 0; yp < yput; yp++) {
+								for (int zp = 0; zp < zput; zp++) {
+									SetBlick((Put.x + xp - xput / 2), (Put.y + yp - yput / 2), (Put.z + zp - zput / 2), blicksel);
+								}
+							}
+						}
+						blicksel = -1;
+					}
+#endif
+				}
+			);
+			m_Jobs.at(1).Init(
+				[&]() {
+					m_vert32sSB.at(0).ResetNum();
+					for (auto& cellx : m_CellxN) {
+						if (ShadowRate < cellx.scaleRate) {
+							continue;
+						}
+						auto center = cellx.GetPoint(CamPosSB);
+						AddShadowCubesX(cellx, center.x, center.y, center.z);
+						AddShadowCubesZ(cellx, center.x, center.y, center.z);
+					}
+				},
+				[&]() {
+					m_vert32sSB.at(0).FlipVerts();
+					//
+					auto* DrawParts = DXDraw::Instance();
+					CamPosSB = DrawParts->GetMainCamera().GetCamPos();
+					light = DrawParts->GetLightVec();
+				}
+			);
+			m_Jobs.at(2).Init(
+				[&]() {
+					m_vert32sS.at(0).ResetNum();
+					for (auto& cellx : m_CellxN) {
+						if (ShadowRate < cellx.scaleRate) {
+							continue;
+						}
+						auto center = cellx.GetPoint(CamPosS);
+						AddSetShadowCubesX(cellx, center.x, center.y, center.z);
+						AddSetShadowCubesZ(cellx, center.x, center.y, center.z);
+					}
+				},
+				[&]() {
+					m_vert32sS.at(0).FlipVerts();
+					//
+					auto* DrawParts = DXDraw::Instance();
+					CamPosS = DrawParts->GetMainCamera().GetCamPos();
+					CamVecS = (DrawParts->GetMainCamera().GetCamVec() - CamPosS).normalized();
+				}
+			);
 			SettingChange();
 		}
 		//
 		void		BackGroundClass::Execute(void) noexcept {
-			auto* DrawParts = DXDraw::Instance();
 			auto* OptionParts = OPTION::Instance();
-#if EDITBLICK
+#if defined(DEBUG) & EDITBLICK
 			{
-				printfDx("%5.2fms \n", (float)(m_TotalTime) / 1000.f);
 				auto& cell = m_CellxN.front();
 				auto Put = cell.GetPoint(PutPos);
 				printfDx("%d,%d,%d\n", Put.x, Put.y, Put.z);
-			}
-#endif
-			if (m_JobEnd) {
-				m_JobEnd = false;
-				m_TotalTime = GetNowHiPerformanceCount() - m_StartTime;
-				m_StartTime = GetNowHiPerformanceCount();
-				if (m_Job.joinable()) {
-					m_Job.detach();
+				auto* Pad = PadControl::Instance();
+				LenMouse += Pad->GetMouseWheelRot();
+				if (Pad->GetKey(PADS::SHOT).trigger()) {
+					blicksel = 1;
 				}
-				//
-				m_vert32Out = m_vert32;
-				m_index32Out = m_index32;
-				m_32NumOut = m_32Num;
-				//
-				CamPos = DrawParts->GetMainCamera().GetCamPos();
-				CamVec = (DrawParts->GetMainCamera().GetCamVec() - CamPos).normalized();
-				//
-#if EDITBLICK
-				PutPos = (CamPos + CamVec * (LenMouse * Scale_Rate));
-				if (blicksel >= 0) {
-					auto& cell = m_CellxN.front();
-					auto Put = cell.GetPoint(PutPos);
-					for (int xp = 0; xp < xput; xp++) {
-						for (int yp = 0; yp < yput; yp++) {
-							for (int zp = 0; zp < zput; zp++) {
-								SetBlick((Put.x + xp - xput / 2), (Put.y + yp - yput / 2), (Put.z + zp - zput / 2), blicksel);
-							}
-						}
-					}
-					blicksel = -1;
+				if (Pad->GetKey(PADS::AIM).trigger()) {
+					blicksel = 0;
 				}
-#endif
-				//
-				{
-					std::thread tmp([this]() {
-						AddCubes();
-						m_JobEnd = true;
-						});
-					m_Job.swap(tmp);
-					//‹­§‘Ò‹@
-					//m_Job.join();
+				if (Pad->GetKey(PADS::JUMP).trigger()) {
+					SaveCellsFile();
 				}
 			}
-
+#endif
+			m_Jobs.at(0).Execute();
 			if (OptionParts->GetParamInt(EnumSaveParam::shadow) > 0) {
-				if (m_ShadowJobEnd) {
-					m_ShadowJobEnd = false;
-					if (m_ShadowJob.joinable()) {
-						m_ShadowJob.detach();
-					}
-					//
-					m_vert32SBOut = m_vert32SB;
-					m_index32SBOut = m_index32SB;
-					m_SB32NumOut = m_SB32Num;
-					//
-					CamPosSB = DrawParts->GetMainCamera().GetCamPos();
-					light = DrawParts->GetLightVec();
-					//
-					std::thread tmp([this]() {
-						AddShadowCubes();
-						m_ShadowJobEnd = true;
-						});
-					m_ShadowJob.swap(tmp);
-					//‹­§‘Ò‹@
-					//m_ShadowJob.join();
-				}
-				if (m_SetShadowJobEnd) {
-					m_SetShadowJobEnd = false;
-					if (m_SetShadowJob.joinable()) {
-						m_SetShadowJob.detach();
-					}
-					//
-					m_vert32SOut = m_vert32S;
-					m_index32SOut = m_index32S;
-					m_S32NumOut = m_S32Num;
-					//
-					CamPosS = DrawParts->GetMainCamera().GetCamPos();
-					CamVecS = (DrawParts->GetMainCamera().GetCamVec() - CamPosS).normalized();
-					//
-					std::thread tmp([this]() {
-						AddSetShadowCubes();
-						m_SetShadowJobEnd = true;
-						});
-					m_SetShadowJob.swap(tmp);
-					//‹­§‘Ò‹@
-					//m_SetShadowJob.join();
-				}
+				m_Jobs.at(1).Execute();
+				m_Jobs.at(2).Execute();
 			}
-#if EDITBLICK
-			auto* Pad = PadControl::Instance();
-			LenMouse += Pad->GetMouseWheelRot();
-			if (Pad->GetKey(PADS::SHOT).trigger()) {
-				blicksel = 1;
-			}
-			if (Pad->GetKey(PADS::AIM).trigger()) {
-				blicksel = 0;
-			}
-			if (Pad->GetKey(PADS::JUMP).trigger()) {
-				SaveCellsFile();
-			}
-#endif
 		}
 		//
 		void		BackGroundClass::BG_Draw(void) const noexcept {
@@ -1534,22 +1453,22 @@ namespace FPS_n2 {
 			SetUseLighting(TRUE);
 		}
 		void		BackGroundClass::Shadow_Draw(void) const noexcept {
-			if (m_SB32NumOut > 0) {
-				DrawPolygon32bitIndexed3D(m_vert32SBOut.data(), static_cast<int>(m_SB32NumOut * 4), m_index32SBOut.data(), static_cast<int>(m_SB32NumOut * 6 / 3), m_tex.get(), TRUE);
+			if (m_vert32sSB.at(0).m_32NumOut > 0) {
+				DrawPolygon32bitIndexed3D(m_vert32sSB.at(0).m_vert32Out.data(), static_cast<int>(m_vert32sSB.at(0).m_32NumOut * 4), m_vert32sSB.at(0).m_index32Out.data(), static_cast<int>(m_vert32sSB.at(0).m_32NumOut * 6 / 3), m_tex.get(), TRUE);
 			}
 		}
 		void		BackGroundClass::SetShadow_Draw_Rigid(void) const noexcept {
-			if (m_S32NumOut > 0) {
+			if (m_vert32sS.at(0).m_32NumOut > 0) {
 				SetUseTextureToShader(0, m_tex.get());
-				DrawPolygon32bitIndexed3DToShader(m_vert32SOut.data(), static_cast<int>(m_S32NumOut * 4), m_index32SOut.data(), static_cast<int>(m_S32NumOut * 6 / 3));
+				DrawPolygon32bitIndexed3DToShader(m_vert32sS.at(0).m_vert32Out.data(), static_cast<int>(m_vert32sS.at(0).m_32NumOut * 4), m_vert32sS.at(0).m_index32Out.data(), static_cast<int>(m_vert32sS.at(0).m_32NumOut * 6 / 3));
 				SetUseTextureToShader(0, INVALID_ID);
 			}
 		}
 		void		BackGroundClass::Draw(void) const noexcept {
-			if (m_32NumOut > 0) {
-				DrawPolygon32bitIndexed3D(m_vert32Out.data(), static_cast<int>(m_32NumOut * 4), m_index32Out.data(), static_cast<int>(m_32NumOut * 6 / 3), m_tex.get(), TRUE);
+			if (m_vert32s.at(0).m_32NumOut > 0) {
+				DrawPolygon32bitIndexed3D(m_vert32s.at(0).m_vert32Out.data(), static_cast<int>(m_vert32s.at(0).m_32NumOut * 4), m_vert32s.at(0).m_index32Out.data(), static_cast<int>(m_vert32s.at(0).m_32NumOut * 6 / 3), m_tex.get(), TRUE);
 			}
-#if EDITBLICK
+#if defined(DEBUG) & EDITBLICK
 			int x = (int)(PutPos.x / CellScale), y = (int)(PutPos.y / CellScale), z = (int)(PutPos.z / CellScale);
 			SetUseLighting(FALSE);
 			DrawCube3D(
