@@ -443,16 +443,17 @@ namespace FPS_n2 {
 					int8_t selectBlock = s_EmptyBlick;
 					for (int x = center.x + xMaxminT, XMax = center.x + xMaxmaxT; x <= XMax; ++x) {
 						if (
-							(x == XMax) ||
-							(CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus))) ||
-							(!cellx.IsActiveCell(x, y, z)) ||
-							(!isHitmin && (selectBlock != cellx.GetSellBuf(x, y, z).m_Cell))
+							(x == XMax)
+							|| (CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus)))
+							|| (!cellx.IsActiveCell(x, y, z))
+							|| (!isHitmin && (selectBlock != cellx.GetSellBuf(x, y, z).m_Cell))
 							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
 								isHitmin = true;
-								bool Fill = CheckFill && (((xmin <= center.x + DrawMinXMinus + 1) && (center.x + DrawMinXMinus + 1 <= xmax)) || ((xmin <= center.x + DrawMinXPlus - 1) && (center.x + DrawMinXPlus - 1 <= xmax)));
+
+								bool Fill = CheckFill && (xmin <= center.x + DrawMinXPlus && center.x + DrawMinXMinus <= xmax);
 								if (z >= center.z) {
 									if (Fill || AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, 5)) {
 										AddPlaneZMinus(id, cellx, xmin, xmax, y, z);
@@ -507,16 +508,16 @@ namespace FPS_n2 {
 					int8_t selectBlock = s_EmptyBlick;
 					for (int z = center.z + zMaxminT, ZMax = center.z + zMaxmaxT; z <= ZMax; ++z) {
 						if (
-							(z == center.z + zMaxmaxT) ||
-							(CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus))) ||
-							(!cellx.IsActiveCell(x, y, z)) ||
-							(!isHitmin && (selectBlock != cellx.GetSellBuf(x, y, z).m_Cell))
+							(z == center.z + zMaxmaxT)
+							|| (CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus)))
+							|| (!cellx.IsActiveCell(x, y, z))
+							|| (!isHitmin && (selectBlock != cellx.GetSellBuf(x, y, z).m_Cell))
 							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
 								isHitmin = true;
-								bool Fill = CheckFill && (((zmin <= center.z + DrawMinZMinus + 1) && (center.z + DrawMinZMinus + 1 <= zmax)) || ((zmin <= center.z + DrawMinZPlus - 1) && (center.z + DrawMinZPlus - 1 <= zmax)));
+								bool Fill = CheckFill && (zmin <= center.z + DrawMinZPlus && center.z + DrawMinZMinus <= zmax);
 								if (x >= center.x) {
 									if (Fill || AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 1)) {
 										AddPlaneXMinus(id, cellx, x, y, zmin, zmax);
@@ -755,9 +756,9 @@ namespace FPS_n2 {
 					bool isHitmin = true;
 					for (int x = center.x + DrawMaxXMinus, XMax = center.x + DrawMaxXPlus; x <= XMax; ++x) {
 						if (
-							(x == center.x + DrawMaxXPlus) ||
-							(CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus))) ||
-							(!cellx.IsActiveCell(x, y, z))
+							(x == center.x + DrawMaxXPlus)
+							|| (CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus)))
+							|| (!cellx.IsActiveCell(x, y, z))
 							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
@@ -804,9 +805,9 @@ namespace FPS_n2 {
 					bool isHitmin = true;
 					for (int z = center.z + DrawMaxZMinus, ZMax = center.z + DrawMaxZPlus; z <= ZMax; ++z) {
 						if (
-							(z == DrawMaxZPlus) ||
-							(CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus))) ||
-							(!cellx.IsActiveCell(x, y, z))
+							(z == DrawMaxZPlus)
+							|| (CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus)))
+							|| (!cellx.IsActiveCell(x, y, z))
 							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
@@ -938,9 +939,9 @@ namespace FPS_n2 {
 					bool isHitmin = true;
 					for (int x = center.x + xMaxminT, XMax = center.x + xMaxmaxT; x <= XMax; ++x) {
 						if (
-							(x == XMax) ||
-							(CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus))) ||
-							(!cellx.IsActiveCell(x, y, z))
+							(x == XMax)
+							|| (CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus)))
+							|| (!cellx.IsActiveCell(x, y, z))
 							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
@@ -995,9 +996,9 @@ namespace FPS_n2 {
 					bool isHitmin = true;
 					for (int z = center.z + zMaxminT, ZMax = center.z + zMaxmaxT; z <= ZMax; ++z) {
 						if (
-							(z == center.z + zMaxmaxT) ||
-							(CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus))) ||
-							(!cellx.IsActiveCell(x, y, z))
+							(z == center.z + zMaxmaxT)
+							|| (CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus)))
+							|| (!cellx.IsActiveCell(x, y, z))
 							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
