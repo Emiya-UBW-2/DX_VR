@@ -447,7 +447,7 @@ namespace FPS_n2 {
 							(CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus))) ||
 							(!cellx.IsActiveCell(x, y, z)) ||
 							(!isHitmin && (selectBlock != cellx.GetSellBuf(x, y, z).m_Cell))
-							//|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -511,7 +511,7 @@ namespace FPS_n2 {
 							(CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus))) ||
 							(!cellx.IsActiveCell(x, y, z)) ||
 							(!isHitmin && (selectBlock != cellx.GetSellBuf(x, y, z).m_Cell))
-							//|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -758,7 +758,7 @@ namespace FPS_n2 {
 							(x == center.x + DrawMaxXPlus) ||
 							(CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus))) ||
 							(!cellx.IsActiveCell(x, y, z))
-							//|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -807,7 +807,7 @@ namespace FPS_n2 {
 							(z == DrawMaxZPlus) ||
 							(CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus))) ||
 							(!cellx.IsActiveCell(x, y, z))
-							//|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -941,7 +941,7 @@ namespace FPS_n2 {
 							(x == XMax) ||
 							(CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus))) ||
 							(!cellx.IsActiveCell(x, y, z))
-							//|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -998,7 +998,7 @@ namespace FPS_n2 {
 							(z == center.z + zMaxmaxT) ||
 							(CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus))) ||
 							(!cellx.IsActiveCell(x, y, z))
-							//|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -1076,10 +1076,10 @@ namespace FPS_n2 {
 			std::vector<MV1_COLL_RESULT_POLY> kabes;// 壁ポリゴンと判断されたポリゴンの構造体のアドレスを保存しておく
 			auto& cell = m_CellxN.front();
 			auto Start = cell.GetPoint(StartPos);
-			auto End = cell.GetPoint(StartPos);// *EndPos
+			auto End = cell.GetPoint(*EndPos);// *EndPos
 
 			for (int xm = -3; xm <= 3; ++xm) {
-				for (int ym = 2; ym <= 2; ++ym) {
+				for (int ym = 3; ym <= 6; ++ym) {
 					for (int zm = -3; zm <= 3; ++zm) {
 						Bresenham3D(
 							Start.x + xm, Start.y + ym, Start.z + zm,
@@ -1228,10 +1228,19 @@ namespace FPS_n2 {
 			//*/
 			/*
 			for (int x = 0; x < cell.All; ++x) {
+				for (int z = 0; z < cell.All; ++z) {
+					for (int y = cell.All; y >= 190; --y) {
+						cell.SetSellBuf(x, y, z).m_Cell = 0;
+					}
+				}
+			}
+			//*/
+			/*
+			for (int x = 0; x < cell.All; ++x) {
 				if (x - cell.All/2 > -72) {
 					for (int z = 0; z < cell.All; ++z) {
-						for (int y = 15; y < cell.All / 2; ++y) {
-							cell.SetCell(x, y, z) = cell.GetCell(x, y + 15, z);
+						for (int y = cell.All; y >=130+15 ; --y) {
+							cell.SetSellBuf(x, y, z).m_Cell = cell.GetSellBuf(x, y - 15, z).m_Cell;
 						}
 					}
 				}

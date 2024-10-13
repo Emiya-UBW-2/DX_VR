@@ -92,7 +92,7 @@ namespace FPS_n2 {
 							}
 						}
 					}
-					if ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 2.f))) {
+					if ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 4.f))) {
 						return 1;
 					}
 					else {
@@ -258,9 +258,9 @@ namespace FPS_n2 {
 #if defined(DEBUG) & EDITBLICK
 			//Edit
 			float							LenMouse = 2.f;
-			int								xput = 5;
-			int								yput = 25;
-			int								zput = 5;
+			int								xput = 3;
+			int								yput = 3;
+			int								zput = 3;
 			int8_t							blicksel = -1;
 			Vector3DX						PutPos;
 #endif
@@ -448,10 +448,10 @@ namespace FPS_n2 {
 				}
 				int HitPosZ = *zMaxmin + static_cast<int>((*zMaxmax - *zMaxmin) * std::clamp(std::abs(dTa) / (std::abs(dTa) + std::abs(dTb)), 0.f, 1.f));
 				if (dTa < 0.f) {
-					*zMaxmin = HitPosZ;
+					*zMaxmin = std::max(HitPosZ - 1, *zMaxmin);
 				}
 				else {
-					*zMaxmax = HitPosZ;
+					*zMaxmax = std::min(HitPosZ + 1, *zMaxmax);
 				}
 				return true;
 			}
@@ -475,10 +475,10 @@ namespace FPS_n2 {
 				}
 				int HitPosX = *xMaxmin + static_cast<int>((*xMaxmax - *xMaxmin) * std::clamp(std::abs(dTa) / (std::abs(dTa) + std::abs(dTb)), 0.f, 1.f));
 				if (dTa < 0.f) {
-					*xMaxmin = HitPosX;
+					*xMaxmin = std::max(HitPosX - 1, *xMaxmin);
 				}
 				else {
-					*xMaxmax = HitPosX;
+					*xMaxmax = std::min(HitPosX + 1, *xMaxmax);
 				}
 				return true;
 			}

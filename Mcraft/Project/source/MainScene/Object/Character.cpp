@@ -200,7 +200,7 @@ namespace FPS_n2 {
 			Vector3DX vec = CharaMove::GetVec();
 			if (IsHitGround) {
 				auto yPos = pos.y;
-				Easing(&yPos, groundYpos, 0.8f, EasingType::OutExpo);
+				Easing(&yPos, groundYpos, 0.6f, EasingType::OutExpo);
 				pos.y = (yPos);
 				vec.y = (0.f);
 			}
