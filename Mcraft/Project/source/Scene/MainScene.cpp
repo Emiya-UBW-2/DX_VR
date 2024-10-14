@@ -35,7 +35,7 @@ namespace FPS_n2 {
 			BackGround->Init();
 			//
 			Vector3DX LightVec = Vector3DX::vget(-0.3f, -0.3f, -0.15f); LightVec = LightVec.normalized();
-			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
+			DrawParts->SetAmbientLight(LightVec, GetColorF(0.5f, 0.5f, 0.5f, 1.0f));
 			SetLightDifColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 			//Cam
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
