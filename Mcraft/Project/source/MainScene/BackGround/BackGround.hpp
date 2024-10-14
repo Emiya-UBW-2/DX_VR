@@ -53,6 +53,7 @@ namespace FPS_n2 {
 			{
 				int8_t m_Cell{};
 				int8_t m_FillInfo{};//周りの遮蔽データのbitフラグ
+				std::array<uint8_t,8> m_DifColorPow{};
 			};
 			struct CellsData {
 				std::vector<CellBuffer> m_CellBuffer;
@@ -66,14 +67,14 @@ namespace FPS_n2 {
 				const int	GetIndex(int t) const noexcept { return (t % All + All) % All; }
 				const size_t	GetCellNum(int x, int y, int z) const noexcept { return static_cast<size_t>(GetIndex(x) * AllPow2 + y * All + GetIndex(z)); }
 				//
-				const auto&		GetSellBuf(int x, int y, int z) const noexcept { return m_CellBuffer[GetCellNum(x, y, z)]; }
-				auto&			SetSellBuf(int x, int y, int z) noexcept { return m_CellBuffer[GetCellNum(x, y, z)]; }
+				const auto&		GetCellBuf(int x, int y, int z) const noexcept { return m_CellBuffer[GetCellNum(x, y, z)]; }
+				auto&			SetCellBuf(int x, int y, int z) noexcept { return m_CellBuffer[GetCellNum(x, y, z)]; }
 				//
 				const auto GetPosBuffer(int x, int y, int z,int ID) const noexcept {
 					return GetPos(x + ((ID >> 2) & 1), y + ((ID >> 1) & 1), z + (ID & 1));
 				}
 				//
-				const bool		IsActiveCell(int x, int y, int z) const noexcept { return GetSellBuf(x, y, z).m_Cell != s_EmptyBlick; }
+				const bool		IsActiveCell(int x, int y, int z) const noexcept { return GetCellBuf(x, y, z).m_Cell != s_EmptyBlick; }
 				const int8_t	isFill(int x, int y, int z, int mul) const noexcept {
 					mul /= scaleRate;
 					int FillCount = 0;
@@ -89,7 +90,7 @@ namespace FPS_n2 {
 								++FillAll;
 								if (!IsActiveCell(xt, yt, zt)) { continue; }
 								++FillCount;
-								auto cell = GetSellBuf(xt, yt, zt).m_Cell + 1;
+								auto cell = GetCellBuf(xt, yt, zt).m_Cell + 1;
 								if (cell > IDCount.size()) {
 									IDCount.resize(cell);
 								}
@@ -134,13 +135,13 @@ namespace FPS_n2 {
 				}
 				//
 				void			CalcOcclusion(int x, int y, int z) noexcept {
-					m_CellBuffer[GetCellNum(x, y, z)].m_FillInfo = 0;
-					m_CellBuffer[GetCellNum(x, y, z)].m_FillInfo |= (1 << 0) * IsActiveCell(x + 1, y, z);
-					m_CellBuffer[GetCellNum(x, y, z)].m_FillInfo |= (1 << 1) * IsActiveCell(x - 1, y, z);
-					m_CellBuffer[GetCellNum(x, y, z)].m_FillInfo |= (1 << 2) * ((y == All - 1) ? 1 : IsActiveCell(x, y + 1, z));
-					m_CellBuffer[GetCellNum(x, y, z)].m_FillInfo |= (1 << 3) * ((y == 0) ? 1 : IsActiveCell(x, y - 1, z));
-					m_CellBuffer[GetCellNum(x, y, z)].m_FillInfo |= (1 << 4) * IsActiveCell(x, y, z + 1);
-					m_CellBuffer[GetCellNum(x, y, z)].m_FillInfo |= (1 << 5) * IsActiveCell(x, y, z - 1);
+					SetCellBuf(x, y, z).m_FillInfo = 0;
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 0) * IsActiveCell(x + 1, y, z);
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 1) * IsActiveCell(x - 1, y, z);
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 2) * ((y == All - 1) ? 1 : IsActiveCell(x, y + 1, z));
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 3) * ((y == 0) ? 1 : IsActiveCell(x, y - 1, z));
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 4) * IsActiveCell(x, y, z + 1);
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 5) * IsActiveCell(x, y, z - 1);
 				}
 			};
 			//

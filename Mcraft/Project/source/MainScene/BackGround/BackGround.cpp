@@ -89,7 +89,7 @@ namespace FPS_n2 {
 		//
 		bool		BackGroundClass::AddCubeX_CanAddPlane(const CellsData& cellx, int xmin, int xmax, int cy, int cz, int id) noexcept {
 			for (int x = xmin; x <= xmax; ++x) {
-				if ((cellx.GetSellBuf(x, cy, cz).m_FillInfo & (1 << id)) == 0) {
+				if ((cellx.GetCellBuf(x, cy, cz).m_FillInfo & (1 << id)) == 0) {
 					return true;
 				}
 			}
@@ -97,7 +97,7 @@ namespace FPS_n2 {
 		}
 		bool		BackGroundClass::AddCubeZ_CanAddPlane(const CellsData& cellx, int cx, int cy, int zmin, int zmax, int id) noexcept {
 			for (int z = zmin; z <= zmax; ++z) {
-				if ((cellx.GetSellBuf(cx, cy, z).m_FillInfo & (1 << id)) == 0) {
+				if ((cellx.GetCellBuf(cx, cy, z).m_FillInfo & (1 << id)) == 0) {
 					return true;
 				}
 			}
@@ -111,11 +111,10 @@ namespace FPS_n2 {
 			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
 
 			int Xofs = zmin % 2 == 0;
-			int Yofs = ((cellx.GetSellBuf(x, y, zmin).m_Cell - 1) * 3) + 1;
+			int Yofs = ((cellx.GetCellBuf(x, y, zmin).m_Cell - 1) * 3) + 1;
 			float uAdd = 1.f / 2.f;
 			float vAdd = 1.f / 16.f;
 
-			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -126,7 +125,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::right().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmax).m_DifColorPow.at(0b101));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -135,7 +135,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::right().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmin).m_DifColorPow.at(0b100));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -144,7 +145,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::right().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmax).m_DifColorPow.at(0b111));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -153,7 +155,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::right().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmin).m_DifColorPow.at(0b110));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 		}
@@ -164,11 +167,10 @@ namespace FPS_n2 {
 			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
 
 			int Xofs = zmin % 2 == 0;
-			int Yofs = ((cellx.GetSellBuf(x, y, zmin).m_Cell - 1) * 3) + 1;
+			int Yofs = ((cellx.GetCellBuf(x, y, zmin).m_Cell - 1) * 3) + 1;
 			float uAdd = 1.f / 2.f;
 			float vAdd = 1.f / 16.f;
 
-			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -178,7 +180,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::left().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmax).m_DifColorPow.at(0b011));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -187,7 +190,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::left().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmin).m_DifColorPow.at(0b010));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -196,7 +200,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::left().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmax).m_DifColorPow.at(0b001));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -205,7 +210,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::left().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmin).m_DifColorPow.at(0b000));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 		}
@@ -216,11 +222,10 @@ namespace FPS_n2 {
 			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
 
 			int Xofs = zmin % 2 == 0;
-			int Yofs = ((cellx.GetSellBuf(x, y, zmin).m_Cell - 1) * 3) + 0;
+			int Yofs = ((cellx.GetCellBuf(x, y, zmin).m_Cell - 1) * 3) + 0;
 			float uAdd = 1.f / 2.f;
 			float vAdd = 1.f / 16.f;
 
-			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -230,7 +235,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::up().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmax).m_DifColorPow.at(0b111));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -239,7 +245,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::up().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmin).m_DifColorPow.at(0b110));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -248,7 +255,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::up().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmax).m_DifColorPow.at(0b011));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -257,7 +265,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::up().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmin).m_DifColorPow.at(0b010));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 		}
@@ -268,11 +277,10 @@ namespace FPS_n2 {
 			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
 
 			int Xofs = zmin % 2 == 0;
-			int Yofs = ((cellx.GetSellBuf(x, y, zmin).m_Cell - 1) * 3) + 2;
+			int Yofs = ((cellx.GetCellBuf(x, y, zmin).m_Cell - 1) * 3) + 2;
 			float uAdd = 1.f / 2.f;
 			float vAdd = 1.f / 16.f;
 
-			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -282,7 +290,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::down().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmax).m_DifColorPow.at(0b001));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -291,7 +300,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::down().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmin).m_DifColorPow.at(0b000));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -300,7 +310,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::down().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmax).m_DifColorPow.at(0b101));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -309,7 +320,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::down().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(x, y, zmin).m_DifColorPow.at(0b100));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 		}
@@ -320,11 +332,10 @@ namespace FPS_n2 {
 			int xscale = (xmax - xmin + 1) * cellx.scaleRate;
 
 			int Xofs = xmax % 2 == 0;
-			int Yofs = ((cellx.GetSellBuf(xmin, y, z).m_Cell - 1) * 3) + 1;
+			int Yofs = ((cellx.GetCellBuf(xmin, y, z).m_Cell - 1) * 3) + 1;
 			float uAdd = 1.f / 2.f;
 			float vAdd = 1.f / 16.f;
 
-			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -334,7 +345,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::forward().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(xmin, y, z).m_DifColorPow.at(0b001));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -343,7 +355,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::forward().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(xmax, y, z).m_DifColorPow.at(0b101));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -352,7 +365,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::forward().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(xmin, y, z).m_DifColorPow.at(0b011));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -361,7 +375,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::forward().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(xmax, y, z).m_DifColorPow.at(0b111));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 		}
@@ -372,11 +387,10 @@ namespace FPS_n2 {
 			int xscale = (xmax - xmin + 1) * cellx.scaleRate;
 
 			int Xofs = xmax % 2 == 0;
-			int Yofs = ((cellx.GetSellBuf(xmin, y, z).m_Cell - 1) * 3) + 1;
+			int Yofs = ((cellx.GetCellBuf(xmin, y, z).m_Cell - 1) * 3) + 1;
 			float uAdd = 1.f / 2.f;
 			float vAdd = 1.f / 16.f;
 
-			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -386,7 +400,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::back().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(xmin, y, z).m_DifColorPow.at(0b010));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -395,7 +410,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
 				V.norm = Vector3DX::back().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(xmax, y, z).m_DifColorPow.at(0b110));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -404,7 +420,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::back().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(xmin, y, z).m_DifColorPow.at(0b000));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 			{
@@ -413,7 +430,8 @@ namespace FPS_n2 {
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
 				V.norm = Vector3DX::back().get();
-				V.dif = DifColor;
+				uint8_t Power = static_cast<uint8_t>(cellx.GetCellBuf(xmax, y, z).m_DifColorPow.at(0b100));
+				V.dif = GetColorU8(Power, Power, Power, 255);
 				V.spc = SpcColor;
 			}
 		}
@@ -446,8 +464,8 @@ namespace FPS_n2 {
 							(x == XMax)
 							|| (CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus)))
 							|| (!cellx.IsActiveCell(x, y, z))
-							|| (!isHitmin && (selectBlock != cellx.GetSellBuf(x, y, z).m_Cell))
-							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (!isHitmin && (selectBlock != cellx.GetCellBuf(x, y, z).m_Cell))
+							|| (cellx.GetCellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -465,7 +483,7 @@ namespace FPS_n2 {
 									}
 								}
 								//この場合だけもう一回判定させるドン
-								if (selectBlock != cellx.GetSellBuf(x, y, z).m_Cell) {
+								if (selectBlock != cellx.GetCellBuf(x, y, z).m_Cell) {
 									x--;
 								}
 							}
@@ -475,7 +493,7 @@ namespace FPS_n2 {
 							if (isHitmin) {
 								isHitmin = false;
 								xmin = x;
-								selectBlock = cellx.GetSellBuf(x, y, z).m_Cell;
+								selectBlock = cellx.GetCellBuf(x, y, z).m_Cell;
 							}
 							xmax = x;
 						}
@@ -511,8 +529,8 @@ namespace FPS_n2 {
 							(z == center.z + zMaxmaxT)
 							|| (CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus)))
 							|| (!cellx.IsActiveCell(x, y, z))
-							|| (!isHitmin && (selectBlock != cellx.GetSellBuf(x, y, z).m_Cell))
-							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (!isHitmin && (selectBlock != cellx.GetCellBuf(x, y, z).m_Cell))
+							|| (cellx.GetCellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -539,7 +557,7 @@ namespace FPS_n2 {
 									}
 								}
 								//この場合だけもう一回判定させるドン
-								if (selectBlock != cellx.GetSellBuf(x, y, z).m_Cell) {
+								if (selectBlock != cellx.GetCellBuf(x, y, z).m_Cell) {
 									z--;
 								}
 							}
@@ -549,7 +567,7 @@ namespace FPS_n2 {
 							if (isHitmin) {
 								isHitmin = false;
 								zmin = z;
-								selectBlock = cellx.GetSellBuf(x, y, z).m_Cell;
+								selectBlock = cellx.GetCellBuf(x, y, z).m_Cell;
 							}
 							zmax = z;
 						}
@@ -759,7 +777,7 @@ namespace FPS_n2 {
 							(x == center.x + DrawMaxXPlus)
 							|| (CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus)))
 							|| (!cellx.IsActiveCell(x, y, z))
-							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (cellx.GetCellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -808,7 +826,7 @@ namespace FPS_n2 {
 							(z == DrawMaxZPlus)
 							|| (CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus)))
 							|| (!cellx.IsActiveCell(x, y, z))
-							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (cellx.GetCellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -942,7 +960,7 @@ namespace FPS_n2 {
 							(x == XMax)
 							|| (CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus)))
 							|| (!cellx.IsActiveCell(x, y, z))
-							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (cellx.GetCellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -999,7 +1017,7 @@ namespace FPS_n2 {
 							(z == center.z + zMaxmaxT)
 							|| (CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus)))
 							|| (!cellx.IsActiveCell(x, y, z))
-							|| (cellx.GetSellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (cellx.GetCellBuf(x, y, z).m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -1055,7 +1073,7 @@ namespace FPS_n2 {
 							[&](int x, int y, int z) {
 								if (!cell.isInside(y)) { return false; }
 								if (!cell.IsActiveCell(x, y, z)) { return false; }
-								if (!(cell.GetSellBuf(x, y, z).m_FillInfo != 0b111111)) { return false; }
+								if (!(cell.GetCellBuf(x, y, z).m_FillInfo != 0b111111)) { return false; }
 								Vector3DX MinPos = cell.GetPos(x, y, z);
 								Vector3DX MaxPos = cell.GetPos(x + 1, y + 1, z + 1);
 								if (ColRayBox(StartPos, EndPos, MinPos, MaxPos, Normal)) {
@@ -1088,7 +1106,7 @@ namespace FPS_n2 {
 							[&](int x, int y, int z) {
 								if (!cell.isInside(y)) { return false; }
 								if (!cell.IsActiveCell(x, y, z)) { return false; }
-								if (!(cell.GetSellBuf(x, y, z).m_FillInfo != 0b111111)) { return false; }
+								if (!(cell.GetCellBuf(x, y, z).m_FillInfo != 0b111111)) { return false; }
 								Vector3DX MinPos = cell.GetPos(x, y, z);
 								Vector3DX MaxPos = cell.GetPos(x + 1, y + 1, z + 1);
 
@@ -1213,7 +1231,7 @@ namespace FPS_n2 {
 			for (int xm = 0; xm < cell.All; ++xm) {
 				for (int ym = 0; ym < cell.All; ++ym) {
 					for (int zm = 0; zm < cell.All; ++zm) {
-						cell.SetSellBuf(xm, ym, zm).m_Cell = m_CellBase[cell.GetCellNum(xm, ym, zm)];
+						cell.SetCellBuf(xm, ym, zm).m_Cell = m_CellBase[cell.GetCellNum(xm, ym, zm)];
 					}
 				}
 			}
@@ -1222,7 +1240,7 @@ namespace FPS_n2 {
 				if (x - cell.All/2 > -72) {
 					for (int z = 0; z < cell.All; ++z) {
 						for (int y = cell.All; y >=130+15 ; --y) {
-							cell.SetSellBuf(x, y, z).m_Cell = cell.GetSellBuf(x, y - 15, z).m_Cell;
+							cell.SetCellBuf(x, y, z).m_Cell = cell.GetCellBuf(x, y - 15, z).m_Cell;
 						}
 					}
 				}
@@ -1232,7 +1250,7 @@ namespace FPS_n2 {
 			for (int x = 0; x < cell.All; ++x) {
 				for (int z = 0; z < cell.All; ++z) {
 					for (int y = cell.All; y >= 190; --y) {
-						cell.SetSellBuf(x, y, z).m_Cell = 0;
+						cell.SetCellBuf(x, y, z).m_Cell = 0;
 					}
 				}
 			}
@@ -1244,7 +1262,7 @@ namespace FPS_n2 {
 			for (int xm = 0; xm < cell.All; ++xm) {
 				for (int ym = 0; ym < cell.All; ++ym) {
 					for (int zm = 0; zm < cell.All; ++zm) {
-						m_CellBase[cell.GetCellNum(xm, ym, zm)] = cell.SetSellBuf(xm, ym, zm).m_Cell;
+						m_CellBase[cell.GetCellNum(xm, ym, zm)] = cell.SetCellBuf(xm, ym, zm).m_Cell;
 					}
 				}
 			}
@@ -1284,12 +1302,12 @@ namespace FPS_n2 {
 			if (!cell.isInside(y)) { return; }
 			//テクスチャだけ変える
 			/*
-			if (cell.SetSellBuf(x, y, z).m_Cell == s_EmptyBlick) { return; }
-			cell.SetSellBuf(x, y, z).m_Cell = select;
+			if (cell.SetCellBuf(x, y, z).m_Cell == s_EmptyBlick) { return; }
+			cell.SetCellBuf(x, y, z).m_Cell = select;
 			return;
 			//*/
 			//
-			cell.SetSellBuf(x, y, z).m_Cell = select;
+			cell.SetCellBuf(x, y, z).m_Cell = select;
 			//簡易版を更新
 			for (int sel = 1; sel < total; ++sel) {
 				auto& cell1 = m_CellxN.at(sel);
@@ -1298,7 +1316,7 @@ namespace FPS_n2 {
 				int ym = y / cell1.scaleRate;
 				int zm = z / cell1.scaleRate;
 
-				cell1.SetSellBuf(xm, ym, zm).m_Cell = cell.isFill(xm, ym, zm, cell1.scaleRate);
+				cell1.SetCellBuf(xm, ym, zm).m_Cell = cell.isFill(xm, ym, zm, cell1.scaleRate);
 			}
 			//遮蔽検索
 			for (auto& cellx : m_CellxN) {
@@ -1344,10 +1362,10 @@ namespace FPS_n2 {
 						auto Height = static_cast<int>(ns.octaveNoise(2, (static_cast<float>(x)) / cell.All, (static_cast<float>(z)) / cell.All) * static_cast<float>(cell.All * 4 / 5));
 						for (int y = 0; y < cell.All; ++y) {
 							if (y <= Height) {
-								cell.SetSellBuf(x, y, z).m_Cell = 1;
+								cell.SetCellBuf(x, y, z).m_Cell = 1;
 								continue;
 							}
-							cell.SetSellBuf(x, y, z).m_Cell = s_EmptyBlick;
+							cell.SetCellBuf(x, y, z).m_Cell = s_EmptyBlick;
 						}
 					}
 				}
@@ -1364,7 +1382,7 @@ namespace FPS_n2 {
 				for (int xm = 0; xm < cell1.All; ++xm) {
 					for (int ym = 0; ym < cell1.All; ++ym) {
 						for (int zm = 0; zm < cell1.All; ++zm) {
-							cell1.SetSellBuf(xm, ym, zm).m_Cell = cell.isFill(xm, ym, zm, cell1.scaleRate);
+							cell1.SetCellBuf(xm, ym, zm).m_Cell = cell.isFill(xm, ym, zm, cell1.scaleRate);
 						}
 					}
 				}
@@ -1376,6 +1394,24 @@ namespace FPS_n2 {
 						for (int z = 0; z < cellx.All; ++z) {
 							if (!cellx.IsActiveCell(x, y, z)) { continue; }
 							cellx.CalcOcclusion(x, y, z);
+						}
+					}
+				}
+			}
+			//各辺の明るさを指定
+			for (auto& cellx : m_CellxN) {
+				for (int x = 0; x < cellx.All; ++x) {
+					for (int y = 0; y < cellx.All; ++y) {
+						for (int z = 0; z < cellx.All; ++z) {
+							if (!cellx.IsActiveCell(x, y, z)) { continue; }
+							cellx.SetCellBuf(x, y, z).m_DifColorPow.at(0b000) = 128;
+							cellx.SetCellBuf(x, y, z).m_DifColorPow.at(0b001) = 128;
+							cellx.SetCellBuf(x, y, z).m_DifColorPow.at(0b010) = 128;
+							cellx.SetCellBuf(x, y, z).m_DifColorPow.at(0b011) = 128;
+							cellx.SetCellBuf(x, y, z).m_DifColorPow.at(0b100) = 128;
+							cellx.SetCellBuf(x, y, z).m_DifColorPow.at(0b101) = 128;
+							cellx.SetCellBuf(x, y, z).m_DifColorPow.at(0b110) = 128;
+							cellx.SetCellBuf(x, y, z).m_DifColorPow.at(0b111) = 128;
 						}
 					}
 				}
