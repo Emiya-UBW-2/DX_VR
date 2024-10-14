@@ -74,7 +74,7 @@ namespace FPS_n2 {
 				}
 				//
 				const bool		IsActiveCell(int x, int y, int z) const noexcept { return GetSellBuf(x, y, z).m_Cell != s_EmptyBlick; }
-				const int8_t	isFill(int x, int y, int z, int mul) noexcept {
+				const int8_t	isFill(int x, int y, int z, int mul) const noexcept {
 					mul /= scaleRate;
 					int FillCount = 0;
 					int FillAll = 0;
@@ -93,14 +93,14 @@ namespace FPS_n2 {
 								if (cell > IDCount.size()) {
 									IDCount.resize(cell);
 								}
-								IDCount.at(cell - 1)++;
+								IDCount.at(static_cast<size_t>(cell - 1))++;
 							}
 						}
 					}
 					if ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 4.f))) {
 						int max = -1;
-						int id = 1;
-						for (int index = 0; auto & i : IDCount) {
+						int8_t id = 1;
+						for (int8_t index = 0; auto & i : IDCount) {
 							if (max < i) {
 								max = i;
 								id = index;

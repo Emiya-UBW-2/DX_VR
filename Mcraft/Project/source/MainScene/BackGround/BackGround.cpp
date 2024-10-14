@@ -1716,9 +1716,16 @@ namespace FPS_n2 {
 			SetUseTextureToShader(0, INVALID_ID);
 		}
 		void		BackGroundClass::Draw(void) const noexcept {
+			float Near = GetCameraNear();
+			float Far = GetCameraFar();
+			constexpr int MinLimit = std::min(std::min(DrawMinXPlus, DrawMinZPlus), DrawMinYPlus) * 3 / 4;
+			constexpr int MaxLimit = std::min(std::min(DrawMaxXPlus, DrawMaxZPlus), DrawMaxYPlus) * 5 / 4;
+
 			for (int i = 0; i < total; i++) {
 				auto& Vert = m_vert32s.at(i);
 				if (Vert.m_32NumOut > 0) {
+					float Min = (m_CellxN.at(i).scaleRate != 1) ? MinLimit * m_CellxN.at(i).Scale : 0;
+					if (!(Min < Far && Near < MaxLimit * m_CellxN.at(i).Scale)) { continue; }
 					DrawPolygon32bitIndexed3D(Vert.m_vert32Out.data(), static_cast<int>(Vert.m_32NumOut * 4), Vert.m_index32Out.data(), static_cast<int>(Vert.m_32NumOut * 6 / 3), m_tex.get(), TRUE);
 				}
 			}

@@ -38,9 +38,18 @@ namespace FPS_n2 {
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f, 1.0f, 1.0f, 1.0f));
 			SetLightDifColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 			//Cam
-			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
-
+			//info
+			constexpr float Max = std::min(std::min(BackGround::DrawMaxXPlus, BackGround::DrawMaxZPlus), BackGround::DrawMaxYPlus) * BackGround::CellScale;
+			float SQRTMax = Max;
+			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 0.3f, SQRTMax);
+			//DoF
+			PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.3f, Scale_Rate * 5.f, Scale_Rate * 0.1f, SQRTMax);
+			//Fog
+			SetFogMode(DX_FOGMODE_LINEAR);
+			SetFogStartEnd(SQRTMax, SQRTMax * 20.f);
+			SetFogColor(114, 120, 128);
+			//
 			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 				auto& p = PlayerMngr->GetPlayer(index);
 				auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
@@ -263,7 +272,6 @@ namespace FPS_n2 {
 			//視点
 			{
 				auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
-				auto* OptionParts = OPTION::Instance();
 				//カメラ
 				Vector3DX CamPos = ViewChara->GetEyePosition();
 				Vector3DX CamVec = CamPos + ViewChara->GetEyeMatrix().zvec() * -1.f;
@@ -312,10 +320,6 @@ namespace FPS_n2 {
 				}
 #endif
 				DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
-				//info
-				DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 0.3f, Scale_Rate * 20.f);
-				//DoF
-				PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.3f, Scale_Rate * 5.f, Scale_Rate * 0.1f, Scale_Rate * 20.f);
 			}
 			//コンカッション
 			{
@@ -395,24 +399,20 @@ namespace FPS_n2 {
 
 		//
 		void			MainGameScene::BG_Draw_Sub(void) noexcept {
-			auto* BackGround = BackGround::BackGroundClass::Instance();
-			BackGround->BG_Draw();
+			BackGround::BackGroundClass::Instance()->BG_Draw();
 		}
 		void			MainGameScene::ShadowDraw_Far_Sub(void) noexcept {
 		}
 		void			MainGameScene::ShadowDraw_Sub(void) noexcept {
-			auto* BackGround = BackGround::BackGroundClass::Instance();
-			BackGround->Shadow_Draw();
+			BackGround::BackGroundClass::Instance()->Shadow_Draw();
 			ObjectManager::Instance()->Draw_Shadow();
 		}
 		void			MainGameScene::CubeMap_Sub(void) noexcept {
-			auto* BackGround = BackGround::BackGroundClass::Instance();
-			BackGround->Draw();
+			BackGround::BackGroundClass::Instance()->Draw();
 		}
 
 		void MainGameScene::SetShadowDraw_Rigid_Sub(void) noexcept {
-			auto* BackGround = BackGround::BackGroundClass::Instance();
-			BackGround->SetShadow_Draw_Rigid();
+			BackGround::BackGroundClass::Instance()->SetShadow_Draw_Rigid();
 		}
 
 		void MainGameScene::SetShadowDraw_Sub(void) noexcept {
@@ -420,16 +420,15 @@ namespace FPS_n2 {
 		}
 
 		void			MainGameScene::MainDraw_Sub(void) noexcept {
-			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* DrawParts = DXDraw::Instance();
-			SetFogStartEnd(DrawParts->GetMainCamera().GetCamNear(), DrawParts->GetMainCamera().GetCamFar() * 2.f);
-			BackGround->Draw();
+			SetFogEnable(TRUE);
+			BackGround::BackGroundClass::Instance()->Draw();
 			ObjectManager::Instance()->Draw();
 			//ObjectManager::Instance()->Draw_Depth();
 			for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 			}
+			SetFogEnable(FALSE);
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) noexcept {
