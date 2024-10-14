@@ -6,6 +6,7 @@ struct PS_INPUT
     float2 TexCoords0 : TEXCOORD0; // テクスチャ座標
     float4 LPPosition : TEXCOORD1; // ライトからみた座標( xとyはライトの射影座標、zはビュー座標 )
 	float4 LPPosition2 : TEXCOORD2; // ライトからみた座標( xとyはライトの射影座標、zはビュー座標 )
+    float4 Position : SV_POSITION; // 座標( プロジェクション空間 )
 };
 
 // ピクセルシェーダーの出力
@@ -47,7 +48,7 @@ PS_OUTPUT main(PS_INPUT PSInput)
     DepthTexCoord.y = 1.0f - (PSInput.LPPosition.y + 1.0f) / 2.0f; // yは更に上下反転
 
 	// 深度バッファテクスチャから深度を取得( +補正値 )
-	int xs = 3;
+	int xs = 4;
 	{
 		comp = 0;
 		total = 0;
@@ -91,11 +92,12 @@ PS_OUTPUT main(PS_INPUT PSInput)
         }
     }
 	
-    if ((int)g_param.x>2 && PSOutput.Color0.r < 128.f / 255.f)
+    if ((int) g_param.x > 2 && PSOutput.Color0.r < 128.f / 255.f)
     {
         PSOutput.Color0.r = 0.f;
-
     }
+	
+    PSOutput.Color0.r = lerp(PSOutput.Color0.r, 0.f, saturate(PSInput.Position.w / g_param.y));
 
 	// 出力パラメータを返す
     return PSOutput;

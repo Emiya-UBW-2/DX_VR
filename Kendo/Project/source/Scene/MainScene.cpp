@@ -37,7 +37,7 @@ namespace FPS_n2 {
 			BackGround->Init();
 			//
 			Vector3DX LightVec = Vector3DX::vget(1.3f, -0.5f, 0.05f); LightVec = LightVec.normalized();
-			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
+			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
 			SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 
 			auto& SecondLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec * -1.f);
@@ -497,7 +497,7 @@ namespace FPS_n2 {
 			HitMark::Instance()->Update();
 		}
 		//UI表示
-		void			MainGameScene::DrawUI_In_Sub(void) noexcept {
+		void			MainGameScene::DrawUI_Base_Sub(void) noexcept {
 			HitMark::Instance()->Draw();
 			FadeControl::DrawFade();
 			//UI

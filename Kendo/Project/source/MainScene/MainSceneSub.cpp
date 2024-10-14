@@ -7,9 +7,9 @@ namespace FPS_n2 {
 		void PauseMenuControl::LoadPause(void) noexcept {
 			auto* ButtonParts = ButtonControl::Instance();
 			ButtonParts->ResetSel();
-			ButtonParts->AddStringButton("Retire", 48, true, 1920 - 64, 1080 - 84 - 64 * 2, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton("Option", 48, true, 1920 - 64, 1080 - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton("Return Game", 48, true, 1920 - 64, 1080 - 84 - 64 * 0, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton("Retire", 48, true, basex - 64, basey - 84 - 64 * 2, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton("Option", 48, true, basex - 64, basey - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton("Return Game", 48, true, basex - 64, basey - 84 - 64 * 0, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 		}
 		void PauseMenuControl::SetPause(void) noexcept {
 			this->m_IsRetire = false;
@@ -24,13 +24,13 @@ namespace FPS_n2 {
 					Pad->SetMouseMoveEnable(false);
 					Pad->ChangeGuide(
 						[]() {
-							auto* KeyGuide = PadControl::Instance();
+							auto* Pad = PadControl::Instance();
 							auto* LocalizeParts = LocalizePool::Instance();
-							KeyGuide->AddGuide(PADS::INTERACT, LocalizeParts->Get(9992));
-							KeyGuide->AddGuide(PADS::RELOAD, LocalizeParts->Get(9991));
-							KeyGuide->AddGuide(PADS::MOVE_W, "");
-							KeyGuide->AddGuide(PADS::MOVE_S, "");
-							KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizeParts->Get(9993));
+							Pad->AddGuide(PADS::INTERACT, LocalizeParts->Get(9992));
+							Pad->AddGuide(PADS::RELOAD, LocalizeParts->Get(9991));
+							Pad->AddGuide(PADS::MOVE_W, "");
+							Pad->AddGuide(PADS::MOVE_S, "");
+							Pad->AddGuide(PADS::MOVE_STICK, LocalizeParts->Get(9993));
 						});
 					if (!OptionWindowClass::Instance()->IsActive()) {
 						ButtonParts->UpdateInput();
@@ -88,10 +88,9 @@ namespace FPS_n2 {
 			this->m_BlackOutAlpha = std::clamp(this->m_BlackOutAlpha + (this->m_IsBlackOut ? 1.f : -1.f) / DrawParts->GetFps() / 0.5f, 0.f, 1.f);
 		}
 		void FadeControl::DrawFade(void) noexcept {
-			auto* DrawParts = DXDraw::Instance();
 			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * this->m_BlackOutAlpha), 0, 255));
-			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
+			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, UIWidth, UIHeight, Black, TRUE);
 			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 		}
-};
+	};
 };
