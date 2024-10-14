@@ -1,0 +1,5 @@
+Name=6L20 30Round
+
+capacity=30
+useammo0=545x39
+end

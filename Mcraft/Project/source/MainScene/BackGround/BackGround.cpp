@@ -1422,7 +1422,7 @@ namespace FPS_n2 {
 			Param.Ambient = GetColorF(0.5f, 0.5f, 0.5f, 1.0f);						// アンビエントカラー
 			Param.Specular = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// スペキュラカラー
 			Param.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// エミッシブカラー
-			Param.Power = 500.f;							// スペキュラハイライトの鮮明度
+			Param.Power = 500.f;													// スペキュラハイライトの鮮明度
 			SetMaterialParam(Param);
 			//
 			constexpr size_t size = (DrawMax + DrawMax) * (DrawMax + DrawMax) * (DrawMax + DrawMax) / 2 * 3 / 100;
