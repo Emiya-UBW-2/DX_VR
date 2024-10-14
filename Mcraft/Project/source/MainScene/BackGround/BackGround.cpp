@@ -113,7 +113,7 @@ namespace FPS_n2 {
 			int Xofs = zmin % 2 == 0;
 			int Yofs = ((cellx.GetSellBuf(x, y, zmin).m_Cell - 1) * 3) + 1;
 			float uAdd = 1.f / 2.f;
-			float vAdd = 1.f / 8.f;
+			float vAdd = 1.f / 16.f;
 
 			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
@@ -166,7 +166,7 @@ namespace FPS_n2 {
 			int Xofs = zmin % 2 == 0;
 			int Yofs = ((cellx.GetSellBuf(x, y, zmin).m_Cell - 1) * 3) + 1;
 			float uAdd = 1.f / 2.f;
-			float vAdd = 1.f / 8.f;
+			float vAdd = 1.f / 16.f;
 
 			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
@@ -218,7 +218,7 @@ namespace FPS_n2 {
 			int Xofs = zmin % 2 == 0;
 			int Yofs = ((cellx.GetSellBuf(x, y, zmin).m_Cell - 1) * 3) + 0;
 			float uAdd = 1.f / 2.f;
-			float vAdd = 1.f / 8.f;
+			float vAdd = 1.f / 16.f;
 
 			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
@@ -270,7 +270,7 @@ namespace FPS_n2 {
 			int Xofs = zmin % 2 == 0;
 			int Yofs = ((cellx.GetSellBuf(x, y, zmin).m_Cell - 1) * 3) + 2;
 			float uAdd = 1.f / 2.f;
-			float vAdd = 1.f / 8.f;
+			float vAdd = 1.f / 16.f;
 
 			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
@@ -322,7 +322,7 @@ namespace FPS_n2 {
 			int Xofs = xmax % 2 == 0;
 			int Yofs = ((cellx.GetSellBuf(xmin, y, z).m_Cell - 1) * 3) + 1;
 			float uAdd = 1.f / 2.f;
-			float vAdd = 1.f / 8.f;
+			float vAdd = 1.f / 16.f;
 
 			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
@@ -374,7 +374,7 @@ namespace FPS_n2 {
 			int Xofs = xmax % 2 == 0;
 			int Yofs = ((cellx.GetSellBuf(xmin, y, z).m_Cell - 1) * 3) + 1;
 			float uAdd = 1.f / 2.f;
-			float vAdd = 1.f / 8.f;
+			float vAdd = 1.f / 16.f;
 
 			COLOR_U8 DifColor = GetColorU8(128, 128, 128, 255);
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
