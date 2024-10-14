@@ -44,7 +44,7 @@ namespace FPS_n2 {
 			float SQRTMax = Max;
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 0.3f, SQRTMax);
 			//DoF
-			PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.3f, Scale_Rate * 5.f, Scale_Rate * 0.1f, SQRTMax);
+			PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.3f, Scale_Rate * 5.f, Scale_Rate * 0.1f, SQRTMax * 2.f);
 			//Fog
 			SetFogMode(DX_FOGMODE_LINEAR);
 			SetFogStartEnd(SQRTMax, SQRTMax * 20.f);

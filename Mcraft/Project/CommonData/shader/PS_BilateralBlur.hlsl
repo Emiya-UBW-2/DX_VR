@@ -42,8 +42,8 @@ cbuffer cbMULTIPLYCOLOR_CBUFFER1 : register(b2)
 SamplerState g_DiffuseMapSampler : register(s0); // ディフューズマップサンプラ
 Texture2D g_DiffuseMapTexture : register(t0); // ディフューズマップテクスチャ
 
-SamplerState g_albedoMapSampler : register(s1); // ディフューズマップサンプラ
-Texture2D g_albedoMapTexture : register(t1); // ディフューズマップテクスチャ
+//SamplerState g_albedoMapSampler : register(s1); // ディフューズマップサンプラ
+//Texture2D g_albedoMapTexture : register(t1); // ディフューズマップテクスチャ
 
 
 float Gaussian(float sigma, float x)
@@ -96,10 +96,9 @@ PS_OUTPUT main(PS_INPUT PSInput)
 {
     PS_OUTPUT PSOutput;
     
-    float filtered = 1 - JoinedBilateralGaussianBlur(PSInput.texCoords0);
-    float3 pivot = g_albedoMapTexture.Sample(g_albedoMapSampler, PSInput.texCoords0).xyz;
-
-    //PSOutput.color0 = float4(lerp(float3(1, 1, 1), pivot * 0.25f, filtered), 1);
-    PSOutput.color0 = float4(1 - filtered, 1 - filtered, 1 - filtered, 1);
+    float filtered = JoinedBilateralGaussianBlur(PSInput.texCoords0);
+    //float3 pivot = g_albedoMapTexture.Sample(g_albedoMapSampler, PSInput.texCoords0).xyz;
+    //PSOutput.color0 = float4(lerp(float3(1, 1, 1), pivot * 0.25f, 1 - filtered), 1);
+    PSOutput.color0 = float4(filtered, filtered, filtered, 1);
     return PSOutput;
 }
