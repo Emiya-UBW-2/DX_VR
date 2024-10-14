@@ -1217,25 +1217,6 @@ namespace FPS_n2 {
 					}
 				}
 			}
-
-			/*
-			for (int x = 0; x < cell.All; ++x) {
-				for (int z = 0; z < cell.All; ++z) {
-					for (int y = cell.All; y >= 2; --y) {
-						cell.SetCell(x, y, z) = cell.GetCell(x, y - 2, z);
-					}
-				}
-			}
-			//*/
-			/*
-			for (int x = 0; x < cell.All; ++x) {
-				for (int z = 0; z < cell.All; ++z) {
-					for (int y = cell.All; y >= 190; --y) {
-						cell.SetSellBuf(x, y, z).m_Cell = 0;
-					}
-				}
-			}
-			//*/
 			/*
 			for (int x = 0; x < cell.All; ++x) {
 				if (x - cell.All/2 > -72) {
@@ -1249,31 +1230,9 @@ namespace FPS_n2 {
 			//*/
 			/*
 			for (int x = 0; x < cell.All; ++x) {
-				if (x - cell.All/2 <= -72) {
-					for (int z = 0; z < cell.All; ++z) {
-						for (int y = 15; y < cell.All / 2-18; ++y) {
-							cell.SetCell(x, y, z) = cell.GetCell(x, y + 15, z);
-						}
-					}
-				}
-			}
-			//*/
-			/*
-			for (int x = 0; x < cell.All; ++x) {
 				for (int z = 0; z < cell.All; ++z) {
-					if (z <= cell.All / 2 - 40 || cell.All / 2 + 26 <= z) {
-						for (int y = cell.All / 2 - 48; y <= cell.All; ++y) {
-							cell.SetCell(x, y, z) = 0;
-						}
-					}
-				}
-			}
-			//*/
-			/*
-			for (int x = 0; x < cell.All; ++x) {
-				for (int z = 0; z < cell.All; ++z) {
-					for (int y = 0; y <= cell.All / 2; ++y) {
-						cell.SetCell(x, y, z) = 1;
+					for (int y = cell.All; y >= 190; --y) {
+						cell.SetSellBuf(x, y, z).m_Cell = 0;
 					}
 				}
 			}
