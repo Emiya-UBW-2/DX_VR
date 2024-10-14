@@ -86,14 +86,14 @@ namespace FPS_n2 {
 			auto* OptionParts = OPTION::Instance();
 			bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 			if (HeadBobbing) {
-				//tmpUpperMatrix = WalkSwingControl::GetWalkSwingMat() * tmpUpperMatrix;
+				tmpUpperMatrix = WalkSwingControl::GetWalkSwingMat() * tmpUpperMatrix;
 			}
 			tmpUpperMatrix *= this->GetMove().GetMat().Get44DX();
 
 			auto EyePosition = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f + tmpUpperMatrix.zvec() * (-0.04f * Scale_Rate);
 
 			if (HeadBobbing) {
-				//EyePosition += EyeSwingControl::GetEyeSwingPos();
+				EyePosition += EyeSwingControl::GetEyeSwingPos();
 			}
 			if (GetGunPtrNow()) {
 				EyePosition = Lerp<Vector3DX>(EyePosition, GetGunPtrNow()->GetEyePos(), GunReadyControl::GetADSPer());
