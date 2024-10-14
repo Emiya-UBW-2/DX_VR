@@ -12,11 +12,15 @@
 #include	"../CommonScene/UI/CommonUIControl.hpp"
 #include	"../MainScene/MainSceneSub.hpp"
 
+#include "../CommonScene/Object/GunsModify.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class MainGameScene : public TEMPSCENE ,
 			public PauseMenuControl,
 			public FadeControl
+			, public GunsModify
+			, public EffectControl
 		{
 		private:
 			//UIŠÖ˜A
@@ -66,6 +70,9 @@ namespace FPS_n2 {
 			//UI•\Ž¦
 			void			DrawUI_Base_Sub(void) noexcept override;
 			void			DrawUI_In_Sub(void) noexcept override;
+		private:
+			void			LoadGun(const std::string& FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept;
+			void			UpdateBullet(void) noexcept;
 		};
 	}
 }

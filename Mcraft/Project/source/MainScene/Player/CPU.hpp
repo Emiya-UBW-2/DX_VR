@@ -1,23 +1,31 @@
 #pragma once
-#pragma warning(disable:4464)
 #include	"../../Header.hpp"
+#include	"../../MainScene/BackGround/BackGround.hpp"
+#include	"../../sub.hpp"
 
 namespace FPS_n2 {
-	namespace Player {
-		//AI—p
-		class AIControl {
-			PlayerID m_MyID{ 0 };
-
-			float m_Counter{ 0 };
-		public:
-			void Init(PlayerID MyID) noexcept {
-				m_MyID = MyID;
-			}
-			void Execute(InputControl* MyInput) noexcept;
-			void Draw(void) noexcept {
-			}
-			void Dispose(void) noexcept {
-			}
+	namespace Sceneclass {
+		enum class ENUM_AI_PHASE {
+			Normal,
+			Shot,
+			Dead,
 		};
-	}
-}
+
+		class AIControl {
+		private:
+			class Impl;
+			Impl* m_Param;
+			Impl* GetParam() noexcept { return m_Param; }
+		public:
+			AIControl();
+			~AIControl();
+		public:
+			void Init(PlayerID MyCharaID) noexcept;
+			void Execute(InputControl* MyInput, bool CanRepop) noexcept;
+			void Draw() noexcept {}
+			void Dispose() noexcept {}
+		public:
+			const bool CannotRepop() noexcept;
+		};
+	};
+};

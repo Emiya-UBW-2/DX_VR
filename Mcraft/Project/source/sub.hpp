@@ -4,23 +4,22 @@
 #include "MainScene/Object/CharacterEnum.hpp"
 //
 namespace FPS_n2 {
+
 	//ダメージイベント
 	struct DamageEvent {
 		PlayerID				ShotID{ 127 };
 		PlayerID				DamageID{ 127 };
 		HitPoint				Damage{ 0 };
-		int8_t					m_HitType{};
+		ArmerPoint				ArmerDamage{ 0 };
 		Vector3DX				m_Pos;
 	public:
-		void SetEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint pDamage, HitType pHitType, const Vector3DX& pPos) noexcept {
+		void SetEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint pDamage, ArmerPoint pArmerDamage, const Vector3DX& pPos) noexcept {
 			this->ShotID = ShotID_t;
 			this->DamageID = DamageID_t;
 			this->Damage = pDamage;
-			this->m_HitType = static_cast<int8_t>(pHitType);
+			this->ArmerDamage = pArmerDamage;
 			this->m_Pos = pPos;
 		}
-	public:
-		HitType GetHitType(void) const noexcept { return static_cast<HitType>(m_HitType); }
 	};
 	class DamageEventControl {
 		std::array<DamageEvent, 16>							m_Damage;
@@ -41,28 +40,25 @@ namespace FPS_n2 {
 		void			Reset(void) noexcept {
 			this->m_DamageCount = 0;
 		}
-		void			Add(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint pDamage, HitType pHitType, const Vector3DX& pPos) noexcept {
-			this->m_Damage.at(this->m_DamageCount).SetEvent(ShotID_t, DamageID_t, pDamage, pHitType, pPos);
+		void			Add(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint pDamage, ArmerPoint pArmerDamage, const Vector3DX& pPos) noexcept {
+			this->m_Damage.at(this->m_DamageCount).SetEvent(ShotID_t, DamageID_t, pDamage, pArmerDamage, pPos);
 			++this->m_DamageCount %= static_cast<uint8_t>(this->m_Damage.size());
 		}
 	};
 	//
-	class CommonBattleResource : public SingletonBase<CommonBattleResource> {
-	private:
-		friend class SingletonBase<CommonBattleResource>;
-	private:
-		CommonBattleResource(void) noexcept {}
-		CommonBattleResource(const CommonBattleResource&) = delete;
-		CommonBattleResource(CommonBattleResource&& o) = delete;
-		CommonBattleResource& operator=(const CommonBattleResource&) = delete;
-		CommonBattleResource& operator=(CommonBattleResource&& o) = delete;
-
-		virtual ~CommonBattleResource(void) noexcept {}
-	public:
-		void			Load(void) noexcept;
-		void			Set(void) noexcept;
-		void			Dispose(void) noexcept;
-	public:
-		void			LoadChara(const std::string& FolderName, PlayerID ID) noexcept;
+	namespace Sceneclass {
+		class CommonBattleResource : public SingletonBase<CommonBattleResource> {
+		private:
+			friend class SingletonBase<CommonBattleResource>;
+		private:
+		public:
+			void			Load(void) noexcept;
+			void			Set(void) noexcept;
+			void			Dispose(void) noexcept;
+		public:
+			void			LoadChara(const std::string& FolderName, PlayerID ID) noexcept;
+			void			LoadCharaGun(const std::string& FolderName, PlayerID ID, int Sel) noexcept;
+			void			LoadOnlyGun(const std::string& FolderName, int Sel) noexcept;
+		};
 	};
 };

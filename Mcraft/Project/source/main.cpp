@@ -30,24 +30,23 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(PADS::LEAN_R, true);//UIのみ
 	Pad->SetIsUseButton(PADS::RELOAD, true);//UIのみ
 	Pad->SetIsUseButton(PADS::INTERACT, true);//UIのみ
-	Pad->SetIsUseButton(PADS::THROW, false);
-	Pad->SetIsUseButton(PADS::MELEE, false);
+	Pad->SetIsUseButton(PADS::THROW, true);
+	Pad->SetIsUseButton(PADS::MELEE, true);
 	Pad->SetIsUseButton(PADS::JUMP, true);
-	Pad->SetIsUseButton(PADS::INVENTORY, false);
-	Pad->SetIsUseButton(PADS::RUN, false);
+	Pad->SetIsUseButton(PADS::INVENTORY, true);
+	Pad->SetIsUseButton(PADS::RUN, true);
 	Pad->SetIsUseButton(PADS::WALK, true);
 	Pad->SetIsUseButton(PADS::SHOT, true);
 	Pad->SetIsUseButton(PADS::AIM, true);
 	Pad->SetIsUseButton(PADS::ULT, true);
-	Pad->SetIsUseButton(PADS::SQUAT, false);
-	Pad->SetIsUseButton(PADS::PRONE, false);
-	Pad->SetIsUseButton(PADS::CHECK, false);
+	Pad->SetIsUseButton(PADS::SQUAT, true);
+	Pad->SetIsUseButton(PADS::PRONE, true);
+	Pad->SetIsUseButton(PADS::CHECK, true);
 	//
 	auto* DXLib_refParts = DXLib_ref::Instance();
 	if (!DXLib_refParts->StartLogic()) { return 0; }
 	//追加設定
-	std::string Name = "AA"+std::to_string(GetNowHiPerformanceCount());
-	SetMainWindowText(Name.c_str());						//タイトル
+	SetMainWindowText("Phantom of the Bunker");						//タイトル
 	//SetUseHalfLambertLighting(TRUE);
 	MV1SetLoadModelReMakeNormal(TRUE);
 	//SetUsePixelLighting(TRUE);
@@ -55,10 +54,23 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetTextureAddressMode(DX_TEXADDRESS_WRAP);
 	//
 	FPS_n2::Player::PlayerManager::Create();
-	FPS_n2::CommonBattleResource::Create();
+	FPS_n2::Sceneclass::CommonBattleResource::Create();
 	FPS_n2::BackGround::BackGroundClass::Create();
 	FPS_n2::NetWorkBrowser::Create();
 	FPS_n2::Sceneclass::ButtonControl::Create();
+	FPS_n2::Sceneclass::GunAnimManager::Create();
+	FPS_n2::Sceneclass::ModDataManager::Create();
+	FPS_n2::Sceneclass::AmmoDataManager::Create();
+	//
+	auto* SaveDataParts = SaveDataClass::Instance();
+	auto* BGM = BGMPool::Instance();
+	auto* OptionParts = OPTION::Instance();
+	//初期開放
+	SaveDataParts->Save();
+	//BGM
+	BGM->Add(0, "data/Sound/BGM/Title.wav");
+	BGM->Add(1, "data/Sound/BGM/Vivaldi_Winter.wav", true);
+	BGM->SetVol(OptionParts->GetParamFloat(EnumSaveParam::BGM));
 	//シーン
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto LoadScenePtr = std::make_shared<FPS_n2::Sceneclass::LoadScene>();

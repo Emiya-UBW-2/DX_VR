@@ -5,17 +5,24 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			MainGameScene::Load_Sub(void) noexcept {
+			//ロード
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			//BG
 			BackGround->Load();
 			//
+			GunAnimManager::Instance()->Load("data/CharaAnime/");
+			//
 			BattleResourceMngr->Load();
-			PlayerMngr->Init(NetWork::Player_num);
-			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-				BattleResourceMngr->LoadChara("Suit", (PlayerID)index);
+			PlayerMngr->Init(NetWork::Player_num, 0);
+
+			BattleResourceMngr->LoadChara("Suit", GetMyPlayerID());
+			{
+				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+				Chara->SetPlayMode(false);
 			}
+			LoadGun("M16-4", GetMyPlayerID(), false, 0);
 			//UI
 			this->m_UIclass.Load();
 			PauseMenuControl::LoadPause();
@@ -42,7 +49,7 @@ namespace FPS_n2 {
 			//info
 			constexpr float Max = std::min(std::min(BackGround::DrawMaxXPlus, BackGround::DrawMaxZPlus), BackGround::DrawMaxYPlus) * BackGround::CellScale;
 			float SQRTMax = Max;
-			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 0.3f, SQRTMax);
+			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 0.03f, SQRTMax);
 			//DoF
 			PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.3f, Scale_Rate * 5.f, Scale_Rate * 0.1f, SQRTMax * 2.f);
 			//Fog
@@ -52,19 +59,18 @@ namespace FPS_n2 {
 			//
 			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 				auto& p = PlayerMngr->GetPlayer(index);
-				auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
-				c->SetViewID(0);
+				auto& c = (std::shared_ptr<Sceneclass::CharacterClass>&)p->GetChara();
 				//人の座標設定
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 100.f*Scale_Rate, 0.f);
+					pos_t = Vector3DX::vget(0.f, 1.f * Scale_Rate, 0.f);
 
-					Vector3DX EndPos = pos_t - Vector3DX::up() * 500.f * Scale_Rate;
-					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 500.f * Scale_Rate, &EndPos)) {
+					Vector3DX EndPos = pos_t - Vector3DX::up() * 2.f * Scale_Rate;
+					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 2.f * Scale_Rate, &EndPos)) {
 						pos_t = EndPos;
 					}
-					c->ValueSet((PlayerID)index, CharaTypeID::Team);
-					c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
+					c->ValueSet((PlayerID)index, true, CharaTypeID::Team);
+					c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t, 0);
 				}
 				p->GetAI()->Init((PlayerID)index);
 			}
@@ -78,6 +84,7 @@ namespace FPS_n2 {
 			PauseMenuControl::SetPause();
 			FadeControl::SetFade();
 			this->m_IsEnd = false;
+			EffectControl::Init();
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* PostPassParts = PostPassEffect::Instance();
@@ -129,7 +136,7 @@ namespace FPS_n2 {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 
-			auto& Chara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+			auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 
 			auto* Pad = PadControl::Instance();
 			Pad->SetMouseMoveEnable(true);
@@ -187,11 +194,18 @@ namespace FPS_n2 {
 					MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
 					MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
 					MyInput.SetInputPADS(PADS::MOVE_D, Pad->GetKey(PADS::MOVE_D).press());
-
-					MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press());
-					MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press());
+					MyInput.SetInputPADS(PADS::RUN, Pad->GetKey(PADS::RUN).press());
+					MyInput.SetInputPADS(PADS::LEAN_L, Pad->GetKey(PADS::LEAN_L).press());
+					MyInput.SetInputPADS(PADS::LEAN_R, Pad->GetKey(PADS::LEAN_R).press());
+					MyInput.SetInputPADS(PADS::MELEE, Pad->GetKey(PADS::MELEE).press());
+					MyInput.SetInputPADS(PADS::RELOAD, Pad->GetKey(PADS::RELOAD).press());
+					MyInput.SetInputPADS(PADS::INTERACT, Pad->GetKey(PADS::INTERACT).press());
+					MyInput.SetInputPADS(PADS::SQUAT, Pad->GetKey(PADS::SQUAT).press());
+					MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press() && !DXDraw::Instance()->IsPause());
+					MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press() && !DXDraw::Instance()->IsPause());
 					MyInput.SetInputPADS(PADS::ULT, Pad->GetKey(PADS::ULT).press());
-
+					MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
+					MyInput.SetInputPADS(PADS::CHECK, Pad->GetKey(PADS::CHECK).press());
 					MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
 					MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
 				}
@@ -211,9 +225,8 @@ namespace FPS_n2 {
 					bool IsServerNotPlayer = !m_NetWorkController->GetClient() && !m_NetWorkController->GetServerPlayer();
 					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 						auto& p = PlayerMngr->GetPlayer(index);
-						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+						auto& c = (std::shared_ptr<Sceneclass::CharacterClass>&)p->GetChara();
 						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)index);
-						c->SetViewID(GetMyPlayerID());
 						if (index == GetMyPlayerID() && !IsServerNotPlayer) {
 							c->SetInput(Ret.GetInput(), true);//自身が動かすもの
 						}
@@ -238,14 +251,13 @@ namespace FPS_n2 {
 				else {//オフライン
 					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 						auto& p = PlayerMngr->GetPlayer(index);
-						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
-						c->SetViewID(GetMyPlayerID());
+						auto& c = (std::shared_ptr<Sceneclass::CharacterClass>&)p->GetChara();
 						if (index == GetMyPlayerID()) {
 							c->SetInput(MyInput, true);
 						}
 						else {
 							InputControl OtherInput;
-							p->GetAI()->Execute(&OtherInput);
+							p->GetAI()->Execute(&OtherInput, false);
 							c->SetInput(OtherInput, true);
 						}
 						//ダメージイベント処理
@@ -255,7 +267,7 @@ namespace FPS_n2 {
 				//ダメージイベント
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 					auto& p = PlayerMngr->GetPlayer(index);
-					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+					auto& c = (std::shared_ptr<Sceneclass::CharacterClass>&)p->GetChara();
 					for (int j = 0, Num = static_cast<int>(this->m_DamageEvents.size()); j < Num; ++j) {
 						if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)])) {
 							std::swap(this->m_DamageEvents.back(), m_DamageEvents[static_cast<size_t>(j)]);
@@ -269,14 +281,15 @@ namespace FPS_n2 {
 			//Execute
 			ObjMngr->ExecuteObject();
 			ObjMngr->LateExecuteObject();
+			UpdateBullet();							//弾の更新
 			//視点
 			{
-				auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+				auto& ViewChara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 				//カメラ
-				Vector3DX CamPos = ViewChara->GetEyePosition();
+				Vector3DX CamPos = ViewChara->GetEyeMatrix().pos() + CameraShake::Instance()->GetCamShake();
 				Vector3DX CamVec = CamPos + ViewChara->GetEyeMatrix().zvec() * -1.f;
 				CamVec += CameraShake::Instance()->GetCamShake();
-				CamPos += CameraShake::Instance()->GetCamShake()*2.f;
+				CamPos += CameraShake::Instance()->GetCamShake() * 2.f;
 #ifdef DEBUG
 				if (CheckHitKeyWithCheck(KEY_INPUT_F1) != 0) {
 					DBG_CamSel = -1;
@@ -320,12 +333,39 @@ namespace FPS_n2 {
 				}
 #endif
 				DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
+				auto fov_t = DrawParts->GetMainCamera().GetCamFov();
+				auto near_t = DrawParts->GetMainCamera().GetCamNear();
+				auto far_t = DrawParts->GetMainCamera().GetCamFar();
+				//fov
+				{
+					auto* OptionParts = OPTION::Instance();
+					float fov = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
+					if (Chara->GetIsADS()) {
+						fov -= deg2rad(15);
+						fov /= std::max(1.f, Chara->GetSightZoomSize() / 2.f);
+					}
+					else if (Chara->GetRun()) {
+						fov += deg2rad(5);
+					}
+					if (Chara->GetMeleeSwitch()) {
+						fov += deg2rad(15);
+						Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
+					}
+					else if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetShotSwitch()) {
+						fov -= deg2rad(5);
+						Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
+					}
+					else {
+						Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
+					}
+				}
+				DrawParts->SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
 			}
 			//コンカッション
 			{
-				if (Chara->PopConcussionSwitch()) {
-					m_Concussion = 1.f;
-				}
+				//if (Chara->PopConcussionSwitch()) {
+				//	m_Concussion = 1.f;
+				//}
 				DrawParts->Set_is_Blackout(m_Concussion > 0.f);
 				if (m_Concussion == 1.f) {
 					CameraShake::Instance()->SetCamShake(0.5f, 0.01f * Scale_Rate);
@@ -359,12 +399,14 @@ namespace FPS_n2 {
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=0.7ms");
 #endif // DEBUG
+			EffectControl::Execute();
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			//使い回しオブジェ系
 			BackGround->Dispose();
+			GunsModify::DisposeSlots();
 			//
 			if (m_NetWorkController) {
 				m_NetWorkController->Dispose();
@@ -380,6 +422,7 @@ namespace FPS_n2 {
 				DrawParts->Set_zoom_lens(1.f);
 			}
 			UISystem::Instance()->DelUI(m_UILayer);
+			EffectControl::Dispose();
 			if (this->m_IsEnd) {//タイトルに戻る
 				SetNextSelect(0);
 			}
@@ -429,9 +472,48 @@ namespace FPS_n2 {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 			}
 			SetFogEnable(FALSE);
+
+
+			//シェーダー描画用パラメーターセット
+			auto* DrawParts = DXDraw::Instance();
+
+			auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+			if (Chara->GetGunPtrNow()) {
+				Chara->GetGunPtrNow()->UpdateReticle();
+				float Zoom = Chara->GetSightZoomSize();
+				bool IsActive = Chara->GetGunPtrNow()->IsActiveReticle() && Zoom > 1.f;
+				DrawParts->Set_is_lens(IsActive);
+				DrawParts->Set_zoom_lens(std::max(1.f, Zoom / 2.f));
+				if (IsActive) {
+					DrawParts->Set_xp_lens(Chara->GetGunPtrNow()->GetLensXPos());
+					DrawParts->Set_yp_lens(Chara->GetGunPtrNow()->GetLensYPos());
+					DrawParts->Set_size_lens(Chara->GetGunPtrNow()->GetLensSize());
+				}
+			}
+			else {
+				DrawParts->Set_is_lens(false);
+				DrawParts->Set_zoom_lens(1.f);
+			}
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+			if (!Chara->IsAlive()) { return; }
+			//レティクル表示
+			if (Chara->GetGunPtrNow()) {
+				if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&
+					!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
+					auto* WindowParts = WindowSystem::DrawControl::Instance();
+					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph(),
+						static_cast<int>(Chara->GetGunPtrNow()->GetReticleXPos() * DrawParts->GetUIY(1980) / DrawParts->GetScreenY(1980)),
+						static_cast<int>(Chara->GetGunPtrNow()->GetReticleYPos() * DrawParts->GetUIY(1080) / DrawParts->GetScreenY(1080)),
+						1.f, Chara->GetLeanRad(), true);
+				}
+			}
+
+
 			FadeControl::DrawFade();
 			//UI
 			if (!DXDraw::Instance()->IsPause()) {
@@ -441,7 +523,6 @@ namespace FPS_n2 {
 			//auto* NetBrowser = NetWorkBrowser::Instance();
 			//NetBrowser->Draw();
 			if (m_NetWorkController) {
-				auto* DrawParts = DXDraw::Instance();
 				if (m_NetWorkController->GetPing() >= 0.f) {
 					WindowSystem::SetMsg(UIWidth, DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
 				}
@@ -458,6 +539,58 @@ namespace FPS_n2 {
 		void MainGameScene::DrawUI_In_Sub(void) noexcept {
 			if (DXDraw::Instance()->IsPause()) {
 				PauseMenuControl::DrawPause();
+			}
+		}
+		//load
+		void MainGameScene::LoadGun(const std::string& FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept {
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto* BattleResourceMngr = CommonBattleResource::Instance();
+			BattleResourceMngr->LoadCharaGun(FolderName, ID, Sel);
+			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID)->GetChara();
+			GunsModify::CreateSelData(c->GetGunPtr(Sel), IsPreset);
+			c->GetGunPtr(Sel)->Init_Gun();
+		}
+		void MainGameScene::UpdateBullet(void) noexcept {
+			auto* ObjMngr = ObjectManager::Instance();
+			auto* DrawParts = DXDraw::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* SE = SoundPool::Instance();
+
+			int loop = 0;
+			while (true) {
+				auto ammo = ObjMngr->GetObj((int)ObjType::Ammo, loop);
+				if (ammo != nullptr) {
+					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
+					if (a->IsActive()) {
+						//AmmoClass
+						Vector3DX repos_tmp = a->GetRePos();
+						Vector3DX pos_tmp = a->GetMove().GetPos();
+
+						Vector3DX norm_tmp;
+						auto ColResGround = BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
+						bool is_HitAll = false;
+						for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
+							if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }
+							HitPoint Damage = a->GetDamage();
+							ArmerPoint ArmerDamage = 0;
+							if (tgt->CheckDamageRay(&Damage, &ArmerDamage, true, (PlayerID)a->GetShootedID(), repos_tmp, &pos_tmp)) {
+								a->Penetrate(Damage, ArmerDamage);
+								is_HitAll = true;
+							}
+						}
+						if (ColResGround && !is_HitAll) {
+							a->HitGround(pos_tmp);
+							EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale_Rate);
+							SE->Get((int)SoundEnum::HitGround0 + GetRand(5 - 1)).Play_3D(0, pos_tmp, Scale_Rate * 10.f);
+						}
+					}
+				}
+				else {
+					break;
+				}
+				loop++;
 			}
 		}
 	}

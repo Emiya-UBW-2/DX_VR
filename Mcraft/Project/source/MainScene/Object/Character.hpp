@@ -1,87 +1,150 @@
 #pragma once
-#pragma warning(disable:4464)
 #include	"../../Header.hpp"
 #include "CharacterEnum.hpp"
 #include "Character_before.hpp"
-#include "../../MainScene/BackGround/BackGround.hpp"
+#include "CharaAnimData.hpp"
 
 namespace FPS_n2 {
-	namespace CharacterObject {
+	namespace Sceneclass {
+
 		class CharacterClass :
 			public ObjectBaseClass,
 			public StaminaControl,
+			public LifeControl,
+			public KeyControl,
+			public EffectControl,
+			public LaserSightClass,
 			public HitBoxControl,
-			public CharaMove
-#ifdef _USE_EFFEKSEER_
-			, public EffectControl
-#endif
+			public WalkSwingControl,
+			public EyeSwingControl,
+			public StackLeftHandControl,
+			public MagStockControl,
+			public HitReactionControl,
+			public RagDollControl,
+			public ULTControl,
+			public GunReadyControl,
+			public GunPtrControl,
+			public AutoAimControl
 		{
 		private:
+			bool												m_ActionFirstFrame{ false };
+			CharaActionID										m_CharaAction{ CharaActionID::Ready };
+			std::array<ArmMovePerClass, (int)EnumGunAnimType::Max>	m_Arm;
+			bool												m_MagHand{ false };
+			ArmMovePerClass										m_MagArm;
+			float												m_StuckGunTimer{ 0.f };
+			bool												m_IsStuckGun{ false };
+			float												m_AmmoHandR{ 0.f };
+			float												m_AmmoHand{ 0.f };
+			int													m_ReadyAnimPhase{ 0 };
+			float												m_ReadyAnim{ -1.f };
+			bool												m_IsChanging{ false };
+			bool												m_IsChange{ false };
+			bool												m_HeadShotSwitch{ false };
+			float												m_ULTUp{ 0.f };
+			bool												m_ULTActive{ false };
+			float												m_HPRec{ 0.f };
 			//入力
+			float												m_MeleeCoolDown{ 0.f };
+			bool												m_ArmBreak{ false };
+			switchs												m_SightChange;
+			float												m_SoundPower{ 0.f };			//サウンド
 			int													m_CharaSound{ -1 };			//サウンド
+			Vector3DX											m_RecoilRadAdd;
+			Pendulum2D											m_SlingZrad;
+			std::array<float, 2>								m_SlingPer{};
+			std::array<Matrix4x4DX, 2>							m_SlingMat;
+			ArmMovePerClass										m_ULTBar;
 			CharaTypeID											m_CharaType{};
-			bool												m_ConcussionSwitch{ false };
+			bool												m_IsMainGame{ false };
+			int													m_ArmerStock{ 0 };
+			int													m_MorphineStock{ 0 };
+			bool												m_AmmoLoadStart{ false };
+			bool												m_AmmoLoadSwitch{ false };
+			int													m_AmmoLoadCount{ 0 };
 
-			DamageEventControl									m_Damage;
+			bool											m_IsHardMode{ false };
+
 			bool												m_MoveOverRideFlag{ false };
 			moves												m_OverRideInfo;
-			Vector3DX											m_EyePosition;
-
+		private:
 			PlayerID											m_MyID{ 0 };
-			PlayerID											m_ViewID{ 0 };
 		public:
-			bool												CanLookTarget{ true };
-		public://ゲッター
 			const auto& GetMyPlayerID(void) const noexcept { return this->m_MyID; }
-			const auto& GetDamageEvent(void) const noexcept { return this->m_Damage; }
-			const auto& GetEyePosition(void) const noexcept { return this->m_EyePosition; }
-			const auto& GetCharaType(void) const noexcept { return this->m_CharaType; }
-			auto			PopConcussionSwitch(void) noexcept {
-				auto Prev = m_ConcussionSwitch;
-				m_ConcussionSwitch = false;
-				return Prev;
-			}
-			Vector3DX		GetFramePosition(CharaFrame frame) const noexcept { return GetObj_const().GetFramePosition(GetFrame(static_cast<int>(frame))); }
-		public://セッター
-			void			ValueSet(PlayerID pID, CharaTypeID value) noexcept {
-				this->m_CharaType = value;
-				this->m_MyID = pID;
-			}
-			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.AddDamageEvent(pRet); }
 			void			SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
-			void			SetViewID(PlayerID value) noexcept { this->m_ViewID = value; }
-			bool			SetDamageEvent(const DamageEvent& value) noexcept;
+
+			auto	GetFrameWorldMat(CharaFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
+			auto	GetFrameLocalMat(CharaFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix(GetFrame(static_cast<int>(frame))); }
+
 			void			SetMoveOverRide(const moves& o) noexcept {
 				this->m_MoveOverRideFlag = true;
 				this->m_OverRideInfo = o;
 			}
-		public: //更新関連
-			bool			CheckDamageRay(HitPoint* Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
-			void			MovePoint(float pxRad, float pyRad, const Vector3DX& pPos) noexcept;
-			void			SetInput(const InputControl& pInput, bool pReady) noexcept;
+		public:
+			bool												CanLookTarget{ true };
+
+			bool			GetArmer() noexcept {
+				auto prev = this->m_ArmerStock;
+				this->m_ArmerStock = 1;
+				return this->m_ArmerStock != prev;
+			}
+			void			SetPlayMode(bool value) noexcept { m_IsHardMode = value; }
+		private:
+			const Matrix4x4DX GetCharaDir(void) const noexcept;
+
+			const auto		GetCharaPosition(void) const noexcept { return this->GetMove().GetPos(); }
+			const auto		IsAimPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() <= 0.1f); }
+			const auto		IsLowReadyPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() >= 0.95f); }
+		private:
+			void			Shot_Start() noexcept;
+			void			Reload_Start() noexcept;
+		public://ゲッター
+			const Matrix4x4DX GetEyeMatrix(void) const noexcept;
+			const auto& GetGunSelPer(void) const noexcept { return this->m_ULTBar.Per(); }
+			const auto& GetCharaType(void) const noexcept { return this->m_CharaType; }
+			const auto& GetCharaAction(void) const noexcept { return this->m_CharaAction; }
+			auto& GetSoundPower(void) noexcept { return this->m_SoundPower; }
+			const auto		GetMeleeSwitch(void) const noexcept { return m_MeleeCoolDown == 1.f; }
+			const auto		GetRecoilRadAdd(void) const noexcept {
+				auto* DrawParts = DXDraw::Instance();
+				return this->m_RecoilRadAdd * (60.f / DrawParts->GetFps());
+			}
+			const auto		PopHeadShotSwitch() noexcept {
+				auto ret = this->m_HeadShotSwitch;
+				this->m_HeadShotSwitch = false;
+				return ret;
+			}
+			const auto& GetArmerStock(void) const noexcept { return this->m_ArmerStock; }
+			const auto& GetMorphineStock(void) const noexcept { return this->m_MorphineStock; }
+		public://セッター
+			bool			SetDamageEvent(const DamageEvent& value) noexcept;
+			void			Heal(HitPoint value, bool SwitchOn) noexcept {
+				LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, value, 0);
+				if (SwitchOn) {
+					m_ArmBreak = false;
+				}
+			}
+			const bool		CheckDamageRay(HitPoint* Damage, ArmerPoint* ArmerDamage, bool CheckBodyParts, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
 		private: //更新関連
 			void			ExecuteInput(void) noexcept;
-			void			ExecuteAction(void) noexcept;
-			void			ExecuteAnim(void) noexcept;
 			void			ExecuteSound(void) noexcept;
 			void			ExecuteMatrix(void) noexcept;
-		private: //継承
-			int				GetFrameNum(void) noexcept override { return static_cast<int>(CharaFrame::Max); }
-			const char* GetFrameStr(int id) noexcept override { return CharaFrameName[id]; }
-
-			int				GetShapeNum(void) noexcept override { return static_cast<int>(CharaShape::Max); }
-			const char* GetShapeStr(int id) noexcept override { return CharaShapeName[id]; }
 		public: //コンストラクタ、デストラクタ
 			CharacterClass(void) noexcept {
-				this->m_objType = static_cast<int>(ObjType::Human);
+				this->m_objType = (int)ObjType::Human;
 				this->m_IsDraw = true;
 			}
-			CharacterClass(const CharacterClass&) = delete;
-			CharacterClass(CharacterClass&& o) = delete;
-			CharacterClass& operator=(const CharacterClass&) = delete;
-			CharacterClass& operator=(CharacterClass&& o) = delete;
+			~CharacterClass(void) noexcept {}
+		public:
+			void			ValueSet(PlayerID pID, bool IsMainGame, CharaTypeID value) noexcept;
+			void			MovePoint(float pxRad, float pyRad, const Vector3DX& pPos, int GunSel) noexcept;
+			void			SetInput(const InputControl& pInput, bool pReady) noexcept;
+		private:
+			int	GetFrameNum() noexcept override { return (int)CharaFrame::Max; }
+			const char* GetFrameStr(int id) noexcept override { return CharaFrameName[id]; }
 
-			virtual ~CharacterClass(void) noexcept {}
+			int	GetShapeNum() noexcept override { return (int)CharaShape::Max; }
+			const char* GetShapeStr(int id) noexcept override { return CharaShapeName[id]; }
 		private: //継承
 			void			Init_Sub(void) noexcept override;
 			void			FirstExecute(void) noexcept override;
@@ -95,34 +158,9 @@ namespace FPS_n2 {
 					this->m_IsDraw |= true;
 				}
 			}
-			void			Draw(bool isDrawSemiTrans) noexcept override {
-				if (this->m_IsActive && this->m_IsDraw) {
-					if (m_MyID == m_ViewID) {
-						if (isDrawSemiTrans) {
-							this->GetObj().DrawModel();
-						}
-					}
-					else {
-						for (int i = 0, Num = this->GetObj_const().GetMeshNum(); i < Num; ++i) {
-							if (this->GetObj_const().GetMeshSemiTransState(i) == isDrawSemiTrans) {
-								this->GetObj().DrawMesh(i);
-							}
-						}
-						//hitbox描画
-						//HitBoxControl::DrawHitBox();
-					}
-				}
-			}
-			void			DrawShadow(void) noexcept override {
-				if (this->m_IsActive) {
-					this->GetObj().DrawModel();
-				}
-			}
-			void			Dispose_Sub(void) noexcept override {
-#ifdef _USE_EFFEKSEER_
-				EffectControl::Dispose();
-#endif
-			}
+			void			Draw(bool isDrawSemiTrans) noexcept override;
+			void			DrawShadow(void) noexcept override;
+			void			Dispose_Sub(void) noexcept override;
 		};
-	}
+	};
 };

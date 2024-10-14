@@ -1061,7 +1061,7 @@ namespace FPS_n2 {
 		bool		BackGroundClass::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
 			auto& cell = m_CellxN.front();
 			auto Start = cell.GetPoint(StartPos);
-			auto End = cell.GetPoint(StartPos);// *EndPos
+			auto End = cell.GetPoint(*EndPos);
 
 			for (int xm = -1; xm <= 1; ++xm) {
 				for (int ym = -1; ym <= 1; ++ym) {
@@ -1095,7 +1095,7 @@ namespace FPS_n2 {
 			std::vector<MV1_COLL_RESULT_POLY> kabes;// 壁ポリゴンと判断されたポリゴンの構造体のアドレスを保存しておく
 			auto& cell = m_CellxN.front();
 			auto Start = cell.GetPoint(StartPos);
-			auto End = cell.GetPoint(*EndPos);// *EndPos
+			auto End = cell.GetPoint(*EndPos);
 
 			for (int xm = -3; xm <= 3; ++xm) {
 				for (int ym = 3; ym <= 6; ++ym) {
