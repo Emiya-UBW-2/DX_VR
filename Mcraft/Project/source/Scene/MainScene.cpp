@@ -437,9 +437,6 @@ namespace FPS_n2 {
 			if (!DXDraw::Instance()->IsPause()) {
 				this->m_UIclass.Draw();
 			}
-			else {
-				PauseMenuControl::DrawPause();
-			}
 			//’ÊMÝ’è
 			//auto* NetBrowser = NetWorkBrowser::Instance();
 			//NetBrowser->Draw();
@@ -456,6 +453,11 @@ namespace FPS_n2 {
 						WindowSystem::SetMsg(UIWidth, DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
 					}
 				}
+			}
+		}
+		void MainGameScene::DrawUI_In_Sub(void) noexcept {
+			if (DXDraw::Instance()->IsPause()) {
+				PauseMenuControl::DrawPause();
 			}
 		}
 	}
