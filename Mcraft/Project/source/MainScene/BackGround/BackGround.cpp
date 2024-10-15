@@ -1264,21 +1264,48 @@ namespace FPS_n2 {
 			//*/
 		}
 		void		BackGroundClass::SaveCellsFile() noexcept {
-			auto& cell = m_CellxN.front();
+			{
+				auto& cell = m_CellxN.front();
 
-			m_CellBase.resize(256 * 256 * 256);
-			for (int xm = 0; xm < cell.All; ++xm) {
-				for (int ym = 0; ym < cell.All; ++ym) {
-					for (int zm = 0; zm < cell.All; ++zm) {
-						m_CellBase[cell.GetCellNum(xm, ym, zm)] = cell.SetCellBuf(xm, ym, zm).m_Cell;
+				m_CellBase.resize(256 * 256 * 256);
+				for (int xm = 0; xm < cell.All; ++xm) {
+					for (int ym = 0; ym < cell.All; ++ym) {
+						for (int zm = 0; zm < cell.All; ++zm) {
+							m_CellBase[cell.GetCellNum(xm, ym, zm)] = cell.SetCellBuf(xm, ym, zm).m_Cell;
+						}
 					}
 				}
-			}
 
-			std::ofstream fout{};
-			fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
-			fout.write((char*)m_CellBase.data(), sizeof(m_CellBase.at(0)) * (256 * 256 * 256));
-			fout.close();  //ファイルを閉じる
+				std::ofstream fout{};
+				fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
+				fout.write((char*)m_CellBase.data(), sizeof(m_CellBase.at(0)) * (256 * 256 * 256));
+				fout.close();  //ファイルを閉じる
+			}
+			//一部を切り取って保存
+			{
+				auto& cell = m_CellxN.front();
+
+				int XMax = 128;
+				int YMax = 256;
+				int ZMax = 256;
+				m_CellBase.resize(XMax * YMax * ZMax);
+				for (int xm = -XMax / 2; xm < XMax / 2; ++xm) {
+					for (int ym = -YMax / 2; ym < YMax / 2; ++ym) {
+						for (int zm = -ZMax / 2; zm < ZMax / 2; ++zm) {
+							m_CellBase[static_cast<size_t>((xm + XMax / 2) * YMax * ZMax + (ym + YMax / 2) * ZMax + (zm + ZMax / 2))] =
+								cell.SetCellBuf(xm + cell.Half, ym + cell.Half, zm + cell.Half).m_Cell;
+						}
+					}
+				}
+
+				std::ofstream fout{};
+				fout.open("data/Build/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
+				fout.write((char*)&XMax, sizeof(XMax));
+				fout.write((char*)&YMax, sizeof(YMax));
+				fout.write((char*)&ZMax, sizeof(ZMax));
+				fout.write((char*)m_CellBase.data(), sizeof(m_CellBase.at(0)) * (XMax * YMax * ZMax));
+				fout.close();  //ファイルを閉じる
+			}
 		}
 		//
 		void		BackGroundClass::SettingChange() noexcept {
