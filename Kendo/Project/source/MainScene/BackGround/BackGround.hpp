@@ -82,6 +82,7 @@ namespace FPS_n2 {
 				this->m_ObjGround.DrawModel();
 			}
 			void			Shadow_Draw(void) noexcept {
+				this->m_ObjGround.DrawModel();
 			}
 			void			Draw(void) noexcept {
 				this->m_ObjGround.DrawModel();

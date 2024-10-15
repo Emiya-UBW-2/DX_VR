@@ -664,7 +664,7 @@ namespace FPS_n2 {
 				vec.y = (0.f);
 			}
 			else {
-				vec.y = (this->m_move.GetVec().y + (M_GR / (DrawParts->GetFps() * DrawParts->GetFps())));
+				vec.y = (this->m_move.GetVec().y + (GravityRate / (DrawParts->GetFps() * DrawParts->GetFps())));
 			}
 			this->m_move.SetVec(vec);
 			pos += this->m_move.GetVec();

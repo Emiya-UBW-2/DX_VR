@@ -32,11 +32,11 @@ namespace FPS_n2 {
 			//
 			BattleResourceMngr->Set();
 
-			SetShadowScale(1.f);
+			SetShadowScale(0.75f);
 			//
 			BackGround->Init();
 			//
-			Vector3DX LightVec = Vector3DX::vget(1.3f, -0.5f, 0.05f); LightVec = LightVec.normalized();
+			Vector3DX LightVec = Vector3DX::vget(1.f, -0.5f, 0.05f); LightVec = LightVec.normalized();
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
 			SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 
@@ -193,8 +193,8 @@ namespace FPS_n2 {
 					{
 						Vector2DX MSVec = Chara->GetBambooVec();
 						MSVec.Set(
-							std::clamp(MSVec.x + Pad->GetLS_Y() * deg2rad(0.1f), deg2rad(-10), deg2rad(10)),
-							std::clamp(MSVec.y + Pad->GetLS_X() * deg2rad(0.1f), deg2rad(-30), deg2rad(30))
+							std::clamp(MSVec.x + Pad->GetLS_Y() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-10), deg2rad(10)),
+							std::clamp(MSVec.y + Pad->GetLS_X() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-30), deg2rad(30))
 						);
 						MyInput.SetxRad(MSVec.x);
 						MyInput.SetyRad(MSVec.y);
@@ -259,8 +259,8 @@ namespace FPS_n2 {
 							{
 								Vector2DX MSVec;
 								MSVec.Set(
-									std::clamp(c->GetBambooVec().x + Pad->GetLS_Y() * deg2rad(0.1f), deg2rad(-10), deg2rad(10)),
-									std::clamp(c->GetBambooVec().y + Pad->GetLS_X() * deg2rad(0.1f), deg2rad(-30), deg2rad(30))
+									std::clamp(c->GetBambooVec().x + Pad->GetLS_Y() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-10), deg2rad(10)),
+									std::clamp(c->GetBambooVec().y + Pad->GetLS_X() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-30), deg2rad(30))
 								);
 								MyInput.SetxRad(MSVec.x);
 								MyInput.SetyRad(MSVec.y);
