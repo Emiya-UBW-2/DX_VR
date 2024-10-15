@@ -299,18 +299,20 @@ namespace FPS_n2 {
 			//
 			bool Press_Shot = KeyControl::GetInputControl().GetPADSPress(PADS::SHOT) && !m_IsChange;
 			bool Press_Reload = KeyControl::GetInputControl().GetPADSPress(PADS::RELOAD) && !m_IsChange;
-			if (GetGunPtrNow()->GetAmmoNumTotal() == 0 && GetGunPtrNow()->GetGunAnime() == GunAnimeID::Base) {
+			if (GetGunPtrNow() && GetGunPtrNow()->GetAmmoNumTotal() == 0 && GetGunPtrNow()->GetGunAnime() == GunAnimeID::Base) {
 				Press_Reload |= Press_Shot;				//打ち切りで自動リロード
 			}
 			bool Press_Aim = KeyControl::GetInputControl().GetPADSPress(PADS::AIM) && !m_IsChange;
-			switch (GetGunPtrNow()->GetShotType()) {
-			case SHOTTYPE::BOLT:
-				if (GetGunPtrNow()->GetGunAnime() > GunAnimeID::Shot) {//撃てない状態
-					Press_Aim = false;
+			if (GetGunPtrNow()) {
+				switch (GetGunPtrNow()->GetShotType()) {
+				case SHOTTYPE::BOLT:
+					if (GetGunPtrNow()->GetGunAnime() > GunAnimeID::Shot) {//撃てない状態
+						Press_Aim = false;
+					}
+					break;
+				default:
+					break;
 				}
-				break;
-			default:
-				break;
 			}
 			//ターゲットが見える場合かまえっぱなし
 			if (m_IsMainGame && !m_IsChanging) {
@@ -327,7 +329,7 @@ namespace FPS_n2 {
 			if (PrevAction == m_CharaAction) {
 				switch (m_CharaAction) {
 				case CharaActionID::Ready:
-					if (m_ActionFirstFrame) {
+					if (m_ActionFirstFrame && GetGunPtrNow()) {
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::Base);
 					}
 					//アーマー着用/弾込め
@@ -351,7 +353,7 @@ namespace FPS_n2 {
 						GunReadyControl::SetAimOrADS();
 					}
 					//リロード/マガジンチェック
-					if (!KeyControl::GetRun() && Press_Reload) {
+					if (!KeyControl::GetRun() && Press_Reload && GetGunPtrNow()) {
 						bool IsCheck = GetGunPtrNow()->GetIsMagFull();
 						if (IsGun0Select() && GetGunPtrNow()->GetModData()->GetReloadType() == RELOADTYPE::MAG) {
 							IsCheck = (GetGunPtrNow()->GetAmmoNum() >= MagStockControl::GetMag(0));
@@ -376,7 +378,7 @@ namespace FPS_n2 {
 						GunReadyControl::SetReady();
 					}
 					//
-					if (GetGunPtrNow()->GetGunAnime() == GunAnimeID::Shot) {
+					if (GetGunPtrNow() && GetGunPtrNow()->GetGunAnime() == GunAnimeID::Shot) {
 						bool ischeck = true;
 						switch (GetGunPtrNow()->GetShotType()) {
 						case SHOTTYPE::FULL:
@@ -411,22 +413,22 @@ namespace FPS_n2 {
 					}
 					break;
 				case CharaActionID::Cocking:
-					if (m_ActionFirstFrame) {
+					if (m_ActionFirstFrame && GetGunPtrNow()) {
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::Cocking);
 					}
 					//
-					if (GetGunPtrNow()->GetGunAnime() != GunAnimeID::Cocking) {
+					if (GetGunPtrNow() && GetGunPtrNow()->GetGunAnime() != GunAnimeID::Cocking) {
 						m_CharaAction = CharaActionID::Ready;
 					}
 					//姿勢指定
 					GunReadyControl::SetAim();
 					break;
 				case CharaActionID::Check:
-					if (m_ActionFirstFrame) {
+					if (m_ActionFirstFrame && GetGunPtrNow()) {
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::CheckStart);
 					}
 					//
-					if (!GetGunPtrNow()->GetChecking()) {
+					if (GetGunPtrNow() && !GetGunPtrNow()->GetChecking()) {
 						m_CharaAction = CharaActionID::Ready;
 					}
 					//姿勢指定
@@ -559,7 +561,7 @@ namespace FPS_n2 {
 					break;
 				}
 				//近接
-				if (!KeyControl::GetRun() && KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && m_MeleeCoolDown == 0.f && IsAimPer() && !GetIsADS()) {
+				if (!KeyControl::GetRun() && KeyControl::GetInputControl().GetPADSPress(PADS::MELEE) && m_MeleeCoolDown == 0.f && IsAimPer() && !GetIsADS() && GetGunPtrNow()) {
 					m_CharaAction = CharaActionID::Melee;
 				}
 			}
@@ -1114,7 +1116,7 @@ namespace FPS_n2 {
 		void			CharacterClass::ValueSet(PlayerID pID, bool IsMainGame, CharaTypeID value) noexcept {
 			this->m_IsMainGame = IsMainGame;
 			this->m_CharaType = value;
-			{
+			if (GetGunPtr(0)) {
 				GetGunPtr(0)->SetFallObject();
 				if (GetGunPtr(1)) {
 					GetGunPtr(1)->SetFallObject();
@@ -1294,15 +1296,17 @@ namespace FPS_n2 {
 			//
 			this->m_Arm[(int)EnumGunAnimType::ADS].Execute(GunReadyControl::GetIsADS(), 0.2f, 0.2f, 0.9f);
 			this->m_Arm[(int)EnumGunAnimType::Run].Execute(!GetIsAim() && KeyControl::GetRun(), 0.1f, 0.2f, 0.95f);
-			this->m_Arm[(int)EnumGunAnimType::ReloadStart_Empty].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadStart_Empty, 0.5f, 0.2f);
-			this->m_Arm[(int)EnumGunAnimType::ReloadStart].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadStart, 0.2f, 0.2f);
-			this->m_Arm[(int)EnumGunAnimType::Reload].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadOne, 0.1f, 0.2f, 0.9f);
-			this->m_Arm[(int)EnumGunAnimType::ReloadEnd].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadEnd, 0.1f, 0.2f, 0.9f);
-			this->m_Arm[(int)EnumGunAnimType::Ready].Execute(!GetIsAim(), 0.1f, 0.2f, 0.9f);
-			this->m_Arm[(int)EnumGunAnimType::Check].Execute(GetGunPtrNow()->GetGunAnime() >= GunAnimeID::CheckStart && GetGunPtrNow()->GetGunAnime() <= GunAnimeID::Checking, 0.05f, 0.2f);
-			this->m_Arm[(int)EnumGunAnimType::Watch].Execute(GetCharaAction() == CharaActionID::Watch, 0.1f, 0.1f);
-			this->m_Arm[(int)EnumGunAnimType::Melee].Execute(GetCharaAction() == CharaActionID::Melee, 1.1f, 0.1f);
-			this->m_Arm[(int)EnumGunAnimType::AmmoLoad].Execute(GetIsAim() && (GunAnimeID::AmmoLoading <= GetGunPtrNow()->GetGunAnime()) && (GetGunPtrNow()->GetGunAnime() <= GunAnimeID::AmmoLoadEnd), 0.1f, 0.1f);
+			if (GetGunPtrNow()) {
+				this->m_Arm[(int)EnumGunAnimType::ReloadStart_Empty].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadStart_Empty, 0.5f, 0.2f);
+				this->m_Arm[(int)EnumGunAnimType::ReloadStart].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadStart, 0.2f, 0.2f);
+				this->m_Arm[(int)EnumGunAnimType::Reload].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadOne, 0.1f, 0.2f, 0.9f);
+				this->m_Arm[(int)EnumGunAnimType::ReloadEnd].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadEnd, 0.1f, 0.2f, 0.9f);
+				this->m_Arm[(int)EnumGunAnimType::Ready].Execute(!GetIsAim(), 0.1f, 0.2f, 0.9f);
+				this->m_Arm[(int)EnumGunAnimType::Check].Execute(GetGunPtrNow()->GetGunAnime() >= GunAnimeID::CheckStart && GetGunPtrNow()->GetGunAnime() <= GunAnimeID::Checking, 0.05f, 0.2f);
+				this->m_Arm[(int)EnumGunAnimType::Watch].Execute(GetCharaAction() == CharaActionID::Watch, 0.1f, 0.1f);
+				this->m_Arm[(int)EnumGunAnimType::Melee].Execute(GetCharaAction() == CharaActionID::Melee, 1.1f, 0.1f);
+				this->m_Arm[(int)EnumGunAnimType::AmmoLoad].Execute(GetIsAim() && (GunAnimeID::AmmoLoading <= GetGunPtrNow()->GetGunAnime()) && (GetGunPtrNow()->GetGunAnime() <= GunAnimeID::AmmoLoadEnd), 0.1f, 0.1f);
+			}
 			//
 			KeyControl::UpdateKeyRad();
 			GetObj().ResetFrameUserLocalMatrix(GetFrame((int)CharaFrame::Upper));
