@@ -460,12 +460,13 @@ namespace FPS_n2 {
 					bool isHitmin = true;
 					int8_t selectBlock = s_EmptyBlick;
 					for (int x = center.x + xMaxminT, XMax = center.x + xMaxmaxT; x <= XMax; ++x) {
+						auto& CellBuff = cellx.GetCellBuf(x, y, z);
 						if (
 							(x == XMax)
 							|| (CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus)))
-							|| (!cellx.IsActiveCell(x, y, z))
-							|| (!isHitmin && (selectBlock != cellx.GetCellBuf(x, y, z).m_Cell))
-							|| (cellx.GetCellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (CellBuff.m_Cell == s_EmptyBlick)
+							|| (!isHitmin && (selectBlock != CellBuff.m_Cell))
+							|| (CellBuff.m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -483,7 +484,7 @@ namespace FPS_n2 {
 									}
 								}
 								//この場合だけもう一回判定させるドン
-								if (selectBlock != cellx.GetCellBuf(x, y, z).m_Cell) {
+								if (selectBlock != CellBuff.m_Cell) {
 									x--;
 								}
 							}
@@ -493,7 +494,7 @@ namespace FPS_n2 {
 							if (isHitmin) {
 								isHitmin = false;
 								xmin = x;
-								selectBlock = cellx.GetCellBuf(x, y, z).m_Cell;
+								selectBlock = CellBuff.m_Cell;
 							}
 							xmax = x;
 						}
@@ -525,12 +526,13 @@ namespace FPS_n2 {
 					bool isHitmin = true;
 					int8_t selectBlock = s_EmptyBlick;
 					for (int z = center.z + zMaxminT, ZMax = center.z + zMaxmaxT; z <= ZMax; ++z) {
+						auto& CellBuff = cellx.GetCellBuf(x, y, z);
 						if (
 							(z == center.z + zMaxmaxT)
 							|| (CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus)))
-							|| (!cellx.IsActiveCell(x, y, z))
-							|| (!isHitmin && (selectBlock != cellx.GetCellBuf(x, y, z).m_Cell))
-							|| (cellx.GetCellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (CellBuff.m_Cell == s_EmptyBlick)
+							|| (!isHitmin && (selectBlock != CellBuff.m_Cell))
+							|| (CellBuff.m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -557,7 +559,7 @@ namespace FPS_n2 {
 									}
 								}
 								//この場合だけもう一回判定させるドン
-								if (selectBlock != cellx.GetCellBuf(x, y, z).m_Cell) {
+								if (selectBlock != CellBuff.m_Cell) {
 									z--;
 								}
 							}
@@ -567,7 +569,7 @@ namespace FPS_n2 {
 							if (isHitmin) {
 								isHitmin = false;
 								zmin = z;
-								selectBlock = cellx.GetCellBuf(x, y, z).m_Cell;
+								selectBlock = CellBuff.m_Cell;
 							}
 							zmax = z;
 						}
@@ -773,11 +775,12 @@ namespace FPS_n2 {
 					int xmax = 0;
 					bool isHitmin = true;
 					for (int x = center.x + DrawMaxXMinus, XMax = center.x + DrawMaxXPlus; x <= XMax; ++x) {
+						auto& CellBuff = cellx.GetCellBuf(x, y, z);
 						if (
 							(x == center.x + DrawMaxXPlus)
 							|| (CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus)))
-							|| (!cellx.IsActiveCell(x, y, z))
-							|| (cellx.GetCellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (CellBuff.m_Cell == s_EmptyBlick)
+							|| (CellBuff.m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -822,11 +825,12 @@ namespace FPS_n2 {
 					int zmax = 0;
 					bool isHitmin = true;
 					for (int z = center.z + DrawMaxZMinus, ZMax = center.z + DrawMaxZPlus; z <= ZMax; ++z) {
+						auto& CellBuff = cellx.GetCellBuf(x, y, z);
 						if (
 							(z == DrawMaxZPlus)
 							|| (CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus)))
-							|| (!cellx.IsActiveCell(x, y, z))
-							|| (cellx.GetCellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (CellBuff.m_Cell == s_EmptyBlick)
+							|| (CellBuff.m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -956,11 +960,12 @@ namespace FPS_n2 {
 					int xmax = 0;
 					bool isHitmin = true;
 					for (int x = center.x + xMaxminT, XMax = center.x + xMaxmaxT; x <= XMax; ++x) {
+						auto& CellBuff = cellx.GetCellBuf(x, y, z);
 						if (
 							(x == XMax)
 							|| (CheckInside && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus)))
-							|| (!cellx.IsActiveCell(x, y, z))
-							|| (cellx.GetCellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (CellBuff.m_Cell == s_EmptyBlick)
+							|| (CellBuff.m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -1013,11 +1018,12 @@ namespace FPS_n2 {
 					int zmax = 0;
 					bool isHitmin = true;
 					for (int z = center.z + zMaxminT, ZMax = center.z + zMaxmaxT; z <= ZMax; ++z) {
+						auto& CellBuff = cellx.GetCellBuf(x, y, z);
 						if (
 							(z == center.z + zMaxmaxT)
 							|| (CheckInside && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus)))
-							|| (!cellx.IsActiveCell(x, y, z))
-							|| (cellx.GetCellBuf(x, y, z).m_FillInfo == 0b111111)
+							|| (CellBuff.m_Cell == s_EmptyBlick)
+							|| (CellBuff.m_FillInfo == 0b111111)
 							) {
 							//置けない部分なので今まで置けていた分をまとめてポリゴン化
 							if (!isHitmin) {
@@ -1072,7 +1078,7 @@ namespace FPS_n2 {
 							End.x + xm, End.y + ym, End.z + zm,
 							[&](int x, int y, int z) {
 								if (!cell.isInside(y)) { return false; }
-								if (!cell.IsActiveCell(x, y, z)) { return false; }
+								if (cell.GetCellBuf(x, y, z).m_Cell == s_EmptyBlick) { return false; }
 								if (!(cell.GetCellBuf(x, y, z).m_FillInfo != 0b111111)) { return false; }
 								Vector3DX MinPos = cell.GetPos(x, y, z);
 								Vector3DX MaxPos = cell.GetPos(x + 1, y + 1, z + 1);
@@ -1105,7 +1111,7 @@ namespace FPS_n2 {
 							End.x + xm, End.y + ym, End.z + zm,
 							[&](int x, int y, int z) {
 								if (!cell.isInside(y)) { return false; }
-								if (!cell.IsActiveCell(x, y, z)) { return false; }
+								if (cell.GetCellBuf(x, y, z).m_Cell == s_EmptyBlick) { return false; }
 								if (!(cell.GetCellBuf(x, y, z).m_FillInfo != 0b111111)) { return false; }
 								Vector3DX MinPos = cell.GetPos(x, y, z);
 								Vector3DX MaxPos = cell.GetPos(x + 1, y + 1, z + 1);
@@ -1226,7 +1232,8 @@ namespace FPS_n2 {
 
 			std::ifstream fin{};
 			fin.open("data/Map.txt", std::ios::in | std::ios::binary);
-			fin.read((char*)&m_CellBase, sizeof(m_CellBase));
+			m_CellBase.resize(256 * 256 * 256);
+			fin.read((char*)m_CellBase.data(), sizeof(m_CellBase.at(0))*(256 * 256 * 256));
 			fin.close();
 			for (int xm = 0; xm < cell.All; ++xm) {
 				for (int ym = 0; ym < cell.All; ++ym) {
@@ -1259,6 +1266,7 @@ namespace FPS_n2 {
 		void		BackGroundClass::SaveCellsFile() noexcept {
 			auto& cell = m_CellxN.front();
 
+			m_CellBase.resize(256 * 256 * 256);
 			for (int xm = 0; xm < cell.All; ++xm) {
 				for (int ym = 0; ym < cell.All; ++ym) {
 					for (int zm = 0; zm < cell.All; ++zm) {
@@ -1269,7 +1277,7 @@ namespace FPS_n2 {
 
 			std::ofstream fout{};
 			fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
-			fout.write((char*)&m_CellBase, sizeof(m_CellBase));
+			fout.write((char*)m_CellBase.data(), sizeof(m_CellBase.at(0)) * (256 * 256 * 256));
 			fout.close();  //ファイルを閉じる
 		}
 		//
@@ -1392,7 +1400,7 @@ namespace FPS_n2 {
 				for (int x = 0; x < cellx.All; ++x) {
 					for (int y = 0; y < cellx.All; ++y) {
 						for (int z = 0; z < cellx.All; ++z) {
-							if (!cellx.IsActiveCell(x, y, z)) { continue; }
+							if (cellx.GetCellBuf(x, y, z).m_Cell == s_EmptyBlick) { continue; }
 							cellx.CalcOcclusion(x, y, z);
 						}
 					}
@@ -1403,7 +1411,7 @@ namespace FPS_n2 {
 				for (int x = 0; x < cellx.All; ++x) {
 					for (int y = 0; y < cellx.All; ++y) {
 						for (int z = 0; z < cellx.All; ++z) {
-							if (!cellx.IsActiveCell(x, y, z)) { continue; }
+							if (cellx.GetCellBuf(x, y, z).m_Cell == s_EmptyBlick) { continue; }
 							cellx.SetCellBuf(x, y, z).m_DifColorPow.at(0b000) = 128;
 							cellx.SetCellBuf(x, y, z).m_DifColorPow.at(0b001) = 128;
 							cellx.SetCellBuf(x, y, z).m_DifColorPow.at(0b010) = 128;

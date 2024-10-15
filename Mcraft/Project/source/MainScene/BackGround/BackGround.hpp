@@ -3,7 +3,7 @@
 #include "../../Header.hpp"
 #include "../../MainScene/BackGround/BackGroundSub.hpp"
 
-#define EDITBLICK (FALSE)
+#define EDITBLICK (TRUE)
 
 namespace FPS_n2 {
 	namespace BackGround {
@@ -74,7 +74,6 @@ namespace FPS_n2 {
 					return GetPos(x + ((ID >> 2) & 1), y + ((ID >> 1) & 1), z + (ID & 1));
 				}
 				//
-				const bool		IsActiveCell(int x, int y, int z) const noexcept { return GetCellBuf(x, y, z).m_Cell != s_EmptyBlick; }
 				const int8_t	isFill(int x, int y, int z, int mul) const noexcept {
 					mul /= scaleRate;
 					int FillCount = 0;
@@ -88,7 +87,7 @@ namespace FPS_n2 {
 						for (int yt = yMaxmin; yt < std::min(yMaxmin + mul, All); ++yt) {
 							for (int zt = zMaxmin; zt < zMaxmin + mul; ++zt) {
 								++FillAll;
-								if (!IsActiveCell(xt, yt, zt)) { continue; }
+								if (GetCellBuf(xt, yt, zt).m_Cell == s_EmptyBlick) { continue; }
 								++FillCount;
 								auto cell = GetCellBuf(xt, yt, zt).m_Cell + 1;
 								if (cell > IDCount.size()) {
@@ -136,12 +135,12 @@ namespace FPS_n2 {
 				//
 				void			CalcOcclusion(int x, int y, int z) noexcept {
 					SetCellBuf(x, y, z).m_FillInfo = 0;
-					SetCellBuf(x, y, z).m_FillInfo |= (1 << 0) * IsActiveCell(x + 1, y, z);
-					SetCellBuf(x, y, z).m_FillInfo |= (1 << 1) * IsActiveCell(x - 1, y, z);
-					SetCellBuf(x, y, z).m_FillInfo |= (1 << 2) * ((y == All - 1) ? 1 : IsActiveCell(x, y + 1, z));
-					SetCellBuf(x, y, z).m_FillInfo |= (1 << 3) * ((y == 0) ? 1 : IsActiveCell(x, y - 1, z));
-					SetCellBuf(x, y, z).m_FillInfo |= (1 << 4) * IsActiveCell(x, y, z + 1);
-					SetCellBuf(x, y, z).m_FillInfo |= (1 << 5) * IsActiveCell(x, y, z - 1);
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 0) * (GetCellBuf(x + 1, y, z).m_Cell != s_EmptyBlick);
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 1) * (GetCellBuf(x - 1, y, z).m_Cell != s_EmptyBlick);
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 2) * ((y == All - 1) ? 1 : (GetCellBuf(x, y + 1, z).m_Cell != s_EmptyBlick));
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 3) * ((y == 0) ? 1 : (GetCellBuf(x, y - 1, z).m_Cell != s_EmptyBlick));
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 4) * (GetCellBuf(x, y, z + 1).m_Cell != s_EmptyBlick);
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 5) * (GetCellBuf(x, y, z - 1).m_Cell != s_EmptyBlick);
 				}
 			};
 			//
@@ -250,7 +249,7 @@ namespace FPS_n2 {
 			MV1								m_ObjSky;
 			GraphHandle						m_tex{};
 			GraphHandle						m_norm{};
-			std::array<int8_t, 256 * 256 * 256> m_CellBase{};
+			std::vector<int8_t>				m_CellBase{};
 			std::array<CellsData, total>	m_CellxN;
 			std::array<ThreadJobs, total + total + total>	m_Jobs;
 			//
