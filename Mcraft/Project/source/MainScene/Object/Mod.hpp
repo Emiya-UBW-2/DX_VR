@@ -56,19 +56,19 @@ namespace FPS_n2 {
 			void			DrawShadow(void) noexcept override {
 				if (this->m_IsActive && this->m_IsDraw) {
 					auto* DrawParts = DXDraw::Instance();
-					if ((GetMove().GetPos() - DrawParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale_Rate) { return; }
+					if ((GetMove().GetPos() - DrawParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale3DRate) { return; }
 					this->m_obj.DrawModel();
 				}
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				if (this->m_IsActive && this->m_IsDraw) {
 					if (CheckCameraViewClip_Box(
-						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-1.f * Scale_Rate, -1.f * Scale_Rate, -1.f * Scale_Rate)).get(),
-						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(1.f * Scale_Rate, 1.f * Scale_Rate, 1.f * Scale_Rate)).get()) == FALSE
+						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-1.f * Scale3DRate, -1.f * Scale3DRate, -1.f * Scale3DRate)).get(),
+						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(1.f * Scale3DRate, 1.f * Scale3DRate, 1.f * Scale3DRate)).get()) == FALSE
 						) {
 						if (!isDrawSemiTrans) {
 							auto* DrawParts = DXDraw::Instance();
-							if ((GetMove().GetPos() - DrawParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale_Rate) { return; }
+							if ((GetMove().GetPos() - DrawParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale3DRate) { return; }
 							this->m_obj.DrawModel();
 						}
 					}

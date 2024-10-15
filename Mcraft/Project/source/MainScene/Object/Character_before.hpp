@@ -87,7 +87,7 @@ namespace FPS_n2 {
 			bool	Colcheck(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
 				if (HitCheck_Sphere_Capsule(
 					m_pos.get(), m_radius,
-					StartPos.get(), pEndPos->get(), 0.001f * Scale_Rate
+					StartPos.get(), pEndPos->get(), 0.001f * Scale3DRate
 				) == TRUE) {
 					VECTOR pos1 = StartPos.get();
 					VECTOR pos2 = pEndPos->get();
@@ -359,7 +359,7 @@ namespace FPS_n2 {
 					return 0.45f;
 				}
 				else if (GetRun()) {
-					return 1.275f;
+					return 1.75f;
 				}
 				else {
 					return 0.65f;
@@ -563,14 +563,14 @@ namespace FPS_n2 {
 			void			DrawLaser() const noexcept {
 				if (m_IsLaserActive) {
 					/*
-					auto P = LaserEndPos / Scale_Rate;
+					auto P = LaserEndPos / Scale3DRate;
 					clsDx();
 					printfDx("(%5.2f,%5.2f,%5.2f)\n", P.x, P.y, P.z);
 					//*/
 					SetUseLighting(FALSE);
 					SetUseHalfLambertLighting(FALSE);
-					DrawSphere_3D(LaserEndPos, 0.01f * Scale_Rate, GetColor(255, 24, 24), Black);
-					DrawCapsule_3D(LaserStartPos, LaserEndPos, 0.0015f * Scale_Rate, GetColor(255, 24, 24), Black);
+					DrawSphere_3D(LaserEndPos, 0.01f * Scale3DRate, GetColor(255, 24, 24), Black);
+					DrawCapsule_3D(LaserStartPos, LaserEndPos, 0.0015f * Scale3DRate, GetColor(255, 24, 24), Black);
 					SetUseLighting(TRUE);
 					SetUseHalfLambertLighting(TRUE);
 				}
@@ -811,7 +811,7 @@ namespace FPS_n2 {
 						m_StuckLeftHandYVec = Normal;
 					}
 					else {
-						if ((m_StuckLeftHandPos - Pos).magnitude() > 0.3f * Scale_Rate) {
+						if ((m_StuckLeftHandPos - Pos).magnitude() > 0.3f * Scale3DRate) {
 							m_StuckLeftHandPos = Pos;
 							m_StuckLeftHandNormal = Normal;
 						}

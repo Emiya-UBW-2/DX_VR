@@ -12,20 +12,14 @@ namespace FPS_n2 {
 		};
 
 		class AIControl {
-		private:
-			class Impl;
-			Impl* m_Param;
-			Impl* GetParam() noexcept { return m_Param; }
 		public:
 			AIControl();
 			~AIControl();
 		public:
-			void Init(PlayerID MyCharaID) noexcept;
-			void Execute(InputControl* MyInput, bool CanRepop) noexcept;
+			void Init(PlayerID) noexcept;
+			void Execute(InputControl*) noexcept;
 			void Draw() noexcept {}
 			void Dispose() noexcept {}
-		public:
-			const bool CannotRepop() noexcept;
 		};
 	};
 };

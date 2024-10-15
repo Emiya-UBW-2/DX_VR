@@ -49,9 +49,7 @@ namespace FPS_n2 {
 			//info
 			constexpr float Max = std::min(std::min(BackGround::DrawMaxXPlus, BackGround::DrawMaxZPlus), BackGround::DrawMaxYPlus) * BackGround::CellScale;
 			float SQRTMax = Max;
-			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 0.03f, SQRTMax);
-			//DoF
-			PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.3f, Scale_Rate * 5.f, Scale_Rate * 0.1f, SQRTMax * 2.f);
+			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.03f, SQRTMax);
 			//Fog
 			SetFogMode(DX_FOGMODE_LINEAR);
 			SetFogStartEnd(SQRTMax, SQRTMax * 20.f);
@@ -63,10 +61,10 @@ namespace FPS_n2 {
 				//人の座標設定
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 1.f * Scale_Rate, 0.f);
+					pos_t = Vector3DX::vget(0.f, 1.f * Scale3DRate, 0.f);
 
-					Vector3DX EndPos = pos_t - Vector3DX::up() * 2.f * Scale_Rate;
-					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 2.f * Scale_Rate, &EndPos)) {
+					Vector3DX EndPos = pos_t - Vector3DX::up() * 2.f * Scale3DRate;
+					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 2.f * Scale3DRate, &EndPos)) {
 						pos_t = EndPos;
 					}
 					c->ValueSet((PlayerID)index, true, CharaTypeID::Team);
@@ -257,7 +255,7 @@ namespace FPS_n2 {
 						}
 						else {
 							InputControl OtherInput;
-							p->GetAI()->Execute(&OtherInput, false);
+							p->GetAI()->Execute(&OtherInput);
 							c->SetInput(OtherInput, true);
 						}
 						//ダメージイベント処理
@@ -316,17 +314,17 @@ namespace FPS_n2 {
 				case 0:
 				case 3:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().xvec() * (2.f * Scale_Rate);
+					CamPos += ViewChara->GetEyeMatrix().xvec() * (2.f * Scale3DRate);
 					break;
 				case 1:
 				case 4:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().yvec() * (2.f * Scale_Rate) + ViewChara->GetEyeMatrix().zvec() * 0.1f;
+					CamPos += ViewChara->GetEyeMatrix().yvec() * (2.f * Scale3DRate) + ViewChara->GetEyeMatrix().zvec() * 0.1f;
 					break;
 				case 2:
 				case 5:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().zvec() * (-2.f * Scale_Rate);
+					CamPos += ViewChara->GetEyeMatrix().zvec() * (-2.f * Scale3DRate);
 					break;
 				default:
 					break;
@@ -360,6 +358,13 @@ namespace FPS_n2 {
 					}
 				}
 				DrawParts->SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
+				//DoF
+				if (Chara->GetIsADS()) {
+					PostPassEffect::Instance()->Set_DoFNearFar(Scale3DRate * 0.3f, far_t * 5.75f, Scale3DRate * 0.1f, far_t * 6.f);
+				}
+				else {
+					PostPassEffect::Instance()->Set_DoFNearFar(Scale3DRate * 0.3f, Scale3DRate * 5.f, Scale3DRate * 0.1f, far_t * 2.f);
+				}
 			}
 			//コンカッション
 			{
@@ -368,7 +373,7 @@ namespace FPS_n2 {
 				//}
 				DrawParts->Set_is_Blackout(m_Concussion > 0.f);
 				if (m_Concussion == 1.f) {
-					CameraShake::Instance()->SetCamShake(0.5f, 0.01f * Scale_Rate);
+					CameraShake::Instance()->SetCamShake(0.5f, 0.01f * Scale3DRate);
 				}
 				if (m_Concussion > 0.9f) {
 					Easing(&m_ConcussionPer, 1.f, 0.1f, EasingType::OutExpo);
@@ -552,7 +557,6 @@ namespace FPS_n2 {
 		}
 		void MainGameScene::UpdateBullet(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
-			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* SE = SoundPool::Instance();
@@ -582,8 +586,8 @@ namespace FPS_n2 {
 						}
 						if (ColResGround && !is_HitAll) {
 							a->HitGround(pos_tmp);
-							EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale_Rate);
-							SE->Get((int)SoundEnum::HitGround0 + GetRand(5 - 1)).Play_3D(0, pos_tmp, Scale_Rate * 10.f);
+							EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale3DRate);
+							SE->Get((int)SoundEnum::HitGround0 + GetRand(5 - 1)).Play_3D(0, pos_tmp, Scale3DRate * 10.f);
 						}
 					}
 				}

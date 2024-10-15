@@ -54,9 +54,9 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				for (auto& l : this->m_Line) {
 					l += Vector3DX::vget(
-						GetRandf(0.1f * Scale_Rate / DrawParts->GetFps()),
-						0.4f * Scale_Rate / DrawParts->GetFps() + GetRandf(0.1f * Scale_Rate / DrawParts->GetFps()),
-						GetRandf(0.1f * Scale_Rate) / DrawParts->GetFps());
+						GetRandf(0.1f * Scale3DRate / DrawParts->GetFps()),
+						0.4f * Scale3DRate / DrawParts->GetFps() + GetRandf(0.1f * Scale3DRate / DrawParts->GetFps()),
+						GetRandf(0.1f * Scale3DRate) / DrawParts->GetFps());
 				}
 				this->m_Line[this->m_LineSel] = pPos;
 				++this->m_LineSel %= this->m_Line.size();
@@ -76,7 +76,7 @@ namespace FPS_n2 {
 						this->m_Line[p1].get(),
 						this->m_Line[p2].get()) == FALSE
 						) {
-						DrawCapsule3D(this->m_Line[p1].get(), this->m_Line[p2].get(), (0.00762f) * Scale_Rate * 1.f * (static_cast<float>(i - min) / max), 3,
+						DrawCapsule3D(this->m_Line[p1].get(), this->m_Line[p2].get(), (0.00762f) * Scale3DRate * 1.f * (static_cast<float>(i - min) / max), 3,
 							GetColor(216, 216, 216),
 							GetColor(96, 96, 64),
 							TRUE);

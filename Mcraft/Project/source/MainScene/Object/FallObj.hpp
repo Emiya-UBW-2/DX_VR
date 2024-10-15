@@ -22,8 +22,8 @@ namespace FPS_n2 {
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				if (this->m_IsActive && this->m_IsDraw) {
 					if (CheckCameraViewClip_Box(
-						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-0.1f * Scale_Rate, -0.1f * Scale_Rate, -0.1f * Scale_Rate)).get(),
-						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(0.1f * Scale_Rate, 0.1f * Scale_Rate, 0.1f * Scale_Rate)).get()) == FALSE
+						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-0.1f * Scale3DRate, -0.1f * Scale3DRate, -0.1f * Scale3DRate)).get(),
+						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(0.1f * Scale3DRate, 0.1f * Scale3DRate, 0.1f * Scale3DRate)).get()) == FALSE
 						) {
 						if (!isDrawSemiTrans) {
 							this->m_obj.DrawModel();

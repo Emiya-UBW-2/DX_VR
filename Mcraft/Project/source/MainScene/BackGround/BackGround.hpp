@@ -10,7 +10,7 @@ namespace FPS_n2 {
 		static constexpr int8_t s_EmptyBlick = 0;
 		static constexpr int total = 4;
 		static constexpr int MulPer = 2;
-		static constexpr float CellScale = Scale_Rate / 2.f / 2.f;
+		static constexpr float CellScale = Scale3DRate / 2.f / 2.f;
 
 		static constexpr int DrawMax = 65;
 

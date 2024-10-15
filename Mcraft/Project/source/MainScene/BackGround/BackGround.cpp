@@ -1195,7 +1195,7 @@ namespace FPS_n2 {
 						for (auto& kabe : kabes) {
 							// プレイヤーと当たっているかを判定
 							if (GetHitCapsuleToTriangle(*EndPos + AddCapsuleMin, *EndPos + AddCapsuleMax, Radius, kabe.Position[0], kabe.Position[1], kabe.Position[2])) {
-								*EndPos += Vector3DX(kabe.Normal) * (0.015f * Scale_Rate);					// 当たっていたら規定距離分プレイヤーを壁の法線方向に移動させる
+								*EndPos += Vector3DX(kabe.Normal) * (0.015f * Scale3DRate);					// 当たっていたら規定距離分プレイヤーを壁の法線方向に移動させる
 								bool j = false;
 								for (auto& kabe2 : kabes) {
 									// 当たっていたらループを抜ける
@@ -1448,7 +1448,7 @@ namespace FPS_n2 {
 					CamVec.at(id) = (DrawParts->GetMainCamera().GetCamVec() - CamPos.at(id)).normalized();
 					//
 #if defined(DEBUG) & EDITBLICK
-					PutPos = (CamPos.at(0) + CamVec.at(0) * (LenMouse * Scale_Rate));
+					PutPos = (CamPos.at(0) + CamVec.at(0) * (LenMouse * Scale3DRate));
 					//PutPos.y = CellScale * (2.f+16.f);
 					if (blicksel >= 0) {
 						auto& cell = m_CellxN.front();
@@ -1708,7 +1708,7 @@ namespace FPS_n2 {
 					DrawPolygon32bitIndexed3DToShader(Vert.m_vert32Out.data(), static_cast<int>(Vert.m_32NumOut * 4), Vert.m_index32Out.data(), static_cast<int>(Vert.m_32NumOut * 6 / 3));
 				}
 			}
-			SetUseTextureToShader(0, INVALID_ID);
+			SetUseTextureToShader(0, InvalidID);
 		}
 		void		BackGroundClass::Draw(void) const noexcept {
 			float Near = GetCameraNear();

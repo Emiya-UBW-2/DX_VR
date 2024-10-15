@@ -245,7 +245,7 @@ namespace FPS_n2 {
 				m_MagFall.SetFall(
 					GetFrameWorldMat_P(GunFrame::Magpos).pos(),
 					Matrix3x3DX::Get33DX(GetFrameWorldMat_P(GunFrame::Magpos).rotation()),
-					GetFrameWorldMat_P(GunFrame::Magpos).yvec() * -1.f * (Scale_Rate * 3.f / 60.f),
+					GetFrameWorldMat_P(GunFrame::Magpos).yvec() * -1.f * (Scale3DRate * 3.f / 60.f),
 					12.f, SoundEnum::MagFall);
 			}
 			void		SetReloadStart(int NextMagNum, int NextMagUniqueID) noexcept {

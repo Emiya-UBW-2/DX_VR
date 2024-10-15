@@ -100,7 +100,7 @@ namespace FPS_n2 {
 					Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(this->m_Rotate.x)) *
 					Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(this->m_Rotate.y)) *
 					Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(this->m_Rotate.z)) *
-					Matrix4x4DX::Mtrans(this->m_Pos * Scale_Rate);
+					Matrix4x4DX::Mtrans(this->m_Pos * Scale3DRate);
 			}
 		};
 

@@ -6,7 +6,7 @@ namespace FPS_n2 {
 		// 
 		bool ButtonControl::GetTriggerButton(void) const noexcept {
 			auto* Pad = PadControl::Instance();
-			return (select != INVALID_ID) && (this->m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetKey(PADS::INTERACT).trigger());
+			return (select != InvalidID) && (this->m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetKey(PADS::INTERACT).trigger());
 		}
 		ButtonControl::ButtonControl(void) noexcept {
 			this->m_SelectBackImage = GraphHandle::Load("CommonData/UI/select.png");
@@ -23,7 +23,7 @@ namespace FPS_n2 {
 			int preselect = select;
 			bool preMouseSel = this->m_MouseSelMode;
 			if (Pad->GetKey(PADS::MOVE_W).trigger() || Pad->GetKey(PADS::MOVE_A).trigger()) {
-				if (select != INVALID_ID) {
+				if (select != InvalidID) {
 					--select;
 					if (select < 0) { select = static_cast<int>(ButtonSel.size()) - 1; }
 				}
@@ -33,7 +33,7 @@ namespace FPS_n2 {
 				this->m_MouseSelMode = false;
 			}
 			if (Pad->GetKey(PADS::MOVE_S).trigger() || Pad->GetKey(PADS::MOVE_D).trigger()) {
-				if (select != INVALID_ID) {
+				if (select != InvalidID) {
 					++select;
 					if (select > static_cast<int>(ButtonSel.size()) - 1) { select = 0; }
 				}
@@ -44,7 +44,7 @@ namespace FPS_n2 {
 			}
 
 			if (this->m_MouseSelMode) {
-				select = INVALID_ID;
+				select = InvalidID;
 			}
 			// 
 			for (auto& y : ButtonSel) {
@@ -54,7 +54,7 @@ namespace FPS_n2 {
 				}
 			}
 			if (preselect != select || preMouseSel != this->m_MouseSelMode) {
-				if (select != INVALID_ID) {
+				if (select != InvalidID) {
 					for (auto& y : ButtonSel) {
 						y->SetNone();
 					}

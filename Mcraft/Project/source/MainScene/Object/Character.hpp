@@ -152,8 +152,8 @@ namespace FPS_n2 {
 				this->m_IsDraw = false;
 				this->m_DistanceToCam = (this->GetObj().GetMatrix().pos() - GetScreenPosition()).magnitude();
 				if (CheckCameraViewClip_Box(
-					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-2.5f * Scale_Rate, -0.f * Scale_Rate, -2.5f * Scale_Rate)).get(),
-					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(2.5f * Scale_Rate, 2.5f * Scale_Rate, 2.5f * Scale_Rate)).get()) == FALSE
+					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-2.5f * Scale3DRate, -0.f * Scale3DRate, -2.5f * Scale3DRate)).get(),
+					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(2.5f * Scale3DRate, 2.5f * Scale3DRate, 2.5f * Scale3DRate)).get()) == FALSE
 					) {
 					this->m_IsDraw |= true;
 				}

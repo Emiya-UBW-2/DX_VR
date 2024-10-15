@@ -67,10 +67,10 @@ namespace FPS_n2 {
 			}
 			if (this->m_MyID != 0) {
 				if (GetRand(1) == 0) {
-					SE->Get((int)SoundEnum::Man_reload).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
+					SE->Get((int)SoundEnum::Man_reload).Play_3D(0, GetEyeMatrix().pos(), Scale3DRate * 10.f);
 				}
 				else {
-					SE->Get((int)SoundEnum::Man_takecover).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
+					SE->Get((int)SoundEnum::Man_takecover).Play_3D(0, GetEyeMatrix().pos(), Scale3DRate * 10.f);
 				}
 				this->m_SoundPower = 0.6f * (CanLookTarget ? 1.f : 0.5f);
 			}
@@ -90,7 +90,7 @@ namespace FPS_n2 {
 			}
 			tmpUpperMatrix *= this->GetMove().GetMat().Get44DX();
 
-			auto EyePosition = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f + tmpUpperMatrix.zvec() * (-0.04f * Scale_Rate);
+			auto EyePosition = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f + tmpUpperMatrix.zvec() * (-0.04f * Scale3DRate);
 
 			if (HeadBobbing) {
 				EyePosition += EyeSwingControl::GetEyeSwingPos();
@@ -115,10 +115,10 @@ namespace FPS_n2 {
 				}
 				if (LifeControl::IsAlive()) {
 					if ((value.Damage >= 0) && (value.ArmerDamage >= 0)) {
-						SE->Get((int)SoundEnum::Man_Hurt1 + GetRand(6 - 1)).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
+						SE->Get((int)SoundEnum::Man_Hurt1 + GetRand(6 - 1)).Play_3D(0, GetEyeMatrix().pos(), Scale3DRate * 10.f);
 					}
 					else {
-						//SE->Get((int)SoundEnum::Man_Hurt1 + GetRand(6 - 1)).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
+						//SE->Get((int)SoundEnum::Man_Hurt1 + GetRand(6 - 1)).Play_3D(0, GetEyeMatrix().pos(), Scale3DRate * 10.f);
 						//
 						if (!PrevLive) {
 						}
@@ -135,7 +135,7 @@ namespace FPS_n2 {
 					SE->Get((int)SoundEnum::Man_breathing).StopAll(0);
 					SE->Get((int)SoundEnum::Man_breathend).StopAll(0);
 
-					SE->Get((int)SoundEnum::Man_Death1 + GetRand(8 - 1)).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
+					SE->Get((int)SoundEnum::Man_Death1 + GetRand(8 - 1)).Play_3D(0, GetEyeMatrix().pos(), Scale3DRate * 10.f);
 					if (value.ShotID == 0) {
 						PlayerMngr->GetPlayer(value.ShotID)->AddScore(100 + ((IsGun0Select() && (value.Damage >= 100)) ? 20 : 0));
 						PlayerMngr->GetPlayer(value.ShotID)->AddKill(1);
@@ -157,7 +157,7 @@ namespace FPS_n2 {
 		}
 		const bool		CharacterClass::CheckDamageRay(HitPoint* Damage, ArmerPoint* ArmerDamage, bool CheckBodyParts, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
 			if (!LifeControl::IsAlive()) { return false; }
-			if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, GetCharaPosition()) <= 2.0f * Scale_Rate)) { return false; }
+			if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, GetCharaPosition()) <= 2.0f * Scale3DRate)) { return false; }
 
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SE = SoundPool::Instance();
@@ -213,27 +213,27 @@ namespace FPS_n2 {
 				//SE
 				if (AttackID == 0) {
 					if (*Damage > 0) {
-						SE->Get((int)SoundEnum::Hit).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
+						SE->Get((int)SoundEnum::Hit).Play_3D(0, GetEyeMatrix().pos(), Scale3DRate * 10.f);
 					}
 					else {
-						SE->Get((int)SoundEnum::HitGuard).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f, 128);
+						SE->Get((int)SoundEnum::HitGuard).Play_3D(0, GetEyeMatrix().pos(), Scale3DRate * 10.f, 128);
 					}
 				}
 				if (m_MyID == 0 && m_IsMainGame) {
 					if (*Damage > 0) {
-						SE->Get((int)SoundEnum::HitMe).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f);
+						SE->Get((int)SoundEnum::HitMe).Play_3D(0, GetEyeMatrix().pos(), Scale3DRate * 10.f);
 					}
 					else {
-						SE->Get((int)SoundEnum::HitGuard).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 10.f, 255);
+						SE->Get((int)SoundEnum::HitGuard).Play_3D(0, GetEyeMatrix().pos(), Scale3DRate * 10.f, 255);
 					}
 				}
 				//エフェクトセット
 				if (*Damage > 0) {
-					EffectControl::SetOnce(EffectResource::Effect::ef_hitblood, *pEndPos, Vector3DX::forward(), Scale_Rate);
+					EffectControl::SetOnce(EffectResource::Effect::ef_hitblood, *pEndPos, Vector3DX::forward(), Scale3DRate);
 					EffectControl::SetEffectSpeed(EffectResource::Effect::ef_hitblood, 2.f);
 				}
 				else {
-					EffectControl::SetOnce(EffectResource::Effect::ef_gndsmoke, *pEndPos, (Chara->GetCharaPosition() - this->GetCharaPosition()).normalized(), 0.25f * Scale_Rate);
+					EffectControl::SetOnce(EffectResource::Effect::ef_gndsmoke, *pEndPos, (Chara->GetCharaPosition() - this->GetCharaPosition()).normalized(), 0.25f * Scale3DRate);
 				}
 				//ヒットモーション
 				{
@@ -253,8 +253,6 @@ namespace FPS_n2 {
 		//操作
 		void			CharacterClass::ExecuteInput(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
-			auto* SE = SoundPool::Instance();
-			auto* ItemLogParts = SideLog::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			//auto* OptionParts = OPTION::Instance();
 			//
@@ -581,9 +579,9 @@ namespace FPS_n2 {
 						if (this->m_CharaSound != 1) {
 							this->m_CharaSound = 1;
 							this->m_SoundPower = 0.5f * (CanLookTarget ? 1.f : 0.5f);
-							if ((DrawParts->GetMainCamera().GetCamPos() - GetFrameWorldMat(CharaFrame::LeftFoot).pos()).magnitude() < Scale_Rate * 5.f * 1.5f) {
+							if ((DrawParts->GetMainCamera().GetCamPos() - GetFrameWorldMat(CharaFrame::LeftFoot).pos()).magnitude() < Scale3DRate * 5.f * 1.5f) {
 
-								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale_Rate * 5.f);
+								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale3DRate * 5.f);
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
 										auto* OptionParts = OPTION::Instance();
@@ -601,9 +599,9 @@ namespace FPS_n2 {
 						if (this->m_CharaSound != 3) {
 							this->m_CharaSound = 3;
 							this->m_SoundPower = 0.5f * (CanLookTarget ? 1.f : 0.5f);
-							if ((DrawParts->GetMainCamera().GetCamPos() - GetFrameWorldMat(CharaFrame::RightFoot).pos()).magnitude() < Scale_Rate * 5.f * 1.5f) {
+							if ((DrawParts->GetMainCamera().GetCamPos() - GetFrameWorldMat(CharaFrame::RightFoot).pos()).magnitude() < Scale3DRate * 5.f * 1.5f) {
 
-								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale_Rate * 5.f);
+								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale3DRate * 5.f);
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
 										auto* OptionParts = OPTION::Instance();
@@ -625,8 +623,8 @@ namespace FPS_n2 {
 						if (this->m_CharaSound != 5) {
 							this->m_CharaSound = 5;
 							this->m_SoundPower = 0.5f * (CanLookTarget ? 1.f : 0.5f);
-							if ((DrawParts->GetMainCamera().GetCamPos() - GetFrameWorldMat(CharaFrame::LeftFoot).pos()).magnitude() < Scale_Rate * 5.f * 1.5f) {
-								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale_Rate * 15.f);
+							if ((DrawParts->GetMainCamera().GetCamPos() - GetFrameWorldMat(CharaFrame::LeftFoot).pos()).magnitude() < Scale3DRate * 5.f * 1.5f) {
+								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale3DRate * 15.f);
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
 										auto* OptionParts = OPTION::Instance();
@@ -646,8 +644,8 @@ namespace FPS_n2 {
 						if (this->m_CharaSound != 6) {
 							this->m_CharaSound = 6;
 							this->m_SoundPower = 0.5f * (CanLookTarget ? 1.f : 0.5f);
-							if ((DrawParts->GetMainCamera().GetCamPos() - GetFrameWorldMat(CharaFrame::RightFoot).pos()).magnitude() < Scale_Rate * 5.f * 1.5f) {
-								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale_Rate * 15.f);
+							if ((DrawParts->GetMainCamera().GetCamPos() - GetFrameWorldMat(CharaFrame::RightFoot).pos()).magnitude() < Scale3DRate * 5.f * 1.5f) {
+								SE->Get((int)SoundEnum::RunFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale3DRate * 15.f);
 								if (!GunReadyControl::GetIsADS()) {
 									if (this->m_MyID == 0) {
 										auto* OptionParts = OPTION::Instance();
@@ -664,18 +662,18 @@ namespace FPS_n2 {
 			}
 			//しゃがみ音
 			if (KeyControl::GetSquatSwitch()) {
-				SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::Upper).pos(), Scale_Rate * 3.f);
+				SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::Upper).pos(), Scale3DRate * 3.f);
 				this->m_SoundPower = 0.1f * (CanLookTarget ? 1.f : 0.5f);
 			}
 			//リーン音
 			if (KeyControl::GetLeanSwitch()) {
-				SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::Upper).pos(), Scale_Rate * 3.f);
+				SE->Get((int)SoundEnum::StandupFoot).Play_3D(0, GetFrameWorldMat(CharaFrame::Upper).pos(), Scale3DRate * 3.f);
 				this->m_SoundPower = 0.1f * (CanLookTarget ? 1.f : 0.5f);
 			}
 			//心拍音
 			if (this->m_MyID == 0) {
 				if (StaminaControl::ExcuteStamina(0.f, this->GetMove().GetVec().magnitude() / DrawParts->GetFps(), KeyControl::GetIsSquat())) {
-					SE->Get((int)SoundEnum::Heart).Play_3D(0, GetEyeMatrix().pos(), Scale_Rate * 0.5f);
+					SE->Get((int)SoundEnum::Heart).Play_3D(0, GetEyeMatrix().pos(), Scale3DRate * 0.5f);
 				}
 			}
 		}
@@ -688,8 +686,8 @@ namespace FPS_n2 {
 			Vector3DX PosBuf = this->GetMove().GetPos();
 			bool IsHitGround = (PosBuf.y <= 0.f); //高度0なら止まる
 			float groundYpos = 0.f;
-			Vector3DX EndPos = PosBuf - Vector3DX::up() * (0.5f * Scale_Rate);
-			IsHitGround = BackGround->CheckLinetoMap(PosBuf + Vector3DX::up() * (0.f * Scale_Rate), &EndPos);
+			Vector3DX EndPos = PosBuf - Vector3DX::up() * (0.5f * Scale3DRate);
+			IsHitGround = BackGround->CheckLinetoMap(PosBuf + Vector3DX::up() * (0.f * Scale3DRate), &EndPos);
 			groundYpos = EndPos.y;
 			if (IsHitGround) {
 				auto yPos = PosBuf.y;
@@ -703,15 +701,15 @@ namespace FPS_n2 {
 			}
 			else {
 				float Y = this->GetMove().GetVec().y;
-				Vector3DX vec = KeyControl::GetVec(); vec.y = (Y + (M_GR / (DrawParts->GetFps() * DrawParts->GetFps())));
+				Vector3DX vec = KeyControl::GetVec(); vec.y = (Y + (GravityRate / (DrawParts->GetFps() * DrawParts->GetFps())));
 				this->SetMove().SetVec(vec);
 			}
 			PosBuf += this->GetMove().GetVec();
 			//壁判定
-			BackGround->CheckMapWall(this->m_move.GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale_Rate + 0.1f), Vector3DX::up() * (1.6f * Scale_Rate), 0.6f * Scale_Rate);
+			BackGround->CheckMapWall(this->m_move.GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * (1.6f * Scale3DRate), 0.6f * Scale3DRate);
 			//ほかプレイヤーとの判定
 			if (m_IsMainGame) {
-				float Radius = 2.f * 0.5f * Scale_Rate;
+				float Radius = 2.f * 0.5f * Scale3DRate;
 				for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
 					if (i == this->m_MyID) { continue; }
 					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
@@ -731,6 +729,7 @@ namespace FPS_n2 {
 			}
 			auto* OptionParts = OPTION::Instance();
 			bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
+			HeadBobbing = false;
 			this->SetMove().SetPos(PosBuf);
 			this->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::forward(), HeadBobbing ? (KeyControl::GetRad().z / 2.f) : 0.f) * Matrix3x3DX::RotAxis(Vector3DX::up(), KeyControl::GetYRadBottom()));
 			this->SetMove().Update(0.9f, 0.f);
@@ -744,8 +743,8 @@ namespace FPS_n2 {
 					GetCharaDir().inverse() *
 					Matrix4x4DX::Mtrans(
 						GetFrameWorldMat(CharaFrame::Upper).pos() +
-						GetFrameWorldMat(CharaFrame::Upper).yvec() * (-0.5f * Scale_Rate) +
-						GetFrameWorldMat(CharaFrame::Upper).xvec() * (-0.3f * Scale_Rate)
+						GetFrameWorldMat(CharaFrame::Upper).yvec() * (-0.5f * Scale3DRate) +
+						GetFrameWorldMat(CharaFrame::Upper).xvec() * (-0.3f * Scale3DRate)
 					);
 			}
 			GunSel = 1 - GunSel;
@@ -761,11 +760,11 @@ namespace FPS_n2 {
 						) *
 					Matrix4x4DX::Mtrans(
 						GetFrameWorldMat(CharaFrame::Head).pos() +
-						GetFrameWorldMat(CharaFrame::Head).zvec() * (-0.3f * Scale_Rate) +
+						GetFrameWorldMat(CharaFrame::Head).zvec() * (-0.3f * Scale3DRate) +
 						(
 							this->GetMove().GetMat().xvec() * sin(m_SlingZrad.GetRad()) +
 							this->GetMove().GetMat().yvec() * cos(m_SlingZrad.GetRad())
-							) * -(0.5f * Scale_Rate)
+							) * -(0.5f * Scale3DRate)
 					);
 			}
 			//銃座標指定
@@ -836,7 +835,7 @@ namespace FPS_n2 {
 									if (!Chara->IsAlive()) { continue; }
 									if (!Chara->CanLookTarget) { continue; }
 									Vector3DX Vec = (Chara->GetEyeMatrix().pos() - BasePos);
-									if (Vec.magnitude() >= (Scale_Rate * Range)) { continue; }
+									if (Vec.magnitude() >= (Scale3DRate * Range)) { continue; }
 									if (Vector3DX::Dot((GetEyeMatrix().zvec() * -1.f), Vec.normalized()) < cos(deg2rad(15))) { continue; }
 
 									AutoAimControl::SetAutoAimActive(i);
@@ -853,7 +852,7 @@ namespace FPS_n2 {
 
 							float PAdd = 0.f;
 							if (!IsSelGun) {
-								PAdd = -1.f * Scale_Rate * Per;
+								PAdd = -1.f * Scale3DRate * Per;
 							}
 
 							tmp_gunmat *= Matrix4x4DX::RotVec2(tmp_gunmat.yvec(), Lerp(Mat.yvec(), AnimMat.yvec(), Per));
@@ -1010,8 +1009,8 @@ namespace FPS_n2 {
 							break;
 						default:
 							if (!GetRun() && !m_ArmBreak) {
-								auto StartPos = GetFrameWorldMat(CharaFrame::Head).pos() + Matrix4x4DX::Vtrans(Vector3DX::vget(0.f, -0.1f, -0.2f) * Scale_Rate, GetCharaDir());
-								auto EndPost = StartPos + Matrix4x4DX::Vtrans(Vector3DX::vget(0.5f, -0.1f, -0.7f) * Scale_Rate, GetCharaDir());
+								auto StartPos = GetFrameWorldMat(CharaFrame::Head).pos() + Matrix4x4DX::Vtrans(Vector3DX::vget(0.f, -0.1f, -0.2f) * Scale3DRate, GetCharaDir());
+								auto EndPost = StartPos + Matrix4x4DX::Vtrans(Vector3DX::vget(0.5f, -0.1f, -0.7f) * Scale3DRate, GetCharaDir());
 								Vector3DX Normal;
 								if (BackGround->CheckLinetoMap(StartPos, &EndPost, &Normal)) {
 									StackLeftHandControl::SetStackLeftHand(EndPost, Normal);
@@ -1029,7 +1028,7 @@ namespace FPS_n2 {
 						Handszvec = Lerp(Handszvec, Vector3DX::Cross(StackLeftHandControl::GetStuckLeftHandYVec(), GetEyeMatrix().yvec()).normalized(), StackLeftHandControl::GetStuckLeftHandPer());
 					}
 					if (m_ArmBreak) {
-						HandsPos += Vector3DX::vget(GetRandf(1.f * Scale_Rate), GetRandf(1.f * Scale_Rate), GetRandf(1.f * Scale_Rate)) * 0.002f;
+						HandsPos += Vector3DX::vget(GetRandf(1.f * Scale3DRate), GetRandf(1.f * Scale3DRate), GetRandf(1.f * Scale3DRate)) * 0.002f;
 					}
 
 					IK_RightArm(
@@ -1148,7 +1147,7 @@ namespace FPS_n2 {
 			if (GetGunPtr(1)) {
 				GetGunPtr(1)->SetPlayerID(this->m_MyID);
 			}
-			m_SlingZrad.Init(0.05f * Scale_Rate, 3.f, deg2rad(50));
+			m_SlingZrad.Init(0.05f * Scale3DRate, 3.f, deg2rad(50));
 			m_HPRec = 0.f;
 			m_CharaAction = CharaActionID::Ready;
 			m_ActionFirstFrame = true;
@@ -1324,7 +1323,7 @@ namespace FPS_n2 {
 			GetCharaAnimeBufID(CharaAnimeID::Hand_Ready) = 1.f;
 			//下半身アニメ演算
 			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomTurnAnimSel(), 0.5f);
-			ObjectBaseClass::SetAnimLoop((int)CharaAnimeID::Bottom_Stand_Run, KeyControl::GetSpeedPer());
+			ObjectBaseClass::SetAnimLoop((int)CharaAnimeID::Bottom_Stand_Run, KeyControl::GetSpeedPer()/2.f);
 			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomWalkAnimSel(), KeyControl::GetVecFront());
 			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomLeftStepAnimSel(), KeyControl::GetVecLeft());
 			ObjectBaseClass::SetAnimLoop((int)KeyControl::GetBottomWalkBackAnimSel(), KeyControl::GetVecRear());
@@ -1349,8 +1348,8 @@ namespace FPS_n2 {
 		void			CharacterClass::Draw(bool isDrawSemiTrans) noexcept {
 			if (this->m_IsActive && this->m_IsDraw) {
 				if ((CheckCameraViewClip_Box(
-					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-2.5f * Scale_Rate, -0.5f * Scale_Rate, -2.5f * Scale_Rate)).get(),
-					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(2.5f * Scale_Rate, 2.f * Scale_Rate, 2.5f * Scale_Rate)).get()) == FALSE)
+					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-2.5f * Scale3DRate, -0.5f * Scale3DRate, -2.5f * Scale3DRate)).get(),
+					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(2.5f * Scale3DRate, 2.f * Scale3DRate, 2.5f * Scale3DRate)).get()) == FALSE)
 					) {
 					//
 					int fog_enable;

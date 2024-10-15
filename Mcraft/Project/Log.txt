@@ -1,269 +1,149 @@
 ﻿0:ファイルアクセス処理の初期化...成功
-18:ChangeWindowMode実行 
-19:ウインドウモードフラグが立てられました
-21:ＤＸライブラリの初期化処理開始
-22:	システムの情報を出力します
-22:		ＤＸライブラリ Ver3.24e
-22:		論理プロセッサの数 : 16
-23:		ＯＳ  Windows10 ( Build 19045  )
-124:		現時点のＣＰＵ動作速度：大体3.69GHz
-124:		ＭＭＸ命令を使用します
-125:		ＳＳＥ命令が使用可能です
-125:		ＳＳＥ２命令が使用可能です
-126:		ＣＰＵベンダ：AuthenticAMD
-127:		ＣＰＵ名：AMD Ryzen 7 2700X Eight-Core Processor         
-127:	ＣＯＭの初期化... 成功
-129:	非同期読み込み処理の初期化...成功
-130:	メモリ総量:16317.98MB  空きメモリ領域:4879.50MB 
-131:	タイマーの精度を検査します
-131:	精度結果 更新回数 マルチメディアタイマー：0  パフォーマンスカウンター：60
-131:	 パフォーマンスカウンターを使用します タイマー精度 : 10000.000000 KHz 
-132:	 
-132:	ソフトの二重起動検査... 二重起動はされていませんでした
-133:	ウインドウクラスを登録します... 登録に成功しました
-134:	ウインドウモード起動用のウインドウを作成します
-134:	ディスプレイ情報のセットアップ開始
-135:		モニターの数：2  ディスプレイデバイスの数：4
-136:		No.0  モニター名：\\.\DISPLAY1　1920x1080　32bit　60Hz  96x96dpi
-136:		No.1  モニター名：\\.\DISPLAY2　1920x1080　32bit　60Hz  96x96dpi
-155:	ディスプレイ情報のセットアップ完了
-156:	ウインドウ矩形 ( -16, -50 )-( 1920, 1069 )
-163:	ウインドウの作成に成功しました
-163:	ウインドウを表示します
-271:	ＩＭＥを無効にしました
-275:	ウインドウスタイルをウインドウモード用に変更します... 完了
-302:	XInput DLL の読み込み中... 成功
-311:	DirectInput関係初期化処理
-312:		DirectInput8 の取得を試みます...成功
-339:			引き続き初期化処理... 初期化成功
-438:		ジョイパッドの初期化... 
-439:			XInput 対応コントローラーのチェックを開始します
-439:				XInput 対応コントローラー No.0 をチェック
-440:				XInput 対応コントローラー No.0 の接続は確認できませんでした
-440:				XInput 対応コントローラー No.1 をチェック
-441:				XInput 対応コントローラー No.1 の接続は確認できませんでした
-441:				XInput 対応コントローラー No.2 をチェック
-442:				XInput 対応コントローラー No.2 の接続は確認できませんでした
-442:				XInput 対応コントローラー No.3 をチェック
-443:				XInput 対応コントローラー No.3 の接続は確認できませんでした
-443:			XInput 対応コントローラーのチェック完了
-443:			DirectInput 対応ジョイパッドの列挙を開始します
-500:			DirectInput 対応ジョイパッドの列挙終了
-501:		ジョイパッドの初期化は正常に終了しました
-501:		マウスデバイスの初期化... 初期化成功
-502:		キーボードデバイスの初期化... 初期化成功
-510:	DirectInput 関連の初期化は正常に終了しました
-518:	XAudio2 の初期化を行います
-524:		XAudio2_8.dll を使用します
-530:		XAudio2 インターフェースの取得と初期化を行います....  成功 Ver2.8
-594:	XAudio2 の初期化は正常に終了しました
-602:	d3d11.dll の読み込み.... 成功
-610:	dxgi.dll の読み込み.... 成功
-611:	API CreateDXGIFactory2 のアドレスを取得します.... 成功
-612:	IDXGIFactory2 を作成します.... 成功
-617:	API CreateDXGIFactory6 のアドレスを取得します.... 成功
-618:	IDXGIAdapter を列挙
-619:		Adapter No.0 Desc:NVIDIA GeForce GTX 1660 Ti  VRAM:5966MB
-619:			Output Device No.0 Name:\\.\DISPLAY2 ( 0, 0 )-( 1920, 1080 )
-620:			Output Device No.1 Name:\\.\DISPLAY1 ( -1920, 0 )-( 0, 1080 )
-621:		Adapter No.1 Desc:Microsoft Basic Render Driver  VRAM:0MB
-621:	API D3D11CreateDevice のアドレスを取得します.... 成功
-622:	IDXGIAdapter を取得します.... 成功
-623:	IDXGIAdapter1 を取得します.... 成功
-624:	IDXGIAdapter2 を取得します.... 成功
-625:	IDXGIAdapter3 を取得します.... 成功
-626:	IDXGIAdapter4 を取得します.... 成功
-627:	Direct3D 11 FeatureLevel 11_0 以上を対象とします
-627:	ID3D11Device オブジェクトを取得します.... 成功
-865:	IDXGIDevice1 を取得します.... 成功
-866:	IDXGIDevice1->SetMaximunFrameLatency( 1 ); を実行しました
-867:	[ウインドウモード 1920x1080 ( 0, 0 )-( 1920, 1080 )]
-867:	IDXGISwapChain2 を作成します.... 成功
-891:	IDXGIFactory2->CreateSwapChainForHwnd の戻り値：0x00000000
-892:	IDXGIOutput を取得します.... 成功
-894:	Graphics Device:NVIDIA GeForce GTX 1660 Ti
-894:	画面のフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
-895:	16bit Zバッファフォーマットは DXGI_FORMAT_D16_UNORM です
-895:	24bit Zバッファフォーマットは DXGI_FORMAT_D24_UNORM_S8_UINT です
-896:	32bit Zバッファフォーマットは DXGI_FORMAT_D32_FLOAT です
-896:	16bit カラーフォーマットは DXGI_FORMAT_B5G6R5_UNORM です
-897:	32bit カラーフォーマットは DXGI_FORMAT_B8G8R8X8_UNORM です
-897:	アルファ付き 16bit カラーフォーマットは DXGI_FORMAT_B4G4R4A4_UNORM です
-898:	アルファ付き 32bit カラーフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
-899:	アルファテスト用 16bit カラーフォーマットは DXGI_FORMAT_B5G5R5A1_UNORM です
-899:	アルファテスト用 32bit カラーフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
-900:	ＤＸＴ１テクスチャフォーマットは DXGI_FORMAT_BC1_UNORM です
-901:	ＤＸＴ２テクスチャフォーマットは使えません
-901:	ＤＸＴ３テクスチャフォーマットは DXGI_FORMAT_BC2_UNORM です
-901:	ＤＸＴ４テクスチャフォーマットは使えません
-902:	ＤＸＴ５テクスチャフォーマットは DXGI_FORMAT_BC3_UNORM です
-902:	BC7_UNORM テクスチャフォーマットは DXGI_FORMAT_BC7_UNORM です
-903:	BC7_UNORM_SRGB テクスチャフォーマットは DXGI_FORMAT_BC7_UNORM_SRGB です
-903:	ABGR 整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_UNORM です
-904:	ABGR 浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_FLOAT です
-904:	ABGR 浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32B32A32_FLOAT です
-905:	１チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8_UNORM です
-905:	１チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_UNORM です
-905:	１チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_FLOAT です
-906:	１チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32_FLOAT です
-906:	２チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8G8_UNORM です
-907:	２チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_UNORM です
-907:	２チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_FLOAT です
-908:	２チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32_FLOAT です
-908:	描画用 16bit カラーフォーマットは DXGI_FORMAT_B5G6R5_UNORM です
-909:	描画用 32bit カラーフォーマットは DXGI_FORMAT_B8G8R8X8_UNORM です
-909:	描画用アルファ付き 32bit カラーフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
-909:	描画用 ABGR 整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_UNORM です
-910:	描画用 ABGR 浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_FLOAT です
-910:	描画用 ABGR 浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32B32A32_FLOAT です
-911:	描画用１チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8_UNORM です
-911:	描画用１チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_UNORM です
-912:	描画用１チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_FLOAT です
-912:	描画用１チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32_FLOAT です
-913:	描画用２チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8G8_UNORM です
-913:	描画用２チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_UNORM です
-914:	描画用２チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_FLOAT です
-915:	描画用２チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32_FLOAT です
-915:	使用する機能レベル:D3D_FEATURE_LEVEL_11_1
-916:	同時にレンダリングできるバッファの数:8
-916:	最大テクスチャサイズ　幅:16384 高さ:16384
-917:	標準描画用の頂点バッファの作成.... 成功
-919:	シェーダーコード関係の初期化.... 成功
-941:	各種シェーダー用定数バッファの作成.... 成功
-943:	各種 ID3D11InputLayout の作成.... 成功
-976:	画像の単純転送処理の初期化... 成功
-978:	深度バッファを作成します.... 成功
-982:	フォントの初期化を行います
-986:	フォントの初期化は正常に終了しました
-1079:	文字コードバッファの初期化を行います... 完了しました
-1101:ＤＸライブラリの初期化処理終了
-1116:ウインドウスタイルをウインドウモード用に変更します... 完了
-1130:ChangeWindowMode実行 
-1560:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\envi.wav
-1561:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\envi.wav
-1562:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\envi2.wav
-1563:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\envi2.wav
-1565:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\case.wav
-1565:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\case.wav
-1567:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\ModFall.wav
-1568:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\ModFall.wav
-1569:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\trigger.wav
-1570:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\trigger.wav
-1572:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\ammoload.wav
-1573:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\ammoload.wav
-1574:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\Tinnitus.wav
-1575:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\Tinnitus.wav
-1578:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM870\0.wav
-1578:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM870\0.wav
-1580:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM16\0.wav
-1581:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM16\0.wav
-1583:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\auto1911\0.wav
-1584:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\auto1911\0.wav
-1585:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoAK\0.wav
-1586:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoAK\0.wav
-1587:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM870\1.wav
-1588:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM870\1.wav
-1591:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM16\1.wav
-1591:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM16\1.wav
-1593:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\auto1911\1.wav
-1594:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\auto1911\1.wav
-1595:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoAK\1.wav
-1596:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoAK\1.wav
-1599:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM870\2.wav
-1599:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM870\2.wav
-1600:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM16\2.wav
-1601:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM16\2.wav
-1603:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\auto1911\2.wav
-1603:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\auto1911\2.wav
-1605:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoAK\2.wav
-1605:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoAK\2.wav
-1608:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM870\3.wav
-1608:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM870\3.wav
-1610:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM16\3.wav
-1611:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM16\3.wav
-1613:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\auto1911\3.wav
-1614:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\auto1911\3.wav
-1622:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoAK\3.wav
-1622:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoAK\3.wav
-1624:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM870\4.wav
-1624:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM870\4.wav
-1626:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM16\4.wav
-1626:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM16\4.wav
-1627:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\auto1911\4.wav
-1628:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\auto1911\4.wav
-1629:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoAK\4.wav
-1629:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoAK\4.wav
-1631:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM870\5.wav
-1631:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM870\5.wav
-1633:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM16\5.wav
-1634:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoM16\5.wav
-1636:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\auto1911\5.wav
-1637:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\auto1911\5.wav
-1638:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoAK\5.wav
-1639:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\autoAK\5.wav
-1641:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\move\sliding.wav
-1641:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\move\sliding.wav
-1645:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\move\sliding.wav
-1646:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\move\sliding.wav
-1650:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\move\getammo.wav
-1650:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\move\getammo.wav
-1655:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\hit.wav
-1656:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\hit.wav
-1657:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\HitMe.wav
-1658:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\HitMe.wav
-1659:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\Guard.wav
-1660:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\Guard.wav
-1664:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\HitGround\1.wav
-1664:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\HitGround\1.wav
-1665:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\HitGround\2.wav
-1666:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\HitGround\2.wav
-1667:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\HitGround\3.wav
-1668:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\HitGround\3.wav
-1669:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\HitGround\4.wav
-1670:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\HitGround\4.wav
-1671:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\HitGround\5.wav
-1672:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\gun\HitGround\5.wav
-1673:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\hurt_01.wav
-1674:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\hurt_01.wav
-1675:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\hurt_02.wav
-1676:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\hurt_02.wav
-1678:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\hurt_03.wav
-1679:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\hurt_03.wav
-1680:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\hurt_04.wav
-1681:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\hurt_04.wav
-1683:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\hurt_05.wav
-1683:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\hurt_05.wav
-1685:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\hurt_06.wav
-1686:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\hurt_06.wav
-1687:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_01.wav
-1688:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_01.wav
-1689:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_02.wav
-1690:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_02.wav
-1691:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_03.wav
-1692:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_03.wav
-1693:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_04.wav
-1694:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_04.wav
-1695:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_05.wav
-1696:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_05.wav
-1697:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_06.wav
-1698:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_06.wav
-1700:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_07.wav
-1700:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_07.wav
-1701:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_08.wav
-1702:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\death_08.wav
-1703:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\contact.wav
-1704:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\contact.wav
-1705:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\openfire.wav
-1706:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\openfire.wav
-1707:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\reload.wav
-1708:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\reload.wav
-1709:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\takecover.wav
-1710:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\takecover.wav
-1711:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\breathing.wav
-1712:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\breathing.wav
-1713:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\breathend.wav
-1713:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\voice\breathend.wav
-1715:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\near.wav
-1716:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\near.wav
-1717:File Open Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\Stim.wav
-1717:Sound File Load Error : C:\Users\Yabushita_Maki\Documents\GitHub\DX_VR\Mcraft\Project\data\Sound\SE\Stim.wav
+34:ChangeWindowMode実行 
+34:ウインドウモードフラグが立てられました
+36:ＤＸライブラリの初期化処理開始
+37:	システムの情報を出力します
+38:		ＤＸライブラリ Ver3.24e
+38:		論理プロセッサの数 : 16
+39:		ＯＳ  Windows10 ( Build 19045  )
+139:		現時点のＣＰＵ動作速度：大体3.66GHz
+139:		ＭＭＸ命令を使用します
+140:		ＳＳＥ命令が使用可能です
+140:		ＳＳＥ２命令が使用可能です
+141:		ＣＰＵベンダ：AuthenticAMD
+143:		ＣＰＵ名：AMD Ryzen 7 2700X Eight-Core Processor         
+143:	ＣＯＭの初期化... 成功
+145:	非同期読み込み処理の初期化...成功
+147:	メモリ総量:16317.98MB  空きメモリ領域:3519.01MB 
+148:	タイマーの精度を検査します
+149:	精度結果 更新回数 マルチメディアタイマー：0  パフォーマンスカウンター：60
+149:	 パフォーマンスカウンターを使用します タイマー精度 : 10000.000000 KHz 
+151:	 
+151:	ソフトの二重起動検査... 二重起動はされていませんでした
+152:	ウインドウクラスを登録します... 登録に成功しました
+154:	ウインドウモード起動用のウインドウを作成します
+154:	ディスプレイ情報のセットアップ開始
+155:		モニターの数：2  ディスプレイデバイスの数：4
+156:		No.0  モニター名：\\.\DISPLAY1　1920x1080　32bit　60Hz  96x96dpi
+157:		No.1  モニター名：\\.\DISPLAY2　1920x1080　32bit　60Hz  96x96dpi
+183:	ディスプレイ情報のセットアップ完了
+184:	ウインドウ矩形 ( -16, -50 )-( 1920, 1069 )
+194:	ウインドウの作成に成功しました
+195:	ウインドウを表示します
+282:	ＩＭＥを無効にしました
+284:	ウインドウスタイルをウインドウモード用に変更します... 完了
+314:	XInput DLL の読み込み中... 成功
+419:	DirectInput関係初期化処理
+421:		DirectInput8 の取得を試みます...成功
+473:			引き続き初期化処理... 初期化成功
+493:		ジョイパッドの初期化... 
+494:			XInput 対応コントローラーのチェックを開始します
+494:				XInput 対応コントローラー No.0 をチェック
+495:				XInput 対応コントローラー No.0 の接続は確認できませんでした
+495:				XInput 対応コントローラー No.1 をチェック
+496:				XInput 対応コントローラー No.1 の接続は確認できませんでした
+496:				XInput 対応コントローラー No.2 をチェック
+497:				XInput 対応コントローラー No.2 の接続は確認できませんでした
+497:				XInput 対応コントローラー No.3 をチェック
+497:				XInput 対応コントローラー No.3 の接続は確認できませんでした
+498:			XInput 対応コントローラーのチェック完了
+498:			DirectInput 対応ジョイパッドの列挙を開始します
+589:			DirectInput 対応ジョイパッドの列挙終了
+590:		ジョイパッドの初期化は正常に終了しました
+590:		マウスデバイスの初期化... 初期化成功
+591:		キーボードデバイスの初期化... 初期化成功
+606:	DirectInput 関連の初期化は正常に終了しました
+618:	WASAPI の初期化を行います
+628:		デバイス名 : スピーカー (Realtek(R) Audio)
+638:		デフォルト遅延時間 : 10.000 ms
+639:		最小遅延時間       : 3.000 ms
+639:		遅延時間           : 10.000 ms
+643:		チャンネル数  　   : 2 ch
+644:		量子化ビット深度   : 32 bit
+644:		有効ビット深度　   : 32 bit
+644:		サンプリングレート : 48000 Hz
+645:		データ形式         : 浮動小数点型
+674:		動作モード         : 共有モード
+674:	WASAPI の初期化は正常に終了しました
+680:	d3d11.dll の読み込み.... 成功
+687:	dxgi.dll の読み込み.... 成功
+688:	API CreateDXGIFactory2 のアドレスを取得します.... 成功
+689:	IDXGIFactory2 を作成します.... 成功
+694:	API CreateDXGIFactory6 のアドレスを取得します.... 成功
+695:	IDXGIAdapter を列挙
+696:		Adapter No.0 Desc:NVIDIA GeForce GTX 1660 Ti  VRAM:5966MB
+696:			Output Device No.0 Name:\\.\DISPLAY2 ( 0, 0 )-( 1920, 1080 )
+698:			Output Device No.1 Name:\\.\DISPLAY1 ( -1920, 0 )-( 0, 1080 )
+698:		Adapter No.1 Desc:Microsoft Basic Render Driver  VRAM:0MB
+699:	API D3D11CreateDevice のアドレスを取得します.... 成功
+700:	IDXGIAdapter を取得します.... 成功
+701:	IDXGIAdapter1 を取得します.... 成功
+701:	IDXGIAdapter2 を取得します.... 成功
+702:	IDXGIAdapter3 を取得します.... 成功
+702:	IDXGIAdapter4 を取得します.... 成功
+703:	Direct3D 11 FeatureLevel 11_0 以上を対象とします
+704:	ID3D11Device オブジェクトを取得します.... 成功
+916:	IDXGIDevice1 を取得します.... 成功
+917:	IDXGIDevice1->SetMaximunFrameLatency( 1 ); を実行しました
+917:	[ウインドウモード 1920x1080 ( 0, 0 )-( 1920, 1080 )]
+918:	IDXGISwapChain2 を作成します.... 成功
+944:	IDXGIFactory2->CreateSwapChainForHwnd の戻り値：0x00000000
+945:	IDXGIOutput を取得します.... 成功
+947:	Graphics Device:NVIDIA GeForce GTX 1660 Ti
+947:	画面のフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
+947:	16bit Zバッファフォーマットは DXGI_FORMAT_D16_UNORM です
+948:	24bit Zバッファフォーマットは DXGI_FORMAT_D24_UNORM_S8_UINT です
+948:	32bit Zバッファフォーマットは DXGI_FORMAT_D32_FLOAT です
+949:	16bit カラーフォーマットは DXGI_FORMAT_B5G6R5_UNORM です
+949:	32bit カラーフォーマットは DXGI_FORMAT_B8G8R8X8_UNORM です
+950:	アルファ付き 16bit カラーフォーマットは DXGI_FORMAT_B4G4R4A4_UNORM です
+950:	アルファ付き 32bit カラーフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
+950:	アルファテスト用 16bit カラーフォーマットは DXGI_FORMAT_B5G5R5A1_UNORM です
+951:	アルファテスト用 32bit カラーフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
+951:	ＤＸＴ１テクスチャフォーマットは DXGI_FORMAT_BC1_UNORM です
+952:	ＤＸＴ２テクスチャフォーマットは使えません
+952:	ＤＸＴ３テクスチャフォーマットは DXGI_FORMAT_BC2_UNORM です
+952:	ＤＸＴ４テクスチャフォーマットは使えません
+952:	ＤＸＴ５テクスチャフォーマットは DXGI_FORMAT_BC3_UNORM です
+953:	BC7_UNORM テクスチャフォーマットは DXGI_FORMAT_BC7_UNORM です
+953:	BC7_UNORM_SRGB テクスチャフォーマットは DXGI_FORMAT_BC7_UNORM_SRGB です
+953:	ABGR 整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_UNORM です
+954:	ABGR 浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_FLOAT です
+954:	ABGR 浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32B32A32_FLOAT です
+954:	１チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8_UNORM です
+955:	１チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_UNORM です
+955:	１チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_FLOAT です
+956:	１チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32_FLOAT です
+956:	２チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8G8_UNORM です
+957:	２チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_UNORM です
+957:	２チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_FLOAT です
+957:	２チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32_FLOAT です
+958:	描画用 16bit カラーフォーマットは DXGI_FORMAT_B5G6R5_UNORM です
+958:	描画用 32bit カラーフォーマットは DXGI_FORMAT_B8G8R8X8_UNORM です
+958:	描画用アルファ付き 32bit カラーフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
+959:	描画用 ABGR 整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_UNORM です
+959:	描画用 ABGR 浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_FLOAT です
+959:	描画用 ABGR 浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32B32A32_FLOAT です
+960:	描画用１チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8_UNORM です
+960:	描画用１チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_UNORM です
+960:	描画用１チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_FLOAT です
+961:	描画用１チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32_FLOAT です
+961:	描画用２チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8G8_UNORM です
+962:	描画用２チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_UNORM です
+962:	描画用２チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_FLOAT です
+962:	描画用２チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32_FLOAT です
+963:	使用する機能レベル:D3D_FEATURE_LEVEL_11_1
+963:	同時にレンダリングできるバッファの数:8
+963:	最大テクスチャサイズ　幅:16384 高さ:16384
+964:	標準描画用の頂点バッファの作成.... 成功
+965:	シェーダーコード関係の初期化.... 成功
+980:	各種シェーダー用定数バッファの作成.... 成功
+982:	各種 ID3D11InputLayout の作成.... 成功
+1008:	画像の単純転送処理の初期化... 成功
+1011:	深度バッファを作成します.... 成功
+1014:	フォントの初期化を行います
+1018:	フォントの初期化は正常に終了しました
+1106:	文字コードバッファの初期化を行います... 完了しました
+1123:ＤＸライブラリの初期化処理終了
+1135:ウインドウスタイルをウインドウモード用に変更します... 完了
+1148:ChangeWindowMode実行 

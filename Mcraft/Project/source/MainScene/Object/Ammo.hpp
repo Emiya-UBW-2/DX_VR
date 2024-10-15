@@ -47,7 +47,7 @@ namespace FPS_n2 {
 				this->repos = pos_t;
 				this->SetMove().SetAll(pos_t, pos_t, pos_t, pVec, Matrix3x3DX::identity(), Matrix3x3DX::identity());
 				this->m_AmmoData = pAmmoData;
-				this->m_speed = this->m_AmmoData->GetSpeed() * Scale_Rate;
+				this->m_speed = this->m_AmmoData->GetSpeed() * Scale3DRate;
 				this->m_penetration = this->m_AmmoData->GetPenetration();
 				this->m_yAdd = 0.f;
 				this->m_Timer = 0.f;
@@ -110,7 +110,7 @@ namespace FPS_n2 {
 					//移動確定
 					this->pos = this->pos + (this->GetMove().GetVec() * (this->m_speed / DrawParts->GetFps())) + Vector3DX::up() * this->m_yAdd;
 					this->SetMove().Update(0.f, 0.f);
-					this->m_yAdd += (M_GR / (DrawParts->GetFps() * DrawParts->GetFps()));
+					this->m_yAdd += (GravityRate / (DrawParts->GetFps() * DrawParts->GetFps()));
 
 					//消す(スピードが0以下、貫通が0以下、5回反射する)
 					if (this->m_speed <= 0.f || this->m_penetration <= 0.f || this->m_RicochetCnt > 5 || this->m_Timer > 5.f) {
@@ -136,7 +136,7 @@ namespace FPS_n2 {
 						if (CheckCameraViewClip_Box(this->repos.get(), this->pos.get()) == FALSE) {
 							SetUseLighting(FALSE);
 							SetUseHalfLambertLighting(FALSE);
-							DrawCapsule_3D(this->pos, this->repos, 1.f * ((this->m_AmmoData->GetCaliber() - 0.00762f) * 0.1f + 0.00762f) * Scale_Rate, GetColor(255, 255, 172), Yellow);
+							DrawCapsule_3D(this->pos, this->repos, 1.f * ((this->m_AmmoData->GetCaliber() - 0.00762f) * 0.1f + 0.00762f) * Scale3DRate, GetColor(255, 255, 172), Yellow);
 							SetUseLighting(TRUE);
 							SetUseHalfLambertLighting(TRUE);
 						}

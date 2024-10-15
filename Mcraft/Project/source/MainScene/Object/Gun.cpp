@@ -47,7 +47,7 @@ namespace FPS_n2 {
 					m_CartFall.SetFall(
 						GetFrameWorldMat_P(GunFrame::Cart).pos(),
 						Matrix3x3DX::Get33DX(GetFrameWorldMat_P(GunFrame::Muzzle).rotation()),
-						(GetFrameWorldMat_P(GunFrame::CartVec).pos() - GetFrameWorldMat_P(GunFrame::Cart).pos()).normalized() * (Scale_Rate * 2.f / 60.f), 2.f, SoundEnum::CartFall);
+						(GetFrameWorldMat_P(GunFrame::CartVec).pos() - GetFrameWorldMat_P(GunFrame::Cart).pos()).normalized() * (Scale3DRate * 2.f / 60.f), 2.f, SoundEnum::CartFall);
 				}
 			}
 		}
@@ -60,13 +60,13 @@ namespace FPS_n2 {
 				if ((5.f < GetObj().SetAnim((int)GunAnimeID::Cocking).GetTime() && GetObj().SetAnim((int)GunAnimeID::Cocking).GetTime() < 6.f)) {
 					if (m_boltSoundSequence != 1) {
 						m_boltSoundSequence = 1;
-						SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 50.f);
+						SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 50.f);
 					}
 				}
 				if ((28.f < GetObj().SetAnim((int)GunAnimeID::Cocking).GetTime() && GetObj().SetAnim((int)GunAnimeID::Cocking).GetTime() < 29.f)) {
 					if (m_boltSoundSequence != 3) {
 						m_boltSoundSequence = 3;
-						SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 50.f);
+						SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 50.f);
 					}
 				}
 			}
@@ -75,14 +75,14 @@ namespace FPS_n2 {
 				if ((5.f < GetObj().SetAnim((int)GunAnimeID::ReloadStart_Empty).GetTime() && GetObj().SetAnim((int)GunAnimeID::ReloadStart_Empty).GetTime() < 6.f)) {
 					if (m_boltSoundSequence != 5) {
 						m_boltSoundSequence = 5;
-						SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 50.f);
+						SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 50.f);
 					}
 				}
 
 				if ((5.f < GetObj().SetAnim((int)GunAnimeID::ReloadStart).GetTime() && GetObj().SetAnim((int)GunAnimeID::ReloadStart).GetTime() < 6.f)) {
 					if (m_boltSoundSequence != 5) {
 						m_boltSoundSequence = 5;
-						SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 50.f);
+						SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 50.f);
 					}
 				}
 			}
@@ -91,7 +91,7 @@ namespace FPS_n2 {
 				if ((10.f < GetObj().SetAnim((int)GunAnimeID::ReloadOne).GetTime() && GetObj().SetAnim((int)GunAnimeID::ReloadOne).GetTime() < 11.f)) {
 					if (m_boltSoundSequence != 7) {
 						m_boltSoundSequence = 7;
-						SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 50.f);
+						SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 50.f);
 					}
 				}
 				else if (GetObj().SetAnim((int)GunAnimeID::ReloadOne).GetPer() != 0.f) {
@@ -103,7 +103,7 @@ namespace FPS_n2 {
 				if ((8.f < GetObj().SetAnim((int)GunAnimeID::ReloadEnd).GetTime() && GetObj().SetAnim((int)GunAnimeID::ReloadEnd).GetTime() < 9.f)) {
 					if (m_boltSoundSequence != 8) {
 						m_boltSoundSequence = 8;
-						SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 50.f);
+						SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 50.f);
 					}
 				}
 			}
@@ -112,13 +112,13 @@ namespace FPS_n2 {
 				if ((0.5f < GetObj().SetAnim((int)GunAnimeID::Shot).GetTime() && GetObj().SetAnim((int)GunAnimeID::Shot).GetTime() < 1.f)) {
 					if (m_boltSoundSequence != 1) {
 						m_boltSoundSequence = 1;
-						SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 50.f);
+						SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 50.f);
 					}
 				}
 				if ((5.f < GetObj().SetAnim((int)GunAnimeID::Shot).GetTime() && GetObj().SetAnim((int)GunAnimeID::Shot).GetTime() < 6.f)) {
 					if (m_boltSoundSequence != 3) {
 						m_boltSoundSequence = 3;
-						SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 50.f);
+						SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 50.f);
 					}
 				}
 			}
@@ -130,13 +130,13 @@ namespace FPS_n2 {
 				if ((8.f < GetObj().SetAnim((int)GunAnimeID::Cocking).GetTime() && GetObj().SetAnim((int)GunAnimeID::Cocking).GetTime() < 9.f)) {
 					if (m_boltSoundSequence != 1) {
 						m_boltSoundSequence = 1;
-						SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 2.f);
+						SE->Get((int)GetGunSoundSet().m_Cock1).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 2.f);
 					}
 				}
 				if ((18.f < GetObj().SetAnim((int)GunAnimeID::Cocking).GetTime() && GetObj().SetAnim((int)GunAnimeID::Cocking).GetTime() < 19.f)) {
 					if (m_boltSoundSequence != 2) {
 						m_boltSoundSequence = 2;
-						SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 2.f);
+						SE->Get((int)GetGunSoundSet().m_Cock2).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 2.f);
 					}
 				}
 			}
@@ -145,13 +145,13 @@ namespace FPS_n2 {
 				if ((0.f < GetObj().SetAnim((int)GunAnimeID::ReloadStart_Empty).GetTime() && GetObj().SetAnim((int)GunAnimeID::ReloadStart_Empty).GetTime() < 1.f)) {
 					if (m_boltSoundSequence != 3) {
 						m_boltSoundSequence = 3;
-						SE->Get((int)GetGunSoundSet().m_Unload).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 2.f);
+						SE->Get((int)GetGunSoundSet().m_Unload).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 2.f);
 					}
 				}
 				if ((0.f < GetObj().SetAnim((int)GunAnimeID::ReloadStart).GetTime() && GetObj().SetAnim((int)GunAnimeID::ReloadStart).GetTime() < 1.f)) {
 					if (m_boltSoundSequence != 3) {
 						m_boltSoundSequence = 3;
-						SE->Get((int)GetGunSoundSet().m_Unload).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 2.f);
+						SE->Get((int)GetGunSoundSet().m_Unload).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 2.f);
 					}
 				}
 			}
@@ -160,7 +160,7 @@ namespace FPS_n2 {
 				if ((0.f < GetObj().SetAnim((int)GunAnimeID::ReloadEnd).GetTime() && GetObj().SetAnim((int)GunAnimeID::ReloadEnd).GetTime() < 1.f)) {
 					if (m_boltSoundSequence != 5) {
 						m_boltSoundSequence = 5;
-						SE->Get((int)GetGunSoundSet().m_Load).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 2.f);
+						SE->Get((int)GetGunSoundSet().m_Load).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 2.f);
 					}
 				}
 			}
@@ -169,7 +169,7 @@ namespace FPS_n2 {
 				if ((0.f < GetObj().SetAnim((int)GunAnimeID::CheckStart).GetTime() && GetObj().SetAnim((int)GunAnimeID::CheckStart).GetTime() < 1.f)) {
 					if (m_boltSoundSequence != 6) {
 						m_boltSoundSequence = 6;
-						SE->Get((int)GetGunSoundSet().m_Unload).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 2.f);
+						SE->Get((int)GetGunSoundSet().m_Unload).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 2.f);
 					}
 				}
 			}
@@ -178,7 +178,7 @@ namespace FPS_n2 {
 				if ((25.f < GetObj().SetAnim((int)GunAnimeID::Checking).GetTime() && GetObj().SetAnim((int)GunAnimeID::Checking).GetTime() < 26.f)) {
 					if (m_boltSoundSequence != 7) {
 						m_boltSoundSequence = 7;
-						SE->Get((int)GetGunSoundSet().m_Load).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 2.f);
+						SE->Get((int)GetGunSoundSet().m_Load).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 2.f);
 					}
 				}
 			}
@@ -248,13 +248,13 @@ namespace FPS_n2 {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* SE = SoundPool::Instance();
 			//
-			SE->Get((int)SoundEnum::Trigger).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 5.f);
+			SE->Get((int)SoundEnum::Trigger).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 5.f);
 			switch (GetGunShootSound()) {
 			case GunShootSound::Normal:
-				SE->Get((int)GetGunSoundSet().m_ShotNormal).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 50.f);
+				SE->Get((int)GetGunSoundSet().m_ShotNormal).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 50.f);
 				break;
 			case GunShootSound::Suppressor:
-				SE->Get((int)GetGunSoundSet().m_ShotSuppressor).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 50.f);
+				SE->Get((int)GetGunSoundSet().m_ShotSuppressor).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 50.f);
 				break;
 			default:
 				break;
@@ -403,7 +403,7 @@ namespace FPS_n2 {
 					if (m_boltSoundSequence != 9) {
 						m_boltSoundSequence = 9;
 						auto* SE = SoundPool::Instance();
-						SE->Get((int)SoundEnum::AmmoLoad).Play_3D(0, GetObj().GetMatrix().pos(), Scale_Rate * 50.f);
+						SE->Get((int)SoundEnum::AmmoLoad).Play_3D(0, GetObj().GetMatrix().pos(), Scale3DRate * 50.f);
 					}
 				}
 				break;
@@ -433,7 +433,7 @@ namespace FPS_n2 {
 			ReticleControl::UpdateReticleControl(
 				LensPos,
 				GetFrameWorldMat_P(GunFrame::LensSize).pos(),
-				LensPos + (LensPos - GetEyePos()).normalized() * (5.f * Scale_Rate));
+				LensPos + (LensPos - GetEyePos()).normalized() * (5.f * Scale3DRate));
 		}
 
 		void				GunClass::Init_Gun(void) noexcept {
@@ -574,15 +574,15 @@ namespace FPS_n2 {
 		void				GunClass::DrawShadow(void) noexcept {
 			if (this->m_IsActive && this->m_IsDraw) {
 				auto* DrawParts = DXDraw::Instance();
-				if ((GetMove().GetPos() - DrawParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale_Rate) { return; }
+				if ((GetMove().GetPos() - DrawParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale3DRate) { return; }
 				this->GetObj().DrawModel();
 			}
 		}
 		void				GunClass::Draw(bool isDrawSemiTrans) noexcept {
 			if (this->m_IsActive && this->m_IsDraw) {
 				if (CheckCameraViewClip_Box(
-					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-0.5f * Scale_Rate, -0.5f * Scale_Rate, -0.5f * Scale_Rate)).get(),
-					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(0.5f * Scale_Rate, 0.5f * Scale_Rate, 0.5f * Scale_Rate)).get()) == FALSE
+					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-0.5f * Scale3DRate, -0.5f * Scale3DRate, -0.5f * Scale3DRate)).get(),
+					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(0.5f * Scale3DRate, 0.5f * Scale3DRate, 0.5f * Scale3DRate)).get()) == FALSE
 					) {
 					if (isDrawSemiTrans) {
 #if HIGH_FPS_ROM

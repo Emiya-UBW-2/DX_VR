@@ -17,10 +17,10 @@ namespace FPS_n2 {
 			// 
 			ButtonParts->ResetSel();
 			// 
-			ButtonParts->AddStringButton("Let's Go!", 52, true, basex - 64 - 48, basey - 84 - 64 * 2, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton("Reset SaveData", 48, true, basex - 64, basey - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, basex - 96 - 64, 64, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, basex - 64, 64, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonParts->AddStringButton("Let's Go!", 52, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 2, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton("Reset SaveData", 48, true, BaseScreenWidth - 64, BaseScreenHeight - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, BaseScreenWidth - 96 - 64, 64, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, BaseScreenWidth - 64, 64, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			// クレジット
 			this->m_CreditControl = std::make_unique<CreditControl>();
 			this->m_CreditControl->Init();
@@ -165,7 +165,7 @@ namespace FPS_n2 {
 			// 
 			ButtonParts->Draw();
 			// 
-			if ((ButtonParts->GetSelect() != INVALID_ID) && !PopUpParts->IsActivePop()) {
+			if ((ButtonParts->GetSelect() != InvalidID) && !PopUpParts->IsActivePop()) {
 				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18), 
 					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 					DrawParts->GetUIY(32), UIHeight - DrawParts->GetUIY(32 + 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
