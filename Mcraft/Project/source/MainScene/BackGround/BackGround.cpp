@@ -1227,8 +1227,8 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundClass::LoadCellsFile() noexcept {
+			auto& cell = m_CellxN.front();
 			{
-				auto& cell = m_CellxN.front();
 				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
 
 				std::ifstream fin{};
@@ -1260,7 +1260,7 @@ namespace FPS_n2 {
 			/*
 			for (int x = 0; x < cell.All; ++x) {
 				for (int z = 0; z < cell.All; ++z) {
-					for (int y = cell.All; y >= 190; --y) {
+					for (int y = cell.All; y >= 133; --y) {
 						cell.SetCellBuf(x, y, z).m_Cell = 0;
 					}
 				}
@@ -1473,7 +1473,6 @@ namespace FPS_n2 {
 				for (int x = 0; x < cellx.All; ++x) {
 					for (int y = 0; y < cellx.All; ++y) {
 						for (int z = 0; z < cellx.All; ++z) {
-							if (cellx.GetCellBuf(x, y, z).m_Cell == s_EmptyBlick) { continue; }
 							cellx.SetCellBuf(x, y, z).m_DifColorPow.at(0b000) = 128;
 							cellx.SetCellBuf(x, y, z).m_DifColorPow.at(0b001) = 128;
 							cellx.SetCellBuf(x, y, z).m_DifColorPow.at(0b010) = 128;
@@ -1519,7 +1518,7 @@ namespace FPS_n2 {
 					//
 #if defined(DEBUG) & EDITBLICK
 					PutPos = (CamPos.at(0) + CamVec.at(0) * (LenMouse * Scale3DRate));
-					//PutPos.y = CellScale * (2.f+16.f);
+					//PutPos.y = CellScale * (2.f);
 					if (blicksel >= 0) {
 						auto& cell = m_CellxN.front();
 						auto Put = cell.GetPoint(PutPos);
