@@ -536,6 +536,9 @@ namespace FPS_n2 {
 			void			LoadCellsFile() noexcept;
 			void			SaveCellsFile() noexcept;
 
+			void			LoadCellsClip(int xpos, int ypos,int zpos) noexcept;
+			void			SaveCellsClip(int XMin, int XMax, int YMin, int YMax, int ZMin, int ZMax) noexcept;
+
 			void			SettingChange() noexcept;
 
 #if defined(DEBUG) & EDITBLICK

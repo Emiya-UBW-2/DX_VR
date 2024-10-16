@@ -1227,21 +1227,25 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundClass::LoadCellsFile() noexcept {
-			auto& cell = m_CellxN.front();
-			cell.SetScale(static_cast<int>(pow(MulPer, 0)));
+			{
+				auto& cell = m_CellxN.front();
+				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
 
-			std::ifstream fin{};
-			fin.open("data/Map.txt", std::ios::in | std::ios::binary);
-			m_CellBase.resize(256 * 256 * 256);
-			fin.read((char*)m_CellBase.data(), sizeof(m_CellBase.at(0))*(256 * 256 * 256));
-			fin.close();
-			for (int xm = 0; xm < cell.All; ++xm) {
-				for (int ym = 0; ym < cell.All; ++ym) {
-					for (int zm = 0; zm < cell.All; ++zm) {
-						cell.SetCellBuf(xm, ym, zm).m_Cell = m_CellBase[cell.GetCellNum(xm, ym, zm)];
+				std::ifstream fin{};
+				fin.open("data/Map.txt", std::ios::in | std::ios::binary);
+				m_CellBase.resize(256 * 256 * 256);
+				fin.read((char*)m_CellBase.data(), sizeof(m_CellBase.at(0)) * (256 * 256 * 256));
+				fin.close();
+				for (int xm = 0; xm < cell.All; ++xm) {
+					for (int ym = 0; ym < cell.All; ++ym) {
+						for (int zm = 0; zm < cell.All; ++zm) {
+							cell.SetCellBuf(xm, ym, zm).m_Cell = m_CellBase[cell.GetCellNum(xm, ym, zm)];
+						}
 					}
 				}
 			}
+			//一部をペースト
+			//LoadCellsClip(0, 128, 0);
 			/*
 			for (int x = 0; x < cell.All; ++x) {
 				if (x - cell.All/2 > -72) {
@@ -1282,30 +1286,61 @@ namespace FPS_n2 {
 				fout.close();  //ファイルを閉じる
 			}
 			//一部を切り取って保存
-			{
-				auto& cell = m_CellxN.front();
+			/*
+			int XMin = 37;
+			int XMax = 144;
+			int YMin = 128;
+			int YMax = 205;
+			int ZMin = 91;
+			int ZMax = 153;
+			SaveCellsClip(XMin, XMax, YMin, YMax, ZMin, ZMax);
+			//*/
+		}
+		void BackGroundClass::LoadCellsClip(int xpos, int ypos, int zpos) noexcept {
+			auto& cell = m_CellxN.front();
+			int XTotal = 1;
+			int YTotal = 1;
+			int ZTotal = 1;
+			std::ifstream fin{};
+			fin.open("data/Build/Map.txt", std::ios::in | std::ios::binary);
+			fin.read((char*)&XTotal, sizeof(XTotal));
+			fin.read((char*)&YTotal, sizeof(YTotal));
+			fin.read((char*)&ZTotal, sizeof(ZTotal));
+			m_CellBase.resize(XTotal * YTotal * ZTotal);
+			fin.read((char*)m_CellBase.data(), sizeof(m_CellBase.at(0)) * (XTotal * YTotal * ZTotal));
+			fin.close();  //ファイルを閉じる
 
-				int XMax = 128;
-				int YMax = 256;
-				int ZMax = 256;
-				m_CellBase.resize(XMax * YMax * ZMax);
-				for (int xm = -XMax / 2; xm < XMax / 2; ++xm) {
-					for (int ym = -YMax / 2; ym < YMax / 2; ++ym) {
-						for (int zm = -ZMax / 2; zm < ZMax / 2; ++zm) {
-							m_CellBase[static_cast<size_t>((xm + XMax / 2) * YMax * ZMax + (ym + YMax / 2) * ZMax + (zm + ZMax / 2))] =
-								cell.SetCellBuf(xm + cell.Half, ym + cell.Half, zm + cell.Half).m_Cell;
-						}
+			for (int xm = 0; xm < XTotal; ++xm) {
+				for (int ym = 0; ym < YTotal; ++ym) {
+					for (int zm = 0; zm < ZTotal; ++zm) {
+						cell.SetCellBuf(xm + xpos, ym + ypos, zm + zpos).m_Cell =
+							m_CellBase[static_cast<size_t>(xm * YTotal * ZTotal + ym * ZTotal + zm)];
 					}
 				}
-
-				std::ofstream fout{};
-				fout.open("data/Build/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
-				fout.write((char*)&XMax, sizeof(XMax));
-				fout.write((char*)&YMax, sizeof(YMax));
-				fout.write((char*)&ZMax, sizeof(ZMax));
-				fout.write((char*)m_CellBase.data(), sizeof(m_CellBase.at(0)) * (XMax * YMax * ZMax));
-				fout.close();  //ファイルを閉じる
 			}
+		}
+		void BackGroundClass::SaveCellsClip(int XMin, int XMax, int YMin, int YMax, int ZMin, int ZMax) noexcept {
+			auto& cell = m_CellxN.front();
+			int XTotal = (XMax - XMin + 1);
+			int YTotal = (YMax - YMin + 1);
+			int ZTotal = (ZMax - ZMin + 1);
+
+			m_CellBase.resize(XTotal * YTotal * ZTotal);
+			for (int xm = 0; xm < XTotal; ++xm) {
+				for (int ym = 0; ym < YTotal; ++ym) {
+					for (int zm = 0; zm < ZTotal; ++zm) {
+						m_CellBase[static_cast<size_t>(xm * YTotal * ZTotal + ym * ZTotal + zm)] = cell.SetCellBuf(XMin + xm, YMin + ym, ZMin + zm).m_Cell;
+					}
+				}
+			}
+
+			std::ofstream fout{};
+			fout.open("data/Build/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
+			fout.write((char*)&XTotal, sizeof(XTotal));
+			fout.write((char*)&YTotal, sizeof(YTotal));
+			fout.write((char*)&ZTotal, sizeof(ZTotal));
+			fout.write((char*)m_CellBase.data(), sizeof(m_CellBase.at(0)) * (XTotal * YTotal * ZTotal));
+			fout.close();  //ファイルを閉じる
 		}
 		//
 		void		BackGroundClass::SettingChange() noexcept {

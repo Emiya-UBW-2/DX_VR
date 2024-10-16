@@ -723,7 +723,9 @@ namespace FPS_n2 {
 			auto& GetGunPtrOther(void) noexcept { return this->m_Gun_Ptr[GetOtherGunSelect()]; }
 			const auto& GetGunPtrOther(void) const noexcept { return this->m_Gun_Ptr[GetOtherGunSelect()]; }
 
-			const auto		GetSightZoomSize() const noexcept { return GetGunPtrNow()->GetSightPtr() ? (*GetGunPtrNow()->GetSightPtr())->GetModData()->GetZoomSize() : 1.f; }
+			const auto		GetSightZoomSize() const noexcept {
+				return (GetGunPtrNow() && GetGunPtrNow()->GetSightPtr()) ? (*GetGunPtrNow()->GetSightPtr())->GetModData()->GetZoomSize() : 1.f;
+			}
 
 			const auto		IsGun0Select() const noexcept { return this->m_GunSelect == 0; }
 			const auto		IsULTSelect() const noexcept { return this->m_GunSelect == 1; }
