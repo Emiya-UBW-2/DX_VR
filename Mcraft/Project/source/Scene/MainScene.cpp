@@ -61,7 +61,7 @@ namespace FPS_n2 {
 				//人の座標設定
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 1.f * Scale3DRate, 0.f);
+					pos_t = Vector3DX::vget(0.f, 5.f * Scale3DRate, 0.f);
 
 					Vector3DX EndPos = pos_t - Vector3DX::up() * 2.f * Scale3DRate;
 					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 2.f * Scale3DRate, &EndPos)) {
@@ -426,7 +426,7 @@ namespace FPS_n2 {
 				DrawParts->Set_is_lens(false);
 				DrawParts->Set_zoom_lens(1.f);
 			}
-			UISystem::Instance()->DelUI(m_UILayer);
+			UniversalUI::UISystem::Instance()->DelUI(m_UILayer);
 			EffectControl::Dispose();
 			if (this->m_IsEnd) {//タイトルに戻る
 				SetNextSelect(0);

@@ -439,7 +439,7 @@ namespace FPS_n2 {
 				DrawParts->Set_is_lens(false);
 				DrawParts->Set_zoom_lens(1.f);
 			}
-			UISystem::Instance()->DelUI(m_UILayer);
+			UniversalUI::UISystem::Instance()->DelUI(m_UILayer);
 			if (this->m_IsEnd) {//ƒ^ƒCƒgƒ‹‚É–ß‚é
 				SetNextSelect(0);
 			}
