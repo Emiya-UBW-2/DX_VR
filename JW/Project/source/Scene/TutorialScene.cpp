@@ -130,8 +130,8 @@ namespace FPS_n2 {
 			auto* BGM = BGMPool::Instance();
 			BGM->StopAll();
 
-			ScoreBoard = GraphHandle::Load("data/UI/Score.png");
-			ScoreBoard2 = GraphHandle::Load("data/UI/Score2.png");
+			ScoreBoard.Load("data/UI/Score.png");
+			ScoreBoard2.Load("data/UI/Score2.png");
 			//
 			for (int j = 0; j < 5; j++) {
 				auto Obj = std::make_shared<TargetClass>();
@@ -271,15 +271,15 @@ namespace FPS_n2 {
 				if (m_TutorialNow < m_Tutorial.size()) {
 					this->m_TutorialLog.Add(m_Tutorial.at(m_TutorialNow).m_Mes.c_str());
 					SetCreate3DSoundFlag(FALSE);
-					m_TutorialVoice.stop();
+					m_TutorialVoice.Stop();
 					m_TutorialVoice.Dispose();
 
 					char Mes[256]{};
 					snprintfDx(Mes, 256, "data/Sound/VOICE/voice-%d.wav", m_TutorialNow);
 
-					m_TutorialVoice = SoundHandle::Load(Mes);
-					m_TutorialVoice.play(DX_PLAYTYPE_BACK, TRUE);
-					m_TutorialVoice.vol(static_cast<int>(255 * OptionParts->GetParamFloat(EnumSaveParam::SE)));
+					m_TutorialVoice.Load(Mes);
+					m_TutorialVoice.Play(DX_PLAYTYPE_BACK, TRUE);
+					m_TutorialVoice.SetVol(static_cast<int>(255 * OptionParts->GetParamFloat(EnumSaveParam::SE)));
 
 					m_TutorialNow++;
 				}
@@ -592,7 +592,6 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			TutorialScene::Dispose_Sub(void) noexcept {
-			auto* OptionParts = OPTION::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 
 			//使い回しオブジェ系
@@ -713,10 +712,8 @@ namespace FPS_n2 {
 				}
 				//*/
 			}
-		}
-		void			TutorialScene::DrawUI_In_Sub(void) noexcept {
+
 			auto* WindowParts = WindowSystem::DrawControl::Instance();
-			auto* DrawParts = DXDraw::Instance();
 			auto* Pad = PadControl::Instance();
 			//ポーズ
 			if (DXDraw::Instance()->IsPause()) {
@@ -762,8 +759,8 @@ namespace FPS_n2 {
 					//
 					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
 						DrawParts->GetUIY(18),
-																		  FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP,
-																		  DrawParts->GetUIY(960), DrawParts->GetUIY(870), Red, Black, "%s:%s", LocalizePool::Instance()->Get(300), Pad->GetKeyStr(PADS::INTERACT).c_str());
+						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP,
+						DrawParts->GetUIY(960), DrawParts->GetUIY(870), Red, Black, "%s:%s", LocalizePool::Instance()->Get(300), Pad->GetKeyStr(PADS::INTERACT).c_str());
 
 					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*m_FirstFade), 0, 255));
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);

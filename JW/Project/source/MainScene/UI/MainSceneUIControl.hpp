@@ -211,9 +211,9 @@ namespace FPS_n2 {
 				const auto&		GetGraph(void) const noexcept { return this->UltGauge; }
 			public:
 				void			Load(const char* Path) noexcept {
-					UltGaugeMask = GraphHandle::Load(Path);
+					UltGaugeMask.Load(Path);
 					UltGaugeMask.GetSize(&ultxp, &ultyp);
-					UltGauge = GraphHandle::Make(ultxp, ultyp, true);
+					UltGauge.Make(ultxp, ultyp, true);
 				}
 				void			Dispose(void) noexcept {
 					UltGaugeMask.Dispose();
@@ -258,12 +258,12 @@ namespace FPS_n2 {
 		private:
 		public:
 			void			Load() noexcept {
-				this->Gauge_Graph = GraphHandle::Load("data/UI/Gauge.png");
-				this->Gauge_Aim_Graph = GraphHandle::Load("data/UI/Gauge_Aim.png");
-				this->OIL_Graph = GraphHandle::Load("data/UI/back.png");
+				this->Gauge_Graph.Load("data/UI/Gauge.png");
+				this->Gauge_Aim_Graph.Load("data/UI/Gauge_Aim.png");
+				this->OIL_Graph.Load("data/UI/back.png");
 
-				this->Armer_Graph = GraphHandle::Load("data/UI/Armer.png");
-				this->Morphine_Graph = GraphHandle::Load("data/UI/Morphine.png");
+				this->Armer_Graph.Load("data/UI/Armer.png");
+				this->Morphine_Graph.Load("data/UI/Morphine.png");
 			}
 			void			Dispose(void) noexcept {
 				this->Armer_Graph.Dispose();
@@ -296,7 +296,7 @@ namespace FPS_n2 {
 					}
 					m_GaugeMask.at(0).Dispose();
 					m_GaugeMask.at(0).Load(Path.c_str());
-					ULT_Graph = GraphHandle::Load(Path);
+					ULT_Graph.Load(Path);
 				}
 				//
 				for (int i = 0; i < 3; i++) {

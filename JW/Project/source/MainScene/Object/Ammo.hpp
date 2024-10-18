@@ -110,7 +110,7 @@ namespace FPS_n2 {
 					//移動確定
 					this->pos = this->pos + (this->GetMove().GetVec() * (this->m_speed / DrawParts->GetFps())) + Vector3DX::up() * this->m_yAdd;
 					this->SetMove().Update(0.f, 0.f);
-					this->m_yAdd += (M_GR / (DrawParts->GetFps()*DrawParts->GetFps()));
+					this->m_yAdd += (GravityRate / (DrawParts->GetFps()*DrawParts->GetFps()));
 
 					//消す(スピードが0以下、貫通が0以下、5回反射する)
 					if (this->m_speed <= 0.f || this->m_penetration <= 0.f || this->m_RicochetCnt > 5 || this->m_Timer > 5.f) {

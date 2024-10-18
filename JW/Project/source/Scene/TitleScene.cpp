@@ -25,8 +25,8 @@ namespace FPS_n2 {
 			GameFadeIn = 1.f;
 			GameStart = 0.f;
 
-			m_TitleImage = GraphHandle::Load("data/UI/Title.png");
-			m_SelectBackImage = GraphHandle::Load("CommonData/UI/select.png");
+			m_TitleImage.Load("data/UI/Title.png");
+			m_SelectBackImage.Load("CommonData/UI/select.png");
 			for (auto& y : ButtonSel) {
 				y.LoadCommon(&m_SelectBackImage);
 			}

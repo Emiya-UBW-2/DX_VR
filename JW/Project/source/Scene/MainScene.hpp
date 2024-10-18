@@ -117,7 +117,6 @@ namespace FPS_n2 {
 			void			MainDrawFront_Sub(void) noexcept override;
 			//UI•\Ž¦
 			void			DrawUI_Base_Sub(void) noexcept override;
-			void			DrawUI_In_Sub(void) noexcept override;
 		public:
 			void			Dispose_Load_Sub(void) noexcept override;
 		public:

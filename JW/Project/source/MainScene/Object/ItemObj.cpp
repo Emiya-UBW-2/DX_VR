@@ -19,7 +19,7 @@ namespace FPS_n2 {
 					Easing(&vec, Vector3DX::vget(0.f, Y, 0.f), 0.95f, EasingType::OutExpo);
 					this->SetMove().SetVec(vec);
 
-					this->m_yAdd += (M_GR / (DrawParts->GetFps()*DrawParts->GetFps()));
+					this->m_yAdd += (GravityRate / (DrawParts->GetFps()*DrawParts->GetFps()));
 
 					Vector3DX EndPos = this->GetMove().GetPos();
 					Vector3DX Normal;

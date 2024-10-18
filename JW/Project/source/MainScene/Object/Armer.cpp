@@ -11,7 +11,7 @@ namespace FPS_n2 {
 					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(0.5f*Scale_Rate, 0.5f*Scale_Rate, 0.5f*Scale_Rate)).get()) == FALSE
 					) {
 					for (int i = 0; i < this->GetObj().GetMeshNum(); i++) {
-						if ((MV1GetMeshSemiTransState(this->GetObj().GetHandle(), i) == TRUE) == isDrawSemiTrans) {
+						if (this->GetObj().GetMeshSemiTransState(i) == isDrawSemiTrans) {
 							this->GetObj().DrawMesh(i);
 						}
 					}

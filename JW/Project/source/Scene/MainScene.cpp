@@ -19,9 +19,9 @@ namespace FPS_n2 {
 			BattleResourceMngr->Load();
 			//
 			this->m_UIclass.Load();
-			this->hit_Graph = GraphHandle::Load("data/UI/battle_hit.bmp");
-			this->guard_Graph = GraphHandle::Load("data/UI/battle_guard.bmp");
-			this->m_MiniMapScreen = GraphHandle::Make(DrawParts->GetUIY(128) * 2, DrawParts->GetUIY(128) * 2, true);
+			this->hit_Graph.Load("data/UI/battle_hit.bmp");
+			this->guard_Graph.Load("data/UI/battle_guard.bmp");
+			this->m_MiniMapScreen.Make(DrawParts->GetUIY(128) * 2, DrawParts->GetUIY(128) * 2, true);
 			PlayerMngr->Init(11, 0);
 			for (int i = 1; i < PlayerMngr->GetPlayerNum(); i++) {
 				BattleResourceMngr->LoadChara("Soldier", (PlayerID)i);
@@ -32,7 +32,7 @@ namespace FPS_n2 {
 				}
 				else {
 					auto& Base = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1)->GetChara();
-					c->GetRagDoll() = Base->GetRagDoll().Duplicate();
+					c->GetRagDoll().Duplicate(Base->GetRagDoll());
 					MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
 				}
 				c->Init_RagDollControl(c->GetObj());
@@ -186,7 +186,7 @@ namespace FPS_n2 {
 			m_ResultRank = -1;
 			m_ResultPhase = 0;
 
-			m_SelectBackImage = GraphHandle::Load("CommonData/UI/select.png");
+			m_SelectBackImage.Load("CommonData/UI/select.png");
 			ButtonSel.LoadCommon(&m_SelectBackImage);
 
 			ButtonSel.Load_Icon("CommonData/UI/Right.png", true);
@@ -580,10 +580,6 @@ namespace FPS_n2 {
 			}
 			//*/
 
-		}
-		void			MAINLOOP::DrawUI_In_Sub(void) noexcept {
-			auto* DrawParts = DXDraw::Instance();
-
 			if (m_PreEndTimer > 0) {
 				DrawBlackOut((1.f - std::max(m_PreEndTimer - 2.f, 0.f)) * 2.f);
 			}
@@ -594,8 +590,6 @@ namespace FPS_n2 {
 			}
 			else if (m_PreEndTimer == -1.f) {
 				if (!DrawParts->IsPause()) {
-					auto* PlayerMngr = PlayerManager::Instance();
-					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 					if (Chara->IsAlive()) {
 						//ミニマップ
 						auto* WindowParts = WindowSystem::DrawControl::Instance();
@@ -659,7 +653,7 @@ namespace FPS_n2 {
 		void			MAINLOOP::StartResult(void) noexcept {
 			m_IsEnd = true;
 #if FALSE
-			movie = GraphHandle::Load("data/Movie/end0.mp4");
+			movie.Load("data/Movie/end0.mp4");
 			PlayMovieToGraph(movie.get());
 			ChangeMovieVolumeToGraph(std::clamp(static_cast<int>(255.f*OptionParts->GetParamFloat(EnumSaveParam::SE)), 0, 255), movie.get());
 			m_movieTotalFrame = GetMovieTotalFrameToGraph(movie.get());
@@ -986,7 +980,7 @@ namespace FPS_n2 {
 					if (a->IsActive()) {
 						//AmmoClass
 						Vector3DX repos_tmp = a->GetRePos();
-						Vector3DX pos_tmp = a->GetMove().GetPos();
+						Vector3DX pos_tmp = a->GetPos();
 
 						if (GetMyPlayerID() != a->GetShootedID()) {
 							if (GetMinLenSegmentToPoint(repos_tmp, pos_tmp, DrawParts->GetMainCamera().GetCamPos()) < 1.f*Scale_Rate) {
@@ -1132,7 +1126,7 @@ namespace FPS_n2 {
 						Vector3DX CamUp = DrawParts->SetMainCamera().GetCamUp();
 						CamPos.y += (m_DeathCamYAdd);
 						if (std::abs(m_DeathCamYAdd) > 0.01f) {
-							m_DeathCamYAdd += (M_GR / (DrawParts->GetFps() * DrawParts->GetFps())) / 2.f;
+							m_DeathCamYAdd += (GravityRate / (DrawParts->GetFps() * DrawParts->GetFps())) / 2.f;
 						}
 						else {
 							m_DeathCamYAdd = 0.f;
@@ -1547,7 +1541,7 @@ namespace FPS_n2 {
 			}
 			for (int index = 0; index < DegDiv; index++) {
 				int next = (index + 1) % DegDiv;
-				DrawLine_2D(
+				DrawLine(
 					xp + DrawParts->GetUIY(static_cast<int>(cos(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f))),
 					yp + DrawParts->GetUIY(static_cast<int>(sin(deg2rad(index * 360 / DegDiv))*(DegPers[index].first*200.f))),
 					xp + DrawParts->GetUIY(static_cast<int>(cos(deg2rad(next * 360 / DegDiv))*(DegPers[next].first*200.f))),

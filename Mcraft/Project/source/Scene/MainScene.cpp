@@ -22,7 +22,7 @@ namespace FPS_n2 {
 				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 				Chara->SetPlayMode(false);
 			}
-			LoadGun("M16-4", GetMyPlayerID(), false, 0);
+			//LoadGun("M16-4", GetMyPlayerID(), false, 0);
 			//UI
 			this->m_UIclass.Load();
 			PauseMenuControl::LoadPause();

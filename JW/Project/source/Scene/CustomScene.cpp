@@ -17,7 +17,7 @@ namespace FPS_n2 {
 			//
 			bselect = 0;
 			m_MouseSelMode = false;
-			m_SelectBackImage = GraphHandle::Load("CommonData/UI/select.png");
+			m_SelectBackImage.Load("CommonData/UI/select.png");
 			for (auto& y : ButtonSel) {
 				y.LoadCommon(&m_SelectBackImage);
 			}
@@ -428,9 +428,9 @@ namespace FPS_n2 {
 						if (ModPtr1) {
 							SetUseLighting(FALSE);
 							ModPtr1->GetObj().SetOpacityRate(0.5f*std::clamp(m_SelAlpha, 0.f, 1.f));
-							MV1SetMaterialDrawAddColorAll(ModPtr1->GetObj().GetHandle(), -255, 255, -255);
+							ModPtr1->GetObj().SetMaterialDrawAddColorAll(-255, 255, -255);
 							ModPtr1->GetObj().DrawModel();
-							MV1SetMaterialDrawAddColorAll(ModPtr1->GetObj().GetHandle(), 0, 0, 0);
+							ModPtr1->GetObj().SetMaterialDrawAddColorAll(0, 0, 0);
 							ModPtr1->GetObj().SetOpacityRate(1.f);
 							SetUseLighting(TRUE);
 						}

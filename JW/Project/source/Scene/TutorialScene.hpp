@@ -88,7 +88,7 @@ namespace FPS_n2 {
 				}
 			}
 			void Set() noexcept {
-				this->m_tutorialGraph = GraphHandle::Load("data/UI/tutorial.png");
+				this->m_tutorialGraph.Load("data/UI/tutorial.png");
 				this->m_tutorialGraph.GetSize(&xs, &ys);
 				xs = 128 * xs / ys;
 				ys = 128;
@@ -185,7 +185,6 @@ namespace FPS_n2 {
 			void			MainDraw_Sub(void) noexcept override;
 			//UI•\Ž¦
 			void			DrawUI_Base_Sub(void) noexcept override;
-			void			DrawUI_In_Sub(void) noexcept override;
 		public:
 			void			Dispose_Load_Sub(void) noexcept override;
 		private:

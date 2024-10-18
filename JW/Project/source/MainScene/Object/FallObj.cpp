@@ -16,7 +16,7 @@ namespace FPS_n2 {
 			if (this->m_IsActive) {
 				Vector3DX PosBuf = this->GetMove().GetPos() + this->GetMove().GetVec() * 60.f / DrawParts->GetFps() + Vector3DX::up() * this->m_yAdd;
 				if (this->m_yAdd != 0.f) {
-					this->m_yAdd += (M_GR / (DrawParts->GetFps()*DrawParts->GetFps()));
+					this->m_yAdd += (GravityRate / (DrawParts->GetFps()*DrawParts->GetFps()));
 				}
 				if ((PosBuf - this->GetMove().GetRePos()).y < 0.f) {
 					Vector3DX EndPos = PosBuf;

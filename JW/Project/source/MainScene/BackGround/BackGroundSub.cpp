@@ -6,7 +6,7 @@
 namespace FPS_n2 {
 	//
 	void			BuildControl::MakeMiniMap() noexcept {
-		m_MapGraph = GraphHandle::Make(Size * (int)tileSize, Size * (int)tileSize, true);
+		m_MapGraph.Make(Size * (int)tileSize, Size * (int)tileSize, true);
 		m_MapGraph.GetSize(&m_MapGraphXSize, &m_MapGraphYSize);
 	}
 	void			BuildControl::UpdateMiniMap() noexcept {

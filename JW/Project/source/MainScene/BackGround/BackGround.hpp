@@ -81,7 +81,7 @@ namespace FPS_n2 {
 					path += "model.mv1";
 					MV1::Load(path, &this->m_ObjSky, DX_LOADMODEL_PHYSICS_DISABLE);
 					this->m_ObjSky.SetScale(Vector3DX::vget(10.f, 10.f, 10.f));
-					MV1SetDifColorScale(this->m_ObjSky.GetHandle(), GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
+					this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
 				}
 				//
 				Init_Sub();

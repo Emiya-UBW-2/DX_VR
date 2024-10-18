@@ -139,8 +139,8 @@ namespace FPS_n2 {
 		public:
 			void		Set(int index, const MV1& ObjModel, const MV1& ColModel, int frame) {
 				this->MyIndex = index;
-				this->m_Obj = ObjModel.Duplicate();
-				this->m_Col = ColModel.Duplicate();
+				this->m_Obj.Duplicate(ObjModel);
+				this->m_Col.Duplicate(ColModel);
 				this->m_Col.SetupCollInfo(1, 1, 1, m_mesh);
 				this->m_mesh = frame;
 				for (int i = 0; i < 4; i++) {
@@ -149,7 +149,7 @@ namespace FPS_n2 {
 			}
 			void		ChangeSel(int frame) {
 				if (this->m_Col.IsActive()) {
-					MV1TerminateCollInfo(this->m_Col.GetHandle(), m_mesh);
+					this->m_Col.TerminateCollInfo(m_mesh);
 					this->m_Col.SetupCollInfo(1, 1, 1, m_mesh);
 					this->m_mesh = frame;
 				}
@@ -214,14 +214,14 @@ namespace FPS_n2 {
 		public:
 			void			Set(int No, const Vector3DX& BasePos, Builds* ptr) {
 				this->m_LightPoiont[No].m_Pos = BasePos;
-				this->m_LightPoiont[No].m_Obj = this->m_ObjLightBase.Duplicate();
+				this->m_LightPoiont[No].m_Obj.Duplicate(this->m_ObjLightBase);
 				this->m_LightPoiont[No].m_SlingZrad.Init(0.05f*Scale_Rate, 3.f, deg2rad(0));
 				this->m_LightPoiont[No].m_NearPath = ptr;
 			}
 		public:
 			void			Load() {
 				MV1::Load("data/model/map_parts/light.mv1", &this->m_ObjLightBase, DX_LOADMODEL_PHYSICS_DISABLE);
-				Light_Graph = GraphHandle::Load("data/Picture/light.png");
+				Light_Graph.Load("data/Picture/light.png");
 			}
 			void			Init(int count) {
 				this->m_LightPoiont.resize(count);
@@ -254,7 +254,7 @@ namespace FPS_n2 {
 
 					if (o.m_isHit) {
 						o.m_Pos.y += (o.m_Yadd);
-						o.m_Yadd += M_GR / (DrawParts->GetFps() * DrawParts->GetFps());
+						o.m_Yadd += GravityRate / (DrawParts->GetFps() * DrawParts->GetFps());
 						o.m_EraseTimer -= 1.f / DrawParts->GetFps();
 					}
 
@@ -373,7 +373,7 @@ namespace FPS_n2 {
 			void		Set() {
 				MV1::Load("data/model/map_gareki/model.mv1", &this->m_Base, DX_LOADMODEL_PHYSICS_DISABLE);
 				for (auto& o : m_Obj) {
-					o.m_Obj = m_Base.Duplicate();
+					o.m_Obj.Duplicate(m_Base);
 				}
 			}
 			void		Execute(const Vector3DX& CamPos) {
@@ -476,8 +476,8 @@ namespace FPS_n2 {
 		public:
 			void			Set(int No, const Vector3DX& BasePos, Builds* ptr) {
 				this->m_DrumPoiont[No].m_Pos = BasePos;
-				this->m_DrumPoiont[No].m_Obj = this->m_ObjDrumBase.Duplicate();
-				this->m_DrumPoiont[No].m_Col = this->m_ColBase.Duplicate();
+				this->m_DrumPoiont[No].m_Obj.Duplicate(this->m_ObjDrumBase);
+				this->m_DrumPoiont[No].m_Col.Duplicate(this->m_ColBase);
 				this->m_DrumPoiont[No].m_Col.SetupCollInfo(1, 1, 1);
 				this->m_DrumPoiont[No].m_NearPath = ptr;
 			}
