@@ -145,7 +145,7 @@ PS_OUTPUT main(PS_INPUT PSInput)
     
 
     //ao = lerp(ao, 1.0f, abs(normal.x)/1.5f);
-    //ao = lerp(ao, 1.0f, saturate(pos.z / 1000.f));
+    ao = lerp(ao, 1.0f, saturate(pos.z / 1000.f));
     
     PSOutput.color0 = float4(ao, ao, ao, 1.0f);
     return PSOutput;

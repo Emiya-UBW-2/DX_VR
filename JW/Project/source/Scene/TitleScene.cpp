@@ -33,6 +33,7 @@ namespace FPS_n2 {
 
 			Vector3DX LightVec = Vector3DX::vget(0.f, -1.f, 0.5f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.f, 1.f, 1.f, 0.0f));
+			SetShadowScale(0.5f);
 			//
 			DeleteLightHandleAll();
 			SetLightEnable(TRUE);
@@ -330,6 +331,9 @@ namespace FPS_n2 {
 		}
 
 		void			TitleScene::ShadowDraw_Sub(void) noexcept {
+			ObjectManager::Instance()->Draw_Shadow();
+		}
+		void TitleScene::SetShadowDraw_Sub(void) noexcept {
 			ObjectManager::Instance()->Draw_Shadow();
 		}
 		void			TitleScene::MainDraw_Sub(void) noexcept {

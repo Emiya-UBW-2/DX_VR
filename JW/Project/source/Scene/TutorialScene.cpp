@@ -43,6 +43,7 @@ namespace FPS_n2 {
 			//
 			Vector3DX LightVec = Vector3DX::vget(-0.1f, -1.f, 0.f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(1.f, 1.f, 1.f, 0.0f));
+			SetShadowScale(0.5f);
 			//
 			DeleteLightHandleAll();
 			SetLightEnable(TRUE);
@@ -627,6 +628,10 @@ namespace FPS_n2 {
 		void			TutorialScene::ShadowDraw_Sub(void) noexcept {
 			ObjectManager::Instance()->Draw_Shadow();
 		}
+		void TutorialScene::SetShadowDraw_Sub(void) noexcept {
+			//this->m_BackGround->BG_Draw();
+			ObjectManager::Instance()->Draw_Shadow();
+		}
 		void			TutorialScene::MainDraw_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
@@ -716,12 +721,7 @@ namespace FPS_n2 {
 			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			auto* Pad = PadControl::Instance();
 			//ポーズ
-			if (DXDraw::Instance()->IsPause()) {
-				if (!DrawParts->IsExit() && !DrawParts->IsRestart()) {
-					m_MainLoopPauseControl.Draw();
-				}
-			}
-			else {
+			if (!DXDraw::Instance()->IsPause()) {
 				//的ヒット状況表示
 				if (tgtSel >= 0) {
 					auto& t = (std::shared_ptr<TargetClass>&)(*ObjectManager::Instance()->GetObj((int)ObjType::Target, tgtSel));
@@ -765,6 +765,15 @@ namespace FPS_n2 {
 					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*m_FirstFade), 0, 255));
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
 					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+				}
+			}
+		}
+		void TutorialScene::DrawUI_In_Sub(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
+			//ポーズ
+			if (DXDraw::Instance()->IsPause()) {
+				if (!DrawParts->IsExit() && !DrawParts->IsRestart()) {
+					m_MainLoopPauseControl.Draw();
 				}
 			}
 		}

@@ -1,4 +1,4 @@
 GodRay=false
 Distortion=true
 PBR=false
-CubeMap=true
+CubeMap=false

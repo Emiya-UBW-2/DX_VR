@@ -56,6 +56,7 @@ namespace FPS_n2 {
 			//
 			Vector3DX LightVec = Vector3DX::vget(0.f, -1.f, 0.f);
 			DrawParts->SetAmbientLight(LightVec, GetColorF(0.92f, 0.91f, 0.90f, 0.0f));
+			SetShadowScale(0.5f);
 			//
 			this->m_BackGround = std::make_shared<BackGroundClassMain>();
 			this->m_BackGround->Init("", "");//1.59•b
@@ -474,6 +475,9 @@ namespace FPS_n2 {
 			this->m_BackGround->Shadow_Draw();
 			ObjectManager::Instance()->Draw_Shadow();
 		}
+		void MAINLOOP::SetShadowDraw_Sub(void) noexcept {
+			ObjectManager::Instance()->Draw_Shadow();
+		}
 		void			MAINLOOP::MainDraw_Sub(void) noexcept {
 			//*
 			SetVerticalFogEnable(TRUE);
@@ -597,6 +601,9 @@ namespace FPS_n2 {
 					}
 				}
 			}
+		}
+		void MAINLOOP::DrawUI_In_Sub(void) noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			//ƒ|[ƒY
 			if (DrawParts->IsPause() && (!DrawParts->IsExit() && !DrawParts->IsRestart())) {
 				m_MainLoopPauseControl.Draw();
