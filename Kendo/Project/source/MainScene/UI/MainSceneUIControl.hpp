@@ -174,9 +174,9 @@ namespace FPS_n2 {
 				~GaugeMask(void) noexcept {}
 			public:
 				void			Load(const char* Path) noexcept {
-					UltGaugeMask = GraphHandle::Load(Path);
+					UltGaugeMask.Load(Path);
 					UltGaugeMask.GetSize(&ultxp, &ultyp);
-					UltGauge = GraphHandle::Make(ultxp, ultyp, true);
+					UltGauge.Make(ultxp, ultyp, true);
 				}
 				void			Dispose(void) noexcept {
 					UltGaugeMask.Dispose();
@@ -216,7 +216,7 @@ namespace FPS_n2 {
 			virtual ~UIClass(void) noexcept {}
 		public:
 			void			Load(void) noexcept {
-				m_HeartIcon = GraphHandle::Load("data/UI/Heart.png");
+				m_HeartIcon.Load("data/UI/Heart.png");
 			}
 			void			Dispose(void) noexcept {
 				m_HeartIcon.Dispose();

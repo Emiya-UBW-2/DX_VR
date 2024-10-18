@@ -95,7 +95,7 @@ namespace FPS_n2 {
 
 				FILEINFO FileInfo;
 				if (FileRead_findFirst((this->m_path + "reticle_0.png").c_str(), &FileInfo) != (DWORD_PTR)-1) {
-					m_Reitcle = GraphHandle::Load(this->m_path + "reticle_0.png");
+					m_Reitcle.Load(this->m_path + "reticle_0.png");
 				}
 
 				this->m_AmmoSpec.clear();

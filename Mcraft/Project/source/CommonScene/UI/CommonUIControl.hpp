@@ -48,7 +48,7 @@ namespace FPS_n2 {
 					this->m_SelectBackImage = BGPath;
 				}
 				void			Load_Icon(const char* IconPath, bool IsEnableSelect) noexcept {
-					this->m_Icon = GraphHandle::Load(IconPath);
+					this->m_Icon.Load(IconPath);
 					this->m_Icon.GetSize(&xsize, &ysize);
 					this->m_ButtonMode = ButtonMode::Icon;
 					this->m_EnableSelect = IsEnableSelect;

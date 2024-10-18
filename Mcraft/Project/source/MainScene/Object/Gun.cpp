@@ -593,7 +593,7 @@ namespace FPS_n2 {
 #endif
 					}
 					for (int i = 0; i < this->GetObj().GetMeshNum(); i++) {
-						if ((MV1GetMeshSemiTransState(this->GetObj().GetHandle(), i) == TRUE) == isDrawSemiTrans) {
+						if (this->GetObj().GetMeshSemiTransState(i) == isDrawSemiTrans) {
 							this->GetObj().DrawMesh(i);
 						}
 					}

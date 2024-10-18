@@ -13,7 +13,7 @@ namespace FPS_n2 {
 			// 
 			this->m_GameFadeIn = 1.f;
 			this->m_GameStart = 0.f;
-			this->m_TitleImage = GraphHandle::Load("data/UI/Title.png");
+			this->m_TitleImage.Load("data/UI/Title.png");
 			// 
 			ButtonParts->ResetSel();
 			// 

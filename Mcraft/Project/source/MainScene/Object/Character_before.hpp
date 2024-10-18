@@ -1064,7 +1064,7 @@ namespace FPS_n2 {
 					this->m_RagDollTimer = std::min(this->m_RagDollTimer + 1.f / DrawParts->GetFps(), 3.f);
 				}
 				if (this->m_RagDollTimer < 3.f) {
-					MV1SetPrioritizePhysicsOverAnimFlag(this->m_RagDoll.GetHandle(), TRUE);
+					this->m_RagDoll.SetPrioritizePhysicsOverAnimFlag(true);
 					this->frame_s.copy_frame(obj_body_t, this->lagframe_, &m_RagDoll);
 					this->m_RagDoll.UpdateAnimAll();
 					if (this->m_RagDollTimer == 0.f) {

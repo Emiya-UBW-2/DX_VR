@@ -1267,10 +1267,10 @@ namespace FPS_n2 {
 			//‰‰ñ‚Ì‚ÝXV‚·‚é“à—e
 			if (this->m_IsFirstLoop) {
 			}
-			int num = MV1GetMaterialNum(GetObj().GetHandle());
+			int num = GetObj().GetMaterialNum();
 			for (int i = 0; i < num; i++) {
-				MV1SetMaterialDifColor(GetObj().GetHandle(), i, GetColorF(0.8f, 0.8f, 0.8f, 1.f));
-				MV1SetMaterialAmbColor(GetObj().GetHandle(), i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
+				GetObj().SetMaterialDifColor(i, GetColorF(0.8f, 0.8f, 0.8f, 1.f));
+				GetObj().SetMaterialAmbColor(i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
 			}
 			this->m_SoundPower = std::max(this->m_SoundPower - 1.f / DrawParts->GetFps(), 0.f);
 			GunReadyControl::UpdateReady();
@@ -1374,14 +1374,14 @@ namespace FPS_n2 {
 					//MV1SetMaterialTypeAll(this->GetObj().GetHandle(), DX_MATERIAL_TYPE_MAT_SPEC_LUMINANCE_CLIP_UNORM);
 					if (LifeControl::IsAlive()) {
 						for (int i = 0; i < this->GetObj().GetMeshNum(); i++) {
-							if ((MV1GetMeshSemiTransState(this->GetObj().GetHandle(), i) == TRUE) == isDrawSemiTrans) {
+							if (this->GetObj().GetMeshSemiTransState(i) == isDrawSemiTrans) {
 								this->GetObj().DrawMesh(i);
 							}
 						}
 					}
 					else {
 						for (int i = 0; i < RagDollControl::GetRagDoll().GetMeshNum(); i++) {
-							if ((MV1GetMeshSemiTransState(RagDollControl::GetRagDoll().GetHandle(), i) == TRUE) == isDrawSemiTrans) {
+							if (RagDollControl::GetRagDoll().GetMeshSemiTransState(i) == isDrawSemiTrans) {
 								RagDollControl::GetRagDoll().DrawMesh(i);
 							}
 						}

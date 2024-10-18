@@ -100,9 +100,9 @@ namespace FPS_n2 {
 		c->SetWeaponPtr(Ptr);
 	}
 	void HitMark::Load(void) noexcept {
-		this->MenGraph = GraphHandle::Load("data/UI/hit_Men.bmp");
-		this->KoteGraph = GraphHandle::Load("data/UI/hit_Kote.bmp");
-		this->DoGraph = GraphHandle::Load("data/UI/hit_Do.bmp");
+		this->MenGraph.Load("data/UI/hit_Men.bmp");
+		this->KoteGraph.Load("data/UI/hit_Kote.bmp");
+		this->DoGraph.Load("data/UI/hit_Do.bmp");
 	}
 	void HitMark::Set(void) noexcept {
 		for (auto& h : m_HitPos) {

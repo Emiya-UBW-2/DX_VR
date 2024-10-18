@@ -1410,8 +1410,8 @@ namespace FPS_n2 {
 		//
 		void		BackGroundClass::Load(void) noexcept {
 			MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
-			m_tex = GraphHandle::Load("data/tex.png");
-			m_norm = GraphHandle::Load("data/nrm.png");
+			m_tex.Load("data/tex.png");
+			m_norm.Load("data/nrm.png");
 		}
 		//
 		void		BackGroundClass::Init(void) noexcept {
