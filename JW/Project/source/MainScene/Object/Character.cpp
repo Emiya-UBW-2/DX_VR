@@ -885,6 +885,7 @@ namespace FPS_n2 {
 			}
 			auto* OptionParts = OPTION::Instance();
 			bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
+			HeadBobbing &= (this->m_MyID != 0);
 			this->SetMove().SetPos(PosBuf);
 			this->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::forward(), HeadBobbing ? (KeyControl::GetRad().z / 2.f) : 0.f) * Matrix3x3DX::RotAxis(Vector3DX::up(), KeyControl::GetYRadBottom()));
 			this->SetMove().Update(0.9f, 0.f);

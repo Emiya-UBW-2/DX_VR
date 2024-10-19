@@ -507,7 +507,7 @@ namespace FPS_n2 {
 			this->GetParam()->Init();
 		}
 		void AIControl::Execute(InputControl* MyInput, bool CanRepop) noexcept {
-			//return;
+			return;
 			//AI
 			this->GetParam()->Execute_Before(CanRepop);
 			switch (this->GetParam()->m_Phase) {

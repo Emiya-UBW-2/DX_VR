@@ -116,8 +116,8 @@ namespace FPS_n2 {
 						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), TRUE);
 				}
 				void			DrawGaugeCircleLeft(int xp1, int yp1,
-													COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
-													GraphHandle* CircleObj, float deg, int Add) {
+					COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
+					GraphHandle* CircleObj, float deg, int Add) {
 					//return;
 					auto* WindowParts = WindowSystem::DrawControl::Instance();
 					auto* DrawParts = DXDraw::Instance();
@@ -127,29 +127,29 @@ namespace FPS_n2 {
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
 					WindowParts->SetAdd(WindowSystem::DrawLayer::Normal, Add);
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorBase.r, ColorBase.g, ColorBase.b);
-					DrawCircleGauge(xp1 + DrawParts->GetUIY(256), yp1,
-									50.0 + ((50.0 - 15.0*2.0)*1.0) + 15.0 + deg,
-									CircleObj->get(),
-									50.0 + 15.0 + deg,
-									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
+						xp1 + DrawParts->GetUIY(256), yp1,
+						50.0f + ((50.0f - 15.0f * 2.0f) * 1.0f) + 15.0f + deg,
+						50.0f + 15.0f + deg,
+						((float)(DrawParts->GetUIY(1080)) / 1080.0f));
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
-					DrawCircleGauge(xp1 + DrawParts->GetUIY(256), yp1,
-									50.0 + ((50.0 - 15.0*2.0)*(double)std::max(per, perbuf)) + 15.0 + deg,
-									CircleObj->get(),
-									50.0 + ((50.0 - 15.0*2.0)*(double)std::min(per, perbuf)) + 15.0 + deg,
-									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
+						xp1 + DrawParts->GetUIY(256), yp1,
+						50.0f + ((50.0f - 15.0f * 2.0f) * std::max(per, perbuf)) + 15.0f + deg,
+						50.0f + ((50.0f - 15.0f * 2.0f) * std::min(per, perbuf)) + 15.0f + deg,
+						((float)(DrawParts->GetUIY(1080)) / 1080.0f));
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, Color.r, Color.g, Color.b);
-					DrawCircleGauge(xp1 + DrawParts->GetUIY(256), yp1,
-									50.0 + ((50.0 - 15.0*2.0)*(double)std::min(per, perbuf)) + 15.0 + deg,
-									CircleObj->get(),
-									50.0 + 15.0 + deg,
-									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
+						xp1 + DrawParts->GetUIY(256), yp1,
+						50.0f + ((50.0f - 15.0f * 2.0f) * std::min(per, perbuf)) + 15.0f + deg,
+						50.0f + 15.0f + deg,
+						((float)(DrawParts->GetUIY(1080)) / 1080.0f));
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
 				void			DrawGaugeCircleRight(int xp1, int yp1,
 													 COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
-													 GraphHandle* CircleObj, float deg, int Add) {
+													 const GraphHandle* CircleObj, float deg, int Add) {
 					//return;
 					auto* DrawParts = DXDraw::Instance();
 					auto* WindowParts = WindowSystem::DrawControl::Instance();
@@ -157,25 +157,31 @@ namespace FPS_n2 {
 					COLOR_U8 ColorAddSub = (this->m_Buffer > this->m_Now) ? ColorSub : ColorAdd;
 					float per = std::clamp((float)this->m_Now / this->m_Max, 0.f, 1.f);
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
+					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					WindowParts->SetAdd(WindowSystem::DrawLayer::Normal, Add);
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorBase.r, ColorBase.g, ColorBase.b);
-					DrawCircleGauge(xp1 - DrawParts->GetUIY(256), yp1,
-						(50.0 - 15.0*2.0) + 15.0 + deg,
-									CircleObj->get(),
-									(double)((50.0 - 15.0*2.0)*(1.0 - 1.0)) + 15.0 + deg,
-									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+
+					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
+						xp1 - DrawParts->GetUIY(256), yp1,
+						(50.0f - 15.0f * 2.0f) + 15.0f + deg,
+						((50.0f - 15.0f * 2.0f) * (1.0f - 1.0f)) + 15.0f + deg,
+						((float)(DrawParts->GetUIY(1080)) / 1080.0f));
+
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
-					DrawCircleGauge(xp1 - DrawParts->GetUIY(256), yp1,
-						(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
-									CircleObj->get(),
-									(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::max(per, perbuf))) + 15.0 + deg,
-									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+
+					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
+						xp1 - DrawParts->GetUIY(256), yp1,
+						((50.0f - 15.0f * 2.0f) * (1.0f - std::min(per, perbuf))) + 15.0f + deg,
+						((50.0f - 15.0f * 2.0f) * (1.0f - std::max(per, perbuf))) + 15.0f + deg,
+						((float)(DrawParts->GetUIY(1080)) / 1080.0f));
+
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, Color.r, Color.g, Color.b);
-					DrawCircleGauge(xp1 - DrawParts->GetUIY(256), yp1,
-						(50.0 - 15.0*2.0) + 15.0 + deg,
-									CircleObj->get(),
-									(double)((50.0 - 15.0*2.0)*(1.0 - (double)std::min(per, perbuf))) + 15.0 + deg,
-									((double)(DrawParts->GetUIY(1080)) / 1080.0));
+					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
+						xp1 - DrawParts->GetUIY(256), yp1,
+						(50.0f - 15.0f * 2.0f) + 15.0f + deg,
+						((50.0f - 15.0f * 2.0f) * (1.0f - std::min(per, perbuf))) + 15.0f + deg,
+						((float)(DrawParts->GetUIY(1080)) / 1080.0f));
+
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
@@ -406,7 +412,7 @@ namespace FPS_n2 {
 															GetColorU8(255, 255, 255, 255),
 															GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(64, 64, 255, 255),
 															GetColorU8(0, 255, 0, 255), GetColorU8(255, 0, 0, 255),
-															&this->Gauge_Graph, deg, 32);
+															&this->Gauge_Graph, deg, 128);
 
 						if (intParam[8] > 0) {
 							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*0.4f), 0, 255));
@@ -428,7 +434,7 @@ namespace FPS_n2 {
 															 GetColorU8(255, 255, 255, 255),
 															 GetColorU8(255, 128, 128, 255), GetColorU8(255, 255, 128, 255), GetColorU8(64, 64, 255, 255),
 															 GetColorU8(0, 255, 0, 255), GetColorU8(255, 0, 0, 255),
-															 &this->Gauge_Graph, deg, 32);
+															 &this->Gauge_Graph, deg, 128);
 					}
 				}
 				//オートエイム
@@ -506,13 +512,12 @@ namespace FPS_n2 {
 						yp1 = DrawParts->GetUIY(800 + m_GaugeMask.at(0).GetYSize() * 3 / 10 + static_cast<int>(150.f* UltPer));
 						rad = 0.f;
 					}
-					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &m_GaugeMask.at(0).GetGraph(), xp1, yp1, 0.6f *(float)DrawParts->GetUIY(100) / 100.f, rad, true);
 					if (intParam[7] == 1) {
-						WindowParts->SetAdd(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f*sin(deg2rad(ULTTimer))), 0, 255));
-						WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &ULT_Graph, xp1, yp1, 0.6f *(float)DrawParts->GetUIY(100) / 100.f, rad, true);
-						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * sin(deg2rad(ULTTimer))), 0, 255));
 						ULTTimer += 15.f * 60.f / DrawParts->GetFps();
 					}
+					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &m_GaugeMask.at(0).GetGraph(), xp1, yp1, 0.6f *(float)DrawParts->GetUIY(100) / 100.f, rad, true);
+					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
 				//ゲージ
 				{

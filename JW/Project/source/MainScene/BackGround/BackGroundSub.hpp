@@ -302,6 +302,13 @@ namespace FPS_n2 {
 						}
 					}
 				}
+				if (count == 0) {
+					SetLightEnable(TRUE);
+					ChangeLightTypeDir(DrawParts->GetLightVec().get());
+					SetLightDifColor(GetColorF(1.f, 1.f, 1.f, 1.f));
+					SetLightSpcColor(GetColorF(0.1f, 0.1f, 0.1f, 0.f));
+					SetLightAmbColor(GetColorF(0.1f, 0.1f, 0.1f, 1.f));
+				}
 			}
 			void			Draw() {
 				for (auto& b : this->m_LightPoiont) {

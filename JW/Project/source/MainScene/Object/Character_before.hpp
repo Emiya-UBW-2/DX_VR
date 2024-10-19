@@ -365,7 +365,7 @@ namespace FPS_n2 {
 					return 1.275f;
 				}
 				else {
-					return 0.65f;
+					return 0.85f;
 				}
 			}
 			const auto		GetVec(void) const noexcept {

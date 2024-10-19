@@ -1265,6 +1265,7 @@ namespace FPS_n2 {
 				c->SetIsLaserActive(true);
 			}
 			//ƒ‰ƒCƒg
+			SetLightEnable(FALSE);
 			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 				if (!c->GetGunPtrNow()) { continue; }

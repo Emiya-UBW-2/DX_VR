@@ -129,8 +129,8 @@ namespace FPS_n2 {
 							xp + DrawParts->GetUIY(xs), yp + DrawParts->GetUIY(ys),
 							true);
 						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic,
-							DrawParts->GetUIY(24), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-																					  xp + DrawParts->GetUIY(69), yp + DrawParts->GetUIY(14), Gray75, Black, d.GetMsg());
+							DrawParts->GetUIY(18), FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+																					  xp + DrawParts->GetUIY(69), yp + DrawParts->GetUIY(14), Gray25, Black, d.GetMsg());
 					}
 				}
 				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
@@ -170,6 +170,8 @@ namespace FPS_n2 {
 			GraphHandle ScoreBoard;
 			GraphHandle ScoreBoard2;
 			bool											m_Sound{true};
+
+			const LightHandle* m_Light{ nullptr };
 		public:
 			TutorialScene(void) noexcept {}
 			~TutorialScene(void) noexcept {}

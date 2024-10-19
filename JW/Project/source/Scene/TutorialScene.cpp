@@ -199,6 +199,20 @@ namespace FPS_n2 {
 			m_IsFirstGame = (SaveDataParts->GetParam("FirstGame") != 1);
 			m_FirstFade = 1.f;
 			EffectControl::Init();
+
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0)->GetChara();
+			while (true) {
+				if (!Chara->GetGunPtrNow()) { continue; }
+				if (!Chara->GetGunPtrNow()->HasFrame(GunFrame::Light) || !Chara->GetGunPtrNow()->IsActive()) {
+					break;
+				}
+				//
+				auto mat = Chara->GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Light);
+				Vector3DX StartPos = mat.pos();
+				Vector3DX EndPos = StartPos + mat.zvec() * -1.f * 15.f * Scale_Rate;
+				m_Light = &LightPool::Instance()->Put(LightType::SPOT, mat.pos());
+				break;
+			}
 		}
 		bool			TutorialScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
@@ -509,28 +523,34 @@ namespace FPS_n2 {
 				break;
 			}
 			//ライト
-			while (true) {
-				if (!Chara->GetGunPtrNow()) { continue; }
-				if (!Chara->GetGunPtrNow()->HasFrame(GunFrame::Light) || !Chara->GetGunPtrNow()->IsActive()) {
+			if (m_Light) {
+				SetLightEnableHandle(m_Light->get(), FALSE);
+				while (true) {
+					if (!Chara->GetGunPtrNow()) { continue; }
+					if (!Chara->GetGunPtrNow()->HasFrame(GunFrame::Light) || !Chara->GetGunPtrNow()->IsActive()) {
+						break;
+					}
+					//
+					auto mat = Chara->GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Light);
+					Vector3DX StartPos = mat.pos();
+					Vector3DX EndPos = StartPos + mat.zvec() * -1.f * 15.f * Scale_Rate;
+
+					SetLightEnableHandle(m_Light->get(), TRUE);
+					m_Light->SetPos(mat.pos(), (mat.zvec() * -1.f));
+					SetLightDifColorHandle(m_Light->get(), GetColorF(1.f, 1.f, 1.f, 1.f));
+					SetLightSpcColorHandle(m_Light->get(), GetColorF(0.01f, 0.01f, 0.01f, 0.f));
+					SetLightAmbColorHandle(m_Light->get(), GetColorF(0.1f, 0.1f, 0.1f, 1.f));
+					SetLightAngleHandle(m_Light->get(),
+						DX_PI_F / 8.0f,
+						DX_PI_F / 12.0f);
+					SetLightRangeAttenHandle(m_Light->get(),
+						35.0f * Scale_Rate,
+						0.0f,
+						0.006f,
+						0.0f
+					);
 					break;
 				}
-				//
-				auto mat = Chara->GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Light);
-				Vector3DX StartPos = mat.pos();
-				Vector3DX EndPos = StartPos + mat.zvec()*-1.f * 15.f*Scale_Rate;
-				SetLightEnable(TRUE);
-				ChangeLightTypeSpot(mat.pos().get(),
-									(mat.zvec()*-1.f).get(),
-									DX_PI_F / 8.0f,
-									DX_PI_F / 12.0f,
-									35.0f*Scale_Rate,
-									0.0f,
-									0.006f,
-									0.0f);
-				SetLightDifColor(GetColorF(1.f, 1.f, 1.f, 1.f));
-				SetLightSpcColor(GetColorF(0.01f, 0.01f, 0.01f, 0.f));
-				SetLightAmbColor(GetColorF(0.1f, 0.1f, 0.1f, 1.f));
-				break;
 			}
 #ifdef DEBUG
 			DebugParts->SetPoint("---");
@@ -595,6 +615,8 @@ namespace FPS_n2 {
 		void			TutorialScene::Dispose_Sub(void) noexcept {
 			auto* PlayerMngr = PlayerManager::Instance();
 
+			m_Light = nullptr;
+			DeleteLightHandleAll();
 			//使い回しオブジェ系
 			auto* Ptr = &PlayerMngr->GetPlayer(0)->GetChara();
 			ObjectManager::Instance()->DelObj(Ptr);
