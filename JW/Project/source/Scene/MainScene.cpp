@@ -541,28 +541,30 @@ namespace FPS_n2 {
 		}
 		//UI表示
 		void			MAINLOOP::DrawUI_Base_Sub(void) noexcept {
-			if (m_PreEndTimer != -1.f) { return; }
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
-			if (!Chara->IsAlive()) { return; }
-			//auto* OptionParts = OPTION::Instance();
-			DrawHitGraph();			//着弾表示
-			DrawSoundGraph();		//サウンド表示
-			//レティクル表示
-			if (Chara->GetGunPtrNow()) {
-				if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&
-					!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
-					auto* WindowParts = WindowSystem::DrawControl::Instance();
-					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph(),
-						static_cast<int>(Chara->GetGunPtrNow()->GetReticleXPos()*DrawParts->GetUIY(1980) / DrawParts->GetScreenY(1980)),
-						static_cast<int>(Chara->GetGunPtrNow()->GetReticleYPos()*DrawParts->GetUIY(1080) / DrawParts->GetScreenY(1080)),
-						1.f, Chara->GetLeanRad(), true);
+			if (m_PreEndTimer == -1.f) {
+				if (Chara->IsAlive()) {
+					//auto* OptionParts = OPTION::Instance();
+					DrawHitGraph();			//着弾表示
+					DrawSoundGraph();		//サウンド表示
+					//レティクル表示
+					if (Chara->GetGunPtrNow()) {
+						if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&
+							!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
+							auto* WindowParts = WindowSystem::DrawControl::Instance();
+							WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph(),
+								static_cast<int>(Chara->GetGunPtrNow()->GetReticleXPos() * DrawParts->GetUIY(1980) / DrawParts->GetScreenY(1980)),
+								static_cast<int>(Chara->GetGunPtrNow()->GetReticleYPos() * DrawParts->GetUIY(1080) / DrawParts->GetScreenY(1080)),
+								1.f, Chara->GetLeanRad(), true);
+						}
+					}
+					//UI
+					if (!DrawParts->IsPause()) {
+						this->m_UIclass.Draw();
+					}
 				}
-			}
-			//UI
-			if (!DrawParts->IsPause()) {
-				this->m_UIclass.Draw();
 			}
 			//通信設定
 			/*
@@ -1745,7 +1747,7 @@ namespace FPS_n2 {
 			float per = (1.f - (16.f / 9.f) / 2.35f) / 2.f;
 			WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), static_cast<int>(DrawParts->GetUIY(1080) * per), Black, TRUE);
 			WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, DrawParts->GetUIY(1080) - static_cast<int>(DrawParts->GetUIY(1080) * per), DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
-			if (m_EndTimer > 0) {
+			if (m_EndTimer >= 0) {
 				DrawBlackOut((1.f - m_EndTimer) * 2.f);
 			}
 		}
