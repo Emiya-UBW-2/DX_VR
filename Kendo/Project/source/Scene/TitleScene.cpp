@@ -154,13 +154,13 @@ namespace FPS_n2 {
 			SetNextSelect(static_cast<size_t>(ButtonParts->GetSelect()));
 		}
 		// 
-		void			TitleScene::MainDraw_Sub(void) noexcept {
+		void			TitleScene::MainDraw_Sub(void) const noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			// ”wŒi
 			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Gray50, TRUE);
 			// •`‰æ
 		}
-		void			TitleScene::DrawUI_Base_Sub(void) noexcept {
+		void			TitleScene::DrawUI_Base_Sub(void) const noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();

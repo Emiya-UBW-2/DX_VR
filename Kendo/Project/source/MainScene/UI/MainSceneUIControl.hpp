@@ -27,7 +27,7 @@ namespace FPS_n2 {
 					}
 				}
 				void			DrawGauge(int xp1, int yp1, int xp2, int yp2,
-					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
+					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) const noexcept {
 					//return;
 					int ParamBuf = static_cast<int>(this->m_Buffer + 0.5f);
 					DrawBoxLine_2D(xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White);
@@ -139,14 +139,14 @@ namespace FPS_n2 {
 				const auto& GetGaugeMax(void) const noexcept { return this->m_Max; }
 
 			private:
-				int Blend3Int(int pInt1, int pInt2, int pInt3, float per) noexcept {
+				int Blend3Int(int pInt1, int pInt2, int pInt3, float per) const noexcept {
 					int ans;
 					ans = static_cast<int>(std::clamp<float>(per * 2.f - 1.f, 0.f, 1.f) * static_cast<float>(pInt3));
 					ans += static_cast<int>(std::clamp<float>((per < 0.5f) ? (per * 2.f) : ((1.f - per) * 2.f), 0.f, 1.f) * static_cast<float>(pInt2));
 					ans += static_cast<int>(std::clamp<float>((1.f - per) * 2.f - 1.f, 0.f, 1.f) * static_cast<float>(pInt1));
 					return ans;
 				}
-				COLOR_U8 Blend3Color(COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, float per) noexcept {
+				COLOR_U8 Blend3Color(COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, float per) const noexcept {
 					int r, g, b;
 					r = Blend3Int(Color1.r, Color2.r, Color3.r, per);
 					g = Blend3Int(Color1.g, Color2.g, Color3.g, per);
@@ -223,7 +223,7 @@ namespace FPS_n2 {
 			}
 			void			Set(void) noexcept {
 			}
-			void			Draw(void) noexcept {
+			void			Draw(void) const noexcept {
 				auto* DrawParts = DXDraw::Instance();
 				int xp1, yp1;
 				//タイム,スコア

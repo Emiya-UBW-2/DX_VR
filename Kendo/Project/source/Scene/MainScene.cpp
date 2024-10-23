@@ -459,31 +459,31 @@ namespace FPS_n2 {
 		}
 
 		//
-		void			MainGameScene::BG_Draw_Sub(void) noexcept {
+		void			MainGameScene::BG_Draw_Sub(void) const noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			BackGround->BG_Draw();
 		}
-		void			MainGameScene::ShadowDraw_Far_Sub(void) noexcept {
+		void			MainGameScene::ShadowDraw_Far_Sub(void) const noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			BackGround->Shadow_Draw_Far();
 		}
-		void			MainGameScene::ShadowDraw_Sub(void) noexcept {
+		void			MainGameScene::ShadowDraw_Sub(void) const noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			BackGround->Shadow_Draw();
 			ObjectManager::Instance()->Draw_Shadow();
 		}
-		void			MainGameScene::CubeMap_Sub(void) noexcept {
+		void			MainGameScene::CubeMap_Sub(void) const noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			BackGround->Draw();
 		}
 
-		void MainGameScene::SetShadowDraw_Sub(void) noexcept {
+		void MainGameScene::SetShadowDraw_Sub(void) const noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			BackGround->Draw();
 			ObjectManager::Instance()->Draw();
 		}
 
-		void			MainGameScene::MainDraw_Sub(void) noexcept {
+		void			MainGameScene::MainDraw_Sub(void) const noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* DrawParts = DXDraw::Instance();
@@ -497,7 +497,7 @@ namespace FPS_n2 {
 			HitMark::Instance()->Update();
 		}
 		//UI•\Ž¦
-		void			MainGameScene::DrawUI_Base_Sub(void) noexcept {
+		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
 			HitMark::Instance()->Draw();
 			FadeControl::DrawFade();
 			//UI

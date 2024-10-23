@@ -15,7 +15,7 @@ namespace FPS_n2 {
 			void			LoadPause(void) noexcept;
 			void			SetPause(void) noexcept;
 			void			UpdatePause(void) noexcept;
-			void			DrawPause(void) noexcept;
+			void			DrawPause(void) const noexcept;
 			void			DisposePause(void) noexcept;
 		};
 
@@ -30,7 +30,7 @@ namespace FPS_n2 {
 		protected:
 			void			SetFade(void) noexcept;
 			void			UpdateFade(void) noexcept;
-			void			DrawFade(void) noexcept;
+			void			DrawFade(void) const noexcept;
 		};
 	};
 };
