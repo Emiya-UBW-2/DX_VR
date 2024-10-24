@@ -446,28 +446,28 @@ namespace FPS_n2 {
 		}
 
 		//
-		void			MainGameScene::BG_Draw_Sub(void) noexcept {
+		void			MainGameScene::BG_Draw_Sub(void) const noexcept {
 			BackGround::BackGroundClass::Instance()->BG_Draw();
 		}
-		void			MainGameScene::ShadowDraw_Far_Sub(void) noexcept {
+		void			MainGameScene::ShadowDraw_Far_Sub(void) const noexcept {
 		}
-		void			MainGameScene::ShadowDraw_Sub(void) noexcept {
+		void			MainGameScene::ShadowDraw_Sub(void) const noexcept {
 			BackGround::BackGroundClass::Instance()->Shadow_Draw();
 			ObjectManager::Instance()->Draw_Shadow();
 		}
-		void			MainGameScene::CubeMap_Sub(void) noexcept {
+		void			MainGameScene::CubeMap_Sub(void) const noexcept {
 			BackGround::BackGroundClass::Instance()->Draw();
 		}
 
-		void MainGameScene::SetShadowDraw_Rigid_Sub(void) noexcept {
+		void MainGameScene::SetShadowDraw_Rigid_Sub(void) const noexcept {
 			BackGround::BackGroundClass::Instance()->SetShadow_Draw_Rigid();
 		}
 
-		void MainGameScene::SetShadowDraw_Sub(void) noexcept {
+		void MainGameScene::SetShadowDraw_Sub(void) const noexcept {
 			ObjectManager::Instance()->Draw();
 		}
 
-		void			MainGameScene::MainDraw_Sub(void) noexcept {
+		void			MainGameScene::MainDraw_Sub(void) const noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			SetFogEnable(TRUE);
 			BackGround::BackGroundClass::Instance()->Draw();
@@ -501,7 +501,7 @@ namespace FPS_n2 {
 			}
 		}
 		//UI•\Ž¦
-		void			MainGameScene::DrawUI_Base_Sub(void) noexcept {
+		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
@@ -529,19 +529,19 @@ namespace FPS_n2 {
 			//NetBrowser->Draw();
 			if (m_NetWorkController) {
 				if (m_NetWorkController->GetPing() >= 0.f) {
-					WindowSystem::SetMsg(UIWidth, DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
+					WindowSystem::SetMsg(DrawParts->GetUIXMax(), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
 				}
 				else {
 					if (m_NetWorkController->GetClient()) {
-						WindowSystem::SetMsg(UIWidth, DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, Red, Black, "Lost Connection");
+						WindowSystem::SetMsg(DrawParts->GetUIXMax(), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, Red, Black, "Lost Connection");
 					}
 					else {
-						WindowSystem::SetMsg(UIWidth, DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
+						WindowSystem::SetMsg(DrawParts->GetUIXMax(), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
 					}
 				}
 			}
 		}
-		void MainGameScene::DrawUI_In_Sub(void) noexcept {
+		void MainGameScene::DrawUI_In_Sub(void) const noexcept {
 			if (DXDraw::Instance()->IsPause()) {
 				PauseMenuControl::DrawPause();
 			}

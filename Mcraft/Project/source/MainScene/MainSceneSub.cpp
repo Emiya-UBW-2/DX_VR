@@ -66,7 +66,7 @@ namespace FPS_n2 {
 				ButtonParts->ResetSel();
 			}
 		}
-		void PauseMenuControl::DrawPause(void) noexcept {
+		void PauseMenuControl::DrawPause(void) const noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// ƒ|[ƒY
@@ -87,9 +87,10 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			this->m_BlackOutAlpha = std::clamp(this->m_BlackOutAlpha + (this->m_IsBlackOut ? 1.f : -1.f) / DrawParts->GetFps() / 0.5f, 0.f, 1.f);
 		}
-		void FadeControl::DrawFade(void) noexcept {
+		void FadeControl::DrawFade(void) const noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * this->m_BlackOutAlpha), 0, 255));
-			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, UIWidth, UIHeight, Black, TRUE);
+			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIXMax(), DrawParts->GetUIYMax(), Black, TRUE);
 			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 		}
 };

@@ -146,11 +146,12 @@ namespace FPS_n2 {
 			SetNextSelect(static_cast<size_t>(ButtonParts->GetSelect()));
 		}
 		// 
-		void			TitleScene::MainDraw_Sub(void) noexcept {
+		void			TitleScene::MainDraw_Sub(void) const noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			// ”wŒi
-			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, ScreenWidth, ScreenHeight, Gray50, TRUE);
+			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetScreenXMax(), DrawParts->GetScreenYMax(), Gray50, TRUE);
 		}
-		void			TitleScene::DrawUI_Base_Sub(void) noexcept {
+		void			TitleScene::DrawUI_Base_Sub(void) const noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
@@ -168,15 +169,15 @@ namespace FPS_n2 {
 			if ((ButtonParts->GetSelect() != InvalidID) && !PopUpParts->IsActivePop()) {
 				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18), 
 					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-					DrawParts->GetUIY(32), UIHeight - DrawParts->GetUIY(32 + 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
+					DrawParts->GetUIY(32), DrawParts->GetUIYMax() - DrawParts->GetUIY(32 + 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
 			}
 			// 
 			{
 				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameFadeIn, 0.f, 1.f)), 0, 255));
-				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, ScreenWidth, ScreenHeight, Black, TRUE);
+				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetScreenXMax(), DrawParts->GetScreenYMax(), Black, TRUE);
 
 				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameStart, 0.f, 1.f)), 0, 255));
-				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, ScreenWidth, ScreenHeight, White, TRUE);
+				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetScreenXMax(), DrawParts->GetScreenYMax(), White, TRUE);
 
 				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}

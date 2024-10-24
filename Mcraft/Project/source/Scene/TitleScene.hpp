@@ -27,9 +27,9 @@ namespace FPS_n2 {
 			bool			Update_Sub(void) noexcept override;
 			void			Dispose_Sub(void) noexcept override;
 			// 
-			void			MainDraw_Sub(void) noexcept override;
+			void			MainDraw_Sub(void) const noexcept override;
 			// UI•\Ž¦
-			void			DrawUI_Base_Sub(void) noexcept override;
+			void			DrawUI_Base_Sub(void) const noexcept override;
 		};
 	};
 };
