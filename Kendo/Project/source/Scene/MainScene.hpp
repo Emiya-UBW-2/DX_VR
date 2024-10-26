@@ -12,6 +12,8 @@
 #include	"../CommonScene/UI/CommonUIControl.hpp"
 #include	"../MainScene/MainSceneSub.hpp"
 
+#include "../MainScene/EventScene/EventScene.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class MainGameScene : public TEMPSCENE ,
@@ -32,6 +34,9 @@ namespace FPS_n2 {
 #ifdef DEBUG
 			float m_D1{ 38.f / 255.f }, m_D2{ 192.f / 255.f }, m_D3{ 1.f };
 #endif
+			EventScene		m_EventScene;
+			bool			m_IsEventSceneActive{ false };
+			bool			m_IsEventSceneFlag{ false };
 		private:
 			auto		GetMyPlayerID(void) const noexcept {
 				if (m_NetWorkController) {

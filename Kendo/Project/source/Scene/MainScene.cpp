@@ -108,9 +108,9 @@ namespace FPS_n2 {
 			}
 			PostPassParts->SetLevelFilter(m_D1*255.f, m_D2*255.f, m_D3);
 			//*/
-			PostPassParts->SetLevelFilter(38, 154, 1.f);
+			//PostPassParts->SetLevelFilter(38, 154, 1.f);
 #else
-			PostPassParts->SetLevelFilter(38, 154, 1.f);
+			//PostPassParts->SetLevelFilter(38, 154, 1.f);
 #endif
 			PauseMenuControl::UpdatePause();
 			if (PauseMenuControl::IsRetire()) {
@@ -155,11 +155,35 @@ namespace FPS_n2 {
 						KeyGuide->AddGuide(PADS::JUMP, LocalizePool::Instance()->Get(9905));
 					}
 				});
+
+			if (m_IsEventSceneFlag) {
+				m_IsEventSceneFlag = false;
+				if (!m_IsEventSceneActive) {
+					DrawParts->SetDistortionPer(120.f * 4);
+					m_EventScene.Load("data/Cut.txt");
+					m_EventScene.Start();
+					m_IsEventSceneActive = true;
+				}
+			}
+
+			if (m_IsEventSceneActive) {
+				m_EventScene.GetDeltaTime();
+			}
 			if (DXDraw::Instance()->IsPause()) {
 				Pad->SetMouseMoveEnable(false);
 				if (!m_NetWorkController) {
 					return true;
 				}
+			}
+			if (m_IsEventSceneActive) {
+				if (m_EventScene.IsEnd()) {
+					DrawParts->SetDistortionPer(120.f);
+					FadeControl::SetFade();
+					m_EventScene.Dispose();
+					m_IsEventSceneActive = false;
+				}
+				m_EventScene.Update();
+				return true;
 			}
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
@@ -170,6 +194,7 @@ namespace FPS_n2 {
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
 				//SE->Get(static_cast<int>(SoundEnum::Environment)).Play(0, DX_PLAYTYPE_LOOP, TRUE);
+				m_IsEventSceneFlag = true;
 			}
 			//Input,AI
 			{
@@ -422,6 +447,9 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
+			if (m_IsEventSceneActive) {
+				m_EventScene.Dispose();
+			}
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			//使い回しオブジェ系
 			BackGround->Dispose();
@@ -460,67 +488,99 @@ namespace FPS_n2 {
 
 		//
 		void			MainGameScene::BG_Draw_Sub(void) const noexcept {
-			auto* BackGround = BackGround::BackGroundClass::Instance();
-			BackGround->BG_Draw();
+			if (m_IsEventSceneActive) {
+				m_EventScene.BGDraw();
+			}
+			else {
+				auto* BackGround = BackGround::BackGroundClass::Instance();
+				BackGround->BG_Draw();
+			}
 		}
 		void			MainGameScene::ShadowDraw_Far_Sub(void) const noexcept {
-			auto* BackGround = BackGround::BackGroundClass::Instance();
-			BackGround->Shadow_Draw_Far();
+			if (!m_IsEventSceneActive) {
+				//auto* BackGround = BackGround::BackGroundClass::Instance();
+				//BackGround->Shadow_Draw_Far();
+			}
 		}
 		void			MainGameScene::ShadowDraw_Sub(void) const noexcept {
-			auto* BackGround = BackGround::BackGroundClass::Instance();
-			BackGround->Shadow_Draw();
-			ObjectManager::Instance()->Draw_Shadow();
+			if (m_IsEventSceneActive) {
+				m_EventScene.ShadowDraw();
+			}
+			else {
+				auto* BackGround = BackGround::BackGroundClass::Instance();
+				BackGround->Shadow_Draw();
+				ObjectManager::Instance()->Draw_Shadow();
+			}
 		}
 		void			MainGameScene::CubeMap_Sub(void) const noexcept {
-			auto* BackGround = BackGround::BackGroundClass::Instance();
-			BackGround->Draw();
+			if (m_IsEventSceneActive) {
+				m_EventScene.BGDraw();
+			}
+			else {
+				auto* BackGround = BackGround::BackGroundClass::Instance();
+				BackGround->Draw();
+			}
 		}
 
 		void MainGameScene::SetShadowDraw_Sub(void) const noexcept {
-			auto* BackGround = BackGround::BackGroundClass::Instance();
-			BackGround->Draw();
-			ObjectManager::Instance()->Draw();
+			if (m_IsEventSceneActive) {
+				m_EventScene.SetShadowDraw();
+			}
+			else {
+				auto* BackGround = BackGround::BackGroundClass::Instance();
+				BackGround->Draw();
+				ObjectManager::Instance()->Draw();
+			}
 		}
 
 		void			MainGameScene::MainDraw_Sub(void) const noexcept {
-			auto* BackGround = BackGround::BackGroundClass::Instance();
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* DrawParts = DXDraw::Instance();
-			SetFogStartEnd(DrawParts->GetMainCamera().GetCamNear(), DrawParts->GetMainCamera().GetCamFar() * 2.f);
-			BackGround->Draw();
-			ObjectManager::Instance()->Draw();
-			//ObjectManager::Instance()->Draw_Depth();
-			for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
-				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
+			if (m_IsEventSceneActive) {
+				m_EventScene.MainDraw();
 			}
-			HitMark::Instance()->Update();
+			else {
+				auto* BackGround = BackGround::BackGroundClass::Instance();
+				auto* PlayerMngr = Player::PlayerManager::Instance();
+				auto* DrawParts = DXDraw::Instance();
+				SetFogStartEnd(DrawParts->GetMainCamera().GetCamNear(), DrawParts->GetMainCamera().GetCamFar() * 2.f);
+				BackGround->Draw();
+				ObjectManager::Instance()->Draw();
+				//ObjectManager::Instance()->Draw_Depth();
+				for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
+					PlayerMngr->GetPlayer(i)->GetAI()->Draw();
+				}
+				HitMark::Instance()->Update();
+			}
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
-			HitMark::Instance()->Draw();
-			FadeControl::DrawFade();
-			//UI
-			if (!DXDraw::Instance()->IsPause()) {
-				this->m_UIclass.Draw();
+			if (m_IsEventSceneActive) {
+				m_EventScene.UIDraw();
 			}
 			else {
-				PauseMenuControl::DrawPause();
-			}
-			//通信設定
-			auto* NetBrowser = NetWorkBrowser::Instance();
-			NetBrowser->Draw();
-			if (m_NetWorkController) {
-				auto* DrawParts = DXDraw::Instance();
-				if (m_NetWorkController->GetPing() >= 0.f) {
-					WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
+				HitMark::Instance()->Draw();
+				FadeControl::DrawFade();
+				//UI
+				if (!DXDraw::Instance()->IsPause()) {
+					this->m_UIclass.Draw();
 				}
 				else {
-					if (m_NetWorkController->GetClient()) {
-						WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, Red, Black, "Lost Connection");
+					PauseMenuControl::DrawPause();
+				}
+				//通信設定
+				//auto* NetBrowser = NetWorkBrowser::Instance();
+				//NetBrowser->Draw();
+				if (m_NetWorkController) {
+					auto* DrawParts = DXDraw::Instance();
+					if (m_NetWorkController->GetPing() >= 0.f) {
+						WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
 					}
 					else {
-						WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
+						if (m_NetWorkController->GetClient()) {
+							WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, Red, Black, "Lost Connection");
+						}
+						else {
+							WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
+						}
 					}
 				}
 			}

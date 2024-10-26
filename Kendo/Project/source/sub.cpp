@@ -10,6 +10,10 @@ const FPS_n2::HitMark* SingletonBase<FPS_n2::HitMark>::m_Singleton = nullptr;
 namespace FPS_n2 {
 	void			CommonBattleResource::Load(void) noexcept {
 		auto* SE = SoundPool::Instance();
+		//
+		SE->Add((int)SoundEnum::Taiko1, 1, "data/Sound/SE/taiko.wav", false);
+		SE->Add((int)SoundEnum::KendoKun, 1, "data/Sound/Voice/kendokun.wav", false);
+		//
 		SE->Add(static_cast<int>(SoundEnum::RunFoot), 4, "data/Sound/SE/move/runfoot.wav");
 		SE->Add(static_cast<int>(SoundEnum::StandupFoot), 2, "data/Sound/SE/move/standup.wav");
 		SE->Add(static_cast<int>(SoundEnum::Heart), 5, "data/Sound/SE/move/heart.wav", false);
@@ -34,6 +38,8 @@ namespace FPS_n2 {
 	void			CommonBattleResource::Set(void) noexcept {
 		auto* SE = SoundPool::Instance();
 		auto* OptionParts = OPTION::Instance();
+		SE->Get((int)SoundEnum::Taiko1).SetVol_Local(216);
+		SE->Get((int)SoundEnum::KendoKun).SetVol_Local(128);
 
 		SE->Get(static_cast<int>(SoundEnum::RunFoot)).SetVol_Local(128);
 		SE->Get(static_cast<int>(SoundEnum::Heart)).SetVol_Local(92);
@@ -43,8 +49,11 @@ namespace FPS_n2 {
 	}
 	void			CommonBattleResource::Dispose(void) noexcept {
 		auto* SE = SoundPool::Instance();
+		//
+		SE->Delete((int)SoundEnum::Taiko1);
+		SE->Delete((int)SoundEnum::KendoKun);
+		//
 		SE->Delete(static_cast<int>(SoundEnum::RunFoot));
-
 		SE->Delete(static_cast<int>(SoundEnum::Kendo_Swing));
 		SE->Delete(static_cast<int>(SoundEnum::Kendo_Hit));
 		SE->Delete(static_cast<int>(SoundEnum::Kendo_Foot));

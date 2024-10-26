@@ -13,6 +13,8 @@ namespace FPS_n2 {
 	};
 	enum class SoundEnum : uint8_t {
 		RunFoot = static_cast<uint8_t>(SoundEnumCommon::Num),
+		KendoKun,
+		Taiko1,
 		StandupFoot,
 		Heart,
 		//
@@ -32,8 +34,33 @@ namespace FPS_n2 {
 		OneMunute,
 		TimeUp,
 
-		Num,
+		Max,
 	};
+	static const char* SoundID[(int)SoundEnum::Max] = {
+		"",
+		"",
+		"",
+		"",
+		"RunFoot",
+		"KendoKun",
+		"Taiko1",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+	};
+
 	enum class CharaTypeID : uint8_t {
 		Mine,
 		Team,

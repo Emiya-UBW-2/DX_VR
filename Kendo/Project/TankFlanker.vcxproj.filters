@@ -37,6 +37,9 @@
     <Filter Include="ソース ファイル\CommonScene\UI">
       <UniqueIdentifier>{7b8a29fa-fcc4-4dec-9d1a-d5e860f21f7a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\MainScene\EventScene">
+      <UniqueIdentifier>{9bd942f4-f437-42bf-87d4-34e6ad55986c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\sub.hpp">
@@ -105,6 +108,9 @@
     <ClInclude Include="source\MainScene\MainSceneSub.hpp">
       <Filter>ソース ファイル\MainScene</Filter>
     </ClInclude>
+    <ClInclude Include="source\MainScene\EventScene\EventScene.hpp">
+      <Filter>ソース ファイル\MainScene\EventScene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -157,6 +163,9 @@
     </ClCompile>
     <ClCompile Include="source\MainScene\MainSceneSub.cpp">
       <Filter>ソース ファイル\MainScene</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\EventScene\EventScene.cpp">
+      <Filter>ソース ファイル\MainScene\EventScene</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

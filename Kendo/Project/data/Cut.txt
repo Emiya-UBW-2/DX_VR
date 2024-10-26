@@ -1,0 +1,126 @@
+//
+		SetArg(KenPic, "data/Picture/ken.png");
+		SetArg(SinPic, "data/Picture/sin.png");
+
+		SetArg(Kendo, "data/MovieModel/Chara/model.pmx");
+		SetArg(Bamboo, "data/MovieModel/Bamboo/model.pmx");
+
+		SetArg(Stage, "data/model/map/model_DISABLE.mv1");
+		SetArg(Sky, "data/model/sky/model.mv1");
+//モデル読み込み
+		LoadModel(Kendo, 2);
+		LoadModel(Bamboo, 2);
+		LoadModel(Stage, 1);
+		LoadModel(Sky, 1);
+
+		LoadGraph(KenPic, 1, 960,540, 0.0, 1.0, 0.35);
+		LoadGraph(SinPic, 1, 960,540, 0.0, 1.0, 0.35);
+//モデル読み込み終わり
+	//ｾｯﾀｯﾌﾟ
+		SetModelMode(Stage, 0, FAR_TRUE);
+		SetModelMode(Sky, 0, SKY_TRUE);
+//カット設定
+	//0
+		SetCut(1.5);
+		SetBright(230, 245, 255);
+		WhiteOut(0.1);
+
+			SetDrawGraph(KenPic, 0,2);
+
+			SetDrawSE(KendoKun);
+			SetDrawSE(Taiko1);
+	//1
+		SetCut(3.5);
+		SetBright(230, 245, 255);
+		WhiteIn(0.95);
+
+		//SetFog(100, 110, 128, 50.f,200.f);
+
+		SetCamForcus(Kendo, 0, UPPER, 0.0, 0.0, 0.0);
+		SetCampos_NoneRad(-20.f , 14.f, 25.f);
+		SetCamInfo(25, 1.0, 100.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, Kendo, 0, UPPER, 1.0, 2.0, 0.0);
+		SetUpdateCampos(0.9f);
+			SetDrawModel(Stage, 0, 15);
+			SetModelMat(Stage, 0, 0.0, 0.0, -0.001, 0.0, 0.0);
+
+			SetDrawModel(Sky, 0, 15);
+			SetModelMat(Sky, 0, 0.0, 0.0, -0.001, 0.0, 0.0);
+
+			SetDrawModel(Kendo, 0, 15);
+			SetModelMat(Kendo, 0, 0.0, 0.0, 0.0, 35.0, 0.0);
+			SetModelAnime(Kendo, 0, 0, FALSE, 1.0, 0);
+
+			SetDrawModel(Bamboo, 0, 15);
+			SetModelMat(Bamboo, 0, 0.0, 0.0, 0.0, 35.0, 0.0);
+			SetModelAnime(Bamboo, 0, 0, FALSE, 1.0, 0);
+
+			SetDrawModel(Kendo, 1, 15);
+			SetModelMat(Kendo, 1, 180.0, 0.0, 0.0, -35.0, 0.0);
+			SetModelAnime(Kendo, 1, 0, FALSE, 1.0, 0);
+
+			SetDrawModel(Bamboo, 1, 15);
+			SetModelMat(Bamboo, 1, 180.0, 0.0, 0.0, -35.0, 0.0);
+			SetModelAnime(Bamboo, 1, 0, FALSE, 1.0, 0);
+	//2
+		SetCut(5.5);
+
+		SetCamvec(0.f , 14.f, 0.f);
+		SetCampos_NoneRad(95.f , 14.f, 0.f);
+		SetCamInfo(35, 5.0, 500.0, 0.0);
+
+			SetDrawGraph(SinPic, 0,1);
+	//3
+		SetCut(7.5);
+
+		SetCamForcus(Kendo, 0, RIGHTLEG, 0.0, 0.0, 0.0);
+		SetCampos_NoneRad(15.f , 4.f, 30.f);
+		SetCamInfo(45, 1.0, 100.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, Kendo, 0, RIGHTLEG, 0.0, 0.0, 0.0);
+		SetUpdateCampos(0.9f);
+	//4
+		SetCut(10.5);
+
+		SetCamForcus(Kendo, 0, UPPER, 0.0, 0.0, 0.0);
+		SetCampos_NoneRad(15.f , 14.f, -50.f);
+		SetCamInfo(25, 1.0, 100.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.9f, Kendo, 0, UPPER, 0.0, 2.0, 0.0);
+		SetUpdateCampos(0.9f);
+	//5
+		SetCut(12.0);//
+		SetPrevCamInfo();
+
+		SetUpdateEnable();
+		WhiteOut(0.9f);
+	//END
+		//SetCut(60.0);
+//LAST
+
+
+
+//テロップはじめ
+		SetTelopTime(0.0, 0.1);
+		SetTelop(1280, 780, 16, " ", LEFT);
+		SetTelop(1280, 840, 24, " ", RIGHT);
+		SetTelop(1280, 800, 32, " ", LEFT);
+		SetTelop(1280, 840, 48, " ", RIGHT);
+
+	//テロップ3
+		SetTelopTime(33.0, 4.0);
+		SetTelop(220, 240, 48, "Thank  You  for  Wathcing!", LEFT);
+		SetTelop(1280, 790, 24, "お借りしたモデル", RIGHT);
+		SetTelop(1280, 630, 16, "  とりそば様", LEFT);
+		SetTelop(1280, 650, 32, " AK-12", LEFT);
+		SetTelop(1280, 730, 16, "  フラン様", LEFT);
+		SetTelop(1280, 750, 32, " 着せ替え用スーツ", LEFT);
+		SetTelop(1280, 830, 16, "  スパークリング湯豆腐様", LEFT);
+		SetTelop(1280, 850, 32, " 高科ちなみ", LEFT);
+		SetTelop(1280, 930, 16, "  Bzovius様", LEFT);
+		SetTelop(1280, 950, 32, " Russian Soldier", LEFT);
+//テロップ終わり

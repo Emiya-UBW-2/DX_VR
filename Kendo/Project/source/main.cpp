@@ -46,8 +46,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	auto* DXLib_refParts = DXLib_ref::Instance();
 	if (!DXLib_refParts->StartLogic()) { return 0; }
 	//追加設定
-	std::string Name = "AA"+std::to_string(GetNowHiPerformanceCount());
-	SetMainWindowText(Name.c_str());						//タイトル
+	SetMainWindowText("剣道-つるぎ みち-");						//タイトル
 	//SetUseHalfLambertLighting(TRUE);
 	MV1SetLoadModelReMakeNormal(TRUE);
 	//
@@ -72,7 +71,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	MainGameScenePtr->SetNextSceneList(1, MainGameScenePtr);
 
 	auto* SceneParts = SceneControl::Instance();
-	//SceneParts->AddList(Titlescene);
+	SceneParts->AddList(Titlescene);
 	SceneParts->AddList(LoadScenePtr);
 	SceneParts->AddList(MainGameScenePtr);
 	//最初の読み込み

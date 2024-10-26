@@ -22,7 +22,7 @@ namespace FPS_n2 {
 				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 				Chara->SetPlayMode(false);
 			}
-			//LoadGun("M16-4", GetMyPlayerID(), false, 0);
+			//LoadGun("type89", GetMyPlayerID(), false, 0);
 			//UI
 			this->m_UIclass.Load();
 			PauseMenuControl::LoadPause();
@@ -37,7 +37,7 @@ namespace FPS_n2 {
 			//
 			BattleResourceMngr->Set();
 
-			SetShadowScale(2.f);
+			SetShadowScale(0.5f);
 			//
 			BackGround->Init();
 			//

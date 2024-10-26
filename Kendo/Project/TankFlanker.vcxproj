@@ -16,6 +16,7 @@
     <ClInclude Include="source\Header.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGround.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGroundSub.hpp" />
+    <ClInclude Include="source\MainScene\EventScene\EventScene.hpp" />
     <ClInclude Include="source\MainScene\Input.hpp" />
     <ClInclude Include="source\MainScene\MainSceneSub.hpp" />
     <ClInclude Include="source\MainScene\NetWork.hpp" />
@@ -39,6 +40,7 @@
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\MainScene\BackGround\BackGround.cpp" />
     <ClCompile Include="source\MainScene\BackGround\BackGroundSub.cpp" />
+    <ClCompile Include="source\MainScene\EventScene\EventScene.cpp" />
     <ClCompile Include="source\MainScene\Input.cpp" />
     <ClCompile Include="source\MainScene\MainSceneSub.cpp" />
     <ClCompile Include="source\MainScene\NetWork.cpp" />

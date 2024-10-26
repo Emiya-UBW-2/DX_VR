@@ -56,14 +56,15 @@ namespace FPS_n2 {
 				this->m_ObjGroundCol.SetupCollInfo(1, 1, 1);
 				//‹ó
 				this->m_ObjSky.SetScale(Vector3DX::vget(10.f, 10.f, 10.f));
-				this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
+				//this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
 				for (int i = 0, num = this->m_ObjSky.GetMaterialNum(); i < num; ++i) {
-					this->m_ObjSky.SetMaterialDifColor(i, GetColorF(0.5f, 0.5f, 0.5f, 1.f));
-					this->m_ObjSky.SetMaterialAmbColor(i, GetColorF(0.f, 0.f, 0.f, 1.f));
+					//this->m_ObjSky.SetMaterialDifColor(i, GetColorF(0.75f, 0.75f, 0.75f, 1.f));
+					//this->m_ObjSky.SetMaterialDifColor(i, GetColorF(0.5f, 0.5f, 0.5f, 1.f));
+					//this->m_ObjSky.SetMaterialAmbColor(i, GetColorF(0.f, 0.f, 0.f, 1.f));
 				}
 				for (int i = 0, num = this->m_ObjGround.GetMaterialNum(); i < num; ++i) {
-					this->m_ObjGround.SetMaterialDifColor(i, GetColorF(1.f, 1.f, 1.f, 1.f));
-					this->m_ObjGround.SetMaterialAmbColor(i, GetColorF(0.15f, 0.15f, 0.15f, 1.f));
+					//this->m_ObjGround.SetMaterialDifColor(i, GetColorF(1.f, 1.f, 1.f, 1.f));
+					//this->m_ObjGround.SetMaterialAmbColor(i, GetColorF(0.15f, 0.15f, 0.15f, 1.f));
 				}
 			}
 			//
