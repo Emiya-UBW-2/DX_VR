@@ -79,9 +79,13 @@ namespace FPS_n2 {
 			ButtonParts->Dispose();
 		}
 		//
-		void FadeControl::SetFade(void) noexcept {
+		void FadeControl::SetFadeIn(void) noexcept {
 			this->m_IsBlackOut = false;
 			this->m_BlackOutAlpha = 1.f;
+		}
+		void FadeControl::SetFadeOut(void) noexcept {
+			this->m_IsBlackOut = true;
+			this->m_BlackOutAlpha = 0.f;
 		}
 		void FadeControl::UpdateFade(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -89,9 +93,11 @@ namespace FPS_n2 {
 		}
 		void FadeControl::DrawFade(void) const noexcept {
 			auto* DrawParts = DXDraw::Instance();
-			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * this->m_BlackOutAlpha), 0, 255));
-			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIXMax(), DrawParts->GetUIYMax(), Black, TRUE);
-			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+			if (this->m_BlackOutAlpha > 0.f) {
+				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * this->m_BlackOutAlpha), 0, 255));
+				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIXMax(), DrawParts->GetUIYMax(), Black, TRUE);
+				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+			}
 		}
 	};
 };

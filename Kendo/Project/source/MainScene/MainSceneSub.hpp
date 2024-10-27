@@ -26,9 +26,8 @@ namespace FPS_n2 {
 			auto		IsFadeClear(void) const noexcept { return this->m_BlackOutAlpha == 0.f; }
 			auto		IsFadeAll(void) const noexcept { return this ->m_BlackOutAlpha >= 1.f; }
 		protected:
-			void			SetBlackOut(bool value) noexcept { this->m_IsBlackOut = value; }
-		protected:
-			void			SetFade(void) noexcept;
+			void			SetFadeIn(void) noexcept;
+			void			SetFadeOut(void) noexcept;
 			void			UpdateFade(void) noexcept;
 			void			DrawFade(void) const noexcept;
 		};

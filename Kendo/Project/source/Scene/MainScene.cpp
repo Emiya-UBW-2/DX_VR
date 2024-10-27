@@ -72,13 +72,16 @@ namespace FPS_n2 {
 			auto* NetBrowser = NetWorkBrowser::Instance();
 			NetBrowser->Init();
 			PauseMenuControl::SetPause();
-			FadeControl::SetFade();
+			FadeControl::SetFadeIn();
 			this->m_IsEnd = false;
 			HitMark::Instance()->Set();
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* DrawParts = DXDraw::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
 #ifdef DEBUG
 			/*
 			{
@@ -116,15 +119,17 @@ namespace FPS_n2 {
 			if (PauseMenuControl::IsRetire()) {
 				this->m_IsEnd = true;
 			}
-			if (this->m_IsEnd && FadeControl::IsFadeAll()) {
-				return false;
+			if (this->m_IsEnd) {
+				if (FadeControl::IsFadeClear()) {
+					FadeControl::SetFadeOut();
+				}
+				if (FadeControl::IsFadeAll()) {
+					return false;
+				}
 			}
-			FadeControl::SetBlackOut(this->m_IsEnd);
-
-			FadeControl::UpdateFade();
-			auto* DrawParts = DXDraw::Instance();
-			auto* ObjMngr = ObjectManager::Instance();
-			auto* PlayerMngr = Player::PlayerManager::Instance();
+			if (!GetIsFirstLoop()) {
+				FadeControl::UpdateFade();
+			}
 
 			auto& Chara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 
@@ -183,7 +188,7 @@ namespace FPS_n2 {
 			if (m_IsEventSceneActive) {
 				if (m_EventScene.IsEnd()) {
 					DrawParts->SetDistortionPer(120.f);
-					FadeControl::SetFade();
+					FadeControl::SetFadeIn();
 					m_EventScene.Dispose();
 					m_IsEventSceneActive = false;
 				}
@@ -558,17 +563,22 @@ namespace FPS_n2 {
 		}
 		//UIï\é¶
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
+			FadeControl::DrawFade();
 			if (m_IsEventSceneActive) {
 				m_EventScene.UIDraw();
 			}
 			else {
 				HitMark::Instance()->Draw();
-				FadeControl::DrawFade();
 				//UI
 				if (!DXDraw::Instance()->IsPause()) {
 					this->m_UIclass.Draw();
 				}
-				else {
+			}
+		}
+		void MainGameScene::DrawUI_In_Sub(void) const noexcept		{
+			if (!m_IsEventSceneActive) {
+				//UI
+				if (DXDraw::Instance()->IsPause()) {
 					PauseMenuControl::DrawPause();
 				}
 				//í êMê›íË

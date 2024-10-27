@@ -989,7 +989,7 @@ namespace FPS_n2 {
 		}
 	}
 	void			EventScene::UIDraw() const noexcept {
-		if (IsEnd()) { return; }
+		//if (IsEnd()) { return; }
 		auto* DrawParts = DXDraw::Instance();
 
 		if (m_NowTime > 0) {

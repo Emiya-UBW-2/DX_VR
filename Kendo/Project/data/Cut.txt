@@ -105,22 +105,6 @@
 
 
 //テロップはじめ
-		SetTelopTime(0.0, 0.1);
-		SetTelop(1280, 780, 16, " ", LEFT);
-		SetTelop(1280, 840, 24, " ", RIGHT);
-		SetTelop(1280, 800, 32, " ", LEFT);
-		SetTelop(1280, 840, 48, " ", RIGHT);
-
-	//テロップ3
 		SetTelopTime(33.0, 4.0);
 		SetTelop(220, 240, 48, "Thank  You  for  Wathcing!", LEFT);
-		SetTelop(1280, 790, 24, "お借りしたモデル", RIGHT);
-		SetTelop(1280, 630, 16, "  とりそば様", LEFT);
-		SetTelop(1280, 650, 32, " AK-12", LEFT);
-		SetTelop(1280, 730, 16, "  フラン様", LEFT);
-		SetTelop(1280, 750, 32, " 着せ替え用スーツ", LEFT);
-		SetTelop(1280, 830, 16, "  スパークリング湯豆腐様", LEFT);
-		SetTelop(1280, 850, 32, " 高科ちなみ", LEFT);
-		SetTelop(1280, 930, 16, "  Bzovius様", LEFT);
-		SetTelop(1280, 950, 32, " Russian Soldier", LEFT);
 //テロップ終わり

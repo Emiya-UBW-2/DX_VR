@@ -66,6 +66,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	//‘JˆÚæŽw’è
 	Titlescene->SetNextSceneList(0, MainGameScenePtr);
+	Titlescene->SetNextSceneList(1, MainGameScenePtr);
 	LoadScenePtr->SetNextSceneList(0, MainGameScenePtr);
 	MainGameScenePtr->SetNextSceneList(0, Titlescene);
 	MainGameScenePtr->SetNextSceneList(1, MainGameScenePtr);
