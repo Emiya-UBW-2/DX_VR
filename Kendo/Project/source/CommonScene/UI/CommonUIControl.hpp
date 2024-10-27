@@ -167,7 +167,7 @@ namespace FPS_n2 {
 								Color = Gray75;
 								break;
 							case ButtonStatus::Ready:
-								Color = GetColor(148, 216, 132);
+								Color = GetColor(64, 192, 64);
 								break;
 							case ButtonStatus::Focus:
 								Color = Green;
@@ -191,7 +191,7 @@ namespace FPS_n2 {
 								}
 								break;
 							case ButtonStatus::Focus:
-								Color = WhiteSel;
+								Color = Green;
 								if (!this->m_EnableSelect) {
 									Color = GetColor(216, 143, 143);
 								}
@@ -225,7 +225,7 @@ namespace FPS_n2 {
 							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 216, 216, 216);
 							break;
 						case ButtonStatus::Focus:
-							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 216, 255, 216);
+							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 0, 255, 0);
 							break;
 						default:
 							break;

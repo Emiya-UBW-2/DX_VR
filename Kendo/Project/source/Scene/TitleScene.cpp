@@ -10,6 +10,7 @@ namespace FPS_n2 {
 		void			TitleScene::Set_Sub(void) noexcept {
 			auto* BGM = BGMPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
+			auto* LocalizeParts = LocalizePool::Instance();
 			// 
 			this->m_GameFadeIn = 1.f;
 			this->m_GameStart = 0.f;
@@ -18,11 +19,11 @@ namespace FPS_n2 {
 			ButtonParts->ResetSel();
 			// 
 			ButtonParts->AddStringButton(
-				"Let's Go!", 52, true,
+				LocalizeParts->Get(400), 52, true,
 				1920 - 64 - 48, 1080 - 84 - 64 * 2, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 			ButtonParts->AddStringButton(
-				"Reset SaveData", 48, true,
-				1920 - 64, 1080 - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+				LocalizeParts->Get(401), 48, true,
+				1920 - 64 - 48, 1080 - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 			ButtonParts->AddIconButton(
 				"CommonData/UI/setting.png", true,
 				(1920 - 96 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
@@ -73,37 +74,7 @@ namespace FPS_n2 {
 						this->m_GameStart += 0.0001f;
 						break;
 					case 1:
-						PopUpParts->Add(LocalizeParts->Get(3100), DrawParts->GetUIY(480), DrawParts->GetUIY(240),
-							[&](int xmin, int ymin, int xmax, int ymax, bool) {
-								auto* LocalizeParts = LocalizePool::Instance();
-								int xp1, yp1;
-								//ƒ^ƒCƒgƒ‹
-								{
-									xp1 = xmin + DrawParts->GetUIY(24);
-									yp1 = ymin + LineHeight;
-
-									WindowSystem::SetMsg(xp1, yp1 + LineHeight / 2, LineHeight, FontHandle::FontXCenter::LEFT, White, Black, LocalizeParts->Get(3101));
-								}
-								//
-								{
-									xp1 = (xmax + xmin) / 2 - DrawParts->GetUIY(54);
-									yp1 = ymax - LineHeight * 3;
-
-									auto* Pad = PadControl::Instance();
-									bool ret = WindowSystem::SetMsgClickBox(xp1, yp1, xp1 + DrawParts->GetUIY(108), yp1 + LineHeight * 2, LineHeight, Gray15, false, true, LocalizeParts->Get(3102));
-									if (Pad->GetKey(PADS::INTERACT).trigger() || ret) {
-										auto* SaveDataParts = SaveDataClass::Instance();
-										SaveDataParts->Reset();
-										SaveDataParts->Save();
-										DrawParts->SetPause(false);
-										m_CloseResetSave = true;
-									}
-								}
-							},
-							[]() {},
-							[]() {},
-							true
-						);
+						this->m_GameStart += 0.0001f;
 						break;
 					case 2:
 						OptionWindowClass::Instance()->SetActive();
@@ -157,7 +128,7 @@ namespace FPS_n2 {
 		void			TitleScene::MainDraw_Sub(void) const noexcept {
 			auto* DrawParts = DXDraw::Instance();
 			// ”wŒi
-			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Gray50, TRUE);
+			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetScreenY(1920), DrawParts->GetScreenY(1080), Gray65, TRUE);
 			// •`‰æ
 		}
 		void			TitleScene::DrawUI_Base_Sub(void) const noexcept {
@@ -167,18 +138,18 @@ namespace FPS_n2 {
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
 			WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, 
-				&this->m_TitleImage, DrawParts->GetUIY(64), DrawParts->GetUIY(64), DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), true);
+				&this->m_TitleImage, DrawParts->GetUIY(64), DrawParts->GetUIY(64), DrawParts->GetUIY(64 + 1024), DrawParts->GetUIY(64 + 256), true);
 			// 
 			WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18), 
-				FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP,
-				DrawParts->GetUIY(64 + 369), DrawParts->GetUIY(64 + 207), White, Black, "Ver 1.0.1");
+				FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+				DrawParts->GetUIY(64), DrawParts->GetUIY(64 + 256), White, Black, "Ver 1.0.0");
 			// 
 			ButtonParts->Draw();
 			// 
 			if ((ButtonParts->GetSelect() != InvalidID) && !PopUpParts->IsActivePop()) {
 				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18), 
 					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-					DrawParts->GetUIY(32), DrawParts->GetUIY(1080 - 32 - 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
+					DrawParts->GetUIY(32), DrawParts->GetUIY(1080 - 32 - 32), White, Black, LocalizeParts->Get(410 + ButtonParts->GetSelect()));
 			}
 			// 
 			{

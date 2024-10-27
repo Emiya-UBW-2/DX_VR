@@ -30,7 +30,7 @@ namespace FPS_n2 {
 					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) const noexcept {
 					//return;
 					int ParamBuf = static_cast<int>(this->m_Buffer + 0.5f);
-					DrawBoxLine_2D(xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White);
+					WindowSystem::SetBox(xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White);
 					int length = (xp2 - 1) - (xp1 + 1);
 
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
@@ -53,7 +53,7 @@ namespace FPS_n2 {
 					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
 					//return;
 					int ParamBuf = static_cast<int>(this->m_Buffer + 0.5f);
-					DrawBoxLine_2D(xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White);
+					WindowSystem::SetBox(xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White);
 					int length = (yp2 - 1) - (yp1 + 1);
 
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));

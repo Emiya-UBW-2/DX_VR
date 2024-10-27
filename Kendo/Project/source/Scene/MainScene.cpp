@@ -131,7 +131,7 @@ namespace FPS_n2 {
 			auto* Pad = PadControl::Instance();
 			Pad->SetMouseMoveEnable(true);
 			Pad->ChangeGuide(
-				[]() {
+				[this]() {
 					auto* KeyGuide = PadControl::Instance();
 					if (DXDraw::Instance()->IsPause()) {
 						KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9992));
@@ -141,18 +141,22 @@ namespace FPS_n2 {
 						KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9993));
 					}
 					else {
-						KeyGuide->AddGuide(PADS::MOVE_W, "");
-						KeyGuide->AddGuide(PADS::MOVE_S, "");
-						KeyGuide->AddGuide(PADS::MOVE_A, "");
-						KeyGuide->AddGuide(PADS::MOVE_D, "");
-						KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9900));
+						if (m_IsEventSceneActive) {
+						}
+						else {
+							KeyGuide->AddGuide(PADS::MOVE_W, "");
+							KeyGuide->AddGuide(PADS::MOVE_S, "");
+							KeyGuide->AddGuide(PADS::MOVE_A, "");
+							KeyGuide->AddGuide(PADS::MOVE_D, "");
+							KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9900));
 
-						KeyGuide->AddGuide(PADS::SHOT, LocalizePool::Instance()->Get(9906));
-						KeyGuide->AddGuide(PADS::AIM, LocalizePool::Instance()->Get(9908));
-						KeyGuide->AddGuide(PADS::ULT, LocalizePool::Instance()->Get(9907));
+							KeyGuide->AddGuide(PADS::SHOT, LocalizePool::Instance()->Get(9906));
+							KeyGuide->AddGuide(PADS::AIM, LocalizePool::Instance()->Get(9908));
+							KeyGuide->AddGuide(PADS::ULT, LocalizePool::Instance()->Get(9907));
 
-						KeyGuide->AddGuide(PADS::WALK, LocalizePool::Instance()->Get(9903));
-						KeyGuide->AddGuide(PADS::JUMP, LocalizePool::Instance()->Get(9905));
+							KeyGuide->AddGuide(PADS::WALK, LocalizePool::Instance()->Get(9903));
+							KeyGuide->AddGuide(PADS::JUMP, LocalizePool::Instance()->Get(9905));
+						}
 					}
 				});
 
@@ -163,6 +167,7 @@ namespace FPS_n2 {
 					m_EventScene.Load("data/Cut.txt");
 					m_EventScene.Start();
 					m_IsEventSceneActive = true;
+					Pad->SetGuideUpdate();
 				}
 			}
 
