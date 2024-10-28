@@ -2,7 +2,6 @@
 
 #include "Scene/TitleScene.hpp"
 #include "Scene/MainScene.hpp"
-#include "Scene/MainSceneLoader.hpp"
 
 #include "MainScene/NetworkBrowser.hpp"
 
@@ -60,20 +59,19 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::HitMark::Create();
 	//ÉVÅ[Éì
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
-	auto LoadScenePtr = std::make_shared<FPS_n2::Sceneclass::LoadScene>();
 	auto MainGameScenePtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
+	auto MainGameSceneTrainingPtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
+	MainGameSceneTrainingPtr->SetIsTraining(true);
 
 
 	//ëJà⁄êÊéwíË
 	Titlescene->SetNextSceneList(0, MainGameScenePtr);
-	Titlescene->SetNextSceneList(1, MainGameScenePtr);
-	LoadScenePtr->SetNextSceneList(0, MainGameScenePtr);
+	Titlescene->SetNextSceneList(1, MainGameSceneTrainingPtr);
 	MainGameScenePtr->SetNextSceneList(0, Titlescene);
-	MainGameScenePtr->SetNextSceneList(1, MainGameScenePtr);
+	MainGameSceneTrainingPtr->SetNextSceneList(0, Titlescene);
 
 	auto* SceneParts = SceneControl::Instance();
 	SceneParts->AddList(Titlescene);
-	SceneParts->AddList(LoadScenePtr);
 	SceneParts->AddList(MainGameScenePtr);
 	//ç≈èâÇÃì«Ç›çûÇ›
 	if (!DXLib_refParts->MainLogic()) { return 0; }

@@ -169,7 +169,7 @@ namespace FPS_n2 {
 				m_IsEventSceneFlag = false;
 				if (!m_IsEventSceneActive) {
 					DrawParts->SetDistortionPer(120.f * 4);
-					m_EventScene.Load("data/Cut.txt");
+					m_EventScene.Load(m_EventSelect.c_str());
 					m_EventScene.Start();
 					m_IsEventSceneActive = true;
 					Pad->SetGuideUpdate();
@@ -204,7 +204,10 @@ namespace FPS_n2 {
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
 				//SE->Get(static_cast<int>(SoundEnum::Environment)).Play(0, DX_PLAYTYPE_LOOP, TRUE);
-				m_IsEventSceneFlag = true;
+				if (m_isTraining) {
+					m_IsEventSceneFlag = true;
+					m_EventSelect = "data/Cut/Cut1.txt";
+				}
 			}
 			//Input,AI
 			{

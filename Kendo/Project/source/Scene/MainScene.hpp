@@ -31,12 +31,14 @@ namespace FPS_n2 {
 			std::vector<DamageEvent>					m_DamageEvents;
 			//
 			bool										m_IsEnd{ false };//シーン全体の終了フラグ
+			bool										m_isTraining{ false };
 #ifdef DEBUG
 			float m_D1{ 38.f / 255.f }, m_D2{ 192.f / 255.f }, m_D3{ 1.f };
 #endif
 			EventScene		m_EventScene;
 			bool			m_IsEventSceneActive{ false };
 			bool			m_IsEventSceneFlag{ false };
+			std::string		m_EventSelect;
 		private:
 			auto		GetMyPlayerID(void) const noexcept {
 				if (m_NetWorkController) {
@@ -44,6 +46,8 @@ namespace FPS_n2 {
 				}
 				return (PlayerID)0;
 			}
+		public:
+			void		SetIsTraining(bool value)noexcept { m_isTraining = value; }
 		public:
 			MainGameScene(void) noexcept {}
 			MainGameScene(const MainGameScene&) = delete;
