@@ -12,9 +12,12 @@ namespace FPS_n2 {
 		Weapon,
 	};
 	enum class SoundEnum : uint8_t {
-		RunFoot = static_cast<uint8_t>(SoundEnumCommon::Num),
-		EV1_1,
+		EV1_1 = static_cast<uint8_t>(SoundEnumCommon::Num),
 		Taiko1,
+		EV2_1,
+		EV2_2,
+		//
+		RunFoot,
 		StandupFoot,
 		Heart,
 		//
@@ -41,9 +44,11 @@ namespace FPS_n2 {
 		"",
 		"",
 		"",
-		"RunFoot",
 		"EV1_1",
 		"Taiko1",
+		"EV2_1",
+		"EV2_2",
+		"",
 		"",
 		"",
 		"",

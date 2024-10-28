@@ -22,8 +22,8 @@
 //ÉJÉbÉgê›íË
 	//0
 		SetCut(1.5);
-		SetBright(230, 245, 255);
 		WhiteOut(0.1);
+		BlackIn(0.1);
 
 			SetDrawGraph(KenPic, 0,2);
 
@@ -31,7 +31,6 @@
 			SetDrawSE(Taiko1);
 	//1
 		SetCut(3.5);
-		SetBright(230, 245, 255);
 		WhiteIn(0.95);
 
 		//SetFog(100, 110, 128, 50.f,200.f);

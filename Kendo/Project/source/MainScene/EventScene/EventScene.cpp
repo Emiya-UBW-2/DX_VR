@@ -124,6 +124,9 @@ namespace FPS_n2 {
 					m.SetPhysics(true, 1.f);
 					m.isFarPhysics = true;
 				}
+				else {
+					m.SetPhysics(false, 1.f);
+				}
 			}
 			//
 		}
