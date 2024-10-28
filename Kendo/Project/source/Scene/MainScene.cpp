@@ -77,7 +77,6 @@ namespace FPS_n2 {
 			HitMark::Instance()->Set();
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
-			auto* PostPassParts = PostPassEffect::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();

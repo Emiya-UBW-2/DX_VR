@@ -27,7 +27,7 @@
 
 			SetDrawGraph(KenPic, 0,2);
 
-			SetDrawSE(KendoKun);
+			SetDrawSE(EV1_1);
 			SetDrawSE(Taiko1);
 	//1
 		SetCut(3.5);
