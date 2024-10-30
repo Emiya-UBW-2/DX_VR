@@ -205,7 +205,7 @@ namespace FPS_n2 {
 				//SE->Get(static_cast<int>(SoundEnum::Environment)).Play(0, DX_PLAYTYPE_LOOP, TRUE);
 				if (m_isTraining) {
 					m_IsEventSceneFlag = true;
-					m_EventSelect = "data/Cut/Cut2.txt";
+					m_EventSelect = "data/Cut/Cut3.txt";
 				}
 			}
 			//Input,AI

@@ -102,7 +102,7 @@
 	//2
 		SetCut(5.5);
 
-		SetCamForcus(Teacher, 0, UPPER, 0.0, 2.0, 0.0);
+		SetCamForcus(Teacher, 0, UPPER, 0.0, 10.0, 0.0);
 		SetCampos_NoneRad(5.f , 36.f, 85.f);
 		SetCamInfo(25, 1.0, 100.0, 0.0);
 
@@ -120,12 +120,12 @@
 		SetCut(10.5);
 
 
-		SetCamForcus(Teacher, 0, UPPER, 0.0, 0.0, -10.0);
+		SetCamForcus(Teacher, 0, UPPER, 0.0, 5.0, -10.0);
 		SetCampos_NoneRad(-45.f , 10.f, 25.f);
 		SetCamInfo(25, 1.0, 100.0, 0.0);
 
 		SetUpdateEnable();
-		SetUpdateCamForcus(0.9f, Teacher, 0, UPPER, 0.0, 2.0, -10.0);
+		SetUpdateCamForcus(0.95f, Teacher, 0, UPPER, 0.0, 2.0, -10.0);
 		SetUpdateCampos(0.9f);
 	//4
 		SetCut(12.5);
@@ -141,29 +141,29 @@
 
 			SetDrawModel(Kendo, 0, 15);
 			SetModelMat(Kendo, 0, 200.0, -10.0, 0.0, 40.0, 0.0);
-			SetModelAnime(Kendo, 0, 0, FALSE, 0.5, 60);
+			SetModelAnime(Kendo, 0, 0, FALSE, 0.7, 60);
 
 			SetDrawModel(Bamboo, 0, 15);
 			SetModelMat(Bamboo, 0, 200.0, -10.0, 0.0, 40.0, 0.0);
-			SetModelAnime(Bamboo, 0, 0, FALSE, 0.5, 60);
+			SetModelAnime(Bamboo, 0, 0, FALSE, 0.7, 60);
 
 
 			SetDrawModel(Kendo, 1, 15);
 			SetModelMat(Kendo, 1, 180.0, 0.0, 0.0, 30.0, 0.0);
-			SetModelAnime(Kendo, 1, 0, FALSE, 0.6, 60);
+			SetModelAnime(Kendo, 1, 0, FALSE, 0.76, 60);
 
 			SetDrawModel(Bamboo, 1, 15);
 			SetModelMat(Bamboo, 1, 180.0, 0.0, 0.0, 30.0, 0.0);
-			SetModelAnime(Bamboo, 1, 0, FALSE, 0.6, 60);
+			SetModelAnime(Bamboo, 1, 0, FALSE, 0.76, 60);
 
 
 			SetDrawModel(Kendo, 2, 15);
 			SetModelMat(Kendo, 2, 160.0, 10.0, 0.0, 35.0, 0.0);
-			SetModelAnime(Kendo, 2, 0, FALSE, 0.55, 60);
+			SetModelAnime(Kendo, 2, 0, FALSE, 0.65, 60);
 
 			SetDrawModel(Bamboo, 2, 15);
 			SetModelMat(Bamboo, 2, 160.0, 10.0, 0.0, 35.0, 0.0);
-			SetModelAnime(Bamboo, 2, 0, FALSE, 0.55, 60);
+			SetModelAnime(Bamboo, 2, 0, FALSE, 0.65, 60);
 	//5
 		SetCut(15.0);//
 		SetPrevCamInfo();
