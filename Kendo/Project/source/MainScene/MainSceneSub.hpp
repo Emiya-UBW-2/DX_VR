@@ -22,12 +22,13 @@ namespace FPS_n2 {
 		class FadeControl {
 			bool						m_IsBlackOut{ false };//カットシーン中フラグ
 			float						m_BlackOutAlpha{ 0.f };
+			float						m_BlackOutPower{ 2.f };
 		protected:
 			auto		IsFadeClear(void) const noexcept { return this->m_BlackOutAlpha == 0.f; }
 			auto		IsFadeAll(void) const noexcept { return this ->m_BlackOutAlpha >= 1.f; }
 		protected:
-			void			SetFadeIn(void) noexcept;
-			void			SetFadeOut(void) noexcept;
+			void			SetFadeIn(float Per) noexcept;
+			void			SetFadeOut(float Per) noexcept;
 			void			UpdateFade(void) noexcept;
 			void			DrawFade(void) const noexcept;
 		};

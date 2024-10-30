@@ -47,7 +47,7 @@ namespace FPS_n2 {
 				pp_y = std::clamp(-100.f * Chara->GetBambooVec().y / deg2rad(150.f), -3.f, 3.f);
 			}
 #ifdef DEBUG
-			printfDx("[%5.2f,%5.2f]\n", pp_x, pp_y);
+			//printfDx("[%5.2f,%5.2f]\n", pp_x, pp_y);
 #endif
 			//AI
 			MyInput->SetInputStart(pp_x, pp_y);

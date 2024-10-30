@@ -624,7 +624,7 @@ namespace FPS_n2 {
 			}
 			//S”‰¹
 #ifdef DEBUG
-			printfDx("HEART : %f\n", m_HeartUp);
+			//printfDx("HEART : %f\n", m_HeartUp);
 #endif
 			Easing(&m_HeartUpR, m_HeartUp, 0.99f, EasingType::OutExpo);
 			if (StaminaControl::ExcuteStamina(m_HeartUpR / DrawParts->GetFps())) {

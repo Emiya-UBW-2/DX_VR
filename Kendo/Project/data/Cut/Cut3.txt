@@ -81,7 +81,7 @@
 		SetUpdateCamForcus(0.9f, Kendo, 0, UPPER, 10.0, 2.0, 0.0);
 		SetUpdateCampos(0.9f);
 	//5
-		SetCut(12.0);//
+		SetCut(7.0);//
 		SetPrevCamInfo();
 
 		SetUpdateEnable();

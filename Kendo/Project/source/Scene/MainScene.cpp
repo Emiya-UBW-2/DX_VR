@@ -22,6 +22,7 @@ namespace FPS_n2 {
 			PauseMenuControl::LoadPause();
 			HitMark::Instance()->Load();
 			//
+			m_GameStart.Load("data/UI/GameStart.png");
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -72,9 +73,15 @@ namespace FPS_n2 {
 			auto* NetBrowser = NetWorkBrowser::Instance();
 			NetBrowser->Init();
 			PauseMenuControl::SetPause();
-			FadeControl::SetFadeIn();
+			FadeControl::SetFadeIn(2.f);
 			this->m_IsEnd = false;
 			HitMark::Instance()->Set();
+
+			m_GameStartAlpha = 0.f;
+			m_GameStartScale = 0.f;
+			m_GameStartTimer = 1.f;
+
+			m_Timer = 180.f;
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
@@ -120,7 +127,7 @@ namespace FPS_n2 {
 			}
 			if (this->m_IsEnd) {
 				if (FadeControl::IsFadeClear()) {
-					FadeControl::SetFadeOut();
+					FadeControl::SetFadeOut(2.f);
 				}
 				if (FadeControl::IsFadeAll()) {
 					return false;
@@ -187,9 +194,14 @@ namespace FPS_n2 {
 			if (m_IsEventSceneActive) {
 				if (m_EventScene.IsEnd()) {
 					DrawParts->SetDistortionPer(120.f);
-					FadeControl::SetFadeIn();
+					FadeControl::SetFadeIn(m_isTraining ? 2.f : 0.5f);
 					m_EventScene.Dispose();
 					m_IsEventSceneActive = false;
+					Pad->SetGuideUpdate();
+					if (!m_isTraining) {
+						m_GameStartTimer = 1.f;
+						m_Timer = 180.f;
+					}
 				}
 				m_EventScene.Update();
 				return true;
@@ -205,8 +217,36 @@ namespace FPS_n2 {
 				//SE->Get(static_cast<int>(SoundEnum::Environment)).Play(0, DX_PLAYTYPE_LOOP, TRUE);
 				if (m_isTraining) {
 					m_IsEventSceneFlag = true;
+					m_EventSelect = "data/Cut/Cut1.txt";
+				}
+				else {
+					m_IsEventSceneFlag = true;
 					m_EventSelect = "data/Cut/Cut3.txt";
 				}
+			}
+			if (!m_isTraining) {
+				if (m_GameStartTimer > 0.f) {
+					float Per = std::clamp((0.8f - m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
+					m_GameStartAlpha = Lerp(0.f, 1.f, Per);
+					m_GameStartScale = Lerp(5.f, 1.0f, Per);
+				}
+				else if (m_GameStartTimer > 0.f - 1.f) {
+					float Per = std::clamp((0.f - m_GameStartTimer), 0.f, 1.f);//0to1
+					m_GameStartAlpha = Lerp(1.f, 1.f, Per);
+					m_GameStartScale = Lerp(1.0f, 1.1f, Per);
+				}
+				else if (m_GameStartTimer > -1.f - 0.2f) {
+					float Per = std::clamp((-1.f - m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
+					m_GameStartAlpha = Lerp(1.f, 0.f, Per);
+					m_GameStartScale = Lerp(1.1f, 0.f, Per);
+				}
+				else {
+					m_GameStartAlpha = 0.f;
+					m_GameStartScale = 0.f;
+				}
+				m_GameStartTimer -= DrawParts->GetDeltaTime();
+
+				m_Timer -= DrawParts->GetDeltaTime();
 			}
 			//Input,AI
 			{
@@ -391,7 +431,7 @@ namespace FPS_n2 {
 					if (!c->IsAttacking()) { continue; }
 					if (c->GetGuardOn()) { continue; }
 #ifdef DEBUG
-					printfDx("[%f]\n", c->GetWeaponPtr()->GetMoveSpeed());
+					//printfDx("[%f]\n", c->GetWeaponPtr()->GetMoveSpeed());
 #endif
 					Vector3DX StartPos = c->GetWeaponPtr()->GetMove().GetPos();
 					Vector3DX EndPos = c->GetWeaponPtr()->GetFramePosition(WeaponObject::WeaponFrame::End);
@@ -444,7 +484,7 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(0, 0);
 				this->m_UIclass.SetIntParam(1, 0);
 				//timer
-				this->m_UIclass.SetfloatParam(0, 0.f);
+				this->m_UIclass.SetfloatParam(0, m_Timer);
 				//S””
 				this->m_UIclass.SetIntParam(2, static_cast<int>(Chara->GetHeartRate()));
 				this->m_UIclass.SetfloatParam(1, Chara->GetHeartRatePow());
@@ -574,6 +614,21 @@ namespace FPS_n2 {
 				//UI
 				if (!DXDraw::Instance()->IsPause()) {
 					this->m_UIclass.Draw();
+					if (!m_isTraining) {
+						auto* DrawParts = DXDraw::Instance();
+						int xp1 = DrawParts->GetUIY(1929/2);
+						int yp1 = DrawParts->GetUIY(240);
+
+						if ((m_GameStartAlpha * 255.f) > 1.f) {
+							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameStartAlpha), 0, 255));
+							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+							WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+								&m_GameStart, xp1, yp1, m_GameStartScale,0.f, true);
+							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						}
+
+					}
 				}
 			}
 		}

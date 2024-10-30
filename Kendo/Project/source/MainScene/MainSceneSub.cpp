@@ -79,17 +79,19 @@ namespace FPS_n2 {
 			ButtonParts->Dispose();
 		}
 		//
-		void FadeControl::SetFadeIn(void) noexcept {
+		void FadeControl::SetFadeIn(float Per) noexcept {
 			this->m_IsBlackOut = false;
 			this->m_BlackOutAlpha = 1.f;
+			this->m_BlackOutPower = Per;
 		}
-		void FadeControl::SetFadeOut(void) noexcept {
+		void FadeControl::SetFadeOut(float Per) noexcept {
 			this->m_IsBlackOut = true;
 			this->m_BlackOutAlpha = 0.f;
+			this->m_BlackOutPower = Per;
 		}
 		void FadeControl::UpdateFade(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
-			this->m_BlackOutAlpha = std::clamp(this->m_BlackOutAlpha + (this->m_IsBlackOut ? 1.f : -1.f) / DrawParts->GetFps() / 0.5f, 0.f, 1.f);
+			this->m_BlackOutAlpha = std::clamp(this->m_BlackOutAlpha + (this->m_IsBlackOut ? 1.f : -1.f) / DrawParts->GetFps() * this->m_BlackOutPower, 0.f, 1.f);
 		}
 		void FadeControl::DrawFade(void) const noexcept {
 			auto* DrawParts = DXDraw::Instance();
