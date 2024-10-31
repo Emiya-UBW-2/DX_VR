@@ -19,7 +19,7 @@ namespace FPS_n2 {
 			}
 			//UI
 			this->m_UIclass.Load();
-			PauseMenuControl::LoadPause();
+			m_PauseMenuControl.LoadPause();
 			HitMark::Instance()->Load();
 			//
 			m_GameStart.Load("data/UI/GameStart.png");
@@ -72,7 +72,7 @@ namespace FPS_n2 {
 			this->m_DamageEvents.clear();
 			auto* NetBrowser = NetWorkBrowser::Instance();
 			NetBrowser->Init();
-			PauseMenuControl::SetPause();
+			m_PauseMenuControl.SetPause();
 			FadeControl::SetFadeIn(2.f);
 			this->m_IsEnd = false;
 			HitMark::Instance()->Set();
@@ -121,8 +121,8 @@ namespace FPS_n2 {
 #else
 			//PostPassParts->SetLevelFilter(38, 154, 1.f);
 #endif
-			PauseMenuControl::UpdatePause();
-			if (PauseMenuControl::IsRetire()) {
+			m_PauseMenuControl.UpdatePause();
+			if (m_PauseMenuControl.IsRetire()) {
 				this->m_IsEnd = true;
 			}
 			if (this->m_IsEnd) {
@@ -137,12 +137,27 @@ namespace FPS_n2 {
 				FadeControl::UpdateFade();
 			}
 
+			if (GetIsFirstLoop()) {
+				//SE->Get(static_cast<int>(SoundEnum::Environment)).Play(0, DX_PLAYTYPE_LOOP, TRUE);
+				if (m_isTraining) {
+					m_IsEventSceneFlag = true;
+					m_EventSelect = "data/Cut/Cut1.txt";
+				}
+				else {
+					m_IsEventSceneFlag = true;
+					m_EventSelect = "data/Cut/Cut3.txt";
+				}
+			}
+
 			auto& Chara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 
 			auto* Pad = PadControl::Instance();
 			Pad->SetMouseMoveEnable(true);
 			Pad->ChangeGuide(
 				[this]() {
+					if (m_IsEventSceneFlag) {
+						return;
+					}
 					auto* KeyGuide = PadControl::Instance();
 					if (DXDraw::Instance()->IsPause()) {
 						KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9992));
@@ -153,6 +168,7 @@ namespace FPS_n2 {
 					}
 					else {
 						if (m_IsEventSceneActive) {
+							KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9914));
 						}
 						else {
 							KeyGuide->AddGuide(PADS::MOVE_W, "");
@@ -192,6 +208,9 @@ namespace FPS_n2 {
 				}
 			}
 			if (m_IsEventSceneActive) {
+				if (Pad->GetKey(PADS::INTERACT).trigger()) {
+					m_EventScene.Skip();
+				}
 				if (m_EventScene.IsEnd()) {
 					DrawParts->SetDistortionPer(120.f);
 					FadeControl::SetFadeIn(m_isTraining ? 2.f : 0.5f);
@@ -213,22 +232,11 @@ namespace FPS_n2 {
 			DebugParts->SetPoint("Execute=Start");
 #endif // DEBUG
 			//FirstDoingv
-			if (GetIsFirstLoop()) {
-				//SE->Get(static_cast<int>(SoundEnum::Environment)).Play(0, DX_PLAYTYPE_LOOP, TRUE);
-				if (m_isTraining) {
-					m_IsEventSceneFlag = true;
-					m_EventSelect = "data/Cut/Cut1.txt";
-				}
-				else {
-					m_IsEventSceneFlag = true;
-					m_EventSelect = "data/Cut/Cut3.txt";
-				}
-			}
 			if (!m_isTraining) {
 				if (m_GameStartTimer > 0.f) {
 					float Per = std::clamp((0.8f - m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
 					m_GameStartAlpha = Lerp(0.f, 1.f, Per);
-					m_GameStartScale = Lerp(5.f, 1.0f, Per);
+					m_GameStartScale = Lerp(0.f, 1.0f, Per);
 				}
 				else if (m_GameStartTimer > 0.f - 1.f) {
 					float Per = std::clamp((0.f - m_GameStartTimer), 0.f, 1.f);//0to1
@@ -238,7 +246,7 @@ namespace FPS_n2 {
 				else if (m_GameStartTimer > -1.f - 0.2f) {
 					float Per = std::clamp((-1.f - m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
 					m_GameStartAlpha = Lerp(1.f, 0.f, Per);
-					m_GameStartScale = Lerp(1.1f, 0.f, Per);
+					m_GameStartScale = Lerp(1.1f, 5.f, Per);
 				}
 				else {
 					m_GameStartAlpha = 0.f;
@@ -534,7 +542,7 @@ namespace FPS_n2 {
 			this->m_UIclass.Dispose();
 			PlayerMngr->Dispose();
 			ObjectManager::Instance()->DeleteAll();
-			PauseMenuControl::DisposePause();
+			m_PauseMenuControl.DisposePause();
 			HitMark::Instance()->Dispose();
 		}
 
@@ -632,11 +640,11 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void MainGameScene::DrawUI_In_Sub(void) const noexcept		{
+		void MainGameScene::DrawUI_In_Sub(void) const noexcept {
 			if (!m_IsEventSceneActive) {
 				//UI
 				if (DXDraw::Instance()->IsPause()) {
-					PauseMenuControl::DrawPause();
+					m_PauseMenuControl.DrawPause();
 				}
 				//í êMê›íË
 				//auto* NetBrowser = NetWorkBrowser::Instance();

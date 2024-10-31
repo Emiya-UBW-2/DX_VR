@@ -874,6 +874,8 @@ namespace FPS_n2 {
 		m_RandcamupBuf = Vector3DX::zero();
 		m_RandcamvecBuf = Vector3DX::zero();
 		m_RandcamposBuf = Vector3DX::zero();
+		m_isSkip = false;
+		Black_Skip = 0.f;
 
 		m_BaseTime = GetNowHiPerformanceCount();
 		m_NowTime = (m_Counter != 0) ? m_CutInfo[m_Counter - 1].GetTimeLimit() : 0;
@@ -938,6 +940,12 @@ namespace FPS_n2 {
 				}
 				CutInfo.UpdateCam(&DrawParts->SetMainCamera());
 			}
+			if (m_isSkip) {
+				Easing(&Black_Skip, 1.f, 0.9f, EasingType::OutExpo);
+				if (Black_Skip >= 0.999f) {
+					Black_Skip = 1.f;
+				}
+			}
 			//
 			auto far_t = DrawParts->SetMainCamera().GetCamFar();
 			PostPassEffect::Instance()->Set_DoFNearFar(1.f * Scale3DRate, far_t / 2, 0.5f * Scale3DRate, far_t);
@@ -982,14 +990,7 @@ namespace FPS_n2 {
 	}
 	void			EventScene::MainDraw(void) const noexcept {
 		if (IsEnd()) { return; }
-		auto* DrawParts = DXDraw::Instance();
-		auto camfar = GetCameraFar();
-		if (DrawParts->GetMainCamera().GetCamFar() - 1.f < camfar && camfar < DrawParts->GetMainCamera().GetCamFar() + 1.f) {
-			m_ModelControl.Draw(false, false, false, FALSE);
-		}
-		else {
-			m_ModelControl.Draw(false, false, false, TRUE);
-		}
+		m_ModelControl.Draw(false, false, false, FALSE);
 	}
 	void			EventScene::UIDraw() const noexcept {
 		//if (IsEnd()) { return; }
@@ -1007,6 +1008,13 @@ namespace FPS_n2 {
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * White_Buf));
 			DrawBox(0, 0, DrawParts->GetScreenX(1920), DrawParts->GetScreenY(1920), GetColor(255, 255, 255), TRUE);
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+		}
+		if (m_isSkip) {
+			if (Black_Skip != 0.f) {
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * Black_Skip));
+				DrawBox(0, 0, DrawParts->GetScreenX(1920), DrawParts->GetScreenY(1920), GetColor(0, 0, 0), TRUE);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+			}
 		}
 
 		SetDrawMode(DX_DRAWMODE_BILINEAR);

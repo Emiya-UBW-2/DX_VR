@@ -721,11 +721,18 @@ namespace FPS_n2 {
 		int				m_count{ 0 };
 
 		int NowCut = 0;
+
+		bool			m_isSkip = false;
+		float			Black_Skip{ 0.f };
 	private:
 		//スクリプト読み込み処理
 		bool			LoadOnce(std::string_view func_t) noexcept;
 	public:
-		auto			IsEnd() const noexcept { return (m_Counter >= m_CutInfo.size()); }
+		auto			IsEnd() const noexcept { return (m_Counter >= m_CutInfo.size()) || (m_isSkip && (Black_Skip>=1.f)); }
+	public:
+		void			Skip() noexcept {
+			m_isSkip = true;
+		}
 	public:
 		void			Load(const char* Path) noexcept;
 		void			Start(void) noexcept;

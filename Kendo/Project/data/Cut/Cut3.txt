@@ -5,13 +5,18 @@
 		SetArg(Kendo, "data/MovieModel/Chara/model.pmx");
 		SetArg(Bamboo, "data/MovieModel/Bamboo/model.pmx");
 
+		SetArg(Suit, "data/MovieModel/Suit/model.pmx");
+
 		SetArg(Stage, "data/model/map/model_DISABLE.mv1");
 		SetArg(Sky, "data/model/sky/model.mv1");
 //ÉÇÉfÉãì«Ç›çûÇ›
-		LoadModel(Kendo, 2);
-		LoadModel(Bamboo, 2);
 		LoadModel(Stage, 1);
 		LoadModel(Sky, 1);
+
+		LoadModel(Kendo, 2);
+		LoadModel(Bamboo, 2);
+
+		LoadModel(Suit, 3);
 
 		LoadGraph(KenPic, 1, 960,540, 0.0, 1.0, 0.35);
 		LoadGraph(SinPic, 1, 960,540, 0.0, 1.0, 0.35);
@@ -44,6 +49,20 @@
 
 			SetDrawModel(Sky, 0, 15);
 			SetModelMat(Sky, 0, 0.0, 0.0, -0.001, 0.0, 0.0);
+
+
+			SetDrawModel(Suit, 0, 15);
+			SetModelMat(Suit, 0, -90.0, -50.0, 0.0, 0.0, 0.0);
+			SetModelAnime(Suit, 0, 0, FALSE, 1.0, 0);
+
+			SetDrawModel(Suit, 1, 15);
+			SetModelMat(Suit, 1, -210.0, 30.0, 0.0, -45.0, 0.0);
+			SetModelAnime(Suit, 1, 0, FALSE, 1.0, 0);
+
+			SetDrawModel(Suit, 2, 15);
+			SetModelMat(Suit, 2, 30.0, 30.0, 0.0, 45.0, 0.0);
+			SetModelAnime(Suit, 2, 0, FALSE, 1.0, 0);
+
 
 			SetDrawModel(Kendo, 0, 15);
 			SetModelMat(Kendo, 0, 0.0, 0.0, 0.0, 35.0, 0.0);

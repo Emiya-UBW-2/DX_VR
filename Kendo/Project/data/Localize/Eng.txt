@@ -119,3 +119,4 @@
 9907=Dou(Torso)
 9908=Kote(Right Arm)
 9913=Pause
+9914=Skip Movie
