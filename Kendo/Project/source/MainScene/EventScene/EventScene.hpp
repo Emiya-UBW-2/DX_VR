@@ -563,11 +563,16 @@ namespace FPS_n2 {
 				model.resize(model.size() + 1);
 				return &(model.back());
 			}
-			void			Update(size_t Counter, bool isFirstLoop) noexcept {
+			void			Update(size_t Counter, bool isFirstLoop, bool isPlay) noexcept {
 				auto* SE = SoundPool::Instance();
 				for (auto& m : model) {
-					if (m.m_PlayCounter == Counter && isFirstLoop) {
-						SE->Get((int)m.m_SoundEnum).Play(0, DX_PLAYTYPE_BACK, TRUE);
+					if ((m.m_PlayCounter == Counter && isFirstLoop) || isPlay) {
+						if (!SE->Get((int)m.m_SoundEnum).GetHandles().at(0)->handle.back().CheckPlay()) {
+							SE->Get((int)m.m_SoundEnum).GetHandles().at(0)->handle.back().Play(DX_PLAYTYPE_BACK, FALSE);
+						}
+						else {
+							SE->Get((int)m.m_SoundEnum).GetHandles().at(0)->handle.back().Stop();
+						}
 					}
 				}
 			}

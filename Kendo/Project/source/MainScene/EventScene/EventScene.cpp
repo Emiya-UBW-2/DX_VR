@@ -904,54 +904,61 @@ namespace FPS_n2 {
 
 			if (IsEnd()) { return; }
 			//カットの処理
-			{
-				m_PosCamCut.Update(m_Counter);
-				m_ModelControl.FirstUpdate(m_Counter, isFirstLoop, ResetPhysics);
-				m_GraphControl.FirstUpdate(m_Counter, isFirstLoop);
-				m_SEControl.Update(m_Counter, isFirstLoop);
-				auto& CutInfo = m_CutInfo[m_Counter];
-				auto& CutInfoUpdate = m_CutInfoUpdate[m_Counter];
-				if (isFirstLoop) {
-					if (m_Counter > 0) {
-						CutInfo.SetPrev(m_CutInfo[m_Counter - 1]);
-					}
-					CutInfoUpdate.SetupByPrev(m_CutInfoUpdate[m_Counter - 1]);
-					CutInfo.SetUpFog();
-					//
-					Vector3DX vec;
-					if (CutInfo.GetForcusCenter(&vec, m_ModelControl)) {
-						CutInfo.Aim_camera.SetCamPos(CutInfo.Aim_camera.GetCamPos(), vec, CutInfo.Aim_camera.GetCamUp());
-					}
-					if (CutInfo.isResetRandCampos) { m_RandcamposBuf = Vector3DX::zero(); }
-					if (CutInfo.isResetRandCamvec) { m_RandcamvecBuf = Vector3DX::zero(); }
-					if (CutInfo.isResetRandCamup) { m_RandcamupBuf = Vector3DX::zero(); }
+			if (DXDraw::Instance()->IsPauseSwitch()) {
+				printfDx("AAAA\n");
+			}
+			m_SEControl.Update(m_Counter, isFirstLoop, DXDraw::Instance()->IsPauseSwitch());
+			if (!DXDraw::Instance()->IsPause()) {
+				{
+					m_PosCamCut.Update(m_Counter);
+					m_ModelControl.FirstUpdate(m_Counter, isFirstLoop, ResetPhysics);
+					m_GraphControl.FirstUpdate(m_Counter, isFirstLoop);
+					auto& CutInfo = m_CutInfo[m_Counter];
+					auto& CutInfoUpdate = m_CutInfoUpdate[m_Counter];
+					if (isFirstLoop) {
+						if (m_Counter > 0) {
+							CutInfo.SetPrev(m_CutInfo[m_Counter - 1]);
+						}
+						CutInfoUpdate.SetupByPrev(m_CutInfoUpdate[m_Counter - 1]);
+						CutInfo.SetUpFog();
+						//
+						Vector3DX vec;
+						if (CutInfo.GetForcusCenter(&vec, m_ModelControl)) {
+							CutInfo.Aim_camera.SetCamPos(CutInfo.Aim_camera.GetCamPos(), vec, CutInfo.Aim_camera.GetCamUp());
+						}
+						if (CutInfo.isResetRandCampos) { m_RandcamposBuf = Vector3DX::zero(); }
+						if (CutInfo.isResetRandCamvec) { m_RandcamvecBuf = Vector3DX::zero(); }
+						if (CutInfo.isResetRandCamup) { m_RandcamupBuf = Vector3DX::zero(); }
 
-					if (m_PosCamCut.GetisActive()) {
-						CutInfo.Aim_camera.SetCamPos(CutInfo.Aim_camera.GetCamVec() + m_PosCam[m_PosCamCut.GetNowCut()], CutInfo.Aim_camera.GetCamVec(), CutInfo.Aim_camera.GetCamUp());
+						if (m_PosCamCut.GetisActive()) {
+							CutInfo.Aim_camera.SetCamPos(CutInfo.Aim_camera.GetCamVec() + m_PosCam[m_PosCamCut.GetNowCut()], CutInfo.Aim_camera.GetCamVec(), CutInfo.Aim_camera.GetCamUp());
+						}
+						CutInfoUpdate.ResetCam(CutInfo.Aim_camera);
 					}
-					CutInfoUpdate.ResetCam(CutInfo.Aim_camera);
+					else {
+						CutInfoUpdate.Update(CutInfo, &m_RandcamupBuf, &m_RandcamvecBuf, &m_RandcamposBuf, &Black_Buf, &White_Buf, m_ModelControl);
+						//
+						if (m_PosCamCut.GetisActive()) {
+							CutInfo.Aim_camera.SetCamPos(CutInfo.Aim_camera.GetCamVec() + m_PosCam[m_PosCamCut.GetNowCut()], CutInfo.Aim_camera.GetCamVec(), CutInfo.Aim_camera.GetCamUp());
+						}
+					}
+					CutInfo.UpdateCam(&DrawParts->SetMainCamera());
 				}
-				else {
-					CutInfoUpdate.Update(CutInfo, &m_RandcamupBuf, &m_RandcamvecBuf, &m_RandcamposBuf, &Black_Buf, &White_Buf, m_ModelControl);
-					//
-					if (m_PosCamCut.GetisActive()) {
-						CutInfo.Aim_camera.SetCamPos(CutInfo.Aim_camera.GetCamVec() + m_PosCam[m_PosCamCut.GetNowCut()], CutInfo.Aim_camera.GetCamVec(), CutInfo.Aim_camera.GetCamUp());
+				if (m_isSkip) {
+					Easing(&Black_Skip, 1.f, 0.9f, EasingType::OutExpo);
+					if (Black_Skip >= 0.999f) {
+						Black_Skip = 1.f;
 					}
 				}
-				CutInfo.UpdateCam(&DrawParts->SetMainCamera());
+				//
+				auto far_t = DrawParts->SetMainCamera().GetCamFar();
+				PostPassEffect::Instance()->Set_DoFNearFar(1.f * Scale3DRate, far_t / 2, 0.5f * Scale3DRate, far_t);
 			}
-			if (m_isSkip) {
-				Easing(&Black_Skip, 1.f, 0.9f, EasingType::OutExpo);
-				if (Black_Skip >= 0.999f) {
-					Black_Skip = 1.f;
-				}
-			}
-			//
-			auto far_t = DrawParts->SetMainCamera().GetCamFar();
-			PostPassEffect::Instance()->Set_DoFNearFar(1.f * Scale3DRate, far_t / 2, 0.5f * Scale3DRate, far_t);
 		}
 		//経過時間測定
-		m_NowTime += (LONGLONG)((float)deltatime);
+		if (!DXDraw::Instance()->IsPause()) {
+			m_NowTime += (LONGLONG)((float)deltatime);
+		}
 	}
 	void			EventScene::Dispose(void) noexcept {
 		m_Variable.Dispose();

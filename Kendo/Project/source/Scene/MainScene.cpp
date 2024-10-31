@@ -200,14 +200,6 @@ namespace FPS_n2 {
 
 			if (m_IsEventSceneActive) {
 				m_EventScene.GetDeltaTime();
-			}
-			if (DXDraw::Instance()->IsPause()) {
-				Pad->SetMouseMoveEnable(false);
-				if (!m_NetWorkController) {
-					return true;
-				}
-			}
-			if (m_IsEventSceneActive) {
 				if (Pad->GetKey(PADS::INTERACT).trigger()) {
 					m_EventScene.Skip();
 				}
@@ -224,6 +216,12 @@ namespace FPS_n2 {
 				}
 				m_EventScene.Update();
 				return true;
+			}
+			if (DXDraw::Instance()->IsPause()) {
+				Pad->SetMouseMoveEnable(false);
+				if (!m_NetWorkController) {
+					return true;
+				}
 			}
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
@@ -641,11 +639,11 @@ namespace FPS_n2 {
 			}
 		}
 		void MainGameScene::DrawUI_In_Sub(void) const noexcept {
+			//UI
+			if (DXDraw::Instance()->IsPause()) {
+				m_PauseMenuControl.DrawPause();
+			}
 			if (!m_IsEventSceneActive) {
-				//UI
-				if (DXDraw::Instance()->IsPause()) {
-					m_PauseMenuControl.DrawPause();
-				}
 				//通信設定
 				//auto* NetBrowser = NetWorkBrowser::Instance();
 				//NetBrowser->Draw();
