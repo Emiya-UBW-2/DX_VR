@@ -93,22 +93,22 @@ namespace FPS_n2 {
 			{
 				auto* DrawParts = DXDraw::Instance();
 				if (CheckHitKeyWithCheck(KEY_INPUT_1) != 0) {
-					m_D1 = std::clamp(m_D1 - 0.1f * 1.f / DrawParts->GetFps(), 0.f, 1.f);
+					m_D1 = std::clamp(m_D1 - 0.1f * DrawParts->GetDeltaTime(), 0.f, 1.f);
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_2) != 0) {
-					m_D1 = std::clamp(m_D1 + 0.1f * 1.f / DrawParts->GetFps(), 0.f, 1.f);
+					m_D1 = std::clamp(m_D1 + 0.1f * DrawParts->GetDeltaTime(), 0.f, 1.f);
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_3) != 0) {
-					m_D2 = std::clamp(m_D2 - 0.1f * 1.f / DrawParts->GetFps(), 0.f, 1.f);
+					m_D2 = std::clamp(m_D2 - 0.1f * DrawParts->GetDeltaTime(), 0.f, 1.f);
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_4) != 0) {
-					m_D2 = std::clamp(m_D2 + 0.1f * 1.f / DrawParts->GetFps(), 0.f, 1.f);
+					m_D2 = std::clamp(m_D2 + 0.1f * DrawParts->GetDeltaTime(), 0.f, 1.f);
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_5) != 0) {
-					m_D3 = std::clamp(m_D3 - 0.1f * 1.f / DrawParts->GetFps(), 1.f, 10.f);
+					m_D3 = std::clamp(m_D3 - 0.1f * DrawParts->GetDeltaTime(), 1.f, 10.f);
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_6) != 0) {
-					m_D3 = std::clamp(m_D3 + 0.1f * 1.f / DrawParts->GetFps(), 1.f, 10.f);
+					m_D3 = std::clamp(m_D3 + 0.1f * DrawParts->GetDeltaTime(), 1.f, 10.f);
 				}
 				printfDx("Dif[%5.2f]\n", m_D1*255.f);
 				printfDx("Spc[%5.2f]\n", m_D2*255.f);
@@ -150,6 +150,13 @@ namespace FPS_n2 {
 			}
 
 			auto& Chara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+
+			//UIパラメーター
+			if (GetIsFirstLoop()) {
+				this->m_UIclass.InitGaugeParam(0, static_cast<int>(Chara->GetYaTimerMax() * 10.f), static_cast<int>(Chara->GetYaTimerMax() * 10.f));
+				this->m_UIclass.InitGaugeParam(1, static_cast<int>(Chara->GetStaminaMax() * 10000.f), static_cast<int>(Chara->GetStaminaMax() * 10000.f));
+				this->m_UIclass.InitGaugeParam(2, static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f));
+			}
 
 			auto* Pad = PadControl::Instance();
 			Pad->SetMouseMoveEnable(true);
@@ -476,16 +483,11 @@ namespace FPS_n2 {
 					Easing(&m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
 				}
 				DrawParts->Set_Per_Blackout(m_ConcussionPer * 2.f);
-				m_Concussion = std::max(m_Concussion - 1.f / DrawParts->GetFps(), 0.f);
+				m_Concussion = std::max(m_Concussion - DrawParts->GetDeltaTime(), 0.f);
 			}
 			BackGround->Execute();
 			//UIパラメーター
 			{
-				if (GetIsFirstLoop()) {
-					this->m_UIclass.InitGaugeParam(0, static_cast<int>(0.f), static_cast<int>(Chara->GetYaTimerMax()));
-					this->m_UIclass.InitGaugeParam(1, static_cast<int>(Chara->GetStaminaMax()), static_cast<int>(Chara->GetStaminaMax()));
-					this->m_UIclass.InitGaugeParam(0, static_cast<int>(0.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax()));
-				}
 				//NvsN
 				this->m_UIclass.SetIntParam(0, 0);
 				this->m_UIclass.SetIntParam(1, 0);
@@ -495,9 +497,9 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(2, static_cast<int>(Chara->GetHeartRate()));
 				this->m_UIclass.SetfloatParam(1, Chara->GetHeartRatePow());
 				//ゲージ
-				this->m_UIclass.SetGaugeParam(0, static_cast<int>((Chara->GetYaTimerMax() - Chara->GetYaTimer()) * 10000.f), static_cast<int>(Chara->GetYaTimerMax() * 10000.f), 15);
+				this->m_UIclass.SetGaugeParam(0, static_cast<int>((Chara->GetYaTimerMax() - Chara->GetYaTimer()) * 10.f), static_cast<int>(Chara->GetYaTimerMax() * 10.f), 2);
 				this->m_UIclass.SetGaugeParam(1, static_cast<int>(Chara->GetStamina() * 10000.f), static_cast<int>(Chara->GetStaminaMax() * 10000.f), 15);
-				this->m_UIclass.SetGaugeParam(2, static_cast<int>((Chara->GetGuardCoolDownTimer()) * 100.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f), 0);
+				this->m_UIclass.SetGaugeParam(2, static_cast<int>((Chara->GetGuardCoolDownTimerMax() - Chara->GetGuardCoolDownTimer()) * 100.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f), 0);
 			}
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=0.7ms");

@@ -1,0 +1,10 @@
+
+プレイヤーモデル改造元(着せ替え用スーツ)=フラン様
+サウンド素材(Oculus Audio Pack 1)=Meta様
+サウンド素材=効果音ラボ様
+UI用気迫素材(nc303750)=NALL様
+UI用アイコン=icooon-mono.com様
+キーボードのアイコン=Digipot様
+マネージャー(VOICEROID2 紲星あかり)=AHS様
+顧問(VOICEPEAK 桜乃そら)=AHS様
+DXライブラリ=山田巧様

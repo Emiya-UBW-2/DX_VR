@@ -202,7 +202,7 @@ namespace FPS_n2 {
 				}
 				//‚à‚ç‚¦‚Ä‚È‚¢
 				else {
-					m_CannotConnectTimer += 1.f / DrawParts->GetFps();
+					m_CannotConnectTimer += DrawParts->GetDeltaTime();
 					if (this->m_CannotConnectTimer > 1.f) {
 						m_CannotConnectTimer -= 1.f;
 						++this->m_NetWorkSel;

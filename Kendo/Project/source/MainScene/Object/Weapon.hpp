@@ -50,7 +50,7 @@ namespace FPS_n2 {
 
 			void			FirstExecute(void) noexcept override {
 				auto* DrawParts = DXDraw::Instance();
-				m_UpperAnim += 1.f / DrawParts->GetFps();
+				m_UpperAnim += DrawParts->GetDeltaTime();
 
 				for (int i = 0, num = GetObj().GetMaterialNum(); i < num; ++i) {
 					GetObj().SetMaterialDifColor(i, GetColorF(1.f, 1.f, 1.f, 1.f));

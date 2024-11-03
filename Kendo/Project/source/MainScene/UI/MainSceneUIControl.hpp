@@ -19,8 +19,8 @@ namespace FPS_n2 {
 					this->m_Now = value;
 					this->m_Max = Max;
 					if (Rate > 0) {
-						float Limit = static_cast<float>(this->m_Max / Rate) * 1.5f;
-						this->m_Buffer += std::clamp(static_cast<float>(static_cast<float>(this->m_Now) - this->m_Buffer) * static_cast<float>(this->m_Max / Rate), -Limit, Limit) / DrawParts->GetFps();
+						float Limit = static_cast<float>(this->m_Max / Rate);
+						this->m_Buffer += std::clamp(static_cast<float>(static_cast<float>(this->m_Now) - this->m_Buffer) * Limit, -Limit * 1.5f, Limit * 1.5f) * DrawParts->GetDeltaTime();
 					}
 					else {
 						this->m_Buffer = static_cast<float>(this->m_Now);
@@ -144,7 +144,7 @@ namespace FPS_n2 {
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
-				const auto		GetGaugeDiff() const noexcept { return (float)this->m_Now - std::min((float)this->m_Max, this->m_Buffer); }
+				const auto	GetGaugeBuff() const noexcept { return static_cast<int>(this->m_Buffer + 0.5f); }
 				const auto& GetGauge() const noexcept { return this->m_Now; }
 				const auto& GetGaugeMax() const noexcept { return this->m_Max; }
 
@@ -254,6 +254,7 @@ namespace FPS_n2 {
 			//std::array<std::unique_ptr<GaugeMask>, 2 + 3>	m_GaugeMask;
 
 			GraphHandle						m_HeartIcon;
+			GraphHandle						m_Kiai;
 		public:
 			UIClass(void) noexcept {}
 			UIClass(const UIClass&) = delete;
@@ -265,28 +266,46 @@ namespace FPS_n2 {
 		public:
 			void			Load(void) noexcept {
 				m_HeartIcon.Load("data/UI/Heart.png");
+				m_Kiai.Load("data/UI/Kiai.png");
 			}
 			void			Dispose(void) noexcept {
 				m_HeartIcon.Dispose();
+				m_Kiai.Dispose();
 			}
 			void			Set(void) noexcept {
 			}
 			void			Draw(void) const noexcept {
 				auto* DrawParts = DXDraw::Instance();
+				//気合
+				{
+					float radius = Lerp(static_cast<float>(1.f), static_cast<float>(1.01f), floatParam[1]);
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
+						255, 150, 155);
+					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255 * (m_GaugeParam[0].GetGaugeMax() - m_GaugeParam[0].GetGaugeBuff()) / m_GaugeParam[0].GetGaugeMax());
+					WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Kiai,
+						static_cast<int>(DrawParts->GetUIXMax() / 2 - DrawParts->GetUIXMax() / 2 * radius),
+						static_cast<int>(DrawParts->GetUIYMax() / 2 - DrawParts->GetUIYMax() / 2 * radius),
+						static_cast<int>(DrawParts->GetUIXMax() / 2 + DrawParts->GetUIXMax() / 2 * radius),
+						static_cast<int>(DrawParts->GetUIYMax() / 2 + DrawParts->GetUIYMax() / 2 * radius),
+						true);
+					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
+						255, 255, 255);
+				}
 				int xp1, yp1;
 				//タイム,スコア
 				{
 					xp1 = DrawParts->GetUIY(30);
 					yp1 = DrawParts->GetUIY(10);
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32), 
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
 						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32), 
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
 						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + DrawParts->GetUIY(240), yp1, White, Black, "%d:%05.2f",
 						static_cast<int>(floatParam[0] / 60.f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
 
 					xp1 = DrawParts->GetUIY(1920 / 2);
 					yp1 = DrawParts->GetUIY(10);
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32), 
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
 						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "%d : %d", intParam[0], intParam[1]);
 				}
 				//情報
@@ -302,38 +321,39 @@ namespace FPS_n2 {
 							255, 0, 0);
 						WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
 							&m_HeartIcon, xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
-						WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 
+						WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
 							255, 255, 255);
 						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24), 
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
 						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
 
 					//気合
-					xp1 = DrawParts->GetUIY(24);
+					xp1 = DrawParts->GetUIY(24 + 9 * 2);
 					yp1 = DrawParts->GetUIY(1080 - 96);
 
 					m_GaugeParam[0].DrawGauge(
-						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(12),
+						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(6),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
+
 					//スタミナ
-					xp1 = DrawParts->GetUIY(24);
+					xp1 = DrawParts->GetUIY(24 + 9 * 1);
 					yp1 = DrawParts->GetUIY(1080 - 96 + 18);
 
 					m_GaugeParam[1].DrawGauge(
-						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(12),
+						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(6),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
 
 					//スタミナ
-					xp1 = DrawParts->GetUIY(24);
-					yp1 = DrawParts->GetUIY(1080 - 96 + 18*2);
+					xp1 = DrawParts->GetUIY(24 + 9 * 0);
+					yp1 = DrawParts->GetUIY(1080 - 96 + 18 * 2);
 
 					m_GaugeParam[2].DrawGauge(
-						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(12),
+						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(6),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);

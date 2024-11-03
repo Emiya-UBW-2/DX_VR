@@ -34,7 +34,7 @@ namespace FPS_n2 {
 			bool shotSub_Key{ false };
 			float pp_x{ 0.f }, pp_y{ 0.f };
 
-			m_Counter += 1.f / DrawParts->GetFps();
+			m_Counter += DrawParts->GetDeltaTime();
 			if (m_Counter > 5.f) {
 				m_Counter -= 5.f;
 			}

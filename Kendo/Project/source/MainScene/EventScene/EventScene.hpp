@@ -271,7 +271,7 @@ namespace FPS_n2 {
 					}
 					prevID = ID;
 					Sel_AnimNum(this->obj, ID, AnimChange);
-					AnimChange = std::clamp(AnimChange + 1.f / DrawParts->GetFps(), 0.f, 1.f);
+					AnimChange = std::clamp(AnimChange + DrawParts->GetDeltaTime(), 0.f, 1.f);
 					if (ID < this->obj.GetAnimNum()) {
 						this->obj.SetAnim(ID).Update(isloop, speed);
 					}

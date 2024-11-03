@@ -137,7 +137,7 @@ namespace FPS_n2 {
 					h.m_Pos2D = h.m_Pos2D * ((float)DrawParts->GetUIY(1080) / (float)DrawParts->GetScreenY(1080));
 				}
 			}
-			h.Time = std::max(h.Time - 1.f / DrawParts->GetFps(), 0.f);
+			h.Time = std::max(h.Time - DrawParts->GetDeltaTime(), 0.f);
 		}
 	}
 	void HitMark::Draw(void) noexcept {

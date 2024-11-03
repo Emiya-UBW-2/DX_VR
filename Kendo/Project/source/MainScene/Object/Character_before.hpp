@@ -86,21 +86,22 @@ namespace FPS_n2 {
 				this->m_HeartRate_r += HeartRateUp * ((HeartRateUp > 0.f) ? std::clamp((1.f - (this->m_HeartRate - HeartRateMin) / (HeartRateMax - HeartRateMin)), 0.f, 1.f) : 1.f);
 				this->m_HeartRate_r = std::clamp(this->m_HeartRate_r, HeartRateMin, HeartRateMax);
 				if (this->m_HeartRate < this->m_HeartRate_r) {
-					this->m_HeartRate += 5.f / DrawParts->GetFps();
+					this->m_HeartRate += 5.f * DrawParts->GetDeltaTime();
 				}
 				else if (this->m_HeartRate >= this->m_HeartRate_r) {
-					this->m_HeartRate -= 5.f / DrawParts->GetFps();
+					this->m_HeartRate -= 5.f * DrawParts->GetDeltaTime();
 				}
 				this->m_HeartRate = std::clamp(this->m_HeartRate, HeartRateMin, HeartRateMax);
 
-				this->m_HeartRateRad += deg2rad(this->m_HeartRate) / DrawParts->GetFps();
+				this->m_HeartRateRad += deg2rad(this->m_HeartRate) * DrawParts->GetDeltaTime();
 				if (this->m_HeartRateRad >= DX_PI_F * 2) { this->m_HeartRateRad -= DX_PI_F * 2; }
 				if (
 					(deg2rad(0) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(10)) ||
 					(deg2rad(60) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(70)) ||
 					(deg2rad(120) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(130)) ||
 					(deg2rad(180) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(190)) ||
-					(deg2rad(240) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(250))
+					(deg2rad(240) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(250)) ||
+					(deg2rad(300) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(310))
 					) {
 					if (!this->m_HeartSoundFlag) {
 						this->m_HeartSoundFlag = true;
@@ -114,7 +115,7 @@ namespace FPS_n2 {
 					Easing(&this->m_HeartRatePow, 0.f, 0.95f, EasingType::OutExpo);
 				}
 
-				this->m_Stamina += std::clamp((HeartRateStamona - this->m_HeartRate) / (HeartRateStamona - HeartRateMin), -2.5f, 2.5f) / DrawParts->GetFps();
+				this->m_Stamina += std::clamp((HeartRateStamona - this->m_HeartRate) / (HeartRateStamona - HeartRateMin), -2.5f, 2.5f) * DrawParts->GetDeltaTime();
 				this->m_Stamina = std::clamp(this->m_Stamina, 0.f, StaminaMax);
 
 				if (this->m_Stamina <= 0.f) {
@@ -204,7 +205,7 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				Vector3DX vecBuf = Matrix3x3DX::Vtrans(m_VecTotal, Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_yrad_Upper));
 				if (m_MoverPer > 0.f) {
-					vecBuf = vecBuf.normalized() * (GetSpeedPer() * Frame_Rate / DrawParts->GetFps());
+					vecBuf = vecBuf.normalized() * (GetSpeedPer() * Frame_Rate * DrawParts->GetDeltaTime());
 				}
 				return vecBuf;
 			}
@@ -263,12 +264,12 @@ namespace FPS_n2 {
 				auto akey = this->m_Input.GetPADSPress(PADS::MOVE_A) && !(m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking);
 				auto dkey = this->m_Input.GetPADSPress(PADS::MOVE_D) && !(m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking);
 
-				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (wkey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
-				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (akey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
-				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (skey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
-				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (dkey ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
+				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (wkey ? 5.f : -15.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (akey ? 5.f : -15.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (skey ? 5.f : -15.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (dkey ? 5.f : -15.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
 				if (m_IsRunning || m_IsDouAttacking) {
-					this->m_Vec[3] = std::clamp(this->m_Vec[3] + 5.f / DrawParts->GetFps(), 0.f, 1.f);
+					this->m_Vec[3] = std::clamp(this->m_Vec[3] + 5.f * DrawParts->GetDeltaTime(), 0.f, 1.f);
 				}
 				m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
 				m_MoverPer = m_VecTotal.magnitude();
@@ -302,7 +303,7 @@ namespace FPS_n2 {
 						Vector3DX vec_a; vec_a.Set(std::sin(bottom), std::cos(bottom), 0.f);
 						float cost = Vector3DX::Cross(vec_a, Vec).z;
 						float sint = Vector3DX::Dot(vec_a, Vec);
-						YradChange = std::clamp(std::atan2f(cost, sint), deg2rad(-10), deg2rad(10)) * 10.f / DrawParts->GetFps();
+						YradChange = std::clamp(std::atan2f(cost, sint), deg2rad(-10), deg2rad(10)) * 10.f * DrawParts->GetDeltaTime();
 						this->m_yrad_Bottom += YradChange;
 
 						if (this->m_yrad_Bottom < 0.f) { this->m_yrad_Bottom += DX_PI_F * 2.f; }
@@ -350,12 +351,12 @@ namespace FPS_n2 {
 						i == static_cast<int>(CharaObjAnimeID::Bottom_Stand_LeftStep) ||
 						i == static_cast<int>(CharaObjAnimeID::Bottom_Stand_RightStep) ||
 						i == static_cast<int>(CharaObjAnimeID::Bottom_Stand_WalkBack)) {
-						this->m_AnimPerBuf[static_cast<size_t>(i)] = std::clamp(this->m_AnimPerBuf[static_cast<size_t>(i)] + ((i == static_cast<int>(this->m_BottomAnimSelect)) ? 6.f : -2.f) / DrawParts->GetFps(), 0.f, 1.f);
+						this->m_AnimPerBuf[static_cast<size_t>(i)] = std::clamp(this->m_AnimPerBuf[static_cast<size_t>(i)] + ((i == static_cast<int>(this->m_BottomAnimSelect)) ? 6.f : -2.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
 					}
 					if (
 						i == static_cast<int>(CharaObjAnimeID::Bottom_Squat) ||
 						i == static_cast<int>(CharaObjAnimeID::Bottom_Squat_Walk)) {
-						this->m_AnimPerBuf[static_cast<size_t>(i)] = std::clamp(this->m_AnimPerBuf[static_cast<size_t>(i)] + ((i == static_cast<int>(this->m_BottomAnimSelect)) ? 2.f : -2.f) / DrawParts->GetFps(), 0.f, 1.f);
+						this->m_AnimPerBuf[static_cast<size_t>(i)] = std::clamp(this->m_AnimPerBuf[static_cast<size_t>(i)] + ((i == static_cast<int>(this->m_BottomAnimSelect)) ? 2.f : -2.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
 					}
 				}
 				//
@@ -365,7 +366,7 @@ namespace FPS_n2 {
 				//ˆÚ“®‚ÌÛ‚ÌŽ‹“_‚Ì—h‚ê
 				float SwingPer = GetRun() ? 0.5f : ((GetVec().magnitude() * DrawParts->GetFps() / Frame_Rate) / 0.65f);
 				if (SwingPer > 0.f) {
-					this->m_MoveEyePosTimer += SwingPer * deg2rad(GetRun() ? 12.f : 5.f) * Frame_Rate / DrawParts->GetFps();
+					this->m_MoveEyePosTimer += SwingPer * deg2rad(GetRun() ? 12.f : 5.f) * Frame_Rate * DrawParts->GetDeltaTime();
 				}
 				else {
 					this->m_MoveEyePosTimer = 0.f;

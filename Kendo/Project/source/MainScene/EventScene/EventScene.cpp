@@ -685,9 +685,9 @@ namespace FPS_n2 {
 		}
 
 		CameraNotFirst_After.SetCamPos(
-			CameraNotFirst_After.GetCamPos() + CameraNotFirst_Vec.GetCamPos() * (1.f / DrawParts->GetFps()),
-			CameraNotFirst_After.GetCamVec() + CameraNotFirst_Vec.GetCamVec() * (1.f / DrawParts->GetFps()),
-			CameraNotFirst_After.GetCamUp() + CameraNotFirst_Vec.GetCamUp() * (1.f / DrawParts->GetFps())
+			CameraNotFirst_After.GetCamPos() + CameraNotFirst_Vec.GetCamPos() * DrawParts->GetDeltaTime(),
+			CameraNotFirst_After.GetCamVec() + CameraNotFirst_Vec.GetCamVec() * DrawParts->GetDeltaTime(),
+			CameraNotFirst_After.GetCamUp() + CameraNotFirst_Vec.GetCamUp() * DrawParts->GetDeltaTime()
 		);
 		Easing(pBlack, Black, Black_Per, EasingType::OutExpo);
 		Easing(pWhite, White, White_Per, EasingType::OutExpo);

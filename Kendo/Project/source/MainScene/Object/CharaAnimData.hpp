@@ -252,46 +252,46 @@ namespace FPS_n2 {
 							//
 							if (CheckHitKeyWithCheck(KEY_INPUT_RCONTROL) != 0) {
 								if (CheckHitKeyWithCheck(KEY_INPUT_J) != 0) {
-									DBG_AnimRot.x += 5.f / DrawParts->GetFps();
+									DBG_AnimRot.x += 5.f * DrawParts->GetDeltaTime();
 								}
 								if (CheckHitKeyWithCheck(KEY_INPUT_L) != 0) {
-									DBG_AnimRot.x -= 5.f / DrawParts->GetFps();
+									DBG_AnimRot.x -= 5.f * DrawParts->GetDeltaTime();
 								}
 								//
 								if (CheckHitKeyWithCheck(KEY_INPUT_I) != 0) {
-									DBG_AnimRot.y += 5.f / DrawParts->GetFps();
+									DBG_AnimRot.y += 5.f * DrawParts->GetDeltaTime();
 								}
 								if (CheckHitKeyWithCheck(KEY_INPUT_K) != 0) {
-									DBG_AnimRot.y -= 5.f / DrawParts->GetFps();
+									DBG_AnimRot.y -= 5.f * DrawParts->GetDeltaTime();
 								}
 								//
 								if (CheckHitKeyWithCheck(KEY_INPUT_U) != 0) {
-									DBG_AnimRot.z += 5.f / DrawParts->GetFps();
+									DBG_AnimRot.z += 5.f * DrawParts->GetDeltaTime();
 								}
 								if (CheckHitKeyWithCheck(KEY_INPUT_O) != 0) {
-									DBG_AnimRot.z -= 5.f / DrawParts->GetFps();
+									DBG_AnimRot.z -= 5.f * DrawParts->GetDeltaTime();
 								}
 							}
 							else {
 								if (CheckHitKeyWithCheck(KEY_INPUT_J) != 0) {
-									DBG_AnimPos.x += 0.01f / DrawParts->GetFps();
+									DBG_AnimPos.x += 0.01f * DrawParts->GetDeltaTime();
 								}
 								if (CheckHitKeyWithCheck(KEY_INPUT_L) != 0) {
-									DBG_AnimPos.x -= 0.01f / DrawParts->GetFps();
+									DBG_AnimPos.x -= 0.01f * DrawParts->GetDeltaTime();
 								}
 								//
 								if (CheckHitKeyWithCheck(KEY_INPUT_I) != 0) {
-									DBG_AnimPos.y += 0.01f / DrawParts->GetFps();
+									DBG_AnimPos.y += 0.01f * DrawParts->GetDeltaTime();
 								}
 								if (CheckHitKeyWithCheck(KEY_INPUT_K) != 0) {
-									DBG_AnimPos.y -= 0.01f / DrawParts->GetFps();
+									DBG_AnimPos.y -= 0.01f * DrawParts->GetDeltaTime();
 								}
 								//
 								if (CheckHitKeyWithCheck(KEY_INPUT_U) != 0) {
-									DBG_AnimPos.z += 0.01f / DrawParts->GetFps();
+									DBG_AnimPos.z += 0.01f * DrawParts->GetDeltaTime();
 								}
 								if (CheckHitKeyWithCheck(KEY_INPUT_O) != 0) {
-									DBG_AnimPos.z -= 0.01f / DrawParts->GetFps();
+									DBG_AnimPos.z -= 0.01f * DrawParts->GetDeltaTime();
 								}
 							}
 							printfDx("Rot[%5.2f,%5.2f,%5.2f]\n", DBG_AnimRot.x, DBG_AnimRot.y, DBG_AnimRot.z);

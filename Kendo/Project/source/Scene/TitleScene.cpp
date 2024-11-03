@@ -102,8 +102,8 @@ namespace FPS_n2 {
 			// 
 			ButtonParts->Update();
 			// 
-			this->m_GameFadeIn = std::max(this->m_GameFadeIn - 1.f / DrawParts->GetFps() / 0.5f, 0.f);
-			if (this->m_GameStart != 0.f) { this->m_GameStart += 1.f / DrawParts->GetFps() / 0.5f; }
+			this->m_GameFadeIn = std::max(this->m_GameFadeIn - DrawParts->GetDeltaTime() / 0.5f, 0.f);
+			if (this->m_GameStart != 0.f) { this->m_GameStart += DrawParts->GetDeltaTime() / 0.5f; }
 			return (this->m_GameStart <= 1.f);
 		}
 		void			TitleScene::Dispose_Sub(void) noexcept {

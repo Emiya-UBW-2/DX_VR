@@ -329,11 +329,12 @@ namespace FPS_n2 {
 			if ((m_CharaAction == EnumArmAnimType::Ready) && m_YaTimer <= 0.f && CharaMove::GetInputControl().GetPADSPress(PADS::JUMP)) {
 				SE->Get(static_cast<int>(SoundEnum::Voice_Ya)).Play_3D(0, GetEyePosition(), Scale_Rate * 35.f);
 				m_YaTimer = GetYaTimerMax();
+				m_HeartUp = 50.f;
 			}
-			m_YaTimer = std::max(m_YaTimer - 1.f / DrawParts->GetFps(), 0.f);
-			m_DamageCoolTime = std::max(m_DamageCoolTime - 1.f / DrawParts->GetFps(), 0.f);
-			m_TsubaSoundCoolTime = std::max(m_TsubaSoundCoolTime - 1.f / DrawParts->GetFps(), 0.f);
-			m_GuardHit = std::max(m_GuardHit - 1.f / DrawParts->GetFps(), 0.f);
+			m_YaTimer = std::max(m_YaTimer - DrawParts->GetDeltaTime(), 0.f);
+			m_DamageCoolTime = std::max(m_DamageCoolTime - DrawParts->GetDeltaTime(), 0.f);
+			m_TsubaSoundCoolTime = std::max(m_TsubaSoundCoolTime - DrawParts->GetDeltaTime(), 0.f);
+			m_GuardHit = std::max(m_GuardHit - DrawParts->GetDeltaTime(), 0.f);
 			//
 			auto Prev = m_CharaAction;
 			switch (m_CharaAction) {
@@ -368,7 +369,7 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				m_HeartUp = std::max(m_HeartUp - 30.f / DrawParts->GetFps(), -5.f);
+				m_HeartUp = std::max(m_HeartUp - 30.f * DrawParts->GetDeltaTime(), -5.f);
 			}
 			break;
 			case EnumArmAnimType::Run:
@@ -382,8 +383,8 @@ namespace FPS_n2 {
 					CheckTsuba();
 				}
 
-				m_RunTime = std::max(m_RunTime + 1.f / DrawParts->GetFps(), 0.f);
-				m_HeartUp = std::max(m_HeartUp + 0.5f * 30.f / DrawParts->GetFps(), 3.f);
+				m_RunTime = std::max(m_RunTime + DrawParts->GetDeltaTime(), 0.f);
+				m_HeartUp = std::max(m_HeartUp + 0.5f * 30.f * DrawParts->GetDeltaTime(), 3.f);
 			}
 			break;
 			case EnumArmAnimType::Men:
@@ -439,8 +440,8 @@ namespace FPS_n2 {
 						break;
 					}
 				}
-				m_FrontAttackActionTime = std::max(m_FrontAttackActionTime - 1.f / DrawParts->GetFps(), 0.f);
-				m_HeartUp = std::max(m_HeartUp + 0.1f * 30.f / DrawParts->GetFps(), 10.f);
+				m_FrontAttackActionTime = std::max(m_FrontAttackActionTime - DrawParts->GetDeltaTime(), 0.f);
+				m_HeartUp = std::max(m_HeartUp + 0.1f * 30.f * DrawParts->GetDeltaTime(), 10.f);
 			}
 			break;
 			case EnumArmAnimType::Dou:
@@ -448,8 +449,8 @@ namespace FPS_n2 {
 				if (m_FrontAttackActionTime <= 0.f) {
 					m_CharaAction = EnumArmAnimType::Run;
 				}
-				m_FrontAttackActionTime = std::max(m_FrontAttackActionTime - 1.f / DrawParts->GetFps(), 0.f);
-				m_HeartUp = std::max(m_HeartUp + 0.1f * 30.f / DrawParts->GetFps(), 10.f);
+				m_FrontAttackActionTime = std::max(m_FrontAttackActionTime - DrawParts->GetDeltaTime(), 0.f);
+				m_HeartUp = std::max(m_HeartUp + 0.1f * 30.f * DrawParts->GetDeltaTime(), 10.f);
 			}
 			break;
 			case EnumArmAnimType::Tsuba:
@@ -465,8 +466,8 @@ namespace FPS_n2 {
 						m_CharaAction = EnumArmAnimType::HikiDou;
 					}
 				}
-				m_TsubaCoolDown = std::max(m_TsubaCoolDown - 1.f / DrawParts->GetFps(), 0.f);
-				m_HeartUp = std::max(m_HeartUp - 30.f / DrawParts->GetFps(), -5.f);
+				m_TsubaCoolDown = std::max(m_TsubaCoolDown - DrawParts->GetDeltaTime(), 0.f);
+				m_HeartUp = std::max(m_HeartUp - 30.f * DrawParts->GetDeltaTime(), -5.f);
 			}
 			break;
 			case EnumArmAnimType::HikiMen:
@@ -476,8 +477,8 @@ namespace FPS_n2 {
 				if (m_BackAttackActionTime <= 0.f) {
 					m_CharaAction = EnumArmAnimType::Ready;
 				}
-				m_BackAttackActionTime = std::max(m_BackAttackActionTime - 1.f / DrawParts->GetFps(), 0.f);
-				m_HeartUp = std::max(m_HeartUp + 0.1f * 30.f / DrawParts->GetFps(), 10.f);
+				m_BackAttackActionTime = std::max(m_BackAttackActionTime - DrawParts->GetDeltaTime(), 0.f);
+				m_HeartUp = std::max(m_HeartUp + 0.1f * 30.f * DrawParts->GetDeltaTime(), 10.f);
 			}
 			break;
 			case EnumArmAnimType::GuardSuriage:
@@ -493,7 +494,7 @@ namespace FPS_n2 {
 						m_CharaAction = EnumArmAnimType::Dou;
 					}
 				}
-				m_GuardTimer = std::max(m_GuardTimer - 1.f / DrawParts->GetFps(), 0.f);
+				m_GuardTimer = std::max(m_GuardTimer - DrawParts->GetDeltaTime(), 0.f);
 				if (m_CharaAction != EnumArmAnimType::GuardSuriage) {
 					m_GuardCoolDownTimer = GetGuardCoolDownTimerMax();
 				}
@@ -527,7 +528,7 @@ namespace FPS_n2 {
 			}
 			CharaMove::UpdateKeyRad(this->m_move);
 			if (m_CharaAction != EnumArmAnimType::Run && m_CharaAction != EnumArmAnimType::GuardSuriage) {
-				m_GuardCoolDownTimer = std::max(m_GuardCoolDownTimer - 1.f / DrawParts->GetFps(), 0.f);
+				m_GuardCoolDownTimer = std::max(m_GuardCoolDownTimer - DrawParts->GetDeltaTime(), 0.f);
 			}
 		}
 		void			CharacterClass::ExecuteAction(void) noexcept {
@@ -627,7 +628,7 @@ namespace FPS_n2 {
 			//printfDx("HEART : %f\n", m_HeartUp);
 #endif
 			Easing(&m_HeartUpR, m_HeartUp, 0.99f, EasingType::OutExpo);
-			if (StaminaControl::ExcuteStamina(m_HeartUpR / DrawParts->GetFps())) {
+			if (StaminaControl::ExcuteStamina(m_HeartUpR * DrawParts->GetDeltaTime())) {
 				if (this->m_MyID == this->m_ViewID) {
 					SE->Get(static_cast<int>(SoundEnum::Heart)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 				}
