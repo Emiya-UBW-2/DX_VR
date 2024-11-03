@@ -81,4 +81,16 @@ namespace FPS_n2 {
 		Arm,
 		Leg,
 	};
+
+
+	enum class WazaType {
+		Men,		//メイン
+		SuriageMen,	//ガード後にメイン
+		Hikimen,	//引きながらメイン
+
+		Kote,		//サブ
+		Hikigote,	//引きながらサブ
+
+		Dou,		//ガード後にサブ
+	};
 };

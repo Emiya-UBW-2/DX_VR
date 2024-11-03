@@ -344,7 +344,7 @@ namespace FPS_n2 {
 						}
 						else {
 							InputControl OtherInput;
-							p->GetAI()->Execute(&OtherInput);
+							p->GetAI()->Execute(&OtherInput, m_isTraining);
 							{
 								Vector2DX MSVec;
 								MSVec.Set(
@@ -454,7 +454,7 @@ namespace FPS_n2 {
 						auto& p2 = PlayerMngr->GetPlayer(index2);
 						auto& tgt = (std::shared_ptr<CharacterObject::CharacterClass>&)p2->GetChara();
 						HitPoint Damage = static_cast<HitPoint>(100.f * c->GetWeaponPtr()->GetMoveSpeed() / 5.f);
-						tgt->CheckDamageRay(&Damage, c->GetMyPlayerID(), StartPos, &EndPos);
+						tgt->CheckDamageRay(&Damage, c->GetMyPlayerID(), c->GetYaTimer() / c->GetYaTimerMax(), c->GetWazaType(), StartPos, &EndPos);
 					}
 				}
 			}

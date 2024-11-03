@@ -13,7 +13,7 @@ namespace FPS_n2 {
 			void Init(PlayerID MyID) noexcept {
 				m_MyID = MyID;
 			}
-			void Execute(InputControl* MyInput) noexcept;
+			void Execute(InputControl* MyInput, bool IsTutorial) noexcept;
 			void Draw(void) noexcept {
 			}
 			void Dispose(void) noexcept {

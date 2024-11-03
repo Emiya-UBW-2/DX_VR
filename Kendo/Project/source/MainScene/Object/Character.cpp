@@ -208,9 +208,59 @@ namespace FPS_n2 {
 						}
 					}
 					else {
+						int HitPosPoints = 10;
+						{
+							float MinPoint = 0.5f;
+							if (value.HitPer < MinPoint) {
+								HitPosPoints -= static_cast<int>(std::clamp(0.f, 20.f, (MinPoint - value.HitPer) / (MinPoint - 0.f)));
+							}
+							float MaxPoint = 0.9f;
+							if (MaxPoint < value.HitPer) {
+								HitPosPoints -= static_cast<int>(std::clamp(0.f, 20.f, (value.HitPer - MaxPoint) / (1.f - MaxPoint)));
+							}
+						}
+
+						int KihakuPoints = 10;
+						if (value.KihakuPer < 0.8f) {
+							KihakuPoints = -10;
+						}
+
+						int TotalAddHits = 0;
+						TotalAddHits += value.Damage;
+						TotalAddHits += HitPosPoints;
+						TotalAddHits += KihakuPoints;
+
 						HitMark::Instance()->Add(value.m_Pos, value.GetHitType(), static_cast<float>(value.Damage) / 100.f);
-						SideLog::Instance()->Add(5.0f, (value.Damage >= 0) ? Green : Red, "打突 +%4d pt", std::abs(value.Damage));
-						SideLog::Instance()->Add(5.0f, (value.Damage >= 0) ? Green : Red, "気迫 -%4d pt", std::abs(value.Damage));
+
+						float offset = 0.f;
+
+						switch (value.m_WazaType) {
+						case FPS_n2::WazaType::Men:
+							SideLog::Instance()->Add(3.0f, offset, Yellow, "面"); offset += 0.1f;
+							break;
+						case FPS_n2::WazaType::SuriageMen:
+							SideLog::Instance()->Add(3.0f, offset, Yellow, "すり上げ面"); offset += 0.1f;
+							break;
+						case FPS_n2::WazaType::Hikimen:
+							SideLog::Instance()->Add(3.0f, offset, Yellow, "引き面"); offset += 0.1f;
+							break;
+						case FPS_n2::WazaType::Kote:
+							SideLog::Instance()->Add(3.0f, offset, Yellow, "小手"); offset += 0.1f;
+							break;
+						case FPS_n2::WazaType::Hikigote:
+							SideLog::Instance()->Add(3.0f, offset, Yellow, "引き小手"); offset += 0.1f;
+							break;
+						case FPS_n2::WazaType::Dou:
+							SideLog::Instance()->Add(3.0f, offset, Yellow, "胴"); offset += 0.1f;
+							break;
+						default:
+							break;
+						}
+
+						SideLog::Instance()->Add(3.0f, offset, (value.Damage >= 0) ? Green : Red, "威力　　 %s%4d pt", (value.Damage >= 0) ? "+" : "-", std::abs(value.Damage)); offset += 0.1f;
+						SideLog::Instance()->Add(3.0f, offset, (HitPosPoints >= 0) ? Green : Red, "打突部位 %s%4d pt", (HitPosPoints >= 0) ? "+" : "-", std::abs(HitPosPoints)); offset += 0.1f;
+						SideLog::Instance()->Add(3.0f, offset, (KihakuPoints >= 0) ? Green : Red, "気迫　　 %s%4d pt", (KihakuPoints >= 0) ? "+" : "-", std::abs(KihakuPoints)); offset += 0.1f;
+						SideLog::Instance()->Add(3.0f, offset, (TotalAddHits >= 0) ? Green : Red, "計　　　 %s%4d pt", (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits)); offset += 0.1f;
 					}
 				}
 				//ダメージ
@@ -219,14 +269,15 @@ namespace FPS_n2 {
 			return false;
 		}
 		//
-		bool		CharacterClass::CheckDamageRay(HitPoint* Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
+		bool		CharacterClass::CheckDamageRay(HitPoint* Damage, PlayerID AttackID, float Kihaku, WazaType pWazaType, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
 			if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, GetMove().GetPos()) <= 2.0f * Scale_Rate)) { return false; }
+			float BaseLen = (StartPos - *pEndPos).magnitude();
 			//被弾処理
 			auto* HitPtr = HitBoxControl::GetLineHit(StartPos, pEndPos);
 			if (HitPtr) {
 				//ダメージ登録
 				{
-					m_Damage.Add(AttackID, this->m_MyID, *Damage, HitPtr->GetColType(), *pEndPos);
+					m_Damage.Add(AttackID, this->m_MyID, *Damage, Kihaku, (StartPos - *pEndPos).magnitude() / BaseLen, HitPtr->GetColType(), pWazaType, *pEndPos);
 				}
 				return true;
 			}
@@ -364,12 +415,15 @@ namespace FPS_n2 {
 					if (!IsOutArea && (Len < Radius) && IsFront) {
 						if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
 							m_CharaAction = EnumArmAnimType::Men;
+							m_WazaType = WazaType::Men;
 						}
 						else if (CharaMove::GetInputControl().GetPADSPress(PADS::ULT)) {
 							m_CharaAction = EnumArmAnimType::Kote;
+							m_WazaType = WazaType::Kote;
 						}
 						else if (false) {
 							m_CharaAction = EnumArmAnimType::Dou;
+							m_WazaType = WazaType::Dou;
 						}
 					}
 				}
@@ -408,23 +462,28 @@ namespace FPS_n2 {
 					case EnumArmAnimType::Men:
 						if (false) {
 							m_CharaAction = EnumArmAnimType::Dou;//面胴
+							m_WazaType = WazaType::Dou;
 						}
 						//小手面後派生
 						if (false) {
 							if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
 								m_CharaAction = EnumArmAnimType::Men;//小手面面
+								m_WazaType = WazaType::Men;
 							}
 							if (false) {
 								m_CharaAction = EnumArmAnimType::Dou;//小手面胴
+								m_WazaType = WazaType::Dou;
 							}
 						}
 						break;
 					case EnumArmAnimType::Kote:
 						if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
 							m_CharaAction = EnumArmAnimType::Men;//小手面
+							m_WazaType = WazaType::Men;
 						}
 						if (false) {
 							m_CharaAction = EnumArmAnimType::Dou;//小手胴
+							m_WazaType = WazaType::Dou;
 						}
 						break;
 					case EnumArmAnimType::Dou:
@@ -432,6 +491,7 @@ namespace FPS_n2 {
 					case EnumArmAnimType::Tsuki:
 						if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
 							m_CharaAction = EnumArmAnimType::Men;//突き面
+							m_WazaType = WazaType::Men;
 						}
 						break;
 					case EnumArmAnimType::Tsuba:
@@ -462,9 +522,11 @@ namespace FPS_n2 {
 				if (m_TsubaCoolDown <= 0.f) {
 					if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
 						m_CharaAction = EnumArmAnimType::HikiMen;
+						m_WazaType = WazaType::Hikimen;
 					}
 					else if (CharaMove::GetInputControl().GetPADSPress(PADS::ULT)) {
 						m_CharaAction = EnumArmAnimType::HikiKote;
+						m_WazaType = WazaType::Hikigote;
 					}
 					else if (false) {
 						m_CharaAction = EnumArmAnimType::HikiDou;
@@ -493,9 +555,11 @@ namespace FPS_n2 {
 				else {
 					if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
 						m_CharaAction = EnumArmAnimType::Men;
+						m_WazaType = WazaType::SuriageMen;
 					}
 					else if (CharaMove::GetInputControl().GetPADSPress(PADS::ULT)) {
 						m_CharaAction = EnumArmAnimType::Dou;
+						m_WazaType = WazaType::Dou;
 					}
 				}
 				m_GuardTimer = std::max(m_GuardTimer - DrawParts->GetDeltaTime(), 0.f);

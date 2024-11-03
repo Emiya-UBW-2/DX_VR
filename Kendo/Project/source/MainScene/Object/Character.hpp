@@ -56,6 +56,8 @@ namespace FPS_n2 {
 
 			PlayerID											m_MyID{ 0 };
 			PlayerID											m_ViewID{ 0 };
+
+			WazaType											m_WazaType{ WazaType::Men };
 		public:
 			bool												CanLookTarget{ true };
 		public://ゲッター
@@ -70,6 +72,7 @@ namespace FPS_n2 {
 			const auto& GetGuardCoolDownTimer(void) const noexcept { return m_GuardCoolDownTimer; }
 			const auto GetGuardCoolDownTimerMax(void) const noexcept { return 4.f; }
 			const auto& GetWeaponPtr(void) const noexcept { return m_Weapon_Ptr; }
+			const auto& GetWazaType(void) const noexcept { return m_WazaType; }
 			auto			PopConcussionSwitch(void) noexcept {
 				auto Prev = m_ConcussionSwitch;
 				m_ConcussionSwitch = false;
@@ -138,7 +141,7 @@ namespace FPS_n2 {
 				OverrideAction();
 			}
 		public: //更新関連
-			bool			CheckDamageRay(HitPoint* Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
+			bool			CheckDamageRay(HitPoint* Damage, PlayerID AttackID, float Kihaku, WazaType pWazaType, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
 			void			MovePoint(float pxRad, float pyRad, const Vector3DX& pPos) noexcept;
 			void			SetInput(const InputControl& pInput, bool pReady) noexcept;
 		private:

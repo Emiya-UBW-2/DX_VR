@@ -5,7 +5,7 @@
 
 namespace FPS_n2 {
 	namespace Player {
-		void AIControl::Execute(InputControl* MyInput) noexcept
+		void AIControl::Execute(InputControl* MyInput, bool IsTutorial) noexcept
 		{
 			auto* DrawParts = DXDraw::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -28,6 +28,9 @@ namespace FPS_n2 {
 
 			if (IsOutArea) {
 				W_key = true;
+			}
+			if (IsTutorial) {
+
 			}
 
 			bool shotMain_Key{ false };

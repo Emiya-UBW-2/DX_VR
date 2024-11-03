@@ -9,14 +9,20 @@ namespace FPS_n2 {
 		PlayerID				ShotID{ 127 };
 		PlayerID				DamageID{ 127 };
 		HitPoint				Damage{ 0 };
+		float					HitPer{ 1.f };
+		float					KihakuPer{ 1.f };
 		int8_t					m_HitType{};
+		WazaType				m_WazaType{};
 		Vector3DX				m_Pos;
 	public:
-		void SetEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint pDamage, HitType pHitType, const Vector3DX& pPos) noexcept {
+		void SetEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint pDamage, float Kihaku, float pHitPer, HitType pHitType, WazaType pWazaType, const Vector3DX& pPos) noexcept {
 			this->ShotID = ShotID_t;
 			this->DamageID = DamageID_t;
 			this->Damage = pDamage;
+			this->KihakuPer = Kihaku;
+			this->HitPer = pHitPer;
 			this->m_HitType = static_cast<int8_t>(pHitType);
+			this->m_WazaType = pWazaType;
 			this->m_Pos = pPos;
 		}
 	public:
@@ -41,8 +47,8 @@ namespace FPS_n2 {
 		void			Reset(void) noexcept {
 			this->m_DamageCount = 0;
 		}
-		void			Add(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint pDamage, HitType pHitType, const Vector3DX& pPos) noexcept {
-			this->m_Damage.at(this->m_DamageCount).SetEvent(ShotID_t, DamageID_t, pDamage, pHitType, pPos);
+		void			Add(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint pDamage, float Kihaku, float pHitPer, HitType pHitType, WazaType pWazaType, const Vector3DX& pPos) noexcept {
+			this->m_Damage.at(this->m_DamageCount).SetEvent(ShotID_t, DamageID_t, pDamage, Kihaku, pHitPer, pHitType, pWazaType, pPos);
 			++this->m_DamageCount %= static_cast<uint8_t>(this->m_Damage.size());
 		}
 	};
