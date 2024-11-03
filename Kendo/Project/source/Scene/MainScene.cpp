@@ -23,6 +23,7 @@ namespace FPS_n2 {
 			HitMark::Instance()->Load();
 			//
 			m_GameStart.Load("data/UI/GameStart.png");
+			m_GameRestart.Load("data/UI/GameReStart.png");
 			m_Once.Load("data/UI/Once.png");
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
@@ -88,12 +89,15 @@ namespace FPS_n2 {
 			m_IsGameStart = false;
 			m_Timer = 180.f;
 			m_IsPlayable = false;
+
+			m_pStart = &m_GameStart;
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto* SE = SoundPool::Instance();
 #ifdef DEBUG
 			/*
 			{
@@ -295,6 +299,7 @@ namespace FPS_n2 {
 						if (m_GameStartTimer <= 0.f) {
 							m_IsGameStart = true;
 							m_IsPlayable = true;
+							SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Start)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						}
 					}
 					else if (m_IsGameStart) {
@@ -304,6 +309,7 @@ namespace FPS_n2 {
 							}
 							if (FadeControl::IsFadeAll()) {
 								FadeControl::SetFadeIn(1.f / 2.f);
+								m_pStart = &m_GameRestart;
 								m_GameStartTimer = 2.f;
 								m_IsGameStart = false;
 								//初期化
@@ -338,6 +344,32 @@ namespace FPS_n2 {
 						else {
 							m_ScoreUp1 = 1.f;
 						}
+					}
+					if (m_IsPlayable) {
+						//タイムアップ
+						if (m_Timer < 0.f) {
+							if (m_IsTimeUp) {
+								m_IsTimeUp = false;
+								SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Stop)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							}
+						}
+						else {
+							m_IsTimeUp = true;
+						}
+						//残り1分
+						if (m_Timer < 60.f) {
+							if (m_IsDrawOneMinute) {
+								m_IsDrawOneMinute = false;
+								SideLog::Instance()->Add(10.f, 0.f, Red, "残り1分!");
+							}
+						}
+						else {
+							m_IsDrawOneMinute = true;
+						}
+					}
+					else {
+						m_IsTimeUp = true;
+						m_IsDrawOneMinute = true;
 					}
 				}
 			}
@@ -632,6 +664,7 @@ namespace FPS_n2 {
 			m_PauseMenuControl.DisposePause();
 			HitMark::Instance()->Dispose();
 			m_GameStart.Dispose();
+			m_GameRestart.Dispose();
 			m_Once.Dispose();
 		}
 
@@ -720,7 +753,7 @@ namespace FPS_n2 {
 							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameStartAlpha), 0, 255));
 							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
 							WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
-								&m_GameStart, xp1, yp1, m_GameStartScale,0.f, true);
+								m_pStart, xp1, yp1, m_GameStartScale,0.f, true);
 							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						}

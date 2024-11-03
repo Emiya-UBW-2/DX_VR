@@ -162,6 +162,8 @@ namespace FPS_n2 {
 
 			float												m_MoveEyePosTimer{ 0.f };
 			Vector3DX											m_MoveEyePos;
+
+			float												m_SpeedMul{ 1.f };
 		public://ゲッター
 			CharaObjAnimeID										m_BottomAnimSelect{};
 		public://ゲッター
@@ -175,6 +177,8 @@ namespace FPS_n2 {
 			void			SetIsFrontAttacking(bool value) noexcept { this->m_IsFrontAttacking = value; }
 			void			SetIsDouAttacking(bool value) noexcept { this->m_IsDouAttacking = value; }
 			void			SetIsBackAttacking(bool value) noexcept { this->m_IsBackAttacking = value; }
+
+			void			SetSpeedMul(float value) noexcept { this->m_SpeedMul = value; }
 		protected:
 			const auto& GetEyeSwingPos(void) const noexcept { return this->m_MoveEyePos; }
 			const auto& GetEyeRotMatrix(void) const noexcept { return this->m_EyeMatrix; }
@@ -186,10 +190,10 @@ namespace FPS_n2 {
 			auto		GetWeaponSwingMat(void) const noexcept { return Matrix3x3DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
 			auto		GetSpeedPer(void) const noexcept {
 				if (this->m_Input.GetPADSPress(PADS::WALK)) {
-					return 0.15f;
+					return 0.15f * this->m_SpeedMul;
 				}
 				else if (GetIsSquat()) {
-					return 0.45f;
+					return 0.45f * this->m_SpeedMul;
 				}
 				else if (m_IsRunning) {
 					return 0.975f;
@@ -198,7 +202,7 @@ namespace FPS_n2 {
 					return 1.175f;
 				}
 				else {
-					return 0.45f;
+					return 0.45f * this->m_SpeedMul;
 				}
 			}
 			auto		GetVec(void) const noexcept {

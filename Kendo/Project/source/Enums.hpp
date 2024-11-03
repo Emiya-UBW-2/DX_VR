@@ -23,6 +23,7 @@ namespace FPS_n2 {
 		//
 		Kendo_Swing,
 		Kendo_Hit,
+		Kendo_GetHit,
 		Kendo_Foot,
 		Kendo_Tsuba,
 		//
@@ -31,6 +32,13 @@ namespace FPS_n2 {
 		Voice_Kote,
 		Voice_Dou,
 		Voice_Tsuki,
+		//
+		JudgeVoice_Men,
+		JudgeVoice_Kote,
+		JudgeVoice_Dou,
+		JudgeVoice_Start,
+		JudgeVoice_Stop,
+		JudgeVoice_Divide,
 		//
 		CountDown,
 		Second,
@@ -48,6 +56,13 @@ namespace FPS_n2 {
 		"Taiko1",
 		"EV2_1",
 		"EV2_2",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
 		"",
 		"",
 		"",

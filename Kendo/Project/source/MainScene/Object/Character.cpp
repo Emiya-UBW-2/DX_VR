@@ -283,10 +283,33 @@ namespace FPS_n2 {
 						SideLog::Instance()->Add(3.0f, offset, (HitPosPoints >= 0) ? Green : Red, "打突部位 %s%4d pt", (HitPosPoints >= 0) ? "+" : "-", std::abs(HitPosPoints)); offset += 0.1f;
 						SideLog::Instance()->Add(3.0f, offset, (KihakuPoints >= 0) ? Green : Red, "気迫　　 %s%4d pt", (KihakuPoints >= 0) ? "+" : "-", std::abs(KihakuPoints)); offset += 0.1f;
 						SideLog::Instance()->Add(3.0f, offset, (TotalAddHits >= 0) ? Green : Red, "計　　　 %s%4d pt", (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits)); offset += 0.1f;
+						if (TotalAddHits >= 100) {
+							SideLog::Instance()->Add(3.5f, offset, Yellow, "有効打突！"); offset += 0.1f;
+						}
+						else if (TotalAddHits >= 80) {
+							SideLog::Instance()->Add(3.5f, offset, Red, "もう一息"); offset += 0.1f;
+						}
 
 						if (TotalAddHits >= 100) {
 							auto* PlayerMngr = Player::PlayerManager::Instance();
 							PlayerMngr->AddScore(value.ShotID);
+
+							SE->Get(static_cast<int>(SoundEnum::Kendo_GetHit)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+
+							switch (value.GetHitType()) {
+							case HitType::Head://面
+								SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Men)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+								break;
+							case HitType::Body://胴
+								SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Dou)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+								break;
+							case HitType::Arm://小手
+								SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Kote)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+								break;
+							case HitType::Leg:
+							default:
+								break;
+							}
 						}
 					}
 				}
@@ -409,6 +432,7 @@ namespace FPS_n2 {
 				Input.ResetKeyInput();
 			}
 			CharaMove::InputKey(Input);
+			CharaMove::SetSpeedMul(Lerp(0.5f, 1.f, GetStamina() / GetStaminaMax()));
 		}
 		void			CharacterClass::FirstExecute(void) noexcept {
 			//初回のみ更新する内容

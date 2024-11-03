@@ -310,9 +310,9 @@ namespace FPS_n2 {
 					if ((per * 255.f) > 1.f) {
 						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
 						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
-							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, Yellow, Black, "TIME");
+							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, (floatParam[0] < 60.f) ? Red : Yellow, Black, "TIME");
 						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
-							FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + DrawParts->GetUIY(300), yp1, Yellow, Black, "%d:%05.2f",
+							FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + DrawParts->GetUIY(300), yp1, (floatParam[0] < 60.f) ? Red : Yellow, Black, "%d:%05.2f",
 							static_cast<int>(floatParam[0] / 60.f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
 						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
@@ -320,18 +320,26 @@ namespace FPS_n2 {
 				//ÉXÉRÉA
 				{
 					xp1 = DrawParts->GetUIY(1920 / 2);
-					yp1 = DrawParts->GetUIY(50);
+					yp1 = DrawParts->GetUIY(28);
 
-					int Y1add = DrawParts->GetUIY(static_cast<int>(Lerp(0.f, -16.f, floatParam[3])));
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
+						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40), yp1 + DrawParts->GetUIY(20),
+						xp1 - DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(28), Red, true);
+					int Y1add = DrawParts->GetUIY(static_cast<int>(Lerp(0.f, -8.f, floatParam[3])));
 					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
-						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1 - DrawParts->GetUIY(10), yp1 + Y1add, White, Black, "%d", intParam[0]);
+						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1 - DrawParts->GetUIY(20), yp1 + Y1add, Red, Black, "%d", intParam[0]);
 
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18),
-						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, White, Black, ":");
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
+						xp1 - DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(20),
+						xp1 + DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(28), Gray75, true);
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
+						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Gray25, Black, ":");
 
-					int Y2add = DrawParts->GetUIY(static_cast<int>(Lerp(0.f, -16.f, floatParam[4])));
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
+						xp1 + DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(20), xp1 + DrawParts->GetUIY(10) + DrawParts->GetUIY(40), yp1 + DrawParts->GetUIY(28), White, true);
+					int Y2add = DrawParts->GetUIY(static_cast<int>(Lerp(0.f, -8.f, floatParam[4])));
 					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1 + DrawParts->GetUIY(10), yp1 + Y2add, White, Black, "%d", intParam[1]);
+						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1 + DrawParts->GetUIY(20), yp1 + Y2add, White, Black, "%d", intParam[1]);
 				}
 				//èÓïÒ
 				{

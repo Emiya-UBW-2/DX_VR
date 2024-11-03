@@ -40,6 +40,8 @@ namespace FPS_n2 {
 			std::string		m_EventSelect;
 
 			GraphHandle		m_GameStart;
+			GraphHandle		m_GameRestart;
+			GraphHandle*	m_pStart{ nullptr };
 			GraphHandle		m_Once;
 
 			float m_GameStartTimer{ 2.f };
@@ -53,6 +55,9 @@ namespace FPS_n2 {
 			float m_WinOnceTimer{ 2.f };
 			float m_WinOnceAlpha{ 0.f };
 			float m_WinOnceScale{ 0.f };
+
+			bool m_IsDrawOneMinute{ false };
+			bool m_IsTimeUp{ false };
 
 			float							m_ScoreUp0{ 0.f };
 			float							m_ScoreUp1{ 0.f };

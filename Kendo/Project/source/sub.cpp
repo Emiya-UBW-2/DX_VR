@@ -22,6 +22,7 @@ namespace FPS_n2 {
 		//
 		SE->Add(static_cast<int>(SoundEnum::Kendo_Swing), 2, "data/Sound/SE/Kendo/Swing.wav");
 		SE->Add(static_cast<int>(SoundEnum::Kendo_Hit), 2, "data/Sound/SE/Kendo/Hit.wav");
+		SE->Add(static_cast<int>(SoundEnum::Kendo_GetHit), 1, "data/Sound/SE/Kendo/GetHit.wav", false);
 		SE->Add(static_cast<int>(SoundEnum::Kendo_Foot), 2, "data/Sound/SE/Kendo/Foot.wav");
 		SE->Add(static_cast<int>(SoundEnum::Kendo_Tsuba), 2, "data/Sound/SE/Kendo/Tsuba.wav");
 		//
@@ -30,6 +31,13 @@ namespace FPS_n2 {
 		SE->Add(static_cast<int>(SoundEnum::Voice_Kote), 2, "data/Sound/SE/voice/Kote.wav");
 		SE->Add(static_cast<int>(SoundEnum::Voice_Dou), 2, "data/Sound/SE/voice/Dou.wav");
 		SE->Add(static_cast<int>(SoundEnum::Voice_Tsuki), 2, "data/Sound/SE/voice/Tsuki.wav");
+
+		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Men), 2, "data/Sound/Voice/Men.wav", false);
+		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Kote), 2, "data/Sound/Voice/Kote.wav", false);
+		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Dou), 2, "data/Sound/Voice/Dou.wav", false);
+		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Start), 2, "data/Sound/Voice/Start.wav", false);
+		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Stop), 2, "data/Sound/Voice/Stop.wav", false);
+		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Divide), 2, "data/Sound/Voice/Divide.wav", false);
 		//
 		SE->Add(static_cast<int>(SoundEnum::CountDown), 2, "data/Sound/SE/CountDown.wav", false);
 		SE->Add(static_cast<int>(SoundEnum::Second), 1, "data/Sound/SE/second.wav", false);
@@ -64,6 +72,7 @@ namespace FPS_n2 {
 		SE->Delete(static_cast<int>(SoundEnum::RunFoot));
 		SE->Delete(static_cast<int>(SoundEnum::Kendo_Swing));
 		SE->Delete(static_cast<int>(SoundEnum::Kendo_Hit));
+		SE->Delete(static_cast<int>(SoundEnum::Kendo_GetHit));
 		SE->Delete(static_cast<int>(SoundEnum::Kendo_Foot));
 		SE->Delete(static_cast<int>(SoundEnum::Kendo_Tsuba));
 
@@ -72,6 +81,13 @@ namespace FPS_n2 {
 		SE->Delete(static_cast<int>(SoundEnum::Voice_Kote));
 		SE->Delete(static_cast<int>(SoundEnum::Voice_Dou));
 		SE->Delete(static_cast<int>(SoundEnum::Voice_Tsuki));
+
+		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Men));
+		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Kote));
+		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Dou));
+		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Start));
+		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Stop));
+		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Divide));
 
 		SE->Delete(static_cast<int>(SoundEnum::StandupFoot));
 		SE->Delete(static_cast<int>(SoundEnum::Heart));
