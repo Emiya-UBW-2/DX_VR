@@ -211,40 +211,22 @@ namespace FPS_n2 {
 						int HitDamagePow = value.Damage;
 						switch (value.m_WazaType) {
 						case FPS_n2::WazaType::Men:
-							HitDamagePow = HitDamagePow * 100 / 100;
-							if (value.GetHitType() != HitType::Head) {
-								HitDamagePow = HitDamagePow * 10 / 100;
-							}
+							HitDamagePow = HitDamagePow * 80 / 100;
 							break;
 						case FPS_n2::WazaType::SuriageMen:
-							HitDamagePow = HitDamagePow * 100 / 100;
-							if (value.GetHitType() != HitType::Head) {
-								HitDamagePow = HitDamagePow * 10 / 100;
-							}
+							HitDamagePow = HitDamagePow * 90 / 100;
 							break;
 						case FPS_n2::WazaType::Hikimen:
 							HitDamagePow = HitDamagePow * 150 / 100;
-							if (value.GetHitType() != HitType::Head) {
-								HitDamagePow = HitDamagePow * 10 / 100;
-							}
 							break;
 						case FPS_n2::WazaType::Kote:
 							HitDamagePow = HitDamagePow * 450 / 100;
-							if (value.GetHitType() != HitType::Arm) {
-								HitDamagePow = HitDamagePow * 10 / 100;
-							}
 							break;
 						case FPS_n2::WazaType::Hikigote:
 							HitDamagePow = HitDamagePow * 450 / 100;
-							if (value.GetHitType() != HitType::Arm) {
-								HitDamagePow = HitDamagePow * 10 / 100;
-							}
 							break;
 						case FPS_n2::WazaType::Dou:
-							HitDamagePow = HitDamagePow * 500 / 100;
-							if (value.GetHitType() != HitType::Body) {
-								HitDamagePow = HitDamagePow * 10 / 100;
-							}
+							HitDamagePow = HitDamagePow * 300 / 100;
 							break;
 						default:
 							break;
@@ -255,18 +237,15 @@ namespace FPS_n2 {
 						{
 							float MinPoint = 0.5f;
 							if (value.HitPer < MinPoint) {
-								HitPosPoints -= static_cast<int>(std::clamp(0.f, 20.f, (MinPoint - value.HitPer) / (MinPoint - 0.f)));
+								HitPosPoints -= static_cast<int>(Lerp(0.f, 20.f, (MinPoint - value.HitPer) / (MinPoint - 0.f)));
 							}
 							float MaxPoint = 0.9f;
 							if (MaxPoint < value.HitPer) {
-								HitPosPoints -= static_cast<int>(std::clamp(0.f, 20.f, (value.HitPer - MaxPoint) / (1.f - MaxPoint)));
+								HitPosPoints -= static_cast<int>(Lerp(0.f, 20.f, (value.HitPer - MaxPoint) / (1.f - MaxPoint)));
 							}
 						}
 
-						int KihakuPoints = 10;
-						if (value.KihakuPer < 0.8f) {
-							KihakuPoints = -10;
-						}
+						int KihakuPoints = static_cast<int>(Lerp(-30.f, 20.f, value.KihakuPer));
 
 						int TotalAddHits = 0;
 						TotalAddHits += HitDamagePow;
@@ -304,6 +283,11 @@ namespace FPS_n2 {
 						SideLog::Instance()->Add(3.0f, offset, (HitPosPoints >= 0) ? Green : Red, "打突部位 %s%4d pt", (HitPosPoints >= 0) ? "+" : "-", std::abs(HitPosPoints)); offset += 0.1f;
 						SideLog::Instance()->Add(3.0f, offset, (KihakuPoints >= 0) ? Green : Red, "気迫　　 %s%4d pt", (KihakuPoints >= 0) ? "+" : "-", std::abs(KihakuPoints)); offset += 0.1f;
 						SideLog::Instance()->Add(3.0f, offset, (TotalAddHits >= 0) ? Green : Red, "計　　　 %s%4d pt", (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits)); offset += 0.1f;
+
+						if (TotalAddHits >= 100) {
+							auto* PlayerMngr = Player::PlayerManager::Instance();
+							PlayerMngr->AddScore(value.ShotID);
+						}
 					}
 				}
 				//ダメージ
@@ -320,7 +304,45 @@ namespace FPS_n2 {
 			if (HitPtr) {
 				//ダメージ登録
 				{
-					m_Damage.Add(AttackID, this->m_MyID, *Damage, Kihaku, (StartPos - *pEndPos).magnitude() / BaseLen, HitPtr->GetColType(), pWazaType, *pEndPos);
+					//撃った技と違う個所ならダメージと扱わない
+					bool IsDamage = true;
+					switch (pWazaType) {
+					case FPS_n2::WazaType::Men:
+						if (HitPtr->GetColType() != HitType::Head) {
+							IsDamage = false;
+						}
+						break;
+					case FPS_n2::WazaType::SuriageMen:
+						if (HitPtr->GetColType() != HitType::Head) {
+							IsDamage = false;
+						}
+						break;
+					case FPS_n2::WazaType::Hikimen:
+						if (HitPtr->GetColType() != HitType::Head) {
+							IsDamage = false;
+						}
+						break;
+					case FPS_n2::WazaType::Kote:
+						if (HitPtr->GetColType() != HitType::Arm) {
+							IsDamage = false;
+						}
+						break;
+					case FPS_n2::WazaType::Hikigote:
+						if (HitPtr->GetColType() != HitType::Arm) {
+							IsDamage = false;
+						}
+						break;
+					case FPS_n2::WazaType::Dou:
+						if (HitPtr->GetColType() != HitType::Body) {
+							IsDamage = false;
+						}
+						break;
+					default:
+						break;
+					}
+					if (IsDamage) {
+						m_Damage.Add(AttackID, this->m_MyID, *Damage, Kihaku, (StartPos - *pEndPos).magnitude() / BaseLen, HitPtr->GetColType(), pWazaType, *pEndPos);
+					}
 				}
 				return true;
 			}
@@ -423,7 +445,11 @@ namespace FPS_n2 {
 			}
 
 			//掛け声
-			if ((m_CharaAction == EnumArmAnimType::Ready) && m_YaTimer <= 0.f && CharaMove::GetInputControl().GetPADSPress(PADS::JUMP)) {
+			if (
+				(m_CharaAction == EnumArmAnimType::Ready || m_CharaAction == EnumArmAnimType::Tsuba) &&
+				m_YaTimer == 0.f &&
+				CharaMove::GetInputControl().GetPADSPress(PADS::JUMP)
+				) {
 				SE->Get(static_cast<int>(SoundEnum::Voice_Ya)).Play_3D(0, GetEyePosition(), Scale_Rate * 35.f);
 				m_YaTimer = GetYaTimerMax();
 				m_HeartUp = 50.f;

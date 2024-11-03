@@ -40,12 +40,17 @@ namespace FPS_n2 {
 			std::string		m_EventSelect;
 
 			GraphHandle		m_GameStart;
-			float m_GameStartTimer{ 0.f };
+			float m_GameStartTimer{ 2.f };
 
 			float m_GameStartAlpha{ 0.f };
 			float m_GameStartScale{ 0.f };
 
+			bool m_IsGameStart{ false };
 			float m_Timer{ 0.f };
+			bool m_IsPlayable{ false };
+
+			float							m_ScoreUp0{ 0.f };
+			float							m_ScoreUp1{ 0.f };
 		private:
 			auto		GetMyPlayerID(void) const noexcept {
 				if (m_NetWorkController) {

@@ -78,9 +78,11 @@ namespace FPS_n2 {
 
 			m_GameStartAlpha = 0.f;
 			m_GameStartScale = 0.f;
-			m_GameStartTimer = 1.f;
+			m_GameStartTimer = 2.f;
 
+			m_IsGameStart = false;
 			m_Timer = 180.f;
+			m_IsPlayable = false;
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
@@ -155,6 +157,7 @@ namespace FPS_n2 {
 				this->m_UIclass.InitGaugeParam(0, static_cast<int>(Chara->GetYaTimerMax() * 10.f), static_cast<int>(Chara->GetYaTimerMax() * 10.f));
 				this->m_UIclass.InitGaugeParam(1, static_cast<int>(Chara->GetStaminaMax() * 10000.f), static_cast<int>(Chara->GetStaminaMax() * 10000.f));
 				this->m_UIclass.InitGaugeParam(2, static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f));
+				this->m_UIclass.SetfloatParam(1, std::max(m_GameStartTimer, 0.f));
 			}
 
 			auto* Pad = PadControl::Instance();
@@ -211,12 +214,13 @@ namespace FPS_n2 {
 				}
 				if (m_EventScene.IsEnd()) {
 					DrawParts->SetDistortionPer(120.f);
-					FadeControl::SetFadeIn(m_isTraining ? 2.f : 0.5f);
+					FadeControl::SetFadeIn(1.f / (m_isTraining ? 0.5f : 2.f));
 					m_EventScene.Dispose();
 					m_IsEventSceneActive = false;
 					Pad->SetGuideUpdate();
 					if (!m_isTraining) {
-						m_GameStartTimer = 1.f;
+						m_GameStartTimer = 2.f;
+						m_IsGameStart = false;
 						m_Timer = 180.f;
 					}
 				}
@@ -237,18 +241,18 @@ namespace FPS_n2 {
 #endif // DEBUG
 			//FirstDoingv
 			if (!m_isTraining) {
-				if (m_GameStartTimer > 0.f) {
-					float Per = std::clamp((0.8f - m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
+				if (m_GameStartTimer > 1.f) {
+					float Per = std::clamp((1.4f - m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
 					m_GameStartAlpha = Lerp(0.f, 1.f, Per);
 					m_GameStartScale = Lerp(0.f, 1.0f, Per);
 				}
-				else if (m_GameStartTimer > 0.f - 1.f) {
-					float Per = std::clamp((0.f - m_GameStartTimer), 0.f, 1.f);//0to1
+				else if (m_GameStartTimer > 0.f) {
+					float Per = std::clamp((1.f - m_GameStartTimer), 0.f, 1.f);//0to1
 					m_GameStartAlpha = Lerp(1.f, 1.f, Per);
 					m_GameStartScale = Lerp(1.0f, 1.1f, Per);
 				}
-				else if (m_GameStartTimer > -1.f - 0.2f) {
-					float Per = std::clamp((-1.f - m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
+				else if (m_GameStartTimer > -0.2f) {
+					float Per = std::clamp((-m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
 					m_GameStartAlpha = Lerp(1.f, 0.f, Per);
 					m_GameStartScale = Lerp(1.1f, 5.f, Per);
 				}
@@ -256,17 +260,35 @@ namespace FPS_n2 {
 					m_GameStartAlpha = 0.f;
 					m_GameStartScale = 0.f;
 				}
-				m_GameStartTimer -= DrawParts->GetDeltaTime();
-
-				m_Timer -= DrawParts->GetDeltaTime();
+				m_GameStartTimer = std::max(m_GameStartTimer - DrawParts->GetDeltaTime(), -1.f);
+				if (!m_IsPlayable) {
+					if (!m_IsGameStart && m_GameStartTimer <= 0.f) {
+						m_IsGameStart = true;
+						m_IsPlayable = true;
+					}
+				}
+				else {
+					m_Timer -= DrawParts->GetDeltaTime();
+					//どちらかが勝利したので停止
+					if (PlayerMngr->PutAddScoreFlag()) {
+						m_IsPlayable = false;
+						if (PlayerMngr->GetWinPlayer() == GetMyPlayerID()) {
+							m_ScoreUp0 = 1.f;
+						}
+						else {
+							m_ScoreUp1 = 1.f;
+						}
+					}
+				}
+			}
+			else {
+				m_IsPlayable = FadeControl::IsFadeClear();
 			}
 			//Input,AI
 			{
 				InputControl MyInput;
-				if (DXDraw::Instance()->IsPause() || !FadeControl::IsFadeClear()) {
+				if (m_IsPlayable) {
 					MyInput.ResetAllInput();
-				}
-				else {
 					MyInput.SetInputStart(Pad->GetLS_Y(), Pad->GetLS_X());
 					MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
 					MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
@@ -282,8 +304,8 @@ namespace FPS_n2 {
 					{
 						Vector2DX MSVec = Chara->GetBambooVec();
 						MSVec.Set(
-							std::clamp(MSVec.x + Pad->GetLS_Y() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-10), deg2rad(10)),
-							std::clamp(MSVec.y + Pad->GetLS_X() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-30), deg2rad(30))
+							std::clamp(Chara->GetBambooVec().x + MyInput.GetAddxRad() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-10), deg2rad(10)),
+							std::clamp(Chara->GetBambooVec().y + MyInput.GetAddyRad() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-30), deg2rad(30))
 						);
 						MyInput.SetxRad(MSVec.x);
 						MyInput.SetyRad(MSVec.y);
@@ -344,15 +366,17 @@ namespace FPS_n2 {
 						}
 						else {
 							InputControl OtherInput;
-							p->GetAI()->Execute(&OtherInput, m_isTraining);
-							{
-								Vector2DX MSVec;
-								MSVec.Set(
-									std::clamp(c->GetBambooVec().x + Pad->GetLS_Y() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-10), deg2rad(10)),
-									std::clamp(c->GetBambooVec().y + Pad->GetLS_X() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-30), deg2rad(30))
-								);
-								MyInput.SetxRad(MSVec.x);
-								MyInput.SetyRad(MSVec.y);
+							if (m_IsPlayable) {
+								p->GetAI()->Execute(&OtherInput, m_isTraining);
+								{
+									Vector2DX MSVec;
+									MSVec.Set(
+										std::clamp(c->GetBambooVec().x + OtherInput.GetAddxRad() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-10), deg2rad(10)),
+										std::clamp(c->GetBambooVec().y + OtherInput.GetAddyRad() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-30), deg2rad(30))
+									);
+									OtherInput.SetxRad(MSVec.x);
+									OtherInput.SetyRad(MSVec.y);
+								}
 							}
 							c->SetInput(OtherInput, true);
 						}
@@ -488,13 +512,18 @@ namespace FPS_n2 {
 			//UIパラメーター
 			{
 				//NvsN
-				this->m_UIclass.SetIntParam(0, 0);
-				this->m_UIclass.SetIntParam(1, 0);
+				this->m_UIclass.SetIntParam(0, PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore());
+				this->m_UIclass.SetIntParam(1, PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
+				this->m_UIclass.SetfloatParam(3, m_ScoreUp0);
+				this->m_UIclass.SetfloatParam(4, m_ScoreUp1);
+				Easing(&m_ScoreUp0, 0.f, 0.95f, EasingType::OutExpo);
+				Easing(&m_ScoreUp1, 0.f, 0.95f, EasingType::OutExpo);
 				//timer
 				this->m_UIclass.SetfloatParam(0, m_Timer);
+				this->m_UIclass.SetfloatParam(1, std::max(m_GameStartTimer,0.f));
 				//心拍数
 				this->m_UIclass.SetIntParam(2, static_cast<int>(Chara->GetHeartRate()));
-				this->m_UIclass.SetfloatParam(1, Chara->GetHeartRatePow());
+				this->m_UIclass.SetfloatParam(2, Chara->GetHeartRatePow());
 				//ゲージ
 				this->m_UIclass.SetGaugeParam(0, static_cast<int>((Chara->GetYaTimerMax() - Chara->GetYaTimer()) * 10.f), static_cast<int>(Chara->GetYaTimerMax() * 10.f), 2);
 				this->m_UIclass.SetGaugeParam(1, static_cast<int>(Chara->GetStamina() * 10000.f), static_cast<int>(Chara->GetStaminaMax() * 10000.f), 15);
@@ -580,7 +609,7 @@ namespace FPS_n2 {
 			}
 		}
 
-		void MainGameScene::SetShadowDraw_Sub(void) const noexcept {
+		void			MainGameScene::SetShadowDraw_Sub(void) const noexcept {
 			if (m_IsEventSceneActive) {
 				m_EventScene.SetShadowDraw();
 			}
@@ -638,7 +667,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void MainGameScene::DrawUI_In_Sub(void) const noexcept {
+		void			MainGameScene::DrawUI_In_Sub(void) const noexcept {
 			//UI
 			if (DXDraw::Instance()->IsPause()) {
 				m_PauseMenuControl.DrawPause();

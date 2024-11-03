@@ -41,6 +41,7 @@ namespace FPS_n2 {
 				void Init(void) noexcept {
 					m_Chara = nullptr;
 					this->m_AI = nullptr;
+					m_Score = 0;
 				}
 
 				void Dispose(void) noexcept {
@@ -57,6 +58,8 @@ namespace FPS_n2 {
 		private:
 			std::vector<std::unique_ptr<PlayerControl>>	m_Player;
 			int											m_PlayerNum{};
+			bool										m_ScoreChangeFlag{ false };
+			PlayerID									m_LastAddScore{ InvalidID };
 		private:
 			PlayerManager(void) noexcept {}
 			PlayerManager(const PlayerManager&) = delete;
@@ -82,6 +85,18 @@ namespace FPS_n2 {
 				}
 				m_Player.clear();
 			}
+		public:
+			void AddScore(PlayerID ID) {
+				m_ScoreChangeFlag = true;
+				GetPlayer(ID)->AddScore(1);
+				m_LastAddScore = ID;
+			}
+			const auto PutAddScoreFlag() {
+				auto ret = m_ScoreChangeFlag;
+				m_ScoreChangeFlag = false;
+				return ret;
+			}
+			const auto& GetWinPlayer() const noexcept { return this->m_LastAddScore; }
 		};
 	}
 };

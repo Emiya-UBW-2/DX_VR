@@ -287,7 +287,7 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				//気合
 				{
-					float radius = Lerp(static_cast<float>(1.f), static_cast<float>(1.01f), floatParam[1]);
+					float radius = Lerp(static_cast<float>(1.f), static_cast<float>(1.01f), floatParam[2]);
 					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
 						255, 150, 155);
 					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255 * (m_GaugeParam[0].GetGaugeMax() - m_GaugeParam[0].GetGaugeBuff()) / m_GaugeParam[0].GetGaugeMax());
@@ -302,29 +302,45 @@ namespace FPS_n2 {
 						255, 255, 255);
 				}
 				int xp1, yp1;
-				//タイム,スコア
+				//タイム
 				{
 					xp1 = DrawParts->GetUIY(30);
-					yp1 = DrawParts->GetUIY(10);
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
-						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + DrawParts->GetUIY(300), yp1, White, Black, "%d:%05.2f",
-						static_cast<int>(floatParam[0] / 60.f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
-
+					yp1 = DrawParts->GetUIY(static_cast<int>(Lerp(10.0f, -50.f, std::clamp(floatParam[1] - 0.5f, 0.f, 1.f))));
+					float per = std::cos(DX_PI_F * 10.f * floatParam[1]);
+					if ((per * 255.f) > 1.f) {
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
+						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
+							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, Yellow, Black, "TIME");
+						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
+							FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + DrawParts->GetUIY(300), yp1, Yellow, Black, "%d:%05.2f",
+							static_cast<int>(floatParam[0] / 60.f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					}
+				}
+				//スコア
+				{
 					xp1 = DrawParts->GetUIY(1920 / 2);
-					yp1 = DrawParts->GetUIY(10);
+					yp1 = DrawParts->GetUIY(50);
+
+					int Y1add = DrawParts->GetUIY(static_cast<int>(Lerp(0.f, -16.f, floatParam[3])));
 					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
-						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "%d : %d", intParam[0], intParam[1]);
+						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1 - DrawParts->GetUIY(10), yp1 + Y1add, White, Black, "%d", intParam[0]);
+
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18),
+						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, White, Black, ":");
+
+					int Y2add = DrawParts->GetUIY(static_cast<int>(Lerp(0.f, -16.f, floatParam[4])));
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
+						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1 + DrawParts->GetUIY(10), yp1 + Y2add, White, Black, "%d", intParam[1]);
 				}
 				//情報
 				{
 					//心拍数
 					xp1 = DrawParts->GetUIY((24 + 300 + 24 + 32));
 					yp1 = DrawParts->GetUIY(1080 - 80 - 28 * 1 + 6 / 2);
-					float per = Lerp(0.4f, 0.6f, floatParam[1]);
+					float per = Lerp(0.4f, 0.6f, floatParam[2]);
 					if ((per * 255.f) > 1.f) {
-						int radius = static_cast<int>(Lerp(static_cast<float>(DrawParts->GetUIY(24)), static_cast<float>(DrawParts->GetUIY(32)), floatParam[1]));
+						int radius = static_cast<int>(Lerp(static_cast<float>(DrawParts->GetUIY(24)), static_cast<float>(DrawParts->GetUIY(32)), floatParam[2]));
 						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
 						WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
 							255, 0, 0);
