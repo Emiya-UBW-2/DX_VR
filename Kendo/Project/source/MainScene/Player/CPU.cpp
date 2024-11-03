@@ -43,6 +43,7 @@ namespace FPS_n2 {
 			}
 			if (m_Counter > 3.f) {
 				//shotMain_Key = true;
+				shotSub_Key = true;
 			}
 
 			if (Chara->GetBambooVec().magnitude() > deg2rad(1)) {
@@ -59,7 +60,8 @@ namespace FPS_n2 {
 			MyInput->SetInputPADS(PADS::MOVE_A, A_key);
 			MyInput->SetInputPADS(PADS::MOVE_D, D_key);
 			MyInput->SetInputPADS(PADS::SHOT, shotMain_Key);
-			MyInput->SetInputPADS(PADS::JUMP, shotSub_Key);
+			MyInput->SetInputPADS(PADS::AIM, shotSub_Key);
+			MyInput->SetInputPADS(PADS::JUMP, false);
 		}
 	}
 };

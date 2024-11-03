@@ -208,6 +208,49 @@ namespace FPS_n2 {
 						}
 					}
 					else {
+						int HitDamagePow = value.Damage;
+						switch (value.m_WazaType) {
+						case FPS_n2::WazaType::Men:
+							HitDamagePow = HitDamagePow * 100 / 100;
+							if (value.GetHitType() != HitType::Head) {
+								HitDamagePow = HitDamagePow * 10 / 100;
+							}
+							break;
+						case FPS_n2::WazaType::SuriageMen:
+							HitDamagePow = HitDamagePow * 100 / 100;
+							if (value.GetHitType() != HitType::Head) {
+								HitDamagePow = HitDamagePow * 10 / 100;
+							}
+							break;
+						case FPS_n2::WazaType::Hikimen:
+							HitDamagePow = HitDamagePow * 150 / 100;
+							if (value.GetHitType() != HitType::Head) {
+								HitDamagePow = HitDamagePow * 10 / 100;
+							}
+							break;
+						case FPS_n2::WazaType::Kote:
+							HitDamagePow = HitDamagePow * 450 / 100;
+							if (value.GetHitType() != HitType::Arm) {
+								HitDamagePow = HitDamagePow * 10 / 100;
+							}
+							break;
+						case FPS_n2::WazaType::Hikigote:
+							HitDamagePow = HitDamagePow * 450 / 100;
+							if (value.GetHitType() != HitType::Arm) {
+								HitDamagePow = HitDamagePow * 10 / 100;
+							}
+							break;
+						case FPS_n2::WazaType::Dou:
+							HitDamagePow = HitDamagePow * 500 / 100;
+							if (value.GetHitType() != HitType::Body) {
+								HitDamagePow = HitDamagePow * 10 / 100;
+							}
+							break;
+						default:
+							break;
+						}
+
+
 						int HitPosPoints = 10;
 						{
 							float MinPoint = 0.5f;
@@ -226,11 +269,11 @@ namespace FPS_n2 {
 						}
 
 						int TotalAddHits = 0;
-						TotalAddHits += value.Damage;
+						TotalAddHits += HitDamagePow;
 						TotalAddHits += HitPosPoints;
 						TotalAddHits += KihakuPoints;
 
-						HitMark::Instance()->Add(value.m_Pos, value.GetHitType(), static_cast<float>(value.Damage) / 100.f);
+						HitMark::Instance()->Add(value.m_Pos, value.GetHitType(), static_cast<float>(HitDamagePow) / 100.f);
 
 						float offset = 0.f;
 
@@ -257,7 +300,7 @@ namespace FPS_n2 {
 							break;
 						}
 
-						SideLog::Instance()->Add(3.0f, offset, (value.Damage >= 0) ? Green : Red, "威力　　 %s%4d pt", (value.Damage >= 0) ? "+" : "-", std::abs(value.Damage)); offset += 0.1f;
+						SideLog::Instance()->Add(3.0f, offset, (HitDamagePow >= 0) ? Green : Red, "威力　　 %s%4d pt", (HitDamagePow >= 0) ? "+" : "-", std::abs(HitDamagePow)); offset += 0.1f;
 						SideLog::Instance()->Add(3.0f, offset, (HitPosPoints >= 0) ? Green : Red, "打突部位 %s%4d pt", (HitPosPoints >= 0) ? "+" : "-", std::abs(HitPosPoints)); offset += 0.1f;
 						SideLog::Instance()->Add(3.0f, offset, (KihakuPoints >= 0) ? Green : Red, "気迫　　 %s%4d pt", (KihakuPoints >= 0) ? "+" : "-", std::abs(KihakuPoints)); offset += 0.1f;
 						SideLog::Instance()->Add(3.0f, offset, (TotalAddHits >= 0) ? Green : Red, "計　　　 %s%4d pt", (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits)); offset += 0.1f;
