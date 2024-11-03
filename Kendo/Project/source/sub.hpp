@@ -102,6 +102,7 @@ namespace FPS_n2 {
 		void			Dispose(void) noexcept;
 	public:
 		void			Add(const Vector3DX& Pos, HitType color, float Per) noexcept {
+			m_HitPos.at(m_HitNow).m_Pos2D.z = -100.f;
 			m_HitPos.at(m_HitNow).m_Pos = Pos;
 			m_HitPos.at(m_HitNow).m_Color = color;
 			m_HitPos.at(m_HitNow).m_Per = Per;

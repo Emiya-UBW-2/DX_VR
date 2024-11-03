@@ -128,9 +128,9 @@ namespace FPS_n2 {
 	}
 	void HitMark::Update(void) noexcept {
 		auto* DrawParts = DXDraw::Instance();
-		for (auto& h: m_HitPos) {
+		for (auto& h : m_HitPos) {
 			if (h.Time <= 0.f) { continue; }
-			if (h.Time == h.TimeMax) {
+			if (h.Time == h.TimeMax || h.m_Pos2D.z == -100.f) {
 				auto tmp = ConvWorldPosToScreenPos(h.m_Pos.get());
 				if (tmp.z >= 0.f && tmp.z <= 1.f) {
 					h.m_Pos2D = tmp;
