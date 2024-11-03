@@ -25,7 +25,6 @@ namespace FPS_n2 {
 			float										m_ConcussionPer{ 0.f };
 			UIClass										m_UIclass;
 			PauseMenuControl							m_PauseMenuControl;
-			int											m_UILayer{ 0 };
 			//NetWork
 			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };
 			std::vector<DamageEvent>					m_DamageEvents;

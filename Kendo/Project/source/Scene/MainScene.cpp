@@ -33,7 +33,7 @@ namespace FPS_n2 {
 			//
 			BattleResourceMngr->Set();
 
-			SetShadowScale(0.75f);
+			SetShadowScale(1.5f);
 			//
 			BackGround->Init();
 			//
@@ -67,7 +67,6 @@ namespace FPS_n2 {
 			}
 			//UI
 			this->m_UIclass.Set();
-			//this->m_UILayer = UISystem::Instance()->AddUI("data/UI/MainLoop.json");
 			//
 			this->m_DamageEvents.clear();
 			auto* NetBrowser = NetWorkBrowser::Instance();
@@ -527,7 +526,6 @@ namespace FPS_n2 {
 				DrawParts->Set_is_lens(false);
 				DrawParts->Set_zoom_lens(1.f);
 			}
-			UniversalUI::UISystem::Instance()->DelUI(m_UILayer);
 			if (this->m_IsEnd) {//ƒ^ƒCƒgƒ‹‚É–ß‚é
 				SetNextSelect(0);
 			}

@@ -185,30 +185,33 @@ namespace FPS_n2 {
 		//
 		bool			CharacterClass::SetDamageEvent(const DamageEvent& value) noexcept {
 			if (this->m_MyID == value.DamageID) {
-				if (m_DamageCoolTime == 0.f && (GetRand(100) <= 30)) {
+				if (m_DamageCoolTime == 0.f) {
 					auto* SE = SoundPool::Instance();
 					SE->Get(static_cast<int>(SoundEnum::Kendo_Hit)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale_Rate * 15.f);
 					m_DamageCoolTime = static_cast<float>(SE->Get(static_cast<int>(SoundEnum::Kendo_Hit)).GetTotalTIme(0, 0)) / 1000.f;
-				}
-				//コンカッション
-				if (this->m_MyID == this->m_ViewID) {
-					switch (value.GetHitType()) {
-					case HitType::Head://面
-						m_ConcussionSwitch = true;
-						break;
-					case HitType::Body://胴
-						m_ConcussionSwitch = true;
-						break;
-					case HitType::Arm://小手
-						m_ConcussionSwitch = true;
-						break;
-					case HitType::Leg:
-					default:
-						break;
+
+					//コンカッション
+					if (this->m_MyID == this->m_ViewID) {
+						switch (value.GetHitType()) {
+						case HitType::Head://面
+							m_ConcussionSwitch = true;
+							break;
+						case HitType::Body://胴
+							m_ConcussionSwitch = true;
+							break;
+						case HitType::Arm://小手
+							m_ConcussionSwitch = true;
+							break;
+						case HitType::Leg:
+						default:
+							break;
+						}
 					}
-				}
-				else {
-					HitMark::Instance()->Add(value.m_Pos, value.GetHitType(), static_cast<float>(value.Damage) / 100.f);
+					else {
+						HitMark::Instance()->Add(value.m_Pos, value.GetHitType(), static_cast<float>(value.Damage) / 100.f);
+						SideLog::Instance()->Add(5.0f, (value.Damage >= 0) ? Green : Red, "打突 +%4d pt", std::abs(value.Damage));
+						SideLog::Instance()->Add(5.0f, (value.Damage >= 0) ? Green : Red, "気迫 -%4d pt", std::abs(value.Damage));
+					}
 				}
 				//ダメージ
 				return true;
@@ -348,6 +351,7 @@ namespace FPS_n2 {
 				}
 				if ((m_GuardCoolDownTimer == 0.f) && CharaMove::GetInputControl().GetPADSPress(PADS::AIM)) {
 					m_CharaAction = EnumArmAnimType::GuardSuriage;//上ガード
+					m_GuardCoolDownTimer = GetGuardCoolDownTimerMax();
 				}
 				{
 					auto Dir = CharaMove::GetEyeMatrix().zvec() * -1.f; Dir.y = (0.f); Dir = Dir.normalized();
@@ -495,9 +499,6 @@ namespace FPS_n2 {
 					}
 				}
 				m_GuardTimer = std::max(m_GuardTimer - DrawParts->GetDeltaTime(), 0.f);
-				if (m_CharaAction != EnumArmAnimType::GuardSuriage) {
-					m_GuardCoolDownTimer = GetGuardCoolDownTimerMax();
-				}
 			}
 			break;
 			case EnumArmAnimType::Max:

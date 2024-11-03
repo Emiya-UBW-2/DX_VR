@@ -27,60 +27,62 @@ namespace FPS_n2 {
 					}
 				}
 				void			DrawGauge(int xp1, int yp1, int xp2, int yp2,
-					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) const noexcept {
+					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorFull, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) const noexcept {
 					//return;
 					auto* WindowParts = WindowSystem::DrawControl::Instance();
 					int ParamBuf = static_cast<int>(this->m_Buffer + 0.5f);
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White, FALSE);
-					int length = (xp2 - 1) - (xp1 + 1);
+					int Edge = 0;
+					int length = (xp2 - Edge) - (xp1 + Edge);
 
-					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
+					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
 					COLOR_U8 ColorAddSub = (ParamBuf > this->m_Now) ? ColorSub : ColorAdd;
 
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
-						xp1 + 1 + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + 1,
-						xp2 - 1, yp2 - 1,
+						xp1 + Edge + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + Edge,
+						xp2 - Edge, yp2 - Edge,
 						Black, TRUE);
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
-						xp1 + 1, yp1 + 1,
-						xp1 + 1 + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - 1,
+						xp1 + Edge, yp1 + Edge,
+						xp1 + Edge + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - Edge,
 						GetColor(Color.r, Color.g, Color.b), TRUE);
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
-						xp1 + 1 + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + 1,
-						xp1 + 1 + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - 1,
+						xp1 + Edge + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + Edge,
+						xp1 + Edge + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - Edge,
 						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), TRUE);
 				}
 				void			DrawGaugeUp(int xp1, int yp1, int xp2, int yp2,
-					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
+					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorFull, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
 					//return;
 					auto* WindowParts = WindowSystem::DrawControl::Instance();
 					int ParamBuf = static_cast<int>(this->m_Buffer + 0.5f);
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White, FALSE);
-					int length = (yp2 - 1) - (yp1 + 1);
+					int Edge = 0;
+					int length = (yp2 - Edge) - (yp1 + Edge);
 
-					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
+					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
 					COLOR_U8 ColorAddSub = (ParamBuf > this->m_Now) ? ColorSub : ColorAdd;
 
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
-						xp1 + 1, yp1 + 1,
-						xp2 - 1, yp2 - 1 - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
+						xp1 + Edge, yp1 + Edge,
+						xp2 - Edge, yp2 - Edge - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
 						Black, TRUE);
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
-						xp1 + 1, yp2 - 1 - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
-						xp2 + 1, yp2 - 1,
+						xp1 + Edge, yp2 - Edge - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
+						xp2 + Edge, yp2 - Edge,
 						GetColor(Color.r, Color.g, Color.b), TRUE);
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
-						xp1 + 1, yp2 - 1 - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
-						xp2 + 1, yp2 - 1 - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
+						xp1 + Edge, yp2 - Edge - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
+						xp2 + Edge, yp2 - Edge - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
 						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), TRUE);
 				}
 				void			DrawGaugeCircleLeft(int xp1, int yp1,
-					COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
+					COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorFull, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
 					const GraphHandle* CircleObj, float deg, int Add) noexcept {
 					//return;
 					auto* WindowParts = WindowSystem::DrawControl::Instance();
 					auto* DrawParts = DXDraw::Instance();
-					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, (float)this->m_Now / (float)this->m_Max);
+					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, (float)this->m_Now / (float)this->m_Max);
 					COLOR_U8 ColorAddSub = (this->m_Buffer > this->m_Now) ? ColorSub : ColorAdd;
 					float per = std::clamp((float)this->m_Now / this->m_Max, 0.f, 1.f);
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
@@ -107,12 +109,12 @@ namespace FPS_n2 {
 					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
 				void			DrawGaugeCircleRight(int xp1, int yp1,
-					COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
+					COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorFull, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
 					const GraphHandle* CircleObj, float deg, int Add) noexcept {
 					//return;
 					auto* DrawParts = DXDraw::Instance();
 					auto* WindowParts = WindowSystem::DrawControl::Instance();
-					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, (float)this->m_Now / (float)this->m_Max);
+					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, (float)this->m_Now / (float)this->m_Max);
 					COLOR_U8 ColorAddSub = (this->m_Buffer > this->m_Now) ? ColorSub : ColorAdd;
 					float per = std::clamp((float)this->m_Now / this->m_Max, 0.f, 1.f);
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
@@ -149,49 +151,51 @@ namespace FPS_n2 {
 				const auto& GetGaugeMax() const noexcept { return this->m_Max; }
 
 				void			DrawGaugeMask(int xp1, int yp1, int xp2, int yp2,
-					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
+					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorFull, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
 					//return;
 					int ParamBuf = static_cast<int>(this->m_Buffer + 0.5f);
 					DrawBox(xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White, FALSE);
-					int length = (xp2 - 1) - (xp1 + 1);
+					int Edge = 0;
+					int length = (xp2 - Edge) - (xp1 + Edge);
 
-					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
+					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
 					COLOR_U8 ColorAddSub = (ParamBuf > this->m_Now) ? ColorSub : ColorAdd;
 
 					DrawBox(
-						xp1 + 1 + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + 1,
-						xp2 - 1, yp2 - 1,
+						xp1 + Edge + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + Edge,
+						xp2 - Edge, yp2 - Edge,
 						Black, TRUE);
 					DrawBox(
-						xp1 + 1, yp1 + 1,
-						xp1 + 1 + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - 1,
+						xp1 + Edge, yp1 + Edge,
+						xp1 + Edge + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - Edge,
 						GetColor(Color.r, Color.g, Color.b), TRUE);
 					DrawBox(
-						xp1 + 1 + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + 1,
-						xp1 + 1 + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - 1,
+						xp1 + Edge + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + Edge,
+						xp1 + Edge + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - Edge,
 						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), TRUE);
 				}
 				void			DrawGaugeUpMask(int xp1, int yp1, int xp2, int yp2,
-					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
+					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorFull, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
 					//return;
 					int ParamBuf = static_cast<int>(this->m_Buffer + 0.5f);
 					DrawBox(xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White, FALSE);
-					int length = (yp2 - 1) - (yp1 + 1);
+					int Edge = 0;
+					int length = (yp2 - Edge) - (yp1 + Edge);
 
-					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, (float)this->m_Now / (float)this->m_Max);
+					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, (float)this->m_Now / (float)this->m_Max);
 					COLOR_U8 ColorAddSub = (ParamBuf > this->m_Now) ? ColorSub : ColorAdd;
 
 					DrawBox(
-						xp1 + 1, yp1 + 1,
-						xp2 - 1, yp2 - 1 - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
+						xp1 + Edge, yp1 + Edge,
+						xp2 - Edge, yp2 - Edge - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
 						Black, TRUE);
 					DrawBox(
-						xp1 + 1, yp2 - 1 - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
-						xp2 + 1, yp2 - 1,
+						xp1 + Edge, yp2 - Edge - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
+						xp2 + Edge, yp2 - Edge,
 						GetColor(Color.r, Color.g, Color.b), TRUE);
 					DrawBox(
-						xp1 + 1, yp2 - 1 - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
-						xp2 + 1, yp2 - 1 - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
+						xp1 + Edge, yp2 - Edge - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
+						xp2 + Edge, yp2 - Edge - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
 						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), TRUE);
 				}
 			private:
@@ -202,11 +206,16 @@ namespace FPS_n2 {
 					ans += static_cast<int>(std::clamp<float>((1.f - per) * 2.f - 1.f, 0.f, 1.f) * (float)pInt1);
 					return ans;
 				}
-				COLOR_U8 Blend3Color(COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, float per) const noexcept {
+				COLOR_U8 Blend3Color(COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 Color4, float per) const noexcept {
 					int r, g, b;
 					r = Blend3Int(Color1.r, Color2.r, Color3.r, per);
 					g = Blend3Int(Color1.g, Color2.g, Color3.g, per);
 					b = Blend3Int(Color1.b, Color2.b, Color3.b, per);
+					if (per >= 1.f) {
+						r = Color4.r;
+						g = Color4.g;
+						b = Color4.b;
+					}
 					return GetColorU8(r, g, b, 255);
 				}
 			};
@@ -300,7 +309,7 @@ namespace FPS_n2 {
 					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
 						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
 					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
-						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + DrawParts->GetUIY(240), yp1, White, Black, "%d:%05.2f",
+						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + DrawParts->GetUIY(300), yp1, White, Black, "%d:%05.2f",
 						static_cast<int>(floatParam[0] / 60.f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
 
 					xp1 = DrawParts->GetUIY(1920 / 2);
@@ -311,8 +320,8 @@ namespace FPS_n2 {
 				//情報
 				{
 					//心拍数
-					xp1 = DrawParts->GetUIY((24 + 300 + 8 + 32));
-					yp1 = DrawParts->GetUIY((1080 - 96 + 30 / 2));
+					xp1 = DrawParts->GetUIY((24 + 300 + 24 + 32));
+					yp1 = DrawParts->GetUIY(1080 - 80 - 28 * 1 + 6 / 2);
 					float per = Lerp(0.4f, 0.6f, floatParam[1]);
 					if ((per * 255.f) > 1.f) {
 						int radius = static_cast<int>(Lerp(static_cast<float>(DrawParts->GetUIY(24)), static_cast<float>(DrawParts->GetUIY(32)), floatParam[1]));
@@ -330,31 +339,37 @@ namespace FPS_n2 {
 
 					//気合
 					xp1 = DrawParts->GetUIY(24 + 9 * 2);
-					yp1 = DrawParts->GetUIY(1080 - 96);
+					yp1 = DrawParts->GetUIY(1080 - 80 - 28 * 2);
 
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18),
+						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - DrawParts->GetUIY(2), White, Black, "気合");
 					m_GaugeParam[0].DrawGauge(
 						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(6),
-						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
+						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
 
 					//スタミナ
 					xp1 = DrawParts->GetUIY(24 + 9 * 1);
-					yp1 = DrawParts->GetUIY(1080 - 96 + 18);
+					yp1 = DrawParts->GetUIY(1080 - 80 - 28 * 1);
 
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18),
+						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - DrawParts->GetUIY(2), White, Black, "スタミナ");
 					m_GaugeParam[1].DrawGauge(
 						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(6),
-						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
+						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
 
-					//スタミナ
+					//ガード
 					xp1 = DrawParts->GetUIY(24 + 9 * 0);
-					yp1 = DrawParts->GetUIY(1080 - 96 + 18 * 2);
+					yp1 = DrawParts->GetUIY(1080 - 80 - 28 * 0);
 
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18),
+						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - DrawParts->GetUIY(2), White, Black, "ガード");
 					m_GaugeParam[2].DrawGauge(
 						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(6),
-						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(0, 255, 0, 255),
+						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
 				}
