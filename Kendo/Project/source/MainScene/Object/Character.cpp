@@ -13,18 +13,18 @@ namespace FPS_n2 {
 				break;
 			case EnumArmAnimType::Men:
 			case EnumArmAnimType::HikiMen:
-				SE->Get(static_cast<int>(SoundEnum::Voice_Men)).Play_3D(0, GetEyePosition(), Scale_Rate * 35.f);
+				SE->Get(static_cast<int>(SoundEnum::Voice_Men)).Play_3D(0, GetEyePosition(), Scale3DRate * 35.f);
 				break;
 			case EnumArmAnimType::Kote:
 			case EnumArmAnimType::HikiKote:
-				SE->Get(static_cast<int>(SoundEnum::Voice_Kote)).Play_3D(0, GetEyePosition(), Scale_Rate * 35.f);
+				SE->Get(static_cast<int>(SoundEnum::Voice_Kote)).Play_3D(0, GetEyePosition(), Scale3DRate * 35.f);
 				break;
 			case EnumArmAnimType::Dou:
 			case EnumArmAnimType::HikiDou:
-				SE->Get(static_cast<int>(SoundEnum::Voice_Dou)).Play_3D(0, GetEyePosition(), Scale_Rate * 35.f);
+				SE->Get(static_cast<int>(SoundEnum::Voice_Dou)).Play_3D(0, GetEyePosition(), Scale3DRate * 35.f);
 				break;
 			case EnumArmAnimType::Tsuki:
-				SE->Get(static_cast<int>(SoundEnum::Voice_Tsuki)).Play_3D(0, GetEyePosition(), Scale_Rate * 35.f);
+				SE->Get(static_cast<int>(SoundEnum::Voice_Tsuki)).Play_3D(0, GetEyePosition(), Scale3DRate * 35.f);
 				break;
 			case EnumArmAnimType::Tsuba:
 				break;
@@ -62,7 +62,7 @@ namespace FPS_n2 {
 			auto IsFront = ((Vector3DX::Dot(Dir, Vec)) > 0.f);
 			auto cross = Vector3DX::Cross(Dir, Vec).y;
 
-			float Radius = (0.15f + 0.15f) * Scale_Rate;
+			float Radius = (0.15f + 0.15f) * Scale3DRate;
 			if (Len < Radius) {
 				if (IsFront) {
 					if (abs(cross) < 0.4f) {
@@ -82,7 +82,7 @@ namespace FPS_n2 {
 
 			this->m_CharaSound = -1;
 			auto* SE = SoundPool::Instance();
-			SE->Get(static_cast<int>(SoundEnum::Kendo_Swing)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale_Rate * 5.f);
+			SE->Get(static_cast<int>(SoundEnum::Kendo_Swing)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale3DRate * 5.f);
 		}
 		//
 		void			CharacterClass::OverrideAction(void) noexcept {
@@ -187,7 +187,7 @@ namespace FPS_n2 {
 			if (this->m_MyID == value.DamageID) {
 				if (m_DamageCoolTime == 0.f) {
 					auto* SE = SoundPool::Instance();
-					SE->Get(static_cast<int>(SoundEnum::Kendo_Hit)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale_Rate * 15.f);
+					SE->Get(static_cast<int>(SoundEnum::Kendo_Hit)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale3DRate * 15.f);
 					m_DamageCoolTime = static_cast<float>(SE->Get(static_cast<int>(SoundEnum::Kendo_Hit)).GetTotalTIme(0, 0)) / 1000.f;
 
 					//コンカッション
@@ -320,7 +320,7 @@ namespace FPS_n2 {
 		}
 		//
 		bool		CharacterClass::CheckDamageRay(HitPoint* Damage, PlayerID AttackID, float Kihaku, WazaType pWazaType, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
-			if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, GetMove().GetPos()) <= 2.0f * Scale_Rate)) { return false; }
+			if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, GetMove().GetPos()) <= 2.0f * Scale3DRate)) { return false; }
 			float BaseLen = (StartPos - *pEndPos).magnitude();
 			//被弾処理
 			auto* HitPtr = HitBoxControl::GetLineHit(StartPos, pEndPos);
@@ -418,10 +418,10 @@ namespace FPS_n2 {
 					float cost = Vector3DX::Dot(Vec, Dir);
 					auto IsFront = (cost > cos(deg2rad(40)));
 					if (IsFront) {
-						pp_y = std::clamp(-std::atan2f(sint, cost), -deg2rad(60), deg2rad(60)) * 9.f / Frame_Rate;
+						pp_y = std::clamp(-std::atan2f(sint, cost), -deg2rad(60), deg2rad(60)) * 9.f / FrameRate;
 					}
 					else {
-						pp_y = -deg2rad(60) * 9.f / Frame_Rate;
+						pp_y = -deg2rad(60) * 9.f / FrameRate;
 					}
 				}
 				Input.SetAddxRad(0.f);
@@ -462,7 +462,7 @@ namespace FPS_n2 {
 			bool IsOutArea = false;
 			{
 				Vector3DX Vec = this->m_move.GetPos() - Vector3DX::zero();
-				float Len = 11.f / 2.f * Scale_Rate;
+				float Len = 11.f / 2.f * Scale3DRate;
 				if ((Vec.x < -Len || Len < Vec.x) ||
 					(Vec.z < -Len || Len < Vec.z)) {
 					IsOutArea = true;
@@ -475,7 +475,7 @@ namespace FPS_n2 {
 				m_YaTimer == 0.f &&
 				CharaMove::GetInputControl().GetPADSPress(PADS::JUMP)
 				) {
-				SE->Get(static_cast<int>(SoundEnum::Voice_Ya)).Play_3D(0, GetEyePosition(), Scale_Rate * 35.f);
+				SE->Get(static_cast<int>(SoundEnum::Voice_Ya)).Play_3D(0, GetEyePosition(), Scale3DRate * 35.f);
 				m_YaTimer = GetYaTimerMax();
 				m_HeartUp = 50.f;
 			}
@@ -505,7 +505,7 @@ namespace FPS_n2 {
 
 					float cost = Vector3DX::Dot(Vec, Dir);
 					auto IsFront = (cost > cos(deg2rad(40)));
-					float Radius = 3.5f * Scale_Rate;
+					float Radius = 3.5f * Scale3DRate;
 					if (!IsOutArea && (Len < Radius) && IsFront) {
 						if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
 							m_CharaAction = EnumArmAnimType::Men;
@@ -725,9 +725,9 @@ namespace FPS_n2 {
 					if ((9.f < Time && Time < 10.f)) {
 						if (this->m_CharaSound != 1) {
 							this->m_CharaSound = 1;
-							if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::LeftFoot)).magnitude() < Scale_Rate * 5.f * 1.5f) {
+							if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::LeftFoot)).magnitude() < Scale3DRate * 5.f * 1.5f) {
 
-								SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::LeftFoot), Scale_Rate * 5.f);
+								SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::LeftFoot), Scale3DRate * 5.f);
 							}
 						}
 					}
@@ -735,9 +735,9 @@ namespace FPS_n2 {
 					if ((27.f < Time && Time < 28.f)) {
 						if (this->m_CharaSound != 3) {
 							this->m_CharaSound = 3;
-							if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::RightFoot)).magnitude() < Scale_Rate * 5.f * 1.5f) {
+							if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::RightFoot)).magnitude() < Scale3DRate * 5.f * 1.5f) {
 
-								SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::RightFoot), Scale_Rate * 5.f);
+								SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::RightFoot), Scale3DRate * 5.f);
 							}
 						}
 					}
@@ -747,8 +747,8 @@ namespace FPS_n2 {
 						if ((9.f < Time && Time < 10.f)) {
 							if (this->m_CharaSound != 7) {
 								this->m_CharaSound = 7;
-								if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::RightFoot)).magnitude() < Scale_Rate * 5.f * 1.5f) {
-									SE->Get(static_cast<int>(SoundEnum::Kendo_Foot)).Play_3D(0, GetFramePosition(CharaFrame::RightFoot), Scale_Rate * 15.f);
+								if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::RightFoot)).magnitude() < Scale3DRate * 5.f * 1.5f) {
+									SE->Get(static_cast<int>(SoundEnum::Kendo_Foot)).Play_3D(0, GetFramePosition(CharaFrame::RightFoot), Scale3DRate * 15.f);
 								}
 							}
 						}
@@ -758,8 +758,8 @@ namespace FPS_n2 {
 						if ((3.f < Time && Time < 4.f)) {
 							if (this->m_CharaSound != 5) {
 								this->m_CharaSound = 5;
-								if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::LeftFoot)).magnitude() < Scale_Rate * 5.f * 1.5f) {
-									SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::LeftFoot), Scale_Rate * 15.f);
+								if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::LeftFoot)).magnitude() < Scale3DRate * 5.f * 1.5f) {
+									SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::LeftFoot), Scale3DRate * 15.f);
 								}
 							}
 						}
@@ -767,8 +767,8 @@ namespace FPS_n2 {
 						if ((10.f < Time && Time < 11.f)							) {
 							if (this->m_CharaSound != 6) {
 								this->m_CharaSound = 6;
-								if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::RightFoot)).magnitude() < Scale_Rate * 5.f * 1.5f) {
-									SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::RightFoot), Scale_Rate * 15.f);
+								if ((DrawParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::RightFoot)).magnitude() < Scale3DRate * 5.f * 1.5f) {
+									SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::RightFoot), Scale3DRate * 15.f);
 								}
 							}
 						}
@@ -780,7 +780,7 @@ namespace FPS_n2 {
 			}
 			//しゃがみ音
 			if (CharaMove::GetSquatSwitch()) {
-				SE->Get(static_cast<int>(SoundEnum::StandupFoot)).Play_3D(0, GetFramePosition(CharaFrame::Upper), Scale_Rate * 3.f);
+				SE->Get(static_cast<int>(SoundEnum::StandupFoot)).Play_3D(0, GetFramePosition(CharaFrame::Upper), Scale3DRate * 3.f);
 			}
 			//心拍音
 #ifdef DEBUG
@@ -836,14 +836,14 @@ namespace FPS_n2 {
 
 				auto Vec = (TgtPos - MyPos); Vec.y = (0.f); Vec = Vec.normalized();
 
-				float Radius = (0.5f + 0.25f) * Scale_Rate;
+				float Radius = (0.5f + 0.25f) * Scale3DRate;
 				pos = TgtPos - Vec * Radius;
 			}
 			//壁判定
-			BackGround->CheckMapWall(this->m_move.GetRePos(), &pos, 0.6f * Scale_Rate);
+			BackGround->CheckMapWall(this->m_move.GetRePos(), &pos, 0.6f * Scale3DRate);
 			//ほかプレイヤーとの判定
 			{
-				float Radius = 0.5f * Scale_Rate;
+				float Radius = 0.5f * Scale3DRate;
 				for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 					if (i == this->m_MyID) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
@@ -868,7 +868,7 @@ namespace FPS_n2 {
 				Matrix3x3DX Mat; Mat.SetRadian(CharaMove::GetRadBuf().x, CharaMove::GetRadBuf().y, 0.f);
 				this->m_move.SetMat(Mat);
 			}
-			m_EyePosition = (GetFramePosition(CharaFrame::LeftEye) + GetFramePosition(CharaFrame::RightEye)) / 2.f + (CharaMove::GetEyeRotMatrix() * CharaMove::GetBaseRotMatrix()).zvec() * (-0.04f * Scale_Rate);
+			m_EyePosition = (GetFramePosition(CharaFrame::LeftEye) + GetFramePosition(CharaFrame::RightEye)) / 2.f + (CharaMove::GetEyeRotMatrix() * CharaMove::GetBaseRotMatrix()).zvec() * (-0.04f * Scale3DRate);
 			auto* OptionParts = OPTION::Instance();
 			bool HeadBobbing = ((this->m_MyID != this->m_ViewID) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 			if (HeadBobbing) {
@@ -904,7 +904,7 @@ namespace FPS_n2 {
 						Vector3DX EndPos = this->m_Weapon_Ptr->GetFramePosition(WeaponObject::WeaponFrame::End);
 						Vector3DX VecA = (EndPos - StartPos).normalized();
 						bool IsHit = false;
-						float Radius = 0.025f * Scale_Rate * 2.f;
+						float Radius = 0.025f * Scale3DRate * 2.f;
 						Vector3DX HitPos;
 						for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 							if (i == this->m_MyID) { continue; }
@@ -943,17 +943,17 @@ namespace FPS_n2 {
 
 									if (m_TsubaSoundCoolTime == 0.f && (this->m_Weapon_Ptr->GetMoveSpeed() > 1.f)) {
 										auto* SE = SoundPool::Instance();
-										SE->Get(static_cast<int>(SoundEnum::Kendo_Tsuba)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale_Rate * 15.f, static_cast<int>(128.f * this->m_Weapon_Ptr->GetMoveSpeed()));
+										SE->Get(static_cast<int>(SoundEnum::Kendo_Tsuba)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale3DRate * 15.f, static_cast<int>(128.f * this->m_Weapon_Ptr->GetMoveSpeed()));
 										m_TsubaSoundCoolTime = static_cast<float>(SE->Get(static_cast<int>(SoundEnum::Kendo_Tsuba)).GetTotalTIme(0, 0)) / 1000.f * 0.5f;
 									}
 									WeaponAddRotMat = Matrix3x3DX::RotAxis(Vector3DX::right(), m_BambooVec.x) * Matrix3x3DX::RotAxis(Vector3DX::forward(), m_BambooVec.y);
 									if (IsGuardAction(m_CharaAction) || IsAttacking()) {
 										if (m_GuardHit == 0.f) {
 #ifdef _USE_EFFEKSEER_
-											EffectControl::SetOnce(EffectResource::Effect::ef_gndsmoke, HitPos, (c->GetEyePosition() - GetEyePosition()).normalized(), 0.1f * Scale_Rate);
+											EffectControl::SetOnce(EffectResource::Effect::ef_gndsmoke, HitPos, (c->GetEyePosition() - GetEyePosition()).normalized(), 0.1f * Scale3DRate);
 #endif
 										}
-										m_GuardHit = 3.f / Frame_Rate;
+										m_GuardHit = 3.f / FrameRate;
 									}
 									break;
 							}
@@ -964,7 +964,7 @@ namespace FPS_n2 {
 					}
 					this->m_Weapon_Ptr->ResetMove(WeaponAddRotMat * WeaponBaseRotMat, WeaponBasePos);
 
-					this->m_Weapon_Ptr->SetMoveSpeed((PrevPos - this->m_Weapon_Ptr->GetFramePosition(WeaponObject::WeaponFrame::End)).magnitude()* DrawParts->GetFps() / Frame_Rate);
+					this->m_Weapon_Ptr->SetMoveSpeed((PrevPos - this->m_Weapon_Ptr->GetFramePosition(WeaponObject::WeaponFrame::End)).magnitude()* DrawParts->GetFps() / FrameRate);
 				}
 				//手の位置を制御
 				if ((m_MyID == this->m_ViewID) || this->CanLookTarget) {

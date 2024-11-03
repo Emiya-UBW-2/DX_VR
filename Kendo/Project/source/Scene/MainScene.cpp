@@ -2,6 +2,8 @@
 #include "MainScene.hpp"
 #include "../MainScene/NetworkBrowser.hpp"
 
+#include "../MainScene/Object/Judge.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			MainGameScene::Load_Sub(void) noexcept {
@@ -16,6 +18,12 @@ namespace FPS_n2 {
 			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 				BattleResourceMngr->LoadChara("Chara", (PlayerID)index);
 				BattleResourceMngr->LoadWeapon("Bamboo", (PlayerID)index);
+			}
+			//
+			if (!m_isTraining) {
+				BattleResourceMngr->LoadJudge("Suit", 0);
+				BattleResourceMngr->LoadJudge("Suit", 1);
+				BattleResourceMngr->LoadJudge("Suit", 2);
 			}
 			//UI
 			this->m_UIclass.Load();
@@ -32,6 +40,7 @@ namespace FPS_n2 {
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
 			//
 			BattleResourceMngr->Set();
 
@@ -56,16 +65,27 @@ namespace FPS_n2 {
 				//人の座標設定
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale_Rate) * static_cast<float>(index * 2 - 1));
+					pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale3DRate) * static_cast<float>(index * 2 - 1));
 
-					Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale_Rate;
-					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale_Rate, &EndPos, true)) {
+					Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale3DRate;
+					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale3DRate, &EndPos, true)) {
 						pos_t = EndPos;
 					}
 					c->ValueSet((PlayerID)index, CharaTypeID::Team);
 					c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
 				}
 				p->GetAI()->Init((PlayerID)index);
+			}
+			if (!m_isTraining) {
+				for (int index = 0; index < 3; ++index) {
+					auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&)*ObjMngr->GetObj((int)ObjType::Judge, index);
+					//人の座標設定
+					{
+						float Rad = deg2rad(-90.f + 120.f * static_cast<float>(index));
+						Vector3DX pos_t = Vector3DX::vget(0.f, 0.f, (3.5f * Scale3DRate));
+						c->MovePoint(Rad, Matrix3x3DX::Vtrans(pos_t, Matrix3x3DX::RotAxis(Vector3DX::up(), Rad)));
+					}
+				}
 			}
 			//UI
 			this->m_UIclass.Set();
@@ -219,6 +239,7 @@ namespace FPS_n2 {
 			if (m_IsEventSceneActive) {
 				m_EventScene.GetDeltaTime();
 				if (Pad->GetKey(PADS::INTERACT).trigger()) {
+					SE->Get(static_cast<int>(SoundEnumCommon::UI_OK)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 					m_EventScene.Skip();
 				}
 				if (m_EventScene.IsEnd()) {
@@ -318,10 +339,10 @@ namespace FPS_n2 {
 									auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 									{
 										Vector3DX pos_t;
-										pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale_Rate) * static_cast<float>(index * 2 - 1));
+										pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale3DRate) * static_cast<float>(index * 2 - 1));
 
-										Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale_Rate;
-										if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale_Rate, &EndPos, true)) {
+										Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale3DRate;
+										if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale3DRate, &EndPos, true)) {
 											pos_t = EndPos;
 										}
 										c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
@@ -529,17 +550,17 @@ namespace FPS_n2 {
 				case 0:
 				case 3:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().xvec() * (2.f * Scale_Rate);
+					CamPos += ViewChara->GetEyeMatrix().xvec() * (2.f * Scale3DRate);
 					break;
 				case 1:
 				case 4:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().yvec() * (2.f * Scale_Rate) + ViewChara->GetEyeMatrix().zvec() * 0.1f;
+					CamPos += ViewChara->GetEyeMatrix().yvec() * (2.f * Scale3DRate) + ViewChara->GetEyeMatrix().zvec() * 0.1f;
 					break;
 				case 2:
 				case 5:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().zvec() * (-2.f * Scale_Rate);
+					CamPos += ViewChara->GetEyeMatrix().zvec() * (-2.f * Scale3DRate);
 					break;
 				default:
 					break;
@@ -547,9 +568,9 @@ namespace FPS_n2 {
 #endif
 				DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
 				//info
-				DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale_Rate * 0.3f, Scale_Rate * 20.f);
+				DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.3f, Scale3DRate * 20.f);
 				//DoF
-				PostPassEffect::Instance()->Set_DoFNearFar(Scale_Rate * 0.3f, Scale_Rate * 5.f, Scale_Rate * 0.1f, Scale_Rate * 20.f);
+				PostPassEffect::Instance()->Set_DoFNearFar(Scale3DRate * 0.3f, Scale3DRate * 5.f, Scale3DRate * 0.1f, Scale3DRate * 20.f);
 			}
 			//竹刀判定
 			{
@@ -581,7 +602,7 @@ namespace FPS_n2 {
 				}
 				DrawParts->Set_is_Blackout(m_Concussion > 0.f);
 				if (m_Concussion == 1.f) {
-					CameraShake::Instance()->SetCamShake(0.5f, 0.01f * Scale_Rate);
+					CameraShake::Instance()->SetCamShake(0.5f, 0.01f * Scale3DRate);
 				}
 				if (m_Concussion > 0.9f) {
 					Easing(&m_ConcussionPer, 1.f, 0.1f, EasingType::OutExpo);

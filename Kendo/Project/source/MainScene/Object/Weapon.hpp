@@ -25,14 +25,14 @@ namespace FPS_n2 {
 				auto* AnimMngr = ArmAnimManager::Instance();
 				auto* Ptr = AnimMngr->GetAnimData(ArmAnimeSets[0].at(static_cast<size_t>(ID)));
 				if (!Ptr) { return 0.f; }
-				return static_cast<float>(Ptr->GetTotalTime()) / Frame_Rate;
+				return static_cast<float>(Ptr->GetTotalTime()) / FrameRate;
 			}
 			auto	GetArmAnimeNowMatrix(EnumArmAnimType ID, Matrix4x4DX* Ret) const noexcept {
 				//銃の位置を指定するアニメ
 				auto* AnimMngr = ArmAnimManager::Instance();
 				auto* Ptr = AnimMngr->GetAnimData(ArmAnimeSets[0].at(static_cast<size_t>(ID)));
 				if (!Ptr) { return false; }
-				*Ret = AnimMngr->GetAnimNow(Ptr, this->m_UpperAnim * Frame_Rate).GetMatrix();
+				*Ret = AnimMngr->GetAnimNow(Ptr, this->m_UpperAnim * FrameRate).GetMatrix();
 				return true;
 			}
 		public:

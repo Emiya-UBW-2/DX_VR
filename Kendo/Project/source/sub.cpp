@@ -3,6 +3,7 @@
 #include "MainScene/Player/Player.hpp"
 #include "MainScene/Object/Character.hpp"
 #include "MainScene/Object/Weapon.hpp"
+#include "MainScene/Object/Judge.hpp"
 
 const FPS_n2::CommonBattleResource* SingletonBase<FPS_n2::CommonBattleResource>::m_Singleton = nullptr;
 const FPS_n2::HitMark* SingletonBase<FPS_n2::HitMark>::m_Singleton = nullptr;
@@ -131,6 +132,22 @@ namespace FPS_n2 {
 		Ptr->Init();
 		auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(ID)->GetChara();
 		c->SetWeaponPtr(Ptr);
+	}
+	void CommonBattleResource::LoadJudge(const std::string& FolderName, int ID) noexcept
+	{
+		auto* ObjMngr = ObjectManager::Instance();
+
+		std::string Path = "data/Charactor/";
+		Path += FolderName;
+		Path += "/";
+
+		std::shared_ptr<ObjectBaseClass> Ptr = std::make_shared<Sceneclass::JudgeClass>();
+		ObjMngr->AddObject(Ptr);
+		ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
+		Ptr->Init();
+
+		auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&)Ptr;
+		c->SetID(ID);
 	}
 	void HitMark::Load(void) noexcept {
 		this->MenGraph.Load("data/UI/hit_Men.bmp");

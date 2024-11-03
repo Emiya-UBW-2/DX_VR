@@ -71,6 +71,8 @@ namespace FPS_n2 {
 	public:
 		void			LoadChara(const std::string& FolderName, PlayerID ID) noexcept;
 		void			LoadWeapon(const std::string& FolderName, PlayerID ID) noexcept;
+
+		void			LoadJudge(const std::string& FolderName, int ID) noexcept;
 	};
 
 	class HitMark : public SingletonBase<HitMark> {

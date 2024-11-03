@@ -19,7 +19,7 @@ namespace FPS_n2 {
 			bool IsOutArea = false;
 			{
 				Vector3DX Vec = Chara->GetMove().GetPos() - Vector3DX::zero();
-				float Len = 11.f / 2.f * Scale_Rate;
+				float Len = 11.f / 2.f * Scale3DRate;
 				if ((Vec.x < -Len || Len < Vec.x) ||
 					(Vec.z < -Len || Len < Vec.z)) {
 					IsOutArea = true;

@@ -209,7 +209,7 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				Vector3DX vecBuf = Matrix3x3DX::Vtrans(m_VecTotal, Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_yrad_Upper));
 				if (m_MoverPer > 0.f) {
-					vecBuf = vecBuf.normalized() * (GetSpeedPer() * Frame_Rate * DrawParts->GetDeltaTime());
+					vecBuf = vecBuf.normalized() * (GetSpeedPer() * FrameRate * DrawParts->GetDeltaTime());
 				}
 				return vecBuf;
 			}
@@ -368,9 +368,9 @@ namespace FPS_n2 {
 				m_UpperMatrix = Matrix3x3DX::RotAxis(Vector3DX::right(), XRad) * Matrix3x3DX::RotAxis(Vector3DX::up(), Lerp(this->m_yrad_BottomChange, 0.f, m_RunPer));
 				m_EyeMatrix = Matrix3x3DX::RotAxis(Vector3DX::right(), XRad) * Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_yrad_BottomChange);
 				//ˆÚ“®‚ÌÛ‚Ì‹“_‚Ì—h‚ê
-				float SwingPer = GetRun() ? 0.5f : ((GetVec().magnitude() * DrawParts->GetFps() / Frame_Rate) / 0.65f);
+				float SwingPer = GetRun() ? 0.5f : ((GetVec().magnitude() * DrawParts->GetFps() / FrameRate) / 0.65f);
 				if (SwingPer > 0.f) {
-					this->m_MoveEyePosTimer += SwingPer * deg2rad(GetRun() ? 12.f : 5.f) * Frame_Rate * DrawParts->GetDeltaTime();
+					this->m_MoveEyePosTimer += SwingPer * deg2rad(GetRun() ? 12.f : 5.f) * FrameRate * DrawParts->GetDeltaTime();
 				}
 				else {
 					this->m_MoveEyePosTimer = 0.f;
@@ -416,7 +416,7 @@ namespace FPS_n2 {
 			bool	Colcheck(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
 				if (HitCheck_Sphere_Capsule(
 					m_pos.get(), m_radius,
-					StartPos.get(), pEndPos->get(), 0.001f * Scale_Rate
+					StartPos.get(), pEndPos->get(), 0.001f * Scale3DRate
 				) == TRUE) {
 					VECTOR pos1 = StartPos.get();
 					VECTOR pos2 = pEndPos->get();

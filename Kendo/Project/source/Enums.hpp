@@ -3,13 +3,10 @@
 
 namespace FPS_n2 {
 	//’è”
-	static const float Frame_Rate{ 60.f };
-
-	static const float Scale_Rate{ 12.5f };
-
 	enum class ObjType : uint8_t {
 		Human,
 		Weapon,
+		Judge,
 	};
 	enum class SoundEnum : uint8_t {
 		EV1_1 = static_cast<uint8_t>(SoundEnumCommon::Num),

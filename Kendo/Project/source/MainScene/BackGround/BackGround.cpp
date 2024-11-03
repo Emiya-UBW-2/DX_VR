@@ -3,7 +3,7 @@
 const FPS_n2::BackGround::BackGroundClass* SingletonBase<FPS_n2::BackGround::BackGroundClass>::m_Singleton = nullptr;
 namespace FPS_n2 {
 	namespace BackGround {
-#define PLAYER_HIT_HEIGHT			(1.6f * Scale_Rate)		// 当たり判定カプセルの高さ
+#define PLAYER_HIT_HEIGHT			(1.6f * Scale3DRate)		// 当たり判定カプセルの高さ
 		bool BackGroundClass::CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius) const noexcept
 		{
 			std::vector<std::pair<const MV1*, int>> cols;
@@ -16,7 +16,7 @@ namespace FPS_n2 {
 			for (const auto& objs : cols) {
 				if ((&objs - &cols.front()) != 0) {
 					if (GetMinLenSegmentToPoint(StartPos, StartPos + Vector3DX::up(), objs.first->GetMatrix().pos()) >=
-						(20.f * Scale_Rate + (Radius * 3.f) + MoveVector.magnitude())) {
+						(20.f * Scale3DRate + (Radius * 3.f) + MoveVector.magnitude())) {
 						continue;
 					}
 				}
@@ -68,7 +68,7 @@ namespace FPS_n2 {
 						bool HitF = false;
 						for (auto& h_d : kabe_) {
 							if (GetHitCapsuleToTriangle(*EndPos + Vector3DX::up() * (Radius + 0.1f), *EndPos + Vector3DX::up() * (PLAYER_HIT_HEIGHT), Radius, h_d.Position[0], h_d.Position[1], h_d.Position[2])) {// プレイヤーと当たっているかを判定
-								*EndPos += Vector3DX(h_d.Normal) * (0.015f * Scale_Rate);					// 当たっていたら規定距離分プレイヤーを壁の法線方向に移動させる
+								*EndPos += Vector3DX(h_d.Normal) * (0.015f * Scale3DRate);					// 当たっていたら規定距離分プレイヤーを壁の法線方向に移動させる
 								//EndPos->y(StartPos.y);
 								bool j = false;
 								for (auto& h_d2 : kabe_) {

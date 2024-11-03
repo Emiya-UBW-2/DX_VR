@@ -105,6 +105,12 @@
     <ClInclude Include="source\MainScene\EventScene\EventScene.hpp">
       <Filter>ソース ファイル\MainScene\EventScene</Filter>
     </ClInclude>
+    <ClInclude Include="source\MainScene\Object\Judge.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\Object\JudgeEnum.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -157,6 +163,9 @@
     </ClCompile>
     <ClCompile Include="source\MainScene\EventScene\EventScene.cpp">
       <Filter>ソース ファイル\MainScene\EventScene</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\Judge.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
