@@ -23,6 +23,7 @@ namespace FPS_n2 {
 			HitMark::Instance()->Load();
 			//
 			m_GameStart.Load("data/UI/GameStart.png");
+			m_Once.Load("data/UI/Once.png");
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -79,6 +80,10 @@ namespace FPS_n2 {
 			m_GameStartAlpha = 0.f;
 			m_GameStartScale = 0.f;
 			m_GameStartTimer = 2.f;
+
+			m_WinOnceAlpha = 0.f;
+			m_WinOnceScale = 0.f;
+			m_WinOnceTimer = -1.f;
 
 			m_IsGameStart = false;
 			m_Timer = 180.f;
@@ -153,7 +158,7 @@ namespace FPS_n2 {
 			auto& Chara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 
 			//UIパラメーター
-			if (GetIsFirstLoop()) {
+			if (GetIsFirstLoop() || FadeControl::IsFadeAll()) {
 				this->m_UIclass.InitGaugeParam(0, static_cast<int>(Chara->GetYaTimerMax() * 10.f), static_cast<int>(Chara->GetYaTimerMax() * 10.f));
 				this->m_UIclass.InitGaugeParam(1, static_cast<int>(Chara->GetStaminaMax() * 10000.f), static_cast<int>(Chara->GetStaminaMax() * 10000.f));
 				this->m_UIclass.InitGaugeParam(2, static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f));
@@ -241,36 +246,91 @@ namespace FPS_n2 {
 #endif // DEBUG
 			//FirstDoingv
 			if (!m_isTraining) {
-				if (m_GameStartTimer > 1.f) {
-					float Per = std::clamp((1.4f - m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
-					m_GameStartAlpha = Lerp(0.f, 1.f, Per);
-					m_GameStartScale = Lerp(0.f, 1.0f, Per);
+				{
+					if (m_GameStartTimer > 1.f) {
+						float Per = std::clamp((1.4f - m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
+						m_GameStartAlpha = Lerp(0.f, 1.f, Per);
+						m_GameStartScale = Lerp(0.f, 1.0f, Per);
+					}
+					else if (m_GameStartTimer > 0.f) {
+						float Per = std::clamp((1.f - m_GameStartTimer), 0.f, 1.f);//0to1
+						m_GameStartAlpha = Lerp(1.f, 1.f, Per);
+						m_GameStartScale = Lerp(1.0f, 1.1f, Per);
+					}
+					else if (m_GameStartTimer > -0.2f) {
+						float Per = std::clamp((-m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
+						m_GameStartAlpha = Lerp(1.f, 0.f, Per);
+						m_GameStartScale = Lerp(1.1f, 5.f, Per);
+					}
+					else {
+						m_GameStartAlpha = 0.f;
+						m_GameStartScale = 0.f;
+					}
+					m_GameStartTimer = std::max(m_GameStartTimer - DrawParts->GetDeltaTime(), -1.f);
 				}
-				else if (m_GameStartTimer > 0.f) {
-					float Per = std::clamp((1.f - m_GameStartTimer), 0.f, 1.f);//0to1
-					m_GameStartAlpha = Lerp(1.f, 1.f, Per);
-					m_GameStartScale = Lerp(1.0f, 1.1f, Per);
+				{
+					if (m_WinOnceTimer > 1.f) {
+						float Per = std::clamp((1.4f - m_WinOnceTimer) / 0.2f, 0.f, 1.f);//0to1
+						m_WinOnceAlpha = Lerp(0.f, 1.f, Per);
+						m_WinOnceScale = Lerp(0.f, 1.0f, Per);
+					}
+					else if (m_WinOnceTimer > 0.f) {
+						float Per = std::clamp((1.f - m_WinOnceTimer), 0.f, 1.f);//0to1
+						m_WinOnceAlpha = Lerp(1.f, 1.f, Per);
+						m_WinOnceScale = Lerp(1.0f, 1.1f, Per);
+					}
+					else if (m_WinOnceTimer > -0.2f) {
+						float Per = std::clamp((-m_WinOnceTimer) / 0.2f, 0.f, 1.f);//0to1
+						m_WinOnceAlpha = Lerp(1.f, 0.f, Per);
+						m_WinOnceScale = Lerp(1.1f, 5.f, Per);
+					}
+					else {
+						m_WinOnceAlpha = 0.f;
+						m_WinOnceScale = 0.f;
+					}
+					m_WinOnceTimer = std::max(m_WinOnceTimer - DrawParts->GetDeltaTime(), -1.f);
 				}
-				else if (m_GameStartTimer > -0.2f) {
-					float Per = std::clamp((-m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
-					m_GameStartAlpha = Lerp(1.f, 0.f, Per);
-					m_GameStartScale = Lerp(1.1f, 5.f, Per);
-				}
-				else {
-					m_GameStartAlpha = 0.f;
-					m_GameStartScale = 0.f;
-				}
-				m_GameStartTimer = std::max(m_GameStartTimer - DrawParts->GetDeltaTime(), -1.f);
 				if (!m_IsPlayable) {
-					if (!m_IsGameStart && m_GameStartTimer <= 0.f) {
-						m_IsGameStart = true;
-						m_IsPlayable = true;
+					if (!m_IsGameStart) {
+						if (m_GameStartTimer <= 0.f) {
+							m_IsGameStart = true;
+							m_IsPlayable = true;
+						}
+					}
+					else if (m_IsGameStart) {
+						if (m_WinOnceTimer <= 0.f) {
+							if (FadeControl::IsFadeClear()) {
+								FadeControl::SetFadeOut(2.f);
+							}
+							if (FadeControl::IsFadeAll()) {
+								FadeControl::SetFadeIn(1.f / 2.f);
+								m_GameStartTimer = 2.f;
+								m_IsGameStart = false;
+								//初期化
+								for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
+									auto& p = PlayerMngr->GetPlayer(index);
+									auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+									{
+										Vector3DX pos_t;
+										pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale_Rate) * static_cast<float>(index * 2 - 1));
+
+										Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale_Rate;
+										if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale_Rate, &EndPos, true)) {
+											pos_t = EndPos;
+										}
+										c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
+									}
+								}
+								//
+							}
+						}
 					}
 				}
 				else {
 					m_Timer -= DrawParts->GetDeltaTime();
 					//どちらかが勝利したので停止
 					if (PlayerMngr->PutAddScoreFlag()) {
+						m_WinOnceTimer = 1.5f;
 						m_IsPlayable = false;
 						if (PlayerMngr->GetWinPlayer() == GetMyPlayerID()) {
 							m_ScoreUp0 = 1.f;
@@ -571,6 +631,8 @@ namespace FPS_n2 {
 			ObjectManager::Instance()->DeleteAll();
 			m_PauseMenuControl.DisposePause();
 			HitMark::Instance()->Dispose();
+			m_GameStart.Dispose();
+			m_Once.Dispose();
 		}
 
 		//
@@ -640,8 +702,8 @@ namespace FPS_n2 {
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
-			FadeControl::DrawFade();
 			if (m_IsEventSceneActive) {
+				FadeControl::DrawFade();
 				m_EventScene.UIDraw();
 			}
 			else {
@@ -656,15 +718,24 @@ namespace FPS_n2 {
 
 						if ((m_GameStartAlpha * 255.f) > 1.f) {
 							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameStartAlpha), 0, 255));
-							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
 							WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
 								&m_GameStart, xp1, yp1, m_GameStartScale,0.f, true);
 							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						}
 
+						if ((m_WinOnceAlpha * 255.f) > 1.f) {
+							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_WinOnceAlpha), 0, 255));
+							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+							WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+								&m_Once, xp1, yp1, m_WinOnceScale, 0.f, true);
+							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						}
 					}
 				}
+				FadeControl::DrawFade();
 			}
 		}
 		void			MainGameScene::DrawUI_In_Sub(void) const noexcept {

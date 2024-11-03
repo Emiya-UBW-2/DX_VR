@@ -356,13 +356,14 @@ namespace FPS_n2 {
 			for (auto& a : this->m_Arm) { a.Init(false); }
 			this->m_Arm[static_cast<int>(EnumArmAnimType::Ready)].Init(true);
 			this->m_CharaSound = -1;
-		}
-		void			CharacterClass::Init_Sub(void) noexcept {
+			StaminaControl::InitStamina();
+			m_YaTimer = 0.f;
 			m_HeartUp = 0.f;
 			m_HeartUpR = 0.f;
+		}
+		void			CharacterClass::Init_Sub(void) noexcept {
 			m_BambooVec.Set(0.f, 0.f);
 			m_BambooVecBase.Set(0.f, 0.f);
-			StaminaControl::InitStamina();
 			HitBoxControl::InitHitBox();
 			this->m_MoveOverRideFlag = false;
 #ifdef _USE_EFFEKSEER_
