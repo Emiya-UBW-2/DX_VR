@@ -290,6 +290,11 @@ namespace FPS_n2 {
 							m_IsGameStart = false;
 							m_Timer = 180.f;
 						}
+						else {
+							if (m_EventSelect == "data/Cut/Cut2.txt") {
+								m_IsEnd = true;
+							}
+						}
 					}
 					m_EventScene.Update();
 					return true;
@@ -547,6 +552,19 @@ namespace FPS_n2 {
 				}
 				else {
 					m_IsPlayable = FadeControl::IsFadeClear();
+
+					if (m_IsPlayable) {
+						m_TutorialTimer += DrawParts->GetDeltaTime();
+
+						if (m_TutorialTimer > 10.f) {
+							m_TutorialTimer = 0.f;
+
+							m_IsPlayable = false;
+
+							m_IsEventSceneFlag = true;
+							m_EventSelect = "data/Cut/Cut2.txt";
+						}
+					}
 				}
 				//Input,AI
 				{

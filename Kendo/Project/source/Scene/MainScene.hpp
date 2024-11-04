@@ -72,6 +72,8 @@ namespace FPS_n2 {
 
 			float m_DivideTimer{ 5.f };
 
+			float m_TutorialTimer{ 0.f };
+
 			float							m_ScoreUp0{ 0.f };
 			float							m_ScoreUp1{ 0.f };
 		private:
