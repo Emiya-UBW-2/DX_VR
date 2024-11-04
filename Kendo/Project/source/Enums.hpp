@@ -36,6 +36,8 @@ namespace FPS_n2 {
 		JudgeVoice_Start,
 		JudgeVoice_Stop,
 		JudgeVoice_Divide,
+		JudgeVoice_Win,
+		JudgeVoice_Draw,
 		//
 		CountDown,
 		Second,

@@ -44,6 +44,7 @@ namespace FPS_n2 {
 			GraphHandle*	m_pStart{ nullptr };
 			GraphHandle		m_Once;
 			GraphHandle		m_GameEnd;
+			GraphHandle		m_Result;
 
 			float m_GameStartTimer{ 2.f };
 			float m_GameStartAlpha{ 0.f };
@@ -64,6 +65,9 @@ namespace FPS_n2 {
 
 			bool m_IsDrawOneMinute{ false };
 			bool m_IsTimeUp{ false };
+			bool m_IsWinSound{ false };
+
+			bool m_IsResult{ false };
 
 			float							m_ScoreUp0{ 0.f };
 			float							m_ScoreUp1{ 0.f };

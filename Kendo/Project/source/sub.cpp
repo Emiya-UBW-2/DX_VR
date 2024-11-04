@@ -39,6 +39,8 @@ namespace FPS_n2 {
 		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Start), 2, "data/Sound/Voice/Start.wav", false);
 		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Stop), 2, "data/Sound/Voice/Stop.wav", false);
 		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Divide), 2, "data/Sound/Voice/Divide.wav", false);
+		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Win), 2, "data/Sound/Voice/Win.wav", false);
+		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Draw), 2, "data/Sound/Voice/Draw.wav", false);
 		//
 		SE->Add(static_cast<int>(SoundEnum::CountDown), 2, "data/Sound/SE/CountDown.wav", false);
 		SE->Add(static_cast<int>(SoundEnum::Second), 1, "data/Sound/SE/second.wav", false);
@@ -89,6 +91,8 @@ namespace FPS_n2 {
 		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Start));
 		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Stop));
 		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Divide));
+		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Win));
+		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Draw));
 
 		SE->Delete(static_cast<int>(SoundEnum::StandupFoot));
 		SE->Delete(static_cast<int>(SoundEnum::Heart));
