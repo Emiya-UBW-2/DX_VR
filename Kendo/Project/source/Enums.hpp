@@ -35,13 +35,10 @@ namespace FPS_n2 {
 		JudgeVoice_Dou,
 		JudgeVoice_Start,
 		JudgeVoice_Stop,
-		JudgeVoice_Divide,
 		JudgeVoice_Win,
 		JudgeVoice_Draw,
 		//
 		CountDown,
-		Second,
-		OneMunute,
 		TimeUp,
 
 		Max,
@@ -55,7 +52,6 @@ namespace FPS_n2 {
 		"Taiko1",
 		"EV2_1",
 		"EV2_2",
-		"",
 		"",
 		"",
 		"",

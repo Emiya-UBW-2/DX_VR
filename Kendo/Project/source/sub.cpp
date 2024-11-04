@@ -38,13 +38,10 @@ namespace FPS_n2 {
 		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Dou), 2, "data/Sound/Voice/Dou.wav", false);
 		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Start), 2, "data/Sound/Voice/Start.wav", false);
 		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Stop), 2, "data/Sound/Voice/Stop.wav", false);
-		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Divide), 2, "data/Sound/Voice/Divide.wav", false);
 		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Win), 2, "data/Sound/Voice/Win.wav", false);
 		SE->Add(static_cast<int>(SoundEnum::JudgeVoice_Draw), 2, "data/Sound/Voice/Draw.wav", false);
 		//
 		SE->Add(static_cast<int>(SoundEnum::CountDown), 2, "data/Sound/SE/CountDown.wav", false);
-		SE->Add(static_cast<int>(SoundEnum::Second), 1, "data/Sound/SE/second.wav", false);
-		SE->Add(static_cast<int>(SoundEnum::OneMunute), 1, "data/Sound/SE/OneMinute.wav", false);
 		SE->Add(static_cast<int>(SoundEnum::TimeUp), 1, "data/Sound/SE/TimeUp.wav", false);
 
 	}
@@ -59,7 +56,6 @@ namespace FPS_n2 {
 
 		SE->Get(static_cast<int>(SoundEnum::RunFoot)).SetVol_Local(128);
 		SE->Get(static_cast<int>(SoundEnum::Heart)).SetVol_Local(92);
-		SE->Get(static_cast<int>(SoundEnum::CountDown)).SetVol_Local(128);
 
 		SE->SetVol(OptionParts->GetParamFloat(EnumSaveParam::SE));
 	}
@@ -90,15 +86,13 @@ namespace FPS_n2 {
 		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Dou));
 		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Start));
 		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Stop));
-		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Divide));
 		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Win));
 		SE->Delete(static_cast<int>(SoundEnum::JudgeVoice_Draw));
 
 		SE->Delete(static_cast<int>(SoundEnum::StandupFoot));
 		SE->Delete(static_cast<int>(SoundEnum::Heart));
+
 		SE->Delete(static_cast<int>(SoundEnum::CountDown));
-		SE->Delete(static_cast<int>(SoundEnum::Second));
-		SE->Delete(static_cast<int>(SoundEnum::OneMunute));
 		SE->Delete(static_cast<int>(SoundEnum::TimeUp));
 	}
 	//

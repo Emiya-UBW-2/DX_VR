@@ -275,6 +275,7 @@ namespace FPS_n2 {
 				if (m_IsEventSceneActive) {
 					m_EventScene.GetDeltaTime();
 					if (Pad->GetKey(PADS::INTERACT).trigger()) {
+						SE->StopAll();
 						SE->Get(static_cast<int>(SoundEnumCommon::UI_OK)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						m_EventScene.Skip();
 					}
@@ -405,7 +406,7 @@ namespace FPS_n2 {
 						}
 						else if (m_IsGameStart) {
 							if (!m_IsGameEnd) {
-								if (m_WinOnceTimer <= 0.f) {
+								if (m_WinOnceTimer <= 0.f || m_DivideTimer < 0.f) {
 									if (FadeControl::IsFadeClear()) {
 										FadeControl::SetFadeOut(2.f);
 									}
@@ -518,10 +519,23 @@ namespace FPS_n2 {
 							//タイムアップ
 							if (m_IsTimeUp && (m_Timer < 0.f)) {
 								m_IsTimeUp = false;
+								SE->Get(static_cast<int>(SoundEnum::TimeUp)).Play(0, DX_PLAYTYPE_BACK, TRUE, 255);
+
 								SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Stop)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 								m_IsPlayable = false;
 								m_IsGameEnd = true;
 								m_GameEndTimer = 2.5f;
+							}
+							if (m_TimerSE!= (int)m_Timer) {
+								m_TimerSE = (int)m_Timer;
+								if (m_Timer <= 60.f) {
+									SE->Get(static_cast<int>(SoundEnum::CountDown)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+								}
+							}
+							//エリア外
+							if (m_DivideTimer < 0.f) {
+								SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Stop)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+								m_IsPlayable = false;
 							}
 							//残り1分
 							if (m_IsDrawOneMinute && (m_Timer < 60.f)) {
@@ -666,6 +680,29 @@ namespace FPS_n2 {
 								--j;
 							}
 						}
+					}
+				}
+				//別れタイマー
+				{
+					bool IsWaitOutSide = false;
+					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
+						auto& p = PlayerMngr->GetPlayer(index);
+						//場外判定
+						{
+							Vector3DX Vec = p->GetChara()->GetMove().GetPos() - Vector3DX::zero();
+							float Len = 11.f / 2.f * Scale3DRate;
+							if ((Vec.x < -Len || Len < Vec.x) ||
+								(Vec.z < -Len || Len < Vec.z)) {
+								IsWaitOutSide = true;
+								break;
+							}
+						}
+					}
+					if (IsWaitOutSide) {
+						m_DivideTimer -= DrawParts->GetDeltaTime();
+					}
+					else {
+						m_DivideTimer = 5.f;
 					}
 				}
 				//Execute
@@ -1006,7 +1043,15 @@ namespace FPS_n2 {
 							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						}
-						
+					
+						if (0 <= m_DivideTimer && m_DivideTimer < 5.f) {
+							if ((int)(m_DivideTimer * 100) % 30 < 15) {
+								WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
+									FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, DrawParts->GetUIY(32), DrawParts->GetUIY(384),
+									Yellow, Black,
+									"場外まであと%3.1f秒", m_DivideTimer);
+							}
+						}
 					}
 				}
 				FadeControl::DrawFade();

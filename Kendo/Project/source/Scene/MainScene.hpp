@@ -68,6 +68,9 @@ namespace FPS_n2 {
 			bool m_IsWinSound{ false };
 
 			bool m_IsResult{ false };
+			int m_TimerSE{ 0 };
+
+			float m_DivideTimer{ 5.f };
 
 			float							m_ScoreUp0{ 0.f };
 			float							m_ScoreUp1{ 0.f };

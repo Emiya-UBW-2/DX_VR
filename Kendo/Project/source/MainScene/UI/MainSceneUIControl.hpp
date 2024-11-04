@@ -324,6 +324,10 @@ namespace FPS_n2 {
 
 					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40), yp1 + DrawParts->GetUIY(20),
+						xp1 + DrawParts->GetUIY(10) + DrawParts->GetUIY(40), yp1 + DrawParts->GetUIY(28), Black, true);
+
+					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
+						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40 - 20 * intParam[1]), yp1 + DrawParts->GetUIY(20),
 						xp1 - DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(28), Red, true);
 					int Y1add = DrawParts->GetUIY(static_cast<int>(Lerp(0.f, -8.f, floatParam[3])));
 					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
@@ -336,7 +340,8 @@ namespace FPS_n2 {
 						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Gray25, Black, ":");
 
 					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
-						xp1 + DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(20), xp1 + DrawParts->GetUIY(10) + DrawParts->GetUIY(40), yp1 + DrawParts->GetUIY(28), White, true);
+						xp1 + DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(20),
+						xp1 + DrawParts->GetUIY(10) + DrawParts->GetUIY(40 - 20 * intParam[0]), yp1 + DrawParts->GetUIY(28), White, true);
 					int Y2add = DrawParts->GetUIY(static_cast<int>(Lerp(0.f, -8.f, floatParam[4])));
 					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
 						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1 + DrawParts->GetUIY(20), yp1 + Y2add, White, Black, "%d", intParam[1]);
