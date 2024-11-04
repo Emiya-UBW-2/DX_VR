@@ -21,9 +21,9 @@ namespace FPS_n2 {
 			}
 			//
 			if (!m_isTraining) {
-				BattleResourceMngr->LoadJudge("Suit", 0);
-				BattleResourceMngr->LoadJudge("Suit", 1);
-				BattleResourceMngr->LoadJudge("Suit", 2);
+				BattleResourceMngr->LoadJudge("Suit");
+				BattleResourceMngr->LoadJudge("Suit");
+				BattleResourceMngr->LoadJudge("Suit");
 			}
 			//UI
 			this->m_UIclass.Load();
@@ -33,6 +33,7 @@ namespace FPS_n2 {
 			m_GameStart.Load("data/UI/GameStart.png");
 			m_GameRestart.Load("data/UI/GameReStart.png");
 			m_Once.Load("data/UI/Once.png");
+			m_GameEnd.Load("data/UI/GameEnd.png");
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -80,10 +81,13 @@ namespace FPS_n2 {
 				for (int index = 0; index < 3; ++index) {
 					auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&)*ObjMngr->GetObj((int)ObjType::Judge, index);
 					//人の座標設定
+					c->SetWin(false, false);
+					//人の座標設定
 					{
 						float Rad = deg2rad(-90.f + 120.f * static_cast<float>(index));
 						Vector3DX pos_t = Vector3DX::vget(0.f, 0.f, (3.5f * Scale3DRate));
-						c->MovePoint(Rad, Matrix3x3DX::Vtrans(pos_t, Matrix3x3DX::RotAxis(Vector3DX::up(), Rad)));
+						pos_t = Matrix3x3DX::Vtrans(pos_t, Matrix3x3DX::RotAxis(Vector3DX::up(), Rad));
+						c->MovePoint(Rad, pos_t);
 					}
 				}
 			}
@@ -106,7 +110,14 @@ namespace FPS_n2 {
 			m_WinOnceScale = 0.f;
 			m_WinOnceTimer = -1.f;
 
+			m_GameEndAlpha = 0.f;
+			m_GameEndScale = 0.f;
+			m_GameEndTimer = -1.f;
+
 			m_IsGameStart = false;
+			m_IsGameEnd = false;
+			m_IsTimeUp = true;
+			m_IsDrawOneMinute = true;
 			m_Timer = 180.f;
 			m_IsPlayable = false;
 
@@ -251,7 +262,7 @@ namespace FPS_n2 {
 					if (!m_isTraining) {
 						m_GameStartTimer = 2.f;
 						m_IsGameStart = false;
-						m_Timer = 180.f;
+						m_Timer = 30.f;
 					}
 				}
 				m_EventScene.Update();
@@ -315,6 +326,28 @@ namespace FPS_n2 {
 					}
 					m_WinOnceTimer = std::max(m_WinOnceTimer - DrawParts->GetDeltaTime(), -1.f);
 				}
+				{
+					if (m_GameEndTimer > 1.f) {
+						float Per = std::clamp((1.4f - m_GameEndTimer) / 0.2f, 0.f, 1.f);//0to1
+						m_GameEndAlpha = Lerp(0.f, 1.f, Per);
+						m_GameEndScale = Lerp(0.f, 1.0f, Per);
+					}
+					else if (m_GameEndTimer > 0.f) {
+						float Per = std::clamp((1.f - m_GameEndTimer), 0.f, 1.f);//0to1
+						m_GameEndAlpha = Lerp(1.f, 1.f, Per);
+						m_GameEndScale = Lerp(1.0f, 1.1f, Per);
+					}
+					else if (m_GameEndTimer > -0.2f) {
+						float Per = std::clamp((-m_GameEndTimer) / 0.2f, 0.f, 1.f);//0to1
+						m_GameEndAlpha = Lerp(1.f, 0.f, Per);
+						m_GameEndScale = Lerp(1.1f, 5.f, Per);
+					}
+					else {
+						m_GameEndAlpha = 0.f;
+						m_GameEndScale = 0.f;
+					}
+					m_GameEndTimer = std::max(m_GameEndTimer - DrawParts->GetDeltaTime(), -1.f);
+				}
 				if (!m_IsPlayable) {
 					if (!m_IsGameStart) {
 						if (m_GameStartTimer <= 0.f) {
@@ -324,31 +357,60 @@ namespace FPS_n2 {
 						}
 					}
 					else if (m_IsGameStart) {
-						if (m_WinOnceTimer <= 0.f) {
-							if (FadeControl::IsFadeClear()) {
-								FadeControl::SetFadeOut(2.f);
-							}
-							if (FadeControl::IsFadeAll()) {
-								FadeControl::SetFadeIn(1.f / 2.f);
-								m_pStart = &m_GameRestart;
-								m_GameStartTimer = 2.f;
-								m_IsGameStart = false;
-								//初期化
-								for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-									auto& p = PlayerMngr->GetPlayer(index);
-									auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
-									{
-										Vector3DX pos_t;
-										pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale3DRate) * static_cast<float>(index * 2 - 1));
+						if (!m_IsGameEnd) {
+							if (m_WinOnceTimer <= 0.f) {
+								if (FadeControl::IsFadeClear()) {
+									FadeControl::SetFadeOut(2.f);
+								}
+								if (FadeControl::IsFadeAll()) {
+									FadeControl::SetFadeIn(1.f / 2.f);
+									if (!m_IsGameEnd) {
+										m_pStart = &m_GameRestart;
+										m_GameStartTimer = 2.f;
+										m_IsGameStart = false;
+										//初期化
+										for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
+											auto& p = PlayerMngr->GetPlayer(index);
+											auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+											{
+												Vector3DX pos_t;
+												pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale3DRate) * static_cast<float>(index * 2 - 1));
 
-										Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale3DRate;
-										if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale3DRate, &EndPos, true)) {
-											pos_t = EndPos;
+												Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale3DRate;
+												if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale3DRate, &EndPos, true)) {
+													pos_t = EndPos;
+												}
+												c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
+											}
 										}
-										c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
+										//
+										for (int index = 0; index < 3; ++index) {
+											auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj((int)ObjType::Judge, index);
+											//人の座標設定
+											c->SetWin(false, false);
+											//人の座標設定
+											{
+												float Rad = deg2rad(-90.f + 120.f * static_cast<float>(index));
+												Vector3DX pos_t = Vector3DX::vget(0.f, 0.f, (3.5f * Scale3DRate));
+												pos_t = Matrix3x3DX::Vtrans(pos_t, Matrix3x3DX::RotAxis(Vector3DX::up(), Rad));
+												c->MovePoint(Rad, pos_t);
+											}
+										}
 									}
 								}
-								//
+							}
+						}
+						else {
+							if (m_WinOnceTimer <= 0.f && m_GameEndTimer == -1.f) {
+								m_GameEndTimer = 1.5f;
+							}
+							else if (m_GameEndTimer <= 0.f) {
+								if (FadeControl::IsFadeClear()) {
+									FadeControl::SetFadeOut(0.5f);
+								}
+								if (FadeControl::IsFadeAll()) {
+									this->m_IsEnd = true;
+								}
 							}
 						}
 					}
@@ -361,36 +423,43 @@ namespace FPS_n2 {
 						m_IsPlayable = false;
 						if (PlayerMngr->GetWinPlayer() == GetMyPlayerID()) {
 							m_ScoreUp0 = 1.f;
+							for (int index = 0; index < 3; ++index) {
+								auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj((int)ObjType::Judge, index);
+								//人の座標設定
+								c->SetWin(true, false);
+							}
 						}
 						else {
 							m_ScoreUp1 = 1.f;
-						}
-					}
-					if (m_IsPlayable) {
-						//タイムアップ
-						if (m_Timer < 0.f) {
-							if (m_IsTimeUp) {
-								m_IsTimeUp = false;
-								SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Stop)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							for (int index = 0; index < 3; ++index) {
+								auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj((int)ObjType::Judge, index);
+								//人の座標設定
+								c->SetWin(false, true);
 							}
 						}
-						else {
-							m_IsTimeUp = true;
-						}
-						//残り1分
-						if (m_Timer < 60.f) {
-							if (m_IsDrawOneMinute) {
-								m_IsDrawOneMinute = false;
-								SideLog::Instance()->Add(10.f, 0.f, Red, "残り1分!");
+						//どちらかが2点先に取ったら
+						for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
+							auto& p = PlayerMngr->GetPlayer(index);
+							if (p->GetScore() >= 2.f) {
+								m_IsGameEnd = true;
+								break;
 							}
-						}
-						else {
-							m_IsDrawOneMinute = true;
 						}
 					}
 					else {
-						m_IsTimeUp = true;
-						m_IsDrawOneMinute = true;
+						//タイムアップ
+						if (m_IsTimeUp && (m_Timer < 0.f)) {
+							m_IsTimeUp = false;
+							SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Stop)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							m_IsPlayable = false;
+							m_IsGameEnd = true;
+							m_GameEndTimer = 1.5f;
+						}
+						//残り1分
+						if (m_IsDrawOneMinute && (m_Timer < 60.f)) {
+							m_IsDrawOneMinute = false;
+							SideLog::Instance()->Add(10.f, 0.f, Red, "残り1分!");
+						}
 					}
 				}
 			}
@@ -495,6 +564,26 @@ namespace FPS_n2 {
 						}
 						//ダメージイベント処理
 						c->AddDamageEvent(&this->m_DamageEvents);
+					}
+				}
+
+				if (!m_isTraining) {
+					Vector3DX pos_c;
+					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
+						auto& p = PlayerMngr->GetPlayer(index);
+						pos_c += p->GetChara()->GetMove().GetPos();
+					}
+					pos_c /= (float)PlayerMngr->GetPlayerNum();
+
+					for (int index = 0; index < 3; ++index) {
+						auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj((int)ObjType::Judge, index);
+						//人の座標設定
+						{
+							float Rad = deg2rad(-90.f + 120.f * static_cast<float>(index));
+							Vector3DX pos_t = Vector3DX::vget(0.f, 0.f, (3.5f * Scale3DRate));
+							pos_t = Matrix3x3DX::Vtrans(pos_t, Matrix3x3DX::RotAxis(Vector3DX::up(), Rad));
+							c->SetInput(pos_c + pos_t, pos_c);
+						}
 					}
 				}
 				//ダメージイベント
@@ -633,7 +722,7 @@ namespace FPS_n2 {
 				Easing(&m_ScoreUp1, 0.f, 0.95f, EasingType::OutExpo);
 				//timer
 				this->m_UIclass.SetfloatParam(0, m_Timer);
-				this->m_UIclass.SetfloatParam(1, std::max(m_GameStartTimer,0.f));
+				this->m_UIclass.SetfloatParam(1, m_IsGameEnd ? 2.f : std::max(m_GameStartTimer,0.f));
 				//心拍数
 				this->m_UIclass.SetIntParam(2, static_cast<int>(Chara->GetHeartRate()));
 				this->m_UIclass.SetfloatParam(2, Chara->GetHeartRatePow());
@@ -687,6 +776,7 @@ namespace FPS_n2 {
 			m_GameStart.Dispose();
 			m_GameRestart.Dispose();
 			m_Once.Dispose();
+			m_GameEnd.Dispose();
 		}
 
 		//
@@ -787,6 +877,16 @@ namespace FPS_n2 {
 							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						}
+
+						if ((m_GameEndAlpha * 255.f) > 1.f) {
+							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameEndAlpha), 0, 255));
+							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+							WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+								&m_GameEnd, xp1, yp1, m_GameEndScale, 0.f, true);
+							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						}
+						
 					}
 				}
 				FadeControl::DrawFade();

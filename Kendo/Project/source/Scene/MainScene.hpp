@@ -43,18 +43,24 @@ namespace FPS_n2 {
 			GraphHandle		m_GameRestart;
 			GraphHandle*	m_pStart{ nullptr };
 			GraphHandle		m_Once;
+			GraphHandle		m_GameEnd;
 
 			float m_GameStartTimer{ 2.f };
 			float m_GameStartAlpha{ 0.f };
 			float m_GameStartScale{ 0.f };
 
 			bool m_IsGameStart{ false };
+			bool m_IsGameEnd{ false };
 			float m_Timer{ 0.f };
 			bool m_IsPlayable{ false };
 
 			float m_WinOnceTimer{ 2.f };
 			float m_WinOnceAlpha{ 0.f };
 			float m_WinOnceScale{ 0.f };
+
+			float m_GameEndTimer{ 2.f };
+			float m_GameEndAlpha{ 0.f };
+			float m_GameEndScale{ 0.f };
 
 			bool m_IsDrawOneMinute{ false };
 			bool m_IsTimeUp{ false };

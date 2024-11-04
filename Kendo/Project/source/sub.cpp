@@ -133,7 +133,7 @@ namespace FPS_n2 {
 		auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(ID)->GetChara();
 		c->SetWeaponPtr(Ptr);
 	}
-	void CommonBattleResource::LoadJudge(const std::string& FolderName, int ID) noexcept
+	void CommonBattleResource::LoadJudge(const std::string& FolderName) noexcept
 	{
 		auto* ObjMngr = ObjectManager::Instance();
 
@@ -145,9 +145,6 @@ namespace FPS_n2 {
 		ObjMngr->AddObject(Ptr);
 		ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
 		Ptr->Init();
-
-		auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&)Ptr;
-		c->SetID(ID);
 	}
 	void HitMark::Load(void) noexcept {
 		this->MenGraph.Load("data/UI/hit_Men.bmp");

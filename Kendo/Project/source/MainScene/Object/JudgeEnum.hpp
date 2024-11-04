@@ -12,19 +12,18 @@ namespace FPS_n2 {
 			Bottom_Stand_Turn,
 			//
 			Upper_Ready,
+
+			Upper_RedWin,
+			Upper_WhiteWin,
 			//
 			AnimeIDMax,
 		};
 		enum class JudgeFrame {
 			Upper,
-			Upper2,
-			Head,
 			Max,
 		};
 		static const char* JudgeFrameName[(int)JudgeFrame::Max] = {
 			"è„îºêg",
-			"è„îºêg2",
-			"ì™",
 		};
 	};
 };
