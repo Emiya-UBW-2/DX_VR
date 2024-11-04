@@ -2,7 +2,7 @@
 		SetArg(KenPic, "data/Picture/ken.png");
 		SetArg(SinPic, "data/Picture/sin.png");
 
-		SetArg(Teacher, "data/MovieModel/Teacher/model.pmx");
+		SetArg(Teacher, "data/MovieModel/Teacher/model.mv1");
 
 		SetArg(Kendo, "data/MovieModel/Chara/model.pmx");
 		SetArg(Bamboo, "data/MovieModel/Bamboo/model.pmx");
