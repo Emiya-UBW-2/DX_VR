@@ -177,7 +177,9 @@ namespace FPS_n2 {
 #else
 			//PostPassParts->SetLevelFilter(38, 154, 1.f);
 #endif
-			m_PauseMenuControl.UpdatePause();
+			if (!m_IsResult) {
+				m_PauseMenuControl.UpdatePause();
+			}
 			if (m_PauseMenuControl.IsRetire()) {
 				this->m_IsEnd = true;
 			}
@@ -220,14 +222,14 @@ namespace FPS_n2 {
 			Pad->SetMouseMoveEnable(true);
 			Pad->ChangeGuide(
 				[this]() {
-					if (m_IsResult) {
-						return;
-					}
+					auto* KeyGuide = PadControl::Instance();
 					if (m_IsEventSceneFlag) {
 						return;
 					}
-					auto* KeyGuide = PadControl::Instance();
 					if (DXDraw::Instance()->IsPause()) {
+						if (m_IsResult) {
+							return;
+						}
 						KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9992));
 						KeyGuide->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9991));
 						KeyGuide->AddGuide(PADS::MOVE_W, "");
@@ -235,6 +237,10 @@ namespace FPS_n2 {
 						KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9993));
 					}
 					else {
+						if (m_IsResult) {
+							KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9915));
+							return;
+						}
 						if (m_IsEventSceneActive) {
 							KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9914));
 						}
@@ -281,7 +287,7 @@ namespace FPS_n2 {
 						if (!m_isTraining) {
 							m_GameStartTimer = 2.f;
 							m_IsGameStart = false;
-							m_Timer = 10.f;
+							m_Timer = 180.f;
 						}
 					}
 					m_EventScene.Update();
@@ -307,6 +313,7 @@ namespace FPS_n2 {
 					// ‘I‘ðŽž‚Ì‹““®
 					if (ButtonParts->GetTriggerButton()) {
 						if (ButtonParts->GetSelect() == 0) {
+							SE->Get(static_cast<int>(SoundEnumCommon::UI_OK)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 							this->m_IsEnd = true;
 							FadeControl::SetFadeOut(1.f);
 						}
@@ -464,7 +471,6 @@ namespace FPS_n2 {
 											FadeControl::SetFadeIn(2.f);
 											this->m_IsResult = true;
 											Pad->SetGuideUpdate();
-											auto* ButtonParts = ButtonControl::Instance();
 											ButtonParts->Dispose();
 											ButtonParts->ResetSel();
 											ButtonParts->AddIconButton(
@@ -936,8 +942,27 @@ namespace FPS_n2 {
 			if (m_IsResult) {
 				auto* DrawParts = DXDraw::Instance();
 				auto* ButtonParts = ButtonControl::Instance();
-				m_Result.DrawExtendGraph(DrawParts->GetUIY(0), DrawParts->GetUIY(0), DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), false);
+				auto* PlayerMngr = Player::PlayerManager::Instance();
+				WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Result,
+					DrawParts->GetUIY(0), DrawParts->GetUIY(0), DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), false);
+
+				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
+					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, DrawParts->GetUIY(160), DrawParts->GetUIY(256), Yellow, Black, "Result");
+
+				bool IsWin = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore() > PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
+				bool IsDraw = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore() == PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
+
+				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(48),
+					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, DrawParts->GetUIY(300), DrawParts->GetUIY(384),
+					IsDraw ? Gray25 : (IsWin ? Red : White), Black,
+					IsDraw ? "ˆø‚«•ª‚¯" : (IsWin ? "Ÿ—˜" : "”s‘Þ"));
+				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
+					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, DrawParts->GetUIY(300), DrawParts->GetUIY(386), White, Black, "%d : %d",
+					PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore(), PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
+
 				ButtonParts->Draw();
+
+
 				FadeControl::DrawFade();
 				return;
 			}
