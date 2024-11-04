@@ -6,10 +6,17 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		//
 		void			MainGameScene::Load_Sub(void) noexcept {
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
+
+			auto* BGM = BGMPool::Instance();
+			auto* OptionParts = OPTION::Instance();
+			BGM->Add(0, "data/Sound/BGM/BattleStart.wav", false);
+			BGM->Add(1, "data/Sound/BGM/Result.wav", false);
+			BGM->SetVol(OptionParts->GetParamFloat(EnumSaveParam::BGM));
 			//BG
 			BackGround->Load();
 			//
@@ -27,7 +34,6 @@ namespace FPS_n2 {
 			}
 			//UI
 			this->m_UIclass.Load();
-			m_PauseMenuControl.LoadPause();
 			HitMark::Instance()->Load();
 			//
 			m_GameStart.Load("data/UI/GameStart.png");
@@ -48,6 +54,8 @@ namespace FPS_n2 {
 			BattleResourceMngr->Set();
 
 			SetShadowScale(1.5f);
+			//
+			m_PauseMenuControl.LoadPause();
 			//
 			BackGround->Init();
 			//
@@ -124,9 +132,13 @@ namespace FPS_n2 {
 			m_Timer = 180.f;
 			m_IsPlayable = false;
 
+			m_IsResult = false;
+
 			m_pStart = &m_GameStart;
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
+			auto* BGM = BGMPool::Instance();
+			auto* ButtonParts = ButtonControl::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
@@ -190,6 +202,7 @@ namespace FPS_n2 {
 				else {
 					m_IsEventSceneFlag = true;
 					m_EventSelect = "data/Cut/Cut3.txt";
+					BGM->Get(0)->Play(DX_PLAYTYPE_BACK, TRUE);
 				}
 			}
 
@@ -268,7 +281,7 @@ namespace FPS_n2 {
 						if (!m_isTraining) {
 							m_GameStartTimer = 2.f;
 							m_IsGameStart = false;
-							m_Timer = 30.f;
+							m_Timer = 10.f;
 						}
 					}
 					m_EventScene.Update();
@@ -282,10 +295,21 @@ namespace FPS_n2 {
 				}
 			}
 			else {
+				Pad->SetMouseMoveEnable(false);
 				if (DXDraw::Instance()->IsPause()) {
-					Pad->SetMouseMoveEnable(false);
+					ButtonParts->ResetSel();
 					if (!m_NetWorkController) {
 						return true;
+					}
+				}
+				if (FadeControl::IsFadeClear()) {
+					ButtonParts->UpdateInput();
+					// ‘I‘ğ‚Ì‹““®
+					if (ButtonParts->GetTriggerButton()) {
+						if (ButtonParts->GetSelect() == 0) {
+							this->m_IsEnd = true;
+							FadeControl::SetFadeOut(1.f);
+						}
 					}
 				}
 			}
@@ -437,8 +461,16 @@ namespace FPS_n2 {
 											FadeControl::SetFadeOut(1.f);
 										}
 										if (FadeControl::IsFadeAll()) {
+											FadeControl::SetFadeIn(2.f);
 											this->m_IsResult = true;
 											Pad->SetGuideUpdate();
+											auto* ButtonParts = ButtonControl::Instance();
+											ButtonParts->Dispose();
+											ButtonParts->ResetSel();
+											ButtonParts->AddIconButton(
+												"CommonData/UI/Right.png", true,
+												(1920 / 2), (1080 - 256), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+											BGM->Get(1)->Play(DX_PLAYTYPE_BACK, TRUE);
 										}
 									}
 								}
@@ -470,7 +502,7 @@ namespace FPS_n2 {
 							//‚Ç‚¿‚ç‚©‚ª2“_æ‚Éæ‚Á‚½‚ç
 							for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 								auto& p = PlayerMngr->GetPlayer(index);
-								if (p->GetScore() >= 1.f) {
+								if (p->GetScore() >= 2.f) {
 									m_IsGameEnd = true;
 									break;
 								}
@@ -768,6 +800,9 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
+			m_PauseMenuControl.DisposePause();
+			auto* ButtonParts = ButtonControl::Instance();
+			ButtonParts->Dispose();
 			if (m_IsEventSceneActive) {
 				m_EventScene.Dispose();
 			}
@@ -802,13 +837,15 @@ namespace FPS_n2 {
 			this->m_UIclass.Dispose();
 			PlayerMngr->Dispose();
 			ObjectManager::Instance()->DeleteAll();
-			m_PauseMenuControl.DisposePause();
 			HitMark::Instance()->Dispose();
 			m_GameStart.Dispose();
 			m_GameRestart.Dispose();
 			m_Once.Dispose();
 			m_GameEnd.Dispose();
 			m_Result.Dispose();
+			auto* BGM = BGMPool::Instance();
+			BGM->Delete(0);
+			BGM->Delete(1);
 		}
 
 		//
@@ -898,7 +935,10 @@ namespace FPS_n2 {
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
 			if (m_IsResult) {
 				auto* DrawParts = DXDraw::Instance();
+				auto* ButtonParts = ButtonControl::Instance();
 				m_Result.DrawExtendGraph(DrawParts->GetUIY(0), DrawParts->GetUIY(0), DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), false);
+				ButtonParts->Draw();
+				FadeControl::DrawFade();
 				return;
 			}
 			if (m_IsEventSceneActive) {
@@ -948,6 +988,9 @@ namespace FPS_n2 {
 			}
 		}
 		void			MainGameScene::DrawUI_In_Sub(void) const noexcept {
+			if (m_IsResult) {
+				return;
+			}
 			//UI
 			if (DXDraw::Instance()->IsPause()) {
 				m_PauseMenuControl.DrawPause();

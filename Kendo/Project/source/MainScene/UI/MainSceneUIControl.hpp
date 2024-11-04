@@ -320,7 +320,7 @@ namespace FPS_n2 {
 				//ƒXƒRƒA
 				{
 					xp1 = DrawParts->GetUIY(1920 / 2);
-					yp1 = DrawParts->GetUIY(28);
+					yp1 = DrawParts->GetUIY(static_cast<int>(Lerp(28.0f, -100.f, std::clamp(floatParam[1] - 0.5f, 0.f, 1.f))));
 
 					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40), yp1 + DrawParts->GetUIY(20),
