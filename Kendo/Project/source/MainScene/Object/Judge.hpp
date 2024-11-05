@@ -173,11 +173,11 @@ namespace FPS_n2 {
 						}
 						this->GetObj().SetAnim(i).SetPer(this->m_AnimPerBuf.at(i));
 					}
-					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_Turn, 0.62f);
-					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_Walk, 0.62f);
-					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_LeftStep, 0.62f);
-					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_WalkBack, 0.62f);
-					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_RightStep, 0.62f);
+					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_Turn, 0.72f);
+					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_Walk, 0.72f);
+					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_LeftStep, 0.72f);
+					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_WalkBack, 0.72f);
+					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_RightStep, 0.72f);
 					GetObj().UpdateAnimAll();
 				}
 				//•Ç”»’è

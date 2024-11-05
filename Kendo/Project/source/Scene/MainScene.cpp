@@ -18,7 +18,7 @@ namespace FPS_n2 {
 			BGM->Add(1, "data/Sound/BGM/Result.wav", false);
 			BGM->SetVol(OptionParts->GetParamFloat(EnumSaveParam::BGM));
 			//BG
-			BackGround->Load();
+			BackGround->Load(m_isTraining);
 			//
 			BattleResourceMngr->Load();
 			PlayerMngr->Init(NetWork::Player_num);
@@ -59,12 +59,23 @@ namespace FPS_n2 {
 			//
 			BackGround->Init();
 			//
-			Vector3DX LightVec = Vector3DX::vget(1.f, -0.5f, 0.05f); LightVec = LightVec.normalized();
-			DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
-			SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
+			if (m_isTraining) {
+				Vector3DX LightVec = Vector3DX::vget(1.f, -0.5f, 0.05f); LightVec = LightVec.normalized();
+				DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
+				SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 
-			auto& SecondLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec * -1.f);
-			SetLightDifColorHandle(SecondLight.get(), GetColorF(0.5f, 0.5f, 0.3f, 0.1f));
+				auto& SecondLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec * -1.f);
+				SetLightDifColorHandle(SecondLight.get(), GetColorF(0.5f, 0.5f, 0.3f, 0.1f));
+
+				DrawParts->SetGodRayPer(0.5f);
+			}
+			else {
+				Vector3DX LightVec = Vector3DX::vget(0.5f, -0.85f, 0.05f); LightVec = LightVec.normalized();
+				DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
+				SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
+
+				DrawParts->SetGodRayPer(0.25f);
+			}
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
 			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
@@ -890,6 +901,8 @@ namespace FPS_n2 {
 			else {//次のシーンへ
 				SetNextSelect(1);
 			}
+
+			LightPool::Instance()->Dispose();
 		}
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();

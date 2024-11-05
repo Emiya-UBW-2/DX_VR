@@ -11,6 +11,7 @@ namespace FPS_n2 {
 		private:
 		private:
 			MV1							m_ObjSky;
+			MV1							m_ObjGroundShadow;
 			MV1							m_ObjGround;
 			MV1							m_ObjGroundCol;
 
@@ -45,8 +46,15 @@ namespace FPS_n2 {
 		public:
 			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, float Radius) const noexcept;
 		public://
-			void			Load(void) noexcept {
-				MV1::Load("data/model/map/model_DISABLE.mv1", &this->m_ObjGround);
+			void			Load(bool isTraining) noexcept {
+				if (isTraining) {
+					MV1::Load("data/model/map/model_DISABLE.mv1", &this->m_ObjGroundShadow);
+					MV1::Load("data/model/map/model_DISABLE.mv1", &this->m_ObjGround);
+				}
+				else {
+					MV1::Load("data/model/budokan/Shadow.mv1", &this->m_ObjGroundShadow);
+					MV1::Load("data/model/budokan/model_DISABLE.mv1", &this->m_ObjGround);
+				}
 				MV1::Load("data/model/map/col.mv1", &this->m_ObjGroundCol);
 				MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
 			}
@@ -80,10 +88,10 @@ namespace FPS_n2 {
 				SetUseLighting(TRUE);
 			}
 			void			Shadow_Draw_Far(void) noexcept {
-				this->m_ObjGround.DrawModel();
+				this->m_ObjGroundShadow.DrawModel();
 			}
 			void			Shadow_Draw(void) noexcept {
-				this->m_ObjGround.DrawModel();
+				this->m_ObjGroundShadow.DrawModel();
 			}
 			void			Draw(void) noexcept {
 				this->m_ObjGround.DrawModel();
@@ -91,6 +99,7 @@ namespace FPS_n2 {
 			//
 			void			Dispose(void) noexcept {
 				this->m_ObjSky.Dispose();
+				this->m_ObjGroundShadow.Dispose();
 				this->m_ObjGround.Dispose();
 				this->m_ObjGroundCol.Dispose();
 			}

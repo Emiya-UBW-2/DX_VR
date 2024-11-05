@@ -7,7 +7,7 @@
 
 		SetArg(Suit, "data/MovieModel/Suit/model.pmx");
 
-		SetArg(Stage, "data/model/map/model_DISABLE.mv1");
+		SetArg(Stage, "data/model/budokan/model_DISABLE.mv1");
 		SetArg(Sky, "data/model/sky/model.mv1");
 //ÉÇÉfÉãì«Ç›çûÇ›
 		LoadModel(Stage, 1);
