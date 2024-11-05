@@ -264,6 +264,7 @@ namespace FPS_n2 {
 
 			GraphHandle						m_HeartIcon;
 			GraphHandle						m_Kiai;
+			GraphHandle						m_Mine;
 		public:
 			UIClass(void) noexcept {}
 			UIClass(const UIClass&) = delete;
@@ -276,10 +277,12 @@ namespace FPS_n2 {
 			void			Load(void) noexcept {
 				m_HeartIcon.Load("data/UI/Heart.png");
 				m_Kiai.Load("data/UI/Kiai.png");
+				m_Mine.Load("data/UI/Mine.png");
 			}
 			void			Dispose(void) noexcept {
 				m_HeartIcon.Dispose();
 				m_Kiai.Dispose();
+				m_Mine.Dispose();
 			}
 			void			Set(void) noexcept {
 			}
@@ -322,26 +325,46 @@ namespace FPS_n2 {
 					xp1 = DrawParts->GetUIY(1920 / 2);
 					yp1 = DrawParts->GetUIY(static_cast<int>(Lerp(28.0f, -100.f, std::clamp(floatParam[1] - 0.5f, 0.f, 1.f))));
 
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
+						92, 0, 0);
+					WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Mine,
+						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40) - DrawParts->GetUIY(36) + DrawParts->GetUIY(1),
+						yp1 - DrawParts->GetUIY(10) + DrawParts->GetUIY(1),
+						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40) + DrawParts->GetUIY(1),
+						yp1 - DrawParts->GetUIY(10) + DrawParts->GetUIY(36) + DrawParts->GetUIY(1),
+						true);
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
+						192, 0, 0);
+					WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Mine,
+						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40) - DrawParts->GetUIY(36),
+						yp1 - DrawParts->GetUIY(10),
+						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40),
+						yp1 - DrawParts->GetUIY(10) + DrawParts->GetUIY(36),
+						true);
+					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
+						255, 255, 255);
+					
+
 					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40), yp1 + DrawParts->GetUIY(20),
-						xp1 + DrawParts->GetUIY(10) + DrawParts->GetUIY(40), yp1 + DrawParts->GetUIY(28), Black, true);
+						xp1 + DrawParts->GetUIY(10) + DrawParts->GetUIY(40), yp1 + DrawParts->GetUIY(24), Black, true);
 
 					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40 - 20 * intParam[1]), yp1 + DrawParts->GetUIY(20),
-						xp1 - DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(28), Red, true);
+						xp1 - DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(24), Red, true);
 					int Y1add = DrawParts->GetUIY(static_cast<int>(Lerp(0.f, -8.f, floatParam[3])));
 					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
 						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1 - DrawParts->GetUIY(20), yp1 + Y1add, Red, Black, "%d", intParam[0]);
 
 					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(20),
-						xp1 + DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(28), Gray75, true);
+						xp1 + DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(24), Gray75, true);
 					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
 						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Gray25, Black, ":");
 
 					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 + DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(20),
-						xp1 + DrawParts->GetUIY(10) + DrawParts->GetUIY(40 - 20 * intParam[0]), yp1 + DrawParts->GetUIY(28), White, true);
+						xp1 + DrawParts->GetUIY(10) + DrawParts->GetUIY(40 - 20 * intParam[0]), yp1 + DrawParts->GetUIY(24), White, true);
 					int Y2add = DrawParts->GetUIY(static_cast<int>(Lerp(0.f, -8.f, floatParam[4])));
 					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
 						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1 + DrawParts->GetUIY(20), yp1 + Y2add, White, Black, "%d", intParam[1]);

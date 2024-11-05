@@ -118,7 +118,7 @@ namespace FPS_n2 {
 					this->m_BottomRad += GetRadRad2Rad(this->m_BottomRad, this->m_BodyRad) * GetEasingRatio(EasingType::OutExpo, 0.95f);
 				}
 				//
-				{
+				if (!m_RedWin && !m_WhiteWin) {
 					Vector3DX Pos0 = PlayerMngr->GetPlayer(0)->GetChara()->GetMove().GetPos(); Pos0.y = 0.f;
 					Vector3DX Pos1 = PlayerMngr->GetPlayer(1)->GetChara()->GetMove().GetPos(); Pos1.y = 0.f;
 					if (Vector3DX::Cross(Vector3DX::right(), Pos0).y < Vector3DX::Cross(Vector3DX::right(), Pos1).y) {

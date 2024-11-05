@@ -258,36 +258,36 @@ namespace FPS_n2 {
 
 						switch (value.m_WazaType) {
 						case FPS_n2::WazaType::Men:
-							SideLog::Instance()->Add(3.0f, offset, Yellow, "面"); offset += 0.1f;
+							SideLog::Instance()->Add(3.0f, offset, Yellow, "面"); offset += 0.02f;
 							break;
 						case FPS_n2::WazaType::SuriageMen:
-							SideLog::Instance()->Add(3.0f, offset, Yellow, "すり上げ面"); offset += 0.1f;
+							SideLog::Instance()->Add(3.0f, offset, Yellow, "すり上げ面"); offset += 0.02f;
 							break;
 						case FPS_n2::WazaType::Hikimen:
-							SideLog::Instance()->Add(3.0f, offset, Yellow, "引き面"); offset += 0.1f;
+							SideLog::Instance()->Add(3.0f, offset, Yellow, "引き面"); offset += 0.02f;
 							break;
 						case FPS_n2::WazaType::Kote:
-							SideLog::Instance()->Add(3.0f, offset, Yellow, "小手"); offset += 0.1f;
+							SideLog::Instance()->Add(3.0f, offset, Yellow, "小手"); offset += 0.02f;
 							break;
 						case FPS_n2::WazaType::Hikigote:
-							SideLog::Instance()->Add(3.0f, offset, Yellow, "引き小手"); offset += 0.1f;
+							SideLog::Instance()->Add(3.0f, offset, Yellow, "引き小手"); offset += 0.02f;
 							break;
 						case FPS_n2::WazaType::Dou:
-							SideLog::Instance()->Add(3.0f, offset, Yellow, "胴"); offset += 0.1f;
+							SideLog::Instance()->Add(3.0f, offset, Yellow, "胴"); offset += 0.02f;
 							break;
 						default:
 							break;
 						}
 
-						SideLog::Instance()->Add(3.0f, offset, (HitDamagePow >= 0) ? Green : Red, "威力　　 %s%4d pt", (HitDamagePow >= 0) ? "+" : "-", std::abs(HitDamagePow)); offset += 0.1f;
-						SideLog::Instance()->Add(3.0f, offset, (HitPosPoints >= 0) ? Green : Red, "打突部位 %s%4d pt", (HitPosPoints >= 0) ? "+" : "-", std::abs(HitPosPoints)); offset += 0.1f;
-						SideLog::Instance()->Add(3.0f, offset, (KihakuPoints >= 0) ? Green : Red, "気迫　　 %s%4d pt", (KihakuPoints >= 0) ? "+" : "-", std::abs(KihakuPoints)); offset += 0.1f;
-						SideLog::Instance()->Add(3.0f, offset, (TotalAddHits >= 0) ? Green : Red, "計　　　 %s%4d pt", (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits)); offset += 0.1f;
+						SideLog::Instance()->Add(3.0f, offset, (HitDamagePow >= 0) ? Green : Red, "威力　　 %s%4d pt", (HitDamagePow >= 0) ? "+" : "-", std::abs(HitDamagePow)); offset += 0.02f;
+						SideLog::Instance()->Add(3.0f, offset, (HitPosPoints >= 0) ? Green : Red, "打突部位 %s%4d pt", (HitPosPoints >= 0) ? "+" : "-", std::abs(HitPosPoints)); offset += 0.02f;
+						SideLog::Instance()->Add(3.0f, offset, (KihakuPoints >= 0) ? Green : Red, "気迫　　 %s%4d pt", (KihakuPoints >= 0) ? "+" : "-", std::abs(KihakuPoints)); offset += 0.02f;
+						SideLog::Instance()->Add(3.0f, offset, (TotalAddHits >= 0) ? Green : Red, "計　　　 %s%4d pt", (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits)); offset += 0.02f;
 						if (TotalAddHits >= 100) {
-							SideLog::Instance()->Add(3.5f, offset, Yellow, "有効打突！"); offset += 0.1f;
+							SideLog::Instance()->Add(3.5f, offset, Yellow, "有効打突！"); offset += 0.02f;
 						}
 						else if (TotalAddHits >= 80) {
-							SideLog::Instance()->Add(3.5f, offset, Red, "もう一息"); offset += 0.1f;
+							SideLog::Instance()->Add(3.5f, offset, Red, "もう一息"); offset += 0.02f;
 						}
 
 						if (TotalAddHits >= 100) {
