@@ -311,7 +311,7 @@ namespace FPS_n2 {
 			else if (args[4].find("MIDDLE") != std::string::npos) { t = 1; }
 			else if (args[4].find("RIGHT") != std::string::npos) { t = 2; }
 			Texts.resize(Texts.size() + 1);
-			Texts.back().Set(DrawParts->GetScreenY(std::stoi(args[0])), DrawParts->GetScreenY(std::stoi(args[1])), DrawParts->GetScreenY(std::stoi(args[2])), args[3], StartF, ContiF, t);
+			Texts.back().Set(DrawParts->GetUIY(std::stoi(args[0])), DrawParts->GetUIY(std::stoi(args[1])), DrawParts->GetUIY(std::stoi(args[2])), args[3], StartF, ContiF, t);
 		}
 	}
 	void			EventScene::TelopClass::Draw(LONGLONG nowTimeWait) const noexcept {
@@ -976,7 +976,7 @@ namespace FPS_n2 {
 	void			EventScene::BGDraw(void) const noexcept {
 		if (IsEnd()) { return; }
 		auto* DrawParts = DXDraw::Instance();
-		DrawBox(0, 0, DrawParts->GetScreenX(1920), DrawParts->GetScreenY(1920), GetColor(0, 0, 0), TRUE);
+		DrawBox(0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1920), GetColor(0, 0, 0), TRUE);
 		m_ModelControl.Draw_Far();
 	}
 	void			EventScene::ShadowFarDraw(void) const noexcept {
@@ -1008,18 +1008,18 @@ namespace FPS_n2 {
 		}
 		if (Black_Buf != 0.f) {
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * Black_Buf));
-			DrawBox(0, 0, DrawParts->GetScreenX(1920), DrawParts->GetScreenY(1920), GetColor(0, 0, 0), TRUE);
+			DrawBox(0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1920), GetColor(0, 0, 0), TRUE);
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 		}
 		if (White_Buf != 0.f) {
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * White_Buf));
-			DrawBox(0, 0, DrawParts->GetScreenX(1920), DrawParts->GetScreenY(1920), GetColor(255, 255, 255), TRUE);
+			DrawBox(0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1920), GetColor(255, 255, 255), TRUE);
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 		}
 		if (m_isSkip) {
 			if (Black_Skip != 0.f) {
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * Black_Skip));
-				DrawBox(0, 0, DrawParts->GetScreenX(1920), DrawParts->GetScreenY(1920), GetColor(0, 0, 0), TRUE);
+				DrawBox(0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1920), GetColor(0, 0, 0), TRUE);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}
 		}
