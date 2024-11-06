@@ -300,6 +300,7 @@ namespace FPS_n2 {
 							m_GameStartTimer = 2.f;
 							m_IsGameStart = false;
 							m_Timer = 180.f;
+							SE->Get(static_cast<int>(SoundEnum::Audience_Base)).Play(0, DX_PLAYTYPE_LOOP, TRUE);
 						}
 						else {
 							if (m_EventSelect == "data/Cut/Cut2.txt") {
@@ -315,7 +316,7 @@ namespace FPS_n2 {
 					if (!m_NetWorkController) {
 						return true;
 					}
-				}
+				}	  
 			}
 			else {
 				Pad->SetMouseMoveEnable(false);
@@ -486,6 +487,9 @@ namespace FPS_n2 {
 										}
 										if (FadeControl::IsFadeAll()) {
 											FadeControl::SetFadeIn(2.f);
+											SE->Get(static_cast<int>(SoundEnum::Audience_Base)).StopAll(0);
+											SE->Get(static_cast<int>(SoundEnum::Audience_Near)).StopAll(0);
+											SE->Get(static_cast<int>(SoundEnum::Audience_Good)).StopAll(0);
 											this->m_IsResult = true;
 											Pad->SetGuideUpdate();
 											ButtonParts->Dispose();
@@ -872,6 +876,10 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
+			auto* SE = SoundPool::Instance();
+			SE->Get(static_cast<int>(SoundEnum::Audience_Base)).StopAll(0);
+			SE->Get(static_cast<int>(SoundEnum::Audience_Near)).StopAll(0);
+			SE->Get(static_cast<int>(SoundEnum::Audience_Good)).StopAll(0);
 			m_PauseMenuControl.DisposePause();
 			auto* ButtonParts = ButtonControl::Instance();
 			ButtonParts->Dispose();

@@ -41,6 +41,10 @@ namespace FPS_n2 {
 		CountDown,
 		TimeUp,
 
+		Audience_Base,
+		Audience_Near,
+		Audience_Good,
+
 		Max,
 	};
 	static const char* SoundID[(int)SoundEnum::Max] = {
@@ -52,6 +56,9 @@ namespace FPS_n2 {
 		"Taiko1",
 		"EV2_1",
 		"EV2_2",
+		"",
+		"",
+		"",
 		"",
 		"",
 		"",

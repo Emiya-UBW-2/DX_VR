@@ -311,6 +311,12 @@ namespace FPS_n2 {
 								break;
 							}
 						}
+						if (TotalAddHits >= 50) {
+							SE->Get(static_cast<int>(SoundEnum::Audience_Near)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+						}
+						if (TotalAddHits >= 100) {
+							SE->Get(static_cast<int>(SoundEnum::Audience_Good)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+						}
 					}
 				}
 				//É_ÉÅÅ[ÉW

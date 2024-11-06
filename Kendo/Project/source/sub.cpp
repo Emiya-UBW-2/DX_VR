@@ -44,6 +44,10 @@ namespace FPS_n2 {
 		SE->Add(static_cast<int>(SoundEnum::CountDown), 2, "data/Sound/SE/CountDown.wav", false);
 		SE->Add(static_cast<int>(SoundEnum::TimeUp), 1, "data/Sound/SE/TimeUp.wav", false);
 
+		SE->Add(static_cast<int>(SoundEnum::Audience_Base), 1, "data/Sound/SE/Audience_Base.wav", false);
+		SE->Add(static_cast<int>(SoundEnum::Audience_Near), 3, "data/Sound/SE/Audience_Near.wav", false);
+		SE->Add(static_cast<int>(SoundEnum::Audience_Good), 3, "data/Sound/SE/Audience_Good.wav", false);
+
 	}
 	void			CommonBattleResource::Set(void) noexcept {
 		auto* SE = SoundPool::Instance();
@@ -94,6 +98,10 @@ namespace FPS_n2 {
 
 		SE->Delete(static_cast<int>(SoundEnum::CountDown));
 		SE->Delete(static_cast<int>(SoundEnum::TimeUp));
+
+		SE->Delete(static_cast<int>(SoundEnum::Audience_Base));
+		SE->Delete(static_cast<int>(SoundEnum::Audience_Near));
+		SE->Delete(static_cast<int>(SoundEnum::Audience_Good));
 	}
 	//
 	void			CommonBattleResource::LoadChara(const std::string& FolderName, PlayerID ID) noexcept {
