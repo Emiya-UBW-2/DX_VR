@@ -42,6 +42,8 @@ namespace FPS_n2 {
 			m_GameEnd.Load("data/UI/GameEnd.png");
 			m_Result.Load("data/UI/Result.png");
 			m_Result.GraphFilter(DX_GRAPH_FILTER_GAUSS, 8, 400);
+
+			GraphHandle::LoadDiv("data/UI/Teacher.png", 4, 1, 4, 400, 1824 / 4, &m_Teacher);
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -925,6 +927,7 @@ namespace FPS_n2 {
 			m_Once.Dispose();
 			m_GameEnd.Dispose();
 			m_Result.Dispose();
+			m_Teacher.clear();
 			auto* BGM = BGMPool::Instance();
 			BGM->Delete(0);
 			BGM->Delete(1);
@@ -1015,6 +1018,17 @@ namespace FPS_n2 {
 		}
 		//UI•\Ž¦
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
+			if (m_isTraining) {
+				auto* DrawParts = DXDraw::Instance();
+				WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Teacher.at(0),
+					DrawParts->GetUIY(480), DrawParts->GetUIY(1080 - 1824 / 4 / 2), DrawParts->GetUIY(480 + 400 / 2), DrawParts->GetUIY(1080), true);
+
+				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
+					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, DrawParts->GetUIY(480 + 400 / 2 + 48), DrawParts->GetUIY(1080 - 64),
+					Green, Black,
+					"‚ ‚¢‚¤‚¦‚¨‚©‚«‚­‚¯‚±‚³‚µ‚·‚¹‚»‚½‚¿‚Â‚Ä‚Æ");
+			}
+
 			if (m_IsResult) {
 				auto* DrawParts = DXDraw::Instance();
 				auto* ButtonParts = ButtonControl::Instance();

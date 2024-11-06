@@ -46,6 +46,8 @@ namespace FPS_n2 {
 			GraphHandle		m_GameEnd;
 			GraphHandle		m_Result;
 
+			std::vector<GraphHandle>		m_Teacher;
+
 			float m_GameStartTimer{ 2.f };
 			float m_GameStartAlpha{ 0.f };
 			float m_GameStartScale{ 0.f };
