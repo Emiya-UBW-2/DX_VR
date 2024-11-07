@@ -646,7 +646,7 @@ namespace FPS_n2 {
 						if (m_Tutorial.IsEndTutorial()) {
 							m_TutorialTimer += DrawParts->GetDeltaTime();
 
-							if (m_TutorialTimer > 2.f) {
+							if (m_TutorialTimer > 10.f) {
 								m_TutorialTimer = 0.f;
 
 								m_IsPlayable = false;

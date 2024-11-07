@@ -94,6 +94,8 @@ namespace FPS_n2 {
 				Path += ".txt";
 
 				Limit = 0;
+				LastSel = 0;
+				m_CheckHit = HitType::None;
 				this->m_Tutorial.clear();
 				{
 					int mdata = FileRead_open(Path.c_str(), FALSE);
@@ -176,7 +178,7 @@ namespace FPS_n2 {
 						m_TutorialVoice.Stop();
 						m_TutorialVoice.Dispose();
 						char Mes[256]{};
-						snprintfDx(Mes, 256, "data/Sound/VOICE/voice-%d.wav", m_TutorialNow);
+						snprintfDx(Mes, 256, "data/Sound/VOICE/Tutorial/%d.wav", m_TutorialNow);
 						m_TutorialVoice.Load(Mes);
 						m_TutorialVoice.Play(DX_PLAYTYPE_BACK, TRUE);
 						m_TutorialVoice.SetVol(static_cast<int>(255 * OptionParts->GetParamFloat(EnumSaveParam::SE)));
