@@ -67,13 +67,25 @@ namespace FPS_n2 {
 			int												m_GraphID{ 0 };
 			HitType											m_CheckHit{ HitType::None };
 			bool											m_Hit{ false };
+			GraphHandle										m_Men;
+			GraphHandle										m_Kote;
+			GraphHandle										m_Dou;
 		public:
-			void CheckHitOk(HitType hitPos) { if (m_CheckHit == hitPos) { m_Hit = true; } }
+			bool CheckHitOk(HitType hitPos) {
+				if (m_CheckHit == hitPos) {
+					m_Hit = true;
+					return true;
+				}
+				return false;
+			}
 
 			bool IsEndTutorial() { return (m_TutorialNow >= m_Tutorial.size()); }
 		public:
 			void Load(void) noexcept {
 				GraphHandle::LoadDiv("data/UI/Teacher.png", 4, 1, 4, 400, 1824 / 4, &m_Teacher);
+				m_Men.Load("data/UI/Men.mp4");
+				m_Kote.Load("data/UI/Kote.mp4");
+				m_Dou.Load("data/UI/Dou.mp4");
 			}
 			void Set(void) noexcept {
 				auto* OptionParts = OPTION::Instance();
@@ -172,6 +184,22 @@ namespace FPS_n2 {
 						m_GraphID = Data.m_GraphID;
 						//
 						m_CheckHit = Data.m_CheckHit;
+						switch (m_CheckHit) {
+						case HitType::Head:
+							ChangeMovieVolumeToGraph(0, m_Men.get());
+							PlayMovieToGraph(m_Men.get());
+							break;
+						case HitType::Arm:
+							ChangeMovieVolumeToGraph(0, m_Kote.get());
+							PlayMovieToGraph(m_Kote.get());
+							break;
+						case HitType::Body:
+							ChangeMovieVolumeToGraph(0, m_Dou.get());
+							PlayMovieToGraph(m_Dou.get());
+							break;
+						default:
+							break;
+						}
 						//ID
 						m_TutorialNow++;
 					}
@@ -215,6 +243,9 @@ namespace FPS_n2 {
 			}
 			void Dispose_Load(void) noexcept {
 				m_Teacher.clear();
+				m_Men.Dispose();
+				m_Kote.Dispose();
+				m_Dou.Dispose();
 			}
 			void Draw(void) const noexcept {
 				auto* DrawParts = DXDraw::Instance();
@@ -271,6 +302,39 @@ namespace FPS_n2 {
 						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 							xp, yp, Green, Black, "[%s]%s", Pad->GetKeyStr(PADS::INTERACT).c_str(), LocalizePool::Instance()->Get(8993));
+					}
+				}
+				{
+					switch (m_CheckHit) {
+					case HitType::Head:
+						if (GetMovieStateToGraph(m_Men.get()) == 0) {
+							SeekMovieToGraph(m_Men.get(), 0);
+							PlayMovieToGraph(m_Men.get());
+						}
+						WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Men,
+							DrawParts->GetUIY(64), DrawParts->GetUIY(600 - 720 / 2 / 2),
+							DrawParts->GetUIY(64 + 600 / 2), DrawParts->GetUIY(600 + 720 / 2 / 2), false);
+						break;
+					case HitType::Arm:
+						if (GetMovieStateToGraph(m_Kote.get()) == 0) {
+							SeekMovieToGraph(m_Kote.get(), 0);
+							PlayMovieToGraph(m_Kote.get());
+						}
+						WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Kote,
+							DrawParts->GetUIY(64), DrawParts->GetUIY(600 - 720 / 2 / 2),
+							DrawParts->GetUIY(64 + 600 / 2), DrawParts->GetUIY(600 + 720 / 2 / 2), false);
+						break;
+					case HitType::Body:
+						if (GetMovieStateToGraph(m_Dou.get()) == 0) {
+							SeekMovieToGraph(m_Dou.get(), 0);
+							PlayMovieToGraph(m_Dou.get());
+						}
+						WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Dou,
+							DrawParts->GetUIY(64), DrawParts->GetUIY(600 - 720 / 2 / 2),
+							DrawParts->GetUIY(64 + 600 / 2), DrawParts->GetUIY(600 + 720 / 2 / 2), false);
+						break;
+					default:
+						break;
 					}
 				}
 			}

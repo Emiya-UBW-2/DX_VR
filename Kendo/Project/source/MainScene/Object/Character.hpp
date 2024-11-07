@@ -131,7 +131,7 @@ namespace FPS_n2 {
 			void			SetWeaponPtr(std::shared_ptr<WeaponObject::WeaponClass>& pWeaponPtr0) noexcept { this->m_Weapon_Ptr = pWeaponPtr0; }
 			void			SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
 			void			SetViewID(PlayerID value) noexcept { this->m_ViewID = value; }
-			bool			SetDamageEvent(const DamageEvent& value) noexcept;
+			bool			SetDamageEvent(const DamageEvent& value, bool IsTraining) noexcept;
 			void			SetMoveOverRide(const moves& o) noexcept {
 				this->m_MoveOverRideFlag = true;
 				this->m_OverRideInfo = o;

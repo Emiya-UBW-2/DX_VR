@@ -183,7 +183,7 @@ namespace FPS_n2 {
 			m_GuardTimer = 1.f;
 		}
 		//
-		bool			CharacterClass::SetDamageEvent(const DamageEvent& value) noexcept {
+		bool			CharacterClass::SetDamageEvent(const DamageEvent& value, bool IsTraining) noexcept {
 			if (this->m_MyID == value.DamageID) {
 				if (m_DamageCoolTime == 0.f) {
 					auto* SE = SoundPool::Instance();
@@ -295,11 +295,8 @@ namespace FPS_n2 {
 							PlayerMngr->AddScore(value.ShotID, value.GetHitType());
 							SE->Get(static_cast<int>(SoundEnum::Kendo_GetHit)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						}
-						if (TotalAddHits >= 50) {
+						if (!IsTraining && TotalAddHits >= 50) {
 							SE->Get(static_cast<int>(SoundEnum::Audience_Near)).Play(0, DX_PLAYTYPE_BACK, TRUE);
-						}
-						if (TotalAddHits >= 100) {
-							SE->Get(static_cast<int>(SoundEnum::Audience_Good)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						}
 					}
 				}

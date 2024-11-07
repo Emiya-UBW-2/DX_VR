@@ -524,6 +524,8 @@ namespace FPS_n2 {
 							m_WinOnceTimer = 1.5f;
 							m_IsPlayable = false;
 
+							SE->Get(static_cast<int>(SoundEnum::Audience_Good)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+
 							{
 								switch (PlayerMngr->GetWinHitType()) {
 								case HitType::Head://–Ê
@@ -623,8 +625,9 @@ namespace FPS_n2 {
 					else {
 						if (PlayerMngr->PutAddScoreFlag()) {
 							if (PlayerMngr->GetWinPlayer() == GetMyPlayerID()) {
-								m_Tutorial.CheckHitOk(PlayerMngr->GetWinHitType());
-								m_TutorialResetTimer = 2.f;
+								if (m_Tutorial.CheckHitOk(PlayerMngr->GetWinHitType())) {
+									m_TutorialResetTimer = 2.f;
+								}
 							}
 						}
 
@@ -782,7 +785,7 @@ namespace FPS_n2 {
 						auto& p = PlayerMngr->GetPlayer(index);
 						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 						for (int j = 0, Num = static_cast<int>(this->m_DamageEvents.size()); j < Num; ++j) {
-							if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)])) {
+							if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)], m_isTraining)) {
 								std::swap(this->m_DamageEvents.back(), m_DamageEvents[static_cast<size_t>(j)]);
 								this->m_DamageEvents.pop_back();
 								--Num;
