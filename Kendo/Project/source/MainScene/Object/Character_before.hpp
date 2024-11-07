@@ -234,6 +234,7 @@ namespace FPS_n2 {
 				for (size_t i = 0; i < 4; ++i) {
 					this->m_Vec[i] = 0.f;
 				}
+				m_VecTotal = Vector3DX::zero();
 				this->m_Input.ResetAllInput();
 				this->m_rad_Buf.x = (pxRad);
 				this->m_rad_Buf.y = (pyRad);

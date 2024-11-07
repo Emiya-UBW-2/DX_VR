@@ -211,7 +211,7 @@ namespace FPS_n2 {
 						int HitDamagePow = value.Damage;
 						switch (value.m_WazaType) {
 						case FPS_n2::WazaType::Men:
-							HitDamagePow = HitDamagePow * 80 / 100;
+							HitDamagePow = HitDamagePow * 85 / 100;
 							break;
 						case FPS_n2::WazaType::SuriageMen:
 							HitDamagePow = HitDamagePow * 90 / 100;
@@ -226,7 +226,7 @@ namespace FPS_n2 {
 							HitDamagePow = HitDamagePow * 450 / 100;
 							break;
 						case FPS_n2::WazaType::Dou:
-							HitDamagePow = HitDamagePow * 300 / 100;
+							HitDamagePow = HitDamagePow * 400 / 100;
 							break;
 						default:
 							break;
@@ -292,24 +292,8 @@ namespace FPS_n2 {
 
 						if (TotalAddHits >= 100) {
 							auto* PlayerMngr = Player::PlayerManager::Instance();
-							PlayerMngr->AddScore(value.ShotID);
-
+							PlayerMngr->AddScore(value.ShotID, value.GetHitType());
 							SE->Get(static_cast<int>(SoundEnum::Kendo_GetHit)).Play(0, DX_PLAYTYPE_BACK, TRUE);
-
-							switch (value.GetHitType()) {
-							case HitType::Head://–Ê
-								SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Men)).Play(0, DX_PLAYTYPE_BACK, TRUE);
-								break;
-							case HitType::Body://“·
-								SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Dou)).Play(0, DX_PLAYTYPE_BACK, TRUE);
-								break;
-							case HitType::Arm://¬Žè
-								SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Kote)).Play(0, DX_PLAYTYPE_BACK, TRUE);
-								break;
-							case HitType::Leg:
-							default:
-								break;
-							}
 						}
 						if (TotalAddHits >= 50) {
 							SE->Get(static_cast<int>(SoundEnum::Audience_Near)).Play(0, DX_PLAYTYPE_BACK, TRUE);

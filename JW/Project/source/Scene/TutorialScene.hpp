@@ -151,7 +151,7 @@ namespace FPS_n2 {
 			std::shared_ptr<BackGroundClassTutorial>		m_BackGround;					//BG
 			MainLoopPauseControl							m_MainLoopPauseControl;			//ポーズメニュー
 			UIClass											m_UIclass;						//UI関連
-
+			/*
 			struct Msgs {
 				std::string m_Mes;
 				std::vector<PADS>m_PADS;
@@ -162,7 +162,7 @@ namespace FPS_n2 {
 			TutorialLog										m_TutorialLog;
 			SoundHandle										m_TutorialVoice;
 			int												m_TutorialNow{0};
-
+			//*/
 			std::vector<DamageEvent>						m_DamageEvents;				//ダメージ
 
 			int tgtSel = 0;

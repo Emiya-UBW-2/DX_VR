@@ -60,6 +60,7 @@ namespace FPS_n2 {
 			int											m_PlayerNum{};
 			bool										m_ScoreChangeFlag{ false };
 			PlayerID									m_LastAddScore{ InvalidID };
+			HitType										m_LastHitType{ HitType::Head };
 		private:
 			PlayerManager(void) noexcept {}
 			PlayerManager(const PlayerManager&) = delete;
@@ -86,10 +87,11 @@ namespace FPS_n2 {
 				m_Player.clear();
 			}
 		public:
-			void AddScore(PlayerID ID) {
+			void AddScore(PlayerID ID, HitType hitPos) {
 				m_ScoreChangeFlag = true;
 				GetPlayer(ID)->AddScore(1);
 				m_LastAddScore = ID;
+				m_LastHitType = hitPos;
 			}
 			const auto PutAddScoreFlag() {
 				auto ret = m_ScoreChangeFlag;
@@ -97,6 +99,7 @@ namespace FPS_n2 {
 				return ret;
 			}
 			const auto& GetWinPlayer() const noexcept { return this->m_LastAddScore; }
+			const auto& GetWinHitType() const noexcept { return this->m_LastHitType; }
 		};
 	}
 };

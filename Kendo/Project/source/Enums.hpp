@@ -97,6 +97,7 @@ namespace FPS_n2 {
 		Body,
 		Arm,
 		Leg,
+		None,
 	};
 
 

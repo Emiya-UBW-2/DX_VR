@@ -43,7 +43,7 @@ namespace FPS_n2 {
 			m_Result.Load("data/UI/Result.png");
 			m_Result.GraphFilter(DX_GRAPH_FILTER_GAUSS, 8, 400);
 
-			GraphHandle::LoadDiv("data/UI/Teacher.png", 4, 1, 4, 400, 1824 / 4, &m_Teacher);
+			m_Tutorial.Load();
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* DrawParts = DXDraw::Instance();
@@ -148,6 +148,10 @@ namespace FPS_n2 {
 			m_IsResult = false;
 
 			m_pStart = &m_GameStart;
+
+			if (m_isTraining) {
+				m_Tutorial.Set();
+			}
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* BGM = BGMPool::Instance();
@@ -270,6 +274,10 @@ namespace FPS_n2 {
 
 							KeyGuide->AddGuide(PADS::WALK, LocalizePool::Instance()->Get(9903));
 							KeyGuide->AddGuide(PADS::JUMP, LocalizePool::Instance()->Get(9905));
+							if (m_isTraining) {
+								KeyGuide->AddGuide(PADS::INTERACT, "");
+								KeyGuide->AddGuide(PADS::THROW, LocalizePool::Instance()->Get(9916));
+							}
 						}
 					}
 				});
@@ -339,6 +347,9 @@ namespace FPS_n2 {
 						}
 					}
 				}
+			}
+			if (m_isTraining) {
+				m_Tutorial.Update();
 			}
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
@@ -512,6 +523,24 @@ namespace FPS_n2 {
 						if (PlayerMngr->PutAddScoreFlag()) {
 							m_WinOnceTimer = 1.5f;
 							m_IsPlayable = false;
+
+							{
+								switch (PlayerMngr->GetWinHitType()) {
+								case HitType::Head://面
+									SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Men)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+									break;
+								case HitType::Body://胴
+									SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Dou)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+									break;
+								case HitType::Arm://小手
+									SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Kote)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+									break;
+								case HitType::Leg:
+								default:
+									break;
+								}
+							}
+
 							if (PlayerMngr->GetWinPlayer() == GetMyPlayerID()) {
 								m_ScoreUp0 = 1.f;
 								for (int index = 0; index < 3; ++index) {
@@ -570,16 +599,61 @@ namespace FPS_n2 {
 				else {
 					m_IsPlayable = FadeControl::IsFadeClear();
 
-					if (m_IsPlayable) {
-						m_TutorialTimer += DrawParts->GetDeltaTime();
+					if (!m_IsPlayable) {
+						if (FadeControl::IsFadeAll()) {
+							FadeControl::SetFadeIn(1.f / 2.f);
+							m_TutorialResetTimer = 0.f;
+							//初期化
+							for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
+								auto& p = PlayerMngr->GetPlayer(index);
+								auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+								{
+									Vector3DX pos_t;
+									pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale3DRate) * static_cast<float>(index * 2 - 1));
 
-						if (m_TutorialTimer > 10.f) {
+									Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale3DRate;
+									if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale3DRate, &EndPos, true)) {
+										pos_t = EndPos;
+									}
+									c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
+								}
+							}
+						}
+					}
+					else {
+						if (PlayerMngr->PutAddScoreFlag()) {
+							if (PlayerMngr->GetWinPlayer() == GetMyPlayerID()) {
+								m_Tutorial.CheckHitOk(PlayerMngr->GetWinHitType());
+								m_TutorialResetTimer = 2.f;
+							}
+						}
+
+						if (m_TutorialResetTimer > 0.f) {
+							m_TutorialResetTimer -= DrawParts->GetDeltaTime();
+							if (m_TutorialResetTimer <= 0.f) {
+								if (FadeControl::IsFadeClear()) {
+									FadeControl::SetFadeOut(2.f);
+								}
+							}
+						}
+						else {
+							m_TutorialResetTimer = 0.f;
+						}
+
+						if (m_Tutorial.IsEndTutorial()) {
+							m_TutorialTimer += DrawParts->GetDeltaTime();
+
+							if (m_TutorialTimer > 2.f) {
+								m_TutorialTimer = 0.f;
+
+								m_IsPlayable = false;
+
+								m_IsEventSceneFlag = true;
+								m_EventSelect = "data/Cut/Cut2.txt";
+							}
+						}
+						else {
 							m_TutorialTimer = 0.f;
-
-							m_IsPlayable = false;
-
-							m_IsEventSceneFlag = true;
-							m_EventSelect = "data/Cut/Cut2.txt";
 						}
 					}
 				}
@@ -905,6 +979,9 @@ namespace FPS_n2 {
 				DrawParts->Set_is_lens(false);
 				DrawParts->Set_zoom_lens(1.f);
 			}
+
+			this->m_Tutorial.Dispose();
+
 			if (this->m_IsEnd) {//タイトルに戻る
 				SetNextSelect(0);
 			}
@@ -927,7 +1004,8 @@ namespace FPS_n2 {
 			m_Once.Dispose();
 			m_GameEnd.Dispose();
 			m_Result.Dispose();
-			m_Teacher.clear();
+
+			this->m_Tutorial.Dispose_Load();
 			auto* BGM = BGMPool::Instance();
 			BGM->Delete(0);
 			BGM->Delete(1);
@@ -1018,15 +1096,10 @@ namespace FPS_n2 {
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
-			if (m_isTraining) {
-				auto* DrawParts = DXDraw::Instance();
-				WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Teacher.at(0),
-					DrawParts->GetUIY(480), DrawParts->GetUIY(1080 - 1824 / 4 / 2), DrawParts->GetUIY(480 + 400 / 2), DrawParts->GetUIY(1080), true);
-
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
-					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, DrawParts->GetUIY(480 + 400 / 2 + 48), DrawParts->GetUIY(1080 - 64),
-					Green, Black,
-					"あいうえおかきくけこさしすせそたちつてと");
+			if (!m_IsEventSceneActive) {
+				if (m_isTraining) {
+					this->m_Tutorial.Draw();
+				}
 			}
 
 			if (m_IsResult) {
