@@ -79,7 +79,7 @@ namespace FPS_n2 {
 				return Prev;
 			}
 			auto			GetGuardOn(void) const noexcept { return m_GuardHit>0.f; }//ÉKÅ[ÉhÇ≈í|ìÅÇó}Ç¶ÇΩ
-			auto			GetYaTimerMax(void) const noexcept { return 15.f; }
+			auto			GetYaTimerMax(void) const noexcept { return 10.f; }
 			auto			IsGuardStarting(void) const noexcept { return false; }
 			auto			IsAttackAction(EnumArmAnimType value) const noexcept {
 				switch (value) {

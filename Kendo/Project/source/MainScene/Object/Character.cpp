@@ -407,7 +407,7 @@ namespace FPS_n2 {
 					float cost = Vector3DX::Dot(Vec, Dir);
 					auto IsFront = (cost > cos(deg2rad(40)));
 					if (IsFront) {
-						pp_y = std::clamp(-std::atan2f(sint, cost), -deg2rad(60), deg2rad(60)) * 9.f / FrameRate;
+						pp_y = std::clamp(-std::atan2f(sint, cost), -deg2rad(60), deg2rad(60)) * 25.f / FrameRate;
 					}
 					else {
 						pp_y = -deg2rad(60) * 9.f / FrameRate;
@@ -466,7 +466,7 @@ namespace FPS_n2 {
 				) {
 				SE->Get(static_cast<int>(SoundEnum::Voice_Ya)).Play_3D(0, GetEyePosition(), Scale3DRate * 35.f);
 				m_YaTimer = GetYaTimerMax();
-				m_HeartUp = 50.f;
+				m_HeartUp = 20.f;
 			}
 			m_YaTimer = std::max(m_YaTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 			m_DamageCoolTime = std::max(m_DamageCoolTime - DXLib_refParts->GetDeltaTime(), 0.f);

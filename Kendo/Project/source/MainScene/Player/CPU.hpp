@@ -7,8 +7,13 @@ namespace FPS_n2 {
 		//AI用
 		class AIControl {
 			PlayerID m_MyID{ 0 };
-
-			float m_Counter{ 0 };
+			//チュートリアル用
+			float m_Counter01{ 0 };
+			//
+			float m_Counter11{ 0 };
+			float m_Counter12{ 0 };
+			int m_LMR{ 50 };
+			int m_FMB{ 50 };
 		public:
 			void Init(PlayerID MyID) noexcept {
 				m_MyID = MyID;
