@@ -261,7 +261,7 @@ namespace FPS_n2 {
 					}
 				}
 				void			ChangeAnim(int ID, bool isloop, float speed, bool isfastchange) noexcept {
-					auto* DrawParts = DXDraw::Instance();
+					auto* DXLib_refParts = DXLib_ref::Instance();
 					if (isfastchange) {
 						AnimChange = 1.f;
 					}
@@ -271,7 +271,7 @@ namespace FPS_n2 {
 					}
 					prevID = ID;
 					Sel_AnimNum(this->obj, ID, AnimChange);
-					AnimChange = std::clamp(AnimChange + DrawParts->GetDeltaTime(), 0.f, 1.f);
+					AnimChange = std::clamp(AnimChange + DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 					if (ID < this->obj.GetAnimNum()) {
 						this->obj.SetAnim(ID).Update(isloop, speed);
 					}
@@ -305,8 +305,8 @@ namespace FPS_n2 {
 							this->obj.PhysicsResetState();
 						}
 						else {
-							auto* DrawParts = DXDraw::Instance();
-							this->obj.PhysicsCalculation(1000.0f / (DrawParts->GetFps() * (120.f / 60.f)) * this->PhysicsSpeed * x);
+							auto* DXLib_refParts = DXLib_ref::Instance();
+							this->obj.PhysicsCalculation(1000.0f / (DXLib_refParts->GetFps() * (120.f / 60.f)) * this->PhysicsSpeed * x);
 						}
 					}
 				}

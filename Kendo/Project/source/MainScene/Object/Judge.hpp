@@ -64,7 +64,7 @@ namespace FPS_n2 {
 		private: //Œp³
 			void			Init_Sub(void) noexcept override {}
 			void			FirstExecute(void) noexcept override {
-				auto* DrawParts = DXDraw::Instance();
+				auto* DXLib_refParts = DXLib_ref::Instance();
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto* BackGround = BackGround::BackGroundClass::Instance();
 				Vector3DX VecTotal;
@@ -92,10 +92,10 @@ namespace FPS_n2 {
 						m_SKey = Dot > 0.f;
 						m_DKey = Cross < 0.f;
 					}
-					this->m_Vec[0] = std::clamp(this->m_Vec[0] + (m_WKey ? 5.f : -1.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
-					this->m_Vec[1] = std::clamp(this->m_Vec[1] + (m_AKey ? 5.f : -1.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
-					this->m_Vec[2] = std::clamp(this->m_Vec[2] + (m_SKey ? 5.f : -1.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
-					this->m_Vec[3] = std::clamp(this->m_Vec[3] + (m_DKey ? 5.f : -1.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
+					this->m_Vec[0] = std::clamp(this->m_Vec[0] + (m_WKey ? 5.f : -1.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+					this->m_Vec[1] = std::clamp(this->m_Vec[1] + (m_AKey ? 5.f : -1.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+					this->m_Vec[2] = std::clamp(this->m_Vec[2] + (m_SKey ? 5.f : -1.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+					this->m_Vec[3] = std::clamp(this->m_Vec[3] + (m_DKey ? 5.f : -1.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 					VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0.f, this->m_Vec[2] - this->m_Vec[0]);
 					IsMove = (VecTotal.magnitude() > 0.01f);
 				}
@@ -154,22 +154,22 @@ namespace FPS_n2 {
 							Sel == JudgeAnimeID::Bottom_Stand_LeftStep ||
 							Sel == JudgeAnimeID::Bottom_Stand_RightStep ||
 							Sel == JudgeAnimeID::Bottom_Stand_WalkBack) {
-							this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((Sel == BottomAnimSelect) ? 6.f : -2.f) * DrawParts->GetDeltaTime(), 0.f, 0.5f);
+							this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((Sel == BottomAnimSelect) ? 6.f : -2.f) * DXLib_refParts->GetDeltaTime(), 0.f, 0.5f);
 						}
 						if (Sel == JudgeAnimeID::Bottom_Stand) {
-							this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((Sel == BottomAnimSelect) ? 6.f : -2.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
+							this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((Sel == BottomAnimSelect) ? 6.f : -2.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 						}
 						if (Sel == JudgeAnimeID::Bottom_Stand_Turn) {
-							this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((this->m_TurnBody && !IsMove) ? 6.f : -2.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
+							this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((this->m_TurnBody && !IsMove) ? 6.f : -2.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 						}
 						if (Sel == JudgeAnimeID::Upper_Ready) {
-							this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((!m_RedWin && !m_WhiteWin) ? 6.f : -6.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
+							this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((!m_RedWin && !m_WhiteWin) ? 6.f : -6.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 						}
 						if (Sel == JudgeAnimeID::Upper_RedWin) {
-							this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((m_RedWin && !m_WhiteWin) ? 6.f : -6.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
+							this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((m_RedWin && !m_WhiteWin) ? 6.f : -6.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 						}
 						if (Sel == JudgeAnimeID::Upper_WhiteWin) {
-							this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((!m_RedWin && m_WhiteWin) ? 6.f : -6.f) * DrawParts->GetDeltaTime(), 0.f, 1.f);
+							this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((!m_RedWin && m_WhiteWin) ? 6.f : -6.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 						}
 						this->GetObj().SetAnim(i).SetPer(this->m_AnimPerBuf.at(i));
 					}
@@ -182,7 +182,7 @@ namespace FPS_n2 {
 				}
 				//•Ç”»’è
 				Vector3DX PosBuf = this->GetMove().GetPos()
-					+ Matrix4x4DX::Vtrans(VecTotal * (0.45f * 60.f * DrawParts->GetDeltaTime()), Matrix4x4DX::RotAxis(Vector3DX::up(), this->m_TargetRad));
+					+ Matrix4x4DX::Vtrans(VecTotal * (0.45f * 60.f * DXLib_refParts->GetDeltaTime()), Matrix4x4DX::RotAxis(Vector3DX::up(), this->m_TargetRad));
 				BackGround->CheckMapWall(this->m_move.GetRePos(), &PosBuf, 0.6f * Scale3DRate);
 				this->SetMove().SetPos(PosBuf);
 				this->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_BottomRad));

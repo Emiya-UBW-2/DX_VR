@@ -33,8 +33,8 @@ namespace FPS_n2 {
 				}
 				void UpdateActive() noexcept {
 					if (m_Time > 5.f) {
-						auto* DrawParts = DXDraw::Instance();
-						m_Time -= 1.f / DrawParts->GetFps();
+						auto* DXLib_refParts = DXLib_ref::Instance();
+						m_Time -= 1.f / DXLib_refParts->GetFps();
 					}
 					else if (m_Time <= 0.f) {
 						m_Time = -1.f;
@@ -181,7 +181,7 @@ namespace FPS_n2 {
 						snprintfDx(Mes, 256, "data/Sound/VOICE/Tutorial/%d.wav", m_TutorialNow);
 						m_TutorialVoice.Load(Mes);
 						m_TutorialVoice.Play(DX_PLAYTYPE_BACK, TRUE);
-						m_TutorialVoice.SetVol(static_cast<int>(255 * OptionParts->GetParamFloat(EnumSaveParam::SE)));
+						m_TutorialVoice.SetVol(static_cast<int>(128 * OptionParts->GetParamFloat(EnumSaveParam::SE)));
 						//‰æ‘œ
 						m_GraphID = Data.m_GraphID;
 						//

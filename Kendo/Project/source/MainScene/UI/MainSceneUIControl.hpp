@@ -15,12 +15,12 @@ namespace FPS_n2 {
 					this->m_Buffer = static_cast<float>(this->m_Now);
 				}
 				void			SetGaugeParam(int value, int Max, int Rate) noexcept {
-					auto* DrawParts = DXDraw::Instance();
+					auto* DXLib_refParts = DXLib_ref::Instance();
 					this->m_Now = value;
 					this->m_Max = Max;
 					if (Rate > 0) {
 						float Limit = static_cast<float>(this->m_Max / Rate);
-						this->m_Buffer += std::clamp(static_cast<float>(static_cast<float>(this->m_Now) - this->m_Buffer) * Limit, -Limit * 1.5f, Limit * 1.5f) * DrawParts->GetDeltaTime();
+						this->m_Buffer += std::clamp(static_cast<float>(static_cast<float>(this->m_Now) - this->m_Buffer) * Limit, -Limit * 1.5f, Limit * 1.5f) * DXLib_refParts->GetDeltaTime();
 					}
 					else {
 						this->m_Buffer = static_cast<float>(this->m_Now);
@@ -295,10 +295,10 @@ namespace FPS_n2 {
 						255, 150, 155);
 					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255 * (m_GaugeParam[0].GetGaugeMax() - m_GaugeParam[0].GetGaugeBuff()) / m_GaugeParam[0].GetGaugeMax());
 					WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Kiai,
-						static_cast<int>(DrawParts->GetUIXMax() / 2 - DrawParts->GetUIXMax() / 2 * radius),
-						static_cast<int>(DrawParts->GetUIYMax() / 2 - DrawParts->GetUIYMax() / 2 * radius),
-						static_cast<int>(DrawParts->GetUIXMax() / 2 + DrawParts->GetUIXMax() / 2 * radius),
-						static_cast<int>(DrawParts->GetUIYMax() / 2 + DrawParts->GetUIYMax() / 2 * radius),
+						DrawParts->GetUIXMax() / 2 - static_cast<int>(static_cast<float>(DrawParts->GetUIXMax() / 2) * radius),
+						DrawParts->GetUIYMax() / 2 - static_cast<int>(static_cast<float>(DrawParts->GetUIYMax() / 2) * radius),
+						DrawParts->GetUIXMax() / 2 + static_cast<int>(static_cast<float>(DrawParts->GetUIXMax() / 2) * radius),
+						DrawParts->GetUIYMax() / 2 + static_cast<int>(static_cast<float>(DrawParts->GetUIYMax() / 2) * radius),
 						true);
 					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,

@@ -44,6 +44,7 @@ namespace FPS_n2 {
 		}
 		bool			TitleScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
+			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* PopUpParts = PopUp::Instance();
@@ -102,8 +103,8 @@ namespace FPS_n2 {
 			// 
 			ButtonParts->Update();
 			// 
-			this->m_GameFadeIn = std::max(this->m_GameFadeIn - DrawParts->GetDeltaTime() / 0.5f, 0.f);
-			if (this->m_GameStart != 0.f) { this->m_GameStart += DrawParts->GetDeltaTime() / 0.5f; }
+			this->m_GameFadeIn = std::max(this->m_GameFadeIn - DXLib_refParts->GetDeltaTime() / 0.5f, 0.f);
+			if (this->m_GameStart != 0.f) { this->m_GameStart += DXLib_refParts->GetDeltaTime() / 0.5f; }
 			return (this->m_GameStart <= 1.f);
 		}
 		void			TitleScene::Dispose_Sub(void) noexcept {

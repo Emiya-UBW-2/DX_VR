@@ -90,8 +90,8 @@ namespace FPS_n2 {
 			this->m_BlackOutPower = Per;
 		}
 		void FadeControl::UpdateFade(void) noexcept {
-			auto* DrawParts = DXDraw::Instance();
-			this->m_BlackOutAlpha = std::clamp(this->m_BlackOutAlpha + (this->m_IsBlackOut ? 1.f : -1.f) * DrawParts->GetDeltaTime() * this->m_BlackOutPower, 0.f, 1.f);
+			auto* DXLib_refParts = DXLib_ref::Instance();
+			this->m_BlackOutAlpha = std::clamp(this->m_BlackOutAlpha + (this->m_IsBlackOut ? 1.f : -1.f) * DXLib_refParts->GetDeltaTime() * this->m_BlackOutPower, 0.f, 1.f);
 		}
 		void FadeControl::DrawFade(void) const noexcept {
 			auto* DrawParts = DXDraw::Instance();

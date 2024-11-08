@@ -219,6 +219,7 @@ namespace FPS_n2 {
 		}
 
 		ArmAnimNow	GetAnimNow(const AnimDatas* data, float nowframe) noexcept {
+			auto* DXLib_refParts = DXLib_ref::Instance();
 			ArmAnimNow Ret;
 			if (data) {
 				float totalTime = static_cast<float>(data->GetTotalTime());
@@ -248,50 +249,49 @@ namespace FPS_n2 {
 #ifdef DEBUG
 						if (0 <= DBG_CamSel && DBG_CamSel <= 2) {
 							Ret.Set(Vector3DX::zero(), DBG_AnimRot, DBG_AnimPos);
-							auto* DrawParts = DXDraw::Instance();
 							//
 							if (CheckHitKeyWithCheck(KEY_INPUT_RCONTROL) != 0) {
 								if (CheckHitKeyWithCheck(KEY_INPUT_J) != 0) {
-									DBG_AnimRot.x += 5.f * DrawParts->GetDeltaTime();
+									DBG_AnimRot.x += 5.f * DXLib_refParts->GetDeltaTime();
 								}
 								if (CheckHitKeyWithCheck(KEY_INPUT_L) != 0) {
-									DBG_AnimRot.x -= 5.f * DrawParts->GetDeltaTime();
+									DBG_AnimRot.x -= 5.f * DXLib_refParts->GetDeltaTime();
 								}
 								//
 								if (CheckHitKeyWithCheck(KEY_INPUT_I) != 0) {
-									DBG_AnimRot.y += 5.f * DrawParts->GetDeltaTime();
+									DBG_AnimRot.y += 5.f * DXLib_refParts->GetDeltaTime();
 								}
 								if (CheckHitKeyWithCheck(KEY_INPUT_K) != 0) {
-									DBG_AnimRot.y -= 5.f * DrawParts->GetDeltaTime();
+									DBG_AnimRot.y -= 5.f * DXLib_refParts->GetDeltaTime();
 								}
 								//
 								if (CheckHitKeyWithCheck(KEY_INPUT_U) != 0) {
-									DBG_AnimRot.z += 5.f * DrawParts->GetDeltaTime();
+									DBG_AnimRot.z += 5.f * DXLib_refParts->GetDeltaTime();
 								}
 								if (CheckHitKeyWithCheck(KEY_INPUT_O) != 0) {
-									DBG_AnimRot.z -= 5.f * DrawParts->GetDeltaTime();
+									DBG_AnimRot.z -= 5.f * DXLib_refParts->GetDeltaTime();
 								}
 							}
 							else {
 								if (CheckHitKeyWithCheck(KEY_INPUT_J) != 0) {
-									DBG_AnimPos.x += 0.01f * DrawParts->GetDeltaTime();
+									DBG_AnimPos.x += 0.01f * DXLib_refParts->GetDeltaTime();
 								}
 								if (CheckHitKeyWithCheck(KEY_INPUT_L) != 0) {
-									DBG_AnimPos.x -= 0.01f * DrawParts->GetDeltaTime();
+									DBG_AnimPos.x -= 0.01f * DXLib_refParts->GetDeltaTime();
 								}
 								//
 								if (CheckHitKeyWithCheck(KEY_INPUT_I) != 0) {
-									DBG_AnimPos.y += 0.01f * DrawParts->GetDeltaTime();
+									DBG_AnimPos.y += 0.01f * DXLib_refParts->GetDeltaTime();
 								}
 								if (CheckHitKeyWithCheck(KEY_INPUT_K) != 0) {
-									DBG_AnimPos.y -= 0.01f * DrawParts->GetDeltaTime();
+									DBG_AnimPos.y -= 0.01f * DXLib_refParts->GetDeltaTime();
 								}
 								//
 								if (CheckHitKeyWithCheck(KEY_INPUT_U) != 0) {
-									DBG_AnimPos.z += 0.01f * DrawParts->GetDeltaTime();
+									DBG_AnimPos.z += 0.01f * DXLib_refParts->GetDeltaTime();
 								}
 								if (CheckHitKeyWithCheck(KEY_INPUT_O) != 0) {
-									DBG_AnimPos.z -= 0.01f * DrawParts->GetDeltaTime();
+									DBG_AnimPos.z -= 0.01f * DXLib_refParts->GetDeltaTime();
 								}
 							}
 							printfDx("Rot[%5.2f,%5.2f,%5.2f]\n", DBG_AnimRot.x, DBG_AnimRot.y, DBG_AnimRot.z);

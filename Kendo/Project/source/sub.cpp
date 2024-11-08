@@ -164,6 +164,7 @@ namespace FPS_n2 {
 	}
 	void HitMark::Update(void) noexcept {
 		auto* DrawParts = DXDraw::Instance();
+		auto* DXLib_refParts = DXLib_ref::Instance();
 		for (auto& h : m_HitPos) {
 			if (h.Time <= 0.f) { continue; }
 			if (h.Time == h.TimeMax || h.m_Pos2D.z == -100.f) {
@@ -173,7 +174,7 @@ namespace FPS_n2 {
 					h.m_Pos2D = h.m_Pos2D * ((float)DrawParts->GetUIY(1080) / (float)DrawParts->GetScreenY(1080));
 				}
 			}
-			h.Time = std::max(h.Time - DrawParts->GetDeltaTime(), 0.f);
+			h.Time = std::max(h.Time - DXLib_refParts->GetDeltaTime(), 0.f);
 		}
 	}
 	void HitMark::Draw(void) noexcept {

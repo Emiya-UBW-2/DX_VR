@@ -49,8 +49,8 @@ namespace FPS_n2 {
 
 
 			void			FirstExecute(void) noexcept override {
-				auto* DrawParts = DXDraw::Instance();
-				m_UpperAnim += DrawParts->GetDeltaTime();
+				auto* DXLib_refParts = DXLib_ref::Instance();
+				m_UpperAnim += DXLib_refParts->GetDeltaTime();
 
 				for (int i = 0, num = GetObj().GetMaterialNum(); i < num; ++i) {
 					GetObj().SetMaterialDifColor(i, GetColorF(1.f, 1.f, 1.f, 1.f));

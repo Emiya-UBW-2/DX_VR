@@ -7,7 +7,7 @@ namespace FPS_n2 {
 	namespace Player {
 		void AIControl::Execute(InputControl* MyInput, bool IsTutorial) noexcept
 		{
-			auto* DrawParts = DXDraw::Instance();
+			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(m_MyID)->GetChara();
 
@@ -37,7 +37,7 @@ namespace FPS_n2 {
 			bool shotSub_Key{ false };
 			float pp_x{ 0.f }, pp_y{ 0.f };
 
-			m_Counter += DrawParts->GetDeltaTime();
+			m_Counter += DXLib_refParts->GetDeltaTime();
 			if (m_Counter > 5.f) {
 				m_Counter -= 5.f;
 			}

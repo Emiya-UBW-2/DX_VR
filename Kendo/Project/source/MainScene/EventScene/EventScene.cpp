@@ -658,7 +658,7 @@ namespace FPS_n2 {
 		float* pBlack, float* pWhite,
 		const ModelControl& model
 	) noexcept {
-		auto* DrawParts = DXDraw::Instance();
+		auto* DXLib_refParts = DXLib_ref::Instance();
 		if (this->NotFirst_per >= 0.f) {
 			Camera.cam_per = this->NotFirst_per;
 		}
@@ -685,9 +685,9 @@ namespace FPS_n2 {
 		}
 
 		CameraNotFirst_After.SetCamPos(
-			CameraNotFirst_After.GetCamPos() + CameraNotFirst_Vec.GetCamPos() * DrawParts->GetDeltaTime(),
-			CameraNotFirst_After.GetCamVec() + CameraNotFirst_Vec.GetCamVec() * DrawParts->GetDeltaTime(),
-			CameraNotFirst_After.GetCamUp() + CameraNotFirst_Vec.GetCamUp() * DrawParts->GetDeltaTime()
+			CameraNotFirst_After.GetCamPos() + CameraNotFirst_Vec.GetCamPos() * DXLib_refParts->GetDeltaTime(),
+			CameraNotFirst_After.GetCamVec() + CameraNotFirst_Vec.GetCamVec() * DXLib_refParts->GetDeltaTime(),
+			CameraNotFirst_After.GetCamUp() + CameraNotFirst_Vec.GetCamUp() * DXLib_refParts->GetDeltaTime()
 		);
 		Easing(pBlack, Black, Black_Per, EasingType::OutExpo);
 		Easing(pWhite, White, White_Per, EasingType::OutExpo);

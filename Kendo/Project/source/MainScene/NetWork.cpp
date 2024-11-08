@@ -169,7 +169,7 @@ namespace FPS_n2 {
 			this->m_Net.m_Phase = ClientPhase::NotConnect;
 		}
 		bool ClientControl::Update(ServerNetData* pServerCtrl, const PlayerNetData& MyLocalPlayerData, bool IsUpdateTick) noexcept {
-			auto* DrawParts = DXDraw::Instance();
+			auto* DXLib_refParts = DXLib_ref::Instance();
 			int recvRet = -1;
 			bool IsDataUpdated = this->m_Net.m_NetWork.RecvData(&m_BufferDataOnce, &recvRet, false);
 			if (IsDataUpdated) {
@@ -202,7 +202,7 @@ namespace FPS_n2 {
 				}
 				//‚à‚ç‚¦‚Ä‚È‚¢
 				else {
-					m_CannotConnectTimer += DrawParts->GetDeltaTime();
+					m_CannotConnectTimer += DXLib_refParts->GetDeltaTime();
 					if (this->m_CannotConnectTimer > 1.f) {
 						m_CannotConnectTimer -= 1.f;
 						++this->m_NetWorkSel;

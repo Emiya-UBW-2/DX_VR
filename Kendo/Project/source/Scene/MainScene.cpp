@@ -158,6 +158,7 @@ namespace FPS_n2 {
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* DrawParts = DXDraw::Instance();
+			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SE = SoundPool::Instance();
@@ -166,22 +167,22 @@ namespace FPS_n2 {
 			{
 				auto* DrawParts = DXDraw::Instance();
 				if (CheckHitKeyWithCheck(KEY_INPUT_1) != 0) {
-					m_D1 = std::clamp(m_D1 - 0.1f * DrawParts->GetDeltaTime(), 0.f, 1.f);
+					m_D1 = std::clamp(m_D1 - 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_2) != 0) {
-					m_D1 = std::clamp(m_D1 + 0.1f * DrawParts->GetDeltaTime(), 0.f, 1.f);
+					m_D1 = std::clamp(m_D1 + 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_3) != 0) {
-					m_D2 = std::clamp(m_D2 - 0.1f * DrawParts->GetDeltaTime(), 0.f, 1.f);
+					m_D2 = std::clamp(m_D2 - 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_4) != 0) {
-					m_D2 = std::clamp(m_D2 + 0.1f * DrawParts->GetDeltaTime(), 0.f, 1.f);
+					m_D2 = std::clamp(m_D2 + 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_5) != 0) {
-					m_D3 = std::clamp(m_D3 - 0.1f * DrawParts->GetDeltaTime(), 1.f, 10.f);
+					m_D3 = std::clamp(m_D3 - 0.1f * DXLib_refParts->GetDeltaTime(), 1.f, 10.f);
 				}
 				if (CheckHitKeyWithCheck(KEY_INPUT_6) != 0) {
-					m_D3 = std::clamp(m_D3 + 0.1f * DrawParts->GetDeltaTime(), 1.f, 10.f);
+					m_D3 = std::clamp(m_D3 + 0.1f * DXLib_refParts->GetDeltaTime(), 1.f, 10.f);
 				}
 				printfDx("Dif[%5.2f]\n", m_D1*255.f);
 				printfDx("Spc[%5.2f]\n", m_D2*255.f);
@@ -380,7 +381,7 @@ namespace FPS_n2 {
 							m_GameStartAlpha = 0.f;
 							m_GameStartScale = 0.f;
 						}
-						m_GameStartTimer = std::max(m_GameStartTimer - DrawParts->GetDeltaTime(), -1.f);
+						m_GameStartTimer = std::max(m_GameStartTimer - DXLib_refParts->GetDeltaTime(), -1.f);
 					}
 					{
 						if (m_WinOnceTimer > 1.f) {
@@ -402,7 +403,7 @@ namespace FPS_n2 {
 							m_WinOnceAlpha = 0.f;
 							m_WinOnceScale = 0.f;
 						}
-						m_WinOnceTimer = std::max(m_WinOnceTimer - DrawParts->GetDeltaTime(), -1.f);
+						m_WinOnceTimer = std::max(m_WinOnceTimer - DXLib_refParts->GetDeltaTime(), -1.f);
 					}
 					{
 						if (m_GameEndTimer > 1.f) {
@@ -424,7 +425,7 @@ namespace FPS_n2 {
 							m_GameEndAlpha = 0.f;
 							m_GameEndScale = 0.f;
 						}
-						m_GameEndTimer = std::max(m_GameEndTimer - DrawParts->GetDeltaTime(), -1.f);
+						m_GameEndTimer = std::max(m_GameEndTimer - DXLib_refParts->GetDeltaTime(), -1.f);
 					}
 					if (!m_IsPlayable) {
 						if (!m_IsGameStart) {
@@ -518,7 +519,7 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						m_Timer -= DrawParts->GetDeltaTime();
+						m_Timer -= DXLib_refParts->GetDeltaTime();
 						//どちらかが勝利したので停止
 						if (PlayerMngr->PutAddScoreFlag()) {
 							m_WinOnceTimer = 1.5f;
@@ -632,7 +633,7 @@ namespace FPS_n2 {
 						}
 
 						if (m_TutorialResetTimer > 0.f) {
-							m_TutorialResetTimer -= DrawParts->GetDeltaTime();
+							m_TutorialResetTimer -= DXLib_refParts->GetDeltaTime();
 							if (m_TutorialResetTimer <= 0.f) {
 								if (FadeControl::IsFadeClear()) {
 									FadeControl::SetFadeOut(2.f);
@@ -644,7 +645,7 @@ namespace FPS_n2 {
 						}
 
 						if (m_Tutorial.IsEndTutorial()) {
-							m_TutorialTimer += DrawParts->GetDeltaTime();
+							m_TutorialTimer += DXLib_refParts->GetDeltaTime();
 
 							if (m_TutorialTimer > 10.f) {
 								m_TutorialTimer = 0.f;
@@ -680,8 +681,8 @@ namespace FPS_n2 {
 						{
 							Vector2DX MSVec = Chara->GetBambooVec();
 							MSVec.Set(
-								std::clamp(Chara->GetBambooVec().x + MyInput.GetAddxRad() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-10), deg2rad(10)),
-								std::clamp(Chara->GetBambooVec().y + MyInput.GetAddyRad() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-30), deg2rad(30))
+								std::clamp(Chara->GetBambooVec().x + MyInput.GetAddxRad() * deg2rad(0.1f) * DXLib_refParts->GetFps() / FrameRate, deg2rad(-10), deg2rad(10)),
+								std::clamp(Chara->GetBambooVec().y + MyInput.GetAddyRad() * deg2rad(0.1f) * DXLib_refParts->GetFps() / FrameRate, deg2rad(-30), deg2rad(30))
 							);
 							MyInput.SetxRad(MSVec.x);
 							MyInput.SetyRad(MSVec.y);
@@ -747,8 +748,8 @@ namespace FPS_n2 {
 									{
 										Vector2DX MSVec;
 										MSVec.Set(
-											std::clamp(c->GetBambooVec().x + OtherInput.GetAddxRad() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-10), deg2rad(10)),
-											std::clamp(c->GetBambooVec().y + OtherInput.GetAddyRad() * deg2rad(0.1f) * DrawParts->GetFps() / FrameRate, deg2rad(-30), deg2rad(30))
+											std::clamp(c->GetBambooVec().x + OtherInput.GetAddxRad() * deg2rad(0.1f) * DXLib_refParts->GetFps() / FrameRate, deg2rad(-10), deg2rad(10)),
+											std::clamp(c->GetBambooVec().y + OtherInput.GetAddyRad() * deg2rad(0.1f) * DXLib_refParts->GetFps() / FrameRate, deg2rad(-30), deg2rad(30))
 										);
 										OtherInput.SetxRad(MSVec.x);
 										OtherInput.SetyRad(MSVec.y);
@@ -811,7 +812,7 @@ namespace FPS_n2 {
 						}
 					}
 					if (IsWaitOutSide) {
-						m_DivideTimer -= DrawParts->GetDeltaTime();
+						m_DivideTimer -= DXLib_refParts->GetDeltaTime();
 					}
 					else {
 						m_DivideTimer = 5.f;
@@ -903,10 +904,11 @@ namespace FPS_n2 {
 				}
 				//コンカッション
 				{
+					auto* PostPassParts = PostPassEffect::Instance();
 					if (Chara->PopConcussionSwitch()) {
 						m_Concussion = 1.f;
 					}
-					DrawParts->Set_is_Blackout(m_Concussion > 0.f);
+					PostPassParts->Set_is_Blackout(m_Concussion > 0.f);
 					if (m_Concussion == 1.f) {
 						CameraShake::Instance()->SetCamShake(0.5f, 0.01f * Scale3DRate);
 					}
@@ -924,8 +926,8 @@ namespace FPS_n2 {
 					else {
 						Easing(&m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
 					}
-					DrawParts->Set_Per_Blackout(m_ConcussionPer * 2.f);
-					m_Concussion = std::max(m_Concussion - DrawParts->GetDeltaTime(), 0.f);
+					PostPassParts->Set_Per_Blackout(m_ConcussionPer * 2.f);
+					m_Concussion = std::max(m_Concussion - DXLib_refParts->GetDeltaTime(), 0.f);
 				}
 				BackGround->Execute();
 				//UIパラメーター
@@ -974,13 +976,13 @@ namespace FPS_n2 {
 				m_NetWorkController.reset();
 			}
 			{
-				auto* DrawParts = DXDraw::Instance();
+				auto* PostPassParts = PostPassEffect::Instance();
 				PostPassEffect::Instance()->SetLevelFilter(0, 255, 1.f);
-				DrawParts->SetAberrationPower(1.f);
-				DrawParts->Set_is_Blackout(false);
-				DrawParts->Set_Per_Blackout(0.f);
-				DrawParts->Set_is_lens(false);
-				DrawParts->Set_zoom_lens(1.f);
+				PostPassParts->SetAberrationPower(1.f);
+				PostPassParts->Set_is_Blackout(false);
+				PostPassParts->Set_Per_Blackout(0.f);
+				PostPassParts->Set_is_lens(false);
+				PostPassParts->Set_zoom_lens(1.f);
 			}
 
 			this->m_Tutorial.Dispose();
