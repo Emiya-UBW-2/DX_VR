@@ -31,6 +31,7 @@ namespace FPS_n2 {
 			float												m_XScale{ 1.f };
 			bool												m_RedWin{ false };
 			bool												m_WhiteWin{ false };
+			float												m_Speed{ 0.f };
 		public: //コンストラクタ、デストラクタ
 			JudgeClass(void) noexcept {
 				this->m_objType = (int)ObjType::Judge;
@@ -92,6 +93,14 @@ namespace FPS_n2 {
 						m_SKey = Dot > 0.f;
 						m_DKey = Cross < 0.f;
 					}
+
+					if (Len > 5.f * Scale3DRate) {
+						Easing(&m_Speed, 0.8f, 0.9f, EasingType::OutExpo);
+					}
+					else {
+						Easing(&m_Speed, 0.45f, 0.9f, EasingType::OutExpo);
+					}
+
 					this->m_Vec[0] = std::clamp(this->m_Vec[0] + (m_WKey ? 5.f : -1.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 					this->m_Vec[1] = std::clamp(this->m_Vec[1] + (m_AKey ? 5.f : -1.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 					this->m_Vec[2] = std::clamp(this->m_Vec[2] + (m_SKey ? 5.f : -1.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
@@ -173,16 +182,16 @@ namespace FPS_n2 {
 						}
 						this->GetObj().SetAnim(i).SetPer(this->m_AnimPerBuf.at(i));
 					}
-					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_Turn, 0.72f);
-					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_Walk, 0.72f);
-					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_LeftStep, 0.72f);
-					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_WalkBack, 0.72f);
-					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_RightStep, 0.72f);
+					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_Turn, 0.72f * (m_Speed / 0.45f));
+					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_Walk, 0.72f * (m_Speed / 0.45f));
+					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_LeftStep, 0.72f * (m_Speed / 0.45f));
+					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_WalkBack, 0.72f * (m_Speed / 0.45f));
+					ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_RightStep, 0.72f * (m_Speed / 0.45f));
 					GetObj().UpdateAnimAll();
 				}
 				//壁判定
 				Vector3DX PosBuf = this->GetMove().GetPos()
-					+ Matrix4x4DX::Vtrans(VecTotal * (0.45f * 60.f * DXLib_refParts->GetDeltaTime()), Matrix4x4DX::RotAxis(Vector3DX::up(), this->m_TargetRad));
+					+ Matrix4x4DX::Vtrans(VecTotal * (m_Speed * 60.f * DXLib_refParts->GetDeltaTime()), Matrix4x4DX::RotAxis(Vector3DX::up(), this->m_TargetRad));
 				BackGround->CheckMapWall(this->m_move.GetRePos(), &PosBuf, 0.6f * Scale3DRate);
 				this->SetMove().SetPos(PosBuf);
 				this->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_BottomRad));

@@ -466,7 +466,7 @@ namespace FPS_n2 {
 				) {
 				SE->Get(static_cast<int>(SoundEnum::Voice_Ya)).Play_3D(0, GetEyePosition(), Scale3DRate * 35.f);
 				m_YaTimer = GetYaTimerMax();
-				m_HeartUp = 20.f;
+				m_HeartUp = 40.f;
 			}
 			m_YaTimer = std::max(m_YaTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 			m_DamageCoolTime = std::max(m_DamageCoolTime - DXLib_refParts->GetDeltaTime(), 0.f);
@@ -646,6 +646,7 @@ namespace FPS_n2 {
 					}
 				}
 				m_GuardTimer = std::max(m_GuardTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+				m_HeartUp = std::max(m_HeartUp - 60.f * DXLib_refParts->GetDeltaTime(), -15.f);
 			}
 			break;
 			case EnumArmAnimType::Max:
