@@ -54,6 +54,7 @@ namespace FPS_n2 {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* HitMarkParts = HitMark::Instance();
+			auto* PostPassParts = PostPassEffect::Instance();
 			//
 			BattleResourceMngr->Set();
 
@@ -71,14 +72,14 @@ namespace FPS_n2 {
 				auto& SecondLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec * -1.f);
 				SetLightDifColorHandle(SecondLight.get(), GetColorF(0.5f, 0.5f, 0.3f, 0.1f));
 
-				DrawParts->SetGodRayPer(0.5f);
+				PostPassParts->SetGodRayPer(0.5f);
 			}
 			else {
 				Vector3DX LightVec = Vector3DX::vget(0.5f, -0.85f, 0.05f); LightVec = LightVec.normalized();
 				DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
 				SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 
-				DrawParts->SetGodRayPer(0.25f);
+				PostPassParts->SetGodRayPer(0.25f);
 			}
 			//Cam
 			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
@@ -263,7 +264,7 @@ namespace FPS_n2 {
 				if (m_IsEventSceneFlag) {
 					m_IsEventSceneFlag = false;
 					if (!m_IsEventSceneActive) {
-						DrawParts->SetDistortionPer(120.f * 4);
+						PostPassParts->SetDistortionPer(120.f * 4);
 						m_EventScene.Load(m_EventSelect.c_str());
 						m_EventScene.Start();
 						m_IsEventSceneActive = true;
@@ -279,7 +280,7 @@ namespace FPS_n2 {
 						m_EventScene.Skip();
 					}
 					if (m_EventScene.IsEnd()) {
-						DrawParts->SetDistortionPer(120.f);
+						PostPassParts->SetDistortionPer(120.f);
 						FadeControl::SetFadeIn(1.f / (m_isTraining ? 0.5f : 2.f));
 						m_EventScene.Dispose();
 						m_IsEventSceneActive = false;
