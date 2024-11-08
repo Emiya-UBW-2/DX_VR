@@ -308,7 +308,7 @@ namespace FPS_n2 {
 						Vector3DX vec_a; vec_a.Set(std::sin(bottom), std::cos(bottom), 0.f);
 						float cost = Vector3DX::Cross(vec_a, Vec).z;
 						float sint = Vector3DX::Dot(vec_a, Vec);
-						YradChange = std::clamp(std::atan2f(cost, sint), deg2rad(-10), deg2rad(10)) * 10.f * DXLib_refParts->GetDeltaTime();
+						YradChange = std::clamp(std::atan2f(cost, sint), deg2rad(-10), deg2rad(10)) * 30.f * DXLib_refParts->GetDeltaTime();
 						this->m_yrad_Bottom += YradChange;
 
 						if (this->m_yrad_Bottom < 0.f) { this->m_yrad_Bottom += DX_PI_F * 2.f; }

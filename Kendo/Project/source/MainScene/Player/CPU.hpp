@@ -12,6 +12,7 @@ namespace FPS_n2 {
 			//
 			float m_Counter11{ 0 };
 			float m_Counter12{ 0 };
+			float m_Counter13{ 0 };
 			int m_LMR{ 50 };
 			int m_FMB{ 50 };
 		public:

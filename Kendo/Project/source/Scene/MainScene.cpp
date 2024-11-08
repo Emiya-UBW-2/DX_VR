@@ -1158,7 +1158,7 @@ namespace FPS_n2 {
 							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						}
 						if (m_IsPlayable) {
-							if (0 <= m_DivideTimer && m_DivideTimer < 5.f) {
+							if (0 <= m_DivideTimer && m_DivideTimer < 3.f) {
 								if ((int)(m_DivideTimer * 100) % 30 < 15) {
 									WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
 										FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, DrawParts->GetUIY(32), DrawParts->GetUIY(384),

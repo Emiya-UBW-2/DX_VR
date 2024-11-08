@@ -401,6 +401,11 @@ namespace FPS_n2 {
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
+					int KihakuPoints = static_cast<int>(Lerp(-30.f, 20.f, 1.f - (float)m_GaugeParam[0].GetGauge() / m_GaugeParam[0].GetGaugeMax()));
+					if (KihakuPoints > 0) {
+						WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
+							xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(6), White, false);
+					}
 
 					//スタミナ
 					xp1 = DrawParts->GetUIY(24 + 9 * 1);

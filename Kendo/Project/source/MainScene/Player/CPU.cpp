@@ -19,6 +19,7 @@ namespace FPS_n2 {
 			bool shotMain_Key{ false };
 			bool shotSub_Key{ false };
 			bool Guard_Key{ false };
+			bool Ya_Key{ false };
 			float pp_x{ 0.f }, pp_y{ 0.f };
 
 			bool IsOutArea = false;
@@ -73,6 +74,13 @@ namespace FPS_n2 {
 						m_FMB = 34 + GetRand(66);
 					}
 				}
+				m_Counter13 += DXLib_refParts->GetDeltaTime();
+				if (m_Counter13 > 1.f) {
+					m_Counter13 -= 1.f;
+					if (!IsFarPlayer && !IsNearPlayer) {
+						Ya_Key = true;
+					}
+				}
 
 				if (Target->GetCharaAction() != EnumArmAnimType::Ready && Target->GetCharaAction() != EnumArmAnimType::Run) {
 					m_LMR = 50;
@@ -121,7 +129,7 @@ namespace FPS_n2 {
 			MyInput->SetInputPADS(PADS::SHOT, shotMain_Key);
 			MyInput->SetInputPADS(PADS::ULT, shotSub_Key);
 			MyInput->SetInputPADS(PADS::AIM, Guard_Key);
-			MyInput->SetInputPADS(PADS::JUMP, false);
+			MyInput->SetInputPADS(PADS::JUMP, Ya_Key);
 		}
 	}
 };
