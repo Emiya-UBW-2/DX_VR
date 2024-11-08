@@ -19,6 +19,7 @@ namespace FPS_n2 {
 			auto* Pad = PadControl::Instance();
 			auto* DrawParts = DXDraw::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
+			auto* OptionWindowParts = OptionWindowClass::Instance();
 			if (DrawParts->IsPause()) {
 				if (!DrawParts->IsExit() && !DrawParts->IsRestart()) {
 					Pad->SetMouseMoveEnable(false);
@@ -32,7 +33,7 @@ namespace FPS_n2 {
 							Pad->AddGuide(PADS::MOVE_S, "");
 							Pad->AddGuide(PADS::MOVE_STICK, LocalizeParts->Get(9993));
 						});
-					if (!OptionWindowClass::Instance()->IsActive()) {
+					if (!OptionWindowParts->IsActive()) {
 						ButtonParts->UpdateInput();
 						// ‘I‘ðŽž‚Ì‹““®
 						if (ButtonParts->GetTriggerButton()) {
@@ -42,7 +43,7 @@ namespace FPS_n2 {
 								DrawParts->SetPause(false);
 								break;
 							case 1:
-								OptionWindowClass::Instance()->SetActive();
+								OptionWindowParts->SetActive();
 								break;
 							case 2:
 								DrawParts->SetPause(false);
@@ -95,10 +96,11 @@ namespace FPS_n2 {
 		}
 		void FadeControl::DrawFade(void) const noexcept {
 			auto* DrawParts = DXDraw::Instance();
+			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			if (this->m_BlackOutAlpha > 0.f) {
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * this->m_BlackOutAlpha), 0, 255));
-				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIXMax(), DrawParts->GetUIYMax(), Black, TRUE);
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * this->m_BlackOutAlpha), 0, 255));
+				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIXMax(), DrawParts->GetUIYMax(), Black, TRUE);
+				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
 		}
 	};

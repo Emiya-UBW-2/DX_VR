@@ -887,6 +887,7 @@ namespace FPS_n2 {
 	}
 	void			EventScene::Update(void) noexcept {
 		auto* DrawParts = DXDraw::Instance();
+		auto* PostPassParts = PostPassEffect::Instance();
 		if (IsEnd()) { return; }
 
 		if (m_NowTime >= 0) {
@@ -904,11 +905,11 @@ namespace FPS_n2 {
 
 			if (IsEnd()) { return; }
 			//カットの処理
-			if (DXDraw::Instance()->IsPauseSwitch()) {
+			if (DrawParts->IsPauseSwitch()) {
 				printfDx("AAAA\n");
 			}
-			m_SEControl.Update(m_Counter, isFirstLoop, DXDraw::Instance()->IsPauseSwitch());
-			if (!DXDraw::Instance()->IsPause()) {
+			m_SEControl.Update(m_Counter, isFirstLoop, DrawParts->IsPauseSwitch());
+			if (!DrawParts->IsPause()) {
 				{
 					m_PosCamCut.Update(m_Counter);
 					m_ModelControl.FirstUpdate(m_Counter, isFirstLoop, ResetPhysics);
@@ -952,11 +953,11 @@ namespace FPS_n2 {
 				}
 				//
 				auto far_t = DrawParts->SetMainCamera().GetCamFar();
-				PostPassEffect::Instance()->Set_DoFNearFar(1.f * Scale3DRate, far_t / 2, 0.5f * Scale3DRate, far_t);
+				PostPassParts->Set_DoFNearFar(1.f * Scale3DRate, far_t / 2, 0.5f * Scale3DRate, far_t);
 			}
 		}
 		//経過時間測定
-		if (!DXDraw::Instance()->IsPause()) {
+		if (!DrawParts->IsPause()) {
 			m_NowTime += (LONGLONG)((float)deltatime);
 		}
 	}

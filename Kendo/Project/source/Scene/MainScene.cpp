@@ -11,6 +11,7 @@ namespace FPS_n2 {
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* HitMarkParts = HitMark::Instance();
 
 			auto* BGM = BGMPool::Instance();
 			auto* OptionParts = OPTION::Instance();
@@ -34,7 +35,7 @@ namespace FPS_n2 {
 			}
 			//UI
 			this->m_UIclass.Load();
-			HitMark::Instance()->Load();
+			HitMarkParts->Load();
 			//
 			m_GameStart.Load("data/UI/GameStart.png");
 			m_GameRestart.Load("data/UI/GameReStart.png");
@@ -52,6 +53,7 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
+			auto* HitMarkParts = HitMark::Instance();
 			//
 			BattleResourceMngr->Set();
 
@@ -123,7 +125,7 @@ namespace FPS_n2 {
 			m_PauseMenuControl.SetPause();
 			FadeControl::SetFadeIn(2.f);
 			this->m_IsEnd = false;
-			HitMark::Instance()->Set();
+			HitMarkParts->Set();
 
 			m_GameStartAlpha = 0.f;
 			m_GameStartScale = 0.f;
@@ -160,41 +162,15 @@ namespace FPS_n2 {
 			auto* DrawParts = DXDraw::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
+			auto* OptionParts = OPTION::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SE = SoundPool::Instance();
+			auto* SideLogParts = SideLog::Instance();
+			auto* Pad = PadControl::Instance();
+			auto* PostPassParts = PostPassEffect::Instance();
 #ifdef DEBUG
-			/*
-			{
-				auto* DrawParts = DXDraw::Instance();
-				if (CheckHitKeyWithCheck(KEY_INPUT_1) != 0) {
-					m_D1 = std::clamp(m_D1 - 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_2) != 0) {
-					m_D1 = std::clamp(m_D1 + 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_3) != 0) {
-					m_D2 = std::clamp(m_D2 - 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_4) != 0) {
-					m_D2 = std::clamp(m_D2 + 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_5) != 0) {
-					m_D3 = std::clamp(m_D3 - 0.1f * DXLib_refParts->GetDeltaTime(), 1.f, 10.f);
-				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_6) != 0) {
-					m_D3 = std::clamp(m_D3 + 0.1f * DXLib_refParts->GetDeltaTime(), 1.f, 10.f);
-				}
-				printfDx("Dif[%5.2f]\n", m_D1*255.f);
-				printfDx("Spc[%5.2f]\n", m_D2*255.f);
-				printfDx("Amb[%5.2f]\n", m_D3);
-				printfDx("\n");
-			}
-			PostPassParts->SetLevelFilter(m_D1*255.f, m_D2*255.f, m_D3);
-			//*/
-			//PostPassParts->SetLevelFilter(38, 154, 1.f);
-#else
-			//PostPassParts->SetLevelFilter(38, 154, 1.f);
-#endif
+			auto* DebugParts = DebugClass::Instance();					//デバッグ
+#endif // DEBUG
 			if (!m_IsResult) {
 				m_PauseMenuControl.UpdatePause();
 			}
@@ -236,48 +212,49 @@ namespace FPS_n2 {
 				this->m_UIclass.SetfloatParam(1, std::max(m_GameStartTimer, 0.f));
 			}
 
-			auto* Pad = PadControl::Instance();
 			Pad->SetMouseMoveEnable(true);
 			Pad->ChangeGuide(
 				[this]() {
+					auto* DrawParts = DXDraw::Instance();
 					auto* KeyGuide = PadControl::Instance();
+					auto* LocalizeParts = LocalizePool::Instance();
 					if (m_IsEventSceneFlag) {
 						return;
 					}
-					if (DXDraw::Instance()->IsPause()) {
+					if (DrawParts->IsPause()) {
 						if (m_IsResult) {
 							return;
 						}
-						KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9992));
-						KeyGuide->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9991));
+						KeyGuide->AddGuide(PADS::INTERACT, LocalizeParts->Get(9992));
+						KeyGuide->AddGuide(PADS::RELOAD, LocalizeParts->Get(9991));
 						KeyGuide->AddGuide(PADS::MOVE_W, "");
 						KeyGuide->AddGuide(PADS::MOVE_S, "");
-						KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9993));
+						KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizeParts->Get(9993));
 					}
 					else {
 						if (m_IsResult) {
-							KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9915));
+							KeyGuide->AddGuide(PADS::INTERACT, LocalizeParts->Get(9915));
 							return;
 						}
 						if (m_IsEventSceneActive) {
-							KeyGuide->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9914));
+							KeyGuide->AddGuide(PADS::INTERACT, LocalizeParts->Get(9914));
 						}
 						else {
 							KeyGuide->AddGuide(PADS::MOVE_W, "");
 							KeyGuide->AddGuide(PADS::MOVE_S, "");
 							KeyGuide->AddGuide(PADS::MOVE_A, "");
 							KeyGuide->AddGuide(PADS::MOVE_D, "");
-							KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9900));
+							KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizeParts->Get(9900));
 
-							KeyGuide->AddGuide(PADS::SHOT, LocalizePool::Instance()->Get(9906));
-							KeyGuide->AddGuide(PADS::AIM, LocalizePool::Instance()->Get(9908));
-							KeyGuide->AddGuide(PADS::ULT, LocalizePool::Instance()->Get(9907));
+							KeyGuide->AddGuide(PADS::SHOT, LocalizeParts->Get(9906));
+							KeyGuide->AddGuide(PADS::AIM, LocalizeParts->Get(9908));
+							KeyGuide->AddGuide(PADS::ULT, LocalizeParts->Get(9907));
 
-							KeyGuide->AddGuide(PADS::WALK, LocalizePool::Instance()->Get(9903));
-							KeyGuide->AddGuide(PADS::JUMP, LocalizePool::Instance()->Get(9905));
+							KeyGuide->AddGuide(PADS::WALK, LocalizeParts->Get(9903));
+							KeyGuide->AddGuide(PADS::JUMP, LocalizeParts->Get(9905));
 							if (m_isTraining) {
 								KeyGuide->AddGuide(PADS::INTERACT, "");
-								KeyGuide->AddGuide(PADS::THROW, LocalizePool::Instance()->Get(9916));
+								KeyGuide->AddGuide(PADS::THROW, LocalizeParts->Get(9916));
 							}
 						}
 					}
@@ -322,7 +299,7 @@ namespace FPS_n2 {
 					m_EventScene.Update();
 					return true;
 				}
-				if (DXDraw::Instance()->IsPause()) {
+				if (DrawParts->IsPause()) {
 					Pad->SetMouseMoveEnable(false);
 					if (!m_NetWorkController) {
 						return true;
@@ -331,7 +308,7 @@ namespace FPS_n2 {
 			}
 			else {
 				Pad->SetMouseMoveEnable(false);
-				if (DXDraw::Instance()->IsPause()) {
+				if (DrawParts->IsPause()) {
 					ButtonParts->ResetSel();
 					if (!m_NetWorkController) {
 						return true;
@@ -352,9 +329,6 @@ namespace FPS_n2 {
 			if (m_isTraining) {
 				m_Tutorial.Update();
 			}
-#ifdef DEBUG
-			auto* DebugParts = DebugClass::Instance();					//デバッグ
-#endif // DEBUG
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=Start");
 #endif // DEBUG
@@ -594,7 +568,7 @@ namespace FPS_n2 {
 							//残り1分
 							if (m_IsDrawOneMinute && (m_Timer < 60.f)) {
 								m_IsDrawOneMinute = false;
-								SideLog::Instance()->Add(10.f, 0.f, Red, "残り1分!");
+								SideLogParts->Add(10.f, 0.f, Red, "残り1分!");
 							}
 						}
 					}
@@ -825,7 +799,6 @@ namespace FPS_n2 {
 				//視点
 				{
 					auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
-					auto* OptionParts = OPTION::Instance();
 					//カメラ
 					Vector3DX CamPos = ViewChara->GetEyePosition();
 					Vector3DX CamVec = CamPos + ViewChara->GetEyeMatrix().zvec() * -1.f;
@@ -877,7 +850,7 @@ namespace FPS_n2 {
 					//info
 					DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.3f, Scale3DRate * 20.f);
 					//DoF
-					PostPassEffect::Instance()->Set_DoFNearFar(Scale3DRate * 0.3f, Scale3DRate * 5.f, Scale3DRate * 0.1f, Scale3DRate * 20.f);
+					PostPassParts->Set_DoFNearFar(Scale3DRate * 0.3f, Scale3DRate * 5.f, Scale3DRate * 0.1f, Scale3DRate * 20.f);
 				}
 				//竹刀判定
 				{
@@ -904,7 +877,6 @@ namespace FPS_n2 {
 				}
 				//コンカッション
 				{
-					auto* PostPassParts = PostPassEffect::Instance();
 					if (Chara->PopConcussionSwitch()) {
 						m_Concussion = 1.f;
 					}
@@ -958,16 +930,18 @@ namespace FPS_n2 {
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
 			auto* SE = SoundPool::Instance();
+			auto* ButtonParts = ButtonControl::Instance();
+			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* PostPassParts = PostPassEffect::Instance();
+
 			SE->Get(static_cast<int>(SoundEnum::Audience_Base)).StopAll(0);
 			SE->Get(static_cast<int>(SoundEnum::Audience_Near)).StopAll(0);
 			SE->Get(static_cast<int>(SoundEnum::Audience_Good)).StopAll(0);
 			m_PauseMenuControl.DisposePause();
-			auto* ButtonParts = ButtonControl::Instance();
 			ButtonParts->Dispose();
 			if (m_IsEventSceneActive) {
 				m_EventScene.Dispose();
 			}
-			auto* BackGround = BackGround::BackGroundClass::Instance();
 			//使い回しオブジェ系
 			BackGround->Dispose();
 			//
@@ -976,8 +950,7 @@ namespace FPS_n2 {
 				m_NetWorkController.reset();
 			}
 			{
-				auto* PostPassParts = PostPassEffect::Instance();
-				PostPassEffect::Instance()->SetLevelFilter(0, 255, 1.f);
+				PostPassParts->SetLevelFilter(0, 255, 1.f);
 				PostPassParts->SetAberrationPower(1.f);
 				PostPassParts->Set_is_Blackout(false);
 				PostPassParts->Set_Per_Blackout(0.f);
@@ -999,11 +972,14 @@ namespace FPS_n2 {
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
+			auto* BGM = BGMPool::Instance();
+			auto* HitMarkParts = HitMark::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
 			BattleResourceMngr->Dispose();
 			this->m_UIclass.Dispose();
 			PlayerMngr->Dispose();
-			ObjectManager::Instance()->DeleteAll();
-			HitMark::Instance()->Dispose();
+			ObjMngr->DeleteAll();
+			HitMarkParts->Dispose();
 			m_GameStart.Dispose();
 			m_GameRestart.Dispose();
 			m_Once.Dispose();
@@ -1011,13 +987,13 @@ namespace FPS_n2 {
 			m_Result.Dispose();
 
 			this->m_Tutorial.Dispose_Load();
-			auto* BGM = BGMPool::Instance();
 			BGM->Delete(0);
 			BGM->Delete(1);
 		}
 
 		//
 		void			MainGameScene::BG_Draw_Sub(void) const noexcept {
+			auto* BackGround = BackGround::BackGroundClass::Instance();
 			if (m_IsResult) {
 				return;
 			}
@@ -1025,20 +1001,21 @@ namespace FPS_n2 {
 				m_EventScene.BGDraw();
 			}
 			else {
-				auto* BackGround = BackGround::BackGroundClass::Instance();
 				BackGround->BG_Draw();
 			}
 		}
 		void			MainGameScene::ShadowDraw_Far_Sub(void) const noexcept {
+			//auto* BackGround = BackGround::BackGroundClass::Instance();
 			if (m_IsResult) {
 				return;
 			}
 			if (!m_IsEventSceneActive) {
-				//auto* BackGround = BackGround::BackGroundClass::Instance();
 				//BackGround->Shadow_Draw_Far();
 			}
 		}
 		void			MainGameScene::ShadowDraw_Sub(void) const noexcept {
+			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
 			if (m_IsResult) {
 				return;
 			}
@@ -1046,12 +1023,12 @@ namespace FPS_n2 {
 				m_EventScene.ShadowDraw();
 			}
 			else {
-				auto* BackGround = BackGround::BackGroundClass::Instance();
 				BackGround->Shadow_Draw();
-				ObjectManager::Instance()->Draw_Shadow();
+				ObjMngr->Draw_Shadow();
 			}
 		}
 		void			MainGameScene::CubeMap_Sub(void) const noexcept {
+			auto* BackGround = BackGround::BackGroundClass::Instance();
 			if (m_IsResult) {
 				return;
 			}
@@ -1059,12 +1036,13 @@ namespace FPS_n2 {
 				m_EventScene.BGDraw();
 			}
 			else {
-				auto* BackGround = BackGround::BackGroundClass::Instance();
 				BackGround->Draw();
 			}
 		}
 
 		void			MainGameScene::SetShadowDraw_Sub(void) const noexcept {
+			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
 			if (m_IsResult) {
 				return;
 			}
@@ -1072,13 +1050,17 @@ namespace FPS_n2 {
 				m_EventScene.SetShadowDraw();
 			}
 			else {
-				auto* BackGround = BackGround::BackGroundClass::Instance();
 				BackGround->Draw();
-				ObjectManager::Instance()->Draw();
+				ObjMngr->Draw();
 			}
 		}
 
 		void			MainGameScene::MainDraw_Sub(void) const noexcept {
+			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto* DrawParts = DXDraw::Instance();
+			auto* HitMarkParts = HitMark::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
 			if (m_IsResult) {
 				return;
 			}
@@ -1086,21 +1068,23 @@ namespace FPS_n2 {
 				m_EventScene.MainDraw();
 			}
 			else {
-				auto* BackGround = BackGround::BackGroundClass::Instance();
-				auto* PlayerMngr = Player::PlayerManager::Instance();
-				auto* DrawParts = DXDraw::Instance();
 				SetFogStartEnd(DrawParts->GetMainCamera().GetCamNear(), DrawParts->GetMainCamera().GetCamFar() * 2.f);
 				BackGround->Draw();
-				ObjectManager::Instance()->Draw();
-				//ObjectManager::Instance()->Draw_Depth();
+				ObjMngr->Draw();
+				//ObjMngr->Draw_Depth();
 				for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 					PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 				}
-				HitMark::Instance()->Update();
+				HitMarkParts->Update();
 			}
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
+			auto* WindowParts = WindowSystem::DrawControl::Instance();
+			auto* DrawParts = DXDraw::Instance();
+			auto* ButtonParts = ButtonControl::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto* HitMarkParts = HitMark::Instance();
 			if (!m_IsEventSceneActive) {
 				if (m_isTraining) {
 					this->m_Tutorial.Draw();
@@ -1108,23 +1092,20 @@ namespace FPS_n2 {
 			}
 
 			if (m_IsResult) {
-				auto* DrawParts = DXDraw::Instance();
-				auto* ButtonParts = ButtonControl::Instance();
-				auto* PlayerMngr = Player::PlayerManager::Instance();
-				WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Result,
+				WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Result,
 					DrawParts->GetUIY(0), DrawParts->GetUIY(0), DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), false);
 
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
 					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, DrawParts->GetUIY(160), DrawParts->GetUIY(256), Yellow, Black, "Result");
 
 				bool IsWin = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore() > PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
 				bool IsDraw = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore() == PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
 
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(48),
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(48),
 					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, DrawParts->GetUIY(300), DrawParts->GetUIY(384),
 					IsDraw ? Gray25 : (IsWin ? Red : White), Black,
 					IsDraw ? "引き分け" : (IsWin ? "勝利" : "敗退"));
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
 					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, DrawParts->GetUIY(300), DrawParts->GetUIY(386), White, Black, "%d : %d",
 					PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore(), PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
 
@@ -1139,45 +1120,44 @@ namespace FPS_n2 {
 				m_EventScene.UIDraw();
 			}
 			else {
-				HitMark::Instance()->Draw();
+				HitMarkParts->Draw();
 				//UI
-				if (!DXDraw::Instance()->IsPause()) {
+				if (!DrawParts->IsPause()) {
 					this->m_UIclass.Draw();
 					if (!m_isTraining) {
-						auto* DrawParts = DXDraw::Instance();
 						int xp1 = DrawParts->GetUIY(1920 / 2);
 						int yp1 = DrawParts->GetUIY(240);
 
 						if ((m_GameStartAlpha * 255.f) > 1.f) {
-							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameStartAlpha), 0, 255));
-							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
-							WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameStartAlpha), 0, 255));
+							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
+							WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
 								m_pStart, xp1, yp1, m_GameStartScale,0.f, true);
-							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						}
 
 						if ((m_WinOnceAlpha * 255.f) > 1.f) {
-							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_WinOnceAlpha), 0, 255));
-							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
-							WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_WinOnceAlpha), 0, 255));
+							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+							WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
 								&m_Once, xp1, yp1, m_WinOnceScale, 0.f, true);
-							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						}
 
 						if ((m_GameEndAlpha * 255.f) > 1.f) {
-							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameEndAlpha), 0, 255));
-							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
-							WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameEndAlpha), 0, 255));
+							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+							WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
 								&m_GameEnd, xp1, yp1, m_GameEndScale, 0.f, true);
-							WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-							WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						}
 					
 						if (0 <= m_DivideTimer && m_DivideTimer < 5.f) {
 							if ((int)(m_DivideTimer * 100) % 30 < 15) {
-								WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
+								WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
 									FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, DrawParts->GetUIY(32), DrawParts->GetUIY(384),
 									Yellow, Black,
 									"場外まであと%3.1f秒", m_DivideTimer);
@@ -1189,11 +1169,12 @@ namespace FPS_n2 {
 			}
 		}
 		void			MainGameScene::DrawUI_In_Sub(void) const noexcept {
+			auto* DrawParts = DXDraw::Instance();
 			if (m_IsResult) {
 				return;
 			}
 			//UI
-			if (DXDraw::Instance()->IsPause()) {
+			if (DrawParts->IsPause()) {
 				m_PauseMenuControl.DrawPause();
 			}
 			if (!m_IsEventSceneActive) {
@@ -1201,7 +1182,6 @@ namespace FPS_n2 {
 				//auto* NetBrowser = NetWorkBrowser::Instance();
 				//NetBrowser->Draw();
 				if (m_NetWorkController) {
-					auto* DrawParts = DXDraw::Instance();
 					if (m_NetWorkController->GetPing() >= 0.f) {
 						WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
 					}

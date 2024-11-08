@@ -253,6 +253,7 @@ namespace FPS_n2 {
 				auto* DrawParts = DXDraw::Instance();
 				auto* WindowParts = WindowSystem::DrawControl::Instance();
 				auto* Pad = PadControl::Instance();
+				auto* LocalizeParts = LocalizePool::Instance();
 
 				int xp1, yp1;
 				xp1 = DrawParts->GetUIY(480 + 400 / 2 + 48);
@@ -267,14 +268,14 @@ namespace FPS_n2 {
 								std::clamp(static_cast<int>(255.f * d.ActivePer()), 0, 255),
 								255 - std::clamp(std::abs(yp - yp1) * 2 * 255 / DrawParts->GetUIY(255), 0, 255)
 							));
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 							xp1, yp, Green, Black, d.GetMsg());
 					}
 				}
 				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				if (m_TutorialNow != 0) {
-					WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Teacher.at(m_GraphID),
+					WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Teacher.at(m_GraphID),
 						DrawParts->GetUIY(480), DrawParts->GetUIY(1080 - 1824 / 4 / 2), DrawParts->GetUIY(480 + 400 / 2), DrawParts->GetUIY(1080), true);
 				}
 				{
@@ -283,27 +284,27 @@ namespace FPS_n2 {
 					yp = DrawParts->GetUIY(384);
 					switch (m_CheckHit) {
 					case HitType::Head:
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-							xp, yp, Green, Black, LocalizePool::Instance()->Get(8990));
+							xp, yp, Green, Black, LocalizeParts->Get(8990));
 						break;
 					case HitType::Arm:
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-							xp, yp, Green, Black, LocalizePool::Instance()->Get(8991));
+							xp, yp, Green, Black, LocalizeParts->Get(8991));
 						break;
 					case HitType::Body:
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-							xp, yp, Green, Black, LocalizePool::Instance()->Get(8992));
+							xp, yp, Green, Black, LocalizeParts->Get(8992));
 						break;
 					default:
 						break;
 					}
 					if (m_TutorialNow == 0) {
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-							xp, yp, Green, Black, "[%s]%s", Pad->GetKeyStr(PADS::INTERACT).c_str(), LocalizePool::Instance()->Get(8993));
+							xp, yp, Green, Black, "[%s]%s", Pad->GetKeyStr(PADS::INTERACT).c_str(), LocalizeParts->Get(8993));
 					}
 				}
 				{
@@ -313,7 +314,7 @@ namespace FPS_n2 {
 							SeekMovieToGraph(m_Men.get(), 0);
 							PlayMovieToGraph(m_Men.get());
 						}
-						WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Men,
+						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Men,
 							DrawParts->GetUIY(64), DrawParts->GetUIY(600 - 720 / 2 / 2),
 							DrawParts->GetUIY(64 + 600 / 2), DrawParts->GetUIY(600 + 720 / 2 / 2), false);
 						break;
@@ -322,7 +323,7 @@ namespace FPS_n2 {
 							SeekMovieToGraph(m_Kote.get(), 0);
 							PlayMovieToGraph(m_Kote.get());
 						}
-						WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Kote,
+						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Kote,
 							DrawParts->GetUIY(64), DrawParts->GetUIY(600 - 720 / 2 / 2),
 							DrawParts->GetUIY(64 + 600 / 2), DrawParts->GetUIY(600 + 720 / 2 / 2), false);
 						break;
@@ -331,7 +332,7 @@ namespace FPS_n2 {
 							SeekMovieToGraph(m_Dou.get(), 0);
 							PlayMovieToGraph(m_Dou.get());
 						}
-						WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Dou,
+						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Dou,
 							DrawParts->GetUIY(64), DrawParts->GetUIY(600 - 720 / 2 / 2),
 							DrawParts->GetUIY(64 + 600 / 2), DrawParts->GetUIY(600 + 720 / 2 / 2), false);
 						break;

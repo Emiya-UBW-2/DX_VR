@@ -179,27 +179,28 @@ namespace FPS_n2 {
 	}
 	void HitMark::Draw(void) noexcept {
 		auto* DrawParts = DXDraw::Instance();
+		auto* WindowParts = WindowSystem::DrawControl::Instance();
 		for (auto& h : m_HitPos) {
 			if (h.Time <= 0.f) { continue; }
 			if (h.m_Pos2D.z >= 0.f && h.m_Pos2D.z <= 1.f) {
 				float		Per = std::clamp(1.f - h.Time / h.TimeMax, 0.f, 1.f);
 				int			Alpha = std::clamp((int)(std::sin(Per * 2.f * DX_PI_F) * h.m_Per * 255.f), 0, 255);
 				float		Scale = Per * 10.f * h.m_Per;
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, Alpha);
+				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, Alpha);
 				switch (h.m_Color) {
 				case HitType::Head://–Ê
-					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
-					WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, 
+					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, 
 						&MenGraph, (int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
 					break;
 				case HitType::Arm://¬Žè
-					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 128, 0);
-					WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, 
+					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 128, 0);
+					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, 
 						&KoteGraph, (int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
 					break;
 				case HitType::Body://“·
-					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
-					WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, 
+					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
+					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, 
 						&DoGraph, (int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
 					break;
 				case HitType::Leg:
@@ -209,8 +210,8 @@ namespace FPS_n2 {
 
 			}
 		}
-		WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-		WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+		WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+		WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 	}
 	void HitMark::Dispose(void) noexcept {
 		this->MenGraph.Dispose();

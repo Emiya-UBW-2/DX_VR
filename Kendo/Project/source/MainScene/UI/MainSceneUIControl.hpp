@@ -288,20 +288,21 @@ namespace FPS_n2 {
 			}
 			void			Draw(void) const noexcept {
 				auto* DrawParts = DXDraw::Instance();
+				auto* WindowParts = WindowSystem::DrawControl::Instance();
 				//気合
 				{
 					float radius = Lerp(static_cast<float>(1.f), static_cast<float>(1.01f), floatParam[2]);
-					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
+					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
 						255, 150, 155);
-					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255 * (m_GaugeParam[0].GetGaugeMax() - m_GaugeParam[0].GetGaugeBuff()) / m_GaugeParam[0].GetGaugeMax());
-					WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Kiai,
+					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255 * (m_GaugeParam[0].GetGaugeMax() - m_GaugeParam[0].GetGaugeBuff()) / m_GaugeParam[0].GetGaugeMax());
+					WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Kiai,
 						DrawParts->GetUIXMax() / 2 - static_cast<int>(static_cast<float>(DrawParts->GetUIXMax() / 2) * radius),
 						DrawParts->GetUIYMax() / 2 - static_cast<int>(static_cast<float>(DrawParts->GetUIYMax() / 2) * radius),
 						DrawParts->GetUIXMax() / 2 + static_cast<int>(static_cast<float>(DrawParts->GetUIXMax() / 2) * radius),
 						DrawParts->GetUIYMax() / 2 + static_cast<int>(static_cast<float>(DrawParts->GetUIYMax() / 2) * radius),
 						true);
-					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
+					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
 						255, 255, 255);
 				}
 				int xp1, yp1;
@@ -311,13 +312,13 @@ namespace FPS_n2 {
 					yp1 = DrawParts->GetUIY(static_cast<int>(Lerp(10.0f, -50.f, std::clamp(floatParam[1] - 0.5f, 0.f, 1.f))));
 					float per = std::cos(DX_PI_F * 10.f * floatParam[1]);
 					if ((per * 255.f) > 1.f) {
-						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, (floatParam[0] < 60.f) ? Red : Yellow, Black, "TIME");
-						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
 							FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + DrawParts->GetUIY(300), yp1, (floatParam[0] < 60.f) ? Red : Yellow, Black, "%d:%05.2f",
 							static_cast<int>(floatParam[0] / 60.f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
-						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
 				}
 				//スコア
@@ -325,48 +326,48 @@ namespace FPS_n2 {
 					xp1 = DrawParts->GetUIY(1920 / 2);
 					yp1 = DrawParts->GetUIY(static_cast<int>(Lerp(28.0f, -100.f, std::clamp(floatParam[1] - 0.5f, 0.f, 1.f))));
 
-					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
+					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
 						92, 0, 0);
-					WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Mine,
+					WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Mine,
 						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40) - DrawParts->GetUIY(36) + DrawParts->GetUIY(1),
 						yp1 - DrawParts->GetUIY(10) + DrawParts->GetUIY(1),
 						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40) + DrawParts->GetUIY(1),
 						yp1 - DrawParts->GetUIY(10) + DrawParts->GetUIY(36) + DrawParts->GetUIY(1),
 						true);
-					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
+					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
 						192, 0, 0);
-					WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Mine,
+					WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Mine,
 						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40) - DrawParts->GetUIY(36),
 						yp1 - DrawParts->GetUIY(10),
 						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40),
 						yp1 - DrawParts->GetUIY(10) + DrawParts->GetUIY(36),
 						true);
-					WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
+					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
 						255, 255, 255);
 					
 
-					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
+					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40), yp1 + DrawParts->GetUIY(20),
 						xp1 + DrawParts->GetUIY(10) + DrawParts->GetUIY(40), yp1 + DrawParts->GetUIY(24), Black, true);
 
-					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
+					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - DrawParts->GetUIY(10) - DrawParts->GetUIY(40 - 20 * intParam[1]), yp1 + DrawParts->GetUIY(20),
 						xp1 - DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(24), Red, true);
 					int Y1add = DrawParts->GetUIY(static_cast<int>(Lerp(0.f, -8.f, floatParam[3])));
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
 						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1 - DrawParts->GetUIY(20), yp1 + Y1add, Red, Black, "%d", intParam[0]);
 
-					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
+					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(20),
 						xp1 + DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(24), Gray75, true);
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
 						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Gray25, Black, ":");
 
-					WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal,
+					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 + DrawParts->GetUIY(10), yp1 + DrawParts->GetUIY(20),
 						xp1 + DrawParts->GetUIY(10) + DrawParts->GetUIY(40 - 20 * intParam[0]), yp1 + DrawParts->GetUIY(24), White, true);
 					int Y2add = DrawParts->GetUIY(static_cast<int>(Lerp(0.f, -8.f, floatParam[4])));
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
 						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1 + DrawParts->GetUIY(20), yp1 + Y2add, White, Black, "%d", intParam[1]);
 				}
 				//情報
@@ -377,23 +378,23 @@ namespace FPS_n2 {
 					float per = Lerp(0.4f, 0.6f, floatParam[2]);
 					if ((per * 255.f) > 1.f) {
 						int radius = static_cast<int>(Lerp(static_cast<float>(DrawParts->GetUIY(24)), static_cast<float>(DrawParts->GetUIY(32)), floatParam[2]));
-						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
-						WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
+						WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
 							255, 0, 0);
-						WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
+						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
 							&m_HeartIcon, xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
-						WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal,
+						WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
 							255, 255, 255);
-						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
 						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
 
 					//気合
 					xp1 = DrawParts->GetUIY(24 + 9 * 2);
 					yp1 = DrawParts->GetUIY(1080 - 80 - 28 * 2);
 
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18),
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18),
 						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - DrawParts->GetUIY(2), White, Black, "気合");
 					m_GaugeParam[0].DrawGauge(
 						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(6),
@@ -405,7 +406,7 @@ namespace FPS_n2 {
 					xp1 = DrawParts->GetUIY(24 + 9 * 1);
 					yp1 = DrawParts->GetUIY(1080 - 80 - 28 * 1);
 
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18),
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18),
 						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - DrawParts->GetUIY(2), White, Black, "スタミナ");
 					m_GaugeParam[1].DrawGauge(
 						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(6),
@@ -417,7 +418,7 @@ namespace FPS_n2 {
 					xp1 = DrawParts->GetUIY(24 + 9 * 0);
 					yp1 = DrawParts->GetUIY(1080 - 80 - 28 * 0);
 
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18),
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18),
 						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - DrawParts->GetUIY(2), White, Black, "ガード");
 					m_GaugeParam[2].DrawGauge(
 						xp1, yp1, xp1 + DrawParts->GetUIY(300), yp1 + DrawParts->GetUIY(6),
