@@ -47,7 +47,7 @@ namespace FPS_n2 {
 			m_Tutorial.Load();
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
-			auto* DrawParts = DXDraw::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* OptionParts = OPTION::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -66,7 +66,7 @@ namespace FPS_n2 {
 			//
 			if (m_isTraining) {
 				Vector3DX LightVec = Vector3DX::vget(1.f, -0.5f, 0.05f); LightVec = LightVec.normalized();
-				DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
+				WindowSizeParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
 				SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 
 				auto& SecondLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec * -1.f);
@@ -76,14 +76,14 @@ namespace FPS_n2 {
 			}
 			else {
 				Vector3DX LightVec = Vector3DX::vget(0.5f, -0.85f, 0.05f); LightVec = LightVec.normalized();
-				DrawParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
+				WindowSizeParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
 				SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 
 				PostPassParts->SetGodRayPer(0.25f);
 			}
 			//Cam
-			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
-			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
+			WindowSizeParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
+			WindowSizeParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 
 			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 				auto& p = PlayerMngr->GetPlayer(index);
@@ -160,7 +160,7 @@ namespace FPS_n2 {
 			auto* BGM = BGMPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
-			auto* DrawParts = DXDraw::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* OptionParts = OPTION::Instance();
@@ -169,6 +169,7 @@ namespace FPS_n2 {
 			auto* SideLogParts = SideLog::Instance();
 			auto* Pad = PadControl::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
+			auto* SceneParts = SceneControl::Instance();
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
 #endif // DEBUG
@@ -216,13 +217,13 @@ namespace FPS_n2 {
 			Pad->SetMouseMoveEnable(true);
 			Pad->ChangeGuide(
 				[this]() {
-					auto* DrawParts = DXDraw::Instance();
+					auto* SceneParts = SceneControl::Instance();
 					auto* KeyGuide = PadControl::Instance();
 					auto* LocalizeParts = LocalizePool::Instance();
 					if (m_IsEventSceneFlag) {
 						return;
 					}
-					if (DrawParts->IsPause()) {
+					if (SceneParts->IsPause()) {
 						if (m_IsResult) {
 							return;
 						}
@@ -274,7 +275,7 @@ namespace FPS_n2 {
 
 				if (m_IsEventSceneActive) {
 					m_EventScene.GetDeltaTime();
-					if (Pad->GetKey(PADS::INTERACT).trigger()) {
+					if (!SceneParts->IsPause() && Pad->GetKey(PADS::INTERACT).trigger()) {
 						SE->StopAll();
 						SE->Get(static_cast<int>(SoundEnumCommon::UI_OK)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						m_EventScene.Skip();
@@ -300,7 +301,7 @@ namespace FPS_n2 {
 					m_EventScene.Update();
 					return true;
 				}
-				if (DrawParts->IsPause()) {
+				if (SceneParts->IsPause()) {
 					Pad->SetMouseMoveEnable(false);
 					if (!m_NetWorkController) {
 						return true;
@@ -309,7 +310,7 @@ namespace FPS_n2 {
 			}
 			else {
 				Pad->SetMouseMoveEnable(false);
-				if (DrawParts->IsPause()) {
+				if (SceneParts->IsPause()) {
 					ButtonParts->ResetSel();
 					if (!m_NetWorkController) {
 						return true;
@@ -849,9 +850,9 @@ namespace FPS_n2 {
 						break;
 					}
 #endif
-					DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
+					WindowSizeParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
 					//info
-					DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.3f, Scale3DRate * 20.f);
+					WindowSizeParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.3f, Scale3DRate * 20.f);
 					//DoF
 					PostPassParts->Set_DoFNearFar(Scale3DRate * 0.3f, Scale3DRate * 5.f, Scale3DRate * 0.1f, Scale3DRate * 20.f);
 				}
@@ -1061,7 +1062,7 @@ namespace FPS_n2 {
 		void			MainGameScene::MainDraw_Sub(void) const noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* DrawParts = DXDraw::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* HitMarkParts = HitMark::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			if (m_IsResult) {
@@ -1071,7 +1072,7 @@ namespace FPS_n2 {
 				m_EventScene.MainDraw();
 			}
 			else {
-				SetFogStartEnd(DrawParts->GetMainCamera().GetCamNear(), DrawParts->GetMainCamera().GetCamFar() * 2.f);
+				SetFogStartEnd(WindowSizeParts->GetMainCamera().GetCamNear(), WindowSizeParts->GetMainCamera().GetCamFar() * 2.f);
 				BackGround->Draw();
 				ObjMngr->Draw();
 				//ObjMngr->Draw_Depth();
@@ -1084,10 +1085,11 @@ namespace FPS_n2 {
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
 			auto* WindowParts = WindowSystem::DrawControl::Instance();
-			auto* DrawParts = DXDraw::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* HitMarkParts = HitMark::Instance();
+			auto* SceneParts = SceneControl::Instance();
 			if (!m_IsEventSceneActive) {
 				if (m_isTraining) {
 					this->m_Tutorial.Draw();
@@ -1096,20 +1098,20 @@ namespace FPS_n2 {
 
 			if (m_IsResult) {
 				WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Result,
-					DrawParts->GetUIY(0), DrawParts->GetUIY(0), DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), false);
+					WindowSizeParts->GetUIY(0), WindowSizeParts->GetUIY(0), WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1080), false);
 
-				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(32),
-					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, DrawParts->GetUIY(160), DrawParts->GetUIY(256), Yellow, Black, "Result");
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(32),
+					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, WindowSizeParts->GetUIY(160), WindowSizeParts->GetUIY(256), Yellow, Black, "Result");
 
 				bool IsWin = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore() > PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
 				bool IsDraw = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore() == PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
 
-				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(48),
-					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, DrawParts->GetUIY(300), DrawParts->GetUIY(384),
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(48),
+					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, WindowSizeParts->GetUIY(300), WindowSizeParts->GetUIY(384),
 					IsDraw ? Gray25 : (IsWin ? Red : White), Black,
 					IsDraw ? "引き分け" : (IsWin ? "勝利" : "敗退"));
-				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
-					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, DrawParts->GetUIY(300), DrawParts->GetUIY(386), White, Black, "%d : %d",
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(24),
+					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, WindowSizeParts->GetUIY(300), WindowSizeParts->GetUIY(386), White, Black, "%d : %d",
 					PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore(), PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
 
 				ButtonParts->Draw();
@@ -1125,11 +1127,11 @@ namespace FPS_n2 {
 			else {
 				HitMarkParts->Draw();
 				//UI
-				if (!DrawParts->IsPause()) {
+				if (!SceneParts->IsPause()) {
 					this->m_UIclass.Draw();
 					if (!m_isTraining) {
-						int xp1 = DrawParts->GetUIY(1920 / 2);
-						int yp1 = DrawParts->GetUIY(240);
+						int xp1 = WindowSizeParts->GetUIY(1920 / 2);
+						int yp1 = WindowSizeParts->GetUIY(240);
 
 						if ((m_GameStartAlpha * 255.f) > 1.f) {
 							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameStartAlpha), 0, 255));
@@ -1160,8 +1162,8 @@ namespace FPS_n2 {
 						if (m_IsPlayable) {
 							if (0 <= m_DivideTimer && m_DivideTimer < 3.f) {
 								if ((int)(m_DivideTimer * 100) % 30 < 15) {
-									WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(24),
-										FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, DrawParts->GetUIY(32), DrawParts->GetUIY(384),
+									WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(24),
+										FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, WindowSizeParts->GetUIY(32), WindowSizeParts->GetUIY(384),
 										Yellow, Black,
 										"場外まであと%3.1f秒", m_DivideTimer);
 								}
@@ -1173,12 +1175,13 @@ namespace FPS_n2 {
 			}
 		}
 		void			MainGameScene::DrawUI_In_Sub(void) const noexcept {
-			auto* DrawParts = DXDraw::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
+			auto* SceneParts = SceneControl::Instance();
 			if (m_IsResult) {
 				return;
 			}
 			//UI
-			if (DrawParts->IsPause()) {
+			if (SceneParts->IsPause()) {
 				m_PauseMenuControl.DrawPause();
 			}
 			if (!m_IsEventSceneActive) {
@@ -1187,14 +1190,14 @@ namespace FPS_n2 {
 				//NetBrowser->Draw();
 				if (m_NetWorkController) {
 					if (m_NetWorkController->GetPing() >= 0.f) {
-						WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
+						WindowSystem::SetMsg(WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
 					}
 					else {
 						if (m_NetWorkController->GetClient()) {
-							WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, Red, Black, "Lost Connection");
+							WindowSystem::SetMsg(WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, Red, Black, "Lost Connection");
 						}
 						else {
-							WindowSystem::SetMsg(DrawParts->GetUIY(1920), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
+							WindowSystem::SetMsg(WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
 						}
 					}
 				}

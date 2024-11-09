@@ -17,11 +17,11 @@ namespace FPS_n2 {
 		void PauseMenuControl::UpdatePause(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();
-			auto* DrawParts = DXDraw::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* OptionWindowParts = OptionWindowClass::Instance();
-			if (DrawParts->IsPause()) {
-				if (!DrawParts->IsExit() && !DrawParts->IsRestart()) {
+			auto* SceneParts = SceneControl::Instance();
+			if (SceneParts->IsPause()) {
+				if (!SceneParts->IsExit() && !SceneParts->IsRestart()) {
 					Pad->SetMouseMoveEnable(false);
 					Pad->ChangeGuide(
 						[]() {
@@ -40,23 +40,23 @@ namespace FPS_n2 {
 							switch (ButtonParts->GetSelect()) {
 							case 0:
 								this->m_IsRetire = true;
-								DrawParts->SetPause(false);
+								SceneParts->ChangePause(false);
 								break;
 							case 1:
 								OptionWindowParts->SetActive();
 								break;
 							case 2:
-								DrawParts->SetPause(false);
+								SceneParts->ChangePause(false);
 								break;
 							default:
-								DrawParts->SetPause(false);
+								SceneParts->ChangePause(false);
 								break;
 							}
 							SE->Get(static_cast<int>(SoundEnumCommon::UI_OK)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						}
 						if (Pad->GetKey(PADS::RELOAD).trigger()) {
 							SE->Get(static_cast<int>(SoundEnumCommon::UI_CANCEL)).Play(0, DX_PLAYTYPE_BACK, TRUE);
-							DrawParts->SetPause(false);
+							SceneParts->ChangePause(false);
 						}
 						// 
 						ButtonParts->Update();
@@ -68,10 +68,10 @@ namespace FPS_n2 {
 			}
 		}
 		void PauseMenuControl::DrawPause(void) const noexcept {
-			auto* DrawParts = DXDraw::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
+			auto* SceneParts = SceneControl::Instance();
 			// ƒ|[ƒY
-			if (DrawParts->IsPause() && (!DrawParts->IsExit() && !DrawParts->IsRestart())) {
+			if (SceneParts->IsPause() && (!SceneParts->IsExit() && !SceneParts->IsRestart())) {
 				ButtonParts->Draw();
 			}
 		}
@@ -95,11 +95,11 @@ namespace FPS_n2 {
 			this->m_BlackOutAlpha = std::clamp(this->m_BlackOutAlpha + (this->m_IsBlackOut ? 1.f : -1.f) * DXLib_refParts->GetDeltaTime() * this->m_BlackOutPower, 0.f, 1.f);
 		}
 		void FadeControl::DrawFade(void) const noexcept {
-			auto* DrawParts = DXDraw::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			if (this->m_BlackOutAlpha > 0.f) {
 				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * this->m_BlackOutAlpha), 0, 255));
-				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIXMax(), DrawParts->GetUIYMax(), Black, TRUE);
+				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, WindowSizeParts->GetUIXMax(), WindowSizeParts->GetUIYMax(), Black, TRUE);
 				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
 		}

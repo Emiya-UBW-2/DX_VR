@@ -165,7 +165,7 @@ namespace FPS_n2 {
 		}
 	}
 	void HitMark::Update(void) noexcept {
-		auto* DrawParts = DXDraw::Instance();
+		auto* WindowSizeParts = WindowSizeControl::Instance();
 		auto* DXLib_refParts = DXLib_ref::Instance();
 		for (auto& h : m_HitPos) {
 			if (h.Time <= 0.f) { continue; }
@@ -173,14 +173,14 @@ namespace FPS_n2 {
 				auto tmp = ConvWorldPosToScreenPos(h.m_Pos.get());
 				if (tmp.z >= 0.f && tmp.z <= 1.f) {
 					h.m_Pos2D = tmp;
-					h.m_Pos2D = h.m_Pos2D * ((float)DrawParts->GetUIY(1080) / (float)DrawParts->GetScreenY(1080));
+					h.m_Pos2D = h.m_Pos2D * ((float)WindowSizeParts->GetUIY(1080) / (float)WindowSizeParts->GetScreenY(1080));
 				}
 			}
 			h.Time = std::max(h.Time - DXLib_refParts->GetDeltaTime(), 0.f);
 		}
 	}
 	void HitMark::Draw(void) noexcept {
-		auto* DrawParts = DXDraw::Instance();
+		auto* WindowSizeParts = WindowSizeControl::Instance();
 		auto* WindowParts = WindowSystem::DrawControl::Instance();
 		for (auto& h : m_HitPos) {
 			if (h.Time <= 0.f) { continue; }
@@ -193,17 +193,17 @@ namespace FPS_n2 {
 				case HitType::Head://–Ê
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
 					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, 
-						&MenGraph, (int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
+						&MenGraph, (int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)WindowSizeParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
 					break;
 				case HitType::Arm://¬Žè
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 128, 0);
 					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, 
-						&KoteGraph, (int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
+						&KoteGraph, (int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)WindowSizeParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
 					break;
 				case HitType::Body://“·
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
 					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, 
-						&DoGraph, (int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)DrawParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
+						&DoGraph, (int)h.m_Pos2D.x, (int)h.m_Pos2D.y, (float)WindowSizeParts->GetUIY((int)(Scale * 0.5f * 100.0f)) / 100.f, 0.f, true);
 					break;
 				case HitType::Leg:
 				default:

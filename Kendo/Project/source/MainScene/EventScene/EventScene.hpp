@@ -504,11 +504,11 @@ namespace FPS_n2 {
 					if (this->Cutinfo.GetisActive() && this->Alpha.Ans > 0.f) {
 						SetDrawBright(Bright_R, Bright_G, Bright_B);
 
-						auto* DrawParts = DXDraw::Instance();
+						auto* WindowSizeParts = WindowSizeControl::Instance();
 
 						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * this->Alpha.Ans));
 
-						this->handle.DrawRotaGraph(DrawParts->GetUIY((int)(this->X.Ans)), DrawParts->GetUIY((int)(this->Y.Ans)), (float)DrawParts->GetUIY(1920) / this->ysize * this->Scale.Ans, this->Rad.Ans, true);
+						this->handle.DrawRotaGraph(WindowSizeParts->GetUIY((int)(this->X.Ans)), WindowSizeParts->GetUIY((int)(this->Y.Ans)), (float)WindowSizeParts->GetUIY(1920) / this->ysize * this->Scale.Ans, this->Rad.Ans, true);
 
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 
@@ -555,6 +555,7 @@ namespace FPS_n2 {
 				}
 			};
 			std::vector<SE> model;
+			bool IsPlay = false;
 		public:
 			SEControl(void) noexcept {
 				Dispose();
@@ -564,9 +565,11 @@ namespace FPS_n2 {
 				return &(model.back());
 			}
 			void			Update(size_t Counter, bool isFirstLoop, bool isPlay) noexcept {
+				bool IsPlaySwitch = (IsPlay != isPlay);
+				IsPlay = isPlay;
 				auto* SE = SoundPool::Instance();
 				for (auto& m : model) {
-					if ((m.m_PlayCounter == Counter && isFirstLoop) || isPlay) {
+					if ((m.m_PlayCounter == Counter && isFirstLoop) || IsPlaySwitch) {
 						if (!SE->Get((int)m.m_SoundEnum).GetHandles().at(0)->handle.back().CheckPlay()) {
 							SE->Get((int)m.m_SoundEnum).GetHandles().at(0)->handle.back().Play(DX_PLAYTYPE_BACK, FALSE);
 						}
@@ -576,7 +579,10 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			void			Dispose(void) noexcept { model.clear(); }
+			void			Dispose(void) noexcept {
+				model.clear();
+				IsPlay = false;
+			}
 		};
 		class TelopClass {
 		private:

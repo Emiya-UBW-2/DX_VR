@@ -45,13 +45,14 @@ namespace FPS_n2 {
 		bool			TitleScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
-			auto* DrawParts = DXDraw::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* OptionWindowParts = OptionWindowClass::Instance();
-			if (DrawParts->IsPause()) {
+			auto* SceneParts = SceneControl::Instance();
+			if (SceneParts->IsPause()) {
 				return true;
 			}
 			Pad->SetMouseMoveEnable(false);
@@ -82,7 +83,7 @@ namespace FPS_n2 {
 						OptionWindowParts->SetActive();
 						break;
 					case 3:
-						PopUpParts->Add(LocalizeParts->Get(120), DrawParts->GetUIY(720), DrawParts->GetUIY(840),
+						PopUpParts->Add(LocalizeParts->Get(120), WindowSizeParts->GetUIY(720), WindowSizeParts->GetUIY(840),
 							[&](int xmin, int ymin, int xmax, int, bool) {
 								this->m_CreditControl->Draw(xmin, ymin, xmax);
 							},
@@ -128,40 +129,40 @@ namespace FPS_n2 {
 		}
 		// 
 		void			TitleScene::MainDraw_Sub(void) const noexcept {
-			auto* DrawParts = DXDraw::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			// ”wŒi
-			WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Gray65, TRUE);
+			WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1080), Gray65, TRUE);
 			// •`‰æ
 		}
 		void			TitleScene::DrawUI_Base_Sub(void) const noexcept {
-			auto* DrawParts = DXDraw::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			// 
 			WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, 
-				&this->m_TitleImage, DrawParts->GetUIY(64), DrawParts->GetUIY(64), DrawParts->GetUIY(64 + 1024), DrawParts->GetUIY(64 + 256), true);
+				&this->m_TitleImage, WindowSizeParts->GetUIY(64), WindowSizeParts->GetUIY(64), WindowSizeParts->GetUIY(64 + 1024), WindowSizeParts->GetUIY(64 + 256), true);
 			// 
-			WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18), 
+			WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(18), 
 				FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-				DrawParts->GetUIY(64), DrawParts->GetUIY(64 + 256), White, Black, "Ver 1.0.0");
+				WindowSizeParts->GetUIY(64), WindowSizeParts->GetUIY(64 + 256), White, Black, "Ver 1.0.0");
 			// 
 			ButtonParts->Draw();
 			// 
 			if ((ButtonParts->GetSelect() != InvalidID) && !PopUpParts->IsActivePop()) {
-				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, DrawParts->GetUIY(18), 
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(18), 
 					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-					DrawParts->GetUIY(32), DrawParts->GetUIY(1080 - 32 - 32), White, Black, LocalizeParts->Get(410 + ButtonParts->GetSelect()));
+					WindowSizeParts->GetUIY(32), WindowSizeParts->GetUIY(1080 - 32 - 32), White, Black, LocalizeParts->Get(410 + ButtonParts->GetSelect()));
 			}
 			// 
 			{
 				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameFadeIn, 0.f, 1.f)), 0, 255));
-				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), Black, TRUE);
+				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1080), Black, TRUE);
 
 				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameStart, 0.f, 1.f)), 0, 255));
-				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1080), White, TRUE);
+				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1080), White, TRUE);
 
 				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}

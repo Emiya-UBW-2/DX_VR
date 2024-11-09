@@ -11,7 +11,7 @@ int DBG_CamSel = -1;
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetDoubleStartValidFlag(TRUE);
-	SetEnableXAudioFlag(TRUE);//Xaudio(ロードが長いとロストするので必要に応じて)
+	//SetEnableXAudioFlag(TRUE);//Xaudio(ロードが長いとロストするので必要に応じて)
 	DXLib_ref::Create();
 	//使用するボタンの指定
 	auto* Pad = PadControl::Instance();
@@ -43,7 +43,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(PADS::CHECK, false);
 	//
 	auto* DXLib_refParts = DXLib_ref::Instance();
-	if (!DXLib_refParts->StartLogic()) { return 0; }
+	if (DXLib_refParts->FirstBootSetting()) { return 0; }
+	DXLib_refParts->StartLogic();
 	//追加設定
 	SetMainWindowText("剣道-つるぎ みち-");						//タイトル
 	//SetUseHalfLambertLighting(TRUE);
@@ -71,9 +72,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	MainGameSceneTrainingPtr->SetNextSceneList(0, Titlescene);
 
 	auto* SceneParts = SceneControl::Instance();
-	SceneParts->AddList(Titlescene);
-	SceneParts->AddList(MainGameScenePtr);
-	//最初の読み込み
-	if (!DXLib_refParts->MainLogic()) { return 0; }
+	SceneParts->SetFirstScene(Titlescene);
+
+	DXLib_refParts->MainLogic();
 	return 0;
 }

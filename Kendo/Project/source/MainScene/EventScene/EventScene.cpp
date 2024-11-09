@@ -296,7 +296,7 @@ namespace FPS_n2 {
 		ContiF = 0;
 	}
 	void			EventScene::TelopClass::LoadTelop(const std::string& func, const std::vector<std::string>& args) noexcept {
-		auto* DrawParts = DXDraw::Instance();
+		auto* WindowSizeParts = WindowSizeControl::Instance();
 		if (func.find("SetTelopTime") != std::string::npos) {
 			StartF = (LONGLONG)(1000000.f * std::stof(args[0]));
 			ContiF = (LONGLONG)(1000000.f * std::stof(args[1]));
@@ -311,7 +311,7 @@ namespace FPS_n2 {
 			else if (args[4].find("MIDDLE") != std::string::npos) { t = 1; }
 			else if (args[4].find("RIGHT") != std::string::npos) { t = 2; }
 			Texts.resize(Texts.size() + 1);
-			Texts.back().Set(DrawParts->GetUIY(std::stoi(args[0])), DrawParts->GetUIY(std::stoi(args[1])), DrawParts->GetUIY(std::stoi(args[2])), args[3], StartF, ContiF, t);
+			Texts.back().Set(WindowSizeParts->GetUIY(std::stoi(args[0])), WindowSizeParts->GetUIY(std::stoi(args[1])), WindowSizeParts->GetUIY(std::stoi(args[2])), args[3], StartF, ContiF, t);
 		}
 	}
 	void			EventScene::TelopClass::Draw(LONGLONG nowTimeWait) const noexcept {
@@ -886,14 +886,15 @@ namespace FPS_n2 {
 		m_BaseTime = GetNowHiPerformanceCount();
 	}
 	void			EventScene::Update(void) noexcept {
-		auto* DrawParts = DXDraw::Instance();
+		auto* WindowSizeParts = WindowSizeControl::Instance();
 		auto* PostPassParts = PostPassEffect::Instance();
+		auto* SceneParts = SceneControl::Instance();
 		if (IsEnd()) { return; }
 
 		if (m_NowTime >= 0) {
 			if (m_count == 0) {
 				m_count = 1;
-				DrawParts->Update_Shadow([&] { ShadowFarDraw(); }, Vector3DX::zero(), 4.f, false);
+				PostPassParts->Update_Shadow([&] { ShadowFarDraw(); }, Vector3DX::zero(), 4.f, false);
 			}
 			bool isFirstLoop = (m_NowTime == 0);
 			bool ResetPhysics = false;
@@ -905,11 +906,8 @@ namespace FPS_n2 {
 
 			if (IsEnd()) { return; }
 			//カットの処理
-			if (DrawParts->IsPauseSwitch()) {
-				printfDx("AAAA\n");
-			}
-			m_SEControl.Update(m_Counter, isFirstLoop, DrawParts->IsPauseSwitch());
-			if (!DrawParts->IsPause()) {
+			m_SEControl.Update(m_Counter, isFirstLoop, SceneParts->IsPause());
+			if (!SceneParts->IsPause()) {
 				{
 					m_PosCamCut.Update(m_Counter);
 					m_ModelControl.FirstUpdate(m_Counter, isFirstLoop, ResetPhysics);
@@ -919,8 +917,8 @@ namespace FPS_n2 {
 					if (isFirstLoop) {
 						if (m_Counter > 0) {
 							CutInfo.SetPrev(m_CutInfo[m_Counter - 1]);
+							CutInfoUpdate.SetupByPrev(m_CutInfoUpdate[m_Counter - 1]);
 						}
-						CutInfoUpdate.SetupByPrev(m_CutInfoUpdate[m_Counter - 1]);
 						CutInfo.SetUpFog();
 						//
 						Vector3DX vec;
@@ -943,7 +941,7 @@ namespace FPS_n2 {
 							CutInfo.Aim_camera.SetCamPos(CutInfo.Aim_camera.GetCamVec() + m_PosCam[m_PosCamCut.GetNowCut()], CutInfo.Aim_camera.GetCamVec(), CutInfo.Aim_camera.GetCamUp());
 						}
 					}
-					CutInfo.UpdateCam(&DrawParts->SetMainCamera());
+					CutInfo.UpdateCam(&WindowSizeParts->SetMainCamera());
 				}
 				if (m_isSkip) {
 					Easing(&Black_Skip, 1.f, 0.9f, EasingType::OutExpo);
@@ -952,12 +950,12 @@ namespace FPS_n2 {
 					}
 				}
 				//
-				auto far_t = DrawParts->SetMainCamera().GetCamFar();
+				auto far_t = WindowSizeParts->SetMainCamera().GetCamFar();
 				PostPassParts->Set_DoFNearFar(1.f * Scale3DRate, far_t / 2, 0.5f * Scale3DRate, far_t);
 			}
 		}
 		//経過時間測定
-		if (!DrawParts->IsPause()) {
+		if (!SceneParts->IsPause()) {
 			m_NowTime += (LONGLONG)((float)deltatime);
 		}
 	}
@@ -976,8 +974,8 @@ namespace FPS_n2 {
 
 	void			EventScene::BGDraw(void) const noexcept {
 		if (IsEnd()) { return; }
-		auto* DrawParts = DXDraw::Instance();
-		DrawBox(0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1920), GetColor(0, 0, 0), TRUE);
+		auto* WindowSizeParts = WindowSizeControl::Instance();
+		DrawBox(0, 0, WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1920), GetColor(0, 0, 0), TRUE);
 		m_ModelControl.Draw_Far();
 	}
 	void			EventScene::ShadowFarDraw(void) const noexcept {
@@ -1002,25 +1000,25 @@ namespace FPS_n2 {
 	}
 	void			EventScene::UIDraw() const noexcept {
 		//if (IsEnd()) { return; }
-		auto* DrawParts = DXDraw::Instance();
+		auto* WindowSizeParts = WindowSizeControl::Instance();
 
 		if (m_NowTime > 0) {
 			m_TelopClass.Draw(m_NowTime);
 		}
 		if (Black_Buf != 0.f) {
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * Black_Buf));
-			DrawBox(0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1920), GetColor(0, 0, 0), TRUE);
+			DrawBox(0, 0, WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1920), GetColor(0, 0, 0), TRUE);
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 		}
 		if (White_Buf != 0.f) {
 			SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * White_Buf));
-			DrawBox(0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1920), GetColor(255, 255, 255), TRUE);
+			DrawBox(0, 0, WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1920), GetColor(255, 255, 255), TRUE);
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 		}
 		if (m_isSkip) {
 			if (Black_Skip != 0.f) {
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * Black_Skip));
-				DrawBox(0, 0, DrawParts->GetUIY(1920), DrawParts->GetUIY(1920), GetColor(0, 0, 0), TRUE);
+				DrawBox(0, 0, WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1920), GetColor(0, 0, 0), TRUE);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}
 		}
