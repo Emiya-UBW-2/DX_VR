@@ -132,6 +132,11 @@ VS_OUTPUT main( VS_INPUT VSInput )
 	// ライトのビュー座標をライトの射影座標に変換
 	VSOutput.LPPosition = mul( g_LightProjectionMatrix, lLViewPosition ) ;
 
+	// 深度テクスチャの座標を算出
+    VSOutput.LPPosition.x = (VSOutput.LPPosition.x + 1.0f) / 2.0f; // VSOutput.LPPosition.xy は -1.0f ～ 1.0f の値なので、これを 0.0f ～ 1.0f の値にする
+    VSOutput.LPPosition.y = 1.0f - (VSOutput.LPPosition.y + 1.0f) / 2.0f; // yは更に上下反転
+	
+	
 	// Ｚ値だけはライトのビュー座標にする
 	VSOutput.LPPosition.z = lLViewPosition.z ;
 
@@ -140,6 +145,10 @@ VS_OUTPUT main( VS_INPUT VSInput )
 
 	// ライトのビュー座標をライトの射影座標に変換
 	VSOutput.LPPosition2 = mul(g_LightProjectionMatrix2, lLViewPosition);
+
+	// 深度テクスチャの座標を算出
+    VSOutput.LPPosition2.x = (VSOutput.LPPosition2.x + 1.0f) / 2.0f; // VSOutput.LPPosition2.xy は -1.0f ～ 1.0f の値なので、これを 0.0f ～ 1.0f の値にする
+    VSOutput.LPPosition2.y = 1.0f - (VSOutput.LPPosition2.y + 1.0f) / 2.0f; // yは更に上下反転
 
 	// Ｚ値だけはライトのビュー座標にする
 	VSOutput.LPPosition2.z = lLViewPosition.z;

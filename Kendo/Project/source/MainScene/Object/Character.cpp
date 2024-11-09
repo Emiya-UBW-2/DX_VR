@@ -364,7 +364,7 @@ namespace FPS_n2 {
 			CharaMove::InitKey(pxRad, pyRad);
 			Matrix3x3DX Mat; Mat.SetRadian(CharaMove::GetRadBuf().x, CharaMove::GetRadBuf().y, 0.f);
 			ResetMove(Mat, pPos);
-			m_CharaAction = EnumArmAnimType::Ready;
+			OverrideReady();
 			for (auto& a : this->m_Arm) { a.Init(false); }
 			this->m_Arm[static_cast<int>(EnumArmAnimType::Ready)].Init(true);
 			this->m_CharaSound = -1;
