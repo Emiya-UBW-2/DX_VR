@@ -219,7 +219,6 @@ namespace FPS_n2 {
 		}
 
 		ArmAnimNow	GetAnimNow(const AnimDatas* data, float nowframe) noexcept {
-			auto* DXLib_refParts = DXLib_ref::Instance();
 			ArmAnimNow Ret;
 			if (data) {
 				float totalTime = static_cast<float>(data->GetTotalTime());
@@ -248,6 +247,7 @@ namespace FPS_n2 {
 						);
 #ifdef DEBUG
 						if (0 <= DBG_CamSel && DBG_CamSel <= 2) {
+							auto* DXLib_refParts = DXLib_ref::Instance();
 							Ret.Set(Vector3DX::zero(), DBG_AnimRot, DBG_AnimPos);
 							//
 							if (CheckHitKeyWithCheck(KEY_INPUT_RCONTROL) != 0) {
