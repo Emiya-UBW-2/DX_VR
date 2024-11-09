@@ -45,6 +45,8 @@ namespace FPS_n2 {
 		Audience_Near,
 		Audience_Good,
 
+		Breath,
+
 		Max,
 	};
 	static const char* SoundID[(int)SoundEnum::Max] = {
@@ -56,6 +58,7 @@ namespace FPS_n2 {
 		"Taiko1",
 		"EV2_1",
 		"EV2_2",
+		"",
 		"",
 		"",
 		"",

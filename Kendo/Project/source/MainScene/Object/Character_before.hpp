@@ -59,6 +59,9 @@ namespace FPS_n2 {
 			float												m_HeartRatePow{ 0.f };//心拍数
 			bool												m_HeartSoundFlag{ false };
 
+			float												m_BreathRad{ 0.f };
+			bool												m_BreathSoundFlag{ false };
+
 			float												m_Stamina{ StaminaMax };//スタミナ
 			bool												m_StaminaLoss{ false };//スタミナ切れ
 		public:
@@ -95,6 +98,7 @@ namespace FPS_n2 {
 
 				this->m_HeartRateRad += deg2rad(this->m_HeartRate) * DXLib_refParts->GetDeltaTime();
 				if (this->m_HeartRateRad >= DX_PI_F * 2) { this->m_HeartRateRad -= DX_PI_F * 2; }
+				auto Prev = this->m_HeartSoundFlag;
 				if (
 					(deg2rad(0) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(10)) ||
 					(deg2rad(60) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(70)) ||
@@ -126,7 +130,28 @@ namespace FPS_n2 {
 						this->m_StaminaLoss = false;
 					}
 				}
-				return this->m_HeartSoundFlag;
+				return this->m_HeartSoundFlag && (Prev != this->m_HeartSoundFlag);
+			}
+
+			bool		ExcuteBreath() noexcept {
+				auto* DXLib_refParts = DXLib_ref::Instance();
+				this->m_BreathRad += deg2rad(Lerp(60.f, 40.f, GetStamina() / GetStaminaMax())) * DXLib_refParts->GetDeltaTime();
+				if (this->m_BreathRad >= DX_PI_F * 2) { this->m_BreathRad -= DX_PI_F * 2; }
+				auto Prev = this->m_BreathSoundFlag;
+				if (
+					(deg2rad(0) <= this->m_BreathRad && this->m_BreathRad <= deg2rad(10)) ||
+					(deg2rad(60) <= this->m_BreathRad && this->m_BreathRad <= deg2rad(70)) ||
+					(deg2rad(120) <= this->m_BreathRad && this->m_BreathRad <= deg2rad(130)) ||
+					(deg2rad(180) <= this->m_BreathRad && this->m_BreathRad <= deg2rad(190)) ||
+					(deg2rad(240) <= this->m_BreathRad && this->m_BreathRad <= deg2rad(250)) ||
+					(deg2rad(300) <= this->m_BreathRad && this->m_BreathRad <= deg2rad(310))
+					) {
+					this->m_BreathSoundFlag = true;
+				}
+				else {
+					this->m_BreathSoundFlag = false;
+				}
+				return this->m_BreathSoundFlag && (Prev != this->m_BreathSoundFlag);
 			}
 		};
 		//キャラ入力

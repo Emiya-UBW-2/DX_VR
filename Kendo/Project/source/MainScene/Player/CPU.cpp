@@ -117,8 +117,8 @@ namespace FPS_n2 {
 			}
 
 			if (Chara->GetBambooVec().magnitude() > deg2rad(1)) {
-				pp_x = std::clamp(-1000.f * Chara->GetBambooVec().x / deg2rad(150.f), -3.f, 3.f);
-				pp_y = std::clamp(-1000.f * Chara->GetBambooVec().y / deg2rad(150.f), -3.f, 3.f);
+				pp_x = std::clamp(-10000.f * Chara->GetBambooVec().x / deg2rad(150.f), -9.f, 9.f);
+				pp_y = std::clamp(-10000.f * Chara->GetBambooVec().y / deg2rad(150.f), -9.f, 9.f);
 			}
 			//AI
 			MyInput->SetInputStart(pp_x, pp_y);

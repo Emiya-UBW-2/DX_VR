@@ -20,6 +20,7 @@ namespace FPS_n2 {
 		SE->Add(static_cast<int>(SoundEnum::RunFoot), 4, "data/Sound/SE/move/runfoot.wav");
 		SE->Add(static_cast<int>(SoundEnum::StandupFoot), 2, "data/Sound/SE/move/standup.wav");
 		SE->Add(static_cast<int>(SoundEnum::Heart), 5, "data/Sound/SE/move/heart.wav", false);
+		SE->Add(static_cast<int>(SoundEnum::Breath), 6, "data/Sound/SE/move/breath.wav", false);
 		//
 		SE->Add(static_cast<int>(SoundEnum::Kendo_Swing), 2, "data/Sound/SE/Kendo/Swing.wav");
 		SE->Add(static_cast<int>(SoundEnum::Kendo_Hit), 2, "data/Sound/SE/Kendo/Hit.wav");
@@ -95,6 +96,7 @@ namespace FPS_n2 {
 
 		SE->Delete(static_cast<int>(SoundEnum::StandupFoot));
 		SE->Delete(static_cast<int>(SoundEnum::Heart));
+		SE->Delete(static_cast<int>(SoundEnum::Breath));
 
 		SE->Delete(static_cast<int>(SoundEnum::CountDown));
 		SE->Delete(static_cast<int>(SoundEnum::TimeUp));

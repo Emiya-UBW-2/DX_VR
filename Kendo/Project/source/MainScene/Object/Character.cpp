@@ -783,6 +783,15 @@ namespace FPS_n2 {
 					SE->Get(static_cast<int>(SoundEnum::Heart)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 				}
 			}
+			if (StaminaControl::ExcuteBreath()) {
+				if (this->m_MyID == this->m_ViewID) {
+					SE->Get(static_cast<int>(SoundEnum::Breath)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+				}
+				SE->Get(static_cast<int>(SoundEnum::Breath)).SetVol_Local(static_cast<int>(Lerp(255.f, 92.f, GetStamina() / GetStaminaMax())));
+			}
+			if (m_YaTimer >= GetYaTimerMax() * 0.9f) {
+				SE->Get(static_cast<int>(SoundEnum::Breath)).StopAll(0);
+			}
 		}
 		void			CharacterClass::ExecuteMatrix(void) noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
