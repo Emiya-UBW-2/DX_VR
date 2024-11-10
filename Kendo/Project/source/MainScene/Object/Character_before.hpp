@@ -193,6 +193,7 @@ namespace FPS_n2 {
 			CharaObjAnimeID										m_BottomAnimSelect{};
 		public://ƒQƒbƒ^[
 			auto		GetRun(void) const noexcept { return this->m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking; }
+			auto		GetIsFrontAttacking(void) const noexcept { return this->m_IsFrontAttacking; }
 			auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }
 			auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
 			auto		GetEyeMatrix(void) const noexcept { return this->m_EyeMatrix * this->m_BaseMatrix; }

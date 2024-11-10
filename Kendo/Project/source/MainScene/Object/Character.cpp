@@ -192,24 +192,7 @@ namespace FPS_n2 {
 					SE->Get(static_cast<int>(SoundEnum::Kendo_Hit)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale3DRate * 15.f);
 					m_DamageCoolTime = static_cast<float>(SE->Get(static_cast<int>(SoundEnum::Kendo_Hit)).GetTotalTIme(0, 0)) / 1000.f;
 
-					//コンカッション
-					if (this->m_MyID == this->m_ViewID) {
-						switch (value.GetHitType()) {
-						case HitType::Head://面
-							m_ConcussionSwitch = true;
-							break;
-						case HitType::Body://胴
-							m_ConcussionSwitch = true;
-							break;
-						case HitType::Arm://小手
-							m_ConcussionSwitch = true;
-							break;
-						case HitType::Leg:
-						default:
-							break;
-						}
-					}
-					else {
+					{
 						int HitDamagePow = value.Damage;
 						switch (value.m_WazaType) {
 						case FPS_n2::WazaType::Men:
@@ -254,44 +237,6 @@ namespace FPS_n2 {
 						TotalAddHits += HitPosPoints;
 						TotalAddHits += KihakuPoints;
 
-						HitMarkParts->Add(value.m_Pos, value.GetHitType(), static_cast<float>(HitDamagePow) / 100.f);
-
-						float offset = 0.f;
-
-						switch (value.m_WazaType) {
-						case FPS_n2::WazaType::Men:
-							SideLogParts->Add(3.0f, offset, Yellow, "面"); offset += 0.02f;
-							break;
-						case FPS_n2::WazaType::SuriageMen:
-							SideLogParts->Add(3.0f, offset, Yellow, "すり上げ面"); offset += 0.02f;
-							break;
-						case FPS_n2::WazaType::Hikimen:
-							SideLogParts->Add(3.0f, offset, Yellow, "引き面"); offset += 0.02f;
-							break;
-						case FPS_n2::WazaType::Kote:
-							SideLogParts->Add(3.0f, offset, Yellow, "小手"); offset += 0.02f;
-							break;
-						case FPS_n2::WazaType::Hikigote:
-							SideLogParts->Add(3.0f, offset, Yellow, "引き小手"); offset += 0.02f;
-							break;
-						case FPS_n2::WazaType::Dou:
-							SideLogParts->Add(3.0f, offset, Yellow, "胴"); offset += 0.02f;
-							break;
-						default:
-							break;
-						}
-
-						SideLogParts->Add(3.0f, offset, (HitDamagePow >= 0) ? Green : Red, "威力　　 %s%4d pt", (HitDamagePow >= 0) ? "+" : "-", std::abs(HitDamagePow)); offset += 0.02f;
-						SideLogParts->Add(3.0f, offset, (HitPosPoints >= 0) ? Green : Red, "打突部位 %s%4d pt", (HitPosPoints >= 0) ? "+" : "-", std::abs(HitPosPoints)); offset += 0.02f;
-						SideLogParts->Add(3.0f, offset, (KihakuPoints >= 0) ? Green : Red, "気迫　　 %s%4d pt", (KihakuPoints >= 0) ? "+" : "-", std::abs(KihakuPoints)); offset += 0.02f;
-						SideLogParts->Add(3.0f, offset, (TotalAddHits >= 0) ? Green : Red, "計　　　 %s%4d pt", (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits)); offset += 0.02f;
-						if (TotalAddHits >= 100) {
-							SideLogParts->Add(3.5f, offset, Yellow, "有効打突！"); offset += 0.02f;
-						}
-						else if (TotalAddHits >= 80) {
-							SideLogParts->Add(3.5f, offset, Red, "もう一息"); offset += 0.02f;
-						}
-
 						if (TotalAddHits >= 100) {
 							auto* PlayerMngr = Player::PlayerManager::Instance();
 							PlayerMngr->AddScore(value.ShotID, value.GetHitType());
@@ -299,6 +244,61 @@ namespace FPS_n2 {
 						}
 						if (!IsTraining && TotalAddHits >= 50) {
 							SE->Get(static_cast<int>(SoundEnum::Audience_Near)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+						}
+						if (this->m_MyID == this->m_ViewID) {
+							//コンカッション
+							switch (value.GetHitType()) {
+							case HitType::Head://面
+								m_ConcussionSwitch = true;
+								break;
+							case HitType::Body://胴
+								m_ConcussionSwitch = true;
+								break;
+							case HitType::Arm://小手
+								m_ConcussionSwitch = true;
+								break;
+							case HitType::Leg:
+							default:
+								break;
+							}
+							SideLogParts->Add(1.0f, 0.f, White, "%s%4d pt", (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits));
+						}
+						else {
+							HitMarkParts->Add(value.m_Pos, value.GetHitType(), static_cast<float>(HitDamagePow) / 100.f);
+
+							float offset = 0.f;
+							switch (value.m_WazaType) {
+							case FPS_n2::WazaType::Men:
+								SideLogParts->Add(3.0f, offset, Yellow, "面"); offset += 0.02f;
+								break;
+							case FPS_n2::WazaType::SuriageMen:
+								SideLogParts->Add(3.0f, offset, Yellow, "すり上げ面"); offset += 0.02f;
+								break;
+							case FPS_n2::WazaType::Hikimen:
+								SideLogParts->Add(3.0f, offset, Yellow, "引き面"); offset += 0.02f;
+								break;
+							case FPS_n2::WazaType::Kote:
+								SideLogParts->Add(3.0f, offset, Yellow, "小手"); offset += 0.02f;
+								break;
+							case FPS_n2::WazaType::Hikigote:
+								SideLogParts->Add(3.0f, offset, Yellow, "引き小手"); offset += 0.02f;
+								break;
+							case FPS_n2::WazaType::Dou:
+								SideLogParts->Add(3.0f, offset, Yellow, "胴"); offset += 0.02f;
+								break;
+							default:
+								break;
+							}
+							SideLogParts->Add(3.0f, offset, (HitDamagePow >= 0) ? Green : Red, "威力　　 %s%4d pt", (HitDamagePow >= 0) ? "+" : "-", std::abs(HitDamagePow)); offset += 0.02f;
+							SideLogParts->Add(3.0f, offset, (HitPosPoints >= 0) ? Green : Red, "打突部位 %s%4d pt", (HitPosPoints >= 0) ? "+" : "-", std::abs(HitPosPoints)); offset += 0.02f;
+							SideLogParts->Add(3.0f, offset, (KihakuPoints >= 0) ? Green : Red, "気迫　　 %s%4d pt", (KihakuPoints >= 0) ? "+" : "-", std::abs(KihakuPoints)); offset += 0.02f;
+							SideLogParts->Add(3.0f, offset, (TotalAddHits >= 0) ? Green : Red, "計　　　 %s%4d pt", (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits)); offset += 0.02f;
+							if (TotalAddHits >= 100) {
+								SideLogParts->Add(3.5f, offset, Yellow, "有効打突！"); offset += 0.02f;
+							}
+							else if (TotalAddHits >= 80) {
+								SideLogParts->Add(3.5f, offset, Red, "もう一息"); offset += 0.02f;
+							}
 						}
 					}
 				}
@@ -402,15 +402,21 @@ namespace FPS_n2 {
 				float Len = 0.f;
 				auto Vec = (Target->GetMove().GetPos() - this->GetEyePosition()); Vec.y = (0.f); Len = Vec.magnitude(); Vec = Vec.normalized();
 				float pp_y = 0.f;
+
+				float sint = Vector3DX::Cross(Vec, Dir).y;
+				float cost = Vector3DX::Dot(Vec, Dir);
+				auto IsFront = (cost > cos(deg2rad(40)));
 				if (!CharaMove::GetRun()) {
-					float sint = Vector3DX::Cross(Vec, Dir).y;
-					float cost = Vector3DX::Dot(Vec, Dir);
-					auto IsFront = (cost > cos(deg2rad(40)));
 					if (IsFront) {
 						pp_y = std::clamp(-std::atan2f(sint, cost), -deg2rad(60), deg2rad(60)) * 25.f / FrameRate;
 					}
 					else {
 						pp_y = -deg2rad(60) * 9.f / FrameRate;
+					}
+				}
+				else if (CharaMove::GetIsFrontAttacking()) {
+					if (IsFront) {
+						pp_y = std::clamp(-std::atan2f(sint, cost), -deg2rad(60), deg2rad(60)) * 40.f / FrameRate;
 					}
 				}
 				Input.SetAddxRad(0.f);

@@ -34,14 +34,13 @@ namespace FPS_n2 {
 
 			bool IsNearPlayer = false;
 			bool IsFarPlayer = false;
+			Vector3DX Vec = Target->GetMove().GetPos() - Chara->GetMove().GetPos(); Vec.y = 0.f;
+			float Length = Vec.magnitude();
 			{
-				Vector3DX Vec = Target->GetMove().GetPos() - Chara->GetMove().GetPos(); Vec.y = 0.f;
-				float LenF = 3.5f * Scale3DRate;
-				if (Vec.sqrMagnitude() > LenF * LenF) {
+				if (Length > 2.65f * Scale3DRate) {
 					IsFarPlayer = true;
 				}
-				float LenN = 1.0f * Scale3DRate;
-				if (Vec.sqrMagnitude() < LenN * LenN) {
+				if (Length < 1.0f * Scale3DRate) {
 					IsNearPlayer = true;
 				}
 			}
@@ -77,11 +76,32 @@ namespace FPS_n2 {
 				m_Counter13 += DXLib_refParts->GetDeltaTime();
 				if (m_Counter13 > 1.f) {
 					m_Counter13 -= 1.f;
-					if (!IsFarPlayer && !IsNearPlayer) {
+					if ((!IsFarPlayer && !IsNearPlayer) || (Target->GetYaTimer() >= Target->GetYaTimerMax() * 0.9f)) {
 						Ya_Key = true;
 					}
 				}
 
+				m_Counter14 += DXLib_refParts->GetDeltaTime();
+				if (m_Counter14 > 0.2f) {
+					m_Counter14 -= 0.2f;
+					if ((1.f * Scale3DRate < Length) && (Length < 2.4f * Scale3DRate)) {
+						//ŽdŠ|‚¯
+						if (
+							(Chara->GetYaTimer() <= Chara->GetYaTimerMax() * 0.975f) && 
+							((Chara->GetYaTimer() >= Chara->GetYaTimerMax() * 0.5f) || (GetRand(100) < 10))
+							) {
+							//–Ê
+							if ((Chara->GetCharaAction() == EnumArmAnimType::Ready) && (Target->GetCharaAction() == EnumArmAnimType::Ready)) {
+								shotMain_Key = true;
+							}
+							//¬Žè
+							if ((Chara->GetCharaAction() == EnumArmAnimType::Ready) && (Target->GetCharaAction() == EnumArmAnimType::GuardSuriage)) {
+								shotSub_Key = true;
+							}
+						}
+					}
+				}
+				//
 				if (Target->GetCharaAction() != EnumArmAnimType::Ready && Target->GetCharaAction() != EnumArmAnimType::Run) {
 					m_LMR = 50;
 				}
