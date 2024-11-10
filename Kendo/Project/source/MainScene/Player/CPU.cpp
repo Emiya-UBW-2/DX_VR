@@ -85,10 +85,17 @@ namespace FPS_n2 {
 				if (m_Counter14 > 0.2f) {
 					m_Counter14 -= 0.2f;
 					if ((1.f * Scale3DRate < Length) && (Length < 2.4f * Scale3DRate)) {
+						//Žó‚¯
+						{
+							//–hŒä
+							if ((Chara->GetCharaAction() == EnumArmAnimType::Ready) && (Target->GetCharaAction() == EnumArmAnimType::Men)) {
+								Guard_Key = (GetRand(100) < 70);
+							}
+						}
 						//ŽdŠ|‚¯
 						if (
-							(Chara->GetYaTimer() <= Chara->GetYaTimerMax() * 0.975f) && 
-							((Chara->GetYaTimer() >= Chara->GetYaTimerMax() * 0.5f) || (GetRand(100) < 10))
+							(Chara->GetYaTimer() <= Chara->GetYaTimerMax() * 0.99f) && 
+							((Chara->GetYaTimer() >= Chara->GetYaTimerMax() * 0.75f) || (GetRand(100) < 10))
 							) {
 							//–Ê
 							if ((Chara->GetCharaAction() == EnumArmAnimType::Ready) && (Target->GetCharaAction() == EnumArmAnimType::Ready)) {
@@ -98,6 +105,11 @@ namespace FPS_n2 {
 							if ((Chara->GetCharaAction() == EnumArmAnimType::Ready) && (Target->GetCharaAction() == EnumArmAnimType::GuardSuriage)) {
 								shotSub_Key = true;
 							}
+						}
+					}
+					else {
+						if ((Chara->GetCharaAction() == EnumArmAnimType::Tsuba) && (Target->GetCharaAction() == EnumArmAnimType::Tsuba)) {
+							shotMain_Key = (GetRand(100) < 20);
 						}
 					}
 				}

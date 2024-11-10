@@ -261,7 +261,7 @@ namespace FPS_n2 {
 							default:
 								break;
 							}
-							SideLogParts->Add(1.0f, 0.f, White, "%s%4d pt", (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits));
+							SideLogParts->Add(3.0f, 0.f, White, "%s%4d pt", (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits));
 						}
 						else {
 							HitMarkParts->Add(value.m_Pos, value.GetHitType(), static_cast<float>(HitDamagePow) / 100.f);
