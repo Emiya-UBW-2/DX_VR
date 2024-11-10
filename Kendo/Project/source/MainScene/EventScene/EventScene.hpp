@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Header.hpp"
+#include	"../../Header.hpp"
 //
 namespace FPS_n2 {
 	static void		Sub_Func(std::string& func_t, const char& in_str) noexcept {

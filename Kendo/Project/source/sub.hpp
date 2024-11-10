@@ -1,7 +1,7 @@
 #pragma once
 #include	"Header.hpp"
 
-#include "MainScene/Object/CharacterEnum.hpp"
+#include	"MainScene/Object/CharacterEnum.hpp"
 //
 namespace FPS_n2 {
 	//ダメージイベント

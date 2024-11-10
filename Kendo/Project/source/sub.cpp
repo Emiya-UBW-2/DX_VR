@@ -1,9 +1,9 @@
 #include	"sub.hpp"
 
-#include "MainScene/Player/Player.hpp"
-#include "MainScene/Object/Character.hpp"
-#include "MainScene/Object/Weapon.hpp"
-#include "MainScene/Object/Judge.hpp"
+#include	"MainScene/Player/Player.hpp"
+#include	"MainScene/Object/Character.hpp"
+#include	"MainScene/Object/Weapon.hpp"
+#include	"MainScene/Object/Judge.hpp"
 
 const FPS_n2::CommonBattleResource* SingletonBase<FPS_n2::CommonBattleResource>::m_Singleton = nullptr;
 const FPS_n2::HitMark* SingletonBase<FPS_n2::HitMark>::m_Singleton = nullptr;

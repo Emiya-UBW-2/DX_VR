@@ -1,8 +1,8 @@
 #pragma warning(disable:4464)
-#include "MainScene.hpp"
-#include "../MainScene/NetworkBrowser.hpp"
+#include	"MainScene.hpp"
+#include	"../MainScene/NetworkBrowser.hpp"
 
-#include "../MainScene/Object/Judge.hpp"
+#include	"../MainScene/Object/Judge.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -174,6 +174,7 @@ namespace FPS_n2 {
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
 #endif // DEBUG
+			auto* LocalizeParts = LocalizePool::Instance();
 			if (!m_IsResult) {
 				m_PauseMenuControl.UpdatePause();
 			}
@@ -258,7 +259,7 @@ namespace FPS_n2 {
 							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9905));
 							if (m_isTraining) {
 								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), "");
-								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::THROW).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9916));
+								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::RELOAD).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9916));
 							}
 						}
 					}
@@ -572,7 +573,7 @@ namespace FPS_n2 {
 							//残り1分
 							if (m_IsDrawOneMinute && (m_Timer < 60.f)) {
 								m_IsDrawOneMinute = false;
-								SideLogParts->Add(10.f, 0.f, Red, "残り1分!");
+								SideLogParts->Add(10.f, 0.f, Red, LocalizeParts->Get(200));
 							}
 						}
 					}
@@ -1091,6 +1092,7 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* HitMarkParts = HitMark::Instance();
 			auto* SceneParts = SceneControl::Instance();
+			auto* LocalizeParts = LocalizePool::Instance();
 			if (!m_IsEventSceneActive) {
 				if (m_isTraining) {
 					this->m_Tutorial.Draw();
@@ -1101,16 +1103,13 @@ namespace FPS_n2 {
 				WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Result,
 					(0), (0), (1920), (1080), false);
 
-				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
-					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, (160), (256), Yellow, Black, "Result");
-
 				bool IsWin = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore() > PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
 				bool IsDraw = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore() == PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
 
 				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (48),
 					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, (300), (384),
 					IsDraw ? Gray25 : (IsWin ? Red : White), Black,
-					IsDraw ? "引き分け" : (IsWin ? "勝利" : "敗退"));
+					IsDraw ? LocalizeParts->Get(6002) : (IsWin ? LocalizeParts->Get(6000) : LocalizeParts->Get(6001)));
 				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, (300), (386), White, Black, "%d : %d",
 					PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore(), PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());

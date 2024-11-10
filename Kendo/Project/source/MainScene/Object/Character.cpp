@@ -1,6 +1,6 @@
 #include	"Character.hpp"
 
-#include "../../MainScene/Player/Player.hpp"
+#include	"../../MainScene/Player/Player.hpp"
 
 namespace FPS_n2 {
 	namespace CharacterObject {
@@ -187,6 +187,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* SideLogParts = SideLog::Instance();
 			auto* HitMarkParts = HitMark::Instance();
+			auto* LocalizeParts = LocalizePool::Instance();
 			if (this->m_MyID == value.DamageID) {
 				if (m_DamageCoolTime == 0.f) {
 					SE->Get(static_cast<int>(SoundEnum::Kendo_Hit)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale3DRate * 15.f);
@@ -261,7 +262,7 @@ namespace FPS_n2 {
 							default:
 								break;
 							}
-							SideLogParts->Add(3.0f, 0.f, White, "%s%4d pt", (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits));
+							SideLogParts->Add(3.0f, 0.f, White, "%s%4d", (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits));
 						}
 						else {
 							HitMarkParts->Add(value.m_Pos, value.GetHitType(), static_cast<float>(HitDamagePow) / 100.f);
@@ -269,35 +270,35 @@ namespace FPS_n2 {
 							float offset = 0.f;
 							switch (value.m_WazaType) {
 							case FPS_n2::WazaType::Men:
-								SideLogParts->Add(3.0f, offset, Yellow, "面"); offset += 0.02f;
+								SideLogParts->Add(3.0f, offset, Yellow, LocalizeParts->Get(7000)); offset += 0.02f;
 								break;
 							case FPS_n2::WazaType::SuriageMen:
-								SideLogParts->Add(3.0f, offset, Yellow, "すり上げ面"); offset += 0.02f;
+								SideLogParts->Add(3.0f, offset, Yellow, LocalizeParts->Get(7001)); offset += 0.02f;
 								break;
 							case FPS_n2::WazaType::Hikimen:
-								SideLogParts->Add(3.0f, offset, Yellow, "引き面"); offset += 0.02f;
+								SideLogParts->Add(3.0f, offset, Yellow, LocalizeParts->Get(7002)); offset += 0.02f;
 								break;
 							case FPS_n2::WazaType::Kote:
-								SideLogParts->Add(3.0f, offset, Yellow, "小手"); offset += 0.02f;
+								SideLogParts->Add(3.0f, offset, Yellow, LocalizeParts->Get(7003)); offset += 0.02f;
 								break;
 							case FPS_n2::WazaType::Hikigote:
-								SideLogParts->Add(3.0f, offset, Yellow, "引き小手"); offset += 0.02f;
+								SideLogParts->Add(3.0f, offset, Yellow, LocalizeParts->Get(7004)); offset += 0.02f;
 								break;
 							case FPS_n2::WazaType::Dou:
-								SideLogParts->Add(3.0f, offset, Yellow, "胴"); offset += 0.02f;
+								SideLogParts->Add(3.0f, offset, Yellow, LocalizeParts->Get(7005)); offset += 0.02f;
 								break;
 							default:
 								break;
 							}
-							SideLogParts->Add(3.0f, offset, (HitDamagePow >= 0) ? Green : Red, "威力　　 %s%4d pt", (HitDamagePow >= 0) ? "+" : "-", std::abs(HitDamagePow)); offset += 0.02f;
-							SideLogParts->Add(3.0f, offset, (HitPosPoints >= 0) ? Green : Red, "打突部位 %s%4d pt", (HitPosPoints >= 0) ? "+" : "-", std::abs(HitPosPoints)); offset += 0.02f;
-							SideLogParts->Add(3.0f, offset, (KihakuPoints >= 0) ? Green : Red, "気迫　　 %s%4d pt", (KihakuPoints >= 0) ? "+" : "-", std::abs(KihakuPoints)); offset += 0.02f;
-							SideLogParts->Add(3.0f, offset, (TotalAddHits >= 0) ? Green : Red, "計　　　 %s%4d pt", (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits)); offset += 0.02f;
+							SideLogParts->Add(3.0f, offset, (HitDamagePow >= 0) ? Green : Red, "%s%s%4d", LocalizeParts->Get(7010), (HitDamagePow >= 0) ? "+" : "-", std::abs(HitDamagePow)); offset += 0.02f;
+							SideLogParts->Add(3.0f, offset, (HitPosPoints >= 0) ? Green : Red, "%s%s%4d", LocalizeParts->Get(7011), (HitPosPoints >= 0) ? "+" : "-", std::abs(HitPosPoints)); offset += 0.02f;
+							SideLogParts->Add(3.0f, offset, (KihakuPoints >= 0) ? Green : Red, "%s%s%4d", LocalizeParts->Get(7012), (KihakuPoints >= 0) ? "+" : "-", std::abs(KihakuPoints)); offset += 0.02f;
+							SideLogParts->Add(3.0f, offset, (TotalAddHits >= 0) ? Green : Red, "%s%s%4d", LocalizeParts->Get(7013), (TotalAddHits >= 0) ? "+" : "-", std::abs(TotalAddHits)); offset += 0.02f;
 							if (TotalAddHits >= 100) {
-								SideLogParts->Add(3.5f, offset, Yellow, "有効打突！"); offset += 0.02f;
+								SideLogParts->Add(3.5f, offset, Yellow, LocalizeParts->Get(7014)); offset += 0.02f;
 							}
 							else if (TotalAddHits >= 80) {
-								SideLogParts->Add(3.5f, offset, Red, "もう一息"); offset += 0.02f;
+								SideLogParts->Add(3.5f, offset, Red, LocalizeParts->Get(7015)); offset += 0.02f;
 							}
 						}
 					}

@@ -1,12 +1,12 @@
 #pragma once
 #pragma warning(disable:4464)
 #include	"../../Header.hpp"
-#include "CharacterEnum.hpp"
-#include "Character_before.hpp"
-#include "CharaAnimData.hpp"
-#include "../../MainScene/BackGround/BackGround.hpp"
+#include	"CharacterEnum.hpp"
+#include	"Character_before.hpp"
+#include	"CharaAnimData.hpp"
+#include	"../../MainScene/BackGround/BackGround.hpp"
 
-#include "Weapon.hpp"
+#include	"Weapon.hpp"
 
 namespace FPS_n2 {
 	namespace CharacterObject {

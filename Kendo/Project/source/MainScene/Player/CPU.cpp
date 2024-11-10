@@ -1,7 +1,7 @@
 #include	"CPU.hpp"
 #pragma warning(disable:4464)
-#include "../../MainScene/Object/Character.hpp"
-#include "../../MainScene/Player/Player.hpp"
+#include	"../../MainScene/Object/Character.hpp"
+#include	"../../MainScene/Player/Player.hpp"
 
 namespace FPS_n2 {
 	namespace Player {

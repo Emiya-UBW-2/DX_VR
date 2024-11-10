@@ -1,9 +1,9 @@
 #pragma once
 
-#include "DXLib_ref/Souece/DXLib_ref.h"
+#include	"DXLib_ref/Souece/DXLib_ref.h"
 using namespace DXLibRef;
 
-#include "Enums.hpp"
+#include	"Enums.hpp"
 
 
 #ifdef DEBUG

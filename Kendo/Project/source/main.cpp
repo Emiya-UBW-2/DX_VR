@@ -1,9 +1,9 @@
 #include"Header.hpp"
 
-#include "Scene/TitleScene.hpp"
-#include "Scene/MainScene.hpp"
+#include	"Scene/TitleScene.hpp"
+#include	"Scene/MainScene.hpp"
 
-#include "MainScene/NetworkBrowser.hpp"
+#include	"MainScene/NetworkBrowser.hpp"
 
 #ifdef DEBUG
 int DBG_CamSel = -1;
@@ -30,7 +30,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(PADS::LEAN_R, true);//UI‚Ì‚Ý
 	Pad->SetIsUseButton(PADS::RELOAD, true);//UI‚Ì‚Ý
 	Pad->SetIsUseButton(PADS::INTERACT, true);//UI‚Ì‚Ý
-	Pad->SetIsUseButton(PADS::THROW, true);//UI‚Ì‚Ý
+	Pad->SetIsUseButton(PADS::THROW, false);
 	Pad->SetIsUseButton(PADS::MELEE, false);
 	Pad->SetIsUseButton(PADS::JUMP, true);
 	Pad->SetIsUseButton(PADS::INVENTORY, false);

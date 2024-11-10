@@ -2,10 +2,10 @@
 #pragma warning(disable:4464)
 #include	"../../Header.hpp"
 
-#include "../../sub.hpp"
-#include "../../MainScene/NetWork.hpp"
-#include "CharaAnimData.hpp"
-#include "CharacterEnum.hpp"
+#include	"../../sub.hpp"
+#include	"../../MainScene/NetWork.hpp"
+#include	"CharaAnimData.hpp"
+#include	"CharacterEnum.hpp"
 
 namespace FPS_n2 {
 	namespace CharacterObject {

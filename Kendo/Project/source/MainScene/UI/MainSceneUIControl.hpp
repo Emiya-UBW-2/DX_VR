@@ -286,6 +286,7 @@ namespace FPS_n2 {
 			}
 			void			Draw(void) const noexcept {
 				auto* WindowParts = WindowSystem::DrawControl::Instance();
+				auto* LocalizeParts = LocalizePool::Instance();
 				//気合
 				{
 					float radius = Lerp(static_cast<float>(1.f), static_cast<float>(1.01f), floatParam[2]);
@@ -392,7 +393,7 @@ namespace FPS_n2 {
 					yp1 = (1080 - 80 - 28 * 2);
 
 					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, "気合");
+						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, LocalizeParts->Get(5000));
 					m_GaugeParam[0].DrawGauge(
 						xp1, yp1, xp1 + (300), yp1 + (6),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),
@@ -409,7 +410,7 @@ namespace FPS_n2 {
 					yp1 = (1080 - 80 - 28 * 1);
 
 					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, "スタミナ");
+						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, LocalizeParts->Get(5001));
 					m_GaugeParam[1].DrawGauge(
 						xp1, yp1, xp1 + (300), yp1 + (6),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),
@@ -421,7 +422,7 @@ namespace FPS_n2 {
 					yp1 = (1080 - 80 - 28 * 0);
 
 					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, "ガード");
+						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, LocalizeParts->Get(5002));
 					m_GaugeParam[2].DrawGauge(
 						xp1, yp1, xp1 + (300), yp1 + (6),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),

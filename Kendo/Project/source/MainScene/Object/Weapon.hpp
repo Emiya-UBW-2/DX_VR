@@ -1,8 +1,8 @@
 #pragma once
 #include	"../../Header.hpp"
 
-#include "WeaponEnum.hpp"
-#include "CharaAnimData.hpp"
+#include	"WeaponEnum.hpp"
+#include	"CharaAnimData.hpp"
 
 namespace FPS_n2 {
 	namespace WeaponObject {

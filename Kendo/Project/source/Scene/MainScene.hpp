@@ -2,17 +2,17 @@
 #pragma warning(disable:4464)
 #include	"../Header.hpp"
 
-#include "../MainScene/BackGround/BackGround.hpp"
-#include "../MainScene/Object/Character.hpp"
-#include "../MainScene/Player/Player.hpp"
+#include	"../MainScene/BackGround/BackGround.hpp"
+#include	"../MainScene/Object/Character.hpp"
+#include	"../MainScene/Player/Player.hpp"
 
-#include "../MainScene/NetWork.hpp"
+#include	"../MainScene/NetWork.hpp"
 
-#include "../MainScene/UI/MainSceneUIControl.hpp"
+#include	"../MainScene/UI/MainSceneUIControl.hpp"
 #include	"../CommonScene/UI/CommonUIControl.hpp"
 #include	"../MainScene/MainSceneSub.hpp"
 
-#include "../MainScene/EventScene/EventScene.hpp"
+#include	"../MainScene/EventScene/EventScene.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -215,7 +215,7 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				if (Pad->GetPadsInfo(PADS::THROW).GetKey().trigger()) {
+				if (Pad->GetPadsInfo(PADS::RELOAD).GetKey().trigger()) {
 					//ƒƒOŠª‚«–ß‚µ
 					int count = 0;
 					for (auto& d : m_data) {
@@ -300,9 +300,14 @@ namespace FPS_n2 {
 						break;
 					}
 					if (m_TutorialNow == 0) {
+						auto* KeyGuideParts = KeyGuide::Instance();
+						auto* Pad = PadControl::Instance();
+						KeyGuideParts->DrawButton(xp, yp - 24, KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()));
+						xp += KeyGuideParts->GetDrawSize(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType())) + 3;
 						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-							xp, yp, Green, Black, "%s", LocalizeParts->Get(8993));
+							xp, yp, Green, Black, LocalizeParts->Get(8993));
+
 					}
 				}
 				{

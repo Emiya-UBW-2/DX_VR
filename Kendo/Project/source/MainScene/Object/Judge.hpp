@@ -1,9 +1,9 @@
 #pragma once
 #include	"../../Header.hpp"
-#include "JudgeEnum.hpp"
+#include	"JudgeEnum.hpp"
 
-#include "../../MainScene/Player/Player.hpp"
-#include "../../MainScene/BackGround/BackGround.hpp"
+#include	"../../MainScene/Player/Player.hpp"
+#include	"../../MainScene/BackGround/BackGround.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
