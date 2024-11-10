@@ -41,7 +41,6 @@ namespace FPS_n2 {
 			Vector2DX											m_BambooVecBase;
 
 			Vector2DX											m_BambooVec;
-			Vector2DX											m_GuardVec, m_GuardVecR;
 
 			float												m_HeartUp{ 0.f };
 			float												m_HeartUpR{ 0.f };
@@ -67,7 +66,6 @@ namespace FPS_n2 {
 			const auto& GetCharaType(void) const noexcept { return this->m_CharaType; }
 			const auto& GetCharaAction(void) const noexcept { return this->m_CharaAction; }
 			const auto& GetBambooVec(void) const noexcept { return m_BambooVec; }
-			const auto& GetGuardVec(void) const noexcept { return m_GuardVecR; }
 			const auto& GetYaTimer(void) const noexcept { return m_YaTimer; }
 			const auto& GetGuardCoolDownTimer(void) const noexcept { return m_GuardCoolDownTimer; }
 			const auto GetGuardCoolDownTimerMax(void) const noexcept { return 4.f; }

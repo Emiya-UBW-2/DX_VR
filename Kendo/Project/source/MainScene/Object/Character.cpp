@@ -177,8 +177,6 @@ namespace FPS_n2 {
 			m_BambooVecBase.Set(0.f, 0.f);
 		}
 		void			CharacterClass::OverrideGuard(void) noexcept {
-			m_GuardVec.Set(0.f, 0.f);
-			m_GuardVecR.Set(0.f, 0.f);
 			m_BambooVecBase = Vector2DX::zero();
 			m_GuardTimer = 1.f;
 		}
@@ -386,10 +384,6 @@ namespace FPS_n2 {
 		//
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
 			InputControl Input = pInput;
-			//ƒK[ƒh“ü—Í‚ğ”½‰f
-			m_GuardVec.x = std::clamp(m_GuardVec.x + Input.GetAddyRad() / 200.f, -1.5f, 1.5f);
-			m_GuardVec.y = std::clamp(m_GuardVec.y + Input.GetAddxRad() / 200.f, -1.5f, 1.5f);
-			Easing(&m_GuardVecR, m_GuardVec, 0.9f, EasingType::OutExpo);
 			//’|“‚Ì‰ñ“]‚ğ”½‰f
 			if (!IsAttacking()) {
 				Easing(&m_BambooVecBase, Vector2DX::vget(Input.GetxRad(), Input.GetyRad()), 0.7f, EasingType::OutExpo);
