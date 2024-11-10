@@ -6,7 +6,7 @@ namespace FPS_n2 {
 		// 
 		bool ButtonControl::GetTriggerButton(void) const noexcept {
 			auto* Pad = PadControl::Instance();
-			return (select != InvalidID) && (this->m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetKey(PADS::INTERACT).trigger());
+			return (select != InvalidID) && (this->m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetPadsInfo(PADS::INTERACT).GetKey().trigger());
 		}
 		ButtonControl::ButtonControl(void) noexcept {
 			this->m_SelectBackImage.Load("CommonData/UI/select.png");
@@ -22,7 +22,7 @@ namespace FPS_n2 {
 
 			int preselect = select;
 			bool preMouseSel = this->m_MouseSelMode;
-			if (Pad->GetKey(PADS::MOVE_W).trigger() || Pad->GetKey(PADS::MOVE_A).trigger()) {
+			if (Pad->GetPadsInfo(PADS::MOVE_W).GetKey().trigger() || Pad->GetPadsInfo(PADS::MOVE_A).GetKey().trigger()) {
 				if (select != InvalidID) {
 					--select;
 					if (select < 0) { select = static_cast<int>(ButtonSel.size()) - 1; }
@@ -32,7 +32,7 @@ namespace FPS_n2 {
 				}
 				this->m_MouseSelMode = false;
 			}
-			if (Pad->GetKey(PADS::MOVE_S).trigger() || Pad->GetKey(PADS::MOVE_D).trigger()) {
+			if (Pad->GetPadsInfo(PADS::MOVE_S).GetKey().trigger() || Pad->GetPadsInfo(PADS::MOVE_D).GetKey().trigger()) {
 				if (select != InvalidID) {
 					++select;
 					if (select > static_cast<int>(ButtonSel.size()) - 1) { select = 0; }
@@ -107,22 +107,21 @@ namespace FPS_n2 {
 			FileRead_close(mdata);
 		}
 		void CreditControl::Draw(int xmin, int ymin, int xmax) const noexcept {
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* WindowParts = WindowSystem::DrawControl::Instance();
 
 			int xp1, yp1;
 
-			xp1 = xmin + WindowSizeParts->GetUIY(24);
+			xp1 = xmin + (24);
 			yp1 = ymin + LineHeight;
-			int Height = WindowSizeParts->GetUIY(12);
+			int Height = (12);
 			for (auto& c : this->m_CreditStr) {
 				if (this->m_CreditCoulm < static_cast<int>(&c - &this->m_CreditStr.front())) { break; }
-				int xpos = xp1 + WindowSizeParts->GetUIY(6);
+				int xpos = xp1 + (6);
 				int ypos = yp1 + Height / 2;
 				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::DIZ_UD_Gothic, Height,
 					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.first);
 
-				xpos = xmax - WindowSizeParts->GetUIY(24);
+				xpos = xmax - (24);
 				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::DIZ_UD_Gothic, Height,
 					FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.second);
 				yp1 += Height;

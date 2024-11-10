@@ -145,7 +145,7 @@ namespace FPS_n2 {
 			void Update(void) noexcept {
 				auto* Pad = PadControl::Instance();
 				auto* OptionParts = OPTION::Instance();
-				if (Pad->GetKey(PADS::INTERACT).trigger()) {
+				if (Pad->GetPadsInfo(PADS::INTERACT).GetKey().trigger()) {
 					if (m_CheckHit == HitType::None) {
 						m_Hit = true;
 					}
@@ -215,7 +215,7 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				if (Pad->GetKey(PADS::THROW).trigger()) {
+				if (Pad->GetPadsInfo(PADS::THROW).GetKey().trigger()) {
 					//ƒƒOŠª‚«–ß‚µ
 					int count = 0;
 					for (auto& d : m_data) {
@@ -250,25 +250,23 @@ namespace FPS_n2 {
 				m_Dou.Dispose();
 			}
 			void Draw(void) const noexcept {
-				auto* WindowSizeParts = WindowSizeControl::Instance();
 				auto* WindowParts = WindowSystem::DrawControl::Instance();
-				auto* Pad = PadControl::Instance();
 				auto* LocalizeParts = LocalizePool::Instance();
 
 				int xp1, yp1;
-				xp1 = WindowSizeParts->GetUIY(480 + 400 / 2 + 48);
-				yp1 = WindowSizeParts->GetUIY(1080 - 64 - 64);
+				xp1 = (480 + 400 / 2 + 48);
+				yp1 = (1080 - 64 - 64);
 
 				for (auto& d : m_data) {
 					if (d.ActivePer() > 0.f) {
-						int yp = yp1 - WindowSizeParts->GetUIY(static_cast<int>((64 + 5) * d.GetFlip()));
+						int yp = yp1 - (static_cast<int>((64 + 5) * d.GetFlip()));
 
 						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal,
 							std::min(
 								std::clamp(static_cast<int>(255.f * d.ActivePer()), 0, 255),
-								255 - std::clamp(std::abs(yp - yp1) * 2 * 255 / WindowSizeParts->GetUIY(255), 0, 255)
+								255 - std::clamp(std::abs(yp - yp1) * 2 * 255 / (255), 0, 255)
 							));
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(24),
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 							xp1, yp, Green, Black, d.GetMsg());
 					}
@@ -276,25 +274,25 @@ namespace FPS_n2 {
 				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				if (m_TutorialNow != 0) {
 					WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Teacher.at(m_GraphID),
-						WindowSizeParts->GetUIY(480), WindowSizeParts->GetUIY(1080 - 1824 / 4 / 2), WindowSizeParts->GetUIY(480 + 400 / 2), WindowSizeParts->GetUIY(1080), true);
+						(480), (1080 - 1824 / 4 / 2), (480 + 400 / 2), (1080), true);
 				}
 				{
 					int xp, yp;
-					xp = WindowSizeParts->GetUIY(32);
-					yp = WindowSizeParts->GetUIY(384);
+					xp = (32);
+					yp = (384);
 					switch (m_CheckHit) {
 					case HitType::Head:
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(24),
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 							xp, yp, Green, Black, LocalizeParts->Get(8990));
 						break;
 					case HitType::Arm:
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(24),
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 							xp, yp, Green, Black, LocalizeParts->Get(8991));
 						break;
 					case HitType::Body:
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(24),
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 							xp, yp, Green, Black, LocalizeParts->Get(8992));
 						break;
@@ -302,9 +300,9 @@ namespace FPS_n2 {
 						break;
 					}
 					if (m_TutorialNow == 0) {
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(24),
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-							xp, yp, Green, Black, "[%s]%s", Pad->GetKeyStr(PADS::INTERACT).c_str(), LocalizeParts->Get(8993));
+							xp, yp, Green, Black, "%s", LocalizeParts->Get(8993));
 					}
 				}
 				{
@@ -315,8 +313,8 @@ namespace FPS_n2 {
 							PlayMovieToGraph(m_Men.get());
 						}
 						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Men,
-							WindowSizeParts->GetUIY(64), WindowSizeParts->GetUIY(600 - 720 / 2 / 2),
-							WindowSizeParts->GetUIY(64 + 600 / 2), WindowSizeParts->GetUIY(600 + 720 / 2 / 2), false);
+							(64), (600 - 720 / 2 / 2),
+							(64 + 600 / 2), (600 + 720 / 2 / 2), false);
 						break;
 					case HitType::Arm:
 						if (GetMovieStateToGraph(m_Kote.get()) == 0) {
@@ -324,8 +322,8 @@ namespace FPS_n2 {
 							PlayMovieToGraph(m_Kote.get());
 						}
 						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Kote,
-							WindowSizeParts->GetUIY(64), WindowSizeParts->GetUIY(600 - 720 / 2 / 2),
-							WindowSizeParts->GetUIY(64 + 600 / 2), WindowSizeParts->GetUIY(600 + 720 / 2 / 2), false);
+							(64), (600 - 720 / 2 / 2),
+							(64 + 600 / 2), (600 + 720 / 2 / 2), false);
 						break;
 					case HitType::Body:
 						if (GetMovieStateToGraph(m_Dou.get()) == 0) {
@@ -333,8 +331,8 @@ namespace FPS_n2 {
 							PlayMovieToGraph(m_Dou.get());
 						}
 						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Dou,
-							WindowSizeParts->GetUIY(64), WindowSizeParts->GetUIY(600 - 720 / 2 / 2),
-							WindowSizeParts->GetUIY(64 + 600 / 2), WindowSizeParts->GetUIY(600 + 720 / 2 / 2), false);
+							(64), (600 - 720 / 2 / 2),
+							(64 + 600 / 2), (600 + 720 / 2 / 2), false);
 						break;
 					default:
 						break;

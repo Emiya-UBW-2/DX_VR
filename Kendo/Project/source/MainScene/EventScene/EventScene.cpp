@@ -296,7 +296,6 @@ namespace FPS_n2 {
 		ContiF = 0;
 	}
 	void			EventScene::TelopClass::LoadTelop(const std::string& func, const std::vector<std::string>& args) noexcept {
-		auto* WindowSizeParts = WindowSizeControl::Instance();
 		if (func.find("SetTelopTime") != std::string::npos) {
 			StartF = (LONGLONG)(1000000.f * std::stof(args[0]));
 			ContiF = (LONGLONG)(1000000.f * std::stof(args[1]));
@@ -311,7 +310,7 @@ namespace FPS_n2 {
 			else if (args[4].find("MIDDLE") != std::string::npos) { t = 1; }
 			else if (args[4].find("RIGHT") != std::string::npos) { t = 2; }
 			Texts.resize(Texts.size() + 1);
-			Texts.back().Set(WindowSizeParts->GetUIY(std::stoi(args[0])), WindowSizeParts->GetUIY(std::stoi(args[1])), WindowSizeParts->GetUIY(std::stoi(args[2])), args[3], StartF, ContiF, t);
+			Texts.back().Set((std::stoi(args[0])), (std::stoi(args[1])), (std::stoi(args[2])), args[3], StartF, ContiF, t);
 		}
 	}
 	void			EventScene::TelopClass::Draw(LONGLONG nowTimeWait) const noexcept {

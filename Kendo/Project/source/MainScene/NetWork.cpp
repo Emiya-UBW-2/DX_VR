@@ -289,7 +289,7 @@ namespace FPS_n2 {
 				};
 				//サーバー兼観戦者
 				for (int index = 0; index < Player_num; ++index) {
-					if (CheckHitKeyWithCheck(KeyInputs[index]) != 0) {
+					if (CheckHitKey(KeyInputs[index]) != 0) {
 						this->m_PlayerNet.SetLocalPlayerID((PlayerID)index);
 						break;
 					}

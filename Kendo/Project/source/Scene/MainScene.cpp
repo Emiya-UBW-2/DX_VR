@@ -168,6 +168,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* SideLogParts = SideLog::Instance();
 			auto* Pad = PadControl::Instance();
+			auto* KeyGuideParts = KeyGuide::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* SceneParts = SceneControl::Instance();
 #ifdef DEBUG
@@ -215,10 +216,11 @@ namespace FPS_n2 {
 			}
 
 			Pad->SetMouseMoveEnable(true);
-			Pad->ChangeGuide(
+			KeyGuideParts->ChangeGuide(
 				[this]() {
+					auto* Pad = PadControl::Instance();
 					auto* SceneParts = SceneControl::Instance();
-					auto* KeyGuide = PadControl::Instance();
+					auto* KeyGuideParts = KeyGuide::Instance();
 					auto* LocalizeParts = LocalizePool::Instance();
 					if (m_IsEventSceneFlag) {
 						return;
@@ -227,36 +229,36 @@ namespace FPS_n2 {
 						if (m_IsResult) {
 							return;
 						}
-						KeyGuide->AddGuide(PADS::INTERACT, LocalizeParts->Get(9992));
-						KeyGuide->AddGuide(PADS::RELOAD, LocalizeParts->Get(9991));
-						KeyGuide->AddGuide(PADS::MOVE_W, "");
-						KeyGuide->AddGuide(PADS::MOVE_S, "");
-						KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizeParts->Get(9993));
+						KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9992));
+						KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::RELOAD).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9991));
+						KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
+						KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_S).GetAssign(), Pad->GetControlType()), "");
+						KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_STICK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9993));
 					}
 					else {
 						if (m_IsResult) {
-							KeyGuide->AddGuide(PADS::INTERACT, LocalizeParts->Get(9915));
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9915));
 							return;
 						}
 						if (m_IsEventSceneActive) {
-							KeyGuide->AddGuide(PADS::INTERACT, LocalizeParts->Get(9914));
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9914));
 						}
 						else {
-							KeyGuide->AddGuide(PADS::MOVE_W, "");
-							KeyGuide->AddGuide(PADS::MOVE_S, "");
-							KeyGuide->AddGuide(PADS::MOVE_A, "");
-							KeyGuide->AddGuide(PADS::MOVE_D, "");
-							KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizeParts->Get(9900));
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_S).GetAssign(), Pad->GetControlType()), "");
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_A).GetAssign(), Pad->GetControlType()), "");
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_D).GetAssign(), Pad->GetControlType()), "");
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_STICK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9900));
 
-							KeyGuide->AddGuide(PADS::SHOT, LocalizeParts->Get(9906));
-							KeyGuide->AddGuide(PADS::AIM, LocalizeParts->Get(9908));
-							KeyGuide->AddGuide(PADS::ULT, LocalizeParts->Get(9907));
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::SHOT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9906));
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::AIM).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9908));
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::ULT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9907));
 
-							KeyGuide->AddGuide(PADS::WALK, LocalizeParts->Get(9903));
-							KeyGuide->AddGuide(PADS::JUMP, LocalizeParts->Get(9905));
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::WALK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9903));
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9905));
 							if (m_isTraining) {
-								KeyGuide->AddGuide(PADS::INTERACT, "");
-								KeyGuide->AddGuide(PADS::THROW, LocalizeParts->Get(9916));
+								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), "");
+								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::THROW).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9916));
 							}
 						}
 					}
@@ -269,13 +271,13 @@ namespace FPS_n2 {
 						m_EventScene.Load(m_EventSelect.c_str());
 						m_EventScene.Start();
 						m_IsEventSceneActive = true;
-						Pad->SetGuideUpdate();
+						KeyGuideParts->SetGuideFlip();
 					}
 				}
 
 				if (m_IsEventSceneActive) {
 					m_EventScene.GetDeltaTime();
-					if (!SceneParts->IsPause() && Pad->GetKey(PADS::INTERACT).trigger()) {
+					if (!SceneParts->IsPause() && Pad->GetPadsInfo(PADS::INTERACT).GetKey().trigger()) {
 						SE->StopAll();
 						SE->Get(static_cast<int>(SoundEnumCommon::UI_OK)).Play(0, DX_PLAYTYPE_BACK, TRUE);
 						m_EventScene.Skip();
@@ -285,7 +287,7 @@ namespace FPS_n2 {
 						FadeControl::SetFadeIn(1.f / (m_isTraining ? 0.5f : 2.f));
 						m_EventScene.Dispose();
 						m_IsEventSceneActive = false;
-						Pad->SetGuideUpdate();
+						KeyGuideParts->SetGuideFlip();
 						if (!m_isTraining) {
 							m_GameStartTimer = 2.f;
 							m_IsGameStart = false;
@@ -481,7 +483,7 @@ namespace FPS_n2 {
 											SE->Get(static_cast<int>(SoundEnum::Audience_Near)).StopAll(0);
 											SE->Get(static_cast<int>(SoundEnum::Audience_Good)).StopAll(0);
 											this->m_IsResult = true;
-											Pad->SetGuideUpdate();
+											KeyGuideParts->SetGuideFlip();
 											ButtonParts->Dispose();
 											ButtonParts->ResetSel();
 											ButtonParts->AddIconButton(
@@ -643,17 +645,17 @@ namespace FPS_n2 {
 					if (m_IsPlayable) {
 						MyInput.ResetAllInput();
 						MyInput.SetInputStart(Pad->GetLS_Y(), Pad->GetLS_X());
-						MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
-						MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
-						MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
-						MyInput.SetInputPADS(PADS::MOVE_D, Pad->GetKey(PADS::MOVE_D).press());
+						MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetPadsInfo(PADS::MOVE_W).GetKey().press());
+						MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetPadsInfo(PADS::MOVE_S).GetKey().press());
+						MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetPadsInfo(PADS::MOVE_A).GetKey().press());
+						MyInput.SetInputPADS(PADS::MOVE_D, Pad->GetPadsInfo(PADS::MOVE_D).GetKey().press());
 
-						MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press());
-						MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press());
-						MyInput.SetInputPADS(PADS::ULT, Pad->GetKey(PADS::ULT).press());
+						MyInput.SetInputPADS(PADS::SHOT, Pad->GetPadsInfo(PADS::SHOT).GetKey().press());
+						MyInput.SetInputPADS(PADS::AIM, Pad->GetPadsInfo(PADS::AIM).GetKey().press());
+						MyInput.SetInputPADS(PADS::ULT, Pad->GetPadsInfo(PADS::ULT).GetKey().press());
 
-						MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
-						MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
+						MyInput.SetInputPADS(PADS::WALK, Pad->GetPadsInfo(PADS::WALK).GetKey().press());
+						MyInput.SetInputPADS(PADS::JUMP, Pad->GetPadsInfo(PADS::JUMP).GetKey().press());
 						{
 							Vector2DX MSVec = Chara->GetBambooVec();
 							MSVec.Set(
@@ -809,25 +811,25 @@ namespace FPS_n2 {
 					CamVec += CameraShake::Instance()->GetCamShake();
 					CamPos += CameraShake::Instance()->GetCamShake() * 2.f;
 #ifdef DEBUG
-					if (CheckHitKeyWithCheck(KEY_INPUT_F1) != 0) {
+					if (CheckHitKey(KEY_INPUT_F1) != 0) {
 						DBG_CamSel = -1;
 					}
-					if (CheckHitKeyWithCheck(KEY_INPUT_F2) != 0) {
+					if (CheckHitKey(KEY_INPUT_F2) != 0) {
 						DBG_CamSel = 0;
 					}
-					if (CheckHitKeyWithCheck(KEY_INPUT_F3) != 0) {
+					if (CheckHitKey(KEY_INPUT_F3) != 0) {
 						DBG_CamSel = 1;
 					}
-					if (CheckHitKeyWithCheck(KEY_INPUT_F4) != 0) {
+					if (CheckHitKey(KEY_INPUT_F4) != 0) {
 						DBG_CamSel = 2;
 					}
-					if (CheckHitKeyWithCheck(KEY_INPUT_F5) != 0) {
+					if (CheckHitKey(KEY_INPUT_F5) != 0) {
 						DBG_CamSel = 3;
 					}
-					if (CheckHitKeyWithCheck(KEY_INPUT_F6) != 0) {
+					if (CheckHitKey(KEY_INPUT_F6) != 0) {
 						DBG_CamSel = 4;
 					}
-					if (CheckHitKeyWithCheck(KEY_INPUT_F7) != 0) {
+					if (CheckHitKey(KEY_INPUT_F7) != 0) {
 						DBG_CamSel = 5;
 					}
 					switch (DBG_CamSel) {
@@ -1085,7 +1087,6 @@ namespace FPS_n2 {
 		//UI•\Ž¦
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
 			auto* WindowParts = WindowSystem::DrawControl::Instance();
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* HitMarkParts = HitMark::Instance();
@@ -1098,20 +1099,20 @@ namespace FPS_n2 {
 
 			if (m_IsResult) {
 				WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Result,
-					WindowSizeParts->GetUIY(0), WindowSizeParts->GetUIY(0), WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1080), false);
+					(0), (0), (1920), (1080), false);
 
-				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(32),
-					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, WindowSizeParts->GetUIY(160), WindowSizeParts->GetUIY(256), Yellow, Black, "Result");
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
+					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, (160), (256), Yellow, Black, "Result");
 
 				bool IsWin = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore() > PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
 				bool IsDraw = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore() == PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
 
-				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(48),
-					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, WindowSizeParts->GetUIY(300), WindowSizeParts->GetUIY(384),
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (48),
+					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, (300), (384),
 					IsDraw ? Gray25 : (IsWin ? Red : White), Black,
 					IsDraw ? "ˆø‚«•ª‚¯" : (IsWin ? "Ÿ—˜" : "”s‘Þ"));
-				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(24),
-					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, WindowSizeParts->GetUIY(300), WindowSizeParts->GetUIY(386), White, Black, "%d : %d",
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
+					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, (300), (386), White, Black, "%d : %d",
 					PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore(), PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
 
 				ButtonParts->Draw();
@@ -1130,8 +1131,8 @@ namespace FPS_n2 {
 				if (!SceneParts->IsPause()) {
 					this->m_UIclass.Draw();
 					if (!m_isTraining) {
-						int xp1 = WindowSizeParts->GetUIY(1920 / 2);
-						int yp1 = WindowSizeParts->GetUIY(240);
+						int xp1 = (1920 / 2);
+						int yp1 = (240);
 
 						if ((m_GameStartAlpha * 255.f) > 1.f) {
 							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameStartAlpha), 0, 255));
@@ -1162,8 +1163,8 @@ namespace FPS_n2 {
 						if (m_IsPlayable) {
 							if (0 <= m_DivideTimer && m_DivideTimer < 3.f) {
 								if ((int)(m_DivideTimer * 100) % 30 < 15) {
-									WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(24),
-										FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, WindowSizeParts->GetUIY(32), WindowSizeParts->GetUIY(384),
+									WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
+										FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, (32), (384),
 										Yellow, Black,
 										"êŠO‚Ü‚Å‚ ‚Æ%3.1f•b", m_DivideTimer);
 								}
@@ -1175,7 +1176,6 @@ namespace FPS_n2 {
 			}
 		}
 		void			MainGameScene::DrawUI_In_Sub(void) const noexcept {
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			if (m_IsResult) {
 				return;
@@ -1190,14 +1190,14 @@ namespace FPS_n2 {
 				//NetBrowser->Draw();
 				if (m_NetWorkController) {
 					if (m_NetWorkController->GetPing() >= 0.f) {
-						WindowSystem::SetMsg(WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
+						WindowSystem::SetMsg((1920), (32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
 					}
 					else {
 						if (m_NetWorkController->GetClient()) {
-							WindowSystem::SetMsg(WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, Red, Black, "Lost Connection");
+							WindowSystem::SetMsg((1920), (32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, Red, Black, "Lost Connection");
 						}
 						else {
-							WindowSystem::SetMsg(WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
+							WindowSystem::SetMsg((1920), (32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
 						}
 					}
 				}

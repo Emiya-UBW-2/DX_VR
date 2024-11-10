@@ -250,47 +250,47 @@ namespace FPS_n2 {
 							auto* DXLib_refParts = DXLib_ref::Instance();
 							Ret.Set(Vector3DX::zero(), DBG_AnimRot, DBG_AnimPos);
 							//
-							if (CheckHitKeyWithCheck(KEY_INPUT_RCONTROL) != 0) {
-								if (CheckHitKeyWithCheck(KEY_INPUT_J) != 0) {
+							if (CheckHitKey(KEY_INPUT_RCONTROL) != 0) {
+								if (CheckHitKey(KEY_INPUT_J) != 0) {
 									DBG_AnimRot.x += 5.f * DXLib_refParts->GetDeltaTime();
 								}
-								if (CheckHitKeyWithCheck(KEY_INPUT_L) != 0) {
+								if (CheckHitKey(KEY_INPUT_L) != 0) {
 									DBG_AnimRot.x -= 5.f * DXLib_refParts->GetDeltaTime();
 								}
 								//
-								if (CheckHitKeyWithCheck(KEY_INPUT_I) != 0) {
+								if (CheckHitKey(KEY_INPUT_I) != 0) {
 									DBG_AnimRot.y += 5.f * DXLib_refParts->GetDeltaTime();
 								}
-								if (CheckHitKeyWithCheck(KEY_INPUT_K) != 0) {
+								if (CheckHitKey(KEY_INPUT_K) != 0) {
 									DBG_AnimRot.y -= 5.f * DXLib_refParts->GetDeltaTime();
 								}
 								//
-								if (CheckHitKeyWithCheck(KEY_INPUT_U) != 0) {
+								if (CheckHitKey(KEY_INPUT_U) != 0) {
 									DBG_AnimRot.z += 5.f * DXLib_refParts->GetDeltaTime();
 								}
-								if (CheckHitKeyWithCheck(KEY_INPUT_O) != 0) {
+								if (CheckHitKey(KEY_INPUT_O) != 0) {
 									DBG_AnimRot.z -= 5.f * DXLib_refParts->GetDeltaTime();
 								}
 							}
 							else {
-								if (CheckHitKeyWithCheck(KEY_INPUT_J) != 0) {
+								if (CheckHitKey(KEY_INPUT_J) != 0) {
 									DBG_AnimPos.x += 0.01f * DXLib_refParts->GetDeltaTime();
 								}
-								if (CheckHitKeyWithCheck(KEY_INPUT_L) != 0) {
+								if (CheckHitKey(KEY_INPUT_L) != 0) {
 									DBG_AnimPos.x -= 0.01f * DXLib_refParts->GetDeltaTime();
 								}
 								//
-								if (CheckHitKeyWithCheck(KEY_INPUT_I) != 0) {
+								if (CheckHitKey(KEY_INPUT_I) != 0) {
 									DBG_AnimPos.y += 0.01f * DXLib_refParts->GetDeltaTime();
 								}
-								if (CheckHitKeyWithCheck(KEY_INPUT_K) != 0) {
+								if (CheckHitKey(KEY_INPUT_K) != 0) {
 									DBG_AnimPos.y -= 0.01f * DXLib_refParts->GetDeltaTime();
 								}
 								//
-								if (CheckHitKeyWithCheck(KEY_INPUT_U) != 0) {
+								if (CheckHitKey(KEY_INPUT_U) != 0) {
 									DBG_AnimPos.z += 0.01f * DXLib_refParts->GetDeltaTime();
 								}
-								if (CheckHitKeyWithCheck(KEY_INPUT_O) != 0) {
+								if (CheckHitKey(KEY_INPUT_O) != 0) {
 									DBG_AnimPos.z -= 0.01f * DXLib_refParts->GetDeltaTime();
 								}
 							}

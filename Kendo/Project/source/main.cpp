@@ -14,6 +14,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//SetEnableXAudioFlag(TRUE);//Xaudio(ロードが長いとロストするので必要に応じて)
 	DXLib_ref::Create();
 	//使用するボタンの指定
+	//*
 	auto* Pad = PadControl::Instance();
 	Pad->SetIsUseButton(PADS::MOVE_W, true);
 	Pad->SetIsUseButton(PADS::MOVE_A, true);
@@ -41,6 +42,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(PADS::SQUAT, false);
 	Pad->SetIsUseButton(PADS::PRONE, false);
 	Pad->SetIsUseButton(PADS::CHECK, false);
+	Pad->SetIsUseButton(PADS::Escape, true);
+	//*/
 	//
 	auto* DXLib_refParts = DXLib_ref::Instance();
 	if (DXLib_refParts->FirstBootSetting()) { return 0; }

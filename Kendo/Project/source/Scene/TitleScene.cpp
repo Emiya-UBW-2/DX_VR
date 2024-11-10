@@ -44,8 +44,8 @@ namespace FPS_n2 {
 		}
 		bool			TitleScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
+			auto* KeyGuideParts = KeyGuide::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
@@ -56,16 +56,17 @@ namespace FPS_n2 {
 				return true;
 			}
 			Pad->SetMouseMoveEnable(false);
-			Pad->ChangeGuide(
+			KeyGuideParts->ChangeGuide(
 				[]() {
-					auto* KeyGuide = PadControl::Instance();
+					auto* Pad = PadControl::Instance();
+					auto* KeyGuideParts = KeyGuide::Instance();
 					auto* LocalizeParts = LocalizePool::Instance();
-					KeyGuide->AddGuide(PADS::MOVE_W, "");
-					KeyGuide->AddGuide(PADS::MOVE_S, "");
-					KeyGuide->AddGuide(PADS::MOVE_A, "");
-					KeyGuide->AddGuide(PADS::MOVE_D, "");
-					KeyGuide->AddGuide(PADS::MOVE_STICK, LocalizeParts->Get(9993));
-					KeyGuide->AddGuide(PADS::INTERACT, LocalizeParts->Get(9992));
+					KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
+					KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_S).GetAssign(), Pad->GetControlType()), "");
+					KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_A).GetAssign(), Pad->GetControlType()), "");
+					KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_D).GetAssign(), Pad->GetControlType()), "");
+					KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_STICK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9993));
+					KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9992));
 				}
 			);
 			if (!PopUpParts->IsActivePop() && (this->m_GameFadeIn == 0.f) && (this->m_GameStart == 0.f)) {
@@ -83,7 +84,7 @@ namespace FPS_n2 {
 						OptionWindowParts->SetActive();
 						break;
 					case 3:
-						PopUpParts->Add(LocalizeParts->Get(120), WindowSizeParts->GetUIY(720), WindowSizeParts->GetUIY(840),
+						PopUpParts->Add(LocalizeParts->Get(120), (720), (840),
 							[&](int xmin, int ymin, int xmax, int, bool) {
 								this->m_CreditControl->Draw(xmin, ymin, xmax);
 							},
@@ -129,40 +130,38 @@ namespace FPS_n2 {
 		}
 		// 
 		void			TitleScene::MainDraw_Sub(void) const noexcept {
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			// ”wŒi
-			WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1080), Gray65, TRUE);
+			WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, (1920), (1080), Gray65, TRUE);
 			// •`‰æ
 		}
 		void			TitleScene::DrawUI_Base_Sub(void) const noexcept {
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			// 
 			WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, 
-				&this->m_TitleImage, WindowSizeParts->GetUIY(64), WindowSizeParts->GetUIY(64), WindowSizeParts->GetUIY(64 + 1024), WindowSizeParts->GetUIY(64 + 256), true);
+				&this->m_TitleImage, (64), (64), (64 + 1024), (64 + 256), true);
 			// 
-			WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(18), 
+			WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18), 
 				FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
-				WindowSizeParts->GetUIY(64), WindowSizeParts->GetUIY(64 + 256), White, Black, "Ver 1.0.0");
+				(64), (64 + 256), White, Black, "Ver 1.0.0");
 			// 
 			ButtonParts->Draw();
 			// 
 			if ((ButtonParts->GetSelect() != InvalidID) && !PopUpParts->IsActivePop()) {
-				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(18), 
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18), 
 					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
-					WindowSizeParts->GetUIY(32), WindowSizeParts->GetUIY(1080 - 32 - 32), White, Black, LocalizeParts->Get(410 + ButtonParts->GetSelect()));
+					(32), (1080 - 32 - 32), White, Black, LocalizeParts->Get(410 + ButtonParts->GetSelect()));
 			}
 			// 
 			{
 				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameFadeIn, 0.f, 1.f)), 0, 255));
-				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1080), Black, TRUE);
+				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, (1920), (1080), Black, TRUE);
 
 				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameStart, 0.f, 1.f)), 0, 255));
-				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1080), White, TRUE);
+				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, (1920), (1080), White, TRUE);
 
 				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}

@@ -775,10 +775,6 @@ namespace FPS_n2 {
 			else {
 				this->m_CharaSound = -1;
 			}
-			//‚µ‚á‚ª‚İ‰¹
-			if (CharaMove::GetSquatSwitch()) {
-				SE->Get(static_cast<int>(SoundEnum::StandupFoot)).Play_3D(0, GetFramePosition(CharaFrame::Upper), Scale3DRate * 3.f);
-			}
 			//S”‰¹
 #ifdef DEBUG
 			//printfDx("HEART : %f\n", m_HeartUp);

@@ -161,7 +161,6 @@ namespace FPS_n2 {
 			Vector3DX											m_VecTotal;
 			std::array<float, 4>								m_Vec{};
 			InputControl										m_Input;
-			switchs												m_Squat;
 			Vector3DX											m_rad_Buf;
 			float												m_ZRad{};
 			float												m_yrad_Upper{ 0.f }, m_yrad_Bottom{ 0.f };
@@ -195,10 +194,8 @@ namespace FPS_n2 {
 			auto		GetRun(void) const noexcept { return this->m_IsRunning || m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking; }
 			auto		GetIsFrontAttacking(void) const noexcept { return this->m_IsFrontAttacking; }
 			auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }
-			auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
 			auto		GetEyeMatrix(void) const noexcept { return this->m_EyeMatrix * this->m_BaseMatrix; }
 		public://セッター
-			void			SetIsSquat(bool value) noexcept { this->m_Squat.Set(value); }
 			void			SetIsRunning(bool value) noexcept { this->m_IsRunning = value; }
 			void			SetIsFrontAttacking(bool value) noexcept { this->m_IsFrontAttacking = value; }
 			void			SetIsDouAttacking(bool value) noexcept { this->m_IsDouAttacking = value; }
@@ -218,9 +215,6 @@ namespace FPS_n2 {
 				if (this->m_Input.GetPADSPress(PADS::WALK)) {
 					return 0.15f * this->m_SpeedMul;
 				}
-				else if (GetIsSquat()) {
-					return 0.45f * this->m_SpeedMul;
-				}
 				else if (m_IsRunning) {
 					return 0.975f;
 				}
@@ -239,9 +233,8 @@ namespace FPS_n2 {
 				}
 				return vecBuf;
 			}
-			auto		GetSquatSwitch(void) const noexcept { return this->m_Squat.trigger(); }
-			auto		GetBottomStandAnimSel(void) const noexcept { return GetIsSquat() ? CharaObjAnimeID::Bottom_Squat : CharaObjAnimeID::Bottom_Stand; }
-			auto		GetBottomWalkAnimSel(void) const noexcept { return GetIsSquat() ? CharaObjAnimeID::Bottom_Squat_Walk : CharaObjAnimeID::Bottom_Stand_Walk; }
+			auto		GetBottomStandAnimSel(void) const noexcept { return CharaObjAnimeID::Bottom_Stand; }
+			auto		GetBottomWalkAnimSel(void) const noexcept { return CharaObjAnimeID::Bottom_Stand_Walk; }
 			auto		GetVecFront(void) const noexcept { return 1.15f * this->m_Vec[0] * std::clamp(GetSpeedPer() / 0.45f, 0.5f, 1.f); }
 			auto		GetVecRear(void) const noexcept { return 1.15f * this->m_Vec[2] * std::clamp(GetSpeedPer() / 0.45f, 0.5f, 1.f); }
 			auto		GetVecLeft(void) const noexcept { return 1.15f * this->m_Vec[1] * std::clamp(GetSpeedPer() / 0.45f, 0.5f, 1.f); }
@@ -265,7 +258,6 @@ namespace FPS_n2 {
 				this->m_rad_Buf.x = (pxRad);
 				this->m_rad_Buf.y = (pyRad);
 
-				SetIsSquat(false);
 				this->m_yrad_Upper = this->m_rad_Buf.y;
 				this->m_yrad_Bottom = this->m_rad_Buf.y;
 				this->m_PrevRadX = this->m_rad_Buf.x;
@@ -280,8 +272,6 @@ namespace FPS_n2 {
 			void		InputKey(const InputControl& pInput) noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				this->m_Input = pInput;
-				//入力
-				this->m_Squat.Execute(false);
 				//回転
 				{
 					this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + this->m_Input.GetAddxRad(), deg2rad(-12.f), deg2rad(12.f));
@@ -372,7 +362,7 @@ namespace FPS_n2 {
 				if (wkey && !skey) { this->m_BottomAnimSelect = m_IsRunning ? CharaObjAnimeID::Bottom_Stand_Run : GetBottomWalkAnimSel(); }
 				if (m_IsFrontAttacking || m_IsDouAttacking || m_IsBackAttacking) { this->m_BottomAnimSelect = CharaObjAnimeID::Bottom_Stand_Attack; }
 				//下半身
-				Easing(&CharaMove::SetCharaAnimeBufID(CharaObjAnimeID::Bottom_Stand_Turn), (!GetIsSquat() && this->m_TurnBody) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
+				Easing(&CharaMove::SetCharaAnimeBufID(CharaObjAnimeID::Bottom_Stand_Turn), (this->m_TurnBody) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
 				for (int i = 0; i < static_cast<int>(CharaObjAnimeID::AnimeIDMax); ++i) {
 					if (
 						i == static_cast<int>(CharaObjAnimeID::Bottom_Stand) ||

@@ -84,68 +84,66 @@ namespace FPS_n2 {
 				}
 			public:
 				bool			GetInto(void) const noexcept {
-					auto* WindowSizeParts = WindowSizeControl::Instance();
-					int xp = WindowSizeParts->GetUIY(xp1);
-					int yp = WindowSizeParts->GetUIY(yp1);
+					int xp = (xp1);
+					int yp = (yp1);
 					switch (LMR) {
 					case FontHandle::FontXCenter::LEFT:
-						xp = WindowSizeParts->GetUIY(xp1);
+						xp = (xp1);
 						break;
 					case FontHandle::FontXCenter::MIDDLE:
-						xp = WindowSizeParts->GetUIY(xp1) - WindowSizeParts->GetUIY(xsize) / 2;
+						xp = (xp1) - (xsize) / 2;
 						break;
 					case FontHandle::FontXCenter::RIGHT:
-						xp = WindowSizeParts->GetUIY(xp1) - WindowSizeParts->GetUIY(xsize);
+						xp = (xp1) - (xsize);
 						break;
 					default:
 						break;
 					}
 					switch (TMB) {
 					case FontHandle::FontYCenter::TOP:
-						yp = WindowSizeParts->GetUIY(yp1);
+						yp = (yp1);
 						break;
 					case FontHandle::FontYCenter::MIDDLE:
-						yp = WindowSizeParts->GetUIY(yp1) - WindowSizeParts->GetUIY(ysize) / 2;
+						yp = (yp1) - (ysize) / 2;
 						break;
 					case FontHandle::FontYCenter::BOTTOM:
-						yp = WindowSizeParts->GetUIY(yp1) - WindowSizeParts->GetUIY(ysize);
+						yp = (yp1) - (ysize);
 						break;
 					default:
 						break;
 					}
-					return IntoMouse(xp, yp, xp + WindowSizeParts->GetUIY(xsize), yp + WindowSizeParts->GetUIY(ysize));
+					return IntoMouse(xp, yp, xp + (xsize), yp + (ysize));
 				}
 				void			Draw(void) noexcept {
-					auto* WindowSizeParts = WindowSizeControl::Instance();
 					auto* WindowParts = WindowSystem::DrawControl::Instance();
 					switch (this->m_ButtonMode) {
 					case ButtonMode::String:
 					{
 						if (SelYadd > 0.f) {
-							int xp = WindowSizeParts->GetUIY(xp1);
-							int yp = WindowSizeParts->GetUIY(yp1);
+							int xp = (xp1);
+							int yp = (yp1);
 							switch (LMR) {
 							case FontHandle::FontXCenter::LEFT:
-								xp = WindowSizeParts->GetUIY(xp1);
+								xp = (xp1);
 								break;
 							case FontHandle::FontXCenter::MIDDLE:
-								xp = WindowSizeParts->GetUIY(xp1) - WindowSizeParts->GetUIY(xsize) / 2;
+								xp = (xp1) - (xsize) / 2;
 								break;
 							case FontHandle::FontXCenter::RIGHT:
-								xp = WindowSizeParts->GetUIY(xp1) - WindowSizeParts->GetUIY(xsize);
+								xp = (xp1) - (xsize);
 								break;
 							default:
 								break;
 							}
 							switch (TMB) {
 							case FontHandle::FontYCenter::TOP:
-								yp = WindowSizeParts->GetUIY(yp1);
+								yp = (yp1);
 								break;
 							case FontHandle::FontYCenter::MIDDLE:
-								yp = WindowSizeParts->GetUIY(yp1) - WindowSizeParts->GetUIY(ysize) / 2;
+								yp = (yp1) - (ysize) / 2;
 								break;
 							case FontHandle::FontYCenter::BOTTOM:
-								yp = WindowSizeParts->GetUIY(yp1) - WindowSizeParts->GetUIY(ysize);
+								yp = (yp1) - (ysize);
 								break;
 							default:
 								break;
@@ -156,13 +154,13 @@ namespace FPS_n2 {
 							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(128.f * per), 0, 255));
 							WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
 								this->m_SelectBackImage,
-								xp + WindowSizeParts->GetUIY(xsize) / 2 - static_cast<int>(static_cast<float>(WindowSizeParts->GetUIY(xsize) / 2 + WindowSizeParts->GetUIY(300)) * per2), yp + WindowSizeParts->GetUIY(ysize) - WindowSizeParts->GetUIY(12) - static_cast<int>(static_cast<float>(WindowSizeParts->GetUIY(ysize) / 6) * per),
-								xp + WindowSizeParts->GetUIY(xsize) / 2 + static_cast<int>(static_cast<float>(WindowSizeParts->GetUIY(xsize) / 2 + WindowSizeParts->GetUIY(300)) * per2), yp + WindowSizeParts->GetUIY(ysize) - WindowSizeParts->GetUIY(12) + static_cast<int>(static_cast<float>(WindowSizeParts->GetUIY(ysize) / 6) * per),
+								xp + (xsize) / 2 - static_cast<int>(static_cast<float>((xsize) / 2 + (300)) * per2), yp + (ysize) - (12) - static_cast<int>(static_cast<float>((ysize) / 6) * per),
+								xp + (xsize) / 2 + static_cast<int>(static_cast<float>((xsize) / 2 + (300)) * per2), yp + (ysize) - (12) + static_cast<int>(static_cast<float>((ysize) / 6) * per),
 								true);
 							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						}
 						unsigned int Color = Black;
-						if (WindowSizeParts->GetUIY(ysize) > WindowSizeParts->GetUIY(50)) {
+						if ((ysize) > (50)) {
 							switch (this->m_ButtonStatus) {
 							case ButtonStatus::None:
 								Color = Gray75;
@@ -201,8 +199,8 @@ namespace FPS_n2 {
 								break;
 							}
 						}
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(ysize),
-							LMR, TMB, WindowSizeParts->GetUIY(xp1), WindowSizeParts->GetUIY(yp1 + static_cast<int>(SelYadd)), Color, Black, this->m_String);
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (ysize),
+							LMR, TMB, (xp1), (yp1 + static_cast<int>(SelYadd)), Color, Black, this->m_String);
 					}
 					break;
 					case ButtonMode::Icon:
@@ -213,8 +211,8 @@ namespace FPS_n2 {
 							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(128.f * per1), 0, 255));
 							WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
 								this->m_SelectBackImage,
-								WindowSizeParts->GetUIY(xp1) - static_cast<int>(static_cast<float>(WindowSizeParts->GetUIY(xsize)) * per2), WindowSizeParts->GetUIY(yp1) - static_cast<int>(static_cast<float>(WindowSizeParts->GetUIY(ysize)) * per2),
-								WindowSizeParts->GetUIY(xp1) + static_cast<int>(static_cast<float>(WindowSizeParts->GetUIY(xsize)) * per2), WindowSizeParts->GetUIY(yp1) + static_cast<int>(static_cast<float>(WindowSizeParts->GetUIY(ysize)) * per2),
+								(xp1) - static_cast<int>(static_cast<float>((xsize)) * per2), (yp1) - static_cast<int>(static_cast<float>((ysize)) * per2),
+								(xp1) + static_cast<int>(static_cast<float>((xsize)) * per2), (yp1) + static_cast<int>(static_cast<float>((ysize)) * per2),
 								true);
 							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						}
@@ -233,7 +231,7 @@ namespace FPS_n2 {
 						}
 						WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
 							&this->m_Icon,
-							WindowSizeParts->GetUIY(xp1), WindowSizeParts->GetUIY(yp1), static_cast<float>(WindowSizeParts->GetUIY(100)) / 100.f * (1.f + SelYadd / 50.f), 0.f, true);
+							(xp1), (yp1), static_cast<float>((100)) / 100.f * (1.f + SelYadd / 50.f), 0.f, true);
 						WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 					}
 					break;

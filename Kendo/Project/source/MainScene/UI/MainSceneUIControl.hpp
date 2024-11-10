@@ -81,7 +81,6 @@ namespace FPS_n2 {
 					const GraphHandle* CircleObj, float deg, int Add) noexcept {
 					//return;
 					auto* WindowParts = WindowSystem::DrawControl::Instance();
-					auto* WindowSizeParts = WindowSizeControl::Instance();
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, (float)this->m_Now / (float)this->m_Max);
 					COLOR_U8 ColorAddSub = (this->m_Buffer > this->m_Now) ? ColorSub : ColorAdd;
 					float per = std::clamp((float)this->m_Now / this->m_Max, 0.f, 1.f);
@@ -89,22 +88,22 @@ namespace FPS_n2 {
 					WindowParts->SetAdd(WindowSystem::DrawLayer::Normal, Add);
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorBase.r, ColorBase.g, ColorBase.b);
 					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
-						xp1 + WindowSizeParts->GetUIY(256), yp1,
+						xp1 + (256), yp1,
 						50.0f + ((50.0f - 15.0f * 2.0f) * 1.0f) + 15.0f + deg,
 						50.0f + 15.0f + deg,
-						((float)(WindowSizeParts->GetUIY(1080)) / 1080.0f));
+						((float)((1080)) / 1080.0f));
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
 					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
-						xp1 + WindowSizeParts->GetUIY(256), yp1,
+						xp1 + (256), yp1,
 						50.0f + ((50.0f - 15.0f * 2.0f) * std::max(per, perbuf)) + 15.0f + deg,
 						50.0f + ((50.0f - 15.0f * 2.0f) * std::min(per, perbuf)) + 15.0f + deg,
-						((float)(WindowSizeParts->GetUIY(1080)) / 1080.0f));
+						((float)((1080)) / 1080.0f));
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, Color.r, Color.g, Color.b);
 					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
-						xp1 + WindowSizeParts->GetUIY(256), yp1,
+						xp1 + (256), yp1,
 						50.0f + ((50.0f - 15.0f * 2.0f) * std::min(per, perbuf)) + 15.0f + deg,
 						50.0f + 15.0f + deg,
-						((float)(WindowSizeParts->GetUIY(1080)) / 1080.0f));
+						((float)((1080)) / 1080.0f));
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
@@ -112,7 +111,6 @@ namespace FPS_n2 {
 					COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorFull, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
 					const GraphHandle* CircleObj, float deg, int Add) noexcept {
 					//return;
-					auto* WindowSizeParts = WindowSizeControl::Instance();
 					auto* WindowParts = WindowSystem::DrawControl::Instance();
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, (float)this->m_Now / (float)this->m_Max);
 					COLOR_U8 ColorAddSub = (this->m_Buffer > this->m_Now) ? ColorSub : ColorAdd;
@@ -123,25 +121,25 @@ namespace FPS_n2 {
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorBase.r, ColorBase.g, ColorBase.b);
 
 					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
-						xp1 - WindowSizeParts->GetUIY(256), yp1,
+						xp1 - (256), yp1,
 						(50.0f - 15.0f * 2.0f) + 15.0f + deg,
 						((50.0f - 15.0f * 2.0f) * (1.0f - 1.0f)) + 15.0f + deg,
-						((float)(WindowSizeParts->GetUIY(1080)) / 1080.0f));
+						((float)((1080)) / 1080.0f));
 
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
 
 					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
-						xp1 - WindowSizeParts->GetUIY(256), yp1,
+						xp1 - (256), yp1,
 						((50.0f - 15.0f * 2.0f) * (1.0f - std::min(per, perbuf))) + 15.0f + deg,
 						((50.0f - 15.0f * 2.0f) * (1.0f - std::max(per, perbuf))) + 15.0f + deg,
-						((float)(WindowSizeParts->GetUIY(1080)) / 1080.0f));
+						((float)((1080)) / 1080.0f));
 
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, Color.r, Color.g, Color.b);
 					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
-						xp1 - WindowSizeParts->GetUIY(256), yp1,
+						xp1 - (256), yp1,
 						(50.0f - 15.0f * 2.0f) + 15.0f + deg,
 						((50.0f - 15.0f * 2.0f) * (1.0f - std::min(per, perbuf))) + 15.0f + deg,
-						((float)(WindowSizeParts->GetUIY(1080)) / 1080.0f));
+						((float)((1080)) / 1080.0f));
 
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
@@ -287,7 +285,6 @@ namespace FPS_n2 {
 			void			Set(void) noexcept {
 			}
 			void			Draw(void) const noexcept {
-				auto* WindowSizeParts = WindowSizeControl::Instance();
 				auto* WindowParts = WindowSystem::DrawControl::Instance();
 				//気合
 				{
@@ -296,10 +293,10 @@ namespace FPS_n2 {
 						255, 150, 155);
 					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255 * (m_GaugeParam[0].GetGaugeMax() - m_GaugeParam[0].GetGaugeBuff()) / m_GaugeParam[0].GetGaugeMax());
 					WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Kiai,
-						WindowSizeParts->GetUIXMax() / 2 - static_cast<int>(static_cast<float>(WindowSizeParts->GetUIXMax() / 2) * radius),
-						WindowSizeParts->GetUIYMax() / 2 - static_cast<int>(static_cast<float>(WindowSizeParts->GetUIYMax() / 2) * radius),
-						WindowSizeParts->GetUIXMax() / 2 + static_cast<int>(static_cast<float>(WindowSizeParts->GetUIXMax() / 2) * radius),
-						WindowSizeParts->GetUIYMax() / 2 + static_cast<int>(static_cast<float>(WindowSizeParts->GetUIYMax() / 2) * radius),
+						BaseScreenWidth / 2 - static_cast<int>(static_cast<float>(BaseScreenWidth / 2) * radius),
+						BaseScreenHeight / 2 - static_cast<int>(static_cast<float>(BaseScreenHeight / 2) * radius),
+						BaseScreenWidth / 2 + static_cast<int>(static_cast<float>(BaseScreenWidth / 2) * radius),
+						BaseScreenHeight / 2 + static_cast<int>(static_cast<float>(BaseScreenHeight / 2) * radius),
 						true);
 					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
@@ -308,76 +305,76 @@ namespace FPS_n2 {
 				int xp1, yp1;
 				//タイム
 				{
-					xp1 = WindowSizeParts->GetUIY(30);
-					yp1 = WindowSizeParts->GetUIY(static_cast<int>(Lerp(10.0f, -50.f, std::clamp(floatParam[1] - 0.5f, 0.f, 1.f))));
+					xp1 = (30);
+					yp1 = (static_cast<int>(Lerp(10.0f, -50.f, std::clamp(floatParam[1] - 0.5f, 0.f, 1.f))));
 					float per = std::cos(DX_PI_F * 10.f * floatParam[1]);
 					if ((per * 255.f) > 1.f) {
 						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(32),
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, (floatParam[0] < 60.f) ? Red : Yellow, Black, "TIME");
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(32),
-							FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + WindowSizeParts->GetUIY(300), yp1, (floatParam[0] < 60.f) ? Red : Yellow, Black, "%d:%05.2f",
+						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
+							FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + (300), yp1, (floatParam[0] < 60.f) ? Red : Yellow, Black, "%d:%05.2f",
 							static_cast<int>(floatParam[0] / 60.f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
 						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
 				}
 				//スコア
 				{
-					xp1 = WindowSizeParts->GetUIY(1920 / 2);
-					yp1 = WindowSizeParts->GetUIY(static_cast<int>(Lerp(28.0f, -100.f, std::clamp(floatParam[1] - 0.5f, 0.f, 1.f))));
+					xp1 = (1920 / 2);
+					yp1 = (static_cast<int>(Lerp(28.0f, -100.f, std::clamp(floatParam[1] - 0.5f, 0.f, 1.f))));
 
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
 						92, 0, 0);
 					WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Mine,
-						xp1 - WindowSizeParts->GetUIY(10) - WindowSizeParts->GetUIY(40) - WindowSizeParts->GetUIY(36) + WindowSizeParts->GetUIY(1),
-						yp1 - WindowSizeParts->GetUIY(10) + WindowSizeParts->GetUIY(1),
-						xp1 - WindowSizeParts->GetUIY(10) - WindowSizeParts->GetUIY(40) + WindowSizeParts->GetUIY(1),
-						yp1 - WindowSizeParts->GetUIY(10) + WindowSizeParts->GetUIY(36) + WindowSizeParts->GetUIY(1),
+						xp1 - (10) - (40) - (36) + (1),
+						yp1 - (10) + (1),
+						xp1 - (10) - (40) + (1),
+						yp1 - (10) + (36) + (1),
 						true);
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
 						192, 0, 0);
 					WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Mine,
-						xp1 - WindowSizeParts->GetUIY(10) - WindowSizeParts->GetUIY(40) - WindowSizeParts->GetUIY(36),
-						yp1 - WindowSizeParts->GetUIY(10),
-						xp1 - WindowSizeParts->GetUIY(10) - WindowSizeParts->GetUIY(40),
-						yp1 - WindowSizeParts->GetUIY(10) + WindowSizeParts->GetUIY(36),
+						xp1 - (10) - (40) - (36),
+						yp1 - (10),
+						xp1 - (10) - (40),
+						yp1 - (10) + (36),
 						true);
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
 						255, 255, 255);
 					
 
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
-						xp1 - WindowSizeParts->GetUIY(10) - WindowSizeParts->GetUIY(40), yp1 + WindowSizeParts->GetUIY(20),
-						xp1 + WindowSizeParts->GetUIY(10) + WindowSizeParts->GetUIY(40), yp1 + WindowSizeParts->GetUIY(24), Black, true);
+						xp1 - (10) - (40), yp1 + (20),
+						xp1 + (10) + (40), yp1 + (24), Black, true);
 
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
-						xp1 - WindowSizeParts->GetUIY(10) - WindowSizeParts->GetUIY(40 - 20 * intParam[1]), yp1 + WindowSizeParts->GetUIY(20),
-						xp1 - WindowSizeParts->GetUIY(10), yp1 + WindowSizeParts->GetUIY(24), Red, true);
-					int Y1add = WindowSizeParts->GetUIY(static_cast<int>(Lerp(0.f, -8.f, floatParam[3])));
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(32),
-						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1 - WindowSizeParts->GetUIY(20), yp1 + Y1add, Red, Black, "%d", intParam[0]);
+						xp1 - (10) - (40 - 20 * intParam[1]), yp1 + (20),
+						xp1 - (10), yp1 + (24), Red, true);
+					int Y1add = (static_cast<int>(Lerp(0.f, -8.f, floatParam[3])));
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
+						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1 - (20), yp1 + Y1add, Red, Black, "%d", intParam[0]);
 
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
-						xp1 - WindowSizeParts->GetUIY(10), yp1 + WindowSizeParts->GetUIY(20),
-						xp1 + WindowSizeParts->GetUIY(10), yp1 + WindowSizeParts->GetUIY(24), Gray75, true);
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(24),
+						xp1 - (10), yp1 + (20),
+						xp1 + (10), yp1 + (24), Gray75, true);
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Gray25, Black, ":");
 
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
-						xp1 + WindowSizeParts->GetUIY(10), yp1 + WindowSizeParts->GetUIY(20),
-						xp1 + WindowSizeParts->GetUIY(10) + WindowSizeParts->GetUIY(40 - 20 * intParam[0]), yp1 + WindowSizeParts->GetUIY(24), White, true);
-					int Y2add = WindowSizeParts->GetUIY(static_cast<int>(Lerp(0.f, -8.f, floatParam[4])));
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(32),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1 + WindowSizeParts->GetUIY(20), yp1 + Y2add, White, Black, "%d", intParam[1]);
+						xp1 + (10), yp1 + (20),
+						xp1 + (10) + (40 - 20 * intParam[0]), yp1 + (24), White, true);
+					int Y2add = (static_cast<int>(Lerp(0.f, -8.f, floatParam[4])));
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
+						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1 + (20), yp1 + Y2add, White, Black, "%d", intParam[1]);
 				}
 				//情報
 				{
 					//心拍数
-					xp1 = WindowSizeParts->GetUIY((24 + 300 + 24 + 32));
-					yp1 = WindowSizeParts->GetUIY(1080 - 80 - 28 * 1 + 6 / 2);
+					xp1 = ((24 + 300 + 24 + 32));
+					yp1 = (1080 - 80 - 28 * 1 + 6 / 2);
 					float per = Lerp(0.4f, 0.6f, floatParam[2]);
 					if ((per * 255.f) > 1.f) {
-						int radius = static_cast<int>(Lerp(static_cast<float>(WindowSizeParts->GetUIY(24)), static_cast<float>(WindowSizeParts->GetUIY(32)), floatParam[2]));
+						int radius = static_cast<int>(Lerp(static_cast<float>((24)), static_cast<float>((32)), floatParam[2]));
 						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
 						WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
 							255, 0, 0);
@@ -387,46 +384,46 @@ namespace FPS_n2 {
 							255, 255, 255);
 						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(24),
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
 
 					//気合
-					xp1 = WindowSizeParts->GetUIY(24 + 9 * 2);
-					yp1 = WindowSizeParts->GetUIY(1080 - 80 - 28 * 2);
+					xp1 = (24 + 9 * 2);
+					yp1 = (1080 - 80 - 28 * 2);
 
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(18),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - WindowSizeParts->GetUIY(2), White, Black, "気合");
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
+						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, "気合");
 					m_GaugeParam[0].DrawGauge(
-						xp1, yp1, xp1 + WindowSizeParts->GetUIY(300), yp1 + WindowSizeParts->GetUIY(6),
+						xp1, yp1, xp1 + (300), yp1 + (6),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
 					int KihakuPoints = static_cast<int>(Lerp(-30.f, 20.f, 1.f - (float)m_GaugeParam[0].GetGauge() / m_GaugeParam[0].GetGaugeMax()));
 					if (KihakuPoints > 0) {
 						WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
-							xp1, yp1, xp1 + WindowSizeParts->GetUIY(300), yp1 + WindowSizeParts->GetUIY(6), White, false);
+							xp1, yp1, xp1 + (300), yp1 + (6), White, false);
 					}
 
 					//スタミナ
-					xp1 = WindowSizeParts->GetUIY(24 + 9 * 1);
-					yp1 = WindowSizeParts->GetUIY(1080 - 80 - 28 * 1);
+					xp1 = (24 + 9 * 1);
+					yp1 = (1080 - 80 - 28 * 1);
 
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(18),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - WindowSizeParts->GetUIY(2), White, Black, "スタミナ");
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
+						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, "スタミナ");
 					m_GaugeParam[1].DrawGauge(
-						xp1, yp1, xp1 + WindowSizeParts->GetUIY(300), yp1 + WindowSizeParts->GetUIY(6),
+						xp1, yp1, xp1 + (300), yp1 + (6),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
 
 					//ガード
-					xp1 = WindowSizeParts->GetUIY(24 + 9 * 0);
-					yp1 = WindowSizeParts->GetUIY(1080 - 80 - 28 * 0);
+					xp1 = (24 + 9 * 0);
+					yp1 = (1080 - 80 - 28 * 0);
 
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, WindowSizeParts->GetUIY(18),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - WindowSizeParts->GetUIY(2), White, Black, "ガード");
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
+						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, "ガード");
 					m_GaugeParam[2].DrawGauge(
-						xp1, yp1, xp1 + WindowSizeParts->GetUIY(300), yp1 + WindowSizeParts->GetUIY(6),
+						xp1, yp1, xp1 + (300), yp1 + (6),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
