@@ -398,7 +398,7 @@ namespace FPS_n2 {
 			}
 		}
 		if (isforcus) {
-			*vec = *vec / (float)(Forcus.size());
+			*vec = *vec / static_cast<float>(Forcus.size());
 		}
 		return isforcus;
 	}
@@ -538,7 +538,7 @@ namespace FPS_n2 {
 			}
 		}
 		if (isforcus) {
-			*vec = *vec / (float)(Forcus.size());
+			*vec = *vec / static_cast<float>(Forcus.size());
 		}
 		return isforcus;
 	}
@@ -807,7 +807,7 @@ namespace FPS_n2 {
 		if (m_Func.find("LoadGraph") != std::string::npos) {
 			for (int i = 0, count = std::stoi(m_Args[1]); i < count; i++) {
 				m_GraphControl.Load(
-					(float)(std::stoi(m_Args[2])), (float)(std::stoi(m_Args[3])),
+					static_cast<float>(std::stoi(m_Args[2])), static_cast<float>(std::stoi(m_Args[3])),
 					std::stof(m_Args[4]), std::stof(m_Args[5]), std::stof(m_Args[6]),
 					m_Args[0]);
 			}
@@ -831,7 +831,7 @@ namespace FPS_n2 {
 		if (m_Func.find("SetCut") != std::string::npos) {
 			m_CutInfo.emplace_back(Cut_Info_First((LONGLONG)(1000000.f * std::stof(m_Args[0]))));
 			m_CutInfoUpdate.resize(m_CutInfoUpdate.size() + 1);
-			NowCut = (int)(m_CutInfo.size()) - 1;
+			NowCut = static_cast<int>(m_CutInfo.size()) - 1;
 		}
 		//Campos‚ÌŽw’è
 		else if (m_Func.find("SetCampos_Attach") != std::string::npos) {
@@ -955,7 +955,7 @@ namespace FPS_n2 {
 		}
 		//Œo‰ßŽžŠÔ‘ª’è
 		if (!SceneParts->IsPause()) {
-			m_NowTime += (LONGLONG)((float)deltatime);
+			m_NowTime += (LONGLONG)(static_cast<float>(deltatime));
 		}
 	}
 	void			EventScene::Dispose(void) noexcept {
@@ -1005,18 +1005,18 @@ namespace FPS_n2 {
 			m_TelopClass.Draw(m_NowTime);
 		}
 		if (Black_Buf != 0.f) {
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * Black_Buf));
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255.f * Black_Buf));
 			DrawBox(0, 0, WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1920), GetColor(0, 0, 0), TRUE);
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 		}
 		if (White_Buf != 0.f) {
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * White_Buf));
+			SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255.f * White_Buf));
 			DrawBox(0, 0, WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1920), GetColor(255, 255, 255), TRUE);
 			SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 		}
 		if (m_isSkip) {
 			if (Black_Skip != 0.f) {
-				SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * Black_Skip));
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255.f * Black_Skip));
 				DrawBox(0, 0, WindowSizeParts->GetUIY(1920), WindowSizeParts->GetUIY(1920), GetColor(0, 0, 0), TRUE);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 			}

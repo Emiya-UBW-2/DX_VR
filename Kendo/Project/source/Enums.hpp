@@ -9,7 +9,7 @@ namespace FPS_n2 {
 		Judge,
 	};
 	enum class SoundEnum : uint8_t {
-		EV1_1 = static_cast<uint8_t>(SoundEnumCommon::Num),
+		EV1_1 = static_cast<uint8_t>(SoundSelectCommon::Num),
 		Taiko1,
 		EV2_1,
 		EV2_2,
@@ -49,7 +49,7 @@ namespace FPS_n2 {
 
 		Max,
 	};
-	static const char* SoundID[(int)SoundEnum::Max] = {
+	static const char* SoundID[static_cast<int>(SoundEnum::Max)] = {
 		"",
 		"",
 		"",

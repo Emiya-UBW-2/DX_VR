@@ -13,11 +13,9 @@ namespace FPS_n2 {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* HitMarkParts = HitMark::Instance();
 
-			auto* BGM = BGMPool::Instance();
-			auto* OptionParts = OPTION::Instance();
-			BGM->Add(0, "data/Sound/BGM/BattleStart.wav", false);
-			BGM->Add(1, "data/Sound/BGM/Result.wav", false);
-			BGM->SetVol(OptionParts->GetParamFloat(EnumSaveParam::BGM));
+			auto* SE = SoundPool::Instance();
+			SE->Add(SoundType::BGM, 0, 1, "data/Sound/BGM/BattleStart.wav", false);
+			SE->Add(SoundType::BGM, 1, 1, "data/Sound/BGM/Result.wav", false);
 			//BG
 			BackGround->Load(m_isTraining);
 			//
@@ -105,7 +103,7 @@ namespace FPS_n2 {
 			}
 			if (!m_isTraining) {
 				for (int index = 0; index < 3; ++index) {
-					auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&)*ObjMngr->GetObj((int)ObjType::Judge, index);
+					auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&)*ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
 					//人の座標設定
 					c->SetWin(false, false);
 					//人の座標設定
@@ -157,7 +155,6 @@ namespace FPS_n2 {
 			}
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
-			auto* BGM = BGMPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* WindowSizeParts = WindowSizeControl::Instance();
@@ -194,7 +191,7 @@ namespace FPS_n2 {
 			}
 
 			if (GetIsFirstLoop()) {
-				//SE->Get(static_cast<int>(SoundEnum::Environment)).Play(0, DX_PLAYTYPE_LOOP, TRUE);
+				//SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Environment))->Play(DX_PLAYTYPE_LOOP, TRUE);
 				if (m_isTraining) {
 					m_IsEventSceneFlag = true;
 					m_EventSelect = "data/Cut/Cut1.txt";
@@ -202,7 +199,7 @@ namespace FPS_n2 {
 				else {
 					m_IsEventSceneFlag = true;
 					m_EventSelect = "data/Cut/Cut3.txt";
-					BGM->Get(0)->Play(DX_PLAYTYPE_BACK, TRUE);
+					SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_BACK, TRUE);
 				}
 			}
 
@@ -279,8 +276,8 @@ namespace FPS_n2 {
 				if (m_IsEventSceneActive) {
 					m_EventScene.GetDeltaTime();
 					if (!SceneParts->IsPause() && Pad->GetPadsInfo(PADS::INTERACT).GetKey().trigger()) {
-						SE->StopAll();
-						SE->Get(static_cast<int>(SoundEnumCommon::UI_OK)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+						SE->StopAll(SoundType::SE);
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, TRUE);
 						m_EventScene.Skip();
 					}
 					if (m_EventScene.IsEnd()) {
@@ -293,7 +290,7 @@ namespace FPS_n2 {
 							m_GameStartTimer = 2.f;
 							m_IsGameStart = false;
 							m_Timer = 180.f;
-							SE->Get(static_cast<int>(SoundEnum::Audience_Base)).Play(0, DX_PLAYTYPE_LOOP, TRUE);
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Base))->Play(DX_PLAYTYPE_LOOP, TRUE);
 						}
 						else {
 							if (m_EventSelect == "data/Cut/Cut2.txt") {
@@ -324,7 +321,7 @@ namespace FPS_n2 {
 					// 選択時の挙動
 					if (ButtonParts->GetTriggerButton()) {
 						if (ButtonParts->GetSelect() == 0) {
-							SE->Get(static_cast<int>(SoundEnumCommon::UI_OK)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, TRUE);
 							this->m_IsEnd = true;
 							FadeControl::SetFadeOut(1.f);
 						}
@@ -411,7 +408,7 @@ namespace FPS_n2 {
 							if (m_GameStartTimer <= 0.f) {
 								m_IsGameStart = true;
 								m_IsPlayable = true;
-								SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Start)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::JudgeVoice_Start))->Play(DX_PLAYTYPE_BACK, TRUE);
 							}
 						}
 						else if (m_IsGameStart) {
@@ -443,7 +440,7 @@ namespace FPS_n2 {
 											}
 											//
 											for (int index = 0; index < 3; ++index) {
-												auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj((int)ObjType::Judge, index);
+												auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
 												//人の座標設定
 												c->SetWin(false, false);
 												//人の座標設定
@@ -467,10 +464,10 @@ namespace FPS_n2 {
 										m_IsWinSound = true;
 
 										if (PlayerMngr->GetPlayer(0)->GetScore() != PlayerMngr->GetPlayer(1)->GetScore()) {
-											SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Win)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::JudgeVoice_Win))->Play(DX_PLAYTYPE_BACK, TRUE);
 										}
 										else {
-											SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Draw)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::JudgeVoice_Draw))->Play(DX_PLAYTYPE_BACK, TRUE);
 										}
 										//
 									}
@@ -480,9 +477,9 @@ namespace FPS_n2 {
 										}
 										if (FadeControl::IsFadeAll()) {
 											FadeControl::SetFadeIn(2.f);
-											SE->Get(static_cast<int>(SoundEnum::Audience_Base)).StopAll(0);
-											SE->Get(static_cast<int>(SoundEnum::Audience_Near)).StopAll(0);
-											SE->Get(static_cast<int>(SoundEnum::Audience_Good)).StopAll(0);
+											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Base))->StopAll();
+											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Near))->StopAll();
+											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Good))->StopAll();
 											this->m_IsResult = true;
 											KeyGuideParts->SetGuideFlip();
 											ButtonParts->Dispose();
@@ -490,7 +487,7 @@ namespace FPS_n2 {
 											ButtonParts->AddIconButton(
 												"CommonData/UI/Right.png", true,
 												(1920 / 2), (1080 - 256), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-											BGM->Get(1)->Play(DX_PLAYTYPE_BACK, TRUE);
+											SE->Get(SoundType::BGM, 1)->Play(DX_PLAYTYPE_BACK, TRUE);
 										}
 									}
 								}
@@ -504,18 +501,18 @@ namespace FPS_n2 {
 							m_WinOnceTimer = 1.5f;
 							m_IsPlayable = false;
 
-							SE->Get(static_cast<int>(SoundEnum::Audience_Good)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Good))->Play(DX_PLAYTYPE_BACK, TRUE);
 
 							{
 								switch (PlayerMngr->GetWinHitType()) {
 								case HitType::Head://面
-									SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Men)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::JudgeVoice_Men))->Play(DX_PLAYTYPE_BACK, TRUE);
 									break;
 								case HitType::Body://胴
-									SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Dou)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::JudgeVoice_Dou))->Play(DX_PLAYTYPE_BACK, TRUE);
 									break;
 								case HitType::Arm://小手
-									SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Kote)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::JudgeVoice_Kote))->Play(DX_PLAYTYPE_BACK, TRUE);
 									break;
 								case HitType::Leg:
 								default:
@@ -526,7 +523,7 @@ namespace FPS_n2 {
 							if (PlayerMngr->GetWinPlayer() == GetMyPlayerID()) {
 								m_ScoreUp0 = 1.f;
 								for (int index = 0; index < 3; ++index) {
-									auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj((int)ObjType::Judge, index);
+									auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
 									//人の座標設定
 									c->SetWin(true, false);
 								}
@@ -534,7 +531,7 @@ namespace FPS_n2 {
 							else {
 								m_ScoreUp1 = 1.f;
 								for (int index = 0; index < 3; ++index) {
-									auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj((int)ObjType::Judge, index);
+									auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
 									//人の座標設定
 									c->SetWin(false, true);
 								}
@@ -552,22 +549,22 @@ namespace FPS_n2 {
 							//タイムアップ
 							if (m_IsTimeUp && (m_Timer < 0.f)) {
 								m_IsTimeUp = false;
-								SE->Get(static_cast<int>(SoundEnum::TimeUp)).Play(0, DX_PLAYTYPE_BACK, TRUE, 255);
+								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::TimeUp))->Play(DX_PLAYTYPE_BACK, TRUE, 255);
 
-								SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Stop)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::JudgeVoice_Stop))->Play(DX_PLAYTYPE_BACK, TRUE);
 								m_IsPlayable = false;
 								m_IsGameEnd = true;
 								m_GameEndTimer = 2.5f;
 							}
-							if (m_TimerSE!= (int)m_Timer) {
-								m_TimerSE = (int)m_Timer;
+							if (m_TimerSE!= static_cast<int>(m_Timer)) {
+								m_TimerSE = static_cast<int>(m_Timer);
 								if (m_Timer <= 60.f) {
-									SE->Get(static_cast<int>(SoundEnum::CountDown)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::CountDown))->Play(DX_PLAYTYPE_BACK, TRUE);
 								}
 							}
 							//エリア外
 							if (m_DivideTimer < 0.f) {
-								SE->Get(static_cast<int>(SoundEnum::JudgeVoice_Stop)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::JudgeVoice_Stop))->Play(DX_PLAYTYPE_BACK, TRUE);
 								m_IsPlayable = false;
 							}
 							//残り1分
@@ -747,10 +744,10 @@ namespace FPS_n2 {
 							auto& p = PlayerMngr->GetPlayer(index);
 							pos_c += p->GetChara()->GetMove().GetPos();
 						}
-						pos_c /= (float)PlayerMngr->GetPlayerNum();
+						pos_c /= static_cast<float>(PlayerMngr->GetPlayerNum());
 
 						for (int index = 0; index < 3; ++index) {
-							auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj((int)ObjType::Judge, index);
+							auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
 							//人の座標設定
 							{
 								float Rad = deg2rad(-90.f + 120.f * static_cast<float>(index));
@@ -941,9 +938,9 @@ namespace FPS_n2 {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 
-			SE->Get(static_cast<int>(SoundEnum::Audience_Base)).StopAll(0);
-			SE->Get(static_cast<int>(SoundEnum::Audience_Near)).StopAll(0);
-			SE->Get(static_cast<int>(SoundEnum::Audience_Good)).StopAll(0);
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Base))->StopAll();
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Near))->StopAll();
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Good))->StopAll();
 			m_PauseMenuControl.DisposePause();
 			ButtonParts->Dispose();
 			if (m_IsEventSceneActive) {
@@ -979,7 +976,7 @@ namespace FPS_n2 {
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
-			auto* BGM = BGMPool::Instance();
+			auto* SE = SoundPool::Instance();
 			auto* HitMarkParts = HitMark::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			BattleResourceMngr->Dispose();
@@ -994,8 +991,8 @@ namespace FPS_n2 {
 			m_Result.Dispose();
 
 			this->m_Tutorial.Dispose_Load();
-			BGM->Delete(0);
-			BGM->Delete(1);
+			SE->Delete(SoundType::BGM, 0);
+			SE->Delete(SoundType::BGM, 1);
 		}
 
 		//
@@ -1161,7 +1158,7 @@ namespace FPS_n2 {
 						}
 						if (m_IsPlayable) {
 							if (0 <= m_DivideTimer && m_DivideTimer < 3.f) {
-								if ((int)(m_DivideTimer * 100) % 30 < 15) {
+								if (static_cast<int>(m_DivideTimer * 100) % 30 < 15) {
 									WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 										FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, (32), (384),
 										Yellow, Black,

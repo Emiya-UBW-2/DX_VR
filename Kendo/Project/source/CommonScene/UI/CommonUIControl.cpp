@@ -59,7 +59,7 @@ namespace FPS_n2 {
 						y->SetNone();
 					}
 					ButtonSel.at(static_cast<size_t>(select))->SetFocus();
-					SE->Get(static_cast<int>(SoundEnumCommon::UI_Select)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, TRUE);
 				}
 				else {
 					for (auto& y : ButtonSel) {

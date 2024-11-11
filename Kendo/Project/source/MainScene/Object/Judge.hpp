@@ -26,7 +26,7 @@ namespace FPS_n2 {
 			float												m_TargetRad{ 0.f };									//上半身を向けるべき方向
 			float												m_BodyRad{ 0.f };									//身体の回転方向
 			float												m_BottomRad{ 0.f };
-			std::array<float, (int)JudgeAnimeID::AnimeIDMax>	m_AnimPerBuf{ 0 };
+			std::array<float, static_cast<int>(JudgeAnimeID::AnimeIDMax)>	m_AnimPerBuf{ 0 };
 			bool												m_TurnBody{ false };
 			float												m_XScale{ 1.f };
 			bool												m_RedWin{ false };
@@ -34,12 +34,12 @@ namespace FPS_n2 {
 			float												m_Speed{ 0.f };
 		public: //コンストラクタ、デストラクタ
 			JudgeClass(void) noexcept {
-				this->m_objType = (int)ObjType::Judge;
+				this->m_objType = static_cast<int>(ObjType::Judge);
 				this->m_IsDraw = true;
 			}
 			~JudgeClass(void) noexcept {}
 		private:
-			int	GetFrameNum() noexcept override { return (int)JudgeFrame::Max; }
+			int	GetFrameNum() noexcept override { return static_cast<int>(JudgeFrame::Max); }
 			const char* GetFrameStr(int id) noexcept override { return JudgeFrameName[id]; }
 		public:
 			void			MovePoint(float pyRad, const Vector3DX& pPos) noexcept {
@@ -49,7 +49,7 @@ namespace FPS_n2 {
 				this->m_BottomRad = this->m_TargetRad;
 				this->m_TurnBody = false;
 				for (auto& a : this->m_AnimPerBuf) { a = 0.f; }
-				this->m_AnimPerBuf[(int)JudgeAnimeID::Upper_Ready] = 1.f;
+				this->m_AnimPerBuf[static_cast<int>(JudgeAnimeID::Upper_Ready)] = 1.f;
 				SetMove().SetAll(pPos, pPos, pPos, Vector3DX::zero(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_BottomRad), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_BottomRad));
 				m_RedWin = false;
 				m_WhiteWin = false;

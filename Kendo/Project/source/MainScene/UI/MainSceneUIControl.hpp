@@ -81,9 +81,9 @@ namespace FPS_n2 {
 					const GraphHandle* CircleObj, float deg, int Add) noexcept {
 					//return;
 					auto* WindowParts = WindowSystem::DrawControl::Instance();
-					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, (float)this->m_Now / (float)this->m_Max);
+					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
 					COLOR_U8 ColorAddSub = (this->m_Buffer > this->m_Now) ? ColorSub : ColorAdd;
-					float per = std::clamp((float)this->m_Now / this->m_Max, 0.f, 1.f);
+					float per = std::clamp(static_cast<float>(this->m_Now) / this->m_Max, 0.f, 1.f);
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
 					WindowParts->SetAdd(WindowSystem::DrawLayer::Normal, Add);
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorBase.r, ColorBase.g, ColorBase.b);
@@ -91,19 +91,19 @@ namespace FPS_n2 {
 						xp1 + (256), yp1,
 						50.0f + ((50.0f - 15.0f * 2.0f) * 1.0f) + 15.0f + deg,
 						50.0f + 15.0f + deg,
-						((float)((1080)) / 1080.0f));
+						(static_cast<float>((1080)) / 1080.0f));
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
 					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
 						xp1 + (256), yp1,
 						50.0f + ((50.0f - 15.0f * 2.0f) * std::max(per, perbuf)) + 15.0f + deg,
 						50.0f + ((50.0f - 15.0f * 2.0f) * std::min(per, perbuf)) + 15.0f + deg,
-						((float)((1080)) / 1080.0f));
+						(static_cast<float>((1080)) / 1080.0f));
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, Color.r, Color.g, Color.b);
 					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
 						xp1 + (256), yp1,
 						50.0f + ((50.0f - 15.0f * 2.0f) * std::min(per, perbuf)) + 15.0f + deg,
 						50.0f + 15.0f + deg,
-						((float)((1080)) / 1080.0f));
+						(static_cast<float>((1080)) / 1080.0f));
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
@@ -112,9 +112,9 @@ namespace FPS_n2 {
 					const GraphHandle* CircleObj, float deg, int Add) noexcept {
 					//return;
 					auto* WindowParts = WindowSystem::DrawControl::Instance();
-					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, (float)this->m_Now / (float)this->m_Max);
+					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
 					COLOR_U8 ColorAddSub = (this->m_Buffer > this->m_Now) ? ColorSub : ColorAdd;
-					float per = std::clamp((float)this->m_Now / this->m_Max, 0.f, 1.f);
+					float per = std::clamp(static_cast<float>(this->m_Now) / this->m_Max, 0.f, 1.f);
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
 					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					WindowParts->SetAdd(WindowSystem::DrawLayer::Normal, Add);
@@ -124,7 +124,7 @@ namespace FPS_n2 {
 						xp1 - (256), yp1,
 						(50.0f - 15.0f * 2.0f) + 15.0f + deg,
 						((50.0f - 15.0f * 2.0f) * (1.0f - 1.0f)) + 15.0f + deg,
-						((float)((1080)) / 1080.0f));
+						(static_cast<float>((1080)) / 1080.0f));
 
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
 
@@ -132,14 +132,14 @@ namespace FPS_n2 {
 						xp1 - (256), yp1,
 						((50.0f - 15.0f * 2.0f) * (1.0f - std::min(per, perbuf))) + 15.0f + deg,
 						((50.0f - 15.0f * 2.0f) * (1.0f - std::max(per, perbuf))) + 15.0f + deg,
-						((float)((1080)) / 1080.0f));
+						(static_cast<float>((1080)) / 1080.0f));
 
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, Color.r, Color.g, Color.b);
 					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
 						xp1 - (256), yp1,
 						(50.0f - 15.0f * 2.0f) + 15.0f + deg,
 						((50.0f - 15.0f * 2.0f) * (1.0f - std::min(per, perbuf))) + 15.0f + deg,
-						((float)((1080)) / 1080.0f));
+						(static_cast<float>((1080)) / 1080.0f));
 
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
@@ -180,7 +180,7 @@ namespace FPS_n2 {
 					int Edge = 0;
 					int length = (yp2 - Edge) - (yp1 + Edge);
 
-					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, (float)this->m_Now / (float)this->m_Max);
+					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
 					COLOR_U8 ColorAddSub = (ParamBuf > this->m_Now) ? ColorSub : ColorAdd;
 
 					DrawBox(
@@ -199,9 +199,9 @@ namespace FPS_n2 {
 			private:
 				int Blend3Int(int pInt1, int pInt2, int pInt3, float per) const noexcept {
 					int ans;
-					ans = static_cast<int>(std::clamp<float>(per * 2.f - 1.f, 0.f, 1.f) * (float)pInt3);
-					ans += static_cast<int>(std::clamp<float>((per < 0.5f) ? (per * 2.f) : ((1.f - per) * 2.f), 0.f, 1.f) * (float)pInt2);
-					ans += static_cast<int>(std::clamp<float>((1.f - per) * 2.f - 1.f, 0.f, 1.f) * (float)pInt1);
+					ans = static_cast<int>(std::clamp<float>(per * 2.f - 1.f, 0.f, 1.f) * static_cast<float>(pInt3));
+					ans += static_cast<int>(std::clamp<float>((per < 0.5f) ? (per * 2.f) : ((1.f - per) * 2.f), 0.f, 1.f) * static_cast<float>(pInt2));
+					ans += static_cast<int>(std::clamp<float>((1.f - per) * 2.f - 1.f, 0.f, 1.f) * static_cast<float>(pInt1));
 					return ans;
 				}
 				COLOR_U8 Blend3Color(COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 Color4, float per) const noexcept {
@@ -399,7 +399,7 @@ namespace FPS_n2 {
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
-					int KihakuPoints = static_cast<int>(Lerp(-30.f, 20.f, 1.f - (float)m_GaugeParam[0].GetGauge() / m_GaugeParam[0].GetGaugeMax()));
+					int KihakuPoints = static_cast<int>(Lerp(-30.f, 20.f, 1.f - static_cast<float>(m_GaugeParam[0].GetGauge()) / m_GaugeParam[0].GetGaugeMax()));
 					if (KihakuPoints > 0) {
 						WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
 							xp1, yp1, xp1 + (300), yp1 + (6), White, false);

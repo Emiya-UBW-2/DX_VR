@@ -234,7 +234,7 @@ namespace FPS_n2 {
 					int siz = obj.GetFrameNum();
 					for (int i = 0; i < siz; i++) {
 						if (obj.GetFrameName(i) == FrameName) {
-							FrameNum.emplace_back(std::make_pair((int)i, FrameName));
+							FrameNum.emplace_back(std::make_pair(static_cast<int>(i), FrameName));
 							return;
 						}
 					}
@@ -506,9 +506,9 @@ namespace FPS_n2 {
 
 						auto* WindowSizeParts = WindowSizeControl::Instance();
 
-						SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.f * this->Alpha.Ans));
+						SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255.f * this->Alpha.Ans));
 
-						this->handle.DrawRotaGraph(WindowSizeParts->GetUIY((int)(this->X.Ans)), WindowSizeParts->GetUIY((int)(this->Y.Ans)), (float)WindowSizeParts->GetUIY(1920) / this->ysize * this->Scale.Ans, this->Rad.Ans, true);
+						this->handle.DrawRotaGraph(WindowSizeParts->GetUIY(static_cast<int>(this->X.Ans)), WindowSizeParts->GetUIY(static_cast<int>(this->Y.Ans)), static_cast<float>(WindowSizeParts->GetUIY(1920)) / this->ysize * this->Scale.Ans, this->Rad.Ans, true);
 
 						SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 
@@ -545,7 +545,7 @@ namespace FPS_n2 {
 				int			m_PlayCounter{ -1 };
 			public:
 				void			Init(std::string_view Path, int startFrame) noexcept {
-					for (int i = 0; i < (int)SoundEnum::Max; i++) {
+					for (int i = 0; i < static_cast<int>(SoundEnum::Max); i++) {
 						if (Path == SoundID[i]) {
 							m_SoundEnum = (SoundEnum)i;
 							break;
@@ -570,11 +570,11 @@ namespace FPS_n2 {
 				auto* SE = SoundPool::Instance();
 				for (auto& m : model) {
 					if ((m.m_PlayCounter == Counter && isFirstLoop) || IsPlaySwitch) {
-						if (!SE->Get((int)m.m_SoundEnum).GetHandles().at(0)->handle.back().CheckPlay()) {
-							SE->Get((int)m.m_SoundEnum).GetHandles().at(0)->handle.back().Play(DX_PLAYTYPE_BACK, FALSE);
+						if (!SE->Get(SoundType::SE, static_cast<int>(m.m_SoundEnum))->CheckPlay()) {
+							SE->Get(SoundType::SE, static_cast<int>(m.m_SoundEnum))->Play(DX_PLAYTYPE_BACK, FALSE);
 						}
 						else {
-							SE->Get((int)m.m_SoundEnum).GetHandles().at(0)->handle.back().Stop();
+							SE->Get(SoundType::SE, static_cast<int>(m.m_SoundEnum))->StopAll();
 						}
 					}
 				}

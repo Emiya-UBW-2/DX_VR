@@ -81,11 +81,11 @@ namespace FPS_n2 {
 				}
 			}
 			//
-			GetObj().ResetFrameUserLocalMatrix(GetFrame((int)JudgeFrame::Upper));
-			GetObj().SetFrameLocalMatrix(GetFrame((int)JudgeFrame::Upper),
+			GetObj().ResetFrameUserLocalMatrix(GetFrame(static_cast<int>(JudgeFrame::Upper)));
+			GetObj().SetFrameLocalMatrix(GetFrame(static_cast<int>(JudgeFrame::Upper)),
 				GetObj_const().GetFrameLocalMatrix(GetFrame(static_cast<int>(JudgeFrame::Upper))).rotation()
 				* Matrix4x4DX::RotAxis(Vector3DX::up(), (this->m_TargetRad - this->m_BottomRad) * m_XScale)
-				* GetFrameBaseLocalMat((int)JudgeFrame::Upper));
+				* GetFrameBaseLocalMat(static_cast<int>(JudgeFrame::Upper)));
 			//ÉAÉjÉÅââéZ
 			{
 				JudgeAnimeID BottomAnimSelect = JudgeAnimeID::Bottom_Stand;
@@ -96,7 +96,7 @@ namespace FPS_n2 {
 					if (deg2rad(-135) < Rad && Rad < deg2rad(-45)) { BottomAnimSelect = JudgeAnimeID::Bottom_Stand_LeftStep; }
 					if (Rad < deg2rad(-135) || deg2rad(135) < Rad) { BottomAnimSelect = JudgeAnimeID::Bottom_Stand_WalkBack; }
 				}
-				for (int i = 0; i < (int)JudgeAnimeID::AnimeIDMax; i++) {
+				for (int i = 0; i < static_cast<int>(JudgeAnimeID::AnimeIDMax); i++) {
 					JudgeAnimeID Sel = (JudgeAnimeID)i;
 					if (
 						Sel == JudgeAnimeID::Bottom_Stand_Walk ||
@@ -122,11 +122,11 @@ namespace FPS_n2 {
 					}
 					this->GetObj().SetAnim(i).SetPer(this->m_AnimPerBuf.at(i));
 				}
-				ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_Turn, 0.72f * (m_Speed / 0.45f));
-				ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_Walk, 0.72f * (m_Speed / 0.45f));
-				ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_LeftStep, 0.72f * (m_Speed / 0.45f));
-				ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_WalkBack, 0.72f * (m_Speed / 0.45f));
-				ObjectBaseClass::SetAnimLoop((int)JudgeAnimeID::Bottom_Stand_RightStep, 0.72f * (m_Speed / 0.45f));
+				ObjectBaseClass::SetAnimLoop(static_cast<int>(JudgeAnimeID::Bottom_Stand_Turn), 0.72f * (m_Speed / 0.45f));
+				ObjectBaseClass::SetAnimLoop(static_cast<int>(JudgeAnimeID::Bottom_Stand_Walk), 0.72f * (m_Speed / 0.45f));
+				ObjectBaseClass::SetAnimLoop(static_cast<int>(JudgeAnimeID::Bottom_Stand_LeftStep), 0.72f * (m_Speed / 0.45f));
+				ObjectBaseClass::SetAnimLoop(static_cast<int>(JudgeAnimeID::Bottom_Stand_WalkBack), 0.72f * (m_Speed / 0.45f));
+				ObjectBaseClass::SetAnimLoop(static_cast<int>(JudgeAnimeID::Bottom_Stand_RightStep), 0.72f * (m_Speed / 0.45f));
 				GetObj().UpdateAnimAll();
 			}
 			//ï«îªíË

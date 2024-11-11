@@ -13,18 +13,18 @@ namespace FPS_n2 {
 				break;
 			case EnumArmAnimType::Men:
 			case EnumArmAnimType::HikiMen:
-				SE->Get(static_cast<int>(SoundEnum::Voice_Men)).Play_3D(0, GetEyePosition(), Scale3DRate * 35.f);
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Men))->Play3D(GetEyePosition(), Scale3DRate * 35.f);
 				break;
 			case EnumArmAnimType::Kote:
 			case EnumArmAnimType::HikiKote:
-				SE->Get(static_cast<int>(SoundEnum::Voice_Kote)).Play_3D(0, GetEyePosition(), Scale3DRate * 35.f);
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Kote))->Play3D(GetEyePosition(), Scale3DRate * 35.f);
 				break;
 			case EnumArmAnimType::Dou:
 			case EnumArmAnimType::HikiDou:
-				SE->Get(static_cast<int>(SoundEnum::Voice_Dou)).Play_3D(0, GetEyePosition(), Scale3DRate * 35.f);
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Dou))->Play3D(GetEyePosition(), Scale3DRate * 35.f);
 				break;
 			case EnumArmAnimType::Tsuki:
-				SE->Get(static_cast<int>(SoundEnum::Voice_Tsuki)).Play_3D(0, GetEyePosition(), Scale3DRate * 35.f);
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Tsuki))->Play3D(GetEyePosition(), Scale3DRate * 35.f);
 				break;
 			case EnumArmAnimType::Tsuba:
 				break;
@@ -38,10 +38,10 @@ namespace FPS_n2 {
 		}
 		void			CharacterClass::StopVoice(void) const noexcept {
 			auto* SE = SoundPool::Instance();
-			SE->Get(static_cast<int>(SoundEnum::Voice_Men)).StopAll(0);
-			SE->Get(static_cast<int>(SoundEnum::Voice_Kote)).StopAll(0);
-			SE->Get(static_cast<int>(SoundEnum::Voice_Dou)).StopAll(0);
-			SE->Get(static_cast<int>(SoundEnum::Voice_Tsuki)).StopAll(0);
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Men))->StopAll();
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Kote))->StopAll();
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Dou))->StopAll();
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Tsuki))->StopAll();
 		}
 
 		void			CharacterClass::CheckTsuba(void) noexcept {
@@ -82,7 +82,7 @@ namespace FPS_n2 {
 
 			this->m_CharaSound = -1;
 			auto* SE = SoundPool::Instance();
-			SE->Get(static_cast<int>(SoundEnum::Kendo_Swing)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale3DRate * 5.f);
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Kendo_Swing))->Play3D(GetFramePosition(CharaFrame::RightWrist), Scale3DRate * 5.f);
 		}
 		//
 		void			CharacterClass::OverrideAction(void) noexcept {
@@ -188,8 +188,8 @@ namespace FPS_n2 {
 			auto* LocalizeParts = LocalizePool::Instance();
 			if (this->m_MyID == value.DamageID) {
 				if (m_DamageCoolTime == 0.f) {
-					SE->Get(static_cast<int>(SoundEnum::Kendo_Hit)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale3DRate * 15.f);
-					m_DamageCoolTime = static_cast<float>(SE->Get(static_cast<int>(SoundEnum::Kendo_Hit)).GetTotalTIme(0, 0)) / 1000.f;
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Kendo_Hit))->Play3D(GetFramePosition(CharaFrame::RightWrist), Scale3DRate * 15.f);
+					m_DamageCoolTime = static_cast<float>(SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Kendo_Hit))->GetTotalTIme()) / 1000.f;
 
 					{
 						int HitDamagePow = value.Damage;
@@ -239,10 +239,10 @@ namespace FPS_n2 {
 						if (TotalAddHits >= 100) {
 							auto* PlayerMngr = Player::PlayerManager::Instance();
 							PlayerMngr->AddScore(value.ShotID, value.GetHitType());
-							SE->Get(static_cast<int>(SoundEnum::Kendo_GetHit)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Kendo_GetHit))->Play(DX_PLAYTYPE_BACK, TRUE);
 						}
 						if (!IsTraining && TotalAddHits >= 50) {
-							SE->Get(static_cast<int>(SoundEnum::Audience_Near)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Near))->Play(DX_PLAYTYPE_BACK, TRUE);
 						}
 						if (this->m_MyID == this->m_ViewID) {
 							//コンカッション
@@ -465,7 +465,7 @@ namespace FPS_n2 {
 				m_YaTimer == 0.f &&
 				CharaMove::GetInputControl().GetPADSPress(PADS::JUMP)
 				) {
-				SE->Get(static_cast<int>(SoundEnum::Voice_Ya)).Play_3D(0, GetEyePosition(), Scale3DRate * 35.f);
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Ya))->Play3D(GetEyePosition(), Scale3DRate * 35.f);
 				m_YaTimer = GetYaTimerMax();
 				m_HeartUp = 40.f;
 			}
@@ -719,7 +719,7 @@ namespace FPS_n2 {
 							this->m_CharaSound = 1;
 							if ((WindowSizeParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::LeftFoot)).magnitude() < Scale3DRate * 5.f * 1.5f) {
 
-								SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::LeftFoot), Scale3DRate * 5.f);
+								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::RunFoot))->Play3D(GetFramePosition(CharaFrame::LeftFoot), Scale3DRate * 5.f);
 							}
 						}
 					}
@@ -729,7 +729,7 @@ namespace FPS_n2 {
 							this->m_CharaSound = 3;
 							if ((WindowSizeParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::RightFoot)).magnitude() < Scale3DRate * 5.f * 1.5f) {
 
-								SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::RightFoot), Scale3DRate * 5.f);
+								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::RunFoot))->Play3D(GetFramePosition(CharaFrame::RightFoot), Scale3DRate * 5.f);
 							}
 						}
 					}
@@ -740,7 +740,7 @@ namespace FPS_n2 {
 							if (this->m_CharaSound != 7) {
 								this->m_CharaSound = 7;
 								if ((WindowSizeParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::RightFoot)).magnitude() < Scale3DRate * 5.f * 1.5f) {
-									SE->Get(static_cast<int>(SoundEnum::Kendo_Foot)).Play_3D(0, GetFramePosition(CharaFrame::RightFoot), Scale3DRate * 15.f);
+									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Kendo_Foot))->Play3D(GetFramePosition(CharaFrame::RightFoot), Scale3DRate * 15.f);
 								}
 							}
 						}
@@ -751,7 +751,7 @@ namespace FPS_n2 {
 							if (this->m_CharaSound != 5) {
 								this->m_CharaSound = 5;
 								if ((WindowSizeParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::LeftFoot)).magnitude() < Scale3DRate * 5.f * 1.5f) {
-									SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::LeftFoot), Scale3DRate * 15.f);
+									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::RunFoot))->Play3D(GetFramePosition(CharaFrame::LeftFoot), Scale3DRate * 15.f);
 								}
 							}
 						}
@@ -760,7 +760,7 @@ namespace FPS_n2 {
 							if (this->m_CharaSound != 6) {
 								this->m_CharaSound = 6;
 								if ((WindowSizeParts->GetMainCamera().GetCamPos() - GetFramePosition(CharaFrame::RightFoot)).magnitude() < Scale3DRate * 5.f * 1.5f) {
-									SE->Get(static_cast<int>(SoundEnum::RunFoot)).Play_3D(0, GetFramePosition(CharaFrame::RightFoot), Scale3DRate * 15.f);
+									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::RunFoot))->Play3D(GetFramePosition(CharaFrame::RightFoot), Scale3DRate * 15.f);
 								}
 							}
 						}
@@ -777,17 +777,17 @@ namespace FPS_n2 {
 			Easing(&m_HeartUpR, m_HeartUp, 0.99f, EasingType::OutExpo);
 			if (StaminaControl::ExcuteStamina(m_HeartUpR * DXLib_refParts->GetDeltaTime())) {
 				if (this->m_MyID == this->m_ViewID) {
-					SE->Get(static_cast<int>(SoundEnum::Heart)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heart))->Play(DX_PLAYTYPE_BACK, TRUE);
 				}
 			}
 			if (StaminaControl::ExcuteBreath()) {
 				if (this->m_MyID == this->m_ViewID) {
-					SE->Get(static_cast<int>(SoundEnum::Breath)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Breath))->Play(DX_PLAYTYPE_BACK, TRUE);
 				}
-				SE->Get(static_cast<int>(SoundEnum::Breath)).SetVol_Local(static_cast<int>(Lerp(255.f, 92.f, GetStamina() / GetStaminaMax())));
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Breath))->SetLocalVolume(static_cast<int>(Lerp(255.f, 92.f, GetStamina() / GetStaminaMax())));
 			}
 			if (m_YaTimer >= GetYaTimerMax() * 0.9f) {
-				SE->Get(static_cast<int>(SoundEnum::Breath)).StopAll(0);
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Breath))->StopAll();
 			}
 		}
 		void			CharacterClass::ExecuteMatrix(void) noexcept {
@@ -940,8 +940,8 @@ namespace FPS_n2 {
 
 									if (m_TsubaSoundCoolTime == 0.f && (this->m_Weapon_Ptr->GetMoveSpeed() > 1.f)) {
 										auto* SE = SoundPool::Instance();
-										SE->Get(static_cast<int>(SoundEnum::Kendo_Tsuba)).Play_3D(0, GetFramePosition(CharaFrame::RightWrist), Scale3DRate * 15.f, static_cast<int>(128.f * this->m_Weapon_Ptr->GetMoveSpeed()));
-										m_TsubaSoundCoolTime = static_cast<float>(SE->Get(static_cast<int>(SoundEnum::Kendo_Tsuba)).GetTotalTIme(0, 0)) / 1000.f * 0.5f;
+										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Kendo_Tsuba))->Play3D(GetFramePosition(CharaFrame::RightWrist), Scale3DRate * 15.f, static_cast<int>(128.f * this->m_Weapon_Ptr->GetMoveSpeed()));
+										m_TsubaSoundCoolTime = static_cast<float>(SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Kendo_Tsuba))->GetTotalTIme()) / 1000.f * 0.5f;
 									}
 									WeaponAddRotMat = Matrix3x3DX::RotAxis(Vector3DX::right(), m_BambooVec.x) * Matrix3x3DX::RotAxis(Vector3DX::forward(), m_BambooVec.y);
 									if (IsGuardAction(m_CharaAction) || IsAttacking()) {

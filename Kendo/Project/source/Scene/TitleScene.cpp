@@ -8,7 +8,7 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			TitleScene::Set_Sub(void) noexcept {
-			auto* BGM = BGMPool::Instance();
+			//auto* SE = SoundPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			// 
@@ -34,11 +34,9 @@ namespace FPS_n2 {
 			this->m_CreditControl = std::make_unique<CreditControl>();
 			this->m_CreditControl->Init();
 			// 
-			//*
-			if (!BGM->Get(0)->Check()) {
-				BGM->Get(0)->Play(DX_PLAYTYPE_LOOP, TRUE);
-			}
-			BGM->Get(0)->SetVol_Local(255);
+			/*
+			SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_LOOP, TRUE);
+			SE->Get(SoundType::BGM, 0)->SetLocalVolume(255);
 			// */
 			m_CloseResetSave = false;
 		}
@@ -96,7 +94,7 @@ namespace FPS_n2 {
 					default:
 						break;
 					}
-					SE->Get(static_cast<int>(SoundEnumCommon::UI_OK)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, TRUE);
 				}
 			}
 			if (m_CloseResetSave && PopUpParts->IsActivePop()) {
@@ -112,10 +110,10 @@ namespace FPS_n2 {
 		}
 		void			TitleScene::Dispose_Sub(void) noexcept {
 			auto* SaveDataParts = SaveDataClass::Instance();
-			auto* BGM = BGMPool::Instance();
+			//auto* SE = SoundPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
-			BGM->Get(0)->Stop();
+			//SE->Get(SoundType::BGM, 0)->StopAll();
 			// 
 			this->m_CreditControl->Dispose();
 			this->m_CreditControl.reset();
