@@ -23,19 +23,17 @@ namespace FPS_n2 {
 		public:
 			void Load(void) noexcept {
 				SetOutApplicationLogValidFlag(FALSE);
-				int mdata = FileRead_open("data/NetWorkSetting.txt", FALSE);
+				FileStreamDX FileStream("data/NetWorkSetting.txt");
 				while (true) {
+					auto ALL = FileStream.SeekLineAndGetStr();
 					m_NewWorkSetting.resize(this->m_NewWorkSetting.size() + 1);
-					m_NewWorkSetting.back().UsePort = std::clamp<int>(getparams::_int(mdata), 0, 50000);
-					m_NewWorkSetting.back().IP.d1 = (unsigned char)std::clamp<int>(getparams::_int(mdata), 0, 255);
-					m_NewWorkSetting.back().IP.d2 = (unsigned char)std::clamp<int>(getparams::_int(mdata), 0, 255);
-					m_NewWorkSetting.back().IP.d3 = (unsigned char)std::clamp<int>(getparams::_int(mdata), 0, 255);
-					m_NewWorkSetting.back().IP.d4 = (unsigned char)std::clamp<int>(getparams::_int(mdata), 0, 255);
-					if (FileRead_eof(mdata) != 0) {
-						break;
-					}
+					m_NewWorkSetting.back().UsePort = std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 50000);
+					m_NewWorkSetting.back().IP.d1 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
+					m_NewWorkSetting.back().IP.d2 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
+					m_NewWorkSetting.back().IP.d3 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
+					m_NewWorkSetting.back().IP.d4 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
+					if (FileStream.ComeEof()) { break; }
 				}
-				FileRead_close(mdata);
 				SetOutApplicationLogValidFlag(TRUE);
 			}
 			void Save(void) noexcept {

@@ -98,10 +98,10 @@ namespace FPS_n2 {
 				m_CheckHit = HitType::None;
 				this->m_Tutorial.clear();
 				{
-					int mdata = FileRead_open(Path.c_str(), FALSE);
+					FileStreamDX FileStream(Path.c_str());
 					while (true) {
-						if (FileRead_eof(mdata) != 0) { break; }
-						auto ALL = getparams::Getstr(mdata);
+						if (FileStream.ComeEof()) { break; }
+						auto ALL = FileStream.SeekLineAndGetStr();
 						//コメントアウト
 						if (ALL.find("//") != std::string::npos) {
 							ALL = ALL.substr(0, ALL.find("//"));
@@ -109,8 +109,8 @@ namespace FPS_n2 {
 						//
 						if (ALL == "") { continue; }
 						if (ALL.find('=') != std::string::npos) {
-							auto LEFT = getparams::getleft(ALL);
-							auto RIGHT = getparams::getright(ALL);
+							auto LEFT = FileStreamDX::getleft(ALL);
+							auto RIGHT = FileStreamDX::getright(ALL);
 							if (LEFT == "Face") {
 								m_Tutorial.resize(m_Tutorial.size() + 1);
 								m_Tutorial.back().m_GraphID = std::stoi(RIGHT);
@@ -137,7 +137,6 @@ namespace FPS_n2 {
 							m_Tutorial.back().m_Mes += ALL + "\n";
 						}
 					}
-					FileRead_close(mdata);
 				}
 
 				m_TutorialNow = 0;

@@ -87,14 +87,14 @@ namespace FPS_n2 {
 		}
 		// 
 		void CreditControl::Init(void) noexcept {
-			int mdata = FileRead_open("data/Credit.txt", FALSE);
 			this->m_CreditCoulm = 0;
+			FileStreamDX FileStream("data/Credit.txt");
 			while (true) {
-				if (FileRead_eof(mdata) != 0) { break; }
-				auto ALL = getparams::Getstr(mdata);
+				if (FileStream.ComeEof()) { break; }
+				auto ALL = FileStream.SeekLineAndGetStr();
 				if (ALL.find('=') != std::string::npos) {
-					auto LEFT = getparams::getleft(ALL);
-					auto RIGHT = getparams::getright(ALL);
+					auto LEFT = FileStreamDX::getleft(ALL);
+					auto RIGHT = FileStreamDX::getright(ALL);
 					sprintfDx(this->m_CreditStr.at(static_cast<size_t>(this->m_CreditCoulm)).first, LEFT.c_str());
 					sprintfDx(this->m_CreditStr.at(static_cast<size_t>(this->m_CreditCoulm)).second, RIGHT.c_str());
 				}
@@ -104,7 +104,6 @@ namespace FPS_n2 {
 				}
 				++this->m_CreditCoulm;
 			}
-			FileRead_close(mdata);
 		}
 		void CreditControl::Draw(int xmin, int ymin, int xmax) const noexcept {
 			auto* WindowParts = WindowSystem::DrawControl::Instance();

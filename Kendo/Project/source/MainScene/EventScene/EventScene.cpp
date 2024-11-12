@@ -852,14 +852,14 @@ namespace FPS_n2 {
 	void			EventScene::Load(const char* Path) noexcept {
 		m_TelopClass.Init();
 		//
-		int mdata = FileRead_open(Path, FALSE);
+		FileStreamDX FileStream(Path);
 		SetUseASyncLoadFlag(TRUE);
 		//
-		while (FileRead_eof(mdata) == 0) {
+		while (true) {
+			if (FileStream.ComeEof()) { break; }
 			if (ProcessMessage() != 0) {}
-			if (!LoadOnce(getparams::Getstr(mdata))) { continue; }
+			if (!LoadOnce(FileStream.SeekLineAndGetStr())) { continue; }
 		}
-		FileRead_close(mdata);
 		//
 		SetUseASyncLoadFlag(FALSE);
 		while (ProcessMessage() == 0 && GetASyncLoadNum() != 0) {}

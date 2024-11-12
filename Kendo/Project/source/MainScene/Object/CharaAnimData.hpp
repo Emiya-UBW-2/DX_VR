@@ -200,14 +200,13 @@ namespace FPS_n2 {
 			m_Object.resize(m_Object.size() + 1);
 			m_Object.back().first = std::make_shared<ArmanimData>();
 
-			int mdata = FileRead_open(filepath, FALSE);
-			m_Object.back().first->Set(getparams::Getstr(mdata), EnumSel);
+			FileStreamDX FileStream(filepath);
+			m_Object.back().first->Set(FileStream.SeekLineAndGetStr(), EnumSel);
 			while (true) {
-				if (FileRead_eof(mdata) != 0) { break; }
+				if (FileStream.ComeEof()) { break; }
 				m_Object.back().second.emplace_back(std::make_shared<ArmAnim>());
-				m_Object.back().second.back()->Set(getparams::Getstr(mdata));
+				m_Object.back().second.back()->Set(FileStream.SeekLineAndGetStr());
 			}
-			FileRead_close(mdata);
 		}
 
 		const AnimDatas* GetAnimData(EnumArmAnim EnumSel) const noexcept {
