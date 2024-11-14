@@ -60,19 +60,25 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::BackGround::BackGroundClass::Create();
 	FPS_n2::NetWorkBrowser::Create();
 	FPS_n2::Sceneclass::ButtonControl::Create();
+	FPS_n2::Sceneclass::FadeControl::Create();						// UI用フェードインマネージャー
 	FPS_n2::HitMark::Create();
 	//シーン
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto MainGameScenePtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
 	auto MainGameSceneTrainingPtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
-	MainGameSceneTrainingPtr->SetIsTraining(true);
+	auto MainGameSceneReplayPtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
+	MainGameScenePtr->SetGameMode(FPS_n2::GameMode::Main);
+	MainGameSceneTrainingPtr->SetGameMode(FPS_n2::GameMode::Training);
+	MainGameSceneReplayPtr->SetGameMode(FPS_n2::GameMode::Replay);
 
 
 	//遷移先指定
 	Titlescene->SetNextSceneList(0, MainGameScenePtr);
 	Titlescene->SetNextSceneList(1, MainGameSceneTrainingPtr);
+	Titlescene->SetNextSceneList(2, MainGameSceneReplayPtr);
 	MainGameScenePtr->SetNextSceneList(0, Titlescene);
 	MainGameSceneTrainingPtr->SetNextSceneList(0, Titlescene);
+	MainGameSceneReplayPtr->SetNextSceneList(0, Titlescene);
 
 	auto* SceneParts = SceneControl::Instance();
 	SceneParts->SetFirstScene(Titlescene);

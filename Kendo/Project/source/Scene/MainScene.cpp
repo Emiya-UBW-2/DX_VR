@@ -10,7 +10,8 @@ namespace FPS_n2 {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
-			FadeControl::SetFadeIn(2.f);
+			auto* FadeInParts = FadeControl::Instance();
+			FadeInParts->SetFadeIn(2.f);
 			this->m_IsEnd = false;
 
 			m_GameStartAlpha = 0.f;
@@ -54,7 +55,7 @@ namespace FPS_n2 {
 					c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
 				}
 			}
-			if (!m_isTraining) {
+			if (m_GameMode != GameMode::Training) {
 				for (int index = 0; index < 3; ++index) {
 					auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
 					//人の座標設定
@@ -98,7 +99,7 @@ namespace FPS_n2 {
 			SE->Add(SoundType::BGM, 0, 1, "data/Sound/BGM/BattleStart.wav", false);
 			SE->Add(SoundType::BGM, 1, 1, "data/Sound/BGM/Result.wav", false);
 			//BG
-			BackGround->Load(m_isTraining);
+			BackGround->Load(m_GameMode == GameMode::Training);
 			//
 			BattleResourceMngr->Load();
 			PlayerMngr->Init(NetWork::Player_num);
@@ -107,7 +108,7 @@ namespace FPS_n2 {
 				BattleResourceMngr->LoadWeapon("Bamboo", (PlayerID)index);
 			}
 			//
-			if (!m_isTraining) {
+			if (m_GameMode != GameMode::Training) {
 				BattleResourceMngr->LoadJudge("Suit");
 				BattleResourceMngr->LoadJudge("Suit");
 				BattleResourceMngr->LoadJudge("Suit");
@@ -142,7 +143,7 @@ namespace FPS_n2 {
 			//
 			BackGround->Init();
 			//
-			if (m_isTraining) {
+			if (m_GameMode == GameMode::Training) {
 				Vector3DX LightVec = Vector3DX::vget(1.f, -0.5f, 0.05f); LightVec = LightVec.normalized();
 				WindowSizeParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
 				SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
@@ -177,14 +178,21 @@ namespace FPS_n2 {
 			NetBrowser->Init();
 
 			HitMarkParts->Set();
-			if (m_isTraining) {
+			if (m_GameMode == GameMode::Training) {
 				m_Tutorial.Set();
 			}
 			m_PauseMenuControl.SetPause();
-			m_Replay.Clear();
-			m_GameControlType = GameControlType::InGame;
 
 			SetupBattleStart();
+			if (m_GameMode == GameMode::Replay) {
+				m_Replay.Clear();
+				m_Replay.Load();
+				m_GameControlType = GameControlType::Replay;
+			}
+			else {
+				m_Replay.Clear();
+				m_GameControlType = GameControlType::InGame;
+			}
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* ButtonParts = ButtonControl::Instance();
@@ -204,6 +212,7 @@ namespace FPS_n2 {
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
 #endif // DEBUG
 			auto* LocalizeParts = LocalizePool::Instance();
+			auto* FadeInParts = FadeControl::Instance();
 			if (m_GameControlType == GameControlType::InGame) {
 				if (!m_IsResult) {
 					m_PauseMenuControl.UpdatePause();
@@ -213,34 +222,36 @@ namespace FPS_n2 {
 				}
 			}
 			if (this->m_IsEnd) {
-				if (FadeControl::IsFadeClear()) {
-					FadeControl::SetFadeOut(2.f);
+				if (FadeInParts->IsFadeClear()) {
+					FadeInParts->SetFadeOut(2.f);
 				}
-				if (FadeControl::IsFadeAll()) {
+				if (FadeInParts->IsFadeAll()) {
 					return false;
 				}
 			}
 			if (!GetIsFirstLoop()) {
-				FadeControl::UpdateFade();
+				FadeInParts->Update();
 			}
 
-			if (GetIsFirstLoop()) {
-				//SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Environment))->Play(DX_PLAYTYPE_LOOP, TRUE);
-				if (m_isTraining) {
-					m_IsEventSceneFlag = true;
-					m_EventSelect = "data/Cut/Cut1.txt";
-				}
-				else {
-					m_IsEventSceneFlag = true;
-					m_EventSelect = "data/Cut/Cut3.txt";
-					SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_BACK, TRUE);
+			if (m_GameMode != GameMode::Replay) {
+				if (GetIsFirstLoop()) {
+					//SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Environment))->Play(DX_PLAYTYPE_LOOP, TRUE);
+					if (m_GameMode == GameMode::Training) {
+						m_IsEventSceneFlag = true;
+						m_EventSelect = "data/Cut/Cut1.txt";
+					}
+					else {
+						m_IsEventSceneFlag = true;
+						m_EventSelect = "data/Cut/Cut3.txt";
+						SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_BACK, TRUE);
+					}
 				}
 			}
 
 			auto& Chara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 
 			//UIパラメーター
-			if (GetIsFirstLoop() || FadeControl::IsFadeAll()) {
+			if (GetIsFirstLoop() || FadeInParts->IsFadeAll()) {
 				this->m_UIclass.InitGaugeParam(0, static_cast<int>(Chara->GetYaTimerMax() * 10.f), static_cast<int>(Chara->GetYaTimerMax() * 10.f));
 				this->m_UIclass.InitGaugeParam(1, static_cast<int>(Chara->GetStaminaMax() * 10000.f), static_cast<int>(Chara->GetStaminaMax() * 10000.f));
 				this->m_UIclass.InitGaugeParam(2, static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f));
@@ -296,7 +307,7 @@ namespace FPS_n2 {
 
 							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::WALK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9903));
 							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9905));
-							if (m_isTraining) {
+							if (m_GameMode == GameMode::Training) {
 								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), "");
 								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::RELOAD).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9916));
 							}
@@ -324,11 +335,11 @@ namespace FPS_n2 {
 					}
 					if (m_EventScene.IsEnd()) {
 						PostPassParts->SetDistortionPer(120.f);
-						FadeControl::SetFadeIn(1.f / (m_isTraining ? 0.5f : 2.f));
+						FadeInParts->SetFadeIn(1.f / ((m_GameMode == GameMode::Training) ? 0.5f : 2.f));
 						m_EventScene.Dispose();
 						m_IsEventSceneActive = false;
 						KeyGuideParts->SetGuideFlip();
-						if (!m_isTraining) {
+						if (m_GameMode != GameMode::Training) {
 							m_IsGameStart = false;
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Base))->Play(DX_PLAYTYPE_LOOP, TRUE);
 						}
@@ -347,7 +358,7 @@ namespace FPS_n2 {
 						return true;
 					}
 				}	  
-				if (!m_isTraining) {
+				if (m_GameMode != GameMode::Training) {
 					if (m_GameControlType == GameControlType::Replay) {
 						//リザルトに移動
 						if (Pad->GetPadsInfo(PADS::JUMP).GetKey().trigger()) {
@@ -365,7 +376,7 @@ namespace FPS_n2 {
 						return true;
 					}
 				}
-				if (FadeControl::IsFadeClear()) {
+				if (FadeInParts->IsFadeClear()) {
 					ButtonParts->UpdateInput();
 					// 選択時の挙動
 					if (ButtonParts->GetTriggerButton()) {
@@ -374,7 +385,7 @@ namespace FPS_n2 {
 						case 0:
 						{
 							this->m_IsEnd = true;
-							FadeControl::SetFadeOut(1.f);
+							FadeInParts->SetFadeOut(1.f);
 						}
 						break;
 						case 1:
@@ -401,7 +412,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			if (m_isTraining) {
+			if (m_GameMode == GameMode::Training) {
 				m_Tutorial.Update();
 			}
 #ifdef DEBUG
@@ -409,7 +420,7 @@ namespace FPS_n2 {
 #endif // DEBUG
 			//FirstDoingv
 			if (!m_IsResult) {
-				if (!m_isTraining) {
+				if (m_GameMode != GameMode::Training) {
 					{
 						if (m_GameStartTimer > 1.f) {
 							float Per = std::clamp((1.4f - m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
@@ -487,11 +498,11 @@ namespace FPS_n2 {
 						else if (m_IsGameStart) {
 							if (!m_IsGameEnd) {
 								if (m_WinOnceTimer <= 0.f || m_DivideTimer < 0.f) {
-									if (FadeControl::IsFadeClear()) {
-										FadeControl::SetFadeOut(2.f);
+									if (FadeInParts->IsFadeClear()) {
+										FadeInParts->SetFadeOut(2.f);
 									}
-									if (FadeControl::IsFadeAll()) {
-										FadeControl::SetFadeIn(1.f / 2.f);
+									if (FadeInParts->IsFadeAll()) {
+										FadeInParts->SetFadeIn(1.f / 2.f);
 										if (!m_IsGameEnd) {
 											m_pStart = &m_GameRestart;
 											m_GameStartTimer = 2.f;
@@ -545,11 +556,11 @@ namespace FPS_n2 {
 										//
 									}
 									if (m_GameEndTimer <= 0.f) {
-										if (FadeControl::IsFadeClear()) {
-											FadeControl::SetFadeOut(1.f);
+										if (FadeInParts->IsFadeClear()) {
+											FadeInParts->SetFadeOut(1.f);
 										}
-										if (FadeControl::IsFadeAll()) {
-											FadeControl::SetFadeIn(2.f);
+										if (FadeInParts->IsFadeAll()) {
+											FadeInParts->SetFadeIn(2.f);
 											SetupResult();
 											if (m_GameControlType == GameControlType::InGame) {
 												SE->Get(SoundType::BGM, 1)->Play(DX_PLAYTYPE_BACK, TRUE);
@@ -643,11 +654,11 @@ namespace FPS_n2 {
 					}
 				}
 				else {
-					m_IsPlayable = FadeControl::IsFadeClear();
+					m_IsPlayable = FadeInParts->IsFadeClear();
 
 					if (!m_IsPlayable) {
-						if (FadeControl::IsFadeAll()) {
-							FadeControl::SetFadeIn(1.f / 2.f);
+						if (FadeInParts->IsFadeAll()) {
+							FadeInParts->SetFadeIn(1.f / 2.f);
 							m_TutorialResetTimer = 0.f;
 							//初期化
 							for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
@@ -678,8 +689,8 @@ namespace FPS_n2 {
 						if (m_TutorialResetTimer > 0.f) {
 							m_TutorialResetTimer -= DXLib_refParts->GetDeltaTime();
 							if (m_TutorialResetTimer <= 0.f) {
-								if (FadeControl::IsFadeClear()) {
-									FadeControl::SetFadeOut(2.f);
+								if (FadeInParts->IsFadeClear()) {
+									FadeInParts->SetFadeOut(2.f);
 								}
 							}
 						}
@@ -751,7 +762,7 @@ namespace FPS_n2 {
 					switch (m_GameControlType) {
 					case GameControlType::InGame:
 					{
-						if (!m_isTraining) {
+						if (m_GameMode != GameMode::Training) {
 							m_Replay.Add();
 						}
 						for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
@@ -759,7 +770,7 @@ namespace FPS_n2 {
 							auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 							c->SetViewID(GetMyPlayerID());
 							if ((PlayerID)index == GetMyPlayerID()) {
-								if (!m_isTraining) {
+								if (m_GameMode != GameMode::Training) {
 									int32_t FreeData[10]{};
 									FreeData[0] = static_cast<int>(c->GetCharaAction());
 									m_Replay.SetBack().SetOnce((PlayerID)index).SetMyPlayer(MyInput, c->GetMove(), c->GetDamageEvent(), FreeData);
@@ -769,7 +780,7 @@ namespace FPS_n2 {
 							else {
 								InputControl OtherInput;
 								if (m_IsPlayable) {
-									p->GetAI()->Execute(&OtherInput, m_isTraining);
+									p->GetAI()->Execute(&OtherInput, m_GameMode == GameMode::Training);
 									{
 										Vector2DX MSVec;
 										MSVec.Set(
@@ -781,7 +792,7 @@ namespace FPS_n2 {
 									}
 								}
 
-								if (!m_isTraining) {
+								if (m_GameMode != GameMode::Training) {
 									int32_t FreeData[10]{};
 									FreeData[0] = static_cast<int>(c->GetCharaAction());
 									m_Replay.SetBack().SetOnce((PlayerID)index).SetMyPlayer(OtherInput, c->GetMove(), c->GetDamageEvent(), FreeData);
@@ -851,7 +862,7 @@ namespace FPS_n2 {
 						break;
 					}
 
-					if (!m_isTraining) {
+					if (m_GameMode != GameMode::Training) {
 						Vector3DX pos_c;
 						for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 							auto& p = PlayerMngr->GetPlayer(index);
@@ -875,7 +886,7 @@ namespace FPS_n2 {
 						auto& p = PlayerMngr->GetPlayer(index);
 						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 						for (int j = 0, Num = static_cast<int>(this->m_DamageEvents.size()); j < Num; ++j) {
-							if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)], m_isTraining)) {
+							if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)], m_GameMode == GameMode::Training)) {
 								std::swap(this->m_DamageEvents.back(), m_DamageEvents[static_cast<size_t>(j)]);
 								this->m_DamageEvents.pop_back();
 								--Num;
@@ -1203,91 +1214,90 @@ namespace FPS_n2 {
 			auto* HitMarkParts = HitMark::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
+			auto* FadeInParts = FadeControl::Instance();
 			if (!m_IsEventSceneActive) {
-				if (m_isTraining) {
+				if (m_GameMode == GameMode::Training) {
 					this->m_Tutorial.Draw();
 				}
 			}
-
 			if (m_GameControlType == GameControlType::Replay) {
 				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
 					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, (64), (64), Green, Black, "Replay");
 			}
+			{
+				if (m_IsResult) {
+					WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Result,
+						(0), (0), (1920), (1080), false);
 
-			if (m_IsResult) {
-				WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Result,
-					(0), (0), (1920), (1080), false);
+					bool IsWin = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetMaxScore() > PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetMaxScore());
+					bool IsDraw = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetMaxScore() == PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetMaxScore());
 
-				bool IsWin = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetMaxScore() > PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetMaxScore());
-				bool IsDraw = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetMaxScore() == PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetMaxScore());
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (48),
+						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, (300), (384),
+						IsDraw ? Gray25 : (IsWin ? Red : White), Black,
+						IsDraw ? LocalizeParts->Get(6002) : (IsWin ? LocalizeParts->Get(6000) : LocalizeParts->Get(6001)));
+					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
+						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, (300), (386), White, Black, "%d : %d",
+						PlayerMngr->GetPlayer(GetMyPlayerID())->GetMaxScore(), PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetMaxScore());
 
-				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (48),
-					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, (300), (384),
-					IsDraw ? Gray25 : (IsWin ? Red : White), Black,
-					IsDraw ? LocalizeParts->Get(6002) : (IsWin ? LocalizeParts->Get(6000) : LocalizeParts->Get(6001)));
-				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
-					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, (300), (386), White, Black, "%d : %d",
-					PlayerMngr->GetPlayer(GetMyPlayerID())->GetMaxScore(), PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetMaxScore());
+					ButtonParts->Draw();
+					return;
+				}
+				else {
+					if (m_IsEventSceneActive) {
+						m_EventScene.UIDraw();
+					}
+					else {
+						HitMarkParts->Draw();
+						//UI
+						if (!SceneParts->IsPause()) {
+							this->m_UIclass.Draw();
+							if (m_GameMode != GameMode::Training) {
+								int xp1 = (1920 / 2);
+								int yp1 = (240);
 
-				ButtonParts->Draw();
+								if ((m_GameStartAlpha * 255.f) > 1.f) {
+									WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameStartAlpha), 0, 255));
+									WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
+									WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+										m_pStart, xp1, yp1, m_GameStartScale, 0.f, true);
+									WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+									WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+								}
 
+								if ((m_WinOnceAlpha * 255.f) > 1.f) {
+									WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_WinOnceAlpha), 0, 255));
+									WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+									WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+										&m_Once, xp1, yp1, m_WinOnceScale, 0.f, true);
+									WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+									WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+								}
 
-				FadeControl::DrawFade();
-				return;
-			}
-			if (m_IsEventSceneActive) {
-				FadeControl::DrawFade();
-				m_EventScene.UIDraw();
-			}
-			else {
-				HitMarkParts->Draw();
-				//UI
-				if (!SceneParts->IsPause()) {
-					this->m_UIclass.Draw();
-					if (!m_isTraining) {
-						int xp1 = (1920 / 2);
-						int yp1 = (240);
-
-						if ((m_GameStartAlpha * 255.f) > 1.f) {
-							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameStartAlpha), 0, 255));
-							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
-							WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
-								m_pStart, xp1, yp1, m_GameStartScale,0.f, true);
-							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-						}
-
-						if ((m_WinOnceAlpha * 255.f) > 1.f) {
-							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_WinOnceAlpha), 0, 255));
-							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
-							WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
-								&m_Once, xp1, yp1, m_WinOnceScale, 0.f, true);
-							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-						}
-
-						if ((m_GameEndAlpha * 255.f) > 1.f) {
-							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameEndAlpha), 0, 255));
-							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
-							WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
-								&m_GameEnd, xp1, yp1, m_GameEndScale, 0.f, true);
-							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-						}
-						if (m_IsPlayable) {
-							if (0 <= m_DivideTimer && m_DivideTimer < 3.f) {
-								if (static_cast<int>(m_DivideTimer * 100) % 30 < 15) {
-									WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
-										FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, (32), (384),
-										Yellow, Black,
-										"場外まであと%3.1f秒", m_DivideTimer);
+								if ((m_GameEndAlpha * 255.f) > 1.f) {
+									WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameEndAlpha), 0, 255));
+									WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+									WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+										&m_GameEnd, xp1, yp1, m_GameEndScale, 0.f, true);
+									WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+									WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+								}
+								if (m_IsPlayable) {
+									if (0 <= m_DivideTimer && m_DivideTimer < 3.f) {
+										if (static_cast<int>(m_DivideTimer * 100) % 30 < 15) {
+											WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
+												FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, (32), (384),
+												Yellow, Black,
+												"場外まであと%3.1f秒", m_DivideTimer);
+										}
+									}
 								}
 							}
 						}
 					}
 				}
-				FadeControl::DrawFade();
 			}
+			FadeInParts->Draw();
 		}
 		void			MainGameScene::DrawUI_In_Sub(void) const noexcept {
 			auto* SceneParts = SceneControl::Instance();

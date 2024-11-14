@@ -24,6 +24,9 @@ namespace FPS_n2 {
 			ButtonParts->AddStringButton(
 				LocalizeParts->Get(401), 48, true,
 				1920 - 64 - 48, 1080 - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton(
+				LocalizeParts->Get(402), 48, true,
+				1920 - 64 - 48, 1080 - 84 - 64 * 0, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
 			ButtonParts->AddIconButton(
 				"CommonData/UI/setting.png", true,
 				(1920 - 96 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
@@ -79,9 +82,12 @@ namespace FPS_n2 {
 						this->m_GameStart += 0.0001f;
 						break;
 					case 2:
-						OptionWindowParts->SetActive();
+						this->m_GameStart += 0.0001f;
 						break;
 					case 3:
+						OptionWindowParts->SetActive();
+						break;
+					case 4:
 						PopUpParts->Add(LocalizeParts->Get(120), (720), (840),
 							[&](int xmin, int ymin, int xmax, int, bool) {
 								this->m_CreditControl->Draw(xmin, ymin, xmax);

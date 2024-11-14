@@ -302,5 +302,33 @@ namespace FPS_n2 {
 			void Dispose(void) noexcept;
 		};
 		// 
+		class FadeControl : public SingletonBase<FadeControl> {
+		private:
+			friend class SingletonBase<FadeControl>;
+		private:
+			bool						m_IsBlackOut{ false };// カットシーン中フラグ
+			float						m_BlackOutAlpha{ 0.f };
+			float						m_BlackOutPower{ 2.f };
+		private:
+			//コンストラクタ
+			FadeControl(void) noexcept {}
+			FadeControl(const FadeControl&) = delete;// コピーしてはいけないので通常のコンストラクタ以外をすべてdelete
+			FadeControl(FadeControl&& o) = delete;
+			FadeControl& operator=(const FadeControl&) = delete;
+			FadeControl& operator=(FadeControl&& o) = delete;
+			// デストラクタはシングルトンなので呼ばれません
+		public:
+			auto			IsFadeClear(void) const noexcept { return this->m_BlackOutAlpha == 0.f; }
+			auto			IsFadeAll(void) const noexcept { return this->m_BlackOutAlpha >= 1.f; }
+		public:
+			// true=FadeOut
+			void			SetFade(bool value) noexcept { this->m_IsBlackOut = value; }
+			void			SetFadeIn(float Per) noexcept;
+			void			SetFadeOut(float Per) noexcept;
+		public:
+			void			Update(void) noexcept;
+			void			Draw(void) const noexcept;
+		};
+		// 
 	};
 };

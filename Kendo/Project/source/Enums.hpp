@@ -114,4 +114,10 @@ namespace FPS_n2 {
 
 		Dou,		//ガード後にサブ
 	};
+
+	enum class GameMode {
+		Main,
+		Training,
+		Replay,
+	};
 };
