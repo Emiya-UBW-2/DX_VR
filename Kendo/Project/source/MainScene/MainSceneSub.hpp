@@ -18,7 +18,6 @@ namespace FPS_n2 {
 			void			SetPause(void) noexcept;
 			void			UpdatePause(void) noexcept;
 			void			DrawPause(void) const noexcept;
-			void			DisposePause(void) noexcept;
 		};
 	};
 

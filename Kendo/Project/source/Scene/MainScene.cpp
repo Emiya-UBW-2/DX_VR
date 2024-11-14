@@ -1065,7 +1065,6 @@ namespace FPS_n2 {
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Base))->StopAll();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Near))->StopAll();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Good))->StopAll();
-			m_PauseMenuControl.DisposePause();
 			ButtonParts->Dispose();
 			if (m_IsEventSceneActive) {
 				m_EventScene.Dispose();

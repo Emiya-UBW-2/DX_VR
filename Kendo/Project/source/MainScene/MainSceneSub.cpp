@@ -77,10 +77,6 @@ namespace FPS_n2 {
 				ButtonParts->Draw();
 			}
 		}
-		void PauseMenuControl::DisposePause(void) noexcept {
-			auto* ButtonParts = ButtonControl::Instance();
-			ButtonParts->Dispose();
-		}
 		//
 	};
 };
