@@ -345,6 +345,56 @@ namespace FPS_n2 {
 			}
 		};
 
+		enum class GameControlType {
+			InGame,
+			Network,
+			Replay,
+		};
+
+		class ReplayData {
+			std::array<NetWork::PlayerSendData,2> m_Data;
+		public:
+			auto& SetOnce(PlayerID value) noexcept { return m_Data.at(value); }
+			const auto& GetOnce(PlayerID value) const noexcept { return m_Data.at(value); }
+		};
+		class Replay {
+			std::vector<ReplayData> m_Data;
+			int m_Now{ 0 };
+		public:
+			void Clear() noexcept {
+				m_Data.clear();
+				m_Now = 0;
+			}
+			void Save() noexcept {
+				size_t Size = m_Data.size();
+				std::ofstream fout;
+				fout.open("Replay/Rep.txt", std::ios::out | std::ios::binary | std::ios::trunc);
+				fout.write((char*)&Size, sizeof(Size));
+				fout.write((char*)&m_Data.at(0), sizeof(m_Data.at(0)) * m_Data.size());
+				fout.close();  //ƒtƒ@ƒCƒ‹‚ð•Â‚¶‚é
+			}
+			void Load() noexcept {
+				if (!std::filesystem::is_regular_file("Replay/Rep.txt")) {
+					return;
+				}
+				size_t Size = 0;
+
+				std::ifstream fin;
+				fin.open("Replay/Rep.txt", std::ios::in | std::ios::binary);
+				fin.read((char*)&Size, sizeof(Size));
+				m_Data.resize(Size);
+				fin.read((char*)&m_Data.at(0), sizeof(m_Data.at(0)) * m_Data.size());
+				fin.close();
+			}
+		public:
+			void Start() noexcept { m_Now = 0; }
+			const auto& GetNow() const noexcept { return m_Data.at(m_Now); }
+			void Seek() noexcept { ++m_Now %= m_Data.size(); }
+		public:
+			void Add() noexcept { m_Data.emplace_back(); }
+			auto& SetBack() noexcept { return m_Data.back(); }
+		};
+
 
 		class MainGameScene : public TEMPSCENE ,
 			public FadeControl
@@ -357,6 +407,7 @@ namespace FPS_n2 {
 			UIClass										m_UIclass;
 			PauseMenuControl							m_PauseMenuControl;
 			//NetWork
+			GameControlType								m_GameControlType{ GameControlType::InGame };
 			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };
 			std::vector<DamageEvent>					m_DamageEvents;
 			//
@@ -409,6 +460,8 @@ namespace FPS_n2 {
 
 			float							m_ScoreUp0{ 0.f };
 			float							m_ScoreUp1{ 0.f };
+
+			Replay							m_Replay;
 		private:
 			auto		GetMyPlayerID(void) const noexcept {
 				if (m_NetWorkController) {
@@ -416,6 +469,8 @@ namespace FPS_n2 {
 				}
 				return (PlayerID)0;
 			}
+			void		SetupBattleStart(void) noexcept;
+			void		SetupResult(void) noexcept;
 		public:
 			void		SetIsTraining(bool value)noexcept { m_isTraining = value; }
 		public:

@@ -14,9 +14,10 @@ namespace FPS_n2 {
 				std::shared_ptr<ObjectBaseClass>				m_Chara{ nullptr };
 				std::shared_ptr<AIControl>						m_AI{ nullptr };
 				int												m_Score{ 0 };							//スコア
+				int												m_MaxScore{ 0 };							//スコア
 			public:
 				PlayerControl(void) noexcept {
-					this->m_Score = 0;
+					Init();
 				}
 
 				PlayerControl(const PlayerControl&) = delete;
@@ -34,14 +35,22 @@ namespace FPS_n2 {
 				void		SetAI(const std::shared_ptr<AIControl>& pAI) noexcept { this->m_AI = pAI; }
 				auto& GetAI(void) noexcept { return this->m_AI; }
 
-				void		AddScore(int value) noexcept { this->m_Score += value; }
-				void		SetScore(int value) noexcept { this->m_Score = value; }
+				void		AddScore(int value) noexcept {
+					this->m_Score += value;
+					this->m_MaxScore = std::max(this->m_MaxScore, this->m_Score);
+				}
+				void		SetScore(int value) noexcept {
+					this->m_Score = value;
+					this->m_MaxScore = std::max(this->m_MaxScore, this->m_Score);
+				}
 				const auto& GetScore(void) const noexcept { return this->m_Score; }
+				const auto& GetMaxScore(void) const noexcept { return this->m_MaxScore; }
 			public:
 				void Init(void) noexcept {
-					m_Chara = nullptr;
+					this->m_Chara = nullptr;
 					this->m_AI = nullptr;
-					m_Score = 0;
+					this->m_Score = 0;
+					this->m_MaxScore = 0;
 				}
 
 				void Dispose(void) noexcept {
@@ -52,7 +61,7 @@ namespace FPS_n2 {
 						this->m_AI->Dispose();
 						this->m_AI.reset();
 					}
-					m_Score = 0;
+					this->m_Score = 0;
 				}
 			};
 		private:
@@ -92,6 +101,14 @@ namespace FPS_n2 {
 				GetPlayer(ID)->AddScore(1);
 				m_LastAddScore = ID;
 				m_LastHitType = hitPos;
+			}
+			void ResetScore() {
+				m_ScoreChangeFlag = false;
+				for (auto& p : m_Player) {
+					p->SetScore(0);
+				}
+				m_LastAddScore = InvalidID;
+				m_LastHitType = HitType::Head;
 			}
 			const auto PutAddScoreFlag() {
 				auto ret = m_ScoreChangeFlag;

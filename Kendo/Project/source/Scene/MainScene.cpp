@@ -6,6 +6,87 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		void MainGameScene::SetupBattleStart(void) noexcept {
+			auto* ObjMngr = ObjectManager::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto* BackGround = BackGround::BackGroundClass::Instance();
+			FadeControl::SetFadeIn(2.f);
+			this->m_IsEnd = false;
+
+			m_GameStartAlpha = 0.f;
+			m_GameStartScale = 0.f;
+			m_GameStartTimer = 2.f;
+
+			m_WinOnceAlpha = 0.f;
+			m_WinOnceScale = 0.f;
+			m_WinOnceTimer = -1.f;
+
+			m_GameEndAlpha = 0.f;
+			m_GameEndScale = 0.f;
+			m_GameEndTimer = -1.f;
+			m_IsWinSound = false;
+
+			m_IsGameStart = false;
+			m_IsGameEnd = false;
+			m_IsTimeUp = true;
+			m_IsDrawOneMinute = true;
+			m_Timer = 180.f;
+			m_IsPlayable = false;
+
+			m_IsResult = false;
+
+			m_pStart = &m_GameStart;
+
+			PlayerMngr->ResetScore();
+
+			//初期化
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
+				auto& p = PlayerMngr->GetPlayer(index);
+				auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+				{
+					Vector3DX pos_t;
+					pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale3DRate) * static_cast<float>(index * 2 - 1));
+
+					Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale3DRate;
+					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale3DRate, &EndPos, true)) {
+						pos_t = EndPos;
+					}
+					c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
+				}
+			}
+			if (!m_isTraining) {
+				for (int index = 0; index < 3; ++index) {
+					auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
+					//人の座標設定
+					c->SetWin(false, false);
+					//人の座標設定
+					{
+						float Rad = deg2rad(-90.f + 120.f * static_cast<float>(index));
+						Vector3DX pos_t = Vector3DX::vget(0.f, 0.f, (3.5f * Scale3DRate));
+						pos_t = Matrix3x3DX::Vtrans(pos_t, Matrix3x3DX::RotAxis(Vector3DX::up(), Rad));
+						c->MovePoint(Rad, pos_t);
+					}
+				}
+			}
+		}
+		void MainGameScene::SetupResult(void) noexcept {
+			auto* SE = SoundPool::Instance();
+			auto* ButtonParts = ButtonControl::Instance();
+			auto* KeyGuideParts = KeyGuide::Instance();
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Base))->StopAll();
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Near))->StopAll();
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Good))->StopAll();
+			this->m_IsResult = true;
+			KeyGuideParts->SetGuideFlip();
+			ButtonParts->Dispose();
+			ButtonParts->ResetSel();
+			ButtonParts->AddIconButton(
+				"CommonData/UI/Right.png", true,
+				(1920 / 2 + 64), (1080 - 256), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonParts->AddIconButton(
+				"data/UI/Reset.png", true,
+				(1920 / 2 - 64), (1080 - 256), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+		}
 		//
 		void			MainGameScene::Load_Sub(void) noexcept {
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
@@ -50,7 +131,6 @@ namespace FPS_n2 {
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
-			auto* ObjMngr = ObjectManager::Instance();
 			auto* HitMarkParts = HitMark::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			//
@@ -87,33 +167,7 @@ namespace FPS_n2 {
 				auto& p = PlayerMngr->GetPlayer(index);
 				auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 				c->SetViewID(0);
-				//人の座標設定
-				{
-					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale3DRate) * static_cast<float>(index * 2 - 1));
-
-					Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale3DRate;
-					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale3DRate, &EndPos, true)) {
-						pos_t = EndPos;
-					}
-					c->ValueSet((PlayerID)index, CharaTypeID::Team);
-					c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
-				}
 				p->GetAI()->Init((PlayerID)index);
-			}
-			if (!m_isTraining) {
-				for (int index = 0; index < 3; ++index) {
-					auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&)*ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
-					//人の座標設定
-					c->SetWin(false, false);
-					//人の座標設定
-					{
-						float Rad = deg2rad(-90.f + 120.f * static_cast<float>(index));
-						Vector3DX pos_t = Vector3DX::vget(0.f, 0.f, (3.5f * Scale3DRate));
-						pos_t = Matrix3x3DX::Vtrans(pos_t, Matrix3x3DX::RotAxis(Vector3DX::up(), Rad));
-						c->MovePoint(Rad, pos_t);
-					}
-				}
 			}
 			//UI
 			this->m_UIclass.Set();
@@ -121,38 +175,16 @@ namespace FPS_n2 {
 			this->m_DamageEvents.clear();
 			auto* NetBrowser = NetWorkBrowser::Instance();
 			NetBrowser->Init();
-			m_PauseMenuControl.SetPause();
-			FadeControl::SetFadeIn(2.f);
-			this->m_IsEnd = false;
+
 			HitMarkParts->Set();
-
-			m_GameStartAlpha = 0.f;
-			m_GameStartScale = 0.f;
-			m_GameStartTimer = 2.f;
-
-			m_WinOnceAlpha = 0.f;
-			m_WinOnceScale = 0.f;
-			m_WinOnceTimer = -1.f;
-
-			m_GameEndAlpha = 0.f;
-			m_GameEndScale = 0.f;
-			m_GameEndTimer = -1.f;
-			m_IsWinSound = false;
-
-			m_IsGameStart = false;
-			m_IsGameEnd = false;
-			m_IsTimeUp = true;
-			m_IsDrawOneMinute = true;
-			m_Timer = 180.f;
-			m_IsPlayable = false;
-
-			m_IsResult = false;
-
-			m_pStart = &m_GameStart;
-
 			if (m_isTraining) {
 				m_Tutorial.Set();
 			}
+			m_PauseMenuControl.SetPause();
+			m_Replay.Clear();
+			m_GameControlType = GameControlType::InGame;
+
+			SetupBattleStart();
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* ButtonParts = ButtonControl::Instance();
@@ -172,11 +204,13 @@ namespace FPS_n2 {
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
 #endif // DEBUG
 			auto* LocalizeParts = LocalizePool::Instance();
-			if (!m_IsResult) {
-				m_PauseMenuControl.UpdatePause();
-			}
-			if (m_PauseMenuControl.IsRetire()) {
-				this->m_IsEnd = true;
+			if (m_GameControlType == GameControlType::InGame) {
+				if (!m_IsResult) {
+					m_PauseMenuControl.UpdatePause();
+				}
+				if (m_PauseMenuControl.IsRetire()) {
+					this->m_IsEnd = true;
+				}
 			}
 			if (this->m_IsEnd) {
 				if (FadeControl::IsFadeClear()) {
@@ -227,6 +261,9 @@ namespace FPS_n2 {
 						if (m_IsResult) {
 							return;
 						}
+						if (m_GameControlType == GameControlType::Replay) {
+							return;
+						}
 						KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9992));
 						KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::RELOAD).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9991));
 						KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
@@ -236,6 +273,11 @@ namespace FPS_n2 {
 					else {
 						if (m_IsResult) {
 							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9915));
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9917));
+							return;
+						}
+						if (m_GameControlType == GameControlType::Replay) {
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9918));
 							return;
 						}
 						if (m_IsEventSceneActive) {
@@ -287,9 +329,7 @@ namespace FPS_n2 {
 						m_IsEventSceneActive = false;
 						KeyGuideParts->SetGuideFlip();
 						if (!m_isTraining) {
-							m_GameStartTimer = 2.f;
 							m_IsGameStart = false;
-							m_Timer = 180.f;
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Base))->Play(DX_PLAYTYPE_LOOP, TRUE);
 						}
 						else {
@@ -307,6 +347,15 @@ namespace FPS_n2 {
 						return true;
 					}
 				}	  
+				if (!m_isTraining) {
+					if (m_GameControlType == GameControlType::Replay) {
+						//リザルトに移動
+						if (Pad->GetPadsInfo(PADS::JUMP).GetKey().trigger()) {
+							SetupResult();
+							//PlayerMngr->ResetScore();
+						}
+					}
+				}
 			}
 			else {
 				Pad->SetMouseMoveEnable(false);
@@ -320,11 +369,35 @@ namespace FPS_n2 {
 					ButtonParts->UpdateInput();
 					// 選択時の挙動
 					if (ButtonParts->GetTriggerButton()) {
-						if (ButtonParts->GetSelect() == 0) {
-							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, TRUE);
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, TRUE);
+						switch (ButtonParts->GetSelect()) {
+						case 0:
+						{
 							this->m_IsEnd = true;
 							FadeControl::SetFadeOut(1.f);
 						}
+						break;
+						case 1:
+						{
+							//リプレイ
+							m_GameControlType = GameControlType::Replay;
+							m_Replay.Start();
+							KeyGuideParts->SetGuideFlip();
+							SetupBattleStart();
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Base))->Play(DX_PLAYTYPE_LOOP, TRUE);
+						}
+						break;
+						default:
+							break;
+						}
+					}
+					if (Pad->GetPadsInfo(PADS::JUMP).GetKey().trigger()) {
+						//リプレイ
+						m_GameControlType = GameControlType::Replay;
+						m_Replay.Start();
+						KeyGuideParts->SetGuideFlip();
+						SetupBattleStart();
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Base))->Play(DX_PLAYTYPE_LOOP, TRUE);
 					}
 				}
 			}
@@ -477,17 +550,11 @@ namespace FPS_n2 {
 										}
 										if (FadeControl::IsFadeAll()) {
 											FadeControl::SetFadeIn(2.f);
-											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Base))->StopAll();
-											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Near))->StopAll();
-											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Good))->StopAll();
-											this->m_IsResult = true;
-											KeyGuideParts->SetGuideFlip();
-											ButtonParts->Dispose();
-											ButtonParts->ResetSel();
-											ButtonParts->AddIconButton(
-												"CommonData/UI/Right.png", true,
-												(1920 / 2), (1080 - 256), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-											SE->Get(SoundType::BGM, 1)->Play(DX_PLAYTYPE_BACK, TRUE);
+											SetupResult();
+											if (m_GameControlType == GameControlType::InGame) {
+												SE->Get(SoundType::BGM, 1)->Play(DX_PLAYTYPE_BACK, TRUE);
+												m_Replay.Save();
+											}
 										}
 									}
 								}
@@ -665,19 +732,69 @@ namespace FPS_n2 {
 						}
 					}
 					//ネットワーク
-					auto* NetBrowser = NetWorkBrowser::Instance();
-					if (NetBrowser->IsDataReady() && !m_NetWorkController) {
-						m_NetWorkController = std::make_unique<NetWork::NetWorkController>();
-						this->m_NetWorkController->Init(NetBrowser->GetClient(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
+					{
+						auto* NetBrowser = NetWorkBrowser::Instance();
+						if (NetBrowser->IsDataReady() && !m_NetWorkController) {
+							m_NetWorkController = std::make_unique<NetWork::NetWorkController>();
+							this->m_NetWorkController->Init(NetBrowser->GetClient(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
+						}
+						if (m_NetWorkController) {
+							int32_t FreeData[10]{};
+							FreeData[0] = static_cast<int>(Chara->GetCharaAction());
+							this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, Chara->GetMove(), Chara->GetDamageEvent(), FreeData);
+							this->m_NetWorkController->Update();
+						}
+						if (m_NetWorkController && m_NetWorkController->IsInGame()) {
+							m_GameControlType = GameControlType::Network;
+						}
 					}
-					if (m_NetWorkController) {
-						int32_t FreeData[10]{};
-						FreeData[0] = static_cast<int>(Chara->GetCharaAction());
-						this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, Chara->GetMove(), Chara->GetDamageEvent(), FreeData);
-						this->m_NetWorkController->Update();
+					switch (m_GameControlType) {
+					case GameControlType::InGame:
+					{
+						if (!m_isTraining) {
+							m_Replay.Add();
+						}
+						for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
+							auto& p = PlayerMngr->GetPlayer(index);
+							auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+							c->SetViewID(GetMyPlayerID());
+							if ((PlayerID)index == GetMyPlayerID()) {
+								if (!m_isTraining) {
+									int32_t FreeData[10]{};
+									FreeData[0] = static_cast<int>(c->GetCharaAction());
+									m_Replay.SetBack().SetOnce((PlayerID)index).SetMyPlayer(MyInput, c->GetMove(), c->GetDamageEvent(), FreeData);
+								}
+								c->SetInput(MyInput, true);
+							}
+							else {
+								InputControl OtherInput;
+								if (m_IsPlayable) {
+									p->GetAI()->Execute(&OtherInput, m_isTraining);
+									{
+										Vector2DX MSVec;
+										MSVec.Set(
+											std::clamp(c->GetBambooVec().x + OtherInput.GetAddxRad() * deg2rad(0.1f) * DXLib_refParts->GetFps() / FrameRate, deg2rad(-10), deg2rad(10)),
+											std::clamp(c->GetBambooVec().y + OtherInput.GetAddyRad() * deg2rad(0.1f) * DXLib_refParts->GetFps() / FrameRate, deg2rad(-30), deg2rad(30))
+										);
+										OtherInput.SetxRad(MSVec.x);
+										OtherInput.SetyRad(MSVec.y);
+									}
+								}
+
+								if (!m_isTraining) {
+									int32_t FreeData[10]{};
+									FreeData[0] = static_cast<int>(c->GetCharaAction());
+									m_Replay.SetBack().SetOnce((PlayerID)index).SetMyPlayer(OtherInput, c->GetMove(), c->GetDamageEvent(), FreeData);
+								}
+								c->SetInput(OtherInput, true);
+							}
+							//ダメージイベント処理
+							c->AddDamageEvent(&this->m_DamageEvents);
+						}
 					}
-					//
-					if (m_NetWorkController && m_NetWorkController->IsInGame()) {
+						break;
+					case GameControlType::Network:
+					{
 						bool IsServerNotPlayer = !m_NetWorkController->GetClient() && !m_NetWorkController->GetServerPlayer();
 						for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 							auto& p = PlayerMngr->GetPlayer(index);
@@ -709,33 +826,29 @@ namespace FPS_n2 {
 							Ret.AddDamageEvent(&this->m_DamageEvents);
 						}
 					}
-					else {//オフライン
+					break;
+					case GameControlType::Replay:
+					{
 						for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 							auto& p = PlayerMngr->GetPlayer(index);
 							auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 							c->SetViewID(GetMyPlayerID());
-							if (index == GetMyPlayerID()) {
-								c->SetInput(MyInput, true);
-							}
-							else {
-								InputControl OtherInput;
-								if (m_IsPlayable) {
-									p->GetAI()->Execute(&OtherInput, m_isTraining);
-									{
-										Vector2DX MSVec;
-										MSVec.Set(
-											std::clamp(c->GetBambooVec().x + OtherInput.GetAddxRad() * deg2rad(0.1f) * DXLib_refParts->GetFps() / FrameRate, deg2rad(-10), deg2rad(10)),
-											std::clamp(c->GetBambooVec().y + OtherInput.GetAddyRad() * deg2rad(0.1f) * DXLib_refParts->GetFps() / FrameRate, deg2rad(-30), deg2rad(30))
-										);
-										OtherInput.SetxRad(MSVec.x);
-										OtherInput.SetyRad(MSVec.y);
-									}
-								}
-								c->SetInput(OtherInput, true);
+							NetWork::PlayerSendData Ret = m_Replay.GetNow().GetOnce((PlayerID)index);
+							//サーバーがCPUを動かす場合
+							c->SetInput(Ret.GetInput(), true);
+							c->SetMoveOverRide(Ret.GetMove());
+							//アクションが違う場合には上書き
+							if (Ret.GetFreeData()[0] != static_cast<int>(c->GetCharaAction())) {
+								c->SetActionOverRide(static_cast<EnumArmAnimType>(Ret.GetFreeData()[0]));
 							}
 							//ダメージイベント処理
-							c->AddDamageEvent(&this->m_DamageEvents);
+							Ret.GetDamageEvent().PutDamageEvent(&this->m_DamageEvents);
 						}
+						m_Replay.Seek();
+					}
+						break;
+					default:
+						break;
 					}
 
 					if (!m_isTraining) {
@@ -1096,12 +1209,17 @@ namespace FPS_n2 {
 				}
 			}
 
+			if (m_GameControlType == GameControlType::Replay) {
+				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
+					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, (64), (64), Green, Black, "Replay");
+			}
+
 			if (m_IsResult) {
 				WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Result,
 					(0), (0), (1920), (1080), false);
 
-				bool IsWin = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore() > PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
-				bool IsDraw = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore() == PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
+				bool IsWin = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetMaxScore() > PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetMaxScore());
+				bool IsDraw = (PlayerMngr->GetPlayer(GetMyPlayerID())->GetMaxScore() == PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetMaxScore());
 
 				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (48),
 					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, (300), (384),
@@ -1109,7 +1227,7 @@ namespace FPS_n2 {
 					IsDraw ? LocalizeParts->Get(6002) : (IsWin ? LocalizeParts->Get(6000) : LocalizeParts->Get(6001)));
 				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, (300), (386), White, Black, "%d : %d",
-					PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore(), PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
+					PlayerMngr->GetPlayer(GetMyPlayerID())->GetMaxScore(), PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetMaxScore());
 
 				ButtonParts->Draw();
 
@@ -1174,6 +1292,9 @@ namespace FPS_n2 {
 		void			MainGameScene::DrawUI_In_Sub(void) const noexcept {
 			auto* SceneParts = SceneControl::Instance();
 			if (m_IsResult) {
+				return;
+			}
+			if (m_GameControlType == GameControlType::Replay) {
 				return;
 			}
 			//UI
