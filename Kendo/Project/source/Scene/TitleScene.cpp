@@ -10,29 +10,17 @@ namespace FPS_n2 {
 		void			TitleScene::Set_Sub(void) noexcept {
 			//auto* SE = SoundPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
-			auto* LocalizeParts = LocalizePool::Instance();
 			// 
 			this->m_GameFadeIn = 1.f;
 			this->m_GameStart = 0.f;
 			this->m_TitleImage.Load("data/UI/Title.png");
 			// 
 			ButtonParts->ResetSel();
-			// 
-			ButtonParts->AddStringButton(
-				LocalizeParts->Get(400), 52, true,
-				1920 - 64 - 48, 1080 - 84 - 64 * 2, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton(
-				LocalizeParts->Get(401), 48, true,
-				1920 - 64 - 48, 1080 - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton(
-				LocalizeParts->Get(402), 48, true,
-				1920 - 64 - 48, 1080 - 84 - 64 * 0, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddIconButton(
-				"CommonData/UI/setting.png", true,
-				(1920 - 96 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonParts->AddIconButton(
-				"CommonData/UI/credit.png", true,
-				(1920 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonParts->AddStringButton(400, 52, true, 1920 - 64 - 48, 1080 - 84 - 64 * 2, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton(401, 48, true, 1920 - 64 - 48, 1080 - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton(402, 48, true, 1920 - 64 - 48, 1080 - 84 - 64 * 0, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, (1920 - 96 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, (1920 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
 			// クレジット
 			this->m_CreditControl = std::make_unique<CreditControl>();
 			this->m_CreditControl->Init();

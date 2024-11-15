@@ -106,12 +106,16 @@
 0413=Change Setting
 0414=Watch Credit
 
+0420=Return Title
+0421=Option
+0422=Return Game
+
 9990=Exit
 9991=Return
 9992=Decision
 9993=Select
 9994=Change Tab
-
+9995=Pause
 
 9900=Move
 9903=Walk

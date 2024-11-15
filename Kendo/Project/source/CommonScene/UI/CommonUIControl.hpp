@@ -34,7 +34,7 @@ namespace FPS_n2 {
 				ButtonMode m_ButtonMode{ ButtonMode::String };
 				bool m_EnableSelect{ false };
 			private:
-				char m_String[64]{};
+				int m_LocalizeID{0};
 				GraphHandle m_Icon;
 
 			public:
@@ -53,9 +53,10 @@ namespace FPS_n2 {
 					this->m_ButtonMode = ButtonMode::Icon;
 					this->m_EnableSelect = IsEnableSelect;
 				}
-				void			Load_String(const char* String, int fontsize, bool IsEnableSelect) noexcept {
-					snprintfDx(this->m_String, 64, String);
-					xsize = WindowSystem::GetMsgLen(fontsize, this->m_String);
+				void			Load_String(int LocalizeID, int fontsize, bool IsEnableSelect) noexcept {
+					auto* LocalizeParts = LocalizePool::Instance();
+					m_LocalizeID = LocalizeID;
+					xsize = WindowSystem::GetMsgLen(fontsize, LocalizeParts->Get(m_LocalizeID));
 					ysize = fontsize;
 					this->m_ButtonMode = ButtonMode::String;
 					this->m_EnableSelect = IsEnableSelect;
@@ -116,6 +117,7 @@ namespace FPS_n2 {
 				}
 				void			Draw(void) noexcept {
 					auto* WindowParts = WindowSystem::DrawControl::Instance();
+					auto* LocalizeParts = LocalizePool::Instance();
 					switch (this->m_ButtonMode) {
 					case ButtonMode::String:
 					{
@@ -200,7 +202,7 @@ namespace FPS_n2 {
 							}
 						}
 						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (ysize),
-							LMR, TMB, (xp1), (yp1 + static_cast<int>(SelYadd)), Color, Black, this->m_String);
+							LMR, TMB, (xp1), (yp1 + static_cast<int>(SelYadd)), Color, Black, LocalizeParts->Get(m_LocalizeID));
 					}
 					break;
 					case ButtonMode::Icon:
@@ -266,19 +268,13 @@ namespace FPS_n2 {
 			void Draw(void) noexcept;
 			void Dispose(void) noexcept;
 		public:
-			void AddStringButton(
-				const char* String, int fontsize, bool IsEnableSelect,
-				int xp, int yp, FontHandle::FontXCenter FontX, FontHandle::FontYCenter FontY
-			) noexcept {
+			void AddStringButton(int LocalizeID, int fontsize, bool IsEnableSelect, int xp, int yp, FontHandle::FontXCenter FontX, FontHandle::FontYCenter FontY) noexcept {
 				ButtonSel.emplace_back(std::make_shared<ButtonClass>());
 				ButtonSel.back()->LoadCommon(&this->m_SelectBackImage);
-				ButtonSel.back()->Load_String(String, fontsize, IsEnableSelect);
+				ButtonSel.back()->Load_String(LocalizeID, fontsize, IsEnableSelect);
 				ButtonSel.back()->Set(xp, yp, FontX, FontY);
 			}
-			void AddIconButton(
-				const char* IconPath, bool IsEnableSelect,
-				int xp, int yp, FontHandle::FontXCenter FontX, FontHandle::FontYCenter FontY
-			) noexcept {
+			void AddIconButton(const char* IconPath, bool IsEnableSelect, int xp, int yp, FontHandle::FontXCenter FontX, FontHandle::FontYCenter FontY) noexcept {
 				ButtonSel.emplace_back(std::make_shared<ButtonClass>());
 				ButtonSel.back()->LoadCommon(&this->m_SelectBackImage);
 				ButtonSel.back()->Load_Icon(IconPath, IsEnableSelect);
