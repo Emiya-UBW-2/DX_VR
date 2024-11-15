@@ -20,12 +20,13 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class MainGameScene : public TEMPSCENE {
 		private:
-			Tutorial									m_Tutorial;
 			//UIŠÖ˜A
 			float										m_Concussion{ 0.f };
 			float										m_ConcussionPer{ 0.f };
 			UIClass										m_UIclass;
 			PauseMenuControl							m_PauseMenuControl;
+			ResultMenuControl							m_ResultMenuControl;
+			Tutorial									m_Tutorial;
 			//NetWork
 			GameControlType								m_GameControlType{ GameControlType::InGame };
 			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };
@@ -41,47 +42,24 @@ namespace FPS_n2 {
 			bool			m_IsEventSceneFlag{ false };
 			std::string		m_EventSelect;
 
-			GraphHandle		m_GameStart;
-			GraphHandle		m_GameRestart;
-			GraphHandle*	m_pStart{ nullptr };
-			GraphHandle		m_Once;
-			GraphHandle		m_GameEnd;
-			GraphHandle		m_Result;
+			bool			m_IsGameStart{ false };
+			bool			m_IsGameEnd{ false };
+			float			m_Timer{ 0.f };
+			bool			m_IsPlayable{ false };
 
-			float m_GameStartTimer{ 2.f };
-			float m_GameStartAlpha{ 0.f };
-			float m_GameStartScale{ 0.f };
+			bool			m_IsDrawOneMinute{ false };
+			bool			m_IsTimeUp{ false };
+			bool			m_IsWinSound{ false };
 
-			bool m_IsGameStart{ false };
-			bool m_IsGameEnd{ false };
-			float m_Timer{ 0.f };
-			bool m_IsPlayable{ false };
+			bool			m_IsResult{ false };
+			int				m_TimerSE{ 0 };
 
-			float m_WinOnceTimer{ 2.f };
-			float m_WinOnceAlpha{ 0.f };
-			float m_WinOnceScale{ 0.f };
+			float			m_DivideTimer{ 5.f };
 
-			float m_GameEndTimer{ 2.f };
-			float m_GameEndAlpha{ 0.f };
-			float m_GameEndScale{ 0.f };
+			float			m_TutorialTimer{ 0.f };
+			float			m_TutorialResetTimer{ 0.f };
 
-			bool m_IsDrawOneMinute{ false };
-			bool m_IsTimeUp{ false };
-			bool m_IsWinSound{ false };
-
-			bool m_IsResult{ false };
-			int m_TimerSE{ 0 };
-
-			float m_DivideTimer{ 5.f };
-
-			float m_TutorialTimer{ 0.f };
-
-			float m_TutorialResetTimer{ 0.f };
-
-			float							m_ScoreUp0{ 0.f };
-			float							m_ScoreUp1{ 0.f };
-
-			Replay							m_Replay;
+			Replay			m_Replay;
 		private:
 			auto		GetMyPlayerID(void) const noexcept {
 				if (m_NetWorkController) {
@@ -89,8 +67,15 @@ namespace FPS_n2 {
 				}
 				return (PlayerID)0;
 			}
+			void		SetupStartCommon(void) noexcept;
 			void		SetupBattleStart(void) noexcept;
+			void		SetupBattleRestart(void) noexcept;
 			void		SetupResult(void) noexcept;
+
+			void		UpdateEvent(void) noexcept;
+			void		SetupEnd(void) noexcept;
+
+			void		UpdateInGame(void) noexcept;
 		public:
 			void		SetGameMode(GameMode value)noexcept { m_GameMode = value; }
 		public:
@@ -109,12 +94,8 @@ namespace FPS_n2 {
 			void			Dispose_Load_Sub(void) noexcept override;
 			//
 			void			BG_Draw_Sub(void) const noexcept override;
-			void			ShadowDraw_Far_Sub(void) const noexcept override;
 			void			ShadowDraw_Sub(void) const noexcept override;
-			void			CubeMap_Sub(void) const noexcept override;
-
 			void			SetShadowDraw_Sub(void) const noexcept override;
-
 			void			MainDraw_Sub(void) const noexcept override;
 			//UI•\Ž¦
 			void			DrawUI_Base_Sub(void) const noexcept override;

@@ -263,6 +263,24 @@ namespace FPS_n2 {
 			GraphHandle						m_HeartIcon;
 			GraphHandle						m_Kiai;
 			GraphHandle						m_Mine;
+
+			GraphHandle		m_GameStart;
+			GraphHandle		m_GameRestart;
+			GraphHandle* m_pStart{ nullptr };
+			GraphHandle		m_Once;
+			GraphHandle		m_GameEnd;
+
+			float m_GameStartTimer{ 2.f };
+			float m_GameStartAlpha{ 0.f };
+			float m_GameStartScale{ 0.f };
+
+			float m_WinOnceTimer{ 2.f };
+			float m_WinOnceAlpha{ 0.f };
+			float m_WinOnceScale{ 0.f };
+
+			float m_GameEndTimer{ 2.f };
+			float m_GameEndAlpha{ 0.f };
+			float m_GameEndScale{ 0.f };
 		public:
 			UIClass(void) noexcept {}
 			UIClass(const UIClass&) = delete;
@@ -272,21 +290,140 @@ namespace FPS_n2 {
 
 			virtual ~UIClass(void) noexcept {}
 		public:
+			bool			IsGameStartEnd() const noexcept { return m_GameStartTimer <= 0.f; }
+			void			SetGameStart(bool isFirstRound) noexcept {
+				if (isFirstRound) {
+					m_pStart = &m_GameStart;
+				}
+				else {
+					m_pStart = &m_GameRestart;
+				}
+				m_GameStartTimer = 2.f;
+			}
+
+			bool			IsWinOnceEnd() const noexcept { return m_WinOnceTimer <= 0.f; }
+			void			SetWinOnceStart() noexcept { m_WinOnceTimer = 1.5f; }
+
+			bool			IsGameEndEnd() const noexcept { return m_GameEndTimer <= 0.f; }
+			void			SetTimeUpStart() noexcept { m_GameEndTimer = 2.5f; }
+			void			SetGameEndStart() noexcept { m_GameEndTimer = std::max(m_GameEndTimer, 1.5f); }
+		public:
 			void			Load(void) noexcept {
+				auto* HitMarkParts = HitMark::Instance();
+
 				m_HeartIcon.Load("data/UI/Heart.png");
 				m_Kiai.Load("data/UI/Kiai.png");
 				m_Mine.Load("data/UI/Mine.png");
+				m_GameStart.Load("data/UI/GameStart.png");
+				m_GameRestart.Load("data/UI/GameReStart.png");
+				m_Once.Load("data/UI/Once.png");
+				m_GameEnd.Load("data/UI/GameEnd.png");
+				HitMarkParts->Load();
 			}
-			void			Dispose(void) noexcept {
+			void			Dispose_Load(void) noexcept {
+				auto* HitMarkParts = HitMark::Instance();
 				m_HeartIcon.Dispose();
 				m_Kiai.Dispose();
 				m_Mine.Dispose();
+				m_GameStart.Dispose();
+				m_GameRestart.Dispose();
+				m_Once.Dispose();
+				m_GameEnd.Dispose();
+
+				HitMarkParts->Dispose();
 			}
 			void			Set(void) noexcept {
+				auto* HitMarkParts = HitMark::Instance();
+
+				m_GameStartAlpha = 0.f;
+				m_GameStartScale = 0.f;
+				m_GameStartTimer = 2.f;
+
+				m_WinOnceAlpha = 0.f;
+				m_WinOnceScale = 0.f;
+				m_WinOnceTimer = -1.f;
+
+				m_GameEndAlpha = 0.f;
+				m_GameEndScale = 0.f;
+				m_GameEndTimer = -1.f;
+				//
+				HitMarkParts->Set();
+			}
+			void			Update(void) noexcept {
+				auto* DXLib_refParts = DXLib_ref::Instance();
+				{
+					if (m_GameStartTimer > 1.f) {
+						float Per = std::clamp((1.4f - m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
+						m_GameStartAlpha = Lerp(0.f, 1.f, Per);
+						m_GameStartScale = Lerp(0.f, 1.0f, Per);
+					}
+					else if (m_GameStartTimer > 0.f) {
+						float Per = std::clamp((1.f - m_GameStartTimer), 0.f, 1.f);//0to1
+						m_GameStartAlpha = Lerp(1.f, 1.f, Per);
+						m_GameStartScale = Lerp(1.0f, 1.1f, Per);
+					}
+					else if (m_GameStartTimer > -0.2f) {
+						float Per = std::clamp((-m_GameStartTimer) / 0.2f, 0.f, 1.f);//0to1
+						m_GameStartAlpha = Lerp(1.f, 0.f, Per);
+						m_GameStartScale = Lerp(1.1f, 5.f, Per);
+					}
+					else {
+						m_GameStartAlpha = 0.f;
+						m_GameStartScale = 0.f;
+					}
+					m_GameStartTimer = std::max(m_GameStartTimer - DXLib_refParts->GetDeltaTime(), -1.f);
+				}
+				{
+					if (m_WinOnceTimer > 1.f) {
+						float Per = std::clamp((1.4f - m_WinOnceTimer) / 0.2f, 0.f, 1.f);//0to1
+						m_WinOnceAlpha = Lerp(0.f, 1.f, Per);
+						m_WinOnceScale = Lerp(0.f, 1.0f, Per);
+					}
+					else if (m_WinOnceTimer > 0.f) {
+						float Per = std::clamp((1.f - m_WinOnceTimer), 0.f, 1.f);//0to1
+						m_WinOnceAlpha = Lerp(1.f, 1.f, Per);
+						m_WinOnceScale = Lerp(1.0f, 1.1f, Per);
+					}
+					else if (m_WinOnceTimer > -0.2f) {
+						float Per = std::clamp((-m_WinOnceTimer) / 0.2f, 0.f, 1.f);//0to1
+						m_WinOnceAlpha = Lerp(1.f, 0.f, Per);
+						m_WinOnceScale = Lerp(1.1f, 5.f, Per);
+					}
+					else {
+						m_WinOnceAlpha = 0.f;
+						m_WinOnceScale = 0.f;
+					}
+					m_WinOnceTimer = std::max(m_WinOnceTimer - DXLib_refParts->GetDeltaTime(), -1.f);
+				}
+				{
+					if (m_GameEndTimer > 1.f) {
+						float Per = std::clamp((1.4f - m_GameEndTimer) / 0.2f, 0.f, 1.f);//0to1
+						m_GameEndAlpha = Lerp(0.f, 1.f, Per);
+						m_GameEndScale = Lerp(0.f, 1.0f, Per);
+					}
+					else if (m_GameEndTimer > 0.f) {
+						float Per = std::clamp((1.f - m_GameEndTimer), 0.f, 1.f);//0to1
+						m_GameEndAlpha = Lerp(1.f, 1.f, Per);
+						m_GameEndScale = Lerp(1.0f, 1.1f, Per);
+					}
+					else if (m_GameEndTimer > -0.2f) {
+						float Per = std::clamp((-m_GameEndTimer) / 0.2f, 0.f, 1.f);//0to1
+						m_GameEndAlpha = Lerp(1.f, 0.f, Per);
+						m_GameEndScale = Lerp(1.1f, 5.f, Per);
+					}
+					else {
+						m_GameEndAlpha = 0.f;
+						m_GameEndScale = 0.f;
+					}
+					m_GameEndTimer = std::max(m_GameEndTimer - DXLib_refParts->GetDeltaTime(), -1.f);
+				}
 			}
 			void			Draw(void) const noexcept {
 				auto* WindowParts = WindowSystem::DrawControl::Instance();
 				auto* LocalizeParts = LocalizePool::Instance();
+				auto* HitMarkParts = HitMark::Instance();
+				//
+				HitMarkParts->Draw();
 				//気合
 				{
 					float radius = Lerp(static_cast<float>(1.f), static_cast<float>(1.01f), floatParam[2]);
@@ -307,8 +444,8 @@ namespace FPS_n2 {
 				//タイム
 				{
 					xp1 = (30);
-					yp1 = (static_cast<int>(Lerp(10.0f, -50.f, std::clamp(floatParam[1] - 0.5f, 0.f, 1.f))));
-					float per = std::cos(DX_PI_F * 10.f * floatParam[1]);
+					yp1 = (static_cast<int>(Lerp(10.0f, -50.f, std::clamp(((intParam[3]) ? 2.f : std::max(m_GameStartTimer, 0.f)) - 0.5f, 0.f, 1.f))));
+					float per = std::cos(DX_PI_F * 10.f * ((intParam[3]) ? 2.f : std::max(m_GameStartTimer, 0.f)));
 					if ((per * 255.f) > 1.f) {
 						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
 						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
@@ -322,7 +459,7 @@ namespace FPS_n2 {
 				//スコア
 				{
 					xp1 = (1920 / 2);
-					yp1 = (static_cast<int>(Lerp(28.0f, -100.f, std::clamp(floatParam[1] - 0.5f, 0.f, 1.f))));
+					yp1 = (static_cast<int>(Lerp(28.0f, -100.f, std::clamp(((intParam[3]) ? 2.f : std::max(m_GameStartTimer, 0.f)) - 0.5f, 0.f, 1.f))));
 
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
 						92, 0, 0);
@@ -342,7 +479,7 @@ namespace FPS_n2 {
 						true);
 					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
 						255, 255, 255);
-					
+
 
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - (10) - (40), yp1 + (20),
@@ -351,9 +488,8 @@ namespace FPS_n2 {
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - (10) - (40 - 20 * intParam[1]), yp1 + (20),
 						xp1 - (10), yp1 + (24), Red, true);
-					int Y1add = (static_cast<int>(Lerp(0.f, -8.f, floatParam[3])));
 					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
-						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1 - (20), yp1 + Y1add, Red, Black, "%d", intParam[0]);
+						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1 - (20), yp1, Red, Black, "%d", intParam[0]);
 
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - (10), yp1 + (20),
@@ -364,9 +500,8 @@ namespace FPS_n2 {
 					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 + (10), yp1 + (20),
 						xp1 + (10) + (40 - 20 * intParam[0]), yp1 + (24), White, true);
-					int Y2add = (static_cast<int>(Lerp(0.f, -8.f, floatParam[4])));
 					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1 + (20), yp1 + Y2add, White, Black, "%d", intParam[1]);
+						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1 + (20), yp1, White, Black, "%d", intParam[1]);
 				}
 				//情報
 				{
@@ -428,6 +563,46 @@ namespace FPS_n2 {
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
+				}
+				//
+				{
+					xp1 = (1920 / 2);
+					yp1 = (240);
+
+					if ((m_GameStartAlpha * 255.f) > 1.f) {
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameStartAlpha), 0, 255));
+						WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
+						WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+							m_pStart, xp1, yp1, m_GameStartScale, 0.f, true);
+						WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					}
+
+					if ((m_WinOnceAlpha * 255.f) > 1.f) {
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_WinOnceAlpha), 0, 255));
+						WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+						WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+							&m_Once, xp1, yp1, m_WinOnceScale, 0.f, true);
+						WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					}
+
+					if ((m_GameEndAlpha * 255.f) > 1.f) {
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameEndAlpha), 0, 255));
+						WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+						WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+							&m_GameEnd, xp1, yp1, m_GameEndScale, 0.f, true);
+						WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					}
+					if (0 <= floatParam[1] && floatParam[1] < 3.f) {
+						if (static_cast<int>(floatParam[1] * 100) % 30 < 15) {
+							WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
+								FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, (32), (384),
+								Yellow, Black,
+								"場外まであと%3.1f秒", floatParam[1]);
+						}
+					}
 				}
 			}
 
