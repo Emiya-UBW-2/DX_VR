@@ -48,11 +48,10 @@ namespace FPS_n2 {
 			this->m_IsEnd = false;
 			this->m_IsWinSound = false;
 			this->m_IsGameEnd = false;
-			this->m_IsTimeUp = true;
+			this->m_IsTimeUp = false;
 			this->m_IsDrawOneMinute = true;
 			this->m_Timer = 180.f;
 			this->m_IsPlayable = false;
-			this->m_IsResult = false;
 			PlayerMngr->ResetScore();
 			//
 			FadeInParts->SetFadeIn(2.f);
@@ -78,7 +77,11 @@ namespace FPS_n2 {
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Good))->StopAll();
 			KeyGuideParts->SetGuideFlip();
 			m_ResultMenuControl.Set();
-			this->m_IsResult = true;
+			m_GameControlType = GameControlType::Result;
+		}
+		void MainGameScene::SetupEvent(const char* Path) noexcept {
+			m_IsEventSceneFlag = true;
+			m_EventSelect = Path;
 		}
 		void MainGameScene::UpdateEvent(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -160,7 +163,7 @@ namespace FPS_n2 {
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::JudgeVoice_Start))->Play(DX_PLAYTYPE_BACK, TRUE);
 						}
 					}
-					else if (m_IsGameStart) {
+					else {
 						if (!m_IsGameEnd) {
 							if (this->m_UIclass.IsWinOnceEnd() || m_DivideTimer < 0.f) {
 								if (FadeInParts->IsFadeClear()) {
@@ -183,7 +186,6 @@ namespace FPS_n2 {
 									else {
 										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::JudgeVoice_Draw))->Play(DX_PLAYTYPE_BACK, TRUE);
 									}
-									//
 								}
 								if (this->m_UIclass.IsGameEndEnd()) {
 									if (FadeInParts->IsFadeClear()) {
@@ -253,8 +255,8 @@ namespace FPS_n2 {
 					}
 					else {
 						//タイムアップ
-						if (m_IsTimeUp && (m_Timer < 0.f)) {
-							m_IsTimeUp = false;
+						if (!m_IsTimeUp && (m_Timer < 0.f)) {
+							m_IsTimeUp = true;
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::TimeUp))->Play(DX_PLAYTYPE_BACK, TRUE, 255);
 
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::JudgeVoice_Stop))->Play(DX_PLAYTYPE_BACK, TRUE);
@@ -282,7 +284,7 @@ namespace FPS_n2 {
 				}
 			}
 			else {
-				m_IsPlayable = FadeInParts->IsFadeClear();
+				m_IsPlayable = FadeInParts->IsFadeClear() && !m_IsEventSceneActive;
 
 				if (!m_IsPlayable) {
 					if (FadeInParts->IsFadeAll()) {
@@ -292,11 +294,9 @@ namespace FPS_n2 {
 					}
 				}
 				else {
-					if (PlayerMngr->PutAddScoreFlag()) {
-						if (PlayerMngr->GetWinPlayer() == GetMyPlayerID()) {
-							if (m_Tutorial.CheckHitOk(PlayerMngr->GetWinHitType())) {
-								m_TutorialResetTimer = 2.f;
-							}
+					if (PlayerMngr->PutAddScoreFlag() && (PlayerMngr->GetWinPlayer() == GetMyPlayerID())) {
+						if (m_Tutorial.CheckHitOk(PlayerMngr->GetWinHitType())) {
+							m_TutorialResetTimer = 2.f;
 						}
 					}
 
@@ -320,8 +320,7 @@ namespace FPS_n2 {
 
 							m_IsPlayable = false;
 
-							m_IsEventSceneFlag = true;
-							m_EventSelect = "data/Cut/Cut2.txt";
+							SetupEvent("data/Cut/Cut2.txt");
 						}
 					}
 					else {
@@ -357,7 +356,7 @@ namespace FPS_n2 {
 					}
 				}
 				//ネットワーク
-				{
+				if (m_GameControlType == GameControlType::InGame || m_GameControlType == GameControlType::Network) {
 					auto* NetBrowser = NetWorkBrowser::Instance();
 					if (NetBrowser->IsDataReady() && !m_NetWorkController) {
 						m_NetWorkController = std::make_unique<NetWork::NetWorkController>();
@@ -774,12 +773,10 @@ namespace FPS_n2 {
 			//
 			if (GetIsFirstLoop()) {
 				if (m_GameMode == GameMode::Training) {
-					m_IsEventSceneFlag = true;
-					m_EventSelect = "data/Cut/Cut1.txt";
+					SetupEvent("data/Cut/Cut1.txt");
 				}
 				else if (m_GameMode == GameMode::Main) {
-					m_IsEventSceneFlag = true;
-					m_EventSelect = "data/Cut/Cut3.txt";
+					SetupEvent("data/Cut/Cut3.txt");
 					SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_BACK, TRUE);
 				}
 			}
@@ -790,20 +787,10 @@ namespace FPS_n2 {
 					auto* SceneParts = SceneControl::Instance();
 					auto* KeyGuideParts = KeyGuide::Instance();
 					auto* LocalizeParts = LocalizePool::Instance();
-					if (m_IsResult) {
-						if (!SceneParts->IsPause()) {
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9915));
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9917));
-						}
-						return;
-					}
-					if (m_GameControlType == GameControlType::Replay) {
-						if (!SceneParts->IsPause()) {
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9918));
-						}
-					}
-					else {
-						if (SceneParts->IsPause()) {
+					if (SceneParts->IsPause()) {
+						switch (m_GameControlType) {
+						case GameControlType::InGame:
+						case GameControlType::Network:
 							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
 							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_S).GetAssign(), Pad->GetControlType()), "");
 							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_A).GetAssign(), Pad->GetControlType()), "");
@@ -811,79 +798,108 @@ namespace FPS_n2 {
 							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_STICK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9993));
 							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9992));
 							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::RELOAD).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9991));
+							break;
+						case GameControlType::Replay:
+							break;
+						case GameControlType::Result:
+							break;
+						default:
+							break;
 						}
-						else {
+					}
+					else {
+						switch (m_GameControlType) {
+						case GameControlType::InGame:
+						case GameControlType::Network:
 							if (m_IsEventSceneFlag || m_IsEventSceneActive) {
 								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9914));
-								return;
 							}
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_S).GetAssign(), Pad->GetControlType()), "");
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_A).GetAssign(), Pad->GetControlType()), "");
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_D).GetAssign(), Pad->GetControlType()), "");
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_STICK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9900));
+							else {
+								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
+								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_S).GetAssign(), Pad->GetControlType()), "");
+								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_A).GetAssign(), Pad->GetControlType()), "");
+								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_D).GetAssign(), Pad->GetControlType()), "");
+								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_STICK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9900));
 
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::SHOT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9906));
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::AIM).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9908));
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::ULT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9907));
+								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::SHOT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9906));
+								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::AIM).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9908));
+								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::ULT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9907));
 
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::WALK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9903));
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9905));
-							if (m_GameMode == GameMode::Training) {
-								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), "");
-								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::RELOAD).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9916));
+								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::WALK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9903));
+								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9905));
+								if (m_GameMode == GameMode::Training) {
+									KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), "");
+									KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::RELOAD).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9916));
+								}
 							}
+							break;
+						case GameControlType::Replay:
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9918));
+							break;
+						case GameControlType::Result:
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9915));
+							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9917));
+							break;
+						default:
+							break;
 						}
 					}
 				});
 			//
-			Pad->SetMouseMoveEnable((m_GameMode != GameMode::Replay) && !SceneParts->IsPause() && !m_IsResult);
 			FadeInParts->Update();
 			if (this->m_IsEnd && FadeInParts->IsFadeAll()) {
 				return false;
 			}
-			if (!m_IsResult) {
-				if (m_GameControlType == GameControlType::InGame) {
-					if (SceneParts->IsPause()) {
-						m_PauseMenuControl.UpdatePause();
-					}
-					if (m_PauseMenuControl.IsRetire()) {
-						SetupEnd();
-					}
+			switch (m_GameControlType) {
+			case GameControlType::InGame:
+				Pad->SetMouseMoveEnable(!SceneParts->IsPause());
+				if (SceneParts->IsPause()) {
+					m_PauseMenuControl.UpdatePause();
 				}
+				else {
+					ButtonParts->ResetSel();
+				}
+				if (m_PauseMenuControl.IsRetire()) {
+					SetupEnd();
+				}
+				//
 				UpdateEvent();
 				if (m_IsEventSceneActive) {
 					return true;
 				}
-			}
-			if (SceneParts->IsPause()) {
-				if (m_IsResult) {
-					ButtonParts->ResetSel();
-				}
-				if (!m_NetWorkController) {
+				if (SceneParts->IsPause() && !m_NetWorkController) {
 					return true;
 				}
-			}
-			else {
-				if (!m_IsResult) {
-					ButtonParts->ResetSel();
-				}
-			}
-			if (!m_IsResult) {
-				if (m_GameMode != GameMode::Training) {
-					if (m_GameControlType == GameControlType::Replay) {
-						//リザルトに移動
-						if (Pad->GetPadsInfo(PADS::JUMP).GetKey().trigger()) {
-							SetupResult();
-						}
-					}
-				}
-				else {
+				if (m_GameMode == GameMode::Training) {
 					m_Tutorial.Update();
 				}
 				UpdateInGame();
-			}
-			else {
+				break;
+			case GameControlType::Network:
+				Pad->SetMouseMoveEnable(!SceneParts->IsPause());
+				if (SceneParts->IsPause() && !m_NetWorkController) {
+					return true;
+				}
+				UpdateInGame();
+				break;
+			case GameControlType::Replay:
+				Pad->SetMouseMoveEnable(false);
+				if (SceneParts->IsPause() && !m_NetWorkController) {
+					return true;
+				}
+				UpdateInGame();
+				if (Pad->GetPadsInfo(PADS::JUMP).GetKey().trigger()) {
+					SetupResult();
+				}
+				break;
+			case GameControlType::Result:
+				Pad->SetMouseMoveEnable(false);
+				if (SceneParts->IsPause()) {
+					ButtonParts->ResetSel();
+				}
+				if (SceneParts->IsPause() && !m_NetWorkController) {
+					return true;
+				}
 				if (FadeInParts->IsFadeClear()) {
 					this->m_ResultMenuControl.Update();
 					if (this->m_ResultMenuControl.IsReplay()) {
@@ -898,6 +914,9 @@ namespace FPS_n2 {
 						SetupEnd();
 					}
 				}
+				break;
+			default:
+				break;
 			}
 			return true;
 		}
@@ -942,7 +961,7 @@ namespace FPS_n2 {
 		//
 		void			MainGameScene::BG_Draw_Sub(void) const noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
-			if (m_IsResult) { return; }
+			if (m_GameControlType == GameControlType::Result) { return; }
 			if (m_IsEventSceneActive) {
 				m_EventScene.BGDraw();
 			}
@@ -953,7 +972,7 @@ namespace FPS_n2 {
 		void			MainGameScene::ShadowDraw_Sub(void) const noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
-			if (m_IsResult) { return; }
+			if (m_GameControlType == GameControlType::Result) { return; }
 			if (m_IsEventSceneActive) {
 				m_EventScene.ShadowDraw();
 			}
@@ -965,7 +984,7 @@ namespace FPS_n2 {
 		void			MainGameScene::SetShadowDraw_Sub(void) const noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
-			if (m_IsResult) { return; }
+			if (m_GameControlType == GameControlType::Result) { return; }
 			if (m_IsEventSceneActive) {
 				m_EventScene.SetShadowDraw();
 			}
@@ -980,7 +999,7 @@ namespace FPS_n2 {
 			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* HitMarkParts = HitMark::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
-			if (m_IsResult) { return; }
+			if (m_GameControlType == GameControlType::Result) { return; }
 			if (m_IsEventSceneActive) {
 				m_EventScene.MainDraw();
 			}
@@ -1000,7 +1019,7 @@ namespace FPS_n2 {
 			auto* SceneParts = SceneControl::Instance();
 			auto* FadeInParts = FadeControl::Instance();
 
-			if (m_IsResult) {
+			if (m_GameControlType == GameControlType::Result) {
 				this->m_ResultMenuControl.Draw();
 			}
 			else if (m_IsEventSceneActive) {
@@ -1017,14 +1036,16 @@ namespace FPS_n2 {
 				}
 				this->m_UIclass.Draw();
 			}
-			FadeInParts->Draw();
+			if (!m_IsEventSceneActive) {
+				FadeInParts->Draw();
+			}
 		}
 		void			MainGameScene::DrawUI_In_Sub(void) const noexcept {
 			auto* SceneParts = SceneControl::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// ポーズ
 			if (SceneParts->IsPause()) {
-				if (!m_IsResult && (m_GameControlType != GameControlType::Replay)) {
+				if ((m_GameControlType != GameControlType::Result) && (m_GameControlType != GameControlType::Replay)) {
 					ButtonParts->Draw();
 				}
 			}

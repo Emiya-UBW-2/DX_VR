@@ -28,56 +28,50 @@ namespace FPS_n2 {
 			ResultMenuControl							m_ResultMenuControl;
 			Tutorial									m_Tutorial;
 			//NetWork
-			GameControlType								m_GameControlType{ GameControlType::InGame };
 			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };
 			std::vector<DamageEvent>					m_DamageEvents;
 			//
-			bool										m_IsEnd{ false };//シーン全体の終了フラグ
 			GameMode									m_GameMode{ GameMode::Main };
-#ifdef DEBUG
-			float m_D1{ 38.f / 255.f }, m_D2{ 192.f / 255.f }, m_D3{ 1.f };
-#endif
-			EventScene		m_EventScene;
-			bool			m_IsEventSceneActive{ false };
-			bool			m_IsEventSceneFlag{ false };
-			std::string		m_EventSelect;
-
-			bool			m_IsGameStart{ false };
-			bool			m_IsGameEnd{ false };
-			float			m_Timer{ 0.f };
-			bool			m_IsPlayable{ false };
-
-			bool			m_IsDrawOneMinute{ false };
-			bool			m_IsTimeUp{ false };
-			bool			m_IsWinSound{ false };
-
-			bool			m_IsResult{ false };
-			int				m_TimerSE{ 0 };
-
-			float			m_DivideTimer{ 5.f };
-
-			float			m_TutorialTimer{ 0.f };
-			float			m_TutorialResetTimer{ 0.f };
-
-			Replay			m_Replay;
+			GameControlType								m_GameControlType{ GameControlType::InGame };
+			//イベント
+			EventScene									m_EventScene;
+			bool										m_IsEventSceneActive{ false };
+			bool										m_IsEventSceneFlag{ false };
+			std::string									m_EventSelect;
+			//
+			bool										m_IsEnd{ false };//シーン全体の終了フラグ
+			bool										m_IsGameStart{ false };
+			bool										m_IsGameEnd{ false };
+			float										m_Timer{ 0.f };
+			bool										m_IsPlayable{ false };
+			bool										m_IsDrawOneMinute{ false };
+			bool										m_IsTimeUp{ false };
+			bool										m_IsWinSound{ false };
+			bool										m_IsResult{ false };
+			int											m_TimerSE{ 0 };
+			float										m_DivideTimer{ 5.f };
+			//
+			float										m_TutorialTimer{ 0.f };
+			float										m_TutorialResetTimer{ 0.f };
+			//
+			Replay										m_Replay;
 		private:
-			auto		GetMyPlayerID(void) const noexcept {
+			auto			GetMyPlayerID(void) const noexcept {
 				if (m_NetWorkController) {
 					return m_NetWorkController->GetMyPlayerID();
 				}
 				return (PlayerID)0;
 			}
-			void		SetupStartCommon(void) noexcept;
-			void		SetupBattleStart(void) noexcept;
-			void		SetupBattleRestart(void) noexcept;
-			void		SetupResult(void) noexcept;
+			void			SetupStartCommon(void) noexcept;
+			void			SetupBattleStart(void) noexcept;
+			void			SetupBattleRestart(void) noexcept;
+			void			SetupResult(void) noexcept;
 
-			void		UpdateEvent(void) noexcept;
-			void		SetupEnd(void) noexcept;
+			void			SetupEvent(const char* Path) noexcept;
+			void			UpdateEvent(void) noexcept;
+			void			SetupEnd(void) noexcept;
 
-			void		UpdateInGame(void) noexcept;
-		public:
-			void		SetGameMode(GameMode value)noexcept { m_GameMode = value; }
+			void			UpdateInGame(void) noexcept;
 		public:
 			MainGameScene(void) noexcept {}
 			MainGameScene(const MainGameScene&) = delete;
@@ -86,6 +80,8 @@ namespace FPS_n2 {
 			MainGameScene& operator=(MainGameScene&& o) = delete;
 
 			virtual ~MainGameScene(void) noexcept {}
+		public:
+			void			SetGameMode(GameMode value)noexcept { m_GameMode = value; }
 		public:
 			void			Load_Sub(void) noexcept override;
 			void			Set_Sub(void) noexcept override;

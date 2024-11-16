@@ -325,6 +325,8 @@ namespace FPS_n2 {
 					}
 				}
 				{
+					auto* KeyGuideParts = KeyGuide::Instance();
+					auto* Pad = PadControl::Instance();
 					switch (m_CheckHit) {
 					case HitType::Head:
 						if (GetMovieStateToGraph(m_Men.get()) == 0) {
@@ -334,6 +336,10 @@ namespace FPS_n2 {
 						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Men,
 							(64), (600 - 720 / 2 / 2),
 							(64 + 600 / 2), (600 + 720 / 2 / 2), false);
+
+						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2), KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::SHOT).GetAssign(), Pad->GetControlType()));
+
+						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2 + 30), KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()));
 						break;
 					case HitType::Arm:
 						if (GetMovieStateToGraph(m_Kote.get()) == 0) {
@@ -343,6 +349,10 @@ namespace FPS_n2 {
 						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Kote,
 							(64), (600 - 720 / 2 / 2),
 							(64 + 600 / 2), (600 + 720 / 2 / 2), false);
+
+						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2), KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::ULT).GetAssign(), Pad->GetControlType()));
+
+						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2 + 30), KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()));
 						break;
 					case HitType::Body:
 						if (GetMovieStateToGraph(m_Dou.get()) == 0) {
@@ -352,6 +362,11 @@ namespace FPS_n2 {
 						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Dou,
 							(64), (600 - 720 / 2 / 2),
 							(64 + 600 / 2), (600 + 720 / 2 / 2), false);
+
+						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2), KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::AIM).GetAssign(), Pad->GetControlType()));
+						KeyGuideParts->DrawButton((64 + 30), (600 + 720 / 2 / 2), KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::ULT).GetAssign(), Pad->GetControlType()));
+
+						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2+30), KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()));
 						break;
 					default:
 						break;
@@ -367,6 +382,7 @@ namespace FPS_n2 {
 		InGame,
 		Network,
 		Replay,
+		Result,
 	};
 
 	class ReplayData {
