@@ -650,7 +650,7 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(1, PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetScore());
 				//timer
 				this->m_UIclass.SetfloatParam(0, m_Timer);
-				this->m_UIclass.SetIntParam(3, m_IsGameEnd ? 1 : 0);
+				this->m_UIclass.SetIntParam(3, (m_IsGameEnd || (m_GameMode == GameMode::Training)) ? 1 : 0);
 				//êŠO•\¦
 				this->m_UIclass.SetfloatParam(1, (m_IsPlayable && (m_GameMode != GameMode::Training)) ? m_DivideTimer : -1.f);
 				//S””

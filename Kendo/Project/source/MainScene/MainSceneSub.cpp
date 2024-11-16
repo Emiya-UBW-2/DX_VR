@@ -127,6 +127,5 @@ namespace FPS_n2 {
 		void ResultMenuControl::Dispose_Load(void) noexcept {
 			this->m_Result.Dispose();
 		}
-		//
-	};
-};
+	}
+}

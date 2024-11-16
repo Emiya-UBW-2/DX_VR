@@ -120,4 +120,11 @@ namespace FPS_n2 {
 		Training,
 		Replay,
 	};
-};
+
+	enum class GameControlType {
+		InGame,
+		Network,
+		Replay,
+		Result,
+	};
+}

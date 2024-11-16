@@ -12,7 +12,7 @@ namespace FPS_n2 {
 		class PauseMenuControl {
 			bool			m_IsRetire{ false };
 		public:
-			const auto&		IsRetire(void) const noexcept { return this->m_IsRetire; }
+			const auto& IsRetire(void) const noexcept { return this->m_IsRetire; }
 		public:
 			void			Set(void) noexcept;
 			void			UpdatePause(void) noexcept;
@@ -366,7 +366,7 @@ namespace FPS_n2 {
 						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2), KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::AIM).GetAssign(), Pad->GetControlType()));
 						KeyGuideParts->DrawButton((64 + 30), (600 + 720 / 2 / 2), KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::ULT).GetAssign(), Pad->GetControlType()));
 
-						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2+30), KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()));
+						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2 + 30), KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()));
 						break;
 					default:
 						break;
@@ -374,58 +374,48 @@ namespace FPS_n2 {
 				}
 			}
 		};
-	};
-
-
-
-	enum class GameControlType {
-		InGame,
-		Network,
-		Replay,
-		Result,
-	};
-
-	class ReplayData {
-		std::array<NetWork::PlayerSendData, 2> m_Data;
-	public:
-		auto& SetOnce(PlayerID value) noexcept { return m_Data.at(value); }
-		const auto& GetOnce(PlayerID value) const noexcept { return m_Data.at(value); }
-	};
-	class Replay {
-		std::vector<ReplayData> m_Data;
-		int m_Now{ 0 };
-	public:
-		void Clear() noexcept {
-			m_Data.clear();
-			m_Now = 0;
-		}
-		void Save() noexcept {
-			size_t Size = m_Data.size();
-			std::ofstream fout;
-			fout.open("Replay/Rep.txt", std::ios::out | std::ios::binary | std::ios::trunc);
-			fout.write((char*)&Size, sizeof(Size));
-			fout.write((char*)&m_Data.at(0), sizeof(m_Data.at(0)) * m_Data.size());
-			fout.close();  //ファイルを閉じる
-		}
-		void Load() noexcept {
-			if (!std::filesystem::is_regular_file("Replay/Rep.txt")) {
-				return;
+		class ReplayData {
+			std::array<NetWork::PlayerSendData, 2> m_Data;
+		public:
+			auto& SetOnce(PlayerID value) noexcept { return m_Data.at(value); }
+			const auto& GetOnce(PlayerID value) const noexcept { return m_Data.at(value); }
+		};
+		class Replay {
+			std::vector<ReplayData> m_Data;
+			int m_Now{ 0 };
+		public:
+			void Clear() noexcept {
+				m_Data.clear();
+				m_Now = 0;
 			}
-			size_t Size = 0;
+			void Save() noexcept {
+				size_t Size = m_Data.size();
+				std::ofstream fout;
+				fout.open("Replay/Rep.txt", std::ios::out | std::ios::binary | std::ios::trunc);
+				fout.write((char*)&Size, sizeof(Size));
+				fout.write((char*)&m_Data.at(0), sizeof(m_Data.at(0)) * m_Data.size());
+				fout.close();  //ファイルを閉じる
+			}
+			void Load() noexcept {
+				if (!std::filesystem::is_regular_file("Replay/Rep.txt")) {
+					return;
+				}
+				size_t Size = 0;
 
-			std::ifstream fin;
-			fin.open("Replay/Rep.txt", std::ios::in | std::ios::binary);
-			fin.read((char*)&Size, sizeof(Size));
-			m_Data.resize(Size);
-			fin.read((char*)&m_Data.at(0), sizeof(m_Data.at(0)) * m_Data.size());
-			fin.close();
-		}
-	public:
-		void Start() noexcept { m_Now = 0; }
-		const auto& GetNow() const noexcept { return m_Data.at(m_Now); }
-		void Seek() noexcept { ++m_Now %= m_Data.size(); }
-	public:
-		void Add() noexcept { m_Data.emplace_back(); }
-		auto& SetBack() noexcept { return m_Data.back(); }
-	};
-};
+				std::ifstream fin;
+				fin.open("Replay/Rep.txt", std::ios::in | std::ios::binary);
+				fin.read((char*)&Size, sizeof(Size));
+				m_Data.resize(Size);
+				fin.read((char*)&m_Data.at(0), sizeof(m_Data.at(0)) * m_Data.size());
+				fin.close();
+			}
+		public:
+			void Start() noexcept { m_Now = 0; }
+			const auto& GetNow() const noexcept { return m_Data.at(m_Now); }
+			void Seek() noexcept { ++m_Now %= m_Data.size(); }
+		public:
+			void Add() noexcept { m_Data.emplace_back(); }
+			auto& SetBack() noexcept { return m_Data.back(); }
+		};
+	}
+}

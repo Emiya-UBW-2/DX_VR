@@ -50,13 +50,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DXLib_refParts->StartLogic();
 	//’Ç‰ÁÝ’è
 	SetMainWindowText("Œ•“¹-‚Â‚é‚¬ ‚Ý‚¿-");						//ƒ^ƒCƒgƒ‹
-	//SetUseHalfLambertLighting(TRUE);
+	SetUseHalfLambertLighting(TRUE);
 	MV1SetLoadModelReMakeNormal(TRUE);
 	//
 	FPS_n2::ArmAnimManager::Create();
+	FPS_n2::ArmAnimManager::Instance()->Load("data/CharaAnime/");
 	FPS_n2::Player::PlayerManager::Create();
 	FPS_n2::CommonBattleResource::Create();
-	FPS_n2::ArmAnimManager::Instance()->Load("data/CharaAnime/");
 	FPS_n2::BackGround::BackGroundClass::Create();
 	FPS_n2::NetWorkBrowser::Create();
 	FPS_n2::Sceneclass::ButtonControl::Create();
