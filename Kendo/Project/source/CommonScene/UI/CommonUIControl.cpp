@@ -7,7 +7,9 @@ namespace FPS_n2 {
 		// 
 		bool ButtonControl::GetTriggerButton(void) const noexcept {
 			auto* Pad = PadControl::Instance();
-			return (select != InvalidID) && (this->m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetPadsInfo(PADS::INTERACT).GetKey().trigger());
+			return (select != InvalidID)
+				&& ButtonSel.at(static_cast<size_t>(select))->IsEnableSelect()
+				&& (this->m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetPadsInfo(PADS::INTERACT).GetKey().trigger());
 		}
 		ButtonControl::ButtonControl(void) noexcept {
 			this->m_SelectBackImage.Load("CommonData/UI/select.png");

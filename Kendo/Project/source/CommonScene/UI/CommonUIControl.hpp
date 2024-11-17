@@ -76,6 +76,7 @@ namespace FPS_n2 {
 					this->m_Icon.Dispose();
 				}
 			public:
+				const auto&		IsEnableSelect(void) const noexcept { return m_EnableSelect; }
 				auto			IsFocus(void) const noexcept { return this->m_ButtonStatus == ButtonStatus::Focus; }
 				void			SetNone(void) noexcept { this->m_ButtonStatus = ButtonStatus::None; }
 				void			SetReady(void) noexcept { this->m_ButtonStatus = ButtonStatus::Ready; }
