@@ -11,6 +11,7 @@ int DBG_CamSel = -1;
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetDoubleStartValidFlag(TRUE);
+	SetMultiThreadFlag(TRUE);
 	//SetEnableXAudioFlag(TRUE);//Xaudio(ロードが長いとロストするので必要に応じて)
 	DXLib_ref::Create();
 	//使用するボタンの指定

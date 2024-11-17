@@ -193,11 +193,11 @@ namespace FPS_n2 {
 									}
 									if (FadeInParts->IsFadeAll()) {
 										FadeInParts->SetFadeIn(2.f);
-										SetupResult();
 										if (m_GameControlType == GameControlType::InGame) {
 											SE->Get(SoundType::BGM, 1)->Play(DX_PLAYTYPE_BACK, TRUE);
 											m_Replay.Save();
 										}
+										SetupResult();
 									}
 								}
 							}

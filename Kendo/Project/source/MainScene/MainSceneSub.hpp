@@ -397,7 +397,7 @@ namespace FPS_n2 {
 				fout.close();  //ƒtƒ@ƒCƒ‹‚ð•Â‚¶‚é
 			}
 			void Load() noexcept {
-				if (!std::filesystem::is_regular_file("Replay/Rep.txt")) {
+				if (!IsFileExist("Replay/Rep.txt")) {
 					return;
 				}
 				size_t Size = 0;
