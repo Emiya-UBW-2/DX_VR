@@ -76,6 +76,12 @@ namespace FPS_n2 {
 				m_ConcussionSwitch = false;
 				return Prev;
 			}
+			const auto		IsOutArea(void) const noexcept {
+				Vector3DX Vec = this->GetMove().GetPos() - Vector3DX::zero();
+				float Len = 11.f / 2.f * Scale3DRate;
+				return ((Vec.x < -Len || Len < Vec.x) ||
+					(Vec.z < -Len || Len < Vec.z));
+			}
 			auto			GetGuardOn(void) const noexcept { return m_GuardHit>0.f; }//ƒK[ƒh‚Å’|“‚ğ—}‚¦‚½
 			auto			GetYaTimerMax(void) const noexcept { return 10.f; }
 			auto			IsGuardStarting(void) const noexcept { return false; }

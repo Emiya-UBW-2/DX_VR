@@ -448,17 +448,6 @@ namespace FPS_n2 {
 		void			CharacterClass::ExecuteInput(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* SE = SoundPool::Instance();
-			//
-			bool IsOutArea = false;
-			{
-				Vector3DX Vec = this->m_move.GetPos() - Vector3DX::zero();
-				float Len = 11.f / 2.f * Scale3DRate;
-				if ((Vec.x < -Len || Len < Vec.x) ||
-					(Vec.z < -Len || Len < Vec.z)) {
-					IsOutArea = true;
-				}
-			}
-
 			//Š|‚¯º
 			if (
 				(m_CharaAction == EnumArmAnimType::Ready || m_CharaAction == EnumArmAnimType::Tsuba) &&
@@ -496,7 +485,7 @@ namespace FPS_n2 {
 					float cost = Vector3DX::Dot(Vec, Dir);
 					auto IsFront = (cost > cos(deg2rad(40)));
 					float Radius = 3.5f * Scale3DRate;
-					if (!IsOutArea && (Len < Radius) && IsFront) {
+					if (!IsOutArea() && (Len < Radius) && IsFront) {
 						if (CharaMove::GetInputControl().GetPADSPress(PADS::SHOT)) {
 							m_CharaAction = EnumArmAnimType::Men;
 							m_WazaType = WazaType::Men;
@@ -516,7 +505,7 @@ namespace FPS_n2 {
 			break;
 			case EnumArmAnimType::Run:
 			{
-				if (IsOutArea || m_RunTime >= 1.25f) {
+				if (IsOutArea() || m_RunTime >= 1.25f) {
 					m_CharaAction = EnumArmAnimType::Ready;
 				}
 

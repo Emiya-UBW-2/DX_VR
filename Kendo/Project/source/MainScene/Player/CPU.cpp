@@ -22,28 +22,8 @@ namespace FPS_n2 {
 			bool Ya_Key{ false };
 			float pp_x{ 0.f }, pp_y{ 0.f };
 
-			bool IsOutArea = false;
-			{
-				Vector3DX Vec = Chara->GetMove().GetPos() - Vector3DX::zero();
-				float Len = 11.f / 2.f * Scale3DRate;
-				if ((Vec.x < -Len || Len < Vec.x) ||
-					(Vec.z < -Len || Len < Vec.z)) {
-					IsOutArea = true;
-				}
-			}
-
-			bool IsNearPlayer = false;
-			bool IsFarPlayer = false;
 			Vector3DX Vec = Target->GetMove().GetPos() - Chara->GetMove().GetPos(); Vec.y = 0.f;
 			float Length = Vec.magnitude();
-			{
-				if (Length > 2.65f * Scale3DRate) {
-					IsFarPlayer = true;
-				}
-				if (Length < 1.0f * Scale3DRate) {
-					IsNearPlayer = true;
-				}
-			}
 
 			if (IsTutorial) {
 				m_Counter01 += DXLib_refParts->GetDeltaTime();
@@ -55,18 +35,23 @@ namespace FPS_n2 {
 				}
 			}
 			else {
+				//
 				m_Counter11 += DXLib_refParts->GetDeltaTime();
 				if (m_Counter11 > 2.5f) {
 					m_Counter11 -= 2.5f;
 					m_LMR = GetRand(100);
 				}
+				if (Target->GetCharaAction() != EnumArmAnimType::Ready && Target->GetCharaAction() != EnumArmAnimType::Run) {
+					m_LMR = 50;
+				}
+				//
 				m_Counter12 += DXLib_refParts->GetDeltaTime();
 				if (m_Counter12 > 0.2f) {
 					m_Counter12 -= 0.2f;
-					if (IsFarPlayer) {
+					if (Length > 2.65f * Scale3DRate) {
 						m_FMB = 0;
 					}
-					else if (IsNearPlayer) {
+					else if (Length < 1.0f * Scale3DRate) {
 						m_FMB = 100;
 					}
 					else {
@@ -76,7 +61,7 @@ namespace FPS_n2 {
 				m_Counter13 += DXLib_refParts->GetDeltaTime();
 				if (m_Counter13 > 1.f) {
 					m_Counter13 -= 1.f;
-					if ((!IsFarPlayer && !IsNearPlayer) || (Target->GetYaTimer() >= Target->GetYaTimerMax() * 0.9f)) {
+					if ((1.0f * Scale3DRate <= Length && Length <= 2.65f * Scale3DRate) || (Target->GetYaTimer() >= Target->GetYaTimerMax() * 0.9f)) {
 						Ya_Key = true;
 					}
 				}
@@ -114,10 +99,6 @@ namespace FPS_n2 {
 					}
 				}
 				//
-				if (Target->GetCharaAction() != EnumArmAnimType::Ready && Target->GetCharaAction() != EnumArmAnimType::Run) {
-					m_LMR = 50;
-				}
-
 				if (0 <= m_LMR && m_LMR <= 25) {
 					A_key = true;
 					D_key = false;
@@ -142,10 +123,10 @@ namespace FPS_n2 {
 					W_key = false;
 					S_key = true;
 				}
-			}
 
-			if (IsOutArea) {
-				W_key = true;
+				if (Chara->IsOutArea()) {
+					W_key = true;
+				}
 			}
 
 			if (Chara->GetBambooVec().magnitude() > deg2rad(1)) {

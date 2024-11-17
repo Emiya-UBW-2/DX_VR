@@ -299,6 +299,9 @@ namespace FPS_n2 {
 							m_TutorialResetTimer = 2.f;
 						}
 					}
+					if (m_DivideTimer < 0.f && m_TutorialResetTimer == 0.f) {
+						m_TutorialResetTimer = 0.001f;
+					}
 
 					if (m_TutorialResetTimer > 0.f) {
 						m_TutorialResetTimer -= DXLib_refParts->GetDeltaTime();
@@ -513,15 +516,11 @@ namespace FPS_n2 {
 				bool IsWaitOutSide = false;
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 					auto& p = PlayerMngr->GetPlayer(index);
+					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
 					//場外判定
-					{
-						Vector3DX Vec = p->GetChara()->GetMove().GetPos() - Vector3DX::zero();
-						float Len = 11.f / 2.f * Scale3DRate;
-						if ((Vec.x < -Len || Len < Vec.x) ||
-							(Vec.z < -Len || Len < Vec.z)) {
-							IsWaitOutSide = true;
-							break;
-						}
+					if (c->IsOutArea()) {
+						IsWaitOutSide = true;
+						break;
 					}
 				}
 				if (IsWaitOutSide) {
@@ -643,7 +642,6 @@ namespace FPS_n2 {
 					this->m_UIclass.InitGaugeParam(0, static_cast<int>(Chara->GetYaTimerMax() * 10.f), static_cast<int>(Chara->GetYaTimerMax() * 10.f));
 					this->m_UIclass.InitGaugeParam(1, static_cast<int>(Chara->GetStaminaMax() * 10000.f), static_cast<int>(Chara->GetStaminaMax() * 10000.f));
 					this->m_UIclass.InitGaugeParam(2, static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f));
-					this->m_UIclass.SetIntParam(3, m_IsGameEnd ? 1 : 0);
 				}
 				//NvsN
 				this->m_UIclass.SetIntParam(0, PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore());
@@ -652,7 +650,7 @@ namespace FPS_n2 {
 				this->m_UIclass.SetfloatParam(0, m_Timer);
 				this->m_UIclass.SetIntParam(3, (m_IsGameEnd || (m_GameMode == GameMode::Training)) ? 1 : 0);
 				//場外表示
-				this->m_UIclass.SetfloatParam(1, (m_IsPlayable && (m_GameMode != GameMode::Training)) ? m_DivideTimer : -1.f);
+				this->m_UIclass.SetfloatParam(1, m_IsPlayable ? m_DivideTimer : -1.f);
 				//心拍数
 				this->m_UIclass.SetIntParam(2, static_cast<int>(Chara->GetHeartRate()));
 				this->m_UIclass.SetfloatParam(2, Chara->GetHeartRatePow());

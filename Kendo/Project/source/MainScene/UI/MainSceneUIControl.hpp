@@ -598,7 +598,7 @@ namespace FPS_n2 {
 					if (0 <= floatParam[1] && floatParam[1] < 3.f) {
 						if (static_cast<int>(floatParam[1] * 100) % 30 < 15) {
 							WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
-								FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, (32), (384),
+								FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, (64), (900),
 								Yellow, Black,
 								"èÍäOÇ‹Ç≈Ç†Ç∆%3.1fïb", floatParam[1]);
 						}
