@@ -47,6 +47,8 @@ namespace FPS_n2 {
 
 		Breath,
 
+		Envi,
+
 		Max,
 	};
 	static const char* SoundID[static_cast<int>(SoundEnum::Max)] = {

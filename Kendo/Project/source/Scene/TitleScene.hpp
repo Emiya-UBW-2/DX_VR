@@ -14,6 +14,14 @@ namespace FPS_n2 {
 			bool						m_CloseResetSave{false};
 			// 
 			std::unique_ptr<CreditControl>	m_CreditControl;
+			//
+			MV1							m_TitleBGSky;
+			MV1							m_TitleBGMap;
+			MV1							m_TitleChara;
+			MV1							m_TitleBamboo;
+
+			int							m_Phase{ 0 };
+			float						m_PhaseTime{ 0.f };
 		public:
 			TitleScene(void) noexcept {}
 			TitleScene(const TitleScene&) = delete;
@@ -23,12 +31,17 @@ namespace FPS_n2 {
 
 			virtual ~TitleScene(void) noexcept {}
 		public:
+			void			Load_Sub(void) noexcept override;
 			void			Set_Sub(void) noexcept override;
 			bool			Update_Sub(void) noexcept override;
 			void			Dispose_Sub(void) noexcept override;
-			// 
+			void			Dispose_Load_Sub(void) noexcept override;
+			//
+			void			BG_Draw_Sub(void) const noexcept override;
+			void			ShadowDraw_Sub(void) const noexcept override;
+			void			SetShadowDraw_Sub(void) const noexcept override;
 			void			MainDraw_Sub(void) const noexcept override;
-			// UI•\Ž¦
+			//UI•\Ž¦
 			void			DrawUI_Base_Sub(void) const noexcept override;
 		};
 	};
