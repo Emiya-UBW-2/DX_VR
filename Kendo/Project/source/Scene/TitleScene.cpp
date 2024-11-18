@@ -79,7 +79,7 @@ namespace FPS_n2 {
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
-			auto* OptionWindowParts = OptionWindowClass::Instance();
+			auto* OptionDrawCtrls = OptionWindowClass::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			auto* WindowSizeParts = WindowSizeControl::Instance();
 			if (SceneParts->IsPause()) {
@@ -154,7 +154,7 @@ namespace FPS_n2 {
 						this->m_GameStart += 0.0001f;
 						break;
 					case 3:
-						OptionWindowParts->SetActive();
+						OptionDrawCtrls->SetActive();
 						break;
 					case 4:
 						PopUpParts->Add(LocalizeParts->Get(120), (720), (840),
@@ -236,35 +236,35 @@ namespace FPS_n2 {
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
-			auto* WindowParts = WindowSystem::DrawControl::Instance();
+			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			// 
-			WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 64, 64, 64);
-			WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
+			DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 64, 64, 64);
+			DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
 				&this->m_TitleImage, (64 + 4), (64 + 4), (64 + 1024 + 4), (64 + 256 + 4), true);
-			WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-			WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
+			DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+			DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
 				&this->m_TitleImage, (64), (64), (64 + 1024), (64 + 256), true);
 			// 
-			WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18), 
+			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18), 
 				FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
 				(64), (64 + 256), White, Black, "Ver 1.0.0");
 			// 
 			ButtonParts->Draw();
 			// 
 			if ((ButtonParts->GetSelect() != InvalidID) && !PopUpParts->IsActivePop()) {
-				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18), 
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18), 
 					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 					(32), (1080 - 32 - 32), White, Black, LocalizeParts->Get(410 + ButtonParts->GetSelect()));
 			}
 			// 
 			{
-				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameFadeIn, 0.f, 1.f)), 0, 255));
-				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, (1920), (1080), Black, TRUE);
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameFadeIn, 0.f, 1.f)), 0, 255));
+				DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, (1920), (1080), Black, TRUE);
 
-				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameStart, 0.f, 1.f)), 0, 255));
-				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, (1920), (1080), White, TRUE);
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameStart, 0.f, 1.f)), 0, 255));
+				DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, (1920), (1080), White, TRUE);
 
-				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
 		}
 	};

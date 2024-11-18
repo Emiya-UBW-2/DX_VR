@@ -109,7 +109,7 @@ namespace FPS_n2 {
 			}
 		}
 		void CreditControl::Draw(int xmin, int ymin, int xmax) const noexcept {
-			auto* WindowParts = WindowSystem::DrawControl::Instance();
+			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 
 			int xp1, yp1;
 
@@ -120,11 +120,11 @@ namespace FPS_n2 {
 				if (this->m_CreditCoulm < static_cast<int>(&c - &this->m_CreditStr.front())) { break; }
 				int xpos = xp1 + (6);
 				int ypos = yp1 + Height / 2;
-				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::DIZ_UD_Gothic, Height,
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::DIZ_UD_Gothic, Height,
 					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.first);
 
 				xpos = xmax - (24);
-				WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::DIZ_UD_Gothic, Height,
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::DIZ_UD_Gothic, Height,
 					FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.second);
 				yp1 += Height;
 			}
@@ -152,11 +152,11 @@ namespace FPS_n2 {
 			this->m_BlackOutAlpha = std::clamp(this->m_BlackOutAlpha + (this->m_IsBlackOut ? 1.f : -1.f) * DXLib_refParts->GetDeltaTime() * this->m_BlackOutPower, 0.f, 1.f);
 		}
 		void FadeControl::Draw(void) const noexcept {
-			auto* WindowParts = WindowSystem::DrawControl::Instance();
+			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			if (this->m_BlackOutAlpha > 0.f) {
-				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * this->m_BlackOutAlpha), 0, 255));
-				WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, BaseScreenWidth, BaseScreenHeight, Black, TRUE);
-				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * this->m_BlackOutAlpha), 0, 255));
+				DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, BaseScreenWidth, BaseScreenHeight, Black, TRUE);
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
 		}
 		//

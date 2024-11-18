@@ -18,7 +18,7 @@ namespace FPS_n2 {
 			auto* Pad = PadControl::Instance();
 			auto* KeyGuideParts = KeyGuide::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
-			auto* OptionWindowParts = OptionWindowClass::Instance();
+			auto* OptionDrawCtrls = OptionWindowClass::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			if (!PopUpParts->IsActivePop()) {
@@ -42,7 +42,7 @@ namespace FPS_n2 {
 						SceneParts->ChangePause(false);
 						break;
 					case 1:
-						OptionWindowParts->SetActive();
+						OptionDrawCtrls->SetActive();
 						break;
 					case 2:
 						SceneParts->ChangePause(false);
@@ -108,18 +108,18 @@ namespace FPS_n2 {
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* WindowParts = WindowSystem::DrawControl::Instance();
+			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 
 			PlayerID Now = 0;// GetMyPlayerID();
 
-			WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Result, (0), (0), (1920), (1080), false);
+			DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Result, (0), (0), (1920), (1080), false);
 			bool IsWin = (PlayerMngr->GetPlayer(Now)->GetMaxScore() > PlayerMngr->GetPlayer(1 - Now)->GetMaxScore());
 			bool IsDraw = (PlayerMngr->GetPlayer(Now)->GetMaxScore() == PlayerMngr->GetPlayer(1 - Now)->GetMaxScore());
-			WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (48),
+			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (48),
 				FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, (300), (384),
 				IsDraw ? Gray25 : (IsWin ? Red : White), Black,
 				IsDraw ? LocalizeParts->Get(6002) : (IsWin ? LocalizeParts->Get(6000) : LocalizeParts->Get(6001)));
-			WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
+			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 				FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, (300), (386), White, Black, "%d : %d",
 				PlayerMngr->GetPlayer(Now)->GetMaxScore(), PlayerMngr->GetPlayer(1 - Now)->GetMaxScore());
 			ButtonParts->Draw();

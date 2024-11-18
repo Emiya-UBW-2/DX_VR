@@ -1013,7 +1013,7 @@ namespace FPS_n2 {
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
-			auto* WindowParts = WindowSystem::DrawControl::Instance();
+			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			auto* FadeInParts = FadeControl::Instance();
 
@@ -1029,7 +1029,7 @@ namespace FPS_n2 {
 				}
 				//UI
 				if (m_GameControlType == GameControlType::Replay) {
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
 						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, (64), (64), Green, Black, "Replay");
 				}
 				this->m_UIclass.Draw();
@@ -1039,6 +1039,7 @@ namespace FPS_n2 {
 			}
 		}
 		void			MainGameScene::DrawUI_In_Sub(void) const noexcept {
+			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// ポーズ
@@ -1054,14 +1055,20 @@ namespace FPS_n2 {
 				//NetBrowser->Draw();
 				if (m_NetWorkController) {
 					if (m_NetWorkController->GetPing() >= 0.f) {
-						WindowSystem::SetMsg((1920), (32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
+							FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, (1920), (32), White, Black,
+							"Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
 					}
 					else {
 						if (m_NetWorkController->GetClient()) {
-							WindowSystem::SetMsg((1920), (32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, Red, Black, "Lost Connection");
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
+								FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, (1920), (32), White, Black,
+								"Lost Connection");
 						}
 						else {
-							WindowSystem::SetMsg((1920), (32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
+								FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, (1920), (32), White, Black,
+								"Ping:---ms");
 						}
 					}
 				}

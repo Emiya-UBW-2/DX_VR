@@ -29,24 +29,24 @@ namespace FPS_n2 {
 				void			DrawGauge(int xp1, int yp1, int xp2, int yp2,
 					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorFull, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) const noexcept {
 					//return;
-					auto* WindowParts = WindowSystem::DrawControl::Instance();
+					auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 					int ParamBuf = static_cast<int>(this->m_Buffer + 0.5f);
-					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White, FALSE);
+					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White, FALSE);
 					int Edge = 0;
 					int length = (xp2 - Edge) - (xp1 + Edge);
 
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
 					COLOR_U8 ColorAddSub = (ParamBuf > this->m_Now) ? ColorSub : ColorAdd;
 
-					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 + Edge + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + Edge,
 						xp2 - Edge, yp2 - Edge,
 						Black, TRUE);
-					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 + Edge, yp1 + Edge,
 						xp1 + Edge + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - Edge,
 						GetColor(Color.r, Color.g, Color.b), TRUE);
-					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 + Edge + length * std::max(this->m_Now, ParamBuf) / this->m_Max, yp1 + Edge,
 						xp1 + Edge + length * std::min(this->m_Now, ParamBuf) / this->m_Max, yp2 - Edge,
 						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), TRUE);
@@ -54,24 +54,24 @@ namespace FPS_n2 {
 				void			DrawGaugeUp(int xp1, int yp1, int xp2, int yp2,
 					COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorFull, COLOR_U8 ColorAdd, COLOR_U8 ColorSub) noexcept {
 					//return;
-					auto* WindowParts = WindowSystem::DrawControl::Instance();
+					auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 					int ParamBuf = static_cast<int>(this->m_Buffer + 0.5f);
-					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White, FALSE);
+					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 + 0, yp1 + 0, xp2 - 0, yp2 - 0, White, FALSE);
 					int Edge = 0;
 					int length = (yp2 - Edge) - (yp1 + Edge);
 
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
 					COLOR_U8 ColorAddSub = (ParamBuf > this->m_Now) ? ColorSub : ColorAdd;
 
-					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 + Edge, yp1 + Edge,
 						xp2 - Edge, yp2 - Edge - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
 						Black, TRUE);
-					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 + Edge, yp2 - Edge - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
 						xp2 + Edge, yp2 - Edge,
 						GetColor(Color.r, Color.g, Color.b), TRUE);
-					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 + Edge, yp2 - Edge - length * std::max(this->m_Now, ParamBuf) / this->m_Max,
 						xp2 + Edge, yp2 - Edge - length * std::min(this->m_Now, ParamBuf) / this->m_Max,
 						GetColor(ColorAddSub.r, ColorAddSub.g, ColorAddSub.b), TRUE);
@@ -80,69 +80,69 @@ namespace FPS_n2 {
 					COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorFull, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
 					const GraphHandle* CircleObj, float deg, int Add) noexcept {
 					//return;
-					auto* WindowParts = WindowSystem::DrawControl::Instance();
+					auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
 					COLOR_U8 ColorAddSub = (this->m_Buffer > this->m_Now) ? ColorSub : ColorAdd;
 					float per = std::clamp(static_cast<float>(this->m_Now) / this->m_Max, 0.f, 1.f);
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
-					WindowParts->SetAdd(WindowSystem::DrawLayer::Normal, Add);
-					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorBase.r, ColorBase.g, ColorBase.b);
-					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
+					DrawCtrls->SetAdd(WindowSystem::DrawLayer::Normal, Add);
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, ColorBase.r, ColorBase.g, ColorBase.b);
+					DrawCtrls->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
 						xp1 + (256), yp1,
 						50.0f + ((50.0f - 15.0f * 2.0f) * 1.0f) + 15.0f + deg,
 						50.0f + 15.0f + deg,
 						(static_cast<float>((1080)) / 1080.0f));
-					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
-					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
+					DrawCtrls->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
 						xp1 + (256), yp1,
 						50.0f + ((50.0f - 15.0f * 2.0f) * std::max(per, perbuf)) + 15.0f + deg,
 						50.0f + ((50.0f - 15.0f * 2.0f) * std::min(per, perbuf)) + 15.0f + deg,
 						(static_cast<float>((1080)) / 1080.0f));
-					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, Color.r, Color.g, Color.b);
-					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, Color.r, Color.g, Color.b);
+					DrawCtrls->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
 						xp1 + (256), yp1,
 						50.0f + ((50.0f - 15.0f * 2.0f) * std::min(per, perbuf)) + 15.0f + deg,
 						50.0f + 15.0f + deg,
 						(static_cast<float>((1080)) / 1080.0f));
-					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
 				void			DrawGaugeCircleRight(int xp1, int yp1,
 					COLOR_U8 ColorBase, COLOR_U8 Color1, COLOR_U8 Color2, COLOR_U8 Color3, COLOR_U8 ColorFull, COLOR_U8 ColorAdd, COLOR_U8 ColorSub,
 					const GraphHandle* CircleObj, float deg, int Add) noexcept {
 					//return;
-					auto* WindowParts = WindowSystem::DrawControl::Instance();
+					auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 					COLOR_U8 Color = Blend3Color(Color1, Color2, Color3, ColorFull, static_cast<float>(this->m_Now) / static_cast<float>(this->m_Max));
 					COLOR_U8 ColorAddSub = (this->m_Buffer > this->m_Now) ? ColorSub : ColorAdd;
 					float per = std::clamp(static_cast<float>(this->m_Now) / this->m_Max, 0.f, 1.f);
 					float perbuf = std::clamp(this->m_Buffer / this->m_Max, 0.f, 1.f);
-					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-					WindowParts->SetAdd(WindowSystem::DrawLayer::Normal, Add);
-					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorBase.r, ColorBase.g, ColorBase.b);
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					DrawCtrls->SetAdd(WindowSystem::DrawLayer::Normal, Add);
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, ColorBase.r, ColorBase.g, ColorBase.b);
 
-					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
+					DrawCtrls->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
 						xp1 - (256), yp1,
 						(50.0f - 15.0f * 2.0f) + 15.0f + deg,
 						((50.0f - 15.0f * 2.0f) * (1.0f - 1.0f)) + 15.0f + deg,
 						(static_cast<float>((1080)) / 1080.0f));
 
-					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, ColorAddSub.r, ColorAddSub.g, ColorAddSub.b);
 
-					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
+					DrawCtrls->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
 						xp1 - (256), yp1,
 						((50.0f - 15.0f * 2.0f) * (1.0f - std::min(per, perbuf))) + 15.0f + deg,
 						((50.0f - 15.0f * 2.0f) * (1.0f - std::max(per, perbuf))) + 15.0f + deg,
 						(static_cast<float>((1080)) / 1080.0f));
 
-					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, Color.r, Color.g, Color.b);
-					WindowParts->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, Color.r, Color.g, Color.b);
+					DrawCtrls->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, CircleObj,
 						xp1 - (256), yp1,
 						(50.0f - 15.0f * 2.0f) + 15.0f + deg,
 						((50.0f - 15.0f * 2.0f) * (1.0f - std::min(per, perbuf))) + 15.0f + deg,
 						(static_cast<float>((1080)) / 1080.0f));
 
-					WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
 				const auto	GetGaugeBuff() const noexcept { return static_cast<int>(this->m_Buffer + 0.5f); }
 				const auto& GetGauge() const noexcept { return this->m_Now; }
@@ -419,7 +419,7 @@ namespace FPS_n2 {
 				}
 			}
 			void			Draw(void) const noexcept {
-				auto* WindowParts = WindowSystem::DrawControl::Instance();
+				auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 				auto* LocalizeParts = LocalizePool::Instance();
 				auto* HitMarkParts = HitMark::Instance();
 				//
@@ -427,17 +427,17 @@ namespace FPS_n2 {
 				//気合
 				{
 					float radius = Lerp(static_cast<float>(1.f), static_cast<float>(1.01f), floatParam[2]);
-					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal,
 						255, 150, 155);
-					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255 * (m_GaugeParam[0].GetGaugeMax() - m_GaugeParam[0].GetGaugeBuff()) / m_GaugeParam[0].GetGaugeMax());
-					WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Kiai,
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255 * (m_GaugeParam[0].GetGaugeMax() - m_GaugeParam[0].GetGaugeBuff()) / m_GaugeParam[0].GetGaugeMax());
+					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Kiai,
 						BaseScreenWidth / 2 - static_cast<int>(static_cast<float>(BaseScreenWidth / 2) * radius),
 						BaseScreenHeight / 2 - static_cast<int>(static_cast<float>(BaseScreenHeight / 2) * radius),
 						BaseScreenWidth / 2 + static_cast<int>(static_cast<float>(BaseScreenWidth / 2) * radius),
 						BaseScreenHeight / 2 + static_cast<int>(static_cast<float>(BaseScreenHeight / 2) * radius),
 						true);
-					WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal,
 						255, 255, 255);
 				}
 				int xp1, yp1;
@@ -447,13 +447,13 @@ namespace FPS_n2 {
 					yp1 = (static_cast<int>(Lerp(10.0f, -50.f, std::clamp(((intParam[3]) ? 2.f : std::max(m_GameStartTimer, 0.f)) - 0.5f, 0.f, 1.f))));
 					float per = std::cos(DX_PI_F * 10.f * ((intParam[3]) ? 2.f : std::max(m_GameStartTimer, 0.f)));
 					if ((per * 255.f) > 1.f) {
-						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, (floatParam[0] < 60.f) ? Red : Yellow, Black, "TIME");
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
 							FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + (300), yp1, (floatParam[0] < 60.f) ? Red : Yellow, Black, "%d:%05.2f",
 							static_cast<int>(floatParam[0] / 60.f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
-						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
 				}
 				//スコア
@@ -461,46 +461,46 @@ namespace FPS_n2 {
 					xp1 = (1920 / 2);
 					yp1 = (static_cast<int>(Lerp(28.0f, -100.f, std::clamp(((intParam[3]) ? 2.f : std::max(m_GameStartTimer, 0.f)) - 0.5f, 0.f, 1.f))));
 
-					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal,
 						92, 0, 0);
-					WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Mine,
+					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Mine,
 						xp1 - (10) - (40) - (36) + (1),
 						yp1 - (10) + (1),
 						xp1 - (10) - (40) + (1),
 						yp1 - (10) + (36) + (1),
 						true);
-					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal,
 						192, 0, 0);
-					WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Mine,
+					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Mine,
 						xp1 - (10) - (40) - (36),
 						yp1 - (10),
 						xp1 - (10) - (40),
 						yp1 - (10) + (36),
 						true);
-					WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal,
 						255, 255, 255);
 
 
-					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - (10) - (40), yp1 + (20),
 						xp1 + (10) + (40), yp1 + (24), Black, true);
 
-					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - (10) - (40 - 20 * intParam[1]), yp1 + (20),
 						xp1 - (10), yp1 + (24), Red, true);
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
 						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1 - (20), yp1, Red, Black, "%d", intParam[0]);
 
-					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - (10), yp1 + (20),
 						xp1 + (10), yp1 + (24), Gray75, true);
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Gray25, Black, ":");
 
-					WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
+					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 + (10), yp1 + (20),
 						xp1 + (10) + (40 - 20 * intParam[0]), yp1 + (24), White, true);
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
 						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1 + (20), yp1, White, Black, "%d", intParam[1]);
 				}
 				//情報
@@ -511,23 +511,23 @@ namespace FPS_n2 {
 					float per = Lerp(0.4f, 0.6f, floatParam[2]);
 					if ((per * 255.f) > 1.f) {
 						int radius = static_cast<int>(Lerp(static_cast<float>((24)), static_cast<float>((32)), floatParam[2]));
-						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
-						WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal,
 							255, 0, 0);
-						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
+						DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
 							&m_HeartIcon, xp1 - radius, yp1 - radius, xp1 + radius, yp1 + radius, true);
-						WindowParts->SetBright(WindowSystem::DrawLayer::Normal,
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal,
 							255, 255, 255);
-						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
 
 					//気合
 					xp1 = (24 + 9 * 2);
 					yp1 = (1080 - 80 - 28 * 2);
 
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
 						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, LocalizeParts->Get(5000));
 					m_GaugeParam[0].DrawGauge(
 						xp1, yp1, xp1 + (300), yp1 + (6),
@@ -536,7 +536,7 @@ namespace FPS_n2 {
 					);
 					int KihakuPoints = static_cast<int>(Lerp(-30.f, 20.f, 1.f - static_cast<float>(m_GaugeParam[0].GetGauge()) / m_GaugeParam[0].GetGaugeMax()));
 					if (KihakuPoints > 0) {
-						WindowParts->SetDrawBox(WindowSystem::DrawLayer::Normal,
+						DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
 							xp1, yp1, xp1 + (300), yp1 + (6), White, false);
 					}
 
@@ -544,7 +544,7 @@ namespace FPS_n2 {
 					xp1 = (24 + 9 * 1);
 					yp1 = (1080 - 80 - 28 * 1);
 
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
 						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, LocalizeParts->Get(5001));
 					m_GaugeParam[1].DrawGauge(
 						xp1, yp1, xp1 + (300), yp1 + (6),
@@ -556,7 +556,7 @@ namespace FPS_n2 {
 					xp1 = (24 + 9 * 0);
 					yp1 = (1080 - 80 - 28 * 0);
 
-					WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
 						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, LocalizeParts->Get(5002));
 					m_GaugeParam[2].DrawGauge(
 						xp1, yp1, xp1 + (300), yp1 + (6),
@@ -570,34 +570,34 @@ namespace FPS_n2 {
 					yp1 = (240);
 
 					if ((m_GameStartAlpha * 255.f) > 1.f) {
-						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameStartAlpha), 0, 255));
-						WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
-						WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameStartAlpha), 0, 255));
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
+						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
 							m_pStart, xp1, yp1, m_GameStartScale, 0.f, true);
-						WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
 
 					if ((m_WinOnceAlpha * 255.f) > 1.f) {
-						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_WinOnceAlpha), 0, 255));
-						WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
-						WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_WinOnceAlpha), 0, 255));
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
 							&m_Once, xp1, yp1, m_WinOnceScale, 0.f, true);
-						WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
 
 					if ((m_GameEndAlpha * 255.f) > 1.f) {
-						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameEndAlpha), 0, 255));
-						WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
-						WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * m_GameEndAlpha), 0, 255));
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
 							&m_GameEnd, xp1, yp1, m_GameEndScale, 0.f, true);
-						WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
 					if (0 <= floatParam[1] && floatParam[1] < 3.f) {
 						if (static_cast<int>(floatParam[1] * 100) % 30 < 15) {
-							WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 								FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, (64), (900),
 								Yellow, Black,
 								"場外まであと%3.1f秒", floatParam[1]);

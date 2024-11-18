@@ -264,7 +264,7 @@ namespace FPS_n2 {
 				m_Dou.Dispose();
 			}
 			void Draw(void) const noexcept {
-				auto* WindowParts = WindowSystem::DrawControl::Instance();
+				auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 				auto* LocalizeParts = LocalizePool::Instance();
 
 				int xp1, yp1;
@@ -275,19 +275,19 @@ namespace FPS_n2 {
 					if (d.ActivePer() > 0.f) {
 						int yp = yp1 - (static_cast<int>((64 + 5) * d.GetFlip()));
 
-						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal,
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal,
 							std::min(
 								std::clamp(static_cast<int>(255.f * d.ActivePer()), 0, 255),
 								255 - std::clamp(std::abs(yp - yp1) * 2 * 255 / (255), 0, 255)
 							));
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 							xp1, yp, Green, Black, d.GetMsg());
 					}
 				}
-				WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				if (m_TutorialNow != 0) {
-					WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Teacher.at(m_GraphID),
+					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Teacher.at(m_GraphID),
 						(480), (1080 - 1824 / 4 / 2), (480 + 400 / 2), (1080), true);
 				}
 				{
@@ -296,17 +296,17 @@ namespace FPS_n2 {
 					yp = (384);
 					switch (m_CheckHit) {
 					case HitType::Head:
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 							xp, yp, Green, Black, LocalizeParts->Get(8990));
 						break;
 					case HitType::Arm:
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 							xp, yp, Green, Black, LocalizeParts->Get(8991));
 						break;
 					case HitType::Body:
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 							xp, yp, Green, Black, LocalizeParts->Get(8992));
 						break;
@@ -318,7 +318,7 @@ namespace FPS_n2 {
 						auto* Pad = PadControl::Instance();
 						KeyGuideParts->DrawButton(xp, yp - 24, KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()));
 						xp += KeyGuideParts->GetDrawSize(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType())) + 3;
-						WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
 							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
 							xp, yp, Green, Black, LocalizeParts->Get(8993));
 
@@ -333,7 +333,7 @@ namespace FPS_n2 {
 							SeekMovieToGraph(m_Men.get(), 0);
 							PlayMovieToGraph(m_Men.get());
 						}
-						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Men,
+						DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Men,
 							(64), (600 - 720 / 2 / 2),
 							(64 + 600 / 2), (600 + 720 / 2 / 2), false);
 
@@ -346,7 +346,7 @@ namespace FPS_n2 {
 							SeekMovieToGraph(m_Kote.get(), 0);
 							PlayMovieToGraph(m_Kote.get());
 						}
-						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Kote,
+						DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Kote,
 							(64), (600 - 720 / 2 / 2),
 							(64 + 600 / 2), (600 + 720 / 2 / 2), false);
 
@@ -359,7 +359,7 @@ namespace FPS_n2 {
 							SeekMovieToGraph(m_Dou.get(), 0);
 							PlayMovieToGraph(m_Dou.get());
 						}
-						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Dou,
+						DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Dou,
 							(64), (600 - 720 / 2 / 2),
 							(64 + 600 / 2), (600 + 720 / 2 / 2), false);
 
