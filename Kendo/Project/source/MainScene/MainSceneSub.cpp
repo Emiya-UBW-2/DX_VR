@@ -112,6 +112,7 @@ namespace FPS_n2 {
 
 			PlayerID Now = 0;// GetMyPlayerID();
 
+			DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Result, (0), (0), (1920), (1080), false);
 			bool IsWin = (PlayerMngr->GetPlayer(Now)->GetMaxScore() > PlayerMngr->GetPlayer(1 - Now)->GetMaxScore());
 			bool IsDraw = (PlayerMngr->GetPlayer(Now)->GetMaxScore() == PlayerMngr->GetPlayer(1 - Now)->GetMaxScore());
