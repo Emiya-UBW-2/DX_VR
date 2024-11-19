@@ -789,13 +789,13 @@ namespace FPS_n2 {
 						switch (m_GameControlType) {
 						case GameControlType::InGame:
 						case GameControlType::Network:
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_S).GetAssign(), Pad->GetControlType()), "");
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_A).GetAssign(), Pad->GetControlType()), "");
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_D).GetAssign(), Pad->GetControlType()), "");
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_STICK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9993));
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9992));
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::RELOAD).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9991));
+							KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
+							KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_S).GetAssign(), Pad->GetControlType()), "");
+							KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_A).GetAssign(), Pad->GetControlType()), "");
+							KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_D).GetAssign(), Pad->GetControlType()), "");
+							KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_STICK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9993));
+							KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9992));
+							KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::RELOAD).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9991));
 							break;
 						case GameControlType::Replay:
 							break;
@@ -810,33 +810,33 @@ namespace FPS_n2 {
 						case GameControlType::InGame:
 						case GameControlType::Network:
 							if (m_IsEventSceneFlag || m_IsEventSceneActive) {
-								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9914));
+								KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9914));
 							}
 							else {
-								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
-								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_S).GetAssign(), Pad->GetControlType()), "");
-								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_A).GetAssign(), Pad->GetControlType()), "");
-								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_D).GetAssign(), Pad->GetControlType()), "");
-								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_STICK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9900));
+								KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
+								KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_S).GetAssign(), Pad->GetControlType()), "");
+								KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_A).GetAssign(), Pad->GetControlType()), "");
+								KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_D).GetAssign(), Pad->GetControlType()), "");
+								KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_STICK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9900));
 
-								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::SHOT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9906));
-								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::AIM).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9908));
-								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::ULT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9907));
+								KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::SHOT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9906));
+								KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::AIM).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9908));
+								KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::ULT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9907));
 
-								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::WALK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9903));
-								KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9905));
+								KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::WALK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9903));
+								KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9905));
 								if (m_GameMode == GameMode::Training) {
-									KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), "");
-									KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::RELOAD).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9916));
+									KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), "");
+									KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::RELOAD).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9916));
 								}
 							}
 							break;
 						case GameControlType::Replay:
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9918));
+							KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9918));
 							break;
 						case GameControlType::Result:
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9915));
-							KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9917));
+							KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9915));
+							KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::JUMP).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9917));
 							break;
 						default:
 							break;
@@ -1029,8 +1029,8 @@ namespace FPS_n2 {
 				}
 				//UI
 				if (m_GameControlType == GameControlType::Replay) {
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, (64), (64), Green, Black, "Replay");
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, (64), (64), Green, Black, "Replay");
 				}
 				this->m_UIclass.Draw();
 			}
@@ -1055,19 +1055,19 @@ namespace FPS_n2 {
 				//NetBrowser->Draw();
 				if (m_NetWorkController) {
 					if (m_NetWorkController->GetPing() >= 0.f) {
-						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
-							FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, (1920), (32), White, Black,
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (32), White, Black,
 							"Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
 					}
 					else {
 						if (m_NetWorkController->GetClient()) {
-							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
-								FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, (1920), (32), White, Black,
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+								FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (32), White, Black,
 								"Lost Connection");
 						}
 						else {
-							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
-								FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, (1920), (32), White, Black,
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+								FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (32), White, Black,
 								"Ping:---ms");
 						}
 					}

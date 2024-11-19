@@ -39,8 +39,8 @@ namespace FPS_n2 {
 		//
 		{
 			DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp - (10), yp - (10), xp + xs + (10), yp + ys + (10), Gray25, true);//背景
-			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
-				FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp + xs, yp, White, Black,
+			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+				FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp + xs, yp, White, Black,
 				" %d/%d", static_cast<int>(this->m_Sequence), static_cast<int>(NetWork::NetWorkSequence::MainGame));
 		}
 		auto Prev = this->m_Sequence;
@@ -73,8 +73,8 @@ namespace FPS_n2 {
 			}
 			break;
 		case BrowserSequence::CheckPreset:
-			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
-				FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp, yp, White, Black,
+			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp, White, Black,
 				 "プリセット設定");
 			if (m_SeqFirst) {
 				m_NewWorkSettings.Load();
@@ -96,22 +96,22 @@ namespace FPS_n2 {
 			}
 			break;
 		case BrowserSequence::SetNewData:
-			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
-				FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp, yp, White, Black, 
+			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp, White, Black, 
 				"新規設定");
 			if (m_SeqFirst) {
 				m_NewWorkSettings.AddBack();
 			}
 			{
-				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
-					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp + xs / 2, y1p, White, Black,
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+					FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp + xs / 2, y1p, White, Black,
 					"ポート=[%d-%d]", this->m_NetSetting.UsePort, this->m_NetSetting.UsePort + NetWork::Player_num - 1);
 				AddSubBox(xp + xs / 2, y1p + LineHeight / 2, [&]() { ++this->m_NetSetting.UsePort; }, [&]() { --this->m_NetSetting.UsePort; });
 			}
 			if (this->m_IsClient) {//サーバ-はいらない
 				int yp1 = y1p + (100);
-				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
-					FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, xp + xs / 2, yp1, White, Black,
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+					FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp + xs / 2, yp1, White, Black,
 					"IP=[%d,%d,%d,%d]", this->m_NetSetting.IP.d1, this->m_NetSetting.IP.d2, this->m_NetSetting.IP.d3, this->m_NetSetting.IP.d4);
 				for (int i = 0; i < 4; ++i) {
 					auto* ip_tmp = &this->m_NetSetting.IP.d1;
@@ -141,18 +141,18 @@ namespace FPS_n2 {
 			}
 			break;
 		case BrowserSequence::Ready:
-			WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
-				FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp, yp, White, Black, "通信中!");
+			WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp, White, Black, "通信中!");
 			{
 				int yp1 = y1p;
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
-					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp, yp1, White, Black,
+				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp1, White, Black,
 					"種別[%s]", this->m_IsClient ? "クライアント" : "サーバー"); yp1 += LineHeight;
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
-					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp, yp1, White, Black,
+				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp1, White, Black,
 					"使用ポート[%d-%d]", this->m_NetSetting.UsePort, this->m_NetSetting.UsePort + NetWork::Player_num - 1); yp1 += LineHeight;
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, LineHeight,
-					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp, yp1, White, Black,
+				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp1, White, Black,
 					"IP=[%d,%d,%d,%d]", this->m_NetSetting.IP.d1, this->m_NetSetting.IP.d2, this->m_NetSetting.IP.d3, this->m_NetSetting.IP.d4); yp1 += LineHeight;
 			}
 			break;

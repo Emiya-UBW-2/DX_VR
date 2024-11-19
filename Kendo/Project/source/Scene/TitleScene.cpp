@@ -42,11 +42,11 @@ namespace FPS_n2 {
 			this->m_TitleImage.Load("data/UI/Title.png");
 			// 
 			ButtonParts->ResetSel();
-			ButtonParts->AddStringButton(400, 52, true, 1920 - 64 - 48, 1080 - 84 - 64 * 2, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton(401, 48, true, 1920 - 64 - 48, 1080 - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton(402, 48, IsFileExist("Replay/Rep.txt"), 1920 - 64 - 48, 1080 - 84 - 64 * 0, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, (1920 - 96 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, (1920 - 64), (64), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonParts->AddStringButton(400, 52, true, 1920 - 64 - 48, 1080 - 84 - 64 * 2, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton(401, 48, true, 1920 - 64 - 48, 1080 - 84 - 64 * 1, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton(402, 48, IsFileExist("Replay/Rep.txt"), 1920 - 64 - 48, 1080 - 84 - 64 * 0, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
+			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, (1920 - 96 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
+			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, (1920 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			// クレジット
 			this->m_CreditControl = std::make_unique<CreditControl>();
 			this->m_CreditControl->Init();
@@ -131,12 +131,12 @@ namespace FPS_n2 {
 					auto* Pad = PadControl::Instance();
 					auto* KeyGuideParts = KeyGuide::Instance();
 					auto* LocalizeParts = LocalizePool::Instance();
-					KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
-					KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_S).GetAssign(), Pad->GetControlType()), "");
-					KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_A).GetAssign(), Pad->GetControlType()), "");
-					KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_D).GetAssign(), Pad->GetControlType()), "");
-					KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_STICK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9993));
-					KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9992));
+					KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
+					KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_S).GetAssign(), Pad->GetControlType()), "");
+					KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_A).GetAssign(), Pad->GetControlType()), "");
+					KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_D).GetAssign(), Pad->GetControlType()), "");
+					KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_STICK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9993));
+					KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9992));
 				}
 			);
 			if (!PopUpParts->IsActivePop() && (this->m_GameFadeIn == 0.f) && (this->m_GameStart == 0.f)) {
@@ -245,15 +245,15 @@ namespace FPS_n2 {
 			DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
 				&this->m_TitleImage, (64), (64), (64 + 1024), (64 + 256), true);
 			// 
-			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18), 
-				FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP,
+			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18), 
+				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 				(64), (64 + 256), White, Black, "Ver 1.0.0");
 			// 
 			ButtonParts->Draw();
 			// 
 			if ((ButtonParts->GetSelect() != InvalidID) && !PopUpParts->IsActivePop()) {
-				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18), 
-					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM,
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18), 
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
 					(32), (1080 - 32 - 32), White, Black, LocalizeParts->Get(410 + ButtonParts->GetSelect()));
 			}
 			// 

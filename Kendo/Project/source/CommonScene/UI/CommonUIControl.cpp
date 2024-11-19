@@ -120,12 +120,12 @@ namespace FPS_n2 {
 				if (this->m_CreditCoulm < static_cast<int>(&c - &this->m_CreditStr.front())) { break; }
 				int xpos = xp1 + (6);
 				int ypos = yp1 + Height / 2;
-				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::DIZ_UD_Gothic, Height,
-					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.first);
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, Height,
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.first);
 
 				xpos = xmax - (24);
-				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::DIZ_UD_Gothic, Height,
-					FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.second);
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, Height,
+					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.second);
 				yp1 += Height;
 			}
 		}

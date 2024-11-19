@@ -8,9 +8,9 @@ namespace FPS_n2 {
 			auto* ButtonParts = ButtonControl::Instance();
 			ButtonParts->Dispose();
 			ButtonParts->ResetSel();
-			ButtonParts->AddStringButton(420, 48, true, BaseScreenWidth - 64, BaseScreenHeight - 84 - 64 * 2, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton(421, 48, true, BaseScreenWidth - 64, BaseScreenHeight - 84 - 64 * 1, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton(422, 48, true, BaseScreenWidth - 64, BaseScreenHeight - 84 - 64 * 0, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton(420, 48, true, BaseScreenWidth - 64, BaseScreenHeight - 84 - 64 * 2, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton(421, 48, true, BaseScreenWidth - 64, BaseScreenHeight - 84 - 64 * 1, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton(422, 48, true, BaseScreenWidth - 64, BaseScreenHeight - 84 - 64 * 0, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
 			this->m_IsRetire = false;
 		}
 		void PauseMenuControl::UpdatePause(void) noexcept {
@@ -27,11 +27,11 @@ namespace FPS_n2 {
 						auto* Pad = PadControl::Instance();
 						auto* KeyGuideParts = KeyGuide::Instance();
 						auto* LocalizeParts = LocalizePool::Instance();
-						KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9992));
-						KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::RELOAD).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9991));
-						KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
-						KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_S).GetAssign(), Pad->GetControlType()), "");
-						KeyGuideParts->AddGuide(KeyGuideParts->GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_STICK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9993));
+						KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::INTERACT).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9992));
+						KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::RELOAD).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9991));
+						KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_W).GetAssign(), Pad->GetControlType()), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_S).GetAssign(), Pad->GetControlType()), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(Pad->GetPadsInfo(PADS::MOVE_STICK).GetAssign(), Pad->GetControlType()), LocalizeParts->Get(9993));
 					});
 				ButtonParts->UpdateInput();
 				// ‘I‘ðŽž‚Ì‹““®
@@ -69,8 +69,8 @@ namespace FPS_n2 {
 			auto* ButtonParts = ButtonControl::Instance();
 			ButtonParts->Dispose();
 			ButtonParts->ResetSel();
-			ButtonParts->AddIconButton("CommonData/UI/Right.png", true, (1920 / 2 + 64), (1080 - 256), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
-			ButtonParts->AddIconButton("data/UI/Reset.png", true, (1920 / 2 - 64), (1080 - 256), FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE);
+			ButtonParts->AddIconButton("CommonData/UI/Right.png", true, (1920 / 2 + 64), (1080 - 256), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
+			ButtonParts->AddIconButton("data/UI/Reset.png", true, (1920 / 2 - 64), (1080 - 256), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			m_IsReplay = false;
 			m_IsEnd = false;
 		}
@@ -116,12 +116,12 @@ namespace FPS_n2 {
 			DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_Result, (0), (0), (1920), (1080), false);
 			bool IsWin = (PlayerMngr->GetPlayer(Now)->GetMaxScore() > PlayerMngr->GetPlayer(1 - Now)->GetMaxScore());
 			bool IsDraw = (PlayerMngr->GetPlayer(Now)->GetMaxScore() == PlayerMngr->GetPlayer(1 - Now)->GetMaxScore());
-			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (48),
-				FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::BOTTOM, (300), (384),
+			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (48),
+				FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM, (300), (384),
 				IsDraw ? Gray25 : (IsWin ? Red : White), Black,
 				IsDraw ? LocalizeParts->Get(6002) : (IsWin ? LocalizeParts->Get(6000) : LocalizeParts->Get(6001)));
-			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
-				FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, (300), (386), White, Black, "%d : %d",
+			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+				FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, (300), (386), White, Black, "%d : %d",
 				PlayerMngr->GetPlayer(Now)->GetMaxScore(), PlayerMngr->GetPlayer(1 - Now)->GetMaxScore());
 			ButtonParts->Draw();
 		}

@@ -448,10 +448,10 @@ namespace FPS_n2 {
 					float per = std::cos(DX_PI_F * 10.f * ((intParam[3]) ? 2.f : std::max(m_GameStartTimer, 0.f)));
 					if ((per * 255.f) > 1.f) {
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
-						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
-							FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, xp1, yp1, (floatParam[0] < 60.f) ? Red : Yellow, Black, "TIME");
-						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
-							FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, xp1 + (300), yp1, (floatParam[0] < 60.f) ? Red : Yellow, Black, "%d:%05.2f",
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, (floatParam[0] < 60.f) ? Red : Yellow, Black, "TIME");
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 + (300), yp1, (floatParam[0] < 60.f) ? Red : Yellow, Black, "%d:%05.2f",
 							static_cast<int>(floatParam[0] / 60.f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
@@ -488,20 +488,20 @@ namespace FPS_n2 {
 					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - (10) - (40 - 20 * intParam[1]), yp1 + (20),
 						xp1 - (10), yp1 + (24), Red, true);
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
-						FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xp1 - (20), yp1, Red, Black, "%d", intParam[0]);
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::MIDDLE, xp1 - (20), yp1, Red, Black, "%d", intParam[0]);
 
 					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 - (10), yp1 + (20),
 						xp1 + (10), yp1 + (24), Gray75, true);
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
-						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, Gray25, Black, ":");
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE, xp1, yp1, Gray25, Black, ":");
 
 					DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal,
 						xp1 + (10), yp1 + (20),
 						xp1 + (10) + (40 - 20 * intParam[0]), yp1 + (24), White, true);
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (32),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xp1 + (20), yp1, White, Black, "%d", intParam[1]);
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp1 + (20), yp1, White, Black, "%d", intParam[1]);
 				}
 				//èÓïÒ
 				{
@@ -520,15 +520,15 @@ namespace FPS_n2 {
 							255, 255, 255);
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
-						FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
 
 					//ãCçá
 					xp1 = (24 + 9 * 2);
 					yp1 = (1080 - 80 - 28 * 2);
 
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, LocalizeParts->Get(5000));
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, LocalizeParts->Get(5000));
 					m_GaugeParam[0].DrawGauge(
 						xp1, yp1, xp1 + (300), yp1 + (6),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),
@@ -544,8 +544,8 @@ namespace FPS_n2 {
 					xp1 = (24 + 9 * 1);
 					yp1 = (1080 - 80 - 28 * 1);
 
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, LocalizeParts->Get(5001));
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, LocalizeParts->Get(5001));
 					m_GaugeParam[1].DrawGauge(
 						xp1, yp1, xp1 + (300), yp1 + (6),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),
@@ -556,8 +556,8 @@ namespace FPS_n2 {
 					xp1 = (24 + 9 * 0);
 					yp1 = (1080 - 80 - 28 * 0);
 
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (18),
-						FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, LocalizeParts->Get(5002));
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1, yp1 - (2), White, Black, LocalizeParts->Get(5002));
 					m_GaugeParam[2].DrawGauge(
 						xp1, yp1, xp1 + (300), yp1 + (6),
 						GetColorU8(255, 0, 0, 255), GetColorU8(255, 255, 0, 255), GetColorU8(128, 255, 0, 255), GetColorU8(192, 255, 192, 255),
@@ -597,8 +597,8 @@ namespace FPS_n2 {
 					}
 					if (0 <= floatParam[1] && floatParam[1] < 3.f) {
 						if (static_cast<int>(floatParam[1] * 100) % 30 < 15) {
-							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (24),
-								FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::BOTTOM, (64), (900),
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, (64), (900),
 								Yellow, Black,
 								"èÍäOÇ‹Ç≈Ç†Ç∆%3.1fïb", floatParam[1]);
 						}

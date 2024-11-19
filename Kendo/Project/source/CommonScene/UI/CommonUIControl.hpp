@@ -25,8 +25,8 @@ namespace FPS_n2 {
 				int yp1{ 0 };
 				int xsize{ 0 };
 				int ysize{ 0 };
-				FontHandle::FontXCenter LMR{ FontHandle::FontXCenter::LEFT };
-				FontHandle::FontYCenter TMB{ FontHandle::FontYCenter::TOP };
+				FontSystem::FontXCenter LMR{ FontSystem::FontXCenter::LEFT };
+				FontSystem::FontYCenter TMB{ FontSystem::FontYCenter::TOP };
 
 				float SelYadd{ 0.f };
 
@@ -56,12 +56,12 @@ namespace FPS_n2 {
 				void			Load_String(int LocalizeID, int fontsize, bool IsEnableSelect) noexcept {
 					auto* LocalizeParts = LocalizePool::Instance();
 					m_LocalizeID = LocalizeID;
-					xsize = FontPool::Instance()->Get(FontPool::FontType::MS_Gothic, fontsize, 3)->GetStringWidth(InvalidID, LocalizeParts->Get(m_LocalizeID));
+					xsize = FontSystem::FontPool::Instance()->Get(FontSystem::FontType::MS_Gothic, fontsize, 3)->GetStringWidth(LocalizeParts->Get(m_LocalizeID));
 					ysize = fontsize;
 					this->m_ButtonMode = ButtonMode::String;
 					this->m_EnableSelect = IsEnableSelect;
 				}
-				void			Set(int xp, int yp, FontHandle::FontXCenter FontX, FontHandle::FontYCenter FontY) noexcept {
+				void			Set(int xp, int yp, FontSystem::FontXCenter FontX, FontSystem::FontYCenter FontY) noexcept {
 					xp1 = xp;
 					yp1 = yp;
 					LMR = FontX;
@@ -89,26 +89,26 @@ namespace FPS_n2 {
 					int xp = (xp1);
 					int yp = (yp1);
 					switch (LMR) {
-					case FontHandle::FontXCenter::LEFT:
+					case FontSystem::FontXCenter::LEFT:
 						xp = (xp1);
 						break;
-					case FontHandle::FontXCenter::MIDDLE:
+					case FontSystem::FontXCenter::MIDDLE:
 						xp = (xp1) - (xsize) / 2;
 						break;
-					case FontHandle::FontXCenter::RIGHT:
+					case FontSystem::FontXCenter::RIGHT:
 						xp = (xp1) - (xsize);
 						break;
 					default:
 						break;
 					}
 					switch (TMB) {
-					case FontHandle::FontYCenter::TOP:
+					case FontSystem::FontYCenter::TOP:
 						yp = (yp1);
 						break;
-					case FontHandle::FontYCenter::MIDDLE:
+					case FontSystem::FontYCenter::MIDDLE:
 						yp = (yp1) - (ysize) / 2;
 						break;
-					case FontHandle::FontYCenter::BOTTOM:
+					case FontSystem::FontYCenter::BOTTOM:
 						yp = (yp1) - (ysize);
 						break;
 					default:
@@ -126,26 +126,26 @@ namespace FPS_n2 {
 							int xp = (xp1);
 							int yp = (yp1);
 							switch (LMR) {
-							case FontHandle::FontXCenter::LEFT:
+							case FontSystem::FontXCenter::LEFT:
 								xp = (xp1);
 								break;
-							case FontHandle::FontXCenter::MIDDLE:
+							case FontSystem::FontXCenter::MIDDLE:
 								xp = (xp1) - (xsize) / 2;
 								break;
-							case FontHandle::FontXCenter::RIGHT:
+							case FontSystem::FontXCenter::RIGHT:
 								xp = (xp1) - (xsize);
 								break;
 							default:
 								break;
 							}
 							switch (TMB) {
-							case FontHandle::FontYCenter::TOP:
+							case FontSystem::FontYCenter::TOP:
 								yp = (yp1);
 								break;
-							case FontHandle::FontYCenter::MIDDLE:
+							case FontSystem::FontYCenter::MIDDLE:
 								yp = (yp1) - (ysize) / 2;
 								break;
-							case FontHandle::FontYCenter::BOTTOM:
+							case FontSystem::FontYCenter::BOTTOM:
 								yp = (yp1) - (ysize);
 								break;
 							default:
@@ -202,7 +202,7 @@ namespace FPS_n2 {
 								break;
 							}
 						}
-						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::MS_Gothic, (ysize),
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (ysize),
 							LMR, TMB, (xp1), (yp1 + static_cast<int>(SelYadd)), Color, Black, LocalizeParts->Get(m_LocalizeID));
 					}
 					break;
@@ -269,13 +269,13 @@ namespace FPS_n2 {
 			void Draw(void) noexcept;
 			void Dispose(void) noexcept;
 		public:
-			void AddStringButton(int LocalizeID, int fontsize, bool IsEnableSelect, int xp, int yp, FontHandle::FontXCenter FontX, FontHandle::FontYCenter FontY) noexcept {
+			void AddStringButton(int LocalizeID, int fontsize, bool IsEnableSelect, int xp, int yp, FontSystem::FontXCenter FontX, FontSystem::FontYCenter FontY) noexcept {
 				ButtonSel.emplace_back(std::make_shared<ButtonClass>());
 				ButtonSel.back()->LoadCommon(&this->m_SelectBackImage);
 				ButtonSel.back()->Load_String(LocalizeID, fontsize, IsEnableSelect);
 				ButtonSel.back()->Set(xp, yp, FontX, FontY);
 			}
-			void AddIconButton(const char* IconPath, bool IsEnableSelect, int xp, int yp, FontHandle::FontXCenter FontX, FontHandle::FontYCenter FontY) noexcept {
+			void AddIconButton(const char* IconPath, bool IsEnableSelect, int xp, int yp, FontSystem::FontXCenter FontX, FontSystem::FontYCenter FontY) noexcept {
 				ButtonSel.emplace_back(std::make_shared<ButtonClass>());
 				ButtonSel.back()->LoadCommon(&this->m_SelectBackImage);
 				ButtonSel.back()->Load_Icon(IconPath, IsEnableSelect);

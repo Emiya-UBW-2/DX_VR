@@ -274,16 +274,16 @@ namespace FPS_n2 {
 	}
 	void			EventScene::TelopClass::Cut_tex::Draw(LONGLONG nowTimeWait) const noexcept {
 		if (this->START_TIME < nowTimeWait && nowTimeWait < this->END_TIME) {
-			auto* Fonts = FontPool::Instance();
+			auto* Fonts = FontSystem::FontPool::Instance();
 			switch (this->LMR) {
 			case 0:
-				Fonts->Get(FontPool::FontType::MS_Gothic, -1, 3)->DrawString(this->size, FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::TOP, this->xpos, this->ypos, GetColor(255, 255, 255), GetColor(0, 0, 0), this->str);
+				Fonts->Get(FontSystem::FontType::MS_Gothic, this->size, 3)->DrawString(FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, this->xpos, this->ypos, GetColor(255, 255, 255), GetColor(0, 0, 0), this->str);
 				break;
 			case 1:
-				Fonts->Get(FontPool::FontType::MS_Gothic, -1, 3)->DrawString(this->size, FontHandle::FontXCenter::MIDDLE, FontHandle::FontYCenter::TOP, this->xpos, this->ypos, GetColor(255, 255, 255), GetColor(0, 0, 0), this->str);
+				Fonts->Get(FontSystem::FontType::MS_Gothic, this->size, 3)->DrawString(FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, this->xpos, this->ypos, GetColor(255, 255, 255), GetColor(0, 0, 0), this->str);
 				break;
 			case 2:
-				Fonts->Get(FontPool::FontType::MS_Gothic, -1, 3)->DrawString(this->size, FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::TOP, this->xpos, this->ypos, GetColor(255, 255, 255), GetColor(0, 0, 0), this->str);
+				Fonts->Get(FontSystem::FontType::MS_Gothic, this->size, 3)->DrawString(FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, this->xpos, this->ypos, GetColor(255, 255, 255), GetColor(0, 0, 0), this->str);
 				break;
 			default:
 				break;
