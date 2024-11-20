@@ -31,6 +31,7 @@ namespace FPS_n2 {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_W), "");
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_S), "");
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_STICK), LocalizeParts->Get(9993));
+						KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(MOUSE_INPUT_LEFT | 0xF00, ControlType::PC), LocalizeParts->Get(9919));
 					});
 				ButtonParts->UpdateInput();
 				// ‘I‘ğ‚Ì‹““®

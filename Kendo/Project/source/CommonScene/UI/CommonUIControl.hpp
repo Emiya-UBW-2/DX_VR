@@ -154,7 +154,7 @@ namespace FPS_n2 {
 
 							float per = std::clamp(SelYadd / 5.f, 0.f, 1.f);
 							float per2 = 1.f - std::clamp(SelYadd / 10.f, 0.f, 1.f);
-							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(128.f * per), 0, 255));
+							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
 							DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
 								this->m_SelectBackImage,
 								xp + (xsize) / 2 - static_cast<int>(static_cast<float>((xsize) / 2 + (300)) * per2), yp + (ysize) - (12) - static_cast<int>(static_cast<float>((ysize) / 6) * per),
@@ -210,14 +210,23 @@ namespace FPS_n2 {
 					{
 						if (SelYadd > 0.f) {
 							float per1 = std::clamp(SelYadd / 5.f, 0.f, 1.f);
-							float per2 = 1.f - std::clamp(SelYadd / 10.f, 0.f, 1.f);
-							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(128.f * per1), 0, 255));
+							float per2 = (1.f - std::clamp(SelYadd / 10.f, 0.f, 1.f))*1.5f;
+							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per1), 0, 255));
 							DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
 								this->m_SelectBackImage,
 								(xp1) - static_cast<int>(static_cast<float>((xsize)) * per2), (yp1) - static_cast<int>(static_cast<float>((ysize)) * per2),
 								(xp1) + static_cast<int>(static_cast<float>((xsize)) * per2), (yp1) + static_cast<int>(static_cast<float>((ysize)) * per2),
 								true);
 							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						}
+
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 64, 64, 64);
+						for (int x = -1; x <= 1; x++) {
+							for (int y = -1; y <= 1; y++) {
+								DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+									&this->m_Icon,
+									(xp1 + x * 2), (yp1 + y * 2), static_cast<float>((100)) / 100.f * (1.f + SelYadd / 50.f), 0.f, true);
+							}
 						}
 						switch (this->m_ButtonStatus) {
 						case ButtonStatus::None:
@@ -296,6 +305,37 @@ namespace FPS_n2 {
 		public:
 			void Init(void) noexcept;
 			void Draw(int xmin, int ymin, int xmax) const noexcept;
+			void Dispose(void) noexcept;
+		};
+		// 
+		struct InfoPage {
+			bool						m_IsMovie{ false };
+			GraphHandle					m_Graph;
+			std::vector<std::string>	m_String;
+
+			void Dispose(void) noexcept {
+				m_Graph.Dispose();
+				m_String.clear();
+			}
+		};
+		class InfoControl {
+			int						m_InfoNow{ 0 };
+			std::vector<InfoPage>	m_InfoStr{};
+		public:
+			InfoControl(void) noexcept {}
+			InfoControl(const InfoControl&) = delete;
+			InfoControl(InfoControl&& o) = delete;
+			InfoControl& operator=(const InfoControl&) = delete;
+			InfoControl& operator=(InfoControl&& o) = delete;
+		private:
+			void DelPage() noexcept;
+			void SetPage() noexcept;
+		public:
+			void Init(void) noexcept;
+			void Start() noexcept;
+			void Draw(int xmin, int ymin, int xmax, int ymax) noexcept;
+			void End() noexcept;
+			void Guide() noexcept;
 			void Dispose(void) noexcept;
 		};
 		// 

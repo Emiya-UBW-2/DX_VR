@@ -136,6 +136,121 @@ namespace FPS_n2 {
 				sprintfDx(c.second, "");
 			}
 		}
+		void InfoControl::DelPage() noexcept {
+			if (this->m_InfoStr.at(m_InfoNow).m_Graph.IsActive()) {
+				if (this->m_InfoStr.at(m_InfoNow).m_IsMovie) {
+					PauseMovieToGraph(this->m_InfoStr.at(m_InfoNow).m_Graph.get());
+				}
+			}
+		}
+		void InfoControl::SetPage() noexcept {
+			if (this->m_InfoStr.at(m_InfoNow).m_Graph.IsActive()) {
+				if (this->m_InfoStr.at(m_InfoNow).m_IsMovie) {
+					ChangeMovieVolumeToGraph(0, this->m_InfoStr.at(m_InfoNow).m_Graph.get());
+					PlayMovieToGraph(this->m_InfoStr.at(m_InfoNow).m_Graph.get());
+				}
+			}
+		}
+		// 
+		void InfoControl::Init(void) noexcept {
+			FileStreamDX FileStream("data/Info.txt");
+			while (true) {
+				if (FileStream.ComeEof()) { break; }
+				auto ALL = FileStream.SeekLineAndGetStr();
+				if (ALL == "") { continue; }
+				if (ALL.find('=') != std::string::npos) {
+					auto LEFT = FileStreamDX::getleft(ALL);
+					auto RIGHT = FileStreamDX::getright(ALL);
+					if (LEFT == "AddPage") {
+						this->m_InfoStr.emplace_back();
+					}
+					else if (LEFT == "Text") {
+						this->m_InfoStr.back().m_String.emplace_back(RIGHT);
+					}
+					else if (LEFT == "Graph") {
+						this->m_InfoStr.back().m_Graph.Load(RIGHT);
+						this->m_InfoStr.back().m_IsMovie = (RIGHT.find("mp4") != std::string::npos);
+					}
+				}
+			}
+		}
+		void InfoControl::Start() noexcept {
+			m_InfoNow = 0;
+			SetPage();
+		}
+		void InfoControl::Draw(int xmin, int ymin, int xmax, int ymax) noexcept {
+			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
+			auto* Pad = PadControl::Instance();
+
+			int xp1, yp1;
+
+			xp1 = xmin + 72;
+			yp1 = ymin + LineHeight;
+			if (this->m_InfoStr.at(m_InfoNow).m_Graph.IsActive()) {
+				if (this->m_InfoStr.at(m_InfoNow).m_IsMovie) {
+					if (GetMovieStateToGraph(this->m_InfoStr.at(m_InfoNow).m_Graph.get()) == 0) {
+						SeekMovieToGraph(this->m_InfoStr.at(m_InfoNow).m_Graph.get(), 0);
+						PlayMovieToGraph(this->m_InfoStr.at(m_InfoNow).m_Graph.get());
+					}
+				}
+				DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
+					&this->m_InfoStr.at(m_InfoNow).m_Graph,
+					xp1, yp1,
+					(xmax - 72), yp1 + ((xmax - 72) - xp1) * 720 / 600,
+					false);
+				yp1 = yp1 + ((xmax - 72) - xp1) * 720 / 600;
+			}
+			int Height = (16);
+			for (const auto& c : this->m_InfoStr.at(m_InfoNow).m_String) {
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, Height,
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + (6), yp1, White, Black, c);
+				yp1 += Height + 4;
+			}
+
+			xp1 = (xmax + xmin) / 2;
+			yp1 = ymax - LineHeight * 1;
+			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, Height,
+				FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1 + (6), yp1, White, Black, "%d / %d", m_InfoNow + 1, (int)(this->m_InfoStr.size()));
+			// 
+			{
+				yp1 = ymax - LineHeight * 3;
+				bool ret = WindowSystem::SetMsgClickBox(xmin + 6, yp1, xmin + 48, yp1 + LineHeight * 2, LineHeight, Gray15, false, true, "<");
+				if (Pad->GetPadsInfo(PADS::MOVE_A).GetKey().trigger() || ret) {
+					DelPage();
+					--m_InfoNow;
+					if (m_InfoNow < 0) {
+						m_InfoNow = (int)(this->m_InfoStr.size()) -1;
+					}
+					SetPage();
+				}
+			}
+			// 
+			{
+				yp1 = ymax - LineHeight * 3;
+				bool ret = WindowSystem::SetMsgClickBox(xmax - 48, yp1, xmax - 6, yp1 + LineHeight * 2, LineHeight, Gray15, false, true, ">");
+				if (Pad->GetPadsInfo(PADS::MOVE_D).GetKey().trigger() || ret) {
+					DelPage();
+					++m_InfoNow %= (int)(this->m_InfoStr.size());
+					SetPage();
+				}
+			}
+		}
+		void InfoControl::End() noexcept {
+			DelPage();
+		}
+		void InfoControl::Guide() noexcept {
+			auto* KeyGuideParts = KeyGuide::Instance();
+			auto* LocalizeParts = LocalizePool::Instance();
+			KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_A), "");
+			KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_D), "");
+			KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_STICK), LocalizeParts->Get(9993));
+		}
+		void InfoControl::Dispose(void) noexcept {
+			for (auto& c : this->m_InfoStr) {
+				c.Dispose();
+			}
+			this->m_InfoStr.clear();
+		}
 		// 
 		void FadeControl::SetFadeIn(float Per) noexcept {
 			this->m_IsBlackOut = false;

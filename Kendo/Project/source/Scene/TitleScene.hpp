@@ -14,6 +14,7 @@ namespace FPS_n2 {
 			bool						m_CloseResetSave{false};
 			// 
 			std::unique_ptr<CreditControl>	m_CreditControl;
+			std::unique_ptr<InfoControl>	m_InfoControl;
 			//
 			MV1							m_TitleBGSky;
 			MV1							m_TitleBGMap;

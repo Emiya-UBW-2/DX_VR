@@ -795,6 +795,7 @@ namespace FPS_n2 {
 							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_STICK), LocalizeParts->Get(9993));
 							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::INTERACT), LocalizeParts->Get(9992));
 							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::RELOAD), LocalizeParts->Get(9991));
+							KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(MOUSE_INPUT_LEFT | 0xF00, ControlType::PC), LocalizeParts->Get(9919));
 							break;
 						case GameControlType::Replay:
 							break;
@@ -836,6 +837,7 @@ namespace FPS_n2 {
 						case GameControlType::Result:
 							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::INTERACT), LocalizeParts->Get(9915));
 							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::JUMP), LocalizeParts->Get(9917));
+							KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(MOUSE_INPUT_LEFT | 0xF00, ControlType::PC), LocalizeParts->Get(9919));
 							break;
 						default:
 							break;

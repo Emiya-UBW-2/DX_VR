@@ -45,11 +45,15 @@ namespace FPS_n2 {
 			ButtonParts->AddStringButton(400, 52, true, 1920 - 64 - 48, 1080 - 84 - 64 * 2, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
 			ButtonParts->AddStringButton(401, 48, true, 1920 - 64 - 48, 1080 - 84 - 64 * 1, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
 			ButtonParts->AddStringButton(402, 48, IsFileExist("Replay/Rep.txt"), 1920 - 64 - 48, 1080 - 84 - 64 * 0, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
-			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, (1920 - 96 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
-			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, (1920 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
+			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, (1920 - 96 * 2 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
+			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, (1920 - 96 * 1 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
+			ButtonParts->AddIconButton("data/UI/Info.png", true, (1920 - 96 * 0 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			// クレジット
 			this->m_CreditControl = std::make_unique<CreditControl>();
 			this->m_CreditControl->Init();
+			//
+			this->m_InfoControl = std::make_unique<InfoControl>();
+			this->m_InfoControl->Init();
 			// 
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, TRUE);
 			//Cam
@@ -136,6 +140,7 @@ namespace FPS_n2 {
 					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_D), "");
 					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_STICK), LocalizeParts->Get(9993));
 					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::INTERACT), LocalizeParts->Get(9992));
+					KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(MOUSE_INPUT_LEFT | 0xF00, ControlType::PC), LocalizeParts->Get(9919));
 				}
 			);
 			if (!PopUpParts->IsActivePop() && (this->m_GameFadeIn == 0.f) && (this->m_GameStart == 0.f)) {
@@ -165,6 +170,17 @@ namespace FPS_n2 {
 							true
 						);
 						break;
+					case 5:
+						this->m_InfoControl->Start();
+						PopUpParts->Add(LocalizeParts->Get(130), (720), (840),
+							[&](int xmin, int ymin, int xmax, int ymax, bool) {
+								this->m_InfoControl->Draw(xmin, ymin, xmax, ymax);
+							},
+							[&]() { this->m_InfoControl->End(); },
+							[&]() { this->m_InfoControl->Guide(); },
+							true
+						);
+						break;
 					default:
 						break;
 					}
@@ -191,6 +207,9 @@ namespace FPS_n2 {
 			// 
 			this->m_CreditControl->Dispose();
 			this->m_CreditControl.reset();
+			// 
+			this->m_InfoControl->Dispose();
+			this->m_InfoControl.reset();
 			// 
 			ButtonParts->Dispose();
 			// 
