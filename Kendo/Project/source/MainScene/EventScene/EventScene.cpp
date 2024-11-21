@@ -885,9 +885,9 @@ namespace FPS_n2 {
 		m_BaseTime = GetNowHiPerformanceCount();
 	}
 	void			EventScene::Update(void) noexcept {
-		auto* WindowSizeParts = WindowSizeControl::Instance();
 		auto* PostPassParts = PostPassEffect::Instance();
 		auto* SceneParts = SceneControl::Instance();
+		auto* CameraParts = Camera3D::Instance();
 		if (IsEnd()) { return; }
 
 		if (m_NowTime >= 0) {
@@ -940,7 +940,7 @@ namespace FPS_n2 {
 							CutInfo.Aim_camera.SetCamPos(CutInfo.Aim_camera.GetCamVec() + m_PosCam[m_PosCamCut.GetNowCut()], CutInfo.Aim_camera.GetCamVec(), CutInfo.Aim_camera.GetCamUp());
 						}
 					}
-					CutInfo.UpdateCam(&WindowSizeParts->SetMainCamera());
+					CutInfo.UpdateCam(&CameraParts->SetMainCamera());
 				}
 				if (m_isSkip) {
 					Easing(&Black_Skip, 1.f, 0.9f, EasingType::OutExpo);
@@ -949,7 +949,7 @@ namespace FPS_n2 {
 					}
 				}
 				//
-				auto far_t = WindowSizeParts->SetMainCamera().GetCamFar();
+				auto far_t = CameraParts->SetMainCamera().GetCamFar();
 				PostPassParts->Set_DoFNearFar(1.f * Scale3DRate, far_t / 2, 0.5f * Scale3DRate, far_t);
 			}
 		}

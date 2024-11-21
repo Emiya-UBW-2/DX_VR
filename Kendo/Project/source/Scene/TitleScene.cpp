@@ -23,6 +23,7 @@ namespace FPS_n2 {
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* WindowSizeParts = WindowSizeControl::Instance();
+			auto* CameraParts = Camera3D::Instance();
 			//
 			this->m_TitleBGSky.SetScale(Vector3DX::vget(10.f, 10.f, 10.f));
 			MV1::SetAnime(&(this->m_TitleChara), this->m_TitleChara);
@@ -57,10 +58,10 @@ namespace FPS_n2 {
 			// 
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, TRUE);
 			//Cam
-			WindowSizeParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.3f, Scale3DRate * 20.f);
+			CameraParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.3f, Scale3DRate * 20.f);
 			Vector3DX CamVec = Vector3DX::vget(0, 10, 75);
 			Vector3DX CamPos = CamVec + Vector3DX::vget(-20, -5, -20);
-			WindowSizeParts->SetMainCamera().SetCamPos(CamPos, CamVec, Vector3DX::vget(0, 1, 0));
+			CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, Vector3DX::vget(0, 1, 0));
 			{
 				Vector3DX LightVec = Vector3DX::vget(1.f, -0.5f, 0.05f); LightVec = LightVec.normalized();
 				WindowSizeParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
@@ -85,7 +86,7 @@ namespace FPS_n2 {
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* OptionDrawCtrls = OptionPopup::Instance();
 			auto* SceneParts = SceneControl::Instance();
-			auto* WindowSizeParts = WindowSizeControl::Instance();
+			auto* CameraParts = Camera3D::Instance();
 			if (SceneParts->IsPause()) {
 				return true;
 			}
@@ -127,7 +128,7 @@ namespace FPS_n2 {
 				m_PhaseTime += DXLib_refParts->GetDeltaTime();
 			}
 
-			WindowSizeParts->SetMainCamera().SetCamPos(CamPos, CamVec, Vector3DX::vget(0, 1, 0));
+			CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, Vector3DX::vget(0, 1, 0));
 
 			Pad->SetMouseMoveEnable(false);
 			KeyGuideParts->ChangeGuide(

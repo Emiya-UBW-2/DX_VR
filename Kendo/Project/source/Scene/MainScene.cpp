@@ -135,8 +135,8 @@ namespace FPS_n2 {
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* CameraParts = Camera3D::Instance();
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
 #endif // DEBUG
@@ -547,7 +547,7 @@ namespace FPS_n2 {
 			{
 				if (Chara->PopConcussionSwitch()) {
 					m_Concussion = 1.f;
-					CameraShake::Instance()->SetCamShake(0.5f, 0.01f * Scale3DRate);
+					Camera3D::Instance()->SetCamShake(0.5f, 0.01f * Scale3DRate);
 				}
 				PostPassParts->Set_is_Blackout(m_Concussion > 0.f);
 				if (m_Concussion > 0.9f) {
@@ -573,8 +573,8 @@ namespace FPS_n2 {
 				//カメラ
 				Vector3DX CamPos = ViewChara->GetEyePosition();
 				Vector3DX CamVec = CamPos + ViewChara->GetEyeMatrix().zvec() * -1.f;
-				CamVec += CameraShake::Instance()->GetCamShake();
-				CamPos += CameraShake::Instance()->GetCamShake() * 2.f;
+				CamVec += Camera3D::Instance()->GetCamShake();
+				CamPos += Camera3D::Instance()->GetCamShake() * 2.f;
 #ifdef DEBUG
 				if (CheckHitKey(KEY_INPUT_F1) != 0) {
 					DBG_CamSel = -1;
@@ -617,9 +617,9 @@ namespace FPS_n2 {
 					break;
 				}
 #endif
-				WindowSizeParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
+				CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
 				//info
-				WindowSizeParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.3f, Scale3DRate * 20.f);
+				CameraParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.3f, Scale3DRate * 20.f);
 				//DoF
 				PostPassParts->Set_DoFNearFar(Scale3DRate * 0.3f, Scale3DRate * 5.f, Scale3DRate * 0.1f, Scale3DRate * 20.f);
 			}
@@ -979,15 +979,15 @@ namespace FPS_n2 {
 		void			MainGameScene::MainDraw_Sub(void) const noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* HitMarkParts = HitMark::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
+			auto* CameraParts = Camera3D::Instance();
 			if (m_GameControlType == GameControlType::Result) { return; }
 			if (m_IsEventSceneActive) {
 				m_EventScene.MainDraw();
 			}
 			else {
-				SetFogStartEnd(WindowSizeParts->GetMainCamera().GetCamNear(), WindowSizeParts->GetMainCamera().GetCamFar() * 2.f);
+				SetFogStartEnd(CameraParts->GetMainCamera().GetCamNear(), CameraParts->GetMainCamera().GetCamFar() * 2.f);
 				BackGround->Draw();
 				ObjMngr->Draw();
 				for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
