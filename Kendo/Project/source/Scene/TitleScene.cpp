@@ -134,13 +134,13 @@ namespace FPS_n2 {
 				[]() {
 					auto* KeyGuideParts = KeyGuide::Instance();
 					auto* LocalizeParts = LocalizePool::Instance();
-					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_W), "");
-					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_S), "");
-					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_A), "");
-					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_D), "");
-					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_STICK), LocalizeParts->Get(9993));
-					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::INTERACT), LocalizeParts->Get(9992));
-					KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(MOUSE_INPUT_LEFT | 0xF00, ControlType::PC), LocalizeParts->Get(9919));
+					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
+					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_S), "");
+					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_A), "");
+					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_D), "");
+					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), LocalizeParts->Get(9993));
+					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizeParts->Get(9992));
+					KeyGuideParts->AddGuide(Controls::GetIDtoOffset(Controls::GetStrtoID("LMOUSE", Controls::ControlType::PC), Controls::ControlType::PC), LocalizeParts->Get(9919));
 				}
 			);
 			if (!PopUpParts->IsActivePop() && (this->m_GameFadeIn == 0.f) && (this->m_GameStart == 0.f)) {
@@ -149,11 +149,7 @@ namespace FPS_n2 {
 				if (ButtonParts->GetTriggerButton()) {
 					switch (ButtonParts->GetSelect()) {
 					case 0:
-						this->m_GameStart += 0.0001f;
-						break;
 					case 1:
-						this->m_GameStart += 0.0001f;
-						break;
 					case 2:
 						this->m_GameStart += 0.0001f;
 						break;

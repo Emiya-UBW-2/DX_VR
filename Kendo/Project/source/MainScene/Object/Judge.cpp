@@ -137,7 +137,7 @@ namespace FPS_n2 {
 			{
 				float Radius = 0.5f * Scale3DRate;
 				for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
-					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
+					auto& c = PlayerMngr->GetPlayer(i)->GetChara();
 					//Ž©•ª‚ª“–‚½‚Á‚½‚ç‰Ÿ‚µ–ß‚·
 					Vector3DX Vec = (c->GetMove().GetPos() - PosBuf); Vec.y = (0.f);
 					float Len = Vec.magnitude();

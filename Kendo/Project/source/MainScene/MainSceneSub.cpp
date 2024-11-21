@@ -26,12 +26,12 @@ namespace FPS_n2 {
 					[this]() {
 						auto* KeyGuideParts = KeyGuide::Instance();
 						auto* LocalizeParts = LocalizePool::Instance();
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::INTERACT), LocalizeParts->Get(9992));
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::RELOAD), LocalizeParts->Get(9991));
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_W), "");
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_S), "");
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_STICK), LocalizeParts->Get(9993));
-						KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(MOUSE_INPUT_LEFT | 0xF00, ControlType::PC), LocalizeParts->Get(9919));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizeParts->Get(9992));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizeParts->Get(9991));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_S), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), LocalizeParts->Get(9993));
+						KeyGuideParts->AddGuide(Controls::GetIDtoOffset(Controls::GetStrtoID("LMOUSE", Controls::ControlType::PC), Controls::ControlType::PC), LocalizeParts->Get(9919));
 					});
 				ButtonParts->UpdateInput();
 				// ‘I‘ðŽž‚Ì‹““®
@@ -53,7 +53,7 @@ namespace FPS_n2 {
 					}
 					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, TRUE);
 				}
-				if (Pad->GetPadsInfo(PADS::RELOAD).GetKey().trigger()) {
+				if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_CANCEL))->Play(DX_PLAYTYPE_BACK, TRUE);
 					SceneParts->ChangePause(false);
 				}
@@ -100,7 +100,7 @@ namespace FPS_n2 {
 					break;
 				}
 			}
-			if (Pad->GetPadsInfo(PADS::JUMP).GetKey().trigger()) {
+			if (Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().trigger()) {
 				this->m_IsReplay = true;
 			}
 		}

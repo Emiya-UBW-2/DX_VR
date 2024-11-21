@@ -3,6 +3,8 @@
 #include	"../../MainScene/NetWork.hpp"
 #include	"CPU.hpp"
 
+#include	"../../MainScene/Object/Character.hpp"
+
 namespace FPS_n2 {
 	namespace Player {
 		class PlayerManager : public SingletonBase<PlayerManager> {
@@ -11,7 +13,7 @@ namespace FPS_n2 {
 		private:
 			class PlayerControl {
 			private:
-				std::shared_ptr<ObjectBaseClass>				m_Chara{ nullptr };
+				std::shared_ptr<CharacterObject::CharacterClass>m_Chara{ nullptr };
 				std::shared_ptr<AIControl>						m_AI{ nullptr };
 				int												m_Score{ 0 };							//スコア
 				int												m_MaxScore{ 0 };							//スコア
@@ -29,7 +31,7 @@ namespace FPS_n2 {
 					this->Dispose();
 				}
 			public:
-				void		SetChara(const std::shared_ptr<ObjectBaseClass>& pChara) noexcept { this->m_Chara = pChara; }
+				void		SetChara(const std::shared_ptr<CharacterObject::CharacterClass>& pChara) noexcept { this->m_Chara = pChara; }
 				auto& GetChara(void) noexcept { return this->m_Chara; }
 
 				void		SetAI(const std::shared_ptr<AIControl>& pAI) noexcept { this->m_AI = pAI; }

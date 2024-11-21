@@ -112,13 +112,11 @@ namespace FPS_n2 {
 		Path += FolderName;
 		Path += "/";
 
-		std::shared_ptr<ObjectBaseClass> Ptr = std::make_shared<CharacterObject::CharacterClass>();
-		ObjMngr->AddObject(Ptr);
-		ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
-		Ptr->Init();
-		p->SetChara(Ptr);
-		auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
-		c->SetPlayerID(ID);
+		p->SetChara(std::make_shared<CharacterObject::CharacterClass>());
+		ObjMngr->AddObject(p->GetChara());
+		ObjMngr->LoadModel(p->GetChara(), p->GetChara(), Path.c_str());
+		p->GetChara()->Init();
+		p->GetChara()->SetPlayerID(ID);
 		p->SetAI(std::make_shared<Player::AIControl>());
 		//p->GetAI()->SetPlayerID(value);
 		//p->GetAI()->Init();
@@ -135,7 +133,7 @@ namespace FPS_n2 {
 		ObjMngr->AddObject(Ptr);
 		ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
 		Ptr->Init();
-		auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(ID)->GetChara();
+		auto& c = PlayerMngr->GetPlayer(ID)->GetChara();
 		c->SetWeaponPtr(Ptr);
 	}
 	void CommonBattleResource::LoadJudge(const std::string& FolderName) noexcept
@@ -146,7 +144,7 @@ namespace FPS_n2 {
 		Path += FolderName;
 		Path += "/";
 
-		std::shared_ptr<ObjectBaseClass> Ptr = std::make_shared<Sceneclass::JudgeClass>();
+		auto Ptr = std::make_shared<Sceneclass::JudgeClass>();
 		ObjMngr->AddObject(Ptr);
 		ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
 		Ptr->Init();

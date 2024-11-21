@@ -9,39 +9,31 @@ namespace FPS_n2 {
 		void MainGameScene::SetupStartCommon(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* BackGround = BackGround::BackGroundClass::Instance();
 			this->m_IsGameStart = false;
 			//初期化
 			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-				auto& p = PlayerMngr->GetPlayer(index);
-				auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+				auto& c = PlayerMngr->GetPlayer(index)->GetChara();
 				{
-					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale3DRate) * static_cast<float>(index * 2 - 1));
-
-					Vector3DX EndPos = pos_t - Vector3DX::up() * 10.f * Scale3DRate;
-					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 10.f * Scale3DRate, &EndPos, true)) {
-						pos_t = EndPos;
-					}
-					c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t);
+					Vector3DX pos_t = Vector3DX::vget(0.f, 0.f, (-1.5f * Scale3DRate) * static_cast<float>(index * 2 - 1));
+					c->MovePoint(deg2rad(180.f * static_cast<float>(index)), pos_t);
 				}
 			}
 			if (this->m_GameMode != GameMode::Training) {
 				for (int index = 0; index < 3; ++index) {
-					auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
+					auto& j = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
 					//人の座標設定
-					c->SetWin(false, false);
+					j->SetWin(false, false);
 					//人の座標設定
 					{
 						float Rad = deg2rad(-90.f + 120.f * static_cast<float>(index));
-						Vector3DX pos_t = Vector3DX::vget(0.f, 0.f, (3.5f * Scale3DRate));
-						pos_t = Matrix3x3DX::Vtrans(pos_t, Matrix3x3DX::RotAxis(Vector3DX::up(), Rad));
-						c->MovePoint(Rad, pos_t);
+						Vector3DX pos_t = Matrix3x3DX::Vtrans(Vector3DX::vget(0.f, 0.f, (3.5f * Scale3DRate)), Matrix3x3DX::RotAxis(Vector3DX::up(), Rad));
+						j->MovePoint(Rad, pos_t);
 					}
 				}
 			}
 		}
 		void MainGameScene::SetupBattleStart(void) noexcept {
+			auto* SE = SoundPool::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* FadeInParts = FadeControl::Instance();
 			//
@@ -58,6 +50,9 @@ namespace FPS_n2 {
 			this->m_UIclass.SetGameStart(true);
 			//
 			SetupStartCommon();
+			if (m_GameMode != GameMode::Training) {
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Base))->Play(DX_PLAYTYPE_LOOP, TRUE);
+			}
 		}
 		void MainGameScene::SetupBattleRestart(void) noexcept {
 			auto* FadeInParts = FadeControl::Instance();
@@ -102,7 +97,7 @@ namespace FPS_n2 {
 			}
 			if (m_IsEventSceneActive) {
 				m_EventScene.GetDeltaTime();
-				if (!SceneParts->IsPause() && Pad->GetPadsInfo(PADS::INTERACT).GetKey().trigger()) {
+				if (!SceneParts->IsPause() && Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
 					SE->StopAll(SoundType::SE);
 					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, TRUE);
 					m_EventScene.Skip();
@@ -113,11 +108,7 @@ namespace FPS_n2 {
 					m_EventScene.Dispose();
 					m_IsEventSceneActive = false;
 					KeyGuideParts->SetGuideFlip();
-					if (m_GameMode != GameMode::Training) {
-						m_IsGameStart = false;
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Base))->Play(DX_PLAYTYPE_LOOP, TRUE);
-					}
-					else {
+					if (m_GameMode == GameMode::Training) {
 						if (m_EventSelect == "data/Cut/Cut2.txt") {
 							SetupEnd();
 						}
@@ -149,7 +140,7 @@ namespace FPS_n2 {
 #ifdef DEBUG
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
 #endif // DEBUG
-			auto& Chara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+			auto& Chara = PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=Start");
 #endif // DEBUG
@@ -232,22 +223,21 @@ namespace FPS_n2 {
 
 						if (PlayerMngr->GetWinPlayer() == GetMyPlayerID()) {
 							for (int index = 0; index < 3; ++index) {
-								auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
+								auto& j = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
 								//人の座標設定
-								c->SetWin(true, false);
+								j->SetWin(true, false);
 							}
 						}
 						else {
 							for (int index = 0; index < 3; ++index) {
-								auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
+								auto& j = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
 								//人の座標設定
-								c->SetWin(false, true);
+								j->SetWin(false, true);
 							}
 						}
 						//どちらかが2点先に取ったら
 						for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-							auto& p = PlayerMngr->GetPlayer(index);
-							if (p->GetScore() >= 2.f) {
+							if (PlayerMngr->GetPlayer(index)->GetScore() >= 2.f) {
 								m_IsGameEnd = true;
 								break;
 							}
@@ -336,18 +326,19 @@ namespace FPS_n2 {
 				InputControl MyInput;
 				if (m_IsPlayable) {
 					MyInput.ResetAllInput();
-					MyInput.SetInputStart(Pad->GetLS_Y(), Pad->GetLS_X());
-					MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetPadsInfo(PADS::MOVE_W).GetKey().press());
-					MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetPadsInfo(PADS::MOVE_S).GetKey().press());
-					MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetPadsInfo(PADS::MOVE_A).GetKey().press());
-					MyInput.SetInputPADS(PADS::MOVE_D, Pad->GetPadsInfo(PADS::MOVE_D).GetKey().press());
+					MyInput.SetAddxRad(Pad->GetLS_Y());
+					MyInput.SetAddyRad(Pad->GetLS_X());
+					MyInput.SetInputPADS(Controls::PADS::MOVE_W, Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::MOVE_S, Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::MOVE_A, Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::MOVE_D, Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().press());
 
-					MyInput.SetInputPADS(PADS::SHOT, Pad->GetPadsInfo(PADS::SHOT).GetKey().press());
-					MyInput.SetInputPADS(PADS::AIM, Pad->GetPadsInfo(PADS::AIM).GetKey().press());
-					MyInput.SetInputPADS(PADS::ULT, Pad->GetPadsInfo(PADS::ULT).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::SHOT, Pad->GetPadsInfo(Controls::PADS::SHOT).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::AIM, Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::ULT, Pad->GetPadsInfo(Controls::PADS::ULT).GetKey().press());
 
-					MyInput.SetInputPADS(PADS::WALK, Pad->GetPadsInfo(PADS::WALK).GetKey().press());
-					MyInput.SetInputPADS(PADS::JUMP, Pad->GetPadsInfo(PADS::JUMP).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::WALK, Pad->GetPadsInfo(Controls::PADS::WALK).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::JUMP, Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().press());
 					{
 						Vector2DX MSVec = Chara->GetBambooVec();
 						MSVec.Set(
@@ -383,7 +374,7 @@ namespace FPS_n2 {
 					}
 					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 						auto& p = PlayerMngr->GetPlayer(index);
-						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+						auto& c = p->GetChara();
 						c->SetViewID(GetMyPlayerID());
 						if ((PlayerID)index == GetMyPlayerID()) {
 							if (m_GameMode != GameMode::Training) {
@@ -425,7 +416,7 @@ namespace FPS_n2 {
 					bool IsServerNotPlayer = !m_NetWorkController->GetClient() && !m_NetWorkController->GetServerPlayer();
 					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 						auto& p = PlayerMngr->GetPlayer(index);
-						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+						auto& c = p->GetChara();
 						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)index);
 						c->SetViewID(GetMyPlayerID());
 						if (index == GetMyPlayerID() && !IsServerNotPlayer) {
@@ -457,8 +448,7 @@ namespace FPS_n2 {
 				case GameControlType::Replay:
 				{
 					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-						auto& p = PlayerMngr->GetPlayer(index);
-						auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+						auto& c = PlayerMngr->GetPlayer(index)->GetChara();
 						c->SetViewID(GetMyPlayerID());
 						NetWork::PlayerSendData Ret = m_Replay.GetNow().GetOnce((PlayerID)index);
 						//サーバーがCPUを動かす場合
@@ -481,26 +471,24 @@ namespace FPS_n2 {
 				if (m_GameMode != GameMode::Training) {
 					Vector3DX pos_c;
 					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-						auto& p = PlayerMngr->GetPlayer(index);
-						pos_c += p->GetChara()->GetMove().GetPos();
+						pos_c += PlayerMngr->GetPlayer(index)->GetChara()->GetMove().GetPos();
 					}
 					pos_c /= static_cast<float>(PlayerMngr->GetPlayerNum());
 
 					for (int index = 0; index < 3; ++index) {
-						auto& c = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
+						auto& j = (std::shared_ptr<Sceneclass::JudgeClass>&) * ObjMngr->GetObj(static_cast<int>(ObjType::Judge), index);
 						//人の座標設定
 						{
 							float Rad = deg2rad(-90.f + 120.f * static_cast<float>(index));
 							Vector3DX pos_t = Vector3DX::vget(0.f, 0.f, (3.5f * Scale3DRate));
 							pos_t = Matrix3x3DX::Vtrans(pos_t, Matrix3x3DX::RotAxis(Vector3DX::up(), Rad));
-							c->SetInput(pos_c + pos_t, pos_c);
+							j->SetInput(pos_c + pos_t, pos_c);
 						}
 					}
 				}
 				//ダメージイベント
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-					auto& p = PlayerMngr->GetPlayer(index);
-					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+					auto& c = PlayerMngr->GetPlayer(index)->GetChara();
 					for (int j = 0, Num = static_cast<int>(this->m_DamageEvents.size()); j < Num; ++j) {
 						if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)], m_GameMode == GameMode::Training)) {
 							std::swap(this->m_DamageEvents.back(), m_DamageEvents[static_cast<size_t>(j)]);
@@ -515,8 +503,7 @@ namespace FPS_n2 {
 			{
 				bool IsWaitOutSide = false;
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-					auto& p = PlayerMngr->GetPlayer(index);
-					auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+					auto& c = PlayerMngr->GetPlayer(index)->GetChara();
 					//場外判定
 					if (c->IsOutArea()) {
 						IsWaitOutSide = true;
@@ -538,8 +525,7 @@ namespace FPS_n2 {
 			ObjMngr->LateExecuteObject();
 			//竹刀判定
 			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-				auto& p = PlayerMngr->GetPlayer(index);
-				auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+				auto& c = PlayerMngr->GetPlayer(index)->GetChara();
 				if (!c->IsAttacking()) { continue; }
 				if (c->GetGuardOn()) { continue; }
 				Vector3DX StartPos = c->GetWeaponPtr()->GetMove().GetPos();
@@ -548,10 +534,13 @@ namespace FPS_n2 {
 
 				for (int index2 = 0; index2 < PlayerMngr->GetPlayerNum(); ++index2) {
 					if (index == index2) { continue; }
-					auto& p2 = PlayerMngr->GetPlayer(index2);
-					auto& tgt = (std::shared_ptr<CharacterObject::CharacterClass>&)p2->GetChara();
-					HitPoint Damage = static_cast<HitPoint>(100.f * c->GetWeaponPtr()->GetMoveSpeed() / 5.f);
-					tgt->CheckDamageRay(&Damage, c->GetMyPlayerID(), c->GetYaTimer() / c->GetYaTimerMax(), c->GetWazaType(), StartPos, &EndPos);
+					auto& tgt = PlayerMngr->GetPlayer(index2)->GetChara();
+					tgt->CheckDamageRay(
+						static_cast<HitPoint>(100.f * c->GetWeaponPtr()->GetMoveSpeed() / 5.f),
+						c->GetMyPlayerID(),
+						c->GetYaTimer() / c->GetYaTimerMax(),
+						c->GetWazaType(),
+						StartPos, &EndPos);
 				}
 			}
 			//コンカッション
@@ -580,7 +569,7 @@ namespace FPS_n2 {
 			}
 			//視点
 			{
-				auto& ViewChara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+				auto& ViewChara = PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 				//カメラ
 				Vector3DX CamPos = ViewChara->GetEyePosition();
 				Vector3DX CamVec = CamPos + ViewChara->GetEyeMatrix().zvec() * -1.f;
@@ -699,7 +688,6 @@ namespace FPS_n2 {
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* SE = SoundPool::Instance();
-			auto* OptionParts = OPTION::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* WindowSizeParts = WindowSizeControl::Instance();
@@ -710,13 +698,10 @@ namespace FPS_n2 {
 			SetShadowScale(0.75f);
 			m_PauseMenuControl.Set();
 			BackGround->Init();
-			//Cam
-			WindowSizeParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), 1.f, 100.f);
-			WindowSizeParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 			//
 			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 				auto& p = PlayerMngr->GetPlayer(index);
-				auto& c = (std::shared_ptr<CharacterObject::CharacterClass>&)p->GetChara();
+				auto& c = p->GetChara();
 				c->SetViewID(GetMyPlayerID());
 				p->GetAI()->Init((PlayerID)index);
 			}
@@ -788,14 +773,14 @@ namespace FPS_n2 {
 						switch (m_GameControlType) {
 						case GameControlType::InGame:
 						case GameControlType::Network:
-							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_W), "");
-							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_S), "");
-							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_A), "");
-							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_D), "");
-							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_STICK), LocalizeParts->Get(9993));
-							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::INTERACT), LocalizeParts->Get(9992));
-							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::RELOAD), LocalizeParts->Get(9991));
-							KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(MOUSE_INPUT_LEFT | 0xF00, ControlType::PC), LocalizeParts->Get(9919));
+							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
+							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_S), "");
+							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_A), "");
+							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_D), "");
+							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), LocalizeParts->Get(9993));
+							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizeParts->Get(9992));
+							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizeParts->Get(9991));
+							KeyGuideParts->AddGuide(Controls::GetIDtoOffset(Controls::GetStrtoID("LMOUSE", Controls::ControlType::PC), Controls::ControlType::PC), LocalizeParts->Get(9919));
 							break;
 						case GameControlType::Replay:
 							break;
@@ -810,34 +795,34 @@ namespace FPS_n2 {
 						case GameControlType::InGame:
 						case GameControlType::Network:
 							if (m_IsEventSceneFlag || m_IsEventSceneActive) {
-								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::INTERACT), LocalizeParts->Get(9914));
+								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizeParts->Get(9914));
 							}
 							else {
-								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_W), "");
-								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_S), "");
-								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_A), "");
-								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_D), "");
-								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_STICK), LocalizeParts->Get(9900));
+								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
+								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_S), "");
+								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_A), "");
+								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_D), "");
+								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), LocalizeParts->Get(9900));
 
-								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::SHOT), LocalizeParts->Get(9906));
-								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::AIM), LocalizeParts->Get(9908));
-								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::ULT), LocalizeParts->Get(9907));
+								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::SHOT), LocalizeParts->Get(9906));
+								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::AIM), LocalizeParts->Get(9908));
+								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ULT), LocalizeParts->Get(9907));
 
-								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::WALK), LocalizeParts->Get(9903));
-								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::JUMP), LocalizeParts->Get(9905));
+								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::WALK), LocalizeParts->Get(9903));
+								KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::JUMP), LocalizeParts->Get(9905));
 								if (m_GameMode == GameMode::Training) {
-									KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::INTERACT), "");
-									KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::RELOAD), LocalizeParts->Get(9916));
+									KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), "");
+									KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizeParts->Get(9916));
 								}
 							}
 							break;
 						case GameControlType::Replay:
-							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::JUMP), LocalizeParts->Get(9918));
+							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::JUMP), LocalizeParts->Get(9918));
 							break;
 						case GameControlType::Result:
-							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::INTERACT), LocalizeParts->Get(9915));
-							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::JUMP), LocalizeParts->Get(9917));
-							KeyGuideParts->AddGuide(KeyGuide::GetIDtoOffset(MOUSE_INPUT_LEFT | 0xF00, ControlType::PC), LocalizeParts->Get(9919));
+							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizeParts->Get(9915));
+							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::JUMP), LocalizeParts->Get(9917));
+							KeyGuideParts->AddGuide(Controls::GetIDtoOffset(Controls::GetStrtoID("LMOUSE", Controls::ControlType::PC), Controls::ControlType::PC), LocalizeParts->Get(9919));
 							break;
 						default:
 							break;
@@ -887,7 +872,7 @@ namespace FPS_n2 {
 					return true;
 				}
 				UpdateInGame();
-				if (Pad->GetPadsInfo(PADS::JUMP).GetKey().trigger()) {
+				if (Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().trigger()) {
 					SetupResult();
 				}
 				break;
@@ -907,7 +892,6 @@ namespace FPS_n2 {
 						m_Replay.Start();
 						KeyGuideParts->SetGuideFlip();
 						SetupBattleStart();
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Base))->Play(DX_PLAYTYPE_LOOP, TRUE);
 					}
 					if (this->m_ResultMenuControl.IsEnd()) {
 						SetupEnd();

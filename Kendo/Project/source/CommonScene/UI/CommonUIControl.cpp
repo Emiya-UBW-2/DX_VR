@@ -5,11 +5,143 @@ const FPS_n2::Sceneclass::FadeControl* SingletonBase<FPS_n2::Sceneclass::FadeCon
 namespace FPS_n2 {
 	namespace Sceneclass {
 		// 
+		void ButtonControl::ButtonClass::Draw(void) noexcept {
+			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
+			auto* LocalizeParts = LocalizePool::Instance();
+			switch (this->m_ButtonMode) {
+			case ButtonMode::String:
+			{
+				if (SelYadd > 0.f) {
+					int xp = (xp1);
+					int yp = (yp1);
+					switch (LMR) {
+					case FontSystem::FontXCenter::LEFT:
+						xp = (xp1);
+						break;
+					case FontSystem::FontXCenter::MIDDLE:
+						xp = (xp1)-(xsize) / 2;
+						break;
+					case FontSystem::FontXCenter::RIGHT:
+						xp = (xp1)-(xsize);
+						break;
+					default:
+						break;
+					}
+					switch (TMB) {
+					case FontSystem::FontYCenter::TOP:
+						yp = (yp1);
+						break;
+					case FontSystem::FontYCenter::MIDDLE:
+						yp = (yp1)-(ysize) / 2;
+						break;
+					case FontSystem::FontYCenter::BOTTOM:
+						yp = (yp1)-(ysize);
+						break;
+					default:
+						break;
+					}
+
+					float per = std::clamp(SelYadd / 5.f, 0.f, 1.f);
+					float per2 = 1.f - std::clamp(SelYadd / 10.f, 0.f, 1.f);
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per), 0, 255));
+					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
+						this->m_SelectBackImage,
+						xp + (xsize) / 2 - static_cast<int>(static_cast<float>((xsize) / 2 + (300)) * per2), yp + (ysize)-(12) - static_cast<int>(static_cast<float>((ysize) / 6) * per),
+						xp + (xsize) / 2 + static_cast<int>(static_cast<float>((xsize) / 2 + (300)) * per2), yp + (ysize)-(12) + static_cast<int>(static_cast<float>((ysize) / 6) * per),
+						true);
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+				}
+				unsigned int Color = Black;
+				if (ysize > 50) {
+					switch (this->m_ButtonStatus) {
+					case ButtonStatus::None:
+						Color = Gray75;
+						break;
+					case ButtonStatus::Ready:
+						Color = GetColor(64, 192, 64);
+						break;
+					case ButtonStatus::Focus:
+						Color = Green;
+						break;
+					default:
+						break;
+					}
+				}
+				else {
+					switch (this->m_ButtonStatus) {
+					case ButtonStatus::None:
+						Color = Gray75;
+						if (!this->m_EnableSelect) {
+							Color = GetColor(64, 48, 48);
+						}
+						break;
+					case ButtonStatus::Ready:
+						Color = Gray15;
+						if (!this->m_EnableSelect) {
+							Color = Gray65;
+						}
+						break;
+					case ButtonStatus::Focus:
+						Color = Green;
+						if (!this->m_EnableSelect) {
+							Color = GetColor(216, 143, 143);
+						}
+						break;
+					default:
+						break;
+					}
+				}
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, ysize, LMR, TMB, xp1, yp1 + static_cast<int>(SelYadd), Color, Black, LocalizeParts->Get(m_LocalizeID));
+			}
+			break;
+			case ButtonMode::Icon:
+			{
+				if (SelYadd > 0.f) {
+					float per1 = std::clamp(SelYadd / 5.f, 0.f, 1.f);
+					float per2 = (1.f - std::clamp(SelYadd / 10.f, 0.f, 1.f)) * 1.5f;
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * per1), 0, 255));
+					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
+						this->m_SelectBackImage,
+						(xp1)-static_cast<int>(static_cast<float>((xsize)) * per2), (yp1)-static_cast<int>(static_cast<float>((ysize)) * per2),
+						(xp1)+static_cast<int>(static_cast<float>((xsize)) * per2), (yp1)+static_cast<int>(static_cast<float>((ysize)) * per2),
+						true);
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+				}
+				DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 64, 64, 64);
+				for (int x = -1; x <= 1; x++) {
+					for (int y = -1; y <= 1; y++) {
+						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+							&this->m_Icon,
+							(xp1 + x * 2), (yp1 + y * 2), static_cast<float>((100)) / 100.f * (1.f + SelYadd / 50.f), 0.f, true);
+					}
+				}
+				switch (this->m_ButtonStatus) {
+				case ButtonStatus::None:
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 128, 128, 128);
+					break;
+				case ButtonStatus::Ready:
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 216, 216, 216);
+					break;
+				case ButtonStatus::Focus:
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 255, 0);
+					break;
+				default:
+					break;
+				}
+				DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &this->m_Icon, xp1, yp1, 1.f + SelYadd / 50.f, 0.f, true);
+				DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+			}
+			break;
+			default:
+				break;
+			}
+		}
+		//
 		bool ButtonControl::GetTriggerButton(void) const noexcept {
 			auto* Pad = PadControl::Instance();
 			return (select != InvalidID)
 				&& ButtonSel.at(static_cast<size_t>(select))->IsEnableSelect()
-				&& (this->m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetPadsInfo(PADS::INTERACT).GetKey().trigger());
+				&& (this->m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger());
 		}
 		ButtonControl::ButtonControl(void) noexcept {
 			this->m_SelectBackImage.Load("CommonData/UI/select.png");
@@ -25,7 +157,7 @@ namespace FPS_n2 {
 
 			int preselect = select;
 			bool preMouseSel = this->m_MouseSelMode;
-			if (Pad->GetPadsInfo(PADS::MOVE_W).GetKey().trigger() || Pad->GetPadsInfo(PADS::MOVE_A).GetKey().trigger()) {
+			if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger() || Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
 				if (select != InvalidID) {
 					--select;
 					if (select < 0) { select = static_cast<int>(ButtonSel.size()) - 1; }
@@ -35,7 +167,7 @@ namespace FPS_n2 {
 				}
 				this->m_MouseSelMode = false;
 			}
-			if (Pad->GetPadsInfo(PADS::MOVE_S).GetKey().trigger() || Pad->GetPadsInfo(PADS::MOVE_D).GetKey().trigger()) {
+			if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger() || Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
 				if (select != InvalidID) {
 					++select;
 					if (select > static_cast<int>(ButtonSel.size()) - 1) { select = 0; }
@@ -83,7 +215,6 @@ namespace FPS_n2 {
 		}
 		void ButtonControl::Dispose(void) noexcept {
 			for (auto& y : ButtonSel) {
-				y->Dispose();
 				y.reset();
 			}
 			ButtonSel.clear();
@@ -136,6 +267,7 @@ namespace FPS_n2 {
 				sprintfDx(c.second, "");
 			}
 		}
+		//
 		void InfoControl::DelPage() noexcept {
 			if (this->m_InfoStr.at(m_InfoNow).m_Graph.IsActive()) {
 				if (this->m_InfoStr.at(m_InfoNow).m_IsMovie) {
@@ -151,7 +283,6 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		// 
 		void InfoControl::Init(void) noexcept {
 			FileStreamDX FileStream("data/Info.txt");
 			while (true) {
@@ -181,6 +312,7 @@ namespace FPS_n2 {
 		void InfoControl::Draw(int xmin, int ymin, int xmax, int ymax) noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* Pad = PadControl::Instance();
+			auto* SE = SoundPool::Instance();
 
 			int xp1, yp1;
 
@@ -215,12 +347,13 @@ namespace FPS_n2 {
 			{
 				yp1 = ymax - LineHeight * 3;
 				bool ret = WindowSystem::SetMsgClickBox(xmin + 6, yp1, xmin + 48, yp1 + LineHeight * 2, LineHeight, Gray15, false, true, "<");
-				if (Pad->GetPadsInfo(PADS::MOVE_A).GetKey().trigger() || ret) {
+				if (Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger() || ret) {
 					DelPage();
 					--m_InfoNow;
 					if (m_InfoNow < 0) {
 						m_InfoNow = (int)(this->m_InfoStr.size()) -1;
 					}
+					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, TRUE);
 					SetPage();
 				}
 			}
@@ -228,9 +361,10 @@ namespace FPS_n2 {
 			{
 				yp1 = ymax - LineHeight * 3;
 				bool ret = WindowSystem::SetMsgClickBox(xmax - 48, yp1, xmax - 6, yp1 + LineHeight * 2, LineHeight, Gray15, false, true, ">");
-				if (Pad->GetPadsInfo(PADS::MOVE_D).GetKey().trigger() || ret) {
+				if (Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger() || ret) {
 					DelPage();
 					++m_InfoNow %= (int)(this->m_InfoStr.size());
+					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, TRUE);
 					SetPage();
 				}
 			}
@@ -241,9 +375,9 @@ namespace FPS_n2 {
 		void InfoControl::Guide() noexcept {
 			auto* KeyGuideParts = KeyGuide::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
-			KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_A), "");
-			KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_D), "");
-			KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(PADS::MOVE_STICK), LocalizeParts->Get(9993));
+			KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_A), "");
+			KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_D), "");
+			KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), LocalizeParts->Get(9993));
 		}
 		void InfoControl::Dispose(void) noexcept {
 			for (auto& c : this->m_InfoStr) {
@@ -275,5 +409,5 @@ namespace FPS_n2 {
 			}
 		}
 		//
-	};
-};
+	}
+}

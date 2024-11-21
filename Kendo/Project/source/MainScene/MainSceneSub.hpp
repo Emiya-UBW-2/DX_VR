@@ -159,7 +159,7 @@ namespace FPS_n2 {
 			void Update(void) noexcept {
 				auto* Pad = PadControl::Instance();
 				auto* OptionParts = OPTION::Instance();
-				if (Pad->GetPadsInfo(PADS::INTERACT).GetKey().trigger()) {
+				if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
 					if (m_CheckHit == HitType::None) {
 						m_Hit = true;
 					}
@@ -229,7 +229,7 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				if (Pad->GetPadsInfo(PADS::RELOAD).GetKey().trigger()) {
+				if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
 					//ƒƒOŠª‚«–ß‚µ
 					int count = 0;
 					for (auto& d : m_data) {
@@ -315,8 +315,8 @@ namespace FPS_n2 {
 					}
 					if (m_TutorialNow == 0) {
 						auto* KeyGuideParts = KeyGuide::Instance();
-						KeyGuideParts->DrawButton(xp, yp - 24, KeyGuide::GetPADStoOffset(PADS::INTERACT));
-						xp += KeyGuideParts->GetDrawSize(KeyGuide::GetPADStoOffset(PADS::INTERACT)) + 3;
+						KeyGuideParts->DrawButton(xp, yp - 24, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
+						xp += KeyGuideParts->GetDrawSize(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT)) + 3;
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
 							xp, yp, Green, Black, LocalizeParts->Get(8993));
@@ -335,9 +335,9 @@ namespace FPS_n2 {
 							(64), (600 - 720 / 2 / 2),
 							(64 + 600 / 2), (600 + 720 / 2 / 2), false);
 
-						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2), KeyGuide::GetPADStoOffset(PADS::SHOT));
+						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2), KeyGuide::GetPADStoOffset(Controls::PADS::SHOT));
 
-						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2 + 30), KeyGuide::GetPADStoOffset(PADS::JUMP));
+						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2 + 30), KeyGuide::GetPADStoOffset(Controls::PADS::JUMP));
 						break;
 					case HitType::Arm:
 						if (GetMovieStateToGraph(m_Kote.get()) == 0) {
@@ -348,9 +348,9 @@ namespace FPS_n2 {
 							(64), (600 - 720 / 2 / 2),
 							(64 + 600 / 2), (600 + 720 / 2 / 2), false);
 
-						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2), KeyGuide::GetPADStoOffset(PADS::ULT));
+						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2), KeyGuide::GetPADStoOffset(Controls::PADS::ULT));
 
-						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2 + 30), KeyGuide::GetPADStoOffset(PADS::JUMP));
+						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2 + 30), KeyGuide::GetPADStoOffset(Controls::PADS::JUMP));
 						break;
 					case HitType::Body:
 						if (GetMovieStateToGraph(m_Dou.get()) == 0) {
@@ -361,10 +361,10 @@ namespace FPS_n2 {
 							(64), (600 - 720 / 2 / 2),
 							(64 + 600 / 2), (600 + 720 / 2 / 2), false);
 
-						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2), KeyGuide::GetPADStoOffset(PADS::AIM));
-						KeyGuideParts->DrawButton((64 + 30), (600 + 720 / 2 / 2), KeyGuide::GetPADStoOffset(PADS::ULT));
+						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2), KeyGuide::GetPADStoOffset(Controls::PADS::AIM));
+						KeyGuideParts->DrawButton((64 + 30), (600 + 720 / 2 / 2), KeyGuide::GetPADStoOffset(Controls::PADS::ULT));
 
-						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2 + 30), KeyGuide::GetPADStoOffset(PADS::JUMP));
+						KeyGuideParts->DrawButton((64), (600 + 720 / 2 / 2 + 30), KeyGuide::GetPADStoOffset(Controls::PADS::JUMP));
 						break;
 					default:
 						break;

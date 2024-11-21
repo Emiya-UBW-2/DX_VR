@@ -88,12 +88,6 @@ namespace FPS_n2 {
 		"",
 	};
 
-	enum class CharaTypeID : uint8_t {
-		Mine,
-		Team,
-		Enemy,
-	};
-
 	typedef int8_t	PlayerID;
 	typedef short	HitPoint;
 

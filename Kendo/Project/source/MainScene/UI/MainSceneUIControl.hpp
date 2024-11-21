@@ -217,48 +217,11 @@ namespace FPS_n2 {
 					return GetColorU8(r, g, b, 255);
 				}
 			};
-
-			class GaugeMask {
-			private:
-				int ultxp{ 0 }, ultyp{ 0 };
-				GraphHandle UltGaugeMask;
-				GraphHandle UltGauge;
-			public:
-				const auto& GetXSize(void) const noexcept { return this->ultxp; }
-				const auto& GetYSize(void) const noexcept { return this->ultyp; }
-				const auto& GetGraph(void) const noexcept { return this->UltGauge; }
-			public:
-				void			Load(const char* Path) noexcept {
-					UltGaugeMask.Load(Path);
-					UltGaugeMask.GetSize(&ultxp, &ultyp);
-					UltGauge.Make(ultxp, ultyp, true);
-				}
-				void			Dispose(void) noexcept {
-					UltGaugeMask.Dispose();
-					UltGauge.Dispose();
-				}
-
-				void SetDraw(std::function<void()> Doing) noexcept {
-					int Prev = GetDrawScreen();
-					UltGauge.SetDraw_Screen();
-					{
-						Doing();
-					}
-					SetDrawScreen(Prev);
-					GraphBlend(UltGauge.get(), UltGaugeMask.get(), 255, DX_GRAPH_BLEND_RGBA_SELECT_MIX,
-						DX_RGBA_SELECT_SRC_R,
-						DX_RGBA_SELECT_SRC_G,
-						DX_RGBA_SELECT_SRC_B,
-						DX_RGBA_SELECT_BLEND_R
-					);
-				}
-			};
 		private:
 			std::array<GaugeParam, 3>		m_GaugeParam;
 			std::array<int, 6>				intParam{};
 			std::array<float, 6>			floatParam{};
 			std::array<std::string, 1>		strParam;
-			//std::array<std::unique_ptr<GaugeMask>, 2 + 3>	m_GaugeMask;
 
 			GraphHandle						m_HeartIcon;
 			GraphHandle						m_Kiai;
@@ -266,7 +229,7 @@ namespace FPS_n2 {
 
 			GraphHandle		m_GameStart;
 			GraphHandle		m_GameRestart;
-			GraphHandle* m_pStart{ nullptr };
+			GraphHandle*	m_pStart{ nullptr };
 			GraphHandle		m_Once;
 			GraphHandle		m_GameEnd;
 

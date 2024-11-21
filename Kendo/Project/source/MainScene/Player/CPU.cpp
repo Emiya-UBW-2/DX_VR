@@ -5,12 +5,11 @@
 
 namespace FPS_n2 {
 	namespace Player {
-		void AIControl::Execute(InputControl* MyInput, bool IsTutorial) noexcept
-		{
+		void AIControl::Execute(InputControl* MyInput, bool IsTutorial) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto& Chara = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(m_MyID)->GetChara();
-			auto& Target = (std::shared_ptr<CharacterObject::CharacterClass>&)PlayerMngr->GetPlayer(1 - this->m_MyID)->GetChara();
+			auto& Chara = PlayerMngr->GetPlayer(m_MyID)->GetChara();
+			auto& Target = PlayerMngr->GetPlayer(1 - this->m_MyID)->GetChara();
 
 			bool W_key{ false };
 			bool A_key{ false };
@@ -134,15 +133,17 @@ namespace FPS_n2 {
 				pp_y = std::clamp(-10000.f * Chara->GetBambooVec().y / deg2rad(150.f), -9.f, 9.f);
 			}
 			//AI
-			MyInput->SetInputStart(pp_x, pp_y);
-			MyInput->SetInputPADS(PADS::MOVE_W, W_key);
-			MyInput->SetInputPADS(PADS::MOVE_S, S_key);
-			MyInput->SetInputPADS(PADS::MOVE_A, A_key);
-			MyInput->SetInputPADS(PADS::MOVE_D, D_key);
-			MyInput->SetInputPADS(PADS::SHOT, shotMain_Key);
-			MyInput->SetInputPADS(PADS::ULT, shotSub_Key);
-			MyInput->SetInputPADS(PADS::AIM, Guard_Key);
-			MyInput->SetInputPADS(PADS::JUMP, Ya_Key);
+			MyInput->ResetAllInput();
+			MyInput->SetAddxRad(pp_x);
+			MyInput->SetAddyRad(pp_y);
+			MyInput->SetInputPADS(Controls::PADS::MOVE_W, W_key);
+			MyInput->SetInputPADS(Controls::PADS::MOVE_S, S_key);
+			MyInput->SetInputPADS(Controls::PADS::MOVE_A, A_key);
+			MyInput->SetInputPADS(Controls::PADS::MOVE_D, D_key);
+			MyInput->SetInputPADS(Controls::PADS::SHOT, shotMain_Key);
+			MyInput->SetInputPADS(Controls::PADS::ULT, shotSub_Key);
+			MyInput->SetInputPADS(Controls::PADS::AIM, Guard_Key);
+			MyInput->SetInputPADS(Controls::PADS::JUMP, Ya_Key);
 		}
 	}
-};
+}

@@ -7,17 +7,6 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		// ベクトルと上から右回りの角度を取得
-		static inline float GetRadVec(const Vector2DX& vec1) noexcept { return std::atan2f(vec1.x, vec1.y); }
-		//角度差計算(360度回る際の演算などで使用します)
-		static inline float GetRadRad2Rad(float NowRadian, float TargetRadian) noexcept {
-			Vector2DX Vec; Vec.Set(std::sin(NowRadian), std::cos(NowRadian));
-			Vector2DX vec_a; vec_a.Set(std::sin(TargetRadian), std::cos(TargetRadian));
-			float cost = Vector2DX::Cross(vec_a, Vec);
-			float sint = sqrtf(std::abs(1.f - cost * cost));
-			return GetRadVec(Vector2DX::vget(cost, sint));
-		}
-
 		class JudgeClass : public ObjectBaseClass {
 		private:
 			Vector3DX											m_TargetPos;

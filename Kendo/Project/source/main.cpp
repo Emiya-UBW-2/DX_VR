@@ -17,33 +17,33 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//使用するボタンの指定
 	//*
 	auto* Pad = PadControl::Instance();
-	Pad->SetIsUseButton(PADS::MOVE_W, true);
-	Pad->SetIsUseButton(PADS::MOVE_A, true);
-	Pad->SetIsUseButton(PADS::MOVE_S, true);
-	Pad->SetIsUseButton(PADS::MOVE_D, true);
-	Pad->SetIsUseButton(PADS::MOVE_STICK, true);
-	Pad->SetIsUseButton(PADS::DIR_UP, false);
-	Pad->SetIsUseButton(PADS::DIR_DOWN, false);
-	Pad->SetIsUseButton(PADS::DIR_LEFT, false);
-	Pad->SetIsUseButton(PADS::DIR_RIGHT, false);
-	Pad->SetIsUseButton(PADS::DIR_STICK, true);
-	Pad->SetIsUseButton(PADS::LEAN_L, true);//UIのみ
-	Pad->SetIsUseButton(PADS::LEAN_R, true);//UIのみ
-	Pad->SetIsUseButton(PADS::RELOAD, true);//UIのみ
-	Pad->SetIsUseButton(PADS::INTERACT, true);//UIのみ
-	Pad->SetIsUseButton(PADS::THROW, false);
-	Pad->SetIsUseButton(PADS::MELEE, false);
-	Pad->SetIsUseButton(PADS::JUMP, true);
-	Pad->SetIsUseButton(PADS::INVENTORY, false);
-	Pad->SetIsUseButton(PADS::RUN, false);
-	Pad->SetIsUseButton(PADS::WALK, true);
-	Pad->SetIsUseButton(PADS::SHOT, true);
-	Pad->SetIsUseButton(PADS::AIM, true);
-	Pad->SetIsUseButton(PADS::ULT, true);
-	Pad->SetIsUseButton(PADS::SQUAT, false);
-	Pad->SetIsUseButton(PADS::PRONE, false);
-	Pad->SetIsUseButton(PADS::CHECK, false);
-	Pad->SetIsUseButton(PADS::Escape, true);
+	Pad->SetIsUseButton(Controls::PADS::MOVE_W, true);
+	Pad->SetIsUseButton(Controls::PADS::MOVE_A, true);
+	Pad->SetIsUseButton(Controls::PADS::MOVE_S, true);
+	Pad->SetIsUseButton(Controls::PADS::MOVE_D, true);
+	Pad->SetIsUseButton(Controls::PADS::MOVE_STICK, true);
+	Pad->SetIsUseButton(Controls::PADS::DIR_UP, false);
+	Pad->SetIsUseButton(Controls::PADS::DIR_DOWN, false);
+	Pad->SetIsUseButton(Controls::PADS::DIR_LEFT, false);
+	Pad->SetIsUseButton(Controls::PADS::DIR_RIGHT, false);
+	Pad->SetIsUseButton(Controls::PADS::DIR_STICK, true);
+	Pad->SetIsUseButton(Controls::PADS::LEAN_L, true);//UIのみ
+	Pad->SetIsUseButton(Controls::PADS::LEAN_R, true);//UIのみ
+	Pad->SetIsUseButton(Controls::PADS::RELOAD, true);//UIのみ
+	Pad->SetIsUseButton(Controls::PADS::INTERACT, true);//UIのみ
+	Pad->SetIsUseButton(Controls::PADS::THROW, false);
+	Pad->SetIsUseButton(Controls::PADS::MELEE, false);
+	Pad->SetIsUseButton(Controls::PADS::JUMP, true);
+	Pad->SetIsUseButton(Controls::PADS::INVENTORY, false);
+	Pad->SetIsUseButton(Controls::PADS::RUN, false);
+	Pad->SetIsUseButton(Controls::PADS::WALK, true);
+	Pad->SetIsUseButton(Controls::PADS::SHOT, true);
+	Pad->SetIsUseButton(Controls::PADS::AIM, true);
+	Pad->SetIsUseButton(Controls::PADS::ULT, true);
+	Pad->SetIsUseButton(Controls::PADS::SQUAT, false);
+	Pad->SetIsUseButton(Controls::PADS::PRONE, false);
+	Pad->SetIsUseButton(Controls::PADS::CHECK, false);
+	Pad->SetIsUseButton(Controls::PADS::Escape, true);
 	//*/
 	//
 	auto* DXLib_refParts = DXLib_ref::Instance();
