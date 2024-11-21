@@ -547,7 +547,7 @@ namespace FPS_n2 {
 			{
 				if (Chara->PopConcussionSwitch()) {
 					m_Concussion = 1.f;
-					Camera3D::Instance()->SetCamShake(0.5f, 0.01f * Scale3DRate);
+					CameraParts->SetCamShake(0.5f, 0.01f * Scale3DRate);
 				}
 				PostPassParts->Set_is_Blackout(m_Concussion > 0.f);
 				if (m_Concussion > 0.9f) {
@@ -573,8 +573,8 @@ namespace FPS_n2 {
 				//カメラ
 				Vector3DX CamPos = ViewChara->GetEyePosition();
 				Vector3DX CamVec = CamPos + ViewChara->GetEyeMatrix().zvec() * -1.f;
-				CamVec += Camera3D::Instance()->GetCamShake();
-				CamPos += Camera3D::Instance()->GetCamShake() * 2.f;
+				CamVec += CameraParts->GetCamShake();
+				CamPos += CameraParts->GetCamShake() * 2.f;
 #ifdef DEBUG
 				if (CheckHitKey(KEY_INPUT_F1) != 0) {
 					DBG_CamSel = -1;
@@ -690,12 +690,10 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			//
 			BattleResourceMngr->Set();
-			SetShadowScale(0.75f);
 			m_PauseMenuControl.Set();
 			BackGround->Init();
 			//
@@ -716,8 +714,13 @@ namespace FPS_n2 {
 			//
 			if (m_GameMode == GameMode::Training) {
 				Vector3DX LightVec = Vector3DX::vget(1.f, -0.5f, 0.05f); LightVec = LightVec.normalized();
-				WindowSizeParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
-				SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
+				PostPassParts->SetAmbientLight(LightVec);
+
+				SetLightEnable(FALSE);
+
+				auto& FirstLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec);
+				SetLightAmbColorHandle(FirstLight.get(), GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
+				SetLightDifColorHandle(FirstLight.get(), GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
 
 				auto& SecondLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec * -1.f);
 				SetLightDifColorHandle(SecondLight.get(), GetColorF(0.5f, 0.5f, 0.3f, 0.1f));
@@ -726,11 +729,17 @@ namespace FPS_n2 {
 			}
 			else {
 				Vector3DX LightVec = Vector3DX::vget(0.5f, -0.85f, 0.05f); LightVec = LightVec.normalized();
-				WindowSizeParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
-				SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
+				PostPassParts->SetAmbientLight(LightVec);
+
+				SetLightEnable(FALSE);
+
+				auto& FirstLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec);
+				SetLightAmbColorHandle(FirstLight.get(), GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
+				SetLightDifColorHandle(FirstLight.get(), GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
 
 				PostPassParts->SetGodRayPer(0.25f);
 			}
+			PostPassParts->SetShadowScale(0.75f);
 			//
 			if (m_GameMode == GameMode::Replay) {
 				m_Replay.Clear();

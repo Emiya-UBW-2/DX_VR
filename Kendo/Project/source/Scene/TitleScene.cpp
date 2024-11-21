@@ -22,7 +22,6 @@ namespace FPS_n2 {
 			auto* OptionParts = OptionManager::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* CameraParts = Camera3D::Instance();
 			//
 			this->m_TitleBGSky.SetScale(Vector3DX::vget(10.f, 10.f, 10.f));
@@ -64,13 +63,19 @@ namespace FPS_n2 {
 			CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, Vector3DX::vget(0, 1, 0));
 			{
 				Vector3DX LightVec = Vector3DX::vget(1.f, -0.5f, 0.05f); LightVec = LightVec.normalized();
-				WindowSizeParts->SetAmbientLight(LightVec, GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
-				SetLightDifColor(GetColorF(1.0f, 0.96f, 0.94f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
+				PostPassParts->SetAmbientLight(LightVec);
+
+				SetLightEnable(FALSE);
+
+				auto& FirstLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec);
+				SetLightAmbColorHandle(FirstLight.get(), GetColorF(1.0f / 3.f, 0.96f / 3.f, 0.94f / 3.f, 1.0f));
+				SetLightDifColorHandle(FirstLight.get(), GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
 
 				auto& SecondLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec * -1.f);
 				SetLightDifColorHandle(SecondLight.get(), GetColorF(0.5f, 0.5f, 0.3f, 0.1f));
 
 				PostPassParts->SetGodRayPer(0.5f);
+				PostPassParts->SetShadowScale(0.75f);
 			}
 			m_CloseResetSave = false;
 			//DoF

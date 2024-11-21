@@ -893,7 +893,7 @@ namespace FPS_n2 {
 		if (m_NowTime >= 0) {
 			if (m_count == 0) {
 				m_count = 1;
-				PostPassParts->Update_Shadow([&] { ShadowFarDraw(); }, Vector3DX::zero(), 4.f, false);
+				PostPassParts->Update_Shadow([&] { ShadowFarDraw(); }, Vector3DX::zero(), false);
 			}
 			bool isFirstLoop = (m_NowTime == 0);
 			bool ResetPhysics = false;
