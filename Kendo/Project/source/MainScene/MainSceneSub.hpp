@@ -103,7 +103,7 @@ namespace FPS_n2 {
 				m_Dou.Load("data/UI/Dou.mp4");
 			}
 			void Set(void) noexcept {
-				auto* OptionParts = OPTION::Instance();
+				auto* OptionParts = OptionManager::Instance();
 				std::string Path = "data/Tutorial_";
 				Path += LanguageStr[OptionParts->GetParamInt(EnumSaveParam::Language)];
 				Path += ".txt";
@@ -158,7 +158,7 @@ namespace FPS_n2 {
 			}
 			void Update(void) noexcept {
 				auto* Pad = PadControl::Instance();
-				auto* OptionParts = OPTION::Instance();
+				auto* OptionParts = OptionManager::Instance();
 				if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
 					if (m_CheckHit == HitType::None) {
 						m_Hit = true;

@@ -18,7 +18,7 @@ namespace FPS_n2 {
 			auto* Pad = PadControl::Instance();
 			auto* KeyGuideParts = KeyGuide::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
-			auto* OptionDrawCtrls = OptionWindowClass::Instance();
+			auto* OptionDrawCtrls = OptionPopup::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			if (!PopUpParts->IsActivePop()) {

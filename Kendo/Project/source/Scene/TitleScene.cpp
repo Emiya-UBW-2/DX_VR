@@ -19,7 +19,7 @@ namespace FPS_n2 {
 		}
 		void			TitleScene::Set_Sub(void) noexcept {
 			auto* SE = SoundPool::Instance();
-			auto* OptionParts = OPTION::Instance();
+			auto* OptionParts = OptionManager::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* WindowSizeParts = WindowSizeControl::Instance();
@@ -83,7 +83,7 @@ namespace FPS_n2 {
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
-			auto* OptionDrawCtrls = OptionWindowClass::Instance();
+			auto* OptionDrawCtrls = OptionPopup::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			auto* WindowSizeParts = WindowSizeControl::Instance();
 			if (SceneParts->IsPause()) {

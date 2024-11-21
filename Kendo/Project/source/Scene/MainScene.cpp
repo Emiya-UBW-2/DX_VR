@@ -127,7 +127,7 @@ namespace FPS_n2 {
 		void MainGameScene::UpdateInGame(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();
-			auto* OptionParts = OPTION::Instance();
+			auto* OptionParts = OptionManager::Instance();
 			auto* SideLogParts = SideLog::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* FadeInParts = FadeControl::Instance();

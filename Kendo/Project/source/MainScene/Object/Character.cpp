@@ -830,7 +830,7 @@ namespace FPS_n2 {
 				this->m_move.SetMat(Mat);
 			}
 			m_EyePosition = (GetFramePosition(CharaFrame::LeftEye) + GetFramePosition(CharaFrame::RightEye)) / 2.f + (m_CharaMove.GetEyeRotMatrix() * m_CharaMove.GetBaseRotMatrix()).zvec() * (-0.04f * Scale3DRate);
-			auto* OptionParts = OPTION::Instance();
+			auto* OptionParts = OptionManager::Instance();
 			bool HeadBobbing = ((this->m_MyID != this->m_ViewID) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 			if (HeadBobbing) {
 				m_EyePosition += m_CharaMove.GetEyeSwingPos();
