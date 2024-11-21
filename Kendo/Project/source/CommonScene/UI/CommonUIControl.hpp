@@ -113,6 +113,7 @@ namespace FPS_n2 {
 			int							select{ 0 };
 			bool						m_MouseSelMode{ false };
 		public:
+			const auto& IsMouseSelMode(void) const noexcept { return m_MouseSelMode; }
 			const auto& GetSelect(void) const noexcept { return select; }
 			bool		GetTriggerButton(void) const noexcept;
 		private:

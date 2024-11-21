@@ -253,6 +253,7 @@ namespace FPS_n2 {
 			m_TitleBamboo.DrawModel();
 		}
 		void			TitleScene::DrawUI_Base_Sub(void) const noexcept {
+			auto* Pad = PadControl::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
@@ -272,9 +273,16 @@ namespace FPS_n2 {
 			ButtonParts->Draw();
 			// 
 			if ((ButtonParts->GetSelect() != InvalidID) && !PopUpParts->IsActivePop()) {
-				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18), 
-					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
-					(32), (1080 - 32 - 32), White, Black, LocalizeParts->Get(410 + ButtonParts->GetSelect()));
+				if (ButtonParts->IsMouseSelMode()) {
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM,
+						Pad->GetMS_X(), Pad->GetMS_Y(), White, Black, LocalizeParts->Get(410 + ButtonParts->GetSelect()));
+				}
+				else {
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
+						(32), (1080 - 32 - 32), White, Black, LocalizeParts->Get(410 + ButtonParts->GetSelect()));
+				}
 			}
 			// 
 			{
