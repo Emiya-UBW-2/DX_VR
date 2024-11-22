@@ -21,6 +21,8 @@ namespace FPS_n2 {
 			MV1							m_TitleChara;
 			MV1							m_TitleBamboo;
 
+			GraphHandle					m_Flag;
+
 			int							m_Phase{ 0 };
 			float						m_PhaseTime{ 0.f };
 		public:

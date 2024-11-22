@@ -15,6 +15,7 @@ namespace FPS_n2 {
 			MV1::Load("data/MovieModel/Chara/model.mv1", &this->m_TitleChara);
 			MV1::Load("data/MovieModel/Bamboo/model.mv1", &this->m_TitleBamboo);
 
+			m_Flag.Load("data/UI/Flag.png");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Envi), 1, "data/Sound/SE/envi.wav", false);
 		}
 		void			TitleScene::Set_Sub(void) noexcept {
@@ -228,6 +229,8 @@ namespace FPS_n2 {
 			m_TitleChara.Dispose();
 			m_TitleBamboo.Dispose();
 
+			m_Flag.Dispose();
+
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Envi));
 		}
 		//
@@ -269,6 +272,25 @@ namespace FPS_n2 {
 			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18), 
 				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 				(64), (64 + 256), White, Black, "Ver 1.0.0");
+			//
+			{
+				int xp1 = 1920 - 64 - 48 - 48 * 3;
+				int yp1 = 1080 - 84 - 64 * 3;
+				int WinCount = SaveDataClass::Instance()->GetParam("WinCount");
+				for (int i = 0; i < 3; ++i) {
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 64, 64, 64);
+					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &this->m_Flag, xp1 - 32, yp1 - 32, xp1, yp1, true);
+					if (i > WinCount) {
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 0, 0);
+					}
+					else {
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+					}
+					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &this->m_Flag, xp1 - 32 - 4, yp1 - 32 - 4, xp1 - 4, yp1 - 4, true);
+					xp1 += 48;
+				}
+				DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+			}
 			// 
 			ButtonParts->Draw();
 			// 

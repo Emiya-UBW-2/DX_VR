@@ -916,6 +916,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
 
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Base))->StopAll();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Audience_Near))->StopAll();
@@ -934,6 +935,16 @@ namespace FPS_n2 {
 			this->m_Tutorial.Dispose();
 
 			SetNextSelect(0);//ƒ^ƒCƒgƒ‹‚É–ß‚é
+			if (m_GameMode == GameMode::Main) {
+				if (!m_PauseMenuControl.IsRetire()) {
+					PlayerID Now = GetMyPlayerID();
+					bool IsWin = (PlayerMngr->GetPlayer(Now)->GetMaxScore() > PlayerMngr->GetPlayer(1 - Now)->GetMaxScore());
+					if (IsWin) {
+						SaveDataClass::Instance()->SetParam("WinCount", SaveDataClass::Instance()->GetParam("WinCount") + 1);
+						SaveDataClass::Instance()->Save();
+					}
+				}
+			}
 		}
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
 			auto* SE = SoundPool::Instance();
