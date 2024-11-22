@@ -21,8 +21,6 @@ namespace FPS_n2 {
 			BackGroundClass(BackGroundClass&& o) = delete;
 			BackGroundClass& operator=(const BackGroundClass&) = delete;
 			BackGroundClass& operator=(BackGroundClass&& o) = delete;
-
-			virtual ~BackGroundClass(void) noexcept {}
 		public://getter
 			const auto& GetGroundCol(void) noexcept { return this->m_ObjGroundCol; }
 			auto		CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, bool isNearest, Vector3DX* Normal = nullptr) const noexcept {

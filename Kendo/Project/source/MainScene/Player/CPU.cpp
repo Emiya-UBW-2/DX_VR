@@ -60,7 +60,7 @@ namespace FPS_n2 {
 				m_Counter13 += DXLib_refParts->GetDeltaTime();
 				if (m_Counter13 > 1.f) {
 					m_Counter13 -= 1.f;
-					if ((1.0f * Scale3DRate <= Length && Length <= 2.65f * Scale3DRate) || (Target->GetYaTimer() >= Target->GetYaTimerMax() * 0.9f)) {
+					if ((1.0f * Scale3DRate <= Length && Length <= 2.65f * Scale3DRate) || (Target->GetYaTimerPer() >= 0.9f)) {
 						Ya_Key = true;
 					}
 				}
@@ -78,8 +78,8 @@ namespace FPS_n2 {
 						}
 						//ŽdŠ|‚¯
 						if (
-							(Chara->GetYaTimer() <= Chara->GetYaTimerMax() * 0.99f) && 
-							((Chara->GetYaTimer() >= Chara->GetYaTimerMax() * 0.75f) || (GetRand(100) < 10))
+							(Chara->GetYaTimerPer() <= 0.99f) &&
+							((Chara->GetYaTimerPer() >= 0.75f) || (GetRand(100) < 10))
 							) {
 							//–Ê
 							if ((Chara->GetCharaAction() == EnumArmAnimType::Ready) && (Target->GetCharaAction() == EnumArmAnimType::Ready)) {

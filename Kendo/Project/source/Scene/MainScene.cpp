@@ -382,7 +382,7 @@ namespace FPS_n2 {
 								FreeData[0] = static_cast<int>(c->GetCharaAction());
 								m_Replay.SetBack().SetOnce((PlayerID)index).SetMyPlayer(MyInput, c->GetMove(), c->GetDamageEvent(), FreeData);
 							}
-							c->SetInput(MyInput, true);
+							c->SetInput(MyInput);
 						}
 						else {
 							InputControl OtherInput;
@@ -404,7 +404,7 @@ namespace FPS_n2 {
 								FreeData[0] = static_cast<int>(c->GetCharaAction());
 								m_Replay.SetBack().SetOnce((PlayerID)index).SetMyPlayer(OtherInput, c->GetMove(), c->GetDamageEvent(), FreeData);
 							}
-							c->SetInput(OtherInput, true);
+							c->SetInput(OtherInput);
 						}
 						//ダメージイベント処理
 						c->AddDamageEvent(&this->m_DamageEvents);
@@ -420,7 +420,7 @@ namespace FPS_n2 {
 						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)index);
 						c->SetViewID(GetMyPlayerID());
 						if (index == GetMyPlayerID() && !IsServerNotPlayer) {
-							c->SetInput(Ret.GetInput(), true);//自身が動かすもの
+							c->SetInput(Ret.GetInput());//自身が動かすもの
 						}
 						else {//サーバーからのデータで動くもの
 							//サーバーがCPUを動かす場合
@@ -428,7 +428,7 @@ namespace FPS_n2 {
 								//cpu
 								//p->GetAI()->Execute(&MyInput);
 							}
-							c->SetInput(Ret.GetInput(), true);
+							c->SetInput(Ret.GetInput());
 							bool override_true = true;
 							//override_true = Ret.GetIsActive();
 							if (override_true) {
@@ -452,7 +452,7 @@ namespace FPS_n2 {
 						c->SetViewID(GetMyPlayerID());
 						NetWork::PlayerSendData Ret = m_Replay.GetNow().GetOnce((PlayerID)index);
 						//サーバーがCPUを動かす場合
-						c->SetInput(Ret.GetInput(), true);
+						c->SetInput(Ret.GetInput());
 						c->SetMoveOverRide(Ret.GetMove());
 						//アクションが違う場合には上書き
 						if (Ret.GetFreeData()[0] != static_cast<int>(c->GetCharaAction())) {
@@ -526,7 +526,7 @@ namespace FPS_n2 {
 			//竹刀判定
 			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 				auto& c = PlayerMngr->GetPlayer(index)->GetChara();
-				if (!c->IsAttacking()) { continue; }
+				if (!CharacterObject::CharaMove::IsAttackAction(c->GetCharaAction())) { continue; }
 				if (c->GetGuardOn()) { continue; }
 				Vector3DX StartPos = c->GetWeaponPtr()->GetMove().GetPos();
 				Vector3DX EndPos = c->GetWeaponPtr()->GetFramePosition(WeaponObject::WeaponFrame::End);
@@ -538,7 +538,7 @@ namespace FPS_n2 {
 					tgt->CheckDamageRay(
 						static_cast<HitPoint>(100.f * c->GetWeaponPtr()->GetMoveSpeed() / 5.f),
 						c->GetMyPlayerID(),
-						c->GetYaTimer() / c->GetYaTimerMax(),
+						c->GetYaTimerPer(),
 						c->GetWazaType(),
 						StartPos, &EndPos);
 				}
@@ -628,9 +628,9 @@ namespace FPS_n2 {
 			{
 				//UIパラメーター
 				if (GetIsFirstLoop() || FadeInParts->IsFadeAll()) {
-					this->m_UIclass.InitGaugeParam(0, static_cast<int>(Chara->GetYaTimerMax() * 10.f), static_cast<int>(Chara->GetYaTimerMax() * 10.f));
-					this->m_UIclass.InitGaugeParam(1, static_cast<int>(Chara->GetStaminaMax() * 10000.f), static_cast<int>(Chara->GetStaminaMax() * 10000.f));
-					this->m_UIclass.InitGaugeParam(2, static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f));
+					this->m_UIclass.InitGaugeParam(0, 100, 100);
+					this->m_UIclass.InitGaugeParam(1, 300000, 300000);
+					this->m_UIclass.InitGaugeParam(2, 100, 100);
 				}
 				//NvsN
 				this->m_UIclass.SetIntParam(0, PlayerMngr->GetPlayer(GetMyPlayerID())->GetScore());
@@ -644,9 +644,9 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(2, static_cast<int>(Chara->GetHeartRate()));
 				this->m_UIclass.SetfloatParam(2, Chara->GetHeartRatePow());
 				//ゲージ
-				this->m_UIclass.SetGaugeParam(0, static_cast<int>((Chara->GetYaTimerMax() - Chara->GetYaTimer()) * 10.f), static_cast<int>(Chara->GetYaTimerMax() * 10.f), 2);
-				this->m_UIclass.SetGaugeParam(1, static_cast<int>(Chara->GetStamina() * 10000.f), static_cast<int>(Chara->GetStaminaMax() * 10000.f), 15);
-				this->m_UIclass.SetGaugeParam(2, static_cast<int>((Chara->GetGuardCoolDownTimerMax() - Chara->GetGuardCoolDownTimer()) * 100.f), static_cast<int>(Chara->GetGuardCoolDownTimerMax() * 100.f), 0);
+				this->m_UIclass.SetGaugeParam(0, static_cast<int>((1.f - Chara->GetYaTimerPer()) * 100.f), 100, 2);
+				this->m_UIclass.SetGaugeParam(1, static_cast<int>(Chara->GetStaminaPer() * 300000.f), 300000, 15);
+				this->m_UIclass.SetGaugeParam(2, static_cast<int>((1.f - Chara->GetGuardCoolDownTimerPer()) * 100.f), 100, 0);
 
 				this->m_UIclass.Update();
 			}

@@ -147,10 +147,6 @@ namespace FPS_n2 {
 			this->m_SelectBackImage.Load("CommonData/UI/select.png");
 			ResetSel();
 		}
-		ButtonControl::~ButtonControl(void) noexcept {
-			Dispose();
-			this->m_SelectBackImage.Dispose();
-		}
 		void ButtonControl::UpdateInput(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();

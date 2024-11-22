@@ -4,78 +4,18 @@
 
 namespace FPS_n2 {
 	namespace CharacterObject {
-		void			CharacterClass::PlayVoice(void) const noexcept {
-			auto* SE = SoundPool::Instance();
-			switch (m_ArmMoveClass.GetCharaAction()) {
-			case EnumArmAnimType::Ready:
-				break;
-			case EnumArmAnimType::Run:
-				break;
-			case EnumArmAnimType::Men:
-			case EnumArmAnimType::HikiMen:
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Men))->Play3D(GetEyePosition(), Scale3DRate * 35.f);
-				break;
-			case EnumArmAnimType::Kote:
-			case EnumArmAnimType::HikiKote:
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Kote))->Play3D(GetEyePosition(), Scale3DRate * 35.f);
-				break;
-			case EnumArmAnimType::Dou:
-			case EnumArmAnimType::HikiDou:
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Dou))->Play3D(GetEyePosition(), Scale3DRate * 35.f);
-				break;
-			case EnumArmAnimType::Tsuki:
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Tsuki))->Play3D(GetEyePosition(), Scale3DRate * 35.f);
-				break;
-			case EnumArmAnimType::Tsuba:
-				break;
-			case EnumArmAnimType::GuardSuriage:
-				break;
-			case EnumArmAnimType::Max:
-				break;
-			default:
-				break;
-			}
-		}
-		void			CharacterClass::StopVoice(void) const noexcept {
-			auto* SE = SoundPool::Instance();
-			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Men))->StopAll();
-			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Kote))->StopAll();
-			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Dou))->StopAll();
-			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Tsuki))->StopAll();
-		}
-
-		void			CharacterClass::CheckTsuba(void) noexcept {
-			bool IsGuard = false;
-
-
+		bool			CharacterClass::CheckTsuba(void) const noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto& Target = PlayerMngr->GetPlayer(1 - this->m_MyID)->GetChara();
-
 			auto TgtPos = Target->GetFramePosition(CharaFrame::LeftWrist);
 			auto MyPos = this->GetFramePosition(CharaFrame::LeftWrist);
-
 			float Len = 0.f;
 			auto Vec = (TgtPos - MyPos); Vec.y = (0.f); Len = Vec.magnitude(); Vec = Vec.normalized();
-
 			auto Dir = m_CharaMove.GetEyeMatrix().zvec() * -1.f; Dir.y = (0.f); Dir = Dir.normalized();
-
 			auto IsFront = ((Vector3DX::Dot(Dir, Vec)) > 0.f);
 			auto cross = Vector3DX::Cross(Dir, Vec).y;
-
 			float Radius = (0.15f + 0.15f) * Scale3DRate;
-			if (Len < Radius) {
-				if (IsFront) {
-					if (abs(cross) < 0.4f) {
-						IsGuard = true;
-					}
-				}
-			}
-
-			if (IsGuard) {
-				OverrideTsuba();
-				//ëäéËÇ‡Ç¬ÇŒÇ∫ÇËçáÇ¢Ç…Ç∑ÇÈ
-				Target->OverrideTsuba();
-			}
+			return ((Len < Radius) && IsFront && (abs(cross) < 0.4f));
 		}
 		void			CharacterClass::SetFumikomi(void) noexcept {
 			this->GetObj().SetAnim(static_cast<int>(CharaObjAnimeID::Bottom_Stand_Attack)).GoStart();
@@ -88,97 +28,49 @@ namespace FPS_n2 {
 		void			CharacterClass::OverrideAction(void) noexcept {
 			this->m_Weapon_Ptr->ResetAnim();
 			//this->m_Weapon_Ptr->SetAnim();
-			switch (m_ArmMoveClass.GetCharaAction()) {
+			switch (m_CharaMove.GetCharaAction()) {
 			case EnumArmAnimType::Ready:
-				OverrideReady();
+				m_CharaMove.OverrideReady();
 				break;
 			case EnumArmAnimType::Run:
-				OverrideRun();
+				m_CharaMove.OverrideRun();
 				break;
 			case EnumArmAnimType::Men:
 			case EnumArmAnimType::Kote:
 			case EnumArmAnimType::Tsuki:
-				OverrideFrontAttack();
+				m_CharaMove.OverrideFrontAttack(this->m_Weapon_Ptr->GetArmAnimeTotalTime(m_CharaMove.GetCharaAction()));
+				SetFumikomi();
+				m_BambooVecBase.Set(0.f, 0.f);
 				break;
 			case EnumArmAnimType::Dou:
-				OverrideDo();
+				m_CharaMove.OverrideDo(this->m_Weapon_Ptr->GetArmAnimeTotalTime(m_CharaMove.GetCharaAction()));
+				SetFumikomi();
+				m_BambooVecBase.Set(0.f, 0.f);
 				break;
 			case EnumArmAnimType::Tsuba:
-				OverrideTsuba();
+				m_CharaMove.OverrideTsuba();
 				break;
 			case EnumArmAnimType::HikiMen:
 			case EnumArmAnimType::HikiKote:
 			case EnumArmAnimType::HikiDou:
-				OverrideBackAttack();
+				m_CharaMove.OverrideBackAttack(std::max(0.75f, this->m_Weapon_Ptr->GetArmAnimeTotalTime(m_CharaMove.GetCharaAction())));
+				SetFumikomi();
+				m_BambooVecBase.Set(0.f, 0.f);
+				{
+					auto* PlayerMngr = Player::PlayerManager::Instance();
+					auto& Target = PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetChara();
+					Target->OverrideReady();
+				}
 				break;
 			case EnumArmAnimType::GuardSuriage:
-				OverrideGuard();
+				m_CharaMove.OverrideGuard();
+				m_BambooVecBase.Set(0.f, 0.f);
 				break;
 			case EnumArmAnimType::Max:
 				break;
 			default:
 				break;
 			}
-		}
-		void			CharacterClass::OverrideReady(void) noexcept {
-			m_ArmMoveClass.ChangeAction(EnumArmAnimType::Ready);
-			m_CharaMove.SetIsFrontAttacking(false);
-			m_CharaMove.SetIsDouAttacking(false);
-			m_CharaMove.SetIsBackAttacking(false);
-			m_CharaMove.SetIsRunning(false);
-		}
-		void			CharacterClass::OverrideRun(void) noexcept {
-			m_RunTime = 0.f;
-			m_CharaMove.SetIsFrontAttacking(false);
-			m_CharaMove.SetIsDouAttacking(false);
-			m_CharaMove.SetIsBackAttacking(false);
-			m_CharaMove.SetIsRunning(true);
-		}
-		void			CharacterClass::OverrideFrontAttack(void) noexcept {
-			m_FrontAttackActionTime = this->m_Weapon_Ptr->GetArmAnimeTotalTime(m_ArmMoveClass.GetCharaAction());
-			m_CharaMove.SetIsFrontAttacking(true);
-			m_CharaMove.SetIsDouAttacking(false);
-			m_CharaMove.SetIsBackAttacking(false);
-			SetFumikomi();
-			StopVoice();
-			PlayVoice();
-			m_BambooVecBase.Set(0.f, 0.f);
-		}
-		void			CharacterClass::OverrideDo(void) noexcept {
-			m_FrontAttackActionTime = this->m_Weapon_Ptr->GetArmAnimeTotalTime(m_ArmMoveClass.GetCharaAction());
-			m_CharaMove.SetIsFrontAttacking(false);
-			m_CharaMove.SetIsDouAttacking(true);
-			m_CharaMove.SetIsBackAttacking(false);
-			SetFumikomi();
-			StopVoice();
-			PlayVoice();
-			m_BambooVecBase.Set(0.f, 0.f);
-		}
-		void			CharacterClass::OverrideTsuba(void) noexcept {
-			m_TsubaCoolDown = 0.5f;
-			m_ArmMoveClass.ChangeAction(EnumArmAnimType::Tsuba);
-			m_CharaMove.SetIsFrontAttacking(false);
-			m_CharaMove.SetIsDouAttacking(false);
-			m_CharaMove.SetIsBackAttacking(false);
-			m_CharaMove.SetIsRunning(false);
-		}
-		void			CharacterClass::OverrideBackAttack(void) noexcept {
-			m_BackAttackActionTime = std::max(0.75f, this->m_Weapon_Ptr->GetArmAnimeTotalTime(m_ArmMoveClass.GetCharaAction()));
-			m_CharaMove.SetIsFrontAttacking(false);
-			m_CharaMove.SetIsDouAttacking(true);
-			m_CharaMove.SetIsBackAttacking(true);
-			SetFumikomi();
-			StopVoice();
-			PlayVoice();
-
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto& Target = PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetChara();
-			Target->OverrideReady();
-			m_BambooVecBase.Set(0.f, 0.f);
-		}
-		void			CharacterClass::OverrideGuard(void) noexcept {
-			m_BambooVecBase = Vector2DX::zero();
-			m_GuardTimer = 1.f;
 		}
 		//
 		bool			CharacterClass::SetDamageEvent(const DamageEvent& value, bool IsTraining) noexcept {
@@ -379,29 +271,25 @@ namespace FPS_n2 {
 			return false;
 		}
 		void			CharacterClass::MovePoint(float pyRad, const Vector3DX& pPos) noexcept {
-			m_CharaMove.InitKey(pyRad);
+			m_CharaMove.Init(pyRad);
 			Matrix3x3DX Mat; Mat.SetRadian(0.f, m_CharaMove.GetRadBuf(), 0.f);
 			ResetMove(Mat, pPos);
-			OverrideReady();
-			m_ArmMoveClass.Init();
 			this->m_CharaSound = -1;
-			m_StaminaControl.InitStamina();
 		}
 		void			CharacterClass::Init_Sub(void) noexcept {
 			m_BambooVec.Set(0.f, 0.f);
 			m_BambooVecBase.Set(0.f, 0.f);
-			m_HitBoxControl.InitHitBox();
+			m_HitBoxControl.Init();
 			this->m_MoveOverRideFlag = false;
 #ifdef _USE_EFFEKSEER_
 			m_Effect.Init();				//
 #endif
 		}
 		//
-		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
-			InputControl Input = pInput;
+		void			CharacterClass::SetInput(const InputControl& pInput) noexcept {
 			//í|ìÅÇÃâÒì]ÇîΩâf
-			if (!IsAttacking()) {
-				Easing(&m_BambooVecBase, Vector2DX::vget(Input.GetxRad(), Input.GetyRad()), 0.7f, EasingType::OutExpo);
+			if (!CharaMove::IsAttackAction(m_CharaMove.GetCharaAction())) {
+				Easing(&m_BambooVecBase, Vector2DX::vget(pInput.GetxRad(), pInput.GetyRad()), 0.7f, EasingType::OutExpo);
 			}
 			//é©ìÆÇ≈ëäéËÇå¸Ç≠
 			float pp_y = 0.f;
@@ -411,7 +299,7 @@ namespace FPS_n2 {
 
 				auto Dir = m_CharaMove.GetEyeMatrix().zvec() * -1.f; Dir.y = (0.f); Dir = Dir.normalized();
 				float Len = 0.f;
-				auto Vec = (Target->GetMove().GetPos() - this->GetEyePosition()); Vec.y = (0.f); Len = Vec.magnitude(); Vec = Vec.normalized();
+				auto Vec = (Target->GetMove().GetPos() - this->m_CharaMove.GetEyePosition()); Vec.y = (0.f); Len = Vec.magnitude(); Vec = Vec.normalized();
 
 				float sint = Vector3DX::Cross(Vec, Dir).y;
 				float cost = Vector3DX::Dot(Vec, Dir);
@@ -431,11 +319,7 @@ namespace FPS_n2 {
 				}
 			}
 			//
-			if (!pReady) {
-				Input.ResetKeyInput();
-			}
-			m_CharaMove.InputKey(Input, pp_y);
-			m_CharaMove.SetSpeedMul(Lerp(0.5f, 1.f, m_StaminaControl.GetStamina() / m_StaminaControl.GetStaminaMax()));
+			m_CharaMove.InputKey(pInput, pp_y);
 		}
 		void			CharacterClass::FirstExecute(void) noexcept {
 			//èââÒÇÃÇ›çXêVÇ∑ÇÈì‡óe
@@ -448,221 +332,102 @@ namespace FPS_n2 {
 			}
 			//
 			ExecuteInput();
-			m_ArmMoveClass.ExecuteAction();
 			ExecuteAnim();
 			ExecuteSound();
 			ExecuteMatrix();
-			m_HitBoxControl.UpdataHitBox(this, 1.f);									//ÉqÉbÉgÉ{ÉbÉNÉX
+			m_HitBoxControl.Update(this, 1.f);									//ÉqÉbÉgÉ{ÉbÉNÉX
 #ifdef _USE_EFFEKSEER_
 			m_Effect.Execute();				//
+#endif
+		}
+		void			CharacterClass::CheckDraw(void) noexcept {
+			this->m_IsDraw = false;
+			this->m_DistanceToCam = (this->GetObj().GetMatrix().pos() - GetScreenPosition()).magnitude();
+			if (CheckCameraViewClip_Box(
+				(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-2.5f * Scale3DRate, -0.f * Scale3DRate, -2.5f * Scale3DRate)).get(),
+				(this->GetObj().GetMatrix().pos() + Vector3DX::vget(2.5f * Scale3DRate, 2.5f * Scale3DRate, 2.5f * Scale3DRate)).get()) == FALSE
+				) {
+				this->m_IsDraw |= true;
+			}
+		}
+		void			CharacterClass::Draw(bool isDrawSemiTrans) noexcept {
+			if (this->m_IsActive && this->m_IsDraw) {
+				if (m_MyID == m_ViewID) {
+					if (isDrawSemiTrans) {
+						this->GetObj().DrawModel();
+					}
+				}
+				else {
+					for (int i = 0, Num = this->GetObj_const().GetMeshNum(); i < Num; ++i) {
+						if (this->GetObj_const().GetMeshSemiTransState(i) == isDrawSemiTrans) {
+							this->GetObj().DrawMesh(i);
+						}
+					}
+					//hitboxï`âÊ
+					//m_HitBoxControl.Draw();
+				}
+			}
+		}
+		void			CharacterClass::DrawShadow(void) noexcept {
+			if (this->m_IsActive) {
+				this->GetObj().DrawModel();
+			}
+		}
+		void			CharacterClass::Dispose_Sub(void) noexcept {
+			m_Weapon_Ptr.reset();
+#ifdef _USE_EFFEKSEER_
+			m_Effect.Dispose();
 #endif
 		}
 		//
 		void			CharacterClass::ExecuteInput(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
-			auto* SE = SoundPool::Instance();
-			//ä|ÇØê∫
-			if (
-				(m_ArmMoveClass.GetCharaAction() == EnumArmAnimType::Ready || m_ArmMoveClass.GetCharaAction() == EnumArmAnimType::Tsuba) &&
-				GetYaTimer() == 0.f &&
-				m_CharaMove.GetInputControl().GetPADSPress(Controls::PADS::JUMP)
-				) {
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Voice_Ya))->Play3D(GetEyePosition(), Scale3DRate * 35.f);
-				m_StaminaControl.m_YaTimer = GetYaTimerMax();
-				m_StaminaControl.m_HeartUp = 40.f;
-			}
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto& Target = PlayerMngr->GetPlayer(1 - this->m_MyID)->GetChara();
+			//
 			m_DamageCoolTime = std::max(m_DamageCoolTime - DXLib_refParts->GetDeltaTime(), 0.f);
 			m_TsubaSoundCoolTime = std::max(m_TsubaSoundCoolTime - DXLib_refParts->GetDeltaTime(), 0.f);
 			m_GuardHit = std::max(m_GuardHit - DXLib_refParts->GetDeltaTime(), 0.f);
 			//
-			auto Prev = m_ArmMoveClass.GetCharaAction();
-			auto SetAction = m_ArmMoveClass.GetCharaAction();
-			switch (m_ArmMoveClass.GetCharaAction()) {
-			case EnumArmAnimType::Ready:
-			{
-				auto* PlayerMngr = Player::PlayerManager::Instance();
-				auto& Target = PlayerMngr->GetPlayer(1 - this->m_MyID)->GetChara();
-				//Ç¬ÇŒÇ∫ÇËîªíË
-				if(Target->GetCharaAction()==GetCharaAction()){
-					CheckTsuba();
-				}
-				if ((m_GuardCoolDownTimer == 0.f) && m_CharaMove.GetInputControl().GetPADSPress(Controls::PADS::AIM)) {
-					SetAction = EnumArmAnimType::GuardSuriage;//è„ÉKÅ[Éh
-					m_GuardCoolDownTimer = GetGuardCoolDownTimerMax();
-				}
-				{
-					auto Dir = m_CharaMove.GetEyeMatrix().zvec() * -1.f; Dir.y = (0.f); Dir = Dir.normalized();
-					float Len = 0.f;
-					auto Vec = (Target->GetMove().GetPos() - this->GetEyePosition()); Vec.y = (0.f); Len = Vec.magnitude(); Vec = Vec.normalized();
-
-					float cost = Vector3DX::Dot(Vec, Dir);
-					auto IsFront = (cost > cos(deg2rad(40)));
+			auto SetAction = m_CharaMove.UpdateAction();
+			if (m_CharaMove.GetCharaAction() == SetAction) {
+				if (m_CharaMove.GetCharaAction() == EnumArmAnimType::Ready) {
+					//Ç¬ÇŒÇ∫ÇËîªíË
+					if (Target->GetCharaAction() == this->GetCharaAction()) {
+						if (CheckTsuba()) {
+							SetAction = EnumArmAnimType::Tsuba;
+							//ëäéËÇ‡Ç¬ÇŒÇ∫ÇËçáÇ¢Ç…Ç∑ÇÈ
+							Target->OverrideTsuba();
+						}
+					}
+					//ë≈ìÀâ¬î\îÕàÕÇ…Ç¢ÇÈÇ©îªíË
+					auto Dir = this->GetEyeMatrix().zvec() * -1.f; Dir.y = (0.f); Dir = Dir.normalized();
+					auto Vec = (Target->GetMove().GetPos() - this->GetEyePosition()); Vec.y = (0.f);
+					float Len = Vec.magnitude();
+					Vec = Vec.normalized();
+					auto IsFront = (Vector3DX::Dot(Vec, Dir) > cos(deg2rad(40)));
 					float Radius = 3.5f * Scale3DRate;
-					if (!IsOutArea() && (Len < Radius) && IsFront) {
-						if (m_CharaMove.GetInputControl().GetPADSPress(Controls::PADS::SHOT)) {
-							SetAction = EnumArmAnimType::Men;
-							m_WazaType = WazaType::Men;
-						}
-						else if (m_CharaMove.GetInputControl().GetPADSPress(Controls::PADS::ULT)) {
-							SetAction = EnumArmAnimType::Kote;
-							m_WazaType = WazaType::Kote;
-						}
-						else if (false) {
-							SetAction = EnumArmAnimType::Dou;
-							m_WazaType = WazaType::Dou;
+					m_CharaMove.m_CanFrontAttack = (!IsOutArea() && (Len < Radius) && IsFront);
+				}
+				if (m_CharaMove.GetCharaAction() == EnumArmAnimType::Run) {
+					if (IsOutArea()) {
+						SetAction = EnumArmAnimType::Ready;
+					}
+					//Ç¬ÇŒÇ∫ÇËîªíË
+					if (m_CharaMove.m_RunTime <= 0.025f) {
+						if (CheckTsuba()) {
+							SetAction = EnumArmAnimType::Tsuba;
+							//ëäéËÇ‡Ç¬ÇŒÇ∫ÇËçáÇ¢Ç…Ç∑ÇÈ
+							Target->OverrideTsuba();
 						}
 					}
 				}
-				m_StaminaControl.m_HeartUp = std::max(m_StaminaControl.m_HeartUp - 30.f * DXLib_refParts->GetDeltaTime(), -5.f);
 			}
-			break;
-			case EnumArmAnimType::Run:
-			{
-				if (IsOutArea() || m_RunTime >= 1.25f) {
-					SetAction = EnumArmAnimType::Ready;
-				}
-
-				//Ç¬ÇŒÇ∫ÇËîªíË
-				if (m_RunTime <= 0.025f) {
-					CheckTsuba();
-				}
-
-				m_RunTime = std::max(m_RunTime + DXLib_refParts->GetDeltaTime(), 0.f);
-				m_StaminaControl.m_HeartUp = std::max(m_StaminaControl.m_HeartUp + 0.5f * 30.f * DXLib_refParts->GetDeltaTime(), 3.f);
-			}
-			break;
-			case EnumArmAnimType::Men:
-			case EnumArmAnimType::Kote:
-			case EnumArmAnimType::Tsuki:
-			{
-				//ãZîhê∂
-				if (m_FrontAttackActionTime <= 0.06f) {//éÛïtäJén
-					if (m_FrontAttackActionTime <= 0.f) {//îhê∂êÊÇ™Ç»Ç≠0ïbÇ…Ç»Ç¡ÇΩ
-						SetAction = EnumArmAnimType::Run;
-					}
-					switch (Prev) {
-					case EnumArmAnimType::Ready:
-					case EnumArmAnimType::Run:
-						break;
-					case EnumArmAnimType::Men:
-						if (false) {
-							SetAction = EnumArmAnimType::Dou;//ñ ì∑
-							m_WazaType = WazaType::Dou;
-						}
-						//è¨éËñ å„îhê∂
-						if (false) {
-							if (m_CharaMove.GetInputControl().GetPADSPress(Controls::PADS::SHOT)) {
-								SetAction = EnumArmAnimType::Men;//è¨éËñ ñ 
-								m_WazaType = WazaType::Men;
-							}
-							if (false) {
-								SetAction = EnumArmAnimType::Dou;//è¨éËñ ì∑
-								m_WazaType = WazaType::Dou;
-							}
-						}
-						break;
-					case EnumArmAnimType::Kote:
-						if (m_CharaMove.GetInputControl().GetPADSPress(Controls::PADS::SHOT)) {
-							SetAction = EnumArmAnimType::Men;//è¨éËñ 
-							m_WazaType = WazaType::Men;
-						}
-						if (false) {
-							SetAction = EnumArmAnimType::Dou;//è¨éËì∑
-							m_WazaType = WazaType::Dou;
-						}
-						break;
-					case EnumArmAnimType::Dou:
-						break;
-					case EnumArmAnimType::Tsuki:
-						if (m_CharaMove.GetInputControl().GetPADSPress(Controls::PADS::SHOT)) {
-							SetAction = EnumArmAnimType::Men;//ìÀÇ´ñ 
-							m_WazaType = WazaType::Men;
-						}
-						break;
-					case EnumArmAnimType::Tsuba:
-					case EnumArmAnimType::HikiMen:
-					case EnumArmAnimType::HikiKote:
-					case EnumArmAnimType::HikiDou:
-					case EnumArmAnimType::GuardSuriage:
-					case EnumArmAnimType::Max:
-					default:
-						break;
-					}
-				}
-				m_FrontAttackActionTime = std::max(m_FrontAttackActionTime - DXLib_refParts->GetDeltaTime(), 0.f);
-				m_StaminaControl.m_HeartUp = std::max(m_StaminaControl.m_HeartUp + 0.1f * 30.f * DXLib_refParts->GetDeltaTime(), 10.f);
-			}
-			break;
-			case EnumArmAnimType::Dou:
-			{
-				if (m_FrontAttackActionTime <= 0.f) {
-					SetAction = EnumArmAnimType::Run;
-				}
-				m_FrontAttackActionTime = std::max(m_FrontAttackActionTime - DXLib_refParts->GetDeltaTime(), 0.f);
-				m_StaminaControl.m_HeartUp = std::max(m_StaminaControl.m_HeartUp + 0.1f * 30.f * DXLib_refParts->GetDeltaTime(), 10.f);
-			}
-			break;
-			case EnumArmAnimType::Tsuba:
-			{
-				if (m_TsubaCoolDown <= 0.f) {
-					if (m_CharaMove.GetInputControl().GetPADSPress(Controls::PADS::SHOT)) {
-						SetAction = EnumArmAnimType::HikiMen;
-						m_WazaType = WazaType::Hikimen;
-					}
-					else if (m_CharaMove.GetInputControl().GetPADSPress(Controls::PADS::ULT)) {
-						SetAction = EnumArmAnimType::HikiKote;
-						m_WazaType = WazaType::Hikigote;
-					}
-					else if (false) {
-						SetAction = EnumArmAnimType::HikiDou;
-					}
-				}
-				m_TsubaCoolDown = std::max(m_TsubaCoolDown - DXLib_refParts->GetDeltaTime(), 0.f);
-				m_StaminaControl.m_HeartUp = std::max(m_StaminaControl.m_HeartUp - 30.f * DXLib_refParts->GetDeltaTime(), -5.f);
-			}
-			break;
-			case EnumArmAnimType::HikiMen:
-			case EnumArmAnimType::HikiKote:
-			case EnumArmAnimType::HikiDou:
-			{
-				if (m_BackAttackActionTime <= 0.f) {
-					SetAction = EnumArmAnimType::Ready;
-				}
-				m_BackAttackActionTime = std::max(m_BackAttackActionTime - DXLib_refParts->GetDeltaTime(), 0.f);
-				m_StaminaControl.m_HeartUp = std::max(m_StaminaControl.m_HeartUp + 0.1f * 30.f * DXLib_refParts->GetDeltaTime(), 10.f);
-			}
-			break;
-			case EnumArmAnimType::GuardSuriage:
-			{
-				if (m_GuardTimer == 0.f) {
-					SetAction = EnumArmAnimType::Ready;
-				}
-				else {
-					if (m_CharaMove.GetInputControl().GetPADSPress(Controls::PADS::SHOT)) {
-						SetAction = EnumArmAnimType::Men;
-						m_WazaType = WazaType::SuriageMen;
-					}
-					else if (m_CharaMove.GetInputControl().GetPADSPress(Controls::PADS::ULT)) {
-						SetAction = EnumArmAnimType::Dou;
-						m_WazaType = WazaType::Dou;
-					}
-				}
-				m_GuardTimer = std::max(m_GuardTimer - DXLib_refParts->GetDeltaTime(), 0.f);
-				m_StaminaControl.m_HeartUp = std::max(m_StaminaControl.m_HeartUp - 60.f * DXLib_refParts->GetDeltaTime(), -15.f);
-			}
-			break;
-			case EnumArmAnimType::Max:
-			default:
-				break;
-			}
-			if (Prev != SetAction) {
-				m_ArmMoveClass.ChangeAction(SetAction);
+			if (m_CharaMove.GetCharaAction() != SetAction) {
+				m_CharaMove.ChangeAction(SetAction);
 				OverrideAction();
 			}
-			m_CharaMove.UpdateKeyRad(this->m_move);
-			if (m_ArmMoveClass.GetCharaAction() != EnumArmAnimType::Run && m_ArmMoveClass.GetCharaAction() != EnumArmAnimType::GuardSuriage) {
-				m_GuardCoolDownTimer = std::max(m_GuardCoolDownTimer - DXLib_refParts->GetDeltaTime(), 0.f);
-			}
+			m_CharaMove.Update(this->m_move);
 		}
 		void			CharacterClass::ExecuteAnim(void) noexcept {
 			//è„îºêgÉAÉjÉÅââéZ
@@ -686,8 +451,8 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* CameraParts = Camera3D::Instance();
 			//ë´âπ
-			if (m_CharaMove.m_BottomAnimSelect != m_CharaMove.GetBottomStandAnimSel()) {
-				auto Time = this->GetObj().SetAnim(static_cast<int>(m_CharaMove.m_BottomAnimSelect)).GetTime();
+			if (m_CharaMove.GetBottomAnimSelect() != m_CharaMove.GetBottomStandAnimSel()) {
+				auto Time = this->GetObj().SetAnim(static_cast<int>(m_CharaMove.GetBottomAnimSelect())).GetTime();
 				if (!m_CharaMove.GetRun()) {
 					//L
 					if ((9.f < Time && Time < 10.f)) {
@@ -746,23 +511,20 @@ namespace FPS_n2 {
 			else {
 				this->m_CharaSound = -1;
 			}
-			//êSîèâπ
-#ifdef DEBUG
-			//printfDx("HEART : %f\n", m_HeartUp);
-#endif
-			if (m_StaminaControl.ExcuteStamina()) {
-				if (this->m_MyID == this->m_ViewID) {
+			//
+			if (this->m_MyID == this->m_ViewID) {
+				//êSîèâπ
+				if (m_CharaMove.GetHeartSwitch()) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heart))->Play(DX_PLAYTYPE_BACK, TRUE);
 				}
-			}
-			if (m_StaminaControl.ExcuteBreath()) {
-				if (this->m_MyID == this->m_ViewID) {
+				//ëß
+				if (m_CharaMove.GetBreathSwitch()) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Breath))->Play(DX_PLAYTYPE_BACK, TRUE);
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Breath))->SetLocalVolume(static_cast<int>(Lerp(255.f, 92.f, m_CharaMove.GetStaminaPer())));
 				}
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Breath))->SetLocalVolume(static_cast<int>(Lerp(255.f, 92.f, m_StaminaControl.GetStamina() / m_StaminaControl.GetStaminaMax())));
-			}
-			if (GetYaTimer() >= GetYaTimerMax() * 0.9f) {
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Breath))->StopAll();
+				if (m_CharaMove.GetYaTimerPer() >= 0.9f) {
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Breath))->StopAll();
+				}
 			}
 		}
 		void			CharacterClass::ExecuteMatrix(void) noexcept {
@@ -770,8 +532,7 @@ namespace FPS_n2 {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			//
-			GetObj().SetFrameLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Upper)),
-				(m_CharaMove.GetUpperRotMatrix()).Get44DX() * GetFrameBaseLocalMat(static_cast<int>(CharaFrame::Upper)));
+			GetObj().SetFrameLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Upper)), m_CharaMove.GetUpperRotMatrix().Get44DX() * GetFrameBaseLocalMat(static_cast<int>(CharaFrame::Upper)));
 			//
 			Vector3DX pos = this->m_move.GetPosBuf();
 			//vector
@@ -789,7 +550,7 @@ namespace FPS_n2 {
 			}
 			this->m_move.SetVec(vec);
 			pos += this->m_move.GetVec();
-			if (m_ArmMoveClass.GetCharaAction() == EnumArmAnimType::Tsuba) {
+			if (m_CharaMove.GetCharaAction() == EnumArmAnimType::Tsuba) {
 				auto& Target = PlayerMngr->GetPlayer(1 - GetMyPlayerID())->GetChara();
 
 				auto& TgtPos = Target->GetMove().GetPos();
@@ -829,12 +590,9 @@ namespace FPS_n2 {
 				Matrix3x3DX Mat; Mat.SetRadian(0.f, m_CharaMove.GetRadBuf(), 0.f);
 				this->m_move.SetMat(Mat);
 			}
-			m_EyePosition = (GetFramePosition(CharaFrame::LeftEye) + GetFramePosition(CharaFrame::RightEye)) / 2.f + (m_CharaMove.GetEyeRotMatrix() * m_CharaMove.GetBaseRotMatrix()).zvec() * (-0.04f * Scale3DRate);
-			auto* OptionParts = OptionManager::Instance();
-			bool HeadBobbing = ((this->m_MyID != this->m_ViewID) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
-			if (HeadBobbing) {
-				m_EyePosition += m_CharaMove.GetEyeSwingPos();
-			}
+			m_CharaMove.SetEyePosition(
+				(GetFramePosition(CharaFrame::LeftEye) + GetFramePosition(CharaFrame::RightEye)) / 2.f + m_CharaMove.GetEyeMatrix().zvec() * (-0.04f * Scale3DRate)
+			);
 			//èeç¿ïWéwíË
 			if (this->m_Weapon_Ptr) {
 
@@ -845,14 +603,14 @@ namespace FPS_n2 {
 					for (size_t i = 0; i < static_cast<size_t>(EnumArmAnimType::Max); ++i) {
 						Matrix4x4DX AnimData;
 						if (!this->m_Weapon_Ptr->GetArmAnimeNowMatrix((EnumArmAnimType)i, &AnimData)) { continue; }
-						WeaponBaseMat = Lerp(WeaponBaseMat, AnimData, this->m_ArmMoveClass.GetArmPer((EnumArmAnimType)i));
+						WeaponBaseMat = Lerp(WeaponBaseMat, AnimData, this->m_CharaMove.GetArmPer((EnumArmAnimType)i));
 					}
 					Vector3DX PrevPos = this->m_Weapon_Ptr->GetFramePosition(WeaponObject::WeaponFrame::End);
 
-					Vector3DX WeaponBasePos = GetFramePosition(CharaFrame::Head) + Matrix3x3DX::Vtrans(WeaponBaseMat.pos(), (m_CharaMove.GetUpperRotMatrix() * m_CharaMove.GetBaseRotMatrix()));
+					Vector3DX WeaponBasePos = GetFramePosition(CharaFrame::Head) + Matrix3x3DX::Vtrans(WeaponBaseMat.pos(), m_CharaMove.GetUpperMatrix());
 					auto WeaponBaseRotMat = Matrix3x3DX::RotVec2(Vector3DX::forward(), WeaponBaseMat.zvec());
 					WeaponBaseRotMat *= Matrix3x3DX::RotVec2(WeaponBaseRotMat.yvec(), WeaponBaseMat.yvec());
-					WeaponBaseRotMat *= m_CharaMove.GetWeaponSwingMat() * (m_CharaMove.GetUpperRotMatrix() * m_CharaMove.GetBaseRotMatrix());
+					WeaponBaseRotMat *= m_CharaMove.GetWeaponSwingMat() * m_CharaMove.GetUpperMatrix();
 					//í|ìÅìØémÇÃîªíË
 					Matrix3x3DX WeaponAddRotMat;
 					Vector2DX Prev = m_BambooVec;
@@ -908,10 +666,10 @@ namespace FPS_n2 {
 										m_TsubaSoundCoolTime = static_cast<float>(SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Kendo_Tsuba))->GetTotalTIme()) / 1000.f * 0.5f;
 									}
 									WeaponAddRotMat = Matrix3x3DX::RotAxis(Vector3DX::right(), m_BambooVec.x) * Matrix3x3DX::RotAxis(Vector3DX::forward(), m_BambooVec.y);
-									if (ArmMoveClass::IsGuardAction(m_ArmMoveClass.GetCharaAction()) || IsAttacking()) {
+									if (CharaMove::IsGuardAction(m_CharaMove.GetCharaAction()) || CharaMove::IsAttackAction(m_CharaMove.GetCharaAction())) {
 										if (m_GuardHit == 0.f) {
 #ifdef _USE_EFFEKSEER_
-											m_Effect.SetOnce(EffectResource::Effect::ef_gndsmoke, HitPos, (c->GetEyePosition() - GetEyePosition()).normalized(), 0.1f * Scale3DRate);
+											m_Effect.SetOnce(EffectResource::Effect::ef_gndsmoke, HitPos, (c->GetEyePosition() - this->m_CharaMove.GetEyePosition()).normalized(), 0.1f * Scale3DRate);
 #endif
 										}
 										m_GuardHit = 3.f / FrameRate;

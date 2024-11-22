@@ -4,17 +4,17 @@
 
 namespace FPS_n2 {
 	namespace CharacterObject {
-		void HitBoxControl::UpdataHitBox(const ObjectBaseClass* ptr, float SizeRate) noexcept {
+		void HitBoxControl::Update(const ObjectBaseClass* ptr, float SizeRate) noexcept {
 			auto* Ptr = (CharacterClass*)ptr;
 			size_t ID = 0;
-			m_HitBox[ID].Execute(Ptr->GetEyePosition(), 0.2f * Scale3DRate * SizeRate, HitType::Head); ID++;
-			m_HitBox[ID].Execute(Ptr->GetObj().GetFrameLocalWorldMatrix(Ptr->GetFrame(static_cast<int>(CharaFrame::Upper))).pos(), 0.18f * Scale3DRate * SizeRate, HitType::Body); ID++;
+			m_HitBox[ID].Update(Ptr->GetEyePosition(), 0.2f * Scale3DRate * SizeRate, HitType::Head); ID++;
+			m_HitBox[ID].Update(Ptr->GetFramePosition(CharaFrame::Upper), 0.18f * Scale3DRate * SizeRate, HitType::Body); ID++;
 
-			m_HitBox[ID].Execute((Ptr->GetObj().GetFrameLocalWorldMatrix(Ptr->GetFrame(static_cast<int>(CharaFrame::RightWrist))).pos() + Ptr->GetObj().GetFrameLocalWorldMatrix(Ptr->GetFrame(static_cast<int>(CharaFrame::RightArm2))).pos()) / 2.f, 0.1f * Scale3DRate * SizeRate, HitType::Arm); ID++;
-			m_HitBox[ID].Execute(Ptr->GetObj().GetFrameLocalWorldMatrix(Ptr->GetFrame(static_cast<int>(CharaFrame::RightWrist))).pos(), 0.1f * Scale3DRate * SizeRate, HitType::Arm); ID++;
+			m_HitBox[ID].Update((Ptr->GetFramePosition(CharaFrame::RightWrist) + Ptr->GetFramePosition(CharaFrame::RightArm2)) / 2.f, 0.1f * Scale3DRate * SizeRate, HitType::Arm); ID++;
+			m_HitBox[ID].Update(Ptr->GetFramePosition(CharaFrame::RightWrist), 0.1f * Scale3DRate * SizeRate, HitType::Arm); ID++;
 
-			m_HitBox[ID].Execute((Ptr->GetObj().GetFrameLocalWorldMatrix(Ptr->GetFrame(static_cast<int>(CharaFrame::LeftWrist))).pos() + Ptr->GetObj().GetFrameLocalWorldMatrix(Ptr->GetFrame(static_cast<int>(CharaFrame::LeftArm2))).pos()) / 2.f, 0.1f * Scale3DRate * SizeRate, HitType::Arm); ID++;
-			m_HitBox[ID].Execute(Ptr->GetObj().GetFrameLocalWorldMatrix(Ptr->GetFrame(static_cast<int>(CharaFrame::LeftWrist))).pos(), 0.1f * Scale3DRate * SizeRate, HitType::Arm); ID++;
+			m_HitBox[ID].Update((Ptr->GetFramePosition(CharaFrame::LeftWrist) + Ptr->GetFramePosition(CharaFrame::LeftArm2)) / 2.f, 0.1f * Scale3DRate * SizeRate, HitType::Arm); ID++;
+			m_HitBox[ID].Update(Ptr->GetFramePosition(CharaFrame::LeftWrist), 0.1f * Scale3DRate * SizeRate, HitType::Arm); ID++;
 		}
 	}
 }

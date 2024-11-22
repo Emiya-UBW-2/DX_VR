@@ -250,8 +250,7 @@ namespace FPS_n2 {
 			UIClass(UIClass&& o) = delete;
 			UIClass& operator=(const UIClass&) = delete;
 			UIClass& operator=(UIClass&& o) = delete;
-
-			virtual ~UIClass(void) noexcept {}
+			~UIClass(void) noexcept {}
 		public:
 			bool			IsGameStartEnd() const noexcept { return m_GameStartTimer <= 0.f; }
 			void			SetGameStart(bool isFirstRound) noexcept {

@@ -77,8 +77,6 @@ namespace FPS_n2 {
 		CommonBattleResource(CommonBattleResource&& o) = delete;
 		CommonBattleResource& operator=(const CommonBattleResource&) = delete;
 		CommonBattleResource& operator=(CommonBattleResource&& o) = delete;
-
-		virtual ~CommonBattleResource(void) noexcept {}
 	public:
 		void			Load(void) noexcept;
 		void			Set(void) noexcept;
@@ -115,8 +113,6 @@ namespace FPS_n2 {
 		HitMark(HitMark&& o) = delete;
 		HitMark& operator=(const HitMark&) = delete;
 		HitMark& operator=(HitMark&& o) = delete;
-
-		virtual ~HitMark(void) noexcept {}
 	public:
 		void			Load(void) noexcept;
 		void			Set(void) noexcept;

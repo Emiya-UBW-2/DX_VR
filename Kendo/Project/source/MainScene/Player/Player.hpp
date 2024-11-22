@@ -78,8 +78,6 @@ namespace FPS_n2 {
 			PlayerManager(PlayerManager&& o) = delete;
 			PlayerManager& operator=(const PlayerManager&) = delete;
 			PlayerManager& operator=(PlayerManager&& o) = delete;
-
-			virtual ~PlayerManager(void) noexcept {}
 		public:
 			const auto& GetPlayerNum(void) const noexcept { return this->m_PlayerNum; }
 			auto& GetPlayer(int ID) noexcept { return this->m_Player[static_cast<size_t>(ID)]; }

@@ -122,8 +122,6 @@ namespace FPS_n2 {
 			ButtonControl(ButtonControl&& o) = delete;
 			ButtonControl& operator=(const ButtonControl&) = delete;
 			ButtonControl& operator=(ButtonControl&& o) = delete;
-
-			virtual ~ButtonControl(void) noexcept;
 		public:
 			void ResetSel(void) noexcept {
 				select = 0;

@@ -156,7 +156,6 @@ namespace FPS_n2 {
 			const auto& GetPos(void) const noexcept { return this->m_Pos; }
 			const auto& GetFrame(void) const noexcept { return this->m_Frame; }
 		};
-
 		struct AnimDatas {
 		public:
 		public:
@@ -173,11 +172,9 @@ namespace FPS_n2 {
 		};
 	private:
 		std::vector<AnimDatas>	m_Object;
-
 #ifdef DEBUG
 		Vector3DX DBG_AnimRot;
 		Vector3DX DBG_AnimPos;
-
 #endif
 	private:
 		ArmAnimManager(void) noexcept {}
@@ -185,8 +182,6 @@ namespace FPS_n2 {
 		ArmAnimManager(ArmAnimManager&& o) = delete;
 		ArmAnimManager& operator=(const ArmAnimManager&) = delete;
 		ArmAnimManager& operator=(ArmAnimManager&& o) = delete;
-
-		virtual ~ArmAnimManager(void) noexcept {}
 	public:
 		void	Load(const char* filepath) noexcept {
 			for (int loop = 0; loop < static_cast<int>(EnumArmAnim::Max); ++loop) {
@@ -208,7 +203,6 @@ namespace FPS_n2 {
 				m_Object.back().second.back()->Set(FileStream.SeekLineAndGetStr());
 			}
 		}
-
 		const AnimDatas* GetAnimData(EnumArmAnim EnumSel) const noexcept {
 			auto Find = std::find_if(m_Object.begin(), m_Object.end(), [&](const AnimDatas& tgt) {return tgt.first->GetEnumArmAnim() == EnumSel; });
 			if (Find != m_Object.end()) {
@@ -216,7 +210,6 @@ namespace FPS_n2 {
 			}
 			return nullptr;
 		}
-
 		ArmAnimNow	GetAnimNow(const AnimDatas* data, float nowframe) noexcept {
 			ArmAnimNow Ret;
 			if (data) {
