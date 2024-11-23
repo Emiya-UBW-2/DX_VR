@@ -51,7 +51,7 @@ namespace FPS_n2 {
 			ButtonParts->AddIconButton("data/UI/Info.png", true, (1920 - 96 * 0 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			int WinCount = static_cast<int>(SaveDataClass::Instance()->GetParam("WinCount"));
 			if (2 < WinCount) {
-				ButtonParts->AddStringButton(400, 24, true, 1920 - 64 - 48-125, 1080 - 84 - 64 * 3, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM);
+				ButtonParts->AddStringButton(406, 24, true, 1920 - 64 - 48-125, 1080 - 84 - 64 * 3, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM);
 			}
 			// クレジット
 			this->m_CreditControl = std::make_unique<CreditControl>();

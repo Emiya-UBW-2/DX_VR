@@ -15,9 +15,9 @@
 		SetModelMode(Sky, 0, SKY_TRUE);
 //ÉJÉbÉgê›íË
 	//0
-		SetCut(10.0);
+		SetCut(6.0);
 		WhiteIn(0.1);
-		BlackIn(0.1);
+		BlackIn(0.9);
 
 		SetCamForcus(Kendo, 0, RIGHTLEG, 0.0, 0.0, 0.0);
 		SetCampos_NoneRad(15.f , 4.f, 70.f);
@@ -41,11 +41,11 @@
 			SetModelMat(Bamboo, 0, 0.0, 0.0, 0.0, 75.0, 0.0);
 			SetModelAnime(Bamboo, 0, 0, FALSE, 1.0, 0);
 	//5
-		SetCut(12.0);//
+		SetCut(8.0);//
 		SetPrevCamInfo();
 
 		SetUpdateEnable();
-		WhiteOut(0.9f);
+		BlackOut(0.9);
 	//END
 		//SetCut(60.0);
 //LAST
