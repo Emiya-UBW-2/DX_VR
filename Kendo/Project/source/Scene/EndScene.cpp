@@ -69,7 +69,7 @@ namespace FPS_n2 {
 			auto* SceneParts = SceneControl::Instance();
 			//
 			if (GetIsFirstLoop()) {
-				SetupEvent("data/Cut/Cut1.txt");
+				SetupEvent("data/Cut/Cut4.txt");
 			}
 			//
 			KeyGuideParts->ChangeGuide(

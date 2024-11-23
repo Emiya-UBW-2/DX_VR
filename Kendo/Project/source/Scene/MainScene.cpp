@@ -940,7 +940,7 @@ namespace FPS_n2 {
 					PlayerID Now = GetMyPlayerID();
 					bool IsWin = (PlayerMngr->GetPlayer(Now)->GetMaxScore() > PlayerMngr->GetPlayer(1 - Now)->GetMaxScore());
 					if (IsWin) {
-						SaveDataClass::Instance()->SetParam("WinCount", SaveDataClass::Instance()->GetParam("WinCount") + 1);
+						SaveDataClass::Instance()->SetParam("WinCount", std::max<int64_t>(0, SaveDataClass::Instance()->GetParam("WinCount")) + 1);
 						SaveDataClass::Instance()->Save();
 					}
 				}

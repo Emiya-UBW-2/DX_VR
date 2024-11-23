@@ -101,11 +101,14 @@
 0400=Battle Start
 0401=Training Start
 0402=Replay
+0406=エピローグ
 0410=Start Battle.
 0411=Start Training For Battle.
 0412=Run Last Replay
 0413=Change Setting
 0414=Watch Credit
+0415=剣道に関する情報を確認します
+0416=
 
 0420=Return Title
 0421=Option

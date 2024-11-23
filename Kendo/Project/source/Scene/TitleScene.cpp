@@ -50,7 +50,7 @@ namespace FPS_n2 {
 			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, (1920 - 96 * 1 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			ButtonParts->AddIconButton("data/UI/Info.png", true, (1920 - 96 * 0 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			int WinCount = static_cast<int>(SaveDataClass::Instance()->GetParam("WinCount"));
-			if (2 <= WinCount) {
+			if (2 < WinCount) {
 				ButtonParts->AddStringButton(400, 24, true, 1920 - 64 - 48-125, 1080 - 84 - 64 * 3, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM);
 			}
 			// クレジット
@@ -283,13 +283,13 @@ namespace FPS_n2 {
 				(64), (64 + 256), White, Black, "Ver 1.0.0");
 			//
 			int WinCount = static_cast<int>(SaveDataClass::Instance()->GetParam("WinCount"));
-			if(2 > WinCount){
+			if(2 >= WinCount){
 				int xp1 = 1920 - 64 - 48 - 48 * 3;
 				int yp1 = 1080 - 84 - 64 * 3;
 				for (int i = 0; i < 3; ++i) {
 					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 64, 64, 64);
 					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &this->m_Flag, xp1 - 32, yp1 - 32, xp1, yp1, true);
-					if (i > WinCount) {
+					if (i >= WinCount) {
 						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 0, 0);
 					}
 					else {
