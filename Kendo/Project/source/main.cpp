@@ -2,6 +2,7 @@
 
 #include	"Scene/TitleScene.hpp"
 #include	"Scene/MainScene.hpp"
+#include	"Scene/EndScene.hpp"
 
 #include	"MainScene/NetworkBrowser.hpp"
 
@@ -65,21 +66,25 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::HitMark::Create();
 	//ÉVÅ[Éì
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
+
 	auto MainGameScenePtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
-	auto MainGameSceneTrainingPtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
-	auto MainGameSceneReplayPtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
 	MainGameScenePtr->SetGameMode(FPS_n2::GameMode::Main);
+	auto MainGameSceneTrainingPtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
 	MainGameSceneTrainingPtr->SetGameMode(FPS_n2::GameMode::Training);
+	auto MainGameSceneReplayPtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
 	MainGameSceneReplayPtr->SetGameMode(FPS_n2::GameMode::Replay);
 
+	auto EndScenePtr = std::make_shared<FPS_n2::Sceneclass::EndScene>();
 
 	//ëJà⁄êÊéwíË
 	Titlescene->SetNextSceneList(0, MainGameScenePtr);
 	Titlescene->SetNextSceneList(1, MainGameSceneTrainingPtr);
 	Titlescene->SetNextSceneList(2, MainGameSceneReplayPtr);
+	Titlescene->SetNextSceneList(3, EndScenePtr);
 	MainGameScenePtr->SetNextSceneList(0, Titlescene);
 	MainGameSceneTrainingPtr->SetNextSceneList(0, Titlescene);
 	MainGameSceneReplayPtr->SetNextSceneList(0, Titlescene);
+	EndScenePtr->SetNextSceneList(0, Titlescene);
 
 	auto* SceneParts = SceneControl::Instance();
 	SceneParts->SetFirstScene(Titlescene);

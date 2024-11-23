@@ -31,6 +31,7 @@
     <ClInclude Include="source\MainScene\Player\CPU.hpp" />
     <ClInclude Include="source\MainScene\Player\Player.hpp" />
     <ClInclude Include="source\MainScene\UI\MainSceneUIControl.hpp" />
+    <ClInclude Include="source\Scene\EndScene.hpp" />
     <ClInclude Include="source\Scene\MainScene.hpp" />
     <ClInclude Include="source\Scene\TitleScene.hpp" />
     <ClInclude Include="source\sub.hpp" />
@@ -51,6 +52,7 @@
     <ClCompile Include="source\MainScene\Object\Weapon.cpp" />
     <ClCompile Include="source\MainScene\Player\CPU.cpp" />
     <ClCompile Include="source\MainScene\Player\Player.cpp" />
+    <ClCompile Include="source\Scene\EndScene.cpp" />
     <ClCompile Include="source\Scene\MainScene.cpp" />
     <ClCompile Include="source\Scene\TitleScene.cpp" />
     <ClCompile Include="source\sub.cpp" />

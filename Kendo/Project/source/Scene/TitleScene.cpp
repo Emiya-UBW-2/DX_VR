@@ -49,6 +49,10 @@ namespace FPS_n2 {
 			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, (1920 - 96 * 2 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, (1920 - 96 * 1 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			ButtonParts->AddIconButton("data/UI/Info.png", true, (1920 - 96 * 0 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
+			int WinCount = static_cast<int>(SaveDataClass::Instance()->GetParam("WinCount"));
+			if (2 <= WinCount) {
+				ButtonParts->AddStringButton(400, 24, true, 1920 - 64 - 48-125, 1080 - 84 - 64 * 3, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM);
+			}
 			// クレジット
 			this->m_CreditControl = std::make_unique<CreditControl>();
 			this->m_CreditControl->Init();
@@ -159,6 +163,8 @@ namespace FPS_n2 {
 					case 1:
 					case 2:
 						this->m_GameStart += 0.0001f;
+						// 次シーン決定
+						SetNextSelect(static_cast<size_t>(ButtonParts->GetSelect()));
 						break;
 					case 3:
 						OptionDrawCtrls->SetActive();
@@ -183,6 +189,11 @@ namespace FPS_n2 {
 							[&]() { this->m_InfoControl->Guide(); },
 							true
 						);
+						break;
+					case 6:
+						this->m_GameStart += 0.0001f;
+						// 次シーン決定
+						SetNextSelect(3);
 						break;
 					default:
 						break;
@@ -219,8 +230,6 @@ namespace FPS_n2 {
 			this->m_TitleImage.Dispose();
 			// セーブ
 			SaveDataParts->Save();
-			// 次シーン決定
-			SetNextSelect(static_cast<size_t>(ButtonParts->GetSelect()));
 		}
 		void TitleScene::Dispose_Load_Sub(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -273,10 +282,10 @@ namespace FPS_n2 {
 				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 				(64), (64 + 256), White, Black, "Ver 1.0.0");
 			//
-			{
+			int WinCount = static_cast<int>(SaveDataClass::Instance()->GetParam("WinCount"));
+			if(2 > WinCount){
 				int xp1 = 1920 - 64 - 48 - 48 * 3;
 				int yp1 = 1080 - 84 - 64 * 3;
-				int WinCount = SaveDataClass::Instance()->GetParam("WinCount");
 				for (int i = 0; i < 3; ++i) {
 					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 64, 64, 64);
 					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &this->m_Flag, xp1 - 32, yp1 - 32, xp1, yp1, true);
