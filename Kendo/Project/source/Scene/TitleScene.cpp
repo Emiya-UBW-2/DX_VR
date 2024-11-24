@@ -72,7 +72,7 @@ namespace FPS_n2 {
 			this->m_CreditControl->Init();
 			//
 			this->m_InfoControl = std::make_unique<InfoControl>();
-			this->m_InfoControl->Init();
+			//this->m_InfoControl->Init();
 			// 
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, TRUE);
 			//Cam

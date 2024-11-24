@@ -310,10 +310,12 @@ namespace FPS_n2 {
 			}
 		}
 		void InfoControl::Start() noexcept {
+			Init();
 			m_InfoNow = 0;
 			SetPage();
 		}
 		void InfoControl::Draw(int xmin, int ymin, int xmax, int ymax) noexcept {
+			if (this->m_InfoStr.size() == 0) { return; }
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* Pad = PadControl::Instance();
 			auto* SE = SoundPool::Instance();
@@ -375,6 +377,7 @@ namespace FPS_n2 {
 		}
 		void InfoControl::End() noexcept {
 			DelPage();
+			Dispose();
 		}
 		void InfoControl::Guide() noexcept {
 			auto* KeyGuideParts = KeyGuide::Instance();
