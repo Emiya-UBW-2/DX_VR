@@ -40,6 +40,8 @@
 			SetDrawModel(Bamboo, 0, 15);
 			SetModelMat(Bamboo, 0, 0.0, 0.0, 0.0, 75.0, 0.0);
 			SetModelAnime(Bamboo, 0, 0, FALSE, 1.0, 0);
+
+			SetDrawSE(ThankYou);
 	//5
 		SetCut(8.0);//
 		SetPrevCamInfo();
@@ -53,6 +55,6 @@
 
 
 //テロップはじめ
-		SetTelopTime(33.0, 4.0);
-		SetTelop(220, 240, 48, "Thank  You  for  Wathcing!", LEFT);
+		SetTelopTime(1.9, 6.5);
+		SetTelop(960, 540, 64, "Thank  You  for  Playing!", MIDDLE);
 //テロップ終わり

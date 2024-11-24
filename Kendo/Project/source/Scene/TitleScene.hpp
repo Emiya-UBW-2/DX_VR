@@ -25,6 +25,7 @@ namespace FPS_n2 {
 
 			int							m_Phase{ 0 };
 			float						m_PhaseTime{ 0.f };
+			int							m_WinCount{ 0 };
 		public:
 			TitleScene(void) noexcept {}
 			TitleScene(const TitleScene&) = delete;

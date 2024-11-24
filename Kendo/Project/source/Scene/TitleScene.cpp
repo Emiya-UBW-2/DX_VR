@@ -12,8 +12,16 @@ namespace FPS_n2 {
 
 			MV1::Load("data/model/sky/model.mv1", &this->m_TitleBGSky);
 			MV1::Load("data/model/map/model_DISABLE.mv1", &this->m_TitleBGMap);
-			MV1::Load("data/MovieModel/Chara/model.mv1", &this->m_TitleChara);
-			MV1::Load("data/MovieModel/Bamboo/model.mv1", &this->m_TitleBamboo);
+
+			m_WinCount = static_cast<int>(SaveDataClass::Instance()->GetParam("WinCount"));
+			if (2 < m_WinCount) {
+				MV1::Load("data/MovieModel/CharaEnd/model.mv1", &this->m_TitleChara);
+				MV1::Load("data/MovieModel/BambooEnd/model.mv1", &this->m_TitleBamboo);
+			}
+			else {
+				MV1::Load("data/MovieModel/Chara/model.mv1", &this->m_TitleChara);
+				MV1::Load("data/MovieModel/Bamboo/model.mv1", &this->m_TitleBamboo);
+			}
 
 			m_Flag.Load("data/UI/Flag.png");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Envi), 1, "data/Sound/SE/envi.wav", false);
@@ -37,6 +45,13 @@ namespace FPS_n2 {
 			this->m_TitleBamboo.SetAnim(0).SetPer(1.0f);
 			this->m_TitleBamboo.SetAnim(0).SetTime(0.0f);
 			this->m_TitleBamboo.UpdateAnimAll();
+			m_WinCount = static_cast<int>(SaveDataClass::Instance()->GetParam("WinCount"));
+			if (2 < m_WinCount) {
+				this->m_TitleChara.SetAnim(0).GoEnd();
+				this->m_TitleChara.UpdateAnimAll();
+				this->m_TitleBamboo.SetAnim(0).SetTime(0.0f);
+				this->m_TitleBamboo.UpdateAnimAll();
+			}
 			// 
 			this->m_GameFadeIn = 1.f;
 			this->m_GameStart = 0.f;
@@ -49,8 +64,7 @@ namespace FPS_n2 {
 			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, (1920 - 96 * 2 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, (1920 - 96 * 1 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			ButtonParts->AddIconButton("data/UI/Info.png", true, (1920 - 96 * 0 - 64), (64), FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
-			int WinCount = static_cast<int>(SaveDataClass::Instance()->GetParam("WinCount"));
-			if (2 < WinCount) {
+			if (2 < m_WinCount) {
 				ButtonParts->AddStringButton(406, 24, true, 1920 - 64 - 48-125, 1080 - 84 - 64 * 3, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM);
 			}
 			// クレジット
@@ -282,14 +296,13 @@ namespace FPS_n2 {
 				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 				(64), (64 + 256), White, Black, "Ver 1.0.0");
 			//
-			int WinCount = static_cast<int>(SaveDataClass::Instance()->GetParam("WinCount"));
-			if(2 >= WinCount){
+			if(2 >= m_WinCount){
 				int xp1 = 1920 - 64 - 48 - 48 * 3;
 				int yp1 = 1080 - 84 - 64 * 3;
 				for (int i = 0; i < 3; ++i) {
 					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 64, 64, 64);
 					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &this->m_Flag, xp1 - 32, yp1 - 32, xp1, yp1, true);
-					if (i >= WinCount) {
+					if (i >= m_WinCount) {
 						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 0, 0);
 					}
 					else {

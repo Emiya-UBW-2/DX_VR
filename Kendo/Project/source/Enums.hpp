@@ -13,6 +13,7 @@ namespace FPS_n2 {
 		Taiko1,
 		EV2_1,
 		EV2_2,
+		ThankYou,
 		//
 		RunFoot,
 		StandupFoot,
@@ -60,6 +61,7 @@ namespace FPS_n2 {
 		"Taiko1",
 		"EV2_1",
 		"EV2_2",
+		"ThankYou",
 		"",
 		"",
 		"",

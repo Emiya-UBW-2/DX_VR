@@ -42,6 +42,10 @@ namespace FPS_n2 {
 		}
 		//
 		void			EndScene::Load_Sub(void) noexcept {
+			auto* SE = SoundPool::Instance();
+			//
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::ThankYou), 1, "data/Sound/Voice/ThankYou.wav", false);
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::ThankYou))->SetLocalVolume(128);
 		}
 		void			EndScene::Set_Sub(void) noexcept {
 			auto* PostPassParts = PostPassEffect::Instance();
@@ -62,6 +66,8 @@ namespace FPS_n2 {
 				PostPassParts->SetGodRayPer(0.5f);
 			}
 			PostPassParts->SetShadowScale(0.75f);
+
+			m_IsEnd = false;
 		}
 		bool			EndScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
@@ -106,7 +112,10 @@ namespace FPS_n2 {
 			}
 			SetNextSelect(0);//ƒ^ƒCƒgƒ‹‚É–ß‚é
 		}
-		void			EndScene::Dispose_Load_Sub(void) noexcept {}
+		void			EndScene::Dispose_Load_Sub(void) noexcept {
+			auto* SE = SoundPool::Instance();
+			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::ThankYou));
+		}
 		//
 		void			EndScene::BG_Draw_Sub(void) const noexcept {
 			if (m_IsEventSceneActive) {
