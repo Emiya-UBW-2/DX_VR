@@ -1,0 +1,61 @@
+//
+		SetArg(Kendo, "data/MovieModel/CharaEnd/model.pmx");
+		SetArg(Bamboo, "data/MovieModel/BambooEnd/model.pmx");
+
+		SetArg(Stage, "data/model/map/model_DISABLE.mv1");
+		SetArg(Sky, "data/model/sky/model.mv1");
+//モデル読み込み
+		LoadModel(Kendo, 1);
+		LoadModel(Bamboo, 1);
+		LoadModel(Stage, 1);
+		LoadModel(Sky, 1);
+//モデル読み込み終わり
+	//ｾｯﾀｯﾌﾟ
+		SetModelMode(Stage, 0, FAR_TRUE);
+		SetModelMode(Sky, 0, SKY_TRUE);
+//カット設定
+	//0
+		SetCut(6.0);
+		WhiteIn(0.1);
+		BlackIn(0.9);
+
+		SetCamForcus(Kendo, 0, RIGHTLEG, 0.0, 0.0, 0.0);
+		SetCampos_NoneRad(15.f , 4.f, 70.f);
+		SetCamInfo(45, 1.0, 100.0, 0.0);
+
+		SetUpdateEnable();
+		SetUpdateCamForcus(0.95f, Kendo, 0, RIGHTLEG, 0.0, 0.0, 0.0);
+		SetUpdateCampos(0.95f);
+
+			SetDrawModel(Stage, 0, 15);
+			SetModelMat(Stage, 0, 0.0, 0.0, -0.001, 0.0, 0.0);
+
+			SetDrawModel(Sky, 0, 15);
+			SetModelMat(Sky, 0, 0.0, 0.0, -0.001, 0.0, 0.0);
+
+			SetDrawModel(Kendo, 0, 15);
+			SetModelMat(Kendo, 0, 0.0, 0.0, 0.0, 75.0, 0.0);
+			SetModelAnime(Kendo, 0, 0, FALSE, 0.75, 0);
+
+			SetDrawModel(Bamboo, 0, 15);
+			SetModelMat(Bamboo, 0, 0.0, 0.0, 0.0, 75.0, 0.0);
+			SetModelAnime(Bamboo, 0, 0, FALSE, 1.0, 0);
+
+			SetDrawSE(ThankYou);
+	//5
+		SetCut(8.0);//
+		SetPrevCamInfo();
+
+		SetUpdateEnable();
+		BlackOut(0.9);
+	//END
+		//SetCut(60.0);
+//LAST
+
+
+
+//テロップはじめ
+		SetTelopTime(1.9, 6.5);
+		SetTelop(960, 540, 64, "Thank  You  for  Playing!", MIDDLE);
+		SetTelop(960, 620, 24, "プレイ感謝します!", MIDDLE);
+//テロップ終わり

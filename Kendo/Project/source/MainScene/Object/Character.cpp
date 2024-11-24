@@ -669,7 +669,7 @@ namespace FPS_n2 {
 									if (CharaMove::IsGuardAction(m_CharaMove.GetCharaAction()) || CharaMove::IsAttackAction(m_CharaMove.GetCharaAction())) {
 										if (m_GuardHit == 0.f) {
 #ifdef _USE_EFFEKSEER_
-											m_Effect.SetOnce(EffectResource::Effect::ef_gndsmoke, HitPos, (c->GetEyePosition() - this->m_CharaMove.GetEyePosition()).normalized(), 0.1f * Scale3DRate);
+											m_Effect.SetOnce((EffectControl::Effect)0, HitPos, (c->GetEyePosition() - this->m_CharaMove.GetEyePosition()).normalized(), 0.1f * Scale3DRate);
 #endif
 										}
 										m_GuardHit = 3.f / FrameRate;
