@@ -682,7 +682,9 @@ namespace FPS_n2 {
 			//UI
 			this->m_UIclass.Load();
 			//
-			m_Tutorial.Load();
+			if (m_GameMode == GameMode::Training) {
+				m_Tutorial.Load();
+			}
 			//
 			m_ResultMenuControl.Load();
 		}
@@ -932,7 +934,9 @@ namespace FPS_n2 {
 				m_NetWorkController->Dispose();
 				m_NetWorkController.reset();
 			}
-			this->m_Tutorial.Dispose();
+			if (m_GameMode == GameMode::Training) {
+				this->m_Tutorial.Dispose();
+			}
 
 			SetNextSelect(0);//ƒ^ƒCƒgƒ‹‚É–ß‚é
 			if (m_GameMode == GameMode::Main) {
@@ -957,7 +961,9 @@ namespace FPS_n2 {
 			ObjMngr->DeleteAll();
 			this->m_ResultMenuControl.Dispose_Load();
 			this->m_UIclass.Dispose_Load();
-			this->m_Tutorial.Dispose_Load();
+			if (m_GameMode == GameMode::Training) {
+				this->m_Tutorial.Dispose_Load();
+			}
 			SE->Delete(SoundType::BGM, 0);
 			SE->Delete(SoundType::BGM, 1);
 		}

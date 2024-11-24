@@ -98,9 +98,12 @@ namespace FPS_n2 {
 		public:
 			void Load(void) noexcept {
 				GraphHandle::LoadDiv("data/UI/Teacher.png", 4, 1, 4, 400, 1824 / 4, &m_Teacher);
-				m_Men.Load("data/UI/Men.mp4");
-				m_Kote.Load("data/UI/Kote.mp4");
-				m_Dou.Load("data/UI/Dou.mp4");
+				auto* OptionParts = OptionManager::Instance();
+				if (OptionParts->GetParamBoolean(EnumSaveParam::LoadMovie)) {
+					m_Men.Load("data/UI/Men.mp4");
+					m_Kote.Load("data/UI/Kote.mp4");
+					m_Dou.Load("data/UI/Dou.mp4");
+				}
 			}
 			void Set(void) noexcept {
 				auto* OptionParts = OptionManager::Instance();

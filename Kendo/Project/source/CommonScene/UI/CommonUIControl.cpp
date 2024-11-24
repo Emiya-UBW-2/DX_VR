@@ -295,8 +295,16 @@ namespace FPS_n2 {
 						this->m_InfoStr.back().m_String.emplace_back(RIGHT);
 					}
 					else if (LEFT == "Graph") {
-						this->m_InfoStr.back().m_Graph.Load(RIGHT);
-						this->m_InfoStr.back().m_IsMovie = (RIGHT.find("mp4") != std::string::npos);
+						auto* OptionParts = OptionManager::Instance();
+						bool IsMovie = (RIGHT.find("mp4") != std::string::npos);
+						if (OptionParts->GetParamBoolean(EnumSaveParam::LoadMovie)) {
+							this->m_InfoStr.back().m_Graph.Load(RIGHT);
+							this->m_InfoStr.back().m_IsMovie = IsMovie;
+						}
+						else if(!IsMovie){
+							this->m_InfoStr.back().m_Graph.Load(RIGHT);
+							this->m_InfoStr.back().m_IsMovie = IsMovie;
+						}
 					}
 				}
 			}

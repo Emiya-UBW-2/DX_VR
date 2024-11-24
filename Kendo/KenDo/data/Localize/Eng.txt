@@ -66,6 +66,7 @@
 1136=Borderless
 1137=Full Screen
 1138=Change Render Scale(Need Restart)
+1139=動画読込の可否指定(OS側でコーデックが対応しない場合オフへ)
 
 1140=Change X Sensitivity
 1141=Change Y Sensitivity
