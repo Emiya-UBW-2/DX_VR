@@ -223,7 +223,6 @@ namespace FPS_n2 {
 					m_EyePosition += this->m_MoveEyePos;
 				}
 			}
-			void			SetActionOverRide(EnumArmAnimType o) noexcept { this->m_CharaAction = o; }
 			void			ChangeAction(EnumArmAnimType SetAction) noexcept {
 				if (
 					(

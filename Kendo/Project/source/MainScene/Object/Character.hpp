@@ -73,7 +73,8 @@ namespace FPS_n2 {
 				this->m_OverRideInfo = o;
 			}
 			void			SetActionOverRide(EnumArmAnimType o) noexcept {
-				m_CharaMove.SetActionOverRide(o);
+				if (m_CharaMove.GetCharaAction() == EnumArmAnimType::Run) { return; }
+				m_CharaMove.ChangeAction(o);
 				OverrideAction();
 			}
 		public: //çXêVä÷òA

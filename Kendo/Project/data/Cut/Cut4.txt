@@ -57,4 +57,5 @@
 //テロップはじめ
 		SetTelopTime(1.9, 6.5);
 		SetTelop(960, 540, 64, "Thank  You  for  Playing!", MIDDLE);
+		SetTelop(960, 620, 24, "プレイ感謝します!", MIDDLE);
 //テロップ終わり
