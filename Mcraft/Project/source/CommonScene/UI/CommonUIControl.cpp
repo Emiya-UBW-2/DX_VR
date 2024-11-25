@@ -6,7 +6,7 @@ namespace FPS_n2 {
 		// 
 		bool ButtonControl::GetTriggerButton(void) const noexcept {
 			auto* Pad = PadControl::Instance();
-			return (select != InvalidID) && (this->m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetKey(PADS::INTERACT).trigger());
+			return (select != InvalidID) && (this->m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger());
 		}
 		ButtonControl::ButtonControl(void) noexcept {
 			this->m_SelectBackImage.Load("CommonData/UI/select.png");
@@ -22,7 +22,7 @@ namespace FPS_n2 {
 
 			int preselect = select;
 			bool preMouseSel = this->m_MouseSelMode;
-			if (Pad->GetKey(PADS::MOVE_W).trigger() || Pad->GetKey(PADS::MOVE_A).trigger()) {
+			if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger() || Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
 				if (select != InvalidID) {
 					--select;
 					if (select < 0) { select = static_cast<int>(ButtonSel.size()) - 1; }
@@ -32,7 +32,7 @@ namespace FPS_n2 {
 				}
 				this->m_MouseSelMode = false;
 			}
-			if (Pad->GetKey(PADS::MOVE_S).trigger() || Pad->GetKey(PADS::MOVE_D).trigger()) {
+			if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger() || Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
 				if (select != InvalidID) {
 					++select;
 					if (select > static_cast<int>(ButtonSel.size()) - 1) { select = 0; }
@@ -59,7 +59,7 @@ namespace FPS_n2 {
 						y->SetNone();
 					}
 					ButtonSel.at(static_cast<size_t>(select))->SetFocus();
-					SE->Get(static_cast<int>(SoundEnumCommon::UI_Select)).Play(0, DX_PLAYTYPE_BACK, TRUE);
+					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, TRUE);
 				}
 				else {
 					for (auto& y : ButtonSel) {
@@ -87,14 +87,14 @@ namespace FPS_n2 {
 		}
 		// 
 		void CreditControl::Init(void) noexcept {
-			int mdata = FileRead_open("data/Credit.txt", FALSE);
+			FileStreamDX FileStream("data/Credit.txt");
 			this->m_CreditCoulm = 0;
 			while (true) {
-				if (FileRead_eof(mdata) != 0) { break; }
-				auto ALL = getparams::Getstr(mdata);
+				if (FileStream.ComeEof()) { break; }
+				auto ALL = FileStream.SeekLineAndGetStr();
 				if (ALL.find('=') != std::string::npos) {
-					auto LEFT = getparams::getleft(ALL);
-					auto RIGHT = getparams::getright(ALL);
+					auto LEFT = FileStreamDX::getleft(ALL);
+					auto RIGHT = FileStreamDX::getright(ALL);
 					sprintfDx(this->m_CreditStr.at(static_cast<size_t>(this->m_CreditCoulm)).first, LEFT.c_str());
 					sprintfDx(this->m_CreditStr.at(static_cast<size_t>(this->m_CreditCoulm)).second, RIGHT.c_str());
 				}
@@ -104,26 +104,25 @@ namespace FPS_n2 {
 				}
 				++this->m_CreditCoulm;
 			}
-			FileRead_close(mdata);
 		}
 		void CreditControl::Draw(int xmin, int ymin, int xmax) const noexcept {
-			auto* DrawParts = DXDraw::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
 
 			int xp1, yp1;
 
-			xp1 = xmin + DrawParts->GetUIY(24);
+			xp1 = xmin + WindowSizeParts->GetUIY(24);
 			yp1 = ymin + LineHeight;
-			int Height = DrawParts->GetUIY(12);
+			int Height = WindowSizeParts->GetUIY(12);
 			for (auto& c : this->m_CreditStr) {
 				if (this->m_CreditCoulm < static_cast<int>(&c - &this->m_CreditStr.front())) { break; }
-				int xpos = xp1 + DrawParts->GetUIY(6);
+				int xpos = xp1 + WindowSizeParts->GetUIY(6);
 				int ypos = yp1 + Height / 2;
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::DIZ_UD_Gothic, Height,
-					FontHandle::FontXCenter::LEFT, FontHandle::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.first);
+				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, Height,
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.first);
 
-				xpos = xmax - DrawParts->GetUIY(24);
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontPool::FontType::DIZ_UD_Gothic, Height,
-					FontHandle::FontXCenter::RIGHT, FontHandle::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.second);
+				xpos = xmax - WindowSizeParts->GetUIY(24);
+				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, Height,
+					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.second);
 				yp1 += Height;
 			}
 		}

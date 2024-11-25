@@ -124,7 +124,7 @@ namespace FPS_n2 {
 			//const auto&		GetHeartRate(void) const noexcept { return this->m_HeartRate; }
 			//const auto&		GetHeartRateRad(void) const noexcept { return this->m_HeartRateRad; }
 			const auto		GetHeartRandVec(float SquatPer) const noexcept {
-				auto* DrawParts = DXDraw::Instance();
+				auto* DXLib_refParts = DXLib_ref::Instance();
 				auto tmp2 = 0.2f * GetRandf(deg2rad(1.f));
 				auto tmp3 = Lerp(0.5f, 0.15f, SquatPer);
 				Vector3DX tmpvec = Vector3DX::vget(
@@ -132,7 +132,7 @@ namespace FPS_n2 {
 					tmp2 + 0.00006f * sin(this->m_HeartRateRad * 3) * powf(this->m_HeartRate / HeartRateMin, 3.f),
 					0.f
 				);
-				return tmpvec * tmp3 * (60.f / DrawParts->GetFps());
+				return tmpvec * tmp3 * (60.f / DXLib_refParts->GetFps());
 			}
 		public:
 			void		InitStamina() {
@@ -142,25 +142,25 @@ namespace FPS_n2 {
 				this->m_HeartSoundFlag = false;
 			}
 			bool		ExcuteStamina(float addRun, float HeartRateUp, bool IsSquat) {
-				auto* DrawParts = DXDraw::Instance();
+				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (addRun > 0.f) {
-					this->m_HeartRate_r += (10.f + GetRandf(10.f)) / DrawParts->GetFps();
+					this->m_HeartRate_r += (10.f + GetRandf(10.f)) / DXLib_refParts->GetFps();
 				}
 				else if (addRun < 0.f) {
-					this->m_HeartRate_r -= (5.f + GetRandf(5.f)) / DrawParts->GetFps();
+					this->m_HeartRate_r -= (5.f + GetRandf(5.f)) / DXLib_refParts->GetFps();
 				}
 				this->m_HeartRate_r += HeartRateUp;
-				this->m_HeartRate_r -= (2.f + GetRandf(4.f)) / DrawParts->GetFps();
+				this->m_HeartRate_r -= (2.f + GetRandf(4.f)) / DXLib_refParts->GetFps();
 				this->m_HeartRate_r = std::clamp(this->m_HeartRate_r, HeartRateMin, HeartRateMax);
 
 				if (this->m_HeartRate < this->m_HeartRate_r) {
-					this->m_HeartRate += 5.f / DrawParts->GetFps();
+					this->m_HeartRate += 5.f / DXLib_refParts->GetFps();
 				}
 				else if (this->m_HeartRate >= this->m_HeartRate_r) {
-					this->m_HeartRate -= 5.f / DrawParts->GetFps();
+					this->m_HeartRate -= 5.f / DXLib_refParts->GetFps();
 				}
 				//this->m_HeartRate = this->m_HeartRate_r;
-				this->m_HeartRateRad += deg2rad(this->m_HeartRate) / DrawParts->GetFps();
+				this->m_HeartRateRad += deg2rad(this->m_HeartRate) / DXLib_refParts->GetFps();
 				if (this->m_HeartRateRad >= DX_PI_F * 2) { this->m_HeartRateRad -= DX_PI_F * 2; }
 				if (
 					(deg2rad(0) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(10)) ||
@@ -176,10 +176,10 @@ namespace FPS_n2 {
 				}
 
 
-				this->m_Stamina += std::clamp((100.f - this->m_HeartRate) / 40.f, -2.5f, 2.5f) / DrawParts->GetFps();
+				this->m_Stamina += std::clamp((100.f - this->m_HeartRate) / 40.f, -2.5f, 2.5f) / DXLib_refParts->GetFps();
 
 				if (IsSquat) {
-					this->m_Stamina += 1.0f / DrawParts->GetFps();
+					this->m_Stamina += 1.0f / DXLib_refParts->GetFps();
 				}
 
 				this->m_Stamina = std::clamp(this->m_Stamina, 0.f, StaminaMax);
@@ -277,9 +277,9 @@ namespace FPS_n2 {
 			void			SetAim(void) noexcept { this->m_ReadyTimer = 0.1f; }
 			void			SetADS(void) noexcept { this->m_ReadyTimer = 0.f; }
 			void			UpdateReady(void) noexcept {
-				auto* DrawParts = DXDraw::Instance();
+				auto* DXLib_refParts = DXLib_ref::Instance();
 				Easing(&this->m_ADSPer, this->GetIsADS() ? 1.f : 0.f, 0.9f, EasingType::OutExpo);//
-				this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / DrawParts->GetFps(), 0.f, UpperTimerLimit);
+				this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / DXLib_refParts->GetFps(), 0.f, UpperTimerLimit);
 			}
 			void			SetAimOrADS(void) noexcept {
 				this->m_ReadyTimer = std::min(this->m_ReadyTimer, 0.1f);
@@ -297,6 +297,7 @@ namespace FPS_n2 {
 			InputControl										m_Input;
 			switchs												m_ULTKey;
 			switchs												m_Squat;
+			bool												m_IsSquat{ false };
 			int													m_LeanRate{ 0 };
 			bool												m_LeanSwitch{ false };
 			switchs												m_QKey;
@@ -313,14 +314,14 @@ namespace FPS_n2 {
 		public://ゲッター
 			CharaAnimeID										m_BottomAnimSelect{};
 		public://ゲッター
-			const auto		GetRun(void) const noexcept { return this->m_Input.GetPADSPress(PADS::RUN) && this->m_Input.GetPADSPress(PADS::MOVE_W) && !this->m_Input.GetPADSPress(PADS::MOVE_S); }
+			const auto		GetRun(void) const noexcept { return this->m_Input.GetPADSPress(Controls::PADS::RUN) && this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_S); }
 			const auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }
 			const auto		GetLeanRad(void) const noexcept { return this->m_LeanRad; }
-			const auto		GetIsSquat(void) const noexcept { return this->m_Squat.on(); }
+			const auto		GetIsSquat(void) const noexcept { return this->m_IsSquat; }
 		public://セッター
 			auto& SetRadBuf(void) noexcept { return this->m_rad_Buf; }
 			auto& SetRad(void) noexcept { return this->m_rad; }
-			void			SetIsSquat(bool value) noexcept { this->m_Squat.Set(value); }
+			void			SetIsSquat(bool value) noexcept { this->m_IsSquat = value; }
 			void			SetHeadShot(void) noexcept { m_HeadShotPer = 1.f; }
 		protected:
 			const auto		GetInputControl(void) const noexcept { return this->m_Input; }
@@ -331,8 +332,8 @@ namespace FPS_n2 {
 			const auto		GetMoverPer(void) const noexcept { return m_MoverPer; }
 			const auto		IsMove(void) const noexcept { return m_MoverPer > 0.1f; }
 			const auto		GetFrontP(void) const noexcept {
-				auto wkey = this->m_Input.GetPADSPress(PADS::MOVE_W);
-				auto skey = this->m_Input.GetPADSPress(PADS::MOVE_S);
+				auto wkey = this->m_Input.GetPADSPress(Controls::PADS::MOVE_W);
+				auto skey = this->m_Input.GetPADSPress(Controls::PADS::MOVE_S);
 				auto FrontP = (wkey && !skey) ? (atan2f(m_VecTotal.x, -m_VecTotal.z) * -m_VecTotal.z) : 0.f;
 				FrontP += (!wkey && skey) ? (atan2f(-m_VecTotal.x, m_VecTotal.z) * m_VecTotal.z) : 0.f;
 				return FrontP;
@@ -352,7 +353,7 @@ namespace FPS_n2 {
 			const auto		GetBottomTurnAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_Turn : CharaAnimeID::Bottom_Stand_Turn; }
 
 			const auto		GetSpeedPer(void) const noexcept {
-				if (this->m_Input.GetPADSPress(PADS::WALK)) {
+				if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
 					return 0.15f;
 				}
 				if (GetIsSquat()) {
@@ -366,10 +367,10 @@ namespace FPS_n2 {
 				}
 			}
 			const auto		GetVec(void) const noexcept {
-				auto* DrawParts = DXDraw::Instance();
+				auto* DXLib_refParts = DXLib_ref::Instance();
 				Vector3DX vecBuf = m_VecTotal;
 				if (m_MoverPer > 0.f) {
-					vecBuf = vecBuf.normalized() * (GetSpeedPer() * 60.f / DrawParts->GetFps());
+					vecBuf = vecBuf.normalized() * (GetSpeedPer() * 60.f / DXLib_refParts->GetFps());
 				}
 				vecBuf = Matrix4x4DX::Vtrans(vecBuf, Matrix4x4DX::RotAxis(Vector3DX::up(), this->m_yrad_Upper));
 				return vecBuf;
@@ -400,14 +401,17 @@ namespace FPS_n2 {
 				for (auto& a : this->m_AnimPerBuf) { a = 0.f; }
 			}
 			void		InputKey(const InputControl& pInput, bool pReady, const Vector3DX& pAddRadvec) {
-				auto* DrawParts = DXDraw::Instance();
+				auto* DXLib_refParts = DXLib_ref::Instance();
 				this->m_Input = pInput;
 				if (!pReady) {
 					this->m_Input.ResetKeyInput();
 				}
 				//入力
-				this->m_ULTKey.Execute(this->m_Input.GetPADSPress(PADS::ULT));
-				this->m_Squat.Execute(this->m_Input.GetPADSPress(PADS::SQUAT));
+				this->m_ULTKey.Update(this->m_Input.GetPADSPress(Controls::PADS::ULT));
+				this->m_Squat.Update(this->m_Input.GetPADSPress(Controls::PADS::SQUAT));
+				if (this->m_Squat.trigger()) {
+					m_IsSquat ^= 1;
+				}
 				if (this->GetRun()) { SetIsSquat(false); }
 				//回転
 				{
@@ -415,12 +419,12 @@ namespace FPS_n2 {
 
 					this->m_rad_Buf.x = (
 						std::clamp(
-							this->m_rad_Buf.x + (this->m_Input.GetAddxRad() * (this->m_Input.GetPADSPress(PADS::RUN) ? 0.5f : 1.f)),
+							this->m_rad_Buf.x + (this->m_Input.GetAddxRad() * (this->m_Input.GetPADSPress(Controls::PADS::RUN) ? 0.5f : 1.f)),
 							deg2rad(-70.f), deg2rad(24.f))
 						+ this->m_radAdd.x
 						);
 					this->m_rad_Buf.y = (
-						this->m_rad_Buf.y + (this->m_Input.GetAddyRad() * (this->m_Input.GetPADSPress(PADS::RUN) ? 0.5f : 1.f))
+						this->m_rad_Buf.y + (this->m_Input.GetAddyRad() * (this->m_Input.GetPADSPress(Controls::PADS::RUN) ? 0.5f : 1.f))
 						+ this->m_radAdd.y
 						);
 
@@ -429,17 +433,17 @@ namespace FPS_n2 {
 					Easing(&this->m_rad.z, m_rad_Buf.z, 0.5f, EasingType::OutExpo);
 				}
 				//移動
-				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (this->m_Input.GetPADSPress(PADS::MOVE_W) ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
-				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (this->m_Input.GetPADSPress(PADS::MOVE_A) ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
-				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (this->m_Input.GetPADSPress(PADS::MOVE_S) ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
-				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (this->m_Input.GetPADSPress(PADS::MOVE_D) ? 5.f : -15.f) / DrawParts->GetFps(), 0.f, 1.f);
+				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) ? 5.f : -15.f) / DXLib_refParts->GetFps(), 0.f, 1.f);
+				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_A) ? 5.f : -15.f) / DXLib_refParts->GetFps(), 0.f, 1.f);
+				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) ? 5.f : -15.f) / DXLib_refParts->GetFps(), 0.f, 1.f);
+				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_D) ? 5.f : -15.f) / DXLib_refParts->GetFps(), 0.f, 1.f);
 				m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
 				m_MoverPer = m_VecTotal.magnitude();
 				//リーン
 				m_LeanSwitch = false;
 				auto Prev = this->m_LeanRate;
 				if (true) {//トグル式
-					this->m_QKey.Execute(this->m_Input.GetPADSPress(PADS::LEAN_L));
+					this->m_QKey.Update(this->m_Input.GetPADSPress(Controls::PADS::LEAN_L));
 					if (this->m_QKey.trigger()) {
 						if (this->m_LeanRate == -1) {
 							this->m_LeanRate = 1;
@@ -453,7 +457,7 @@ namespace FPS_n2 {
 							}
 						}
 					}
-					this->m_EKey.Execute(this->m_Input.GetPADSPress(PADS::LEAN_R));
+					this->m_EKey.Update(this->m_Input.GetPADSPress(Controls::PADS::LEAN_R));
 					if (this->m_EKey.trigger()) {
 						if (this->m_LeanRate == 1) {
 							this->m_LeanRate = -1;
@@ -470,10 +474,10 @@ namespace FPS_n2 {
 				}
 				else {
 					this->m_LeanRate = 0;
-					if (this->m_Input.GetPADSPress(PADS::LEAN_L)) {
+					if (this->m_Input.GetPADSPress(Controls::PADS::LEAN_L)) {
 						this->m_LeanRate = 1;
 					}
-					if (this->m_Input.GetPADSPress(PADS::LEAN_R)) {
+					if (this->m_Input.GetPADSPress(Controls::PADS::LEAN_R)) {
 						this->m_LeanRate = -1;
 					}
 				}
@@ -481,7 +485,7 @@ namespace FPS_n2 {
 				m_LeanSwitch = (Prev != this->m_LeanRate);
 			}
 			void		UpdateKeyRad() {
-				auto* DrawParts = DXDraw::Instance();
+				auto* DXLib_refParts = DXLib_ref::Instance();
 				//
 				if (!IsMove()) {
 					if (deg2rad(50.f) < abs(GetYRadUpperChange())) {
@@ -521,10 +525,10 @@ namespace FPS_n2 {
 				Easing(&m_UpperzVec, m_UpperzVecNormal, 0.8f, EasingType::OutExpo);
 
 				this->m_BottomAnimSelect = GetBottomStandAnimSel();
-				if (this->m_Input.GetPADSPress(PADS::MOVE_A) && !this->m_Input.GetPADSPress(PADS::MOVE_D)) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
-				if (this->m_Input.GetPADSPress(PADS::MOVE_D) && !this->m_Input.GetPADSPress(PADS::MOVE_A)) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
-				if (this->m_Input.GetPADSPress(PADS::MOVE_S) && !this->m_Input.GetPADSPress(PADS::MOVE_W)) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
-				if (this->m_Input.GetPADSPress(PADS::MOVE_W) && !this->m_Input.GetPADSPress(PADS::MOVE_S)) { this->m_BottomAnimSelect = GetRun() ? CharaAnimeID::Bottom_Stand_Run : GetBottomWalkAnimSel(); }
+				if (this->m_Input.GetPADSPress(Controls::PADS::MOVE_A) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_D)) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
+				if (this->m_Input.GetPADSPress(Controls::PADS::MOVE_D) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_A)) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
+				if (this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_W)) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
+				if (this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_S)) { this->m_BottomAnimSelect = GetRun() ? CharaAnimeID::Bottom_Stand_Run : GetBottomWalkAnimSel(); }
 				//下半身
 				Easing(&GetCharaAnimeBufID(GetBottomTurnAnimSel()), (!GetIsSquat() && this->m_TurnBody) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
 				for (int i = 0; i < (int)CharaAnimeID::AnimeIDMax; i++) {
@@ -535,7 +539,7 @@ namespace FPS_n2 {
 						i == (int)CharaAnimeID::Bottom_Stand_LeftStep ||
 						i == (int)CharaAnimeID::Bottom_Stand_RightStep ||
 						i == (int)CharaAnimeID::Bottom_Stand_WalkBack) {
-						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 6.f : -2.f) / DrawParts->GetFps(), 0.f, 1.f);
+						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 6.f : -2.f) / DXLib_refParts->GetFps(), 0.f, 1.f);
 					}
 					if (
 						i == (int)CharaAnimeID::Bottom_Squat ||
@@ -543,7 +547,7 @@ namespace FPS_n2 {
 						i == (int)CharaAnimeID::Bottom_Squat_LeftStep ||
 						i == (int)CharaAnimeID::Bottom_Squat_RightStep ||
 						i == (int)CharaAnimeID::Bottom_Squat_WalkBack) {
-						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 2.f : -2.f) / DrawParts->GetFps(), 0.f, 1.f);
+						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 2.f : -2.f) / DXLib_refParts->GetFps(), 0.f, 1.f);
 					}
 				}
 			}
@@ -639,7 +643,7 @@ namespace FPS_n2 {
 			~WalkSwingControl(void) noexcept {}
 		public:
 			void UpdateWalkSwing(const Vector3DX& Pos, float SwingPer)noexcept {
-				auto* DrawParts = DXDraw::Instance();
+				auto* DXLib_refParts = DXLib_ref::Instance();
 				m_WalkSwingRad.Set(5.f, 0.f, 10.f);
 				//X
 				{
@@ -647,7 +651,7 @@ namespace FPS_n2 {
 						m_WalkSwing_t.x = (1.f);
 					}
 					else {
-						m_WalkSwing_t.x = (std::max(m_WalkSwing_t.x - 15.f / DrawParts->GetFps(), 0.f));
+						m_WalkSwing_t.x = (std::max(m_WalkSwing_t.x - 15.f / DXLib_refParts->GetFps(), 0.f));
 					}
 				}
 				//Z
@@ -694,9 +698,9 @@ namespace FPS_n2 {
 				this->m_MoveEyePosTimer = 0.f;
 			}
 			void UpdateEyeSwing(const Matrix4x4DX& pCharaMat, float SwingPer, float SwingSpeed)noexcept {
-				auto* DrawParts = DXDraw::Instance();
+				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (SwingPer > 0.f) {
-					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed) * 60.f / DrawParts->GetFps();
+					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed) * 60.f / DXLib_refParts->GetFps();
 				}
 				else {
 					this->m_MoveEyePosTimer = 0.f;
@@ -804,7 +808,7 @@ namespace FPS_n2 {
 				m_IsStuckLeftHandTimer = 0.f;
 			}
 			void SetStackLeftHand(const Vector3DX& Pos, const Vector3DX& Normal) {
-				auto* DrawParts = DXDraw::Instance();
+				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (m_IsStuckLeftHandTimer >= 0.5f) {
 					if (!m_IsStuckLeftHand) {
 						m_StuckLeftHandPos = Pos;
@@ -821,7 +825,7 @@ namespace FPS_n2 {
 					}
 					m_IsStuckLeftHand = true;
 				}
-				m_IsStuckLeftHandTimer = std::min(m_IsStuckLeftHandTimer + 1.f / DrawParts->GetFps(), 0.5f);
+				m_IsStuckLeftHandTimer = std::min(m_IsStuckLeftHandTimer + 1.f / DXLib_refParts->GetFps(), 0.5f);
 			}
 		};
 		//
@@ -885,9 +889,9 @@ namespace FPS_n2 {
 				m_HitPower = 1.f;
 			}
 			void Execute_HitReactionControl() noexcept {
-				auto* DrawParts = DXDraw::Instance();
+				auto* DXLib_refParts = DXLib_ref::Instance();
 				Easing(&this->m_HitPowerR, this->m_HitPower, 0.8f, EasingType::OutExpo);
-				this->m_HitPower = std::max(this->m_HitPower - 1.f / DrawParts->GetFps() / 0.3f, 0.f);
+				this->m_HitPower = std::max(this->m_HitPower - 1.f / DXLib_refParts->GetFps() / 0.3f, 0.f);
 			}
 		};
 		//ラグドール
@@ -1056,12 +1060,12 @@ namespace FPS_n2 {
 				this->lagframe_.Get_frame(m_RagDoll);
 			}
 			void Execute_RagDollControl(MV1& obj_body_t, bool isAlive) noexcept {
-				auto* DrawParts = DXDraw::Instance();
+				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (isAlive) {
 					this->m_RagDollTimer = 0.f;
 				}
 				else {
-					this->m_RagDollTimer = std::min(this->m_RagDollTimer + 1.f / DrawParts->GetFps(), 3.f);
+					this->m_RagDollTimer = std::min(this->m_RagDollTimer + 1.f / DXLib_refParts->GetFps(), 3.f);
 				}
 				if (this->m_RagDollTimer < 3.f) {
 					this->m_RagDoll.SetPrioritizePhysicsOverAnimFlag(true);
@@ -1071,7 +1075,7 @@ namespace FPS_n2 {
 						this->m_RagDoll.PhysicsResetState();
 					}
 					else {
-						this->m_RagDoll.PhysicsCalculation(1000.f / DrawParts->GetFps());
+						this->m_RagDoll.PhysicsCalculation(1000.f / DXLib_refParts->GetFps());
 					}
 				}
 			}

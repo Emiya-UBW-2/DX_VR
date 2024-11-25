@@ -1344,7 +1344,7 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundClass::SettingChange() noexcept {
-			auto* OptionParts = OPTION::Instance();
+			auto* OptionParts = OptionManager::Instance();
 			switch (OptionParts->GetParamInt(EnumSaveParam::ObjLevel)) {
 			case 0:
 			case 1:
@@ -1512,9 +1512,9 @@ namespace FPS_n2 {
 					size_t id = 0;
 					m_vert32s.at(id).FlipVerts();
 					//
-					auto* DrawParts = DXDraw::Instance();
-					CamPos.at(id) = DrawParts->GetMainCamera().GetCamPos();
-					CamVec.at(id) = (DrawParts->GetMainCamera().GetCamVec() - CamPos.at(id)).normalized();
+					auto* CameraParts = Camera3D::Instance();
+					CamPos.at(id) = CameraParts->GetMainCamera().GetCamPos();
+					CamVec.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPos.at(id)).normalized();
 					//
 #if defined(DEBUG) & EDITBLICK
 					PutPos = (CamPos.at(0) + CamVec.at(0) * (LenMouse * Scale3DRate));
@@ -1545,9 +1545,9 @@ namespace FPS_n2 {
 					size_t id = 1;
 					m_vert32s.at(id).FlipVerts();
 					//
-					auto* DrawParts = DXDraw::Instance();
-					CamPos.at(id) = DrawParts->GetMainCamera().GetCamPos();
-					CamVec.at(id) = (DrawParts->GetMainCamera().GetCamVec() - CamPos.at(id)).normalized();
+					auto* CameraParts = Camera3D::Instance();
+					CamPos.at(id) = CameraParts->GetMainCamera().GetCamPos();
+					CamVec.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPos.at(id)).normalized();
 				}
 			);
 			m_Jobs.at(2).Init(
@@ -1561,9 +1561,9 @@ namespace FPS_n2 {
 					size_t id = 2;
 					m_vert32s.at(id).FlipVerts();
 					//
-					auto* DrawParts = DXDraw::Instance();
-					CamPos.at(id) = DrawParts->GetMainCamera().GetCamPos();
-					CamVec.at(id) = (DrawParts->GetMainCamera().GetCamVec() - CamPos.at(id)).normalized();
+					auto* CameraParts = Camera3D::Instance();
+					CamPos.at(id) = CameraParts->GetMainCamera().GetCamPos();
+					CamVec.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPos.at(id)).normalized();
 				}
 			);
 			m_Jobs.at(3).Init(
@@ -1577,9 +1577,9 @@ namespace FPS_n2 {
 					size_t id = 3;
 					m_vert32s.at(id).FlipVerts();
 					//
-					auto* DrawParts = DXDraw::Instance();
-					CamPos.at(id) = DrawParts->GetMainCamera().GetCamPos();
-					CamVec.at(id) = (DrawParts->GetMainCamera().GetCamVec() - CamPos.at(id)).normalized();
+					auto* CameraParts = Camera3D::Instance();
+					CamPos.at(id) = CameraParts->GetMainCamera().GetCamPos();
+					CamVec.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPos.at(id)).normalized();
 				}
 			);
 			m_Jobs.at((size_t)(total + 0)).Init(
@@ -1593,9 +1593,9 @@ namespace FPS_n2 {
 					size_t id = 0;
 					m_vert32sS.at(id).FlipVerts();
 					//
-					auto* DrawParts = DXDraw::Instance();
-					CamPosS.at(id) = DrawParts->GetMainCamera().GetCamPos();
-					CamVecS.at(id) = (DrawParts->GetMainCamera().GetCamVec() - CamPosS.at(id)).normalized();
+					auto* CameraParts = Camera3D::Instance();
+					CamPosS.at(id) = CameraParts->GetMainCamera().GetCamPos();
+					CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPosS.at(id)).normalized();
 				}
 			);
 			m_Jobs.at((size_t)(total + 1)).Init(
@@ -1609,9 +1609,9 @@ namespace FPS_n2 {
 					size_t id = 1;
 					m_vert32sS.at(id).FlipVerts();
 					//
-					auto* DrawParts = DXDraw::Instance();
-					CamPosS.at(id) = DrawParts->GetMainCamera().GetCamPos();
-					CamVecS.at(id) = (DrawParts->GetMainCamera().GetCamVec() - CamPosS.at(id)).normalized();
+					auto* CameraParts = Camera3D::Instance();
+					CamPosS.at(id) = CameraParts->GetMainCamera().GetCamPos();
+					CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPosS.at(id)).normalized();
 				}
 			);
 			m_Jobs.at((size_t)(total + 2)).Init(
@@ -1625,9 +1625,9 @@ namespace FPS_n2 {
 					size_t id = 2;
 					m_vert32sS.at(id).FlipVerts();
 					//
-					auto* DrawParts = DXDraw::Instance();
-					CamPosS.at(id) = DrawParts->GetMainCamera().GetCamPos();
-					CamVecS.at(id) = (DrawParts->GetMainCamera().GetCamVec() - CamPosS.at(id)).normalized();
+					auto* CameraParts = Camera3D::Instance();
+					CamPosS.at(id) = CameraParts->GetMainCamera().GetCamPos();
+					CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPosS.at(id)).normalized();
 				}
 			);
 			m_Jobs.at((size_t)(total + 3)).Init(
@@ -1641,9 +1641,9 @@ namespace FPS_n2 {
 					size_t id = 3;
 					m_vert32sS.at(id).FlipVerts();
 					//
-					auto* DrawParts = DXDraw::Instance();
-					CamPosS.at(id) = DrawParts->GetMainCamera().GetCamPos();
-					CamVecS.at(id) = (DrawParts->GetMainCamera().GetCamVec() - CamPosS.at(id)).normalized();
+					auto* CameraParts = Camera3D::Instance();
+					CamPosS.at(id) = CameraParts->GetMainCamera().GetCamPos();
+					CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPosS.at(id)).normalized();
 				}
 			);
 			m_Jobs.at((size_t)(total + total + 0)).Init(
@@ -1657,9 +1657,9 @@ namespace FPS_n2 {
 					size_t id = 0;
 					m_vert32sSB.at(id).FlipVerts();
 					//
-					auto* DrawParts = DXDraw::Instance();
-					CamPosSB.at(id) = DrawParts->GetMainCamera().GetCamPos();
-					light.at(id) = DrawParts->GetLightVec();
+					auto* CameraParts = Camera3D::Instance();
+					CamPosSB.at(id) = CameraParts->GetMainCamera().GetCamPos();
+					light.at(id) = WindowSizeParts->GetLightVec();
 				}
 			);
 			m_Jobs.at((size_t)(total + total + 1)).Init(
@@ -1673,9 +1673,9 @@ namespace FPS_n2 {
 					size_t id = 1;
 					m_vert32sSB.at(id).FlipVerts();
 					//
-					auto* DrawParts = DXDraw::Instance();
-					CamPosSB.at(id) = DrawParts->GetMainCamera().GetCamPos();
-					light.at(id) = DrawParts->GetLightVec();
+					auto* CameraParts = Camera3D::Instance();
+					CamPosSB.at(id) = CameraParts->GetMainCamera().GetCamPos();
+					light.at(id) = WindowSizeParts->GetLightVec();
 				}
 			);
 			m_Jobs.at((size_t)(total + total + 2)).Init(
@@ -1689,9 +1689,9 @@ namespace FPS_n2 {
 					size_t id = 2;
 					m_vert32sSB.at(id).FlipVerts();
 					//
-					auto* DrawParts = DXDraw::Instance();
-					CamPosSB.at(id) = DrawParts->GetMainCamera().GetCamPos();
-					light.at(id) = DrawParts->GetLightVec();
+					auto* CameraParts = Camera3D::Instance();
+					CamPosSB.at(id) = CameraParts->GetMainCamera().GetCamPos();
+					light.at(id) = WindowSizeParts->GetLightVec();
 				}
 			);
 			m_Jobs.at((size_t)(total + total + 3)).Init(
@@ -1705,9 +1705,9 @@ namespace FPS_n2 {
 					size_t id = 3;
 					m_vert32sSB.at(id).FlipVerts();
 					//
-					auto* DrawParts = DXDraw::Instance();
-					CamPosSB.at(id) = DrawParts->GetMainCamera().GetCamPos();
-					light.at(id) = DrawParts->GetLightVec();
+					auto* CameraParts = Camera3D::Instance();
+					CamPosSB.at(id) = CameraParts->GetMainCamera().GetCamPos();
+					light.at(id) = WindowSizeParts->GetLightVec();
 				}
 			);
 			SettingChange();
@@ -1715,7 +1715,7 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundClass::Execute(void) noexcept {
-			auto* OptionParts = OPTION::Instance();
+			auto* OptionParts = OptionManager::Instance();
 #if defined(DEBUG) & EDITBLICK
 			{
 				auto& cell = m_CellxN.front();
@@ -1723,13 +1723,13 @@ namespace FPS_n2 {
 				printfDx("%d,%d,%d\n", Put.x, Put.y, Put.z);
 				auto* Pad = PadControl::Instance();
 				LenMouse += Pad->GetMouseWheelRot();
-				if (Pad->GetKey(PADS::SHOT).trigger()) {
+				if (Pad->GetPadsInfo(Controls::PADS::SHOT).GetKey().trigger()) {
 					blicksel = 1;
 				}
-				if (Pad->GetKey(PADS::AIM).trigger()) {
+				if (Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().trigger()) {
 					blicksel = 0;
 				}
-				if (Pad->GetKey(PADS::JUMP).trigger()) {
+				if (Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().trigger()) {
 					SaveCellsFile();
 				}
 			}

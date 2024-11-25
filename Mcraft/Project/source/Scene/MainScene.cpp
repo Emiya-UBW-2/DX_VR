@@ -29,27 +29,30 @@ namespace FPS_n2 {
 			//
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
-			auto* DrawParts = DXDraw::Instance();
-			auto* OptionParts = OPTION::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
+			auto* OptionParts = OptionManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* CameraParts = Camera3D::Instance();
+			auto* PostPassParts = PostPassEffect::Instance();
 			//
 			BattleResourceMngr->Set();
 
-			SetShadowScale(0.5f);
+			PostPassParts->SetShadowScale(0.5f);
 			//
 			BackGround->Init();
 			//
 			Vector3DX LightVec = Vector3DX::vget(-0.3f, -0.3f, -0.15f); LightVec = LightVec.normalized();
-			DrawParts->SetAmbientLight(LightVec, GetColorF(0.5f, 0.5f, 0.5f, 1.0f));
+			PostPassParts->SetAmbientLight(LightVec);
+			SetLightAmbColor(GetColorF(0.5f, 0.5f, 0.5f, 1.0f));
 			SetLightDifColor(GetColorF(1.0f, 1.0f, 1.0f, 1.0f));																// デフォルトライトのディフューズカラーを設定する
 			//Cam
-			DrawParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
+			CameraParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 			//info
 			constexpr float Max = std::min(std::min(BackGround::DrawMaxXPlus, BackGround::DrawMaxZPlus), BackGround::DrawMaxYPlus) * BackGround::CellScale;
 			float SQRTMax = Max;
-			DrawParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.03f, SQRTMax);
+			CameraParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.03f, SQRTMax);
 			//Fog
 			SetFogMode(DX_FOGMODE_LINEAR);
 			SetFogStartEnd(SQRTMax, SQRTMax * 20.f);
@@ -74,7 +77,6 @@ namespace FPS_n2 {
 			}
 			//UI
 			this->m_UIclass.Set();
-			//this->m_UILayer = UISystem::Instance()->AddUI("data/UI/MainLoop.json");
 			//
 			this->m_DamageEvents.clear();
 			auto* NetBrowser = NetWorkBrowser::Instance();
@@ -85,29 +87,31 @@ namespace FPS_n2 {
 			EffectControl::Init();
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
+			auto* CameraParts = Camera3D::Instance();
+			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 #ifdef DEBUG
 			/*
 			{
-				auto* DrawParts = DXDraw::Instance();
-				if (CheckHitKeyWithCheck(KEY_INPUT_1) != 0) {
-					m_D1 = std::clamp(m_D1 - 0.1f * 1.f / DrawParts->GetFps(), 0.f, 1.f);
+				auto* WindowSizeParts = WindowSizeControl::Instance();
+				if (CheckHitKey(KEY_INPUT_1) != 0) {
+					m_D1 = std::clamp(m_D1 - 0.1f * 1.f / DXLib_refParts->GetFps(), 0.f, 1.f);
 				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_2) != 0) {
-					m_D1 = std::clamp(m_D1 + 0.1f * 1.f / DrawParts->GetFps(), 0.f, 1.f);
+				if (CheckHitKey(KEY_INPUT_2) != 0) {
+					m_D1 = std::clamp(m_D1 + 0.1f * 1.f / DXLib_refParts->GetFps(), 0.f, 1.f);
 				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_3) != 0) {
-					m_D2 = std::clamp(m_D2 - 0.1f * 1.f / DrawParts->GetFps(), 0.f, 1.f);
+				if (CheckHitKey(KEY_INPUT_3) != 0) {
+					m_D2 = std::clamp(m_D2 - 0.1f * 1.f / DXLib_refParts->GetFps(), 0.f, 1.f);
 				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_4) != 0) {
-					m_D2 = std::clamp(m_D2 + 0.1f * 1.f / DrawParts->GetFps(), 0.f, 1.f);
+				if (CheckHitKey(KEY_INPUT_4) != 0) {
+					m_D2 = std::clamp(m_D2 + 0.1f * 1.f / DXLib_refParts->GetFps(), 0.f, 1.f);
 				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_5) != 0) {
-					m_D3 = std::clamp(m_D3 - 0.1f * 1.f / DrawParts->GetFps(), 1.f, 10.f);
+				if (CheckHitKey(KEY_INPUT_5) != 0) {
+					m_D3 = std::clamp(m_D3 - 0.1f * 1.f / DXLib_refParts->GetFps(), 1.f, 10.f);
 				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_6) != 0) {
-					m_D3 = std::clamp(m_D3 + 0.1f * 1.f / DrawParts->GetFps(), 1.f, 10.f);
+				if (CheckHitKey(KEY_INPUT_6) != 0) {
+					m_D3 = std::clamp(m_D3 + 0.1f * 1.f / DXLib_refParts->GetFps(), 1.f, 10.f);
 				}
 				printfDx("Dif[%5.2f]\n", m_D1*255.f);
 				printfDx("Spc[%5.2f]\n", m_D2*255.f);
@@ -130,40 +134,44 @@ namespace FPS_n2 {
 			FadeControl::SetBlackOut(this->m_IsEnd);
 
 			FadeControl::UpdateFade();
-			auto* DrawParts = DXDraw::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 
 			auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 
+			auto* SceneParts = SceneControl::Instance();
 			auto* Pad = PadControl::Instance();
 			Pad->SetMouseMoveEnable(true);
-			Pad->ChangeGuide(
+			auto* KeyGuideParts = KeyGuide::Instance();
+			KeyGuideParts->ChangeGuide(
 				[]() {
+					auto* SceneParts = SceneControl::Instance();
+					auto* KeyGuideParts = KeyGuide::Instance();
 					auto* Pad = PadControl::Instance();
-					if (DXDraw::Instance()->IsPause()) {
-						Pad->AddGuide(PADS::INTERACT, LocalizePool::Instance()->Get(9992));
-						Pad->AddGuide(PADS::RELOAD, LocalizePool::Instance()->Get(9991));
-						Pad->AddGuide(PADS::MOVE_W, "");
-						Pad->AddGuide(PADS::MOVE_S, "");
-						Pad->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9993));
+					if (SceneParts->IsPause()) {
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizePool::Instance()->Get(9992));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizePool::Instance()->Get(9991));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_S), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), LocalizePool::Instance()->Get(9993));
 					}
 					else {
-						Pad->AddGuide(PADS::MOVE_W, "");
-						Pad->AddGuide(PADS::MOVE_S, "");
-						Pad->AddGuide(PADS::MOVE_A, "");
-						Pad->AddGuide(PADS::MOVE_D, "");
-						Pad->AddGuide(PADS::MOVE_STICK, LocalizePool::Instance()->Get(9900));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_S), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_A), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_D), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), LocalizePool::Instance()->Get(9900));
 
-						Pad->AddGuide(PADS::SHOT, LocalizePool::Instance()->Get(9906));
-						Pad->AddGuide(PADS::AIM, LocalizePool::Instance()->Get(9908));
-						Pad->AddGuide(PADS::ULT, LocalizePool::Instance()->Get(9907));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::SHOT), LocalizePool::Instance()->Get(9906));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::AIM), LocalizePool::Instance()->Get(9908));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ULT), LocalizePool::Instance()->Get(9907));
 
-						Pad->AddGuide(PADS::WALK, LocalizePool::Instance()->Get(9903));
-						Pad->AddGuide(PADS::JUMP, LocalizePool::Instance()->Get(9905));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::WALK), LocalizePool::Instance()->Get(9903));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::JUMP), LocalizePool::Instance()->Get(9905));
 					}
 				});
-			if (DXDraw::Instance()->IsPause()) {
+			if (SceneParts->IsPause()) {
 				Pad->SetMouseMoveEnable(false);
 				BackGround->SettingChange();
 				if (!m_NetWorkController) {
@@ -178,34 +186,36 @@ namespace FPS_n2 {
 #endif // DEBUG
 			//FirstDoingv
 			if (GetIsFirstLoop()) {
-				//SE->Get(static_cast<int>(SoundEnum::Environment)).Play(0, DX_PLAYTYPE_LOOP, TRUE);
+				//SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Environment))->Play(DX_PLAYTYPE_LOOP, TRUE);
 			}
 			//Input,AI
 			{
 				InputControl MyInput;
-				if (DXDraw::Instance()->IsPause() || !FadeControl::IsFadeClear()) {
+				if (SceneParts->IsPause() || !FadeControl::IsFadeClear()) {
 					MyInput.ResetAllInput();
 				}
 				else {
-					MyInput.SetInputStart(Pad->GetLS_Y() / 100.f, Pad->GetLS_X() / 100.f);
-					MyInput.SetInputPADS(PADS::MOVE_W, Pad->GetKey(PADS::MOVE_W).press());
-					MyInput.SetInputPADS(PADS::MOVE_S, Pad->GetKey(PADS::MOVE_S).press());
-					MyInput.SetInputPADS(PADS::MOVE_A, Pad->GetKey(PADS::MOVE_A).press());
-					MyInput.SetInputPADS(PADS::MOVE_D, Pad->GetKey(PADS::MOVE_D).press());
-					MyInput.SetInputPADS(PADS::RUN, Pad->GetKey(PADS::RUN).press());
-					MyInput.SetInputPADS(PADS::LEAN_L, Pad->GetKey(PADS::LEAN_L).press());
-					MyInput.SetInputPADS(PADS::LEAN_R, Pad->GetKey(PADS::LEAN_R).press());
-					MyInput.SetInputPADS(PADS::MELEE, Pad->GetKey(PADS::MELEE).press());
-					MyInput.SetInputPADS(PADS::RELOAD, Pad->GetKey(PADS::RELOAD).press());
-					MyInput.SetInputPADS(PADS::INTERACT, Pad->GetKey(PADS::INTERACT).press());
-					MyInput.SetInputPADS(PADS::SQUAT, Pad->GetKey(PADS::SQUAT).press());
-					MyInput.SetInputPADS(PADS::SHOT, Pad->GetKey(PADS::SHOT).press() && !DXDraw::Instance()->IsPause());
-					MyInput.SetInputPADS(PADS::AIM, Pad->GetKey(PADS::AIM).press() && !DXDraw::Instance()->IsPause());
-					MyInput.SetInputPADS(PADS::ULT, Pad->GetKey(PADS::ULT).press());
-					MyInput.SetInputPADS(PADS::THROW, Pad->GetKey(PADS::THROW).press());
-					MyInput.SetInputPADS(PADS::CHECK, Pad->GetKey(PADS::CHECK).press());
-					MyInput.SetInputPADS(PADS::WALK, Pad->GetKey(PADS::WALK).press());
-					MyInput.SetInputPADS(PADS::JUMP, Pad->GetKey(PADS::JUMP).press());
+					MyInput.ResetAllInput();
+					MyInput.SetAddxRad(Pad->GetLS_Y() / 100.f);
+					MyInput.SetAddyRad(Pad->GetLS_X() / 100.f);
+					MyInput.SetInputPADS(Controls::PADS::MOVE_W, Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::MOVE_S, Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::MOVE_A, Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::MOVE_D, Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::RUN, Pad->GetPadsInfo(Controls::PADS::RUN).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::LEAN_L, Pad->GetPadsInfo(Controls::PADS::LEAN_L).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::LEAN_R, Pad->GetPadsInfo(Controls::PADS::LEAN_R).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::MELEE, Pad->GetPadsInfo(Controls::PADS::MELEE).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::RELOAD, Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::INTERACT, Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::SQUAT, Pad->GetPadsInfo(Controls::PADS::SQUAT).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::SHOT, Pad->GetPadsInfo(Controls::PADS::SHOT).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::AIM, Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::ULT, Pad->GetPadsInfo(Controls::PADS::ULT).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::THROW, Pad->GetPadsInfo(Controls::PADS::THROW).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::CHECK, Pad->GetPadsInfo(Controls::PADS::CHECK).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::WALK, Pad->GetPadsInfo(Controls::PADS::WALK).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::JUMP, Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().press());
 				}
 				//ネットワーク
 				auto* NetBrowser = NetWorkBrowser::Instance();
@@ -284,30 +294,30 @@ namespace FPS_n2 {
 			{
 				auto& ViewChara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 				//カメラ
-				Vector3DX CamPos = ViewChara->GetEyeMatrix().pos() + CameraShake::Instance()->GetCamShake();
+				Vector3DX CamPos = ViewChara->GetEyeMatrix().pos() + Camera3D::Instance()->GetCamShake();
 				Vector3DX CamVec = CamPos + ViewChara->GetEyeMatrix().zvec() * -1.f;
-				CamVec += CameraShake::Instance()->GetCamShake();
-				CamPos += CameraShake::Instance()->GetCamShake() * 2.f;
+				CamVec += Camera3D::Instance()->GetCamShake();
+				CamPos += Camera3D::Instance()->GetCamShake() * 2.f;
 #ifdef DEBUG
-				if (CheckHitKeyWithCheck(KEY_INPUT_F1) != 0) {
+				if (CheckHitKey(KEY_INPUT_F1) != 0) {
 					DBG_CamSel = -1;
 				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_F2) != 0) {
+				if (CheckHitKey(KEY_INPUT_F2) != 0) {
 					DBG_CamSel = 0;
 				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_F3) != 0) {
+				if (CheckHitKey(KEY_INPUT_F3) != 0) {
 					DBG_CamSel = 1;
 				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_F4) != 0) {
+				if (CheckHitKey(KEY_INPUT_F4) != 0) {
 					DBG_CamSel = 2;
 				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_F5) != 0) {
+				if (CheckHitKey(KEY_INPUT_F5) != 0) {
 					DBG_CamSel = 3;
 				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_F6) != 0) {
+				if (CheckHitKey(KEY_INPUT_F6) != 0) {
 					DBG_CamSel = 4;
 				}
-				if (CheckHitKeyWithCheck(KEY_INPUT_F7) != 0) {
+				if (CheckHitKey(KEY_INPUT_F7) != 0) {
 					DBG_CamSel = 5;
 				}
 				switch (DBG_CamSel) {
@@ -330,13 +340,13 @@ namespace FPS_n2 {
 					break;
 				}
 #endif
-				DrawParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
-				auto fov_t = DrawParts->GetMainCamera().GetCamFov();
-				auto near_t = DrawParts->GetMainCamera().GetCamNear();
-				auto far_t = DrawParts->GetMainCamera().GetCamFar();
+				CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
+				auto fov_t = CameraParts->GetMainCamera().GetCamFov();
+				auto near_t = CameraParts->GetMainCamera().GetCamNear();
+				auto far_t = CameraParts->GetMainCamera().GetCamFar();
 				//fov
 				{
-					auto* OptionParts = OPTION::Instance();
+					auto* OptionParts = OptionManager::Instance();
 					float fov = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
 					if (Chara->GetIsADS()) {
 						fov -= deg2rad(15);
@@ -357,7 +367,7 @@ namespace FPS_n2 {
 						Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
 					}
 				}
-				DrawParts->SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
+				CameraParts->SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
 				//DoF
 				if (Chara->GetIsADS()) {
 					PostPassEffect::Instance()->Set_DoFNearFar(Scale3DRate * 0.3f, far_t * 5.75f, Scale3DRate * 0.1f, far_t * 6.f);
@@ -371,9 +381,9 @@ namespace FPS_n2 {
 				//if (Chara->PopConcussionSwitch()) {
 				//	m_Concussion = 1.f;
 				//}
-				DrawParts->Set_is_Blackout(m_Concussion > 0.f);
+				PostPassParts->Set_is_Blackout(m_Concussion > 0.f);
 				if (m_Concussion == 1.f) {
-					CameraShake::Instance()->SetCamShake(0.5f, 0.01f * Scale3DRate);
+					Camera3D::Instance()->SetCamShake(0.5f, 0.01f * Scale3DRate);
 				}
 				if (m_Concussion > 0.9f) {
 					Easing(&m_ConcussionPer, 1.f, 0.1f, EasingType::OutExpo);
@@ -389,8 +399,8 @@ namespace FPS_n2 {
 				else {
 					Easing(&m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
 				}
-				DrawParts->Set_Per_Blackout(m_ConcussionPer * 2.f);
-				m_Concussion = std::max(m_Concussion - 1.f / DrawParts->GetFps(), 0.f);
+				PostPassParts->Set_Per_Blackout(m_ConcussionPer * 2.f);
+				m_Concussion = std::max(m_Concussion - 1.f / DXLib_refParts->GetFps(), 0.f);
 			}
 			BackGround->Execute();
 			//UIパラメーター
@@ -418,15 +428,14 @@ namespace FPS_n2 {
 				m_NetWorkController.reset();
 			}
 			{
-				auto* DrawParts = DXDraw::Instance();
-				PostPassEffect::Instance()->SetLevelFilter(0, 255, 1.f);
-				DrawParts->SetAberrationPower(1.f);
-				DrawParts->Set_is_Blackout(false);
-				DrawParts->Set_Per_Blackout(0.f);
-				DrawParts->Set_is_lens(false);
-				DrawParts->Set_zoom_lens(1.f);
+				auto* PostPassParts = PostPassEffect::Instance();
+				PostPassParts->SetLevelFilter(0, 255, 1.f);
+				PostPassParts->SetAberrationPower(1.f);
+				PostPassParts->Set_is_Blackout(false);
+				PostPassParts->Set_Per_Blackout(0.f);
+				PostPassParts->Set_is_lens(false);
+				PostPassParts->Set_zoom_lens(1.f);
 			}
-			UniversalUI::UISystem::Instance()->DelUI(m_UILayer);
 			EffectControl::Dispose();
 			if (this->m_IsEnd) {//タイトルに戻る
 				SetNextSelect(0);
@@ -480,29 +489,30 @@ namespace FPS_n2 {
 
 
 			//シェーダー描画用パラメーターセット
-			auto* DrawParts = DXDraw::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
+			auto* PostPassParts = PostPassEffect::Instance();
 
 			auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 			if (Chara->GetGunPtrNow()) {
 				Chara->GetGunPtrNow()->UpdateReticle();
 				float Zoom = Chara->GetSightZoomSize();
 				bool IsActive = Chara->GetGunPtrNow()->IsActiveReticle() && Zoom > 1.f;
-				DrawParts->Set_is_lens(IsActive);
-				DrawParts->Set_zoom_lens(std::max(1.f, Zoom / 2.f));
+				PostPassParts->Set_is_lens(IsActive);
+				PostPassParts->Set_zoom_lens(std::max(1.f, Zoom / 2.f));
 				if (IsActive) {
-					DrawParts->Set_xp_lens(Chara->GetGunPtrNow()->GetLensXPos());
-					DrawParts->Set_yp_lens(Chara->GetGunPtrNow()->GetLensYPos());
-					DrawParts->Set_size_lens(Chara->GetGunPtrNow()->GetLensSize());
+					PostPassParts->Set_xp_lens(Chara->GetGunPtrNow()->GetLensXPos());
+					PostPassParts->Set_yp_lens(Chara->GetGunPtrNow()->GetLensYPos());
+					PostPassParts->Set_size_lens(Chara->GetGunPtrNow()->GetLensSize());
 				}
 			}
 			else {
-				DrawParts->Set_is_lens(false);
-				DrawParts->Set_zoom_lens(1.f);
+				PostPassParts->Set_is_lens(false);
+				PostPassParts->Set_zoom_lens(1.f);
 			}
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
-			auto* DrawParts = DXDraw::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 			if (!Chara->IsAlive()) { return; }
@@ -512,8 +522,8 @@ namespace FPS_n2 {
 					!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
 					auto* WindowParts = WindowSystem::DrawControl::Instance();
 					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph(),
-						static_cast<int>(Chara->GetGunPtrNow()->GetReticleXPos() * DrawParts->GetUIY(1980) / DrawParts->GetScreenY(1980)),
-						static_cast<int>(Chara->GetGunPtrNow()->GetReticleYPos() * DrawParts->GetUIY(1080) / DrawParts->GetScreenY(1080)),
+						static_cast<int>(Chara->GetGunPtrNow()->GetReticleXPos() * WindowSizeParts->GetUIY(1980) / WindowSizeParts->GetScreenY(1980)),
+						static_cast<int>(Chara->GetGunPtrNow()->GetReticleYPos() * WindowSizeParts->GetUIY(1080) / WindowSizeParts->GetScreenY(1080)),
 						1.f, Chara->GetLeanRad(), true);
 				}
 			}
@@ -521,7 +531,8 @@ namespace FPS_n2 {
 
 			FadeControl::DrawFade();
 			//UI
-			if (!DXDraw::Instance()->IsPause()) {
+			auto* SceneParts = SceneControl::Instance();
+			if (!SceneParts->IsPause()) {
 				this->m_UIclass.Draw();
 			}
 			//通信設定
@@ -529,20 +540,21 @@ namespace FPS_n2 {
 			//NetBrowser->Draw();
 			if (m_NetWorkController) {
 				if (m_NetWorkController->GetPing() >= 0.f) {
-					WindowSystem::SetMsg(DrawParts->GetUIXMax(), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
+					WindowSystem::SetMsg(WindowSizeParts->GetUIXMax(), WindowSizeParts->GetUIY(32) + LineHeight / 2, LineHeight, FontSystem::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
 				}
 				else {
 					if (m_NetWorkController->GetClient()) {
-						WindowSystem::SetMsg(DrawParts->GetUIXMax(), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, Red, Black, "Lost Connection");
+						WindowSystem::SetMsg(WindowSizeParts->GetUIXMax(), WindowSizeParts->GetUIY(32) + LineHeight / 2, LineHeight, FontSystem::FontXCenter::RIGHT, Red, Black, "Lost Connection");
 					}
 					else {
-						WindowSystem::SetMsg(DrawParts->GetUIXMax(), DrawParts->GetUIY(32) + LineHeight / 2, LineHeight, FontHandle::FontXCenter::RIGHT, White, Black, "Ping:---ms");
+						WindowSystem::SetMsg(WindowSizeParts->GetUIXMax(), WindowSizeParts->GetUIY(32) + LineHeight / 2, LineHeight, FontSystem::FontXCenter::RIGHT, White, Black, "Ping:---ms");
 					}
 				}
 			}
 		}
 		void MainGameScene::DrawUI_In_Sub(void) const noexcept {
-			if (DXDraw::Instance()->IsPause()) {
+			auto* SceneParts = SceneControl::Instance();
+			if (SceneParts->IsPause()) {
 				PauseMenuControl::DrawPause();
 			}
 		}
@@ -586,8 +598,8 @@ namespace FPS_n2 {
 						}
 						if (ColResGround && !is_HitAll) {
 							a->HitGround(pos_tmp);
-							EffectControl::SetOnce_Any(EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale3DRate);
-							SE->Get((int)SoundEnum::HitGround0 + GetRand(5 - 1)).Play_3D(0, pos_tmp, Scale3DRate * 10.f);
+							EffectControl::SetOnce_Any((int)EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale3DRate);
+							SE->Get(SoundType::SE, (int)SoundEnum::HitGround0 + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
 						}
 					}
 				}

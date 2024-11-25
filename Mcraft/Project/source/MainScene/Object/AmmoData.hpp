@@ -30,22 +30,21 @@ namespace FPS_n2 {
 
 				//Load_Sub(this->m_path);
 
-				int mdata = FileRead_open((this->m_path + "data.txt").c_str(), FALSE);
+				FileStreamDX FileStream((this->m_path + "data.txt").c_str());
 				while (true) {
-					if (FileRead_eof(mdata) != 0) { break; }
-					auto ALL = getparams::Getstr(mdata);
+					if (FileStream.ComeEof()) { break; }
+					auto ALL = FileStream.SeekLineAndGetStr();
 					//コメントアウト
 					if (ALL.find("//") != std::string::npos) {
 						ALL = ALL.substr(0, ALL.find("//"));
 					}
 					//
 					if (ALL == "") { continue; }
-					auto LEFT = getparams::getleft(ALL);
-					auto RIGHT = getparams::getright(ALL);
+					auto LEFT = FileStreamDX::getleft(ALL);
+					auto RIGHT = FileStreamDX::getright(ALL);
 					//アイテムデータ読みとり
 					Set_Sub(LEFT, RIGHT);
 				}
-				FileRead_close(mdata);
 			}
 		private:
 			void		Set_Sub(const std::string& LEFT, const std::string& RIGHT) noexcept {

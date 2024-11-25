@@ -42,7 +42,7 @@ namespace FPS_n2 {
 			"Target",
 		};
 		enum class SoundEnum {
-			RunFoot = (int)SoundEnumCommon::Num,
+			RunFoot = (int)SoundSelectCommon::Num,
 			StandUp,
 			SlideFoot,
 			StandupFoot,

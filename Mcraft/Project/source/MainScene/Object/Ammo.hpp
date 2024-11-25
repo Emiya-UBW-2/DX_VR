@@ -89,7 +89,7 @@ namespace FPS_n2 {
 			}
 			//
 			void			FirstExecute(void) noexcept override {
-				auto* DrawParts = DXDraw::Instance();
+				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (this->m_IsHit) {
 					this->m_IsHit = false;
 					this->m_HitTimer = 0.25f;
@@ -97,7 +97,7 @@ namespace FPS_n2 {
 					this->m_Hit_AddX = GetRand(32);
 					this->m_Hit_AddY = GetRand(32);
 				}
-				this->m_HitTimer = std::clamp(this->m_HitTimer - 1.f / DrawParts->GetFps(), 0.f, 0.25f);
+				this->m_HitTimer = std::clamp(this->m_HitTimer - 1.f / DXLib_refParts->GetFps(), 0.f, 0.25f);
 				if (this->m_Hit_alpha > 0.f) {
 					Easing(&this->m_Hit_alpha, (this->m_HitTimer > 0.f) ? 2.f : 0.f, 0.95f, EasingType::OutExpo);
 					if (this->m_Hit_alpha <= 0.01f) {
@@ -108,19 +108,19 @@ namespace FPS_n2 {
 				repos = this->pos;//弾だけ外で判定してるので
 				if (IsActive()) {
 					//移動確定
-					this->pos = this->pos + (this->GetMove().GetVec() * (this->m_speed / DrawParts->GetFps())) + Vector3DX::up() * this->m_yAdd;
+					this->pos = this->pos + (this->GetMove().GetVec() * (this->m_speed / DXLib_refParts->GetFps())) + Vector3DX::up() * this->m_yAdd;
 					this->SetMove().Update(0.f, 0.f);
-					this->m_yAdd += (GravityRate / (DrawParts->GetFps() * DrawParts->GetFps()));
+					this->m_yAdd += (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));
 
 					//消す(スピードが0以下、貫通が0以下、5回反射する)
 					if (this->m_speed <= 0.f || this->m_penetration <= 0.f || this->m_RicochetCnt > 5 || this->m_Timer > 5.f) {
 						SetActive(false);
 					}
-					//this->m_speed -= 5.f / DrawParts->GetFps();
-					//this->m_penetration -= 5.f / DrawParts->GetFps();
+					//this->m_speed -= 5.f / DXLib_refParts->GetFps();
+					//this->m_penetration -= 5.f / DXLib_refParts->GetFps();
 				}
 
-				this->m_Timer += 1.f / DrawParts->GetFps();
+				this->m_Timer += 1.f / DXLib_refParts->GetFps();
 			}
 			//
 			void			DrawShadow(void) noexcept override {}

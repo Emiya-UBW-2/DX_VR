@@ -170,7 +170,7 @@ namespace FPS_n2 {
 			this->m_Net.m_Phase = ClientPhase::NotConnect;
 		}
 		bool ClientControl::Update(ServerNetData* pServerCtrl, const PlayerNetData& MyLocalPlayerData, bool IsUpdateTick) noexcept {
-			auto* DrawParts = DXDraw::Instance();
+			auto* DXLib_refParts = DXLib_ref::Instance();
 			int recvRet = -1;
 			bool IsDataUpdated = this->m_Net.m_NetWork.RecvData(&m_BufferDataOnce, &recvRet, false);
 			if (IsDataUpdated) {
@@ -203,7 +203,7 @@ namespace FPS_n2 {
 				}
 				//もらえてない
 				else {
-					m_CannotConnectTimer += 1.f / DrawParts->GetFps();
+					m_CannotConnectTimer += 1.f / DXLib_refParts->GetFps();
 					if (this->m_CannotConnectTimer > 1.f) {
 						m_CannotConnectTimer -= 1.f;
 						++this->m_NetWorkSel;
@@ -290,7 +290,7 @@ namespace FPS_n2 {
 				};
 				//サーバー兼観戦者
 				for (int index = 0; index < Player_num; ++index) {
-					if (CheckHitKeyWithCheck(KeyInputs[index]) != 0) {
+					if (CheckHitKey(KeyInputs[index]) != 0) {
 						this->m_PlayerNet.SetLocalPlayerID((PlayerID)index);
 						break;
 					}

@@ -16,35 +16,36 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DXLib_ref::Create();
 	//使用するボタンの指定
 	auto* Pad = PadControl::Instance();
-	Pad->SetIsUseButton(PADS::MOVE_W, true);
-	Pad->SetIsUseButton(PADS::MOVE_A, true);
-	Pad->SetIsUseButton(PADS::MOVE_S, true);
-	Pad->SetIsUseButton(PADS::MOVE_D, true);
-	Pad->SetIsUseButton(PADS::MOVE_STICK, true);
-	Pad->SetIsUseButton(PADS::DIR_UP, false);
-	Pad->SetIsUseButton(PADS::DIR_DOWN, false);
-	Pad->SetIsUseButton(PADS::DIR_LEFT, false);
-	Pad->SetIsUseButton(PADS::DIR_RIGHT, false);
-	Pad->SetIsUseButton(PADS::DIR_STICK, true);
-	Pad->SetIsUseButton(PADS::LEAN_L, true);//UIのみ
-	Pad->SetIsUseButton(PADS::LEAN_R, true);//UIのみ
-	Pad->SetIsUseButton(PADS::RELOAD, true);//UIのみ
-	Pad->SetIsUseButton(PADS::INTERACT, true);//UIのみ
-	Pad->SetIsUseButton(PADS::THROW, true);
-	Pad->SetIsUseButton(PADS::MELEE, true);
-	Pad->SetIsUseButton(PADS::JUMP, true);
-	Pad->SetIsUseButton(PADS::INVENTORY, true);
-	Pad->SetIsUseButton(PADS::RUN, true);
-	Pad->SetIsUseButton(PADS::WALK, true);
-	Pad->SetIsUseButton(PADS::SHOT, true);
-	Pad->SetIsUseButton(PADS::AIM, true);
-	Pad->SetIsUseButton(PADS::ULT, true);
-	Pad->SetIsUseButton(PADS::SQUAT, true);
-	Pad->SetIsUseButton(PADS::PRONE, true);
-	Pad->SetIsUseButton(PADS::CHECK, true);
+	Pad->SetIsUseButton(Controls::PADS::MOVE_W, true);
+	Pad->SetIsUseButton(Controls::PADS::MOVE_A, true);
+	Pad->SetIsUseButton(Controls::PADS::MOVE_S, true);
+	Pad->SetIsUseButton(Controls::PADS::MOVE_D, true);
+	Pad->SetIsUseButton(Controls::PADS::MOVE_STICK, true);
+	Pad->SetIsUseButton(Controls::PADS::DIR_UP, false);
+	Pad->SetIsUseButton(Controls::PADS::DIR_DOWN, false);
+	Pad->SetIsUseButton(Controls::PADS::DIR_LEFT, false);
+	Pad->SetIsUseButton(Controls::PADS::DIR_RIGHT, false);
+	Pad->SetIsUseButton(Controls::PADS::DIR_STICK, true);
+	Pad->SetIsUseButton(Controls::PADS::LEAN_L, true);//UIのみ
+	Pad->SetIsUseButton(Controls::PADS::LEAN_R, true);//UIのみ
+	Pad->SetIsUseButton(Controls::PADS::RELOAD, true);//UIのみ
+	Pad->SetIsUseButton(Controls::PADS::INTERACT, true);//UIのみ
+	Pad->SetIsUseButton(Controls::PADS::THROW, true);
+	Pad->SetIsUseButton(Controls::PADS::MELEE, true);
+	Pad->SetIsUseButton(Controls::PADS::JUMP, true);
+	Pad->SetIsUseButton(Controls::PADS::INVENTORY, true);
+	Pad->SetIsUseButton(Controls::PADS::RUN, true);
+	Pad->SetIsUseButton(Controls::PADS::WALK, true);
+	Pad->SetIsUseButton(Controls::PADS::SHOT, true);
+	Pad->SetIsUseButton(Controls::PADS::AIM, true);
+	Pad->SetIsUseButton(Controls::PADS::ULT, true);
+	Pad->SetIsUseButton(Controls::PADS::SQUAT, true);
+	Pad->SetIsUseButton(Controls::PADS::PRONE, true);
+	Pad->SetIsUseButton(Controls::PADS::CHECK, true);
 	//
 	auto* DXLib_refParts = DXLib_ref::Instance();
-	if (!DXLib_refParts->StartLogic()) { return 0; }
+	if (DXLib_refParts->FirstBootSetting()) { return 0; }
+	DXLib_refParts->StartLogic();
 	//追加設定
 	SetMainWindowText("Phantom of the Bunker");						//タイトル
 	//SetUseHalfLambertLighting(TRUE);
@@ -63,14 +64,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::Sceneclass::AmmoDataManager::Create();
 	//
 	auto* SaveDataParts = SaveDataClass::Instance();
-	auto* BGM = BGMPool::Instance();
-	auto* OptionParts = OPTION::Instance();
+	auto* SE = SoundPool::Instance();
+	auto* OptionParts = OptionManager::Instance();
 	//初期開放
 	SaveDataParts->Save();
 	//BGM
-	BGM->Add(0, "data/Sound/BGM/Title.wav");
-	BGM->Add(1, "data/Sound/BGM/Vivaldi_Winter.wav", true);
-	BGM->SetVol(OptionParts->GetParamFloat(EnumSaveParam::BGM));
+	SE->Add(SoundType::BGM, 0, 1, "data/Sound/BGM/Title.wav");
+	SE->Add(SoundType::BGM, 1, 1, "data/Sound/BGM/Vivaldi_Winter.wav", true);
 	//シーン
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto LoadScenePtr = std::make_shared<FPS_n2::Sceneclass::LoadScene>();
@@ -85,9 +85,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	auto* SceneParts = SceneControl::Instance();
 	//SceneParts->AddList(Titlescene);
-	SceneParts->AddList(LoadScenePtr);
-	SceneParts->AddList(MainGameScenePtr);
+	SceneParts->SetFirstScene(LoadScenePtr);
 	//最初の読み込み
-	if (!DXLib_refParts->MainLogic()) { return 0; }
+	DXLib_refParts->MainLogic();
 	return 0;
 }
