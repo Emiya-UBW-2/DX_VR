@@ -72,6 +72,14 @@ namespace FPS_n2 {
 			void			SetupEnd(void) noexcept;
 
 			void			UpdateInGame(void) noexcept;
+		private:
+			void			LoadResource(void) noexcept;
+			void			SetResource(void) noexcept;
+			void			DisposeResource(void) noexcept;
+		private:
+			void			LoadChara(const std::string& FolderName, PlayerID ID) noexcept;
+			void			LoadWeapon(const std::string& FolderName, PlayerID ID) noexcept;
+			void			LoadJudge(const std::string& FolderName) noexcept;
 		public:
 			MainGameScene(void) noexcept {}
 			MainGameScene(const MainGameScene&) = delete;

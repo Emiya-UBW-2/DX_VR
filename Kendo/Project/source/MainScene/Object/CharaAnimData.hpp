@@ -19,6 +19,54 @@ namespace FPS_n2 {
 		GuardSuriage,
 		Max,
 	};
+	static const bool			IsAttackAction(EnumArmAnimType value) noexcept {
+		switch (value) {
+		case EnumArmAnimType::Men:
+		case EnumArmAnimType::Kote:
+		case EnumArmAnimType::Dou:
+		case EnumArmAnimType::Tsuki:
+		case EnumArmAnimType::HikiMen:
+		case EnumArmAnimType::HikiKote:
+		case EnumArmAnimType::HikiDou:
+			return true;
+		case EnumArmAnimType::Ready:
+		case EnumArmAnimType::Run:
+		case EnumArmAnimType::Tsuba:
+		case EnumArmAnimType::GuardSuriage:
+		case EnumArmAnimType::Max:
+		default:
+			return false;
+		}
+	}
+	static const bool			IsBackAttackAction(EnumArmAnimType value) noexcept {
+		switch (value) {
+		case EnumArmAnimType::HikiMen:
+		case EnumArmAnimType::HikiKote:
+		case EnumArmAnimType::HikiDou:
+			return true;
+		default:
+			return false;
+		}
+	}
+	static const bool			IsGuardAction(EnumArmAnimType value) noexcept {
+		switch (value) {
+		case EnumArmAnimType::GuardSuriage:
+			return true;
+		case EnumArmAnimType::Ready:
+		case EnumArmAnimType::Run:
+		case EnumArmAnimType::Men:
+		case EnumArmAnimType::Kote:
+		case EnumArmAnimType::Dou:
+		case EnumArmAnimType::Tsuki:
+		case EnumArmAnimType::Tsuba:
+		case EnumArmAnimType::HikiMen:
+		case EnumArmAnimType::HikiKote:
+		case EnumArmAnimType::HikiDou:
+		case EnumArmAnimType::Max:
+		default:
+			return false;
+		}
+	}
 	//ÉAÉjÉÅ
 	enum class EnumArmAnim : uint8_t {
 		Saber_Ready,
