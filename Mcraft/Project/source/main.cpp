@@ -65,7 +65,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//
 	auto* SaveDataParts = SaveDataClass::Instance();
 	auto* SE = SoundPool::Instance();
-	auto* OptionParts = OptionManager::Instance();
 	//‰ŠúŠJ•ú
 	SaveDataParts->Save();
 	//BGM

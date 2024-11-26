@@ -1659,7 +1659,8 @@ namespace FPS_n2 {
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPosSB.at(id) = CameraParts->GetMainCamera().GetCamPos();
-					light.at(id) = WindowSizeParts->GetLightVec();
+					auto* PostPassParts = PostPassEffect::Instance();
+					light.at(id) = PostPassParts->GetShadowDir();
 				}
 			);
 			m_Jobs.at((size_t)(total + total + 1)).Init(
@@ -1675,7 +1676,8 @@ namespace FPS_n2 {
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPosSB.at(id) = CameraParts->GetMainCamera().GetCamPos();
-					light.at(id) = WindowSizeParts->GetLightVec();
+					auto* PostPassParts = PostPassEffect::Instance();
+					light.at(id) = PostPassParts->GetShadowDir();
 				}
 			);
 			m_Jobs.at((size_t)(total + total + 2)).Init(
@@ -1691,7 +1693,8 @@ namespace FPS_n2 {
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPosSB.at(id) = CameraParts->GetMainCamera().GetCamPos();
-					light.at(id) = WindowSizeParts->GetLightVec();
+					auto* PostPassParts = PostPassEffect::Instance();
+					light.at(id) = PostPassParts->GetShadowDir();
 				}
 			);
 			m_Jobs.at((size_t)(total + total + 3)).Init(
@@ -1707,7 +1710,8 @@ namespace FPS_n2 {
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPosSB.at(id) = CameraParts->GetMainCamera().GetCamPos();
-					light.at(id) = WindowSizeParts->GetLightVec();
+					auto* PostPassParts = PostPassEffect::Instance();
+					light.at(id) = PostPassParts->GetShadowDir();
 				}
 			);
 			SettingChange();

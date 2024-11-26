@@ -106,21 +106,19 @@ namespace FPS_n2 {
 			}
 		}
 		void CreditControl::Draw(int xmin, int ymin, int xmax) const noexcept {
-			auto* WindowSizeParts = WindowSizeControl::Instance();
-
 			int xp1, yp1;
 
-			xp1 = xmin + WindowSizeParts->GetUIY(24);
+			xp1 = xmin + (24);
 			yp1 = ymin + LineHeight;
-			int Height = WindowSizeParts->GetUIY(12);
+			int Height = (12);
 			for (auto& c : this->m_CreditStr) {
 				if (this->m_CreditCoulm < static_cast<int>(&c - &this->m_CreditStr.front())) { break; }
-				int xpos = xp1 + WindowSizeParts->GetUIY(6);
+				int xpos = xp1 + (6);
 				int ypos = yp1 + Height / 2;
 				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, Height,
 					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.first);
 
-				xpos = xmax - WindowSizeParts->GetUIY(24);
+				xpos = xmax - (24);
 				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, Height,
 					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.second);
 				yp1 += Height;

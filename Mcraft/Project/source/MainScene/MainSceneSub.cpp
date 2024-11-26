@@ -17,17 +17,16 @@ namespace FPS_n2 {
 		void PauseMenuControl::UpdatePause(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			if (SceneParts->IsPause()) {
-				if (!WindowSizeParts->IsExit() && !WindowSizeParts->IsRestart()) {
+				auto* PopUpParts = PopUp::Instance();
+				if (!PopUpParts->IsActivePop()) {
 					Pad->SetMouseMoveEnable(false);
 					auto* KeyGuideParts = KeyGuide::Instance();
 					KeyGuideParts->ChangeGuide(
 						[]() {
 							auto* KeyGuideParts = KeyGuide::Instance();
-							auto* Pad = PadControl::Instance();
 							auto* LocalizeParts = LocalizePool::Instance();
 							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizeParts->Get(9992));
 							KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizeParts->Get(9991));
@@ -42,23 +41,23 @@ namespace FPS_n2 {
 							switch (ButtonParts->GetSelect()) {
 							case 0:
 								this->m_IsRetire = true;
-								WindowSizeParts->SetPause(false);
+								SceneParts->ChangePause(false);
 								break;
 							case 1:
 								OptionPopup::Instance()->SetActive();
 								break;
 							case 2:
-								WindowSizeParts->SetPause(false);
+								SceneParts->ChangePause(false);
 								break;
 							default:
-								WindowSizeParts->SetPause(false);
+								SceneParts->ChangePause(false);
 								break;
 							}
 							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, TRUE);
 						}
 						if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
 							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_CANCEL))->Play(DX_PLAYTYPE_BACK, TRUE);
-							WindowSizeParts->SetPause(false);
+							SceneParts->ChangePause(false);
 						}
 						// 
 						ButtonParts->Update();
@@ -70,11 +69,10 @@ namespace FPS_n2 {
 			}
 		}
 		void PauseMenuControl::DrawPause(void) const noexcept {
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			// ƒ|[ƒY
-			if (SceneParts->IsPause() && (!WindowSizeParts->IsExit() && !WindowSizeParts->IsRestart())) {
+			if (SceneParts->IsPause()) {
 				ButtonParts->Draw();
 			}
 		}

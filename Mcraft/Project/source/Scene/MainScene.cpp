@@ -29,7 +29,6 @@ namespace FPS_n2 {
 			//
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* OptionParts = OptionManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -134,7 +133,6 @@ namespace FPS_n2 {
 			FadeControl::SetBlackOut(this->m_IsEnd);
 
 			FadeControl::UpdateFade();
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 
@@ -148,7 +146,6 @@ namespace FPS_n2 {
 				[]() {
 					auto* SceneParts = SceneControl::Instance();
 					auto* KeyGuideParts = KeyGuide::Instance();
-					auto* Pad = PadControl::Instance();
 					if (SceneParts->IsPause()) {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizePool::Instance()->Get(9992));
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizePool::Instance()->Get(9991));
@@ -489,7 +486,6 @@ namespace FPS_n2 {
 
 
 			//シェーダー描画用パラメーターセット
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 
 			auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
@@ -512,6 +508,7 @@ namespace FPS_n2 {
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
+			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
@@ -522,8 +519,8 @@ namespace FPS_n2 {
 					!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
 					auto* WindowParts = WindowSystem::DrawControl::Instance();
 					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph(),
-						static_cast<int>(Chara->GetGunPtrNow()->GetReticleXPos() * WindowSizeParts->GetUIY(1980) / WindowSizeParts->GetScreenY(1980)),
-						static_cast<int>(Chara->GetGunPtrNow()->GetReticleYPos() * WindowSizeParts->GetUIY(1080) / WindowSizeParts->GetScreenY(1080)),
+						static_cast<int>(Chara->GetGunPtrNow()->GetReticleXPos() * 1980 / WindowSizeParts->GetScreenY(1980)),
+						static_cast<int>(Chara->GetGunPtrNow()->GetReticleYPos() * 1080 / WindowSizeParts->GetScreenY(1080)),
 						1.f, Chara->GetLeanRad(), true);
 				}
 			}
@@ -540,14 +537,20 @@ namespace FPS_n2 {
 			//NetBrowser->Draw();
 			if (m_NetWorkController) {
 				if (m_NetWorkController->GetPing() >= 0.f) {
-					WindowSystem::SetMsg(WindowSizeParts->GetUIXMax(), WindowSizeParts->GetUIY(32) + LineHeight / 2, LineHeight, FontSystem::FontXCenter::RIGHT, White, Black, "Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (32), White, Black,
+						"Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
 				}
 				else {
 					if (m_NetWorkController->GetClient()) {
-						WindowSystem::SetMsg(WindowSizeParts->GetUIXMax(), WindowSizeParts->GetUIY(32) + LineHeight / 2, LineHeight, FontSystem::FontXCenter::RIGHT, Red, Black, "Lost Connection");
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (32), White, Black,
+							"Lost Connection");
 					}
 					else {
-						WindowSystem::SetMsg(WindowSizeParts->GetUIXMax(), WindowSizeParts->GetUIY(32) + LineHeight / 2, LineHeight, FontSystem::FontXCenter::RIGHT, White, Black, "Ping:---ms");
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (32), White, Black,
+							"Ping:---ms");
 					}
 				}
 			}

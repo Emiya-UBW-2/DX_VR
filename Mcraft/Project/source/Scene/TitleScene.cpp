@@ -32,12 +32,12 @@ namespace FPS_n2 {
 		}
 		bool			TitleScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
+			auto* SceneParts = SceneControl::Instance();
 			if (SceneParts->IsPause()) {
 				return true;
 			}
@@ -45,7 +45,6 @@ namespace FPS_n2 {
 			auto* KeyGuideParts = KeyGuide::Instance();
 			KeyGuideParts->ChangeGuide(
 				[]() {
-					auto* Pad = PadControl::Instance();
 					auto* LocalizeParts = LocalizePool::Instance();
 					auto* KeyGuideParts = KeyGuide::Instance();
 					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
@@ -65,29 +64,32 @@ namespace FPS_n2 {
 						this->m_GameStart += 0.0001f;
 						break;
 					case 1:
-						PopUpParts->Add(LocalizeParts->Get(3100), WindowSizeParts->GetUIY(480), WindowSizeParts->GetUIY(240),
+						PopUpParts->Add(LocalizeParts->Get(3100), (480), (240),
 							[&](int xmin, int ymin, int xmax, int ymax, bool) {
 								auto* LocalizeParts = LocalizePool::Instance();
+								auto* SceneParts = SceneControl::Instance();
+								auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 								int xp1, yp1;
 								//ƒ^ƒCƒgƒ‹
 								{
-									xp1 = xmin + WindowSizeParts->GetUIY(24);
+									xp1 = xmin + (24);
 									yp1 = ymin + LineHeight;
 
-									WindowSystem::SetMsg(xp1, yp1 + LineHeight / 2, LineHeight, FontSystem::FontXCenter::LEFT, White, Black, LocalizeParts->Get(3101));
+									DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+										FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, White, Black, LocalizeParts->Get(3101));
 								}
 								//
 								{
-									xp1 = (xmax + xmin) / 2 - WindowSizeParts->GetUIY(54);
+									xp1 = (xmax + xmin) / 2 - (54);
 									yp1 = ymax - LineHeight * 3;
 
 									auto* Pad = PadControl::Instance();
-									bool ret = WindowSystem::SetMsgClickBox(xp1, yp1, xp1 + WindowSizeParts->GetUIY(108), yp1 + LineHeight * 2, LineHeight, Gray15, false, true, LocalizeParts->Get(3102));
+									bool ret = WindowSystem::SetMsgClickBox(xp1, yp1, xp1 + (108), yp1 + LineHeight * 2, LineHeight, Gray15, false, true, LocalizeParts->Get(3102));
 									if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger() || ret) {
 										auto* SaveDataParts = SaveDataClass::Instance();
 										SaveDataParts->Reset();
 										SaveDataParts->Save();
-										WindowSizeParts->SetPause(false);
+										SceneParts->ChangePause(false);
 										m_CloseResetSave = true;
 									}
 								}
@@ -101,7 +103,7 @@ namespace FPS_n2 {
 						OptionPopup::Instance()->SetActive();
 						break;
 					case 3:
-						PopUpParts->Add(LocalizeParts->Get(120), WindowSizeParts->GetUIY(720), WindowSizeParts->GetUIY(840),
+						PopUpParts->Add(LocalizeParts->Get(120), (720), (840),
 							[&](int xmin, int ymin, int xmax, int, bool) {
 								this->m_CreditControl->Draw(xmin, ymin, xmax);
 							},
@@ -132,7 +134,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
-			SE->Get(SoundType::BGM, 0)->Stop();
+			SE->Get(SoundType::BGM, 0)->StopAll();
 			// 
 			this->m_CreditControl->Dispose();
 			this->m_CreditControl.reset();
@@ -158,18 +160,18 @@ namespace FPS_n2 {
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
 			WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, 
-				&this->m_TitleImage, WindowSizeParts->GetUIY(64), WindowSizeParts->GetUIY(64), WindowSizeParts->GetUIY(64 + 369), WindowSizeParts->GetUIY(64 + 207), true);
+				&this->m_TitleImage, (64), (64), (64 + 369), (64 + 207), true);
 			// 
-			WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, WindowSizeParts->GetUIY(18), 
+			WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18), 
 				FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
-				WindowSizeParts->GetUIY(64 + 369), WindowSizeParts->GetUIY(64 + 207), White, Black, "Ver 1.0.1");
+				(64 + 369), (64 + 207), White, Black, "Ver 1.0.1");
 			// 
 			ButtonParts->Draw();
 			// 
 			if ((ButtonParts->GetSelect() != InvalidID) && !PopUpParts->IsActivePop()) {
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, WindowSizeParts->GetUIY(18), 
+				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18), 
 					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
-					WindowSizeParts->GetUIY(32), WindowSizeParts->GetUIYMax() - WindowSizeParts->GetUIY(32 + 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
+					(32), 1080 - (32 + 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
 			}
 			// 
 			{

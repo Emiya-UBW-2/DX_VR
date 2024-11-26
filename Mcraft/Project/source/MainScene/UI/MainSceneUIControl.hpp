@@ -24,21 +24,20 @@ namespace FPS_n2 {
 			void			Set(void) noexcept {
 			}
 			void			Draw(void) const noexcept {
-				auto* WindowSizeParts = WindowSizeControl::Instance();
 				int xp1, yp1;
 				//タイム,スコア
 				{
-					xp1 = WindowSizeParts->GetUIY(30);
-					yp1 = WindowSizeParts->GetUIY(10);
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, WindowSizeParts->GetUIY(32), 
+					xp1 = (30);
+					yp1 = (10);
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32), 
 						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, WindowSizeParts->GetUIY(32), 
-						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 + WindowSizeParts->GetUIY(240), yp1, White, Black, "%d:%05.2f",
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32), 
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 + (240), yp1, White, Black, "%d:%05.2f",
 						static_cast<int>(floatParam[0] / 60.f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
 
-					xp1 = WindowSizeParts->GetUIXMax() / 2;
-					yp1 = WindowSizeParts->GetUIY(10);
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, WindowSizeParts->GetUIY(32), 
+					xp1 = 1920 / 2;
+					yp1 = (10);
+					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32), 
 						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, White, Black, "%d : %d", intParam[0], intParam[1]);
 				}
 			}
