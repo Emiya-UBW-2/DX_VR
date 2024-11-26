@@ -23,3 +23,4 @@ ControlType=XBox
 Language=Jpn
 AA=true
 DrawScale=1.000000
+LoadMovie=true

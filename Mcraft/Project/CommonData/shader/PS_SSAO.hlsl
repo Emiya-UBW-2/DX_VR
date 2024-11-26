@@ -44,10 +44,6 @@ cbuffer cbMULTIPLYCOLOR_CBUFFER2 : register(b3)
 {
     float4 caminfo;
 }
-cbuffer cbMULTIPLYCOLOR_CBUFFER2 : register(b4)
-{
-    float4 caminfo2;
-}
 
 SamplerState g_DiffuseMapSampler : register(s0); // ディフューズマップサンプラ
 Texture2D g_DiffuseMapTexture : register(t0); // ディフューズマップテクスチャ
@@ -61,10 +57,10 @@ Texture2D g_DepthMapTexture : register(t2); // 深度マップテクスチャ
 
 #define SAMPLES 16
 #define INTENSITY 1.0
-#define SCALE 2.5
-#define BIAS 0.05
-#define SAMPLE_RAD 0.02
-#define MAX_DISTANCE 0.07
+#define SCALE 0.0
+#define BIAS 0.33
+#define SAMPLE_RAD 4.5
+#define MAX_DISTANCE 1500.0
 
 #define MOD3 float3(0.1031,0.11369,0.13787)
 
@@ -98,9 +94,9 @@ float AmbientOcclusion(in float3 diff, in float3 normal)
     {
         return 0;
     }
-    float d = (1.0 / (1.0 + len * caminfo2.x));//近いほど高い係数をかける
-    float ao = max(0.0, dotnrm - caminfo2.y) * d;
-    ao *= smoothstep(caminfo2.w, caminfo2.w * 0.5, len);
+    float d = (1.0 / (1.0 + len * SCALE)); //近いほど高い係数をかける
+    float ao = max(0.0, dotnrm - BIAS) * d;
+    ao *= smoothstep(MAX_DISTANCE, MAX_DISTANCE * 0.5, len);
     return ao;
 
 }
@@ -125,7 +121,7 @@ float SSAO(float2 tcoord, float3 pos, float3 normal, float rad)
         radian += goldenAngle;
     }
     ao *= inv;
-    ao = 1 - ao * caminfo.w;
+    ao = 1 - ao * INTENSITY;
     return ao;
 }
 
@@ -140,12 +136,12 @@ PS_OUTPUT main(PS_INPUT PSInput)
     float3 pos = DisptoProj(PSInput.texCoords0);
 
     float ao = 1.0;
-    float rad = caminfo2.z / pos.z;
+    float rad = SAMPLE_RAD / pos.z;
     ao = SSAO(PSInput.texCoords0, pos, normal, rad);
     
 
     //ao = lerp(ao, 1.0f, abs(normal.x)/1.5f);
-    ao = lerp(ao, 1.0f, saturate(pos.z / 1000.f));
+    //ao = lerp(ao, 1.0f, saturate(pos.z / 1000.f));
     
     PSOutput.color0 = float4(ao, ao, ao, 1.0f);
     return PSOutput;
