@@ -596,7 +596,9 @@ namespace FPS_n2 {
 				case 2:
 				case 5:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().zvec() * (-2.f * Scale3DRate);
+					CamPos += ViewChara->GetEyeMatrix().yvec() * (-0.5f * Scale3DRate);
+					CamPos += ViewChara->GetEyeMatrix().xvec() * (1.5f * Scale3DRate);
+					CamPos += ViewChara->GetEyeMatrix().zvec() * (-1.5f * Scale3DRate);
 					break;
 				default:
 					break;
