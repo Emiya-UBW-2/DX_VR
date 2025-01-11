@@ -17,7 +17,7 @@ namespace FPS_n2 {
 			BattleResourceMngr->Load();
 			PlayerMngr->Init(NetWork::Player_num, 0);
 
-			BattleResourceMngr->LoadChara("Suit", GetMyPlayerID());
+			BattleResourceMngr->LoadChara("Main", GetMyPlayerID());
 			{
 				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 				Chara->SetPlayMode(false);
@@ -319,17 +319,17 @@ namespace FPS_n2 {
 				}
 				switch (DBG_CamSel) {
 				case 0:
-				case 3:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().xvec() * (2.f * Scale3DRate);
+					CamPos += ViewChara->GetEyeMatrix().xvec() * (1.f * Scale3DRate);
 					break;
 				case 1:
-				case 4:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().yvec() * (2.f * Scale3DRate) + ViewChara->GetEyeMatrix().zvec() * 0.1f;
+					CamPos -= ViewChara->GetEyeMatrix().xvec() * (1.f * Scale3DRate);
 					break;
 				case 2:
-				case 5:
+					CamVec = CamPos;
+					CamPos += ViewChara->GetEyeMatrix().yvec() * (2.f * Scale3DRate) + ViewChara->GetEyeMatrix().zvec() * 0.1f;
+				case 3:
 					CamVec = CamPos;
 					CamPos += ViewChara->GetEyeMatrix().zvec() * (-2.f * Scale3DRate);
 					break;

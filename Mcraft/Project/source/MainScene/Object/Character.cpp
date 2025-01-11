@@ -90,7 +90,7 @@ namespace FPS_n2 {
 			}
 			tmpUpperMatrix *= this->GetMove().GetMat().Get44DX();
 
-			auto EyePosition = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f + tmpUpperMatrix.zvec() * (-0.04f * Scale3DRate);
+			auto EyePosition = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f;
 
 			if (HeadBobbing) {
 				EyePosition += EyeSwingControl::GetEyeSwingPos();
