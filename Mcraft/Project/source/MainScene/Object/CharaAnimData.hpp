@@ -97,9 +97,9 @@ namespace FPS_n2 {
 		public:
 			const auto	GetMatrix() const noexcept {
 				return
+					Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(this->m_Rotate.z)) *
 					Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(this->m_Rotate.x)) *
 					Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(this->m_Rotate.y)) *
-					Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(this->m_Rotate.z)) *
 					Matrix4x4DX::Mtrans(this->m_Pos * Scale3DRate);
 			}
 		};
@@ -199,6 +199,10 @@ namespace FPS_n2 {
 			};
 		private:
 			std::vector<AnimDatas>	m_Object;
+#ifdef DEBUG
+			Vector3DX DBG_AnimRot;
+			Vector3DX DBG_AnimPos = Vector3DX::vget(-0.06f, -0.15f, -0.23f);
+#endif
 		public:
 			void	Load(const char* filepath) {
 				for (int loop = 0; loop < (int)EnumGunAnim::Max; loop++) {
@@ -230,7 +234,7 @@ namespace FPS_n2 {
 				return nullptr;
 			}
 
-			static GunAnimNow	GetAnimNow(const AnimDatas* data, float nowframe) noexcept {
+			GunAnimNow	GetAnimNow(const AnimDatas* data, float nowframe) noexcept {
 				GunAnimNow Ret; Ret.Set(Vector3DX::zero(), Vector3DX::zero());
 				if (data) {
 					float totalTime = (float)data->GetTotalTime();
@@ -256,6 +260,63 @@ namespace FPS_n2 {
 								Lerp((*ani)->GetRotate(), (*(ani + 1))->GetRotate(), nowframe / Frame),
 								Lerp((*ani)->GetPos(), (*(ani + 1))->GetPos(), nowframe / Frame)
 							);
+#ifdef DEBUG
+							if (0 <= DBG_CamSel && DBG_CamSel <= 3) {
+								auto* DXLib_refParts = DXLib_ref::Instance();
+								Ret.Set(DBG_AnimRot, DBG_AnimPos);
+								//
+								if (CheckHitKey(KEY_INPUT_RCONTROL) != 0) {
+									if (CheckHitKey(KEY_INPUT_J) != 0) {
+										DBG_AnimRot.x += 5.f * DXLib_refParts->GetDeltaTime();
+									}
+									if (CheckHitKey(KEY_INPUT_L) != 0) {
+										DBG_AnimRot.x -= 5.f * DXLib_refParts->GetDeltaTime();
+									}
+									//
+									if (CheckHitKey(KEY_INPUT_I) != 0) {
+										DBG_AnimRot.y += 5.f * DXLib_refParts->GetDeltaTime();
+									}
+									if (CheckHitKey(KEY_INPUT_K) != 0) {
+										DBG_AnimRot.y -= 5.f * DXLib_refParts->GetDeltaTime();
+									}
+									//
+									if (CheckHitKey(KEY_INPUT_U) != 0) {
+										DBG_AnimRot.z += 5.f * DXLib_refParts->GetDeltaTime();
+									}
+									if (CheckHitKey(KEY_INPUT_O) != 0) {
+										DBG_AnimRot.z -= 5.f * DXLib_refParts->GetDeltaTime();
+									}
+								}
+								else {
+									if (CheckHitKey(KEY_INPUT_J) != 0) {
+										DBG_AnimPos.x += 0.01f * DXLib_refParts->GetDeltaTime();
+									}
+									if (CheckHitKey(KEY_INPUT_L) != 0) {
+										DBG_AnimPos.x -= 0.01f * DXLib_refParts->GetDeltaTime();
+									}
+									//
+									if (CheckHitKey(KEY_INPUT_I) != 0) {
+										DBG_AnimPos.y += 0.01f * DXLib_refParts->GetDeltaTime();
+									}
+									if (CheckHitKey(KEY_INPUT_K) != 0) {
+										DBG_AnimPos.y -= 0.01f * DXLib_refParts->GetDeltaTime();
+									}
+									//
+									if (CheckHitKey(KEY_INPUT_U) != 0) {
+										DBG_AnimPos.z += 0.01f * DXLib_refParts->GetDeltaTime();
+									}
+									if (CheckHitKey(KEY_INPUT_O) != 0) {
+										DBG_AnimPos.z -= 0.01f * DXLib_refParts->GetDeltaTime();
+									}
+								}
+								printfDx("Rot[%5.2f,%5.2f,%5.2f]\n", DBG_AnimRot.x, DBG_AnimRot.y, DBG_AnimRot.z);
+								printfDx("Pos[%5.2f,%5.2f,%5.2f]\n", DBG_AnimPos.x, DBG_AnimPos.y, -DBG_AnimPos.z);
+							}
+							else {
+								//DBG_AnimRot.Set(0.0f, 0.0f, 0.0f);
+								//DBG_AnimPos.Set(0.0f, 0.0f, 0.0f);
+							}
+#endif
 							break;
 						}
 						nowframe -= Frame;

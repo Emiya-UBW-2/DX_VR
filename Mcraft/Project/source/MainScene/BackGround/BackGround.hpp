@@ -3,7 +3,7 @@
 #include "../../Header.hpp"
 #include "../../MainScene/BackGround/BackGroundSub.hpp"
 
-#define EDITBLICK (TRUE)
+#define EDITBLICK (FALSE)
 
 namespace FPS_n2 {
 	namespace BackGround {

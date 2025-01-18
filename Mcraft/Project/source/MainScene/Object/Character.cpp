@@ -1180,7 +1180,7 @@ namespace FPS_n2 {
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* SE = SoundPool::Instance();
-			KeyControl::InputKey(pInput, pReady, StaminaControl::GetHeartRandVec(KeyControl::GetIsSquat() ? 1.f : 0.f));
+			KeyControl::InputKey(pInput, pReady, StaminaControl::GetHeartRandVec(KeyControl::GetIsSquat() ? 1.f : 0.f) * 0.f);
 			//AIM
 			if (GetGunPtrNow()) {
 				if (pReady) {
@@ -1271,7 +1271,7 @@ namespace FPS_n2 {
 			int num = GetObj().GetMaterialNum();
 			for (int i = 0; i < num; i++) {
 				GetObj().SetMaterialDifColor(i, GetColorF(0.8f, 0.8f, 0.8f, 1.f));
-				GetObj().SetMaterialAmbColor(i, GetColorF(0.25f, 0.25f, 0.25f, 1.f));
+				GetObj().SetMaterialAmbColor(i, GetColorF(0.5f, 0.5f, 0.5f, 1.f));
 			}
 			this->m_SoundPower = std::max(this->m_SoundPower - 1.f / DXLib_refParts->GetFps(), 0.f);
 			GunReadyControl::UpdateReady();

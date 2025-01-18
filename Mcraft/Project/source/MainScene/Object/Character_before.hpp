@@ -132,7 +132,7 @@ namespace FPS_n2 {
 					tmp2 + 0.00006f * sin(this->m_HeartRateRad * 3) * powf(this->m_HeartRate / HeartRateMin, 3.f),
 					0.f
 				);
-				return tmpvec * tmp3 * (60.f / DXLib_refParts->GetFps());
+				return tmpvec * tmp3;
 			}
 		public:
 			void		InitStamina() {

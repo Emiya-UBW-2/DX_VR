@@ -42,7 +42,7 @@ namespace FPS_n2 {
 			//
 			BackGround->Init();
 			//
-			Vector3DX LightVec = Vector3DX::vget(-0.3f, -0.3f, -0.15f); LightVec = LightVec.normalized();
+			Vector3DX LightVec = Vector3DX::vget(0.f, -0.3f, 0.15f); LightVec = LightVec.normalized();
 			PostPassParts->SetAmbientLight(LightVec);
 
 			SetLightEnable(FALSE);
@@ -76,7 +76,7 @@ namespace FPS_n2 {
 						pos_t = EndPos;
 					}
 					c->ValueSet((PlayerID)index, true, CharaTypeID::Team);
-					c->MovePoint(deg2rad(0.f), deg2rad(180.f * static_cast<float>(index)), pos_t, 0);
+					c->MovePoint(deg2rad(0.f), deg2rad(0.f), pos_t, 0);
 				}
 				p->GetAI()->Init((PlayerID)index);
 			}
@@ -199,8 +199,8 @@ namespace FPS_n2 {
 				}
 				else {
 					MyInput.ResetAllInput();
-					MyInput.SetAddxRad(Pad->GetLS_Y() / 100.f);
-					MyInput.SetAddyRad(Pad->GetLS_X() / 100.f);
+					//MyInput.SetAddxRad(Pad->GetLS_Y() / 100.f);
+					//MyInput.SetAddyRad(Pad->GetLS_X() / 100.f);
 					MyInput.SetInputPADS(Controls::PADS::MOVE_W, Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::MOVE_S, Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::MOVE_A, Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().press());
@@ -326,19 +326,19 @@ namespace FPS_n2 {
 				switch (DBG_CamSel) {
 				case 0:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().xvec() * (1.f * Scale3DRate);
+					CamPos += ViewChara->GetEyeMatrix().xvec() * (10.f * Scale3DRate);
 					break;
 				case 1:
 					CamVec = CamPos;
-					CamPos -= ViewChara->GetEyeMatrix().xvec() * (1.f * Scale3DRate);
+					CamPos -= ViewChara->GetEyeMatrix().xvec() * (10.f * Scale3DRate);
 					break;
 				case 2:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().yvec() * (2.f * Scale3DRate) + ViewChara->GetEyeMatrix().zvec() * 0.1f;
+					CamPos += ViewChara->GetEyeMatrix().yvec() * (10.f * Scale3DRate) + ViewChara->GetEyeMatrix().zvec() * 0.1f;
 					break;
 				case 3:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().zvec() * (-2.f * Scale3DRate);
+					CamPos += ViewChara->GetEyeMatrix().zvec() * (-10.f * Scale3DRate);
 					break;
 				default:
 					break;
@@ -371,6 +371,12 @@ namespace FPS_n2 {
 						Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
 					}
 				}
+#ifdef DEBUG
+				if (0 <= DBG_CamSel && DBG_CamSel <= 3) {
+					fov_t = deg2rad(15);
+				}
+#endif
+
 				CameraParts->SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
 				//DoF
 				if (Chara->GetIsADS()) {

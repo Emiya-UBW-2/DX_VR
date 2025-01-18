@@ -54,23 +54,18 @@ namespace FPS_n2 {
 				ModSlotControl::UpdatePartsMove(GetFrameWorldMat_P(GunFrame::MuzzleAdapter), GunSlot::MuzzleAdapter);
 			}
 			void			DrawShadow(void) noexcept override {
-				if (this->m_IsActive && this->m_IsDraw) {
+				if (this->m_IsActive) {
 					auto* CameraParts = Camera3D::Instance();
 					if ((GetMove().GetPos() - CameraParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale3DRate) { return; }
 					this->m_obj.DrawModel();
 				}
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {
-				if (this->m_IsActive && this->m_IsDraw) {
-					if (CheckCameraViewClip_Box(
-						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-1.f * Scale3DRate, -1.f * Scale3DRate, -1.f * Scale3DRate)).get(),
-						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(1.f * Scale3DRate, 1.f * Scale3DRate, 1.f * Scale3DRate)).get()) == FALSE
-						) {
-						if (!isDrawSemiTrans) {
-							auto* CameraParts = Camera3D::Instance();
-							if ((GetMove().GetPos() - CameraParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale3DRate) { return; }
-							this->m_obj.DrawModel();
-						}
+				if (this->m_IsActive) {
+					if (!isDrawSemiTrans) {
+						auto* CameraParts = Camera3D::Instance();
+						if ((GetMove().GetPos() - CameraParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale3DRate) { return; }
+						this->m_obj.DrawModel();
 					}
 				}
 			}
