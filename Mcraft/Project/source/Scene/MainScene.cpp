@@ -69,7 +69,7 @@ namespace FPS_n2 {
 				//l‚ÌÀ•WÝ’è
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 5.f * Scale3DRate, 0.f);
+					pos_t = Vector3DX::vget(0.f, 0.f * Scale3DRate, 0.f);
 
 					Vector3DX EndPos = pos_t - Vector3DX::up() * 2.f * Scale3DRate;
 					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 2.f * Scale3DRate, &EndPos)) {
@@ -335,6 +335,7 @@ namespace FPS_n2 {
 				case 2:
 					CamVec = CamPos;
 					CamPos += ViewChara->GetEyeMatrix().yvec() * (2.f * Scale3DRate) + ViewChara->GetEyeMatrix().zvec() * 0.1f;
+					break;
 				case 3:
 					CamVec = CamPos;
 					CamPos += ViewChara->GetEyeMatrix().zvec() * (-2.f * Scale3DRate);

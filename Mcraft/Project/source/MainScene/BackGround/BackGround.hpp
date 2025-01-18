@@ -3,7 +3,7 @@
 #include "../../Header.hpp"
 #include "../../MainScene/BackGround/BackGroundSub.hpp"
 
-#define EDITBLICK (FALSE)
+#define EDITBLICK (TRUE)
 
 namespace FPS_n2 {
 	namespace BackGround {
@@ -12,7 +12,7 @@ namespace FPS_n2 {
 		static constexpr int MulPer = 2;
 		static constexpr float CellScale = Scale3DRate / 2.f / 2.f;
 
-		static constexpr int DrawMax = 65;
+		static constexpr int DrawMax = 25;//65
 
 		static constexpr int DrawMaxXPlus = DrawMax;
 		static constexpr int DrawMaxXMinus = -DrawMax;
@@ -20,8 +20,8 @@ namespace FPS_n2 {
 		static constexpr int DrawMaxZPlus = DrawMax;
 		static constexpr int DrawMaxZMinus = -DrawMax;
 
-		static constexpr int DrawMaxYPlus = 30 * 6 / 5;
-		static constexpr int DrawMaxYMinus = -30 * 4 / 5;
+		static constexpr int DrawMaxYPlus = 15 * 2 / 5;//30 * 6 / 5
+		static constexpr int DrawMaxYMinus = -15 * 8 / 5;//-30 * 4 / 5
 
 
 		static constexpr int DrawMinXPlus = DrawMaxXPlus / MulPer;

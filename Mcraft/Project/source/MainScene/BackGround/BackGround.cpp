@@ -1424,6 +1424,23 @@ namespace FPS_n2 {
 				this->m_ObjSky.SetMaterialAmbColor(i, GetColorF(0.f, 0.f, 0.f, 1.f));
 			}
 			if (false) {
+				//‹ó‚Á‚Û
+				auto& cell = m_CellxN.front();
+				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
+				for (int x = 0; x < cell.All; ++x) {
+					for (int z = 0; z < cell.All; ++z) {
+						for (int y = 0; y < cell.All; ++y) {
+							if (y <= cell.All/2) {
+								cell.SetCellBuf(x, y, z).m_Cell = 1;
+								continue;
+							}
+							cell.SetCellBuf(x, y, z).m_Cell = s_EmptyBlick;
+						}
+					}
+				}
+				SaveCellsFile();
+			}
+			else if (false) {
 				PerlinNoise ns(GetRand(100));
 				auto& cell = m_CellxN.front();
 				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
