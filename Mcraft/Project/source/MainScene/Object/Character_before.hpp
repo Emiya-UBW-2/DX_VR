@@ -124,7 +124,6 @@ namespace FPS_n2 {
 			//const auto&		GetHeartRate(void) const noexcept { return this->m_HeartRate; }
 			//const auto&		GetHeartRateRad(void) const noexcept { return this->m_HeartRateRad; }
 			const auto		GetHeartRandVec(float SquatPer) const noexcept {
-				auto* DXLib_refParts = DXLib_ref::Instance();
 				auto tmp2 = 0.2f * GetRandf(deg2rad(1.f));
 				auto tmp3 = Lerp(0.5f, 0.15f, SquatPer);
 				Vector3DX tmpvec = Vector3DX::vget(
