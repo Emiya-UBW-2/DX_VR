@@ -1,3 +1,0 @@
-Name=CTS1500 DotSight
-
-end

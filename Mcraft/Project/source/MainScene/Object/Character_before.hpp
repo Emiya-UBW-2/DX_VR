@@ -232,35 +232,6 @@ namespace FPS_n2 {
 			}
 		};
 		//
-		class ULTControl {
-		private://キャラパラメーター
-			const int										ULTMax = 100;
-		private:
-			int											m_ULT{ 0 };							//スコア
-			bool										m_ULTSwitch{ false };
-		public://ゲッター
-			const auto		IsULTActive(void) const noexcept { return this->m_ULT == ULTMax; }
-			const auto		ULTActiveSwitch(void) noexcept {
-				auto ret = this->m_ULTSwitch;
-				this->m_ULTSwitch = false;
-				return ret;
-			}
-			const auto& GetULT(void) const noexcept { return this->m_ULT; }
-			const auto& GetULTMax(void) const noexcept { return ULTMax; }
-			void			AddULT(int damage_t, bool SwitchOn) noexcept {
-				auto prev = this->m_ULT;
-				this->m_ULT = std::clamp<int>(this->m_ULT + damage_t, 0, ULTMax);
-				if (SwitchOn) {
-					m_ULTSwitch |= ((prev != ULTMax) && IsULTActive());
-				}
-			}
-		public:
-			void		InitULT() {
-				this->m_ULT = 0;
-				this->m_ULTSwitch = false;
-			}
-		};
-		//
 		class GunReadyControl {
 		private://キャラパラメーター
 			const float											UpperTimerLimit = 10.f;
@@ -278,7 +249,9 @@ namespace FPS_n2 {
 			void			UpdateReady(void) noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				Easing(&this->m_ADSPer, this->GetIsADS() ? 1.f : 0.f, 0.9f, EasingType::OutExpo);//
-				this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / DXLib_refParts->GetFps(), 0.f, UpperTimerLimit);
+				if (this->m_ReadyTimer != UpperTimerLimit) {
+					this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / DXLib_refParts->GetFps(), 0.f, UpperTimerLimit-0.1f);
+				}
 			}
 			void			SetAimOrADS(void) noexcept {
 				this->m_ReadyTimer = std::min(this->m_ReadyTimer, 0.1f);
@@ -860,9 +833,13 @@ namespace FPS_n2 {
 				}
 				m_AmmoStock = 0;
 			}
-			void SetMag(int select, int AmmoNum) noexcept { m_MagazineStock[select].AmmoNum = AmmoNum; }
+			void SetMag(int select, int AmmoNum) noexcept {
+				m_MagazineStock[select].AmmoNum = AmmoNum;
+				m_MagazineStock[select].AmmoNum = m_MagazineStock[select].AmmoAll;
+			}
 			void SetOldMag(int OLDAmmoNum, int OLDAmmoAll, int OLDModUniqueID) noexcept {
 				m_MagazineStock[0].AmmoNum = OLDAmmoNum;
+				m_MagazineStock[0].AmmoNum = m_MagazineStock[0].AmmoAll;
 				m_MagazineStock[0].AmmoAll = OLDAmmoAll;
 				m_MagazineStock[0].ModUniqueID = OLDModUniqueID;
 				std::sort(m_MagazineStock.begin(), m_MagazineStock.end(), [&](const MagStock& A, const MagStock& B) {return A.AmmoNum > B.AmmoNum; });

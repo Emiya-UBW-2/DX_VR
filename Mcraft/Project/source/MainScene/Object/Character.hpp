@@ -21,7 +21,6 @@ namespace FPS_n2 {
 			public MagStockControl,
 			public HitReactionControl,
 			public RagDollControl,
-			public ULTControl,
 			public GunReadyControl,
 			public GunPtrControl,
 			public AutoAimControl
@@ -57,8 +56,6 @@ namespace FPS_n2 {
 			ArmMovePerClass										m_ULTBar;
 			CharaTypeID											m_CharaType{};
 			bool												m_IsMainGame{ false };
-			int													m_ArmerStock{ 0 };
-			int													m_MorphineStock{ 0 };
 			bool												m_AmmoLoadStart{ false };
 			bool												m_AmmoLoadSwitch{ false };
 			int													m_AmmoLoadCount{ 0 };
@@ -83,11 +80,6 @@ namespace FPS_n2 {
 		public:
 			bool												CanLookTarget{ true };
 
-			bool			GetArmer() noexcept {
-				auto prev = this->m_ArmerStock;
-				this->m_ArmerStock = 1;
-				return this->m_ArmerStock != prev;
-			}
 			void			SetPlayMode(bool value) noexcept { m_IsHardMode = value; }
 		private:
 			const Matrix4x4DX GetCharaDir(void) const noexcept;
@@ -114,8 +106,6 @@ namespace FPS_n2 {
 				this->m_HeadShotSwitch = false;
 				return ret;
 			}
-			const auto& GetArmerStock(void) const noexcept { return this->m_ArmerStock; }
-			const auto& GetMorphineStock(void) const noexcept { return this->m_MorphineStock; }
 		public://セッター
 			bool			SetDamageEvent(const DamageEvent& value) noexcept;
 			void			Heal(HitPoint value, bool SwitchOn) noexcept {

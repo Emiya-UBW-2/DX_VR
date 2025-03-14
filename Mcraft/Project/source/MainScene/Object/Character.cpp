@@ -19,9 +19,6 @@ namespace FPS_n2 {
 				PlayerMngr->GetPlayer(this->m_MyID)->AddShot(GetGunPtrNow()->GetPelletNum());
 			}
 			GetGunPtrNow()->SetBullet();
-			if (IsULTSelect()) {
-				ULTControl::AddULT(-3, true);
-			}
 			//
 			float Power = 0.0001f * GetGunPtrNow()->GetRecoilPower();
 			if (GetIsSquat()) {
@@ -139,15 +136,6 @@ namespace FPS_n2 {
 					if (value.ShotID == 0) {
 						PlayerMngr->GetPlayer(value.ShotID)->AddScore(100 + ((IsGun0Select() && (value.Damage >= 100)) ? 20 : 0));
 						PlayerMngr->GetPlayer(value.ShotID)->AddKill(1);
-
-						auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(value.ShotID)->GetChara();
-						if (Chara->GetAutoAimActive()) {
-
-							Chara->AddULT(IsULTSelect() ? 1 : 6, Chara->IsGun0Select());
-						}
-						else {
-							Chara->AddULT(IsULTSelect() ? 9 : 20, Chara->IsGun0Select());
-						}
 					}
 				}
 				this->m_SoundPower = 0.5f * (CanLookTarget ? 1.f : 0.5f);
@@ -361,7 +349,7 @@ namespace FPS_n2 {
 						if (!IsCheck) {
 							m_CharaAction = CharaActionID::Reload;
 						}
-						else if (true) {
+						else if (false) {
 							m_CharaAction = CharaActionID::Check;
 						}
 					}
@@ -738,7 +726,7 @@ namespace FPS_n2 {
 			this->SetMove().Update(0.9f, 0.f);
 			UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			//ƒXƒŠƒ“ƒOêŠ’Tõ
-			int GunSel = m_IsHardMode ? 1 : 0;
+			int GunSel = 1;
 			if (GetGunPtr(GunSel)) {
 				m_SlingMat[GunSel] =
 					Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(-90)) *
@@ -1126,7 +1114,6 @@ namespace FPS_n2 {
 			StaminaControl::InitStamina();
 			LifeControl::InitLife();
 			StackLeftHandControl::InitStackLeftHand();
-			ULTControl::InitULT();
 			//
 			this->m_MyID = pID;
 			//
@@ -1173,9 +1160,6 @@ namespace FPS_n2 {
 				m_ReadyAnim = -1.f;
 			}
 			GunReadyControl::SetReady();
-			//
-			this->m_MorphineStock = !m_IsHardMode ? 3 : 1;
-			this->m_ArmerStock = 0;
 		}
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
@@ -1188,10 +1172,9 @@ namespace FPS_n2 {
 						if (!m_ULTActive) {
 							if (m_ULTUp > 0.5f) {
 								m_ULTUp -= 0.5f;
-								ULTControl::AddULT(1, true);
 							}
 							m_ULTUp += 1.f / DXLib_refParts->GetFps();
-							if (ULTControl::IsULTActive() && KeyControl::GetULTKey()) {
+							if (KeyControl::GetULTKey()) {
 								m_IsChanging = true;
 								m_IsChange = true;
 								m_ULTActive = true;
@@ -1201,15 +1184,13 @@ namespace FPS_n2 {
 						else {
 							if (m_ULTUp > 0.25f) {
 								m_ULTUp -= 0.25f;
-								ULTControl::AddULT(-1, true);
 							}
 							m_ULTUp += 1.f / DXLib_refParts->GetFps();
-							if (ULTControl::GetULT() == 0 || (GetIsAim() && KeyControl::GetULTKey())) {
+							if (GetIsAim() && KeyControl::GetULTKey()) {
 								m_IsChanging = true;
 								m_IsChange = true;
 								m_ULTActive = false;
 								m_ULTUp = 0.f;
-								ULTControl::AddULT(-20, false);
 							}
 						}
 					}
@@ -1302,7 +1283,7 @@ namespace FPS_n2 {
 				this->m_Arm[(int)EnumGunAnimType::ReloadStart].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadStart, 0.2f, 0.2f);
 				this->m_Arm[(int)EnumGunAnimType::Reload].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadOne, 0.1f, 0.2f, 0.9f);
 				this->m_Arm[(int)EnumGunAnimType::ReloadEnd].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadEnd, 0.1f, 0.2f, 0.9f);
-				this->m_Arm[(int)EnumGunAnimType::Ready].Execute(!GetIsAim(), 0.1f, 0.2f, 0.9f);
+				this->m_Arm[(int)EnumGunAnimType::Ready].Execute(!GetIsAim(), 0.1f, 0.2f, 0.87f);
 				this->m_Arm[(int)EnumGunAnimType::Check].Execute(GetGunPtrNow()->GetGunAnime() >= GunAnimeID::CheckStart && GetGunPtrNow()->GetGunAnime() <= GunAnimeID::Checking, 0.05f, 0.2f);
 				this->m_Arm[(int)EnumGunAnimType::Watch].Execute(GetCharaAction() == CharaActionID::Watch, 0.1f, 0.1f);
 				this->m_Arm[(int)EnumGunAnimType::Melee].Execute(GetCharaAction() == CharaActionID::Melee, 1.1f, 0.1f);

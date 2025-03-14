@@ -1,4 +1,0 @@
-Name=ACOG TA31 Scope
-zoom=3.5
-Recoil_Diff=-10
-end

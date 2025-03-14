@@ -293,7 +293,7 @@ namespace FPS_n2 {
 				if (this->m_GunAnimeFirst) {
 					m_UpperAnim = 0.f;
 				}
-				SetAnimOnce((int)GetGunAnime(), 1.5f);
+				SetAnimOnce((int)GetGunAnime(), 1.0f);
 				if (GetObj().SetAnim((int)GetGunAnime()).TimeEnd()) {
 					SetGunAnime(GunAnimeID::ReloadOne);
 				}
@@ -302,7 +302,7 @@ namespace FPS_n2 {
 				if (this->m_GunAnimeFirst) {
 					m_UpperAnim = 0.f;
 				}
-				SetAnimOnce((int)GetGunAnime(), 1.5f);
+				SetAnimOnce((int)GetGunAnime(), 1.0f);
 				if (GetObj().SetAnim((int)GetGunAnime()).TimeEnd()) {
 					SetGunAnime(GunAnimeID::ReloadOne);
 				}
@@ -311,7 +311,7 @@ namespace FPS_n2 {
 				if (this->m_GunAnimeFirst) {
 					m_UpperAnim = 0.f;
 				}
-				SetAnimOnce((int)GetGunAnime(), 1.5f);
+				SetAnimOnce((int)GetGunAnime(), 1.0f);
 				if (GetGunAnimePer(EnumGunAnimType::Reload) >= 1.f) {
 					switch (this->GetModData()->GetReloadType()) {
 					case RELOADTYPE::MAG:
@@ -341,7 +341,7 @@ namespace FPS_n2 {
 				}
 				break;
 			case GunAnimeID::ReloadEnd:
-				SetAnimOnce((int)GetGunAnime(), 1.5f);
+				SetAnimOnce((int)GetGunAnime(), 1.0f);
 				if (GetObj().SetAnim((int)GetGunAnime()).TimeEnd()) {
 					SetGunAnime(GunAnimeID::Checking);
 				}
