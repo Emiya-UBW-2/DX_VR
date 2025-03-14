@@ -34,6 +34,7 @@
     <ClInclude Include="source\MainScene\Object\Mod.hpp" />
     <ClInclude Include="source\MainScene\Object\ModData.hpp" />
     <ClInclude Include="source\MainScene\Object\ModEnum.hpp" />
+    <ClInclude Include="source\MainScene\Object\Target.hpp" />
     <ClInclude Include="source\MainScene\Player\CPU.hpp" />
     <ClInclude Include="source\MainScene\Player\Player.hpp" />
     <ClInclude Include="source\MainScene\UI\MainSceneUIControl.hpp" />
@@ -61,6 +62,7 @@
     <ClCompile Include="source\MainScene\Object\Gun_before.cpp" />
     <ClCompile Include="source\MainScene\Object\Mod.cpp" />
     <ClCompile Include="source\MainScene\Object\ModData.cpp" />
+    <ClCompile Include="source\MainScene\Object\Target.cpp" />
     <ClCompile Include="source\MainScene\Player\CPU.cpp" />
     <ClCompile Include="source\MainScene\Player\Player.cpp" />
     <ClCompile Include="source\Scene\MainScene.cpp" />

@@ -32,6 +32,14 @@ namespace FPS_n2 {
 			std::vector<DamageEvent>					m_DamageEvents;
 			//
 			bool										m_IsEnd{ false };//シーン全体の終了フラグ
+
+			float										m_StartTimer{ 0.f };
+
+
+			int tgtSel = 0;
+			float tgtTimer = 0.f;
+			GraphHandle ScoreBoard2;
+
 #ifdef DEBUG
 			float m_D1{ 38.f / 255.f }, m_D2{ 192.f / 255.f }, m_D3{ 1.f };
 #endif

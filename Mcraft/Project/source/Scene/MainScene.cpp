@@ -2,6 +2,8 @@
 #include "../MainScene/NetworkBrowser.hpp"
 #include "MainScene.hpp"
 
+#include "../MainScene/Object/Target.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			MainGameScene::Load_Sub(void) noexcept {
@@ -81,6 +83,33 @@ namespace FPS_n2 {
 				}
 				p->GetAI()->Init((PlayerID)index);
 			}
+			const Vector3DX TargetPositions[9] = {
+				Vector3DX::vget(0.39f,0.0f,-7.65f),
+				Vector3DX::vget(7.16f,0.0f,-7.65f),
+				Vector3DX::vget(14.28f,0.0f,-7.65f),
+				Vector3DX::vget(0.39f,0.0f,-3.51f),
+				Vector3DX::vget(7.16f,0.0f,-3.51f),
+				Vector3DX::vget(14.28f,0.0f,-3.51f),
+				Vector3DX::vget(0.39f,0.0f, 0.85f),
+				Vector3DX::vget(7.16f,0.0f, 0.85f),
+				Vector3DX::vget(14.28f,0.0f, 0.85f),
+			};
+			auto* ObjMngr = ObjectManager::Instance();
+			for (int j = 0; j < 9; j++) {
+				auto Obj = std::make_shared<TargetClass>();
+				ObjMngr->AddObject(Obj);
+				ObjMngr->LoadModel(Obj, Obj, "data/model/Target2/");
+
+				auto Rot = Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRand(360)));
+				Obj->SetMove().SetMat(Rot);
+				Obj->SetMove().SetPos((TargetPositions[j] * Scale3DRate) + Rot.zvec() * (1.5f * Scale3DRate));
+				Obj->SetMove().Update(0.f, 0.f);
+				Obj->UpdateObjMatrix(Obj->GetMove().GetMat(), Obj->GetMove().GetPos());
+			}
+			ScoreBoard2.Load("data/UI/Score2.png");
+			//UI
+			tgtSel = -1;
+			tgtTimer = 0.f;
 			//UI
 			this->m_UIclass.Set();
 			//
@@ -91,6 +120,7 @@ namespace FPS_n2 {
 			FadeControl::SetFade();
 			this->m_IsEnd = false;
 			EffectControl::Init();
+			this->m_StartTimer = 5.f;
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* CameraParts = Camera3D::Instance();
@@ -132,12 +162,14 @@ namespace FPS_n2 {
 #endif
 			PauseMenuControl::UpdatePause();
 			if (PauseMenuControl::IsRetire()) {
+				if (!this->m_IsEnd) {
+					FadeControl::SetBlackOut(true);
+				}
 				this->m_IsEnd = true;
 			}
 			if (this->m_IsEnd && FadeControl::IsFadeAll()) {
 				return false;
 			}
-			FadeControl::SetBlackOut(this->m_IsEnd);
 
 			FadeControl::UpdateFade();
 			auto* ObjMngr = ObjectManager::Instance();
@@ -167,12 +199,16 @@ namespace FPS_n2 {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_D), "");
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), LocalizePool::Instance()->Get(9900));
 
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::LEAN_L), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::LEAN_R), LocalizePool::Instance()->Get(9902));
+
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::SHOT), LocalizePool::Instance()->Get(9906));
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::AIM), LocalizePool::Instance()->Get(9908));
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ULT), LocalizePool::Instance()->Get(9907));
 
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::WALK), LocalizePool::Instance()->Get(9903));
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::JUMP), LocalizePool::Instance()->Get(9905));
+
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizePool::Instance()->Get(9904));
 					}
 				});
 			if (SceneParts->IsPause()) {
@@ -194,8 +230,14 @@ namespace FPS_n2 {
 			}
 			//Input,AI
 			{
+				if (!GetIsFirstLoop()) {
+					this->m_StartTimer = std::max(this->m_StartTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+				}
+				if (2.f > this->m_StartTimer && this->m_StartTimer > 1.f) {
+					Chara->SetAim();
+				}
 				InputControl MyInput;
-				if (SceneParts->IsPause() || !FadeControl::IsFadeClear()) {
+				if (SceneParts->IsPause() || !FadeControl::IsFadeClear() || (this->m_StartTimer > 0.f)) {
 					MyInput.ResetAllInput();
 				}
 				else {
@@ -209,17 +251,17 @@ namespace FPS_n2 {
 					//MyInput.SetInputPADS(Controls::PADS::RUN, Pad->GetPadsInfo(Controls::PADS::RUN).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::LEAN_L, Pad->GetPadsInfo(Controls::PADS::LEAN_L).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::LEAN_R, Pad->GetPadsInfo(Controls::PADS::LEAN_R).GetKey().press());
-					MyInput.SetInputPADS(Controls::PADS::MELEE, Pad->GetPadsInfo(Controls::PADS::MELEE).GetKey().press());
+					//MyInput.SetInputPADS(Controls::PADS::MELEE, Pad->GetPadsInfo(Controls::PADS::MELEE).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::RELOAD, Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::INTERACT, Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().press());
-					MyInput.SetInputPADS(Controls::PADS::SQUAT, Pad->GetPadsInfo(Controls::PADS::SQUAT).GetKey().press());
+					//MyInput.SetInputPADS(Controls::PADS::SQUAT, Pad->GetPadsInfo(Controls::PADS::SQUAT).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::SHOT, Pad->GetPadsInfo(Controls::PADS::SHOT).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::AIM, Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::ULT, Pad->GetPadsInfo(Controls::PADS::ULT).GetKey().press());
-					MyInput.SetInputPADS(Controls::PADS::THROW, Pad->GetPadsInfo(Controls::PADS::THROW).GetKey().press());
-					MyInput.SetInputPADS(Controls::PADS::CHECK, Pad->GetPadsInfo(Controls::PADS::CHECK).GetKey().press());
+					//MyInput.SetInputPADS(Controls::PADS::THROW, Pad->GetPadsInfo(Controls::PADS::THROW).GetKey().press());
+					//MyInput.SetInputPADS(Controls::PADS::CHECK, Pad->GetPadsInfo(Controls::PADS::CHECK).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::WALK, Pad->GetPadsInfo(Controls::PADS::WALK).GetKey().press());
-					MyInput.SetInputPADS(Controls::PADS::JUMP, Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().press());
+					//MyInput.SetInputPADS(Controls::PADS::JUMP, Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().press());
 				}
 				//ネットワーク
 				auto* NetBrowser = NetWorkBrowser::Instance();
@@ -294,6 +336,7 @@ namespace FPS_n2 {
 			ObjMngr->ExecuteObject();
 			ObjMngr->LateExecuteObject();
 			UpdateBullet();							//弾の更新
+			tgtTimer = std::max(tgtTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 			//視点
 			{
 				auto& ViewChara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
@@ -381,7 +424,7 @@ namespace FPS_n2 {
 				CameraParts->SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
 				//DoF
 				if (Chara->GetIsADS()) {
-					PostPassEffect::Instance()->Set_DoFNearFar(Scale3DRate * 0.3f, far_t * 5.75f, Scale3DRate * 0.1f, far_t * 6.f);
+					PostPassEffect::Instance()->Set_DoFNearFar(Scale3DRate * 0.3f, Scale3DRate * 5.f, Scale3DRate * 0.1f, far_t * 3.f);
 				}
 				else {
 					PostPassEffect::Instance()->Set_DoFNearFar(Scale3DRate * 0.3f, Scale3DRate * 5.f, Scale3DRate * 0.1f, far_t * 2.f);
@@ -421,6 +464,7 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(1, 0);
 				//timer
 				this->m_UIclass.SetfloatParam(0, 0.f);
+				this->m_UIclass.SetfloatParam(1, m_StartTimer);
 			}
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=0.7ms");
@@ -433,6 +477,7 @@ namespace FPS_n2 {
 			//使い回しオブジェ系
 			BackGround->Dispose();
 			GunsModify::DisposeSlots();
+			ScoreBoard2.Dispose();
 			//
 			if (m_NetWorkController) {
 				m_NetWorkController->Dispose();
@@ -546,6 +591,34 @@ namespace FPS_n2 {
 			if (!SceneParts->IsPause()) {
 				this->m_UIclass.Draw();
 			}
+			if (!SceneParts->IsPause()) {
+				//的ヒット状況表示
+				if (tgtSel >= 0) {
+					auto* WindowParts = WindowSystem::DrawControl::Instance();
+					auto& t = (std::shared_ptr<TargetClass>&)(*ObjectManager::Instance()->GetObj((int)ObjType::Target, tgtSel));
+
+					int xp = 1920 / 2 - 300;
+					int yp = 1080 / 2 + 100;
+					int size = 100;
+					int xs = size / 2;
+					int ys = size / 2;
+					int xp2 = xp + ys * 2;
+					int yp2 = yp + ys * 2;
+					float AlphaPer = std::clamp(tgtTimer, 0.f, 1.f);
+					if (AlphaPer > 0.01f) {
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * AlphaPer));
+						//背景
+						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &ScoreBoard2, xp, yp, xp2, yp2, true);
+						//命中箇所
+						for (auto& r : t->GetHitPosRec()) {
+							float cos_t, sin_t;
+							t->GetHitPoint(r, &cos_t, &sin_t);
+							WindowParts->SetDrawCircle(WindowSystem::DrawLayer::Normal, xp + xs + static_cast<int>((float)xs * cos_t), yp + ys + static_cast<int>((float)ys * sin_t), 2, Green);
+						}
+						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					}
+				}
+			}
 			//通信設定
 			//auto* NetBrowser = NetWorkBrowser::Instance();
 			//NetBrowser->Draw();
@@ -600,9 +673,41 @@ namespace FPS_n2 {
 						Vector3DX repos_tmp = a->GetRePos();
 						Vector3DX pos_tmp = a->GetMove().GetPos();
 
+						bool is_HitAll = false;
+
+						int j = 0;
+						while (true) {
+							auto target = ObjMngr->GetObj((int)ObjType::Target, j);
+							if (target != nullptr) {
+								auto& t = (std::shared_ptr<TargetClass>&)(*target);
+								auto Res = t->GetColLine(repos_tmp, pos_tmp, -1);
+								if (Res.HitFlag == TRUE) {
+									//エフェクト
+									EffectControl::SetOnce_Any((int)EffectResource::Effect::ef_gndsmoke, Res.HitPosition, (Vector3DX)(Res.Normal) * -1.f, a->GetCaliberSize() / 0.02f * Scale3DRate);
+									SE->Get(SoundType::SE, (int)SoundEnum::HitGround0 + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
+									//ヒット演算
+									if (tgtSel != -1 && tgtSel != j) {
+										auto& tOLD = (std::shared_ptr<TargetClass>&)(*ObjMngr->GetObj((int)ObjType::Target, tgtSel));
+										tOLD->ResetHit();
+									}
+									tgtSel = j;
+									tgtTimer = 2.f;
+
+									t->SetHitPos(Res.HitPosition);
+	
+									a->Penetrate(0, 0);
+									is_HitAll = true;
+								}
+							}
+							else {
+								break;
+							}
+							j++;
+						}
+
+
 						Vector3DX norm_tmp;
 						auto ColResGround = BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
-						bool is_HitAll = false;
 						for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 							if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }

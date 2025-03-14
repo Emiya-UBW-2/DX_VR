@@ -35,8 +35,6 @@ namespace FPS_n2 {
 			bool												m_IsStuckGun{ false };
 			float												m_AmmoHandR{ 0.f };
 			float												m_AmmoHand{ 0.f };
-			int													m_ReadyAnimPhase{ 0 };
-			float												m_ReadyAnim{ -1.f };
 			bool												m_IsChanging{ false };
 			bool												m_IsChange{ false };
 			bool												m_HeadShotSwitch{ false };

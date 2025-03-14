@@ -26,22 +26,22 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(Controls::PADS::DIR_LEFT, false);
 	Pad->SetIsUseButton(Controls::PADS::DIR_RIGHT, false);
 	Pad->SetIsUseButton(Controls::PADS::DIR_STICK, true);
-	Pad->SetIsUseButton(Controls::PADS::LEAN_L, true);//UI‚Ì‚Ý
-	Pad->SetIsUseButton(Controls::PADS::LEAN_R, true);//UI‚Ì‚Ý
+	Pad->SetIsUseButton(Controls::PADS::LEAN_L, true);
+	Pad->SetIsUseButton(Controls::PADS::LEAN_R, true);
 	Pad->SetIsUseButton(Controls::PADS::RELOAD, true);//UI‚Ì‚Ý
 	Pad->SetIsUseButton(Controls::PADS::INTERACT, true);//UI‚Ì‚Ý
-	Pad->SetIsUseButton(Controls::PADS::THROW, true);
-	Pad->SetIsUseButton(Controls::PADS::MELEE, true);
-	Pad->SetIsUseButton(Controls::PADS::JUMP, true);
+	//Pad->SetIsUseButton(Controls::PADS::THROW, true);
+	//Pad->SetIsUseButton(Controls::PADS::MELEE, true);
+	//Pad->SetIsUseButton(Controls::PADS::JUMP, true);
 	Pad->SetIsUseButton(Controls::PADS::INVENTORY, true);
-	Pad->SetIsUseButton(Controls::PADS::RUN, true);
+	//Pad->SetIsUseButton(Controls::PADS::RUN, true);
 	Pad->SetIsUseButton(Controls::PADS::WALK, true);
 	Pad->SetIsUseButton(Controls::PADS::SHOT, true);
 	Pad->SetIsUseButton(Controls::PADS::AIM, true);
 	Pad->SetIsUseButton(Controls::PADS::ULT, true);
-	Pad->SetIsUseButton(Controls::PADS::SQUAT, true);
-	Pad->SetIsUseButton(Controls::PADS::PRONE, true);
-	Pad->SetIsUseButton(Controls::PADS::CHECK, true);
+	//Pad->SetIsUseButton(Controls::PADS::SQUAT, true);
+	//Pad->SetIsUseButton(Controls::PADS::PRONE, true);
+	//Pad->SetIsUseButton(Controls::PADS::CHECK, true);
 	//
 	auto* DXLib_refParts = DXLib_ref::Instance();
 	if (DXLib_refParts->FirstBootSetting()) { return 0; }

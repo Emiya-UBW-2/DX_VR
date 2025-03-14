@@ -85,12 +85,12 @@
 1160=Decision
 1161=(Not Use)
 1162=(Not Use)
-1163=Fire Up
+1163=(Not Use)
 1164=(Not Use)
 1165=Slow Walk
-1166=Men(Head)
-1167=Dou(Torso)
-1168=Kote(Right Arm)
+1166=Shot
+1167=Aim Down Sight
+1168=Change Weapon
 1169=(Not Use)
 1170=(Not Use)
 1171=(Not Use)
@@ -104,11 +104,13 @@
 9992=Decision
 9993=Select
 9994=Change Tab
+9995=Pause
 
 9900=Move
+9902=Right Lean
 9903=Walk
-9905=Fire Up
-9906=Men(Head)
-9907=Dou(Torso)
-9908=Kote(Right Arm)
+9904=Reload
+9906=Shot
+9907=Change Weapon
+9908=Aim Down Sight
 9913=Pause

@@ -306,12 +306,21 @@ namespace FPS_n2 {
 				if (GetObj().SetAnim((int)GetGunAnime()).TimeEnd()) {
 					SetGunAnime(GunAnimeID::ReloadOne);
 				}
+				if ((this->GetModData()->GetReloadType() == RELOADTYPE::MAG) && this->m_Cancel) {
+					this->m_Cancel = false;
+					SetGunAnime(GunAnimeID::Base);
+				}
 				break;
 			case GunAnimeID::ReloadOne:
 				if (this->m_GunAnimeFirst) {
 					m_UpperAnim = 0.f;
 				}
 				SetAnimOnce((int)GetGunAnime(), 1.0f);
+
+				if ((this->GetModData()->GetReloadType() == RELOADTYPE::MAG) && this->m_Cancel) {
+					this->m_Cancel = false;
+					SetGunAnime(GunAnimeID::Base);
+				}
 				if (GetGunAnimePer(EnumGunAnimType::Reload) >= 1.f) {
 					switch (this->GetModData()->GetReloadType()) {
 					case RELOADTYPE::MAG:

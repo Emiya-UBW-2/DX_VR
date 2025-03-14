@@ -2,6 +2,8 @@
 
 #include "../../MainScene/Player/Player.hpp"
 
+#include "../../MainScene/Object/Target.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		const Matrix4x4DX CharacterClass::GetCharaDir(void) const noexcept {
@@ -245,45 +247,6 @@ namespace FPS_n2 {
 			//auto* OptionParts = OptionManager::Instance();
 			//
 			auto PrevAction = m_CharaAction;
-			//開始演出
-			if (GetGunPtrNow() && m_ReadyAnim > 0.f) {
-				m_ReadyAnim = std::max(m_ReadyAnim - 1.f / DXLib_refParts->GetFps(), 0.f);
-				switch (m_ReadyAnimPhase) {
-				case 0:
-					GunReadyControl::SetAim();
-					if (m_ReadyAnim < 4.f) {
-						m_ReadyAnimPhase++;
-						//リロード
-						m_CharaAction = CharaActionID::Reload;
-						Camera3D::Instance()->SetCamShake(0.1f, 2.f);
-					}
-					break;
-				case 1:
-					if (GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadEnd) {
-						m_ReadyAnimPhase++;
-						Camera3D::Instance()->SetCamShake(0.1f, 2.f);
-					}
-					break;
-				case 2:
-					GunReadyControl::SetReady();
-					if (IsLowReadyPer()) {
-						m_ReadyAnimPhase++;
-						GunReadyControl::SetAim();
-						SelectGun(0);
-						m_CharaAction = CharaActionID::Check;
-						Camera3D::Instance()->SetCamShake(0.1f, 2.f);
-					}
-					break;
-				case 3:
-					if (GetGunPtrNow()->GetGunAnime() == GunAnimeID::CheckEnd) {
-						m_ReadyAnimPhase++;
-					}
-					break;
-				default:
-					m_ReadyAnim = -1.f;
-					break;
-				}
-			}
 			//
 			bool Press_Shot = KeyControl::GetInputControl().GetPADSPress(Controls::PADS::SHOT) && !m_IsChange;
 			bool Press_Reload = KeyControl::GetInputControl().GetPADSPress(Controls::PADS::RELOAD) && !m_IsChange;
@@ -427,10 +390,15 @@ namespace FPS_n2 {
 						Reload_Start();
 					}
 					else {
-						if ((GetGunPtrNow()->GetModData()->GetReloadType() == RELOADTYPE::AMMO) && (GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadOne)) {
+						if ((GetGunPtrNow()->GetModData()->GetReloadType() == RELOADTYPE::AMMO) && (GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadOne)) 
+						{
 							if (KeyControl::GetInputControl().GetPADSPress(Controls::PADS::SHOT)) {
 								GetGunPtrNow()->SetCancel(true);
 							}
+						}
+						if (KeyControl::GetInputControl().GetPADSPress(Controls::PADS::ULT)) {
+							GetGunPtrNow()->SetCancel(true);
+							m_CharaAction = CharaActionID::Ready;
 						}
 						if (!GetGunPtrNow()->GetReloading()) {
 							if (GetGunPtrNow()->GetInChamber()) {
@@ -687,7 +655,7 @@ namespace FPS_n2 {
 
 				Vector3DX vec = KeyControl::GetVec(); vec.y = 0.f;
 				this->SetMove().SetVec(vec);
-				this->SetMove().Update(0.f, 0.f);
+				this->SetMove().Update(0.5f, 0.f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}
 			else {
@@ -711,6 +679,24 @@ namespace FPS_n2 {
 					if (Len < Radius) {
 						PosBuf = PosBuf + Vec.normalized() * (Len - Radius);
 					}
+				}
+				auto* ObjMngr = ObjectManager::Instance();
+				int j = 0;
+				while (true) {
+					auto target = ObjMngr->GetObj((int)ObjType::Target, j);
+					if (target != nullptr) {
+						auto& t = (std::shared_ptr<TargetClass>&)(*target);
+						//自分が当たったら押し戻す
+						Vector3DX Vec = (t->GetMove().GetPos() - this->GetCharaPosition()); Vec.y = (0.f);
+						float Len = Vec.magnitude();
+						if (Len < Radius) {
+							PosBuf = PosBuf + Vec.normalized() * (Len - Radius);
+						}
+					}
+					else {
+						break;
+					}
+					j++;
 				}
 			}
 			//座標オーバーライド
@@ -1152,13 +1138,6 @@ namespace FPS_n2 {
 			this->m_ULTBar.Init(IsGun0Select());
 			this->m_SlingPer[0] = (IsGun0Select()) ? 0.f : 1.f;
 			this->m_SlingPer[1] = 1.f - this->m_SlingPer[0];
-			if (GunSel == 1) {
-				m_ReadyAnim = 5.f;
-				m_ReadyAnimPhase = 0;
-			}
-			else {
-				m_ReadyAnim = -1.f;
-			}
 			GunReadyControl::SetReady();
 		}
 		void			CharacterClass::SetInput(const InputControl& pInput, bool pReady) noexcept {
