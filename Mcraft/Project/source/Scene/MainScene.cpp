@@ -539,7 +539,7 @@ namespace FPS_n2 {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 			}
 			for (auto& s : m_LineDebug) {
-				DrawCapsule3D(s.PosA.get(), s.PosB.get(), 0.1f * Scale3DRate, 8, GetColor(255, 0, 0), GetColor(255, 0, 0), TRUE);
+				DrawCapsule3D(s.PosA.get(), s.PosB.get(), 0.02f * Scale3DRate, 8, GetColor(255, 0, 0), GetColor(255, 0, 0), TRUE);
 			}
 			SetFogEnable(FALSE);
 

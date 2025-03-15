@@ -242,7 +242,6 @@ namespace FPS_n2 {
 		}
 		//ëÄçÏ
 		void			CharacterClass::ExecuteInput(void) noexcept {
-			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			//auto* OptionParts = OptionManager::Instance();
 			//

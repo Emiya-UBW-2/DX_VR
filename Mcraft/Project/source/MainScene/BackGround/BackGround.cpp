@@ -1080,8 +1080,8 @@ namespace FPS_n2 {
 								if (!cell.isInside(y)) { return false; }
 								if (cell.GetCellBuf(x, y, z).m_Cell == s_EmptyBlick) { return false; }
 								if (!(cell.GetCellBuf(x, y, z).m_FillInfo != 0b111111)) { return false; }
-								Vector3DX MinPos = cell.GetPos(x, y, z);
-								Vector3DX MaxPos = cell.GetPos(x + 1, y + 1, z + 1);
+								Vector3DX MinPos = cell.GetPos(x, y, z) + Vector3DX::one() * -0.1f * Scale3DRate;
+								Vector3DX MaxPos = cell.GetPos(x + 1, y + 1, z + 1) + Vector3DX::one() * 0.1f * Scale3DRate;
 								if (ColRayBox(StartPos, EndPos, MinPos, MaxPos, Normal)) {
 									isHit = true;
 									return true;
@@ -1233,8 +1233,8 @@ namespace FPS_n2 {
 
 				std::ifstream fin{};
 				fin.open("data/Map.txt", std::ios::in | std::ios::binary);
-				m_CellBase.resize(256 * 256 * 256);
-				fin.read((char*)m_CellBase.data(), sizeof(m_CellBase.at(0)) * (256 * 256 * 256));
+				m_CellBase.resize((size_t)256 * 256 * 256);
+				fin.read((char*)m_CellBase.data(), (size_t)sizeof(m_CellBase.at(0)) * 256 * 256 * 256);
 				fin.close();
 				for (int xm = 0; xm < cell.All; ++xm) {
 					for (int ym = 0; ym < cell.All; ++ym) {
@@ -1271,7 +1271,7 @@ namespace FPS_n2 {
 			{
 				auto& cell = m_CellxN.front();
 
-				m_CellBase.resize(256 * 256 * 256);
+				m_CellBase.resize((size_t)256 * 256 * 256);
 				for (int xm = 0; xm < cell.All; ++xm) {
 					for (int ym = 0; ym < cell.All; ++ym) {
 						for (int zm = 0; zm < cell.All; ++zm) {
@@ -1282,7 +1282,7 @@ namespace FPS_n2 {
 
 				std::ofstream fout{};
 				fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
-				fout.write((char*)m_CellBase.data(), sizeof(m_CellBase.at(0)) * (256 * 256 * 256));
+				fout.write((char*)m_CellBase.data(), (size_t)sizeof(m_CellBase.at(0)) * 256 * 256 * 256);
 				fout.close();  //ファイルを閉じる
 			}
 			//一部を切り取って保存
@@ -1306,8 +1306,8 @@ namespace FPS_n2 {
 			fin.read((char*)&XTotal, sizeof(XTotal));
 			fin.read((char*)&YTotal, sizeof(YTotal));
 			fin.read((char*)&ZTotal, sizeof(ZTotal));
-			m_CellBase.resize(XTotal * YTotal * ZTotal);
-			fin.read((char*)m_CellBase.data(), sizeof(m_CellBase.at(0)) * (XTotal * YTotal * ZTotal));
+			m_CellBase.resize((size_t)XTotal * YTotal * ZTotal);
+			fin.read((char*)m_CellBase.data(), (size_t)sizeof(m_CellBase.at(0)) * XTotal * YTotal * ZTotal);
 			fin.close();  //ファイルを閉じる
 
 			for (int xm = 0; xm < XTotal; ++xm) {
@@ -1325,7 +1325,7 @@ namespace FPS_n2 {
 			int YTotal = (YMax - YMin + 1);
 			int ZTotal = (ZMax - ZMin + 1);
 
-			m_CellBase.resize(XTotal * YTotal * ZTotal);
+			m_CellBase.resize((size_t)XTotal * YTotal * ZTotal);
 			for (int xm = 0; xm < XTotal; ++xm) {
 				for (int ym = 0; ym < YTotal; ++ym) {
 					for (int zm = 0; zm < ZTotal; ++zm) {
@@ -1339,7 +1339,7 @@ namespace FPS_n2 {
 			fout.write((char*)&XTotal, sizeof(XTotal));
 			fout.write((char*)&YTotal, sizeof(YTotal));
 			fout.write((char*)&ZTotal, sizeof(ZTotal));
-			fout.write((char*)m_CellBase.data(), sizeof(m_CellBase.at(0)) * (XTotal * YTotal * ZTotal));
+			fout.write((char*)m_CellBase.data(), (size_t)sizeof(m_CellBase.at(0)) * XTotal * YTotal * ZTotal);
 			fout.close();  //ファイルを閉じる
 		}
 		//
