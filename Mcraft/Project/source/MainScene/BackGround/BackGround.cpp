@@ -1067,7 +1067,7 @@ namespace FPS_n2 {
 		bool		BackGroundClass::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
 			auto& cell = m_CellxN.front();
 			auto Start = cell.GetPoint(StartPos);
-			auto End = cell.GetPoint(StartPos);// *EndPos
+			auto End = cell.GetPoint(*EndPos);// *EndPos
 
 			for (int xm = -1; xm <= 1; ++xm) {
 				for (int ym = -1; ym <= 1; ++ym) {
@@ -1438,6 +1438,99 @@ namespace FPS_n2 {
 						}
 					}
 				}
+				SaveCellsFile();
+			}
+			else if (true) {
+				//‹ó‚Á‚Û
+				auto& cell = m_CellxN.front();
+				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
+
+				PerlinNoise ns(GetRand(100));
+				for (int x = 0; x < cell.All; ++x) {
+					for (int z = 0; z < cell.All; ++z) {
+						for (int y = 0; y < cell.All; ++y) {
+							cell.SetCellBuf(x, y, z).m_Cell = s_EmptyBlick;
+						}
+					}
+				}
+
+				int Size = 25;
+				m_MazeControl.createMaze(Size, Size);
+				int Rate = 6;
+				int Heights = 10;
+				//*
+				int Edge = 6;
+
+				for (int z = -Edge; z < Size * Rate + Edge; z++) {
+					for (int x = -Edge; x < Size * Rate + Edge; x++) {
+						int xPos = -Size * Rate / 2 + x;
+						int zPos = -Size * Rate / 2 + z;
+						auto Height = static_cast<int>(ns.octaveNoise(2, 
+							(static_cast<float>(x)) / (Size * Rate),
+							(static_cast<float>(z)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 5));
+						for (int y = Height; y <= Height + Heights; ++y) {
+							if (y <= Height) {
+								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
+							}
+						}
+					}
+				}
+
+				for (int z = -Edge; z < Size * Rate + Edge; z++) {
+					for (int x = -Edge; x < Size * Rate + Edge; x++) {
+						if ((x == -Edge || x == Size * Rate + Edge - 1) || (z == -Edge || z == Size * Rate + Edge - 1)) {
+							int xPos = -Size * Rate / 2 + x;
+							int zPos = -Size * Rate / 2 + z;
+							auto Height = static_cast<int>(ns.octaveNoise(2, 
+								(static_cast<float>(x)) / (Size * Rate),
+								(static_cast<float>(z)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 5));
+							for (int y = Height; y <= Height + Heights; ++y) {
+								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
+							}
+						}
+					}
+				}
+				//*/
+				for (int z = 0; z < Size * Rate; z++) {
+					for (int x = 0; x < Size * Rate; x++) {
+						auto SetWall = [&](int xt,int zt) {
+							int xPos = -Size * Rate / 2 + x + xt;
+							int zPos = -Size * Rate / 2 + z + zt;
+							auto Height = static_cast<int>(ns.octaveNoise(2, 
+								(static_cast<float>(x + xt)) / (Size * Rate),
+								(static_cast<float>(z + zt)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 5));
+							for (int y = Height; y <= Height + Heights; ++y) {
+								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
+							}
+						};
+						int xp = x / Rate;
+						int zp = z / Rate;
+						if (!m_MazeControl.PosIsPath(xp, zp) && (x % Rate == 0) && (z % Rate == 0)) {
+							SetWall(0, 0);
+							if ((xp > 0) && !m_MazeControl.PosIsPath(xp - 1, zp)) {
+								for (int xt = 0; xt < Rate; xt++) {
+									SetWall(-xt, 0);
+								}
+							}
+							if ((zp > Size - 1) && !m_MazeControl.PosIsPath(xp, zp - 1)) {
+								for (int zt = 0; zt < Rate; zt++) {
+									SetWall(0, -zt);
+								}
+							}
+							if ((xp < 0) && !m_MazeControl.PosIsPath(xp + 1, zp)) {
+								for (int xt = 0; xt < Rate; xt++) {
+									SetWall(xt, 0);
+								}
+							}
+							if ((zp < Size - 1) && !m_MazeControl.PosIsPath(xp, zp + 1)) {
+								for (int zt = 0; zt < Rate; zt++) {
+									SetWall(0, zt);
+								}
+							}
+						}
+					}
+				}
+
 				SaveCellsFile();
 			}
 			else if (false) {

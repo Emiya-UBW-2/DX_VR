@@ -72,10 +72,11 @@ namespace FPS_n2 {
 				//人の座標設定
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 0.f * Scale3DRate, 0.f);
+					pos_t = Vector3DX::vget(0.f, 0.f, 0.f);
+					pos_t *= Scale3DRate;
 
-					Vector3DX EndPos = pos_t - Vector3DX::up() * 2.f * Scale3DRate;
-					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 2.f * Scale3DRate, &EndPos)) {
+					Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
+					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 200.f * Scale3DRate, &EndPos)) {
 						pos_t = EndPos;
 					}
 					c->ValueSet((PlayerID)index, true, CharaTypeID::Team);
@@ -83,26 +84,22 @@ namespace FPS_n2 {
 				}
 				p->GetAI()->Init((PlayerID)index);
 			}
-			const Vector3DX TargetPositions[9] = {
-				Vector3DX::vget(0.39f,0.0f,-7.65f),
-				Vector3DX::vget(7.16f,0.0f,-7.65f),
-				Vector3DX::vget(14.28f,0.0f,-7.65f),
-				Vector3DX::vget(0.39f,0.0f,-3.51f),
-				Vector3DX::vget(7.16f,0.0f,-3.51f),
-				Vector3DX::vget(14.28f,0.0f,-3.51f),
-				Vector3DX::vget(0.39f,0.0f, 0.85f),
-				Vector3DX::vget(7.16f,0.0f, 0.85f),
-				Vector3DX::vget(14.28f,0.0f, 0.85f),
-			};
 			auto* ObjMngr = ObjectManager::Instance();
-			for (int j = 0; j < 9; j++) {
+			for (int j = 0; j < 20; j++) {
 				auto Obj = std::make_shared<TargetClass>();
 				ObjMngr->AddObject(Obj);
 				ObjMngr->LoadModel(Obj, Obj, "data/model/Target2/");
 
-				auto Rot = Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRand(360)));
-				Obj->SetMove().SetMat(Rot);
-				Obj->SetMove().SetPos((TargetPositions[j] * Scale3DRate) + Rot.zvec() * (1.5f * Scale3DRate));
+				Vector3DX pos_t;
+				pos_t.Set(GetRandf(20.f), 0.f, GetRandf(20.f));
+				pos_t *= Scale3DRate;
+
+				Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
+				if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 200.f * Scale3DRate, &EndPos)) {
+					pos_t = EndPos;
+				}
+				Obj->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRand(360))));
+				Obj->SetMove().SetPos(pos_t);
 				Obj->SetMove().Update(0.f, 0.f);
 				Obj->UpdateObjMatrix(Obj->GetMove().GetMat(), Obj->GetMove().GetPos());
 			}
@@ -541,6 +538,9 @@ namespace FPS_n2 {
 			for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 			}
+			for (auto& s : m_LineDebug) {
+				DrawCapsule3D(s.PosA.get(), s.PosB.get(), 0.1f * Scale3DRate, 8, GetColor(255, 0, 0), GetColor(255, 0, 0), TRUE);
+			}
 			SetFogEnable(FALSE);
 
 
@@ -671,9 +671,13 @@ namespace FPS_n2 {
 					if (a->IsActive()) {
 						//AmmoClass
 						Vector3DX repos_tmp = a->GetRePos();
-						Vector3DX pos_tmp = a->GetMove().GetPos();
+						Vector3DX pos_tmp = a->GetPos();
 
 						bool is_HitAll = false;
+
+						Vector3DX norm_tmp;
+						auto ColResGround = BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
+
 
 						int j = 0;
 						while (true) {
@@ -682,8 +686,10 @@ namespace FPS_n2 {
 								auto& t = (std::shared_ptr<TargetClass>&)(*target);
 								auto Res = t->GetColLine(repos_tmp, pos_tmp, -1);
 								if (Res.HitFlag == TRUE) {
+									pos_tmp = Res.HitPosition;
+									norm_tmp = Res.Normal;
 									//エフェクト
-									EffectControl::SetOnce_Any((int)EffectResource::Effect::ef_gndsmoke, Res.HitPosition, (Vector3DX)(Res.Normal) * -1.f, a->GetCaliberSize() / 0.02f * Scale3DRate);
+									EffectControl::SetOnce_Any((int)EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp * -1.f, a->GetCaliberSize() / 0.02f * Scale3DRate);
 									SE->Get(SoundType::SE, (int)SoundEnum::HitGround0 + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
 									//ヒット演算
 									if (tgtSel != -1 && tgtSel != j) {
@@ -693,8 +699,8 @@ namespace FPS_n2 {
 									tgtSel = j;
 									tgtTimer = 2.f;
 
-									t->SetHitPos(Res.HitPosition);
-	
+									t->SetHitPos(pos_tmp);
+
 									a->Penetrate(0, 0);
 									is_HitAll = true;
 								}
@@ -706,8 +712,6 @@ namespace FPS_n2 {
 						}
 
 
-						Vector3DX norm_tmp;
-						auto ColResGround = BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
 						for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 							if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }
@@ -718,6 +722,10 @@ namespace FPS_n2 {
 								is_HitAll = true;
 							}
 						}
+						//m_LineDebug.emplace_back();
+						//m_LineDebug.back().PosA = repos_tmp;
+						//m_LineDebug.back().PosB = pos_tmp;
+						//m_LineDebug.back().Time = 10.f;
 						if (ColResGround && !is_HitAll) {
 							a->HitGround(pos_tmp);
 							EffectControl::SetOnce_Any((int)EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale3DRate);

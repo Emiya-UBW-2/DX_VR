@@ -326,7 +326,7 @@ namespace FPS_n2 {
 
 			const auto		GetSpeedPer(void) const noexcept {
 				if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
-					return 0.15f;
+					return 0.45f;
 				}
 				if (GetIsSquat()) {
 					return 0.45f;
@@ -335,7 +335,7 @@ namespace FPS_n2 {
 					return 1.75f;
 				}
 				else {
-					return 0.65f;
+					return 1.95f;
 				}
 			}
 			const auto		GetVec(void) const noexcept {

@@ -662,6 +662,8 @@ namespace FPS_n2 {
 				float Y = this->GetMove().GetVec().y;
 				Vector3DX vec = KeyControl::GetVec(); vec.y = (Y + (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps())));
 				this->SetMove().SetVec(vec);
+				this->SetMove().Update(0.5f, 0.f);
+				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}
 			PosBuf += this->GetMove().GetVec();
 			//•Ç”»’è
