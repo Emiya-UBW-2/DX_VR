@@ -128,8 +128,8 @@ namespace FPS_n2 {
 		static constexpr int DrawMaxZPlus = DrawMax;
 		static constexpr int DrawMaxZMinus = -DrawMax;
 
-		static constexpr int DrawMaxYPlus = 15 * 2 / 5;//30 * 6 / 5
-		static constexpr int DrawMaxYMinus = -15 * 8 / 5;//-30 * 4 / 5
+		static constexpr int DrawMaxYPlus = 30 * 6 / 5;
+		static constexpr int DrawMaxYMinus = -30 * 4 / 5;
 
 
 		static constexpr int DrawMinXPlus = DrawMaxXPlus / MulPer;

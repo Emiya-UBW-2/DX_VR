@@ -1,0 +1,6 @@
+Name=GMag 17Round
+
+capacity=17
+useammo0=9x19
+
+end

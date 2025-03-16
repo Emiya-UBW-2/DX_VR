@@ -1462,7 +1462,7 @@ namespace FPS_n2 {
 					}
 				}
 
-				int Size = 25;
+				int Size = 21;
 				m_MazeControl.createMaze(Size, Size);
 				int Rate = 6;
 				int Heights = 10;
@@ -1478,7 +1478,7 @@ namespace FPS_n2 {
 							(static_cast<float>(z)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 5));
 						for (int y = Height; y <= Height + Heights; ++y) {
 							if (y <= Height) {
-								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
+								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 2;
 							}
 						}
 					}
@@ -1492,7 +1492,7 @@ namespace FPS_n2 {
 							auto Height = static_cast<int>(ns.octaveNoise(2, 
 								(static_cast<float>(x)) / (Size * Rate),
 								(static_cast<float>(z)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 5));
-							for (int y = Height; y <= Height + Heights; ++y) {
+							for (int y = Height; y <= cell.All*3/5; ++y) {
 								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
 							}
 						}
@@ -1508,7 +1508,7 @@ namespace FPS_n2 {
 								(static_cast<float>(x + xt)) / (Size * Rate),
 								(static_cast<float>(z + zt)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 5));
 							for (int y = Height; y <= Height + Heights; ++y) {
-								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
+								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 2;
 							}
 						};
 						int xp = x / Rate;

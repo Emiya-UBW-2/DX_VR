@@ -17,8 +17,7 @@ namespace FPS_n2 {
 			// 
 			ButtonParts->ResetSel();
 			// 
-			ButtonParts->AddStringButton("Let's Go!", 52, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 2, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
-			ButtonParts->AddStringButton("Reset SaveData", 48, true, BaseScreenWidth - 64, BaseScreenHeight - 84 - 64 * 1, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton("Start Game", 52, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 2, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
 			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, BaseScreenWidth - 96 - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, BaseScreenWidth - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			// クレジット
@@ -64,45 +63,9 @@ namespace FPS_n2 {
 						this->m_GameStart += 0.0001f;
 						break;
 					case 1:
-						PopUpParts->Add(LocalizeParts->Get(3100), (480), (240),
-							[&](int xmin, int ymin, int xmax, int ymax, bool) {
-								auto* LocalizeParts = LocalizePool::Instance();
-								auto* SceneParts = SceneControl::Instance();
-								auto* DrawCtrls = WindowSystem::DrawControl::Instance();
-								int xp1, yp1;
-								//タイトル
-								{
-									xp1 = xmin + (24);
-									yp1 = ymin + LineHeight;
-
-									DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-										FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, White, Black, LocalizeParts->Get(3101));
-								}
-								//
-								{
-									xp1 = (xmax + xmin) / 2 - (54);
-									yp1 = ymax - LineHeight * 3;
-
-									auto* Pad = PadControl::Instance();
-									bool ret = WindowSystem::SetMsgClickBox(xp1, yp1, xp1 + (108), yp1 + LineHeight * 2, LineHeight, Gray15, false, true, LocalizeParts->Get(3102));
-									if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger() || ret) {
-										auto* SaveDataParts = SaveDataClass::Instance();
-										SaveDataParts->Reset();
-										SaveDataParts->Save();
-										SceneParts->ChangePause(false);
-										m_CloseResetSave = true;
-									}
-								}
-							},
-							[]() {},
-							[]() {},
-							true
-						);
-						break;
-					case 2:
 						OptionPopup::Instance()->SetActive();
 						break;
-					case 3:
+					case 2:
 						PopUpParts->Add(LocalizeParts->Get(120), (720), (840),
 							[&](int xmin, int ymin, int xmax, int, bool) {
 								this->m_CreditControl->Draw(xmin, ymin, xmax);
@@ -164,7 +127,7 @@ namespace FPS_n2 {
 			// 
 			WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18), 
 				FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
-				(64 + 369), (64 + 207), White, Black, "Ver 1.0.1");
+				(64 + 369), (64 + 207), White, Black, "Ver 0.0.0");
 			// 
 			ButtonParts->Draw();
 			// 
@@ -176,10 +139,10 @@ namespace FPS_n2 {
 			// 
 			{
 				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameFadeIn, 0.f, 1.f)), 0, 255));
-				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, WindowSizeParts->GetScreenXMax(), WindowSizeParts->GetScreenYMax(), Black, TRUE);
+				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Black, TRUE);
 
 				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameStart, 0.f, 1.f)), 0, 255));
-				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, WindowSizeParts->GetScreenXMax(), WindowSizeParts->GetScreenYMax(), White, TRUE);
+				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, White, TRUE);
 
 				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
