@@ -1438,7 +1438,7 @@ namespace FPS_n2 {
 				for (int x = 0; x < cell.All; ++x) {
 					for (int z = 0; z < cell.All; ++z) {
 						for (int y = 0; y < cell.All; ++y) {
-							if (y <= cell.All/2) {
+							if (y <= cell.All * 1 / 4) {
 								cell.SetCellBuf(x, y, z).m_Cell = 1;
 								continue;
 							}
@@ -1462,7 +1462,18 @@ namespace FPS_n2 {
 					}
 				}
 
-				int Size = 21;
+				for (int x = 0; x < cell.All; x += 2) {
+					for (int z = 0; z < cell.All; z += 2) {
+						if (GetRand(100) < 70) {
+							int y = cell.All * 1 / 4-5;
+							cell.SetCellBuf(x + 0, y, z + 0).m_Cell = 1;
+							cell.SetCellBuf(x + 0, y, z + 1).m_Cell = 1;
+							cell.SetCellBuf(x + 1, y, z + 0).m_Cell = 1;
+							cell.SetCellBuf(x + 1, y, z + 1).m_Cell = 1;
+						}
+					}
+				}
+				int Size = 17;
 				m_MazeControl.createMaze(Size, Size);
 				int Rate = 6;
 				int Heights = 10;
@@ -1475,7 +1486,7 @@ namespace FPS_n2 {
 						int zPos = -Size * Rate / 2 + z;
 						auto Height = static_cast<int>(ns.octaveNoise(2, 
 							(static_cast<float>(x)) / (Size * Rate),
-							(static_cast<float>(z)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 5));
+							(static_cast<float>(z)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 10));
 						for (int y = Height; y <= Height + Heights; ++y) {
 							if (y <= Height) {
 								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 2;
@@ -1491,7 +1502,7 @@ namespace FPS_n2 {
 							int zPos = -Size * Rate / 2 + z;
 							auto Height = static_cast<int>(ns.octaveNoise(2, 
 								(static_cast<float>(x)) / (Size * Rate),
-								(static_cast<float>(z)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 5));
+								(static_cast<float>(z)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 10));
 							for (int y = Height; y <= cell.All*3/5; ++y) {
 								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
 							}
@@ -1506,7 +1517,7 @@ namespace FPS_n2 {
 							int zPos = -Size * Rate / 2 + z + zt;
 							auto Height = static_cast<int>(ns.octaveNoise(2, 
 								(static_cast<float>(x + xt)) / (Size * Rate),
-								(static_cast<float>(z + zt)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 5));
+								(static_cast<float>(z + zt)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 10));
 							for (int y = Height; y <= Height + Heights; ++y) {
 								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 2;
 							}

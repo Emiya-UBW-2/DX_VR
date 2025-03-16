@@ -30,18 +30,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(Controls::PADS::LEAN_R, true);
 	Pad->SetIsUseButton(Controls::PADS::RELOAD, true);//UI‚Ì‚İ
 	Pad->SetIsUseButton(Controls::PADS::INTERACT, true);//UI‚Ì‚İ
-	//Pad->SetIsUseButton(Controls::PADS::THROW, true);
-	//Pad->SetIsUseButton(Controls::PADS::MELEE, true);
-	//Pad->SetIsUseButton(Controls::PADS::JUMP, true);
+	Pad->SetIsUseButton(Controls::PADS::THROW, false);
+	Pad->SetIsUseButton(Controls::PADS::MELEE, false);
+	Pad->SetIsUseButton(Controls::PADS::JUMP, false);
 	Pad->SetIsUseButton(Controls::PADS::INVENTORY, true);
-	//Pad->SetIsUseButton(Controls::PADS::RUN, true);
+	Pad->SetIsUseButton(Controls::PADS::RUN, false);
 	Pad->SetIsUseButton(Controls::PADS::WALK, true);
 	Pad->SetIsUseButton(Controls::PADS::SHOT, true);
 	Pad->SetIsUseButton(Controls::PADS::AIM, true);
 	Pad->SetIsUseButton(Controls::PADS::ULT, true);
-	//Pad->SetIsUseButton(Controls::PADS::SQUAT, true);
-	//Pad->SetIsUseButton(Controls::PADS::PRONE, true);
-	//Pad->SetIsUseButton(Controls::PADS::CHECK, true);
+	Pad->SetIsUseButton(Controls::PADS::SQUAT, false);
+	Pad->SetIsUseButton(Controls::PADS::PRONE, false);
+	Pad->SetIsUseButton(Controls::PADS::CHECK, false);
 	//
 	auto* DXLib_refParts = DXLib_ref::Instance();
 	if (DXLib_refParts->FirstBootSetting()) { return 0; }
@@ -69,7 +69,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SaveDataParts->Save();
 	//BGM
 	SE->Add(SoundType::BGM, 0, 1, "data/Sound/BGM/Title.wav");
-	SE->Add(SoundType::BGM, 1, 1, "data/Sound/BGM/Vivaldi_Winter.wav", true);
 	//ƒV[ƒ“
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto LoadScenePtr = std::make_shared<FPS_n2::Sceneclass::LoadScene>();

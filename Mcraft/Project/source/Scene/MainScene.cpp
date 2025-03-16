@@ -59,7 +59,7 @@ namespace FPS_n2 {
 			SetLightAmbColorHandle(FirstLight.get(), GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
 			SetLightDifColorHandle(FirstLight.get(), GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
 
-			PostPassParts->SetGodRayPer(0.05f);
+			PostPassParts->SetGodRayPer(0.5f);
 			//Cam
 			CameraParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 			//info
@@ -67,6 +67,9 @@ namespace FPS_n2 {
 			float SQRTMax = Max;
 			CameraParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.03f, SQRTMax);
 			//Fog
+			SetVerticalFogMode(DX_FOGMODE_LINEAR);
+			SetVerticalFogStartEnd(-26.f * Scale3DRate, -10.f * Scale3DRate);
+			SetVerticalFogColor(0, 0, 0);
 			SetFogMode(DX_FOGMODE_LINEAR);
 			SetFogStartEnd(SQRTMax, SQRTMax * 20.f);
 			SetFogColor(114, 120, 128);
@@ -77,11 +80,11 @@ namespace FPS_n2 {
 				//l‚ÌÀ•WÝ’è
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, 0.f, 0.f);
+					pos_t = Vector3DX::vget(0.f, -20.f, 0.f);
 					pos_t *= Scale3DRate;
 
 					Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
-					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 200.f * Scale3DRate, &EndPos)) {
+					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 0.f * Scale3DRate, &EndPos)) {
 						pos_t = EndPos;
 					}
 					c->ValueSet((PlayerID)index, true, CharaTypeID::Team);
@@ -90,17 +93,17 @@ namespace FPS_n2 {
 				p->GetAI()->Init((PlayerID)index);
 			}
 			auto* ObjMngr = ObjectManager::Instance();
-			for (int j = 0; j < 20; j++) {
+			for (int j = 0; j < 10; j++) {
 				auto Obj = std::make_shared<TargetClass>();
 				ObjMngr->AddObject(Obj);
 				ObjMngr->LoadModel(Obj, Obj, "data/model/Target2/");
 
 				Vector3DX pos_t;
-				pos_t.Set(GetRandf(20.f), 0.f, GetRandf(20.f));
+				pos_t.Set(GetRandf(10.f), -20.f, GetRandf(10.f));
 				pos_t *= Scale3DRate;
 
 				Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
-				if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 200.f * Scale3DRate, &EndPos)) {
+				if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 0.f * Scale3DRate, &EndPos)) {
 					pos_t = EndPos;
 				}
 				Obj->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRand(360))));
@@ -537,6 +540,7 @@ namespace FPS_n2 {
 		void			MainGameScene::MainDraw_Sub(void) const noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			SetFogEnable(TRUE);
+			SetVerticalFogEnable(TRUE);
 			BackGround::BackGroundClass::Instance()->Draw();
 			ObjectManager::Instance()->Draw();
 			//ObjectManager::Instance()->Draw_Depth();
@@ -549,6 +553,7 @@ namespace FPS_n2 {
 				DrawCapsule3D(s.PosA.get(), s.PosB.get(), 0.02f * Scale3DRate, 8, GetColor(0, 0, (32 * index) % 256), GetColor(0, 0, 0), TRUE);
 			}
 #endif // DEBUG
+			SetVerticalFogEnable(FALSE);
 			SetFogEnable(FALSE);
 
 

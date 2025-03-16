@@ -120,7 +120,7 @@ namespace FPS_n2 {
 		static constexpr int MulPer = 2;
 		static constexpr float CellScale = Scale3DRate / 2.f / 2.f;
 
-		static constexpr int DrawMax = 35;//65
+		static constexpr int DrawMax = 25;//65
 
 		static constexpr int DrawMaxXPlus = DrawMax;
 		static constexpr int DrawMaxXMinus = -DrawMax;
