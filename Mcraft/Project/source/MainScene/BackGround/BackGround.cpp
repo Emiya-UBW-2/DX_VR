@@ -1082,9 +1082,17 @@ namespace FPS_n2 {
 								if (!(cell.GetCellBuf(x, y, z).m_FillInfo != 0b111111)) { return false; }
 								Vector3DX MinPos = cell.GetPos(x, y, z) + Vector3DX::one() * -0.1f * Scale3DRate;
 								Vector3DX MaxPos = cell.GetPos(x + 1, y + 1, z + 1) + Vector3DX::one() * 0.1f * Scale3DRate;
-								if (ColRayBox(StartPos, EndPos, MinPos, MaxPos, Normal)) {
+								Vector3DX tmpEndPos = *EndPos;
+								Vector3DX tmpNormal;
+								if (ColRayBox(StartPos, &tmpEndPos, MinPos, MaxPos, &tmpNormal)) {
+									if ((tmpEndPos - StartPos).sqrMagnitude() < (*EndPos - StartPos).sqrMagnitude()) {
+										*EndPos = tmpEndPos;
+										if (Normal) {
+											*Normal = tmpNormal;
+										}
+									}
 									isHit = true;
-									return true;
+									//return true;
 								}
 								return false;
 							});
@@ -1459,7 +1467,7 @@ namespace FPS_n2 {
 				int Rate = 6;
 				int Heights = 10;
 				//*
-				int Edge = 6;
+				int Edge = 0;
 
 				for (int z = -Edge; z < Size * Rate + Edge; z++) {
 					for (int x = -Edge; x < Size * Rate + Edge; x++) {

@@ -120,7 +120,7 @@ namespace FPS_n2 {
 		static constexpr int MulPer = 2;
 		static constexpr float CellScale = Scale3DRate / 2.f / 2.f;
 
-		static constexpr int DrawMax = 25;//65
+		static constexpr int DrawMax = 35;//65
 
 		static constexpr int DrawMaxXPlus = DrawMax;
 		static constexpr int DrawMaxXMinus = -DrawMax;
@@ -496,11 +496,14 @@ namespace FPS_n2 {
 				float t_max = FLT_MAX;
 
 				for (int i = 0; i < 3; ++i) {
+					/*
 					if (abs(d[i]) < FLT_EPSILON) {
 						if (p[i] < min[i] || p[i] > max[i])
 							return false; // 交差していない
 					}
-					else {
+					else 
+						//*/
+					{
 						// スラブとの距離を算出
 						// t1が近スラブ、t2が遠スラブとの距離
 						float odd = 1.0f / d[i];

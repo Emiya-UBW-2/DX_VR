@@ -24,7 +24,12 @@ namespace FPS_n2 {
 				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 				Chara->SetPlayMode(false);
 			}
-			LoadGun("type89", GetMyPlayerID(), false, 0);
+			if (GetRand(100) < 50) {
+				LoadGun("type89", GetMyPlayerID(), false, 0);
+			}
+			else {
+				LoadGun("Mod870", GetMyPlayerID(), false, 0);
+			}
 			LoadGun("P226", GetMyPlayerID(), false, 1);
 			//UI
 			this->m_UIclass.Load();
@@ -538,9 +543,12 @@ namespace FPS_n2 {
 			for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 			}
+#ifdef DEBUG
 			for (auto& s : m_LineDebug) {
-				DrawCapsule3D(s.PosA.get(), s.PosB.get(), 0.02f * Scale3DRate, 8, GetColor(255, 0, 0), GetColor(255, 0, 0), TRUE);
+				int index = &s - &m_LineDebug.front();
+				DrawCapsule3D(s.PosA.get(), s.PosB.get(), 0.02f * Scale3DRate, 8, GetColor(0, 0, (32 * index) % 256), GetColor(0, 0, 0), TRUE);
 			}
+#endif // DEBUG
 			SetFogEnable(FALSE);
 
 
@@ -689,7 +697,7 @@ namespace FPS_n2 {
 									pos_tmp = Res.HitPosition;
 									norm_tmp = Res.Normal;
 									//エフェクト
-									EffectControl::SetOnce_Any((int)EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp * -1.f, a->GetCaliberSize() / 0.02f * Scale3DRate);
+									EffectControl::SetOnce_Any((int)EffectResource::Effect::ef_gndsmoke, pos_tmp, (pos_tmp - repos_tmp).normalized(), a->GetCaliberSize() / 0.02f * Scale3DRate);
 									SE->Get(SoundType::SE, (int)SoundEnum::HitGround0 + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
 									//ヒット演算
 									if (tgtSel != -1 && tgtSel != j) {
@@ -722,13 +730,15 @@ namespace FPS_n2 {
 								is_HitAll = true;
 							}
 						}
+#ifdef DEBUG
 						//m_LineDebug.emplace_back();
 						//m_LineDebug.back().PosA = repos_tmp;
 						//m_LineDebug.back().PosB = pos_tmp;
 						//m_LineDebug.back().Time = 10.f;
+#endif // DEBUG
 						if (ColResGround && !is_HitAll) {
 							a->HitGround(pos_tmp);
-							EffectControl::SetOnce_Any((int)EffectResource::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale3DRate);
+							EffectControl::SetOnce_Any((int)EffectResource::Effect::ef_gndsmoke, pos_tmp, (pos_tmp - repos_tmp).normalized(), a->GetCaliberSize() / 0.02f * Scale3DRate);
 							SE->Get(SoundType::SE, (int)SoundEnum::HitGround0 + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
 						}
 					}

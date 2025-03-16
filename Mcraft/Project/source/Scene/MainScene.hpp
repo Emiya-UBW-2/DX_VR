@@ -48,8 +48,8 @@ namespace FPS_n2 {
 
 #ifdef DEBUG
 			float m_D1{ 38.f / 255.f }, m_D2{ 192.f / 255.f }, m_D3{ 1.f };
-#endif
 			std::vector<LineDebug> m_LineDebug;
+#endif
 		private:
 			auto		GetMyPlayerID(void) const noexcept {
 				if (m_NetWorkController) {

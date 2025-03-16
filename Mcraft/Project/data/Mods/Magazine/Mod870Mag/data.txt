@@ -1,0 +1,6 @@
+Name=M870Mag 8Round
+
+capacity=8
+useammo0=12ga_BuckShot
+
+end

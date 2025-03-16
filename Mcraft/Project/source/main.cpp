@@ -77,14 +77,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 
 	//‘JˆÚæŽw’è
-	Titlescene->SetNextSceneList(0, MainGameScenePtr);
+	Titlescene->SetNextSceneList(0, LoadScenePtr);
 	LoadScenePtr->SetNextSceneList(0, MainGameScenePtr);
 	MainGameScenePtr->SetNextSceneList(0, Titlescene);
-	MainGameScenePtr->SetNextSceneList(1, MainGameScenePtr);
+	MainGameScenePtr->SetNextSceneList(1, LoadScenePtr);
 
 	auto* SceneParts = SceneControl::Instance();
-	//SceneParts->AddList(Titlescene);
-	SceneParts->SetFirstScene(LoadScenePtr);
+	SceneParts->SetFirstScene(Titlescene);
+	//SceneParts->SetFirstScene(LoadScenePtr);
 	//Å‰‚Ì“Ç‚Ýž‚Ý
 	DXLib_refParts->MainLogic();
 	return 0;
