@@ -58,8 +58,6 @@ namespace FPS_n2 {
 			bool												m_AmmoLoadSwitch{ false };
 			int													m_AmmoLoadCount{ 0 };
 
-			bool											m_IsHardMode{ false };
-
 			bool												m_MoveOverRideFlag{ false };
 			moves												m_OverRideInfo;
 		private:
@@ -77,8 +75,6 @@ namespace FPS_n2 {
 			}
 		public:
 			bool												CanLookTarget{ true };
-
-			void			SetPlayMode(bool value) noexcept { m_IsHardMode = value; }
 		private:
 			const Matrix4x4DX GetCharaDir(void) const noexcept;
 

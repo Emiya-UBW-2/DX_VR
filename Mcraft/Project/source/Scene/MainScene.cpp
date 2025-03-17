@@ -20,10 +20,6 @@ namespace FPS_n2 {
 			PlayerMngr->Init(NetWork::Player_num, 0);
 
 			BattleResourceMngr->LoadChara("Main", GetMyPlayerID());
-			{
-				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
-				Chara->SetPlayMode(false);
-			}
 			if (GetRand(100) < 50) {
 				LoadGun("type89", GetMyPlayerID(), false, 0);
 			}
@@ -31,6 +27,29 @@ namespace FPS_n2 {
 				LoadGun("Mod870", GetMyPlayerID(), false, 0);
 			}
 			LoadGun("P226", GetMyPlayerID(), false, 1);
+
+			for (int loop = 1; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+				BattleResourceMngr->LoadChara("Soldier", loop);
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(loop)->GetChara();
+				if (loop == 1) {
+					MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
+					MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
+				}
+				else {
+					auto& Base = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1)->GetChara();
+					c->GetRagDoll().Duplicate(Base->GetRagDoll());
+					MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
+				}
+				c->Init_RagDollControl(c->GetObj());
+				//
+				if (GetRand(100) < 50) {
+					LoadGun("type89", loop, false, 0);
+				}
+				else {
+					LoadGun("Mod870", loop, false, 0);
+				}
+				LoadGun("P226", loop, false, 1);
+			}
 			//UI
 			this->m_UIclass.Load();
 			PauseMenuControl::LoadPause();
@@ -59,7 +78,7 @@ namespace FPS_n2 {
 			SetLightAmbColorHandle(FirstLight.get(), GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
 			SetLightDifColorHandle(FirstLight.get(), GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
 
-			PostPassParts->SetGodRayPer(0.5f);
+			PostPassParts->SetGodRayPer(0.25f);
 			//Cam
 			CameraParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 			//info

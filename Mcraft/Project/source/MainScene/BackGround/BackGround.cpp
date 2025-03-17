@@ -1464,7 +1464,7 @@ namespace FPS_n2 {
 
 				for (int x = 0; x < cell.All; x += 2) {
 					for (int z = 0; z < cell.All; z += 2) {
-						if (GetRand(100) < 70) {
+						if (GetRand(100) < 30) {
 							int y = cell.All * 1 / 4-5;
 							cell.SetCellBuf(x + 0, y, z + 0).m_Cell = 1;
 							cell.SetCellBuf(x + 0, y, z + 1).m_Cell = 1;
