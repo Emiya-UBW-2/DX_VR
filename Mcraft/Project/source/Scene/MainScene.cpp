@@ -42,13 +42,7 @@ namespace FPS_n2 {
 				}
 				c->Init_RagDollControl(c->GetObj());
 				//
-				if (GetRand(100) < 50) {
-					LoadGun("type89", loop, false, 0);
-				}
-				else {
-					LoadGun("Mod870", loop, false, 0);
-				}
-				LoadGun("P226", loop, false, 1);
+				LoadGun("AKS-74", loop, false, 0);
 			}
 			//UI
 			this->m_UIclass.Load();
@@ -99,7 +93,7 @@ namespace FPS_n2 {
 				//l‚ÌÀ•WÝ’è
 				{
 					Vector3DX pos_t;
-					pos_t = Vector3DX::vget(0.f, -20.f, 0.f);
+					pos_t.Set(GetRandf(10.f), -20.f, GetRandf(10.f));
 					pos_t *= Scale3DRate;
 
 					Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
@@ -107,10 +101,11 @@ namespace FPS_n2 {
 						pos_t = EndPos;
 					}
 					c->ValueSet((PlayerID)index, true, CharaTypeID::Team);
-					c->MovePoint(deg2rad(0.f), deg2rad(0.f), pos_t, 0);
+					c->MovePoint(deg2rad(0.f), deg2rad(GetRand(360)), pos_t, 0);
 				}
 				p->GetAI()->Init((PlayerID)index);
 			}
+			/*
 			auto* ObjMngr = ObjectManager::Instance();
 			for (int j = 0; j < 10; j++) {
 				auto Obj = std::make_shared<TargetClass>();
@@ -130,6 +125,7 @@ namespace FPS_n2 {
 				Obj->SetMove().Update(0.f, 0.f);
 				Obj->UpdateObjMatrix(Obj->GetMove().GetMat(), Obj->GetMove().GetPos());
 			}
+			//*/
 			ScoreBoard2.Load("data/UI/Score2.png");
 			//UI
 			tgtSel = -1;

@@ -6,7 +6,7 @@
 
 namespace FPS_n2 {
 	namespace NetWork {
-		static const int		Player_num = 2;
+		static const int		Player_num = 10;
 
 		using NetTime = LONGLONG;
 		//クライアントが送信するデータ ローカル版
