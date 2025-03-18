@@ -1,0 +1,8 @@
+Name=5.45x39
+ammo_cal(mm)=5.45
+ammo_speed(m/s)=800
+ammo_pene(mm)=25
+ammo_damage=90
+FallSound=0
+Pellets=1
+Accuracy=0.2
