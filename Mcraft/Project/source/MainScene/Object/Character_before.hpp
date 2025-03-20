@@ -730,6 +730,8 @@ namespace FPS_n2 {
 			float												m_AutoAimOn{ 0.f };
 			float												m_AutoAimTimer{ 0.f };
 		public://ÉQÉbÉ^Å[
+			float												m_AutoAimPer{ 0.f };
+			Vector3DX											m_AutoAimVec{};
 		public:
 			AutoAimControl(void) noexcept {}
 			~AutoAimControl(void) noexcept {}

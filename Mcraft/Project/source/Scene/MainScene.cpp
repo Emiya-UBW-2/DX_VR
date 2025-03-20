@@ -477,6 +477,23 @@ namespace FPS_n2 {
 				m_Concussion = std::max(m_Concussion - 1.f / DXLib_refParts->GetFps(), 0.f);
 			}
 			BackGround->Execute();
+			//
+			{
+				Vector3DX StartPos = Chara->GetEyeMatrix().pos();
+				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+					if (index == 0) { continue; }
+					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
+					Vector3DX TgtPos = c->GetEyeMatrix().pos();
+					c->CanLookTarget = true;
+
+					auto EndPos = TgtPos;
+					auto ColResGround = BackGround->CheckLinetoMap(StartPos, &EndPos);
+
+					if (ColResGround) {
+						c->CanLookTarget = false;
+					}
+				}
+			}
 			//UIパラメーター
 			{
 				//NvsN

@@ -790,22 +790,17 @@ namespace FPS_n2 {
 					//
 					this->m_ULTBar.Execute(IsGun0Select(), 0.1f, 0.1f, 0.7f);
 					//
+					Easing(&m_AutoAimPer, (GunReadyControl::GetIsADS() && GetAutoAimActive()) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+
 					for (int index = 0; index < 2; index++) {
 						auto& p = GetGunPtr(index);
 						if (p) {
 							bool IsSelGun = (index == GetNowGunSelect());
-							auto& Mat = this->m_SlingMat[index];
-							auto& Per = this->m_SlingPer[index];
-							Easing(&Per, IsSelGun ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
-							if (Per <= 0.001f) { Per = 0.f; }
-							if (Per >= 0.999f) { Per = 1.f; }
-
-							auto tmp_gunmat = Matrix4x4DX::RotVec2(Vector3DX::forward(), Lerp(Mat.zvec(), AnimMat.zvec(), Per));
 
 							//オートエイム
 							if (IsSelGun && GunReadyControl::GetIsADS() && GetGunPtrNow()->IsAutoAimActive() && m_IsMainGame) {
 								Vector3DX BasePos = p->GetFrameWorldMat_P(GunFrame::Muzzle).pos();
-								float Range = GetIsLaserActive() ? 13.f : 7.f;
+								float Range = 13.f;// GetIsLaserActive() ? 13.f : 7.f;
 
 								for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
 									if (i == this->m_MyID) { continue; }
@@ -814,7 +809,7 @@ namespace FPS_n2 {
 									if (!Chara->CanLookTarget) { continue; }
 									Vector3DX Vec = (Chara->GetEyeMatrix().pos() - BasePos);
 									if (Vec.magnitude() >= (Scale3DRate * Range)) { continue; }
-									if (Vector3DX::Dot((GetEyeMatrix().zvec() * -1.f), Vec.normalized()) < cos(deg2rad(15))) { continue; }
+									if (Vector3DX::Dot((GetEyeMatrix().zvec() * -1.f), Vec.normalized()) < cos(deg2rad(25))) { continue; }
 
 									AutoAimControl::SetAutoAimActive(i);
 									break;
@@ -822,21 +817,32 @@ namespace FPS_n2 {
 
 								if (GetAutoAimActive()) {
 									auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetAutoAimID())->GetChara();
-									Vector3DX Vec = (Chara->GetEyeMatrix().pos() - BasePos);
-									tmp_gunmat = Matrix4x4DX::RotVec2(GetEyeMatrix().zvec() * -1.f, Vec.normalized()) * tmp_gunmat;
-
+									m_AutoAimVec = (Chara->GetEyeMatrix().pos() - BasePos).normalized();
 								}
 							}
+
+
+							auto& Mat = this->m_SlingMat[index];
+							auto& Per = this->m_SlingPer[index];
+							Easing(&Per, IsSelGun ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+							if (Per <= 0.001f) { Per = 0.f; }
+							if (Per >= 0.999f) { Per = 1.f; }
+
+							auto tmp_gunmat = Matrix4x4DX::RotVec2(Vector3DX::forward(), Lerp(Mat.zvec(), AnimMat.zvec(), Per));
+							tmp_gunmat *= Matrix4x4DX::RotVec2(tmp_gunmat.yvec(), Lerp(Mat.yvec(), AnimMat.yvec(), Per));
 
 							float PAdd = 0.f;
 							if (!IsSelGun) {
 								PAdd = -1.f * Scale3DRate * Per;
 							}
 
-							tmp_gunmat *= Matrix4x4DX::RotVec2(tmp_gunmat.yvec(), Lerp(Mat.yvec(), AnimMat.yvec(), Per));
 							tmp_gunmat *=
 								KeyControl::GetGunSwingMat() * GetCharaDir() *
-								Matrix4x4DX::RotVec2(Lerp(p->GetObj().GetMatrix().yvec(), p->GetEyeYVec(), GunReadyControl::GetADSPer()), p->GetObj().GetMatrix().yvec()) *
+								Matrix4x4DX::RotVec2(Lerp(p->GetObj().GetMatrix().yvec(), p->GetEyeYVec(), GunReadyControl::GetADSPer()), p->GetObj().GetMatrix().yvec());
+
+							tmp_gunmat = Lerp(tmp_gunmat, tmp_gunmat * Matrix4x4DX::RotVec2((tmp_gunmat).zvec() * -1.f, m_AutoAimVec), m_AutoAimPer);
+
+							tmp_gunmat *=
 								Matrix4x4DX::Mtrans(Lerp(Mat.pos() + Vector3DX::up() * PAdd, Post0, Per));
 							p->SetGunMatrix(tmp_gunmat);
 						}

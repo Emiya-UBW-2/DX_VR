@@ -101,7 +101,7 @@ namespace FPS_n2 {
 					return this->m_SightPtr.at(m_GunSightSel);
 				}
 			}
-			const bool	IsAutoAimActive() const noexcept { return ((m_GunSightSel == 1) && !this->m_SightPtr.at(1)); }
+			const bool	IsAutoAimActive() const noexcept { return ((m_GunSightSel == 1) && !this->m_SightPtr.at(1)) || true; }
 			const auto	GetInChamber(void) const noexcept { return this->m_ChamberAmmoData != nullptr; }
 			const auto	GetAmmoAll(void) const noexcept {
 				if (this->m_MagazinePtr) {
