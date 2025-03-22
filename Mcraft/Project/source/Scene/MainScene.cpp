@@ -636,8 +636,8 @@ namespace FPS_n2 {
 					Vector3DX ReticlePosBuf = ConvWorldPosToScreenPos(c->GetEyeMatrix().pos().get());
 					if (0.f < ReticlePosBuf.z && ReticlePosBuf.z < 1.f) {
 						auto* WindowSizeParts = WindowSizeControl::Instance();
-						c->m_CameraPos.x = static_cast<int>(ReticlePosBuf.x * 1980 / WindowSizeParts->GetScreenY(1980));
-						c->m_CameraPos.y = static_cast<int>(ReticlePosBuf.y * 1080 / WindowSizeParts->GetScreenY(1080));
+						c->m_CameraPos.x = static_cast<float>(static_cast<int>(ReticlePosBuf.x * 1980 / WindowSizeParts->GetScreenY(1980)));
+						c->m_CameraPos.y = static_cast<float>(static_cast<int>(ReticlePosBuf.y * 1080 / WindowSizeParts->GetScreenY(1080)));
 						c->m_CameraPos.z = ReticlePosBuf.z;
 					}
 				}

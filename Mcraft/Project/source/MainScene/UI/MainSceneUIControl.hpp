@@ -104,7 +104,7 @@ namespace FPS_n2 {
 						auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 						if (!c->IsAlive() || !c->CanLookTarget) { continue; }
 						if (0.f < c->m_CameraPos.z && c->m_CameraPos.z < 1.f) {
-							WindowSystem::DrawControl::Instance()->SetDrawCircle(WindowSystem::DrawLayer::Normal, (int)c->m_CameraPos.x, (int)c->m_CameraPos.y, 2400 / std::max(0.1f, c->m_Length) + Lerp(100, 0, LookPer), Green, false, 2);
+							WindowSystem::DrawControl::Instance()->SetDrawCircle(WindowSystem::DrawLayer::Normal, (int)c->m_CameraPos.x, (int)c->m_CameraPos.y, static_cast<int>(2400 / std::max(0.1f, c->m_Length) + Lerp(100, 0, LookPer)), Green, false, 2);
 						}
 					}
 				}
