@@ -827,9 +827,8 @@ namespace FPS_n2 {
 									int pos = -1;
 									float CosMax = -1.f;
 									for (const auto& h : Chara->GetHitBoxPointList()) {
-										auto* BackGround = BackGround::BackGroundClass::Instance();
-										auto EndPos = h.GetPos();
-										auto ColResGround = BackGround->CheckLinetoMap(BasePos, &EndPos);
+										auto EndPost = h.GetPos();
+										auto ColResGround = BackGround->CheckLinetoMap(BasePos, &EndPost);
 										if (ColResGround) { continue; }
 										Vector3DX Vec = (h.GetPos() - BasePos);
 										//if (Vec.magnitude() >= (Scale3DRate * Range)) { continue; }

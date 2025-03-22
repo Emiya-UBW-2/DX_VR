@@ -19,6 +19,9 @@ namespace FPS_n2 {
 			BattleResourceMngr->Load();
 			PlayerMngr->Init(NetWork::Player_num, 0);
 
+			this->hit_Graph.Load("data/UI/battle_hit.bmp");
+			this->guard_Graph.Load("data/UI/battle_guard.bmp");
+
 			BattleResourceMngr->LoadChara("Main", GetMyPlayerID());
 			if (GetRand(100) < 50) {
 				LoadGun("type89", GetMyPlayerID(), false, 0);
@@ -560,10 +563,63 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			BattleResourceMngr->Dispose();
+			this->hit_Graph.Dispose();
+			this->guard_Graph.Dispose();
 			this->m_UIclass.Dispose();
 			PlayerMngr->Dispose();
 			ObjectManager::Instance()->DeleteAll();
 			PauseMenuControl::DisposePause();
+		}
+
+		void			MainGameScene::DrawHitGraph(void) const noexcept {
+			auto* WindowParts = WindowSystem::DrawControl::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
+			auto* WindowSizeParts = WindowSizeControl::Instance();
+			int loop = 0;
+			while (true) {
+				auto ammo = ObjMngr->GetObj((int)ObjType::Ammo, loop);
+				if (ammo != nullptr) {
+					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
+					if (a->m_IsDrawHitUI && a->GetShootedID() == 0) {
+						int			Alpha = static_cast<int>(a->m_Hit_alpha * 255.f);
+						Vector3DX	DispPos = a->m_Hit_DispPos;
+						if ((Alpha >= 10) && (DispPos.z >= 0.f && DispPos.z <= 1.f)) {
+							DispPos.x = static_cast<float>(static_cast<int>(DispPos.x * 1980 / WindowSizeParts->GetScreenY(1980)));
+							DispPos.y = static_cast<float>(static_cast<int>(DispPos.y * 1080 / WindowSizeParts->GetScreenY(1080)));
+							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, Alpha);
+							//
+							int r = static_cast<int>(255 * std::clamp((float)a->m_Damage / 100.f * 2.f, 0.f, 1.f));
+							int g = 255 - r;
+							if (a->m_Damage > 0) {
+								WindowParts->SetBright(WindowSystem::DrawLayer::Normal, r, g, 0);
+								WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &hit_Graph, (int)DispPos.x, (int)DispPos.y, (float)static_cast<int>((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+							}
+							if (a->m_ArmerDamage > 0) {
+								WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 128, 128, 128);
+								WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &guard_Graph, (int)DispPos.x, (int)DispPos.y, (float)static_cast<int>((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+							}
+							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+							//
+							if (a->m_Damage > 0) {
+								WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic,
+									24, FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+									(int)DispPos.x + a->m_Hit_AddX, (int)DispPos.y + a->m_Hit_AddY, GetColor(r, g, 0), Black, "%d", a->m_Damage);
+							}
+							//–h‚¢‚¾ƒ_ƒ[ƒW
+							if (a->m_ArmerDamage > 0) {
+								WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic,
+									20, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
+									(int)DispPos.x + a->m_Hit_AddX - 10, (int)DispPos.y + a->m_Hit_AddY, Gray50, Black, "%d", a->m_ArmerDamage);
+							}
+						}
+					}
+				}
+				else {
+					break;
+				}
+				loop++;
+			}
+			WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 		}
 
 		//
@@ -585,7 +641,7 @@ namespace FPS_n2 {
 		}
 
 		void MainGameScene::SetShadowDraw_Sub(void) const noexcept {
-			ObjectManager::Instance()->Draw();
+			ObjectManager::Instance()->Draw(false);
 		}
 
 		void			MainGameScene::MainDraw_Sub(void) const noexcept {
@@ -663,39 +719,11 @@ namespace FPS_n2 {
 			}
 
 
-			FadeControl::DrawFade();
+			DrawHitGraph();			//’…’e•\Ž¦
 			//UI
 			auto* SceneParts = SceneControl::Instance();
 			if (!SceneParts->IsPause()) {
 				this->m_UIclass.Draw();
-			}
-			if (!SceneParts->IsPause()) {
-				//“Iƒqƒbƒgó‹µ•\Ž¦
-				if (tgtSel >= 0) {
-					auto* WindowParts = WindowSystem::DrawControl::Instance();
-					auto& t = (std::shared_ptr<TargetClass>&)(*ObjectManager::Instance()->GetObj((int)ObjType::Target, tgtSel));
-
-					int xp = 1920 / 2 - 300;
-					int yp = 1080 / 2 + 100;
-					int size = 100;
-					int xs = size / 2;
-					int ys = size / 2;
-					int xp2 = xp + ys * 2;
-					int yp2 = yp + ys * 2;
-					float AlphaPer = std::clamp(tgtTimer, 0.f, 1.f);
-					if (AlphaPer > 0.01f) {
-						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * AlphaPer));
-						//”wŒi
-						WindowParts->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &ScoreBoard2, xp, yp, xp2, yp2, true);
-						//–½’†‰ÓŠ
-						for (auto& r : t->GetHitPosRec()) {
-							float cos_t, sin_t;
-							t->GetHitPoint(r, &cos_t, &sin_t);
-							WindowParts->SetDrawCircle(WindowSystem::DrawLayer::Normal, xp + xs + static_cast<int>((float)xs * cos_t), yp + ys + static_cast<int>((float)ys * sin_t), 2, Green);
-						}
-						WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-					}
-				}
 			}
 			//’ÊMÝ’è
 			//auto* NetBrowser = NetWorkBrowser::Instance();
@@ -719,6 +747,8 @@ namespace FPS_n2 {
 					}
 				}
 			}
+
+			FadeControl::DrawFade();
 		}
 		void MainGameScene::DrawUI_In_Sub(void) const noexcept {
 			auto* SceneParts = SceneControl::Instance();
@@ -779,7 +809,7 @@ namespace FPS_n2 {
 
 									t->SetHitPos(pos_tmp);
 
-									a->Penetrate(0, 0);
+									a->Penetrate(pos_tmp, 0, 0);
 									is_HitAll = true;
 								}
 							}
@@ -796,7 +826,7 @@ namespace FPS_n2 {
 							HitPoint Damage = a->GetDamage();
 							ArmerPoint ArmerDamage = 0;
 							if (tgt->CheckDamageRay(&Damage, &ArmerDamage, true, (PlayerID)a->GetShootedID(), repos_tmp, &pos_tmp)) {
-								a->Penetrate(Damage, ArmerDamage);
+								a->Penetrate(pos_tmp, Damage, ArmerDamage);
 								is_HitAll = true;
 							}
 						}

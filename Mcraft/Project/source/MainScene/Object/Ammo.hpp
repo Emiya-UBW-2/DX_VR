@@ -54,8 +54,9 @@ namespace FPS_n2 {
 				this->m_ShootCheraID = pMyID;
 			}
 			const auto		PenetrationCheck(float pArmer, const Vector3DX& normal) const noexcept { return (this->m_penetration > (pArmer * (1.0f / std::abs(Vector3DX::Dot(this->GetMove().GetVec().normalized(), normal))))); }
-			void			Penetrate(HitPoint Damage, ArmerPoint ArmerDamage) noexcept {
+			void			Penetrate(const Vector3DX& position, HitPoint Damage, ArmerPoint ArmerDamage) noexcept {
 				SetActive(false);
+				this->pos = position;
 				this->m_IsHit = true;
 				this->m_IsDrawHitUI = true;
 				this->m_Damage = Damage;
@@ -126,7 +127,7 @@ namespace FPS_n2 {
 			void			DrawShadow(void) noexcept override {}
 			void			CheckDraw(void) noexcept override {
 				auto tmp = ConvWorldPosToScreenPos(this->pos.get());
-				if (tmp.z >= 0.f && tmp.z <= 1.f) {
+				if (0.f < tmp.z && tmp.z < 1.f) {
 					this->m_Hit_DispPos = tmp;
 				}
 			}

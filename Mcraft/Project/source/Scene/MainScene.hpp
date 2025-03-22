@@ -16,11 +16,13 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+#ifdef DEBUG
 		struct LineDebug {
 			Vector3DX PosA;
 			Vector3DX PosB;
 			float Time = 0;
 		};
+#endif
 
 		class MainGameScene : public TEMPSCENE ,
 			public PauseMenuControl,
@@ -45,6 +47,8 @@ namespace FPS_n2 {
 			int tgtSel = 0;
 			float tgtTimer = 0.f;
 			GraphHandle ScoreBoard2;
+			GraphHandle										hit_Graph;
+			GraphHandle										guard_Graph;
 
 #ifdef DEBUG
 			float m_D1{ 38.f / 255.f }, m_D2{ 192.f / 255.f }, m_D3{ 1.f };
@@ -87,6 +91,8 @@ namespace FPS_n2 {
 		private:
 			void			LoadGun(const std::string& FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept;
 			void			UpdateBullet(void) noexcept;
+
+			void			DrawHitGraph(void) const noexcept;
 		};
 	}
 }
