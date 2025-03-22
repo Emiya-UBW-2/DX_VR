@@ -129,6 +129,12 @@ namespace FPS_n2 {
 					WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 + 1, xp2, yp2 + 1, Black, 2);
 					WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
 
+					xp1 = intParam[2] - (int)(Scale1 * 1.0f * sin(deg2rad(0) + floatParam[3]));
+					yp1 = intParam[3] + (int)(Scale1 * 1.0f * cos(deg2rad(0) + floatParam[3]));
+					xp2 = intParam[2] - (int)(Scale1 * 0.5f * sin(deg2rad(0) + floatParam[3]));
+					yp2 = intParam[3] + (int)(Scale1 * 0.5f * cos(deg2rad(0) + floatParam[3]));
+					WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 + 1, xp2, yp2 + 1, Black, 2);
+					WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
 
 					xp1 = intParam[2] - (int)(Scale1 * 1.5f * sin(deg2rad(60) + floatParam[3]));
 					yp1 = intParam[3] + (int)(Scale1 * 1.5f * cos(deg2rad(60) + floatParam[3]));
