@@ -29,7 +29,7 @@ namespace FPS_n2 {
 			LoadGun("P226", GetMyPlayerID(), false, 1);
 
 			for (int loop = 1; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-				BattleResourceMngr->LoadChara("Soldier", loop);
+				BattleResourceMngr->LoadChara("Soldier", (PlayerID)loop);
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(loop)->GetChara();
 				if (loop == 1) {
 					MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
@@ -42,7 +42,7 @@ namespace FPS_n2 {
 				}
 				c->Init_RagDollControl(c->GetObj());
 				//
-				LoadGun("AKS-74", loop, false, 0);
+				LoadGun("AKS-74", (PlayerID)loop, false, 0);
 			}
 			//UI
 			this->m_UIclass.Load();
@@ -152,22 +152,22 @@ namespace FPS_n2 {
 			{
 				auto* WindowSizeParts = WindowSizeControl::Instance();
 				if (CheckHitKey(KEY_INPUT_1) != 0) {
-					m_D1 = std::clamp(m_D1 - 0.1f * 1.f / DXLib_refParts->GetFps(), 0.f, 1.f);
+					m_D1 = std::clamp(m_D1 - 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				}
 				if (CheckHitKey(KEY_INPUT_2) != 0) {
-					m_D1 = std::clamp(m_D1 + 0.1f * 1.f / DXLib_refParts->GetFps(), 0.f, 1.f);
+					m_D1 = std::clamp(m_D1 + 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				}
 				if (CheckHitKey(KEY_INPUT_3) != 0) {
-					m_D2 = std::clamp(m_D2 - 0.1f * 1.f / DXLib_refParts->GetFps(), 0.f, 1.f);
+					m_D2 = std::clamp(m_D2 - 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				}
 				if (CheckHitKey(KEY_INPUT_4) != 0) {
-					m_D2 = std::clamp(m_D2 + 0.1f * 1.f / DXLib_refParts->GetFps(), 0.f, 1.f);
+					m_D2 = std::clamp(m_D2 + 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				}
 				if (CheckHitKey(KEY_INPUT_5) != 0) {
-					m_D3 = std::clamp(m_D3 - 0.1f * 1.f / DXLib_refParts->GetFps(), 1.f, 10.f);
+					m_D3 = std::clamp(m_D3 - 0.1f * DXLib_refParts->GetDeltaTime(), 1.f, 10.f);
 				}
 				if (CheckHitKey(KEY_INPUT_6) != 0) {
-					m_D3 = std::clamp(m_D3 + 0.1f * 1.f / DXLib_refParts->GetFps(), 1.f, 10.f);
+					m_D3 = std::clamp(m_D3 + 0.1f * DXLib_refParts->GetDeltaTime(), 1.f, 10.f);
 				}
 				printfDx("Dif[%5.2f]\n", m_D1*255.f);
 				printfDx("Spc[%5.2f]\n", m_D2*255.f);
@@ -474,7 +474,7 @@ namespace FPS_n2 {
 					Easing(&m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
 				}
 				PostPassParts->Set_Per_Blackout(m_ConcussionPer * 2.f);
-				m_Concussion = std::max(m_Concussion - 1.f / DXLib_refParts->GetFps(), 0.f);
+				m_Concussion = std::max(m_Concussion - DXLib_refParts->GetDeltaTime(), 0.f);
 			}
 			BackGround->Execute();
 			//
@@ -484,6 +484,9 @@ namespace FPS_n2 {
 					if (index == 0) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 					Vector3DX TgtPos = c->GetEyeMatrix().pos();
+
+					c->m_Length = (TgtPos - StartPos).magnitude();
+
 					c->CanLookTarget = true;
 
 					auto EndPos = TgtPos;
@@ -496,17 +499,33 @@ namespace FPS_n2 {
 			}
 			//UIパラメーター
 			{
+				float Len = std::max(0.01f, std::hypotf((float)(Chara->GetGunPtrNow()->GetAimXPos() - 1920 / 2), (float)(Chara->GetGunPtrNow()->GetAimYPos() - 1080 / 2)));
+				Len = std::clamp(100.f / Len, 0.f, 1.f);
+				this->m_UIclass.SetIntParam(2, Chara->GetGunPtrNow()->GetAimXPos());
+				this->m_UIclass.SetIntParam(3, Chara->GetGunPtrNow()->GetAimYPos());
+				this->m_UIclass.SetfloatParam(2, deg2rad(5) * Len);
 				//NvsN
-				this->m_UIclass.SetIntParam(0, 0);
-				this->m_UIclass.SetIntParam(1, 0);
+				this->m_UIclass.SetIntParam(0, Chara->GetGunPtrNow()->GetAmmoNumTotal());
+				this->m_UIclass.SetIntParam(1, Chara->GetGunPtrNow()->GetAmmoAll());
+				this->m_UIclass.SetfloatParam(3, Chara->GetLeanRad());
 				//timer
 				this->m_UIclass.SetfloatParam(0, 0.f);
 				this->m_UIclass.SetfloatParam(1, m_StartTimer);
+
+				this->m_UIclass.Update();
 			}
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=0.7ms");
 #endif // DEBUG
 			EffectControl::Execute();
+
+			//
+			{
+				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
+					c->m_CameraPos.z = -1.f;
+				}
+			}
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
@@ -608,6 +627,20 @@ namespace FPS_n2 {
 			else {
 				PostPassParts->Set_is_lens(false);
 				PostPassParts->Set_zoom_lens(1.f);
+			}
+			//
+			{
+				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+					if (index == 0) { continue; }
+					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
+					Vector3DX ReticlePosBuf = ConvWorldPosToScreenPos(c->GetEyeMatrix().pos().get());
+					if (0.f < ReticlePosBuf.z && ReticlePosBuf.z < 1.f) {
+						auto* WindowSizeParts = WindowSizeControl::Instance();
+						c->m_CameraPos.x = static_cast<int>(ReticlePosBuf.x * 1980 / WindowSizeParts->GetScreenY(1980));
+						c->m_CameraPos.y = static_cast<int>(ReticlePosBuf.y * 1080 / WindowSizeParts->GetScreenY(1080));
+						c->m_CameraPos.z = ReticlePosBuf.z;
+					}
+				}
 			}
 		}
 		//UI表示

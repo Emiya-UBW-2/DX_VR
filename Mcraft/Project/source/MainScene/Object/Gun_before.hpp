@@ -54,13 +54,13 @@ namespace FPS_n2 {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				for (auto& l : this->m_Line) {
 					l += Vector3DX::vget(
-						GetRandf(0.1f * Scale3DRate / DXLib_refParts->GetFps()),
-						0.4f * Scale3DRate / DXLib_refParts->GetFps() + GetRandf(0.1f * Scale3DRate / DXLib_refParts->GetFps()),
-						GetRandf(0.1f * Scale3DRate) / DXLib_refParts->GetFps());
+						GetRandf(0.1f * Scale3DRate * DXLib_refParts->GetDeltaTime()),
+						0.4f * Scale3DRate * DXLib_refParts->GetDeltaTime() + GetRandf(0.1f * Scale3DRate * DXLib_refParts->GetDeltaTime()),
+						GetRandf(0.1f * Scale3DRate * DXLib_refParts->GetDeltaTime()));
 				}
 				this->m_Line[this->m_LineSel] = pPos;
 				++this->m_LineSel %= this->m_Line.size();
-				m_LinePer = std::clamp(m_LinePer - 1.f / DXLib_refParts->GetFps() / 10.f, 0.f, 1.f);
+				m_LinePer = std::clamp(m_LinePer - DXLib_refParts->GetDeltaTime() / 10.f, 0.f, 1.f);
 			}
 			void		DrawMuzzleSmoke() noexcept {
 				SetUseLighting(FALSE);
@@ -123,6 +123,27 @@ namespace FPS_n2 {
 		public:
 			void		UpdatePartsAnim(MV1& pParent);
 			void		UpdatePartsMove(const Matrix4x4DX& pMat, GunSlot Slot);
+		};
+
+		class AimPointControl {
+			int Reticle_xpos = 0;
+			int Reticle_ypos = 0;
+		public:
+			AimPointControl() {}
+			~AimPointControl() {}
+		public:
+			void UpdateAimPointControl(const Vector3DX& ReticlePos) noexcept {
+				Vector3DX ReticlePosBuf = ConvWorldPosToScreenPos(ReticlePos.get());
+				if (0.f < ReticlePosBuf.z && ReticlePosBuf.z < 1.f) {
+					auto* WindowSizeParts = WindowSizeControl::Instance();
+					Reticle_xpos = static_cast<int>(ReticlePosBuf.x * 1980 / WindowSizeParts->GetScreenY(1980));
+					Reticle_ypos = static_cast<int>(ReticlePosBuf.y * 1080 / WindowSizeParts->GetScreenY(1080));
+				}
+			}
+		public:
+			const auto& GetAimXPos(void) const noexcept { return this->Reticle_xpos; }
+			const auto& GetAimYPos(void) const noexcept { return this->Reticle_ypos; }
+		private:
 		};
 
 		class ReticleControl {

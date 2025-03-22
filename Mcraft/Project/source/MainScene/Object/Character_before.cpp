@@ -75,7 +75,7 @@ namespace FPS_n2 {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto prev = m_AutoAimTimer;
-			m_AutoAimTimer = std::max(m_AutoAimTimer - 1.f / DXLib_refParts->GetFps(), 0.f);
+			m_AutoAimTimer = std::max(m_AutoAimTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 			if (prev > 0.f && m_AutoAimTimer == 0.f) {
 				m_AutoAim = -1;
 			}

@@ -102,6 +102,7 @@ namespace FPS_n2 {
 				return FALSE;
 			}
 			const auto GetColType()const noexcept { return this->m_HitType; }
+			const auto GetPos()const noexcept { return this->m_pos; }
 		};
 
 		//キャラのうち特定機能だけ抜き出したもの
@@ -143,23 +144,23 @@ namespace FPS_n2 {
 			bool		ExcuteStamina(float addRun, float HeartRateUp, bool IsSquat) {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (addRun > 0.f) {
-					this->m_HeartRate_r += (10.f + GetRandf(10.f)) / DXLib_refParts->GetFps();
+					this->m_HeartRate_r += (10.f + GetRandf(10.f)) * DXLib_refParts->GetDeltaTime();
 				}
 				else if (addRun < 0.f) {
-					this->m_HeartRate_r -= (5.f + GetRandf(5.f)) / DXLib_refParts->GetFps();
+					this->m_HeartRate_r -= (5.f + GetRandf(5.f)) * DXLib_refParts->GetDeltaTime();
 				}
 				this->m_HeartRate_r += HeartRateUp;
-				this->m_HeartRate_r -= (2.f + GetRandf(4.f)) / DXLib_refParts->GetFps();
+				this->m_HeartRate_r -= (2.f + GetRandf(4.f)) * DXLib_refParts->GetDeltaTime();
 				this->m_HeartRate_r = std::clamp(this->m_HeartRate_r, HeartRateMin, HeartRateMax);
 
 				if (this->m_HeartRate < this->m_HeartRate_r) {
-					this->m_HeartRate += 5.f / DXLib_refParts->GetFps();
+					this->m_HeartRate += 5.f * DXLib_refParts->GetDeltaTime();
 				}
 				else if (this->m_HeartRate >= this->m_HeartRate_r) {
-					this->m_HeartRate -= 5.f / DXLib_refParts->GetFps();
+					this->m_HeartRate -= 5.f * DXLib_refParts->GetDeltaTime();
 				}
 				//this->m_HeartRate = this->m_HeartRate_r;
-				this->m_HeartRateRad += deg2rad(this->m_HeartRate) / DXLib_refParts->GetFps();
+				this->m_HeartRateRad += deg2rad(this->m_HeartRate) * DXLib_refParts->GetDeltaTime();
 				if (this->m_HeartRateRad >= DX_PI_F * 2) { this->m_HeartRateRad -= DX_PI_F * 2; }
 				if (
 					(deg2rad(0) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(10)) ||
@@ -175,10 +176,10 @@ namespace FPS_n2 {
 				}
 
 
-				this->m_Stamina += std::clamp((100.f - this->m_HeartRate) / 40.f, -2.5f, 2.5f) / DXLib_refParts->GetFps();
+				this->m_Stamina += std::clamp((100.f - this->m_HeartRate) / 40.f, -2.5f, 2.5f) * DXLib_refParts->GetDeltaTime();
 
 				if (IsSquat) {
-					this->m_Stamina += 1.0f / DXLib_refParts->GetFps();
+					this->m_Stamina += 1.0f * DXLib_refParts->GetDeltaTime();
 				}
 
 				this->m_Stamina = std::clamp(this->m_Stamina, 0.f, StaminaMax);
@@ -250,7 +251,7 @@ namespace FPS_n2 {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				Easing(&this->m_ADSPer, this->GetIsADS() ? 1.f : 0.f, 0.9f, EasingType::OutExpo);//
 				if (this->m_ReadyTimer != UpperTimerLimit) {
-					this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + 1.f / DXLib_refParts->GetFps(), 0.f, UpperTimerLimit-0.1f);
+					this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + DXLib_refParts->GetDeltaTime(), 0.f, UpperTimerLimit-0.1f);
 				}
 			}
 			void			SetAimOrADS(void) noexcept {
@@ -342,7 +343,7 @@ namespace FPS_n2 {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				Vector3DX vecBuf = m_VecTotal;
 				if (m_MoverPer > 0.f) {
-					vecBuf = vecBuf.normalized() * (GetSpeedPer() * 60.f / DXLib_refParts->GetFps());
+					vecBuf = vecBuf.normalized() * (GetSpeedPer() * 60.f * DXLib_refParts->GetDeltaTime());
 				}
 				vecBuf = Matrix4x4DX::Vtrans(vecBuf, Matrix4x4DX::RotAxis(Vector3DX::up(), this->m_yrad_Upper));
 				return vecBuf;
@@ -405,10 +406,10 @@ namespace FPS_n2 {
 					Easing(&this->m_rad.z, m_rad_Buf.z, 0.5f, EasingType::OutExpo);
 				}
 				//移動
-				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) ? 5.f : -15.f) / DXLib_refParts->GetFps(), 0.f, 1.f);
-				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_A) ? 5.f : -15.f) / DXLib_refParts->GetFps(), 0.f, 1.f);
-				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) ? 5.f : -15.f) / DXLib_refParts->GetFps(), 0.f, 1.f);
-				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_D) ? 5.f : -15.f) / DXLib_refParts->GetFps(), 0.f, 1.f);
+				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_A) ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_D) ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
 				m_MoverPer = m_VecTotal.magnitude();
 				//リーン
@@ -511,7 +512,7 @@ namespace FPS_n2 {
 						i == (int)CharaAnimeID::Bottom_Stand_LeftStep ||
 						i == (int)CharaAnimeID::Bottom_Stand_RightStep ||
 						i == (int)CharaAnimeID::Bottom_Stand_WalkBack) {
-						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 6.f : -2.f) / DXLib_refParts->GetFps(), 0.f, 1.f);
+						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 6.f : -2.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 					}
 					if (
 						i == (int)CharaAnimeID::Bottom_Squat ||
@@ -519,7 +520,7 @@ namespace FPS_n2 {
 						i == (int)CharaAnimeID::Bottom_Squat_LeftStep ||
 						i == (int)CharaAnimeID::Bottom_Squat_RightStep ||
 						i == (int)CharaAnimeID::Bottom_Squat_WalkBack) {
-						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 2.f : -2.f) / DXLib_refParts->GetFps(), 0.f, 1.f);
+						this->m_AnimPerBuf[i] = std::clamp(this->m_AnimPerBuf[i] + ((i == (int)this->m_BottomAnimSelect) ? 2.f : -2.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 					}
 				}
 			}
@@ -575,6 +576,7 @@ namespace FPS_n2 {
 					h.Colcheck(StartPos, pEndPos);
 				}
 			}
+			const auto& GetHitBoxPointList() const { return m_HitBox; }
 		public:
 			HitBoxControl(void) noexcept {}
 			~HitBoxControl(void) noexcept {}
@@ -623,7 +625,7 @@ namespace FPS_n2 {
 						m_WalkSwing_t.x = (1.f);
 					}
 					else {
-						m_WalkSwing_t.x = (std::max(m_WalkSwing_t.x - 15.f / DXLib_refParts->GetFps(), 0.f));
+						m_WalkSwing_t.x = (std::max(m_WalkSwing_t.x - 15.f * DXLib_refParts->GetDeltaTime(), 0.f));
 					}
 				}
 				//Z
@@ -672,7 +674,7 @@ namespace FPS_n2 {
 			void UpdateEyeSwing(const Matrix4x4DX& pCharaMat, float SwingPer, float SwingSpeed)noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (SwingPer > 0.f) {
-					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed) * 60.f / DXLib_refParts->GetFps();
+					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed) * 60.f * DXLib_refParts->GetDeltaTime();
 				}
 				else {
 					this->m_MoveEyePosTimer = 0.f;
@@ -727,6 +729,7 @@ namespace FPS_n2 {
 		class AutoAimControl {
 		private:
 			int													m_AutoAim{ -1 };
+			int													m_AutoAimPoint{ -1 };
 			float												m_AutoAimOn{ 0.f };
 			float												m_AutoAimTimer{ 0.f };
 		public://ゲッター
@@ -737,14 +740,16 @@ namespace FPS_n2 {
 			~AutoAimControl(void) noexcept {}
 		public:
 			const auto& GetAutoAimID(void) const noexcept { return this->m_AutoAim; }
+			const auto& GetAutoAimPoint(void) const noexcept { return this->m_AutoAimPoint; }
 			const auto& GetAutoAimOn(void) const noexcept { return this->m_AutoAimOn; }
 
 			const auto		GetAutoAimActive(void) const noexcept { return this->m_AutoAim != -1; }
 			const auto		GetAutoAimPer(void) const noexcept { return this->m_AutoAimTimer / 1.f; }
 		public:
-			void SetAutoAimActive(int ID) noexcept {
+			void SetAutoAimActive(int ID, int Point) noexcept {
 				m_AutoAimTimer = 1.f;
 				m_AutoAim = ID;
+				m_AutoAimPoint = Point;
 			}
 			void UpdateAutoAim(bool isActive) noexcept;
 		};
@@ -799,7 +804,7 @@ namespace FPS_n2 {
 					}
 					m_IsStuckLeftHand = true;
 				}
-				m_IsStuckLeftHandTimer = std::min(m_IsStuckLeftHandTimer + 1.f / DXLib_refParts->GetFps(), 0.5f);
+				m_IsStuckLeftHandTimer = std::min(m_IsStuckLeftHandTimer + DXLib_refParts->GetDeltaTime(), 0.5f);
 			}
 		};
 		//
@@ -869,7 +874,7 @@ namespace FPS_n2 {
 			void Execute_HitReactionControl() noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				Easing(&this->m_HitPowerR, this->m_HitPower, 0.8f, EasingType::OutExpo);
-				this->m_HitPower = std::max(this->m_HitPower - 1.f / DXLib_refParts->GetFps() / 0.3f, 0.f);
+				this->m_HitPower = std::max(this->m_HitPower - DXLib_refParts->GetDeltaTime() / 0.3f, 0.f);
 			}
 		};
 		//ラグドール
@@ -1043,7 +1048,7 @@ namespace FPS_n2 {
 					this->m_RagDollTimer = 0.f;
 				}
 				else {
-					this->m_RagDollTimer = std::min(this->m_RagDollTimer + 1.f / DXLib_refParts->GetFps(), 3.f);
+					this->m_RagDollTimer = std::min(this->m_RagDollTimer + DXLib_refParts->GetDeltaTime(), 3.f);
 				}
 				if (this->m_RagDollTimer < 3.f) {
 					this->m_RagDoll.SetPrioritizePhysicsOverAnimFlag(true);
@@ -1053,7 +1058,7 @@ namespace FPS_n2 {
 						this->m_RagDoll.PhysicsResetState();
 					}
 					else {
-						this->m_RagDoll.PhysicsCalculation(1000.f / DXLib_refParts->GetFps());
+						this->m_RagDoll.PhysicsCalculation(1000.f * DXLib_refParts->GetDeltaTime());
 					}
 				}
 			}

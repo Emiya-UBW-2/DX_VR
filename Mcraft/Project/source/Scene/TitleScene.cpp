@@ -88,8 +88,8 @@ namespace FPS_n2 {
 			// 
 			ButtonParts->Update();
 			// 
-			this->m_GameFadeIn = std::max(this->m_GameFadeIn - 1.f / DXLib_refParts->GetFps() / 0.5f, 0.f);
-			if (this->m_GameStart != 0.f) { this->m_GameStart += 1.f / DXLib_refParts->GetFps() / 0.5f; }
+			this->m_GameFadeIn = std::max(this->m_GameFadeIn - DXLib_refParts->GetDeltaTime() / 0.5f, 0.f);
+			if (this->m_GameStart != 0.f) { this->m_GameStart += DXLib_refParts->GetDeltaTime() / 0.5f; }
 			return (this->m_GameStart <= 1.f);
 		}
 		void			TitleScene::Dispose_Sub(void) noexcept {
@@ -117,7 +117,6 @@ namespace FPS_n2 {
 			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, WindowSizeParts->GetScreenXMax(), WindowSizeParts->GetScreenYMax(), Gray50, TRUE);
 		}
 		void			TitleScene::DrawUI_Base_Sub(void) const noexcept {
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();

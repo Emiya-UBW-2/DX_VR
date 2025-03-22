@@ -97,7 +97,7 @@ namespace FPS_n2 {
 					this->m_Hit_AddX = GetRand(32);
 					this->m_Hit_AddY = GetRand(32);
 				}
-				this->m_HitTimer = std::clamp(this->m_HitTimer - 1.f / DXLib_refParts->GetFps(), 0.f, 0.25f);
+				this->m_HitTimer = std::clamp(this->m_HitTimer - DXLib_refParts->GetDeltaTime(), 0.f, 0.25f);
 				if (this->m_Hit_alpha > 0.f) {
 					Easing(&this->m_Hit_alpha, (this->m_HitTimer > 0.f) ? 2.f : 0.f, 0.95f, EasingType::OutExpo);
 					if (this->m_Hit_alpha <= 0.01f) {
@@ -108,7 +108,7 @@ namespace FPS_n2 {
 				repos = this->pos;//’e‚¾‚¯ŠO‚Å”»’è‚µ‚Ä‚é‚Ì‚Å
 				if (IsActive()) {
 					//ˆÚ“®Šm’è
-					this->pos = this->pos + (this->GetMove().GetVec() * (this->m_speed / DXLib_refParts->GetFps())) + Vector3DX::up() * this->m_yAdd;
+					this->pos = this->pos + (this->GetMove().GetVec() * (this->m_speed * DXLib_refParts->GetDeltaTime())) + Vector3DX::up() * this->m_yAdd;
 					this->SetMove().Update(0.f, 0.f);
 					this->m_yAdd += (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));
 
@@ -116,11 +116,11 @@ namespace FPS_n2 {
 					if (this->m_speed <= 0.f || this->m_penetration <= 0.f || this->m_RicochetCnt > 5 || this->m_Timer > 5.f) {
 						SetActive(false);
 					}
-					//this->m_speed -= 5.f / DXLib_refParts->GetFps();
-					//this->m_penetration -= 5.f / DXLib_refParts->GetFps();
+					//this->m_speed -= 5.f  * DXLib_refParts->GetDeltaTime();
+					//this->m_penetration -= 5.f * DXLib_refParts->GetDeltaTime();
 				}
 
-				this->m_Timer += 1.f / DXLib_refParts->GetFps();
+				this->m_Timer += DXLib_refParts->GetDeltaTime();
 			}
 			//
 			void			DrawShadow(void) noexcept override {}

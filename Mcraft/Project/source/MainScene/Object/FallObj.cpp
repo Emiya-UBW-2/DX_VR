@@ -15,7 +15,7 @@ namespace FPS_n2 {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			if (this->m_IsActive) {
-				Vector3DX PosBuf = this->GetMove().GetPos() + this->GetMove().GetVec() * 60.f / DXLib_refParts->GetFps() + Vector3DX::up() * this->m_yAdd;
+				Vector3DX PosBuf = this->GetMove().GetPos() + this->GetMove().GetVec() * 60.f * DXLib_refParts->GetDeltaTime() + Vector3DX::up() * this->m_yAdd;
 				if (this->m_yAdd != 0.f) {
 					this->m_yAdd += (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));
 				}
@@ -41,13 +41,13 @@ namespace FPS_n2 {
 					if ((PosBuf - this->GetMove().GetRePos()).y <= 0.f) {
 						BB *= -1.f;
 					}
-					this->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::Cross(BB, this->GetMove().GetMat().zvec()), deg2rad(-50.f * 60.f / DXLib_refParts->GetFps())) * this->GetMove().GetMat());
+					this->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::Cross(BB, this->GetMove().GetMat().zvec()), deg2rad(-50.f * 60.f * DXLib_refParts->GetDeltaTime())) * this->GetMove().GetMat());
 				}
 
 				if (this->m_Timer < 0.f) {
 					this->m_IsActive = false;
 				}
-				this->m_Timer -= 1.f / DXLib_refParts->GetFps();
+				this->m_Timer -= DXLib_refParts->GetDeltaTime();
 				//‹¤’Ê
 				this->SetMove().SetPos(PosBuf);
 				SetMove().Update(0.f, 0.f);

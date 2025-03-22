@@ -12,7 +12,7 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class GunClass : public ObjectBaseClass, public MuzzleSmokeControl, public ModSlotControl, public ReticleControl {
+		class GunClass : public ObjectBaseClass, public MuzzleSmokeControl, public ModSlotControl, public ReticleControl, public AimPointControl {
 		private:
 			std::shared_ptr<AmmoDataClass>			m_ChamberAmmoData{ nullptr };		//
 			bool									m_GunAnimeFirst{ false };

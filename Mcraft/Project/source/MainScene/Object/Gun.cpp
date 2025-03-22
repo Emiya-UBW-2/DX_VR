@@ -292,6 +292,7 @@ namespace FPS_n2 {
 			case GunAnimeID::ReloadStart_Empty:
 				if (this->m_GunAnimeFirst) {
 					m_UpperAnim = 0.f;
+					this->m_Cancel = false;
 				}
 				SetAnimOnce((int)GetGunAnime(), 1.0f);
 				if (GetObj().SetAnim((int)GetGunAnime()).TimeEnd()) {
@@ -301,6 +302,7 @@ namespace FPS_n2 {
 			case GunAnimeID::ReloadStart:
 				if (this->m_GunAnimeFirst) {
 					m_UpperAnim = 0.f;
+					this->m_Cancel = false;
 				}
 				SetAnimOnce((int)GetGunAnime(), 1.0f);
 				if (GetObj().SetAnim((int)GetGunAnime()).TimeEnd()) {
@@ -394,6 +396,7 @@ namespace FPS_n2 {
 			case GunAnimeID::AmmoLoading:
 				if (this->m_GunAnimeFirst) {
 					this->m_boltSoundSequence = -1;
+					this->m_Cancel = false;
 				}
 				SetAnimOnce((int)GetGunAnime(), 1.0f);
 				if (GetObj().SetAnim((int)GetGunAnime()).TimeEnd()) {
@@ -425,7 +428,7 @@ namespace FPS_n2 {
 				break;
 			}
 			//
-			m_UpperAnim += 60.f / DXLib_refParts->GetFps();
+			m_UpperAnim += 60.f * DXLib_refParts->GetDeltaTime();
 			if (prev) {
 				this->m_GunAnimeFirst = false;
 			}
@@ -438,6 +441,7 @@ namespace FPS_n2 {
 			m_CartFall.Init((*m_MagazinePtr)->GetModData()->GetAmmoSpecMagTop()->GetPath(), 4);	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
 		}
 		void				GunClass::UpdateReticle() noexcept {
+			AimPointControl::UpdateAimPointControl(GetEyePos() + GetFrameWorldMat_P(GunFrame::Muzzle).zvec() * -100.f);
 			auto LensPos = GetFrameWorldMat_P(GunFrame::Lens).pos();
 			ReticleControl::UpdateReticleControl(
 				LensPos,
@@ -535,7 +539,7 @@ namespace FPS_n2 {
 						if (m_GunSightSel == 1) {
 							isHit = true;
 						}
-						GetObj().SetAnim(i).SetPer(std::clamp(GetObj().SetAnim(i).GetPer() + 1.f / DXLib_refParts->GetFps() * (isHit ? 1.f : -1.f), 0.f, 1.f));
+						GetObj().SetAnim(i).SetPer(std::clamp(GetObj().SetAnim(i).GetPer() + DXLib_refParts->GetDeltaTime() * (isHit ? 1.f : -1.f), 0.f, 1.f));
 					}
 					else if ((GunAnimeID)i == GunAnimeID::Open) {
 						bool isHit = false;
@@ -552,7 +556,7 @@ namespace FPS_n2 {
 								isHit = true;
 							}
 						}
-						GetObj().SetAnim(i).SetPer(std::clamp(GetObj().SetAnim(i).GetPer() + 10.f / DXLib_refParts->GetFps() * (isHit ? 1.f : -1.f), 0.f, 1.f));
+						GetObj().SetAnim(i).SetPer(std::clamp(GetObj().SetAnim(i).GetPer() + 10.f * DXLib_refParts->GetDeltaTime() * (isHit ? 1.f : -1.f), 0.f, 1.f));
 					}
 					else {
 						GetObj().SetAnim(i).Reset();

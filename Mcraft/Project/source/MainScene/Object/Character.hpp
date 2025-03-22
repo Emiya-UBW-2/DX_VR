@@ -18,7 +18,6 @@ namespace FPS_n2 {
 			public WalkSwingControl,
 			public EyeSwingControl,
 			public StackLeftHandControl,
-			public MagStockControl,
 			public HitReactionControl,
 			public RagDollControl,
 			public GunReadyControl,
@@ -51,6 +50,7 @@ namespace FPS_n2 {
 			Pendulum2D											m_SlingZrad;
 			std::array<float, 2>								m_SlingPer{};
 			std::array<Matrix4x4DX, 2>							m_SlingMat;
+			std::array<MagStockControl, 2>						m_MagStockControl;
 			ArmMovePerClass										m_ULTBar;
 			CharaTypeID											m_CharaType{};
 			bool												m_IsMainGame{ false };
@@ -60,6 +60,8 @@ namespace FPS_n2 {
 
 			bool												m_MoveOverRideFlag{ false };
 			moves												m_OverRideInfo;
+
+			bool												LookEnemy{};
 		private:
 			PlayerID											m_MyID{ 0 };
 		public:
@@ -75,6 +77,8 @@ namespace FPS_n2 {
 			}
 		public:
 			bool												CanLookTarget{ true };
+			Vector3DX											m_CameraPos;
+			float												m_Length{};
 		private:
 			const Matrix4x4DX GetCharaDir(void) const noexcept;
 
@@ -93,7 +97,7 @@ namespace FPS_n2 {
 			const auto		GetMeleeSwitch(void) const noexcept { return m_MeleeCoolDown == 1.f; }
 			const auto		GetRecoilRadAdd(void) const noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
-				return this->m_RecoilRadAdd * (60.f / DXLib_refParts->GetFps());
+				return this->m_RecoilRadAdd * (60.f * DXLib_refParts->GetDeltaTime());
 			}
 			const auto		PopHeadShotSwitch() noexcept {
 				auto ret = this->m_HeadShotSwitch;
