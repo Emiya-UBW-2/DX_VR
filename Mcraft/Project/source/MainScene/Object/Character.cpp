@@ -923,19 +923,85 @@ namespace FPS_n2 {
 						break;
 					case GunAnimeID::ReloadOne:
 					{
-						BasePer = 0.f;
-						MaxPer = 0.7f;
-						if (AnimPer <= MaxPer) {
-							//float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
-							float Per = this->m_Arm[(int)EnumGunAnimType::Reload].Per();
-							tmp_gunmat = Lerp(GetFrameWorldMat(CharaFrame::LeftMag), GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2), Per);
-							break;
+						switch (GetGunPtrNow()->GetModData()->GetReloadType()) {
+						case RELOADTYPE::MAG:
+						{
+							if (AnimPer <= 0.1f) {
+								float MissPer = GetRandf(0.025f);
+								GetGunPtrNow()->SetMagLoadSuccess(GetRand(100) < 50);
+								m_MagMiss = Matrix4x4DX::Mtrans(GetGunPtrNow()->GetMove().GetMat().xvec() * (MissPer * Scale3DRate));
+								m_MagSuccess = Matrix4x4DX::Mtrans(
+									GetGunPtrNow()->GetMove().GetMat().yvec() * (-0.05f * Scale3DRate) +
+									GetGunPtrNow()->GetMove().GetMat().xvec() * (MissPer / 3.f * Scale3DRate)
+								);
+							}
+							BasePer = 0.f;
+							MaxPer = 0.55f;
+							if (AnimPer <= MaxPer) {
+								//float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
+								float Per = this->m_Arm[(int)EnumGunAnimType::Reload].Per();
+								if (GetGunPtrNow()->IsMagLoadSuccess()) {
+									tmp_gunmat = Lerp(GetFrameWorldMat(CharaFrame::LeftMag), GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2), Per);
+								}
+								else {
+									tmp_gunmat = Lerp(GetFrameWorldMat(CharaFrame::LeftMag), GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2) * m_MagMiss, Per);
+								}
+								break;
+							}
+							if (GetGunPtrNow()->IsMagLoadSuccess()) {
+								BasePer = MaxPer;
+								MaxPer = 0.75f;
+								if (AnimPer <= MaxPer) {
+									float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
+									tmp_gunmat = Lerp(GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2), GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Magpos), Per);
+									break;
+								}
+							}
+							else {
+								BasePer = MaxPer;
+								MaxPer = 0.75f;
+								if (AnimPer <= MaxPer) {
+									float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
+									tmp_gunmat = Lerp(GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2) * m_MagMiss, GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2) * m_MagSuccess, Per);
+									break;
+								}
+								BasePer = MaxPer;
+								MaxPer = 0.85f;
+								if (AnimPer <= MaxPer) {
+									float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
+									tmp_gunmat = Lerp(GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2) * m_MagSuccess, GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2), Per);
+									break;
+								}
+								BasePer = MaxPer;
+								MaxPer = 1.0f;
+								if (AnimPer <= MaxPer) {
+									float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
+									tmp_gunmat = Lerp(GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2), GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Magpos), Per);
+									break;
+								}
+							}
 						}
-						BasePer = 0.7f;
-						MaxPer = 0.9f;
-						if (AnimPer <= MaxPer) {
-							float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
-							tmp_gunmat = Lerp(GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2), GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Magpos), Per);
+							break;
+						case RELOADTYPE::AMMO:
+						{
+							GetGunPtrNow()->SetMagLoadSuccess(false);
+							BasePer = 0.f;
+							MaxPer = 0.5f;
+							if (AnimPer <= MaxPer) {
+								float Per = this->m_Arm[(int)EnumGunAnimType::Reload].Per();
+								tmp_gunmat = Lerp(GetFrameWorldMat(CharaFrame::LeftMag), GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2), Per);
+								break;
+							}
+							BasePer = 0.7f;
+							MaxPer = 0.9f;
+							if (AnimPer <= MaxPer) {
+								float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
+								tmp_gunmat = Lerp(GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2), GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Magpos), Per);
+								break;
+							}
+						}
+							break;
+						default:
 							break;
 						}
 					}
@@ -1282,7 +1348,25 @@ namespace FPS_n2 {
 			if (GetGunPtrNow()) {
 				this->m_Arm[(int)EnumGunAnimType::ReloadStart_Empty].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadStart_Empty, 0.5f, 0.2f);
 				this->m_Arm[(int)EnumGunAnimType::ReloadStart].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadStart, 0.2f, 0.2f);
-				this->m_Arm[(int)EnumGunAnimType::Reload].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadOne, 0.1f, 0.2f, 0.9f);
+				{
+					bool IsReload = false;
+					switch (GetGunPtrNow()->GetModData()->GetReloadType()) {
+					case RELOADTYPE::MAG:
+					{
+						IsReload = (GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadOne);
+						this->m_Arm[(int)EnumGunAnimType::Reload].Execute(IsReload, 0.1f, 0.2f, 0.8f);
+					}
+					break;
+					case RELOADTYPE::AMMO:
+					{
+						IsReload = (GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadOne) && (GetGunPtrNow()->GetObj().SetAnim((int)GetGunPtrNow()->GetGunAnime()).GetTimePer() < 0.5f);
+						this->m_Arm[(int)EnumGunAnimType::Reload].Execute(IsReload, 0.1f, 0.2f, 0.9f);
+					}
+					break;
+					default:
+						break;
+					}
+				}
 				this->m_Arm[(int)EnumGunAnimType::ReloadEnd].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadEnd, 0.1f, 0.2f, 0.9f);
 				this->m_Arm[(int)EnumGunAnimType::Ready].Execute(!GetIsAim(), 0.1f, 0.2f, 0.87f);
 				this->m_Arm[(int)EnumGunAnimType::Check].Execute(GetGunPtrNow()->GetGunAnime() >= GunAnimeID::CheckStart && GetGunPtrNow()->GetGunAnime() <= GunAnimeID::Checking, 0.05f, 0.2f);

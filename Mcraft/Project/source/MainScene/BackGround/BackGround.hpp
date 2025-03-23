@@ -492,7 +492,7 @@ namespace FPS_n2 {
 				max[1] = AABBMaxPos.y;
 				max[2] = AABBMaxPos.z;
 
-				float t = -FLT_MAX;
+				float t_min = -FLT_MAX;
 				float t_max = FLT_MAX;
 
 				for (int i = 0; i < 3; ++i) {
@@ -502,7 +502,7 @@ namespace FPS_n2 {
 							return false; // 交差していない
 					}
 					else 
-						//*/
+					//*/
 					{
 						// スラブとの距離を算出
 						// t1が近スラブ、t2が遠スラブとの距離
@@ -515,35 +515,15 @@ namespace FPS_n2 {
 							t2 = tmp;
 						}
 
-						if (t1 > t) {
-							t = t1;
-							//どの向き？
-							switch (i) {
-							case 0:
-								if (Normal) {
-									*Normal = Vec.x > 0.f ? Vector3DX::left() : Vector3DX::right();
-								}
-								break;
-							case 1:
-								if (Normal) {
-									*Normal = Vec.y > 0.f ? Vector3DX::down() : Vector3DX::up();
-								}
-								break;
-							case 2:
-								if (Normal) {
-									*Normal = Vec.z > 0.f ? Vector3DX::back() : Vector3DX::forward();
-								}
-								break;
-							default:
-								break;
-							}
+						if (t1 > t_min) {
+							t_min = t1;
 						}
 						if (t2 < t_max) {
 							t_max = t2;
 						}
 
 						// スラブ交差チェック
-						if (t >= t_max) {
+						if (t_min >= t_max) {
 							return false;
 						}
 					}
@@ -551,8 +531,45 @@ namespace FPS_n2 {
 
 				// 交差している
 				if (EndPos) {
-					*EndPos = StartPos + Vec * t;
+					*EndPos = StartPos + Vec * t_min;
 				}
+				float ret[3] = { EndPos->x, EndPos->y, EndPos->z };
+				//どの向き？
+				if (Normal) {
+					for (int i = 0; i < 3; ++i) {
+						if (std::abs(ret[i] - min[i]) < 0.1f) {
+							switch (i) {
+							case 0:
+								*Normal = Vector3DX::left();
+								break;
+							case 1:
+								*Normal = Vector3DX::down();
+								break;
+							case 2:
+								*Normal = Vector3DX::back();
+								break;
+							default:
+								break;
+							}
+						}
+						if (std::abs(ret[i] - max[i]) < 0.1f) {
+							switch (i) {
+							case 0:
+								*Normal = Vector3DX::right();
+								break;
+							case 1:
+								*Normal = Vector3DX::up();
+								break;
+							case 2:
+								*Normal = Vector3DX::forward();
+								break;
+							default:
+								break;
+							}
+						}
+					}
+				}
+
 				return true;
 			}
 			inline static bool		CalcYZActive(const Vector3DX& Vec, int x, int yMaxmin, int yMaxmax, int zMaxmin, int zMaxmax) noexcept {

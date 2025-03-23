@@ -38,7 +38,7 @@ namespace FPS_n2 {
 		//
 		class MuzzleSmokeControl {
 		private://キャラパラメーター
-			std::array<Vector3DX, 8>		m_Line;
+			std::array<std::pair<Vector3DX,float>, 16>		m_Line;
 			int								m_LineSel = 0;
 			float							m_LinePer{ 0.f };
 		private:
@@ -47,20 +47,21 @@ namespace FPS_n2 {
 		protected:
 			void		InitMuzzleSmoke(const Vector3DX& pPos) {
 				for (auto& l : this->m_Line) {
-					l = pPos;
+					l.first = pPos;
+					l.second = 1.f;
 				}
 			}
-			void		ExecuteMuzzleSmoke(const Vector3DX& pPos) {
+			void		ExecuteMuzzleSmoke(const Vector3DX& pPos, bool IsAddSmoke) {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				for (auto& l : this->m_Line) {
-					l += Vector3DX::vget(
-						GetRandf(0.1f * Scale3DRate * DXLib_refParts->GetDeltaTime()),
-						0.4f * Scale3DRate * DXLib_refParts->GetDeltaTime() + GetRandf(0.1f * Scale3DRate * DXLib_refParts->GetDeltaTime()),
-						GetRandf(0.1f * Scale3DRate * DXLib_refParts->GetDeltaTime()));
+					float Per = 0.1f * l.second;
+					l.first += Vector3DX::vget(GetRandf(Per), 0.8f + GetRandf(Per), GetRandf(Per)) * Scale3DRate * DXLib_refParts->GetDeltaTime();
+					Easing(&l.second, 0.f, 0.8f, EasingType::OutExpo);
 				}
-				this->m_Line[this->m_LineSel] = pPos;
-				++this->m_LineSel %= this->m_Line.size();
-				m_LinePer = std::clamp(m_LinePer - DXLib_refParts->GetDeltaTime() / 10.f, 0.f, 1.f);
+					this->m_Line[this->m_LineSel].first = pPos;
+					this->m_Line[this->m_LineSel].second = IsAddSmoke ? 1.f : 0.f;
+					++this->m_LineSel %= this->m_Line.size();
+				m_LinePer = std::clamp(m_LinePer - DXLib_refParts->GetDeltaTime() / 30.f, 0.f, 1.f);
 			}
 			void		DrawMuzzleSmoke() noexcept {
 				SetUseLighting(FALSE);
@@ -73,10 +74,11 @@ namespace FPS_n2 {
 					auto p1 = (LS - 1) % max;
 					auto p2 = LS % max;
 					if (CheckCameraViewClip_Box(
-						this->m_Line[p1].get(),
-						this->m_Line[p2].get()) == FALSE
+						this->m_Line[p1].first.get(),
+						this->m_Line[p2].first.get()) == FALSE
+						&& (this->m_Line[p2].second > 0.f)
 						) {
-						DrawCapsule3D(this->m_Line[p1].get(), this->m_Line[p2].get(), (0.00762f) * Scale3DRate * 1.f * (static_cast<float>(i - min) / max), 3,
+						DrawCapsule3D(this->m_Line[p1].first.get(), this->m_Line[p2].first.get(), (0.00762f) * Scale3DRate * 1.f * (static_cast<float>(i - min) / max), 3,
 							GetColor(216, 216, 216),
 							GetColor(96, 96, 64),
 							TRUE);

@@ -656,7 +656,7 @@ namespace FPS_n2 {
 			}
 #ifdef DEBUG
 			for (auto& s : m_LineDebug) {
-				int index = &s - &m_LineDebug.front();
+				int index = (int)(&s - &m_LineDebug.front());
 				DrawCapsule3D(s.PosA.get(), s.PosB.get(), 0.02f * Scale3DRate, 8, GetColor(0, 0, (32 * index) % 256), GetColor(0, 0, 0), TRUE);
 			}
 #endif // DEBUG
@@ -783,7 +783,7 @@ namespace FPS_n2 {
 
 						bool is_HitAll = false;
 
-						Vector3DX norm_tmp;
+						Vector3DX norm_tmp = Vector3DX::zero();
 						auto ColResGround = BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
 
 
@@ -831,10 +831,14 @@ namespace FPS_n2 {
 							}
 						}
 #ifdef DEBUG
-						//m_LineDebug.emplace_back();
-						//m_LineDebug.back().PosA = repos_tmp;
-						//m_LineDebug.back().PosB = pos_tmp;
-						//m_LineDebug.back().Time = 10.f;
+						/*
+						if (norm_tmp != Vector3DX::zero()) {
+							m_LineDebug.emplace_back();
+							m_LineDebug.back().PosA = pos_tmp;
+							m_LineDebug.back().PosB = pos_tmp + norm_tmp * (1.f * Scale3DRate);
+							m_LineDebug.back().Time = 10.f;
+						}
+						//*/
 #endif // DEBUG
 						if (ColResGround && !is_HitAll) {
 							a->HitGround(pos_tmp);

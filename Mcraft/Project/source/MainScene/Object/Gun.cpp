@@ -323,7 +323,7 @@ namespace FPS_n2 {
 					this->m_Cancel = false;
 					SetGunAnime(GunAnimeID::Base);
 				}
-				if (GetGunAnimePer(EnumGunAnimType::Reload) >= 1.f) {
+				if (m_isMagSuccess ? (GetGunAnimePer(EnumGunAnimType::Reload) >= 0.75f) : (GetGunAnimePer(EnumGunAnimType::Reload) >= 1.f)) {
 					switch (this->GetModData()->GetReloadType()) {
 					case RELOADTYPE::MAG:
 						//ユニークIDが異なる場合登録するオブジェと切り替える(現状不要なのでいったんオフ)
@@ -517,7 +517,7 @@ namespace FPS_n2 {
 				InitMuzzleSmoke(GetFrameWorldMat_P(GunFrame::Muzzle).pos());
 			}
 			else {
-				ExecuteMuzzleSmoke(GetFrameWorldMat_P(GunFrame::Muzzle).pos());
+				ExecuteMuzzleSmoke(GetFrameWorldMat_P(GunFrame::Muzzle).pos(), GetGunAnime() != GunAnimeID::Shot);
 			}
 			//
 			for (int i = 0; i < GetObj().GetAnimNum(); i++) {

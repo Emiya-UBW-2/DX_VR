@@ -37,6 +37,7 @@ namespace FPS_n2 {
 			int										m_Recoil_Diff{ 0 };
 			int										m_Capacity{ 0 };//’e”
 			float																			m_UpperAnim{ 0.f };
+			bool												m_isMagSuccess{};
 		private:
 			PlayerID											m_MyID{ 0 };
 		public:
@@ -89,6 +90,7 @@ namespace FPS_n2 {
 			const auto& GetGunAnime(void) const noexcept { return this->m_GunAnime; }
 			const auto& GetAmmoNum(void) const noexcept { return this->m_Capacity; }
 			const auto& GetMagazinePtr(void) const noexcept { return m_MagazinePtr; }
+			const auto& IsMagLoadSuccess() const { return m_isMagSuccess; }
 			const auto	GetPelletNum(void) const noexcept { return this->m_ChamberAmmoData ? this->m_ChamberAmmoData->GetPellet() : 0; }
 			const auto	GetSightMax() const noexcept { return (int)this->m_SightPtr.size(); }
 			const auto* GetSightPtr() const noexcept {
@@ -198,6 +200,7 @@ namespace FPS_n2 {
 				return true;
 			}
 		public:
+			void		SetMagLoadSuccess(bool value) { m_isMagSuccess = value; }
 			void		SetCancel(bool value) noexcept { m_Cancel = value; }
 			void		SetGunAnime(GunAnimeID pShotPhase) noexcept {
 				this->m_GunAnimeFirst = (this->m_GunAnime != pShotPhase);

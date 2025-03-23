@@ -54,6 +54,7 @@ namespace FPS_n2 {
 			std::array<MagStockControl, 2>						m_MagStockControl;
 			ArmMovePerClass										m_ULTBar;
 			CharaTypeID											m_CharaType{};
+			Matrix4x4DX											m_MagMiss{}, m_MagSuccess{};
 			bool												m_IsMainGame{ false };
 			bool												m_AmmoLoadStart{ false };
 			bool												m_AmmoLoadSwitch{ false };
