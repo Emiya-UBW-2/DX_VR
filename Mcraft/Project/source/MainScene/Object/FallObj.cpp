@@ -2,11 +2,13 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		void			FallObjClass::SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float timer, SoundEnum sound) noexcept {
+		void			FallObjClass::SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float timer, SoundEnum sound, bool IsGrenade) noexcept {
 			this->m_IsActive = true;
 			this->m_yAdd = 0.001f;
 			this->m_SoundSwitch = true;
 			this->m_Timer = timer;
+			this->m_IsGrenade = IsGrenade;
+			this->m_BoundCount = 0;
 
 			this->SetMove().SetAll(pos, pos, pos, vec, mat, mat);
 			this->m_CallSound = sound;
@@ -21,16 +23,19 @@ namespace FPS_n2 {
 				if (this->m_yAdd != 0.f) {
 					this->m_yAdd += (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));
 				}
-				if ((PosBuf - this->GetMove().GetRePos()).y < 0.f) {
+				//if ((PosBuf - this->GetMove().GetRePos()).y < 0.f) 
+				{
 					Vector3DX EndPos = PosBuf;
 					Vector3DX Normal;
 					if (BackGround->CheckLinetoMap(this->GetMove().GetRePos(), &EndPos, &Normal)) {
 						PosBuf = EndPos;
-						this->SetMove().SetVec(Vector3DX::Reflect(this->GetMove().GetVec(), Normal));
-						if (Normal.y > 0.5f) {
-							//this->m_yAdd = 0.f;
+						if (std::abs(Normal.y) > 0.5f) {
+							m_BoundCount++;
 						}
-						this->m_yAdd *= -0.25f;
+						Vector3DX Vec = Vector3DX::Reflect(this->GetMove().GetVec(), Normal);
+						Vec *= 0.5f;
+						this->SetMove().SetVec(Vec);
+						this->m_yAdd = 0.001f;
 						if (m_SoundSwitch) {
 							m_SoundSwitch = false;
 							SoundPool::Instance()->Get(SoundType::SE, (int)this->m_CallSound)->Play3D(PosBuf, Scale3DRate * 3.f);
@@ -48,6 +53,10 @@ namespace FPS_n2 {
 				}
 
 				if (this->m_Timer < 0.f) {
+					if (this->m_IsGrenade) {
+						m_EffectControl.SetOnce((int)EffectResource::Effect::ef_greexp, this->SetMove().GetPos(), Vector3DX::forward(), 0.5f*Scale3DRate);
+						m_EffectControl.SetEffectSpeed((int)EffectResource::Effect::ef_greexp, 2.f);
+					}
 					this->m_IsActive = false;
 				}
 				this->m_Timer -= DXLib_refParts->GetDeltaTime();
@@ -56,6 +65,7 @@ namespace FPS_n2 {
 				SetMove().Update(0.f, 0.f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}
+			m_EffectControl.Execute();
 		}
 	};
 };

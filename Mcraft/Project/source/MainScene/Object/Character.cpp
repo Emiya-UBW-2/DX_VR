@@ -514,6 +514,14 @@ namespace FPS_n2 {
 			}
 			//
 			m_ActionFirstFrame = (PrevAction != m_CharaAction);
+
+			//
+			if (KeyControl::GetThrowKey()) {
+				m_Grenade.SetFall(
+					GetFrameWorldMat(CharaFrame::RightHandJoint).pos(),
+					Matrix3x3DX::Get33DX(GetEyeMatrix().rotation()),
+					(GetEyeMatrix().zvec() * -1.f).normalized() * (Scale3DRate * 15.f / 60.f), 3.5f, SoundEnum::CartFall, true);
+			}
 		}
 		//âπéwé¶
 		void			CharacterClass::ExecuteSound(void) noexcept {
@@ -1310,6 +1318,8 @@ namespace FPS_n2 {
 			HitBoxControl::InitHitBox();
 			m_ArmBreak = false;
 			EffectControl::Init();
+			m_Grenade.Dispose();
+			m_Grenade.Init("data/model/RGD5/", 4);	//ëïìUÇµÇΩÉ}ÉKÉWÉìÇÃíeÇ…çáÇÌÇπÇƒñÚ‰∞ê∂ê¨
 		}
 		void			CharacterClass::FirstExecute(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();

@@ -47,7 +47,7 @@ namespace FPS_n2 {
 					m_CartFall.SetFall(
 						GetFrameWorldMat_P(GunFrame::Cart).pos(),
 						Matrix3x3DX::Get33DX(GetFrameWorldMat_P(GunFrame::Muzzle).rotation()),
-						(GetFrameWorldMat_P(GunFrame::CartVec).pos() - GetFrameWorldMat_P(GunFrame::Cart).pos() + Vector3DX::vget(GetRandf(0.2f), 0.5f + GetRandf(1.f), GetRandf(0.2f))).normalized() * (Scale3DRate * 2.f / 60.f), 2.f, SoundEnum::CartFall);
+						(GetFrameWorldMat_P(GunFrame::CartVec).pos() - GetFrameWorldMat_P(GunFrame::Cart).pos() + Vector3DX::vget(GetRandf(0.2f), 0.5f + GetRandf(1.f), GetRandf(0.2f))).normalized() * (Scale3DRate * 2.f / 60.f), 2.f, SoundEnum::CartFall, false);
 				}
 			}
 		}

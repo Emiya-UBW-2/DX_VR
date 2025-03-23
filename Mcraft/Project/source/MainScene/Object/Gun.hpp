@@ -249,7 +249,7 @@ namespace FPS_n2 {
 					GetFrameWorldMat_P(GunFrame::Magpos).pos(),
 					Matrix3x3DX::Get33DX(GetFrameWorldMat_P(GunFrame::Magpos).rotation()),
 					GetFrameWorldMat_P(GunFrame::Magpos).yvec() * -1.f * (Scale3DRate * 3.f / 60.f),
-					12.f, SoundEnum::MagFall);
+					12.f, SoundEnum::MagFall, false);
 			}
 			void		SetReloadStart(int NextMagNum, int NextMagUniqueID) noexcept {
 				this->m_NextMagNum = NextMagNum;

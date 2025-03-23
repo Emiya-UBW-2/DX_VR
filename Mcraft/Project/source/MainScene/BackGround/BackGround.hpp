@@ -537,7 +537,7 @@ namespace FPS_n2 {
 				//‚Ç‚ÌŒü‚«H
 				if (Normal) {
 					for (int i = 0; i < 3; ++i) {
-						if (std::abs(ret[i] - min[i]) < 0.1f) {
+						if (std::abs(ret[i] - min[i]) < 0.001f) {
 							switch (i) {
 							case 0:
 								*Normal = Vector3DX::left();
@@ -552,7 +552,7 @@ namespace FPS_n2 {
 								break;
 							}
 						}
-						if (std::abs(ret[i] - max[i]) < 0.1f) {
+						if (std::abs(ret[i] - max[i]) < 0.001f) {
 							switch (i) {
 							case 0:
 								*Normal = Vector3DX::right();

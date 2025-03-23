@@ -9,14 +9,19 @@ namespace FPS_n2 {
 			float m_Timer{ 0.f };
 			bool m_SoundSwitch{ false };
 			SoundEnum m_CallSound{ SoundEnum::CartFall };
+			bool m_IsGrenade{ false };
+			int m_BoundCount{ 0 };
+
+			EffectControl m_EffectControl;
 		public:
 			FallObjClass(void) noexcept { this->m_objType = (int)ObjType::FallObj; }
 			~FallObjClass(void) noexcept {}
 		public:
-			void			SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float timer, SoundEnum sound) noexcept;
+			void			SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float timer, SoundEnum sound, bool IsGrenade) noexcept;
 		public:
 			void			Init_Sub(void) noexcept override {
 				this->m_IsActive = false;
+				m_EffectControl.Init();
 			}
 			void			FirstExecute(void) noexcept override;
 			void			CheckDraw(void) noexcept override {
@@ -30,6 +35,7 @@ namespace FPS_n2 {
 				}
 			}
 			void			Dispose_Sub(void) noexcept override {
+				m_EffectControl.Dispose();
 			}
 		};
 	};

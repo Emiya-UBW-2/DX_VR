@@ -30,7 +30,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(Controls::PADS::LEAN_R, true);
 	Pad->SetIsUseButton(Controls::PADS::RELOAD, true);//UI‚Ì‚Ý
 	Pad->SetIsUseButton(Controls::PADS::INTERACT, true);//UI‚Ì‚Ý
-	Pad->SetIsUseButton(Controls::PADS::THROW, false);
+	Pad->SetIsUseButton(Controls::PADS::THROW, true);
 	Pad->SetIsUseButton(Controls::PADS::MELEE, false);
 	Pad->SetIsUseButton(Controls::PADS::JUMP, false);
 	Pad->SetIsUseButton(Controls::PADS::INVENTORY, true);

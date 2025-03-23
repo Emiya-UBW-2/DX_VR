@@ -22,8 +22,8 @@ namespace FPS_n2 {
 					c->Init();
 				}
 			}
-			void		SetFall(const Vector3DX& pPos, const Matrix3x3DX& pMat, const Vector3DX& pVec, float time, SoundEnum sound) {
-				this->m_Ptr[this->m_Now]->SetFall(pPos, pMat, pVec, time, sound);
+			void		SetFall(const Vector3DX& pPos, const Matrix3x3DX& pMat, const Vector3DX& pVec, float time, SoundEnum sound, bool IsGrenade) {
+				this->m_Ptr[this->m_Now]->SetFall(pPos, pMat, pVec, time, sound, IsGrenade);
 				++this->m_Now %= this->m_Ptr.size();
 			}
 			void		Dispose() noexcept {

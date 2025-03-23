@@ -65,6 +65,8 @@ namespace FPS_n2 {
 
 			bool												LookEnemy{};
 			float												m_LeanSwitch{};
+
+			FallControl											m_Grenade;
 		private:
 			PlayerID											m_MyID{ 0 };
 		public:

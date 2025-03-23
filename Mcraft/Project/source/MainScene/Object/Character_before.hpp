@@ -269,6 +269,7 @@ namespace FPS_n2 {
 			std::array<float, 4>								m_Vec{ 0,0,0,0 };
 			InputControl										m_Input;
 			switchs												m_ULTKey;
+			switchs												m_ThrowKey;
 			switchs												m_Squat;
 			bool												m_IsSquat{ false };
 			int													m_LeanRate{ 0 };
@@ -314,6 +315,7 @@ namespace FPS_n2 {
 			const auto		GetLeanRate(void) const noexcept { return this->m_LeanRate; }
 			const auto		GetLeanSwitch(void) const noexcept { return this->m_LeanSwitch; }
 			const auto		GetULTKey(void) const noexcept { return this->m_ULTKey.trigger(); }
+			const auto		GetThrowKey(void) const noexcept { return this->m_ThrowKey.trigger(); }
 			const auto		GetSquatSwitch(void) const noexcept { return this->m_Squat.trigger(); }
 			const auto		GetGunSwingMat(void) const noexcept { return Matrix4x4DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
 			auto& GetCharaAnimeBufID(CharaAnimeID value) noexcept { return this->m_AnimPerBuf.at((int)value); }
@@ -382,6 +384,7 @@ namespace FPS_n2 {
 				//“ü—Í
 				this->m_ULTKey.Update(this->m_Input.GetPADSPress(Controls::PADS::ULT));
 				this->m_Squat.Update(this->m_Input.GetPADSPress(Controls::PADS::SQUAT));
+				this->m_ThrowKey.Update(this->m_Input.GetPADSPress(Controls::PADS::THROW));
 				if (this->m_Squat.trigger()) {
 					m_IsSquat ^= 1;
 				}

@@ -144,6 +144,8 @@ namespace FPS_n2 {
 			this->m_IsEnd = false;
 			EffectControl::Init();
 			this->m_StartTimer = 5.f;
+
+			EffectControl::SetLoop((int)EffectResource::Effect::ef_greexp2, Vector3DX::zero());
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* CameraParts = Camera3D::Instance();
@@ -232,6 +234,8 @@ namespace FPS_n2 {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::WALK), LocalizePool::Instance()->Get(9903));
 
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizePool::Instance()->Get(9904));
+
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::THROW), LocalizePool::Instance()->Get(9904));
 					}
 				});
 			if (SceneParts->IsPause()) {
@@ -281,7 +285,7 @@ namespace FPS_n2 {
 					MyInput.SetInputPADS(Controls::PADS::SHOT, Pad->GetPadsInfo(Controls::PADS::SHOT).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::AIM, Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::ULT, Pad->GetPadsInfo(Controls::PADS::ULT).GetKey().press());
-					//MyInput.SetInputPADS(Controls::PADS::THROW, Pad->GetPadsInfo(Controls::PADS::THROW).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::THROW, Pad->GetPadsInfo(Controls::PADS::THROW).GetKey().press());
 					//MyInput.SetInputPADS(Controls::PADS::CHECK, Pad->GetPadsInfo(Controls::PADS::CHECK).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::WALK, Pad->GetPadsInfo(Controls::PADS::WALK).GetKey().press());
 					//MyInput.SetInputPADS(Controls::PADS::JUMP, Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().press());
@@ -411,6 +415,10 @@ namespace FPS_n2 {
 					break;
 				}
 #endif
+				Easing(&m_EffectPos, CamPos, 0.95f, EasingType::OutExpo);
+				EffectControl::Update_LoopEffect((int)EffectResource::Effect::ef_greexp2, m_EffectPos, Vector3DX::forward(), 0.5f);
+				EffectControl::SetEffectColor((int)EffectResource::Effect::ef_greexp2, 255, 255, 255, 64);
+
 				CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
 				auto fov_t = CameraParts->GetMainCamera().GetCamFov();
 				auto near_t = CameraParts->GetMainCamera().GetCamNear();
