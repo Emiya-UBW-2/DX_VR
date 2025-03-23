@@ -902,6 +902,7 @@ namespace FPS_n2 {
 					GunPos = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::RightHandPos).pos();
 					Gunyvec = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::RightHandYvec).pos() - GunPos;
 					Gunzvec = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::RightHandZvec).pos() - GunPos;
+					bool IsBreak = false;
 					{
 						switch (GetGunPtrNow()->GetModData()->GetReloadType()) {
 						case RELOADTYPE::MAG:
@@ -936,6 +937,7 @@ namespace FPS_n2 {
 							case GunAnimeID::Shot:
 								m_MagHand = false;
 								if (m_ArmBreak) {
+									IsBreak = true;
 									m_MagHand = true;
 								}
 								break;
@@ -970,6 +972,7 @@ namespace FPS_n2 {
 							case GunAnimeID::Shot:
 								m_MagHand = false;
 								if (m_ArmBreak) {
+									IsBreak = true;
 									m_MagHand = true;
 								}
 								break;
@@ -1005,6 +1008,35 @@ namespace FPS_n2 {
 						HandsPos = Lerp(HandPos, MagPos, m_MagArm.Per());
 						Handsyvec = Lerp(Handyvec, Magyvec, 0.f);
 						Handszvec = Lerp(Handzvec, Magzvec, 0.f);
+
+						Easing(&m_ArmBreakPer, IsBreak ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+						if(m_ArmBreakPer>0.01f){
+							m_SlingArmZrad.Update(DXLib_refParts->GetDeltaTime());
+							m_SlingArmZrad.AddRad((0.5f * (KeyControl::GetRad().y - KeyControl::GetYRadBottom()))* DXLib_refParts->GetDeltaTime());
+							m_SlingArmMat =
+								Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(-30)) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(-90)) *
+								(
+									Matrix4x4DX::RotAxis(Vector3DX::forward(), -this->m_SlingArmZrad.GetRad()) *
+									Matrix4x4DX::RotAxis(Vector3DX::up(), KeyControl::GetRad().y)
+									) *
+								Matrix4x4DX::Mtrans(
+									GetFrameWorldMat(CharaFrame::Head).pos() +
+									GetFrameWorldMat(CharaFrame::Head).xvec() * (0.15f * Scale3DRate) +
+									GetFrameWorldMat(CharaFrame::Head).zvec() * (-0.1f * Scale3DRate) +
+									(
+										this->GetMove().GetMat().xvec() * sin(m_SlingArmZrad.GetRad()) +
+										this->GetMove().GetMat().yvec() * cos(m_SlingArmZrad.GetRad())
+										) * -(0.5f * Scale3DRate)
+								);
+
+							HandPos = m_SlingArmMat.pos();
+							Handyvec = m_SlingArmMat.yvec();
+							Handzvec = m_SlingArmMat.zvec() * -1.f;
+
+							HandsPos = Lerp(HandsPos, HandPos, m_ArmBreakPer);
+							Handsyvec = Lerp(Handsyvec, Handyvec, m_ArmBreakPer);
+							Handszvec = Lerp(Handszvec, Handzvec, m_ArmBreakPer);
+						}
 					}
 					if (m_ArmBreak) {
 						HandsPos += Vector3DX::vget(GetRandf(1.f * Scale3DRate), GetRandf(1.f * Scale3DRate), GetRandf(1.f * Scale3DRate)) * 0.002f;
@@ -1126,6 +1158,8 @@ namespace FPS_n2 {
 				GetGunPtr(1)->SetPlayerID(this->m_MyID);
 			}
 			m_SlingZrad.Init(0.05f * Scale3DRate, 3.f, deg2rad(50));
+			m_SlingArmZrad.Init(0.08f * Scale3DRate, 3.f, deg2rad(50));
+			m_ArmBreakPer = 0.f;
 			m_HPRec = 0.f;
 			m_CharaAction = CharaActionID::Ready;
 			m_ActionFirstFrame = true;

@@ -47,6 +47,9 @@ namespace FPS_n2 {
 			float												m_SoundPower{ 0.f };			//サウンド
 			int													m_CharaSound{ -1 };			//サウンド
 			Vector3DX											m_RecoilRadAdd;
+			Pendulum2D											m_SlingArmZrad;
+			Matrix4x4DX											m_SlingArmMat;
+			float												m_ArmBreakPer{};
 			Pendulum2D											m_SlingZrad;
 			std::array<float, 2>								m_SlingPer{};
 			std::array<Matrix4x4DX, 2>							m_SlingMat;
