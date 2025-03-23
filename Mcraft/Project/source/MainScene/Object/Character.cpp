@@ -820,7 +820,7 @@ namespace FPS_n2 {
 
 							Vector3DX BasePos = GetEyeMatrix().pos();
 							//オートエイム
-							if (IsSelGun && GunReadyControl::GetIsADS() && GetGunPtrNow()->IsAutoAimActive() && m_IsMainGame) {
+							if (IsSelGun && GunReadyControl::GetIsADS() && p->IsAutoAimActive() && m_IsMainGame) {
 								//float Range = 13.f;// GetIsLaserActive() ? 13.f : 7.f;
 
 								float Len = std::max(0.01f, std::hypotf((float)(p->GetAimXPos() - 1920 / 2), (float)(p->GetAimYPos() - 1080 / 2)));
@@ -860,17 +860,18 @@ namespace FPS_n2 {
 										break;
 									}
 								}
-
-							}
-							if (GetAutoAimActive()) {
-								auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(AutoAimControl::GetAutoAimID())->GetChara();
-								Easing(&m_AutoAimVec, (Chara->GetHitBoxPointList().at(AutoAimControl::GetAutoAimPoint()).GetPos() - BasePos).normalized(), 0.8f, EasingType::OutExpo);
-							}
-							else {
-								Easing(&m_AutoAimVec, tmp_gunmat.zvec() * -1.f, 0.95f, EasingType::OutExpo);
 							}
 
-							tmp_gunmat = Lerp(tmp_gunmat, tmp_gunmat * Matrix4x4DX::RotVec2(tmp_gunmat.zvec() * -1.f, m_AutoAimVec), m_AutoAimPer);
+							if (IsSelGun) {
+								if (GetAutoAimActive()) {
+									auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(AutoAimControl::GetAutoAimID())->GetChara();
+									Easing(&m_AutoAimVec, (Chara->GetHitBoxPointList().at(AutoAimControl::GetAutoAimPoint()).GetPos() - BasePos).normalized(), 0.8f, EasingType::OutExpo);
+								}
+								else {
+									Easing(&m_AutoAimVec, tmp_gunmat.zvec() * -1.f, 0.95f, EasingType::OutExpo);
+								}
+								tmp_gunmat = Lerp(tmp_gunmat, tmp_gunmat * Matrix4x4DX::RotVec2(tmp_gunmat.zvec() * -1.f, m_AutoAimVec), m_AutoAimPer);
+							}
 
 							tmp_gunmat *=
 								Matrix4x4DX::Mtrans(Lerp(Mat.pos() + Vector3DX::up() * PAdd, Post0, Per));
