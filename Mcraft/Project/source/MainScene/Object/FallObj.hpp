@@ -19,15 +19,13 @@ namespace FPS_n2 {
 				this->m_IsActive = false;
 			}
 			void			FirstExecute(void) noexcept override;
+			void			CheckDraw(void) noexcept override {
+				m_IsDraw = true;
+			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {
 				if (this->m_IsActive && this->m_IsDraw) {
-					if (CheckCameraViewClip_Box(
-						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(-0.1f * Scale3DRate, -0.1f * Scale3DRate, -0.1f * Scale3DRate)).get(),
-						(this->GetObj().GetMatrix().pos() + Vector3DX::vget(0.1f * Scale3DRate, 0.1f * Scale3DRate, 0.1f * Scale3DRate)).get()) == FALSE
-						) {
-						if (!isDrawSemiTrans) {
-							this->m_obj.DrawModel();
-						}
+					if (!isDrawSemiTrans) {
+						this->m_obj.DrawModel();
 					}
 				}
 			}

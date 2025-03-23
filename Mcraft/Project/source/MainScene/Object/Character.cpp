@@ -778,6 +778,13 @@ namespace FPS_n2 {
 						if (!GetGunPtrNow()->GetGunAnimeNow((EnumGunAnimType)i, &AnimData)) { continue; }
 						AnimMat = Lerp(AnimMat, AnimData, this->m_Arm[i].Per());
 					}
+					{
+						auto Pos = AnimMat.pos();
+
+						Easing(&m_LeanSwitch, (GetLeanRate() <= 0 || GetGunPtrNow()->GetReloading()) ? 1.f : -1.f, 0.9f, EasingType::OutExpo);
+						Pos.x *= m_LeanSwitch;
+						AnimMat = AnimMat.rotation() * Matrix4x4DX::Mtrans(Pos);
+					}
 					Vector3DX Post0 = GetFrameWorldMat(CharaFrame::Head).pos() + Matrix4x4DX::Vtrans(AnimMat.pos(), GetCharaDir());
 					//
 					this->m_ULTBar.Execute(IsGun0Select(), 0.1f, 0.1f, 0.7f);

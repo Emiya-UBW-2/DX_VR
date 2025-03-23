@@ -62,6 +62,7 @@ namespace FPS_n2 {
 			moves												m_OverRideInfo;
 
 			bool												LookEnemy{};
+			float												m_LeanSwitch{};
 		private:
 			PlayerID											m_MyID{ 0 };
 		public:

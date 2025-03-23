@@ -10,6 +10,8 @@ namespace FPS_n2 {
 
 			this->SetMove().SetAll(pos, pos, pos, vec, mat, mat);
 			this->m_CallSound = sound;
+			SetMove().Update(0.f, 0.f);
+			UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 		}
 		void			FallObjClass::FirstExecute(void) noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
@@ -28,13 +30,14 @@ namespace FPS_n2 {
 						if (Normal.y > 0.5f) {
 							//this->m_yAdd = 0.f;
 						}
+						this->m_yAdd *= -0.25f;
 						if (m_SoundSwitch) {
 							m_SoundSwitch = false;
 							SoundPool::Instance()->Get(SoundType::SE, (int)this->m_CallSound)->Play3D(PosBuf, Scale3DRate * 3.f);
 						}
 					}
 				}
-				PosBuf.y = (std::max(PosBuf.y, 0.f));
+				//PosBuf.y = (std::max(PosBuf.y, 0.f));
 
 				if (this->m_yAdd != 0.f) {
 					auto BB = (PosBuf - this->GetMove().GetRePos()).normalized();
