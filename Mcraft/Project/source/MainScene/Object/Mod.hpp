@@ -81,31 +81,18 @@ namespace FPS_n2 {
 
 
 		class MagazineClass : public ModClass {
-		private:
-			Matrix4x4DX									HandMatrix;
-			float										HandPer{ 0.f };
-			bool										m_isDirect{ false };
 		public:
 			MagazineClass(void) noexcept { this->m_objType = (int)ObjType::Magazine; }
 			~MagazineClass(void) noexcept {}
 		public:
 			void			FirstExecute_Mod(void) noexcept override {
-				if (this->m_isDirect) {
-					SetMove().SetMat(Matrix3x3DX::Get33DX(this->HandMatrix.rotation()));
-					SetMove().SetPos(this->HandMatrix.pos());
-				}
-				else if (this->HandPer > 0.f) {
-					SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-30.f * this->HandPer)) * GetMove().GetMat());
-					SetMove().SetPos(Lerp(GetMove().GetPos(), this->HandMatrix.pos(), this->HandPer));
-				}
-				SetMove().Update(0.f, 0.f);
-				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}
 		public:
-			void			SetHandMatrix(const Matrix4x4DX& value, float pPer, bool isDirect) noexcept {
-				this->HandMatrix = value;
-				this->HandPer = pPer;
-				this->m_isDirect = isDirect;
+			void			SetHandMatrix(const Matrix4x4DX& value) noexcept {
+				SetMove().SetMat(Matrix3x3DX::Get33DX(value.rotation()));
+				SetMove().SetPos(value.pos());
+				SetMove().Update(0.f, 0.f);
+				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}
 		};
 

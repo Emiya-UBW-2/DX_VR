@@ -32,8 +32,6 @@ namespace FPS_n2 {
 			ArmMovePerClass										m_MagArm;
 			float												m_StuckGunTimer{ 0.f };
 			bool												m_IsStuckGun{ false };
-			float												m_AmmoHandR{ 0.f };
-			float												m_AmmoHand{ 0.f };
 			bool												m_IsChanging{ false };
 			bool												m_IsChange{ false };
 			bool												m_HeadShotSwitch{ false };

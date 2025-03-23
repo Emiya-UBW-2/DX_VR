@@ -47,7 +47,7 @@ namespace FPS_n2 {
 					m_CartFall.SetFall(
 						GetFrameWorldMat_P(GunFrame::Cart).pos(),
 						Matrix3x3DX::Get33DX(GetFrameWorldMat_P(GunFrame::Muzzle).rotation()),
-						(GetFrameWorldMat_P(GunFrame::CartVec).pos() - GetFrameWorldMat_P(GunFrame::Cart).pos()).normalized() * (Scale3DRate * 2.f / 60.f), 2.f, SoundEnum::CartFall);
+						(GetFrameWorldMat_P(GunFrame::CartVec).pos() - GetFrameWorldMat_P(GunFrame::Cart).pos() + Vector3DX::vget(GetRandf(0.2f), 0.5f + GetRandf(1.f), GetRandf(0.2f))).normalized() * (Scale3DRate * 2.f / 60.f), 2.f, SoundEnum::CartFall);
 				}
 			}
 		}
@@ -281,7 +281,7 @@ namespace FPS_n2 {
 			case GunAnimeID::Base:
 				break;
 			case GunAnimeID::Shot:
-				SetAnimOnce((int)GetGunAnime(), ((float)this->GetModData()->GetShotRate()) / 300.f);//•ªŠÔ300
+				SetAnimOnce((int)GetGunAnime(), ((float)this->GetModData()->GetShotRate()) / 300.f);
 				break;
 			case GunAnimeID::Cocking:
 				SetAnimOnce((int)GetGunAnime(), 1.5f);
@@ -532,7 +532,14 @@ namespace FPS_n2 {
 				}
 				else {
 					if ((GunAnimeID)i == GunAnimeID::Base) {
-						GetObj().SetAnim(i).SetPer(1.f);
+						bool isHit = true;
+						if ((GetGunAnime() == GunAnimeID::Shot)) {
+							if (GetObj().SetAnim((int)GetGunAnime()).GetTimePer() < 0.7f) {
+								isHit = false;
+							}
+							isHit = false;
+						}
+						GetObj().SetAnim(i).SetPer(std::clamp(GetObj().SetAnim(i).GetPer() + DXLib_refParts->GetDeltaTime() * (isHit ? 5.f : -5.f), 0.f, 1.f));
 					}
 					else if ((GunAnimeID)i == GunAnimeID::OffsetAnim) {
 						bool isHit = false;

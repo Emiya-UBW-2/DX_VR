@@ -393,19 +393,19 @@ namespace FPS_n2 {
 				switch (DBG_CamSel) {
 				case 0:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().xvec() * (10.f * Scale3DRate);
+					CamPos += ViewChara->GetEyeMatrix().xvec() * (3.f * Scale3DRate);
 					break;
 				case 1:
 					CamVec = CamPos;
-					CamPos -= ViewChara->GetEyeMatrix().xvec() * (10.f * Scale3DRate);
+					CamPos -= ViewChara->GetEyeMatrix().xvec() * (3.f * Scale3DRate);
 					break;
 				case 2:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().yvec() * (10.f * Scale3DRate) + ViewChara->GetEyeMatrix().zvec() * 0.1f;
+					CamPos += ViewChara->GetEyeMatrix().yvec() * (3.f * Scale3DRate) + ViewChara->GetEyeMatrix().zvec() * 0.1f;
 					break;
 				case 3:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().zvec() * (-10.f * Scale3DRate);
+					CamPos += ViewChara->GetEyeMatrix().zvec() * (-3.f * Scale3DRate);
 					break;
 				default:
 					break;

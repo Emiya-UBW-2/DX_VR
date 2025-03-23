@@ -894,6 +894,70 @@ namespace FPS_n2 {
 						GetGunPtrOther()->SetGunMatrix(tmp_gunmat);
 					}
 				}
+				//LeftMag
+				{
+					auto tmp_gunmat = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Magpos);
+					float AnimPer = GetGunPtrNow()->GetObj().SetAnim((int)GetGunPtrNow()->GetGunAnime()).GetTimePer();
+					float BasePer = 0.f;
+					float MaxPer = 0.f;
+					switch (GetGunPtrNow()->GetGunAnime()) {
+					case GunAnimeID::ReloadStart_Empty:
+						tmp_gunmat = GetFrameWorldMat(CharaFrame::LeftMag);
+						break;
+					case GunAnimeID::ReloadStart:
+						BasePer = 0.3f;
+						MaxPer = 0.6f;
+						if (AnimPer <= MaxPer) {
+							float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
+							tmp_gunmat = Lerp(GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Magpos), GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2), Per);
+							break;
+						}
+
+						BasePer = 0.5f;
+						MaxPer = 1.f;
+						if (AnimPer <= MaxPer) {
+							float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
+							tmp_gunmat = Lerp(GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2), GetFrameWorldMat(CharaFrame::LeftMag), Per);
+							break;
+						}
+						break;
+					case GunAnimeID::ReloadOne:
+					{
+						BasePer = 0.f;
+						MaxPer = 0.7f;
+						if (AnimPer <= MaxPer) {
+							//float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
+							float Per = this->m_Arm[(int)EnumGunAnimType::Reload].Per();
+							tmp_gunmat = Lerp(GetFrameWorldMat(CharaFrame::LeftMag), GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2), Per);
+							break;
+						}
+						BasePer = 0.7f;
+						MaxPer = 0.9f;
+						if (AnimPer <= MaxPer) {
+							float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
+							tmp_gunmat = Lerp(GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Mag2), GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Magpos), Per);
+							break;
+						}
+					}
+					break;
+					case GunAnimeID::CheckStart:
+						break;
+					case GunAnimeID::Checking:
+						break;
+					case GunAnimeID::CheckEnd:
+						break;
+					case GunAnimeID::AmmoLoading:
+						break;
+					case GunAnimeID::AmmoLoadEnd:
+						break;
+					default:
+						break;
+					}
+					(*GetGunPtrNow()->GetMagazinePtr())->SetHandMatrix(tmp_gunmat);
+					if (GetGunPtrOther()) {
+						(*GetGunPtrOther()->GetMagazinePtr())->SetHandMatrix(GetGunPtrOther()->GetFrameWorldMat_P(GunFrame::Magpos));
+					}
+				}
 				//e•\Ž¦
 				if (GetGunPtrOther()) {
 					GetGunPtrOther()->SetActiveAll(true);
@@ -909,7 +973,7 @@ namespace FPS_n2 {
 						case RELOADTYPE::MAG:
 							switch (GetGunPtrNow()->GetGunAnime()) {
 							case GunAnimeID::ReloadStart_Empty:
-								if (GetGunPtrNow()->GetObj().SetAnim((int)GunAnimeID::ReloadStart_Empty).GetTimePer() > 0.5f) {
+								if (GetGunPtrNow()->GetObj().SetAnim((int)GetGunPtrNow()->GetGunAnime()).GetTimePer() > 0.5f) {
 									if (!m_MagHand) {
 										GetGunPtrNow()->SetMagFall();
 									}
@@ -920,26 +984,22 @@ namespace FPS_n2 {
 								}
 								break;
 							case GunAnimeID::ReloadStart:
-								if (GetGunPtrNow()->GetObj().SetAnim((int)GunAnimeID::ReloadStart).GetTimePer() > 0.8f) {
-									m_MagHand = true;
-								}
+								m_MagHand = true;
 								break;
 							case GunAnimeID::ReloadOne:
-								if (GetGunPtrNow()->GetGunAnimePer(EnumGunAnimType::Reload) < 0.6f) {
-									m_MagHand = true;
-								}
-								else {
+								m_MagHand = true;
+								break;
+							case GunAnimeID::ReloadEnd:
+								if (GetGunPtrNow()->GetObj().SetAnim((int)GetGunPtrNow()->GetGunAnime()).GetTimePer() > 0.6f) {
 									m_MagHand = false;
 								}
 								break;
 							case GunAnimeID::Base:
-							case GunAnimeID::ReloadEnd:
 							case GunAnimeID::CheckEnd:
 							case GunAnimeID::Shot:
 								m_MagHand = false;
 								if (m_ArmBreak) {
 									IsBreak = true;
-									m_MagHand = true;
 								}
 								break;
 							default:
@@ -950,31 +1010,23 @@ namespace FPS_n2 {
 						case RELOADTYPE::AMMO:
 							switch (GetGunPtrNow()->GetGunAnime()) {
 							case GunAnimeID::ReloadStart_Empty:
-								if (GetGunPtrNow()->GetObj().SetAnim((int)GunAnimeID::ReloadStart_Empty).GetTimePer() > 0.8f) {
-									m_MagHand = true;
-								}
+								m_MagHand = true;
 								break;
 							case GunAnimeID::ReloadStart:
-								if (GetGunPtrNow()->GetObj().SetAnim((int)GunAnimeID::ReloadStart).GetTimePer() > 0.8f) {
-									m_MagHand = true;
-								}
+								m_MagHand = true;
 								break;
 							case GunAnimeID::ReloadOne:
-								if (GetGunPtrNow()->GetGunAnimePer(EnumGunAnimType::Reload) < 0.6f) {
-									m_MagHand = true;
-								}
-								else {
-									m_MagHand = false;
-								}
+								m_MagHand = true;
+								break;
+							case GunAnimeID::ReloadEnd:
+								m_MagHand = false;
 								break;
 							case GunAnimeID::Base:
-							case GunAnimeID::ReloadEnd:
 							case GunAnimeID::CheckEnd:
 							case GunAnimeID::Shot:
 								m_MagHand = false;
 								if (m_ArmBreak) {
 									IsBreak = true;
-									m_MagHand = true;
 								}
 								break;
 							default:
@@ -985,30 +1037,23 @@ namespace FPS_n2 {
 						default:
 							break;
 						}
-						if (GetCharaAction() == CharaActionID::Melee) {
-							m_MagHand = true;
-						}
-						if (GetCharaAction() == CharaActionID::Watch) {
-							if (m_ArmBreak) {
-								m_MagHand = true;
-							}
-							else {
-								m_MagHand = this->IsGun0Select();
-							}
-						}
-
-						m_MagArm.Execute(m_MagHand, 0.3f, 0.5f);
+						m_MagArm.Execute(m_MagHand, 0.1f, 0.1f,0.7f);
 
 						Vector3DX HandPos = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::LeftHandPos).pos();
 						Vector3DX Handyvec = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::LeftHandYvec).pos() - HandPos;
 						Vector3DX Handzvec = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::LeftHandZvec).pos() - HandPos;
 
+						Vector3DX MagPos = (*GetGunPtrNow()->GetMagazinePtr())->GetFrameWorldMat(GunFrame::LeftHandPos).pos();
+						Vector3DX Magyvec = (*GetGunPtrNow()->GetMagazinePtr())->GetFrameWorldMat(GunFrame::LeftHandYvec).pos() - MagPos;
+						Vector3DX Magzvec = (*GetGunPtrNow()->GetMagazinePtr())->GetFrameWorldMat(GunFrame::LeftHandZvec).pos() - MagPos;
+						/*
 						Vector3DX MagPos = GetFrameWorldMat(CharaFrame::LeftMag).pos();
 						Vector3DX Magyvec = GetFrameWorldMat(CharaFrame::LeftMagyvec).pos() - MagPos;
 						Vector3DX Magzvec = GetFrameWorldMat(CharaFrame::LeftMagzvec).pos() - MagPos;
+						//*/
 						HandsPos = Lerp(HandPos, MagPos, m_MagArm.Per());
-						Handsyvec = Lerp(Handyvec, Magyvec, 0.f);
-						Handszvec = Lerp(Handzvec, Magzvec, 0.f);
+						Handsyvec = Lerp(Handyvec, Magyvec, m_MagArm.Per());
+						Handszvec = Lerp(Handzvec, Magzvec, m_MagArm.Per());
 
 						Easing(&m_ArmBreakPer, IsBreak ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 						if(m_ArmBreakPer>0.01f){
@@ -1061,64 +1106,6 @@ namespace FPS_n2 {
 						GetFrame(static_cast<int>(CharaFrame::LeftWrist)),
 						GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftWrist)),
 						HandsPos, Handsyvec, Handszvec);
-				}
-				//LeftMag
-				{
-					auto tmp_gunmat = Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(-90)) * GetFrameWorldMat(CharaFrame::LeftHandJoint);
-					bool isDirect = false;
-					switch (GetGunPtrNow()->GetGunAnime()) {
-					case GunAnimeID::ReloadStart_Empty:
-						m_AmmoHandR = 1.f;
-						m_AmmoHand = 1.f;
-						break;
-					case GunAnimeID::ReloadStart:
-						m_AmmoHandR = 1.f;
-						m_AmmoHand = 1.f;
-						break;
-					case GunAnimeID::ReloadOne:
-						if (GetGunPtrNow()->GetGunAnimePer(EnumGunAnimType::Reload) < 0.86f) {
-							m_AmmoHandR = 1.f;
-							m_AmmoHand = 1.f;
-						}
-						if (GetGunPtrNow()->GetGunAnimePer(EnumGunAnimType::Reload) > 0.96f) {
-							m_AmmoHandR = 0.f;
-							m_AmmoHand = 0.f;
-						}
-						break;
-					case GunAnimeID::CheckStart:
-						if (GetGunPtrNow()->GetObj().SetAnim((int)GunAnimeID::CheckStart).GetTimePer() > 0.5f) {
-							m_AmmoHandR = 1.f;
-						}
-						break;
-					case GunAnimeID::Checking:
-						m_AmmoHandR = 1.f;
-						break;
-					case GunAnimeID::CheckEnd:
-						m_AmmoHandR = 0.f;
-						break;
-					case GunAnimeID::AmmoLoading:
-						m_AmmoHandR = 1.f;
-						m_AmmoHand = 1.f;
-						isDirect = true;
-						break;
-					case GunAnimeID::AmmoLoadEnd:
-						m_AmmoHandR = 0.f;
-						isDirect = true;
-						break;
-					default:
-						m_AmmoHandR = 0.f;
-						tmp_gunmat = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Magpos);
-						break;
-					}
-					if (GetGunPtrNow()->GetModData()->GetReloadType() == RELOADTYPE::AMMO) {
-						m_AmmoHand = 0.f;
-						isDirect = false;
-					}
-					(*GetGunPtrNow()->GetMagazinePtr())->SetHandMatrix(tmp_gunmat, m_AmmoHand, isDirect);
-					if (GetGunPtrOther()) {
-						(*GetGunPtrOther()->GetMagazinePtr())->SetHandMatrix(tmp_gunmat, 0.f, false);
-					}
-					Easing(&m_AmmoHand, m_AmmoHandR, 0.9f, EasingType::OutExpo);
 				}
 			}
 		}
