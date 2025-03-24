@@ -46,7 +46,6 @@ namespace FPS_n2 {
 			int													m_CharaSound{ -1 };			//ƒTƒEƒ“ƒh
 			Vector3DX											m_RecoilRadAdd;
 			Pendulum2D											m_SlingArmZrad;
-			Matrix4x4DX											m_SlingArmMat;
 			float												m_ArmBreakPer{};
 			Pendulum2D											m_SlingZrad;
 			std::array<float, 2>								m_SlingPer{};
@@ -85,7 +84,7 @@ namespace FPS_n2 {
 			Vector3DX											m_CameraPos;
 			float												m_Length{};
 		private:
-			const Matrix4x4DX GetCharaDir(void) const noexcept;
+			const Matrix3x3DX GetCharaDir(void) const noexcept;
 
 			const auto		GetCharaPosition(void) const noexcept { return this->GetMove().GetPos(); }
 			const auto		IsAimPer(void) const noexcept { return (this->m_Arm[(int)EnumGunAnimType::Ready].Per() <= 0.1f); }

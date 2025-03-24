@@ -316,7 +316,7 @@ namespace FPS_n2 {
 			const auto		GetULTKey(void) const noexcept { return this->m_ULTKey.trigger(); }
 			const auto		GetThrowKey(void) const noexcept { return this->m_ThrowKey.trigger(); }
 			const auto		GetSquatSwitch(void) const noexcept { return this->m_Squat.trigger(); }
-			const auto		GetGunSwingMat(void) const noexcept { return Matrix4x4DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
+			const auto		GetGunSwingMat(void) const noexcept { return Matrix3x3DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
 			auto& GetCharaAnimeBufID(CharaAnimeID value) noexcept { return this->m_AnimPerBuf.at((int)value); }
 			//
 			const auto		GetBottomStandAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
@@ -327,23 +327,23 @@ namespace FPS_n2 {
 			const auto		GetBottomTurnAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_Turn : CharaAnimeID::Bottom_Stand_Turn; }
 
 			const auto		GetSpeedPer(void) const noexcept {
+				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
-					return 1.25f;
+					return 1.25f * 60.f * DXLib_refParts->GetDeltaTime();
 				}
 				if (GetIsSquat()) {
-					return 0.45f;
+					return 0.45f * 60.f * DXLib_refParts->GetDeltaTime();
 				}
 				else {
-					return 2.25f;
+					return 2.25f * 60.f * DXLib_refParts->GetDeltaTime();
 				}
 			}
 			const auto		GetVec(void) const noexcept {
-				auto* DXLib_refParts = DXLib_ref::Instance();
 				Vector3DX vecBuf = m_VecTotal;
 				if (m_MoverPer > 0.f) {
-					vecBuf = vecBuf.normalized() * (GetSpeedPer() * 60.f * DXLib_refParts->GetDeltaTime());
+					vecBuf = vecBuf.normalized() * GetSpeedPer();
 				}
-				vecBuf = Matrix4x4DX::Vtrans(vecBuf, Matrix4x4DX::RotAxis(Vector3DX::up(), this->m_yrad_Upper));
+				vecBuf = Matrix3x3DX::Vtrans(vecBuf, Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_yrad_Upper));
 				return vecBuf;
 			}
 			const auto		GetVecFront(void) const noexcept { return 1.15f * this->m_Vec[0] * std::clamp(GetSpeedPer() / 0.65f, 0.5f, 1.f); }
@@ -603,8 +603,8 @@ namespace FPS_n2 {
 			Vector3DX											m_PrevPos;
 		public://ƒQƒbƒ^[
 			const auto		GetWalkSwingMat(void) const noexcept {
-				return Matrix4x4DX::RotAxis(Vector3DX::forward(), deg2rad(m_WalkSwing.z * m_WalkSwingRad.z)) *
-					Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(m_WalkSwing.x * m_WalkSwingRad.x));
+				return Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(m_WalkSwing.z * m_WalkSwingRad.z)) *
+					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(m_WalkSwing.x * m_WalkSwingRad.x));
 			}
 		public:
 			WalkSwingControl(void) noexcept {}
@@ -665,7 +665,7 @@ namespace FPS_n2 {
 			void InitEyeSwing() noexcept {
 				this->m_MoveEyePosTimer = 0.f;
 			}
-			void UpdateEyeSwing(const Matrix4x4DX& pCharaMat, float SwingPer, float SwingSpeed)noexcept {
+			void UpdateEyeSwing(const Matrix3x3DX& pCharaMat, float SwingPer, float SwingSpeed)noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (SwingPer > 0.f) {
 					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed) * 60.f * DXLib_refParts->GetDeltaTime();
@@ -673,9 +673,9 @@ namespace FPS_n2 {
 				else {
 					this->m_MoveEyePosTimer = 0.f;
 				}
-				auto EyePos = Matrix4x4DX::Vtrans(Vector3DX::up() * (0.25f * SwingPer), Matrix4x4DX::RotAxis(Vector3DX::forward(), this->m_MoveEyePosTimer));
+				auto EyePos = Matrix3x3DX::Vtrans(Vector3DX::up() * (0.25f * SwingPer), Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_MoveEyePosTimer));
 				EyePos.y = (-std::abs(EyePos.y));
-				Easing(&this->m_MoveEyePos, Matrix4x4DX::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
+				Easing(&this->m_MoveEyePos, Matrix3x3DX::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
 			}
 		};
 		//
