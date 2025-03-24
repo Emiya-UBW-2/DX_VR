@@ -27,20 +27,16 @@ namespace FPS_n2 {
 			};
 		private:
 			std::vector<std::shared_ptr<Slot>>	SelData;
-			ULT_GUN						m_ULTSelect{ ULT_GUN::PCC_4 };
 			std::vector<SlotSaveData>	SlotSave;
 			SharedObj		 			m_BaseObj{ nullptr };
 		public:
 			const auto& GetSelData() const noexcept { return SelData; }
-			const auto& GetULTSelect() const noexcept { return m_ULTSelect; }
 		private:
 			void			SetMods(ModSlotControl* ModPtr, const Slot* SlotPtr);
 			void			UpdateMods(ModSlotControl* ModPtr, const Slot* SlotPtr, bool isPreset) noexcept;
 		public:
 			void			CreateSelData(const std::shared_ptr<GunClass>& GunPtr, bool isPreset);
 			bool			ChangeSelData(const Slot* SlotPtr, int sel, bool isDeleteSlot);
-
-			void			SetULTSelect(ULT_GUN value) noexcept { m_ULTSelect = value; }
 		public:
 			void			LoadSlots(const char* path);
 			void			SaveSlots(const char* path);

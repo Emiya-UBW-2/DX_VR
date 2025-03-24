@@ -6,7 +6,7 @@
 
 #include "MainScene/NetworkBrowser.hpp"
 
-#ifdef DEBUG
+#ifdef DEBUG_CAM
 int DBG_CamSel = -1;
 #endif
 

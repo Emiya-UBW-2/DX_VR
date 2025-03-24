@@ -529,12 +529,9 @@ namespace FPS_n2 {
 					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(0.5f * Scale3DRate, 0.5f * Scale3DRate, 0.5f * Scale3DRate)).get()) == FALSE
 					) {
 					if (isDrawSemiTrans) {
-#if HIGH_FPS_ROM
-#else
 						if (GetMyPlayerID() == 0) {
 							DrawMuzzleSmoke();
 						}
-#endif
 					}
 					for (int i = 0; i < this->GetObj().GetMeshNum(); i++) {
 						if (this->GetObj().GetMeshSemiTransState(i) == isDrawSemiTrans) {

@@ -90,7 +90,7 @@ namespace FPS_n2 {
 			//
 			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 				auto& p = PlayerMngr->GetPlayer(index);
-				auto& c = (std::shared_ptr<Sceneclass::CharacterClass>&)p->GetChara();
+				auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
 				//人の座標設定
 				{
 					Vector3DX pos_t;
@@ -107,9 +107,6 @@ namespace FPS_n2 {
 				p->GetAI()->Init((PlayerID)index);
 			}
 			//UI
-			tgtSel = -1;
-			tgtTimer = 0.f;
-			//UI
 			this->m_UIclass.Set();
 			//
 			this->m_DamageEvents.clear();
@@ -124,43 +121,17 @@ namespace FPS_n2 {
 			EffectControl::SetLoop((int)Sceneclass::Effect::ef_dust, Vector3DX::zero());
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
+#ifdef DEBUG
+			auto* DebugParts = DebugClass::Instance();					//デバッグ
+#endif // DEBUG
+#ifdef DEBUG
+			DebugParts->SetPoint("Execute=Start");
+#endif // DEBUG
 			auto* CameraParts = Camera3D::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
-#ifdef DEBUG
-			/*
-			{
-				auto* WindowSizeParts = WindowSizeControl::Instance();
-				if (CheckHitKey(KEY_INPUT_1) != 0) {
-					m_D1 = std::clamp(m_D1 - 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				}
-				if (CheckHitKey(KEY_INPUT_2) != 0) {
-					m_D1 = std::clamp(m_D1 + 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				}
-				if (CheckHitKey(KEY_INPUT_3) != 0) {
-					m_D2 = std::clamp(m_D2 - 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				}
-				if (CheckHitKey(KEY_INPUT_4) != 0) {
-					m_D2 = std::clamp(m_D2 + 0.1f * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				}
-				if (CheckHitKey(KEY_INPUT_5) != 0) {
-					m_D3 = std::clamp(m_D3 - 0.1f * DXLib_refParts->GetDeltaTime(), 1.f, 10.f);
-				}
-				if (CheckHitKey(KEY_INPUT_6) != 0) {
-					m_D3 = std::clamp(m_D3 + 0.1f * DXLib_refParts->GetDeltaTime(), 1.f, 10.f);
-				}
-				printfDx("Dif[%5.2f]\n", m_D1*255.f);
-				printfDx("Spc[%5.2f]\n", m_D2*255.f);
-				printfDx("Amb[%5.2f]\n", m_D3);
-				printfDx("\n");
-			}
-			PostPassParts->SetLevelFilter(m_D1*255.f, m_D2*255.f, m_D3);
-			//*/
 			PostPassParts->SetLevelFilter(38, 154, 1.f);
-#else
-			PostPassParts->SetLevelFilter(38, 154, 1.f);
-#endif
 			PauseMenuControl::UpdatePause();
 			if (PauseMenuControl::IsRetire()) {
 				if (!this->m_IsEnd) {
@@ -176,7 +147,7 @@ namespace FPS_n2 {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 
-			auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 
 			auto* SceneParts = SceneControl::Instance();
 			auto* Pad = PadControl::Instance();
@@ -222,15 +193,10 @@ namespace FPS_n2 {
 				}
 			}
 #ifdef DEBUG
-			auto* DebugParts = DebugClass::Instance();					//デバッグ
-#endif // DEBUG
-#ifdef DEBUG
-			DebugParts->SetPoint("Execute=Start");
+			DebugParts->SetPoint("0.05");
 #endif // DEBUG
 			//FirstDoingv
-			if (GetIsFirstLoop()) {
-				//SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Environment))->Play(DX_PLAYTYPE_LOOP, TRUE);
-			}
+			if (GetIsFirstLoop()) {}
 			//Input,AI
 			{
 				if (!GetIsFirstLoop()) {
@@ -282,7 +248,7 @@ namespace FPS_n2 {
 					bool IsServerNotPlayer = !m_NetWorkController->GetClient() && !m_NetWorkController->GetServerPlayer();
 					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 						auto& p = PlayerMngr->GetPlayer(index);
-						auto& c = (std::shared_ptr<Sceneclass::CharacterClass>&)p->GetChara();
+						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
 						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)index);
 						if (index == GetMyPlayerID() && !IsServerNotPlayer) {
 							c->SetInput(Ret.GetInput(), true);//自身が動かすもの
@@ -308,7 +274,7 @@ namespace FPS_n2 {
 				else {//オフライン
 					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 						auto& p = PlayerMngr->GetPlayer(index);
-						auto& c = (std::shared_ptr<Sceneclass::CharacterClass>&)p->GetChara();
+						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
 						if (index == GetMyPlayerID()) {
 							c->SetInput(MyInput, true);
 						}
@@ -324,7 +290,7 @@ namespace FPS_n2 {
 				//ダメージイベント
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 					auto& p = PlayerMngr->GetPlayer(index);
-					auto& c = (std::shared_ptr<Sceneclass::CharacterClass>&)p->GetChara();
+					auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
 					for (int j = 0, Num = static_cast<int>(this->m_DamageEvents.size()); j < Num; ++j) {
 						if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)])) {
 							std::swap(this->m_DamageEvents.back(), m_DamageEvents[static_cast<size_t>(j)]);
@@ -336,10 +302,18 @@ namespace FPS_n2 {
 				}
 			}
 			//Execute
+#ifdef DEBUG
+			DebugParts->SetPoint("1.58");
+#endif // DEBUG
 			ObjMngr->ExecuteObject();
 			ObjMngr->LateExecuteObject();
+#ifdef DEBUG
+			DebugParts->SetPoint("0.00");
+#endif // DEBUG
 			UpdateBullet();							//弾の更新
-			tgtTimer = std::max(tgtTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+#ifdef DEBUG
+			DebugParts->SetPoint("1.61");
+#endif // DEBUG
 			//視点
 			{
 				auto& ViewChara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
@@ -348,7 +322,7 @@ namespace FPS_n2 {
 				Vector3DX CamVec = CamPos + ViewChara->GetEyeMatrix().zvec() * -1.f;
 				CamVec += Camera3D::Instance()->GetCamShake();
 				CamPos += Camera3D::Instance()->GetCamShake() * 2.f;
-#ifdef DEBUG
+#ifdef DEBUG_CAM
 				if (CheckHitKey(KEY_INPUT_F1) != 0) {
 					DBG_CamSel = -1;
 				}
@@ -397,8 +371,6 @@ namespace FPS_n2 {
 
 				CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
 				auto fov_t = CameraParts->GetMainCamera().GetCamFov();
-				auto near_t = CameraParts->GetMainCamera().GetCamNear();
-				auto far_t = CameraParts->GetMainCamera().GetCamFar();
 				//fov
 				{
 					auto* OptionParts = OptionManager::Instance();
@@ -418,14 +390,14 @@ namespace FPS_n2 {
 					else {
 						Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
 					}
-				}
-#ifdef DEBUG
-				if (0 <= DBG_CamSel && DBG_CamSel <= 3) {
-					fov_t = deg2rad(15);
-				}
+#ifdef DEBUG_CAM
+					if (0 <= DBG_CamSel && DBG_CamSel <= 3) {
+						fov_t = deg2rad(15);
+					}
 #endif
-
-				CameraParts->SetMainCamera().SetCamInfo(fov_t, near_t, far_t);
+				}
+				auto far_t = CameraParts->GetMainCamera().GetCamFar();
+				CameraParts->SetMainCamera().SetCamInfo(fov_t, CameraParts->GetMainCamera().GetCamNear(), far_t);
 				//DoF
 				if (Chara->GetIsADS()) {
 					PostPassEffect::Instance()->Set_DoFNearFar(Scale3DRate * 0.3f, Scale3DRate * 5.f, Scale3DRate * 0.1f, far_t * 3.f);
@@ -498,11 +470,7 @@ namespace FPS_n2 {
 
 				this->m_UIclass.Update();
 			}
-#ifdef DEBUG
-			DebugParts->SetPoint("Execute=0.7ms");
-#endif // DEBUG
 			EffectControl::Execute();
-
 			//
 			{
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
@@ -510,6 +478,9 @@ namespace FPS_n2 {
 					c->m_CameraPos.z = -1.f;
 				}
 			}
+#ifdef DEBUG
+			DebugParts->SetPoint("Execute=End");
+#endif // DEBUG
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {

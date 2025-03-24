@@ -8,8 +8,6 @@ namespace FPS_n2 {
 			Human,
 			Ammo,
 			FallObj,
-			Armer,
-			Morphine,
 			Gun,
 			Magazine,
 			Lower,
@@ -18,17 +16,12 @@ namespace FPS_n2 {
 			UnderRail,
 			Sight,
 			MuzzleAdapter,
-			MovieObj,
-			ItemObj,
-			Target,
 			Max,
 		};
 		static const char* ObjTypeName[(int)ObjType::Max] = {
 			"Human",
 			"Ammo",
 			"FallObj",
-			"Armer",
-			"Morphine",
 			"Gun",
 			"Magazine",
 			"Lower",
@@ -37,9 +30,6 @@ namespace FPS_n2 {
 			"UnderRail",
 			"Sight",
 			"MuzzleAdapter",
-			"MovieObj",
-			"ItemObj",
-			"Target",
 		};
 		enum class SoundEnum {
 			RunFoot = (int)SoundSelectCommon::Num,
@@ -133,23 +123,6 @@ namespace FPS_n2 {
 			Enemy,
 		};
 
-		enum class ULT_GUN {
-			PCC_4,
-			AKS_74,
-			Mod870,
-			M16_4,
-			M4A1,
-			Max,
-		};
-		static const char* ULT_GUNName[(int)ULT_GUN::Max] = {
-			"PCC_4",
-			"AKS-74",
-			"Mod870",
-			"M16-4",
-			"M4A1",
-		};
-
-		//*
 		enum class Effect {
 			ef_gndsmoke,		// ’n–Êƒqƒbƒg
 			ef_fire2,			// ”­–C‰Š
@@ -157,8 +130,6 @@ namespace FPS_n2 {
 			ef_greexp,			// ƒOƒŒ”š”­
 			ef_dust,			// ‚Ü‚í‚è‚Ìšº
 		};
-		//*/
-
 	};
 
 	typedef char PlayerID;

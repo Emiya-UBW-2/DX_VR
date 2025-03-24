@@ -236,7 +236,7 @@ namespace FPS_n2 {
 								Lerp((*ani)->GetRotate(), (*(ani + 1))->GetRotate(), nowframe / Frame),
 								Lerp((*ani)->GetPos(), (*(ani + 1))->GetPos(), nowframe / Frame)
 							);
-#ifdef DEBUG
+#ifdef DEBUG_CAM
 							if (0 <= DBG_CamSel && DBG_CamSel <= 3) {
 								auto* DXLib_refParts = DXLib_ref::Instance();
 								Ret.Set(DBG_AnimRot, DBG_AnimPos);
