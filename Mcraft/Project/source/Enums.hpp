@@ -148,6 +148,17 @@ namespace FPS_n2 {
 			"M16-4",
 			"M4A1",
 		};
+
+		//*
+		enum class Effect {
+			ef_gndsmoke,		// 地面ヒット
+			ef_fire2,			// 発砲炎
+			ef_hitblood,		// 血しぶき
+			ef_greexp,			// グレ爆発
+			ef_dust,			// まわりの埃
+		};
+		//*/
+
 	};
 
 	typedef char PlayerID;

@@ -164,24 +164,6 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			//6
-			{
-				if ((0.f < GetObj().SetAnim((int)GunAnimeID::CheckStart).GetTime() && GetObj().SetAnim((int)GunAnimeID::CheckStart).GetTime() < 1.f)) {
-					if (m_boltSoundSequence != 6) {
-						m_boltSoundSequence = 6;
-						SE->Get(SoundType::SE, (int)GetGunSoundSet().m_Unload)->Play3D(GetObj().GetMatrix().pos(), Scale3DRate * 2.f);
-					}
-				}
-			}
-			//7
-			{
-				if ((25.f < GetObj().SetAnim((int)GunAnimeID::Checking).GetTime() && GetObj().SetAnim((int)GunAnimeID::Checking).GetTime() < 26.f)) {
-					if (m_boltSoundSequence != 7) {
-						m_boltSoundSequence = 7;
-						SE->Get(SoundType::SE, (int)GetGunSoundSet().m_Load)->Play3D(GetObj().GetMatrix().pos(), Scale3DRate * 2.f);
-					}
-				}
-			}
 			break;
 			default:
 				break;
@@ -267,7 +249,7 @@ namespace FPS_n2 {
 					Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(this->m_ChamberAmmoData->GetAccuracy()))) *
 					Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(this->m_ChamberAmmoData->GetAccuracy()))) *
 					GetFrameWorldMat_P(GunFrame::Muzzle);
-				LastAmmo->Put(this->m_ChamberAmmoData, mat.pos(), mat.zvec() * -1.f, m_MyID);
+				LastAmmo->Put(this->m_ChamberAmmoData, mat.pos(), mat.zvec() * -1.f, GetMyPlayerID());
 			}
 			UnloadChamber();
 			AddMuzzleSmokePower();
@@ -354,24 +336,6 @@ namespace FPS_n2 {
 			case GunAnimeID::ReloadEnd:
 				SetAnimOnce((int)GetGunAnime(), 1.0f);
 				if (GetObj().SetAnim((int)GetGunAnime()).TimeEnd()) {
-					SetGunAnime(GunAnimeID::Checking);
-				}
-				break;
-			case GunAnimeID::CheckStart:
-				SetAnimOnce((int)GetGunAnime(), 1.5f);
-				if (GetObj().SetAnim((int)GetGunAnime()).TimeEnd()) {
-					SetGunAnime(GunAnimeID::Checking);
-				}
-				break;
-			case GunAnimeID::Checking:
-				SetAnimOnce((int)GetGunAnime(), 1.f);
-				if (GetObj().SetAnim((int)GetGunAnime()).TimeEnd()) {
-					SetGunAnime(GunAnimeID::CheckEnd);
-				}
-				break;
-			case GunAnimeID::CheckEnd:
-				SetAnimOnce((int)GetGunAnime(), 2.f);
-				if (GetObj().SetAnim((int)GetGunAnime()).TimeEnd()) {
 					SetGunAnime(GunAnimeID::Base);
 				}
 				break;
@@ -385,44 +349,7 @@ namespace FPS_n2 {
 					SetGunAnime(GunAnimeID::Base);
 				}
 				break;
-			case GunAnimeID::Melee:
-				if (this->m_GunAnimeFirst) {
-					m_UpperAnim = 0.f;
-				}
-				if (GetGunAnimePer(EnumGunAnimType::Melee) >= 1.f) {
-					SetGunAnime(GunAnimeID::Base);
-				}
-				break;
-			case GunAnimeID::AmmoLoading:
-				if (this->m_GunAnimeFirst) {
-					this->m_boltSoundSequence = -1;
-					this->m_Cancel = false;
-				}
-				SetAnimOnce((int)GetGunAnime(), 1.0f);
-				if (GetObj().SetAnim((int)GetGunAnime()).TimeEnd()) {
-					if (this->m_Cancel) {
-						this->m_Cancel = false;
-						SetGunAnime(GunAnimeID::AmmoLoadEnd);
-					}
-					else {
-						this->GetObj().SetAnim((int)GetGunAnime()).Reset();
-						this->GetObj().SetAnim((int)GetGunAnime()).SetPer(1.f);
-						this->m_boltSoundSequence = -1;
-					}
-				}
-				//ƒTƒEƒ“ƒh
-				if (GetObj().SetAnim((int)GetGunAnime()).GetTimePer() > 0.3f) {
-					if (m_boltSoundSequence != 9) {
-						m_boltSoundSequence = 9;
-						auto* SE = SoundPool::Instance();
-						SE->Get(SoundType::SE, (int)SoundEnum::AmmoLoad)->Play3D(GetObj().GetMatrix().pos(), Scale3DRate * 50.f);
-					}
-				}
-				break;
-			case GunAnimeID::AmmoLoadEnd:
-				SetAnimOnce((int)GetGunAnime(), 1.5f);
-				break;
-			case GunAnimeID::OffsetAnim:
+			case GunAnimeID::Hammer:
 				break;
 			default:
 				break;
@@ -526,9 +453,6 @@ namespace FPS_n2 {
 					if (GetGunAnime() == GunAnimeID::Watch) {
 						GetObj().SetAnim(i).SetPer(0.f);
 					}
-					if (GetGunAnime() == GunAnimeID::Melee) {
-						GetObj().SetAnim(i).SetPer(0.f);
-					}
 				}
 				else {
 					if ((GunAnimeID)i == GunAnimeID::Base) {
@@ -541,7 +465,7 @@ namespace FPS_n2 {
 						}
 						GetObj().SetAnim(i).SetPer(std::clamp(GetObj().SetAnim(i).GetPer() + DXLib_refParts->GetDeltaTime() * (isHit ? 5.f : -5.f), 0.f, 1.f));
 					}
-					else if ((GunAnimeID)i == GunAnimeID::OffsetAnim) {
+					else if ((GunAnimeID)i == GunAnimeID::Hammer) {
 						bool isHit = false;
 						if (m_GunSightSel == 1) {
 							isHit = true;
@@ -607,7 +531,7 @@ namespace FPS_n2 {
 					if (isDrawSemiTrans) {
 #if HIGH_FPS_ROM
 #else
-						if (m_MyID == 0) {
+						if (GetMyPlayerID() == 0) {
 							DrawMuzzleSmoke();
 						}
 #endif

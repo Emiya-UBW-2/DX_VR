@@ -12,15 +12,9 @@ namespace FPS_n2 {
 			ReloadStart,
 			ReloadOne,
 			ReloadEnd,
-			CheckStart,
-			Checking,
-			CheckEnd,
 			Open,
 			Watch,
-			Melee,
-			AmmoLoading,
-			AmmoLoadEnd,
-			OffsetAnim,
+			Hammer,
 			AnimeIDMax,
 		};
 		enum class GunFrame {

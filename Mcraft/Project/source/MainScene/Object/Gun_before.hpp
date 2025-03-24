@@ -9,6 +9,7 @@ namespace FPS_n2 {
 		//
 		class FallControl {
 		private:
+		public:
 			std::vector<std::shared_ptr<FallObjClass>>	m_Ptr;
 			int											m_Now{ 0 };
 		public:

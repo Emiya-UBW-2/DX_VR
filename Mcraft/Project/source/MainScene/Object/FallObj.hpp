@@ -12,16 +12,16 @@ namespace FPS_n2 {
 			bool m_IsGrenade{ false };
 			int m_BoundCount{ 0 };
 
-			EffectControl m_EffectControl;
+			bool m_GrenadeBombFlag{ false };
 		public:
 			FallObjClass(void) noexcept { this->m_objType = (int)ObjType::FallObj; }
 			~FallObjClass(void) noexcept {}
 		public:
+			bool			PopGrenadeBombSwitch();
 			void			SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float timer, SoundEnum sound, bool IsGrenade) noexcept;
 		public:
 			void			Init_Sub(void) noexcept override {
 				this->m_IsActive = false;
-				m_EffectControl.Init();
 			}
 			void			FirstExecute(void) noexcept override;
 			void			CheckDraw(void) noexcept override {
@@ -34,9 +34,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			void			Dispose_Sub(void) noexcept override {
-				m_EffectControl.Dispose();
-			}
+			void			Dispose_Sub(void) noexcept override {}
 		};
 	};
 };

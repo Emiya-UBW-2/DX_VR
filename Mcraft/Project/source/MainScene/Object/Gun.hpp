@@ -122,7 +122,6 @@ namespace FPS_n2 {
 			const auto	GetIsMagFull(void) const noexcept { return this->m_Capacity == this->GetAmmoAll(); }
 
 			const auto	GetReloading(void) const noexcept { return (GunAnimeID::ReloadStart_Empty <= GetGunAnime()) && (GetGunAnime() <= GunAnimeID::ReloadEnd); }
-			const auto	GetChecking(void) const noexcept { return (GunAnimeID::CheckStart <= GetGunAnime()) && (GetGunAnime() <= GunAnimeID::CheckEnd); }
 			const auto	GetEyePos(void) const noexcept {
 				Vector3DX Pos;
 				if (this->m_SightPtr.at(1)) {

@@ -226,7 +226,7 @@ namespace FPS_n2 {
 
 			~ClientControl(void) noexcept {}
 		public:
-			const auto& GetMyID(void) const noexcept { return this->m_MyID; }
+			const auto&		GetMyID(void) const noexcept { return this->m_MyID; }
 			auto			CanGetMyID(void) const noexcept { return (this->m_Net.m_Phase == ClientPhase::GetNumber) || (this->m_Net.m_Phase == ClientPhase::Ready); }
 		public:
 			void			Init(int pPort, const IPDATA& pIP) noexcept;

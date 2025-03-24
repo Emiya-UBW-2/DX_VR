@@ -288,7 +288,6 @@ namespace FPS_n2 {
 		public://ゲッター
 			CharaAnimeID										m_BottomAnimSelect{};
 		public://ゲッター
-			const auto		GetRun(void) const noexcept { return this->m_Input.GetPADSPress(Controls::PADS::RUN) && this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_S); }
 			const auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }
 			const auto		GetLeanRad(void) const noexcept { return this->m_LeanRad; }
 			const auto		GetIsSquat(void) const noexcept { return this->m_IsSquat; }
@@ -333,9 +332,6 @@ namespace FPS_n2 {
 				}
 				if (GetIsSquat()) {
 					return 0.45f;
-				}
-				else if (GetRun()) {
-					return 1.75f;
 				}
 				else {
 					return 2.25f;
@@ -388,7 +384,6 @@ namespace FPS_n2 {
 				if (this->m_Squat.trigger()) {
 					m_IsSquat ^= 1;
 				}
-				if (this->GetRun()) { SetIsSquat(false); }
 				//回転
 				{
 					Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
@@ -475,10 +470,6 @@ namespace FPS_n2 {
 					this->m_TurnBody = false;
 				}
 
-				if (GetRun()) {//リーンをリセット
-					m_LeanSwitch = (this->m_LeanRate != 0);
-					this->m_LeanRate = 0;
-				}
 				if (this->m_TurnBody || IsMove()) { Easing(&this->m_yrad_Upper, this->m_rad.y, 0.85f, EasingType::OutExpo); }
 				auto YradChange = this->m_yrad_Bottom;
 				Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - GetFrontP(), 0.85f, EasingType::OutExpo);
@@ -504,7 +495,7 @@ namespace FPS_n2 {
 				if (this->m_Input.GetPADSPress(Controls::PADS::MOVE_A) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_D)) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
 				if (this->m_Input.GetPADSPress(Controls::PADS::MOVE_D) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_A)) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
 				if (this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_W)) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
-				if (this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_S)) { this->m_BottomAnimSelect = GetRun() ? CharaAnimeID::Bottom_Stand_Run : GetBottomWalkAnimSel(); }
+				if (this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_S)) { this->m_BottomAnimSelect = GetBottomWalkAnimSel(); }
 				//下半身
 				Easing(&GetCharaAnimeBufID(GetBottomTurnAnimSel()), (!GetIsSquat() && this->m_TurnBody) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
 				for (int i = 0; i < (int)CharaAnimeID::AnimeIDMax; i++) {

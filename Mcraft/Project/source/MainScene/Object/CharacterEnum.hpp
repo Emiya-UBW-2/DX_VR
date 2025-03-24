@@ -6,11 +6,8 @@ namespace FPS_n2 {
 		enum class CharaActionID : int {
 			Ready,		//何もしていない
 			Cocking,	//コッキング
-			Check,		//マガジンチェック
 			Reload,		//リロード
 			Watch,		//銃を眺める
-			Melee,		//近接
-			AmmoLoad,	//弾込め
 			Max,
 		};
 

@@ -112,7 +112,7 @@ namespace FPS_n2 {
 		public://セッター
 			bool			SetDamageEvent(const DamageEvent& value) noexcept;
 			void			Heal(HitPoint value, bool SwitchOn) noexcept {
-				LifeControl::SetHealEvent(this->m_MyID, this->m_MyID, value, 0);
+				LifeControl::SetHealEvent(GetMyPlayerID(), GetMyPlayerID(), value, 0);
 				if (SwitchOn) {
 					m_ArmBreak = false;
 				}

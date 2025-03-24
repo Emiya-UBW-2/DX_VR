@@ -6,16 +6,12 @@ namespace FPS_n2 {
 		enum class EnumGunAnimType {
 			Aim,
 			ADS,
-			Run,
 			ReloadStart_Empty,
 			ReloadStart,
 			Reload,
 			ReloadEnd,
 			Ready,
-			Check,
 			Watch,
-			Melee,
-			AmmoLoad,
 			Max,
 		};
 		enum class EnumGunAnim {
@@ -28,11 +24,7 @@ namespace FPS_n2 {
 			M1911_reloadstart,
 			M1911_reload,
 			M1911_reloadend,
-			M1911_run,
-			M1911_check1,
 			M1911_watch,
-			M1911_melee,
-			M1911_ammoload,
 			M16_ready1,
 			M16_ready2,
 			M16_aim,
@@ -41,15 +33,9 @@ namespace FPS_n2 {
 			M16_reloadstart,
 			M16_reload,
 			M16_reloadend,
-			M16_run,
-			M16_check1,
 			M16_watch,
-			M16_ammoload,
-			M16_melee,
 			M870_raload,
 			M870_ready,
-			FMG9_aim,
-			FMG9_ads,
 			Max,
 		};
 		static const char* EnumGunAnimName[(int)EnumGunAnim::Max] = {
@@ -62,11 +48,7 @@ namespace FPS_n2 {
 			"M1911_reloadstart",
 			"M1911_reload",
 			"M1911_reloadend",
-			"M1911_run",
-			"M1911_check1",
 			"M1911_watch",
-			"M1911_melee",
-			"M1911_ammoload",
 			"M16_ready1",
 			"M16_ready2",
 			"M16_aim",
@@ -75,15 +57,9 @@ namespace FPS_n2 {
 			"M16_reloadstart",
 			"M16_reload",
 			"M16_reloadend",
-			"M16_run",
-			"M16_check1",
 			"M16_watch",
-			"M16_ammoload",
-			"M16_melee",
 			"M870_raload",
 			"M870_ready",
-			"FMG9_aim",
-			"FMG9_ads",
 		};
 
 		class GunAnimNow {
@@ -335,61 +311,34 @@ namespace FPS_n2 {
 				//M4
 				EnumGunAnim::M16_aim,
 				EnumGunAnim::M16_ads,
-				EnumGunAnim::M16_run,
 				EnumGunAnim::M16_reloadstart_empty,
 				EnumGunAnim::M16_reloadstart,
 				EnumGunAnim::M16_reload,
 				EnumGunAnim::M16_reloadend,
 				EnumGunAnim::M16_ready1,
-				EnumGunAnim::M16_check1,
 				EnumGunAnim::M16_watch,
-				EnumGunAnim::M16_melee,
-				EnumGunAnim::M1911_ammoload
 			},
 			{
 				//ƒnƒ“ƒhƒKƒ“
 				EnumGunAnim::M1911_aim1,
 				EnumGunAnim::M1911_ads,
-				EnumGunAnim::M1911_run,
 				EnumGunAnim::M1911_reloadstart_empty,
 				EnumGunAnim::M1911_reloadstart,
 				EnumGunAnim::M1911_reload,
 				EnumGunAnim::M1911_reloadend,
 				EnumGunAnim::M1911_ready1,
-				EnumGunAnim::M1911_check1,
 				EnumGunAnim::M1911_watch,
-				EnumGunAnim::M1911_melee,
-				EnumGunAnim::M1911_ammoload
 			},
 			{
 				//M4
 				EnumGunAnim::M16_aim,
 				EnumGunAnim::M16_ads,
-				EnumGunAnim::M16_run,
 				EnumGunAnim::M16_reloadstart_empty,
 				EnumGunAnim::M16_reloadstart,
 				EnumGunAnim::M870_raload,
 				EnumGunAnim::M16_reloadend,
 				EnumGunAnim::M870_ready,
-				EnumGunAnim::M16_check1,
 				EnumGunAnim::M16_watch,
-				EnumGunAnim::M1911_melee,
-				EnumGunAnim::M1911_ammoload
-			},
-			{
-				//M4
-				EnumGunAnim::FMG9_aim,
-				EnumGunAnim::FMG9_ads,
-				EnumGunAnim::M16_run,
-				EnumGunAnim::M1911_reloadstart_empty,
-				EnumGunAnim::M1911_reloadstart,
-				EnumGunAnim::M1911_reload,
-				EnumGunAnim::M1911_reloadend,
-				EnumGunAnim::M16_ready1,
-				EnumGunAnim::M16_check1,
-				EnumGunAnim::M16_watch,
-				EnumGunAnim::M16_melee,
-				EnumGunAnim::M1911_ammoload
 			},
 		};
 	};

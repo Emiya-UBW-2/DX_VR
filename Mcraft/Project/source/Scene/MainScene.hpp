@@ -46,7 +46,6 @@ namespace FPS_n2 {
 
 			int tgtSel = 0;
 			float tgtTimer = 0.f;
-			GraphHandle ScoreBoard2;
 			GraphHandle										hit_Graph;
 			GraphHandle										guard_Graph;
 

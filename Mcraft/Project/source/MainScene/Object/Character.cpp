@@ -2,8 +2,6 @@
 
 #include "../../MainScene/Player/Player.hpp"
 
-#include "../../MainScene/Object/Target.hpp"
-
 namespace FPS_n2 {
 	namespace Sceneclass {
 		const Matrix4x4DX CharacterClass::GetCharaDir(void) const noexcept {
@@ -11,14 +9,14 @@ namespace FPS_n2 {
 
 			tmpUpperMatrix *=
 				Matrix4x4DX::RotAxis(Vector3DX::right(), KeyControl::GetRad().x) *
-				Matrix4x4DX::RotAxis(Vector3DX::up(), Lerp(KeyControl::GetYRadBottomChange(), 0.f, this->m_Arm[(int)EnumGunAnimType::Run].Per()));
+				Matrix4x4DX::RotAxis(Vector3DX::up(), KeyControl::GetYRadBottomChange());
 			return tmpUpperMatrix * this->GetMove().GetMat().Get44DX();
 		}
 		//
 		void			CharacterClass::Shot_Start() noexcept {
-			if (this->m_MyID == 0) {
+			if (GetMyPlayerID() == 0) {
 				auto* PlayerMngr = Player::PlayerManager::Instance();
-				PlayerMngr->GetPlayer(this->m_MyID)->AddShot(GetGunPtrNow()->GetPelletNum());
+				PlayerMngr->GetPlayer(GetMyPlayerID())->AddShot(GetGunPtrNow()->GetPelletNum());
 			}
 			GetGunPtrNow()->SetBullet();
 			//
@@ -31,19 +29,19 @@ namespace FPS_n2 {
 			}
 			this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power, 0.f);
 			//
-			if (this->m_MyID == 0) {
+			if (GetMyPlayerID() == 0) {
 				Camera3D::Instance()->SetCamShake(0.1f, 0.3f);
 			}
 			//エフェクト
 			auto mat = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Muzzle);
 			switch (GetGunPtrNow()->GetGunShootSound()) {
 			case GunShootSound::Normal:
-				EffectControl::SetOnce((int)EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec() * -1.f, 0.5f);
-				EffectControl::SetEffectSpeed((int)EffectResource::Effect::ef_fire2, 2.f);
+				EffectControl::SetOnce((int)Sceneclass::Effect::ef_fire2, mat.pos(), mat.zvec() * -1.f, 0.5f);
+				EffectControl::SetEffectSpeed((int)Sceneclass::Effect::ef_fire2, 2.f);
 				break;
 			case GunShootSound::Suppressor:
-				EffectControl::SetOnce((int)EffectResource::Effect::ef_fire2, mat.pos(), mat.zvec() * -1.f, 0.25f);
-				EffectControl::SetEffectSpeed((int)EffectResource::Effect::ef_fire2, 2.f);
+				EffectControl::SetOnce((int)Sceneclass::Effect::ef_fire2, mat.pos(), mat.zvec() * -1.f, 0.25f);
+				EffectControl::SetEffectSpeed((int)Sceneclass::Effect::ef_fire2, 2.f);
 				break;
 			default:
 				break;
@@ -60,7 +58,7 @@ namespace FPS_n2 {
 				GetGunPtrNow()->SetReloadStart(m_MagStockControl.at(GetNowGunSelect()).GetNowMag().AmmoNum, m_MagStockControl.at(GetNowGunSelect()).GetNowMag().ModUniqueID);
 				m_MagStockControl.at(GetNowGunSelect()).SetOldMag(Num, All, UniqueID);
 			}
-			if (this->m_MyID != 0) {
+			if (GetMyPlayerID() != 0) {
 				if (GetRand(1) == 0) {
 					SE->Get(SoundType::SE, (int)SoundEnum::Man_reload)->Play3D(GetEyeMatrix().pos(), Scale3DRate * 10.f);
 				}
@@ -79,7 +77,7 @@ namespace FPS_n2 {
 				Matrix4x4DX::RotAxis(Vector3DX::up(), KeyControl::GetYRadBottomChange());
 
 			auto* OptionParts = OptionManager::Instance();
-			bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
+			bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 			if (HeadBobbing) {
 				tmpUpperMatrix = WalkSwingControl::GetWalkSwingMat() * tmpUpperMatrix;
 			}
@@ -99,7 +97,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 
-			if (this->m_MyID == value.DamageID) {
+			if (GetMyPlayerID() == value.DamageID) {
 				auto PrevLive = LifeControl::IsAlive();
 				LifeControl::SubHP(value.Damage);
 				LifeControl::SubAP(value.ArmerDamage);
@@ -155,7 +153,7 @@ namespace FPS_n2 {
 				if (CheckBodyParts) {
 					switch (HitPtr->GetColType()) {
 					case HitType::Head:
-						if (m_MyID == 0) {
+						if (GetMyPlayerID() == 0) {
 							*Damage = *Damage;
 							*ArmerDamage = 0;
 							m_HeadShotSwitch = true;
@@ -194,7 +192,7 @@ namespace FPS_n2 {
 					//auto v1 = GetEyeMatrix().zvec() * -1.f;
 					//auto v2 = (Chara->GetCharaPosition() - this->GetCharaPosition()).normalized(); v2.y = (0);
 					//atan2f(Vector3DX::Cross(v1, v2).y, Vector3DX::Dot(v1, v2))
-					LifeControl::SetSubHPEvent(AttackID, this->m_MyID, *Damage, *ArmerDamage);
+					LifeControl::SetSubHPEvent(AttackID, GetMyPlayerID(), *Damage, *ArmerDamage);
 				}
 				//SE
 				if (AttackID == 0) {
@@ -205,7 +203,7 @@ namespace FPS_n2 {
 						SE->Get(SoundType::SE, (int)SoundEnum::HitGuard)->Play3D(GetEyeMatrix().pos(), Scale3DRate * 10.f, 128);
 					}
 				}
-				if (m_MyID == 0 && m_IsMainGame) {
+				if (GetMyPlayerID() == 0 && m_IsMainGame) {
 					if (*Damage > 0) {
 						SE->Get(SoundType::SE, (int)SoundEnum::HitMe)->Play3D(GetEyeMatrix().pos(), Scale3DRate * 10.f);
 					}
@@ -215,11 +213,11 @@ namespace FPS_n2 {
 				}
 				//エフェクトセット
 				if (*Damage > 0) {
-					EffectControl::SetOnce((int)(int)EffectResource::Effect::ef_hitblood, *pEndPos, Vector3DX::forward(), Scale3DRate);
-					EffectControl::SetEffectSpeed((int)EffectResource::Effect::ef_hitblood, 2.f);
+					EffectControl::SetOnce((int)(int)Sceneclass::Effect::ef_hitblood, *pEndPos, Vector3DX::forward(), Scale3DRate);
+					EffectControl::SetEffectSpeed((int)Sceneclass::Effect::ef_hitblood, 2.f);
 				}
 				else {
-					EffectControl::SetOnce((int)EffectResource::Effect::ef_gndsmoke, *pEndPos, (Chara->GetCharaPosition() - this->GetCharaPosition()).normalized(), 0.25f * Scale3DRate);
+					EffectControl::SetOnce((int)Sceneclass::Effect::ef_gndsmoke, *pEndPos, (Chara->GetCharaPosition() - this->GetCharaPosition()).normalized(), 0.25f * Scale3DRate);
 				}
 				//ヒットモーション
 				{
@@ -270,7 +268,7 @@ namespace FPS_n2 {
 			//ターゲットが見える場合かまえっぱなし
 			if (m_IsMainGame && !m_IsChanging) {
 				for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
-					if (i == this->m_MyID) { continue; }
+					if (i == GetMyPlayerID()) { continue; }
 					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
 					if (!Chara->IsAlive()) { continue; }
 					if (!Chara->CanLookTarget) { continue; }
@@ -286,7 +284,7 @@ namespace FPS_n2 {
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::Base);
 					}
 					//射撃
-					if (!KeyControl::GetRun() && Press_Shot) {
+					if (Press_Shot) {
 						if (IsAimPer()) {
 							if (GetGunPtrNow() && (GetGunPtrNow()->GetGunAnime() == GunAnimeID::Base) && GetGunPtrNow()->GetInChamber()) {
 								Shot_Start();
@@ -295,16 +293,13 @@ namespace FPS_n2 {
 						GunReadyControl::SetAimOrADS();
 					}
 					//リロード/マガジンチェック
-					if (!KeyControl::GetRun() && Press_Reload && GetGunPtrNow()) {
+					if (Press_Reload && GetGunPtrNow()) {
 						bool IsCheck = GetGunPtrNow()->GetIsMagFull();
 						if (GetGunPtrNow() && GetGunPtrNow()->GetModData()->GetReloadType() == RELOADTYPE::MAG) {
 							IsCheck = (GetGunPtrNow()->GetAmmoNum() >= m_MagStockControl.at(GetNowGunSelect()).GetMag(0));
 						}
 						if (!IsCheck) {
 							m_CharaAction = CharaActionID::Reload;
-						}
-						else if (false) {
-							m_CharaAction = CharaActionID::Check;
 						}
 					}
 					//姿勢指定
@@ -315,9 +310,6 @@ namespace FPS_n2 {
 						else {
 							GunReadyControl::SetAim();
 						}
-					}
-					if (KeyControl::GetRun()) {
-						GunReadyControl::SetReady();
 					}
 					//
 					if (GetGunPtrNow() && GetGunPtrNow()->GetGunAnime() == GunAnimeID::Shot) {
@@ -360,17 +352,6 @@ namespace FPS_n2 {
 					}
 					//
 					if (GetGunPtrNow() && GetGunPtrNow()->GetGunAnime() != GunAnimeID::Cocking) {
-						m_CharaAction = CharaActionID::Ready;
-					}
-					//姿勢指定
-					GunReadyControl::SetAim();
-					break;
-				case CharaActionID::Check:
-					if (m_ActionFirstFrame && GetGunPtrNow()) {
-						GetGunPtrNow()->SetGunAnime(GunAnimeID::CheckStart);
-					}
-					//
-					if (GetGunPtrNow() && !GetGunPtrNow()->GetChecking()) {
 						m_CharaAction = CharaActionID::Ready;
 					}
 					//姿勢指定
@@ -419,97 +400,8 @@ namespace FPS_n2 {
 					//姿勢指定
 					GunReadyControl::SetAim();
 					break;
-				case CharaActionID::Melee:
-					if (m_ActionFirstFrame) {
-						GetGunPtrNow()->SetGunAnime(GunAnimeID::Melee);
-						m_MeleeCoolDown = 1.f;
-						if (this->m_MyID == 0) {
-							Camera3D::Instance()->SetCamShake(0.1f, 5.f);
-						}
-					}
-					//
-					if (GetGunPtrNow()->GetGunAnime() != GunAnimeID::Melee) {
-						m_CharaAction = CharaActionID::Ready;
-					}
-					//姿勢指定
-					GunReadyControl::SetAim();
-					break;
-				case CharaActionID::AmmoLoad:
-					if (m_ActionFirstFrame) {
-						this->m_AmmoLoadStart = true;
-					}
-					if (GetGunPtrNow()) {
-						if (this->m_AmmoLoadStart) {
-							if (IsLowReadyPer()) {
-								this->m_AmmoLoadStart = false;
-								GetGunPtrNow()->SetGunAnime(GunAnimeID::AmmoLoading);
-								GetGunPtrNow()->SetCancel(false);
-								this->m_AmmoLoadCount = 0;
-								this->m_AmmoLoadSwitch = true;
-							}
-							GunReadyControl::SetReady();
-						}
-						else {
-							if (GetGunPtrNow()->GetGunAnime() == GunAnimeID::AmmoLoading) {
-								//銃表示
-								GetGunPtrNow()->SetActiveAll(false);
-								(*GetGunPtrNow()->GetMagazinePtr())->SetActive(true);
-								//
-								GunReadyControl::SetAim();
-								if (GetGunPtrNow()->GetObj().SetAnim((int)GunAnimeID::AmmoLoading).TimeStart()) {
-									this->m_AmmoLoadSwitch = true;
-								}
-
-								if (KeyControl::GetInputControl().GetPADSPress(Controls::PADS::SHOT)) {
-									GetGunPtrNow()->SetCancel(true);
-								}
-								if (this->m_AmmoLoadSwitch) {
-									this->m_AmmoLoadSwitch = false;
-									if (this->m_AmmoLoadCount < 4) {
-										int AmmoCount = (m_AmmoLoadCount >= 1) ? m_MagStockControl.at(GetNowGunSelect()).GetMag(this->m_AmmoLoadCount - 1) : GetGunPtrNow()->GetAmmoNum();
-										int InAmmo = std::clamp(m_MagStockControl.at(GetNowGunSelect()).GetAmmoStock(), 0, GetGunPtrNow()->GetAmmoAll() - AmmoCount);
-										AmmoCount += InAmmo;
-										m_MagStockControl.at(GetNowGunSelect()).SubAmmoStock(InAmmo);
-										for (int i = 2; i >= this->m_AmmoLoadCount; i--) {
-											InAmmo = std::clamp(m_MagStockControl.at(GetNowGunSelect()).GetMag(i), 0, GetGunPtrNow()->GetAmmoAll() - AmmoCount);
-											AmmoCount += InAmmo;
-											m_MagStockControl.at(GetNowGunSelect()).SetMag(i, m_MagStockControl.at(GetNowGunSelect()).GetMag(i) - InAmmo);
-										}
-										if (m_AmmoLoadCount == 0) {
-											GetGunPtrNow()->SetAmmo(AmmoCount);
-										}
-										else {
-											m_MagStockControl.at(GetNowGunSelect()).SetMag(this->m_AmmoLoadCount - 1, AmmoCount);
-										}
-										this->m_AmmoLoadCount++;
-										if (this->m_AmmoLoadCount >= 4) {
-											this->m_AmmoLoadCount = 0;
-											GetGunPtrNow()->SetCancel(true);
-										}
-									}
-								}
-							}
-							else {
-								GunReadyControl::SetReady();
-								if (IsLowReadyPer()) {
-									if (!GetGunPtrNow()->GetInChamber()) {
-										m_CharaAction = CharaActionID::Cocking;
-									}
-									else {
-										m_CharaAction = CharaActionID::Ready;
-									}
-									GetGunPtrNow()->SetActiveAll(true);
-								}
-							}
-						}
-					}
-					break;
 				default:
 					break;
-				}
-				//近接
-				if (!KeyControl::GetRun() && KeyControl::GetInputControl().GetPADSPress(Controls::PADS::MELEE) && m_MeleeCoolDown == 0.f && IsAimPer() && !GetIsADS() && GetGunPtrNow()) {
-					m_CharaAction = CharaActionID::Melee;
 				}
 			}
 			//
@@ -522,6 +414,12 @@ namespace FPS_n2 {
 					Matrix3x3DX::Get33DX(GetEyeMatrix().rotation()),
 					(GetEyeMatrix().zvec() * -1.f).normalized() * (Scale3DRate * 15.f / 60.f), 3.5f, SoundEnum::CartFall, true);
 			}
+			for (auto& g : m_Grenade.m_Ptr) {
+				if (g->PopGrenadeBombSwitch()) {
+					EffectControl::SetOnce((int)Sceneclass::Effect::ef_greexp, g->GetMove().GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate);
+					EffectControl::SetEffectSpeed((int)Sceneclass::Effect::ef_greexp, 2.f);
+				}
+			}
 		}
 		//音指示
 		void			CharacterClass::ExecuteSound(void) noexcept {
@@ -531,86 +429,40 @@ namespace FPS_n2 {
 			//足音
 			if (this->m_BottomAnimSelect != GetBottomStandAnimSel()) {
 				auto Time = this->GetObj().SetAnim((int)this->m_BottomAnimSelect).GetTime();
-				if (!GetRun()) {
-					//L
-					if ((9.f < Time && Time < 10.f)) {
-						if (this->m_CharaSound != 1) {
-							this->m_CharaSound = 1;
-							this->m_SoundPower = 0.5f * (CanLookTarget ? 1.f : 0.5f);
-							if ((CameraParts->GetMainCamera().GetCamPos() - GetFrameWorldMat(CharaFrame::LeftFoot).pos()).magnitude() < Scale3DRate * 5.f * 1.5f) {
+				//L
+				if ((9.f < Time && Time < 10.f)) {
+					if (this->m_CharaSound != 1) {
+						this->m_CharaSound = 1;
+						this->m_SoundPower = 0.5f * (CanLookTarget ? 1.f : 0.5f);
+						if ((CameraParts->GetMainCamera().GetCamPos() - GetFrameWorldMat(CharaFrame::LeftFoot).pos()).magnitude() < Scale3DRate * 5.f * 1.5f) {
 
-								SE->Get(SoundType::SE, (int)SoundEnum::RunFoot)->Play3D(GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale3DRate * 5.f);
-								if (!GunReadyControl::GetIsADS()) {
-									if (this->m_MyID == 0) {
-										auto* OptionParts = OptionManager::Instance();
-										bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
-										if (HeadBobbing) {
-											//Camera3D::Instance()->SetCamShake(0.1f, 1.f);
-										}
-									}
-								}
-							}
-						}
-					}
-					//R
-					if ((27.f < Time && Time < 28.f)) {
-						if (this->m_CharaSound != 3) {
-							this->m_CharaSound = 3;
-							this->m_SoundPower = 0.5f * (CanLookTarget ? 1.f : 0.5f);
-							if ((CameraParts->GetMainCamera().GetCamPos() - GetFrameWorldMat(CharaFrame::RightFoot).pos()).magnitude() < Scale3DRate * 5.f * 1.5f) {
-
-								SE->Get(SoundType::SE, (int)SoundEnum::RunFoot)->Play3D(GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale3DRate * 5.f);
-								if (!GunReadyControl::GetIsADS()) {
-									if (this->m_MyID == 0) {
-										auto* OptionParts = OptionManager::Instance();
-										bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
-										if (HeadBobbing) {
-											//Camera3D::Instance()->SetCamShake(0.1f, 1.f);
-										}
+							SE->Get(SoundType::SE, (int)SoundEnum::RunFoot)->Play3D(GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale3DRate * 5.f);
+							if (!GunReadyControl::GetIsADS()) {
+								if (GetMyPlayerID() == 0) {
+									auto* OptionParts = OptionManager::Instance();
+									bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
+									if (HeadBobbing) {
+										//Camera3D::Instance()->SetCamShake(0.1f, 1.f);
 									}
 								}
 							}
 						}
 					}
 				}
-				else {
-					//L
-					if (
-						(3.f < Time && Time < 4.f)
-						) {
-						if (this->m_CharaSound != 5) {
-							this->m_CharaSound = 5;
-							this->m_SoundPower = 0.5f * (CanLookTarget ? 1.f : 0.5f);
-							if ((CameraParts->GetMainCamera().GetCamPos() - GetFrameWorldMat(CharaFrame::LeftFoot).pos()).magnitude() < Scale3DRate * 5.f * 1.5f) {
-								SE->Get(SoundType::SE, (int)SoundEnum::RunFoot)->Play3D(GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale3DRate * 15.f);
-								if (!GunReadyControl::GetIsADS()) {
-									if (this->m_MyID == 0) {
-										auto* OptionParts = OptionManager::Instance();
-										bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
-										if (HeadBobbing) {
-											//Camera3D::Instance()->SetCamShake(0.1f, 1.f);
-										}
-									}
-								}
-							}
-						}
-					}
-					//R
-					if (
-						(10.f < Time && Time < 11.f)
-						) {
-						if (this->m_CharaSound != 6) {
-							this->m_CharaSound = 6;
-							this->m_SoundPower = 0.5f * (CanLookTarget ? 1.f : 0.5f);
-							if ((CameraParts->GetMainCamera().GetCamPos() - GetFrameWorldMat(CharaFrame::RightFoot).pos()).magnitude() < Scale3DRate * 5.f * 1.5f) {
-								SE->Get(SoundType::SE, (int)SoundEnum::RunFoot)->Play3D(GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale3DRate * 15.f);
-								if (!GunReadyControl::GetIsADS()) {
-									if (this->m_MyID == 0) {
-										auto* OptionParts = OptionManager::Instance();
-										bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
-										if (HeadBobbing) {
-											//Camera3D::Instance()->SetCamShake(0.1f, 1.f);
-										}
+				//R
+				if ((27.f < Time && Time < 28.f)) {
+					if (this->m_CharaSound != 3) {
+						this->m_CharaSound = 3;
+						this->m_SoundPower = 0.5f * (CanLookTarget ? 1.f : 0.5f);
+						if ((CameraParts->GetMainCamera().GetCamPos() - GetFrameWorldMat(CharaFrame::RightFoot).pos()).magnitude() < Scale3DRate * 5.f * 1.5f) {
+
+							SE->Get(SoundType::SE, (int)SoundEnum::RunFoot)->Play3D(GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale3DRate * 5.f);
+							if (!GunReadyControl::GetIsADS()) {
+								if (GetMyPlayerID() == 0) {
+									auto* OptionParts = OptionManager::Instance();
+									bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
+									if (HeadBobbing) {
+										//Camera3D::Instance()->SetCamShake(0.1f, 1.f);
 									}
 								}
 							}
@@ -629,7 +481,7 @@ namespace FPS_n2 {
 				this->m_SoundPower = 0.1f * (CanLookTarget ? 1.f : 0.5f);
 			}
 			//心拍音
-			if (this->m_MyID == 0) {
+			if (GetMyPlayerID() == 0) {
 				if (StaminaControl::ExcuteStamina(0.f, this->GetMove().GetVec().magnitude() * DXLib_refParts->GetDeltaTime(), KeyControl::GetIsSquat())) {
 					SE->Get(SoundType::SE, (int)SoundEnum::Heart)->Play3D(GetEyeMatrix().pos(), Scale3DRate * 0.5f);
 				}
@@ -671,7 +523,7 @@ namespace FPS_n2 {
 			if (m_IsMainGame) {
 				float Radius = 2.f * 0.5f * Scale3DRate;
 				for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
-					if (i == this->m_MyID) { continue; }
+					if (i == GetMyPlayerID()) { continue; }
 					auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
 					if (!Chara->IsAlive()) { continue; }
 					//自分が当たったら押し戻す
@@ -681,24 +533,6 @@ namespace FPS_n2 {
 						PosBuf = PosBuf + Vec.normalized() * (Len - Radius);
 					}
 				}
-				auto* ObjMngr = ObjectManager::Instance();
-				int j = 0;
-				while (true) {
-					auto target = ObjMngr->GetObj((int)ObjType::Target, j);
-					if (target != nullptr) {
-						auto& t = (std::shared_ptr<TargetClass>&)(*target);
-						//自分が当たったら押し戻す
-						Vector3DX Vec = (t->GetMove().GetPos() - this->GetCharaPosition()); Vec.y = (0.f);
-						float Len = Vec.magnitude();
-						if (Len < Radius) {
-							PosBuf = PosBuf + Vec.normalized() * (Len - Radius);
-						}
-					}
-					else {
-						break;
-					}
-					j++;
-				}
 			}
 			//座標オーバーライド
 			if (this->m_MoveOverRideFlag) {
@@ -706,7 +540,7 @@ namespace FPS_n2 {
 				this->m_move = this->m_OverRideInfo;
 			}
 			auto* OptionParts = OptionManager::Instance();
-			bool HeadBobbing = ((this->m_MyID != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
+			bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 			HeadBobbing = false;
 			this->SetMove().SetPos(PosBuf);
 			this->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::forward(), HeadBobbing ? (KeyControl::GetRad().z / 2.f) : 0.f) * Matrix3x3DX::RotAxis(Vector3DX::up(), KeyControl::GetYRadBottom()));
@@ -745,14 +579,14 @@ namespace FPS_n2 {
 							) * -(0.5f * Scale3DRate)
 					);
 			}
-			//銃座標指定
-			Vector3DX GunPos;
-			Vector3DX Gunyvec;
-			Vector3DX Gunzvec;
-			Vector3DX HandsPos;
-			Vector3DX Handsyvec;
-			Vector3DX Handszvec;
 			if (GetGunPtrNow()) {
+				//銃座標指定
+				Vector3DX GunPos;
+				Vector3DX Gunyvec;
+				Vector3DX Gunzvec;
+				Vector3DX HandsPos;
+				Vector3DX Handsyvec;
+				Vector3DX Handszvec;
 				//銃ひっこめ
 				{
 					if (m_StuckGunTimer == 0.f) {
@@ -835,7 +669,7 @@ namespace FPS_n2 {
 								Len = std::clamp(100.f / Len, 0.f, 1.f);
 
 								for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
-									if (i == this->m_MyID) { continue; }
+									if (i == GetMyPlayerID()) { continue; }
 									auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
 									if (!Chara->IsAlive()) { continue; }
 									if (!Chara->CanLookTarget) { continue; }
@@ -1014,16 +848,6 @@ namespace FPS_n2 {
 						}
 					}
 					break;
-					case GunAnimeID::CheckStart:
-						break;
-					case GunAnimeID::Checking:
-						break;
-					case GunAnimeID::CheckEnd:
-						break;
-					case GunAnimeID::AmmoLoading:
-						break;
-					case GunAnimeID::AmmoLoadEnd:
-						break;
 					default:
 						break;
 					}
@@ -1037,7 +861,7 @@ namespace FPS_n2 {
 					GetGunPtrOther()->SetActiveAll(true);
 				}
 				//手の位置を制御
-				if ((m_MyID == 0) || this->CanLookTarget) {
+				if ((GetMyPlayerID() == 0) || this->CanLookTarget) {
 					GunPos = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::RightHandPos).pos();
 					Gunyvec = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::RightHandYvec).pos() - GunPos;
 					Gunzvec = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::RightHandZvec).pos() - GunPos;
@@ -1069,7 +893,6 @@ namespace FPS_n2 {
 								}
 								break;
 							case GunAnimeID::Base:
-							case GunAnimeID::CheckEnd:
 							case GunAnimeID::Shot:
 								m_MagHand = false;
 								if (m_ArmBreak) {
@@ -1096,7 +919,6 @@ namespace FPS_n2 {
 								m_MagHand = false;
 								break;
 							case GunAnimeID::Base:
-							case GunAnimeID::CheckEnd:
 							case GunAnimeID::Shot:
 								m_MagHand = false;
 								if (m_ArmBreak) {
@@ -1197,7 +1019,7 @@ namespace FPS_n2 {
 			LifeControl::InitLife();
 			StackLeftHandControl::InitStackLeftHand();
 			//
-			this->m_MyID = pID;
+			SetPlayerID(pID);
 			//
 			for (auto& a : this->m_Arm) { a.Init(false); }
 			this->m_Arm[(int)EnumGunAnimType::Aim].Init(true);
@@ -1214,10 +1036,10 @@ namespace FPS_n2 {
 			this->m_MoveOverRideFlag = false;
 			//銃のIDセットアップ
 			if (GetGunPtr(0)) {
-				GetGunPtr(0)->SetPlayerID(this->m_MyID);
+				GetGunPtr(0)->SetPlayerID(GetMyPlayerID());
 			}
 			if (GetGunPtr(1)) {
-				GetGunPtr(1)->SetPlayerID(this->m_MyID);
+				GetGunPtr(1)->SetPlayerID(GetMyPlayerID());
 			}
 			m_SlingZrad.Init(0.05f * Scale3DRate, 3.f, deg2rad(50));
 			m_SlingArmZrad.Init(0.08f * Scale3DRate, 3.f, deg2rad(50));
@@ -1278,7 +1100,7 @@ namespace FPS_n2 {
 							if (m_HPRec >= 0.f) {
 								m_HPRec -= 2.f;
 								Heal(2, false);
-								if (m_MyID == 0) {
+								if (GetMyPlayerID() == 0) {
 									SE->Get(SoundType::SE, (int)SoundEnum::Man_breathing)->Play(DX_PLAYTYPE_BACK);
 								}
 							}
@@ -1286,7 +1108,7 @@ namespace FPS_n2 {
 						}
 						else {
 							if (m_HPRec != 0.f) {
-								if (m_MyID == 0) {
+								if (GetMyPlayerID() == 0) {
 									SE->Get(SoundType::SE, (int)SoundEnum::Man_breathing)->StopAll();
 									SE->Get(SoundType::SE, (int)SoundEnum::Man_breathend)->Play(DX_PLAYTYPE_BACK);
 								}
@@ -1354,7 +1176,6 @@ namespace FPS_n2 {
 			}
 			//
 			this->m_Arm[(int)EnumGunAnimType::ADS].Execute(GunReadyControl::GetIsADS(), 0.2f, 0.2f, 0.9f);
-			this->m_Arm[(int)EnumGunAnimType::Run].Execute(!GetIsAim() && KeyControl::GetRun(), 0.1f, 0.2f, 0.95f);
 			if (GetGunPtrNow()) {
 				this->m_Arm[(int)EnumGunAnimType::ReloadStart_Empty].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadStart_Empty, 0.5f, 0.2f);
 				this->m_Arm[(int)EnumGunAnimType::ReloadStart].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadStart, 0.2f, 0.2f);
@@ -1379,10 +1200,7 @@ namespace FPS_n2 {
 				}
 				this->m_Arm[(int)EnumGunAnimType::ReloadEnd].Execute(GetGunPtrNow()->GetGunAnime() == GunAnimeID::ReloadEnd, 0.1f, 0.2f, 0.9f);
 				this->m_Arm[(int)EnumGunAnimType::Ready].Execute(!GetIsAim(), 0.1f, 0.2f, 0.87f);
-				this->m_Arm[(int)EnumGunAnimType::Check].Execute(GetGunPtrNow()->GetGunAnime() >= GunAnimeID::CheckStart && GetGunPtrNow()->GetGunAnime() <= GunAnimeID::Checking, 0.05f, 0.2f);
 				this->m_Arm[(int)EnumGunAnimType::Watch].Execute(GetCharaAction() == CharaActionID::Watch, 0.1f, 0.1f);
-				this->m_Arm[(int)EnumGunAnimType::Melee].Execute(GetCharaAction() == CharaActionID::Melee, 1.1f, 0.1f);
-				this->m_Arm[(int)EnumGunAnimType::AmmoLoad].Execute(GetIsAim() && (GunAnimeID::AmmoLoading <= GetGunPtrNow()->GetGunAnime()) && (GetGunPtrNow()->GetGunAnime() <= GunAnimeID::AmmoLoadEnd), 0.1f, 0.1f);
 			}
 			//
 			KeyControl::UpdateKeyRad();
@@ -1415,7 +1233,7 @@ namespace FPS_n2 {
 			}
 			GetObj().UpdateAnimAll();
 			//移動の際の視点制御
-			EyeSwingControl::UpdateEyeSwing(GetCharaDir(), std::clamp(KeyControl::GetVec().magnitude() / 0.65f, 0.f, 0.85f / 0.65f), KeyControl::GetRun() ? 8.f : 5.f);
+			EyeSwingControl::UpdateEyeSwing(GetCharaDir(), std::clamp(KeyControl::GetVec().magnitude() / 0.65f, 0.f, 0.85f / 0.65f), 5.f);
 			//
 			ExecuteSound();
 			//

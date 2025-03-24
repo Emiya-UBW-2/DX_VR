@@ -2,8 +2,6 @@
 #include "../MainScene/NetworkBrowser.hpp"
 #include "MainScene.hpp"
 
-#include "../MainScene/Object/Target.hpp"
-
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			MainGameScene::Load_Sub(void) noexcept {
@@ -108,28 +106,6 @@ namespace FPS_n2 {
 				}
 				p->GetAI()->Init((PlayerID)index);
 			}
-			/*
-			auto* ObjMngr = ObjectManager::Instance();
-			for (int j = 0; j < 10; j++) {
-				auto Obj = std::make_shared<TargetClass>();
-				ObjMngr->AddObject(Obj);
-				ObjMngr->LoadModel(Obj, Obj, "data/model/Target2/");
-
-				Vector3DX pos_t;
-				pos_t.Set(GetRandf(10.f), -20.f, GetRandf(10.f));
-				pos_t *= Scale3DRate;
-
-				Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
-				if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 0.f * Scale3DRate, &EndPos)) {
-					pos_t = EndPos;
-				}
-				Obj->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRand(360))));
-				Obj->SetMove().SetPos(pos_t);
-				Obj->SetMove().Update(0.f, 0.f);
-				Obj->UpdateObjMatrix(Obj->GetMove().GetMat(), Obj->GetMove().GetPos());
-			}
-			//*/
-			ScoreBoard2.Load("data/UI/Score2.png");
 			//UI
 			tgtSel = -1;
 			tgtTimer = 0.f;
@@ -145,7 +121,7 @@ namespace FPS_n2 {
 			EffectControl::Init();
 			this->m_StartTimer = 5.f;
 
-			EffectControl::SetLoop((int)EffectResource::Effect::ef_greexp2, Vector3DX::zero());
+			EffectControl::SetLoop((int)Sceneclass::Effect::ef_dust, Vector3DX::zero());
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* CameraParts = Camera3D::Instance();
@@ -416,8 +392,8 @@ namespace FPS_n2 {
 				}
 #endif
 				Easing(&m_EffectPos, CamPos, 0.95f, EasingType::OutExpo);
-				EffectControl::Update_LoopEffect((int)EffectResource::Effect::ef_greexp2, m_EffectPos, Vector3DX::forward(), 0.5f);
-				EffectControl::SetEffectColor((int)EffectResource::Effect::ef_greexp2, 255, 255, 255, 64);
+				EffectControl::Update_LoopEffect((int)Sceneclass::Effect::ef_dust, m_EffectPos, Vector3DX::forward(), 0.5f);
+				EffectControl::SetEffectColor((int)Sceneclass::Effect::ef_dust, 255, 255, 255, 64);
 
 				CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
 				auto fov_t = CameraParts->GetMainCamera().GetCamFov();
@@ -430,9 +406,6 @@ namespace FPS_n2 {
 					if (Chara->GetIsADS()) {
 						fov -= deg2rad(15);
 						fov /= std::max(1.f, Chara->GetSightZoomSize() / 2.f);
-					}
-					else if (Chara->GetRun()) {
-						fov += deg2rad(5);
 					}
 					if (Chara->GetMeleeSwitch()) {
 						fov += deg2rad(15);
@@ -492,7 +465,7 @@ namespace FPS_n2 {
 			{
 				Vector3DX StartPos = Chara->GetEyeMatrix().pos();
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
-					if (index == 0) { continue; }
+					if (index == GetMyPlayerID()) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 					Vector3DX TgtPos = c->GetEyeMatrix().pos();
 
@@ -515,7 +488,7 @@ namespace FPS_n2 {
 				this->m_UIclass.SetIntParam(2, Chara->GetGunPtrNow()->GetAimXPos());
 				this->m_UIclass.SetIntParam(3, Chara->GetGunPtrNow()->GetAimYPos());
 				this->m_UIclass.SetfloatParam(2, deg2rad(5) * Len);
-				//NvsN
+				//Ammo
 				this->m_UIclass.SetIntParam(0, Chara->GetGunPtrNow()->GetAmmoNumTotal());
 				this->m_UIclass.SetIntParam(1, Chara->GetGunPtrNow()->GetAmmoAll());
 				this->m_UIclass.SetfloatParam(3, Chara->GetLeanRad());
@@ -544,7 +517,6 @@ namespace FPS_n2 {
 			//使い回しオブジェ系
 			BackGround->Dispose();
 			GunsModify::DisposeSlots();
-			ScoreBoard2.Dispose();
 			//
 			if (m_NetWorkController) {
 				m_NetWorkController->Dispose();
@@ -588,7 +560,7 @@ namespace FPS_n2 {
 				auto ammo = ObjMngr->GetObj((int)ObjType::Ammo, loop);
 				if (ammo != nullptr) {
 					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
-					if (a->m_IsDrawHitUI && a->GetShootedID() == 0) {
+					if (a->m_IsDrawHitUI && a->GetShootedID() == GetMyPlayerID()) {
 						int			Alpha = static_cast<int>(a->m_Hit_alpha * 255.f);
 						Vector3DX	DispPos = a->m_Hit_DispPos;
 						if ((Alpha >= 10) && (DispPos.z >= 0.f && DispPos.z <= 1.f)) {
@@ -695,7 +667,7 @@ namespace FPS_n2 {
 			//
 			{
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
-					if (index == 0) { continue; }
+					if (index == GetMyPlayerID()) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 					Vector3DX ReticlePosBuf = ConvWorldPosToScreenPos(c->GetEyeMatrix().pos().get());
 					if (0.f < ReticlePosBuf.z && ReticlePosBuf.z < 1.f) {
@@ -794,40 +766,6 @@ namespace FPS_n2 {
 						Vector3DX norm_tmp = Vector3DX::zero();
 						auto ColResGround = BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
 
-
-						int j = 0;
-						while (true) {
-							auto target = ObjMngr->GetObj((int)ObjType::Target, j);
-							if (target != nullptr) {
-								auto& t = (std::shared_ptr<TargetClass>&)(*target);
-								auto Res = t->GetColLine(repos_tmp, pos_tmp, -1);
-								if (Res.HitFlag == TRUE) {
-									pos_tmp = Res.HitPosition;
-									norm_tmp = Res.Normal;
-									//エフェクト
-									EffectControl::SetOnce_Any((int)EffectResource::Effect::ef_gndsmoke, pos_tmp, (pos_tmp - repos_tmp).normalized(), a->GetCaliberSize() / 0.02f * Scale3DRate);
-									SE->Get(SoundType::SE, (int)SoundEnum::HitGround0 + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
-									//ヒット演算
-									if (tgtSel != -1 && tgtSel != j) {
-										auto& tOLD = (std::shared_ptr<TargetClass>&)(*ObjMngr->GetObj((int)ObjType::Target, tgtSel));
-										tOLD->ResetHit();
-									}
-									tgtSel = j;
-									tgtTimer = 2.f;
-
-									t->SetHitPos(pos_tmp);
-
-									a->Penetrate(pos_tmp, 0, 0);
-									is_HitAll = true;
-								}
-							}
-							else {
-								break;
-							}
-							j++;
-						}
-
-
 						for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 							if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }
@@ -850,7 +788,7 @@ namespace FPS_n2 {
 #endif // DEBUG
 						if (ColResGround && !is_HitAll) {
 							a->HitGround(pos_tmp);
-							EffectControl::SetOnce_Any((int)EffectResource::Effect::ef_gndsmoke, pos_tmp, (pos_tmp - repos_tmp).normalized(), a->GetCaliberSize() / 0.02f * Scale3DRate);
+							EffectControl::SetOnce_Any((int)Sceneclass::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale3DRate);
 							SE->Get(SoundType::SE, (int)SoundEnum::HitGround0 + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
 						}
 					}

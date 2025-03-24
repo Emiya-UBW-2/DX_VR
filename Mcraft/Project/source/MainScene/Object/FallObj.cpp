@@ -2,12 +2,20 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		bool FallObjClass::PopGrenadeBombSwitch() {
+			if (m_GrenadeBombFlag) {
+				m_GrenadeBombFlag = false;
+				return true;
+			}
+			return false;
+		}
 		void			FallObjClass::SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float timer, SoundEnum sound, bool IsGrenade) noexcept {
 			this->m_IsActive = true;
 			this->m_yAdd = 0.001f;
 			this->m_SoundSwitch = true;
 			this->m_Timer = timer;
 			this->m_IsGrenade = IsGrenade;
+			this->m_GrenadeBombFlag = false;
 			this->m_BoundCount = 0;
 
 			this->SetMove().SetAll(pos, pos, pos, vec, mat, mat);
@@ -54,8 +62,7 @@ namespace FPS_n2 {
 
 				if (this->m_Timer < 0.f) {
 					if (this->m_IsGrenade) {
-						m_EffectControl.SetOnce((int)EffectResource::Effect::ef_greexp, this->SetMove().GetPos(), Vector3DX::forward(), 0.5f*Scale3DRate);
-						m_EffectControl.SetEffectSpeed((int)EffectResource::Effect::ef_greexp, 2.f);
+						m_GrenadeBombFlag = true;
 					}
 					this->m_IsActive = false;
 				}
@@ -66,7 +73,6 @@ namespace FPS_n2 {
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}
 			if (this->m_IsGrenade) {
-				m_EffectControl.Execute();
 			}
 		}
 	};
