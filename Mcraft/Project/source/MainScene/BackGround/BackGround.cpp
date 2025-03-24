@@ -1353,25 +1353,8 @@ namespace FPS_n2 {
 		//
 		void		BackGroundClass::SettingChange() noexcept {
 			auto* OptionParts = OptionManager::Instance();
-			switch (OptionParts->GetParamInt(EnumSaveParam::ObjLevel)) {
-			case 0:
-			case 1:
-				ShadowRate = static_cast<int>(pow(MulPer, 0));
-				BaseRate = static_cast<int>(pow(MulPer, 2));
-				break;
-			case 2:
-				ShadowRate = static_cast<int>(pow(MulPer, 0));
-				BaseRate = static_cast<int>(pow(MulPer, 3));
-				break;
-			case 3:
-				ShadowRate = static_cast<int>(pow(MulPer, 1));
-				BaseRate = static_cast<int>(pow(MulPer, 4));
-				break;
-			default:
-				ShadowRate = static_cast<int>(pow(MulPer, 1));
-				BaseRate = static_cast<int>(pow(MulPer, 4));
-				break;
-			};
+			ShadowRate = static_cast<int>(pow(MulPer, 1));
+			BaseRate = static_cast<int>(pow(MulPer, 1));
 		}
 		//
 #if defined(DEBUG) & EDITBLICK
@@ -1478,40 +1461,40 @@ namespace FPS_n2 {
 				int Rate = 6;
 				int Heights = 10;
 				//*
-				int Edge = 0;
+				int Edge = -Rate;
+				int EdgeP = -3;
 
-				for (int z = -Edge; z < Size * Rate + Edge; z++) {
-					for (int x = -Edge; x < Size * Rate + Edge; x++) {
-						int xPos = -Size * Rate / 2 + x;
-						int zPos = -Size * Rate / 2 + z;
-						auto Height = static_cast<int>(ns.octaveNoise(2, 
-							(static_cast<float>(x)) / (Size * Rate),
-							(static_cast<float>(z)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 10));
-						for (int y = Height; y <= Height + Heights; ++y) {
-							if (y <= Height) {
-								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 2;
+				for (int z = 0; z < Size * Rate; z++) {
+					for (int x = 0; x < Size * Rate; x++) {
+						if (!((x <= -EdgeP || x >= Size * Rate + EdgeP - 1) || (z <= -EdgeP || z >= Size * Rate + EdgeP - 1))) {
+							int xPos = -Size * Rate / 2 + x;
+							int zPos = -Size * Rate / 2 + z;
+							auto Height = static_cast<int>(ns.octaveNoise(2,
+								(static_cast<float>(x)) / (Size * Rate - 1),
+								(static_cast<float>(z)) / (Size * Rate - 1)) * static_cast<float>(cell.All * 1 / 10));
+							for (int y = Height; y <= Height + Heights; ++y) {
+								if (y <= Height) {
+									cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 2;
+								}
 							}
 						}
 					}
 				}
 
-				for (int z = -Edge; z < Size * Rate + Edge; z++) {
-					for (int x = -Edge; x < Size * Rate + Edge; x++) {
-						if ((x == -Edge || x == Size * Rate + Edge - 1) || (z == -Edge || z == Size * Rate + Edge - 1)) {
+				for (int x = 0; x < cell.All; ++x) {
+					for (int z = 0; z < cell.All; ++z) {
+						if ((x <= -EdgeP || x >= Size * Rate + EdgeP - 1) || (z <= -EdgeP || z >= Size * Rate + EdgeP - 1)) {
 							int xPos = -Size * Rate / 2 + x;
 							int zPos = -Size * Rate / 2 + z;
-							auto Height = static_cast<int>(ns.octaveNoise(2, 
-								(static_cast<float>(x)) / (Size * Rate),
-								(static_cast<float>(z)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 10));
-							for (int y = Height; y <= cell.All*3/5; ++y) {
+							for (int y = 0; y <= cell.All*3/5; ++y) {
 								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
 							}
 						}
 					}
 				}
 				//*/
-				for (int z = 0; z < Size * Rate; z++) {
-					for (int x = 0; x < Size * Rate; x++) {
+				for (int z = -Edge; z < Size * Rate + Edge; z++) {
+					for (int x = -Edge; x < Size * Rate + Edge; x++) {
 						auto SetWall = [&](int xt,int zt) {
 							int xPos = -Size * Rate / 2 + x + xt;
 							int zPos = -Size * Rate / 2 + z + zt;
