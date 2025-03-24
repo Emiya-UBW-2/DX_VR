@@ -714,7 +714,7 @@ namespace FPS_n2 {
 			UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			//ƒXƒŠƒ“ƒOêŠ’Tõ
 			int GunSel = 1;
-			if (GetGunPtr(GunSel)) {
+			if (GetGunPtr(GunSel) && this->m_SlingPer[GunSel] < 1.f) {
 				m_SlingMat[GunSel] =
 					Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(-90)) *
 					GetFrameWorldMat(CharaFrame::Upper).rotation() *
@@ -726,7 +726,7 @@ namespace FPS_n2 {
 					);
 			}
 			GunSel = 1 - GunSel;
-			if (GetGunPtr(GunSel)) {
+			if (GetGunPtr(GunSel) && this->m_SlingPer[GunSel] < 1.f) {
 				m_SlingZrad.Update(DXLib_refParts->GetDeltaTime());
 				m_SlingZrad.AddRad(((1.f - m_SlingPer.at(GetOtherGunSelect())) + 0.5f * (KeyControl::GetRad().y - KeyControl::GetYRadBottom())) * DXLib_refParts->GetDeltaTime());
 				m_SlingMat[GunSel] =

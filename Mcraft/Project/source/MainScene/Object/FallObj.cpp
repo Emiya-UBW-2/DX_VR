@@ -65,7 +65,9 @@ namespace FPS_n2 {
 				SetMove().Update(0.f, 0.f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}
-			m_EffectControl.Execute();
+			if (this->m_IsGrenade) {
+				m_EffectControl.Execute();
+			}
 		}
 	};
 };
