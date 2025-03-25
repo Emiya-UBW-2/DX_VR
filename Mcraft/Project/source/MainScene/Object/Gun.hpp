@@ -229,9 +229,9 @@ namespace FPS_n2 {
 			void		CockByMag() noexcept { this->m_ChamberAmmoData = (*m_MagazinePtr)->GetModData()->GetAmmoSpecMagTop(); }//マガジンの一番上の弾データをチャンバーイン
 			void		UnloadChamber() noexcept { this->m_ChamberAmmoData.reset(); }
 			void		SetShotSwitchOff() noexcept { this->m_ShotSwitch = false; }
-			void		SetGunMatrix(const Matrix4x4DX& value) noexcept {
-				SetMove().SetMat(Matrix3x3DX::Get33DX(value.rotation()));
-				SetMove().SetPos(value.pos());
+			void		SetGunMatrix(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept {
+				SetMove().SetMat(rotation);
+				SetMove().SetPos(pos);
 				SetMove().Update(0.f, 0.f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 
@@ -246,7 +246,7 @@ namespace FPS_n2 {
 			void		SetMagFall() noexcept {
 				m_MagFall.SetFall(
 					GetFrameWorldMat_P(GunFrame::Magpos).pos(),
-					Matrix3x3DX::Get33DX(GetFrameWorldMat_P(GunFrame::Magpos).rotation()),
+					Matrix3x3DX::Get33DX(GetFrameWorldMat_P(GunFrame::Magpos)),
 					GetFrameWorldMat_P(GunFrame::Magpos).yvec() * -1.f * (Scale3DRate * 3.f / 60.f),
 					12.f, SoundEnum::MagFall, false);
 			}

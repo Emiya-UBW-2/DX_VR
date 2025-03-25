@@ -60,16 +60,16 @@ namespace FPS_n2 {
 			}
 			if (GetMyPlayerID() != 0) {
 				if (GetRand(1) == 0) {
-					SE->Get(SoundType::SE, (int)SoundEnum::Man_reload)->Play3D(GetEyeMatrix().pos(), Scale3DRate * 10.f);
+					SE->Get(SoundType::SE, (int)SoundEnum::Man_reload)->Play3D(GetEyePosition(), Scale3DRate * 10.f);
 				}
 				else {
-					SE->Get(SoundType::SE, (int)SoundEnum::Man_takecover)->Play3D(GetEyeMatrix().pos(), Scale3DRate * 10.f);
+					SE->Get(SoundType::SE, (int)SoundEnum::Man_takecover)->Play3D(GetEyePosition(), Scale3DRate * 10.f);
 				}
 				this->m_SoundPower = 0.6f * (CanLookTarget ? 1.f : 0.5f);
 			}
 		}
 		//
-		const Matrix4x4DX CharacterClass::GetEyeMatrix(void) const noexcept {
+		const Matrix3x3DX CharacterClass::GetEyeRotation(void) const noexcept {
 			Matrix3x3DX tmpUpperMatrix = Matrix3x3DX::RotAxis(Vector3DX::forward(), KeyControl::GetLeanRad() / 5.f);
 
 			tmpUpperMatrix *=
@@ -83,15 +83,20 @@ namespace FPS_n2 {
 			}
 			tmpUpperMatrix *= this->GetMove().GetMat();
 
-			auto EyePosition = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f;
+			return tmpUpperMatrix;
+		}
+		const Vector3DX CharacterClass::GetEyePosition(void) const noexcept {
+			auto* OptionParts = OptionManager::Instance();
+			bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 
+			auto EyePosition = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f;
 			if (HeadBobbing) {
 				EyePosition += EyeSwingControl::GetEyeSwingPos();
 			}
 			if (GetGunPtrNow()) {
 				EyePosition = Lerp<Vector3DX>(EyePosition, GetGunPtrNow()->GetEyePos(), GunReadyControl::GetADSPer());
 			}
-			return tmpUpperMatrix.Get44DX() * Matrix4x4DX::Mtrans(EyePosition);
+			return EyePosition;
 		}
 		bool			CharacterClass::SetDamageEvent(const DamageEvent& value) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -108,10 +113,10 @@ namespace FPS_n2 {
 				}
 				if (LifeControl::IsAlive()) {
 					if ((value.Damage >= 0) && (value.ArmerDamage >= 0)) {
-						SE->Get(SoundType::SE, (int)SoundEnum::Man_Hurt1 + GetRand(6 - 1))->Play3D(GetEyeMatrix().pos(), Scale3DRate * 10.f);
+						SE->Get(SoundType::SE, (int)SoundEnum::Man_Hurt1 + GetRand(6 - 1))->Play3D(GetEyePosition(), Scale3DRate * 10.f);
 					}
 					else {
-						//SE->Get(SoundType::SE, (int)SoundEnum::Man_Hurt1 + GetRand(6 - 1))->Play3D(GetEyeMatrix().pos(), Scale3DRate * 10.f);
+						//SE->Get(SoundType::SE, (int)SoundEnum::Man_Hurt1 + GetRand(6 - 1))->Play3D(GetEyePosition(), Scale3DRate * 10.f);
 						//
 						if (!PrevLive) {
 						}
@@ -128,7 +133,7 @@ namespace FPS_n2 {
 					SE->Get(SoundType::SE, (int)SoundEnum::Man_breathing)->StopAll();
 					SE->Get(SoundType::SE, (int)SoundEnum::Man_breathend)->StopAll();
 
-					SE->Get(SoundType::SE, (int)SoundEnum::Man_Death1 + GetRand(8 - 1))->Play3D(GetEyeMatrix().pos(), Scale3DRate * 10.f);
+					SE->Get(SoundType::SE, (int)SoundEnum::Man_Death1 + GetRand(8 - 1))->Play3D(GetEyePosition(), Scale3DRate * 10.f);
 					if (value.ShotID == 0) {
 						PlayerMngr->GetPlayer(value.ShotID)->AddScore(100 + ((IsGun0Select() && (value.Damage >= 100)) ? 20 : 0));
 						PlayerMngr->GetPlayer(value.ShotID)->AddKill(1);
@@ -189,7 +194,7 @@ namespace FPS_n2 {
 				}
 				//ダメージ登録
 				{
-					//auto v1 = GetEyeMatrix().zvec() * -1.f;
+					//auto v1 = GetEyeRotation().zvec() * -1.f;
 					//auto v2 = (Chara->GetCharaPosition() - this->GetCharaPosition()).normalized(); v2.y = (0);
 					//atan2f(Vector3DX::Cross(v1, v2).y, Vector3DX::Dot(v1, v2))
 					LifeControl::SetSubHPEvent(AttackID, GetMyPlayerID(), *Damage, *ArmerDamage);
@@ -197,18 +202,18 @@ namespace FPS_n2 {
 				//SE
 				if (AttackID == 0) {
 					if (*Damage > 0) {
-						SE->Get(SoundType::SE, (int)SoundEnum::Hit)->Play3D(GetEyeMatrix().pos(), Scale3DRate * 10.f);
+						SE->Get(SoundType::SE, (int)SoundEnum::Hit)->Play3D(GetEyePosition(), Scale3DRate * 10.f);
 					}
 					else {
-						SE->Get(SoundType::SE, (int)SoundEnum::HitGuard)->Play3D(GetEyeMatrix().pos(), Scale3DRate * 10.f, 128);
+						SE->Get(SoundType::SE, (int)SoundEnum::HitGuard)->Play3D(GetEyePosition(), Scale3DRate * 10.f, 128);
 					}
 				}
 				if (GetMyPlayerID() == 0 && m_IsMainGame) {
 					if (*Damage > 0) {
-						SE->Get(SoundType::SE, (int)SoundEnum::HitMe)->Play3D(GetEyeMatrix().pos(), Scale3DRate * 10.f);
+						SE->Get(SoundType::SE, (int)SoundEnum::HitMe)->Play3D(GetEyePosition(), Scale3DRate * 10.f);
 					}
 					else {
-						SE->Get(SoundType::SE, (int)SoundEnum::HitGuard)->Play3D(GetEyeMatrix().pos(), Scale3DRate * 10.f, 255);
+						SE->Get(SoundType::SE, (int)SoundEnum::HitGuard)->Play3D(GetEyePosition(), Scale3DRate * 10.f, 255);
 					}
 				}
 				//エフェクトセット
@@ -411,8 +416,8 @@ namespace FPS_n2 {
 			if (KeyControl::GetThrowKey()) {
 				m_Grenade.SetFall(
 					GetFrameWorldMat(CharaFrame::RightHandJoint).pos(),
-					Matrix3x3DX::Get33DX(GetEyeMatrix().rotation()),
-					(GetEyeMatrix().zvec() * -1.f).normalized() * (Scale3DRate * 15.f / 60.f), 3.5f, SoundEnum::CartFall, true);
+					GetEyeRotation(),
+					(GetEyeRotation().zvec() * -1.f).normalized() * (Scale3DRate * 15.f / 60.f), 3.5f, SoundEnum::CartFall, true);
 			}
 			for (auto& g : m_Grenade.m_Ptr) {
 				if (g->PopGrenadeBombSwitch()) {
@@ -483,7 +488,7 @@ namespace FPS_n2 {
 			//心拍音
 			if (GetMyPlayerID() == 0) {
 				if (StaminaControl::ExcuteStamina(0.f, this->GetMove().GetVec().magnitude() * DXLib_refParts->GetDeltaTime(), KeyControl::GetIsSquat())) {
-					SE->Get(SoundType::SE, (int)SoundEnum::Heart)->Play3D(GetEyeMatrix().pos(), Scale3DRate * 0.5f);
+					SE->Get(SoundType::SE, (int)SoundEnum::Heart)->Play3D(GetEyePosition(), Scale3DRate * 0.5f);
 				}
 			}
 		}
@@ -539,11 +544,8 @@ namespace FPS_n2 {
 				this->m_MoveOverRideFlag = false;
 				this->m_move = this->m_OverRideInfo;
 			}
-			auto* OptionParts = OptionManager::Instance();
-			bool HeadBobbing = ((GetMyPlayerID() != 0) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
-			HeadBobbing = false;
 			this->SetMove().SetPos(PosBuf);
-			this->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::forward(), HeadBobbing ? (KeyControl::GetRad().z / 2.f) : 0.f) * Matrix3x3DX::RotAxis(Vector3DX::up(), KeyControl::GetYRadBottom()));
+			this->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), KeyControl::GetYRadBottom()));
 			this->SetMove().Update(0.9f, 0.f);
 			UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			//スリング場所探索
@@ -584,19 +586,12 @@ namespace FPS_n2 {
 					);
 			}
 			if (GetGunPtrNow()) {
-				//銃座標指定
-				Vector3DX GunPos;
-				Vector3DX Gunyvec;
-				Vector3DX Gunzvec;
-				Vector3DX HandsPos;
-				Vector3DX Handsyvec;
-				Vector3DX Handszvec;
 				//銃ひっこめ
 				{
 					if (m_StuckGunTimer == 0.f) {
 						m_StuckGunTimer = 0.1f;
 						auto EndPost = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Muzzle).pos();
-						if (BackGround->CheckLinetoMap(GetEyeMatrix().pos(), &EndPost)) {//0.03ms
+						if (BackGround->CheckLinetoMap(GetEyePosition(), &EndPost)) {//0.03ms
 							m_IsStuckGun = true;
 						}
 						else {
@@ -664,7 +659,7 @@ namespace FPS_n2 {
 
 
 
-							Vector3DX BasePos = GetEyeMatrix().pos();
+							Vector3DX BasePos = GetEyePosition();
 							//オートエイム
 							if (IsSelGun && GunReadyControl::GetIsADS() && p->IsAutoAimActive() && m_IsMainGame) {
 								//float Range = 13.f;// GetIsLaserActive() ? 13.f : 7.f;
@@ -719,15 +714,17 @@ namespace FPS_n2 {
 								tmp_gunmat = Lerp(tmp_gunmat, tmp_gunmat * Matrix3x3DX::RotVec2(tmp_gunmat.zvec() * -1.f, m_AutoAimVec), m_AutoAimPer);
 							}
 
-							p->SetGunMatrix(tmp_gunmat.Get44DX() * Matrix4x4DX::Mtrans(Lerp(Mat.pos() + Vector3DX::up() * PAdd, Post0, Per)));
+							p->SetGunMatrix(tmp_gunmat, Lerp(Mat.pos() + Vector3DX::up() * PAdd, Post0, Per));
 						}
 					}
 				}
 				else {
-					GetGunPtrNow()->SetGunMatrix(lagframe_.RIGHThand_f.GetFrameWorldPosition().rotation().inverse()* RagDollControl::GetRagDoll().GetFrameLocalWorldMatrix(lagframe_.RIGHThand_f.GetFrameID()));
+					auto Mat = lagframe_.RIGHThand_f.GetFrameWorldPosition().rotation().inverse() * RagDollControl::GetRagDoll().GetFrameLocalWorldMatrix(lagframe_.RIGHThand_f.GetFrameID());
+					GetGunPtrNow()->SetGunMatrix(Matrix3x3DX::Get33DX(Mat), Mat.pos());
 					if (GetGunPtrOther()) {
 						//仮の画面外指定
-						GetGunPtrOther()->SetGunMatrix(Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(90)).Get44DX() * GetFrameWorldMat(CharaFrame::Upper));
+						Mat = Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(90)).Get44DX() * GetFrameWorldMat(CharaFrame::Upper);
+						GetGunPtrOther()->SetGunMatrix(Matrix3x3DX::Get33DX(Mat), Mat.pos());
 					}
 				}
 				//LeftMag
@@ -856,11 +853,22 @@ namespace FPS_n2 {
 				}
 				//手の位置を制御
 				if ((GetMyPlayerID() == 0) || this->CanLookTarget) {
-					GunPos = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::RightHandPos).pos();
-					Gunyvec = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::RightHandYvec).pos() - GunPos;
-					Gunzvec = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::RightHandZvec).pos() - GunPos;
-					bool IsBreak = false;
+					//銃座標
+					Vector3DX GunPos = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::RightHandPos).pos();
+					Vector3DX Gunyvec = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::RightHandYvec).pos() - GunPos;
+					Vector3DX Gunzvec = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::RightHandZvec).pos() - GunPos;
+					IK_RightArm(
+						&GetObj(),
+						GetFrame(static_cast<int>(CharaFrame::RightArm)),
+						GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightArm)),
+						GetFrame(static_cast<int>(CharaFrame::RightArm2)),
+						GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightArm2)),
+						GetFrame(static_cast<int>(CharaFrame::RightWrist)),
+						GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightWrist)),
+						GunPos, Gunyvec, Gunzvec);
+
 					{
+						bool IsBreak = false;
 						switch (GetGunPtrNow()->GetModData()->GetReloadType()) {
 						case RELOADTYPE::MAG:
 							switch (GetGunPtrNow()->GetGunAnime()) {
@@ -941,9 +949,9 @@ namespace FPS_n2 {
 						Vector3DX Magyvec = GetFrameWorldMat(CharaFrame::LeftMagyvec).pos() - MagPos;
 						Vector3DX Magzvec = GetFrameWorldMat(CharaFrame::LeftMagzvec).pos() - MagPos;
 						//*/
-						HandsPos = Lerp(HandPos, MagPos, m_MagArm.Per());
-						Handsyvec = Lerp(Handyvec, Magyvec, m_MagArm.Per());
-						Handszvec = Lerp(Handzvec, Magzvec, m_MagArm.Per());
+						Vector3DX HandsPos = Lerp(HandPos, MagPos, m_MagArm.Per());
+						Vector3DX Handsyvec = Lerp(Handyvec, Magyvec, m_MagArm.Per());
+						Vector3DX Handszvec = Lerp(Handzvec, Magzvec, m_MagArm.Per());
 
 						Easing(&m_ArmBreakPer, IsBreak ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 						if(m_ArmBreakPer>0.01f){
@@ -975,29 +983,20 @@ namespace FPS_n2 {
 							Handsyvec = Lerp(Handsyvec, Handyvec, m_ArmBreakPer);
 							Handszvec = Lerp(Handszvec, Handzvec, m_ArmBreakPer);
 						}
-					}
-					if (m_ArmBreak) {
-						HandsPos += Vector3DX::vget(GetRandf(1.f * Scale3DRate), GetRandf(1.f * Scale3DRate), GetRandf(1.f * Scale3DRate)) * 0.002f;
-					}
+						if (m_ArmBreak) {
+							HandsPos += Vector3DX::vget(GetRandf(1.f * Scale3DRate), GetRandf(1.f * Scale3DRate), GetRandf(1.f * Scale3DRate)) * 0.002f;
+						}
 
-					IK_RightArm(
-						&GetObj(),
-						GetFrame(static_cast<int>(CharaFrame::RightArm)),
-						GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightArm)),
-						GetFrame(static_cast<int>(CharaFrame::RightArm2)),
-						GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightArm2)),
-						GetFrame(static_cast<int>(CharaFrame::RightWrist)),
-						GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightWrist)),
-						GunPos, Gunyvec, Gunzvec);
-					IK_LeftArm(
-						&GetObj(),
-						GetFrame(static_cast<int>(CharaFrame::LeftArm)),
-						GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftArm)),
-						GetFrame(static_cast<int>(CharaFrame::LeftArm2)),
-						GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftArm2)),
-						GetFrame(static_cast<int>(CharaFrame::LeftWrist)),
-						GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftWrist)),
-						HandsPos, Handsyvec, Handszvec);
+						IK_LeftArm(
+							&GetObj(),
+							GetFrame(static_cast<int>(CharaFrame::LeftArm)),
+							GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftArm)),
+							GetFrame(static_cast<int>(CharaFrame::LeftArm2)),
+							GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftArm2)),
+							GetFrame(static_cast<int>(CharaFrame::LeftWrist)),
+							GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftWrist)),
+							HandsPos, Handsyvec, Handszvec);
+					}
 				}
 			}
 		}
@@ -1202,11 +1201,11 @@ namespace FPS_n2 {
 			KeyControl::UpdateKeyRad();
 			GetObj().ResetFrameUserLocalMatrix(GetFrame((int)CharaFrame::Upper));
 			GetObj().SetFrameLocalMatrix(GetFrame((int)CharaFrame::Upper),
-				GetFrameLocalMat(CharaFrame::Upper).rotation() * Matrix4x4DX::RotAxis(Vector3DX::right(), -KeyControl::GetRad().x / 2.f) * (GetCharaDir().Get44DX() * this->GetMove().GetMat().Get44DX().inverse()).rotation()
+				(Matrix3x3DX::Get33DX(GetFrameLocalMat(CharaFrame::Upper)) * Matrix3x3DX::RotAxis(Vector3DX::right(), -KeyControl::GetRad().x / 2.f) * (GetCharaDir() * this->GetMove().GetMat().inverse())).Get44DX()
 				* GetFrameBaseLocalMat((int)CharaFrame::Upper));
 			GetObj().ResetFrameUserLocalMatrix(GetFrame((int)CharaFrame::Upper2));
 			GetObj().SetFrameLocalMatrix(GetFrame((int)CharaFrame::Upper2),
-				GetFrameLocalMat(CharaFrame::Upper2).rotation() * Matrix4x4DX::RotAxis(Vector3DX::right(), KeyControl::GetRad().x / 2.f) * HitReactionControl::GetHitReactionMat()
+				(Matrix3x3DX::Get33DX(GetFrameLocalMat(CharaFrame::Upper2)) * Matrix3x3DX::RotAxis(Vector3DX::right(), KeyControl::GetRad().x / 2.f) * HitReactionControl::GetHitReactionMat()).Get44DX()
 				* GetFrameBaseLocalMat((int)CharaFrame::Upper2));
 			HitReactionControl::Execute_HitReactionControl();
 			//上半身演算
@@ -1237,7 +1236,7 @@ namespace FPS_n2 {
 			//
 			RagDollControl::Execute_RagDollControl(this->GetObj(), LifeControl::IsAlive());													//ラグドール
 			HitBoxControl::UpdataHitBox(this, (this->GetCharaType() == CharaTypeID::Enemy) ? 1.1f : 1.f);									//ヒットボックス
-			WalkSwingControl::UpdateWalkSwing(GetEyeMatrix().pos() - GetCharaPosition(), std::clamp(this->GetMove().GetVec().magnitude() / 2.f, 0.f, 0.5f));
+			WalkSwingControl::UpdateWalkSwing(GetEyePosition() - GetCharaPosition(), std::clamp(this->GetMove().GetVec().magnitude() / 2.f, 0.f, 0.5f));
 			EffectControl::Execute();
 		}
 		void			CharacterClass::Draw(bool isDrawSemiTrans) noexcept {

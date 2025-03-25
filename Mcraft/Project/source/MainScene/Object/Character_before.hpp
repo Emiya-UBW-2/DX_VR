@@ -485,7 +485,7 @@ namespace FPS_n2 {
 				//e‚Ì—h‚ê
 				Easing(&m_UpperRad, (this->m_rad - this->m_UpperPrevRad) * -1.f, 0.9f, EasingType::OutExpo);
 				m_UpperPrevRad = this->m_rad;
-				auto mat = Matrix4x4DX::RotAxis(Vector3DX::right(), m_UpperRad.x) * Matrix4x4DX::RotAxis(Vector3DX::up(), m_UpperRad.y);
+				auto mat = Matrix3x3DX::RotAxis(Vector3DX::right(), m_UpperRad.x) * Matrix3x3DX::RotAxis(Vector3DX::up(), m_UpperRad.y);
 				Easing(&m_UpperyVecNormal, mat.yvec(), 0.8f, EasingType::OutExpo);
 				Easing(&m_UpperzVecNormal, mat.zvec(), 0.8f, EasingType::OutExpo);
 				Easing(&m_UpperyVec, m_UpperyVecNormal, 0.8f, EasingType::OutExpo);
@@ -708,7 +708,6 @@ namespace FPS_n2 {
 			GunPtrControl(void) noexcept {}
 			~GunPtrControl(void) noexcept {}
 		public:
-			//void UpdateEyeSwing(const Matrix4x4DX& pCharaMat, float SwingPer, float SwingSpeed)noexcept {}
 			void DisposeGunPtr() noexcept {
 				auto* ObjMngr = ObjectManager::Instance();
 				for (auto& g : m_Gun_Ptr) {
@@ -858,7 +857,7 @@ namespace FPS_n2 {
 			HitReactionControl(void) noexcept {}
 			~HitReactionControl(void) noexcept {}
 		public:
-			const auto GetHitReactionMat() const noexcept { return Matrix4x4DX::RotAxis(m_HitAxis, m_HitPowerR * deg2rad(90.f)); }
+			const auto GetHitReactionMat() const noexcept { return Matrix3x3DX::RotAxis(m_HitAxis, m_HitPowerR * deg2rad(90.f)); }
 			const auto IsDamaging(void) const noexcept { return m_HitPower > 0.f; }
 		public:
 			void SetHit(const Vector3DX& Axis) noexcept {

@@ -43,9 +43,9 @@ namespace FPS_n2 {
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 				FirstExecute_Mod();
 			}
-			void			SetModMatrix(const Matrix4x4DX& value) noexcept {
-				SetMove().SetMat(Matrix3x3DX::Get33DX(value.rotation()));
-				SetMove().SetPos(value.pos());
+			void			SetModMatrix(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept {
+				SetMove().SetMat(rotation);
+				SetMove().SetPos(pos);
 				SetMove().Update(0.f, 0.f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 				ModSlotControl::UpdatePartsAnim(GetObj());
@@ -89,7 +89,7 @@ namespace FPS_n2 {
 			}
 		public:
 			void			SetHandMatrix(const Matrix4x4DX& value) noexcept {
-				SetMove().SetMat(Matrix3x3DX::Get33DX(value.rotation()));
+				SetMove().SetMat(Matrix3x3DX::Get33DX(value));
 				SetMove().SetPos(value.pos());
 				SetMove().Update(0.f, 0.f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());

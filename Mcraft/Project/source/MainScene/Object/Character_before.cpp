@@ -36,7 +36,7 @@ namespace FPS_n2 {
 		void HitBoxControl::UpdataHitBox(const ObjectBaseClass* ptr, float SizeRate) noexcept {
 			auto* Ptr = (CharacterClass*)ptr;
 			int ID = 0;
-			auto headpos = Ptr->GetEyeMatrix().pos();
+			auto headpos = Ptr->GetEyePosition();
 			m_HitBox[ID].Execute(headpos, 0.13f * Scale3DRate * SizeRate, HitType::Head); ID++;
 			m_HitBox[ID].Execute((headpos + Ptr->GetFrameWorldMat(CharaFrame::Upper).pos()) / 2.f, 0.16f * Scale3DRate * SizeRate, HitType::Body); ID++;
 			m_HitBox[ID].Execute(Ptr->GetFrameWorldMat(CharaFrame::Upper).pos(), 0.13f * Scale3DRate * SizeRate, HitType::Body); ID++;

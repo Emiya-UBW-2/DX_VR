@@ -1352,7 +1352,6 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundClass::SettingChange() noexcept {
-			auto* OptionParts = OptionManager::Instance();
 			ShadowRate = static_cast<int>(pow(MulPer, 1));
 			BaseRate = static_cast<int>(pow(MulPer, 1));
 		}
@@ -1462,13 +1461,19 @@ namespace FPS_n2 {
 				int Heights = 10;
 				//*
 				int Edge = -Rate;
-				int EdgeP = -3;
+				int EdgeP = -Rate;
 
-				for (int z = 0; z < Size * Rate; z++) {
-					for (int x = 0; x < Size * Rate; x++) {
-						if (!((x <= -EdgeP || x >= Size * Rate + EdgeP - 1) || (z <= -EdgeP || z >= Size * Rate + EdgeP - 1))) {
-							int xPos = -Size * Rate / 2 + x;
-							int zPos = -Size * Rate / 2 + z;
+				for (int x = 0; x < cell.All; ++x) {
+					for (int z = 0; z < cell.All; ++z) {
+						int xPos = -Size * Rate / 2 + x;
+						int zPos = -Size * Rate / 2 + z;
+
+						if ((x <= -EdgeP || x >= Size * Rate + EdgeP - 1) || (z <= -EdgeP || z >= Size * Rate + EdgeP - 1)) {
+							for (int y = 0; y <= cell.All*3/5; ++y) {
+								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
+							}
+						}
+						else {
 							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(x)) / (Size * Rate - 1),
 								(static_cast<float>(z)) / (Size * Rate - 1)) * static_cast<float>(cell.All * 1 / 10));
@@ -1476,18 +1481,6 @@ namespace FPS_n2 {
 								if (y <= Height) {
 									cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 2;
 								}
-							}
-						}
-					}
-				}
-
-				for (int x = 0; x < cell.All; ++x) {
-					for (int z = 0; z < cell.All; ++z) {
-						if ((x <= -EdgeP || x >= Size * Rate + EdgeP - 1) || (z <= -EdgeP || z >= Size * Rate + EdgeP - 1)) {
-							int xPos = -Size * Rate / 2 + x;
-							int zPos = -Size * Rate / 2 + z;
-							for (int y = 0; y <= cell.All*3/5; ++y) {
-								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
 							}
 						}
 					}

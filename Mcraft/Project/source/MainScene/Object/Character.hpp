@@ -93,7 +93,8 @@ namespace FPS_n2 {
 			void			Shot_Start() noexcept;
 			void			Reload_Start() noexcept;
 		public://ƒQƒbƒ^[
-			const Matrix4x4DX GetEyeMatrix(void) const noexcept;
+			const Matrix3x3DX GetEyeRotation(void) const noexcept;
+			const Vector3DX GetEyePosition(void) const noexcept;
 			const auto& GetGunSelPer(void) const noexcept { return this->m_ULTBar.Per(); }
 			const auto& GetCharaType(void) const noexcept { return this->m_CharaType; }
 			const auto& GetCharaAction(void) const noexcept { return this->m_CharaAction; }

@@ -229,15 +229,14 @@ namespace FPS_n2 {
 					}
 					Obj->GetObj().ResetFrameUserLocalMatrix(Obj->GetFrame((int)GunFrame::Center));
 					Obj->GetObj().UpdateAnimAll();
-					auto Rot = Obj->GetFrameLocalMat(GunFrame::Center).rotation();
-					Obj->GetObj().SetFrameLocalMatrix(Obj->GetFrame((int)GunFrame::Center), Rot * Obj->GetFrameBaseLocalMat((int)GunFrame::Center));
+					Obj->GetObj().SetFrameLocalMatrix(Obj->GetFrame((int)GunFrame::Center), Obj->GetFrameLocalMat(GunFrame::Center).rotation() * Obj->GetFrameBaseLocalMat((int)GunFrame::Center));
 				}
 			}
 		}
 		void		ModSlotControl::UpdatePartsMove(const Matrix4x4DX& pMat, GunSlot Slot) {
 			if (this->m_Parts_Ptr[(int)Slot]) {
 				auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[(int)Slot]);
-				Obj->SetModMatrix(pMat);
+				Obj->SetModMatrix(Matrix3x3DX::Get33DX(pMat), pMat.pos());
 			}
 		}
 

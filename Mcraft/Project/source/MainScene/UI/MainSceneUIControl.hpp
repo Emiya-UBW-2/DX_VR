@@ -93,14 +93,14 @@ namespace FPS_n2 {
 					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 
 					Scale = Scale +4 + Lerp(100, 0, LookPer);
-					Vector3DX StartPos = Chara->GetEyeMatrix().pos();
-					Vector3DX Vec1 = Chara->GetEyeMatrix().zvec() * -1.f; Vec1.y = 0.f; Vec1 = Vec1.normalized();
+					Vector3DX StartPos = Chara->GetEyePosition();
+					Vector3DX Vec1 = Chara->GetEyeRotation().zvec() * -1.f; Vec1.y = 0.f; Vec1 = Vec1.normalized();
 					{
 						for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 							if (index == 0) { continue; }
 							auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 							if (!c->IsAlive() || !c->CanLookTarget) { continue; }
-							Vector3DX Vec2 = (c->GetEyeMatrix().pos() - StartPos); Vec2.y = 0.f; Vec2 = Vec2.normalized();
+							Vector3DX Vec2 = (c->GetEyePosition() - StartPos); Vec2.y = 0.f; Vec2 = Vec2.normalized();
 							float Angle = DX_PI_F + Vector3DX::Angle(Vec1, Vec2) * (Vector3DX::Cross(Vec1, Vec2).y > 0.f ? 1.f : -1.f);
 
 							xp1 = intParam[2] - (int)(Scale * 1.5f * sin(Angle + deg2rad(5)));

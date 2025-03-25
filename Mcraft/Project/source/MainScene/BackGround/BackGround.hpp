@@ -128,7 +128,7 @@ namespace FPS_n2 {
 		static constexpr int DrawMaxZPlus = DrawMax;
 		static constexpr int DrawMaxZMinus = -DrawMax;
 
-		static constexpr int DrawMaxYPlus = 30;
+		static constexpr int DrawMaxYPlus = 40;
 		static constexpr int DrawMaxYMinus = -30;
 
 

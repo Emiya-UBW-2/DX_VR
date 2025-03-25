@@ -46,7 +46,7 @@ namespace FPS_n2 {
 				if (this->m_IsEject && (this->m_IsEject != Prev)) {
 					m_CartFall.SetFall(
 						GetFrameWorldMat_P(GunFrame::Cart).pos(),
-						Matrix3x3DX::Get33DX(GetFrameWorldMat_P(GunFrame::Muzzle).rotation()),
+						Matrix3x3DX::Get33DX(GetFrameWorldMat_P(GunFrame::Muzzle)),
 						(GetFrameWorldMat_P(GunFrame::CartVec).pos() - GetFrameWorldMat_P(GunFrame::Cart).pos() + Vector3DX::vget(GetRandf(0.2f), 0.5f + GetRandf(1.f), GetRandf(0.2f))).normalized() * (Scale3DRate * 2.f / 60.f), 2.f, SoundEnum::CartFall, false);
 				}
 			}
@@ -246,8 +246,9 @@ namespace FPS_n2 {
 				ObjMngr->AddObject(LastAmmo);
 				LastAmmo->Init();
 				auto mat =
-					Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(this->m_ChamberAmmoData->GetAccuracy()))) *
-					Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(this->m_ChamberAmmoData->GetAccuracy()))) *
+					(Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(this->m_ChamberAmmoData->GetAccuracy()))) *
+					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(this->m_ChamberAmmoData->GetAccuracy())))
+						).Get44DX() *
 					GetFrameWorldMat_P(GunFrame::Muzzle);
 				LastAmmo->Put(this->m_ChamberAmmoData, mat.pos(), mat.zvec() * -1.f, GetMyPlayerID());
 			}

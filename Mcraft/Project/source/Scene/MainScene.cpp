@@ -303,23 +303,23 @@ namespace FPS_n2 {
 			}
 			//Execute
 #ifdef DEBUG
-			DebugParts->SetPoint("1.58");
+			DebugParts->SetPoint("1.72");
 #endif // DEBUG
 			ObjMngr->ExecuteObject();
-			ObjMngr->LateExecuteObject();
 #ifdef DEBUG
 			DebugParts->SetPoint("0.00");
 #endif // DEBUG
+			ObjMngr->LateExecuteObject();
 			UpdateBullet();							//弾の更新
 #ifdef DEBUG
-			DebugParts->SetPoint("1.61");
+			DebugParts->SetPoint("0.52");
 #endif // DEBUG
 			//視点
 			{
 				auto& ViewChara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 				//カメラ
-				Vector3DX CamPos = ViewChara->GetEyeMatrix().pos() + Camera3D::Instance()->GetCamShake();
-				Vector3DX CamVec = CamPos + ViewChara->GetEyeMatrix().zvec() * -1.f;
+				Vector3DX CamPos = ViewChara->GetEyePosition() + Camera3D::Instance()->GetCamShake();
+				Vector3DX CamVec = CamPos + ViewChara->GetEyeRotation().zvec() * -1.f;
 				CamVec += Camera3D::Instance()->GetCamShake();
 				CamPos += Camera3D::Instance()->GetCamShake() * 2.f;
 #ifdef DEBUG_CAM
@@ -347,19 +347,19 @@ namespace FPS_n2 {
 				switch (DBG_CamSel) {
 				case 0:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().xvec() * (3.f * Scale3DRate);
+					CamPos += ViewChara->GetEyeRotation().xvec() * (3.f * Scale3DRate);
 					break;
 				case 1:
 					CamVec = CamPos;
-					CamPos -= ViewChara->GetEyeMatrix().xvec() * (3.f * Scale3DRate);
+					CamPos -= ViewChara->GetEyeRotation().xvec() * (3.f * Scale3DRate);
 					break;
 				case 2:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().yvec() * (3.f * Scale3DRate) + ViewChara->GetEyeMatrix().zvec() * 0.1f;
+					CamPos += ViewChara->GetEyeRotation().yvec() * (3.f * Scale3DRate) + ViewChara->GetEyeRotation().zvec() * 0.1f;
 					break;
 				case 3:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeMatrix().zvec() * (-3.f * Scale3DRate);
+					CamPos += ViewChara->GetEyeRotation().zvec() * (-3.f * Scale3DRate);
 					break;
 				default:
 					break;
@@ -369,7 +369,7 @@ namespace FPS_n2 {
 				EffectControl::Update_LoopEffect((int)Sceneclass::Effect::ef_dust, m_EffectPos, Vector3DX::forward(), 0.5f);
 				EffectControl::SetEffectColor((int)Sceneclass::Effect::ef_dust, 255, 255, 255, 64);
 
-				CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeMatrix().yvec());
+				CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeRotation().yvec());
 				auto fov_t = CameraParts->GetMainCamera().GetCamFov();
 				//fov
 				{
@@ -435,11 +435,11 @@ namespace FPS_n2 {
 			BackGround->Execute();
 			//
 			{
-				Vector3DX StartPos = Chara->GetEyeMatrix().pos();
+				Vector3DX StartPos = Chara->GetEyePosition();
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 					if (index == GetMyPlayerID()) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
-					Vector3DX TgtPos = c->GetEyeMatrix().pos();
+					Vector3DX TgtPos = c->GetEyePosition();
 
 					c->m_Length = (TgtPos - StartPos).magnitude();
 
@@ -640,7 +640,7 @@ namespace FPS_n2 {
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 					if (index == GetMyPlayerID()) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
-					Vector3DX ReticlePosBuf = ConvWorldPosToScreenPos(c->GetEyeMatrix().pos().get());
+					Vector3DX ReticlePosBuf = ConvWorldPosToScreenPos(c->GetEyePosition().get());
 					if (0.f < ReticlePosBuf.z && ReticlePosBuf.z < 1.f) {
 						auto* WindowSizeParts = WindowSizeControl::Instance();
 						c->m_CameraPos.x = static_cast<float>(static_cast<int>(ReticlePosBuf.x * 1980 / WindowSizeParts->GetScreenY(1980)));
