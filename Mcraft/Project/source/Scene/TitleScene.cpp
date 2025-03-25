@@ -25,7 +25,7 @@ namespace FPS_n2 {
 			this->m_CreditControl->Init();
 			// 
 			//*
-			SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_LOOP, TRUE);
+			//SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_LOOP, TRUE);
 			// */
 			m_CloseResetSave = false;
 		}
@@ -97,7 +97,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
-			SE->Get(SoundType::BGM, 0)->StopAll();
+			//SE->Get(SoundType::BGM, 0)->StopAll();
 			// 
 			this->m_CreditControl->Dispose();
 			this->m_CreditControl.reset();
