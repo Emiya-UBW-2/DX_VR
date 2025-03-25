@@ -21,8 +21,12 @@ namespace FPS_n2 {
 			this->guard_Graph.Load("data/UI/battle_guard.bmp");
 
 			BattleResourceMngr->LoadChara("Main", GetMyPlayerID());
-			if (GetRand(100) < 50) {
+			int Rand = GetRand(100);
+			if (Rand < 30) {
 				LoadGun("type89", GetMyPlayerID(), false, 0);
+			}
+			else if (Rand < 30+40) {
+				LoadGun("type20E", GetMyPlayerID(), false, 0);
 			}
 			else {
 				LoadGun("Mod870", GetMyPlayerID(), false, 0);
