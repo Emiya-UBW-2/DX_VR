@@ -30,7 +30,7 @@ namespace FPS_n2 {
 			this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power, 0.f);
 			//
 			if (GetMyPlayerID() == 0) {
-				Camera3D::Instance()->SetCamShake(0.1f, 0.3f);
+				Camera3D::Instance()->SetCamShake(0.1f, 0.1f);
 			}
 			//エフェクト
 			auto mat = GetGunPtrNow()->GetFrameWorldMat_P(GunFrame::Muzzle);
@@ -412,17 +412,26 @@ namespace FPS_n2 {
 			//
 			m_ActionFirstFrame = (PrevAction != m_CharaAction);
 
-			//
-			if (KeyControl::GetThrowKey()) {
-				m_Grenade.SetFall(
-					GetFrameWorldMat(CharaFrame::RightHandJoint).pos(),
-					GetEyeRotation(),
-					(GetEyeRotation().zvec() * -1.f).normalized() * (Scale3DRate * 15.f / 60.f), 3.5f, SoundEnum::CartFall, true);
+			//グレネード投てき
+			auto* SE = SoundPool::Instance();
+			{
+				if (KeyControl::GetThrowKey().trigger()) {
+					SE->Get(SoundType::SE, (int)SoundEnum::Pin)->Play3D(GetMove().GetPos(), Scale3DRate * 2.f);
+				}
+				if (KeyControl::GetThrowKey().release_trigger()) {
+					SE->Get(SoundType::SE, (int)SoundEnum::Throw)->Play3D(GetMove().GetPos(), Scale3DRate * 2.f);
+					m_Grenade.SetFall(
+						GetFrameWorldMat(CharaFrame::RightHandJoint).pos(),
+						GetEyeRotation(),
+						(GetEyeRotation().zvec() * -1.f).normalized()* (Scale3DRate * 15.f / 60.f), 3.5f, SoundEnum::FallGrenade, true);
+				}
 			}
 			for (auto& g : m_Grenade.m_Ptr) {
 				if (g->PopGrenadeBombSwitch()) {
 					EffectControl::SetOnce((int)Sceneclass::Effect::ef_greexp, g->GetMove().GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate);
 					EffectControl::SetEffectSpeed((int)Sceneclass::Effect::ef_greexp, 2.f);
+					//
+					SE->Get(SoundType::SE, (int)SoundEnum::Explosion)->Play3D(g->GetMove().GetPos(), Scale3DRate * 25.f);
 				}
 			}
 		}
@@ -503,7 +512,7 @@ namespace FPS_n2 {
 			float groundYpos = 0.f;
 			Vector3DX EndPos = PosBuf - Vector3DX::up() * (0.5f * Scale3DRate);
 			IsHitGround = BackGround->CheckLinetoMap(PosBuf + Vector3DX::up() * (0.f * Scale3DRate), &EndPos);
-			groundYpos = EndPos.y;
+			groundYpos = EndPos.y - (0.12f * Scale3DRate);
 			if (IsHitGround) {
 				auto yPos = PosBuf.y;
 				Easing(&yPos, groundYpos, 0.6f, EasingType::OutExpo);

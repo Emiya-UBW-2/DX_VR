@@ -13,6 +13,10 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, (int)SoundEnum::CartFall, 6, "data/Sound/SE/gun/case.wav", false);
 			SE->Add(SoundType::SE, (int)SoundEnum::MagFall, 6, "data/Sound/SE/gun/ModFall.wav", false);
 			SE->Add(SoundType::SE, (int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
+			SE->Add(SoundType::SE, (int)SoundEnum::Pin, 4, "data/Sound/SE/pin.wav");
+			SE->Add(SoundType::SE, (int)SoundEnum::Throw, 4, "data/Sound/SE/throw.wav");
+			SE->Add(SoundType::SE, (int)SoundEnum::FallGrenade, 4, "data/Sound/SE/fallgrenade.wav");
+			SE->Add(SoundType::SE, (int)SoundEnum::Explosion, 4, "data/Sound/SE/explosion.wav");
 			for (int i = 0; i < 6; i++) {
 				SE->Add(SoundType::SE, (int)SoundEnum::Cocking1_0 + i, 4, "data/Sound/SE/gun/autoM870/" + std::to_string(i) + ".wav");
 				SE->Add(SoundType::SE, (int)SoundEnum::Cocking2_0 + i, 4, "data/Sound/SE/gun/autoM16/" + std::to_string(i) + ".wav");
@@ -68,6 +72,10 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::SE, (int)SoundEnum::CartFall);
 			SE->Delete(SoundType::SE, (int)SoundEnum::MagFall);
 			SE->Delete(SoundType::SE, (int)SoundEnum::Trigger);
+			SE->Delete(SoundType::SE, (int)SoundEnum::Pin);
+			SE->Delete(SoundType::SE, (int)SoundEnum::Throw);
+			SE->Delete(SoundType::SE, (int)SoundEnum::FallGrenade);
+			SE->Delete(SoundType::SE, (int)SoundEnum::Explosion);
 			for (int i = 0; i < 6; i++) {
 				SE->Delete(SoundType::SE, (int)SoundEnum::Cocking1_0 + i);
 				SE->Delete(SoundType::SE, (int)SoundEnum::Cocking2_0 + i);

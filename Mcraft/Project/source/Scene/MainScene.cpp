@@ -215,8 +215,13 @@ namespace FPS_n2 {
 				}
 				else {
 					MyInput.ResetAllInput();
-					MyInput.SetAddxRad(Pad->GetLS_Y() / 200.f);
-					MyInput.SetAddyRad(Pad->GetLS_X() / 200.f);
+					float AimPer = 1.f;
+					if (Chara->GetIsADS()) {
+						AimPer /= std::max(1.f, Chara->GetSightZoomSize());
+					}
+					auto RecoilRadAdd = Chara->GetRecoilRadAdd();
+					MyInput.SetAddxRad(Pad->GetLS_Y() / 200.f * AimPer - RecoilRadAdd.y);
+					MyInput.SetAddyRad(Pad->GetLS_X() / 200.f * AimPer + RecoilRadAdd.x);
 					MyInput.SetInputPADS(Controls::PADS::MOVE_W, Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::MOVE_S, Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::MOVE_A, Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().press());

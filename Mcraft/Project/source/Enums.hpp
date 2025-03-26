@@ -36,6 +36,10 @@ namespace FPS_n2 {
 				StandupFoot,
 				Heart,
 				//
+				Pin,
+				Throw,
+				FallGrenade,
+				Explosion,
 				//
 				Trigger,
 				//

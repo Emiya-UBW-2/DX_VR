@@ -314,7 +314,7 @@ namespace FPS_n2 {
 			const auto		GetLeanRate(void) const noexcept { return this->m_LeanRate; }
 			const auto		GetLeanSwitch(void) const noexcept { return this->m_LeanSwitch; }
 			const auto		GetULTKey(void) const noexcept { return this->m_ULTKey.trigger(); }
-			const auto		GetThrowKey(void) const noexcept { return this->m_ThrowKey.trigger(); }
+			const auto		GetThrowKey(void) const noexcept { return this->m_ThrowKey; }
 			const auto		GetSquatSwitch(void) const noexcept { return this->m_Squat.trigger(); }
 			const auto		GetGunSwingMat(void) const noexcept { return Matrix3x3DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
 			auto& GetCharaAnimeBufID(CharaAnimeID value) noexcept { return this->m_AnimPerBuf.at((int)value); }

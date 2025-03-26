@@ -1461,7 +1461,7 @@ namespace FPS_n2 {
 				int Heights = 10;
 				//*
 				int Edge = -Rate;
-				int EdgeP = -Rate;
+				int EdgeP = -0;
 
 				for (int x = 0; x < cell.All; ++x) {
 					for (int z = 0; z < cell.All; ++z) {
