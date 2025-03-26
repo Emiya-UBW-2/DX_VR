@@ -9,28 +9,28 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class PauseMenuControl {
 			bool			m_IsRetire{ false };
-		protected:
+		public:
 			const auto&		IsRetire(void) const noexcept { return this->m_IsRetire; }
-		protected:
-			void			LoadPause(void) noexcept;
-			void			SetPause(void) noexcept;
-			void			UpdatePause(void) noexcept;
-			void			DrawPause(void) const noexcept;
-			void			DisposePause(void) noexcept;
+		public:
+			void			Load(void) noexcept;
+			void			Init(void) noexcept;
+			void			Update(void) noexcept;
+			void			Draw(void) const noexcept;
+			void			Dispose(void) noexcept;
 		};
 
 		class FadeControl {
 			bool						m_IsBlackOut{ false };//カットシーン中フラグ
 			float						m_BlackOutAlpha{ 0.f };
-		protected:
-			auto		IsFadeClear(void) const noexcept { return this->m_BlackOutAlpha == 0.f; }
-			auto		IsFadeAll(void) const noexcept { return this ->m_BlackOutAlpha >= 1.f; }
-		protected:
+		public:
+			auto		IsClear(void) const noexcept { return this->m_BlackOutAlpha == 0.f; }
+			auto		IsAll(void) const noexcept { return this ->m_BlackOutAlpha >= 1.f; }
+		public:
 			void			SetBlackOut(bool value) noexcept { this->m_IsBlackOut = value; }
-		protected:
-			void			SetFade(void) noexcept;
-			void			UpdateFade(void) noexcept;
-			void			DrawFade(void) const noexcept;
+		public:
+			void			Init(void) noexcept;
+			void			Update(void) noexcept;
+			void			Draw(void) const noexcept;
 		};
 	};
 };

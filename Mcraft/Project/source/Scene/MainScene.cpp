@@ -15,12 +15,12 @@ namespace FPS_n2 {
 			GunAnimManager::Instance()->Load("data/CharaAnime/");
 			//
 			BattleResourceMngr->Load();
-			PlayerMngr->Init(NetWork::Player_num, 0);
+			PlayerMngr->Init(NetWork::Player_num);
 
 			this->hit_Graph.Load("data/UI/battle_hit.bmp");
 			this->guard_Graph.Load("data/UI/battle_guard.bmp");
 
-			BattleResourceMngr->LoadChara("Main", GetMyPlayerID());
+			CharacterClass::LoadChara("Main", GetMyPlayerID());
 			int Rand = GetRand(100);
 			if (Rand < 30) {
 				LoadGun("type89", GetMyPlayerID(), false, 0);
@@ -34,24 +34,22 @@ namespace FPS_n2 {
 			LoadGun("P226", GetMyPlayerID(), false, 1);
 
 			for (int loop = 1; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-				BattleResourceMngr->LoadChara("Soldier", (PlayerID)loop);
+				CharacterClass::LoadChara("Soldier", (PlayerID)loop);
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(loop)->GetChara();
 				if (loop == 1) {
 					MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
-					MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
 				}
 				else {
 					auto& Base = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1)->GetChara();
 					c->GetRagDoll().Duplicate(Base->GetRagDoll());
-					MV1::SetAnime(&c->GetRagDoll(), c->GetObj());
 				}
-				c->Init_RagDollControl(c->GetObj());
+				c->SetupRagDoll();
 				//
 				LoadGun("AKS-74", (PlayerID)loop, false, 0);
 			}
 			//UI
 			this->m_UIclass.Load();
-			PauseMenuControl::LoadPause();
+			m_PauseMenuControl.Load();
 			//
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
@@ -105,7 +103,7 @@ namespace FPS_n2 {
 					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 0.f * Scale3DRate, &EndPos)) {
 						pos_t = EndPos;
 					}
-					c->ValueSet((PlayerID)index, true, CharaTypeID::Team);
+					c->ValueSet((PlayerID)index, CharaTypeID::Team);
 					c->MovePoint(deg2rad(0.f), deg2rad(GetRand(360)), pos_t, 0);
 				}
 				p->GetAI()->Init((PlayerID)index);
@@ -116,8 +114,8 @@ namespace FPS_n2 {
 			this->m_DamageEvents.clear();
 			auto* NetBrowser = NetWorkBrowser::Instance();
 			NetBrowser->Init();
-			PauseMenuControl::SetPause();
-			FadeControl::SetFade();
+			m_PauseMenuControl.Init();
+			m_FadeControl.Init();
 			this->m_IsEnd = false;
 			EffectControl::Init();
 			this->m_StartTimer = 5.f;
@@ -136,18 +134,18 @@ namespace FPS_n2 {
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			PostPassParts->SetLevelFilter(38, 154, 1.f);
-			PauseMenuControl::UpdatePause();
-			if (PauseMenuControl::IsRetire()) {
+			m_PauseMenuControl.Update();
+			if (m_PauseMenuControl.IsRetire()) {
 				if (!this->m_IsEnd) {
-					FadeControl::SetBlackOut(true);
+					m_FadeControl.SetBlackOut(true);
 				}
 				this->m_IsEnd = true;
 			}
-			if (this->m_IsEnd && FadeControl::IsFadeAll()) {
+			if (this->m_IsEnd && m_FadeControl.IsAll()) {
 				return false;
 			}
 
-			FadeControl::UpdateFade();
+			m_FadeControl.Update();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 
@@ -210,7 +208,7 @@ namespace FPS_n2 {
 					Chara->SetAim();
 				}
 				InputControl MyInput;
-				if (SceneParts->IsPause() || !FadeControl::IsFadeClear() || (this->m_StartTimer > 0.f)) {
+				if (SceneParts->IsPause() || !m_FadeControl.IsClear() || (this->m_StartTimer > 0.f)) {
 					MyInput.ResetAllInput();
 				}
 				else {
@@ -356,19 +354,19 @@ namespace FPS_n2 {
 				switch (DBG_CamSel) {
 				case 0:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeRotation().xvec() * (3.f * Scale3DRate);
+					CamPos += ViewChara->GetEyeRotationCache().xvec() * (3.f * Scale3DRate);
 					break;
 				case 1:
 					CamVec = CamPos;
-					CamPos -= ViewChara->GetEyeRotation().xvec() * (3.f * Scale3DRate);
+					CamPos -= ViewChara->GetEyeRotationCache().xvec() * (3.f * Scale3DRate);
 					break;
 				case 2:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeRotation().yvec() * (3.f * Scale3DRate) + ViewChara->GetEyeRotation().zvec() * 0.1f;
+					CamPos += ViewChara->GetEyeRotationCache().yvec() * (3.f * Scale3DRate) + ViewChara->GetEyeRotationCache().zvec() * 0.1f;
 					break;
 				case 3:
 					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeRotation().zvec() * (-3.f * Scale3DRate);
+					CamPos += ViewChara->GetEyeRotationCache().zvec() * (-3.f * Scale3DRate);
 					break;
 				default:
 					break;
@@ -388,11 +386,7 @@ namespace FPS_n2 {
 						fov -= deg2rad(15);
 						fov /= std::max(1.f, Chara->GetSightZoomSize() / 2.f);
 					}
-					if (Chara->GetMeleeSwitch()) {
-						fov += deg2rad(15);
-						Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
-					}
-					else if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetShotSwitch()) {
+					if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetShotSwitch()) {
 						fov -= deg2rad(5);
 						Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
 					}
@@ -444,35 +438,18 @@ namespace FPS_n2 {
 			BackGround->Execute();
 			//
 			{
-				Vector3DX StartPos = Chara->GetEyePosition();
+				Vector3DX StartPos = Chara->GetEyePositionCache();
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 					if (index == GetMyPlayerID()) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
-					Vector3DX TgtPos = c->GetEyePosition();
-
-					c->m_Length = (TgtPos - StartPos).magnitude();
-
-					c->CanLookTarget = true;
-
+					Vector3DX TgtPos = c->GetEyePositionCache();
 					auto EndPos = TgtPos;
-					auto ColResGround = BackGround->CheckLinetoMap(StartPos, &EndPos);
-
-					if (ColResGround) {
-						c->CanLookTarget = false;
-					}
+					c->CanLookTarget = !BackGround->CheckLinetoMap(StartPos, &EndPos);
+					c->m_Length = (TgtPos - StartPos).magnitude();
 				}
 			}
 			//UIパラメーター
 			{
-				float Len = std::max(0.01f, std::hypotf((float)(Chara->GetGunPtrNow()->GetAimXPos() - 1920 / 2), (float)(Chara->GetGunPtrNow()->GetAimYPos() - 1080 / 2)));
-				Len = std::clamp(100.f / Len, 0.f, 1.f);
-				this->m_UIclass.SetIntParam(2, Chara->GetGunPtrNow()->GetAimXPos());
-				this->m_UIclass.SetIntParam(3, Chara->GetGunPtrNow()->GetAimYPos());
-				this->m_UIclass.SetfloatParam(2, deg2rad(5) * Len);
-				//Ammo
-				this->m_UIclass.SetIntParam(0, Chara->GetGunPtrNow()->GetAmmoNumTotal());
-				this->m_UIclass.SetIntParam(1, Chara->GetGunPtrNow()->GetAmmoAll());
-				this->m_UIclass.SetfloatParam(3, Chara->GetLeanRad());
 				//timer
 				this->m_UIclass.SetfloatParam(0, 0.f);
 				this->m_UIclass.SetfloatParam(1, m_StartTimer);
@@ -496,7 +473,7 @@ namespace FPS_n2 {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			//使い回しオブジェ系
 			BackGround->Dispose();
-			GunsModify::DisposeSlots();
+			m_GunsModify.DisposeSlots();
 			//
 			if (m_NetWorkController) {
 				m_NetWorkController->Dispose();
@@ -528,9 +505,9 @@ namespace FPS_n2 {
 			this->m_UIclass.Dispose();
 			PlayerMngr->Dispose();
 			ObjectManager::Instance()->DeleteAll();
-			PauseMenuControl::DisposePause();
+			m_PauseMenuControl.Dispose();
 		}
-
+		//
 		void			MainGameScene::DrawHitGraph(void) const noexcept {
 			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
@@ -581,29 +558,7 @@ namespace FPS_n2 {
 			}
 			WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 		}
-
 		//
-		void			MainGameScene::BG_Draw_Sub(void) const noexcept {
-			BackGround::BackGroundClass::Instance()->BG_Draw();
-		}
-		void			MainGameScene::ShadowDraw_Far_Sub(void) const noexcept {
-		}
-		void			MainGameScene::ShadowDraw_Sub(void) const noexcept {
-			BackGround::BackGroundClass::Instance()->Shadow_Draw();
-			ObjectManager::Instance()->Draw_Shadow();
-		}
-		void			MainGameScene::CubeMap_Sub(void) const noexcept {
-			BackGround::BackGroundClass::Instance()->Draw();
-		}
-
-		void MainGameScene::SetShadowDraw_Rigid_Sub(void) const noexcept {
-			BackGround::BackGroundClass::Instance()->SetShadow_Draw_Rigid();
-		}
-
-		void MainGameScene::SetShadowDraw_Sub(void) const noexcept {
-			ObjectManager::Instance()->Draw(false);
-		}
-
 		void			MainGameScene::MainDraw_Sub(void) const noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			SetFogEnable(TRUE);
@@ -611,10 +566,10 @@ namespace FPS_n2 {
 			BackGround::BackGroundClass::Instance()->Draw();
 			ObjectManager::Instance()->Draw();
 			//ObjectManager::Instance()->Draw_Depth();
+#ifdef DEBUG
 			for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 			}
-#ifdef DEBUG
 			for (auto& s : m_LineDebug) {
 				int index = (int)(&s - &m_LineDebug.front());
 				DrawCapsule3D(s.PosA.get(), s.PosB.get(), 0.02f * Scale3DRate, 8, GetColor(0, 0, (32 * index) % 256), GetColor(0, 0, 0), TRUE);
@@ -625,56 +580,38 @@ namespace FPS_n2 {
 
 
 			//シェーダー描画用パラメーターセット
-			auto* PostPassParts = PostPassEffect::Instance();
-
 			auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 			if (Chara->GetGunPtrNow()) {
 				Chara->GetGunPtrNow()->UpdateReticle();
-				float Zoom = Chara->GetSightZoomSize();
-				bool IsActive = Chara->GetGunPtrNow()->IsActiveReticle() && Zoom > 1.f;
-				PostPassParts->Set_is_lens(IsActive);
-				PostPassParts->Set_zoom_lens(std::max(1.f, Zoom / 2.f));
-				if (IsActive) {
-					PostPassParts->Set_xp_lens(Chara->GetGunPtrNow()->GetLensXPos());
-					PostPassParts->Set_yp_lens(Chara->GetGunPtrNow()->GetLensYPos());
-					PostPassParts->Set_size_lens(Chara->GetGunPtrNow()->GetLensSize());
-				}
 			}
 			else {
+				auto* PostPassParts = PostPassEffect::Instance();
 				PostPassParts->Set_is_lens(false);
 				PostPassParts->Set_zoom_lens(1.f);
 			}
 			//
-			{
-				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
-					if (index == GetMyPlayerID()) { continue; }
-					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
-					Vector3DX ReticlePosBuf = ConvWorldPosToScreenPos(c->GetEyePosition().get());
-					if (0.f < ReticlePosBuf.z && ReticlePosBuf.z < 1.f) {
-						auto* WindowSizeParts = WindowSizeControl::Instance();
-						c->m_CameraPos.x = static_cast<float>(static_cast<int>(ReticlePosBuf.x * 1980 / WindowSizeParts->GetScreenY(1980)));
-						c->m_CameraPos.y = static_cast<float>(static_cast<int>(ReticlePosBuf.y * 1080 / WindowSizeParts->GetScreenY(1080)));
-						c->m_CameraPos.z = ReticlePosBuf.z;
-					}
+			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+				if (index == GetMyPlayerID()) { continue; }
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
+				Vector3DX EyePos = ConvWorldPosToScreenPos(c->GetEyePositionCache().get());
+				if (0.f < EyePos.z && EyePos.z < 1.f) {
+					auto* WindowSizeParts = WindowSizeControl::Instance();
+					c->m_CameraPos.x = static_cast<float>(static_cast<int>(EyePos.x * 1980 / WindowSizeParts->GetScreenY(1980)));
+					c->m_CameraPos.y = static_cast<float>(static_cast<int>(EyePos.y * 1080 / WindowSizeParts->GetScreenY(1080)));
+					c->m_CameraPos.z = EyePos.z;
 				}
 			}
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
 			if (!Chara->IsAlive()) { return; }
 			//レティクル表示
 			if (Chara->GetGunPtrNow()) {
-				if (Chara->GetGunPtrNow()->IsActiveReticle() && Chara->GetGunPtrNow()->GetSightPtr() &&
-					!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
-					auto* WindowParts = WindowSystem::DrawControl::Instance();
-					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*Chara->GetGunPtrNow()->GetSightPtr())->GetModData()->GetReitcleGraph(),
-						static_cast<int>(Chara->GetGunPtrNow()->GetReticleXPos() * 1980 / WindowSizeParts->GetScreenY(1980)),
-						static_cast<int>(Chara->GetGunPtrNow()->GetReticleYPos() * 1080 / WindowSizeParts->GetScreenY(1080)),
-						1.f, Chara->GetLeanRad(), true);
+				if(!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
+					Chara->GetGunPtrNow()->DrawReticle(Chara->GetLeanRad());
 				}
 			}
 
@@ -708,24 +645,18 @@ namespace FPS_n2 {
 				}
 			}
 
-			FadeControl::DrawFade();
-		}
-		void MainGameScene::DrawUI_In_Sub(void) const noexcept {
-			auto* SceneParts = SceneControl::Instance();
-			if (SceneParts->IsPause()) {
-				PauseMenuControl::DrawPause();
-			}
+			m_FadeControl.Draw();
 		}
 		//load
-		void MainGameScene::LoadGun(const std::string& FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept {
+		void			MainGameScene::LoadGun(const std::string& FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* BattleResourceMngr = CommonBattleResource::Instance();
-			BattleResourceMngr->LoadCharaGun(FolderName, ID, Sel);
 			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID)->GetChara();
-			GunsModify::CreateSelData(c->GetGunPtr(Sel), IsPreset);
+			c->LoadCharaGun(FolderName, Sel);
+			m_GunsModify.CreateSelData(c->GetGunPtr(Sel), IsPreset);
 			c->GetGunPtr(Sel)->Init_Gun();
 		}
-		void MainGameScene::UpdateBullet(void) noexcept {
+		//
+		void			MainGameScene::UpdateBullet(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();

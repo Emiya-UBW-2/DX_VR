@@ -8,7 +8,6 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			TitleScene::Set_Sub(void) noexcept {
-			auto* SE = SoundPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
 			this->m_GameFadeIn = 1.f;
@@ -24,8 +23,9 @@ namespace FPS_n2 {
 			this->m_CreditControl = std::make_unique<CreditControl>();
 			this->m_CreditControl->Init();
 			// 
-			//*
-			//SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_LOOP, TRUE);
+			/*
+			auto* SE = SoundPool::Instance();
+			SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_LOOP, TRUE);
 			// */
 			m_CloseResetSave = false;
 		}
@@ -94,10 +94,12 @@ namespace FPS_n2 {
 		}
 		void			TitleScene::Dispose_Sub(void) noexcept {
 			auto* SaveDataParts = SaveDataClass::Instance();
-			auto* SE = SoundPool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
-			// 
-			//SE->Get(SoundType::BGM, 0)->StopAll();
+			//
+			/*
+			auto* SE = SoundPool::Instance();
+			SE->Get(SoundType::BGM, 0)->StopAll();
+			//*/
 			// 
 			this->m_CreditControl->Dispose();
 			this->m_CreditControl.reset();

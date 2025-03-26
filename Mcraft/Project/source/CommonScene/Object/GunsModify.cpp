@@ -55,14 +55,15 @@ namespace FPS_n2 {
 			for (int loop = 0; loop < (int)SelData.size(); loop++) {
 				auto& y = SelData[loop];
 				if (y->ParentSlot == SlotPtr) {
-					UpdateMods(((std::shared_ptr<ModClass>&)(ModPtr->GetPartsPtr(y->SlotType))).get(), y.get(), isPreset);
+					if (!ModPtr->GetPartsPtr(y->SlotType)) { return; }
+					UpdateMods(&((std::shared_ptr<ModClass>&)(ModPtr->GetPartsPtr(y->SlotType)))->GetModSlot(), y.get(), isPreset);
 				}
 			}
 		}
 		//
 		void			GunsModify::CreateSelData(const std::shared_ptr<GunClass>& GunPtr, bool isPreset) {
 			m_BaseObj = GunPtr;
-			UpdateMods(GunPtr.get(), nullptr, isPreset);
+			UpdateMods(&GunPtr->GetModSlot(), nullptr, isPreset);
 		}
 		bool			GunsModify::ChangeSelData(const Slot* SlotPtr, int sel, bool isDeleteSlot) {
 			for (int loop = 0; loop < (int)SelData.size(); loop++) {
@@ -88,7 +89,7 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						UpdateMods(((std::shared_ptr<ModClass>&)(y->m_Data->GetPartsPtr(y->SlotType))).get(), y.get(), false);
+						UpdateMods(&((std::shared_ptr<ModClass>&)(y->m_Data->GetPartsPtr(y->SlotType)))->GetModSlot(), y.get(), false);
 					}
 					Ret = true;
 					break;

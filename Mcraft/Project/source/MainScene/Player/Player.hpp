@@ -75,9 +75,6 @@ namespace FPS_n2 {
 		private:
 			std::vector<std::unique_ptr<PlayerControl>>	m_Player;
 			int											m_PlayerNum{};
-
-			std::vector<std::shared_ptr<ObjectBaseClass>>	m_Gun{};
-			int												m_GunNum{};
 		private:
 			PlayerManager(void) noexcept {}
 			PlayerManager(const PlayerManager&) = delete;
@@ -89,12 +86,8 @@ namespace FPS_n2 {
 		public:
 			const auto& GetPlayerNum(void) const noexcept { return this->m_PlayerNum; }
 			auto& GetPlayer(int ID) noexcept { return this->m_Player[ID]; }
-
-			const auto& GetGunNum(void) const noexcept { return this->m_GunNum; }
-			void		SetGun(int ID, const std::shared_ptr<ObjectBaseClass>& pGunPtr0) noexcept { this->m_Gun[ID] = pGunPtr0; }
-			auto& GetGun(int ID) noexcept { return this->m_Gun[ID]; }
 		public:
-			void Init(int playerNum, int gunNum) noexcept {
+			void Init(int playerNum) noexcept {
 				if (playerNum > 0) {
 					m_PlayerNum = playerNum;
 					m_Player.resize(static_cast<size_t>(m_PlayerNum));
@@ -102,20 +95,12 @@ namespace FPS_n2 {
 						p = std::make_unique<PlayerControl>();
 					}
 				}
-				if (gunNum > 0) {
-					m_GunNum = gunNum;
-					m_Gun.resize(static_cast<size_t>(m_GunNum));
-				}
 			}
 			void Dispose(void) noexcept {
 				for (auto& p : m_Player) {
 					p.reset();
 				}
 				m_Player.clear();
-				for (auto& p : m_Gun) {
-					p.reset();
-				}
-				m_Gun.clear();
 			}
 		};
 	}

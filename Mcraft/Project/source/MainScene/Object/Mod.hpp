@@ -6,7 +6,11 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class ModClass : public ObjectBaseClass, public ModSlotControl {
+		class ModClass : public ObjectBaseClass {
+			ModSlotControl										m_ModSlotControl{};
+		public:
+			ModSlotControl& GetModSlot() noexcept { return this->m_ModSlotControl; }
+			const ModSlotControl& GetModSlot() const noexcept { return this->m_ModSlotControl; }
 		public:
 			ModClass(void) noexcept {}
 			~ModClass(void) noexcept {}
@@ -17,7 +21,7 @@ namespace FPS_n2 {
 			const auto		GetFrameWorldMat_P(GunFrame frame) const noexcept {
 				//ŠY“–ƒtƒŒ[ƒ€‚ª‚ ‚é‚Ì‚È‚çã‘‚«
 				Matrix4x4DX Ret;
-				if (ModSlotControl::GetPartsFrameWorldMat(frame, &Ret)) {
+				if (m_ModSlotControl.GetPartsFrameWorldMat(frame, &Ret)) {
 					return Ret;
 				}
 				if (HaveFrame((int)frame)) {
@@ -35,7 +39,7 @@ namespace FPS_n2 {
 			}
 		public:
 			void			Init_Sub(void) noexcept override {
-				ModSlotControl::InitModSlotControl(this->m_FilePath);
+				m_ModSlotControl.InitModSlotControl(this->m_FilePath);
 			}
 
 			void			FirstExecute(void) noexcept override {
@@ -48,10 +52,10 @@ namespace FPS_n2 {
 				SetMove().SetPos(pos);
 				SetMove().Update(0.f, 0.f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
-				ModSlotControl::UpdatePartsAnim(GetObj());
-				ModSlotControl::UpdatePartsMove(GetFrameWorldMat_P(GunFrame::UnderRail), GunSlot::UnderRail);
-				ModSlotControl::UpdatePartsMove(GetFrameWorldMat_P(GunFrame::Sight), GunSlot::Sight);
-				ModSlotControl::UpdatePartsMove(GetFrameWorldMat_P(GunFrame::MuzzleAdapter), GunSlot::MuzzleAdapter);
+				m_ModSlotControl.UpdatePartsAnim(GetObj());
+				m_ModSlotControl.UpdatePartsMove(GetFrameWorldMat_P(GunFrame::UnderRail), GunSlot::UnderRail);
+				m_ModSlotControl.UpdatePartsMove(GetFrameWorldMat_P(GunFrame::Sight), GunSlot::Sight);
+				m_ModSlotControl.UpdatePartsMove(GetFrameWorldMat_P(GunFrame::MuzzleAdapter), GunSlot::MuzzleAdapter);
 			}
 			void			DrawShadow(void) noexcept override {
 				if (this->m_IsActive) {
@@ -70,7 +74,7 @@ namespace FPS_n2 {
 				}
 			}
 			void			Dispose_Sub(void) noexcept override {
-				ModSlotControl::DisposeModSlotControl();
+				m_ModSlotControl.DisposeModSlotControl();
 			}
 		private:
 			int	GetFrameNum() noexcept override { return (int)GunFrame::Max; }

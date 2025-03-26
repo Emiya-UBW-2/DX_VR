@@ -4,17 +4,17 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		void PauseMenuControl::LoadPause(void) noexcept {
+		void PauseMenuControl::Load(void) noexcept {
 			auto* ButtonParts = ButtonControl::Instance();
 			ButtonParts->ResetSel();
 			ButtonParts->AddStringButton("Retire", 48, true, BaseScreenWidth - 64, BaseScreenHeight - 84 - 64 * 2, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
 			ButtonParts->AddStringButton("Option", 48, true, BaseScreenWidth - 64, BaseScreenHeight - 84 - 64 * 1, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
 			ButtonParts->AddStringButton("Return Game", 48, true, BaseScreenWidth - 64, BaseScreenHeight - 84 - 64 * 0, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
 		}
-		void PauseMenuControl::SetPause(void) noexcept {
+		void PauseMenuControl::Init(void) noexcept {
 			this->m_IsRetire = false;
 		}
-		void PauseMenuControl::UpdatePause(void) noexcept {
+		void PauseMenuControl::Update(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
@@ -68,7 +68,7 @@ namespace FPS_n2 {
 				ButtonParts->ResetSel();
 			}
 		}
-		void PauseMenuControl::DrawPause(void) const noexcept {
+		void PauseMenuControl::Draw(void) const noexcept {
 			auto* ButtonParts = ButtonControl::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			// ƒ|[ƒY
@@ -76,20 +76,20 @@ namespace FPS_n2 {
 				ButtonParts->Draw();
 			}
 		}
-		void PauseMenuControl::DisposePause(void) noexcept {
+		void PauseMenuControl::Dispose(void) noexcept {
 			auto* ButtonParts = ButtonControl::Instance();
 			ButtonParts->Dispose();
 		}
 		//
-		void FadeControl::SetFade(void) noexcept {
+		void FadeControl::Init(void) noexcept {
 			this->m_IsBlackOut = false;
 			this->m_BlackOutAlpha = 1.f;
 		}
-		void FadeControl::UpdateFade(void) noexcept {
+		void FadeControl::Update(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			this->m_BlackOutAlpha = std::clamp(this->m_BlackOutAlpha + (this->m_IsBlackOut ? 1.f : -1.f) * DXLib_refParts->GetDeltaTime() / 0.5f, 0.f, 1.f);
 		}
-		void FadeControl::DrawFade(void) const noexcept {
+		void FadeControl::Draw(void) const noexcept {
 			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * this->m_BlackOutAlpha), 0, 255));
 			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Black, TRUE);
 			WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);

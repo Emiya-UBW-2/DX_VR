@@ -64,11 +64,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::Sceneclass::AmmoDataManager::Create();
 	//
 	auto* SaveDataParts = SaveDataClass::Instance();
-	auto* SE = SoundPool::Instance();
 	//‰ŠúŠJ•ú
 	SaveDataParts->Save();
 	//BGM
-	//SE->Add(SoundType::BGM, 0, 1, "data/Sound/BGM/Title.wav");
+	/*
+	auto* SE = SoundPool::Instance();
+	SE->Add(SoundType::BGM, 0, 1, "data/Sound/BGM/Title.wav");
+	//*/
 	//ƒV[ƒ“
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto LoadScenePtr = std::make_shared<FPS_n2::Sceneclass::LoadScene>();

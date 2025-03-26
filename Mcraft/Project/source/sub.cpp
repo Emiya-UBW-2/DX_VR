@@ -1,8 +1,5 @@
 #include	"sub.hpp"
 
-#include "MainScene/Player/Player.hpp"
-#include "MainScene/Object/Character.hpp"
-
 const FPS_n2::Sceneclass::CommonBattleResource* SingletonBase<FPS_n2::Sceneclass::CommonBattleResource>::m_Singleton = nullptr;
 
 namespace FPS_n2 {
@@ -25,7 +22,6 @@ namespace FPS_n2 {
 			}
 			SE->Add(SoundType::SE, (int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
 			SE->Add(SoundType::SE, (int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
-			SE->Add(SoundType::SE, (int)SoundEnum::Heart, 3, "data/Sound/SE/move/heart.wav");
 			SE->Add(SoundType::SE, (int)SoundEnum::Hit, 3, "data/Sound/SE/hit.wav");
 			SE->Add(SoundType::SE, (int)SoundEnum::HitMe, 3, "data/Sound/SE/HitMe.wav");
 			SE->Add(SoundType::SE, (int)SoundEnum::HitGuard, 3, "data/Sound/SE/Guard.wav");
@@ -56,7 +52,6 @@ namespace FPS_n2 {
 			SE->Get(SoundType::SE, (int)SoundEnum::Shot2)->SetLocalVolume(216);
 			SE->Get(SoundType::SE, (int)SoundEnum::Shot3)->SetLocalVolume(216);
 			SE->Get(SoundType::SE, (int)SoundEnum::RunFoot)->SetLocalVolume(128);
-			SE->Get(SoundType::SE, (int)SoundEnum::Heart)->SetLocalVolume(92);
 			SE->Get(SoundType::SE, (int)SoundEnum::Hit)->SetLocalVolume(255);
 			SE->Get(SoundType::SE, (int)SoundEnum::HitMe)->SetLocalVolume(255);
 			SE->Get(SoundType::SE, (int)SoundEnum::HitGuard)->SetLocalVolume(255);
@@ -84,7 +79,6 @@ namespace FPS_n2 {
 			}
 			SE->Delete(SoundType::SE, (int)SoundEnum::RunFoot);
 			SE->Delete(SoundType::SE, (int)SoundEnum::StandupFoot);
-			SE->Delete(SoundType::SE, (int)SoundEnum::Heart);
 			SE->Delete(SoundType::SE, (int)SoundEnum::Hit);
 			SE->Delete(SoundType::SE, (int)SoundEnum::HitMe);
 			SE->Delete(SoundType::SE, (int)SoundEnum::HitGuard);
@@ -103,56 +97,6 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::SE, (int)SoundEnum::Man_takecover);
 			SE->Delete(SoundType::SE, (int)SoundEnum::Man_breathing);
 			SE->Delete(SoundType::SE, (int)SoundEnum::Man_breathend);
-		}
-		//
-		void			CommonBattleResource::LoadChara(const std::string& FolderName, PlayerID ID) noexcept {
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* ObjMngr = ObjectManager::Instance();
-			auto& p = PlayerMngr->GetPlayer(ID);
-
-			std::string Path = "data/Charactor/";
-			Path += FolderName;
-			Path += "/";
-
-			std::shared_ptr<ObjectBaseClass> Ptr = std::make_shared<CharacterClass>();
-			ObjMngr->AddObject(Ptr);
-			ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
-			Ptr->Init();
-			p->SetChara(Ptr);
-			auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
-			c->SetPlayerID(ID);
-			p->SetAI(std::make_shared<AIControl>());
-			//p->GetAI()->SetPlayerID(value);
-			//p->GetAI()->Init();
-		}
-		void			CommonBattleResource::LoadCharaGun(const std::string& FolderName, PlayerID ID, int Sel) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-
-			std::string Path = "data/gun/";
-			Path += FolderName;
-			Path += "/";
-
-			auto Ptr = std::make_shared<GunClass>();
-			ObjMngr->AddObject(Ptr);
-			ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
-			Ptr->Init();
-			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID)->GetChara();
-			c->SetGunPtr(Sel, Ptr);
-		}
-		void			CommonBattleResource::LoadOnlyGun(const std::string& FolderName, int Sel) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-
-			std::string Path = "data/gun/";
-			Path += FolderName;
-			Path += "/";
-
-			auto Ptr = std::make_shared<GunClass>();
-			ObjMngr->AddObject(Ptr);
-			ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
-			Ptr->Init();
-			PlayerMngr->SetGun(Sel, Ptr);
 		}
 	};
 };

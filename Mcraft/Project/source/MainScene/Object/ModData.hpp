@@ -62,7 +62,7 @@ namespace FPS_n2 {
 			const auto& GetRecoilReturn(void) const noexcept { return this->m_RecoilReturn; }
 			const auto& GetShotType(void) const noexcept { return this->m_ShotType; }
 			const auto& GetHumanAnimType(void) const noexcept { return this->m_HumanAnimType; }
-			const auto& GetIronSight(void) const noexcept { return this->m_IronSight; }
+			const auto& IsIronSight(void) const noexcept { return this->m_IronSight; }
 			const auto& GetInfo(void) const noexcept { return this->m_Info; }
 			const auto& GetInfoEng(void) const noexcept { return this->m_InfoEng; }
 

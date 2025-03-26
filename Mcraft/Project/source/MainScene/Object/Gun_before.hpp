@@ -38,14 +38,13 @@ namespace FPS_n2 {
 		};
 		//
 		class MuzzleSmokeControl {
-		private://キャラパラメーター
+		private:
 			std::array<std::pair<Vector3DX,float>, 16>		m_Line;
 			int								m_LineSel = 0;
 			float							m_LinePer{ 0.f };
-		private:
 		public://ゲッター
 			void			AddMuzzleSmokePower() noexcept { m_LinePer = std::clamp(m_LinePer + 0.1f, 0.f, 1.f); }
-		protected:
+		public:
 			void		InitMuzzleSmoke(const Vector3DX& pPos) {
 				for (auto& l : this->m_Line) {
 					l.first = pPos;
@@ -98,7 +97,7 @@ namespace FPS_n2 {
 		public:
 			auto& GetModData() noexcept { return this->m_ModDataClass; }
 			const auto& GetModData() const noexcept { return this->m_ModDataClass; }
-		protected:
+		public:
 			void			InitModSlotControl(const std::string& PilePath) noexcept {
 				m_ModDataClass = *ModDataManager::Instance()->AddData(PilePath);
 			}
@@ -135,6 +134,9 @@ namespace FPS_n2 {
 			AimPointControl() {}
 			~AimPointControl() {}
 		public:
+			const auto& GetAimXPos(void) const noexcept { return this->Reticle_xpos; }
+			const auto& GetAimYPos(void) const noexcept { return this->Reticle_ypos; }
+		public:
 			void UpdateAimPointControl(const Vector3DX& ReticlePos) noexcept {
 				Vector3DX ReticlePosBuf = ConvWorldPosToScreenPos(ReticlePos.get());
 				if (0.f < ReticlePosBuf.z && ReticlePosBuf.z < 1.f) {
@@ -143,10 +145,6 @@ namespace FPS_n2 {
 					Reticle_ypos = static_cast<int>(ReticlePosBuf.y * 1080 / WindowSizeParts->GetScreenY(1080));
 				}
 			}
-		public:
-			const auto& GetAimXPos(void) const noexcept { return this->Reticle_xpos; }
-			const auto& GetAimYPos(void) const noexcept { return this->Reticle_ypos; }
-		private:
 		};
 
 		class ReticleControl {

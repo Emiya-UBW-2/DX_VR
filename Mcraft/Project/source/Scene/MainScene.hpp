@@ -24,13 +24,11 @@ namespace FPS_n2 {
 		};
 #endif
 
-		class MainGameScene : public TEMPSCENE ,
-			public PauseMenuControl,
-			public FadeControl
-			, public GunsModify
-			, public EffectControl
-		{
+		class MainGameScene : public TEMPSCENE, public EffectControl {
 		private:
+			PauseMenuControl m_PauseMenuControl;
+			FadeControl m_FadeControl;
+			GunsModify m_GunsModify;
 			//UIŠÖ˜A
 			float										m_Concussion{ 0.f };
 			float										m_ConcussionPer{ 0.f };
@@ -69,18 +67,33 @@ namespace FPS_n2 {
 			void			Dispose_Sub(void) noexcept override;
 			void			Dispose_Load_Sub(void) noexcept override;
 			//
-			void			BG_Draw_Sub(void) const noexcept override;
-			void			ShadowDraw_Far_Sub(void) const noexcept override;
-			void			ShadowDraw_Sub(void) const noexcept override;
-			void			CubeMap_Sub(void) const noexcept override;
+			void			BG_Draw_Sub(void) const noexcept override {
+				BackGround::BackGroundClass::Instance()->BG_Draw();
+			}
+			void			ShadowDraw_Far_Sub(void) const noexcept override {}
+			void			ShadowDraw_Sub(void) const noexcept override {
+				BackGround::BackGroundClass::Instance()->Shadow_Draw();
+				ObjectManager::Instance()->Draw_Shadow();
+			}
+			void			CubeMap_Sub(void) const noexcept override {
+				BackGround::BackGroundClass::Instance()->Draw();
+			}
 
-			void			SetShadowDraw_Rigid_Sub(void) const noexcept override;
-			void			SetShadowDraw_Sub(void) const noexcept override;
-
+			void			SetShadowDraw_Rigid_Sub(void) const noexcept override {
+				BackGround::BackGroundClass::Instance()->SetShadow_Draw_Rigid();
+			}
+			void			SetShadowDraw_Sub(void) const noexcept override {
+				ObjectManager::Instance()->Draw(false);
+			}
 			void			MainDraw_Sub(void) const noexcept override;
 			//UI•\Ž¦
 			void			DrawUI_Base_Sub(void) const noexcept override;
-			void			DrawUI_In_Sub(void) const noexcept override;
+			void			DrawUI_In_Sub(void) const noexcept override {
+				auto* SceneParts = SceneControl::Instance();
+				if (SceneParts->IsPause()) {
+					m_PauseMenuControl.Draw();
+				}
+			}
 		private:
 			void			LoadGun(const std::string& FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept;
 			void			UpdateBullet(void) noexcept;

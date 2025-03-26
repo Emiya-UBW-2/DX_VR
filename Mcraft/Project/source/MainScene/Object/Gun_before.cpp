@@ -102,7 +102,7 @@ namespace FPS_n2 {
 			//ë∑Ç™Ç†ÇÍÇŒÇªÇøÇÁÇóDêÊ
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (this->m_Parts_Ptr[loop]) {
-					if (((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->HasFrameBySlot(frame)) {
+					if (((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModSlot().HasFrameBySlot(frame)) {
 						return true;
 					}
 				}
@@ -121,7 +121,7 @@ namespace FPS_n2 {
 			//ë∑Ç™Ç†ÇÍÇŒÇªÇøÇÁÇóDêÊ
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (this->m_Parts_Ptr[loop]) {
-					if (((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetPartsFrameLocalMatBySlot(frame, pRet)) {
+					if (((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModSlot().GetPartsFrameLocalMatBySlot(frame, pRet)) {
 						Ret = true;
 					}
 				}
@@ -147,7 +147,7 @@ namespace FPS_n2 {
 			//ë∑Ç™Ç†ÇÍÇŒÇªÇøÇÁÇóDêÊ
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (this->m_Parts_Ptr[loop]) {
-					if (((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetPartsFrameWorldMat(frame, pRet)) {
+					if (((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModSlot().GetPartsFrameWorldMat(frame, pRet)) {
 						Ret = true;
 					}
 				}
@@ -164,7 +164,7 @@ namespace FPS_n2 {
 			//ë∑Ç™Ç†ÇÍÇŒÇªÇøÇÁÇ‡
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (this->m_Parts_Ptr[loop]) {
-					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetChildPartsList(Ret);
+					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModSlot().GetChildPartsList(Ret);
 				}
 			}
 		}
@@ -178,7 +178,7 @@ namespace FPS_n2 {
 			//ë∑Ç™Ç†ÇÍÇŒÇªÇøÇÁÇ‡
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (this->m_Parts_Ptr[loop]) {
-					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->ResetPartsFrameLocalMat(frame);
+					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModSlot().ResetPartsFrameLocalMat(frame);
 				}
 			}
 		}
@@ -192,7 +192,7 @@ namespace FPS_n2 {
 			//ë∑Ç™Ç†ÇÍÇŒÇªÇøÇÁÇ‡
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (this->m_Parts_Ptr[loop]) {
-					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->SetPartsFrameLocalMat(frame, value);
+					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModSlot().SetPartsFrameLocalMat(frame, value);
 				}
 			}
 		}
@@ -205,7 +205,7 @@ namespace FPS_n2 {
 			//ë∑Ç™Ç†ÇÍÇŒÇªÇøÇÁÇ‡
 			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
 				if (this->m_Parts_Ptr[loop]) {
-					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->SetActiveBySlot(value);
+					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModSlot().SetActiveBySlot(value);
 				}
 			}
 		}

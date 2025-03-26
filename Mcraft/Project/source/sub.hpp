@@ -55,10 +55,6 @@ namespace FPS_n2 {
 			void			Load(void) noexcept;
 			void			Set(void) noexcept;
 			void			Dispose(void) noexcept;
-		public:
-			void			LoadChara(const std::string& FolderName, PlayerID ID) noexcept;
-			void			LoadCharaGun(const std::string& FolderName, PlayerID ID, int Sel) noexcept;
-			void			LoadOnlyGun(const std::string& FolderName, int Sel) noexcept;
 		};
 	};
 };

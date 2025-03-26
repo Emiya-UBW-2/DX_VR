@@ -10,6 +10,8 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		//キャラのうち特定機能だけ抜き出したもの
+		//
 		class ArmMovePerClass {
 			float												m_ArmPer{ 0.f };
 			bool												m_Armon{ false };
@@ -18,7 +20,7 @@ namespace FPS_n2 {
 				m_Armon = isOn;
 				m_ArmPer = isOn ? 1.f : 0.f;
 			}
-			void Execute(bool isOn, float OnOver = 0.2f, float OffOver = 0.2f, float Per = 0.8f) noexcept {
+			void Update(bool isOn, float OnOver = 0.2f, float OffOver = 0.2f, float Per = 0.8f) noexcept {
 				if (isOn) {
 					if (m_Armon) {
 						Easing(&this->m_ArmPer, 1.f, 0.9f, EasingType::OutExpo);
@@ -45,7 +47,6 @@ namespace FPS_n2 {
 		public:
 			const auto& Per() const noexcept { return m_ArmPer; }
 		};
-
 		//
 		enum class HitType {
 			Head,
@@ -58,7 +59,7 @@ namespace FPS_n2 {
 			float		m_radius{ 0.f };
 			HitType		m_HitType{ HitType::Body };
 		public:
-			void	Execute(const Vector3DX& pos, float radius, HitType pHitType) {
+			void	Update(const Vector3DX& pos, float radius, HitType pHitType) {
 				m_pos = pos;
 				m_radius = radius;
 				m_HitType = pHitType;
@@ -104,179 +105,46 @@ namespace FPS_n2 {
 			const auto GetColType()const noexcept { return this->m_HitType; }
 			const auto GetPos()const noexcept { return this->m_pos; }
 		};
-
-		//キャラのうち特定機能だけ抜き出したもの
-		class StaminaControl {
-		private://キャラパラメーター
-			const float											HeartRateMin{ 60.f };//心拍数最小
-			const float											HeartRateMax{ 180.f };//心拍数最大
-			const float											StaminaMax{ 100.f };
+		//ヒットポイントなどのパラメーター
+		template<class Point,int MaxPoint>
+		class PointControl {
+		private://パラメーター
+			const Point											Max = MaxPoint;
 		private:
-			float												m_HeartRate{ HeartRateMin };//心拍数
-			float												m_HeartRate_r{ HeartRateMin };//心拍数
-			float												m_HeartRateRad{ 0.f };//呼吸Sin渡し
-			float												m_Stamina{ StaminaMax };//スタミナ
-			bool												m_CannotRun{ false };//スタミナ切れ
-			bool												m_HeartSoundFlag{ false };
+			Point												m_HP{ 0 };							//スコア
 		public://ゲッター
-			//const auto&		GetStamina(void) const noexcept { return this->m_Stamina; }
-			//const auto&		GetStaminaMax(void) const noexcept { return this->StaminaMax; }
-			//const auto&		GetCannotRun(void) const noexcept { return this->m_CannotRun; }
-			//const auto&		GetHeartRate(void) const noexcept { return this->m_HeartRate; }
-			//const auto&		GetHeartRateRad(void) const noexcept { return this->m_HeartRateRad; }
-			const auto		GetHeartRandVec(float SquatPer) const noexcept {
-				auto tmp2 = 0.2f * GetRandf(deg2rad(1.f));
-				auto tmp3 = Lerp(0.5f, 0.15f, SquatPer);
-				Vector3DX tmpvec = Vector3DX::vget(
-					tmp2 + 0.00006f * sin(this->m_HeartRateRad) * powf(this->m_HeartRate / HeartRateMin, 3.f),
-					tmp2 + 0.00006f * sin(this->m_HeartRateRad * 3) * powf(this->m_HeartRate / HeartRateMin, 3.f),
-					0.f
-				);
-				return tmpvec * tmp3;
-			}
+			const auto		IsNotZero(void) const noexcept { return this->m_HP != 0; }
+			const auto&		GetPoint(void) const noexcept { return this->m_HP; }
+			const auto&		GetMax(void) const noexcept { return Max; }
+			void			Sub(Point damage_t) noexcept { this->m_HP = std::clamp<Point>(this->m_HP - damage_t, 0, Max); }
 		public:
-			void		InitStamina() {
-				this->m_HeartRate = HeartRateMin;
-				this->m_HeartRateRad = 0.f;
-				this->m_Stamina = StaminaMax;
-				this->m_HeartSoundFlag = false;
-			}
-			bool		ExcuteStamina(float addRun, float HeartRateUp, bool IsSquat) {
-				auto* DXLib_refParts = DXLib_ref::Instance();
-				if (addRun > 0.f) {
-					this->m_HeartRate_r += (10.f + GetRandf(10.f)) * DXLib_refParts->GetDeltaTime();
-				}
-				else if (addRun < 0.f) {
-					this->m_HeartRate_r -= (5.f + GetRandf(5.f)) * DXLib_refParts->GetDeltaTime();
-				}
-				this->m_HeartRate_r += HeartRateUp;
-				this->m_HeartRate_r -= (2.f + GetRandf(4.f)) * DXLib_refParts->GetDeltaTime();
-				this->m_HeartRate_r = std::clamp(this->m_HeartRate_r, HeartRateMin, HeartRateMax);
-
-				if (this->m_HeartRate < this->m_HeartRate_r) {
-					this->m_HeartRate += 5.f * DXLib_refParts->GetDeltaTime();
-				}
-				else if (this->m_HeartRate >= this->m_HeartRate_r) {
-					this->m_HeartRate -= 5.f * DXLib_refParts->GetDeltaTime();
-				}
-				//this->m_HeartRate = this->m_HeartRate_r;
-				this->m_HeartRateRad += deg2rad(this->m_HeartRate) * DXLib_refParts->GetDeltaTime();
-				if (this->m_HeartRateRad >= DX_PI_F * 2) { this->m_HeartRateRad -= DX_PI_F * 2; }
-				if (
-					(deg2rad(0) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(10)) ||
-					(deg2rad(120) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(130)) ||
-					(deg2rad(240) <= this->m_HeartRateRad && this->m_HeartRateRad <= deg2rad(250))
-					) {
-					if (!this->m_HeartSoundFlag) {
-						this->m_HeartSoundFlag = true;
-					}
-				}
-				else {
-					this->m_HeartSoundFlag = false;
-				}
-
-
-				this->m_Stamina += std::clamp((100.f - this->m_HeartRate) / 40.f, -2.5f, 2.5f) * DXLib_refParts->GetDeltaTime();
-
-				if (IsSquat) {
-					this->m_Stamina += 1.0f * DXLib_refParts->GetDeltaTime();
-				}
-
-				this->m_Stamina = std::clamp(this->m_Stamina, 0.f, StaminaMax);
-
-				if (this->m_Stamina <= 0.f) {
-					this->m_CannotRun = true;
-				}
-				if (this->m_CannotRun) {
-					if (this->m_Stamina > StaminaMax * 0.3f) {
-						this->m_CannotRun = false;
-					}
-				}
-				return this->m_HeartSoundFlag;
-			}
+			void		Init() { Sub(-Max); }
 		};
 		//
-		class LifeControl {
-		private://キャラパラメーター
-			const HitPoint										HPMax = 100;
-			const ArmerPoint									APMax = 100;
-		private:
-			HitPoint											m_HP{ 0 };							//スコア
-			ArmerPoint											m_AP{ 0 };							//スコア
-			DamageEventControl									m_Damage;
-		protected:
-			void			SetHealEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint value, ArmerPoint Armervalue) noexcept {
-				m_Damage.Add(ShotID_t, DamageID_t, -value, -Armervalue, Vector3DX::up());
-			}
-			void			SetSubHPEvent(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint value, ArmerPoint Armervalue) noexcept {
-				m_Damage.Add(ShotID_t, DamageID_t, value, Armervalue, Vector3DX::up());
-			}
-		public://ゲッター
-			const auto		IsAlive(void) const noexcept { return this->m_HP != 0; }
-			const auto& GetHP(void) const noexcept { return this->m_HP; }
-			const auto& GetHPMax(void) const noexcept { return HPMax; }
-			void			SubHP(HitPoint damage_t) noexcept { this->m_HP = std::clamp<HitPoint>(this->m_HP - damage_t, 0, HPMax); }
-
-			const auto		IsLowHP(void) const noexcept { return GetHP() < (GetHPMax() * 35 / 100); }
-
-			const auto		IsArmerActive(void) const noexcept { return this->m_AP != 0; }
-			const auto& GetAP(void) const noexcept { return this->m_AP; }
-			const auto& GetAPMax(void) const noexcept { return APMax; }
-			void			SubAP(ArmerPoint damage_t) noexcept { this->m_AP = std::clamp<ArmerPoint>(this->m_AP - damage_t, 0, APMax); }
-
-			const auto& GetDamageEvent(void) const noexcept { return this->m_Damage; }
-			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.AddDamageEvent(pRet); }
-		public:
-			void		InitLife() {
-				this->m_HP = HPMax;
-				this->m_AP = APMax;
-			}
-		};
-		//
-		class GunReadyControl {
-		private://キャラパラメーター
-			const float											UpperTimerLimit = 10.f;
-		private:
-			float												m_ReadyTimer{ 0.f };
-			float												m_ADSPer{ 0.f };
-		public://ゲッター
-			const auto		GetIsADS(void) const noexcept { return this->m_ReadyTimer == 0.f; }
-			const auto		GetIsAim(void) const noexcept { return !(this->m_ReadyTimer == UpperTimerLimit); }
-			const auto& GetADSPer(void) const noexcept { return this->m_ADSPer; }
-		public:
-			void			SetReady(void) noexcept { this->m_ReadyTimer = UpperTimerLimit; }
-			void			SetAim(void) noexcept { this->m_ReadyTimer = 0.1f; }
-			void			SetADS(void) noexcept { this->m_ReadyTimer = 0.f; }
-			void			UpdateReady(void) noexcept {
-				auto* DXLib_refParts = DXLib_ref::Instance();
-				Easing(&this->m_ADSPer, this->GetIsADS() ? 1.f : 0.f, 0.9f, EasingType::OutExpo);//
-				if (this->m_ReadyTimer != UpperTimerLimit) {
-					this->m_ReadyTimer = std::clamp(this->m_ReadyTimer + DXLib_refParts->GetDeltaTime(), 0.f, UpperTimerLimit-0.1f);
-				}
-			}
-			void			SetAimOrADS(void) noexcept {
-				this->m_ReadyTimer = std::min(this->m_ReadyTimer, 0.1f);
-			}
+		enum class EnumGunReadySeq {
+			LowReady,
+			Aim,
+			ADS,
 		};
 		//キャラ入力
 		class KeyControl {
 		private://キャラパラメーター
+			switchs												m_ULTKey;
+			switchs												m_ThrowKey;
+			switchs												m_Squat;
+			switchs												m_QKey;
+			switchs												m_EKey;
+
 			float												m_LeanRad{ 0.f };
-			float												m_LateLeanRad{ 0.f };
-			float												m_HeadShotPer{ 0.f };
 			float												m_MoverPer{ 0.f };
 			Vector3DX											m_VecTotal;
 			std::array<float, 4>								m_Vec{ 0,0,0,0 };
 			InputControl										m_Input;
-			switchs												m_ULTKey;
-			switchs												m_ThrowKey;
-			switchs												m_Squat;
 			bool												m_IsSquat{ false };
 			int													m_LeanRate{ 0 };
 			bool												m_LeanSwitch{ false };
-			switchs												m_QKey;
-			switchs												m_EKey;
-			Vector3DX											m_rad_Buf, m_rad, m_radAdd;
+			Vector3DX											m_rad_Buf, m_rad;
+			Vector2DX											m_radAdd;
 			float												m_yrad_Upper{ 0.f }, m_yrad_Bottom{ 0.f };
 			float												m_yrad_UpperChange{ 0.f }, m_yrad_BottomChange{ 0.f };
 			Vector3DX											m_UpperPrevRad;
@@ -285,30 +153,33 @@ namespace FPS_n2 {
 			Vector3DX											m_UpperyVec, m_UpperzVec, m_UpperPos;
 			std::array<float, (int)CharaAnimeID::AnimeIDMax>	m_AnimPerBuf{ 0 };
 			bool												m_TurnBody{ false };
-		public://ゲッター
 			CharaAnimeID										m_BottomAnimSelect{};
-		public://ゲッター
-			const auto		GetRadBuf(void) const noexcept { return this->m_rad_Buf; }
-			const auto		GetLeanRad(void) const noexcept { return this->m_LeanRad; }
-			const auto		GetIsSquat(void) const noexcept { return this->m_IsSquat; }
+
+			float												m_SwitchPer{};
+			bool												m_IsSwitchRight{};
 		public://セッター
-			auto& SetRadBuf(void) noexcept { return this->m_rad_Buf; }
-			auto& SetRad(void) noexcept { return this->m_rad; }
 			void			SetIsSquat(bool value) noexcept { this->m_IsSquat = value; }
-			void			SetHeadShot(void) noexcept { m_HeadShotPer = 1.f; }
-		protected:
+			void			SetIsSwitchRight(bool value) noexcept { this->m_IsSwitchRight = value; }
+			auto&			SetCharaAnimeBufID(CharaAnimeID value) noexcept { return this->m_AnimPerBuf.at((int)value); }
+		public://ゲッター
+			const auto&		GetCharaAnimeBufID(CharaAnimeID value) const noexcept { return this->m_AnimPerBuf.at((int)value); }
+			const auto&		GetSwitchPer(void) const noexcept { return this->m_SwitchPer; }
+			const auto&		GetBottomAnimSelectNow(void) const noexcept { return this->m_BottomAnimSelect; }
+			const auto&		GetLeanRad(void) const noexcept { return this->m_LeanRad; }
+			const auto&		GetIsSquat(void) const noexcept { return this->m_IsSquat; }
+
 			const auto		GetInputControl(void) const noexcept { return this->m_Input; }
+
+			const auto		IsMoveFront(void) const noexcept { return GetInputControl().GetPADSPress(Controls::PADS::MOVE_W) && !GetInputControl().GetPADSPress(Controls::PADS::MOVE_S); }
+			const auto		IsMoveBack(void) const noexcept { return GetInputControl().GetPADSPress(Controls::PADS::MOVE_S) && !GetInputControl().GetPADSPress(Controls::PADS::MOVE_W); }
+			const auto		IsMoveLeft(void) const noexcept { return GetInputControl().GetPADSPress(Controls::PADS::MOVE_A) && !GetInputControl().GetPADSPress(Controls::PADS::MOVE_D); }
+			const auto		IsMoveRight(void) const noexcept { return GetInputControl().GetPADSPress(Controls::PADS::MOVE_D) && !GetInputControl().GetPADSPress(Controls::PADS::MOVE_A); }
+
 			const auto		GetRad(void) const noexcept { return this->m_rad; }
 			const auto		GetYRadBottom(void) const noexcept { return this->m_yrad_Bottom; }
-			const auto		GetYRadUpperChange(void) const noexcept { return this->m_yrad_UpperChange; }
-			const auto		GetYRadBottomChange(void) const noexcept { return this->m_yrad_BottomChange; }
-			const auto		GetMoverPer(void) const noexcept { return m_MoverPer; }
-			const auto		IsMove(void) const noexcept { return m_MoverPer > 0.1f; }
 			const auto		GetFrontP(void) const noexcept {
-				auto wkey = this->m_Input.GetPADSPress(Controls::PADS::MOVE_W);
-				auto skey = this->m_Input.GetPADSPress(Controls::PADS::MOVE_S);
-				auto FrontP = (wkey && !skey) ? (atan2f(m_VecTotal.x, -m_VecTotal.z) * -m_VecTotal.z) : 0.f;
-				FrontP += (!wkey && skey) ? (atan2f(-m_VecTotal.x, m_VecTotal.z) * m_VecTotal.z) : 0.f;
+				auto FrontP = IsMoveFront() ? (atan2f(m_VecTotal.x, -m_VecTotal.z) * -m_VecTotal.z) : 0.f;
+				FrontP += IsMoveBack() ? (atan2f(-m_VecTotal.x, m_VecTotal.z) * m_VecTotal.z) : 0.f;
 				return FrontP;
 			}
 			const auto		GetLeanRate(void) const noexcept { return this->m_LeanRate; }
@@ -317,18 +188,30 @@ namespace FPS_n2 {
 			const auto		GetThrowKey(void) const noexcept { return this->m_ThrowKey; }
 			const auto		GetSquatSwitch(void) const noexcept { return this->m_Squat.trigger(); }
 			const auto		GetGunSwingMat(void) const noexcept { return Matrix3x3DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
-			auto& GetCharaAnimeBufID(CharaAnimeID value) noexcept { return this->m_AnimPerBuf.at((int)value); }
-			//
+			const auto		GetCharaLocalDir(void) const noexcept {
+				return
+					Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_LeanRad) *
+					Matrix3x3DX::RotAxis(Vector3DX::right(), GetRad().x) *
+					Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_yrad_BottomChange)
+					;
+			}
+			const auto		GetEyeLocalDir(void) const noexcept {
+				return
+					Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_LeanRad / 5.f) *
+					Matrix3x3DX::RotAxis(Vector3DX::right(), GetRad().x) *
+					Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_yrad_BottomChange)
+					;
+			}
 			const auto		GetBottomStandAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
 			const auto		GetBottomWalkAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_Walk : CharaAnimeID::Bottom_Stand_Walk; }
 			const auto		GetBottomWalkBackAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_WalkBack : CharaAnimeID::Bottom_Stand_WalkBack; }
 			const auto		GetBottomLeftStepAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_LeftStep : CharaAnimeID::Bottom_Stand_LeftStep; }
 			const auto		GetBottomRightStepAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_RightStep : CharaAnimeID::Bottom_Stand_RightStep; }
 			const auto		GetBottomTurnAnimSel(void) const noexcept { return GetIsSquat() ? CharaAnimeID::Bottom_Squat_Turn : CharaAnimeID::Bottom_Stand_Turn; }
-
+			const auto		GetIsStop(void) const noexcept { return m_BottomAnimSelect == GetBottomStandAnimSel(); }
 			const auto		GetSpeedPer(void) const noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
-				if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
+				if (GetInputControl().GetPADSPress(Controls::PADS::WALK)) {
 					return 1.25f * 60.f * DXLib_refParts->GetDeltaTime();
 				}
 				if (GetIsSquat()) {
@@ -351,118 +234,112 @@ namespace FPS_n2 {
 			const auto		GetVecLeft(void) const noexcept { return 1.15f * this->m_Vec[1] * std::clamp(GetSpeedPer() / 0.65f, 0.5f, 1.f); }
 			const auto		GetVecRight(void) const noexcept { return 1.15f * this->m_Vec[3] * std::clamp(GetSpeedPer() / 0.65f, 0.5f, 1.f); }
 		public:
-			void		InitKey(float pxRad, float pyRad) {
+			void			Init(float pxRad, float pyRad) {
 				for (int i = 0; i < 4; i++) {
 					this->m_Vec[i] = 0.f;
 				}
 				this->m_Input.ResetAllInput();
-				this->m_radAdd.Set(0, 0, 0);
+				this->m_radAdd.Set(0, 0);
 				this->m_rad_Buf.x = (pxRad);
 				this->m_rad_Buf.y = (pyRad);
 				this->m_rad = this->m_rad_Buf;
 
 				SetIsSquat(false);
-				this->m_yrad_Upper = this->m_rad.y;
-				this->m_yrad_Bottom = this->m_rad.y;
+				this->m_yrad_Upper = GetRad().y;
+				this->m_yrad_Bottom = GetRad().y;
 				this->m_yrad_BottomChange = 0.f;
-				this->m_LateLeanRad = 0.f;
 				this->m_LeanRad = 0.f;
 				this->m_TurnBody = false;
 				//
 				for (auto& a : this->m_AnimPerBuf) { a = 0.f; }
 			}
-			void		InputKey(const InputControl& pInput, bool pReady, const Vector3DX& pAddRadvec) {
+			void			Input(const InputControl& pInput, bool pReady, const Vector2DX& pAddRadvec) {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				this->m_Input = pInput;
 				if (!pReady) {
 					this->m_Input.ResetKeyInput();
 				}
 				//入力
-				this->m_ULTKey.Update(this->m_Input.GetPADSPress(Controls::PADS::ULT));
-				this->m_Squat.Update(this->m_Input.GetPADSPress(Controls::PADS::SQUAT));
-				this->m_ThrowKey.Update(this->m_Input.GetPADSPress(Controls::PADS::THROW));
+				this->m_QKey.Update(GetInputControl().GetPADSPress(Controls::PADS::LEAN_L));
+				this->m_EKey.Update(GetInputControl().GetPADSPress(Controls::PADS::LEAN_R));
+				this->m_ULTKey.Update(GetInputControl().GetPADSPress(Controls::PADS::ULT));
+				this->m_ThrowKey.Update(GetInputControl().GetPADSPress(Controls::PADS::THROW));
+				this->m_Squat.Update(GetInputControl().GetPADSPress(Controls::PADS::SQUAT));
 				if (this->m_Squat.trigger()) {
 					m_IsSquat ^= 1;
 				}
 				//回転
 				{
 					Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
-
-					this->m_rad_Buf.x = (
-						std::clamp(
-							this->m_rad_Buf.x + (this->m_Input.GetAddxRad() * (this->m_Input.GetPADSPress(Controls::PADS::RUN) ? 0.5f : 1.f)),
-							deg2rad(-70.f), deg2rad(24.f))
-						+ this->m_radAdd.x
-						);
-					this->m_rad_Buf.y = (
-						this->m_rad_Buf.y + (this->m_Input.GetAddyRad() * (this->m_Input.GetPADSPress(Controls::PADS::RUN) ? 0.5f : 1.f))
-						+ this->m_radAdd.y
-						);
-
+					this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + GetInputControl().GetAddxRad(), deg2rad(-70.f), deg2rad(24.f)) + this->m_radAdd.x;
+					this->m_rad_Buf.y = this->m_rad_Buf.y + GetInputControl().GetAddyRad() + this->m_radAdd.y;
 					Easing(&this->m_rad.x, m_rad_Buf.x, 0.5f, EasingType::OutExpo);
 					Easing(&this->m_rad.y, m_rad_Buf.y, 0.8f, EasingType::OutExpo);
 					Easing(&this->m_rad.z, m_rad_Buf.z, 0.5f, EasingType::OutExpo);
 				}
 				//移動
-				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_A) ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (this->m_Input.GetPADSPress(Controls::PADS::MOVE_D) ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (GetInputControl().GetPADSPress(Controls::PADS::MOVE_W) ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (GetInputControl().GetPADSPress(Controls::PADS::MOVE_A) ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (GetInputControl().GetPADSPress(Controls::PADS::MOVE_S) ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (GetInputControl().GetPADSPress(Controls::PADS::MOVE_D) ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
 				m_MoverPer = m_VecTotal.magnitude();
 				//リーン
-				m_LeanSwitch = false;
 				auto Prev = this->m_LeanRate;
 				if (true) {//トグル式
-					this->m_QKey.Update(this->m_Input.GetPADSPress(Controls::PADS::LEAN_L));
 					if (this->m_QKey.trigger()) {
-						if (this->m_LeanRate == -1) {
+						switch (this->m_LeanRate) {
+						case -1:
 							this->m_LeanRate = 1;
-						}
-						else {
-							if (this->m_LeanRate < 1) {
-								this->m_LeanRate++;
-							}
-							else {
-								this->m_LeanRate--;
-							}
+							break;
+						case 0:
+							this->m_LeanRate = 1;
+							break;
+						case 1:
+							this->m_LeanRate = 0;
+							break;
+						default:
+							break;
 						}
 					}
-					this->m_EKey.Update(this->m_Input.GetPADSPress(Controls::PADS::LEAN_R));
 					if (this->m_EKey.trigger()) {
-						if (this->m_LeanRate == 1) {
+						switch (this->m_LeanRate) {
+						case -1:
+							this->m_LeanRate = 0;
+							break;
+						case 0:
 							this->m_LeanRate = -1;
-						}
-						else {
-							if (this->m_LeanRate > -1) {
-								this->m_LeanRate--;
-							}
-							else {
-								this->m_LeanRate++;
-							}
+							break;
+						case 1:
+							this->m_LeanRate = -1;
+							break;
+						default:
+							break;
 						}
 					}
 				}
 				else {
 					this->m_LeanRate = 0;
-					if (this->m_Input.GetPADSPress(Controls::PADS::LEAN_L)) {
+					if (this->m_QKey.press()) {
 						this->m_LeanRate = 1;
 					}
-					if (this->m_Input.GetPADSPress(Controls::PADS::LEAN_R)) {
+					if (this->m_EKey.press()) {
 						this->m_LeanRate = -1;
 					}
 				}
 				this->m_LeanRate = std::clamp(this->m_LeanRate, -1, 1);
-				m_LeanSwitch = (Prev != this->m_LeanRate);
+				this->m_LeanSwitch = (Prev != this->m_LeanRate);
 			}
-			void		UpdateKeyRad() {
+			void			Update() {
 				auto* DXLib_refParts = DXLib_ref::Instance();
+
+				Easing(&m_SwitchPer, m_IsSwitchRight ? 1.f : -1.f, 0.9f, EasingType::OutExpo);
 				//
-				if (!IsMove()) {
-					if (deg2rad(50.f) < abs(GetYRadUpperChange())) {
+				if (!(m_MoverPer > 0.1f)) {
+					if (deg2rad(50.f) < abs(this->m_yrad_UpperChange)) {
 						this->m_TurnBody = true;
 					}
-					if (abs(GetYRadUpperChange()) < deg2rad(0.5f)) {
+					if (abs(this->m_yrad_UpperChange) < deg2rad(0.5f)) {
 						this->m_TurnBody = false;
 					}
 				}
@@ -470,21 +347,19 @@ namespace FPS_n2 {
 					this->m_TurnBody = false;
 				}
 
-				if (this->m_TurnBody || IsMove()) { Easing(&this->m_yrad_Upper, this->m_rad.y, 0.85f, EasingType::OutExpo); }
+				if (this->m_TurnBody || (m_MoverPer > 0.1f)) { Easing(&this->m_yrad_Upper, GetRad().y, 0.85f, EasingType::OutExpo); }
 				auto YradChange = this->m_yrad_Bottom;
 				Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - GetFrontP(), 0.85f, EasingType::OutExpo);
 				YradChange = this->m_yrad_Bottom - YradChange;
 				float Z = this->m_rad_Buf.z;
 				Easing(&Z, (abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f, EasingType::OutExpo);
 				this->m_rad_Buf.z = (Z);
-				this->m_yrad_UpperChange = this->m_rad.y - this->m_yrad_Upper;
-				this->m_yrad_BottomChange = this->m_rad.y - this->m_yrad_Bottom;
-				Easing(&this->m_LateLeanRad, this->m_LeanRad, 0.9f, EasingType::OutExpo);
-				Easing(&this->m_LeanRad, (static_cast<float>(-this->m_LeanRate) + this->m_HeadShotPer) * deg2rad(25), 0.9f, EasingType::OutExpo);
-				Easing(&this->m_HeadShotPer, 0.f, 0.9f, EasingType::OutExpo);
+				this->m_yrad_UpperChange = GetRad().y - this->m_yrad_Upper;
+				this->m_yrad_BottomChange = GetRad().y - this->m_yrad_Bottom;
+				Easing(&this->m_LeanRad, static_cast<float>(-this->m_LeanRate) * deg2rad(25), 0.9f, EasingType::OutExpo);
 				//銃の揺れ
-				Easing(&m_UpperRad, (this->m_rad - this->m_UpperPrevRad) * -1.f, 0.9f, EasingType::OutExpo);
-				m_UpperPrevRad = this->m_rad;
+				Easing(&m_UpperRad, (GetRad() - this->m_UpperPrevRad) * -1.f, 0.9f, EasingType::OutExpo);
+				m_UpperPrevRad = GetRad();
 				auto mat = Matrix3x3DX::RotAxis(Vector3DX::right(), m_UpperRad.x) * Matrix3x3DX::RotAxis(Vector3DX::up(), m_UpperRad.y);
 				Easing(&m_UpperyVecNormal, mat.yvec(), 0.8f, EasingType::OutExpo);
 				Easing(&m_UpperzVecNormal, mat.zvec(), 0.8f, EasingType::OutExpo);
@@ -492,12 +367,12 @@ namespace FPS_n2 {
 				Easing(&m_UpperzVec, m_UpperzVecNormal, 0.8f, EasingType::OutExpo);
 
 				this->m_BottomAnimSelect = GetBottomStandAnimSel();
-				if (this->m_Input.GetPADSPress(Controls::PADS::MOVE_A) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_D)) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
-				if (this->m_Input.GetPADSPress(Controls::PADS::MOVE_D) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_A)) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
-				if (this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_W)) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
-				if (this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_S)) { this->m_BottomAnimSelect = GetBottomWalkAnimSel(); }
+				if (IsMoveLeft()) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
+				if (IsMoveRight()) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
+				if (IsMoveBack()) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
+				if (IsMoveFront()) { this->m_BottomAnimSelect = GetBottomWalkAnimSel(); }
 				//下半身
-				Easing(&GetCharaAnimeBufID(GetBottomTurnAnimSel()), (!GetIsSquat() && this->m_TurnBody) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
+				Easing(&SetCharaAnimeBufID(GetBottomTurnAnimSel()), (!GetIsSquat() && this->m_TurnBody) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
 				for (int i = 0; i < (int)CharaAnimeID::AnimeIDMax; i++) {
 					if (
 						i == (int)CharaAnimeID::Bottom_Stand ||
@@ -555,7 +430,7 @@ namespace FPS_n2 {
 		class HitBoxControl {
 		private:
 			std::vector<HitBox>									m_HitBox;
-		protected:
+		public:
 			const HitBox* GetLineHit(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
 				for (auto& h : this->m_HitBox) {
 					if (h.Colcheck(StartPos, pEndPos)) {
@@ -574,12 +449,12 @@ namespace FPS_n2 {
 		public:
 			HitBoxControl(void) noexcept {}
 			~HitBoxControl(void) noexcept {}
-		protected:
-			void InitHitBox() noexcept {
+		public:
+			void Init() noexcept {
 				m_HitBox.resize(27);
 			}
-			void UpdataHitBox(const ObjectBaseClass* ptr, float SizeRate) noexcept;
-			void DrawHitBox() noexcept {
+			void Update(const ObjectBaseClass* ptr, float SizeRate) noexcept;
+			void Draw() noexcept {
 				//this->GetObj().SetOpacityRate(0.5f);
 				SetFogEnable(FALSE);
 				SetUseLighting(FALSE);
@@ -610,7 +485,7 @@ namespace FPS_n2 {
 			WalkSwingControl(void) noexcept {}
 			~WalkSwingControl(void) noexcept {}
 		public:
-			void UpdateWalkSwing(const Vector3DX& Pos, float SwingPer)noexcept {
+			void Update(const Vector3DX& Pos, float SwingPer)noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				m_WalkSwingRad.Set(5.f, 0.f, 10.f);
 				//X
@@ -662,10 +537,10 @@ namespace FPS_n2 {
 			EyeSwingControl(void) noexcept {}
 			~EyeSwingControl(void) noexcept {}
 		public:
-			void InitEyeSwing() noexcept {
+			void Init() noexcept {
 				this->m_MoveEyePosTimer = 0.f;
 			}
-			void UpdateEyeSwing(const Matrix3x3DX& pCharaMat, float SwingPer, float SwingSpeed)noexcept {
+			void Update(const Matrix3x3DX& pCharaMat, float SwingPer, float SwingSpeed)noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (SwingPer > 0.f) {
 					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed) * 60.f * DXLib_refParts->GetDeltaTime();
@@ -676,128 +551,6 @@ namespace FPS_n2 {
 				auto EyePos = Matrix3x3DX::Vtrans(Vector3DX::up() * (0.25f * SwingPer), Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_MoveEyePosTimer));
 				EyePos.y = (-std::abs(EyePos.y));
 				Easing(&this->m_MoveEyePos, Matrix3x3DX::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
-			}
-		};
-		//
-		class GunPtrControl {
-		private:
-			int													m_GunSelect{ 0 };
-			std::array<std::shared_ptr<GunClass>, 2>			m_Gun_Ptr{ nullptr , nullptr };			//銃
-		public://ゲッター
-			auto& GetGunPtr(int ID) noexcept { return this->m_Gun_Ptr[ID]; }
-
-			const int		GetNowGunSelect() const noexcept { return this->m_GunSelect; }
-			const int		GetOtherGunSelect() const noexcept { return 1 - this->m_GunSelect; }
-
-			auto& GetGunPtrNow(void) noexcept { return this->m_Gun_Ptr[GetNowGunSelect()]; }
-			const auto& GetGunPtrNow(void) const noexcept { return this->m_Gun_Ptr[GetNowGunSelect()]; }
-
-			auto& GetGunPtrOther(void) noexcept { return this->m_Gun_Ptr[GetOtherGunSelect()]; }
-			const auto& GetGunPtrOther(void) const noexcept { return this->m_Gun_Ptr[GetOtherGunSelect()]; }
-
-			const auto		GetSightZoomSize() const noexcept {
-				return (GetGunPtrNow() && GetGunPtrNow()->GetSightPtr()) ? (*GetGunPtrNow()->GetSightPtr())->GetModData()->GetZoomSize() : 1.f;
-			}
-
-			const auto		IsGun0Select() const noexcept { return this->m_GunSelect == 0; }
-			const auto		IsULTSelect() const noexcept { return this->m_GunSelect == 1; }
-		public://セッター
-			void			SelectGun(int ID) noexcept { this->m_GunSelect = ID; }
-			void			SetGunPtr(int ID, const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_Gun_Ptr[ID] = pGunPtr0; }
-		public:
-			GunPtrControl(void) noexcept {}
-			~GunPtrControl(void) noexcept {}
-		public:
-			void DisposeGunPtr() noexcept {
-				auto* ObjMngr = ObjectManager::Instance();
-				for (auto& g : m_Gun_Ptr) {
-					if (g) {
-						ObjMngr->DelObj((SharedObj*)&g);
-						g.reset();
-					}
-				}
-			}
-		};
-		//
-		class AutoAimControl {
-		private:
-			int													m_AutoAim{ -1 };
-			int													m_AutoAimPoint{ -1 };
-			float												m_AutoAimOn{ 0.f };
-			float												m_AutoAimTimer{ 0.f };
-		public://ゲッター
-			float												m_AutoAimPer{ 0.f };
-			Vector3DX											m_AutoAimVec{};
-		public:
-			AutoAimControl(void) noexcept {}
-			~AutoAimControl(void) noexcept {}
-		public:
-			const auto& GetAutoAimID(void) const noexcept { return this->m_AutoAim; }
-			const auto& GetAutoAimPoint(void) const noexcept { return this->m_AutoAimPoint; }
-			const auto& GetAutoAimOn(void) const noexcept { return this->m_AutoAimOn; }
-
-			const auto		GetAutoAimActive(void) const noexcept { return this->m_AutoAim != -1; }
-			const auto		GetAutoAimPer(void) const noexcept { return this->m_AutoAimTimer / 1.f; }
-		public:
-			void SetAutoAimActive(int ID, int Point) noexcept {
-				m_AutoAimTimer = 1.f;
-				m_AutoAim = ID;
-				m_AutoAimPoint = Point;
-			}
-			void UpdateAutoAim(bool isActive) noexcept;
-		};
-		//
-		class StackLeftHandControl {
-		private:
-			float												m_IsStuckLeftHandTimer{ 0.f };
-			bool												m_IsStuckLeftHand{ false };
-			ArmMovePerClass										m_StuckLeftHand;
-			Vector3DX											m_StuckLeftHandPos;
-			Vector3DX											m_StuckLeftHandNormal;
-			Vector3DX											m_StuckLeftHandPos_R;
-			Vector3DX											m_StuckLeftHandYVec;
-		public://ゲッター
-			const auto& GetStuckLeftHandPos(void) const noexcept { return m_StuckLeftHandPos_R; }
-			const auto& GetStuckLeftHandYVec(void) const noexcept { return m_StuckLeftHandYVec; }
-			const auto		GetStuckLeftHandPer(void) const noexcept { return m_StuckLeftHand.Per(); }
-		public:
-			StackLeftHandControl(void) noexcept {}
-			~StackLeftHandControl(void) noexcept {}
-		public:
-			void InitStackLeftHand() {
-				this->m_IsStuckLeftHandTimer = 0.f;
-				this->m_IsStuckLeftHand = false;
-				this->m_StuckLeftHand.Init(false);
-			}
-			void UpdateStackLeftHand() {
-				Easing(&m_StuckLeftHandPos_R, m_StuckLeftHandPos, 0.9f, EasingType::OutExpo);
-				Easing(&m_StuckLeftHandYVec, m_StuckLeftHandNormal, 0.9f, EasingType::OutExpo);
-				m_StuckLeftHand.Execute(m_IsStuckLeftHand, 0.2f, 0.2f);
-			}
-		public:
-			void ResetStackLeftHand() {
-				m_IsStuckLeftHand = false;
-				m_IsStuckLeftHandTimer = 0.f;
-			}
-			void SetStackLeftHand(const Vector3DX& Pos, const Vector3DX& Normal) {
-				auto* DXLib_refParts = DXLib_ref::Instance();
-				if (m_IsStuckLeftHandTimer >= 0.5f) {
-					if (!m_IsStuckLeftHand) {
-						m_StuckLeftHandPos = Pos;
-						m_StuckLeftHandNormal = Normal;
-						m_StuckLeftHandPos_R = Pos;
-						m_StuckLeftHandYVec = Normal;
-					}
-					else {
-						if ((m_StuckLeftHandPos - Pos).magnitude() > 0.3f * Scale3DRate) {
-							m_StuckLeftHandPos = Pos;
-							m_StuckLeftHandNormal = Normal;
-						}
-						m_StuckLeftHandPos.y = (Pos.y);
-					}
-					m_IsStuckLeftHand = true;
-				}
-				m_IsStuckLeftHandTimer = std::min(m_IsStuckLeftHandTimer + DXLib_refParts->GetDeltaTime(), 0.5f);
 			}
 		};
 		//
@@ -847,6 +600,135 @@ namespace FPS_n2 {
 			bool GetNeedAmmoLoad(bool MagInGunFull, bool MagInGunEmpty) noexcept;
 		};
 		//
+		class GunPtrControl {
+		private:
+			int													m_GunSelect{ 0 };
+			int													m_ReserveGunSelect{ 0 };
+			std::array<std::shared_ptr<GunClass>, 2>			m_Gun_Ptr{ nullptr , nullptr };			//銃
+			std::array<MagStockControl, 2>						m_MagStockControl;
+			std::array<Matrix3x3DX, 2>							m_SlingRot;
+			std::array<Vector3DX, 2>							m_SlingPos;
+		public:
+			std::array<float, 2>								m_SlingPer{};
+		public://ゲッター
+			auto&				GetGunPtr(int ID) noexcept { return this->m_Gun_Ptr[ID]; }
+
+			const int			GetNowGunSelect() const noexcept { return this->m_GunSelect; }
+			const int			GetOtherGunSelect() const noexcept { return 1 - GetNowGunSelect(); }
+
+			auto& GetGunPtrNow(void) noexcept { return GetGunPtr(GetNowGunSelect()); }
+			const auto& GetGunPtrNow(void) const noexcept { return this->m_Gun_Ptr[GetNowGunSelect()]; }
+
+			auto& GetGunPtrOther(void) noexcept { return GetGunPtr(GetOtherGunSelect()); }
+			const auto& GetGunPtrOther(void) const noexcept { return this->m_Gun_Ptr[GetOtherGunSelect()]; }
+
+			const auto			GetSightZoomSize() const noexcept { return (GetGunPtrNow() && GetGunPtrNow()->GetSightPtr()) ? (*GetGunPtrNow()->GetSightPtr())->GetModSlot().GetModData()->GetZoomSize() : 1.f; }
+			bool				IsNeedReload() const noexcept {
+				if (!GetGunPtrNow()) { return false; }
+				if (GetGunPtrNow() && GetGunPtrNow()->GetReloadType() == RELOADTYPE::MAG) {
+					return !(GetGunPtrNow()->GetAmmoNum() >= m_MagStockControl.at(GetNowGunSelect()).GetMag(0));
+				}
+				return !GetGunPtrNow()->GetIsMagFull();
+			}
+			void				SetGunMountMat(int ID, const Matrix3x3DX& Rot, const Vector3DX& Pos) noexcept {
+				m_SlingRot[ID] = Rot;
+				m_SlingPos[ID] = Pos;
+			}
+			void				UpdateGun(int ID) noexcept {
+				bool IsSelGun = (ID == GetNowGunSelect());
+				Easing(&m_SlingPer[ID], IsSelGun ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+				if (m_SlingPer[ID] <= 0.001f) { m_SlingPer[ID] = 0.f; }
+				if (m_SlingPer[ID] >= 0.999f) { m_SlingPer[ID] = 1.f; }
+			}
+			const Matrix3x3DX	GetGunRotMat(int ID, const Matrix3x3DX& AimGunRot) const noexcept {
+				Matrix3x3DX tmp_gunmat = Matrix3x3DX::RotVec2(Vector3DX::forward(), Lerp(m_SlingRot[ID].zvec(), AimGunRot.zvec(), m_SlingPer[ID]));
+				tmp_gunmat *= Matrix3x3DX::RotVec2(tmp_gunmat.yvec(), Lerp(m_SlingRot[ID].yvec(), AimGunRot.yvec(), m_SlingPer[ID]));
+				return tmp_gunmat;
+			}
+			const Vector3DX		GetGunPos(int ID, const Vector3DX& AimGunPos) const noexcept {
+				bool IsSelGun = (ID == GetNowGunSelect());
+				float PAdd = 0.f;
+				if (!IsSelGun) {
+					PAdd = -1.f * Scale3DRate * m_SlingPer[ID];
+				}
+				return Lerp(m_SlingPos[ID] + Vector3DX::up() * PAdd, AimGunPos, m_SlingPer[ID]);
+			}
+		public://セッター
+			void				SelectReserveGun(int ID) noexcept {
+				m_ReserveGunSelect = ID;
+			}
+			void				InvokeReserveGunSel() noexcept {
+				SelectGun(m_ReserveGunSelect);
+			}
+			void				SelectGun(int ID, bool IsForceSling = true) noexcept {
+				this->m_GunSelect = ID;
+				SelectReserveGun(ID);
+				if (IsForceSling) {
+					m_SlingPer[0] = (GetNowGunSelect() == 0) ? 0.f : 1.f;
+					m_SlingPer[1] = 1.f - m_SlingPer[0];
+				}
+			}
+			void				SetGunPtr(int ID, const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_Gun_Ptr[ID] = pGunPtr0; }
+			void				SetupMagazine(void) noexcept {
+				for (int loop = 0; loop < 2; ++loop) {
+					if (GetGunPtr(loop)) {
+						m_MagStockControl.at(loop).Init_MagStockControl(GetGunPtr(loop)->GetAmmoNum(), GetGunPtr(loop)->GetAmmoAll(), GetGunPtr(loop)->GetMagUniqueID());
+					}
+				}
+			}
+			void				SwapMagazine(void) noexcept {
+				if (GetGunPtrNow()) {
+					int Num = GetGunPtrNow()->GetAmmoNum();
+					int All = GetGunPtrNow()->GetAmmoAll();
+					int UniqueID = GetGunPtrNow()->GetMagUniqueID();
+					auto& MagStock = m_MagStockControl.at(GetNowGunSelect());
+					GetGunPtrNow()->SetReloadStart(MagStock.GetNowMag().AmmoNum, MagStock.GetNowMag().ModUniqueID);
+					MagStock.SetOldMag(Num, All, UniqueID);
+				}
+			}
+		public:
+			GunPtrControl(void) noexcept {}
+			~GunPtrControl(void) noexcept {}
+		public:
+			void DisposeGunPtr() noexcept {
+				auto* ObjMngr = ObjectManager::Instance();
+				for (auto& g : m_Gun_Ptr) {
+					if (g) {
+						ObjMngr->DelObj((SharedObj*)&g);
+						g.reset();
+					}
+				}
+			}
+		};
+		//
+		class AutoAimControl {
+		private:
+			int													m_AutoAim{ -1 };
+			int													m_AutoAimPoint{ -1 };
+			float												m_AutoAimOn{ 0.f };
+			float												m_AutoAimTimer{ 0.f };
+		public://ゲッター
+			float												m_AutoAimPer{ 0.f };
+			Vector3DX											m_AutoAimVec{};
+		public:
+			AutoAimControl(void) noexcept {}
+			~AutoAimControl(void) noexcept {}
+		public:
+			const auto& GetAutoAimID(void) const noexcept { return this->m_AutoAim; }
+			const auto& GetAutoAimPoint(void) const noexcept { return this->m_AutoAimPoint; }
+			const auto& GetAutoAimOn(void) const noexcept { return this->m_AutoAimOn; }
+
+			const auto		GetAutoAimActive(void) const noexcept { return this->m_AutoAim != -1; }
+			const auto		GetAutoAimPer(void) const noexcept { return this->m_AutoAimTimer / 1.f; }
+		public:
+			void SetAutoAimActive(int ID, int Point) noexcept {
+				m_AutoAimTimer = 1.f;
+				m_AutoAim = ID;
+				m_AutoAimPoint = Point;
+			}
+			void Update(bool isActive) noexcept;
+		};
+		//
 		class HitReactionControl {
 		private:
 			Vector3DX											m_HitAxis{ Vector3DX::forward() };
@@ -864,7 +746,7 @@ namespace FPS_n2 {
 				m_HitAxis = Axis;
 				m_HitPower = 1.f;
 			}
-			void Execute_HitReactionControl() noexcept {
+			void Update() noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				Easing(&this->m_HitPowerR, this->m_HitPower, 0.8f, EasingType::OutExpo);
 				this->m_HitPower = std::max(this->m_HitPower - DXLib_refParts->GetDeltaTime() / 0.3f, 0.f);
@@ -1019,7 +901,7 @@ namespace FPS_n2 {
 		private:
 			MV1													m_RagDoll;
 			float												m_RagDollTimer{ 0.f };						//ラグドールの物理演算フラグ
-		protected:
+		public:
 			//体のフレーム情報
 			frame_body lagframe_;							//フレーム
 			frame_body frame_s;								//フレーム
@@ -1029,13 +911,13 @@ namespace FPS_n2 {
 		public:
 			auto& GetRagDoll(void) noexcept { return this->m_RagDoll; }
 		public:
-			void Init_RagDollControl(MV1& obj_body_t) noexcept {
+			void Init(MV1& obj_body_t) noexcept {
 				//身体
 				this->frame_s.Get_frame(obj_body_t);
 				//ラグドール
 				this->lagframe_.Get_frame(m_RagDoll);
 			}
-			void Execute_RagDollControl(MV1& obj_body_t, bool isAlive) noexcept {
+			void Update(MV1& obj_body_t, bool isAlive) noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (isAlive) {
 					this->m_RagDollTimer = 0.f;
