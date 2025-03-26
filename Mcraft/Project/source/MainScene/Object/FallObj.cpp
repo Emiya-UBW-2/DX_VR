@@ -36,7 +36,7 @@ namespace FPS_n2 {
 					Vector3DX EndPos = PosBuf;
 					Vector3DX Normal;
 					if (BackGround->CheckLinetoMap(this->GetMove().GetRePos(), &EndPos, &Normal)) {
-						PosBuf = EndPos;
+						PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
 						if (std::abs(Normal.y) > 0.5f) {
 							m_BoundCount++;
 						}

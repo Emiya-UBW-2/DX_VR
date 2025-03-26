@@ -43,6 +43,7 @@ namespace FPS_n2 {
 			Pendulum2D											m_SlingZrad;
 			Matrix4x4DX											m_MagMiss{}, m_MagSuccess{};
 			FallControl											m_Grenade;
+			std::shared_ptr<AmmoDataClass>						m_ChamberAmmoData{ nullptr };		//
 			bool												m_MoveOverRideFlag{ false };
 			moves												m_OverRideInfo;
 			PlayerID											m_MyID{ 0 };
@@ -157,6 +158,7 @@ namespace FPS_n2 {
 			void			Dispose_Sub(void) noexcept override {
 				EffectControl::Dispose();
 				m_GunPtrControl.DisposeGunPtr();
+				m_ChamberAmmoData.reset();
 			}
 		};
 	};

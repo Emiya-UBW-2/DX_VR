@@ -679,7 +679,7 @@ namespace FPS_n2 {
 
 						for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
-							if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }
+							//if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }
 							HitPoint Damage = a->GetDamage();
 							ArmerPoint ArmerDamage = 0;
 							if (tgt->CheckDamageRay(&Damage, &ArmerDamage, true, (PlayerID)a->GetShootedID(), repos_tmp, &pos_tmp)) {
@@ -699,6 +699,32 @@ namespace FPS_n2 {
 #endif // DEBUG
 						if (ColResGround && !is_HitAll) {
 							a->HitGround(pos_tmp);
+							//”j‰ó
+							int								xput = 4;
+							int								yput = 1;
+							int								zput = 4;
+							Vector3DX						PutPos = pos_tmp;
+							auto Put = BackGround->GetPoint(PutPos);
+							for (int xp = 0; xp < xput; xp++) {
+								for (int yp = 0; yp < yput; yp++) {
+									for (int zp = 0; zp < zput; zp++) {
+										int xx = (Put.x + xp - xput / 2);
+										int yy = (Put.y + yp - yput / 2);
+										int zz = (Put.z + zp - zput / 2);
+										auto& cell = BackGround->GetCellBuf(xx, yy, zz);
+										switch (cell.m_Cell) {
+										case 2:
+											BackGround->SetBlick(xx, yy, zz, 3);
+											break;
+										case 3:
+											BackGround->SetBlick(xx, yy, zz, FPS_n2::BackGround::s_EmptyBlick);
+											break;
+										default:
+											break;
+										}
+									}
+								}
+							}
 							EffectControl::SetOnce_Any((int)Sceneclass::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale3DRate);
 							SE->Get(SoundType::SE, (int)SoundEnum::HitGround0 + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
 						}

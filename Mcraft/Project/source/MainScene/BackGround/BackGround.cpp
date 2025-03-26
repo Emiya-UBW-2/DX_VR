@@ -1356,7 +1356,6 @@ namespace FPS_n2 {
 			BaseRate = static_cast<int>(pow(MulPer, 1));
 		}
 		//
-#if defined(DEBUG) & EDITBLICK
 		void		BackGroundClass::SetBlick(int x, int y, int z, int8_t select) noexcept {
 			auto& cell = m_CellxN.front();
 			if (!cell.isInside(y)) { return; }
@@ -1396,7 +1395,6 @@ namespace FPS_n2 {
 				CheckCell(xm, ym, zm - 1);
 			}
 		}
-#endif
 		//
 		void		BackGroundClass::Load(void) noexcept {
 			MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
@@ -1477,10 +1475,8 @@ namespace FPS_n2 {
 							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(x)) / (Size * Rate - 1),
 								(static_cast<float>(z)) / (Size * Rate - 1)) * static_cast<float>(cell.All * 1 / 10));
-							for (int y = Height; y <= Height + Heights; ++y) {
-								if (y <= Height) {
-									cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 2;
-								}
+							for (int y = 0; y <= Height; ++y) {
+								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 2;
 							}
 						}
 					}

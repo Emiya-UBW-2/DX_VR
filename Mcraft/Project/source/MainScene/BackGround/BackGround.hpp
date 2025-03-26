@@ -537,7 +537,7 @@ namespace FPS_n2 {
 				//‚Ç‚ÌŒü‚«H
 				if (Normal) {
 					for (int i = 0; i < 3; ++i) {
-						if (std::abs(ret[i] - min[i]) < 0.001f) {
+						if (std::abs(ret[i] - min[i]) < 0.00001f) {
 							switch (i) {
 							case 0:
 								*Normal = Vector3DX::left();
@@ -552,7 +552,7 @@ namespace FPS_n2 {
 								break;
 							}
 						}
-						if (std::abs(ret[i] - max[i]) < 0.001f) {
+						if (std::abs(ret[i] - max[i]) < 0.00001f) {
 							switch (i) {
 							case 0:
 								*Normal = Vector3DX::right();
@@ -671,9 +671,13 @@ namespace FPS_n2 {
 
 			void			SettingChange() noexcept;
 
-#if defined(DEBUG) & EDITBLICK
 			void			SetBlick(int x, int y, int z, int8_t select) noexcept;
-#endif
+			const Vector3Int GetPoint(const Vector3DX& pos) const noexcept { return m_CellxN.front().GetPoint(pos); }
+			const auto& GetCellBuf(int x, int y, int z) const noexcept {
+				auto& cell = m_CellxN.front();
+				//if (!cell.isInside(y)) { return; }
+				return cell.GetCellBuf(x, y, z);
+			}
 		public://
 			void			Load(void) noexcept;
 			//

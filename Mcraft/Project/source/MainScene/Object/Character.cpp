@@ -443,6 +443,37 @@ namespace FPS_n2 {
 					EffectControl::SetOnce((int)Sceneclass::Effect::ef_greexp, g->GetMove().GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate);
 					EffectControl::SetEffectSpeed((int)Sceneclass::Effect::ef_greexp, 2.f);
 					SE->Get(SoundType::SE, (int)SoundEnum::Explosion)->Play3D(g->GetMove().GetPos(), Scale3DRate * 25.f);
+
+					auto* ObjMngr = ObjectManager::Instance();
+					auto* BackGround = BackGround::BackGroundClass::Instance();
+
+					for (int i = 0, max = m_ChamberAmmoData->GetPellet(); i < max; i++) {
+						auto LastAmmo = std::make_shared<AmmoClass>();
+						ObjMngr->AddObject(LastAmmo);
+						LastAmmo->Init();
+						auto mat =
+							Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-GetRand(30))) *
+							Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180)));
+						LastAmmo->Put(this->m_ChamberAmmoData, g->GetMove().GetPos() + mat.zvec() * (0.5f * Scale3DRate) + Vector3DX::up() * (0.5f * Scale3DRate), mat.zvec(), GetMyPlayerID());
+					}
+
+					//破壊
+					int								xput = 6;
+					int								yput = 8;
+					int								zput = 6;
+					Vector3DX						PutPos = g->GetMove().GetPos();
+					auto Put = BackGround->GetPoint(PutPos);
+					for (int xp = 0; xp < xput; xp++) {
+						for (int yp = 0; yp < yput; yp++) {
+							for (int zp = 0; zp < zput; zp++) {
+								auto& cell = BackGround->GetCellBuf((Put.x + xp - xput / 2), (Put.y + yp), (Put.z + zp - zput / 2));
+								if (cell.m_Cell==1) {
+									continue;
+								}
+								BackGround->SetBlick((Put.x + xp - xput / 2), (Put.y + yp), (Put.z + zp - zput / 2), FPS_n2::BackGround::s_EmptyBlick);
+							}
+						}
+					}
 				}
 			}
 			if (m_GunPtrControl.GetGunPtrNow()) {
@@ -1141,6 +1172,8 @@ namespace FPS_n2 {
 			EffectControl::Init();
 			m_Grenade.Dispose();
 			m_Grenade.Init("data/model/RGD5/", 4);	//装填したマガジンの弾に合わせて薬莢生成
+
+			m_ChamberAmmoData = AmmoDataManager::Instance()->LoadAction("data/ammo/FragRGD/");
 		}
 		void			CharacterClass::FirstExecute(void) noexcept {
 			//初回のみ更新する内容

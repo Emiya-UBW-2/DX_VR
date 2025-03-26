@@ -211,13 +211,16 @@ namespace FPS_n2 {
 			const auto		GetIsStop(void) const noexcept { return m_BottomAnimSelect == GetBottomStandAnimSel(); }
 			const auto		GetSpeedPer(void) const noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
-				if (GetInputControl().GetPADSPress(Controls::PADS::WALK)) {
-					return 1.25f * 60.f * DXLib_refParts->GetDeltaTime();
-				}
 				if (GetIsSquat()) {
-					return 0.45f * 60.f * DXLib_refParts->GetDeltaTime();
+					if (GetInputControl().GetPADSPress(Controls::PADS::WALK)) {
+						return 0.95f * 60.f * DXLib_refParts->GetDeltaTime();
+					}
+					return 1.85f * 60.f * DXLib_refParts->GetDeltaTime();
 				}
 				else {
+					if (GetInputControl().GetPADSPress(Controls::PADS::WALK)) {
+						return 1.25f * 60.f * DXLib_refParts->GetDeltaTime();
+					}
 					return 2.25f * 60.f * DXLib_refParts->GetDeltaTime();
 				}
 			}
