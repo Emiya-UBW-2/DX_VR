@@ -48,7 +48,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DXLib_refParts->StartLogic();
 	//í«â¡ê›íË
 	SetMainWindowText("Phantom of the Bunker");						//É^ÉCÉgÉã
-	//SetUseHalfLambertLighting(TRUE);
+	SetUseHalfLambertLighting(TRUE);
 	MV1SetLoadModelReMakeNormal(TRUE);
 	//SetUsePixelLighting(TRUE);
 	SetUseBackCulling(TRUE);
