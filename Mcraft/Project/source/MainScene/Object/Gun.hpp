@@ -18,13 +18,13 @@ namespace FPS_n2 {
 			AimPointControl										m_AimPointControl{};
 			ReticleControl										m_ReticleControl{};
 			ModSlotControl										m_ModSlotControl{};
-			std::shared_ptr<AmmoDataClass>						m_ChamberAmmoData{ nullptr };		//
 
-			bool												m_GunAnimeFirst{ false };
+			std::shared_ptr<AmmoDataClass>						m_ChamberAmmoData{ nullptr };		//
+			std::array<ArmMovePerClass, static_cast<int>(EnumGunAnimType::Max)>	m_Arm{};
 			GunAnimeID											m_GunAnime{ GunAnimeID::Base };	//
 			float												m_GunAnimeTime{ 0.f };
-
-			bool												m_Cancel{ false };			//
+			bool												m_ReloadAmmoCancel{ false };		//
+			bool												m_ShotEnd{ false };		//
 			bool												m_ShotSwitch{ false };				//
 			int													m_boltSoundSequence{ -1 };			//サウンド
 			bool												m_IsChamberOn{ false };				//チャンバーに弾を込めるか
@@ -45,8 +45,9 @@ namespace FPS_n2 {
 			int													m_Capacity{ 0 };//弾数
 			bool												m_isMagSuccess{};
 			PlayerID											m_MyID{ 0 };
+			Matrix4x4DX											m_MagMiss{}, m_MagSuccess{};
 		public:
-			const auto&			GetMyPlayerID(void) const noexcept { return this->m_MyID; }
+			const auto&			GetMyUserPlayerID(void) const noexcept { return this->m_MyID; }
 			void				SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
 
 			auto				GetFrameWorldMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
@@ -54,9 +55,6 @@ namespace FPS_n2 {
 
 			ModSlotControl& GetModSlot() noexcept { return this->m_ModSlotControl; }
 			const ModSlotControl& GetModSlot() const noexcept { return this->m_ModSlotControl; }
-		private:
-			void				ExecuteCartInChamber(void) noexcept;//チャンバーへの装弾、排出
-			void				ExecuteSound(void) noexcept;//チャンバーへの装弾、排出
 		private:
 			const auto			GetGunSoundSet(void) const noexcept { return GunSoundSets[GetModSlot().GetModData()->GetSoundSel()]; }
 			const auto&			GetHumanAnimType(void) const noexcept {
@@ -69,13 +67,8 @@ namespace FPS_n2 {
 			const bool			HasFrame(GunFrame frame) const noexcept;
 			const Matrix4x4DX	GetFrameWorldMat_P(GunFrame frame, bool CheckSight = true) const noexcept;
 		public:
-			const auto&			GetAimXPos(void) const noexcept { return this->m_AimPointControl.GetAimXPos(); }
-			const auto&			GetAimYPos(void) const noexcept { return this->m_AimPointControl.GetAimYPos(); }
-			const auto			GetAutoAimRadian() const noexcept {
-				float Len = std::max(0.01f, std::hypotf((float)(GetAimXPos() - 1920 / 2), (float)(GetAimYPos() - 1080 / 2)));
-				Len = std::clamp(100.f / Len, 0.f, 1.f);
-				return deg2rad(5) * Len;
-			}
+			const auto			GetAimXPos(void) const noexcept { return this->m_AimPointControl.GetAimXPos(); }
+			const auto			GetAimYPos(void) const noexcept { return this->m_AimPointControl.GetAimYPos(); }
 		public://ゲッター
 			const auto			GetRecoilPower(void) const noexcept {
 				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModSlot().GetModData()->GetIsRecoilPower()) {
@@ -104,12 +97,27 @@ namespace FPS_n2 {
 
 			const auto&			GetShotSwitch(void) const noexcept { return this->m_ShotSwitch; }
 			const auto&			GetGunAnime(void) const noexcept { return this->m_GunAnime; }
+			const auto			GetNowGunAnimeTime(void) const noexcept { return GetObj_const().GetAnim(static_cast<size_t>(GetGunAnime())).GetTime(); }
+			const auto			GetNowGunAnimeTimePer(void) const noexcept { return GetObj_const().GetAnim(static_cast<int>(GetGunAnime())).GetTimePer(); }
+			const auto			GetReloading(void) const noexcept { return (GunAnimeID::ReloadStart_Empty <= GetGunAnime()) && (GetGunAnime() <= GunAnimeID::ReloadEnd); }
+			const auto			GetReloadStart(void) const noexcept { return (GetGunAnime() == GunAnimeID::ReloadStart_Empty || GetGunAnime() == GunAnimeID::ReloadStart); }
+			const auto			IsCanShoot(void) const noexcept {
+				switch (GetGunAnime()) {
+				case GunAnimeID::Base:
+				case GunAnimeID::Shot:
+					return true;
+					break;
+				default:
+					return false;
+				}
+			}
+
 			const auto&			GetAmmoNum(void) const noexcept { return this->m_Capacity; }
 			const auto&			GetMagazinePtr(void) const noexcept { return *this->m_MagazinePtr; }
 			const auto&			IsMagLoadSuccess() const { return this->m_isMagSuccess; }
 			const auto			GetInChamber(void) const noexcept { return this->m_ChamberAmmoData != nullptr; }
 			const auto			GetPelletNum(void) const noexcept { return GetInChamber() ? this->m_ChamberAmmoData->GetPellet() : 0; }
-			const auto			GetSightMax() const noexcept { return (int)this->m_SightPtr.size(); }
+			const auto			GetSightMax() const noexcept { return static_cast<int>(this->m_SightPtr.size()); }
 			const auto*			GetSightPtr() const noexcept {
 				if (this->m_GunChangePer < 0.5f) {
 					int Prev = (this->m_GunSightSel - 1);
@@ -133,7 +141,6 @@ namespace FPS_n2 {
 			const auto			GetIsMagEmpty(void) const noexcept { return this->m_Capacity == 0; }//次弾がない
 			const auto			GetIsMagFull(void) const noexcept { return this->m_Capacity == this->GetAmmoAll(); }
 
-			const auto			GetReloading(void) const noexcept { return (GunAnimeID::ReloadStart_Empty <= GetGunAnime()) && (GetGunAnime() <= GunAnimeID::ReloadEnd); }
 			const auto			GetEyePos(void) const noexcept {
 				Vector3DX Pos;
 				if (this->m_SightPtr.at(1)) {
@@ -181,8 +188,8 @@ namespace FPS_n2 {
 					}
 					if (HasFrame(GunFrame::EyeOffsetPos)) {
 						Vector3DX vec = GetFrameWorldMat_P(GunFrame::EyeOffsetPos).yvec();
-						if (GetObj_const().GetFrameChildNum(GetFrame((int)GunFrame::EyeOffsetPos)) > 0) {
-							vec = (GetObj_const().GetChildFrameWorldMatrix(GetFrame((int)GunFrame::EyeOffsetPos), 0).pos() - GetFrameWorldMat_P(GunFrame::EyeOffsetPos).pos()).normalized();
+						if (GetObj_const().GetFrameChildNum(GetFrame(static_cast<int>(GunFrame::EyeOffsetPos))) > 0) {
+							vec = (GetObj_const().GetChildFrameWorldMatrix(GetFrame(static_cast<int>(GunFrame::EyeOffsetPos)), 0).pos() - GetFrameWorldMat_P(GunFrame::EyeOffsetPos).pos()).normalized();
 						}
 						if (this->m_GunSightSel == 0) {
 							Pos = Lerp(vec, Pos, this->m_GunChangePer);
@@ -197,25 +204,62 @@ namespace FPS_n2 {
 			const auto			GetGunAnimePer(EnumGunAnimType ID) {
 				//銃の位置を指定するアニメ
 				auto* AnimMngr = GunAnimManager::Instance();
-				auto* Ptr = AnimMngr->GetAnimData(GunAnimeSets[GetHumanAnimType()].Anim.at((int)ID));
+				auto* Ptr = AnimMngr->GetAnimData(GunAnimeSets[GetHumanAnimType()].Anim.at(static_cast<int>(ID)));
 				if (!Ptr) { return 0.f; }
 				float totalTime = (float)Ptr->GetTotalTime();
 				return (totalTime > 0.f) ? (60.f * this->m_GunAnimeTime / totalTime) : 1.f;
 			}
-			const auto			GetGunAnimeNow(EnumGunAnimType ID, Matrix4x4DX* Ret) {
+			const auto			GetGunAnimeNow(EnumGunAnimType ID, Matrix4x4DX* Ret) const noexcept {
 				//銃の位置を指定するアニメ
 				auto* AnimMngr = GunAnimManager::Instance();
-				auto* Ptr = AnimMngr->GetAnimData(GunAnimeSets[GetHumanAnimType()].Anim.at((int)ID));
+				auto* Ptr = AnimMngr->GetAnimData(GunAnimeSets[GetHumanAnimType()].Anim.at(static_cast<int>(ID)));
 				if (!Ptr) { return false; }
 				*Ret = AnimMngr->GetAnimNow(Ptr, 60.f * this->m_GunAnimeTime).GetMatrix();
 				return true;
 			}
+			const auto			GetGunAnimeNow() const noexcept {
+				Matrix4x4DX AnimMat;
+				for (int i = 0; i < static_cast<int>(EnumGunAnimType::Max); i++) {
+					Matrix4x4DX AnimData;
+					if (!GetGunAnimeNow((EnumGunAnimType)i, &AnimData)) { continue; }
+					AnimMat = Lerp(AnimMat, AnimData, this->m_Arm[i].Per());
+				}
+				return AnimMat;
+			}
+			const auto			GetGunAnimBlendPer(EnumGunAnimType ID) const noexcept { return this->m_Arm[static_cast<int>(ID)].Per(); }
+			void				UpdateGunAnime(const std::array<bool, static_cast<int>(EnumGunAnimType::Max)>& Array, bool IsForce) noexcept {
+				if (IsForce) {
+					for (int loop = 0; loop < static_cast<int>(EnumGunAnimType::Max); ++loop) {
+						this->m_Arm[loop].Init(Array[loop]);
+					}
+				}
+				else {
+#if TRUE
+					this->m_Arm[static_cast<int>(EnumGunAnimType::ADS)].Update(Array[static_cast<int>(EnumGunAnimType::ADS)], 0.2f, 0.2f, 0.9f);
+					this->m_Arm[static_cast<int>(EnumGunAnimType::ReloadStart_Empty)].Update(Array[static_cast<int>(EnumGunAnimType::ReloadStart_Empty)], 0.5f, 0.2f);
+					this->m_Arm[static_cast<int>(EnumGunAnimType::ReloadStart)].Update(Array[static_cast<int>(EnumGunAnimType::ReloadStart)], 0.2f, 0.2f);
+					this->m_Arm[static_cast<int>(EnumGunAnimType::Reload)].Update(Array[static_cast<int>(EnumGunAnimType::Reload)], 0.1f, 0.2f, (GetReloadType() == RELOADTYPE::AMMO) ? 0.9f : 0.8f);
+					this->m_Arm[static_cast<int>(EnumGunAnimType::ReloadEnd)].Update(Array[static_cast<int>(EnumGunAnimType::ReloadEnd)], 0.1f, 0.2f, 0.9f);
+					this->m_Arm[static_cast<int>(EnumGunAnimType::Ready)].Update(Array[static_cast<int>(EnumGunAnimType::Ready)], 0.1f, 0.2f, 0.87f);
+					this->m_Arm[static_cast<int>(EnumGunAnimType::Watch)].Update(Array[static_cast<int>(EnumGunAnimType::Watch)], 0.1f, 0.1f);
+#else
+					for (int loop = 0; loop < static_cast<int>(EnumGunAnimType::Max); ++loop) {
+						this->m_Arm[loop].Update(Array[loop], 0.2f, 0.2f, 0.9f);
+					}
+#endif
+				}
+			}
 		public:
 			void				SetMagLoadSuccess(bool value) { this->m_isMagSuccess = value; }
-			void				SetCancel(bool value) noexcept { this->m_Cancel = value; }
+			void				SetReloadAmmoCancel() noexcept {
+				if (GetReloadType() == RELOADTYPE::AMMO) {
+					this->m_ReloadAmmoCancel = true;
+				}
+			}
+			void				SetShotEnd(bool value) noexcept { m_ShotEnd = value; }
 			void				SetGunAnime(GunAnimeID pShotPhase) noexcept {
-				this->m_GunAnimeFirst = (this->m_GunAnime != pShotPhase);
 				this->m_GunAnime = pShotPhase;
+				this->m_GunAnimeTime = 0.f;
 			}
 			void				ChangeSightSel() noexcept {
 				if (true) {
@@ -241,7 +285,36 @@ namespace FPS_n2 {
 			void				CockByMag() noexcept { this->m_ChamberAmmoData = GetMagazinePtr()->GetModSlot().GetModData()->GetAmmoSpecMagTop(); }//マガジンの一番上の弾データをチャンバーイン
 			void				UnloadChamber() noexcept { this->m_ChamberAmmoData.reset(); }
 			void				SetShotSwitchOff() noexcept { this->m_ShotSwitch = false; }
-			void				SetGunMatrix(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept {
+			void				SetMagFall() noexcept {
+				this->m_MagFall.SetFall(
+					GetFrameWorldMat_P(GunFrame::Magpos).pos(),
+					Matrix3x3DX::Get33DX(GetFrameWorldMat_P(GunFrame::Magpos)),
+					GetFrameWorldMat_P(GunFrame::Magpos).yvec() * -1.f * (Scale3DRate * 3.f / 60.f),
+					12.f, SoundEnum::MagFall, false);
+			}
+			void				SetNextMagazine(int NextMagNum, int NextMagUniqueID) noexcept {
+				this->m_NextMagNum = NextMagNum;
+				this->m_NextMagUniqueID = NextMagUniqueID;
+			}
+			void				SetActiveAll(bool value) noexcept;
+			void				SetBullet(void) noexcept;//発砲
+			void				UpdateGunAnims(void) noexcept;
+		public:
+			void				SetupModSlot(void) noexcept {
+				m_ModSlotControl.InitModSlotControl(this->m_FilePath);
+			}
+			void				SetupSpawn(const std::array<bool, static_cast<int>(EnumGunAnimType::Max)>& Array) noexcept;
+		public:
+			void				UpdateReticle() noexcept;
+			void				DrawReticle(float Rad) const noexcept {
+				if (m_ReticleControl.IsActiveReticle() && GetSightPtr()) {
+					auto* WindowParts = WindowSystem::DrawControl::Instance();
+					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*GetSightPtr())->GetModSlot().GetModData()->GetReitcleGraph(),
+						static_cast<int>(m_ReticleControl.GetReticleXPos()), static_cast<int>(m_ReticleControl.GetReticleYPos()), 1.f, Rad, true);
+				}
+			}
+		public:
+			void				UpdateGunMat(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept {
 				SetMove().SetMat(rotation);
 				SetMove().SetPos(pos);
 				SetMove().Update(0.f, 0.f);
@@ -255,56 +328,15 @@ namespace FPS_n2 {
 				m_ModSlotControl.UpdatePartsMove(GetFrameWorldMat_P(GunFrame::Sight), GunSlot::Sight);
 				m_ModSlotControl.UpdatePartsMove(GetFrameWorldMat_P(GunFrame::Magpos), GunSlot::Magazine);
 			}
-			void				SetMagFall() noexcept {
-				this->m_MagFall.SetFall(
-					GetFrameWorldMat_P(GunFrame::Magpos).pos(),
-					Matrix3x3DX::Get33DX(GetFrameWorldMat_P(GunFrame::Magpos)),
-					GetFrameWorldMat_P(GunFrame::Magpos).yvec() * -1.f * (Scale3DRate * 3.f / 60.f),
-					12.f, SoundEnum::MagFall, false);
-			}
-			void				SetReloadStart(int NextMagNum, int NextMagUniqueID) noexcept {
-				this->m_NextMagNum = NextMagNum;
-				switch (GetReloadType()) {
-				case RELOADTYPE::MAG:
-					this->m_NextMagUniqueID = NextMagUniqueID;
-					break;
-				case RELOADTYPE::AMMO:
-					this->m_NextMagUniqueID = 0;
-					break;
-				default:
-					break;
-				}
-				SetGunAnime((!GetIsMagEmpty()) ? GunAnimeID::ReloadStart : GunAnimeID::ReloadStart_Empty);
-			}
-			void				SetActiveAll(bool value) noexcept;
-			void				SetBullet(void) noexcept;//発砲
-			void				UpdateGunAnims(void) noexcept;
+			void				UpdateMagazineMat(const Matrix4x4DX& MagPoachMat) noexcept;
 		public:
-			void				SetFallObject() noexcept;
-		public:
-			void				UpdateReticle() noexcept;
-			void				DrawReticle(float Rad) const noexcept {
-				auto* WindowSizeParts = WindowSizeControl::Instance();
-				if (m_ReticleControl.IsActiveReticle() && GetSightPtr()) {
-					auto* WindowParts = WindowSystem::DrawControl::Instance();
-					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*GetSightPtr())->GetModSlot().GetModData()->GetReitcleGraph(),
-						static_cast<int>(m_ReticleControl.GetReticleXPos() * 1980 / WindowSizeParts->GetScreenY(1980)),
-						static_cast<int>(m_ReticleControl.GetReticleYPos() * 1080 / WindowSizeParts->GetScreenY(1080)),
-						1.f, Rad, true);
-				}
-			}
-		public:
-			void				Init_Gun(void) noexcept;
-		public:
-			GunClass(void) noexcept { this->m_objType = (int)ObjType::Gun; }
+			GunClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Gun); }
 			~GunClass(void) noexcept {}
 		private:
-			int					GetFrameNum() noexcept override { return (int)GunFrame::Max; }
+			int					GetFrameNum() noexcept override { return static_cast<int>(GunFrame::Max); }
 			const char*			GetFrameStr(int id) noexcept override { return GunFrameName[id]; }
 		private: //継承
-			void				Init_Sub(void) noexcept override {
-				m_ModSlotControl.InitModSlotControl(this->m_FilePath);
-			}
+			void				Init_Sub(void) noexcept override;
 			void				FirstExecute(void) noexcept override;
 			void				DrawShadow(void) noexcept override;
 			void				Draw(bool isDrawSemiTrans) noexcept override;

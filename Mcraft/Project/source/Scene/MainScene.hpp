@@ -24,11 +24,11 @@ namespace FPS_n2 {
 		};
 #endif
 
-		class MainGameScene : public TEMPSCENE, public EffectControl {
+		class MainGameScene : public TEMPSCENE {
 		private:
-			PauseMenuControl m_PauseMenuControl;
-			FadeControl m_FadeControl;
-			GunsModify m_GunsModify;
+			PauseMenuControl							m_PauseMenuControl;
+			FadeControl									m_FadeControl;
+			EffectControl								m_EffectControl;
 			//UIŠÖ˜A
 			float										m_Concussion{ 0.f };
 			float										m_ConcussionPer{ 0.f };
@@ -46,9 +46,9 @@ namespace FPS_n2 {
 			std::vector<LineDebug>						m_LineDebug;
 #endif
 		private:
-			auto		GetMyPlayerID(void) const noexcept {
+			auto		GetViewPlayerID(void) const noexcept {
 				if (m_NetWorkController) {
-					return m_NetWorkController->GetMyPlayerID();
+					return m_NetWorkController->GetMyLocalPlayerID();
 				}
 				return (PlayerID)0;
 			}
@@ -95,9 +95,7 @@ namespace FPS_n2 {
 				}
 			}
 		private:
-			void			LoadGun(const std::string& FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept;
 			void			UpdateBullet(void) noexcept;
-
 			void			DrawHitGraph(void) const noexcept;
 		};
 	}

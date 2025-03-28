@@ -7,6 +7,42 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//
+		class ArmMovePerClass {
+			float												m_ArmPer{ 0.f };
+			bool												m_Armon{ false };
+		public:
+			void Init(bool isOn)noexcept {
+				m_Armon = isOn;
+				m_ArmPer = isOn ? 1.f : 0.f;
+			}
+			void Update(bool isOn, float OnOver = 0.2f, float OffOver = 0.2f, float Per = 0.8f) noexcept {
+				if (isOn) {
+					if (m_Armon) {
+						Easing(&this->m_ArmPer, 1.f, 0.9f, EasingType::OutExpo);
+					}
+					else {
+						Easing(&this->m_ArmPer, 1.f + OnOver, Per, EasingType::OutExpo);
+						if (this->m_ArmPer >= 1.f + OnOver / 2.f) {
+							m_Armon = true;
+						}
+					}
+				}
+				else {
+					if (!m_Armon) {
+						Easing(&this->m_ArmPer, 0.f, 0.9f, EasingType::OutExpo);
+					}
+					else {
+						Easing(&this->m_ArmPer, 0.f - OffOver, Per, EasingType::OutExpo);
+						if (this->m_ArmPer <= 0.f - OffOver / 2.f) {
+							m_Armon = false;
+						}
+					}
+				}
+			}
+		public:
+			const auto& Per() const noexcept { return m_ArmPer; }
+		};
+		//
 		class FallControl {
 		private:
 		public:
@@ -92,7 +128,7 @@ namespace FPS_n2 {
 
 		class ModSlotControl {
 		private:
-			std::array<SharedObj, (int)GunSlot::Max>	m_Parts_Ptr{ nullptr };
+			std::array<SharedObj, static_cast<int>(GunSlot::Max)>	m_Parts_Ptr{ nullptr };
 			std::shared_ptr<ModDataClass>		m_ModDataClass;
 		public:
 			auto& GetModData() noexcept { return this->m_ModDataClass; }
@@ -102,7 +138,7 @@ namespace FPS_n2 {
 				m_ModDataClass = *ModDataManager::Instance()->AddData(PilePath);
 			}
 			void			DisposeModSlotControl(void) noexcept {
-				for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+				for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 					RemoveMod((GunSlot)loop);
 				}
 				m_ModDataClass.reset();
@@ -113,7 +149,7 @@ namespace FPS_n2 {
 		private:
 			const bool	IsEffectParts(GunSlot Slot, GunFrame frame) const noexcept;
 		public:
-			const auto& GetPartsPtr(GunSlot Slot) const noexcept { return this->m_Parts_Ptr[(int)Slot]; }
+			const auto& GetPartsPtr(GunSlot Slot) const noexcept { return this->m_Parts_Ptr[static_cast<int>(Slot)]; }
 			const bool	HasFrameBySlot(GunFrame frame) const noexcept;
 			const bool	GetPartsFrameLocalMatBySlot(GunFrame frame, Matrix4x4DX* pRet) const noexcept;
 			const bool	GetPartsFrameWorldMat(GunFrame frame, Matrix4x4DX* pRet) const noexcept;
@@ -134,23 +170,23 @@ namespace FPS_n2 {
 			AimPointControl() {}
 			~AimPointControl() {}
 		public:
-			const auto& GetAimXPos(void) const noexcept { return this->Reticle_xpos; }
-			const auto& GetAimYPos(void) const noexcept { return this->Reticle_ypos; }
+			const int GetAimXPos(void) const noexcept { return this->Reticle_xpos; }
+			const int GetAimYPos(void) const noexcept { return this->Reticle_ypos; }
 		public:
 			void UpdateAimPointControl(const Vector3DX& ReticlePos) noexcept {
 				Vector3DX ReticlePosBuf = ConvWorldPosToScreenPos(ReticlePos.get());
 				if (0.f < ReticlePosBuf.z && ReticlePosBuf.z < 1.f) {
 					auto* WindowSizeParts = WindowSizeControl::Instance();
-					Reticle_xpos = static_cast<int>(ReticlePosBuf.x * 1980 / WindowSizeParts->GetScreenY(1980));
-					Reticle_ypos = static_cast<int>(ReticlePosBuf.y * 1080 / WindowSizeParts->GetScreenY(1080));
+					Reticle_xpos = static_cast<int>(ReticlePosBuf.x) * 1980 / WindowSizeParts->GetScreenY(1980);
+					Reticle_ypos = static_cast<int>(ReticlePosBuf.y) * 1080 / WindowSizeParts->GetScreenY(1080);
 				}
 			}
 		};
 
 		class ReticleControl {
 			bool Reticle_on = false;
-			float Reticle_xpos = 0;
-			float Reticle_ypos = 0;
+			int Reticle_xpos = 0;
+			int Reticle_ypos = 0;
 			float Lens_xpos = 0;
 			float Lens_ypos = 0;
 			float LensSize = 10000;
@@ -171,15 +207,17 @@ namespace FPS_n2 {
 				}
 				Vector3DX ReticlePosBuf = ConvWorldPosToScreenPos(ReticlePos.get());
 				if (0.f < ReticlePosBuf.z && ReticlePosBuf.z < 1.f) {
-					Reticle_xpos = ReticlePosBuf.x;
-					Reticle_ypos = ReticlePosBuf.y;
-					Reticle_on = (LensSize > std::hypotf(Lens_xpos - Reticle_xpos, Lens_ypos - Reticle_ypos));
+					Reticle_on = (LensSize > std::hypotf(Lens_xpos - ReticlePosBuf.x, Lens_ypos - ReticlePosBuf.y));
+
+					auto* WindowSizeParts = WindowSizeControl::Instance();
+					Reticle_xpos = static_cast<int>(ReticlePosBuf.x) * 1980 / WindowSizeParts->GetScreenY(1980);
+					Reticle_ypos = static_cast<int>(ReticlePosBuf.y) * 1080 / WindowSizeParts->GetScreenY(1080);
 				}
 			}
 		public:
 			const auto& IsActiveReticle(void) const noexcept { return this->Reticle_on; }
-			const auto& GetReticleXPos(void) const noexcept { return this->Reticle_xpos; }
-			const auto& GetReticleYPos(void) const noexcept { return this->Reticle_ypos; }
+			const int GetReticleXPos(void) const noexcept { return this->Reticle_xpos; }
+			const int GetReticleYPos(void) const noexcept { return this->Reticle_ypos; }
 			const auto& GetLensXPos(void) const noexcept { return this->Lens_xpos; }
 			const auto& GetLensYPos(void) const noexcept { return this->Lens_ypos; }
 			const auto& GetLensSize(void) const noexcept { return this->LensSize; }

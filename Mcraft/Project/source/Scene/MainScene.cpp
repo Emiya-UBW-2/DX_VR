@@ -15,42 +15,46 @@ namespace FPS_n2 {
 			GunAnimManager::Instance()->Load("data/CharaAnime/");
 			//
 			BattleResourceMngr->Load();
-			PlayerMngr->Init(NetWork::Player_num);
-
+			//UI
 			this->hit_Graph.Load("data/UI/battle_hit.bmp");
 			this->guard_Graph.Load("data/UI/battle_guard.bmp");
-
-			CharacterClass::LoadChara("Main", GetMyPlayerID());
-			int Rand = GetRand(100);
-			if (Rand < 30) {
-				LoadGun("type89", GetMyPlayerID(), false, 0);
-			}
-			else if (Rand < 30+40) {
-				LoadGun("type20E", GetMyPlayerID(), false, 0);
-			}
-			else {
-				LoadGun("Mod870", GetMyPlayerID(), false, 0);
-			}
-			LoadGun("P226", GetMyPlayerID(), false, 1);
-
-			for (int loop = 1; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-				CharacterClass::LoadChara("Soldier", (PlayerID)loop);
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(loop)->GetChara();
-				if (loop == 1) {
-					MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
-				}
-				else {
-					auto& Base = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1)->GetChara();
-					c->GetRagDoll().Duplicate(Base->GetRagDoll());
-				}
-				c->SetupRagDoll();
-				//
-				LoadGun("AKS-74", (PlayerID)loop, false, 0);
-			}
-			//UI
 			this->m_UIclass.Load();
 			m_PauseMenuControl.Load();
 			//
+			PlayerMngr->Init(NetWork::Player_num);
+			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(loop)->GetChara();
+				if (loop == GetViewPlayerID()) {
+					CharacterClass::LoadChara("Main", (PlayerID)loop);
+					int Rand = GetRand(100);
+					if (Rand < 30) {
+						c->LoadCharaGun("type89", 0, false);
+					}
+					else if (Rand < 30 + 40) {
+						c->LoadCharaGun("type20E", 0, false);
+					}
+					else {
+						c->LoadCharaGun("Mod870", 0, false);
+					}
+					c->LoadCharaGun("P226", 1, false);
+					c->SetCharaTypeID(CharaTypeID::Team);
+				}
+				else {
+					CharacterClass::LoadChara("Soldier", (PlayerID)loop);
+					c->LoadCharaGun("AKS-74", 0, false);
+					//ラグドール
+					if (loop == 1) {
+						MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
+					}
+					else {
+						auto& Base = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1)->GetChara();
+						c->GetRagDoll().Duplicate(Base->GetRagDoll());
+					}
+					c->SetupRagDoll();
+					c->SetCharaTypeID(CharaTypeID::Enemy);
+				}
+				c->SetPlayerID((PlayerID)loop);
+			}
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
@@ -59,6 +63,7 @@ namespace FPS_n2 {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* CameraParts = Camera3D::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
+			auto* NetBrowser = NetWorkBrowser::Instance();
 			//
 			BattleResourceMngr->Set();
 
@@ -79,48 +84,42 @@ namespace FPS_n2 {
 			//Cam
 			CameraParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 			//info
-			constexpr float Max = std::min(std::min(BackGround::DrawMaxXPlus, BackGround::DrawMaxZPlus), BackGround::DrawMaxYPlus) * BackGround::CellScale;
-			float SQRTMax = Max;
-			CameraParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.03f, SQRTMax);
+			constexpr float FarMax = std::min(std::min(BackGround::DrawMaxXPlus, BackGround::DrawMaxZPlus), BackGround::DrawMaxYPlus) * BackGround::CellScale;
+			CameraParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.03f, FarMax);
 			//Fog
 			SetVerticalFogMode(DX_FOGMODE_LINEAR);
 			SetVerticalFogStartEnd(-26.f * Scale3DRate, -10.f * Scale3DRate);
 			SetVerticalFogColor(0, 0, 0);
+			//Fog
 			SetFogMode(DX_FOGMODE_LINEAR);
-			SetFogStartEnd(SQRTMax, SQRTMax * 20.f);
+			SetFogStartEnd(FarMax, FarMax * 20.f);
 			SetFogColor(114, 120, 128);
 			//
 			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-				auto& p = PlayerMngr->GetPlayer(index);
-				auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
+				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 				//人の座標設定
-				{
-					Vector3DX pos_t;
-					pos_t.Set(GetRandf(10.f), -20.f, GetRandf(10.f));
-					pos_t *= Scale3DRate;
+				Vector3DX pos_t;
+				pos_t.Set(GetRandf(10.f), -20.f, GetRandf(10.f));
+				pos_t *= Scale3DRate;
 
-					Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
-					if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 0.f * Scale3DRate, &EndPos)) {
-						pos_t = EndPos;
-					}
-					c->ValueSet((PlayerID)index, CharaTypeID::Team);
-					c->MovePoint(deg2rad(0.f), deg2rad(GetRand(360)), pos_t, 0);
+				Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
+				if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 0.f * Scale3DRate, &EndPos)) {
+					pos_t = EndPos;
 				}
-				p->GetAI()->Init((PlayerID)index);
+				c->Spawn(deg2rad(0.f), deg2rad(GetRand(360)), pos_t, 0);
 			}
 			//UI
 			this->m_UIclass.Set();
 			//
 			this->m_DamageEvents.clear();
-			auto* NetBrowser = NetWorkBrowser::Instance();
 			NetBrowser->Init();
 			m_PauseMenuControl.Init();
 			m_FadeControl.Init();
 			this->m_IsEnd = false;
-			EffectControl::Init();
+			m_EffectControl.Init();
 			this->m_StartTimer = 5.f;
 
-			EffectControl::SetLoop((int)Sceneclass::Effect::ef_dust, Vector3DX::zero());
+			m_EffectControl.SetLoop(static_cast<int>(Sceneclass::Effect::ef_dust), Vector3DX::zero());
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 #ifdef DEBUG
@@ -133,6 +132,14 @@ namespace FPS_n2 {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto* SceneParts = SceneControl::Instance();
+			auto* Pad = PadControl::Instance();
+			auto* KeyGuideParts = KeyGuide::Instance();
+			auto* NetBrowser = NetWorkBrowser::Instance();
+			auto* OptionParts = OptionManager::Instance();
+
 			PostPassParts->SetLevelFilter(38, 154, 1.f);
 			m_PauseMenuControl.Update();
 			if (m_PauseMenuControl.IsRetire()) {
@@ -146,15 +153,10 @@ namespace FPS_n2 {
 			}
 
 			m_FadeControl.Update();
-			auto* ObjMngr = ObjectManager::Instance();
-			auto* PlayerMngr = Player::PlayerManager::Instance();
 
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetViewPlayerID())->GetChara();
 
-			auto* SceneParts = SceneControl::Instance();
-			auto* Pad = PadControl::Instance();
 			Pad->SetMouseMoveEnable(true);
-			auto* KeyGuideParts = KeyGuide::Instance();
 			KeyGuideParts->ChangeGuide(
 				[]() {
 					auto* SceneParts = SceneControl::Instance();
@@ -204,19 +206,9 @@ namespace FPS_n2 {
 				if (!GetIsFirstLoop()) {
 					this->m_StartTimer = std::max(this->m_StartTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 				}
-				if (2.f > this->m_StartTimer && this->m_StartTimer > 1.f) {
-					Chara->SetAim();
-				}
-				InputControl MyInput;
-				if (SceneParts->IsPause() || !m_FadeControl.IsClear() || (this->m_StartTimer > 0.f)) {
-					MyInput.ResetAllInput();
-				}
-				else {
-					MyInput.ResetAllInput();
-					float AimPer = 1.f;
-					if (Chara->GetIsADS()) {
-						AimPer /= std::max(1.f, Chara->GetSightZoomSize());
-					}
+				InputControl MyInput; MyInput.ResetAllInput();
+				if (!SceneParts->IsPause() && m_FadeControl.IsClear() && (this->m_StartTimer <= 0.f)) {
+					float AimPer = 1.f / std::max(1.f, Chara->GetSightZoomSize());
 					auto RecoilRadAdd = Chara->GetRecoilRadAdd();
 					MyInput.SetAddxRad(Pad->GetLS_Y() / 200.f * AimPer - RecoilRadAdd.y);
 					MyInput.SetAddyRad(Pad->GetLS_X() / 200.f * AimPer + RecoilRadAdd.x);
@@ -231,16 +223,16 @@ namespace FPS_n2 {
 					MyInput.SetInputPADS(Controls::PADS::RELOAD, Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::INTERACT, Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().press());
 					//MyInput.SetInputPADS(Controls::PADS::SQUAT, Pad->GetPadsInfo(Controls::PADS::SQUAT).GetKey().press());
+					//MyInput.SetInputPADS(Controls::PADS::PRONE, Pad->GetPadsInfo(Controls::PADS::PRONE).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::SHOT, Pad->GetPadsInfo(Controls::PADS::SHOT).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::AIM, Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::ULT, Pad->GetPadsInfo(Controls::PADS::ULT).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::THROW, Pad->GetPadsInfo(Controls::PADS::THROW).GetKey().press());
-					//MyInput.SetInputPADS(Controls::PADS::CHECK, Pad->GetPadsInfo(Controls::PADS::CHECK).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::CHECK, Pad->GetPadsInfo(Controls::PADS::CHECK).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::WALK, Pad->GetPadsInfo(Controls::PADS::WALK).GetKey().press());
 					//MyInput.SetInputPADS(Controls::PADS::JUMP, Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().press());
 				}
 				//ネットワーク
-				auto* NetBrowser = NetWorkBrowser::Instance();
 				if (NetBrowser->IsDataReady() && !m_NetWorkController) {
 					m_NetWorkController = std::make_unique<NetWork::NetWorkController>();
 					this->m_NetWorkController->Init(NetBrowser->GetClient(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
@@ -257,8 +249,8 @@ namespace FPS_n2 {
 						auto& p = PlayerMngr->GetPlayer(index);
 						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
 						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)index);
-						if (index == GetMyPlayerID() && !IsServerNotPlayer) {
-							c->SetInput(Ret.GetInput(), true);//自身が動かすもの
+						if (index == GetViewPlayerID() && !IsServerNotPlayer) {
+							c->Input(Ret.GetInput());//自身が動かすもの
 						}
 						else {//サーバーからのデータで動くもの
 							//サーバーがCPUを動かす場合
@@ -266,7 +258,7 @@ namespace FPS_n2 {
 								//cpu
 								//p->GetAI()->Execute(&MyInput);
 							}
-							c->SetInput(Ret.GetInput(), true);
+							c->Input(Ret.GetInput());
 							bool override_true = true;
 							//override_true = Ret.GetIsActive();
 							if (override_true) {
@@ -282,13 +274,13 @@ namespace FPS_n2 {
 					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 						auto& p = PlayerMngr->GetPlayer(index);
 						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
-						if (index == GetMyPlayerID()) {
-							c->SetInput(MyInput, true);
+						if (index == GetViewPlayerID()) {
+							c->Input(MyInput);
 						}
 						else {
 							InputControl OtherInput;
 							p->GetAI()->Execute(&OtherInput);
-							c->SetInput(OtherInput, true);
+							c->Input(OtherInput);
 						}
 						//ダメージイベント処理
 						c->AddDamageEvent(&this->m_DamageEvents);
@@ -323,10 +315,10 @@ namespace FPS_n2 {
 #endif // DEBUG
 			//視点
 			{
-				auto& ViewChara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
+				auto& ViewChara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetViewPlayerID())->GetChara();
 				//カメラ
-				Vector3DX CamPos = ViewChara->GetEyePosition() + Camera3D::Instance()->GetCamShake();
-				Vector3DX CamVec = CamPos + ViewChara->GetEyeRotation().zvec() * -1.f;
+				Vector3DX CamPos = ViewChara->GetEyePositionCache() + Camera3D::Instance()->GetCamShake();
+				Vector3DX CamVec = CamPos + ViewChara->GetEyeRotationCache().zvec() * -1.f;
 				CamVec += Camera3D::Instance()->GetCamShake();
 				CamPos += Camera3D::Instance()->GetCamShake() * 2.f;
 #ifdef DEBUG_CAM
@@ -373,20 +365,19 @@ namespace FPS_n2 {
 				}
 #endif
 				Easing(&m_EffectPos, CamPos, 0.95f, EasingType::OutExpo);
-				EffectControl::Update_LoopEffect((int)Sceneclass::Effect::ef_dust, m_EffectPos, Vector3DX::forward(), 0.5f);
-				EffectControl::SetEffectColor((int)Sceneclass::Effect::ef_dust, 255, 255, 255, 64);
+				m_EffectControl.Update_LoopEffect(static_cast<int>(Sceneclass::Effect::ef_dust), m_EffectPos, Vector3DX::forward(), 0.5f);
+				m_EffectControl.SetEffectColor(static_cast<int>(Sceneclass::Effect::ef_dust), 255, 255, 255, 64);
 
-				CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeRotation().yvec());
+				CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeRotationCache().yvec());
 				auto fov_t = CameraParts->GetMainCamera().GetCamFov();
 				//fov
 				{
-					auto* OptionParts = OptionManager::Instance();
 					float fov = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
 					if (Chara->GetIsADS()) {
 						fov -= deg2rad(15);
 						fov /= std::max(1.f, Chara->GetSightZoomSize() / 2.f);
 					}
-					if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetShotSwitch()) {
+					if (Chara->IsGunShotSwitch()) {
 						fov -= deg2rad(5);
 						Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
 					}
@@ -402,12 +393,7 @@ namespace FPS_n2 {
 				auto far_t = CameraParts->GetMainCamera().GetCamFar();
 				CameraParts->SetMainCamera().SetCamInfo(fov_t, CameraParts->GetMainCamera().GetCamNear(), far_t);
 				//DoF
-				if (Chara->GetIsADS()) {
-					PostPassEffect::Instance()->Set_DoFNearFar(Scale3DRate * 0.3f, Scale3DRate * 5.f, Scale3DRate * 0.1f, far_t * 3.f);
-				}
-				else {
-					PostPassEffect::Instance()->Set_DoFNearFar(Scale3DRate * 0.3f, Scale3DRate * 5.f, Scale3DRate * 0.1f, far_t * 2.f);
-				}
+				PostPassEffect::Instance()->Set_DoFNearFar(Scale3DRate * 0.3f, Scale3DRate * 5.f, Scale3DRate * 0.1f, Chara->GetIsADS() ? (far_t * 3.f) : (far_t * 2.f));
 			}
 			//コンカッション
 			{
@@ -440,11 +426,11 @@ namespace FPS_n2 {
 			{
 				Vector3DX StartPos = Chara->GetEyePositionCache();
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
-					if (index == GetMyPlayerID()) { continue; }
+					if (index == GetViewPlayerID()) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 					Vector3DX TgtPos = c->GetEyePositionCache();
 					auto EndPos = TgtPos;
-					c->CanLookTarget = !BackGround->CheckLinetoMap(StartPos, &EndPos);
+					c->m_CanLookTarget = !BackGround->CheckLinetoMap(StartPos, &EndPos);
 					c->m_Length = (TgtPos - StartPos).magnitude();
 				}
 			}
@@ -456,7 +442,7 @@ namespace FPS_n2 {
 
 				this->m_UIclass.Update();
 			}
-			EffectControl::Execute();
+			m_EffectControl.Execute();
 			//
 			{
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
@@ -471,16 +457,16 @@ namespace FPS_n2 {
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
 			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* PostPassParts = PostPassEffect::Instance();
 			//使い回しオブジェ系
 			BackGround->Dispose();
-			m_GunsModify.DisposeSlots();
+			GunsModify::Instance()->DisposeSlots();
 			//
 			if (m_NetWorkController) {
 				m_NetWorkController->Dispose();
 				m_NetWorkController.reset();
 			}
 			{
-				auto* PostPassParts = PostPassEffect::Instance();
 				PostPassParts->SetLevelFilter(0, 255, 1.f);
 				PostPassParts->SetAberrationPower(1.f);
 				PostPassParts->Set_is_Blackout(false);
@@ -488,7 +474,7 @@ namespace FPS_n2 {
 				PostPassParts->Set_is_lens(false);
 				PostPassParts->Set_zoom_lens(1.f);
 			}
-			EffectControl::Dispose();
+			m_EffectControl.Dispose();
 			if (this->m_IsEnd) {//タイトルに戻る
 				SetNextSelect(0);
 			}
@@ -511,42 +497,38 @@ namespace FPS_n2 {
 		void			MainGameScene::DrawHitGraph(void) const noexcept {
 			auto* WindowParts = WindowSystem::DrawControl::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
-			auto* WindowSizeParts = WindowSizeControl::Instance();
 			int loop = 0;
 			while (true) {
-				auto ammo = ObjMngr->GetObj((int)ObjType::Ammo, loop);
+				auto ammo = ObjMngr->GetObj(static_cast<int>(ObjType::Ammo), loop);
 				if (ammo != nullptr) {
 					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
-					if (a->m_IsDrawHitUI && a->GetShootedID() == GetMyPlayerID()) {
+					if (a->m_IsDrawHitUI && a->GetShootedID() == GetViewPlayerID()) {
 						int			Alpha = static_cast<int>(a->m_Hit_alpha * 255.f);
-						Vector3DX	DispPos = a->m_Hit_DispPos;
-						if ((Alpha >= 10) && (DispPos.z >= 0.f && DispPos.z <= 1.f)) {
-							DispPos.x = static_cast<float>(static_cast<int>(DispPos.x * 1980 / WindowSizeParts->GetScreenY(1980)));
-							DispPos.y = static_cast<float>(static_cast<int>(DispPos.y * 1080 / WindowSizeParts->GetScreenY(1080)));
+						if ((Alpha >= 10) && (a->m_Hit_DispPos.z >= 0.f && a->m_Hit_DispPos.z <= 1.f)) {
 							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, Alpha);
 							//
 							int r = static_cast<int>(255 * std::clamp((float)a->m_Damage / 100.f * 2.f, 0.f, 1.f));
 							int g = 255 - r;
 							if (a->m_Damage > 0) {
 								WindowParts->SetBright(WindowSystem::DrawLayer::Normal, r, g, 0);
-								WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &hit_Graph, (int)DispPos.x, (int)DispPos.y, (float)static_cast<int>((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+								WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &hit_Graph, static_cast<int>(a->m_Hit_DispPos.x), static_cast<int>(a->m_Hit_DispPos.y), (float)static_cast<int>((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
 							}
 							if (a->m_ArmerDamage > 0) {
 								WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 128, 128, 128);
-								WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &guard_Graph, (int)DispPos.x, (int)DispPos.y, (float)static_cast<int>((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+								WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &guard_Graph, static_cast<int>(a->m_Hit_DispPos.x), static_cast<int>(a->m_Hit_DispPos.y), (float)static_cast<int>((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
 							}
 							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 							//
 							if (a->m_Damage > 0) {
 								WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic,
 									24, FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
-									(int)DispPos.x + a->m_Hit_AddX, (int)DispPos.y + a->m_Hit_AddY, GetColor(r, g, 0), Black, "%d", a->m_Damage);
+									static_cast<int>(a->m_Hit_DispPos.x + a->m_Hit_AddX), static_cast<int>(a->m_Hit_DispPos.y + a->m_Hit_AddY), GetColor(r, g, 0), Black, "%d", a->m_Damage);
 							}
 							//防いだダメージ
 							if (a->m_ArmerDamage > 0) {
 								WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic,
 									20, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
-									(int)DispPos.x + a->m_Hit_AddX - 10, (int)DispPos.y + a->m_Hit_AddY, Gray50, Black, "%d", a->m_ArmerDamage);
+									static_cast<int>(a->m_Hit_DispPos.x + a->m_Hit_AddX) - 10, static_cast<int>(a->m_Hit_DispPos.y + a->m_Hit_AddY), Gray50, Black, "%d", a->m_ArmerDamage);
 							}
 						}
 					}
@@ -560,71 +542,36 @@ namespace FPS_n2 {
 		}
 		//
 		void			MainGameScene::MainDraw_Sub(void) const noexcept {
-			auto* PlayerMngr = Player::PlayerManager::Instance();
 			SetFogEnable(TRUE);
 			SetVerticalFogEnable(TRUE);
 			BackGround::BackGroundClass::Instance()->Draw();
 			ObjectManager::Instance()->Draw();
 			//ObjectManager::Instance()->Draw_Depth();
+			SetVerticalFogEnable(FALSE);
+			SetFogEnable(FALSE);
 #ifdef DEBUG
+			auto* PlayerMngr = Player::PlayerManager::Instance();
 			for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
 				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
 			}
 			for (auto& s : m_LineDebug) {
-				int index = (int)(&s - &m_LineDebug.front());
+				int index = static_cast<int>(&s - &m_LineDebug.front());
 				DrawCapsule3D(s.PosA.get(), s.PosB.get(), 0.02f * Scale3DRate, 8, GetColor(0, 0, (32 * index) % 256), GetColor(0, 0, 0), TRUE);
 			}
 #endif // DEBUG
-			SetVerticalFogEnable(FALSE);
-			SetFogEnable(FALSE);
-
-
-			//シェーダー描画用パラメーターセット
-			auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
-			if (Chara->GetGunPtrNow()) {
-				Chara->GetGunPtrNow()->UpdateReticle();
-			}
-			else {
-				auto* PostPassParts = PostPassEffect::Instance();
-				PostPassParts->Set_is_lens(false);
-				PostPassParts->Set_zoom_lens(1.f);
-			}
-			//
-			for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
-				if (index == GetMyPlayerID()) { continue; }
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
-				Vector3DX EyePos = ConvWorldPosToScreenPos(c->GetEyePositionCache().get());
-				if (0.f < EyePos.z && EyePos.z < 1.f) {
-					auto* WindowSizeParts = WindowSizeControl::Instance();
-					c->m_CameraPos.x = static_cast<float>(static_cast<int>(EyePos.x * 1980 / WindowSizeParts->GetScreenY(1980)));
-					c->m_CameraPos.y = static_cast<float>(static_cast<int>(EyePos.y * 1080 / WindowSizeParts->GetScreenY(1080)));
-					c->m_CameraPos.z = EyePos.z;
-				}
-			}
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetMyPlayerID())->GetChara();
-			if (!Chara->IsAlive()) { return; }
-			//レティクル表示
-			if (Chara->GetGunPtrNow()) {
-				if(!((Chara->GetADSPer() < 0.8f) && Chara->GetSightZoomSize() > 1.f)) {
-					Chara->GetGunPtrNow()->DrawReticle(Chara->GetLeanRad());
-				}
-			}
-
-
-			DrawHitGraph();			//着弾表示
-			//UI
 			auto* SceneParts = SceneControl::Instance();
-			if (!SceneParts->IsPause()) {
-				this->m_UIclass.Draw();
-			}
-			//通信設定
 			//auto* NetBrowser = NetWorkBrowser::Instance();
-			//NetBrowser->Draw();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetViewPlayerID())->GetChara();
+			if (!Chara->IsAlive()) { return; }
+			Chara->DrawReticle();										//レティクル表示
+			DrawHitGraph();												//着弾表示
+			if (!SceneParts->IsPause()) { this->m_UIclass.Draw(); }		//UI
+			//NetBrowser->Draw();										//通信設定
 			if (m_NetWorkController) {
 				if (m_NetWorkController->GetPing() >= 0.f) {
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
@@ -644,16 +591,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-
 			m_FadeControl.Draw();
-		}
-		//load
-		void			MainGameScene::LoadGun(const std::string& FolderName, PlayerID ID, bool IsPreset, int Sel) noexcept {
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(ID)->GetChara();
-			c->LoadCharaGun(FolderName, Sel);
-			m_GunsModify.CreateSelData(c->GetGunPtr(Sel), IsPreset);
-			c->GetGunPtr(Sel)->Init_Gun();
 		}
 		//
 		void			MainGameScene::UpdateBullet(void) noexcept {
@@ -664,7 +602,7 @@ namespace FPS_n2 {
 
 			int loop = 0;
 			while (true) {
-				auto ammo = ObjMngr->GetObj((int)ObjType::Ammo, loop);
+				auto ammo = ObjMngr->GetObj(static_cast<int>(ObjType::Ammo), loop);
 				if (ammo != nullptr) {
 					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
 					if (a->IsActive()) {
@@ -679,7 +617,6 @@ namespace FPS_n2 {
 
 						for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
-							//if (tgt->GetMyPlayerID() == a->GetShootedID()) { continue; }
 							HitPoint Damage = a->GetDamage();
 							ArmerPoint ArmerDamage = 0;
 							if (tgt->CheckDamageRay(&Damage, &ArmerDamage, true, (PlayerID)a->GetShootedID(), repos_tmp, &pos_tmp)) {
@@ -725,8 +662,8 @@ namespace FPS_n2 {
 									}
 								}
 							}
-							EffectControl::SetOnce_Any((int)Sceneclass::Effect::ef_gndsmoke, pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale3DRate);
-							SE->Get(SoundType::SE, (int)SoundEnum::HitGround0 + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
+							m_EffectControl.SetOnce_Any(static_cast<int>(Sceneclass::Effect::ef_gndsmoke), pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale3DRate);
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGround0) + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
 						}
 					}
 				}

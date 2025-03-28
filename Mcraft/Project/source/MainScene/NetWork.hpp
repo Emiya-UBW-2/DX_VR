@@ -280,7 +280,7 @@ namespace FPS_n2 {
 			const auto& GetClient(void) const noexcept { return this->m_IsClient; }
 			const auto& GetServerPlayer(void) const noexcept { return this->m_IsServerPlayer; }
 			const auto& GetPing(void) const noexcept { return this->m_Ping; }
-			const auto& GetMyPlayerID(void) const noexcept { return this->m_PlayerNet.GetMyLocalPlayerID(); }
+			const auto& GetMyLocalPlayerID(void) const noexcept { return this->m_PlayerNet.GetMyLocalPlayerID(); }
 
 			auto& SetLocalData(void) noexcept { return this->m_LocalData; }
 		public:

@@ -24,11 +24,11 @@ namespace FPS_n2 {
 				if (m_ModSlotControl.GetPartsFrameWorldMat(frame, &Ret)) {
 					return Ret;
 				}
-				if (HaveFrame((int)frame)) {
+				if (HaveFrame(static_cast<int>(frame))) {
 					Ret = GetFrameWorldMat(frame);
 					if (frame == GunFrame::Sight) {
-						if (GetObj_const().GetFrameChildNum(GetFrame((int)frame)) > 0) {
-							Vector3DX vec = (GetObj_const().GetChildFrameWorldMatrix(GetFrame((int)frame), 0).pos() - Ret.pos()).normalized();
+						if (GetObj_const().GetFrameChildNum(GetFrame(static_cast<int>(frame))) > 0) {
+							Vector3DX vec = (GetObj_const().GetChildFrameWorldMatrix(GetFrame(static_cast<int>(frame)), 0).pos() - Ret.pos()).normalized();
 							//Vector3DX::Cross(pRet->xvec(), vec)
 							Ret = (Ret.rotation() * Matrix4x4DX::RotVec2(Ret.yvec(), vec)) * Matrix4x4DX::Mtrans(Ret.pos());
 						}
@@ -77,7 +77,7 @@ namespace FPS_n2 {
 				m_ModSlotControl.DisposeModSlotControl();
 			}
 		private:
-			int	GetFrameNum() noexcept override { return (int)GunFrame::Max; }
+			int	GetFrameNum() noexcept override { return static_cast<int>(GunFrame::Max); }
 			const char* GetFrameStr(int id) noexcept override { return GunFrameName[id]; }
 		public:
 			virtual void	FirstExecute_Mod(void) noexcept {}
@@ -86,7 +86,7 @@ namespace FPS_n2 {
 
 		class MagazineClass : public ModClass {
 		public:
-			MagazineClass(void) noexcept { this->m_objType = (int)ObjType::Magazine; }
+			MagazineClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Magazine); }
 			~MagazineClass(void) noexcept {}
 		public:
 			void			FirstExecute_Mod(void) noexcept override {
@@ -104,14 +104,14 @@ namespace FPS_n2 {
 		private:
 		public://ゲッター
 		public:
-			LowerClass(void) noexcept { this->m_objType = (int)ObjType::Lower; }
+			LowerClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Lower); }
 			~LowerClass(void) noexcept {}
 		public:
 		};
 
 		class UpperClass : public ModClass {
 		public:
-			UpperClass(void) noexcept { this->m_objType = (int)ObjType::Upper; }
+			UpperClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Upper); }
 			~UpperClass(void) noexcept {}
 		};
 
@@ -119,7 +119,7 @@ namespace FPS_n2 {
 		private:
 		public://ゲッター
 		public:
-			BarrelClass(void) noexcept { this->m_objType = (int)ObjType::Barrel; }
+			BarrelClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Barrel); }
 			~BarrelClass(void) noexcept {}
 		public:
 		};
@@ -128,20 +128,20 @@ namespace FPS_n2 {
 		private:
 		public://ゲッター
 		public:
-			UnderRailClass(void) noexcept { this->m_objType = (int)ObjType::UnderRail; }
+			UnderRailClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::UnderRail); }
 			~UnderRailClass(void) noexcept {}
 		public:
 		};
 
 		class SightClass : public ModClass {
 		public:
-			SightClass(void) noexcept { this->m_objType = (int)ObjType::Sight; }
+			SightClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Sight); }
 			~SightClass(void) noexcept {}
 		};
 
 		class MuzzleClass : public ModClass {
 		public:
-			MuzzleClass(void) noexcept { this->m_objType = (int)ObjType::MuzzleAdapter; }
+			MuzzleClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::MuzzleAdapter); }
 			~MuzzleClass(void) noexcept {}
 		};
 	};

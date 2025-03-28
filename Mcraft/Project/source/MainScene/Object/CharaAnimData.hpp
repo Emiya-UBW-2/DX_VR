@@ -38,7 +38,7 @@ namespace FPS_n2 {
 			M870_ready,
 			Max,
 		};
-		static const char* EnumGunAnimName[(int)EnumGunAnim::Max] = {
+		static const char* EnumGunAnimName[static_cast<int>(EnumGunAnim::Max)] = {
 			"M1911_ready1",
 			"M1911_ready2",
 			"M1911_aim1",
@@ -183,7 +183,7 @@ namespace FPS_n2 {
 #endif
 		public:
 			void	Load(const char* filepath) {
-				for (int loop = 0; loop < (int)EnumGunAnim::Max; loop++) {
+				for (int loop = 0; loop < static_cast<int>(EnumGunAnim::Max); loop++) {
 					std::string Path = filepath;
 					Path += EnumGunAnimName[loop];
 					Path += ".txt";
@@ -306,7 +306,7 @@ namespace FPS_n2 {
 
 
 		struct GunAnimSet {
-			std::array<EnumGunAnim, (int)EnumGunAnimType::Max> Anim;
+			std::array<EnumGunAnim, static_cast<int>(EnumGunAnimType::Max)> Anim;
 		};
 		const GunAnimSet GunAnimeSets[] = {
 			{

@@ -6,7 +6,12 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class GunsModify {
+		class GunsModify : public SingletonBase<GunsModify> {
+		private:
+			friend class SingletonBase<GunsModify>;
+		private:
+			GunsModify() {}
+			virtual ~GunsModify() {}
 		public:
 			struct Slot {
 				GunSlot			SlotType{ GunSlot::Magazine };

@@ -47,7 +47,7 @@ namespace FPS_n2 {
 			EyeOffsetPos,
 			Max,
 		};
-		static const char* GunFrameName[(int)GunFrame::Max] = {
+		static const char* GunFrameName[static_cast<int>(GunFrame::Max)] = {
 			"ÉZÉìÉ^Å[",
 			"cart",
 			"cartvec",
@@ -83,7 +83,7 @@ namespace FPS_n2 {
 			FULL,
 			Max,
 		};
-		static const char* SHOTTYPEName[(int)SHOTTYPE::Max] = {
+		static const char* SHOTTYPEName[static_cast<int>(SHOTTYPE::Max)] = {
 			"BOLT",
 			"SEMI",
 			"FULL",
@@ -149,7 +149,7 @@ namespace FPS_n2 {
 			MuzzleAdapter,
 			Max,
 		};
-		static const char* GunSlotName[(int)GunSlot::Max] = {
+		static const char* GunSlotName[static_cast<int>(GunSlot::Max)] = {
 			"Gun",
 			"Magazine",
 			"Upper",
@@ -164,7 +164,7 @@ namespace FPS_n2 {
 			Suppressor,
 			Max,
 		};
-		static const char* GunShootSoundName[(int)GunShootSound::Max] = {
+		static const char* GunShootSoundName[static_cast<int>(GunShootSound::Max)] = {
 			"Normal",
 			"Suppressor",
 		};

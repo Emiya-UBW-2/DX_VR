@@ -82,7 +82,7 @@ namespace FPS_n2 {
 				this->m_IsDrawHitUI = false;
 			}
 		public: //コンストラクタ、デストラクタ
-			AmmoClass(void) noexcept { this->m_objType = (int)ObjType::Ammo; }
+			AmmoClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Ammo); }
 			~AmmoClass(void) noexcept { m_AmmoData.reset(); }
 		public: //継承
 			void			Init_Sub() noexcept override {
@@ -126,9 +126,12 @@ namespace FPS_n2 {
 			//
 			void			DrawShadow(void) noexcept override {}
 			void			CheckDraw(void) noexcept override {
+				auto* WindowSizeParts = WindowSizeControl::Instance();
 				auto tmp = ConvWorldPosToScreenPos(this->pos.get());
 				if (0.f < tmp.z && tmp.z < 1.f) {
-					this->m_Hit_DispPos = tmp;
+					this->m_Hit_DispPos.x = static_cast<float>(static_cast<int>(tmp.x * 1980 / WindowSizeParts->GetScreenY(1980)));
+					this->m_Hit_DispPos.y = static_cast<float>(static_cast<int>(tmp.y * 1080 / WindowSizeParts->GetScreenY(1080)));
+					this->m_Hit_DispPos.z = tmp.z;
 				}
 			}
 			void			Draw(bool isDrawSemiTrans) noexcept override {

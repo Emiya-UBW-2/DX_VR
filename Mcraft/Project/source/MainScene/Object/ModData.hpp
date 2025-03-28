@@ -13,7 +13,7 @@ namespace FPS_n2 {
 				std::vector<std::string>	m_Conflicts;
 				bool						m_IsNeed{ false };
 
-				const auto					ItemMaxCount(void) const noexcept { return  this->m_IsNeed ? ((int)this->m_ItemsUniqueID.size() - 1) : (int)this->m_ItemsUniqueID.size(); }
+				const auto					ItemMaxCount(void) const noexcept { return  this->m_IsNeed ? (static_cast<int>(this->m_ItemsUniqueID.size()) - 1) : static_cast<int>(this->m_ItemsUniqueID.size()); }
 			};
 		private:
 			std::string		m_path;

@@ -10,8 +10,8 @@ namespace FPS_n2 {
 		void			TitleScene::Set_Sub(void) noexcept {
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
-			this->m_GameFadeIn = 1.f;
-			this->m_GameStart = 0.f;
+			m_FadeControl.Init();
+			this->m_IsEnd = false;
 			this->m_TitleImage.Load("data/UI/Title.png");
 			// 
 			ButtonParts->ResetSel();
@@ -27,7 +27,6 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_LOOP, TRUE);
 			// */
-			m_CloseResetSave = false;
 		}
 		bool			TitleScene::Update_Sub(void) noexcept {
 			auto* Pad = PadControl::Instance();
@@ -35,7 +34,6 @@ namespace FPS_n2 {
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
-			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			if (SceneParts->IsPause()) {
 				return true;
@@ -54,13 +52,16 @@ namespace FPS_n2 {
 					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizeParts->Get(9992));
 				}
 			);
-			if (!PopUpParts->IsActivePop() && (this->m_GameFadeIn == 0.f) && (this->m_GameStart == 0.f)) {
+			if (!PopUpParts->IsActivePop() && m_FadeControl.IsClear()) {
 				ButtonParts->UpdateInput();
 				// ‘I‘ðŽž‚Ì‹““®
 				if (ButtonParts->GetTriggerButton()) {
 					switch (ButtonParts->GetSelect()) {
 					case 0:
-						this->m_GameStart += 0.0001f;
+						if (!this->m_IsEnd) {
+							m_FadeControl.SetBlackOut(true);
+						}
+						this->m_IsEnd = true;
 						break;
 					case 1:
 						OptionPopup::Instance()->SetActive();
@@ -81,16 +82,14 @@ namespace FPS_n2 {
 					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, TRUE);
 				}
 			}
-			if (m_CloseResetSave && PopUpParts->IsActivePop()) {
-				m_CloseResetSave = false;
-				PopUpParts->EndAll();
-			}
 			// 
 			ButtonParts->Update();
 			// 
-			this->m_GameFadeIn = std::max(this->m_GameFadeIn - DXLib_refParts->GetDeltaTime() / 0.5f, 0.f);
-			if (this->m_GameStart != 0.f) { this->m_GameStart += DXLib_refParts->GetDeltaTime() / 0.5f; }
-			return (this->m_GameStart <= 1.f);
+			m_FadeControl.Update();
+			if (this->m_IsEnd && m_FadeControl.IsAll()) {
+				return false;
+			}
+			return true;
 		}
 		void			TitleScene::Dispose_Sub(void) noexcept {
 			auto* SaveDataParts = SaveDataClass::Instance();
@@ -113,12 +112,9 @@ namespace FPS_n2 {
 			SetNextSelect(static_cast<size_t>(ButtonParts->GetSelect()));
 		}
 		// 
-		void			TitleScene::MainDraw_Sub(void) const noexcept {
-			auto* WindowSizeParts = WindowSizeControl::Instance();
-			// ”wŒi
-			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, WindowSizeParts->GetScreenXMax(), WindowSizeParts->GetScreenYMax(), Gray50, TRUE);
-		}
 		void			TitleScene::DrawUI_Base_Sub(void) const noexcept {
+			// ”wŒi
+			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Gray50, TRUE);
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
@@ -138,15 +134,7 @@ namespace FPS_n2 {
 					(32), 1080 - (32 + 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
 			}
 			// 
-			{
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameFadeIn, 0.f, 1.f)), 0, 255));
-				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Black, TRUE);
-
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * std::clamp(this->m_GameStart, 0.f, 1.f)), 0, 255));
-				WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, White, TRUE);
-
-				WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-			}
+			m_FadeControl.Draw();
 		}
 	};
 };

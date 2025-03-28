@@ -7,7 +7,7 @@ namespace FPS_n2 {
 		void		ModDataClass::SetSlot(const std::string& LEFT, const std::string& RIGHT) noexcept {
 			if (LEFT.find("Slot") != std::string::npos) {
 				if (LEFT.find("Type") != std::string::npos) {
-					for (int i = 0; i < (int)GunSlot::Max; i++) {
+					for (int i = 0; i < static_cast<int>(GunSlot::Max); i++) {
 						if (RIGHT == GunSlotName[i]) {
 							this->m_PartsSlot.resize(this->m_PartsSlot.size() + 1);
 							this->m_PartsSlot.back().m_GunSlot = (GunSlot)i;
@@ -18,7 +18,7 @@ namespace FPS_n2 {
 				else if (LEFT.find("Item") != std::string::npos) {
 					std::string Path;
 					Path = "data/Mods/";
-					Path += GunSlotName[(int)this->m_PartsSlot.back().m_GunSlot];
+					Path += GunSlotName[static_cast<int>(this->m_PartsSlot.back().m_GunSlot)];
 					Path += "/" + RIGHT + "/";
 					this->m_PartsSlot.back().m_ItemsUniqueID.emplace_back((*ModDataManager::Instance()->AddData(Path))->GetUniqueID());
 				}
@@ -42,7 +42,7 @@ namespace FPS_n2 {
 				this->m_IsRecoilReturn = true;
 			}
 			else if (LEFT == "shottype") {
-				for (int i = 0; i < (int)SHOTTYPE::Max; i++) {
+				for (int i = 0; i < static_cast<int>(SHOTTYPE::Max); i++) {
 					if (RIGHT == SHOTTYPEName[i]) {
 						this->m_ShotType = (SHOTTYPE)i;
 						this->m_IsShotType = true;
@@ -52,7 +52,7 @@ namespace FPS_n2 {
 			}
 
 			else if (LEFT == "GunShootSound") {
-				for (int i = 0; i < (int)GunShootSound::Max; i++) {
+				for (int i = 0; i < static_cast<int>(GunShootSound::Max); i++) {
 					if (RIGHT == GunShootSoundName[i]) {
 						this->m_GunShootSound = (GunShootSound)i;
 						break;

@@ -28,7 +28,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(Controls::PADS::DIR_STICK, true);
 	Pad->SetIsUseButton(Controls::PADS::LEAN_L, true);
 	Pad->SetIsUseButton(Controls::PADS::LEAN_R, true);
-	Pad->SetIsUseButton(Controls::PADS::RELOAD, true);//UI‚Ì‚İ
+	Pad->SetIsUseButton(Controls::PADS::RELOAD, true);
 	Pad->SetIsUseButton(Controls::PADS::INTERACT, true);//UI‚Ì‚İ
 	Pad->SetIsUseButton(Controls::PADS::THROW, true);
 	Pad->SetIsUseButton(Controls::PADS::MELEE, false);
@@ -41,7 +41,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(Controls::PADS::ULT, true);
 	Pad->SetIsUseButton(Controls::PADS::SQUAT, false);
 	Pad->SetIsUseButton(Controls::PADS::PRONE, false);
-	Pad->SetIsUseButton(Controls::PADS::CHECK, false);
+	Pad->SetIsUseButton(Controls::PADS::CHECK, true);
 	//
 	auto* DXLib_refParts = DXLib_ref::Instance();
 	if (DXLib_refParts->FirstBootSetting()) { return 0; }
@@ -62,6 +62,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::Sceneclass::GunAnimManager::Create();
 	FPS_n2::Sceneclass::ModDataManager::Create();
 	FPS_n2::Sceneclass::AmmoDataManager::Create();
+
+	FPS_n2::Sceneclass::GunsModify::Create();
 	//
 	auto* SaveDataParts = SaveDataClass::Instance();
 	//‰ŠúŠJ•ú

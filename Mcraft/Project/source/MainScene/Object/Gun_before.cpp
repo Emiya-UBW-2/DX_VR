@@ -4,7 +4,7 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		const bool	ModSlotControl::IsEffectParts(GunSlot Slot, GunFrame frame) const noexcept {
-			if (this->m_Parts_Ptr[(int)Slot] == nullptr) {
+			if (this->m_Parts_Ptr[static_cast<int>(Slot)] == nullptr) {
 				return false;
 			}
 			bool Ret = false;
@@ -86,21 +86,21 @@ namespace FPS_n2 {
 				break;
 			}
 			if (Ret) {
-				auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[(int)Slot]);
-				if (Obj->HaveFrame((int)frame)) {
+				auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[static_cast<int>(Slot)]);
+				if (Obj->HaveFrame(static_cast<int>(frame))) {
 					return true;
 				}
 			}
 			return false;
 		}
 		const bool ModSlotControl::HasFrameBySlot(GunFrame frame) const noexcept {
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
 					return true;
 				}
 			}
 			//ë∑Ç™Ç†ÇÍÇŒÇªÇøÇÁÇóDêÊ
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (this->m_Parts_Ptr[loop]) {
 					if (((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModSlot().HasFrameBySlot(frame)) {
 						return true;
@@ -111,7 +111,7 @@ namespace FPS_n2 {
 		}
 		const bool	ModSlotControl::GetPartsFrameLocalMatBySlot(GunFrame frame, Matrix4x4DX* pRet) const noexcept {
 			bool Ret = false;
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
 					auto& Ptr = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
 					*pRet = Ptr->GetFrameLocalMat(frame);
@@ -119,7 +119,7 @@ namespace FPS_n2 {
 				}
 			}
 			//ë∑Ç™Ç†ÇÍÇŒÇªÇøÇÁÇóDêÊ
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (this->m_Parts_Ptr[loop]) {
 					if (((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModSlot().GetPartsFrameLocalMatBySlot(frame, pRet)) {
 						Ret = true;
@@ -130,13 +130,13 @@ namespace FPS_n2 {
 		}
 		const bool	ModSlotControl::GetPartsFrameWorldMat(GunFrame frame, Matrix4x4DX* pRet) const noexcept {
 			bool Ret = false;
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
 					auto& m = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
 					*pRet = m->GetFrameWorldMat_P(frame);
 					if (frame == GunFrame::Sight) {
-						if (m->GetObj_const().GetFrameChildNum(m->GetFrame((int)frame)) > 0) {
-							Vector3DX vec = (m->GetObj_const().GetChildFrameWorldMatrix(m->GetFrame((int)frame), 0).pos() - pRet->pos()).normalized();
+						if (m->GetObj_const().GetFrameChildNum(m->GetFrame(static_cast<int>(frame))) > 0) {
+							Vector3DX vec = (m->GetObj_const().GetChildFrameWorldMatrix(m->GetFrame(static_cast<int>(frame)), 0).pos() - pRet->pos()).normalized();
 							//Vector3DX::Cross(pRet->xvec(), vec)
 							*pRet *= Matrix4x4DX::RotVec2(pRet->yvec(), vec);
 						}
@@ -145,7 +145,7 @@ namespace FPS_n2 {
 				}
 			}
 			//ë∑Ç™Ç†ÇÍÇŒÇªÇøÇÁÇóDêÊ
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (this->m_Parts_Ptr[loop]) {
 					if (((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModSlot().GetPartsFrameWorldMat(frame, pRet)) {
 						Ret = true;
@@ -156,54 +156,54 @@ namespace FPS_n2 {
 		}
 
 		void		ModSlotControl::GetChildPartsList(std::vector<const SharedObj*>* Ret) const noexcept {
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (this->m_Parts_Ptr[loop]) {
 					Ret->emplace_back(&this->m_Parts_Ptr[loop]);
 				}
 			}
 			//ë∑Ç™Ç†ÇÍÇŒÇªÇøÇÁÇ‡
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (this->m_Parts_Ptr[loop]) {
 					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModSlot().GetChildPartsList(Ret);
 				}
 			}
 		}
 		void		ModSlotControl::ResetPartsFrameLocalMat(GunFrame frame) noexcept {
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
 					auto& Ptr = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
-					Ptr->GetObj().ResetFrameUserLocalMatrix(Ptr->GetFrame((int)frame));
+					Ptr->GetObj().ResetFrameUserLocalMatrix(Ptr->GetFrame(static_cast<int>(frame)));
 				}
 			}
 			//ë∑Ç™Ç†ÇÍÇŒÇªÇøÇÁÇ‡
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (this->m_Parts_Ptr[loop]) {
 					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModSlot().ResetPartsFrameLocalMat(frame);
 				}
 			}
 		}
 		void		ModSlotControl::SetPartsFrameLocalMat(GunFrame frame, const Matrix4x4DX& value) noexcept {
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (IsEffectParts((GunSlot)loop, frame)) {
 					auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
-					Obj->GetObj().SetFrameLocalMatrix(Obj->GetFrame((int)frame), value * Obj->GetFrameBaseLocalMat((int)frame));
+					Obj->GetObj().SetFrameLocalMatrix(Obj->GetFrame(static_cast<int>(frame)), value * Obj->GetFrameBaseLocalMat(static_cast<int>(frame)));
 				}
 			}
 			//ë∑Ç™Ç†ÇÍÇŒÇªÇøÇÁÇ‡
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (this->m_Parts_Ptr[loop]) {
 					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModSlot().SetPartsFrameLocalMat(frame, value);
 				}
 			}
 		}
 		void		ModSlotControl::SetActiveBySlot(bool value) noexcept {
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (this->m_Parts_Ptr[loop]) {
 					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->SetActive(value);
 				}
 			}
 			//ë∑Ç™Ç†ÇÍÇŒÇªÇøÇÁÇ‡
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (this->m_Parts_Ptr[loop]) {
 					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->GetModSlot().SetActiveBySlot(value);
 				}
@@ -211,15 +211,15 @@ namespace FPS_n2 {
 		}
 
 		void		ModSlotControl::RemoveMod(GunSlot Slot) noexcept {
-			if (this->m_Parts_Ptr[(int)Slot]) {
+			if (this->m_Parts_Ptr[static_cast<int>(Slot)]) {
 				auto* ObjMngr = ObjectManager::Instance();
-				ObjMngr->DelObj(&this->m_Parts_Ptr[(int)Slot]);
-				this->m_Parts_Ptr[(int)Slot].reset();
+				ObjMngr->DelObj(&this->m_Parts_Ptr[static_cast<int>(Slot)]);
+				this->m_Parts_Ptr[static_cast<int>(Slot)].reset();
 			}
 		}
 
 		void		ModSlotControl::UpdatePartsAnim(MV1& pParent) {
-			for (int loop = 0; loop < (int)GunSlot::Max; loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 				if (this->m_Parts_Ptr[loop]) {
 					//1ÇÃÉtÉåÅ[ÉÄà⁄ìÆó Çñ≥éãÇ∑ÇÈ
 					auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
@@ -227,15 +227,15 @@ namespace FPS_n2 {
 						Obj->GetObj().SetAnim(static_cast<int>((GunAnimeID)i)).SetPer(pParent.SetAnim(i).GetPer());
 						Obj->GetObj().SetAnim(static_cast<int>((GunAnimeID)i)).SetTime(pParent.SetAnim(i).GetTime());
 					}
-					Obj->GetObj().ResetFrameUserLocalMatrix(Obj->GetFrame((int)GunFrame::Center));
+					Obj->GetObj().ResetFrameUserLocalMatrix(Obj->GetFrame(static_cast<int>(GunFrame::Center)));
 					Obj->GetObj().UpdateAnimAll();
-					Obj->GetObj().SetFrameLocalMatrix(Obj->GetFrame((int)GunFrame::Center), Obj->GetFrameLocalMat(GunFrame::Center).rotation() * Obj->GetFrameBaseLocalMat((int)GunFrame::Center));
+					Obj->GetObj().SetFrameLocalMatrix(Obj->GetFrame(static_cast<int>(GunFrame::Center)), Obj->GetFrameLocalMat(GunFrame::Center).rotation() * Obj->GetFrameBaseLocalMat(static_cast<int>(GunFrame::Center)));
 				}
 			}
 		}
 		void		ModSlotControl::UpdatePartsMove(const Matrix4x4DX& pMat, GunSlot Slot) {
-			if (this->m_Parts_Ptr[(int)Slot]) {
-				auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[(int)Slot]);
+			if (this->m_Parts_Ptr[static_cast<int>(Slot)]) {
+				auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[static_cast<int>(Slot)]);
 				Obj->SetModMatrix(Matrix3x3DX::Get33DX(pMat), pMat.pos());
 			}
 		}
@@ -244,9 +244,9 @@ namespace FPS_n2 {
 			RemoveMod(Slot);
 			auto* Slots = this->m_ModDataClass->GetPartsSlot(Slot);
 			if (Slots) {
-				if (this->m_Parts_Ptr[(int)Slot] == nullptr) {
+				if (this->m_Parts_Ptr[static_cast<int>(Slot)] == nullptr) {
 					auto AddObj = [&](const SharedObj& NewObj) {
-						this->m_Parts_Ptr[(int)Slot] = NewObj;
+						this->m_Parts_Ptr[static_cast<int>(Slot)] = NewObj;
 						auto& Data = *ModDataManager::Instance()->GetData(Slots->m_ItemsUniqueID.at(ID));
 
 						auto* ObjMngr = ObjectManager::Instance();
@@ -282,7 +282,7 @@ namespace FPS_n2 {
 				}
 			}
 
-			return this->m_Parts_Ptr[(int)Slot];
+			return this->m_Parts_Ptr[static_cast<int>(Slot)];
 		}
 	};
 };

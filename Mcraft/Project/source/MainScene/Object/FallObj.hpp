@@ -14,7 +14,7 @@ namespace FPS_n2 {
 
 			bool m_GrenadeBombFlag{ false };
 		public:
-			FallObjClass(void) noexcept { this->m_objType = (int)ObjType::FallObj; }
+			FallObjClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::FallObj); }
 			~FallObjClass(void) noexcept {}
 		public:
 			bool			PopGrenadeBombSwitch();

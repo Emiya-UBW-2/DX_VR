@@ -1899,7 +1899,7 @@ namespace FPS_n2 {
 				}
 			}
 #if defined(DEBUG) & EDITBLICK
-			int x = (int)(PutPos.x / CellScale), y = (int)(PutPos.y / CellScale), z = (int)(PutPos.z / CellScale);
+			int x = static_cast<int>(PutPos.x / CellScale), y = static_cast<int>(PutPos.y / CellScale), z = static_cast<int>(PutPos.z / CellScale);
 			SetUseLighting(FALSE);
 			DrawCube3D(
 				(Vector3DX::vget((float)(x - xput / 2), (float)(y - yput / 2), (float)(z - zput / 2)) * CellScale).get(),

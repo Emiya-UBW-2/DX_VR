@@ -23,9 +23,7 @@ namespace FPS_n2 {
 			if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 0.f * Scale3DRate, &EndPos)) {
 				pos_t = EndPos;
 			}
-
-			MyChara->MovePoint(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, 0);
-			MyChara->Heal(100, true);
+			MyChara->Spawn(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, 0);
 		}
 		//
 		AIControl::AIControl() {

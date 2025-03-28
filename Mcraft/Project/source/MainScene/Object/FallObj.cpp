@@ -46,7 +46,7 @@ namespace FPS_n2 {
 						this->m_yAdd = 0.001f;
 						if (m_SoundSwitch) {
 							m_SoundSwitch = false;
-							SoundPool::Instance()->Get(SoundType::SE, (int)this->m_CallSound)->Play3D(PosBuf, Scale3DRate * 3.f);
+							SoundPool::Instance()->Get(SoundType::SE, static_cast<int>(this->m_CallSound))->Play3D(PosBuf, Scale3DRate * 3.f);
 						}
 					}
 				}
