@@ -5,7 +5,7 @@ using namespace DXLibRef;
 
 #include "Enums.hpp"
 
-#define DEBUG_CAM
+//#define DEBUG_CAM
 
 #ifdef DEBUG_CAM
 extern int DBG_CamSel;

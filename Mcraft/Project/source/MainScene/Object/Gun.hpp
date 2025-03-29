@@ -20,15 +20,17 @@ namespace FPS_n2 {
 			ModSlotControl										m_ModSlotControl{};
 
 			std::shared_ptr<AmmoDataClass>						m_ChamberAmmoData{ nullptr };		//
-			std::array<ArmMovePerClass, static_cast<int>(EnumGunAnimType::Max)>	m_Arm{};
-			GunAnimeID											m_GunAnime{ GunAnimeID::Base };	//
+			std::array<ArmMovePerClass, static_cast<int>(GunAnimeID::ChoiceOnceMax)>	m_Arm{};
+			GunAnimeID										m_GunAnime{ GunAnimeID::Shot };	//
 			float												m_GunAnimeTime{ 0.f };
 			bool												m_ReloadAmmoCancel{ false };		//
 			bool												m_ShotEnd{ false };		//
 			bool												m_ShotSwitch{ false };				//
 			int													m_boltSoundSequence{ -1 };			//サウンド
 			bool												m_IsChamberOn{ false };				//チャンバーに弾を込めるか
+			bool												m_PrevChamberOn{ false };
 			bool												m_IsEject{ false };
+			bool												m_PrevEject{ false };
 			int													m_NextMagNum{ 0 };
 			int													m_NextMagUniqueID{ 0 };
 			FallControl											m_MagFall;
@@ -97,25 +99,20 @@ namespace FPS_n2 {
 
 			const auto&			GetShotSwitch(void) const noexcept { return this->m_ShotSwitch; }
 			const auto&			GetGunAnime(void) const noexcept { return this->m_GunAnime; }
-			const auto			GetGunAnimeID(void) const noexcept {
-				if (GetGunAnime() == GunAnimeID::Throw) {
-					return static_cast<int>(GunAnimeID::Base);
+			const auto			GetGunAnimeID(GunAnimeID Select) const noexcept {
+				if (Select == GunAnimeID::None) {
+					return -1;
 				}
-				if (GetGunAnime() == GunAnimeID::ThrowReady) {
-					return static_cast<int>(GunAnimeID::Base);
-				}
-				return static_cast<int>(this->m_GunAnime);
+				return GetModSlot().GetModData()->GetAnimSelectList().at(static_cast<int>(Select));
 			}
+			const auto			GetNowGunAnimeID(void) const noexcept { return GetGunAnimeID(GetGunAnime()); }
 
 			const auto			IsThrowWeapon() const noexcept { return GetModSlot().GetModData()->GetIsThrowWeapon(); }
 
-			const auto			GetNowGunAnimeTime(void) const noexcept { return GetObj_const().GetAnim(GetGunAnimeID()).GetTime(); }
-			const auto			GetNowGunAnimeTimePer(void) const noexcept { return GetObj_const().GetAnim(GetGunAnimeID()).GetTimePer(); }
 			const auto			GetReloading(void) const noexcept { return (GunAnimeID::ReloadStart_Empty <= GetGunAnime()) && (GetGunAnime() <= GunAnimeID::ReloadEnd); }
-			const auto			GetReloadStart(void) const noexcept { return (GetGunAnime() == GunAnimeID::ReloadStart_Empty || GetGunAnime() == GunAnimeID::ReloadStart); }
 			const auto			IsCanShoot(void) const noexcept {
 				switch (GetGunAnime()) {
-				case GunAnimeID::Base:
+				case GunAnimeID::None:
 				case GunAnimeID::Shot:
 					return true;
 					break;
@@ -222,7 +219,7 @@ namespace FPS_n2 {
 				}
 				return Pos;
 			}
-			const auto			GetGunAnimePer(EnumGunAnimType ID) {
+			const auto			GetGunAnimePer(GunAnimeID ID) {
 				//銃の位置を指定するアニメ
 				auto* AnimMngr = GunAnimManager::Instance();
 				auto* Ptr = AnimMngr->GetAnimData(GunAnimeSets[GetHumanAnimType()].Anim.at(static_cast<int>(ID)));
@@ -230,46 +227,66 @@ namespace FPS_n2 {
 				float totalTime = (float)Ptr->GetTotalTime();
 				return (totalTime > 0.f) ? (60.f * this->m_GunAnimeTime / totalTime) : 1.f;
 			}
-			const auto			GetGunAnimeNow(EnumGunAnimType ID, Matrix4x4DX* Ret) const noexcept {
-				//銃の位置を指定するアニメ
-				auto* AnimMngr = GunAnimManager::Instance();
-				auto* Ptr = AnimMngr->GetAnimData(GunAnimeSets[GetHumanAnimType()].Anim.at(static_cast<int>(ID)));
-				if (!Ptr) { return false; }
-				*Ret = AnimMngr->GetAnimNow(Ptr, 60.f * this->m_GunAnimeTime).GetMatrix();
-				return true;
-			}
 			const auto			GetGunAnimeNow() const noexcept {
+				auto* AnimMngr = GunAnimManager::Instance();
 				Matrix4x4DX AnimMat;
-				for (int i = 0; i < static_cast<int>(EnumGunAnimType::Max); i++) {
-					Matrix4x4DX AnimData;
-					if (!GetGunAnimeNow((EnumGunAnimType)i, &AnimData)) { continue; }
-					AnimMat = Lerp(AnimMat, AnimData, this->m_Arm[i].Per());
+				{
+					auto* Ptr = AnimMngr->GetAnimData(GunAnimeSets[GetHumanAnimType()].Anim.at(static_cast<int>(GunAnimeID::Aim)));
+					if (Ptr) {
+						AnimMat = AnimMngr->GetAnimNow(Ptr, 60.f * this->m_GunAnimeTime).GetMatrix();
+					}
+				}
+				for (int loop = 0; loop < static_cast<int>(GunAnimeID::ChoiceOnceMax); ++loop) {
+					//銃の位置を指定するアニメ
+					auto* Ptr = AnimMngr->GetAnimData(GunAnimeSets[GetHumanAnimType()].Anim.at(loop));
+					if (!Ptr) { continue; }
+					AnimMat = Lerp(AnimMat, AnimMngr->GetAnimNow(Ptr, 60.f * this->m_GunAnimeTime).GetMatrix(), this->m_Arm[loop].Per());
 				}
 				return AnimMat;
 			}
-			const auto			GetGunAnimBlendPer(EnumGunAnimType ID) const noexcept { return this->m_Arm[static_cast<int>(ID)].Per(); }
-			void				UpdateGunAnime(const std::array<bool, static_cast<int>(EnumGunAnimType::Max)>& Array, bool IsForce) noexcept {
-				if (IsForce) {
-					for (int loop = 0; loop < static_cast<int>(EnumGunAnimType::Max); ++loop) {
+			const auto			GetGunAnimBlendPer(GunAnimeID ID) const noexcept { return this->m_Arm[static_cast<int>(ID)].Per(); }
+			void				UpdateGunAnime(const std::array<bool, static_cast<int>(GunAnimeID::ChoiceOnceMax)>& Array, bool IsForce) noexcept {
+				for (int loop = 0; loop < static_cast<int>(GunAnimeID::ChoiceOnceMax); ++loop) {
+					if (IsForce) {
 						this->m_Arm[loop].Init(Array[loop]);
 					}
-				}
-				else {
+					else {
 #if TRUE
-					this->m_Arm[static_cast<int>(EnumGunAnimType::ADS)].Update(Array[static_cast<int>(EnumGunAnimType::ADS)], 0.2f, 0.2f, 0.9f);
-					this->m_Arm[static_cast<int>(EnumGunAnimType::ReloadStart_Empty)].Update(Array[static_cast<int>(EnumGunAnimType::ReloadStart_Empty)], 0.5f, 0.2f);
-					this->m_Arm[static_cast<int>(EnumGunAnimType::ReloadStart)].Update(Array[static_cast<int>(EnumGunAnimType::ReloadStart)], 0.2f, 0.2f);
-					this->m_Arm[static_cast<int>(EnumGunAnimType::Reload)].Update(Array[static_cast<int>(EnumGunAnimType::Reload)], 0.1f, 0.2f, (GetReloadType() == RELOADTYPE::AMMO) ? 0.9f : 0.8f);
-					this->m_Arm[static_cast<int>(EnumGunAnimType::ReloadEnd)].Update(Array[static_cast<int>(EnumGunAnimType::ReloadEnd)], 0.1f, 0.2f, 0.9f);
-					this->m_Arm[static_cast<int>(EnumGunAnimType::Ready)].Update(Array[static_cast<int>(EnumGunAnimType::Ready)], 0.1f, 0.2f, 0.87f);
-					this->m_Arm[static_cast<int>(EnumGunAnimType::Watch)].Update(Array[static_cast<int>(EnumGunAnimType::Watch)], 0.1f, 0.1f);
-					this->m_Arm[static_cast<int>(EnumGunAnimType::ThrowReady)].Update(Array[static_cast<int>(EnumGunAnimType::ThrowReady)], 0.1f, 0.1f);
-					this->m_Arm[static_cast<int>(EnumGunAnimType::Throw)].Update(Array[static_cast<int>(EnumGunAnimType::Throw)], 0.1f, 0.1f);
+						switch (static_cast<GunAnimeID>(loop)) {
+						case GunAnimeID::LowReady:
+							this->m_Arm[loop].Update(Array[loop], 0.f, 0.f, 0.87f);
+							break;
+						case GunAnimeID::ADS:
+							this->m_Arm[loop].Update(Array[loop], 0.2f, 0.2f, 0.9f);
+							break;
+						case GunAnimeID::ReloadStart_Empty:
+							this->m_Arm[loop].Update(Array[loop], 0.5f, 0.2f);
+							break;
+						case GunAnimeID::ReloadStart:
+							this->m_Arm[loop].Update(Array[loop], 0.2f, 0.2f);
+							break;
+						case GunAnimeID::Reload:
+							this->m_Arm[loop].Update(Array[loop], 0.1f, 0.2f, (GetReloadType() == RELOADTYPE::AMMO) ? 0.9f : 0.8f);
+							break;
+						case GunAnimeID::ReloadEnd:
+							this->m_Arm[loop].Update(Array[loop], 0.1f, 0.2f, 0.9f);
+							break;
+						case GunAnimeID::Watch:
+							this->m_Arm[loop].Update(Array[loop], 0.1f, 0.1f);
+							break;
+						case GunAnimeID::ThrowReady:
+							this->m_Arm[loop].Update(Array[loop], 0.1f, 0.1f);
+							break;
+						case GunAnimeID::Throw:
+							this->m_Arm[loop].Update(Array[loop], 0.1f, 0.1f);
+							break;
+						default:
+							break;
+						}
 #else
-					for (int loop = 0; loop < static_cast<int>(EnumGunAnimType::Max); ++loop) {
 						this->m_Arm[loop].Update(Array[loop], 0.2f, 0.2f, 0.9f);
-					}
 #endif
+					}
 				}
 			}
 		public:
@@ -330,7 +347,7 @@ namespace FPS_n2 {
 			void				SetupModSlot(void) noexcept {
 				m_ModSlotControl.InitModSlotControl(this->m_FilePath);
 			}
-			void				SetupSpawn(const std::array<bool, static_cast<int>(EnumGunAnimType::Max)>& Array) noexcept;
+			void				SetupSpawn(const std::array<bool, static_cast<int>(GunAnimeID::ChoiceOnceMax)>& Array) noexcept;
 		public:
 			void				UpdateReticle() noexcept;
 			void				DrawReticle(float Rad) const noexcept {

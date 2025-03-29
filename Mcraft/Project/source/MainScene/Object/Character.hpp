@@ -29,18 +29,15 @@ namespace FPS_n2 {
 			CharaAnimeID										m_BottomAnimSelect{};
 			float												m_SwitchPer{};
 			bool												m_IsSwitchRight{};
-			EnumGunReadySeq										m_GunReadySeq{ EnumGunReadySeq::Aim };
 			float												m_ADSPer{ 0.f };
 			PointControl<HitPoint, 100>							m_HP{};
 			PointControl<ArmerPoint, 100>						m_AP{};
 			DamageEventControl									m_Damage;
-			std::array<bool, static_cast<int>(EnumGunAnimType::Max)>			m_IsActiveArmAnim{};
+			std::array<bool, static_cast<int>(GunAnimeID::ChoiceOnceMax)>			m_IsActiveArmAnim{};
 			bool												m_MagHand{ false };
 			ArmMovePerClass										m_MagArm;
 			float												m_StuckGunTimer{ 0.f };
 			bool												m_IsStuckGun{ false };
-			bool												m_IsChanging{ false };
-			bool												m_IsChange{ false };
 			float												m_HPRec{ 0.f };
 			bool												m_ArmBreak{ false };
 			switchs												m_SightChange;
@@ -59,8 +56,6 @@ namespace FPS_n2 {
 			PlayerID											m_MyID{ 0 };
 			CharaTypeID											m_CharaType{};
 			bool												m_Cancel{ false };			//
-
-			bool												m_IsGrenadeThrow{ false };			//
 		private://キャッシュ
 			Matrix3x3DX											m_CharaRotationCache{};
 			Matrix3x3DX											m_EyeRotationCache{};
@@ -106,7 +101,7 @@ namespace FPS_n2 {
 				}
 			}
 			const auto		GetSpeedPer(void) const noexcept { return std::clamp(GetSpeed() / 0.65f, 0.5f, 1.f); }
-			const auto		GetIsADS(void) const noexcept { return this->m_GunReadySeq == EnumGunReadySeq::ADS; }
+			const bool		GetIsADS(void) const noexcept;
 			const auto		GetSightZoomSize() const noexcept { return GetIsADS() ? m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).GetSightZoomSize() : 1.f; }
 			auto&			GetRagDoll(void) noexcept { return m_RagDollControl.GetRagDoll(); }
 			const auto&		GetLeanRad(void) const noexcept { return m_LeanControl.GetRad(); }
@@ -158,6 +153,8 @@ namespace FPS_n2 {
 			void			Heal(HitPoint value) noexcept { m_Damage.Add(GetMyPlayerID(), GetMyPlayerID(), -value, -value, Vector3DX::up()); }
 			const bool		CheckDamageRay(HitPoint* Damage, ArmerPoint* ArmerDamage, bool CheckBodyParts, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
 		private: //更新関連
+			void			GunChangeStart(int Gunselect) noexcept;
+
 			void			ExecuteInput(void) noexcept;
 			void			ExecuteMatrix(void) noexcept;
 			void			ExecuteGrenade(void) noexcept;

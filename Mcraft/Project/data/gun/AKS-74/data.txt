@@ -6,7 +6,7 @@ Info=ストックを折りたたむことで超至近での交戦にも対応できる。
 
 Info_Eng=Assault rifle for airborne troops and crew. 
 Info_Eng=High reliability due to simple structure. 
-Info_Eng=By folding the stock, it can be used in extremely close combat.
+Info_Eng=By folding the stock= it can be used in extremely close combat.
 
 ShotRate=600
 RecoilPower=210
@@ -19,5 +19,15 @@ reloadType=MAG
 Slot0Type=Magazine
 Slot0IsNeed=true
 Slot0Item=AK_6L20
+
+Shot=1
+Cocking=2
+ReloadStart_Empty=3
+ReloadStart=4
+Reload=5
+ReloadEnd=6
+Watch=8
+Hammer=0
+Open=7
 
 end

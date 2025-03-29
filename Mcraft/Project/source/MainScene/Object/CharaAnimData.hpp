@@ -3,18 +3,47 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		enum class EnumGunAnimType {
-			Aim,
+		enum class GunAnimeID {
+			//どれか択一で行うアニメーション
+			LowReady,
 			ADS,
+			Shot,
+			Cocking,
 			ReloadStart_Empty,
 			ReloadStart,
 			Reload,
 			ReloadEnd,
-			Ready,
 			Watch,
 			ThrowReady,
 			Throw,
-			Max,
+
+			ChoiceOnceMax,//どれか択一で行うアニメーション の総数
+
+			Aim = ChoiceOnceMax,
+			Hammer,
+			Open,
+
+			Max,//全体
+
+			None,
+
+		};
+		static const char* GunAnimeIDName[static_cast<int>(GunAnimeID::Max)] = {
+			"Ready",
+			"ADS",
+			"Shot",
+			"Cocking",
+			"ReloadStart_Empty",
+			"ReloadStart",
+			"Reload",
+			"ReloadEnd",
+			"Watch",
+			"ThrowReady",
+			"Throw",
+
+			"Aim",
+			"Hammer",
+			"Open",
 		};
 		enum class EnumGunAnim {
 			M1911_ready1,
@@ -39,6 +68,7 @@ namespace FPS_n2 {
 			M870_raload,
 			M870_ready,
 			RGD5_aim,
+			RGD5_down,
 			RGD5_Ready,
 			RGD5_throw,
 			Max,
@@ -66,6 +96,7 @@ namespace FPS_n2 {
 			"M870_raload",
 			"M870_ready",
 			"RGD5_aim",
+			"RGD5_down",
 			"RGD5_Ready",
 			"RGD5_throw",
 		};
@@ -185,7 +216,7 @@ namespace FPS_n2 {
 			};
 		private:
 			std::vector<AnimDatas>	m_Object;
-#ifdef DEBUG
+#ifdef DEBUG_CAM
 			Vector3DX DBG_AnimRot = Vector3DX::vget(0.f, 0.f, deg2rad(-20));
 			Vector3DX DBG_AnimPos = Vector3DX::vget(-0.09f, -0.10f, -0.45f);
 #endif
@@ -195,20 +226,17 @@ namespace FPS_n2 {
 					std::string Path = filepath;
 					Path += EnumGunAnimName[loop];
 					Path += ".txt";
-					LoadAction(Path.c_str(), (EnumGunAnim)loop);
-				}
-			}
-			void	LoadAction(const char* filepath, EnumGunAnim EnumSel) noexcept {
-				m_Object.resize(m_Object.size() + 1);
-				m_Object.back().first = std::make_shared<GunanimData>();
+					m_Object.resize(m_Object.size() + 1);
+					m_Object.back().first = std::make_shared<GunanimData>();
 
-				FileStreamDX FileStream(filepath);
-				m_Object.back().first->Set(FileStream.SeekLineAndGetStr(), EnumSel);
-				while (true) {
-					if (FileStream.ComeEof()) { break; }
-					auto ALL = FileStream.SeekLineAndGetStr();
-					m_Object.back().second.emplace_back(std::make_shared<AnimDatas::GunAnim>());
-					m_Object.back().second.back()->Set(ALL);
+					FileStreamDX FileStream(Path.c_str());
+					m_Object.back().first->Set(FileStream.SeekLineAndGetStr(), (EnumGunAnim)loop);
+					while (true) {
+						if (FileStream.ComeEof()) { break; }
+						auto ALL = FileStream.SeekLineAndGetStr();
+						m_Object.back().second.emplace_back(std::make_shared<AnimDatas::GunAnim>());
+						m_Object.back().second.back()->Set(ALL);
+					}
 				}
 			}
 
@@ -314,60 +342,76 @@ namespace FPS_n2 {
 
 
 		struct GunAnimSet {
-			std::array<EnumGunAnim, static_cast<int>(EnumGunAnimType::Max)> Anim;
+			std::array<EnumGunAnim, static_cast<int>(GunAnimeID::Max)> Anim;
 		};
 		const GunAnimSet GunAnimeSets[] = {
+			//M4
 			{
-				//M4
-				EnumGunAnim::M16_aim,
+				EnumGunAnim::M16_ready1,
 				EnumGunAnim::M16_ads,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
 				EnumGunAnim::M16_reloadstart_empty,
 				EnumGunAnim::M16_reloadstart,
 				EnumGunAnim::M16_reload,
 				EnumGunAnim::M16_reloadend,
-				EnumGunAnim::M16_ready1,
 				EnumGunAnim::M16_watch,
 				EnumGunAnim::RGD5_Ready,
 				EnumGunAnim::RGD5_throw,
+				EnumGunAnim::M16_aim,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
 			},
+			//ハンドガン
 			{
-				//ハンドガン
-				EnumGunAnim::M1911_aim1,
+				EnumGunAnim::M1911_ready1,
 				EnumGunAnim::M1911_ads,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
 				EnumGunAnim::M1911_reloadstart_empty,
 				EnumGunAnim::M1911_reloadstart,
 				EnumGunAnim::M1911_reload,
 				EnumGunAnim::M1911_reloadend,
-				EnumGunAnim::M1911_ready1,
 				EnumGunAnim::M1911_watch,
 				EnumGunAnim::RGD5_Ready,
 				EnumGunAnim::RGD5_throw,
+				EnumGunAnim::M1911_aim1,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
 			},
+			//M870
 			{
-				//M4
-				EnumGunAnim::M16_aim,
+				EnumGunAnim::M870_ready,
 				EnumGunAnim::M16_ads,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
 				EnumGunAnim::M16_reloadstart_empty,
 				EnumGunAnim::M16_reloadstart,
 				EnumGunAnim::M870_raload,
 				EnumGunAnim::M16_reloadend,
-				EnumGunAnim::M870_ready,
 				EnumGunAnim::M16_watch,
 				EnumGunAnim::RGD5_Ready,
 				EnumGunAnim::RGD5_throw,
+				EnumGunAnim::M16_aim,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
 			},
+			//グレネード
 			{
-				//グレネード
-				EnumGunAnim::RGD5_aim,
-				EnumGunAnim::RGD5_aim,
-				EnumGunAnim::RGD5_aim,
-				EnumGunAnim::RGD5_aim,
-				EnumGunAnim::RGD5_aim,
-				EnumGunAnim::RGD5_aim,
-				EnumGunAnim::RGD5_aim,
-				EnumGunAnim::RGD5_aim,
+				EnumGunAnim::RGD5_down,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
 				EnumGunAnim::RGD5_Ready,
 				EnumGunAnim::RGD5_throw,
+				EnumGunAnim::RGD5_aim,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
 			},
 		};
 	};

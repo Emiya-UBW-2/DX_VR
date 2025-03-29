@@ -1,14 +1,13 @@
-Name=AKS-74N AssaultRifle
+Name=RGD5
 
-Info=空挺部隊、搭乗員向けの突撃銃。
-Info=シンプルな構造により信頼性が高い。
-Info=ストックを折りたたむことで超至近での交戦にも対応できる。
+Info=AA
 
-Info_Eng=Assault rifle for airborne troops and crew. 
-Info_Eng=High reliability due to simple structure. 
-Info_Eng=By folding the stock, it can be used in extremely close combat.
+Info_Eng=AA
 
 usehumanAnim=3
 IsThrowWeapon=True
+
+ThrowReady=0
+Throw=1
 
 end

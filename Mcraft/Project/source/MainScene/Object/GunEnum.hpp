@@ -4,21 +4,6 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		enum class GunAnimeID : int {
-			Base,
-			Shot,
-			Cocking,
-			ReloadStart_Empty,
-			ReloadStart,
-			ReloadOne,
-			ReloadEnd,
-			Open,
-			Watch,
-			Hammer,
-			ThrowReady,
-			Throw,
-			AnimeIDMax,
-		};
 		enum class GunFrame {
 			Center,
 			Cart,

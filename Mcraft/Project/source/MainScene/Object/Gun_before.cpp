@@ -224,8 +224,8 @@ namespace FPS_n2 {
 					//1‚ÌƒtƒŒ[ƒ€ˆÚ“®—Ê‚ğ–³‹‚·‚é
 					auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
 					for (int i = 0; i < Obj->GetObj().GetAnimNum(); i++) {
-						Obj->GetObj().SetAnim(static_cast<int>((GunAnimeID)i)).SetPer(pParent.SetAnim(i).GetPer());
-						Obj->GetObj().SetAnim(static_cast<int>((GunAnimeID)i)).SetTime(pParent.SetAnim(i).GetTime());
+						Obj->GetObj().SetAnim(i).SetPer(pParent.SetAnim(i).GetPer());
+						Obj->GetObj().SetAnim(i).SetTime(pParent.SetAnim(i).GetTime());
 					}
 					Obj->GetObj().ResetFrameUserLocalMatrix(Obj->GetFrame(static_cast<int>(GunFrame::Center)));
 					Obj->GetObj().UpdateAnimAll();

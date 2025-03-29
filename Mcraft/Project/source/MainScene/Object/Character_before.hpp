@@ -464,7 +464,7 @@ namespace FPS_n2 {
 					}
 				}
 
-				void				SetupGun(const std::array<bool, static_cast<int>(EnumGunAnimType::Max)>& Array) noexcept {
+				void				SetupGun(const std::array<bool, static_cast<int>(GunAnimeID::ChoiceOnceMax)>& Array) noexcept {
 					if (m_Gun_Ptr) {
 						m_Gun_Ptr->SetupSpawn(Array);
 						m_MagStockControl.Init(m_Gun_Ptr->GetAmmoNum(), m_Gun_Ptr->GetAmmoAll(), m_Gun_Ptr->GetMagUniqueID());

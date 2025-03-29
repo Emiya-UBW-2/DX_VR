@@ -44,6 +44,8 @@ namespace FPS_n2 {
 			RELOADTYPE						m_ReloadType{ RELOADTYPE::MAG };	//
 			bool							m_IsThrowWeapon{ false };
 
+			std::array<int, static_cast<int>(GunAnimeID::Max)> m_AnimSelect{ -1 };
+
 			std::vector<std::shared_ptr<AmmoDataClass>>	m_AmmoSpec;
 			std::vector<std::string>					m_Info;
 			std::vector<std::string>					m_InfoEng;
@@ -57,6 +59,7 @@ namespace FPS_n2 {
 			const auto& GetReloadType(void) const noexcept { return this->m_ReloadType; }
 			//«”\
 			const auto& GetIsThrowWeapon(void) const noexcept { return this->m_IsThrowWeapon; }
+			const auto& GetAnimSelectList(void) const noexcept { return this->m_AnimSelect; }
 			const auto& GetIsRecoilPower(void) const noexcept { return this->m_IsRecoilPower; }
 			const auto& GetIsRecoilReturn(void) const noexcept { return this->m_IsRecoilReturn; }
 			const auto& GetIsShotType(void) const noexcept { return this->m_IsShotType; }
@@ -93,6 +96,10 @@ namespace FPS_n2 {
 			void			SetUniqueID(int value) noexcept { m_UniqueID = value; }
 		public://
 			void		Set(std::string path_) {
+				for (auto& s : m_AnimSelect) {
+					s = -1;
+				}
+
 				this->m_path = path_;
 
 				FILEINFO FileInfo;

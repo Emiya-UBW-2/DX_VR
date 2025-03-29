@@ -85,14 +85,14 @@ namespace FPS_n2 {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			switch (GetGunAnime()) {
 			case GunAnimeID::Shot:
-				SetAnimOnce(GetGunAnimeID(), ((float)GetModSlot().GetModData()->GetShotRate()) / 300.f);
-				if (GetNowGunAnimeTimePer() >= 1.f && m_ShotEnd) {
+				SetAnimOnce(GetGunAnimeID(GetGunAnime()), ((float)GetModSlot().GetModData()->GetShotRate()) / 300.f/10.f);
+				if (GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTimePer() >= 1.f && m_ShotEnd) {
 					m_ShotEnd = false;
 					if (!GetIsMagEmpty()) {
 						switch (GetShotType()) {
 						case SHOTTYPE::FULL:
 						case SHOTTYPE::SEMI:
-							SetGunAnime(GunAnimeID::Base);
+							SetGunAnime(GunAnimeID::None);
 							break;
 						case SHOTTYPE::BOLT:
 							SetGunAnime(GunAnimeID::Cocking);
@@ -102,31 +102,31 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						SetGunAnime(GunAnimeID::Base);
+						SetGunAnime(GunAnimeID::None);
 					}
 				}
 				break;
 			case GunAnimeID::Cocking:
-				SetAnimOnce(GetGunAnimeID(), 1.5f);
-				if (GetNowGunAnimeTimePer() >= 1.f) {
-					SetGunAnime(GunAnimeID::Base);
+				SetAnimOnce(GetGunAnimeID(GetGunAnime()), 1.5f);
+				if (GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTimePer() >= 1.f) {
+					SetGunAnime(GunAnimeID::None);
 				}
 				break;
 			case GunAnimeID::ReloadStart_Empty:
-				SetAnimOnce(GetGunAnimeID(), 1.0f);
-				if (GetNowGunAnimeTimePer() >= 1.f) {
-					SetGunAnime(GunAnimeID::ReloadOne);
+				SetAnimOnce(GetGunAnimeID(GetGunAnime()), 1.0f);
+				if (GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTimePer() >= 1.f) {
+					SetGunAnime(GunAnimeID::Reload);
 				}
 				break;
 			case GunAnimeID::ReloadStart:
-				SetAnimOnce(GetGunAnimeID(), 1.0f);
-				if (GetNowGunAnimeTimePer() >= 1.f) {
-					SetGunAnime(GunAnimeID::ReloadOne);
+				SetAnimOnce(GetGunAnimeID(GetGunAnime()), 1.0f);
+				if (GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTimePer() >= 1.f) {
+					SetGunAnime(GunAnimeID::Reload);
 				}
 				break;
-			case GunAnimeID::ReloadOne:
-				SetAnimOnce(GetGunAnimeID(), 1.0f);
-				if (this->m_isMagSuccess ? (GetGunAnimePer(EnumGunAnimType::Reload) >= 0.75f) : (GetGunAnimePer(EnumGunAnimType::Reload) >= 1.f)) {
+			case GunAnimeID::Reload:
+				SetAnimOnce(GetGunAnimeID(GetGunAnime()), 1.0f);
+				if (this->m_isMagSuccess ? (GetGunAnimePer(GetGunAnime()) >= 0.75f) : (GetGunAnimePer(GetGunAnime()) >= 1.f)) {
 					switch (GetReloadType()) {
 					case RELOADTYPE::MAG:
 						//ƒ†ƒj[ƒNID‚ªˆÙ‚È‚éê‡“o˜^‚·‚éƒIƒuƒWƒF‚ÆØ‚è‘Ö‚¦‚é(Œ»ó•s—v‚È‚Ì‚Å‚¢‚Á‚½‚ñƒIƒt)
@@ -144,8 +144,8 @@ namespace FPS_n2 {
 							SetGunAnime(GunAnimeID::ReloadEnd);
 						}
 						else {
-							this->GetObj().SetAnim(GetGunAnimeID()).Reset();
-							this->GetObj().SetAnim(GetGunAnimeID()).SetPer(1.f);
+							this->GetObj().SetAnim(GetGunAnimeID(GetGunAnime())).Reset();
+							this->GetObj().SetAnim(GetGunAnimeID(GetGunAnime())).SetPer(1.f);
 							this->m_GunAnimeTime = 0.f;
 						}
 						break;
@@ -155,43 +155,40 @@ namespace FPS_n2 {
 				}
 				break;
 			case GunAnimeID::ReloadEnd:
-				SetAnimOnce(GetGunAnimeID(), 1.0f);
-				if (GetNowGunAnimeTimePer() >= 1.f) {
+				SetAnimOnce(GetGunAnimeID(GetGunAnime()), 1.0f);
+				if (GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTimePer() >= 1.f) {
 					if (GetInChamber()) {
-						SetGunAnime(GunAnimeID::Base);
+						SetGunAnime(GunAnimeID::None);
 					}
 					else {
 						if (!GetIsMagEmpty()) {
 							SetGunAnime(GunAnimeID::Cocking);
 						}
 						else {
-							SetGunAnime(GunAnimeID::Base);
+							SetGunAnime(GunAnimeID::None);
 						}
 					}
 				}
 				break;
 			case GunAnimeID::Watch:
-				if (GetGunAnimePer(EnumGunAnimType::Watch) >= 1.f) {
-					SetGunAnime(GunAnimeID::Base);
+				if (GetGunAnimePer(GetGunAnime()) >= 1.f) {
+					SetGunAnime(GunAnimeID::None);
 				}
 				break;
-			case GunAnimeID::Base:
-			case GunAnimeID::Open:
-			case GunAnimeID::Hammer:
 			default:
 				break;
 			}
 			//
 			this->m_GunAnimeTime += DXLib_refParts->GetDeltaTime();
 		}
-		void				GunClass::SetupSpawn(const std::array<bool, static_cast<int>(EnumGunAnimType::Max)>& Array) noexcept {
+		void				GunClass::SetupSpawn(const std::array<bool, static_cast<int>(GunAnimeID::ChoiceOnceMax)>& Array) noexcept {
 			this->m_MagFall.Dispose();
 			this->m_CartFall.Dispose();
 			if (this->m_MagazinePtr) {
 				this->m_MagFall.Init(GetMagazinePtr()->GetFilePath(), 1);
 				this->m_CartFall.Init(GetMagazinePtr()->GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPath(), 4);	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
 			}
-			SetGunAnime(GunAnimeID::Base);
+			SetGunAnime(GunAnimeID::None);
 			UpdateGunAnime(Array, true);
 		}
 		void				GunClass::UpdateReticle() noexcept {
@@ -218,34 +215,38 @@ namespace FPS_n2 {
 				return;
 			}
 
-			float AnimPer = GetNowGunAnimeTimePer();
+			float AnimPer = 0.f;
 			float BasePer = 0.f;
 			float MaxPer = 0.f;
 			switch (GetGunAnime()) {
 			case GunAnimeID::ReloadStart_Empty:
+				AnimPer = GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTimePer();
 				GetMagazinePtr()->SetHandMatrix(MagPoachMat);
 				break;
 			case GunAnimeID::ReloadStart:
-				MaxPer = 0.3f;
-				if (BasePer <= AnimPer && AnimPer <= MaxPer) {
-					GetMagazinePtr()->SetHandMatrix(GetFrameWorldMat_P(GunFrame::Magpos));
-				}
-				BasePer = MaxPer;
-				MaxPer = 0.6f;
-				if (BasePer <= AnimPer && AnimPer <= MaxPer) {
-					float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
-					GetMagazinePtr()->SetHandMatrix(Lerp(GetFrameWorldMat_P(GunFrame::Magpos), GetFrameWorldMat_P(GunFrame::Mag2), Per));
-				}
+				AnimPer = GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTimePer();
+				{
+					MaxPer = 0.3f;
+					if (BasePer <= AnimPer && AnimPer <= MaxPer) {
+						GetMagazinePtr()->SetHandMatrix(GetFrameWorldMat_P(GunFrame::Magpos));
+					}
+					BasePer = MaxPer;
+					MaxPer = 0.6f;
+					if (BasePer <= AnimPer && AnimPer <= MaxPer) {
+						float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
+						GetMagazinePtr()->SetHandMatrix(Lerp(GetFrameWorldMat_P(GunFrame::Magpos), GetFrameWorldMat_P(GunFrame::Mag2), Per));
+					}
 
-				BasePer = MaxPer;
-				MaxPer = 1.f;
-				if (BasePer <= AnimPer && AnimPer <= MaxPer) {
-					float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
-					GetMagazinePtr()->SetHandMatrix(Lerp(GetFrameWorldMat_P(GunFrame::Mag2), MagPoachMat, Per));
+					BasePer = MaxPer;
+					MaxPer = 1.f;
+					if (BasePer <= AnimPer && AnimPer <= MaxPer) {
+						float Per = std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f);
+						GetMagazinePtr()->SetHandMatrix(Lerp(GetFrameWorldMat_P(GunFrame::Mag2), MagPoachMat, Per));
+					}
 				}
 				break;
-			case GunAnimeID::ReloadOne:
-			{
+			case GunAnimeID::Reload:
+				AnimPer = GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTimePer();
 				switch (GetReloadType()) {
 				case RELOADTYPE::MAG:
 				{
@@ -261,7 +262,7 @@ namespace FPS_n2 {
 					if (this->m_isMagSuccess) {
 						MaxPer = 0.55f;
 						if (BasePer <= AnimPer && AnimPer <= MaxPer) {
-							float Per = GetGunAnimBlendPer(EnumGunAnimType::Reload);
+							float Per = GetGunAnimBlendPer(GetGunAnime());
 							GetMagazinePtr()->SetHandMatrix(Lerp(MagPoachMat, GetFrameWorldMat_P(GunFrame::Mag2), Per));
 						}
 						BasePer = MaxPer;
@@ -274,7 +275,7 @@ namespace FPS_n2 {
 					else {
 						MaxPer = 0.55f;
 						if (BasePer <= AnimPer && AnimPer <= MaxPer) {
-							float Per = GetGunAnimBlendPer(EnumGunAnimType::Reload);
+							float Per = GetGunAnimBlendPer(GetGunAnime());
 							GetMagazinePtr()->SetHandMatrix(Lerp(MagPoachMat, GetFrameWorldMat_P(GunFrame::Mag2) * m_MagMiss, Per));
 						}
 						BasePer = MaxPer;
@@ -303,7 +304,7 @@ namespace FPS_n2 {
 					SetMagLoadSuccess(false);
 					MaxPer = 0.5f;
 					if (BasePer <= AnimPer && AnimPer <= MaxPer) {
-						float Per = GetGunAnimBlendPer(EnumGunAnimType::Reload);
+						float Per = GetGunAnimBlendPer(GetGunAnime());
 						GetMagazinePtr()->SetHandMatrix(Lerp(MagPoachMat, GetFrameWorldMat_P(GunFrame::Mag2), Per));
 					}
 					BasePer = MaxPer;
@@ -323,8 +324,7 @@ namespace FPS_n2 {
 					GetMagazinePtr()->SetHandMatrix(GetFrameWorldMat_P(GunFrame::Magpos));
 					break;
 				}
-			}
-			break;
+				break;
 			default:
 				break;
 			}
@@ -400,48 +400,42 @@ namespace FPS_n2 {
 				m_MuzzleSmokeControl.ExecuteMuzzleSmoke(GetFrameWorldMat_P(GunFrame::Muzzle).pos(), GetGunAnime() != GunAnimeID::Shot);
 			}
 			//
-			for (int i = 0; i < GetObj().GetAnimNum(); i++) {
-				if (GetGunAnime() == (GunAnimeID)i) {
-					GetObj().SetAnim(i).SetPer(1.f);
-					if (GetGunAnime() == GunAnimeID::Watch) {
-						GetObj().SetAnim(i).SetPer(0.f);
-					}
-				}
-				else {
-					if ((GunAnimeID)i == GunAnimeID::Base) {
-						GetObj().SetAnim(i).SetPer(std::clamp(GetObj().SetAnim(i).GetPer() + DXLib_refParts->GetDeltaTime() * ((GetGunAnime() != GunAnimeID::Shot) ? 5.f : -5.f), 0.f, 1.f));
-					}
-					else if ((GunAnimeID)i == GunAnimeID::Hammer) {
-						GetObj().SetAnim(i).SetPer(std::clamp(GetObj().SetAnim(i).GetPer() + DXLib_refParts->GetDeltaTime() * ((this->m_GunSightSel == 1) ? 1.f : -1.f), 0.f, 1.f));
-					}
-					else if ((GunAnimeID)i == GunAnimeID::Open) {
-						bool isHit = false;
-						if (GetAmmoNumTotal() == 0) {
-							isHit = true;
-						}
-						else {
-							if (GetGunAnime() == GunAnimeID::Cocking) {
-								if (GetNowGunAnimeTime() <= 22.f) {
-									isHit = true;
-								}
-							}
-							else if (GetIsMagFull() && !GetInChamber()) {
-								isHit = true;
-							}
-						}
-						GetObj().SetAnim(i).SetPer(std::clamp(GetObj().SetAnim(i).GetPer() + 10.f * DXLib_refParts->GetDeltaTime() * (isHit ? 1.f : -1.f), 0.f, 1.f));
+			for (int i = 0; i < static_cast<int>(GunAnimeID::ChoiceOnceMax); i++) {
+				int ID = GetGunAnimeID((GunAnimeID)i);
+				if (ID != -1) {
+					if (GetGunAnime() == (GunAnimeID)i) {
+						GetObj().SetAnim(ID).SetPer(1.f);
 					}
 					else {
-						GetObj().SetAnim(i).Reset();
+						GetObj().SetAnim(ID).Reset();
+					}
+				}
+			}
+			{
+				bool isHit = ((GetAmmoNumTotal() == 0) || (GetIsMagFull() && !GetInChamber()) || (GetGunAnime() == GunAnimeID::Cocking && (GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTime() <= 22.f)));
+				for (int i = static_cast<int>(GunAnimeID::ChoiceOnceMax); i < static_cast<int>(GunAnimeID::Max); i++) {
+					int ID = GetGunAnimeID((GunAnimeID)i);
+					if (ID != -1) {
+						switch ((GunAnimeID)i) {
+						case FPS_n2::Sceneclass::GunAnimeID::Hammer:
+							GetObj().SetAnim(ID).SetPer(std::clamp(GetObj().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * ((GetGunAnime() != GunAnimeID::Shot) ? 5.f : -5.f), 0.f, 1.f));
+							break;
+						case FPS_n2::Sceneclass::GunAnimeID::Open:
+							GetObj().SetAnim(ID).SetPer(std::clamp(GetObj().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * (isHit ? 10.f : -10.f), 0.f, 1.f));
+							break;
+						default:
+							break;
+						}
 					}
 				}
 			}
 			//
 			auto SE = SoundPool::Instance();
 
-			float Time = GetNowGunAnimeTime();
+			float Time{};
 			switch (GetGunAnime()) {
 			case GunAnimeID::Shot:
+				Time = GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTime();
 				switch (GetShotType()) {
 				case SHOTTYPE::BOLT:
 					if ((0.5f < Time && Time < 1.f)) {
@@ -465,6 +459,7 @@ namespace FPS_n2 {
 				}
 				break;
 			case GunAnimeID::Cocking:
+				Time = GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTime();
 				switch (GetShotType()) {
 				case SHOTTYPE::BOLT:
 					if ((5.f < Time && Time < 6.f)) {
@@ -500,6 +495,7 @@ namespace FPS_n2 {
 				}
 				break;
 			case GunAnimeID::ReloadStart_Empty:
+				Time = GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTime();
 				switch (GetShotType()) {
 				case SHOTTYPE::BOLT:
 					if ((5.f < Time && Time < 6.f)) {
@@ -523,6 +519,7 @@ namespace FPS_n2 {
 				}
 				break;
 			case GunAnimeID::ReloadStart:
+				Time = GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTime();
 				switch (GetShotType()) {
 				case SHOTTYPE::BOLT:
 					if ((5.f < Time && Time < 6.f)) {
@@ -545,7 +542,8 @@ namespace FPS_n2 {
 					break;
 				}
 				break;
-			case GunAnimeID::ReloadOne:
+			case GunAnimeID::Reload:
+				Time = GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTime();
 				switch (GetShotType()) {
 				case SHOTTYPE::BOLT:
 					if ((10.f < Time && Time < 11.f)) {
@@ -554,7 +552,7 @@ namespace FPS_n2 {
 							SE->Get(SoundType::SE, (int)GetGunSoundSet().m_Cock1)->Play3D(GetObj().GetMatrix().pos(), Scale3DRate * 50.f);
 						}
 					}
-					else if (GetObj().SetAnim((int)GunAnimeID::ReloadOne).GetPer() != 0.f) {
+					else if (GetObj().GetAnim(GetGunAnimeID(GetGunAnime())).GetPer() != 0.f) {
 						this->m_boltSoundSequence = -1;
 					}
 					break;
@@ -566,6 +564,7 @@ namespace FPS_n2 {
 				}
 				break;
 			case GunAnimeID::ReloadEnd:
+				Time = GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTime();
 				switch (GetShotType()) {
 				case SHOTTYPE::BOLT:
 					if ((8.f < Time && Time < 9.f)) {
@@ -588,11 +587,6 @@ namespace FPS_n2 {
 					break;
 				}
 				break;
-			case GunAnimeID::Base:
-			case GunAnimeID::Open:
-			case GunAnimeID::Watch:
-			case GunAnimeID::Hammer:
-				break;
 			default:
 				break;
 			}
@@ -612,47 +606,54 @@ namespace FPS_n2 {
 			}
 			//
 			Easing(&this->m_GunChangePer, 1.f, 0.8f, EasingType::OutExpo);
-			//’e–ò‚Ì‰‰ŽZ
-			{
-				bool IsChamberOn = false;
-				switch (GetShotType()) {
-				case SHOTTYPE::FULL:
-				case SHOTTYPE::SEMI:
-					IsChamberOn |= ((GetGunAnime() == GunAnimeID::Shot) && (GetNowGunAnimeTime() >= 3.f));
-					IsChamberOn |= ((GetGunAnime() == GunAnimeID::Cocking) && (GetNowGunAnimeTime() >= 25.f));
-					break;
-				case SHOTTYPE::BOLT:
-					IsChamberOn |= ((GetGunAnime() == GunAnimeID::Cocking) && (GetNowGunAnimeTime() >= 25.f));
-					break;
-				default:
-					break;
+
+			switch (GetGunAnime()) {
+			case GunAnimeID::Shot:
+				if ((GetShotType() != SHOTTYPE::BOLT) && GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTime() >= 3.f) {
+					this->m_IsChamberOn = true;
 				}
-				if (this->m_IsChamberOn != IsChamberOn) {
-					this->m_IsChamberOn = IsChamberOn;
-					if (IsChamberOn) {
-						if (!GetIsMagEmpty()) {
-							CockByMag();
-						}
-						SetAmmo(this->m_Capacity - 1);
+				break;
+			case GunAnimeID::Cocking:
+				if (GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTime() >= 25.f) {
+					this->m_IsChamberOn = true;
+				}
+				this->m_IsEject = (GetShotType() != SHOTTYPE::BOLT) && this->m_ShotSwitch;
+				if (GetShotType() == SHOTTYPE::BOLT) {
+					this->m_IsEject = (GetShotType() == SHOTTYPE::BOLT) && (GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTime() >= 19.f);
+				}
+				break;
+			case GunAnimeID::ReloadStart_Empty:
+				this->m_IsChamberOn = false;
+				this->m_IsEject = (GetShotType() != SHOTTYPE::BOLT) && this->m_ShotSwitch;
+				if (GetShotType() == SHOTTYPE::BOLT) {
+					this->m_IsEject = (GetShotType() == SHOTTYPE::BOLT) && (GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTime() >= 19.f);
+				}
+				break;
+			case GunAnimeID::ReloadStart:
+				this->m_IsChamberOn = false;
+				this->m_IsEject = (GetShotType() != SHOTTYPE::BOLT) && this->m_ShotSwitch;
+				if (GetShotType() == SHOTTYPE::BOLT) {
+					this->m_IsEject = (GetShotType() == SHOTTYPE::BOLT) && (GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTime() >= 19.f);
+				}
+				break;
+			default:
+				this->m_IsChamberOn = false;
+				this->m_IsEject = (GetShotType() != SHOTTYPE::BOLT) && this->m_ShotSwitch;
+				break;
+			}
+			//’e–ò‚Ì‰‰ŽZ
+			if (this->m_PrevChamberOn != this->m_IsChamberOn) {
+				this->m_PrevChamberOn = this->m_IsChamberOn;
+				if (this->m_IsChamberOn) {
+					if (!GetIsMagEmpty()) {
+						CockByMag();
 					}
+					SetAmmo(this->m_Capacity - 1);
 				}
 			}
-			{
-				auto Prev = this->m_IsEject;
-				switch (GetShotType()) {
-				case SHOTTYPE::FULL:
-				case SHOTTYPE::SEMI:
-					this->m_IsEject = this->m_ShotSwitch;
-					break;
-				case SHOTTYPE::BOLT:
-					this->m_IsEject = false;
-					this->m_IsEject |= (GetReloadStart() && (GetNowGunAnimeTime() >= 19.f && GetNowGunAnimeTimePer() < 1.f));
-					this->m_IsEject |= ((GetGunAnime() == GunAnimeID::Cocking) && (GetNowGunAnimeTime() >= 19.f && GetNowGunAnimeTimePer() < 1.f));
-					break;
-				default:
-					break;
-				}
-				if (this->m_IsEject && !Prev) {
+			if (this->m_PrevEject != this->m_IsEject) {
+				this->m_PrevEject = this->m_IsEject;
+				if (this->m_IsEject) {
 					this->m_CartFall.SetFall(
 						GetFrameWorldMat_P(GunFrame::Cart).pos(),
 						Matrix3x3DX::Get33DX(GetFrameWorldMat_P(GunFrame::Muzzle)),

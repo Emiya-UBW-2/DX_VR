@@ -1,12 +1,8 @@
-Name=AKS-74N AssaultRifle
+Name=20式
 
-Info=空挺部隊、搭乗員向けの突撃銃。
-Info=シンプルな構造により信頼性が高い。
-Info=ストックを折りたたむことで超至近での交戦にも対応できる。
+Info=AA
 
-Info_Eng=Assault rifle for airborne troops and crew. 
-Info_Eng=High reliability due to simple structure. 
-Info_Eng=By folding the stock, it can be used in extremely close combat.
+Info_Eng=AA
 
 ShotRate=800
 RecoilPower=120
@@ -23,5 +19,15 @@ Slot0Item=STANAG_30
 Slot1Type=Sight
 Slot1IsNeed=true
 Slot1Item=ACOG
+
+Shot=1
+Cocking=2
+ReloadStart_Empty=3
+ReloadStart=4
+Reload=5
+ReloadEnd=6
+Watch=8
+Hammer=0
+Open=7
 
 end

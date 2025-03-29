@@ -108,6 +108,14 @@ namespace FPS_n2 {
 			else if (LEFT == "IsThrowWeapon") {
 				this->m_IsThrowWeapon = RIGHT == "True";
 			}
+			else {
+				for (int loop = 0; loop < static_cast<int>(GunAnimeID::Max); ++loop) {
+					if (LEFT == GunAnimeIDName[loop]) {
+						m_AnimSelect[loop] = std::stoi(RIGHT);
+						break;
+					}
+				}
+			}
 		}
 
 		const std::shared_ptr<ModDataClass>* ModDataManager::AddData(const std::string& filepath) noexcept {
