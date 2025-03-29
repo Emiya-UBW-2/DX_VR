@@ -59,6 +59,8 @@ namespace FPS_n2 {
 			PlayerID											m_MyID{ 0 };
 			CharaTypeID											m_CharaType{};
 			bool												m_Cancel{ false };			//
+
+			bool												m_IsGrenadeThrow{ false };			//
 		private://キャッシュ
 			Matrix3x3DX											m_CharaRotationCache{};
 			Matrix3x3DX											m_EyeRotationCache{};
@@ -105,23 +107,23 @@ namespace FPS_n2 {
 			}
 			const auto		GetSpeedPer(void) const noexcept { return std::clamp(GetSpeed() / 0.65f, 0.5f, 1.f); }
 			const auto		GetIsADS(void) const noexcept { return this->m_GunReadySeq == EnumGunReadySeq::ADS; }
-			const auto		GetSightZoomSize() const noexcept { return GetIsADS() ? m_GunPtrControl.GetSightZoomSize() : 1.f; }
+			const auto		GetSightZoomSize() const noexcept { return GetIsADS() ? m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).GetSightZoomSize() : 1.f; }
 			auto&			GetRagDoll(void) noexcept { return m_RagDollControl.GetRagDoll(); }
 			const auto&		GetLeanRad(void) const noexcept { return m_LeanControl.GetRad(); }
-			const auto&		GetGunPtrNow(void) const noexcept { return m_GunPtrControl.GetGunPtrNow(); }
+			const auto&		GetGunPtrNow(void) const noexcept { return m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).m_Gun_Ptr; }
 			const auto&		GetAutoAimID(void) const noexcept { return m_AutoAimControl.GetAutoAimID(); }
 			const auto		GetAutoAimActive(void) const noexcept { return m_AutoAimControl.GetAutoAimActive(); }
 			const auto&		GetHitBoxList(void) const noexcept { return m_HitBoxControl.GetHitBoxPointList(); }
-			const auto		IsGunShotSwitch(void) const noexcept { return m_GunPtrControl.GetGunPtrNow() && m_GunPtrControl.GetGunPtrNow()->GetShotSwitch(); }
+			const auto		IsGunShotSwitch(void) const noexcept { return m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).m_Gun_Ptr && m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).m_Gun_Ptr->GetShotSwitch(); }
 			const auto		GetAutoAimRadian() const noexcept {
-				float Len = std::max(0.01f, std::hypotf((float)(m_GunPtrControl.GetGunPtrNow()->GetAimXPos() - 1920 / 2), (float)(m_GunPtrControl.GetGunPtrNow()->GetAimYPos() - 1080 / 2)));
+				float Len = std::max(0.01f, std::hypotf((float)(m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).m_Gun_Ptr->GetAimXPos() - 1920 / 2), (float)(m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).m_Gun_Ptr->GetAimYPos() - 1080 / 2)));
 				Len = std::clamp(100.f / Len, 0.f, 1.f);
 				return deg2rad(5) * Len;
 			}
 			void			DrawReticle(void) const noexcept {
-				if (m_GunPtrControl.GetGunPtrNow()) {
-					if ((this->m_ADSPer >= 0.8f) || (m_GunPtrControl.GetSightZoomSize() == 1.f)) {
-						m_GunPtrControl.GetGunPtrNow()->DrawReticle(GetLeanRad());
+				if (m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).m_Gun_Ptr) {
+					if ((this->m_ADSPer >= 0.8f) || (m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).GetSightZoomSize() == 1.f)) {
+						m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).m_Gun_Ptr->DrawReticle(GetLeanRad());
 					}
 				}
 			}
@@ -141,8 +143,8 @@ namespace FPS_n2 {
 				this->m_MyID = value;
 				//銃のIDセットアップ
 				for (int loop = 0; loop < 2; ++loop) {
-					if (m_GunPtrControl.GetGunPtr(loop)) {
-						m_GunPtrControl.GetGunPtr(loop)->SetPlayerID(GetMyPlayerID());
+					if (m_GunPtrControl.GetParam(loop).m_Gun_Ptr) {
+						m_GunPtrControl.GetParam(loop).m_Gun_Ptr->SetPlayerID(GetMyPlayerID());
 					}
 				}
 			}

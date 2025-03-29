@@ -97,8 +97,20 @@ namespace FPS_n2 {
 
 			const auto&			GetShotSwitch(void) const noexcept { return this->m_ShotSwitch; }
 			const auto&			GetGunAnime(void) const noexcept { return this->m_GunAnime; }
-			const auto			GetNowGunAnimeTime(void) const noexcept { return GetObj_const().GetAnim(static_cast<size_t>(GetGunAnime())).GetTime(); }
-			const auto			GetNowGunAnimeTimePer(void) const noexcept { return GetObj_const().GetAnim(static_cast<int>(GetGunAnime())).GetTimePer(); }
+			const auto			GetGunAnimeID(void) const noexcept {
+				if (GetGunAnime() == GunAnimeID::Throw) {
+					return static_cast<int>(GunAnimeID::Base);
+				}
+				if (GetGunAnime() == GunAnimeID::ThrowReady) {
+					return static_cast<int>(GunAnimeID::Base);
+				}
+				return static_cast<int>(this->m_GunAnime);
+			}
+
+			const auto			IsThrowWeapon() const noexcept { return GetModSlot().GetModData()->GetIsThrowWeapon(); }
+
+			const auto			GetNowGunAnimeTime(void) const noexcept { return GetObj_const().GetAnim(GetGunAnimeID()).GetTime(); }
+			const auto			GetNowGunAnimeTimePer(void) const noexcept { return GetObj_const().GetAnim(GetGunAnimeID()).GetTimePer(); }
 			const auto			GetReloading(void) const noexcept { return (GunAnimeID::ReloadStart_Empty <= GetGunAnime()) && (GetGunAnime() <= GunAnimeID::ReloadEnd); }
 			const auto			GetReloadStart(void) const noexcept { return (GetGunAnime() == GunAnimeID::ReloadStart_Empty || GetGunAnime() == GunAnimeID::ReloadStart); }
 			const auto			IsCanShoot(void) const noexcept {
@@ -134,6 +146,15 @@ namespace FPS_n2 {
 					return GetMagazinePtr()->GetModSlot().GetModData()->GetUniqueID();
 				}
 				return GetModSlot().GetModData()->GetUniqueID();
+			}
+			const Matrix4x4DX	GetMagHandMat() {
+				if (this->m_MagazinePtr) {
+					Vector3DX MagPos = GetMagazinePtr()->GetFrameWorldMat(GunFrame::LeftHandPos).pos();
+					Vector3DX Magyvec = GetMagazinePtr()->GetFrameWorldMat(GunFrame::LeftHandYvec).pos() - MagPos;
+					Vector3DX Magzvec = GetMagazinePtr()->GetFrameWorldMat(GunFrame::LeftHandZvec).pos() - MagPos;
+					return Matrix4x4DX::Axis1(Magyvec.normalized(), Magzvec.normalized(), MagPos);
+				}
+				return Matrix4x4DX::identity();
 			}
 			const auto			GetReloadType(void) const noexcept { return GetModSlot().GetModData()->GetReloadType(); }
 
@@ -242,6 +263,8 @@ namespace FPS_n2 {
 					this->m_Arm[static_cast<int>(EnumGunAnimType::ReloadEnd)].Update(Array[static_cast<int>(EnumGunAnimType::ReloadEnd)], 0.1f, 0.2f, 0.9f);
 					this->m_Arm[static_cast<int>(EnumGunAnimType::Ready)].Update(Array[static_cast<int>(EnumGunAnimType::Ready)], 0.1f, 0.2f, 0.87f);
 					this->m_Arm[static_cast<int>(EnumGunAnimType::Watch)].Update(Array[static_cast<int>(EnumGunAnimType::Watch)], 0.1f, 0.1f);
+					this->m_Arm[static_cast<int>(EnumGunAnimType::ThrowReady)].Update(Array[static_cast<int>(EnumGunAnimType::ThrowReady)], 0.1f, 0.1f);
+					this->m_Arm[static_cast<int>(EnumGunAnimType::Throw)].Update(Array[static_cast<int>(EnumGunAnimType::Throw)], 0.1f, 0.1f);
 #else
 					for (int loop = 0; loop < static_cast<int>(EnumGunAnimType::Max); ++loop) {
 						this->m_Arm[loop].Update(Array[loop], 0.2f, 0.2f, 0.9f);
@@ -282,7 +305,11 @@ namespace FPS_n2 {
 				this->m_GunChangePer = 0.f;
 			}
 			void				SetAmmo(int value) noexcept { this->m_Capacity = std::clamp(value, 0, this->GetAmmoAll()); }
-			void				CockByMag() noexcept { this->m_ChamberAmmoData = GetMagazinePtr()->GetModSlot().GetModData()->GetAmmoSpecMagTop(); }//マガジンの一番上の弾データをチャンバーイン
+			void				CockByMag() noexcept {
+				if (this->m_MagazinePtr) {
+					this->m_ChamberAmmoData = GetMagazinePtr()->GetModSlot().GetModData()->GetAmmoSpecMagTop();//マガジンの一番上の弾データをチャンバーイン
+				}
+			}
 			void				UnloadChamber() noexcept { this->m_ChamberAmmoData.reset(); }
 			void				SetShotSwitchOff() noexcept { this->m_ShotSwitch = false; }
 			void				SetMagFall() noexcept {
@@ -328,7 +355,7 @@ namespace FPS_n2 {
 				m_ModSlotControl.UpdatePartsMove(GetFrameWorldMat_P(GunFrame::Sight), GunSlot::Sight);
 				m_ModSlotControl.UpdatePartsMove(GetFrameWorldMat_P(GunFrame::Magpos), GunSlot::Magazine);
 			}
-			void				UpdateMagazineMat(const Matrix4x4DX& MagPoachMat) noexcept;
+			void				UpdateMagazineMat(bool IsSelGun, const Matrix4x4DX& MagPoachMat) noexcept;
 		public:
 			GunClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Gun); }
 			~GunClass(void) noexcept {}

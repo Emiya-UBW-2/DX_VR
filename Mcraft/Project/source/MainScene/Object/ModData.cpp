@@ -105,6 +105,9 @@ namespace FPS_n2 {
 					this->m_ReloadType = RELOADTYPE::AMMO;
 				}
 			}
+			else if (LEFT == "IsThrowWeapon") {
+				this->m_IsThrowWeapon = RIGHT == "True";
+			}
 		}
 
 		const std::shared_ptr<ModDataClass>* ModDataManager::AddData(const std::string& filepath) noexcept {

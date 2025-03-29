@@ -42,6 +42,7 @@ namespace FPS_n2 {
 			int								m_ShotRate{ 300 };
 			int								m_SoundSel{ 0 };
 			RELOADTYPE						m_ReloadType{ RELOADTYPE::MAG };	//
+			bool							m_IsThrowWeapon{ false };
 
 			std::vector<std::shared_ptr<AmmoDataClass>>	m_AmmoSpec;
 			std::vector<std::string>					m_Info;
@@ -55,6 +56,7 @@ namespace FPS_n2 {
 			const auto& GetSoundSel(void) const noexcept { return this->m_SoundSel; }
 			const auto& GetReloadType(void) const noexcept { return this->m_ReloadType; }
 			//«”\
+			const auto& GetIsThrowWeapon(void) const noexcept { return this->m_IsThrowWeapon; }
 			const auto& GetIsRecoilPower(void) const noexcept { return this->m_IsRecoilPower; }
 			const auto& GetIsRecoilReturn(void) const noexcept { return this->m_IsRecoilReturn; }
 			const auto& GetIsShotType(void) const noexcept { return this->m_IsShotType; }

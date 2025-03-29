@@ -85,7 +85,7 @@ namespace FPS_n2 {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			switch (GetGunAnime()) {
 			case GunAnimeID::Shot:
-				SetAnimOnce((int)GetGunAnime(), ((float)GetModSlot().GetModData()->GetShotRate()) / 300.f);
+				SetAnimOnce(GetGunAnimeID(), ((float)GetModSlot().GetModData()->GetShotRate()) / 300.f);
 				if (GetNowGunAnimeTimePer() >= 1.f && m_ShotEnd) {
 					m_ShotEnd = false;
 					if (!GetIsMagEmpty()) {
@@ -107,25 +107,25 @@ namespace FPS_n2 {
 				}
 				break;
 			case GunAnimeID::Cocking:
-				SetAnimOnce((int)GetGunAnime(), 1.5f);
+				SetAnimOnce(GetGunAnimeID(), 1.5f);
 				if (GetNowGunAnimeTimePer() >= 1.f) {
 					SetGunAnime(GunAnimeID::Base);
 				}
 				break;
 			case GunAnimeID::ReloadStart_Empty:
-				SetAnimOnce((int)GetGunAnime(), 1.0f);
+				SetAnimOnce(GetGunAnimeID(), 1.0f);
 				if (GetNowGunAnimeTimePer() >= 1.f) {
 					SetGunAnime(GunAnimeID::ReloadOne);
 				}
 				break;
 			case GunAnimeID::ReloadStart:
-				SetAnimOnce((int)GetGunAnime(), 1.0f);
+				SetAnimOnce(GetGunAnimeID(), 1.0f);
 				if (GetNowGunAnimeTimePer() >= 1.f) {
 					SetGunAnime(GunAnimeID::ReloadOne);
 				}
 				break;
 			case GunAnimeID::ReloadOne:
-				SetAnimOnce((int)GetGunAnime(), 1.0f);
+				SetAnimOnce(GetGunAnimeID(), 1.0f);
 				if (this->m_isMagSuccess ? (GetGunAnimePer(EnumGunAnimType::Reload) >= 0.75f) : (GetGunAnimePer(EnumGunAnimType::Reload) >= 1.f)) {
 					switch (GetReloadType()) {
 					case RELOADTYPE::MAG:
@@ -144,8 +144,8 @@ namespace FPS_n2 {
 							SetGunAnime(GunAnimeID::ReloadEnd);
 						}
 						else {
-							this->GetObj().SetAnim((int)GetGunAnime()).Reset();
-							this->GetObj().SetAnim((int)GetGunAnime()).SetPer(1.f);
+							this->GetObj().SetAnim(GetGunAnimeID()).Reset();
+							this->GetObj().SetAnim(GetGunAnimeID()).SetPer(1.f);
 							this->m_GunAnimeTime = 0.f;
 						}
 						break;
@@ -155,7 +155,7 @@ namespace FPS_n2 {
 				}
 				break;
 			case GunAnimeID::ReloadEnd:
-				SetAnimOnce((int)GetGunAnime(), 1.0f);
+				SetAnimOnce(GetGunAnimeID(), 1.0f);
 				if (GetNowGunAnimeTimePer() >= 1.f) {
 					if (GetInChamber()) {
 						SetGunAnime(GunAnimeID::Base);
@@ -187,8 +187,10 @@ namespace FPS_n2 {
 		void				GunClass::SetupSpawn(const std::array<bool, static_cast<int>(EnumGunAnimType::Max)>& Array) noexcept {
 			this->m_MagFall.Dispose();
 			this->m_CartFall.Dispose();
-			this->m_MagFall.Init(GetMagazinePtr()->GetFilePath(), 1);
-			this->m_CartFall.Init(GetMagazinePtr()->GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPath(), 4);	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
+			if (this->m_MagazinePtr) {
+				this->m_MagFall.Init(GetMagazinePtr()->GetFilePath(), 1);
+				this->m_CartFall.Init(GetMagazinePtr()->GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPath(), 4);	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
+			}
 			SetGunAnime(GunAnimeID::Base);
 			UpdateGunAnime(Array, true);
 		}
@@ -208,7 +210,14 @@ namespace FPS_n2 {
 				PostPassParts->Set_size_lens(m_ReticleControl.GetLensSize());
 			}
 		}
-		void				GunClass::UpdateMagazineMat(const Matrix4x4DX& MagPoachMat) noexcept {
+		void				GunClass::UpdateMagazineMat(bool IsSelGun, const Matrix4x4DX& MagPoachMat) noexcept {
+			if (!this->m_MagazinePtr) { return; }
+
+			if (!IsSelGun) {
+				GetMagazinePtr()->SetHandMatrix(GetFrameWorldMat_P(GunFrame::Magpos));
+				return;
+			}
+
 			float AnimPer = GetNowGunAnimeTimePer();
 			float BasePer = 0.f;
 			float MaxPer = 0.f;

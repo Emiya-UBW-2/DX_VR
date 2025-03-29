@@ -12,6 +12,8 @@ namespace FPS_n2 {
 			ReloadEnd,
 			Ready,
 			Watch,
+			ThrowReady,
+			Throw,
 			Max,
 		};
 		enum class EnumGunAnim {
@@ -36,6 +38,9 @@ namespace FPS_n2 {
 			M16_watch,
 			M870_raload,
 			M870_ready,
+			RGD5_aim,
+			RGD5_Ready,
+			RGD5_throw,
 			Max,
 		};
 		static const char* EnumGunAnimName[static_cast<int>(EnumGunAnim::Max)] = {
@@ -60,6 +65,9 @@ namespace FPS_n2 {
 			"M16_watch",
 			"M870_raload",
 			"M870_ready",
+			"RGD5_aim",
+			"RGD5_Ready",
+			"RGD5_throw",
 		};
 
 		class GunAnimNow {
@@ -178,8 +186,8 @@ namespace FPS_n2 {
 		private:
 			std::vector<AnimDatas>	m_Object;
 #ifdef DEBUG
-			Vector3DX DBG_AnimRot;
-			Vector3DX DBG_AnimPos = Vector3DX::vget(-0.06f, -0.15f, -0.23f);
+			Vector3DX DBG_AnimRot = Vector3DX::vget(0.f, 0.f, deg2rad(-20));
+			Vector3DX DBG_AnimPos = Vector3DX::vget(-0.09f, -0.10f, -0.45f);
 #endif
 		public:
 			void	Load(const char* filepath) {
@@ -239,7 +247,7 @@ namespace FPS_n2 {
 								Lerp((*ani)->GetPos(), (*(ani + 1))->GetPos(), nowframe / Frame)
 							);
 #ifdef DEBUG_CAM
-							if (0 <= DBG_CamSel && DBG_CamSel <= 3) {
+							if (0 <= DBG_CamSel && DBG_CamSel <= 3 && false) {
 								auto* DXLib_refParts = DXLib_ref::Instance();
 								Ret.Set(DBG_AnimRot, DBG_AnimPos);
 								//
@@ -319,6 +327,8 @@ namespace FPS_n2 {
 				EnumGunAnim::M16_reloadend,
 				EnumGunAnim::M16_ready1,
 				EnumGunAnim::M16_watch,
+				EnumGunAnim::RGD5_Ready,
+				EnumGunAnim::RGD5_throw,
 			},
 			{
 				//ハンドガン
@@ -330,6 +340,8 @@ namespace FPS_n2 {
 				EnumGunAnim::M1911_reloadend,
 				EnumGunAnim::M1911_ready1,
 				EnumGunAnim::M1911_watch,
+				EnumGunAnim::RGD5_Ready,
+				EnumGunAnim::RGD5_throw,
 			},
 			{
 				//M4
@@ -341,6 +353,21 @@ namespace FPS_n2 {
 				EnumGunAnim::M16_reloadend,
 				EnumGunAnim::M870_ready,
 				EnumGunAnim::M16_watch,
+				EnumGunAnim::RGD5_Ready,
+				EnumGunAnim::RGD5_throw,
+			},
+			{
+				//グレネード
+				EnumGunAnim::RGD5_aim,
+				EnumGunAnim::RGD5_aim,
+				EnumGunAnim::RGD5_aim,
+				EnumGunAnim::RGD5_aim,
+				EnumGunAnim::RGD5_aim,
+				EnumGunAnim::RGD5_aim,
+				EnumGunAnim::RGD5_aim,
+				EnumGunAnim::RGD5_aim,
+				EnumGunAnim::RGD5_Ready,
+				EnumGunAnim::RGD5_throw,
 			},
 		};
 	};

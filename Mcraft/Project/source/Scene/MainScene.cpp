@@ -37,11 +37,13 @@ namespace FPS_n2 {
 						c->LoadCharaGun("Mod870", 0, false);
 					}
 					c->LoadCharaGun("P226", 1, false);
+					c->LoadCharaGun("RGD5", 2, false);
 					c->SetCharaTypeID(CharaTypeID::Team);
 				}
 				else {
 					CharacterClass::LoadChara("Soldier", (PlayerID)loop);
 					c->LoadCharaGun("AKS-74", 0, false);
+					c->LoadCharaGun("RGD5", 2, false);
 					//ラグドール
 					if (loop == 1) {
 						MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール

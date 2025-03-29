@@ -502,21 +502,13 @@ namespace FPS_n2 {
 		private:
 			int													m_GunSelect{ 0 };
 			int													m_ReserveGunSelect{ 0 };
-			std::array<GunParam, 2>								m_GunParam{};			//銃
+			std::array<GunParam, 3>								m_GunParam{};			//銃
 		public://ゲッター
+			auto&				GetParam(int ID) noexcept { return this->m_GunParam[ID]; }
+			const auto&			GetParam(int ID) const noexcept { return this->m_GunParam[ID]; }
+			const auto			GetGunNum() const noexcept { return static_cast<int>(sizeof(m_GunParam) / sizeof(m_GunParam[0])); }
 			const auto			GetNowGunSelect() const noexcept { return this->m_GunSelect; }
-			const auto			GetOtherGunSelect() const noexcept { return 1 - GetNowGunSelect(); }
-			const auto			GetSightZoomSize() const noexcept { return this->m_GunParam[GetNowGunSelect()].GetSightZoomSize(); }
-			const auto			IsNeedReload() const noexcept { return this->m_GunParam[GetNowGunSelect()].IsNeedReload(); }
-			const auto			GetGunRotMat(int ID, const Matrix3x3DX& AimGunRot) const noexcept { return m_GunParam[ID].GetGunRotMat(AimGunRot); }
-			const auto			GetGunPos(int ID, const Vector3DX& AimGunPos) const noexcept { return m_GunParam[ID].GetGunPos(ID == GetNowGunSelect(), AimGunPos); }
-			const auto& GetSlingPer(int ID) const noexcept { return this->m_GunParam[ID].m_SlingPer; }
-			const auto& GetGunPtr(int ID) const noexcept { return this->m_GunParam[ID].m_Gun_Ptr; }
-			const auto& GetGunPtrNow(void) const noexcept { return GetGunPtr(GetNowGunSelect()); }
-			const auto& GetGunPtrOther(void) const noexcept { return GetGunPtr(GetOtherGunSelect()); }
 		public://セッター
-			void				SetGunMountMat(int ID, const Matrix3x3DX& Rot, const Vector3DX& Pos) noexcept { m_GunParam[ID].SetGunMountMat(Rot, Pos); }
-			void				UpdateGun(int ID) noexcept { m_GunParam[ID].Update(ID == GetNowGunSelect()); }
 			void				SelectReserveGun(int ID) noexcept { m_ReserveGunSelect = ID; }
 			void				InvokeReserveGunSel() noexcept { SelectGun(m_ReserveGunSelect); }
 			void				SelectGun(int ID) noexcept {
@@ -524,17 +516,10 @@ namespace FPS_n2 {
 				SelectReserveGun(ID);
 			}
 			void				SetGunPtr(int ID, const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_GunParam[ID].m_Gun_Ptr = pGunPtr0; }
-			void				SwapMagazine(void) noexcept { this->m_GunParam[GetNowGunSelect()].SwapMagazine(); }
 		public:
 			GunPtrControl(void) noexcept {}
 			~GunPtrControl(void) noexcept {}
 		public:
-			void				Init(const std::array<bool, static_cast<int>(EnumGunAnimType::Max)>& Array) noexcept {
-				for (int loop = 0; loop < 2; ++loop) {
-					this->m_GunParam[loop].SetupGun(Array);
-					this->m_GunParam[loop].m_SlingPer = (GetNowGunSelect() == loop) ? 0.f : 1.f;
-				}
-			}
 			void				Dispose() noexcept {
 				for (auto& g : m_GunParam) {
 					g.Dispose();

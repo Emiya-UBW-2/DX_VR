@@ -15,6 +15,8 @@ namespace FPS_n2 {
 			Open,
 			Watch,
 			Hammer,
+			ThrowReady,
+			Throw,
 			AnimeIDMax,
 		};
 		enum class GunFrame {
