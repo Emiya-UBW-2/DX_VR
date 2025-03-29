@@ -85,7 +85,7 @@ namespace FPS_n2 {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			switch (GetGunAnime()) {
 			case GunAnimeID::Shot:
-				SetAnimOnce(GetGunAnimeID(GetGunAnime()), ((float)GetModSlot().GetModData()->GetShotRate()) / 300.f/10.f);
+				SetAnimOnce(GetGunAnimeID(GetGunAnime()), ((float)GetModSlot().GetModData()->GetShotRate()) / 300.f);
 				if (GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTimePer() >= 1.f && m_ShotEnd) {
 					m_ShotEnd = false;
 					if (!GetIsMagEmpty()) {

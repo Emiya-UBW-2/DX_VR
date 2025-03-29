@@ -108,6 +108,8 @@ namespace FPS_n2 {
 			const auto			GetNowGunAnimeID(void) const noexcept { return GetGunAnimeID(GetGunAnime()); }
 
 			const auto			IsThrowWeapon() const noexcept { return GetModSlot().GetModData()->GetIsThrowWeapon(); }
+			const auto			GetCanADS() const noexcept { return GetModSlot().GetModData()->GetCanADS(); }
+			const auto			GetCanSwitch() const noexcept { return GetModSlot().GetModData()->GetCanSwitch(); }
 
 			const auto			GetReloading(void) const noexcept { return (GunAnimeID::ReloadStart_Empty <= GetGunAnime()) && (GetGunAnime() <= GunAnimeID::ReloadEnd); }
 			const auto			IsCanShoot(void) const noexcept {

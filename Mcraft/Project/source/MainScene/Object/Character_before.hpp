@@ -479,13 +479,7 @@ namespace FPS_n2 {
 					tmp_gunmat *= Matrix3x3DX::RotVec2(tmp_gunmat.yvec(), Lerp(m_SlingRot.yvec(), AimGunRot.yvec(), m_SlingPer));
 					return tmp_gunmat;
 				}
-				const Vector3DX		GetGunPos(bool IsSelGun, const Vector3DX& AimGunPos) const noexcept {
-					float PAdd = 0.f;
-					if (!IsSelGun) {
-						PAdd = -1.f * Scale3DRate * m_SlingPer;
-					}
-					return Lerp(m_SlingPos + Vector3DX::up() * PAdd, AimGunPos, m_SlingPer);
-				}
+				const Vector3DX		GetGunPos(const Vector3DX& AimGunPos) const noexcept { return Lerp(m_SlingPos, AimGunPos, m_SlingPer); }
 				void				Update(bool IsSelGun) noexcept {
 					Easing(&m_SlingPer, IsSelGun ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 					if (m_SlingPer <= 0.001f) { m_SlingPer = 0.f; }

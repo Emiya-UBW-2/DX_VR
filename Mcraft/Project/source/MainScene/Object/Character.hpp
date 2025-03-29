@@ -28,7 +28,6 @@ namespace FPS_n2 {
 			std::array<float, static_cast<int>(CharaAnimeID::AnimeIDMax)>	m_AnimPerBuf{ 0 };
 			CharaAnimeID										m_BottomAnimSelect{};
 			float												m_SwitchPer{};
-			bool												m_IsSwitchRight{};
 			float												m_ADSPer{ 0.f };
 			PointControl<HitPoint, 100>							m_HP{};
 			PointControl<ArmerPoint, 100>						m_AP{};
@@ -40,9 +39,6 @@ namespace FPS_n2 {
 			bool												m_IsStuckGun{ false };
 			float												m_HPRec{ 0.f };
 			bool												m_ArmBreak{ false };
-			switchs												m_SightChange;
-			switchs												m_ULTKey;
-			switchs												m_ThrowKey;
 			switchs												m_Squat;
 			int													m_CharaSound{ -1 };			//サウンド
 			Vector3DX											m_RecoilRadAdd;
@@ -56,6 +52,7 @@ namespace FPS_n2 {
 			PlayerID											m_MyID{ 0 };
 			CharaTypeID											m_CharaType{};
 			bool												m_Cancel{ false };			//
+			bool												m_ThrowByShot{ false };			//
 		private://キャッシュ
 			Matrix3x3DX											m_CharaRotationCache{};
 			Matrix3x3DX											m_EyeRotationCache{};
@@ -89,15 +86,15 @@ namespace FPS_n2 {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (this->m_IsSquat) {
 					if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
-						return 0.95f * 60.f * DXLib_refParts->GetDeltaTime();
+						return 0.65f;
 					}
-					return 1.85f * 60.f * DXLib_refParts->GetDeltaTime();
+					return 0.95f;
 				}
 				else {
 					if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
-						return 1.25f * 60.f * DXLib_refParts->GetDeltaTime();
+						return 0.95f;
 					}
-					return 2.25f * 60.f * DXLib_refParts->GetDeltaTime();
+					return 1.25f;
 				}
 			}
 			const auto		GetSpeedPer(void) const noexcept { return std::clamp(GetSpeed() / 0.65f, 0.5f, 1.f); }

@@ -108,6 +108,12 @@ namespace FPS_n2 {
 			else if (LEFT == "IsThrowWeapon") {
 				this->m_IsThrowWeapon = RIGHT == "True";
 			}
+			else if (LEFT == "CanADS") {
+				this->m_CanADS = RIGHT == "True";
+			}
+			else if (LEFT == "CanSwitch") {
+				this->m_CanSwitch = RIGHT == "True";
+			}
 			else {
 				for (int loop = 0; loop < static_cast<int>(GunAnimeID::Max); ++loop) {
 					if (LEFT == GunAnimeIDName[loop]) {

@@ -4,7 +4,7 @@ Info=AA
 
 Info_Eng=AA
 
-ShotRate=800
+ShotRate=600
 RecoilPower=120
 RecoilReturn=0.9
 shottype=FULL

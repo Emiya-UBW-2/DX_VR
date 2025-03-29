@@ -6,6 +6,8 @@ Info_Eng=AA
 
 usehumanAnim=3
 IsThrowWeapon=True
+CanADS=False
+CanSwitch=False
 
 ThrowReady=0
 Throw=1

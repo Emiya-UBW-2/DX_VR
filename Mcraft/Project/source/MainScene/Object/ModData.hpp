@@ -43,6 +43,9 @@ namespace FPS_n2 {
 			int								m_SoundSel{ 0 };
 			RELOADTYPE						m_ReloadType{ RELOADTYPE::MAG };	//
 			bool							m_IsThrowWeapon{ false };
+			bool							m_CanADS{ true };
+			bool							m_CanSwitch{ true };
+
 
 			std::array<int, static_cast<int>(GunAnimeID::Max)> m_AnimSelect{ -1 };
 
@@ -59,6 +62,8 @@ namespace FPS_n2 {
 			const auto& GetReloadType(void) const noexcept { return this->m_ReloadType; }
 			//«”\
 			const auto& GetIsThrowWeapon(void) const noexcept { return this->m_IsThrowWeapon; }
+			const auto& GetCanADS(void) const noexcept { return this->m_CanADS; }
+			const auto& GetCanSwitch(void) const noexcept { return this->m_CanSwitch; }
 			const auto& GetAnimSelectList(void) const noexcept { return this->m_AnimSelect; }
 			const auto& GetIsRecoilPower(void) const noexcept { return this->m_IsRecoilPower; }
 			const auto& GetIsRecoilReturn(void) const noexcept { return this->m_IsRecoilReturn; }

@@ -11,6 +11,7 @@ shottype=SEMI
 usehumanAnim=1
 soundsel=1
 reloadType=MAG
+CanSwitch=False
 
 Slot0Type=Magazine
 Slot0IsNeed=true
