@@ -24,14 +24,14 @@ Slot1Type=Sight
 Slot1IsNeed=true
 Slot1Item=VIPER_DotSight
 
+Hammer=0
 Shot=1
 Cocking=2
 ReloadStart_Empty=3
 ReloadStart=4
 Reload=5
 ReloadEnd=6
-Watch=8
-Hammer=0
 Open=7
+Watch=8
 
 end

@@ -15,13 +15,13 @@ namespace FPS_n2 {
 				m_Armon = isOn;
 				m_ArmPer = isOn ? 1.f : 0.f;
 			}
-			void Update(bool isOn, float OnOver = 0.2f, float OffOver = 0.2f, float Per = 0.8f) noexcept {
+			void Update(bool isOn, float OnOver = 0.2f, float OffOver = 0.2f, float UpPer = 0.8f, float DownPer = 0.8f) noexcept {
 				if (isOn) {
 					if (m_Armon) {
 						Easing(&this->m_ArmPer, 1.f, 0.9f, EasingType::OutExpo);
 					}
 					else {
-						Easing(&this->m_ArmPer, 1.f + OnOver, Per, EasingType::OutExpo);
+						Easing(&this->m_ArmPer, 1.f + OnOver, UpPer, EasingType::OutExpo);
 						if (this->m_ArmPer >= 1.f + OnOver / 2.f) {
 							m_Armon = true;
 						}
@@ -32,7 +32,7 @@ namespace FPS_n2 {
 						Easing(&this->m_ArmPer, 0.f, 0.9f, EasingType::OutExpo);
 					}
 					else {
-						Easing(&this->m_ArmPer, 0.f - OffOver, Per, EasingType::OutExpo);
+						Easing(&this->m_ArmPer, 0.f - OffOver, DownPer, EasingType::OutExpo);
 						if (this->m_ArmPer <= 0.f - OffOver / 2.f) {
 							m_Armon = false;
 						}

@@ -26,6 +26,7 @@ namespace FPS_n2 {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(loop)->GetChara();
 				if (loop == GetViewPlayerID()) {
 					CharacterClass::LoadChara("Main", (PlayerID)loop);
+					//*
 					int Rand = GetRand(100);
 					if (Rand < 30) {
 						c->LoadCharaGun("type89", 0, false);
@@ -36,6 +37,8 @@ namespace FPS_n2 {
 					else {
 						c->LoadCharaGun("Mod870", 0, false);
 					}
+					//*/
+					//c->LoadCharaGun("AKS-74", 0, false);
 					c->LoadCharaGun("P226", 1, false);
 					c->LoadCharaGun("RGD5", 2, false);
 					c->SetCharaTypeID(CharaTypeID::Team);
@@ -210,7 +213,7 @@ namespace FPS_n2 {
 				}
 				InputControl MyInput; MyInput.ResetAllInput();
 				if (!SceneParts->IsPause() && m_FadeControl.IsClear() && (this->m_StartTimer <= 0.f)) {
-					float AimPer = 1.f / std::max(1.f, Chara->GetSightZoomSize());
+					float AimPer = 1.f / std::max(1.f, Chara->GetIsADS() ? Chara->GetGunPtrNow()->GetSightZoomSize() : 1.f);
 					auto RecoilRadAdd = Chara->GetRecoilRadAdd();
 					MyInput.SetAddxRad(Pad->GetLS_Y() / 200.f * AimPer - RecoilRadAdd.y);
 					MyInput.SetAddyRad(Pad->GetLS_X() / 200.f * AimPer + RecoilRadAdd.x);
@@ -377,7 +380,7 @@ namespace FPS_n2 {
 					float fov = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
 					if (Chara->GetIsADS()) {
 						fov -= deg2rad(15);
-						fov /= std::max(1.f, Chara->GetSightZoomSize() / 2.f);
+						fov /= std::max(1.f, Chara->GetGunPtrNow()->GetSightZoomSize() / 2.f);
 					}
 					if (Chara->IsGunShotSwitch()) {
 						fov -= deg2rad(5);
@@ -570,7 +573,10 @@ namespace FPS_n2 {
 			//auto* NetBrowser = NetWorkBrowser::Instance();
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetViewPlayerID())->GetChara();
 			if (!Chara->IsAlive()) { return; }
-			Chara->DrawReticle();										//レティクル表示
+			//レティクル表示
+			if (Chara->GetGunPtrNow()) {
+				Chara->GetGunPtrNow()->DrawReticle(Chara->GetLeanRad());
+			}
 			DrawHitGraph();												//着弾表示
 			if (!SceneParts->IsPause()) { this->m_UIclass.Draw(); }		//UI
 			//NetBrowser->Draw();										//通信設定

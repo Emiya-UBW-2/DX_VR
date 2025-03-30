@@ -19,7 +19,7 @@ namespace FPS_n2 {
 
 			ChoiceOnceMax,//どれか択一で行うアニメーション の総数
 
-			Aim = ChoiceOnceMax,
+			Base = ChoiceOnceMax,
 			Hammer,
 			Open,
 
@@ -46,18 +46,16 @@ namespace FPS_n2 {
 			"Open",
 		};
 		enum class EnumGunAnim {
-			M1911_ready1,
-			M1911_ready2,
-			M1911_aim1,
-			M1911_aim2,
+			M1911_ready,
+			M1911_aim,
 			M1911_ads,
 			M1911_reloadstart_empty,
 			M1911_reloadstart,
 			M1911_reload,
 			M1911_reloadend,
 			M1911_watch,
-			M16_ready1,
-			M16_ready2,
+			M1911_cocking,
+			M16_ready,
 			M16_aim,
 			M16_ads,
 			M16_reloadstart_empty,
@@ -71,21 +69,25 @@ namespace FPS_n2 {
 			RGD5_down,
 			RGD5_Ready,
 			RGD5_throw,
+			AK_cocking,
+			AK_reloadstart_empty,
+			AK_reloadstart,
+			AK_reload,
+			AK_reloadend,
+			AK_ready,
 			Max,
 		};
 		static const char* EnumGunAnimName[static_cast<int>(EnumGunAnim::Max)] = {
-			"M1911_ready1",
-			"M1911_ready2",
-			"M1911_aim1",
-			"M1911_aim2",
+			"M1911_ready",
+			"M1911_aim",
 			"M1911_ads",
 			"M1911_reloadstart_empty",
 			"M1911_reloadstart",
 			"M1911_reload",
 			"M1911_reloadend",
 			"M1911_watch",
-			"M16_ready1",
-			"M16_ready2",
+			"M1911_cocking",
+			"M16_ready",
 			"M16_aim",
 			"M16_ads",
 			"M16_reloadstart_empty",
@@ -99,6 +101,12 @@ namespace FPS_n2 {
 			"RGD5_down",
 			"RGD5_Ready",
 			"RGD5_throw",
+			"AK_cocking",
+			"AK_reloadstart_empty",
+			"AK_reloadstart",
+			"AK_reload",
+			"AK_reloadend",
+			"AK_ready",
 		};
 
 		class GunAnimNow {
@@ -126,7 +134,7 @@ namespace FPS_n2 {
 			friend class SingletonBase<GunAnimManager>;
 		private:
 			class GunanimData {
-				EnumGunAnim		m_EnumGunAnim{ EnumGunAnim::M16_ready1 };
+				EnumGunAnim		m_EnumGunAnim{};
 				bool			m_IsLoop{ true };
 			public:
 				void Set(const std::string& data, EnumGunAnim EnumSel) {
@@ -347,35 +355,35 @@ namespace FPS_n2 {
 		const GunAnimSet GunAnimeSets[] = {
 			//M4
 			{
-				EnumGunAnim::M16_ready1,
+				EnumGunAnim::M16_ready,
 				EnumGunAnim::M16_ads,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
-				EnumGunAnim::M16_reloadstart_empty,
-				EnumGunAnim::M16_reloadstart,
-				EnumGunAnim::M16_reload,
-				EnumGunAnim::M16_reloadend,
+				EnumGunAnim::AK_reloadstart_empty,
+				EnumGunAnim::AK_reloadstart,
+				EnumGunAnim::AK_reload,
+				EnumGunAnim::AK_reloadend,
 				EnumGunAnim::M16_watch,
-				EnumGunAnim::RGD5_Ready,
-				EnumGunAnim::RGD5_throw,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
 				EnumGunAnim::M16_aim,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 			},
 			//ハンドガン
 			{
-				EnumGunAnim::M1911_ready1,
+				EnumGunAnim::M1911_ready,
 				EnumGunAnim::M1911_ads,
 				EnumGunAnim::Max,
-				EnumGunAnim::Max,
+				EnumGunAnim::M1911_cocking,
 				EnumGunAnim::M1911_reloadstart_empty,
 				EnumGunAnim::M1911_reloadstart,
 				EnumGunAnim::M1911_reload,
 				EnumGunAnim::M1911_reloadend,
 				EnumGunAnim::M1911_watch,
-				EnumGunAnim::RGD5_Ready,
-				EnumGunAnim::RGD5_throw,
-				EnumGunAnim::M1911_aim1,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
+				EnumGunAnim::M1911_aim,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 			},
@@ -390,8 +398,8 @@ namespace FPS_n2 {
 				EnumGunAnim::M870_raload,
 				EnumGunAnim::M16_reloadend,
 				EnumGunAnim::M16_watch,
-				EnumGunAnim::RGD5_Ready,
-				EnumGunAnim::RGD5_throw,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
 				EnumGunAnim::M16_aim,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
@@ -410,6 +418,23 @@ namespace FPS_n2 {
 				EnumGunAnim::RGD5_Ready,
 				EnumGunAnim::RGD5_throw,
 				EnumGunAnim::RGD5_aim,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
+			},
+			//AK
+			{
+				EnumGunAnim::AK_ready,
+				EnumGunAnim::M16_ads,
+				EnumGunAnim::Max,
+				EnumGunAnim::AK_cocking,
+				EnumGunAnim::AK_reloadstart_empty,
+				EnumGunAnim::AK_reloadstart,
+				EnumGunAnim::AK_reload,
+				EnumGunAnim::AK_reloadend,
+				EnumGunAnim::M16_watch,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
+				EnumGunAnim::M16_aim,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 			},

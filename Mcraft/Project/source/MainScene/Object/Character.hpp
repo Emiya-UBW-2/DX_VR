@@ -28,7 +28,6 @@ namespace FPS_n2 {
 			std::array<float, static_cast<int>(CharaAnimeID::AnimeIDMax)>	m_AnimPerBuf{ 0 };
 			CharaAnimeID										m_BottomAnimSelect{};
 			float												m_SwitchPer{};
-			float												m_ADSPer{ 0.f };
 			PointControl<HitPoint, 100>							m_HP{};
 			PointControl<ArmerPoint, 100>						m_AP{};
 			DamageEventControl									m_Damage;
@@ -83,7 +82,6 @@ namespace FPS_n2 {
 			const auto		GetBottomRightStepAnimSel(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_RightStep : CharaAnimeID::Bottom_Stand_RightStep; }
 			const auto		GetBottomTurnAnimSel(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_Turn : CharaAnimeID::Bottom_Stand_Turn; }
 			const auto		GetSpeed(void) const noexcept {
-				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (this->m_IsSquat) {
 					if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
 						return 0.65f;
@@ -99,25 +97,24 @@ namespace FPS_n2 {
 			}
 			const auto		GetSpeedPer(void) const noexcept { return std::clamp(GetSpeed() / 0.65f, 0.5f, 1.f); }
 			const bool		GetIsADS(void) const noexcept;
-			const auto		GetSightZoomSize() const noexcept { return GetIsADS() ? m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).GetSightZoomSize() : 1.f; }
 			auto&			GetRagDoll(void) noexcept { return m_RagDollControl.GetRagDoll(); }
 			const auto&		GetLeanRad(void) const noexcept { return m_LeanControl.GetRad(); }
-			const auto&		GetGunPtrNow(void) const noexcept { return m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).m_Gun_Ptr; }
+			const auto& GetGunPtrNow(void) const noexcept {
+				auto& NowGunPtrNow = m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect());
+				return NowGunPtrNow.m_Gun_Ptr;
+			}
 			const auto&		GetAutoAimID(void) const noexcept { return m_AutoAimControl.GetAutoAimID(); }
 			const auto		GetAutoAimActive(void) const noexcept { return m_AutoAimControl.GetAutoAimActive(); }
 			const auto&		GetHitBoxList(void) const noexcept { return m_HitBoxControl.GetHitBoxPointList(); }
-			const auto		IsGunShotSwitch(void) const noexcept { return m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).m_Gun_Ptr && m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).m_Gun_Ptr->GetShotSwitch(); }
+			const auto		IsGunShotSwitch(void) const noexcept {
+				auto& NowGunPtrNow = m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect());
+				return NowGunPtrNow.m_Gun_Ptr && NowGunPtrNow.m_Gun_Ptr->GetShotSwitch();
+			}
 			const auto		GetAutoAimRadian() const noexcept {
-				float Len = std::max(0.01f, std::hypotf((float)(m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).m_Gun_Ptr->GetAimXPos() - 1920 / 2), (float)(m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).m_Gun_Ptr->GetAimYPos() - 1080 / 2)));
+				auto& NowGunPtrNow = m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect());
+				float Len = std::max(0.01f, std::hypotf((float)(NowGunPtrNow.m_Gun_Ptr->GetAimXPos() - 1920 / 2), (float)(NowGunPtrNow.m_Gun_Ptr->GetAimYPos() - 1080 / 2)));
 				Len = std::clamp(100.f / Len, 0.f, 1.f);
 				return deg2rad(5) * Len;
-			}
-			void			DrawReticle(void) const noexcept {
-				if (m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).m_Gun_Ptr) {
-					if ((this->m_ADSPer >= 0.8f) || (m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).GetSightZoomSize() == 1.f)) {
-						m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect()).m_Gun_Ptr->DrawReticle(GetLeanRad());
-					}
-				}
 			}
 		public://ÉQÉbÉ^Å[
 			const auto		IsAlive(void) const noexcept { return m_HP.IsNotZero(); }

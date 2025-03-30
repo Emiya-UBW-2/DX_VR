@@ -17,14 +17,10 @@ Slot0Type=Magazine
 Slot0IsNeed=true
 Slot0Item=Mag226
 
+Hammer=0
 Shot=1
 Cocking=2
-ReloadStart_Empty=3
-ReloadStart=4
-Reload=5
-ReloadEnd=6
-Watch=8
-Hammer=0
-Open=7
+Open=3
+Watch=4
 
 end

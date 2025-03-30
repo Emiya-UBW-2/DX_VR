@@ -367,108 +367,23 @@ namespace FPS_n2 {
 			}
 		};
 		//
-		class MagStockControl {
-		private:
-			class MagStock {
-			public:
-				int AmmoNum{ 0 };
-				int AmmoAll{ 0 };
-				int ModUniqueID{ -1 };
-			};
-
-			std::array<MagStock, 3>								m_MagazineStock;
-		public:
-			int													m_AmmoStock{ 0 };
-			const auto& GetAmmoStock() const noexcept { return m_AmmoStock; }
-			void AddAmmoStock(int Ammo) noexcept { m_AmmoStock += Ammo; }
-			void SubAmmoStock(int Ammo) noexcept { m_AmmoStock -= Ammo; }
-		public:
-			MagStockControl(void) noexcept {}
-			~MagStockControl(void) noexcept {}
-		public:
-			const auto& GetNowMag() const noexcept { return m_MagazineStock[0]; }
-			const auto& GetMagDatas() const noexcept { return m_MagazineStock; }
-			const auto& GetMag(int select) const noexcept { return m_MagazineStock[select].AmmoNum; }
-		public:
-			void Init(int AmmoNum, int AmmoAll, int ModUniqueID) noexcept {
-				size_t Total = m_MagazineStock.size();
-				for (size_t i = 0; i < Total; i++) {
-					m_MagazineStock[i].AmmoNum = AmmoNum;
-					m_MagazineStock[i].AmmoAll = AmmoAll;
-					m_MagazineStock[i].ModUniqueID = ModUniqueID;
-				}
-				m_AmmoStock = 0;
-			}
-			void SetOldMag(int OLDAmmoNum, int OLDAmmoAll, int OLDModUniqueID) noexcept {
-				m_MagazineStock[0].AmmoNum = OLDAmmoNum;
-				m_MagazineStock[0].AmmoNum = m_MagazineStock[0].AmmoAll;
-				m_MagazineStock[0].AmmoAll = OLDAmmoAll;
-				m_MagazineStock[0].ModUniqueID = OLDModUniqueID;
-				std::sort(m_MagazineStock.begin(), m_MagazineStock.end(), [&](const MagStock& A, const MagStock& B) {return A.AmmoNum > B.AmmoNum; });
-			}
-			bool GetNeedAmmoLoad(bool MagInGunFull, bool MagInGunEmpty) noexcept {
-				int Total = static_cast<int>(m_MagazineStock.size());
-				//半端マグが2個以上ある
-				//もしくは半端マグがあってストックもある
-				int RetFull = MagInGunFull ? 1 : 0;
-				int RetEmpty = MagInGunEmpty ? 1 : 0;
-				int RetNotFull = (!MagInGunEmpty && !MagInGunFull) ? 1 : 0;
-				for (int i = 0; i < Total; i++) {
-					if (m_MagazineStock[i].AmmoNum == 0) {
-						RetEmpty++;
-					}
-					else if (m_MagazineStock[i].AmmoNum == m_MagazineStock[i].AmmoAll) {
-						RetFull++;
-					}
-					else {
-						RetNotFull++;
-					}
-				}
-				if (RetFull >= Total + 1) { return false; }//全部満タン
-				if (RetEmpty >= Total + 1 && m_AmmoStock == 0) { return false; }//全部空で予備もない
-				if (RetNotFull >= 2) { return true; }//半端マグが2本以上ある
-				if (RetNotFull == 1 && !MagInGunFull) { return true; }//半端マグが2本以上ある
-				if ((RetEmpty + RetNotFull) >= 1 && m_AmmoStock > 0) { return true; }//半端マグが1本以上あって予備弾もある
-				//
-				return false;
-			}
-		};
-		//
 		class GunPtrControl {
 		private:
 			struct GunParam {
 			private:
-				MagStockControl						m_MagStockControl{};
 				Matrix3x3DX							m_SlingRot{};
 				Vector3DX							m_SlingPos{};
 			public:
 				std::shared_ptr<GunClass>			m_Gun_Ptr{ nullptr };
 				float								m_SlingPer{};
 			public:
-				const auto			GetSightZoomSize() const noexcept { return (m_Gun_Ptr && m_Gun_Ptr->GetSightPtr()) ? (*m_Gun_Ptr->GetSightPtr())->GetModSlot().GetModData()->GetZoomSize() : 1.f; }
 				bool				IsNeedReload() const noexcept {
 					if (!m_Gun_Ptr) { return false; }
-					if (m_Gun_Ptr && m_Gun_Ptr->GetReloadType() == RELOADTYPE::MAG) {
-						return !(m_Gun_Ptr->GetAmmoNum() >= m_MagStockControl.GetMag(0));
-					}
 					return !m_Gun_Ptr->GetIsMagFull();
 				}
 				void				SwapMagazine(void) noexcept {
-					if (m_Gun_Ptr) {
-						int Num = m_Gun_Ptr->GetAmmoNum();
-						int All = m_Gun_Ptr->GetAmmoAll();
-						int UniqueID = m_Gun_Ptr->GetMagUniqueID();
-						auto& MagStock = m_MagStockControl;
-						m_Gun_Ptr->SetNextMagazine(MagStock.GetNowMag().AmmoNum, MagStock.GetNowMag().ModUniqueID);
-						MagStock.SetOldMag(Num, All, UniqueID);
-					}
-				}
-
-				void				SetupGun(const std::array<bool, static_cast<int>(GunAnimeID::ChoiceOnceMax)>& Array) noexcept {
-					if (m_Gun_Ptr) {
-						m_Gun_Ptr->SetupSpawn(Array);
-						m_MagStockControl.Init(m_Gun_Ptr->GetAmmoNum(), m_Gun_Ptr->GetAmmoAll(), m_Gun_Ptr->GetMagUniqueID());
-					}
+					if (!m_Gun_Ptr) { return; }
+					m_Gun_Ptr->SetNextMagazine(m_Gun_Ptr->GetAmmoAll(), m_Gun_Ptr->GetMagUniqueID());
 				}
 				void				SetGunMountMat(const Matrix3x3DX& Rot, const Vector3DX& Pos) noexcept {
 					m_SlingRot = Rot;
@@ -485,12 +400,11 @@ namespace FPS_n2 {
 					if (m_SlingPer <= 0.001f) { m_SlingPer = 0.f; }
 					if (m_SlingPer >= 0.999f) { m_SlingPer = 1.f; }
 				}
-				void Dispose() {
+				void				Dispose() {
+					if (!m_Gun_Ptr) { return; }
 					auto* ObjMngr = ObjectManager::Instance();
-					if (m_Gun_Ptr) {
-						ObjMngr->DelObj((SharedObj*)&m_Gun_Ptr);
-						m_Gun_Ptr.reset();
-					}
+					ObjMngr->DelObj((SharedObj*)&m_Gun_Ptr);
+					m_Gun_Ptr.reset();
 				}
 			};
 		private:
@@ -504,10 +418,14 @@ namespace FPS_n2 {
 			const auto			GetNowGunSelect() const noexcept { return this->m_GunSelect; }
 		public://セッター
 			void				SelectReserveGun(int ID) noexcept { m_ReserveGunSelect = ID; }
-			void				InvokeReserveGunSel() noexcept { SelectGun(m_ReserveGunSelect); }
+			const auto			IsChangeGunSel() const noexcept { return this->m_GunSelect != m_ReserveGunSelect; }
+			void				InvokeReserveGunSel() noexcept { this->m_GunSelect = m_ReserveGunSelect; }
 			void				SelectGun(int ID) noexcept {
 				this->m_GunSelect = ID;
-				SelectReserveGun(ID);
+				this->m_ReserveGunSelect = ID;
+				for (int loop = 0; loop < GetGunNum(); ++loop) {
+					this->m_GunParam[loop].m_SlingPer = (this->m_GunSelect == loop) ? 0.f : 1.f;
+				}
 			}
 			void				SetGunPtr(int ID, const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_GunParam[ID].m_Gun_Ptr = pGunPtr0; }
 		public:

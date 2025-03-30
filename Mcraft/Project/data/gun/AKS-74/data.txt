@@ -12,7 +12,7 @@ ShotRate=600
 RecoilPower=210
 RecoilReturn=0.8
 shottype=FULL
-usehumanAnim=0
+usehumanAnim=4
 soundsel=3
 reloadType=MAG
 
@@ -20,14 +20,8 @@ Slot0Type=Magazine
 Slot0IsNeed=true
 Slot0Item=AK_6L20
 
-Shot=1
-Cocking=2
-ReloadStart_Empty=3
-ReloadStart=4
-Reload=5
-ReloadEnd=6
-Watch=8
-Hammer=0
-Open=7
+Shot=0
+Cocking=1
+Watch=2
 
 end

@@ -80,7 +80,7 @@ namespace FPS_n2 {
 			const auto& GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
 			//スコープ
 			const auto& GetReitcleGraph(void) const noexcept { return this->m_Reitcle; }
-			const auto& GetZoomSize(void) const noexcept { return this->m_ZoomSize; }
+			const auto& GetSightZoomSize(void) const noexcept { return this->m_ZoomSize; }
 			//マガジン
 			const auto& GetAmmoAll(void) const noexcept { return this->m_CapacityMax; }
 			const auto& GetAmmoSpecMagTop(void) const noexcept { return this->m_AmmoSpec[0]; }
