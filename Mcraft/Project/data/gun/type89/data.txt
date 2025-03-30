@@ -16,14 +16,9 @@ Slot0Type=Magazine
 Slot0IsNeed=true
 Slot0Item=STANAG_30
 
-Shot=1
-Cocking=2
-ReloadStart_Empty=3
-ReloadStart=4
-Reload=5
-ReloadEnd=6
-Watch=8
-Hammer=0
-Open=7
+Shot=0
+Cocking=1
+Open=2
+Watch=3
 
 end

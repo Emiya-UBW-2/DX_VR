@@ -13,6 +13,7 @@ namespace FPS_n2 {
 			float TimePer{};
 			bool CanLookTarget = false;
 			float LookPer{};
+			float IsDrawAimUIPer{};
 		public:
 			UIClass(void) noexcept {}
 			UIClass(const UIClass&) = delete;
@@ -34,6 +35,7 @@ namespace FPS_n2 {
 				auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(0)->GetChara();
 				int RetX = Chara->GetGunPtrNow()->GetAimXPos();
 				int RetY = Chara->GetGunPtrNow()->GetAimYPos();
+				bool IsDrawAimUI = Chara->GetGunPtrNow()->GetCanShot();
 
 				TimePer += DXLib_refParts->GetDeltaTime();
 				if (TimePer > 3.f / FrameRate) {
@@ -51,6 +53,10 @@ namespace FPS_n2 {
 					CanLookTarget |= c->IsAlive() && c->m_CanLookTarget;
 				}
 				Easing(&LookPer, CanLookTarget ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+				Easing(&IsDrawAimUIPer, IsDrawAimUI? 1.f : 0.f,0.9f, EasingType::OutExpo);
+				if (IsDrawAimUIPer < 0.1f) {
+					IsDrawAimUIPer = 0.f;
+				}
 			}
 			void			Draw(void) const noexcept {
 				auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -88,74 +94,80 @@ namespace FPS_n2 {
 						}
 					}
 
-					auto fov_t = CameraParts->GetMainCamera().GetCamFov();
-					int Scale = static_cast<int>(1080 * Chara->GetAutoAimRadian() / fov_t);
-					WindowSystem::DrawControl::Instance()->SetDrawCircle(WindowSystem::DrawLayer::Normal, XP1, YP1, Scale1, Black, false, 2);
-					WindowSystem::DrawControl::Instance()->SetDrawCircle(WindowSystem::DrawLayer::Normal, RetX, RetY, Scale, Green, false, 2);
-					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, LookPer));
-					WindowSystem::DrawControl::Instance()->SetDrawCircle(WindowSystem::DrawLayer::Normal, RetX, RetY, Scale + 4 + Lerp(100, 0, LookPer), Green, false, 2);
-					WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					if (IsDrawAimUIPer > 0.1f) {
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, IsDrawAimUIPer));
+						auto fov_t = CameraParts->GetMainCamera().GetCamFov();
+						int Scale = static_cast<int>(1080 * Chara->GetAutoAimRadian() / fov_t);
+						WindowSystem::DrawControl::Instance()->SetDrawCircle(WindowSystem::DrawLayer::Normal, XP1, YP1, Scale1, Black, false, 2);
+						WindowSystem::DrawControl::Instance()->SetDrawCircle(WindowSystem::DrawLayer::Normal, RetX, RetY, Scale, Green, false, 2);
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, LookPer * IsDrawAimUIPer));
+						WindowSystem::DrawControl::Instance()->SetDrawCircle(WindowSystem::DrawLayer::Normal, RetX, RetY, Scale + 4 + Lerp(100, 0, LookPer), Green, false, 2);
+						//WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, IsDrawAimUIPer));
 
-					Scale = Scale +4 + Lerp(100, 0, LookPer);
-					Vector3DX StartPos = Chara->GetEyePositionCache();
-					Vector3DX Vec1 = Chara->GetEyeRotationCache().zvec() * -1.f; Vec1.y = 0.f; Vec1 = Vec1.normalized();
-					{
-						for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
-							if (index == 0) { continue; }
-							auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
-							if (!c->IsAlive() || !c->m_CanLookTarget) { continue; }
-							Vector3DX Vec2 = (c->GetEyePositionCache() - StartPos); Vec2.y = 0.f; Vec2 = Vec2.normalized();
-							float Angle = DX_PI_F + Vector3DX::Angle(Vec1, Vec2) * (Vector3DX::Cross(Vec1, Vec2).y > 0.f ? 1.f : -1.f);
+						Scale = Scale + 4 + Lerp(100, 0, LookPer);
+						Vector3DX StartPos = Chara->GetEyePositionCache();
+						Vector3DX Vec1 = Chara->GetEyeRotationCache().zvec() * -1.f; Vec1.y = 0.f; Vec1 = Vec1.normalized();
+						{
+							for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
+								if (index == 0) { continue; }
+								auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
+								if (!c->IsAlive() || !c->m_CanLookTarget) { continue; }
+								Vector3DX Vec2 = (c->GetEyePositionCache() - StartPos); Vec2.y = 0.f; Vec2 = Vec2.normalized();
+								float Angle = DX_PI_F + Vector3DX::Angle(Vec1, Vec2) * (Vector3DX::Cross(Vec1, Vec2).y > 0.f ? 1.f : -1.f);
 
-							xp1 = RetX - static_cast<int>(Scale * 1.5f * sin(Angle + deg2rad(5)));
-							yp1 = RetY + static_cast<int>(Scale * 1.5f * cos(Angle + deg2rad(5)));
-							xp2 = RetX - static_cast<int>(Scale * sin(Angle));
-							yp2 = RetY + static_cast<int>(Scale * cos(Angle));
-							xp3 = RetX - static_cast<int>(Scale * 1.5f * sin(Angle - deg2rad(5)));
-							yp3 = RetY + static_cast<int>(Scale * 1.5f * cos(Angle - deg2rad(5)));
-							unsigned int Color = (index == Chara->GetAutoAimID()) ? Green : DarkGreen;
-							WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Color, 2);
-							WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp2, yp2, xp3, yp3, Color, 2);
-							WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3, xp1, yp1, Color, 2);
+								xp1 = RetX - static_cast<int>(Scale * 1.5f * sin(Angle + deg2rad(5)));
+								yp1 = RetY + static_cast<int>(Scale * 1.5f * cos(Angle + deg2rad(5)));
+								xp2 = RetX - static_cast<int>(Scale * sin(Angle));
+								yp2 = RetY + static_cast<int>(Scale * cos(Angle));
+								xp3 = RetX - static_cast<int>(Scale * 1.5f * sin(Angle - deg2rad(5)));
+								yp3 = RetY + static_cast<int>(Scale * 1.5f * cos(Angle - deg2rad(5)));
+								unsigned int Color = (index == Chara->GetAutoAimID()) ? Green : DarkGreen;
+								WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Color, 2);
+								WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp2, yp2, xp3, yp3, Color, 2);
+								WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3, xp1, yp1, Color, 2);
+							}
 						}
+						float BaseRad = Chara->GetLeanRad();
+						xp1 = RetX - static_cast<int>(Scale1 * 1.0f * sin(deg2rad(90) + BaseRad));
+						yp1 = RetY + static_cast<int>(Scale1 * 1.0f * cos(deg2rad(90) + BaseRad));
+						xp2 = RetX - static_cast<int>(Scale1 * 0.85f * sin(deg2rad(90) + BaseRad));
+						yp2 = RetY + static_cast<int>(Scale1 * 0.85f * cos(deg2rad(90) + BaseRad));
+						WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 + 1, xp2, yp2 + 1, Black, 2);
+						WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
+
+						xp1 = RetX - static_cast<int>(Scale1 * 1.0f * sin(deg2rad(-90) + BaseRad));
+						yp1 = RetY + static_cast<int>(Scale1 * 1.0f * cos(deg2rad(-90) + BaseRad));
+						xp2 = RetX - static_cast<int>(Scale1 * 0.85f * sin(deg2rad(-90) + BaseRad));
+						yp2 = RetY + static_cast<int>(Scale1 * 0.85f * cos(deg2rad(-90) + BaseRad));
+						WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 + 1, xp2, yp2 + 1, Black, 2);
+						WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
+
+						xp1 = RetX - static_cast<int>(Scale1 * 1.0f * sin(deg2rad(0) + BaseRad));
+						yp1 = RetY + static_cast<int>(Scale1 * 1.0f * cos(deg2rad(0) + BaseRad));
+						xp2 = RetX - static_cast<int>(Scale1 * 0.5f * sin(deg2rad(0) + BaseRad));
+						yp2 = RetY + static_cast<int>(Scale1 * 0.5f * cos(deg2rad(0) + BaseRad));
+						WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 + 1, xp2, yp2 + 1, Black, 2);
+						WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
+
+						xp1 = RetX - static_cast<int>(Scale1 * 1.5f * sin(deg2rad(60) + BaseRad));
+						yp1 = RetY + static_cast<int>(Scale1 * 1.5f * cos(deg2rad(60) + BaseRad));
+						xp2 = RetX - static_cast<int>(Scale1 * sin(deg2rad(60) + BaseRad));
+						yp2 = RetY + static_cast<int>(Scale1 * cos(deg2rad(60) + BaseRad));
+						WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 + 1, xp2, yp2 + 1, Black, 2);
+						WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 100, yp1 + 1, xp1, yp1 + 1, Black, 2);
+						WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
+						WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 100, yp1, xp1, yp1, Green, 2);
+
+						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1 - 65, yp1 - 3, Green, Black, "/%d", Chara->GetGunPtrNow()->GetAmmoAll());
+						WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1 - 100, yp1 - 3, Green, Black, "%d", Chara->GetGunPtrNow()->GetAmmoNumTotal());
+
+						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
-					float BaseRad = Chara->GetLeanRad();
-					xp1 = RetX - static_cast<int>(Scale1 * 1.0f * sin(deg2rad(90) + BaseRad));
-					yp1 = RetY + static_cast<int>(Scale1 * 1.0f * cos(deg2rad(90) + BaseRad));
-					xp2 = RetX - static_cast<int>(Scale1 * 0.85f * sin(deg2rad(90) + BaseRad));
-					yp2 = RetY + static_cast<int>(Scale1 * 0.85f * cos(deg2rad(90) + BaseRad));
-					WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 + 1, xp2, yp2 + 1, Black, 2);
-					WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
 
-					xp1 = RetX - static_cast<int>(Scale1 * 1.0f * sin(deg2rad(-90) + BaseRad));
-					yp1 = RetY + static_cast<int>(Scale1 * 1.0f * cos(deg2rad(-90) + BaseRad));
-					xp2 = RetX - static_cast<int>(Scale1 * 0.85f * sin(deg2rad(-90) + BaseRad));
-					yp2 = RetY + static_cast<int>(Scale1 * 0.85f * cos(deg2rad(-90) + BaseRad));
-					WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 + 1, xp2, yp2 + 1, Black, 2);
-					WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
-
-					xp1 = RetX - static_cast<int>(Scale1 * 1.0f * sin(deg2rad(0) + BaseRad));
-					yp1 = RetY + static_cast<int>(Scale1 * 1.0f * cos(deg2rad(0) + BaseRad));
-					xp2 = RetX - static_cast<int>(Scale1 * 0.5f * sin(deg2rad(0) + BaseRad));
-					yp2 = RetY + static_cast<int>(Scale1 * 0.5f * cos(deg2rad(0) + BaseRad));
-					WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 + 1, xp2, yp2 + 1, Black, 2);
-					WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
-
-					xp1 = RetX - static_cast<int>(Scale1 * 1.5f * sin(deg2rad(60) + BaseRad));
-					yp1 = RetY + static_cast<int>(Scale1 * 1.5f * cos(deg2rad(60) + BaseRad));
-					xp2 = RetX - static_cast<int>(Scale1 * sin(deg2rad(60) + BaseRad));
-					yp2 = RetY + static_cast<int>(Scale1 * cos(deg2rad(60) + BaseRad));
-					WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 + 1, xp2, yp2 + 1, Black, 2);
-					WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 100, yp1 + 1, xp1, yp1 + 1, Black, 2);
-					WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
-					WindowSystem::DrawControl::Instance()->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 100, yp1, xp1, yp1, Green, 2);
-
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
-						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1 - 65, yp1 - 3, Green, Black, "/%d", Chara->GetGunPtrNow()->GetAmmoAll());
-					WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
-						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1 - 100, yp1 - 3, Green, Black, "%d", Chara->GetGunPtrNow()->GetAmmoNumTotal());
-
-
+					//スタートタイマー
 					if (floatParam[1] > 0.f) {
 						xp1 = 1920 / 2;
 						yp1 = (340);
@@ -163,6 +175,7 @@ namespace FPS_n2 {
 							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, White, Black, "%d:%05.2f",
 							static_cast<int>(floatParam[1] / 60.f), static_cast<float>(static_cast<int>(floatParam[1]) % 60) + (floatParam[1] - static_cast<float>(static_cast<int>(floatParam[1]))));
 					}
+
 				}
 			}
 

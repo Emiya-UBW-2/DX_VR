@@ -147,6 +147,8 @@ namespace FPS_n2 {
 			void			Heal(HitPoint value) noexcept { m_Damage.Add(GetMyPlayerID(), GetMyPlayerID(), -value, -value, Vector3DX::up()); }
 			const bool		CheckDamageRay(HitPoint* Damage, ArmerPoint* ArmerDamage, bool CheckBodyParts, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
 		private: //XVŠÖ˜A
+			//“Š‚°•Ší‚Å‚Í‚È‚¢Å‰‚Ì•Ší‚ÉØ‚è‘Ö‚¦
+			void			GunChangeThrowWeapon(bool isThrow) noexcept;
 			void			GunChangeStart(int Gunselect) noexcept;
 
 			void			ExecuteInput(void) noexcept;

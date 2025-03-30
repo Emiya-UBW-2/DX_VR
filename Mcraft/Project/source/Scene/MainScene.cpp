@@ -38,7 +38,7 @@ namespace FPS_n2 {
 						c->LoadCharaGun("Mod870", 0, false);
 					}
 					//*/
-					//c->LoadCharaGun("AKS-74", 0, false);
+					//c->LoadCharaGun("Mod870", 0, false);
 					c->LoadCharaGun("P226", 1, false);
 					c->LoadCharaGun("RGD5", 2, false);
 					c->SetCharaTypeID(CharaTypeID::Team);
