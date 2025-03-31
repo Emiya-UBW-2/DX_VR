@@ -106,8 +106,9 @@ namespace FPS_n2 {
 						WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, IsDrawAimUIPer));
 
 						Scale = Scale + 4 + Lerp(100, 0, LookPer);
-						Vector3DX StartPos = Chara->GetEyePositionCache();
-						Vector3DX Vec1 = Chara->GetEyeRotationCache().zvec() * -1.f; Vec1.y = 0.f; Vec1 = Vec1.normalized();
+
+						Vector3DX StartPos = CameraParts->GetMainCamera().GetCamPos();
+						Vector3DX Vec1 = CameraParts->GetMainCamera().GetCamVec() - StartPos; Vec1.y = 0.f; Vec1 = Vec1.normalized();
 						{
 							for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
 								if (index == 0) { continue; }

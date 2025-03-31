@@ -143,8 +143,8 @@ namespace FPS_n2 {
 			std::list<std::shared_ptr<ModDataClass>>	m_Object;
 			int											m_LastUniqueID{ 0 };
 		private:
-			ModDataManager() {}
-			~ModDataManager() {}
+			ModDataManager(void) noexcept {}
+			~ModDataManager(void) noexcept {}
 		public:
 			const std::shared_ptr<ModDataClass>* GetData(int uniqueID) noexcept {
 				for (auto& o : m_Object) {

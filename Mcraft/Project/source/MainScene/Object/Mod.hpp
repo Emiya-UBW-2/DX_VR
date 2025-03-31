@@ -9,27 +9,25 @@ namespace FPS_n2 {
 		class ModClass : public ObjectBaseClass {
 			ModSlotControl										m_ModSlotControl{};
 		public:
-			ModSlotControl& GetModSlot(void) noexcept { return this->m_ModSlotControl; }
+			ModSlotControl& SetModSlot(void) noexcept { return this->m_ModSlotControl; }
 			const ModSlotControl& GetModSlot(void) const noexcept { return this->m_ModSlotControl; }
 		public:
 			ModClass(void) noexcept {}
 			~ModClass(void) noexcept {}
 		public:
 			auto	GetFrameWorldMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
-			auto	GetFrameLocalMat(GunFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix(GetFrame(static_cast<int>(frame))); }
 
-			const auto		GetFrameWorldMat_P(GunFrame frame) const noexcept {
-				//äYìñÉtÉåÅ[ÉÄÇ™Ç†ÇÈÇÃÇ»ÇÁè„èëÇ´
-				Matrix4x4DX Ret;
-				if (m_ModSlotControl.GetPartsFrameWorldMat(frame, &Ret)) {
-					return Ret;
+			const Matrix4x4DX		GetFramePartsMat(GunFrame frame) const noexcept {
+				const auto* ptr = GetModSlot().HasFrameBySlot(frame);
+				if (ptr) {
+					return ((std::shared_ptr<ModClass>&)(*ptr))->GetFramePartsMat(frame);
 				}
 				if (HaveFrame(static_cast<int>(frame))) {
-					Ret = GetFrameWorldMat(frame);
+					auto FrameID = GetFrame(static_cast<int>(frame));
+					Matrix4x4DX Ret = GetObj_const().GetFrameLocalWorldMatrix(FrameID);
 					if (frame == GunFrame::Sight) {
-						if (GetObj_const().GetFrameChildNum(GetFrame(static_cast<int>(frame))) > 0) {
-							Vector3DX vec = (GetObj_const().GetChildFrameWorldMatrix(GetFrame(static_cast<int>(frame)), 0).pos() - Ret.pos()).normalized();
-							//Vector3DX::Cross(pRet->xvec(), vec)
+						if (GetObj_const().GetFrameChildNum(FrameID) > 0) {
+							Vector3DX vec = (GetObj_const().GetChildFrameWorldMatrix(FrameID, 0).pos() - Ret.pos()).normalized();
 							Ret = (Ret.rotation() * Matrix4x4DX::RotVec2(Ret.yvec(), vec)) * Matrix4x4DX::Mtrans(Ret.pos());
 						}
 					}
@@ -39,7 +37,7 @@ namespace FPS_n2 {
 			}
 		public:
 			void			Init_Sub(void) noexcept override {
-				m_ModSlotControl.InitModSlotControl(this->m_FilePath);
+				SetModSlot().InitModSlotControl(this->m_FilePath);
 			}
 
 			void			FirstExecute(void) noexcept override {
@@ -52,10 +50,10 @@ namespace FPS_n2 {
 				SetMove().SetPos(pos);
 				SetMove().Update(0.f, 0.f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
-				m_ModSlotControl.UpdatePartsAnim(GetObj());
-				m_ModSlotControl.UpdatePartsMove(GetFrameWorldMat_P(GunFrame::UnderRail), GunSlot::UnderRail);
-				m_ModSlotControl.UpdatePartsMove(GetFrameWorldMat_P(GunFrame::Sight), GunSlot::Sight);
-				m_ModSlotControl.UpdatePartsMove(GetFrameWorldMat_P(GunFrame::MuzzleAdapter), GunSlot::MuzzleAdapter);
+				SetModSlot().UpdatePartsAnim(GetObj_const());
+				SetModSlot().UpdatePartsMove(GetFramePartsMat(GunFrame::UnderRail), GunSlot::UnderRail);
+				SetModSlot().UpdatePartsMove(GetFramePartsMat(GunFrame::Sight), GunSlot::Sight);
+				SetModSlot().UpdatePartsMove(GetFramePartsMat(GunFrame::MuzzleAdapter), GunSlot::MuzzleAdapter);
 			}
 			void			DrawShadow(void) noexcept override {
 				if (this->m_IsActive) {
@@ -74,7 +72,7 @@ namespace FPS_n2 {
 				}
 			}
 			void			Dispose_Sub(void) noexcept override {
-				m_ModSlotControl.DisposeModSlotControl();
+				SetModSlot().DisposeModSlotControl();
 			}
 		private:
 			int	GetFrameNum() noexcept override { return static_cast<int>(GunFrame::Max); }

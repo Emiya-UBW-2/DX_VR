@@ -29,24 +29,24 @@ namespace FPS_n2 {
 					//*
 					int Rand = GetRand(100);
 					if (Rand < 30) {
-						c->LoadCharaGun("type89", 0, false);
+						c->LoadCharaGun("type89", 0);
 					}
 					else if (Rand < 30 + 40) {
-						c->LoadCharaGun("type20E", 0, false);
+						c->LoadCharaGun("type20E", 0);
 					}
 					else {
-						c->LoadCharaGun("Mod870", 0, false);
+						c->LoadCharaGun("Mod870", 0);
 					}
 					//*/
-					//c->LoadCharaGun("Mod870", 0, false);
-					c->LoadCharaGun("P226", 1, false);
-					c->LoadCharaGun("RGD5", 2, false);
+					//c->LoadCharaGun("Mod870", 0);
+					c->LoadCharaGun("P226", 1);
+					c->LoadCharaGun("RGD5", 2);
 					c->SetCharaTypeID(CharaTypeID::Team);
 				}
 				else {
 					CharacterClass::LoadChara("Soldier", (PlayerID)loop);
-					c->LoadCharaGun("AKS-74", 0, false);
-					c->LoadCharaGun("RGD5", 2, false);
+					c->LoadCharaGun("AKS-74", 0);
+					c->LoadCharaGun("RGD5", 2);
 					//ラグドール
 					if (loop == 1) {
 						MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール

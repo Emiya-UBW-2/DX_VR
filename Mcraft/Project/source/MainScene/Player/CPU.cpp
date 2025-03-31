@@ -8,7 +8,7 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		void		AIControl::Repop() {
+		void		AIControl::Repop(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
@@ -26,9 +26,9 @@ namespace FPS_n2 {
 			MyChara->Spawn(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, 0);
 		}
 		//
-		AIControl::AIControl() {
+		AIControl::AIControl(void) noexcept {
 		}
-		AIControl::~AIControl() {
+		AIControl::~AIControl(void) noexcept {
 		}
 		//
 		void AIControl::Init(PlayerID MyID) noexcept {

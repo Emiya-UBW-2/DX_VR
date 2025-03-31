@@ -2,7 +2,7 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		bool FallObjClass::PopGrenadeBombSwitch() {
+		bool FallObjClass::PopGrenadeBombSwitch(void) noexcept {
 			if (m_GrenadeBombFlag) {
 				m_GrenadeBombFlag = false;
 				return true;
@@ -18,7 +18,7 @@ namespace FPS_n2 {
 			this->m_GrenadeBombFlag = false;
 			this->m_BoundCount = 0;
 
-			this->SetMove().SetAll(pos, pos, pos, vec, mat, mat);
+			SetMove().SetAll(pos, pos, pos, vec, mat, mat);
 			this->m_CallSound = sound;
 			SetMove().Update(0.f, 0.f);
 			UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
@@ -42,7 +42,7 @@ namespace FPS_n2 {
 						}
 						Vector3DX Vec = Vector3DX::Reflect(this->GetMove().GetVec(), Normal);
 						Vec *= 0.5f;
-						this->SetMove().SetVec(Vec);
+						SetMove().SetVec(Vec);
 						this->m_yAdd = 0.001f;
 						if (m_SoundSwitch) {
 							m_SoundSwitch = false;
@@ -57,7 +57,7 @@ namespace FPS_n2 {
 					if ((PosBuf - this->GetMove().GetRePos()).y <= 0.f) {
 						BB *= -1.f;
 					}
-					this->SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::Cross(BB, this->GetMove().GetMat().zvec()), deg2rad(-50.f * 60.f * DXLib_refParts->GetDeltaTime())) * this->GetMove().GetMat());
+					SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::Cross(BB, this->GetMove().GetMat().zvec()), deg2rad(-50.f * 60.f * DXLib_refParts->GetDeltaTime())) * this->GetMove().GetMat());
 				}
 
 				if (this->m_Timer < 0.f) {
@@ -68,7 +68,7 @@ namespace FPS_n2 {
 				}
 				this->m_Timer -= DXLib_refParts->GetDeltaTime();
 				//‹¤’Ê
-				this->SetMove().SetPos(PosBuf);
+				SetMove().SetPos(PosBuf);
 				SetMove().Update(0.f, 0.f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}

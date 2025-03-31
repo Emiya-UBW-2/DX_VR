@@ -17,10 +17,10 @@ namespace FPS_n2 {
 
 			float									m_RepopTimer{ 0.f };
 		public:
-			void Repop();
+			void Repop() noexcept;
 		public:
-			AIControl();
-			~AIControl();
+			AIControl() noexcept;
+			~AIControl() noexcept;
 		public:
 			void Init(PlayerID MyID) noexcept;
 			void Execute(InputControl*) noexcept;

@@ -88,7 +88,7 @@ namespace FPS_n2 {
 			const auto& GetMax(void) const noexcept { return Max; }
 			void			Sub(Point damage_t) noexcept { this->m_HP = std::clamp<Point>(this->m_HP - damage_t, 0, Max); }
 		public:
-			void		Init() { Sub(-Max); }
+			void		Init(void) noexcept { Sub(-Max); }
 		};
 		//キャラ入力
 		class LeanControl {
@@ -103,7 +103,7 @@ namespace FPS_n2 {
 			const auto& GetRate(void) const noexcept { return this->m_Rate; }
 			const auto& GetSwitch(void) const noexcept { return this->m_Switch; }
 		public:
-			void			Init() {
+			void			Init(void) noexcept {
 				this->m_Rad = 0.f;
 			}
 			void			Update(bool LeftPress, bool RightPress) {
@@ -155,7 +155,7 @@ namespace FPS_n2 {
 			const auto& GetVecLeft(void) const noexcept { return this->m_Vec[1]; }
 			const auto& GetVecRight(void) const noexcept { return this->m_Vec[3]; }
 		public:
-			void			Init() {
+			void			Init(void) noexcept {
 				for (int i = 0; i < 4; i++) {
 					this->m_Vec[i] = 0.f;
 				}
@@ -175,19 +175,19 @@ namespace FPS_n2 {
 			Vector3DX											m_rad_Buf, m_rad;
 			Vector2DX											m_radAdd;
 			float												m_yrad_Upper{ 0.f }, m_yrad_Bottom{ 0.f };
-			float												m_yrad_UpperChange{ 0.f }, m_yrad_BottomChange{ 0.f };
+			float												m_yrad_UpperChange{ 0.f };
 			Vector3DX											m_UpperPrevRad;
 			Vector3DX											m_UpperRad;
-			Vector3DX											m_UpperyVecNormal, m_UpperzVecNormal;
-			Vector3DX											m_UpperyVec, m_UpperzVec, m_UpperPos;
+			Vector3DX											m_UpperPos;
 			bool												m_TurnBody{ false };
+			Matrix3x3DX											m_GunSwingMat, m_GunSwingMat2;
 		public://セッター
 			const auto		IsTurnBody(void) const noexcept { return this->m_TurnBody; }
 			const auto		GetRad(void) const noexcept { return this->m_rad; }
 			const auto		GetYRadUpper(void) const noexcept { return this->m_yrad_Upper; }
 			const auto		GetYRadBottom(void) const noexcept { return this->m_yrad_Bottom; }
-			const auto		GetYRadBottomChange(void) const noexcept { return this->m_yrad_BottomChange; }
-			const auto		GetGunSwingMat(void) const noexcept { return Matrix3x3DX::Axis1(m_UpperyVec.normalized(), m_UpperzVec.normalized()); }
+			const auto		GetYRadBottomChange(void) const noexcept { return GetRad().y - this->m_yrad_Bottom; }
+			const auto		GetGunSwingMat(void) const noexcept { return m_GunSwingMat2; }
 		public:
 			void			Init(float pxRad, float pyRad) {
 				this->m_radAdd.Set(0, 0);
@@ -196,23 +196,15 @@ namespace FPS_n2 {
 				this->m_rad = this->m_rad_Buf;
 				this->m_yrad_Upper = GetRad().y;
 				this->m_yrad_Bottom = GetRad().y;
-				this->m_yrad_BottomChange = 0.f;
 				this->m_TurnBody = false;
 			}
 			void Update(float pxRad, float pyRad, const Vector2DX& pAddRadvec, bool IsMove, float pyRadFront) {
-				Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
-				this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + pxRad, deg2rad(-70.f), deg2rad(24.f)) + this->m_radAdd.x;
-				this->m_rad_Buf.y = this->m_rad_Buf.y + pyRad + this->m_radAdd.y;
-				Easing(&this->m_rad.x, m_rad_Buf.x, 0.5f, EasingType::OutExpo);
-				Easing(&this->m_rad.y, m_rad_Buf.y, 0.8f, EasingType::OutExpo);
-				Easing(&this->m_rad.z, m_rad_Buf.z, 0.5f, EasingType::OutExpo);
-
-
 				if (!IsMove) {
-					if (deg2rad(50.f) < abs(this->m_yrad_UpperChange)) {
+					float Change = abs(GetRad().y - this->m_yrad_Upper);
+					if (deg2rad(50.f) < Change) {
 						this->m_TurnBody = true;
 					}
-					if (abs(this->m_yrad_UpperChange) < deg2rad(0.5f)) {
+					if (Change < deg2rad(0.5f)) {
 						this->m_TurnBody = false;
 					}
 				}
@@ -220,23 +212,26 @@ namespace FPS_n2 {
 					this->m_TurnBody = false;
 				}
 
+
+				Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
+				this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + pxRad, deg2rad(-70.f), deg2rad(24.f)) + this->m_radAdd.x;
+				this->m_rad_Buf.y = this->m_rad_Buf.y + pyRad + this->m_radAdd.y;
+				Easing(&this->m_rad.x, this->m_rad_Buf.x, 0.5f, EasingType::OutExpo);
+				Easing(&this->m_rad.y, this->m_rad_Buf.y, 0.8f, EasingType::OutExpo);
+				Easing(&this->m_rad.z, this->m_rad_Buf.z, 0.5f, EasingType::OutExpo);
+
+
+
 				if (this->m_TurnBody || IsMove) { Easing(&this->m_yrad_Upper, GetRad().y, 0.85f, EasingType::OutExpo); }
 				auto YradChange = this->m_yrad_Bottom;
 				Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - pyRadFront, 0.85f, EasingType::OutExpo);
 				YradChange = this->m_yrad_Bottom - YradChange;
-				float Z = this->m_rad_Buf.z;
-				Easing(&Z, (abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f, EasingType::OutExpo);
-				this->m_rad_Buf.z = (Z);
-				this->m_yrad_UpperChange = GetRad().y - this->m_yrad_Upper;
-				this->m_yrad_BottomChange = GetRad().y - this->m_yrad_Bottom;
+				Easing(&this->m_rad_Buf.z, (abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f, EasingType::OutExpo);
 				//銃の揺れ
 				Easing(&m_UpperRad, (GetRad() - this->m_UpperPrevRad) * -1.f, 0.9f, EasingType::OutExpo);
 				m_UpperPrevRad = GetRad();
-				auto mat = Matrix3x3DX::RotAxis(Vector3DX::right(), m_UpperRad.x) * Matrix3x3DX::RotAxis(Vector3DX::up(), m_UpperRad.y);
-				Easing(&m_UpperyVecNormal, mat.yvec(), 0.8f, EasingType::OutExpo);
-				Easing(&m_UpperzVecNormal, mat.zvec(), 0.8f, EasingType::OutExpo);
-				Easing(&m_UpperyVec, m_UpperyVecNormal, 0.8f, EasingType::OutExpo);
-				Easing(&m_UpperzVec, m_UpperzVecNormal, 0.8f, EasingType::OutExpo);
+				Easing(&m_GunSwingMat, Matrix3x3DX::RotAxis(Vector3DX::right(), m_UpperRad.x) * Matrix3x3DX::RotAxis(Vector3DX::up(), m_UpperRad.y), 0.8f, EasingType::OutExpo);
+				Easing(&m_GunSwingMat2, m_GunSwingMat, 0.8f, EasingType::OutExpo);
 			}
 		};
 		//
@@ -289,16 +284,11 @@ namespace FPS_n2 {
 			Vector3DX											m_WalkSwing_p;
 			Vector3DX											m_WalkSwing_t;
 			Vector3DX											m_PrevPos;
-		public://ゲッター
-			const auto		GetWalkSwingMat(void) const noexcept {
-				return Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(m_WalkSwing.z * m_WalkSwingRad.z)) *
-					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(m_WalkSwing.x * m_WalkSwingRad.x));
-			}
 		public:
 			WalkSwingControl(void) noexcept {}
 			~WalkSwingControl(void) noexcept {}
 		public:
-			void Update(const Vector3DX& Pos, float SwingPer)noexcept {
+			const auto Calc(const Vector3DX& Pos, float SwingPer)noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				m_WalkSwingRad.Set(5.f, 0.f, 10.f);
 				//X
@@ -338,22 +328,19 @@ namespace FPS_n2 {
 				m_PrevPos = Pos;
 				//
 				Easing(&m_WalkSwing, m_WalkSwing_p, 0.5f, EasingType::OutExpo);
+				return Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(m_WalkSwing.z * m_WalkSwingRad.z)) *
+					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(m_WalkSwing.x * m_WalkSwingRad.x));
 			}
 		};
 		class EyeSwingControl {
 		private:
 			float												m_MoveEyePosTimer{ 0.f };
 			Vector3DX											m_MoveEyePos;
-		public://ゲッター
-			const auto& GetEyeSwingPos(void) const noexcept { return this->m_MoveEyePos; }
 		public:
 			EyeSwingControl(void) noexcept {}
 			~EyeSwingControl(void) noexcept {}
 		public:
-			void Init(void) noexcept {
-				this->m_MoveEyePosTimer = 0.f;
-			}
-			void Update(const Matrix3x3DX& pCharaMat, float SwingPer, float SwingSpeed)noexcept {
+			const auto& Calc(const Matrix3x3DX& pCharaMat, float SwingPer, float SwingSpeed) noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (SwingPer > 0.f) {
 					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed) * 60.f * DXLib_refParts->GetDeltaTime();
@@ -364,65 +351,35 @@ namespace FPS_n2 {
 				auto EyePos = Matrix3x3DX::Vtrans(Vector3DX::up() * (0.25f * SwingPer), Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_MoveEyePosTimer));
 				EyePos.y = (-std::abs(EyePos.y));
 				Easing(&this->m_MoveEyePos, Matrix3x3DX::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
+				return this->m_MoveEyePos;
 			}
 		};
 		//
 		class GunPtrControl {
 		private:
-			struct GunParam {
-			private:
-				Matrix3x3DX							m_SlingRot{};
-				Vector3DX							m_SlingPos{};
-			public:
-				std::shared_ptr<GunClass>			m_Gun_Ptr{ nullptr };
-				float								m_SlingPer{};
-			public:
-				void				SetGunMountMat(const Matrix3x3DX& Rot, const Vector3DX& Pos) noexcept {
-					m_SlingRot = Rot;
-					m_SlingPos = Pos;
-				}
-				const Matrix3x3DX	GetGunRotMat(const Matrix3x3DX& AimGunRot) const noexcept { return Lerp(m_SlingRot, AimGunRot, m_SlingPer); }
-				const Vector3DX		GetGunPos(const Vector3DX& AimGunPos) const noexcept { return Lerp(m_SlingPos, AimGunPos, m_SlingPer); }
-				void				Update(bool IsSelGun) noexcept {
-					Easing(&m_SlingPer, IsSelGun ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
-					if (m_SlingPer <= 0.001f) { m_SlingPer = 0.f; }
-					if (m_SlingPer >= 0.999f) { m_SlingPer = 1.f; }
-				}
-				void				Dispose() {
-					if (!m_Gun_Ptr) { return; }
-					auto* ObjMngr = ObjectManager::Instance();
-					ObjMngr->DelObj((SharedObj*)&m_Gun_Ptr);
-					m_Gun_Ptr.reset();
-				}
-			};
 		private:
 			int													m_GunSelect{ 0 };
 			int													m_ReserveGunSelect{ 0 };
-			std::array<GunParam, 3>								m_GunParam{};			//銃
+			std::array<std::shared_ptr<GunClass>, 3>			m_GunPtr{};			//銃
 		public://ゲッター
-			auto&				GetParam(int ID) noexcept { return this->m_GunParam[ID]; }
-			const auto&			GetParam(int ID) const noexcept { return this->m_GunParam[ID]; }
-			const auto			GetGunNum(void) const noexcept { return static_cast<int>(sizeof(m_GunParam) / sizeof(m_GunParam[0])); }
+			auto&				GetGunPtr(int ID) noexcept { return this->m_GunPtr[ID]; }
+			const auto&			GetGunPtr(int ID) const noexcept { return this->m_GunPtr[ID]; }
+			const auto			GetGunNum(void) const noexcept { return static_cast<int>(m_GunPtr.size()); }
 			const auto			GetNowGunSelect(void) const noexcept { return this->m_GunSelect; }
 		public://セッター
-			void				GunChangeStart(int Gunselect) noexcept {
-				if (GetParam(GetNowGunSelect()).m_Gun_Ptr->GetGunAnime() != GunAnimeID::LowReady) {
-					GetParam(GetNowGunSelect()).m_Gun_Ptr->SetGunAnime(GunAnimeID::LowReady);
-					SelectReserveGun(Gunselect);
-				}
-			}
+			//次の武器に切り替え
 			void				GunChangeNext(bool IsUpDown) noexcept {
 				int Next = GetNowGunSelect();
 				while (true) {
-					Next = (Next + IsUpDown ? 1 : -1);
+					Next += (IsUpDown ? 1 : -1);
 					if (Next >= GetGunNum()) {
 						Next -= GetGunNum();
 					}
-					if (Next < 0) {
+					else if (Next < 0) {
 						Next += GetGunNum();
 					}
-					if (GetParam(Next).m_Gun_Ptr) {
-						GunChangeStart(Next);
+					if (GetGunPtr(Next)) {
+						m_ReserveGunSelect = Next;
 						break;
 					}
 				}
@@ -430,37 +387,30 @@ namespace FPS_n2 {
 			//投げ武器ではない最初の武器に切り替え
 			void				GunChangeThrowWeapon(bool isThrow) noexcept {
 				for (int loop = 0; loop < GetGunNum(); ++loop) {
-					auto& p = GetParam(loop).m_Gun_Ptr;
+					auto& p = GetGunPtr(loop);
 					if (!p) { continue; }
 
-					if (isThrow ? p->IsThrowWeapon() : !p->IsThrowWeapon()) {
-						GunChangeStart(loop);
+					if (isThrow ? p->GetModSlot().GetModData()->GetIsThrowWeapon() : !p->GetModSlot().GetModData()->GetIsThrowWeapon()) {
+						m_ReserveGunSelect = loop;
 						break;
 					}
 				}
 			}
 
-			void				SelectReserveGun(int ID) noexcept { m_ReserveGunSelect = ID; }
 			const auto			IsChangeGunSel(void) const noexcept { return GetNowGunSelect() != m_ReserveGunSelect; }
-			void				InvokeReserveGunSel(void) noexcept { SelectGun(m_ReserveGunSelect, false); }
-			void				SelectGun(int ID, bool IsForce) noexcept {
-				this->m_GunSelect = ID;
-				this->m_ReserveGunSelect = ID;
-				if (IsForce) {
-					for (int loop = 0; loop < GetGunNum(); ++loop) {
-						this->m_GunParam[loop].m_SlingPer = (GetNowGunSelect() == loop) ? 0.f : 1.f;
-					}
-				}
-				GetParam(GetNowGunSelect()).m_Gun_Ptr->SetGunAnime(GunAnimeID::None);
-			}
-			void				SetGunPtr(int ID, const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_GunParam[ID].m_Gun_Ptr = pGunPtr0; }
+			void				InvokeReserveGunSel(void) noexcept { this->m_GunSelect = m_ReserveGunSelect; }
+			void				SelectGun(int ID) noexcept { this->m_GunSelect = this->m_ReserveGunSelect = ID; }
+			void				SetGunPtr(int ID, const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_GunPtr[ID] = pGunPtr0; }
 		public:
 			GunPtrControl(void) noexcept {}
 			~GunPtrControl(void) noexcept {}
 		public:
 			void				Dispose(void) noexcept {
-				for (auto& g : m_GunParam) {
-					g.Dispose();
+				for (auto& g : m_GunPtr) {
+					if (!g) { return; }
+					auto* ObjMngr = ObjectManager::Instance();
+					ObjMngr->DelObj((SharedObj*)&g);
+					g.reset();
 				}
 			}
 		};
@@ -546,7 +496,7 @@ namespace FPS_n2 {
 				frames LEFTfoot1_f;
 			public:
 				//
-				void Get_frame(MV1& obj_) noexcept {
+				void Get_frame(const MV1& obj_) noexcept {
 					for (int i = 0; i < int(obj_.GetFrameNum()); ++i) {
 						std::string p = obj_.GetFrameName(i);
 						if (p == std::string("グルーブ")) {
@@ -669,7 +619,7 @@ namespace FPS_n2 {
 		public:
 			auto& GetRagDoll(void) noexcept { return this->m_RagDoll; }
 		public:
-			void Init(MV1& obj_body_t) noexcept {
+			void Init(const MV1& obj_body_t) noexcept {
 				//身体
 				this->frame_s.Get_frame(obj_body_t);
 				//ラグドール

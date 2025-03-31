@@ -17,7 +17,7 @@ namespace FPS_n2 {
 			FallObjClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::FallObj); }
 			~FallObjClass(void) noexcept {}
 		public:
-			bool			PopGrenadeBombSwitch();
+			bool			PopGrenadeBombSwitch() noexcept;
 			void			SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float timer, SoundEnum sound, bool IsGrenade) noexcept;
 		public:
 			void			Init_Sub(void) noexcept override {

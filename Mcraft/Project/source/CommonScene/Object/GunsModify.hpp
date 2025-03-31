@@ -10,8 +10,8 @@ namespace FPS_n2 {
 		private:
 			friend class SingletonBase<GunsModify>;
 		private:
-			GunsModify() {}
-			virtual ~GunsModify() {}
+			GunsModify(void) noexcept {}
+			virtual ~GunsModify(void) noexcept {}
 		public:
 			struct Slot {
 				GunSlot			SlotType{ GunSlot::Magazine };
@@ -40,13 +40,13 @@ namespace FPS_n2 {
 			void			SetMods(ModSlotControl* ModPtr, const Slot* SlotPtr);
 			void			UpdateMods(ModSlotControl* ModPtr, const Slot* SlotPtr, bool isPreset) noexcept;
 		public:
-			void			CreateSelData(const std::shared_ptr<GunClass>& GunPtr, bool isPreset);
-			bool			ChangeSelData(const Slot* SlotPtr, int sel, bool isDeleteSlot);
+			void			CreateSelData(const std::shared_ptr<GunClass>& GunPtr, bool isPreset) noexcept;
+			bool			ChangeSelData(const Slot* SlotPtr, int sel, bool isDeleteSlot) noexcept;
 		public:
-			void			LoadSlots(const char* path);
-			void			SaveSlots(const char* path);
+			void			LoadSlots(const char* path) noexcept;
+			void			SaveSlots(const char* path) noexcept;
 		public:
-			void			DisposeSlots() {
+			void			DisposeSlots(void) noexcept {
 				for (auto& y : SelData) {
 					y.reset();
 				}

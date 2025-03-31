@@ -4,8 +4,6 @@
 #include "Character_before.hpp"
 #include "CharaAnimData.hpp"
 
-#include "Gun_before.hpp"
-
 namespace FPS_n2 {
 	namespace Sceneclass {
 
@@ -31,8 +29,6 @@ namespace FPS_n2 {
 			PointControl<HitPoint, 100>							m_HP{};
 			PointControl<ArmerPoint, 100>						m_AP{};
 			DamageEventControl									m_Damage;
-			bool												m_MagHand{ false };
-			ArmMovePerClass										m_MagArm;
 			float												m_StuckGunTimer{ 0.f };
 			bool												m_IsStuckGun{ false };
 			float												m_HPRec{ 0.f };
@@ -52,7 +48,6 @@ namespace FPS_n2 {
 			bool												m_Cancel{ false };			//
 			bool												m_ThrowByShot{ false };			//
 		private://キャッシュ
-			Matrix3x3DX											m_CharaRotationCache{};
 			Matrix3x3DX											m_EyeRotationCache{};
 			Vector3DX											m_EyePositionCache{};
 		public:
@@ -98,20 +93,15 @@ namespace FPS_n2 {
 			const bool		GetIsADS(void) const noexcept;
 			auto&			GetRagDoll(void) noexcept { return m_RagDollControl.GetRagDoll(); }
 			const auto&		GetLeanRad(void) const noexcept { return m_LeanControl.GetRad(); }
-			const auto& GetGunPtrNow(void) const noexcept {
-				auto& NowGunPtrNow = m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect());
-				return NowGunPtrNow.m_Gun_Ptr;
-			}
+			const auto&		GetGunPtrNow(void) const noexcept { return m_GunPtrControl.GetGunPtr(m_GunPtrControl.GetNowGunSelect()); }
 			const auto&		GetAutoAimID(void) const noexcept { return m_AutoAimControl.GetAutoAimID(); }
 			const auto		GetAutoAimActive(void) const noexcept { return m_AutoAimControl.GetAutoAimActive(); }
 			const auto&		GetHitBoxList(void) const noexcept { return m_HitBoxControl.GetHitBoxPointList(); }
 			const auto		IsGunShotSwitch(void) const noexcept {
-				auto& NowGunPtrNow = m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect());
-				return NowGunPtrNow.m_Gun_Ptr && NowGunPtrNow.m_Gun_Ptr->GetShotSwitch();
+				return GetGunPtrNow() && GetGunPtrNow()->GetShotSwitch();
 			}
 			const auto		GetAutoAimRadian(void) const noexcept {
-				auto& NowGunPtrNow = m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect());
-				float Len = std::max(0.01f, std::hypotf((float)(NowGunPtrNow.m_Gun_Ptr->GetAimXPos() - 1920 / 2), (float)(NowGunPtrNow.m_Gun_Ptr->GetAimYPos() - 1080 / 2)));
+				float Len = std::max(0.01f, std::hypotf((float)(GetGunPtrNow()->GetAimXPos() - 1920 / 2), (float)(GetGunPtrNow()->GetAimYPos() - 1080 / 2)));
 				Len = std::clamp(100.f / Len, 0.f, 1.f);
 				return deg2rad(5) * Len;
 			}
@@ -130,9 +120,9 @@ namespace FPS_n2 {
 			void			SetPlayerID(PlayerID value) noexcept {
 				this->m_MyID = value;
 				//銃のIDセットアップ
-				for (int loop = 0; loop < 2; ++loop) {
-					if (m_GunPtrControl.GetParam(loop).m_Gun_Ptr) {
-						m_GunPtrControl.GetParam(loop).m_Gun_Ptr->SetPlayerID(GetMyPlayerID());
+				for (int loop = 0; loop < m_GunPtrControl.GetGunNum(); ++loop) {
+					if (m_GunPtrControl.GetGunPtr(loop)) {
+						m_GunPtrControl.GetGunPtr(loop)->SetPlayerID(GetMyPlayerID());
 					}
 				}
 			}
@@ -157,10 +147,10 @@ namespace FPS_n2 {
 			~CharacterClass(void) noexcept {}
 		public:
 			static void		LoadChara(const std::string& FolderName, PlayerID ID) noexcept;
-			void			LoadCharaGun(const std::string& FolderName, int Sel, bool IsPreset) noexcept;
+			void			LoadCharaGun(const std::string& FolderName, int Sel) noexcept;
 			void			SetupRagDoll(void) noexcept {
-				MV1::SetAnime(&m_RagDollControl.GetRagDoll(), GetObj());
-				m_RagDollControl.Init(GetObj());
+				MV1::SetAnime(&m_RagDollControl.GetRagDoll(), GetObj_const());
+				m_RagDollControl.Init(GetObj_const());
 			}
 			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSel) noexcept;
 			void			Input(const InputControl& pInput) noexcept { this->m_Input = pInput; }
@@ -178,7 +168,7 @@ namespace FPS_n2 {
 			void			DrawShadow(void) noexcept override {
 				if (this->m_IsActive) {
 					if (IsAlive()) {
-						this->GetObj().DrawModel();
+						this->GetObj_const().DrawModel();
 					}
 					else {
 						m_RagDollControl.GetRagDoll().DrawModel();

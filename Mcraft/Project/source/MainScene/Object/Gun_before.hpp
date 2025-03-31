@@ -134,9 +134,7 @@ namespace FPS_n2 {
 			auto& GetModData(void) noexcept { return this->m_ModDataClass; }
 			const auto& GetModData(void) const noexcept { return this->m_ModDataClass; }
 		public:
-			void			InitModSlotControl(const std::string& PilePath) noexcept {
-				m_ModDataClass = *ModDataManager::Instance()->AddData(PilePath);
-			}
+			void			InitModSlotControl(const std::string& FilePath) noexcept { m_ModDataClass = *ModDataManager::Instance()->AddData(FilePath); }
 			void			DisposeModSlotControl(void) noexcept {
 				for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 					RemoveMod((GunSlot)loop);
@@ -148,18 +146,16 @@ namespace FPS_n2 {
 			void			RemoveMod(GunSlot Slot) noexcept;
 		private:
 			const bool	IsEffectParts(GunSlot Slot, GunFrame frame) const noexcept;
+			const bool	IsEffectParts(const SharedObj& SlotParts, GunFrame frame) const noexcept;
 		public:
+			const void	CalcAnyBySlot(const std::function<void(const SharedObj&)> & Doing) const noexcept;
+			const SharedObj* HasFrameBySlot(GunFrame frame) const noexcept;
 			const auto& GetPartsPtr(GunSlot Slot) const noexcept { return this->m_Parts_Ptr[static_cast<int>(Slot)]; }
-			const bool	HasFrameBySlot(GunFrame frame) const noexcept;
-			const bool	GetPartsFrameLocalMatBySlot(GunFrame frame, Matrix4x4DX* pRet) const noexcept;
-			const bool	GetPartsFrameWorldMat(GunFrame frame, Matrix4x4DX* pRet) const noexcept;
 
-			void		ResetPartsFrameLocalMat(GunFrame frame) noexcept;
-			void		SetPartsFrameLocalMat(GunFrame frame, const Matrix4x4DX& value) noexcept;
 			void		GetChildPartsList(std::vector<const SharedObj*>* Ret) const noexcept;
-			void		SetActiveBySlot(bool value) noexcept;
+			void		SetActiveBySlot(bool value) const noexcept;
 		public:
-			void		UpdatePartsAnim(MV1& pParent);
+			void		UpdatePartsAnim(const MV1& pParent);
 			void		UpdatePartsMove(const Matrix4x4DX& pMat, GunSlot Slot);
 		};
 
@@ -167,8 +163,8 @@ namespace FPS_n2 {
 			int Reticle_xpos = 0;
 			int Reticle_ypos = 0;
 		public:
-			AimPointControl() {}
-			~AimPointControl() {}
+			AimPointControl(void) noexcept {}
+			~AimPointControl(void) noexcept {}
 		public:
 			const int GetAimXPos(void) const noexcept { return this->Reticle_xpos; }
 			const int GetAimYPos(void) const noexcept { return this->Reticle_ypos; }
@@ -191,8 +187,8 @@ namespace FPS_n2 {
 			float Lens_ypos = 0;
 			float LensSize = 10000;
 		public:
-			ReticleControl() {}
-			~ReticleControl() {}
+			ReticleControl(void) noexcept {}
+			~ReticleControl(void) noexcept {}
 		public:
 			void UpdateReticleControl(const Vector3DX& LensPos, const Vector3DX& LensPos2, const Vector3DX& ReticlePos) noexcept {
 				Vector3DX LensPosBuf = ConvWorldPosToScreenPos(LensPos.get());
@@ -221,7 +217,6 @@ namespace FPS_n2 {
 			const auto& GetLensXPos(void) const noexcept { return this->Lens_xpos; }
 			const auto& GetLensYPos(void) const noexcept { return this->Lens_ypos; }
 			const auto& GetLensSize(void) const noexcept { return this->LensSize; }
-		private:
 		};
 	};
 };

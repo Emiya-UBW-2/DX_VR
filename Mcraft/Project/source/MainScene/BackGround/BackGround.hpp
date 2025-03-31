@@ -103,7 +103,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			void Reset() {
+			void Reset(void) noexcept {
 				for (auto& mx : m_Maze) {
 					mx.clear();
 				}
@@ -661,6 +661,10 @@ namespace FPS_n2 {
 			void			AddSetShadowCubesZ(size_t id) noexcept;
 		public:
 			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
+			bool			CheckLinetoMap(const Vector3DX& StartPos, const Vector3DX& EndPos) const noexcept {
+				Vector3DX pEndPos = EndPos;
+				return CheckLinetoMap(StartPos, &pEndPos);
+			}
 			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept;
 
 			void			LoadCellsFile() noexcept;
