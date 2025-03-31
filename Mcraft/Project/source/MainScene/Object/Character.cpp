@@ -152,24 +152,6 @@ namespace FPS_n2 {
 			}
 			return false;
 		}
-		void CharacterClass::GunChangeThrowWeapon(bool isThrow) noexcept {
-			for (int loop = 0; loop < m_GunPtrControl.GetGunNum(); ++loop) {
-				auto& p = m_GunPtrControl.GetParam(loop).m_Gun_Ptr;
-				if (!p) { continue; }
-
-				if (isThrow ? p->IsThrowWeapon() : !p->IsThrowWeapon()) {
-					GunChangeStart(loop);
-					break;
-				}
-			}
-		}
-		void CharacterClass::GunChangeStart(int Gunselect) noexcept {
-			auto& NowGunPtrNow = m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect());
-			if (NowGunPtrNow.m_Gun_Ptr->GetGunAnime() != GunAnimeID::LowReady) {
-				NowGunPtrNow.m_Gun_Ptr->SetGunAnime(GunAnimeID::LowReady);
-				m_GunPtrControl.SelectReserveGun(Gunselect);
-			}
-		}
 		//操作
 		void			CharacterClass::ExecuteInput(void) noexcept {
 			auto* CameraParts = Camera3D::Instance();
@@ -220,31 +202,13 @@ namespace FPS_n2 {
 				if (NowGunPtrNow.m_Gun_Ptr->GetGunAnime() != GunAnimeID::LowReady) {
 					int Wheel = 0;//PadControl::Instance()->GetMouseWheelRot();
 					if (this->m_Input.GetPADSPress(Controls::PADS::ULT) || (Wheel != 0)) {
-						int UpDown = 1;
-						if (Wheel > 0) {
-							UpDown = -1;
-						}
-						int Next = m_GunPtrControl.GetNowGunSelect();
-						while (true) {
-							Next = (Next + UpDown);
-							if (Next >= m_GunPtrControl.GetGunNum()) {
-								Next -= m_GunPtrControl.GetGunNum();
-							}
-							if (Next < 0) {
-								Next += m_GunPtrControl.GetGunNum();
-							}
-							if (m_GunPtrControl.GetParam(Next).m_Gun_Ptr) {
-								GunChangeStart(Next);
-								break;
-							}
-						}
+						m_GunPtrControl.GunChangeNext((Wheel < 0));
 					}
 				}
 				switch (NowGunPtrNow.m_Gun_Ptr->GetGunAnime()) {
 				case GunAnimeID::LowReady:
 					m_MagHand = false;
 					if (m_GunPtrControl.IsChangeGunSel() && NowGunPtrNow.m_Gun_Ptr->GetGunAnimBlendPer(NowGunPtrNow.m_Gun_Ptr->GetGunAnime()) > 0.95f) {
-						NowGunPtrNow.m_Gun_Ptr->SetGunAnime(GunAnimeID::None);
 						m_GunPtrControl.InvokeReserveGunSel();
 					}
 					break;
@@ -255,8 +219,7 @@ namespace FPS_n2 {
 							if (NowGunPtrNow.m_Gun_Ptr->GetInChamber()) {
 								auto* PlayerMngr = Player::PlayerManager::Instance();
 								PlayerMngr->GetPlayer(GetMyPlayerID())->AddShot(NowGunPtrNow.m_Gun_Ptr->GetPelletNum());
-								NowGunPtrNow.m_Gun_Ptr->SetBullet();
-								NowGunPtrNow.m_Gun_Ptr->SetGunAnime(GunAnimeID::Shot);
+								NowGunPtrNow.m_Gun_Ptr->SetShotStart();
 								//リコイル
 								float Power = 0.0001f * NowGunPtrNow.m_Gun_Ptr->GetRecoilPower();
 								this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power, 0.f);
@@ -283,18 +246,8 @@ namespace FPS_n2 {
 						//Reload
 						bool Press_Reload = this->m_Input.GetPADSPress(Controls::PADS::RELOAD);
 						Press_Reload |= (NowGunPtrNow.m_Gun_Ptr->GetAmmoNumTotal() == 0) && this->m_Input.GetPADSPress(Controls::PADS::SHOT);				//打ち切りで自動リロード
-						Press_Reload &= NowGunPtrNow.IsNeedReload();//リロードの必要がある場合のみリロード
 						if (Press_Reload) {
-							NowGunPtrNow.SwapMagazine();
-							NowGunPtrNow.m_Gun_Ptr->SetGunAnime((!NowGunPtrNow.m_Gun_Ptr->GetIsMagEmpty()) ? GunAnimeID::ReloadStart : GunAnimeID::ReloadStart_Empty);
-							if (GetMyPlayerID() != 0) {
-								if (GetRand(100) < 50) {
-									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_reload))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
-								}
-								else {
-									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
-								}
-							}
+							NowGunPtrNow.m_Gun_Ptr->ReloadStart();
 						}
 						//武器を眺める
 						if (this->m_Input.GetPADSPress(Controls::PADS::CHECK)) {
@@ -304,7 +257,7 @@ namespace FPS_n2 {
 							//グレネード構え
 							if (this->m_Input.GetPADSPress(Controls::PADS::THROW)) {
 								//投げ武器である最初の武器に切り替え
-								GunChangeThrowWeapon(true);
+								m_GunPtrControl.GunChangeThrowWeapon(true);
 							}
 						}
 						else {
@@ -332,26 +285,17 @@ namespace FPS_n2 {
 					}
 					break;
 				case GunAnimeID::ReloadStart_Empty:
-					switch (NowGunPtrNow.m_Gun_Ptr->GetReloadType()) {
-					case RELOADTYPE::MAG:
-						if (NowGunPtrNow.m_Gun_Ptr->GetGunAnimePer(NowGunPtrNow.m_Gun_Ptr->GetGunAnime()) < 0.5f) {
-							m_MagHand = false;
-						}
-						else {
-							if (!m_MagHand) {
-								NowGunPtrNow.m_Gun_Ptr->SetMagFall();
-							}
-							m_MagHand = true;
-						}
-						break;
-					case RELOADTYPE::AMMO:
-						m_MagHand = true;
-						break;
-					default:
-						break;
-					}
-					break;
 				case GunAnimeID::ReloadStart:
+					if (GetMyPlayerID() != 0) {
+						if (!m_MagHand) {
+							if (GetRand(100) < 50) {
+								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_reload))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+							}
+							else {
+								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+							}
+						}
+					}
 					m_MagHand = true;
 					break;
 				case GunAnimeID::Reload:
@@ -404,7 +348,7 @@ namespace FPS_n2 {
 					}
 					if (NowGunPtrNow.m_Gun_Ptr->GetGunAnimePer(NowGunPtrNow.m_Gun_Ptr->GetGunAnime()) >= 0.6f) {
 						//投げ武器ではない最初の武器に切り替え
-						GunChangeThrowWeapon(false);
+						m_GunPtrControl.GunChangeThrowWeapon(false);
 					}
 					break;
 				default:
@@ -412,28 +356,6 @@ namespace FPS_n2 {
 				}
 
 				m_MagArm.Update(m_MagHand, 0.1f, 0.1f, 0.7f, 0.7f);
-			}
-			//銃アニメの指定
-			this->m_IsActiveArmAnim[static_cast<int>(GunAnimeID::ADS)] = GetIsADS();
-			if (NowGunPtrNow.m_Gun_Ptr) {
-				for (int loop = 0; loop < static_cast<int>(GunAnimeID::ChoiceOnceMax); loop++) {
-					bool IsNowAnim = NowGunPtrNow.m_Gun_Ptr->GetGunAnime() == static_cast<GunAnimeID>(loop);
-					switch (static_cast<GunAnimeID>(loop)) {
-					case GunAnimeID::ReloadStart_Empty:
-					case GunAnimeID::ReloadStart:
-					case GunAnimeID::ReloadEnd:
-					case GunAnimeID::Watch:
-					case GunAnimeID::ThrowReady:
-					case GunAnimeID::Throw:
-					case GunAnimeID::LowReady:
-					case GunAnimeID::Cocking:
-					case GunAnimeID::Reload:
-						this->m_IsActiveArmAnim[loop] = IsNowAnim;
-						break;
-					default:
-						break;
-					}
-				}
 			}
 			this->m_MoveControl.Update(
 				this->m_Input.GetPADSPress(Controls::PADS::MOVE_W),
@@ -527,14 +449,11 @@ namespace FPS_n2 {
 				if (p) {
 					bool IsSelGun = loop == m_GunPtrControl.GetNowGunSelect();
 					if (IsSelGun) {
-						p->UpdateGunAnime(this->m_IsActiveArmAnim, false);
+						p->UpdateGunAnime(GetIsADS(), false);
 						p->UpdateGunAnims();
 					}
 					else {
-						std::array<bool, static_cast<int>(GunAnimeID::ChoiceOnceMax)>			tmp{};
-						for (auto& a : tmp) { a = false; }
-						tmp[static_cast<int>(GunAnimeID::LowReady)] = true;
-						p->UpdateGunAnime(tmp, true);
+						p->UpdateGunAnime(false, true);
 					}
 				}
 			}
@@ -901,9 +820,6 @@ namespace FPS_n2 {
 			m_SlingArmZrad.Init(0.08f * Scale3DRate, 3.f, deg2rad(50));
 			m_HPRec = 0.f;
 
-			for (auto& a : this->m_IsActiveArmAnim) { a = false; }
-			this->m_IsActiveArmAnim[static_cast<int>(GunAnimeID::LowReady)] = true;
-
 			this->m_MagArm.Init(false);
 			this->m_MagHand = false;
 			m_EyeSwingControl.Init();
@@ -916,7 +832,7 @@ namespace FPS_n2 {
 			this->m_IsSquat = false;
 			SetMove().SetAll(pPos, pPos, pPos, Vector3DX::zero(), Matrix3x3DX::RotAxis(Vector3DX::up(), m_RotateControl.GetRad().y), Matrix3x3DX::RotAxis(Vector3DX::up(), m_RotateControl.GetRad().y));
 			//
-			m_GunPtrControl.SelectGun(GunSel);
+			m_GunPtrControl.SelectGun(GunSel, true);
 			m_SlingZrad.Init(0.05f * Scale3DRate, 3.f, deg2rad(50));
 		}
 		//

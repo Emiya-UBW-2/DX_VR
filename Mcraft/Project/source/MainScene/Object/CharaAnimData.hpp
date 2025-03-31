@@ -120,7 +120,7 @@ namespace FPS_n2 {
 				m_Pos = Pos;
 			}
 		public:
-			const auto	GetMatrix() const noexcept {
+			const auto	GetMatrix(void) const noexcept {
 				return
 					(
 						Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(this->m_Rotate.z)) *
@@ -168,8 +168,8 @@ namespace FPS_n2 {
 					m_IsLoop = (Args[0] == "Loop");
 				}
 			public:
-				const auto& GetEnumGunAnim() const noexcept { return this->m_EnumGunAnim; }
-				const auto& GetIsLoop() const noexcept { return this->m_IsLoop; }
+				const auto& GetEnumGunAnim(void) const noexcept { return this->m_EnumGunAnim; }
+				const auto& GetIsLoop(void) const noexcept { return this->m_IsLoop; }
 			};
 
 			struct AnimDatas {
@@ -208,9 +208,9 @@ namespace FPS_n2 {
 						m_Frame = std::stoi(Args[6]);
 					}
 				public:
-					const auto& GetRotate() const noexcept { return this->m_Rotate; }
-					const auto& GetPos() const noexcept { return this->m_Pos; }
-					const auto& GetFrame() const noexcept { return this->m_Frame; }
+					const auto& GetRotate(void) const noexcept { return this->m_Rotate; }
+					const auto& GetPos(void) const noexcept { return this->m_Pos; }
+					const auto& GetFrame(void) const noexcept { return this->m_Frame; }
 				};
 			public:
 				std::shared_ptr<GunanimData> first;

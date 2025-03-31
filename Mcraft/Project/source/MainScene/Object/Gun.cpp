@@ -6,7 +6,7 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		const bool			GunClass::HasFrame(GunFrame frame) const noexcept {
 			//該当フレームがあるのなら上書き
-			if (m_SightPtr) {
+			if (this->m_SightPtr) {
 				switch (frame) {
 				case GunFrame::Eyepos:
 				case GunFrame::Lens:
@@ -16,7 +16,7 @@ namespace FPS_n2 {
 					break;
 				}
 			}
-			if (m_ModSlotControl.HasFrameBySlot(frame)) {
+			if (this->m_ModSlotControl.HasFrameBySlot(frame)) {
 				return true;
 			}
 			if (HaveFrame((int)frame)) {
@@ -26,18 +26,18 @@ namespace FPS_n2 {
 		}
 		const Matrix4x4DX	GunClass::GetFrameWorldMat_P(GunFrame frame, bool CheckSight) const noexcept {
 			//該当フレームがあるのなら上書き
-			if (m_SightPtr && CheckSight) {
+			if (this->m_SightPtr && CheckSight) {
 				switch (frame) {
 				case GunFrame::Eyepos:
 				case GunFrame::Lens:
 				case GunFrame::LensSize:
-					return (*m_SightPtr)->GetFrameWorldMat_P(frame);
+					return (*this->m_SightPtr)->GetFrameWorldMat_P(frame);
 				default:
 					break;
 				}
 			}
 			Matrix4x4DX Ret;
-			if (m_ModSlotControl.GetPartsFrameWorldMat(frame, &Ret)) {
+			if (this->m_ModSlotControl.GetPartsFrameWorldMat(frame, &Ret)) {
 				return Ret;
 			}
 			if (HaveFrame((int)frame)) {
@@ -51,7 +51,7 @@ namespace FPS_n2 {
 				this->SetActive(value);
 			}
 		}
-		void				GunClass::SetBullet(void) noexcept {
+		void				GunClass::SetShotStart(void) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* SE = SoundPool::Instance();
 			//
@@ -77,17 +77,18 @@ namespace FPS_n2 {
 					Matrix3x3DX::Get33DX(MuzzleMat);
 				LastAmmo->Put(this->m_ChamberAmmoData, MuzzleMat.pos(), mat.zvec() * -1.f, GetMyUserPlayerID());
 			}
-			UnloadChamber();
-			m_MuzzleSmokeControl.AddMuzzleSmokePower();
+			this->m_ChamberAmmoData.reset(); //UnloadChamber
+			this->m_MuzzleSmokeControl.AddMuzzleSmokePower();
 			this->m_ShotSwitch = true;
+			SetGunAnime(GunAnimeID::Shot);
 		}
-		void				GunClass::UpdateGunAnims() noexcept {
+		void				GunClass::UpdateGunAnims(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			switch (GetGunAnime()) {
 			case GunAnimeID::Shot:
 				SetAnimOnce(GetGunAnimeID(GetGunAnime()), ((float)GetModSlot().GetModData()->GetShotRate()) / 300.f);
-				if (GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTimePer() >= 1.f && m_ShotEnd) {
-					m_ShotEnd = false;
+				if (GetObj_const().GetAnim(GetGunAnimeID(GetGunAnime())).GetTimePer() >= 1.f && this->m_ShotEnd) {
+					this->m_ShotEnd = false;
 					if (!GetIsMagEmpty()) {
 						switch (GetShotType()) {
 						case SHOTTYPE::FULL:
@@ -113,6 +114,21 @@ namespace FPS_n2 {
 				}
 				break;
 			case GunAnimeID::ReloadStart_Empty:
+				if (GetReloadType() == RELOADTYPE::MAG) {
+					if (GetGunAnimePer(GetGunAnime()) >= 0.5f) {
+						if (!this->m_isMagFall) {
+							this->m_isMagFall = true;
+							this->m_MagFall.SetFall(
+								GetFrameWorldMat_P(GunFrame::Magpos).pos(),
+								Matrix3x3DX::Get33DX(GetFrameWorldMat_P(GunFrame::Magpos)),
+								GetFrameWorldMat_P(GunFrame::Magpos).yvec() * -1.f * (Scale3DRate * 3.f / 60.f),
+								12.f, SoundEnum::MagFall, false);
+						}
+					}
+					else {
+						this->m_isMagFall = false;
+					}
+				}
 				if (GetGunAnimePer(GetGunAnime()) >= 1.f) {
 					SetGunAnime(GunAnimeID::Reload);
 				}
@@ -126,17 +142,13 @@ namespace FPS_n2 {
 				if (this->m_isMagSuccess ? (GetGunAnimePer(GetGunAnime()) >= 0.75f) : (GetGunAnimePer(GetGunAnime()) >= 1.f)) {
 					switch (GetReloadType()) {
 					case RELOADTYPE::MAG:
-						//ユニークIDが異なる場合登録するオブジェと切り替える(現状不要なのでいったんオフ)
-						//if (this->m_NextMagUniqueID != GetMagazinePtr()->GetModSlot().GetModData()->GetUniqueID()) {
-						//	this->m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(m_ModSlotControl.SetMod(GunSlot::Magazine, this->m_NextMagUniqueID, this->m_obj)));
-						//}
-						SetAmmo(this->m_NextMagNum);
+						this->m_Capacity = std::clamp(this->m_ReloadAddAmmo, 0, this->GetAmmoAll());//マガジン装填
 						SetGunAnime(GunAnimeID::ReloadEnd);
 						break;
 					case RELOADTYPE::AMMO:
-						SetAmmo(this->m_Capacity + 1);
-						this->m_NextMagNum--;
-						if ((this->GetIsMagFull() || (this->m_NextMagNum <= 0)) || this->m_ReloadAmmoCancel) {
+						this->m_Capacity = std::clamp(this->m_Capacity + 1, 0, this->GetAmmoAll());//マガジン装填
+						this->m_ReloadAddAmmo--;
+						if (((this->m_Capacity == this->GetAmmoAll()) || (this->m_ReloadAddAmmo <= 0)) || this->m_ReloadAmmoCancel) {
 							this->m_ReloadAmmoCancel = false;
 							SetGunAnime(GunAnimeID::ReloadEnd);
 						}
@@ -178,8 +190,8 @@ namespace FPS_n2 {
 			for (auto& g : this->m_GunAnimeTime) {
 				int index = static_cast<int>(&g - &this->m_GunAnimeTime.front());
 				if (index == (int)GetGunAnime()) {
-					if (m_IsGunAnimChange) {
-						m_IsGunAnimChange = false;
+					if (this->m_IsGunAnimChange) {
+						this->m_IsGunAnimChange = false;
 						continue;
 					}
 				}
@@ -201,7 +213,7 @@ namespace FPS_n2 {
 			float MaxPer = 0.f;
 			switch (GetGunAnime()) {
 			case GunAnimeID::ReloadStart_Empty:
-				GetMagazinePtr()->SetHandMatrix(m_MagazinePoachMat);
+				GetMagazinePtr()->SetHandMatrix(this->m_MagazinePoachMat);
 				break;
 			case GunAnimeID::ReloadStart:
 				AnimPer = GetGunAnimePer(GetGunAnime());
@@ -223,7 +235,7 @@ namespace FPS_n2 {
 					}
 
 					MatMin = MatMax;
-					MatMax = m_MagazinePoachMat;
+					MatMax = this->m_MagazinePoachMat;
 					BasePer = MaxPer;
 					MaxPer = 1.f;
 					if (BasePer <= AnimPer && AnimPer <= MaxPer) {
@@ -237,16 +249,16 @@ namespace FPS_n2 {
 				switch (GetReloadType()) {
 				case RELOADTYPE::MAG:
 				{
-					MatMin = m_MagazinePoachMat;
-					MatMax = m_MagazinePoachMat;
+					MatMin = this->m_MagazinePoachMat;
+					MatMax = this->m_MagazinePoachMat;
 					MaxPer = 0.1f;
 					if (BasePer <= AnimPer && AnimPer <= MaxPer) {
 						GetMagazinePtr()->SetHandMatrix(Lerp(MatMin, MatMax, std::clamp((AnimPer - BasePer) / (MaxPer - BasePer), 0.f, 1.f)));
 						//マグチェンジ成功確率
-						SetMagLoadSuccess(GetRand(100) < 50);
+						this->m_isMagSuccess = GetRand(100) < 50;
 						float MissPer = GetRandf(0.025f);
-						m_MagMiss = Matrix4x4DX::Mtrans(GetMove().GetMat().xvec() * (MissPer * Scale3DRate));
-						m_MagSuccess = Matrix4x4DX::Mtrans(
+						this->m_MagMiss = Matrix4x4DX::Mtrans(GetMove().GetMat().xvec() * (MissPer * Scale3DRate));
+						this->m_MagSuccess = Matrix4x4DX::Mtrans(
 							GetMove().GetMat().yvec() * (-0.05f * Scale3DRate) +
 							GetMove().GetMat().xvec() * (MissPer / 3.f * Scale3DRate)
 						);
@@ -280,7 +292,7 @@ namespace FPS_n2 {
 					}
 					else {
 						MatMin = MatMax;
-						MatMax = GetFrameWorldMat_P(GunFrame::Mag2) * m_MagMiss;
+						MatMax = GetFrameWorldMat_P(GunFrame::Mag2) * this->m_MagMiss;
 						BasePer = MaxPer;
 						MaxPer = 0.55f;
 						if (BasePer <= AnimPer && AnimPer <= MaxPer) {
@@ -288,7 +300,7 @@ namespace FPS_n2 {
 							break;
 						}
 						MatMin = MatMax;
-						MatMax = GetFrameWorldMat_P(GunFrame::Mag2) * m_MagSuccess;
+						MatMax = GetFrameWorldMat_P(GunFrame::Mag2) * this->m_MagSuccess;
 						BasePer = MaxPer;
 						MaxPer = 0.75f;
 						if (BasePer <= AnimPer && AnimPer <= MaxPer) {
@@ -316,8 +328,8 @@ namespace FPS_n2 {
 				break;
 				case RELOADTYPE::AMMO:
 				{
-					SetMagLoadSuccess(false);
-					MatMin = m_MagazinePoachMat;
+					this->m_isMagSuccess = false;
+					MatMin = this->m_MagazinePoachMat;
 					MatMax = GetFrameWorldMat_P(GunFrame::Mag2);
 					MaxPer = 0.5f;
 					if (BasePer <= AnimPer && AnimPer <= MaxPer) {
@@ -363,7 +375,7 @@ namespace FPS_n2 {
 		void				GunClass::Init_Sub(void) noexcept {
 			{
 				std::vector<const SharedObj*> PartsList;
-				m_ModSlotControl.GetChildPartsList(&PartsList);
+				this->m_ModSlotControl.GetChildPartsList(&PartsList);
 				this->m_SightPtr = nullptr;
 				this->m_MuzzlePtr = nullptr;
 				this->m_UpperPtr = nullptr;
@@ -403,21 +415,20 @@ namespace FPS_n2 {
 				this->m_CartFall.Init(GetMagazinePtr()->GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPath(), 4);	//装填したマガジンの弾に合わせて薬莢生成
 			}
 			SetGunAnime(GunAnimeID::None);
-			std::array<bool, static_cast<int>(GunAnimeID::ChoiceOnceMax)>			tmp{};
-			for (auto& a : tmp) { a = false; }
-			tmp[static_cast<int>(GunAnimeID::LowReady)] = true;
-			UpdateGunAnime(tmp, true);
-			SetAmmo(GetAmmoAll());								//マガジン装填
-			CockByMag();										//チャンバーイン
+			UpdateGunAnime(false, true);
+			this->m_Capacity = std::clamp(GetAmmoAll(), 0, this->GetAmmoAll());//マガジン装填
+			if (this->m_MagazinePtr) {
+				this->m_ChamberAmmoData = GetMagazinePtr()->GetModSlot().GetModData()->GetAmmoSpecMagTop();//マガジンの一番上の弾データをチャンバーイン
+			}
 		}
 		void				GunClass::FirstExecute(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* SE = SoundPool::Instance();
 			if (this->m_IsFirstLoop) {
-				m_MuzzleSmokeControl.InitMuzzleSmoke(GetFrameWorldMat_P(GunFrame::Muzzle).pos());
+				this->m_MuzzleSmokeControl.InitMuzzleSmoke(GetFrameWorldMat_P(GunFrame::Muzzle).pos());
 			}
 			else {
-				m_MuzzleSmokeControl.ExecuteMuzzleSmoke(GetFrameWorldMat_P(GunFrame::Muzzle).pos(), GetGunAnime() != GunAnimeID::Shot);
+				this->m_MuzzleSmokeControl.ExecuteMuzzleSmoke(GetFrameWorldMat_P(GunFrame::Muzzle).pos(), GetGunAnime() != GunAnimeID::Shot);
 			}
 			//
 			for (int i = 0; i < static_cast<int>(GunAnimeID::ChoiceOnceMax); i++) {
@@ -432,7 +443,7 @@ namespace FPS_n2 {
 				}
 			}
 			{
-				bool isHit = ((GetAmmoNumTotal() == 0) || (GetIsMagFull() && !GetInChamber()) || (GetGunAnime() == GunAnimeID::Cocking && (GetGunAnimeTime(GetGunAnime()) <= 22.f)));
+				bool isHit = ((GetAmmoNumTotal() == 0) || ((this->m_Capacity == this->GetAmmoAll()) && !GetInChamber()) || (GetGunAnime() == GunAnimeID::Cocking && (GetGunAnimeTime(GetGunAnime()) <= 22.f)));
 				for (int i = static_cast<int>(GunAnimeID::ChoiceOnceMax); i < static_cast<int>(GunAnimeID::Max); i++) {
 					int ID = GetGunAnimeID((GunAnimeID)i);
 					if (ID != -1) {
@@ -600,9 +611,11 @@ namespace FPS_n2 {
 				this->m_PrevChamberOn = this->m_IsChamberOn;
 				if (this->m_IsChamberOn) {
 					if (!GetIsMagEmpty()) {
-						CockByMag();
+						if (this->m_MagazinePtr) {
+							this->m_ChamberAmmoData = GetMagazinePtr()->GetModSlot().GetModData()->GetAmmoSpecMagTop();//マガジンの一番上の弾データをチャンバーイン
+						}
 					}
-					SetAmmo(this->m_Capacity - 1);
+					this->m_Capacity = std::clamp(this->m_Capacity - 1, 0, this->GetAmmoAll());//マガジン装填
 				}
 			}
 			if (this->m_PrevEject != this->m_IsEject) {
@@ -629,7 +642,7 @@ namespace FPS_n2 {
 					(this->GetObj().GetMatrix().pos() + Vector3DX::vget(0.5f * Scale3DRate, 0.5f * Scale3DRate, 0.5f * Scale3DRate)).get()) == FALSE
 					) {
 					if (isDrawSemiTrans && GetMyUserPlayerID() == 0) {
-						m_MuzzleSmokeControl.DrawMuzzleSmoke();
+						this->m_MuzzleSmokeControl.DrawMuzzleSmoke();
 					}
 					for (int i = 0; i < this->GetObj().GetMeshNum(); i++) {
 						if (this->GetObj().GetMeshSemiTransState(i) == isDrawSemiTrans) {

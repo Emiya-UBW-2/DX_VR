@@ -1234,7 +1234,7 @@ namespace FPS_n2 {
 			return HitFlag;
 		}
 		//
-		void		BackGroundClass::LoadCellsFile() noexcept {
+		void		BackGroundClass::LoadCellsFile(void) noexcept {
 			auto& cell = m_CellxN.front();
 			{
 				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
@@ -1275,7 +1275,7 @@ namespace FPS_n2 {
 			}
 			//*/
 		}
-		void		BackGroundClass::SaveCellsFile() noexcept {
+		void		BackGroundClass::SaveCellsFile(void) noexcept {
 			{
 				auto& cell = m_CellxN.front();
 
@@ -1351,7 +1351,7 @@ namespace FPS_n2 {
 			fout.close();  //ƒtƒ@ƒCƒ‹‚ð•Â‚¶‚é
 		}
 		//
-		void		BackGroundClass::SettingChange() noexcept {
+		void		BackGroundClass::SettingChange(void) noexcept {
 			ShadowRate = static_cast<int>(pow(MulPer, 1));
 			BaseRate = static_cast<int>(pow(MulPer, 1));
 		}

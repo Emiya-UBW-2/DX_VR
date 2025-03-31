@@ -40,7 +40,7 @@ namespace FPS_n2 {
 				}
 			}
 		public:
-			const auto& Per() const noexcept { return m_ArmPer; }
+			const auto& Per(void) const noexcept { return m_ArmPer; }
 		};
 		//
 		class FallControl {
@@ -63,7 +63,7 @@ namespace FPS_n2 {
 				this->m_Ptr[this->m_Now]->SetFall(pPos, pMat, pVec, time, sound, IsGrenade);
 				++this->m_Now %= this->m_Ptr.size();
 			}
-			void		Dispose() noexcept {
+			void		Dispose(void) noexcept {
 				auto* ObjMngr = ObjectManager::Instance();
 				for (auto& c : m_Ptr) {
 					ObjMngr->DelObj((SharedObj*)&c);
@@ -79,7 +79,7 @@ namespace FPS_n2 {
 			int								m_LineSel = 0;
 			float							m_LinePer{ 0.f };
 		public://ƒQƒbƒ^[
-			void			AddMuzzleSmokePower() noexcept { m_LinePer = std::clamp(m_LinePer + 0.1f, 0.f, 1.f); }
+			void			AddMuzzleSmokePower(void) noexcept { m_LinePer = std::clamp(m_LinePer + 0.1f, 0.f, 1.f); }
 		public:
 			void		InitMuzzleSmoke(const Vector3DX& pPos) {
 				for (auto& l : this->m_Line) {
@@ -99,7 +99,7 @@ namespace FPS_n2 {
 					++this->m_LineSel %= this->m_Line.size();
 				m_LinePer = std::clamp(m_LinePer - DXLib_refParts->GetDeltaTime() / 30.f, 0.f, 1.f);
 			}
-			void		DrawMuzzleSmoke() noexcept {
+			void		DrawMuzzleSmoke(void) noexcept {
 				SetUseLighting(FALSE);
 				SetUseHalfLambertLighting(FALSE);
 				int max = static_cast<int>(this->m_Line.size());
@@ -131,8 +131,8 @@ namespace FPS_n2 {
 			std::array<SharedObj, static_cast<int>(GunSlot::Max)>	m_Parts_Ptr{ nullptr };
 			std::shared_ptr<ModDataClass>		m_ModDataClass;
 		public:
-			auto& GetModData() noexcept { return this->m_ModDataClass; }
-			const auto& GetModData() const noexcept { return this->m_ModDataClass; }
+			auto& GetModData(void) noexcept { return this->m_ModDataClass; }
+			const auto& GetModData(void) const noexcept { return this->m_ModDataClass; }
 		public:
 			void			InitModSlotControl(const std::string& PilePath) noexcept {
 				m_ModDataClass = *ModDataManager::Instance()->AddData(PilePath);

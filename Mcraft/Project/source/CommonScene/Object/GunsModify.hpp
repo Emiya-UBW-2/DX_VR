@@ -27,7 +27,7 @@ namespace FPS_n2 {
 				GunSlot ParentSlotType{ GunSlot::Gun };
 				int		m_Parentsel{ 0 };
 			public:
-				const auto IsParentNone() const noexcept { return (ParentSlotType == GunSlot::Gun); }
+				const auto IsParentNone(void) const noexcept { return (ParentSlotType == GunSlot::Gun); }
 				const auto IsParent(GunSlot Slot_t, int sel_t) const noexcept { return (ParentSlotType == Slot_t) && (m_Parentsel == sel_t); }
 			};
 		private:
@@ -35,7 +35,7 @@ namespace FPS_n2 {
 			std::vector<SlotSaveData>	SlotSave;
 			SharedObj		 			m_BaseObj{ nullptr };
 		public:
-			const auto& GetSelData() const noexcept { return SelData; }
+			const auto& GetSelData(void) const noexcept { return SelData; }
 		private:
 			void			SetMods(ModSlotControl* ModPtr, const Slot* SlotPtr);
 			void			UpdateMods(ModSlotControl* ModPtr, const Slot* SlotPtr, bool isPreset) noexcept;

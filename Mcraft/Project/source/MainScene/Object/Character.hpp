@@ -31,7 +31,6 @@ namespace FPS_n2 {
 			PointControl<HitPoint, 100>							m_HP{};
 			PointControl<ArmerPoint, 100>						m_AP{};
 			DamageEventControl									m_Damage;
-			std::array<bool, static_cast<int>(GunAnimeID::ChoiceOnceMax)>			m_IsActiveArmAnim{};
 			bool												m_MagHand{ false };
 			ArmMovePerClass										m_MagArm;
 			float												m_StuckGunTimer{ 0.f };
@@ -110,7 +109,7 @@ namespace FPS_n2 {
 				auto& NowGunPtrNow = m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect());
 				return NowGunPtrNow.m_Gun_Ptr && NowGunPtrNow.m_Gun_Ptr->GetShotSwitch();
 			}
-			const auto		GetAutoAimRadian() const noexcept {
+			const auto		GetAutoAimRadian(void) const noexcept {
 				auto& NowGunPtrNow = m_GunPtrControl.GetParam(m_GunPtrControl.GetNowGunSelect());
 				float Len = std::max(0.01f, std::hypotf((float)(NowGunPtrNow.m_Gun_Ptr->GetAimXPos() - 1920 / 2), (float)(NowGunPtrNow.m_Gun_Ptr->GetAimYPos() - 1080 / 2)));
 				Len = std::clamp(100.f / Len, 0.f, 1.f);
@@ -147,10 +146,6 @@ namespace FPS_n2 {
 			void			Heal(HitPoint value) noexcept { m_Damage.Add(GetMyPlayerID(), GetMyPlayerID(), -value, -value, Vector3DX::up()); }
 			const bool		CheckDamageRay(HitPoint* Damage, ArmerPoint* ArmerDamage, bool CheckBodyParts, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
 		private: //XVŠÖ˜A
-			//“Š‚°•Ší‚Å‚Í‚È‚¢Å‰‚Ì•Ší‚ÉØ‚è‘Ö‚¦
-			void			GunChangeThrowWeapon(bool isThrow) noexcept;
-			void			GunChangeStart(int Gunselect) noexcept;
-
 			void			ExecuteInput(void) noexcept;
 			void			ExecuteMatrix(void) noexcept;
 			void			ExecuteGrenade(void) noexcept;

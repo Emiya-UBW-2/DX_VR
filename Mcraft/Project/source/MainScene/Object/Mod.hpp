@@ -9,8 +9,8 @@ namespace FPS_n2 {
 		class ModClass : public ObjectBaseClass {
 			ModSlotControl										m_ModSlotControl{};
 		public:
-			ModSlotControl& GetModSlot() noexcept { return this->m_ModSlotControl; }
-			const ModSlotControl& GetModSlot() const noexcept { return this->m_ModSlotControl; }
+			ModSlotControl& GetModSlot(void) noexcept { return this->m_ModSlotControl; }
+			const ModSlotControl& GetModSlot(void) const noexcept { return this->m_ModSlotControl; }
 		public:
 			ModClass(void) noexcept {}
 			~ModClass(void) noexcept {}

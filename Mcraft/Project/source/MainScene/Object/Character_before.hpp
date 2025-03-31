@@ -34,7 +34,7 @@ namespace FPS_n2 {
 				m_radius = radius;
 				m_HitType = pHitType;
 			}
-			void	Draw() const noexcept {
+			void	Draw(void) const noexcept {
 				unsigned int color;
 				switch (m_HitType) {
 				case HitType::Head:
@@ -263,11 +263,11 @@ namespace FPS_n2 {
 			HitBoxControl(void) noexcept {}
 			~HitBoxControl(void) noexcept {}
 		public:
-			void Init() noexcept {
+			void Init(void) noexcept {
 				m_HitBox.resize(27);
 			}
 			void Update(const ObjectBaseClass* ptr, float SizeRate) noexcept;
-			void Draw() noexcept {
+			void Draw(void) noexcept {
 				//this->GetObj().SetOpacityRate(0.5f);
 				SetFogEnable(FALSE);
 				SetUseLighting(FALSE);
@@ -350,7 +350,7 @@ namespace FPS_n2 {
 			EyeSwingControl(void) noexcept {}
 			~EyeSwingControl(void) noexcept {}
 		public:
-			void Init() noexcept {
+			void Init(void) noexcept {
 				this->m_MoveEyePosTimer = 0.f;
 			}
 			void Update(const Matrix3x3DX& pCharaMat, float SwingPer, float SwingSpeed)noexcept {
@@ -377,14 +377,6 @@ namespace FPS_n2 {
 				std::shared_ptr<GunClass>			m_Gun_Ptr{ nullptr };
 				float								m_SlingPer{};
 			public:
-				bool				IsNeedReload() const noexcept {
-					if (!m_Gun_Ptr) { return false; }
-					return !m_Gun_Ptr->GetIsMagFull();
-				}
-				void				SwapMagazine(void) noexcept {
-					if (!m_Gun_Ptr) { return; }
-					m_Gun_Ptr->SetNextMagazine(m_Gun_Ptr->GetAmmoAll(), m_Gun_Ptr->GetMagUniqueID());
-				}
 				void				SetGunMountMat(const Matrix3x3DX& Rot, const Vector3DX& Pos) noexcept {
 					m_SlingRot = Rot;
 					m_SlingPos = Pos;
@@ -410,25 +402,63 @@ namespace FPS_n2 {
 		public://ゲッター
 			auto&				GetParam(int ID) noexcept { return this->m_GunParam[ID]; }
 			const auto&			GetParam(int ID) const noexcept { return this->m_GunParam[ID]; }
-			const auto			GetGunNum() const noexcept { return static_cast<int>(sizeof(m_GunParam) / sizeof(m_GunParam[0])); }
-			const auto			GetNowGunSelect() const noexcept { return this->m_GunSelect; }
+			const auto			GetGunNum(void) const noexcept { return static_cast<int>(sizeof(m_GunParam) / sizeof(m_GunParam[0])); }
+			const auto			GetNowGunSelect(void) const noexcept { return this->m_GunSelect; }
 		public://セッター
+			void				GunChangeStart(int Gunselect) noexcept {
+				if (GetParam(GetNowGunSelect()).m_Gun_Ptr->GetGunAnime() != GunAnimeID::LowReady) {
+					GetParam(GetNowGunSelect()).m_Gun_Ptr->SetGunAnime(GunAnimeID::LowReady);
+					SelectReserveGun(Gunselect);
+				}
+			}
+			void				GunChangeNext(bool IsUpDown) noexcept {
+				int Next = GetNowGunSelect();
+				while (true) {
+					Next = (Next + IsUpDown ? 1 : -1);
+					if (Next >= GetGunNum()) {
+						Next -= GetGunNum();
+					}
+					if (Next < 0) {
+						Next += GetGunNum();
+					}
+					if (GetParam(Next).m_Gun_Ptr) {
+						GunChangeStart(Next);
+						break;
+					}
+				}
+			}
+			//投げ武器ではない最初の武器に切り替え
+			void				GunChangeThrowWeapon(bool isThrow) noexcept {
+				for (int loop = 0; loop < GetGunNum(); ++loop) {
+					auto& p = GetParam(loop).m_Gun_Ptr;
+					if (!p) { continue; }
+
+					if (isThrow ? p->IsThrowWeapon() : !p->IsThrowWeapon()) {
+						GunChangeStart(loop);
+						break;
+					}
+				}
+			}
+
 			void				SelectReserveGun(int ID) noexcept { m_ReserveGunSelect = ID; }
-			const auto			IsChangeGunSel() const noexcept { return this->m_GunSelect != m_ReserveGunSelect; }
-			void				InvokeReserveGunSel() noexcept { this->m_GunSelect = m_ReserveGunSelect; }
-			void				SelectGun(int ID) noexcept {
+			const auto			IsChangeGunSel(void) const noexcept { return GetNowGunSelect() != m_ReserveGunSelect; }
+			void				InvokeReserveGunSel(void) noexcept { SelectGun(m_ReserveGunSelect, false); }
+			void				SelectGun(int ID, bool IsForce) noexcept {
 				this->m_GunSelect = ID;
 				this->m_ReserveGunSelect = ID;
-				for (int loop = 0; loop < GetGunNum(); ++loop) {
-					this->m_GunParam[loop].m_SlingPer = (this->m_GunSelect == loop) ? 0.f : 1.f;
+				if (IsForce) {
+					for (int loop = 0; loop < GetGunNum(); ++loop) {
+						this->m_GunParam[loop].m_SlingPer = (GetNowGunSelect() == loop) ? 0.f : 1.f;
+					}
 				}
+				GetParam(GetNowGunSelect()).m_Gun_Ptr->SetGunAnime(GunAnimeID::None);
 			}
 			void				SetGunPtr(int ID, const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_GunParam[ID].m_Gun_Ptr = pGunPtr0; }
 		public:
 			GunPtrControl(void) noexcept {}
 			~GunPtrControl(void) noexcept {}
 		public:
-			void				Dispose() noexcept {
+			void				Dispose(void) noexcept {
 				for (auto& g : m_GunParam) {
 					g.Dispose();
 				}
@@ -467,14 +497,14 @@ namespace FPS_n2 {
 			HitReactionControl(void) noexcept {}
 			~HitReactionControl(void) noexcept {}
 		public:
-			const auto GetHitReactionMat() const noexcept { return Matrix3x3DX::RotAxis(m_HitAxis, m_HitPowerR * deg2rad(90.f)); }
+			const auto GetHitReactionMat(void) const noexcept { return Matrix3x3DX::RotAxis(m_HitAxis, m_HitPowerR * deg2rad(90.f)); }
 			const auto IsDamaging(void) const noexcept { return m_HitPower > 0.f; }
 		public:
 			void SetHit(const Vector3DX& Axis) noexcept {
 				m_HitAxis = Axis;
 				m_HitPower = 1.f;
 			}
-			void Update() noexcept {
+			void Update(void) noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				Easing(&this->m_HitPowerR, this->m_HitPower, 0.8f, EasingType::OutExpo);
 				this->m_HitPower = std::max(this->m_HitPower - DXLib_refParts->GetDeltaTime() / 0.3f, 0.f);

@@ -24,8 +24,8 @@ namespace FPS_n2 {
 		public:
 			void Init(PlayerID MyID) noexcept;
 			void Execute(InputControl*) noexcept;
-			void Draw() noexcept {}
-			void Dispose() noexcept {}
+			void Draw(void) noexcept {}
+			void Dispose(void) noexcept {}
 		};
 	};
 };

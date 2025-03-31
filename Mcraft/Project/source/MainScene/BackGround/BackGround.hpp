@@ -50,7 +50,7 @@ namespace FPS_n2 {
 				}
 			}
 			//’Ê˜H‚Ì‘”‚ğæ“¾
-			const auto GetPachCount() noexcept {
+			const auto GetPachCount(void) noexcept {
 				int OneSize = 0;
 				for (int y = 0; y < m_Height; y++) {
 					for (int x = 0; x < m_Width; x++) {
