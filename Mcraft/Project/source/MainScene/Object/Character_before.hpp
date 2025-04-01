@@ -173,24 +173,16 @@ namespace FPS_n2 {
 		class RotateControl {
 		private://キャラパラメーター
 			Vector3DX											m_rad_Buf, m_rad;
-			Vector2DX											m_radAdd;
 			float												m_yrad_Upper{ 0.f }, m_yrad_Bottom{ 0.f };
-			float												m_yrad_UpperChange{ 0.f };
-			Vector3DX											m_UpperPrevRad;
-			Vector3DX											m_UpperRad;
-			Vector3DX											m_UpperPos;
 			bool												m_TurnBody{ false };
-			Matrix3x3DX											m_GunSwingMat, m_GunSwingMat2;
 		public://セッター
-			const auto		IsTurnBody(void) const noexcept { return this->m_TurnBody; }
-			const auto		GetRad(void) const noexcept { return this->m_rad; }
-			const auto		GetYRadUpper(void) const noexcept { return this->m_yrad_Upper; }
-			const auto		GetYRadBottom(void) const noexcept { return this->m_yrad_Bottom; }
+			const auto&		IsTurnBody(void) const noexcept { return this->m_TurnBody; }
+			const auto&		GetRad(void) const noexcept { return this->m_rad; }
+			const auto&		GetYRadUpper(void) const noexcept { return this->m_yrad_Upper; }
+			const auto&		GetYRadBottom(void) const noexcept { return this->m_yrad_Bottom; }
 			const auto		GetYRadBottomChange(void) const noexcept { return GetRad().y - this->m_yrad_Bottom; }
-			const auto		GetGunSwingMat(void) const noexcept { return m_GunSwingMat2; }
 		public:
 			void			Init(float pxRad, float pyRad) {
-				this->m_radAdd.Set(0, 0);
 				this->m_rad_Buf.x = (pxRad);
 				this->m_rad_Buf.y = (pyRad);
 				this->m_rad = this->m_rad_Buf;
@@ -198,7 +190,7 @@ namespace FPS_n2 {
 				this->m_yrad_Bottom = GetRad().y;
 				this->m_TurnBody = false;
 			}
-			void Update(float pxRad, float pyRad, const Vector2DX& pAddRadvec, bool IsMove, float pyRadFront) {
+			void Update(float pxRad, float pyRad, bool IsMove, float pyRadFront) {
 				if (!IsMove) {
 					float Change = abs(GetRad().y - this->m_yrad_Upper);
 					if (deg2rad(50.f) < Change) {
@@ -213,9 +205,8 @@ namespace FPS_n2 {
 				}
 
 
-				Easing(&this->m_radAdd, pAddRadvec, 0.95f, EasingType::OutExpo);
-				this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + pxRad, deg2rad(-70.f), deg2rad(24.f)) + this->m_radAdd.x;
-				this->m_rad_Buf.y = this->m_rad_Buf.y + pyRad + this->m_radAdd.y;
+				this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + pxRad, deg2rad(-70.f), deg2rad(24.f));
+				this->m_rad_Buf.y = this->m_rad_Buf.y + pyRad;
 				Easing(&this->m_rad.x, this->m_rad_Buf.x, 0.5f, EasingType::OutExpo);
 				Easing(&this->m_rad.y, this->m_rad_Buf.y, 0.8f, EasingType::OutExpo);
 				Easing(&this->m_rad.z, this->m_rad_Buf.z, 0.5f, EasingType::OutExpo);
@@ -227,11 +218,6 @@ namespace FPS_n2 {
 				Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - pyRadFront, 0.85f, EasingType::OutExpo);
 				YradChange = this->m_yrad_Bottom - YradChange;
 				Easing(&this->m_rad_Buf.z, (abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f, EasingType::OutExpo);
-				//銃の揺れ
-				Easing(&m_UpperRad, (GetRad() - this->m_UpperPrevRad) * -1.f, 0.9f, EasingType::OutExpo);
-				m_UpperPrevRad = GetRad();
-				Easing(&m_GunSwingMat, Matrix3x3DX::RotAxis(Vector3DX::right(), m_UpperRad.x) * Matrix3x3DX::RotAxis(Vector3DX::up(), m_UpperRad.y), 0.8f, EasingType::OutExpo);
-				Easing(&m_GunSwingMat2, m_GunSwingMat, 0.8f, EasingType::OutExpo);
 			}
 		};
 		//
@@ -279,68 +265,47 @@ namespace FPS_n2 {
 		//歩く時の揺れ
 		class WalkSwingControl {
 		private:
-			Vector3DX											m_WalkSwingRad;
-			Vector3DX											m_WalkSwing;
-			Vector3DX											m_WalkSwing_p;
-			Vector3DX											m_WalkSwing_t;
-			Vector3DX											m_PrevPos;
+			Vector3DX											m_WalkSwing{};
+			Vector3DX											m_WalkSwing_p{};
+			Vector3DX											m_WalkSwing_t{};
+			float												m_PrevY{};
+			float												m_MoveEyePosTimer{ 0.f };
+			Vector3DX											m_MoveEyePos{};
 		public:
 			WalkSwingControl(void) noexcept {}
 			~WalkSwingControl(void) noexcept {}
 		public:
-			const auto Calc(const Vector3DX& Pos, float SwingPer)noexcept {
+			const auto CalcWalk(const Vector3DX& Pos, float SwingPer)noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
-				m_WalkSwingRad.Set(5.f, 0.f, 10.f);
 				//X
 				{
-					if (m_PrevPos.y > Pos.y) {
-						m_WalkSwing_t.x = (1.f);
+					if (m_PrevY > Pos.y) {
+						m_WalkSwing_t.x = 1.f;
 					}
 					else {
-						m_WalkSwing_t.x = (std::max(m_WalkSwing_t.x - 15.f * DXLib_refParts->GetDeltaTime(), 0.f));
+						m_WalkSwing_t.x = std::max(m_WalkSwing_t.x - 15.f * DXLib_refParts->GetDeltaTime(), 0.f);
 					}
+					m_PrevY = Pos.y;
 				}
 				//Z
 				{
 					if (m_WalkSwing_t.x == 1.f) {
 						if (m_WalkSwing_t.z >= 0.f) {
-							m_WalkSwing_t.z = (-1.f);
+							m_WalkSwing_t.z = -1.f;
 						}
 						else {
-							m_WalkSwing_t.z = (1.f);
+							m_WalkSwing_t.z = 1.f;
 						}
 					}
 				}
-				auto WS_tmp = m_WalkSwing_t * SwingPer;
-				//X
-				{
-					auto tmp = m_WalkSwing_p.x;
-					Easing(&tmp, WS_tmp.x, (m_WalkSwing_p.x > WS_tmp.x) ? 0.6f : 0.9f, EasingType::OutExpo);
-					m_WalkSwing_p.x = (tmp);
-				}
-				//Z
-				{
-					auto tmp = m_WalkSwing_p.z;
-					Easing(&tmp, WS_tmp.z, 0.95f, EasingType::OutExpo);
-					m_WalkSwing_p.z = (tmp);
-				}
-				//
-				m_PrevPos = Pos;
-				//
+				Easing(&m_WalkSwing_p.x, m_WalkSwing_t.x * SwingPer, (m_WalkSwing_p.x > m_WalkSwing_t.x * SwingPer) ? 0.6f : 0.9f, EasingType::OutExpo);
+				Easing(&m_WalkSwing_p.z, m_WalkSwing_t.z * SwingPer, 0.95f, EasingType::OutExpo);
 				Easing(&m_WalkSwing, m_WalkSwing_p, 0.5f, EasingType::OutExpo);
+				Vector3DX m_WalkSwingRad = Vector3DX::vget(5.f, 0.f, 10.f);
 				return Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(m_WalkSwing.z * m_WalkSwingRad.z)) *
 					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(m_WalkSwing.x * m_WalkSwingRad.x));
 			}
-		};
-		class EyeSwingControl {
-		private:
-			float												m_MoveEyePosTimer{ 0.f };
-			Vector3DX											m_MoveEyePos;
-		public:
-			EyeSwingControl(void) noexcept {}
-			~EyeSwingControl(void) noexcept {}
-		public:
-			const auto& Calc(const Matrix3x3DX& pCharaMat, float SwingPer, float SwingSpeed) noexcept {
+			const auto& CalcEye(const Matrix3x3DX& pCharaMat, float SwingPer, float SwingSpeed) noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (SwingPer > 0.f) {
 					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed) * 60.f * DXLib_refParts->GetDeltaTime();
@@ -349,7 +314,7 @@ namespace FPS_n2 {
 					this->m_MoveEyePosTimer = 0.f;
 				}
 				auto EyePos = Matrix3x3DX::Vtrans(Vector3DX::up() * (0.25f * SwingPer), Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_MoveEyePosTimer));
-				EyePos.y = (-std::abs(EyePos.y));
+				EyePos.y = -std::abs(EyePos.y);
 				Easing(&this->m_MoveEyePos, Matrix3x3DX::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
 				return this->m_MoveEyePos;
 			}
@@ -413,28 +378,6 @@ namespace FPS_n2 {
 					g.reset();
 				}
 			}
-		};
-		//
-		class AutoAimControl {
-		private:
-			int													m_AutoAim{ -1 };
-			int													m_AutoAimPoint{ -1 };
-			float												m_AutoAimTimer{ 0.f };
-			Vector3DX											m_AutoAimVec{};
-			bool												m_AutoAimActive{};
-			float												m_AutoAimPer{ 0.f };
-		public:
-			AutoAimControl(void) noexcept {}
-			~AutoAimControl(void) noexcept {}
-		public://ゲッター
-			const auto& GetAutoAimID(void) const noexcept { return this->m_AutoAim; }
-			const auto		GetAutoAimActive(void) const noexcept { return this->m_AutoAimActive; }
-		public:
-			void CalcAutoAimMat(Matrix3x3DX* ptmp_gunmat) const noexcept {
-				*ptmp_gunmat = Lerp(*ptmp_gunmat, (*ptmp_gunmat) * Matrix3x3DX::RotVec2(ptmp_gunmat->zvec() * -1.f, m_AutoAimVec), m_AutoAimPer);
-			}
-		public:
-			void Update(bool isActive, PlayerID MyPlayerID, const Vector3DX& EyePos, const Vector3DX& AimVector, float Radian) noexcept;
 		};
 		//
 		class HitReactionControl {
@@ -617,7 +560,8 @@ namespace FPS_n2 {
 			RagDollControl(void) noexcept {}
 			~RagDollControl(void) noexcept {}
 		public:
-			auto& GetRagDoll(void) noexcept { return this->m_RagDoll; }
+			auto& SetRagDoll(void) noexcept { return this->m_RagDoll; }
+			const auto& GetRagDoll(void) const noexcept { return this->m_RagDoll; }
 		public:
 			void Init(const MV1& obj_body_t) noexcept {
 				//身体

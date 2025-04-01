@@ -18,7 +18,7 @@ namespace FPS_n2 {
 			Throw,
 
 			ChoiceOnceMax,//どれか択一で行うアニメーション の総数
-
+			//ここからは常時/特殊パターンのアニメーション
 			Base = ChoiceOnceMax,
 			Hammer,
 			Open,

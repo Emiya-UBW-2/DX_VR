@@ -12,8 +12,7 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
-			auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
-			auto TgtPos = TargetChara->GetFrameWorldMat(CharaFrame::Upper2).pos();
+			//auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 
 			Vector3DX pos_t;
 			pos_t.Set(GetRandf(10.f), -20.f, GetRandf(10.f));

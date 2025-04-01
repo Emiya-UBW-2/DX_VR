@@ -49,11 +49,11 @@ namespace FPS_n2 {
 					c->LoadCharaGun("RGD5", 2);
 					//ラグドール
 					if (loop == 1) {
-						MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->GetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
+						MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->SetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
 					}
 					else {
 						auto& Base = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1)->GetChara();
-						c->GetRagDoll().Duplicate(Base->GetRagDoll());
+						c->SetRagDoll().Duplicate(Base->GetRagDoll());
 					}
 					c->SetupRagDoll();
 					c->SetCharaTypeID(CharaTypeID::Enemy);
@@ -214,9 +214,8 @@ namespace FPS_n2 {
 				InputControl MyInput; MyInput.ResetAllInput();
 				if (!SceneParts->IsPause() && m_FadeControl.IsClear() && (this->m_StartTimer <= 0.f)) {
 					float AimPer = 1.f / std::max(1.f, Chara->GetIsADS() ? Chara->GetGunPtrNow()->GetSightZoomSize() : 1.f);
-					auto RecoilRadAdd = Chara->GetRecoilRadAdd();
-					MyInput.SetAddxRad(Pad->GetLS_Y() / 200.f * AimPer - RecoilRadAdd.y);
-					MyInput.SetAddyRad(Pad->GetLS_X() / 200.f * AimPer + RecoilRadAdd.x);
+					MyInput.SetAddxRad(Pad->GetLS_Y() / 200.f * AimPer);
+					MyInput.SetAddyRad(Pad->GetLS_X() / 200.f * AimPer);
 					MyInput.SetInputPADS(Controls::PADS::MOVE_W, Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::MOVE_S, Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::MOVE_A, Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().press());

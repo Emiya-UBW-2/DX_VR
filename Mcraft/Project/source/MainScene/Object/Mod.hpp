@@ -37,7 +37,7 @@ namespace FPS_n2 {
 			}
 		public:
 			void			Init_Sub(void) noexcept override {
-				SetModSlot().InitModSlotControl(this->m_FilePath);
+				SetModSlot().Init(this->m_FilePath);
 			}
 
 			void			FirstExecute(void) noexcept override {
@@ -72,7 +72,7 @@ namespace FPS_n2 {
 				}
 			}
 			void			Dispose_Sub(void) noexcept override {
-				SetModSlot().DisposeModSlotControl();
+				SetModSlot().Dispose();
 			}
 		private:
 			int	GetFrameNum() noexcept override { return static_cast<int>(GunFrame::Max); }

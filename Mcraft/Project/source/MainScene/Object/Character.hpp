@@ -11,11 +11,9 @@ namespace FPS_n2 {
 		private:
 			HitBoxControl										m_HitBoxControl;
 			WalkSwingControl									m_WalkSwingControl;
-			EyeSwingControl										m_EyeSwingControl;
 			HitReactionControl									m_HitReactionControl;
 			RagDollControl										m_RagDollControl;
 			GunPtrControl										m_GunPtrControl;
-			AutoAimControl										m_AutoAimControl;
 			EffectControl										m_EffectControl;
 			LeanControl											m_LeanControl{};
 			MoveControl											m_MoveControl{};
@@ -35,18 +33,15 @@ namespace FPS_n2 {
 			bool												m_ArmBreak{ false };
 			switchs												m_Squat;
 			int													m_CharaSound{ -1 };			//サウンド
-			Vector3DX											m_RecoilRadAdd;
 			Pendulum2D											m_SlingArmZrad;
 			float												m_ArmBreakPer{};
 			Pendulum2D											m_SlingZrad;
 			FallControl											m_Grenade;
-			std::shared_ptr<AmmoDataClass>						m_ChamberAmmoData{ nullptr };		//
+			std::shared_ptr<AmmoDataClass>						m_GrenadeData{ nullptr };		//
 			bool												m_MoveOverRideFlag{ false };
 			moves												m_OverRideInfo;
 			PlayerID											m_MyID{ 0 };
 			CharaTypeID											m_CharaType{};
-			bool												m_Cancel{ false };			//
-			bool												m_ThrowByShot{ false };			//
 		private://キャッシュ
 			Matrix3x3DX											m_EyeRotationCache{};
 			Vector3DX											m_EyePositionCache{};
@@ -91,19 +86,14 @@ namespace FPS_n2 {
 			}
 			const auto		GetSpeedPer(void) const noexcept { return std::clamp(GetSpeed() / 0.65f, 0.5f, 1.f); }
 			const bool		GetIsADS(void) const noexcept;
-			auto&			GetRagDoll(void) noexcept { return m_RagDollControl.GetRagDoll(); }
+			auto&			SetRagDoll(void) noexcept { return m_RagDollControl.SetRagDoll(); }
+			const auto&		GetRagDoll(void) const noexcept { return m_RagDollControl.GetRagDoll(); }
 			const auto&		GetLeanRad(void) const noexcept { return m_LeanControl.GetRad(); }
+			const auto&		GetRotRad(void) const noexcept { return m_RotateControl.GetRad(); }
 			const auto&		GetGunPtrNow(void) const noexcept { return m_GunPtrControl.GetGunPtr(m_GunPtrControl.GetNowGunSelect()); }
-			const auto&		GetAutoAimID(void) const noexcept { return m_AutoAimControl.GetAutoAimID(); }
-			const auto		GetAutoAimActive(void) const noexcept { return m_AutoAimControl.GetAutoAimActive(); }
 			const auto&		GetHitBoxList(void) const noexcept { return m_HitBoxControl.GetHitBoxPointList(); }
 			const auto		IsGunShotSwitch(void) const noexcept {
 				return GetGunPtrNow() && GetGunPtrNow()->GetShotSwitch();
-			}
-			const auto		GetAutoAimRadian(void) const noexcept {
-				float Len = std::max(0.01f, std::hypotf((float)(GetGunPtrNow()->GetAimXPos() - 1920 / 2), (float)(GetGunPtrNow()->GetAimYPos() - 1080 / 2)));
-				Len = std::clamp(100.f / Len, 0.f, 1.f);
-				return deg2rad(5) * Len;
 			}
 		public://ゲッター
 			const auto		IsAlive(void) const noexcept { return m_HP.IsNotZero(); }
@@ -115,7 +105,6 @@ namespace FPS_n2 {
 			const auto&		GetEyeRotationCache(void) const noexcept { return this->m_EyeRotationCache; }
 			const auto&		GetEyePositionCache(void) const noexcept { return this->m_EyePositionCache; }
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
-			const auto		GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd * (60.f * DXLib_ref::Instance()->GetDeltaTime()); }
 		public://セッター
 			void			SetPlayerID(PlayerID value) noexcept {
 				this->m_MyID = value;
@@ -149,7 +138,7 @@ namespace FPS_n2 {
 			static void		LoadChara(const std::string& FolderName, PlayerID ID) noexcept;
 			void			LoadCharaGun(const std::string& FolderName, int Sel) noexcept;
 			void			SetupRagDoll(void) noexcept {
-				MV1::SetAnime(&m_RagDollControl.GetRagDoll(), GetObj_const());
+				MV1::SetAnime(&m_RagDollControl.SetRagDoll(), GetObj_const());
 				m_RagDollControl.Init(GetObj_const());
 			}
 			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSel) noexcept;
@@ -178,7 +167,7 @@ namespace FPS_n2 {
 			void			Dispose_Sub(void) noexcept override {
 				m_EffectControl.Dispose();
 				m_GunPtrControl.Dispose();
-				m_ChamberAmmoData.reset();
+				m_GrenadeData.reset();
 			}
 		};
 	};
