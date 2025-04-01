@@ -28,6 +28,7 @@ namespace FPS_n2 {
 			std::shared_ptr<AmmoDataClass>						m_ChamberAmmoData{ nullptr };		//
 			std::array<ArmMovePerClass, static_cast<int>(GunAnimeID::ChoiceOnceMax)>	m_GunAnimePer{};
 			std::array<float, static_cast<int>(GunAnimeID::Max)>						m_GunAnimeTime{};
+			std::array<float, static_cast<int>(GunAnimeID::Max)>						m_GunAnimeSpeed{};
 			bool												m_IsGunAnimChange{};
 			GunAnimeID											m_GunAnime{ GunAnimeID::Shot };	//
 			bool												m_ReloadAmmoCancel{ false };		//
@@ -60,6 +61,8 @@ namespace FPS_n2 {
 			Matrix3x3DX											m_GunSwingMat, m_GunSwingMat2;
 			Vector2DX											m_RecoilRadAdd;
 		public:
+			float												m_SwitchPer{};
+
 			Matrix3x3DX											m_SlingRot{};
 			Vector3DX											m_SlingPos{};
 			float												m_SlingPer{};

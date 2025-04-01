@@ -42,6 +42,7 @@ namespace FPS_n2 {
 			GraphHandle									hit_Graph;
 			GraphHandle									guard_Graph;
 			Vector3DX									m_EffectPos;
+			InputControl								MyInput;
 #ifdef DEBUG
 			std::vector<LineDebug>						m_LineDebug;
 #endif

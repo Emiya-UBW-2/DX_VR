@@ -23,7 +23,6 @@ namespace FPS_n2 {
 			bool												m_IsSquat{ false };
 			std::array<float, static_cast<int>(CharaAnimeID::AnimeIDMax)>	m_AnimPerBuf{ 0 };
 			CharaAnimeID										m_BottomAnimSelect{};
-			float												m_SwitchPer{};
 			PointControl<HitPoint, 100>							m_HP{};
 			PointControl<ArmerPoint, 100>						m_AP{};
 			DamageEventControl									m_Damage;

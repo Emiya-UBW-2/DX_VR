@@ -211,7 +211,7 @@ namespace FPS_n2 {
 				if (!GetIsFirstLoop()) {
 					this->m_StartTimer = std::max(this->m_StartTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 				}
-				InputControl MyInput; MyInput.ResetAllInput();
+				MyInput.ResetAllInput();
 				if (!SceneParts->IsPause() && m_FadeControl.IsClear() && (this->m_StartTimer <= 0.f)) {
 					float AimPer = 1.f / std::max(1.f, Chara->GetIsADS() ? Chara->GetGunPtrNow()->GetSightZoomSize() : 1.f);
 					MyInput.SetAddxRad(Pad->GetLS_Y() / 200.f * AimPer);

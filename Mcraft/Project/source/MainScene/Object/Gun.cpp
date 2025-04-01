@@ -42,7 +42,7 @@ namespace FPS_n2 {
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.f, 0.f, 0.87f, 0.87f);
 					break;
 				case GunAnimeID::ADS:
-					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.2f, 0.2f, 0.9f, 0.9f);
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.f, 0.2f, 0.9f, 0.9f);
 					break;
 				case GunAnimeID::Cocking:
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.f, 0.f, 0.1f, 0.9f);
@@ -217,6 +217,9 @@ namespace FPS_n2 {
 			if (m_SlingPer <= 0.001f) { m_SlingPer = 0.f; }
 			if (m_SlingPer >= 0.999f) { m_SlingPer = 1.f; }
 			if (IsSelGun) {
+				if (GetNowGunAnimeID() != -1) {
+					SetAnimOnce(GetNowGunAnimeID(), this->m_GunAnimeSpeed.at(static_cast<int>(GetGunAnime())));
+				}
 				switch (GetGunAnime()) {
 				case GunAnimeID::LowReady:
 					m_MagHand = false;
@@ -231,7 +234,6 @@ namespace FPS_n2 {
 							this->m_IsEject = true;
 						}
 					}
-					SetAnimOnce(GetNowGunAnimeID(), ((float)GetModSlot().GetModData()->GetShotRate()) / 300.f);
 					if (GetObj_const().GetAnim(GetNowGunAnimeID()).GetTimePer() >= 1.f && this->m_ShotEnd) {
 						this->m_ShotEnd = false;
 						if (!GetIsMagEmpty()) {
@@ -253,8 +255,6 @@ namespace FPS_n2 {
 					}
 					break;
 				case GunAnimeID::Cocking:
-					SetAnimOnce(GetNowGunAnimeID(), 1.f);
-					//
 					switch (GetShotType()) {
 					case SHOTTYPE::BOLT:
 						if ((5.f < GetNowGunAnimeTime() && GetNowGunAnimeTime() < 6.f)) {
@@ -490,7 +490,7 @@ namespace FPS_n2 {
 			Matrix4x4DX AnimMat = GetGunAnimeNow();
 			Matrix3x3DX AnimRot = Matrix3x3DX::Get33DX(AnimMat) * m_GunSwingMat2 * CharaRotationCache * EyeYRot;
 			Vector3DX AnimPos = AnimMat.pos();
-			//AnimPos.x *= this->m_SwitchPer;
+			AnimPos.x *= this->m_SwitchPer;
 			AnimPos = HeadPos + Matrix3x3DX::Vtrans(AnimPos, CharaRotationCache);
 			//オートエイム
 			if (IsSelGun) {
@@ -544,6 +544,10 @@ namespace FPS_n2 {
 				this->m_MagFall.Init((*this->m_MagazinePtr)->GetFilePath(), 1);
 				this->m_CartFall.Init((*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPath(), 4);	//装填したマガジンの弾に合わせて薬莢生成
 			}
+			for (auto& g : this->m_GunAnimeSpeed) {
+				g = 1.f;
+			}
+			this->m_GunAnimeSpeed.at(static_cast<int>(GunAnimeID::Shot)) = ((float)GetModSlot().GetModData()->GetShotRate()) / 300.f;
 			InitGunAnime();
 		}
 		void				GunClass::FirstExecute(void) noexcept {
@@ -573,7 +577,7 @@ namespace FPS_n2 {
 					if (ID != -1) {
 						switch ((GunAnimeID)i) {
 						case FPS_n2::Sceneclass::GunAnimeID::Hammer:
-							GetObj().SetAnim(ID).SetPer(std::clamp(GetObj_const().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * ((GetGunAnime() == GunAnimeID::Shot) ? -5.f : 5.f), 0.f, 1.f));
+							GetObj().SetAnim(ID).SetPer(std::clamp(GetObj_const().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * (((GetGunAnime() == GunAnimeID::Shot) && (GetNowGunAnimePer() < 0.5f)) ? -10.f : 10.f), 0.f, 1.f));
 							break;
 						case FPS_n2::Sceneclass::GunAnimeID::Open:
 							GetObj().SetAnim(ID).SetPer(std::clamp(GetObj_const().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * (isHit ? 10.f : -10.f), 0.f, 1.f));

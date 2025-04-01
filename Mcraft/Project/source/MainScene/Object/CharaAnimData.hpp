@@ -48,6 +48,7 @@ namespace FPS_n2 {
 		enum class EnumGunAnim {
 			M1911_ready,
 			M1911_aim,
+			M1911_shot,
 			M1911_ads,
 			M1911_reloadstart_empty,
 			M1911_reloadstart,
@@ -58,6 +59,7 @@ namespace FPS_n2 {
 			M16_ready,
 			M16_aim,
 			M16_ads,
+			M16_shot,
 			M16_reloadstart_empty,
 			M16_reloadstart,
 			M16_reload,
@@ -81,6 +83,7 @@ namespace FPS_n2 {
 		static const char* EnumGunAnimName[static_cast<int>(EnumGunAnim::Max)] = {
 			"M1911_ready",
 			"M1911_aim",
+			"M1911_shot",
 			"M1911_ads",
 			"M1911_reloadstart_empty",
 			"M1911_reloadstart",
@@ -91,6 +94,7 @@ namespace FPS_n2 {
 			"M16_ready",
 			"M16_aim",
 			"M16_ads",
+			"M16_shot",
 			"M16_reloadstart_empty",
 			"M16_reloadstart",
 			"M16_reload",
@@ -359,7 +363,7 @@ namespace FPS_n2 {
 			{
 				EnumGunAnim::M16_ready,
 				EnumGunAnim::M16_ads,
-				EnumGunAnim::Max,
+				EnumGunAnim::M16_shot,
 				EnumGunAnim::AK_cocking,
 				EnumGunAnim::AK_reloadstart_empty,
 				EnumGunAnim::AK_reloadstart,
@@ -376,7 +380,7 @@ namespace FPS_n2 {
 			{
 				EnumGunAnim::M1911_ready,
 				EnumGunAnim::M1911_ads,
-				EnumGunAnim::Max,
+				EnumGunAnim::M1911_shot,
 				EnumGunAnim::M1911_cocking,
 				EnumGunAnim::M1911_reloadstart_empty,
 				EnumGunAnim::M1911_reloadstart,
@@ -393,7 +397,7 @@ namespace FPS_n2 {
 			{
 				EnumGunAnim::M870_ready,
 				EnumGunAnim::M16_ads,
-				EnumGunAnim::Max,
+				EnumGunAnim::M16_shot,
 				EnumGunAnim::M870_cocking,
 				EnumGunAnim::M16_reloadstart_empty,
 				EnumGunAnim::M16_reloadstart,
@@ -427,7 +431,7 @@ namespace FPS_n2 {
 			{
 				EnumGunAnim::AK_ready,
 				EnumGunAnim::M16_ads,
-				EnumGunAnim::Max,
+				EnumGunAnim::M16_shot,
 				EnumGunAnim::AK_cocking,
 				EnumGunAnim::AK_reloadstart_empty,
 				EnumGunAnim::AK_reloadstart,
