@@ -12,4 +12,6 @@ CanSwitch=False
 ThrowReady=0
 Throw=1
 
+useammo0=FragRGD
+
 end

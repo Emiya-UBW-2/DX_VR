@@ -33,8 +33,6 @@ namespace FPS_n2 {
 			Pendulum2D											m_SlingArmZrad;
 			float												m_ArmBreakPer{};
 			Pendulum2D											m_SlingZrad;
-			FallControl											m_Grenade;
-			std::shared_ptr<AmmoDataClass>						m_GrenadeData{ nullptr };		//
 			bool												m_MoveOverRideFlag{ false };
 			moves												m_OverRideInfo;
 			PlayerID											m_MyID{ 0 };
@@ -115,7 +113,6 @@ namespace FPS_n2 {
 		private: //更新関連
 			void			ExecuteInput(void) noexcept;
 			void			ExecuteMatrix(void) noexcept;
-			void			ExecuteGrenade(void) noexcept;
 		public: //コンストラクタ、デストラクタ
 			CharacterClass(void) noexcept {
 				this->m_objType = static_cast<int>(ObjType::Human);
@@ -226,8 +223,6 @@ namespace FPS_n2 {
 			void			Dispose_Sub(void) noexcept override {
 				this->m_RagDollControl.Dispose();
 				this->m_GunPtrControl.Dispose();
-				this->m_Grenade.Dispose();
-				this->m_GrenadeData.reset();
 			}
 		};
 	};

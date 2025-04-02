@@ -288,13 +288,6 @@ namespace FPS_n2 {
 					}
 					break;
 				case GunAnimeID::Throw:
-					if (GetGunPtrNow()->GetNowGunAnimePer() >= 0.4f) {
-						if (GetGunPtrNow()->IsActive()) {
-							GetGunPtrNow()->SetActiveAll(false);//手にあるものは非表示にする
-							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Throw))->Play3D(GetMove().GetPos(), Scale3DRate * 2.f);
-							this->m_Grenade.SetFall(GetFrameWorldMat(CharaFrame::RightHandJoint).pos(), GetEyeRotationCache(), (GetEyeRotationCache().zvec() * -1.f).normalized() * (Scale3DRate * 15.f / 60.f), 3.5f, SoundEnum::FallGrenade, true);
-						}
-					}
 					if (GetGunPtrNow()->GetNowGunAnimePer() >= 0.6f) {
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
 						//投げ武器ではない最初の武器に切り替え
@@ -529,6 +522,7 @@ namespace FPS_n2 {
 					bool IsSelect = loop == this->m_GunPtrControl.GetNowGunSelect();
 					if (IsSelect) {
 						p->SetMagazinePoachMat(GetFrameWorldMat(CharaFrame::LeftMag));
+						p->SetGrenadeThrowRot(GetEyeRotationCache());
 					}
 					else {
 						p->InitGunAnime();
@@ -627,46 +621,6 @@ namespace FPS_n2 {
 					GetMove().GetMat();
 			}
 		}
-		//グレネード更新
-		void			CharacterClass::ExecuteGrenade(void) noexcept {
-			auto* SE = SoundPool::Instance();
-			auto* ObjMngr = ObjectManager::Instance();
-			auto* BackGround = BackGround::BackGroundClass::Instance();
-
-			for (const auto& g : this->m_Grenade.GetPtrList()) {
-				if (g->PopGrenadeBombSwitch()) {
-					EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_greexp, g->GetMove().GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate, 2.f);
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Explosion))->Play3D(g->GetMove().GetPos(), Scale3DRate * 25.f);
-
-					for (int i = 0, max = this->m_GrenadeData->GetPellet(); i < max; i++) {
-						auto LastAmmo = std::make_shared<AmmoClass>();
-						ObjMngr->AddObject(LastAmmo);
-						LastAmmo->Init();
-						auto mat =
-							Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-GetRand(30))) *
-							Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180)));
-						LastAmmo->Put(this->m_GrenadeData, g->GetMove().GetPos() + mat.zvec() * (0.5f * Scale3DRate) + Vector3DX::up() * (0.5f * Scale3DRate), mat.zvec(), GetMyPlayerID());
-					}
-
-					//破壊
-					int								xput = 6;
-					int								yput = 8;
-					int								zput = 6;
-					auto Put = BackGround->GetPoint(g->GetMove().GetPos());
-					for (int xp = -xput / 2; xp < xput / 2; xp++) {
-						for (int yp = 0; yp < yput; yp++) {
-							for (int zp = -zput / 2; zp < zput / 2; zp++) {
-								auto& cell = BackGround->GetCellBuf((Put.x + xp), (Put.y + yp), (Put.z + zp));
-								if (cell.m_Cell == 1) {
-									continue;
-								}
-								BackGround->SetBlick((Put.x + xp), (Put.y + yp), (Put.z + zp), FPS_n2::BackGround::s_EmptyBlick);
-							}
-						}
-					}
-				}
-			}
-		}
 		//
 		void			CharacterClass::LoadChara(const std::string& FolderName, PlayerID ID) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -702,8 +656,6 @@ namespace FPS_n2 {
 		void			CharacterClass::Init_Sub(void) noexcept {
 			this->m_HitBoxControl.Init();
 			this->m_ArmBreak = false;
-			this->m_Grenade.Init("data/model/RGD5/", 4);
-			this->m_GrenadeData = AmmoDataManager::Instance()->LoadAction("data/ammo/FragRGD/");
 		}
 		void			CharacterClass::FirstExecute(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -711,7 +663,6 @@ namespace FPS_n2 {
 			if (this->m_IsFirstLoop) {}//初回のみ更新する内容
 			ExecuteInput();
 			ExecuteMatrix();
-			ExecuteGrenade();
 			this->m_IsActiveCameraPos = false;
 			if (GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) {
 				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(0)->GetChara();

@@ -485,6 +485,15 @@ namespace FPS_n2 {
 						SetGunAnime(GunAnimeID::None);
 					}
 					break;
+				case GunAnimeID::Throw:
+					if (GetNowGunAnimePer() >= 0.4f) {
+						if (IsActive()) {
+							SetActiveAll(false);//手にあるものは非表示にする
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Throw))->Play3D(GetMove().GetPos(), Scale3DRate * 2.f);
+							this->m_Grenade.SetFall(GetMove().GetPos(), this->m_GrenadeThrowRot, (this->m_GrenadeThrowRot.zvec() * -1.f).normalized()* (Scale3DRate * 15.f / 60.f), 3.5f, SoundEnum::FallGrenade, true);
+						}
+					}
+					break;
 				default:
 					break;
 				}
@@ -521,6 +530,46 @@ namespace FPS_n2 {
 			}
 			//武器座標
 			SetGunMat(Lerp(m_SlingRot * m_GunSwingMat2 * EyeYRot, AnimRot, m_SlingPer), Lerp(m_SlingPos, AnimPos, m_SlingPer));
+		}
+		//グレネード更新
+		void				GunClass::ExecuteGrenade(void) noexcept {
+			auto* SE = SoundPool::Instance();
+			auto* ObjMngr = ObjectManager::Instance();
+			auto* BackGround = BackGround::BackGroundClass::Instance();
+
+			for (const auto& g : this->m_Grenade.GetPtrList()) {
+				if (g->PopGrenadeBombSwitch()) {
+					EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_greexp, g->GetMove().GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate, 2.f);
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Explosion))->Play3D(g->GetMove().GetPos(), Scale3DRate * 25.f);
+
+					for (int i = 0, max = this->m_ChamberAmmoData->GetPellet(); i < max; i++) {
+						auto LastAmmo = std::make_shared<AmmoClass>();
+						ObjMngr->AddObject(LastAmmo);
+						LastAmmo->Init();
+						auto mat =
+							Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-GetRand(30))) *
+							Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180)));
+						LastAmmo->Put(this->m_ChamberAmmoData, g->GetMove().GetPos() + mat.zvec() * (0.5f * Scale3DRate) + Vector3DX::up() * (0.5f * Scale3DRate), mat.zvec(), GetMyUserPlayerID());
+					}
+
+					//破壊
+					int								xput = 6;
+					int								yput = 8;
+					int								zput = 6;
+					auto Put = BackGround->GetPoint(g->GetMove().GetPos());
+					for (int xp = -xput / 2; xp < xput / 2; xp++) {
+						for (int yp = 0; yp < yput; yp++) {
+							for (int zp = -zput / 2; zp < zput / 2; zp++) {
+								auto& cell = BackGround->GetCellBuf((Put.x + xp), (Put.y + yp), (Put.z + zp));
+								if (cell.m_Cell == 1) {
+									continue;
+								}
+								BackGround->SetBlick((Put.x + xp), (Put.y + yp), (Put.z + zp), FPS_n2::BackGround::s_EmptyBlick);
+							}
+						}
+					}
+				}
+			}
 		}
 		void				GunClass::Init_Sub(void) noexcept {
 			SetModSlot().Init(this->m_FilePath);
@@ -566,6 +615,10 @@ namespace FPS_n2 {
 				this->m_MagFall.Init((*this->m_MagazinePtr)->GetFilePath(), 1);
 				this->m_CartFall.Init((*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPath(), 4);	//装填したマガジンの弾に合わせて薬莢生成
 			}
+			if (GetModSlot().GetModData()->GetIsThrowWeapon()) {
+				this->m_Grenade.Init(GetFilePath(), 1);
+			}
+
 			for (auto& g : this->m_GunAnimeSpeed) {
 				g = 1.f;
 			}
@@ -621,6 +674,8 @@ namespace FPS_n2 {
 			else {
 				Easing(&this->m_RecoilRadAdd, Vector2DX::zero(), 0.7f, EasingType::OutExpo);
 			}
+			//グレネード演算
+			ExecuteGrenade();
 		}
 		void				GunClass::CheckDraw(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
