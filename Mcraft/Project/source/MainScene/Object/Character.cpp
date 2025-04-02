@@ -199,6 +199,9 @@ namespace FPS_n2 {
 				//•ŠíØ‘Ö
 				if (GetGunPtrNow()->GetGunAnime() != GunAnimeID::LowReady) {
 					int Wheel = 0;//PadControl::Instance()->GetMouseWheelRot();
+					if (GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) {
+						Wheel = PadControl::Instance()->GetMouseWheelRot();
+					}
 					if (this->m_Input.GetPADSTrigger(Controls::PADS::ULT)) {
 						Wheel = -1;
 					}
