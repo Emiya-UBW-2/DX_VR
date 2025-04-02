@@ -39,6 +39,7 @@ namespace FPS_n2 {
 			CharaTypeID											m_CharaType{};
 			bool												m_CanLookTarget{ true };
 			float												m_Length{};
+			bool												m_ConcussionSwitch{};
 		private://ƒLƒƒƒbƒVƒ…
 			Matrix3x3DX											m_EyeRotationCache{};
 			Vector3DX											m_EyePositionCache{};
@@ -99,6 +100,16 @@ namespace FPS_n2 {
 						this->m_GunPtrControl.GetGunPtr(loop)->SetPlayerID(GetMyPlayerID());
 					}
 				}
+			}
+			void			SetConcussionSwitch() noexcept {
+				m_ConcussionSwitch = true;
+			}
+			bool			PopConcussionSwitch() noexcept {
+				if (m_ConcussionSwitch) {
+					m_ConcussionSwitch = false;
+					return true;
+				}
+				return false;
 			}
 			void			SetCharaTypeID(CharaTypeID value) noexcept { this->m_CharaType = value; }
 			void			SetMoveOverRide(const moves& o) noexcept {

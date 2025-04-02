@@ -15,7 +15,7 @@ namespace FPS_n2 {
 					IsActiveGunAnim = false;// IsADS;
 					break;
 				case GunAnimeID::Shot:
-					IsActiveGunAnim = false;//TODO
+					//IsActiveGunAnim = false;//TODO
 					break;
 				default:
 					break;
@@ -31,7 +31,7 @@ namespace FPS_n2 {
 					IsActiveGunAnim = IsADS;
 					break;
 				case GunAnimeID::Shot:
-					IsActiveGunAnim = false;//TODO
+					//IsActiveGunAnim = false;//TODO
 					break;
 				default:
 					break;
@@ -43,6 +43,9 @@ namespace FPS_n2 {
 					break;
 				case GunAnimeID::ADS:
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.f, 0.2f, 0.9f, 0.9f);
+					break;
+				case GunAnimeID::Shot:
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.f, 0.f, 0.5f, 0.5f);
 					break;
 				case GunAnimeID::Cocking:
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.f, 0.f, 0.1f, 0.9f);

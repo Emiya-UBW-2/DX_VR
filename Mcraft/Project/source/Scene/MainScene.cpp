@@ -399,9 +399,9 @@ namespace FPS_n2 {
 			}
 			//コンカッション
 			{
-				//if (Chara->PopConcussionSwitch()) {
-				//	m_Concussion = 1.f;
-				//}
+				if (Chara->PopConcussionSwitch()) {
+					m_Concussion = 1.f;
+				}
 				PostPassParts->Set_is_Blackout(m_Concussion > 0.f);
 				if (m_Concussion == 1.f) {
 					Camera3D::Instance()->SetCamShake(0.5f, 0.01f * Scale3DRate);

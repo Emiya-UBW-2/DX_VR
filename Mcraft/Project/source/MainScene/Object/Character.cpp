@@ -99,6 +99,10 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			if (!IsAlive()) { return false; }
 			if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, GetMove().GetPos()) <= 2.0f * Scale3DRate)) { return false; }
+
+			if (AttackID != PlayerMngr->GetWatchPlayer()) {
+				SetConcussionSwitch();
+			}
 			//”í’eˆ—
 			auto* HitPtr = this->m_HitBoxControl.GetLineHit(StartPos, pEndPos);
 			if (HitPtr) {
