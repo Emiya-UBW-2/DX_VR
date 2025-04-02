@@ -121,7 +121,7 @@ namespace FPS_n2 {
 			m_PauseMenuControl.Init();
 			m_FadeControl.Init();
 			this->m_IsEnd = false;
-			this->m_StartTimer = 5.f;
+			this->m_StartTimer = 3.f;
 
 			EffectSingleton::Instance()->SetLoop(Sceneclass::Effect::ef_dust, Vector3DX::zero());
 		}

@@ -111,7 +111,6 @@ namespace FPS_n2 {
 			}
 			this->m_ChamberAmmoData.reset(); //UnloadChamber
 			this->m_MuzzleSmokeControl.AddMuzzleSmokePower();
-			this->m_ShotSwitch = true;
 			SetGunAnime(GunAnimeID::Shot);
 			//リコイル
 			float Power = 0.0001f * GetRecoilPower();
@@ -121,7 +120,7 @@ namespace FPS_n2 {
 				Camera3D::Instance()->SetCamShake(0.1f, 0.1f);
 			}
 			//エフェクト
-			EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_fire2, GetFrameWorldMatParts(GunFrame::Muzzle).pos(), GetMove().GetMat().zvec() * -1.f, 0.5f, 2.f);
+			EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_fire2, GetFrameWorldMatParts(GunFrame::Muzzle).pos(), GetMove().GetMat().zvec() * -1.f, 0.35f, 2.f);
 		}
 		void				GunClass::SetGunMat(const Matrix3x3DX& AnimRot, const Vector3DX& AnimPos) noexcept {
 			//武器座標
@@ -237,9 +236,8 @@ namespace FPS_n2 {
 					m_MagHand = false;
 					break;
 				case GunAnimeID::Shot:
-					this->m_ShotSwitch = false;
 					if (GetShotType() != SHOTTYPE::BOLT) {
-						if (GetObj_const().GetAnim(GetNowGunAnimeID()).GetTime() >= 3.f) {
+						if (GetNowGunAnimePer() >= 0.6f) {
 							if (!this->m_IsChamberOn) {
 								this->m_IsChamberOn = true;
 								ChamberIn();
@@ -254,7 +252,7 @@ namespace FPS_n2 {
 							this->m_IsEject = false;
 						}
 					}
-					if (GetObj_const().GetAnim(GetNowGunAnimeID()).GetTimePer() >= 1.f && this->m_ShotEnd) {
+					if (GetNowGunAnimePer() >= 1.f && this->m_ShotEnd) {
 						this->m_ShotEnd = false;
 						if (this->m_Capacity != 0) {
 							switch (GetShotType()) {
@@ -599,7 +597,7 @@ namespace FPS_n2 {
 				if (ID != -1) {
 					switch ((GunAnimeID)i) {
 					case FPS_n2::Sceneclass::GunAnimeID::Hammer:
-						GetObj().SetAnim(ID).SetPer(std::clamp(GetObj_const().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * (((GetGunAnime() == GunAnimeID::Shot) && (GetNowGunAnimePer() < 0.5f)) ? -10.f : 10.f), 0.f, 1.f));
+						GetObj().SetAnim(ID).SetPer(std::clamp(GetObj_const().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * (GetShotSwitch() ? -10.f : 10.f), 0.f, 1.f));
 						break;
 					case FPS_n2::Sceneclass::GunAnimeID::Open:
 						GetObj().SetAnim(ID).SetPer(std::clamp(GetObj_const().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * (

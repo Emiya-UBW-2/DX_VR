@@ -52,7 +52,6 @@ namespace FPS_n2 {
 			Matrix4x4DX											m_MagMiss{}, m_MagSuccess{};
 			Matrix4x4DX											m_MagazinePoachMat{};
 			bool												m_isMagFall{};
-			bool												m_ShotSwitch{ false };				//
 			bool												m_MagHand{ false };
 			ArmMovePerClass										m_MagArm;
 			Vector3DX											m_UpperPrevRad, m_UpperRad;
@@ -152,7 +151,7 @@ namespace FPS_n2 {
 			const int			GetAmmoAll(void) const noexcept { return this->m_MagazinePtr ? (*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoAll() : 0; }
 			const auto			GetReloadType(void) const noexcept { return GetModSlot().GetModData()->GetReloadType(); }
 			const auto			GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd * (60.f * DXLib_ref::Instance()->GetDeltaTime()); }
-			const auto&			GetShotSwitch(void) const noexcept { return this->m_ShotSwitch; }
+			const auto&			GetShotSwitch(void) const noexcept { return GetGunAnime() == GunAnimeID::Shot && (GetNowGunAnimePer() < 0.5f); }
 			const GunAnimeID&	GetGunAnime(void) const noexcept { return this->m_GunAnime; }
 			const auto			GetNowGunAnimeID(void) const noexcept {
 				if (GetGunAnime() == GunAnimeID::None) { return -1; }
@@ -184,7 +183,7 @@ namespace FPS_n2 {
 			const auto			GetLeftHandMat(void) const noexcept { return Lerp(GetBaseLeftHandMat(), GetMagHandMat(), m_MagArm.Per()); }
 			const auto			GetAmmoNumTotal(void) const noexcept { return this->m_Capacity + ((this->m_ChamberAmmoData) ? 1 : 0); }
 			const auto			GetGunAnimBlendPer(GunAnimeID ID) const noexcept { return this->m_GunAnimePer[static_cast<int>(ID)].Per(); }
-			const auto			GetNowGunAnimePer(void) const noexcept {
+			const float			GetNowGunAnimePer(void) const noexcept {
 				auto* AnimMngr = GunAnimManager::Instance();
 				auto* Ptr = AnimMngr->GetAnimData(GetGunAnim(GetGunAnime()));
 				if (!Ptr) { return 0.f; }
