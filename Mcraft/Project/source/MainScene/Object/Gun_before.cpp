@@ -17,7 +17,7 @@ namespace FPS_n2 {
 					if (i == MyPlayerID) { continue; }
 					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
 					if (!c->IsAlive()) { continue; }
-					if (!c->m_CanLookTarget) { continue; }
+					if (!c->GetCanLookByPlayer()) { continue; }
 					int pos = -1;
 					float CosMax = -1.f;
 					for (const auto& h : c->GetHitBoxList()) {

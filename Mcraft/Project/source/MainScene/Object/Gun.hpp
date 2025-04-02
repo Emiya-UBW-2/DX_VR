@@ -35,9 +35,7 @@ namespace FPS_n2 {
 			bool												m_ShotEnd{ false };		//
 			int													m_boltSoundSequence{ -1 };			//サウンド
 			bool												m_IsChamberOn{ false };				//チャンバーに弾を込めるか
-			bool												m_PrevChamberOn{ false };
 			bool												m_IsEject{ false };
-			bool												m_PrevEject{ false };
 			FallControl											m_MagFall;
 			FallControl											m_CartFall;
 			int													m_GunSightSel{ 0 };
@@ -60,8 +58,8 @@ namespace FPS_n2 {
 			Vector3DX											m_UpperPrevRad, m_UpperRad;
 			Matrix3x3DX											m_GunSwingMat, m_GunSwingMat2;
 			Vector2DX											m_RecoilRadAdd;
-		public:
 			float												m_SwitchPer{};
+		public:
 
 			Matrix3x3DX											m_SlingRot{};
 			Vector3DX											m_SlingPos{};
@@ -72,6 +70,16 @@ namespace FPS_n2 {
 
 			ModSlotControl& SetModSlot(void) noexcept { return this->m_ModSlotControl; }
 			const ModSlotControl& GetModSlot(void) const noexcept { return this->m_ModSlotControl; }
+
+			const auto&			GetSwitchPer(void) const noexcept { return m_SwitchPer; }
+			void				CalcSwitchPer(bool IsRight) noexcept {
+				if (GetModSlot().GetModData()->GetCanSwitch()) {
+					Easing(&m_SwitchPer, IsRight ? 1.f : -1.f, 0.9f, EasingType::OutExpo);
+				}
+				else {
+					m_SwitchPer = 1.f;
+				}
+			}
 		private:
 			const auto&			GetGunSoundSet(void) const noexcept { return GunSoundSets[GetModSlot().GetModData()->GetSoundSel()]; }
 			const auto&			GetGunAnim(GunAnimeID AnimID) const noexcept {
@@ -98,8 +106,21 @@ namespace FPS_n2 {
 				}
 				return GetModSlot().GetModData()->GetRecoilPower() + this->m_Recoil_Diff;
 			}
+			void				ChamberIn(void) noexcept {
+				if (this->m_Capacity != 0) {
+					this->m_Capacity--;
+					if (this->m_MagazinePtr) {
+						this->m_ChamberAmmoData = (*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoSpecMagTop();//マガジンの一番上の弾データをチャンバーイン
+					}
+				}
+			}
+			void				EjectCart(void) noexcept {
+				this->m_CartFall.SetFall(
+					GetFrameWorldMatParts(GunFrame::Cart).pos(), GetMove().GetMat(),
+					(GetFrameWorldMatParts(GunFrame::CartVec).pos() - GetFrameWorldMatParts(GunFrame::Cart).pos() + Vector3DX::vget(GetRandf(0.2f), 0.5f + GetRandf(1.f), GetRandf(0.2f))).normalized() * (Scale3DRate * 2.f / 60.f), 2.f, SoundEnum::CartFall, false);
+			}
 		public://ゲッター
-			const auto			GetFrameWorldMatParts(GunFrame frame) const noexcept {
+			const Matrix4x4DX	GetFrameWorldMatParts(GunFrame frame) const noexcept {
 				auto* ptr = GetModSlot().HasFrameBySlot(frame);
 				if (ptr) {
 					return ((std::shared_ptr<ModClass>&)(*ptr))->GetFramePartsMat(frame);
@@ -128,7 +149,7 @@ namespace FPS_n2 {
 			}
 			const auto			GetCanADS(void) const noexcept { return (GetGunAnime() == GunAnimeID::None || GetGunAnime() == GunAnimeID::Shot) && GetCanShot() && GetModSlot().GetModData()->GetCanADS(); }
 			const auto			GetSightZoomSize(void) const noexcept { return this->m_SightPtr ? (*this->m_SightPtr)->GetModSlot().GetModData()->GetSightZoomSize() : 1.f; }
-			const auto			GetAmmoAll(void) const noexcept { return this->m_MagazinePtr ? (*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoAll() : 0; }
+			const int			GetAmmoAll(void) const noexcept { return this->m_MagazinePtr ? (*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoAll() : 0; }
 			const auto			GetReloadType(void) const noexcept { return GetModSlot().GetModData()->GetReloadType(); }
 			const auto			GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd * (60.f * DXLib_ref::Instance()->GetDeltaTime()); }
 			const auto&			GetShotSwitch(void) const noexcept { return this->m_ShotSwitch; }
@@ -138,8 +159,7 @@ namespace FPS_n2 {
 				return GetModSlot().GetModData()->GetAnimSelectList().at(static_cast<int>(GetGunAnime()));
 			}
 			const auto			GetReloading(void) const noexcept { return (GunAnimeID::ReloadStart_Empty <= GetGunAnime()) && (GetGunAnime() <= GunAnimeID::ReloadEnd); }
-			const auto			CanShootAmmo(void) const noexcept { return this->m_ChamberAmmoData != nullptr; }
-			const auto			GetPelletNum(void) const noexcept { return CanShootAmmo() ? this->m_ChamberAmmoData->GetPellet() : 0; }
+			const auto			GetPelletNum(void) const noexcept { return (this->m_ChamberAmmoData) ? this->m_ChamberAmmoData->GetPellet() : 0; }
 			const auto			GetRightHandMat(void) const noexcept {
 				Vector3DX GunPos = GetFrameWorldMatParts(GunFrame::RightHandPos).pos();
 				Vector3DX Gunyvec = GetFrameWorldMatParts(GunFrame::RightHandYvec).pos() - GunPos;
@@ -162,8 +182,7 @@ namespace FPS_n2 {
 				return Matrix4x4DX::identity();
 			}
 			const auto			GetLeftHandMat(void) const noexcept { return Lerp(GetBaseLeftHandMat(), GetMagHandMat(), m_MagArm.Per()); }
-			const auto			GetAmmoNumTotal(void) const noexcept { return this->m_Capacity + (CanShootAmmo() ? 1 : 0); }
-			const auto			GetIsMagEmpty(void) const noexcept { return this->m_Capacity == 0; }//次弾がない
+			const auto			GetAmmoNumTotal(void) const noexcept { return this->m_Capacity + ((this->m_ChamberAmmoData) ? 1 : 0); }
 			const auto			GetGunAnimBlendPer(GunAnimeID ID) const noexcept { return this->m_GunAnimePer[static_cast<int>(ID)].Per(); }
 			const auto			GetNowGunAnimePer(void) const noexcept {
 				auto* AnimMngr = GunAnimManager::Instance();
@@ -203,13 +222,15 @@ namespace FPS_n2 {
 			}
 			void				SetShotStart(void) noexcept;//発砲
 			void				ReloadStart(void) noexcept {
-				if (this->m_Capacity != this->GetAmmoAll()) {//リロードの必要がある場合のみリロード
-					if (!GetIsMagEmpty()) {
-						SetGunAnime(GunAnimeID::ReloadStart);
-					}
-					else {
-						SetGunAnime(GunAnimeID::ReloadStart_Empty);
-					}
+				if (GetModSlot().GetModData()->GetIsThrowWeapon()) {
+					return;
+				}
+				if (this->m_Capacity == this->GetAmmoAll()) { return; }//リロードの必要がある場合のみリロード
+				if (this->m_Capacity != 0) {
+					SetGunAnime(GunAnimeID::ReloadStart);
+				}
+				else {
+					SetGunAnime(GunAnimeID::ReloadStart_Empty);
 				}
 			}
 			void				SetActiveAll(bool value) noexcept {
@@ -223,8 +244,8 @@ namespace FPS_n2 {
 			void				UpdateGunMat(bool IsSelGun, bool IsActiveAutoAim, const Matrix3x3DX& CharaRotationCache, const Vector3DX& HeadPos) noexcept;
 			void				DrawReticle(float Rad) const noexcept {
 				if (this->m_Reticle_on && this->m_SightPtr && ((GetGunAnimBlendPer(GunAnimeID::ADS) >= 0.8f) || (GetSightZoomSize() == 1.f))) {
-					auto* WindowParts = WindowSystem::DrawControl::Instance();
-					WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*this->m_SightPtr)->GetModSlot().GetModData()->GetReitcleGraph(),
+					auto* DrawCtrls = WindowSystem::DrawControl::Instance();
+					DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*this->m_SightPtr)->GetModSlot().GetModData()->GetReitcleGraph(),
 						this->m_Reticle.XScreenPos(), this->m_Reticle.YScreenPos(), 1.f, Rad, true);
 				}
 			}
@@ -237,6 +258,12 @@ namespace FPS_n2 {
 				if (this->m_MagazinePtr) {
 					this->m_ChamberAmmoData = (*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoSpecMagTop();//マガジンの一番上の弾データをチャンバーイン
 				}
+				//TODO:投げ武器の弾データ
+				/*
+				if (GetModSlot().GetModData()->GetIsThrowWeapon()) {
+					this->m_ChamberAmmoData = GetModSlot().GetModData()->GetAmmoSpecMagTop();
+				}
+				//*/
 			}
 		public:
 			GunClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Gun); }
@@ -254,48 +281,7 @@ namespace FPS_n2 {
 					GetObj_const().DrawModel();
 				}
 			}
-			void				CheckDraw(void) noexcept override {
-				ObjectBaseClass::CheckDraw();
-				if (GetMyUserPlayerID() == 0) {
-					auto* PostPassParts = PostPassEffect::Instance();
-					if (!GetCanShot()) {
-						return;
-					}
-					this->m_AimPoint.Calc(GetFrameWorldMatParts(GunFrame::Muzzle).pos() + GetMove().GetMat().zvec() * (-50.f * Scale3DRate));
-					Vector3DX LensPos;
-					Vector3DX LensSizeFrame;
-					if (this->m_SightPtr) {//サイトがあるならそれを最優先とする
-						LensPos = (*this->m_SightPtr)->GetFramePartsMat(GunFrame::Lens).pos();
-						LensSizeFrame = (*this->m_SightPtr)->GetFramePartsMat(GunFrame::LensSize).pos();
-					}
-					else {
-						LensPos = GetFrameWorldMatParts(GunFrame::Lens).pos();
-						LensSizeFrame = GetFrameWorldMatParts(GunFrame::LensSize).pos();
-					}
-					if (m_Lens.Calc(LensPos)) {
-						if (m_LensSize.Calc(LensSizeFrame)) {
-							m_LensSizeLen = static_cast<float>(std::hypot(m_Lens.XPos() - m_LensSize.XPos(), m_Lens.YPos() - m_LensSize.YPos()));
-						}
-						if (m_Reticle.Calc(LensPos + (LensPos - GetADSEyeMat().pos()).normalized() * (5.f * Scale3DRate))) {
-							m_Reticle_on = (m_LensSizeLen > std::hypot(m_Lens.XPos() - m_Reticle.XPos(), m_Lens.YPos() - m_Reticle.YPos()));
-						}
-					}
-					//レンズ表示機能への反映
-					if (GetSightZoomSize() > 1.f) {
-						if (this->m_Reticle_on) {
-							PostPassParts->Set_is_lens(true);
-							PostPassParts->Set_zoom_lens(std::max(1.f, GetSightZoomSize() / 2.f));
-							PostPassParts->Set_xp_lens(static_cast<float>(this->m_Lens.XPos()));
-							PostPassParts->Set_yp_lens(static_cast<float>(this->m_Lens.YPos()));
-							PostPassParts->Set_size_lens(this->m_LensSizeLen);
-						}
-						else if (GetGunAnimBlendPer(GunAnimeID::ADS) < 0.5f) {
-							PostPassParts->Set_is_lens(false);
-							PostPassParts->Set_zoom_lens(1.f);
-						}
-					}
-				}
-			}
+			void				CheckDraw(void) noexcept override;
 			void				Draw(bool isDrawSemiTrans) noexcept override;
 			void				Dispose_Sub(void) noexcept override {
 				SetModSlot().Dispose();

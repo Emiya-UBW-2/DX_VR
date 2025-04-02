@@ -16,15 +16,15 @@ namespace FPS_n2 {
 			//
 			BattleResourceMngr->Load();
 			//UI
-			this->hit_Graph.Load("data/UI/battle_hit.bmp");
-			this->guard_Graph.Load("data/UI/battle_guard.bmp");
+			HitMarkerPool::Create();
 			this->m_UIclass.Load();
 			m_PauseMenuControl.Load();
 			//
 			PlayerMngr->Init(NetWork::Player_num);
+			PlayerMngr->SetWatchPlayer(GetViewPlayerID());
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(loop)->GetChara();
-				if (loop == GetViewPlayerID()) {
+				if (loop == PlayerMngr->GetWatchPlayer()) {
 					CharacterClass::LoadChara("Main", (PlayerID)loop);
 					//*
 					int Rand = GetRand(100);
@@ -52,8 +52,7 @@ namespace FPS_n2 {
 						MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->SetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
 					}
 					else {
-						auto& Base = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1)->GetChara();
-						c->SetRagDoll().Duplicate(Base->GetRagDoll());
+						c->SetRagDoll().Duplicate(((std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1)->GetChara())->GetRagDoll());
 					}
 					c->SetupRagDoll();
 					c->SetCharaTypeID(CharaTypeID::Enemy);
@@ -71,6 +70,7 @@ namespace FPS_n2 {
 			auto* NetBrowser = NetWorkBrowser::Instance();
 			//
 			BattleResourceMngr->Set();
+			EffectSingleton::Create();
 
 			PostPassParts->SetShadowScale(0.5f);
 			//
@@ -121,10 +121,9 @@ namespace FPS_n2 {
 			m_PauseMenuControl.Init();
 			m_FadeControl.Init();
 			this->m_IsEnd = false;
-			m_EffectControl.Init();
 			this->m_StartTimer = 5.f;
 
-			m_EffectControl.SetLoop(static_cast<int>(Sceneclass::Effect::ef_dust), Vector3DX::zero());
+			EffectSingleton::Instance()->SetLoop(Sceneclass::Effect::ef_dust, Vector3DX::zero());
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 #ifdef DEBUG
@@ -159,7 +158,7 @@ namespace FPS_n2 {
 
 			m_FadeControl.Update();
 
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetViewPlayerID())->GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
 
 			Pad->SetMouseMoveEnable(true);
 			KeyGuideParts->ChangeGuide(
@@ -253,7 +252,7 @@ namespace FPS_n2 {
 						auto& p = PlayerMngr->GetPlayer(index);
 						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
 						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)index);
-						if (index == GetViewPlayerID() && !IsServerNotPlayer) {
+						if (index == PlayerMngr->GetWatchPlayer() && !IsServerNotPlayer) {
 							c->Input(Ret.GetInput());//自身が動かすもの
 						}
 						else {//サーバーからのデータで動くもの
@@ -278,7 +277,7 @@ namespace FPS_n2 {
 					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 						auto& p = PlayerMngr->GetPlayer(index);
 						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
-						if (index == GetViewPlayerID()) {
+						if (index == PlayerMngr->GetWatchPlayer()) {
 							c->Input(MyInput);
 						}
 						else {
@@ -313,13 +312,12 @@ namespace FPS_n2 {
 			DebugParts->SetPoint("0.00");
 #endif // DEBUG
 			ObjMngr->LateExecuteObject();
-			UpdateBullet();							//弾の更新
 #ifdef DEBUG
 			DebugParts->SetPoint("0.52");
 #endif // DEBUG
 			//視点
 			{
-				auto& ViewChara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetViewPlayerID())->GetChara();
+				auto& ViewChara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
 				//カメラ
 				Vector3DX CamPos = ViewChara->GetEyePositionCache() + Camera3D::Instance()->GetCamShake();
 				Vector3DX CamVec = CamPos + ViewChara->GetEyeRotationCache().zvec() * -1.f;
@@ -369,8 +367,8 @@ namespace FPS_n2 {
 				}
 #endif
 				Easing(&m_EffectPos, CamPos, 0.95f, EasingType::OutExpo);
-				m_EffectControl.Update_LoopEffect(static_cast<int>(Sceneclass::Effect::ef_dust), m_EffectPos, Vector3DX::forward(), 0.5f);
-				m_EffectControl.SetEffectColor(static_cast<int>(Sceneclass::Effect::ef_dust), 255, 255, 255, 64);
+				EffectSingleton::Instance()->Update_LoopEffect(Sceneclass::Effect::ef_dust, m_EffectPos, Vector3DX::forward(), 0.5f);
+				EffectSingleton::Instance()->SetEffectColor(Sceneclass::Effect::ef_dust, 255, 255, 255, 64);
 
 				CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeRotationCache().yvec());
 				auto fov_t = CameraParts->GetMainCamera().GetCamFov();
@@ -381,7 +379,7 @@ namespace FPS_n2 {
 						fov -= deg2rad(15);
 						fov /= std::max(1.f, Chara->GetGunPtrNow()->GetSightZoomSize() / 2.f);
 					}
-					if (Chara->IsGunShotSwitch()) {
+					if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetShotSwitch()) {
 						fov -= deg2rad(5);
 						Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
 					}
@@ -426,18 +424,6 @@ namespace FPS_n2 {
 				m_Concussion = std::max(m_Concussion - DXLib_refParts->GetDeltaTime(), 0.f);
 			}
 			BackGround->Execute();
-			//
-			{
-				Vector3DX StartPos = Chara->GetEyePositionCache();
-				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
-					if (index == GetViewPlayerID()) { continue; }
-					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
-					Vector3DX TgtPos = c->GetEyePositionCache();
-					auto EndPos = TgtPos;
-					c->m_CanLookTarget = !BackGround->CheckLinetoMap(StartPos, &EndPos);
-					c->m_Length = (TgtPos - StartPos).magnitude();
-				}
-			}
 			//UIパラメーター
 			{
 				//timer
@@ -446,14 +432,7 @@ namespace FPS_n2 {
 
 				this->m_UIclass.Update();
 			}
-			m_EffectControl.Execute();
-			//
-			{
-				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
-					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
-					c->m_CameraPos.z = -1.f;
-				}
-			}
+			HitMarkerPool::Instance()->Update();
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=End");
 #endif // DEBUG
@@ -478,7 +457,7 @@ namespace FPS_n2 {
 				PostPassParts->Set_is_lens(false);
 				PostPassParts->Set_zoom_lens(1.f);
 			}
-			m_EffectControl.Dispose();
+			EffectSingleton::Release();
 			if (this->m_IsEnd) {//タイトルに戻る
 				SetNextSelect(0);
 			}
@@ -490,59 +469,11 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			BattleResourceMngr->Dispose();
-			this->hit_Graph.Dispose();
-			this->guard_Graph.Dispose();
 			this->m_UIclass.Dispose();
 			PlayerMngr->Dispose();
 			ObjectManager::Instance()->DeleteAll();
 			m_PauseMenuControl.Dispose();
-		}
-		//
-		void			MainGameScene::DrawHitGraph(void) const noexcept {
-			auto* WindowParts = WindowSystem::DrawControl::Instance();
-			auto* ObjMngr = ObjectManager::Instance();
-			int loop = 0;
-			while (true) {
-				auto ammo = ObjMngr->GetObj(static_cast<int>(ObjType::Ammo), loop);
-				if (ammo != nullptr) {
-					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
-					if (a->m_IsDrawHitUI && a->GetShootedID() == GetViewPlayerID()) {
-						int			Alpha = static_cast<int>(a->m_Hit_alpha * 255.f);
-						if ((Alpha >= 10) && (a->m_Hit_DispPos.z >= 0.f && a->m_Hit_DispPos.z <= 1.f)) {
-							WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, Alpha);
-							//
-							int r = static_cast<int>(255 * std::clamp((float)a->m_Damage / 100.f * 2.f, 0.f, 1.f));
-							int g = 255 - r;
-							if (a->m_Damage > 0) {
-								WindowParts->SetBright(WindowSystem::DrawLayer::Normal, r, g, 0);
-								WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &hit_Graph, static_cast<int>(a->m_Hit_DispPos.x), static_cast<int>(a->m_Hit_DispPos.y), (float)static_cast<int>((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
-							}
-							if (a->m_ArmerDamage > 0) {
-								WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 128, 128, 128);
-								WindowParts->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &guard_Graph, static_cast<int>(a->m_Hit_DispPos.x), static_cast<int>(a->m_Hit_DispPos.y), (float)static_cast<int>((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
-							}
-							WindowParts->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-							//
-							if (a->m_Damage > 0) {
-								WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic,
-									24, FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
-									static_cast<int>(a->m_Hit_DispPos.x + a->m_Hit_AddX), static_cast<int>(a->m_Hit_DispPos.y + a->m_Hit_AddY), GetColor(r, g, 0), Black, "%d", a->m_Damage);
-							}
-							//防いだダメージ
-							if (a->m_ArmerDamage > 0) {
-								WindowParts->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic,
-									20, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
-									static_cast<int>(a->m_Hit_DispPos.x + a->m_Hit_AddX) - 10, static_cast<int>(a->m_Hit_DispPos.y + a->m_Hit_AddY), Gray50, Black, "%d", a->m_ArmerDamage);
-							}
-						}
-					}
-				}
-				else {
-					break;
-				}
-				loop++;
-			}
-			WindowParts->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+			HitMarkerPool::Release();
 		}
 		//
 		void			MainGameScene::MainDraw_Sub(void) const noexcept {
@@ -553,16 +484,7 @@ namespace FPS_n2 {
 			//ObjectManager::Instance()->Draw_Depth();
 			SetVerticalFogEnable(FALSE);
 			SetFogEnable(FALSE);
-#ifdef DEBUG
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			for (int i = 0; i < PlayerMngr->GetPlayerNum(); ++i) {
-				PlayerMngr->GetPlayer(i)->GetAI()->Draw();
-			}
-			for (auto& s : m_LineDebug) {
-				int index = static_cast<int>(&s - &m_LineDebug.front());
-				DrawCapsule3D(s.PosA.get(), s.PosB.get(), 0.02f * Scale3DRate, 8, GetColor(0, 0, (32 * index) % 256), GetColor(0, 0, 0), TRUE);
-			}
-#endif // DEBUG
+			HitMarkerPool::Instance()->Check();
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
@@ -570,13 +492,13 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			//auto* NetBrowser = NetWorkBrowser::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(GetViewPlayerID())->GetChara();
+			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
 			if (!Chara->IsAlive()) { return; }
 			//レティクル表示
 			if (Chara->GetGunPtrNow()) {
 				Chara->GetGunPtrNow()->DrawReticle(Chara->GetLeanRad());
 			}
-			DrawHitGraph();												//着弾表示
+			HitMarkerPool::Instance()->Draw();
 			if (!SceneParts->IsPause()) { this->m_UIclass.Draw(); }		//UI
 			//NetBrowser->Draw();										//通信設定
 			if (m_NetWorkController) {
@@ -599,86 +521,6 @@ namespace FPS_n2 {
 				}
 			}
 			m_FadeControl.Draw();
-		}
-		//
-		void			MainGameScene::UpdateBullet(void) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* BackGround = BackGround::BackGroundClass::Instance();
-			auto* SE = SoundPool::Instance();
-
-			int loop = 0;
-			while (true) {
-				auto ammo = ObjMngr->GetObj(static_cast<int>(ObjType::Ammo), loop);
-				if (ammo != nullptr) {
-					auto& a = (std::shared_ptr<AmmoClass>&)(*ammo);
-					if (a->IsActive()) {
-						//AmmoClass
-						Vector3DX repos_tmp = a->GetRePos();
-						Vector3DX pos_tmp = a->GetPos();
-
-						bool is_HitAll = false;
-
-						Vector3DX norm_tmp = Vector3DX::zero();
-						auto ColResGround = BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
-
-						for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
-							auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
-							HitPoint Damage = a->GetDamage();
-							ArmerPoint ArmerDamage = 0;
-							if (tgt->CheckDamageRay(&Damage, &ArmerDamage, true, (PlayerID)a->GetShootedID(), repos_tmp, &pos_tmp)) {
-								a->Penetrate(pos_tmp, Damage, ArmerDamage);
-								is_HitAll = true;
-							}
-						}
-#ifdef DEBUG
-						/*
-						if (norm_tmp != Vector3DX::zero()) {
-							m_LineDebug.emplace_back();
-							m_LineDebug.back().PosA = pos_tmp;
-							m_LineDebug.back().PosB = pos_tmp + norm_tmp * (1.f * Scale3DRate);
-							m_LineDebug.back().Time = 10.f;
-						}
-						//*/
-#endif // DEBUG
-						if (ColResGround && !is_HitAll) {
-							a->HitGround(pos_tmp);
-							//破壊
-							int								xput = 4;
-							int								yput = 1;
-							int								zput = 4;
-							Vector3DX						PutPos = pos_tmp;
-							auto Put = BackGround->GetPoint(PutPos);
-							for (int xp = 0; xp < xput; xp++) {
-								for (int yp = 0; yp < yput; yp++) {
-									for (int zp = 0; zp < zput; zp++) {
-										int xx = (Put.x + xp - xput / 2);
-										int yy = (Put.y + yp - yput / 2);
-										int zz = (Put.z + zp - zput / 2);
-										auto& cell = BackGround->GetCellBuf(xx, yy, zz);
-										switch (cell.m_Cell) {
-										case 2:
-											BackGround->SetBlick(xx, yy, zz, 3);
-											break;
-										case 3:
-											BackGround->SetBlick(xx, yy, zz, FPS_n2::BackGround::s_EmptyBlick);
-											break;
-										default:
-											break;
-										}
-									}
-								}
-							}
-							m_EffectControl.SetOnce_Any(static_cast<int>(Sceneclass::Effect::ef_gndsmoke), pos_tmp, norm_tmp, a->GetCaliberSize() / 0.02f * Scale3DRate);
-							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGround0) + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
-						}
-					}
-				}
-				else {
-					break;
-				}
-				loop++;
-			}
 		}
 	}
 }

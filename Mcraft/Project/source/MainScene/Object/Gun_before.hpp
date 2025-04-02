@@ -67,9 +67,10 @@ namespace FPS_n2 {
 		//
 		class FallControl {
 		private:
-		public:
 			std::vector<std::shared_ptr<FallObjClass>>	m_Ptr;
 			int											m_Now{ 0 };
+		public:
+			const auto& GetPtrList(void) const noexcept { return m_Ptr; }
 		public:
 			void		Init(const std::string& pPath, int count) {
 				auto* ObjMngr = ObjectManager::Instance();
@@ -147,7 +148,7 @@ namespace FPS_n2 {
 				SetUseHalfLambertLighting(TRUE);
 			}
 		};
-
+		//
 		class ModSlotControl {
 		private:
 			std::array<SharedObj, static_cast<int>(GunSlot::Max)>	m_Parts_Ptr{ nullptr };
@@ -174,34 +175,6 @@ namespace FPS_n2 {
 			const SharedObj* HasFrameBySlot(GunFrame frame) const noexcept;
 			void		UpdatePartsAnim(const MV1& pParent);
 			void		UpdatePartsMove(const Matrix4x4DX& pMat, GunSlot Slot);
-		};
-
-		class ScreenPosition {
-			int m_XPos{};
-			int m_YPos{};
-			int m_XScreenPos{};
-			int m_YScreenPos{};
-		public:
-			ScreenPosition(void) noexcept {}
-			~ScreenPosition(void) noexcept {}
-		public:
-			const int XPos(void) const noexcept { return this->m_XPos; }
-			const int YPos(void) const noexcept { return this->m_YPos; }
-			const int XScreenPos(void) const noexcept { return this->m_XScreenPos; }
-			const int YScreenPos(void) const noexcept { return this->m_YScreenPos; }
-		public:
-			bool Calc(const Vector3DX& Pos3D) noexcept {
-				Vector3DX Pos = ConvWorldPosToScreenPos(Pos3D.get());
-				if (0.f < Pos.z && Pos.z < 1.f) {
-					auto* WindowSizeParts = WindowSizeControl::Instance();
-					m_XPos = static_cast<int>(Pos.x);
-					m_YPos = static_cast<int>(Pos.y);
-					m_XScreenPos = m_XPos * 1980 / WindowSizeParts->GetScreenY(1980);
-					m_YScreenPos = m_YPos * 1080 / WindowSizeParts->GetScreenY(1080);
-					return true;
-				}
-				return false;
-			}
 		};
 	};
 };

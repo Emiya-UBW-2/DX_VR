@@ -75,6 +75,8 @@ namespace FPS_n2 {
 		private:
 			std::vector<std::unique_ptr<PlayerControl>>	m_Player;
 			int											m_PlayerNum{};
+
+			PlayerID									m_WatchPlayer{};
 		private:
 			PlayerManager(void) noexcept {}
 			PlayerManager(const PlayerManager&) = delete;
@@ -84,8 +86,12 @@ namespace FPS_n2 {
 
 			virtual ~PlayerManager(void) noexcept {}
 		public:
+			const auto& GetWatchPlayer(void) const noexcept { return this->m_WatchPlayer; }
+
 			const auto& GetPlayerNum(void) const noexcept { return this->m_PlayerNum; }
 			auto& GetPlayer(int ID) noexcept { return this->m_Player[ID]; }
+
+			void SetWatchPlayer(PlayerID playerID) noexcept { m_WatchPlayer = playerID; }
 		public:
 			void Init(int playerNum) noexcept {
 				if (playerNum > 0) {

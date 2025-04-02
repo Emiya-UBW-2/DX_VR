@@ -113,23 +113,24 @@ namespace FPS_n2 {
 		}
 		// 
 		void			TitleScene::DrawUI_Base_Sub(void) const noexcept {
+			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			// ”wŒi
-			WindowSystem::DrawControl::Instance()->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Gray50, TRUE);
+			DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Gray50, TRUE);
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
-			WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, 
+			DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, 
 				&this->m_TitleImage, (64), (64), (64 + 369), (64 + 207), true);
 			// 
-			WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18), 
+			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18), 
 				FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
 				(64 + 369), (64 + 207), White, Black, "Ver 0.0.0");
 			// 
 			ButtonParts->Draw();
 			// 
 			if ((ButtonParts->GetSelect() != InvalidID) && !PopUpParts->IsActivePop()) {
-				WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18), 
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18), 
 					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
 					(32), 1080 - (32 + 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
 			}

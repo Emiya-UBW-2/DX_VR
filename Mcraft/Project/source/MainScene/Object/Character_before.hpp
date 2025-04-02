@@ -92,63 +92,60 @@ namespace FPS_n2 {
 		};
 		//キャラ入力
 		class LeanControl {
-		private://キャラパラメーター
-			switchs												m_QKey;
-			switchs												m_EKey;
+		private:
 			float												m_Rad{ 0.f };
 			int													m_Rate{ 0 };
 			bool												m_Switch{ false };
 		public://ゲッター
 			const auto& GetRad(void) const noexcept { return this->m_Rad; }
-			const auto& GetRate(void) const noexcept { return this->m_Rate; }
 			const auto& GetSwitch(void) const noexcept { return this->m_Switch; }
 		public:
 			void			Init(void) noexcept {
 				this->m_Rad = 0.f;
 			}
-			void			Update(bool LeftPress, bool RightPress) {
+			void			Update(bool LeftTrigger, bool RightTrigger) {
 				//入力
-				this->m_QKey.Update(LeftPress);
-				this->m_EKey.Update(RightPress);
 				auto Prev = this->m_Rate;
-				if (true) {//トグル式
-					if (this->m_QKey.trigger()) {
-						if (this->m_Rate != 1) {
-							this->m_Rate = 1;
-						}
-						else {
-							this->m_Rate = 0;
-						}
+				if (LeftTrigger) {
+					if (this->m_Rate != -1) {
+						this->m_Rate = -1;
 					}
-					if (this->m_EKey.trigger()) {
-						if (this->m_Rate != -1) {
-							this->m_Rate = -1;
-						}
-						else {
-							this->m_Rate = 0;
-						}
+					else {
+						this->m_Rate = 0;
 					}
 				}
-				else {
-					this->m_Rate = 0;
-					if (this->m_QKey.press()) {
+				if (RightTrigger) {
+					if (this->m_Rate != 1) {
 						this->m_Rate = 1;
 					}
-					if (this->m_EKey.press()) {
-						this->m_Rate = -1;
+					else {
+						this->m_Rate = 0;
 					}
 				}
 				this->m_Switch = (Prev != this->m_Rate);
-				Easing(&this->m_Rad, static_cast<float>(-this->m_Rate) * deg2rad(25), 0.9f, EasingType::OutExpo);
+				Easing(&this->m_Rad, static_cast<float>(this->m_Rate) * deg2rad(25), 0.9f, EasingType::OutExpo);
 			}
 		};
 		class MoveControl {
-		private://キャラパラメーター
+		private:
 			float												m_VecPower{ 0.f };
 			Vector3DX											m_VecTotal;
 			std::array<float, 4>								m_Vec{ 0,0,0,0 };
 		public://ゲッター
 			const auto& GetVecTotal(void) const noexcept { return this->m_VecTotal; }
+			const auto GetVecMove(void) const noexcept {
+				if (this->m_VecPower > 0.f) {
+					return this->m_VecTotal.normalized() * std::clamp(this->m_VecPower, 0.f, 1.f);
+				}
+				return Vector3DX::zero();
+			}
+			const auto GoFrontRad(void) const noexcept {
+				return atan2f(this->m_VecTotal.x, -this->m_VecTotal.z) * -this->m_VecTotal.z;
+			}
+			const auto GoBackRad(void) const noexcept {
+				return atan2f(-this->m_VecTotal.x, this->m_VecTotal.z) * this->m_VecTotal.z;
+			}
+
 			const auto& GetVecPower(void) const noexcept { return this->m_VecPower; }
 			const auto& GetVecFront(void) const noexcept { return this->m_Vec[0]; }
 			const auto& GetVecRear(void) const noexcept { return this->m_Vec[2]; }
@@ -171,7 +168,7 @@ namespace FPS_n2 {
 			}
 		};
 		class RotateControl {
-		private://キャラパラメーター
+		private:
 			Vector3DX											m_rad_Buf, m_rad;
 			float												m_yrad_Upper{ 0.f }, m_yrad_Bottom{ 0.f };
 			bool												m_TurnBody{ false };
@@ -404,190 +401,145 @@ namespace FPS_n2 {
 			}
 		};
 		//ラグドール
+		enum class RagFrame {
+			//頭
+			head,
+			//胴体
+			bodyg,
+			bodyc,
+			bodyb,
+			body,
+			//右手座標系
+			RIGHThand2,
+			RIGHThand,
+			RIGHTarm2,
+			RIGHTarm1,
+			//左手座標系
+			LEFThand2,
+			LEFThand,
+			LEFTarm2,
+			LEFTarm1,
+
+			//右手座標系
+			RIGHTreg2,
+			RIGHTreg,
+			RIGHTfoot2,
+			RIGHTfoot1,
+			//左手座標系
+			LEFTreg2,
+			LEFTreg,
+			LEFTfoot2,
+			LEFTfoot1,
+
+			Max,
+		};
+		static const char* RagFrameName[static_cast<int>(RagFrame::Max)] = {
+			"頭",
+			"グルーブ",
+			"下半身",
+			"上半身",
+			"上半身2",
+			"右手首先",
+			"右手首",
+			"右ひじ",
+			"右腕",
+			"左手首先",
+			"左手首",
+			"左ひじ",
+			"左腕",
+			"右足首先",
+			"右足首",
+			"右ひざ",
+			"右足",
+			"左足首先",
+			"左足首",
+			"左ひざ",
+			"左足",
+		};
 		class RagDollControl {
 		private:
 			//体のフレーム情報
 			class frame_body {
 			public:
-				//頭
-				frames head_f;
-				//胴体
-				frames bodyg_f;
-				frames bodyc_f;
-				frames bodyb_f;
-				frames body_f;
-				//右手座標系
-				frames RIGHThand2_f;
-				frames RIGHThand_f;
-				frames RIGHTarm2_f;
-				frames RIGHTarm1_f;
-				//左手座標系
-				frames LEFThand2_f;
-				frames LEFThand_f;
-				frames LEFTarm2_f;
-				frames LEFTarm1_f;
-
-				//右手座標系
-				frames RIGHTreg2_f;
-				frames RIGHTreg_f;
-				frames RIGHTfoot2_f;
-				frames RIGHTfoot1_f;
-				//左手座標系
-				frames LEFTreg2_f;
-				frames LEFTreg_f;
-				frames LEFTfoot2_f;
-				frames LEFTfoot1_f;
+				std::array<frames, static_cast<int>(RagFrame::Max)> m_Frames;
 			public:
 				//
-				void Get_frame(const MV1& obj_) noexcept {
+				void SetupFrameInfo(const MV1& obj_) noexcept {
 					for (int i = 0; i < int(obj_.GetFrameNum()); ++i) {
 						std::string p = obj_.GetFrameName(i);
-						if (p == std::string("グルーブ")) {
-							this->bodyg_f.Set(i, obj_);
-						}
-						else if (p == std::string("下半身")) {
-							this->bodyc_f.Set(i, obj_);
-						}
-
-						else if (p.find("左足") != std::string::npos && p.find("首") == std::string::npos && p.find("先") == std::string::npos && p.find("ＩＫ") == std::string::npos) {
-							this->LEFTfoot1_f.Set(i, obj_);
-						}
-						else if (p.find("左ひざ") != std::string::npos) {
-							this->LEFTfoot2_f.Set(i, obj_);
-						}
-						else if (p.find("左足首") != std::string::npos && p.find("先") == std::string::npos) {
-							this->LEFTreg_f.Set(i, obj_);
-						}
-						else if (p.find("左足首先") != std::string::npos) {
-							this->LEFTreg2_f.Set(i, obj_);
-						}
-
-						else if (p.find("右足") != std::string::npos && p.find("首") == std::string::npos && p.find("先") == std::string::npos && p.find("ＩＫ") == std::string::npos) {
-							this->RIGHTfoot1_f.Set(i, obj_);
-						}
-						else if (p.find("右ひざ") != std::string::npos) {
-							this->RIGHTfoot2_f.Set(i, obj_);
-						}
-						else if (p.find("右足首") != std::string::npos && p.find("先") == std::string::npos) {
-							this->RIGHTreg_f.Set(i, obj_);
-						}
-						else if (p.find("右足首先") != std::string::npos) {
-							this->RIGHTreg2_f.Set(i, obj_);
-						}
-						else if (p.find("上半身") != std::string::npos && p.find("上半身2") == std::string::npos) {
-							this->bodyb_f.Set(i, obj_);
-						}
-						else if (p.find("上半身2") != std::string::npos) {
-							this->body_f.Set(i, obj_);
-						}
-						else if (p.find("頭") != std::string::npos && p.find("先") == std::string::npos) {
-							this->head_f.Set(i, obj_);
-							//head_hight = obj_.frame(this->head_f.first).y;
-						}
-
-						else if (p.find("右腕") != std::string::npos && p.find("捩") == std::string::npos) {
-							this->RIGHTarm1_f.Set(i, obj_);
-						}
-						else if (p.find("右ひじ") != std::string::npos) {
-							this->RIGHTarm2_f.Set(i, obj_);
-						}
-						else if (p == std::string("右手首")) {
-							this->RIGHThand_f.Set(i, obj_);
-						}
-						else if (p == std::string("右手先") || p == std::string("右手首先")) {
-							this->RIGHThand2_f.Set(i, obj_);
-						}
-
-						else if (p.find("左腕") != std::string::npos && p.find("捩") == std::string::npos) {
-							this->LEFTarm1_f.Set(i, obj_);
-						}
-						else if (p.find("左ひじ") != std::string::npos) {
-							this->LEFTarm2_f.Set(i, obj_);
-						}
-						else if (p == std::string("左手首")) {
-							this->LEFThand_f.Set(i, obj_);
-						}
-						else if (p == std::string("左手先") || p == std::string("左手首先")) {
-							this->LEFThand2_f.Set(i, obj_);
+						for (auto& f : this->m_Frames) {
+							int index = static_cast<int>(&f - &this->m_Frames.front());
+							if (p == RagFrameName[index]) {
+								f.Set(i, obj_);
+								break;
+							}
 						}
 					}
 				}
 				//
-				void copy_frame(MV1& mine, frame_body& frame_tgt_, MV1* tgt) noexcept {
+				void CopyFrame(const MV1& mine, const frame_body& frame_tgt_, MV1* tgt) noexcept {
 					tgt->SetMatrix(mine.GetMatrix());
-					//
-					tgt->SetFrameLocalMatrix(frame_tgt_.head_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.head_f.GetFrameID()));
-					//
-					tgt->SetFrameLocalMatrix(frame_tgt_.bodyg_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.bodyg_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.bodyc_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.bodyc_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.bodyb_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.bodyb_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.body_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.body_f.GetFrameID()));
-					//右手座標系
-					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHThand2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHThand2_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHThand_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHThand_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHTarm2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHTarm2_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHTarm1_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHTarm1_f.GetFrameID()));
-					//左手座標系
-					tgt->SetFrameLocalMatrix(frame_tgt_.LEFThand2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFThand2_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.LEFThand_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFThand_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTarm2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTarm2_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTarm1_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTarm1_f.GetFrameID()));
-					//右手座標系
-					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHTreg2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHTreg2_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHTreg_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHTreg_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHTfoot2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHTfoot2_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.RIGHTfoot1_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.RIGHTfoot1_f.GetFrameID()));
-					//左手座標系
-					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTreg2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTreg2_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTreg_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTreg_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTfoot2_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTfoot2_f.GetFrameID()));
-					tgt->SetFrameLocalMatrix(frame_tgt_.LEFTfoot1_f.GetFrameID(), mine.GetFrameLocalMatrix(frame_tgt_.LEFTfoot1_f.GetFrameID()));
-					for (int i = 0; i < tgt->GetAnimNum(); ++i) {
-						tgt->SetAnim(i).SetPer(mine.SetAnim(i).GetPer());
-						tgt->SetAnim(i).SetTime(mine.SetAnim(i).GetTime());
+					for (const auto& f : frame_tgt_.m_Frames) {
+						tgt->SetFrameLocalMatrix(f.GetFrameID(), mine.GetFrameLocalMatrix(f.GetFrameID()));
 					}
+					for (int i = 0, max = static_cast<int>(tgt->GetAnimNum()); i < max; ++i) {
+						tgt->SetAnim(i).SetPer(mine.GetAnim(i).GetPer());
+						tgt->SetAnim(i).SetTime(mine.GetAnim(i).GetTime());
+					}
+					tgt->UpdateAnimAll();
 				}
 				//
 			};
 		private:
+			const MV1*											m_pBaseObj{nullptr};
 			MV1													m_RagDoll;
-			float												m_RagDollTimer{ 0.f };						//ラグドールの物理演算フラグ
+			float												m_Timer{ 0.f };						//ラグドールの物理演算タイマー
+			frame_body											m_RagObjFrame;						//フレーム
+			frame_body											m_BaseObjFrame;						//フレーム
 		public:
-			//体のフレーム情報
-			frame_body lagframe_;							//フレーム
-			frame_body frame_s;								//フレーム
 		public:
 			RagDollControl(void) noexcept {}
 			~RagDollControl(void) noexcept {}
 		public:
 			auto& SetRagDoll(void) noexcept { return this->m_RagDoll; }
 			const auto& GetRagDoll(void) const noexcept { return this->m_RagDoll; }
+
+			const auto GetFrameMat(RagFrame select) const noexcept {
+				auto& frame = this->m_RagObjFrame.m_Frames.at(static_cast<int>(select));
+				return frame.GetFrameWorldPosition().rotation().inverse() * this->m_RagDoll.GetFrameLocalWorldMatrix(frame.GetFrameID());
+			}
+
 		public:
 			void Init(const MV1& obj_body_t) noexcept {
-				//身体
-				this->frame_s.Get_frame(obj_body_t);
-				//ラグドール
-				this->lagframe_.Get_frame(m_RagDoll);
+				this->m_pBaseObj = &obj_body_t;
+				if (!this->m_pBaseObj) { return; }
+				this->m_BaseObjFrame.SetupFrameInfo(*this->m_pBaseObj);				//身体
+				this->m_RagObjFrame.SetupFrameInfo(this->m_RagDoll);			//ラグドール
 			}
-			void Update(MV1& obj_body_t, bool isAlive) noexcept {
+			void Update(bool isAlive) noexcept {
+				if (!this->m_pBaseObj) { return; }
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (isAlive) {
-					this->m_RagDollTimer = 0.f;
+					this->m_Timer = 0.f;
 				}
 				else {
-					this->m_RagDollTimer = std::min(this->m_RagDollTimer + DXLib_refParts->GetDeltaTime(), 3.f);
-				}
-				if (this->m_RagDollTimer < 3.f) {
-					this->m_RagDoll.SetPrioritizePhysicsOverAnimFlag(true);
-					this->frame_s.copy_frame(obj_body_t, this->lagframe_, &m_RagDoll);
-					this->m_RagDoll.UpdateAnimAll();
-					if (this->m_RagDollTimer == 0.f) {
+					if (this->m_Timer == 0.f) {
+						this->m_RagDoll.SetPrioritizePhysicsOverAnimFlag(true);
+						this->m_BaseObjFrame.CopyFrame(*this->m_pBaseObj, this->m_RagObjFrame, &this->m_RagDoll);
 						this->m_RagDoll.PhysicsResetState();
 					}
-					else {
+					if (this->m_Timer < 3.f) {
+						this->m_RagDoll.SetPrioritizePhysicsOverAnimFlag(true);
+						this->m_BaseObjFrame.CopyFrame(*this->m_pBaseObj, this->m_RagObjFrame, &this->m_RagDoll);
 						this->m_RagDoll.PhysicsCalculation(1000.f * DXLib_refParts->GetDeltaTime());
 					}
+					this->m_Timer += DXLib_refParts->GetDeltaTime();
 				}
+			}
+			void Dispose(void) noexcept {
+				if (!this->m_pBaseObj) { return; }
+				this->m_pBaseObj = nullptr;
+				this->m_RagDoll.Dispose();
 			}
 		};
 	};

@@ -16,19 +16,10 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-#ifdef DEBUG
-		struct LineDebug {
-			Vector3DX PosA;
-			Vector3DX PosB;
-			float Time = 0;
-		};
-#endif
-
 		class MainGameScene : public TEMPSCENE {
 		private:
 			PauseMenuControl							m_PauseMenuControl;
 			FadeControl									m_FadeControl;
-			EffectControl								m_EffectControl;
 			//UI関連
 			float										m_Concussion{ 0.f };
 			float										m_ConcussionPer{ 0.f };
@@ -39,13 +30,8 @@ namespace FPS_n2 {
 			//
 			bool										m_IsEnd{ false };//シーン全体の終了フラグ
 			float										m_StartTimer{ 0.f };
-			GraphHandle									hit_Graph;
-			GraphHandle									guard_Graph;
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
-#ifdef DEBUG
-			std::vector<LineDebug>						m_LineDebug;
-#endif
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
 				if (m_NetWorkController) {
@@ -95,9 +81,6 @@ namespace FPS_n2 {
 					m_PauseMenuControl.Draw();
 				}
 			}
-		private:
-			void			UpdateBullet(void) noexcept;
-			void			DrawHitGraph(void) const noexcept;
 		};
 	}
 }

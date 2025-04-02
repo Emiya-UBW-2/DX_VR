@@ -203,5 +203,8 @@
     <ClCompile Include="source\CommonScene\Object\GunsModify.cpp">
       <Filter>ソース ファイル\CommonScene\Object</Filter>
     </ClCompile>
+    <ClCompile Include="source\MainScene\Object\Ammo.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

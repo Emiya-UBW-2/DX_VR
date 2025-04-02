@@ -77,6 +77,12 @@ namespace FPS_n2 {
 			}
 		}
 		void				GunClass::SetShotStart(void) noexcept {
+			if (GetModSlot().GetModData()->GetIsThrowWeapon()) {
+				return;
+			}
+			if (!(this->m_ChamberAmmoData)) {
+				return;
+			}
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -110,6 +116,12 @@ namespace FPS_n2 {
 			//リコイル
 			float Power = 0.0001f * GetRecoilPower();
 			this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power);
+			//ビジュアルリコイル
+			if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
+				Camera3D::Instance()->SetCamShake(0.1f, 0.1f);
+			}
+			//エフェクト
+			EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_fire2, GetFrameWorldMatParts(GunFrame::Muzzle).pos(), GetMove().GetMat().zvec() * -1.f, 0.5f, 2.f);
 		}
 		void				GunClass::SetGunMat(const Matrix3x3DX& AnimRot, const Vector3DX& AnimPos) noexcept {
 			//武器座標
@@ -227,16 +239,24 @@ namespace FPS_n2 {
 				case GunAnimeID::Shot:
 					this->m_ShotSwitch = false;
 					if (GetShotType() != SHOTTYPE::BOLT) {
-						this->m_IsChamberOn = false;
-						this->m_IsEject = false;
 						if (GetObj_const().GetAnim(GetNowGunAnimeID()).GetTime() >= 3.f) {
-							this->m_IsChamberOn = true;
-							this->m_IsEject = true;
+							if (!this->m_IsChamberOn) {
+								this->m_IsChamberOn = true;
+								ChamberIn();
+							}
+							if (!this->m_IsEject) {
+								this->m_IsEject = true;
+								EjectCart();
+							}
+						}
+						else {
+							this->m_IsChamberOn = false;
+							this->m_IsEject = false;
 						}
 					}
 					if (GetObj_const().GetAnim(GetNowGunAnimeID()).GetTimePer() >= 1.f && this->m_ShotEnd) {
 						this->m_ShotEnd = false;
-						if (!GetIsMagEmpty()) {
+						if (this->m_Capacity != 0) {
 							switch (GetShotType()) {
 							case SHOTTYPE::FULL:
 							case SHOTTYPE::SEMI:
@@ -288,13 +308,21 @@ namespace FPS_n2 {
 					default:
 						break;
 					}
-					this->m_IsChamberOn = false;
-					this->m_IsEject = false;
 					if (GetNowGunAnimeTime() >= 19.f) {
-						this->m_IsChamberOn = true;
-						if (GetShotType() == SHOTTYPE::BOLT) {
-							this->m_IsEject = true;
+						if (!this->m_IsChamberOn) {
+							this->m_IsChamberOn = true;
+							ChamberIn();
 						}
+						if (GetShotType() == SHOTTYPE::BOLT) {
+							if (!this->m_IsEject) {
+								this->m_IsEject = true;
+								EjectCart();
+							}
+						}
+					}
+					else {
+						this->m_IsChamberOn = false;
+						this->m_IsEject = false;
 					}
 					if (GetNowGunAnimePer() >= 1.f) {
 						SetGunAnime(GunAnimeID::None);
@@ -445,16 +473,12 @@ namespace FPS_n2 {
 						break;
 					}
 					if (GetNowGunAnimePer() >= 1.f) {
-						if (CanShootAmmo()) {
-							SetGunAnime(GunAnimeID::None);
+						//チャンバーに弾がないがマガジンには弾がある場合
+						if (!(this->m_ChamberAmmoData) && (this->m_Capacity != 0)) {
+							SetGunAnime(GunAnimeID::Cocking);
 						}
 						else {
-							if (!GetIsMagEmpty()) {
-								SetGunAnime(GunAnimeID::Cocking);
-							}
-							else {
-								SetGunAnime(GunAnimeID::None);
-							}
+							SetGunAnime(GunAnimeID::None);
 						}
 					}
 					break;
@@ -467,7 +491,7 @@ namespace FPS_n2 {
 					break;
 				}
 				//
-				if (GetMyUserPlayerID() == 0) {
+				if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
 					printfDx("[%s]\n", (GetGunAnime() == GunAnimeID::None) ? "None" : GunAnimeIDName[(int)GetGunAnime()]);
 					printfDx("[%f]\n", (GetGunAnime() == GunAnimeID::None) ? 0.0f : GetNowGunAnimeTime());
 					printfDx("[%f]\n", GetGunAnimBlendPer(GunAnimeID::LowReady));
@@ -490,7 +514,7 @@ namespace FPS_n2 {
 			Matrix4x4DX AnimMat = GetGunAnimeNow();
 			Matrix3x3DX AnimRot = Matrix3x3DX::Get33DX(AnimMat) * m_GunSwingMat2 * CharaRotationCache * EyeYRot;
 			Vector3DX AnimPos = AnimMat.pos();
-			AnimPos.x *= this->m_SwitchPer;
+			AnimPos.x *= GetSwitchPer();
 			AnimPos = HeadPos + Matrix3x3DX::Vtrans(AnimPos, CharaRotationCache);
 			//オートエイム
 			if (IsSelGun) {
@@ -570,47 +594,28 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			{
-				bool isHit = ((GetAmmoNumTotal() == 0) || ((this->m_Capacity == GetAmmoAll()) && !CanShootAmmo()) || (GetGunAnime() == GunAnimeID::Cocking && (GetNowGunAnimeTime() <= 22.f)));
-				for (int i = static_cast<int>(GunAnimeID::ChoiceOnceMax); i < static_cast<int>(GunAnimeID::Max); i++) {
-					int ID = GetModSlot().GetModData()->GetAnimSelectList().at(i);
-					if (ID != -1) {
-						switch ((GunAnimeID)i) {
-						case FPS_n2::Sceneclass::GunAnimeID::Hammer:
-							GetObj().SetAnim(ID).SetPer(std::clamp(GetObj_const().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * (((GetGunAnime() == GunAnimeID::Shot) && (GetNowGunAnimePer() < 0.5f)) ? -10.f : 10.f), 0.f, 1.f));
-							break;
-						case FPS_n2::Sceneclass::GunAnimeID::Open:
-							GetObj().SetAnim(ID).SetPer(std::clamp(GetObj_const().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * (isHit ? 10.f : -10.f), 0.f, 1.f));
-							break;
-						default:
-							break;
-						}
+			for (int i = static_cast<int>(GunAnimeID::ChoiceOnceMax); i < static_cast<int>(GunAnimeID::Max); i++) {
+				int ID = GetModSlot().GetModData()->GetAnimSelectList().at(i);
+				if (ID != -1) {
+					switch ((GunAnimeID)i) {
+					case FPS_n2::Sceneclass::GunAnimeID::Hammer:
+						GetObj().SetAnim(ID).SetPer(std::clamp(GetObj_const().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * (((GetGunAnime() == GunAnimeID::Shot) && (GetNowGunAnimePer() < 0.5f)) ? -10.f : 10.f), 0.f, 1.f));
+						break;
+					case FPS_n2::Sceneclass::GunAnimeID::Open:
+						GetObj().SetAnim(ID).SetPer(std::clamp(GetObj_const().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * (
+
+							((GetAmmoNumTotal() == 0) || ((this->m_Capacity == GetAmmoAll()) && !(this->m_ChamberAmmoData)) || (GetGunAnime() == GunAnimeID::Cocking && (GetNowGunAnimeTime() <= 22.f)))
+
+							? 10.f : -10.f), 0.f, 1.f));
+						break;
+					default:
+						break;
 					}
 				}
 			}
 			//
 			m_MagArm.Update(m_MagHand, 0.1f, 0.1f, 0.7f, 0.7f);
 			GetObj().UpdateAnimAll();
-			//弾薬の演算
-			if (this->m_PrevChamberOn != this->m_IsChamberOn) {
-				this->m_PrevChamberOn = this->m_IsChamberOn;
-				if (this->m_IsChamberOn) {
-					if (!GetIsMagEmpty()) {
-						if (this->m_MagazinePtr) {
-							this->m_ChamberAmmoData = (*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoSpecMagTop();//マガジンの一番上の弾データをチャンバーイン
-						}
-					}
-					this->m_Capacity = std::clamp(this->m_Capacity - 1, 0, GetAmmoAll());//マガジン装填
-				}
-			}
-			if (this->m_PrevEject != this->m_IsEject) {
-				this->m_PrevEject = this->m_IsEject;
-				if (this->m_IsEject) {
-					this->m_CartFall.SetFall(
-						GetFrameWorldMatParts(GunFrame::Cart).pos(), GetMove().GetMat(),
-						(GetFrameWorldMatParts(GunFrame::CartVec).pos() - GetFrameWorldMatParts(GunFrame::Cart).pos() + Vector3DX::vget(GetRandf(0.2f), 0.5f + GetRandf(1.f), GetRandf(0.2f))).normalized() * (Scale3DRate * 2.f / 60.f), 2.f, SoundEnum::CartFall, false);
-				}
-			}
 			//リコイルの演算
 			if (this->m_RecoilRadAdd.y < 0.f) {
 				Easing(&this->m_RecoilRadAdd, Vector2DX::vget(0.f, 0.01f), GetRecoilReturn(), EasingType::OutExpo);
@@ -619,13 +624,57 @@ namespace FPS_n2 {
 				Easing(&this->m_RecoilRadAdd, Vector2DX::zero(), 0.7f, EasingType::OutExpo);
 			}
 		}
+		void				GunClass::CheckDraw(void) noexcept {
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			ObjectBaseClass::CheckDraw();
+			if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
+				auto* PostPassParts = PostPassEffect::Instance();
+				if (!GetCanShot()) {
+					return;
+				}
+				this->m_AimPoint.Calc(GetFrameWorldMatParts(GunFrame::Muzzle).pos() + GetMove().GetMat().zvec() * (-50.f * Scale3DRate));
+				Vector3DX LensPos;
+				Vector3DX LensSizeFrame;
+				if (this->m_SightPtr) {//サイトがあるならそれを最優先とする
+					LensPos = (*this->m_SightPtr)->GetFramePartsMat(GunFrame::Lens).pos();
+					LensSizeFrame = (*this->m_SightPtr)->GetFramePartsMat(GunFrame::LensSize).pos();
+				}
+				else {
+					LensPos = GetFrameWorldMatParts(GunFrame::Lens).pos();
+					LensSizeFrame = GetFrameWorldMatParts(GunFrame::LensSize).pos();
+				}
+				if (m_Lens.Calc(LensPos)) {
+					if (m_LensSize.Calc(LensSizeFrame)) {
+						m_LensSizeLen = static_cast<float>(std::hypot(m_Lens.XPos() - m_LensSize.XPos(), m_Lens.YPos() - m_LensSize.YPos()));
+					}
+					if (m_Reticle.Calc(LensPos + (LensPos - GetADSEyeMat().pos()).normalized() * (5.f * Scale3DRate))) {
+						m_Reticle_on = (m_LensSizeLen > std::hypot(m_Lens.XPos() - m_Reticle.XPos(), m_Lens.YPos() - m_Reticle.YPos()));
+					}
+				}
+				//レンズ表示機能への反映
+				if (GetSightZoomSize() > 1.f) {
+					if (this->m_Reticle_on) {
+						PostPassParts->Set_is_lens(true);
+						PostPassParts->Set_zoom_lens(std::max(1.f, GetSightZoomSize() / 2.f));
+						PostPassParts->Set_xp_lens(static_cast<float>(this->m_Lens.XPos()));
+						PostPassParts->Set_yp_lens(static_cast<float>(this->m_Lens.YPos()));
+						PostPassParts->Set_size_lens(this->m_LensSizeLen);
+					}
+					else if (GetGunAnimBlendPer(GunAnimeID::ADS) < 0.5f) {
+						PostPassParts->Set_is_lens(false);
+						PostPassParts->Set_zoom_lens(1.f);
+					}
+				}
+			}
+		}
 		void				GunClass::Draw(bool isDrawSemiTrans) noexcept {
+			auto* PlayerMngr = Player::PlayerManager::Instance();
 			if (this->m_IsActive && this->m_IsDraw) {
 				if (CheckCameraViewClip_Box(
 					(GetObj_const().GetMatrix().pos() + Vector3DX::vget(-0.5f * Scale3DRate, -0.5f * Scale3DRate, -0.5f * Scale3DRate)).get(),
 					(GetObj_const().GetMatrix().pos() + Vector3DX::vget(0.5f * Scale3DRate, 0.5f * Scale3DRate, 0.5f * Scale3DRate)).get()) == FALSE
 					) {
-					if (isDrawSemiTrans && GetMyUserPlayerID() == 0) {
+					if (isDrawSemiTrans && GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
 						this->m_MuzzleSmokeControl.DrawMuzzleSmoke();
 					}
 					for (int i = 0; i < GetObj_const().GetMeshNum(); i++) {

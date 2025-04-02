@@ -115,6 +115,7 @@ namespace FPS_n2 {
 					return IntoMouse(xp, yp, xp + (xsize), yp + (ysize));
 				}
 				void			Draw(void) noexcept {
+					auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 					switch (this->m_ButtonMode) {
 						case ButtonMode::String:
 							{
@@ -150,13 +151,13 @@ namespace FPS_n2 {
 
 									float per = std::clamp(SelYadd / 5.f, 0.f, 1.f);
 									float per2 = 1.f - std::clamp(SelYadd / 10.f, 0.f, 1.f);
-									WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(128.f * per), 0, 255));
-									WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, 
+									DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(128.f * per), 0, 255));
+									DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, 
 										this->m_SelectBackImage,
 										xp + (xsize) / 2 - static_cast<int>(static_cast<float>((xsize) / 2 + (300)) * per2), yp + (ysize) - (12) - static_cast<int>(static_cast<float>((ysize) / 6) * per),
 										xp + (xsize) / 2 + static_cast<int>(static_cast<float>((xsize) / 2 + (300)) * per2), yp + (ysize) - (12) + static_cast<int>(static_cast<float>((ysize) / 6) * per),
 										true);
-									WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+									DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 								}
 								unsigned int Color = Black;
 								if ((ysize) > (50)) {
@@ -198,7 +199,7 @@ namespace FPS_n2 {
 											break;
 									}
 								}
-								WindowSystem::DrawControl::Instance()->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (ysize),
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (ysize),
 									LMR, TMB, (xp1), (yp1 + static_cast<int>(SelYadd)), Color, Black, this->m_String);
 							}
 							break;
@@ -207,31 +208,31 @@ namespace FPS_n2 {
 								if (SelYadd > 0.f) {
 									float per1 = std::clamp(SelYadd / 5.f, 0.f, 1.f);
 									float per2 = 1.f - std::clamp(SelYadd / 10.f, 0.f, 1.f);
-									WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(128.f * per1), 0, 255));
-									WindowSystem::DrawControl::Instance()->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
+									DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(128.f * per1), 0, 255));
+									DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
 										this->m_SelectBackImage,
 										(xp1) - static_cast<int>(static_cast<float>((xsize)) * per2), (yp1) - static_cast<int>(static_cast<float>((ysize)) * per2),
 										(xp1) + static_cast<int>(static_cast<float>((xsize)) * per2), (yp1) + static_cast<int>(static_cast<float>((ysize)) * per2),
 										true);
-									WindowSystem::DrawControl::Instance()->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+									DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 								}
 								switch (this->m_ButtonStatus) {
 									case ButtonStatus::None:
-										WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 128, 128, 128);
+										DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 128, 128, 128);
 										break;
 									case ButtonStatus::Ready:
-										WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 216, 216, 216);
+										DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 216, 216, 216);
 										break;
 									case ButtonStatus::Focus:
-										WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 216, 255, 216);
+										DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 216, 255, 216);
 										break;
 									default:
 										break;
 								}
-								WindowSystem::DrawControl::Instance()->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+								DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
 									&this->m_Icon,
 									(xp1), (yp1), static_cast<float>((100)) / 100.f * (1.f + SelYadd / 50.f), 0.f, true);
-								WindowSystem::DrawControl::Instance()->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+								DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 							}
 							break;
 						default:

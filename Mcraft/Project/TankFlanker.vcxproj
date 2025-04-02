@@ -52,6 +52,7 @@
     <ClCompile Include="source\MainScene\MainSceneSub.cpp" />
     <ClCompile Include="source\MainScene\NetWork.cpp" />
     <ClCompile Include="source\MainScene\NetworkBrowser.cpp" />
+    <ClCompile Include="source\MainScene\Object\Ammo.cpp" />
     <ClCompile Include="source\MainScene\Object\AmmoData.cpp" />
     <ClCompile Include="source\MainScene\Object\CharaAnimData.cpp" />
     <ClCompile Include="source\MainScene\Object\Character.cpp" />
