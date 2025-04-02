@@ -118,10 +118,12 @@ namespace FPS_n2 {
 		class GunAnimNow {
 			Vector3DX		m_Rotate;
 			Vector3DX		m_Pos;
+			std::array<std::array<float, 5>, 2>			m_Finger{};
 		public:
-			void Set(const Vector3DX& Rotate, const Vector3DX& Pos) {
+			void Set(const Vector3DX& Rotate, const Vector3DX& Pos, const std::array<std::array<float, 5>, 2>& Finger) {
 				m_Rotate = Rotate;
 				m_Pos = Pos;
+				m_Finger = Finger;
 			}
 		public:
 			const auto	GetMatrix(void) const noexcept {
@@ -133,6 +135,8 @@ namespace FPS_n2 {
 						).Get44DX() *
 					Matrix4x4DX::Mtrans(this->m_Pos * Scale3DRate);
 			}
+			const auto& GetFingerPerArray(void) const noexcept { return this->m_Finger; }
+			const auto& GetFingerPer(int LR, int Number) const noexcept { return this->m_Finger.at(LR).at(Number); }
 		};
 
 		class GunAnimManager : public SingletonBase<GunAnimManager> {
@@ -182,6 +186,7 @@ namespace FPS_n2 {
 					Vector3DX		m_Rotate;
 					Vector3DX		m_Pos;
 					int				m_Frame{ 1 };
+					std::array<std::array<float, 5>, 2>			m_Finger{};
 				public:
 					void Set(const std::string& data) {
 						std::vector<std::string> Args;
@@ -210,11 +215,21 @@ namespace FPS_n2 {
 						m_Rotate.Set(std::stof(Args[0]), std::stof(Args[1]), std::stof(Args[2]));
 						m_Pos.Set(std::stof(Args[3]), std::stof(Args[4]), -std::stof(Args[5]));
 						m_Frame = std::stoi(Args[6]);
+
+						int loop = 0;
+						for (auto& LR : m_Finger) {
+							for (auto& f : LR) {
+								f = std::stof(Args[7+loop]);
+								++loop;
+							}
+						}
 					}
 				public:
 					const auto& GetRotate(void) const noexcept { return this->m_Rotate; }
 					const auto& GetPos(void) const noexcept { return this->m_Pos; }
 					const auto& GetFrame(void) const noexcept { return this->m_Frame; }
+					const auto& GetFingerPerArray(void) const noexcept { return this->m_Finger; }
+					const auto& GetFingerPer(int LR, int Number) const noexcept { return this->m_Finger.at(LR).at(Number); }
 				};
 			public:
 				std::shared_ptr<GunanimData> first;
@@ -263,7 +278,8 @@ namespace FPS_n2 {
 			}
 
 			GunAnimNow	GetAnimNow(const AnimDatas* data, float nowframe) noexcept {
-				GunAnimNow Ret; Ret.Set(Vector3DX::zero(), Vector3DX::zero());
+				std::array<std::array<float, 5>, 2>			Finger{};
+				GunAnimNow Ret; Ret.Set(Vector3DX::zero(), Vector3DX::zero(), Finger);
 				if (data) {
 					float totalTime = (float)data->GetTotalTime();
 					if (data->first->GetIsLoop()) {
@@ -284,14 +300,25 @@ namespace FPS_n2 {
 					for (auto ani = data->second.begin(), e = data->second.end() - 1; ani != e; ++ani) {
 						float Frame = static_cast<float>((*ani)->GetFrame());
 						if ((nowframe - Frame) <= 0.f) {
+							int LRindex = 0;
+							for (const auto& LR : (*ani)->GetFingerPerArray()) {
+								int Numberindex = 0;
+								for (auto& f : LR) {
+									Finger.at(LRindex).at(Numberindex) = Lerp(f, (*(ani + 1))->GetFingerPer(LRindex, Numberindex), nowframe / Frame);
+									Numberindex++;
+								}
+								LRindex++;
+							}
 							Ret.Set(
 								Lerp((*ani)->GetRotate(), (*(ani + 1))->GetRotate(), nowframe / Frame),
-								Lerp((*ani)->GetPos(), (*(ani + 1))->GetPos(), nowframe / Frame)
+								Lerp((*ani)->GetPos(), (*(ani + 1))->GetPos(), nowframe / Frame),
+								Finger
 							);
+
 #ifdef DEBUG_CAM
 							if (0 <= DBG_CamSel && DBG_CamSel <= 3 && false) {
 								auto* DXLib_refParts = DXLib_ref::Instance();
-								Ret.Set(DBG_AnimRot, DBG_AnimPos);
+								Ret.Set(DBG_AnimRot, DBG_AnimPos, Finger);
 								//
 								if (CheckHitKey(KEY_INPUT_RCONTROL) != 0) {
 									if (CheckHitKey(KEY_INPUT_J) != 0) {

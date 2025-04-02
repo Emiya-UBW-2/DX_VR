@@ -20,7 +20,18 @@ namespace FPS_n2 {
 			Bottom_Squat_Turn,//12
 			//
 			Upper_Ready,
-			Hand_Ready,
+			//
+			Right_Thumb,
+			Right_Point,
+			Right_middle,
+			Right_Ring,
+			Right_Pinky,
+			//
+			Left_Thumb,
+			Left_Point,
+			Left_middle,
+			Left_Ring,
+			Left_Pinky,
 			//
 			AnimeIDMax,
 		};

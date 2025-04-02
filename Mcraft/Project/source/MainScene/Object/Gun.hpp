@@ -191,6 +191,34 @@ namespace FPS_n2 {
 				float totalTime = (float)Ptr->GetTotalTime();
 				return (totalTime > 0.f) ? std::clamp(GetNowGunAnimeTime() / totalTime, 0.f, 1.f) : 1.f;
 			}
+			//			std::array<std::array<float, 5>, 2>			m_Finger{};
+
+			const auto			GetGunAnimeFingerNow(void) const noexcept {
+				auto* AnimMngr = GunAnimManager::Instance();
+				std::array<std::array<float, 5>, 2>	Finger{};
+				{
+					auto* Ptr = AnimMngr->GetAnimData(GetGunAnim(GunAnimeID::Base));
+					if (Ptr) {
+						Finger = AnimMngr->GetAnimNow(Ptr, this->m_GunAnimeTime.at(static_cast<int>(GunAnimeID::Base))).GetFingerPerArray();
+					}
+				}
+				for (int loop = 0; loop < static_cast<int>(GunAnimeID::ChoiceOnceMax); ++loop) {
+					auto* Ptr = AnimMngr->GetAnimData(GetGunAnim((GunAnimeID)loop));
+					if (!Ptr) { continue; }
+					auto& AnimArray = AnimMngr->GetAnimNow(Ptr, this->m_GunAnimeTime.at(loop)).GetFingerPerArray();
+					int LRindex = 0;
+					for (const auto& LR : AnimArray) {
+						int Numberindex = 0;
+						for (auto& f : LR) {
+							Finger.at(LRindex).at(Numberindex) = Lerp(Finger.at(LRindex).at(Numberindex), f, this->m_GunAnimePer[loop].Per());
+							Numberindex++;
+						}
+						LRindex++;
+					}
+				}
+				return Finger;
+			}
+
 			const auto			GetGunAnimeNow(void) const noexcept {
 				auto* AnimMngr = GunAnimManager::Instance();
 				Matrix4x4DX AnimMat;

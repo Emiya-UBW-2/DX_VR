@@ -319,7 +319,7 @@ namespace FPS_n2 {
 			if (this->m_LeanControl.GetSwitch()) {
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetFrameWorldMat(CharaFrame::Upper).pos(), Scale3DRate * 3.f);
 			}
-			GetGunPtrNow()->CalcSwitchPer(this->m_LeanControl.GetRad() > deg2rad(-5) || GetGunPtrNow()->GetReloading());
+			GetGunPtrNow()->CalcSwitchPer(this->m_LeanControl.GetRad() > deg2rad(-1) || GetGunPtrNow()->GetReloading());
 			//下半身
 			this->m_BottomAnimSelect = GetBottomStandAnimSel();
 			if (IsMoveLeft()) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
@@ -407,8 +407,23 @@ namespace FPS_n2 {
 					).Get44DX() * GetFrameBaseLocalMat(static_cast<int>(CharaFrame::Neck)));
 			this->m_HitReactionControl.Update();
 			//上半身アニメ演算
+
 			this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Upper_Ready)) = 1.f;
-			this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Hand_Ready)) = 1.f;
+
+
+			auto FingerPer = GetGunPtrNow()->GetGunAnimeFingerNow();
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Thumb)) ,FingerPer.at(0).at(0), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Point)) ,FingerPer.at(0).at(1), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_middle)) ,FingerPer.at(0).at(2), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Ring)) ,FingerPer.at(0).at(3), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Pinky)) ,FingerPer.at(0).at(4), 0.8f, EasingType::OutExpo);
+			//
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Thumb)) ,FingerPer.at(1).at(0), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Point)) ,FingerPer.at(1).at(1), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_middle)) ,FingerPer.at(1).at(2), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Ring)) ,FingerPer.at(1).at(3), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Pinky)) ,FingerPer.at(1).at(4), 0.8f, EasingType::OutExpo);
+
 			//下半身アニメ演算
 			ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomTurnAnimSel()), 0.5f);
 			ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaAnimeID::Bottom_Stand_Run), GetSpeed() * 0.5f);
