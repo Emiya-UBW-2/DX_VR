@@ -1481,7 +1481,7 @@ namespace FPS_n2 {
 						if ((-EdgeP < x && x < Size * Rate + EdgeP - 1) && (-EdgeP < z && z < Size * Rate + EdgeP - 1)) {
 							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(x)) / (Size * Rate - 1),
-								(static_cast<float>(z)) / (Size * Rate - 1)) * static_cast<float>(cell.All * 1 / 10));
+								(static_cast<float>(z)) / (Size * Rate - 1)) * static_cast<float>(cell.All * 1 / 20));
 							for (int y = 0; y <= Height; ++y) {
 								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 2;
 							}
@@ -1496,7 +1496,7 @@ namespace FPS_n2 {
 							int zPos = -Size * Rate / 2 + z + zt;
 							auto Height = static_cast<int>(ns.octaveNoise(2, 
 								(static_cast<float>(x + xt)) / (Size * Rate),
-								(static_cast<float>(z + zt)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 10));
+								(static_cast<float>(z + zt)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 20));
 							for (int y = Height; y <= Height + Heights; ++y) {
 								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 2;
 							}
