@@ -200,9 +200,6 @@ namespace FPS_n2 {
 					return true;
 				}
 			}
-#ifdef DEBUG
-			DebugParts->SetPoint("0.05");
-#endif // DEBUG
 			//FirstDoingv
 			if (GetIsFirstLoop()) {}
 			//Input,AI
@@ -304,17 +301,8 @@ namespace FPS_n2 {
 				}
 			}
 			//Execute
-#ifdef DEBUG
-			DebugParts->SetPoint("1.72");
-#endif // DEBUG
 			ObjMngr->ExecuteObject();
-#ifdef DEBUG
-			DebugParts->SetPoint("0.00");
-#endif // DEBUG
 			ObjMngr->LateExecuteObject();
-#ifdef DEBUG
-			DebugParts->SetPoint("0.52");
-#endif // DEBUG
 			//Ž‹“_
 			{
 				auto& ViewChara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
@@ -433,7 +421,6 @@ namespace FPS_n2 {
 				this->m_UIclass.Update();
 			}
 			HitMarkerPool::Instance()->Update();
-
 			EffectSingleton::Instance()->Update();
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=End");

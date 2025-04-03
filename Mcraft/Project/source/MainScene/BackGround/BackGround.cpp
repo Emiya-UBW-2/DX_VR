@@ -117,10 +117,10 @@ namespace FPS_n2 {
 
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 
 			{
-				auto& V = Verts.m_vert32[ZERO + 0];
+				auto& V = Verts.SetInVert()[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -130,7 +130,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 1];
+				auto& V = Verts.SetInVert()[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -140,7 +140,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 2];
+				auto& V = Verts.SetInVert()[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -150,7 +150,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 3];
+				auto& V = Verts.SetInVert()[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -173,9 +173,9 @@ namespace FPS_n2 {
 
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 			{
-				auto& V = Verts.m_vert32[ZERO + 0];
+				auto& V = Verts.SetInVert()[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -185,7 +185,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 1];
+				auto& V = Verts.SetInVert()[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -195,7 +195,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 2];
+				auto& V = Verts.SetInVert()[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -205,7 +205,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 3];
+				auto& V = Verts.SetInVert()[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -228,9 +228,9 @@ namespace FPS_n2 {
 
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 			{
-				auto& V = Verts.m_vert32[ZERO + 0];
+				auto& V = Verts.SetInVert()[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -240,7 +240,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 1];
+				auto& V = Verts.SetInVert()[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -250,7 +250,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 2];
+				auto& V = Verts.SetInVert()[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -260,7 +260,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 3];
+				auto& V = Verts.SetInVert()[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -283,9 +283,9 @@ namespace FPS_n2 {
 
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 			{
-				auto& V = Verts.m_vert32[ZERO + 0];
+				auto& V = Verts.SetInVert()[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -295,7 +295,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 1];
+				auto& V = Verts.SetInVert()[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -305,7 +305,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 2];
+				auto& V = Verts.SetInVert()[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 				V.u = uAdd * static_cast<float>(Xofs + zscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -315,7 +315,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 3];
+				auto& V = Verts.SetInVert()[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -338,9 +338,9 @@ namespace FPS_n2 {
 
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 			{
-				auto& V = Verts.m_vert32[ZERO + 0];
+				auto& V = Verts.SetInVert()[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b001).get();
 				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -350,7 +350,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 1];
+				auto& V = Verts.SetInVert()[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b101).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -360,7 +360,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 2];
+				auto& V = Verts.SetInVert()[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b011).get();
 				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -370,7 +370,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 3];
+				auto& V = Verts.SetInVert()[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b111).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -393,9 +393,9 @@ namespace FPS_n2 {
 
 			COLOR_U8 SpcColor = GetColorU8(64, 64, 64, 255);
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 			{
-				auto& V = Verts.m_vert32[ZERO + 0];
+				auto& V = Verts.SetInVert()[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b010).get();
 				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -405,7 +405,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 1];
+				auto& V = Verts.SetInVert()[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b110).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 0);
@@ -415,7 +415,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 2];
+				auto& V = Verts.SetInVert()[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b000).get();
 				V.u = uAdd * static_cast<float>(Xofs + xscale);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -425,7 +425,7 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 3];
+				auto& V = Verts.SetInVert()[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b100).get();
 				V.u = uAdd * static_cast<float>(Xofs + 0);
 				V.v = vAdd * static_cast<float>(Yofs + 1);
@@ -582,27 +582,27 @@ namespace FPS_n2 {
 			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 			{
-				auto& V = Verts.m_vert32[ZERO + 0];
+				auto& V = Verts.SetInVert()[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
 				V.norm = Vector3DX::right().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 1];
+				auto& V = Verts.SetInVert()[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
 				V.norm = Vector3DX::right().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 2];
+				auto& V = Verts.SetInVert()[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
 				V.norm = Vector3DX::right().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 3];
+				auto& V = Verts.SetInVert()[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 				V.norm = Vector3DX::right().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
@@ -612,27 +612,27 @@ namespace FPS_n2 {
 			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 			{
-				auto& V = Verts.m_vert32[ZERO + 0];
+				auto& V = Verts.SetInVert()[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
 				V.norm = Vector3DX::left().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 1];
+				auto& V = Verts.SetInVert()[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
 				V.norm = Vector3DX::left().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 2];
+				auto& V = Verts.SetInVert()[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
 				V.norm = Vector3DX::left().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 3];
+				auto& V = Verts.SetInVert()[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
 				V.norm = Vector3DX::left().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
@@ -642,27 +642,27 @@ namespace FPS_n2 {
 			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 			{
-				auto& V = Verts.m_vert32[ZERO + 0];
+				auto& V = Verts.SetInVert()[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
 				V.norm = Vector3DX::up().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 1];
+				auto& V = Verts.SetInVert()[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
 				V.norm = Vector3DX::up().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 2];
+				auto& V = Verts.SetInVert()[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
 				V.norm = Vector3DX::up().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 3];
+				auto& V = Verts.SetInVert()[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
 				V.norm = Vector3DX::up().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
@@ -672,27 +672,27 @@ namespace FPS_n2 {
 			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 			{
-				auto& V = Verts.m_vert32[ZERO + 0];
+				auto& V = Verts.SetInVert()[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
 				V.norm = Vector3DX::down().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 1];
+				auto& V = Verts.SetInVert()[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
 				V.norm = Vector3DX::down().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 2];
+				auto& V = Verts.SetInVert()[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
 				V.norm = Vector3DX::down().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 3];
+				auto& V = Verts.SetInVert()[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 				V.norm = Vector3DX::down().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
@@ -702,27 +702,27 @@ namespace FPS_n2 {
 			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 			{
-				auto& V = Verts.m_vert32[ZERO + 0];
+				auto& V = Verts.SetInVert()[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b001).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 1];
+				auto& V = Verts.SetInVert()[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b101).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 2];
+				auto& V = Verts.SetInVert()[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b011).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 3];
+				auto& V = Verts.SetInVert()[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b111).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
@@ -732,27 +732,27 @@ namespace FPS_n2 {
 			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 			{
-				auto& V = Verts.m_vert32[ZERO + 0];
+				auto& V = Verts.SetInVert()[ZERO + 0];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b011).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 1];
+				auto& V = Verts.SetInVert()[ZERO + 1];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b111).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 2];
+				auto& V = Verts.SetInVert()[ZERO + 2];
 				V.pos = cellx.GetPosBuffer(xmin, y, z, 0b001).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 			{
-				auto& V = Verts.m_vert32[ZERO + 3];
+				auto& V = Verts.SetInVert()[ZERO + 3];
 				V.pos = cellx.GetPosBuffer(xmax, y, z, 0b101).get();
 				V.norm = Vector3DX::forward().get();
 				V.dif = GetColorU8(128, 128, 128, 255);
@@ -874,67 +874,67 @@ namespace FPS_n2 {
 			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 
-			Verts.m_vert32[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
-			Verts.m_vert32[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
-			Verts.m_vert32[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
-			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
+			Verts.SetInVert()[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
+			Verts.SetInVert()[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
+			Verts.SetInVert()[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
+			Verts.SetInVert()[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 
-			Verts.m_vert32[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
-			Verts.m_vert32[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
-			Verts.m_vert32[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
-			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
+			Verts.SetInVert()[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
+			Verts.SetInVert()[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
+			Verts.SetInVert()[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
+			Verts.SetInVert()[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 
-			Verts.m_vert32[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
-			Verts.m_vert32[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
-			Verts.m_vert32[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
-			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
+			Verts.SetInVert()[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmax, 0b011).get();
+			Verts.SetInVert()[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmax, 0b111).get();
+			Verts.SetInVert()[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
+			Verts.SetInVert()[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 
-			Verts.m_vert32[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
-			Verts.m_vert32[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
-			Verts.m_vert32[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
-			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
+			Verts.SetInVert()[ZERO + 0].pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
+			Verts.SetInVert()[ZERO + 1].pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
+			Verts.SetInVert()[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
+			Verts.SetInVert()[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
 			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 
-			Verts.m_vert32[ZERO + 0].pos = cellx.GetPosBuffer(xmin, y, z, 0b001).get();
-			Verts.m_vert32[ZERO + 1].pos = cellx.GetPosBuffer(xmax, y, z, 0b101).get();
-			Verts.m_vert32[ZERO + 2].pos = cellx.GetPosBuffer(xmin, y, z, 0b011).get();
-			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(xmax, y, z, 0b111).get();
+			Verts.SetInVert()[ZERO + 0].pos = cellx.GetPosBuffer(xmin, y, z, 0b001).get();
+			Verts.SetInVert()[ZERO + 1].pos = cellx.GetPosBuffer(xmax, y, z, 0b101).get();
+			Verts.SetInVert()[ZERO + 2].pos = cellx.GetPosBuffer(xmin, y, z, 0b011).get();
+			Verts.SetInVert()[ZERO + 3].pos = cellx.GetPosBuffer(xmax, y, z, 0b111).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
 			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
-			auto ZERO = Verts.m_32Num * 4 - 4;
+			auto ZERO = Verts.GetInNum() * 4 - 4;
 
-			Verts.m_vert32[ZERO + 0].pos = cellx.GetPosBuffer(xmin, y, z, 0b010).get();
-			Verts.m_vert32[ZERO + 1].pos = cellx.GetPosBuffer(xmax, y, z, 0b110).get();
-			Verts.m_vert32[ZERO + 2].pos = cellx.GetPosBuffer(xmin, y, z, 0b000).get();
-			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(xmax, y, z, 0b100).get();
+			Verts.SetInVert()[ZERO + 0].pos = cellx.GetPosBuffer(xmin, y, z, 0b010).get();
+			Verts.SetInVert()[ZERO + 1].pos = cellx.GetPosBuffer(xmax, y, z, 0b110).get();
+			Verts.SetInVert()[ZERO + 2].pos = cellx.GetPosBuffer(xmin, y, z, 0b000).get();
+			Verts.SetInVert()[ZERO + 3].pos = cellx.GetPosBuffer(xmax, y, z, 0b100).get();
 		}
 
 		void		BackGroundClass::AddSetShadowCubesX(size_t id) noexcept {
@@ -1442,17 +1442,6 @@ namespace FPS_n2 {
 					}
 				}
 
-				for (int x = 0; x < cell.All; x += 2) {
-					for (int z = 0; z < cell.All; z += 2) {
-						if (GetRand(100) < 30) {
-							int y = cell.All * 1 / 4-10;
-							cell.SetCellBuf(x + 0, y, z + 0).m_Cell = 1;
-							cell.SetCellBuf(x + 0, y, z + 1).m_Cell = 1;
-							cell.SetCellBuf(x + 1, y, z + 0).m_Cell = 1;
-							cell.SetCellBuf(x + 1, y, z + 1).m_Cell = 1;
-						}
-					}
-				}
 				int Size = 17;
 				this->m_MazeControl.createMaze(Size, Size);
 				int Rate = 6;
@@ -1461,17 +1450,35 @@ namespace FPS_n2 {
 				int Edge = -Rate;
 				int EdgeP = -0;
 
+				for (int x = 0; x < cell.All; x += 2) {
+					for (int z = 0; z < cell.All; z += 2) {
+						int xPos = -Size * Rate / 2 + x;
+						int zPos = -Size * Rate / 2 + z;
+						if ((-EdgeP < x && x < Size * Rate + EdgeP - 1) && (-EdgeP < z && z < Size * Rate + EdgeP - 1)) {
+							if (GetRand(100) < 30) {
+								int y = cell.All * 1 / 4 - 10;
+								cell.SetCellBuf(cell.All / 2 + xPos + 0, y, cell.All / 2 + zPos + 0).m_Cell = 1;
+								cell.SetCellBuf(cell.All / 2 + xPos + 0, y, cell.All / 2 + zPos + 1).m_Cell = 1;
+								cell.SetCellBuf(cell.All / 2 + xPos + 1, y, cell.All / 2 + zPos + 0).m_Cell = 1;
+								cell.SetCellBuf(cell.All / 2 + xPos + 1, y, cell.All / 2 + zPos + 1).m_Cell = 1;
+							}
+						}
+					}
+				}
+
 				for (int x = 0; x < cell.All; ++x) {
 					for (int z = 0; z < cell.All; ++z) {
 						int xPos = -Size * Rate / 2 + x;
 						int zPos = -Size * Rate / 2 + z;
 
-						if ((x == -EdgeP || x == Size * Rate + EdgeP - 1) || (z == -EdgeP || z == Size * Rate + EdgeP - 1)) {
-							for (int y = 0; y <= cell.All * 1 / 4 + 10; ++y) {
-								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
+						if ((-EdgeP <= x && x <= Size * Rate + EdgeP - 1) && (-EdgeP <= z && z <= Size * Rate + EdgeP - 1)) {
+							if ((x == -EdgeP || x == Size * Rate + EdgeP - 1) || (z == -EdgeP || z == Size * Rate + EdgeP - 1)) {
+								for (int y = 0; y <= cell.All * 1 / 4 + 10; ++y) {
+									cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
+								}
 							}
 						}
-						else {
+						if ((-EdgeP < x && x < Size * Rate + EdgeP - 1) && (-EdgeP < z && z < Size * Rate + EdgeP - 1)) {
 							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(x)) / (Size * Rate - 1),
 								(static_cast<float>(z)) / (Size * Rate - 1)) * static_cast<float>(cell.All * 1 / 10));
@@ -1869,8 +1876,8 @@ namespace FPS_n2 {
 		void		BackGroundClass::Shadow_Draw(void) const noexcept {
 			for (int i = 0; i < total; i++) {
 				auto& Vert = this->m_vert32sSB.at(i);
-				if (Vert.m_32NumOut > 0) {
-					DrawPolygon32bitIndexed3D(Vert.m_vert32Out.data(), static_cast<int>(Vert.m_32NumOut * 4), Vert.m_index32Out.data(), static_cast<int>(Vert.m_32NumOut * 6 / 3), this->m_tex.get(), TRUE);
+				if (Vert.GetOutNum() > 0) {
+					DrawPolygon32bitIndexed3D(Vert.GetOutVert().data(), static_cast<int>(Vert.GetOutNum() * 4), Vert.GetOutindex().data(), static_cast<int>(Vert.GetOutNum() * 6 / 3), this->m_tex.get(), TRUE);
 				}
 			}
 		}
@@ -1878,8 +1885,8 @@ namespace FPS_n2 {
 			SetUseTextureToShader(0, this->m_tex.get());
 			for (int i = 0; i < total; i++) {
 				auto& Vert = this->m_vert32sS.at(i);
-				if (Vert.m_32NumOut > 0) {
-					DrawPolygon32bitIndexed3DToShader(Vert.m_vert32Out.data(), static_cast<int>(Vert.m_32NumOut * 4), Vert.m_index32Out.data(), static_cast<int>(Vert.m_32NumOut * 6 / 3));
+				if (Vert.GetOutNum() > 0) {
+					DrawPolygon32bitIndexed3DToShader(Vert.GetOutVert().data(), static_cast<int>(Vert.GetOutNum() * 4), Vert.GetOutindex().data(), static_cast<int>(Vert.GetOutNum() * 6 / 3));
 				}
 			}
 			SetUseTextureToShader(0, InvalidID);
@@ -1892,10 +1899,10 @@ namespace FPS_n2 {
 
 			for (int i = 0; i < total; i++) {
 				auto& Vert = this->m_vert32s.at(i);
-				if (Vert.m_32NumOut > 0) {
+				if (Vert.GetOutNum() > 0) {
 					float Min = (this->m_CellxN.at(i).scaleRate != 1) ? MinLimit * this->m_CellxN.at(i).Scale : 0;
 					if (!(Min < Far && Near < MaxLimit * this->m_CellxN.at(i).Scale)) { continue; }
-					DrawPolygon32bitIndexed3D(Vert.m_vert32Out.data(), static_cast<int>(Vert.m_32NumOut * 4), Vert.m_index32Out.data(), static_cast<int>(Vert.m_32NumOut * 6 / 3), this->m_tex.get(), TRUE);
+					DrawPolygon32bitIndexed3D(Vert.GetOutVert().data(), static_cast<int>(Vert.GetOutNum() * 4), Vert.GetOutindex().data(), static_cast<int>(Vert.GetOutNum() * 6 / 3), this->m_tex.get(), TRUE);
 				}
 			}
 #if defined(DEBUG) & EDITBLICK

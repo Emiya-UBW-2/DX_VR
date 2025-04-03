@@ -306,50 +306,60 @@ namespace FPS_n2 {
 			};
 			//
 			template<class T>
-			struct vert32 {
-				std::vector<T>					m_vert32;
-				std::vector<uint32_t>			m_index32;
-				size_t							m_32Num{ 0 };
-				size_t							m_32Size{ 0 };
-				std::vector<T>					m_vert32Out;
-				std::vector<uint32_t>			m_index32Out;
-				size_t							m_32NumOut{ 0 };
+			class vert32 {
+				int												m_Now{ 0 };
+
+				size_t											m_32Size{ 0 };
+				std::array<std::vector<T>, 2>					m_vert32;
+				std::array<std::vector<uint32_t>, 2>			m_index32;
+				std::array<size_t, 2>							m_32Num{ 0 };
+			public:
+				const auto& GetInNum() const noexcept { return this->m_32Num.at(m_Now); }
+				auto& SetInVert() noexcept { return this->m_vert32.at(m_Now); }
+				auto& SetInIndex() noexcept { return this->m_index32.at(m_Now); }
+			public:
+				const auto& GetOutNum() const noexcept { return this->m_32Num.at(static_cast<int>(1 - m_Now)); }
+				const auto& GetOutVert() const noexcept { return this->m_vert32.at(static_cast<int>(1 - m_Now)); }
+				const auto& GetOutindex() const noexcept { return this->m_index32.at(static_cast<int>(1 - m_Now)); }
 			public:
 				void		Init(size_t size) noexcept {
-					this->m_vert32.resize(size * 4);
-					this->m_index32.resize(size * 6);
-					this->m_32Num = 0;
+					for (int loop = 0; loop < 2; ++loop) {
+						this->m_vert32.at(loop).resize(size * 4);
+						this->m_index32.at(loop).resize(size * 6);
+					}
+					this->m_32Num.at(m_Now) = 0;
 					this->m_32Size = size;
 				}
 				void		ResetNum(void) noexcept {
-					this->m_32Num = 0;
+					this->m_32Num.at(m_Now) = 0;
 				}
 				void		AllocatePlane(void) noexcept {
-					++this->m_32Num;
-					if (this->m_32Num > this->m_32Size) {
-						this->m_32Size = this->m_32Num;
-						this->m_vert32.resize(this->m_32Size * 4);
-						this->m_index32.resize(this->m_32Size * 6);
+					++this->m_32Num.at(m_Now);
+					if (GetInNum() > this->m_32Size) {
+						this->m_32Size = GetInNum();
+						for (int loop = 0; loop < 2; ++loop) {
+							this->m_vert32.at(loop).resize(this->m_32Size * 4);
+							this->m_index32.at(loop).resize(this->m_32Size * 6);
+						}
 					}
-					auto ZERO = (uint32_t)(this->m_32Num * 4 - 4);
-					this->m_index32[this->m_32Num * 6 - 6] = ZERO;
-					this->m_index32[this->m_32Num * 6 - 5] = ZERO + 1;
-					this->m_index32[this->m_32Num * 6 - 4] = ZERO + 2;
-					this->m_index32[this->m_32Num * 6 - 3] = ZERO + 3;
-					this->m_index32[this->m_32Num * 6 - 2] = ZERO + 2;
-					this->m_index32[this->m_32Num * 6 - 1] = ZERO + 1;
+					auto ZERO = (uint32_t)(GetInNum() * 4 - 4);
+					SetInIndex()[GetInNum() * 6 - 6] = ZERO;
+					SetInIndex()[GetInNum() * 6 - 5] = ZERO + 1;
+					SetInIndex()[GetInNum() * 6 - 4] = ZERO + 2;
+					SetInIndex()[GetInNum() * 6 - 3] = ZERO + 3;
+					SetInIndex()[GetInNum() * 6 - 2] = ZERO + 2;
+					SetInIndex()[GetInNum() * 6 - 1] = ZERO + 1;
 				}
 				void		FlipVerts(void) noexcept {
-					this->m_vert32Out = this->m_vert32;
-					this->m_index32Out = this->m_index32;
-					this->m_32NumOut = this->m_32Num;
+					m_Now = 1 - m_Now;
 				}
 				void		Disable(void) noexcept {
-					this->m_32NumOut = 0;
+					ResetNum();
+					this->m_32Num.at(static_cast<int>(1 - m_Now)) = 0;
 				}
 				void		Draw(const GraphHandle& GrHandle) const noexcept {
-					if (this->m_32NumOut > 0) {
-						DrawPolygon32bitIndexed3D(this->m_vert32Out.data(), static_cast<int>(this->m_32NumOut * 4), this->m_index32Out.data(), static_cast<int>(this->m_32NumOut * 6 / 3), GrHandle.get(), TRUE);
+					if (GetOutNum() > 0) {
+						DrawPolygon32bitIndexed3D(GetOutVert().data(), static_cast<int>(GetOutNum() * 4), GetOutindex().data(), static_cast<int>(GetOutNum() * 6 / 3), GrHandle.get(), TRUE);
 					}
 				}
 			};

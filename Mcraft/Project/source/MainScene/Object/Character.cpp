@@ -21,25 +21,25 @@ namespace FPS_n2 {
 					if (value.Damage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Hit))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 					}
-					else {
+					else if (value.ArmerDamage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f, 128);
 					}
 					//ヒットカウント
 					if ((value.Damage >= 0) && (value.ArmerDamage >= 0)) {
 						PlayerMngr->GetPlayer(value.ShotID)->AddHit(1);
+						//ヒット座標表示を登録
+						HitMarkerPool::Instance()->AddMarker(value.m_EndPos, value.Damage, value.ArmerDamage);
 					}
 					if (IsDeath) {
 						PlayerMngr->GetPlayer(value.ShotID)->AddScore(100);
 						PlayerMngr->GetPlayer(value.ShotID)->AddKill(1);
 					}
-					//ヒット座標表示を登録
-					HitMarkerPool::Instance()->AddMarker(value.m_EndPos, value.Damage, value.ArmerDamage);
 				}
 				if (value.DamageID == PlayerMngr->GetWatchPlayer()) {//撃たれたキャラ
 					if (value.Damage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitMe))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 					}
-					else {
+					else if (value.ArmerDamage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f, 255);
 					}
 				}
@@ -48,13 +48,13 @@ namespace FPS_n2 {
 					EffectSingleton::Instance()->SetOnce(Sceneclass::Effect::ef_hitblood, value.m_EndPos, Vector3DX::forward(), Scale3DRate);
 					EffectSingleton::Instance()->SetEffectSpeed(Sceneclass::Effect::ef_hitblood, 2.f);
 				}
-				else {
+				else if (value.ArmerDamage > 0) {
 					EffectSingleton::Instance()->SetOnce(Sceneclass::Effect::ef_gndsmoke, value.m_EndPos, (value.m_StartPos - value.m_EndPos).normalized(), 0.25f * Scale3DRate);
 				}
 				//ヒットモーション
 				if (value.Damage > 0) {
 					this->m_HitReactionControl.SetHit(Matrix3x3DX::Vtrans(Vector3DX::Cross((value.m_EndPos - value.m_StartPos).normalized(), Vector3DX::up()) * -1.f, Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::Upper2)).inverse()));
-					switch (HitType::Leg) {
+					switch (static_cast<HitType>(value.m_HitType)) {
 					case HitType::Head:
 						break;
 					case HitType::Body:
@@ -380,26 +380,26 @@ namespace FPS_n2 {
 				Matrix3x3DX::RotAxis(Vector3DX::right(), this->m_RotateControl.GetRad().x) *
 				Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetYRadBottomChange());
 			//
-			GetObj().ResetFrameUserLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Upper)));
+			//GetObj().ResetFrameUserLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Upper)));
 			GetObj().SetFrameLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Upper)),
 				(
-					Matrix3x3DX::Get33DX(GetFrameLocalMat(CharaFrame::Upper)) *
+					//Matrix3x3DX::Get33DX(GetFrameLocalMat(CharaFrame::Upper)) *
 					Matrix3x3DX::RotAxis(Vector3DX::right(), -this->m_RotateControl.GetRad().x / 2.f) *
 					CharaLocalRotationCache
 					).Get44DX() * GetFrameBaseLocalMat(static_cast<int>(CharaFrame::Upper)));
-			GetObj().ResetFrameUserLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Upper2)));
+			//GetObj().ResetFrameUserLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Upper2)));
 			GetObj().SetFrameLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Upper2)),
 				(
-					Matrix3x3DX::Get33DX(GetFrameLocalMat(CharaFrame::Upper2)) *
+					//Matrix3x3DX::Get33DX(GetFrameLocalMat(CharaFrame::Upper2)) *
 					Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(32 * GetGunPtrNow()->GetSwitchPer())) *
 					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-35)) *
 					Matrix3x3DX::RotAxis(Vector3DX::right(), this->m_RotateControl.GetRad().x / 2.f) *
 					this->m_HitReactionControl.GetHitReactionMat()
 					).Get44DX() * GetFrameBaseLocalMat(static_cast<int>(CharaFrame::Upper2)));
-			GetObj().ResetFrameUserLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Neck)));
+			//GetObj().ResetFrameUserLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Neck)));
 			GetObj().SetFrameLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Neck)),
 				(
-					Matrix3x3DX::Get33DX(GetFrameLocalMat(CharaFrame::Neck)) *
+					//Matrix3x3DX::Get33DX(GetFrameLocalMat(CharaFrame::Neck)) *
 					Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(-32 * GetGunPtrNow()->GetSwitchPer())) *
 					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(25)) *
 					Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(12 * GetGunPtrNow()->GetSwitchPer()))
