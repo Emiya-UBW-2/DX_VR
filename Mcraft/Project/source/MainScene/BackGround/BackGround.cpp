@@ -1456,7 +1456,7 @@ namespace FPS_n2 {
 						int zPos = -Size * Rate / 2 + z;
 						if ((-EdgeP < x && x < Size * Rate + EdgeP - 1) && (-EdgeP < z && z < Size * Rate + EdgeP - 1)) {
 							if (GetRand(100) < 30) {
-								int y = cell.All * 1 / 4 - 10;
+								int y = cell.All * 1 / 4 - 15;
 								cell.SetCellBuf(cell.All / 2 + xPos + 0, y, cell.All / 2 + zPos + 0).m_Cell = 1;
 								cell.SetCellBuf(cell.All / 2 + xPos + 0, y, cell.All / 2 + zPos + 1).m_Cell = 1;
 								cell.SetCellBuf(cell.All / 2 + xPos + 1, y, cell.All / 2 + zPos + 0).m_Cell = 1;
@@ -1473,7 +1473,7 @@ namespace FPS_n2 {
 
 						if ((-EdgeP <= x && x <= Size * Rate + EdgeP - 1) && (-EdgeP <= z && z <= Size * Rate + EdgeP - 1)) {
 							if ((x == -EdgeP || x == Size * Rate + EdgeP - 1) || (z == -EdgeP || z == Size * Rate + EdgeP - 1)) {
-								for (int y = 0; y <= cell.All * 1 / 4 + 10; ++y) {
+								for (int y = 0; y <= cell.All * 1 / 4; ++y) {
 									cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
 								}
 							}
