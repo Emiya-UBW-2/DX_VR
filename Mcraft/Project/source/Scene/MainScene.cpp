@@ -395,7 +395,7 @@ namespace FPS_n2 {
 				auto far_t = CameraParts->GetMainCamera().GetCamFar();
 				CameraParts->SetMainCamera().SetCamInfo(fov_t, CameraParts->GetMainCamera().GetCamNear(), far_t);
 				//DoF
-				PostPassEffect::Instance()->Set_DoFNearFar(Scale3DRate * 0.3f, Scale3DRate * 5.f, Scale3DRate * 0.1f, Chara->GetIsADS() ? (far_t * 3.f) : (far_t * 2.f));
+				PostPassEffect::Instance()->Set_DoFNearFar(Chara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.2f), Scale3DRate * 5.f, Scale3DRate * 0.1f, Chara->GetIsADS() ? (far_t * 3.f) : (far_t * 2.f));
 			}
 			//コンカッション
 			{

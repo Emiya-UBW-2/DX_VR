@@ -450,9 +450,13 @@ namespace FPS_n2 {
 				vec = Matrix3x3DX::Vtrans(this->m_MoveControl.GetVecMove() * GetSpeed(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetYRadUpper()));
 			}
 			if (IsHitGround) {
-				auto yPos = PosBuf.y;
-				Easing(&yPos, EndPos.y - (0.12f * Scale3DRate), 0.6f, EasingType::OutExpo);
-				PosBuf.y = (yPos);
+				float GroundHight = EndPos.y - (0.12f * Scale3DRate);
+				if ((PosBuf.y - GroundHight) > (0.0008f * Scale3DRate / DXLib_refParts->GetDeltaTime())) {
+					PosBuf.y = GroundHight;//‚Š—‰º‚ÌÛ‚Í‘¦”½‰f
+				}
+				else {
+					Easing(&PosBuf.y, GroundHight, 0.6f, EasingType::OutExpo);
+				}
 
 				vec.y = 0.f;
 			}
