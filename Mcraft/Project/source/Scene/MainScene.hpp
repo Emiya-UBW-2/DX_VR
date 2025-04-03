@@ -34,8 +34,8 @@ namespace FPS_n2 {
 			InputControl								MyInput;
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
-				if (m_NetWorkController) {
-					return m_NetWorkController->GetMyLocalPlayerID();
+				if (this->m_NetWorkController) {
+					return this->m_NetWorkController->GetMyLocalPlayerID();
 				}
 				return (PlayerID)0;
 			}
@@ -70,15 +70,15 @@ namespace FPS_n2 {
 				BackGround::BackGroundClass::Instance()->SetShadow_Draw_Rigid();
 			}
 			void			SetShadowDraw_Sub(void) const noexcept override {
-				ObjectManager::Instance()->Draw(false);
+				ObjectManager::Instance()->Draw(false, -1);
 			}
-			void			MainDraw_Sub(void) const noexcept override;
+			void			MainDraw_Sub(int Range) const noexcept override;
 			//UI•\Ž¦
 			void			DrawUI_Base_Sub(void) const noexcept override;
 			void			DrawUI_In_Sub(void) const noexcept override {
 				auto* SceneParts = SceneControl::Instance();
 				if (SceneParts->IsPause()) {
-					m_PauseMenuControl.Draw();
+					this->m_PauseMenuControl.Draw();
 				}
 			}
 		};

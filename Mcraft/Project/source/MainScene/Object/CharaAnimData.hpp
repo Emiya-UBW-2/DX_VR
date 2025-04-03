@@ -121,9 +121,9 @@ namespace FPS_n2 {
 			std::array<std::array<float, 5>, 2>			m_Finger{};
 		public:
 			void Set(const Vector3DX& Rotate, const Vector3DX& Pos, const std::array<std::array<float, 5>, 2>& Finger) {
-				m_Rotate = Rotate;
-				m_Pos = Pos;
-				m_Finger = Finger;
+				this->m_Rotate = Rotate;
+				this->m_Pos = Pos;
+				this->m_Finger = Finger;
 			}
 		public:
 			const auto	GetMatrix(void) const noexcept {
@@ -172,8 +172,8 @@ namespace FPS_n2 {
 						}
 					}
 
-					m_EnumGunAnim = EnumSel;
-					m_IsLoop = (Args[0] == "Loop");
+					this->m_EnumGunAnim = EnumSel;
+					this->m_IsLoop = (Args[0] == "Loop");
 				}
 			public:
 				const auto& GetEnumGunAnim(void) const noexcept { return this->m_EnumGunAnim; }
@@ -212,14 +212,14 @@ namespace FPS_n2 {
 								break;
 							}
 						}
-						m_Rotate.Set(std::stof(Args[0]), std::stof(Args[1]), std::stof(Args[2]));
-						m_Pos.Set(std::stof(Args[3]), std::stof(Args[4]), -std::stof(Args[5]));
-						m_Frame = std::stoi(Args[6]);
+						this->m_Rotate.Set(std::stof(Args[0]), std::stof(Args[1]), std::stof(Args[2]));
+						this->m_Pos.Set(std::stof(Args[3]), std::stof(Args[4]), -std::stof(Args[5]));
+						this->m_Frame = std::stoi(Args[6]);
 
-						int loop = 0;
-						for (auto& LR : m_Finger) {
+						int loop = 7;
+						for (auto& LR : this->m_Finger) {
 							for (auto& f : LR) {
-								f = std::stof(Args[7+loop]);
+								f = std::stof(Args[loop]);
 								++loop;
 							}
 						}
@@ -255,23 +255,23 @@ namespace FPS_n2 {
 					std::string Path = filepath;
 					Path += EnumGunAnimName[loop];
 					Path += ".txt";
-					m_Object.resize(m_Object.size() + 1);
-					m_Object.back().first = std::make_shared<GunanimData>();
+					this->m_Object.resize(this->m_Object.size() + 1);
+					this->m_Object.back().first = std::make_shared<GunanimData>();
 
 					FileStreamDX FileStream(Path.c_str());
-					m_Object.back().first->Set(FileStream.SeekLineAndGetStr(), (EnumGunAnim)loop);
+					this->m_Object.back().first->Set(FileStream.SeekLineAndGetStr(), (EnumGunAnim)loop);
 					while (true) {
 						if (FileStream.ComeEof()) { break; }
 						auto ALL = FileStream.SeekLineAndGetStr();
-						m_Object.back().second.emplace_back(std::make_shared<AnimDatas::GunAnim>());
-						m_Object.back().second.back()->Set(ALL);
+						this->m_Object.back().second.emplace_back(std::make_shared<AnimDatas::GunAnim>());
+						this->m_Object.back().second.back()->Set(ALL);
 					}
 				}
 			}
 
 			const AnimDatas* GetAnimData(EnumGunAnim EnumSel) const noexcept {
-				auto Find = std::find_if(m_Object.begin(), m_Object.end(), [&](const AnimDatas& tgt) {return tgt.first->GetEnumGunAnim() == EnumSel; });
-				if (Find != m_Object.end()) {
+				auto Find = std::find_if(this->m_Object.begin(), this->m_Object.end(), [&](const AnimDatas& tgt) {return tgt.first->GetEnumGunAnim() == EnumSel; });
+				if (Find != this->m_Object.end()) {
 					return &*Find;
 				}
 				return nullptr;

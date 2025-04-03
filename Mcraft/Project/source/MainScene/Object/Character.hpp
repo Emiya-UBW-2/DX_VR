@@ -89,8 +89,8 @@ namespace FPS_n2 {
 			const auto		GetIsADS(void) const noexcept { return (!this->m_IsStuckGun && GetGunPtrNow()->GetCanADS()) && this->m_Input.GetPADSPress(Controls::PADS::AIM); }
 			const auto		IsAlive(void) const noexcept { return this->m_HP.IsNotZero(); }
 			const auto		IsLowHP(void) const noexcept { return this->m_HP.GetPoint() < (this->m_HP.GetMax() * 35 / 100); }
-			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetObj_const().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
-			const auto		GetFrameLocalMat(CharaFrame frame) const noexcept { return GetObj_const().GetFrameLocalMatrix(GetFrame(static_cast<int>(frame))); }
+			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
+			const auto		GetFrameLocalMat(CharaFrame frame) const noexcept { return GetObj().GetFrameLocalMatrix(GetFrame(static_cast<int>(frame))); }
 		public://セッター
 			void			SetPlayerID(PlayerID value) noexcept {
 				this->m_MyID = value;
@@ -102,11 +102,11 @@ namespace FPS_n2 {
 				}
 			}
 			void			SetConcussionSwitch() noexcept {
-				m_ConcussionSwitch = true;
+				this->m_ConcussionSwitch = true;
 			}
 			bool			PopConcussionSwitch() noexcept {
-				if (m_ConcussionSwitch) {
-					m_ConcussionSwitch = false;
+				if (this->m_ConcussionSwitch) {
+					this->m_ConcussionSwitch = false;
 					return true;
 				}
 				return false;
@@ -127,15 +127,14 @@ namespace FPS_n2 {
 		public: //コンストラクタ、デストラクタ
 			CharacterClass(void) noexcept {
 				this->m_objType = static_cast<int>(ObjType::Human);
-				this->m_IsDraw = true;
 			}
 			~CharacterClass(void) noexcept {}
 		public:
 			static void		LoadChara(const std::string& FolderName, PlayerID ID) noexcept;
 			void			LoadCharaGun(const std::string& FolderName, int Sel) noexcept;
 			void			SetupRagDoll(void) noexcept {
-				MV1::SetAnime(&SetRagDoll(), GetObj_const());
-				this->m_RagDollControl.Init(GetObj_const());
+				MV1::SetAnime(&SetRagDoll(), GetObj());
+				this->m_RagDollControl.Init(GetObj());
 			}
 			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSel) noexcept {
 				this->m_HP.Init();
@@ -172,65 +171,9 @@ namespace FPS_n2 {
 		private: //継承
 			void			Init_Sub(void) noexcept override;
 			void			FirstExecute(void) noexcept override;
-			void			CheckDraw(void) noexcept override;
-			void			Draw(bool isDrawSemiTrans) noexcept override {
-				if (this->m_IsActive && this->m_IsDraw) {
-					if ((CheckCameraViewClip_Box(
-						(GetObj_const().GetMatrix().pos() + Vector3DX::vget(-2.5f * Scale3DRate, -0.5f * Scale3DRate, -2.5f * Scale3DRate)).get(),
-						(GetObj_const().GetMatrix().pos() + Vector3DX::vget(2.5f * Scale3DRate, 2.f * Scale3DRate, 2.5f * Scale3DRate)).get()) == FALSE)
-						) {
-						//
-						int fog_enable;
-						int fog_mode;
-						int fog_r, fog_g, fog_b;
-						float fog_start, fog_end;
-						float fog_density;
-						fog_enable = GetFogEnable();													// フォグが有効かどうかを取得する( TRUE:有効 FALSE:無効 )
-						fog_mode = GetFogMode();														// フォグモードを取得する
-						GetFogColor(&fog_r, &fog_g, &fog_b);											// フォグカラーを取得する
-						GetFogStartEnd(&fog_start, &fog_end);											// フォグが始まる距離と終了する距離を取得する( 0.0f ～ 1.0f )
-						fog_density = GetFogDensity();													// フォグの密度を取得する( 0.0f ～ 1.0f )
-
-
-						//キャラ描画
-						SetFogEnable(TRUE);
-						SetFogColor(0, 0, 0);
-						//MV1SetMaterialTypeAll(this->GetObj_const().GetHandle(), DX_MATERIAL_TYPE_MAT_SPEC_LUMINANCE_CLIP_UNORM);
-						if (IsAlive()) {
-							for (int i = 0; i < GetObj_const().GetMeshNum(); i++) {
-								if (GetObj_const().GetMeshSemiTransState(i) == isDrawSemiTrans) {
-									GetObj_const().DrawMesh(i);
-								}
-							}
-						}
-						else {
-							for (int i = 0; i < GetRagDoll().GetMeshNum(); i++) {
-								if (GetRagDoll().GetMeshSemiTransState(i) == isDrawSemiTrans) {
-									GetRagDoll().DrawMesh(i);
-								}
-							}
-						}
-						//hitbox描画
-						//this->m_HitBoxControl.DrawHitBox();
-						//
-						SetFogEnable(fog_enable);
-						SetFogMode(fog_mode);
-						SetFogColor(fog_r, fog_g, fog_b);
-						SetFogStartEnd(fog_start, fog_end);
-						SetFogDensity(fog_density);
-					}
-				}
-			}
-			void			DrawShadow(void) noexcept override {
-				if (this->m_IsActive) {
-					if (IsAlive()) {
-						GetObj_const().DrawModel();
-					}
-					else {
-						GetRagDoll().DrawModel();
-					}
-				}
-			}
+			void			CheckDraw_Sub(int) noexcept override;
+			void			Draw(bool isDrawSemiTrans, int Range) noexcept override;
+			void			DrawShadow(void) noexcept override;
 			void			Dispose_Sub(void) noexcept override {
 				this->m_RagDollControl.Dispose();
 				this->m_GunPtrControl.Dispose();

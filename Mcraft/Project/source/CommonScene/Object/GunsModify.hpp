@@ -17,8 +17,8 @@ namespace FPS_n2 {
 				GunSlot			SlotType{ GunSlot::Magazine };
 				int				m_sel{ 0 };
 				bool			m_selectSwitch{ 0 };
-				const Slot* ParentSlot{ nullptr };
-				ModSlotControl* m_Data{ nullptr };
+				const Slot*		ParentSlot{ nullptr };
+				ModSlotControl*	m_Data{ nullptr };
 			};
 		private:
 			struct SlotSaveData {
@@ -28,7 +28,7 @@ namespace FPS_n2 {
 				int		m_Parentsel{ 0 };
 			public:
 				const auto IsParentNone(void) const noexcept { return (ParentSlotType == GunSlot::Gun); }
-				const auto IsParent(GunSlot Slot_t, int sel_t) const noexcept { return (ParentSlotType == Slot_t) && (m_Parentsel == sel_t); }
+				const auto IsParent(GunSlot Slot_t, int sel_t) const noexcept { return (ParentSlotType == Slot_t) && (this->m_Parentsel == sel_t); }
 			};
 		private:
 			std::vector<std::shared_ptr<Slot>>	SelData;
@@ -51,7 +51,7 @@ namespace FPS_n2 {
 					y.reset();
 				}
 				SelData.clear();
-				m_BaseObj.reset();
+				this->m_BaseObj.reset();
 			}
 		};
 	};

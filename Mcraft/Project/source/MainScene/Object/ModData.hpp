@@ -47,7 +47,7 @@ namespace FPS_n2 {
 			bool							m_CanSwitch{ true };
 
 
-			std::array<int, static_cast<int>(GunAnimeID::Max)> m_AnimSelect{ -1 };
+			std::array<int, static_cast<int>(GunAnimeID::Max)>	m_AnimSelect{ -1 };
 
 			std::vector<std::shared_ptr<AmmoDataClass>>	m_AmmoSpec;
 			std::vector<std::string>					m_Info;
@@ -98,10 +98,10 @@ namespace FPS_n2 {
 			}
 			const auto& GetUniqueID(void) const noexcept { return this->m_UniqueID; }
 		public://
-			void			SetUniqueID(int value) noexcept { m_UniqueID = value; }
+			void			SetUniqueID(int value) noexcept { this->m_UniqueID = value; }
 		public://
 			void		Set(std::string path_) {
-				for (auto& s : m_AnimSelect) {
+				for (auto& s : this->m_AnimSelect) {
 					s = -1;
 				}
 
@@ -109,7 +109,7 @@ namespace FPS_n2 {
 
 				FILEINFO FileInfo;
 				if (FileRead_findFirst((this->m_path + "reticle_0.png").c_str(), &FileInfo) != (DWORD_PTR)-1) {
-					m_Reitcle.Load(this->m_path + "reticle_0.png");
+					this->m_Reitcle.Load(this->m_path + "reticle_0.png");
 				}
 
 				this->m_AmmoSpec.clear();
@@ -147,7 +147,7 @@ namespace FPS_n2 {
 			~ModDataManager(void) noexcept {}
 		public:
 			const std::shared_ptr<ModDataClass>* GetData(int uniqueID) noexcept {
-				for (auto& o : m_Object) {
+				for (auto& o : this->m_Object) {
 					if (o->GetUniqueID() == uniqueID) {
 						return &o;
 					}

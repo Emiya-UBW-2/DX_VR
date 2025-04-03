@@ -61,7 +61,7 @@ namespace FPS_n2 {
 			}
 
 			else if (LEFT == "zoom") {
-				m_ZoomSize = std::stof(RIGHT);
+				this->m_ZoomSize = std::stof(RIGHT);
 			}
 
 			else if (LEFT == "usehumanAnim") {
@@ -76,19 +76,19 @@ namespace FPS_n2 {
 			}
 
 			else if (LEFT == "ShootRate_Diff") {
-				m_ShootRate_Diff = std::stoi(RIGHT);
+				this->m_ShootRate_Diff = std::stoi(RIGHT);
 			}
 			else if (LEFT == "Recoil_Diff") {
-				m_Recoil_Diff = std::stoi(RIGHT);
+				this->m_Recoil_Diff = std::stoi(RIGHT);
 			}
 			else if (LEFT == "IronSight") {
 				this->m_IronSight = true;
 			}
 			else if (LEFT == "Info") {
-				m_Info.emplace_back(RIGHT);
+				this->m_Info.emplace_back(RIGHT);
 			}
 			else if (LEFT == "Info_Eng") {
-				m_InfoEng.emplace_back(RIGHT);
+				this->m_InfoEng.emplace_back(RIGHT);
 			}
 
 			else if (LEFT == "ShotRate") {
@@ -117,7 +117,7 @@ namespace FPS_n2 {
 			else {
 				for (int loop = 0; loop < static_cast<int>(GunAnimeID::Max); ++loop) {
 					if (LEFT == GunAnimeIDName[loop]) {
-						m_AnimSelect[loop] = std::stoi(RIGHT);
+						this->m_AnimSelect[loop] = std::stoi(RIGHT);
 						break;
 					}
 				}
@@ -125,17 +125,17 @@ namespace FPS_n2 {
 		}
 
 		const std::shared_ptr<ModDataClass>* ModDataManager::AddData(const std::string& filepath) noexcept {
-			for (auto& o : m_Object) {
+			for (auto& o : this->m_Object) {
 				if (o->GetPath() == filepath) {
 					return &o;
 				}
 			}
 			auto tmp = std::make_shared<ModDataClass>();
-			auto UniqueID = m_LastUniqueID;
+			auto UniqueID = this->m_LastUniqueID;
 			tmp->SetUniqueID(UniqueID);
-			m_LastUniqueID++;
+			this->m_LastUniqueID++;
 			tmp->Set(filepath);
-			m_Object.emplace_back(tmp);
+			this->m_Object.emplace_back(tmp);
 			return GetData(UniqueID);
 		}
 	};

@@ -10,7 +10,7 @@ namespace FPS_n2 {
 		void			TitleScene::Set_Sub(void) noexcept {
 			auto* ButtonParts = ButtonControl::Instance();
 			// 
-			m_FadeControl.Init();
+			this->m_FadeControl.Init();
 			this->m_IsEnd = false;
 			this->m_TitleImage.Load("data/UI/Title.png");
 			// 
@@ -52,14 +52,14 @@ namespace FPS_n2 {
 					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizeParts->Get(9992));
 				}
 			);
-			if (!PopUpParts->IsActivePop() && m_FadeControl.IsClear()) {
+			if (!PopUpParts->IsActivePop() && this->m_FadeControl.IsClear()) {
 				ButtonParts->UpdateInput();
 				// ‘I‘ðŽž‚Ì‹““®
 				if (ButtonParts->GetTriggerButton()) {
 					switch (ButtonParts->GetSelect()) {
 					case 0:
 						if (!this->m_IsEnd) {
-							m_FadeControl.SetBlackOut(true);
+							this->m_FadeControl.SetBlackOut(true);
 						}
 						this->m_IsEnd = true;
 						break;
@@ -85,8 +85,8 @@ namespace FPS_n2 {
 			// 
 			ButtonParts->Update();
 			// 
-			m_FadeControl.Update();
-			if (this->m_IsEnd && m_FadeControl.IsAll()) {
+			this->m_FadeControl.Update();
+			if (this->m_IsEnd && this->m_FadeControl.IsAll()) {
 				return false;
 			}
 			return true;
@@ -135,7 +135,7 @@ namespace FPS_n2 {
 					(32), 1080 - (32 + 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
 			}
 			// 
-			m_FadeControl.Draw();
+			this->m_FadeControl.Draw();
 		}
 	};
 };

@@ -63,20 +63,20 @@ namespace FPS_n2 {
 			//
 			if (WindowSystem::SetMsgClickBox(xp, y1p + 150, xp + xs, y1p + 150 + LineHeight * 2, LineHeight, Gray75, false, true, "クライアントで即プレイ")) {
 				BeClient();
-				m_NewWorkSettings.Load();
-				ReadyConnect(m_NewWorkSettings.Get(0));
+				this->m_NewWorkSettings.Load();
+				ReadyConnect(this->m_NewWorkSettings.Get(0));
 			}
 			if (WindowSystem::SetMsgClickBox(xp, y1p + 200, xp + xs, y1p + 200 + LineHeight * 2, LineHeight, Gray75, false, true, "サーバーで即プレイ")) {
 				BeServerPlayer();
-				m_NewWorkSettings.Load();
-				ReadyConnect(m_NewWorkSettings.Get(0));
+				this->m_NewWorkSettings.Load();
+				ReadyConnect(this->m_NewWorkSettings.Get(0));
 			}
 			break;
 		case BrowserSequence::CheckPreset:
 			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp, White, Black, "プリセット設定");
-			if (m_SeqFirst) {
-				m_NewWorkSettings.Load();
+			if (this->m_SeqFirst) {
+				this->m_NewWorkSettings.Load();
 			}
 			for (int i = 0, Num = this->m_NewWorkSettings.GetSize(); i < Num + 1; ++i) {
 				if (i < Num) {
@@ -97,8 +97,8 @@ namespace FPS_n2 {
 		case BrowserSequence::SetNewData:
 			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp, White, Black, "新規設定");
-			if (m_SeqFirst) {
-				m_NewWorkSettings.AddBack();
+			if (this->m_SeqFirst) {
+				this->m_NewWorkSettings.AddBack();
 			}
 			{
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
@@ -130,9 +130,9 @@ namespace FPS_n2 {
 			{
 				int yp1 = y1p + 200;
 				if (WindowSystem::SetMsgClickBox(xp + xs - 120, yp1, xp + xs, yp1 + LineHeight * 2, LineHeight, Gray75, false, true, "Set")) {
-					m_NewWorkSettings.SetBack(this->m_NetSetting);
-					m_NewWorkSettings.Save();
-					ReadyConnect(m_NewWorkSettings.Get(this->m_NewWorkSettings.GetSize() - 1));
+					this->m_NewWorkSettings.SetBack(this->m_NetSetting);
+					this->m_NewWorkSettings.Save();
+					ReadyConnect(this->m_NewWorkSettings.Get(this->m_NewWorkSettings.GetSize() - 1));
 				}
 			}
 			break;
@@ -152,6 +152,6 @@ namespace FPS_n2 {
 		default:
 			break;
 		}
-		m_SeqFirst = (Prev != this->m_Sequence);
+		this->m_SeqFirst = (Prev != this->m_Sequence);
 	}
 };

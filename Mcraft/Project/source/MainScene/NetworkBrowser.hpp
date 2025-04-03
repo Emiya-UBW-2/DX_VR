@@ -25,12 +25,12 @@ namespace FPS_n2 {
 				SetOutApplicationLogValidFlag(FALSE);
 				FileStreamDX FileStream("data/NetWorkSetting.txt");
 				while (true) {
-					m_NewWorkSetting.resize(this->m_NewWorkSetting.size() + 1);
-					m_NewWorkSetting.back().UsePort = std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 50000);
-					m_NewWorkSetting.back().IP.d1 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
-					m_NewWorkSetting.back().IP.d2 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
-					m_NewWorkSetting.back().IP.d3 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
-					m_NewWorkSetting.back().IP.d4 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
+					this->m_NewWorkSetting.resize(this->m_NewWorkSetting.size() + 1);
+					this->m_NewWorkSetting.back().UsePort = std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 50000);
+					this->m_NewWorkSetting.back().IP.d1 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
+					this->m_NewWorkSetting.back().IP.d2 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
+					this->m_NewWorkSetting.back().IP.d3 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
+					this->m_NewWorkSetting.back().IP.d4 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
 					if (FileStream.ComeEof()) {
 						break;
 					}
@@ -50,15 +50,15 @@ namespace FPS_n2 {
 				outputfile.close();
 			}
 
-			auto		GetSize(void) const noexcept { return static_cast<int>(m_NewWorkSetting.size()); }
+			auto		GetSize(void) const noexcept { return static_cast<int>(this->m_NewWorkSetting.size()); }
 			const auto& Get(int ID) const noexcept { return this->m_NewWorkSetting[static_cast<size_t>(ID)]; }
 			void		AddBack(void) noexcept {
-				m_NewWorkSetting.resize(this->m_NewWorkSetting.size() + 1);
-				m_NewWorkSetting.back().UsePort = 10850;
-				m_NewWorkSetting.back().IP.d1 = 127;
-				m_NewWorkSetting.back().IP.d2 = 0;
-				m_NewWorkSetting.back().IP.d3 = 0;
-				m_NewWorkSetting.back().IP.d4 = 1;
+				this->m_NewWorkSetting.resize(this->m_NewWorkSetting.size() + 1);
+				this->m_NewWorkSetting.back().UsePort = 10850;
+				this->m_NewWorkSetting.back().IP.d1 = 127;
+				this->m_NewWorkSetting.back().IP.d2 = 0;
+				this->m_NewWorkSetting.back().IP.d3 = 0;
+				this->m_NewWorkSetting.back().IP.d4 = 1;
 			}
 			void		SetBack(const NewSetting& per) noexcept { this->m_NewWorkSetting.back() = per; }
 		};

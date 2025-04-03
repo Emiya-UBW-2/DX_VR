@@ -27,7 +27,7 @@ namespace FPS_n2 {
 				this->m_move = move_t;
 				this->m_DamageEvent = Damage_t;
 				for (int i = 0; i < 10; ++i) {
-					m_FreeData[i] = pFreeData[i];
+					this->m_FreeData[i] = pFreeData[i];
 				}
 			}
 		};
@@ -49,15 +49,15 @@ namespace FPS_n2 {
 			int			CalcCheckSum(void) const noexcept {
 				return (
 					500 +
-					static_cast<int>(m_ID) +
-					static_cast<int>(m_Attribute) +
-					static_cast<int>(m_ClientTime) +
+					static_cast<int>(this->m_ID) +
+					static_cast<int>(this->m_Attribute) +
+					static_cast<int>(this->m_ClientTime) +
 					(static_cast<int>(this->m_move.GetPos().x * 100.f) + static_cast<int>(this->m_move.GetPos().y * 100.f) + static_cast<int>(this->m_move.GetPos().z * 100.f)) +
 					(static_cast<int>(this->m_move.GetVec().x * 100.f) + static_cast<int>(this->m_move.GetVec().y * 100.f) + static_cast<int>(this->m_move.GetVec().z * 100.f))
 					);
 			}
 		public:
-			auto			IsCheckSum(void) const noexcept { return m_CheckSum == (size_t)this->CalcCheckSum(); }
+			auto			IsCheckSum(void) const noexcept { return this->m_CheckSum == (size_t)this->CalcCheckSum(); }
 			auto		 	GetFlag(NetAttribute flag) const noexcept { return (this->m_Attribute & (1 << static_cast<int>(flag))) != 0; }
 			const auto& GetClientTime(void) const noexcept { return this->m_ClientTime; }
 			const auto& GetID(void) const noexcept { return this->m_ID; }
@@ -74,7 +74,7 @@ namespace FPS_n2 {
 					this->m_Attribute &= ~(1 << static_cast<int>(flag));
 				}
 			}
-			void			SetID(PlayerID value) noexcept { m_ID = value; }
+			void			SetID(PlayerID value) noexcept { this->m_ID = value; }
 			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_DamageEvent.AddDamageEvent(pRet); }
 		public:
 			void			SetData(const PlayerSendData& o, NetTime ClientTime) noexcept {
@@ -84,7 +84,7 @@ namespace FPS_n2 {
 				this->m_ClientTime = ClientTime;
 				this->m_CheckSum = (size_t)this->CalcCheckSum();
 				for (int i = 0; i < 10; ++i) {
-					m_FreeData[i] = o.GetFreeData()[i];
+					this->m_FreeData[i] = o.GetFreeData()[i];
 				}
 			}
 		public:
@@ -106,17 +106,17 @@ namespace FPS_n2 {
 				}
 				return (
 					500 +
-					static_cast<int>(m_PlayerID) +
+					static_cast<int>(this->m_PlayerID) +
 					static_cast<int>(ServerFrame) +
 					Players
 					);
 			}
 		public:
-			auto			IsCheckSum(void) const noexcept { return m_CheckSum == (size_t)this->CalcCheckSum(); }
+			auto			IsCheckSum(void) const noexcept { return this->m_CheckSum == (size_t)this->CalcCheckSum(); }
 		public:
 			void			CalcCheckSun(void) noexcept { this->m_CheckSum = (size_t)this->CalcCheckSum(); }
-			void			SetInGame(void) noexcept { m_PlayerID = -1; }
-			auto			IsInGame(void) const noexcept { return m_PlayerID == -1; }//インゲーム中です
+			void			SetInGame(void) noexcept { this->m_PlayerID = -1; }
+			auto			IsInGame(void) const noexcept { return this->m_PlayerID == -1; }//インゲーム中です
 		};
 		//通信
 		class PlayerNetWork {
@@ -161,7 +161,7 @@ namespace FPS_n2 {
 					this->m_ClientTime += NowTime - this->m_PrevTime;
 					this->m_PrevTime = NowTime;
 				}
-				this->m_LocalData.SetData(pdata, m_ClientTime);
+				this->m_LocalData.SetData(pdata, this->m_ClientTime);
 			}
 		public:
 			PlayerNetData 	GetLerpServerPlayerData(PlayerID pPlayerID) const noexcept;
@@ -183,7 +183,7 @@ namespace FPS_n2 {
 			UDPNetWorkDX			m_NetWork;
 			ClientPhase				m_Phase{};
 		public:
-			bool IsReady(void) const noexcept { return m_Phase == ClientPhase::Ready; }
+			bool IsReady(void) const noexcept { return this->m_Phase == ClientPhase::Ready; }
 		};
 		//サーバー専用
 		class ServerControl {
@@ -263,16 +263,16 @@ namespace FPS_n2 {
 		private:
 			void			CalcPing(LONGLONG microsec) noexcept {
 				if (microsec == -1) {
-					m_Ping = -1.f;
+					this->m_Ping = -1.f;
 					return;
 				}
-				this->m_Pings.at(m_PingNow) = std::max(0.f, static_cast<float>(microsec) / 1000.f - (1000.f / this->m_Tick));//ティック分引く
+				this->m_Pings.at(this->m_PingNow) = std::max(0.f, static_cast<float>(microsec) / 1000.f - (1000.f / this->m_Tick));//ティック分引く
 				++m_PingNow %= this->m_Pings.size();
-				m_Ping = 0.f;
+				this->m_Ping = 0.f;
 				for (auto& p : this->m_Pings) {
-					m_Ping += p;
+					this->m_Ping += p;
 				}
-				m_Ping /= static_cast<float>(this->m_Pings.size());
+				this->m_Ping /= static_cast<float>(this->m_Pings.size());
 			}
 		public:
 			auto			IsInGame(void) const noexcept { return this->m_Sequence == NetWorkSequence::MainGame; }
@@ -287,8 +287,8 @@ namespace FPS_n2 {
 			void Init(bool IsClient, int Port, const IPDATA& ip, bool IsServerPlayer) noexcept;
 			void Update(void) noexcept;
 			void Dispose(void) noexcept {
-				m_ServerCtrl.Dispose();
-				m_ClientCtrl.Dispose();
+				this->m_ServerCtrl.Dispose();
+				this->m_ClientCtrl.Dispose();
 			}
 		};
 	}

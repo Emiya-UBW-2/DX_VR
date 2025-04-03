@@ -82,15 +82,15 @@ namespace FPS_n2 {
 			std::vector<std::shared_ptr<AmmoDataClass>>	m_Object;
 		public:
 			const auto& LoadAction(const std::string& filepath) noexcept {
-				for (auto& o : m_Object) {
+				for (auto& o : this->m_Object) {
 					if (o->GetPath() == filepath) {
 						return o;
 					}
 				}
-				m_Object.resize(m_Object.size() + 1);
-				m_Object.back() = std::make_shared<AmmoDataClass>();
-				m_Object.back()->Set(filepath);
-				return m_Object.back();
+				this->m_Object.resize(this->m_Object.size() + 1);
+				this->m_Object.back() = std::make_shared<AmmoDataClass>();
+				this->m_Object.back()->Set(filepath);
+				return this->m_Object.back();
 			}
 		};
 	};

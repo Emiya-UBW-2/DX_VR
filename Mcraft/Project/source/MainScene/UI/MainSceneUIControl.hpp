@@ -29,7 +29,7 @@ namespace FPS_n2 {
 			}
 			void			Update(void) noexcept {
 				auto* PlayerMngr = Player::PlayerManager::Instance();
-				auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(0)->GetChara();
+				auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
 
 				CanLookTarget = false;
 				for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
@@ -45,7 +45,7 @@ namespace FPS_n2 {
 				auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto* CameraParts = Camera3D::Instance();
-				auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(0)->GetChara();
+				auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
 				int RetX = Chara->GetGunPtrNow()->GetAimXPos();
 				int RetY = Chara->GetGunPtrNow()->GetAimYPos();
 

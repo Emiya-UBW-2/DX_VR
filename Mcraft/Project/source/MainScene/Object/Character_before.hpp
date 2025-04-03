@@ -30,13 +30,13 @@ namespace FPS_n2 {
 			HitType		m_HitType{ HitType::Body };
 		public:
 			void	Update(const Vector3DX& pos, float radius, HitType pHitType) {
-				m_pos = pos;
-				m_radius = radius;
-				m_HitType = pHitType;
+				this->m_pos = pos;
+				this->m_radius = radius;
+				this->m_HitType = pHitType;
 			}
 			void	Draw(void) const noexcept {
 				unsigned int color;
-				switch (m_HitType) {
+				switch (this->m_HitType) {
 				case HitType::Head:
 					color = Red;
 					break;
@@ -52,17 +52,17 @@ namespace FPS_n2 {
 				default:
 					break;
 				}
-				DrawSphere_3D(m_pos, m_radius, color, color);
+				DrawSphere_3D(this->m_pos, this->m_radius, color, color);
 			}
 
 			bool	Colcheck(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
 				if (HitCheck_Sphere_Capsule(
-					m_pos.get(), m_radius,
+					this->m_pos.get(), this->m_radius,
 					StartPos.get(), pEndPos->get(), 0.001f * Scale3DRate
 				) == TRUE) {
 					VECTOR pos1 = StartPos.get();
 					VECTOR pos2 = pEndPos->get();
-					VECTOR pos3 = m_pos.get();
+					VECTOR pos3 = this->m_pos.get();
 					SEGMENT_POINT_RESULT Res;
 					Segment_Point_Analyse(&pos1, &pos2, &pos3, &Res);
 
@@ -95,15 +95,13 @@ namespace FPS_n2 {
 		private:
 			float												m_Rad{ 0.f };
 			int													m_Rate{ 0 };
-			bool												m_Switch{ false };
 		public://ゲッター
 			const auto& GetRad(void) const noexcept { return this->m_Rad; }
-			const auto& GetSwitch(void) const noexcept { return this->m_Switch; }
 		public:
 			void			Init(void) noexcept {
 				this->m_Rad = 0.f;
 			}
-			void			Update(bool LeftTrigger, bool RightTrigger) {
+			bool			Update(bool LeftTrigger, bool RightTrigger) {
 				//入力
 				auto Prev = this->m_Rate;
 				if (LeftTrigger) {
@@ -122,8 +120,8 @@ namespace FPS_n2 {
 						this->m_Rate = 0;
 					}
 				}
-				this->m_Switch = (Prev != this->m_Rate);
 				Easing(&this->m_Rad, static_cast<float>(this->m_Rate) * deg2rad(25), 0.9f, EasingType::OutExpo);
+				return (Prev != this->m_Rate);
 			}
 		};
 		class MoveControl {
@@ -163,8 +161,8 @@ namespace FPS_n2 {
 				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (AKey ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (SKey ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (DKey ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
-				m_VecPower = m_VecTotal.magnitude();
+				this->m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
+				this->m_VecPower = this->m_VecTotal.magnitude();
 			}
 		};
 		class RotateControl {
@@ -236,17 +234,17 @@ namespace FPS_n2 {
 					h.Colcheck(StartPos, pEndPos);
 				}
 			}
-			const auto& GetHitBoxPointList() const { return m_HitBox; }
+			const auto& GetHitBoxPointList() const { return this->m_HitBox; }
 		public:
 			HitBoxControl(void) noexcept {}
 			~HitBoxControl(void) noexcept {}
 		public:
 			void Init(void) noexcept {
-				m_HitBox.resize(27);
+				this->m_HitBox.resize(27);
 			}
 			void Update(const ObjectBaseClass* ptr, float SizeRate) noexcept;
 			void Draw(void) noexcept {
-				//this->GetObj().SetOpacityRate(0.5f);
+				//GetObj().SetOpacityRate(0.5f);
 				SetFogEnable(FALSE);
 				SetUseLighting(FALSE);
 				//SetUseZBuffer3D(FALSE);
@@ -276,31 +274,31 @@ namespace FPS_n2 {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				//X
 				{
-					if (m_PrevY > Pos.y) {
-						m_WalkSwing_t.x = 1.f;
+					if (this->m_PrevY > Pos.y) {
+						this->m_WalkSwing_t.x = 1.f;
 					}
 					else {
-						m_WalkSwing_t.x = std::max(m_WalkSwing_t.x - 15.f * DXLib_refParts->GetDeltaTime(), 0.f);
+						this->m_WalkSwing_t.x = std::max(this->m_WalkSwing_t.x - 15.f * DXLib_refParts->GetDeltaTime(), 0.f);
 					}
-					m_PrevY = Pos.y;
+					this->m_PrevY = Pos.y;
 				}
 				//Z
 				{
-					if (m_WalkSwing_t.x == 1.f) {
-						if (m_WalkSwing_t.z >= 0.f) {
-							m_WalkSwing_t.z = -1.f;
+					if (this->m_WalkSwing_t.x == 1.f) {
+						if (this->m_WalkSwing_t.z >= 0.f) {
+							this->m_WalkSwing_t.z = -1.f;
 						}
 						else {
-							m_WalkSwing_t.z = 1.f;
+							this->m_WalkSwing_t.z = 1.f;
 						}
 					}
 				}
-				Easing(&m_WalkSwing_p.x, m_WalkSwing_t.x * SwingPer, (m_WalkSwing_p.x > m_WalkSwing_t.x * SwingPer) ? 0.6f : 0.9f, EasingType::OutExpo);
-				Easing(&m_WalkSwing_p.z, m_WalkSwing_t.z * SwingPer, 0.95f, EasingType::OutExpo);
-				Easing(&m_WalkSwing, m_WalkSwing_p, 0.5f, EasingType::OutExpo);
-				Vector3DX m_WalkSwingRad = Vector3DX::vget(5.f, 0.f, 10.f);
-				return Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(m_WalkSwing.z * m_WalkSwingRad.z)) *
-					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(m_WalkSwing.x * m_WalkSwingRad.x));
+				Easing(&this->m_WalkSwing_p.x, this->m_WalkSwing_t.x * SwingPer, (this->m_WalkSwing_p.x > this->m_WalkSwing_t.x * SwingPer) ? 0.6f : 0.9f, EasingType::OutExpo);
+				Easing(&this->m_WalkSwing_p.z, this->m_WalkSwing_t.z * SwingPer, 0.95f, EasingType::OutExpo);
+				Easing(&this->m_WalkSwing, this->m_WalkSwing_p, 0.5f, EasingType::OutExpo);
+				Vector3DX WalkSwingRad = Vector3DX::vget(5.f, 0.f, 10.f);
+				return Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(this->m_WalkSwing.z * WalkSwingRad.z)) *
+					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(this->m_WalkSwing.x * WalkSwingRad.x));
 			}
 			const auto& CalcEye(const Matrix3x3DX& pCharaMat, float SwingPer, float SwingSpeed) noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
@@ -326,7 +324,7 @@ namespace FPS_n2 {
 		public://ゲッター
 			auto&				GetGunPtr(int ID) noexcept { return this->m_GunPtr[ID]; }
 			const auto&			GetGunPtr(int ID) const noexcept { return this->m_GunPtr[ID]; }
-			const auto			GetGunNum(void) const noexcept { return static_cast<int>(m_GunPtr.size()); }
+			const auto			GetGunNum(void) const noexcept { return static_cast<int>(this->m_GunPtr.size()); }
 			const auto			GetNowGunSelect(void) const noexcept { return this->m_GunSelect; }
 		public://セッター
 			//次の武器に切り替え
@@ -341,7 +339,7 @@ namespace FPS_n2 {
 						Next += GetGunNum();
 					}
 					if (GetGunPtr(Next)) {
-						m_ReserveGunSelect = Next;
+						this->m_ReserveGunSelect = Next;
 						break;
 					}
 				}
@@ -353,14 +351,14 @@ namespace FPS_n2 {
 					if (!p) { continue; }
 
 					if (isThrow ? p->GetModSlot().GetModData()->GetIsThrowWeapon() : !p->GetModSlot().GetModData()->GetIsThrowWeapon()) {
-						m_ReserveGunSelect = loop;
+						this->m_ReserveGunSelect = loop;
 						break;
 					}
 				}
 			}
 
-			const auto			IsChangeGunSel(void) const noexcept { return GetNowGunSelect() != m_ReserveGunSelect; }
-			void				InvokeReserveGunSel(void) noexcept { this->m_GunSelect = m_ReserveGunSelect; }
+			const auto			IsChangeGunSel(void) const noexcept { return GetNowGunSelect() != this->m_ReserveGunSelect; }
+			void				InvokeReserveGunSel(void) noexcept { this->m_GunSelect = this->m_ReserveGunSelect; }
 			void				SelectGun(int ID) noexcept { this->m_GunSelect = this->m_ReserveGunSelect = ID; }
 			void				SetGunPtr(int ID, const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_GunPtr[ID] = pGunPtr0; }
 		public:
@@ -368,7 +366,7 @@ namespace FPS_n2 {
 			~GunPtrControl(void) noexcept {}
 		public:
 			void				Dispose(void) noexcept {
-				for (auto& g : m_GunPtr) {
+				for (auto& g : this->m_GunPtr) {
 					if (!g) { return; }
 					auto* ObjMngr = ObjectManager::Instance();
 					ObjMngr->DelObj((SharedObj*)&g);
@@ -387,12 +385,12 @@ namespace FPS_n2 {
 			HitReactionControl(void) noexcept {}
 			~HitReactionControl(void) noexcept {}
 		public:
-			const auto GetHitReactionMat(void) const noexcept { return Matrix3x3DX::RotAxis(m_HitAxis, m_HitPowerR * deg2rad(90.f)); }
-			const auto IsDamaging(void) const noexcept { return m_HitPower > 0.f; }
+			const auto GetHitReactionMat(void) const noexcept { return Matrix3x3DX::RotAxis(this->m_HitAxis, this->m_HitPowerR * deg2rad(90.f)); }
+			const auto IsDamaging(void) const noexcept { return this->m_HitPower > 0.f; }
 		public:
 			void SetHit(const Vector3DX& Axis) noexcept {
-				m_HitAxis = Axis;
-				m_HitPower = 1.f;
+				this->m_HitAxis = Axis;
+				this->m_HitPower = 1.f;
 			}
 			void Update(void) noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();

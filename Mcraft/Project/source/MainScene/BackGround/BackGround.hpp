@@ -20,7 +20,7 @@ namespace FPS_n2 {
 			//穴掘り
 			void dig(int x, int y) {
 				//指定した部分を掘っておく
-				m_Maze[x][y] = MAZETYPE::PATH;
+				this->m_Maze[x][y] = MAZETYPE::PATH;
 				// どの方向を掘ろうとしたかを覚えておく変数
 				int ok = 0;
 				// 全方向試すまでループ
@@ -30,9 +30,9 @@ namespace FPS_n2 {
 					float rad = deg2rad(Dir * 90);
 					int next_x = x + static_cast<int>(sin(rad) * 2.f);//0 2 0 -2
 					int next_y = y + static_cast<int>(cos(rad) * 2.f);//2 0 -2 0
-					if ((0 <= next_x && next_x < m_Width) && (0 <= next_y && next_y < m_Height)) {
-						if (m_Maze[next_x][next_y] == MAZETYPE::WALL) {
-							m_Maze[static_cast<size_t>((next_x + x) / 2)][static_cast<size_t>((next_y + y) / 2)] = MAZETYPE::PATH;
+					if ((0 <= next_x && next_x < this->m_Width) && (0 <= next_y && next_y < this->m_Height)) {
+						if (this->m_Maze[next_x][next_y] == MAZETYPE::WALL) {
+							this->m_Maze[static_cast<size_t>((next_x + x) / 2)][static_cast<size_t>((next_y + y) / 2)] = MAZETYPE::PATH;
 							//その場から次の穴掘り
 							dig(next_x, next_y);
 						}
@@ -42,8 +42,8 @@ namespace FPS_n2 {
 		public:
 			//該当座標が通路かどうか
 			const auto PosIsPath(int x, int y) {
-				if ((0 <= x && x < m_Width) && (0 <= y && y < m_Height)) {
-					return m_Maze[x][y] == MAZETYPE::PATH;
+				if ((0 <= x && x < this->m_Width) && (0 <= y && y < this->m_Height)) {
+					return this->m_Maze[x][y] == MAZETYPE::PATH;
 				}
 				else {
 					return false;
@@ -52,8 +52,8 @@ namespace FPS_n2 {
 			//通路の総数を取得
 			const auto GetPachCount(void) noexcept {
 				int OneSize = 0;
-				for (int y = 0; y < m_Height; y++) {
-					for (int x = 0; x < m_Width; x++) {
+				for (int y = 0; y < this->m_Height; y++) {
+					for (int x = 0; x < this->m_Width; x++) {
 						if (PosIsPath(x, y)) {
 							OneSize++;
 						}
@@ -64,52 +64,52 @@ namespace FPS_n2 {
 		public:
 			// 迷路を作成する
 			void createMaze(int w, int h) {
-				m_Width = w;
-				m_Height = h;
+				this->m_Width = w;
+				this->m_Height = h;
 
-				m_Maze.resize(m_Width);
-				for (auto& mx : m_Maze) {
-					mx.resize(m_Height);
+				this->m_Maze.resize(this->m_Width);
+				for (auto& mx : this->m_Maze) {
+					mx.resize(this->m_Height);
 					for (auto& m : mx) {
 						m = MAZETYPE::WALL; // 全マス壁にする
 					}
 				}
 
 				// 開始点をランダム（奇数座標）に決定する
-				dig(std::clamp(2 * GetRand(m_Width / 2) + 1, 0, m_Width - 1), std::clamp(2 * GetRand(m_Height / 2) + 1, 0, m_Height - 1));
+				dig(std::clamp(2 * GetRand(this->m_Width / 2) + 1, 0, this->m_Width - 1), std::clamp(2 * GetRand(this->m_Height / 2) + 1, 0, this->m_Height - 1));
 				//追加で穴あけ
-				for (int y = 1; y < m_Height - 1; y++) {
-					for (int x = 1; x < m_Width - 1; x++) {
+				for (int y = 1; y < this->m_Height - 1; y++) {
+					for (int x = 1; x < this->m_Width - 1; x++) {
 						bool isHit = false;
-						if (x == 1 || (x == m_Width - 1 - 1)) {
+						if (x == 1 || (x == this->m_Width - 1 - 1)) {
 							isHit = true;
 						}
-						if (y == 1 || (y == m_Height - 1 - 1)) {
+						if (y == 1 || (y == this->m_Height - 1 - 1)) {
 							isHit = true;
 						}
 						if (!isHit) { continue; }
-						m_Maze[x][y] = MAZETYPE::PATH;
+						this->m_Maze[x][y] = MAZETYPE::PATH;
 					}
 				}
 				//追加で穴あけ
-				for (int y = 1; y < m_Height - 1; y++) {
-					for (int x = 1; x < m_Width - 1; x++) {
+				for (int y = 1; y < this->m_Height - 1; y++) {
+					for (int x = 1; x < this->m_Width - 1; x++) {
 						bool isHit = false;
 						if ((y % 6) == 0) {
 							if ((x % 6) == 0) { isHit = true; }
 						}
 						if (!isHit) { continue; }
-						m_Maze[x][y] = MAZETYPE::PATH;
+						this->m_Maze[x][y] = MAZETYPE::PATH;
 					}
 				}
 			}
 			void Reset(void) noexcept {
-				for (auto& mx : m_Maze) {
+				for (auto& mx : this->m_Maze) {
 					mx.clear();
 				}
-				m_Maze.clear();
-				m_Width = 1;
-				m_Height = 1;
+				this->m_Maze.clear();
+				this->m_Width = 1;
+				this->m_Height = 1;
 			}
 		};
 
@@ -175,8 +175,8 @@ namespace FPS_n2 {
 				const int	GetIndex(int t) const noexcept { return (t % All + All) % All; }
 				const size_t	GetCellNum(int x, int y, int z) const noexcept { return static_cast<size_t>(GetIndex(x) * AllPow2 + y * All + GetIndex(z)); }
 				//
-				const auto&		GetCellBuf(int x, int y, int z) const noexcept { return m_CellBuffer[GetCellNum(x, y, z)]; }
-				auto&			SetCellBuf(int x, int y, int z) noexcept { return m_CellBuffer[GetCellNum(x, y, z)]; }
+				const auto&		GetCellBuf(int x, int y, int z) const noexcept { return this->m_CellBuffer[GetCellNum(x, y, z)]; }
+				auto&			SetCellBuf(int x, int y, int z) noexcept { return this->m_CellBuffer[GetCellNum(x, y, z)]; }
 				//
 				const auto GetPosBuffer(int x, int y, int z,int ID) const noexcept {
 					return GetPos(x + ((ID >> 2) & 1), y + ((ID >> 1) & 1), z + (ID & 1));
@@ -238,7 +238,7 @@ namespace FPS_n2 {
 					Half = All / 2;
 					AllPow2 = All * All;
 					Scale = (CellScale * scaleRate);
-					m_CellBuffer.resize((size_t)(All * All * All));
+					this->m_CellBuffer.resize((size_t)(All * All * All));
 				}
 				//
 				void			CalcOcclusion(int x, int y, int z) noexcept {
@@ -261,47 +261,47 @@ namespace FPS_n2 {
 				std::function<void()>			m_EndDoing{ nullptr };
 			public:
 				void Init(std::function<void()> Doing, std::function<void()> EndDoing) noexcept {
-					m_JobEnd = true;
-					m_Doing = Doing;
-					m_EndDoing = EndDoing;
+					this->m_JobEnd = true;
+					this->m_Doing = Doing;
+					this->m_EndDoing = EndDoing;
 				}
 
 				void Execute(void) noexcept {
-					if (m_JobEnd) {
-						m_JobEnd = false;
-						m_TotalTime = GetNowHiPerformanceCount() - m_StartTime;
-						m_StartTime = GetNowHiPerformanceCount();
-						if (m_Job.joinable()) {
-							m_Job.detach();
+					if (this->m_JobEnd) {
+						this->m_JobEnd = false;
+						this->m_TotalTime = GetNowHiPerformanceCount() - this->m_StartTime;
+						this->m_StartTime = GetNowHiPerformanceCount();
+						if (this->m_Job.joinable()) {
+							this->m_Job.detach();
 						}
 						//
-						if (m_EndDoing) {
-							m_EndDoing();
+						if (this->m_EndDoing) {
+							this->m_EndDoing();
 						}
 						//
 						{
 							std::thread tmp([&]() {
-								if (m_Doing) {
-									m_Doing();
+								if (this->m_Doing) {
+									this->m_Doing();
 								}
-								m_JobEnd = true;
+								this->m_JobEnd = true;
 								});
-							m_Job.swap(tmp);
+							this->m_Job.swap(tmp);
 							//強制待機
 							//m_Job.join();
 						}
 					}
 #if defined(DEBUG)
-					printfDx("%5.2fms \n", (float)(m_TotalTime) / 1000.f);
+					printfDx("%5.2fms \n", (float)(this->m_TotalTime) / 1000.f);
 #endif
 				}
 
 				void Dispose(void) noexcept {
-					if (m_Job.joinable()) {
-						m_Job.detach();
+					if (this->m_Job.joinable()) {
+						this->m_Job.detach();
 					}
-					m_Doing = nullptr;
-					m_EndDoing = nullptr;
+					this->m_Doing = nullptr;
+					this->m_EndDoing = nullptr;
 				}
 			};
 			//
@@ -676,9 +676,9 @@ namespace FPS_n2 {
 			void			SettingChange() noexcept;
 
 			void			SetBlick(int x, int y, int z, int8_t select) noexcept;
-			const Vector3Int GetPoint(const Vector3DX& pos) const noexcept { return m_CellxN.front().GetPoint(pos); }
+			const Vector3Int GetPoint(const Vector3DX& pos) const noexcept { return this->m_CellxN.front().GetPoint(pos); }
 			const auto& GetCellBuf(int x, int y, int z) const noexcept {
-				auto& cell = m_CellxN.front();
+				auto& cell = this->m_CellxN.front();
 				//if (!cell.isInside(y)) { return; }
 				return cell.GetCellBuf(x, y, z);
 			}

@@ -18,7 +18,7 @@ namespace FPS_n2 {
 			//UI
 			HitMarkerPool::Create();
 			this->m_UIclass.Load();
-			m_PauseMenuControl.Load();
+			this->m_PauseMenuControl.Load();
 			//
 			PlayerMngr->Init(NetWork::Player_num);
 			PlayerMngr->SetWatchPlayer(GetViewPlayerID());
@@ -118,8 +118,8 @@ namespace FPS_n2 {
 			//
 			this->m_DamageEvents.clear();
 			NetBrowser->Init();
-			m_PauseMenuControl.Init();
-			m_FadeControl.Init();
+			this->m_PauseMenuControl.Init();
+			this->m_FadeControl.Init();
 			this->m_IsEnd = false;
 			this->m_StartTimer = 3.f;
 
@@ -145,18 +145,18 @@ namespace FPS_n2 {
 			auto* OptionParts = OptionManager::Instance();
 
 			PostPassParts->SetLevelFilter(38, 154, 1.f);
-			m_PauseMenuControl.Update();
-			if (m_PauseMenuControl.IsRetire()) {
+			this->m_PauseMenuControl.Update();
+			if (this->m_PauseMenuControl.IsRetire()) {
 				if (!this->m_IsEnd) {
-					m_FadeControl.SetBlackOut(true);
+					this->m_FadeControl.SetBlackOut(true);
 				}
 				this->m_IsEnd = true;
 			}
-			if (this->m_IsEnd && m_FadeControl.IsAll()) {
+			if (this->m_IsEnd && this->m_FadeControl.IsAll()) {
 				return false;
 			}
 
-			m_FadeControl.Update();
+			this->m_FadeControl.Update();
 
 			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
 
@@ -211,7 +211,7 @@ namespace FPS_n2 {
 					this->m_StartTimer = std::max(this->m_StartTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 				}
 				MyInput.ResetAllInput();
-				if (!SceneParts->IsPause() && m_FadeControl.IsClear() && (this->m_StartTimer <= 0.f)) {
+				if (!SceneParts->IsPause() && this->m_FadeControl.IsClear() && (this->m_StartTimer <= 0.f)) {
 					float AimPer = 1.f / std::max(1.f, Chara->GetIsADS() ? Chara->GetGunPtrNow()->GetSightZoomSize() : 1.f);
 					MyInput.SetAddxRad(Pad->GetLS_Y() / 200.f * AimPer);
 					MyInput.SetAddyRad(Pad->GetLS_X() / 200.f * AimPer);
@@ -237,16 +237,16 @@ namespace FPS_n2 {
 				}
 				//ネットワーク
 				if (NetBrowser->IsDataReady() && !m_NetWorkController) {
-					m_NetWorkController = std::make_unique<NetWork::NetWorkController>();
+					this->m_NetWorkController = std::make_unique<NetWork::NetWorkController>();
 					this->m_NetWorkController->Init(NetBrowser->GetClient(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
 				}
-				if (m_NetWorkController) {
+				if (this->m_NetWorkController) {
 					int32_t FreeData[10]{};
 					this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, Chara->GetMove(), Chara->GetDamageEvent(), FreeData);
 					this->m_NetWorkController->Update();
 				}
 				//
-				if (m_NetWorkController && m_NetWorkController->IsInGame()) {
+				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {
 					bool IsServerNotPlayer = !m_NetWorkController->GetClient() && !m_NetWorkController->GetServerPlayer();
 					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
 						auto& p = PlayerMngr->GetPlayer(index);
@@ -295,7 +295,7 @@ namespace FPS_n2 {
 					auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
 					for (int j = 0, Num = static_cast<int>(this->m_DamageEvents.size()); j < Num; ++j) {
 						if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)])) {
-							std::swap(this->m_DamageEvents.back(), m_DamageEvents[static_cast<size_t>(j)]);
+							std::swap(this->m_DamageEvents.back(), this->m_DamageEvents[static_cast<size_t>(j)]);
 							this->m_DamageEvents.pop_back();
 							--Num;
 							--j;
@@ -366,8 +366,8 @@ namespace FPS_n2 {
 					break;
 				}
 #endif
-				Easing(&m_EffectPos, CamPos, 0.95f, EasingType::OutExpo);
-				EffectSingleton::Instance()->Update_LoopEffect(Sceneclass::Effect::ef_dust, m_EffectPos, Vector3DX::forward(), 0.5f);
+				Easing(&this->m_EffectPos, CamPos, 0.95f, EasingType::OutExpo);
+				EffectSingleton::Instance()->Update_LoopEffect(Sceneclass::Effect::ef_dust, this->m_EffectPos, Vector3DX::forward(), 0.5f);
 				EffectSingleton::Instance()->SetEffectColor(Sceneclass::Effect::ef_dust, 255, 255, 255, 64);
 
 				CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeRotationCache().yvec());
@@ -400,39 +400,41 @@ namespace FPS_n2 {
 			//コンカッション
 			{
 				if (Chara->PopConcussionSwitch()) {
-					m_Concussion = 1.f;
+					this->m_Concussion = 1.f;
 				}
-				PostPassParts->Set_is_Blackout(m_Concussion > 0.f);
-				if (m_Concussion == 1.f) {
+				PostPassParts->Set_is_Blackout(this->m_Concussion > 0.f);
+				if (this->m_Concussion == 1.f) {
 					Camera3D::Instance()->SetCamShake(0.5f, 0.01f * Scale3DRate);
 				}
-				if (m_Concussion > 0.9f) {
-					Easing(&m_ConcussionPer, 1.f, 0.1f, EasingType::OutExpo);
+				if (this->m_Concussion > 0.9f) {
+					Easing(&this->m_ConcussionPer, 1.f, 0.1f, EasingType::OutExpo);
 				}
-				else if (m_Concussion > 0.25f) {
-					if (m_ConcussionPer > 0.25f) {
-						Easing(&m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
+				else if (this->m_Concussion > 0.25f) {
+					if (this->m_ConcussionPer > 0.25f) {
+						Easing(&this->m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
 					}
 					else {
-						m_ConcussionPer = 0.25f;
+						this->m_ConcussionPer = 0.25f;
 					}
 				}
 				else {
-					Easing(&m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
+					Easing(&this->m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
 				}
-				PostPassParts->Set_Per_Blackout(m_ConcussionPer * 2.f);
-				m_Concussion = std::max(m_Concussion - DXLib_refParts->GetDeltaTime(), 0.f);
+				PostPassParts->Set_Per_Blackout(this->m_ConcussionPer * 2.f);
+				this->m_Concussion = std::max(this->m_Concussion - DXLib_refParts->GetDeltaTime(), 0.f);
 			}
 			BackGround->Execute();
 			//UIパラメーター
 			{
 				//timer
 				this->m_UIclass.SetfloatParam(0, 0.f);
-				this->m_UIclass.SetfloatParam(1, m_StartTimer);
+				this->m_UIclass.SetfloatParam(1, this->m_StartTimer);
 
 				this->m_UIclass.Update();
 			}
 			HitMarkerPool::Instance()->Update();
+
+			EffectSingleton::Instance()->Update();
 #ifdef DEBUG
 			DebugParts->SetPoint("Execute=End");
 #endif // DEBUG
@@ -445,9 +447,9 @@ namespace FPS_n2 {
 			BackGround->Dispose();
 			GunsModify::Instance()->DisposeSlots();
 			//
-			if (m_NetWorkController) {
-				m_NetWorkController->Dispose();
-				m_NetWorkController.reset();
+			if (this->m_NetWorkController) {
+				this->m_NetWorkController->Dispose();
+				this->m_NetWorkController.reset();
 			}
 			{
 				PostPassParts->SetLevelFilter(0, 255, 1.f);
@@ -472,15 +474,15 @@ namespace FPS_n2 {
 			this->m_UIclass.Dispose();
 			PlayerMngr->Dispose();
 			ObjectManager::Instance()->DeleteAll();
-			m_PauseMenuControl.Dispose();
+			this->m_PauseMenuControl.Dispose();
 			HitMarkerPool::Release();
 		}
 		//
-		void			MainGameScene::MainDraw_Sub(void) const noexcept {
+		void			MainGameScene::MainDraw_Sub(int Range) const noexcept {
 			SetFogEnable(TRUE);
 			SetVerticalFogEnable(TRUE);
 			BackGround::BackGroundClass::Instance()->Draw();
-			ObjectManager::Instance()->Draw();
+			ObjectManager::Instance()->Draw(true, Range);
 			//ObjectManager::Instance()->Draw_Depth();
 			SetVerticalFogEnable(FALSE);
 			SetFogEnable(FALSE);
@@ -501,14 +503,14 @@ namespace FPS_n2 {
 			HitMarkerPool::Instance()->Draw();
 			if (!SceneParts->IsPause()) { this->m_UIclass.Draw(); }		//UI
 			//NetBrowser->Draw();										//通信設定
-			if (m_NetWorkController) {
-				if (m_NetWorkController->GetPing() >= 0.f) {
+			if (this->m_NetWorkController) {
+				if (this->m_NetWorkController->GetPing() >= 0.f) {
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (32), White, Black,
-						"Ping:%3dms", static_cast<int>(m_NetWorkController->GetPing()));
+						"Ping:%3dms", static_cast<int>(this->m_NetWorkController->GetPing()));
 				}
 				else {
-					if (m_NetWorkController->GetClient()) {
+					if (this->m_NetWorkController->GetClient()) {
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (32), White, Black,
 							"Lost Connection");
@@ -520,7 +522,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			m_FadeControl.Draw();
+			this->m_FadeControl.Draw();
 		}
 	}
 }

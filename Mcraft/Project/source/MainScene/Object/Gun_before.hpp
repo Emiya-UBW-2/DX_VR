@@ -12,18 +12,18 @@ namespace FPS_n2 {
 			bool												m_Armon{ false };
 		public:
 			void Init(bool isOn)noexcept {
-				m_Armon = isOn;
-				m_ArmPer = isOn ? 1.f : 0.f;
+				this->m_Armon = isOn;
+				this->m_ArmPer = isOn ? 1.f : 0.f;
 			}
 			void Update(bool isOn, float OnOver = 0.2f, float OffOver = 0.2f, float UpPer = 0.8f, float DownPer = 0.8f) noexcept {
 				if (isOn) {
-					if (m_Armon) {
+					if (this->m_Armon) {
 						Easing(&this->m_ArmPer, 1.f, 0.9f, EasingType::OutExpo);
 					}
 					else {
 						Easing(&this->m_ArmPer, 1.f + OnOver, UpPer, EasingType::OutExpo);
 						if (this->m_ArmPer >= 1.f + OnOver / 2.f) {
-							m_Armon = true;
+							this->m_Armon = true;
 						}
 					}
 				}
@@ -34,13 +34,13 @@ namespace FPS_n2 {
 					else {
 						Easing(&this->m_ArmPer, 0.f - OffOver, DownPer, EasingType::OutExpo);
 						if (this->m_ArmPer <= 0.f - OffOver / 2.f) {
-							m_Armon = false;
+							this->m_Armon = false;
 						}
 					}
 				}
 			}
 		public:
-			const auto& Per(void) const noexcept { return m_ArmPer; }
+			const auto& Per(void) const noexcept { return this->m_ArmPer; }
 		};
 		//
 		class AutoAimControl {
@@ -59,7 +59,7 @@ namespace FPS_n2 {
 			const auto		GetAutoAimActive(void) const noexcept { return this->m_AutoAimActive; }
 		public:
 			void CalcAutoAimMat(Matrix3x3DX* ptmp_gunmat) const noexcept {
-				*ptmp_gunmat = Lerp(*ptmp_gunmat, (*ptmp_gunmat) * Matrix3x3DX::RotVec2(ptmp_gunmat->zvec() * -1.f, m_AutoAimVec), m_AutoAimPer);
+				*ptmp_gunmat = Lerp(*ptmp_gunmat, (*ptmp_gunmat) * Matrix3x3DX::RotVec2(ptmp_gunmat->zvec() * -1.f, this->m_AutoAimVec), this->m_AutoAimPer);
 			}
 		public:
 			void Update(bool isActive, PlayerID MyPlayerID, const Vector3DX& EyePos, const Vector3DX& AimVector, float Radian) noexcept;
@@ -70,29 +70,29 @@ namespace FPS_n2 {
 			std::vector<std::shared_ptr<FallObjClass>>	m_Ptr;
 			int											m_Now{ 0 };
 		public:
-			const auto& GetPtrList(void) const noexcept { return m_Ptr; }
+			const auto& GetPtrList(void) const noexcept { return this->m_Ptr; }
 		public:
 			void		Init(const std::string& pPath, int count) {
 				auto* ObjMngr = ObjectManager::Instance();
-				m_Ptr.resize(count);
-				for (auto& c : m_Ptr) {
+				this->m_Ptr.resize(count);
+				for (auto& c : this->m_Ptr) {
 					c = std::make_shared<FallObjClass>();
 					ObjMngr->AddObject(c);
 					ObjMngr->LoadModel(c, c, pPath.c_str());
 					c->Init();
 				}
 			}
-			void		SetFall(const Vector3DX& pPos, const Matrix3x3DX& pMat, const Vector3DX& pVec, float time, SoundEnum sound, bool IsGrenade) {
-				this->m_Ptr[this->m_Now]->SetFall(pPos, pMat, pVec, time, sound, IsGrenade);
+			void		SetFall(const Vector3DX& pPos, const Matrix3x3DX& pMat, const Vector3DX& pVec, float time, FallObjectType Type) {
+				this->m_Ptr[this->m_Now]->SetFall(pPos, pMat, pVec, time, Type);
 				++this->m_Now %= this->m_Ptr.size();
 			}
 			void		Dispose(void) noexcept {
 				auto* ObjMngr = ObjectManager::Instance();
-				for (auto& c : m_Ptr) {
+				for (auto& c : this->m_Ptr) {
 					ObjMngr->DelObj((SharedObj*)&c);
 					c.reset();
 				}
-				m_Ptr.clear();
+				this->m_Ptr.clear();
 			}
 		};
 		//
@@ -102,7 +102,7 @@ namespace FPS_n2 {
 			int								m_LineSel = 0;
 			float							m_LinePer{ 0.f };
 		public://ƒQƒbƒ^[
-			void			AddMuzzleSmokePower(void) noexcept { m_LinePer = std::clamp(m_LinePer + 0.1f, 0.f, 1.f); }
+			void			AddMuzzleSmokePower(void) noexcept { this->m_LinePer = std::clamp(this->m_LinePer + 0.1f, 0.f, 1.f); }
 		public:
 			void		InitMuzzleSmoke(const Vector3DX& pPos) {
 				for (auto& l : this->m_Line) {
@@ -117,16 +117,16 @@ namespace FPS_n2 {
 					l.first += Vector3DX::vget(GetRandf(Per), 0.8f + GetRandf(Per), GetRandf(Per)) * Scale3DRate * DXLib_refParts->GetDeltaTime();
 					Easing(&l.second, 0.f, 0.8f, EasingType::OutExpo);
 				}
-					this->m_Line[this->m_LineSel].first = pPos;
-					this->m_Line[this->m_LineSel].second = IsAddSmoke ? 1.f : 0.f;
-					++this->m_LineSel %= this->m_Line.size();
-				m_LinePer = std::clamp(m_LinePer - DXLib_refParts->GetDeltaTime() / 30.f, 0.f, 1.f);
+				this->m_Line[this->m_LineSel].first = pPos;
+				this->m_Line[this->m_LineSel].second = IsAddSmoke ? 1.f : 0.f;
+				++this->m_LineSel %= this->m_Line.size();
+				this->m_LinePer = std::clamp(this->m_LinePer - DXLib_refParts->GetDeltaTime() / 30.f, 0.f, 1.f);
 			}
 			void		DrawMuzzleSmoke(void) noexcept {
 				SetUseLighting(FALSE);
 				SetUseHalfLambertLighting(FALSE);
 				int max = static_cast<int>(this->m_Line.size());
-				int min = 1 + static_cast<int>((1.f - m_LinePer) * (float)max);
+				int min = 1 + static_cast<int>((1.f - this->m_LinePer) * (float)max);
 				for (int i = max - 1; i >= min; i--) {
 					int LS = (i + this->m_LineSel);
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255.f * (static_cast<float>(i - min) / max)));
@@ -157,12 +157,12 @@ namespace FPS_n2 {
 			auto& GetModData(void) noexcept { return this->m_ModDataClass; }
 			const auto& GetModData(void) const noexcept { return this->m_ModDataClass; }
 		public:
-			void		Init(const std::string& FilePath) noexcept { m_ModDataClass = *ModDataManager::Instance()->AddData(FilePath); }
+			void		Init(const std::string& FilePath) noexcept { this->m_ModDataClass = *ModDataManager::Instance()->AddData(FilePath); }
 			void		Dispose(void) noexcept {
 				for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
 					RemoveMod((GunSlot)loop);
 				}
-				m_ModDataClass.reset();
+				this->m_ModDataClass.reset();
 			}
 		public:
 			const SharedObj& SetMod(GunSlot Slot, int ID, const SharedObj& BaseModel) noexcept;

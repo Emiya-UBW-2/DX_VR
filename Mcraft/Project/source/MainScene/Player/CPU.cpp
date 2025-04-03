@@ -31,18 +31,18 @@ namespace FPS_n2 {
 		}
 		//
 		void AIControl::Init(PlayerID MyID) noexcept {
-			m_MyCharaID = MyID;
+			this->m_MyCharaID = MyID;
 		}
 		void AIControl::Execute(InputControl*) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 			if (MyChara->IsAlive()) {
-				m_RepopTimer = 0.f;
+				this->m_RepopTimer = 0.f;
 			}
 			else {
-				m_RepopTimer += DXLib_refParts->GetDeltaTime();
-				if (m_RepopTimer > 5.f) {
+				this->m_RepopTimer += DXLib_refParts->GetDeltaTime();
+				if (this->m_RepopTimer > 5.f) {
 					Repop();
 				}
 			}

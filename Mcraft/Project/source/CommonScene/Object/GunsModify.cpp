@@ -13,7 +13,7 @@ namespace FPS_n2 {
 					if (Data && y->m_sel < static_cast<int>(Data->m_ItemsUniqueID.size())) {
 						if (y->m_selectSwitch) {
 							y->m_selectSwitch = false;
-							ModPtr->SetMod(y->SlotType, y->m_sel, m_BaseObj);
+							ModPtr->SetMod(y->SlotType, y->m_sel, this->m_BaseObj);
 						}
 					}
 					else {
@@ -64,7 +64,7 @@ namespace FPS_n2 {
 		}
 		//
 		void			GunsModify::CreateSelData(const std::shared_ptr<GunClass>& GunPtr, bool isPreset) noexcept {
-			m_BaseObj = GunPtr;
+			this->m_BaseObj = GunPtr;
 			UpdateMods(&GunPtr->SetModSlot(), nullptr, isPreset);
 		}
 		bool			GunsModify::ChangeSelData(const Slot* SlotPtr, int sel, bool isDeleteSlot) noexcept {

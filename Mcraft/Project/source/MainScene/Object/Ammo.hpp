@@ -48,22 +48,20 @@ namespace FPS_n2 {
 		public: //Œp³
 			void			Init_Sub() noexcept override {
 				SetActive(true);
+				ObjectBaseClass::SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
+				ObjectBaseClass::SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
 			}
 			void			FirstExecute(void) noexcept override;
 			void			DrawShadow(void) noexcept override {}
-			void			CheckDraw(void) noexcept override {}
-			void			Draw(bool isDrawSemiTrans) noexcept override {
-				if (!isDrawSemiTrans) {
-					if (IsActive()) {
-						if (CheckCameraViewClip_Box(this->m_repos.get(), this->m_pos.get()) == FALSE) {
-							SetUseLighting(FALSE);
-							SetUseHalfLambertLighting(FALSE);
-							DrawCapsule_3D(this->m_pos, this->m_repos, 1.f * ((this->m_AmmoData->GetCaliber() - 0.00762f) * 0.1f + 0.00762f) * Scale3DRate, GetColor(255, 255, 172), Yellow);
-							SetUseLighting(TRUE);
-							SetUseHalfLambertLighting(TRUE);
-						}
-					}
-				}
+			void			Draw(bool isDrawSemiTrans, int Range) noexcept override {
+				if (!IsActive()) { return; }
+				if (!IsDraw(Range)) { return; }
+				if (isDrawSemiTrans) { return; }
+				SetUseLighting(FALSE);
+				SetUseHalfLambertLighting(FALSE);
+				DrawCapsule_3D(this->m_pos, this->m_repos, 1.f * ((this->m_AmmoData->GetCaliber() - 0.00762f) * 0.1f + 0.00762f) * Scale3DRate, GetColor(255, 255, 172), Yellow);
+				SetUseLighting(TRUE);
+				SetUseHalfLambertLighting(TRUE);
 			}
 		};
 	};

@@ -57,7 +57,7 @@ namespace FPS_n2 {
 				const auto& GetShot(void) const noexcept { return this->m_Shot; }
 			public:
 				void Init(void) noexcept {
-					m_Chara = nullptr;
+					this->m_Chara = nullptr;
 					this->m_AI = nullptr;
 				}
 
@@ -69,7 +69,7 @@ namespace FPS_n2 {
 						this->m_AI->Dispose();
 						this->m_AI.reset();
 					}
-					m_Score = 0;
+					this->m_Score = 0;
 				}
 			};
 		private:
@@ -91,22 +91,22 @@ namespace FPS_n2 {
 			const auto& GetPlayerNum(void) const noexcept { return this->m_PlayerNum; }
 			auto& GetPlayer(int ID) noexcept { return this->m_Player[ID]; }
 
-			void SetWatchPlayer(PlayerID playerID) noexcept { m_WatchPlayer = playerID; }
+			void SetWatchPlayer(PlayerID playerID) noexcept { this->m_WatchPlayer = playerID; }
 		public:
 			void Init(int playerNum) noexcept {
 				if (playerNum > 0) {
-					m_PlayerNum = playerNum;
-					m_Player.resize(static_cast<size_t>(m_PlayerNum));
-					for (auto& p : m_Player) {
+					this->m_PlayerNum = playerNum;
+					this->m_Player.resize(static_cast<size_t>(this->m_PlayerNum));
+					for (auto& p : this->m_Player) {
 						p = std::make_unique<PlayerControl>();
 					}
 				}
 			}
 			void Dispose(void) noexcept {
-				for (auto& p : m_Player) {
+				for (auto& p : this->m_Player) {
 					p.reset();
 				}
-				m_Player.clear();
+				this->m_Player.clear();
 			}
 		};
 	}

@@ -95,10 +95,10 @@ namespace FPS_n2 {
 			Vector3DX Pos = ConvWorldPosToScreenPos(Pos3D.get());
 			if (0.f < Pos.z && Pos.z < 1.f) {
 				auto* WindowSizeParts = WindowSizeControl::Instance();
-				m_XPos = static_cast<int>(Pos.x);
-				m_YPos = static_cast<int>(Pos.y);
-				m_XScreenPos = m_XPos * 1980 / WindowSizeParts->GetScreenY(1980);
-				m_YScreenPos = m_YPos * 1080 / WindowSizeParts->GetScreenY(1080);
+				this->m_XPos = static_cast<int>(Pos.x);
+				this->m_YPos = static_cast<int>(Pos.y);
+				this->m_XScreenPos = this->m_XPos * 1980 / WindowSizeParts->GetScreenY(1980);
+				this->m_YScreenPos = this->m_YPos * 1080 / WindowSizeParts->GetScreenY(1080);
 				return true;
 			}
 			return false;
@@ -198,7 +198,7 @@ namespace FPS_n2 {
 		GraphHandle					guard_Graph;
 	public:
 		void			AddMarker(const Vector3DX& position, HitPoint Damage, ArmerPoint ArmerDamage) noexcept {
-			this->m_HitMarkerList.at(m_Now).AddMarker(position, Damage, ArmerDamage);
+			this->m_HitMarkerList.at(this->m_Now).AddMarker(position, Damage, ArmerDamage);
 		}
 	public:
 		void			Init(void) noexcept {
@@ -242,33 +242,33 @@ namespace FPS_n2 {
 	public:
 		// 複数エフェクトの再生
 		void		SetOnce_Any(Sceneclass::Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.f, float speed = 1.f) noexcept {
-			m_EffectControl.SetOnce_Any(static_cast<int>(ID), pos_t, nomal_t, scale, speed);
+			this->m_EffectControl.SetOnce_Any(static_cast<int>(ID), pos_t, nomal_t, scale, speed);
 		}
 		// 単体で制御したいエフェクトの制御
 		void		SetLoop(Sceneclass::Effect ID, const Vector3DX& pos_t) noexcept {
-			m_EffectControl.SetLoop(static_cast<int>(ID), pos_t);
+			this->m_EffectControl.SetLoop(static_cast<int>(ID), pos_t);
 		}
 		void		Update_LoopEffect(Sceneclass::Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.f) noexcept {
-			m_EffectControl.Update_LoopEffect(static_cast<int>(ID), pos_t, nomal_t, scale);
+			this->m_EffectControl.Update_LoopEffect(static_cast<int>(ID), pos_t, nomal_t, scale);
 		}
 		void		SetOnce(Sceneclass::Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.f) noexcept {
-			m_EffectControl.SetOnce(static_cast<int>(ID), pos_t, nomal_t, scale);
+			this->m_EffectControl.SetOnce(static_cast<int>(ID), pos_t, nomal_t, scale);
 		}
 		void		SetEffectSpeed(Sceneclass::Effect ID, float value) noexcept {
-			m_EffectControl.SetEffectSpeed(static_cast<int>(ID), value);
+			this->m_EffectControl.SetEffectSpeed(static_cast<int>(ID), value);
 		}
 		void		SetEffectColor(Sceneclass::Effect ID, int r, int g, int b, int a) noexcept {
-			m_EffectControl.SetEffectColor(static_cast<int>(ID), r, g, b, a);
+			this->m_EffectControl.SetEffectColor(static_cast<int>(ID), r, g, b, a);
 		}
 	public:
 		void			Init(void) noexcept {
-			m_EffectControl.Init();
+			this->m_EffectControl.Init();
 		}
 		void			Update(void) noexcept {
-			m_EffectControl.Execute();
+			this->m_EffectControl.Execute();
 		}
 		void			Dispose(void) noexcept {
-			m_EffectControl.Dispose();
+			this->m_EffectControl.Dispose();
 		}
 	};
 

@@ -105,7 +105,7 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundClass::AddPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			auto& Verts = m_vert32s.at(id);
+			auto& Verts = this->m_vert32s.at(id);
 			Verts.AllocatePlane();
 
 			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
@@ -161,7 +161,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			auto& Verts = m_vert32s.at(id);
+			auto& Verts = this->m_vert32s.at(id);
 			Verts.AllocatePlane();
 
 			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
@@ -216,7 +216,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			auto& Verts = m_vert32s.at(id);
+			auto& Verts = this->m_vert32s.at(id);
 			Verts.AllocatePlane();
 
 			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
@@ -271,7 +271,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			auto& Verts = m_vert32s.at(id);
+			auto& Verts = this->m_vert32s.at(id);
 			Verts.AllocatePlane();
 
 			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
@@ -326,7 +326,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
-			auto& Verts = m_vert32s.at(id);
+			auto& Verts = this->m_vert32s.at(id);
 			Verts.AllocatePlane();
 
 			int xscale = (xmax - xmin + 1) * cellx.scaleRate;
@@ -381,7 +381,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
-			auto& Verts = m_vert32s.at(id);
+			auto& Verts = this->m_vert32s.at(id);
 			Verts.AllocatePlane();
 
 			int xscale = (xmax - xmin + 1) * cellx.scaleRate;
@@ -437,7 +437,7 @@ namespace FPS_n2 {
 		}
 
 		void		BackGroundClass::AddCubesX(size_t id) noexcept {
-			auto& cellx = m_CellxN.at(id);
+			auto& cellx = this->m_CellxN.at(id);
 			auto center = cellx.GetPoint(CamPos.at(id));
 			for (int z = center.z + DrawMaxZMinus, ZMax = center.z + DrawMaxZPlus; z <= ZMax; ++z) {
 				if (!CalcXYActive(CamVec.at(id), DrawMaxXMinus, DrawMaxXPlus, DrawMaxYMinus, DrawMaxYPlus, z - center.z)) { continue; }
@@ -503,7 +503,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddCubesZ(size_t id) noexcept {
-			auto& cellx = m_CellxN.at(id);
+			auto& cellx = this->m_CellxN.at(id);
 			auto center = cellx.GetPoint(CamPos.at(id));
 			for (int x = center.x + DrawMaxXMinus, XMax = center.x + DrawMaxXPlus; x <= XMax; ++x) {
 				if (!CalcYZActive(CamVec.at(id), x - center.x, DrawMaxYMinus, DrawMaxYPlus, DrawMaxZMinus, DrawMaxZPlus)) { continue; }
@@ -579,7 +579,7 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundClass::AddShadowPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			auto& Verts = m_vert32sSB.at(id);
+			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -609,7 +609,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddShadowPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			auto& Verts = m_vert32sSB.at(id);
+			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -639,7 +639,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddShadowPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			auto& Verts = m_vert32sSB.at(id);
+			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -669,7 +669,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddShadowPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			auto& Verts = m_vert32sSB.at(id);
+			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -699,7 +699,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddShadowPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
-			auto& Verts = m_vert32sSB.at(id);
+			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -729,7 +729,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddShadowPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
-			auto& Verts = m_vert32sSB.at(id);
+			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -760,7 +760,7 @@ namespace FPS_n2 {
 		}
 
 		void		BackGroundClass::AddShadowCubesX(size_t id) noexcept {
-			auto& cellx = m_CellxN.at(id);
+			auto& cellx = this->m_CellxN.at(id);
 			auto center = cellx.GetPoint(CamPosS.at(id));
 			for (int z = center.z + DrawMaxZMinus, ZMax = center.z + DrawMaxZPlus; z <= ZMax; ++z) {
 
@@ -810,7 +810,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddShadowCubesZ(size_t id) noexcept {
-			auto& cellx = m_CellxN.at(id);
+			auto& cellx = this->m_CellxN.at(id);
 			auto center = cellx.GetPoint(CamPosS.at(id));
 			for (int x = center.x + DrawMaxXMinus, XMax = center.x + DrawMaxXPlus; x <= XMax; ++x) {
 
@@ -871,7 +871,7 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundClass::AddSetShadowPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			auto& Verts = m_vert32sS.at(id);
+			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -882,7 +882,7 @@ namespace FPS_n2 {
 			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			auto& Verts = m_vert32sS.at(id);
+			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -893,7 +893,7 @@ namespace FPS_n2 {
 			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			auto& Verts = m_vert32sS.at(id);
+			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -904,7 +904,7 @@ namespace FPS_n2 {
 			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
-			auto& Verts = m_vert32sS.at(id);
+			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -915,7 +915,7 @@ namespace FPS_n2 {
 			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
-			auto& Verts = m_vert32sS.at(id);
+			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -926,7 +926,7 @@ namespace FPS_n2 {
 			Verts.m_vert32[ZERO + 3].pos = cellx.GetPosBuffer(xmax, y, z, 0b111).get();
 		}
 		void		BackGroundClass::AddSetShadowPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
-			auto& Verts = m_vert32sS.at(id);
+			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
 			auto ZERO = Verts.m_32Num * 4 - 4;
@@ -938,7 +938,7 @@ namespace FPS_n2 {
 		}
 
 		void		BackGroundClass::AddSetShadowCubesX(size_t id) noexcept {
-			auto& cellx = m_CellxN.at(id);
+			auto& cellx = this->m_CellxN.at(id);
 			auto center = cellx.GetPoint(CamPosS.at(id));
 			for (int z = center.z + DrawMaxZMinus, ZMax = center.z + DrawMaxZPlus; z <= ZMax; ++z) {
 				if (!CalcXYActive(CamVecS.at(id), DrawMaxXMinus, DrawMaxXPlus, DrawMaxYMinus, DrawMaxYPlus, z - center.z)) { continue; }
@@ -996,7 +996,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundClass::AddSetShadowCubesZ(size_t id) noexcept {
-			auto& cellx = m_CellxN.at(id);
+			auto& cellx = this->m_CellxN.at(id);
 			auto center = cellx.GetPoint(CamPosS.at(id));
 			for (int x = center.x + DrawMaxXMinus, XMax = center.x + DrawMaxXPlus; x <= XMax; ++x) {
 				if (!CalcYZActive(CamVecS.at(id), x - center.x, DrawMaxYMinus, DrawMaxYPlus, DrawMaxZMinus, DrawMaxZPlus)) { continue; }
@@ -1065,7 +1065,7 @@ namespace FPS_n2 {
 		}
 		//
 		bool		BackGroundClass::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
-			auto& cell = m_CellxN.front();
+			auto& cell = this->m_CellxN.front();
 			auto Start = cell.GetPoint(StartPos);
 			auto End = cell.GetPoint(*EndPos);// *EndPos
 
@@ -1107,7 +1107,7 @@ namespace FPS_n2 {
 			auto MoveVector = *EndPos - StartPos;
 			// プレイヤーの周囲にあるステージポリゴンを取得する( 検出する範囲は移動距離も考慮する )
 			std::vector<MV1_COLL_RESULT_POLY> kabes;// 壁ポリゴンと判断されたポリゴンの構造体のアドレスを保存しておく
-			auto& cell = m_CellxN.front();
+			auto& cell = this->m_CellxN.front();
 			auto Start = cell.GetPoint(StartPos);
 			auto End = cell.GetPoint(*EndPos);// *EndPos
 
@@ -1235,19 +1235,19 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundClass::LoadCellsFile(void) noexcept {
-			auto& cell = m_CellxN.front();
+			auto& cell = this->m_CellxN.front();
 			{
 				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
 
 				std::ifstream fin{};
 				fin.open("data/Map.txt", std::ios::in | std::ios::binary);
-				m_CellBase.resize((size_t)256 * 256 * 256);
-				fin.read((char*)m_CellBase.data(), (size_t)sizeof(m_CellBase.at(0)) * 256 * 256 * 256);
+				this->m_CellBase.resize((size_t)256 * 256 * 256);
+				fin.read((char*)m_CellBase.data(), (size_t)sizeof(this->m_CellBase.at(0)) * 256 * 256 * 256);
 				fin.close();
 				for (int xm = 0; xm < cell.All; ++xm) {
 					for (int ym = 0; ym < cell.All; ++ym) {
 						for (int zm = 0; zm < cell.All; ++zm) {
-							cell.SetCellBuf(xm, ym, zm).m_Cell = m_CellBase[cell.GetCellNum(xm, ym, zm)];
+							cell.SetCellBuf(xm, ym, zm).m_Cell = this->m_CellBase[cell.GetCellNum(xm, ym, zm)];
 						}
 					}
 				}
@@ -1277,20 +1277,20 @@ namespace FPS_n2 {
 		}
 		void		BackGroundClass::SaveCellsFile(void) noexcept {
 			{
-				auto& cell = m_CellxN.front();
+				auto& cell = this->m_CellxN.front();
 
-				m_CellBase.resize((size_t)256 * 256 * 256);
+				this->m_CellBase.resize((size_t)256 * 256 * 256);
 				for (int xm = 0; xm < cell.All; ++xm) {
 					for (int ym = 0; ym < cell.All; ++ym) {
 						for (int zm = 0; zm < cell.All; ++zm) {
-							m_CellBase[cell.GetCellNum(xm, ym, zm)] = cell.SetCellBuf(xm, ym, zm).m_Cell;
+							this->m_CellBase[cell.GetCellNum(xm, ym, zm)] = cell.SetCellBuf(xm, ym, zm).m_Cell;
 						}
 					}
 				}
 
 				std::ofstream fout{};
 				fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
-				fout.write((char*)m_CellBase.data(), (size_t)sizeof(m_CellBase.at(0)) * 256 * 256 * 256);
+				fout.write((char*)m_CellBase.data(), (size_t)sizeof(this->m_CellBase.at(0)) * 256 * 256 * 256);
 				fout.close();  //ファイルを閉じる
 			}
 			//一部を切り取って保存
@@ -1305,7 +1305,7 @@ namespace FPS_n2 {
 			//*/
 		}
 		void BackGroundClass::LoadCellsClip(int xpos, int ypos, int zpos) noexcept {
-			auto& cell = m_CellxN.front();
+			auto& cell = this->m_CellxN.front();
 			int XTotal = 1;
 			int YTotal = 1;
 			int ZTotal = 1;
@@ -1314,30 +1314,30 @@ namespace FPS_n2 {
 			fin.read((char*)&XTotal, sizeof(XTotal));
 			fin.read((char*)&YTotal, sizeof(YTotal));
 			fin.read((char*)&ZTotal, sizeof(ZTotal));
-			m_CellBase.resize((size_t)XTotal * YTotal * ZTotal);
-			fin.read((char*)m_CellBase.data(), (size_t)sizeof(m_CellBase.at(0)) * XTotal * YTotal * ZTotal);
+			this->m_CellBase.resize((size_t)XTotal * YTotal * ZTotal);
+			fin.read((char*)m_CellBase.data(), (size_t)sizeof(this->m_CellBase.at(0)) * XTotal * YTotal * ZTotal);
 			fin.close();  //ファイルを閉じる
 
 			for (int xm = 0; xm < XTotal; ++xm) {
 				for (int ym = 0; ym < YTotal; ++ym) {
 					for (int zm = 0; zm < ZTotal; ++zm) {
 						cell.SetCellBuf(xm + xpos, ym + ypos, zm + zpos).m_Cell =
-							m_CellBase[static_cast<size_t>(xm * YTotal * ZTotal + ym * ZTotal + zm)];
+							this->m_CellBase[static_cast<size_t>(xm * YTotal * ZTotal + ym * ZTotal + zm)];
 					}
 				}
 			}
 		}
 		void BackGroundClass::SaveCellsClip(int XMin, int XMax, int YMin, int YMax, int ZMin, int ZMax) noexcept {
-			auto& cell = m_CellxN.front();
+			auto& cell = this->m_CellxN.front();
 			int XTotal = (XMax - XMin + 1);
 			int YTotal = (YMax - YMin + 1);
 			int ZTotal = (ZMax - ZMin + 1);
 
-			m_CellBase.resize((size_t)XTotal * YTotal * ZTotal);
+			this->m_CellBase.resize((size_t)XTotal * YTotal * ZTotal);
 			for (int xm = 0; xm < XTotal; ++xm) {
 				for (int ym = 0; ym < YTotal; ++ym) {
 					for (int zm = 0; zm < ZTotal; ++zm) {
-						m_CellBase[static_cast<size_t>(xm * YTotal * ZTotal + ym * ZTotal + zm)] = cell.SetCellBuf(XMin + xm, YMin + ym, ZMin + zm).m_Cell;
+						this->m_CellBase[static_cast<size_t>(xm * YTotal * ZTotal + ym * ZTotal + zm)] = cell.SetCellBuf(XMin + xm, YMin + ym, ZMin + zm).m_Cell;
 					}
 				}
 			}
@@ -1347,7 +1347,7 @@ namespace FPS_n2 {
 			fout.write((char*)&XTotal, sizeof(XTotal));
 			fout.write((char*)&YTotal, sizeof(YTotal));
 			fout.write((char*)&ZTotal, sizeof(ZTotal));
-			fout.write((char*)m_CellBase.data(), (size_t)sizeof(m_CellBase.at(0)) * XTotal * YTotal * ZTotal);
+			fout.write((char*)m_CellBase.data(), (size_t)sizeof(this->m_CellBase.at(0)) * XTotal * YTotal * ZTotal);
 			fout.close();  //ファイルを閉じる
 		}
 		//
@@ -1357,7 +1357,7 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundClass::SetBlick(int x, int y, int z, int8_t select) noexcept {
-			auto& cell = m_CellxN.front();
+			auto& cell = this->m_CellxN.front();
 			if (!cell.isInside(y)) { return; }
 			//テクスチャだけ変える
 			/*
@@ -1369,7 +1369,7 @@ namespace FPS_n2 {
 			cell.SetCellBuf(x, y, z).m_Cell = select;
 			//簡易版を更新
 			for (int sel = 1; sel < total; ++sel) {
-				auto& cell1 = m_CellxN.at(sel);
+				auto& cell1 = this->m_CellxN.at(sel);
 
 				int xm = x / cell1.scaleRate;
 				int ym = y / cell1.scaleRate;
@@ -1378,7 +1378,7 @@ namespace FPS_n2 {
 				cell1.SetCellBuf(xm, ym, zm).m_Cell = cell.isFill(xm, ym, zm, cell1.scaleRate);
 			}
 			//遮蔽検索
-			for (auto& cellx : m_CellxN) {
+			for (auto& cellx : this->m_CellxN) {
 				int xm = x / cellx.scaleRate;
 				int ym = y / cellx.scaleRate;
 				int zm = z / cellx.scaleRate;
@@ -1398,8 +1398,8 @@ namespace FPS_n2 {
 		//
 		void		BackGroundClass::Load(void) noexcept {
 			MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
-			m_tex.Load("data/tex.png");
-			m_norm.Load("data/nrm.png");
+			this->m_tex.Load("data/tex.png");
+			this->m_norm.Load("data/nrm.png");
 		}
 		//
 		void		BackGroundClass::Init(void) noexcept {
@@ -1413,7 +1413,7 @@ namespace FPS_n2 {
 			}
 			if (false) {
 				//空っぽ
-				auto& cell = m_CellxN.front();
+				auto& cell = this->m_CellxN.front();
 				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
 				for (int x = 0; x < cell.All; ++x) {
 					for (int z = 0; z < cell.All; ++z) {
@@ -1430,7 +1430,7 @@ namespace FPS_n2 {
 			}
 			else if (true) {
 				//空っぽ
-				auto& cell = m_CellxN.front();
+				auto& cell = this->m_CellxN.front();
 				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
 
 				PerlinNoise ns(GetRand(100));
@@ -1445,7 +1445,7 @@ namespace FPS_n2 {
 				for (int x = 0; x < cell.All; x += 2) {
 					for (int z = 0; z < cell.All; z += 2) {
 						if (GetRand(100) < 30) {
-							int y = cell.All * 1 / 4-5;
+							int y = cell.All * 1 / 4-10;
 							cell.SetCellBuf(x + 0, y, z + 0).m_Cell = 1;
 							cell.SetCellBuf(x + 0, y, z + 1).m_Cell = 1;
 							cell.SetCellBuf(x + 1, y, z + 0).m_Cell = 1;
@@ -1454,7 +1454,7 @@ namespace FPS_n2 {
 					}
 				}
 				int Size = 17;
-				m_MazeControl.createMaze(Size, Size);
+				this->m_MazeControl.createMaze(Size, Size);
 				int Rate = 6;
 				int Heights = 10;
 				//*
@@ -1466,8 +1466,8 @@ namespace FPS_n2 {
 						int xPos = -Size * Rate / 2 + x;
 						int zPos = -Size * Rate / 2 + z;
 
-						if ((x <= -EdgeP || x >= Size * Rate + EdgeP - 1) || (z <= -EdgeP || z >= Size * Rate + EdgeP - 1)) {
-							for (int y = 0; y <= cell.All*3/5; ++y) {
+						if ((x == -EdgeP || x == Size * Rate + EdgeP - 1) || (z == -EdgeP || z == Size * Rate + EdgeP - 1)) {
+							for (int y = 0; y <= cell.All * 1 / 4 + 10; ++y) {
 								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
 							}
 						}
@@ -1526,7 +1526,7 @@ namespace FPS_n2 {
 			}
 			else if (false) {
 				PerlinNoise ns(GetRand(100));
-				auto& cell = m_CellxN.front();
+				auto& cell = this->m_CellxN.front();
 				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
 				for (int x = 0; x < cell.All; ++x) {
 					for (int z = 0; z < cell.All; ++z) {
@@ -1546,9 +1546,9 @@ namespace FPS_n2 {
 				LoadCellsFile();
 			}
 			//簡略版を制作
-			auto& cell = m_CellxN.front();
+			auto& cell = this->m_CellxN.front();
 			for (int sel = 1; sel < total; ++sel) {
-				auto& cell1 = m_CellxN.at(sel);
+				auto& cell1 = this->m_CellxN.at(sel);
 				cell1.SetScale(static_cast<int>(pow(MulPer, sel)));
 				for (int xm = 0; xm < cell1.All; ++xm) {
 					for (int ym = 0; ym < cell1.All; ++ym) {
@@ -1559,7 +1559,7 @@ namespace FPS_n2 {
 				}
 			}
 			//遮蔽検索
-			for (auto& cellx : m_CellxN) {
+			for (auto& cellx : this->m_CellxN) {
 				for (int x = 0; x < cellx.All; ++x) {
 					for (int y = 0; y < cellx.All; ++y) {
 						for (int z = 0; z < cellx.All; ++z) {
@@ -1570,7 +1570,7 @@ namespace FPS_n2 {
 				}
 			}
 			//各辺の明るさを指定
-			for (auto& cellx : m_CellxN) {
+			for (auto& cellx : this->m_CellxN) {
 				for (int x = 0; x < cellx.All; ++x) {
 					for (int y = 0; y < cellx.All; ++y) {
 						for (int z = 0; z < cellx.All; ++z) {
@@ -1597,21 +1597,21 @@ namespace FPS_n2 {
 			//
 			constexpr size_t size = (DrawMax + DrawMax) * (DrawMax + DrawMax) * (DrawMax + DrawMax) / 2 * 3 / 100;
 			for (int i = 0; i < total; i++) {
-				m_vert32s.at(i).Init(size);
-				m_vert32sS.at(i).Init(size);
-				m_vert32sSB.at(i).Init(size);
+				this->m_vert32s.at(i).Init(size);
+				this->m_vert32sS.at(i).Init(size);
+				this->m_vert32sSB.at(i).Init(size);
 			}
 			//
-			m_Jobs.at(0).Init(
+			this->m_Jobs.at(0).Init(
 				[&]() {
 					size_t id = 0;
-					m_vert32s.at(id).ResetNum();
+					this->m_vert32s.at(id).ResetNum();
 					AddCubesX(id);
 					AddCubesZ(id);
 				},
 				[&]() {
 					size_t id = 0;
-					m_vert32s.at(id).FlipVerts();
+					this->m_vert32s.at(id).FlipVerts();
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPos.at(id) = CameraParts->GetMainCamera().GetCamPos();
@@ -1621,7 +1621,7 @@ namespace FPS_n2 {
 					PutPos = (CamPos.at(0) + CamVec.at(0) * (LenMouse * Scale3DRate));
 					//PutPos.y = CellScale * (2.f);
 					if (blicksel >= 0) {
-						auto& cell = m_CellxN.front();
+						auto& cell = this->m_CellxN.front();
 						auto Put = cell.GetPoint(PutPos);
 						for (int xp = 0; xp < xput; xp++) {
 							for (int yp = 0; yp < yput; yp++) {
@@ -1635,128 +1635,128 @@ namespace FPS_n2 {
 #endif
 				}
 			);
-			m_Jobs.at(1).Init(
+			this->m_Jobs.at(1).Init(
 				[&]() {
 					size_t id = 1;
-					m_vert32s.at(id).ResetNum();
+					this->m_vert32s.at(id).ResetNum();
 					AddCubesX(id);
 					AddCubesZ(id);
 				},
 				[&]() {
 					size_t id = 1;
-					m_vert32s.at(id).FlipVerts();
+					this->m_vert32s.at(id).FlipVerts();
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPos.at(id) = CameraParts->GetMainCamera().GetCamPos();
 					CamVec.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPos.at(id)).normalized();
 				}
 			);
-			m_Jobs.at(2).Init(
+			this->m_Jobs.at(2).Init(
 				[&]() {
 					size_t id = 2;
-					m_vert32s.at(id).ResetNum();
+					this->m_vert32s.at(id).ResetNum();
 					AddCubesX(id);
 					AddCubesZ(id);
 				},
 				[&]() {
 					size_t id = 2;
-					m_vert32s.at(id).FlipVerts();
+					this->m_vert32s.at(id).FlipVerts();
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPos.at(id) = CameraParts->GetMainCamera().GetCamPos();
 					CamVec.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPos.at(id)).normalized();
 				}
 			);
-			m_Jobs.at(3).Init(
+			this->m_Jobs.at(3).Init(
 				[&]() {
 					size_t id = 3;
-					m_vert32s.at(id).ResetNum();
+					this->m_vert32s.at(id).ResetNum();
 					AddCubesX(id);
 					AddCubesZ(id);
 				},
 				[&]() {
 					size_t id = 3;
-					m_vert32s.at(id).FlipVerts();
+					this->m_vert32s.at(id).FlipVerts();
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPos.at(id) = CameraParts->GetMainCamera().GetCamPos();
 					CamVec.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPos.at(id)).normalized();
 				}
 			);
-			m_Jobs.at((size_t)(total + 0)).Init(
+			this->m_Jobs.at((size_t)(total + 0)).Init(
 				[&]() {
 					size_t id = 0;
-					m_vert32sS.at(id).ResetNum();
+					this->m_vert32sS.at(id).ResetNum();
 					AddSetShadowCubesX(id);
 					AddSetShadowCubesZ(id);
 				},
 				[&]() {
 					size_t id = 0;
-					m_vert32sS.at(id).FlipVerts();
+					this->m_vert32sS.at(id).FlipVerts();
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPosS.at(id) = CameraParts->GetMainCamera().GetCamPos();
 					CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPosS.at(id)).normalized();
 				}
 			);
-			m_Jobs.at((size_t)(total + 1)).Init(
+			this->m_Jobs.at((size_t)(total + 1)).Init(
 				[&]() {
 					size_t id = 1;
-					m_vert32sS.at(id).ResetNum();
+					this->m_vert32sS.at(id).ResetNum();
 					AddSetShadowCubesX(id);
 					AddSetShadowCubesZ(id);
 				},
 				[&]() {
 					size_t id = 1;
-					m_vert32sS.at(id).FlipVerts();
+					this->m_vert32sS.at(id).FlipVerts();
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPosS.at(id) = CameraParts->GetMainCamera().GetCamPos();
 					CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPosS.at(id)).normalized();
 				}
 			);
-			m_Jobs.at((size_t)(total + 2)).Init(
+			this->m_Jobs.at((size_t)(total + 2)).Init(
 				[&]() {
 					size_t id = 2;
-					m_vert32sS.at(id).ResetNum();
+					this->m_vert32sS.at(id).ResetNum();
 					AddSetShadowCubesX(id);
 					AddSetShadowCubesZ(id);
 				},
 				[&]() {
 					size_t id = 2;
-					m_vert32sS.at(id).FlipVerts();
+					this->m_vert32sS.at(id).FlipVerts();
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPosS.at(id) = CameraParts->GetMainCamera().GetCamPos();
 					CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPosS.at(id)).normalized();
 				}
 			);
-			m_Jobs.at((size_t)(total + 3)).Init(
+			this->m_Jobs.at((size_t)(total + 3)).Init(
 				[&]() {
 					size_t id = 3;
-					m_vert32sS.at(id).ResetNum();
+					this->m_vert32sS.at(id).ResetNum();
 					AddSetShadowCubesX(id);
 					AddSetShadowCubesZ(id);
 				},
 				[&]() {
 					size_t id = 3;
-					m_vert32sS.at(id).FlipVerts();
+					this->m_vert32sS.at(id).FlipVerts();
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPosS.at(id) = CameraParts->GetMainCamera().GetCamPos();
 					CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - CamPosS.at(id)).normalized();
 				}
 			);
-			m_Jobs.at((size_t)(total + total + 0)).Init(
+			this->m_Jobs.at((size_t)(total + total + 0)).Init(
 				[&]() {
 					size_t id = 0;
-					m_vert32sSB.at(id).ResetNum();
+					this->m_vert32sSB.at(id).ResetNum();
 					AddShadowCubesX(id);
 					AddShadowCubesZ(id);
 				},
 				[&]() {
 					size_t id = 0;
-					m_vert32sSB.at(id).FlipVerts();
+					this->m_vert32sSB.at(id).FlipVerts();
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPosSB.at(id) = CameraParts->GetMainCamera().GetCamPos();
@@ -1764,16 +1764,16 @@ namespace FPS_n2 {
 					light.at(id) = PostPassParts->GetShadowDir();
 				}
 			);
-			m_Jobs.at((size_t)(total + total + 1)).Init(
+			this->m_Jobs.at((size_t)(total + total + 1)).Init(
 				[&]() {
 					size_t id = 1;
-					m_vert32sSB.at(id).ResetNum();
+					this->m_vert32sSB.at(id).ResetNum();
 					AddShadowCubesX(id);
 					AddShadowCubesZ(id);
 				},
 				[&]() {
 					size_t id = 1;
-					m_vert32sSB.at(id).FlipVerts();
+					this->m_vert32sSB.at(id).FlipVerts();
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPosSB.at(id) = CameraParts->GetMainCamera().GetCamPos();
@@ -1781,16 +1781,16 @@ namespace FPS_n2 {
 					light.at(id) = PostPassParts->GetShadowDir();
 				}
 			);
-			m_Jobs.at((size_t)(total + total + 2)).Init(
+			this->m_Jobs.at((size_t)(total + total + 2)).Init(
 				[&]() {
 					size_t id = 2;
-					m_vert32sSB.at(id).ResetNum();
+					this->m_vert32sSB.at(id).ResetNum();
 					AddShadowCubesX(id);
 					AddShadowCubesZ(id);
 				},
 				[&]() {
 					size_t id = 2;
-					m_vert32sSB.at(id).FlipVerts();
+					this->m_vert32sSB.at(id).FlipVerts();
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPosSB.at(id) = CameraParts->GetMainCamera().GetCamPos();
@@ -1798,16 +1798,16 @@ namespace FPS_n2 {
 					light.at(id) = PostPassParts->GetShadowDir();
 				}
 			);
-			m_Jobs.at((size_t)(total + total + 3)).Init(
+			this->m_Jobs.at((size_t)(total + total + 3)).Init(
 				[&]() {
 					size_t id = 3;
-					m_vert32sSB.at(id).ResetNum();
+					this->m_vert32sSB.at(id).ResetNum();
 					AddShadowCubesX(id);
 					AddShadowCubesZ(id);
 				},
 				[&]() {
 					size_t id = 3;
-					m_vert32sSB.at(id).FlipVerts();
+					this->m_vert32sSB.at(id).FlipVerts();
 					//
 					auto* CameraParts = Camera3D::Instance();
 					CamPosSB.at(id) = CameraParts->GetMainCamera().GetCamPos();
@@ -1823,7 +1823,7 @@ namespace FPS_n2 {
 			auto* OptionParts = OptionManager::Instance();
 #if defined(DEBUG) & EDITBLICK
 			{
-				auto& cell = m_CellxN.front();
+				auto& cell = this->m_CellxN.front();
 				auto Put = cell.GetPoint(PutPos);
 				printfDx("%d,%d,%d\n", Put.x, Put.y, Put.z);
 				auto* Pad = PadControl::Instance();
@@ -1842,20 +1842,20 @@ namespace FPS_n2 {
 			for (int i = 0; i < total; i++) {
 				if ((i != 0) && (i != ThreadCounter)) { continue; }
 				//
-				if (BaseRate < m_CellxN.at(i).scaleRate) {
-					m_vert32s.at(i).Disable();
+				if (BaseRate < this->m_CellxN.at(i).scaleRate) {
+					this->m_vert32s.at(i).Disable();
 				}
 				else {
-					m_Jobs.at(i).Execute();
+					this->m_Jobs.at(i).Execute();
 				}
 				//
-				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (ShadowRate < m_CellxN.at(i).scaleRate)) {
-					m_vert32sS.at(i).Disable();
-					m_vert32sSB.at(i).Disable();
+				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (ShadowRate < this->m_CellxN.at(i).scaleRate)) {
+					this->m_vert32sS.at(i).Disable();
+					this->m_vert32sSB.at(i).Disable();
 				}
 				else {
-					m_Jobs.at((size_t)(total + i)).Execute();
-					m_Jobs.at((size_t)(total + total + i)).Execute();
+					this->m_Jobs.at((size_t)(total + i)).Execute();
+					this->m_Jobs.at((size_t)(total + total + i)).Execute();
 				}
 			}
 			++ThreadCounter %= total;
@@ -1868,16 +1868,16 @@ namespace FPS_n2 {
 		}
 		void		BackGroundClass::Shadow_Draw(void) const noexcept {
 			for (int i = 0; i < total; i++) {
-				auto& Vert = m_vert32sSB.at(i);
+				auto& Vert = this->m_vert32sSB.at(i);
 				if (Vert.m_32NumOut > 0) {
-					DrawPolygon32bitIndexed3D(Vert.m_vert32Out.data(), static_cast<int>(Vert.m_32NumOut * 4), Vert.m_index32Out.data(), static_cast<int>(Vert.m_32NumOut * 6 / 3), m_tex.get(), TRUE);
+					DrawPolygon32bitIndexed3D(Vert.m_vert32Out.data(), static_cast<int>(Vert.m_32NumOut * 4), Vert.m_index32Out.data(), static_cast<int>(Vert.m_32NumOut * 6 / 3), this->m_tex.get(), TRUE);
 				}
 			}
 		}
 		void		BackGroundClass::SetShadow_Draw_Rigid(void) const noexcept {
-			SetUseTextureToShader(0, m_tex.get());
+			SetUseTextureToShader(0, this->m_tex.get());
 			for (int i = 0; i < total; i++) {
-				auto& Vert = m_vert32sS.at(i);
+				auto& Vert = this->m_vert32sS.at(i);
 				if (Vert.m_32NumOut > 0) {
 					DrawPolygon32bitIndexed3DToShader(Vert.m_vert32Out.data(), static_cast<int>(Vert.m_32NumOut * 4), Vert.m_index32Out.data(), static_cast<int>(Vert.m_32NumOut * 6 / 3));
 				}
@@ -1891,11 +1891,11 @@ namespace FPS_n2 {
 			constexpr int MaxLimit = std::min(std::min(DrawMaxXPlus, DrawMaxZPlus), DrawMaxYPlus) * 5 / 4;
 
 			for (int i = 0; i < total; i++) {
-				auto& Vert = m_vert32s.at(i);
+				auto& Vert = this->m_vert32s.at(i);
 				if (Vert.m_32NumOut > 0) {
-					float Min = (m_CellxN.at(i).scaleRate != 1) ? MinLimit * m_CellxN.at(i).Scale : 0;
-					if (!(Min < Far && Near < MaxLimit * m_CellxN.at(i).Scale)) { continue; }
-					DrawPolygon32bitIndexed3D(Vert.m_vert32Out.data(), static_cast<int>(Vert.m_32NumOut * 4), Vert.m_index32Out.data(), static_cast<int>(Vert.m_32NumOut * 6 / 3), m_tex.get(), TRUE);
+					float Min = (this->m_CellxN.at(i).scaleRate != 1) ? MinLimit * this->m_CellxN.at(i).Scale : 0;
+					if (!(Min < Far && Near < MaxLimit * this->m_CellxN.at(i).Scale)) { continue; }
+					DrawPolygon32bitIndexed3D(Vert.m_vert32Out.data(), static_cast<int>(Vert.m_32NumOut * 4), Vert.m_index32Out.data(), static_cast<int>(Vert.m_32NumOut * 6 / 3), this->m_tex.get(), TRUE);
 				}
 			}
 #if defined(DEBUG) & EDITBLICK
