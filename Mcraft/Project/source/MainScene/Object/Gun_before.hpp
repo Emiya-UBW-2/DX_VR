@@ -99,8 +99,8 @@ namespace FPS_n2 {
 		class MuzzleSmokeControl {
 		private:
 			std::array<std::pair<Vector3DX,float>, 16>		m_Line;
-			int								m_LineSel = 0;
-			float							m_LinePer{ 0.f };
+			int												m_LineSel = 0;
+			float											m_LinePer{ 0.f };
 		public://ƒQƒbƒ^[
 			void			AddMuzzleSmokePower(void) noexcept { this->m_LinePer = std::clamp(this->m_LinePer + 0.1f, 0.f, 1.f); }
 		public:
@@ -152,7 +152,7 @@ namespace FPS_n2 {
 		class ModSlotControl {
 		private:
 			std::array<SharedObj, static_cast<int>(GunSlot::Max)>	m_Parts_Ptr{ nullptr };
-			std::shared_ptr<ModDataClass>		m_ModDataClass;
+			std::shared_ptr<ModDataClass>							m_ModDataClass;
 		public:
 			auto& GetModData(void) noexcept { return this->m_ModDataClass; }
 			const auto& GetModData(void) const noexcept { return this->m_ModDataClass; }

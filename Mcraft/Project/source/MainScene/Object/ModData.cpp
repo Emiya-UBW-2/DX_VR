@@ -52,9 +52,9 @@ namespace FPS_n2 {
 			}
 
 			else if (LEFT == "GunShootSound") {
-				for (int i = 0; i < static_cast<int>(GunShootSound::Max); i++) {
-					if (RIGHT == GunShootSoundName[i]) {
-						this->m_GunShootSound = (GunShootSound)i;
+				for (int i = 0; i < static_cast<int>(EnumGunSound::Max); i++) {
+					if (RIGHT == EnumGunSoundName[i]) {
+						this->m_GunShootSound = (EnumGunSound)i;
 						break;
 					}
 				}

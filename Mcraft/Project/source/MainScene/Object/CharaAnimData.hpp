@@ -7,7 +7,6 @@ namespace FPS_n2 {
 			//どれか択一で行うアニメーション
 			LowReady,
 			ADS,
-			Shot,
 			Cocking,
 			ReloadStart_Empty,
 			ReloadStart,
@@ -20,6 +19,7 @@ namespace FPS_n2 {
 			ChoiceOnceMax,//どれか択一で行うアニメーション の総数
 			//ここからは常時/特殊パターンのアニメーション
 			Base = ChoiceOnceMax,
+			Shot,
 			Hammer,
 			Open,
 
@@ -31,7 +31,6 @@ namespace FPS_n2 {
 		static const char* GunAnimeIDName[static_cast<int>(GunAnimeID::Max)] = {
 			"Ready",
 			"ADS",
-			"Shot",
 			"Cocking",
 			"ReloadStart_Empty",
 			"ReloadStart",
@@ -42,6 +41,7 @@ namespace FPS_n2 {
 			"Throw",
 
 			"Aim",
+			"Shot",
 			"Hammer",
 			"Open",
 		};
@@ -68,6 +68,13 @@ namespace FPS_n2 {
 			M870_raload,
 			M870_ready,
 			M870_cocking,
+			M870_ads,
+			M870_reloadstart_empty,
+			M870_reloadstart,
+			M870_reloadend,
+			M870_watch,
+			M870_aim,
+			M870_shot,
 			RGD5_aim,
 			RGD5_down,
 			RGD5_Ready,
@@ -103,6 +110,13 @@ namespace FPS_n2 {
 			"M870_raload",
 			"M870_ready",
 			"M870_cocking",
+			"M870_ads",
+			"M870_reloadstart_empty",
+			"M870_reloadstart",
+			"M870_reloadend",
+			"M870_watch",
+			"M870_aim",
+			"M870_shot",
 			"RGD5_aim",
 			"RGD5_down",
 			"RGD5_Ready",
@@ -115,12 +129,71 @@ namespace FPS_n2 {
 			"AK_ready",
 		};
 
+		class FingerData {
+			std::array<std::array<float, 5>, 2> m_Fingers{};
+		public:
+			auto& SetFingerPer(int LR, int Number) noexcept { return this->m_Fingers.at(LR).at(Number); }
+			const auto& GetFingerPer(int LR, int Number) const noexcept { return this->m_Fingers.at(LR).at(Number); }
+		public:
+			FingerData operator+(const FingerData& p) const noexcept {
+				FingerData Ret;
+				for (int LRindex = 0; LRindex < 2; ++LRindex) {
+					for (int Numberindex = 0; Numberindex < 5; ++Numberindex) {
+					}
+				}
+				int LRindex = 0;
+				for (const auto& LR : this->m_Fingers) {
+					int Numberindex = 0;
+					for (auto& f : LR) {
+						Ret.m_Fingers.at(LRindex).at(Numberindex) = f + p.m_Fingers.at(LRindex).at(Numberindex);
+						Numberindex++;
+					}
+					LRindex++;
+				}
+				return Ret;
+			}
+			FingerData operator-(const FingerData& p) const noexcept {
+				FingerData Ret;
+				for (int LRindex = 0; LRindex < 2; ++LRindex) {
+					for (int Numberindex = 0; Numberindex < 5; ++Numberindex) {
+					}
+				}
+				int LRindex = 0;
+				for (const auto& LR : this->m_Fingers) {
+					int Numberindex = 0;
+					for (auto& f : LR) {
+						Ret.m_Fingers.at(LRindex).at(Numberindex) = f - p.m_Fingers.at(LRindex).at(Numberindex);
+						Numberindex++;
+					}
+					LRindex++;
+				}
+				return Ret;
+			}
+			FingerData operator*(float scale) const noexcept {
+				FingerData Ret;
+				for (int LRindex = 0; LRindex < 2; ++LRindex) {
+					for (int Numberindex = 0; Numberindex < 5; ++Numberindex) {
+					}
+				}
+				int LRindex = 0;
+				for (const auto& LR : this->m_Fingers) {
+					int Numberindex = 0;
+					for (auto& f : LR) {
+						Ret.m_Fingers.at(LRindex).at(Numberindex) = f * scale;
+						Numberindex++;
+					}
+					LRindex++;
+				}
+				return Ret;
+			}
+		};
+
 		class GunAnimNow {
 			Vector3DX		m_Rotate;
 			Vector3DX		m_Pos;
-			std::array<std::array<float, 5>, 2>			m_Finger{};
+			FingerData		m_Finger{};
 		public:
-			void Set(const Vector3DX& Rotate, const Vector3DX& Pos, const std::array<std::array<float, 5>, 2>& Finger) {
+			void Set(const Vector3DX& Rotate, const Vector3DX& Pos, const FingerData& Finger) {
 				this->m_Rotate = Rotate;
 				this->m_Pos = Pos;
 				this->m_Finger = Finger;
@@ -135,8 +208,7 @@ namespace FPS_n2 {
 						).Get44DX() *
 					Matrix4x4DX::Mtrans(this->m_Pos * Scale3DRate);
 			}
-			const auto& GetFingerPerArray(void) const noexcept { return this->m_Finger; }
-			const auto& GetFingerPer(int LR, int Number) const noexcept { return this->m_Finger.at(LR).at(Number); }
+			const auto& GetFingerPer(void) const noexcept { return this->m_Finger; }
 		};
 
 		class GunAnimManager : public SingletonBase<GunAnimManager> {
@@ -186,7 +258,7 @@ namespace FPS_n2 {
 					Vector3DX		m_Rotate;
 					Vector3DX		m_Pos;
 					int				m_Frame{ 1 };
-					std::array<std::array<float, 5>, 2>			m_Finger{};
+					FingerData		m_Finger{};
 				public:
 					void Set(const std::string& data) {
 						std::vector<std::string> Args;
@@ -217,9 +289,9 @@ namespace FPS_n2 {
 						this->m_Frame = std::stoi(Args[6]);
 
 						int loop = 7;
-						for (auto& LR : this->m_Finger) {
-							for (auto& f : LR) {
-								f = std::stof(Args[loop]);
+						for (int LRindex = 0; LRindex < 2;++LRindex) {
+							for (int Numberindex = 0; Numberindex < 5;++Numberindex) {
+								this->m_Finger.SetFingerPer(LRindex, Numberindex) = std::stof(Args[loop]);
 								++loop;
 							}
 						}
@@ -228,8 +300,7 @@ namespace FPS_n2 {
 					const auto& GetRotate(void) const noexcept { return this->m_Rotate; }
 					const auto& GetPos(void) const noexcept { return this->m_Pos; }
 					const auto& GetFrame(void) const noexcept { return this->m_Frame; }
-					const auto& GetFingerPerArray(void) const noexcept { return this->m_Finger; }
-					const auto& GetFingerPer(int LR, int Number) const noexcept { return this->m_Finger.at(LR).at(Number); }
+					const auto& GetFingerPer(void) const noexcept { return this->m_Finger; }
 				};
 			public:
 				std::shared_ptr<GunanimData> first;
@@ -278,7 +349,7 @@ namespace FPS_n2 {
 			}
 
 			GunAnimNow	GetAnimNow(const AnimDatas* data, float nowframe) noexcept {
-				std::array<std::array<float, 5>, 2>			Finger{};
+				FingerData			Finger{};
 				GunAnimNow Ret; Ret.Set(Vector3DX::zero(), Vector3DX::zero(), Finger);
 				if (data) {
 					float totalTime = (float)data->GetTotalTime();
@@ -300,15 +371,8 @@ namespace FPS_n2 {
 					for (auto ani = data->second.begin(), e = data->second.end() - 1; ani != e; ++ani) {
 						float Frame = static_cast<float>((*ani)->GetFrame());
 						if ((nowframe - Frame) <= 0.f) {
-							int LRindex = 0;
-							for (const auto& LR : (*ani)->GetFingerPerArray()) {
-								int Numberindex = 0;
-								for (auto& f : LR) {
-									Finger.at(LRindex).at(Numberindex) = Lerp(f, (*(ani + 1))->GetFingerPer(LRindex, Numberindex), nowframe / Frame);
-									Numberindex++;
-								}
-								LRindex++;
-							}
+							Finger = Lerp((*ani)->GetFingerPer(), (*(ani + 1))->GetFingerPer(), nowframe / Frame);
+
 							Ret.Set(
 								Lerp((*ani)->GetRotate(), (*(ani + 1))->GetRotate(), nowframe / Frame),
 								Lerp((*ani)->GetPos(), (*(ani + 1))->GetPos(), nowframe / Frame),
@@ -390,7 +454,6 @@ namespace FPS_n2 {
 			{
 				EnumGunAnim::M16_ready,
 				EnumGunAnim::M16_ads,
-				EnumGunAnim::M16_shot,
 				EnumGunAnim::AK_cocking,
 				EnumGunAnim::AK_reloadstart_empty,
 				EnumGunAnim::AK_reloadstart,
@@ -400,6 +463,7 @@ namespace FPS_n2 {
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 				EnumGunAnim::M16_aim,
+				EnumGunAnim::M16_shot,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 			},
@@ -407,7 +471,6 @@ namespace FPS_n2 {
 			{
 				EnumGunAnim::M1911_ready,
 				EnumGunAnim::M1911_ads,
-				EnumGunAnim::M1911_shot,
 				EnumGunAnim::M1911_cocking,
 				EnumGunAnim::M1911_reloadstart_empty,
 				EnumGunAnim::M1911_reloadstart,
@@ -417,23 +480,24 @@ namespace FPS_n2 {
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 				EnumGunAnim::M1911_aim,
+				EnumGunAnim::M1911_shot,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 			},
 			//M870
 			{
 				EnumGunAnim::M870_ready,
-				EnumGunAnim::M16_ads,
-				EnumGunAnim::M16_shot,
+				EnumGunAnim::M870_ads,
 				EnumGunAnim::M870_cocking,
-				EnumGunAnim::M16_reloadstart_empty,
-				EnumGunAnim::M16_reloadstart,
+				EnumGunAnim::M870_reloadstart_empty,
+				EnumGunAnim::M870_reloadstart,
 				EnumGunAnim::M870_raload,
-				EnumGunAnim::M16_reloadend,
-				EnumGunAnim::M16_watch,
+				EnumGunAnim::M870_reloadend,
+				EnumGunAnim::M870_watch,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
-				EnumGunAnim::M16_aim,
+				EnumGunAnim::M870_aim,
+				EnumGunAnim::M870_shot,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 			},
@@ -447,10 +511,10 @@ namespace FPS_n2 {
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
-				EnumGunAnim::Max,
 				EnumGunAnim::RGD5_Ready,
 				EnumGunAnim::RGD5_throw,
 				EnumGunAnim::RGD5_aim,
+				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 			},
@@ -458,7 +522,6 @@ namespace FPS_n2 {
 			{
 				EnumGunAnim::AK_ready,
 				EnumGunAnim::M16_ads,
-				EnumGunAnim::M16_shot,
 				EnumGunAnim::AK_cocking,
 				EnumGunAnim::AK_reloadstart_empty,
 				EnumGunAnim::AK_reloadstart,
@@ -468,6 +531,7 @@ namespace FPS_n2 {
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 				EnumGunAnim::M16_aim,
+				EnumGunAnim::M16_shot,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 			},

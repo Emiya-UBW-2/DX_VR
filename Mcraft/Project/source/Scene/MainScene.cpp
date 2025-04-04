@@ -307,7 +307,12 @@ namespace FPS_n2 {
 			{
 				auto& ViewChara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
 				//ƒJƒƒ‰
-				Vector3DX CamPos = ViewChara->GetEyePositionCache() + Camera3D::Instance()->GetCamShake();
+				Vector3DX BaseCamPos = ViewChara->GetEyePositionCache();
+				if (ViewChara->GetGunPtrNow()) {
+					BaseCamPos = Lerp<Vector3DX>(BaseCamPos, ViewChara->GetGunPtrNow()->GetADSEyeMat().pos(), ViewChara->GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::ADS));
+				}
+
+				Vector3DX CamPos = BaseCamPos + Camera3D::Instance()->GetCamShake();
 				Vector3DX CamVec = CamPos + ViewChara->GetEyeRotationCache().zvec() * -1.f;
 				CamVec += Camera3D::Instance()->GetCamShake();
 				CamPos += Camera3D::Instance()->GetCamShake() * 2.f;

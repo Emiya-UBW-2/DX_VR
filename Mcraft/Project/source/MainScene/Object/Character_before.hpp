@@ -157,10 +157,10 @@ namespace FPS_n2 {
 			}
 			void			Update(bool WKey, bool AKey, bool SKey, bool DKey) {
 				auto* DXLib_refParts = DXLib_ref::Instance();
-				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (WKey ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (AKey ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (SKey ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (DKey ? 5.f : -15.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (WKey ? 3.f : -7.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (AKey ? 3.f : -7.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (SKey ? 3.f : -7.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (DKey ? 3.f : -7.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				this->m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
 				this->m_VecPower = this->m_VecTotal.magnitude();
 			}

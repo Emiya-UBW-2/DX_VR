@@ -77,13 +77,27 @@ namespace FPS_n2 {
 			AMMO,
 			MAG,
 		};
+
+		enum class EnumGunSound {
+			CockingPull,
+			CockingRelease,
+			ShotNormal,
+			ShotSuppressor,
+			UnloadMag,
+			LoadMag,
+			Max,
+		};
+		static const char* EnumGunSoundName[static_cast<int>(EnumGunSound::Max)] = {
+			"CockingPull",
+			"CockingRelease",
+			"Normal",
+			"Suppressor",
+			"UnloadMag",
+			"LoadMag",
+		};
+
 		struct GunSoundSet {
-			SoundEnum					m_Cock1{ SoundEnum::Shot2 };
-			SoundEnum					m_Cock2{ SoundEnum::Shot2 };
-			SoundEnum					m_ShotNormal{ SoundEnum::Shot2 };
-			SoundEnum					m_ShotSuppressor{ SoundEnum::Shot2 };
-			SoundEnum					m_Unload{ SoundEnum::Unload2 };
-			SoundEnum					m_Load{ SoundEnum::Load2 };
+			std::array<SoundEnum,static_cast<int>(EnumGunSound::Max)>	m_Sound{ };
 		};
 		const GunSoundSet GunSoundSets[] = {
 			{
@@ -143,15 +157,6 @@ namespace FPS_n2 {
 			"UnderRail",
 			"Sight",
 			"MuzzleAdapter",
-		};
-		enum class GunShootSound {
-			Normal,
-			Suppressor,
-			Max,
-		};
-		static const char* GunShootSoundName[static_cast<int>(GunShootSound::Max)] = {
-			"Normal",
-			"Suppressor",
 		};
 	};
 };

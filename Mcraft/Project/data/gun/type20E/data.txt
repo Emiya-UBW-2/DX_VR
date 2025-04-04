@@ -20,7 +20,6 @@ Slot1Type=Sight
 Slot1IsNeed=true
 Slot1Item=ACOG
 
-Shot=0
 Cocking=1
 Open=2
 Watch=3

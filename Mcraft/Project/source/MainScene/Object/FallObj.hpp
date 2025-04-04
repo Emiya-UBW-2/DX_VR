@@ -9,17 +9,36 @@ namespace FPS_n2 {
 			Magazine,
 			Grenade,
 		};
+
+		class FallObjChildBase {
+		public:
+			FallObjChildBase() {}
+			virtual ~FallObjChildBase() {}
+		public:
+			virtual SoundEnum GetFallSound(void) const noexcept = 0;
+		public:
+			virtual void RotateOnAir(moves* objMove) noexcept = 0;
+			virtual void RotateOnGround(moves* objMove) noexcept = 0;
+			virtual void OnTimeEnd(const moves& objMove) noexcept = 0;
+		};
+
 		class FallObjClass : public ObjectBaseClass {
 			float m_yAdd{ 0.f };
 			float m_Timer{ 0.f };
 			bool m_SoundSwitch{ false };
-			FallObjectType m_FallObjectType{};
-			bool m_GrenadeBombFlag{ false };
+			std::unique_ptr<FallObjChildBase> m_FallObject{};
+			bool m_IsEndFall{ false };
 		public:
 			FallObjClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::FallObj); }
 			~FallObjClass(void) noexcept {}
 		public:
-			bool			PopGrenadeBombSwitch() noexcept;
+			bool			PopIsEndFall() noexcept {
+				if (this->m_IsEndFall) {
+					this->m_IsEndFall = false;
+					return true;
+				}
+				return false;
+			}
 			void			SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float timer, FallObjectType Type) noexcept;
 		public:
 			void				Init_Sub(void) noexcept override {

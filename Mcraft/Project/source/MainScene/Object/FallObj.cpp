@@ -2,16 +2,72 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		bool FallObjClass::PopGrenadeBombSwitch(void) noexcept {
-			if (this->m_GrenadeBombFlag) {
-				this->m_GrenadeBombFlag = false;
-				return true;
+		//それぞれのオブジェクトの動き
+		class FallObjCart : public FallObjChildBase {
+		public:
+			FallObjCart() {}
+			virtual ~FallObjCart() {}
+		public:
+			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::CartFall; }
+		public:
+			void RotateOnAir(moves*) noexcept override {}//なにもしない
+			void RotateOnGround(moves* objMove) noexcept override {
+				//テキトーに飛び回る
+				auto* DXLib_refParts = DXLib_ref::Instance();
+				objMove->SetMat(Matrix3x3DX::RotAxis(Vector3DX::Cross(objMove->GetVec().normalized(), objMove->GetMat().zvec()), deg2rad(-50.f * 60.f * DXLib_refParts->GetDeltaTime())) * objMove->GetMat());
 			}
-			return false;
-		}
+			void OnTimeEnd(const moves&) noexcept override {}//なにもしない
+		};
+		class FallObjMagazine : public FallObjChildBase {
+		public:
+			FallObjMagazine() {}
+			virtual ~FallObjMagazine() {}
+		public:
+			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::MagFall; }
+		public:
+			void RotateOnAir(moves* objMove) noexcept override {
+				//NormalをX軸に指定して横に向く
+				objMove->SetMat(objMove->GetMat() * Matrix3x3DX::RotVec2(objMove->GetMat().xvec(), Vector3DX::up()));
+			}
+			void RotateOnGround(moves*) noexcept override {}// なにもしない
+			void OnTimeEnd(const moves&) noexcept override {}//なにもしない
+		};
+		class FallObjGrenade : public FallObjChildBase {
+		public:
+			FallObjGrenade() {}
+			virtual ~FallObjGrenade() {}
+		public:
+			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::FallGrenade; }
+		public:
+			void RotateOnAir(moves*) noexcept override {}//なにもしない
+			void RotateOnGround(moves* objMove) noexcept override {
+				//テキトーに飛び回る
+				auto* DXLib_refParts = DXLib_ref::Instance();
+				objMove->SetMat(Matrix3x3DX::RotAxis(Vector3DX::Cross(objMove->GetVec().normalized(), objMove->GetMat().zvec()), deg2rad(-50.f * 60.f * DXLib_refParts->GetDeltaTime())) * objMove->GetMat());
+			}
+			void OnTimeEnd(const moves& objMove) noexcept override {
+				auto* SE = SoundPool::Instance();
+				EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_greexp, objMove.GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate, 2.f);
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Explosion))->Play3D(objMove.GetPos(), Scale3DRate * 25.f);
+			}
+		};
+
+
 		void			FallObjClass::SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float timer, FallObjectType Type) noexcept {
 			this->m_Timer = timer;
-			this->m_FallObjectType = Type;
+			switch (Type) {
+			case FallObjectType::Cart:
+				m_FallObject = std::make_unique<FallObjCart>();
+				break;
+			case FallObjectType::Grenade:
+				m_FallObject = std::make_unique<FallObjGrenade>();
+				break;
+			case FallObjectType::Magazine:
+				m_FallObject = std::make_unique<FallObjMagazine>();
+				break;
+			default:
+				break;
+			}
 
 			SetMove().SetAll(pos, pos, pos, vec, mat, mat);
 			SetMove().Update(0.f, 0.f);
@@ -22,7 +78,7 @@ namespace FPS_n2 {
 			SetActive(true);
 			this->m_yAdd = 0.f;
 			this->m_SoundSwitch = true;
-			this->m_GrenadeBombFlag = false;
+			this->m_IsEndFall = false;
 		}
 		void			FallObjClass::FirstExecute(void) noexcept {
 			if (!IsActive()) { return; }
@@ -40,69 +96,21 @@ namespace FPS_n2 {
 					this->m_yAdd = 0.f;
 					if (this->m_SoundSwitch) {
 						this->m_SoundSwitch = false;
-						switch (this->m_FallObjectType) {
-						case FallObjectType::Cart:
-							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::CartFall))->Play3D(PosBuf, Scale3DRate * 5.f);
-							break;
-						case FallObjectType::Grenade:
-							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::FallGrenade))->Play3D(PosBuf, Scale3DRate * 5.f);
-							break;
-						case FallObjectType::Magazine:
-							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::MagFall))->Play3D(PosBuf, Scale3DRate * 5.f);
-							break;
-						default:
-							break;
-						}
+						SE->Get(SoundType::SE, static_cast<int>(m_FallObject->GetFallSound()))->Play3D(PosBuf, Scale3DRate * 5.f);
 					}
-					switch (this->m_FallObjectType) {
-					case FallObjectType::Magazine:
-						//NormalをX軸に指定して横に向く
-						SetMove().SetMat(GetMove().GetMat() * Matrix3x3DX::RotVec2(GetMove().GetMat().xvec(), Vector3DX::up()));
-						break;
-					default:
-						break;
-					}
+					m_FallObject->RotateOnGround(&SetMove());
+				}
+			}
+			m_FallObject->RotateOnAir(&SetMove());
 
-				}
-			}
-			switch (this->m_FallObjectType) {
-			case FallObjectType::Cart:
-			case FallObjectType::Grenade:
-			{
-				//テキトーに飛び回る
-				auto BB = (PosBuf - GetMove().GetRePos()).normalized();
-				if ((PosBuf - GetMove().GetRePos()).y <= 0.f) {
-					BB *= -1.f;
-				}
-				SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::Cross(BB, GetMove().GetMat().zvec()), deg2rad(-50.f * 60.f * DXLib_refParts->GetDeltaTime())) * GetMove().GetMat());
-			}
-			break;
-			case FallObjectType::Magazine:
-				//そのままを維持する
-				break;
-			default:
-				break;
-			}
 			SetMove().SetPos(PosBuf);
 			SetMove().Update(0.f, 0.f);
 			UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			//
 			if (this->m_Timer < 0.f) {
-				switch (this->m_FallObjectType) {
-				case FallObjectType::Cart:
-					break;
-				case FallObjectType::Grenade:
-					if (!this->m_GrenadeBombFlag) {
-						this->m_GrenadeBombFlag = true;
-						EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_greexp, GetMove().GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate, 2.f);
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Explosion))->Play3D(GetMove().GetPos(), Scale3DRate * 25.f);
-					}
-					break;
-				case FallObjectType::Magazine:
-					break;
-				default:
-					break;
-				}
+				this->m_IsEndFall = true;
+				m_FallObject->OnTimeEnd(GetMove());
+				m_FallObject.reset();
 				SetActive(false);
 			}
 			else {

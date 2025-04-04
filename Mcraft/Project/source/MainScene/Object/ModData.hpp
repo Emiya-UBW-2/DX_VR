@@ -30,7 +30,7 @@ namespace FPS_n2 {
 			SHOTTYPE						m_ShotType{ SHOTTYPE::SEMI };		//
 			bool							m_IronSight{ false };
 
-			GunShootSound					m_GunShootSound{ GunShootSound::Normal };
+			EnumGunSound					m_GunShootSound{ EnumGunSound::ShotNormal };
 
 			GraphHandle						m_Reitcle;
 			float							m_ZoomSize{ 1.f };

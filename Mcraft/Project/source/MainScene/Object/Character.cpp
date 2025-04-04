@@ -151,14 +151,8 @@ namespace FPS_n2 {
 				if (this->m_StuckGunTimer == 0.f) {
 					this->m_StuckGunTimer = 0.1f;
 					if (BackGround->CheckLinetoMap(GetEyePositionCache(), GetGunPtrNow()->GetFrameWorldMatParts(GunFrame::Muzzle).pos())) {//0.03ms
-						switch (GetGunPtrNow()->GetGunAnime()) {
-						case GunAnimeID::LowReady:
-						case GunAnimeID::None:
-						case GunAnimeID::Shot:
+						if (GetGunPtrNow()->IsCanShot()) {
 							this->m_IsStuckGun = true;
-							break;
-						default:
-							break;
 						}
 					}
 					else {
@@ -207,17 +201,20 @@ namespace FPS_n2 {
 							GetGunPtrNow()->SetGunAnime(GunAnimeID::Watch);
 						}
 						if (!GetGunPtrNow()->GetModSlot().GetModData()->GetIsThrowWeapon()) {
-							//射撃
-							if (this->m_Input.GetPADSPress(Controls::PADS::SHOT)) {
-								GetGunPtrNow()->SetShotStart();
-							}
 							//Reload
 							if (this->m_Input.GetPADSPress(Controls::PADS::RELOAD) ||
-								((GetGunPtrNow()->GetAmmoNumTotal() == 0) && this->m_Input.GetPADSPress(Controls::PADS::SHOT))) {
+								((GetGunPtrNow()->GetAmmoNumTotal() == 0) && this->m_Input.GetPADSTrigger(Controls::PADS::SHOT))) {
 								GetGunPtrNow()->ReloadStart();
 							}
+							//射撃
+							else if (this->m_Input.GetPADSPress(Controls::PADS::SHOT)) {
+								if (this->m_Input.GetPADSTrigger(Controls::PADS::SHOT)) {
+									SE->Get(SoundType::SE, (int)SoundEnum::Trigger)->Play3D(GetEyePositionCache(), Scale3DRate * 5.f);
+								}
+								GetGunPtrNow()->SetShotStart();
+							}
 							//グレネード構え
-							if (this->m_Input.GetPADSPress(Controls::PADS::THROW)) {
+							else if (this->m_Input.GetPADSPress(Controls::PADS::THROW)) {
 								GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
 								//投げ武器である最初の武器に切り替え
 								this->m_GunPtrControl.GunChangeThrowWeapon(true);
@@ -236,7 +233,7 @@ namespace FPS_n2 {
 					//射撃終了フラグ
 					switch (GetGunPtrNow()->GetShotType()) {
 					case SHOTTYPE::FULL:
-						GetGunPtrNow()->SetShotEnd(GetGunPtrNow()->GetAmmoNumTotal() != 0);
+						GetGunPtrNow()->SetShotEnd(true);
 						break;
 					case SHOTTYPE::SEMI:
 					case SHOTTYPE::BOLT:
@@ -266,14 +263,14 @@ namespace FPS_n2 {
 					}
 					break;
 				case GunAnimeID::ThrowReady:
-					if (GetGunPtrNow()->GetNowGunAnimePer() >= 1.f) {
+					if (GetGunPtrNow()->IsNowGunAnimeEnd()) {
 						if (!this->m_Input.GetPADSPress(Controls::PADS::SHOT) && !this->m_Input.GetPADSPress(Controls::PADS::THROW)) {
 							GetGunPtrNow()->SetGunAnime(GunAnimeID::Throw);
 						}
 					}
 					break;
 				case GunAnimeID::Throw:
-					if (GetGunPtrNow()->GetNowGunAnimePer() >= 0.6f) {
+					if (GetGunPtrNow()->GetNowAnimTimePerCache() >= 0.6f) {
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
 						//投げ武器ではない最初の武器に切り替え
 						this->m_GunPtrControl.GunChangeThrowWeapon(false);
@@ -296,7 +293,7 @@ namespace FPS_n2 {
 			if (this->m_LeanControl.Update(this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_L), this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_R))) {
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
 			}
-			GetGunPtrNow()->CalcSwitchPer(this->m_LeanControl.GetRad() > deg2rad(-1) || GetGunPtrNow()->GetReloading());
+			GetGunPtrNow()->CalcSwitchPer(this->m_LeanControl.GetRad() > deg2rad(-1) || !GetGunPtrNow()->IsCanShot());
 			//下半身
 			this->m_BottomAnimSelect = GetBottomStandAnimSel();
 			if (IsMoveLeft()) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
@@ -409,22 +406,22 @@ namespace FPS_n2 {
 			this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Upper_Ready)) = 1.f;
 			//指演算
 			auto FingerPer = GetGunPtrNow()->GetGunAnimeFingerNow();
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Thumb)) ,FingerPer.at(0).at(0), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Thumb)) ,FingerPer.GetFingerPer(0, 0), 0.8f, EasingType::OutExpo);
 			if (GetGunPtrNow()->GetGunAnime() == GunAnimeID::Shot) {//撃つときはそちらを参照する
 				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Point)), 0.4f, 0.5f, EasingType::OutExpo);
 			}
 			else {
-				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Point)), FingerPer.at(0).at(1), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Point)), FingerPer.GetFingerPer(0, 1), 0.8f, EasingType::OutExpo);
 			}
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_middle)) ,FingerPer.at(0).at(2), 0.8f, EasingType::OutExpo);
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Ring)) ,FingerPer.at(0).at(3), 0.8f, EasingType::OutExpo);
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Pinky)) ,FingerPer.at(0).at(4), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_middle)) , FingerPer.GetFingerPer(0, 2), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Ring)) , FingerPer.GetFingerPer(0, 3), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Pinky)) , FingerPer.GetFingerPer(0, 4), 0.8f, EasingType::OutExpo);
 			//
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Thumb)) ,FingerPer.at(1).at(0), 0.8f, EasingType::OutExpo);
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Point)) ,FingerPer.at(1).at(1), 0.8f, EasingType::OutExpo);
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_middle)) ,FingerPer.at(1).at(2), 0.8f, EasingType::OutExpo);
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Ring)) ,FingerPer.at(1).at(3), 0.8f, EasingType::OutExpo);
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Pinky)) ,FingerPer.at(1).at(4), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Thumb)) , FingerPer.GetFingerPer(1, 0), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Point)) , FingerPer.GetFingerPer(1, 1), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_middle)) , FingerPer.GetFingerPer(1, 2), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Ring)) , FingerPer.GetFingerPer(1, 3), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Pinky)) , FingerPer.GetFingerPer(1, 4), 0.8f, EasingType::OutExpo);
 
 			//下半身アニメ演算
 			ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomTurnAnimSel()), 0.5f);
@@ -464,7 +461,7 @@ namespace FPS_n2 {
 				SetMove().SetVec(vec);
 				PosBuf += GetMove().GetVec();
 				//壁判定
-				BackGround->CheckMapWall(GetMove().GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * (1.6f * Scale3DRate), 0.6f * Scale3DRate);
+				BackGround->CheckMapWall(GetMove().GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * (1.6f * Scale3DRate), 0.7f * Scale3DRate);
 				//ほかプレイヤーとの判定
 				{
 					float Radius = 2.f * 0.5f * Scale3DRate;
@@ -536,8 +533,6 @@ namespace FPS_n2 {
 						p->SetGrenadeThrowRot(GetEyeRotationCache());
 						//アニメーション
 						p->UpdateGunAnimePer(GetIsADS());
-						p->UpdateGunAnime();
-
 					}
 					else {
 						p->InitGunAnimePer();
@@ -562,7 +557,10 @@ namespace FPS_n2 {
 					{
 						Matrix4x4DX HandMat;
 						HandMat = GetGunPtrNow()->GetLeftHandMat();
-						Easing(&this->m_ArmBreakPer, (((GetGunPtrNow()->GetGunAnime() == GunAnimeID::None || GetGunPtrNow()->GetGunAnime() == GunAnimeID::Shot) && this->m_ArmBreak) || GetGunPtrNow()->GetModSlot().GetModData()->GetIsThrowWeapon()) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+						Easing(&this->m_ArmBreakPer, (
+							(GetGunPtrNow()->IsCanShot() && this->m_ArmBreak) ||
+							(GetGunPtrNow()->GetModSlot().GetModData()->GetIsThrowWeapon() && (GetGunPtrNow()->GetGunAnime() != GunAnimeID::ThrowReady))
+							) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 						if (this->m_ArmBreakPer > 0.01f) {
 							this->m_SlingArmZrad.Update(DXLib_refParts->GetDeltaTime());
 							this->m_SlingArmZrad.AddRad((0.5f * (this->m_RotateControl.GetRad().y - this->m_RotateControl.GetYRadBottom())) * DXLib_refParts->GetDeltaTime());
@@ -609,9 +607,6 @@ namespace FPS_n2 {
 					if (HeadBobbing) {
 						this->m_EyePositionCache += this->m_WalkSwingControl.CalcEye(CharaRotationCache, std::clamp(this->m_MoveControl.GetVecPower(), 0.f, 0.85f) / 0.65f, 5.f);
 					}
-					if (GetGunPtrNow()) {
-						this->m_EyePositionCache = Lerp<Vector3DX>(this->m_EyePositionCache, GetGunPtrNow()->GetADSEyeMat().pos(), GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::ADS));
-					}
 					this->m_EyeRotationCache = Matrix3x3DX::identity();
 					if (HeadBobbing) {
 						this->m_EyeRotationCache = this->m_WalkSwingControl.CalcWalk(GetEyePositionCache() - GetMove().GetPos(), std::clamp(GetMove().GetVec().magnitude() / 2.f, 0.f, 0.5f));
@@ -630,7 +625,6 @@ namespace FPS_n2 {
 					if (loop == this->m_GunPtrControl.GetNowGunSelect()) {
 						auto Mat = this->m_RagDollControl.GetFrameMat(RagFrame::RIGHThand);
 						p->SetGunMat(Matrix3x3DX::Get33DX(Mat), Mat.pos());
-						p->SetMagMat(false);
 						p->SetActiveAll(true);
 					}
 					else {
