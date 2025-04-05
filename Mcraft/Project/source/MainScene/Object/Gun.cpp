@@ -34,19 +34,19 @@ namespace FPS_n2 {
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.f, 0.f, 0.1f, 0.9f);
 					break;
 				case GunAnimeID::ReloadStart_Empty:
-					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.5f, 0.2f, 0.9f, 0.0f);
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.5f, 0.0f, 0.9f, 0.0f);
 					break;
 				case GunAnimeID::ReloadStart:
-					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.2f, 0.2f, 0.9f, 0.0f);
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.2f, 0.0f, 0.9f, 0.0f);
 					break;
 				case GunAnimeID::ReloadWait:
-					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.1f, 0.2f, 0.0f, 0.0f);
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.0f, 0.0f, 0.0f, 0.0f);
 					break;
 				case GunAnimeID::Reload:
-					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.1f, 0.2f, 0.0f, 0.0f);
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.0f, 0.0f, 0.0f, 0.0f);
 					break;
 				case GunAnimeID::ReloadEnd:
-					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.1f, 0.2f, 0.0f, 0.9f);
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.0f, 0.2f, 0.0f, 0.9f);
 					break;
 				case GunAnimeID::Watch:
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.1f, 0.1f, 0.8f, 0.8f);
