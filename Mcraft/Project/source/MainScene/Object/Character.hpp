@@ -52,6 +52,7 @@ namespace FPS_n2 {
 			const auto&		GetIsActiveCameraPosToPlayer(void) const noexcept { return this->m_IsActiveCameraPos; }
 			const auto&		GetCameraPosToPlayer(void) const noexcept { return this->m_CameraPos; }
 		public://ƒQƒbƒ^[
+			const auto&		GetMoveEyePos(void) const noexcept { return m_WalkSwingControl.GetMoveEyePos(); }
 			const auto&		GetRagDoll(void) const noexcept { return this->m_RagDollControl.GetRagDoll(); }
 			const auto&		GetLeanRad(void) const noexcept { return this->m_LeanControl.GetRad(); }
 			const auto&		GetRotRad(void) const noexcept { return this->m_RotateControl.GetRad(); }

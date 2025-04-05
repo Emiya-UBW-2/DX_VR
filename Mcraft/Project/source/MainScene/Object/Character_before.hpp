@@ -265,10 +265,13 @@ namespace FPS_n2 {
 			Vector3DX											m_WalkSwing_t{};
 			float												m_PrevY{};
 			float												m_MoveEyePosTimer{ 0.f };
+			Vector3DX											m_MoveEyePosLocal{};
 			Vector3DX											m_MoveEyePos{};
 		public:
 			WalkSwingControl(void) noexcept {}
 			~WalkSwingControl(void) noexcept {}
+		public:
+			const auto& GetMoveEyePos(void) const noexcept { return m_MoveEyePosLocal; }
 		public:
 			const auto CalcWalk(const Vector3DX& Pos, float SwingPer)noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
@@ -310,6 +313,7 @@ namespace FPS_n2 {
 				}
 				auto EyePos = Matrix3x3DX::Vtrans(Vector3DX::up() * (0.25f * SwingPer), Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_MoveEyePosTimer));
 				EyePos.y = -std::abs(EyePos.y);
+				Easing(&this->m_MoveEyePosLocal, EyePos, 0.9f, EasingType::OutExpo);
 				Easing(&this->m_MoveEyePos, Matrix3x3DX::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
 				return this->m_MoveEyePos;
 			}
