@@ -109,7 +109,6 @@ namespace FPS_n2 {
 		}
 		//
 		void				GunClass::UpdateGunMat(bool IsSelGun, bool IsActiveAutoAim, const Matrix3x3DX& CharaRotationCache, const Vector3DX& HeadPos, const Vector3DX& RotRad) noexcept {
-			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* SE = SoundPool::Instance();
 			if (IsSelGun) {

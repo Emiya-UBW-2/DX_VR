@@ -4,7 +4,7 @@ Info=AA
 
 Info_Eng=AA
 
-ShotRate=600
+ShotRate=850
 RecoilPower=120
 RecoilReturn=0.9
 shottype=FULL
@@ -16,9 +16,7 @@ Slot0Type=Magazine
 Slot0IsNeed=true
 Slot0Item=STANAG_30
 
-Shot=0
-Cocking=1
-Open=2
-Watch=3
+Cocking=0
+Open=1
 
 end

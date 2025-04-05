@@ -107,9 +107,10 @@
 9995=Pause
 
 9900=Move
-9902=Right Lean
+9902=Lean
 9903=Walk
 9904=Reload
+9905=Grenade
 9906=Shot
 9907=Change Weapon
 9908=Aim Down Sight
