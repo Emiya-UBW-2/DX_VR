@@ -63,12 +63,14 @@ namespace FPS_n2 {
 		};
 
 		enum class SHOTTYPE {
+			PUMP,
 			BOLT,
 			SEMI,
 			FULL,
 			Max,
 		};
 		static const char* SHOTTYPEName[static_cast<int>(SHOTTYPE::Max)] = {
+			"PUMP",
 			"BOLT",
 			"SEMI",
 			"FULL",

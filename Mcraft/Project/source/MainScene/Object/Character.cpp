@@ -231,16 +231,11 @@ namespace FPS_n2 {
 					break;
 				case GunAnimeID::Shot:
 					//ŽËŒ‚I—¹ƒtƒ‰ƒO
-					switch (GetGunPtrNow()->GetShotType()) {
-					case SHOTTYPE::FULL:
+					if (GetGunPtrNow()->GetShotType() == SHOTTYPE::FULL) {
 						GetGunPtrNow()->SetShotEnd(true);
-						break;
-					case SHOTTYPE::SEMI:
-					case SHOTTYPE::BOLT:
+					}
+					else {
 						GetGunPtrNow()->SetShotEnd(!this->m_Input.GetPADSPress(Controls::PADS::SHOT));
-						break;
-					default:
-						break;
 					}
 					break;
 				case GunAnimeID::ReloadStart_Empty:

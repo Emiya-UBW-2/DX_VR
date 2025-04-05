@@ -127,6 +127,7 @@ namespace FPS_n2 {
 								SetGunAnime(GunAnimeID::None);
 								break;
 							case SHOTTYPE::BOLT:
+							case SHOTTYPE::PUMP:
 								SetGunAnime(GunAnimeID::Cocking);
 								break;
 							default:
@@ -202,6 +203,7 @@ namespace FPS_n2 {
 				}
 				//
 #if defined(DEBUG)
+				auto* PlayerMngr = Player::PlayerManager::Instance();
 				if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
 					printfDx("[%s]\n", (GetGunAnime() == GunAnimeID::None) ? "None" : GunAnimeIDName[(int)GetGunAnime()]);
 					printfDx("[%f]\n", (GetGunAnime() == GunAnimeID::None) ? 0.0f : GetNowAnimTimePerCache());
@@ -266,7 +268,7 @@ namespace FPS_n2 {
 					this->m_MagHand = false;
 					break;
 				case GunAnimeID::Shot:
-					if (GetShotType() != SHOTTYPE::BOLT) {
+					if (GetShotType() == SHOTTYPE::FULL || GetShotType() == SHOTTYPE::SEMI) {
 						if (GetNowAnimTimePerCache() >= 0.6f) {
 							EjectCart();
 						}
@@ -284,6 +286,7 @@ namespace FPS_n2 {
 				case GunAnimeID::Cocking:
 					switch (GetShotType()) {
 					case SHOTTYPE::BOLT:
+					case SHOTTYPE::PUMP:
 						if ((5.f / 35.f < GetNowAnimTimePerCache() && GetNowAnimTimePerCache() < 6.f / 35.f)) {
 							PlayGunSound(EnumGunSound::CockingPull);
 						}
@@ -305,7 +308,7 @@ namespace FPS_n2 {
 					}
 					if (GetNowAnimTimePerCache() >= 19.f / 35.f) {
 						ChamberIn();
-						if (GetShotType() == SHOTTYPE::BOLT) {
+						if (GetShotType() == SHOTTYPE::BOLT || GetShotType() == SHOTTYPE::PUMP) {
 							EjectCart();
 						}
 					}
@@ -315,34 +318,55 @@ namespace FPS_n2 {
 					}
 					break;
 				case GunAnimeID::ReloadStart_Empty:
-					if (this->m_MagazinePtr) {
-						(*this->m_MagazinePtr)->SetHandMatrix(this->m_MagazinePoachMat);
-					}
-					if (GetReloadType() == RELOADTYPE::MAG) {
-						if (GetNowAnimTimePerCache() >= 0.5f) {
-							if (!this->m_isMagFall) {
-								this->m_isMagFall = true;
-								auto MagposMat = GetFrameWorldMatParts(GunFrame::Magpos);
-								this->m_MagFall.SetFall(
-									MagposMat.pos(), Matrix3x3DX::Get33DX(MagposMat), MagposMat.yvec() * (Scale3DRate * -3.f / 60.f),
-									12.f, FallObjectType::Magazine);
+					if (GetShotType() == SHOTTYPE::PUMP) {
+						MatMax = GetFrameWorldMatParts(GunFrame::Magpos);
+						SetMagMatLerp(this->m_MagazinePoachMat, 15.f / 60.f);
+						SetMagMatLerp(GetFrameWorldMatParts(GunFrame::Mag2), 25.f / 60.f);
+						SetMagMatLerp(GetFrameWorldMatParts(GunFrame::Magpos), 35.f / 60.f);
+						SetMagMatLerp(GetFrameWorldMatParts(GunFrame::Magpos), 48.f / 60.f);
+						SetMagMatLerp(this->m_MagazinePoachMat, 1.0f);
+
+						if (0.5f < GetNowAnimTimePerCache() && GetNowAnimTimePerCache() < 0.7f) {
+							PlayGunSound(EnumGunSound::LoadMag);
+							if (!this->m_IsChamberOn) {
+								this->m_Capacity++;
 							}
+							ChamberIn();
 						}
 						else {
-							this->m_isMagFall = false;
+							this->m_EnumGunSoundNow = EnumGunSound::Max;
+							this->m_IsChamberOn = false;
+						}
+						float Per = 35.f / 60.f;
+						if (GetShotType() == SHOTTYPE::PUMP) {
+							this->m_MagHand = true;
+							if (Per <= GetNowAnimTimePerCache()) {
+								this->m_MagHand = false;
+							}
 						}
 					}
-					this->m_MagHand = true;
-					switch (GetReloadType()) {
-					case RELOADTYPE::MAG:
-						if (0.f < GetNowAnimTimePerCache()) {
-							PlayGunSound(EnumGunSound::UnloadMag);
+					else {
+						if (this->m_MagazinePtr) {
+							(*this->m_MagazinePtr)->SetHandMatrix(this->m_MagazinePoachMat);
 						}
-						break;
-					case RELOADTYPE::AMMO:
-						break;
-					default:
-						break;
+						this->m_MagHand = true;
+						if (GetReloadType() == RELOADTYPE::MAG) {
+							if (GetNowAnimTimePerCache() >= 0.5f) {
+								if (!this->m_isMagFall) {
+									this->m_isMagFall = true;
+									auto MagposMat = GetFrameWorldMatParts(GunFrame::Magpos);
+									this->m_MagFall.SetFall(
+										MagposMat.pos(), Matrix3x3DX::Get33DX(MagposMat), MagposMat.yvec() * (Scale3DRate * -3.f / 60.f),
+										12.f, FallObjectType::Magazine);
+								}
+							}
+							else {
+								this->m_isMagFall = false;
+							}
+							if (0.f < GetNowAnimTimePerCache()) {
+								PlayGunSound(EnumGunSound::UnloadMag);
+							}
+						}
 					}
 					break;
 				case GunAnimeID::ReloadStart:
@@ -367,11 +391,13 @@ namespace FPS_n2 {
 					}
 					break;
 				case GunAnimeID::ReloadWait:
+					this->m_MagHand = true;
 					if (this->m_MagazinePtr) {
 						(*this->m_MagazinePtr)->SetHandMatrix(this->m_MagazinePoachMat);
 					}
 					break;
 				case GunAnimeID::Reload:
+					this->m_MagHand = true;
 					switch (GetReloadType()) {
 					case RELOADTYPE::MAG:
 						MatMax = this->m_MagazinePoachMat;
@@ -577,7 +603,7 @@ namespace FPS_n2 {
 						//射撃時のボルトアニメを行わせる
 						switch (GetGunAnime()) {
 						case GunAnimeID::Shot:
-							if (GetShotType() != SHOTTYPE::BOLT) {
+							if (GetShotType() == SHOTTYPE::FULL || GetShotType() == SHOTTYPE::SEMI) {
 								float Per = 0.6f;
 								if (GetNowAnimTimePerCache() < Per) {
 									SetObj().SetAnim(ID).SetPer(std::clamp(GetNowAnimTimePerCache() / Per, 0.f, 1.f));
@@ -603,10 +629,30 @@ namespace FPS_n2 {
 								SetObj().SetAnim(ID).SetPer(std::max(GetObj().GetAnim(ID).GetPer(), std::clamp(GetNowAnimTimePerCache() / Per, 0.f, 1.f)));
 							}
 							else {
-								SetObj().SetAnim(ID).SetPer(std::clamp(1.f - (GetNowAnimTimePerCache() - Per) / (1.f - Per), 0.f, 1.f));
+								if (GetShotType() == SHOTTYPE::PUMP) {
+									if (GetAmmoNumTotal() == 0) {
+										SetObj().SetAnim(ID).SetPer(1.f);
+									}
+									else {
+										SetObj().SetAnim(ID).SetPer(std::clamp(1.f - (GetNowAnimTimePerCache() - Per) / (1.f - Per), 0.f, 1.f));
+									}
+								}
+								else {
+									SetObj().SetAnim(ID).SetPer(std::clamp(1.f - (GetNowAnimTimePerCache() - Per) / (1.f - Per), 0.f, 1.f));
+								}
 							}
 						}
 							break;
+						case GunAnimeID::ReloadStart_Empty:
+						{
+							float Per = 35.f / 60.f;
+							if (GetShotType() == SHOTTYPE::PUMP) {
+								if (Per <= GetNowAnimTimePerCache()) {
+									SetObj().SetAnim(ID).SetPer(std::clamp(1.f - (GetNowAnimTimePerCache() - Per) / (1.f - Per), 0.f, 1.f));
+								}
+							}
+						}
+						break;
 						default:
 							break;
 						}
