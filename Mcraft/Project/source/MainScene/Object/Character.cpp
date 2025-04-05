@@ -255,6 +255,7 @@ namespace FPS_n2 {
 						}
 					}
 					break;
+				case GunAnimeID::ReloadWait:
 				case GunAnimeID::Reload:
 					if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::AMMO) {
 						if (this->m_Input.GetPADSTrigger(Controls::PADS::SHOT)) {

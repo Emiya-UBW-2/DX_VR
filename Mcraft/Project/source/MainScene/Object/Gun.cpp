@@ -39,6 +39,9 @@ namespace FPS_n2 {
 				case GunAnimeID::ReloadStart:
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.2f, 0.2f, 0.9f, 0.0f);
 					break;
+				case GunAnimeID::ReloadWait:
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.1f, 0.2f, 0.0f, 0.0f);
+					break;
 				case GunAnimeID::Reload:
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.1f, 0.2f, 0.0f, 0.0f);
 					break;
@@ -140,10 +143,15 @@ namespace FPS_n2 {
 					break;
 				case GunAnimeID::ReloadStart_Empty:
 					if (IsNowGunAnimeEnd()) {
-						SetGunAnime(GunAnimeID::Reload);
+						SetGunAnime(GunAnimeID::ReloadWait);
 					}
 					break;
 				case GunAnimeID::ReloadStart:
+					if (IsNowGunAnimeEnd()) {
+						SetGunAnime(GunAnimeID::ReloadWait);
+					}
+					break;
+				case GunAnimeID::ReloadWait:
 					if (IsNowGunAnimeEnd()) {
 						SetGunAnime(GunAnimeID::Reload);
 					}
@@ -162,7 +170,7 @@ namespace FPS_n2 {
 								SetGunAnime(GunAnimeID::ReloadEnd);
 							}
 							else {
-								SetGunAnime(GunAnimeID::Reload);
+								SetGunAnime(GunAnimeID::ReloadWait);
 							}
 							break;
 						default:
@@ -359,6 +367,11 @@ namespace FPS_n2 {
 						break;
 					}
 					break;
+				case GunAnimeID::ReloadWait:
+					if (this->m_MagazinePtr) {
+						(*this->m_MagazinePtr)->SetHandMatrix(this->m_MagazinePoachMat);
+					}
+					break;
 				case GunAnimeID::Reload:
 					switch (GetReloadType()) {
 					case RELOADTYPE::MAG:
@@ -528,7 +541,7 @@ namespace FPS_n2 {
 			for (auto& g : this->m_GunAnimeSpeed) {
 				g = 1.f;
 			}
-			this->m_GunAnimeSpeed.at(static_cast<int>(GunAnimeID::Shot)) = ((float)GetModSlot().GetModData()->GetShotRate()) / 60.f / 5.f;
+			this->m_GunAnimeSpeed.at(static_cast<int>(GunAnimeID::Shot)) = ((float)GetModSlot().GetModData()->GetShotRate()) / 60.f / 10.f;
 			InitGunAnimePer();
 			ObjectBaseClass::SetMinAABB(Vector3DX::vget(-0.5f, -0.5f, -0.5f) * Scale3DRate);
 			ObjectBaseClass::SetMaxAABB(Vector3DX::vget(0.5f, 0.5f, 0.5f) * Scale3DRate);
@@ -630,10 +643,11 @@ namespace FPS_n2 {
 		void				GunClass::CheckDraw_Sub(int) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
+				auto* PostPassParts = PostPassEffect::Instance();
 				if (!GetCanShot()) {
+					PostPassParts->Set_is_lens(false);
 					return;
 				}
-				auto* PostPassParts = PostPassEffect::Instance();
 				this->m_AimPoint.Calc(GetFrameWorldMatParts(GunFrame::Muzzle).pos() + GetMove().GetMat().zvec() * (-50.f * Scale3DRate));
 				Vector3DX LensPos;
 				Vector3DX LensSizeFrame;

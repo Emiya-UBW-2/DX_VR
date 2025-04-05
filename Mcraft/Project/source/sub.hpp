@@ -199,6 +199,7 @@ namespace FPS_n2 {
 	public:
 		void			AddMarker(const Vector3DX& position, HitPoint Damage, ArmerPoint ArmerDamage) noexcept {
 			this->m_HitMarkerList.at(this->m_Now).AddMarker(position, Damage, ArmerDamage);
+			++this->m_Now %= static_cast<int>(this->m_HitMarkerList.size());
 		}
 	public:
 		void			Init(void) noexcept {

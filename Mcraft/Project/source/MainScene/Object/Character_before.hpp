@@ -209,9 +209,9 @@ namespace FPS_n2 {
 
 
 				if (this->m_TurnBody || IsMove) { Easing(&this->m_yrad_Upper, GetRad().y, 0.85f, EasingType::OutExpo); }
-				auto YradChange = this->m_yrad_Bottom;
+				auto PrevYradBottom = this->m_yrad_Bottom;
 				Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - pyRadFront, 0.85f, EasingType::OutExpo);
-				YradChange = this->m_yrad_Bottom - YradChange;
+				auto YradChange = this->m_yrad_Bottom - PrevYradBottom;
 				Easing(&this->m_rad_Buf.z, (abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f, EasingType::OutExpo);
 			}
 		};
