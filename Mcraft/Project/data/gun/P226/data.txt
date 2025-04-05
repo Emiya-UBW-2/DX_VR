@@ -18,8 +18,7 @@ Slot0IsNeed=true
 Slot0Item=Mag226
 
 Hammer=0
-Cocking=2
-Open=3
-Watch=4
+Cocking=1
+Open=2
 
 end

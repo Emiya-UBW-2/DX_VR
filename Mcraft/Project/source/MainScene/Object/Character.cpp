@@ -517,10 +517,15 @@ namespace FPS_n2 {
 							);
 							break;
 						case 1://ホルスター
-						case 2://一応同じ
 							p->SetSlingMat(
 								Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-90)) * Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::Upper)),
 								GetFrameWorldMat(CharaFrame::Upper).pos() + GetFrameWorldMat(CharaFrame::Upper).yvec() * (-0.5f * Scale3DRate) + GetFrameWorldMat(CharaFrame::Upper).xvec() * (-0.3f * Scale3DRate)
+							);
+							break;
+						case 2://グレネード
+							p->SetSlingMat(
+								Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::LeftMag)),
+								GetFrameWorldMat(CharaFrame::LeftMag).pos()
 							);
 							break;
 						default:

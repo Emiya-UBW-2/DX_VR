@@ -4,7 +4,7 @@ Info=AA
 
 Info_Eng=AA
 
-ShotRate=600
+ShotRate=850
 RecoilPower=120
 RecoilReturn=0.9
 shottype=FULL
@@ -20,8 +20,7 @@ Slot1Type=Sight
 Slot1IsNeed=true
 Slot1Item=ACOG
 
-Cocking=1
-Open=2
-Watch=3
+Cocking=0
+Open=1
 
 end

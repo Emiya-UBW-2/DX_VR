@@ -20,7 +20,7 @@ Slot0Type=Magazine
 Slot0IsNeed=true
 Slot0Item=AK_6L20
 
-Cocking=1
-Watch=2
+Cocking=0
+Open=1
 
 end

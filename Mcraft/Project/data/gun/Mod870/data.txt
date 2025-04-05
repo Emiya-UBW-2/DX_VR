@@ -24,8 +24,7 @@ Slot1Type=Sight
 Slot1IsNeed=true
 Slot1Item=VIPER_DotSight
 
-Cocking=1
-Open=2
-Watch=3
+Cocking=0
+Open=1
 
 end
