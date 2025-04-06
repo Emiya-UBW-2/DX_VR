@@ -391,7 +391,7 @@ namespace FPS_n2 {
 
 #ifdef DEBUG_CAM
 							if (ID == 0) {
-								if (0 <= DBG_CamSel && DBG_CamSel <= 3) {
+								if (0 <= DBG_CamSel && DBG_CamSel <= 3 && false) {
 									auto* DXLib_refParts = DXLib_ref::Instance();
 									Ret.Set(DBG_AnimRot, DBG_AnimPos, Finger);
 									//
