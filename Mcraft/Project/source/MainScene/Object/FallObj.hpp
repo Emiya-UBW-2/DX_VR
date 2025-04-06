@@ -65,5 +65,39 @@ namespace FPS_n2 {
 			}
 			void			Dispose_Sub(void) noexcept override {}
 		};
+
+		class AmmoInChamberClass : public ObjectBaseClass {
+		public:
+			AmmoInChamberClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::AmmoInChamber); }
+			~AmmoInChamberClass(void) noexcept {}
+		public:
+			void			SetMat(const Vector3DX& pos, const Matrix3x3DX& mat) noexcept {
+				SetMove().SetAll(pos, pos, pos, Vector3DX::zero(), mat, mat);
+				SetMove().Update(0.f, 0.f);
+				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
+			}
+		public:
+			void				Init_Sub(void) noexcept override {
+				ObjectBaseClass::SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
+				ObjectBaseClass::SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
+				SetActive(true);
+			}
+			void				FirstExecute(void) noexcept override{}
+			void				DrawShadow(void) noexcept override {
+				if (!IsActive()) { return; }
+				auto* CameraParts = Camera3D::Instance();
+				if ((GetMove().GetPos() - CameraParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale3DRate) { return; }
+				GetObj().DrawModel();
+			}
+			void			Draw(bool isDrawSemiTrans, int Range) noexcept override {
+				if (!IsActive()) { return; }
+				if (!IsDraw(Range)) { return; }
+				if (isDrawSemiTrans) { return; }
+				auto* CameraParts = Camera3D::Instance();
+				if ((GetMove().GetPos() - CameraParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale3DRate) { return; }
+				GetObj().DrawModel();
+			}
+			void			Dispose_Sub(void) noexcept override {}
+		};
 	};
 };

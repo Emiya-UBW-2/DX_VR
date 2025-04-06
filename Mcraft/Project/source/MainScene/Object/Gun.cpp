@@ -99,6 +99,7 @@ namespace FPS_n2 {
 			this->m_MuzzleSmokeControl.AddMuzzleSmokePower();
 			//撃ちアニメに移行
 			SetGunAnime(GunAnimeID::Shot);
+			this->m_AmmoInChamberClass->SetActive(true);
 			//リコイル
 			float Power = 0.0001f * GetRecoilPower();
 			this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power);
@@ -270,7 +271,9 @@ namespace FPS_n2 {
 						}
 					}
 					};
-
+				if (this->m_AmmoInChamberClass) {
+					this->m_AmmoInChamberClass->SetMat(GetFrameWorldMatParts(GunFrame::Cart).pos(), GetMove().GetMat());
+				}
 				switch (GetGunAnime()) {
 				case GunAnimeID::LowReady:
 					this->m_MagHand = false;
@@ -572,6 +575,11 @@ namespace FPS_n2 {
 			if (this->m_MagazinePtr) {
 				this->m_MagFall.Init((*this->m_MagazinePtr)->GetFilePath(), 1);
 				this->m_CartFall.Init((*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPath(), 4);	//装填したマガジンの弾に合わせて薬莢生成
+				auto* ObjMngr = ObjectManager::Instance();
+				this->m_AmmoInChamberClass = std::make_shared<AmmoInChamberClass>();
+				ObjMngr->AddObject(this->m_AmmoInChamberClass);
+				ObjMngr->LoadModel(this->m_AmmoInChamberClass, this->m_AmmoInChamberClass, (*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPath().c_str());
+				this->m_AmmoInChamberClass->Init();
 			}
 			if (GetModSlot().GetModData()->GetIsThrowWeapon()) {
 				this->m_Grenade.Init(GetFilePath(), 1);
@@ -692,11 +700,6 @@ namespace FPS_n2 {
 		}
 		void				GunClass::DrawShadow(void) noexcept {
 			if (!IsActive()) { return; }
-
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyUserPlayerID())->GetChara();
-			if (Chara->GetLengthToPlayer() > 10.f * Scale3DRate) { return; }
-
 			GetObj().DrawModel();
 		}
 		void				GunClass::CheckDraw_Sub(int) noexcept {
@@ -745,11 +748,7 @@ namespace FPS_n2 {
 		void				GunClass::Draw(bool isDrawSemiTrans, int Range) noexcept {
 			if (!IsActive()) { return; }
 			if (!IsDraw(Range)) { return; }
-
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(GetMyUserPlayerID())->GetChara();
-			if (Chara->GetLengthToPlayer() > 10.f * Scale3DRate) { return; }
-
 			if (isDrawSemiTrans && GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
 				this->m_MuzzleSmokeControl.DrawMuzzleSmoke();
 			}

@@ -44,6 +44,7 @@ namespace FPS_n2 {
 			bool												m_IsEject{ false };
 			FallControl											m_MagFall;
 			FallControl											m_CartFall;
+			std::shared_ptr<AmmoInChamberClass>					m_AmmoInChamberClass{ nullptr };
 			int													m_GunSightSel{ 0 };
 			const std::shared_ptr<SightClass>*					m_SightPtr{ nullptr };
 			const std::shared_ptr<MuzzleClass>*					m_MuzzlePtr{ nullptr };
@@ -117,6 +118,7 @@ namespace FPS_n2 {
 			void				EjectCart(void) noexcept {
 				if (!this->m_IsEject) {
 					this->m_IsEject = true;
+					this->m_AmmoInChamberClass->SetActive(false);
 					this->m_CartFall.SetFall(
 						GetFrameWorldMatParts(GunFrame::Cart).pos(), GetMove().GetMat(),
 						(GetFrameWorldMatParts(GunFrame::CartVec).pos() - GetFrameWorldMatParts(GunFrame::Cart).pos() + Vector3DX::vget(GetRandf(0.2f), 0.5f + GetRandf(1.f), GetRandf(0.2f))).normalized() * (Scale3DRate * 2.f / 60.f), 2.f, FallObjectType::Cart);
@@ -332,6 +334,10 @@ namespace FPS_n2 {
 				this->m_MagFall.Dispose();
 				this->m_CartFall.Dispose();
 				this->m_Grenade.Dispose();
+
+				auto* ObjMngr = ObjectManager::Instance();
+				ObjMngr->DelObj((SharedObj*)&this->m_AmmoInChamberClass);
+				this->m_AmmoInChamberClass.reset();
 			}
 		};
 	};
