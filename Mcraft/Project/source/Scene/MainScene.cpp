@@ -26,7 +26,7 @@ namespace FPS_n2 {
 				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(loop)->GetChara();
 				if (loop == PlayerMngr->GetWatchPlayer()) {
 					CharacterClass::LoadChara("Main", (PlayerID)loop);
-					/*
+					//*
 					int Rand = GetRand(100);
 					if (Rand < 30) {
 						c->LoadCharaGun("type89", 0);
@@ -38,7 +38,7 @@ namespace FPS_n2 {
 						c->LoadCharaGun("Mod870", 0);
 					}
 					//*/
-					c->LoadCharaGun("AKS-74", 0);
+					//c->LoadCharaGun("Mod870", 0);
 					c->LoadCharaGun("P226", 1);
 					c->LoadCharaGun("RGD5", 2);
 					c->SetCharaTypeID(CharaTypeID::Team);
