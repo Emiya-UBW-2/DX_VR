@@ -11,7 +11,7 @@ Info_Far=It specialized for close combat.
 ShotRate=300
 RecoilPower=200
 RecoilReturn=0.95
-shottype=BOLT
+shottype=PUMP
 usehumanAnim=2
 soundsel=2
 reloadType=AMMO
@@ -24,7 +24,6 @@ Slot1Type=Sight
 Slot1IsNeed=true
 Slot1Item=VIPER_DotSight
 
-Cocking=0
-Open=1
+Open=0
 
 end

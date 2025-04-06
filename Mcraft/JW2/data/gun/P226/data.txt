@@ -4,7 +4,7 @@ Info=AA
 
 Info_Eng=AA
 
-ShotRate=300
+ShotRate=600
 RecoilPower=100
 RecoilReturn=0.95
 shottype=SEMI

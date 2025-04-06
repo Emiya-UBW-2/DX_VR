@@ -20,7 +20,6 @@ Slot1Type=Sight
 Slot1IsNeed=true
 Slot1Item=ACOG
 
-Cocking=0
-Open=1
+Open=0
 
 end

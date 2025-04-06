@@ -16,7 +16,6 @@ Slot0Type=Magazine
 Slot0IsNeed=true
 Slot0Item=STANAG_30
 
-Cocking=0
-Open=1
+Open=0
 
 end
