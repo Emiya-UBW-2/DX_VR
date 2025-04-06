@@ -569,6 +569,7 @@ namespace FPS_n2 {
 							Matrix4x4DX HandMat;
 							HandMat = GetGunPtrNow()->GetLeftHandMat();
 							Easing(&this->m_ArmBreakPer, (
+								(GetGunPtrNow()->GetGunAnime() == GunAnimeID::Watch) ||
 								(GetGunPtrNow()->IsCanShot() && this->m_ArmBreak) ||
 								(GetGunPtrNow()->GetModSlot().GetModData()->GetIsThrowWeapon() && (GetGunPtrNow()->GetGunAnime() != GunAnimeID::ThrowReady))
 								) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);

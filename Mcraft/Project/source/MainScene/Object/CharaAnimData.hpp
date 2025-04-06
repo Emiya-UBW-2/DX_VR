@@ -83,6 +83,7 @@ namespace FPS_n2 {
 			RGD5_down,
 			RGD5_Ready,
 			RGD5_throw,
+			RGD5_watch,
 			AK_cocking,
 			AK_reloadstart_empty,
 			AK_reloadstart,
@@ -128,6 +129,7 @@ namespace FPS_n2 {
 			"RGD5_down",
 			"RGD5_Ready",
 			"RGD5_throw",
+			"RGD5_watch",
 			"AK_cocking",
 			"AK_reloadstart_empty",
 			"AK_reloadstart",
@@ -356,7 +358,7 @@ namespace FPS_n2 {
 				return nullptr;
 			}
 
-			GunAnimNow	GetAnimNow(const AnimDatas* data, float nowframe) noexcept {
+			GunAnimNow	GetAnimNow(PlayerID ID, const AnimDatas* data, float nowframe) noexcept {
 				FingerData			Finger{};
 				GunAnimNow Ret; Ret.Set(Vector3DX::zero(), Vector3DX::zero(), Finger);
 				if (data) {
@@ -388,60 +390,62 @@ namespace FPS_n2 {
 							);
 
 #ifdef DEBUG_CAM
-							if (0 <= DBG_CamSel && DBG_CamSel <= 3 && false) {
-								auto* DXLib_refParts = DXLib_ref::Instance();
-								Ret.Set(DBG_AnimRot, DBG_AnimPos, Finger);
-								//
-								if (CheckHitKey(KEY_INPUT_RCONTROL) != 0) {
-									if (CheckHitKey(KEY_INPUT_J) != 0) {
-										DBG_AnimRot.x += 5.f * DXLib_refParts->GetDeltaTime();
-									}
-									if (CheckHitKey(KEY_INPUT_L) != 0) {
-										DBG_AnimRot.x -= 5.f * DXLib_refParts->GetDeltaTime();
-									}
+							if (ID == 0) {
+								if (0 <= DBG_CamSel && DBG_CamSel <= 3) {
+									auto* DXLib_refParts = DXLib_ref::Instance();
+									Ret.Set(DBG_AnimRot, DBG_AnimPos, Finger);
 									//
-									if (CheckHitKey(KEY_INPUT_I) != 0) {
-										DBG_AnimRot.y += 5.f * DXLib_refParts->GetDeltaTime();
+									if (CheckHitKey(KEY_INPUT_RCONTROL) != 0) {
+										if (CheckHitKey(KEY_INPUT_J) != 0) {
+											DBG_AnimRot.x += 5.f * DXLib_refParts->GetDeltaTime() * 0.1f;
+										}
+										if (CheckHitKey(KEY_INPUT_L) != 0) {
+											DBG_AnimRot.x -= 5.f * DXLib_refParts->GetDeltaTime() * 0.1f;
+										}
+										//
+										if (CheckHitKey(KEY_INPUT_I) != 0) {
+											DBG_AnimRot.y += 5.f * DXLib_refParts->GetDeltaTime() * 0.1f;
+										}
+										if (CheckHitKey(KEY_INPUT_K) != 0) {
+											DBG_AnimRot.y -= 5.f * DXLib_refParts->GetDeltaTime() * 0.1f;
+										}
+										//
+										if (CheckHitKey(KEY_INPUT_U) != 0) {
+											DBG_AnimRot.z += 5.f * DXLib_refParts->GetDeltaTime() * 0.1f;
+										}
+										if (CheckHitKey(KEY_INPUT_O) != 0) {
+											DBG_AnimRot.z -= 5.f * DXLib_refParts->GetDeltaTime() * 0.1f;
+										}
 									}
-									if (CheckHitKey(KEY_INPUT_K) != 0) {
-										DBG_AnimRot.y -= 5.f * DXLib_refParts->GetDeltaTime();
+									else {
+										if (CheckHitKey(KEY_INPUT_J) != 0) {
+											DBG_AnimPos.x += 0.01f * DXLib_refParts->GetDeltaTime() * 0.1f;
+										}
+										if (CheckHitKey(KEY_INPUT_L) != 0) {
+											DBG_AnimPos.x -= 0.01f * DXLib_refParts->GetDeltaTime() * 0.1f;
+										}
+										//
+										if (CheckHitKey(KEY_INPUT_I) != 0) {
+											DBG_AnimPos.y += 0.01f * DXLib_refParts->GetDeltaTime() * 0.1f;
+										}
+										if (CheckHitKey(KEY_INPUT_K) != 0) {
+											DBG_AnimPos.y -= 0.01f * DXLib_refParts->GetDeltaTime() * 0.1f;
+										}
+										//
+										if (CheckHitKey(KEY_INPUT_U) != 0) {
+											DBG_AnimPos.z += 0.01f * DXLib_refParts->GetDeltaTime() * 0.1f;
+										}
+										if (CheckHitKey(KEY_INPUT_O) != 0) {
+											DBG_AnimPos.z -= 0.01f * DXLib_refParts->GetDeltaTime() * 0.1f;
+										}
 									}
-									//
-									if (CheckHitKey(KEY_INPUT_U) != 0) {
-										DBG_AnimRot.z += 5.f * DXLib_refParts->GetDeltaTime();
-									}
-									if (CheckHitKey(KEY_INPUT_O) != 0) {
-										DBG_AnimRot.z -= 5.f * DXLib_refParts->GetDeltaTime();
-									}
+									printfDx("Rot[%5.2f,%5.2f,%5.2f]\n", DBG_AnimRot.x, DBG_AnimRot.y, DBG_AnimRot.z);
+									printfDx("Pos[%5.2f,%5.2f,%5.2f]\n", DBG_AnimPos.x, DBG_AnimPos.y, -DBG_AnimPos.z);
 								}
 								else {
-									if (CheckHitKey(KEY_INPUT_J) != 0) {
-										DBG_AnimPos.x += 0.01f * DXLib_refParts->GetDeltaTime();
-									}
-									if (CheckHitKey(KEY_INPUT_L) != 0) {
-										DBG_AnimPos.x -= 0.01f * DXLib_refParts->GetDeltaTime();
-									}
-									//
-									if (CheckHitKey(KEY_INPUT_I) != 0) {
-										DBG_AnimPos.y += 0.01f * DXLib_refParts->GetDeltaTime();
-									}
-									if (CheckHitKey(KEY_INPUT_K) != 0) {
-										DBG_AnimPos.y -= 0.01f * DXLib_refParts->GetDeltaTime();
-									}
-									//
-									if (CheckHitKey(KEY_INPUT_U) != 0) {
-										DBG_AnimPos.z += 0.01f * DXLib_refParts->GetDeltaTime();
-									}
-									if (CheckHitKey(KEY_INPUT_O) != 0) {
-										DBG_AnimPos.z -= 0.01f * DXLib_refParts->GetDeltaTime();
-									}
+									//DBG_AnimRot.Set(0.0f, 0.0f, 0.0f);
+									//DBG_AnimPos.Set(0.0f, 0.0f, 0.0f);
 								}
-								printfDx("Rot[%5.2f,%5.2f,%5.2f]\n", DBG_AnimRot.x, DBG_AnimRot.y, DBG_AnimRot.z);
-								printfDx("Pos[%5.2f,%5.2f,%5.2f]\n", DBG_AnimPos.x, DBG_AnimPos.y, -DBG_AnimPos.z);
-							}
-							else {
-								//DBG_AnimRot.Set(0.0f, 0.0f, 0.0f);
-								//DBG_AnimPos.Set(0.0f, 0.0f, 0.0f);
 							}
 #endif
 							break;
@@ -522,7 +526,7 @@ namespace FPS_n2 {
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
-				EnumGunAnim::Max,
+				EnumGunAnim::RGD5_watch,
 				EnumGunAnim::RGD5_Ready,
 				EnumGunAnim::RGD5_throw,
 				EnumGunAnim::RGD5_aim,

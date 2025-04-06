@@ -128,7 +128,7 @@ namespace FPS_n2 {
 			void				ExecuteGrenade(void) noexcept;
 			const auto			GetAnimDataNow(GunAnimeID ID) const noexcept {
 				auto* AnimMngr = GunAnimManager::Instance();
-				return AnimMngr->GetAnimNow(AnimMngr->GetAnimData(GetGunAnim(ID)), this->m_GunAnimeTime.at(static_cast<int>(ID)));
+				return AnimMngr->GetAnimNow(GetMyUserPlayerID(), AnimMngr->GetAnimData(GetGunAnim(ID)), this->m_GunAnimeTime.at(static_cast<int>(ID)));
 			}
 			const auto			GetNowGunAnimeID(void) const noexcept {
 				if (GetGunAnime() == GunAnimeID::None) { return -1; }
@@ -147,7 +147,7 @@ namespace FPS_n2 {
 				}
 				return Matrix4x4DX::identity();
 			}
-			const auto&			GetMyUserPlayerID(void) const noexcept { return this->m_MyID; }
+			const PlayerID&		GetMyUserPlayerID(void) const noexcept { return this->m_MyID; }
 			const auto&			GetSwitchPer(void) const noexcept { return this->m_SwitchPer; }
 			const auto&			GetAutoAimID(void) const noexcept { return this->m_AutoAimControl.GetAutoAimID(); }
 			const auto			GetNowAnimTimePerCache(void) const noexcept {

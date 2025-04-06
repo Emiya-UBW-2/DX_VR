@@ -123,7 +123,9 @@ namespace FPS_n2 {
 			this->m_IsEnd = false;
 			this->m_StartTimer = 3.f;
 
-			EffectSingleton::Instance()->SetLoop(Sceneclass::Effect::ef_dust, Vector3DX::zero());
+			auto& ViewChara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
+			this->m_EffectPos = ViewChara->GetEyePositionCache();
+			EffectSingleton::Instance()->SetLoop(Sceneclass::Effect::ef_dust, this->m_EffectPos);
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 #ifdef DEBUG
@@ -311,7 +313,6 @@ namespace FPS_n2 {
 				if (ViewChara->GetGunPtrNow()) {
 					BaseCamPos = Lerp<Vector3DX>(BaseCamPos, ViewChara->GetGunPtrNow()->GetADSEyeMat().pos(), ViewChara->GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::ADS));
 				}
-
 				Vector3DX CamPos = BaseCamPos + Camera3D::Instance()->GetCamShake();
 				Vector3DX CamVec = CamPos + ViewChara->GetEyeRotationCache().zvec() * -1.f;
 				CamVec += Camera3D::Instance()->GetCamShake();
@@ -388,7 +389,9 @@ namespace FPS_n2 {
 				auto far_t = CameraParts->GetMainCamera().GetCamFar();
 				CameraParts->SetMainCamera().SetCamInfo(fov_t, CameraParts->GetMainCamera().GetCamNear(), far_t);
 				//DoF
-				PostPassEffect::Instance()->Set_DoFNearFar(Chara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.2f), Scale3DRate * 5.f, Scale3DRate * 0.1f, Chara->GetIsADS() ? (far_t * 3.f) : (far_t * 2.f));
+				PostPassEffect::Instance()->Set_DoFNearFar(
+					Chara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), Scale3DRate * 5.f,
+					Chara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), Chara->GetIsADS() ? (far_t * 3.f) : (far_t * 2.f));
 			}
 			//コンカッション
 			{

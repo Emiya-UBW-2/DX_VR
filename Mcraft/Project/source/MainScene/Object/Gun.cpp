@@ -49,7 +49,7 @@ namespace FPS_n2 {
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.0f, 0.2f, 0.0f, 0.9f);
 					break;
 				case GunAnimeID::Watch:
-					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.1f, 0.1f, 0.8f, 0.8f);
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.1f, 0.1f, 0.9f, 0.9f);
 					break;
 				case GunAnimeID::ThrowReady:
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.1f, 0.1f, 0.8f, 0.8f);
