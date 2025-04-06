@@ -61,6 +61,8 @@ namespace FPS_n2 {
 			bool												m_isMagFall{};
 			bool												m_MagHand{ false };
 			ArmMovePerClass										m_MagArm;
+			bool												m_CockHand{ false };
+			ArmMovePerClass										m_CockArm;
 			Vector3DX											m_UpperPrevRad, m_UpperRad;
 			Matrix3x3DX											m_GunSwingMat, m_GunSwingMat2;
 			Vector2DX											m_RecoilRadAdd;
@@ -195,6 +197,12 @@ namespace FPS_n2 {
 				Vector3DX Handzvec = GetFrameWorldMatParts(GunFrame::LeftHandZvec).pos() - HandPos;
 				return Matrix4x4DX::Axis1(Handyvec.normalized(), Handzvec.normalized(), HandPos);
 			}
+			const auto			GetCockLeftHandMat(void) const noexcept {
+				Vector3DX HandPos = GetFrameWorldMatParts(GunFrame::LeftHandPosCock).pos();
+				Vector3DX Handyvec = GetFrameWorldMatParts(GunFrame::LeftHandYvecCock).pos() - HandPos;
+				Vector3DX Handzvec = GetFrameWorldMatParts(GunFrame::LeftHandZvecCock).pos() - HandPos;
+				return Matrix4x4DX::Axis1(Handyvec.normalized(), Handzvec.normalized(), HandPos);
+			}
 			const auto			GetMagHandMat(void) const noexcept {
 				if (this->m_MagazinePtr) {
 					Vector3DX MagPos = (*this->m_MagazinePtr)->GetFrameWorldMat(GunFrame::LeftHandPos).pos();
@@ -204,7 +212,9 @@ namespace FPS_n2 {
 				}
 				return Matrix4x4DX::identity();
 			}
-			const auto			GetLeftHandMat(void) const noexcept { return Lerp(GetBaseLeftHandMat(), GetMagHandMat(), this->m_MagArm.Per()); }
+			const auto			GetLeftHandMat(void) const noexcept {
+				return Lerp(Lerp(GetBaseLeftHandMat(), GetMagHandMat(), this->m_MagArm.Per()), GetCockLeftHandMat(), this->m_CockArm.Per());
+			}
 			const auto			GetAmmoNumTotal(void) const noexcept { return this->m_Capacity + ((this->m_ChamberAmmoData) ? 1 : 0); }
 			const auto			GetNowGunAnimePer(void) const noexcept {
 				if (GetGunAnime() >= GunAnimeID::Max) {
@@ -279,6 +289,8 @@ namespace FPS_n2 {
 			void				Spawn(void) noexcept {
 				this->m_MagHand = false;
 				this->m_MagArm.Init(this->m_MagHand);
+				this->m_CockHand = false;
+				this->m_CockArm.Init(this->m_CockHand);
 				this->m_SlingPer = 1.f;
 				this->m_IsChamberOn = false;
 				SetGunAnime(GunAnimeID::None);

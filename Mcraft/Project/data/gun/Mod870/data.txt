@@ -24,6 +24,6 @@ Slot1Type=Sight
 Slot1IsNeed=true
 Slot1Item=VIPER_DotSight
 
-Open=1
+Open=0
 
 end

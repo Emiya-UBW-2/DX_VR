@@ -161,13 +161,27 @@ namespace FPS_n2 {
 						switch (GetReloadType()) {
 						case RELOADTYPE::MAG:
 							this->m_Capacity = GetAmmoAll();//ƒ}ƒKƒWƒ“‘•“U
-							SetGunAnime(GunAnimeID::ReloadEnd);
+							if (IsNowGunAnimeEnd()) {
+								//ƒ`ƒƒƒ“ƒo[‚É’e‚ª‚È‚¢‚ªƒ}ƒKƒWƒ“‚É‚Í’e‚ª‚ ‚éê‡
+								if (!this->m_ChamberAmmoData) {
+									SetGunAnime(GunAnimeID::Cocking);
+								}
+								else {
+									SetGunAnime(GunAnimeID::ReloadEnd);
+								}
+							}
 							break;
 						case RELOADTYPE::AMMO:
 							this->m_Capacity++;//ƒ}ƒKƒWƒ“‘•“U
 							if ((this->m_Capacity == GetAmmoAll()) || this->m_ReloadAmmoCancel) {
 								this->m_ReloadAmmoCancel = false;
-								SetGunAnime(GunAnimeID::ReloadEnd);
+								//ƒ`ƒƒƒ“ƒo[‚É’e‚ª‚È‚¢‚ªƒ}ƒKƒWƒ“‚É‚Í’e‚ª‚ ‚éê‡
+								if (!this->m_ChamberAmmoData) {
+									SetGunAnime(GunAnimeID::Cocking);
+								}
+								else {
+									SetGunAnime(GunAnimeID::ReloadEnd);
+								}
 							}
 							else {
 								SetGunAnime(GunAnimeID::ReloadWait);
@@ -180,13 +194,7 @@ namespace FPS_n2 {
 					break;
 				case GunAnimeID::ReloadEnd:
 					if (IsNowGunAnimeEnd()) {
-						//ƒ`ƒƒƒ“ƒo[‚É’e‚ª‚È‚¢‚ªƒ}ƒKƒWƒ“‚É‚Í’e‚ª‚ ‚éê‡
-						if (!this->m_ChamberAmmoData && (this->m_Capacity != 0)) {
-							SetGunAnime(GunAnimeID::Cocking);
-						}
-						else {
-							SetGunAnime(GunAnimeID::None);
-						}
+						SetGunAnime(GunAnimeID::None);
 					}
 					break;
 				case GunAnimeID::Watch:
@@ -284,6 +292,8 @@ namespace FPS_n2 {
 					}
 					break;
 				case GunAnimeID::Cocking:
+					this->m_MagHand = false;
+					this->m_CockHand = true;
 					switch (GetShotType()) {
 					case SHOTTYPE::BOLT:
 					case SHOTTYPE::PUMP:
@@ -305,6 +315,9 @@ namespace FPS_n2 {
 						break;
 					default:
 						break;
+					}
+					if (GetNowAnimTimePerCache() >= 25.f / 35.f) {
+						this->m_CockHand = false;
 					}
 					if (GetNowAnimTimePerCache() >= 19.f / 35.f) {
 						ChamberIn();
@@ -665,6 +678,7 @@ namespace FPS_n2 {
 			}
 			//
 			this->m_MagArm.Update(this->m_MagHand, 0.1f, 0.1f, 0.7f, 0.7f);
+			this->m_CockArm.Update(this->m_CockHand, 0.0f, 0.1f, 0.7f, 0.7f);
 			SetObj().UpdateAnimAll();
 			//ƒŠƒRƒCƒ‹‚Ì‰‰ŽZ
 			if (this->m_RecoilRadAdd.y < 0.f) {
