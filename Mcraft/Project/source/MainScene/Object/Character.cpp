@@ -443,7 +443,7 @@ namespace FPS_n2 {
 			}
 			SetObj().UpdateAnimAll();
 			{
-				Vector3DX PosBuf = GetMove().GetPos();
+				Vector3DX PosBuf = GetMove().GetPosBuf();
 				//‘f‚ÌˆÚ“®ƒxƒNƒgƒ‹
 				Vector3DX vec = (this->m_MoveControl.GetVecPower() > 0.f) ?
 					Matrix3x3DX::Vtrans(this->m_MoveControl.GetVecMove() * GetSpeed(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetYRadUpper())) :
@@ -452,7 +452,7 @@ namespace FPS_n2 {
 				Vector3DX EndPos = PosBuf - Vector3DX::up() * (0.5f * Scale3DRate);
 				if (BackGround->CheckLinetoMap(PosBuf + Vector3DX::up() * (0.f * Scale3DRate), &EndPos)) {
 					float GroundHight = EndPos.y - (0.12f * Scale3DRate);
-					if ((PosBuf.y - GroundHight) > (0.0008f * Scale3DRate / DXLib_refParts->GetDeltaTime())) {
+					if ((PosBuf.y - GroundHight) > (0.008f * Scale3DRate / DXLib_refParts->GetDeltaTime())) {
 						PosBuf.y = GroundHight;//‚Š—Ž‰º‚ÌÛ‚Í‘¦Žž”½‰f
 					}
 					else {
@@ -491,7 +491,7 @@ namespace FPS_n2 {
 				//ƒx[ƒX‚É”½‰f
 				SetMove().SetPos(PosBuf);
 				SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetYRadBottom()));
-				SetMove().Update(0.5f, 0.f);
+				SetMove().Update(0.8f, 0.f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}
 			if (IsAlive()) {
