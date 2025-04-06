@@ -267,6 +267,7 @@ namespace FPS_n2 {
 			float												m_MoveEyePosTimer{ 0.f };
 			Vector3DX											m_MoveEyePosLocal{};
 			Vector3DX											m_MoveEyePos{};
+			float												m_BreathEyePosTimer{ 0.f };
 		public:
 			WalkSwingControl(void) noexcept {}
 			~WalkSwingControl(void) noexcept {}
@@ -313,8 +314,13 @@ namespace FPS_n2 {
 				}
 				auto EyePos = Matrix3x3DX::Vtrans(Vector3DX::up() * (0.25f * SwingPer), Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_MoveEyePosTimer));
 				EyePos.y = -std::abs(EyePos.y);
-				Easing(&this->m_MoveEyePosLocal, EyePos, 0.9f, EasingType::OutExpo);
-				Easing(&this->m_MoveEyePos, Matrix3x3DX::Vtrans(EyePos, pCharaMat), 0.9f, EasingType::OutExpo);
+
+				this->m_BreathEyePosTimer += DXLib_refParts->GetDeltaTime() * 60 / 120;
+
+				Vector3DX EyePosBreath = Vector3DX::up() * (std::sin(this->m_BreathEyePosTimer * deg2rad(360)) * 0.005f * Scale3DRate);
+
+				Easing(&this->m_MoveEyePosLocal, EyePos + EyePosBreath, 0.9f, EasingType::OutExpo);
+				Easing(&this->m_MoveEyePos, Matrix3x3DX::Vtrans(EyePos + EyePosBreath, pCharaMat), 0.9f, EasingType::OutExpo);
 				return this->m_MoveEyePos;
 			}
 		};
