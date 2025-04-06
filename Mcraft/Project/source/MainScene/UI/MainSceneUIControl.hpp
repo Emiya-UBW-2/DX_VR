@@ -38,16 +38,18 @@ namespace FPS_n2 {
 					CanLookTarget |= c->IsAlive() && c->GetCanLookByPlayer();
 				}
 				Easing(&LookPer, CanLookTarget ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
-				Easing(&IsDrawAimUIPer, Chara->GetGunPtrNow()->GetCanShot() ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
-				if (IsDrawAimUIPer < 0.1f && !Chara->GetGunPtrNow()->GetCanShot()) { IsDrawAimUIPer = 0.f; }
+				bool IsDrawAimUI = false;
+				if (Chara->GetGunPtrNow()) {
+					IsDrawAimUI = Chara->GetGunPtrNow()->GetCanShot();
+				}
+				Easing(&IsDrawAimUIPer, IsDrawAimUI ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+				if (IsDrawAimUIPer < 0.1f && !IsDrawAimUI) { IsDrawAimUIPer = 0.f; }
 			}
 			void			Draw(void) const noexcept {
 				auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto* CameraParts = Camera3D::Instance();
 				auto& Chara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
-				int RetX = Chara->GetGunPtrNow()->GetAimXPos() + static_cast<int>(Chara->GetMoveEyePos().x * 100.f);
-				int RetY = Chara->GetGunPtrNow()->GetAimYPos() + static_cast<int>(Chara->GetMoveEyePos().y * 100.f);
 
 				int xp1{}, yp1{};
 				int xp2{}, yp2{};
@@ -69,7 +71,7 @@ namespace FPS_n2 {
 							auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
 							if (!c->IsAlive() || !c->GetCanLookByPlayer()) { continue; }
 							if (c->GetIsActiveCameraPosToPlayer()) {
-								if (Chara->GetGunPtrNow()->GetAutoAimActive() && index == Chara->GetGunPtrNow()->GetAutoAimID()) {
+								if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetAutoAimActive() && index == Chara->GetGunPtrNow()->GetAutoAimID()) {
 									DrawCtrls->SetDrawCircle(WindowSystem::DrawLayer::Normal, static_cast<int>(c->GetCameraPosToPlayer().XScreenPos()), static_cast<int>(c->GetCameraPosToPlayer().YScreenPos()), static_cast<int>(2400 / std::max(0.1f, c->GetLengthToPlayer()) + Lerp(100, 0, LookPer)), Red, false, 5);
 								}
 								else {
@@ -78,7 +80,9 @@ namespace FPS_n2 {
 							}
 						}
 
-						if (IsDrawAimUIPer > 0.1f) {
+						if (IsDrawAimUIPer > 0.1f && Chara->GetGunPtrNow()) {
+							int RetX = Chara->GetGunPtrNow()->GetAimXPos() + static_cast<int>(Chara->GetMoveEyePos().x * 100.f);
+							int RetY = Chara->GetGunPtrNow()->GetAimYPos() + static_cast<int>(Chara->GetMoveEyePos().y * 100.f);
 							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, IsDrawAimUIPer));
 							auto fov_t = CameraParts->GetMainCamera().GetCamFov();
 							int Scale = static_cast<int>(1080 * Chara->GetGunPtrNow()->GetAutoAimRadian() / fov_t);

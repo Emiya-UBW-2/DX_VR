@@ -281,7 +281,10 @@ namespace FPS_n2 {
 				this->m_Input.GetPADSPress(Controls::PADS::MOVE_A),
 				this->m_Input.GetPADSPress(Controls::PADS::MOVE_S),
 				this->m_Input.GetPADSPress(Controls::PADS::MOVE_D));
-			auto RecoilRadAdd = GetGunPtrNow()->GetRecoilRadAdd() * (60.f * DXLib_ref::Instance()->GetDeltaTime());
+			Vector2DX RecoilRadAdd;
+			if (GetGunPtrNow()) {
+				RecoilRadAdd = GetGunPtrNow()->GetRecoilRadAdd() * (60.f * DXLib_ref::Instance()->GetDeltaTime());
+			}
 			this->m_RotateControl.Update(
 				this->m_Input.GetAddxRad() - RecoilRadAdd.y, this->m_Input.GetAddyRad() + RecoilRadAdd.x,
 				this->m_MoveControl.GetVecPower() > 0.1f, (IsMoveFront() ? this->m_MoveControl.GoFrontRad() : 0.f) + (IsMoveBack() ? this->m_MoveControl.GoBackRad() : 0.f));
@@ -289,7 +292,9 @@ namespace FPS_n2 {
 			if (this->m_LeanControl.Update(this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_L), this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_R))) {
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
 			}
-			GetGunPtrNow()->CalcSwitchPer(this->m_LeanControl.GetRad() > deg2rad(-1) || !GetGunPtrNow()->IsCanShot());
+			if (GetGunPtrNow()) {
+				GetGunPtrNow()->CalcSwitchPer(this->m_LeanControl.GetRad() > deg2rad(-1) || !GetGunPtrNow()->IsCanShot());
+			}
 			//下半身
 			this->m_BottomAnimSelect = GetBottomStandAnimSel();
 			if (IsMoveLeft()) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
@@ -368,6 +373,10 @@ namespace FPS_n2 {
 					this->m_HPRec = 0.f;
 				}
 			}
+			float SwitchPer = 1.f;
+			if (GetGunPtrNow()) {
+				SwitchPer = GetGunPtrNow()->GetSwitchPer();
+			}
 			Matrix3x3DX CharaLocalRotationCache = 
 				Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_LeanControl.GetRad()) *
 				Matrix3x3DX::RotAxis(Vector3DX::right(), this->m_RotateControl.GetRad().x) *
@@ -384,7 +393,7 @@ namespace FPS_n2 {
 			GetObj().SetFrameLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Upper2)),
 				(
 					//Matrix3x3DX::Get33DX(GetFrameLocalMat(CharaFrame::Upper2)) *
-					Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(32 * GetGunPtrNow()->GetSwitchPer())) *
+					Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(32 * SwitchPer)) *
 					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-35)) *
 					Matrix3x3DX::RotAxis(Vector3DX::right(), this->m_RotateControl.GetRad().x / 2.f) *
 					this->m_HitReactionControl.GetHitReactionMat()
@@ -393,32 +402,33 @@ namespace FPS_n2 {
 			GetObj().SetFrameLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Neck)),
 				(
 					//Matrix3x3DX::Get33DX(GetFrameLocalMat(CharaFrame::Neck)) *
-					Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(-32 * GetGunPtrNow()->GetSwitchPer())) *
+					Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(-32 * SwitchPer)) *
 					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(25)) *
-					Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(12 * GetGunPtrNow()->GetSwitchPer()))
+					Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(12 * SwitchPer))
 					).Get44DX() * GetFrameBaseLocalMat(static_cast<int>(CharaFrame::Neck)));
 			this->m_HitReactionControl.Update();
 			//上半身アニメ演算
 			this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Upper_Ready)) = 1.f;
 			//指演算
-			auto FingerPer = GetGunPtrNow()->GetGunAnimeFingerNow();
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Thumb)) ,FingerPer.GetFingerPer(0, 0), 0.8f, EasingType::OutExpo);
-			if (GetGunPtrNow()->GetGunAnime() == GunAnimeID::Shot) {//撃つときはそちらを参照する
-				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Point)), 0.4f, 0.5f, EasingType::OutExpo);
+			if (GetGunPtrNow()) {
+				auto FingerPer = GetGunPtrNow()->GetGunAnimeFingerNow();
+				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Thumb)), FingerPer.GetFingerPer(0, 0), 0.8f, EasingType::OutExpo);
+				if (GetGunPtrNow()->GetGunAnime() == GunAnimeID::Shot) {//撃つときはそちらを参照する
+					Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Point)), 0.4f, 0.5f, EasingType::OutExpo);
+				}
+				else {
+					Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Point)), FingerPer.GetFingerPer(0, 1), 0.8f, EasingType::OutExpo);
+				}
+				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_middle)), FingerPer.GetFingerPer(0, 2), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Ring)), FingerPer.GetFingerPer(0, 3), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Pinky)), FingerPer.GetFingerPer(0, 4), 0.8f, EasingType::OutExpo);
+				//
+				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Thumb)), FingerPer.GetFingerPer(1, 0), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Point)), FingerPer.GetFingerPer(1, 1), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_middle)), FingerPer.GetFingerPer(1, 2), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Ring)), FingerPer.GetFingerPer(1, 3), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Pinky)), FingerPer.GetFingerPer(1, 4), 0.8f, EasingType::OutExpo);
 			}
-			else {
-				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Point)), FingerPer.GetFingerPer(0, 1), 0.8f, EasingType::OutExpo);
-			}
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_middle)) , FingerPer.GetFingerPer(0, 2), 0.8f, EasingType::OutExpo);
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Ring)) , FingerPer.GetFingerPer(0, 3), 0.8f, EasingType::OutExpo);
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Pinky)) , FingerPer.GetFingerPer(0, 4), 0.8f, EasingType::OutExpo);
-			//
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Thumb)) , FingerPer.GetFingerPer(1, 0), 0.8f, EasingType::OutExpo);
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Point)) , FingerPer.GetFingerPer(1, 1), 0.8f, EasingType::OutExpo);
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_middle)) , FingerPer.GetFingerPer(1, 2), 0.8f, EasingType::OutExpo);
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Ring)) , FingerPer.GetFingerPer(1, 3), 0.8f, EasingType::OutExpo);
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Pinky)) , FingerPer.GetFingerPer(1, 4), 0.8f, EasingType::OutExpo);
-
 			//下半身アニメ演算
 			ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomTurnAnimSel()), 0.5f);
 			ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaAnimeID::Bottom_Stand_Run), GetSpeed() * 0.5f);
@@ -543,60 +553,62 @@ namespace FPS_n2 {
 				}
 				//手の位置を制御
 				if ((GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) || GetCanLookByPlayer()) {
-					//銃座標
-					{
-						IK_RightArm(
-							&SetObj(),
-							GetFrame(static_cast<int>(CharaFrame::RightArm)),
-							GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightArm)),
-							GetFrame(static_cast<int>(CharaFrame::RightArm2)),
-							GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightArm2)),
-							GetFrame(static_cast<int>(CharaFrame::RightWrist)),
-							GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightWrist)),
-							GetGunPtrNow()->GetRightHandMat());
-					}
-					{
-						Matrix4x4DX HandMat;
-						HandMat = GetGunPtrNow()->GetLeftHandMat();
-						Easing(&this->m_ArmBreakPer, (
-							(GetGunPtrNow()->IsCanShot() && this->m_ArmBreak) ||
-							(GetGunPtrNow()->GetModSlot().GetModData()->GetIsThrowWeapon() && (GetGunPtrNow()->GetGunAnime() != GunAnimeID::ThrowReady))
-							) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
-						if (this->m_ArmBreakPer > 0.01f) {
-							this->m_SlingArmZrad.Update(DXLib_refParts->GetDeltaTime());
-							this->m_SlingArmZrad.AddRad((0.5f * (this->m_RotateControl.GetRad().y - this->m_RotateControl.GetYRadBottom())) * DXLib_refParts->GetDeltaTime());
-							Matrix4x4DX SlingArmMat =
-								(
-									Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(180)) *
-									Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-30)) * Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(-90)) *
-									(
-										Matrix3x3DX::RotAxis(Vector3DX::forward(), -this->m_SlingArmZrad.GetRad()) *
-										Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y)
-										)
-									).Get44DX() *
-								Matrix4x4DX::Mtrans(
-									GetFrameWorldMat(CharaFrame::Head).pos() +
-									GetFrameWorldMat(CharaFrame::Head).xvec() * (0.15f * Scale3DRate) +
-									GetFrameWorldMat(CharaFrame::Head).zvec() * (-0.1f * Scale3DRate) +
-									(
-										GetMove().GetMat().xvec() * sin(this->m_SlingArmZrad.GetRad()) +
-										GetMove().GetMat().yvec() * cos(this->m_SlingArmZrad.GetRad())
-										) * -(0.5f * Scale3DRate)
-								);
-							HandMat = Lerp(HandMat, SlingArmMat, this->m_ArmBreakPer);
+					if (GetGunPtrNow()) {
+						//銃座標
+						{
+							IK_RightArm(
+								&SetObj(),
+								GetFrame(static_cast<int>(CharaFrame::RightArm)),
+								GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightArm)),
+								GetFrame(static_cast<int>(CharaFrame::RightArm2)),
+								GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightArm2)),
+								GetFrame(static_cast<int>(CharaFrame::RightWrist)),
+								GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightWrist)),
+								GetGunPtrNow()->GetRightHandMat());
 						}
-						if (this->m_ArmBreak) {
-							HandMat = HandMat.rotation() * Matrix4x4DX::Mtrans(HandMat.pos() + Vector3DX::vget(GetRandf(1.f), GetRandf(1.f), GetRandf(1.f)) * (0.002f * Scale3DRate));
+						{
+							Matrix4x4DX HandMat;
+							HandMat = GetGunPtrNow()->GetLeftHandMat();
+							Easing(&this->m_ArmBreakPer, (
+								(GetGunPtrNow()->IsCanShot() && this->m_ArmBreak) ||
+								(GetGunPtrNow()->GetModSlot().GetModData()->GetIsThrowWeapon() && (GetGunPtrNow()->GetGunAnime() != GunAnimeID::ThrowReady))
+								) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+							if (this->m_ArmBreakPer > 0.01f) {
+								this->m_SlingArmZrad.Update(DXLib_refParts->GetDeltaTime());
+								this->m_SlingArmZrad.AddRad((0.5f * (this->m_RotateControl.GetRad().y - this->m_RotateControl.GetYRadBottom())) * DXLib_refParts->GetDeltaTime());
+								Matrix4x4DX SlingArmMat =
+									(
+										Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(180)) *
+										Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-30)) * Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(-90)) *
+										(
+											Matrix3x3DX::RotAxis(Vector3DX::forward(), -this->m_SlingArmZrad.GetRad()) *
+											Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y)
+											)
+										).Get44DX() *
+									Matrix4x4DX::Mtrans(
+										GetFrameWorldMat(CharaFrame::Head).pos() +
+										GetFrameWorldMat(CharaFrame::Head).xvec() * (0.15f * Scale3DRate) +
+										GetFrameWorldMat(CharaFrame::Head).zvec() * (-0.1f * Scale3DRate) +
+										(
+											GetMove().GetMat().xvec() * sin(this->m_SlingArmZrad.GetRad()) +
+											GetMove().GetMat().yvec() * cos(this->m_SlingArmZrad.GetRad())
+											) * -(0.5f * Scale3DRate)
+									);
+								HandMat = Lerp(HandMat, SlingArmMat, this->m_ArmBreakPer);
+							}
+							if (this->m_ArmBreak) {
+								HandMat = HandMat.rotation() * Matrix4x4DX::Mtrans(HandMat.pos() + Vector3DX::vget(GetRandf(1.f), GetRandf(1.f), GetRandf(1.f)) * (0.002f * Scale3DRate));
+							}
+							IK_LeftArm(
+								&SetObj(),
+								GetFrame(static_cast<int>(CharaFrame::LeftArm)),
+								GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftArm)),
+								GetFrame(static_cast<int>(CharaFrame::LeftArm2)),
+								GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftArm2)),
+								GetFrame(static_cast<int>(CharaFrame::LeftWrist)),
+								GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftWrist)),
+								HandMat);
 						}
-						IK_LeftArm(
-							&SetObj(),
-							GetFrame(static_cast<int>(CharaFrame::LeftArm)),
-							GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftArm)),
-							GetFrame(static_cast<int>(CharaFrame::LeftArm2)),
-							GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftArm2)),
-							GetFrame(static_cast<int>(CharaFrame::LeftWrist)),
-							GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftWrist)),
-							HandMat);
 					}
 				}
 				//ヒットボックス
