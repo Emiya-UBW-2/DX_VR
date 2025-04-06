@@ -223,7 +223,6 @@ namespace FPS_n2 {
 						else {
 							//グレネード投てき
 							if (this->m_Input.GetPADSPress(Controls::PADS::THROW) || this->m_Input.GetPADSPress(Controls::PADS::SHOT)) {
-								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Pin))->Play3D(GetEyePositionCache(), Scale3DRate * 2.f);
 								GetGunPtrNow()->SetGunAnime(GunAnimeID::ThrowReady);
 							}
 						}
@@ -446,7 +445,7 @@ namespace FPS_n2 {
 				Vector3DX PosBuf = GetMove().GetPosBuf();
 				//素の移動ベクトル
 				Vector3DX vec = (this->m_MoveControl.GetVecPower() > 0.f) ?
-					Matrix3x3DX::Vtrans(this->m_MoveControl.GetVecMove() * GetSpeed(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetYRadUpper())) :
+					Matrix3x3DX::Vtrans(this->m_MoveControl.GetVecMove() * GetSpeed() * 60.f * DXLib_refParts->GetDeltaTime(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetYRadUpper())) :
 					Vector3DX::zero();
 				//床判定
 				Vector3DX EndPos = PosBuf - Vector3DX::up() * (0.5f * Scale3DRate);

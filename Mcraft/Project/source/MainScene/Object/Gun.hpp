@@ -71,6 +71,7 @@ namespace FPS_n2 {
 			float												m_SlingPer{};
 			Matrix3x3DX											m_SlingRot{};
 			Vector3DX											m_SlingPos{};
+			bool												m_ReleasePin{ false };
 		private:
 		private:
 			const auto			GetGunSoundSet(EnumGunSound Select) const noexcept { return static_cast<int>(GunSoundSets[GetModSlot().GetModData()->GetSoundSel()].m_Sound.at(static_cast<int>(Select))); }
@@ -315,6 +316,9 @@ namespace FPS_n2 {
 				SetModSlot().UpdatePartsMove(GetFrameWorldMatParts(GunFrame::Barrel), GunSlot::Barrel);
 				SetModSlot().UpdatePartsMove(GetFrameWorldMatParts(GunFrame::Sight), GunSlot::Sight);
 				SetModSlot().UpdatePartsMove(GetFrameWorldMatParts(GunFrame::Magpos), GunSlot::Magazine);
+				if (this->m_AmmoInChamberClass) {
+					this->m_AmmoInChamberClass->SetMat(GetFrameWorldMatParts(GunFrame::Cart).pos(), GetMove().GetMat());
+				}
 			}
 			void				UpdateGunMat(bool IsSelGun, bool IsActiveAutoAim, const Matrix3x3DX& CharaRotationCache, const Vector3DX& HeadPos, const Vector3DX& RotRad) noexcept;
 		public:

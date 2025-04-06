@@ -271,9 +271,6 @@ namespace FPS_n2 {
 						}
 					}
 					};
-				if (this->m_AmmoInChamberClass) {
-					this->m_AmmoInChamberClass->SetMat(GetFrameWorldMatParts(GunFrame::Cart).pos(), GetMove().GetMat());
-				}
 				switch (GetGunAnime()) {
 				case GunAnimeID::LowReady:
 					this->m_MagHand = false;
@@ -480,6 +477,17 @@ namespace FPS_n2 {
 						break;
 					default:
 						break;
+					}
+					break;
+				case GunAnimeID::ThrowReady:
+					if (GetNowAnimTimePerCache() >= 0.55f) {
+						if (!m_ReleasePin) {
+							m_ReleasePin = true;
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Pin))->Play3D(GetMove().GetPos(), Scale3DRate * 2.f);
+						}
+					}
+					else {
+						m_ReleasePin = false;
 					}
 					break;
 				case GunAnimeID::Throw:
