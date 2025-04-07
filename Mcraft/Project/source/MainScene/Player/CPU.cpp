@@ -11,8 +11,8 @@ namespace FPS_n2 {
 		void		AIControl::Repop(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
-			auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
-			//auto& TargetChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
+			auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
+			//auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 
 			Vector3DX pos_t;
 			pos_t.Set(GetRandf(10.f), -20.f, GetRandf(10.f));
@@ -36,7 +36,7 @@ namespace FPS_n2 {
 		void AIControl::Execute(InputControl*) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto& MyChara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
+			auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 			if (MyChara->IsAlive()) {
 				this->m_RepopTimer = 0.f;
 			}

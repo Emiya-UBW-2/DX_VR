@@ -36,7 +36,7 @@ namespace FPS_n2 {
 			std::array<ArmMovePerClass, static_cast<int>(GunAnimeID::ChoiceOnceMax)>	m_GunAnimePer{};
 			std::array<float, static_cast<int>(GunAnimeID::Max)>						m_GunAnimeTime{};
 			std::array<float, static_cast<int>(GunAnimeID::Max)>						m_GunAnimeSpeed{};
-			GunAnimeID											m_GunAnime{ GunAnimeID::None };	//
+			GunAnimeID											m_GunAnime{ GunAnimeID::Base };	//
 			bool												m_ReloadAmmoCancel{ false };		//
 			bool												m_ShotEnd{ false };		//
 			EnumGunSound										m_EnumGunSoundNow{ EnumGunSound::Max };			//サウンド
@@ -73,6 +73,7 @@ namespace FPS_n2 {
 			Vector3DX											m_SlingPos{};
 			bool												m_ReleasePin{ false };
 		private:
+			GunAnimNow											m_AnimNowCache{};
 		private:
 			const auto			GetGunSoundSet(EnumGunSound Select) const noexcept { return static_cast<int>(GunSoundSets[GetModSlot().GetModData()->GetSoundSel()].m_Sound.at(static_cast<int>(Select))); }
 			void				PlayGunSound(EnumGunSound Select) noexcept {
@@ -131,7 +132,7 @@ namespace FPS_n2 {
 				return AnimMngr->GetAnimNow(GetMyUserPlayerID(), AnimMngr->GetAnimData(GetGunAnim(ID)), this->m_GunAnimeTime.at(static_cast<int>(ID)));
 			}
 			const auto			GetNowGunAnimeID(void) const noexcept {
-				if (GetGunAnime() == GunAnimeID::None) { return -1; }
+				if (GetGunAnime() == GunAnimeID::Base) { return -1; }
 				return GetModSlot().GetModData()->GetAnimSelectList().at(static_cast<int>(GetGunAnime()));
 			}
 		public://ゲッター
@@ -150,6 +151,7 @@ namespace FPS_n2 {
 			const PlayerID&		GetMyUserPlayerID(void) const noexcept { return this->m_MyID; }
 			const auto&			GetSwitchPer(void) const noexcept { return this->m_SwitchPer; }
 			const auto&			GetAutoAimID(void) const noexcept { return this->m_AutoAimControl.GetAutoAimID(); }
+			const auto&			GetGunAnimeNow(void) const noexcept { return m_AnimNowCache; }
 			const auto			GetNowAnimTimePerCache(void) const noexcept {
 				if (GetGunAnime() < GunAnimeID::Max) {
 					auto* AnimMngr = GunAnimManager::Instance();
@@ -180,7 +182,7 @@ namespace FPS_n2 {
 			const auto			GetAutoAimRadian(void) const noexcept { return deg2rad(5) * std::clamp(100.f / std::max(0.01f, std::hypotf((float)(GetAimXPos() - 1920 / 2), (float)(GetAimYPos() - 1080 / 2))), 0.f, 1.f); }
 			const auto			GetGunAnimBlendPer(GunAnimeID ID) const noexcept { return this->m_GunAnimePer[static_cast<int>(ID)].Per(); }
 			const auto			GetCanShot(void) const noexcept { return GetGunAnimBlendPer(GunAnimeID::LowReady) <= 0.1f; }
-			const auto			IsCanShot(void) const noexcept { return GetGunAnime() == GunAnimeID::None || GetGunAnime() == GunAnimeID::Shot; }
+			const auto			IsCanShot(void) const noexcept { return GetGunAnime() == GunAnimeID::Base || GetGunAnime() == GunAnimeID::Shot; }
 			const auto			GetCanADS(void) const noexcept { return IsCanShot() && GetCanShot() && GetModSlot().GetModData()->GetCanADS(); }
 			const auto			GetSightZoomSize(void) const noexcept { return this->m_SightPtr ? (*this->m_SightPtr)->GetModSlot().GetModData()->GetSightZoomSize() : 1.f; }
 			const auto			GetAmmoAll(void) const noexcept { return this->m_MagazinePtr ? (*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoAll() : 0; }
@@ -231,13 +233,6 @@ namespace FPS_n2 {
 			}
 			const auto			IsNowGunAnimeEnd(void) const noexcept { return GetNowAnimTimePerCache() >= 1.f; }
 			const auto			GetShotSwitch(void) const noexcept { return GetGunAnime() == GunAnimeID::Shot && (GetNowAnimTimePerCache() < 0.5f); }
-			const auto			GetGunAnimeFingerNow(void) const noexcept {
-				FingerData	Finger = GetAnimDataNow(GunAnimeID::Base).GetFingerPer();
-				for (int loop = 0; loop < static_cast<int>(GunAnimeID::ChoiceOnceMax); ++loop) {
-					Finger = Lerp(Finger, GetAnimDataNow((GunAnimeID)loop).GetFingerPer(), this->m_GunAnimePer[loop].Per());
-				}
-				return Finger;
-			}
 		public:
 			void				SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
 			auto&				SetModSlot(void) noexcept { return this->m_ModSlotControl; }
@@ -296,7 +291,7 @@ namespace FPS_n2 {
 				this->m_CockArm.Init(this->m_CockHand);
 				this->m_SlingPer = 1.f;
 				this->m_IsChamberOn = false;
-				SetGunAnime(GunAnimeID::None);
+				SetGunAnime(GunAnimeID::Base);
 				this->m_Capacity = GetAmmoAll();//マガジン装填
 				ChamberIn();
 			}

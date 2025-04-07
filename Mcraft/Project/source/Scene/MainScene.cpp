@@ -23,7 +23,7 @@ namespace FPS_n2 {
 			PlayerMngr->Init(NetWork::Player_num);
 			PlayerMngr->SetWatchPlayer(GetViewPlayerID());
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(loop)->GetChara();
+				auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
 				if (loop == PlayerMngr->GetWatchPlayer()) {
 					CharacterClass::LoadChara("Main", (PlayerID)loop);
 					//*
@@ -52,7 +52,7 @@ namespace FPS_n2 {
 						MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->SetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
 					}
 					else {
-						c->SetRagDoll().Duplicate(((std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(1)->GetChara())->GetRagDoll());
+						c->SetRagDoll().Duplicate((PlayerMngr->GetPlayer(1)->GetChara())->GetRagDoll());
 					}
 					c->SetupRagDoll();
 					c->SetCharaTypeID(CharaTypeID::Enemy);
@@ -100,8 +100,8 @@ namespace FPS_n2 {
 			SetFogStartEnd(FarMax, FarMax * 20.f);
 			SetFogColor(114, 120, 128);
 			//
-			for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-				auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
+			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+				auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
 				//人の座標設定
 				Vector3DX pos_t;
 				pos_t.Set(GetRandf(10.f), -20.f, GetRandf(10.f));
@@ -123,7 +123,7 @@ namespace FPS_n2 {
 			this->m_IsEnd = false;
 			this->m_StartTimer = 3.f;
 
-			auto& ViewChara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
+			auto& ViewChara = PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
 			this->m_EffectPos = ViewChara->GetEyePositionCache();
 			EffectSingleton::Instance()->SetLoop(Sceneclass::Effect::ef_dust, this->m_EffectPos);
 		}
@@ -160,7 +160,7 @@ namespace FPS_n2 {
 
 			this->m_FadeControl.Update();
 
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
+			auto& ViewChara = PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
 
 			Pad->SetMouseMoveEnable(true);
 			KeyGuideParts->ChangeGuide(
@@ -211,7 +211,7 @@ namespace FPS_n2 {
 				}
 				MyInput.ResetAllInput();
 				if (!SceneParts->IsPause() && this->m_FadeControl.IsClear() && (this->m_StartTimer <= 0.f)) {
-					float AimPer = 1.f / std::max(1.f, Chara->GetIsADS() ? Chara->GetGunPtrNow()->GetSightZoomSize() : 1.f);
+					float AimPer = 1.f / std::max(1.f, ViewChara->GetIsADS() ? ViewChara->GetGunPtrNow()->GetSightZoomSize() : 1.f);
 					MyInput.SetAddxRad(Pad->GetLS_Y() / 200.f * AimPer);
 					MyInput.SetAddyRad(Pad->GetLS_X() / 200.f * AimPer);
 					MyInput.SetInputPADS(Controls::PADS::MOVE_W, Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().press());
@@ -241,24 +241,23 @@ namespace FPS_n2 {
 				}
 				if (this->m_NetWorkController) {
 					int32_t FreeData[10]{};
-					this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, Chara->GetMove(), Chara->GetDamageEvent(), FreeData);
+					this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, ViewChara->GetMove(), ViewChara->GetDamageEvent(), FreeData);
 					this->m_NetWorkController->Update();
 				}
 				//
 				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {
 					bool IsServerNotPlayer = !m_NetWorkController->GetClient() && !m_NetWorkController->GetServerPlayer();
-					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-						auto& p = PlayerMngr->GetPlayer(index);
-						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
-						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)index);
-						if (index == PlayerMngr->GetWatchPlayer() && !IsServerNotPlayer) {
+					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+						auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
+						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)loop);
+						if (loop == PlayerMngr->GetWatchPlayer() && !IsServerNotPlayer) {
 							c->Input(Ret.GetInput());//自身が動かすもの
 						}
 						else {//サーバーからのデータで動くもの
 							//サーバーがCPUを動かす場合
 							if (!m_NetWorkController->GetClient()) {
 								//cpu
-								//p->GetAI()->Execute(&MyInput);
+								//PlayerMngr->GetPlayer(loop)->GetAI()->Execute(&MyInput);
 							}
 							c->Input(Ret.GetInput());
 							bool override_true = true;
@@ -273,15 +272,14 @@ namespace FPS_n2 {
 					}
 				}
 				else {//オフライン
-					for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-						auto& p = PlayerMngr->GetPlayer(index);
-						auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
-						if (index == PlayerMngr->GetWatchPlayer()) {
+					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+						auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
+						if (loop == PlayerMngr->GetWatchPlayer()) {
 							c->Input(MyInput);
 						}
 						else {
 							InputControl OtherInput;
-							p->GetAI()->Execute(&OtherInput);
+							PlayerMngr->GetPlayer(loop)->GetAI()->Execute(&OtherInput);
 							c->Input(OtherInput);
 						}
 						//ダメージイベント処理
@@ -289,15 +287,14 @@ namespace FPS_n2 {
 					}
 				}
 				//ダメージイベント
-				for (int index = 0; index < PlayerMngr->GetPlayerNum(); ++index) {
-					auto& p = PlayerMngr->GetPlayer(index);
-					auto& c = (std::shared_ptr<CharacterClass>&)p->GetChara();
-					for (int j = 0, Num = static_cast<int>(this->m_DamageEvents.size()); j < Num; ++j) {
-						if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(j)])) {
-							std::swap(this->m_DamageEvents.back(), this->m_DamageEvents[static_cast<size_t>(j)]);
+				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+					auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
+					for (int loop2 = 0, Num = static_cast<int>(this->m_DamageEvents.size()); loop2 < Num; ++loop2) {
+						if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(loop2)])) {
+							std::swap(this->m_DamageEvents.back(), this->m_DamageEvents[static_cast<size_t>(loop2)]);
 							this->m_DamageEvents.pop_back();
 							--Num;
-							--j;
+							--loop2;
 						}
 					}
 				}
@@ -307,16 +304,15 @@ namespace FPS_n2 {
 			ObjMngr->LateExecuteObject();
 			//視点
 			{
-				auto& ViewChara = (std::shared_ptr<Sceneclass::CharacterClass>&)PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
 				//カメラ
 				Vector3DX BaseCamPos = ViewChara->GetEyePositionCache();
 				if (ViewChara->GetGunPtrNow()) {
 					BaseCamPos = Lerp<Vector3DX>(BaseCamPos, ViewChara->GetGunPtrNow()->GetADSEyeMat().pos(), ViewChara->GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::ADS));
 				}
-				Vector3DX CamPos = BaseCamPos + Camera3D::Instance()->GetCamShake();
-				Vector3DX CamVec = CamPos + ViewChara->GetEyeRotationCache().zvec() * -1.f;
-				CamVec += Camera3D::Instance()->GetCamShake();
-				CamPos += Camera3D::Instance()->GetCamShake() * 2.f;
+				Vector3DX m_CamPos = BaseCamPos + Camera3D::Instance()->GetCamShake();
+				Vector3DX m_CamVec = m_CamPos + ViewChara->GetEyeRotationCache().zvec() * -1.f;
+				m_CamVec += Camera3D::Instance()->GetCamShake();
+				m_CamPos += Camera3D::Instance()->GetCamShake() * 2.f;
 #ifdef DEBUG_CAM
 				if (CheckHitKey(KEY_INPUT_F1) != 0) {
 					DBG_CamSel = -1;
@@ -341,39 +337,39 @@ namespace FPS_n2 {
 				}
 				switch (DBG_CamSel) {
 				case 0:
-					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeRotationCache().xvec() * (3.f * Scale3DRate);
+					m_CamVec = m_CamPos;
+					m_CamPos += ViewChara->GetEyeRotationCache().xvec() * (3.f * Scale3DRate);
 					break;
 				case 1:
-					CamVec = CamPos;
-					CamPos -= ViewChara->GetEyeRotationCache().xvec() * (3.f * Scale3DRate);
+					m_CamVec = m_CamPos;
+					m_CamPos -= ViewChara->GetEyeRotationCache().xvec() * (3.f * Scale3DRate);
 					break;
 				case 2:
-					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeRotationCache().yvec() * (3.f * Scale3DRate) + ViewChara->GetEyeRotationCache().zvec() * 0.1f;
+					m_CamVec = m_CamPos;
+					m_CamPos += ViewChara->GetEyeRotationCache().yvec() * (3.f * Scale3DRate) + ViewChara->GetEyeRotationCache().zvec() * 0.1f;
 					break;
 				case 3:
-					CamVec = CamPos;
-					CamPos += ViewChara->GetEyeRotationCache().zvec() * (-3.f * Scale3DRate);
+					m_CamVec = m_CamPos;
+					m_CamPos += ViewChara->GetEyeRotationCache().zvec() * (-3.f * Scale3DRate);
 					break;
 				default:
 					break;
 				}
 #endif
-				Easing(&this->m_EffectPos, CamPos, 0.95f, EasingType::OutExpo);
+				Easing(&this->m_EffectPos, m_CamPos, 0.95f, EasingType::OutExpo);
 				EffectSingleton::Instance()->Update_LoopEffect(Sceneclass::Effect::ef_dust, this->m_EffectPos, Vector3DX::forward(), 0.5f);
 				EffectSingleton::Instance()->SetEffectColor(Sceneclass::Effect::ef_dust, 255, 255, 255, 64);
 
-				CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, ViewChara->GetEyeRotationCache().yvec());
+				CameraParts->SetMainCamera().SetCamPos(m_CamPos, m_CamVec, ViewChara->GetEyeRotationCache().yvec());
 				auto fov_t = CameraParts->GetMainCamera().GetCamFov();
 				//fov
 				{
 					float fov = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
-					if (Chara->GetIsADS()) {
+					if (ViewChara->GetIsADS()) {
 						fov -= deg2rad(15);
-						fov /= std::max(1.f, Chara->GetGunPtrNow()->GetSightZoomSize() / 2.f);
+						fov /= std::max(1.f, ViewChara->GetGunPtrNow()->GetSightZoomSize() / 2.f);
 					}
-					if (Chara->GetGunPtrNow() && Chara->GetGunPtrNow()->GetShotSwitch()) {
+					if (ViewChara->GetGunPtrNow() && ViewChara->GetGunPtrNow()->GetShotSwitch()) {
 						fov -= deg2rad(5);
 						Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
 					}
@@ -390,12 +386,12 @@ namespace FPS_n2 {
 				CameraParts->SetMainCamera().SetCamInfo(fov_t, CameraParts->GetMainCamera().GetCamNear(), far_t);
 				//DoF
 				PostPassEffect::Instance()->Set_DoFNearFar(
-					Chara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), Scale3DRate * 5.f,
-					Chara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), Chara->GetIsADS() ? (far_t * 3.f) : (far_t * 2.f));
+					ViewChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), Scale3DRate * 5.f,
+					ViewChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), ViewChara->GetIsADS() ? (far_t * 3.f) : (far_t * 2.f));
 			}
 			//コンカッション
 			{
-				if (Chara->PopConcussionSwitch()) {
+				if (ViewChara->PopConcussionSwitch()) {
 					this->m_Concussion = 1.f;
 				}
 				PostPassParts->Set_is_Blackout(this->m_Concussion > 0.f);
@@ -489,11 +485,11 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			//auto* NetBrowser = NetWorkBrowser::Instance();
-			auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
-			if (!Chara->IsAlive()) { return; }
+			auto& ViewChara = PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
+			if (!ViewChara->IsAlive()) { return; }
 			//レティクル表示
-			if (Chara->GetGunPtrNow()) {
-				Chara->GetGunPtrNow()->DrawReticle(Chara->GetLeanRad());
+			if (ViewChara->GetGunPtrNow()) {
+				ViewChara->GetGunPtrNow()->DrawReticle(ViewChara->GetLeanRad());
 			}
 			HitMarkerPool::Instance()->Draw();
 			if (!SceneParts->IsPause()) { this->m_UIclass.Draw(); }		//UI

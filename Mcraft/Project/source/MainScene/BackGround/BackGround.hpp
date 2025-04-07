@@ -159,9 +159,11 @@ namespace FPS_n2 {
 			};
 			struct CellBuffer
 			{
-				int8_t m_Cell{};
-				int8_t m_FillInfo{};//周りの遮蔽データのbitフラグ
-				std::array<uint8_t,8> m_DifColorPow{};
+				int8_t					m_Cell{};
+				int8_t					m_FillInfo{};//周りの遮蔽データのbitフラグ
+			public:
+				bool IsEmpty() const noexcept { return this->m_Cell == s_EmptyBlick; }
+				bool IsOcclusion() const noexcept { return this->m_FillInfo == 0b111111; }
 			};
 			struct CellsData {
 				std::vector<CellBuffer> m_CellBuffer;
@@ -195,7 +197,7 @@ namespace FPS_n2 {
 						for (int yt = yMaxmin; yt < std::min(yMaxmin + mul, All); ++yt) {
 							for (int zt = zMaxmin; zt < zMaxmin + mul; ++zt) {
 								++FillAll;
-								if (GetCellBuf(xt, yt, zt).m_Cell == s_EmptyBlick) { continue; }
+								if (GetCellBuf(xt, yt, zt).IsEmpty()) { continue; }
 								++FillCount;
 								auto cell = GetCellBuf(xt, yt, zt).m_Cell + 1;
 								if (cell > IDCount.size()) {
@@ -243,20 +245,22 @@ namespace FPS_n2 {
 				//
 				void			CalcOcclusion(int x, int y, int z) noexcept {
 					SetCellBuf(x, y, z).m_FillInfo = 0;
-					SetCellBuf(x, y, z).m_FillInfo |= (1 << 0) * (GetCellBuf(x + 1, y, z).m_Cell != s_EmptyBlick);
-					SetCellBuf(x, y, z).m_FillInfo |= (1 << 1) * (GetCellBuf(x - 1, y, z).m_Cell != s_EmptyBlick);
-					SetCellBuf(x, y, z).m_FillInfo |= (1 << 2) * ((y == All - 1) ? 1 : (GetCellBuf(x, y + 1, z).m_Cell != s_EmptyBlick));
-					SetCellBuf(x, y, z).m_FillInfo |= (1 << 3) * ((y == 0) ? 1 : (GetCellBuf(x, y - 1, z).m_Cell != s_EmptyBlick));
-					SetCellBuf(x, y, z).m_FillInfo |= (1 << 4) * (GetCellBuf(x, y, z + 1).m_Cell != s_EmptyBlick);
-					SetCellBuf(x, y, z).m_FillInfo |= (1 << 5) * (GetCellBuf(x, y, z - 1).m_Cell != s_EmptyBlick);
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 0) * (!GetCellBuf(x + 1, y, z).IsEmpty());
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 1) * (!GetCellBuf(x - 1, y, z).IsEmpty());
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 2) * ((y == All - 1) ? true : !GetCellBuf(x, y + 1, z).IsEmpty());
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 3) * ((y == 0) ? true : !GetCellBuf(x, y - 1, z).IsEmpty());
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 4) * (!GetCellBuf(x, y, z + 1).IsEmpty());
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 5) * (!GetCellBuf(x, y, z - 1).IsEmpty());
 				}
 			};
 			//
 			struct ThreadJobs {
 				std::thread						m_Job;
 				bool							m_JobEnd{};
+#if defined(DEBUG) && false
 				LONGLONG						m_StartTime{};
 				LONGLONG						m_TotalTime{};
+#endif
 				std::function<void()>			m_Doing{ nullptr };
 				std::function<void()>			m_EndDoing{ nullptr };
 			public:
@@ -269,8 +273,10 @@ namespace FPS_n2 {
 				void Execute(void) noexcept {
 					if (this->m_JobEnd) {
 						this->m_JobEnd = false;
+#if defined(DEBUG) && false
 						this->m_TotalTime = GetNowHiPerformanceCount() - this->m_StartTime;
 						this->m_StartTime = GetNowHiPerformanceCount();
+#endif
 						if (this->m_Job.joinable()) {
 							this->m_Job.detach();
 						}
@@ -288,10 +294,10 @@ namespace FPS_n2 {
 								});
 							this->m_Job.swap(tmp);
 							//強制待機
-							//m_Job.join();
+							//this->m_Job.join();
 						}
 					}
-#if defined(DEBUG)
+#if defined(DEBUG) && false
 					printfDx("%5.2fms \n", (float)(this->m_TotalTime) / 1000.f);
 #endif
 				}
@@ -314,27 +320,27 @@ namespace FPS_n2 {
 				std::array<std::vector<uint32_t>, 2>			m_index32;
 				std::array<size_t, 2>							m_32Num{ 0 };
 			public:
-				const auto& GetInNum() const noexcept { return this->m_32Num.at(m_Now); }
-				auto& SetInVert() noexcept { return this->m_vert32.at(m_Now); }
-				auto& SetInIndex() noexcept { return this->m_index32.at(m_Now); }
+				const auto& GetInNum() const noexcept { return this->m_32Num.at(this->m_Now); }
+				auto& SetInVert() noexcept { return this->m_vert32.at(this->m_Now); }
+				auto& SetInIndex() noexcept { return this->m_index32.at(this->m_Now); }
 			public:
-				const auto& GetOutNum() const noexcept { return this->m_32Num.at(static_cast<int>(1 - m_Now)); }
-				const auto& GetOutVert() const noexcept { return this->m_vert32.at(static_cast<int>(1 - m_Now)); }
-				const auto& GetOutindex() const noexcept { return this->m_index32.at(static_cast<int>(1 - m_Now)); }
+				const auto& GetOutNum() const noexcept { return this->m_32Num.at(static_cast<size_t>(1 - this->m_Now)); }
+				const auto& GetOutVert() const noexcept { return this->m_vert32.at(static_cast<size_t>(1 - this->m_Now)); }
+				const auto& GetOutindex() const noexcept { return this->m_index32.at(static_cast<size_t>(1 - this->m_Now)); }
 			public:
 				void		Init(size_t size) noexcept {
 					for (int loop = 0; loop < 2; ++loop) {
 						this->m_vert32.at(loop).resize(size * 4);
 						this->m_index32.at(loop).resize(size * 6);
 					}
-					this->m_32Num.at(m_Now) = 0;
+					this->m_32Num.at(this->m_Now) = 0;
 					this->m_32Size = size;
 				}
 				void		ResetNum(void) noexcept {
-					this->m_32Num.at(m_Now) = 0;
+					this->m_32Num.at(this->m_Now) = 0;
 				}
 				void		AllocatePlane(void) noexcept {
-					++this->m_32Num.at(m_Now);
+					++this->m_32Num.at(this->m_Now);
 					if (GetInNum() > this->m_32Size) {
 						this->m_32Size = GetInNum();
 						for (int loop = 0; loop < 2; ++loop) {
@@ -351,11 +357,16 @@ namespace FPS_n2 {
 					SetInIndex()[GetInNum() * 6 - 1] = ZERO + 1;
 				}
 				void		FlipVerts(void) noexcept {
-					m_Now = 1 - m_Now;
+					this->m_Now = 1 - this->m_Now;
 				}
 				void		Disable(void) noexcept {
 					ResetNum();
-					this->m_32Num.at(static_cast<int>(1 - m_Now)) = 0;
+					this->m_32Num.at(static_cast<size_t>(1 - this->m_Now)) = 0;
+				}
+				void		DrawByShader(void) const noexcept {
+					if (GetOutNum() > 0) {
+						DrawPolygon32bitIndexed3DToShader(GetOutVert().data(), static_cast<int>(GetOutNum() * 4), GetOutindex().data(), static_cast<int>(GetOutNum() * 6 / 3));
+					}
 				}
 				void		Draw(const GraphHandle& GrHandle) const noexcept {
 					if (GetOutNum() > 0) {
@@ -371,23 +382,23 @@ namespace FPS_n2 {
 			std::array<CellsData, total>	m_CellxN;
 			std::array<ThreadJobs, total + total + total>	m_Jobs;
 			//
-			int								BaseRate = 100;
-			int								ShadowRate = 100;
-			int								ThreadCounter = 0;
+			int								m_BaseRate = 100;
+			int								m_ShadowRate = 100;
+			int								m_ThreadCounter = 0;
 			//表示ポリゴンスレッド用
 			std::array<vert32<VERTEX3D>, total>	m_vert32s;
-			std::array<Vector3DX, total>	CamPos;
-			std::array<Vector3DX, total>	CamVec;
+			std::array<Vector3DX, total>	m_CamPos;
+			std::array<Vector3DX, total>	m_CamVec;
 			//影スレッド用
 			std::array<vert32<VERTEX3D>, total>	m_vert32sSB;
-			std::array<Vector3DX, total>	CamPosSB;
-			std::array<Vector3DX, total>	light;
+			std::array<Vector3DX, total>	m_CamPosSB;
+			std::array<Vector3DX, total>	m_light;
 
 			std::array<vert32<VERTEX3DSHADER>, total>	m_vert32sS;
-			std::array<Vector3DX, total>	CamPosS;
-			std::array<Vector3DX, total>	CamVecS;
+			std::array<Vector3DX, total>	m_CamPosS;
+			std::array<Vector3DX, total>	m_CamVecS;
 
-			MazeControl					m_MazeControl;
+			MazeControl						m_MazeControl;
 			//
 #if defined(DEBUG) & EDITBLICK
 			//Edit
@@ -430,7 +441,7 @@ namespace FPS_n2 {
 				if ((l >= m) && (l >= n)) {
 					err_1 = dy2 - l;
 					err_2 = dz2 - l;
-					for (int i = 0; i < l; ++i) {
+					for (int loop = 0; loop < l; ++loop) {
 						if (OutPutLine(point[0], point[1], point[2])) { return; }
 						if (err_1 > 0) {
 							point[1] += y_inc;
@@ -448,7 +459,7 @@ namespace FPS_n2 {
 				else if ((m >= l) && (m >= n)) {
 					err_1 = dx2 - m;
 					err_2 = dz2 - m;
-					for (int i = 0; i < m; ++i) {
+					for (int loop = 0; loop < m; ++loop) {
 						if (OutPutLine(point[0], point[1], point[2])) { return; }
 						if (err_1 > 0) {
 							point[0] += x_inc;
@@ -466,7 +477,7 @@ namespace FPS_n2 {
 				else {
 					err_1 = dy2 - n;
 					err_2 = dx2 - n;
-					for (int i = 0; i < n; ++i) {
+					for (int loop = 0; loop < n; ++loop) {
 						if (OutPutLine(point[0], point[1], point[2])) { return; }
 						if (err_1 > 0) {
 							point[1] += y_inc;
@@ -505,10 +516,10 @@ namespace FPS_n2 {
 				float t_min = -FLT_MAX;
 				float t_max = FLT_MAX;
 
-				for (int i = 0; i < 3; ++i) {
+				for (int loop = 0; loop < 3; ++loop) {
 					/*
-					if (abs(d[i]) < FLT_EPSILON) {
-						if (p[i] < min[i] || p[i] > max[i])
+					if (abs(d[loop]) < FLT_EPSILON) {
+						if (p[loop] < min[loop] || p[loop] > max[loop])
 							return false; // 交差していない
 					}
 					else 
@@ -516,9 +527,9 @@ namespace FPS_n2 {
 					{
 						// スラブとの距離を算出
 						// t1が近スラブ、t2が遠スラブとの距離
-						float odd = 1.0f / d[i];
-						float t1 = (min[i] - p[i]) * odd;
-						float t2 = (max[i] - p[i]) * odd;
+						float odd = 1.0f / d[loop];
+						float t1 = (min[loop] - p[loop]) * odd;
+						float t2 = (max[loop] - p[loop]) * odd;
 						if (t1 > t2) {
 							float tmp = t1;
 							t1 = t2;
@@ -546,9 +557,9 @@ namespace FPS_n2 {
 				float ret[3] = { EndPos->x, EndPos->y, EndPos->z };
 				//どの向き？
 				if (Normal) {
-					for (int i = 0; i < 3; ++i) {
-						if (std::abs(ret[i] - min[i]) < 0.00001f) {
-							switch (i) {
+					for (int loop = 0; loop < 3; ++loop) {
+						if (std::abs(ret[loop] - min[loop]) < 0.00001f) {
+							switch (loop) {
 							case 0:
 								*Normal = Vector3DX::left();
 								break;
@@ -562,8 +573,8 @@ namespace FPS_n2 {
 								break;
 							}
 						}
-						if (std::abs(ret[i] - max[i]) < 0.00001f) {
-							switch (i) {
+						if (std::abs(ret[loop] - max[loop]) < 0.00001f) {
+							switch (loop) {
 							case 0:
 								*Normal = Vector3DX::right();
 								break;

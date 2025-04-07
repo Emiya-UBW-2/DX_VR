@@ -19,14 +19,14 @@ namespace FPS_n2 {
 
 			ChoiceOnceMax,//どれか択一で行うアニメーション の総数
 			//ここからは常時/特殊パターンのアニメーション
-			Base = ChoiceOnceMax,
+			Aim = ChoiceOnceMax,
 			Shot,
 			Hammer,
 			Open,
 
 			Max,//全体
 
-			None,
+			Base,
 
 		};
 		static const char* GunAnimeIDName[static_cast<int>(GunAnimeID::Max)] = {
@@ -209,16 +209,22 @@ namespace FPS_n2 {
 				this->m_Finger = Finger;
 			}
 		public:
-			const auto	GetMatrix(void) const noexcept {
+			const auto	GetRot(void) const noexcept {
 				return
-					(
-						Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(this->m_Rotate.z)) *
-						Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(this->m_Rotate.x)) *
-						Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(this->m_Rotate.y))
-						).Get44DX() *
-					Matrix4x4DX::Mtrans(this->m_Pos * Scale3DRate);
+					Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(this->m_Rotate.z)) *
+					Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(this->m_Rotate.x)) *
+					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(this->m_Rotate.y));
+			}
+			const auto	GetPos(void) const noexcept {
+				return this->m_Pos * Scale3DRate;
 			}
 			const auto& GetFingerPer(void) const noexcept { return this->m_Finger; }
+		public:
+			void LerpNow(const GunAnimNow& target, float Per) {
+				this->m_Rotate = Lerp(this->m_Rotate, target.m_Rotate, Per);
+				this->m_Pos = Lerp(this->m_Pos, target.m_Pos, Per);
+				this->m_Finger = Lerp(this->m_Finger, target.m_Finger, Per);
+			}
 		};
 
 		class GunAnimManager : public SingletonBase<GunAnimManager> {

@@ -91,7 +91,6 @@ namespace FPS_n2 {
 			const auto		IsAlive(void) const noexcept { return this->m_HP.IsNotZero(); }
 			const auto		IsLowHP(void) const noexcept { return this->m_HP.GetPoint() < (this->m_HP.GetMax() * 35 / 100); }
 			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
-			const auto		GetFrameLocalMat(CharaFrame frame) const noexcept { return GetObj().GetFrameLocalMatrix(GetFrame(static_cast<int>(frame))); }
 		public://セッター
 			void			SetPlayerID(PlayerID value) noexcept {
 				this->m_MyID = value;

@@ -82,7 +82,7 @@ namespace FPS_n2 {
 			//エフェクト
 			EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec() * -1.f, 0.35f, 2.f);
 			//発砲
-			for (int i = 0, max = GetPelletNum(); i < max; i++) {
+			for (int loop = 0, max = GetPelletNum(); loop < max; loop++) {
 				auto LastAmmo = std::make_shared<AmmoClass>();
 				ObjMngr->AddObject(LastAmmo);
 				LastAmmo->Init();
@@ -118,28 +118,22 @@ namespace FPS_n2 {
 					SetAnimOnce(GetNowGunAnimeID(), this->m_GunAnimeSpeed.at(static_cast<int>(GetGunAnime())));
 				}
 				switch (GetGunAnime()) {
+				case GunAnimeID::Base:
+					if (!this->m_ChamberAmmoData && this->m_Capacity != 0) {
+						SetGunAnime(GunAnimeID::Cocking);//チャンバーが空で弾倉が空でないなら
+					}
+					break;
 				case GunAnimeID::Shot:
 					if (IsNowGunAnimeEnd()) {
 						if (this->m_ShotEnd) {
 							this->m_ShotEnd = false;
-							switch (GetShotType()) {
-							case SHOTTYPE::FULL:
-							case SHOTTYPE::SEMI:
-								SetGunAnime(GunAnimeID::None);
-								break;
-							case SHOTTYPE::BOLT:
-							case SHOTTYPE::PUMP:
-								SetGunAnime(GunAnimeID::Cocking);
-								break;
-							default:
-								break;
-							}
+							SetGunAnime(GunAnimeID::Base);
 						}
 					}
 					break;
 				case GunAnimeID::Cocking:
 					if (IsNowGunAnimeEnd()) {
-						SetGunAnime(GunAnimeID::None);
+						SetGunAnime(GunAnimeID::Base);
 					}
 					break;
 				case GunAnimeID::ReloadStart_Empty:
@@ -162,27 +156,13 @@ namespace FPS_n2 {
 						switch (GetReloadType()) {
 						case RELOADTYPE::MAG:
 							this->m_Capacity = GetAmmoAll();//マガジン装填
-							if (IsNowGunAnimeEnd()) {
-								//チャンバーに弾がないがマガジンには弾がある場合
-								if (!this->m_ChamberAmmoData) {
-									SetGunAnime(GunAnimeID::Cocking);
-								}
-								else {
-									SetGunAnime(GunAnimeID::ReloadEnd);
-								}
-							}
+							SetGunAnime(GunAnimeID::ReloadEnd);
 							break;
 						case RELOADTYPE::AMMO:
 							this->m_Capacity++;//マガジン装填
 							if ((this->m_Capacity == GetAmmoAll()) || this->m_ReloadAmmoCancel) {
 								this->m_ReloadAmmoCancel = false;
-								//チャンバーに弾がないがマガジンには弾がある場合
-								if (!this->m_ChamberAmmoData) {
-									SetGunAnime(GunAnimeID::Cocking);
-								}
-								else {
-									SetGunAnime(GunAnimeID::ReloadEnd);
-								}
+								SetGunAnime(GunAnimeID::ReloadEnd);
 							}
 							else {
 								SetGunAnime(GunAnimeID::ReloadWait);
@@ -194,13 +174,16 @@ namespace FPS_n2 {
 					}
 					break;
 				case GunAnimeID::ReloadEnd:
+					if (!this->m_ChamberAmmoData) {
+						SetGunAnime(GunAnimeID::Cocking);
+					}
 					if (IsNowGunAnimeEnd()) {
-						SetGunAnime(GunAnimeID::None);
+						SetGunAnime(GunAnimeID::Base);
 					}
 					break;
 				case GunAnimeID::Watch:
 					if (IsNowGunAnimeEnd()) {
-						SetGunAnime(GunAnimeID::None);
+						SetGunAnime(GunAnimeID::Base);
 					}
 					break;
 				default:
@@ -214,8 +197,8 @@ namespace FPS_n2 {
 #if defined(DEBUG)
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
-					printfDx("[%s]\n", (GetGunAnime() == GunAnimeID::None) ? "None" : GunAnimeIDName[(int)GetGunAnime()]);
-					printfDx("[%f]\n", (GetGunAnime() == GunAnimeID::None) ? 0.0f : GetNowAnimTimePerCache());
+					printfDx("[%s]\n", (GetGunAnime() == GunAnimeID::Base) ? "Base" : GunAnimeIDName[(int)GetGunAnime()]);
+					printfDx("[%f]\n", (GetGunAnime() == GunAnimeID::Base) ? 0.0f : GetNowAnimTimePerCache());
 				}
 #endif
 			}
@@ -232,17 +215,19 @@ namespace FPS_n2 {
 			if (this->m_SlingPer >= 0.999f) { this->m_SlingPer = 1.f; }
 			//
 			auto EyeYRot = Matrix3x3DX::RotVec2(Lerp(GetMove().GetMat().yvec(), GetADSEyeMat().yvec(), GetGunAnimBlendPer(GunAnimeID::ADS)), GetMove().GetMat().yvec());
+			//アニメ演算の結果をキャッシュ
+			m_AnimNowCache = GetAnimDataNow(GunAnimeID::Aim);
+			for (int loop = 0; loop < static_cast<int>(GunAnimeID::ChoiceOnceMax); ++loop) {
+				if (this->m_GunAnimePer[loop].Per() != 0.f) {
+					m_AnimNowCache.LerpNow(GetAnimDataNow((GunAnimeID)loop), this->m_GunAnimePer[loop].Per());
+				}
+			}
 			//
 			Matrix3x3DX AnimRot;
 			Vector3DX AnimPos;
 			if (this->m_SlingPer > 0.f) {
-				//
-				Matrix4x4DX AnimMat = GetAnimDataNow(GunAnimeID::Base).GetMatrix();
-				for (int loop = 0; loop < static_cast<int>(GunAnimeID::ChoiceOnceMax); ++loop) {
-					AnimMat = Lerp(AnimMat, GetAnimDataNow((GunAnimeID)loop).GetMatrix(), this->m_GunAnimePer[loop].Per());
-				}
-				AnimRot = Matrix3x3DX::Get33DX(AnimMat) * this->m_GunSwingMat2 * CharaRotationCache * EyeYRot;
-				AnimPos = AnimMat.pos();
+				AnimRot = GetGunAnimeNow().GetRot() * this->m_GunSwingMat2 * CharaRotationCache * EyeYRot;
+				AnimPos = GetGunAnimeNow().GetPos();
 				AnimPos.x *= GetSwitchPer();
 				AnimPos = HeadPos + Matrix3x3DX::Vtrans(AnimPos, CharaRotationCache);
 				//オートエイム
@@ -511,7 +496,7 @@ namespace FPS_n2 {
 
 			for (const auto& g : this->m_Grenade.GetPtrList()) {
 				if (g->PopIsEndFall()) {
-					for (int i = 0, max = GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPellet(); i < max; i++) {
+					for (int loop = 0, max = GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPellet(); loop < max; loop++) {
 						auto LastAmmo = std::make_shared<AmmoClass>();
 						ObjMngr->AddObject(LastAmmo);
 						LastAmmo->Init();
@@ -609,10 +594,10 @@ namespace FPS_n2 {
 				this->m_MuzzleSmokeControl.ExecuteMuzzleSmoke(GetFrameWorldMatParts(GunFrame::Muzzle).pos(), GetGunAnime() != GunAnimeID::Shot && m_SlingPer >= 1.f);
 			}
 			//
-			for (int i = 0; i < static_cast<int>(GunAnimeID::ChoiceOnceMax); i++) {
-				int ID = GetModSlot().GetModData()->GetAnimSelectList().at(i);
+			for (int loop = 0; loop < static_cast<int>(GunAnimeID::ChoiceOnceMax); loop++) {
+				int ID = GetModSlot().GetModData()->GetAnimSelectList().at(loop);
 				if (ID != -1) {
-					if (GetGunAnime() == (GunAnimeID)i) {
+					if (GetGunAnime() == (GunAnimeID)loop) {
 						SetObj().SetAnim(ID).SetPer(1.f);
 					}
 					else {
@@ -620,10 +605,10 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			for (int i = static_cast<int>(GunAnimeID::ChoiceOnceMax); i < static_cast<int>(GunAnimeID::Max); i++) {
-				int ID = GetModSlot().GetModData()->GetAnimSelectList().at(i);
+			for (int loop = static_cast<int>(GunAnimeID::ChoiceOnceMax); loop < static_cast<int>(GunAnimeID::Max); loop++) {
+				int ID = GetModSlot().GetModData()->GetAnimSelectList().at(loop);
 				if (ID != -1) {
-					switch ((GunAnimeID)i) {
+					switch ((GunAnimeID)loop) {
 					case GunAnimeID::Hammer:
 						SetObj().SetAnim(ID).SetPer(std::clamp(GetObj().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * (GetShotSwitch() ? -10.f : 10.f), 0.f, 1.f));
 						break;

@@ -10,12 +10,12 @@ namespace FPS_n2 {
 		public:
 			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::CartFall; }
 		public:
-			void RotateOnAir(moves*) noexcept override {}//なにもしない
-			void RotateOnGround(moves* objMove) noexcept override {
+			void RotateOnAir(moves* objMove) noexcept override {
 				//テキトーに飛び回る
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				objMove->SetMat(Matrix3x3DX::RotAxis(Vector3DX::Cross(objMove->GetVec().normalized(), objMove->GetMat().zvec()), deg2rad(-50.f * 60.f * DXLib_refParts->GetDeltaTime())) * objMove->GetMat());
 			}
+			void RotateOnGround(moves*) noexcept override {}
 			void OnTimeEnd(const moves&) noexcept override {}//なにもしない
 		};
 		class FallObjMagazine : public FallObjChildBase {
@@ -25,11 +25,11 @@ namespace FPS_n2 {
 		public:
 			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::MagFall; }
 		public:
-			void RotateOnAir(moves* objMove) noexcept override {
+			void RotateOnAir(moves*) noexcept override {}// なにもしない
+			void RotateOnGround(moves* objMove) noexcept override {
 				//NormalをX軸に指定して横に向く
 				objMove->SetMat(objMove->GetMat() * Matrix3x3DX::RotVec2(objMove->GetMat().xvec(), Vector3DX::up()));
 			}
-			void RotateOnGround(moves*) noexcept override {}// なにもしない
 			void OnTimeEnd(const moves&) noexcept override {}//なにもしない
 		};
 		class FallObjGrenade : public FallObjChildBase {
@@ -39,12 +39,12 @@ namespace FPS_n2 {
 		public:
 			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::FallGrenade; }
 		public:
-			void RotateOnAir(moves*) noexcept override {}//なにもしない
-			void RotateOnGround(moves* objMove) noexcept override {
+			void RotateOnAir(moves* objMove) noexcept override {
 				//テキトーに飛び回る
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				objMove->SetMat(Matrix3x3DX::RotAxis(Vector3DX::Cross(objMove->GetVec().normalized(), objMove->GetMat().zvec()), deg2rad(-50.f * 60.f * DXLib_refParts->GetDeltaTime())) * objMove->GetMat());
 			}
+			void RotateOnGround(moves*) noexcept override {}//なにもしない
 			void OnTimeEnd(const moves& objMove) noexcept override {
 				auto* SE = SoundPool::Instance();
 				EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_greexp, objMove.GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate, 2.f);

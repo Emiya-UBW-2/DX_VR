@@ -2,6 +2,7 @@
 #pragma warning(disable:4464)
 #include "../../MainScene/NetWork.hpp"
 #include	"CPU.hpp"
+#include "../Object/Character.hpp"
 
 namespace FPS_n2 {
 	namespace Player {
@@ -11,7 +12,7 @@ namespace FPS_n2 {
 		private:
 			class PlayerControl {
 			private:
-				std::shared_ptr<ObjectBaseClass>				m_Chara{ nullptr };
+				std::shared_ptr<Sceneclass::CharacterClass>		m_Chara{ nullptr };
 				std::shared_ptr<Sceneclass::AIControl>			m_AI{ nullptr };
 				int												m_Score{ 0 };							//スコア
 				int												m_Kill{ 0 };							//スコア
@@ -34,7 +35,7 @@ namespace FPS_n2 {
 					this->Dispose();
 				}
 			public:
-				void		SetChara(const std::shared_ptr<ObjectBaseClass>& pChara) noexcept { this->m_Chara = pChara; }
+				void		SetChara(const std::shared_ptr<Sceneclass::CharacterClass>& pChara) noexcept { this->m_Chara = pChara; }
 				auto& GetChara(void) noexcept { return this->m_Chara; }
 
 				void		SetAI(const std::shared_ptr<Sceneclass::AIControl>& pAI) noexcept { this->m_AI = pAI; }

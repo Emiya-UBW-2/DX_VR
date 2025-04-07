@@ -78,16 +78,16 @@ namespace FPS_n2 {
 			if (this->m_SeqFirst) {
 				this->m_NewWorkSettings.Load();
 			}
-			for (int i = 0, Num = this->m_NewWorkSettings.GetSize(); i < Num + 1; ++i) {
-				if (i < Num) {
-					auto& n = this->m_NewWorkSettings.Get(i);
-					if (WindowSystem::SetMsgClickBox(xp, y1p + 50 * i, xp + xs, y1p + 50 * i + LineHeight * 2, LineHeight, Gray75, false, true, "[%d][%d,%d,%d,%d]", n.UsePort, n.IP.d1, n.IP.d2, n.IP.d3, n.IP.d4)) {
+			for (int loop = 0, Num = this->m_NewWorkSettings.GetSize(); loop < Num + 1; ++loop) {
+				if (loop < Num) {
+					auto& n = this->m_NewWorkSettings.Get(loop);
+					if (WindowSystem::SetMsgClickBox(xp, y1p + 50 * loop, xp + xs, y1p + 50 * loop + LineHeight * 2, LineHeight, Gray75, false, true, "[%d][%d,%d,%d,%d]", n.UsePort, n.IP.d1, n.IP.d2, n.IP.d3, n.IP.d4)) {
 						ReadyConnect(n);
 						break;
 					}
 				}
 				else {
-					if (WindowSystem::SetMsgClickBox(xp, y1p + 50 * i, xp + xs, y1p + 50 * i + LineHeight * 2, LineHeight, Gray75, false, true, "Ý’è‚ð’Ç‰Á‚·‚é")) {
+					if (WindowSystem::SetMsgClickBox(xp, y1p + 50 * loop, xp + xs, y1p + 50 * loop + LineHeight * 2, LineHeight, Gray75, false, true, "Ý’è‚ð’Ç‰Á‚·‚é")) {
 						this->m_Sequence = BrowserSequence::SetNewData;
 						break;
 					}
@@ -109,15 +109,15 @@ namespace FPS_n2 {
 				int yp1 = y1p + 100;
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 					FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp + xs / 2, yp1, White, Black, "IP=[%d,%d,%d,%d]", this->m_NetSetting.IP.d1, this->m_NetSetting.IP.d2, this->m_NetSetting.IP.d3, this->m_NetSetting.IP.d4);
-				for (int i = 0; i < 4; ++i) {
+				for (int loop = 0; loop < 4; ++loop) {
 					auto* ip_tmp = &this->m_NetSetting.IP.d1;
-					switch (i) {
+					switch (loop) {
 					case 0:ip_tmp = &this->m_NetSetting.IP.d1; break;
 					case 1:ip_tmp = &this->m_NetSetting.IP.d2; break;
 					case 2:ip_tmp = &this->m_NetSetting.IP.d3; break;
 					case 3:ip_tmp = &this->m_NetSetting.IP.d4; break;
 					}
-					AddSubBox(xp + xs / 2 + 70 * (i - 2) + 35, yp1 + LineHeight / 2,
+					AddSubBox(xp + xs / 2 + 70 * (loop - 2) + 35, yp1 + LineHeight / 2,
 						[&]() {
 							if (*ip_tmp == 255) { *ip_tmp = 0; }
 							else { ++(*ip_tmp); }

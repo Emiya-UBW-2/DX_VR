@@ -25,9 +25,8 @@ void FPS_n2::Sceneclass::AmmoClass::FirstExecute(void) noexcept {
 	//’n–Ê‚Æ‚Ì”»’è
 	auto ColResGround = BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
 	//ƒLƒƒƒ‰‚Æ‚Ì”»’è
-	for (int index = 0; index < PlayerMngr->GetPlayerNum(); index++) {
-		auto& tgt = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(index)->GetChara();
-		if (tgt->CheckDamageRay(this->m_AmmoData->GetDamage(), (PlayerID)this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
+	for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); loop++) {
+		if (PlayerMngr->GetPlayer(loop)->GetChara()->CheckDamageRay(this->m_AmmoData->GetDamage(), (PlayerID)this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
 			SetDelete();
 			is_HitAll = true;
 		}

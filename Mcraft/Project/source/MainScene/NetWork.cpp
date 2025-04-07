@@ -15,8 +15,8 @@ namespace FPS_n2 {
 			tmp.m_ID = ServerData.m_ID;
 			tmp.m_Attribute = ServerData.m_Attribute;
 			tmp.m_ClientTime = ServerData.m_ClientTime;
-			for (int i = 0; i < 10; ++i) {
-				tmp.m_FreeData[i] = ServerData.GetFreeData()[i];
+			for (int loop = 0; loop < 10; ++loop) {
+				tmp.m_FreeData[loop] = ServerData.GetFreeData()[loop];
 			}
 			return tmp;
 		}
@@ -81,13 +81,13 @@ namespace FPS_n2 {
 		}
 		void ServerControl::Init(int pPort, bool IsServerPlay) noexcept {
 			this->m_IsServerPlay = IsServerPlay;
-			int i = 0;
+			int loop = 0;
 			for (auto& n : this->m_Net) {
 				int index = static_cast<int>(&n - &this->m_Net.front());
 				if (this->m_IsServerPlay) {
 					if (index == 0) { continue; }//サーバープレイヤーは絶対0を使うので
 				}
-				n.m_NetWork.Init(true, pPort + i); ++i;
+				n.m_NetWork.Init(true, pPort + loop); ++loop;
 				n.m_Phase = ClientPhase::WaitConnect;
 			}
 		}
@@ -289,9 +289,9 @@ namespace FPS_n2 {
 					KEY_INPUT_NUMPAD9,
 				};
 				//サーバー兼観戦者
-				for (int index = 0; index < Player_num; ++index) {
-					if (CheckHitKey(KeyInputs[index]) != 0) {
-						this->m_PlayerNet.SetLocalPlayerID((PlayerID)index);
+				for (int loop = 0; loop < Player_num; ++loop) {
+					if (CheckHitKey(KeyInputs[loop]) != 0) {
+						this->m_PlayerNet.SetLocalPlayerID((PlayerID)loop);
 						break;
 					}
 				}

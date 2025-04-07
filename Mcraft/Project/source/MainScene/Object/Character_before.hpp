@@ -81,14 +81,14 @@ namespace FPS_n2 {
 		private://パラメーター
 			const Point											Max = MaxPoint;
 		private:
-			Point												m_HP{ 0 };							//スコア
+			Point												m_Point{ 0 };
 		public://ゲッター
-			const auto		IsNotZero(void) const noexcept { return this->m_HP != 0; }
-			const auto& GetPoint(void) const noexcept { return this->m_HP; }
-			const auto& GetMax(void) const noexcept { return Max; }
-			void			Sub(Point damage_t) noexcept { this->m_HP = std::clamp<Point>(this->m_HP - damage_t, 0, Max); }
+			const auto		IsNotZero(void) const noexcept { return this->m_Point != 0; }
+			const auto&		GetPoint(void) const noexcept { return this->m_Point; }
+			const auto&		GetMax(void) const noexcept { return Max; }
+			void			Sub(Point damage_t) noexcept { this->m_Point = std::clamp<Point>(this->m_Point - damage_t, 0, Max); }
 		public:
-			void		Init(void) noexcept { Sub(-Max); }
+			void			Init(void) noexcept { Sub(-Max); }
 		};
 		//キャラ入力
 		class LeanControl {
@@ -151,8 +151,8 @@ namespace FPS_n2 {
 			const auto& GetVecRight(void) const noexcept { return this->m_Vec[3]; }
 		public:
 			void			Init(void) noexcept {
-				for (int i = 0; i < 4; i++) {
-					this->m_Vec[i] = 0.f;
+				for (int loop = 0; loop < 4; loop++) {
+					this->m_Vec[loop] = 0.f;
 				}
 			}
 			void			Update(bool WKey, bool AKey, bool SKey, bool DKey) {
@@ -473,12 +473,12 @@ namespace FPS_n2 {
 			public:
 				//
 				void SetupFrameInfo(const MV1& obj_) noexcept {
-					for (int i = 0; i < int(obj_.GetFrameNum()); ++i) {
-						std::string p = obj_.GetFrameName(i);
+					for (int loop = 0; loop < int(obj_.GetFrameNum()); ++loop) {
+						std::string p = obj_.GetFrameName(loop);
 						for (auto& f : this->m_Frames) {
 							int index = static_cast<int>(&f - &this->m_Frames.front());
 							if (p == RagFrameName[index]) {
-								f.Set(i, obj_);
+								f.Set(loop, obj_);
 								break;
 							}
 						}
@@ -490,9 +490,9 @@ namespace FPS_n2 {
 					for (const auto& f : frame_tgt_.m_Frames) {
 						tgt->SetFrameLocalMatrix(f.GetFrameID(), mine.GetFrameLocalMatrix(f.GetFrameID()));
 					}
-					for (int i = 0, max = static_cast<int>(tgt->GetAnimNum()); i < max; ++i) {
-						tgt->SetAnim(i).SetPer(mine.GetAnim(i).GetPer());
-						tgt->SetAnim(i).SetTime(mine.GetAnim(i).GetTime());
+					for (int loop = 0, max = static_cast<int>(tgt->GetAnimNum()); loop < max; ++loop) {
+						tgt->SetAnim(loop).SetPer(mine.GetAnim(loop).GetPer());
+						tgt->SetAnim(loop).SetTime(mine.GetAnim(loop).GetTime());
 					}
 					tgt->UpdateAnimAll();
 				}

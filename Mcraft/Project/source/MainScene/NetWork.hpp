@@ -26,8 +26,8 @@ namespace FPS_n2 {
 				this->m_Input = pInput;
 				this->m_move = move_t;
 				this->m_DamageEvent = Damage_t;
-				for (int i = 0; i < 10; ++i) {
-					this->m_FreeData[i] = pFreeData[i];
+				for (int loop = 0; loop < 10; ++loop) {
+					this->m_FreeData[loop] = pFreeData[loop];
 				}
 			}
 		};
@@ -83,8 +83,8 @@ namespace FPS_n2 {
 				this->m_DamageEvent = o.GetDamageEvent();
 				this->m_ClientTime = ClientTime;
 				this->m_CheckSum = (size_t)this->CalcCheckSum();
-				for (int i = 0; i < 10; ++i) {
-					this->m_FreeData[i] = o.GetFreeData()[i];
+				for (int loop = 0; loop < 10; ++loop) {
+					this->m_FreeData[loop] = o.GetFreeData()[loop];
 				}
 			}
 		public:
@@ -101,8 +101,8 @@ namespace FPS_n2 {
 		private:
 			int				CalcCheckSum(void) const noexcept {
 				int Players = 0;
-				for (int i = 0; i < Player_num; ++i) {
-					Players += (PlayerData[i].IsCheckSum() ? 100 : 0);
+				for (int loop = 0; loop < Player_num; ++loop) {
+					Players += (PlayerData[loop].IsCheckSum() ? 100 : 0);
 				}
 				return (
 					500 +

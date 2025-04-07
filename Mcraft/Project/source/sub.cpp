@@ -16,26 +16,26 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, (int)SoundEnum::Throw, 4, "data/Sound/SE/throw.wav");
 			SE->Add(SoundType::SE, (int)SoundEnum::FallGrenade, 4, "data/Sound/SE/fallgrenade.wav");
 			SE->Add(SoundType::SE, (int)SoundEnum::Explosion, 4, "data/Sound/SE/explosion.wav");
-			for (int i = 0; i < 6; i++) {
-				SE->Add(SoundType::SE, (int)SoundEnum::Cocking1_0 + i, 4, "data/Sound/SE/gun/autoM870/" + std::to_string(i) + ".wav");
-				SE->Add(SoundType::SE, (int)SoundEnum::Cocking2_0 + i, 4, "data/Sound/SE/gun/autoM16/" + std::to_string(i) + ".wav");
-				SE->Add(SoundType::SE, (int)SoundEnum::Cocking3_0 + i, 4, "data/Sound/SE/gun/auto1911/" + std::to_string(i) + ".wav");
-				SE->Add(SoundType::SE, (int)SoundEnum::Cocking4_0 + i, 4, "data/Sound/SE/gun/autoAK/" + std::to_string(i) + ".wav");
+			for (int loop = 0; loop < 6; loop++) {
+				SE->Add(SoundType::SE, (int)SoundEnum::Cocking1_0 + loop, 4, "data/Sound/SE/gun/autoM870/" + std::to_string(loop) + ".wav");
+				SE->Add(SoundType::SE, (int)SoundEnum::Cocking2_0 + loop, 4, "data/Sound/SE/gun/autoM16/" + std::to_string(loop) + ".wav");
+				SE->Add(SoundType::SE, (int)SoundEnum::Cocking3_0 + loop, 4, "data/Sound/SE/gun/auto1911/" + std::to_string(loop) + ".wav");
+				SE->Add(SoundType::SE, (int)SoundEnum::Cocking4_0 + loop, 4, "data/Sound/SE/gun/autoAK/" + std::to_string(loop) + ".wav");
 			}
 			SE->Add(SoundType::SE, (int)SoundEnum::RunFoot, 6, "data/Sound/SE/move/runfoot.wav");
 			SE->Add(SoundType::SE, (int)SoundEnum::StandupFoot, 3, "data/Sound/SE/move/standup.wav");
 			SE->Add(SoundType::SE, (int)SoundEnum::Hit, 3, "data/Sound/SE/hit.wav");
 			SE->Add(SoundType::SE, (int)SoundEnum::HitMe, 3, "data/Sound/SE/HitMe.wav");
 			SE->Add(SoundType::SE, (int)SoundEnum::HitGuard, 3, "data/Sound/SE/Guard.wav");
-			for (int i = 0; i < 5; i++) {
-				SE->Add(SoundType::SE, (int)SoundEnum::HitGround0 + i, 2, "data/Sound/SE/gun/HitGround/" + std::to_string(i + 1) + ".wav");
+			for (int loop = 0; loop < 5; loop++) {
+				SE->Add(SoundType::SE, (int)SoundEnum::HitGround0 + loop, 2, "data/Sound/SE/gun/HitGround/" + std::to_string(loop + 1) + ".wav");
 			}
 
-			for (int i = 0; i < 6; i++) {
-				SE->Add(SoundType::SE, (int)SoundEnum::Man_Hurt1 + i, 2, "data/Sound/SE/voice/hurt_0" + std::to_string(i + 1) + ".wav");
+			for (int loop = 0; loop < 6; loop++) {
+				SE->Add(SoundType::SE, (int)SoundEnum::Man_Hurt1 + loop, 2, "data/Sound/SE/voice/hurt_0" + std::to_string(loop + 1) + ".wav");
 			}
-			for (int i = 0; i < 8; i++) {
-				SE->Add(SoundType::SE, (int)SoundEnum::Man_Death1 + i, 2, "data/Sound/SE/voice/death_0" + std::to_string(i + 1) + ".wav");
+			for (int loop = 0; loop < 8; loop++) {
+				SE->Add(SoundType::SE, (int)SoundEnum::Man_Death1 + loop, 2, "data/Sound/SE/voice/death_0" + std::to_string(loop + 1) + ".wav");
 			}
 			SE->Add(SoundType::SE, (int)SoundEnum::Man_contact, 10, "data/Sound/SE/voice/contact.wav");
 			SE->Add(SoundType::SE, (int)SoundEnum::Man_openfire, 10, "data/Sound/SE/voice/openfire.wav");
@@ -60,8 +60,8 @@ namespace FPS_n2 {
 
 			SE->Get(SoundType::SE, (int)SoundEnum::Man_breathing)->SetLocalVolume(192);
 			SE->Get(SoundType::SE, (int)SoundEnum::Man_breathend)->SetLocalVolume(192);
-			for (int i = 0; i < 5; i++) {
-				SE->Get(SoundType::SE, (int)SoundEnum::HitGround0 + i)->SetLocalVolume(92);
+			for (int loop = 0; loop < 5; loop++) {
+				SE->Get(SoundType::SE, (int)SoundEnum::HitGround0 + loop)->SetLocalVolume(92);
 			}
 		}
 		void			CommonBattleResource::Dispose(void) noexcept {
@@ -73,25 +73,25 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::SE, (int)SoundEnum::Throw);
 			SE->Delete(SoundType::SE, (int)SoundEnum::FallGrenade);
 			SE->Delete(SoundType::SE, (int)SoundEnum::Explosion);
-			for (int i = 0; i < 6; i++) {
-				SE->Delete(SoundType::SE, (int)SoundEnum::Cocking1_0 + i);
-				SE->Delete(SoundType::SE, (int)SoundEnum::Cocking2_0 + i);
-				SE->Delete(SoundType::SE, (int)SoundEnum::Cocking3_0 + i);
-				SE->Delete(SoundType::SE, (int)SoundEnum::Cocking4_0 + i);
+			for (int loop = 0; loop < 6; loop++) {
+				SE->Delete(SoundType::SE, (int)SoundEnum::Cocking1_0 + loop);
+				SE->Delete(SoundType::SE, (int)SoundEnum::Cocking2_0 + loop);
+				SE->Delete(SoundType::SE, (int)SoundEnum::Cocking3_0 + loop);
+				SE->Delete(SoundType::SE, (int)SoundEnum::Cocking4_0 + loop);
 			}
 			SE->Delete(SoundType::SE, (int)SoundEnum::RunFoot);
 			SE->Delete(SoundType::SE, (int)SoundEnum::StandupFoot);
 			SE->Delete(SoundType::SE, (int)SoundEnum::Hit);
 			SE->Delete(SoundType::SE, (int)SoundEnum::HitMe);
 			SE->Delete(SoundType::SE, (int)SoundEnum::HitGuard);
-			for (int i = 0; i < 5; i++) {
-				SE->Delete(SoundType::SE, (int)SoundEnum::HitGround0 + i);
+			for (int loop = 0; loop < 5; loop++) {
+				SE->Delete(SoundType::SE, (int)SoundEnum::HitGround0 + loop);
 			}
-			for (int i = 0; i < 6; i++) {
-				SE->Delete(SoundType::SE, (int)SoundEnum::Man_Hurt1 + i);
+			for (int loop = 0; loop < 6; loop++) {
+				SE->Delete(SoundType::SE, (int)SoundEnum::Man_Hurt1 + loop);
 			}
-			for (int i = 0; i < 8; i++) {
-				SE->Delete(SoundType::SE, (int)SoundEnum::Man_Death1 + i);
+			for (int loop = 0; loop < 8; loop++) {
+				SE->Delete(SoundType::SE, (int)SoundEnum::Man_Death1 + loop);
 			}
 			SE->Delete(SoundType::SE, (int)SoundEnum::Man_contact);
 			SE->Delete(SoundType::SE, (int)SoundEnum::Man_openfire);

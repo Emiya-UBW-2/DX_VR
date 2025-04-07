@@ -13,9 +13,9 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			if (isActive) {
-				for (int i = 0; i < PlayerMngr->GetPlayerNum(); i++) {
-					if (i == MyPlayerID) { continue; }
-					auto& c = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(i)->GetChara();
+				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); loop++) {
+					if (loop == MyPlayerID) { continue; }
+					auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
 					if (!c->IsAlive()) { continue; }
 					if (!c->GetCanLookByPlayer()) { continue; }
 					int pos = -1;
@@ -41,7 +41,7 @@ namespace FPS_n2 {
 					}
 					if (pos != -1) {
 						this->m_AutoAimTimer = 1.f;
-						this->m_AutoAim = i;
+						this->m_AutoAim = loop;
 						this->m_AutoAimPoint = pos;
 						break;
 					}
@@ -54,8 +54,8 @@ namespace FPS_n2 {
 				this->m_AutoAim = -1;
 			}
 			if (this->m_AutoAim != -1) {
-				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_AutoAim)->GetChara();
-				if (!Chara->IsAlive()) {
+				auto& TargetChara = PlayerMngr->GetPlayer(this->m_AutoAim)->GetChara();
+				if (!TargetChara->IsAlive()) {
 					this->m_AutoAim = -1;
 				}
 			}
@@ -63,8 +63,8 @@ namespace FPS_n2 {
 			Easing(&this->m_AutoAimPer, this->m_AutoAimActive ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 
 			if (this->m_AutoAim != -1) {
-				auto& Chara = (std::shared_ptr<CharacterClass>&)PlayerMngr->GetPlayer(this->m_AutoAim)->GetChara();
-				Easing(&this->m_AutoAimVec, (Chara->GetHitBoxList().at(this->m_AutoAimPoint).GetPos() - EyePos).normalized(), 0.8f, EasingType::OutExpo);
+				auto& TargetChara = PlayerMngr->GetPlayer(this->m_AutoAim)->GetChara();
+				Easing(&this->m_AutoAimVec, (TargetChara->GetHitBoxList().at(this->m_AutoAimPoint).GetPos() - EyePos).normalized(), 0.8f, EasingType::OutExpo);
 			}
 			else {
 				Easing(&this->m_AutoAimVec, AimVector, 0.95f, EasingType::OutExpo);
@@ -191,9 +191,9 @@ namespace FPS_n2 {
 				if (this->m_Parts_Ptr[loop] && false) {//現状のカスタム範囲では不要
 					//1のフレーム移動量を無視する
 					auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
-					for (int i = 0; i < Obj->GetObj().GetAnimNum(); i++) {
-						Obj->SetObj().SetAnim(i).SetPer(pParent.GetAnim(i).GetPer());
-						Obj->SetObj().SetAnim(i).SetTime(pParent.GetAnim(i).GetTime());
+					for (int loop2 = 0; loop2 < Obj->GetObj().GetAnimNum(); loop2++) {
+						Obj->SetObj().SetAnim(loop2).SetPer(pParent.GetAnim(loop2).GetPer());
+						Obj->SetObj().SetAnim(loop2).SetTime(pParent.GetAnim(loop2).GetTime());
 					}
 					Obj->SetObj().UpdateAnimAll();
 				}

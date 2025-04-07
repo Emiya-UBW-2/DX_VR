@@ -7,10 +7,10 @@ namespace FPS_n2 {
 		void		ModDataClass::SetSlot(const std::string& LEFT, const std::string& RIGHT) noexcept {
 			if (LEFT.find("Slot") != std::string::npos) {
 				if (LEFT.find("Type") != std::string::npos) {
-					for (int i = 0; i < static_cast<int>(GunSlot::Max); i++) {
-						if (RIGHT == GunSlotName[i]) {
+					for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
+						if (RIGHT == GunSlotName[loop]) {
 							this->m_PartsSlot.resize(this->m_PartsSlot.size() + 1);
-							this->m_PartsSlot.back().m_GunSlot = (GunSlot)i;
+							this->m_PartsSlot.back().m_GunSlot = (GunSlot)loop;
 							break;
 						}
 					}
@@ -42,9 +42,9 @@ namespace FPS_n2 {
 				this->m_IsRecoilReturn = true;
 			}
 			else if (LEFT == "shottype") {
-				for (int i = 0; i < static_cast<int>(SHOTTYPE::Max); i++) {
-					if (RIGHT == SHOTTYPEName[i]) {
-						this->m_ShotType = (SHOTTYPE)i;
+				for (int loop = 0; loop < static_cast<int>(SHOTTYPE::Max); loop++) {
+					if (RIGHT == SHOTTYPEName[loop]) {
+						this->m_ShotType = (SHOTTYPE)loop;
 						this->m_IsShotType = true;
 						break;
 					}
@@ -52,9 +52,9 @@ namespace FPS_n2 {
 			}
 
 			else if (LEFT == "GunShootSound") {
-				for (int i = 0; i < static_cast<int>(EnumGunSound::Max); i++) {
-					if (RIGHT == EnumGunSoundName[i]) {
-						this->m_GunShootSound = (EnumGunSound)i;
+				for (int loop = 0; loop < static_cast<int>(EnumGunSound::Max); loop++) {
+					if (RIGHT == EnumGunSoundName[loop]) {
+						this->m_GunShootSound = (EnumGunSound)loop;
 						break;
 					}
 				}
