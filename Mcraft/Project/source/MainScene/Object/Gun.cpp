@@ -573,6 +573,8 @@ namespace FPS_n2 {
 				ObjMngr->AddObject(this->m_AmmoInChamberClass);
 				ObjMngr->LoadModel(this->m_AmmoInChamberClass, this->m_AmmoInChamberClass, (*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPath().c_str());
 				this->m_AmmoInChamberClass->Init();
+
+				(*this->m_MagazinePtr)->SetAmmoActive(GetReloadType()== RELOADTYPE::MAG);
 			}
 			if (GetModSlot().GetModData()->GetIsThrowWeapon()) {
 				this->m_Grenade.Init(GetFilePath(), 1);

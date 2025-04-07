@@ -40,6 +40,7 @@ namespace FPS_n2 {
 				SetModSlot().Init(GetFilePath());
 				ObjectBaseClass::SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
 				ObjectBaseClass::SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
+				Init_Mod();
 			}
 
 			void			FirstExecute(void) noexcept override {
@@ -77,23 +78,54 @@ namespace FPS_n2 {
 			}
 			void			Dispose_Sub(void) noexcept override {
 				SetModSlot().Dispose();
+				Dispose_Mod();
 			}
 		private:
 			int	GetFrameNum() noexcept override { return static_cast<int>(GunFrame::Max); }
 			const char* GetFrameStr(int id) noexcept override { return GunFrameName[id]; }
 		public:
+			virtual void	Init_Mod(void) noexcept {}
 			virtual void	FirstExecute_Mod(void) noexcept {}
+			virtual void	Dispose_Mod(void) noexcept {}
 		};
 
 
 		class MagazineClass : public ModClass {
+			std::array<std::shared_ptr<AmmoInChamberClass>,5>			m_Ammo{};		//
 		public:
 			MagazineClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Magazine); }
 			~MagazineClass(void) noexcept {}
 		public:
+			void			Init_Mod(void) noexcept override {
+				auto* ObjMngr = ObjectManager::Instance();
+				for (auto& a : m_Ammo) {
+					a = std::make_shared<AmmoInChamberClass>();
+					ObjMngr->AddObject(a);
+					ObjMngr->LoadModel(a, a, GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPath().c_str());
+					a->Init();
+					a->SetActive(true);
+				}
+			}
 			void			FirstExecute_Mod(void) noexcept override {
+				int index = 1;
+				for (auto& a : m_Ammo) {
+					auto Mat = GetObj().GetFrameLocalWorldMatrix(index); index++;
+					a->SetMat(Mat.pos(), Matrix3x3DX::Get33DX(Mat));
+				}
+			}
+			void			Dispose_Mod(void) noexcept override {
+				auto* ObjMngr = ObjectManager::Instance();
+				for (auto& a : m_Ammo) {
+					ObjMngr->DelObj((SharedObj*)&a);
+					a.reset();
+				}
 			}
 		public:
+			void			SetAmmoActive(bool value) noexcept {
+				for (auto& a : m_Ammo) {
+					a->SetActive(value);
+				}
+			}
 			void			SetHandMatrix(const Matrix4x4DX& value) noexcept {
 				SetMove().SetMat(Matrix3x3DX::Get33DX(value));
 				SetMove().SetPos(value.pos());
