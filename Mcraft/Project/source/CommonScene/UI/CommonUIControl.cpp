@@ -6,7 +6,7 @@ namespace FPS_n2 {
 		// 
 		bool ButtonControl::GetTriggerButton(void) const noexcept {
 			auto* Pad = PadControl::Instance();
-			return (select != InvalidID) && (this->m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger());
+			return (m_select != InvalidID) && (this->m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger());
 		}
 		ButtonControl::ButtonControl(void) noexcept {
 			this->m_SelectBackImage.Load("CommonData/UI/select.png");
@@ -20,70 +20,70 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();
 
-			int preselect = select;
+			int preselect = m_select;
 			bool preMouseSel = this->m_MouseSelMode;
 			if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger() || Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
-				if (select != InvalidID) {
-					--select;
-					if (select < 0) { select = static_cast<int>(ButtonSel.size()) - 1; }
+				if (m_select != InvalidID) {
+					--m_select;
+					if (m_select < 0) { m_select = static_cast<int>(m_ButtonSel.size()) - 1; }
 				}
 				else {
-					select = 0;
+					m_select = 0;
 				}
 				this->m_MouseSelMode = false;
 			}
 			if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger() || Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
-				if (select != InvalidID) {
-					++select;
-					if (select > static_cast<int>(ButtonSel.size()) - 1) { select = 0; }
+				if (m_select != InvalidID) {
+					++m_select;
+					if (m_select > static_cast<int>(m_ButtonSel.size()) - 1) { m_select = 0; }
 				}
 				else {
-					select = 0;
+					m_select = 0;
 				}
 				this->m_MouseSelMode = false;
 			}
 
 			if (this->m_MouseSelMode) {
-				select = InvalidID;
+				m_select = InvalidID;
 			}
 			// 
-			for (auto& y : ButtonSel) {
+			for (auto& y : m_ButtonSel) {
 				if (y->GetInto()) {
 					this->m_MouseSelMode = true;
-					select = static_cast<int>(&y - &ButtonSel.front());
+					m_select = static_cast<int>(&y - &m_ButtonSel.front());
 				}
 			}
-			if (preselect != select || preMouseSel != this->m_MouseSelMode) {
-				if (select != InvalidID) {
-					for (auto& y : ButtonSel) {
+			if (preselect != m_select || preMouseSel != this->m_MouseSelMode) {
+				if (m_select != InvalidID) {
+					for (auto& y : m_ButtonSel) {
 						y->SetNone();
 					}
-					ButtonSel.at(static_cast<size_t>(select))->SetFocus();
-					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, TRUE);
+					m_ButtonSel.at(static_cast<size_t>(m_select))->SetFocus();
+					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 				}
 				else {
-					for (auto& y : ButtonSel) {
+					for (auto& y : m_ButtonSel) {
 						y->SetReady();
 					}
 				}
 			}
 		}
 		void ButtonControl::Update(void) noexcept {
-			for (auto& y : ButtonSel) {
+			for (auto& y : m_ButtonSel) {
 				y->Update();
 			}
 		}
 		void ButtonControl::Draw(void) noexcept {
-			for (auto& y : ButtonSel) {
+			for (auto& y : m_ButtonSel) {
 				y->Draw();
 			}
 		}
 		void ButtonControl::Dispose(void) noexcept {
-			for (auto& y : ButtonSel) {
+			for (auto& y : m_ButtonSel) {
 				y->Dispose();
 				y.reset();
 			}
-			ButtonSel.clear();
+			m_ButtonSel.clear();
 		}
 		// 
 		void CreditControl::Init(void) noexcept {

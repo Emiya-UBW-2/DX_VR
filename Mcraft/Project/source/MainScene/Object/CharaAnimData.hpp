@@ -140,7 +140,7 @@ namespace FPS_n2 {
 		};
 
 		class FingerData {
-			std::array<std::array<float, 5>, 2> m_Fingers{};
+			std::array<std::array<float, 5>, 2>	m_Fingers{};
 		public:
 			auto& SetFingerPer(int LR, int Number) noexcept { return this->m_Fingers.at(LR).at(Number); }
 			const auto& GetFingerPer(int LR, int Number) const noexcept { return this->m_Fingers.at(LR).at(Number); }
@@ -156,9 +156,9 @@ namespace FPS_n2 {
 					int Numberindex = 0;
 					for (auto& f : LR) {
 						Ret.m_Fingers.at(LRindex).at(Numberindex) = f + p.m_Fingers.at(LRindex).at(Numberindex);
-						Numberindex++;
+						++Numberindex;
 					}
-					LRindex++;
+					++LRindex;
 				}
 				return Ret;
 			}
@@ -173,9 +173,9 @@ namespace FPS_n2 {
 					int Numberindex = 0;
 					for (auto& f : LR) {
 						Ret.m_Fingers.at(LRindex).at(Numberindex) = f - p.m_Fingers.at(LRindex).at(Numberindex);
-						Numberindex++;
+						++Numberindex;
 					}
-					LRindex++;
+					++LRindex;
 				}
 				return Ret;
 			}
@@ -190,9 +190,9 @@ namespace FPS_n2 {
 					int Numberindex = 0;
 					for (auto& f : LR) {
 						Ret.m_Fingers.at(LRindex).at(Numberindex) = f * scale;
-						Numberindex++;
+						++Numberindex;
 					}
-					LRindex++;
+					++LRindex;
 				}
 				return Ret;
 			}
@@ -332,13 +332,13 @@ namespace FPS_n2 {
 			};
 		private:
 			std::vector<AnimDatas>	m_Object;
-#ifdef DEBUG_CAM
+#if defined(DEBUG) && DEBUG_CAM
 			Vector3DX DBG_AnimRot = Vector3DX::vget(0.f, 0.f, deg2rad(-20));
 			Vector3DX DBG_AnimPos = Vector3DX::vget(-0.09f, -0.10f, -0.45f);
 #endif
 		public:
 			void	Load(const char* filepath) {
-				for (int loop = 0; loop < static_cast<int>(EnumGunAnim::Max); loop++) {
+				for (int loop = 0; loop < static_cast<int>(EnumGunAnim::Max); ++loop) {
 					std::string Path = filepath;
 					Path += EnumGunAnimName[loop];
 					Path += ".txt";
@@ -368,7 +368,7 @@ namespace FPS_n2 {
 				FingerData			Finger{};
 				GunAnimNow Ret; Ret.Set(Vector3DX::zero(), Vector3DX::zero(), Finger);
 				if (data) {
-					float totalTime = (float)data->GetTotalTime();
+					float totalTime = static_cast<float>(data->GetTotalTime());
 					if (data->first->GetIsLoop()) {
 						while (true) {
 							if ((nowframe - totalTime) > 0.f) {
@@ -395,7 +395,7 @@ namespace FPS_n2 {
 								Finger
 							);
 
-#ifdef DEBUG_CAM
+#if defined(DEBUG) && DEBUG_CAM
 							if (ID == 0) {
 								if (0 <= DBG_CamSel && DBG_CamSel <= 3 && false) {
 									auto* DXLib_refParts = DXLib_ref::Instance();

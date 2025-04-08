@@ -1,5 +1,5 @@
 #include	"BackGround.hpp"
-#include <random>
+#include	<random>
 
 const FPS_n2::BackGround::BackGroundClass* SingletonBase<FPS_n2::BackGround::BackGroundClass>::m_Singleton = nullptr;
 namespace FPS_n2 {
@@ -462,7 +462,7 @@ namespace FPS_n2 {
 								}
 								//Ç±ÇÃèÍçáÇæÇØÇ‡Ç§àÍâÒîªíËÇ≥ÇπÇÈÉhÉì
 								if (selectBlock != CellBuff.m_Cell) {
-									x--;
+									--x;
 								}
 							}
 						}
@@ -537,7 +537,7 @@ namespace FPS_n2 {
 								}
 								//Ç±ÇÃèÍçáÇæÇØÇ‡Ç§àÍâÒîªíËÇ≥ÇπÇÈÉhÉì
 								if (selectBlock != CellBuff.m_Cell) {
-									z--;
+									--z;
 								}
 							}
 						}
@@ -1466,8 +1466,8 @@ namespace FPS_n2 {
 					}
 				}
 				//*/
-				for (int z = -Edge; z < Size * Rate + Edge; z++) {
-					for (int x = -Edge; x < Size * Rate + Edge; x++) {
+				for (int z = -Edge; z < Size * Rate + Edge; ++z) {
+					for (int x = -Edge; x < Size * Rate + Edge; ++x) {
 						auto SetWall = [&](int xt,int zt) {
 							int xPos = -Size * Rate / 2 + x + xt;
 							int zPos = -Size * Rate / 2 + z + zt;
@@ -1483,22 +1483,22 @@ namespace FPS_n2 {
 						if (!this->m_MazeControl.PosIsPath(xp, zp) && (x % Rate == 0) && (z % Rate == 0)) {
 							SetWall(0, 0);
 							if ((xp > 0) && !this->m_MazeControl.PosIsPath(xp - 1, zp)) {
-								for (int xt = 0; xt < Rate; xt++) {
+								for (int xt = 0; xt < Rate; ++xt) {
 									SetWall(-xt, 0);
 								}
 							}
 							if ((zp > Size - 1) && !this->m_MazeControl.PosIsPath(xp, zp - 1)) {
-								for (int zt = 0; zt < Rate; zt++) {
+								for (int zt = 0; zt < Rate; ++zt) {
 									SetWall(0, -zt);
 								}
 							}
 							if ((xp < 0) && !this->m_MazeControl.PosIsPath(xp + 1, zp)) {
-								for (int xt = 0; xt < Rate; xt++) {
+								for (int xt = 0; xt < Rate; ++xt) {
 									SetWall(xt, 0);
 								}
 							}
 							if ((zp < Size - 1) && !this->m_MazeControl.PosIsPath(xp, zp + 1)) {
-								for (int zt = 0; zt < Rate; zt++) {
+								for (int zt = 0; zt < Rate; ++zt) {
 									SetWall(0, zt);
 								}
 							}
@@ -1563,7 +1563,7 @@ namespace FPS_n2 {
 			SetMaterialParam(Param);
 			//
 			constexpr size_t size = (DrawMax + DrawMax) * (DrawMax + DrawMax) * (DrawMax + DrawMax) / 2 * 3 / 100;
-			for (int loop = 0; loop < total; loop++) {
+			for (int loop = 0; loop < total; ++loop) {
 				this->m_vert32s.at(loop).Init(size);
 				this->m_vert32sS.at(loop).Init(size);
 				this->m_vert32sSB.at(loop).Init(size);
@@ -1590,9 +1590,9 @@ namespace FPS_n2 {
 					if (blicksel >= 0) {
 						auto& cell = this->m_CellxN.front();
 						auto Put = cell.GetPoint(PutPos);
-						for (int xp = 0; xp < xput; xp++) {
-							for (int yp = 0; yp < yput; yp++) {
-								for (int zp = 0; zp < zput; zp++) {
+						for (int xp = 0; xp < xput; ++xp) {
+							for (int yp = 0; yp < yput; ++yp) {
+								for (int zp = 0; zp < zput; ++zp) {
 									SetBlick((Put.x + xp - xput / 2), (Put.y + yp - yput / 2), (Put.z + zp - zput / 2), blicksel);
 								}
 							}
@@ -1806,7 +1806,7 @@ namespace FPS_n2 {
 				}
 			}
 #endif
-			for (int loop = 0; loop < total; loop++) {
+			for (int loop = 0; loop < total; ++loop) {
 				if ((loop != 0) && (loop != this->m_ThreadCounter)) { continue; }
 				//
 				if (this->m_BaseRate < this->m_CellxN.at(loop).scaleRate) {
@@ -1829,9 +1829,9 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundClass::BG_Draw(void) const noexcept {
-			SetUseLighting(FALSE);
+			SetUseLighting(false);
 			this->m_ObjSky.DrawModel();
-			SetUseLighting(TRUE);
+			SetUseLighting(true);
 		}
 		void		BackGroundClass::Shadow_Draw(void) const noexcept {
 			for (auto& Vert : this->m_vert32sSB) {
@@ -1851,7 +1851,7 @@ namespace FPS_n2 {
 			constexpr int MinLimit = std::min(std::min(DrawMinXPlus, DrawMinZPlus), DrawMinYPlus) * 3 / 4;
 			constexpr int MaxLimit = std::min(std::min(DrawMaxXPlus, DrawMaxZPlus), DrawMaxYPlus) * 5 / 4;
 
-			for (int loop = 0; loop < total; loop++) {
+			for (int loop = 0; loop < total; ++loop) {
 				auto& Vert = this->m_vert32s.at(loop);
 				if (Vert.GetOutNum() > 0) {
 					float Min = (this->m_CellxN.at(loop).scaleRate != 1) ? MinLimit * this->m_CellxN.at(loop).Scale : 0;
@@ -1861,12 +1861,12 @@ namespace FPS_n2 {
 			}
 #if defined(DEBUG) & EDITBLICK
 			int x = static_cast<int>(PutPos.x / CellScale), y = static_cast<int>(PutPos.y / CellScale), z = static_cast<int>(PutPos.z / CellScale);
-			SetUseLighting(FALSE);
+			SetUseLighting(false);
 			DrawCube3D(
-				(Vector3DX::vget((float)(x - xput / 2), (float)(y - yput / 2), (float)(z - zput / 2)) * CellScale).get(),
-				(Vector3DX::vget((float)(x + xput - xput / 2), (float)(y + yput - yput / 2), (float)(z + zput - zput / 2)) * CellScale).get(),
-				GetColor(0, 64, 0), GetColor(0, 0, 0), FALSE);
-			SetUseLighting(TRUE);
+				(Vector3DX::vget(static_cast<float>(x - xput / 2), static_cast<float>(y - yput / 2), static_cast<float>(z - zput / 2)) * CellScale).get(),
+				(Vector3DX::vget(static_cast<float>(x + xput - xput / 2), static_cast<float>(y + yput - yput / 2), static_cast<float>(z + zput - zput / 2)) * CellScale).get(),
+				GetColor(0, 64, 0), GetColor(0, 0, 0), false);
+			SetUseLighting(true);
 #endif
 		}
 		//

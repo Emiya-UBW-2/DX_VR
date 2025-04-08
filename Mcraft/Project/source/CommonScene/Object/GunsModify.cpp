@@ -1,50 +1,50 @@
 #include	"GunsModify.hpp"
-#include "../../sub.hpp"
+#include	"../../sub.hpp"
 
 const FPS_n2::Sceneclass::GunsModify* SingletonBase<FPS_n2::Sceneclass::GunsModify>::m_Singleton = nullptr;
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		void			GunsModify::SetMods(ModSlotControl* ModPtr, const Slot* SlotPtr) {
+		void			GunsModify::SetMods(ModSlotControl* pMod, const std::unique_ptr<Slot>* pParentSlot) {
 			//自分の下の世代のオブジェをセット
-			for (auto& y : SelData) {
-				if (y->ParentSlot == SlotPtr) {
-					const auto& Data = ModPtr->GetModData()->GetPartsSlot(y->SlotType);
-					if (Data && y->m_sel < static_cast<int>(Data->m_ItemsUniqueID.size())) {
-						if (y->m_selectSwitch) {
-							y->m_selectSwitch = false;
-							ModPtr->SetMod(y->SlotType, y->m_sel, this->m_BaseObj);
+			for (auto& data : this->m_SelectPartsData) {
+				if (data->m_ParentSlot == pParentSlot) {
+					const auto& Data = pMod->GetModData()->GetPartsSlot(data->m_SlotType);
+					if (Data && data->m_sel < static_cast<int>(Data->m_ItemsUniqueID.size())) {
+						if (data->m_selectSwitch) {
+							data->m_selectSwitch = false;
+							pMod->SetMod(data->m_SlotType, data->m_sel, this->m_BaseObj);
 						}
 					}
 					else {
-						ModPtr->RemoveMod(y->SlotType);
+						pMod->RemoveMod(data->m_SlotType);
 					}
 				}
 			}
 		}
-		void			GunsModify::UpdateMods(ModSlotControl* ModPtr, const Slot* SlotPtr, bool isPreset) noexcept {
-			if (!ModPtr) { return; }
+		void			GunsModify::UpdateMods(ModSlotControl* pMod, const std::unique_ptr<Slot>* pParentSlot, bool isPreset) noexcept {
+			if (!pMod) { return; }
 			//AddSlot
-			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
-				if (ModPtr->GetModData()->GetPartsSlot((GunSlot)loop)) {
-					SelData.emplace_back(std::make_shared<Slot>());
-					auto& y = SelData.back();
-					y->SlotType = (GunSlot)loop;
-					y->ParentSlot = SlotPtr;
-					y->m_Data = ModPtr;
-					y->m_selectSwitch = true;
-					const auto& Data = ModPtr->GetModData()->GetPartsSlot(y->SlotType);
-					y->m_sel = Data->m_IsNeed ? 0 : static_cast<int>(Data->m_ItemsUniqueID.size());
+			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
+				if (pMod->GetModData()->GetPartsSlot((GunSlot)loop)) {
+					this->m_SelectPartsData.emplace_back(std::make_unique<Slot>());
+					auto& data = this->m_SelectPartsData.back();
+					data->m_SlotType = (GunSlot)loop;
+					data->m_ParentSlot = pParentSlot;
+					data->m_Data = pMod;
+					data->m_selectSwitch = true;
+					const auto& Data = pMod->GetModData()->GetPartsSlot(data->m_SlotType);
+					data->m_sel = Data->m_IsNeed ? 0 : static_cast<int>(Data->m_ItemsUniqueID.size());
 					if (isPreset) {
-						for (const auto& S : SlotSave) {
-							if (y->ParentSlot) {
-								if (!S.IsParent(y->ParentSlot->SlotType, y->ParentSlot->m_sel)) { continue; }
+						for (const auto& S : m_SlotSave) {
+							if (data->m_ParentSlot) {
+								if (!S.IsParent((*data->m_ParentSlot)->m_SlotType, (*data->m_ParentSlot)->m_sel)) { continue; }
 							}
 							else {
 								if (!S.IsParentNone()) { continue; }
 							}
-							if (y->SlotType == S.SlotType) {
-								y->m_sel = S.m_sel;
+							if (data->m_SlotType == S.m_SlotType) {
+								data->m_sel = S.m_sel;
 								break;
 							}
 						}
@@ -52,13 +52,13 @@ namespace FPS_n2 {
 				}
 			}
 			//
-			SetMods(ModPtr, SlotPtr);
+			SetMods(pMod, pParentSlot);
 			//
-			for (int loop = 0; loop < static_cast<int>(SelData.size()); loop++) {
-				auto& y = SelData[loop];
-				if (y->ParentSlot == SlotPtr) {
-					if (!ModPtr->GetPartsPtr(y->SlotType)) { return; }
-					UpdateMods(&((std::shared_ptr<ModClass>&)(ModPtr->GetPartsPtr(y->SlotType)))->SetModSlot(), y.get(), isPreset);
+			for (int loop = 0; loop < static_cast<int>(this->m_SelectPartsData.size()); ++loop) {
+				auto& data = this->m_SelectPartsData[loop];
+				if (data->m_ParentSlot == pParentSlot) {
+					if (!pMod->GetPartsPtr(data->m_SlotType)) { return; }
+					UpdateMods(&((std::unique_ptr<ModClass>&)(pMod->GetPartsPtr(data->m_SlotType)))->SetModSlot(), &data, isPreset);
 				}
 			}
 		}
@@ -67,31 +67,31 @@ namespace FPS_n2 {
 			this->m_BaseObj = GunPtr;
 			UpdateMods(&GunPtr->SetModSlot(), nullptr, isPreset);
 		}
-		bool			GunsModify::ChangeSelData(const Slot* SlotPtr, int sel, bool isDeleteSlot) noexcept {
-			for (int loop = 0; loop < static_cast<int>(SelData.size()); loop++) {
-				const auto& y = SelData[loop];
-				if (y.get() != SlotPtr) {
-					if (y->ParentSlot == SlotPtr) {
-						if (ChangeSelData(y.get(), static_cast<int>(y->m_Data->GetModData()->GetPartsSlot(y->SlotType)->m_ItemsUniqueID.size()), true)) { loop--; }
+		bool			GunsModify::ChangeSelData(const std::unique_ptr<Slot>* pParentSlot, int sel, bool isDeleteSlot) noexcept {
+			for (int loop = 0; loop < static_cast<int>(this->m_SelectPartsData.size()); ++loop) {
+				const auto& data = this->m_SelectPartsData[loop];
+				if (&data != pParentSlot) {
+					if (data->m_ParentSlot == pParentSlot) {
+						if (ChangeSelData(&data, static_cast<int>(data->m_Data->GetModData()->GetPartsSlot(data->m_SlotType)->m_ItemsUniqueID.size()), true)) { --loop; }
 					}
 				}
 			}
 			bool Ret = false;
-			for (int loop = 0; loop < static_cast<int>(SelData.size()); loop++) {
-				const auto& y = SelData[loop];
-				if (y.get() == SlotPtr) {
-					y->m_sel = sel;
-					y->m_selectSwitch = true;
-					SetMods(y->m_Data, y->ParentSlot);
-					if (sel == static_cast<int>(y->m_Data->GetModData()->GetPartsSlot(y->SlotType)->m_ItemsUniqueID.size())) {
+			for (int loop = 0; loop < static_cast<int>(this->m_SelectPartsData.size()); ++loop) {
+				const auto& data = this->m_SelectPartsData[loop];
+				if (&data == pParentSlot) {
+					data->m_sel = sel;
+					data->m_selectSwitch = true;
+					SetMods(data->m_Data, data->m_ParentSlot);
+					if (sel == static_cast<int>(data->m_Data->GetModData()->GetPartsSlot(data->m_SlotType)->m_ItemsUniqueID.size())) {
 						//削除
 						if (isDeleteSlot) {
-							SelData[loop].reset();
-							SelData.erase(SelData.begin() + loop);
+							this->m_SelectPartsData[loop].reset();
+							this->m_SelectPartsData.erase(this->m_SelectPartsData.begin() + loop);
 						}
 					}
 					else {
-						UpdateMods(&((std::shared_ptr<ModClass>&)(y->m_Data->GetPartsPtr(y->SlotType)))->SetModSlot(), y.get(), false);
+						UpdateMods(&((std::shared_ptr<ModClass>&)(data->m_Data->GetPartsPtr(data->m_SlotType)))->SetModSlot(), &data, false);
 					}
 					Ret = true;
 					break;
@@ -101,7 +101,7 @@ namespace FPS_n2 {
 		}
 		void			GunsModify::LoadSlots(const char* path) noexcept {
 			SlotSaveData Tmp;
-			SlotSave.clear();
+			m_SlotSave.clear();
 			std::ifstream inputfile(path, std::ios::binary);
 			if (inputfile) {
 				{
@@ -110,7 +110,7 @@ namespace FPS_n2 {
 				}
 				while (!inputfile.eof()) { //ファイルの最後まで続ける
 					inputfile.read(reinterpret_cast<char*>(&Tmp), sizeof(Tmp));
-					SlotSave.emplace_back(Tmp);
+					m_SlotSave.emplace_back(Tmp);
 				}
 			}
 			inputfile.close();
@@ -122,11 +122,11 @@ namespace FPS_n2 {
 				int ULTSel = 0;
 				outputfile.write(reinterpret_cast<char*>(&ULTSel), sizeof(ULTSel));
 			}
-			for (auto& y : SelData) {
-				Tmp.SlotType = y->SlotType;
-				Tmp.m_sel = y->m_sel;
-				Tmp.ParentSlotType = (y->ParentSlot) ? y->ParentSlot->SlotType : GunSlot::Gun;
-				Tmp.m_Parentsel = (y->ParentSlot) ? y->ParentSlot->m_sel : 0;
+			for (auto& data : this->m_SelectPartsData) {
+				Tmp.m_SlotType = data->m_SlotType;
+				Tmp.m_sel = data->m_sel;
+				Tmp.m_ParentSlotType = (data->m_ParentSlot) ? (*data->m_ParentSlot)->m_SlotType : GunSlot::Gun;
+				Tmp.m_Parentsel = (data->m_ParentSlot) ? (*data->m_ParentSlot)->m_sel : 0;
 				outputfile.write(reinterpret_cast<char*>(&Tmp), sizeof(Tmp));
 			}
 			outputfile.close();

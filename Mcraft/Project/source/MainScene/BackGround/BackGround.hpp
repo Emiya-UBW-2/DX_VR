@@ -1,9 +1,11 @@
 #pragma once
 #pragma warning(disable:4464)
-#include "../../Header.hpp"
-#include "../../MainScene/BackGround/BackGroundSub.hpp"
+#include	"../../Header.hpp"
+#include	"../../MainScene/BackGround/BackGroundSub.hpp"
 
-#define EDITBLICK (FALSE)
+#define EDITBLICK (false)
+
+#define CHECKTHREADTIME (false)
 
 namespace FPS_n2 {
 	namespace BackGround {
@@ -13,9 +15,9 @@ namespace FPS_n2 {
 				PATH,
 			};
 		private:
-			int m_Width{ 1 };
-			int m_Height{ 1 };
-			std::vector<std::vector<MAZETYPE>> m_Maze;
+			int		m_Width{ 1 };
+			int		m_Height{ 1 };
+			std::vector<std::vector<MAZETYPE>>		m_Maze;
 		private:
 			//穴掘り
 			void dig(int x, int y) {
@@ -52,10 +54,10 @@ namespace FPS_n2 {
 			//通路の総数を取得
 			const auto GetPachCount(void) noexcept {
 				int OneSize = 0;
-				for (int y = 0; y < this->m_Height; y++) {
-					for (int x = 0; x < this->m_Width; x++) {
+				for (int y = 0; y < this->m_Height; ++y) {
+					for (int x = 0; x < this->m_Width; ++x) {
 						if (PosIsPath(x, y)) {
-							OneSize++;
+							++OneSize;
 						}
 					}
 				}
@@ -78,8 +80,8 @@ namespace FPS_n2 {
 				// 開始点をランダム（奇数座標）に決定する
 				dig(std::clamp(2 * GetRand(this->m_Width / 2) + 1, 0, this->m_Width - 1), std::clamp(2 * GetRand(this->m_Height / 2) + 1, 0, this->m_Height - 1));
 				//追加で穴あけ
-				for (int y = 1; y < this->m_Height - 1; y++) {
-					for (int x = 1; x < this->m_Width - 1; x++) {
+				for (int y = 1; y < this->m_Height - 1; ++y) {
+					for (int x = 1; x < this->m_Width - 1; ++x) {
 						bool isHit = false;
 						if (x == 1 || (x == this->m_Width - 1 - 1)) {
 							isHit = true;
@@ -92,8 +94,8 @@ namespace FPS_n2 {
 					}
 				}
 				//追加で穴あけ
-				for (int y = 1; y < this->m_Height - 1; y++) {
-					for (int x = 1; x < this->m_Width - 1; x++) {
+				for (int y = 1; y < this->m_Height - 1; ++y) {
+					for (int x = 1; x < this->m_Width - 1; ++x) {
 						bool isHit = false;
 						if ((y % 6) == 0) {
 							if ((x % 6) == 0) { isHit = true; }
@@ -162,11 +164,11 @@ namespace FPS_n2 {
 				int8_t					m_Cell{};
 				int8_t					m_FillInfo{};//周りの遮蔽データのbitフラグ
 			public:
-				bool IsEmpty() const noexcept { return this->m_Cell == s_EmptyBlick; }
-				bool IsOcclusion() const noexcept { return this->m_FillInfo == 0b111111; }
+				bool IsEmpty(void) const noexcept { return this->m_Cell == s_EmptyBlick; }
+				bool IsOcclusion(void) const noexcept { return this->m_FillInfo == 0b111111; }
 			};
 			struct CellsData {
-				std::vector<CellBuffer> m_CellBuffer;
+				std::vector<CellBuffer>	m_CellBuffer;
 				int scaleRate = 1;
 				int All = 256 / scaleRate;
 				//算術補助系
@@ -203,7 +205,7 @@ namespace FPS_n2 {
 								if (cell > IDCount.size()) {
 									IDCount.resize(cell);
 								}
-								IDCount.at(static_cast<size_t>(cell - 1))++;
+								++IDCount.at(static_cast<size_t>(cell - 1));
 							}
 						}
 					}
@@ -215,7 +217,7 @@ namespace FPS_n2 {
 								max = i;
 								id = index;
 							}
-							index++;
+							++index;
 						}
 						return id;
 					}
@@ -257,7 +259,7 @@ namespace FPS_n2 {
 			struct ThreadJobs {
 				std::thread						m_Job;
 				bool							m_JobEnd{};
-#if defined(DEBUG) && false
+#if defined(DEBUG) && CHECKTHREADTIME
 				LONGLONG						m_StartTime{};
 				LONGLONG						m_TotalTime{};
 #endif
@@ -273,7 +275,7 @@ namespace FPS_n2 {
 				void Execute(void) noexcept {
 					if (this->m_JobEnd) {
 						this->m_JobEnd = false;
-#if defined(DEBUG) && false
+#if defined(DEBUG) && CHECKTHREADTIME
 						this->m_TotalTime = GetNowHiPerformanceCount() - this->m_StartTime;
 						this->m_StartTime = GetNowHiPerformanceCount();
 #endif
@@ -297,8 +299,8 @@ namespace FPS_n2 {
 							//this->m_Job.join();
 						}
 					}
-#if defined(DEBUG) && false
-					printfDx("%5.2fms \n", (float)(this->m_TotalTime) / 1000.f);
+#if defined(DEBUG) && CHECKTHREADTIME
+					printfDx("%5.2fms \n", static_cast<float>(this->m_TotalTime) / 1000.f);
 #endif
 				}
 
@@ -320,13 +322,13 @@ namespace FPS_n2 {
 				std::array<std::vector<uint32_t>, 2>			m_index32;
 				std::array<size_t, 2>							m_32Num{ 0 };
 			public:
-				const auto& GetInNum() const noexcept { return this->m_32Num.at(this->m_Now); }
-				auto& SetInVert() noexcept { return this->m_vert32.at(this->m_Now); }
-				auto& SetInIndex() noexcept { return this->m_index32.at(this->m_Now); }
+				const auto& GetInNum(void) const noexcept { return this->m_32Num.at(this->m_Now); }
+				auto& SetInVert(void) noexcept { return this->m_vert32.at(this->m_Now); }
+				auto& SetInIndex(void) noexcept { return this->m_index32.at(this->m_Now); }
 			public:
-				const auto& GetOutNum() const noexcept { return this->m_32Num.at(static_cast<size_t>(1 - this->m_Now)); }
-				const auto& GetOutVert() const noexcept { return this->m_vert32.at(static_cast<size_t>(1 - this->m_Now)); }
-				const auto& GetOutindex() const noexcept { return this->m_index32.at(static_cast<size_t>(1 - this->m_Now)); }
+				const auto& GetOutNum(void) const noexcept { return this->m_32Num.at(static_cast<size_t>(1 - this->m_Now)); }
+				const auto& GetOutVert(void) const noexcept { return this->m_vert32.at(static_cast<size_t>(1 - this->m_Now)); }
+				const auto& GetOutindex(void) const noexcept { return this->m_index32.at(static_cast<size_t>(1 - this->m_Now)); }
 			public:
 				void		Init(size_t size) noexcept {
 					for (int loop = 0; loop < 2; ++loop) {
@@ -370,7 +372,7 @@ namespace FPS_n2 {
 				}
 				void		Draw(const GraphHandle& GrHandle) const noexcept {
 					if (GetOutNum() > 0) {
-						DrawPolygon32bitIndexed3D(GetOutVert().data(), static_cast<int>(GetOutNum() * 4), GetOutindex().data(), static_cast<int>(GetOutNum() * 6 / 3), GrHandle.get(), TRUE);
+						DrawPolygon32bitIndexed3D(GetOutVert().data(), static_cast<int>(GetOutNum() * 4), GetOutindex().data(), static_cast<int>(GetOutNum() * 6 / 3), GrHandle.get(), true);
 					}
 				}
 			};
@@ -688,13 +690,13 @@ namespace FPS_n2 {
 			}
 			bool			CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept;
 
-			void			LoadCellsFile() noexcept;
-			void			SaveCellsFile() noexcept;
+			void			LoadCellsFile(void) noexcept;
+			void			SaveCellsFile(void) noexcept;
 
 			void			LoadCellsClip(int xpos, int ypos,int zpos) noexcept;
 			void			SaveCellsClip(int XMin, int XMax, int YMin, int YMax, int ZMin, int ZMax) noexcept;
 
-			void			SettingChange() noexcept;
+			void			SettingChange(void) noexcept;
 
 			void			SetBlick(int x, int y, int z, int8_t select) noexcept;
 			const Vector3Int GetPoint(const Vector3DX& pos) const noexcept { return this->m_CellxN.front().GetPoint(pos); }

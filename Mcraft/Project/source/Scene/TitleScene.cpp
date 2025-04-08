@@ -1,7 +1,4 @@
-#include	"../sub.hpp"
 #include	"TitleScene.hpp"
-
-#include	"../Header.hpp"
 
 #include	"../MainScene/Player/Player.hpp"
 
@@ -25,7 +22,7 @@ namespace FPS_n2 {
 			// 
 			/*
 			auto* SE = SoundPool::Instance();
-			SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_LOOP, TRUE);
+			SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_LOOP, true);
 			// */
 		}
 		bool			TitleScene::Update_Sub(void) noexcept {
@@ -79,7 +76,7 @@ namespace FPS_n2 {
 					default:
 						break;
 					}
-					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, TRUE);
+					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
 				}
 			}
 			// 
@@ -115,7 +112,7 @@ namespace FPS_n2 {
 		void			TitleScene::DrawUI_Base_Sub(void) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			// ”wŒi
-			DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Gray50, TRUE);
+			DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Gray50, true);
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = ButtonControl::Instance();

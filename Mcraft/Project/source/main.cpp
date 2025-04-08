@@ -1,18 +1,18 @@
-#include"Header.hpp"
+#include	"Header.hpp"
 
-#include "Scene/MainScene.hpp"
-#include "Scene/MainSceneLoader.hpp"
-#include "Scene/TitleScene.hpp"
+#include	"Scene/MainScene.hpp"
+#include	"Scene/MainSceneLoader.hpp"
+#include	"Scene/TitleScene.hpp"
 
-#include "MainScene/NetworkBrowser.hpp"
+#include	"MainScene/NetworkBrowser.hpp"
 
-#ifdef DEBUG_CAM
+#if defined(DEBUG) && DEBUG_CAM
 int DBG_CamSel = -1;
 #endif
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
-	SetDoubleStartValidFlag(TRUE);
-	//SetEnableXAudioFlag(TRUE);//Xaudio(ロードが長いとロストするので必要に応じて)
+	SetDoubleStartValidFlag(true);
+	//SetEnableXAudioFlag(true);//Xaudio(ロードが長いとロストするので必要に応じて)
 	DXLib_ref::Create();
 	//使用するボタンの指定
 	auto* Pad = PadControl::Instance();
@@ -48,10 +48,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	DXLib_refParts->StartLogic();
 	//追加設定
 	SetMainWindowText("Phantom of the Bunker");						//タイトル
-	SetUseHalfLambertLighting(TRUE);
-	MV1SetLoadModelReMakeNormal(TRUE);
-	//SetUsePixelLighting(TRUE);
-	SetUseBackCulling(TRUE);
+	SetUseHalfLambertLighting(true);
+	MV1SetLoadModelReMakeNormal(true);
+	//SetUsePixelLighting(true);
+	SetUseBackCulling(true);
 	SetTextureAddressMode(DX_TEXADDRESS_WRAP);
 	//
 	FPS_n2::Player::PlayerManager::Create();

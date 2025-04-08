@@ -1,7 +1,7 @@
 #pragma once
 #pragma warning(disable:4464)
-#include "../Header.hpp"
-#include "../sub.hpp"
+#include	"../Header.hpp"
+#include	"../sub.hpp"
 
 
 namespace FPS_n2 {
@@ -132,8 +132,8 @@ namespace FPS_n2 {
 			NetTime											m_TickRate{ 0 };
 			NetTime											m_PrevFrame{ 0 };
 
-			NetTime						m_ClientTime{ 0 };	//そのプレイヤーのインゲーム時間
-			NetTime						m_PrevTime{ 0 };
+			NetTime											m_ClientTime{ 0 };	//そのプレイヤーのインゲーム時間
+			NetTime											m_PrevTime{ 0 };
 		public:
 			PlayerNetWork(void) noexcept {}
 			PlayerNetWork(const PlayerNetWork&) = delete;
@@ -267,7 +267,7 @@ namespace FPS_n2 {
 					return;
 				}
 				this->m_Pings.at(this->m_PingNow) = std::max(0.f, static_cast<float>(microsec) / 1000.f - (1000.f / this->m_Tick));//ティック分引く
-				++m_PingNow %= this->m_Pings.size();
+				++this->m_PingNow %= this->m_Pings.size();
 				this->m_Ping = 0.f;
 				for (auto& p : this->m_Pings) {
 					this->m_Ping += p;

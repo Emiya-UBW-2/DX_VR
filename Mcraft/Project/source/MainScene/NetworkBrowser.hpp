@@ -22,7 +22,7 @@ namespace FPS_n2 {
 			std::vector<NewSetting>	m_NewWorkSetting;
 		public:
 			void Load(void) noexcept {
-				SetOutApplicationLogValidFlag(FALSE);
+				SetOutApplicationLogValidFlag(false);
 				FileStreamDX FileStream("data/NetWorkSetting.txt");
 				while (true) {
 					this->m_NewWorkSetting.resize(this->m_NewWorkSetting.size() + 1);
@@ -35,7 +35,7 @@ namespace FPS_n2 {
 						break;
 					}
 				}
-				SetOutApplicationLogValidFlag(TRUE);
+				SetOutApplicationLogValidFlag(true);
 			}
 			void Save(void) noexcept {
 				std::ofstream outputfile("data/NetWorkSetting.txt");

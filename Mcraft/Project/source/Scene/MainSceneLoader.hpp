@@ -1,5 +1,5 @@
 #pragma once
-#include"../Header.hpp"
+#include	"../Header.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -15,9 +15,9 @@ namespace FPS_n2 {
 			virtual ~LoadScene(void) noexcept {}
 		public:
 			void Set_Sub(void) noexcept override {
-				SetUseASyncLoadFlag(TRUE);
+				SetUseASyncLoadFlag(true);
 				Get_Next()->Load();//次シーンのロード物
-				SetUseASyncLoadFlag(FALSE);
+				SetUseASyncLoadFlag(false);
 			}
 			bool Update_Sub(void) noexcept override {
 				return (GetASyncLoadNum() > 0);

@@ -1,6 +1,6 @@
 #pragma warning(disable:4464)
-#include "../MainScene/NetworkBrowser.hpp"
-#include "MainScene.hpp"
+#include	"../MainScene/NetworkBrowser.hpp"
+#include	"MainScene.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -79,7 +79,7 @@ namespace FPS_n2 {
 			Vector3DX LightVec = Vector3DX::vget(0.f, -0.3f, 0.15f); LightVec = LightVec.normalized();
 			PostPassParts->SetAmbientLight(LightVec);
 
-			SetLightEnable(FALSE);
+			SetLightEnable(false);
 
 			auto& FirstLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec);
 			SetLightAmbColorHandle(FirstLight.get(), GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
@@ -122,16 +122,12 @@ namespace FPS_n2 {
 			this->m_FadeControl.Init();
 			this->m_IsEnd = false;
 			this->m_StartTimer = 3.f;
-
-			auto& ViewChara = PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
-			this->m_EffectPos = ViewChara->GetEyePositionCache();
-			EffectSingleton::Instance()->SetLoop(Sceneclass::Effect::ef_dust, this->m_EffectPos);
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
-#ifdef DEBUG
+#if defined(DEBUG)
 			auto* DebugParts = DebugClass::Instance();					//デバッグ
 #endif // DEBUG
-#ifdef DEBUG
+#if defined(DEBUG)
 			DebugParts->SetPoint("Execute=Start");
 #endif // DEBUG
 			auto* CameraParts = Camera3D::Instance();
@@ -198,7 +194,7 @@ namespace FPS_n2 {
 			if (SceneParts->IsPause()) {
 				Pad->SetMouseMoveEnable(false);
 				BackGround->SettingChange();
-				if (!m_NetWorkController) {
+				if (!this->m_NetWorkController) {
 					return true;
 				}
 			}
@@ -224,7 +220,7 @@ namespace FPS_n2 {
 					//MyInput.SetInputPADS(Controls::PADS::MELEE, Pad->GetPadsInfo(Controls::PADS::MELEE).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::RELOAD, Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::INTERACT, Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().press());
-					//MyInput.SetInputPADS(Controls::PADS::SQUAT, Pad->GetPadsInfo(Controls::PADS::SQUAT).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::SQUAT, Pad->GetPadsInfo(Controls::PADS::SQUAT).GetKey().press());
 					//MyInput.SetInputPADS(Controls::PADS::PRONE, Pad->GetPadsInfo(Controls::PADS::PRONE).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::SHOT, Pad->GetPadsInfo(Controls::PADS::SHOT).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::AIM, Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().press());
@@ -235,7 +231,7 @@ namespace FPS_n2 {
 					//MyInput.SetInputPADS(Controls::PADS::JUMP, Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().press());
 				}
 				//ネットワーク
-				if (NetBrowser->IsDataReady() && !m_NetWorkController) {
+				if (NetBrowser->IsDataReady() && !this->m_NetWorkController) {
 					this->m_NetWorkController = std::make_unique<NetWork::NetWorkController>();
 					this->m_NetWorkController->Init(NetBrowser->GetClient(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
 				}
@@ -246,7 +242,7 @@ namespace FPS_n2 {
 				}
 				//
 				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {
-					bool IsServerNotPlayer = !m_NetWorkController->GetClient() && !m_NetWorkController->GetServerPlayer();
+					bool IsServerNotPlayer = !this->m_NetWorkController->GetClient() && !this->m_NetWorkController->GetServerPlayer();
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
 						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)loop);
@@ -255,7 +251,7 @@ namespace FPS_n2 {
 						}
 						else {//サーバーからのデータで動くもの
 							//サーバーがCPUを動かす場合
-							if (!m_NetWorkController->GetClient()) {
+							if (!this->m_NetWorkController->GetClient()) {
 								//cpu
 								//PlayerMngr->GetPlayer(loop)->GetAI()->Execute(&MyInput);
 							}
@@ -309,11 +305,22 @@ namespace FPS_n2 {
 				if (ViewChara->GetGunPtrNow()) {
 					BaseCamPos = Lerp<Vector3DX>(BaseCamPos, ViewChara->GetGunPtrNow()->GetADSEyeMat().pos(), ViewChara->GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::ADS));
 				}
-				Vector3DX m_CamPos = BaseCamPos + Camera3D::Instance()->GetCamShake();
-				Vector3DX m_CamVec = m_CamPos + ViewChara->GetEyeRotationCache().zvec() * -1.f;
-				m_CamVec += Camera3D::Instance()->GetCamShake();
-				m_CamPos += Camera3D::Instance()->GetCamShake() * 2.f;
-#ifdef DEBUG_CAM
+
+				if (GetIsFirstLoop()) {
+					this->m_EffectPos = BaseCamPos;
+					EffectSingleton::Instance()->SetLoop(Sceneclass::Effect::ef_dust, this->m_EffectPos);
+				}
+				else {
+					Easing(&this->m_EffectPos, BaseCamPos, 0.95f, EasingType::OutExpo);
+					EffectSingleton::Instance()->Update_LoopEffect(Sceneclass::Effect::ef_dust, this->m_EffectPos, Vector3DX::forward(), 0.5f);
+					EffectSingleton::Instance()->SetEffectColor(Sceneclass::Effect::ef_dust, 255, 255, 255, 64);
+				}
+
+				CameraParts->SetMainCamera().SetCamPos(
+					BaseCamPos + Camera3D::Instance()->GetCamShake(),
+					BaseCamPos + ViewChara->GetEyeRotationCache().zvec() * -1.f + Camera3D::Instance()->GetCamShake() * 2.f,
+					ViewChara->GetEyeRotationCache().yvec());
+#if defined(DEBUG) && DEBUG_CAM
 				if (CheckHitKey(KEY_INPUT_F1) != 0) {
 					DBG_CamSel = -1;
 				}
@@ -329,38 +336,34 @@ namespace FPS_n2 {
 				if (CheckHitKey(KEY_INPUT_F5) != 0) {
 					DBG_CamSel = 3;
 				}
-				if (CheckHitKey(KEY_INPUT_F6) != 0) {
-					DBG_CamSel = 4;
-				}
-				if (CheckHitKey(KEY_INPUT_F7) != 0) {
-					DBG_CamSel = 5;
-				}
-				switch (DBG_CamSel) {
-				case 0:
-					m_CamVec = m_CamPos;
-					m_CamPos += ViewChara->GetEyeRotationCache().xvec() * (3.f * Scale3DRate);
-					break;
-				case 1:
-					m_CamVec = m_CamPos;
-					m_CamPos -= ViewChara->GetEyeRotationCache().xvec() * (3.f * Scale3DRate);
-					break;
-				case 2:
-					m_CamVec = m_CamPos;
-					m_CamPos += ViewChara->GetEyeRotationCache().yvec() * (3.f * Scale3DRate) + ViewChara->GetEyeRotationCache().zvec() * 0.1f;
-					break;
-				case 3:
-					m_CamVec = m_CamPos;
-					m_CamPos += ViewChara->GetEyeRotationCache().zvec() * (-3.f * Scale3DRate);
-					break;
-				default:
-					break;
+				if (0 <= DBG_CamSel && DBG_CamSel <= 3) {
+					Vector3DX CamPos = CameraParts->GetMainCamera().GetCamPos();
+					Vector3DX CamVec = CameraParts->GetMainCamera().GetCamVec();
+					Vector3DX CamUp = CameraParts->GetMainCamera().GetCamUp();
+					Matrix3x3DX Rot = Matrix3x3DX::Axis1(CamUp, (CamVec - CamPos).normalized());
+					switch (DBG_CamSel) {
+					case 0:
+						CamVec = CamPos;
+						CamPos += Rot.xvec() * (3.f * Scale3DRate);
+						break;
+					case 1:
+						CamVec = CamPos;
+						CamPos += Rot.xvec() * (-3.f * Scale3DRate);
+						break;
+					case 2:
+						CamVec = CamPos;
+						CamPos += Rot.yvec() * (3.f * Scale3DRate) + Rot.zvec() * 0.1f;
+						break;
+					case 3:
+						CamVec = CamPos;
+						CamPos += Rot.zvec() * (-3.f * Scale3DRate);
+						break;
+					default:
+						break;
+					}
+					CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, CamUp);
 				}
 #endif
-				Easing(&this->m_EffectPos, m_CamPos, 0.95f, EasingType::OutExpo);
-				EffectSingleton::Instance()->Update_LoopEffect(Sceneclass::Effect::ef_dust, this->m_EffectPos, Vector3DX::forward(), 0.5f);
-				EffectSingleton::Instance()->SetEffectColor(Sceneclass::Effect::ef_dust, 255, 255, 255, 64);
-
-				CameraParts->SetMainCamera().SetCamPos(m_CamPos, m_CamVec, ViewChara->GetEyeRotationCache().yvec());
 				auto fov_t = CameraParts->GetMainCamera().GetCamFov();
 				//fov
 				{
@@ -376,7 +379,7 @@ namespace FPS_n2 {
 					else {
 						Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
 					}
-#ifdef DEBUG_CAM
+#if defined(DEBUG) && DEBUG_CAM
 					if (0 <= DBG_CamSel && DBG_CamSel <= 3) {
 						fov_t = deg2rad(15);
 					}
@@ -390,31 +393,8 @@ namespace FPS_n2 {
 					ViewChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), ViewChara->GetIsADS() ? (far_t * 3.f) : (far_t * 2.f));
 			}
 			//コンカッション
-			{
-				if (ViewChara->PopConcussionSwitch()) {
-					this->m_Concussion = 1.f;
-				}
-				PostPassParts->Set_is_Blackout(this->m_Concussion > 0.f);
-				if (this->m_Concussion == 1.f) {
-					Camera3D::Instance()->SetCamShake(0.5f, 0.01f * Scale3DRate);
-				}
-				if (this->m_Concussion > 0.9f) {
-					Easing(&this->m_ConcussionPer, 1.f, 0.1f, EasingType::OutExpo);
-				}
-				else if (this->m_Concussion > 0.25f) {
-					if (this->m_ConcussionPer > 0.25f) {
-						Easing(&this->m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
-					}
-					else {
-						this->m_ConcussionPer = 0.25f;
-					}
-				}
-				else {
-					Easing(&this->m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
-				}
-				PostPassParts->Set_Per_Blackout(this->m_ConcussionPer * 2.f);
-				this->m_Concussion = std::max(this->m_Concussion - DXLib_refParts->GetDeltaTime(), 0.f);
-			}
+			ViewChara->SetConcussionEffect();
+			//背景
 			BackGround->Execute();
 			//UIパラメーター
 			{
@@ -426,12 +406,13 @@ namespace FPS_n2 {
 			}
 			HitMarkerPool::Instance()->Update();
 			EffectSingleton::Instance()->Update();
-#ifdef DEBUG
+#if defined(DEBUG)
 			DebugParts->SetPoint("Execute=End");
 #endif // DEBUG
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
+			EffectSingleton::Instance()->StopEffect(Sceneclass::Effect::ef_dust);
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			//使い回しオブジェ系
@@ -470,13 +451,13 @@ namespace FPS_n2 {
 		}
 		//
 		void			MainGameScene::MainDraw_Sub(int Range) const noexcept {
-			SetFogEnable(TRUE);
-			SetVerticalFogEnable(TRUE);
+			SetFogEnable(true);
+			SetVerticalFogEnable(true);
 			BackGround::BackGroundClass::Instance()->Draw();
 			ObjectManager::Instance()->Draw(true, Range);
 			//ObjectManager::Instance()->Draw_Depth();
-			SetVerticalFogEnable(FALSE);
-			SetFogEnable(FALSE);
+			SetVerticalFogEnable(false);
+			SetFogEnable(false);
 			HitMarkerPool::Instance()->Check();
 		}
 		//UI表示

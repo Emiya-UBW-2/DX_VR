@@ -53,10 +53,10 @@ namespace FPS_n2 {
 								SceneParts->ChangePause(false);
 								break;
 							}
-							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, TRUE);
+							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
 						}
 						if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
-							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_CANCEL))->Play(DX_PLAYTYPE_BACK, TRUE);
+							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_CANCEL))->Play(DX_PLAYTYPE_BACK, true);
 							SceneParts->ChangePause(false);
 						}
 						// 

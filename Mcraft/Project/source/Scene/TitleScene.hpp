@@ -1,7 +1,7 @@
 #pragma once
 #pragma warning(disable:4464)
 #include	"../Header.hpp"
-
+#include	"../sub.hpp"
 #include	"../CommonScene/UI/CommonUIControl.hpp"
 
 namespace FPS_n2 {

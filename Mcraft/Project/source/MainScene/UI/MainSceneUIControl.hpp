@@ -32,7 +32,7 @@ namespace FPS_n2 {
 				auto& ViewChara = PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
 
 				CanLookTarget = false;
-				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); loop++) {
+				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 					if (loop == PlayerMngr->GetWatchPlayer()) { continue; }
 					auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
 					CanLookTarget |= c->IsAlive() && c->GetCanLookByPlayer();
@@ -66,7 +66,7 @@ namespace FPS_n2 {
 
 
 
-						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); loop++) {
+						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 							if (loop == PlayerMngr->GetWatchPlayer()) { continue; }
 							auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
 							if (!c->IsAlive() || !c->GetCanLookByPlayer()) { continue; }
@@ -97,7 +97,7 @@ namespace FPS_n2 {
 							Vector3DX StartPos = CameraParts->GetMainCamera().GetCamPos();
 							Vector3DX Vec1 = CameraParts->GetMainCamera().GetCamVec() - StartPos; Vec1.y = 0.f; Vec1 = Vec1.normalized();
 							{
-								for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); loop++) {
+								for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 									if (loop == PlayerMngr->GetWatchPlayer()) { continue; }
 									auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
 									if (!c->IsAlive() || !c->GetCanLookByPlayer()) { continue; }

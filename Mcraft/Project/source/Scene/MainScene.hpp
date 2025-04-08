@@ -2,17 +2,17 @@
 #pragma warning(disable:4464)
 #include	"../Header.hpp"
 
-#include "../MainScene/BackGround/BackGround.hpp"
-#include "../MainScene/Object/Character.hpp"
-#include "../MainScene/Player/Player.hpp"
+#include	"../MainScene/BackGround/BackGround.hpp"
+#include	"../MainScene/Object/Character.hpp"
+#include	"../MainScene/Player/Player.hpp"
 
-#include "../MainScene/NetWork.hpp"
+#include	"../MainScene/NetWork.hpp"
 
-#include "../MainScene/UI/MainSceneUIControl.hpp"
+#include	"../MainScene/UI/MainSceneUIControl.hpp"
 #include	"../CommonScene/UI/CommonUIControl.hpp"
 #include	"../MainScene/MainSceneSub.hpp"
 
-#include "../CommonScene/Object/GunsModify.hpp"
+#include	"../CommonScene/Object/GunsModify.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -21,8 +21,6 @@ namespace FPS_n2 {
 			PauseMenuControl							m_PauseMenuControl;
 			FadeControl									m_FadeControl;
 			//UIŠÖ˜A
-			float										m_Concussion{ 0.f };
-			float										m_ConcussionPer{ 0.f };
 			UIClass										m_UIclass;
 			//NetWork
 			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };

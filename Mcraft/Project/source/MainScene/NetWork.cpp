@@ -1,5 +1,5 @@
 #pragma warning(disable:4464)
-#include "NetWork.hpp"
+#include	"NetWork.hpp"
 
 namespace FPS_n2 {
 	namespace NetWork {

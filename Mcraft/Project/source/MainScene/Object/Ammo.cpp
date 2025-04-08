@@ -1,8 +1,8 @@
-#include "Ammo.hpp"
+#include	"Ammo.hpp"
 
-#include "../../MainScene/BackGround/BackGround.hpp"
-#include "../../MainScene/Object/Character.hpp"
-#include "../../MainScene/Player/Player.hpp"
+#include	"../../MainScene/BackGround/BackGround.hpp"
+#include	"../../MainScene/Object/Character.hpp"
+#include	"../../MainScene/Player/Player.hpp"
 
 void FPS_n2::Sceneclass::AmmoClass::FirstExecute(void) noexcept {
 	auto* DXLib_refParts = DXLib_ref::Instance();
@@ -25,7 +25,7 @@ void FPS_n2::Sceneclass::AmmoClass::FirstExecute(void) noexcept {
 	//’n–Ê‚Æ‚Ì”»’è
 	auto ColResGround = BackGround->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
 	//ƒLƒƒƒ‰‚Æ‚Ì”»’è
-	for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); loop++) {
+	for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 		if (PlayerMngr->GetPlayer(loop)->GetChara()->CheckDamageRay(this->m_AmmoData->GetDamage(), (PlayerID)this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
 			SetDelete();
 			is_HitAll = true;
@@ -40,9 +40,9 @@ void FPS_n2::Sceneclass::AmmoClass::FirstExecute(void) noexcept {
 			int								yput = 1;
 			int								zput = 4;
 			auto Put = BackGround->GetPoint(pos_tmp);
-			for (int xp = -xput / 2; xp <= xput / 2; xp++) {
-				for (int yp = -yput / 2; yp <= yput / 2; yp++) {
-					for (int zp = -zput / 2; zp <= zput / 2; zp++) {
+			for (int xp = -xput / 2; xp <= xput / 2; ++xp) {
+				for (int yp = -yput / 2; yp <= yput / 2; ++yp) {
+					for (int zp = -zput / 2; zp <= zput / 2; ++zp) {
 						int xx = (Put.x + xp);
 						int yy = (Put.y + yp);
 						int zz = (Put.z + zp);

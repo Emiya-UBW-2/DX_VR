@@ -1,10 +1,8 @@
 #include	"CPU.hpp"
-#include "../../MainScene/NetWork.hpp"
-#include "../../MainScene/Object/Character.hpp"
-#include "../../MainScene/Player/Player.hpp"
-#include "../../Scene/MainScene.hpp"
-
-#define NOTUSEPATHCHECKER (FALSE)
+#include	"../../MainScene/NetWork.hpp"
+#include	"../../MainScene/Object/Character.hpp"
+#include	"../../MainScene/Player/Player.hpp"
+#include	"../../Scene/MainScene.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {

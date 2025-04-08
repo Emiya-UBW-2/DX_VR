@@ -1,8 +1,8 @@
 #pragma once
 #include	"../../Header.hpp"
 
-#include "GunEnum.hpp"
-#include "AmmoData.hpp"
+#include	"GunEnum.hpp"
+#include	"AmmoData.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {

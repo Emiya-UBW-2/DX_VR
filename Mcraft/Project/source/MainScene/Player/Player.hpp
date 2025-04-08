@@ -1,8 +1,8 @@
 #pragma once
 #pragma warning(disable:4464)
-#include "../../MainScene/NetWork.hpp"
+#include	"../../MainScene/NetWork.hpp"
 #include	"CPU.hpp"
-#include "../Object/Character.hpp"
+#include	"../Object/Character.hpp"
 
 namespace FPS_n2 {
 	namespace Player {

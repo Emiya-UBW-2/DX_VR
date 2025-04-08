@@ -1,7 +1,5 @@
 #pragma once
 #include	"Header.hpp"
-
-#include "MainScene/Object/CharacterEnum.hpp"
 //
 namespace FPS_n2 {
 
@@ -78,10 +76,10 @@ namespace FPS_n2 {
 	};
 
 	class ScreenPosition {
-		int m_XPos{};
-		int m_YPos{};
-		int m_XScreenPos{};
-		int m_YScreenPos{};
+		int	m_XPos{};
+		int	m_YPos{};
+		int	m_XScreenPos{};
+		int	m_YScreenPos{};
 	public:
 		ScreenPosition(void) noexcept {}
 		~ScreenPosition(void) noexcept {}
@@ -131,7 +129,7 @@ namespace FPS_n2 {
 		HitMarker(void) noexcept {}
 		~HitMarker(void) noexcept {}
 	public: //継承
-		void			Init() noexcept {
+		void			Init(void) noexcept {
 			this->m_IsActive = false;
 		}
 		void			Update(void) noexcept {
@@ -158,15 +156,15 @@ namespace FPS_n2 {
 				if (Alpha >= 10) {
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Alpha);
 					//
-					int r = static_cast<int>(255 * std::clamp((float)this->m_Damage / 100.f * 2.f, 0.f, 1.f));
+					int r = static_cast<int>(255 * std::clamp(static_cast<float>(this->m_Damage) / 100.f * 2.f, 0.f, 1.f));
 					int g = 255 - r;
 					if (this->m_Damage > 0) {
 						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, r, g, 0);
-						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &hit_Graph, static_cast<int>(this->m_Hit_DispPos.XScreenPos()), static_cast<int>(this->m_Hit_DispPos.YScreenPos()), (float)static_cast<int>((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &hit_Graph, static_cast<int>(this->m_Hit_DispPos.XScreenPos()), static_cast<int>(this->m_Hit_DispPos.YScreenPos()), static_cast<float>(static_cast<int>(static_cast<float>(Alpha) / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
 					}
 					if (this->m_ArmerDamage > 0) {
 						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 128, 128, 128);
-						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &guard_Graph, static_cast<int>(this->m_Hit_DispPos.XScreenPos()), static_cast<int>(this->m_Hit_DispPos.YScreenPos()), (float)static_cast<int>((float)Alpha / 255.f * 0.5f * 100.0f) / 100.f, 0.f, true);
+						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &guard_Graph, static_cast<int>(this->m_Hit_DispPos.XScreenPos()), static_cast<int>(this->m_Hit_DispPos.YScreenPos()), static_cast<float>(static_cast<int>(static_cast<float>(Alpha) / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
 					}
 					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 					//
@@ -189,8 +187,8 @@ namespace FPS_n2 {
 	private:
 		friend class SingletonBase<HitMarkerPool>;
 	private:
-		HitMarkerPool() { Init(); }
-		virtual ~HitMarkerPool() { Dispose(); }
+		HitMarkerPool(void) noexcept { Init(); }
+		virtual ~HitMarkerPool(void) noexcept { Dispose(); }
 	private:
 		std::array<HitMarker, 64>	m_HitMarkerList;
 		int							m_Now{ 0 };
@@ -236,8 +234,8 @@ namespace FPS_n2 {
 	private:
 		friend class SingletonBase<EffectSingleton>;
 	private:
-		EffectSingleton() { Init(); }
-		virtual ~EffectSingleton() { Dispose(); }
+		EffectSingleton(void) noexcept { Init(); }
+		virtual ~EffectSingleton(void) noexcept { Dispose(); }
 	private:
 		EffectControl								m_EffectControl;
 	public:
@@ -246,6 +244,9 @@ namespace FPS_n2 {
 			this->m_EffectControl.SetOnce_Any(static_cast<int>(ID), pos_t, nomal_t, scale, speed);
 		}
 		// 単体で制御したいエフェクトの制御
+		void		StopEffect(Sceneclass::Effect ID) noexcept {
+			this->m_EffectControl.StopEffect(static_cast<int>(ID));
+		}
 		void		SetLoop(Sceneclass::Effect ID, const Vector3DX& pos_t) noexcept {
 			this->m_EffectControl.SetLoop(static_cast<int>(ID), pos_t);
 		}

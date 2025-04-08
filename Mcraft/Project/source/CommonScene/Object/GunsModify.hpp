@@ -1,8 +1,8 @@
 #pragma once
 #include	"../../Header.hpp"
 
-#include "../../MainScene/Object/Gun.hpp"
-#include "../../MainScene/Object/ModData.hpp"
+#include	"../../MainScene/Object/Gun.hpp"
+#include	"../../MainScene/Object/ModData.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -12,45 +12,42 @@ namespace FPS_n2 {
 		private:
 			GunsModify(void) noexcept {}
 			virtual ~GunsModify(void) noexcept {}
-		public:
+		private:
 			struct Slot {
-				GunSlot			SlotType{ GunSlot::Magazine };
+				GunSlot			m_SlotType{ GunSlot::Magazine };
 				int				m_sel{ 0 };
 				bool			m_selectSwitch{ 0 };
-				const Slot*		ParentSlot{ nullptr };
+				const std::unique_ptr<Slot>*		m_ParentSlot{ nullptr };
 				ModSlotControl*	m_Data{ nullptr };
 			};
-		private:
 			struct SlotSaveData {
-				GunSlot SlotType{ GunSlot::Magazine };
+				GunSlot m_SlotType{ GunSlot::Magazine };
 				int		m_sel{ 0 };
-				GunSlot ParentSlotType{ GunSlot::Gun };
+				GunSlot m_ParentSlotType{ GunSlot::Gun };
 				int		m_Parentsel{ 0 };
 			public:
-				const auto IsParentNone(void) const noexcept { return (ParentSlotType == GunSlot::Gun); }
-				const auto IsParent(GunSlot Slot_t, int sel_t) const noexcept { return (ParentSlotType == Slot_t) && (this->m_Parentsel == sel_t); }
+				const auto IsParentNone(void) const noexcept { return (this->m_ParentSlotType == GunSlot::Gun); }
+				const auto IsParent(GunSlot Slot_t, int sel_t) const noexcept { return (this->m_ParentSlotType == Slot_t) && (this->m_Parentsel == sel_t); }
 			};
 		private:
-			std::vector<std::shared_ptr<Slot>>	SelData;
-			std::vector<SlotSaveData>	SlotSave;
-			SharedObj		 			m_BaseObj{ nullptr };
-		public:
-			const auto& GetSelData(void) const noexcept { return SelData; }
+			std::vector<std::unique_ptr<Slot>>	m_SelectPartsData;
+			std::vector<SlotSaveData>			m_SlotSave;
+			SharedObj		 					m_BaseObj{ nullptr };
 		private:
-			void			SetMods(ModSlotControl* ModPtr, const Slot* SlotPtr);
-			void			UpdateMods(ModSlotControl* ModPtr, const Slot* SlotPtr, bool isPreset) noexcept;
+			void			SetMods(ModSlotControl* pMod, const std::unique_ptr<Slot>* pParentSlot);
+			void			UpdateMods(ModSlotControl* pMod, const std::unique_ptr<Slot>* pParentSlot, bool isPreset) noexcept;
 		public:
 			void			CreateSelData(const std::shared_ptr<GunClass>& GunPtr, bool isPreset) noexcept;
-			bool			ChangeSelData(const Slot* SlotPtr, int sel, bool isDeleteSlot) noexcept;
+			bool			ChangeSelData(const std::unique_ptr<Slot>* pParentSlot, int sel, bool isDeleteSlot) noexcept;
 		public:
 			void			LoadSlots(const char* path) noexcept;
 			void			SaveSlots(const char* path) noexcept;
 		public:
 			void			DisposeSlots(void) noexcept {
-				for (auto& y : SelData) {
-					y.reset();
+				for (auto& data : this->m_SelectPartsData) {
+					data.reset();
 				}
-				SelData.clear();
+				this->m_SelectPartsData.clear();
 				this->m_BaseObj.reset();
 			}
 		};

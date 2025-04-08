@@ -12,8 +12,8 @@ namespace FPS_n2 {
 
 		class FallObjChildBase {
 		public:
-			FallObjChildBase() {}
-			virtual ~FallObjChildBase() {}
+			FallObjChildBase(void) noexcept {}
+			virtual ~FallObjChildBase(void) noexcept {}
 		public:
 			virtual SoundEnum GetFallSound(void) const noexcept = 0;
 		public:
@@ -23,16 +23,16 @@ namespace FPS_n2 {
 		};
 
 		class FallObjClass : public ObjectBaseClass {
-			float m_yAdd{ 0.f };
-			float m_Timer{ 0.f };
-			bool m_SoundSwitch{ false };
-			std::unique_ptr<FallObjChildBase> m_FallObject{};
-			bool m_IsEndFall{ false };
+			float	m_yAdd{ 0.f };
+			float	m_Timer{ 0.f };
+			bool	m_SoundSwitch{ false };
+			std::unique_ptr<FallObjChildBase>	m_FallObject{};
+			bool	m_IsEndFall{ false };
 		public:
 			FallObjClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::FallObj); }
 			~FallObjClass(void) noexcept {}
 		public:
-			bool			PopIsEndFall() noexcept {
+			bool			PopIsEndFall(void) noexcept {
 				if (this->m_IsEndFall) {
 					this->m_IsEndFall = false;
 					return true;

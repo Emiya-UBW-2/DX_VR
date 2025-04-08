@@ -7,7 +7,7 @@ namespace FPS_n2 {
 		void		ModDataClass::SetSlot(const std::string& LEFT, const std::string& RIGHT) noexcept {
 			if (LEFT.find("Slot") != std::string::npos) {
 				if (LEFT.find("Type") != std::string::npos) {
-					for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
+					for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 						if (RIGHT == GunSlotName[loop]) {
 							this->m_PartsSlot.resize(this->m_PartsSlot.size() + 1);
 							this->m_PartsSlot.back().m_GunSlot = (GunSlot)loop;
@@ -42,7 +42,7 @@ namespace FPS_n2 {
 				this->m_IsRecoilReturn = true;
 			}
 			else if (LEFT == "shottype") {
-				for (int loop = 0; loop < static_cast<int>(SHOTTYPE::Max); loop++) {
+				for (int loop = 0; loop < static_cast<int>(SHOTTYPE::Max); ++loop) {
 					if (RIGHT == SHOTTYPEName[loop]) {
 						this->m_ShotType = (SHOTTYPE)loop;
 						this->m_IsShotType = true;
@@ -52,7 +52,7 @@ namespace FPS_n2 {
 			}
 
 			else if (LEFT == "GunShootSound") {
-				for (int loop = 0; loop < static_cast<int>(EnumGunSound::Max); loop++) {
+				for (int loop = 0; loop < static_cast<int>(EnumGunSound::Max); ++loop) {
 					if (RIGHT == EnumGunSoundName[loop]) {
 						this->m_GunShootSound = (EnumGunSound)loop;
 						break;
@@ -133,7 +133,7 @@ namespace FPS_n2 {
 			auto tmp = std::make_shared<ModDataClass>();
 			auto UniqueID = this->m_LastUniqueID;
 			tmp->SetUniqueID(UniqueID);
-			this->m_LastUniqueID++;
+			++this->m_LastUniqueID;
 			tmp->Set(filepath);
 			this->m_Object.emplace_back(tmp);
 			return GetData(UniqueID);

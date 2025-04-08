@@ -1,13 +1,13 @@
 #include	"Gun.hpp"
 
-#include "../../MainScene/Player/Player.hpp"
-#include "../../MainScene/BackGround/BackGround.hpp"
-#include "../../CommonScene/Object/GunsModify.hpp"
-#include "Character.hpp"
+#include	"../../MainScene/Player/Player.hpp"
+#include	"../../MainScene/BackGround/BackGround.hpp"
+#include	"../../CommonScene/Object/GunsModify.hpp"
+#include	"Character.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		void				GunClass::InitGunAnimePer() noexcept {
+		void				GunClass::InitGunAnimePer(void) noexcept {
 			for (int loop = 0; loop < static_cast<int>(GunAnimeID::ChoiceOnceMax); ++loop) {
 				bool IsActiveGunAnim = GetGunAnime() == static_cast<GunAnimeID>(loop);
 				if (static_cast<GunAnimeID>(loop) == GunAnimeID::ADS) {
@@ -22,7 +22,7 @@ namespace FPS_n2 {
 				if (static_cast<GunAnimeID>(loop) == GunAnimeID::ADS) {
 					IsActiveGunAnim = IsADS;
 				}
-#if TRUE
+#if true
 				switch (static_cast<GunAnimeID>(loop)) {
 				case GunAnimeID::LowReady:
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.f, 0.f, 0.87f, 0.87f);
@@ -82,7 +82,7 @@ namespace FPS_n2 {
 			//エフェクト
 			EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec() * -1.f, 0.35f, 2.f);
 			//発砲
-			for (int loop = 0, max = GetPelletNum(); loop < max; loop++) {
+			for (int loop = 0, max = GetPelletNum(); loop < max; ++loop) {
 				auto LastAmmo = std::make_shared<AmmoClass>();
 				ObjMngr->AddObject(LastAmmo);
 				LastAmmo->Init();
@@ -159,7 +159,7 @@ namespace FPS_n2 {
 							SetGunAnime(GunAnimeID::ReloadEnd);
 							break;
 						case RELOADTYPE::AMMO:
-							this->m_Capacity++;//マガジン装填
+							++this->m_Capacity;//マガジン装填
 							if ((this->m_Capacity == GetAmmoAll()) || this->m_ReloadAmmoCancel) {
 								this->m_ReloadAmmoCancel = false;
 								SetGunAnime(GunAnimeID::ReloadEnd);
@@ -197,7 +197,7 @@ namespace FPS_n2 {
 #if defined(DEBUG)
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
-					printfDx("[%s]\n", (GetGunAnime() == GunAnimeID::Base) ? "Base" : GunAnimeIDName[(int)GetGunAnime()]);
+					printfDx("[%s]\n", (GetGunAnime() == GunAnimeID::Base) ? "Base" : GunAnimeIDName[static_cast<int>(GetGunAnime())]);
 					printfDx("[%f]\n", (GetGunAnime() == GunAnimeID::Base) ? 0.0f : GetNowAnimTimePerCache());
 				}
 #endif
@@ -216,10 +216,10 @@ namespace FPS_n2 {
 			//
 			auto EyeYRot = Matrix3x3DX::RotVec2(Lerp(GetMove().GetMat().yvec(), GetADSEyeMat().yvec(), GetGunAnimBlendPer(GunAnimeID::ADS)), GetMove().GetMat().yvec());
 			//アニメ演算の結果をキャッシュ
-			m_AnimNowCache = GetAnimDataNow(GunAnimeID::Aim);
+			this->m_AnimNowCache = GetAnimDataNow(GunAnimeID::Aim);
 			for (int loop = 0; loop < static_cast<int>(GunAnimeID::ChoiceOnceMax); ++loop) {
-				if (this->m_GunAnimePer[loop].Per() != 0.f) {
-					m_AnimNowCache.LerpNow(GetAnimDataNow((GunAnimeID)loop), this->m_GunAnimePer[loop].Per());
+				if (GetGunAnimBlendPer((GunAnimeID)loop) != 0.f) {
+					this->m_AnimNowCache.LerpNow(GetAnimDataNow((GunAnimeID)loop), GetGunAnimBlendPer((GunAnimeID)loop));
 				}
 			}
 			//
@@ -327,7 +327,7 @@ namespace FPS_n2 {
 						if (0.5f < GetNowAnimTimePerCache() && GetNowAnimTimePerCache() < 0.7f) {
 							PlayGunSound(EnumGunSound::LoadMag);
 							if (!this->m_IsChamberOn) {
-								this->m_Capacity++;
+								++this->m_Capacity;
 							}
 							ChamberIn();
 						}
@@ -466,13 +466,13 @@ namespace FPS_n2 {
 					break;
 				case GunAnimeID::ThrowReady:
 					if (GetNowAnimTimePerCache() >= 0.55f) {
-						if (!m_ReleasePin) {
-							m_ReleasePin = true;
+						if (!this->m_ReleasePin) {
+							this->m_ReleasePin = true;
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Pin))->Play3D(GetMove().GetPos(), Scale3DRate * 2.f);
 						}
 					}
 					else {
-						m_ReleasePin = false;
+						this->m_ReleasePin = false;
 					}
 					break;
 				case GunAnimeID::Throw:
@@ -496,7 +496,7 @@ namespace FPS_n2 {
 
 			for (const auto& g : this->m_Grenade.GetPtrList()) {
 				if (g->PopIsEndFall()) {
-					for (int loop = 0, max = GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPellet(); loop < max; loop++) {
+					for (int loop = 0, max = GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPellet(); loop < max; ++loop) {
 						auto LastAmmo = std::make_shared<AmmoClass>();
 						ObjMngr->AddObject(LastAmmo);
 						LastAmmo->Init();
@@ -510,9 +510,9 @@ namespace FPS_n2 {
 					int								yput = 8;
 					int								zput = 6;
 					auto Put = BackGround->GetPoint(g->GetMove().GetPos());
-					for (int xp = -xput / 2; xp < xput / 2; xp++) {
-						for (int yp = 0; yp < yput; yp++) {
-							for (int zp = -zput / 2; zp < zput / 2; zp++) {
+					for (int xp = -xput / 2; xp < xput / 2; ++xp) {
+						for (int yp = 0; yp < yput; ++yp) {
+							for (int zp = -zput / 2; zp < zput / 2; ++zp) {
 								auto& cell = BackGround->GetCellBuf((Put.x + xp), (Put.y + yp), (Put.z + zp));
 								if (cell.m_Cell == 1) {
 									continue;
@@ -538,19 +538,20 @@ namespace FPS_n2 {
 				this->m_MagazinePtr = nullptr;
 
 				for (auto& p : PartsList) {
-					if ((*p)->GetobjType() == (int)ObjType::Sight) {
+					ObjType ObjectType = static_cast<ObjType>((*p)->GetobjType());
+					if (ObjectType == ObjType::Sight) {
 						this->m_SightPtr = &((std::shared_ptr<SightClass>&)(*p));
 					}
-					if ((*p)->GetobjType() == (int)ObjType::MuzzleAdapter) {
+					if (ObjectType == ObjType::MuzzleAdapter) {
 						this->m_MuzzlePtr = &((std::shared_ptr<MuzzleClass>&)(*p));
 					}
-					if ((*p)->GetobjType() == (int)ObjType::Upper) {
+					if (ObjectType == ObjType::Upper) {
 						this->m_UpperPtr = &((std::shared_ptr<UpperClass>&)(*p));
 					}
-					if ((*p)->GetobjType() == (int)ObjType::Lower) {
+					if (ObjectType == ObjType::Lower) {
 						this->m_LowerPtr = &((std::shared_ptr<LowerClass>&)(*p));
 					}
-					if ((*p)->GetobjType() == (int)ObjType::Magazine) {
+					if (ObjectType == ObjType::Magazine) {
 						this->m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(*p));
 					}
 				}
@@ -582,7 +583,7 @@ namespace FPS_n2 {
 			for (auto& g : this->m_GunAnimeSpeed) {
 				g = 1.f;
 			}
-			this->m_GunAnimeSpeed.at(static_cast<int>(GunAnimeID::Shot)) = ((float)GetModSlot().GetModData()->GetShotRate()) / 60.f / 10.f;
+			this->m_GunAnimeSpeed.at(static_cast<int>(GunAnimeID::Shot)) = static_cast<float>(GetModSlot().GetModData()->GetShotRate()) / 60.f / 10.f;
 			InitGunAnimePer();
 			ObjectBaseClass::SetMinAABB(Vector3DX::vget(-0.5f, -0.5f, -0.5f) * Scale3DRate);
 			ObjectBaseClass::SetMaxAABB(Vector3DX::vget(0.5f, 0.5f, 0.5f) * Scale3DRate);
@@ -593,10 +594,10 @@ namespace FPS_n2 {
 				this->m_MuzzleSmokeControl.InitMuzzleSmoke(GetFrameWorldMatParts(GunFrame::Muzzle).pos());
 			}
 			else {
-				this->m_MuzzleSmokeControl.ExecuteMuzzleSmoke(GetFrameWorldMatParts(GunFrame::Muzzle).pos(), GetGunAnime() != GunAnimeID::Shot && m_SlingPer >= 1.f);
+				this->m_MuzzleSmokeControl.ExecuteMuzzleSmoke(GetFrameWorldMatParts(GunFrame::Muzzle).pos(), GetGunAnime() != GunAnimeID::Shot && this->m_SlingPer >= 1.f);
 			}
 			//
-			for (int loop = 0; loop < static_cast<int>(GunAnimeID::ChoiceOnceMax); loop++) {
+			for (int loop = 0; loop < static_cast<int>(GunAnimeID::ChoiceOnceMax); ++loop) {
 				int ID = GetModSlot().GetModData()->GetAnimSelectList().at(loop);
 				if (ID != -1) {
 					if (GetGunAnime() == (GunAnimeID)loop) {
@@ -607,7 +608,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			for (int loop = static_cast<int>(GunAnimeID::ChoiceOnceMax); loop < static_cast<int>(GunAnimeID::Max); loop++) {
+			for (int loop = static_cast<int>(GunAnimeID::ChoiceOnceMax); loop < static_cast<int>(GunAnimeID::Max); ++loop) {
 				int ID = GetModSlot().GetModData()->GetAnimSelectList().at(loop);
 				if (ID != -1) {
 					switch ((GunAnimeID)loop) {

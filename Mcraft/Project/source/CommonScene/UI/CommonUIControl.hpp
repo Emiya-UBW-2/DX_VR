@@ -19,7 +19,7 @@ namespace FPS_n2 {
 				Icon,
 			};
 			class ButtonClass {
-				GraphHandle* m_SelectBackImage{nullptr};
+				GraphHandle*	m_SelectBackImage{nullptr};
 
 				int xp1{0};
 				int yp1{0};
@@ -30,12 +30,12 @@ namespace FPS_n2 {
 
 				float SelYadd{0.f};
 
-				ButtonStatus m_ButtonStatus{ButtonStatus::Ready};
-				ButtonMode m_ButtonMode{ButtonMode::String};
-				bool m_EnableSelect{false};
+				ButtonStatus	m_ButtonStatus{ButtonStatus::Ready};
+				ButtonMode		m_ButtonMode{ButtonMode::String};
+				bool			m_EnableSelect{false};
 			private:
-				char m_String[64]{};
-				GraphHandle m_Icon;
+				char			m_String[64]{};
+				GraphHandle		m_Icon;
 
 			public:
 				ButtonClass(void) noexcept {}
@@ -242,11 +242,11 @@ namespace FPS_n2 {
 			};
 		private:
 			GraphHandle					m_SelectBackImage;
-			std::vector<std::shared_ptr<ButtonClass>>	ButtonSel{};
-			int							select{0};
+			std::vector<std::shared_ptr<ButtonClass>>	m_ButtonSel{};
+			int							m_select{0};
 			bool						m_MouseSelMode{false};
 		public:
-			const auto& GetSelect(void) const noexcept { return select; }
+			const auto& GetSelect(void) const noexcept { return m_select; }
 			bool		GetTriggerButton(void) const noexcept;
 		private:
 			ButtonControl(void) noexcept;
@@ -258,7 +258,7 @@ namespace FPS_n2 {
 			virtual ~ButtonControl(void) noexcept;
 		public:
 			void ResetSel(void) noexcept {
-				select = 0;
+				m_select = 0;
 				this->m_MouseSelMode = false;
 			}
 			void UpdateInput(void) noexcept;
@@ -270,26 +270,26 @@ namespace FPS_n2 {
 				const char* String, int fontsize, bool IsEnableSelect,
 				int xp, int yp, FontSystem::FontXCenter FontX, FontSystem::FontYCenter FontY
 			) noexcept {
-				ButtonSel.emplace_back(std::make_shared<ButtonClass>());
-				ButtonSel.back()->LoadCommon(&this->m_SelectBackImage);
-				ButtonSel.back()->Load_String(String, fontsize, IsEnableSelect);
-				ButtonSel.back()->Set(xp, yp, FontX, FontY);
+				m_ButtonSel.emplace_back(std::make_shared<ButtonClass>());
+				m_ButtonSel.back()->LoadCommon(&this->m_SelectBackImage);
+				m_ButtonSel.back()->Load_String(String, fontsize, IsEnableSelect);
+				m_ButtonSel.back()->Set(xp, yp, FontX, FontY);
 			}
 			void AddIconButton(
 				const char* IconPath, bool IsEnableSelect,
 				int xp, int yp, FontSystem::FontXCenter FontX, FontSystem::FontYCenter FontY
 			) noexcept {
-				ButtonSel.emplace_back(std::make_shared<ButtonClass>());
-				ButtonSel.back()->LoadCommon(&this->m_SelectBackImage);
-				ButtonSel.back()->Load_Icon(IconPath, IsEnableSelect);
-				ButtonSel.back()->Set(xp, yp, FontX, FontY);
+				m_ButtonSel.emplace_back(std::make_shared<ButtonClass>());
+				m_ButtonSel.back()->LoadCommon(&this->m_SelectBackImage);
+				m_ButtonSel.back()->Load_Icon(IconPath, IsEnableSelect);
+				m_ButtonSel.back()->Set(xp, yp, FontX, FontY);
 			}
 		};
 		// 
 		class CreditControl {
 			static const int			CharMax = 256;
 			int							m_CreditCoulm{0};
-			std::array<std::pair<char[CharMax], char[CharMax]>, 64> m_CreditStr{};
+			std::array<std::pair<char[CharMax], char[CharMax]>, 64>	m_CreditStr{};
 		public:
 			CreditControl(void) noexcept {}
 			CreditControl(const CreditControl&) = delete;

@@ -1,8 +1,8 @@
 #include	"Character.hpp"
 
-#include "../../MainScene/Player/Player.hpp"
+#include	"../../MainScene/Player/Player.hpp"
 
-#include "../../CommonScene/Object/GunsModify.hpp"
+#include	"../../CommonScene/Object/GunsModify.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -69,8 +69,7 @@ namespace FPS_n2 {
 						break;
 					}
 				}
-				//todo : ヒットした部分に近い頂点を赤くする
-
+				//ボイス
 				if (IsAlive()) {
 					//被弾ボイス
 					if ((value.Damage >= 0) && (value.ArmerDamage >= 0)) {
@@ -79,7 +78,7 @@ namespace FPS_n2 {
 				}
 				else if (IsDeath) {
 					//死亡ボイス
-					for (int loop = 0; loop < 6; loop++) {
+					for (int loop = 0; loop < 6; ++loop) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_Hurt1) + loop)->StopAll();
 					}
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_contact))->StopAll();
@@ -95,34 +94,35 @@ namespace FPS_n2 {
 			}
 			return false;
 		}
-		const bool		CharacterClass::CheckDamageRay(HitPoint Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
+		const bool		CharacterClass::CheckDamageRay(HitPoint BaseDamage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			if (!IsAlive()) { return false; }
 			if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, GetMove().GetPos()) <= 2.0f * Scale3DRate)) { return false; }
 
 			if (AttackID != PlayerMngr->GetWatchPlayer()) {
-				SetConcussionSwitch();
+				this->m_ConcussionSwitch = true;
 			}
 			//被弾処理
 			auto* HitPtr = this->m_HitBoxControl.GetLineHit(StartPos, pEndPos);
 			if (HitPtr) {
+				HitPoint Damage = BaseDamage;
 				ArmerPoint ArmerDamage = 0;
 				//部位ダメージ演算
 				switch (HitPtr->GetColType()) {
 				case HitType::Head:
-					if (GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) {
-						Damage = std::clamp<HitPoint>(Damage * 1000 / 100, 0, this->m_HP.GetMax());
+					if (GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) {//自機はヘッショされない
+						Damage = std::clamp<HitPoint>(BaseDamage * 1000 / 100, 0, this->m_HP.GetMax());
 					}
 					break;
 				case HitType::Body:
-					ArmerDamage = std::clamp<ArmerPoint>(Damage, 0, this->m_AP.GetPoint());
-					Damage = std::clamp<HitPoint>(Damage - ArmerDamage, 0, this->m_HP.GetMax());
+					ArmerDamage = std::clamp<ArmerPoint>(BaseDamage, 0, this->m_AP.GetPoint());
+					Damage = std::clamp<HitPoint>(BaseDamage - ArmerDamage, 0, this->m_HP.GetMax());
 					break;
 				case HitType::Arm:
-					Damage = Damage * 50 / 100;
+					Damage = BaseDamage * 50 / 100;
 					break;
 				case HitType::Leg:
-					Damage = Damage * 70 / 100;
+					Damage = BaseDamage * 70 / 100;
 					break;
 				default:
 					break;
@@ -174,16 +174,16 @@ namespace FPS_n2 {
 				}
 				//武器切替
 				if (GetGunPtrNow()->GetGunAnime() != GunAnimeID::LowReady) {
-					int Wheel = 0;//PadControl::Instance()->GetMouseWheelRot();
+					int Wheel = 0;
 					if (GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) {
-						Wheel = PadControl::Instance()->GetMouseWheelRot();
+						Wheel = -PadControl::Instance()->GetMouseWheelRot();
 					}
 					if (this->m_Input.GetPADSTrigger(Controls::PADS::ULT)) {
-						Wheel = -1;
+						Wheel = 1;
 					}
 					if (Wheel != 0) {
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
-						this->m_GunPtrControl.GunChangeNext((Wheel < 0));
+						this->m_GunPtrControl.GunChangeNext((Wheel > 0));
 					}
 				}
 				//アクション
@@ -217,7 +217,7 @@ namespace FPS_n2 {
 							//射撃
 							else if (this->m_Input.GetPADSPress(Controls::PADS::SHOT)) {
 								if (this->m_Input.GetPADSTrigger(Controls::PADS::SHOT)) {
-									SE->Get(SoundType::SE, (int)SoundEnum::Trigger)->Play3D(GetEyePositionCache(), Scale3DRate * 5.f);
+									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Trigger))->Play3D(GetEyePositionCache(), Scale3DRate * 5.f);
 								}
 								GetGunPtrNow()->SetShotStart();
 							}
@@ -278,7 +278,7 @@ namespace FPS_n2 {
 				this->m_Input.GetPADSPress(Controls::PADS::MOVE_D));
 			Vector2DX RecoilRadAdd;
 			if (GetGunPtrNow()) {
-				RecoilRadAdd = GetGunPtrNow()->GetRecoilRadAdd() * (60.f * DXLib_ref::Instance()->GetDeltaTime());
+				RecoilRadAdd = GetGunPtrNow()->GetRecoilRadAdd();
 			}
 			this->m_RotateControl.Update(
 				this->m_Input.GetAddxRad() - RecoilRadAdd.y, this->m_Input.GetAddyRad() + RecoilRadAdd.x,
@@ -288,7 +288,7 @@ namespace FPS_n2 {
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
 			}
 			if (GetGunPtrNow()) {
-				GetGunPtrNow()->CalcSwitchPer(this->m_LeanControl.GetRad() > deg2rad(-1) || !GetGunPtrNow()->IsCanShot());
+				GetGunPtrNow()->CalcSwitchPer(this->m_LeanControl.GetRate() >= 0 || !GetGunPtrNow()->IsCanShot());
 			}
 			//下半身
 			this->m_BottomAnimSelect = GetBottomStandAnimSel();
@@ -297,7 +297,7 @@ namespace FPS_n2 {
 			if (IsMoveBack()) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
 			if (IsMoveFront()) { this->m_BottomAnimSelect = GetBottomWalkAnimSel(); }
 			Easing(&this->m_AnimPerBuf.at(static_cast<int>(GetBottomTurnAnimSel())), (!this->m_IsSquat && this->m_RotateControl.IsTurnBody()) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
-			for (int loop = 0; loop < static_cast<int>(CharaAnimeID::AnimeIDMax); loop++) {
+			for (int loop = 0; loop < static_cast<int>(CharaAnimeID::AnimeIDMax); ++loop) {
 				CharaAnimeID ID = static_cast<CharaAnimeID>(loop);
 				if (
 					ID == CharaAnimeID::Bottom_Stand ||
@@ -419,15 +419,27 @@ namespace FPS_n2 {
 				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Pinky)), FingerPer.GetFingerPer(1, 4), 0.8f, EasingType::OutExpo);
 			}
 			//下半身アニメ演算
-			ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomTurnAnimSel()), 0.5f);
-			ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaAnimeID::Bottom_Stand_Run), GetSpeed() * 0.5f);
+			if (this->m_AnimPerBuf[static_cast<int>(GetBottomTurnAnimSel())] > 0.f) {
+				ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomTurnAnimSel()), 0.5f);
+			}
+			if (this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Bottom_Stand_Run)] > 0.f) {
+				ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaAnimeID::Bottom_Stand_Run), GetSpeed() * 0.5f);
+			}
 			float AnimSpeed = 1.15f * std::clamp(GetSpeed() / 0.65f, 0.5f, 1.f);
-			ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomWalkAnimSel()), this->m_MoveControl.GetVecFront() * AnimSpeed);
-			ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomLeftStepAnimSel()), this->m_MoveControl.GetVecLeft() * AnimSpeed);
-			ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomWalkBackAnimSel()), this->m_MoveControl.GetVecRear() * AnimSpeed);
-			ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomRightStepAnimSel()), this->m_MoveControl.GetVecRight() * AnimSpeed);
+			if (this->m_AnimPerBuf[static_cast<int>(GetBottomWalkAnimSel())] > 0.f) {
+				ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomWalkAnimSel()), this->m_MoveControl.GetVecFront() * AnimSpeed);
+			}
+			if (this->m_AnimPerBuf[static_cast<int>(GetBottomLeftStepAnimSel())] > 0.f) {
+				ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomLeftStepAnimSel()), this->m_MoveControl.GetVecLeft() * AnimSpeed);
+			}
+			if (this->m_AnimPerBuf[static_cast<int>(GetBottomWalkBackAnimSel())] > 0.f) {
+				ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomWalkBackAnimSel()), this->m_MoveControl.GetVecRear() * AnimSpeed);
+			}
+			if (this->m_AnimPerBuf[static_cast<int>(GetBottomRightStepAnimSel())] > 0.f) {
+				ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomRightStepAnimSel()), this->m_MoveControl.GetVecRight() * AnimSpeed);
+			}
 			//アニメ反映
-			for (int loop = 0; loop < GetObj().GetAnimNum(); loop++) {
+			for (int loop = 0, max = static_cast<int>(GetObj().GetAnimNum()); loop < max; ++loop) {
 				SetObj().SetAnim(loop).SetPer(this->m_AnimPerBuf.at(loop));
 			}
 			SetObj().UpdateAnimAll();
@@ -460,7 +472,7 @@ namespace FPS_n2 {
 				//ほかプレイヤーとの判定
 				{
 					float Radius = 2.f * 0.5f * Scale3DRate;
-					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); loop++) {
+					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						if (loop == GetMyPlayerID()) { continue; }
 						auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
 						if (!c->IsAlive()) { continue; }
@@ -486,7 +498,7 @@ namespace FPS_n2 {
 			if (IsAlive()) {
 				Matrix3x3DX CharaRotationCache = CharaLocalRotationCache * GetMove().GetMat();
 				//銃の位置を指定するアニメ
-				for (int loop = 0; loop < this->m_GunPtrControl.GetGunNum(); loop++) {
+				for (int loop = 0, max = this->m_GunPtrControl.GetGunNum(); loop < max; ++loop) {
 					auto& p = this->m_GunPtrControl.GetGunPtr(loop);
 					if (!p) { continue; }
 
@@ -535,10 +547,11 @@ namespace FPS_n2 {
 						p->UpdateGunAnimePer(GetIsADS());
 					}
 					else {
-						p->InitGunAnimePer();
 						p->SetActiveAll(true);
+						//アニメーション
+						p->InitGunAnimePer();
 					}
-					p->UpdateGunMat(IsSelect, GetIsADS(), CharaRotationCache, GetFrameWorldMat(CharaFrame::Head).pos(), GetRotRad());
+					p->UpdateGunMat(IsSelect, GetIsADS(), CharaRotationCache, GetFrameWorldMat(CharaFrame::Head).pos(), this->m_RotateControl.GetRad());
 				}
 				//手の位置を制御
 				if ((GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) || GetCanLookByPlayer()) {
@@ -622,7 +635,7 @@ namespace FPS_n2 {
 				}
 			}
 			else {
-				for (int loop = 0; loop < this->m_GunPtrControl.GetGunNum(); ++loop) {
+				for (int loop = 0, max = this->m_GunPtrControl.GetGunNum(); loop < max; ++loop) {
 					auto& p = this->m_GunPtrControl.GetGunPtr(loop);
 					if (!p) { continue; }
 					if (loop == this->m_GunPtrControl.GetNowGunSelect()) {
@@ -687,13 +700,13 @@ namespace FPS_n2 {
 			ExecuteInput();
 			ExecuteMatrix();
 		}
-		void CharacterClass::CheckDraw_Sub(int) noexcept {
+		void			CharacterClass::CheckDraw_Sub(int) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			if (GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) {
 				this->m_IsActiveCameraPos |= this->m_CameraPos.Calc(GetEyePositionCache());
 			}
 		}
-		void CharacterClass::Draw(bool isDrawSemiTrans, int Range) noexcept {
+		void			CharacterClass::Draw(bool isDrawSemiTrans, int Range) noexcept {
 			if (!IsActive()) { return; }
 			if (!IsDraw(Range)) { return; }
 			int fog_enable;
@@ -701,7 +714,7 @@ namespace FPS_n2 {
 			int fog_r, fog_g, fog_b;
 			float fog_start, fog_end;
 			float fog_density;
-			fog_enable = GetFogEnable();													// フォグが有効かどうかを取得する( TRUE:有効 FALSE:無効 )
+			fog_enable = GetFogEnable();													// フォグが有効かどうかを取得する( true:有効 false:無効 )
 			fog_mode = GetFogMode();														// フォグモードを取得する
 			GetFogColor(&fog_r, &fog_g, &fog_b);											// フォグカラーを取得する
 			GetFogStartEnd(&fog_start, &fog_end);											// フォグが始まる距離と終了する距離を取得する( 0.0f ～ 1.0f )
@@ -709,18 +722,18 @@ namespace FPS_n2 {
 
 
 			//キャラ描画
-			SetFogEnable(TRUE);
+			SetFogEnable(true);
 			SetFogColor(0, 0, 0);
 			//MV1SetMaterialTypeAll(GetObj().GetHandle(), DX_MATERIAL_TYPE_MAT_SPEC_LUMINANCE_CLIP_UNORM);
 			if (IsAlive()) {
-				for (int loop = 0; loop < GetObj().GetMeshNum(); loop++) {
+				for (int loop = 0, max = GetObj().GetMeshNum(); loop < max; ++loop) {
 					if (GetObj().GetMeshSemiTransState(loop) == isDrawSemiTrans) {
 						GetObj().DrawMesh(loop);
 					}
 				}
 			}
 			else {
-				for (int loop = 0; loop < GetRagDoll().GetMeshNum(); loop++) {
+				for (int loop = 0, max = GetRagDoll().GetMeshNum(); loop < max; ++loop) {
 					if (GetRagDoll().GetMeshSemiTransState(loop) == isDrawSemiTrans) {
 						GetRagDoll().DrawMesh(loop);
 					}
@@ -735,7 +748,7 @@ namespace FPS_n2 {
 			SetFogStartEnd(fog_start, fog_end);
 			SetFogDensity(fog_density);
 		}
-		void CharacterClass::DrawShadow(void) noexcept {
+		void			CharacterClass::DrawShadow(void) noexcept {
 			if (!IsActive()) { return; }
 			if (IsAlive()) {
 				GetObj().DrawModel();

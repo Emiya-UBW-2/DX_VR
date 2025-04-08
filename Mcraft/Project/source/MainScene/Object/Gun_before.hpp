@@ -1,8 +1,8 @@
 #pragma once
 #include	"../../Header.hpp"
 
-#include "FallObj.hpp"
-#include "ModData.hpp"
+#include	"FallObj.hpp"
+#include	"ModData.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -28,7 +28,7 @@ namespace FPS_n2 {
 					}
 				}
 				else {
-					if (!m_Armon) {
+					if (!this->m_Armon) {
 						Easing(&this->m_ArmPer, 0.f, 0.9f, EasingType::OutExpo);
 					}
 					else {
@@ -123,58 +123,58 @@ namespace FPS_n2 {
 				this->m_LinePer = std::clamp(this->m_LinePer - DXLib_refParts->GetDeltaTime() / 30.f, 0.f, 1.f);
 			}
 			void		DrawMuzzleSmoke(void) noexcept {
-				SetUseLighting(FALSE);
-				SetUseHalfLambertLighting(FALSE);
+				SetUseLighting(false);
+				SetUseHalfLambertLighting(false);
 				int max = static_cast<int>(this->m_Line.size());
-				int min = 1 + static_cast<int>((1.f - this->m_LinePer) * (float)max);
-				for (int loop = max - 1; loop >= min; loop--) {
+				int min = 1 + static_cast<int>((1.f - this->m_LinePer) * static_cast<float>(max));
+				for (int loop = max - 1; loop >= min; --loop) {
 					int LS = (loop + this->m_LineSel);
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255.f * (static_cast<float>(loop - min) / max)));
 					auto p1 = (LS - 1) % max;
 					auto p2 = LS % max;
 					if (CheckCameraViewClip_Box(
 						this->m_Line[p1].first.get(),
-						this->m_Line[p2].first.get()) == FALSE
+						this->m_Line[p2].first.get()) == false
 						&& (this->m_Line[p2].second > 0.f)
 						) {
 						DrawCapsule3D(this->m_Line[p1].first.get(), this->m_Line[p2].first.get(), (0.00762f) * Scale3DRate * 1.f * (static_cast<float>(loop - min) / max), 3,
 							GetColor(216, 216, 216),
 							GetColor(96, 96, 64),
-							TRUE);
+							true);
 					}
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-				SetUseLighting(TRUE);
-				SetUseHalfLambertLighting(TRUE);
+				SetUseLighting(true);
+				SetUseHalfLambertLighting(true);
 			}
 		};
 		//
 		class ModSlotControl {
 		private:
 			std::array<SharedObj, static_cast<int>(GunSlot::Max)>	m_Parts_Ptr{ nullptr };
-			std::shared_ptr<ModDataClass>							m_ModDataClass;
+			const std::shared_ptr<ModDataClass>*					m_ModDataClass{ nullptr };
 		public:
-			auto& GetModData(void) noexcept { return this->m_ModDataClass; }
-			const auto& GetModData(void) const noexcept { return this->m_ModDataClass; }
+			const auto& GetModData(void) const noexcept { return *this->m_ModDataClass; }
 		public:
-			void		Init(const std::string& FilePath) noexcept { this->m_ModDataClass = *ModDataManager::Instance()->AddData(FilePath); }
+			void		Init(const std::string& FilePath) noexcept { this->m_ModDataClass = ModDataManager::Instance()->AddData(FilePath); }
 			void		Dispose(void) noexcept {
-				for (int loop = 0; loop < static_cast<int>(GunSlot::Max); loop++) {
+				for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 					RemoveMod((GunSlot)loop);
 				}
-				this->m_ModDataClass.reset();
+				this->m_ModDataClass = nullptr;
 			}
 		public:
-			const SharedObj& SetMod(GunSlot Slot, int ID, const SharedObj& BaseModel) noexcept;
-			void		RemoveMod(GunSlot Slot) noexcept;
+			void		SetMod(GunSlot gunSlot, int ID, const SharedObj& BaseModel) noexcept;
+			void		RemoveMod(GunSlot gunSlot) noexcept;
 		private:
 			const bool	IsEffectParts(const SharedObj& SlotParts, GunFrame frame) const noexcept;
+			void		AddMod(GunSlot gunSlot, const char* ItemPath, const SharedObj& NewObj, const SharedObj& BaseModel) noexcept;
 		public:
 			void		CalcAnyBySlot(const std::function<void(const SharedObj&)>& Doing) const noexcept;
-			const auto& GetPartsPtr(GunSlot Slot) const noexcept { return this->m_Parts_Ptr[static_cast<int>(Slot)]; }
+			const auto& GetPartsPtr(GunSlot gunSlot) const noexcept { return this->m_Parts_Ptr[static_cast<int>(gunSlot)]; }
 			const SharedObj* HasFrameBySlot(GunFrame frame) const noexcept;
 			void		UpdatePartsAnim(const MV1& pParent);
-			void		UpdatePartsMove(const Matrix4x4DX& pMat, GunSlot Slot);
+			void		UpdatePartsMove(const Matrix4x4DX& pMat, GunSlot gunSlot);
 		};
 	};
 };

@@ -1,8 +1,8 @@
 #pragma once
 #include	"../../Header.hpp"
 
-#include "ModData.hpp"
-#include "Gun_before.hpp"
+#include	"ModData.hpp"
+#include	"Gun_before.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -81,7 +81,7 @@ namespace FPS_n2 {
 				Dispose_Mod();
 			}
 		private:
-			int	GetFrameNum() noexcept override { return static_cast<int>(GunFrame::Max); }
+			int	GetFrameNum(void) noexcept override { return static_cast<int>(GunFrame::Max); }
 			const char* GetFrameStr(int id) noexcept override { return GunFrameName[id]; }
 		public:
 			virtual void	Init_Mod(void) noexcept {}
@@ -98,7 +98,7 @@ namespace FPS_n2 {
 		public:
 			void			Init_Mod(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
-				for (auto& a : m_Ammo) {
+				for (auto& a : this->m_Ammo) {
 					a = std::make_shared<AmmoInChamberClass>();
 					ObjMngr->AddObject(a);
 					ObjMngr->LoadModel(a, a, GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPath().c_str());
@@ -108,21 +108,21 @@ namespace FPS_n2 {
 			}
 			void			FirstExecute_Mod(void) noexcept override {
 				int index = 1;
-				for (auto& a : m_Ammo) {
-					auto Mat = GetObj().GetFrameLocalWorldMatrix(index); index++;
+				for (auto& a : this->m_Ammo) {
+					auto Mat = GetObj().GetFrameLocalWorldMatrix(index); ++index;
 					a->SetMat(Mat.pos(), Matrix3x3DX::Get33DX(Mat));
 				}
 			}
 			void			Dispose_Mod(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
-				for (auto& a : m_Ammo) {
+				for (auto& a : this->m_Ammo) {
 					ObjMngr->DelObj((SharedObj*)&a);
 					a.reset();
 				}
 			}
 		public:
 			void			SetAmmoActive(bool value) noexcept {
-				for (auto& a : m_Ammo) {
+				for (auto& a : this->m_Ammo) {
 					a->SetActive(value);
 				}
 			}

@@ -5,8 +5,8 @@ namespace FPS_n2 {
 		//それぞれのオブジェクトの動き
 		class FallObjCart : public FallObjChildBase {
 		public:
-			FallObjCart() {}
-			virtual ~FallObjCart() {}
+			FallObjCart(void) noexcept {}
+			virtual ~FallObjCart(void) noexcept {}
 		public:
 			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::CartFall; }
 		public:
@@ -20,8 +20,8 @@ namespace FPS_n2 {
 		};
 		class FallObjMagazine : public FallObjChildBase {
 		public:
-			FallObjMagazine() {}
-			virtual ~FallObjMagazine() {}
+			FallObjMagazine(void) noexcept {}
+			virtual ~FallObjMagazine(void) noexcept {}
 		public:
 			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::MagFall; }
 		public:
@@ -34,8 +34,8 @@ namespace FPS_n2 {
 		};
 		class FallObjGrenade : public FallObjChildBase {
 		public:
-			FallObjGrenade() {}
-			virtual ~FallObjGrenade() {}
+			FallObjGrenade(void) noexcept {}
+			virtual ~FallObjGrenade(void) noexcept {}
 		public:
 			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::FallGrenade; }
 		public:
@@ -57,13 +57,13 @@ namespace FPS_n2 {
 			this->m_Timer = timer;
 			switch (Type) {
 			case FallObjectType::Cart:
-				m_FallObject = std::make_unique<FallObjCart>();
+				this->m_FallObject = std::make_unique<FallObjCart>();
 				break;
 			case FallObjectType::Grenade:
-				m_FallObject = std::make_unique<FallObjGrenade>();
+				this->m_FallObject = std::make_unique<FallObjGrenade>();
 				break;
 			case FallObjectType::Magazine:
-				m_FallObject = std::make_unique<FallObjMagazine>();
+				this->m_FallObject = std::make_unique<FallObjMagazine>();
 				break;
 			default:
 				break;
@@ -96,12 +96,12 @@ namespace FPS_n2 {
 					this->m_yAdd = 0.f;
 					if (this->m_SoundSwitch) {
 						this->m_SoundSwitch = false;
-						SE->Get(SoundType::SE, static_cast<int>(m_FallObject->GetFallSound()))->Play3D(PosBuf, Scale3DRate * 5.f);
+						SE->Get(SoundType::SE, static_cast<int>(this->m_FallObject->GetFallSound()))->Play3D(PosBuf, Scale3DRate * 5.f);
 					}
-					m_FallObject->RotateOnGround(&SetMove());
+					this->m_FallObject->RotateOnGround(&SetMove());
 				}
 			}
-			m_FallObject->RotateOnAir(&SetMove());
+			this->m_FallObject->RotateOnAir(&SetMove());
 
 			SetMove().SetPos(PosBuf);
 			SetMove().Update(0.f, 0.f);
@@ -109,8 +109,8 @@ namespace FPS_n2 {
 			//
 			if (this->m_Timer < 0.f) {
 				this->m_IsEndFall = true;
-				m_FallObject->OnTimeEnd(GetMove());
-				m_FallObject.reset();
+				this->m_FallObject->OnTimeEnd(GetMove());
+				this->m_FallObject.reset();
 				SetActive(false);
 			}
 			else {

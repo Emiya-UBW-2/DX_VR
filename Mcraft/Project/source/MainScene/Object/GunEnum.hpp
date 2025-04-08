@@ -1,6 +1,6 @@
 #pragma once
 #include	"../../Header.hpp"
-#include "CharaAnimData.hpp"
+#include	"CharaAnimData.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {

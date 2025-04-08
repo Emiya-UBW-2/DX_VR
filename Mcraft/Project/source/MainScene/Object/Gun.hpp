@@ -1,14 +1,14 @@
 #pragma once
 #include	"../../Header.hpp"
 
-#include "GunEnum.hpp"
-#include "ModData.hpp"
-#include "Gun_before.hpp"
-#include "CharaAnimData.hpp"
+#include	"GunEnum.hpp"
+#include	"ModData.hpp"
+#include	"Gun_before.hpp"
+#include	"CharaAnimData.hpp"
 
-#include "../../sub.hpp"
-#include "Ammo.hpp"
-#include "Mod.hpp"
+#include	"../../sub.hpp"
+#include	"Ammo.hpp"
+#include	"Mod.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -110,7 +110,7 @@ namespace FPS_n2 {
 				if (!this->m_IsChamberOn) {
 					this->m_IsChamberOn = true;
 					if (this->m_Capacity != 0) {
-						this->m_Capacity--;
+						--this->m_Capacity;
 						if (this->m_MagazinePtr) {
 							this->m_ChamberAmmoData = (*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoSpecMagTop();//マガジンの一番上の弾データをチャンバーイン
 						}
@@ -143,7 +143,7 @@ namespace FPS_n2 {
 				if (ptr) {
 					return ((std::shared_ptr<ModClass>&)(*ptr))->GetFramePartsMat(frame);
 				}
-				if (HaveFrame((int)frame)) {
+				if (HaveFrame(static_cast<int>(frame))) {
 					return GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame)));
 				}
 				return Matrix4x4DX::identity();
@@ -151,13 +151,13 @@ namespace FPS_n2 {
 			const PlayerID&		GetMyUserPlayerID(void) const noexcept { return this->m_MyID; }
 			const auto&			GetSwitchPer(void) const noexcept { return this->m_SwitchPer; }
 			const auto&			GetAutoAimID(void) const noexcept { return this->m_AutoAimControl.GetAutoAimID(); }
-			const auto&			GetGunAnimeNow(void) const noexcept { return m_AnimNowCache; }
+			const auto&			GetGunAnimeNow(void) const noexcept { return this->m_AnimNowCache; }
 			const auto			GetNowAnimTimePerCache(void) const noexcept {
 				if (GetGunAnime() < GunAnimeID::Max) {
 					auto* AnimMngr = GunAnimManager::Instance();
 					auto* pData = AnimMngr->GetAnimData(GetGunAnim(GetGunAnime()));
 					if (pData) {
-						float totalTime = (float)pData->GetTotalTime();
+						float totalTime = static_cast<float>(pData->GetTotalTime());
 						return (totalTime > 0.f) ? std::clamp(this->m_GunAnimeTime.at(static_cast<int>(GetGunAnime())) / totalTime, 0.f, 1.f) : 1.f;
 					}
 				}
@@ -179,7 +179,7 @@ namespace FPS_n2 {
 			const auto			GetAimXPos(void) const noexcept { return this->m_AimPoint.XScreenPos(); }
 			const auto			GetAimYPos(void) const noexcept { return this->m_AimPoint.YScreenPos(); }
 			const auto			GetAutoAimActive(void) const noexcept { return this->m_AutoAimControl.GetAutoAimActive(); }
-			const auto			GetAutoAimRadian(void) const noexcept { return deg2rad(5) * std::clamp(100.f / std::max(0.01f, std::hypotf((float)(GetAimXPos() - 1920 / 2), (float)(GetAimYPos() - 1080 / 2))), 0.f, 1.f); }
+			const auto			GetAutoAimRadian(void) const noexcept { return deg2rad(5) * std::clamp(100.f / std::max(0.01f, std::hypotf(static_cast<float>(GetAimXPos() - 1920 / 2), static_cast<float>(GetAimYPos() - 1080 / 2))), 0.f, 1.f); }
 			const auto			GetGunAnimBlendPer(GunAnimeID ID) const noexcept { return this->m_GunAnimePer[static_cast<int>(ID)].Per(); }
 			const auto			GetCanShot(void) const noexcept { return GetGunAnimBlendPer(GunAnimeID::LowReady) <= 0.1f; }
 			const auto			IsCanShot(void) const noexcept { return GetGunAnime() == GunAnimeID::Base || GetGunAnime() == GunAnimeID::Shot; }
@@ -228,7 +228,7 @@ namespace FPS_n2 {
 				auto* AnimMngr = GunAnimManager::Instance();
 				auto* pData = AnimMngr->GetAnimData(GetGunAnim(GetGunAnime()));
 				if (!pData) { return 0.f; }
-				float totalTime = (float)pData->GetTotalTime();
+				float totalTime = static_cast<float>(pData->GetTotalTime());
 				return (totalTime > 0.f) ? std::clamp(this->m_GunAnimeTime.at(static_cast<int>(GetGunAnime())) / totalTime, 0.f, 1.f) : 1.f;
 			}
 			const auto			IsNowGunAnimeEnd(void) const noexcept { return GetNowAnimTimePerCache() >= 1.f; }
@@ -253,7 +253,7 @@ namespace FPS_n2 {
 			void				SetGunAnime(GunAnimeID GunAnime) noexcept {
 				this->m_GunAnime = GunAnime;
 				if (GetGunAnime() < GunAnimeID::Max) {
-					this->m_GunAnimeTime.at((int)GetGunAnime()) = 0.f;
+					this->m_GunAnimeTime.at(static_cast<int>(GetGunAnime())) = 0.f;
 				}
 			}
 			void				SetShotStart(void) noexcept;//発砲
@@ -296,7 +296,7 @@ namespace FPS_n2 {
 				ChamberIn();
 			}
 
-			void				InitGunAnimePer() noexcept;
+			void				InitGunAnimePer(void) noexcept;
 			void				UpdateGunAnimePer(bool IsADS) noexcept;
 			void				SetGunMat(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept {
 				//武器座標

@@ -2,7 +2,7 @@
 
 #pragma once
 #include	"../../Header.hpp"
-#include "AmmoData.hpp"
+#include	"AmmoData.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -36,7 +36,7 @@ namespace FPS_n2 {
 			//跳ね返された
 			const auto		PenetrationCheck(float pArmer, const Vector3DX& normal) const noexcept { return (this->m_penetration > (pArmer * (1.0f / std::abs(Vector3DX::Dot(this->m_vec.normalized(), normal))))); }
 			void			Ricochet(const Vector3DX& position, const Vector3DX& normal) {
-				this->m_RicochetCnt++;
+				++this->m_RicochetCnt;
 				this->m_vec = ((this->m_vec + normal * ((Vector3DX::Dot(this->m_vec, normal)) * -2.0f)).normalized());
 				this->m_pos = this->m_vec * (0.1f) + position;
 				this->m_yAdd = 0.f;
@@ -44,9 +44,9 @@ namespace FPS_n2 {
 			//*/
 		public: //コンストラクタ、デストラクタ
 			AmmoClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Ammo); }
-			~AmmoClass(void) noexcept { m_AmmoData.reset(); }
+			~AmmoClass(void) noexcept { this->m_AmmoData.reset(); }
 		public: //継承
-			void			Init_Sub() noexcept override {
+			void			Init_Sub(void) noexcept override {
 				SetActive(true);
 				ObjectBaseClass::SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
 				ObjectBaseClass::SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
@@ -57,11 +57,11 @@ namespace FPS_n2 {
 				if (!IsActive()) { return; }
 				if (!IsDraw(Range)) { return; }
 				if (isDrawSemiTrans) { return; }
-				SetUseLighting(FALSE);
-				SetUseHalfLambertLighting(FALSE);
+				SetUseLighting(false);
+				SetUseHalfLambertLighting(false);
 				DrawCapsule_3D(this->m_pos, this->m_repos, 1.f * ((this->m_AmmoData->GetCaliber() - 0.00762f) * 0.1f + 0.00762f) * Scale3DRate, GetColor(255, 255, 172), Yellow);
-				SetUseLighting(TRUE);
-				SetUseHalfLambertLighting(TRUE);
+				SetUseLighting(true);
+				SetUseHalfLambertLighting(true);
 			}
 		};
 	};

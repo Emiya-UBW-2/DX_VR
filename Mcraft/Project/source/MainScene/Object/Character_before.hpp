@@ -1,12 +1,12 @@
 #pragma once
 #include	"../../Header.hpp"
 
-#include "../../sub.hpp"
-#include "../../MainScene/NetWork.hpp"
-#include "CharaAnimData.hpp"
-#include "CharacterEnum.hpp"
+#include	"../../sub.hpp"
+#include	"../../MainScene/NetWork.hpp"
+#include	"CharaAnimData.hpp"
+#include	"CharacterEnum.hpp"
 
-#include "Gun.hpp"
+#include	"Gun.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -68,9 +68,9 @@ namespace FPS_n2 {
 
 					*pEndPos = Res.Seg_MinDist_Pos;
 
-					return TRUE;
+					return true;
 				}
-				return FALSE;
+				return false;
 			}
 			const auto GetColType()const noexcept { return this->m_HitType; }
 			const auto GetPos()const noexcept { return this->m_pos; }
@@ -97,9 +97,11 @@ namespace FPS_n2 {
 			int													m_Rate{ 0 };
 		public://ゲッター
 			const auto& GetRad(void) const noexcept { return this->m_Rad; }
+			const auto& GetRate(void) const noexcept { return this->m_Rate; }
 		public:
 			void			Init(void) noexcept {
 				this->m_Rad = 0.f;
+				this->m_Rate = 0;
 			}
 			bool			Update(bool LeftTrigger, bool RightTrigger) {
 				//入力
@@ -151,7 +153,7 @@ namespace FPS_n2 {
 			const auto& GetVecRight(void) const noexcept { return this->m_Vec[3]; }
 		public:
 			void			Init(void) noexcept {
-				for (int loop = 0; loop < 4; loop++) {
+				for (int loop = 0; loop < 4; ++loop) {
 					this->m_Vec[loop] = 0.f;
 				}
 			}
@@ -245,16 +247,16 @@ namespace FPS_n2 {
 			void Update(const ObjectBaseClass* ptr, float SizeRate) noexcept;
 			void Draw(void) noexcept {
 				//GetObj().SetOpacityRate(0.5f);
-				SetFogEnable(FALSE);
-				SetUseLighting(FALSE);
-				//SetUseZBuffer3D(FALSE);
+				SetFogEnable(false);
+				SetUseLighting(false);
+				//SetUseZBuffer3D(false);
 
 				for (auto& h : this->m_HitBox) {
 					h.Draw();
 				}
 
-				//SetUseZBuffer3D(TRUE);
-				SetUseLighting(TRUE);
+				//SetUseZBuffer3D(true);
+				SetUseLighting(true);
 			}
 		};
 		//歩く時の揺れ
@@ -272,7 +274,7 @@ namespace FPS_n2 {
 			WalkSwingControl(void) noexcept {}
 			~WalkSwingControl(void) noexcept {}
 		public:
-			const auto& GetMoveEyePos(void) const noexcept { return m_MoveEyePosLocal; }
+			const auto& GetMoveEyePos(void) const noexcept { return this->m_MoveEyePosLocal; }
 		public:
 			const auto CalcWalk(const Vector3DX& Pos, float SwingPer)noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
@@ -356,7 +358,7 @@ namespace FPS_n2 {
 			}
 			//投げ武器ではない最初の武器に切り替え
 			void				GunChangeThrowWeapon(bool isThrow) noexcept {
-				for (int loop = 0; loop < GetGunNum(); ++loop) {
+				for (int loop = 0, max = GetGunNum(); loop < max; ++loop) {
 					auto& p = GetGunPtr(loop);
 					if (!p) { continue; }
 
@@ -469,11 +471,11 @@ namespace FPS_n2 {
 			//体のフレーム情報
 			class frame_body {
 			public:
-				std::array<frames, static_cast<int>(RagFrame::Max)> m_Frames;
+				std::array<frames, static_cast<int>(RagFrame::Max)>	m_Frames;
 			public:
 				//
 				void SetupFrameInfo(const MV1& obj_) noexcept {
-					for (int loop = 0; loop < int(obj_.GetFrameNum()); ++loop) {
+					for (int loop = 0, max = int(obj_.GetFrameNum()); loop < max; ++loop) {
 						std::string p = obj_.GetFrameName(loop);
 						for (auto& f : this->m_Frames) {
 							int index = static_cast<int>(&f - &this->m_Frames.front());
