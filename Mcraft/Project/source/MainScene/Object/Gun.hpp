@@ -72,6 +72,7 @@ namespace FPS_n2 {
 			Matrix3x3DX											m_SlingRot{};
 			Vector3DX											m_SlingPos{};
 			bool												m_ReleasePin{ false };
+			Matrix4x4DX											m_BaseMuzzle{};
 		private:
 			GunAnimNow											m_AnimNowCache{};
 		private:
@@ -149,6 +150,7 @@ namespace FPS_n2 {
 				return Matrix4x4DX::identity();
 			}
 			const PlayerID&		GetMyUserPlayerID(void) const noexcept { return this->m_MyID; }
+			const auto&			GetBaseMuzzleMat(void) const noexcept { return this->m_BaseMuzzle; }
 			const auto&			GetSwitchPer(void) const noexcept { return this->m_SwitchPer; }
 			const auto&			GetAutoAimID(void) const noexcept { return this->m_AutoAimControl.GetAutoAimID(); }
 			const auto&			GetGunAnimeNow(void) const noexcept { return this->m_AnimNowCache; }
@@ -181,7 +183,7 @@ namespace FPS_n2 {
 			const auto			GetAutoAimActive(void) const noexcept { return this->m_AutoAimControl.GetAutoAimActive(); }
 			const auto			GetAutoAimRadian(void) const noexcept { return deg2rad(5) * std::clamp(100.f / std::max(0.01f, std::hypotf(static_cast<float>(GetAimXPos() - 1920 / 2), static_cast<float>(GetAimYPos() - 1080 / 2))), 0.f, 1.f); }
 			const auto			GetGunAnimBlendPer(GunAnimeID ID) const noexcept { return this->m_GunAnimePer[static_cast<int>(ID)].Per(); }
-			const auto			GetCanShot(void) const noexcept { return GetGunAnimBlendPer(GunAnimeID::LowReady) <= 0.1f; }
+			const auto			GetCanShot(void) const noexcept { return GetGunAnimBlendPer(GunAnimeID::LowReady) <= 0.1f && GetGunAnimBlendPer(GunAnimeID::HighReady) <= 0.1f; }
 			const auto			IsCanShot(void) const noexcept { return GetGunAnime() == GunAnimeID::Base || GetGunAnime() == GunAnimeID::Shot; }
 			const auto			GetCanADS(void) const noexcept { return IsCanShot() && GetCanShot() && GetModSlot().GetModData()->GetCanADS(); }
 			const auto			GetSightZoomSize(void) const noexcept { return this->m_SightPtr ? (*this->m_SightPtr)->GetModSlot().GetModData()->GetSightZoomSize() : 1.f; }
@@ -278,7 +280,7 @@ namespace FPS_n2 {
 			void				SetMagazinePoachMat(const Matrix4x4DX& MagPoachMat) noexcept { this->m_MagazinePoachMat = MagPoachMat; }
 			void				SetGrenadeThrowRot(const Matrix3x3DX& Rot) noexcept { this->m_GrenadeThrowRot = Rot; }
 			void				DrawReticle(float Rad) const noexcept {
-				if (this->m_Reticle_on && this->m_SightPtr && ((GetGunAnimBlendPer(GunAnimeID::ADS) >= 0.8f) || (GetSightZoomSize() == 1.f))) {
+				if (GetCanShot() && this->m_Reticle_on && this->m_SightPtr && ((GetGunAnimBlendPer(GunAnimeID::ADS) >= 0.8f) || (GetSightZoomSize() == 1.f))) {
 					auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 					DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*this->m_SightPtr)->GetModSlot().GetModData()->GetReitcleGraph(),
 						this->m_Reticle.XScreenPos(), this->m_Reticle.YScreenPos(), 1.f, Rad, true);

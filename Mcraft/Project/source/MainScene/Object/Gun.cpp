@@ -24,6 +24,9 @@ namespace FPS_n2 {
 				}
 #if true
 				switch (static_cast<GunAnimeID>(loop)) {
+				case GunAnimeID::HighReady:
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.f, 0.f, 0.87f, 0.87f);
+					break;
 				case GunAnimeID::LowReady:
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.f, 0.f, 0.87f, 0.87f);
 					break;
@@ -257,6 +260,7 @@ namespace FPS_n2 {
 					}
 					};
 				switch (GetGunAnime()) {
+				case GunAnimeID::HighReady:
 				case GunAnimeID::LowReady:
 					this->m_MagHand = false;
 					break;
@@ -587,6 +591,10 @@ namespace FPS_n2 {
 			InitGunAnimePer();
 			ObjectBaseClass::SetMinAABB(Vector3DX::vget(-0.5f, -0.5f, -0.5f) * Scale3DRate);
 			ObjectBaseClass::SetMaxAABB(Vector3DX::vget(0.5f, 0.5f, 0.5f) * Scale3DRate);
+
+			auto BaseAnim = GetAnimDataNow(GunAnimeID::Aim);
+			SetGunMat(BaseAnim.GetRot(), BaseAnim.GetPos());
+			m_BaseMuzzle = GetFrameWorldMatParts(GunFrame::Muzzle);
 		}
 		void				GunClass::FirstExecute(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();

@@ -5,6 +5,7 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		enum class GunAnimeID {
 			//どれか択一で行うアニメーション
+			HighReady,
 			LowReady,
 			ADS,
 			Cocking,
@@ -30,6 +31,7 @@ namespace FPS_n2 {
 
 		};
 		static const char* GunAnimeIDName[static_cast<int>(GunAnimeID::Max)] = {
+			"Ready",
 			"Ready",
 			"ADS",
 			"Cocking",
@@ -91,6 +93,7 @@ namespace FPS_n2 {
 			AK_reload,
 			AK_reloadend,
 			AK_ready,
+			AK_highready,
 			Max,
 		};
 		static const char* EnumGunAnimName[static_cast<int>(EnumGunAnim::Max)] = {
@@ -137,6 +140,7 @@ namespace FPS_n2 {
 			"AK_reload",
 			"AK_reloadend",
 			"AK_ready",
+			"AK_highready",
 		};
 
 		class FingerData {
@@ -333,8 +337,8 @@ namespace FPS_n2 {
 		private:
 			std::vector<AnimDatas>	m_Object;
 #if defined(DEBUG) && DEBUG_CAM
-			Vector3DX DBG_AnimRot = Vector3DX::vget(0.f, 0.f, deg2rad(-20));
-			Vector3DX DBG_AnimPos = Vector3DX::vget(-0.09f, -0.10f, -0.45f);
+			Vector3DX DBG_AnimRot = Vector3DX::vget(0.f, 0.f, deg2rad(0));
+			Vector3DX DBG_AnimPos = Vector3DX::vget(-0.06f, -0.15f, -0.23f);
 #endif
 		public:
 			void	Load(const char* filepath) {
@@ -399,54 +403,54 @@ namespace FPS_n2 {
 							if (ID == 0) {
 								if (0 <= DBG_CamSel && DBG_CamSel <= 3 && false) {
 									auto* DXLib_refParts = DXLib_ref::Instance();
-									Ret.Set(DBG_AnimRot, DBG_AnimPos, Finger);
 									//
 									if (CheckHitKey(KEY_INPUT_RCONTROL) != 0) {
 										if (CheckHitKey(KEY_INPUT_J) != 0) {
-											DBG_AnimRot.x += 5.f * DXLib_refParts->GetDeltaTime() * 0.1f;
+											DBG_AnimRot.x += 5.f * DXLib_refParts->GetDeltaTime();
 										}
 										if (CheckHitKey(KEY_INPUT_L) != 0) {
-											DBG_AnimRot.x -= 5.f * DXLib_refParts->GetDeltaTime() * 0.1f;
+											DBG_AnimRot.x -= 5.f * DXLib_refParts->GetDeltaTime();
 										}
 										//
 										if (CheckHitKey(KEY_INPUT_I) != 0) {
-											DBG_AnimRot.y += 5.f * DXLib_refParts->GetDeltaTime() * 0.1f;
+											DBG_AnimRot.y += 5.f * DXLib_refParts->GetDeltaTime();
 										}
 										if (CheckHitKey(KEY_INPUT_K) != 0) {
-											DBG_AnimRot.y -= 5.f * DXLib_refParts->GetDeltaTime() * 0.1f;
+											DBG_AnimRot.y -= 5.f * DXLib_refParts->GetDeltaTime();
 										}
 										//
 										if (CheckHitKey(KEY_INPUT_U) != 0) {
-											DBG_AnimRot.z += 5.f * DXLib_refParts->GetDeltaTime() * 0.1f;
+											DBG_AnimRot.z += 5.f * DXLib_refParts->GetDeltaTime();
 										}
 										if (CheckHitKey(KEY_INPUT_O) != 0) {
-											DBG_AnimRot.z -= 5.f * DXLib_refParts->GetDeltaTime() * 0.1f;
+											DBG_AnimRot.z -= 5.f * DXLib_refParts->GetDeltaTime();
 										}
 									}
 									else {
 										if (CheckHitKey(KEY_INPUT_J) != 0) {
-											DBG_AnimPos.x += 0.01f * DXLib_refParts->GetDeltaTime() * 0.1f;
+											DBG_AnimPos.x += 0.01f * DXLib_refParts->GetDeltaTime();
 										}
 										if (CheckHitKey(KEY_INPUT_L) != 0) {
-											DBG_AnimPos.x -= 0.01f * DXLib_refParts->GetDeltaTime() * 0.1f;
+											DBG_AnimPos.x -= 0.01f * DXLib_refParts->GetDeltaTime();
 										}
 										//
 										if (CheckHitKey(KEY_INPUT_I) != 0) {
-											DBG_AnimPos.y += 0.01f * DXLib_refParts->GetDeltaTime() * 0.1f;
+											DBG_AnimPos.y += 0.01f * DXLib_refParts->GetDeltaTime();
 										}
 										if (CheckHitKey(KEY_INPUT_K) != 0) {
-											DBG_AnimPos.y -= 0.01f * DXLib_refParts->GetDeltaTime() * 0.1f;
+											DBG_AnimPos.y -= 0.01f * DXLib_refParts->GetDeltaTime();
 										}
 										//
 										if (CheckHitKey(KEY_INPUT_U) != 0) {
-											DBG_AnimPos.z += 0.01f * DXLib_refParts->GetDeltaTime() * 0.1f;
+											DBG_AnimPos.z += 0.01f * DXLib_refParts->GetDeltaTime();
 										}
 										if (CheckHitKey(KEY_INPUT_O) != 0) {
-											DBG_AnimPos.z -= 0.01f * DXLib_refParts->GetDeltaTime() * 0.1f;
+											DBG_AnimPos.z -= 0.01f * DXLib_refParts->GetDeltaTime();
 										}
 									}
 									printfDx("Rot[%5.2f,%5.2f,%5.2f]\n", DBG_AnimRot.x, DBG_AnimRot.y, DBG_AnimRot.z);
 									printfDx("Pos[%5.2f,%5.2f,%5.2f]\n", DBG_AnimPos.x, DBG_AnimPos.y, -DBG_AnimPos.z);
+									Ret.Set(DBG_AnimRot, DBG_AnimPos, Finger);
 								}
 								else {
 									//DBG_AnimRot.Set(0.0f, 0.0f, 0.0f);
@@ -470,6 +474,7 @@ namespace FPS_n2 {
 		const GunAnimSet GunAnimeSets[] = {
 			//M4
 			{
+				EnumGunAnim::AK_highready,
 				EnumGunAnim::M16_ready,
 				EnumGunAnim::M16_ads,
 				EnumGunAnim::M16_cocking,
@@ -488,6 +493,7 @@ namespace FPS_n2 {
 			},
 			//ハンドガン
 			{
+				EnumGunAnim::AK_highready,
 				EnumGunAnim::M1911_ready,
 				EnumGunAnim::M1911_ads,
 				EnumGunAnim::M1911_cocking,
@@ -506,6 +512,7 @@ namespace FPS_n2 {
 			},
 			//M870
 			{
+				EnumGunAnim::AK_highready,
 				EnumGunAnim::M870_ready,
 				EnumGunAnim::M870_ads,
 				EnumGunAnim::M870_cocking,
@@ -524,6 +531,7 @@ namespace FPS_n2 {
 			},
 			//グレネード
 			{
+				EnumGunAnim::AK_highready,
 				EnumGunAnim::RGD5_down,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
@@ -542,6 +550,7 @@ namespace FPS_n2 {
 			},
 			//AK
 			{
+				EnumGunAnim::AK_highready,
 				EnumGunAnim::AK_ready,
 				EnumGunAnim::M16_ads,
 				EnumGunAnim::AK_cocking,

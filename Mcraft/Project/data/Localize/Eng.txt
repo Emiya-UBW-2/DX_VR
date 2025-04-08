@@ -116,4 +116,5 @@
 9906=Shot
 9907=Change Weapon
 9908=Aim Down Sight
+9909=Squat
 9913=Pause

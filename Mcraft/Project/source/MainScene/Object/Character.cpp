@@ -150,7 +150,27 @@ namespace FPS_n2 {
 				//e‚Ğ‚Á‚±‚ß
 				if (this->m_StuckGunTimer == 0.f) {
 					this->m_StuckGunTimer = 0.1f;
-					if (BackGround->CheckLinetoMap(GetEyePositionCache(), GetGunPtrNow()->GetFrameWorldMatParts(GunFrame::Muzzle).pos())) {//0.03ms
+
+					Vector3DX GunStart = GetEyePositionCache();
+					Vector3DX GunEnd = (GetGunPtrNow()->GetBaseMuzzleMat() * GetFrameWorldMat(CharaFrame::Head)).pos();
+					bool IsHit = BackGround->CheckLinetoMap(GunStart, GunEnd);
+					//‚Ù‚©ƒvƒŒƒCƒ„[‚Æ‚Ì”»’è
+					if(!IsHit) {
+						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+							if (loop == GetMyPlayerID()) { continue; }
+							auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
+							if (!c->IsAlive()) { continue; }
+							Vector3DX StartPos = c->GetMove().GetPos();
+							Vector3DX EndPos = c->GetMove().GetPos() + Vector3DX::up() * (1.8f * Scale3DRate);
+							if (GetHitCheckToCapsule(GunStart, GunEnd, 0.1f * Scale3DRate, StartPos, EndPos, 0.3f * Scale3DRate)) {
+								IsHit = true;
+								break;
+							}
+						}
+					}
+
+
+					if (IsHit) {//0.03ms
 						if (GetGunPtrNow()->IsCanShot()) {
 							this->m_IsStuckGun = true;
 						}
@@ -158,7 +178,7 @@ namespace FPS_n2 {
 					else {
 						if (this->m_IsStuckGun) {
 							this->m_IsStuckGun = false;
-							if (GetGunPtrNow()->GetGunAnime() == GunAnimeID::LowReady) {
+							if (GetGunPtrNow()->GetGunAnime() == GunAnimeID::LowReady || GetGunPtrNow()->GetGunAnime() == GunAnimeID::HighReady) {
 								GetGunPtrNow()->SetGunAnime(GunAnimeID::Base);
 							}
 						}
@@ -167,8 +187,12 @@ namespace FPS_n2 {
 				else {
 					this->m_StuckGunTimer = std::max(this->m_StuckGunTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 					if (this->m_IsStuckGun) {
-						if (GetGunPtrNow()->GetGunAnime() != GunAnimeID::LowReady) {
+						auto Zvec = GetFrameWorldMat(CharaFrame::Head).zvec() * -1.f;
+						if (Zvec.y < std::sin(deg2rad(-30))) {
 							GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
+						}
+						else {
+							GetGunPtrNow()->SetGunAnime(GunAnimeID::HighReady);
 						}
 					}
 				}
@@ -621,7 +645,7 @@ namespace FPS_n2 {
 					bool HeadBobbing = ((GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 					this->m_EyePositionCache = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f;
 					if (HeadBobbing) {
-						this->m_EyePositionCache += this->m_WalkSwingControl.CalcEye(CharaRotationCache, std::clamp(this->m_MoveControl.GetVecPower(), 0.f, 0.85f) / 0.65f, 5.f);
+						this->m_EyePositionCache += this->m_WalkSwingControl.CalcEye(CharaRotationCache, std::clamp(std::clamp(this->m_MoveControl.GetVecPower(), 0.f, 1.f) * GetSpeed() / 0.625f, 0.f, 0.85f) / 0.65f, 5.f);
 					}
 					this->m_EyeRotationCache = Matrix3x3DX::identity();
 					if (HeadBobbing) {

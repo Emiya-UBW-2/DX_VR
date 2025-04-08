@@ -52,13 +52,13 @@ namespace FPS_n2 {
 			const auto		GetSpeed(void) const noexcept {
 				if (this->m_IsSquat) {
 					if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
-						return 0.325f;
+						return 0.15f;
 					}
 					return 0.475f;
 				}
 				else {
 					if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
-						return 0.475f;
+						return 0.2f;
 					}
 					return 0.625f;
 				}
