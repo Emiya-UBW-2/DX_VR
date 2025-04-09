@@ -135,17 +135,20 @@ namespace FPS_n2 {
 							yp2 = RetY + static_cast<int>(Scale * 0.5f * cos(deg2rad(0) + BaseRad));
 							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
 
-							xp1 = RetX - static_cast<int>(Scale * 1.5f * sin(deg2rad(60) + BaseRad));
-							yp1 = RetY + static_cast<int>(Scale * 1.5f * cos(deg2rad(60) + BaseRad));
-							xp2 = RetX - static_cast<int>(Scale * sin(deg2rad(60) + BaseRad));
-							yp2 = RetY + static_cast<int>(Scale * cos(deg2rad(60) + BaseRad));
-							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
-							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 100, yp1, xp1, yp1, Green, 2);
+							if (ViewChara->GetGunPtrNow()->GetAmmoAll() > 0) {
+								xp1 = RetX - static_cast<int>(Scale * 1.5f * sin(deg2rad(60) + BaseRad));
+								yp1 = RetY + static_cast<int>(Scale * 1.5f * cos(deg2rad(60) + BaseRad));
+								xp2 = RetX - static_cast<int>(Scale * sin(deg2rad(60) + BaseRad));
+								yp2 = RetY + static_cast<int>(Scale * cos(deg2rad(60) + BaseRad));
+								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
+								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 100, yp1, xp1, yp1, Green, 2);
 
-							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
-								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1 - 65, yp1 - 3, Green, Black, "/%d", ViewChara->GetGunPtrNow()->GetAmmoAll());
-							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
-								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1 - 100, yp1 - 3, Green, Black, "%d", ViewChara->GetGunPtrNow()->GetAmmoNumTotal());
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+									FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1 - 65, yp1 - 3, Green, Black, "/%d", ViewChara->GetGunPtrNow()->GetAmmoAll());
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+									FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1 - 100, yp1 - 3, Green, Black, "%d", ViewChara->GetGunPtrNow()->GetAmmoNumTotal());
+
+							}
 
 							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						}

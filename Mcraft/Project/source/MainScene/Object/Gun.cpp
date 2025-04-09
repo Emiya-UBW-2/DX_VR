@@ -151,6 +151,7 @@ namespace FPS_n2 {
 				case GunAnimeID::ReloadWait:
 					if (IsNowGunAnimeEnd()) {
 						SetGunAnime(GunAnimeID::Reload);
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetMove().GetPos(), Scale3DRate * 3.f);
 					}
 					break;
 				case GunAnimeID::Reload:
@@ -710,7 +711,9 @@ namespace FPS_n2 {
 			if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
 				auto* PostPassParts = PostPassEffect::Instance();
 				if (!GetCanShot()) {
-					PostPassParts->Set_is_lens(false);
+					if (this->m_SlingPer >= 1.f) {
+						PostPassParts->Set_is_lens(false);
+					}
 					return;
 				}
 				this->m_AimPoint.Calc(GetFrameWorldMatParts(GunFrame::Muzzle).pos() + GetMove().GetMat().zvec() * (-50.f * Scale3DRate));

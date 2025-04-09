@@ -214,6 +214,7 @@ namespace FPS_n2 {
 					if (this->m_GunPtrControl.IsChangeGunSel() && GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::LowReady) > 0.95f) {
 						this->m_GunPtrControl.InvokeReserveGunSel();
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::Base);
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
 					}
 					break;
 				case GunAnimeID::Base:
