@@ -65,7 +65,7 @@ namespace FPS_n2 {
 			void			Dispose_GunParts(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
 				for (auto& ammo : this->m_Ammo) {
-					ObjMngr->DelObj((SharedObj*)&ammo);
+					ObjMngr->DelObj(ammo);
 					ammo.reset();
 				}
 			}

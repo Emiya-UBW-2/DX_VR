@@ -381,7 +381,7 @@ namespace FPS_n2 {
 				for (auto& gun : this->m_GunPtr) {
 					if (!gun) { return; }
 					auto* ObjMngr = ObjectManager::Instance();
-					ObjMngr->DelObj((SharedObj*)&gun);
+					ObjMngr->DelObj(gun);
 					gun.reset();
 				}
 			}

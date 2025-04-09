@@ -765,7 +765,7 @@ namespace FPS_n2 {
 			this->m_Grenade.Dispose();
 
 			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DelObj((SharedObj*)&this->m_AmmoInChamberClass);
+			ObjMngr->DelObj(this->m_AmmoInChamberClass);
 			this->m_AmmoInChamberClass.reset();
 		}
 	};

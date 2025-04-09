@@ -89,7 +89,7 @@ namespace FPS_n2 {
 			void		Dispose(void) noexcept {
 				auto* ObjMngr = ObjectManager::Instance();
 				for (auto& ptr : this->m_Ptr) {
-					ObjMngr->DelObj((SharedObj*)&ptr);
+					ObjMngr->DelObj(ptr);
 					ptr.reset();
 				}
 				this->m_Ptr.clear();
@@ -170,7 +170,6 @@ namespace FPS_n2 {
 		private:
 			const bool	IsEffectParts(const SharedGunParts& SlotParts, GunFrame frame) const noexcept;
 			void		AddGunParts(GunSlot gunSlot, const char* FilePath, const SharedGunParts& NewObj, const SharedObj& BaseModel) noexcept;
-			auto&		SetPartsPtr(GunSlot gunSlot) noexcept { return this->m_Parts_Ptr[static_cast<int>(gunSlot)]; }
 		public:
 			void		AttachGunParts(GunSlot gunSlot, int ID, const SharedObj& BaseModel) noexcept;
 			void		RemoveGunParts(GunSlot gunSlot) noexcept;

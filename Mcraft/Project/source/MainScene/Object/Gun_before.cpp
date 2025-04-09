@@ -74,7 +74,7 @@ namespace FPS_n2 {
 		const bool	GunPartsSlotControl::IsEffectParts(const SharedGunParts& SlotParts, GunFrame frame) const noexcept {
 			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 				GunSlot gunSlot = static_cast<GunSlot>(loop);
-				if (SlotParts == GetPartsPtr(gunSlot)) {
+				if (SlotParts == this->m_Parts_Ptr[static_cast<int>(gunSlot)]) {
 					bool HasActiveFrame = false;
 					switch (static_cast<GunSlot>(loop)) {
 					case GunSlot::Magazine:
@@ -154,7 +154,7 @@ namespace FPS_n2 {
 						break;
 					}
 					if (HasActiveFrame) {
-						if (GetPartsPtr(gunSlot)->HaveFrame(static_cast<int>(frame))) {
+						if (this->m_Parts_Ptr[static_cast<int>(gunSlot)]->HaveFrame(static_cast<int>(frame))) {
 							return true;
 						}
 					}
@@ -165,12 +165,12 @@ namespace FPS_n2 {
 		}
 		void		GunPartsSlotControl::CalcAnyBySlot(const std::function<void(const SharedGunParts&)>& Doing) const noexcept {
 			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
-				Doing(GetPartsPtr(static_cast<GunSlot>(loop)));
+				Doing(this->m_Parts_Ptr[loop]);
 			}
 			//孫があればそちらも
 			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
-				if (GetPartsPtr(static_cast<GunSlot>(loop))) {
-					GetPartsPtr(static_cast<GunSlot>(loop))->GetGunPartsSlot()->CalcAnyBySlot(Doing);
+				if (this->m_Parts_Ptr[loop]) {
+					this->m_Parts_Ptr[loop]->GetGunPartsSlot()->CalcAnyBySlot(Doing);
 				}
 			}
 		}
@@ -186,26 +186,26 @@ namespace FPS_n2 {
 		}
 		//
 		void GunPartsSlotControl::AddGunParts(GunSlot gunSlot, const char* FilePath, const SharedGunParts& NewObj, const SharedObj& BaseModel) noexcept {
-			SetPartsPtr(gunSlot) = NewObj;
+			this->m_Parts_Ptr[static_cast<int>(gunSlot)] = NewObj;
 			auto* ObjMngr = ObjectManager::Instance();
 			ObjMngr->AddObject(NewObj);
 			ObjMngr->LoadModel(NewObj, BaseModel, FilePath);
 			NewObj->Init();
 		}
 		void		GunPartsSlotControl::RemoveGunParts(GunSlot gunSlot) noexcept {
-			if (!GetPartsPtr(gunSlot)) { return; }
+			if (!this->m_Parts_Ptr[static_cast<int>(gunSlot)]) { return; }
 			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DelObj((SharedObj*)&SetPartsPtr(gunSlot));
-			SetPartsPtr(gunSlot).reset();
+			ObjMngr->DelObj(this->m_Parts_Ptr[static_cast<int>(gunSlot)]);
+			this->m_Parts_Ptr[static_cast<int>(gunSlot)].reset();
 		}
 		//
 		void		GunPartsSlotControl::UpdatePartsAnim(const MV1& pParent) {
 			return;//現状のカスタム範囲では不要
 			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 				GunSlot gunSlot = static_cast<GunSlot>(loop);
-				if (GetPartsPtr(gunSlot)) {
+				if (this->m_Parts_Ptr[static_cast<int>(gunSlot)]) {
 					//1のフレーム移動量を無視する
-					auto& Obj = SetPartsPtr(gunSlot);
+					auto& Obj = this->m_Parts_Ptr[static_cast<int>(gunSlot)];
 					for (int loop2 = 0, max = static_cast<int>(Obj->GetObj().GetAnimNum()); loop2 < max; ++loop2) {
 						Obj->SetObj().SetAnim(loop2).SetPer(pParent.GetAnim(loop2).GetPer());
 						Obj->SetObj().SetAnim(loop2).SetTime(pParent.GetAnim(loop2).GetTime());
@@ -215,14 +215,14 @@ namespace FPS_n2 {
 			}
 		}
 		void		GunPartsSlotControl::UpdatePartsMove(const Matrix4x4DX& pMat, GunSlot gunSlot) {
-			if (!GetPartsPtr(gunSlot)) { return; }
-			SetPartsPtr(gunSlot)->SetGunPartsMatrix(Matrix3x3DX::Get33DX(pMat), pMat.pos());
+			if (!this->m_Parts_Ptr[static_cast<int>(gunSlot)]) { return; }
+			this->m_Parts_Ptr[static_cast<int>(gunSlot)]->SetGunPartsMatrix(Matrix3x3DX::Get33DX(pMat), pMat.pos());
 		}
 		void GunPartsSlotControl::AttachGunParts(GunSlot gunSlot, int ID, const SharedObj& BaseModel) noexcept {
 			auto* Slots = GetGunPartsData()->GetPartsSlot(gunSlot);
 			if (!Slots) { return; }
 			//パーツがある場合は削除
-			if (GetPartsPtr(gunSlot)) {
+			if (this->m_Parts_Ptr[static_cast<int>(gunSlot)]) {
 				RemoveGunParts(gunSlot);
 			}
 			const auto* FilePath = (*GunPartsDataManager::Instance()->GetData(Slots->m_ItemsUniqueID.at(ID)))->GetPath().c_str();
