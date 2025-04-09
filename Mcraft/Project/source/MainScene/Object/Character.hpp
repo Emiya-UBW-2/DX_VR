@@ -103,9 +103,9 @@ namespace FPS_n2 {
 				}
 			}
 			void			SetCharaTypeID(CharaTypeID value) noexcept { this->m_CharaType = value; }
-			void			SetMoveOverRide(const moves& o) noexcept {
+			void			SetMoveOverRide(const moves& overrideInfo) noexcept {
 				this->m_MoveOverRideFlag = true;
-				this->m_OverRideInfo = o;
+				this->m_OverRideInfo = overrideInfo;
 			}
 			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.AddDamageEvent(pRet); }
 			void			Heal(HitPoint value) noexcept { this->m_Damage.Add(GetMyPlayerID(), GetMyPlayerID(), -value, -value,static_cast<int>(HitType::Body), GetMove().GetPos(), GetMove().GetPos()); }
@@ -139,7 +139,7 @@ namespace FPS_n2 {
 				this->m_RotateControl.Init(pxRad, pyRad);
 				this->m_MoveControl.Init();
 				this->m_LeanControl.Init();
-				for (auto& a : this->m_AnimPerBuf) { a = 0.f; }
+				for (auto& per : this->m_AnimPerBuf) { per = 0.f; }
 				this->m_IsSquat = false;
 				SetMove().SetAll(pPos, pPos, pPos, Vector3DX::zero(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y));
 				//

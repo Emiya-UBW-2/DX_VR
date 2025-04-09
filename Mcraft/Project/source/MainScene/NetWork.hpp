@@ -77,14 +77,14 @@ namespace FPS_n2 {
 			void			SetID(PlayerID value) noexcept { this->m_ID = value; }
 			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_DamageEvent.AddDamageEvent(pRet); }
 		public:
-			void			SetData(const PlayerSendData& o, NetTime ClientTime) noexcept {
-				this->m_Input = o.GetInput();
-				this->m_move = o.GetMove();
-				this->m_DamageEvent = o.GetDamageEvent();
+			void			SetData(const PlayerSendData& sendData, NetTime ClientTime) noexcept {
+				this->m_Input = sendData.GetInput();
+				this->m_move = sendData.GetMove();
+				this->m_DamageEvent = sendData.GetDamageEvent();
 				this->m_ClientTime = ClientTime;
 				this->m_CheckSum = (size_t)this->CalcCheckSum();
 				for (int loop = 0; loop < 10; ++loop) {
-					this->m_FreeData[loop] = o.GetFreeData()[loop];
+					this->m_FreeData[loop] = sendData.GetFreeData()[loop];
 				}
 			}
 		public:
@@ -115,8 +115,8 @@ namespace FPS_n2 {
 			auto			IsCheckSum(void) const noexcept { return this->m_CheckSum == (size_t)this->CalcCheckSum(); }
 		public:
 			void			CalcCheckSun(void) noexcept { this->m_CheckSum = (size_t)this->CalcCheckSum(); }
-			void			SetInGame(void) noexcept { this->m_PlayerID = -1; }
-			auto			IsInGame(void) const noexcept { return this->m_PlayerID == -1; }//インゲーム中です
+			void			SetInGame(void) noexcept { this->m_PlayerID = InvalidID; }
+			auto			IsInGame(void) const noexcept { return this->m_PlayerID == InvalidID; }//インゲーム中です
 		};
 		//通信
 		class PlayerNetWork {
@@ -137,9 +137,9 @@ namespace FPS_n2 {
 		public:
 			PlayerNetWork(void) noexcept {}
 			PlayerNetWork(const PlayerNetWork&) = delete;
-			PlayerNetWork(PlayerNetWork&& o) = delete;
+			PlayerNetWork(PlayerNetWork&&) = delete;
 			PlayerNetWork& operator=(const PlayerNetWork&) = delete;
-			PlayerNetWork& operator=(PlayerNetWork&& o) = delete;
+			PlayerNetWork& operator=(PlayerNetWork&&) = delete;
 
 			~PlayerNetWork(void) noexcept {}
 		public:
@@ -193,9 +193,9 @@ namespace FPS_n2 {
 		public:
 			ServerControl(void) noexcept {}
 			ServerControl(const ServerControl&) = delete;
-			ServerControl(ServerControl&& o) = delete;
+			ServerControl(ServerControl&&) = delete;
 			ServerControl& operator=(const ServerControl&) = delete;
-			ServerControl& operator=(ServerControl&& o) = delete;
+			ServerControl& operator=(ServerControl&&) = delete;
 
 			~ServerControl(void) noexcept {}
 		private:
@@ -220,9 +220,9 @@ namespace FPS_n2 {
 		public:
 			ClientControl(void) noexcept {}
 			ClientControl(const ClientControl&) = delete;
-			ClientControl(ClientControl&& o) = delete;
+			ClientControl(ClientControl&&) = delete;
 			ClientControl& operator=(const ClientControl&) = delete;
-			ClientControl& operator=(ClientControl&& o) = delete;
+			ClientControl& operator=(ClientControl&&) = delete;
 
 			~ClientControl(void) noexcept {}
 		public:
@@ -253,24 +253,26 @@ namespace FPS_n2 {
 			size_t					m_PingNow{ 0 };
 			NetWorkSequence			m_Sequence{ NetWorkSequence::Matching };
 		public:
-			NetWorkController(void) noexcept {}
+			NetWorkController(bool IsClient, int Port, const IPDATA& ip, bool IsServerPlayer) noexcept {
+				Init(IsClient, Port, ip, IsServerPlayer);
+			}
 			NetWorkController(const NetWorkController&) = delete;
-			NetWorkController(NetWorkController&& o) = delete;
+			NetWorkController(NetWorkController&&) = delete;
 			NetWorkController& operator=(const NetWorkController&) = delete;
-			NetWorkController& operator=(NetWorkController&& o) = delete;
+			NetWorkController& operator=(NetWorkController&&) = delete;
 
-			~NetWorkController(void) noexcept {}
+			~NetWorkController(void) noexcept { Dispose(); }
 		private:
 			void			CalcPing(LONGLONG microsec) noexcept {
-				if (microsec == -1) {
+				if (microsec == InvalidID) {
 					this->m_Ping = -1.f;
 					return;
 				}
 				this->m_Pings.at(this->m_PingNow) = std::max(0.f, static_cast<float>(microsec) / 1000.f - (1000.f / this->m_Tick));//ティック分引く
 				++this->m_PingNow %= this->m_Pings.size();
 				this->m_Ping = 0.f;
-				for (auto& p : this->m_Pings) {
-					this->m_Ping += p;
+				for (auto& ping : this->m_Pings) {
+					this->m_Ping += ping;
 				}
 				this->m_Ping /= static_cast<float>(this->m_Pings.size());
 			}
@@ -283,13 +285,14 @@ namespace FPS_n2 {
 			const auto& GetMyLocalPlayerID(void) const noexcept { return this->m_PlayerNet.GetMyLocalPlayerID(); }
 
 			auto& SetLocalData(void) noexcept { return this->m_LocalData; }
-		public:
+		private:
 			void Init(bool IsClient, int Port, const IPDATA& ip, bool IsServerPlayer) noexcept;
-			void Update(void) noexcept;
 			void Dispose(void) noexcept {
 				this->m_ServerCtrl.Dispose();
 				this->m_ClientCtrl.Dispose();
 			}
+		public:
+			void Update(void) noexcept;
 		};
 	}
 }

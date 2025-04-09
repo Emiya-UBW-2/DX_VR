@@ -223,17 +223,17 @@ namespace FPS_n2 {
 			std::vector<HitBox>									m_HitBox;
 		public:
 			const HitBox* GetLineHit(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
-				for (auto& h : this->m_HitBox) {
-					if (h.Colcheck(StartPos, pEndPos)) {
-						return &h;
+				for (auto& hitbox : this->m_HitBox) {
+					if (hitbox.Colcheck(StartPos, pEndPos)) {
+						return &hitbox;
 					}
 				}
 				return nullptr;
 			}
 		public:
 			void		CheckLineHitNearest(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
-				for (auto& h : this->m_HitBox) {
-					h.Colcheck(StartPos, pEndPos);
+				for (auto& hitbox : this->m_HitBox) {
+					hitbox.Colcheck(StartPos, pEndPos);
 				}
 			}
 			const auto& GetHitBoxPointList() const { return this->m_HitBox; }
@@ -251,8 +251,8 @@ namespace FPS_n2 {
 				SetUseLighting(false);
 				//SetUseZBuffer3D(false);
 
-				for (auto& h : this->m_HitBox) {
-					h.Draw();
+				for (auto& hitbox : this->m_HitBox) {
+					hitbox.Draw();
 				}
 
 				//SetUseZBuffer3D(true);
@@ -359,10 +359,10 @@ namespace FPS_n2 {
 			//ìäÇ∞ïêäÌÇ≈ÇÕÇ»Ç¢ç≈èâÇÃïêäÌÇ…êÿÇËë÷Ç¶
 			void				GunChangeThrowWeapon(bool isThrow) noexcept {
 				for (int loop = 0, max = GetGunNum(); loop < max; ++loop) {
-					auto& p = GetGunPtr(loop);
-					if (!p) { continue; }
+					auto& pGun = GetGunPtr(loop);
+					if (!pGun) { continue; }
 
-					if (isThrow ? p->GetModSlot().GetModData()->GetIsThrowWeapon() : !p->GetModSlot().GetModData()->GetIsThrowWeapon()) {
+					if (isThrow ? pGun->GetGunPartsSlot()->GetGunPartsData()->GetIsThrowWeapon() : !pGun->GetGunPartsSlot()->GetGunPartsData()->GetIsThrowWeapon()) {
 						this->m_ReserveGunSelect = loop;
 						break;
 					}
@@ -378,11 +378,11 @@ namespace FPS_n2 {
 			~GunPtrControl(void) noexcept {}
 		public:
 			void				Dispose(void) noexcept {
-				for (auto& g : this->m_GunPtr) {
-					if (!g) { return; }
+				for (auto& gun : this->m_GunPtr) {
+					if (!gun) { return; }
 					auto* ObjMngr = ObjectManager::Instance();
-					ObjMngr->DelObj((SharedObj*)&g);
-					g.reset();
+					ObjMngr->DelObj((SharedObj*)&gun);
+					gun.reset();
 				}
 			}
 		};
@@ -476,11 +476,11 @@ namespace FPS_n2 {
 				//
 				void SetupFrameInfo(const MV1& obj_) noexcept {
 					for (int loop = 0, max = int(obj_.GetFrameNum()); loop < max; ++loop) {
-						std::string p = obj_.GetFrameName(loop);
-						for (auto& f : this->m_Frames) {
-							int index = static_cast<int>(&f - &this->m_Frames.front());
-							if (p == RagFrameName[index]) {
-								f.Set(loop, obj_);
+						std::string FrameName = obj_.GetFrameName(loop);
+						for (auto& frame : this->m_Frames) {
+							int index = static_cast<int>(&frame - &this->m_Frames.front());
+							if (FrameName == RagFrameName[index]) {
+								frame.Set(loop, obj_);
 								break;
 							}
 						}
@@ -489,8 +489,8 @@ namespace FPS_n2 {
 				//
 				void CopyFrame(const MV1& mine, const frame_body& frame_tgt_, MV1* tgt) noexcept {
 					tgt->SetMatrix(mine.GetMatrix());
-					for (const auto& f : frame_tgt_.m_Frames) {
-						tgt->SetFrameLocalMatrix(f.GetFrameID(), mine.GetFrameLocalMatrix(f.GetFrameID()));
+					for (const auto& frame : frame_tgt_.m_Frames) {
+						tgt->SetFrameLocalMatrix(frame.GetFrameID(), mine.GetFrameLocalMatrix(frame.GetFrameID()));
 					}
 					for (int loop = 0, max = static_cast<int>(tgt->GetAnimNum()); loop < max; ++loop) {
 						tgt->SetAnim(loop).SetPer(mine.GetAnim(loop).GetPer());

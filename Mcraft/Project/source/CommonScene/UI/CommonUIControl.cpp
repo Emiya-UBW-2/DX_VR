@@ -47,41 +47,40 @@ namespace FPS_n2 {
 				m_select = InvalidID;
 			}
 			// 
-			for (auto& y : m_ButtonSel) {
-				if (y->GetInto()) {
+			for (auto& sel : m_ButtonSel) {
+				if (sel->GetInto()) {
 					this->m_MouseSelMode = true;
-					m_select = static_cast<int>(&y - &m_ButtonSel.front());
+					m_select = static_cast<int>(&sel - &m_ButtonSel.front());
 				}
 			}
 			if (preselect != m_select || preMouseSel != this->m_MouseSelMode) {
 				if (m_select != InvalidID) {
-					for (auto& y : m_ButtonSel) {
-						y->SetNone();
+					for (auto& sel : m_ButtonSel) {
+						sel->SetNone();
 					}
 					m_ButtonSel.at(static_cast<size_t>(m_select))->SetFocus();
 					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 				}
 				else {
-					for (auto& y : m_ButtonSel) {
-						y->SetReady();
+					for (auto& sel : m_ButtonSel) {
+						sel->SetReady();
 					}
 				}
 			}
 		}
 		void ButtonControl::Update(void) noexcept {
-			for (auto& y : m_ButtonSel) {
-				y->Update();
+			for (auto& sel : m_ButtonSel) {
+				sel->Update();
 			}
 		}
 		void ButtonControl::Draw(void) noexcept {
-			for (auto& y : m_ButtonSel) {
-				y->Draw();
+			for (auto& sel : m_ButtonSel) {
+				sel->Draw();
 			}
 		}
 		void ButtonControl::Dispose(void) noexcept {
-			for (auto& y : m_ButtonSel) {
-				y->Dispose();
-				y.reset();
+			for (auto& sel : m_ButtonSel) {
+				sel.reset();
 			}
 			m_ButtonSel.clear();
 		}
@@ -112,24 +111,24 @@ namespace FPS_n2 {
 			xp1 = xmin + (24);
 			yp1 = ymin + LineHeight;
 			int Height = (12);
-			for (auto& c : this->m_CreditStr) {
-				if (this->m_CreditCoulm < static_cast<int>(&c - &this->m_CreditStr.front())) { break; }
+			for (auto& credit : this->m_CreditStr) {
+				if (this->m_CreditCoulm < static_cast<int>(&credit - &this->m_CreditStr.front())) { break; }
 				int xpos = xp1 + (6);
 				int ypos = yp1 + Height / 2;
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, Height,
-					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.first);
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xpos, ypos, White, Black, credit.first);
 
 				xpos = xmax - (24);
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, Height,
-					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::MIDDLE, xpos, ypos, White, Black, c.second);
+					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::MIDDLE, xpos, ypos, White, Black, credit.second);
 				yp1 += Height;
 			}
 		}
 		void CreditControl::Dispose(void) noexcept {
 			this->m_CreditCoulm = 0;
-			for (auto& c : this->m_CreditStr) {
-				sprintfDx(c.first, "");
-				sprintfDx(c.second, "");
+			for (auto& credit : this->m_CreditStr) {
+				sprintfDx(credit.first, "");
+				sprintfDx(credit.second, "");
 			}
 		}
 	};

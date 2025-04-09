@@ -65,15 +65,15 @@ namespace FPS_n2 {
 			}
 		public:
 			// 迷路を作成する
-			void createMaze(int w, int h) {
-				this->m_Width = w;
-				this->m_Height = h;
+			void createMaze(int width, int height) {
+				this->m_Width = width;
+				this->m_Height = height;
 
 				this->m_Maze.resize(this->m_Width);
-				for (auto& mx : this->m_Maze) {
-					mx.resize(this->m_Height);
-					for (auto& m : mx) {
-						m = MAZETYPE::WALL; // 全マス壁にする
+				for (auto& mazeX : this->m_Maze) {
+					mazeX.resize(this->m_Height);
+					for (auto& cell : mazeX) {
+						cell = MAZETYPE::WALL; // 全マス壁にする
 					}
 				}
 
@@ -212,9 +212,9 @@ namespace FPS_n2 {
 					if ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 4.f))) {
 						int max = -1;
 						int8_t id = 1;
-						for (int8_t index = 0; auto & i : IDCount) {
-							if (max < i) {
-								max = i;
+						for (int8_t index = 0; auto & idc : IDCount) {
+							if (max < idc) {
+								max = idc;
 								id = index;
 							}
 							++index;
@@ -414,9 +414,9 @@ namespace FPS_n2 {
 		public:
 			BackGroundClass(void) noexcept {}
 			BackGroundClass(const BackGroundClass&) = delete;
-			BackGroundClass(BackGroundClass&& o) = delete;
+			BackGroundClass(BackGroundClass&&) = delete;
 			BackGroundClass& operator=(const BackGroundClass&) = delete;
-			BackGroundClass& operator=(BackGroundClass&& o) = delete;
+			BackGroundClass& operator=(BackGroundClass&&) = delete;
 
 			virtual ~BackGroundClass(void) noexcept {}
 		private:
@@ -431,19 +431,19 @@ namespace FPS_n2 {
 				const int dy = y2 - y1;
 				const int dz = z2 - z1;
 				const int x_inc = (dx < 0) ? -1 : 1;
-				const int l = std::abs(dx);
+				const int Length = std::abs(dx);
 				const int y_inc = (dy < 0) ? -1 : 1;
 				const int m = std::abs(dy);
 				const int z_inc = (dz < 0) ? -1 : 1;
 				const int n = std::abs(dz);
-				const int dx2 = l << 1;
+				const int dx2 = Length << 1;
 				const int dy2 = m << 1;
 				const int dz2 = n << 1;
 
-				if ((l >= m) && (l >= n)) {
-					err_1 = dy2 - l;
-					err_2 = dz2 - l;
-					for (int loop = 0; loop < l; ++loop) {
+				if ((Length >= m) && (Length >= n)) {
+					err_1 = dy2 - Length;
+					err_2 = dz2 - Length;
+					for (int loop = 0; loop < Length; ++loop) {
 						if (OutPutLine(point[0], point[1], point[2])) { return; }
 						if (err_1 > 0) {
 							point[1] += y_inc;
@@ -458,7 +458,7 @@ namespace FPS_n2 {
 						point[0] += x_inc;
 					}
 				}
-				else if ((m >= l) && (m >= n)) {
+				else if ((m >= Length) && (m >= n)) {
 					err_1 = dx2 - m;
 					err_2 = dz2 - m;
 					for (int loop = 0; loop < m; ++loop) {
@@ -499,13 +499,13 @@ namespace FPS_n2 {
 			inline static bool		ColRayBox(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AABBMinPos, const Vector3DX& AABBMaxPos, Vector3DX* Normal = nullptr) noexcept {
 				Vector3DX Vec = (*EndPos - StartPos);
 				// 交差判定
-				float p[3]{}, d[3]{}, min[3]{}, max[3]{};
-				p[0] = StartPos.x;
-				p[1] = StartPos.y;
-				p[2] = StartPos.z;
-				d[0] = Vec.x;
-				d[1] = Vec.y;
-				d[2] = Vec.z;
+				float start[3]{}, dir[3]{}, min[3]{}, max[3]{};
+				start[0] = StartPos.x;
+				start[1] = StartPos.y;
+				start[2] = StartPos.z;
+				dir[0] = Vec.x;
+				dir[1] = Vec.y;
+				dir[2] = Vec.z;
 
 				min[0] = AABBMinPos.x;
 				min[1] = AABBMinPos.y;
@@ -520,8 +520,8 @@ namespace FPS_n2 {
 
 				for (int loop = 0; loop < 3; ++loop) {
 					/*
-					if (abs(d[loop]) < FLT_EPSILON) {
-						if (p[loop] < min[loop] || p[loop] > max[loop])
+					if (abs(dir[loop]) < FLT_EPSILON) {
+						if (start[loop] < min[loop] || start[loop] > max[loop])
 							return false; // 交差していない
 					}
 					else 
@@ -529,9 +529,9 @@ namespace FPS_n2 {
 					{
 						// スラブとの距離を算出
 						// t1が近スラブ、t2が遠スラブとの距離
-						float odd = 1.0f / d[loop];
-						float t1 = (min[loop] - p[loop]) * odd;
-						float t2 = (max[loop] - p[loop]) * odd;
+						float odd = 1.0f / dir[loop];
+						float t1 = (min[loop] - start[loop]) * odd;
+						float t2 = (max[loop] - start[loop]) * odd;
 						if (t1 > t2) {
 							float tmp = t1;
 							t1 = t2;

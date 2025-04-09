@@ -25,6 +25,10 @@ namespace FPS_n2 {
 			const auto& GetAccuracy(void) const noexcept { return this->m_Accuracy; }
 			const auto& GetFallSound(void) const noexcept { return this->m_FallSound; }
 		public:
+			AmmoDataClass(std::string path_) noexcept {
+				Set(path_);
+			}
+
 			void			Set(std::string path_) {
 				this->m_path = path_;
 
@@ -82,14 +86,12 @@ namespace FPS_n2 {
 			std::vector<std::shared_ptr<AmmoDataClass>>	m_Object;
 		public:
 			const auto& LoadAction(const std::string& filepath) noexcept {
-				for (auto& o : this->m_Object) {
-					if (o->GetPath() == filepath) {
-						return o;
+				for (auto& obj : this->m_Object) {
+					if (obj->GetPath() == filepath) {
+						return obj;
 					}
 				}
-				this->m_Object.resize(this->m_Object.size() + 1);
-				this->m_Object.back() = std::make_shared<AmmoDataClass>();
-				this->m_Object.back()->Set(filepath);
+				this->m_Object.emplace_back(std::make_shared<AmmoDataClass>(filepath));
 				return this->m_Object.back();
 			}
 		};

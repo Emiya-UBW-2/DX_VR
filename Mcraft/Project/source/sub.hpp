@@ -32,9 +32,9 @@ namespace FPS_n2 {
 	public:
 		void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept {
 			if (!pRet) { return; }
-			for (auto& e : this->m_Damage) {
-				if ((&e - &this->m_Damage.front()) >= this->m_DamageCount) { break; }
-				pRet->emplace_back(e);
+			for (auto& damage : this->m_Damage) {
+				if ((&damage - &this->m_Damage.front()) >= this->m_DamageCount) { break; }
+				pRet->emplace_back(damage);
 			}
 			this->m_DamageCount = 0;
 		}
@@ -156,10 +156,10 @@ namespace FPS_n2 {
 				if (Alpha >= 10) {
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Alpha);
 					//
-					int r = static_cast<int>(255 * std::clamp(static_cast<float>(this->m_Damage) / 100.f * 2.f, 0.f, 1.f));
-					int g = 255 - r;
+					int red = static_cast<int>(255 * std::clamp(static_cast<float>(this->m_Damage) / 100.f * 2.f, 0.f, 1.f));
+					int green = 255 - red;
 					if (this->m_Damage > 0) {
-						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, r, g, 0);
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, red, green, 0);
 						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &hit_Graph, static_cast<int>(this->m_Hit_DispPos.XScreenPos()), static_cast<int>(this->m_Hit_DispPos.YScreenPos()), static_cast<float>(static_cast<int>(static_cast<float>(Alpha) / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
 					}
 					if (this->m_ArmerDamage > 0) {
@@ -171,7 +171,7 @@ namespace FPS_n2 {
 					if (this->m_Damage > 0) {
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic,
 							24, FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
-							static_cast<int>(this->m_Hit_DispPos.XScreenPos() + this->m_Hit_AddX), static_cast<int>(this->m_Hit_DispPos.YScreenPos() + this->m_Hit_AddY), GetColor(r, g, 0), Black, "%d", this->m_Damage);
+							static_cast<int>(this->m_Hit_DispPos.XScreenPos() + this->m_Hit_AddX), static_cast<int>(this->m_Hit_DispPos.YScreenPos() + this->m_Hit_AddY), GetColor(red, green, 0), Black, "%d", this->m_Damage);
 					}
 					//–h‚¢‚¾ƒ_ƒ[ƒW
 					if (this->m_ArmerDamage > 0) {
@@ -203,24 +203,24 @@ namespace FPS_n2 {
 		void			Init(void) noexcept {
 			this->hit_Graph.Load("data/UI/battle_hit.bmp");
 			this->guard_Graph.Load("data/UI/battle_guard.bmp");
-			for (auto& h : this->m_HitMarkerList) {
-				h.Init();
+			for (auto& hitmarker : this->m_HitMarkerList) {
+				hitmarker.Init();
 			}
 		}
 		void			Update(void) noexcept {
-			for (auto& h : this->m_HitMarkerList) {
-				h.Update();
+			for (auto& hitmarker : this->m_HitMarkerList) {
+				hitmarker.Update();
 			}
 		}
 		void			Check(void) noexcept {
-			for (auto& h : this->m_HitMarkerList) {
-				h.CheckDraw();
+			for (auto& hitmarker : this->m_HitMarkerList) {
+				hitmarker.CheckDraw();
 			}
 		}
 		void			Draw(void) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
-			for (auto& h : this->m_HitMarkerList) {
-				h.Draw(this->hit_Graph, this->guard_Graph);
+			for (auto& hitmarker : this->m_HitMarkerList) {
+				hitmarker.Draw(this->hit_Graph, this->guard_Graph);
 			}
 			DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 		}

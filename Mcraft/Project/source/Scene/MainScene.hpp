@@ -12,8 +12,6 @@
 #include	"../CommonScene/UI/CommonUIControl.hpp"
 #include	"../MainScene/MainSceneSub.hpp"
 
-#include	"../CommonScene/Object/GunsModify.hpp"
-
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class MainGameScene : public TEMPSCENE {
@@ -40,9 +38,9 @@ namespace FPS_n2 {
 		public:
 			MainGameScene(void) noexcept {}
 			MainGameScene(const MainGameScene&) = delete;
-			MainGameScene(MainGameScene&& o) = delete;
+			MainGameScene(MainGameScene&&) = delete;
 			MainGameScene& operator=(const MainGameScene&) = delete;
-			MainGameScene& operator=(MainGameScene&& o) = delete;
+			MainGameScene& operator=(MainGameScene&&) = delete;
 
 			virtual ~MainGameScene(void) noexcept {}
 		public:

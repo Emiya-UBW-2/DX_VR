@@ -80,9 +80,9 @@ namespace FPS_n2 {
 			}
 			for (int loop = 0, Num = this->m_NewWorkSettings.GetSize(); loop < Num + 1; ++loop) {
 				if (loop < Num) {
-					auto& n = this->m_NewWorkSettings.Get(loop);
-					if (WindowSystem::SetMsgClickBox(xp, y1p + 50 * loop, xp + xs, y1p + 50 * loop + LineHeight * 2, LineHeight, Gray75, false, true, "[%d][%d,%d,%d,%d]", n.UsePort, n.IP.d1, n.IP.d2, n.IP.d3, n.IP.d4)) {
-						ReadyConnect(n);
+					auto& netset = this->m_NewWorkSettings.Get(loop);
+					if (WindowSystem::SetMsgClickBox(xp, y1p + 50 * loop, xp + xs, y1p + 50 * loop + LineHeight * 2, LineHeight, Gray75, false, true, "[%d][%d,%d,%d,%d]", netset.UsePort, netset.IP.d1, netset.IP.d2, netset.IP.d3, netset.IP.d4)) {
+						ReadyConnect(netset);
 						break;
 					}
 				}

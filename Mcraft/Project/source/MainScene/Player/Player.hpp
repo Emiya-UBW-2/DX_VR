@@ -27,9 +27,9 @@ namespace FPS_n2 {
 				}
 
 				PlayerControl(const PlayerControl&) = delete;
-				PlayerControl(PlayerControl&& o) = delete;
+				PlayerControl(PlayerControl&&) = delete;
 				PlayerControl& operator=(const PlayerControl&) = delete;
-				PlayerControl& operator=(PlayerControl&& o) = delete;
+				PlayerControl& operator=(PlayerControl&&) = delete;
 
 				~PlayerControl(void) noexcept {
 					this->Dispose();
@@ -67,7 +67,6 @@ namespace FPS_n2 {
 						this->m_Chara.reset();
 					}
 					if (this->m_AI) {
-						this->m_AI->Dispose();
 						this->m_AI.reset();
 					}
 					this->m_Score = 0;
@@ -81,9 +80,9 @@ namespace FPS_n2 {
 		private:
 			PlayerManager(void) noexcept {}
 			PlayerManager(const PlayerManager&) = delete;
-			PlayerManager(PlayerManager&& o) = delete;
+			PlayerManager(PlayerManager&&) = delete;
 			PlayerManager& operator=(const PlayerManager&) = delete;
-			PlayerManager& operator=(PlayerManager&& o) = delete;
+			PlayerManager& operator=(PlayerManager&&) = delete;
 
 			virtual ~PlayerManager(void) noexcept {}
 		public:
@@ -98,14 +97,14 @@ namespace FPS_n2 {
 				if (playerNum > 0) {
 					this->m_PlayerNum = playerNum;
 					this->m_Player.resize(static_cast<size_t>(this->m_PlayerNum));
-					for (auto& p : this->m_Player) {
-						p = std::make_unique<PlayerControl>();
+					for (auto& player : this->m_Player) {
+						player = std::make_unique<PlayerControl>();
 					}
 				}
 			}
 			void Dispose(void) noexcept {
-				for (auto& p : this->m_Player) {
-					p.reset();
+				for (auto& player : this->m_Player) {
+					player.reset();
 				}
 				this->m_Player.clear();
 			}

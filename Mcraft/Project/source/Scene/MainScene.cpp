@@ -23,41 +23,41 @@ namespace FPS_n2 {
 			PlayerMngr->Init(NetWork::Player_num);
 			PlayerMngr->SetWatchPlayer(GetViewPlayerID());
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-				auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
+				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				if (loop == PlayerMngr->GetWatchPlayer()) {
 					CharacterClass::LoadChara("Main", (PlayerID)loop);
 					//*
 					int Rand = GetRand(100);
 					if (Rand < 30) {
-						c->LoadCharaGun("type89", 0);
+						chara->LoadCharaGun("type89", 0);
 					}
 					else if (Rand < 30 + 40) {
-						c->LoadCharaGun("type20E", 0);
+						chara->LoadCharaGun("type20E", 0);
 					}
 					else {
-						c->LoadCharaGun("Mod870", 0);
+						chara->LoadCharaGun("Mod870", 0);
 					}
 					//*/
-					//c->LoadCharaGun("Mod870", 0);
-					c->LoadCharaGun("P226", 1);
-					c->LoadCharaGun("RGD5", 2);
-					c->SetCharaTypeID(CharaTypeID::Team);
+					//chara->LoadCharaGun("Mod870", 0);
+					chara->LoadCharaGun("P226", 1);
+					chara->LoadCharaGun("RGD5", 2);
+					chara->SetCharaTypeID(CharaTypeID::Team);
 				}
 				else {
 					CharacterClass::LoadChara("Soldier", (PlayerID)loop);
-					c->LoadCharaGun("AKS-74", 0);
-					c->LoadCharaGun("RGD5", 2);
+					chara->LoadCharaGun("AKS-74", 0);
+					chara->LoadCharaGun("RGD5", 2);
 					//ラグドール
 					if (loop == 1) {
-						MV1::Load((c->GetFilePath() + "model_Rag.mv1").c_str(), &c->SetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
+						MV1::Load((chara->GetFilePath() + "model_Rag.mv1").c_str(), &chara->SetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
 					}
 					else {
-						c->SetRagDoll().Duplicate((PlayerMngr->GetPlayer(1)->GetChara())->GetRagDoll());
+						chara->SetRagDoll().Duplicate((PlayerMngr->GetPlayer(1)->GetChara())->GetRagDoll());
 					}
-					c->SetupRagDoll();
-					c->SetCharaTypeID(CharaTypeID::Enemy);
+					chara->SetupRagDoll();
+					chara->SetCharaTypeID(CharaTypeID::Enemy);
 				}
-				c->SetPlayerID((PlayerID)loop);
+				chara->SetPlayerID((PlayerID)loop);
 			}
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
@@ -101,7 +101,7 @@ namespace FPS_n2 {
 			SetFogColor(114, 120, 128);
 			//
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-				auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
+				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				//人の座標設定
 				Vector3DX pos_t;
 				pos_t.Set(GetRandf(10.f), -20.f, GetRandf(10.f));
@@ -111,7 +111,7 @@ namespace FPS_n2 {
 				if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 0.f * Scale3DRate, &EndPos)) {
 					pos_t = EndPos;
 				}
-				c->Spawn(deg2rad(0.f), deg2rad(GetRand(360)), pos_t, 0);
+				chara->Spawn(deg2rad(0.f), deg2rad(GetRand(360)), pos_t, 0);
 			}
 			//UI
 			this->m_UIclass.Set();
@@ -233,8 +233,7 @@ namespace FPS_n2 {
 				}
 				//ネットワーク
 				if (NetBrowser->IsDataReady() && !this->m_NetWorkController) {
-					this->m_NetWorkController = std::make_unique<NetWork::NetWorkController>();
-					this->m_NetWorkController->Init(NetBrowser->GetClient(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
+					this->m_NetWorkController = std::make_unique<NetWork::NetWorkController>(NetBrowser->GetClient(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
 				}
 				if (this->m_NetWorkController) {
 					int32_t FreeData[10]{};
@@ -245,10 +244,10 @@ namespace FPS_n2 {
 				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {
 					bool IsServerNotPlayer = !this->m_NetWorkController->GetClient() && !this->m_NetWorkController->GetServerPlayer();
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-						auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
+						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)loop);
 						if (loop == PlayerMngr->GetWatchPlayer() && !IsServerNotPlayer) {
-							c->Input(Ret.GetInput());//自身が動かすもの
+							chara->Input(Ret.GetInput());//自身が動かすもの
 						}
 						else {//サーバーからのデータで動くもの
 							//サーバーがCPUを動かす場合
@@ -256,11 +255,11 @@ namespace FPS_n2 {
 								//cpu
 								//PlayerMngr->GetPlayer(loop)->GetAI()->Execute(&MyInput);
 							}
-							c->Input(Ret.GetInput());
+							chara->Input(Ret.GetInput());
 							bool override_true = true;
 							//override_true = Ret.GetIsActive();
 							if (override_true) {
-								c->SetMoveOverRide(Ret.GetMove());
+								chara->SetMoveOverRide(Ret.GetMove());
 							}
 
 						}
@@ -270,24 +269,24 @@ namespace FPS_n2 {
 				}
 				else {//オフライン
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-						auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
+						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 						if (loop == PlayerMngr->GetWatchPlayer()) {
-							c->Input(MyInput);
+							chara->Input(MyInput);
 						}
 						else {
 							InputControl OtherInput;
 							PlayerMngr->GetPlayer(loop)->GetAI()->Execute(&OtherInput);
-							c->Input(OtherInput);
+							chara->Input(OtherInput);
 						}
 						//ダメージイベント処理
-						c->AddDamageEvent(&this->m_DamageEvents);
+						chara->AddDamageEvent(&this->m_DamageEvents);
 					}
 				}
 				//ダメージイベント
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-					auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
+					auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 					for (int loop2 = 0, Num = static_cast<int>(this->m_DamageEvents.size()); loop2 < Num; ++loop2) {
-						if (c->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(loop2)])) {
+						if (chara->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(loop2)])) {
 							std::swap(this->m_DamageEvents.back(), this->m_DamageEvents[static_cast<size_t>(loop2)]);
 							this->m_DamageEvents.pop_back();
 							--Num;
@@ -418,10 +417,8 @@ namespace FPS_n2 {
 			auto* PostPassParts = PostPassEffect::Instance();
 			//使い回しオブジェ系
 			BackGround->Dispose();
-			GunsModify::Instance()->DisposeSlots();
 			//
 			if (this->m_NetWorkController) {
-				this->m_NetWorkController->Dispose();
 				this->m_NetWorkController.reset();
 			}
 			{

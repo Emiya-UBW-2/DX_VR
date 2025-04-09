@@ -68,12 +68,12 @@ namespace FPS_n2 {
 		}
 		//サーバー専用
 		bool ServerControl::AllReady(void) const noexcept {
-			for (auto& n : this->m_Net) {
-				int index = static_cast<int>(&n - &this->m_Net.front());
+			for (auto& net : this->m_Net) {
+				int index = static_cast<int>(&net - &this->m_Net.front());
 				if (this->m_IsServerPlay) {
 					if (index == 0) { continue; }//サーバープレイヤーは絶対0を使うので
 				}
-				if (!n.IsReady()) {
+				if (!net.IsReady()) {
 					return false;
 				}
 			}
@@ -82,13 +82,13 @@ namespace FPS_n2 {
 		void ServerControl::Init(int pPort, bool IsServerPlay) noexcept {
 			this->m_IsServerPlay = IsServerPlay;
 			int loop = 0;
-			for (auto& n : this->m_Net) {
-				int index = static_cast<int>(&n - &this->m_Net.front());
+			for (auto& net : this->m_Net) {
+				int index = static_cast<int>(&net - &this->m_Net.front());
 				if (this->m_IsServerPlay) {
 					if (index == 0) { continue; }//サーバープレイヤーは絶対0を使うので
 				}
-				n.m_NetWork.Init(true, pPort + loop); ++loop;
-				n.m_Phase = ClientPhase::WaitConnect;
+				net.m_NetWork.Init(true, pPort + loop); ++loop;
+				net.m_Phase = ClientPhase::WaitConnect;
 			}
 		}
 		bool ServerControl::Update(ServerNetData* pServerCtrl, const PlayerNetData& MyLocalPlayerData, bool IsUpdateTick) noexcept {
@@ -103,26 +103,26 @@ namespace FPS_n2 {
 				++pServerCtrl->ServerFrame;	// サーバーフレーム更新
 				pServerCtrl->SetInGame();		// インゲームです
 			}
-			for (auto& n : this->m_Net) {
-				int index = static_cast<int>(&n - &this->m_Net.front());
+			for (auto& net : this->m_Net) {
+				int index = static_cast<int>(&net - &this->m_Net.front());
 				if (this->m_IsServerPlay) {
 					if (index == 0) { continue; }//サーバープレイヤーは絶対0を使うので
 				}
 				auto& Player = this->m_LastPlayerData[static_cast<size_t>(index)];
 				PlayerNetData tmpData;
 				int recvRet = -1;
-				auto IsDataUpdated = n.m_NetWork.RecvData(&tmpData, &recvRet, false);
+				auto IsDataUpdated = net.m_NetWork.RecvData(&tmpData, &recvRet, false);
 				if (IsDataUpdated) {
 					if (tmpData.IsCheckSum()) {
 						Player = tmpData;
 					}
 				}
 				bool IsSendData = false;
-				switch (n.m_Phase) {
+				switch (net.m_Phase) {
 				case ClientPhase::WaitConnect:						// 無差別受付
 					pServerCtrl->m_PlayerID = 0;
 					if (IsDataUpdated) {							// 該当ソケットにクライアントからなにか受信したら
-						n.m_Phase = ClientPhase::GetNumber;
+						net.m_Phase = ClientPhase::GetNumber;
 					}
 					break;
 				case ClientPhase::GetNumber://プレイヤー受付
@@ -130,7 +130,7 @@ namespace FPS_n2 {
 					IsSendData = true;
 					if (IsDataUpdated) {
 						if (Player.GetFlag(NetAttribute::IsActive)) {				// ID取れたと識別出来たら
-							n.m_Phase = ClientPhase::Ready;
+							net.m_Phase = ClientPhase::Ready;
 						}
 					}
 					break;
@@ -147,19 +147,19 @@ namespace FPS_n2 {
 				case ClientPhase::Error_CannotConnect:
 				case ClientPhase::Error_ServerInGame:
 				default:
-					n.m_Phase = ClientPhase::WaitConnect;
+					net.m_Phase = ClientPhase::WaitConnect;
 					break;
 				}
 				if (IsSendData && IsUpdateTick) {
 					pServerCtrl->CalcCheckSun();
-					n.m_NetWork.ReturnData(*pServerCtrl);		// クライアントにIDを送る
+					net.m_NetWork.ReturnData(*pServerCtrl);		// クライアントにIDを送る
 				}
 			}
 			return IsAllReady;
 		}
 		void ServerControl::Dispose(void) noexcept {
-			for (auto& n : this->m_Net) {
-				n.m_NetWork.Dispose();
+			for (auto& net : this->m_Net) {
+				net.m_NetWork.Dispose();
 			}
 		}
 		//クライアント専用
@@ -318,7 +318,7 @@ namespace FPS_n2 {
 					}
 				}
 				else {
-					CalcPing(-1); //ロスト
+					CalcPing(InvalidID); //ロスト
 				}
 			}
 		}

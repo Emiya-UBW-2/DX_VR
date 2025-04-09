@@ -15,9 +15,9 @@ namespace FPS_n2 {
 		public:
 			TitleScene(void) noexcept {}
 			TitleScene(const TitleScene&) = delete;
-			TitleScene(TitleScene&& o) = delete;
+			TitleScene(TitleScene&&) = delete;
 			TitleScene& operator=(const TitleScene&) = delete;
-			TitleScene& operator=(TitleScene&& o) = delete;
+			TitleScene& operator=(TitleScene&&) = delete;
 
 			virtual ~TitleScene(void) noexcept {}
 		public:

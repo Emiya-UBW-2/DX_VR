@@ -73,8 +73,6 @@ namespace FPS_n2 {
 			SetMove().Update(0.f, 0.f);
 			UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 
-			ObjectBaseClass::SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
-			ObjectBaseClass::SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
 			SetActive(true);
 			this->m_yAdd = 0.f;
 			this->m_SoundSwitch = true;

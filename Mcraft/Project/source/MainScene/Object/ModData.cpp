@@ -1,15 +1,15 @@
 #include	"ModData.hpp"
 
-const FPS_n2::Sceneclass::ModDataManager* SingletonBase<FPS_n2::Sceneclass::ModDataManager>::m_Singleton = nullptr;
+const FPS_n2::Sceneclass::GunPartsDataManager* SingletonBase<FPS_n2::Sceneclass::GunPartsDataManager>::m_Singleton = nullptr;
 namespace FPS_n2 {
 	namespace Sceneclass {
 
-		void		ModDataClass::SetSlot(const std::string& LEFT, const std::string& RIGHT) noexcept {
+		void		GunPartsDataClass::SetSlot(const std::string& LEFT, const std::string& RIGHT) noexcept {
 			if (LEFT.find("Slot") != std::string::npos) {
 				if (LEFT.find("Type") != std::string::npos) {
 					for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 						if (RIGHT == GunSlotName[loop]) {
-							this->m_PartsSlot.resize(this->m_PartsSlot.size() + 1);
+							this->m_PartsSlot.emplace_back();
 							this->m_PartsSlot.back().m_GunSlot = (GunSlot)loop;
 							break;
 						}
@@ -20,7 +20,7 @@ namespace FPS_n2 {
 					Path = "data/Mods/";
 					Path += GunSlotName[static_cast<int>(this->m_PartsSlot.back().m_GunSlot)];
 					Path += "/" + RIGHT + "/";
-					this->m_PartsSlot.back().m_ItemsUniqueID.emplace_back((*ModDataManager::Instance()->AddData(Path))->GetUniqueID());
+					this->m_PartsSlot.back().m_ItemsUniqueID.emplace_back((*GunPartsDataManager::Instance()->AddData(Path))->GetUniqueID());
 				}
 				else if (LEFT.find("Conflict") != std::string::npos) {
 					this->m_PartsSlot.back().m_Conflicts.emplace_back(RIGHT);
@@ -124,13 +124,13 @@ namespace FPS_n2 {
 			}
 		}
 
-		const std::shared_ptr<ModDataClass>* ModDataManager::AddData(const std::string& filepath) noexcept {
-			for (auto& o : this->m_Object) {
-				if (o->GetPath() == filepath) {
-					return &o;
+		const std::shared_ptr<GunPartsDataClass>* GunPartsDataManager::AddData(const std::string& filepath) noexcept {
+			for (auto& obj : this->m_Object) {
+				if (obj->GetPath() == filepath) {
+					return &obj;
 				}
 			}
-			auto tmp = std::make_shared<ModDataClass>();
+			auto tmp = std::make_shared<GunPartsDataClass>();
 			auto UniqueID = this->m_LastUniqueID;
 			tmp->SetUniqueID(UniqueID);
 			++this->m_LastUniqueID;

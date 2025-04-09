@@ -25,7 +25,7 @@ namespace FPS_n2 {
 				SetOutApplicationLogValidFlag(false);
 				FileStreamDX FileStream("data/NetWorkSetting.txt");
 				while (true) {
-					this->m_NewWorkSetting.resize(this->m_NewWorkSetting.size() + 1);
+					this->m_NewWorkSetting.emplace_back();
 					this->m_NewWorkSetting.back().UsePort = std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 50000);
 					this->m_NewWorkSetting.back().IP.d1 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
 					this->m_NewWorkSetting.back().IP.d2 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
@@ -39,13 +39,13 @@ namespace FPS_n2 {
 			}
 			void Save(void) noexcept {
 				std::ofstream outputfile("data/NetWorkSetting.txt");
-				for (auto& n : this->m_NewWorkSetting) {
-					int ID = static_cast<int>(&n - &this->m_NewWorkSetting.front());
-					outputfile << "Setting" + std::to_string(ID) + "_Port=" + std::to_string(n.UsePort) + "\n";
-					outputfile << "Setting" + std::to_string(ID) + "_IP1=" + std::to_string(n.IP.d1) + "\n";
-					outputfile << "Setting" + std::to_string(ID) + "_IP2=" + std::to_string(n.IP.d2) + "\n";
-					outputfile << "Setting" + std::to_string(ID) + "_IP3=" + std::to_string(n.IP.d3) + "\n";
-					outputfile << "Setting" + std::to_string(ID) + "_IP4=" + std::to_string(n.IP.d4) + "\n";
+				for (auto& netset : this->m_NewWorkSetting) {
+					int ID = static_cast<int>(&netset - &this->m_NewWorkSetting.front());
+					outputfile << "Setting" + std::to_string(ID) + "_Port=" + std::to_string(netset.UsePort) + "\n";
+					outputfile << "Setting" + std::to_string(ID) + "_IP1=" + std::to_string(netset.IP.d1) + "\n";
+					outputfile << "Setting" + std::to_string(ID) + "_IP2=" + std::to_string(netset.IP.d2) + "\n";
+					outputfile << "Setting" + std::to_string(ID) + "_IP3=" + std::to_string(netset.IP.d3) + "\n";
+					outputfile << "Setting" + std::to_string(ID) + "_IP4=" + std::to_string(netset.IP.d4) + "\n";
 				}
 				outputfile.close();
 			}
@@ -53,7 +53,7 @@ namespace FPS_n2 {
 			auto		GetSize(void) const noexcept { return static_cast<int>(this->m_NewWorkSetting.size()); }
 			const auto& Get(int ID) const noexcept { return this->m_NewWorkSetting[static_cast<size_t>(ID)]; }
 			void		AddBack(void) noexcept {
-				this->m_NewWorkSetting.resize(this->m_NewWorkSetting.size() + 1);
+				this->m_NewWorkSetting.emplace_back();
 				this->m_NewWorkSetting.back().UsePort = 10850;
 				this->m_NewWorkSetting.back().IP.d1 = 127;
 				this->m_NewWorkSetting.back().IP.d2 = 0;
@@ -73,9 +73,9 @@ namespace FPS_n2 {
 	private:
 		NetWorkBrowser(void) noexcept {}
 		NetWorkBrowser(const NetWorkBrowser&) = delete;
-		NetWorkBrowser(NetWorkBrowser&& o) = delete;
+		NetWorkBrowser(NetWorkBrowser&&) = delete;
 		NetWorkBrowser& operator=(const NetWorkBrowser&) = delete;
-		NetWorkBrowser& operator=(NetWorkBrowser&& o) = delete;
+		NetWorkBrowser& operator=(NetWorkBrowser&&) = delete;
 
 		~NetWorkBrowser(void) noexcept {}
 	public:
@@ -95,8 +95,8 @@ namespace FPS_n2 {
 			this->m_IsClient = false;
 			this->m_IsServerPlayer = false;
 		}
-		void			ReadyConnect(const NewSetting& n) noexcept {
-			this->m_NetSetting = n;
+		void			ReadyConnect(const NewSetting& netset) noexcept {
+			this->m_NetSetting = netset;
 			this->m_Sequence = BrowserSequence::Ready;
 		}
 	public:

@@ -6,58 +6,19 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class ModClass : public ObjectBaseClass {
-			ModSlotControl										m_ModSlotControl{};
+		class GunPartsClass : public ObjectBaseClass {
+			std::unique_ptr<GunPartsSlotControl>								m_GunPartsSlotControl{};
 		public:
-			ModSlotControl& SetModSlot(void) noexcept { return this->m_ModSlotControl; }
-			const ModSlotControl& GetModSlot(void) const noexcept { return this->m_ModSlotControl; }
+			GunPartsClass(void) noexcept {}
+			~GunPartsClass(void) noexcept {}
 		public:
-			ModClass(void) noexcept {}
-			~ModClass(void) noexcept {}
+			const std::unique_ptr<GunPartsSlotControl>& GetGunPartsSlot(void) const noexcept { return this->m_GunPartsSlotControl; }
+			auto					GetFrameWorldMat(GunFrame frame) const noexcept { return GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
+			const Matrix4x4DX		GetFramePartsMat(GunFrame frame) const noexcept;
 		public:
-			auto	GetFrameWorldMat(GunFrame frame) const noexcept { return GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
-
-			const Matrix4x4DX		GetFramePartsMat(GunFrame frame) const noexcept {
-				const auto* ptr = GetModSlot().HasFrameBySlot(frame);
-				if (ptr) {
-					return ((std::shared_ptr<ModClass>&)(*ptr))->GetFramePartsMat(frame);
-				}
-				if (HaveFrame(static_cast<int>(frame))) {
-					auto FrameID = GetFrame(static_cast<int>(frame));
-					Matrix4x4DX Ret = GetObj().GetFrameLocalWorldMatrix(FrameID);
-					if (frame == GunFrame::Sight) {
-						if (GetObj().GetFrameChildNum(FrameID) > 0) {
-							Vector3DX vec = (GetObj().GetChildFrameWorldMatrix(FrameID, 0).pos() - Ret.pos()).normalized();
-							Ret = (Ret.rotation() * Matrix4x4DX::RotVec2(Ret.yvec(), vec)) * Matrix4x4DX::Mtrans(Ret.pos());
-						}
-					}
-					return Ret;
-				}
-				return Matrix4x4DX::identity();
-			}
-		public:
-			void			Init_Sub(void) noexcept override {
-				SetModSlot().Init(GetFilePath());
-				ObjectBaseClass::SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
-				ObjectBaseClass::SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
-				Init_Mod();
-			}
-
-			void			FirstExecute(void) noexcept override {
-				SetMove().Update(0.f, 0.f);
-				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
-				FirstExecute_Mod();
-			}
-			void			SetModMatrix(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept {
-				SetMove().SetMat(rotation);
-				SetMove().SetPos(pos);
-				SetMove().Update(0.f, 0.f);
-				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
-				SetModSlot().UpdatePartsAnim(GetObj());
-				SetModSlot().UpdatePartsMove(GetFramePartsMat(GunFrame::UnderRail), GunSlot::UnderRail);
-				SetModSlot().UpdatePartsMove(GetFramePartsMat(GunFrame::Sight), GunSlot::Sight);
-				SetModSlot().UpdatePartsMove(GetFramePartsMat(GunFrame::MuzzleAdapter), GunSlot::MuzzleAdapter);
-			}
+			void			Init_Sub(void) noexcept override;
+			void			FirstExecute(void) noexcept override { FirstExecute_GunParts(); }
+			void			SetGunPartsMatrix(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept;
 			void			DrawShadow(void) noexcept override {
 				if (!IsActive()) { return; }
 
@@ -76,54 +37,42 @@ namespace FPS_n2 {
 
 				GetObj().DrawModel();
 			}
-			void			Dispose_Sub(void) noexcept override {
-				SetModSlot().Dispose();
-				Dispose_Mod();
-			}
+			void			Dispose_Sub(void) noexcept override;
 		private:
 			int	GetFrameNum(void) noexcept override { return static_cast<int>(GunFrame::Max); }
 			const char* GetFrameStr(int id) noexcept override { return GunFrameName[id]; }
 		public:
-			virtual void	Init_Mod(void) noexcept {}
-			virtual void	FirstExecute_Mod(void) noexcept {}
-			virtual void	Dispose_Mod(void) noexcept {}
+			virtual void	Init_GunParts(void) noexcept {}
+			virtual void	FirstExecute_GunParts(void) noexcept {}
+			virtual void	Dispose_GunParts(void) noexcept {}
 		};
 
 
-		class MagazineClass : public ModClass {
+		class MagazineClass : public GunPartsClass {
 			std::array<std::shared_ptr<AmmoInChamberClass>,5>			m_Ammo{};		//
 		public:
 			MagazineClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Magazine); }
 			~MagazineClass(void) noexcept {}
 		public:
-			void			Init_Mod(void) noexcept override {
-				auto* ObjMngr = ObjectManager::Instance();
-				for (auto& a : this->m_Ammo) {
-					a = std::make_shared<AmmoInChamberClass>();
-					ObjMngr->AddObject(a);
-					ObjMngr->LoadModel(a, a, GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPath().c_str());
-					a->Init();
-					a->SetActive(true);
-				}
-			}
-			void			FirstExecute_Mod(void) noexcept override {
+			void			Init_GunParts(void) noexcept override;
+			void			FirstExecute_GunParts(void) noexcept override {
 				int index = 1;
-				for (auto& a : this->m_Ammo) {
+				for (auto& ammo : this->m_Ammo) {
 					auto Mat = GetObj().GetFrameLocalWorldMatrix(index); ++index;
-					a->SetMat(Mat.pos(), Matrix3x3DX::Get33DX(Mat));
+					ammo->SetMat(Mat.pos(), Matrix3x3DX::Get33DX(Mat));
 				}
 			}
-			void			Dispose_Mod(void) noexcept override {
+			void			Dispose_GunParts(void) noexcept override {
 				auto* ObjMngr = ObjectManager::Instance();
-				for (auto& a : this->m_Ammo) {
-					ObjMngr->DelObj((SharedObj*)&a);
-					a.reset();
+				for (auto& ammo : this->m_Ammo) {
+					ObjMngr->DelObj((SharedObj*)&ammo);
+					ammo.reset();
 				}
 			}
 		public:
 			void			SetAmmoActive(bool value) noexcept {
-				for (auto& a : this->m_Ammo) {
-					a->SetActive(value);
+				for (auto& ammo : this->m_Ammo) {
+					ammo->SetActive(value);
 				}
 			}
 			void			SetHandMatrix(const Matrix4x4DX& value) noexcept {
@@ -134,7 +83,7 @@ namespace FPS_n2 {
 			}
 		};
 
-		class LowerClass : public ModClass {
+		class LowerClass : public GunPartsClass {
 		private:
 		public://ゲッター
 		public:
@@ -143,13 +92,13 @@ namespace FPS_n2 {
 		public:
 		};
 
-		class UpperClass : public ModClass {
+		class UpperClass : public GunPartsClass {
 		public:
 			UpperClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Upper); }
 			~UpperClass(void) noexcept {}
 		};
 
-		class BarrelClass : public ModClass {
+		class BarrelClass : public GunPartsClass {
 		private:
 		public://ゲッター
 		public:
@@ -158,7 +107,7 @@ namespace FPS_n2 {
 		public:
 		};
 
-		class UnderRailClass : public ModClass {
+		class UnderRailClass : public GunPartsClass {
 		private:
 		public://ゲッター
 		public:
@@ -167,13 +116,13 @@ namespace FPS_n2 {
 		public:
 		};
 
-		class SightClass : public ModClass {
+		class SightClass : public GunPartsClass {
 		public:
 			SightClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Sight); }
 			~SightClass(void) noexcept {}
 		};
 
-		class MuzzleClass : public ModClass {
+		class MuzzleClass : public GunPartsClass {
 		public:
 			MuzzleClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::MuzzleAdapter); }
 			~MuzzleClass(void) noexcept {}

@@ -19,13 +19,18 @@ namespace FPS_n2 {
 		public:
 			void Repop(void) noexcept;
 		public:
-			AIControl(void) noexcept;
-			~AIControl(void) noexcept;
-		public:
+			AIControl(PlayerID MyID) noexcept {
+				Init(MyID);
+			}
+			~AIControl(void) noexcept {
+				Dispose();
+			}
+		private:
 			void Init(PlayerID MyID) noexcept;
+			void Dispose(void) noexcept {}
+		public:
 			void Execute(InputControl*) noexcept;
 			void Draw(void) noexcept {}
-			void Dispose(void) noexcept {}
 		};
 	};
 };

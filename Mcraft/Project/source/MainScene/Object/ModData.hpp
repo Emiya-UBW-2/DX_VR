@@ -6,7 +6,7 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class ModDataClass {
+		class GunPartsDataClass {
 			struct PartsSlot {
 				GunSlot						m_GunSlot{ GunSlot::Gun };
 				std::vector<int>			m_ItemsUniqueID;
@@ -34,7 +34,7 @@ namespace FPS_n2 {
 
 			GraphHandle						m_Reitcle;
 			float							m_ZoomSize{ 1.f };
-			int								m_HumanAnimType{ -1 };				//
+			int								m_HumanAnimType{ InvalidID };				//
 
 			int								m_ShootRate_Diff{ 0 };
 			int								m_Recoil_Diff{ 0 };
@@ -47,12 +47,15 @@ namespace FPS_n2 {
 			bool							m_CanSwitch{ true };
 
 
-			std::array<int, static_cast<int>(GunAnimeID::Max)>	m_AnimSelect{ -1 };
+			std::array<int, static_cast<int>(GunAnimeID::Max)>	m_AnimSelect{ InvalidID };
 
 			std::vector<std::shared_ptr<AmmoDataClass>>	m_AmmoSpec;
 			std::vector<std::string>					m_Info;
 			std::vector<std::string>					m_InfoEng;
 			int											m_CapacityMax{ 0 };
+		public:
+			GunPartsDataClass() noexcept {}
+			~GunPartsDataClass() noexcept {}
 		public://ƒQƒbƒ^[
 			const auto& GetPath(void) const noexcept { return this->m_path; }
 			const auto& GetName(void) const noexcept { return this->m_name; }
@@ -89,9 +92,9 @@ namespace FPS_n2 {
 			const auto& GetRecoil_Diff(void) const noexcept { return this->m_Recoil_Diff; }
 
 			const PartsSlot* GetPartsSlot(GunSlot sel) const noexcept {
-				for (const auto& s : this->m_PartsSlot) {
-					if (s.m_GunSlot == sel) {
-						return &s;
+				for (const auto& slot : this->m_PartsSlot) {
+					if (slot.m_GunSlot == sel) {
+						return &slot;
 					}
 				}
 				return nullptr;
@@ -101,8 +104,8 @@ namespace FPS_n2 {
 			void			SetUniqueID(int value) noexcept { this->m_UniqueID = value; }
 		public://
 			void		Set(std::string path_) {
-				for (auto& s : this->m_AnimSelect) {
-					s = -1;
+				for (auto& anim : this->m_AnimSelect) {
+					anim = InvalidID;
 				}
 
 				this->m_path = path_;
@@ -136,26 +139,26 @@ namespace FPS_n2 {
 			void				SetSlot(const std::string& LEFT, const std::string& RIGHT) noexcept;
 		};
 
-		class ModDataManager : public SingletonBase<ModDataManager> {
+		class GunPartsDataManager : public SingletonBase<GunPartsDataManager> {
 		private:
-			friend class SingletonBase<ModDataManager>;
+			friend class SingletonBase<GunPartsDataManager>;
 		private:
-			std::list<std::shared_ptr<ModDataClass>>	m_Object;
+			std::list<std::shared_ptr<GunPartsDataClass>>	m_Object;
 			int											m_LastUniqueID{ 0 };
 		private:
-			ModDataManager(void) noexcept {}
-			~ModDataManager(void) noexcept {}
+			GunPartsDataManager(void) noexcept {}
+			~GunPartsDataManager(void) noexcept {}
 		public:
-			const std::shared_ptr<ModDataClass>* GetData(int uniqueID) noexcept {
-				for (auto& o : this->m_Object) {
-					if (o->GetUniqueID() == uniqueID) {
-						return &o;
+			const std::shared_ptr<GunPartsDataClass>* GetData(int uniqueID) noexcept {
+				for (auto& obj : this->m_Object) {
+					if (obj->GetUniqueID() == uniqueID) {
+						return &obj;
 					}
 				}
 				return nullptr;
 			}
 		public:
-			const std::shared_ptr<ModDataClass>* AddData(const std::string& filepath) noexcept;
+			const std::shared_ptr<GunPartsDataClass>* AddData(const std::string& filepath) noexcept;
 		};
 	};
 };

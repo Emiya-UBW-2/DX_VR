@@ -2,8 +2,6 @@
 
 #include	"../../MainScene/Player/Player.hpp"
 
-#include	"../../CommonScene/Object/GunsModify.hpp"
-
 namespace FPS_n2 {
 	namespace Sceneclass {
 		bool			CharacterClass::SetDamageEvent(const DamageEvent& value) noexcept {
@@ -158,10 +156,10 @@ namespace FPS_n2 {
 					if(!IsHit) {
 						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 							if (loop == GetMyPlayerID()) { continue; }
-							auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
-							if (!c->IsAlive()) { continue; }
-							Vector3DX StartPos = c->GetMove().GetPos();
-							Vector3DX EndPos = c->GetMove().GetPos() + Vector3DX::up() * (1.8f * Scale3DRate);
+							auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+							if (!chara->IsAlive()) { continue; }
+							Vector3DX StartPos = chara->GetMove().GetPos();
+							Vector3DX EndPos = chara->GetMove().GetPos() + Vector3DX::up() * (1.8f * Scale3DRate);
 							if (GetHitCheckToCapsule(GunStart, GunEnd, 0.1f * Scale3DRate, StartPos, EndPos, 0.3f * Scale3DRate)) {
 								IsHit = true;
 								break;
@@ -224,7 +222,7 @@ namespace FPS_n2 {
 						if (this->m_Input.GetPADSPress(Controls::PADS::CHECK)) {
 							GetGunPtrNow()->SetGunAnime(GunAnimeID::Watch);
 						}
-						if (!GetGunPtrNow()->GetModSlot().GetModData()->GetIsThrowWeapon()) {
+						if (!GetGunPtrNow()->GetGunPartsSlot()->GetGunPartsData()->GetIsThrowWeapon()) {
 							//Reload
 							if (this->m_Input.GetPADSPress(Controls::PADS::RELOAD) ||
 								((GetGunPtrNow()->GetAmmoNumTotal() == 0) && this->m_Input.GetPADSTrigger(Controls::PADS::SHOT))) {
@@ -498,10 +496,10 @@ namespace FPS_n2 {
 					float Radius = 2.f * 0.5f * Scale3DRate;
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						if (loop == GetMyPlayerID()) { continue; }
-						auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
-						if (!c->IsAlive()) { continue; }
+						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+						if (!chara->IsAlive()) { continue; }
 						//自分が当たったら押し戻す
-						Vector3DX Vec = (c->GetMove().GetPos() - GetMove().GetPos()); Vec.y = (0.f);
+						Vector3DX Vec = (chara->GetMove().GetPos() - GetMove().GetPos()); Vec.y = (0.f);
 						float Len = Vec.magnitude();
 						if (Len < Radius) {
 							PosBuf = PosBuf + Vec.normalized() * (Len - Radius);
@@ -523,16 +521,16 @@ namespace FPS_n2 {
 				Matrix3x3DX CharaRotationCache = CharaLocalRotationCache * GetMove().GetMat();
 				//銃の位置を指定するアニメ
 				for (int loop = 0, max = this->m_GunPtrControl.GetGunNum(); loop < max; ++loop) {
-					auto& p = this->m_GunPtrControl.GetGunPtr(loop);
-					if (!p) { continue; }
+					auto& pGun = this->m_GunPtrControl.GetGunPtr(loop);
+					if (!pGun) { continue; }
 
 					//スリング場所探索
-					if (p->IsNeedCalcSling()) {
+					if (pGun->IsNeedCalcSling()) {
 						switch (loop) {
 						case 0://メイン武器のスリング
 							this->m_SlingZrad.Update(DXLib_refParts->GetDeltaTime());
 							this->m_SlingZrad.AddRad((0.5f * (this->m_RotateControl.GetRad().y - this->m_RotateControl.GetYRadBottom())) * DXLib_refParts->GetDeltaTime());
-							p->SetSlingMat(
+							pGun->SetSlingMat(
 								Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-30)) * Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(-90)) *
 								(
 									Matrix3x3DX::RotAxis(Vector3DX::forward(), -this->m_SlingZrad.GetRad()) *
@@ -547,13 +545,13 @@ namespace FPS_n2 {
 							);
 							break;
 						case 1://ホルスター
-							p->SetSlingMat(
+							pGun->SetSlingMat(
 								Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-90)) * Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::Upper)),
 								GetFrameWorldMat(CharaFrame::Upper).pos() + GetFrameWorldMat(CharaFrame::Upper).yvec() * (-0.5f * Scale3DRate) + GetFrameWorldMat(CharaFrame::Upper).xvec() * (-0.3f * Scale3DRate)
 							);
 							break;
 						case 2://グレネード
-							p->SetSlingMat(
+							pGun->SetSlingMat(
 								Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::LeftMag)),
 								GetFrameWorldMat(CharaFrame::LeftMag).pos()
 							);
@@ -565,17 +563,17 @@ namespace FPS_n2 {
 
 					bool IsSelect = loop == this->m_GunPtrControl.GetNowGunSelect();
 					if (IsSelect) {
-						p->SetMagazinePoachMat(GetFrameWorldMat(CharaFrame::LeftMag));
-						p->SetGrenadeThrowRot(GetEyeRotationCache());
+						pGun->SetMagazinePoachMat(GetFrameWorldMat(CharaFrame::LeftMag));
+						pGun->SetGrenadeThrowRot(GetEyeRotationCache());
 						//アニメーション
-						p->UpdateGunAnimePer(GetIsADS());
+						pGun->UpdateGunAnimePer(GetIsADS());
 					}
 					else {
-						p->SetActiveAll(true);
+						pGun->SetActiveAll(true);
 						//アニメーション
-						p->InitGunAnimePer();
+						pGun->InitGunAnimePer();
 					}
-					p->UpdateGunMat(IsSelect, GetIsADS(), CharaRotationCache, GetFrameWorldMat(CharaFrame::Head).pos(), this->m_RotateControl.GetRad());
+					pGun->UpdateGunMat(IsSelect, GetIsADS(), CharaRotationCache, GetFrameWorldMat(CharaFrame::Head).pos(), this->m_RotateControl.GetRad());
 				}
 				//手の位置を制御
 				if ((GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) || GetCanLookByPlayer()) {
@@ -598,7 +596,7 @@ namespace FPS_n2 {
 							Easing(&this->m_ArmBreakPer, (
 								(GetGunPtrNow()->IsCanShot() && this->m_ArmBreak)
 								|| (GetGunPtrNow()->GetGunAnime() == GunAnimeID::Watch)//TODO:専用の左腕アクション
-								|| (GetGunPtrNow()->GetModSlot().GetModData()->GetIsThrowWeapon() && (GetGunPtrNow()->GetGunAnime() != GunAnimeID::ThrowReady))//TODO:専用の左腕アクション
+								|| (GetGunPtrNow()->GetGunPartsSlot()->GetGunPartsData()->GetIsThrowWeapon() && (GetGunPtrNow()->GetGunAnime() != GunAnimeID::ThrowReady))//TODO:専用の左腕アクション
 								) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 							if (this->m_ArmBreakPer > 0.01f) {
 								this->m_SlingArmZrad.Update(DXLib_refParts->GetDeltaTime());
@@ -660,15 +658,15 @@ namespace FPS_n2 {
 			}
 			else {
 				for (int loop = 0, max = this->m_GunPtrControl.GetGunNum(); loop < max; ++loop) {
-					auto& p = this->m_GunPtrControl.GetGunPtr(loop);
-					if (!p) { continue; }
+					auto& pGun = this->m_GunPtrControl.GetGunPtr(loop);
+					if (!pGun) { continue; }
 					if (loop == this->m_GunPtrControl.GetNowGunSelect()) {
 						auto Mat = this->m_RagDollControl.GetFrameMat(RagFrame::RIGHThand);
-						p->SetGunMat(Matrix3x3DX::Get33DX(Mat), Mat.pos());
-						p->SetActiveAll(true);
+						pGun->SetGunMat(Matrix3x3DX::Get33DX(Mat), Mat.pos());
+						pGun->SetActiveAll(true);
 					}
 					else {
-						p->SetActiveAll(false);
+						pGun->SetActiveAll(false);
 					}
 				}
 			}
@@ -687,18 +685,17 @@ namespace FPS_n2 {
 		void			CharacterClass::LoadChara(const std::string& FolderName, PlayerID ID) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
-			auto& p = PlayerMngr->GetPlayer(ID);
+			auto& player = PlayerMngr->GetPlayer(ID);
 
 			std::string Path = "data/Charactor/";
 			Path += FolderName;
 			Path += "/";
 
-			p->SetChara(std::make_shared<CharacterClass>());
-			ObjMngr->AddObject(p->GetChara());
-			ObjMngr->LoadModel(p->GetChara(), p->GetChara(), Path.c_str());
-			p->GetChara()->Init();
-			p->SetAI(std::make_shared<AIControl>());
-			p->GetAI()->Init(ID);
+			player->SetChara(std::make_shared<CharacterClass>());
+			ObjMngr->AddObject(player->GetChara());
+			ObjMngr->LoadModel(player->GetChara(), player->GetChara(), Path.c_str());
+			player->GetChara()->Init();
+			player->SetAI(std::make_shared<AIControl>(ID));
 		}
 		void			CharacterClass::LoadCharaGun(const std::string& FolderName, int Sel) noexcept {
 			auto* ObjMngr = ObjectManager::Instance();

@@ -60,10 +60,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::NetWorkBrowser::Create();
 	FPS_n2::Sceneclass::ButtonControl::Create();
 	FPS_n2::Sceneclass::GunAnimManager::Create();
-	FPS_n2::Sceneclass::ModDataManager::Create();
+	FPS_n2::Sceneclass::GunPartsDataManager::Create();
 	FPS_n2::Sceneclass::AmmoDataManager::Create();
-
-	FPS_n2::Sceneclass::GunsModify::Create();
 	//
 	auto* SaveDataParts = SaveDataClass::Instance();
 	//‰ŠúŠJ•ú

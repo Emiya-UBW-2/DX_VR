@@ -38,14 +38,26 @@ namespace FPS_n2 {
 				GraphHandle		m_Icon;
 
 			public:
-				ButtonClass(void) noexcept {}
+				ButtonClass(GraphHandle* BGPath, int xp, int yp, FontSystem::FontXCenter FontX, FontSystem::FontYCenter FontY) noexcept {
+					LoadCommon(BGPath);
+					Set(xp, yp, FontX, FontY);
+				}
 				ButtonClass(const ButtonClass&) = delete;
-				ButtonClass(ButtonClass&& o) = delete;
+				ButtonClass(ButtonClass&&) = delete;
 				ButtonClass& operator=(const ButtonClass&) = delete;
-				ButtonClass& operator=(ButtonClass&& o) = delete;
+				ButtonClass& operator=(ButtonClass&&) = delete;
+				~ButtonClass(void) noexcept { Dispose(); }
 			public:
 				void			LoadCommon(GraphHandle* BGPath) noexcept {
 					this->m_SelectBackImage = BGPath;
+				}
+				void			Set(int xp, int yp, FontSystem::FontXCenter FontX, FontSystem::FontYCenter FontY) noexcept {
+					xp1 = xp;
+					yp1 = yp;
+					LMR = FontX;
+					TMB = FontY;
+					SelYadd = 0.f;
+					this->m_ButtonStatus = ButtonStatus::Ready;
 				}
 				void			Load_Icon(const char* IconPath, bool IsEnableSelect) noexcept {
 					this->m_Icon.Load(IconPath);
@@ -59,14 +71,6 @@ namespace FPS_n2 {
 					ysize = fontsize;
 					this->m_ButtonMode = ButtonMode::String;
 					this->m_EnableSelect = IsEnableSelect;
-				}
-				void			Set(int xp, int yp, FontSystem::FontXCenter FontX, FontSystem::FontYCenter FontY) noexcept {
-					xp1 = xp;
-					yp1 = yp;
-					LMR = FontX;
-					TMB = FontY;
-					SelYadd = 0.f;
-					this->m_ButtonStatus = ButtonStatus::Ready;
 				}
 				void			Update(void) noexcept {
 					Easing(&SelYadd, 0.f, 0.93f, EasingType::OutExpo);
@@ -251,9 +255,9 @@ namespace FPS_n2 {
 		private:
 			ButtonControl(void) noexcept;
 			ButtonControl(const ButtonControl&) = delete;
-			ButtonControl(ButtonControl&& o) = delete;
+			ButtonControl(ButtonControl&&) = delete;
 			ButtonControl& operator=(const ButtonControl&) = delete;
-			ButtonControl& operator=(ButtonControl&& o) = delete;
+			ButtonControl& operator=(ButtonControl&&) = delete;
 				
 			virtual ~ButtonControl(void) noexcept;
 		public:
@@ -270,19 +274,15 @@ namespace FPS_n2 {
 				const char* String, int fontsize, bool IsEnableSelect,
 				int xp, int yp, FontSystem::FontXCenter FontX, FontSystem::FontYCenter FontY
 			) noexcept {
-				m_ButtonSel.emplace_back(std::make_shared<ButtonClass>());
-				m_ButtonSel.back()->LoadCommon(&this->m_SelectBackImage);
+				m_ButtonSel.emplace_back(std::make_shared<ButtonClass>(&this->m_SelectBackImage, xp, yp, FontX, FontY));
 				m_ButtonSel.back()->Load_String(String, fontsize, IsEnableSelect);
-				m_ButtonSel.back()->Set(xp, yp, FontX, FontY);
 			}
 			void AddIconButton(
 				const char* IconPath, bool IsEnableSelect,
 				int xp, int yp, FontSystem::FontXCenter FontX, FontSystem::FontYCenter FontY
 			) noexcept {
-				m_ButtonSel.emplace_back(std::make_shared<ButtonClass>());
-				m_ButtonSel.back()->LoadCommon(&this->m_SelectBackImage);
+				m_ButtonSel.emplace_back(std::make_shared<ButtonClass>(&this->m_SelectBackImage, xp, yp, FontX, FontY));
 				m_ButtonSel.back()->Load_Icon(IconPath, IsEnableSelect);
-				m_ButtonSel.back()->Set(xp, yp, FontX, FontY);
 			}
 		};
 		// 
@@ -291,14 +291,17 @@ namespace FPS_n2 {
 			int							m_CreditCoulm{0};
 			std::array<std::pair<char[CharMax], char[CharMax]>, 64>	m_CreditStr{};
 		public:
-			CreditControl(void) noexcept {}
+			CreditControl(void) noexcept { Init(); }
 			CreditControl(const CreditControl&) = delete;
-			CreditControl(CreditControl&& o) = delete;
+			CreditControl(CreditControl&&) = delete;
 			CreditControl& operator=(const CreditControl&) = delete;
-			CreditControl& operator=(CreditControl&& o) = delete;
+			CreditControl& operator=(CreditControl&&) = delete;
+
+			~CreditControl(void) noexcept { Dispose(); }
 		public:
-			void Init(void) noexcept;
 			void Draw(int xmin, int ymin, int xmax) const noexcept;
+		private:
+			void Init(void) noexcept;
 			void Dispose(void) noexcept;
 		};
 		// 

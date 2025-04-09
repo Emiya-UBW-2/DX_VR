@@ -23,11 +23,6 @@ namespace FPS_n2 {
 			MyChara->Spawn(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, 0);
 		}
 		//
-		AIControl::AIControl(void) noexcept {
-		}
-		AIControl::~AIControl(void) noexcept {
-		}
-		//
 		void AIControl::Init(PlayerID MyID) noexcept {
 			this->m_MyCharaID = MyID;
 		}

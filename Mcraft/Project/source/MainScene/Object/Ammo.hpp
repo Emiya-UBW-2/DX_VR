@@ -11,7 +11,7 @@ namespace FPS_n2 {
 			std::shared_ptr<AmmoDataClass>	m_AmmoData{ nullptr };
 			float			m_speed{ 0.f };
 			float			m_penetration{ 0.f };
-			int				m_ShootCheraID{ -1 };
+			int				m_ShootCheraID{ InvalidID };
 			float			m_yAdd{ 0.f };
 			float			m_Timer{ 0.f };
 

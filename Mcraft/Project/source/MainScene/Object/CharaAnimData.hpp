@@ -158,8 +158,8 @@ namespace FPS_n2 {
 				int LRindex = 0;
 				for (const auto& LR : this->m_Fingers) {
 					int Numberindex = 0;
-					for (auto& f : LR) {
-						Ret.m_Fingers.at(LRindex).at(Numberindex) = f + p.m_Fingers.at(LRindex).at(Numberindex);
+					for (auto& finger : LR) {
+						Ret.m_Fingers.at(LRindex).at(Numberindex) = finger + p.m_Fingers.at(LRindex).at(Numberindex);
 						++Numberindex;
 					}
 					++LRindex;
@@ -175,8 +175,8 @@ namespace FPS_n2 {
 				int LRindex = 0;
 				for (const auto& LR : this->m_Fingers) {
 					int Numberindex = 0;
-					for (auto& f : LR) {
-						Ret.m_Fingers.at(LRindex).at(Numberindex) = f - p.m_Fingers.at(LRindex).at(Numberindex);
+					for (auto& finger : LR) {
+						Ret.m_Fingers.at(LRindex).at(Numberindex) = finger - p.m_Fingers.at(LRindex).at(Numberindex);
 						++Numberindex;
 					}
 					++LRindex;
@@ -192,8 +192,8 @@ namespace FPS_n2 {
 				int LRindex = 0;
 				for (const auto& LR : this->m_Fingers) {
 					int Numberindex = 0;
-					for (auto& f : LR) {
-						Ret.m_Fingers.at(LRindex).at(Numberindex) = f * scale;
+					for (auto& finger : LR) {
+						Ret.m_Fingers.at(LRindex).at(Numberindex) = finger * scale;
 						++Numberindex;
 					}
 					++LRindex;
@@ -239,6 +239,10 @@ namespace FPS_n2 {
 				EnumGunAnim		m_EnumGunAnim{};
 				bool			m_IsLoop{ true };
 			public:
+				GunanimData(const std::string& data, EnumGunAnim EnumSel) noexcept {
+					Set(data, EnumSel);
+				}
+			public:
 				void Set(const std::string& data, EnumGunAnim EnumSel) {
 					std::vector<std::string> Args;
 					std::string RIGHTBuf = data;
@@ -279,6 +283,10 @@ namespace FPS_n2 {
 					Vector3DX		m_Pos;
 					int				m_Frame{ 1 };
 					FingerData		m_Finger{};
+				public:
+					GunAnim(const std::string& data) noexcept {
+						Set(data);
+					}
 				public:
 					void Set(const std::string& data) {
 						std::vector<std::string> Args;
@@ -346,16 +354,13 @@ namespace FPS_n2 {
 					std::string Path = filepath;
 					Path += EnumGunAnimName[loop];
 					Path += ".txt";
-					this->m_Object.resize(this->m_Object.size() + 1);
-					this->m_Object.back().first = std::make_shared<GunanimData>();
-
+					this->m_Object.emplace_back();
 					FileStreamDX FileStream(Path.c_str());
-					this->m_Object.back().first->Set(FileStream.SeekLineAndGetStr(), (EnumGunAnim)loop);
+					this->m_Object.back().first = std::make_shared<GunanimData>(FileStream.SeekLineAndGetStr(), (EnumGunAnim)loop);
 					while (true) {
 						if (FileStream.ComeEof()) { break; }
 						auto ALL = FileStream.SeekLineAndGetStr();
-						this->m_Object.back().second.emplace_back(std::make_shared<AnimDatas::GunAnim>());
-						this->m_Object.back().second.back()->Set(ALL);
+						this->m_Object.back().second.emplace_back(std::make_shared<AnimDatas::GunAnim>(ALL));
 					}
 				}
 			}
@@ -388,7 +393,7 @@ namespace FPS_n2 {
 							nowframe = totalTime;
 						}
 					}
-					for (auto ani = data->second.begin(), e = data->second.end() - 1; ani != e; ++ani) {
+					for (auto ani = data->second.begin(), endi = data->second.end() - 1; ani != endi; ++ani) {
 						float Frame = static_cast<float>((*ani)->GetFrame());
 						if ((nowframe - Frame) <= 0.f) {
 							Finger = Lerp((*ani)->GetFingerPer(), (*(ani + 1))->GetFingerPer(), nowframe / Frame);

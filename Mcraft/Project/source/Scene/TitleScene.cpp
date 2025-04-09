@@ -18,7 +18,6 @@ namespace FPS_n2 {
 			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, BaseScreenWidth - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			// クレジット
 			this->m_CreditControl = std::make_unique<CreditControl>();
-			this->m_CreditControl->Init();
 			// 
 			/*
 			auto* SE = SoundPool::Instance();
@@ -97,7 +96,6 @@ namespace FPS_n2 {
 			SE->Get(SoundType::BGM, 0)->StopAll();
 			//*/
 			// 
-			this->m_CreditControl->Dispose();
 			this->m_CreditControl.reset();
 			// 
 			ButtonParts->Dispose();

@@ -7,7 +7,7 @@ namespace FPS_n2 {
 		class PerlinNoise {
 		private:
 			//メンバ変数
-			std::array<uint_fast8_t, 512> p{ 0 };
+			std::array<uint_fast8_t, 512> perlinNoise{ 0 };
 
 			constexpr float getFade(const float t_) const noexcept {
 				return t_ * t_ * t_ * (t_ * (t_ * 6 - 15) + 10);
@@ -35,20 +35,20 @@ namespace FPS_n2 {
 				const float u = this->getFade(x_);
 				const float v = this->getFade(y_);
 				const float w = this->getFade(z_);
-				const std::size_t a0 = static_cast<std::size_t>(this->p[x_int] + y_int);
-				const std::size_t a1 = static_cast<std::size_t>(this->p[a0] + z_int);
-				const std::size_t a2 = static_cast<std::size_t>(this->p[a0 + 1] + z_int);
-				const std::size_t b0 = static_cast<std::size_t>(this->p[x_int + 1] + y_int);
-				const std::size_t b1 = static_cast<std::size_t>(this->p[b0] + z_int);
-				const std::size_t b2 = static_cast<std::size_t>(this->p[b0 + 1] + z_int);
+				const std::size_t a0 = static_cast<std::size_t>(this->perlinNoise[x_int] + y_int);
+				const std::size_t a1 = static_cast<std::size_t>(this->perlinNoise[a0] + z_int);
+				const std::size_t a2 = static_cast<std::size_t>(this->perlinNoise[a0 + 1] + z_int);
+				const std::size_t b0 = static_cast<std::size_t>(this->perlinNoise[x_int + 1] + y_int);
+				const std::size_t b1 = static_cast<std::size_t>(this->perlinNoise[b0] + z_int);
+				const std::size_t b2 = static_cast<std::size_t>(this->perlinNoise[b0 + 1] + z_int);
 
 				return this->getLerp(w,
 					this->getLerp(v,
-						this->getLerp(u, this->getGrad(this->p[a1], x_, y_, z_), this->getGrad(this->p[b1], x_ - 1, y_, z_)),
-						this->getLerp(u, this->getGrad(this->p[a2], x_, y_ - 1, z_), this->getGrad(this->p[b2], x_ - 1, y_ - 1, z_))),
+						this->getLerp(u, this->getGrad(this->perlinNoise[a1], x_, y_, z_), this->getGrad(this->perlinNoise[b1], x_ - 1, y_, z_)),
+						this->getLerp(u, this->getGrad(this->perlinNoise[a2], x_, y_ - 1, z_), this->getGrad(this->perlinNoise[b2], x_ - 1, y_ - 1, z_))),
 					this->getLerp(v,
-						this->getLerp(u, this->getGrad(this->p[a1 + 1], x_, y_, z_ - 1), this->getGrad(this->p[b1 + 1], x_ - 1, y_, z_ - 1)),
-						this->getLerp(u, this->getGrad(this->p[a2 + 1], x_, y_ - 1, z_ - 1), this->getGrad(this->p[b2 + 1], x_ - 1, y_ - 1, z_ - 1))));
+						this->getLerp(u, this->getGrad(this->perlinNoise[a1 + 1], x_, y_, z_ - 1), this->getGrad(this->perlinNoise[b1 + 1], x_ - 1, y_, z_ - 1)),
+						this->getLerp(u, this->getGrad(this->perlinNoise[a2 + 1], x_, y_ - 1, z_ - 1), this->getGrad(this->perlinNoise[b2 + 1], x_ - 1, y_ - 1, z_ - 1))));
 			}
 			float setOctaveNoise(const std::size_t octaves_, float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) const noexcept {
 				float noise_value = 0.f;
@@ -71,11 +71,11 @@ namespace FPS_n2 {
 			//SEED値を設定する
 			void setSeed(const std::uint_fast32_t seed_) noexcept {
 				for (std::size_t loop = 0; loop < 256; ++loop) {
-					this->p[loop] = static_cast<uint_fast8_t>(loop);
+					this->perlinNoise[loop] = static_cast<uint_fast8_t>(loop);
 				}
-				std::shuffle(this->p.begin(), this->p.begin() + 256, std::default_random_engine(seed_));
+				std::shuffle(this->perlinNoise.begin(), this->perlinNoise.begin() + 256, std::default_random_engine(seed_));
 				for (std::size_t loop = 0; loop < 256; ++loop) {
-					this->p[256 + loop] = this->p[loop];
+					this->perlinNoise[256 + loop] = this->perlinNoise[loop];
 				}
 			}
 			//オクターブ無しノイズを取得する

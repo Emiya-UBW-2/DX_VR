@@ -2,7 +2,6 @@
 
 #include	"../../MainScene/Player/Player.hpp"
 #include	"../../MainScene/BackGround/BackGround.hpp"
-#include	"../../CommonScene/Object/GunsModify.hpp"
 #include	"Character.hpp"
 
 namespace FPS_n2 {
@@ -71,7 +70,7 @@ namespace FPS_n2 {
 		//
 		void				GunClass::SetShotStart(void) noexcept {
 			if (!this->m_ChamberAmmoData) { return; }
-			if (GetModSlot().GetModData()->GetIsThrowWeapon()) { return; }
+			if (GetGunPartsSlot()->GetGunPartsData()->GetIsThrowWeapon()) { return; }
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -80,7 +79,7 @@ namespace FPS_n2 {
 			auto MuzzleMat = GetFrameWorldMatParts(GunFrame::Muzzle);
 			//èeê∫
 			SE->Get(SoundType::SE, GetGunSoundSet(
-				(this->m_MuzzlePtr) ? (*this->m_MuzzlePtr)->GetModSlot().GetModData()->GetGunShootSound() : GetModSlot().GetModData()->GetGunShootSound()
+				(this->m_MuzzlePtr) ? (*this->m_MuzzlePtr)->GetGunPartsSlot()->GetGunPartsData()->GetGunShootSound() : GetGunPartsSlot()->GetGunPartsData()->GetGunShootSound()
 			))->Play3D(MuzzleMat.pos(), Scale3DRate * 50.f);
 			//ÉGÉtÉFÉNÉg
 			EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec() * -1.f, 0.35f, 2.f);
@@ -117,7 +116,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			if (IsSelGun) {
 				//ÉAÉjÉÅÅ[ÉVÉáÉì
-				if (GetNowGunAnimeID() != -1) {
+				if (GetNowGunAnimeID() != InvalidID) {
 					SetAnimOnce(GetNowGunAnimeID(), this->m_GunAnimeSpeed.at(static_cast<int>(GetGunAnime())));
 				}
 				switch (GetGunAnime()) {
@@ -192,9 +191,9 @@ namespace FPS_n2 {
 				default:
 					break;
 				}
-				for (auto& g : this->m_GunAnimeTime) {
-					int index = static_cast<int>(&g - &this->m_GunAnimeTime.front());
-					g += 60.f * DXLib_refParts->GetDeltaTime() * (this->m_GunAnimeSpeed.at(index));
+				for (auto& time : this->m_GunAnimeTime) {
+					int index = static_cast<int>(&time - &this->m_GunAnimeTime.front());
+					time += 60.f * DXLib_refParts->GetDeltaTime() * (this->m_GunAnimeSpeed.at(index));
 				}
 				//
 #if defined(DEBUG)
@@ -202,6 +201,13 @@ namespace FPS_n2 {
 				if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
 					printfDx("[%s]\n", (GetGunAnime() == GunAnimeID::Base) ? "Base" : GunAnimeIDName[static_cast<int>(GetGunAnime())]);
 					printfDx("[%f]\n", (GetGunAnime() == GunAnimeID::Base) ? 0.0f : GetNowAnimTimePerCache());
+					for (int loop = 0; loop < static_cast<int>(GunAnimeID::Max); ++loop) {
+						printfDx("[%s]", GunAnimeIDName[static_cast<int>(loop)]);
+						if (GetGunAnim((GunAnimeID)loop) != EnumGunAnim::Max) {
+							printfDx("[%s]", EnumGunAnimName[(int)GetGunAnim((GunAnimeID)loop)]);
+						}
+						printfDx("\n");
+					}
 				}
 #endif
 			}
@@ -498,22 +504,22 @@ namespace FPS_n2 {
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 
-			for (const auto& g : this->m_Grenade.GetPtrList()) {
-				if (g->PopIsEndFall()) {
-					for (int loop = 0, max = GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPellet(); loop < max; ++loop) {
+			for (const auto& grenade : this->m_Grenade.GetPtrList()) {
+				if (grenade->PopIsEndFall()) {
+					for (int loop = 0, max = GetGunPartsSlot()->GetGunPartsData()->GetAmmoSpecMagTop()->GetPellet(); loop < max; ++loop) {
 						auto LastAmmo = std::make_shared<AmmoClass>();
 						ObjMngr->AddObject(LastAmmo);
 						LastAmmo->Init();
 						//â~é¸è„Ç…Ç‹Ç´éUÇÁÇ∑
 						auto mat = Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-GetRand(30))) * Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180)));
-						LastAmmo->Put(GetModSlot().GetModData()->GetAmmoSpecMagTop(), g->GetMove().GetPos() + mat.zvec() * (0.5f * Scale3DRate) + Vector3DX::up() * (0.5f * Scale3DRate), mat.zvec(), GetMyUserPlayerID());
+						LastAmmo->Put(GetGunPartsSlot()->GetGunPartsData()->GetAmmoSpecMagTop(), grenade->GetMove().GetPos() + mat.zvec() * (0.5f * Scale3DRate) + Vector3DX::up() * (0.5f * Scale3DRate), mat.zvec(), GetMyUserPlayerID());
 					}
 
 					//îjâÛ
 					int								xput = 6;
 					int								yput = 8;
 					int								zput = 6;
-					auto Put = BackGround->GetPoint(g->GetMove().GetPos());
+					auto Put = BackGround->GetPoint(grenade->GetMove().GetPos());
 					for (int xp = -xput / 2; xp < xput / 2; ++xp) {
 						for (int yp = 0; yp < yput; ++yp) {
 							for (int zp = -zput / 2; zp < zput / 2; ++zp) {
@@ -530,64 +536,64 @@ namespace FPS_n2 {
 		}
 		//
 		void				GunClass::Init_Sub(void) noexcept {
-			SetModSlot().Init(GetFilePath());
-			GunsModify::Instance()->CreateSelData(shared_from_this(), false);
+			this->m_GunPartsSlotControl = std::make_unique<GunPartsSlotControl>(GetFilePath());
+			this->m_GunsModify = std::make_unique<GunsModify>(shared_from_this(), false);
 			{
-				std::vector<const SharedObj*> PartsList;
-				GetModSlot().CalcAnyBySlot([&](const SharedObj& ptr) { if (ptr) { PartsList.emplace_back(&ptr); } });
+				std::vector<const SharedGunParts*> PartsList;
+				GetGunPartsSlot()->CalcAnyBySlot([&](const SharedGunParts& ptr) { if (ptr) { PartsList.emplace_back(&ptr); } });
 				this->m_SightPtr = nullptr;
 				this->m_MuzzlePtr = nullptr;
 				this->m_UpperPtr = nullptr;
 				this->m_LowerPtr = nullptr;
 				this->m_MagazinePtr = nullptr;
 
-				for (auto& p : PartsList) {
-					ObjType ObjectType = static_cast<ObjType>((*p)->GetobjType());
+				for (auto& parts : PartsList) {
+					ObjType ObjectType = static_cast<ObjType>((*parts)->GetobjType());
 					if (ObjectType == ObjType::Sight) {
-						this->m_SightPtr = &((std::shared_ptr<SightClass>&)(*p));
+						this->m_SightPtr = &((std::shared_ptr<SightClass>&)(*parts));
 					}
 					if (ObjectType == ObjType::MuzzleAdapter) {
-						this->m_MuzzlePtr = &((std::shared_ptr<MuzzleClass>&)(*p));
+						this->m_MuzzlePtr = &((std::shared_ptr<MuzzleClass>&)(*parts));
 					}
 					if (ObjectType == ObjType::Upper) {
-						this->m_UpperPtr = &((std::shared_ptr<UpperClass>&)(*p));
+						this->m_UpperPtr = &((std::shared_ptr<UpperClass>&)(*parts));
 					}
 					if (ObjectType == ObjType::Lower) {
-						this->m_LowerPtr = &((std::shared_ptr<LowerClass>&)(*p));
+						this->m_LowerPtr = &((std::shared_ptr<LowerClass>&)(*parts));
 					}
 					if (ObjectType == ObjType::Magazine) {
-						this->m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(*p));
+						this->m_MagazinePtr = &((std::shared_ptr<MagazineClass>&)(*parts));
 					}
 				}
 
 				this->m_ShootRate_Diff = 0;
 				this->m_Recoil_Diff = 0;
-				for (auto& p : PartsList) {
+				for (auto& parts : PartsList) {
 					//ê´î\é¸ÇË
-					auto& d = ((std::shared_ptr<ModClass>&)(*p))->GetModSlot().GetModData();
-					this->m_ShootRate_Diff += d->GetShootRate_Diff();
-					this->m_Recoil_Diff += d->GetRecoil_Diff();
+					auto& data = (*parts)->GetGunPartsSlot()->GetGunPartsData();
+					this->m_ShootRate_Diff += data->GetShootRate_Diff();
+					this->m_Recoil_Diff += data->GetRecoil_Diff();
 				}
 				PartsList.clear();
 			}
 			if (this->m_MagazinePtr) {
 				this->m_MagFall.Init((*this->m_MagazinePtr)->GetFilePath(), 1);
-				this->m_CartFall.Init((*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPath(), 4);	//ëïìUÇµÇΩÉ}ÉKÉWÉìÇÃíeÇ…çáÇÌÇπÇƒñÚ‰∞ê∂ê¨
+				this->m_CartFall.Init((*this->m_MagazinePtr)->GetGunPartsSlot()->GetGunPartsData()->GetAmmoSpecMagTop()->GetPath(), 4);	//ëïìUÇµÇΩÉ}ÉKÉWÉìÇÃíeÇ…çáÇÌÇπÇƒñÚ‰∞ê∂ê¨
 				auto* ObjMngr = ObjectManager::Instance();
 				this->m_AmmoInChamberClass = std::make_shared<AmmoInChamberClass>();
 				ObjMngr->AddObject(this->m_AmmoInChamberClass);
-				ObjMngr->LoadModel(this->m_AmmoInChamberClass, this->m_AmmoInChamberClass, (*this->m_MagazinePtr)->GetModSlot().GetModData()->GetAmmoSpecMagTop()->GetPath().c_str());
+				ObjMngr->LoadModel(this->m_AmmoInChamberClass, this->m_AmmoInChamberClass, (*this->m_MagazinePtr)->GetGunPartsSlot()->GetGunPartsData()->GetAmmoSpecMagTop()->GetPath().c_str());
 				this->m_AmmoInChamberClass->Init();
 
 				(*this->m_MagazinePtr)->SetAmmoActive(GetReloadType()== RELOADTYPE::MAG);
 			}
-			if (GetModSlot().GetModData()->GetIsThrowWeapon()) {
+			if (GetGunPartsSlot()->GetGunPartsData()->GetIsThrowWeapon()) {
 				this->m_Grenade.Init(GetFilePath(), 1);
 			}
-			for (auto& g : this->m_GunAnimeSpeed) {
-				g = 1.f;
+			for (auto& speed : this->m_GunAnimeSpeed) {
+				speed = 1.f;
 			}
-			this->m_GunAnimeSpeed.at(static_cast<int>(GunAnimeID::Shot)) = static_cast<float>(GetModSlot().GetModData()->GetShotRate()) / 60.f / 10.f;
+			this->m_GunAnimeSpeed.at(static_cast<int>(GunAnimeID::Shot)) = static_cast<float>(GetGunPartsSlot()->GetGunPartsData()->GetShotRate()) / 60.f / 10.f;
 			InitGunAnimePer();
 			ObjectBaseClass::SetMinAABB(Vector3DX::vget(-0.5f, -0.5f, -0.5f) * Scale3DRate);
 			ObjectBaseClass::SetMaxAABB(Vector3DX::vget(0.5f, 0.5f, 0.5f) * Scale3DRate);
@@ -606,8 +612,8 @@ namespace FPS_n2 {
 			}
 			//
 			for (int loop = 0; loop < static_cast<int>(GunAnimeID::ChoiceOnceMax); ++loop) {
-				int ID = GetModSlot().GetModData()->GetAnimSelectList().at(loop);
-				if (ID != -1) {
+				int ID = GetGunPartsSlot()->GetGunPartsData()->GetAnimSelectList().at(loop);
+				if (ID != InvalidID) {
 					if (GetGunAnime() == (GunAnimeID)loop) {
 						SetObj().SetAnim(ID).SetPer(1.f);
 					}
@@ -617,8 +623,8 @@ namespace FPS_n2 {
 				}
 			}
 			for (int loop = static_cast<int>(GunAnimeID::ChoiceOnceMax); loop < static_cast<int>(GunAnimeID::Max); ++loop) {
-				int ID = GetModSlot().GetModData()->GetAnimSelectList().at(loop);
-				if (ID != -1) {
+				int ID = GetGunPartsSlot()->GetGunPartsData()->GetAnimSelectList().at(loop);
+				if (ID != InvalidID) {
 					switch ((GunAnimeID)loop) {
 					case GunAnimeID::Hammer:
 						SetObj().SetAnim(ID).SetPer(std::clamp(GetObj().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * (GetShotSwitch() ? -10.f : 10.f), 0.f, 1.f));
@@ -757,6 +763,17 @@ namespace FPS_n2 {
 				this->m_MuzzleSmokeControl.DrawMuzzleSmoke();
 			}
 			ObjectBaseClass::Draw(isDrawSemiTrans, Range);
+		}
+		void GunClass::Dispose_Sub(void) noexcept {
+			this->m_GunsModify.reset();
+			this->m_GunPartsSlotControl.reset();
+			this->m_MagFall.Dispose();
+			this->m_CartFall.Dispose();
+			this->m_Grenade.Dispose();
+
+			auto* ObjMngr = ObjectManager::Instance();
+			ObjMngr->DelObj((SharedObj*)&this->m_AmmoInChamberClass);
+			this->m_AmmoInChamberClass.reset();
 		}
 	};
 };

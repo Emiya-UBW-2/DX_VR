@@ -45,8 +45,8 @@ namespace FPS_n2 {
 		//
 		class AutoAimControl {
 		private:
-			int													m_AutoAim{ -1 };
-			int													m_AutoAimPoint{ -1 };
+			int													m_AutoAim{ InvalidID };
+			int													m_AutoAimPoint{ InvalidID };
 			float												m_AutoAimTimer{ 0.f };
 			Vector3DX											m_AutoAimVec{};
 			bool												m_AutoAimActive{};
@@ -75,11 +75,11 @@ namespace FPS_n2 {
 			void		Init(const std::string& pPath, int count) {
 				auto* ObjMngr = ObjectManager::Instance();
 				this->m_Ptr.resize(count);
-				for (auto& c : this->m_Ptr) {
-					c = std::make_shared<FallObjClass>();
-					ObjMngr->AddObject(c);
-					ObjMngr->LoadModel(c, c, pPath.c_str());
-					c->Init();
+				for (auto& ptr : this->m_Ptr) {
+					ptr = std::make_shared<FallObjClass>();
+					ObjMngr->AddObject(ptr);
+					ObjMngr->LoadModel(ptr, ptr, pPath.c_str());
+					ptr->Init();
 				}
 			}
 			void		SetFall(const Vector3DX& pPos, const Matrix3x3DX& pMat, const Vector3DX& pVec, float time, FallObjectType Type) {
@@ -88,9 +88,9 @@ namespace FPS_n2 {
 			}
 			void		Dispose(void) noexcept {
 				auto* ObjMngr = ObjectManager::Instance();
-				for (auto& c : this->m_Ptr) {
-					ObjMngr->DelObj((SharedObj*)&c);
-					c.reset();
+				for (auto& ptr : this->m_Ptr) {
+					ObjMngr->DelObj((SharedObj*)&ptr);
+					ptr.reset();
 				}
 				this->m_Ptr.clear();
 			}
@@ -105,17 +105,17 @@ namespace FPS_n2 {
 			void			AddMuzzleSmokePower(void) noexcept { this->m_LinePer = std::clamp(this->m_LinePer + 0.1f, 0.f, 1.f); }
 		public:
 			void		InitMuzzleSmoke(const Vector3DX& pPos) {
-				for (auto& l : this->m_Line) {
-					l.first = pPos;
-					l.second = 1.f;
+				for (auto& line : this->m_Line) {
+					line.first = pPos;
+					line.second = 1.f;
 				}
 			}
 			void		ExecuteMuzzleSmoke(const Vector3DX& pPos, bool IsAddSmoke) {
 				auto* DXLib_refParts = DXLib_ref::Instance();
-				for (auto& l : this->m_Line) {
-					float Per = 0.1f * l.second;
-					l.first += Vector3DX::vget(GetRandf(Per), 0.8f + GetRandf(Per), GetRandf(Per)) * Scale3DRate * DXLib_refParts->GetDeltaTime();
-					Easing(&l.second, 0.f, 0.8f, EasingType::OutExpo);
+				for (auto& line : this->m_Line) {
+					float Per = 0.1f * line.second;
+					line.first += Vector3DX::vget(GetRandf(Per), 0.8f + GetRandf(Per), GetRandf(Per)) * Scale3DRate * DXLib_refParts->GetDeltaTime();
+					Easing(&line.second, 0.f, 0.8f, EasingType::OutExpo);
 				}
 				this->m_Line[this->m_LineSel].first = pPos;
 				this->m_Line[this->m_LineSel].second = IsAddSmoke ? 1.f : 0.f;
@@ -149,30 +149,36 @@ namespace FPS_n2 {
 			}
 		};
 		//
-		class ModSlotControl {
+		class GunPartsClass;
+
+		using SharedGunParts = std::shared_ptr<GunPartsClass>;
+
+		class GunPartsSlotControl {
 		private:
-			std::array<SharedObj, static_cast<int>(GunSlot::Max)>	m_Parts_Ptr{ nullptr };
-			const std::shared_ptr<ModDataClass>*					m_ModDataClass{ nullptr };
+			std::array<SharedGunParts, static_cast<int>(GunSlot::Max)>	m_Parts_Ptr{ nullptr };
+			const std::shared_ptr<GunPartsDataClass>*					m_GunPartsDataClass{ nullptr };
 		public:
-			const auto& GetModData(void) const noexcept { return *this->m_ModDataClass; }
-		public:
-			void		Init(const std::string& FilePath) noexcept { this->m_ModDataClass = ModDataManager::Instance()->AddData(FilePath); }
-			void		Dispose(void) noexcept {
-				for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
-					RemoveMod((GunSlot)loop);
-				}
-				this->m_ModDataClass = nullptr;
+			GunPartsSlotControl(const std::string& FilePath) noexcept {
+				this->m_GunPartsDataClass = GunPartsDataManager::Instance()->AddData(FilePath);
 			}
-		public:
-			void		SetMod(GunSlot gunSlot, int ID, const SharedObj& BaseModel) noexcept;
-			void		RemoveMod(GunSlot gunSlot) noexcept;
+			~GunPartsSlotControl(void) noexcept {
+				for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
+					RemoveGunParts((GunSlot)loop);
+				}
+				this->m_GunPartsDataClass = nullptr;
+			}
 		private:
-			const bool	IsEffectParts(const SharedObj& SlotParts, GunFrame frame) const noexcept;
-			void		AddMod(GunSlot gunSlot, const char* ItemPath, const SharedObj& NewObj, const SharedObj& BaseModel) noexcept;
+			const bool	IsEffectParts(const SharedGunParts& SlotParts, GunFrame frame) const noexcept;
+			void		AddGunParts(GunSlot gunSlot, const char* FilePath, const SharedGunParts& NewObj, const SharedObj& BaseModel) noexcept;
+			auto&		SetPartsPtr(GunSlot gunSlot) noexcept { return this->m_Parts_Ptr[static_cast<int>(gunSlot)]; }
 		public:
-			void		CalcAnyBySlot(const std::function<void(const SharedObj&)>& Doing) const noexcept;
+			void		AttachGunParts(GunSlot gunSlot, int ID, const SharedObj& BaseModel) noexcept;
+			void		RemoveGunParts(GunSlot gunSlot) noexcept;
+		public:
+			const auto& GetGunPartsData(void) const noexcept { return *this->m_GunPartsDataClass; }
 			const auto& GetPartsPtr(GunSlot gunSlot) const noexcept { return this->m_Parts_Ptr[static_cast<int>(gunSlot)]; }
-			const SharedObj* HasFrameBySlot(GunFrame frame) const noexcept;
+			void		CalcAnyBySlot(const std::function<void(const SharedGunParts&)>& Doing) const noexcept;
+			const bool	GetFramePartsMat(GunFrame frame, Matrix4x4DX* pOutMat) const noexcept;
 			void		UpdatePartsAnim(const MV1& pParent);
 			void		UpdatePartsMove(const Matrix4x4DX& pMat, GunSlot gunSlot);
 		};

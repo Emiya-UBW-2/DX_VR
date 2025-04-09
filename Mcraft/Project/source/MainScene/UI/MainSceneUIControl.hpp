@@ -15,9 +15,9 @@ namespace FPS_n2 {
 		public:
 			UIClass(void) noexcept {}
 			UIClass(const UIClass&) = delete;
-			UIClass(UIClass&& o) = delete;
+			UIClass(UIClass&&) = delete;
 			UIClass& operator=(const UIClass&) = delete;
-			UIClass& operator=(UIClass&& o) = delete;
+			UIClass& operator=(UIClass&&) = delete;
 
 			virtual ~UIClass(void) noexcept {}
 		public:
@@ -34,8 +34,8 @@ namespace FPS_n2 {
 				CanLookTarget = false;
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 					if (loop == PlayerMngr->GetWatchPlayer()) { continue; }
-					auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
-					CanLookTarget |= c->IsAlive() && c->GetCanLookByPlayer();
+					auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+					CanLookTarget |= chara->IsAlive() && chara->GetCanLookByPlayer();
 				}
 				Easing(&LookPer, CanLookTarget ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 				bool IsDrawAimUI = false;
@@ -68,14 +68,14 @@ namespace FPS_n2 {
 
 						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 							if (loop == PlayerMngr->GetWatchPlayer()) { continue; }
-							auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
-							if (!c->IsAlive() || !c->GetCanLookByPlayer()) { continue; }
-							if (c->GetIsActiveCameraPosToPlayer()) {
+							auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+							if (!chara->IsAlive() || !chara->GetCanLookByPlayer()) { continue; }
+							if (chara->GetIsActiveCameraPosToPlayer()) {
 								if (ViewChara->GetGunPtrNow() && ViewChara->GetGunPtrNow()->GetAutoAimActive() && loop == ViewChara->GetGunPtrNow()->GetAutoAimID()) {
-									DrawCtrls->SetDrawCircle(WindowSystem::DrawLayer::Normal, static_cast<int>(c->GetCameraPosToPlayer().XScreenPos()), static_cast<int>(c->GetCameraPosToPlayer().YScreenPos()), static_cast<int>(2400 / std::max(0.1f, c->GetLengthToPlayer()) + Lerp(100, 0, LookPer)), Red, false, 5);
+									DrawCtrls->SetDrawCircle(WindowSystem::DrawLayer::Normal, static_cast<int>(chara->GetCameraPosToPlayer().XScreenPos()), static_cast<int>(chara->GetCameraPosToPlayer().YScreenPos()), static_cast<int>(2400 / std::max(0.1f, chara->GetLengthToPlayer()) + Lerp(100, 0, LookPer)), Red, false, 5);
 								}
 								else {
-									DrawCtrls->SetDrawCircle(WindowSystem::DrawLayer::Normal, static_cast<int>(c->GetCameraPosToPlayer().XScreenPos()), static_cast<int>(c->GetCameraPosToPlayer().YScreenPos()), static_cast<int>(2400 / std::max(0.1f, c->GetLengthToPlayer()) + Lerp(100, 0, LookPer)), Red50, false, 2);
+									DrawCtrls->SetDrawCircle(WindowSystem::DrawLayer::Normal, static_cast<int>(chara->GetCameraPosToPlayer().XScreenPos()), static_cast<int>(chara->GetCameraPosToPlayer().YScreenPos()), static_cast<int>(2400 / std::max(0.1f, chara->GetLengthToPlayer()) + Lerp(100, 0, LookPer)), Red50, false, 2);
 								}
 							}
 						}
@@ -99,9 +99,9 @@ namespace FPS_n2 {
 							{
 								for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 									if (loop == PlayerMngr->GetWatchPlayer()) { continue; }
-									auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
-									if (!c->IsAlive() || !c->GetCanLookByPlayer()) { continue; }
-									Vector3DX Vec2 = (c->GetEyePositionCache() - StartPos); Vec2.y = 0.f; Vec2 = Vec2.normalized();
+									auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+									if (!chara->IsAlive() || !chara->GetCanLookByPlayer()) { continue; }
+									Vector3DX Vec2 = (chara->GetEyePositionCache() - StartPos); Vec2.y = 0.f; Vec2 = Vec2.normalized();
 									float Angle = DX_PI_F + Vector3DX::Angle(Vec1, Vec2) * (Vector3DX::Cross(Vec1, Vec2).y > 0.f ? 1.f : -1.f);
 
 									xp1 = RetX - static_cast<int>(Scale2 * 1.5f * sin(Angle + deg2rad(5)));

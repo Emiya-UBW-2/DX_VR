@@ -15,15 +15,15 @@ namespace FPS_n2 {
 			if (isActive) {
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 					if (loop == MyPlayerID) { continue; }
-					auto& c = PlayerMngr->GetPlayer(loop)->GetChara();
-					if (!c->IsAlive()) { continue; }
-					if (!c->GetCanLookByPlayer()) { continue; }
-					int pos = -1;
+					auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+					if (!chara->IsAlive()) { continue; }
+					if (!chara->GetCanLookByPlayer()) { continue; }
+					int pos = InvalidID;
 					float CosMax = -1.f;
-					for (const auto& h : c->GetHitBoxList()) {
-						auto EndPost = h.GetPos();
+					for (const auto& hitbox : chara->GetHitBoxList()) {
+						auto EndPost = hitbox.GetPos();
 						if (BackGround->CheckLinetoMap(EyePos, &EndPost)) { continue; }
-						switch (h.GetColType()) {
+						switch (hitbox.GetColType()) {
 						case FPS_n2::Sceneclass::HitType::Head:
 						case FPS_n2::Sceneclass::HitType::Body:
 							break;
@@ -31,15 +31,15 @@ namespace FPS_n2 {
 							continue;
 							break;
 						}
-						float Cos = Vector3DX::Dot(AimVector, (h.GetPos() - EyePos).normalized());
+						float Cos = Vector3DX::Dot(AimVector, (hitbox.GetPos() - EyePos).normalized());
 						if (Cos > cos(Radian)) {
 							if (CosMax < Cos) {
 								CosMax = Cos;
-								pos = static_cast<int>(&h - &c->GetHitBoxList().front());
+								pos = static_cast<int>(&hitbox - &chara->GetHitBoxList().front());
 							}
 						}
 					}
-					if (pos != -1) {
+					if (pos != InvalidID) {
 						this->m_AutoAimTimer = 1.f;
 						this->m_AutoAim = loop;
 						this->m_AutoAimPoint = pos;
@@ -51,18 +51,18 @@ namespace FPS_n2 {
 			auto prev = this->m_AutoAimTimer;
 			this->m_AutoAimTimer = std::max(this->m_AutoAimTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 			if (prev > 0.f && this->m_AutoAimTimer == 0.f) {
-				this->m_AutoAim = -1;
+				this->m_AutoAim = InvalidID;
 			}
-			if (this->m_AutoAim != -1) {
+			if (this->m_AutoAim != InvalidID) {
 				auto& TargetChara = PlayerMngr->GetPlayer(this->m_AutoAim)->GetChara();
 				if (!TargetChara->IsAlive()) {
-					this->m_AutoAim = -1;
+					this->m_AutoAim = InvalidID;
 				}
 			}
-			this->m_AutoAimActive = (isActive && this->m_AutoAim != -1);
+			this->m_AutoAimActive = (isActive && this->m_AutoAim != InvalidID);
 			Easing(&this->m_AutoAimPer, this->m_AutoAimActive ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 
-			if (this->m_AutoAim != -1) {
+			if (this->m_AutoAim != InvalidID) {
 				auto& TargetChara = PlayerMngr->GetPlayer(this->m_AutoAim)->GetChara();
 				Easing(&this->m_AutoAimVec, (TargetChara->GetHitBoxList().at(this->m_AutoAimPoint).GetPos() - EyePos).normalized(), 0.8f, EasingType::OutExpo);
 			}
@@ -71,7 +71,7 @@ namespace FPS_n2 {
 			}
 		}
 		//
-		const bool	ModSlotControl::IsEffectParts(const SharedObj& SlotParts, GunFrame frame) const noexcept {
+		const bool	GunPartsSlotControl::IsEffectParts(const SharedGunParts& SlotParts, GunFrame frame) const noexcept {
 			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 				GunSlot gunSlot = static_cast<GunSlot>(loop);
 				if (SlotParts == GetPartsPtr(gunSlot)) {
@@ -154,7 +154,7 @@ namespace FPS_n2 {
 						break;
 					}
 					if (HasActiveFrame) {
-						if (((const std::shared_ptr<ModClass>&)GetPartsPtr(gunSlot))->HaveFrame(static_cast<int>(frame))) {
+						if (GetPartsPtr(gunSlot)->HaveFrame(static_cast<int>(frame))) {
 							return true;
 						}
 					}
@@ -163,48 +163,50 @@ namespace FPS_n2 {
 			}
 			return false;
 		}
-		void		ModSlotControl::CalcAnyBySlot(const std::function<void(const SharedObj&)>& Doing) const noexcept {
+		void		GunPartsSlotControl::CalcAnyBySlot(const std::function<void(const SharedGunParts&)>& Doing) const noexcept {
 			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
-				GunSlot gunSlot = static_cast<GunSlot>(loop);
-				Doing(GetPartsPtr(gunSlot));
+				Doing(GetPartsPtr(static_cast<GunSlot>(loop)));
 			}
 			//孫があればそちらも
 			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
-				GunSlot gunSlot = static_cast<GunSlot>(loop);
-				if (GetPartsPtr(gunSlot)) {
-					((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop])->SetModSlot().CalcAnyBySlot(Doing);
+				if (GetPartsPtr(static_cast<GunSlot>(loop))) {
+					GetPartsPtr(static_cast<GunSlot>(loop))->GetGunPartsSlot()->CalcAnyBySlot(Doing);
 				}
 			}
 		}
 		//
-		const SharedObj* ModSlotControl::HasFrameBySlot(GunFrame frame) const noexcept {
-			const SharedObj* pRet = nullptr;
-			CalcAnyBySlot([&](const SharedObj& ptr) { if (IsEffectParts(ptr, frame)) { pRet = &ptr; } });
-			return pRet;
+		const bool GunPartsSlotControl::GetFramePartsMat(GunFrame frame, Matrix4x4DX* pOutMat) const noexcept {
+			const SharedGunParts* pRet = nullptr;
+			CalcAnyBySlot([&](const SharedGunParts& ptr) { if (IsEffectParts(ptr, frame)) { pRet = &ptr; } });
+			if (!pRet) {
+				return false;
+			}
+			*pOutMat = (*pRet)->GetFramePartsMat(frame);
+			return true;
 		}
 		//
-		void ModSlotControl::AddMod(GunSlot gunSlot, const char* ItemPath, const SharedObj& NewObj, const SharedObj& BaseModel) noexcept {
-			this->m_Parts_Ptr[static_cast<int>(gunSlot)] = NewObj;
-
+		void GunPartsSlotControl::AddGunParts(GunSlot gunSlot, const char* FilePath, const SharedGunParts& NewObj, const SharedObj& BaseModel) noexcept {
+			SetPartsPtr(gunSlot) = NewObj;
 			auto* ObjMngr = ObjectManager::Instance();
 			ObjMngr->AddObject(NewObj);
-			ObjMngr->LoadModel(NewObj, BaseModel, ItemPath);
+			ObjMngr->LoadModel(NewObj, BaseModel, FilePath);
 			NewObj->Init();
 		}
-		void		ModSlotControl::RemoveMod(GunSlot gunSlot) noexcept {
+		void		GunPartsSlotControl::RemoveGunParts(GunSlot gunSlot) noexcept {
 			if (!GetPartsPtr(gunSlot)) { return; }
 			auto* ObjMngr = ObjectManager::Instance();
-			ObjMngr->DelObj(&this->m_Parts_Ptr[static_cast<int>(gunSlot)]);
-			this->m_Parts_Ptr[static_cast<int>(gunSlot)].reset();
+			ObjMngr->DelObj((SharedObj*)&SetPartsPtr(gunSlot));
+			SetPartsPtr(gunSlot).reset();
 		}
 		//
-		void		ModSlotControl::UpdatePartsAnim(const MV1& pParent) {
+		void		GunPartsSlotControl::UpdatePartsAnim(const MV1& pParent) {
+			return;//現状のカスタム範囲では不要
 			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 				GunSlot gunSlot = static_cast<GunSlot>(loop);
-				if (GetPartsPtr(gunSlot) && false) {//現状のカスタム範囲では不要
+				if (GetPartsPtr(gunSlot)) {
 					//1のフレーム移動量を無視する
-					auto& Obj = ((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[loop]);
-					for (int loop2 = 0; loop2 < Obj->GetObj().GetAnimNum(); ++loop2) {
+					auto& Obj = SetPartsPtr(gunSlot);
+					for (int loop2 = 0, max = static_cast<int>(Obj->GetObj().GetAnimNum()); loop2 < max; ++loop2) {
 						Obj->SetObj().SetAnim(loop2).SetPer(pParent.GetAnim(loop2).GetPer());
 						Obj->SetObj().SetAnim(loop2).SetTime(pParent.GetAnim(loop2).GetTime());
 					}
@@ -212,38 +214,40 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		ModSlotControl::UpdatePartsMove(const Matrix4x4DX& pMat, GunSlot gunSlot) {
+		void		GunPartsSlotControl::UpdatePartsMove(const Matrix4x4DX& pMat, GunSlot gunSlot) {
 			if (!GetPartsPtr(gunSlot)) { return; }
-			((std::shared_ptr<ModClass>&)this->m_Parts_Ptr[static_cast<int>(gunSlot)])->SetModMatrix(Matrix3x3DX::Get33DX(pMat), pMat.pos());
+			SetPartsPtr(gunSlot)->SetGunPartsMatrix(Matrix3x3DX::Get33DX(pMat), pMat.pos());
 		}
-		void ModSlotControl::SetMod(GunSlot gunSlot, int ID, const SharedObj& BaseModel) noexcept {
-			RemoveMod(gunSlot);
-			if (GetPartsPtr(gunSlot) != nullptr) { return; }
-			auto* Slots = GetModData()->GetPartsSlot(gunSlot);
+		void GunPartsSlotControl::AttachGunParts(GunSlot gunSlot, int ID, const SharedObj& BaseModel) noexcept {
+			auto* Slots = GetGunPartsData()->GetPartsSlot(gunSlot);
 			if (!Slots) { return; }
-			auto& Data = *ModDataManager::Instance()->GetData(Slots->m_ItemsUniqueID.at(ID));
+			//パーツがある場合は削除
+			if (GetPartsPtr(gunSlot)) {
+				RemoveGunParts(gunSlot);
+			}
+			const auto* FilePath = (*GunPartsDataManager::Instance()->GetData(Slots->m_ItemsUniqueID.at(ID)))->GetPath().c_str();
 
 			switch (gunSlot) {
 			case GunSlot::Magazine:
-				AddMod(gunSlot, Data->GetPath().c_str(), std::make_shared<MagazineClass>(), BaseModel);
+				AddGunParts(gunSlot, FilePath, std::make_shared<MagazineClass>(), BaseModel);
 				break;
 			case GunSlot::Lower:
-				AddMod(gunSlot, Data->GetPath().c_str(), std::make_shared<LowerClass>(), BaseModel);
+				AddGunParts(gunSlot, FilePath, std::make_shared<LowerClass>(), BaseModel);
 				break;
 			case GunSlot::Upper:
-				AddMod(gunSlot, Data->GetPath().c_str(), std::make_shared<UpperClass>(), BaseModel);
+				AddGunParts(gunSlot, FilePath, std::make_shared<UpperClass>(), BaseModel);
 				break;
 			case GunSlot::Barrel:
-				AddMod(gunSlot, Data->GetPath().c_str(), std::make_shared<BarrelClass>(), BaseModel);
+				AddGunParts(gunSlot, FilePath, std::make_shared<BarrelClass>(), BaseModel);
 				break;
 			case GunSlot::UnderRail:
-				AddMod(gunSlot, Data->GetPath().c_str(), std::make_shared<UnderRailClass>(), BaseModel);
+				AddGunParts(gunSlot, FilePath, std::make_shared<UnderRailClass>(), BaseModel);
 				break;
 			case GunSlot::Sight:
-				AddMod(gunSlot, Data->GetPath().c_str(), std::make_shared<SightClass>(), BaseModel);
+				AddGunParts(gunSlot, FilePath, std::make_shared<SightClass>(), BaseModel);
 				break;
 			case GunSlot::MuzzleAdapter:
-				AddMod(gunSlot, Data->GetPath().c_str(), std::make_shared<MuzzleClass>(), BaseModel);
+				AddGunParts(gunSlot, FilePath, std::make_shared<MuzzleClass>(), BaseModel);
 				break;
 			default:
 				break;

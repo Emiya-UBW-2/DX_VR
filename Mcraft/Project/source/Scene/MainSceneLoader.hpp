@@ -8,9 +8,9 @@ namespace FPS_n2 {
 		public:
 			LoadScene(void) noexcept {}
 			LoadScene(const LoadScene&) = delete;
-			LoadScene(LoadScene&& o) = delete;
+			LoadScene(LoadScene&&) = delete;
 			LoadScene& operator=(const LoadScene&) = delete;
-			LoadScene& operator=(LoadScene&& o) = delete;
+			LoadScene& operator=(LoadScene&&) = delete;
 
 			virtual ~LoadScene(void) noexcept {}
 		public:
