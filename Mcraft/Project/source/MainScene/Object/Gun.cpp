@@ -201,13 +201,6 @@ namespace FPS_n2 {
 				if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
 					printfDx("[%s]\n", (GetGunAnime() == GunAnimeID::Base) ? "Base" : GunAnimeIDName[static_cast<int>(GetGunAnime())]);
 					printfDx("[%f]\n", (GetGunAnime() == GunAnimeID::Base) ? 0.0f : GetNowAnimTimePerCache());
-					for (int loop = 0; loop < static_cast<int>(GunAnimeID::Max); ++loop) {
-						printfDx("[%s]", GunAnimeIDName[static_cast<int>(loop)]);
-						if (GetGunAnim((GunAnimeID)loop) != EnumGunAnim::Max) {
-							printfDx("[%s]", EnumGunAnimName[(int)GetGunAnim((GunAnimeID)loop)]);
-						}
-						printfDx("\n");
-					}
 				}
 #endif
 			}
