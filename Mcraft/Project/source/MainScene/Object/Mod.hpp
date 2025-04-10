@@ -8,6 +8,8 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class GunPartsClass : public ObjectBaseClass {
 			std::unique_ptr<GunPartsSlotControl>								m_GunPartsSlotControl{};
+
+			std::vector<int>													m_IsMeshDraw{};
 		public:
 			GunPartsClass(void) noexcept {}
 			~GunPartsClass(void) noexcept {}
@@ -15,6 +17,10 @@ namespace FPS_n2 {
 			const std::unique_ptr<GunPartsSlotControl>& GetGunPartsSlot(void) const noexcept { return this->m_GunPartsSlotControl; }
 			auto					GetFrameWorldMat(GunFrame frame) const noexcept { return GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
 			const Matrix4x4DX		GetFramePartsMat(GunFrame frame) const noexcept;
+
+			void						SetIsDrawMesh(int meshID, bool IsDraw) noexcept {
+				m_IsMeshDraw.at(meshID) = IsDraw ? TRUE : FALSE;
+			}
 		public:
 			void			Init_Sub(void) noexcept override;
 			void			FirstExecute(void) noexcept override { FirstExecute_GunParts(); }
@@ -25,7 +31,23 @@ namespace FPS_n2 {
 				auto* CameraParts = Camera3D::Instance();
 				if ((GetMove().GetPos() - CameraParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale3DRate) { return; }
 
-				GetObj().DrawModel();
+				bool AllDraw = true;
+				for (auto& isdraw : this->m_IsMeshDraw) {
+					if (isdraw != TRUE) {
+						AllDraw = false;
+					}
+				}
+				if (AllDraw) {
+					GetObj().DrawModel();
+				}
+				else {
+					for (auto& isdraw : this->m_IsMeshDraw) {
+						if (isdraw == TRUE) {
+							int index = static_cast<int>(&isdraw - &this->m_IsMeshDraw.front());
+							GetObj().DrawMesh(index);
+						}
+					}
+				}
 			}
 			void			Draw(bool isDrawSemiTrans, int Range) noexcept override {
 				if (!IsActive()) { return; }
@@ -35,7 +57,23 @@ namespace FPS_n2 {
 				auto* CameraParts = Camera3D::Instance();
 				if ((GetMove().GetPos() - CameraParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale3DRate) { return; }
 
-				GetObj().DrawModel();
+				bool AllDraw = true;
+				for (auto& isdraw : this->m_IsMeshDraw) {
+					if (isdraw != TRUE) {
+						AllDraw = false;
+					}
+				}
+				if (AllDraw) {
+					GetObj().DrawModel();
+				}
+				else {
+					for (auto& isdraw : this->m_IsMeshDraw) {
+						if (isdraw == TRUE) {
+							int index = static_cast<int>(&isdraw - &this->m_IsMeshDraw.front());
+							GetObj().DrawMesh(index);
+						}
+					}
+				}
 			}
 			void			Dispose_Sub(void) noexcept override;
 		private:
@@ -120,6 +158,11 @@ namespace FPS_n2 {
 		public:
 			SightClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Sight); }
 			~SightClass(void) noexcept {}
+		public:
+			void SetScopeAlpha(float Per) noexcept {
+				SetObj().SetMaterialOpacityRate(1, Per);
+				SetIsDrawMesh(1, Per > 0.2f);
+			}
 		};
 
 		class MuzzleClass : public GunPartsClass {

@@ -373,7 +373,11 @@ namespace FPS_n2 {
 				return nullptr;
 			}
 
-			GunAnimNow	GetAnimNow(PlayerID ID, const AnimDatas* data, float nowframe) noexcept {
+			GunAnimNow	GetAnimNow(PlayerID
+#if defined(DEBUG) && DEBUG_CAM
+				ID
+#endif
+				, const AnimDatas* data, float nowframe) noexcept {
 				FingerData			Finger{};
 				GunAnimNow Ret; Ret.Set(Vector3DX::zero(), Vector3DX::zero(), Finger);
 				if (data) {

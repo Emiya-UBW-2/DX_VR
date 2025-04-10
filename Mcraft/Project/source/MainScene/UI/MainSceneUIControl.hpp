@@ -40,7 +40,7 @@ namespace FPS_n2 {
 				Easing(&LookPer, CanLookTarget ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 				bool IsDrawAimUI = false;
 				if (ViewChara->GetGunPtrNow()) {
-					IsDrawAimUI = ViewChara->GetGunPtrNow()->GetCanShot();
+					IsDrawAimUI = ViewChara->GetGunPtrNow()->GetCanShot() && (ViewChara->GetGunPtrNow()->GetGunAnime() != GunAnimeID::Watch);
 				}
 				Easing(&IsDrawAimUIPer, IsDrawAimUI ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 				if (IsDrawAimUIPer < 0.1f && !IsDrawAimUI) { IsDrawAimUIPer = 0.f; }

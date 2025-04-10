@@ -701,6 +701,13 @@ namespace FPS_n2 {
 			}
 			//グレネード演算
 			ExecuteGrenade();
+			//
+			if (this->m_SightPtr && GetSightZoomSize() > 1.f) {
+				float Per = 1.f - std::clamp(GetGunAnimBlendPer(GunAnimeID::ADS), 0.f, 1.f);
+				if (Per < 1.f) {
+					(*this->m_SightPtr)->SetScopeAlpha(Per);
+				}
+			}
 		}
 		void				GunClass::DrawShadow(void) noexcept {
 			if (!IsActive()) { return; }
@@ -712,6 +719,7 @@ namespace FPS_n2 {
 				auto* PostPassParts = PostPassEffect::Instance();
 				if (!GetCanShot()) {
 					if (this->m_SlingPer >= 1.f) {
+						this->m_Reticle_on = false;
 						PostPassParts->Set_is_lens(false);
 					}
 					return;

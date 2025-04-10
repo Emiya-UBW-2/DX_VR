@@ -24,6 +24,10 @@ namespace FPS_n2 {
 			this->m_GunPartsSlotControl = std::make_unique<GunPartsSlotControl>(GetFilePath());
 			ObjectBaseClass::SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
 			ObjectBaseClass::SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
+			this->m_IsMeshDraw.resize(GetObj().GetMeshNum());
+			for (auto& isdraw : this->m_IsMeshDraw) {
+				isdraw = true;
+			}
 			Init_GunParts();
 		}
 		void GunPartsClass::SetGunPartsMatrix(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept {
@@ -37,6 +41,7 @@ namespace FPS_n2 {
 			this->m_GunPartsSlotControl->UpdatePartsMove(GetFramePartsMat(GunFrame::MuzzleAdapter), GunSlot::MuzzleAdapter);
 		}
 		void GunPartsClass::Dispose_Sub(void) noexcept {
+			this->m_IsMeshDraw.clear();
 			this->m_GunPartsSlotControl.reset();
 			Dispose_GunParts();
 		}
