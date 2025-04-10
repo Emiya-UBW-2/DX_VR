@@ -8,6 +8,8 @@
 
 #include	"Gun.hpp"
 
+#define DRAW_HITBOX false
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		//キャラのうち特定機能だけ抜き出したもの
@@ -18,24 +20,23 @@ namespace FPS_n2 {
 			Arm,
 			Leg,
 		};
-		enum class EnumGunReadySeq {
-			LowReady,
-			Aim,
-			ADS,
-		};
 		//
 		class HitBox {
 			Vector3DX	m_pos;
 			float		m_radius{ 0.f };
 			HitType		m_HitType{ HitType::Body };
 		public:
+			const auto&		GetColType(void) const noexcept { return this->m_HitType; }
+			const auto&		GetPos(void) const noexcept { return this->m_pos; }
+		public:
 			void	Update(const Vector3DX& pos, float radius, HitType pHitType) {
 				this->m_pos = pos;
 				this->m_radius = radius;
 				this->m_HitType = pHitType;
 			}
+#if defined(DEBUG) && DRAW_HITBOX
 			void	Draw(void) const noexcept {
-				unsigned int color;
+				unsigned int color{};
 				switch (this->m_HitType) {
 				case HitType::Head:
 					color = Red;
@@ -54,26 +55,19 @@ namespace FPS_n2 {
 				}
 				DrawSphere_3D(this->m_pos, this->m_radius, color, color);
 			}
-
+#endif
 			bool	Colcheck(const Vector3DX& StartPos, Vector3DX* pEndPos) const noexcept {
-				if (HitCheck_Sphere_Capsule(
-					this->m_pos.get(), this->m_radius,
-					StartPos.get(), pEndPos->get(), 0.001f * Scale3DRate
-				) == TRUE) {
-					VECTOR pos1 = StartPos.get();
-					VECTOR pos2 = pEndPos->get();
-					VECTOR pos3 = this->m_pos.get();
-					SEGMENT_POINT_RESULT Res;
-					Segment_Point_Analyse(&pos1, &pos2, &pos3, &Res);
-
+				VECTOR pos1 = StartPos.get();
+				VECTOR pos2 = pEndPos->get();
+				VECTOR posA = this->m_pos.get();
+				SEGMENT_POINT_RESULT Res;
+				Segment_Point_Analyse(&pos1, &pos2, &posA, &Res);
+				if (Res.Seg_Point_MinDist_Square <= this->m_radius * this->m_radius) {
 					*pEndPos = Res.Seg_MinDist_Pos;
-
 					return true;
 				}
 				return false;
 			}
-			const auto GetColType()const noexcept { return this->m_HitType; }
-			const auto GetPos()const noexcept { return this->m_pos; }
 		};
 		//ヒットポイントなどのパラメーター
 		template<class Point, int MaxPoint>
@@ -245,9 +239,8 @@ namespace FPS_n2 {
 				this->m_HitBox.resize(27);
 			}
 			void Update(const ObjectBaseClass* ptr, float SizeRate) noexcept;
+#if defined(DEBUG) && DRAW_HITBOX
 			void Draw(void) noexcept {
-				//GetObj().SetOpacityRate(0.5f);
-				SetFogEnable(false);
 				SetUseLighting(false);
 				//SetUseZBuffer3D(false);
 
@@ -258,6 +251,7 @@ namespace FPS_n2 {
 				//SetUseZBuffer3D(true);
 				SetUseLighting(true);
 			}
+#endif
 		};
 		//歩く時の揺れ
 		class WalkSwingControl {

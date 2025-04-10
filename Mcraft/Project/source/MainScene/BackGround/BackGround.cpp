@@ -1218,8 +1218,8 @@ namespace FPS_n2 {
 
 				std::ifstream fin{};
 				fin.open("data/Map.txt", std::ios::in | std::ios::binary);
-				this->m_CellBase.resize((size_t)256 * 256 * 256);
-				fin.read((char*)this->m_CellBase.data(), (size_t)sizeof(this->m_CellBase.at(0)) * 256 * 256 * 256);
+				this->m_CellBase.resize(static_cast<size_t>(256 * 256 * 256));
+				fin.read((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0))) * 256 * 256 * 256);
 				fin.close();
 				for (int xm = 0; xm < cell.All; ++xm) {
 					for (int ym = 0; ym < cell.All; ++ym) {
@@ -1256,7 +1256,7 @@ namespace FPS_n2 {
 			{
 				auto& cell = this->m_CellxN.front();
 
-				this->m_CellBase.resize((size_t)256 * 256 * 256);
+				this->m_CellBase.resize(static_cast<size_t>(256 * 256 * 256));
 				for (int xm = 0; xm < cell.All; ++xm) {
 					for (int ym = 0; ym < cell.All; ++ym) {
 						for (int zm = 0; zm < cell.All; ++zm) {
@@ -1267,7 +1267,7 @@ namespace FPS_n2 {
 
 				std::ofstream fout{};
 				fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
-				fout.write((char*)this->m_CellBase.data(), (size_t)sizeof(this->m_CellBase.at(0)) * 256 * 256 * 256);
+				fout.write((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0))) * 256 * 256 * 256);
 				fout.close();  //ファイルを閉じる
 			}
 			//一部を切り取って保存
@@ -1291,8 +1291,8 @@ namespace FPS_n2 {
 			fin.read((char*)&XTotal, sizeof(XTotal));
 			fin.read((char*)&YTotal, sizeof(YTotal));
 			fin.read((char*)&ZTotal, sizeof(ZTotal));
-			this->m_CellBase.resize((size_t)XTotal * YTotal * ZTotal);
-			fin.read((char*)this->m_CellBase.data(), (size_t)sizeof(this->m_CellBase.at(0)) * XTotal * YTotal * ZTotal);
+			this->m_CellBase.resize(static_cast<size_t>(XTotal * YTotal * ZTotal));
+			fin.read((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0))) * XTotal * YTotal * ZTotal);
 			fin.close();  //ファイルを閉じる
 
 			for (int xm = 0; xm < XTotal; ++xm) {
@@ -1310,7 +1310,7 @@ namespace FPS_n2 {
 			int YTotal = (YMax - YMin + 1);
 			int ZTotal = (ZMax - ZMin + 1);
 
-			this->m_CellBase.resize((size_t)XTotal * YTotal * ZTotal);
+			this->m_CellBase.resize(static_cast<size_t>(XTotal * YTotal * ZTotal));
 			for (int xm = 0; xm < XTotal; ++xm) {
 				for (int ym = 0; ym < YTotal; ++ym) {
 					for (int zm = 0; zm < ZTotal; ++zm) {
@@ -1324,7 +1324,7 @@ namespace FPS_n2 {
 			fout.write((char*)&XTotal, sizeof(XTotal));
 			fout.write((char*)&YTotal, sizeof(YTotal));
 			fout.write((char*)&ZTotal, sizeof(ZTotal));
-			fout.write((char*)this->m_CellBase.data(), (size_t)sizeof(this->m_CellBase.at(0)) * XTotal * YTotal * ZTotal);
+			fout.write((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0)) * XTotal * YTotal * ZTotal));
 			fout.close();  //ファイルを閉じる
 		}
 		//
@@ -1650,7 +1650,7 @@ namespace FPS_n2 {
 					this->m_CamVec.at(id) = (CameraParts->GetMainCamera().GetCamVec() - this->m_CamPos.at(id)).normalized();
 				}
 			);
-			this->m_Jobs.at((size_t)(total + 0)).Init(
+			this->m_Jobs.at(static_cast<size_t>(total + 0)).Init(
 				[&]() {
 					size_t id = 0;
 					this->m_vert32sS.at(id).ResetNum();
@@ -1666,7 +1666,7 @@ namespace FPS_n2 {
 					this->m_CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - this->m_CamPosS.at(id)).normalized();
 				}
 			);
-			this->m_Jobs.at((size_t)(total + 1)).Init(
+			this->m_Jobs.at(static_cast<size_t>(total + 1)).Init(
 				[&]() {
 					size_t id = 1;
 					this->m_vert32sS.at(id).ResetNum();
@@ -1682,7 +1682,7 @@ namespace FPS_n2 {
 					this->m_CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - this->m_CamPosS.at(id)).normalized();
 				}
 			);
-			this->m_Jobs.at((size_t)(total + 2)).Init(
+			this->m_Jobs.at(static_cast<size_t>(total + 2)).Init(
 				[&]() {
 					size_t id = 2;
 					this->m_vert32sS.at(id).ResetNum();
@@ -1698,7 +1698,7 @@ namespace FPS_n2 {
 					this->m_CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - this->m_CamPosS.at(id)).normalized();
 				}
 			);
-			this->m_Jobs.at((size_t)(total + 3)).Init(
+			this->m_Jobs.at(static_cast<size_t>(total + 3)).Init(
 				[&]() {
 					size_t id = 3;
 					this->m_vert32sS.at(id).ResetNum();
@@ -1714,7 +1714,7 @@ namespace FPS_n2 {
 					this->m_CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - this->m_CamPosS.at(id)).normalized();
 				}
 			);
-			this->m_Jobs.at((size_t)(total + total + 0)).Init(
+			this->m_Jobs.at(static_cast<size_t>(total + total + 0)).Init(
 				[&]() {
 					size_t id = 0;
 					this->m_vert32sSB.at(id).ResetNum();
@@ -1731,7 +1731,7 @@ namespace FPS_n2 {
 					this->m_light.at(id) = PostPassParts->GetShadowDir();
 				}
 			);
-			this->m_Jobs.at((size_t)(total + total + 1)).Init(
+			this->m_Jobs.at(static_cast<size_t>(total + total + 1)).Init(
 				[&]() {
 					size_t id = 1;
 					this->m_vert32sSB.at(id).ResetNum();
@@ -1748,7 +1748,7 @@ namespace FPS_n2 {
 					this->m_light.at(id) = PostPassParts->GetShadowDir();
 				}
 			);
-			this->m_Jobs.at((size_t)(total + total + 2)).Init(
+			this->m_Jobs.at(static_cast<size_t>(total + total + 2)).Init(
 				[&]() {
 					size_t id = 2;
 					this->m_vert32sSB.at(id).ResetNum();
@@ -1765,7 +1765,7 @@ namespace FPS_n2 {
 					this->m_light.at(id) = PostPassParts->GetShadowDir();
 				}
 			);
-			this->m_Jobs.at((size_t)(total + total + 3)).Init(
+			this->m_Jobs.at(static_cast<size_t>(total + total + 3)).Init(
 				[&]() {
 					size_t id = 3;
 					this->m_vert32sSB.at(id).ResetNum();
@@ -1821,8 +1821,8 @@ namespace FPS_n2 {
 					this->m_vert32sSB.at(loop).Disable();
 				}
 				else {
-					this->m_Jobs.at((size_t)(total + loop)).Execute();
-					this->m_Jobs.at((size_t)(total + total + loop)).Execute();
+					this->m_Jobs.at(static_cast<size_t>(total + loop)).Execute();
+					this->m_Jobs.at(static_cast<size_t>(total + total + loop)).Execute();
 				}
 			}
 			++this->m_ThreadCounter %= total;

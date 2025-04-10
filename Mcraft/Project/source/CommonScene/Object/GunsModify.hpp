@@ -23,9 +23,9 @@ namespace FPS_n2 {
 				const std::unique_ptr<GunPartsSlotControl>*	m_MySlot{ nullptr };
 				int											m_sel{ 0 };//セーブへの保持にしか使わん
 			public:
-				bool IsAttachedParts() const noexcept { return (*this->m_MySlot)->GetPartsPtr(this->m_SlotType) != nullptr; }
-				const auto& GetAttachedPartsSlot() const noexcept { return (*this->m_MySlot)->GetPartsPtr(this->m_SlotType)->GetGunPartsSlot(); }
-				const auto& GetParentSlot() const noexcept { return this->m_ParentSlot; }
+				bool IsAttachedParts(void) const noexcept { return (*this->m_MySlot)->GetPartsPtr(this->m_SlotType) != nullptr; }
+				const auto& GetAttachedPartsSlot(void) const noexcept { return (*this->m_MySlot)->GetPartsPtr(this->m_SlotType)->GetGunPartsSlot(); }
+				const auto& GetParentSlot(void) const noexcept { return this->m_ParentSlot; }
 			public:
 				SlotData(GunSlot SlotSelect, const std::unique_ptr<SlotData>*pParent, const std::unique_ptr<GunPartsSlotControl>* pParts) noexcept {
 					m_SlotType = SlotSelect;
@@ -66,8 +66,8 @@ namespace FPS_n2 {
 			};
 		private:
 			std::vector<std::unique_ptr<SlotData>>	m_SlotDataPool;
-			std::vector<SlotSaveData>			m_SlotSave;
-			std::shared_ptr<GunClass>			m_BaseGun{ nullptr };
+			std::vector<SlotSaveData>				m_SlotSave;
+			std::shared_ptr<GunClass>				m_BaseGun{ nullptr };
 		public:
 			GunsModify(const std::shared_ptr<GunClass>& GunPtr, bool isPreset) noexcept {
 				CreateSelData(GunPtr, isPreset);

@@ -56,9 +56,9 @@ namespace FPS_n2 {
 		public:
 			void			Init_GunParts(void) noexcept override;
 			void			FirstExecute_GunParts(void) noexcept override {
-				int index = 1;
 				for (auto& ammo : this->m_Ammo) {
-					auto Mat = GetObj().GetFrameLocalWorldMatrix(index); ++index;
+					int index = static_cast<int>(&ammo - &this->m_Ammo.front());
+					auto Mat = GetObj().GetFrameLocalWorldMatrix(1 + index);
 					ammo->SetMat(Mat.pos(), Matrix3x3DX::Get33DX(Mat));
 				}
 			}
@@ -75,9 +75,9 @@ namespace FPS_n2 {
 					ammo->SetActive(value);
 				}
 			}
-			void			SetHandMatrix(const Matrix4x4DX& value) noexcept {
-				SetMove().SetMat(Matrix3x3DX::Get33DX(value));
-				SetMove().SetPos(value.pos());
+			void			SetHandMatrix(const Matrix4x4DX& Mat) noexcept {
+				SetMove().SetMat(Matrix3x3DX::Get33DX(Mat));
+				SetMove().SetPos(Mat.pos());
 				SetMove().Update(0.f, 0.f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}

@@ -8,13 +8,13 @@ namespace FPS_n2 {
 			//子供にデフォルトの設定を追加
 			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 				GunSlot NowSlot = (GunSlot)loop;
-				const auto& Data = (*pBaseParts)->GetGunPartsData()->GetPartsSlot(NowSlot);
-				if (!Data) { continue; }// スロットがないとスルー
+				const auto& pSlotInfo = (*pBaseParts)->GetGunPartsData()->GetSlotInfo(NowSlot);
+				if (!pSlotInfo) { continue; }// スロットがないとスルー
 				//追加
 				this->m_SlotDataPool.emplace_back(std::make_unique<SlotData>(NowSlot, pParentSlot, pBaseParts));
 				auto& data = this->m_SlotDataPool.back();
 				//スロットに設定するオブジェクトの選択
-				int Select = Data->m_IsNeed ? 0 : InvalidID;
+				int Select = pSlotInfo->m_IsNeed ? 0 : InvalidID;
 				if (isPreset) {
 					for (const auto& S : m_SlotSave) {
 						if (data->IsSavedSlot(S)) {

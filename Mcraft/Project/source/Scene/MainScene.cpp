@@ -240,14 +240,13 @@ namespace FPS_n2 {
 					this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, ViewChara->GetMove(), ViewChara->GetDamageEvent(), FreeData);
 					this->m_NetWorkController->Update();
 				}
-				//
-				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {
+				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//オンライン
 					bool IsServerNotPlayer = !this->m_NetWorkController->GetClient() && !this->m_NetWorkController->GetServerPlayer();
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
-						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetLerpServerPlayerData((PlayerID)loop);
+						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetServerPlayerData((PlayerID)loop);
 						if (loop == PlayerMngr->GetWatchPlayer() && !IsServerNotPlayer) {
-							chara->Input(Ret.GetInput());//自身が動かすもの
+							chara->Input(Ret.GetPlayerSendData().GetInput());//自身が動かすもの
 						}
 						else {//サーバーからのデータで動くもの
 							//サーバーがCPUを動かす場合
@@ -255,13 +254,9 @@ namespace FPS_n2 {
 								//cpu
 								//PlayerMngr->GetPlayer(loop)->GetAI()->Execute(&MyInput);
 							}
-							chara->Input(Ret.GetInput());
-							bool override_true = true;
-							//override_true = Ret.GetIsActive();
-							if (override_true) {
-								chara->SetMoveOverRide(Ret.GetMove());
-							}
+							chara->Input(Ret.GetPlayerSendData().GetInput());
 
+							chara->SetMoveOverRide(Ret.GetPlayerSendData().GetMove());
 						}
 						//ダメージイベント処理
 						Ret.AddDamageEvent(&this->m_DamageEvents);
@@ -392,8 +387,6 @@ namespace FPS_n2 {
 					ViewChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), Scale3DRate * 5.f,
 					ViewChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), ViewChara->GetIsADS() ? (far_t * 3.f) : (far_t * 2.f));
 			}
-			//コンカッション
-			ViewChara->SetConcussionEffect();
 			//背景
 			BackGround->Execute();
 			//UIパラメーター

@@ -41,20 +41,20 @@ namespace FPS_n2 {
 				void		SetAI(const std::shared_ptr<Sceneclass::AIControl>& pAI) noexcept { this->m_AI = pAI; }
 				auto& GetAI(void) noexcept { return this->m_AI; }
 
-				void		AddScore(int value) noexcept { this->m_Score += value; }
-				void		SetScore(int value) noexcept { this->m_Score = value; }
+				void		AddScore(int Score) noexcept { this->m_Score += Score; }
+				void		SetScore(int Score) noexcept { this->m_Score = Score; }
 				const auto& GetScore(void) const noexcept { return this->m_Score; }
 
-				void		AddKill(int value) noexcept { this->m_Kill += value; }
-				void		SetKill(int value) noexcept { this->m_Kill = value; }
+				void		AddKill(int Kill) noexcept { this->m_Kill += Kill; }
+				void		SetKill(int Kill) noexcept { this->m_Kill = Kill; }
 				const auto& GetKill(void) const noexcept { return this->m_Kill; }
 
-				void		AddHit(int value) noexcept { this->m_Hit += value; }
-				void		SetHit(int value) noexcept { this->m_Hit = value; }
+				void		AddHit(int Hit) noexcept { this->m_Hit += Hit; }
+				void		SetHit(int Hit) noexcept { this->m_Hit = Hit; }
 				const auto& GetHit(void) const noexcept { return this->m_Hit; }
 
-				void		AddShot(int value) noexcept { this->m_Shot += value; }
-				void		SetShot(int value) noexcept { this->m_Shot = value; }
+				void		AddShot(int Shot) noexcept { this->m_Shot += Shot; }
+				void		SetShot(int Shot) noexcept { this->m_Shot = Shot; }
 				const auto& GetShot(void) const noexcept { return this->m_Shot; }
 			public:
 				void Init(void) noexcept {

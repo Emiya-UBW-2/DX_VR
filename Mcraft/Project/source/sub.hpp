@@ -256,8 +256,8 @@ namespace FPS_n2 {
 		void		SetOnce(Sceneclass::Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.f) noexcept {
 			this->m_EffectControl.SetOnce(static_cast<int>(ID), pos_t, nomal_t, scale);
 		}
-		void		SetEffectSpeed(Sceneclass::Effect ID, float value) noexcept {
-			this->m_EffectControl.SetEffectSpeed(static_cast<int>(ID), value);
+		void		SetEffectSpeed(Sceneclass::Effect ID, float speed) noexcept {
+			this->m_EffectControl.SetEffectSpeed(static_cast<int>(ID), speed);
 		}
 		void		SetEffectColor(Sceneclass::Effect ID, int r, int g, int b, int a) noexcept {
 			this->m_EffectControl.SetEffectColor(static_cast<int>(ID), r, g, b, a);

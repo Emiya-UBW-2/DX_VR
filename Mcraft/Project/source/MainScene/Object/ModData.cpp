@@ -9,8 +9,8 @@ namespace FPS_n2 {
 				if (LEFT.find("Type") != std::string::npos) {
 					for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 						if (RIGHT == GunSlotName[loop]) {
-							this->m_PartsSlot.emplace_back();
-							this->m_PartsSlot.back().m_GunSlot = (GunSlot)loop;
+							this->m_SlotInfo.emplace_back();
+							this->m_SlotInfo.back().m_SlotType = (GunSlot)loop;
 							break;
 						}
 					}
@@ -18,15 +18,15 @@ namespace FPS_n2 {
 				else if (LEFT.find("Item") != std::string::npos) {
 					std::string Path;
 					Path = "data/Mods/";
-					Path += GunSlotName[static_cast<int>(this->m_PartsSlot.back().m_GunSlot)];
+					Path += GunSlotName[static_cast<int>(this->m_SlotInfo.back().m_SlotType)];
 					Path += "/" + RIGHT + "/";
-					this->m_PartsSlot.back().m_ItemsUniqueID.emplace_back((*GunPartsDataManager::Instance()->AddData(Path))->GetUniqueID());
+					this->m_SlotInfo.back().m_CanAttachItemsUniqueID.emplace_back((*GunPartsDataManager::Instance()->AddData(Path))->GetUniqueID());
 				}
 				else if (LEFT.find("Conflict") != std::string::npos) {
-					this->m_PartsSlot.back().m_Conflicts.emplace_back(RIGHT);
+					this->m_SlotInfo.back().m_ConflictsItemsUniqueID.emplace_back(RIGHT);
 				}
 				else if (LEFT.find("IsNeed") != std::string::npos) {
-					this->m_PartsSlot.back().m_IsNeed = (RIGHT == "true");
+					this->m_SlotInfo.back().m_IsNeed = (RIGHT == "true");
 				}
 			}
 

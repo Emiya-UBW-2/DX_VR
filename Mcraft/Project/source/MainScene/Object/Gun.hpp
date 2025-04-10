@@ -240,7 +240,7 @@ namespace FPS_n2 {
 			const auto			IsNowGunAnimeEnd(void) const noexcept { return GetNowAnimTimePerCache() >= 1.f; }
 			const auto			GetShotSwitch(void) const noexcept { return GetGunAnime() == GunAnimeID::Shot && (GetNowAnimTimePerCache() < 0.5f); }
 		public:
-			void				SetPlayerID(PlayerID value) noexcept { this->m_MyID = value; }
+			void				SetPlayerID(PlayerID ID) noexcept { this->m_MyID = ID; }
 			void				CalcSwitchPer(bool IsRight) noexcept {
 				if (GetGunPartsSlot()->GetGunPartsData()->GetCanSwitch()) {
 					Easing(&this->m_SwitchPer, IsRight ? 1.f : -1.f, 0.9f, EasingType::OutExpo);
@@ -276,8 +276,8 @@ namespace FPS_n2 {
 			}
 			void				SetActiveAll(bool value) noexcept {
 				if (value != IsActive()) {
-					this->m_GunPartsSlotControl->CalcAnyBySlot([&](const SharedGunParts& ptr) { if (ptr) { ptr->SetActive(value); } });
 					SetActive(value);
+					this->m_GunPartsSlotControl->CalcAnyBySlot([&](const SharedGunParts& ptr) { if (ptr) { ptr->SetActive(IsActive()); } });
 				}
 			}
 			void				SetMagazinePoachMat(const Matrix4x4DX& MagPoachMat) noexcept { this->m_MagazinePoachMat = MagPoachMat; }

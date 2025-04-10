@@ -97,10 +97,11 @@ namespace FPS_n2 {
 		};
 		//
 		class MuzzleSmokeControl {
+			static const int								m_LineTotal{ 16 };
 		private:
-			std::array<std::pair<Vector3DX,float>, 16>		m_Line;
-			int												m_LineSel = 0;
-			float											m_LinePer{ 0.f };
+			std::array<std::pair<Vector3DX,float>, m_LineTotal>		m_Line;
+			int														m_LineSel = 0;
+			float													m_LinePer{ 0.f };
 		public://ƒQƒbƒ^[
 			void			AddMuzzleSmokePower(void) noexcept { this->m_LinePer = std::clamp(this->m_LinePer + 0.1f, 0.f, 1.f); }
 		public:
@@ -119,28 +120,23 @@ namespace FPS_n2 {
 				}
 				this->m_Line[this->m_LineSel].first = pPos;
 				this->m_Line[this->m_LineSel].second = IsAddSmoke ? 1.f : 0.f;
-				++this->m_LineSel %= this->m_Line.size();
+				++this->m_LineSel %= this->m_LineTotal;
 				this->m_LinePer = std::clamp(this->m_LinePer - DXLib_refParts->GetDeltaTime() / 30.f, 0.f, 1.f);
 			}
 			void		DrawMuzzleSmoke(void) noexcept {
 				SetUseLighting(false);
 				SetUseHalfLambertLighting(false);
-				int max = static_cast<int>(this->m_Line.size());
-				int min = 1 + static_cast<int>((1.f - this->m_LinePer) * static_cast<float>(max));
-				for (int loop = max - 1; loop >= min; --loop) {
-					int LS = (loop + this->m_LineSel);
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255.f * (static_cast<float>(loop - min) / max)));
-					auto p1 = (LS - 1) % max;
-					auto p2 = LS % max;
-					if (CheckCameraViewClip_Box(
-						this->m_Line[p1].first.get(),
-						this->m_Line[p2].first.get()) == false
+				int min = 1 + static_cast<int>((1.f - this->m_LinePer) * this->m_LineTotal);
+				for (int loop = this->m_LineTotal - 1; loop >= min; --loop) {
+					float Per = static_cast<float>(loop - min) / this->m_LineTotal;
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255.f * Per));
+					auto p1 = (this->m_LineSel + loop - 1) % this->m_LineTotal;
+					auto p2 = (this->m_LineSel + loop) % this->m_LineTotal;
+					if (
+						CheckCameraViewClip_Box(this->m_Line[p1].first.get(), this->m_Line[p2].first.get()) == false
 						&& (this->m_Line[p2].second > 0.f)
 						) {
-						DrawCapsule3D(this->m_Line[p1].first.get(), this->m_Line[p2].first.get(), (0.00762f) * Scale3DRate * 1.f * (static_cast<float>(loop - min) / max), 3,
-							GetColor(216, 216, 216),
-							GetColor(96, 96, 64),
-							true);
+						DrawCapsule3D(this->m_Line[p1].first.get(), this->m_Line[p2].first.get(), 0.00762f * Scale3DRate * Per, 3, GetColor(216, 216, 216), GetColor(96, 96, 64), true);
 					}
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);

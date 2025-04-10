@@ -22,10 +22,11 @@ namespace FPS_n2 {
 
 			int preselect = m_select;
 			bool preMouseSel = this->m_MouseSelMode;
+			int Max = static_cast<int>(m_ButtonSel.size()) - 1;
 			if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger() || Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
 				if (m_select != InvalidID) {
 					--m_select;
-					if (m_select < 0) { m_select = static_cast<int>(m_ButtonSel.size()) - 1; }
+					if (m_select < 0) { m_select = Max; }
 				}
 				else {
 					m_select = 0;
@@ -35,7 +36,7 @@ namespace FPS_n2 {
 			if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger() || Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
 				if (m_select != InvalidID) {
 					++m_select;
-					if (m_select > static_cast<int>(m_ButtonSel.size()) - 1) { m_select = 0; }
+					if (m_select > Max) { m_select = 0; }
 				}
 				else {
 					m_select = 0;

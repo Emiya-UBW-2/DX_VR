@@ -93,8 +93,8 @@ namespace FPS_n2 {
 			const auto		IsLowHP(void) const noexcept { return this->m_HP.GetPoint() < (this->m_HP.GetMax() * 35 / 100); }
 			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
 		public://セッター
-			void			SetPlayerID(PlayerID value) noexcept {
-				this->m_MyID = value;
+			void			SetPlayerID(PlayerID ID) noexcept {
+				this->m_MyID = ID;
 				//銃のIDセットアップ
 				for (int loop = 0, max = this->m_GunPtrControl.GetGunNum(); loop < max; ++loop) {
 					if (this->m_GunPtrControl.GetGunPtr(loop)) {
@@ -102,15 +102,15 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			void			SetCharaTypeID(CharaTypeID value) noexcept { this->m_CharaType = value; }
+			void			SetCharaTypeID(CharaTypeID Type) noexcept { this->m_CharaType = Type; }
 			void			SetMoveOverRide(const moves& overrideInfo) noexcept {
 				this->m_MoveOverRideFlag = true;
 				this->m_OverRideInfo = overrideInfo;
 			}
 			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.AddDamageEvent(pRet); }
-			void			Heal(HitPoint value) noexcept { this->m_Damage.Add(GetMyPlayerID(), GetMyPlayerID(), -value, -value,static_cast<int>(HitType::Body), GetMove().GetPos(), GetMove().GetPos()); }
+			void			Heal(HitPoint Point) noexcept { this->m_Damage.Add(GetMyPlayerID(), GetMyPlayerID(), -Point, -Point,static_cast<int>(HitType::Body), GetMove().GetPos(), GetMove().GetPos()); }
 			auto&			SetRagDoll(void) noexcept { return this->m_RagDollControl.SetRagDoll(); }
-			bool			SetDamageEvent(const DamageEvent& value) noexcept;
+			bool			SetDamageEvent(const DamageEvent& Event) noexcept;
 			const bool		CheckDamageRay(HitPoint Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
 		private: //更新関連
 			void			ExecuteInput(void) noexcept;
@@ -151,34 +151,6 @@ namespace FPS_n2 {
 				this->m_SlingZrad.Init(0.05f * Scale3DRate, 3.f, deg2rad(50));
 			}
 			void			Input(const InputControl& pInput) noexcept { this->m_Input = pInput; }
-			void			SetConcussionEffect(void) noexcept {
-				auto* PostPassParts = PostPassEffect::Instance();
-				auto* DXLib_refParts = DXLib_ref::Instance();
-				if (this->m_ConcussionSwitch) {
-					this->m_ConcussionSwitch = false;
-					this->m_Concussion = 1.f;
-				}
-				PostPassParts->Set_is_Blackout(this->m_Concussion > 0.f);
-				if (this->m_Concussion == 1.f) {
-					Camera3D::Instance()->SetCamShake(0.5f, 0.01f * Scale3DRate);
-				}
-				if (this->m_Concussion > 0.9f) {
-					Easing(&this->m_ConcussionPer, 1.f, 0.1f, EasingType::OutExpo);
-				}
-				else if (this->m_Concussion > 0.25f) {
-					if (this->m_ConcussionPer > 0.25f) {
-						Easing(&this->m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
-					}
-					else {
-						this->m_ConcussionPer = 0.25f;
-					}
-				}
-				else {
-					Easing(&this->m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
-				}
-				PostPassParts->Set_Per_Blackout(this->m_ConcussionPer * 2.f);
-				this->m_Concussion = std::max(this->m_Concussion - DXLib_refParts->GetDeltaTime(), 0.f);
-			}
 		private:
 			int				GetFrameNum(void) noexcept override { return static_cast<int>(CharaFrame::Max); }
 			const char*		GetFrameStr(int id) noexcept override { return CharaFrameName[id]; }

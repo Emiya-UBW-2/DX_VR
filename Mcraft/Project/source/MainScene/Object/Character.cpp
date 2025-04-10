@@ -4,55 +4,55 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		bool			CharacterClass::SetDamageEvent(const DamageEvent& value) noexcept {
-			if (GetMyPlayerID() == value.DamageID) {
+		bool			CharacterClass::SetDamageEvent(const DamageEvent& Event) noexcept {
+			if (GetMyPlayerID() == Event.DamageID) {
 				auto* SE = SoundPool::Instance();
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 
 				auto PrevLive = IsAlive();
-				this->m_HP.Sub(value.Damage);
-				this->m_AP.Sub(value.ArmerDamage);
+				this->m_HP.Sub(Event.Damage);
+				this->m_AP.Sub(Event.ArmerDamage);
 				bool IsDeath = PrevLive && !IsAlive();
 
-				if (value.ShotID == PlayerMngr->GetWatchPlayer()) {//撃ったキャラ
+				if (Event.ShotID == PlayerMngr->GetWatchPlayer()) {//撃ったキャラ
 					//SE
-					if (value.Damage > 0) {
+					if (Event.Damage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Hit))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 					}
-					else if (value.ArmerDamage > 0) {
+					else if (Event.ArmerDamage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f, 128);
 					}
 					//ヒットカウント
-					if ((value.Damage >= 0) && (value.ArmerDamage >= 0)) {
-						PlayerMngr->GetPlayer(value.ShotID)->AddHit(1);
+					if ((Event.Damage >= 0) && (Event.ArmerDamage >= 0)) {
+						PlayerMngr->GetPlayer(Event.ShotID)->AddHit(1);
 						//ヒット座標表示を登録
-						HitMarkerPool::Instance()->AddMarker(value.m_EndPos, value.Damage, value.ArmerDamage);
+						HitMarkerPool::Instance()->AddMarker(Event.m_EndPos, Event.Damage, Event.ArmerDamage);
 					}
 					if (IsDeath) {
-						PlayerMngr->GetPlayer(value.ShotID)->AddScore(100);
-						PlayerMngr->GetPlayer(value.ShotID)->AddKill(1);
+						PlayerMngr->GetPlayer(Event.ShotID)->AddScore(100);
+						PlayerMngr->GetPlayer(Event.ShotID)->AddKill(1);
 					}
 				}
-				if (value.DamageID == PlayerMngr->GetWatchPlayer()) {//撃たれたキャラ
-					if (value.Damage > 0) {
+				if (Event.DamageID == PlayerMngr->GetWatchPlayer()) {//撃たれたキャラ
+					if (Event.Damage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitMe))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 					}
-					else if (value.ArmerDamage > 0) {
+					else if (Event.ArmerDamage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f, 255);
 					}
 				}
 				//エフェクトセット
-				if (value.Damage > 0) {
-					EffectSingleton::Instance()->SetOnce(Sceneclass::Effect::ef_hitblood, value.m_EndPos, Vector3DX::forward(), Scale3DRate);
+				if (Event.Damage > 0) {
+					EffectSingleton::Instance()->SetOnce(Sceneclass::Effect::ef_hitblood, Event.m_EndPos, Vector3DX::forward(), Scale3DRate);
 					EffectSingleton::Instance()->SetEffectSpeed(Sceneclass::Effect::ef_hitblood, 2.f);
 				}
-				else if (value.ArmerDamage > 0) {
-					EffectSingleton::Instance()->SetOnce(Sceneclass::Effect::ef_gndsmoke, value.m_EndPos, (value.m_StartPos - value.m_EndPos).normalized(), 0.25f * Scale3DRate);
+				else if (Event.ArmerDamage > 0) {
+					EffectSingleton::Instance()->SetOnce(Sceneclass::Effect::ef_gndsmoke, Event.m_EndPos, (Event.m_StartPos - Event.m_EndPos).normalized(), 0.25f * Scale3DRate);
 				}
 				//ヒットモーション
-				if (value.Damage > 0) {
-					this->m_HitReactionControl.SetHit(Matrix3x3DX::Vtrans(Vector3DX::Cross((value.m_EndPos - value.m_StartPos).normalized(), Vector3DX::up()) * -1.f, Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::Upper2)).inverse()));
-					switch (static_cast<HitType>(value.m_HitType)) {
+				if (Event.Damage > 0) {
+					this->m_HitReactionControl.SetHit(Matrix3x3DX::Vtrans(Vector3DX::Cross((Event.m_EndPos - Event.m_StartPos).normalized(), Vector3DX::up()) * -1.f, Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::Upper2)).inverse()));
+					switch (static_cast<HitType>(Event.m_HitType)) {
 					case HitType::Head:
 						break;
 					case HitType::Body:
@@ -70,7 +70,7 @@ namespace FPS_n2 {
 				//ボイス
 				if (IsAlive()) {
 					//被弾ボイス
-					if ((value.Damage >= 0) && (value.ArmerDamage >= 0)) {
+					if ((Event.Damage >= 0) && (Event.ArmerDamage >= 0)) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_Hurt1) + GetRand(6 - 1))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 					}
 				}
@@ -369,6 +369,7 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGround = BackGround::BackGroundClass::Instance();
 			auto* OptionParts = OptionManager::Instance();
+			auto* PostPassParts = PostPassEffect::Instance();
 			//
 			if (IsAlive()) {
 				if (IsLowHP()) {
@@ -681,6 +682,33 @@ namespace FPS_n2 {
 				this->m_CanLookTarget = !BackGround->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos);
 				this->m_Length = (GetEyePositionCache() - ViewChara->GetEyePositionCache()).magnitude();
 			}
+			//コンカッション
+			if (GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) {
+				if (this->m_ConcussionSwitch) {
+					this->m_ConcussionSwitch = false;
+					this->m_Concussion = 1.f;
+				}
+				PostPassParts->Set_is_Blackout(this->m_Concussion > 0.f);
+				if (this->m_Concussion == 1.f) {
+					Camera3D::Instance()->SetCamShake(0.5f, 0.01f * Scale3DRate);
+				}
+				if (this->m_Concussion > 0.9f) {
+					Easing(&this->m_ConcussionPer, 1.f, 0.1f, EasingType::OutExpo);
+				}
+				else if (this->m_Concussion > 0.25f) {
+					if (this->m_ConcussionPer > 0.25f) {
+						Easing(&this->m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
+					}
+					else {
+						this->m_ConcussionPer = 0.25f;
+					}
+				}
+				else {
+					Easing(&this->m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
+				}
+				PostPassParts->Set_Per_Blackout(this->m_ConcussionPer * 2.f);
+				this->m_Concussion = std::max(this->m_Concussion - DXLib_refParts->GetDeltaTime(), 0.f);
+			}
 		}
 		//
 		void			CharacterClass::LoadChara(const std::string& FolderName, PlayerID ID) noexcept {
@@ -762,7 +790,9 @@ namespace FPS_n2 {
 				}
 			}
 			//hitbox描画
-			//this->m_HitBoxControl.DrawHitBox();
+#if defined(DEBUG) && DRAW_HITBOX
+			this->m_HitBoxControl.Draw();
+#endif
 			//
 			SetFogEnable(fog_enable);
 			SetFogMode(fog_mode);

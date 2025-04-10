@@ -41,7 +41,7 @@ namespace FPS_n2 {
 		{
 			DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp - 10, yp - 10, xp + xs + 10, yp + ys + 10, Gray25, true);//”wŒi
 			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-				FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp + xs, yp, White, Black, " %d/%d", static_cast<int>(this->m_Sequence), static_cast<int>(NetWork::NetWorkSequence::MainGame));
+				FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp + xs, yp, White, Black, " %d/%d", static_cast<int>(this->m_Sequence), static_cast<int>(BrowserSequence::Ready));
 		}
 		auto Prev = this->m_Sequence;
 

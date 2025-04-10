@@ -3,322 +3,177 @@
 
 namespace FPS_n2 {
 	namespace NetWork {
-		//クライアントが送信するデータ
-		PlayerNetData PlayerNetData::GetLerpData(const PlayerNetData& PrevData, const PlayerNetData& ServerData, float Per) noexcept {
-			PlayerNetData tmp;
-			//
-			tmp.m_Input = Lerp(PrevData.m_Input, ServerData.m_Input, Per);
-			tmp.m_Input.SetKeyInputFlags(ServerData.m_Input);
-			tmp.m_move = PrevData.m_move.LerpMove(ServerData.m_move, Per);
-			tmp.m_DamageEvent = ServerData.m_DamageEvent;
-			//
-			tmp.m_ID = ServerData.m_ID;
-			tmp.m_Attribute = ServerData.m_Attribute;
-			tmp.m_ClientTime = ServerData.m_ClientTime;
-			for (int loop = 0; loop < 10; ++loop) {
-				tmp.m_FreeData[loop] = ServerData.GetFreeData()[loop];
-			}
-			return tmp;
-		}
-		//通信
-		PlayerNetData PlayerNetWork::GetLerpServerPlayerData(PlayerID pPlayerID) const noexcept {
-			return PlayerNetData::GetLerpData(
-				this->m_PrevServerData.PlayerData[static_cast<size_t>(pPlayerID)], this->m_ServerDataCommon.PlayerData[static_cast<size_t>(pPlayerID)],
-				std::clamp(static_cast<float>(this->m_LeapFrame) / static_cast<float>(this->m_LeapFrameMax), 0.f, 1.f));
-		}
-		void PlayerNetWork::Int(NetTime Tick) noexcept {
-			this->m_LastServerFrame = 0;
-			this->m_LeapFrame = 0;
-			this->m_LeapFrameMax = 20;
-			this->m_ServerDataCommon.ServerFrame = 0;
-			this->m_PrevServerData.ServerFrame = 0;
-			this->m_TickCnt = 0;
-			this->m_TickRate = Tick;
-			LONGLONG NowFrame = GetNowHiPerformanceCount();
-			this->m_PrevFrame = NowFrame;
-		}
-		bool PlayerNetWork::UpdateTick(void) noexcept {
-			LONGLONG NowFrame = GetNowHiPerformanceCount();
-			this->m_TickCnt += NowFrame - this->m_PrevFrame;
-			this->m_PrevFrame = NowFrame;
-			if (this->m_TickCnt > this->m_TickRate) {
-				this->m_TickCnt -= this->m_TickRate;
-				return true;
-			}
-			return false;
-		}
-		NetTime PlayerNetWork::Update(bool IsUpdateTick) noexcept {
-			if (IsUpdateTick) {
-				if (this->m_LastServerFrame < this->m_GetServerData.ServerFrame && this->m_GetServerData.ServerFrame <= (this->m_LastServerFrame + 60)) {//入力されたデータが以前もらったものから0~60F後だったら
-					this->m_LastServerFrame = this->m_GetServerData.ServerFrame;
-					this->m_LeapFrame = 0;
-					this->m_PrevServerData = this->m_ServerDataCommon;
-					this->m_ServerDataCommon = this->m_GetServerData;
-					auto Total = static_cast<int>(this->m_ServerDataCommon.ServerFrame) - static_cast<int>(this->m_PrevServerData.ServerFrame);
-					if (Total <= 0) { Total = 20; }
-					this->m_LeapFrameMax = static_cast<size_t>(Total);
-					return this->m_LocalData.GetClientTime() - this->m_ServerDataCommon.PlayerData[this->m_LocalData.GetID()].GetClientTime();//もらったデータと自分のフレームとの差異がpingになる
-				}
-				return MAXLONGLONG;
-			}
-			else {
-				this->m_LeapFrame = std::min<size_t>(this->m_LeapFrame + 1, this->m_LeapFrameMax);
-				return 0;
-			}
-		}
 		//サーバー専用
-		bool ServerControl::AllReady(void) const noexcept {
-			for (auto& net : this->m_Net) {
-				int index = static_cast<int>(&net - &this->m_Net.front());
-				if (this->m_IsServerPlay) {
-					if (index == 0) { continue; }//サーバープレイヤーは絶対0を使うので
+		void ServerControl::Update(PlayerNetWork* pPlayerNetwork) noexcept {
+			pPlayerNetwork->UpdateTick();
+			bool AllReady = true;
+			for (int loop = 0; loop < Player_num; ++loop) {
+				if (GetIsServerPlayer(static_cast<PlayerID>(loop))) {
+					// サーバープレイヤーのデータをアップデート
+					pPlayerNetwork->SetLastServerDataBuffer().PlayerData[loop] = pPlayerNetwork->GetLocalPlayerData();
+					// 席は埋まってます
+					pPlayerNetwork->SetLastServerDataBuffer().m_PlayerFill[loop] = TRUE;
+					continue;
 				}
-				if (!net.IsReady()) {
-					return false;
-				}
-			}
-			return true;
-		}
-		void ServerControl::Init(int pPort, bool IsServerPlay) noexcept {
-			this->m_IsServerPlay = IsServerPlay;
-			int loop = 0;
-			for (auto& net : this->m_Net) {
-				int index = static_cast<int>(&net - &this->m_Net.front());
-				if (this->m_IsServerPlay) {
-					if (index == 0) { continue; }//サーバープレイヤーは絶対0を使うので
-				}
-				net.m_NetWork.Init(true, pPort + loop); ++loop;
-				net.m_Phase = ClientPhase::WaitConnect;
-			}
-		}
-		bool ServerControl::Update(ServerNetData* pServerCtrl, const PlayerNetData& MyLocalPlayerData, bool IsUpdateTick) noexcept {
-			//
-			auto FlipPlayerData = [&](const PlayerNetData& value) { pServerCtrl->PlayerData[value.GetID()] = value; };
-			FlipPlayerData(MyLocalPlayerData);// サーバープレイヤーののプレイヤーデータ
-			bool IsAllReady = AllReady();
-			if (!IsAllReady) {
-				pServerCtrl->ServerFrame = 0;
-			}
-			else {
-				++pServerCtrl->ServerFrame;	// サーバーフレーム更新
-				pServerCtrl->SetInGame();		// インゲームです
-			}
-			for (auto& net : this->m_Net) {
-				int index = static_cast<int>(&net - &this->m_Net.front());
-				if (this->m_IsServerPlay) {
-					if (index == 0) { continue; }//サーバープレイヤーは絶対0を使うので
-				}
-				auto& Player = this->m_LastPlayerData[static_cast<size_t>(index)];
+				auto& net = this->m_PlayerUDPPhase.at(loop);
+
 				PlayerNetData tmpData;
 				int recvRet = -1;
-				auto IsDataUpdated = net.m_NetWork.RecvData(&tmpData, &recvRet, false);
+				auto IsDataUpdated = net.m_NetWork.RecvData(&tmpData, &recvRet, false) && tmpData.IsCheckSum();
 				if (IsDataUpdated) {
-					if (tmpData.IsCheckSum()) {
-						Player = tmpData;
-					}
+					this->m_LastPlayerData.at(loop) = tmpData;
 				}
-				bool IsSendData = false;
+				const auto& player = this->m_LastPlayerData.at(loop);
 				switch (net.m_Phase) {
-				case ClientPhase::WaitConnect:						// 無差別受付
-					pServerCtrl->m_PlayerID = 0;
-					if (IsDataUpdated) {							// 該当ソケットにクライアントからなにか受信したら
-						net.m_Phase = ClientPhase::GetNumber;
+				case ClientPhase::Server_WaitConnect:// 無差別受付
+					if (IsDataUpdated) {// 該当ソケットにクライアントからなにか受信したら
+						net.m_Phase = ClientPhase::Ready;
+						// 席は埋まってます
+						pPlayerNetwork->SetLastServerDataBuffer().m_PlayerFill[loop] = TRUE;
+						//マッチング中とする
+						if (pPlayerNetwork->SetLastServerDataBuffer().m_ServerPhase != ServerPhase::Matching) {
+							pPlayerNetwork->SetLastServerDataBuffer().m_ServerPhase = ServerPhase::Matching;
+						}
 					}
 					break;
-				case ClientPhase::GetNumber://プレイヤー受付
-					pServerCtrl->m_PlayerID = static_cast<PlayerID>(index);//ID受付中ですわ
-					IsSendData = true;
+				case ClientPhase::Ready:
+					//得たプレイヤーのデータをアップデート
 					if (IsDataUpdated) {
-						if (Player.GetFlag(NetAttribute::IsActive)) {				// ID取れたと識別出来たら
-							net.m_Phase = ClientPhase::Ready;
-						}
+						pPlayerNetwork->SetLastServerDataBuffer().PlayerData[player.GetID()] = player;
+					}
+					// クライアントにデータを送る
+					if (pPlayerNetwork->GetTickUpdateFlag()) {
+						pPlayerNetwork->SetLastServerDataBuffer().SetCheckSum();
+						net.m_NetWork.ReturnData(pPlayerNetwork->GetLastServerDataBuffer());
 					}
 					break;
-				case ClientPhase::Ready:						//他プレイヤーの揃い待ち
-					if (IsDataUpdated) {						// クライアントから受信したら
-						if (Player.IsCheckSum()) {				// チェックサムののち
-							FlipPlayerData(Player);				// 更新
-						}
-					}
-					pServerCtrl->SetInGame();								//ID受付終了に指定を変更
-					IsSendData = true;
-					break;
-				case ClientPhase::NotConnect:
-				case ClientPhase::Error_CannotConnect:
-				case ClientPhase::Error_ServerInGame:
 				default:
-					net.m_Phase = ClientPhase::WaitConnect;
 					break;
 				}
-				if (IsSendData && IsUpdateTick) {
-					pServerCtrl->CalcCheckSun();
-					net.m_NetWork.ReturnData(*pServerCtrl);		// クライアントにIDを送る
+				if (net.m_Phase != ClientPhase::Ready) {
+					AllReady = false;
 				}
 			}
-			return IsAllReady;
-		}
-		void ServerControl::Dispose(void) noexcept {
-			for (auto& net : this->m_Net) {
-				net.m_NetWork.Dispose();
+			//
+			if (!AllReady) {
+				pPlayerNetwork->SetLastServerDataBuffer().ServerFrame = 0;
 			}
+			else {
+				++pPlayerNetwork->SetLastServerDataBuffer().ServerFrame;	// サーバーフレーム更新
+				pPlayerNetwork->SetLastServerDataBuffer().m_ServerPhase = ServerPhase::Ingame; // インゲームです
+			}
+			//
+			pPlayerNetwork->Update();
 		}
 		//クライアント専用
-		void ClientControl::Init(int pPort, const IPDATA& pIP) noexcept {
-			this->m_Port = pPort;
-			this->m_IP = pIP;
-			this->m_NetWorkSel = 0;
-			this->m_Net.m_Phase = ClientPhase::NotConnect;
-		}
-		bool ClientControl::Update(ServerNetData* pServerCtrl, const PlayerNetData& MyLocalPlayerData, bool IsUpdateTick) noexcept {
-			auto* DXLib_refParts = DXLib_ref::Instance();
+		void ClientControl::Update(PlayerNetWork* pPlayerNetwork) noexcept {
+			pPlayerNetwork->UpdateTick();
+
+			ServerNetData			tmpData;
 			int recvRet = -1;
-			bool IsDataUpdated = this->m_Net.m_NetWork.RecvData(&this->m_BufferDataOnce, &recvRet, false);
+			bool IsDataUpdated = this->m_PlayerUDPPhase.m_NetWork.RecvData(&tmpData, &recvRet, false) && tmpData.IsCheckSum();
 			if (IsDataUpdated) {
-				if (this->m_BufferDataOnce.IsCheckSum()) {
-					*pServerCtrl = this->m_BufferDataOnce;
-				}
+				pPlayerNetwork->SetLastServerDataBuffer() = tmpData;
 			}
-			bool IsSendData = false;
-			switch (this->m_Net.m_Phase) {
-			case ClientPhase::NotConnect:
-				this->m_CannotConnectTimer = 0.f;
-				this->m_Net.m_NetWork.SetServerIP(this->m_IP);
-				this->m_Net.m_NetWork.Init(false, this->m_Port + this->m_NetWorkSel);
-				this->m_Net.m_Phase = ClientPhase::WaitConnect;
-				break;
-			case ClientPhase::WaitConnect:
-				IsSendData = true;
+			switch (this->m_PlayerUDPPhase.m_Phase) {
+			case ClientPhase::Client_WaitConnect:
 				if (IsDataUpdated) {
 					this->m_CannotConnectTimer = 0.f;
-					if (pServerCtrl->m_PlayerID > 0) {
-						//席が空いていて、自分のIDをもらえたので次へ
-						this->m_MyID = pServerCtrl->m_PlayerID;
-						this->m_Net.m_Phase = ClientPhase::GetNumber;
+					if (pPlayerNetwork->GetLastServerDataBuffer().m_ServerPhase == ServerPhase::Ingame) { //要求したサーバーがインゲーム中でした
+						this->m_PlayerUDPPhase.SendError(ClientPhase::Error_ServerInGame);	//マッチ済なので接続失敗
 					}
-					else if (pServerCtrl->IsInGame()) {
-						//要求したサーバーがインゲーム中でした
-						this->m_Net.m_NetWork.Dispose();
-						this->m_Net.m_Phase = ClientPhase::Error_ServerInGame;	//マッチ済なので接続失敗
+					else {
+						int EmptyID = pPlayerNetwork->SetLastServerDataBuffer().GetEmptyID();
+						if (EmptyID !=InvalidID) {
+							//席が空いていて、自分のIDをもらえたので次へ
+							pPlayerNetwork->SetLocalPlayerID(static_cast<PlayerID>(EmptyID));
+							this->m_PlayerUDPPhase.m_Phase = ClientPhase::Client_GotPlayerID;
+						}
 					}
 				}
-				//もらえてない
+				//もらえてないので所定時間が経ったらソケットを変えて再接続
 				else {
+					auto* DXLib_refParts = DXLib_ref::Instance();
 					this->m_CannotConnectTimer += DXLib_refParts->GetDeltaTime();
 					if (this->m_CannotConnectTimer > 1.f) {
 						this->m_CannotConnectTimer -= 1.f;
 						++this->m_NetWorkSel;
 						if (this->m_NetWorkSel < Player_num) {
-							this->m_Net.m_NetWork.Dispose();
-							this->m_Net.m_NetWork.SetServerIP(this->m_IP);
-							this->m_Net.m_NetWork.Init(false, this->m_Port + this->m_NetWorkSel);
-							this->m_Net.m_Phase = ClientPhase::WaitConnect;
+							this->m_PlayerUDPPhase.Dispose();
+							this->m_PlayerUDPPhase.m_NetWork.SetServerIP(this->m_IP);
+							this->m_PlayerUDPPhase.Init(false, this->m_Port + this->m_NetWorkSel);
 						}
 						else {
-							this->m_Net.m_NetWork.Dispose();
-							this->m_Net.m_Phase = ClientPhase::Error_CannotConnect;	//満タンなので接続失敗
+							this->m_PlayerUDPPhase.SendError(ClientPhase::Error_CannotConnect);	//満タンなので接続失敗
 						}
 					}
 				}
 				break;
-			case ClientPhase::GetNumber:
-				IsSendData = true;
-				if (pServerCtrl->IsInGame()) {
+			case ClientPhase::Client_GotPlayerID:
+				if (pPlayerNetwork->GetLastServerDataBuffer().m_ServerPhase == ServerPhase::Ingame) {
 					//マッチ済なので次へ
-					this->m_Net.m_Phase = ClientPhase::Ready;
+					this->m_PlayerUDPPhase.m_Phase = ClientPhase::Ready;
 				}
 				break;
-			case ClientPhase::Ready:
-				IsSendData = true;
-				break;
-			case ClientPhase::Error_CannotConnect:
-			case ClientPhase::Error_ServerInGame:
 			default:
-				//エラー
 				break;
 			}
-			if (IsSendData && IsUpdateTick) {
-				this->m_Net.m_NetWork.SendData(MyLocalPlayerData);		// 自身のデータを送信
+			// 自身のデータを送信
+			switch (this->m_PlayerUDPPhase.m_Phase) {
+			case ClientPhase::Client_WaitConnect:
+			case ClientPhase::Client_GotPlayerID:
+			case ClientPhase::Ready:
+				if (pPlayerNetwork->GetTickUpdateFlag()) {
+					this->m_PlayerUDPPhase.m_NetWork.SendData(pPlayerNetwork->GetLocalPlayerData());
+				}
+				break;
+			default:
+				break;
 			}
-			return this->m_Net.IsReady();
-		}
-		void ClientControl::Dispose(void) noexcept {
-			this->m_Net.m_NetWork.Dispose();
+			pPlayerNetwork->Update();
 		}
 		//通信
-		void NetWorkController::Init(bool IsClient, int Port, const IPDATA& ip, bool IsServerPlayer) noexcept {
-			this->m_PlayerNet.Int(static_cast<NetTime>((1000.f / this->m_Tick) * 1000.f));
-			this->m_IsClient = IsClient;
-			this->m_IsServerPlayer = IsServerPlayer;
-			if (this->m_IsClient) {
-				this->m_ClientCtrl.Init(Port, ip);
-			}
-			else {
-				this->m_ServerCtrl.Init(Port, this->m_IsServerPlayer);
-			}
-			this->m_Sequence = NetWorkSequence::Matching;
-		}
 		void NetWorkController::Update(void) noexcept {
 			//ローカルデータ更新
-			this->m_PlayerNet.UpdateLocalData(this->m_LocalData, (this->m_Sequence == NetWorkSequence::MainGame));
+			this->m_PlayerNet.UpdateLocalData(this->m_LocalData, IsInGame());
 			if (this->m_IsClient) {
-				if (this->m_Sequence == NetWorkSequence::Matching) {
-					//自分のPlayerID決定
-					if (this->m_ClientCtrl.CanGetMyID()) {
-						this->m_PlayerNet.SetLocalPlayerID(this->m_ClientCtrl.GetMyID());
-					}
-				}
-				this->m_PlayerNet.SetLocalPlayerFlag(NetAttribute::IsActive, this->m_ClientCtrl.CanGetMyID());
+				this->m_ClientCtrl.Update(&this->m_PlayerNet);
 			}
-			else if (this->m_ServerCtrl.GetIsServerPlayer()) {
-				if (this->m_Sequence == NetWorkSequence::Matching) {
+			else {
+				if (this->m_ServerCtrl.GetIsServerPlayer(0)) {
 					//自分のPlayerID決定
 					this->m_PlayerNet.SetLocalPlayerID((PlayerID)0);
 				}
-			}
-			else {
-				static const int KeyInputs[] = {
-					KEY_INPUT_NUMPAD0,
-					KEY_INPUT_NUMPAD1,
-					KEY_INPUT_NUMPAD2,
-					KEY_INPUT_NUMPAD3,
-					KEY_INPUT_NUMPAD4,
-					KEY_INPUT_NUMPAD5,
-					KEY_INPUT_NUMPAD6,
-					KEY_INPUT_NUMPAD7,
-					KEY_INPUT_NUMPAD8,
-					KEY_INPUT_NUMPAD9,
-				};
-				//サーバー兼観戦者
-				for (int loop = 0; loop < Player_num; ++loop) {
-					if (CheckHitKey(KeyInputs[loop]) != 0) {
-						this->m_PlayerNet.SetLocalPlayerID((PlayerID)loop);
-						break;
-					}
-				}
-			}
-			//通信周り
-			bool IsUpdateTick = this->m_PlayerNet.UpdateTick();
-			LONGLONG Ping = MAXLONGLONG;
-			if (this->m_IsClient) {
-				if (this->m_ClientCtrl.Update(&this->m_PlayerNet.SetGetServerData(), this->m_PlayerNet.GetLocalPlayerData(), IsUpdateTick)) {
-					this->m_Sequence = NetWorkSequence::MainGame;
-				}
-				Ping = this->m_PlayerNet.Update(IsUpdateTick);
-			}
-			else {
-				if (this->m_ServerCtrl.Update(&this->m_PlayerNet.SetGetServerData(), this->m_PlayerNet.GetLocalPlayerData(), IsUpdateTick)) {
-					this->m_Sequence = NetWorkSequence::MainGame;
-				}
-				Ping = this->m_PlayerNet.Update(IsUpdateTick);
-			}
-			if (IsUpdateTick) {
-				if (Ping != MAXLONGLONG) {
-					if (Ping != 0) {
-						CalcPing(Ping);
-					}
-				}
 				else {
+					//サーバー兼観戦者
+					static const int KeyInputs[] = {
+						KEY_INPUT_NUMPAD0,
+						KEY_INPUT_NUMPAD1,
+						KEY_INPUT_NUMPAD2,
+						KEY_INPUT_NUMPAD3,
+						KEY_INPUT_NUMPAD4,
+						KEY_INPUT_NUMPAD5,
+						KEY_INPUT_NUMPAD6,
+						KEY_INPUT_NUMPAD7,
+						KEY_INPUT_NUMPAD8,
+						KEY_INPUT_NUMPAD9,
+					};
+					for (int loop = 0; loop < Player_num; ++loop) {
+						if (CheckHitKey(KeyInputs[loop]) != 0) {
+							this->m_PlayerNet.SetLocalPlayerID((PlayerID)loop);
+							break;
+						}
+					}
+				}
+				this->m_ServerCtrl.Update(&this->m_PlayerNet);
+			}
+			//PING計測
+			if (this->m_PlayerNet.GetTickUpdateFlag()) {
+				if (this->m_PlayerNet.GetPingTime() == MAXLONGLONG) {
 					CalcPing(InvalidID); //ロスト
+				}
+				else if (this->m_PlayerNet.GetPingTime() != 0) {
+					CalcPing(this->m_PlayerNet.GetPingTime());
 				}
 			}
 		}

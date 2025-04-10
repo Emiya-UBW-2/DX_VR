@@ -212,12 +212,12 @@ namespace FPS_n2 {
 					if ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 4.f))) {
 						int max = -1;
 						int8_t id = 1;
-						for (int8_t index = 0; auto & idc : IDCount) {
+						for (int8_t loop = 0; auto & idc : IDCount) {
 							if (max < idc) {
 								max = idc;
-								id = index;
+								id = loop;
 							}
-							++index;
+							++loop;
 						}
 						return id;
 					}
@@ -242,7 +242,7 @@ namespace FPS_n2 {
 					Half = All / 2;
 					AllPow2 = All * All;
 					Scale = (CellScale * scaleRate);
-					this->m_CellBuffer.resize((size_t)(All * All * All));
+					this->m_CellBuffer.resize(static_cast<size_t>(All * All * All));
 				}
 				//
 				void			CalcOcclusion(int x, int y, int z) noexcept {

@@ -7,41 +7,39 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class GunPartsDataClass {
-			struct PartsSlot {
-				GunSlot						m_GunSlot{ GunSlot::Gun };
-				std::vector<int>			m_ItemsUniqueID;
-				std::vector<std::string>	m_Conflicts;
+			struct SlotInfo {
+				GunSlot						m_SlotType{ GunSlot::Gun };
+				std::vector<int>			m_CanAttachItemsUniqueID;
+				std::vector<std::string>	m_ConflictsItemsUniqueID;
 				bool						m_IsNeed{ false };
-
-				const auto					ItemMaxCount(void) const noexcept { return  this->m_IsNeed ? (static_cast<int>(this->m_ItemsUniqueID.size()) - 1) : static_cast<int>(this->m_ItemsUniqueID.size()); }
 			};
 		private:
-			std::string		m_path;
-			std::string		m_name;
+			std::string						m_path;
+			std::string						m_name;
 			int								m_UniqueID{ 0 };
-			std::vector<PartsSlot>			m_PartsSlot;						//
+			std::vector<SlotInfo>			m_SlotInfo;
 
 			bool							m_IsRecoilPower{ false };
 			bool							m_IsRecoilReturn{ false };
-			bool							m_IsShotType{ false };		//
+			bool							m_IsShotType{ false };
 
 			int								m_RecoilPower{ 120 };
 			float							m_RecoilReturn{ 0.9f };
-			SHOTTYPE						m_ShotType{ SHOTTYPE::SEMI };		//
+			SHOTTYPE						m_ShotType{ SHOTTYPE::SEMI };
 			bool							m_IronSight{ false };
 
 			EnumGunSound					m_GunShootSound{ EnumGunSound::ShotNormal };
 
 			GraphHandle						m_Reitcle;
 			float							m_ZoomSize{ 1.f };
-			int								m_HumanAnimType{ InvalidID };				//
+			int								m_HumanAnimType{ InvalidID };
 
 			int								m_ShootRate_Diff{ 0 };
 			int								m_Recoil_Diff{ 0 };
 
 			int								m_ShotRate{ 300 };
 			int								m_SoundSel{ 0 };
-			RELOADTYPE						m_ReloadType{ RELOADTYPE::MAG };	//
+			RELOADTYPE						m_ReloadType{ RELOADTYPE::MAG };
 			bool							m_IsThrowWeapon{ false };
 			bool							m_CanADS{ true };
 			bool							m_CanSwitch{ true };
@@ -91,9 +89,9 @@ namespace FPS_n2 {
 			const auto& GetShootRate_Diff(void) const noexcept { return this->m_ShootRate_Diff; }
 			const auto& GetRecoil_Diff(void) const noexcept { return this->m_Recoil_Diff; }
 
-			const PartsSlot* GetPartsSlot(GunSlot sel) const noexcept {
-				for (const auto& slot : this->m_PartsSlot) {
-					if (slot.m_GunSlot == sel) {
+			const SlotInfo* GetSlotInfo(GunSlot sel) const noexcept {
+				for (const auto& slot : this->m_SlotInfo) {
+					if (slot.m_SlotType == sel) {
 						return &slot;
 					}
 				}
@@ -101,7 +99,7 @@ namespace FPS_n2 {
 			}
 			const auto& GetUniqueID(void) const noexcept { return this->m_UniqueID; }
 		public://
-			void			SetUniqueID(int value) noexcept { this->m_UniqueID = value; }
+			void			SetUniqueID(int ID) noexcept { this->m_UniqueID = ID; }
 		public://
 			void		Set(std::string path_) {
 				for (auto& anim : this->m_AnimSelect) {

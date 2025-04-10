@@ -219,13 +219,13 @@ namespace FPS_n2 {
 			this->m_Parts_Ptr[static_cast<int>(gunSlot)]->SetGunPartsMatrix(Matrix3x3DX::Get33DX(pMat), pMat.pos());
 		}
 		void GunPartsSlotControl::AttachGunParts(GunSlot gunSlot, int ID, const SharedObj& BaseModel) noexcept {
-			auto* Slots = GetGunPartsData()->GetPartsSlot(gunSlot);
-			if (!Slots) { return; }
+			auto* pSlotInfo = GetGunPartsData()->GetSlotInfo(gunSlot);
+			if (!pSlotInfo) { return; }
 			//ƒp[ƒc‚ª‚ ‚éê‡‚Ííœ
 			if (this->m_Parts_Ptr[static_cast<int>(gunSlot)]) {
 				RemoveGunParts(gunSlot);
 			}
-			const auto* FilePath = (*GunPartsDataManager::Instance()->GetData(Slots->m_ItemsUniqueID.at(ID)))->GetPath().c_str();
+			const auto* FilePath = (*GunPartsDataManager::Instance()->GetData(pSlotInfo->m_CanAttachItemsUniqueID.at(ID)))->GetPath().c_str();
 
 			switch (gunSlot) {
 			case GunSlot::Magazine:
