@@ -87,7 +87,7 @@ namespace FPS_n2 {
 			for (int loop = 0, max = ChamberAmmoData->GetPellet(); loop < max; ++loop) {
 				auto LastAmmo = std::make_shared<Objects::AmmoObj>();
 				ObjectManager::Instance()->InitObject(LastAmmo);
-				LastAmmo->Put(ChamberAmmoData, MuzzleMat.pos(),
+				LastAmmo->Put(&ChamberAmmoData, MuzzleMat.pos(),
 					(
 						Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(ChamberAmmoData->GetAccuracy()))) *
 						Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(ChamberAmmoData->GetAccuracy()))) *
@@ -503,7 +503,7 @@ namespace FPS_n2 {
 						ObjectManager::Instance()->InitObject(LastAmmo);
 						//‰~Žüã‚É‚Ü‚«ŽU‚ç‚·
 						auto mat = Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-GetRand(30))) * Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180)));
-						LastAmmo->Put(GetModifySlot()->GetMyData()->GetAmmoSpecMagTop(), grenade->GetMove().GetPos() + mat.zvec() * (0.5f * Scale3DRate) + Vector3DX::up() * (0.5f * Scale3DRate), mat.zvec(), GetMyUserPlayerID());
+						LastAmmo->Put(&GetModifySlot()->GetMyData()->GetAmmoSpecMagTop(), grenade->GetMove().GetPos() + mat.zvec() * (0.5f * Scale3DRate) + Vector3DX::up() * (0.5f * Scale3DRate), mat.zvec(), GetMyUserPlayerID());
 					}
 
 					//”j‰ó

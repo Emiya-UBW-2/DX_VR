@@ -28,7 +28,7 @@ namespace FPS_n2 {
 			auto ColResGround = BackGroundParts->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
 			//キャラとの判定
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-				if (PlayerMngr->GetPlayer(loop)->GetChara()->CheckDamageRay(this->m_AmmoData->GetDamage(), (PlayerID)this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
+				if (PlayerMngr->GetPlayer(loop)->GetChara()->CheckDamageRay((*this->m_AmmoData)->GetDamage(), (PlayerID)this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
 					SetDelete();
 					is_HitAll = true;
 				}
@@ -64,7 +64,7 @@ namespace FPS_n2 {
 					}
 				}
 				//エフェクト
-				EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_gndsmoke, pos_tmp, norm_tmp, this->m_AmmoData->GetCaliber() / 0.02f * Scale3DRate);//0.00762f
+				EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_gndsmoke, pos_tmp, norm_tmp, (*this->m_AmmoData)->GetCaliber() / 0.02f * Scale3DRate);//0.00762f
 				//サウンド
 				SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::HitGround0) + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
 			}
