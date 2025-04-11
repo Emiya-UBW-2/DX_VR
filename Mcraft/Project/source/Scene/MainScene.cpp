@@ -6,26 +6,26 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		void			MainGameScene::Load_Sub(void) noexcept {
 			//ロード
-			auto* BattleResourceMngr = CommonBattleResource::Instance();
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* BackGround = BackGround::BackGroundClass::Instance();
 			//BG
-			BackGround->Load();
+			BackGround::BackGroundControl::Create();
 			//
-			GunAnimManager::Instance()->Load("data/CharaAnime/");
+			Charas::GunAnimManager::Create();
+			Charas::GunAnimManager::Instance()->Load("data/CharaAnime/");
 			//
-			BattleResourceMngr->Load();
+			CommonBattleResource::Load();
 			//UI
 			HitMarkerPool::Create();
 			this->m_UIclass.Load();
 			this->m_PauseMenuControl.Load();
 			//
+			Player::PlayerManager::Create();
+			auto* PlayerMngr = Player::PlayerManager::Instance();
 			PlayerMngr->Init(NetWork::Player_num);
 			PlayerMngr->SetWatchPlayer(GetViewPlayerID());
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				if (loop == PlayerMngr->GetWatchPlayer()) {
-					CharacterClass::LoadChara("Main", (PlayerID)loop);
+					Charas::CharacterObj::LoadChara("Main", (PlayerID)loop);
 					//*
 					int Rand = GetRand(100);
 					if (Rand < 30) {
@@ -44,7 +44,7 @@ namespace FPS_n2 {
 					chara->SetCharaTypeID(CharaTypeID::Team);
 				}
 				else {
-					CharacterClass::LoadChara("Soldier", (PlayerID)loop);
+					Charas::CharacterObj::LoadChara("Soldier", (PlayerID)loop);
 					chara->LoadCharaGun("AKS-74", 0);
 					chara->LoadCharaGun("RGD5", 2);
 					//ラグドール
@@ -62,19 +62,18 @@ namespace FPS_n2 {
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
-			auto* BattleResourceMngr = CommonBattleResource::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			auto* CameraParts = Camera3D::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
-			auto* NetBrowser = NetWorkBrowser::Instance();
 			//
-			BattleResourceMngr->Set();
+			CommonBattleResource::Set();
 			EffectSingleton::Create();
+			NetWorkBrowser::Create();
 
 			PostPassParts->SetShadowScale(0.5f);
 			//
-			BackGround->Init();
+			BackGroundParts->Init();
 			//
 			Vector3DX LightVec = Vector3DX::vget(0.f, -0.3f, 0.15f); LightVec = LightVec.normalized();
 			PostPassParts->SetAmbientLight(LightVec);
@@ -108,7 +107,7 @@ namespace FPS_n2 {
 				pos_t *= Scale3DRate;
 
 				Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
-				if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 0.f * Scale3DRate, &EndPos)) {
+				if (BackGroundParts->CheckLinetoMap(pos_t + Vector3DX::up() * 0.f * Scale3DRate, &EndPos)) {
 					pos_t = EndPos;
 				}
 				chara->Spawn(deg2rad(0.f), deg2rad(GetRand(360)), pos_t, 0);
@@ -117,7 +116,6 @@ namespace FPS_n2 {
 			this->m_UIclass.Set();
 			//
 			this->m_DamageEvents.clear();
-			NetBrowser->Init();
 			this->m_PauseMenuControl.Init();
 			this->m_FadeControl.Init();
 			this->m_IsEnd = false;
@@ -125,15 +123,12 @@ namespace FPS_n2 {
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 #if defined(DEBUG)
-			auto* DebugParts = DebugClass::Instance();					//デバッグ
-#endif // DEBUG
-#if defined(DEBUG)
-			DebugParts->SetPoint("Execute=Start");
+			DebugClass::Instance()->SetPoint("Execute=Start");
 #endif // DEBUG
 			auto* CameraParts = Camera3D::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
-			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SceneParts = SceneControl::Instance();
@@ -194,7 +189,7 @@ namespace FPS_n2 {
 				});
 			if (SceneParts->IsPause()) {
 				Pad->SetMouseMoveEnable(false);
-				BackGround->SettingChange();
+				BackGroundParts->SettingChange();
 				if (!this->m_NetWorkController) {
 					return true;
 				}
@@ -296,47 +291,33 @@ namespace FPS_n2 {
 			//視点
 			{
 				//カメラ
-				Vector3DX BaseCamPos = ViewChara->GetEyePositionCache();
-				if (ViewChara->GetGunPtrNow()) {
-					BaseCamPos = Lerp<Vector3DX>(BaseCamPos, ViewChara->GetGunPtrNow()->GetADSEyeMat().pos(), ViewChara->GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::ADS));
-				}
-
-				if (GetIsFirstLoop()) {
-					this->m_EffectPos = BaseCamPos;
-					EffectSingleton::Instance()->SetLoop(Sceneclass::Effect::ef_dust, this->m_EffectPos);
-				}
-				else {
-					Easing(&this->m_EffectPos, BaseCamPos, 0.95f, EasingType::OutExpo);
-					EffectSingleton::Instance()->Update_LoopEffect(Sceneclass::Effect::ef_dust, this->m_EffectPos, Vector3DX::forward(), 0.5f);
-					EffectSingleton::Instance()->SetEffectColor(Sceneclass::Effect::ef_dust, 255, 255, 255, 64);
-				}
-
+				Vector3DX BaseCamPos = ViewChara->GetCameraPosition();
 				CameraParts->SetMainCamera().SetCamPos(
 					BaseCamPos + Camera3D::Instance()->GetCamShake(),
 					BaseCamPos + ViewChara->GetEyeRotationCache().zvec() * -1.f + Camera3D::Instance()->GetCamShake() * 2.f,
 					ViewChara->GetEyeRotationCache().yvec());
 #if defined(DEBUG) && DEBUG_CAM
 				if (CheckHitKey(KEY_INPUT_F1) != 0) {
-					DBG_CamSel = -1;
+					DBG_CamSelect = -1;
 				}
 				if (CheckHitKey(KEY_INPUT_F2) != 0) {
-					DBG_CamSel = 0;
+					DBG_CamSelect = 0;
 				}
 				if (CheckHitKey(KEY_INPUT_F3) != 0) {
-					DBG_CamSel = 1;
+					DBG_CamSelect = 1;
 				}
 				if (CheckHitKey(KEY_INPUT_F4) != 0) {
-					DBG_CamSel = 2;
+					DBG_CamSelect = 2;
 				}
 				if (CheckHitKey(KEY_INPUT_F5) != 0) {
-					DBG_CamSel = 3;
+					DBG_CamSelect = 3;
 				}
-				if (0 <= DBG_CamSel && DBG_CamSel <= 3) {
+				if (0 <= DBG_CamSelect && DBG_CamSelect <= 3) {
 					Vector3DX CamPos = CameraParts->GetMainCamera().GetCamPos();
 					Vector3DX CamVec = CameraParts->GetMainCamera().GetCamVec();
 					Vector3DX CamUp = CameraParts->GetMainCamera().GetCamUp();
 					Matrix3x3DX Rot = Matrix3x3DX::Axis1(CamUp, (CamVec - CamPos).normalized());
-					switch (DBG_CamSel) {
+					switch (DBG_CamSelect) {
 					case 0:
 						CamVec = CamPos;
 						CamPos += Rot.xvec() * (3.f * Scale3DRate);
@@ -375,20 +356,29 @@ namespace FPS_n2 {
 						Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
 					}
 #if defined(DEBUG) && DEBUG_CAM
-					if (0 <= DBG_CamSel && DBG_CamSel <= 3) {
+					if (0 <= DBG_CamSelect && DBG_CamSelect <= 3) {
 						fov_t = deg2rad(15);
 					}
 #endif
 				}
-				auto far_t = CameraParts->GetMainCamera().GetCamFar();
-				CameraParts->SetMainCamera().SetCamInfo(fov_t, CameraParts->GetMainCamera().GetCamNear(), far_t);
-				//DoF
-				PostPassEffect::Instance()->Set_DoFNearFar(
-					ViewChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), Scale3DRate * 5.f,
-					ViewChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), ViewChara->GetIsADS() ? (far_t * 3.f) : (far_t * 2.f));
+				CameraParts->SetMainCamera().SetCamInfo(fov_t, CameraParts->GetMainCamera().GetCamNear(), CameraParts->GetMainCamera().GetCamFar());
+			}
+			//DoF
+			PostPassEffect::Instance()->Set_DoFNearFar(
+				ViewChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), Scale3DRate * 5.f,
+				ViewChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), ViewChara->GetIsADS() ? (CameraParts->GetMainCamera().GetCamFar() * 3.f) : (CameraParts->GetMainCamera().GetCamFar() * 2.f));
+			//埃エフェクト
+			if (GetIsFirstLoop()) {
+				this->m_EffectPos = CameraParts->GetMainCamera().GetCamPos();
+				EffectSingleton::Instance()->SetLoop(Sceneclass::Effect::ef_dust, this->m_EffectPos);
+			}
+			else {
+				Easing(&this->m_EffectPos, CameraParts->GetMainCamera().GetCamPos(), 0.95f, EasingType::OutExpo);
+				EffectSingleton::Instance()->Update_LoopEffect(Sceneclass::Effect::ef_dust, this->m_EffectPos, Vector3DX::forward(), 0.5f);
+				EffectSingleton::Instance()->SetEffectColor(Sceneclass::Effect::ef_dust, 255, 255, 255, 64);
 			}
 			//背景
-			BackGround->Execute();
+			BackGroundParts->Execute();
 			//UIパラメーター
 			{
 				//timer
@@ -400,21 +390,20 @@ namespace FPS_n2 {
 			HitMarkerPool::Instance()->Update();
 			EffectSingleton::Instance()->Update();
 #if defined(DEBUG)
-			DebugParts->SetPoint("Execute=End");
+			DebugClass::Instance()->SetPoint("Execute=End");
 #endif // DEBUG
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
 			EffectSingleton::Instance()->StopEffect(Sceneclass::Effect::ef_dust);
-			auto* BackGround = BackGround::BackGroundClass::Instance();
-			auto* PostPassParts = PostPassEffect::Instance();
 			//使い回しオブジェ系
-			BackGround->Dispose();
+			BackGround::BackGroundControl::Instance()->Dispose();
 			//
 			if (this->m_NetWorkController) {
 				this->m_NetWorkController.reset();
 			}
 			{
+				auto* PostPassParts = PostPassEffect::Instance();
 				PostPassParts->SetLevelFilter(0, 255, 1.f);
 				PostPassParts->SetAberrationPower(1.f);
 				PostPassParts->Set_is_Blackout(false);
@@ -423,6 +412,7 @@ namespace FPS_n2 {
 				PostPassParts->Set_zoom_lens(1.f);
 			}
 			EffectSingleton::Release();
+			NetWorkBrowser::Release();
 			if (this->m_IsEnd) {//タイトルに戻る
 				SetNextSelect(0);
 			}
@@ -431,20 +421,20 @@ namespace FPS_n2 {
 			}
 		}
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* BattleResourceMngr = CommonBattleResource::Instance();
-			BattleResourceMngr->Dispose();
+			BackGround::BackGroundControl::Release();
+			CommonBattleResource::Dispose();
 			this->m_UIclass.Dispose();
-			PlayerMngr->Dispose();
+			Player::PlayerManager::Release();
 			ObjectManager::Instance()->DeleteAll();
 			this->m_PauseMenuControl.Dispose();
 			HitMarkerPool::Release();
+			Charas::GunAnimManager::Release();
 		}
 		//
 		void			MainGameScene::MainDraw_Sub(int Range) const noexcept {
 			SetFogEnable(true);
 			SetVerticalFogEnable(true);
-			BackGround::BackGroundClass::Instance()->Draw();
+			BackGround::BackGroundControl::Instance()->Draw();
 			ObjectManager::Instance()->Draw(true, Range);
 			//ObjectManager::Instance()->Draw_Depth();
 			SetVerticalFogEnable(false);
@@ -456,7 +446,6 @@ namespace FPS_n2 {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SceneParts = SceneControl::Instance();
-			//auto* NetBrowser = NetWorkBrowser::Instance();
 			auto& ViewChara = PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
 			if (!ViewChara->IsAlive()) { return; }
 			//レティクル表示
@@ -465,7 +454,7 @@ namespace FPS_n2 {
 			}
 			HitMarkerPool::Instance()->Draw();
 			if (!SceneParts->IsPause()) { this->m_UIclass.Draw(); }		//UI
-			//NetBrowser->Draw();										//通信設定
+			//NetWorkBrowser::Instance()->Draw();						//通信設定
 			if (this->m_NetWorkController) {
 				if (this->m_NetWorkController->GetPing() >= 0.f) {
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,

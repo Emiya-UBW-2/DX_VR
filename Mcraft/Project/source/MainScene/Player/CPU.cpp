@@ -8,7 +8,7 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		void		AIControl::Repop(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 			//auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 
@@ -17,7 +17,7 @@ namespace FPS_n2 {
 			pos_t *= Scale3DRate;
 
 			Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
-			if (BackGround->CheckLinetoMap(pos_t + Vector3DX::up() * 0.f * Scale3DRate, &EndPos)) {
+			if (BackGroundParts->CheckLinetoMap(pos_t + Vector3DX::up() * 0.f * Scale3DRate, &EndPos)) {
 				pos_t = EndPos;
 			}
 			MyChara->Spawn(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, 0);

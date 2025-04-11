@@ -4,9 +4,6 @@
 const FPS_n2::NetWorkBrowser* SingletonBase<FPS_n2::NetWorkBrowser>::m_Singleton = nullptr;
 
 namespace FPS_n2 {
-	void NetWorkBrowser::Init(void) noexcept {
-		this->m_Sequence = BrowserSequence::SelMode;
-	}
 	void NetWorkBrowser::Draw(void) noexcept {
 		auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 
@@ -47,7 +44,7 @@ namespace FPS_n2 {
 
 		int y1p = yp + 50;
 		switch (this->m_Sequence) {
-		case BrowserSequence::SelMode:
+		case BrowserSequence::SelectMode:
 			if (WindowSystem::SetMsgClickBox(xp, y1p, xp + xs, y1p + LineHeight * 2, LineHeight, Gray75, false, true, "クライアントになる")) {
 				BeClient();
 				this->m_Sequence = BrowserSequence::CheckPreset;

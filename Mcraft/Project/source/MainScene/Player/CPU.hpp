@@ -22,7 +22,7 @@ namespace FPS_n2 {
 			AIControl(PlayerID MyID) noexcept {
 				Init(MyID);
 			}
-			~AIControl(void) noexcept {
+			virtual ~AIControl(void) noexcept {
 				Dispose();
 			}
 		private:

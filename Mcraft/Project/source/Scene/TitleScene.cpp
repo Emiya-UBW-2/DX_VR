@@ -11,7 +11,7 @@ namespace FPS_n2 {
 			this->m_IsEnd = false;
 			this->m_TitleImage.Load("data/UI/Title.png");
 			// 
-			ButtonParts->ResetSel();
+			ButtonParts->ResetSelect();
 			// 
 			ButtonParts->AddStringButton("Start Game", 52, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 2, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
 			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, BaseScreenWidth - 96 - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);

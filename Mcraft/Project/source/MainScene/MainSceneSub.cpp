@@ -6,7 +6,7 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		void PauseMenuControl::Load(void) noexcept {
 			auto* ButtonParts = ButtonControl::Instance();
-			ButtonParts->ResetSel();
+			ButtonParts->ResetSelect();
 			ButtonParts->AddStringButton("Retire", 48, true, BaseScreenWidth - 64, BaseScreenHeight - 84 - 64 * 2, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
 			ButtonParts->AddStringButton("Option", 48, true, BaseScreenWidth - 64, BaseScreenHeight - 84 - 64 * 1, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
 			ButtonParts->AddStringButton("Return Game", 48, true, BaseScreenWidth - 64, BaseScreenHeight - 84 - 64 * 0, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
@@ -65,7 +65,7 @@ namespace FPS_n2 {
 				}
 			}
 			else {
-				ButtonParts->ResetSel();
+				ButtonParts->ResetSelect();
 			}
 		}
 		void PauseMenuControl::Draw(void) const noexcept {

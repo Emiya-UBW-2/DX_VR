@@ -6,11 +6,11 @@ namespace FPS_n2 {
 		// 
 		bool ButtonControl::GetTriggerButton(void) const noexcept {
 			auto* Pad = PadControl::Instance();
-			return (m_select != InvalidID) && (this->m_MouseSelMode ? Pad->GetMouseClick().trigger() : Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger());
+			return (this->m_select != InvalidID) && (this->m_MouseSelectMode ? Pad->GetMouseClick().trigger() : Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger());
 		}
 		ButtonControl::ButtonControl(void) noexcept {
 			this->m_SelectBackImage.Load("CommonData/UI/select.png");
-			ResetSel();
+			ResetSelect();
 		}
 		ButtonControl::~ButtonControl(void) noexcept {
 			Dispose();
@@ -20,73 +20,73 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* Pad = PadControl::Instance();
 
-			int preselect = m_select;
-			bool preMouseSel = this->m_MouseSelMode;
-			int Max = static_cast<int>(m_ButtonSel.size()) - 1;
+			int preselect = this->m_select;
+			bool preMouseSelect = this->m_MouseSelectMode;
+			int Max = static_cast<int>(this->m_ButtonSelect.size()) - 1;
 			if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger() || Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
-				if (m_select != InvalidID) {
-					--m_select;
-					if (m_select < 0) { m_select = Max; }
+				if (this->m_select != InvalidID) {
+					--this->m_select;
+					if (this->m_select < 0) { this->m_select = Max; }
 				}
 				else {
-					m_select = 0;
+					this->m_select = 0;
 				}
-				this->m_MouseSelMode = false;
+				this->m_MouseSelectMode = false;
 			}
 			if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger() || Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
-				if (m_select != InvalidID) {
-					++m_select;
-					if (m_select > Max) { m_select = 0; }
+				if (this->m_select != InvalidID) {
+					++this->m_select;
+					if (this->m_select > Max) { this->m_select = 0; }
 				}
 				else {
-					m_select = 0;
+					this->m_select = 0;
 				}
-				this->m_MouseSelMode = false;
+				this->m_MouseSelectMode = false;
 			}
 
-			if (this->m_MouseSelMode) {
-				m_select = InvalidID;
+			if (this->m_MouseSelectMode) {
+				this->m_select = InvalidID;
 			}
 			// 
-			for (auto& sel : m_ButtonSel) {
-				if (sel->GetInto()) {
-					this->m_MouseSelMode = true;
-					m_select = static_cast<int>(&sel - &m_ButtonSel.front());
+			for (auto& select : this->m_ButtonSelect) {
+				if (select->GetInto()) {
+					this->m_MouseSelectMode = true;
+					this->m_select = static_cast<int>(&select - &m_ButtonSelect.front());
 				}
 			}
-			if (preselect != m_select || preMouseSel != this->m_MouseSelMode) {
-				if (m_select != InvalidID) {
-					for (auto& sel : m_ButtonSel) {
-						sel->SetNone();
+			if (preselect != this->m_select || preMouseSelect != this->m_MouseSelectMode) {
+				if (this->m_select != InvalidID) {
+					for (auto& select : this->m_ButtonSelect) {
+						select->SetNone();
 					}
-					m_ButtonSel.at(static_cast<size_t>(m_select))->SetFocus();
+					this->m_ButtonSelect.at(static_cast<size_t>(this->m_select))->SetFocus();
 					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 				}
 				else {
-					for (auto& sel : m_ButtonSel) {
-						sel->SetReady();
+					for (auto& select : this->m_ButtonSelect) {
+						select->SetReady();
 					}
 				}
 			}
 		}
 		void ButtonControl::Update(void) noexcept {
-			for (auto& sel : m_ButtonSel) {
-				sel->Update();
+			for (auto& select : this->m_ButtonSelect) {
+				select->Update();
 			}
 		}
 		void ButtonControl::Draw(void) noexcept {
-			for (auto& sel : m_ButtonSel) {
-				sel->Draw();
+			for (auto& select : this->m_ButtonSelect) {
+				select->Draw();
 			}
 		}
 		void ButtonControl::Dispose(void) noexcept {
-			for (auto& sel : m_ButtonSel) {
-				sel.reset();
+			for (auto& select : this->m_ButtonSelect) {
+				select.reset();
 			}
-			m_ButtonSel.clear();
+			this->m_ButtonSelect.clear();
 		}
 		// 
-		void CreditControl::Init(void) noexcept {
+		CreditControl::CreditControl(void) noexcept {
 			FileStreamDX FileStream("data/Credit.txt");
 			this->m_CreditCoulm = 0;
 			while (true) {
@@ -105,6 +105,14 @@ namespace FPS_n2 {
 				++this->m_CreditCoulm;
 			}
 		}
+		CreditControl::~CreditControl(void) noexcept {
+			this->m_CreditCoulm = 0;
+			for (auto& credit : this->m_CreditStr) {
+				sprintfDx(credit.first, "");
+				sprintfDx(credit.second, "");
+			}
+		}
+
 		void CreditControl::Draw(int xmin, int ymin, int xmax) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			int xp1, yp1;
@@ -123,13 +131,6 @@ namespace FPS_n2 {
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::DIZ_UD_Gothic, Height,
 					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::MIDDLE, xpos, ypos, White, Black, credit.second);
 				yp1 += Height;
-			}
-		}
-		void CreditControl::Dispose(void) noexcept {
-			this->m_CreditCoulm = 0;
-			for (auto& credit : this->m_CreditStr) {
-				sprintfDx(credit.first, "");
-				sprintfDx(credit.second, "");
 			}
 		}
 	};

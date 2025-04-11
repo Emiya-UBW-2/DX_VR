@@ -3,7 +3,7 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
-		class UIClass {
+		class MainSceneUI {
 		private:
 			std::array<int, 6>				intParam{};
 			std::array<float, 6>			floatParam{};
@@ -13,13 +13,13 @@ namespace FPS_n2 {
 			float LookPer{};
 			float IsDrawAimUIPer{};
 		public:
-			UIClass(void) noexcept {}
-			UIClass(const UIClass&) = delete;
-			UIClass(UIClass&&) = delete;
-			UIClass& operator=(const UIClass&) = delete;
-			UIClass& operator=(UIClass&&) = delete;
+			MainSceneUI(void) noexcept {}
+			MainSceneUI(const MainSceneUI&) = delete;
+			MainSceneUI(MainSceneUI&&) = delete;
+			MainSceneUI& operator=(const MainSceneUI&) = delete;
+			MainSceneUI& operator=(MainSceneUI&&) = delete;
 
-			virtual ~UIClass(void) noexcept {}
+			virtual ~MainSceneUI(void) noexcept {}
 		public:
 			void			Load(void) noexcept {
 			}
@@ -40,7 +40,7 @@ namespace FPS_n2 {
 				Easing(&LookPer, CanLookTarget ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 				bool IsDrawAimUI = false;
 				if (ViewChara->GetGunPtrNow()) {
-					IsDrawAimUI = ViewChara->GetGunPtrNow()->GetCanShot() && (ViewChara->GetGunPtrNow()->GetGunAnime() != GunAnimeID::Watch);
+					IsDrawAimUI = ViewChara->GetGunPtrNow()->GetCanShot() && (ViewChara->GetGunPtrNow()->GetGunAnime() != Charas::GunAnimeID::Watch);
 				}
 				Easing(&IsDrawAimUIPer, IsDrawAimUI ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 				if (IsDrawAimUIPer < 0.1f && !IsDrawAimUI) { IsDrawAimUIPer = 0.f; }

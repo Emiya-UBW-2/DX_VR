@@ -3,10 +3,10 @@
 #include	"../../MainScene/Player/Player.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace Charas {
 		void HitBoxControl::Update(const ObjectBaseClass* ptr, float SizeRate) noexcept {
 			SizeRate *= Scale3DRate;
-			auto* Ptr = (CharacterClass*)ptr;
+			auto* Ptr = (CharacterObj*)ptr;
 			int ID = 0;
 			this->m_HitBox[ID].Update(Ptr->GetEyePositionCache(), 0.13f * SizeRate, HitType::Head); ++ID;
 			this->m_HitBox[ID].Update((Ptr->GetEyePositionCache() + Ptr->GetFrameWorldMat(CharaFrame::Upper).pos()) / 2.f, 0.16f * SizeRate, HitType::Body); ++ID;

@@ -3,7 +3,7 @@
 #include	"../../MainScene/BackGround/BackGround.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace Objects {
 		enum class FallObjectType {
 			Cart,
 			Magazine,
@@ -15,22 +15,22 @@ namespace FPS_n2 {
 			FallObjChildBase(void) noexcept {}
 			virtual ~FallObjChildBase(void) noexcept {}
 		public:
-			virtual SoundEnum GetFallSound(void) const noexcept = 0;
+			virtual Sceneclass::SoundEnum GetFallSound(void) const noexcept = 0;
 		public:
 			virtual void RotateOnAir(moves* objMove) noexcept = 0;
 			virtual void RotateOnGround(moves* objMove) noexcept = 0;
 			virtual void OnTimeEnd(const moves& objMove) noexcept = 0;
 		};
 
-		class FallObjClass : public ObjectBaseClass {
+		class FallObj : public ObjectBaseClass {
 			float	m_yAdd{ 0.f };
 			float	m_Timer{ 0.f };
 			bool	m_SoundSwitch{ false };
 			std::unique_ptr<FallObjChildBase>	m_FallObject{};
 			bool	m_IsEndFall{ false };
 		public:
-			FallObjClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::FallObj); }
-			~FallObjClass(void) noexcept {}
+			FallObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::FallObj); }
+			virtual ~FallObj(void) noexcept {}
 		public:
 			bool			PopIsEndFall(void) noexcept {
 				if (this->m_IsEndFall) {
@@ -66,10 +66,10 @@ namespace FPS_n2 {
 			void			Dispose_Sub(void) noexcept override {}
 		};
 
-		class AmmoInChamberClass : public ObjectBaseClass {
+		class AmmoInChamberObj : public ObjectBaseClass {
 		public:
-			AmmoInChamberClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::AmmoInChamber); }
-			~AmmoInChamberClass(void) noexcept {}
+			AmmoInChamberObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::AmmoInChamber); }
+			virtual ~AmmoInChamberObj(void) noexcept {}
 		public:
 			void			SetMat(const Vector3DX& pos, const Matrix3x3DX& mat) noexcept {
 				SetMove().SetAll(pos, pos, pos, Vector3DX::zero(), mat, mat);
@@ -78,8 +78,8 @@ namespace FPS_n2 {
 			}
 		public:
 			void				Init_Sub(void) noexcept override {
-				ObjectBaseClass::SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
-				ObjectBaseClass::SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
+				SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
+				SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
 				SetActive(true);
 			}
 			void				FirstExecute(void) noexcept override{}

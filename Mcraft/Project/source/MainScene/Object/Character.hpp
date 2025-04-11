@@ -5,9 +5,9 @@
 #include	"CharaAnimData.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace Charas {
 
-		class CharacterClass : public ObjectBaseClass {
+		class CharacterObj : public ObjectBaseClass {
 		private:
 			HitBoxControl										m_HitBoxControl;
 			WalkSwingControl									m_WalkSwingControl;
@@ -36,7 +36,7 @@ namespace FPS_n2 {
 			bool												m_MoveOverRideFlag{ false };
 			moves												m_OverRideInfo;
 			PlayerID											m_MyID{ 0 };
-			CharaTypeID											m_CharaType{};
+			Sceneclass::CharaTypeID								m_CharaType{};
 			bool												m_CanLookTarget{ true };
 			float												m_Length{};
 			bool												m_ConcussionSwitch{};
@@ -67,12 +67,12 @@ namespace FPS_n2 {
 			const auto		IsMoveBack(void) const noexcept { return this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_W); }
 			const auto		IsMoveLeft(void) const noexcept { return this->m_Input.GetPADSPress(Controls::PADS::MOVE_A) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_D); }
 			const auto		IsMoveRight(void) const noexcept { return this->m_Input.GetPADSPress(Controls::PADS::MOVE_D) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_A); }
-			const auto		GetBottomStandAnimSel(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
-			const auto		GetBottomWalkAnimSel(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_Walk : CharaAnimeID::Bottom_Stand_Walk; }
-			const auto		GetBottomWalkBackAnimSel(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_WalkBack : CharaAnimeID::Bottom_Stand_WalkBack; }
-			const auto		GetBottomLeftStepAnimSel(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_LeftStep : CharaAnimeID::Bottom_Stand_LeftStep; }
-			const auto		GetBottomRightStepAnimSel(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_RightStep : CharaAnimeID::Bottom_Stand_RightStep; }
-			const auto		GetBottomTurnAnimSel(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_Turn : CharaAnimeID::Bottom_Stand_Turn; }
+			const auto		GetBottomStandAnimSelect(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat : CharaAnimeID::Bottom_Stand; }
+			const auto		GetBottomWalkAnimSelect(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_Walk : CharaAnimeID::Bottom_Stand_Walk; }
+			const auto		GetBottomWalkBackAnimSelect(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_WalkBack : CharaAnimeID::Bottom_Stand_WalkBack; }
+			const auto		GetBottomLeftStepAnimSelect(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_LeftStep : CharaAnimeID::Bottom_Stand_LeftStep; }
+			const auto		GetBottomRightStepAnimSelect(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_RightStep : CharaAnimeID::Bottom_Stand_RightStep; }
+			const auto		GetBottomTurnAnimSelect(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_Turn : CharaAnimeID::Bottom_Stand_Turn; }
 		public://プレイヤーキャラから見た際の情報
 			const auto&		GetCanLookByPlayer(void) const noexcept { return this->m_CanLookTarget; }
 			const auto&		GetLengthToPlayer(void) const noexcept { return this->m_Length; }
@@ -92,6 +92,12 @@ namespace FPS_n2 {
 			const auto		IsAlive(void) const noexcept { return this->m_HP.IsNotZero(); }
 			const auto		IsLowHP(void) const noexcept { return this->m_HP.GetPoint() < (this->m_HP.GetMax() * 35 / 100); }
 			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
+			const auto		GetCameraPosition(void) const noexcept {
+				if (GetGunPtrNow()) {
+					return Lerp<Vector3DX>(GetEyePositionCache(), GetGunPtrNow()->GetPartsFrameMatParent(Guns::GunFrame::Eyepos).pos(), GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::ADS));
+				}
+				return GetEyePositionCache();
+			}
 		public://セッター
 			void			SetPlayerID(PlayerID ID) noexcept {
 				this->m_MyID = ID;
@@ -102,7 +108,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			void			SetCharaTypeID(CharaTypeID Type) noexcept { this->m_CharaType = Type; }
+			void			SetCharaTypeID(Sceneclass::CharaTypeID Type) noexcept { this->m_CharaType = Type; }
 			void			SetMoveOverRide(const moves& overrideInfo) noexcept {
 				this->m_MoveOverRideFlag = true;
 				this->m_OverRideInfo = overrideInfo;
@@ -116,16 +122,16 @@ namespace FPS_n2 {
 			void			ExecuteInput(void) noexcept;
 			void			ExecuteMatrix(void) noexcept;
 		public: //コンストラクタ、デストラクタ
-			CharacterClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Human); }
-			~CharacterClass(void) noexcept {}
+			CharacterObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Human); }
+			virtual ~CharacterObj(void) noexcept {}
 		public:
 			static void		LoadChara(const std::string& FolderName, PlayerID ID) noexcept;
-			void			LoadCharaGun(const std::string& FolderName, int Sel) noexcept;
+			void			LoadCharaGun(const std::string& FolderName, int Select) noexcept;
 			void			SetupRagDoll(void) noexcept {
 				MV1::SetAnime(&SetRagDoll(), GetObj());
 				this->m_RagDollControl.Init(GetObj());
 			}
-			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSel) noexcept {
+			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect) noexcept {
 				this->m_HP.Init();
 				this->m_AP.Init();
 				Heal(100);
@@ -143,7 +149,7 @@ namespace FPS_n2 {
 				this->m_IsSquat = false;
 				SetMove().SetAll(pPos, pPos, pPos, Vector3DX::zero(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y));
 				//
-				this->m_GunPtrControl.SelectGun(GunSel);
+				this->m_GunPtrControl.SelectGun(GunSelect);
 				for (int loop = 0, max = this->m_GunPtrControl.GetGunNum(); loop < max; ++loop) {
 					if (!this->m_GunPtrControl.GetGunPtr(loop)) { continue; }
 					this->m_GunPtrControl.GetGunPtr(loop)->Spawn();

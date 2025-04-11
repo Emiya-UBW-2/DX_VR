@@ -11,13 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\CommonScene\Object\GunsModify.hpp" />
     <ClInclude Include="source\CommonScene\UI\CommonUIControl.hpp" />
     <ClInclude Include="source\Enums.hpp" />
     <ClInclude Include="source\Header.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGround.hpp" />
     <ClInclude Include="source\MainScene\BackGround\BackGroundSub.hpp" />
-    <ClInclude Include="source\MainScene\Input.hpp" />
     <ClInclude Include="source\MainScene\MainSceneSub.hpp" />
     <ClInclude Include="source\MainScene\NetWork.hpp" />
     <ClInclude Include="source\MainScene\NetworkBrowser.hpp" />
@@ -33,7 +31,6 @@
     <ClInclude Include="source\MainScene\Object\Gun_before.hpp" />
     <ClInclude Include="source\MainScene\Object\Mod.hpp" />
     <ClInclude Include="source\MainScene\Object\ModData.hpp" />
-    <ClInclude Include="source\MainScene\Object\ModEnum.hpp" />
     <ClInclude Include="source\MainScene\Player\CPU.hpp" />
     <ClInclude Include="source\MainScene\Player\Player.hpp" />
     <ClInclude Include="source\MainScene\UI\MainSceneUIControl.hpp" />
@@ -43,12 +40,10 @@
     <ClInclude Include="source\sub.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\CommonScene\Object\GunsModify.cpp" />
     <ClCompile Include="source\CommonScene\UI\CommonUIControl.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\MainScene\BackGround\BackGround.cpp" />
     <ClCompile Include="source\MainScene\BackGround\BackGroundSub.cpp" />
-    <ClCompile Include="source\MainScene\Input.cpp" />
     <ClCompile Include="source\MainScene\MainSceneSub.cpp" />
     <ClCompile Include="source\MainScene\NetWork.cpp" />
     <ClCompile Include="source\MainScene\NetworkBrowser.cpp" />

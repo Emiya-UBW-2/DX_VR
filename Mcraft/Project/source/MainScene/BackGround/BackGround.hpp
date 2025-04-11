@@ -118,7 +118,7 @@ namespace FPS_n2 {
 
 
 		static constexpr int8_t s_EmptyBlick = 0;
-		static constexpr int total = 4;
+		static constexpr int TotalCellLayer = 4;
 		static constexpr int MulPer = 2;
 		static constexpr float CellScale = Scale3DRate / 2.f / 2.f;
 
@@ -143,9 +143,9 @@ namespace FPS_n2 {
 		static constexpr int DrawMinYPlus = DrawMaxYPlus / MulPer;
 		static constexpr int DrawMinYMinus = DrawMaxYMinus / MulPer;
 
-		class BackGroundClass : public SingletonBase<BackGroundClass> {
+		class BackGroundControl : public SingletonBase<BackGroundControl> {
 		private:
-			friend class SingletonBase<BackGroundClass>;
+			friend class SingletonBase<BackGroundControl>;
 		private:
 			struct Vector3Int {
 				int x{};
@@ -169,15 +169,16 @@ namespace FPS_n2 {
 			};
 			struct CellsData {
 				std::vector<CellBuffer>	m_CellBuffer;
-				int scaleRate = 1;
-				int All = 256 / scaleRate;
+				int		m_scaleRate = 1;
+				int		m_All = 256 / this->m_scaleRate;
 				//ŽZp•â•Œn
-				int Half = All / 2;
-				int AllPow2 = All * All;
-				float Scale = (CellScale * scaleRate);
+				int		m_Half = this->m_All / 2;
+				int		m_AllPow2 = this->m_All * this->m_All;
+				float	m_Scale = (CellScale * this->m_scaleRate);
+			public:
 				//
-				const int	GetIndex(int t) const noexcept { return (t % All + All) % All; }
-				const size_t	GetCellNum(int x, int y, int z) const noexcept { return static_cast<size_t>(GetIndex(x) * AllPow2 + y * All + GetIndex(z)); }
+				const int	GetIndex(int t) const noexcept { return (t % this->m_All + this->m_All) % this->m_All; }
+				const size_t	GetCellNum(int x, int y, int z) const noexcept { return static_cast<size_t>(GetIndex(x) * this->m_AllPow2 + y * this->m_All + GetIndex(z)); }
 				//
 				const auto&		GetCellBuf(int x, int y, int z) const noexcept { return this->m_CellBuffer[GetCellNum(x, y, z)]; }
 				auto&			SetCellBuf(int x, int y, int z) noexcept { return this->m_CellBuffer[GetCellNum(x, y, z)]; }
@@ -187,7 +188,7 @@ namespace FPS_n2 {
 				}
 				//
 				const int8_t	isFill(int x, int y, int z, int mul) const noexcept {
-					mul /= scaleRate;
+					mul /= this->m_scaleRate;
 					int FillCount = 0;
 					int FillAll = 0;
 
@@ -196,7 +197,7 @@ namespace FPS_n2 {
 					int zMaxmin = z * mul + mul - 1;
 					std::vector<int> IDCount;
 					for (int xt = xMaxmin; xt < xMaxmin + mul; ++xt) {
-						for (int yt = yMaxmin; yt < std::min(yMaxmin + mul, All); ++yt) {
+						for (int yt = yMaxmin; yt < std::min(yMaxmin + mul, this->m_All); ++yt) {
 							for (int zt = zMaxmin; zt < zMaxmin + mul; ++zt) {
 								++FillAll;
 								if (GetCellBuf(xt, yt, zt).IsEmpty()) { continue; }
@@ -225,31 +226,31 @@ namespace FPS_n2 {
 						return s_EmptyBlick;
 					}
 				}
-				const bool		isInside(int y) const noexcept { return ((0 <= y) && (y < All)); }
+				const bool		isInside(int y) const noexcept { return ((0 <= y) && (y < this->m_All)); }
 				const Vector3DX	GetPos(int x, int y, int z) const noexcept {
-					return Vector3DX::vget(static_cast<float>(x - Half), static_cast<float>(y - Half), static_cast<float>(z - Half)) * Scale;
+					return Vector3DX::vget(static_cast<float>(x - this->m_Half), static_cast<float>(y - this->m_Half), static_cast<float>(z - this->m_Half)) * this->m_Scale;
 				}
 				const Vector3Int GetPoint(const Vector3DX& pos) const noexcept {
-					Vector3DX Start = pos / Scale;
-					return Vector3Int(static_cast<int>(Start.x) + Half, static_cast<int>(Start.y) + Half, static_cast<int>(Start.z) + Half);
+					Vector3DX Start = pos / this->m_Scale;
+					return Vector3Int(static_cast<int>(Start.x) + this->m_Half, static_cast<int>(Start.y) + this->m_Half, static_cast<int>(Start.z) + this->m_Half);
 				}
 
 				//
 				void			SetScale(int scale) noexcept {
-					scaleRate = scale;
-					All = 256 / scaleRate;
+					this->m_scaleRate = scale;
+					this->m_All = 256 / this->m_scaleRate;
 					//ŽZp•â•Œn
-					Half = All / 2;
-					AllPow2 = All * All;
-					Scale = (CellScale * scaleRate);
-					this->m_CellBuffer.resize(static_cast<size_t>(All * All * All));
+					this->m_Half = this->m_All / 2;
+					this->m_AllPow2 = this->m_All * this->m_All;
+					this->m_Scale = (CellScale * this->m_scaleRate);
+					this->m_CellBuffer.resize(static_cast<size_t>(this->m_All * this->m_All * this->m_All));
 				}
 				//
 				void			CalcOcclusion(int x, int y, int z) noexcept {
 					SetCellBuf(x, y, z).m_FillInfo = 0;
 					SetCellBuf(x, y, z).m_FillInfo |= (1 << 0) * (!GetCellBuf(x + 1, y, z).IsEmpty());
 					SetCellBuf(x, y, z).m_FillInfo |= (1 << 1) * (!GetCellBuf(x - 1, y, z).IsEmpty());
-					SetCellBuf(x, y, z).m_FillInfo |= (1 << 2) * ((y == All - 1) ? true : !GetCellBuf(x, y + 1, z).IsEmpty());
+					SetCellBuf(x, y, z).m_FillInfo |= (1 << 2) * ((y == this->m_All - 1) ? true : !GetCellBuf(x, y + 1, z).IsEmpty());
 					SetCellBuf(x, y, z).m_FillInfo |= (1 << 3) * ((y == 0) ? true : !GetCellBuf(x, y - 1, z).IsEmpty());
 					SetCellBuf(x, y, z).m_FillInfo |= (1 << 4) * (!GetCellBuf(x, y, z + 1).IsEmpty());
 					SetCellBuf(x, y, z).m_FillInfo |= (1 << 5) * (!GetCellBuf(x, y, z - 1).IsEmpty());
@@ -381,24 +382,24 @@ namespace FPS_n2 {
 			GraphHandle						m_tex{};
 			GraphHandle						m_norm{};
 			std::vector<int8_t>				m_CellBase{};
-			std::array<CellsData, total>	m_CellxN;
-			std::array<ThreadJobs, total + total + total>	m_Jobs;
+			std::array<CellsData, TotalCellLayer>	m_CellxN;
+			std::array<ThreadJobs, TotalCellLayer + TotalCellLayer + TotalCellLayer>	m_Jobs;
 			//
 			int								m_BaseRate = 100;
 			int								m_ShadowRate = 100;
 			int								m_ThreadCounter = 0;
 			//•\Ž¦ƒ|ƒŠƒSƒ“ƒXƒŒƒbƒh—p
-			std::array<vert32<VERTEX3D>, total>	m_vert32s;
-			std::array<Vector3DX, total>	m_CamPos;
-			std::array<Vector3DX, total>	m_CamVec;
+			std::array<vert32<VERTEX3D>, TotalCellLayer>	m_vert32s;
+			std::array<Vector3DX, TotalCellLayer>	m_CamPos;
+			std::array<Vector3DX, TotalCellLayer>	m_CamVec;
 			//‰eƒXƒŒƒbƒh—p
-			std::array<vert32<VERTEX3D>, total>	m_vert32sSB;
-			std::array<Vector3DX, total>	m_CamPosSB;
-			std::array<Vector3DX, total>	m_light;
+			std::array<vert32<VERTEX3D>, TotalCellLayer>	m_vert32sSB;
+			std::array<Vector3DX, TotalCellLayer>	m_CamPosSB;
+			std::array<Vector3DX, TotalCellLayer>	m_light;
 
-			std::array<vert32<VERTEX3DSHADER>, total>	m_vert32sS;
-			std::array<Vector3DX, total>	m_CamPosS;
-			std::array<Vector3DX, total>	m_CamVecS;
+			std::array<vert32<VERTEX3DSHADER>, TotalCellLayer>	m_vert32sS;
+			std::array<Vector3DX, TotalCellLayer>	m_CamPosS;
+			std::array<Vector3DX, TotalCellLayer>	m_CamVecS;
 
 			MazeControl						m_MazeControl;
 			//
@@ -408,17 +409,17 @@ namespace FPS_n2 {
 			int								xput = 5;
 			int								yput = 2;
 			int								zput = 5;
-			int8_t							blicksel = -1;
+			int8_t							blickselect = -1;
 			Vector3DX						PutPos;
 #endif
 		public:
-			BackGroundClass(void) noexcept {}
-			BackGroundClass(const BackGroundClass&) = delete;
-			BackGroundClass(BackGroundClass&&) = delete;
-			BackGroundClass& operator=(const BackGroundClass&) = delete;
-			BackGroundClass& operator=(BackGroundClass&&) = delete;
+			BackGroundControl(void) noexcept { Load(); }
+			BackGroundControl(const BackGroundControl&) = delete;
+			BackGroundControl(BackGroundControl&&) = delete;
+			BackGroundControl& operator=(const BackGroundControl&) = delete;
+			BackGroundControl& operator=(BackGroundControl&&) = delete;
 
-			virtual ~BackGroundClass(void) noexcept {}
+			virtual ~BackGroundControl(void) noexcept { Dispose(); }
 		private:
 			inline static void		Bresenham3D(int x1, int y1, int z1, int x2, int y2, int z2, const std::function<bool(int, int, int)>& OutPutLine) noexcept {
 				int err_1{}, err_2{};

@@ -19,7 +19,7 @@ namespace FPS_n2 {
 			PauseMenuControl							m_PauseMenuControl;
 			FadeControl									m_FadeControl;
 			//UIŠÖ˜A
-			UIClass										m_UIclass;
+			MainSceneUI										m_UIclass;
 			//NetWork
 			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };
 			std::vector<DamageEvent>					m_DamageEvents;
@@ -51,19 +51,19 @@ namespace FPS_n2 {
 			void			Dispose_Load_Sub(void) noexcept override;
 			//
 			void			BG_Draw_Sub(void) const noexcept override {
-				BackGround::BackGroundClass::Instance()->BG_Draw();
+				BackGround::BackGroundControl::Instance()->BG_Draw();
 			}
 			void			ShadowDraw_Far_Sub(void) const noexcept override {}
 			void			ShadowDraw_Sub(void) const noexcept override {
-				BackGround::BackGroundClass::Instance()->Shadow_Draw();
+				BackGround::BackGroundControl::Instance()->Shadow_Draw();
 				ObjectManager::Instance()->Draw_Shadow();
 			}
 			void			CubeMap_Sub(void) const noexcept override {
-				BackGround::BackGroundClass::Instance()->Draw();
+				BackGround::BackGroundControl::Instance()->Draw();
 			}
 
 			void			SetShadowDraw_Rigid_Sub(void) const noexcept override {
-				BackGround::BackGroundClass::Instance()->SetShadow_Draw_Rigid();
+				BackGround::BackGroundControl::Instance()->SetShadow_Draw_Rigid();
 			}
 			void			SetShadowDraw_Sub(void) const noexcept override {
 				ObjectManager::Instance()->Draw(false, -1);

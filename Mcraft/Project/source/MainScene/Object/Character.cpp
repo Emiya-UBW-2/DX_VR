@@ -3,8 +3,8 @@
 #include	"../../MainScene/Player/Player.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
-		bool			CharacterClass::SetDamageEvent(const DamageEvent& Event) noexcept {
+	namespace Charas {
+		bool			CharacterObj::SetDamageEvent(const DamageEvent& Event) noexcept {
 			if (GetMyPlayerID() == Event.DamageID) {
 				auto* SE = SoundPool::Instance();
 				auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -17,10 +17,10 @@ namespace FPS_n2 {
 				if (Event.ShotID == PlayerMngr->GetWatchPlayer()) {//撃ったキャラ
 					//SE
 					if (Event.Damage > 0) {
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Hit))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+						SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Hit))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 					}
 					else if (Event.ArmerDamage > 0) {
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f, 128);
+						SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f, 128);
 					}
 					//ヒットカウント
 					if ((Event.Damage >= 0) && (Event.ArmerDamage >= 0)) {
@@ -35,10 +35,10 @@ namespace FPS_n2 {
 				}
 				if (Event.DamageID == PlayerMngr->GetWatchPlayer()) {//撃たれたキャラ
 					if (Event.Damage > 0) {
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitMe))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+						SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::HitMe))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 					}
 					else if (Event.ArmerDamage > 0) {
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f, 255);
+						SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f, 255);
 					}
 				}
 				//エフェクトセット
@@ -71,28 +71,28 @@ namespace FPS_n2 {
 				if (IsAlive()) {
 					//被弾ボイス
 					if ((Event.Damage >= 0) && (Event.ArmerDamage >= 0)) {
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_Hurt1) + GetRand(6 - 1))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+						SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Man_Hurt1) + GetRand(6 - 1))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 					}
 				}
 				else if (IsDeath) {
 					//死亡ボイス
 					for (int loop = 0; loop < 6; ++loop) {
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_Hurt1) + loop)->StopAll();
+						SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Man_Hurt1) + loop)->StopAll();
 					}
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_contact))->StopAll();
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_openfire))->StopAll();
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_reload))->StopAll();
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover))->StopAll();
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing))->StopAll();
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend))->StopAll();
+					SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Man_contact))->StopAll();
+					SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Man_openfire))->StopAll();
+					SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Man_reload))->StopAll();
+					SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Man_takecover))->StopAll();
+					SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Man_breathing))->StopAll();
+					SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Man_breathend))->StopAll();
 
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_Death1) + GetRand(8 - 1))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+					SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Man_Death1) + GetRand(8 - 1))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 				}
 				return true;
 			}
 			return false;
 		}
-		const bool		CharacterClass::CheckDamageRay(HitPoint BaseDamage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
+		const bool		CharacterObj::CheckDamageRay(HitPoint BaseDamage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			if (!IsAlive()) { return false; }
 			if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, GetMove().GetPos()) <= 2.0f * Scale3DRate)) { return false; }
@@ -132,17 +132,17 @@ namespace FPS_n2 {
 			return false;
 		}
 		//操作
-		void			CharacterClass::ExecuteInput(void) noexcept {
+		void			CharacterObj::ExecuteInput(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
-			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			//
 			if (!IsAlive()) { return; }
 			if (this->m_Input.GetPADSTrigger(Controls::PADS::SQUAT)) {
 				this->m_IsSquat ^= 1;
 				//しゃがみ音
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
+				SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
 			}
 			if (GetGunPtrNow()) {
 				//銃ひっこめ
@@ -151,7 +151,7 @@ namespace FPS_n2 {
 
 					Vector3DX GunStart = GetEyePositionCache();
 					Vector3DX GunEnd = (GetGunPtrNow()->GetBaseMuzzleMat() * GetFrameWorldMat(CharaFrame::Head)).pos();
-					bool IsHit = BackGround->CheckLinetoMap(GunStart, GunEnd);
+					bool IsHit = BackGroundParts->CheckLinetoMap(GunStart, GunEnd);
 					//ほかプレイヤーとの判定
 					if(!IsHit) {
 						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
@@ -211,10 +211,10 @@ namespace FPS_n2 {
 				//アクション
 				switch (GetGunPtrNow()->GetGunAnime()) {
 				case GunAnimeID::LowReady:
-					if (this->m_GunPtrControl.IsChangeGunSel() && GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::LowReady) > 0.95f) {
-						this->m_GunPtrControl.InvokeReserveGunSel();
+					if (this->m_GunPtrControl.IsChangeGunSelect() && GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::LowReady) > 0.95f) {
+						this->m_GunPtrControl.InvokeReserveGunSelect();
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::Base);
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
+						SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
 					}
 					break;
 				case GunAnimeID::Base:
@@ -223,24 +223,24 @@ namespace FPS_n2 {
 						if (this->m_Input.GetPADSPress(Controls::PADS::CHECK)) {
 							GetGunPtrNow()->SetGunAnime(GunAnimeID::Watch);
 						}
-						if (!GetGunPtrNow()->GetGunPartsSlot()->GetGunPartsData()->GetIsThrowWeapon()) {
+						if (!GetGunPtrNow()->GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
 							//Reload
 							if (this->m_Input.GetPADSPress(Controls::PADS::RELOAD) ||
 								((GetGunPtrNow()->GetAmmoNumTotal() == 0) && this->m_Input.GetPADSTrigger(Controls::PADS::SHOT))) {
 								GetGunPtrNow()->ReloadStart();
 								if (GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) {
 									if (GetRand(100) < 50) {
-										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_reload))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+										SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Man_reload))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 									}
 									else {
-										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+										SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Man_takecover))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 									}
 								}
 							}
 							//射撃
 							else if (this->m_Input.GetPADSPress(Controls::PADS::SHOT)) {
 								if (this->m_Input.GetPADSTrigger(Controls::PADS::SHOT)) {
-									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Trigger))->Play3D(GetEyePositionCache(), Scale3DRate * 5.f);
+									SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Trigger))->Play3D(GetEyePositionCache(), Scale3DRate * 5.f);
 								}
 								GetGunPtrNow()->SetShotStart();
 							}
@@ -261,7 +261,7 @@ namespace FPS_n2 {
 					break;
 				case GunAnimeID::Shot:
 					//射撃終了フラグ
-					if (GetGunPtrNow()->GetShotType() == SHOTTYPE::FULL) {
+					if (GetGunPtrNow()->GetShotType() == Guns::SHOTTYPE::FULL) {
 						GetGunPtrNow()->SetShotEnd(true);
 					}
 					else {
@@ -270,7 +270,7 @@ namespace FPS_n2 {
 					break;
 				case GunAnimeID::ReloadWait:
 				case GunAnimeID::Reload:
-					if (GetGunPtrNow()->GetReloadType() == RELOADTYPE::AMMO) {
+					if (GetGunPtrNow()->GetReloadType() == Guns::RELOADTYPE::AMMO) {
 						if (this->m_Input.GetPADSTrigger(Controls::PADS::SHOT)) {
 							GetGunPtrNow()->SetReloadAmmoCancel();
 						}
@@ -308,18 +308,18 @@ namespace FPS_n2 {
 				this->m_MoveControl.GetVecPower() > 0.1f, (IsMoveFront() ? this->m_MoveControl.GoFrontRad() : 0.f) + (IsMoveBack() ? this->m_MoveControl.GoBackRad() : 0.f));
 			//リーン
 			if (this->m_LeanControl.Update(this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_L), this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_R))) {
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
+				SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
 			}
 			if (GetGunPtrNow()) {
 				GetGunPtrNow()->CalcSwitchPer(this->m_LeanControl.GetRate() >= 0 || !GetGunPtrNow()->IsCanShot());
 			}
 			//下半身
-			this->m_BottomAnimSelect = GetBottomStandAnimSel();
-			if (IsMoveLeft()) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSel(); }
-			if (IsMoveRight()) { this->m_BottomAnimSelect = GetBottomRightStepAnimSel(); }
-			if (IsMoveBack()) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSel(); }
-			if (IsMoveFront()) { this->m_BottomAnimSelect = GetBottomWalkAnimSel(); }
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(GetBottomTurnAnimSel())), (!this->m_IsSquat && this->m_RotateControl.IsTurnBody()) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
+			this->m_BottomAnimSelect = GetBottomStandAnimSelect();
+			if (IsMoveLeft()) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSelect(); }
+			if (IsMoveRight()) { this->m_BottomAnimSelect = GetBottomRightStepAnimSelect(); }
+			if (IsMoveBack()) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSelect(); }
+			if (IsMoveFront()) { this->m_BottomAnimSelect = GetBottomWalkAnimSelect(); }
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(GetBottomTurnAnimSelect())), (!this->m_IsSquat && this->m_RotateControl.IsTurnBody()) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
 			for (int loop = 0; loop < static_cast<int>(CharaAnimeID::AnimeIDMax); ++loop) {
 				CharaAnimeID ID = static_cast<CharaAnimeID>(loop);
 				if (
@@ -341,20 +341,20 @@ namespace FPS_n2 {
 				}
 			}
 			//足音
-			if (this->m_BottomAnimSelect != GetBottomStandAnimSel()) {
+			if (this->m_BottomAnimSelect != GetBottomStandAnimSelect()) {
 				auto Time = GetObj().GetAnim(static_cast<int>(this->m_BottomAnimSelect)).GetTime();
 				//L
 				if ((9.f < Time && Time < 10.f)) {
 					if (this->m_CharaSound != 0) {
 						this->m_CharaSound = 0;
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::RunFoot))->Play3D(GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale3DRate * 5.f);
+						SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::RunFoot))->Play3D(GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale3DRate * 5.f);
 					}
 				}
 				//R
 				if ((27.f < Time && Time < 28.f)) {
 					if (this->m_CharaSound != 1) {
 						this->m_CharaSound = 1;
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::RunFoot))->Play3D(GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale3DRate * 5.f);
+						SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::RunFoot))->Play3D(GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale3DRate * 5.f);
 					}
 				}
 			}
@@ -363,11 +363,11 @@ namespace FPS_n2 {
 			}
 		}
 		//SetMat指示更新
-		void			CharacterClass::ExecuteMatrix(void) noexcept {
+		void			CharacterObj::ExecuteMatrix(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			auto* OptionParts = OptionManager::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			//
@@ -378,15 +378,15 @@ namespace FPS_n2 {
 						this->m_HPRec -= 2.f;
 						Heal(2);
 						if (GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) {
-							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing))->Play(DX_PLAYTYPE_BACK);
+							SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Man_breathing))->Play(DX_PLAYTYPE_BACK);
 						}
 					}
 				}
 				else {
 					if (this->m_HPRec != 0.f) {
 						if (GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) {
-							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing))->StopAll();
-							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend))->Play(DX_PLAYTYPE_BACK);
+							SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Man_breathing))->StopAll();
+							SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Man_breathend))->Play(DX_PLAYTYPE_BACK);
 						}
 					}
 					this->m_HPRec = 0.f;
@@ -443,24 +443,24 @@ namespace FPS_n2 {
 				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Pinky)), FingerPer.GetFingerPer(1, 4), 0.8f, EasingType::OutExpo);
 			}
 			//下半身アニメ演算
-			if (this->m_AnimPerBuf[static_cast<int>(GetBottomTurnAnimSel())] > 0.f) {
-				ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomTurnAnimSel()), 0.5f);
+			if (this->m_AnimPerBuf[static_cast<int>(GetBottomTurnAnimSelect())] > 0.f) {
+				SetAnimLoop(static_cast<int>(GetBottomTurnAnimSelect()), 0.5f);
 			}
 			if (this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Bottom_Stand_Run)] > 0.f) {
-				ObjectBaseClass::SetAnimLoop(static_cast<int>(CharaAnimeID::Bottom_Stand_Run), GetSpeed() * 0.5f);
+				SetAnimLoop(static_cast<int>(CharaAnimeID::Bottom_Stand_Run), GetSpeed() * 0.5f);
 			}
 			float AnimSpeed = 1.15f * std::clamp(GetSpeed() / 0.65f, 0.5f, 1.f);
-			if (this->m_AnimPerBuf[static_cast<int>(GetBottomWalkAnimSel())] > 0.f) {
-				ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomWalkAnimSel()), this->m_MoveControl.GetVecFront() * AnimSpeed);
+			if (this->m_AnimPerBuf[static_cast<int>(GetBottomWalkAnimSelect())] > 0.f) {
+				SetAnimLoop(static_cast<int>(GetBottomWalkAnimSelect()), this->m_MoveControl.GetVecFront() * AnimSpeed);
 			}
-			if (this->m_AnimPerBuf[static_cast<int>(GetBottomLeftStepAnimSel())] > 0.f) {
-				ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomLeftStepAnimSel()), this->m_MoveControl.GetVecLeft() * AnimSpeed);
+			if (this->m_AnimPerBuf[static_cast<int>(GetBottomLeftStepAnimSelect())] > 0.f) {
+				SetAnimLoop(static_cast<int>(GetBottomLeftStepAnimSelect()), this->m_MoveControl.GetVecLeft() * AnimSpeed);
 			}
-			if (this->m_AnimPerBuf[static_cast<int>(GetBottomWalkBackAnimSel())] > 0.f) {
-				ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomWalkBackAnimSel()), this->m_MoveControl.GetVecRear() * AnimSpeed);
+			if (this->m_AnimPerBuf[static_cast<int>(GetBottomWalkBackAnimSelect())] > 0.f) {
+				SetAnimLoop(static_cast<int>(GetBottomWalkBackAnimSelect()), this->m_MoveControl.GetVecRear() * AnimSpeed);
 			}
-			if (this->m_AnimPerBuf[static_cast<int>(GetBottomRightStepAnimSel())] > 0.f) {
-				ObjectBaseClass::SetAnimLoop(static_cast<int>(GetBottomRightStepAnimSel()), this->m_MoveControl.GetVecRight() * AnimSpeed);
+			if (this->m_AnimPerBuf[static_cast<int>(GetBottomRightStepAnimSelect())] > 0.f) {
+				SetAnimLoop(static_cast<int>(GetBottomRightStepAnimSelect()), this->m_MoveControl.GetVecRight() * AnimSpeed);
 			}
 			//アニメ反映
 			for (int loop = 0, max = static_cast<int>(GetObj().GetAnimNum()); loop < max; ++loop) {
@@ -475,7 +475,7 @@ namespace FPS_n2 {
 					Vector3DX::zero();
 				//床判定
 				Vector3DX EndPos = PosBuf - Vector3DX::up() * (0.5f * Scale3DRate);
-				if (BackGround->CheckLinetoMap(PosBuf + Vector3DX::up() * (0.f * Scale3DRate), &EndPos)) {
+				if (BackGroundParts->CheckLinetoMap(PosBuf + Vector3DX::up() * (0.f * Scale3DRate), &EndPos)) {
 					float GroundHight = EndPos.y - (0.12f * Scale3DRate);
 					if ((PosBuf.y - GroundHight) > (0.008f * Scale3DRate / DXLib_refParts->GetDeltaTime())) {
 						PosBuf.y = GroundHight;//高所落下の際は即時反映
@@ -492,7 +492,7 @@ namespace FPS_n2 {
 				SetMove().SetVec(vec);
 				PosBuf += GetMove().GetVec();
 				//壁判定
-				BackGround->CheckMapWall(GetMove().GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * (1.6f * Scale3DRate), 0.7f * Scale3DRate);
+				BackGroundParts->CheckMapWall(GetMove().GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * (1.6f * Scale3DRate), 0.7f * Scale3DRate);
 				//ほかプレイヤーとの判定
 				{
 					float Radius = 2.f * 0.5f * Scale3DRate;
@@ -598,7 +598,7 @@ namespace FPS_n2 {
 							Easing(&this->m_ArmBreakPer, (
 								(GetGunPtrNow()->IsCanShot() && this->m_ArmBreak)
 								|| (GetGunPtrNow()->GetGunAnime() == GunAnimeID::Watch)//TODO:専用の左腕アクション
-								|| (GetGunPtrNow()->GetGunPartsSlot()->GetGunPartsData()->GetIsThrowWeapon() && (GetGunPtrNow()->GetGunAnime() != GunAnimeID::ThrowReady))//TODO:専用の左腕アクション
+								|| (GetGunPtrNow()->GetModifySlot()->GetMyData()->GetIsThrowWeapon() && (GetGunPtrNow()->GetGunAnime() != GunAnimeID::ThrowReady))//TODO:専用の左腕アクション
 								) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 							if (this->m_ArmBreakPer > 0.01f) {
 								this->m_SlingArmZrad.Update(DXLib_refParts->GetDeltaTime());
@@ -639,7 +639,7 @@ namespace FPS_n2 {
 					}
 				}
 				//ヒットボックス
-				this->m_HitBoxControl.Update(this, (GetCharaType() == CharaTypeID::Enemy) ? 1.1f : 1.f);
+				this->m_HitBoxControl.Update(this, (GetCharaType() == Sceneclass::CharaTypeID::Enemy) ? 1.1f : 1.f);
 				//目の座標取得
 				{
 					bool HeadBobbing = ((GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
@@ -679,7 +679,7 @@ namespace FPS_n2 {
 			if (GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) {
 				auto& ViewChara = PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
 				Vector3DX EndPos = GetEyePositionCache();
-				this->m_CanLookTarget = !BackGround->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos);
+				this->m_CanLookTarget = !BackGroundParts->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos);
 				this->m_Length = (GetEyePositionCache() - ViewChara->GetEyePositionCache()).magnitude();
 			}
 			//コンカッション
@@ -711,52 +711,44 @@ namespace FPS_n2 {
 			}
 		}
 		//
-		void			CharacterClass::LoadChara(const std::string& FolderName, PlayerID ID) noexcept {
+		void			CharacterObj::LoadChara(const std::string& FolderName, PlayerID ID) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* ObjMngr = ObjectManager::Instance();
 			auto& player = PlayerMngr->GetPlayer(ID);
 
 			std::string Path = "data/Charactor/";
 			Path += FolderName;
 			Path += "/";
 
-			player->SetChara(std::make_shared<CharacterClass>());
-			ObjMngr->AddObject(player->GetChara());
-			ObjMngr->LoadModel(player->GetChara(), player->GetChara(), Path.c_str());
-			player->GetChara()->Init();
-			player->SetAI(std::make_shared<AIControl>(ID));
+			player->SetChara(std::make_shared<CharacterObj>());
+			ObjectManager::Instance()->InitObject(player->GetChara(), Path.c_str());
+			player->SetAI(std::make_shared<Sceneclass::AIControl>(ID));
 		}
-		void			CharacterClass::LoadCharaGun(const std::string& FolderName, int Sel) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
-
+		void			CharacterObj::LoadCharaGun(const std::string& FolderName, int Select) noexcept {
 			std::string Path = "data/gun/";
 			Path += FolderName;
 			Path += "/";
 
-			auto Ptr = std::make_shared<GunClass>();
-			ObjMngr->AddObject(Ptr);
-			ObjMngr->LoadModel(Ptr, Ptr, Path.c_str());
-			Ptr->Init();
-			this->m_GunPtrControl.SetGunPtr(Sel, Ptr);
+			this->m_GunPtrControl.SetGunPtr(Select, std::make_shared<Guns::GunObj>());
+			ObjectManager::Instance()->InitObject(this->m_GunPtrControl.GetGunPtr(Select), Path.c_str());
 		}
 		//
-		void			CharacterClass::Init_Sub(void) noexcept {
+		void			CharacterObj::Init_Sub(void) noexcept {
 			this->m_HitBoxControl.Init();
 			this->m_ArmBreak = false;
-			ObjectBaseClass::SetMinAABB(Vector3DX::vget(-2.5f, -0.5, -2.5f) * Scale3DRate);
-			ObjectBaseClass::SetMaxAABB(Vector3DX::vget(2.5f, 2.0f, 2.5f) * Scale3DRate);
+			SetMinAABB(Vector3DX::vget(-2.5f, -0.5, -2.5f) * Scale3DRate);
+			SetMaxAABB(Vector3DX::vget(2.5f, 2.0f, 2.5f) * Scale3DRate);
 		}
-		void			CharacterClass::FirstExecute(void) noexcept {
+		void			CharacterObj::FirstExecute(void) noexcept {
 			ExecuteInput();
 			ExecuteMatrix();
 		}
-		void			CharacterClass::CheckDraw_Sub(int) noexcept {
+		void			CharacterObj::CheckDraw_Sub(int) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			if (GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) {
 				this->m_IsActiveCameraPos |= this->m_CameraPos.Calc(GetEyePositionCache());
 			}
 		}
-		void			CharacterClass::Draw(bool isDrawSemiTrans, int Range) noexcept {
+		void			CharacterObj::Draw(bool isDrawSemiTrans, int Range) noexcept {
 			if (!IsActive()) { return; }
 			if (!IsDraw(Range)) { return; }
 			int fog_enable;
@@ -800,7 +792,7 @@ namespace FPS_n2 {
 			SetFogStartEnd(fog_start, fog_end);
 			SetFogDensity(fog_density);
 		}
-		void			CharacterClass::DrawShadow(void) noexcept {
+		void			CharacterObj::DrawShadow(void) noexcept {
 			if (!IsActive()) { return; }
 			if (IsAlive()) {
 				GetObj().DrawModel();

@@ -1,7 +1,7 @@
 #include	"BackGround.hpp"
 #include	<random>
 
-const FPS_n2::BackGround::BackGroundClass* SingletonBase<FPS_n2::BackGround::BackGroundClass>::m_Singleton = nullptr;
+const FPS_n2::BackGround::BackGroundControl* SingletonBase<FPS_n2::BackGround::BackGroundControl>::m_Singleton = nullptr;
 namespace FPS_n2 {
 	namespace BackGround {
 		class PerlinNoise {
@@ -88,7 +88,7 @@ namespace FPS_n2 {
 			}
 		};
 		//
-		bool		BackGroundClass::AddCubeX_CanAddPlane(const CellsData& cellx, int xmin, int xmax, int cy, int cz, int id) noexcept {
+		bool		BackGroundControl::AddCubeX_CanAddPlane(const CellsData& cellx, int xmin, int xmax, int cy, int cz, int id) noexcept {
 			for (int x = xmin; x <= xmax; ++x) {
 				if ((cellx.GetCellBuf(x, cy, cz).m_FillInfo & (1 << id)) == 0) {
 					return true;
@@ -96,7 +96,7 @@ namespace FPS_n2 {
 			}
 			return false;
 		}
-		bool		BackGroundClass::AddCubeZ_CanAddPlane(const CellsData& cellx, int cx, int cy, int zmin, int zmax, int id) noexcept {
+		bool		BackGroundControl::AddCubeZ_CanAddPlane(const CellsData& cellx, int cx, int cy, int zmin, int zmax, int id) noexcept {
 			for (int z = zmin; z <= zmax; ++z) {
 				if ((cellx.GetCellBuf(cx, cy, z).m_FillInfo & (1 << id)) == 0) {
 					return true;
@@ -105,11 +105,11 @@ namespace FPS_n2 {
 			return false;
 		}
 		//
-		void		BackGroundClass::AddPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
+		void		BackGroundControl::AddPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32s.at(id);
 			Verts.AllocatePlane();
 
-			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
+			int zscale = (zmax - zmin + 1) * cellx.m_scaleRate;
 
 			int Xofs = zmin % 2 == 0;
 			int Yofs = ((cellx.GetCellBuf(x, y, zmin).m_Cell - 1) * 3) + 1;
@@ -157,11 +157,11 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 		}
-		void		BackGroundClass::AddPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
+		void		BackGroundControl::AddPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32s.at(id);
 			Verts.AllocatePlane();
 
-			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
+			int zscale = (zmax - zmin + 1) * cellx.m_scaleRate;
 
 			int Xofs = zmin % 2 == 0;
 			int Yofs = ((cellx.GetCellBuf(x, y, zmin).m_Cell - 1) * 3) + 1;
@@ -208,11 +208,11 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 		}
-		void		BackGroundClass::AddPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
+		void		BackGroundControl::AddPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32s.at(id);
 			Verts.AllocatePlane();
 
-			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
+			int zscale = (zmax - zmin + 1) * cellx.m_scaleRate;
 
 			int Xofs = zmin % 2 == 0;
 			int Yofs = ((cellx.GetCellBuf(x, y, zmin).m_Cell - 1) * 3) + 0;
@@ -259,11 +259,11 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 		}
-		void		BackGroundClass::AddPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
+		void		BackGroundControl::AddPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32s.at(id);
 			Verts.AllocatePlane();
 
-			int zscale = (zmax - zmin + 1) * cellx.scaleRate;
+			int zscale = (zmax - zmin + 1) * cellx.m_scaleRate;
 
 			int Xofs = zmin % 2 == 0;
 			int Yofs = ((cellx.GetCellBuf(x, y, zmin).m_Cell - 1) * 3) + 2;
@@ -310,11 +310,11 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 		}
-		void		BackGroundClass::AddPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
+		void		BackGroundControl::AddPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
 			auto& Verts = this->m_vert32s.at(id);
 			Verts.AllocatePlane();
 
-			int xscale = (xmax - xmin + 1) * cellx.scaleRate;
+			int xscale = (xmax - xmin + 1) * cellx.m_scaleRate;
 
 			int Xofs = xmax % 2 == 0;
 			int Yofs = ((cellx.GetCellBuf(xmin, y, z).m_Cell - 1) * 3) + 1;
@@ -361,11 +361,11 @@ namespace FPS_n2 {
 				V.spc = SpcColor;
 			}
 		}
-		void		BackGroundClass::AddPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
+		void		BackGroundControl::AddPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
 			auto& Verts = this->m_vert32s.at(id);
 			Verts.AllocatePlane();
 
-			int xscale = (xmax - xmin + 1) * cellx.scaleRate;
+			int xscale = (xmax - xmin + 1) * cellx.m_scaleRate;
 
 			int Xofs = xmax % 2 == 0;
 			int Yofs = ((cellx.GetCellBuf(xmin, y, z).m_Cell - 1) * 3) + 1;
@@ -413,17 +413,17 @@ namespace FPS_n2 {
 			}
 		}
 
-		void		BackGroundClass::AddCubesX(size_t id) noexcept {
+		void		BackGroundControl::AddCubesX(size_t id) noexcept {
 			auto& cellx = this->m_CellxN.at(id);
 			auto center = cellx.GetPoint(this->m_CamPos.at(id));
 			for (int z = center.z + DrawMaxZMinus, ZMax = center.z + DrawMaxZPlus; z <= ZMax; ++z) {
 				if (!CalcXYActive(this->m_CamVec.at(id), DrawMaxXMinus, DrawMaxXPlus, DrawMaxYMinus, DrawMaxYPlus, z - center.z)) { continue; }
 
-				bool CheckFillZ = (cellx.scaleRate != 1) && ((center.z + DrawMinZMinus <= z) && (z <= center.z + DrawMinZPlus));
-				bool CheckInsideZ = (cellx.scaleRate != 1) && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus));
+				bool CheckFillZ = (cellx.m_scaleRate != 1) && ((center.z + DrawMinZMinus <= z) && (z <= center.z + DrawMinZPlus));
+				bool CheckInsideZ = (cellx.m_scaleRate != 1) && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus));
 
 				for (int y = center.y + DrawMaxYMinus, YMax = center.y + DrawMaxYPlus; y <= YMax; ++y) {
-					if (y < 0 || cellx.All <= y) { continue; }
+					if (y < 0 || cellx.m_All <= y) { continue; }
 
 					int xMaxminT = DrawMaxXMinus;
 					int xMaxmaxT = DrawMaxXPlus;
@@ -479,17 +479,17 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		BackGroundClass::AddCubesZ(size_t id) noexcept {
+		void		BackGroundControl::AddCubesZ(size_t id) noexcept {
 			auto& cellx = this->m_CellxN.at(id);
 			auto center = cellx.GetPoint(this->m_CamPos.at(id));
 			for (int x = center.x + DrawMaxXMinus, XMax = center.x + DrawMaxXPlus; x <= XMax; ++x) {
 				if (!CalcYZActive(this->m_CamVec.at(id), x - center.x, DrawMaxYMinus, DrawMaxYPlus, DrawMaxZMinus, DrawMaxZPlus)) { continue; }
 
-				bool CheckFillX = (cellx.scaleRate != 1) && ((center.x + DrawMinXMinus <= x) && (x <= center.x + DrawMinXPlus));
-				bool CheckInsideX = (cellx.scaleRate != 1) && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus));
+				bool CheckFillX = (cellx.m_scaleRate != 1) && ((center.x + DrawMinXMinus <= x) && (x <= center.x + DrawMinXPlus));
+				bool CheckInsideX = (cellx.m_scaleRate != 1) && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus));
 
 				for (int y = center.y + DrawMaxYMinus, YMax = center.y + DrawMaxYPlus; y <= YMax; ++y) {
-					if (y < 0 || cellx.All <= y) { continue; }
+					if (y < 0 || cellx.m_All <= y) { continue; }
 
 					int zMaxminT = DrawMaxZMinus;
 					int zMaxmaxT = DrawMaxZPlus;
@@ -555,7 +555,7 @@ namespace FPS_n2 {
 			}
 		}
 		//
-		void		BackGroundClass::AddShadowPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
+		void		BackGroundControl::AddShadowPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
@@ -585,7 +585,7 @@ namespace FPS_n2 {
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 		}
-		void		BackGroundClass::AddShadowPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
+		void		BackGroundControl::AddShadowPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
@@ -615,7 +615,7 @@ namespace FPS_n2 {
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 		}
-		void		BackGroundClass::AddShadowPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
+		void		BackGroundControl::AddShadowPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
@@ -645,7 +645,7 @@ namespace FPS_n2 {
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 		}
-		void		BackGroundClass::AddShadowPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
+		void		BackGroundControl::AddShadowPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
@@ -675,7 +675,7 @@ namespace FPS_n2 {
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 		}
-		void		BackGroundClass::AddShadowPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
+		void		BackGroundControl::AddShadowPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
 			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
@@ -705,7 +705,7 @@ namespace FPS_n2 {
 				V.dif = GetColorU8(128, 128, 128, 255);
 			}
 		}
-		void		BackGroundClass::AddShadowPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
+		void		BackGroundControl::AddShadowPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
 			auto& Verts = this->m_vert32sSB.at(id);
 			Verts.AllocatePlane();
 
@@ -736,15 +736,15 @@ namespace FPS_n2 {
 			}
 		}
 
-		void		BackGroundClass::AddShadowCubesX(size_t id) noexcept {
+		void		BackGroundControl::AddShadowCubesX(size_t id) noexcept {
 			auto& cellx = this->m_CellxN.at(id);
 			auto center = cellx.GetPoint(this->m_CamPosS.at(id));
 			for (int z = center.z + DrawMaxZMinus, ZMax = center.z + DrawMaxZPlus; z <= ZMax; ++z) {
 
-				bool CheckInsideZ = (cellx.scaleRate != 1) && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus));
+				bool CheckInsideZ = (cellx.m_scaleRate != 1) && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus));
 
 				for (int y = center.y + DrawMaxYMinus, YMax = center.y + DrawMaxYPlus; y <= YMax; ++y) {
-					if (y < 0 || cellx.All <= y) { continue; }
+					if (y < 0 || cellx.m_All <= y) { continue; }
 
 					bool CheckInside = CheckInsideZ && ((center.y + DrawMinYMinus < y) && (y < center.y + DrawMinYPlus));
 
@@ -786,15 +786,15 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		BackGroundClass::AddShadowCubesZ(size_t id) noexcept {
+		void		BackGroundControl::AddShadowCubesZ(size_t id) noexcept {
 			auto& cellx = this->m_CellxN.at(id);
 			auto center = cellx.GetPoint(this->m_CamPosS.at(id));
 			for (int x = center.x + DrawMaxXMinus, XMax = center.x + DrawMaxXPlus; x <= XMax; ++x) {
 
-				bool CheckInsideX = (cellx.scaleRate != 1) && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus));
+				bool CheckInsideX = (cellx.m_scaleRate != 1) && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus));
 
 				for (int y = center.y + DrawMaxYMinus, YMax = center.y + DrawMaxYPlus; y <= YMax; ++y) {
-					if (y < 0 || cellx.All <= y) { continue; }
+					if (y < 0 || cellx.m_All <= y) { continue; }
 
 					bool CheckInside = CheckInsideX && ((DrawMinYMinus < y - center.y) && (y - center.y < DrawMinYPlus));
 
@@ -847,7 +847,7 @@ namespace FPS_n2 {
 			}
 		}
 		//
-		void		BackGroundClass::AddSetShadowPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
+		void		BackGroundControl::AddSetShadowPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
@@ -858,7 +858,7 @@ namespace FPS_n2 {
 			Verts.SetInVert()[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmin, 0b100).get();
 			Verts.SetInVert()[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 		}
-		void		BackGroundClass::AddSetShadowPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
+		void		BackGroundControl::AddSetShadowPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
@@ -869,7 +869,7 @@ namespace FPS_n2 {
 			Verts.SetInVert()[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
 			Verts.SetInVert()[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmin, 0b000).get();
 		}
-		void		BackGroundClass::AddSetShadowPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
+		void		BackGroundControl::AddSetShadowPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
@@ -880,7 +880,7 @@ namespace FPS_n2 {
 			Verts.SetInVert()[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmin, 0b010).get();
 			Verts.SetInVert()[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmin, 0b110).get();
 		}
-		void		BackGroundClass::AddSetShadowPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
+		void		BackGroundControl::AddSetShadowPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept {
 			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
@@ -891,7 +891,7 @@ namespace FPS_n2 {
 			Verts.SetInVert()[ZERO + 2].pos = cellx.GetPosBuffer(x, y, zmax, 0b001).get();
 			Verts.SetInVert()[ZERO + 3].pos = cellx.GetPosBuffer(x, y, zmax, 0b101).get();
 		}
-		void		BackGroundClass::AddSetShadowPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
+		void		BackGroundControl::AddSetShadowPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
 			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
@@ -902,7 +902,7 @@ namespace FPS_n2 {
 			Verts.SetInVert()[ZERO + 2].pos = cellx.GetPosBuffer(xmin, y, z, 0b011).get();
 			Verts.SetInVert()[ZERO + 3].pos = cellx.GetPosBuffer(xmax, y, z, 0b111).get();
 		}
-		void		BackGroundClass::AddSetShadowPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
+		void		BackGroundControl::AddSetShadowPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept {
 			auto& Verts = this->m_vert32sS.at(id);
 			Verts.AllocatePlane();
 
@@ -914,17 +914,17 @@ namespace FPS_n2 {
 			Verts.SetInVert()[ZERO + 3].pos = cellx.GetPosBuffer(xmax, y, z, 0b100).get();
 		}
 
-		void		BackGroundClass::AddSetShadowCubesX(size_t id) noexcept {
+		void		BackGroundControl::AddSetShadowCubesX(size_t id) noexcept {
 			auto& cellx = this->m_CellxN.at(id);
 			auto center = cellx.GetPoint(this->m_CamPosS.at(id));
 			for (int z = center.z + DrawMaxZMinus, ZMax = center.z + DrawMaxZPlus; z <= ZMax; ++z) {
 				if (!CalcXYActive(this->m_CamVecS.at(id), DrawMaxXMinus, DrawMaxXPlus, DrawMaxYMinus, DrawMaxYPlus, z - center.z)) { continue; }
 
-				bool CheckFillZ = (cellx.scaleRate != 1) && ((center.z + DrawMinZMinus <= z) && (z <= center.z + DrawMinZPlus));
-				bool CheckInsideZ = (cellx.scaleRate != 1) && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus));
+				bool CheckFillZ = (cellx.m_scaleRate != 1) && ((center.z + DrawMinZMinus <= z) && (z <= center.z + DrawMinZPlus));
+				bool CheckInsideZ = (cellx.m_scaleRate != 1) && ((center.z + DrawMinZMinus < z) && (z < center.z + DrawMinZPlus));
 
 				for (int y = center.y + DrawMaxYMinus, YMax = center.y + DrawMaxYPlus; y <= YMax; ++y) {
-					if (y < 0 || cellx.All <= y) { continue; }
+					if (y < 0 || cellx.m_All <= y) { continue; }
 
 					int xMaxminT = DrawMaxXMinus;
 					int xMaxmaxT = DrawMaxXPlus;
@@ -972,17 +972,17 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		BackGroundClass::AddSetShadowCubesZ(size_t id) noexcept {
+		void		BackGroundControl::AddSetShadowCubesZ(size_t id) noexcept {
 			auto& cellx = this->m_CellxN.at(id);
 			auto center = cellx.GetPoint(this->m_CamPosS.at(id));
 			for (int x = center.x + DrawMaxXMinus, XMax = center.x + DrawMaxXPlus; x <= XMax; ++x) {
 				if (!CalcYZActive(this->m_CamVecS.at(id), x - center.x, DrawMaxYMinus, DrawMaxYPlus, DrawMaxZMinus, DrawMaxZPlus)) { continue; }
 
-				bool CheckFillX = (cellx.scaleRate != 1) && ((center.x + DrawMinXMinus <= x) && (x <= center.x + DrawMinXPlus));
-				bool CheckInsideX = (cellx.scaleRate != 1) && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus));
+				bool CheckFillX = (cellx.m_scaleRate != 1) && ((center.x + DrawMinXMinus <= x) && (x <= center.x + DrawMinXPlus));
+				bool CheckInsideX = (cellx.m_scaleRate != 1) && ((center.x + DrawMinXMinus < x) && (x < center.x + DrawMinXPlus));
 
 				for (int y = center.y + DrawMaxYMinus, YMax = center.y + DrawMaxYPlus; y <= YMax; ++y) {
-					if (y < 0 || cellx.All <= y) { continue; }
+					if (y < 0 || cellx.m_All <= y) { continue; }
 
 					int zMaxminT = DrawMaxZMinus;
 					int zMaxmaxT = DrawMaxZPlus;
@@ -1041,7 +1041,7 @@ namespace FPS_n2 {
 			}
 		}
 		//
-		bool		BackGroundClass::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
+		bool		BackGroundControl::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
 			auto& cell = this->m_CellxN.front();
 			auto Start = cell.GetPoint(StartPos);
 			auto End = cell.GetPoint(*EndPos);// *EndPos
@@ -1080,7 +1080,7 @@ namespace FPS_n2 {
 			return false;
 		}
 		//
-		bool		BackGroundClass::CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept {
+		bool		BackGroundControl::CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept {
 			auto MoveVector = *EndPos - StartPos;
 			// プレイヤーの周囲にあるステージポリゴンを取得する( 検出する範囲は移動距離も考慮する )
 			std::vector<MV1_COLL_RESULT_POLY> kabes;// 壁ポリゴンと判断されたポリゴンの構造体のアドレスを保存しておく
@@ -1211,7 +1211,7 @@ namespace FPS_n2 {
 			return HitFlag;
 		}
 		//
-		void		BackGroundClass::LoadCellsFile(void) noexcept {
+		void		BackGroundControl::LoadCellsFile(void) noexcept {
 			auto& cell = this->m_CellxN.front();
 			{
 				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
@@ -1221,9 +1221,9 @@ namespace FPS_n2 {
 				this->m_CellBase.resize(static_cast<size_t>(256 * 256 * 256));
 				fin.read((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0))) * 256 * 256 * 256);
 				fin.close();
-				for (int xm = 0; xm < cell.All; ++xm) {
-					for (int ym = 0; ym < cell.All; ++ym) {
-						for (int zm = 0; zm < cell.All; ++zm) {
+				for (int xm = 0; xm < cell.m_All; ++xm) {
+					for (int ym = 0; ym < cell.m_All; ++ym) {
+						for (int zm = 0; zm < cell.m_All; ++zm) {
 							cell.SetCellBuf(xm, ym, zm).m_Cell = this->m_CellBase[cell.GetCellNum(xm, ym, zm)];
 						}
 					}
@@ -1232,10 +1232,10 @@ namespace FPS_n2 {
 			//一部をペースト
 			//LoadCellsClip(0, 128, 0);
 			/*
-			for (int x = 0; x < cell.All; ++x) {
-				if (x - cell.All/2 > -72) {
-					for (int z = 0; z < cell.All; ++z) {
-						for (int y = cell.All; y >=130+15 ; --y) {
+			for (int x = 0; x < cell.m_All; ++x) {
+				if (x - cell.m_All/2 > -72) {
+					for (int z = 0; z < cell.m_All; ++z) {
+						for (int y = cell.m_All; y >=130+15 ; --y) {
 							cell.SetCellBuf(x, y, z).m_Cell = cell.GetCellBuf(x, y - 15, z).m_Cell;
 						}
 					}
@@ -1243,23 +1243,23 @@ namespace FPS_n2 {
 			}
 			//*/
 			/*
-			for (int x = 0; x < cell.All; ++x) {
-				for (int z = 0; z < cell.All; ++z) {
-					for (int y = cell.All; y >= 133; --y) {
+			for (int x = 0; x < cell.m_All; ++x) {
+				for (int z = 0; z < cell.m_All; ++z) {
+					for (int y = cell.m_All; y >= 133; --y) {
 						cell.SetCellBuf(x, y, z).m_Cell = 0;
 					}
 				}
 			}
 			//*/
 		}
-		void		BackGroundClass::SaveCellsFile(void) noexcept {
+		void		BackGroundControl::SaveCellsFile(void) noexcept {
 			{
 				auto& cell = this->m_CellxN.front();
 
 				this->m_CellBase.resize(static_cast<size_t>(256 * 256 * 256));
-				for (int xm = 0; xm < cell.All; ++xm) {
-					for (int ym = 0; ym < cell.All; ++ym) {
-						for (int zm = 0; zm < cell.All; ++zm) {
+				for (int xm = 0; xm < cell.m_All; ++xm) {
+					for (int ym = 0; ym < cell.m_All; ++ym) {
+						for (int zm = 0; zm < cell.m_All; ++zm) {
 							this->m_CellBase[cell.GetCellNum(xm, ym, zm)] = cell.SetCellBuf(xm, ym, zm).m_Cell;
 						}
 					}
@@ -1281,7 +1281,7 @@ namespace FPS_n2 {
 			SaveCellsClip(XMin, XMax, YMin, YMax, ZMin, ZMax);
 			//*/
 		}
-		void BackGroundClass::LoadCellsClip(int xpos, int ypos, int zpos) noexcept {
+		void BackGroundControl::LoadCellsClip(int xpos, int ypos, int zpos) noexcept {
 			auto& cell = this->m_CellxN.front();
 			int XTotal = 1;
 			int YTotal = 1;
@@ -1304,7 +1304,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void BackGroundClass::SaveCellsClip(int XMin, int XMax, int YMin, int YMax, int ZMin, int ZMax) noexcept {
+		void BackGroundControl::SaveCellsClip(int XMin, int XMax, int YMin, int YMax, int ZMin, int ZMax) noexcept {
 			auto& cell = this->m_CellxN.front();
 			int XTotal = (XMax - XMin + 1);
 			int YTotal = (YMax - YMin + 1);
@@ -1328,12 +1328,12 @@ namespace FPS_n2 {
 			fout.close();  //ファイルを閉じる
 		}
 		//
-		void		BackGroundClass::SettingChange(void) noexcept {
+		void		BackGroundControl::SettingChange(void) noexcept {
 			this->m_ShadowRate = static_cast<int>(pow(MulPer, 1));
 			this->m_BaseRate = static_cast<int>(pow(MulPer, 1));
 		}
 		//
-		void		BackGroundClass::SetBlick(int x, int y, int z, int8_t select) noexcept {
+		void		BackGroundControl::SetBlick(int x, int y, int z, int8_t select) noexcept {
 			auto& cell = this->m_CellxN.front();
 			if (!cell.isInside(y)) { return; }
 			//テクスチャだけ変える
@@ -1345,20 +1345,20 @@ namespace FPS_n2 {
 			//
 			cell.SetCellBuf(x, y, z).m_Cell = select;
 			//簡易版を更新
-			for (int sel = 1; sel < total; ++sel) {
-				auto& cell1 = this->m_CellxN.at(sel);
+			for (int loop = 1; loop < TotalCellLayer; ++loop) {
+				auto& cell1 = this->m_CellxN.at(loop);
 
-				int xm = x / cell1.scaleRate;
-				int ym = y / cell1.scaleRate;
-				int zm = z / cell1.scaleRate;
+				int xm = x / cell1.m_scaleRate;
+				int ym = y / cell1.m_scaleRate;
+				int zm = z / cell1.m_scaleRate;
 
-				cell1.SetCellBuf(xm, ym, zm).m_Cell = cell.isFill(xm, ym, zm, cell1.scaleRate);
+				cell1.SetCellBuf(xm, ym, zm).m_Cell = cell.isFill(xm, ym, zm, cell1.m_scaleRate);
 			}
 			//遮蔽検索
 			for (auto& cellx : this->m_CellxN) {
-				int xm = x / cellx.scaleRate;
-				int ym = y / cellx.scaleRate;
-				int zm = z / cellx.scaleRate;
+				int xm = x / cellx.m_scaleRate;
+				int ym = y / cellx.m_scaleRate;
+				int zm = z / cellx.m_scaleRate;
 				auto CheckCell = [&](int xp, int yp, int zp) {
 					if (cellx.isInside(yp)) {
 						cellx.CalcOcclusion(xp, yp, zp);
@@ -1373,13 +1373,13 @@ namespace FPS_n2 {
 			}
 		}
 		//
-		void		BackGroundClass::Load(void) noexcept {
+		void		BackGroundControl::Load(void) noexcept {
 			MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
 			this->m_tex.Load("data/tex.png");
 			this->m_norm.Load("data/nrm.png");
 		}
 		//
-		void		BackGroundClass::Init(void) noexcept {
+		void		BackGroundControl::Init(void) noexcept {
 			//空
 			this->m_ObjSky.SetScale(Vector3DX::vget(10.f, 10.f, 10.f));
 			this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
@@ -1392,10 +1392,10 @@ namespace FPS_n2 {
 				//空っぽ
 				auto& cell = this->m_CellxN.front();
 				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
-				for (int x = 0; x < cell.All; ++x) {
-					for (int z = 0; z < cell.All; ++z) {
-						for (int y = 0; y < cell.All; ++y) {
-							if (y <= cell.All * 1 / 4) {
+				for (int x = 0; x < cell.m_All; ++x) {
+					for (int z = 0; z < cell.m_All; ++z) {
+						for (int y = 0; y < cell.m_All; ++y) {
+							if (y <= cell.m_All * 1 / 4) {
 								cell.SetCellBuf(x, y, z).m_Cell = 1;
 								continue;
 							}
@@ -1411,9 +1411,9 @@ namespace FPS_n2 {
 				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
 
 				PerlinNoise ns(GetRand(100));
-				for (int x = 0; x < cell.All; ++x) {
-					for (int z = 0; z < cell.All; ++z) {
-						for (int y = 0; y < cell.All; ++y) {
+				for (int x = 0; x < cell.m_All; ++x) {
+					for (int z = 0; z < cell.m_All; ++z) {
+						for (int y = 0; y < cell.m_All; ++y) {
 							cell.SetCellBuf(x, y, z).m_Cell = s_EmptyBlick;
 						}
 					}
@@ -1427,40 +1427,40 @@ namespace FPS_n2 {
 				int Edge = -Rate;
 				int EdgeP = -0;
 
-				for (int x = 0; x < cell.All; x += 2) {
-					for (int z = 0; z < cell.All; z += 2) {
+				for (int x = 0; x < cell.m_All; x += 2) {
+					for (int z = 0; z < cell.m_All; z += 2) {
 						int xPos = -Size * Rate / 2 + x;
 						int zPos = -Size * Rate / 2 + z;
 						if ((-EdgeP < x && x < Size * Rate + EdgeP - 1) && (-EdgeP < z && z < Size * Rate + EdgeP - 1)) {
 							if (GetRand(100) < 30) {
-								int y = cell.All * 1 / 4 - 15;
-								cell.SetCellBuf(cell.All / 2 + xPos + 0, y, cell.All / 2 + zPos + 0).m_Cell = 1;
-								cell.SetCellBuf(cell.All / 2 + xPos + 0, y, cell.All / 2 + zPos + 1).m_Cell = 1;
-								cell.SetCellBuf(cell.All / 2 + xPos + 1, y, cell.All / 2 + zPos + 0).m_Cell = 1;
-								cell.SetCellBuf(cell.All / 2 + xPos + 1, y, cell.All / 2 + zPos + 1).m_Cell = 1;
+								int y = cell.m_All * 1 / 4 - 15;
+								cell.SetCellBuf(cell.m_Half + xPos + 0, y, cell.m_Half + zPos + 0).m_Cell = 1;
+								cell.SetCellBuf(cell.m_Half + xPos + 0, y, cell.m_Half + zPos + 1).m_Cell = 1;
+								cell.SetCellBuf(cell.m_Half + xPos + 1, y, cell.m_Half + zPos + 0).m_Cell = 1;
+								cell.SetCellBuf(cell.m_Half + xPos + 1, y, cell.m_Half + zPos + 1).m_Cell = 1;
 							}
 						}
 					}
 				}
 
-				for (int x = 0; x < cell.All; ++x) {
-					for (int z = 0; z < cell.All; ++z) {
+				for (int x = 0; x < cell.m_All; ++x) {
+					for (int z = 0; z < cell.m_All; ++z) {
 						int xPos = -Size * Rate / 2 + x;
 						int zPos = -Size * Rate / 2 + z;
 
 						if ((-EdgeP <= x && x <= Size * Rate + EdgeP - 1) && (-EdgeP <= z && z <= Size * Rate + EdgeP - 1)) {
 							if ((x == -EdgeP || x == Size * Rate + EdgeP - 1) || (z == -EdgeP || z == Size * Rate + EdgeP - 1)) {
-								for (int y = 0; y <= cell.All * 1 / 4; ++y) {
-									cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 1;
+								for (int y = 0; y <= cell.m_All * 1 / 4; ++y) {
+									cell.SetCellBuf(cell.m_Half + xPos, y, cell.m_Half + zPos).m_Cell = 1;
 								}
 							}
 						}
 						if ((-EdgeP < x && x < Size * Rate + EdgeP - 1) && (-EdgeP < z && z < Size * Rate + EdgeP - 1)) {
 							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(x)) / (Size * Rate - 1),
-								(static_cast<float>(z)) / (Size * Rate - 1)) * static_cast<float>(cell.All * 1 / 20));
+								(static_cast<float>(z)) / (Size * Rate - 1)) * static_cast<float>(cell.m_All * 1 / 20));
 							for (int y = 0; y <= Height; ++y) {
-								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 2;
+								cell.SetCellBuf(cell.m_Half + xPos, y, cell.m_Half + zPos).m_Cell = 2;
 							}
 						}
 					}
@@ -1473,9 +1473,9 @@ namespace FPS_n2 {
 							int zPos = -Size * Rate / 2 + z + zt;
 							auto Height = static_cast<int>(ns.octaveNoise(2, 
 								(static_cast<float>(x + xt)) / (Size * Rate),
-								(static_cast<float>(z + zt)) / (Size * Rate)) * static_cast<float>(cell.All * 1 / 20));
+								(static_cast<float>(z + zt)) / (Size * Rate)) * static_cast<float>(cell.m_All * 1 / 20));
 							for (int y = Height; y <= Height + Heights; ++y) {
-								cell.SetCellBuf(cell.All / 2 + xPos, y, cell.All / 2 + zPos).m_Cell = 2;
+								cell.SetCellBuf(cell.m_Half + xPos, y, cell.m_Half + zPos).m_Cell = 2;
 							}
 						};
 						int xp = x / Rate;
@@ -1512,10 +1512,10 @@ namespace FPS_n2 {
 				PerlinNoise ns(GetRand(100));
 				auto& cell = this->m_CellxN.front();
 				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
-				for (int x = 0; x < cell.All; ++x) {
-					for (int z = 0; z < cell.All; ++z) {
-						auto Height = static_cast<int>(ns.octaveNoise(2, (static_cast<float>(x)) / cell.All, (static_cast<float>(z)) / cell.All) * static_cast<float>(cell.All * 4 / 5));
-						for (int y = 0; y < cell.All; ++y) {
+				for (int x = 0; x < cell.m_All; ++x) {
+					for (int z = 0; z < cell.m_All; ++z) {
+						auto Height = static_cast<int>(ns.octaveNoise(2, (static_cast<float>(x)) / cell.m_All, (static_cast<float>(z)) / cell.m_All) * static_cast<float>(cell.m_All * 4 / 5));
+						for (int y = 0; y < cell.m_All; ++y) {
 							if (y <= Height) {
 								cell.SetCellBuf(x, y, z).m_Cell = 1;
 								continue;
@@ -1531,22 +1531,22 @@ namespace FPS_n2 {
 			}
 			//簡略版を制作
 			auto& cell = this->m_CellxN.front();
-			for (int sel = 1; sel < total; ++sel) {
-				auto& cell1 = this->m_CellxN.at(sel);
-				cell1.SetScale(static_cast<int>(pow(MulPer, sel)));
-				for (int xm = 0; xm < cell1.All; ++xm) {
-					for (int ym = 0; ym < cell1.All; ++ym) {
-						for (int zm = 0; zm < cell1.All; ++zm) {
-							cell1.SetCellBuf(xm, ym, zm).m_Cell = cell.isFill(xm, ym, zm, cell1.scaleRate);
+			for (int select = 1; select < TotalCellLayer; ++select) {
+				auto& cell1 = this->m_CellxN.at(select);
+				cell1.SetScale(static_cast<int>(pow(MulPer, select)));
+				for (int xm = 0; xm < cell1.m_All; ++xm) {
+					for (int ym = 0; ym < cell1.m_All; ++ym) {
+						for (int zm = 0; zm < cell1.m_All; ++zm) {
+							cell1.SetCellBuf(xm, ym, zm).m_Cell = cell.isFill(xm, ym, zm, cell1.m_scaleRate);
 						}
 					}
 				}
 			}
 			//遮蔽検索
 			for (auto& cellx : this->m_CellxN) {
-				for (int x = 0; x < cellx.All; ++x) {
-					for (int y = 0; y < cellx.All; ++y) {
-						for (int z = 0; z < cellx.All; ++z) {
+				for (int x = 0; x < cellx.m_All; ++x) {
+					for (int y = 0; y < cellx.m_All; ++y) {
+						for (int z = 0; z < cellx.m_All; ++z) {
 							if (cellx.GetCellBuf(x, y, z).IsEmpty()) { continue; }
 							cellx.CalcOcclusion(x, y, z);
 						}
@@ -1563,7 +1563,7 @@ namespace FPS_n2 {
 			SetMaterialParam(Param);
 			//
 			constexpr size_t size = (DrawMax + DrawMax) * (DrawMax + DrawMax) * (DrawMax + DrawMax) / 2 * 3 / 100;
-			for (int loop = 0; loop < total; ++loop) {
+			for (int loop = 0; loop < TotalCellLayer; ++loop) {
 				this->m_vert32s.at(loop).Init(size);
 				this->m_vert32sS.at(loop).Init(size);
 				this->m_vert32sSB.at(loop).Init(size);
@@ -1587,17 +1587,17 @@ namespace FPS_n2 {
 #if defined(DEBUG) & EDITBLICK
 					PutPos = (this->m_CamPos.at(0) + this->m_CamVec.at(0) * (LenMouse * Scale3DRate));
 					//PutPos.y = CellScale * (2.f);
-					if (blicksel >= 0) {
+					if (blickselect >= 0) {
 						auto& cell = this->m_CellxN.front();
 						auto Put = cell.GetPoint(PutPos);
 						for (int xp = 0; xp < xput; ++xp) {
 							for (int yp = 0; yp < yput; ++yp) {
 								for (int zp = 0; zp < zput; ++zp) {
-									SetBlick((Put.x + xp - xput / 2), (Put.y + yp - yput / 2), (Put.z + zp - zput / 2), blicksel);
+									SetBlick((Put.x + xp - xput / 2), (Put.y + yp - yput / 2), (Put.z + zp - zput / 2), blickselect);
 								}
 							}
 						}
-						blicksel = -1;
+						blickselect = -1;
 					}
 #endif
 				}
@@ -1650,7 +1650,7 @@ namespace FPS_n2 {
 					this->m_CamVec.at(id) = (CameraParts->GetMainCamera().GetCamVec() - this->m_CamPos.at(id)).normalized();
 				}
 			);
-			this->m_Jobs.at(static_cast<size_t>(total + 0)).Init(
+			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 0)).Init(
 				[&]() {
 					size_t id = 0;
 					this->m_vert32sS.at(id).ResetNum();
@@ -1666,7 +1666,7 @@ namespace FPS_n2 {
 					this->m_CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - this->m_CamPosS.at(id)).normalized();
 				}
 			);
-			this->m_Jobs.at(static_cast<size_t>(total + 1)).Init(
+			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 1)).Init(
 				[&]() {
 					size_t id = 1;
 					this->m_vert32sS.at(id).ResetNum();
@@ -1682,7 +1682,7 @@ namespace FPS_n2 {
 					this->m_CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - this->m_CamPosS.at(id)).normalized();
 				}
 			);
-			this->m_Jobs.at(static_cast<size_t>(total + 2)).Init(
+			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 2)).Init(
 				[&]() {
 					size_t id = 2;
 					this->m_vert32sS.at(id).ResetNum();
@@ -1698,7 +1698,7 @@ namespace FPS_n2 {
 					this->m_CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - this->m_CamPosS.at(id)).normalized();
 				}
 			);
-			this->m_Jobs.at(static_cast<size_t>(total + 3)).Init(
+			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 3)).Init(
 				[&]() {
 					size_t id = 3;
 					this->m_vert32sS.at(id).ResetNum();
@@ -1714,7 +1714,7 @@ namespace FPS_n2 {
 					this->m_CamVecS.at(id) = (CameraParts->GetMainCamera().GetCamVec() - this->m_CamPosS.at(id)).normalized();
 				}
 			);
-			this->m_Jobs.at(static_cast<size_t>(total + total + 0)).Init(
+			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + TotalCellLayer + 0)).Init(
 				[&]() {
 					size_t id = 0;
 					this->m_vert32sSB.at(id).ResetNum();
@@ -1731,7 +1731,7 @@ namespace FPS_n2 {
 					this->m_light.at(id) = PostPassParts->GetShadowDir();
 				}
 			);
-			this->m_Jobs.at(static_cast<size_t>(total + total + 1)).Init(
+			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + TotalCellLayer + 1)).Init(
 				[&]() {
 					size_t id = 1;
 					this->m_vert32sSB.at(id).ResetNum();
@@ -1748,7 +1748,7 @@ namespace FPS_n2 {
 					this->m_light.at(id) = PostPassParts->GetShadowDir();
 				}
 			);
-			this->m_Jobs.at(static_cast<size_t>(total + total + 2)).Init(
+			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + TotalCellLayer + 2)).Init(
 				[&]() {
 					size_t id = 2;
 					this->m_vert32sSB.at(id).ResetNum();
@@ -1765,7 +1765,7 @@ namespace FPS_n2 {
 					this->m_light.at(id) = PostPassParts->GetShadowDir();
 				}
 			);
-			this->m_Jobs.at(static_cast<size_t>(total + total + 3)).Init(
+			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + TotalCellLayer + 3)).Init(
 				[&]() {
 					size_t id = 3;
 					this->m_vert32sSB.at(id).ResetNum();
@@ -1786,7 +1786,7 @@ namespace FPS_n2 {
 			this->m_ThreadCounter = 0;
 		}
 		//
-		void		BackGroundClass::Execute(void) noexcept {
+		void		BackGroundControl::Execute(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
 #if defined(DEBUG) & EDITBLICK
 			{
@@ -1796,66 +1796,66 @@ namespace FPS_n2 {
 				auto* Pad = PadControl::Instance();
 				LenMouse += Pad->GetMouseWheelRot();
 				if (Pad->GetPadsInfo(Controls::PADS::SHOT).GetKey().trigger()) {
-					blicksel = 1;
+					blickselect = 1;
 				}
 				if (Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().trigger()) {
-					blicksel = 0;
+					blickselect = 0;
 				}
 				if (Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().trigger()) {
 					SaveCellsFile();
 				}
 			}
 #endif
-			for (int loop = 0; loop < total; ++loop) {
+			for (int loop = 0; loop < TotalCellLayer; ++loop) {
 				if ((loop != 0) && (loop != this->m_ThreadCounter)) { continue; }
 				//
-				if (this->m_BaseRate < this->m_CellxN.at(loop).scaleRate) {
+				if (this->m_BaseRate < this->m_CellxN.at(loop).m_scaleRate) {
 					this->m_vert32s.at(loop).Disable();
 				}
 				else {
 					this->m_Jobs.at(loop).Execute();
 				}
 				//
-				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (this->m_ShadowRate < this->m_CellxN.at(loop).scaleRate)) {
+				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (this->m_ShadowRate < this->m_CellxN.at(loop).m_scaleRate)) {
 					this->m_vert32sS.at(loop).Disable();
 					this->m_vert32sSB.at(loop).Disable();
 				}
 				else {
-					this->m_Jobs.at(static_cast<size_t>(total + loop)).Execute();
-					this->m_Jobs.at(static_cast<size_t>(total + total + loop)).Execute();
+					this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + loop)).Execute();
+					this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + TotalCellLayer + loop)).Execute();
 				}
 			}
-			++this->m_ThreadCounter %= total;
+			++this->m_ThreadCounter %= TotalCellLayer;
 		}
 		//
-		void		BackGroundClass::BG_Draw(void) const noexcept {
+		void		BackGroundControl::BG_Draw(void) const noexcept {
 			SetUseLighting(false);
 			this->m_ObjSky.DrawModel();
 			SetUseLighting(true);
 		}
-		void		BackGroundClass::Shadow_Draw(void) const noexcept {
+		void		BackGroundControl::Shadow_Draw(void) const noexcept {
 			for (auto& Vert : this->m_vert32sSB) {
 				Vert.Draw(this->m_tex);
 			}
 		}
-		void		BackGroundClass::SetShadow_Draw_Rigid(void) const noexcept {
+		void		BackGroundControl::SetShadow_Draw_Rigid(void) const noexcept {
 			SetUseTextureToShader(0, this->m_tex.get());
 			for (auto& Vert : this->m_vert32sS) {
 				Vert.DrawByShader();
 			}
 			SetUseTextureToShader(0, InvalidID);
 		}
-		void		BackGroundClass::Draw(void) const noexcept {
+		void		BackGroundControl::Draw(void) const noexcept {
 			float Near = GetCameraNear();
 			float Far = GetCameraFar();
 			constexpr int MinLimit = std::min(std::min(DrawMinXPlus, DrawMinZPlus), DrawMinYPlus) * 3 / 4;
 			constexpr int MaxLimit = std::min(std::min(DrawMaxXPlus, DrawMaxZPlus), DrawMaxYPlus) * 5 / 4;
 
-			for (int loop = 0; loop < total; ++loop) {
+			for (int loop = 0; loop < TotalCellLayer; ++loop) {
 				auto& Vert = this->m_vert32s.at(loop);
 				if (Vert.GetOutNum() > 0) {
-					float Min = (this->m_CellxN.at(loop).scaleRate != 1) ? MinLimit * this->m_CellxN.at(loop).Scale : 0;
-					if (!(Min < Far && Near < MaxLimit * this->m_CellxN.at(loop).Scale)) { continue; }
+					float Min = (this->m_CellxN.at(loop).m_scaleRate != 1) ? MinLimit * this->m_CellxN.at(loop).m_Scale : 0;
+					if (!(Min < Far && Near < MaxLimit * this->m_CellxN.at(loop).m_Scale)) { continue; }
 					Vert.Draw(this->m_tex);
 				}
 			}
@@ -1870,7 +1870,10 @@ namespace FPS_n2 {
 #endif
 		}
 		//
-		void		BackGroundClass::Dispose(void) noexcept {
+		void		BackGroundControl::Dispose(void) noexcept {
+			for (auto& t : m_Jobs) {
+				t.Dispose();
+			}
 			this->m_ObjSky.Dispose();
 			SaveCellsFile();
 		}

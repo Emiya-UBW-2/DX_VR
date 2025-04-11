@@ -8,5 +8,5 @@ using namespace DXLibRef;
 #define DEBUG_CAM (TRUE)
 
 #if defined(DEBUG) && DEBUG_CAM
-extern int DBG_CamSel;
+extern int DBG_CamSelect;
 #endif

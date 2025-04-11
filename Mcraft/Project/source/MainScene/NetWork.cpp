@@ -10,7 +10,7 @@ namespace FPS_n2 {
 			for (int loop = 0; loop < Player_num; ++loop) {
 				if (GetIsServerPlayer(static_cast<PlayerID>(loop))) {
 					// サーバープレイヤーのデータをアップデート
-					pPlayerNetwork->SetLastServerDataBuffer().PlayerData[loop] = pPlayerNetwork->GetLocalPlayerData();
+					pPlayerNetwork->SetLastServerDataBuffer().m_PlayerData[loop] = pPlayerNetwork->GetLocalPlayerData();
 					// 席は埋まってます
 					pPlayerNetwork->SetLastServerDataBuffer().m_PlayerFill[loop] = TRUE;
 					continue;
@@ -39,7 +39,7 @@ namespace FPS_n2 {
 				case ClientPhase::Ready:
 					//得たプレイヤーのデータをアップデート
 					if (IsDataUpdated) {
-						pPlayerNetwork->SetLastServerDataBuffer().PlayerData[player.GetID()] = player;
+						pPlayerNetwork->SetLastServerDataBuffer().m_PlayerData[player.GetID()] = player;
 					}
 					// クライアントにデータを送る
 					if (pPlayerNetwork->GetTickUpdateFlag()) {
@@ -56,10 +56,10 @@ namespace FPS_n2 {
 			}
 			//
 			if (!AllReady) {
-				pPlayerNetwork->SetLastServerDataBuffer().ServerFrame = 0;
+				pPlayerNetwork->SetLastServerDataBuffer().m_ServerFrame = 0;
 			}
 			else {
-				++pPlayerNetwork->SetLastServerDataBuffer().ServerFrame;	// サーバーフレーム更新
+				++pPlayerNetwork->SetLastServerDataBuffer().m_ServerFrame;	// サーバーフレーム更新
 				pPlayerNetwork->SetLastServerDataBuffer().m_ServerPhase = ServerPhase::Ingame; // インゲームです
 			}
 			//
@@ -97,11 +97,11 @@ namespace FPS_n2 {
 					this->m_CannotConnectTimer += DXLib_refParts->GetDeltaTime();
 					if (this->m_CannotConnectTimer > 1.f) {
 						this->m_CannotConnectTimer -= 1.f;
-						++this->m_NetWorkSel;
-						if (this->m_NetWorkSel < Player_num) {
+						++this->m_NetWorkSelect;
+						if (this->m_NetWorkSelect < Player_num) {
 							this->m_PlayerUDPPhase.Dispose();
 							this->m_PlayerUDPPhase.m_NetWork.SetServerIP(this->m_IP);
-							this->m_PlayerUDPPhase.Init(false, this->m_Port + this->m_NetWorkSel);
+							this->m_PlayerUDPPhase.Init(false, this->m_Port + this->m_NetWorkSelect);
 						}
 						else {
 							this->m_PlayerUDPPhase.SendError(ClientPhase::Error_CannotConnect);	//満タンなので接続失敗

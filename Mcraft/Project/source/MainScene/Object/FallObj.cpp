@@ -1,14 +1,14 @@
 #include	"FallObj.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace Objects {
 		//それぞれのオブジェクトの動き
 		class FallObjCart : public FallObjChildBase {
 		public:
 			FallObjCart(void) noexcept {}
 			virtual ~FallObjCart(void) noexcept {}
 		public:
-			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::CartFall; }
+			Sceneclass::SoundEnum GetFallSound(void) const noexcept override { return Sceneclass::SoundEnum::CartFall; }
 		public:
 			void RotateOnAir(moves* objMove) noexcept override {
 				//テキトーに飛び回る
@@ -23,7 +23,7 @@ namespace FPS_n2 {
 			FallObjMagazine(void) noexcept {}
 			virtual ~FallObjMagazine(void) noexcept {}
 		public:
-			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::MagFall; }
+			Sceneclass::SoundEnum GetFallSound(void) const noexcept override { return Sceneclass::SoundEnum::MagFall; }
 		public:
 			void RotateOnAir(moves*) noexcept override {}// なにもしない
 			void RotateOnGround(moves* objMove) noexcept override {
@@ -37,7 +37,7 @@ namespace FPS_n2 {
 			FallObjGrenade(void) noexcept {}
 			virtual ~FallObjGrenade(void) noexcept {}
 		public:
-			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::FallGrenade; }
+			Sceneclass::SoundEnum GetFallSound(void) const noexcept override { return Sceneclass::SoundEnum::FallGrenade; }
 		public:
 			void RotateOnAir(moves* objMove) noexcept override {
 				//テキトーに飛び回る
@@ -48,12 +48,12 @@ namespace FPS_n2 {
 			void OnTimeEnd(const moves& objMove) noexcept override {
 				auto* SE = SoundPool::Instance();
 				EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_greexp, objMove.GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate, 2.f);
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Explosion))->Play3D(objMove.GetPos(), Scale3DRate * 25.f);
+				SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Explosion))->Play3D(objMove.GetPos(), Scale3DRate * 25.f);
 			}
 		};
 
 
-		void			FallObjClass::SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float timer, FallObjectType Type) noexcept {
+		void			FallObj::SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float timer, FallObjectType Type) noexcept {
 			this->m_Timer = timer;
 			switch (Type) {
 			case FallObjectType::Cart:
@@ -78,9 +78,9 @@ namespace FPS_n2 {
 			this->m_SoundSwitch = true;
 			this->m_IsEndFall = false;
 		}
-		void			FallObjClass::FirstExecute(void) noexcept {
+		void			FallObj::FirstExecute(void) noexcept {
 			if (!IsActive()) { return; }
-			auto* BackGround = BackGround::BackGroundClass::Instance();
+			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* SE = SoundPool::Instance();
 			Vector3DX PosBuf = GetMove().GetPos() + GetMove().GetVec() * 60.f * DXLib_refParts->GetDeltaTime() + Vector3DX::up() * this->m_yAdd;
@@ -88,7 +88,7 @@ namespace FPS_n2 {
 			{
 				Vector3DX EndPos = PosBuf;
 				Vector3DX Normal;
-				if (BackGround->CheckLinetoMap(GetMove().GetRePos(), &EndPos, &Normal)) {
+				if (BackGroundParts->CheckLinetoMap(GetMove().GetRePos(), &EndPos, &Normal)) {
 					PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
 					SetMove().SetVec(Vector3DX::Reflect(GetMove().GetVec(), Normal) * 0.5f);
 					this->m_yAdd = 0.f;

@@ -2,7 +2,7 @@
 #include	"../../Header.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace Charas {
 		enum class CharaAnimeID : int {
 			Bottom_Stand,
 			Bottom_Stand_Walk,

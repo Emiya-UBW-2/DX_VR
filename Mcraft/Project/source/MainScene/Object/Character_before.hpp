@@ -11,7 +11,7 @@
 #define DRAW_HITBOX false
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace Charas {
 		//キャラのうち特定機能だけ抜き出したもの
 		//
 		enum class HitType {
@@ -233,7 +233,7 @@ namespace FPS_n2 {
 			const auto& GetHitBoxPointList() const { return this->m_HitBox; }
 		public:
 			HitBoxControl(void) noexcept {}
-			~HitBoxControl(void) noexcept {}
+			virtual ~HitBoxControl(void) noexcept {}
 		public:
 			void Init(void) noexcept {
 				this->m_HitBox.resize(27);
@@ -266,7 +266,7 @@ namespace FPS_n2 {
 			float												m_BreathEyePosTimer{ 0.f };
 		public:
 			WalkSwingControl(void) noexcept {}
-			~WalkSwingControl(void) noexcept {}
+			virtual ~WalkSwingControl(void) noexcept {}
 		public:
 			const auto& GetMoveEyePos(void) const noexcept { return this->m_MoveEyePosLocal; }
 		public:
@@ -326,7 +326,7 @@ namespace FPS_n2 {
 		private:
 			int													m_GunSelect{ 0 };
 			int													m_ReserveGunSelect{ 0 };
-			std::array<std::shared_ptr<GunClass>, 3>			m_GunPtr{};			//銃
+			std::array<std::shared_ptr<Guns::GunObj>, 3>		m_GunPtr{};			//銃
 		public://ゲッター
 			auto&				GetGunPtr(int ID) noexcept { return this->m_GunPtr[ID]; }
 			const auto&			GetGunPtr(int ID) const noexcept { return this->m_GunPtr[ID]; }
@@ -356,26 +356,25 @@ namespace FPS_n2 {
 					auto& pGun = GetGunPtr(loop);
 					if (!pGun) { continue; }
 
-					if (isThrow ? pGun->GetGunPartsSlot()->GetGunPartsData()->GetIsThrowWeapon() : !pGun->GetGunPartsSlot()->GetGunPartsData()->GetIsThrowWeapon()) {
+					if (isThrow ? pGun->GetModifySlot()->GetMyData()->GetIsThrowWeapon() : !pGun->GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
 						this->m_ReserveGunSelect = loop;
 						break;
 					}
 				}
 			}
 
-			const auto			IsChangeGunSel(void) const noexcept { return GetNowGunSelect() != this->m_ReserveGunSelect; }
-			void				InvokeReserveGunSel(void) noexcept { this->m_GunSelect = this->m_ReserveGunSelect; }
+			const auto			IsChangeGunSelect(void) const noexcept { return GetNowGunSelect() != this->m_ReserveGunSelect; }
+			void				InvokeReserveGunSelect(void) noexcept { this->m_GunSelect = this->m_ReserveGunSelect; }
 			void				SelectGun(int ID) noexcept { this->m_GunSelect = this->m_ReserveGunSelect = ID; }
-			void				SetGunPtr(int ID, const std::shared_ptr<GunClass>& pGunPtr0) noexcept { this->m_GunPtr[ID] = pGunPtr0; }
+			void				SetGunPtr(int ID, const std::shared_ptr<Guns::GunObj>& pGunPtr0) noexcept { this->m_GunPtr[ID] = pGunPtr0; }
 		public:
 			GunPtrControl(void) noexcept {}
-			~GunPtrControl(void) noexcept {}
+			virtual ~GunPtrControl(void) noexcept {}
 		public:
 			void				Dispose(void) noexcept {
 				for (auto& gun : this->m_GunPtr) {
 					if (!gun) { return; }
-					auto* ObjMngr = ObjectManager::Instance();
-					ObjMngr->DelObj(gun);
+					ObjectManager::Instance()->DelObj(gun);
 					gun.reset();
 				}
 			}
@@ -389,7 +388,7 @@ namespace FPS_n2 {
 		private:
 		public:
 			HitReactionControl(void) noexcept {}
-			~HitReactionControl(void) noexcept {}
+			virtual ~HitReactionControl(void) noexcept {}
 		public:
 			const auto GetHitReactionMat(void) const noexcept { return Matrix3x3DX::RotAxis(this->m_HitAxis, this->m_HitPowerR * deg2rad(90.f)); }
 			const auto IsDamaging(void) const noexcept { return this->m_HitPower > 0.f; }
@@ -503,7 +502,7 @@ namespace FPS_n2 {
 		public:
 		public:
 			RagDollControl(void) noexcept {}
-			~RagDollControl(void) noexcept {}
+			virtual ~RagDollControl(void) noexcept {}
 		public:
 			auto& SetRagDoll(void) noexcept { return this->m_RagDoll; }
 			const auto& GetRagDoll(void) const noexcept { return this->m_RagDoll; }

@@ -49,14 +49,11 @@ namespace FPS_n2 {
 	};
 	//
 	namespace Sceneclass {
-		class CommonBattleResource : public SingletonBase<CommonBattleResource> {
-		private:
-			friend class SingletonBase<CommonBattleResource>;
-		private:
+		class CommonBattleResource {
 		public:
-			void			Load(void) noexcept;
-			void			Set(void) noexcept;
-			void			Dispose(void) noexcept;
+			static void			Load(void) noexcept;
+			static void			Set(void) noexcept;
+			static void			Dispose(void) noexcept;
 		};
 	};
 
@@ -82,7 +79,7 @@ namespace FPS_n2 {
 		int	m_YScreenPos{};
 	public:
 		ScreenPosition(void) noexcept {}
-		~ScreenPosition(void) noexcept {}
+		virtual ~ScreenPosition(void) noexcept {}
 	public:
 		const int XPos(void) const noexcept { return this->m_XPos; }
 		const int YPos(void) const noexcept { return this->m_YPos; }
@@ -127,7 +124,7 @@ namespace FPS_n2 {
 		}
 	public: //コンストラクタ、デストラクタ
 		HitMarker(void) noexcept {}
-		~HitMarker(void) noexcept {}
+		virtual ~HitMarker(void) noexcept {}
 	public: //継承
 		void			Init(void) noexcept {
 			this->m_IsActive = false;
@@ -234,8 +231,12 @@ namespace FPS_n2 {
 	private:
 		friend class SingletonBase<EffectSingleton>;
 	private:
-		EffectSingleton(void) noexcept { Init(); }
-		virtual ~EffectSingleton(void) noexcept { Dispose(); }
+		EffectSingleton(void) noexcept {
+			this->m_EffectControl.Init();
+		}
+		virtual ~EffectSingleton(void) noexcept {
+			this->m_EffectControl.Dispose();
+		}
 	private:
 		EffectControl								m_EffectControl;
 	public:
@@ -263,14 +264,8 @@ namespace FPS_n2 {
 			this->m_EffectControl.SetEffectColor(static_cast<int>(ID), r, g, b, a);
 		}
 	public:
-		void			Init(void) noexcept {
-			this->m_EffectControl.Init();
-		}
 		void			Update(void) noexcept {
 			this->m_EffectControl.Execute();
-		}
-		void			Dispose(void) noexcept {
-			this->m_EffectControl.Dispose();
 		}
 	};
 

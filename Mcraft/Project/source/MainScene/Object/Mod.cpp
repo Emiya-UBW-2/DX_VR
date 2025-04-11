@@ -1,10 +1,10 @@
 #include	"Mod.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
-		const Matrix4x4DX GunPartsClass::GetFramePartsMat(GunFrame frame) const noexcept {
+	namespace Guns {
+		const Matrix4x4DX GunPartsObj::GetFramePartsMat(GunFrame frame) const noexcept {
 			Matrix4x4DX Mat;
-			if (GetGunPartsSlot()->GetFramePartsMat(frame, &Mat)) {
+			if (GetModifySlot()->GetPartsFrameMatChild(frame, &Mat)) {
 				return Mat;
 			}
 			if (HaveFrame(static_cast<int>(frame))) {
@@ -20,39 +20,36 @@ namespace FPS_n2 {
 			}
 			return Matrix4x4DX::identity();
 		}
-		void GunPartsClass::Init_Sub(void) noexcept {
-			this->m_GunPartsSlotControl = std::make_unique<GunPartsSlotControl>(GetFilePath());
-			ObjectBaseClass::SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
-			ObjectBaseClass::SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
+		void GunPartsObj::Init_Sub(void) noexcept {
+			this->m_ModifySlot = std::make_unique<ModifySlot>(GetFilePath());
+			SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
+			SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
 			this->m_IsMeshDraw.resize(GetObj().GetMeshNum());
 			for (auto& isdraw : this->m_IsMeshDraw) {
 				isdraw = true;
 			}
 			Init_GunParts();
 		}
-		void GunPartsClass::SetGunPartsMatrix(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept {
+		void GunPartsObj::SetGunPartsMatrix(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept {
 			SetMove().SetMat(rotation);
 			SetMove().SetPos(pos);
 			SetMove().Update(0.f, 0.f);
 			UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
-			this->m_GunPartsSlotControl->UpdatePartsAnim(GetObj());
-			this->m_GunPartsSlotControl->UpdatePartsMove(GetFramePartsMat(GunFrame::UnderRail), GunSlot::UnderRail);
-			this->m_GunPartsSlotControl->UpdatePartsMove(GetFramePartsMat(GunFrame::Sight), GunSlot::Sight);
-			this->m_GunPartsSlotControl->UpdatePartsMove(GetFramePartsMat(GunFrame::MuzzleAdapter), GunSlot::MuzzleAdapter);
+			this->m_ModifySlot->UpdatePartsAnim(GetObj());
+			this->m_ModifySlot->UpdatePartsMove(GunSlot::UnderRail, GetFramePartsMat(GunFrame::UnderRail));
+			this->m_ModifySlot->UpdatePartsMove(GunSlot::Sight, GetFramePartsMat(GunFrame::Sight));
+			this->m_ModifySlot->UpdatePartsMove(GunSlot::MuzzleAdapter, GetFramePartsMat(GunFrame::MuzzleAdapter));
 		}
-		void GunPartsClass::Dispose_Sub(void) noexcept {
+		void GunPartsObj::Dispose_Sub(void) noexcept {
 			this->m_IsMeshDraw.clear();
-			this->m_GunPartsSlotControl.reset();
+			this->m_ModifySlot.reset();
 			Dispose_GunParts();
 		}
 		//
-		void MagazineClass::Init_GunParts(void) noexcept {
-			auto* ObjMngr = ObjectManager::Instance();
+		void MagazinePartsObj::Init_GunParts(void) noexcept {
 			for (auto& ammo : this->m_Ammo) {
-				ammo = std::make_shared<AmmoInChamberClass>();
-				ObjMngr->AddObject(ammo);
-				ObjMngr->LoadModel(ammo, ammo, GetGunPartsSlot()->GetGunPartsData()->GetAmmoSpecMagTop()->GetPath().c_str());
-				ammo->Init();
+				ammo = std::make_shared<Objects::AmmoInChamberObj>();
+				ObjectManager::Instance()->InitObject(ammo, GetModifySlot()->GetMyData()->GetAmmoSpecMagTop()->GetPath().c_str());
 				ammo->SetActive(true);
 			}
 		}

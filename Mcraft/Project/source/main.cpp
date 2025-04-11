@@ -7,7 +7,7 @@
 #include	"MainScene/NetworkBrowser.hpp"
 
 #if defined(DEBUG) && DEBUG_CAM
-int DBG_CamSel = -1;
+int DBG_CamSelect = -1;
 #endif
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
@@ -54,18 +54,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetUseBackCulling(true);
 	SetTextureAddressMode(DX_TEXADDRESS_WRAP);
 	//
-	FPS_n2::Player::PlayerManager::Create();
-	FPS_n2::Sceneclass::CommonBattleResource::Create();
-	FPS_n2::BackGround::BackGroundClass::Create();
-	FPS_n2::NetWorkBrowser::Create();
 	FPS_n2::Sceneclass::ButtonControl::Create();
-	FPS_n2::Sceneclass::GunAnimManager::Create();
-	FPS_n2::Sceneclass::GunPartsDataManager::Create();
-	FPS_n2::Sceneclass::AmmoDataManager::Create();
 	//
-	auto* SaveDataParts = SaveDataClass::Instance();
-	//初期開放
-	SaveDataParts->Save();
+	FPS_n2::Guns::GunPartsDataManager::Create();
+	FPS_n2::Objects::AmmoDataManager::Create();
+	//初期セーブ
+	SaveDataClass::Instance()->Save();
 	//BGM
 	/*
 	auto* SE = SoundPool::Instance();
@@ -75,18 +69,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto LoadScenePtr = std::make_shared<FPS_n2::Sceneclass::LoadScene>();
 	auto MainGameScenePtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
-
-
 	//遷移先指定
 	Titlescene->SetNextSceneList(0, LoadScenePtr);
 	LoadScenePtr->SetNextSceneList(0, MainGameScenePtr);
 	MainGameScenePtr->SetNextSceneList(0, Titlescene);
 	MainGameScenePtr->SetNextSceneList(1, LoadScenePtr);
-
-	auto* SceneParts = SceneControl::Instance();
-	SceneParts->SetFirstScene(Titlescene);
-	//SceneParts->SetFirstScene(LoadScenePtr);
-	//最初の読み込み
+	SceneControl::Instance()->SetFirstScene(Titlescene);
+	//SceneControl::Instance()->SetFirstScene(LoadScenePtr);
+	//メインロジック開始
 	DXLib_refParts->MainLogic();
 	return 0;
 }

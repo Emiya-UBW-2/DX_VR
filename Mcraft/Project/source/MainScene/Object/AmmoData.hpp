@@ -2,8 +2,8 @@
 #include	"../../Header.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
-		class AmmoDataClass {
+	namespace Objects {
+		class AmmoData {
 		private:
 			std::string		m_path;
 			std::string		m_name;
@@ -25,10 +25,8 @@ namespace FPS_n2 {
 			const auto& GetAccuracy(void) const noexcept { return this->m_Accuracy; }
 			const auto& GetFallSound(void) const noexcept { return this->m_FallSound; }
 		public:
-			AmmoDataClass(std::string path_) noexcept {
-				Set(path_);
-			}
-
+			AmmoData(std::string path_) noexcept { Set(path_); }
+		private:
 			void			Set(std::string path_) {
 				this->m_path = path_;
 
@@ -50,8 +48,7 @@ namespace FPS_n2 {
 					Set_Sub(LEFT, RIGHT);
 				}
 			}
-		private:
-			void		Set_Sub(const std::string& LEFT, const std::string& RIGHT) noexcept {
+			void			Set_Sub(const std::string& LEFT, const std::string& RIGHT) noexcept {
 				if (LEFT == "Name") {
 					this->m_name = RIGHT;
 				}
@@ -83,7 +80,15 @@ namespace FPS_n2 {
 		private:
 			friend class SingletonBase<AmmoDataManager>;
 		private:
-			std::vector<std::shared_ptr<AmmoDataClass>>	m_Object;
+			std::vector<std::shared_ptr<AmmoData>>	m_Object;
+		private:
+			AmmoDataManager(void) noexcept {}
+			virtual ~AmmoDataManager(void) noexcept {
+				for (auto& obj : this->m_Object) {
+					obj.reset();
+				}
+				this->m_Object.clear();
+			}
 		public:
 			const auto& LoadAction(const std::string& filepath) noexcept {
 				for (auto& obj : this->m_Object) {
@@ -91,7 +96,7 @@ namespace FPS_n2 {
 						return obj;
 					}
 				}
-				this->m_Object.emplace_back(std::make_shared<AmmoDataClass>(filepath));
+				this->m_Object.emplace_back(std::make_shared<AmmoData>(filepath));
 				return this->m_Object.back();
 			}
 		};

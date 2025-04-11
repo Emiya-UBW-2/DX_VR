@@ -102,20 +102,20 @@ namespace FPS_n2 {
 		private:
 		public:
 			size_t				m_CheckSum{};			//チェックサム
-			size_t				ServerFrame{ 0 };			//サーバーフレーム
-			PlayerNetData		PlayerData[Player_num];
+			size_t				m_ServerFrame{ 0 };			//サーバーフレーム
+			PlayerNetData		m_PlayerData[Player_num];
 			size_t				m_PlayerFill[Player_num]{ 0 };
 			ServerPhase			m_ServerPhase{ ServerPhase::Empty };
 		private:
 			int					CalcCheckSum(void) const noexcept {
 				int Players = 0;
 				for (int loop = 0; loop < Player_num; ++loop) {
-					Players += (PlayerData[loop].IsCheckSum() ? 100 : 0);
-					Players += (m_PlayerFill[loop] ?  10 : 0);
+					Players += (this->m_PlayerData[loop].IsCheckSum() ? 100 : 0);
+					Players += (this->m_PlayerFill[loop] ?  10 : 0);
 				}
 				return (
 					500 +
-					static_cast<int>(ServerFrame) +
+					static_cast<int>(this->m_ServerFrame) +
 					Players
 					);
 			}
@@ -123,7 +123,7 @@ namespace FPS_n2 {
 			const auto			IsCheckSum(void) const noexcept { return this->m_CheckSum == static_cast<size_t>(CalcCheckSum()); }
 			const auto			GetEmptyID(void) const noexcept {
 				for (int loop = 0; loop < Player_num; ++loop) {
-					if (m_PlayerFill[loop] != TRUE) {
+					if (this->m_PlayerFill[loop] != TRUE) {
 						return loop;
 					}
 				}
@@ -157,7 +157,7 @@ namespace FPS_n2 {
 			PlayerNetWork& operator=(const PlayerNetWork&) = delete;
 			PlayerNetWork& operator=(PlayerNetWork&&) = delete;
 
-			~PlayerNetWork(void) noexcept {}
+			virtual ~PlayerNetWork(void) noexcept {}
 		public:
 			auto& SetLastServerDataBuffer(void) noexcept { return this->m_LastServerDataBuffer; }
 			const auto& GetLastServerDataBuffer(void) const noexcept { return this->m_LastServerDataBuffer; }
@@ -170,7 +170,7 @@ namespace FPS_n2 {
 		public:
 			PlayerNetData 	GetLerpServerPlayerData(PlayerID ID) const noexcept {
 				return PlayerNetData::GetLerpData(
-					this->m_PrevServerData.PlayerData[static_cast<size_t>(ID)], this->m_LastServerData.PlayerData[static_cast<size_t>(ID)],
+					this->m_PrevServerData.m_PlayerData[static_cast<size_t>(ID)], this->m_LastServerData.m_PlayerData[static_cast<size_t>(ID)],
 					std::clamp(static_cast<float>(this->m_LeapFrame) / static_cast<float>(this->m_LeapFrameMax), 0.f, 1.f));
 			}
 		public:
@@ -178,8 +178,8 @@ namespace FPS_n2 {
 				this->m_LastServerFrame = 0;
 				this->m_LeapFrame = 0;
 				this->m_LeapFrameMax = 20;
-				this->m_LastServerData.ServerFrame = 0;
-				this->m_PrevServerData.ServerFrame = 0;
+				this->m_LastServerData.m_ServerFrame = 0;
+				this->m_PrevServerData.m_ServerFrame = 0;
 				this->m_TickCnt = 0;
 				this->m_TickRate = Tick;
 				LONGLONG NowFrame = GetNowHiPerformanceCount();
@@ -215,15 +215,15 @@ namespace FPS_n2 {
 			void			Update(void) noexcept {
 				if (this->m_TickUpdateFlag) {
 					this->m_PingTime = MAXLONGLONG;
-					if (this->m_LastServerFrame < this->m_LastServerDataBuffer.ServerFrame && this->m_LastServerDataBuffer.ServerFrame <= (this->m_LastServerFrame + 60)) {//入力されたデータが以前もらったものから0~60F後だったら
-						this->m_LastServerFrame = this->m_LastServerDataBuffer.ServerFrame;
+					if (this->m_LastServerFrame < this->m_LastServerDataBuffer.m_ServerFrame && this->m_LastServerDataBuffer.m_ServerFrame <= (this->m_LastServerFrame + 60)) {//入力されたデータが以前もらったものから0~60F後だったら
+						this->m_LastServerFrame = this->m_LastServerDataBuffer.m_ServerFrame;
 						this->m_LeapFrame = 0;
 						this->m_PrevServerData = this->m_LastServerData;
 						this->m_LastServerData = this->m_LastServerDataBuffer;
-						auto Total = static_cast<int>(this->m_LastServerData.ServerFrame) - static_cast<int>(this->m_PrevServerData.ServerFrame);
+						auto Total = static_cast<int>(this->m_LastServerData.m_ServerFrame) - static_cast<int>(this->m_PrevServerData.m_ServerFrame);
 						if (Total <= 0) { Total = 20; }
 						this->m_LeapFrameMax = static_cast<size_t>(Total);
-						this->m_PingTime = this->m_LocalData.GetClientTime() - this->m_LastServerData.PlayerData[this->m_LocalData.GetID()].GetClientTime();//もらったデータと自分のフレームとの差異がpingになる
+						this->m_PingTime = this->m_LocalData.GetClientTime() - this->m_LastServerData.m_PlayerData[this->m_LocalData.GetID()].GetClientTime();//もらったデータと自分のフレームとの差異がpingになる
 					}
 				}
 				else {
@@ -277,7 +277,7 @@ namespace FPS_n2 {
 			ServerControl& operator=(const ServerControl&) = delete;
 			ServerControl& operator=(ServerControl&&) = delete;
 
-			~ServerControl(void) noexcept {}
+			virtual ~ServerControl(void) noexcept {}
 		public:
 			const bool		GetIsServerPlayer(PlayerID ID) const noexcept { return this->m_IsServerPlay && (ID == this->m_ServerPlayerID); }
 		public:
@@ -302,7 +302,7 @@ namespace FPS_n2 {
 			float					m_CannotConnectTimer{ 0.f };
 			int						m_Port{ 0 };
 			IPDATA					m_IP{ 127,0,0,1 };
-			int						m_NetWorkSel{ 0 };
+			int						m_NetWorkSelect{ 0 };
 			UDPS					m_PlayerUDPPhase;
 		public:
 			ClientControl(void) noexcept {}
@@ -311,15 +311,15 @@ namespace FPS_n2 {
 			ClientControl& operator=(const ClientControl&) = delete;
 			ClientControl& operator=(ClientControl&&) = delete;
 
-			~ClientControl(void) noexcept {}
+			virtual ~ClientControl(void) noexcept {}
 		public:
 			void			Init(int pPort, const IPDATA& pIP) noexcept {
 				this->m_Port = pPort;
 				this->m_IP = pIP;
 				this->m_CannotConnectTimer = 0.f;
-				this->m_NetWorkSel = 0;
+				this->m_NetWorkSelect = 0;
 				this->m_PlayerUDPPhase.m_NetWork.SetServerIP(this->m_IP);
-				this->m_PlayerUDPPhase.Init(false, this->m_Port + this->m_NetWorkSel);
+				this->m_PlayerUDPPhase.Init(false, this->m_Port + this->m_NetWorkSelect);
 				this->m_PlayerUDPPhase.m_Phase = ClientPhase::Client_WaitConnect;
 			}
 			void			Update(PlayerNetWork* pPlayerNetwork) noexcept;
@@ -352,7 +352,7 @@ namespace FPS_n2 {
 			NetWorkController& operator=(const NetWorkController&) = delete;
 			NetWorkController& operator=(NetWorkController&&) = delete;
 
-			~NetWorkController(void) noexcept { Dispose(); }
+			virtual ~NetWorkController(void) noexcept { Dispose(); }
 		private:
 			void			CalcPing(LONGLONG microsec) noexcept {
 				if (microsec == InvalidID) {

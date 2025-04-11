@@ -5,21 +5,21 @@
 #include	"Gun_before.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
-		class GunPartsClass : public ObjectBaseClass {
-			std::unique_ptr<GunPartsSlotControl>								m_GunPartsSlotControl{};
+	namespace Guns {
+		class GunPartsObj : public ObjectBaseClass {
+			std::unique_ptr<ModifySlot>								m_ModifySlot{};
 
 			std::vector<int>													m_IsMeshDraw{};
 		public:
-			GunPartsClass(void) noexcept {}
-			~GunPartsClass(void) noexcept {}
+			GunPartsObj(void) noexcept {}
+			virtual ~GunPartsObj(void) noexcept {}
 		public:
-			const std::unique_ptr<GunPartsSlotControl>& GetGunPartsSlot(void) const noexcept { return this->m_GunPartsSlotControl; }
+			const std::unique_ptr<ModifySlot>& GetModifySlot(void) const noexcept { return this->m_ModifySlot; }
 			auto					GetFrameWorldMat(GunFrame frame) const noexcept { return GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
 			const Matrix4x4DX		GetFramePartsMat(GunFrame frame) const noexcept;
 
 			void						SetIsDrawMesh(int meshID, bool IsDraw) noexcept {
-				m_IsMeshDraw.at(meshID) = IsDraw ? TRUE : FALSE;
+				this->m_IsMeshDraw.at(meshID) = IsDraw ? TRUE : FALSE;
 			}
 		public:
 			void			Init_Sub(void) noexcept override;
@@ -86,11 +86,11 @@ namespace FPS_n2 {
 		};
 
 
-		class MagazineClass : public GunPartsClass {
-			std::array<std::shared_ptr<AmmoInChamberClass>,5>			m_Ammo{};		//
+		class MagazinePartsObj : public GunPartsObj {
+			std::array<std::shared_ptr<Objects::AmmoInChamberObj>,5>			m_Ammo{};		//
 		public:
-			MagazineClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Magazine); }
-			~MagazineClass(void) noexcept {}
+			MagazinePartsObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Magazine); }
+			virtual ~MagazinePartsObj(void) noexcept {}
 		public:
 			void			Init_GunParts(void) noexcept override;
 			void			FirstExecute_GunParts(void) noexcept override {
@@ -101,9 +101,8 @@ namespace FPS_n2 {
 				}
 			}
 			void			Dispose_GunParts(void) noexcept override {
-				auto* ObjMngr = ObjectManager::Instance();
 				for (auto& ammo : this->m_Ammo) {
-					ObjMngr->DelObj(ammo);
+					ObjectManager::Instance()->DelObj(ammo);
 					ammo.reset();
 				}
 			}
@@ -121,43 +120,43 @@ namespace FPS_n2 {
 			}
 		};
 
-		class LowerClass : public GunPartsClass {
+		class LowerPartsObj : public GunPartsObj {
 		private:
 		public://ゲッター
 		public:
-			LowerClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Lower); }
-			~LowerClass(void) noexcept {}
+			LowerPartsObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Lower); }
+			virtual ~LowerPartsObj(void) noexcept {}
 		public:
 		};
 
-		class UpperClass : public GunPartsClass {
+		class UpperPartsObj : public GunPartsObj {
 		public:
-			UpperClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Upper); }
-			~UpperClass(void) noexcept {}
+			UpperPartsObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Upper); }
+			virtual ~UpperPartsObj(void) noexcept {}
 		};
 
-		class BarrelClass : public GunPartsClass {
+		class BarrelPartsObj : public GunPartsObj {
 		private:
 		public://ゲッター
 		public:
-			BarrelClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Barrel); }
-			~BarrelClass(void) noexcept {}
+			BarrelPartsObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Barrel); }
+			virtual ~BarrelPartsObj(void) noexcept {}
 		public:
 		};
 
-		class UnderRailClass : public GunPartsClass {
+		class UnderRailPartsObj : public GunPartsObj {
 		private:
 		public://ゲッター
 		public:
-			UnderRailClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::UnderRail); }
-			~UnderRailClass(void) noexcept {}
+			UnderRailPartsObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::UnderRail); }
+			virtual ~UnderRailPartsObj(void) noexcept {}
 		public:
 		};
 
-		class SightClass : public GunPartsClass {
+		class SightPartsObj : public GunPartsObj {
 		public:
-			SightClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Sight); }
-			~SightClass(void) noexcept {}
+			SightPartsObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Sight); }
+			virtual ~SightPartsObj(void) noexcept {}
 		public:
 			void SetScopeAlpha(float Per) noexcept {
 				SetObj().SetMaterialOpacityRate(1, Per);
@@ -165,10 +164,10 @@ namespace FPS_n2 {
 			}
 		};
 
-		class MuzzleClass : public GunPartsClass {
+		class MuzzlePartsObj : public GunPartsObj {
 		public:
-			MuzzleClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::MuzzleAdapter); }
-			~MuzzleClass(void) noexcept {}
+			MuzzlePartsObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::MuzzleAdapter); }
+			virtual ~MuzzlePartsObj(void) noexcept {}
 		};
 	};
 };

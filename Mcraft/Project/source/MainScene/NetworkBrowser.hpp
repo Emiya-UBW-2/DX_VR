@@ -5,7 +5,7 @@
 
 namespace FPS_n2 {
 	enum class BrowserSequence : uint8_t {
-		SelMode,
+		SelectMode,
 		CheckPreset,
 		SetNewData,
 		Ready,
@@ -67,17 +67,19 @@ namespace FPS_n2 {
 		bool					m_IsServerPlayer{ true };
 		NewSetting				m_NetSetting;
 		//‹¤’Ê
-		BrowserSequence			m_Sequence{ BrowserSequence::SelMode };
+		BrowserSequence			m_Sequence{ BrowserSequence::SelectMode };
 		bool					m_SeqFirst{ false };
 		NewWorkSetting			m_NewWorkSettings;
 	private:
-		NetWorkBrowser(void) noexcept {}
+		NetWorkBrowser(void) noexcept {
+			this->m_Sequence = BrowserSequence::SelectMode;
+		}
 		NetWorkBrowser(const NetWorkBrowser&) = delete;
 		NetWorkBrowser(NetWorkBrowser&&) = delete;
 		NetWorkBrowser& operator=(const NetWorkBrowser&) = delete;
 		NetWorkBrowser& operator=(NetWorkBrowser&&) = delete;
 
-		~NetWorkBrowser(void) noexcept {}
+		virtual ~NetWorkBrowser(void) noexcept {}
 	public:
 		auto			IsDataReady(void) const noexcept { return this->m_Sequence == BrowserSequence::Ready; }
 		const auto& GetClient(void) const noexcept { return this->m_IsClient; }
@@ -100,7 +102,6 @@ namespace FPS_n2 {
 			this->m_Sequence = BrowserSequence::Ready;
 		}
 	public:
-		void Init(void) noexcept;
 		void Draw(void) noexcept;
 	};
 };

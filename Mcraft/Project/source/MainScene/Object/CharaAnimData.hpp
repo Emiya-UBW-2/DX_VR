@@ -2,7 +2,7 @@
 #include	"../../Header.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace Charas {
 		enum class GunAnimeID {
 			//どれか択一で行うアニメーション
 			HighReady,
@@ -235,15 +235,15 @@ namespace FPS_n2 {
 		private:
 			friend class SingletonBase<GunAnimManager>;
 		private:
-			class GunanimData {
+			class GunAnimData {
 				EnumGunAnim		m_EnumGunAnim{};
 				bool			m_IsLoop{ true };
 			public:
-				GunanimData(const std::string& data, EnumGunAnim EnumSel) noexcept {
-					Set(data, EnumSel);
+				GunAnimData(const std::string& data, EnumGunAnim EnumSelect) noexcept {
+					Set(data, EnumSelect);
 				}
 			public:
-				void Set(const std::string& data, EnumGunAnim EnumSel) {
+				void Set(const std::string& data, EnumGunAnim EnumSelect) {
 					std::vector<std::string> Args;
 					std::string RIGHTBuf = data;
 					//タブけし
@@ -268,7 +268,7 @@ namespace FPS_n2 {
 						}
 					}
 
-					this->m_EnumGunAnim = EnumSel;
+					this->m_EnumGunAnim = EnumSelect;
 					this->m_IsLoop = (Args[0] == "Loop");
 				}
 			public:
@@ -331,15 +331,15 @@ namespace FPS_n2 {
 					const auto& GetFingerPer(void) const noexcept { return this->m_Finger; }
 				};
 			public:
-				std::shared_ptr<GunanimData> first;
-				std::vector<std::shared_ptr<GunAnim>> second;
+				std::unique_ptr<GunAnimData>			m_AnimData;
+				std::vector<std::unique_ptr<GunAnim>>	m_AnimPoint;
 
 				const auto GetTotalTime() const {
-					int total = 0;
-					for (auto& ani : second) {
-						total += ani->GetFrame();
+					int Ret = 0;
+					for (auto& ani : m_AnimPoint) {
+						Ret += ani->GetFrame();
 					}
-					return total;
+					return Ret;
 				}
 			};
 		private:
@@ -348,6 +348,18 @@ namespace FPS_n2 {
 			Vector3DX DBG_AnimRot = Vector3DX::vget(0.f, 0.f, deg2rad(0));
 			Vector3DX DBG_AnimPos = Vector3DX::vget(-0.06f, -0.15f, -0.23f);
 #endif
+		private:
+			GunAnimManager(void) noexcept {}
+			virtual ~GunAnimManager(void) noexcept {
+				for (auto& obj : this->m_Object) {
+					obj.m_AnimData.reset();
+					for (auto& point : obj.m_AnimPoint) {
+						point.reset();
+					}
+					obj.m_AnimPoint.clear();
+				}
+				this->m_Object.clear();
+			}
 		public:
 			void	Load(const char* filepath) {
 				for (int loop = 0; loop < static_cast<int>(EnumGunAnim::Max); ++loop) {
@@ -356,17 +368,17 @@ namespace FPS_n2 {
 					Path += ".txt";
 					this->m_Object.emplace_back();
 					FileStreamDX FileStream(Path.c_str());
-					this->m_Object.back().first = std::make_shared<GunanimData>(FileStream.SeekLineAndGetStr(), (EnumGunAnim)loop);
+					this->m_Object.back().m_AnimData = std::make_unique<GunAnimData>(FileStream.SeekLineAndGetStr(), (EnumGunAnim)loop);
 					while (true) {
 						if (FileStream.ComeEof()) { break; }
 						auto ALL = FileStream.SeekLineAndGetStr();
-						this->m_Object.back().second.emplace_back(std::make_shared<AnimDatas::GunAnim>(ALL));
+						this->m_Object.back().m_AnimPoint.emplace_back(std::make_unique<AnimDatas::GunAnim>(ALL));
 					}
 				}
 			}
 
-			const AnimDatas* GetAnimData(EnumGunAnim EnumSel) const noexcept {
-				auto Find = std::find_if(this->m_Object.begin(), this->m_Object.end(), [&](const AnimDatas& tgt) {return tgt.first->GetEnumGunAnim() == EnumSel; });
+			const AnimDatas* GetAnimData(EnumGunAnim EnumSelect) const noexcept {
+				auto Find = std::find_if(this->m_Object.begin(), this->m_Object.end(), [&](const AnimDatas& tgt) {return tgt.m_AnimData->GetEnumGunAnim() == EnumSelect; });
 				if (Find != this->m_Object.end()) {
 					return &*Find;
 				}
@@ -382,7 +394,7 @@ namespace FPS_n2 {
 				GunAnimNow Ret; Ret.Set(Vector3DX::zero(), Vector3DX::zero(), Finger);
 				if (data) {
 					float totalTime = static_cast<float>(data->GetTotalTime());
-					if (data->first->GetIsLoop()) {
+					if (data->m_AnimData->GetIsLoop()) {
 						while (true) {
 							if ((nowframe - totalTime) > 0.f) {
 								nowframe -= totalTime;
@@ -397,7 +409,7 @@ namespace FPS_n2 {
 							nowframe = totalTime;
 						}
 					}
-					for (auto ani = data->second.begin(), endi = data->second.end() - 1; ani != endi; ++ani) {
+					for (auto ani = data->m_AnimPoint.begin(), endi = data->m_AnimPoint.end() - 1; ani != endi; ++ani) {
 						float Frame = static_cast<float>((*ani)->GetFrame());
 						if ((nowframe - Frame) <= 0.f) {
 							Finger = Lerp((*ani)->GetFingerPer(), (*(ani + 1))->GetFingerPer(), nowframe / Frame);
@@ -410,7 +422,7 @@ namespace FPS_n2 {
 
 #if defined(DEBUG) && DEBUG_CAM
 							if (ID == 0) {
-								if (0 <= DBG_CamSel && DBG_CamSel <= 3 && false) {
+								if (0 <= DBG_CamSelect && DBG_CamSelect <= 3 && false) {
 									auto* DXLib_refParts = DXLib_ref::Instance();
 									//
 									if (CheckHitKey(KEY_INPUT_RCONTROL) != 0) {

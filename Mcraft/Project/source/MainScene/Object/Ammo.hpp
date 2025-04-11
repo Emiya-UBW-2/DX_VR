@@ -5,10 +5,10 @@
 #include	"AmmoData.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
-		class AmmoClass : public ObjectBaseClass {
+	namespace Objects {
+		class AmmoObj : public ObjectBaseClass {
 			int				m_RicochetCnt{ 0 };
-			std::shared_ptr<AmmoDataClass>	m_AmmoData{ nullptr };
+			std::shared_ptr<AmmoData>	m_AmmoData{ nullptr };
 			float			m_speed{ 0.f };
 			float			m_penetration{ 0.f };
 			int				m_ShootCheraID{ InvalidID };
@@ -20,7 +20,7 @@ namespace FPS_n2 {
 			Vector3DX		m_repos;
 		public:
 			//接地
-			void			Put(std::shared_ptr<AmmoDataClass> pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, int pMyID) {
+			void			Put(const std::shared_ptr<AmmoData>& pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, int pMyID) {
 				this->m_RicochetCnt = 0;
 				this->m_pos = pos_t;
 				this->m_repos = pos_t;
@@ -43,13 +43,13 @@ namespace FPS_n2 {
 			}
 			//*/
 		public: //コンストラクタ、デストラクタ
-			AmmoClass(void) noexcept { this->m_objType = static_cast<int>(ObjType::Ammo); }
-			~AmmoClass(void) noexcept { this->m_AmmoData.reset(); }
+			AmmoObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Ammo); }
+			virtual ~AmmoObj(void) noexcept { this->m_AmmoData.reset(); }
 		public: //継承
 			void			Init_Sub(void) noexcept override {
 				SetActive(true);
-				ObjectBaseClass::SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
-				ObjectBaseClass::SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
+				SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
+				SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
 			}
 			void			FirstExecute(void) noexcept override;
 			void			DrawShadow(void) noexcept override {}

@@ -1,10 +1,10 @@
 #include	"ModData.hpp"
 
-const FPS_n2::Sceneclass::GunPartsDataManager* SingletonBase<FPS_n2::Sceneclass::GunPartsDataManager>::m_Singleton = nullptr;
+const FPS_n2::Guns::GunPartsDataManager* SingletonBase<FPS_n2::Guns::GunPartsDataManager>::m_Singleton = nullptr;
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace Guns {
 
-		void		GunPartsDataClass::SetSlot(const std::string& LEFT, const std::string& RIGHT) noexcept {
+		void		GunPartsData::SetSlot(const std::string& LEFT, const std::string& RIGHT) noexcept {
 			if (LEFT.find("Slot") != std::string::npos) {
 				if (LEFT.find("Type") != std::string::npos) {
 					for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
@@ -72,7 +72,7 @@ namespace FPS_n2 {
 				this->m_CapacityMax = (HitPoint)std::stoi(RIGHT);		//‘’e”
 			}
 			else if (LEFT.find("useammo" + std::to_string(this->m_AmmoSpec.size())) != std::string::npos) {
-				this->m_AmmoSpec.emplace_back(AmmoDataManager::Instance()->LoadAction("data/ammo/" + RIGHT + "/"));
+				this->m_AmmoSpec.emplace_back(Objects::AmmoDataManager::Instance()->LoadAction("data/ammo/" + RIGHT + "/"));
 			}
 
 			else if (LEFT == "ShootRate_Diff") {
@@ -94,8 +94,8 @@ namespace FPS_n2 {
 			else if (LEFT == "ShotRate") {
 				this->m_ShotRate = std::stoi(RIGHT);
 			}
-			else if (LEFT == "soundsel") {
-				this->m_SoundSel = std::stoi(RIGHT);
+			else if (LEFT == "soundselect") {
+				this->m_SoundSelect = std::stoi(RIGHT);
 			}
 			else if (LEFT == "reloadType") {
 				if (RIGHT == "MAG") {
@@ -115,8 +115,8 @@ namespace FPS_n2 {
 				this->m_CanSwitch = RIGHT == "True";
 			}
 			else {
-				for (int loop = 0; loop < static_cast<int>(GunAnimeID::Max); ++loop) {
-					if (LEFT == GunAnimeIDName[loop]) {
+				for (int loop = 0; loop < static_cast<int>(Charas::GunAnimeID::Max); ++loop) {
+					if (LEFT == Charas::GunAnimeIDName[loop]) {
 						this->m_AnimSelect[loop] = std::stoi(RIGHT);
 						break;
 					}
@@ -124,13 +124,13 @@ namespace FPS_n2 {
 			}
 		}
 
-		const std::shared_ptr<GunPartsDataClass>* GunPartsDataManager::AddData(const std::string& filepath) noexcept {
+		const std::shared_ptr<GunPartsData>* GunPartsDataManager::AddData(const std::string& filepath) noexcept {
 			for (auto& obj : this->m_Object) {
 				if (obj->GetPath() == filepath) {
 					return &obj;
 				}
 			}
-			auto tmp = std::make_shared<GunPartsDataClass>();
+			auto tmp = std::make_shared<GunPartsData>();
 			auto UniqueID = this->m_LastUniqueID;
 			tmp->SetUniqueID(UniqueID);
 			++this->m_LastUniqueID;
