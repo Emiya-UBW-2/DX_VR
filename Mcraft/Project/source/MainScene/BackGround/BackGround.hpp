@@ -386,18 +386,26 @@ namespace FPS_n2 {
 			int								m_BaseRate = 100;
 			int								m_ShadowRate = 100;
 			int								m_ThreadCounter = 0;
+			struct Draw {
+				vert32<VERTEX3D>	m_vert32;
+				Vector3DX			m_CamPos;
+				Vector3DX			m_CamVec;
+			};
+			struct DrawSB {
+				vert32<VERTEX3D>	m_vert32;
+				Vector3DX			m_CamPos;
+				Vector3DX			m_light;
+			};
+			struct DrawSS {
+				vert32<VERTEX3DSHADER>	m_vert32;
+				Vector3DX			m_CamPos;
+				Vector3DX			m_CamVec;
+			};
 			//表示ポリゴンスレッド用
-			std::array<vert32<VERTEX3D>, TotalCellLayer>	m_vert32s;
-			std::array<Vector3DX, TotalCellLayer>	m_CamPos;
-			std::array<Vector3DX, TotalCellLayer>	m_CamVec;
+			std::array<Draw, TotalCellLayer>	m_Draws;
 			//影スレッド用
-			std::array<vert32<VERTEX3D>, TotalCellLayer>	m_vert32sSB;
-			std::array<Vector3DX, TotalCellLayer>	m_CamPosSB;
-			std::array<Vector3DX, TotalCellLayer>	m_light;
-
-			std::array<vert32<VERTEX3DSHADER>, TotalCellLayer>	m_vert32sS;
-			std::array<Vector3DX, TotalCellLayer>	m_CamPosS;
-			std::array<Vector3DX, TotalCellLayer>	m_CamVecS;
+			std::array<DrawSB, TotalCellLayer>	m_DrawsSB;
+			std::array<DrawSS, TotalCellLayer>	m_DrawsSS;
 
 			MazeControl						m_MazeControl;
 			//
@@ -652,35 +660,24 @@ namespace FPS_n2 {
 			bool			AddCubeX_CanAddPlane(const CellsData& cellx, int xmin, int xmax, int cy, int cz, int id) noexcept;
 			bool			AddCubeZ_CanAddPlane(const CellsData& cellx, int cx, int cy, int zmin, int zmax, int id) noexcept;
 			//
-			void			AddPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
-			void			AddPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
+			void			AddPlaneXPlus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax, bool IsCalcUV, bool IsCalcOnlyPos) noexcept;
+			void			AddPlaneXMinus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax, bool IsCalcUV, bool IsCalcOnlyPos) noexcept;
+			void			AddPlaneYPlus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax, bool IsCalcUV, bool IsCalcOnlyPos) noexcept;
+			void			AddPlaneYMinus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax, bool IsCalcUV, bool IsCalcOnlyPos) noexcept;
+			void			AddPlaneZPlus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int xmin, int xmax, int y, int z, bool IsCalcUV, bool IsCalcOnlyPos) noexcept;
+			void			AddPlaneZMinus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int xmin, int xmax, int y, int z, bool IsCalcUV, bool IsCalcOnlyPos) noexcept;
 
-			void			AddCubesX(size_t id) noexcept;
-			void			AddCubesZ(size_t id) noexcept;
+			void			AddCubes(size_t id) noexcept;
+			void			AddShadowCubes(size_t id) noexcept;
 			//
-			void			AddShadowPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddShadowPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddShadowPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddShadowPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddShadowPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
-			void			AddShadowPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
+			void			AddSetShadowPlaneXPlus(vert32<VERTEX3DSHADER>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddSetShadowPlaneXMinus(vert32<VERTEX3DSHADER>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddSetShadowPlaneYPlus(vert32<VERTEX3DSHADER>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddSetShadowPlaneYMinus(vert32<VERTEX3DSHADER>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
+			void			AddSetShadowPlaneZPlus(vert32<VERTEX3DSHADER>* pTarget, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
+			void			AddSetShadowPlaneZMinus(vert32<VERTEX3DSHADER>* pTarget, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
 
-			void			AddShadowCubesX(size_t id) noexcept;
-			void			AddShadowCubesZ(size_t id) noexcept;
-			//
-			void			AddSetShadowPlaneXPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddSetShadowPlaneXMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddSetShadowPlaneYPlus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddSetShadowPlaneYMinus(size_t id, const CellsData& cellx, int x, int y, int zmin, int zmax) noexcept;
-			void			AddSetShadowPlaneZPlus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
-			void			AddSetShadowPlaneZMinus(size_t id, const CellsData& cellx, int xmin, int xmax, int y, int z) noexcept;
-
-			void			AddSetShadowCubesX(size_t id) noexcept;
-			void			AddSetShadowCubesZ(size_t id) noexcept;
+			void			AddSetShadowCubes(size_t id) noexcept;
 		public:
 			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
 			bool			CheckLinetoMap(const Vector3DX& StartPos, const Vector3DX& EndPos) const noexcept {

@@ -126,7 +126,7 @@ namespace FPS_n2 {
 			//
 			BackGroundParts->Init();
 			//
-			Vector3DX LightVec = Vector3DX::vget(0.f, -0.3f, 0.15f); LightVec = LightVec.normalized();
+			Vector3DX LightVec = Vector3DX::vget(0.05f, -0.3f, 0.15f); LightVec = LightVec.normalized();
 			PostPassParts->SetAmbientLight(LightVec);
 
 			SetLightEnable(false);
