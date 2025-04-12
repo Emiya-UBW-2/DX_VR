@@ -538,8 +538,9 @@ namespace FPS_n2 {
 									Matrix3x3DX::RotAxis(Vector3DX::forward(), -this->m_SlingZrad.GetRad()) *
 									Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y)
 								),
-								GetFrameWorldMat(CharaFrame::Head).pos() +
-								GetFrameWorldMat(CharaFrame::Head).zvec() * (-0.3f * Scale3DRate) +
+								GetFrameWorldMat(CharaFrame::Neck).pos() +
+								GetFrameWorldMat(CharaFrame::Neck).zvec() * (-0.15f * Scale3DRate) +
+								GetMove().GetMat().yvec() * (0.2f * Scale3DRate) +
 								(
 									GetMove().GetMat().xvec() * sin(this->m_SlingZrad.GetRad()) +
 									GetMove().GetMat().yvec() * cos(this->m_SlingZrad.GetRad())
@@ -602,7 +603,7 @@ namespace FPS_n2 {
 								) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 							if (this->m_ArmBreakPer > 0.01f) {
 								this->m_SlingArmZrad.Update(DXLib_refParts->GetDeltaTime());
-								this->m_SlingArmZrad.AddRad((0.5f * (this->m_RotateControl.GetRad().y - this->m_RotateControl.GetYRadBottom())) * DXLib_refParts->GetDeltaTime());
+								this->m_SlingArmZrad.AddRad((0.2f * (this->m_RotateControl.GetRad().y - this->m_RotateControl.GetYRadBottom())) * DXLib_refParts->GetDeltaTime());
 								Matrix4x4DX SlingArmMat =
 									(
 										Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(180)) *

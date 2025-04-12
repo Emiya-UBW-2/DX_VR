@@ -599,7 +599,7 @@ namespace FPS_n2 {
 				this->m_MuzzleSmokeControl.InitMuzzleSmoke(GetPartsFrameMatParent(GunFrame::Muzzle).pos());
 			}
 			else {
-				this->m_MuzzleSmokeControl.ExecuteMuzzleSmoke(GetPartsFrameMatParent(GunFrame::Muzzle).pos(), GetGunAnime() != Charas::GunAnimeID::Shot && this->m_SlingPer >= 1.f);
+				this->m_MuzzleSmokeControl.ExecuteMuzzleSmoke(GetPartsFrameMatParent(GunFrame::Muzzle).pos(), GetGunAnime() != Charas::GunAnimeID::Shot && !IsNeedCalcSling());
 			}
 			//
 			for (int loop = 0; loop < static_cast<int>(Charas::GunAnimeID::ChoiceOnceMax); ++loop) {
@@ -715,7 +715,7 @@ namespace FPS_n2 {
 			if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
 				auto* PostPassParts = PostPassEffect::Instance();
 				if (!GetCanShot()) {
-					if (this->m_SlingPer >= 1.f) {
+					if (!IsNeedCalcSling()) {
 						this->m_Reticle_on = false;
 						PostPassParts->Set_is_lens(false);
 					}
