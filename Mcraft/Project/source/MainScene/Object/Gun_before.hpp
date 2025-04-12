@@ -76,7 +76,6 @@ namespace FPS_n2 {
 				this->m_Ptr.resize(count);
 				for (auto& ptr : this->m_Ptr) {
 					ptr = std::make_shared<Objects::FallObj>();
-					ObjectManager::Instance()->LoadModelBefore(pPath.c_str());
 					ObjectManager::Instance()->InitObject(ptr, pPath.c_str());
 				}
 			}

@@ -570,11 +570,10 @@ namespace FPS_n2 {
 			}
 			if (this->m_MagazinePtr) {
 				this->m_MagFall.Init((*this->m_MagazinePtr)->GetFilePath(), 1);
-				auto& AmmoSpec = Objects::AmmoDataManager::Instance()->Get((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecID(0));
-				this->m_CartFall.Init(AmmoSpec->GetPath(), 4);	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
+				const char* AmmoSpecPath = Objects::AmmoDataManager::Instance()->Get((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecID(0))->GetPath().c_str();
+				this->m_CartFall.Init(AmmoSpecPath, 4);	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
 				this->m_AmmoInChamberObj = std::make_shared<Objects::AmmoInChamberObj>();
-				ObjectManager::Instance()->LoadModelBefore(AmmoSpec->GetPath().c_str());
-				ObjectManager::Instance()->InitObject(this->m_AmmoInChamberObj, AmmoSpec->GetPath().c_str());
+				ObjectManager::Instance()->InitObject(this->m_AmmoInChamberObj, AmmoSpecPath);
 				(*this->m_MagazinePtr)->SetAmmoActive(GetReloadType() == RELOADTYPE::MAG);//’ež‚ßŽ®‚È‚çƒ}ƒKƒWƒ““à•”‚Ì’e‚Í•`‰æ‚µ‚È‚¢
 			}
 			if (GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
@@ -584,16 +583,15 @@ namespace FPS_n2 {
 				speed = 1.f;
 			}
 			this->m_GunAnimeSpeed.at(static_cast<int>(Charas::GunAnimeID::Shot)) = static_cast<float>(GetModifySlot()->GetMyData()->GetShotRate()) / 60.f / 10.f;
-			InitGunAnimePer();
-			SetMinAABB(Vector3DX::vget(-0.5f, -0.5f, -0.5f) * Scale3DRate);
-			SetMaxAABB(Vector3DX::vget(0.5f, 0.5f, 0.5f) * Scale3DRate);
-
 			auto BaseAnim = GetAnimDataNow(Charas::GunAnimeID::Aim);
 			SetGunMat(BaseAnim.GetRot(), BaseAnim.GetPos());
 			this->m_BaseMuzzle = GetPartsFrameMatParent(GunFrame::Muzzle);
 		}
 		//
 		void				GunObj::Init_Sub(void) noexcept {
+			SetMinAABB(Vector3DX::vget(-0.5f, -0.5f, -0.5f) * Scale3DRate);
+			SetMaxAABB(Vector3DX::vget(0.5f, 0.5f, 0.5f) * Scale3DRate);
+			InitGunAnimePer();
 		}
 		void				GunObj::FirstExecute(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();

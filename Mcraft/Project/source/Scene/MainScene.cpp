@@ -73,8 +73,9 @@ namespace FPS_n2 {
 			PlayerMngr->SetWatchPlayer(GetViewPlayerID());
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+				//
 				if (loop == PlayerMngr->GetWatchPlayer()) {
-					Charas::CharacterObj::LoadChara("Main", (PlayerID)loop);//0.1s
+					Charas::CharacterObj::LoadChara("Main", (PlayerID)loop);
 					//*
 					int Rand = GetRand(100);
 					if (Rand < 30) {
@@ -90,8 +91,6 @@ namespace FPS_n2 {
 					//chara->LoadCharaGun("Mod870", 0);
 					chara->LoadCharaGun("P226", 1);
 					chara->LoadCharaGun("RGD5", 2);
-					chara->SetCharaTypeID(CharaTypeID::Team);
-					//0.5s
 				}
 				else {
 					Charas::CharacterObj::LoadChara("Soldier", (PlayerID)loop);
@@ -100,10 +99,11 @@ namespace FPS_n2 {
 					//ƒ‰ƒOƒh[ƒ‹
 					chara->SetRagDoll().Duplicate(m_RagDoll);
 					chara->SetupRagDoll();
-					chara->SetCharaTypeID(CharaTypeID::Enemy);
 				}
+				//
 				chara->SetPlayerID((PlayerID)loop);
-
+				chara->SetCharaTypeID((loop == PlayerMngr->GetWatchPlayer()) ? CharaTypeID::Team : CharaTypeID::Enemy);
+				//
 				for (int loop2 = 0; loop2 < 3; ++loop2) {
 					auto& g = chara->GetGunPtr(loop2);
 					if (!g) { continue; }
