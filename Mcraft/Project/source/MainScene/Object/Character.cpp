@@ -718,7 +718,6 @@ namespace FPS_n2 {
 			std::string Path = "data/Charactor/";
 			Path += FolderName;
 			Path += "/";
-
 			player->SetChara(std::make_shared<CharacterObj>());
 			ObjectManager::Instance()->InitObject(player->GetChara(), Path.c_str());
 			player->SetAI(std::make_shared<Sceneclass::AIControl>(ID));
@@ -727,7 +726,6 @@ namespace FPS_n2 {
 			std::string Path = "data/gun/";
 			Path += FolderName;
 			Path += "/";
-
 			this->m_GunPtrControl.SetGunPtr(Select, std::make_shared<Guns::GunObj>());
 			ObjectManager::Instance()->InitObject(this->m_GunPtrControl.GetGunPtr(Select), Path.c_str());
 		}

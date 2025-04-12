@@ -20,7 +20,7 @@ namespace FPS_n2 {
 					Path = "data/Mods/";
 					Path += GunSlotName[static_cast<int>(this->m_SlotInfo.back()->m_SlotType)];
 					Path += "/" + RIGHT + "/";
-					this->m_SlotInfo.back()->m_CanAttachItemsUniqueID.emplace_back(GunPartsDataManager::Instance()->AddData(Path));
+					this->m_SlotInfo.back()->m_CanAttachItemsUniqueID.emplace_back(GunPartsDataManager::Instance()->Add(Path));
 				}
 				else if (LEFT.find("Conflict") != std::string::npos) {
 					this->m_SlotInfo.back()->m_ConflictsItemsUniqueID.emplace_back(RIGHT);
@@ -72,7 +72,7 @@ namespace FPS_n2 {
 				this->m_CapacityMax = (HitPoint)std::stoi(RIGHT);		//‘’e”
 			}
 			else if (LEFT.find("useammo" + std::to_string(this->m_AmmoSpecID.size())) != std::string::npos) {
-				this->m_AmmoSpecID.emplace_back(Objects::AmmoDataManager::Instance()->LoadAction("data/ammo/" + RIGHT + "/"));
+				this->m_AmmoSpecID.emplace_back(Objects::AmmoDataManager::Instance()->Add("data/ammo/" + RIGHT + "/"));
 			}
 
 			else if (LEFT == "ShootRate_Diff") {
@@ -124,7 +124,7 @@ namespace FPS_n2 {
 			}
 		}
 
-		const int GunPartsDataManager::AddData(const std::string& filepath) noexcept {
+		const int GunPartsDataManager::Add(const std::string& filepath) noexcept {
 			auto Find = std::find_if(this->m_Data.begin(), this->m_Data.end(), [&](const  std::unique_ptr<GunPartsData>& tgt) {return tgt->GetPath() == filepath; });
 			if (Find != this->m_Data.end()) {
 				return (*Find)->GetUniqueID();

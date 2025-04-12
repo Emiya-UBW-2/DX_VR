@@ -526,8 +526,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		//
-		void				GunObj::Init_Sub(void) noexcept {
+		void				GunObj::SetupGun(void) noexcept {
 			this->m_ModifySlot = std::make_unique<ModifySlot>(GetFilePath());
 			this->m_GunsModify = std::make_unique<GunsModify>(shared_from_this(), false);
 			{
@@ -574,8 +573,9 @@ namespace FPS_n2 {
 				auto& AmmoSpec = Objects::AmmoDataManager::Instance()->Get((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecID(0));
 				this->m_CartFall.Init(AmmoSpec->GetPath(), 4);	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
 				this->m_AmmoInChamberObj = std::make_shared<Objects::AmmoInChamberObj>();
+				ObjectManager::Instance()->LoadModelBefore(AmmoSpec->GetPath().c_str());
 				ObjectManager::Instance()->InitObject(this->m_AmmoInChamberObj, AmmoSpec->GetPath().c_str());
-				(*this->m_MagazinePtr)->SetAmmoActive(GetReloadType()== RELOADTYPE::MAG);//’ež‚ßŽ®‚È‚çƒ}ƒKƒWƒ““à•”‚Ì’e‚Í•`‰æ‚µ‚È‚¢
+				(*this->m_MagazinePtr)->SetAmmoActive(GetReloadType() == RELOADTYPE::MAG);//’ež‚ßŽ®‚È‚çƒ}ƒKƒWƒ““à•”‚Ì’e‚Í•`‰æ‚µ‚È‚¢
 			}
 			if (GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
 				this->m_Grenade.Init(GetFilePath(), 1);
@@ -591,6 +591,9 @@ namespace FPS_n2 {
 			auto BaseAnim = GetAnimDataNow(Charas::GunAnimeID::Aim);
 			SetGunMat(BaseAnim.GetRot(), BaseAnim.GetPos());
 			this->m_BaseMuzzle = GetPartsFrameMatParent(GunFrame::Muzzle);
+		}
+		//
+		void				GunObj::Init_Sub(void) noexcept {
 		}
 		void				GunObj::FirstExecute(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();

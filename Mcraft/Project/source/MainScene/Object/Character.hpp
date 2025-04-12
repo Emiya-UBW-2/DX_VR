@@ -83,7 +83,8 @@ namespace FPS_n2 {
 			const auto&		GetRagDoll(void) const noexcept { return this->m_RagDollControl.GetRagDoll(); }
 			const auto&		GetLeanRad(void) const noexcept { return this->m_LeanControl.GetRad(); }
 			const auto&		GetHitBoxList(void) const noexcept { return this->m_HitBoxControl.GetHitBoxPointList(); }
-			const auto&		GetGunPtrNow(void) const noexcept { return this->m_GunPtrControl.GetGunPtr(this->m_GunPtrControl.GetNowGunSelect()); }
+			const auto&		GetGunPtr(int ID) const noexcept { return this->m_GunPtrControl.GetGunPtr(ID); }
+			const auto&		GetGunPtrNow(void) const noexcept { return GetGunPtr(this->m_GunPtrControl.GetNowGunSelect()); }
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_Damage; }
 			const auto&		GetEyeRotationCache(void) const noexcept { return this->m_EyeRotationCache; }
 			const auto&		GetEyePositionCache(void) const noexcept { return this->m_EyePositionCache; }

@@ -47,9 +47,11 @@ namespace FPS_n2 {
 		}
 		//
 		void MagazinePartsObj::Init_GunParts(void) noexcept {
+			const char* Path = Objects::AmmoDataManager::Instance()->Get(GetModifySlot()->GetMyData()->GetAmmoSpecID(0))->GetPath().c_str();
+			ObjectManager::Instance()->LoadModelBefore(Path);
 			for (auto& ammo : this->m_Ammo) {
 				ammo = std::make_shared<Objects::AmmoInChamberObj>();
-				ObjectManager::Instance()->InitObject(ammo, Objects::AmmoDataManager::Instance()->Get(GetModifySlot()->GetMyData()->GetAmmoSpecID(0))->GetPath().c_str());
+				ObjectManager::Instance()->InitObject(ammo, Path);
 				ammo->SetActive(true);
 			}
 		}

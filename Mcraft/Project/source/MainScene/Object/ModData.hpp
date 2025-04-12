@@ -162,7 +162,7 @@ namespace FPS_n2 {
 				return nullptr;
 			}
 		public:
-			const int AddData(const std::string& filepath) noexcept;
+			const int Add(const std::string& filepath) noexcept;
 		};
 	};
 };

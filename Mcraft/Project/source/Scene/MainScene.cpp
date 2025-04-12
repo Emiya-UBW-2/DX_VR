@@ -5,19 +5,68 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			MainGameScene::Load_Sub(void) noexcept {
-			//ロード
-			//BG
 			BackGround::BackGroundControl::Create();
-			//
 			Charas::GunAnimManager::Create();
 			Charas::GunAnimManager::Instance()->Load("data/CharaAnime/");
-			//
 			CommonBattleResource::Load();
-			//UI
 			HitMarkerPool::Create();
 			this->m_UIclass.Load();
 			this->m_PauseMenuControl.Load();
 			//
+			{
+				std::string Path = "data/Charactor/";
+				std::vector<WIN32_FIND_DATA> pData;
+				GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+				for (auto& data : pData) {
+					std::string ChildPath = Path;
+					ChildPath += data.cFileName;
+					ChildPath += "/";
+					ObjectManager::Instance()->LoadModelBefore(ChildPath.c_str());
+				}
+			}
+			//
+			{
+				std::string Path = "data/gun/";
+				std::vector<WIN32_FIND_DATA> pData;
+				GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+				for (auto& data : pData) {
+					std::string ChildPath = Path;
+					ChildPath += data.cFileName;
+					ChildPath += "/";
+					ObjectManager::Instance()->LoadModelBefore(ChildPath.c_str());
+					Guns::GunPartsDataManager::Instance()->Add(ChildPath.c_str());
+				}
+			}
+			//
+			{
+				std::string Path = "data/Mods/";
+				std::vector<WIN32_FIND_DATA> pData;
+				GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+				for (auto& data : pData) {
+					std::string ChildPath = Path;
+					ChildPath += data.cFileName;
+					ChildPath += "/";
+					ObjectManager::Instance()->LoadModelBefore(ChildPath.c_str());
+					Guns::GunPartsDataManager::Instance()->Add(ChildPath.c_str());
+				}
+			}
+			//
+			{
+				std::string Path = "data/ammo/";
+				std::vector<WIN32_FIND_DATA> pData;
+				GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+				for (auto& data : pData) {
+					std::string ChildPath = Path;
+					ChildPath += data.cFileName;
+					ChildPath += "/";
+					ObjectManager::Instance()->LoadModelBefore(ChildPath.c_str());
+					Objects::AmmoDataManager::Instance()->Add(ChildPath.c_str());
+				}
+			}
+
+			MV1::Load("data/Charactor/Soldier/model_Rag.mv1", &m_RagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
+		}
+		void MainGameScene::LoadEnd_Sub(void) noexcept {
 			Player::PlayerManager::Create();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			PlayerMngr->Init(NetWork::Player_num);
@@ -25,7 +74,7 @@ namespace FPS_n2 {
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				if (loop == PlayerMngr->GetWatchPlayer()) {
-					Charas::CharacterObj::LoadChara("Main", (PlayerID)loop);
+					Charas::CharacterObj::LoadChara("Main", (PlayerID)loop);//0.1s
 					//*
 					int Rand = GetRand(100);
 					if (Rand < 30) {
@@ -42,22 +91,24 @@ namespace FPS_n2 {
 					chara->LoadCharaGun("P226", 1);
 					chara->LoadCharaGun("RGD5", 2);
 					chara->SetCharaTypeID(CharaTypeID::Team);
+					//0.5s
 				}
 				else {
 					Charas::CharacterObj::LoadChara("Soldier", (PlayerID)loop);
 					chara->LoadCharaGun("AKS-74", 0);
 					chara->LoadCharaGun("RGD5", 2);
 					//ラグドール
-					if (loop == 1) {
-						MV1::Load((chara->GetFilePath() + "model_Rag.mv1").c_str(), &chara->SetRagDoll(), DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
-					}
-					else {
-						chara->SetRagDoll().Duplicate((PlayerMngr->GetPlayer(1)->GetChara())->GetRagDoll());
-					}
+					chara->SetRagDoll().Duplicate(m_RagDoll);
 					chara->SetupRagDoll();
 					chara->SetCharaTypeID(CharaTypeID::Enemy);
 				}
 				chara->SetPlayerID((PlayerID)loop);
+
+				for (int loop2 = 0; loop2 < 3; ++loop2) {
+					auto& g = chara->GetGunPtr(loop2);
+					if (!g) { continue; }
+					g->SetupGun();
+				}
 			}
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
@@ -429,6 +480,7 @@ namespace FPS_n2 {
 			this->m_PauseMenuControl.Dispose();
 			HitMarkerPool::Release();
 			Charas::GunAnimManager::Release();
+			m_RagDoll.Dispose();
 		}
 		//
 		void			MainGameScene::MainDraw_Sub(int Range) const noexcept {

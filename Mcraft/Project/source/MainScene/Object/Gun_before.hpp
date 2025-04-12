@@ -76,6 +76,7 @@ namespace FPS_n2 {
 				this->m_Ptr.resize(count);
 				for (auto& ptr : this->m_Ptr) {
 					ptr = std::make_shared<Objects::FallObj>();
+					ObjectManager::Instance()->LoadModelBefore(pPath.c_str());
 					ObjectManager::Instance()->InitObject(ptr, pPath.c_str());
 				}
 			}
@@ -151,7 +152,7 @@ namespace FPS_n2 {
 			int															m_MyDataID{};//自分のスペックを含めたデータ
 		public:
 			ModifySlot(const std::string& FilePath) noexcept {
-				this->m_MyDataID = GunPartsDataManager::Instance()->AddData(FilePath);
+				this->m_MyDataID = GunPartsDataManager::Instance()->Add(FilePath);
 			}
 			virtual ~ModifySlot(void) noexcept {
 				for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {

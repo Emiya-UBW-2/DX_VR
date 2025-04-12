@@ -91,12 +91,11 @@ namespace FPS_n2 {
 			}
 		public:
 			const auto& Get(int index) const noexcept { return this->m_Data.at(index); }
-			const int LoadAction(const std::string& filepath) noexcept {
-				for (auto& obj : this->m_Data) {
-					int index = static_cast<int>(&obj - &this->m_Data.front());
-					if (obj->GetPath() == filepath) {
-						return index;
-					}
+			const int Add(const std::string& filepath) noexcept {
+				auto Find = std::find_if(this->m_Data.begin(), this->m_Data.end(), [&](const std::unique_ptr<AmmoData>& tgt) {return tgt->GetPath() == filepath; });
+				if (Find != this->m_Data.end()) {
+					int index = static_cast<int>(Find - this->m_Data.begin());
+					return index;
 				}
 				this->m_Data.emplace_back(std::make_unique<AmmoData>(filepath));
 				return static_cast<int>(this->m_Data.size() - 1);

@@ -188,6 +188,7 @@ namespace FPS_n2 {
 		//
 		void			ModifySlot::Add(GunSlot gunSlot, const char* FilePath, const SharedGunParts& NewObj, const SharedObj& BaseModel) noexcept {
 			this->m_PartsObj[static_cast<int>(gunSlot)] = NewObj;
+			ObjectManager::Instance()->LoadModelBefore(FilePath);
 			ObjectManager::Instance()->InitObject(NewObj, BaseModel, FilePath);
 		}
 		void			ModifySlot::Remove(GunSlot gunSlot) noexcept {

@@ -28,6 +28,8 @@ namespace FPS_n2 {
 			float										m_StartTimer{ 0.f };
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
+
+			MV1											m_RagDoll;
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
 				if (this->m_NetWorkController) {
@@ -45,6 +47,7 @@ namespace FPS_n2 {
 			virtual ~MainGameScene(void) noexcept {}
 		public:
 			void			Load_Sub(void) noexcept override;
+			void			LoadEnd_Sub(void) noexcept override;
 			void			Set_Sub(void) noexcept override;
 			bool			Update_Sub(void) noexcept override;
 			void			Dispose_Sub(void) noexcept override;

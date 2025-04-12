@@ -320,6 +320,8 @@ namespace FPS_n2 {
 		private:
 			int					GetFrameNum(void) noexcept override { return static_cast<int>(GunFrame::Max); }
 			const char*			GetFrameStr(int id) noexcept override { return GunFrameName[id]; }
+		public:
+			void				SetupGun(void) noexcept;
 		private: //åpè≥
 			void				Init_Sub(void) noexcept override;
 			void				FirstExecute(void) noexcept override;
