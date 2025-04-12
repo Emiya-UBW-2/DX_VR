@@ -148,10 +148,10 @@ namespace FPS_n2 {
 		class ModifySlot {
 		private:
 			std::array<SharedGunParts, static_cast<int>(GunSlot::Max)>	m_PartsObj{ nullptr };//子パーツのポインタ
-			const std::shared_ptr<GunPartsData>*						m_MyData{ nullptr };//自分のスペックを含めたデータ
+			int															m_MyDataID{};//自分のスペックを含めたデータ
 		public:
 			ModifySlot(const std::string& FilePath) noexcept {
-				this->m_MyData = GunPartsDataManager::Instance()->AddData(FilePath);
+				this->m_MyDataID = GunPartsDataManager::Instance()->AddData(FilePath);
 			}
 			virtual ~ModifySlot(void) noexcept {
 				for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
@@ -165,7 +165,7 @@ namespace FPS_n2 {
 			void		Attach(GunSlot gunSlot, int ID, const SharedObj& BaseModel) noexcept;
 			void		Remove(GunSlot gunSlot) noexcept;
 		public:
-			const auto&	GetMyData(void) const noexcept { return *this->m_MyData; }
+			const auto&	GetMyData(void) const noexcept { return *GunPartsDataManager::Instance()->GetData(this->m_MyDataID); }
 			const auto&	GetParts(GunSlot gunSlot) const noexcept { return this->m_PartsObj[static_cast<int>(gunSlot)]; }
 			const auto	IsAttachedParts(GunSlot gunSlot) const noexcept { return GetParts(gunSlot) != nullptr; }
 			//自分の子孫のパーツを参照する

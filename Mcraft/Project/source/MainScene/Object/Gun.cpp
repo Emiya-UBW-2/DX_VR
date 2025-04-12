@@ -74,8 +74,8 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			//このプレイヤーはペレット発撃ちましたよ
-			const auto& ChamberAmmoData = (*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecMagTop();//マガジンの一番上の弾データをチャンバーイン
-			PlayerMngr->GetPlayer(GetMyUserPlayerID())->AddShot(ChamberAmmoData->GetPellet());
+			const auto& AmmoSpec = Objects::AmmoDataManager::Instance()->Get((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecID(0));//マガジンの一番上の弾データをチャンバーイン
+			PlayerMngr->GetPlayer(GetMyUserPlayerID())->AddShot(AmmoSpec->GetPellet());
 			auto MuzzleMat = GetPartsFrameMatParent(GunFrame::Muzzle);
 			//銃声
 			SE->Get(SoundType::SE, GetGunSoundSet(
@@ -84,13 +84,13 @@ namespace FPS_n2 {
 			//エフェクト
 			EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec() * -1.f, 0.35f, 2.f);
 			//発砲
-			for (int loop = 0, max = ChamberAmmoData->GetPellet(); loop < max; ++loop) {
+			for (int loop = 0, max = AmmoSpec->GetPellet(); loop < max; ++loop) {
 				auto LastAmmo = std::make_shared<Objects::AmmoObj>();
 				ObjectManager::Instance()->InitObject(LastAmmo);
-				LastAmmo->Put(&ChamberAmmoData, MuzzleMat.pos(),
+				LastAmmo->Put(&AmmoSpec, MuzzleMat.pos(),
 					(
-						Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(ChamberAmmoData->GetAccuracy()))) *
-						Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(ChamberAmmoData->GetAccuracy()))) *
+						Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(AmmoSpec->GetAccuracy()))) *
+						Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(AmmoSpec->GetAccuracy()))) *
 						Matrix3x3DX::Get33DX(MuzzleMat)
 						).zvec() * -1.f, GetMyUserPlayerID());
 			}
@@ -498,12 +498,13 @@ namespace FPS_n2 {
 
 			for (const auto& grenade : this->m_Grenade.GetPtrList()) {
 				if (grenade->PopIsEndFall()) {
-					for (int loop = 0, max = GetModifySlot()->GetMyData()->GetAmmoSpecMagTop()->GetPellet(); loop < max; ++loop) {
+					auto& AmmoSpec = Objects::AmmoDataManager::Instance()->Get(GetModifySlot()->GetMyData()->GetAmmoSpecID(0));
+					for (int loop = 0, max = AmmoSpec->GetPellet(); loop < max; ++loop) {
 						auto LastAmmo = std::make_shared<Objects::AmmoObj>();
 						ObjectManager::Instance()->InitObject(LastAmmo);
 						//円周上にまき散らす
 						auto mat = Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-GetRand(30))) * Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180)));
-						LastAmmo->Put(&GetModifySlot()->GetMyData()->GetAmmoSpecMagTop(), grenade->GetMove().GetPos() + mat.zvec() * (0.5f * Scale3DRate) + Vector3DX::up() * (0.5f * Scale3DRate), mat.zvec(), GetMyUserPlayerID());
+						LastAmmo->Put(&AmmoSpec, grenade->GetMove().GetPos() + mat.zvec() * (0.5f * Scale3DRate) + Vector3DX::up() * (0.5f * Scale3DRate), mat.zvec(), GetMyUserPlayerID());
 					}
 
 					//破壊
@@ -570,7 +571,7 @@ namespace FPS_n2 {
 			}
 			if (this->m_MagazinePtr) {
 				this->m_MagFall.Init((*this->m_MagazinePtr)->GetFilePath(), 1);
-				auto& AmmoSpec = (*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecMagTop();
+				auto& AmmoSpec = Objects::AmmoDataManager::Instance()->Get((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecID(0));
 				this->m_CartFall.Init(AmmoSpec->GetPath(), 4);	//装填したマガジンの弾に合わせて薬莢生成
 				this->m_AmmoInChamberObj = std::make_shared<Objects::AmmoInChamberObj>();
 				ObjectManager::Instance()->InitObject(this->m_AmmoInChamberObj, AmmoSpec->GetPath().c_str());

@@ -17,7 +17,7 @@ namespace FPS_n2 {
 			std::string						m_path;
 			std::string						m_name;
 			int								m_UniqueID{ 0 };
-			std::vector<SlotInfo>			m_SlotInfo;
+			std::vector<std::unique_ptr<SlotInfo>>	m_SlotInfo;
 
 			bool							m_IsRecoilPower{ false };
 			bool							m_IsRecoilReturn{ false };
@@ -47,17 +47,14 @@ namespace FPS_n2 {
 
 			std::array<int, static_cast<int>(Charas::GunAnimeID::Max)>	m_AnimSelect{ InvalidID };
 
-			std::vector<std::shared_ptr<Objects::AmmoData>>	m_AmmoSpec;
+			std::vector<int>	m_AmmoSpecID;
 			std::vector<std::string>					m_Info;
 			std::vector<std::string>					m_InfoEng;
 			int											m_CapacityMax{ 0 };
 		public:
 			GunPartsData(void) noexcept {}
-			virtual ~GunPartsData(void) noexcept {
-				for (auto& ammo : this->m_AmmoSpec) {
-					ammo.reset();
-				}
-				this->m_AmmoSpec.clear();
+			~GunPartsData(void) noexcept {
+				this->m_AmmoSpecID.clear();
 			}
 		public://ゲッター
 			const auto& GetPath(void) const noexcept { return this->m_path; }
@@ -89,15 +86,15 @@ namespace FPS_n2 {
 			const auto& GetSightZoomSize(void) const noexcept { return this->m_ZoomSize; }
 			//マガジン
 			const auto& GetAmmoAll(void) const noexcept { return this->m_CapacityMax; }
-			const auto& GetAmmoSpecMagTop(void) const noexcept { return this->m_AmmoSpec[0]; }
+			const auto& GetAmmoSpecID(int index) const noexcept { return this->m_AmmoSpecID[index]; }
 			//性能周り
 			const auto& GetShootRate_Diff(void) const noexcept { return this->m_ShootRate_Diff; }
 			const auto& GetRecoil_Diff(void) const noexcept { return this->m_Recoil_Diff; }
 
 			const SlotInfo* GetSlotInfo(GunSlot select) const noexcept {
 				for (const auto& slot : this->m_SlotInfo) {
-					if (slot.m_SlotType == select) {
-						return &slot;
+					if (slot->m_SlotType == select) {
+						return slot.get();
 					}
 				}
 				return nullptr;
@@ -118,7 +115,7 @@ namespace FPS_n2 {
 					this->m_Reitcle.Load(this->m_path + "reticle_0.png");
 				}
 
-				this->m_AmmoSpec.clear();
+				this->m_AmmoSpecID.clear();
 				this->m_Info.clear();
 				this->m_InfoEng.clear();
 
@@ -146,27 +143,26 @@ namespace FPS_n2 {
 		private:
 			friend class SingletonBase<GunPartsDataManager>;
 		private:
-			std::list<std::shared_ptr<GunPartsData>>	m_Object;
+			std::list<std::unique_ptr<GunPartsData>>	m_Data;
 			int											m_LastUniqueID{ 0 };
 		private:
 			GunPartsDataManager(void) noexcept {}
 			virtual ~GunPartsDataManager(void) noexcept {
-				for (auto& obj : this->m_Object) {
+				for (auto& obj : this->m_Data) {
 					obj.reset();
 				}
-				this->m_Object.clear();
+				this->m_Data.clear();
 			}
 		public:
-			const std::shared_ptr<GunPartsData>* GetData(int uniqueID) noexcept {
-				for (auto& obj : this->m_Object) {
-					if (obj->GetUniqueID() == uniqueID) {
-						return &obj;
-					}
+			const std::unique_ptr<GunPartsData>* GetData(int uniqueID) noexcept {
+				auto Find = std::find_if(this->m_Data.begin(), this->m_Data.end(), [&](const  std::unique_ptr<GunPartsData>& tgt) {return tgt->GetUniqueID() == uniqueID; });
+				if (Find != this->m_Data.end()) {
+					return &*Find;
 				}
 				return nullptr;
 			}
 		public:
-			const std::shared_ptr<GunPartsData>* AddData(const std::string& filepath) noexcept;
+			const int AddData(const std::string& filepath) noexcept;
 		};
 	};
 };

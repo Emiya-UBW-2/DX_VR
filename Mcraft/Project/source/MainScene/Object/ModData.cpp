@@ -9,8 +9,8 @@ namespace FPS_n2 {
 				if (LEFT.find("Type") != std::string::npos) {
 					for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 						if (RIGHT == GunSlotName[loop]) {
-							this->m_SlotInfo.emplace_back();
-							this->m_SlotInfo.back().m_SlotType = (GunSlot)loop;
+							this->m_SlotInfo.emplace_back(std::make_unique< SlotInfo>());
+							this->m_SlotInfo.back()->m_SlotType = (GunSlot)loop;
 							break;
 						}
 					}
@@ -18,15 +18,15 @@ namespace FPS_n2 {
 				else if (LEFT.find("Item") != std::string::npos) {
 					std::string Path;
 					Path = "data/Mods/";
-					Path += GunSlotName[static_cast<int>(this->m_SlotInfo.back().m_SlotType)];
+					Path += GunSlotName[static_cast<int>(this->m_SlotInfo.back()->m_SlotType)];
 					Path += "/" + RIGHT + "/";
-					this->m_SlotInfo.back().m_CanAttachItemsUniqueID.emplace_back((*GunPartsDataManager::Instance()->AddData(Path))->GetUniqueID());
+					this->m_SlotInfo.back()->m_CanAttachItemsUniqueID.emplace_back(GunPartsDataManager::Instance()->AddData(Path));
 				}
 				else if (LEFT.find("Conflict") != std::string::npos) {
-					this->m_SlotInfo.back().m_ConflictsItemsUniqueID.emplace_back(RIGHT);
+					this->m_SlotInfo.back()->m_ConflictsItemsUniqueID.emplace_back(RIGHT);
 				}
 				else if (LEFT.find("IsNeed") != std::string::npos) {
-					this->m_SlotInfo.back().m_IsNeed = (RIGHT == "true");
+					this->m_SlotInfo.back()->m_IsNeed = (RIGHT == "true");
 				}
 			}
 
@@ -71,8 +71,8 @@ namespace FPS_n2 {
 			else if (LEFT == "capacity") {
 				this->m_CapacityMax = (HitPoint)std::stoi(RIGHT);		//‘’e”
 			}
-			else if (LEFT.find("useammo" + std::to_string(this->m_AmmoSpec.size())) != std::string::npos) {
-				this->m_AmmoSpec.emplace_back(Objects::AmmoDataManager::Instance()->LoadAction("data/ammo/" + RIGHT + "/"));
+			else if (LEFT.find("useammo" + std::to_string(this->m_AmmoSpecID.size())) != std::string::npos) {
+				this->m_AmmoSpecID.emplace_back(Objects::AmmoDataManager::Instance()->LoadAction("data/ammo/" + RIGHT + "/"));
 			}
 
 			else if (LEFT == "ShootRate_Diff") {
@@ -124,19 +124,17 @@ namespace FPS_n2 {
 			}
 		}
 
-		const std::shared_ptr<GunPartsData>* GunPartsDataManager::AddData(const std::string& filepath) noexcept {
-			for (auto& obj : this->m_Object) {
-				if (obj->GetPath() == filepath) {
-					return &obj;
-				}
+		const int GunPartsDataManager::AddData(const std::string& filepath) noexcept {
+			auto Find = std::find_if(this->m_Data.begin(), this->m_Data.end(), [&](const  std::unique_ptr<GunPartsData>& tgt) {return tgt->GetPath() == filepath; });
+			if (Find != this->m_Data.end()) {
+				return (*Find)->GetUniqueID();
 			}
-			auto tmp = std::make_shared<GunPartsData>();
+			this->m_Data.emplace_back(std::make_unique<GunPartsData>());
 			auto UniqueID = this->m_LastUniqueID;
-			tmp->SetUniqueID(UniqueID);
+			this->m_Data.back()->SetUniqueID(UniqueID);
 			++this->m_LastUniqueID;
-			tmp->Set(filepath);
-			this->m_Object.emplace_back(tmp);
-			return GetData(UniqueID);
+			this->m_Data.back()->Set(filepath);
+			return UniqueID;
 		}
 	};
 };

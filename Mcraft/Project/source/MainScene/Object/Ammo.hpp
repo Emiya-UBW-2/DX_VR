@@ -8,7 +8,7 @@ namespace FPS_n2 {
 	namespace Objects {
 		class AmmoObj : public ObjectBaseClass {
 			int				m_RicochetCnt{ 0 };
-			const std::shared_ptr<AmmoData>*	m_AmmoData{ nullptr };
+			const std::unique_ptr<AmmoData>*	m_AmmoData{ nullptr };
 			float			m_speed{ 0.f };
 			float			m_penetration{ 0.f };
 			int				m_ShootCheraID{ InvalidID };
@@ -20,7 +20,7 @@ namespace FPS_n2 {
 			Vector3DX		m_repos;
 		public:
 			//ê⁄ín
-			void			Put(const std::shared_ptr<AmmoData>* pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, int pMyID) {
+			void			Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, int pMyID) {
 				this->m_RicochetCnt = 0;
 				this->m_pos = pos_t;
 				this->m_repos = pos_t;

@@ -159,8 +159,7 @@ namespace FPS_n2 {
 					this->z = Z;
 				}
 			};
-			struct CellBuffer
-			{
+			struct CellBuffer {
 				int8_t					m_Cell{};
 				int8_t					m_FillInfo{};//周りの遮蔽データのbitフラグ
 			public:

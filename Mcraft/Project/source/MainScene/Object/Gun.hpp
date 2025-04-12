@@ -185,7 +185,7 @@ namespace FPS_n2 {
 					auto* AnimMngr = Charas::GunAnimManager::Instance();
 					auto* pData = AnimMngr->GetAnimData(GetGunAnim(GetGunAnime()));
 					if (pData) {
-						float totalTime = static_cast<float>(pData->GetTotalTime());
+						float totalTime = static_cast<float>((*pData)->GetTotalTime());
 						return (totalTime > 0.f) ? std::clamp(this->m_GunAnimeTime.at(static_cast<int>(GetGunAnime())) / totalTime, 0.f, 1.f) : 1.f;
 					}
 				}
@@ -226,7 +226,7 @@ namespace FPS_n2 {
 				auto* AnimMngr = Charas::GunAnimManager::Instance();
 				auto* pData = AnimMngr->GetAnimData(GetGunAnim(GetGunAnime()));
 				if (!pData) { return 0.f; }
-				float totalTime = static_cast<float>(pData->GetTotalTime());
+				float totalTime = static_cast<float>((*pData)->GetTotalTime());
 				return (totalTime > 0.f) ? std::clamp(this->m_GunAnimeTime.at(static_cast<int>(GetGunAnime())) / totalTime, 0.f, 1.f) : 1.f;
 			}
 			const auto			IsNowGunAnimeEnd(void) const noexcept { return GetNowAnimTimePerCache() >= 1.f; }

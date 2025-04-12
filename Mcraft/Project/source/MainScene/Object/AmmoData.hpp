@@ -80,24 +80,26 @@ namespace FPS_n2 {
 		private:
 			friend class SingletonBase<AmmoDataManager>;
 		private:
-			std::vector<std::shared_ptr<AmmoData>>	m_Object;
+			std::vector<std::unique_ptr<AmmoData>>	m_Data;
 		private:
 			AmmoDataManager(void) noexcept {}
 			virtual ~AmmoDataManager(void) noexcept {
-				for (auto& obj : this->m_Object) {
+				for (auto& obj : this->m_Data) {
 					obj.reset();
 				}
-				this->m_Object.clear();
+				this->m_Data.clear();
 			}
 		public:
-			const auto& LoadAction(const std::string& filepath) noexcept {
-				for (auto& obj : this->m_Object) {
+			const auto& Get(int index) const noexcept { return this->m_Data.at(index); }
+			const int LoadAction(const std::string& filepath) noexcept {
+				for (auto& obj : this->m_Data) {
+					int index = static_cast<int>(&obj - &this->m_Data.front());
 					if (obj->GetPath() == filepath) {
-						return obj;
+						return index;
 					}
 				}
-				this->m_Object.emplace_back(std::make_shared<AmmoData>(filepath));
-				return this->m_Object.back();
+				this->m_Data.emplace_back(std::make_unique<AmmoData>(filepath));
+				return static_cast<int>(this->m_Data.size() - 1);
 			}
 		};
 	};

@@ -333,7 +333,16 @@ namespace FPS_n2 {
 			public:
 				std::unique_ptr<GunAnimData>			m_AnimData;
 				std::vector<std::unique_ptr<GunAnim>>	m_AnimPoint;
-
+			public:
+				AnimDatas(void) noexcept {}
+				~AnimDatas(void) noexcept {
+					this->m_AnimData.reset();
+					for (auto& point : this->m_AnimPoint) {
+						point.reset();
+					}
+					this->m_AnimPoint.clear();
+				}
+			public:
 				const auto GetTotalTime() const {
 					int Ret = 0;
 					for (auto& ani : m_AnimPoint) {
@@ -343,7 +352,7 @@ namespace FPS_n2 {
 				}
 			};
 		private:
-			std::vector<AnimDatas>	m_Object;
+			std::vector<std::unique_ptr<AnimDatas>>	m_Data;
 #if defined(DEBUG) && DEBUG_CAM
 			Vector3DX DBG_AnimRot = Vector3DX::vget(0.f, 0.f, deg2rad(0));
 			Vector3DX DBG_AnimPos = Vector3DX::vget(-0.06f, -0.15f, -0.23f);
@@ -351,14 +360,10 @@ namespace FPS_n2 {
 		private:
 			GunAnimManager(void) noexcept {}
 			virtual ~GunAnimManager(void) noexcept {
-				for (auto& obj : this->m_Object) {
-					obj.m_AnimData.reset();
-					for (auto& point : obj.m_AnimPoint) {
-						point.reset();
-					}
-					obj.m_AnimPoint.clear();
+				for (auto& obj : this->m_Data) {
+					obj.reset();
 				}
-				this->m_Object.clear();
+				this->m_Data.clear();
 			}
 		public:
 			void	Load(const char* filepath) {
@@ -366,20 +371,19 @@ namespace FPS_n2 {
 					std::string Path = filepath;
 					Path += EnumGunAnimName[loop];
 					Path += ".txt";
-					this->m_Object.emplace_back();
+					this->m_Data.emplace_back(std::make_unique<AnimDatas>());
 					FileStreamDX FileStream(Path.c_str());
-					this->m_Object.back().m_AnimData = std::make_unique<GunAnimData>(FileStream.SeekLineAndGetStr(), (EnumGunAnim)loop);
+					this->m_Data.back()->m_AnimData = std::make_unique<GunAnimData>(FileStream.SeekLineAndGetStr(), (EnumGunAnim)loop);
 					while (true) {
 						if (FileStream.ComeEof()) { break; }
-						auto ALL = FileStream.SeekLineAndGetStr();
-						this->m_Object.back().m_AnimPoint.emplace_back(std::make_unique<AnimDatas::GunAnim>(ALL));
+						this->m_Data.back()->m_AnimPoint.emplace_back(std::make_unique<AnimDatas::GunAnim>(FileStream.SeekLineAndGetStr()));
 					}
 				}
 			}
 
-			const AnimDatas* GetAnimData(EnumGunAnim EnumSelect) const noexcept {
-				auto Find = std::find_if(this->m_Object.begin(), this->m_Object.end(), [&](const AnimDatas& tgt) {return tgt.m_AnimData->GetEnumGunAnim() == EnumSelect; });
-				if (Find != this->m_Object.end()) {
+			const std::unique_ptr<AnimDatas>* GetAnimData(EnumGunAnim EnumSelect) const noexcept {
+				auto Find = std::find_if(this->m_Data.begin(), this->m_Data.end(), [&](const std::unique_ptr<AnimDatas>& tgt) {return tgt->m_AnimData->GetEnumGunAnim() == EnumSelect; });
+				if (Find != this->m_Data.end()) {
 					return &*Find;
 				}
 				return nullptr;
@@ -389,12 +393,12 @@ namespace FPS_n2 {
 #if defined(DEBUG) && DEBUG_CAM
 				ID
 #endif
-				, const AnimDatas* data, float nowframe) noexcept {
+				, const std::unique_ptr<AnimDatas>* data, float nowframe) noexcept {
 				FingerData			Finger{};
 				GunAnimNow Ret; Ret.Set(Vector3DX::zero(), Vector3DX::zero(), Finger);
 				if (data) {
-					float totalTime = static_cast<float>(data->GetTotalTime());
-					if (data->m_AnimData->GetIsLoop()) {
+					float totalTime = static_cast<float>((*data)->GetTotalTime());
+					if ((*data)->m_AnimData->GetIsLoop()) {
 						while (true) {
 							if ((nowframe - totalTime) > 0.f) {
 								nowframe -= totalTime;
@@ -409,7 +413,7 @@ namespace FPS_n2 {
 							nowframe = totalTime;
 						}
 					}
-					for (auto ani = data->m_AnimPoint.begin(), endi = data->m_AnimPoint.end() - 1; ani != endi; ++ani) {
+					for (auto ani = (*data)->m_AnimPoint.begin(), endi = (*data)->m_AnimPoint.end() - 1; ani != endi; ++ani) {
 						float Frame = static_cast<float>((*ani)->GetFrame());
 						if ((nowframe - Frame) <= 0.f) {
 							Finger = Lerp((*ani)->GetFingerPer(), (*(ani + 1))->GetFingerPer(), nowframe / Frame);
