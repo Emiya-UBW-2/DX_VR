@@ -1,5 +1,6 @@
 #pragma once
 #include	"../../Header.hpp"
+#include	"../../sub.hpp"
 #include	"../../MainScene/BackGround/BackGround.hpp"
 
 namespace FPS_n2 {

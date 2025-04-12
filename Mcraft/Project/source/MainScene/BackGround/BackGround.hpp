@@ -1,7 +1,6 @@
 #pragma once
 #pragma warning(disable:4464)
 #include	"../../Header.hpp"
-#include	"../../MainScene/BackGround/BackGroundSub.hpp"
 
 #define EDITBLICK (false)
 
