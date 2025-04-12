@@ -197,7 +197,6 @@ namespace FPS_n2 {
 		}
 		//
 		void			ModifySlot::UpdatePartsAnim(const MV1& pParent) {
-			return;//現状のカスタム範囲では不要
 			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 				GunSlot gunSlot = static_cast<GunSlot>(loop);
 				if (IsAttachedParts(gunSlot)) {
