@@ -25,9 +25,6 @@
     <Filter Include="ソース ファイル\MainScene\BackGround">
       <UniqueIdentifier>{f8f7caa6-07a4-4b61-981f-3b99bc5d3bb1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\MainScene\UI">
-      <UniqueIdentifier>{a481be59-68ff-4107-9bce-dabca4ec7642}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ソース ファイル\MainScene\Player">
       <UniqueIdentifier>{22770e4f-967e-4eff-a117-222b572d8adf}</UniqueIdentifier>
     </Filter>
@@ -53,9 +50,6 @@
     </ClInclude>
     <ClInclude Include="source\Scene\MainScene.hpp">
       <Filter>ソース ファイル\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="source\MainScene\UI\MainSceneUIControl.hpp">
-      <Filter>ソース ファイル\MainScene\UI</Filter>
     </ClInclude>
     <ClInclude Include="source\MainScene\Player\Player.hpp">
       <Filter>ソース ファイル\MainScene\Player</Filter>

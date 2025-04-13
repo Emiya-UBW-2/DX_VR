@@ -8,7 +8,6 @@
 
 #include	"../MainScene/NetWork.hpp"
 
-#include	"../MainScene/UI/MainSceneUIControl.hpp"
 #include	"../CommonScene/UI/CommonUIControl.hpp"
 #include	"../MainScene/MainSceneSub.hpp"
 

@@ -32,7 +32,6 @@
     <ClInclude Include="source\MainScene\Object\ModData.hpp" />
     <ClInclude Include="source\MainScene\Player\CPU.hpp" />
     <ClInclude Include="source\MainScene\Player\Player.hpp" />
-    <ClInclude Include="source\MainScene\UI\MainSceneUIControl.hpp" />
     <ClInclude Include="source\Scene\MainScene.hpp" />
     <ClInclude Include="source\Scene\MainSceneLoader.hpp" />
     <ClInclude Include="source\Scene\TitleScene.hpp" />
