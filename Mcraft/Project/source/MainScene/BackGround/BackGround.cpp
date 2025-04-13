@@ -105,7 +105,7 @@ namespace FPS_n2 {
 			return false;
 		}
 		//
-		void		BackGroundControl::AddPlaneXPlus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax, bool IsCalcUV, bool IsCalcOnlyPos) noexcept {
+		void		BackGroundControl::AddPlaneXPlus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax, bool IsCalcUV) noexcept {
 			pTarget->AllocatePlane();
 
 			int zscale{};
@@ -166,7 +166,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		BackGroundControl::AddPlaneXMinus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax, bool IsCalcUV, bool IsCalcOnlyPos) noexcept {
+		void		BackGroundControl::AddPlaneXMinus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax, bool IsCalcUV) noexcept {
 			pTarget->AllocatePlane();
 
 			int zscale{};
@@ -227,7 +227,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		BackGroundControl::AddPlaneYPlus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax, bool IsCalcUV, bool IsCalcOnlyPos) noexcept {
+		void		BackGroundControl::AddPlaneYPlus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax, bool IsCalcUV) noexcept {
 			pTarget->AllocatePlane();
 
 			int zscale{};
@@ -288,7 +288,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		BackGroundControl::AddPlaneYMinus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax, bool IsCalcUV, bool IsCalcOnlyPos) noexcept {
+		void		BackGroundControl::AddPlaneYMinus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int x, int y, int zmin, int zmax, bool IsCalcUV) noexcept {
 			pTarget->AllocatePlane();
 
 			int zscale{};
@@ -349,7 +349,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		BackGroundControl::AddPlaneZPlus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int xmin, int xmax, int y, int z, bool IsCalcUV, bool IsCalcOnlyPos) noexcept {
+		void		BackGroundControl::AddPlaneZPlus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int xmin, int xmax, int y, int z, bool IsCalcUV) noexcept {
 			pTarget->AllocatePlane();
 
 			int xscale{};
@@ -410,7 +410,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		void		BackGroundControl::AddPlaneZMinus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int xmin, int xmax, int y, int z, bool IsCalcUV, bool IsCalcOnlyPos) noexcept {
+		void		BackGroundControl::AddPlaneZMinus(vert32<VERTEX3D>* pTarget, const CellsData& cellx, int xmin, int xmax, int y, int z, bool IsCalcUV) noexcept {
 			pTarget->AllocatePlane();
 
 			int xscale{};
@@ -514,12 +514,12 @@ namespace FPS_n2 {
 								bool Fill = CheckFill && (xmin <= center.x + DrawMinXPlus && center.x + DrawMinXMinus <= xmax);
 								if (z >= center.z) {
 									if (Fill || AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, 5)) {
-										AddPlaneZMinus(&Draws.m_vert32, cellx, xmin, xmax, y, z, true, false);
+										AddPlaneZMinus(&Draws.m_vert32, cellx, xmin, xmax, y, z, true);
 									}
 								}
 								else {
 									if (Fill || AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, 4)) {
-										AddPlaneZPlus(&Draws.m_vert32, cellx, xmin, xmax, y, z, true, false);
+										AddPlaneZPlus(&Draws.m_vert32, cellx, xmin, xmax, y, z, true);
 									}
 								}
 								//Ç±ÇÃèÍçáÇæÇØÇ‡Ç§àÍâÒîªíËÇ≥ÇπÇÈÉhÉì
@@ -576,22 +576,22 @@ namespace FPS_n2 {
 								bool Fill = CheckFill && (zmin <= center.z + DrawMinZPlus && center.z + DrawMinZMinus <= zmax);
 								if (x >= center.x) {
 									if (Fill || AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 1)) {
-										AddPlaneXMinus(&Draws.m_vert32, cellx, x, y, zmin, zmax, true, false);
+										AddPlaneXMinus(&Draws.m_vert32, cellx, x, y, zmin, zmax, true);
 									}
 								}
 								else {
 									if (Fill || AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 0)) {
-										AddPlaneXPlus(&Draws.m_vert32, cellx, x, y, zmin, zmax, true, false);
+										AddPlaneXPlus(&Draws.m_vert32, cellx, x, y, zmin, zmax, true);
 									}
 								}
 								if (y >= center.y) {
 									if (Fill || AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 3)) {
-										AddPlaneYMinus(&Draws.m_vert32, cellx, x, y, zmin, zmax, true, false);
+										AddPlaneYMinus(&Draws.m_vert32, cellx, x, y, zmin, zmax, true);
 									}
 								}
 								else {
 									if (Fill || AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 2)) {
-										AddPlaneYPlus(&Draws.m_vert32, cellx, x, y, zmin, zmax, true, false);
+										AddPlaneYPlus(&Draws.m_vert32, cellx, x, y, zmin, zmax, true);
 									}
 								}
 								//Ç±ÇÃèÍçáÇæÇØÇ‡Ç§àÍâÒîªíËÇ≥ÇπÇÈÉhÉì
@@ -644,12 +644,12 @@ namespace FPS_n2 {
 								isHitmin = true;
 								if (DrawsSB.m_light.z > 0.f) {
 									if (AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, 5)) {
-										AddPlaneZMinus(&DrawsSB.m_vert32, cellx, xmin, xmax, y, z, false, false);
+										AddPlaneZMinus(&DrawsSB.m_vert32, cellx, xmin, xmax, y, z, false);
 									}
 								}
 								else {
 									if (AddCubeX_CanAddPlane(cellx, xmin, xmax, y, z, 4)) {
-										AddPlaneZPlus(&DrawsSB.m_vert32, cellx, xmin, xmax, y, z, false, false);
+										AddPlaneZPlus(&DrawsSB.m_vert32, cellx, xmin, xmax, y, z, false);
 									}
 								}
 							}
@@ -691,22 +691,22 @@ namespace FPS_n2 {
 								isHitmin = true;
 								if (DrawsSB.m_light.x > 0.f) {
 									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 1)) {
-										AddPlaneXMinus(&DrawsSB.m_vert32, cellx, x, y, zmin, zmax, false, false);
+										AddPlaneXMinus(&DrawsSB.m_vert32, cellx, x, y, zmin, zmax, false);
 									}
 								}
 								else {
 									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 0)) {
-										AddPlaneXPlus(&DrawsSB.m_vert32, cellx, x, y, zmin, zmax, false, false);
+										AddPlaneXPlus(&DrawsSB.m_vert32, cellx, x, y, zmin, zmax, false);
 									}
 								}
 								if (DrawsSB.m_light.y > 0.f) {
 									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 3)) {
-										AddPlaneYMinus(&DrawsSB.m_vert32, cellx, x, y, zmin, zmax, false, false);
+										AddPlaneYMinus(&DrawsSB.m_vert32, cellx, x, y, zmin, zmax, false);
 									}
 								}
 								else {
 									if (AddCubeZ_CanAddPlane(cellx, x, y, zmin, zmax, 2)) {
-										AddPlaneYPlus(&DrawsSB.m_vert32, cellx, x, y, zmin, zmax, false, false);
+										AddPlaneYPlus(&DrawsSB.m_vert32, cellx, x, y, zmin, zmax, false);
 									}
 								}
 							}
