@@ -750,21 +750,10 @@ namespace FPS_n2 {
 		void			CharacterObj::Draw(bool isDrawSemiTrans, int Range) noexcept {
 			if (!IsActive()) { return; }
 			if (!IsDraw(Range)) { return; }
-			int fog_enable;
-			int fog_mode;
 			int fog_r, fog_g, fog_b;
-			float fog_start, fog_end;
-			float fog_density;
-			fog_enable = GetFogEnable();													// フォグが有効かどうかを取得する( true:有効 false:無効 )
-			fog_mode = GetFogMode();														// フォグモードを取得する
 			GetFogColor(&fog_r, &fog_g, &fog_b);											// フォグカラーを取得する
-			GetFogStartEnd(&fog_start, &fog_end);											// フォグが始まる距離と終了する距離を取得する( 0.0f ～ 1.0f )
-			fog_density = GetFogDensity();													// フォグの密度を取得する( 0.0f ～ 1.0f )
-
-
-			//キャラ描画
-			SetFogEnable(true);
 			SetFogColor(0, 0, 0);
+			//キャラ描画
 			//MV1SetMaterialTypeAll(GetObj().GetHandle(), DX_MATERIAL_TYPE_MAT_SPEC_LUMINANCE_CLIP_UNORM);
 			if (IsAlive()) {
 				for (int loop = 0, max = GetObj().GetMeshNum(); loop < max; ++loop) {
@@ -785,11 +774,7 @@ namespace FPS_n2 {
 			this->m_HitBoxControl.Draw();
 #endif
 			//
-			SetFogEnable(fog_enable);
-			SetFogMode(fog_mode);
 			SetFogColor(fog_r, fog_g, fog_b);
-			SetFogStartEnd(fog_start, fog_end);
-			SetFogDensity(fog_density);
 		}
 		void			CharacterObj::DrawShadow(void) noexcept {
 			if (!IsActive()) { return; }

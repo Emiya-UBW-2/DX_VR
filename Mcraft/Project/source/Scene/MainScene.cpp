@@ -142,10 +142,12 @@ namespace FPS_n2 {
 			constexpr float FarMax = std::min(std::min(BackGround::DrawMaxXPlus, BackGround::DrawMaxZPlus), BackGround::DrawMaxYPlus) * BackGround::CellScale;
 			CameraParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.03f, FarMax);
 			//Fog
+			SetVerticalFogEnable(true);
 			SetVerticalFogMode(DX_FOGMODE_LINEAR);
 			SetVerticalFogStartEnd(-26.f * Scale3DRate, -10.f * Scale3DRate);
 			SetVerticalFogColor(0, 0, 0);
 			//Fog
+			SetFogEnable(true);
 			SetFogMode(DX_FOGMODE_LINEAR);
 			SetFogStartEnd(FarMax, FarMax * 20.f);
 			SetFogColor(114, 120, 128);
@@ -486,13 +488,9 @@ namespace FPS_n2 {
 		}
 		//
 		void			MainGameScene::MainDraw_Sub(int Range) const noexcept {
-			SetFogEnable(true);
-			SetVerticalFogEnable(true);
 			BackGround::BackGroundControl::Instance()->Draw();
 			ObjectManager::Instance()->Draw(true, Range);
 			//ObjectManager::Instance()->Draw_Depth();
-			SetVerticalFogEnable(false);
-			SetFogEnable(false);
 			HitMarkerPool::Instance()->Check();
 		}
 		//UI•\Ž¦
