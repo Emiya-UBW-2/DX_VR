@@ -82,7 +82,7 @@ namespace FPS_n2 {
 				(this->m_MuzzlePtr) ? (*this->m_MuzzlePtr)->GetModifySlot()->GetMyData()->GetGunShootSound() : GetModifySlot()->GetMyData()->GetGunShootSound()
 			))->Play3D(MuzzleMat.pos(), Scale3DRate * 50.f);
 			//エフェクト
-			EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec() * -1.f, 0.35f, 2.f);
+			EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec() * -1.f, 0.35f, 2.f);
 			//発砲
 			for (int loop = 0, max = AmmoSpec->GetPellet(); loop < max; ++loop) {
 				auto LastAmmo = std::make_shared<Objects::AmmoObj>();
@@ -150,7 +150,7 @@ namespace FPS_n2 {
 				case Charas::GunAnimeID::ReloadWait:
 					if (IsNowGunAnimeEnd()) {
 						SetGunAnime(Charas::GunAnimeID::Reload);
-						SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::StandupFoot))->Play3D(GetMove().GetPos(), Scale3DRate * 3.f);
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetMove().GetPos(), Scale3DRate * 3.f);
 					}
 					break;
 				case Charas::GunAnimeID::Reload:
@@ -471,7 +471,7 @@ namespace FPS_n2 {
 					if (GetNowAnimTimePerCache() >= 0.55f) {
 						if (!this->m_ReleasePin) {
 							this->m_ReleasePin = true;
-							SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Pin))->Play3D(GetMove().GetPos(), Scale3DRate * 2.f);
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Pin))->Play3D(GetMove().GetPos(), Scale3DRate * 2.f);
 						}
 					}
 					else {
@@ -482,7 +482,7 @@ namespace FPS_n2 {
 					if (GetNowAnimTimePerCache() >= 0.4f) {
 						if (IsActive()) {
 							SetActiveAll(false);//手にあるものは非表示にする
-							SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Throw))->Play3D(GetMove().GetPos(), Scale3DRate * 2.f);
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Throw))->Play3D(GetMove().GetPos(), Scale3DRate * 2.f);
 							this->m_Grenade.SetFall(GetMove().GetPos(), this->m_GrenadeThrowRot, (this->m_GrenadeThrowRot.zvec() * -1.f).normalized() * (Scale3DRate * 15.f / 60.f), 3.5f, Objects::FallObjectType::Grenade);
 						}
 					}
@@ -519,7 +519,7 @@ namespace FPS_n2 {
 								if (cell.m_Cell == 1) {
 									continue;
 								}
-								BackGroundParts->SetBlick((Put.x + xp), (Put.y + yp), (Put.z + zp), FPS_n2::BackGround::s_EmptyBlick);
+								BackGroundParts->SetBlick((Put.x + xp), (Put.y + yp), (Put.z + zp), BackGround::s_EmptyBlick);
 							}
 						}
 					}
@@ -540,20 +540,20 @@ namespace FPS_n2 {
 				this->m_MagazinePtr = nullptr;
 
 				for (auto& parts : PartsList) {
-					Sceneclass::ObjType ObjectType = static_cast<Sceneclass::ObjType>((*parts)->GetobjType());
-					if (ObjectType == Sceneclass::ObjType::Sight) {
+					ObjType ObjectType = static_cast<ObjType>((*parts)->GetobjType());
+					if (ObjectType == ObjType::Sight) {
 						this->m_SightPtr = &((std::shared_ptr<SightPartsObj>&)(*parts));
 					}
-					if (ObjectType == Sceneclass::ObjType::MuzzleAdapter) {
+					if (ObjectType == ObjType::MuzzleAdapter) {
 						this->m_MuzzlePtr = &((std::shared_ptr<MuzzlePartsObj>&)(*parts));
 					}
-					if (ObjectType == Sceneclass::ObjType::Upper) {
+					if (ObjectType == ObjType::Upper) {
 						this->m_UpperPtr = &((std::shared_ptr<UpperPartsObj>&)(*parts));
 					}
-					if (ObjectType == Sceneclass::ObjType::Lower) {
+					if (ObjectType == ObjType::Lower) {
 						this->m_LowerPtr = &((std::shared_ptr<LowerPartsObj>&)(*parts));
 					}
-					if (ObjectType == Sceneclass::ObjType::Magazine) {
+					if (ObjectType == ObjType::Magazine) {
 						this->m_MagazinePtr = &((std::shared_ptr<MagazinePartsObj>&)(*parts));
 					}
 				}

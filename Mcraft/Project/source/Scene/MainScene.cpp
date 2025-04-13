@@ -425,12 +425,12 @@ namespace FPS_n2 {
 			//埃エフェクト
 			if (GetIsFirstLoop()) {
 				this->m_EffectPos = CameraParts->GetMainCamera().GetCamPos();
-				EffectSingleton::Instance()->SetLoop(Sceneclass::Effect::ef_dust, this->m_EffectPos);
+				EffectSingleton::Instance()->SetLoop(Effect::ef_dust, this->m_EffectPos);
 			}
 			else {
 				Easing(&this->m_EffectPos, CameraParts->GetMainCamera().GetCamPos(), 0.95f, EasingType::OutExpo);
-				EffectSingleton::Instance()->Update_LoopEffect(Sceneclass::Effect::ef_dust, this->m_EffectPos, Vector3DX::forward(), 0.5f);
-				EffectSingleton::Instance()->SetEffectColor(Sceneclass::Effect::ef_dust, 255, 255, 255, 64);
+				EffectSingleton::Instance()->Update_LoopEffect(Effect::ef_dust, this->m_EffectPos, Vector3DX::forward(), 0.5f);
+				EffectSingleton::Instance()->SetEffectColor(Effect::ef_dust, 255, 255, 255, 64);
 			}
 			//背景
 			BackGroundParts->Execute();
@@ -450,7 +450,7 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
-			EffectSingleton::Instance()->StopEffect(Sceneclass::Effect::ef_dust);
+			EffectSingleton::Instance()->StopEffect(Effect::ef_dust);
 			//使い回しオブジェ系
 			BackGround::BackGroundControl::Instance()->Dispose();
 			//

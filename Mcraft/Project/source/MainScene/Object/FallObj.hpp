@@ -16,7 +16,7 @@ namespace FPS_n2 {
 			FallObjChildBase(void) noexcept {}
 			virtual ~FallObjChildBase(void) noexcept {}
 		public:
-			virtual Sceneclass::SoundEnum GetFallSound(void) const noexcept = 0;
+			virtual SoundEnum GetFallSound(void) const noexcept = 0;
 		public:
 			virtual void RotateOnAir(moves* objMove) noexcept = 0;
 			virtual void RotateOnGround(moves* objMove) noexcept = 0;
@@ -30,7 +30,7 @@ namespace FPS_n2 {
 			std::unique_ptr<FallObjChildBase>	m_FallObject{};
 			bool	m_IsEndFall{ false };
 		public:
-			FallObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::FallObj); }
+			FallObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::FallObj); }
 			virtual ~FallObj(void) noexcept {}
 		public:
 			bool			PopIsEndFall(void) noexcept {
@@ -69,7 +69,7 @@ namespace FPS_n2 {
 
 		class AmmoInChamberObj : public ObjectBaseClass {
 		public:
-			AmmoInChamberObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::AmmoInChamber); }
+			AmmoInChamberObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::AmmoInChamber); }
 			virtual ~AmmoInChamberObj(void) noexcept {}
 		public:
 			void			SetMat(const Vector3DX& pos, const Matrix3x3DX& mat) noexcept {

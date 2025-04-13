@@ -5,7 +5,7 @@
 #include	"../../Scene/MainScene.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace AIs {
 		void		AIControl::Repop(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();

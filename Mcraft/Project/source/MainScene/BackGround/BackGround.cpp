@@ -1605,24 +1605,6 @@ namespace FPS_n2 {
 		//
 		void		BackGroundControl::Execute(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
-#if defined(DEBUG) & EDITBLICK
-			{
-				auto& cell = this->m_CellxN.front();
-				auto Put = cell.GetPoint(PutPos);
-				printfDx("%d,%d,%d\n", Put.x, Put.y, Put.z);
-				auto* Pad = PadControl::Instance();
-				LenMouse += Pad->GetMouseWheelRot();
-				if (Pad->GetPadsInfo(Controls::PADS::SHOT).GetKey().trigger()) {
-					blickselect = 1;
-				}
-				if (Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().trigger()) {
-					blickselect = 0;
-				}
-				if (Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().trigger()) {
-					SaveCellsFile();
-				}
-			}
-#endif
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
 				if ((loop != 0) && (loop != this->m_ThreadCounter)) { continue; }
 				//
@@ -1677,15 +1659,6 @@ namespace FPS_n2 {
 					Vert.Draw(this->m_tex);
 				}
 			}
-#if defined(DEBUG) & EDITBLICK
-			int x = static_cast<int>(PutPos.x / CellScale), y = static_cast<int>(PutPos.y / CellScale), z = static_cast<int>(PutPos.z / CellScale);
-			SetUseLighting(false);
-			DrawCube3D(
-				(Vector3DX::vget(static_cast<float>(x - xput / 2), static_cast<float>(y - yput / 2), static_cast<float>(z - zput / 2)) * CellScale).get(),
-				(Vector3DX::vget(static_cast<float>(x + xput - xput / 2), static_cast<float>(y + yput - yput / 2), static_cast<float>(z + zput - zput / 2)) * CellScale).get(),
-				GetColor(0, 64, 0), GetColor(0, 0, 0), false);
-			SetUseLighting(true);
-#endif
 		}
 		//
 		void		BackGroundControl::Dispose(void) noexcept {

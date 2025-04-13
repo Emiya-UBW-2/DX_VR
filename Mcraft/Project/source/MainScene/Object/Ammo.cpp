@@ -54,7 +54,7 @@ namespace FPS_n2 {
 									BackGroundParts->SetBlick(xx, yy, zz, 3);
 									break;
 								case 3:
-									BackGroundParts->SetBlick(xx, yy, zz, FPS_n2::BackGround::s_EmptyBlick);
+									BackGroundParts->SetBlick(xx, yy, zz, BackGround::s_EmptyBlick);
 									break;
 								default:
 									break;
@@ -64,9 +64,9 @@ namespace FPS_n2 {
 					}
 				}
 				//エフェクト
-				EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_gndsmoke, pos_tmp, norm_tmp, (*this->m_AmmoData)->GetCaliber() / 0.02f * Scale3DRate);//0.00762f
+				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, pos_tmp, norm_tmp, (*this->m_AmmoData)->GetCaliber() / 0.02f * Scale3DRate);//0.00762f
 				//サウンド
-				SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::HitGround0) + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGround0) + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
 			}
 			//消す(スピードが0以下、貫通が0以下、5回反射する)
 			if (this->m_speed <= 0.f || this->m_penetration <= 0.f || this->m_RicochetCnt > 5 || this->m_Timer > 5.f) {

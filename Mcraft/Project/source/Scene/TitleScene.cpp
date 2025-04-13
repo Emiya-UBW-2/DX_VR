@@ -5,7 +5,7 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			TitleScene::Set_Sub(void) noexcept {
-			auto* ButtonParts = ButtonControl::Instance();
+			auto* ButtonParts = UIs::ButtonControl::Instance();
 			// 
 			this->m_FadeControl.Init();
 			this->m_IsEnd = false;
@@ -17,7 +17,7 @@ namespace FPS_n2 {
 			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, BaseScreenWidth - 96 - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, BaseScreenWidth - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			// クレジット
-			this->m_CreditControl = std::make_unique<CreditControl>();
+			this->m_CreditControl = std::make_unique<UIs::CreditControl>();
 			// 
 			/*
 			auto* SE = SoundPool::Instance();
@@ -29,7 +29,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
-			auto* ButtonParts = ButtonControl::Instance();
+			auto* ButtonParts = UIs::ButtonControl::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			if (SceneParts->IsPause()) {
 				return true;
@@ -89,7 +89,7 @@ namespace FPS_n2 {
 		}
 		void			TitleScene::Dispose_Sub(void) noexcept {
 			auto* SaveDataParts = SaveDataClass::Instance();
-			auto* ButtonParts = ButtonControl::Instance();
+			auto* ButtonParts = UIs::ButtonControl::Instance();
 			//
 			/*
 			auto* SE = SoundPool::Instance();
@@ -113,7 +113,7 @@ namespace FPS_n2 {
 			DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Gray50, true);
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
-			auto* ButtonParts = ButtonControl::Instance();
+			auto* ButtonParts = UIs::ButtonControl::Instance();
 			// 
 			DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, 
 				&this->m_TitleImage, (64), (64), (64 + 369), (64 + 207), true);

@@ -54,7 +54,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetUseBackCulling(true);
 	SetTextureAddressMode(DX_TEXADDRESS_WRAP);
 	//
-	FPS_n2::Sceneclass::ButtonControl::Create();
+	FPS_n2::UIs::ButtonControl::Create();
 	//
 	FPS_n2::Guns::GunPartsDataManager::Create();
 	FPS_n2::Objects::AmmoDataManager::Create();

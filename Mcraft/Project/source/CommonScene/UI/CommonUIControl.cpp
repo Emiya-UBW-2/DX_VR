@@ -1,8 +1,8 @@
 #include	"CommonUIControl.hpp"
 
-const FPS_n2::Sceneclass::ButtonControl* SingletonBase<FPS_n2::Sceneclass::ButtonControl>::m_Singleton = nullptr;
+const FPS_n2::UIs::ButtonControl* SingletonBase<FPS_n2::UIs::ButtonControl>::m_Singleton = nullptr;
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace UIs {
 		// 
 		bool ButtonControl::GetTriggerButton(void) const noexcept {
 			auto* Pad = PadControl::Instance();

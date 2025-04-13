@@ -18,5 +18,12 @@ namespace FPS_n2 {
 			void			Draw(void) const noexcept;
 			void			Dispose(void) noexcept;
 		};
+
+		class CommonBattleResource {
+		public:
+			static void			Load(void) noexcept;
+			static void			Set(void) noexcept;
+			static void			Dispose(void) noexcept;
+		};
 	};
 };

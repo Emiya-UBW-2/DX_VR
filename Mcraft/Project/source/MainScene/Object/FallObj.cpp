@@ -8,7 +8,7 @@ namespace FPS_n2 {
 			FallObjCart(void) noexcept {}
 			virtual ~FallObjCart(void) noexcept {}
 		public:
-			Sceneclass::SoundEnum GetFallSound(void) const noexcept override { return Sceneclass::SoundEnum::CartFall; }
+			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::CartFall; }
 		public:
 			void RotateOnAir(moves* objMove) noexcept override {
 				//テキトーに飛び回る
@@ -23,7 +23,7 @@ namespace FPS_n2 {
 			FallObjMagazine(void) noexcept {}
 			virtual ~FallObjMagazine(void) noexcept {}
 		public:
-			Sceneclass::SoundEnum GetFallSound(void) const noexcept override { return Sceneclass::SoundEnum::MagFall; }
+			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::MagFall; }
 		public:
 			void RotateOnAir(moves*) noexcept override {}// なにもしない
 			void RotateOnGround(moves* objMove) noexcept override {
@@ -37,7 +37,7 @@ namespace FPS_n2 {
 			FallObjGrenade(void) noexcept {}
 			virtual ~FallObjGrenade(void) noexcept {}
 		public:
-			Sceneclass::SoundEnum GetFallSound(void) const noexcept override { return Sceneclass::SoundEnum::FallGrenade; }
+			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::FallGrenade; }
 		public:
 			void RotateOnAir(moves* objMove) noexcept override {
 				//テキトーに飛び回る
@@ -47,8 +47,8 @@ namespace FPS_n2 {
 			void RotateOnGround(moves*) noexcept override {}//なにもしない
 			void OnTimeEnd(const moves& objMove) noexcept override {
 				auto* SE = SoundPool::Instance();
-				EffectSingleton::Instance()->SetOnce_Any(Sceneclass::Effect::ef_greexp, objMove.GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate, 2.f);
-				SE->Get(SoundType::SE, static_cast<int>(Sceneclass::SoundEnum::Explosion))->Play3D(objMove.GetPos(), Scale3DRate * 25.f);
+				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_greexp, objMove.GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate, 2.f);
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Explosion))->Play3D(objMove.GetPos(), Scale3DRate * 25.f);
 			}
 		};
 

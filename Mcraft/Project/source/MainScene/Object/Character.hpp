@@ -36,7 +36,7 @@ namespace FPS_n2 {
 			bool												m_MoveOverRideFlag{ false };
 			moves												m_OverRideInfo;
 			PlayerID											m_MyID{ 0 };
-			Sceneclass::CharaTypeID								m_CharaType{};
+			CharaTypeID											m_CharaType{};
 			bool												m_CanLookTarget{ true };
 			float												m_Length{};
 			bool												m_ConcussionSwitch{};
@@ -109,7 +109,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			void			SetCharaTypeID(Sceneclass::CharaTypeID Type) noexcept { this->m_CharaType = Type; }
+			void			SetCharaTypeID(CharaTypeID Type) noexcept { this->m_CharaType = Type; }
 			void			SetMoveOverRide(const moves& overrideInfo) noexcept {
 				this->m_MoveOverRideFlag = true;
 				this->m_OverRideInfo = overrideInfo;
@@ -123,7 +123,7 @@ namespace FPS_n2 {
 			void			ExecuteInput(void) noexcept;
 			void			ExecuteMatrix(void) noexcept;
 		public: //コンストラクタ、デストラクタ
-			CharacterObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Human); }
+			CharacterObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::Human); }
 			virtual ~CharacterObj(void) noexcept {}
 		public:
 			static void		LoadChara(const std::string& FolderName, PlayerID ID) noexcept;

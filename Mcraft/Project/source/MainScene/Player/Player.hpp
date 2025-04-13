@@ -12,12 +12,12 @@ namespace FPS_n2 {
 		private:
 			class PlayerControl {
 			private:
-				std::shared_ptr<Charas::CharacterObj>		m_Chara{ nullptr };
-				std::shared_ptr<Sceneclass::AIControl>			m_AI{ nullptr };
-				int												m_Score{ 0 };							//スコア
-				int												m_Kill{ 0 };							//スコア
-				int												m_Hit{ 0 };							//スコア
-				int												m_Shot{ 0 };							//スコア
+				std::shared_ptr<Charas::CharacterObj>	m_Chara{ nullptr };
+				std::shared_ptr<AIs::AIControl>			m_AI{ nullptr };
+				int										m_Score{ 0 };							//スコア
+				int										m_Kill{ 0 };							//スコア
+				int										m_Hit{ 0 };							//スコア
+				int										m_Shot{ 0 };							//スコア
 			public:
 				PlayerControl(void) noexcept {
 					this->m_Score = 0;
@@ -38,7 +38,7 @@ namespace FPS_n2 {
 				void		SetChara(const std::shared_ptr<Charas::CharacterObj>& pChara) noexcept { this->m_Chara = pChara; }
 				auto& GetChara(void) noexcept { return this->m_Chara; }
 
-				void		SetAI(const std::shared_ptr<Sceneclass::AIControl>& pAI) noexcept { this->m_AI = pAI; }
+				void		SetAI(const std::shared_ptr<AIs::AIControl>& pAI) noexcept { this->m_AI = pAI; }
 				auto& GetAI(void) noexcept { return this->m_AI; }
 
 				void		AddScore(int Score) noexcept { this->m_Score += Score; }

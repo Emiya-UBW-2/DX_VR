@@ -4,7 +4,7 @@
 #include	"../../sub.hpp"
 
 namespace FPS_n2 {
-	namespace Sceneclass {
+	namespace AIs {
 		enum class ENUM_AI_PHASE {
 			Normal,
 			Shot,

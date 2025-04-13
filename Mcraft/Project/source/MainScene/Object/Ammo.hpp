@@ -43,7 +43,7 @@ namespace FPS_n2 {
 			}
 			//*/
 		public: //コンストラクタ、デストラクタ
-			AmmoObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Ammo); }
+			AmmoObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::Ammo); }
 			virtual ~AmmoObj(void) noexcept { this->m_AmmoData = nullptr; }
 		public: //継承
 			void			Init_Sub(void) noexcept override {

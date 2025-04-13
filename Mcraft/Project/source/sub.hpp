@@ -48,16 +48,6 @@ namespace FPS_n2 {
 		}
 	};
 	//
-	namespace Sceneclass {
-		class CommonBattleResource {
-		public:
-			static void			Load(void) noexcept;
-			static void			Set(void) noexcept;
-			static void			Dispose(void) noexcept;
-		};
-	};
-
-
 	class FadeControl {
 		bool						m_IsBlackOut{ false };//カットシーン中フラグ
 		float						m_BlackOutAlpha{ 0.f };
@@ -241,26 +231,26 @@ namespace FPS_n2 {
 		EffectControl								m_EffectControl;
 	public:
 		// 複数エフェクトの再生
-		void		SetOnce_Any(Sceneclass::Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.f, float speed = 1.f) noexcept {
+		void		SetOnce_Any(Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.f, float speed = 1.f) noexcept {
 			this->m_EffectControl.SetOnce_Any(static_cast<int>(ID), pos_t, nomal_t, scale, speed);
 		}
 		// 単体で制御したいエフェクトの制御
-		void		StopEffect(Sceneclass::Effect ID) noexcept {
+		void		StopEffect(Effect ID) noexcept {
 			this->m_EffectControl.StopEffect(static_cast<int>(ID));
 		}
-		void		SetLoop(Sceneclass::Effect ID, const Vector3DX& pos_t) noexcept {
+		void		SetLoop(Effect ID, const Vector3DX& pos_t) noexcept {
 			this->m_EffectControl.SetLoop(static_cast<int>(ID), pos_t);
 		}
-		void		Update_LoopEffect(Sceneclass::Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.f) noexcept {
+		void		Update_LoopEffect(Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.f) noexcept {
 			this->m_EffectControl.Update_LoopEffect(static_cast<int>(ID), pos_t, nomal_t, scale);
 		}
-		void		SetOnce(Sceneclass::Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.f) noexcept {
+		void		SetOnce(Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.f) noexcept {
 			this->m_EffectControl.SetOnce(static_cast<int>(ID), pos_t, nomal_t, scale);
 		}
-		void		SetEffectSpeed(Sceneclass::Effect ID, float speed) noexcept {
+		void		SetEffectSpeed(Effect ID, float speed) noexcept {
 			this->m_EffectControl.SetEffectSpeed(static_cast<int>(ID), speed);
 		}
-		void		SetEffectColor(Sceneclass::Effect ID, int r, int g, int b, int a) noexcept {
+		void		SetEffectColor(Effect ID, int r, int g, int b, int a) noexcept {
 			this->m_EffectControl.SetEffectColor(static_cast<int>(ID), r, g, b, a);
 		}
 	public:
@@ -268,5 +258,4 @@ namespace FPS_n2 {
 			this->m_EffectControl.Execute();
 		}
 	};
-
-};
+}

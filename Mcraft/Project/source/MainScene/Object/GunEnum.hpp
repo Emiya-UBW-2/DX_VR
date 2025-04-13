@@ -105,44 +105,44 @@ namespace FPS_n2 {
 		};
 
 		struct GunSoundSet {
-			std::array<Sceneclass::SoundEnum, static_cast<int>(EnumGunSound::Max)>	m_Sound{ };
+			std::array<SoundEnum, static_cast<int>(EnumGunSound::Max)>	m_Sound{ };
 		};
 		const GunSoundSet GunSoundSets[] = {
 			{
 				//M4
-				Sceneclass::SoundEnum::Cocking2_0,
-				Sceneclass::SoundEnum::Cocking2_1,
-				Sceneclass::SoundEnum::Shot2,
-				Sceneclass::SoundEnum::Shot2_Suppressor,
-				Sceneclass::SoundEnum::Unload2,
-				Sceneclass::SoundEnum::Load2
+				SoundEnum::Cocking2_0,
+				SoundEnum::Cocking2_1,
+				SoundEnum::Shot2,
+				SoundEnum::Shot2_Suppressor,
+				SoundEnum::Unload2,
+				SoundEnum::Load2
 			},
 			{
 				//ƒnƒ“ƒhƒKƒ“
-				Sceneclass::SoundEnum::Cocking3_0,
-				Sceneclass::SoundEnum::Cocking3_1,
-				Sceneclass::SoundEnum::Shot3,
-				Sceneclass::SoundEnum::Shot3_Suppressor,
-				Sceneclass::SoundEnum::Unload3,
-				Sceneclass::SoundEnum::Load3
+				SoundEnum::Cocking3_0,
+				SoundEnum::Cocking3_1,
+				SoundEnum::Shot3,
+				SoundEnum::Shot3_Suppressor,
+				SoundEnum::Unload3,
+				SoundEnum::Load3
 			},
 			{
 				//M870
-				Sceneclass::SoundEnum::Cocking1_0,
-				Sceneclass::SoundEnum::Cocking1_1,
-				Sceneclass::SoundEnum::Shot1,
-				Sceneclass::SoundEnum::Shot1_Suppressor,
-				Sceneclass::SoundEnum::Unload1,
-				Sceneclass::SoundEnum::Load1
+				SoundEnum::Cocking1_0,
+				SoundEnum::Cocking1_1,
+				SoundEnum::Shot1,
+				SoundEnum::Shot1_Suppressor,
+				SoundEnum::Unload1,
+				SoundEnum::Load1
 			},
 			{
 				//AK
-				Sceneclass::SoundEnum::Cocking4_0,
-				Sceneclass::SoundEnum::Cocking4_1,
-				Sceneclass::SoundEnum::Shot4,
-				Sceneclass::SoundEnum::Shot4_Suppressor,
-				Sceneclass::SoundEnum::Unload4,
-				Sceneclass::SoundEnum::Load4
+				SoundEnum::Cocking4_0,
+				SoundEnum::Cocking4_1,
+				SoundEnum::Shot4,
+				SoundEnum::Shot4_Suppressor,
+				SoundEnum::Unload4,
+				SoundEnum::Load4
 			},
 		};
 		enum class GunSlot {

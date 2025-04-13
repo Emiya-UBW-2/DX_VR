@@ -2,8 +2,6 @@
 #pragma warning(disable:4464)
 #include	"../../Header.hpp"
 
-#define EDITBLICK (false)
-
 #define CHECKTHREADTIME (false)
 
 namespace FPS_n2 {

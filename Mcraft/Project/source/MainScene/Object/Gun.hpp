@@ -315,7 +315,7 @@ namespace FPS_n2 {
 			}
 			void				UpdateGunMat(bool IsSelectGun, bool IsActiveAutoAim, const Matrix3x3DX& CharaRotationCache, const Vector3DX& HeadPos, const Vector3DX& RotRad) noexcept;
 		public:
-			GunObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Gun); }
+			GunObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::Gun); }
 			virtual ~GunObj(void) noexcept {}
 		private:
 			int					GetFrameNum(void) noexcept override { return static_cast<int>(GunFrame::Max); }

@@ -11,7 +11,7 @@ namespace FPS_n2 {
 			FadeControl							m_FadeControl;
 			bool								m_IsEnd{ false };//シーン全体の終了フラグ
 			GraphHandle							m_TitleImage;
-			std::unique_ptr<CreditControl>		m_CreditControl;
+			std::unique_ptr<UIs::CreditControl>		m_CreditControl;
 		public:
 			TitleScene(void) noexcept {}
 			TitleScene(const TitleScene&) = delete;

@@ -89,7 +89,7 @@ namespace FPS_n2 {
 		class MagazinePartsObj : public GunPartsObj {
 			std::array<std::shared_ptr<Objects::AmmoInChamberObj>,5>			m_Ammo{};		//
 		public:
-			MagazinePartsObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Magazine); }
+			MagazinePartsObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::Magazine); }
 			virtual ~MagazinePartsObj(void) noexcept {}
 		public:
 			void			Init_GunParts(void) noexcept override;
@@ -124,14 +124,14 @@ namespace FPS_n2 {
 		private:
 		public://ゲッター
 		public:
-			LowerPartsObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Lower); }
+			LowerPartsObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::Lower); }
 			virtual ~LowerPartsObj(void) noexcept {}
 		public:
 		};
 
 		class UpperPartsObj : public GunPartsObj {
 		public:
-			UpperPartsObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Upper); }
+			UpperPartsObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::Upper); }
 			virtual ~UpperPartsObj(void) noexcept {}
 		};
 
@@ -139,7 +139,7 @@ namespace FPS_n2 {
 		private:
 		public://ゲッター
 		public:
-			BarrelPartsObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Barrel); }
+			BarrelPartsObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::Barrel); }
 			virtual ~BarrelPartsObj(void) noexcept {}
 		public:
 		};
@@ -148,14 +148,14 @@ namespace FPS_n2 {
 		private:
 		public://ゲッター
 		public:
-			UnderRailPartsObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::UnderRail); }
+			UnderRailPartsObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::UnderRail); }
 			virtual ~UnderRailPartsObj(void) noexcept {}
 		public:
 		};
 
 		class SightPartsObj : public GunPartsObj {
 		public:
-			SightPartsObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::Sight); }
+			SightPartsObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::Sight); }
 			virtual ~SightPartsObj(void) noexcept {}
 		public:
 			void SetScopeAlpha(float Per) noexcept {
@@ -166,7 +166,7 @@ namespace FPS_n2 {
 
 		class MuzzlePartsObj : public GunPartsObj {
 		public:
-			MuzzlePartsObj(void) noexcept { this->m_objType = static_cast<int>(Sceneclass::ObjType::MuzzleAdapter); }
+			MuzzlePartsObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::MuzzleAdapter); }
 			virtual ~MuzzlePartsObj(void) noexcept {}
 		};
 	};
