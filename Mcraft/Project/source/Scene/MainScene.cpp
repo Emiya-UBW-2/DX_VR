@@ -66,7 +66,7 @@ namespace FPS_n2 {
 
 			MV1::Load("data/Charactor/Soldier/model_Rag.mv1", &m_RagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
 		}
-		void MainGameScene::LoadEnd_Sub(void) noexcept {
+		void			MainGameScene::LoadEnd_Sub(void) noexcept {
 			Player::PlayerManager::Create();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			PlayerMngr->Init(NetWork::Player_num);
