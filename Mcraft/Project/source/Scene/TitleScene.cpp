@@ -88,7 +88,7 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			TitleScene::Dispose_Sub(void) noexcept {
-			auto* SaveDataParts = SaveDataClass::Instance();
+			auto* SaveDataParts = SaveData::Instance();
 			auto* ButtonParts = UIs::ButtonControl::Instance();
 			//
 			/*

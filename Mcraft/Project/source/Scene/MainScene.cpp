@@ -176,7 +176,7 @@ namespace FPS_n2 {
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 #if defined(DEBUG)
-			DebugClass::Instance()->SetPoint("Execute=Start");
+			DebugDraw::Instance()->SetPoint("Execute=Start");
 #endif // DEBUG
 			auto* CameraParts = Camera3D::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
@@ -445,7 +445,7 @@ namespace FPS_n2 {
 			HitMarkerPool::Instance()->Update();
 			EffectSingleton::Instance()->Update();
 #if defined(DEBUG)
-			DebugClass::Instance()->SetPoint("Execute=End");
+			DebugDraw::Instance()->SetPoint("Execute=End");
 #endif // DEBUG
 			return true;
 		}

@@ -23,7 +23,7 @@ namespace FPS_n2 {
 			virtual void OnTimeEnd(const moves& objMove) noexcept = 0;
 		};
 
-		class FallObj : public ObjectBaseClass {
+		class FallObj : public BaseObject {
 			float	m_yAdd{ 0.f };
 			float	m_Timer{ 0.f };
 			bool	m_SoundSwitch{ false };
@@ -67,7 +67,7 @@ namespace FPS_n2 {
 			void			Dispose_Sub(void) noexcept override {}
 		};
 
-		class AmmoInChamberObj : public ObjectBaseClass {
+		class AmmoInChamberObj : public BaseObject {
 		public:
 			AmmoInChamberObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::AmmoInChamber); }
 			virtual ~AmmoInChamberObj(void) noexcept {}

@@ -4,7 +4,7 @@
 
 namespace FPS_n2 {
 	namespace Charas {
-		void HitBoxControl::Update(const ObjectBaseClass* ptr, float SizeRate) noexcept {
+		void HitBoxControl::Update(const BaseObject* ptr, float SizeRate) noexcept {
 			SizeRate *= Scale3DRate;
 			auto* Ptr = (CharacterObj*)ptr;
 			int ID = 0;

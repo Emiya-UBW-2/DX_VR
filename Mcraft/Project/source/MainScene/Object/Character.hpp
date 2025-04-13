@@ -7,7 +7,7 @@
 namespace FPS_n2 {
 	namespace Charas {
 
-		class CharacterObj : public ObjectBaseClass {
+		class CharacterObj : public BaseObject {
 		private:
 			HitBoxControl										m_HitBoxControl;
 			WalkSwingControl									m_WalkSwingControl;

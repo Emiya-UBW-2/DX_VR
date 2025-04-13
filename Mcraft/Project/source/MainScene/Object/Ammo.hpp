@@ -6,7 +6,7 @@
 
 namespace FPS_n2 {
 	namespace Objects {
-		class AmmoObj : public ObjectBaseClass {
+		class AmmoObj : public BaseObject {
 			int				m_RicochetCnt{ 0 };
 			const std::unique_ptr<AmmoData>*	m_AmmoData{ nullptr };
 			float			m_speed{ 0.f };

@@ -238,7 +238,7 @@ namespace FPS_n2 {
 			void Init(void) noexcept {
 				this->m_HitBox.resize(27);
 			}
-			void Update(const ObjectBaseClass* ptr, float SizeRate) noexcept;
+			void Update(const BaseObject* ptr, float SizeRate) noexcept;
 #if defined(DEBUG) && DRAW_HITBOX
 			void Draw(void) noexcept {
 				SetUseLighting(false);

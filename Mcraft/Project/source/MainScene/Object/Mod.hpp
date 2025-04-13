@@ -6,7 +6,7 @@
 
 namespace FPS_n2 {
 	namespace Guns {
-		class GunPartsObj : public ObjectBaseClass {
+		class GunPartsObj : public BaseObject {
 			std::unique_ptr<ModifySlot>								m_ModifySlot{};
 
 			std::vector<int>													m_IsMeshDraw{};

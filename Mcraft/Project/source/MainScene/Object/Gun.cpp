@@ -754,7 +754,7 @@ namespace FPS_n2 {
 			if (isDrawSemiTrans && GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
 				this->m_MuzzleSmokeControl.DrawMuzzleSmoke();
 			}
-			ObjectBaseClass::Draw(isDrawSemiTrans, Range);
+			BaseObject::Draw(isDrawSemiTrans, Range);
 		}
 		void GunObj::Dispose_Sub(void) noexcept {
 			this->m_GunsModify.reset();

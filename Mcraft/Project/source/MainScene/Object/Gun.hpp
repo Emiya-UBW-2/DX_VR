@@ -12,7 +12,7 @@
 
 namespace FPS_n2 {
 	namespace Guns {
-		class GunObj : public ObjectBaseClass , public std::enable_shared_from_this<GunObj> {
+		class GunObj : public BaseObject , public std::enable_shared_from_this<GunObj> {
 		private:
 			MuzzleSmokeControl									m_MuzzleSmokeControl{};
 			std::unique_ptr<ModifySlot>							m_ModifySlot{};

@@ -59,7 +59,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::Guns::GunPartsDataManager::Create();
 	FPS_n2::Objects::AmmoDataManager::Create();
 	//‰ŠúƒZ[ƒu
-	SaveDataClass::Instance()->Save();
+	SaveData::Instance()->Save();
 	//BGM
 	/*
 	auto* SE = SoundPool::Instance();
