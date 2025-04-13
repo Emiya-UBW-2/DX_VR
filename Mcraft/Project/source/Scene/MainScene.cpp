@@ -510,23 +510,24 @@ namespace FPS_n2 {
 			if (!SceneParts->IsPause()) { this->m_UIclass.Draw(); }		//UI
 			//NetWorkBrowser::Instance()->Draw();						//’ÊMÝ’è
 			if (this->m_NetWorkController) {
+				std::string PingMes;
 				if (this->m_NetWorkController->GetPing() >= 0.f) {
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (32), White, Black,
-						"Ping:%3dms", static_cast<int>(this->m_NetWorkController->GetPing()));
+					char Mes[260];
+					sprintfDx(Mes, "Ping:%3dms", static_cast<int>(this->m_NetWorkController->GetPing()));
+
+					PingMes = Mes;
 				}
 				else {
 					if (this->m_NetWorkController->GetClient()) {
-						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (32), White, Black,
-							"Lost Connection");
+						PingMes = "Lost Connection";
 					}
 					else {
-						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (32), White, Black,
-							"Ping:---ms");
+						PingMes = "Ping:---ms";
 					}
 				}
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (32), White, Black,
+					PingMes.c_str());
 			}
 			this->m_FadeControl.Draw();
 		}
