@@ -523,6 +523,7 @@ namespace FPS_n2 {
 							}
 						}
 					}
+					BackGroundParts->UpdateOnce();
 				}
 			}
 		}

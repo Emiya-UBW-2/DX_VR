@@ -1602,6 +1602,11 @@ namespace FPS_n2 {
 			SettingChange();
 			this->m_ThreadCounter = 0;
 		}
+		void BackGroundControl::UpdateOnce(void) noexcept {
+			for (int loop = 0; loop < TotalCellLayer; ++loop) {
+				this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + TotalCellLayer + loop)).JobStart();
+			}
+		}
 		//
 		void		BackGroundControl::Execute(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();

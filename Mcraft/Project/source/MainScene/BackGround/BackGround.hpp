@@ -258,6 +258,7 @@ namespace FPS_n2 {
 				bool							m_JobEnd{};
 				bool							m_IsDoOnce{};
 				bool							m_isEnd{};//
+				bool							m_IsDoEnd{};
 #if defined(DEBUG) && CHECKTHREADTIME
 				LONGLONG						m_StartTime{};
 				LONGLONG						m_TotalTime{};
@@ -265,12 +266,20 @@ namespace FPS_n2 {
 				std::function<void()>			m_Doing{ nullptr };
 				std::function<void()>			m_EndDoing{ nullptr };
 			public:
+				void JobStart(void) noexcept {
+					if (this->m_isEnd) {
+						this->m_JobEnd = true;
+						this->m_isEnd = false;
+						this->m_IsDoEnd = false;
+					}
+				}
 				void Init(std::function<void()> Doing, std::function<void()> EndDoing, bool IsDoOnce) noexcept {
-					this->m_JobEnd = true;
-					this->m_isEnd = false;
 					this->m_IsDoOnce = IsDoOnce;
 					this->m_Doing = Doing;
 					this->m_EndDoing = EndDoing;
+					this->m_isEnd = true;
+					JobStart();
+					this->m_IsDoEnd = true;
 				}
 
 				void Execute(void) noexcept {
@@ -280,12 +289,15 @@ namespace FPS_n2 {
 						this->m_TotalTime = GetNowHiPerformanceCount() - this->m_StartTime;
 						this->m_StartTime = GetNowHiPerformanceCount();
 #endif
-						if (this->m_Job.joinable()) {
-							this->m_Job.detach();
-						}
-						//
-						if (this->m_EndDoing) {
-							this->m_EndDoing();
+						if (this->m_IsDoEnd) {
+							this->m_IsDoEnd = false;
+							if (this->m_Job.joinable()) {
+								this->m_Job.detach();
+							}
+							//
+							if (this->m_EndDoing) {
+								this->m_EndDoing();
+							}
 						}
 						//
 						if (!this->m_IsDoOnce) {
@@ -298,6 +310,7 @@ namespace FPS_n2 {
 								}
 								this->m_JobEnd = true;
 								this->m_isEnd = true;
+								this->m_IsDoEnd = true;
 								});
 							this->m_Job.swap(tmp);
 							//ã≠êßë“ã@
@@ -712,6 +725,8 @@ namespace FPS_n2 {
 			//
 			void			Init(void) noexcept;
 			//
+			void			UpdateOnce(void) noexcept;
+
 			void			Execute(void) noexcept;
 			//
 			void			BG_Draw(void) const noexcept;

@@ -42,6 +42,7 @@ namespace FPS_n2 {
 					int								yput = 1;
 					int								zput = 4;
 					auto Put = BackGroundParts->GetPoint(pos_tmp);
+					bool IsChanged = false;
 					for (int xp = -xput / 2; xp <= xput / 2; ++xp) {
 						for (int yp = -yput / 2; yp <= yput / 2; ++yp) {
 							for (int zp = -zput / 2; zp <= zput / 2; ++zp) {
@@ -55,12 +56,16 @@ namespace FPS_n2 {
 									break;
 								case 3:
 									BackGroundParts->SetBlick(xx, yy, zz, BackGround::s_EmptyBlick);
+									IsChanged = true;
 									break;
 								default:
 									break;
 								}
 							}
 						}
+					}
+					if (IsChanged) {
+						BackGroundParts->UpdateOnce();
 					}
 				}
 				//エフェクト
