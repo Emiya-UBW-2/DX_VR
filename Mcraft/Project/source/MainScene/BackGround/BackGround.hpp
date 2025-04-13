@@ -258,6 +258,8 @@ namespace FPS_n2 {
 			struct ThreadJobs {
 				std::thread						m_Job;
 				bool							m_JobEnd{};
+				bool							m_IsDoOnce{};
+				bool							m_isEnd{};//
 #if defined(DEBUG) && CHECKTHREADTIME
 				LONGLONG						m_StartTime{};
 				LONGLONG						m_TotalTime{};
@@ -265,8 +267,10 @@ namespace FPS_n2 {
 				std::function<void()>			m_Doing{ nullptr };
 				std::function<void()>			m_EndDoing{ nullptr };
 			public:
-				void Init(std::function<void()> Doing, std::function<void()> EndDoing) noexcept {
+				void Init(std::function<void()> Doing, std::function<void()> EndDoing, bool IsDoOnce) noexcept {
 					this->m_JobEnd = true;
+					this->m_isEnd = false;
+					this->m_IsDoOnce = IsDoOnce;
 					this->m_Doing = Doing;
 					this->m_EndDoing = EndDoing;
 				}
@@ -286,12 +290,16 @@ namespace FPS_n2 {
 							this->m_EndDoing();
 						}
 						//
-						{
+						if (!this->m_IsDoOnce) {
+							this->m_isEnd = false;
+						}
+						if(!this->m_isEnd) {
 							std::thread tmp([&]() {
 								if (this->m_Doing) {
 									this->m_Doing();
 								}
 								this->m_JobEnd = true;
+								this->m_isEnd = true;
 								});
 							this->m_Job.swap(tmp);
 							//ã≠êßë“ã@

@@ -414,6 +414,8 @@ namespace FPS_n2 {
 				}
 				CameraParts->SetMainCamera().SetCamInfo(fov_t, CameraParts->GetMainCamera().GetCamNear(), CameraParts->GetMainCamera().GetCamFar());
 			}
+			auto Put = CameraParts->GetMainCamera().GetCamPos()/ Scale3DRate;
+			printfDx("%f,%f,%f\n", Put.x, Put.y, Put.z);
 			//DoF
 			PostPassEffect::Instance()->Set_DoFNearFar(
 				ViewChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), Scale3DRate * 5.f,

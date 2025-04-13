@@ -1450,7 +1450,7 @@ namespace FPS_n2 {
 					this->m_Draws.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
 					this->m_Draws.at(id).m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - this->m_Draws.at(id).m_CamPos).normalized();
 				}
-			);
+			, false);
 			this->m_Jobs.at(1).Init(
 				[&]() {
 					AddCubes(1);
@@ -1462,7 +1462,7 @@ namespace FPS_n2 {
 					this->m_Draws.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
 					this->m_Draws.at(id).m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - this->m_Draws.at(id).m_CamPos).normalized();
 				}
-			);
+			, false);
 			this->m_Jobs.at(2).Init(
 				[&]() {
 					AddCubes(2);
@@ -1474,7 +1474,7 @@ namespace FPS_n2 {
 					this->m_Draws.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
 					this->m_Draws.at(id).m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - this->m_Draws.at(id).m_CamPos).normalized();
 				}
-			);
+			, false);
 			this->m_Jobs.at(3).Init(
 				[&]() {
 					AddCubes(3);
@@ -1486,7 +1486,7 @@ namespace FPS_n2 {
 					this->m_Draws.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
 					this->m_Draws.at(id).m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - this->m_Draws.at(id).m_CamPos).normalized();
 				}
-			);
+			, false);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 0)).Init(
 				[&]() {
 					AddSetShadowCubes(0);
@@ -1498,7 +1498,7 @@ namespace FPS_n2 {
 					this->m_DrawsSS.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
 					this->m_DrawsSS.at(id).m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - this->m_DrawsSS.at(id).m_CamPos).normalized();
 				}
-			);
+			, false);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 1)).Init(
 				[&]() {
 					AddSetShadowCubes(1);
@@ -1510,7 +1510,7 @@ namespace FPS_n2 {
 					this->m_DrawsSS.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
 					this->m_DrawsSS.at(id).m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - this->m_DrawsSS.at(id).m_CamPos).normalized();
 				}
-			);
+			, false);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 2)).Init(
 				[&]() {
 					AddSetShadowCubes(2);
@@ -1522,7 +1522,7 @@ namespace FPS_n2 {
 					this->m_DrawsSS.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
 					this->m_DrawsSS.at(id).m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - this->m_DrawsSS.at(id).m_CamPos).normalized();
 				}
-			);
+			, false);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 3)).Init(
 				[&]() {
 					AddSetShadowCubes(3);
@@ -1534,7 +1534,7 @@ namespace FPS_n2 {
 					this->m_DrawsSS.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
 					this->m_DrawsSS.at(id).m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - this->m_DrawsSS.at(id).m_CamPos).normalized();
 				}
-			);
+			, false);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + TotalCellLayer + 0)).Init(
 				[&]() {
 					AddShadowCubes(0);
@@ -1544,10 +1544,13 @@ namespace FPS_n2 {
 					this->m_DrawsSB.at(id).m_vert32.FlipVerts();
 					auto* CameraParts = Camera3D::Instance();
 					this->m_DrawsSB.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
+					this->m_DrawsSB.at(id).m_CamPos.x = 0.f;
+					this->m_DrawsSB.at(id).m_CamPos.y = -30.f * Scale3DRate;
+					this->m_DrawsSB.at(id).m_CamPos.z = 0.f;
 					auto* PostPassParts = PostPassEffect::Instance();
 					this->m_DrawsSB.at(id).m_light = PostPassParts->GetShadowDir();
 				}
-			);
+			, true);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + TotalCellLayer + 1)).Init(
 				[&]() {
 					AddShadowCubes(1);
@@ -1557,10 +1560,13 @@ namespace FPS_n2 {
 					this->m_DrawsSB.at(id).m_vert32.FlipVerts();
 					auto* CameraParts = Camera3D::Instance();
 					this->m_DrawsSB.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
+					this->m_DrawsSB.at(id).m_CamPos.x = 0.f;
+					this->m_DrawsSB.at(id).m_CamPos.y = -30.f * Scale3DRate;
+					this->m_DrawsSB.at(id).m_CamPos.z = 0.f;
 					auto* PostPassParts = PostPassEffect::Instance();
 					this->m_DrawsSB.at(id).m_light = PostPassParts->GetShadowDir();
 				}
-			);
+			, true);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + TotalCellLayer + 2)).Init(
 				[&]() {
 					AddShadowCubes(2);
@@ -1570,10 +1576,13 @@ namespace FPS_n2 {
 					this->m_DrawsSB.at(id).m_vert32.FlipVerts();
 					auto* CameraParts = Camera3D::Instance();
 					this->m_DrawsSB.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
+					this->m_DrawsSB.at(id).m_CamPos.x = 0.f;
+					this->m_DrawsSB.at(id).m_CamPos.y = -30.f * Scale3DRate;
+					this->m_DrawsSB.at(id).m_CamPos.z = 0.f;
 					auto* PostPassParts = PostPassEffect::Instance();
 					this->m_DrawsSB.at(id).m_light = PostPassParts->GetShadowDir();
 				}
-			);
+			, true);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + TotalCellLayer + 3)).Init(
 				[&]() {
 					AddShadowCubes(3);
@@ -1583,10 +1592,13 @@ namespace FPS_n2 {
 					this->m_DrawsSB.at(id).m_vert32.FlipVerts();
 					auto* CameraParts = Camera3D::Instance();
 					this->m_DrawsSB.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
+					this->m_DrawsSB.at(id).m_CamPos.x = 0.f;
+					this->m_DrawsSB.at(id).m_CamPos.y = -30.f * Scale3DRate;
+					this->m_DrawsSB.at(id).m_CamPos.z = 0.f;
 					auto* PostPassParts = PostPassEffect::Instance();
 					this->m_DrawsSB.at(id).m_light = PostPassParts->GetShadowDir();
 				}
-			);
+			, true);
 			SettingChange();
 			this->m_ThreadCounter = 0;
 		}
@@ -1624,6 +1636,7 @@ namespace FPS_n2 {
 				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (this->m_ShadowRate < this->m_CellxN.at(loop).m_scaleRate)) {
 					this->m_DrawsSS.at(loop).m_vert32.Disable();
 					this->m_DrawsSB.at(loop).m_vert32.Disable();
+					this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + TotalCellLayer + loop)).m_isEnd = false;
 				}
 				else {
 					this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + loop)).Execute();
