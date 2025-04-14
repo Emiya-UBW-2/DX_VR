@@ -135,7 +135,7 @@ namespace FPS_n2 {
 			SetLightAmbColorHandle(FirstLight.get(), GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
 			SetLightDifColorHandle(FirstLight.get(), GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
 
-			PostPassParts->SetGodRayPer(0.25f);
+			PostPassParts->SetGodRayPer(0.5f);
 			//Cam
 			CameraParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 			//info
