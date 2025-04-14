@@ -1634,9 +1634,15 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundControl::BG_Draw(void) const noexcept {
+			auto Fog = GetFogEnable();
+			auto VFog = GetVerticalFogEnable();
+			SetFogEnable(false);
+			SetVerticalFogEnable(false);
 			SetUseLighting(false);
 			this->m_ObjSky.DrawModel();
 			SetUseLighting(true);
+			SetFogEnable(Fog);
+			SetVerticalFogEnable(VFog);
 		}
 		void		BackGroundControl::Shadow_Draw(void) const noexcept {
 			for (auto& Vert : this->m_DrawsSB) {
