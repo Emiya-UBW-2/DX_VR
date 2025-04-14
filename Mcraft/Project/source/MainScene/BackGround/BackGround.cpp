@@ -4,6 +4,118 @@
 const FPS_n2::BackGround::BackGroundControl* SingletonBase<FPS_n2::BackGround::BackGroundControl>::m_Singleton = nullptr;
 namespace FPS_n2 {
 	namespace BackGround {
+		class MazeControl {
+			enum class MAZETYPE :int {
+				WALL,
+				PATH,
+			};
+		private:
+			int		m_Width{ 1 };
+			int		m_Height{ 1 };
+			std::vector<std::vector<MAZETYPE>>		m_Maze;
+		private:
+			//穴掘り
+			void dig(int x, int y, const std::function<int()>& Rand) {
+				//指定した部分を掘っておく
+				this->m_Maze[x][y] = MAZETYPE::PATH;
+				// どの方向を掘ろうとしたかを覚えておく変数
+				int ok = 0;
+				// 全方向試すまでループ
+				while (ok != 0b1111) {
+					int Dir = Rand() % 4;
+					ok |= (1 << Dir);
+					float rad = deg2rad(Dir * 90);
+					int next_x = x + static_cast<int>(sin(rad) * 2.f);//0 2 0 -2
+					int next_y = y + static_cast<int>(cos(rad) * 2.f);//2 0 -2 0
+					if ((0 <= next_x && next_x < this->m_Width) && (0 <= next_y && next_y < this->m_Height)) {
+						if (this->m_Maze[next_x][next_y] == MAZETYPE::WALL) {
+							this->m_Maze[static_cast<size_t>((next_x + x) / 2)][static_cast<size_t>((next_y + y) / 2)] = MAZETYPE::PATH;
+							//その場から次の穴掘り
+							dig(next_x, next_y, Rand);
+						}
+					}
+				}
+			}
+		public:
+			//該当座標が通路かどうか
+			const auto PosIsPath(int x, int y) {
+				if ((0 <= x && x < this->m_Width) && (0 <= y && y < this->m_Height)) {
+					return this->m_Maze[x][y] == MAZETYPE::PATH;
+				}
+				else {
+					return false;
+				}
+			}
+			//通路の総数を取得
+			const auto GetPachCount(void) noexcept {
+				int OneSize = 0;
+				for (int y = 0; y < this->m_Height; ++y) {
+					for (int x = 0; x < this->m_Width; ++x) {
+						if (PosIsPath(x, y)) {
+							++OneSize;
+						}
+					}
+				}
+				return OneSize;
+			}
+		public:
+			// 迷路を作成する
+			void createMaze(int width, int height, int seed) {
+				this->m_Width = width;
+				this->m_Height = height;
+
+				this->m_Maze.resize(this->m_Width);
+				for (auto& mazeX : this->m_Maze) {
+					mazeX.resize(this->m_Height);
+					for (auto& cell : mazeX) {
+						cell = MAZETYPE::WALL; // 全マス壁にする
+					}
+				}
+				std::default_random_engine Rand = std::default_random_engine(seed);
+				std::uniform_int_distribution<int> distX(0, this->m_Width / 2);
+				std::uniform_int_distribution<int> distY(0, this->m_Height / 2);
+				std::uniform_int_distribution<int> distR(0, 3);
+				;
+				// 開始点をランダム（奇数座標）に決定する
+				dig(
+					std::clamp(2 * distX(Rand) + 1, 0, this->m_Width - 1),
+					std::clamp(2 * distY(Rand) + 1, 0, this->m_Height - 1),
+					[&]() {return static_cast<int>(distR(Rand)); });
+				//追加で穴あけ
+				for (int y = 1; y < this->m_Height - 1; ++y) {
+					for (int x = 1; x < this->m_Width - 1; ++x) {
+						bool isHit = false;
+						if (x == 1 || (x == this->m_Width - 1 - 1)) {
+							isHit = true;
+						}
+						if (y == 1 || (y == this->m_Height - 1 - 1)) {
+							isHit = true;
+						}
+						if (!isHit) { continue; }
+						this->m_Maze[x][y] = MAZETYPE::PATH;
+					}
+				}
+				//追加で穴あけ
+				for (int y = 1; y < this->m_Height - 1; ++y) {
+					for (int x = 1; x < this->m_Width - 1; ++x) {
+						bool isHit = false;
+						if ((y % 6) == 0) {
+							if ((x % 6) == 0) { isHit = true; }
+						}
+						if (!isHit) { continue; }
+						this->m_Maze[x][y] = MAZETYPE::PATH;
+					}
+				}
+			}
+			void Reset(void) noexcept {
+				for (auto& mx : this->m_Maze) {
+					mx.clear();
+				}
+				this->m_Maze.clear();
+				this->m_Width = 1;
+				this->m_Height = 1;
+			}
+		};
 		class PerlinNoise {
 		private:
 			//メンバ変数
@@ -64,16 +176,16 @@ namespace FPS_n2 {
 			}
 		public:
 			constexpr PerlinNoise() = default;
-			explicit PerlinNoise(const std::uint_fast32_t seed_) noexcept {
-				setSeed(seed_);
+			explicit PerlinNoise(int seed) noexcept {
+				setSeed(seed);
 			}
 
 			//SEED値を設定する
-			void setSeed(const std::uint_fast32_t seed_) noexcept {
+			void setSeed(int seed) noexcept {
 				for (std::size_t loop = 0; loop < 256; ++loop) {
 					this->perlinNoise[loop] = static_cast<uint_fast8_t>(loop);
 				}
-				std::shuffle(this->perlinNoise.begin(), this->perlinNoise.begin() + 256, std::default_random_engine(seed_));
+				std::shuffle(this->perlinNoise.begin(), this->perlinNoise.begin() + 256, std::default_random_engine(seed));
 				for (std::size_t loop = 0; loop < 256; ++loop) {
 					this->perlinNoise[256 + loop] = this->perlinNoise[loop];
 				}
@@ -1138,7 +1250,7 @@ namespace FPS_n2 {
 				std::ofstream fout{};
 				fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
 				fout.write((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0))) * 256 * 256 * 256);
-				fout.close();  //ファイルを閉じる
+				fout.close(); //ファイルを閉じる
 			}
 			//一部を切り取って保存
 			/*
@@ -1163,7 +1275,7 @@ namespace FPS_n2 {
 			fin.read((char*)&ZTotal, sizeof(ZTotal));
 			this->m_CellBase.resize(static_cast<size_t>(XTotal * YTotal * ZTotal));
 			fin.read((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0))) * XTotal * YTotal * ZTotal);
-			fin.close();  //ファイルを閉じる
+			fin.close(); //ファイルを閉じる
 
 			for (int xm = 0; xm < XTotal; ++xm) {
 				for (int ym = 0; ym < YTotal; ++ym) {
@@ -1195,7 +1307,7 @@ namespace FPS_n2 {
 			fout.write((char*)&YTotal, sizeof(YTotal));
 			fout.write((char*)&ZTotal, sizeof(ZTotal));
 			fout.write((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0)) * XTotal * YTotal * ZTotal));
-			fout.close();  //ファイルを閉じる
+			fout.close(); //ファイルを閉じる
 		}
 		//
 		void		BackGroundControl::SettingChange(void) noexcept {
@@ -1258,29 +1370,14 @@ namespace FPS_n2 {
 				this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.7f, 0.7f, 0.7f, 1.f));
 				this->m_ObjSky.SetMaterialAmbColor(loop, GetColorF(0.f, 0.f, 0.f, 1.f));
 			}
-			if (false) {
-				//空っぽ
-				auto& cell = this->m_CellxN.front();
-				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
-				for (int x = 0; x < cell.m_All; ++x) {
-					for (int z = 0; z < cell.m_All; ++z) {
-						for (int y = 0; y < cell.m_All; ++y) {
-							if (y <= cell.m_All * 1 / 4) {
-								cell.SetCellBuf(x, y, z).m_Cell = 1;
-								continue;
-							}
-							cell.SetCellBuf(x, y, z).m_Cell = s_EmptyBlick;
-						}
-					}
-				}
-				SaveCellsFile();
-			}
-			else if (true) {
+			if (true) {
 				//空っぽ
 				auto& cell = this->m_CellxN.front();
 				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
 
-				PerlinNoise ns(GetRand(100));
+				int seed = 0;// GetRand(100);
+
+				PerlinNoise ns(seed);
 				for (int x = 0; x < cell.m_All; ++x) {
 					for (int z = 0; z < cell.m_All; ++z) {
 						for (int y = 0; y < cell.m_All; ++y) {
@@ -1288,30 +1385,15 @@ namespace FPS_n2 {
 						}
 					}
 				}
+				MazeControl mazeControl;
 
-				int Size = 17;
-				this->m_MazeControl.createMaze(Size, Size);
+				int Size = 23;
+				mazeControl.createMaze(Size, Size, seed);
 				int Rate = 6;
 				int Heights = 10;
 				//*
 				int Edge = -Rate;
 				int EdgeP = -0;
-
-				for (int x = 0; x < cell.m_All; x += 2) {
-					for (int z = 0; z < cell.m_All; z += 2) {
-						int xPos = -Size * Rate / 2 + x;
-						int zPos = -Size * Rate / 2 + z;
-						if ((-EdgeP < x && x < Size * Rate + EdgeP - 1) && (-EdgeP < z && z < Size * Rate + EdgeP - 1)) {
-							if (GetRand(100) < 30) {
-								int y = cell.m_All * 1 / 4 - 15;
-								cell.SetCellBuf(cell.m_Half + xPos + 0, y, cell.m_Half + zPos + 0).m_Cell = 1;
-								cell.SetCellBuf(cell.m_Half + xPos + 0, y, cell.m_Half + zPos + 1).m_Cell = 1;
-								cell.SetCellBuf(cell.m_Half + xPos + 1, y, cell.m_Half + zPos + 0).m_Cell = 1;
-								cell.SetCellBuf(cell.m_Half + xPos + 1, y, cell.m_Half + zPos + 1).m_Cell = 1;
-							}
-						}
-					}
-				}
 
 				for (int x = 0; x < cell.m_All; ++x) {
 					for (int z = 0; z < cell.m_All; ++z) {
@@ -1320,7 +1402,7 @@ namespace FPS_n2 {
 
 						if ((-EdgeP <= x && x <= Size * Rate + EdgeP - 1) && (-EdgeP <= z && z <= Size * Rate + EdgeP - 1)) {
 							if ((x == -EdgeP || x == Size * Rate + EdgeP - 1) || (z == -EdgeP || z == Size * Rate + EdgeP - 1)) {
-								for (int y = 0; y <= cell.m_All * 1 / 4; ++y) {
+								for (int y = 0; y <= cell.m_All * 1 / 8; ++y) {
 									cell.SetCellBuf(cell.m_Half + xPos, y, cell.m_Half + zPos).m_Cell = 1;
 								}
 							}
@@ -1328,7 +1410,7 @@ namespace FPS_n2 {
 						if ((-EdgeP < x && x < Size * Rate + EdgeP - 1) && (-EdgeP < z && z < Size * Rate + EdgeP - 1)) {
 							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(x)) / (Size * Rate - 1),
-								(static_cast<float>(z)) / (Size * Rate - 1)) * static_cast<float>(cell.m_All * 1 / 20));
+								(static_cast<float>(z)) / (Size * Rate - 1)) * static_cast<float>(cell.m_All * 1 / 10));
 							for (int y = 0; y <= Height; ++y) {
 								cell.SetCellBuf(cell.m_Half + xPos, y, cell.m_Half + zPos).m_Cell = 2;
 							}
@@ -1343,31 +1425,31 @@ namespace FPS_n2 {
 							int zPos = -Size * Rate / 2 + z + zt;
 							auto Height = static_cast<int>(ns.octaveNoise(2, 
 								(static_cast<float>(x + xt)) / (Size * Rate),
-								(static_cast<float>(z + zt)) / (Size * Rate)) * static_cast<float>(cell.m_All * 1 / 20));
+								(static_cast<float>(z + zt)) / (Size * Rate)) * static_cast<float>(cell.m_All * 1 / 10));
 							for (int y = Height; y <= Height + Heights; ++y) {
 								cell.SetCellBuf(cell.m_Half + xPos, y, cell.m_Half + zPos).m_Cell = 2;
 							}
 						};
 						int xp = x / Rate;
 						int zp = z / Rate;
-						if (!this->m_MazeControl.PosIsPath(xp, zp) && (x % Rate == 0) && (z % Rate == 0)) {
+						if (!mazeControl.PosIsPath(xp, zp) && (x % Rate == 0) && (z % Rate == 0)) {
 							SetWall(0, 0);
-							if ((xp > 0) && !this->m_MazeControl.PosIsPath(xp - 1, zp)) {
+							if ((xp > 0) && !mazeControl.PosIsPath(xp - 1, zp)) {
 								for (int xt = 0; xt < Rate; ++xt) {
 									SetWall(-xt, 0);
 								}
 							}
-							if ((zp > Size - 1) && !this->m_MazeControl.PosIsPath(xp, zp - 1)) {
+							if ((zp > Size - 1) && !mazeControl.PosIsPath(xp, zp - 1)) {
 								for (int zt = 0; zt < Rate; ++zt) {
 									SetWall(0, -zt);
 								}
 							}
-							if ((xp < 0) && !this->m_MazeControl.PosIsPath(xp + 1, zp)) {
+							if ((xp < 0) && !mazeControl.PosIsPath(xp + 1, zp)) {
 								for (int xt = 0; xt < Rate; ++xt) {
 									SetWall(xt, 0);
 								}
 							}
-							if ((zp < Size - 1) && !this->m_MazeControl.PosIsPath(xp, zp + 1)) {
+							if ((zp < Size - 1) && !mazeControl.PosIsPath(xp, zp + 1)) {
 								for (int zt = 0; zt < Rate; ++zt) {
 									SetWall(0, zt);
 								}
@@ -1376,24 +1458,6 @@ namespace FPS_n2 {
 					}
 				}
 
-				SaveCellsFile();
-			}
-			else if (false) {
-				PerlinNoise ns(GetRand(100));
-				auto& cell = this->m_CellxN.front();
-				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
-				for (int x = 0; x < cell.m_All; ++x) {
-					for (int z = 0; z < cell.m_All; ++z) {
-						auto Height = static_cast<int>(ns.octaveNoise(2, (static_cast<float>(x)) / cell.m_All, (static_cast<float>(z)) / cell.m_All) * static_cast<float>(cell.m_All * 4 / 5));
-						for (int y = 0; y < cell.m_All; ++y) {
-							if (y <= Height) {
-								cell.SetCellBuf(x, y, z).m_Cell = 1;
-								continue;
-							}
-							cell.SetCellBuf(x, y, z).m_Cell = s_EmptyBlick;
-						}
-					}
-				}
 				SaveCellsFile();
 			}
 			else {

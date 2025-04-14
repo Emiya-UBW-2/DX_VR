@@ -49,11 +49,14 @@ cbuffer cbMULTIPLYCOLOR_CBUFFER2 : register(b3)
 SamplerState g_DiffuseMapSampler : register(s0); // ディフューズマップサンプラ
 Texture2D g_DiffuseMapTexture : register(t0); // ディフューズマップテクスチャ
 
-SamplerState g_Diffuse2MapSampler : register(s1); // ディフューズマップサンプラ(ぼかし)
+SamplerState g_Diffuse2MapSampler : register(s1); // ディフューズマップサンプラ(ぼかし)近
 Texture2D g_Diffuse2MapTexture : register(t1); // ディフューズマップテクスチャ(ぼかし)
 
-SamplerState g_DepthMapSampler : register(s2); // 深度マップサンプラ
-Texture2D g_DepthMapTexture : register(t2); // 深度マップテクスチャ
+SamplerState g_Diffuse3MapSampler : register(s2); // ディフューズマップサンプラ(ぼかし)遠
+Texture2D g_Diffuse3MapTexture : register(t2); // ディフューズマップテクスチャ(ぼかし)
+
+SamplerState g_DepthMapSampler : register(s3); // 深度マップサンプラ
+Texture2D g_DepthMapTexture : register(t3); // 深度マップテクスチャ
 
 
 PS_OUTPUT main(PS_INPUT PSInput)
@@ -71,32 +74,49 @@ PS_OUTPUT main(PS_INPUT PSInput)
 	//無し
 	if (Depth == 0.f) {
 		per = 0.f;
-	}
+        PSOutput.color0 = g_DiffuseMapTexture.Sample(g_DiffuseMapSampler, PSInput.texCoords0);
+    }
 	//近
 	else if (Depth < near_max) {
 		per = 1.f - (Depth - near_min) / (near_max - near_min);
-	}
-	//中
-	else if (near_max < Depth && Depth < far_min) {
-		per = 0.f;
-	}
-	//遠
-	else if (far_min < Depth) {
-		per = (Depth - far_min) / (far_max - far_min);
-	}
-	else {
-		per = 1.f;
-	}
-	if (per <= 0.f) {
-		per = 0.f;
-	}
-	else if(per >= 1.f){
-		per = 1.f;
-	}
-
-	PSOutput.color0 = lerp(
+        if (per <= 0.f)
+        {
+            per = 0.f;
+        }
+        else if (per >= 1.f)
+        {
+            per = 1.f;
+        }
+        PSOutput.color0 = lerp(
 		g_DiffuseMapTexture.Sample(g_DiffuseMapSampler, PSInput.texCoords0),
 		g_Diffuse2MapTexture.Sample(g_Diffuse2MapSampler, PSInput.texCoords0),
 		per);
+    }
+	//中
+	else if (near_max < Depth && Depth < far_min) {
+		per = 0.f;
+        PSOutput.color0 = g_DiffuseMapTexture.Sample(g_DiffuseMapSampler, PSInput.texCoords0);
+    }
+	//遠
+	else if (far_min < Depth) {
+		per = (Depth - far_min) / (far_max - far_min);
+        if (per <= 0.f)
+        {
+            per = 0.f;
+        }
+        else if (per >= 1.f)
+        {
+            per = 1.f;
+        }
+        PSOutput.color0 = lerp(
+		g_DiffuseMapTexture.Sample(g_DiffuseMapSampler, PSInput.texCoords0),
+		g_Diffuse3MapTexture.Sample(g_Diffuse3MapSampler, PSInput.texCoords0),
+		per);
+    }
+	else {
+		per = 1.f;
+        PSOutput.color0 = g_Diffuse2MapTexture.Sample(g_Diffuse2MapSampler, PSInput.texCoords0);
+    }
+
 	return PSOutput;
 }

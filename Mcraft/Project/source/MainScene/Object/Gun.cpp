@@ -728,8 +728,11 @@ namespace FPS_n2 {
 					if (this->m_LensSize.Calc(GetPartsFrameMatParent(GunFrame::LensSize).pos())) {
 						this->m_LensSizeLen = static_cast<float>(std::hypot(this->m_Lens.XPos() - this->m_LensSize.XPos(), this->m_Lens.YPos() - this->m_LensSize.YPos()));
 					}
-					if (this->m_Reticle.Calc(LensPos + (LensPos - GetPartsFrameMatParent(GunFrame::Eyepos).pos()).normalized() * (5.f * Scale3DRate))) {
+					if (this->m_Reticle.Calc(LensPos + (LensPos - GetPartsFrameMatParent(GunFrame::Eyepos).pos()).normalized() * (1.f * Scale3DRate))) {
 						this->m_Reticle_on = (this->m_LensSizeLen > std::hypot(this->m_Lens.XPos() - this->m_Reticle.XPos(), this->m_Lens.YPos() - this->m_Reticle.YPos()));
+					}
+					else {
+						this->m_Reticle_on = false;
 					}
 				}
 				//レンズ表示機能への反映

@@ -422,8 +422,8 @@ namespace FPS_n2 {
 #endif
 			//DoF
 			PostPassEffect::Instance()->Set_DoFNearFar(
-				ViewChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), Scale3DRate * 5.f,
-				ViewChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), ViewChara->GetIsADS() ? (CameraParts->GetMainCamera().GetCamFar() * 3.f) : (CameraParts->GetMainCamera().GetCamFar() * 2.f));
+				ViewChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), ViewChara->GetIsADS() ? (CameraParts->GetMainCamera().GetCamFar() * 0.8f) : Scale3DRate * 5.f,
+				ViewChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), CameraParts->GetMainCamera().GetCamFar());
 			//埃エフェクト
 			if (GetIsFirstLoop()) {
 				this->m_EffectPos = CameraParts->GetMainCamera().GetCamPos();

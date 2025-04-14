@@ -6,120 +6,12 @@
 
 namespace FPS_n2 {
 	namespace BackGround {
-		class MazeControl {
-			enum class MAZETYPE :int {
-				WALL,
-				PATH,
-			};
-		private:
-			int		m_Width{ 1 };
-			int		m_Height{ 1 };
-			std::vector<std::vector<MAZETYPE>>		m_Maze;
-		private:
-			//穴掘り
-			void dig(int x, int y) {
-				//指定した部分を掘っておく
-				this->m_Maze[x][y] = MAZETYPE::PATH;
-				// どの方向を掘ろうとしたかを覚えておく変数
-				int ok = 0;
-				// 全方向試すまでループ
-				while (ok != 0b1111) {
-					int Dir = GetRand(3) % 4;
-					ok |= (1 << Dir);
-					float rad = deg2rad(Dir * 90);
-					int next_x = x + static_cast<int>(sin(rad) * 2.f);//0 2 0 -2
-					int next_y = y + static_cast<int>(cos(rad) * 2.f);//2 0 -2 0
-					if ((0 <= next_x && next_x < this->m_Width) && (0 <= next_y && next_y < this->m_Height)) {
-						if (this->m_Maze[next_x][next_y] == MAZETYPE::WALL) {
-							this->m_Maze[static_cast<size_t>((next_x + x) / 2)][static_cast<size_t>((next_y + y) / 2)] = MAZETYPE::PATH;
-							//その場から次の穴掘り
-							dig(next_x, next_y);
-						}
-					}
-				}
-			}
-		public:
-			//該当座標が通路かどうか
-			const auto PosIsPath(int x, int y) {
-				if ((0 <= x && x < this->m_Width) && (0 <= y && y < this->m_Height)) {
-					return this->m_Maze[x][y] == MAZETYPE::PATH;
-				}
-				else {
-					return false;
-				}
-			}
-			//通路の総数を取得
-			const auto GetPachCount(void) noexcept {
-				int OneSize = 0;
-				for (int y = 0; y < this->m_Height; ++y) {
-					for (int x = 0; x < this->m_Width; ++x) {
-						if (PosIsPath(x, y)) {
-							++OneSize;
-						}
-					}
-				}
-				return OneSize;
-			}
-		public:
-			// 迷路を作成する
-			void createMaze(int width, int height) {
-				this->m_Width = width;
-				this->m_Height = height;
-
-				this->m_Maze.resize(this->m_Width);
-				for (auto& mazeX : this->m_Maze) {
-					mazeX.resize(this->m_Height);
-					for (auto& cell : mazeX) {
-						cell = MAZETYPE::WALL; // 全マス壁にする
-					}
-				}
-
-				// 開始点をランダム（奇数座標）に決定する
-				dig(std::clamp(2 * GetRand(this->m_Width / 2) + 1, 0, this->m_Width - 1), std::clamp(2 * GetRand(this->m_Height / 2) + 1, 0, this->m_Height - 1));
-				//追加で穴あけ
-				for (int y = 1; y < this->m_Height - 1; ++y) {
-					for (int x = 1; x < this->m_Width - 1; ++x) {
-						bool isHit = false;
-						if (x == 1 || (x == this->m_Width - 1 - 1)) {
-							isHit = true;
-						}
-						if (y == 1 || (y == this->m_Height - 1 - 1)) {
-							isHit = true;
-						}
-						if (!isHit) { continue; }
-						this->m_Maze[x][y] = MAZETYPE::PATH;
-					}
-				}
-				//追加で穴あけ
-				for (int y = 1; y < this->m_Height - 1; ++y) {
-					for (int x = 1; x < this->m_Width - 1; ++x) {
-						bool isHit = false;
-						if ((y % 6) == 0) {
-							if ((x % 6) == 0) { isHit = true; }
-						}
-						if (!isHit) { continue; }
-						this->m_Maze[x][y] = MAZETYPE::PATH;
-					}
-				}
-			}
-			void Reset(void) noexcept {
-				for (auto& mx : this->m_Maze) {
-					mx.clear();
-				}
-				this->m_Maze.clear();
-				this->m_Width = 1;
-				this->m_Height = 1;
-			}
-		};
-
-
-
 		static constexpr int8_t s_EmptyBlick = 0;
 		static constexpr int TotalCellLayer = 4;
 		static constexpr int MulPer = 2;
 		static constexpr float CellScale = Scale3DRate / 2.f / 2.f;
 
-		static constexpr int DrawMax = 50;//65
+		static constexpr int DrawMax = 70;//65
 
 		static constexpr int DrawMaxXPlus = DrawMax;
 		static constexpr int DrawMaxXMinus = -DrawMax;
@@ -127,7 +19,7 @@ namespace FPS_n2 {
 		static constexpr int DrawMaxZPlus = DrawMax;
 		static constexpr int DrawMaxZMinus = -DrawMax;
 
-		static constexpr int DrawMaxYPlus = 40;
+		static constexpr int DrawMaxYPlus = 20;
 		static constexpr int DrawMaxYMinus = -30;
 
 
@@ -291,10 +183,6 @@ namespace FPS_n2 {
 #endif
 						if (this->m_IsDoEnd) {
 							this->m_IsDoEnd = false;
-							if (this->m_Job.joinable()) {
-								this->m_Job.detach();
-							}
-							//
 							if (this->m_EndDoing) {
 								this->m_EndDoing();
 							}
@@ -304,6 +192,9 @@ namespace FPS_n2 {
 							this->m_isEnd = false;
 						}
 						if(!this->m_isEnd) {
+							if (this->m_Job.joinable()) {
+								this->m_Job.detach();
+							}
 							std::thread tmp([&]() {
 								if (this->m_Doing) {
 									this->m_Doing();
@@ -426,7 +317,6 @@ namespace FPS_n2 {
 			std::array<DrawSB, TotalCellLayer>	m_DrawsSB;
 			std::array<DrawSS, TotalCellLayer>	m_DrawsSS;
 
-			MazeControl						m_MazeControl;
 			//
 #if defined(DEBUG) & EDITBLICK
 			//Edit
