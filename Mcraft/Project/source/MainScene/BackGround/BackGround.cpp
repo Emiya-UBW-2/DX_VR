@@ -1375,9 +1375,18 @@ namespace FPS_n2 {
 				auto& cell = this->m_CellxN.front();
 				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
 
-				int seed = 0;// GetRand(100);
+				int seed = GetRand(100);
 
 				PerlinNoise ns(seed);
+				MazeControl mazeControl;
+
+				int Size = 23;
+				mazeControl.createMaze(Size, Size, seed);
+				int Rate = 6;
+				int Heights = 10;
+				int Edge = -Rate;
+				int EdgeP = -0;
+
 				for (int x = 0; x < cell.m_All; ++x) {
 					for (int z = 0; z < cell.m_All; ++z) {
 						for (int y = 0; y < cell.m_All; ++y) {
@@ -1385,16 +1394,6 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				MazeControl mazeControl;
-
-				int Size = 23;
-				mazeControl.createMaze(Size, Size, seed);
-				int Rate = 6;
-				int Heights = 10;
-				//*
-				int Edge = -Rate;
-				int EdgeP = -0;
-
 				for (int x = 0; x < cell.m_All; ++x) {
 					for (int z = 0; z < cell.m_All; ++z) {
 						int xPos = -Size * Rate / 2 + x;
@@ -1417,7 +1416,6 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				//*/
 				for (int z = -Edge; z < Size * Rate + Edge; ++z) {
 					for (int x = -Edge; x < Size * Rate + Edge; ++x) {
 						auto SetWall = [&](int xt,int zt) {
