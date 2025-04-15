@@ -139,10 +139,12 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			//
 			if (!IsAlive()) { return; }
+			this->m_IsSquat = this->m_Input.GetPADSPress(Controls::PADS::SQUAT) ? 1 : 0;
 			if (this->m_Input.GetPADSTrigger(Controls::PADS::SQUAT)) {
-				this->m_IsSquat ^= 1;
 				//しゃがみ音
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
+				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) {
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
+				}
 			}
 			if (GetGunPtrNow()) {
 				//銃ひっこめ
@@ -226,21 +228,24 @@ namespace FPS_n2 {
 						if (!GetGunPtrNow()->GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
 							//Reload
 							if (this->m_Input.GetPADSPress(Controls::PADS::RELOAD) ||
-								((GetGunPtrNow()->GetAmmoNumTotal() == 0) && this->m_Input.GetPADSTrigger(Controls::PADS::SHOT))) {
-								GetGunPtrNow()->ReloadStart();
-								if (GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) {
-									if (GetRand(100) < 50) {
-										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_reload))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
-									}
-									else {
-										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+								((GetGunPtrNow()->GetAmmoNumTotal() == 0) && this->m_Input.GetPADSPress(Controls::PADS::SHOT))) {
+								if (GetGunPtrNow()->ReloadStart()) {
+									if (GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) {
+										if (GetRand(100) < 50) {
+											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_reload))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+										}
+										else {
+											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+										}
 									}
 								}
 							}
 							//射撃
 							else if (this->m_Input.GetPADSPress(Controls::PADS::SHOT)) {
-								if (this->m_Input.GetPADSTrigger(Controls::PADS::SHOT)) {
-									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Trigger))->Play3D(GetEyePositionCache(), Scale3DRate * 5.f);
+								if (GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) {
+									if (this->m_Input.GetPADSTrigger(Controls::PADS::SHOT)) {
+										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Trigger))->Play3D(GetEyePositionCache(), Scale3DRate * 5.f);
+									}
 								}
 								GetGunPtrNow()->SetShotStart();
 							}
@@ -271,7 +276,7 @@ namespace FPS_n2 {
 				case GunAnimeID::ReloadWait:
 				case GunAnimeID::Reload:
 					if (GetGunPtrNow()->GetReloadType() == Guns::RELOADTYPE::AMMO) {
-						if (this->m_Input.GetPADSTrigger(Controls::PADS::SHOT)) {
+						if (this->m_Input.GetPADSPress(Controls::PADS::SHOT)) {
 							GetGunPtrNow()->SetReloadAmmoCancel();
 						}
 					}
@@ -307,7 +312,7 @@ namespace FPS_n2 {
 				this->m_Input.GetAddxRad() - RecoilRadAdd.y, this->m_Input.GetAddyRad() + RecoilRadAdd.x,
 				this->m_MoveControl.GetVecPower() > 0.1f, (IsMoveFront() ? this->m_MoveControl.GoFrontRad() : 0.f) + (IsMoveBack() ? this->m_MoveControl.GoBackRad() : 0.f));
 			//リーン
-			if (this->m_LeanControl.Update(this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_L), this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_R))) {
+			if (this->m_LeanControl.Update(this->m_Input.GetPADSPress(Controls::PADS::LEAN_L), this->m_Input.GetPADSPress(Controls::PADS::LEAN_R))) {
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
 			}
 			if (GetGunPtrNow()) {
@@ -508,14 +513,17 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				//座標オーバーライド
-				if (this->m_MoveOverRideFlag) {
-					this->m_MoveOverRideFlag = false;
-					SetMove() = this->m_OverRideInfo;
-				}
 				//ベースに反映
 				SetMove().SetPos(PosBuf);
 				SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetYRadBottom()));
+				//座標オーバーライド
+				if (this->m_MoveOverRideFlag) {
+					this->m_MoveOverRideFlag = false;
+					SetMove().SetPos(this->m_OverRideInfo.pos);
+					SetMove().SetMat(this->m_OverRideInfo.mat);
+					SetMove().SetVec(this->m_OverRideInfo.vec);
+					this->m_RotateControl.SetRad(this->m_OverRideInfo.WatchRad);
+				}
 				SetMove().Update(0.8f, 0.f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}

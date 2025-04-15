@@ -254,17 +254,18 @@ namespace FPS_n2 {
 				}
 			}
 			void				SetShotStart(void) noexcept;//発砲
-			void				ReloadStart(void) noexcept {
+			bool				ReloadStart(void) noexcept {
 				if (GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
-					return;
+					return false;
 				}
-				if (this->m_Capacity == this->GetAmmoAll()) { return; }//リロードの必要がある場合のみリロード
+				if (this->m_Capacity == this->GetAmmoAll()) { return false; }//リロードの必要がある場合のみリロード
 				if (this->m_Capacity != 0) {
 					SetGunAnime(Charas::GunAnimeID::ReloadStart);
 				}
 				else {
 					SetGunAnime(Charas::GunAnimeID::ReloadStart_Empty);
 				}
+				return true;
 			}
 			void				SetActiveAll(bool value) noexcept {
 				if (value != IsActive()) {

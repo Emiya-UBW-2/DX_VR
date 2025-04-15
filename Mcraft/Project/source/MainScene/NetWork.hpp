@@ -9,11 +9,31 @@ namespace FPS_n2 {
 		static const int		Player_num = 10;
 
 		using NetTime = LONGLONG;
+
+		class MoveInfo {
+		public:
+			Vector3DX repos;		// 反映用座標
+			Vector3DX pos;		// 反映用座標
+			Vector3DX vec;		// 加速
+			Matrix3x3DX mat;	// 回転
+			Vector3DX WatchRad;	// 加速
+		public:
+			auto LerpMove(const MoveInfo& o, float Per) const noexcept {
+				MoveInfo tmp;
+				tmp.repos = Lerp(this->repos, o.repos, Per);
+				tmp.pos = Lerp(this->pos, o.pos, Per);
+				tmp.vec = Lerp(this->vec, o.vec, Per);
+				tmp.mat = Lerp(this->mat, o.mat, Per);
+				tmp.WatchRad = Lerp(this->WatchRad, o.WatchRad, Per);
+				return tmp;
+			}
+		};
+
 		//クライアントが送信するデータ ローカル版
 		class PlayerSendData {
 		private:
 			InputControl				m_Input;
-			moves						m_move;
+			MoveInfo					m_move;
 			DamageEventControl			m_DamageEvent;
 			int32_t						m_FreeData[10]{};
 		public:
@@ -24,7 +44,7 @@ namespace FPS_n2 {
 		public:
 			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_DamageEvent.AddDamageEvent(pRet); }
 		public:
-			void			SetMyPlayer(const InputControl& pInput, const moves& move_t, const DamageEventControl& Damage_t, int32_t* pFreeData) noexcept {
+			void			SetMyPlayer(const InputControl& pInput, const MoveInfo& move_t, const DamageEventControl& Damage_t, int32_t* pFreeData) noexcept {
 				this->m_Input = pInput;
 				this->m_move = move_t;
 				this->m_DamageEvent = Damage_t;
@@ -46,8 +66,8 @@ namespace FPS_n2 {
 			}
 			int			CalcCheckSum(void) const noexcept {
 				return (
-					(static_cast<int>(GetMove().GetPos().x * 100.f) + static_cast<int>(GetMove().GetPos().y * 100.f) + static_cast<int>(GetMove().GetPos().z * 100.f)) +
-					(static_cast<int>(GetMove().GetVec().x * 100.f) + static_cast<int>(GetMove().GetVec().y * 100.f) + static_cast<int>(GetMove().GetVec().z * 100.f))
+					(static_cast<int>(GetMove().pos.x * 100.f) + static_cast<int>(GetMove().pos.y * 100.f) + static_cast<int>(GetMove().pos.z * 100.f)) +
+					(static_cast<int>(GetMove().vec.x * 100.f) + static_cast<int>(GetMove().vec.y * 100.f) + static_cast<int>(GetMove().vec.z * 100.f))
 					);
 			}
 		};
@@ -110,8 +130,8 @@ namespace FPS_n2 {
 			int					CalcCheckSum(void) const noexcept {
 				int Players = 0;
 				for (int loop = 0; loop < Player_num; ++loop) {
-					Players += (this->m_PlayerData[loop].IsCheckSum() ? 100 : 0);
-					Players += (this->m_PlayerFill[loop] ?  10 : 0);
+					Players += static_cast<int>(this->m_PlayerData[loop].IsCheckSum() ? 100 : 0);
+					Players += static_cast<int>(this->m_PlayerFill[loop] * 10);
 				}
 				return (
 					500 +
@@ -123,7 +143,7 @@ namespace FPS_n2 {
 			const auto			IsCheckSum(void) const noexcept { return this->m_CheckSum == static_cast<size_t>(CalcCheckSum()); }
 			const auto			GetEmptyID(void) const noexcept {
 				for (int loop = 0; loop < Player_num; ++loop) {
-					if (this->m_PlayerFill[loop] != TRUE) {
+					if (this->m_PlayerFill[loop] == 1) {
 						return loop;
 					}
 				}
@@ -131,6 +151,15 @@ namespace FPS_n2 {
 			}
 		public:
 			void				SetCheckSum(void) noexcept { this->m_CheckSum = static_cast<size_t>(CalcCheckSum()); }
+		public:
+			void Init(void) noexcept {
+				for (int loop = 0; loop < Player_num; ++loop) {
+					this->m_PlayerFill[loop] = 0;
+				}
+			}
+			ServerNetData(void) noexcept {
+				Init();
+			}
 		};
 		//通信
 		class PlayerNetWork {
@@ -184,9 +213,7 @@ namespace FPS_n2 {
 				this->m_TickRate = Tick;
 				LONGLONG NowFrame = GetNowHiPerformanceCount();
 				this->m_PrevFrame = NowFrame;
-				for (int loop = 0; loop < Player_num; ++loop) {
-					this->m_LastServerDataBuffer.m_PlayerFill[loop] = FALSE;
-				}
+				this->m_LastServerDataBuffer.Init();
 			}
 			void			UpdateLocalData(const PlayerSendData& pdata, bool TimerStart) noexcept {
 				//更新間隔
@@ -374,6 +401,8 @@ namespace FPS_n2 {
 			const auto& GetServerPlayer(void) const noexcept { return this->m_IsServerPlayer; }
 			const auto& GetPing(void) const noexcept { return this->m_Ping; }
 			const auto& GetMyLocalPlayerID(void) const noexcept { return this->m_PlayerNet.GetMyLocalPlayerID(); }
+
+			const auto& GetPlayerData(void) const noexcept { return this->m_PlayerNet; }
 
 			auto& SetLocalData(void) noexcept { return this->m_LocalData; }
 		private:

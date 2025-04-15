@@ -12,7 +12,7 @@ namespace FPS_n2 {
 					// サーバープレイヤーのデータをアップデート
 					pPlayerNetwork->SetLastServerDataBuffer().m_PlayerData[loop] = pPlayerNetwork->GetLocalPlayerData();
 					// 席は埋まってます
-					pPlayerNetwork->SetLastServerDataBuffer().m_PlayerFill[loop] = TRUE;
+					pPlayerNetwork->SetLastServerDataBuffer().m_PlayerFill[loop] = 2;
 					continue;
 				}
 				auto& net = this->m_PlayerUDPPhase.at(loop);
@@ -29,7 +29,7 @@ namespace FPS_n2 {
 					if (IsDataUpdated) {// 該当ソケットにクライアントからなにか受信したら
 						net.m_Phase = ClientPhase::Ready;
 						// 席は埋まってます
-						pPlayerNetwork->SetLastServerDataBuffer().m_PlayerFill[loop] = TRUE;
+						pPlayerNetwork->SetLastServerDataBuffer().m_PlayerFill[loop] = 1;
 						//マッチング中とする
 						if (pPlayerNetwork->SetLastServerDataBuffer().m_ServerPhase != ServerPhase::Matching) {
 							pPlayerNetwork->SetLastServerDataBuffer().m_ServerPhase = ServerPhase::Matching;
@@ -39,7 +39,10 @@ namespace FPS_n2 {
 				case ClientPhase::Ready:
 					//得たプレイヤーのデータをアップデート
 					if (IsDataUpdated) {
-						pPlayerNetwork->SetLastServerDataBuffer().m_PlayerData[player.GetID()] = player;
+						if (player.GetID() == loop) {
+							pPlayerNetwork->SetLastServerDataBuffer().m_PlayerFill[loop] = 2;
+						}
+						pPlayerNetwork->SetLastServerDataBuffer().m_PlayerData[loop] = player;
 					}
 					// クライアントにデータを送る
 					if (pPlayerNetwork->GetTickUpdateFlag()) {
@@ -79,16 +82,11 @@ namespace FPS_n2 {
 			case ClientPhase::Client_WaitConnect:
 				if (IsDataUpdated) {
 					this->m_CannotConnectTimer = 0.f;
-					if (pPlayerNetwork->GetLastServerDataBuffer().m_ServerPhase == ServerPhase::Ingame) { //要求したサーバーがインゲーム中でした
-						this->m_PlayerUDPPhase.SendError(ClientPhase::Error_ServerInGame);	//マッチ済なので接続失敗
-					}
-					else {
-						int EmptyID = pPlayerNetwork->SetLastServerDataBuffer().GetEmptyID();
-						if (EmptyID !=InvalidID) {
-							//席が空いていて、自分のIDをもらえたので次へ
-							pPlayerNetwork->SetLocalPlayerID(static_cast<PlayerID>(EmptyID));
-							this->m_PlayerUDPPhase.m_Phase = ClientPhase::Client_GotPlayerID;
-						}
+					int EmptyID = pPlayerNetwork->SetLastServerDataBuffer().GetEmptyID();
+					if (EmptyID != InvalidID) {
+						//席が空いていて、自分のIDをもらえたので次へ
+						pPlayerNetwork->SetLocalPlayerID(static_cast<PlayerID>(EmptyID));
+						this->m_PlayerUDPPhase.m_Phase = ClientPhase::Client_GotPlayerID;
 					}
 				}
 				//もらえてないので所定時間が経ったらソケットを変えて再接続

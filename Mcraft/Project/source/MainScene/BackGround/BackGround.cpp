@@ -1428,6 +1428,7 @@ namespace FPS_n2 {
 					}
 				}
 				//“à•Ç
+				//*
 				for (int zpos = -Edge; zpos < Size * Rate + Edge; ++zpos) {
 					for (int xpos = -Edge; xpos < Size * Rate + Edge; ++xpos) {
 						auto SetWall = [&](int xt,int zt) {
@@ -1467,7 +1468,7 @@ namespace FPS_n2 {
 						}
 					}
 				}
-
+				//*/
 				SaveCellsFile();
 			}
 			else {

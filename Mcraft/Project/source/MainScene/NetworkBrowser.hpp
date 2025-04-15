@@ -26,11 +26,11 @@ namespace FPS_n2 {
 				FileStreamDX FileStream("data/NetWorkSetting.txt");
 				while (true) {
 					this->m_NewWorkSetting.emplace_back();
-					this->m_NewWorkSetting.back().UsePort = std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 50000);
-					this->m_NewWorkSetting.back().IP.d1 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
-					this->m_NewWorkSetting.back().IP.d2 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
-					this->m_NewWorkSetting.back().IP.d3 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
-					this->m_NewWorkSetting.back().IP.d4 = (unsigned char)std::clamp<int>(std::stoi(FileStream.SeekLineAndGetStr()), 0, 255);
+					this->m_NewWorkSetting.back().UsePort = std::clamp<int>(std::stoi(FileStreamDX::getright(FileStream.SeekLineAndGetStr())), 0, 50000);
+					this->m_NewWorkSetting.back().IP.d1 = (unsigned char)std::clamp<int>(std::stoi(FileStreamDX::getright(FileStream.SeekLineAndGetStr())), 0, 255);
+					this->m_NewWorkSetting.back().IP.d2 = (unsigned char)std::clamp<int>(std::stoi(FileStreamDX::getright(FileStream.SeekLineAndGetStr())), 0, 255);
+					this->m_NewWorkSetting.back().IP.d3 = (unsigned char)std::clamp<int>(std::stoi(FileStreamDX::getright(FileStream.SeekLineAndGetStr())), 0, 255);
+					this->m_NewWorkSetting.back().IP.d4 = (unsigned char)std::clamp<int>(std::stoi(FileStreamDX::getright(FileStream.SeekLineAndGetStr())), 0, 255);
 					if (FileStream.ComeEof()) {
 						break;
 					}

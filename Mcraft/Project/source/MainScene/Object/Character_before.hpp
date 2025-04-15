@@ -100,6 +100,7 @@ namespace FPS_n2 {
 			bool			Update(bool LeftTrigger, bool RightTrigger) {
 				//“ü—Í
 				auto Prev = this->m_Rate;
+				/*
 				if (LeftTrigger) {
 					if (this->m_Rate != -1) {
 						this->m_Rate = -1;
@@ -115,6 +116,14 @@ namespace FPS_n2 {
 					else {
 						this->m_Rate = 0;
 					}
+				}
+				//*/
+				this->m_Rate = 0;
+				if (LeftTrigger) {
+					this->m_Rate = -1;
+				}
+				if (RightTrigger) {
+					this->m_Rate = 1;
 				}
 				Easing(&this->m_Rad, static_cast<float>(this->m_Rate) * deg2rad(25), 0.9f, EasingType::OutExpo);
 				return (Prev != this->m_Rate);
@@ -180,6 +189,9 @@ namespace FPS_n2 {
 				this->m_yrad_Upper = GetRad().y;
 				this->m_yrad_Bottom = GetRad().y;
 				this->m_TurnBody = false;
+			}
+			void			SetRad(const Vector3DX& Rotate) noexcept {
+				this->m_rad_Buf = Rotate;
 			}
 			void Update(float pxRad, float pyRad, bool IsMove, float pyRadFront) {
 				if (!IsMove) {

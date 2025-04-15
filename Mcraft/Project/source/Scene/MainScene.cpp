@@ -190,6 +190,7 @@ namespace FPS_n2 {
 			auto* NetBrowser = NetWorkBrowser::Instance();
 			auto* OptionParts = OptionManager::Instance();
 
+			PlayerMngr->SetWatchPlayer(GetViewPlayerID());
 			PostPassParts->SetLevelFilter(38, 154, 1.f);
 			this->m_PauseMenuControl.Update();
 			if (this->m_PauseMenuControl.IsRetire()) {
@@ -284,9 +285,17 @@ namespace FPS_n2 {
 					this->m_NetWorkController = std::make_unique<NetWork::NetWorkController>(NetBrowser->GetClient(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
 				}
 				if (this->m_NetWorkController) {
+					NetWork::MoveInfo MoveInfoData;
 					int32_t FreeData[10]{};
-					this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, ViewChara->GetMove(), ViewChara->GetDamageEvent(), FreeData);
+
+					MoveInfoData.repos = ViewChara->GetMove().GetRePos();
+					MoveInfoData.pos = ViewChara->GetMove().GetPos();
+					MoveInfoData.vec = ViewChara->GetMove().GetVec();
+					MoveInfoData.mat = ViewChara->GetMove().GetMat();
+					MoveInfoData.WatchRad = ViewChara->GetRotateRad();
+					this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, MoveInfoData, ViewChara->GetDamageEvent(), FreeData);
 					this->m_NetWorkController->Update();
+					ViewChara->SetDamageEventReset();
 				}
 				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//オンライン
 					bool IsServerNotPlayer = !this->m_NetWorkController->GetClient() && !this->m_NetWorkController->GetServerPlayer();
@@ -294,7 +303,7 @@ namespace FPS_n2 {
 						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetServerPlayerData((PlayerID)loop);
 						if (loop == PlayerMngr->GetWatchPlayer() && !IsServerNotPlayer) {
-							chara->Input(Ret.GetPlayerSendData().GetInput());//自身が動かすもの
+							chara->Input(MyInput);//自身が動かすもの
 						}
 						else {//サーバーからのデータで動くもの
 							//サーバーがCPUを動かす場合
@@ -303,7 +312,6 @@ namespace FPS_n2 {
 								//PlayerMngr->GetPlayer(loop)->GetAI()->Execute(&MyInput);
 							}
 							chara->Input(Ret.GetPlayerSendData().GetInput());
-
 							chara->SetMoveOverRide(Ret.GetPlayerSendData().GetMove());
 						}
 						//ダメージイベント処理
@@ -526,7 +534,7 @@ namespace FPS_n2 {
 					}
 				}
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (32), White, Black,
+					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (64), White, Black,
 					PingMes.c_str());
 			}
 			this->m_FadeControl.Draw();

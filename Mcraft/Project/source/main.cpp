@@ -47,7 +47,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	if (DXLib_refParts->FirstBootSetting()) { return 0; }
 	DXLib_refParts->StartLogic();
 	//追加設定
-	SetMainWindowText("Phantom of the Bunker");						//タイトル
+	std::string Title = "Phantom of the Bunker";
+	Title += std::to_string(GetRand(1000));
+	SetMainWindowText(Title.c_str());						//タイトル
 	SetUseHalfLambertLighting(true);
 	MV1SetLoadModelReMakeNormal(true);
 	//SetUsePixelLighting(true);

@@ -34,7 +34,7 @@ namespace FPS_n2 {
 			float												m_ArmBreakPer{};
 			Pendulum2D											m_SlingZrad;
 			bool												m_MoveOverRideFlag{ false };
-			moves												m_OverRideInfo;
+			NetWork::MoveInfo									m_OverRideInfo;
 			PlayerID											m_MyID{ 0 };
 			CharaTypeID											m_CharaType{};
 			bool												m_CanLookTarget{ true };
@@ -81,7 +81,8 @@ namespace FPS_n2 {
 		public://ƒQƒbƒ^[
 			const auto&		GetMoveEyePos(void) const noexcept { return this->m_WalkSwingControl.GetMoveEyePos(); }
 			const auto&		GetRagDoll(void) const noexcept { return this->m_RagDollControl.GetRagDoll(); }
-			const auto&		GetLeanRad(void) const noexcept { return this->m_LeanControl.GetRad(); }
+			const auto& GetLeanRad(void) const noexcept { return this->m_LeanControl.GetRad(); }
+			const auto&		GetRotateRad(void) const noexcept { return this->m_RotateControl.GetRad(); }
 			const auto&		GetHitBoxList(void) const noexcept { return this->m_HitBoxControl.GetHitBoxPointList(); }
 			const auto&		GetGunPtr(int ID) const noexcept { return this->m_GunPtrControl.GetGunPtr(ID); }
 			const auto&		GetGunPtrNow(void) const noexcept { return GetGunPtr(this->m_GunPtrControl.GetNowGunSelect()); }
@@ -110,10 +111,11 @@ namespace FPS_n2 {
 				}
 			}
 			void			SetCharaTypeID(CharaTypeID Type) noexcept { this->m_CharaType = Type; }
-			void			SetMoveOverRide(const moves& overrideInfo) noexcept {
+			void			SetMoveOverRide(const NetWork::MoveInfo& overrideInfo) noexcept {
 				this->m_MoveOverRideFlag = true;
 				this->m_OverRideInfo = overrideInfo;
 			}
+			void			SetDamageEventReset(void) noexcept { this->m_Damage.Reset(); }
 			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.AddDamageEvent(pRet); }
 			void			Heal(HitPoint Point) noexcept { this->m_Damage.Add(GetMyPlayerID(), GetMyPlayerID(), -Point, -Point,static_cast<int>(HitType::Body), GetMove().GetPos(), GetMove().GetPos()); }
 			auto&			SetRagDoll(void) noexcept { return this->m_RagDollControl.SetRagDoll(); }
