@@ -124,7 +124,7 @@ namespace FPS_n2 {
 			}
 		}
 
-		const int GunPartsDataManager::Add(const std::string& filepath) noexcept {
+		const int	GunPartsDataManager::Add(const std::string& filepath) noexcept {
 			auto Find = std::find_if(this->m_Data.begin(), this->m_Data.end(), [&](const  std::unique_ptr<GunPartsData>& tgt) {return tgt->GetPath() == filepath; });
 			if (Find != this->m_Data.end()) {
 				return (*Find)->GetUniqueID();

@@ -50,7 +50,7 @@ namespace FPS_n2 {
 								int yy = (Put.y + yp);
 								int zz = (Put.z + zp);
 								auto& cell = BackGroundParts->GetCellBuf(xx, yy, zz);
-								switch (cell.m_Cell) {
+								switch (cell.GetCell()) {
 								case 2:
 									BackGroundParts->SetBlick(xx, yy, zz, 3);
 									break;

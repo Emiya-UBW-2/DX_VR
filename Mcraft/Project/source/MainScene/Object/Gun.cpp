@@ -516,7 +516,7 @@ namespace FPS_n2 {
 						for (int yp = 0; yp < yput; ++yp) {
 							for (int zp = -zput / 2; zp < zput / 2; ++zp) {
 								auto& cell = BackGroundParts->GetCellBuf((Put.x + xp), (Put.y + yp), (Put.z + zp));
-								if (cell.m_Cell == 1) {
+								if (cell.GetCell() == 1) {
 									continue;
 								}
 								BackGroundParts->SetBlick((Put.x + xp), (Put.y + yp), (Put.z + zp), BackGround::s_EmptyBlick);
