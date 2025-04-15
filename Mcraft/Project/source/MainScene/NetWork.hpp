@@ -359,7 +359,7 @@ namespace FPS_n2 {
 		//通信
 		class NetWorkController {
 			static const int		m_PingTotal{ 60 };
-			float					m_Tick{ 30.f };//ティックレート　プレイヤーのFPSより低いと詰まる
+			float					m_Tick{ 15.f };//ティックレート　プレイヤーのFPSより低いと詰まる
 
 			bool					m_IsClient{ true };
 			bool					m_IsServerPlayer{ true };
