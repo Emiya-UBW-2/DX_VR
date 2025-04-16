@@ -8,8 +8,6 @@
 
 #include	"Gun.hpp"
 
-#define DRAW_HITBOX false
-
 namespace FPS_n2 {
 	namespace Charas {
 		//キャラのうち特定機能だけ抜き出したもの

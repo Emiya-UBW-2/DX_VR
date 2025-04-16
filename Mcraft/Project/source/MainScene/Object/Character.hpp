@@ -116,11 +116,19 @@ namespace FPS_n2 {
 				this->m_OverRideInfo = overrideInfo;
 			}
 			void			SetDamageEventReset(void) noexcept { this->m_Damage.Reset(); }
-			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.AddDamageEvent(pRet); }
-			void			Heal(HitPoint Point) noexcept { this->m_Damage.Add(GetMyPlayerID(), GetMyPlayerID(), -Point, -Point,static_cast<int>(HitType::Body), GetMove().GetPos(), GetMove().GetPos()); }
+			void			PopDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.Pop(pRet); }
+			//自分がダメージを与えたと通知
+			void			SetDamage(PlayerID DamageID_t, HitPoint Damage, ArmerPoint ArmerDamage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
+				this->m_Damage.Add(GetMyPlayerID(), DamageID_t, Damage, ArmerDamage, HitType, StartPos, EndPos);
+			}
+			void			Heal(HitPoint Point) noexcept { SetDamage(GetMyPlayerID(), -Point, -Point, static_cast<int>(HitType::Body), GetMove().GetPos(), GetMove().GetPos()); }
 			auto&			SetRagDoll(void) noexcept { return this->m_RagDollControl.SetRagDoll(); }
 			bool			SetDamageEvent(const DamageEvent& Event) noexcept;
 			const bool		CheckDamageRay(HitPoint Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
+
+			const auto&		GetAutoAimID() const noexcept { return GetGunPtrNow()->GetAutoAimID(); }
+			const auto&		GetAutoAimPos() const noexcept { return GetGunPtrNow()->GetAutoAimPos(); }
+			void			OverrideAutoAimID(PlayerID ID, int pos) const noexcept { GetGunPtrNow()->OverrideAutoAimID(ID, pos); }
 		private: //更新関連
 			void			ExecuteInput(void) noexcept;
 			void			ExecuteMatrix(void) noexcept;

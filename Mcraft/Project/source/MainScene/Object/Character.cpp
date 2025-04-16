@@ -126,7 +126,7 @@ namespace FPS_n2 {
 					break;
 				}
 				//ƒ_ƒ[ƒW“o˜^
-				this->m_Damage.Add(AttackID, GetMyPlayerID(), Damage, ArmerDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+				PlayerMngr->GetPlayer(AttackID)->GetChara()->SetDamage(GetMyPlayerID(), Damage, ArmerDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				return true;
 			}
 			return false;

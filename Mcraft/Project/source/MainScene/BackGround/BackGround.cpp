@@ -1432,6 +1432,10 @@ namespace FPS_n2 {
 				for (int zpos = -Edge; zpos < Size * Rate + Edge; ++zpos) {
 					for (int xpos = -Edge; xpos < Size * Rate + Edge; ++xpos) {
 						auto SetWall = [&](int xt,int zt) {
+#if DEBUG_NET
+							return;
+#endif
+
 							int xPos = -Size * Rate / 2 + xpos + xt;
 							int zPos = -Size * Rate / 2 + zpos + zt;
 							auto Height = static_cast<int>(ns.octaveNoise(2, 

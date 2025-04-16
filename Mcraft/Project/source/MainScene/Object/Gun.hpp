@@ -179,6 +179,7 @@ namespace FPS_n2 {
 			const auto&			GetBaseMuzzleMat(void) const noexcept { return this->m_BaseMuzzle; }
 			const auto&			GetSwitchPer(void) const noexcept { return this->m_SwitchPer; }
 			const auto&			GetAutoAimID(void) const noexcept { return this->m_AutoAimControl.GetAutoAimID(); }
+			const auto&			GetAutoAimPos(void) const noexcept { return this->m_AutoAimControl.GetAutoAimPos(); }
 			const auto&			GetGunAnimeNow(void) const noexcept { return this->m_AnimNowCache; }
 			const auto			GetNowAnimTimePerCache(void) const noexcept {
 				if (GetGunAnime() < Charas::GunAnimeID::Max) {
@@ -232,6 +233,7 @@ namespace FPS_n2 {
 			const auto			IsNowGunAnimeEnd(void) const noexcept { return GetNowAnimTimePerCache() >= 1.f; }
 			const auto			GetShotSwitch(void) const noexcept { return GetGunAnime() == Charas::GunAnimeID::Shot && (GetNowAnimTimePerCache() < 0.5f); }
 		public:
+			void				OverrideAutoAimID(PlayerID ID, int pos) noexcept { this->m_AutoAimControl.OverrideAutoAimID(ID, pos); }
 			void				SetPlayerID(PlayerID ID) noexcept { this->m_MyID = ID; }
 			void				CalcSwitchPer(bool IsRight) noexcept {
 				if (GetModifySlot()->GetMyData()->GetCanSwitch()) {

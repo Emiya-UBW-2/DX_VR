@@ -208,6 +208,9 @@ namespace FPS_n2 {
 			auto& ViewChara = PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
 
 			Pad->SetMouseMoveEnable(true);
+#if DEBUG_NET
+			Pad->SetMouseMoveEnable(false);
+#endif
 			KeyGuideParts->ChangeGuide(
 				[]() {
 					auto* SceneParts = SceneControl::Instance();
@@ -288,6 +291,9 @@ namespace FPS_n2 {
 					NetWork::MoveInfo MoveInfoData;
 					int32_t FreeData[10]{};
 
+					FreeData[0] = ViewChara->GetAutoAimID();
+					FreeData[1] = ViewChara->GetAutoAimPos();
+
 					MoveInfoData.repos = ViewChara->GetMove().GetRePos();
 					MoveInfoData.pos = ViewChara->GetMove().GetPos();
 					MoveInfoData.vec = ViewChara->GetMove().GetVec();
@@ -309,13 +315,15 @@ namespace FPS_n2 {
 							//サーバーがCPUを動かす場合
 							if (!this->m_NetWorkController->GetClient()) {
 								//cpu
-								//PlayerMngr->GetPlayer(loop)->GetAI()->Execute(&MyInput);
+								//PlayerMngr->GetPlayer(loop)->GetAI()->Execute(&MyInput);//AIに入力させる
 							}
+							//サーバーからのデータでキャラを動かす
+							chara->OverrideAutoAimID(static_cast<PlayerID>(Ret.GetPlayerSendData().GetFreeData()[0]), Ret.GetPlayerSendData().GetFreeData()[1]);
 							chara->Input(Ret.GetPlayerSendData().GetInput());
 							chara->SetMoveOverRide(Ret.GetPlayerSendData().GetMove());
 						}
-						//ダメージイベント処理
-						Ret.AddDamageEvent(&this->m_DamageEvents);
+						//このプレイヤーが出したダメージイベントをリストに追加
+						Ret.PopDamageEvent(&this->m_DamageEvents);
 					}
 				}
 				else {//オフライン
@@ -326,11 +334,11 @@ namespace FPS_n2 {
 						}
 						else {
 							InputControl OtherInput;
-							PlayerMngr->GetPlayer(loop)->GetAI()->Execute(&OtherInput);
+							PlayerMngr->GetPlayer(loop)->GetAI()->Execute(&OtherInput);//AIに入力させる
 							chara->Input(OtherInput);
 						}
-						//ダメージイベント処理
-						chara->AddDamageEvent(&this->m_DamageEvents);
+						//このプレイヤーが出したダメージイベントをリストに追加
+						chara->PopDamageEvent(&this->m_DamageEvents);
 					}
 				}
 				//ダメージイベント
@@ -516,7 +524,9 @@ namespace FPS_n2 {
 			}
 			HitMarkerPool::Instance()->Draw();
 			if (!SceneParts->IsPause()) { this->m_UIclass.Draw(); }		//UI
-			//NetWorkBrowser::Instance()->Draw();						//通信設定
+#if DEBUG_NET
+			NetWorkBrowser::Instance()->Draw();						//通信設定
+#endif
 			if (this->m_NetWorkController) {
 				std::string PingMes;
 				if (this->m_NetWorkController->GetPing() >= 0.f) {

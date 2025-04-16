@@ -353,7 +353,7 @@ namespace FPS_n2 {
 			};
 		private:
 			std::vector<std::unique_ptr<AnimDatas>>	m_Data;
-#if defined(DEBUG) && DEBUG_CAM
+#if defined(DEBUG) && DEBUG_CAM && DEBUG_ANIM
 			Vector3DX DBG_AnimRot = Vector3DX::vget(0.f, 0.f, deg2rad(0));
 			Vector3DX DBG_AnimPos = Vector3DX::vget(-0.06f, -0.15f, -0.23f);
 #endif
@@ -390,7 +390,7 @@ namespace FPS_n2 {
 			}
 
 			GunAnimNow	GetAnimNow(PlayerID
-#if defined(DEBUG) && DEBUG_CAM
+#if defined(DEBUG) && DEBUG_CAM && DEBUG_ANIM
 				ID
 #endif
 				, const std::unique_ptr<AnimDatas>* data, float nowframe) noexcept {
@@ -424,9 +424,9 @@ namespace FPS_n2 {
 								Finger
 							);
 
-#if defined(DEBUG) && DEBUG_CAM
+#if defined(DEBUG) && DEBUG_CAM && DEBUG_ANIM
 							if (ID == 0) {
-								if (0 <= DBG_CamSelect && DBG_CamSelect <= 3 && false) {
+								if (0 <= DBG_CamSelect && DBG_CamSelect <= 3) {
 									auto* DXLib_refParts = DXLib_ref::Instance();
 									//
 									if (CheckHitKey(KEY_INPUT_RCONTROL) != 0) {

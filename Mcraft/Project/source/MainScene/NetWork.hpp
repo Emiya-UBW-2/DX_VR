@@ -6,7 +6,11 @@
 
 namespace FPS_n2 {
 	namespace NetWork {
+#if DEBUG_NET
+		static const int		Player_num = 2;
+#else
 		static const int		Player_num = 10;
+#endif
 
 		using NetTime = LONGLONG;
 
@@ -42,7 +46,7 @@ namespace FPS_n2 {
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_DamageEvent; }
 			const auto&		GetFreeData(void) const noexcept { return this->m_FreeData; }
 		public:
-			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_DamageEvent.AddDamageEvent(pRet); }
+			void			PopDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_DamageEvent.Pop(pRet); }
 		public:
 			void			SetMyPlayer(const InputControl& pInput, const MoveInfo& move_t, const DamageEventControl& Damage_t, int32_t* pFreeData) noexcept {
 				this->m_Input = pInput;
@@ -94,7 +98,7 @@ namespace FPS_n2 {
 			const auto& GetPlayerSendData(void) const noexcept { return this->m_PlayerSendData; }
 		public:
 			void			SetID(PlayerID ID) noexcept { this->m_ID = ID; }
-			void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_PlayerSendData.AddDamageEvent(pRet); }
+			void			PopDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_PlayerSendData.PopDamageEvent(pRet); }
 		public:
 			void			SetData(const PlayerSendData& sendData, NetTime ClientTime) noexcept {
 				this->m_PlayerSendData = sendData;

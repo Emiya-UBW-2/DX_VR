@@ -2,7 +2,6 @@
 #pragma warning(disable:4464)
 #include	"../../Header.hpp"
 
-#define CHECKTHREADTIME (false)
 
 namespace FPS_n2 {
 	namespace BackGround {

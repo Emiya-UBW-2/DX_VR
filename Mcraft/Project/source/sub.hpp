@@ -30,13 +30,13 @@ namespace FPS_n2 {
 		const auto& GetDamageEvent(void) const noexcept { return this->m_Damage; }
 		const auto& GetDamageEventCount(void) const noexcept { return this->m_DamageCount; }
 	public:
-		void			AddDamageEvent(std::vector<DamageEvent>* pRet) noexcept {
+		void			Pop(std::vector<DamageEvent>* pRet) noexcept {
 			if (!pRet) { return; }
 			for (auto& damage : this->m_Damage) {
 				if ((&damage - &this->m_Damage.front()) >= this->m_DamageCount) { break; }
 				pRet->emplace_back(damage);
 			}
-			this->m_DamageCount = 0;
+			Reset();
 		}
 	public:
 		void			Reset(void) noexcept {

@@ -55,13 +55,19 @@ namespace FPS_n2 {
 			AutoAimControl(void) noexcept {}
 			virtual ~AutoAimControl(void) noexcept {}
 		public://ƒQƒbƒ^[
-			const auto& GetAutoAimID(void) const noexcept { return this->m_AutoAim; }
+			const auto&		GetAutoAimID(void) const noexcept { return this->m_AutoAim; }
+			const auto&		GetAutoAimPos(void) const noexcept { return this->m_AutoAimPoint; }
 			const auto		GetAutoAimActive(void) const noexcept { return this->m_AutoAimActive; }
 		public:
 			void CalcAutoAimMat(Matrix3x3DX* ptmp_gunmat) const noexcept {
 				*ptmp_gunmat = Lerp(*ptmp_gunmat, (*ptmp_gunmat) * Matrix3x3DX::RotVec2(ptmp_gunmat->zvec() * -1.f, this->m_AutoAimVec), this->m_AutoAimPer);
 			}
 		public:
+			void				OverrideAutoAimID(PlayerID ID, int pos) noexcept {
+				this->m_AutoAimTimer = 1.f;
+				this->m_AutoAim = ID;
+				this->m_AutoAimPoint = pos;
+			}
 			void Update(bool isActive, PlayerID MyPlayerID, const Vector3DX& EyePos, const Vector3DX& AimVector, float Radian) noexcept;
 		};
 		//
