@@ -22,13 +22,13 @@ namespace FPS_n2 {
 		static constexpr int DrawMaxYMinus = -30;
 
 
-		static constexpr int DrawMinXPlus = DrawMaxXPlus / MulPer;
+		static constexpr int DrawMinXPlus = DrawMaxXPlus / MulPer - 1;
 		static constexpr int DrawMinXMinus = DrawMaxXMinus / MulPer;
 
-		static constexpr int DrawMinZPlus = DrawMaxZPlus / MulPer;
+		static constexpr int DrawMinZPlus = DrawMaxZPlus / MulPer - 1;
 		static constexpr int DrawMinZMinus = DrawMaxZMinus / MulPer;
 
-		static constexpr int DrawMinYPlus = DrawMaxYPlus / MulPer;
+		static constexpr int DrawMinYPlus = DrawMaxYPlus / MulPer - 1;
 		static constexpr int DrawMinYMinus = DrawMaxYMinus / MulPer;
 
 		class BackGroundControl : public SingletonBase<BackGroundControl> {

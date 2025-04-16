@@ -1386,6 +1386,9 @@ namespace FPS_n2 {
 				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
 
 				int seed = GetRand(100);
+#if DEBUG_NET
+				seed = 0;
+#endif
 
 				PerlinNoise ns(seed);
 				MazeControl mazeControl;
@@ -1628,6 +1631,8 @@ namespace FPS_n2 {
 					this->m_DrawsSB.at(id).m_CamPos.z = 0.f;
 					auto* PostPassParts = PostPassEffect::Instance();
 					this->m_DrawsSB.at(id).m_light = PostPassParts->GetShadowDir();
+					auto* SceneParts = SceneControl::Instance();
+					SceneParts->SetIsUpdateFarShadowActive();
 				}
 			, true);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + TotalCellLayer + 1)).Init(
@@ -1644,6 +1649,8 @@ namespace FPS_n2 {
 					this->m_DrawsSB.at(id).m_CamPos.z = 0.f;
 					auto* PostPassParts = PostPassEffect::Instance();
 					this->m_DrawsSB.at(id).m_light = PostPassParts->GetShadowDir();
+					auto* SceneParts = SceneControl::Instance();
+					SceneParts->SetIsUpdateFarShadowActive();
 				}
 			, true);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + TotalCellLayer + 2)).Init(
@@ -1660,6 +1667,8 @@ namespace FPS_n2 {
 					this->m_DrawsSB.at(id).m_CamPos.z = 0.f;
 					auto* PostPassParts = PostPassEffect::Instance();
 					this->m_DrawsSB.at(id).m_light = PostPassParts->GetShadowDir();
+					auto* SceneParts = SceneControl::Instance();
+					SceneParts->SetIsUpdateFarShadowActive();
 				}
 			, true);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + TotalCellLayer + 3)).Init(
@@ -1676,6 +1685,8 @@ namespace FPS_n2 {
 					this->m_DrawsSB.at(id).m_CamPos.z = 0.f;
 					auto* PostPassParts = PostPassEffect::Instance();
 					this->m_DrawsSB.at(id).m_light = PostPassParts->GetShadowDir();
+					auto* SceneParts = SceneControl::Instance();
+					SceneParts->SetIsUpdateFarShadowActive();
 				}
 			, true);
 			SettingChange();

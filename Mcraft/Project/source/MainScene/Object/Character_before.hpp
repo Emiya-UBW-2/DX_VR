@@ -98,7 +98,7 @@ namespace FPS_n2 {
 			bool			Update(bool LeftTrigger, bool RightTrigger) {
 				//“ü—Í
 				auto Prev = this->m_Rate;
-				/*
+				//*
 				if (LeftTrigger) {
 					if (this->m_Rate != -1) {
 						this->m_Rate = -1;
@@ -116,6 +116,7 @@ namespace FPS_n2 {
 					}
 				}
 				//*/
+				/*
 				this->m_Rate = 0;
 				if (LeftTrigger) {
 					this->m_Rate = -1;
@@ -123,6 +124,7 @@ namespace FPS_n2 {
 				if (RightTrigger) {
 					this->m_Rate = 1;
 				}
+				//*/
 				Easing(&this->m_Rad, static_cast<float>(this->m_Rate) * deg2rad(25), 0.9f, EasingType::OutExpo);
 				return (Prev != this->m_Rate);
 			}

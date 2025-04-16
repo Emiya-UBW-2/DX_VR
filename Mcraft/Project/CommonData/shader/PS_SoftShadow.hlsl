@@ -45,7 +45,7 @@ PS_OUTPUT main(PS_INPUT PSInput)
 		comp = 0;
         if ((int) g_param.x == 3)
         {
-            const int xs = 3;
+            const int xs = 5;
     		[fastopt]
             for (int x = -xs; x <= xs; x++)
             {
@@ -63,7 +63,7 @@ PS_OUTPUT main(PS_INPUT PSInput)
         }
         if ((int) g_param.x == 2)
         {
-            const int xs = 2;
+            const int xs = 3;
     		[fastopt]
             for (int x = -xs; x <= xs; x++)
             {
@@ -100,27 +100,84 @@ PS_OUTPUT main(PS_INPUT PSInput)
         }
     }
 
-	/*
+	//*
 	// 深度バッファテクスチャから深度を取得( +補正値 )
 	{
-        float LightDepth = PSInput.LPPosition2.z;
-		comp = 0;
-		total = 0;
-		[fastopt]
-		for (int x = -xs;x <= xs;x++) {
+        if ((int) g_param.x == 3)
+        {
+            float LightDepth = PSInput.LPPosition2.z;
+            comp = 0;
+            total = 0;
+            const int xs = 5;
+	    	[fastopt]
+            for (int x = -xs; x <= xs; x++)
+            {
 			[fastopt]
-			for (int y = -xs;y <= xs;y++) {
-				if (abs(x) < (int)g_param.x && abs(y) < (int)g_param.x) {
-					float TextureDepth2 = g_DepthMapTexture2.Sample(g_DepthMapSampler2, PSInput.LPPosition2.xy, int2(x, y)).r;
-				    if ((TextureDepth2 > 0.f) && LightDepth > (TextureDepth2 + 1.f))
-					{
-						comp++;
-					}
-					total++;
-				}
-			}
+                for (int y = -xs; y <= xs; y++)
+                {
+                    if (abs(x) < (int) g_param.x && abs(y) < (int) g_param.x)
+                    {
+                        float TextureDepth2 = g_DepthMapTexture2.Sample(g_DepthMapSampler2, PSInput.LPPosition2.xy, int2(x, y)).r;
+                        if ((TextureDepth2 > 0.f) && LightDepth > (TextureDepth2 + 1.5f))
+                        {
+                            comp++;
+                        }
+                        total++;
+                    }
+                }
+            }
+            PSOutput.Color0.r = max(PSOutput.Color0.r, comp / total);
         }
-        PSOutput.Color0.r = max(PSOutput.Color0.r, comp / total);
+        if ((int) g_param.x == 2)
+        {
+            float LightDepth = PSInput.LPPosition2.z;
+            comp = 0;
+            total = 0;
+            const int xs = 3;
+	    	[fastopt]
+            for (int x = -xs; x <= xs; x++)
+            {
+			[fastopt]
+                for (int y = -xs; y <= xs; y++)
+                {
+                    if (abs(x) < (int) g_param.x && abs(y) < (int) g_param.x)
+                    {
+                        float TextureDepth2 = g_DepthMapTexture2.Sample(g_DepthMapSampler2, PSInput.LPPosition2.xy, int2(x, y)).r;
+                        if ((TextureDepth2 > 0.f) && LightDepth > (TextureDepth2 + 1.5f))
+                        {
+                            comp++;
+                        }
+                        total++;
+                    }
+                }
+            }
+            PSOutput.Color0.r = max(PSOutput.Color0.r, comp / total);
+        }
+        if ((int) g_param.x == 1)
+        {
+            float LightDepth = PSInput.LPPosition2.z;
+            comp = 0;
+            total = 0;
+            const int xs = 1;
+	    	[fastopt]
+            for (int x = -xs; x <= xs; x++)
+            {
+			[fastopt]
+                for (int y = -xs; y <= xs; y++)
+                {
+                    if (abs(x) < (int) g_param.x && abs(y) < (int) g_param.x)
+                    {
+                        float TextureDepth2 = g_DepthMapTexture2.Sample(g_DepthMapSampler2, PSInput.LPPosition2.xy, int2(x, y)).r;
+                        if ((TextureDepth2 > 0.f) && LightDepth > (TextureDepth2 + 1.5f))
+                        {
+                            comp++;
+                        }
+                        total++;
+                    }
+                }
+            }
+            PSOutput.Color0.r = max(PSOutput.Color0.r, comp / total);
+        }
     }
 
     if ((int) g_param.x > 2 && PSOutput.Color0.r < 128.f / 255.f)

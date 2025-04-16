@@ -84,6 +84,9 @@ namespace FPS_n2 {
 		void			CommonBattleResource::Load(void) noexcept {
 			auto* SE = SoundPool::Instance();
 
+			SE->Add(SoundType::SE, (int)SoundEnum::Heli, 1, "data/Sound/SE/Heli.wav");
+			SE->Add(SoundType::SE, (int)SoundEnum::Envi, 1, "data/Sound/SE/Envi.wav", false);
+
 			SE->Add(SoundType::SE, (int)SoundEnum::CartFall, 6, "data/Sound/SE/gun/case.wav", false);
 			SE->Add(SoundType::SE, (int)SoundEnum::MagFall, 6, "data/Sound/SE/gun/ModFall.wav", false);
 			SE->Add(SoundType::SE, (int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
@@ -141,6 +144,9 @@ namespace FPS_n2 {
 		}
 		void			CommonBattleResource::Dispose(void) noexcept {
 			auto* SE = SoundPool::Instance();
+			SE->Delete(SoundType::SE, (int)SoundEnum::Heli);
+			SE->Delete(SoundType::SE, (int)SoundEnum::Envi);
+
 			SE->Delete(SoundType::SE, (int)SoundEnum::CartFall);
 			SE->Delete(SoundType::SE, (int)SoundEnum::MagFall);
 			SE->Delete(SoundType::SE, (int)SoundEnum::Trigger);

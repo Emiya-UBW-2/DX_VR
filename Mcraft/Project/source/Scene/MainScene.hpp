@@ -11,6 +11,8 @@
 #include	"../CommonScene/UI/CommonUIControl.hpp"
 #include	"../MainScene/MainSceneSub.hpp"
 
+#include "../MainScene/Object/Helicopter.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class MainGameScene : public TEMPSCENE {
@@ -29,6 +31,8 @@ namespace FPS_n2 {
 			InputControl								MyInput;
 
 			MV1											m_RagDoll;
+
+			std::shared_ptr<Objects::HelicopterObj>		m_HelicopterObj;
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
 				if (this->m_NetWorkController) {
@@ -55,9 +59,10 @@ namespace FPS_n2 {
 			void			BG_Draw_Sub(void) const noexcept override {
 				BackGround::BackGroundControl::Instance()->BG_Draw();
 			}
-			void			ShadowDraw_Far_Sub(void) const noexcept override {}
-			void			ShadowDraw_Sub(void) const noexcept override {
+			void			ShadowDraw_Far_Sub(void) const noexcept override {
 				BackGround::BackGroundControl::Instance()->Shadow_Draw();
+			}
+			void			ShadowDraw_Sub(void) const noexcept override {
 				ObjectManager::Instance()->Draw_Shadow();
 			}
 			void			CubeMap_Sub(void) const noexcept override {

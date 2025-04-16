@@ -65,6 +65,8 @@ namespace FPS_n2 {
 			}
 
 			MV1::Load("data/Charactor/Soldier/model_Rag.mv1", &m_RagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
+
+			ObjectManager::Instance()->LoadModelBefore("data/model/hindD/");
 		}
 		void			MainGameScene::LoadEnd_Sub(void) noexcept {
 			Player::PlayerManager::Create();
@@ -76,6 +78,9 @@ namespace FPS_n2 {
 				//
 				if (loop == PlayerMngr->GetWatchPlayer()) {
 					Charas::CharacterObj::LoadChara("Main", (PlayerID)loop);
+#if DEBUG_NET
+					chara->LoadCharaGun("type20E", 0);
+#else
 					//*
 					int Rand = GetRand(100);
 					if (Rand < 30) {
@@ -89,6 +94,7 @@ namespace FPS_n2 {
 					}
 					//*/
 					//chara->LoadCharaGun("Mod870", 0);
+#endif
 					chara->LoadCharaGun("P226", 1);
 					chara->LoadCharaGun("RGD5", 2);
 				}
@@ -110,6 +116,8 @@ namespace FPS_n2 {
 					g->SetupGun();
 				}
 			}
+			m_HelicopterObj = std::make_shared<Objects::HelicopterObj>();
+			ObjectManager::Instance()->InitObject(m_HelicopterObj, "data/model/hindD/");
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
@@ -173,6 +181,11 @@ namespace FPS_n2 {
 			this->m_FadeControl.Init();
 			this->m_IsEnd = false;
 			this->m_StartTimer = 3.f;
+
+			auto* SE = SoundPool::Instance();
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
+
+			m_HelicopterObj->SetMat(Vector3DX::vget(0.f, -20.f, 0.f) * Scale3DRate, Matrix3x3DX::identity());
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 #if defined(DEBUG)
@@ -468,6 +481,8 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
+			auto* SE = SoundPool::Instance();
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->StopAll();
 			EffectSingleton::Instance()->StopEffect(Effect::ef_dust);
 			//使い回しオブジェ系
 			BackGround::BackGroundControl::Instance()->Dispose();
@@ -498,6 +513,7 @@ namespace FPS_n2 {
 			CommonBattleResource::Dispose();
 			this->m_UIclass.Dispose();
 			Player::PlayerManager::Release();
+			m_HelicopterObj.reset();
 			ObjectManager::Instance()->DeleteAll();
 			this->m_PauseMenuControl.Dispose();
 			HitMarkerPool::Release();

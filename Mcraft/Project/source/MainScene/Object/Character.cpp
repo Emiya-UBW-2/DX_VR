@@ -139,8 +139,8 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			//
 			if (!IsAlive()) { return; }
-			this->m_IsSquat = this->m_Input.GetPADSPress(Controls::PADS::SQUAT) ? 1 : 0;
 			if (this->m_Input.GetPADSTrigger(Controls::PADS::SQUAT)) {
+				this->m_IsSquat ^= 1;
 				//‚µ‚á‚ª‚Ý‰¹
 				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
@@ -312,7 +312,7 @@ namespace FPS_n2 {
 				this->m_Input.GetAddxRad() - RecoilRadAdd.y, this->m_Input.GetAddyRad() + RecoilRadAdd.x,
 				this->m_MoveControl.GetVecPower() > 0.1f, (IsMoveFront() ? this->m_MoveControl.GoFrontRad() : 0.f) + (IsMoveBack() ? this->m_MoveControl.GoBackRad() : 0.f));
 			//ƒŠ[ƒ“
-			if (this->m_LeanControl.Update(this->m_Input.GetPADSPress(Controls::PADS::LEAN_L), this->m_Input.GetPADSPress(Controls::PADS::LEAN_R))) {
+			if (this->m_LeanControl.Update(this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_L), this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_R))) {
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
 			}
 			if (GetGunPtrNow()) {

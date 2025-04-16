@@ -55,6 +55,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//SetUsePixelLighting(true);
 	SetUseBackCulling(true);
 	SetTextureAddressMode(DX_TEXADDRESS_WRAP);
+	//MV1SetLoadModelUsePackDraw(TRUE);
 	//
 	FPS_n2::UIs::ButtonControl::Create();
 	//
