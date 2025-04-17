@@ -184,8 +184,6 @@ namespace FPS_n2 {
 
 			auto* SE = SoundPool::Instance();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
-
-			m_HelicopterObj->SetMat(Vector3DX::vget(0.f, -20.f, 0.f) * Scale3DRate, Matrix3x3DX::identity());
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 #if defined(DEBUG)
