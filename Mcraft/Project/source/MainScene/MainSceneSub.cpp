@@ -87,6 +87,14 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, (int)SoundEnum::Heli, 1, "data/Sound/SE/Heli.wav");
 			SE->Add(SoundType::SE, (int)SoundEnum::Envi, 1, "data/Sound/SE/Envi.wav", false);
 
+			SE->Add(SoundType::SE, (int)SoundEnum::Tank_Shot, 1, "data/Sound/SE/Tank/Shot.wav");
+			SE->Add(SoundType::SE, (int)SoundEnum::Tank_Ricochet, 1, "data/Sound/SE/Tank/Ricochet.wav");
+			SE->Add(SoundType::SE, (int)SoundEnum::Tank_engine, 1, "data/Sound/SE/Tank/Engine.wav");
+			SE->Add(SoundType::SE, (int)SoundEnum::Tank_Eject, 1, "data/Sound/SE/Tank/Eject.wav");
+			SE->Add(SoundType::SE, (int)SoundEnum::Tank_Reload, 1, "data/Sound/SE/Tank/Reload.wav");
+			SE->Add(SoundType::SE, (int)SoundEnum::Tank_move, 1, "data/Sound/SE/Tank/Move.wav");
+
+
 			SE->Add(SoundType::SE, (int)SoundEnum::CartFall, 6, "data/Sound/SE/gun/case.wav", false);
 			SE->Add(SoundType::SE, (int)SoundEnum::MagFall, 6, "data/Sound/SE/gun/ModFall.wav", false);
 			SE->Add(SoundType::SE, (int)SoundEnum::Trigger, 1, "data/Sound/SE/gun/trigger.wav");
@@ -146,6 +154,12 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			SE->Delete(SoundType::SE, (int)SoundEnum::Heli);
 			SE->Delete(SoundType::SE, (int)SoundEnum::Envi);
+			SE->Delete(SoundType::SE, (int)SoundEnum::Tank_Shot);
+			SE->Delete(SoundType::SE, (int)SoundEnum::Tank_Ricochet);
+			SE->Delete(SoundType::SE, (int)SoundEnum::Tank_engine);
+			SE->Delete(SoundType::SE, (int)SoundEnum::Tank_Eject);
+			SE->Delete(SoundType::SE, (int)SoundEnum::Tank_Reload);
+			SE->Delete(SoundType::SE, (int)SoundEnum::Tank_move);
 
 			SE->Delete(SoundType::SE, (int)SoundEnum::CartFall);
 			SE->Delete(SoundType::SE, (int)SoundEnum::MagFall);

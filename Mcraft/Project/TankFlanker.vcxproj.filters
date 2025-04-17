@@ -114,6 +114,15 @@
     <ClInclude Include="source\MainScene\Object\Helicopter.hpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
     </ClInclude>
+    <ClInclude Include="source\MainScene\Object\Vehicle.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\Object\VehicleData.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="source\MainScene\Object\VehicleEnum.hpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp">
@@ -181,6 +190,12 @@
     </ClCompile>
     <ClCompile Include="source\MainScene\Object\Helicopter.cpp">
       <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\Vehicle.cpp">
+      <Filter>ソース ファイル\MainScene\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MainScene\Object\VehicleData.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -67,6 +67,8 @@ namespace FPS_n2 {
 			MV1::Load("data/Charactor/Soldier/model_Rag.mv1", &m_RagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
 
 			ObjectManager::Instance()->LoadModelBefore("data/model/hindD/");
+			ObjectManager::Instance()->LoadModelBefore("data/model/BMP3/");
+			m_VhehicleData.Set_Pre("BMP3");
 		}
 		void			MainGameScene::LoadEnd_Sub(void) noexcept {
 			Player::PlayerManager::Create();
@@ -118,6 +120,12 @@ namespace FPS_n2 {
 			}
 			m_HelicopterObj = std::make_shared<Objects::HelicopterObj>();
 			ObjectManager::Instance()->InitObject(m_HelicopterObj, "data/model/hindD/");
+			m_VehicleObj = std::make_shared<Objects::VehicleObj>();
+			ObjectManager::Instance()->InitObject(m_VehicleObj, "data/model/BMP3/");
+
+			m_VhehicleData.Set();
+
+			m_VehicleObj->ValueInit(&m_VhehicleData);
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
@@ -365,6 +373,9 @@ namespace FPS_n2 {
 					}
 				}
 			}
+
+			//m_VehicleObj->SetInput(MyInput, true);
+
 			//Execute
 			ObjMngr->ExecuteObject();
 			ObjMngr->LateExecuteObject();
@@ -443,6 +454,10 @@ namespace FPS_n2 {
 				}
 				CameraParts->SetMainCamera().SetCamInfo(fov_t, CameraParts->GetMainCamera().GetCamNear(), CameraParts->GetMainCamera().GetCamFar());
 			}
+
+			//m_VehicleObj->Setcamera(CameraParts->SetMainCamera(), CameraParts->GetMainCamera().GetCamFov());
+
+
 #if defined(DEBUG)
 			auto Put = CameraParts->GetMainCamera().GetCamPos() / Scale3DRate;
 			printfDx("%f,%f,%f\n", Put.x, Put.y, Put.z);
@@ -512,6 +527,7 @@ namespace FPS_n2 {
 			this->m_UIclass.Dispose();
 			Player::PlayerManager::Release();
 			m_HelicopterObj.reset();
+			m_VehicleObj.reset();
 			ObjectManager::Instance()->DeleteAll();
 			this->m_PauseMenuControl.Dispose();
 			HitMarkerPool::Release();

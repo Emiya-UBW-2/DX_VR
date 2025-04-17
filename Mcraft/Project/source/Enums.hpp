@@ -9,6 +9,7 @@ namespace FPS_n2 {
 		FallObj,
 		AmmoInChamber,
 		Helicopter,
+		Vehicle,
 		Gun,
 		Magazine,
 		Lower,
@@ -25,6 +26,7 @@ namespace FPS_n2 {
 		"FallObj",
 		"AmmoInChamber",
 		"Helicopter",
+		"Vehicle",
 		"Gun",
 		"Magazine",
 		"Lower",
@@ -111,6 +113,13 @@ namespace FPS_n2 {
 		HitGround2,
 		HitGround3,
 		HitGround4,
+		//
+		Tank_Shot,
+		Tank_Ricochet,
+		Tank_engine,
+		Tank_Eject,
+		Tank_Reload,
+		Tank_move,
 	};
 	enum class CharaTypeID {
 		Team,
