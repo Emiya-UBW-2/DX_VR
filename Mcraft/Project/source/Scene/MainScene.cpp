@@ -375,7 +375,7 @@ namespace FPS_n2 {
 				}
 			}
 
-			PlayerMngr->GetVehicle()->SetInput(MyInput, true);
+			//PlayerMngr->GetVehicle()->SetInput(MyInput, true);
 
 			//Execute
 			ObjMngr->ExecuteObject();
@@ -456,7 +456,7 @@ namespace FPS_n2 {
 				CameraParts->SetMainCamera().SetCamInfo(fov_t, CameraParts->GetMainCamera().GetCamNear(), CameraParts->GetMainCamera().GetCamFar());
 			}
 
-			PlayerMngr->GetVehicle()->SetCam(CameraParts->SetMainCamera());
+			//PlayerMngr->GetVehicle()->SetCam(CameraParts->SetMainCamera());
 
 
 #if defined(DEBUG)

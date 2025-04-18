@@ -63,19 +63,19 @@ namespace FPS_n2 {
 
 					for (auto& mesh : this->m_VecData->GetSpaceArmerMeshIDList()) {
 						if (tt.GetHitMesh() == mesh) {
-							EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, Scale3DRate);
+							EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 1.f);
 						}
 					}
 					for (auto& mesh : this->m_VecData->GetModuleMeshIDList()) {
 						if (tt.GetHitMesh() == mesh) {
-							EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, Scale3DRate);
+							EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 1.f);
 						}
 					}
 					//ƒ_ƒ[ƒW–Ê‚É“–‚½‚Á‚½
 					for (auto& mesh : this->m_VecData->GetArmerMeshIDList()) {
 						if (tt.GetHitMesh() == mesh.first) {
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_Ricochet))->Play3D(HitPos, 100.0f * Scale3DRate);
-							EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, Scale3DRate * 10.0f);
+							EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 2.0f);
 							break;
 						}
 					}
@@ -169,9 +169,9 @@ namespace FPS_n2 {
 					SetObj().ResetFrameUserLocalMatrix(f.GetFrameID());
 					auto startpos = GetObj().GetFramePosition(f.GetFrameID()) - GetMove().GetMat().yvec() * f.GetFrameWorldPosition().pos().y;
 					auto pos_t1 = startpos + GetMove().GetMat().yvec() * (1.0f * Scale3DRate);
-					auto pos_t2 = startpos + GetMove().GetMat().yvec() * (-0.4f * Scale3DRate);
+					auto pos_t2 = startpos + GetMove().GetMat().yvec() * (-0.1f * Scale3DRate);
 					auto ColRes = BackGroundParts->CheckLinetoMap(pos_t1, &pos_t2);
-					Easing(&Y, (ColRes) ? (pos_t2.y - startpos.y) : -0.4f * Scale3DRate, 0.9f, EasingType::OutExpo);
+					Easing(&Y, (ColRes) ? (pos_t2.y - startpos.y) : -0.1f * Scale3DRate, 0.9f, EasingType::OutExpo);
 					SetObj().SetFrameLocalMatrix(f.GetFrameID(),
 						Matrix4x4DX::RotAxis(Vector3DX::right(), (f.GetFrameWorldPosition().pos().x >= 0) ? this->m_CrawlerRotateLeft : this->m_CrawlerRotateRight) *
 						Matrix4x4DX::Mtrans(Vector3DX::up() * Y) * f.GetFrameWorldPosition()
@@ -193,10 +193,10 @@ namespace FPS_n2 {
 						SetObj().ResetFrameUserLocalMatrix(f.GetFrame().GetFrameID());
 						auto startpos = GetObj().GetFramePosition(f.GetFrame().GetFrameID()) - GetMove().GetMat().yvec() * f.GetFrame().GetFrameWorldPosition().pos().y;
 						auto pos_t1 = startpos + GetMove().GetMat().yvec() * (1.0f * Scale3DRate);
-						auto pos_t2 = startpos + GetMove().GetMat().yvec() * (-0.4f * Scale3DRate);
+						auto pos_t2 = startpos + GetMove().GetMat().yvec() * (-0.2f * Scale3DRate);
 						auto ColRes = BackGroundParts->CheckLinetoMap(pos_t1, &pos_t2);
 						f.Update(ColRes, pos_t2.y);
-						float Y = -0.4f * Scale3DRate;
+						float Y = -0.2f * Scale3DRate;
 						if (ColRes) {
 							Y = (pos_t2.y - startpos.y);
 						}

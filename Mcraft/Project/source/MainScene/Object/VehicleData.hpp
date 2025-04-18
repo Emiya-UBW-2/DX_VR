@@ -54,8 +54,6 @@ namespace FPS_n2 {
 		};
 		//戦車データ
 		class VhehicleData {
-			MV1									m_DataObj;				//
-			MV1									m_DataCol;				//
 			float								m_MaxFrontSpeed{};		//前進速度(km/h)
 			float								m_MaxBackSpeed{};		//後退速度(km/h)
 			float								m_MaxBodyRad{};			//旋回速度(度/秒)
@@ -114,7 +112,7 @@ namespace FPS_n2 {
 			const auto& GetSquareFrameList(void) const noexcept { return this->m_SquareFrameID; }
 			const auto& GetCrawlerFrameList(void) const noexcept { return this->m_CrawlerFrame; }
 		public: //コンストラクタ、デストラクタ
-			VhehicleData(const MV1& DataObj, const MV1&, const char* path) noexcept {
+			VhehicleData(const MV1& DataObj, const MV1& DataCol, const char* path) noexcept {
 				//フレーム情報
 				for (int i = 0; i < DataObj.GetFrameNum(); i++) {
 					std::string p = DataObj.GetFrameName(i);
@@ -146,7 +144,41 @@ namespace FPS_n2 {
 					}
 				}
 				//メッシュ情報
-				//TODO
+				for (int i = 0; i < DataCol.GetMeshNum(); i++) {
+					std::string p = DataCol.GetMaterialName(i);
+					//車体モジュール
+					if (p.find("armer", 0) != std::string::npos) {
+						this->m_ArmerMesh.emplace_back(i, std::stof(FileStreamDX::getright(p)));//装甲
+					}
+					else if (p.find("space", 0) != std::string::npos) {
+						this->m_SpaceArmerMesh.emplace_back(i);//空間装甲
+					}
+					else if (p.find("left_foot", 0) != std::string::npos) {
+						this->m_ModuleMesh.emplace_back(i);//モジュール
+					}
+					else if (p.find("right_foot", 0) != std::string::npos) {
+						this->m_ModuleMesh.emplace_back(i);//モジュール
+					}
+					else if (p.find("engine", 0) != std::string::npos) {
+						this->m_ModuleMesh.emplace_back(i);//モジュール
+					}
+					else if (p.find("human_body", 0) != std::string::npos) {
+						this->m_ModuleMesh.emplace_back(i);//モジュール
+					}
+					else if (p.find("ammo_body", 0) != std::string::npos) {
+						this->m_ModuleMesh.emplace_back(i);//モジュール
+					}
+					//砲塔モジュール
+					if (p.find("gun", 0) != std::string::npos) {
+						this->m_ModuleMesh.emplace_back(i);//モジュール
+					}
+					else if (p.find("human_turret", 0) != std::string::npos) {
+						this->m_ModuleMesh.emplace_back(i);//モジュール
+					}
+					else if (p.find("ammo_turret", 0) != std::string::npos) {
+						this->m_ModuleMesh.emplace_back(i);//モジュール
+					}
+				}
 				//4隅確定
 				this->m_SquareFrameID[0] = GetSide(true, false);			//2		左後部0
 				this->m_SquareFrameID[1] = GetSide(true, true);				//10	左前部1
@@ -163,7 +195,6 @@ namespace FPS_n2 {
 					for (auto& g : this->m_GunData) {
 						g.SetData(&File);
 					}
-					//TODO
 				}
 			}
 			~VhehicleData(void) noexcept {
