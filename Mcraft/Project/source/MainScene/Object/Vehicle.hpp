@@ -44,7 +44,11 @@ namespace FPS_n2 {
 				SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), pyRad));
 				SetMove().SetPos(pos_t);
 				SetMove().SetVec(Vector3DX::zero());
+				SetMove().Update(0.0f, 0.0f);
+				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 				for (auto& w : this->m_WheelHeight) { w = 0.0f; }
+
+				this->m_MouseVec = GetMove().GetMat();
 				//íÔƒXƒ|[ƒ“
 				this->m_speed = 0.0f;
 				this->m_speed_add = 0.0f;

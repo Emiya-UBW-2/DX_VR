@@ -1,0 +1,17 @@
+speed_flont=25
+speed_back=-15
+body_rad=25
+turret_rad=60
+gun_0_ammoName=OF32HE
+gun_0_loadcnt=5.5
+gun_0_UpDeg=25
+gun_0_DownDeg=-5
+gun_0_LeftDeg=-1
+gun_0_RightDeg=-1
+gun_1_ammoName=GSh6K30
+gun_1_loadcnt=0.2
+gun_1_UpDeg=25
+gun_1_DownDeg=-5
+gun_1_LeftDeg=-1
+gun_1_RightDeg=-1
+end
