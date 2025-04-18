@@ -8,99 +8,80 @@ namespace FPS_n2 {
 		//戦車砲データ
 		class GunData {
 		private:
-			std::string							m_name;
-			float								m_loadTime{ 0.f };
-			int									m_Shot_Sound = -1;
-			int									m_Eject_Sound = -1;
-			int									m_Reload_Sound = -1;
-			float								m_UpRadLimit{ 0.f };
-			float								m_DownRadLimit{ 0.f };
+			float								m_loadTime{};
+			float								m_UpRadLimit{};
+			float								m_DownRadLimit{};
+			float								m_LeftRadLimit{};
+			float								m_RightRadLimit{};
+
 			std::array<int, 3>					m_AmmoSpecID{};
 			std::array<frames, 3>				m_frame;
 		public:
-			const auto&		GetName(void) const noexcept { return this->m_name; }
 			const auto&		GetLoadTime(void) const noexcept { return this->m_loadTime; }
-			const auto&		GetShotSound(void) const noexcept { return this->m_Shot_Sound; }
-			const auto&		GetEjectSound(void) const noexcept { return this->m_Eject_Sound; }
-			const auto&		GetReloadSound(void) const noexcept { return this->m_Reload_Sound; }
-			const auto&		GetAmmoSpec(void) const noexcept { return this->m_AmmoSpecID; }
-			const auto&		Get_frame(size_t pID)const noexcept { return this->m_frame[pID]; }
 			const auto&		GetUpRadLimit(void) const noexcept { return this->m_UpRadLimit; }
 			const auto&		GetDownRadLimit(void) const noexcept { return this->m_DownRadLimit; }
+			const auto&		GetLeftRadLimit(void) const noexcept { return this->m_LeftRadLimit; }
+			const auto&		GetRightRadLimit(void) const noexcept { return this->m_RightRadLimit; }
+			const auto&		GetAmmoSpec(void) const noexcept { return this->m_AmmoSpecID; }
+			const auto&		GetGunTurretFrame(void) const noexcept { return this->m_frame.at(0); }
+			const auto&		GetGunTrunnionFrame(void) const noexcept { return this->m_frame.at(1); }
+			const auto&		GetGunMuzzleFrame(void) const noexcept { return this->m_frame.at(2); }
 		public: //コンストラクタ、デストラクタ
 			GunData(void) noexcept { }
 			~GunData(void) noexcept { }
 		public:
-			void			SetFrame(const MV1& obj, int i) noexcept {
+			void			Set(int i, const MV1& obj) noexcept {
 				this->m_frame[0].Set(i, obj);
-				if (obj.GetFrameChildNum(this->m_frame[0].GetFrameID()) <= 0) {
-					return;
+				if (obj.GetFrameChildNum(GetGunTurretFrame().GetFrameID()) > 0) {
+					this->m_frame[1].Set(obj.GetFrameChild(GetGunTurretFrame().GetFrameID(), 0), obj);
 				}
-				int child_num = (int)obj.GetFrameChild(this->m_frame[0].GetFrameID(), 0);
-
-				if (obj.GetFrameName(child_num).find("仰角", 0) != std::string::npos) {
-					this->m_frame[1].Set(child_num, obj);
-				}
-				if (this->m_frame[1].GetFrameID() == -1) {
-					return;
-				}
-
-				if (obj.GetFrameChildNum(this->m_frame[1].GetFrameID()) <= 0) {
-					return;
-				}
-				int child2_num = (int)obj.GetFrameChild(this->m_frame[1].GetFrameID(), 0);
-				{
-					this->m_frame[2].Set(child2_num, obj);
+				if (this->GetGunTrunnionFrame().GetFrameID() < 0) { return; }
+				if (obj.GetFrameChildNum(this->GetGunTrunnionFrame().GetFrameID()) > 0) {
+					this->m_frame[2].Set(obj.GetFrameChild(this->GetGunTrunnionFrame().GetFrameID(), 0), obj);
 				}
 			}
-			void			Set(FileStreamDX* File) noexcept {
-				this->m_name = FileStreamDX::getright(File->SeekLineAndGetStr());
+			void			SetData(FileStreamDX* File) noexcept {
+				std::string ChildPath = "data/ammo/";
+				ChildPath += FileStreamDX::getright(File->SeekLineAndGetStr());
+				ChildPath += "/";
+				this->m_AmmoSpecID.at(0) = Objects::AmmoDataManager::Instance()->Add(ChildPath.c_str());
 				this->m_loadTime = std::stof(FileStreamDX::getright(File->SeekLineAndGetStr()));
-				this->m_Shot_Sound = std::stoi(FileStreamDX::getright(File->SeekLineAndGetStr()));//サウンド
-				this->m_Eject_Sound = std::stoi(FileStreamDX::getright(File->SeekLineAndGetStr()));//サウンド
-				this->m_Reload_Sound = std::stoi(FileStreamDX::getright(File->SeekLineAndGetStr()));//サウンド
 				this->m_UpRadLimit = std::stof(FileStreamDX::getright(File->SeekLineAndGetStr()));
 				this->m_DownRadLimit = std::stof(FileStreamDX::getright(File->SeekLineAndGetStr()));
+				this->m_LeftRadLimit = std::stof(FileStreamDX::getright(File->SeekLineAndGetStr()));
+				this->m_RightRadLimit = std::stof(FileStreamDX::getright(File->SeekLineAndGetStr()));
 			}
 		};
 		//戦車データ
 		class VhehicleData {
-			typedef std::pair<std::shared_ptr<GraphHandle>, int> ViewAndModule;
-		private:
-			std::string							m_name;							//名称
-			HitPoint							m_MaxHP{ 0 };					//HP
-			int									m_MaxFuel{ 0 };					//燃料
-			bool								m_IsFloat{ false };				//浮くかどうか
-			float								m_DownInWater{ 0.f };			//沈む判定箇所
-			float								m_MaxFrontSpeed{ 0.f };			//前進速度(km/h)
-			float								m_MaxBackSpeed{ 0.f };			//後退速度(km/h)
-			float								m_MaxBodyRad{ 0.f };			//旋回速度(度/秒)
-			float								m_MaxTurretRad{ 0.f };			//砲塔駆動速度(度/秒)
-			std::vector<GunData>				m_GunFrameData;					//
-			MV1									m_DataObj;						//
-			MV1									m_DataCol;						//
-			std::vector<frames>					m_wheelframe;					//転輪
-			std::vector<frames>					m_wheelframe_nospring;			//誘導輪回転
-			std::vector<std::pair<int, float>>	m_armer_mesh;					//装甲ID
-			std::vector<int>					m_space_mesh;					//装甲ID
-			std::vector<int>					m_module_mesh;					//装甲ID
-			std::array<int, 4>					m_square{ 0 };					//車輛の四辺
-			std::array<std::vector<frames>, 2>	m_b2upsideframe;				//履帯上
-			std::array<std::vector<frames>, 2>	m_downsideframe;				//履帯
+			MV1									m_DataObj;				//
+			MV1									m_DataCol;				//
+			float								m_MaxFrontSpeed{};		//前進速度(km/h)
+			float								m_MaxBackSpeed{};		//後退速度(km/h)
+			float								m_MaxBodyRad{};			//旋回速度(度/秒)
+			float								m_MaxTurretRad{};		//砲塔駆動速度(度/秒)
+			std::vector<GunData>				m_GunData;				//
+			std::vector<frames>					m_WheelFrame;			//転輪
+			std::vector<frames>					m_NoSpringWheelFrame;	//誘導輪回転
+			std::vector<std::pair<int, float>>	m_ArmerMesh;			//装甲ID
+			std::vector<int>					m_SpaceArmerMesh;		//装甲ID
+			std::vector<int>					m_ModuleMesh;			//装甲ID
+			std::array<int, 4>					m_SquareFrameID{};		//車輛の四辺
+			std::array<std::vector<frames>, 2>	m_CrawlerFrame;			//履帯
 		private:
 			const auto		GetSide(bool isLeft, bool isFront) const noexcept {
 				int ans = 0;
-				float tmp = 0.f;
-				for (auto& f : this->m_wheelframe) {
-					if ((isLeft ? 1.f : -1.f) * f.GetFrameWorldPosition().pos().x >= 0) {
+				float tmp = 0.0f;
+				for (auto& f : this->m_WheelFrame) {
+					if ((isLeft ? 1.0f : -1.0f) * f.GetFrameWorldPosition().pos().x >= 0) {
 						ans = f.GetFrameID();
 						tmp = f.GetFrameWorldPosition().pos().z;
 						break;
 					}
 				}
-				for (auto& f : this->m_wheelframe) {
+				for (auto& f : this->m_WheelFrame) {
 					if (ans != f.GetFrameID()) {
-						if ((isLeft ? 1.f : -1.f) * f.GetFrameWorldPosition().pos().x >= 0) {
+						if ((isLeft ? 1.0f : -1.0f) * f.GetFrameWorldPosition().pos().x >= 0) {
 							if (isFront) {
 								if (tmp > f.GetFrameWorldPosition().pos().z) {
 									ans = f.GetFrameID();
@@ -119,186 +100,129 @@ namespace FPS_n2 {
 				return ans;
 			}
 		public:			//getter
-			const auto& GetName(void) const noexcept { return this->m_name; }
 			const auto& GetMaxFrontSpeed(void) const noexcept { return this->m_MaxFrontSpeed; }
 			const auto& GetMaxBackSpeed(void) const noexcept { return this->m_MaxBackSpeed; }
 			const auto& GetMaxBodyRad(void) const noexcept { return this->m_MaxBodyRad; }
 			const auto& GetMaxTurretRad(void) const noexcept { return this->m_MaxTurretRad; }
-			const auto& Get_gunframe(void) const noexcept { return this->m_GunFrameData; }
-			const auto& Get_wheelframe(void) const noexcept { return this->m_wheelframe; }
-			const auto& Get_wheelframe_nospring(void) const noexcept { return this->m_wheelframe_nospring; }
-			const auto& Get_armer_mesh(void) const noexcept { return this->m_armer_mesh; }
-			const auto& Get_space_mesh(void) const noexcept { return this->m_space_mesh; }
-			const auto& Get_module_mesh(void) const noexcept { return this->m_module_mesh; }
-			const auto& Get_square(size_t ID_t)const noexcept { return this->m_square[ID_t]; }
-			const auto& Get_square(void) const noexcept { return this->m_square; }
-			const auto& Get_b2upsideframe(size_t ID_t)const noexcept { return this->m_b2upsideframe[ID_t]; }
-			const auto& Get_b2upsideframe(void) const noexcept { return this->m_b2upsideframe; }
-			const auto& Get_b2downsideframe(void) const noexcept { return this->m_downsideframe; }
+			const auto& GetGunData(void) const noexcept { return this->m_GunData; }
+			const auto& GetWheelFrameList(void) const noexcept { return this->m_WheelFrame; }
+			const auto& GetNoSpringWheelFrameList(void) const noexcept { return this->m_NoSpringWheelFrame; }
+			const auto& GetArmerMeshIDList(void) const noexcept { return this->m_ArmerMesh; }
+			const auto& GetSpaceArmerMeshIDList(void) const noexcept { return this->m_SpaceArmerMesh; }
+			const auto& GetModuleMeshIDList(void) const noexcept { return this->m_ModuleMesh; }
+			const auto& GetSquareFrameID(size_t ID_t)const noexcept { return this->m_SquareFrameID[ID_t]; }
+			const auto& GetSquareFrameList(void) const noexcept { return this->m_SquareFrameID; }
+			const auto& GetCrawlerFrameList(void) const noexcept { return this->m_CrawlerFrame; }
 		public: //コンストラクタ、デストラクタ
-			VhehicleData(void) noexcept {}
-			VhehicleData(const VhehicleData& o) noexcept {
-				this->m_name = o.m_name;
-				this->m_MaxHP = o.m_MaxHP;
-				this->m_MaxFuel = o.m_MaxFuel;
-				this->m_IsFloat = o.m_IsFloat;
-				this->m_DownInWater = o.m_DownInWater;
-				this->m_MaxFrontSpeed = o.m_MaxFrontSpeed;
-				this->m_MaxBackSpeed = o.m_MaxBackSpeed;
-				this->m_MaxBodyRad = o.m_MaxBodyRad;
-				this->m_MaxTurretRad = o.m_MaxTurretRad;
-				this->m_GunFrameData = o.m_GunFrameData;
-				this->m_wheelframe = o.m_wheelframe;
-				this->m_wheelframe_nospring = o.m_wheelframe_nospring;
-				this->m_armer_mesh = o.m_armer_mesh;
-				this->m_space_mesh = o.m_space_mesh;
-				this->m_module_mesh = o.m_module_mesh;
-				this->m_square = o.m_square;
-				this->m_b2upsideframe = o.m_b2upsideframe;
-				this->m_downsideframe = o.m_downsideframe;
-			}
-			~VhehicleData(void) noexcept {}
-		public:
-			//事前読み込み
-			void		Set_Pre(const char* name) noexcept {
-				this->m_name = name;
-				MV1::Load("data/model/" + this->m_name + "/model_LOADCALC.mv1", &this->m_DataObj);//model.pmx//model_LOADCALC.mv1
-				MV1::Load("data/model/" + this->m_name + "/col.mv1", &this->m_DataCol);
-			}
-			//メイン読み込み
-			void			Set(void) noexcept {
-				//固有
-				this->m_DownInWater = 0.f;
-				for (int i = 0; i < this->m_DataObj.GetMeshNum(); i++) {
-					auto p = this->m_DataObj.GetMeshMaxPosition(i).y;
-					if (this->m_DownInWater < p) {
-						this->m_DownInWater = p;
-					}
-				}
-				this->m_DownInWater /= 2.f;
-				Vector3DX minpos, maxpos;							//
-				for (int i = 0; i < this->m_DataObj.GetFrameNum(); i++) {
-					std::string p = this->m_DataObj.GetFrameName(i);
+			VhehicleData(const MV1& DataObj, const MV1&, const char* path) noexcept {
+				//フレーム情報
+				for (int i = 0; i < DataObj.GetFrameNum(); i++) {
+					std::string p = DataObj.GetFrameName(i);
 					if (p.find("転輪", 0) != std::string::npos) {
-						this->m_wheelframe.resize(this->m_wheelframe.size() + 1);
-						this->m_wheelframe.back().Set(i, this->m_DataObj);
+						this->m_WheelFrame.resize(this->m_WheelFrame.size() + 1);
+						this->m_WheelFrame.back().Set(i, DataObj);
 					}
 					else if ((p.find("輪", 0) != std::string::npos) && (p.find("転輪", 0) == std::string::npos)) {
-						this->m_wheelframe_nospring.resize(this->m_wheelframe_nospring.size() + 1);
-						this->m_wheelframe_nospring.back().Set(i, this->m_DataObj);
+						this->m_NoSpringWheelFrame.resize(this->m_NoSpringWheelFrame.size() + 1);
+						this->m_NoSpringWheelFrame.back().Set(i, DataObj);
 					}
 					else if (p.find("旋回", 0) != std::string::npos) {
-						this->m_GunFrameData.resize(this->m_GunFrameData.size() + 1);
-						this->m_GunFrameData.back().SetFrame(this->m_DataObj, i);
-					}
-					else if (p == "min") {
-						minpos = this->m_DataObj.GetFramePosition(i);
-					}
-					else if (p == "max") {
-						maxpos = this->m_DataObj.GetFramePosition(i);
-					}
-					else if (p.find("２D物理", 0) != std::string::npos || p.find("2D物理", 0) != std::string::npos) { //2D物理
-						this->m_b2upsideframe[0].clear();
-						this->m_b2upsideframe[1].clear();
-						for (int z = 0; z < this->m_DataObj.GetFrameChildNum(i); z++) {
-							if (this->m_DataObj.GetFramePosition(i + 1 + z).x > 0) {
-								this->m_b2upsideframe[0].resize(this->m_b2upsideframe[0].size() + 1);
-								this->m_b2upsideframe[0].back().Set(i + 1 + z, this->m_DataObj);
-							}
-							else {
-								this->m_b2upsideframe[1].resize(this->m_b2upsideframe[1].size() + 1);
-								this->m_b2upsideframe[1].back().Set(i + 1 + z, this->m_DataObj);
-							}
-						}
-						std::sort(this->m_b2upsideframe[0].begin(), this->m_b2upsideframe[0].end(), [](const frames& x, const frames& y) { return x.GetFrameWorldPosition().pos().z < y.GetFrameWorldPosition().pos().z; }); //ソート
-						std::sort(this->m_b2upsideframe[1].begin(), this->m_b2upsideframe[1].end(), [](const frames& x, const frames& y) { return x.GetFrameWorldPosition().pos().z < y.GetFrameWorldPosition().pos().z; }); //ソート
+						this->m_GunData.resize(this->m_GunData.size() + 1);
+						this->m_GunData.back().Set(i, DataObj);
 					}
 					else if (p.find("履帯設置部", 0) != std::string::npos) { //2D物理
-						this->m_downsideframe[0].clear();
-						this->m_downsideframe[1].clear();
-						for (int z = 0; z < this->m_DataObj.GetFrameChildNum(i); z++) {
-							if (this->m_DataObj.GetFramePosition(i + 1 + z).x > 0) {
-								this->m_downsideframe[0].resize(this->m_downsideframe[0].size() + 1);
-								this->m_downsideframe[0].back().Set(i + 1 + z, this->m_DataObj);
+						this->m_CrawlerFrame[0].clear();
+						this->m_CrawlerFrame[1].clear();
+						for (int z = 0; z < DataObj.GetFrameChildNum(i); z++) {
+							if (DataObj.GetFramePosition(i + 1 + z).x > 0) {
+								this->m_CrawlerFrame[0].resize(this->m_CrawlerFrame[0].size() + 1);
+								this->m_CrawlerFrame[0].back().Set(i + 1 + z, DataObj);
 							}
 							else {
-								this->m_downsideframe[1].resize(this->m_downsideframe[1].size() + 1);
-								this->m_downsideframe[1].back().Set(i + 1 + z, this->m_DataObj);
+								this->m_CrawlerFrame[1].resize(this->m_CrawlerFrame[1].size() + 1);
+								this->m_CrawlerFrame[1].back().Set(i + 1 + z, DataObj);
 							}
 						}
 					}
 				}
+				//メッシュ情報
+				//TODO
 				//4隅確定
-				this->m_square[0] = GetSide(true, false);			//2		左後部0
-				this->m_square[1] = GetSide(true, true);			//10	左前部1
-				this->m_square[2] = GetSide(false, false);			//3		右後部2
-				this->m_square[3] = GetSide(false, true);			//11	右前部3
-				//装甲
-
+				this->m_SquareFrameID[0] = GetSide(true, false);			//2		左後部0
+				this->m_SquareFrameID[1] = GetSide(true, true);				//10	左前部1
+				this->m_SquareFrameID[2] = GetSide(false, false);			//3		右後部2
+				this->m_SquareFrameID[3] = GetSide(false, true);			//11	右前部3
 				//data
 				{
-					FileStreamDX File(("data/model/" + this->m_name + "/data.txt").c_str());
-					this->m_MaxHP = (HitPoint)std::stoi(FileStreamDX::getright(File.SeekLineAndGetStr()));
-					this->m_MaxFuel = std::stoi(FileStreamDX::getright(File.SeekLineAndGetStr()));
-					this->m_IsFloat = (FileStreamDX::getright(File.SeekLineAndGetStr()) == "true");
+					std::string Path = path;
+					FileStreamDX File((Path + "data.txt").c_str());
 					this->m_MaxFrontSpeed = std::stof(FileStreamDX::getright(File.SeekLineAndGetStr()));
 					this->m_MaxBackSpeed = std::stof(FileStreamDX::getright(File.SeekLineAndGetStr()));
 					this->m_MaxBodyRad = std::stof(FileStreamDX::getright(File.SeekLineAndGetStr()));
 					this->m_MaxTurretRad = deg2rad(std::stof(FileStreamDX::getright(File.SeekLineAndGetStr())));
-					{
-						for (auto& g : this->m_GunFrameData) {
-							g.Set(&File);
-						}
+					for (auto& g : this->m_GunData) {
+						g.SetData(&File);
 					}
+					//TODO
 				}
-				this->m_DataObj.Dispose();
-				this->m_DataCol.Dispose();
+			}
+			~VhehicleData(void) noexcept {
+				this->m_GunData.clear();
+				this->m_WheelFrame.clear();
+				this->m_NoSpringWheelFrame.clear();
+				this->m_ArmerMesh.clear();
+				this->m_SpaceArmerMesh.clear();
+				this->m_ModuleMesh.clear();
+				for (auto& LR : this->m_CrawlerFrame) {
+					LR.clear();
+				}
 			}
 		};
 		//砲
 		class Guns {
 		private:
-			float							m_loadtimer{ 0 };			//装てんカウンター
-			bool							m_reloadSEFlag{ true };		//
-			float							m_Recoil{ 0.f };			//駐退
-			float							m_React{ 0.f };				//反動
+			float							m_loadtimer{};			//装てんカウンター
+			float							m_Recoil{};			//駐退
+			float							m_React{};				//反動
 			const GunData*					m_GunSpec{ nullptr };		//
 			Vector3DX						m_ShotRadAdd;				//
-		public:			//getter
-			const auto&	Getloadtime(void) const noexcept { return m_loadtimer; }
-			const auto&	GetTotalloadtime(void) const noexcept { return this->m_GunSpec->GetLoadTime(); }
-			const auto&	GetGunSpec(void) const noexcept { return this->m_GunSpec; }
-			const int	GetAmmoSpecNum() const noexcept { return (int)this->m_GunSpec->GetAmmoSpec().size(); }
-			const auto&	GetAmmoSpec(int select) const noexcept { return this->m_GunSpec->GetAmmoSpec()[select]; }
-			const auto&	GetCaliberSize(void) const noexcept { return Objects::AmmoDataManager::Instance()->Get(GetAmmoSpec(0))->GetCaliber(); }
-			const auto&	GetGunTrunnionFrameID(void) const noexcept { return this->m_GunSpec->Get_frame(1).GetFrameID(); }
-			const auto&	GetGunMuzzleFrameID(void) const noexcept { return this->m_GunSpec->Get_frame(2).GetFrameID(); }
-			//銃反動
-			void		FireReaction(Matrix3x3DX* mat_t) const noexcept {
-				(*mat_t) *= Matrix3x3DX::RotAxis(mat_t->xvec(), this->m_ShotRadAdd.x) * Matrix3x3DX::RotAxis(mat_t->zvec(), this->m_ShotRadAdd.z);
-			}
+			Vector2DX						m_ShotTargetRad;			//
 		public:
-			//角度指示
-			void		ExecuteGunFrame(float pGunXrad, float pGunYrad, MV1* obj_body_t, MV1* col_body_t) noexcept {
-				float yrad = pGunYrad;
-				float xrad = std::clamp(pGunXrad, deg2rad(this->m_GunSpec->GetDownRadLimit()), deg2rad(this->m_GunSpec->GetUpRadLimit()));
-				frames id;
-				id = this->m_GunSpec->Get_frame(0);
-				if (id.GetFrameID() >= 0) {
-					obj_body_t->SetFrameLocalMatrix(id.GetFrameID(), Matrix4x4DX::RotAxis(Vector3DX::up(), yrad) * Matrix4x4DX::Mtrans(id.GetFrameLocalPosition().pos()));
-					col_body_t->SetFrameLocalMatrix(id.GetFrameID(), Matrix4x4DX::RotAxis(Vector3DX::up(), yrad) * Matrix4x4DX::Mtrans(id.GetFrameLocalPosition().pos()));
+		public:			//getter
+			const auto& GetGunTurretFrame(void) const noexcept { return this->m_GunSpec->GetGunTurretFrame(); }
+			const auto&	GetGunTrunnionFrame(void) const noexcept { return this->m_GunSpec->GetGunTrunnionFrame(); }
+			const auto&	GetGunMuzzleFrame(void) const noexcept { return this->m_GunSpec->GetGunMuzzleFrame(); }
+			const auto& GetAmmoSpec(void) const noexcept { return Objects::AmmoDataManager::Instance()->Get(this->m_GunSpec->GetAmmoSpec().at(0)); }
+			const auto& GetShotTargetRad(void) const noexcept { return this->m_ShotTargetRad; }
+			const auto& GetRecoil(void) const noexcept { return this->m_Recoil; }
+			const auto& GetShotRadAdd(void) const noexcept { return this->m_ShotRadAdd; }
+			//射撃可能
+			bool		CanShot(void) const noexcept { return this->m_loadtimer == 0; }
+		public:
+			void		UpdateAim(const Vector3DX& NowVec, const Vector3DX& TargetVec, const std::unique_ptr<VhehicleData>& pData) noexcept {
+				auto* DXLib_refParts = DXLib_ref::Instance();
+				//反映
+				float a_hyp = std::hypotf(TargetVec.x, TargetVec.z);
+				float z_hyp = std::hypotf(NowVec.x, NowVec.z);
+
+				float cost = Vector3DX::Cross(NowVec, TargetVec).y / z_hyp;
+				float sint = sqrtf(std::abs(1.0f - cost * cost));
+				float view_YradAdd = std::atan2f(cost, sint);
+				float view_XradAdd = std::atan2f(TargetVec.y, a_hyp) - std::atan2f(NowVec.y, z_hyp);
+
+				this->m_ShotTargetRad.x += std::clamp(view_XradAdd / 5.0f * 60.f, -pData->GetMaxTurretRad(), pData->GetMaxTurretRad()) * DXLib_refParts->GetDeltaTime();
+				this->m_ShotTargetRad.y += std::clamp(view_YradAdd / 5.0f * 60.f, -pData->GetMaxTurretRad(), pData->GetMaxTurretRad()) * DXLib_refParts->GetDeltaTime();
+				//仰俯角制限
+				if (this->m_GunSpec->GetLeftRadLimit() >= 0.f && this->m_GunSpec->GetRightRadLimit() >= 0.f) {
+					this->m_ShotTargetRad.y = std::clamp(this->m_ShotTargetRad.y, deg2rad(this->m_GunSpec->GetLeftRadLimit()), deg2rad(this->m_GunSpec->GetRightRadLimit()));
 				}
-				id = this->m_GunSpec->Get_frame(1);
-				if (id.GetFrameID() >= 0) {
-					obj_body_t->SetFrameLocalMatrix(id.GetFrameID(), Matrix4x4DX::RotAxis(Vector3DX::right(), xrad) * Matrix4x4DX::Mtrans(id.GetFrameLocalPosition().pos()));
-					col_body_t->SetFrameLocalMatrix(id.GetFrameID(), Matrix4x4DX::RotAxis(Vector3DX::right(), xrad) * Matrix4x4DX::Mtrans(id.GetFrameLocalPosition().pos()));
-				}
-				id = this->m_GunSpec->Get_frame(2);
-				if (id.GetFrameID() >= 0) {
-					obj_body_t->SetFrameLocalMatrix(id.GetFrameID(), Matrix4x4DX::Mtrans(Vector3DX::forward() * (this->m_Recoil * 0.5f * Scale3DRate)) * Matrix4x4DX::Mtrans(id.GetFrameLocalPosition().pos()));
-					col_body_t->SetFrameLocalMatrix(id.GetFrameID(), Matrix4x4DX::Mtrans(Vector3DX::forward() * (this->m_Recoil * 0.5f * Scale3DRate)) * Matrix4x4DX::Mtrans(id.GetFrameLocalPosition().pos()));
-				}
-				Easing(&this->m_ShotRadAdd, Matrix4x4DX::RotAxis(Vector3DX::up(), yrad).xvec() * -1.f * deg2rad(-this->m_React * GetCaliberSize() * 50.f), 0.85f, EasingType::OutExpo);
+				this->m_ShotTargetRad.x = std::clamp(this->m_ShotTargetRad.x, deg2rad(this->m_GunSpec->GetDownRadLimit()), deg2rad(this->m_GunSpec->GetUpRadLimit()));
+			}
+			//射撃した
+			void		Shot(void) noexcept {
+				this->m_loadtimer = this->m_GunSpec->GetLoadTime();
+				this->m_Recoil = 1.0f;
+				this->m_React = std::clamp(this->m_React + GetAmmoSpec()->GetCaliber() * 10.0f, 0.0f, 3.0f);
 			}
 		public: //コンストラクタ、デストラクタ
 			Guns(void) noexcept { }
@@ -306,34 +230,21 @@ namespace FPS_n2 {
 		public:
 			void		Init(const GunData* pResorce) noexcept {
 				this->m_GunSpec = pResorce;
-				this->m_ShotRadAdd.Set(0, 0, 0);
+				this->m_ShotRadAdd = Vector3DX::zero();
 			}
-			bool		Execute(bool key) noexcept {
+			void		Update(void) noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
-				auto* SE = SoundPool::Instance();
-				bool isshot = (key && this->m_loadtimer == 0);
 				//射撃
-				if (isshot) {
-					this->m_loadtimer = this->m_GunSpec->GetLoadTime();
-					this->m_Recoil = 1.f;
-					this->m_React = std::clamp(this->m_React + GetCaliberSize() * 10.f, 0.f, 3.f);
-					this->m_reloadSEFlag = true;
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_Eject))->Play();
-				}
-				if (this->m_reloadSEFlag && this->m_loadtimer < 1.f) {
-					this->m_reloadSEFlag = false;
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_Reload))->Play();
-				}
-				this->m_loadtimer = std::max(this->m_loadtimer - 1.f * DXLib_refParts->GetDeltaTime(), 0.f);
-				this->m_Recoil = std::max(this->m_Recoil - 1.f * DXLib_refParts->GetDeltaTime(), 0.f);
-				this->m_React = std::max(this->m_React - 1.f * DXLib_refParts->GetDeltaTime(), 0.f);
-				return isshot;
+				this->m_loadtimer = std::max(this->m_loadtimer - DXLib_refParts->GetDeltaTime(), 0.0f);
+				this->m_Recoil = std::max(this->m_Recoil - DXLib_refParts->GetDeltaTime(), 0.0f);
+				this->m_React = std::max(this->m_React - DXLib_refParts->GetDeltaTime(), 0.0f);
+				auto RotateY = Matrix4x4DX::RotAxis(Vector3DX::up(), this->m_ShotTargetRad.y);
+				Easing(&this->m_ShotRadAdd, RotateY.xvec() * deg2rad(this->m_React * GetAmmoSpec()->GetCaliber() * 50.0f), 0.85f, EasingType::OutExpo);
 			}
 			void		Dispose(void) noexcept {
-				this->m_loadtimer = 0.f;
-				this->m_reloadSEFlag = true;
-				this->m_Recoil = 0.f;
-				this->m_React = 0.f;
+				this->m_loadtimer = 0.0f;
+				this->m_Recoil = 0.0f;
+				this->m_React = 0.0f;
 				this->m_GunSpec = nullptr;
 				this->m_ShotRadAdd = Vector3DX::zero();
 			}
@@ -351,76 +262,23 @@ namespace FPS_n2 {
 			const auto		GetHitMesh(void) const noexcept { return this->m_hitmesh; }
 			const auto		IsHit(void) const noexcept { return (this->m_hitDistance != (std::numeric_limits<float>::max)()); }
 		};
-		//履帯BOX2D
-		class FootWorld {
+		//履帯
+		class CrawlerFrameControl {
 		private:
-			class cat_frame {
-			private:
-				frames					m_frame;
-				float					m_Res_y{ (std::numeric_limits<float>::max)() };
-				//EffectControl::EffectS	m_gndsmkeffcs;
-				float					m_gndsmksize{ 1.f };
-			public:
-				cat_frame(void) noexcept {}
-				//~cat_frame(void) noexcept {}
-			public://getter
-				const auto&		GetColResult_Y(void) const noexcept { return this->m_Res_y; }
-			public:
-				void			Init(const frames& pFrame) noexcept {
-					this->m_frame = pFrame;
-					//this->m_gndsmkeffcs.SetLoop(EffectResource::Instance()->m_Sorce.back(), Vector3DX::vget(0, -1, 0), Vector3DX::vget(0, 0, 1), 0.1f*Scale3DRate);
-					this->m_gndsmksize = 0.1f;
-				}
-				//
-				void			FrameExecute(MV1* pTargetObj) noexcept;
-				void			EffectExecute(MV1* pTargetObj, float pSpd) noexcept {
-					if (this->m_Res_y != (std::numeric_limits<float>::max)()) {
-						Easing(&this->m_gndsmksize, 0.2f + std::abs(pSpd) * 5.5f, 0.975f, EasingType::OutExpo);
-					}
-					else {
-						this->m_gndsmksize = 0.2f;
-					}
-					//this->m_gndsmkeffcs.SetEffectPos(pTargetObj->GetFramePosition(this->m_frame.GetFrameID()) + pTargetObj->GetMatrix().yvec() * (-this->m_frame.GetFrameWorldPosition().pos().y));
-					//this->m_gndsmkeffcs.SetEffectScale(std::clamp(this->m_gndsmksize, 0.2f, 1.5f)*Scale3DRate);
-				}
-				//
-				void			Dispose(void) noexcept {
-					//this->m_gndsmkeffcs.Dispose();
-				}
-			};
-		private:
-			std::vector<cat_frame>		m_downsideframe;			//履帯
-		public:			//getter
-			const auto&			Getdownsideframe(void) const noexcept { return this->m_downsideframe; }
+			frames					m_frame;
+			float					m_HitHeight{ (std::numeric_limits<float>::max)() };
 		public:
-			void			Init(bool IsLeft, const VhehicleData* pUseVeh) noexcept {
-				//履帯
-				{
-					const auto& w = pUseVeh->Get_b2downsideframe()[((IsLeft) ? 0 : 1)];
-					this->m_downsideframe.resize(w.size());
-					for (auto& t : this->m_downsideframe) {
-						t.Init(w[&t - &this->m_downsideframe.front()]);
-					}
-				}
-			}
+			CrawlerFrameControl(void) noexcept {}
+			~CrawlerFrameControl(void) noexcept {}
+		public://getter
+			const auto		OnGround(void) const noexcept { return this->m_HitHeight != (std::numeric_limits<float>::max)(); }
+			const auto&		GetHitHeight(void) const noexcept { return this->m_HitHeight; }
+			const auto&		GetFrame(void) const noexcept { return this->m_frame; }
+		public:
+			void			Init(const frames& pFrame) noexcept { this->m_frame = pFrame; }
 			//
-			void			FirstExecute(MV1* pTargetObj) noexcept {
-				for (auto& t : this->m_downsideframe) {
-					t.FrameExecute(pTargetObj);
-				}
-			}
-			void			LateExecute(MV1* pTargetObj, float pSpd) noexcept {
-				//エフェクト更新
-				for (auto& t : this->m_downsideframe) {
-					t.EffectExecute(pTargetObj, pSpd);
-				}
-			}
-			//
-			void			Dispose(void) noexcept {
-				for (auto& t : this->m_downsideframe) {
-					t.Dispose();
-				}
-				this->m_downsideframe.clear();
+			void			Update(bool ColRes, float Height) noexcept {
+				this->m_HitHeight = (ColRes) ? Height : (std::numeric_limits<float>::max)();
 			}
 		};
 	};

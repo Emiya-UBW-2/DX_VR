@@ -519,6 +519,9 @@ namespace FPS_n2 {
 								if (cell.GetCell() == 1) {
 									continue;
 								}
+								if (cell.GetCell() == 4) {
+									continue;
+								}
 								BackGroundParts->SetBlick((Put.x + xp), (Put.y + yp), (Put.z + zp), BackGround::s_EmptyBlick);
 							}
 						}

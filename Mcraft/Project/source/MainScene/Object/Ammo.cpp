@@ -26,6 +26,13 @@ namespace FPS_n2 {
 
 			//地面との判定
 			auto ColResGround = BackGroundParts->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
+			//ヘリとの判定
+			//TODO PlayerMngr->GetHelicopter()
+			//戦車との判定
+			if (PlayerMngr->GetVehicle()->CheckAmmoHit(repos_tmp, &pos_tmp)) {
+				SetDelete();
+				is_HitAll = true;
+			}
 			//キャラとの判定
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				if (PlayerMngr->GetPlayer(loop)->GetChara()->CheckDamageRay((*this->m_AmmoData)->GetDamage(), (PlayerID)this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
@@ -41,6 +48,16 @@ namespace FPS_n2 {
 					int								xput = 4;
 					int								yput = 1;
 					int								zput = 4;
+					if ((*this->m_AmmoData)->GetCaliber() > 0.0127f) {
+						xput = 6;
+						yput = 3;
+						zput = 6;
+					}
+					if ((*this->m_AmmoData)->GetCaliber() > 0.050f) {
+						xput = 8;
+						yput = 5;
+						zput = 8;
+					}
 					auto Put = BackGroundParts->GetPoint(pos_tmp);
 					bool IsChanged = false;
 					for (int xp = -xput / 2; xp <= xput / 2; ++xp) {
@@ -69,7 +86,7 @@ namespace FPS_n2 {
 					}
 				}
 				//エフェクト
-				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, pos_tmp, norm_tmp, (*this->m_AmmoData)->GetCaliber() / 0.02f * Scale3DRate);//0.00762f
+				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, pos_tmp, norm_tmp, std::min(0.0127f,(*this->m_AmmoData)->GetCaliber()) / 0.02f * Scale3DRate);//0.00762f
 				//サウンド
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGround0) + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
 			}

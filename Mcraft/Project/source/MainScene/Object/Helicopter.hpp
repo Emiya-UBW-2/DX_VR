@@ -21,6 +21,8 @@ namespace FPS_n2 {
 				SetMove().SetAll(pos, pos, pos, Vector3DX::zero(), mat, mat);
 				SetMove().Update(0.f, 0.f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
+				auto* SE = SoundPool::Instance();
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->SetPosition(GetMove().GetPos());
 			}
 		public:
 			void				Init_Sub(void) noexcept override {

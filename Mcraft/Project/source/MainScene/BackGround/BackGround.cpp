@@ -1393,7 +1393,7 @@ namespace FPS_n2 {
 				PerlinNoise ns(seed);
 				MazeControl mazeControl;
 
-				int Size = 23;
+				int Size = 25;
 				mazeControl.createMaze(Size, Size, seed);
 				int Rate = 6;
 				int Heights = 10;
@@ -1425,7 +1425,7 @@ namespace FPS_n2 {
 								(static_cast<float>(xpos)) / (Size * Rate - 1),
 								(static_cast<float>(zpos)) / (Size * Rate - 1)) * static_cast<float>(cell.m_All * 1 / 10));
 							for (int ypos = 0; ypos <= Height; ++ypos) {
-								cell.SetCellBuf(cell.m_Half + xPos, ypos, cell.m_Half + zPos).m_Cell = 2;
+								cell.SetCellBuf(cell.m_Half + xPos, ypos, cell.m_Half + zPos).m_Cell = 4;
 							}
 						}
 					}

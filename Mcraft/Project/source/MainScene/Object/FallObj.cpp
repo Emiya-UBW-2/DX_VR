@@ -1,4 +1,5 @@
 #include	"FallObj.hpp"
+#include	"../../MainScene/Player/Player.hpp"
 
 namespace FPS_n2 {
 	namespace Objects {
@@ -88,7 +89,19 @@ namespace FPS_n2 {
 			{
 				Vector3DX EndPos = PosBuf;
 				Vector3DX Normal;
-				if (BackGroundParts->CheckLinetoMap(GetMove().GetRePos(), &EndPos, &Normal)) {
+
+				auto* PlayerMngr = Player::PlayerManager::Instance();
+				if (PlayerMngr->GetVehicle()->CheckLine(GetMove().GetRePos(), &EndPos, &Normal)) {
+					PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
+					SetMove().SetVec(Vector3DX::Reflect(GetMove().GetVec(), Normal) * 0.5f);
+					this->m_yAdd = 0.f;
+					if (this->m_SoundSwitch) {
+						this->m_SoundSwitch = false;
+						SE->Get(SoundType::SE, static_cast<int>(this->m_FallObject->GetFallSound()))->Play3D(PosBuf, Scale3DRate * 5.f);
+					}
+					this->m_FallObject->RotateOnGround(&SetMove());
+				}
+				else if (BackGroundParts->CheckLinetoMap(GetMove().GetRePos(), &EndPos, &Normal)) {
 					PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
 					SetMove().SetVec(Vector3DX::Reflect(GetMove().GetVec(), Normal) * 0.5f);
 					this->m_yAdd = 0.f;

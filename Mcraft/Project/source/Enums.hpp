@@ -117,8 +117,6 @@ namespace FPS_n2 {
 		Tank_Shot,
 		Tank_Ricochet,
 		Tank_engine,
-		Tank_Eject,
-		Tank_Reload,
 		Tank_move,
 	};
 	enum class CharaTypeID {

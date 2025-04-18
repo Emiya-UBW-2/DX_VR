@@ -68,7 +68,6 @@ namespace FPS_n2 {
 
 			ObjectManager::Instance()->LoadModelBefore("data/model/hindD/");
 			ObjectManager::Instance()->LoadModelBefore("data/model/BMP3/");
-			m_VhehicleData.Set_Pre("BMP3");
 		}
 		void			MainGameScene::LoadEnd_Sub(void) noexcept {
 			Player::PlayerManager::Create();
@@ -118,14 +117,10 @@ namespace FPS_n2 {
 					g->SetupGun();
 				}
 			}
-			m_HelicopterObj = std::make_shared<Objects::HelicopterObj>();
-			ObjectManager::Instance()->InitObject(m_HelicopterObj, "data/model/hindD/");
-			m_VehicleObj = std::make_shared<Objects::VehicleObj>();
-			ObjectManager::Instance()->InitObject(m_VehicleObj, "data/model/BMP3/");
-
-			m_VhehicleData.Set();
-
-			m_VehicleObj->ValueInit(&m_VhehicleData);
+			PlayerMngr->SetHelicopter(std::make_shared<Objects::HelicopterObj>());
+			ObjectManager::Instance()->InitObject(PlayerMngr->GetHelicopter(), "data/model/hindD/");
+			PlayerMngr->SetVehicle(std::make_shared<Objects::VehicleObj>());
+			ObjectManager::Instance()->InitObject(PlayerMngr->GetVehicle(), "data/model/BMP3/");
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
@@ -321,6 +316,11 @@ namespace FPS_n2 {
 					this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, MoveInfoData, ViewChara->GetDamageEvent(), FreeData);
 					this->m_NetWorkController->Update();
 					ViewChara->SetDamageEventReset();
+					//ホストならBMPの判定もやる
+					if (!this->m_NetWorkController->GetClient() && this->m_NetWorkController->GetServerPlayer()) {
+						//PlayerMngr->GetVehicle()->GetDamageEvent()//TODO
+						PlayerMngr->GetVehicle()->SetDamageEventReset();
+					}
 				}
 				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//オンライン
 					bool IsServerNotPlayer = !this->m_NetWorkController->GetClient() && !this->m_NetWorkController->GetServerPlayer();
@@ -359,6 +359,7 @@ namespace FPS_n2 {
 						//このプレイヤーが出したダメージイベントをリストに追加
 						chara->PopDamageEvent(&this->m_DamageEvents);
 					}
+					PlayerMngr->GetVehicle()->PopDamageEvent(&this->m_DamageEvents);
 				}
 				//ダメージイベント
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
@@ -374,7 +375,7 @@ namespace FPS_n2 {
 				}
 			}
 
-			//m_VehicleObj->SetInput(MyInput, true);
+			PlayerMngr->GetVehicle()->SetInput(MyInput, true);
 
 			//Execute
 			ObjMngr->ExecuteObject();
@@ -455,7 +456,7 @@ namespace FPS_n2 {
 				CameraParts->SetMainCamera().SetCamInfo(fov_t, CameraParts->GetMainCamera().GetCamNear(), CameraParts->GetMainCamera().GetCamFar());
 			}
 
-			//m_VehicleObj->Setcamera(CameraParts->SetMainCamera(), CameraParts->GetMainCamera().GetCamFov());
+			PlayerMngr->GetVehicle()->SetCam(CameraParts->SetMainCamera());
 
 
 #if defined(DEBUG)
@@ -526,8 +527,6 @@ namespace FPS_n2 {
 			CommonBattleResource::Dispose();
 			this->m_UIclass.Dispose();
 			Player::PlayerManager::Release();
-			m_HelicopterObj.reset();
-			m_VehicleObj.reset();
 			ObjectManager::Instance()->DeleteAll();
 			this->m_PauseMenuControl.Dispose();
 			HitMarkerPool::Release();

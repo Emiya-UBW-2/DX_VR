@@ -4,6 +4,9 @@
 #include	"CPU.hpp"
 #include	"../Object/Character.hpp"
 
+#include	"../Object/Vehicle.hpp"
+#include	"../Object/Helicopter.hpp"
+
 namespace FPS_n2 {
 	namespace Player {
 		class PlayerManager : public SingletonBase<PlayerManager> {
@@ -77,6 +80,9 @@ namespace FPS_n2 {
 			int											m_PlayerNum{};
 
 			PlayerID									m_WatchPlayer{};
+	
+			std::shared_ptr<Objects::VehicleObj>		m_VehicleObj;
+			std::shared_ptr<Objects::HelicopterObj>		m_HelicopterObj;
 		private:
 			PlayerManager(void) noexcept {}
 			PlayerManager(const PlayerManager&) = delete;
@@ -92,6 +98,12 @@ namespace FPS_n2 {
 			auto& GetPlayer(int ID) noexcept { return this->m_Player[ID]; }
 
 			void SetWatchPlayer(PlayerID playerID) noexcept { this->m_WatchPlayer = playerID; }
+
+			void		SetVehicle(const std::shared_ptr<Objects::VehicleObj>& pObj) noexcept { this->m_VehicleObj = pObj; }
+			auto&		GetVehicle(void) noexcept { return this->m_VehicleObj; }
+
+			void		SetHelicopter(const std::shared_ptr<Objects::HelicopterObj>& pObj) noexcept { this->m_HelicopterObj = pObj; }
+			auto&		GetHelicopter(void) noexcept { return this->m_HelicopterObj; }
 		public:
 			void Init(int playerNum) noexcept {
 				if (playerNum > 0) {
@@ -103,6 +115,8 @@ namespace FPS_n2 {
 				}
 			}
 			void Dispose(void) noexcept {
+				m_VehicleObj.reset();
+				m_HelicopterObj.reset();
 				for (auto& player : this->m_Player) {
 					player.reset();
 				}

@@ -12,7 +12,6 @@
 #include	"../MainScene/MainSceneSub.hpp"
 
 #include "../MainScene/Object/Helicopter.hpp"
-#include "../MainScene/Object/Vehicle.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -32,10 +31,6 @@ namespace FPS_n2 {
 			InputControl								MyInput;
 
 			MV1											m_RagDoll;
-
-			std::shared_ptr<Objects::HelicopterObj>		m_HelicopterObj;
-			std::shared_ptr<Objects::VehicleObj>		m_VehicleObj;
-			Objects::VhehicleData						m_VhehicleData;
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
 				if (this->m_NetWorkController) {

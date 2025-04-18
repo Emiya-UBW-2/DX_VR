@@ -24,13 +24,13 @@ namespace FPS_n2 {
 					}
 					//ƒqƒbƒgƒJƒEƒ“ƒg
 					if ((Event.Damage >= 0) && (Event.ArmerDamage >= 0)) {
-						PlayerMngr->GetPlayer(Event.ShotID)->AddHit(1);
+						PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->AddHit(1);
 						//ƒqƒbƒgÀ•W•\Ž¦‚ð“o˜^
 						HitMarkerPool::Instance()->AddMarker(Event.m_EndPos, Event.Damage, Event.ArmerDamage);
 					}
 					if (IsDeath) {
-						PlayerMngr->GetPlayer(Event.ShotID)->AddScore(100);
-						PlayerMngr->GetPlayer(Event.ShotID)->AddKill(1);
+						PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->AddScore(100);
+						PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->AddKill(1);
 					}
 				}
 				if (Event.DamageID == PlayerMngr->GetWatchPlayer()) {//Œ‚‚½‚ê‚½ƒLƒƒƒ‰
@@ -126,7 +126,15 @@ namespace FPS_n2 {
 					break;
 				}
 				//ƒ_ƒ[ƒW“o˜^
-				PlayerMngr->GetPlayer(AttackID)->GetChara()->SetDamage(GetMyPlayerID(), Damage, ArmerDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+				if (AttackID >= 0) {
+					PlayerMngr->GetPlayer(AttackID)->GetChara()->SetDamage(GetMyPlayerID(), Damage, ArmerDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+				}
+				else if (AttackID == -1) {
+					PlayerMngr->GetVehicle()->SetDamage(GetMyPlayerID(), Damage, ArmerDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+				}
+				else {
+					//TODO PlayerMngr->GetHelicopter()
+				}
 				return true;
 			}
 			return false;
