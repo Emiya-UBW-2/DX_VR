@@ -29,7 +29,7 @@ namespace FPS_n2 {
 			//ƒwƒŠ‚Æ‚Ì”»’è
 			//TODO PlayerMngr->GetHelicopter()
 			//íŽÔ‚Æ‚Ì”»’è
-			if (PlayerMngr->GetVehicle()->CheckAmmoHit(repos_tmp, &pos_tmp)) {
+			if (this->m_ShootCheraID != -1 && PlayerMngr->GetVehicle()->CheckAmmoHit(repos_tmp, &pos_tmp)) {
 				SetDelete();
 				is_HitAll = true;
 			}

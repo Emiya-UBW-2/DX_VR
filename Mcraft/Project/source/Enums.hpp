@@ -130,6 +130,7 @@ namespace FPS_n2 {
 		ef_hitblood,		// 血しぶき
 		ef_greexp,			// グレ爆発
 		ef_dust,			// まわりの埃
+		ef_break,			// ブロック破壊
 	};
 
 	typedef char PlayerID;

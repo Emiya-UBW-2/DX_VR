@@ -515,14 +515,17 @@ namespace FPS_n2 {
 					for (int xp = -xput / 2; xp < xput / 2; ++xp) {
 						for (int yp = 0; yp < yput; ++yp) {
 							for (int zp = -zput / 2; zp < zput / 2; ++zp) {
-								auto& cell = BackGroundParts->GetCellBuf((Put.x + xp), (Put.y + yp), (Put.z + zp));
+								int xx = (Put.x + xp);
+								int yy = (Put.y + yp);
+								int zz = (Put.z + zp);
+								auto& cell = BackGroundParts->GetCellBuf(xx, yy, zz);
 								if (cell.GetCell() == 1) {
 									continue;
 								}
 								if (cell.GetCell() == 4) {
 									continue;
 								}
-								BackGroundParts->SetBlick((Put.x + xp), (Put.y + yp), (Put.z + zp), BackGround::s_EmptyBlick);
+								BackGroundParts->SetBlick(xx, yy, zz, BackGround::s_EmptyBlick);
 							}
 						}
 					}

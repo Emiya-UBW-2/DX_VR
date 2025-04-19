@@ -189,7 +189,7 @@ namespace FPS_n2 {
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
 
 			Vector3DX pos_t = Matrix3x3DX::Vtrans(Vector3DX::forward() * (15.f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
-			pos_t.y = -15.f * Scale3DRate;
+			pos_t.y = -25.f * Scale3DRate;
 
 			PlayerMngr->GetVehicle()->Spawn(std::atan2f(pos_t.x, pos_t.z), pos_t);
 		}

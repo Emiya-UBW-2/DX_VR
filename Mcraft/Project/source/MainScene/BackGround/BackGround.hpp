@@ -608,6 +608,8 @@ namespace FPS_n2 {
 
 			void			SetBlick(int xpos, int ypos, int zpos, int8_t select) noexcept;
 			const Vector3Int GetPoint(const Vector3DX& pos) const noexcept { return this->m_CellxN.front().GetPoint(pos); }
+			const Vector3DX GetPos(int xpos, int ypos, int zpos) const noexcept { return this->m_CellxN.front().GetPos(xpos, ypos, zpos); }
+
 			const auto& GetCellBuf(int xpos, int ypos, int zpos) const noexcept {
 				auto& cell = this->m_CellxN.front();
 				//if (!cell.isInside(ypos)) { return; }

@@ -130,7 +130,7 @@ namespace FPS_n2 {
 
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_move))->SetPosition(GetMove().GetPos());
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_move))->SetLocalVolume(
-				std::clamp((int)(255.0f * (std::abs(GetMove().GetVec().magnitude() / Scale3DRate) * 0.75f + std::abs(this->m_radAdd.y) * 8.0f) * 10.0f), 0, 255)
+				std::clamp((int)(128.0f * (std::abs(GetMove().GetVec().magnitude() / DXLib_refParts->GetDeltaTime()) * 0.005f + std::abs(this->m_radAdd.y) * 0.1f) * 10.0f), 0, 128)
 			);
 			//‘_‚¢
 			for (auto& g : this->m_Gun) {
@@ -223,9 +223,9 @@ namespace FPS_n2 {
 				MoveMat = Matrix3x3DX::Axis1(this->m_BodyNormal, (Matrix3x3DX::RotAxis(Vector3DX::up(), yradBody) * Matrix3x3DX::RotVec2(Vector3DX::up(), this->m_BodyNormal)).zvec() * -1.0f);
 			}
 			//’n–Ê”»’è
+			float OnGroundHeight = 0.0f;
+			int OnGroundCount = 0;
 			{
-				float OnGroundHeight = 0.0f;
-				int OnGroundCount = 0;
 				//—š‘Ñ‚ÌÚ’n”»’è
 				for (const auto& LR : this->m_CrawlerFrame) {
 					for (const auto& f : LR) {
@@ -238,30 +238,22 @@ namespace FPS_n2 {
 				int OnGroundCountSquare = 0;
 				for (const auto& s : this->m_VecData->GetSquareFrameList()) {
 					auto p_t = GetObj().GetFramePosition(s);
-					auto pos_t1 = p_t + (Vector3DX::up() * 3.0f * Scale3DRate);
-					auto pos_t2 = p_t + (Vector3DX::up() * -0.5f * Scale3DRate);
+					auto pos_t1 = p_t + (Vector3DX::up() * 1.0f * Scale3DRate);
+					auto pos_t2 = p_t + (Vector3DX::up() * -1.0f * Scale3DRate);
 					if (BackGroundParts->CheckLinetoMap(pos_t1, &pos_t2)) {
 						OnGroundHeight += pos_t2.y;
 						++OnGroundCount;
 						++OnGroundCountSquare;
 					}
 				}
-				//
-				auto pos_ytmp = GetMove().GetPos().y;
-				if (OnGroundCount > 0) {
-					Easing(&pos_ytmp, (OnGroundHeight / OnGroundCount), 0.9f, EasingType::OutExpo);
-				}
-				Vector3DX Pos = GetMove().GetPos();
-				Pos.y = pos_ytmp;
-				SetMove().SetPos(Pos);
 				//’n–Êor…–Ê‚É‚¢‚é‚©‚Ç‚¤‚©
 				if ((OnGroundCount > 0)) {
 					//‘OiŒã‘Þ
 					this->m_speed_add = std::clamp(this->m_speed_add +
-						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) ? 3.0f : -12.0f) * DXLib_refParts->GetDeltaTime(),
+						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) ? 3.0f : -1.0f) * DXLib_refParts->GetDeltaTime(),
 						0.0f, this->m_VecData->GetMaxFrontSpeed());
 					this->m_speed_sub = std::clamp(this->m_speed_sub -
-						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) ? 3.0f : -12.0f) * DXLib_refParts->GetDeltaTime(),
+						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) ? 3.0f : -1.0f) * DXLib_refParts->GetDeltaTime(),
 						this->m_VecData->GetMaxBackSpeed(), 0.f);
 					//ù‰ñ
 					this->m_yradadd_right = std::clamp(this->m_yradadd_right +
@@ -271,11 +263,11 @@ namespace FPS_n2 {
 						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_D) ? 60.f : -120.f) * DXLib_refParts->GetDeltaTime(),
 						-this->m_VecData->GetMaxBodyRad(), 0.0f);
 				}
-				Easing(&this->m_speed, (this->m_speed_add + this->m_speed_sub), 0.9f, EasingType::OutExpo);
+				Easing(&this->m_speed, (this->m_speed_add + this->m_speed_sub) * 20.f, 0.9f, EasingType::OutExpo);
 				Easing(&this->m_radAdd.y, deg2rad(this->m_yradadd_left + this->m_yradadd_right), 0.9f, EasingType::OutExpo);
 				//Šµ«
 				const auto radold = this->m_radAdd;
-				this->m_radAdd.x = deg2rad(this->m_speed * -5.0f);
+				this->m_radAdd.x = deg2rad(this->m_speed * -1.0f);
 				this->m_radAdd.z = deg2rad(this->m_radAdd.y / deg2rad(5.0f) * -5.0f);
 				Easing(&this->m_Tilt, Vector2DX::vget(
 					std::clamp(this->m_radAdd.x - radold.x, deg2rad(-30.0f), deg2rad(30.0f)),
@@ -283,7 +275,7 @@ namespace FPS_n2 {
 
 				MoveMat *= Matrix3x3DX::RotAxis(MoveMat.xvec(), -this->m_Tilt.x) * Matrix3x3DX::RotAxis(MoveMat.zvec(), this->m_Tilt.y);
 
-				MoveVec = MoveMat.zvec() * -(this->m_speed / 3.6f * Scale3DRate * DXLib_refParts->GetDeltaTime());
+				MoveVec = MoveMat.zvec() * -(this->m_speed / 3.6f * Scale3DRate *DXLib_refParts->GetDeltaTime());
 				if (OnGroundCountSquare < 3 || (OnGroundCount == 0)) {
 					MoveVec.y = GetMove().GetVec().y + (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));
 				}
@@ -309,15 +301,28 @@ namespace FPS_n2 {
 				}
 			}
 			//“]—Ö
-			this->m_CrawlerRotateLeft += -this->m_speed / 3.6f * 0.015f + this->m_radAdd.y * 0.1f;
-			this->m_CrawlerRotateRight += -this->m_speed / 3.6f * 0.015f - this->m_radAdd.y * 0.1f;
+			this->m_CrawlerRotateLeft += -this->m_speed / 3.6f * 0.0015f + this->m_radAdd.y * 0.1f;
+			this->m_CrawlerRotateRight += -this->m_speed / 3.6f * 0.0015f - this->m_radAdd.y * 0.1f;
 
 			MoveMat = MoveMat * Matrix3x3DX::RotAxis(Vector3DX::up(), -this->m_radAdd.y * DXLib_refParts->GetDeltaTime());
 			//ˆÚ“®
 			SetMove().SetVec(MoveVec);
-			SetMove().SetPos(GetMove().GetPos() + GetMove().GetVec());
+
+			auto Pos = GetMove().GetPos() + GetMove().GetVec();
+
+			if (OnGroundCount > 0) {
+				auto pos_ytmp = GetMove().GetPos().y;
+				Easing(&pos_ytmp, (OnGroundHeight / OnGroundCount), 0.9f, EasingType::OutExpo);
+				Pos.y = pos_ytmp;
+			}
+
+
+			Pos.x = std::clamp(Pos.x, -15.f * Scale3DRate, 15.f * Scale3DRate);
+			Pos.z = std::clamp(Pos.z, -15.f * Scale3DRate, 15.f * Scale3DRate);
+			SetMove().SetPos(Pos);
+
 			SetMove().SetMat(MoveMat);
-			SetMove().Update(0.0f, 0.0f);
+			SetMove().Update(0.8f, 0.0f);
 			UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 
 			//”j‰ó
@@ -328,10 +333,13 @@ namespace FPS_n2 {
 				auto Put = BackGroundParts->GetPoint(GetMove().GetPos());
 				int IsBreak = 0;
 				for (int xp = -xput / 2; xp < xput / 2; ++xp) {
-					for (int yp = 0; yp < yput; ++yp) {
+					for (int yp = 0 - 4; yp < yput; ++yp) {
 						for (int zp = -zput / 2; zp < zput / 2; ++zp) {
-							auto& cell = BackGroundParts->GetCellBuf((Put.x + xp), (Put.y + yp), (Put.z + zp));
-							if (cell.GetCell() == 0) {
+							int xx = (Put.x + xp);
+							int yy = (Put.y + yp);
+							int zz = (Put.z + zp);
+							auto& cell = BackGroundParts->GetCellBuf(xx, yy, zz);
+							if (cell.GetCell() == BackGround::s_EmptyBlick) {
 								continue;
 							}
 							if (cell.GetCell() == 1) {
@@ -340,7 +348,11 @@ namespace FPS_n2 {
 							if (cell.GetCell() == 4) {
 								continue;
 							}
-							BackGroundParts->SetBlick((Put.x + xp), (Put.y + yp), (Put.z + zp), BackGround::s_EmptyBlick);
+							BackGroundParts->SetBlick(xx, yy, zz, BackGround::s_EmptyBlick);
+							if ((xp % 3 == 0) || (zp % 3 == 0)) {
+								//EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(xx, yy, zz),
+								//	Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.f)))), 3.f + GetRandf(2.f), 3.f);
+							}
 							++IsBreak;
 						}
 					}
@@ -348,8 +360,8 @@ namespace FPS_n2 {
 				if (IsBreak>0) {
 					BackGroundParts->UpdateOnce();
 					if (IsBreak > 20) {
-						this->m_speed_add *= 0.2f;
-						this->m_speed_sub *= 0.2f;
+						//this->m_speed_add *= 0.5f;
+						//this->m_speed_sub *= 0.5f;
 					}
 				}
 			}
