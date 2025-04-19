@@ -119,8 +119,8 @@ namespace FPS_n2 {
 			}
 			PlayerMngr->SetHelicopter(std::make_shared<Objects::HelicopterObj>());
 			ObjectManager::Instance()->InitObject(PlayerMngr->GetHelicopter(), "data/model/hindD/");
-			PlayerMngr->SetVehicle(std::make_shared<Objects::VehicleObj>());
-			ObjectManager::Instance()->InitObject(PlayerMngr->GetVehicle(), "data/model/BMP3/");
+			//PlayerMngr->SetVehicle(std::make_shared<Objects::VehicleObj>());
+			//ObjectManager::Instance()->InitObject(PlayerMngr->GetVehicle(), "data/model/BMP3/");
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
@@ -188,10 +188,10 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
 
-			Vector3DX pos_t = Matrix3x3DX::Vtrans(Vector3DX::forward() * (15.f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
-			pos_t.y = -25.f * Scale3DRate;
+			//Vector3DX pos_t = Matrix3x3DX::Vtrans(Vector3DX::forward() * (15.f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
+			//pos_t.y = -25.f * Scale3DRate;
 
-			PlayerMngr->GetVehicle()->Spawn(std::atan2f(pos_t.x, pos_t.z), pos_t);
+			//PlayerMngr->GetVehicle()->Spawn(std::atan2f(pos_t.x, pos_t.z), pos_t);
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 #if defined(DEBUG)
@@ -324,7 +324,7 @@ namespace FPS_n2 {
 					//ホストならBMPの判定もやる
 					if (!this->m_NetWorkController->GetClient() && this->m_NetWorkController->GetServerPlayer()) {
 						//PlayerMngr->GetVehicle()->GetDamageEvent()//TODO
-						PlayerMngr->GetVehicle()->SetDamageEventReset();
+						//PlayerMngr->GetVehicle()->SetDamageEventReset();
 					}
 				}
 				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//オンライン
@@ -364,7 +364,7 @@ namespace FPS_n2 {
 						//このプレイヤーが出したダメージイベントをリストに追加
 						chara->PopDamageEvent(&this->m_DamageEvents);
 					}
-					PlayerMngr->GetVehicle()->PopDamageEvent(&this->m_DamageEvents);
+					//PlayerMngr->GetVehicle()->PopDamageEvent(&this->m_DamageEvents);
 				}
 				//ダメージイベント
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {

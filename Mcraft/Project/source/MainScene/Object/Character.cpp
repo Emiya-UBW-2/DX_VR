@@ -130,7 +130,7 @@ namespace FPS_n2 {
 					PlayerMngr->GetPlayer(AttackID)->GetChara()->SetDamage(GetMyPlayerID(), Damage, ArmerDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
 				else if (AttackID == -1) {
-					PlayerMngr->GetVehicle()->SetDamage(GetMyPlayerID(), Damage, ArmerDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+					//PlayerMngr->GetVehicle()->SetDamage(GetMyPlayerID(), Damage, ArmerDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
 				else {
 					//TODO PlayerMngr->GetHelicopter()

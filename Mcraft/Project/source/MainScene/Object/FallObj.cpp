@@ -89,7 +89,7 @@ namespace FPS_n2 {
 			{
 				Vector3DX EndPos = PosBuf;
 				Vector3DX Normal;
-
+/*
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				if (PlayerMngr->GetVehicle()->CheckLine(GetMove().GetRePos(), &EndPos, &Normal)) {
 					PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
@@ -101,7 +101,9 @@ namespace FPS_n2 {
 					}
 					this->m_FallObject->RotateOnGround(&SetMove());
 				}
-				else if (BackGroundParts->CheckLinetoMap(GetMove().GetRePos(), &EndPos, &Normal)) {
+				else
+//*/
+				if (BackGroundParts->CheckLinetoMap(GetMove().GetRePos(), &EndPos, &Normal)) {
 					PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
 					SetMove().SetVec(Vector3DX::Reflect(GetMove().GetVec(), Normal) * 0.5f);
 					this->m_yAdd = 0.f;

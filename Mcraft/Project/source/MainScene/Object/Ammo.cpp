@@ -29,10 +29,10 @@ namespace FPS_n2 {
 			//ƒwƒŠ‚Æ‚Ì”»’è
 			//TODO PlayerMngr->GetHelicopter()
 			//íŽÔ‚Æ‚Ì”»’è
-			if (this->m_ShootCheraID != -1 && PlayerMngr->GetVehicle()->CheckAmmoHit(repos_tmp, &pos_tmp)) {
-				SetDelete();
-				is_HitAll = true;
-			}
+			//if (this->m_ShootCheraID != -1 && PlayerMngr->GetVehicle()->CheckAmmoHit(repos_tmp, &pos_tmp)) {
+			//	SetDelete();
+			//	is_HitAll = true;
+			//}
 			//ƒLƒƒƒ‰‚Æ‚Ì”»’è
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				if (PlayerMngr->GetPlayer(loop)->GetChara()->CheckDamageRay((*this->m_AmmoData)->GetDamage(), (PlayerID)this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
