@@ -250,10 +250,10 @@ namespace FPS_n2 {
 				if ((OnGroundCount > 0)) {
 					//‘OiŒã‘Þ
 					this->m_speed_add = std::clamp(this->m_speed_add +
-						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) ? 3.0f : -1.0f) * DXLib_refParts->GetDeltaTime(),
+						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) ? 3.0f : -12.0f) * DXLib_refParts->GetDeltaTime(),
 						0.0f, this->m_VecData->GetMaxFrontSpeed());
 					this->m_speed_sub = std::clamp(this->m_speed_sub -
-						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) ? 3.0f : -1.0f) * DXLib_refParts->GetDeltaTime(),
+						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) ? 3.0f : -12.0f) * DXLib_refParts->GetDeltaTime(),
 						this->m_VecData->GetMaxBackSpeed(), 0.f);
 					//ù‰ñ
 					this->m_yradadd_right = std::clamp(this->m_yradadd_right +
@@ -363,6 +363,7 @@ namespace FPS_n2 {
 						//this->m_speed_add *= 0.5f;
 						//this->m_speed_sub *= 0.5f;
 					}
+					Camera3D::Instance()->SetCamShake(0.1f, 0.1f);
 				}
 			}
 		}

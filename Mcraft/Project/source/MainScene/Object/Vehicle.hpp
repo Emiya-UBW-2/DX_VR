@@ -10,7 +10,7 @@ namespace FPS_n2 {
 	namespace Objects {
 		//íÔ
 		class VehicleObj : public BaseObject, public EffectControl {
-			static const PlayerID								m_MyPlayerID{ -1 };//Ô—¼‚Í‚Æ‚è‚ ‚¦‚¸-1
+			static const PlayerID								m_MyPlayerID{ 0 };//Ô—¼‚Í‚Æ‚è‚ ‚¦‚¸-1
 		private:
 			//‘€ì
 			InputControl										m_Input;
@@ -76,8 +76,8 @@ namespace FPS_n2 {
 				this->m_range = std::clamp(this->m_range - float(PadControl::Instance()->GetMouseWheelRot()), 1.0f, 4.0f);
 				Vector3DX eyeposBase = GetMove().GetPos() + (GetMove().GetMat().yvec() * (3.0f * Scale3DRate));
 				MainCamera_t.SetCamPos(
-					eyeposBase + this->m_MouseVec.zvec() * (this->m_range * Scale3DRate),
-					eyeposBase + this->m_MouseVec.zvec() * -std::max(this->m_range * Scale3DRate, 1.0f),
+					eyeposBase + this->m_MouseVec.zvec() * (this->m_range * Scale3DRate) + Camera3D::Instance()->GetCamShake() * 10.f,
+					eyeposBase + this->m_MouseVec.zvec() * -std::max(this->m_range * Scale3DRate, 1.0f) + Camera3D::Instance()->GetCamShake()*2.f * 10.f,
 					Lerp(GetMove().GetMat().yvec(), Vector3DX::up(), std::clamp(this->m_range / 3.0f, 0.0f, 1.0f))
 				);
 			}
