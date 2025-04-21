@@ -1201,7 +1201,7 @@ namespace FPS_n2 {
 				PerlinNoise ns(seed);
 				MazeControl mazeControl;
 
-				int Size = 25;
+				int Size = 23;
 				mazeControl.createMaze(Size, Size, seed);
 				int Rate = 6;
 				int Heights = 10;
