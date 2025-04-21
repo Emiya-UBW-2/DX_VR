@@ -456,30 +456,32 @@ namespace FPS_n2 {
 				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Pinky)), FingerPer.GetFingerPer(1, 4), 0.8f, EasingType::OutExpo);
 			}
 			//下半身アニメ演算
-			if (this->m_AnimPerBuf[static_cast<int>(GetBottomTurnAnimSelect())] > 0.f) {
-				SetAnimLoop(static_cast<int>(GetBottomTurnAnimSelect()), 0.5f);
+			if (IsDraw(0) || IsDraw(1) || IsDraw(2)) {
+				if (this->m_AnimPerBuf[static_cast<int>(GetBottomTurnAnimSelect())] > 0.f) {
+					SetAnimLoop(static_cast<int>(GetBottomTurnAnimSelect()), 0.5f);
+				}
+				if (this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Bottom_Stand_Run)] > 0.f) {
+					SetAnimLoop(static_cast<int>(CharaAnimeID::Bottom_Stand_Run), GetSpeed() * 0.5f);
+				}
+				float AnimSpeed = 1.15f * std::clamp(GetSpeed() / 0.65f, 0.5f, 1.f);
+				if (this->m_AnimPerBuf[static_cast<int>(GetBottomWalkAnimSelect())] > 0.f) {
+					SetAnimLoop(static_cast<int>(GetBottomWalkAnimSelect()), this->m_MoveControl.GetVecFront() * AnimSpeed);
+				}
+				if (this->m_AnimPerBuf[static_cast<int>(GetBottomLeftStepAnimSelect())] > 0.f) {
+					SetAnimLoop(static_cast<int>(GetBottomLeftStepAnimSelect()), this->m_MoveControl.GetVecLeft() * AnimSpeed);
+				}
+				if (this->m_AnimPerBuf[static_cast<int>(GetBottomWalkBackAnimSelect())] > 0.f) {
+					SetAnimLoop(static_cast<int>(GetBottomWalkBackAnimSelect()), this->m_MoveControl.GetVecRear() * AnimSpeed);
+				}
+				if (this->m_AnimPerBuf[static_cast<int>(GetBottomRightStepAnimSelect())] > 0.f) {
+					SetAnimLoop(static_cast<int>(GetBottomRightStepAnimSelect()), this->m_MoveControl.GetVecRight() * AnimSpeed);
+				}
+				//アニメ反映
+				for (int loop = 0, max = static_cast<int>(GetObj().GetAnimNum()); loop < max; ++loop) {
+					SetObj().SetAnim(loop).SetPer(this->m_AnimPerBuf.at(loop));
+				}
+				SetObj().UpdateAnimAll();
 			}
-			if (this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Bottom_Stand_Run)] > 0.f) {
-				SetAnimLoop(static_cast<int>(CharaAnimeID::Bottom_Stand_Run), GetSpeed() * 0.5f);
-			}
-			float AnimSpeed = 1.15f * std::clamp(GetSpeed() / 0.65f, 0.5f, 1.f);
-			if (this->m_AnimPerBuf[static_cast<int>(GetBottomWalkAnimSelect())] > 0.f) {
-				SetAnimLoop(static_cast<int>(GetBottomWalkAnimSelect()), this->m_MoveControl.GetVecFront() * AnimSpeed);
-			}
-			if (this->m_AnimPerBuf[static_cast<int>(GetBottomLeftStepAnimSelect())] > 0.f) {
-				SetAnimLoop(static_cast<int>(GetBottomLeftStepAnimSelect()), this->m_MoveControl.GetVecLeft() * AnimSpeed);
-			}
-			if (this->m_AnimPerBuf[static_cast<int>(GetBottomWalkBackAnimSelect())] > 0.f) {
-				SetAnimLoop(static_cast<int>(GetBottomWalkBackAnimSelect()), this->m_MoveControl.GetVecRear() * AnimSpeed);
-			}
-			if (this->m_AnimPerBuf[static_cast<int>(GetBottomRightStepAnimSelect())] > 0.f) {
-				SetAnimLoop(static_cast<int>(GetBottomRightStepAnimSelect()), this->m_MoveControl.GetVecRight() * AnimSpeed);
-			}
-			//アニメ反映
-			for (int loop = 0, max = static_cast<int>(GetObj().GetAnimNum()); loop < max; ++loop) {
-				SetObj().SetAnim(loop).SetPer(this->m_AnimPerBuf.at(loop));
-			}
-			SetObj().UpdateAnimAll();
 			{
 				Vector3DX PosBuf = GetMove().GetPosBuf();
 				//素の移動ベクトル
@@ -505,7 +507,9 @@ namespace FPS_n2 {
 				SetMove().SetVec(vec);
 				PosBuf += GetMove().GetVec();
 				//壁判定
-				BackGroundParts->CheckMapWall(GetMove().GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * (1.6f * Scale3DRate), 0.7f * Scale3DRate);
+				if (GetMove().GetVec().sqrMagnitude() > 0.01f * 0.01f) {
+					BackGroundParts->CheckMapWall(GetMove().GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * (1.6f * Scale3DRate), 0.7f * Scale3DRate);
+				}
 				//ほかプレイヤーとの判定
 				{
 					float Radius = 2.f * 0.5f * Scale3DRate;

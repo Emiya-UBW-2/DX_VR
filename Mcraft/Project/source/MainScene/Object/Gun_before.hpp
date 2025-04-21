@@ -130,16 +130,12 @@ namespace FPS_n2 {
 				SetUseHalfLambertLighting(false);
 				int min = 1 + static_cast<int>((1.f - this->m_LinePer) * this->m_LineTotal);
 				for (int loop = this->m_LineTotal - 1; loop >= min; --loop) {
-					float Per = static_cast<float>(loop - min) / this->m_LineTotal;
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255.f * Per));
 					auto p1 = (this->m_LineSelect + loop - 1) % this->m_LineTotal;
 					auto p2 = (this->m_LineSelect + loop) % this->m_LineTotal;
-					if (
-						CheckCameraViewClip_Box(this->m_Line[p1].first.get(), this->m_Line[p2].first.get()) == false
-						&& (this->m_Line[p2].second > 0.f)
-						) {
-						DrawCapsule3D(this->m_Line[p1].first.get(), this->m_Line[p2].first.get(), 0.00762f * Scale3DRate * Per, 3, GetColor(216, 216, 216), GetColor(96, 96, 64), true);
-					}
+					if (this->m_Line[p2].second <= 0.f) { continue; }
+					float Per = static_cast<float>(loop - min) / this->m_LineTotal;
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255.f * Per));
+					DrawCapsule_3D(this->m_Line[p1].first.get(), this->m_Line[p2].first.get(), 0.00762f * Scale3DRate * Per, GetColor(216, 216, 216), GetColor(96, 96, 64));
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				SetUseLighting(true);

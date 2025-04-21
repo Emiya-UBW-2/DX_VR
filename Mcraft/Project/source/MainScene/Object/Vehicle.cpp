@@ -294,9 +294,7 @@ namespace FPS_n2 {
 						Vector3DX MuzzleVec = (MuzzlePos - GetObj().GetFramePosition(cg.GetGunTrunnionFrame().GetFrameID())).normalized();
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_Shot))->Play3D(GetMove().GetPos(), 100.0f * Scale3DRate);													//サウンド
 						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, cg.GetAmmoSpec()->GetCaliber() * 10.0f * Scale3DRate, 2.f);	//銃発砲エフェクトのセット
-						auto LastAmmo = std::make_shared<Objects::AmmoObj>();
-						ObjectManager::Instance()->InitObject(LastAmmo);
-						LastAmmo->Put(&cg.GetAmmoSpec(), MuzzlePos, MuzzleVec, this->m_MyPlayerID);
+						Objects::AmmoPool::Instance()->Put(&cg.GetAmmoSpec(), MuzzlePos, MuzzleVec, this->m_MyPlayerID);
 					}
 				}
 			}

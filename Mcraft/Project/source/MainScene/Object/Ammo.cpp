@@ -4,9 +4,12 @@
 #include	"../../MainScene/Object/Character.hpp"
 #include	"../../MainScene/Player/Player.hpp"
 
+const FPS_n2::Objects::AmmoPool* SingletonBase<FPS_n2::Objects::AmmoPool>::m_Singleton = nullptr;
+
 namespace FPS_n2 {
 	namespace Objects {
 		void		AmmoObj::FirstUpdate(void) noexcept {
+			if (!IsActive()) { return; }
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
@@ -28,21 +31,23 @@ namespace FPS_n2 {
 			auto ColResGround = BackGroundParts->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
 			//ヘリとの判定
 			//TODO PlayerMngr->GetHelicopter()
+			/*
 			//戦車との判定
-			//if (this->m_ShootCheraID != -1 && PlayerMngr->GetVehicle()->CheckAmmoHit(repos_tmp, &pos_tmp)) {
-			//	SetDelete();
-			//	is_HitAll = true;
-			//}
+			if (this->m_ShootCheraID != -1 && PlayerMngr->GetVehicle()->CheckAmmoHit(repos_tmp, &pos_tmp)) {
+				SetActive(false);
+				is_HitAll = true;
+			}
+			//*/
 			//キャラとの判定
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				if (PlayerMngr->GetPlayer(loop)->GetChara()->CheckDamageRay((*this->m_AmmoData)->GetDamage(), (PlayerID)this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
-					SetDelete();
+					SetActive(false);
 					is_HitAll = true;
 				}
 			}
 			//キャラに当たらず接地したら
 			if (ColResGround && !is_HitAll) {
-				SetDelete();
+				SetActive(false);
 				//壁破壊
 				{
 					int								xput = 4;
@@ -92,7 +97,7 @@ namespace FPS_n2 {
 			}
 			//消す(スピードが0以下、貫通が0以下、5回反射する)
 			if (this->m_speed <= 0.f || this->m_penetration <= 0.f || this->m_RicochetCnt > 5 || this->m_Timer > 5.f) {
-				SetDelete();
+				SetActive(false);
 			}
 			this->m_Timer += DXLib_refParts->GetDeltaTime();
 		}

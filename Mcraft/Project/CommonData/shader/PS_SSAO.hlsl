@@ -56,11 +56,11 @@ Texture2D g_DepthMapTexture : register(t2); // 深度マップテクスチャ
 
 
 #define SAMPLES 16
-#define INTENSITY 1.0
+#define INTENSITY 1.25
 #define SCALE 0.0
 #define BIAS 0.33
-#define SAMPLE_RAD 4.5
-#define MAX_DISTANCE 1500.0
+#define SAMPLE_RAD 20.0
+#define MAX_DISTANCE 1250.0
 
 #define MOD3 float3(0.1031,0.11369,0.13787)
 

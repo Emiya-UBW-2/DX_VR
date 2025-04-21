@@ -31,6 +31,7 @@ namespace FPS_n2 {
 				this->m_yAdd = 0.f;
 				this->m_Timer = 0.f;
 				this->m_ShootCheraID = pMyID;
+				SetActive(true);
 			}
 			/*
 			//’µ‚Ë•Ô‚³‚ê‚½
@@ -47,7 +48,7 @@ namespace FPS_n2 {
 			virtual ~AmmoObj(void) noexcept { this->m_AmmoData = nullptr; }
 		public: //Œp³
 			void			Init_Sub(void) noexcept override {
-				SetActive(true);
+				SetActive(false);
 				SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
 				SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
 			}
@@ -62,6 +63,41 @@ namespace FPS_n2 {
 				DrawCapsule_3D(this->m_pos, this->m_repos, 1.f * (((*this->m_AmmoData)->GetCaliber() - 0.00762f) * 0.1f + 0.00762f) * Scale3DRate, GetColor(255, 255, 172), Yellow);
 				SetUseLighting(true);
 				SetUseHalfLambertLighting(true);
+			}
+		};
+
+
+		class AmmoPool : public SingletonBase<AmmoPool> {
+		private:
+			friend class SingletonBase<AmmoPool>;
+		private:
+			std::vector<std::shared_ptr<Objects::AmmoObj>> m_AmmoList;
+		private:
+			AmmoPool(void) noexcept {
+				this->m_AmmoList.resize(64);
+				for (auto& ammo : this->m_AmmoList) {
+					ammo = std::make_shared<Objects::AmmoObj>();
+					ObjectManager::Instance()->InitObject(ammo);
+				}
+			}
+			virtual ~AmmoPool(void) noexcept {
+				for (auto& ammo : this->m_AmmoList) {
+					ObjectManager::Instance()->DelObj(ammo);
+					ammo.reset();
+				}
+				this->m_AmmoList.clear();
+			}
+		public:
+			void Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, int pMyID) noexcept {
+				for (auto& ammo : this->m_AmmoList) {
+					if (!ammo->IsActive()) {
+						ammo->Put(pAmmoData, pos_t, pVec, pMyID);
+						return;
+					}
+				}
+				this->m_AmmoList.emplace_back(std::make_shared<Objects::AmmoObj>());
+				ObjectManager::Instance()->InitObject(this->m_AmmoList.back());
+				this->m_AmmoList.back()->Put(pAmmoData, pos_t, pVec, pMyID);
 			}
 		};
 	};

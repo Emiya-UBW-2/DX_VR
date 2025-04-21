@@ -70,6 +70,7 @@ namespace FPS_n2 {
 			ObjectManager::Instance()->LoadModelBefore("data/model/BMP3/");
 		}
 		void			MainGameScene::LoadEnd_Sub(void) noexcept {
+			Objects::AmmoPool::Create();
 			Player::PlayerManager::Create();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			PlayerMngr->Init(NetWork::Player_num);
@@ -528,6 +529,7 @@ namespace FPS_n2 {
 			}
 		}
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
+			Objects::AmmoPool::Release();
 			BackGround::BackGroundControl::Release();
 			CommonBattleResource::Dispose();
 			this->m_UIclass.Dispose();
