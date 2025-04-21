@@ -26,6 +26,9 @@ namespace FPS_n2 {
 			bool												m_Reticle_on = false;
 			float												m_LensSizeLen{10000};
 
+			float												m_GunShotZrand{};
+			float												m_GunShotZrandR{};
+
 			FallControl											m_Grenade;
 			bool												m_InChamber{ false };
 			std::array<ArmMovePer, static_cast<int>(Charas::GunAnimeID::ChoiceOnceMax)>	m_GunAnimePer{};

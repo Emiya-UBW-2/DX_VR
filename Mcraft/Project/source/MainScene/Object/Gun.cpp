@@ -235,6 +235,9 @@ namespace FPS_n2 {
 					this->m_AutoAimControl.Update(IsActiveAutoAim, GetMyUserPlayerID(), GetPartsFrameMatParent(GunFrame::Eyepos).pos(), GetMove().GetMat().zvec() * -1.f, GetAutoAimRadian());
 					this->m_AutoAimControl.CalcAutoAimMat(&AnimRot);
 				}
+				Easing(&m_GunShotZrandR, GetShotSwitch() ? GetRandf(90.f) : 0.f, 0.8f, EasingType::OutExpo);
+				Easing(&m_GunShotZrand, m_GunShotZrandR, 0.8f, EasingType::OutExpo);
+				AnimRot = AnimRot * Matrix3x3DX::RotAxis(AnimRot.zvec(), deg2rad(m_GunShotZrand * std::clamp(1.f - GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.f, 1.f)));
 			}
 			//•ŠíÀ•W
 			SetGunMat(Lerp(this->m_SlingRot * this->m_GunSwingMat2 * EyeYRot, AnimRot, this->m_SlingPer), Lerp(this->m_SlingPos, AnimPos, this->m_SlingPer));

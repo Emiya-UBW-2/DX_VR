@@ -685,7 +685,7 @@ namespace FPS_n2 {
 					if (!pGun) { continue; }
 					if (loop == this->m_GunPtrControl.GetNowGunSelect()) {
 						auto Mat = this->m_RagDollControl.GetFrameMat(RagFrame::RIGHThand);
-						pGun->SetGunMat(Matrix3x3DX::Get33DX(Mat), Mat.pos());
+						pGun->SetGunMat(Matrix3x3DX::Get33DX(Mat) * Matrix3x3DX::RotAxis(Vector3DX::right(),deg2rad(-90)), Mat.pos());
 						pGun->SetActiveAll(true);
 					}
 					else {
