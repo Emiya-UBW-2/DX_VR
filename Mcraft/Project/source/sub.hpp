@@ -255,7 +255,7 @@ namespace FPS_n2 {
 		}
 	public:
 		void			Update(void) noexcept {
-			this->m_EffectControl.Execute();
+			this->m_EffectControl.Update();
 		}
 	};
 }

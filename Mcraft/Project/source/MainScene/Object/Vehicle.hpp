@@ -112,7 +112,7 @@ namespace FPS_n2 {
 			~VehicleObj(void) noexcept {}
 		public: //Œp³
 			void			Init_Sub(void) noexcept override;
-			void			FirstExecute(void) noexcept override;
+			void			FirstUpdate(void) noexcept override;
 			void			Draw(bool isDrawSemiTrans, int Range) noexcept override;
 			void			Dispose_Sub(void) noexcept override {
 				this->m_VecData.reset();

@@ -177,7 +177,7 @@ namespace FPS_n2 {
 					this->m_IsDoEnd = true;
 				}
 
-				void Execute(void) noexcept {
+				void Update(void) noexcept {
 					if (this->m_JobEnd) {
 						this->m_JobEnd = false;
 #if defined(DEBUG) && CHECKTHREADTIME
@@ -602,7 +602,7 @@ namespace FPS_n2 {
 			//
 			void			UpdateOnce(void) noexcept;
 
-			void			Execute(void) noexcept;
+			void			Update(void) noexcept;
 			//
 			void			BG_Draw(void) const noexcept;
 			void			Shadow_Draw(void) const noexcept;

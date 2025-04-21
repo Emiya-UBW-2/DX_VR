@@ -79,7 +79,7 @@ namespace FPS_n2 {
 			this->m_SoundSwitch = true;
 			this->m_IsEndFall = false;
 		}
-		void			FallObj::FirstExecute(void) noexcept {
+		void			FallObj::FirstUpdate(void) noexcept {
 			if (!IsActive()) { return; }
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();

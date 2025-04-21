@@ -195,7 +195,7 @@ namespace FPS_n2 {
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 #if defined(DEBUG)
-			DebugDraw::Instance()->SetPoint("Execute=Start");
+			DebugDraw::Instance()->SetPoint("Update=Start");
 #endif // DEBUG
 			auto* CameraParts = Camera3D::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
@@ -339,7 +339,7 @@ namespace FPS_n2 {
 							//サーバーがCPUを動かす場合
 							if (!this->m_NetWorkController->GetClient()) {
 								//cpu
-								//PlayerMngr->GetPlayer(loop)->GetAI()->Execute(&MyInput);//AIに入力させる
+								//PlayerMngr->GetPlayer(loop)->GetAI()->Update(&MyInput);//AIに入力させる
 							}
 							//サーバーからのデータでキャラを動かす
 							chara->OverrideAutoAimID(static_cast<PlayerID>(Ret.GetPlayerSendData().GetFreeData()[0]), Ret.GetPlayerSendData().GetFreeData()[1]);
@@ -358,7 +358,7 @@ namespace FPS_n2 {
 						}
 						else {
 							InputControl OtherInput;
-							PlayerMngr->GetPlayer(loop)->GetAI()->Execute(&OtherInput);//AIに入力させる
+							PlayerMngr->GetPlayer(loop)->GetAI()->Update(&OtherInput);//AIに入力させる
 							chara->Input(OtherInput);
 						}
 						//このプレイヤーが出したダメージイベントをリストに追加
@@ -382,9 +382,9 @@ namespace FPS_n2 {
 
 			//PlayerMngr->GetVehicle()->SetInput(MyInput, true);
 
-			//Execute
-			ObjMngr->ExecuteObject();
-			ObjMngr->LateExecuteObject();
+			//Update
+			ObjMngr->UpdateObject();
+			ObjMngr->LateUpdateObject();
 			//視点
 			{
 				//カメラ
@@ -483,7 +483,7 @@ namespace FPS_n2 {
 				EffectSingleton::Instance()->SetEffectColor(Effect::ef_dust, 255, 255, 255, 64);
 			}
 			//背景
-			BackGroundParts->Execute();
+			BackGroundParts->Update();
 			//UIパラメーター
 			{
 				//timer
@@ -495,7 +495,7 @@ namespace FPS_n2 {
 			HitMarkerPool::Instance()->Update();
 			EffectSingleton::Instance()->Update();
 #if defined(DEBUG)
-			DebugDraw::Instance()->SetPoint("Execute=End");
+			DebugDraw::Instance()->SetPoint("Update=End");
 #endif // DEBUG
 			return true;
 		}

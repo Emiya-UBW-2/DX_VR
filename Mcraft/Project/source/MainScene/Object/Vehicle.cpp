@@ -112,7 +112,7 @@ namespace FPS_n2 {
 			this->m_hitres.resize(GetCol().GetMeshNum());											//モジュールごとの当たり判定結果を確保
 			this->m_hitssort.resize(GetCol().GetMeshNum());											//モジュールごとの当たり判定順序を確保
 		}
-		void			VehicleObj::FirstExecute(void) noexcept {
+		void			VehicleObj::FirstUpdate(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();

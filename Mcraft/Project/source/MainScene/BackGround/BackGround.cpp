@@ -1201,7 +1201,7 @@ namespace FPS_n2 {
 				PerlinNoise ns(seed);
 				MazeControl mazeControl;
 
-				int Size = 23;
+				int Size = 25;
 				mazeControl.createMaze(Size, Size, seed);
 				int Rate = 6;
 				int Heights = 10;
@@ -1457,7 +1457,7 @@ namespace FPS_n2 {
 			}
 		}
 		//
-		void		BackGroundControl::Execute(void) noexcept {
+		void		BackGroundControl::Update(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
 				if ((loop != 0) && (loop != this->m_ThreadCounter)) { continue; }
@@ -1466,7 +1466,7 @@ namespace FPS_n2 {
 					this->m_Draws.at(loop).m_vert32.Disable();
 				}
 				else {
-					this->m_Jobs.at(loop).Execute();
+					this->m_Jobs.at(loop).Update();
 				}
 				//
 				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (this->m_ShadowRate < this->m_CellxN.at(loop).m_scaleRate)) {
@@ -1474,7 +1474,7 @@ namespace FPS_n2 {
 					this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + loop)).m_isEnd = false;
 				}
 				else {
-					this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + loop)).Execute();
+					this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + loop)).Update();
 				}
 			}
 			++this->m_ThreadCounter %= TotalCellLayer;

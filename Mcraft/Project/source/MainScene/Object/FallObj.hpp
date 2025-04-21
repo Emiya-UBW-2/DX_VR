@@ -45,7 +45,7 @@ namespace FPS_n2 {
 			void				Init_Sub(void) noexcept override {
 				SetActive(false);
 			}
-			void				FirstExecute(void) noexcept override;
+			void				FirstUpdate(void) noexcept override;
 			void				DrawShadow(void) noexcept override {
 				if (!IsActive()) { return; }
 
@@ -83,7 +83,7 @@ namespace FPS_n2 {
 				SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
 				SetActive(true);
 			}
-			void				FirstExecute(void) noexcept override{}
+			void				FirstUpdate(void) noexcept override{}
 			void				DrawShadow(void) noexcept override {
 				if (!IsActive()) { return; }
 				auto* CameraParts = Camera3D::Instance();

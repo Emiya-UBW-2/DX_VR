@@ -113,7 +113,7 @@ namespace FPS_n2 {
 					line.second = 1.f;
 				}
 			}
-			void		ExecuteMuzzleSmoke(const Vector3DX& pPos, bool IsAddSmoke) {
+			void		UpdateMuzzleSmoke(const Vector3DX& pPos, bool IsAddSmoke) {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				for (auto& line : this->m_Line) {
 					float Per = 0.1f * line.second;

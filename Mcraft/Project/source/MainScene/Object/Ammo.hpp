@@ -51,7 +51,7 @@ namespace FPS_n2 {
 				SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
 				SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
 			}
-			void			FirstExecute(void) noexcept override;
+			void			FirstUpdate(void) noexcept override;
 			void			DrawShadow(void) noexcept override {}
 			void			Draw(bool isDrawSemiTrans, int Range) noexcept override {
 				if (!IsActive()) { return; }

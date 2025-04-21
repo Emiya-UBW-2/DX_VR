@@ -23,7 +23,7 @@ namespace FPS_n2 {
 			}
 		public:
 			void			Init_Sub(void) noexcept override;
-			void			FirstExecute(void) noexcept override { FirstExecute_GunParts(); }
+			void			FirstUpdate(void) noexcept override { FirstUpdate_GunParts(); }
 			void			SetGunPartsMatrix(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept;
 			void			DrawShadow(void) noexcept override {
 				if (!IsActive()) { return; }
@@ -81,7 +81,7 @@ namespace FPS_n2 {
 			const char* GetFrameStr(int id) noexcept override { return GunFrameName[id]; }
 		public:
 			virtual void	Init_GunParts(void) noexcept {}
-			virtual void	FirstExecute_GunParts(void) noexcept {}
+			virtual void	FirstUpdate_GunParts(void) noexcept {}
 			virtual void	Dispose_GunParts(void) noexcept {}
 		};
 
@@ -93,7 +93,7 @@ namespace FPS_n2 {
 			virtual ~MagazinePartsObj(void) noexcept {}
 		public:
 			void			Init_GunParts(void) noexcept override;
-			void			FirstExecute_GunParts(void) noexcept override {
+			void			FirstUpdate_GunParts(void) noexcept override {
 				for (auto& ammo : this->m_Ammo) {
 					int index = static_cast<int>(&ammo - &this->m_Ammo.front());
 					auto Mat = GetObj().GetFrameLocalWorldMatrix(1 + index);

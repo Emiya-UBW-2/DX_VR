@@ -140,7 +140,7 @@ namespace FPS_n2 {
 			return false;
 		}
 		//ëÄçÏ
-		void			CharacterObj::ExecuteInput(void) noexcept {
+		void			CharacterObj::UpdateInput(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
@@ -376,7 +376,7 @@ namespace FPS_n2 {
 			}
 		}
 		//SetMatéwé¶çXêV
-		void			CharacterObj::ExecuteMatrix(void) noexcept {
+		void			CharacterObj::UpdateMatrix(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -753,9 +753,9 @@ namespace FPS_n2 {
 			SetMinAABB(Vector3DX::vget(-2.5f, -0.5, -2.5f) * Scale3DRate);
 			SetMaxAABB(Vector3DX::vget(2.5f, 2.0f, 2.5f) * Scale3DRate);
 		}
-		void			CharacterObj::FirstExecute(void) noexcept {
-			ExecuteInput();
-			ExecuteMatrix();
+		void			CharacterObj::FirstUpdate(void) noexcept {
+			UpdateInput();
+			UpdateMatrix();
 		}
 		void			CharacterObj::CheckDraw_Sub(int) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();

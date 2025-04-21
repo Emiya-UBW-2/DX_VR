@@ -52,7 +52,7 @@ namespace FPS_n2 {
 				}
 				m_Timer = 0.f;
 			}
-			void				FirstExecute(void) noexcept override{
+			void				FirstUpdate(void) noexcept override{
 				auto* DXLib_refParts = DXLib_ref::Instance();
 
 				SetAnimLoop(static_cast<int>(0), 1.f);

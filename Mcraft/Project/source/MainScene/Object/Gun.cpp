@@ -493,7 +493,7 @@ namespace FPS_n2 {
 			}
 		}
 		//グレネード更新
-		void				GunObj::ExecuteGrenade(void) noexcept {
+		void				GunObj::UpdateGrenade(void) noexcept {
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 
 			for (const auto& grenade : this->m_Grenade.GetPtrList()) {
@@ -600,13 +600,13 @@ namespace FPS_n2 {
 			SetMaxAABB(Vector3DX::vget(0.5f, 0.5f, 0.5f) * Scale3DRate);
 			InitGunAnimePer();
 		}
-		void				GunObj::FirstExecute(void) noexcept {
+		void				GunObj::FirstUpdate(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			if (IsFirstLoop()) {
 				this->m_MuzzleSmokeControl.InitMuzzleSmoke(GetPartsFrameMatParent(GunFrame::Muzzle).pos());
 			}
 			else {
-				this->m_MuzzleSmokeControl.ExecuteMuzzleSmoke(GetPartsFrameMatParent(GunFrame::Muzzle).pos(), GetGunAnime() != Charas::GunAnimeID::Shot && !IsNeedCalcSling());
+				this->m_MuzzleSmokeControl.UpdateMuzzleSmoke(GetPartsFrameMatParent(GunFrame::Muzzle).pos(), GetGunAnime() != Charas::GunAnimeID::Shot && !IsNeedCalcSling());
 			}
 			//
 			for (int loop = 0; loop < static_cast<int>(Charas::GunAnimeID::ChoiceOnceMax); ++loop) {
@@ -704,7 +704,7 @@ namespace FPS_n2 {
 				Easing(&this->m_RecoilRadAdd, Vector2DX::zero(), 0.7f, EasingType::OutExpo);
 			}
 			//グレネード演算
-			ExecuteGrenade();
+			UpdateGrenade();
 			//
 			if (this->m_SightPtr && GetSightZoomSize() > 1.f) {
 				float Per = 1.f - std::clamp(GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.f, 1.f);

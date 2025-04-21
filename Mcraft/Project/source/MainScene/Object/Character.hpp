@@ -130,8 +130,8 @@ namespace FPS_n2 {
 			const auto&		GetAutoAimPos() const noexcept { return GetGunPtrNow()->GetAutoAimPos(); }
 			void			OverrideAutoAimID(PlayerID ID, int pos) const noexcept { GetGunPtrNow()->OverrideAutoAimID(ID, pos); }
 		private: //更新関連
-			void			ExecuteInput(void) noexcept;
-			void			ExecuteMatrix(void) noexcept;
+			void			UpdateInput(void) noexcept;
+			void			UpdateMatrix(void) noexcept;
 		public: //コンストラクタ、デストラクタ
 			CharacterObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::Human); }
 			virtual ~CharacterObj(void) noexcept {}
@@ -176,7 +176,7 @@ namespace FPS_n2 {
 			const char*		GetShapeStr(int id) noexcept override { return CharaShapeName[id]; }
 		private: //継承
 			void			Init_Sub(void) noexcept override;
-			void			FirstExecute(void) noexcept override;
+			void			FirstUpdate(void) noexcept override;
 			void			CheckDraw_Sub(int) noexcept override;
 			void			Draw(bool isDrawSemiTrans, int Range) noexcept override;
 			void			DrawShadow(void) noexcept override;

@@ -121,7 +121,7 @@ namespace FPS_n2 {
 						(GetPartsFrameMatParent(GunFrame::CartVec).pos() - GetPartsFrameMatParent(GunFrame::Cart).pos() + Vector3DX::vget(GetRandf(0.2f), 0.5f + GetRandf(1.f), GetRandf(0.2f))).normalized() * (Scale3DRate * 2.f / 60.f), 2.f, Objects::FallObjectType::Cart);
 				}
 			}
-			void				ExecuteGrenade(void) noexcept;
+			void				UpdateGrenade(void) noexcept;
 			const auto			GetAnimDataNow(Charas::GunAnimeID ID) const noexcept {
 				auto* AnimMngr = Charas::GunAnimManager::Instance();
 				return AnimMngr->GetAnimNow(GetMyUserPlayerID(), AnimMngr->GetAnimData(GetGunAnim(ID)), this->m_GunAnimeTime.at(static_cast<int>(ID)));
@@ -327,7 +327,7 @@ namespace FPS_n2 {
 			void				SetupGun(void) noexcept;
 		private: //åpè≥
 			void				Init_Sub(void) noexcept override;
-			void				FirstExecute(void) noexcept override;
+			void				FirstUpdate(void) noexcept override;
 			void				DrawShadow(void) noexcept override;
 			void				CheckDraw_Sub(int) noexcept override;
 			void				Draw(bool isDrawSemiTrans, int Range) noexcept override;

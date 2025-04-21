@@ -6,7 +6,7 @@
 
 namespace FPS_n2 {
 	namespace Objects {
-		void		AmmoObj::FirstExecute(void) noexcept {
+		void		AmmoObj::FirstUpdate(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
