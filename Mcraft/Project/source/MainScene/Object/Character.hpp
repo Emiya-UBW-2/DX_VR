@@ -81,7 +81,7 @@ namespace FPS_n2 {
 		public://ƒQƒbƒ^[
 			const auto&		GetMoveEyePos(void) const noexcept { return this->m_WalkSwingControl.GetMoveEyePos(); }
 			const auto&		GetRagDoll(void) const noexcept { return this->m_RagDollControl.GetRagDoll(); }
-			const auto& GetLeanRad(void) const noexcept { return this->m_LeanControl.GetRad(); }
+			const auto&		GetLeanRad(void) const noexcept { return this->m_LeanControl.GetRad(); }
 			const auto&		GetRotateRad(void) const noexcept { return this->m_RotateControl.GetRad(); }
 			const auto&		GetHitBoxList(void) const noexcept { return this->m_HitBoxControl.GetHitBoxPointList(); }
 			const auto&		GetGunPtr(int ID) const noexcept { return this->m_GunPtrControl.GetGunPtr(ID); }

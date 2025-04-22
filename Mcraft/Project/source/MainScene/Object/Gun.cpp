@@ -206,7 +206,13 @@ namespace FPS_n2 {
 				Easing(&this->m_UpperRad, (this->m_UpperPrevRad - RotRad), 0.9f, EasingType::OutExpo);
 			}
 			this->m_UpperPrevRad = RotRad;
-			Easing(&this->m_GunSwingMat, Matrix3x3DX::RotAxis(Vector3DX::right(), this->m_UpperRad.x) * Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_UpperRad.y), 0.8f, EasingType::OutExpo);
+			Easing(&this->m_GunSwingMat,
+				Matrix3x3DX::RotAxis(Vector3DX::right(), this->m_UpperRad.x) *
+				Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_UpperRad.y) *
+				Matrix3x3DX::RotAxis(Vector3DX::forward(), std::clamp(
+					-this->m_UpperRad.y * 10.f * std::clamp(1.f - GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.f, 1.f),
+					deg2rad(-10), deg2rad(10))),
+					0.8f, EasingType::OutExpo);
 			Easing(&this->m_GunSwingMat2, this->m_GunSwingMat, 0.8f, EasingType::OutExpo);
 			//ƒXƒŠƒ“ƒO
 			Easing(&this->m_SlingPer, IsSelectGun ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
