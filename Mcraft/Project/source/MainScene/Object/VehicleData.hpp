@@ -283,7 +283,7 @@ namespace FPS_n2 {
 		//–½’†ŠÖ˜A
 		class HitSortInfo {
 			size_t					m_hitmesh{ SIZE_MAX };
-			float					m_hitDistance{ -1 };
+			float					m_hitDistance{ (std::numeric_limits<float>::max)() };
 		public:
 			const auto		operator<(const HitSortInfo& tgt) const noexcept { return this->m_hitDistance < tgt.m_hitDistance; }
 			void			Set(size_t f_t, float s_t = (std::numeric_limits<float>::max)())noexcept {

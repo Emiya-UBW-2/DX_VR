@@ -92,12 +92,14 @@ namespace FPS_n2 {
 
 			virtual ~PlayerManager(void) noexcept {}
 		public:
-			const auto& GetWatchPlayer(void) const noexcept { return this->m_WatchPlayer; }
+			const auto& GetWatchPlayerID(void) const noexcept { return this->m_WatchPlayer; }
 
 			const auto& GetPlayerNum(void) const noexcept { return this->m_PlayerNum; }
 			auto& GetPlayer(int ID) noexcept { return this->m_Player[ID]; }
 
-			void SetWatchPlayer(PlayerID playerID) noexcept { this->m_WatchPlayer = playerID; }
+			auto& GetWatchPlayer(void) noexcept { return this->m_Player[this->m_WatchPlayer]; }
+
+			void SetWatchPlayerID(PlayerID playerID) noexcept { this->m_WatchPlayer = playerID; }
 
 			void		SetVehicle(const std::shared_ptr<Objects::VehicleObj>& pObj) noexcept { this->m_VehicleObj = pObj; }
 			auto&		GetVehicle(void) noexcept { return this->m_VehicleObj; }

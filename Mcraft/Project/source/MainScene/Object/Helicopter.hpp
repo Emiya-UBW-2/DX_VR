@@ -96,10 +96,7 @@ namespace FPS_n2 {
 			void				DrawShadow(void) noexcept override {
 				SetObj().SetMaterialDrawAlphaTestAll(TRUE, DX_CMP_GREATER, 128);
 				BaseObject::DrawShadow();
-			}
-			void			Draw(bool isDrawSemiTrans, int Range) noexcept override {
 				SetObj().SetMaterialDrawAlphaTestAll(FALSE, DX_CMP_GREATER, 254);
-				BaseObject::Draw(isDrawSemiTrans, Range);
 			}
 			void				Dispose_Sub(void) noexcept override {
 				auto* SE = SoundPool::Instance();

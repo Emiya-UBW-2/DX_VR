@@ -48,6 +48,7 @@ namespace FPS_n2 {
 				}
 			};
 			struct CellBuffer {
+				int8_t					m_Life{};
 				int8_t					m_Cell{};
 				int8_t					m_FillInfo{};//周りの遮蔽データのbitフラグ
 			public:
@@ -55,19 +56,23 @@ namespace FPS_n2 {
 				bool IsEmpty(void) const noexcept { return GetCell() == s_EmptyBlick; }
 				bool IsOcclusion(void) const noexcept { return this->m_FillInfo == 0b111111; }
 				bool IsOcclusion(int id) const noexcept { return (this->m_FillInfo & (1 << id)) != 0; }
+
+				bool CanDraw(void) const noexcept { return !IsEmpty() && !IsOcclusion(); }
 			public:
+				void ResetOcclusion(void) noexcept { m_FillInfo = 0; }
 				void SetOcclusion(int id) noexcept { m_FillInfo |= (1 << id); }
 			};
 			struct CellsData {
 				std::vector<CellBuffer>	m_CellBuffer;
-				int		m_scaleRate = 1;
-				int		m_All = 256 / this->m_scaleRate;
+				int		m_scale = 0;
 				//算術補助系
+				int		m_scaleRate = static_cast<int>(std::pow(MulPer, this->m_scale));
+				int		m_All = 256 / this->m_scaleRate;
 				int		m_Half = this->m_All / 2;
 				int		m_AllPow2 = this->m_All * this->m_All;
 				float	m_Scale = (CellScale * this->m_scaleRate);
 			public:
-				const bool		isFarCells(void) const noexcept { return this->m_scaleRate != 1; }
+				const bool		isFarCells(void) const noexcept { return this->m_scale != 0; }
 				//
 				const int		GetIndex(int t) const noexcept { return (t % this->m_All + this->m_All) % this->m_All; }
 				const size_t	GetCellNum(int xpos, int ypos, int zpos) const noexcept { return static_cast<size_t>(GetIndex(xpos) * this->m_AllPow2 + ypos * this->m_All + GetIndex(zpos)); }
@@ -127,7 +132,8 @@ namespace FPS_n2 {
 
 				//
 				void			SetScale(int scale) noexcept {
-					this->m_scaleRate = scale;
+					this->m_scale = scale;
+					this->m_scaleRate = static_cast<int>(std::pow(MulPer, this->m_scale));
 					this->m_All = 256 / this->m_scaleRate;
 					//算術補助系
 					this->m_Half = this->m_All / 2;
@@ -137,7 +143,10 @@ namespace FPS_n2 {
 				}
 				//
 				void			CalcOcclusion(int xpos, int ypos, int zpos) noexcept {
-					SetCellBuf(xpos, ypos, zpos).m_FillInfo = 0;
+					if (!isInside(ypos)) { return; }
+					if (GetCellBuf(xpos, ypos, zpos).IsEmpty()) { return; }
+
+					SetCellBuf(xpos, ypos, zpos).ResetOcclusion();
 					if (!GetCellBuf(xpos + 1, ypos, zpos).IsEmpty()) { SetCellBuf(xpos, ypos, zpos).SetOcclusion(0); }
 
 					if (!GetCellBuf(xpos - 1, ypos, zpos).IsEmpty()) { SetCellBuf(xpos, ypos, zpos).SetOcclusion(1); }
@@ -249,6 +258,12 @@ namespace FPS_n2 {
 					this->m_32Num.at(this->m_Now) = 0;
 					this->m_32Size = size;
 				}
+				void		Dispose(void) noexcept {
+					for (int loop = 0; loop < 2; ++loop) {
+						this->m_vert32.at(loop).clear();
+						this->m_index32.at(loop).clear();
+					}
+				}
 				void		ResetNum(void) noexcept {
 					this->m_32Num.at(this->m_Now) = 0;
 				}
@@ -277,47 +292,32 @@ namespace FPS_n2 {
 					this->m_32Num.at(static_cast<size_t>(1 - this->m_Now)) = 0;
 				}
 				void		DrawByShader(void) const noexcept {
-					if (GetOutNum() > 0) {
-						DrawPolygon32bitIndexed3DToShader2(GetOutVert().data(), static_cast<int>(GetOutNum() * 4), GetOutindex().data(), static_cast<int>(GetOutNum() * 6 / 3));
-					}
+					if (GetOutNum() == 0) { return; }
+					DrawPolygon32bitIndexed3DToShader2(GetOutVert().data(), static_cast<int>(GetOutNum() * 4), GetOutindex().data(), static_cast<int>(GetOutNum() * 6 / 3));
 				}
 				void		Draw(const GraphHandle& GrHandle) const noexcept {
-					if (GetOutNum() > 0) {
-						DrawPolygon32bitIndexed3D(GetOutVert().data(), static_cast<int>(GetOutNum() * 4), GetOutindex().data(), static_cast<int>(GetOutNum() * 6 / 3), GrHandle.get(), true);
-					}
+					if (GetOutNum() == 0) { return; }
+					DrawPolygon32bitIndexed3D(GetOutVert().data(), static_cast<int>(GetOutNum() * 4), GetOutindex().data(), static_cast<int>(GetOutNum() * 6 / 3), GrHandle.get(), true);
 				}
 			};
 			//
 			MV1								m_ObjSky;
 			GraphHandle						m_tex{};
-			GraphHandle						m_norm{};
 			std::vector<int8_t>				m_CellBase{};
 			std::array<CellsData, TotalCellLayer>	m_CellxN;
 			std::array<ThreadJobs, TotalCellLayer + TotalCellLayer>	m_Jobs;
 			//
-			int								m_BaseRate = 100;
-			int								m_ShadowRate = 100;
+			int								m_BaseRate = 1;
+			int								m_ShadowRate = 1;
 			int								m_ThreadCounter = 0;
 			struct Draw {
 				vert32				m_vert32;
 				Vector3DX			m_CamPos;
 				Vector3DX			m_CamVec;
-				Vector3DX			m_light;
 			};
-			//表示ポリゴンスレッド用
-			std::array<Draw, TotalCellLayer>	m_Draws;
-			//影スレッド用
-			std::array<Draw, TotalCellLayer>	m_DrawsSB;
-			//
-#if defined(DEBUG) & EDITBLICK
-			//Edit
-			float							LenMouse = 2.f;
-			int								xput = 5;
-			int								yput = 2;
-			int								zput = 5;
-			int8_t							blickselect = -1;
-			Vector3DX						PutPos;
-#endif
+			//0~TotalCellLayer-1 : 表示ポリゴンスレッド用
+			//TotalCellLayer~:影スレッド用
+			std::array<Draw, TotalCellLayer + TotalCellLayer>	m_Draws;
 		public:
 			BackGroundControl(void) noexcept { Load(); }
 			BackGroundControl(const BackGroundControl&) = delete;
@@ -325,7 +325,7 @@ namespace FPS_n2 {
 			BackGroundControl& operator=(const BackGroundControl&) = delete;
 			BackGroundControl& operator=(BackGroundControl&&) = delete;
 
-			virtual ~BackGroundControl(void) noexcept { Dispose(); }
+			virtual ~BackGroundControl(void) noexcept { Dispose_Load(); }
 		private:
 			inline static void		Bresenham3D(int x1, int y1, int z1, int x2, int y2, int z2, const std::function<bool(int, int, int)>& OutPutLine) noexcept {
 				int err_1{}, err_2{};
@@ -502,74 +502,170 @@ namespace FPS_n2 {
 
 				return true;
 			}
-			inline static bool		CalcYZActive(const Vector3DX& Vec, int xpos, int yMaxmin, int yMaxmax, int zMaxmin, int zMaxmax) noexcept {
-				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
-				if (Vector3DX::Dot(Vec, Vector3DX::vget(static_cast<float>(xpos) + 0.5f, static_cast<float>(yMaxmin) + 0.5f, static_cast<float>(zMaxmin) + 0.5f)) > 0.f) { return true; }
-				if (Vector3DX::Dot(Vec, Vector3DX::vget(static_cast<float>(xpos) + 0.5f, static_cast<float>(yMaxmax) + 0.5f, static_cast<float>(zMaxmax) + 0.5f)) > 0.f) { return true; }
-				if (Vector3DX::Dot(Vec, Vector3DX::vget(static_cast<float>(xpos) + 0.5f, static_cast<float>(yMaxmin) + 0.5f, static_cast<float>(zMaxmax) + 0.5f)) > 0.f) { return true; }
-				if (Vector3DX::Dot(Vec, Vector3DX::vget(static_cast<float>(xpos) + 0.5f, static_cast<float>(yMaxmax) + 0.5f, static_cast<float>(zMaxmin) + 0.5f)) > 0.f) { return true; }
-				return false;
-			}
-			inline static bool		CalcZMinMax(const Vector3DX& Vec, int xpos, int ypos, int* zMaxmin, int* zMaxmax) noexcept {
-				Vector3DX Vec1 = Vector3DX::vget(static_cast<float>(xpos) + 0.5f, static_cast<float>(ypos) + 0.5f, static_cast<float>(*zMaxmin) + 0.5f);
-				Vector3DX Vec2 = Vector3DX::vget(static_cast<float>(xpos) + 0.5f, static_cast<float>(ypos) + 0.5f, static_cast<float>(*zMaxmax) + 0.5f);
-
-				float dTa = Vector3DX::Dot(Vec, Vec1);
-				float dTb = Vector3DX::Dot(Vec, Vec2);
-				bool OnFront = (dTa >= 0.f && dTb >= 0.f);
-				if (OnFront || (dTa < 0.f && dTb < 0.f)) {
-					return OnFront;
-				}
-				int HitPosZ = *zMaxmin + static_cast<int>((*zMaxmax - *zMaxmin) * std::clamp(std::abs(dTa) / (std::abs(dTa) + std::abs(dTb)), 0.f, 1.f));
-				if (dTa < 0.f) {
-					*zMaxmin = std::max(HitPosZ - 1, *zMaxmin);
-				}
-				else {
-					*zMaxmax = std::min(HitPosZ + 1, *zMaxmax);
-				}
-				return true;
-			}
-			inline static bool		CalcXYActive(const Vector3DX& Vec, int xMaxmin, int xMaxmax, int yMaxmin, int yMaxmax, int zpos) noexcept {
-				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
-				if (Vector3DX::Dot(Vec, Vector3DX::vget(static_cast<float>(xMaxmin) + 0.5f, static_cast<float>(yMaxmin) + 0.5f, static_cast<float>(zpos) + 0.5f)) > 0.f) { return true; }
-				if (Vector3DX::Dot(Vec, Vector3DX::vget(static_cast<float>(xMaxmax) + 0.5f, static_cast<float>(yMaxmax) + 0.5f, static_cast<float>(zpos) + 0.5f)) > 0.f) { return true; }
-				if (Vector3DX::Dot(Vec, Vector3DX::vget(static_cast<float>(xMaxmax) + 0.5f, static_cast<float>(yMaxmin) + 0.5f, static_cast<float>(zpos) + 0.5f)) > 0.f) { return true; }
-				if (Vector3DX::Dot(Vec, Vector3DX::vget(static_cast<float>(xMaxmin) + 0.5f, static_cast<float>(yMaxmax) + 0.5f, static_cast<float>(zpos) + 0.5f)) > 0.f) { return true; }
-				return false;
-			}
-			inline static bool		CalcXMinMax(const Vector3DX& Vec, int* xMaxmin, int* xMaxmax, int ypos, int zpos) noexcept {
-				Vector3DX Vec1 = Vector3DX::vget(static_cast<float>(*xMaxmin) + 0.5f, static_cast<float>(ypos) + 0.5f, static_cast<float>(zpos) + 0.5f);
-				Vector3DX Vec2 = Vector3DX::vget(static_cast<float>(*xMaxmax) + 0.5f, static_cast<float>(ypos) + 0.5f, static_cast<float>(zpos) + 0.5f);
-
-				float dTa = Vector3DX::Dot(Vec, Vec1);
-				float dTb = Vector3DX::Dot(Vec, Vec2);
-				bool OnFront = (dTa >= 0.f && dTb >= 0.f);
-				if (OnFront || (dTa < 0.f && dTb < 0.f)) {
-					return OnFront;
-				}
-				int HitPosX = *xMaxmin + static_cast<int>((*xMaxmax - *xMaxmin) * std::clamp(std::abs(dTa) / (std::abs(dTa) + std::abs(dTb)), 0.f, 1.f));
-				if (dTa < 0.f) {
-					*xMaxmin = std::max(HitPosX - 1, *xMaxmin);
-				}
-				else {
-					*xMaxmax = std::min(HitPosX + 1, *xMaxmax);
-				}
-				return true;
-			}
 		private:
-			bool			AddCubeX_CanAddPlane(const CellsData& cellx, const Vector3Int& center, int xmin, int xmax, int cy, int cz, int id) noexcept;
-			bool			AddCubeZ_CanAddPlane(const CellsData& cellx, const Vector3Int& center, int cx, int cy, int zmin, int zmax, int id) noexcept;
-			//
+			//各方向に向いているポリゴンの追加
 			void			AddPlaneXPlus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xpos, int ypos, int zmin, int zmax, bool IsCalcUV) noexcept;
 			void			AddPlaneXMinus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xpos, int ypos, int zmin, int zmax, bool IsCalcUV) noexcept;
 			void			AddPlaneYPlus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xpos, int ypos, int zmin, int zmax, bool IsCalcUV) noexcept;
 			void			AddPlaneYMinus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xpos, int ypos, int zmin, int zmax, bool IsCalcUV) noexcept;
 			void			AddPlaneZPlus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xmin, int xmax, int ypos, int zpos, bool IsCalcUV) noexcept;
 			void			AddPlaneZMinus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xmin, int xmax, int ypos, int zpos, bool IsCalcUV) noexcept;
+			//XZ方向に走査してポリゴンをなるべく少ないポリゴン数で表示する
+			void			AddPlanesXY(vert32* pTarget, float camVecX, float camVecY, const CellsData& cellx, const Vector3Int& center, int xpos, int ypos, int zMaxminT, int zMaxmaxT, bool CheckInsideXY, bool CheckFillXY, bool IsCalcUV) {
+				int zmin = 0;
+				int zmax = 0;
+				bool CheckFillXYZ = false;
+				bool isHitmin = true;
+				int8_t selectBlock = s_EmptyBlick;
+				bool CanDrawXPlus = false;
+				bool CanDrawXMinus = false;
+				bool CanDrawYPlus = false;
+				bool CanDrawYMinus = false;
+				for (int zpos = zMaxminT; zpos <= zMaxmaxT; ++zpos) {
+					auto& CellBuff = cellx.GetCellBuf(center.x + xpos, center.y + ypos, center.z + zpos);
+					bool CheckInsideXYZ = CheckInsideXY && ((DrawMinZMinus < zpos) && (zpos < DrawMinZPlus));
+					bool CheckBlockID = IsCalcUV && (selectBlock != CellBuff.GetCell());
+					if (
+						(zpos == zMaxmaxT)
+						|| CheckInsideXYZ
+						|| (!isHitmin && CheckBlockID)
+						|| !CellBuff.CanDraw()
+						) {
+						//置けない部分なので今まで置けていた分をまとめてポリゴン化
+						if (!isHitmin) {
+							isHitmin = true;
+							if (camVecX < 0.f) {
+								if (CheckFillXYZ || CanDrawXPlus) {
+									AddPlaneXPlus(pTarget, cellx, center, xpos, ypos, zmin, zmax, IsCalcUV);
+								}
+							}
+							else {
+								if (CheckFillXYZ || CanDrawXMinus) {
+									AddPlaneXMinus(pTarget, cellx, center, xpos, ypos, zmin, zmax, IsCalcUV);
+								}
+							}
+							if (camVecY < 0.f) {
+								if (CheckFillXYZ || CanDrawYPlus) {
+									AddPlaneYPlus(pTarget, cellx, center, xpos, ypos, zmin, zmax, IsCalcUV);
+								}
+							}
+							else {
+								if (CheckFillXYZ || CanDrawYMinus) {
+									AddPlaneYMinus(pTarget, cellx, center, xpos, ypos, zmin, zmax, IsCalcUV);
+								}
+							}
+							//この場合だけもう一回判定させるドン
+							if (CheckBlockID) {
+								--zpos;
+							}
+						}
+					}
+					else {
+						//ブロックが置ける部分
+						if (isHitmin) {
+							isHitmin = false;
+							zmin = zpos;
+							selectBlock = CellBuff.GetCell();
+							CanDrawXPlus = false;
+							CanDrawXMinus = false;
+							CanDrawYPlus = false;
+							CanDrawYMinus = false;
+						}
+						zmax = zpos;
+						CheckFillXYZ = CheckFillXY && (zmin <= DrawMinZPlus && DrawMinZMinus <= zmax);
+						if (!CanDrawXPlus) {
+							if (!CellBuff.IsOcclusion(0)) {
+								CanDrawXPlus = true;
+							}
+						}
+						if (!CanDrawXMinus) {
+							if (!CellBuff.IsOcclusion(1)) {
+								CanDrawXMinus = true;
+							}
+						}
+						if (!CanDrawYPlus) {
+							if (!CellBuff.IsOcclusion(2)) {
+								CanDrawYPlus = true;
+							}
+						}
+						if (!CanDrawYMinus) {
+							if (!CellBuff.IsOcclusion(3)) {
+								CanDrawYMinus = true;
+							}
+						}
+					}
+				}
+			}
+			void			AddPlanesZ(vert32* pTarget, float camVecZ, const CellsData& cellx, const Vector3Int& center, int xMaxminT, int xMaxmaxT, int ypos, int zpos, bool CheckInsideYZ, bool CheckFillYZ, bool IsCalcUV) {
+				int xmin = 0;
+				int xmax = 0;
+				bool CheckFillXYZ = false;
+				bool isHitmin = true;
+				int8_t selectBlock = s_EmptyBlick;
+				bool CanDrawZPlus = false;
+				bool CanDrawZMinus = false;
+				for (int xpos = xMaxminT; xpos <= xMaxmaxT; ++xpos) {
+					auto& CellBuff = cellx.GetCellBuf(center.x + xpos, center.y + ypos, center.z + zpos);
+					bool CheckInsideXYZ = CheckInsideYZ && ((DrawMinXMinus < xpos) && (xpos < DrawMinXPlus));
+					bool CheckBlockID = IsCalcUV && (selectBlock != CellBuff.GetCell());
+					if (
+						(xpos == xMaxmaxT)
+						|| CheckInsideXYZ
+						|| (!isHitmin && CheckBlockID)
+						|| !CellBuff.CanDraw()
+						) {
+						//置けない部分なので今まで置けていた分をまとめてポリゴン化
+						if (!isHitmin) {
+							isHitmin = true;
+							if (camVecZ < 0) {
+								if (CheckFillXYZ || CanDrawZPlus) {
+									AddPlaneZPlus(pTarget, cellx, center, xmin, xmax, ypos, zpos, IsCalcUV);
+								}
+							}
+							else {
+								if (CheckFillXYZ || CanDrawZMinus) {
+									AddPlaneZMinus(pTarget, cellx, center, xmin, xmax, ypos, zpos, IsCalcUV);
+								}
+							}
+							//この場合だけもう一回判定させるドン
+							if (CheckBlockID) {
+								--xpos;
+							}
+						}
+					}
+					else {
+						//ブロックが置ける部分
+						if (isHitmin) {
+							isHitmin = false;
+							xmin = xpos;
+							selectBlock = CellBuff.GetCell();
+							CanDrawZPlus = false;
+							CanDrawZMinus = false;
+						}
+						xmax = xpos;
+						CheckFillXYZ = CheckFillYZ && (xmin <= DrawMinXPlus && DrawMinXMinus <= xmax);
+						if (!CanDrawZPlus) {
+							if (!CellBuff.IsOcclusion(4)) {
+								CanDrawZPlus = true;
+							}
+						}
+						if (!CanDrawZMinus) {
+							if (!CellBuff.IsOcclusion(5)) {
+								CanDrawZMinus = true;
+							}
+						}
+					}
+				}
+			}
 			//視界から見て映るものだけをテクスチャ関係込みで更新
 			void			AddCubes(size_t id) noexcept;
+			void			FlipCubes(size_t id) noexcept;
 			//ライトから見て映るものだけを更新
 			void			AddShadowCubes(size_t id) noexcept;
+			void			FlipShadowCubes(size_t id) noexcept;
+		private:
+			const auto& GetReferenceCells(void) const noexcept { return this->m_CellxN[0]; }
+			auto& SetReferenceCells(void) noexcept { return this->m_CellxN[0]; }
 		public:
 			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
 			bool			CheckLinetoMap(const Vector3DX& StartPos, const Vector3DX& EndPos) const noexcept {
@@ -587,13 +683,25 @@ namespace FPS_n2 {
 			void			SettingChange(void) noexcept;
 
 			void			SetBlick(int xpos, int ypos, int zpos, int8_t select) noexcept;
-			const Vector3Int GetPoint(const Vector3DX& pos) const noexcept { return this->m_CellxN.front().GetPoint(pos); }
-			const Vector3DX GetPos(int xpos, int ypos, int zpos) const noexcept { return this->m_CellxN.front().GetPos(xpos, ypos, zpos); }
-
-			const auto& GetCellBuf(int xpos, int ypos, int zpos) const noexcept {
-				auto& cell = this->m_CellxN.front();
-				//if (!cell.isInside(ypos)) { return; }
-				return cell.GetCellBuf(xpos, ypos, zpos);
+			const Vector3Int GetPoint(const Vector3DX& pos) const noexcept { return GetReferenceCells().GetPoint(pos); }
+			const Vector3DX GetPos(int xpos, int ypos, int zpos) const noexcept { return GetReferenceCells().GetPos(xpos, ypos, zpos); }
+			//ブロックにダメージを与える
+			bool			DamageCell(int xpos, int ypos, int zpos, int8_t Damage) noexcept {
+				auto& cell = GetReferenceCells().GetCellBuf(xpos, ypos, zpos);
+				if (cell.IsEmpty()) { return false; }
+				if (cell.GetCell() == 1) { return false; }
+				if (cell.GetCell() == 4) { return false; }
+				SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Life -= Damage;
+				if (cell.m_Life <= 0) {
+					SetBlick(xpos, ypos, zpos, BackGround::s_EmptyBlick);
+					return true;
+				}
+				else if (cell.m_Life <= 50) {
+					if (cell.GetCell() == 2) {
+						SetBlick(xpos, ypos, zpos, 3);
+					}
+				}
+				return false;
 			}
 		public://
 			void			Load(void) noexcept;
@@ -610,6 +718,7 @@ namespace FPS_n2 {
 			void			Draw(void) const noexcept;
 			//
 			void			Dispose(void) noexcept;
+			void			Dispose_Load(void) noexcept;
 		};
 	}
 }

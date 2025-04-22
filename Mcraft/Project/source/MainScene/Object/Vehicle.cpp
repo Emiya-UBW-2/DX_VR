@@ -135,7 +135,7 @@ namespace FPS_n2 {
 			//‘_‚¢
 			for (auto& g : this->m_Gun) {
 				Vector3DX StartPos = GetObj().GetFramePosition(g.GetGunMuzzleFrame().GetFrameID());
-				Vector3DX EndPos = StartPos + (this->m_MouseVec.zvec() * -1.0f).normalized() * (500.0f * Scale3DRate);//‘_‚¤êŠ
+				Vector3DX EndPos = StartPos + (this->m_MouseVec.zvec2()).normalized() * (500.0f * Scale3DRate);//‘_‚¤êŠ
 				Vector3DX BasePos = GetObj().GetFramePosition(g.GetGunTrunnionFrame().GetFrameID());
 				g.UpdateAim((StartPos - BasePos).normalized(), (EndPos - BasePos).normalized(), this->m_VecData);
 			}
@@ -218,9 +218,9 @@ namespace FPS_n2 {
 					).normalized(),
 					0.95f, EasingType::OutExpo);
 				//ŒX‚«‚ð‚à‚Æ‚ÉÅ‰‚ÌÀ•WŠm’è
-				auto pp = (GetMove().GetMat() * Matrix3x3DX::RotVec2(Vector3DX::up(), this->m_BodyNormal).inverse()).zvec() * -1.f;
+				auto pp = (GetMove().GetMat() * Matrix3x3DX::RotVec2(Vector3DX::up(), this->m_BodyNormal).inverse()).zvec2();
 				float yradBody = std::atan2f(pp.x, pp.z);
-				MoveMat = Matrix3x3DX::Axis1(this->m_BodyNormal, (Matrix3x3DX::RotAxis(Vector3DX::up(), yradBody) * Matrix3x3DX::RotVec2(Vector3DX::up(), this->m_BodyNormal)).zvec() * -1.0f);
+				MoveMat = Matrix3x3DX::Axis1(this->m_BodyNormal, (Matrix3x3DX::RotAxis(Vector3DX::up(), yradBody) * Matrix3x3DX::RotVec2(Vector3DX::up(), this->m_BodyNormal)).zvec2());
 			}
 			//’n–Ê”»’è
 			float OnGroundHeight = 0.0f;
@@ -270,12 +270,12 @@ namespace FPS_n2 {
 				this->m_radAdd.x = deg2rad(this->m_speed * -1.0f);
 				this->m_radAdd.z = deg2rad(this->m_radAdd.y / deg2rad(5.0f) * -5.0f);
 				Easing(&this->m_Tilt, Vector2DX::vget(
-					std::clamp(this->m_radAdd.x - radold.x, deg2rad(-30.0f), deg2rad(30.0f)),
-					std::clamp(this->m_radAdd.z - radold.z, deg2rad(-15.0f), deg2rad(15.0f))), 0.95f, EasingType::OutExpo);
+					std::clamp(radold.x - this->m_radAdd.x, deg2rad(-30.0f), deg2rad(30.0f)),
+					std::clamp(radold.z - this->m_radAdd.z, deg2rad(-15.0f), deg2rad(15.0f))), 0.95f, EasingType::OutExpo);
 
-				MoveMat *= Matrix3x3DX::RotAxis(MoveMat.xvec(), -this->m_Tilt.x) * Matrix3x3DX::RotAxis(MoveMat.zvec(), this->m_Tilt.y);
+				MoveMat *= Matrix3x3DX::RotAxis(MoveMat.xvec(), this->m_Tilt.x) * Matrix3x3DX::RotAxis(MoveMat.zvec2(), this->m_Tilt.y);
 
-				MoveVec = MoveMat.zvec() * -(this->m_speed / 3.6f * Scale3DRate *DXLib_refParts->GetDeltaTime());
+				MoveVec = MoveMat.zvec2() * (this->m_speed / 3.6f * Scale3DRate *DXLib_refParts->GetDeltaTime());
 				if (OnGroundCountSquare < 3 || (OnGroundCount == 0)) {
 					MoveVec.y = GetMove().GetVec().y + (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));
 				}
@@ -333,25 +333,13 @@ namespace FPS_n2 {
 				for (int xp = -xput / 2; xp < xput / 2; ++xp) {
 					for (int yp = 0 - 4; yp < yput; ++yp) {
 						for (int zp = -zput / 2; zp < zput / 2; ++zp) {
-							int xx = (Put.x + xp);
-							int yy = (Put.y + yp);
-							int zz = (Put.z + zp);
-							auto& cell = BackGroundParts->GetCellBuf(xx, yy, zz);
-							if (cell.GetCell() == BackGround::s_EmptyBlick) {
-								continue;
+							if (BackGroundParts->DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, 100)) {
+								if ((xp % 3 == 0) || (zp % 3 == 0)) {
+									//EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(xx, yy, zz),
+									//	Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.f)))), 3.f + GetRandf(2.f), 3.f);
+								}
+								++IsBreak;
 							}
-							if (cell.GetCell() == 1) {
-								continue;
-							}
-							if (cell.GetCell() == 4) {
-								continue;
-							}
-							BackGroundParts->SetBlick(xx, yy, zz, BackGround::s_EmptyBlick);
-							if ((xp % 3 == 0) || (zp % 3 == 0)) {
-								//EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(xx, yy, zz),
-								//	Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.f)))), 3.f + GetRandf(2.f), 3.f);
-							}
-							++IsBreak;
 						}
 					}
 				}

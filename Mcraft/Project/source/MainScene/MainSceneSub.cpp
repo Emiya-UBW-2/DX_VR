@@ -69,16 +69,12 @@ namespace FPS_n2 {
 			}
 		}
 		void			PauseMenuControl::Draw(void) const noexcept {
-			auto* ButtonParts = UIs::ButtonControl::Instance();
-			auto* SceneParts = SceneControl::Instance();
-			// ƒ|[ƒY
-			if (SceneParts->IsPause()) {
-				ButtonParts->Draw();
+			if (SceneControl::Instance()->IsPause()) {
+				UIs::ButtonControl::Instance()->Draw();
 			}
 		}
 		void			PauseMenuControl::Dispose(void) noexcept {
-			auto* ButtonParts = UIs::ButtonControl::Instance();
-			ButtonParts->Dispose();
+			UIs::ButtonControl::Instance()->Dispose();
 		}
 
 		void			CommonBattleResource::Load(void) noexcept {
@@ -196,11 +192,11 @@ namespace FPS_n2 {
 		//
 		void			MainSceneUI::Update(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto& ViewChara = PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
+			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 
 			CanLookTarget = false;
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-				if (loop == PlayerMngr->GetWatchPlayer()) { continue; }
+				if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				CanLookTarget |= chara->IsAlive() && chara->GetCanLookByPlayer();
 			}
@@ -216,7 +212,7 @@ namespace FPS_n2 {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* CameraParts = Camera3D::Instance();
-			auto& ViewChara = PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
+			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 
 			int xp1{}, yp1{};
 			int xp2{}, yp2{};
@@ -234,7 +230,7 @@ namespace FPS_n2 {
 
 
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-					if (loop == PlayerMngr->GetWatchPlayer()) { continue; }
+					if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
 					auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 					if (!chara->IsAlive() || !chara->GetCanLookByPlayer()) { continue; }
 					if (chara->GetIsActiveCameraPosToPlayer()) {
@@ -265,7 +261,7 @@ namespace FPS_n2 {
 					Vector3DX Vec1 = CameraParts->GetMainCamera().GetCamVec() - StartPos; Vec1.y = 0.f; Vec1 = Vec1.normalized();
 					{
 						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-							if (loop == PlayerMngr->GetWatchPlayer()) { continue; }
+							if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
 							auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 							if (!chara->IsAlive() || !chara->GetCanLookByPlayer()) { continue; }
 							Vector3DX Vec2 = (chara->GetEyePositionCache() - StartPos); Vec2.y = 0.f; Vec2 = Vec2.normalized();
@@ -332,7 +328,7 @@ namespace FPS_n2 {
 			}
 			//•ûˆÊŽ¥j
 			{
-				Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec() * -1.f; Vec.y = 0.f; Vec = Vec.normalized();
+				Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec2(); Vec.y = 0.f; Vec = Vec.normalized();
 				float radian = std::atan2f(Vec.x, Vec.z);
 				float degreeBase = rad2deg(radian);
 

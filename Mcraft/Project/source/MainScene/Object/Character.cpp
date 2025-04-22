@@ -14,7 +14,7 @@ namespace FPS_n2 {
 				this->m_AP.Sub(Event.ArmerDamage);
 				bool IsDeath = PrevLive && !IsAlive();
 
-				if (Event.ShotID == PlayerMngr->GetWatchPlayer()) {//撃ったキャラ
+				if (Event.ShotID == PlayerMngr->GetWatchPlayerID()) {//撃ったキャラ
 					//SE
 					if (Event.Damage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Hit))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
@@ -24,16 +24,16 @@ namespace FPS_n2 {
 					}
 					//ヒットカウント
 					if ((Event.Damage >= 0) && (Event.ArmerDamage >= 0)) {
-						PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->AddHit(1);
+						PlayerMngr->GetPlayer(Event.ShotID)->AddHit(1);
 						//ヒット座標表示を登録
 						HitMarkerPool::Instance()->AddMarker(Event.m_EndPos, Event.Damage, Event.ArmerDamage);
 					}
 					if (IsDeath) {
-						PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->AddScore(100);
-						PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->AddKill(1);
+						PlayerMngr->GetPlayer(Event.ShotID)->AddScore(100);
+						PlayerMngr->GetPlayer(Event.ShotID)->AddKill(1);
 					}
 				}
-				if (Event.DamageID == PlayerMngr->GetWatchPlayer()) {//撃たれたキャラ
+				if (Event.DamageID == PlayerMngr->GetWatchPlayerID()) {//撃たれたキャラ
 					if (Event.Damage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitMe))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 					}
@@ -97,7 +97,7 @@ namespace FPS_n2 {
 			if (!IsAlive()) { return false; }
 			if (!(GetMinLenSegmentToPoint(StartPos, *pEndPos, GetMove().GetPos()) <= 2.0f * Scale3DRate)) { return false; }
 
-			if (AttackID != PlayerMngr->GetWatchPlayer()) {
+			if (AttackID != PlayerMngr->GetWatchPlayerID()) {
 				this->m_ConcussionSwitch = true;
 			}
 			//被弾処理
@@ -108,7 +108,7 @@ namespace FPS_n2 {
 				//部位ダメージ演算
 				switch (HitPtr->GetColType()) {
 				case HitType::Head:
-					if (GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) {//自機はヘッショされない
+					if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {//自機はヘッショされない
 						Damage = std::clamp<HitPoint>(BaseDamage * 1000 / 100, 0, this->m_HP.GetMax());
 					}
 					break;
@@ -143,14 +143,13 @@ namespace FPS_n2 {
 		void			CharacterObj::UpdateInput(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
-			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			//
 			if (!IsAlive()) { return; }
 			if (this->m_Input.GetPADSTrigger(Controls::PADS::SQUAT)) {
 				this->m_IsSquat ^= 1;
 				//しゃがみ音
-				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) {
+				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
 				}
 			}
@@ -161,7 +160,7 @@ namespace FPS_n2 {
 
 					Vector3DX GunStart = GetEyePositionCache();
 					Vector3DX GunEnd = (GetGunPtrNow()->GetBaseMuzzleMat() * GetFrameWorldMat(CharaFrame::Head)).pos();
-					bool IsHit = BackGroundParts->CheckLinetoMap(GunStart, GunEnd);
+					bool IsHit = BackGround::BackGroundControl::Instance()->CheckLinetoMap(GunStart, GunEnd);
 					//ほかプレイヤーとの判定
 					if(!IsHit) {
 						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
@@ -195,7 +194,7 @@ namespace FPS_n2 {
 				else {
 					this->m_StuckGunTimer = std::max(this->m_StuckGunTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 					if (this->m_IsStuckGun) {
-						auto Zvec = GetFrameWorldMat(CharaFrame::Head).zvec() * -1.f;
+						auto Zvec = GetFrameWorldMat(CharaFrame::Head).zvec2();
 						if (Zvec.y < std::sin(deg2rad(-30))) {
 							GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
 						}
@@ -207,7 +206,7 @@ namespace FPS_n2 {
 				//武器切替
 				if (GetGunPtrNow()->GetGunAnime() != GunAnimeID::LowReady) {
 					int Wheel = 0;
-					if (GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) {
+					if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 						Wheel = -PadControl::Instance()->GetMouseWheelRot();
 					}
 					if (this->m_Input.GetPADSTrigger(Controls::PADS::ULT)) {
@@ -238,7 +237,7 @@ namespace FPS_n2 {
 							if (this->m_Input.GetPADSPress(Controls::PADS::RELOAD) ||
 								((GetGunPtrNow()->GetAmmoNumTotal() == 0) && this->m_Input.GetPADSPress(Controls::PADS::SHOT))) {
 								if (GetGunPtrNow()->ReloadStart()) {
-									if (GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) {
+									if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {
 										if (GetRand(100) < 50) {
 											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_reload))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 										}
@@ -250,7 +249,7 @@ namespace FPS_n2 {
 							}
 							//射撃
 							else if (this->m_Input.GetPADSPress(Controls::PADS::SHOT)) {
-								if (GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) {
+								if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 									if (this->m_Input.GetPADSTrigger(Controls::PADS::SHOT)) {
 										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Trigger))->Play3D(GetEyePositionCache(), Scale3DRate * 5.f);
 									}
@@ -372,7 +371,7 @@ namespace FPS_n2 {
 				}
 			}
 			else {
-				this->m_CharaSound = -1;
+				this->m_CharaSound = InvalidID;
 			}
 		}
 		//SetMat指示更新
@@ -390,14 +389,14 @@ namespace FPS_n2 {
 					if (this->m_HPRec >= 0.f) {
 						this->m_HPRec -= 2.f;
 						Heal(2);
-						if (GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) {
+						if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing))->Play(DX_PLAYTYPE_BACK);
 						}
 					}
 				}
 				else {
 					if (this->m_HPRec != 0.f) {
-						if (GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) {
+						if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing))->StopAll();
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend))->Play(DX_PLAYTYPE_BACK);
 						}
@@ -559,7 +558,7 @@ namespace FPS_n2 {
 									Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y)
 								),
 								GetFrameWorldMat(CharaFrame::Neck).pos() +
-								GetFrameWorldMat(CharaFrame::Neck).zvec() * (-0.15f * Scale3DRate) +
+								GetFrameWorldMat(CharaFrame::Neck).zvec2() * (0.15f * Scale3DRate) +
 								GetMove().GetMat().yvec() * (0.2f * Scale3DRate) +
 								(
 									GetMove().GetMat().xvec() * sin(this->m_SlingZrad.GetRad()) +
@@ -599,7 +598,7 @@ namespace FPS_n2 {
 					pGun->UpdateGunMat(IsSelect, GetIsADS(), CharaRotationCache, GetFrameWorldMat(CharaFrame::Head).pos(), this->m_RotateControl.GetRad());
 				}
 				//手の位置を制御
-				if ((GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) || GetCanLookByPlayer()) {
+				if ((GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) || GetCanLookByPlayer()) {
 					if (GetGunPtrNow()) {
 						//銃座標
 						{
@@ -636,7 +635,7 @@ namespace FPS_n2 {
 									Matrix4x4DX::Mtrans(
 										GetFrameWorldMat(CharaFrame::Head).pos() +
 										GetFrameWorldMat(CharaFrame::Head).xvec() * (0.15f * Scale3DRate) +
-										GetFrameWorldMat(CharaFrame::Head).zvec() * (-0.1f * Scale3DRate) +
+										GetFrameWorldMat(CharaFrame::Head).zvec2() * (0.1f * Scale3DRate) +
 										(
 											GetMove().GetMat().xvec() * sin(this->m_SlingArmZrad.GetRad()) +
 											GetMove().GetMat().yvec() * cos(this->m_SlingArmZrad.GetRad())
@@ -663,7 +662,7 @@ namespace FPS_n2 {
 				this->m_HitBoxControl.Update(this, (GetCharaType() == CharaTypeID::Enemy) ? 1.1f : 1.f);
 				//目の座標取得
 				{
-					bool HeadBobbing = ((GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
+					bool HeadBobbing = ((GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 					this->m_EyePositionCache = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f;
 					if (HeadBobbing) {
 						this->m_EyePositionCache += this->m_WalkSwingControl.CalcEye(CharaRotationCache, std::clamp(std::clamp(this->m_MoveControl.GetVecPower(), 0.f, 1.f) * GetSpeed() / 0.625f, 0.f, 0.85f) / 0.65f, 5.f);
@@ -697,14 +696,14 @@ namespace FPS_n2 {
 			this->m_RagDollControl.Update(IsAlive());
 			//視認判定系
 			this->m_IsActiveCameraPos = false;
-			if (GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) {
-				auto& ViewChara = PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
+			if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {
+				auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 				Vector3DX EndPos = GetEyePositionCache();
 				this->m_CanLookTarget = !BackGroundParts->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos);
 				this->m_Length = (GetEyePositionCache() - ViewChara->GetEyePositionCache()).magnitude();
 			}
 			//コンカッション
-			if (GetMyPlayerID() == PlayerMngr->GetWatchPlayer()) {
+			if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 				if (this->m_ConcussionSwitch) {
 					this->m_ConcussionSwitch = false;
 					this->m_Concussion = 1.f;
@@ -733,8 +732,7 @@ namespace FPS_n2 {
 		}
 		//
 		void			CharacterObj::LoadChara(const std::string& FolderName, PlayerID ID) noexcept {
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto& player = PlayerMngr->GetPlayer(ID);
+			auto& player = Player::PlayerManager::Instance()->GetPlayer(ID);
 
 			std::string Path = "data/Charactor/";
 			Path += FolderName;
@@ -762,8 +760,7 @@ namespace FPS_n2 {
 			UpdateMatrix();
 		}
 		void			CharacterObj::CheckDraw_Sub(int) noexcept {
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			if (GetMyPlayerID() != PlayerMngr->GetWatchPlayer()) {
+			if (GetMyPlayerID() != Player::PlayerManager::Instance()->GetWatchPlayerID()) {
 				this->m_IsActiveCameraPos |= this->m_CameraPos.Calc(GetEyePositionCache());
 			}
 		}

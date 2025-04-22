@@ -18,7 +18,7 @@ namespace FPS_n2 {
 				auto& net = this->m_PlayerUDPPhase.at(loop);
 
 				PlayerNetData tmpData;
-				int recvRet = -1;
+				int recvRet = InvalidID;
 				auto IsDataUpdated = net.m_NetWork.RecvData(&tmpData, &recvRet, false) && tmpData.IsCheckSum();
 				if (IsDataUpdated) {
 					this->m_LastPlayerData.at(loop) = tmpData;
@@ -73,7 +73,7 @@ namespace FPS_n2 {
 			pPlayerNetwork->UpdateTick();
 
 			ServerNetData			tmpData;
-			int recvRet = -1;
+			int recvRet = InvalidID;
 			bool IsDataUpdated = this->m_PlayerUDPPhase.m_NetWork.RecvData(&tmpData, &recvRet, false) && tmpData.IsCheckSum();
 			if (IsDataUpdated) {
 				pPlayerNetwork->SetLastServerDataBuffer() = tmpData;

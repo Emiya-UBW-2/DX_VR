@@ -81,7 +81,6 @@ namespace FPS_n2 {
 		}
 		void			FallObj::FirstUpdate(void) noexcept {
 			if (!IsActive()) { return; }
-			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* SE = SoundPool::Instance();
 			Vector3DX PosBuf = GetMove().GetPos() + GetMove().GetVec() * 60.f * DXLib_refParts->GetDeltaTime() + Vector3DX::up() * this->m_yAdd;
@@ -90,8 +89,7 @@ namespace FPS_n2 {
 				Vector3DX EndPos = PosBuf;
 				Vector3DX Normal;
 /*
-				auto* PlayerMngr = Player::PlayerManager::Instance();
-				if (PlayerMngr->GetVehicle()->CheckLine(GetMove().GetRePos(), &EndPos, &Normal)) {
+				if (Player::PlayerManager::Instance()->GetVehicle()->CheckLine(GetMove().GetRePos(), &EndPos, &Normal)) {
 					PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
 					SetMove().SetVec(Vector3DX::Reflect(GetMove().GetVec(), Normal) * 0.5f);
 					this->m_yAdd = 0.f;
@@ -103,7 +101,7 @@ namespace FPS_n2 {
 				}
 				else
 //*/
-				if (BackGroundParts->CheckLinetoMap(GetMove().GetRePos(), &EndPos, &Normal)) {
+				if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(GetMove().GetRePos(), &EndPos, &Normal)) {
 					PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
 					SetMove().SetVec(Vector3DX::Reflect(GetMove().GetVec(), Normal) * 0.5f);
 					this->m_yAdd = 0.f;

@@ -202,23 +202,6 @@ namespace FPS_n2 {
 			}
 		};
 		//
-		bool		BackGroundControl::AddCubeX_CanAddPlane(const CellsData& cellx, const Vector3Int& center, int xmin, int xmax, int cy, int cz, int id) noexcept {
-			for (int xpos =xmin; xpos <= xmax; ++xpos) {
-				if (!cellx.GetCellBuf(center.x + xpos, center.y + cy, center.z + cz).IsOcclusion(id)) {
-					return true;
-				}
-			}
-			return false;
-		}
-		bool		BackGroundControl::AddCubeZ_CanAddPlane(const CellsData& cellx, const Vector3Int& center, int cx, int cy, int zmin, int zmax, int id) noexcept {
-			for (int zpos = zmin; zpos <= zmax; ++zpos) {
-				if (!cellx.GetCellBuf(center.x + cx, center.y + cy, center.z + zpos).IsOcclusion(id)) {
-					return true;
-				}
-			}
-			return false;
-		}
-		//
 		void		BackGroundControl::AddPlaneXPlus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xpos, int ypos, int zmin, int zmax, bool IsCalcUV) noexcept {
 			pTarget->AllocatePlane();
 
@@ -591,261 +574,148 @@ namespace FPS_n2 {
 			auto& Draws = this->m_Draws.at(id);
 			Draws.m_vert32.ResetNum();
 			auto center = cellx.GetPoint(Draws.m_CamPos);
+
+			float CamXMinX = Draws.m_CamVec.x * (static_cast<float>(DrawMaxXMinus) + 0.5f);
+			float CamXMaxX = Draws.m_CamVec.x * (static_cast<float>(DrawMaxXPlus) + 0.5f);
+			float CamYMinY = Draws.m_CamVec.y * (static_cast<float>(DrawMaxYMinus) + 0.5f);
+			float CamYMaxY = Draws.m_CamVec.y * (static_cast<float>(DrawMaxYPlus) + 0.5f);
+			float CamZMinZ = Draws.m_CamVec.z * (static_cast<float>(DrawMaxZMinus) + 0.5f);
+			float CamZMaxZ = Draws.m_CamVec.z * (static_cast<float>(DrawMaxZPlus) + 0.5f);
 			//X
 			for (int zpos = DrawMaxZMinus; zpos <= DrawMaxZPlus; ++zpos) {
-				if (!CalcXYActive(Draws.m_CamVec, DrawMaxXMinus, DrawMaxXPlus, DrawMaxYMinus, DrawMaxYPlus, zpos)) { continue; }
+				float CamZZ = Draws.m_CamVec.z * (static_cast<float>(zpos) + 0.5f);
+				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
+				if (
+					((CamXMinX + CamYMinY + CamZZ) <= 0.f) &&//Dot
+					((CamXMaxX + CamYMaxY + CamZZ) <= 0.f) &&//Dot
+					((CamXMaxX + CamYMinY + CamZZ) <= 0.f) &&//Dot
+					((CamXMinX + CamYMaxY + CamZZ) <= 0.f)//Dot
+					) { continue; }
 
 				bool CheckFillZ = cellx.isFarCells() && ((DrawMinZMinus <= zpos) && (zpos <= DrawMinZPlus));
 				bool CheckInsideZ = cellx.isFarCells() && ((DrawMinZMinus < zpos) && (zpos < DrawMinZPlus));
 
 				for (int ypos = DrawMaxYMinus; ypos <= DrawMaxYPlus; ++ypos) {
 					if (!cellx.isInside(center.y + ypos)) { continue; }
+					float CamYY = Draws.m_CamVec.y * (static_cast<float>(ypos) + 0.5f);
 
 					int xMaxminT = DrawMaxXMinus;
 					int xMaxmaxT = DrawMaxXPlus;
-					if (!CalcXMinMax(Draws.m_CamVec, &xMaxminT, &xMaxmaxT, ypos, zpos)) { continue; }
-
-					bool CheckFillYZ = CheckFillZ && ((DrawMinYMinus <= ypos) && (ypos <= DrawMinYPlus));
-					bool CheckInside = CheckInsideZ && ((DrawMinYMinus < ypos) && (ypos < DrawMinYPlus));
-
-					int xmin = 0;
-					int xmax = 0;
-					bool CheckFillXYZ = false;
-					bool isHitmin = true;
-					int8_t selectBlock = s_EmptyBlick;
-					for (int xpos = xMaxminT; xpos <= xMaxmaxT; ++xpos) {
-						auto& CellBuff = cellx.GetCellBuf(center.x + xpos, center.y + ypos, center.z + zpos);
-						if (
-							(xpos == xMaxmaxT)
-							|| (CheckInside && ((DrawMinXMinus < xpos) && (xpos < DrawMinXPlus)))
-							|| (CellBuff.IsEmpty())
-							|| (CellBuff.IsOcclusion())
-							|| (!isHitmin && (selectBlock != CellBuff.GetCell()))
-							) {
-							//置けない部分なので今まで置けていた分をまとめてポリゴン化
-							if (!isHitmin) {
-								isHitmin = true;
-
-								if (zpos >= 0) {
-									if (CheckFillXYZ || AddCubeX_CanAddPlane(cellx, center, xmin, xmax, ypos, zpos, 5)) {
-										AddPlaneZMinus(&Draws.m_vert32, cellx, center, xmin, xmax, ypos, zpos, true);
-									}
-								}
-								else {
-									if (CheckFillXYZ || AddCubeX_CanAddPlane(cellx, center, xmin, xmax, ypos, zpos, 4)) {
-										AddPlaneZPlus(&Draws.m_vert32, cellx, center, xmin, xmax, ypos, zpos, true);
-									}
-								}
-								//この場合だけもう一回判定させるドン
-								if (selectBlock != CellBuff.GetCell()) {
-									--xpos;
-								}
-							}
+					{
+						float dTa = (CamXMinX + CamYY + CamZZ);//Dot
+						float dTb = (CamXMaxX + CamYY + CamZZ);//Dot
+						bool OnFront = (dTa >= 0.f && dTb >= 0.f);
+						bool Onbehind = (dTa < 0.f && dTb < 0.f);
+						if (Onbehind && !OnFront) {
+							continue;
 						}
-						else {
-							//ブロックが置ける部分
-							if (isHitmin) {
-								isHitmin = false;
-								xmin = xpos;
-								selectBlock = CellBuff.GetCell();
+						if (!OnFront && !Onbehind) {
+							if (dTa < 0.f) {
+								xMaxminT = std::max(DrawMaxXMinus + static_cast<int>((DrawMaxXPlus - DrawMaxXMinus) * (dTa / (dTa - dTb))) - 1, DrawMaxXMinus);
 							}
-							xmax = xpos;
-							bool CheckFillX = (xmin <= DrawMinXPlus && DrawMinXMinus <= xmax);
-							CheckFillXYZ = CheckFillYZ && CheckFillX;
+							else {
+								xMaxmaxT = std::min(DrawMaxXMinus + static_cast<int>((DrawMaxXPlus - DrawMaxXMinus) * (dTa / (dTa - dTb))) + 1, DrawMaxXPlus);
+							}
 						}
 					}
+
+					bool CheckFillYZ = CheckFillZ && ((DrawMinYMinus <= ypos) && (ypos <= DrawMinYPlus));
+					bool CheckInsideYZ = CheckInsideZ && ((DrawMinYMinus < ypos) && (ypos < DrawMinYPlus));
+					AddPlanesZ(&Draws.m_vert32, static_cast<float>(zpos), cellx, center, xMaxminT, xMaxmaxT, ypos, zpos, CheckInsideYZ, CheckFillYZ, true);
 				}
 			}
 			//Z
 			for (int xpos = DrawMaxXMinus; xpos <= DrawMaxXPlus; ++xpos) {
-				if (!CalcYZActive(Draws.m_CamVec, xpos, DrawMaxYMinus, DrawMaxYPlus, DrawMaxZMinus, DrawMaxZPlus)) { continue; }
+				float CamXX = Draws.m_CamVec.x * (static_cast<float>(xpos) + 0.5f);
+				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
+				if (
+					((CamXX + CamYMinY + CamZMinZ) <= 0.f) &&//Dot
+					((CamXX + CamYMaxY + CamZMaxZ) <= 0.f) &&//Dot
+					((CamXX + CamYMinY + CamZMaxZ) <= 0.f) &&//Dot
+					((CamXX + CamYMaxY + CamZMinZ) <= 0.f)//Dot
+					) {
+					continue;
+				}
 
 				bool CheckFillX = cellx.isFarCells() && ((DrawMinXMinus <= xpos) && (xpos <= DrawMinXPlus));
 				bool CheckInsideX = cellx.isFarCells() && ((DrawMinXMinus < xpos) && (xpos < DrawMinXPlus));
 
 				for (int ypos = DrawMaxYMinus; ypos <= DrawMaxYPlus; ++ypos) {
 					if (!cellx.isInside(center.y + ypos)) { continue; }
+					float CamYY = Draws.m_CamVec.y * (static_cast<float>(ypos) + 0.5f);
 
 					int zMaxminT = DrawMaxZMinus;
 					int zMaxmaxT = DrawMaxZPlus;
-					if (!CalcZMinMax(Draws.m_CamVec, xpos, ypos, &zMaxminT, &zMaxmaxT)) { continue; }
-
-					bool CheckFillXY = CheckFillX && ((DrawMinYMinus <= ypos) && (ypos <= DrawMinYPlus));
-					bool CheckInside = CheckInsideX && ((DrawMinYMinus < ypos) && (ypos < DrawMinYPlus));
-
-					int zmin = 0;
-					int zmax = 0;
-					bool CheckFillXYZ = false;
-					bool isHitmin = true;
-					int8_t selectBlock = s_EmptyBlick;
-					for (int zpos = zMaxminT; zpos <= zMaxmaxT; ++zpos) {
-						auto& CellBuff = cellx.GetCellBuf(center.x + xpos, center.y + ypos, center.z + zpos);
-						if (
-							(zpos == zMaxmaxT)
-							|| (CheckInside && ((DrawMinZMinus < zpos) && (zpos < DrawMinZPlus)))
-							|| (CellBuff.IsEmpty())
-							|| (!isHitmin && (selectBlock != CellBuff.GetCell()))
-							|| (CellBuff.IsOcclusion())
-							) {
-							//置けない部分なので今まで置けていた分をまとめてポリゴン化
-							if (!isHitmin) {
-								isHitmin = true;
-								if (xpos >= 0) {
-									if (CheckFillXYZ || AddCubeZ_CanAddPlane(cellx, center, xpos, ypos, zmin, zmax, 1)) {
-										AddPlaneXMinus(&Draws.m_vert32, cellx, center, xpos, ypos, zmin, zmax, true);
-									}
-								}
-								else {
-									if (CheckFillXYZ || AddCubeZ_CanAddPlane(cellx, center, xpos, ypos, zmin, zmax, 0)) {
-										AddPlaneXPlus(&Draws.m_vert32, cellx, center, xpos, ypos, zmin, zmax, true);
-									}
-								}
-								if (ypos >= 0) {
-									if (CheckFillXYZ || AddCubeZ_CanAddPlane(cellx, center, xpos, ypos, zmin, zmax, 3)) {
-										AddPlaneYMinus(&Draws.m_vert32, cellx, center, xpos, ypos, zmin, zmax, true);
-									}
-								}
-								else {
-									if (CheckFillXYZ || AddCubeZ_CanAddPlane(cellx, center, xpos, ypos, zmin, zmax, 2)) {
-										AddPlaneYPlus(&Draws.m_vert32, cellx, center, xpos, ypos, zmin, zmax, true);
-									}
-								}
-								//この場合だけもう一回判定させるドン
-								if (selectBlock != CellBuff.GetCell()) {
-									--zpos;
-								}
-							}
+					{
+						float dTa = (CamXX + CamYY + CamZMinZ);//Dot
+						float dTb = (CamXX + CamYY + CamZMaxZ);//Dot
+						bool OnFront = (dTa >= 0.f && dTb >= 0.f);
+						bool Onbehind = (dTa < 0.f && dTb < 0.f);
+						if (Onbehind && !OnFront) {
+							continue;
 						}
-						else {
-							//ブロックが置ける部分
-							if (isHitmin) {
-								isHitmin = false;
-								zmin = zpos;
-								selectBlock = CellBuff.GetCell();
+						if (!OnFront && !Onbehind) {
+							if (dTa < 0.f) {
+								zMaxminT = std::max(DrawMaxZMinus + static_cast<int>((DrawMaxZPlus - DrawMaxZMinus) * (dTa / (dTa - dTb))) - 1, DrawMaxZMinus);
 							}
-							zmax = zpos;
-							bool CheckFillZ = (zmin <= DrawMinZPlus && DrawMinZMinus <= zmax);
-							CheckFillXYZ = CheckFillXY && CheckFillZ;
+							else {
+								zMaxmaxT = std::min(DrawMaxZMinus + static_cast<int>((DrawMaxZPlus - DrawMaxZMinus) * (dTa / (dTa - dTb))) + 1, DrawMaxZPlus);
+							}
 						}
 					}
+					bool CheckFillXY = CheckFillX && ((DrawMinYMinus <= ypos) && (ypos <= DrawMinYPlus));
+					bool CheckInsideXY = CheckInsideX && ((DrawMinYMinus < ypos) && (ypos < DrawMinYPlus));
+					AddPlanesXY(&Draws.m_vert32, static_cast<float>(xpos), static_cast<float>(ypos), cellx, center, xpos, ypos, zMaxminT, zMaxmaxT, CheckInsideXY, CheckFillXY, true);
 				}
 			}
 		}
+		void		BackGroundControl::FlipCubes(size_t id) noexcept {
+			auto& Draws = this->m_Draws.at(id);
+			Draws.m_vert32.FlipVerts();
+			auto* CameraParts = Camera3D::Instance();
+			Draws.m_CamPos = CameraParts->GetMainCamera().GetCamPos();
+			Draws.m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized();
+		}
 		void		BackGroundControl::AddShadowCubes(size_t id) noexcept {
+			size_t shadow = TotalCellLayer + id;
 			auto& cellx = this->m_CellxN.at(id);
-			auto& DrawsSB = this->m_DrawsSB.at(id);
-			DrawsSB.m_vert32.ResetNum();
-			auto center = cellx.GetPoint(DrawsSB.m_CamPos);
+			auto& Draws = this->m_Draws.at(shadow);
+			Draws.m_vert32.ResetNum();
+			auto center = cellx.GetPoint(Draws.m_CamPos);
 			//X
 			for (int zpos = DrawMaxZMinus; zpos <= DrawMaxZPlus; ++zpos) {
-
 				bool CheckInsideZ = cellx.isFarCells() && ((DrawMinZMinus < zpos) && (zpos < DrawMinZPlus));
-
 				for (int ypos = DrawMaxYMinus; ypos <= DrawMaxYPlus; ++ypos) {
 					if (!cellx.isInside(center.y + ypos)) { continue; }
-
-					bool CheckInside = CheckInsideZ && ((DrawMinYMinus < ypos) && (ypos < DrawMinYPlus));
-
-					int xmin = 0;
-					int xmax = 0;
-					bool isHitmin = true;
-					for (int xpos = DrawMaxXMinus; xpos <= DrawMaxXPlus; ++xpos) {
-						auto& CellBuff = cellx.GetCellBuf(center.x + xpos, center.y + ypos, center.z + zpos);
-						if (
-							(xpos == DrawMaxXPlus)
-							|| (CheckInside && ((DrawMinXMinus < xpos) && (xpos < DrawMinXPlus)))
-							|| (CellBuff.IsEmpty())
-							|| (CellBuff.IsOcclusion())
-							) {
-							//置けない部分なので今まで置けていた分をまとめてポリゴン化
-							if (!isHitmin) {
-								isHitmin = true;
-								if (DrawsSB.m_light.z > 0.f) {
-									if (AddCubeX_CanAddPlane(cellx, center, xmin, xmax, ypos, zpos, 5)) {
-										AddPlaneZMinus(&DrawsSB.m_vert32, cellx, center, xmin, xmax, ypos, zpos, false);
-									}
-								}
-								else {
-									if (AddCubeX_CanAddPlane(cellx, center, xmin, xmax, ypos, zpos, 4)) {
-										AddPlaneZPlus(&DrawsSB.m_vert32, cellx, center, xmin, xmax, ypos, zpos, false);
-									}
-								}
-							}
-						}
-						else {
-							//ブロックが置ける部分
-							if (isHitmin) {
-								isHitmin = false;
-								xmin = xpos;
-							}
-							xmax = xpos;
-						}
-					}
+					bool CheckInsideYZ = CheckInsideZ && ((DrawMinYMinus < ypos) && (ypos < DrawMinYPlus));
+					AddPlanesZ(&Draws.m_vert32, Draws.m_CamVec.z, cellx, center, DrawMaxXMinus, DrawMaxXPlus, ypos, zpos, CheckInsideYZ, false, false);
 				}
 			}
 			//Z
 			for (int xpos = DrawMaxXMinus; xpos <= DrawMaxXPlus; ++xpos) {
-
 				bool CheckInsideX = cellx.isFarCells() && ((DrawMinXMinus < xpos) && (xpos < DrawMinXPlus));
-
 				for (int ypos = DrawMaxYMinus; ypos <= DrawMaxYPlus; ++ypos) {
 					if (!cellx.isInside(center.y + ypos)) { continue; }
-
-					bool CheckInside = CheckInsideX && ((DrawMinYMinus < ypos) && (ypos < DrawMinYPlus));
-
-					int zmin = 0;
-					int zmax = 0;
-					bool isHitmin = true;
-					for (int zpos = DrawMaxZMinus; zpos <= DrawMaxZPlus; ++zpos) {
-						auto& CellBuff = cellx.GetCellBuf(center.x + xpos, center.y + ypos, center.z + zpos);
-						if (
-							(zpos == DrawMaxZPlus)
-							|| (CheckInside && ((DrawMinZMinus < zpos) && (zpos < DrawMinZPlus)))
-							|| (CellBuff.IsEmpty())
-							|| (CellBuff.IsOcclusion())
-							) {
-							//置けない部分なので今まで置けていた分をまとめてポリゴン化
-							if (!isHitmin) {
-								isHitmin = true;
-								if (DrawsSB.m_light.x > 0.f) {
-									if (AddCubeZ_CanAddPlane(cellx, center, xpos, ypos, zmin, zmax, 1)) {
-										AddPlaneXMinus(&DrawsSB.m_vert32, cellx, center, xpos, ypos, zmin, zmax, false);
-									}
-								}
-								else {
-									if (AddCubeZ_CanAddPlane(cellx, center, xpos, ypos, zmin, zmax, 0)) {
-										AddPlaneXPlus(&DrawsSB.m_vert32, cellx, center, xpos, ypos, zmin, zmax, false);
-									}
-								}
-								if (DrawsSB.m_light.y > 0.f) {
-									if (AddCubeZ_CanAddPlane(cellx, center, xpos, ypos, zmin, zmax, 3)) {
-										AddPlaneYMinus(&DrawsSB.m_vert32, cellx, center, xpos, ypos, zmin, zmax, false);
-									}
-								}
-								else {
-									if (AddCubeZ_CanAddPlane(cellx, center, xpos, ypos, zmin, zmax, 2)) {
-										AddPlaneYPlus(&DrawsSB.m_vert32, cellx, center, xpos, ypos, zmin, zmax, false);
-									}
-								}
-							}
-						}
-						else {
-							//ブロックが置ける部分
-							if (isHitmin) {
-								isHitmin = false;
-								zmin = zpos;
-							}
-							zmax = zpos;
-						}
-					}
+					bool CheckInsideXY = CheckInsideX && ((DrawMinYMinus < ypos) && (ypos < DrawMinYPlus));
+					AddPlanesXY(&Draws.m_vert32, Draws.m_CamVec.x, Draws.m_CamVec.y, cellx, center, xpos, ypos, DrawMaxZMinus, DrawMaxZPlus, CheckInsideXY, false, false);
 				}
 			}
 		}
+		void		BackGroundControl::FlipShadowCubes(size_t id) noexcept {
+			size_t shadow = TotalCellLayer + id;
+			auto* PostPassParts = PostPassEffect::Instance();
+			auto* SceneParts = SceneControl::Instance();
+			auto& Draws = this->m_Draws.at(shadow);
+			Draws.m_vert32.FlipVerts();
+			//Draws.m_CamPos =  Camera3D::Instance()->GetMainCamera().GetCamPos();
+			Draws.m_CamPos = Vector3DX::vget(0.f, -30.f, 0.f) * Scale3DRate;
+			Draws.m_CamVec = PostPassParts->GetShadowDir();
+			SceneParts->SetIsUpdateFarShadowActive();
+		}
 		//
 		bool		BackGroundControl::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
-			auto& cell = this->m_CellxN.front();
-			auto Start = cell.GetPoint(StartPos);
-			auto End = cell.GetPoint(*EndPos);// *EndPos
+			auto Start = GetReferenceCells().GetPoint(StartPos);
+			auto End = GetReferenceCells().GetPoint(*EndPos);// *EndPos
 
 			for (int xm = -1; xm <= 1; ++xm) {
 				for (int ym = -1; ym <= 1; ++ym) {
@@ -855,11 +725,10 @@ namespace FPS_n2 {
 							Start.x + xm, Start.y + ym, Start.z + zm,
 							End.x + xm, End.y + ym, End.z + zm,
 							[&](int xpos, int ypos, int zpos) {
-								if (!cell.isInside(ypos)) { return false; }
-								if (cell.GetCellBuf(xpos, ypos, zpos).IsEmpty()) { return false; }
-								if (cell.GetCellBuf(xpos, ypos, zpos).IsOcclusion()) { return false; }
-								Vector3DX MinPos = cell.GetPos(xpos, ypos, zpos) + Vector3DX::one() * -0.1f * Scale3DRate;
-								Vector3DX MaxPos = cell.GetPos(xpos + 1, ypos + 1, zpos + 1) + Vector3DX::one() * 0.1f * Scale3DRate;
+								if (!GetReferenceCells().isInside(ypos)) { return false; }
+								if (!GetReferenceCells().GetCellBuf(xpos, ypos, zpos).CanDraw()) { return false; }
+								Vector3DX MinPos = GetReferenceCells().GetPos(xpos, ypos, zpos) + Vector3DX::one() * -0.1f * Scale3DRate;
+								Vector3DX MaxPos = GetReferenceCells().GetPos(xpos + 1, ypos + 1, zpos + 1) + Vector3DX::one() * 0.1f * Scale3DRate;
 								Vector3DX tmpEndPos = *EndPos;
 								Vector3DX tmpNormal;
 								if (ColRayBox(StartPos, &tmpEndPos, MinPos, MaxPos, &tmpNormal)) {
@@ -870,7 +739,6 @@ namespace FPS_n2 {
 										}
 									}
 									isHit = true;
-									//return true;
 								}
 								return false;
 							});
@@ -884,9 +752,8 @@ namespace FPS_n2 {
 			auto MoveVector = *EndPos - StartPos;
 			// プレイヤーの周囲にあるステージポリゴンを取得する( 検出する範囲は移動距離も考慮する )
 			std::vector<MV1_COLL_RESULT_POLY> kabes;// 壁ポリゴンと判断されたポリゴンの構造体のアドレスを保存しておく
-			auto& cell = this->m_CellxN.front();
-			auto Start = cell.GetPoint(StartPos);
-			auto End = cell.GetPoint(*EndPos);// *EndPos
+			auto Start = GetReferenceCells().GetPoint(StartPos);
+			auto End = GetReferenceCells().GetPoint(*EndPos);// *EndPos
 
 			for (int xm = -3; xm <= 3; ++xm) {
 				for (int ym = 3; ym <= 6; ++ym) {
@@ -895,11 +762,10 @@ namespace FPS_n2 {
 							Start.x + xm, Start.y + ym, Start.z + zm,
 							End.x + xm, End.y + ym, End.z + zm,
 							[&](int xpos, int ypos, int zpos) {
-								if (!cell.isInside(ypos)) { return false; }
-								if (cell.GetCellBuf(xpos, ypos, zpos).IsEmpty()) { return false; }
-								if (cell.GetCellBuf(xpos, ypos, zpos).IsOcclusion()) { return false; }
-								Vector3DX MinPos = cell.GetPos(xpos, ypos, zpos);
-								Vector3DX MaxPos = cell.GetPos(xpos + 1, ypos + 1, zpos + 1);
+								if (!GetReferenceCells().isInside(ypos)) { return false; }
+								if (!GetReferenceCells().GetCellBuf(xpos, ypos, zpos).CanDraw()) { return false; }
+								Vector3DX MinPos = GetReferenceCells().GetPos(xpos, ypos, zpos);
+								Vector3DX MaxPos = GetReferenceCells().GetPos(xpos + 1, ypos + 1, zpos + 1);
 
 								MV1_COLL_RESULT_POLY tmp{};
 								// Left
@@ -1012,19 +878,18 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundControl::LoadCellsFile(void) noexcept {
-			auto& cell = this->m_CellxN.front();
 			{
-				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
+				SetReferenceCells().SetScale(0);
 
 				std::ifstream fin{};
 				fin.open("data/Map.txt", std::ios::in | std::ios::binary);
 				this->m_CellBase.resize(static_cast<size_t>(256 * 256 * 256));
 				fin.read((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0))) * 256 * 256 * 256);
 				fin.close();
-				for (int xm = 0; xm < cell.m_All; ++xm) {
-					for (int ym = 0; ym < cell.m_All; ++ym) {
-						for (int zm = 0; zm < cell.m_All; ++zm) {
-							cell.SetCellBuf(xm, ym, zm).m_Cell = this->m_CellBase[cell.GetCellNum(xm, ym, zm)];
+				for (int xm = 0; xm < GetReferenceCells().m_All; ++xm) {
+					for (int ym = 0; ym < GetReferenceCells().m_All; ++ym) {
+						for (int zm = 0; zm < GetReferenceCells().m_All; ++zm) {
+							SetReferenceCells().SetCellBuf(xm, ym, zm).m_Cell = this->m_CellBase[GetReferenceCells().GetCellNum(xm, ym, zm)];
 						}
 					}
 				}
@@ -1032,21 +897,21 @@ namespace FPS_n2 {
 			//一部をペースト
 			//LoadCellsClip(0, 128, 0);
 			/*
-			for (int xpos = 0; xpos < cell.m_All; ++xpos) {
-				if (xpos - cell.m_Half > -72) {
-					for (int zpos = 0; zpos < cell.m_All; ++zpos) {
-						for (int ypos = cell.m_All; ypos >=130+15 ; --ypos) {
-							cell.SetCellBuf(xpos, ypos, zpos).m_Cell = cell.GetCellBuf(xpos, ypos - 15, zpos).GetCell();
+			for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
+				if (xpos - GetReferenceCells().m_Half > -72) {
+					for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
+						for (int ypos = GetReferenceCells().m_All; ypos >=130+15 ; --ypos) {
+							SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = GetReferenceCells().GetCellBuf(xpos, ypos - 15, zpos).GetCell();
 						}
 					}
 				}
 			}
 			//*/
 			/*
-			for (int xpos = 0; xpos < cell.m_All; ++xpos) {
-				for (int zpos = 0; zpos < cell.m_All; ++zpos) {
-					for (int ypos = cell.m_All; ypos >= 133; --ypos) {
-						cell.SetCellBuf(xpos, ypos, zpos).m_Cell = 0;
+			for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
+				for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
+					for (int ypos = GetReferenceCells().m_All; ypos >= 133; --ypos) {
+						SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = 0;
 					}
 				}
 			}
@@ -1054,13 +919,11 @@ namespace FPS_n2 {
 		}
 		void		BackGroundControl::SaveCellsFile(void) noexcept {
 			{
-				auto& cell = this->m_CellxN.front();
-
 				this->m_CellBase.resize(static_cast<size_t>(256 * 256 * 256));
-				for (int xm = 0; xm < cell.m_All; ++xm) {
-					for (int ym = 0; ym < cell.m_All; ++ym) {
-						for (int zm = 0; zm < cell.m_All; ++zm) {
-							this->m_CellBase[cell.GetCellNum(xm, ym, zm)] = cell.SetCellBuf(xm, ym, zm).GetCell();
+				for (int xm = 0; xm < GetReferenceCells().m_All; ++xm) {
+					for (int ym = 0; ym < GetReferenceCells().m_All; ++ym) {
+						for (int zm = 0; zm < GetReferenceCells().m_All; ++zm) {
+							this->m_CellBase[GetReferenceCells().GetCellNum(xm, ym, zm)] = GetReferenceCells().GetCellBuf(xm, ym, zm).GetCell();
 						}
 					}
 				}
@@ -1082,7 +945,6 @@ namespace FPS_n2 {
 			//*/
 		}
 		void		BackGroundControl::LoadCellsClip(int xbasepos, int ybasepos, int zbasepos) noexcept {
-			auto& cell = this->m_CellxN.front();
 			int XTotal = 1;
 			int YTotal = 1;
 			int ZTotal = 1;
@@ -1098,14 +960,13 @@ namespace FPS_n2 {
 			for (int xm = 0; xm < XTotal; ++xm) {
 				for (int ym = 0; ym < YTotal; ++ym) {
 					for (int zm = 0; zm < ZTotal; ++zm) {
-						cell.SetCellBuf(xm + xbasepos, ym + ybasepos, zm + zbasepos).m_Cell =
+						SetReferenceCells().SetCellBuf(xm + xbasepos, ym + ybasepos, zm + zbasepos).m_Cell =
 							this->m_CellBase[static_cast<size_t>(xm * YTotal * ZTotal + ym * ZTotal + zm)];
 					}
 				}
 			}
 		}
 		void		BackGroundControl::SaveCellsClip(int XMin, int XMax, int YMin, int YMax, int ZMin, int ZMax) noexcept {
-			auto& cell = this->m_CellxN.front();
 			int XTotal = (XMax - XMin + 1);
 			int YTotal = (YMax - YMin + 1);
 			int ZTotal = (ZMax - ZMin + 1);
@@ -1114,7 +975,7 @@ namespace FPS_n2 {
 			for (int xm = 0; xm < XTotal; ++xm) {
 				for (int ym = 0; ym < YTotal; ++ym) {
 					for (int zm = 0; zm < ZTotal; ++zm) {
-						this->m_CellBase[static_cast<size_t>(xm * YTotal * ZTotal + ym * ZTotal + zm)] = cell.SetCellBuf(XMin + xm, YMin + ym, ZMin + zm).GetCell();
+						this->m_CellBase[static_cast<size_t>(xm * YTotal * ZTotal + ym * ZTotal + zm)] = GetReferenceCells().GetCellBuf(XMin + xm, YMin + ym, ZMin + zm).GetCell();
 					}
 				}
 			}
@@ -1129,21 +990,20 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundControl::SettingChange(void) noexcept {
-			this->m_ShadowRate = static_cast<int>(pow(MulPer, 1));
-			this->m_BaseRate = static_cast<int>(pow(MulPer, 1));
+			this->m_ShadowRate = 1;
+			this->m_BaseRate = 1;
 		}
 		//
 		void		BackGroundControl::SetBlick(int xpos, int ypos, int zpos, int8_t select) noexcept {
-			auto& cell = this->m_CellxN.front();
-			if (!cell.isInside(ypos)) { return; }
+			if (!GetReferenceCells().isInside(ypos)) { return; }
 			//テクスチャだけ変える
 			/*
-			if (cell.SetCellBuf(xpos, ypos, zpos).IsEmpty()) { return; }
-			cell.SetCellBuf(xpos, ypos, zpos).m_Cell = select;
+			if (GetReferenceCells().GetCellBuf(xpos, ypos, zpos).IsEmpty()) { return; }
+			SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = select;
 			return;
 			//*/
 			//
-			cell.SetCellBuf(xpos, ypos, zpos).m_Cell = select;
+			SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = select;
 			//簡易版を更新
 			for (int loop = 1; loop < TotalCellLayer; ++loop) {
 				auto& cell1 = this->m_CellxN.at(loop);
@@ -1152,31 +1012,25 @@ namespace FPS_n2 {
 				int ym = ypos / cell1.m_scaleRate;
 				int zm = zpos / cell1.m_scaleRate;
 
-				cell1.SetCellBuf(xm, ym, zm).m_Cell = cell.isFill(xm, ym, zm, cell1.m_scaleRate);
+				cell1.SetCellBuf(xm, ym, zm).m_Cell = GetReferenceCells().isFill(xm, ym, zm, cell1.m_scaleRate);
 			}
 			//遮蔽検索
 			for (auto& cellx : this->m_CellxN) {
 				int xm = xpos / cellx.m_scaleRate;
 				int ym = ypos / cellx.m_scaleRate;
 				int zm = zpos / cellx.m_scaleRate;
-				auto CheckCell = [&](int xp, int yp, int zp) {
-					if (cellx.isInside(yp)) {
-						cellx.CalcOcclusion(xp, yp, zp);
-					}
-					};
-				CheckCell(xm + 1, ym, zm);
-				CheckCell(xm - 1, ym, zm);
-				CheckCell(xm, ym + 1, zm);
-				CheckCell(xm, ym - 1, zm);
-				CheckCell(xm, ym, zm + 1);
-				CheckCell(xm, ym, zm - 1);
+				cellx.CalcOcclusion(xm + 1, ym, zm);
+				cellx.CalcOcclusion(xm - 1, ym, zm);
+				cellx.CalcOcclusion(xm, ym + 1, zm);
+				cellx.CalcOcclusion(xm, ym - 1, zm);
+				cellx.CalcOcclusion(xm, ym, zm + 1);
+				cellx.CalcOcclusion(xm, ym, zm - 1);
 			}
 		}
 		//
 		void		BackGroundControl::Load(void) noexcept {
 			MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
 			this->m_tex.Load("data/tex.png");
-			this->m_norm.Load("data/nrm.png");
 		}
 		//
 		void		BackGroundControl::Init(void) noexcept {
@@ -1190,8 +1044,7 @@ namespace FPS_n2 {
 			}
 			if (true) {
 				//空っぽ
-				auto& cell = this->m_CellxN.front();
-				cell.SetScale(static_cast<int>(pow(MulPer, 0)));
+				SetReferenceCells().SetScale(0);
 
 				int seed = GetRand(100);
 #if DEBUG_NET
@@ -1208,22 +1061,22 @@ namespace FPS_n2 {
 				int Edge = -Rate;
 				int EdgeP = -0;
 
-				for (int xpos = 0; xpos < cell.m_All; ++xpos) {
-					for (int zpos = 0; zpos < cell.m_All; ++zpos) {
-						for (int ypos = 0; ypos < cell.m_All; ++ypos) {
-							cell.SetCellBuf(xpos, ypos, zpos).m_Cell = s_EmptyBlick;
+				for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
+					for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
+						for (int ypos = 0; ypos < GetReferenceCells().m_All; ++ypos) {
+							SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = s_EmptyBlick;
 						}
 					}
 				}
-				for (int xpos = 0; xpos < cell.m_All; ++xpos) {
-					for (int zpos = 0; zpos < cell.m_All; ++zpos) {
+				for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
+					for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
 						int xPos = -Size * Rate / 2 + xpos;
 						int zPos = -Size * Rate / 2 + zpos;
 						//外壁
 						if ((-EdgeP <= xpos && xpos <= Size * Rate + EdgeP - 1) && (-EdgeP <= zpos && zpos <= Size * Rate + EdgeP - 1)) {
 							if ((xpos == -EdgeP || xpos == Size * Rate + EdgeP - 1) || (zpos == -EdgeP || zpos == Size * Rate + EdgeP - 1)) {
-								for (int ypos = 0; ypos <= cell.m_All / 8; ++ypos) {
-									cell.SetCellBuf(cell.m_Half + xPos, ypos, cell.m_Half + zPos).m_Cell = 1;
+								for (int ypos = 0; ypos <= GetReferenceCells().m_All / 8; ++ypos) {
+									SetReferenceCells().SetCellBuf(GetReferenceCells().m_Half + xPos, ypos, GetReferenceCells().m_Half + zPos).m_Cell = 1;
 								}
 							}
 						}
@@ -1231,9 +1084,9 @@ namespace FPS_n2 {
 						if ((-EdgeP < xpos && xpos < Size * Rate + EdgeP - 1) && (-EdgeP < zpos && zpos < Size * Rate + EdgeP - 1)) {
 							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(xpos)) / (Size * Rate - 1),
-								(static_cast<float>(zpos)) / (Size * Rate - 1)) * static_cast<float>(cell.m_All * 1 / 10));
+								(static_cast<float>(zpos)) / (Size * Rate - 1)) * static_cast<float>(GetReferenceCells().m_All * 1 / 10));
 							for (int ypos = 0; ypos <= Height; ++ypos) {
-								cell.SetCellBuf(cell.m_Half + xPos, ypos, cell.m_Half + zPos).m_Cell = 4;
+								SetReferenceCells().SetCellBuf(GetReferenceCells().m_Half + xPos, ypos, GetReferenceCells().m_Half + zPos).m_Cell = 4;
 							}
 						}
 					}
@@ -1251,9 +1104,9 @@ namespace FPS_n2 {
 							int zPos = -Size * Rate / 2 + zpos + zt;
 							auto Height = static_cast<int>(ns.octaveNoise(2, 
 								(static_cast<float>(xpos + xt)) / (Size * Rate),
-								(static_cast<float>(zpos + zt)) / (Size * Rate)) * static_cast<float>(cell.m_All * 1 / 10));
+								(static_cast<float>(zpos + zt)) / (Size * Rate)) * static_cast<float>(GetReferenceCells().m_All * 1 / 10));
 							for (int ypos = Height; ypos <= Height + Heights; ++ypos) {
-								cell.SetCellBuf(cell.m_Half + xPos, ypos, cell.m_Half + zPos).m_Cell = 2;
+								SetReferenceCells().SetCellBuf(GetReferenceCells().m_Half + xPos, ypos, GetReferenceCells().m_Half + zPos).m_Cell = 2;
 							}
 						};
 						int xp = xpos / Rate;
@@ -1284,20 +1137,32 @@ namespace FPS_n2 {
 					}
 				}
 				//*/
-				SaveCellsFile();
+
+				for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
+					for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
+						for (int ypos = 0; ypos < GetReferenceCells().m_All; ++ypos) {
+							if (GetReferenceCells().GetCellBuf(xpos, ypos, zpos).GetCell() != s_EmptyBlick) {
+								SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Life = 100;
+							}
+							else {
+								SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Life = 0;
+							}
+						}
+					}
+				}
+				//SaveCellsFile();
 			}
 			else {
 				LoadCellsFile();
 			}
 			//簡略版を制作
-			auto& cell = this->m_CellxN.front();
-			for (int select = 1; select < TotalCellLayer; ++select) {
-				auto& cell1 = this->m_CellxN.at(select);
-				cell1.SetScale(static_cast<int>(pow(MulPer, select)));
+			for (int loop = 1; loop < TotalCellLayer; ++loop) {
+				auto& cell1 = this->m_CellxN.at(loop);
+				cell1.SetScale(loop);
 				for (int xm = 0; xm < cell1.m_All; ++xm) {
 					for (int ym = 0; ym < cell1.m_All; ++ym) {
 						for (int zm = 0; zm < cell1.m_All; ++zm) {
-							cell1.SetCellBuf(xm, ym, zm).m_Cell = cell.isFill(xm, ym, zm, cell1.m_scaleRate);
+							cell1.SetCellBuf(xm, ym, zm).m_Cell = GetReferenceCells().isFill(xm, ym, zm, cell1.m_scaleRate);
 						}
 					}
 				}
@@ -1307,7 +1172,6 @@ namespace FPS_n2 {
 				for (int xpos = 0; xpos < cellx.m_All; ++xpos) {
 					for (int ypos = 0; ypos < cellx.m_All; ++ypos) {
 						for (int zpos = 0; zpos < cellx.m_All; ++zpos) {
-							if (cellx.GetCellBuf(xpos, ypos, zpos).IsEmpty()) { continue; }
 							cellx.CalcOcclusion(xpos, ypos, zpos);
 						}
 					}
@@ -1322,132 +1186,35 @@ namespace FPS_n2 {
 			Param.Power = 500.f;													// スペキュラハイライトの鮮明度
 			SetMaterialParam(Param);
 			//
-			constexpr size_t size = (DrawMax + DrawMax) * (DrawMax + DrawMax) * (DrawMax + DrawMax) / 2 * 3 / 100;
-			for (int loop = 0; loop < TotalCellLayer; ++loop) {
-				this->m_Draws.at(loop).m_vert32.Init(size);
-				this->m_DrawsSB.at(loop).m_vert32.Init(size);
+			constexpr size_t size = (DrawMaxXPlus - DrawMaxXMinus) * (DrawMaxYPlus - DrawMaxYMinus) * (DrawMaxZPlus - DrawMaxZMinus) / 2 * 3 / 100;
+			for (auto& Vert : this->m_Draws) {
+				Vert.m_vert32.Init(size);
 			}
 			//
 			this->m_Jobs.at(0).Init(
-				[&]() {
-					AddCubes(0);
-				},
-				[&]() {
-					size_t id = 0;
-					this->m_Draws.at(id).m_vert32.FlipVerts();
-					auto* CameraParts = Camera3D::Instance();
-					this->m_Draws.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
-					this->m_Draws.at(id).m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - this->m_Draws.at(id).m_CamPos).normalized();
-				}
-			, false);
+				[&]() { AddCubes(0); },
+				[&]() { FlipCubes(0); }, false);
 			this->m_Jobs.at(1).Init(
-				[&]() {
-					AddCubes(1);
-				},
-				[&]() {
-					size_t id = 1;
-					this->m_Draws.at(id).m_vert32.FlipVerts();
-					auto* CameraParts = Camera3D::Instance();
-					this->m_Draws.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
-					this->m_Draws.at(id).m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - this->m_Draws.at(id).m_CamPos).normalized();
-				}
-			, false);
+				[&]() { AddCubes(1); },
+				[&]() { FlipCubes(1); }, false);
 			this->m_Jobs.at(2).Init(
-				[&]() {
-					AddCubes(2);
-				},
-				[&]() {
-					size_t id = 2;
-					this->m_Draws.at(id).m_vert32.FlipVerts();
-					auto* CameraParts = Camera3D::Instance();
-					this->m_Draws.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
-					this->m_Draws.at(id).m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - this->m_Draws.at(id).m_CamPos).normalized();
-				}
-			, false);
+				[&]() { AddCubes(2); },
+				[&]() { FlipCubes(2); }, false);
 			this->m_Jobs.at(3).Init(
-				[&]() {
-					AddCubes(3);
-				},
-				[&]() {
-					size_t id = 3;
-					this->m_Draws.at(id).m_vert32.FlipVerts();
-					auto* CameraParts = Camera3D::Instance();
-					this->m_Draws.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
-					this->m_Draws.at(id).m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - this->m_Draws.at(id).m_CamPos).normalized();
-				}
-			, false);
+				[&]() { AddCubes(3); },
+				[&]() { FlipCubes(3); }, false);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 0)).Init(
-				[&]() {
-					AddShadowCubes(0);
-				},
-				[&]() {
-					size_t id = 0;
-					this->m_DrawsSB.at(id).m_vert32.FlipVerts();
-					auto* CameraParts = Camera3D::Instance();
-					this->m_DrawsSB.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
-					this->m_DrawsSB.at(id).m_CamPos.x = 0.f;
-					this->m_DrawsSB.at(id).m_CamPos.y = -30.f * Scale3DRate;
-					this->m_DrawsSB.at(id).m_CamPos.z = 0.f;
-					auto* PostPassParts = PostPassEffect::Instance();
-					this->m_DrawsSB.at(id).m_light = PostPassParts->GetShadowDir();
-					auto* SceneParts = SceneControl::Instance();
-					SceneParts->SetIsUpdateFarShadowActive();
-				}
-			, true);
+				[&]() { AddShadowCubes(0); },
+				[&]() { FlipShadowCubes(0); }, true);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 1)).Init(
-				[&]() {
-					AddShadowCubes(1);
-				},
-				[&]() {
-					size_t id = 1;
-					this->m_DrawsSB.at(id).m_vert32.FlipVerts();
-					auto* CameraParts = Camera3D::Instance();
-					this->m_DrawsSB.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
-					this->m_DrawsSB.at(id).m_CamPos.x = 0.f;
-					this->m_DrawsSB.at(id).m_CamPos.y = -30.f * Scale3DRate;
-					this->m_DrawsSB.at(id).m_CamPos.z = 0.f;
-					auto* PostPassParts = PostPassEffect::Instance();
-					this->m_DrawsSB.at(id).m_light = PostPassParts->GetShadowDir();
-					auto* SceneParts = SceneControl::Instance();
-					SceneParts->SetIsUpdateFarShadowActive();
-				}
-			, true);
+				[&]() { AddShadowCubes(1); },
+				[&]() { FlipShadowCubes(1); }, true);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 2)).Init(
-				[&]() {
-					AddShadowCubes(2);
-				},
-				[&]() {
-					size_t id = 2;
-					this->m_DrawsSB.at(id).m_vert32.FlipVerts();
-					auto* CameraParts = Camera3D::Instance();
-					this->m_DrawsSB.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
-					this->m_DrawsSB.at(id).m_CamPos.x = 0.f;
-					this->m_DrawsSB.at(id).m_CamPos.y = -30.f * Scale3DRate;
-					this->m_DrawsSB.at(id).m_CamPos.z = 0.f;
-					auto* PostPassParts = PostPassEffect::Instance();
-					this->m_DrawsSB.at(id).m_light = PostPassParts->GetShadowDir();
-					auto* SceneParts = SceneControl::Instance();
-					SceneParts->SetIsUpdateFarShadowActive();
-				}
-			, true);
+				[&]() { AddShadowCubes(2); },
+				[&]() { FlipShadowCubes(2); }, true);
 			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 3)).Init(
-				[&]() {
-					AddShadowCubes(3);
-				},
-				[&]() {
-					size_t id = 3;
-					this->m_DrawsSB.at(id).m_vert32.FlipVerts();
-					auto* CameraParts = Camera3D::Instance();
-					this->m_DrawsSB.at(id).m_CamPos = CameraParts->GetMainCamera().GetCamPos();
-					this->m_DrawsSB.at(id).m_CamPos.x = 0.f;
-					this->m_DrawsSB.at(id).m_CamPos.y = -30.f * Scale3DRate;
-					this->m_DrawsSB.at(id).m_CamPos.z = 0.f;
-					auto* PostPassParts = PostPassEffect::Instance();
-					this->m_DrawsSB.at(id).m_light = PostPassParts->GetShadowDir();
-					auto* SceneParts = SceneControl::Instance();
-					SceneParts->SetIsUpdateFarShadowActive();
-				}
-			, true);
+				[&]() { AddShadowCubes(3); },
+				[&]() { FlipShadowCubes(3); }, true);
 			SettingChange();
 			this->m_ThreadCounter = 0;
 		}
@@ -1461,20 +1228,22 @@ namespace FPS_n2 {
 			auto* OptionParts = OptionManager::Instance();
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
 				if ((loop != 0) && (loop != this->m_ThreadCounter)) { continue; }
+				auto& cell1 = this->m_CellxN.at(loop);
 				//
-				if (this->m_BaseRate < this->m_CellxN.at(loop).m_scaleRate) {
+				if (this->m_BaseRate < cell1.m_scale) {
 					this->m_Draws.at(loop).m_vert32.Disable();
 				}
 				else {
 					this->m_Jobs.at(loop).Update();
 				}
 				//
-				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (this->m_ShadowRate < this->m_CellxN.at(loop).m_scaleRate)) {
-					this->m_DrawsSB.at(loop).m_vert32.Disable();
-					this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + loop)).m_isEnd = false;
+				int shadow = TotalCellLayer + loop;
+				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (this->m_ShadowRate < cell1.m_scale)) {
+					this->m_Draws.at(shadow).m_vert32.Disable();
+					this->m_Jobs.at(static_cast<size_t>(shadow)).m_isEnd = false;
 				}
 				else {
-					this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + loop)).Update();
+					this->m_Jobs.at(static_cast<size_t>(shadow)).Update();
 				}
 			}
 			++this->m_ThreadCounter %= TotalCellLayer;
@@ -1492,40 +1261,41 @@ namespace FPS_n2 {
 			SetVerticalFogEnable(VFog);
 		}
 		void		BackGroundControl::Shadow_Draw(void) const noexcept {
-			for (auto& Vert : this->m_DrawsSB) {
-				Vert.m_vert32.Draw(this->m_tex);
+			for (int shadow = TotalCellLayer; shadow < TotalCellLayer + TotalCellLayer; ++shadow) {
+				auto& Vert = this->m_Draws.at(shadow).m_vert32;
+				Vert.Draw(this->m_tex);
 			}
 		}
 		void		BackGroundControl::SetShadow_Draw_Rigid(void) const noexcept {
-			float Near = GetCameraNear();
-			float Far = GetCameraFar();
 			constexpr int MinLimit = std::min(std::min(DrawMinXPlus, DrawMinZPlus), DrawMinYPlus) * 3 / 4;
 			constexpr int MaxLimit = std::min(std::min(DrawMaxXPlus, DrawMaxZPlus), DrawMaxYPlus) * 5 / 4;
+			float Near = GetCameraNear() / MaxLimit;
+			float Far = GetCameraFar() / MinLimit;
 
 			SetUseTextureToShader(0, this->m_tex.get());
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
 				auto& Vert = this->m_Draws.at(loop).m_vert32;
-				if (Vert.GetOutNum() > 0) {
-					float Min = this->m_CellxN.at(loop).isFarCells() ? MinLimit * this->m_CellxN.at(loop).m_Scale : 0;
-					if (!(Min < Far && Near < MaxLimit * this->m_CellxN.at(loop).m_Scale)) { continue; }
-					Vert.DrawByShader();
-				}
+				auto& cell1 = this->m_CellxN.at(loop);
+				if (Vert.GetOutNum() == 0) { continue; }
+				if (!cell1.isFarCells() && !(cell1.m_Scale < Far)) { continue; }
+				if (cell1.isFarCells() && !(Near < cell1.m_Scale && cell1.m_Scale < Far)) { continue; }
+				Vert.DrawByShader();
 			}
 			SetUseTextureToShader(0, InvalidID);
 		}
 		void		BackGroundControl::Draw(void) const noexcept {
-			float Near = GetCameraNear();
-			float Far = GetCameraFar();
 			constexpr int MinLimit = std::min(std::min(DrawMinXPlus, DrawMinZPlus), DrawMinYPlus) * 3 / 4;
 			constexpr int MaxLimit = std::min(std::min(DrawMaxXPlus, DrawMaxZPlus), DrawMaxYPlus) * 5 / 4;
+			float Near = GetCameraNear() / MaxLimit;
+			float Far = GetCameraFar() / MinLimit;
 
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
 				auto& Vert = this->m_Draws.at(loop).m_vert32;
-				if (Vert.GetOutNum() > 0) {
-					float Min = this->m_CellxN.at(loop).isFarCells() ? MinLimit * this->m_CellxN.at(loop).m_Scale : 0;
-					if (!(Min < Far && Near < MaxLimit * this->m_CellxN.at(loop).m_Scale)) { continue; }
-					Vert.Draw(this->m_tex);
-				}
+				auto& cell1 = this->m_CellxN.at(loop);
+				if (Vert.GetOutNum() == 0) { continue; }
+				if (!cell1.isFarCells() && !(cell1.m_Scale < Far)) { continue; }
+				if (cell1.isFarCells() && !(Near < cell1.m_Scale && cell1.m_Scale < Far)) { continue; }
+				Vert.Draw(this->m_tex);
 			}
 		}
 		//
@@ -1533,8 +1303,16 @@ namespace FPS_n2 {
 			for (auto& t : m_Jobs) {
 				t.Dispose();
 			}
+			for (auto& Vert : this->m_Draws) {
+				Vert.m_vert32.Dispose();
+			}
+			for (auto& cellx : this->m_CellxN) {
+				cellx.m_CellBuffer.clear();
+			}
+		}
+		void		BackGroundControl::Dispose_Load(void) noexcept {
 			this->m_ObjSky.Dispose();
-			SaveCellsFile();
+			this->m_tex.Dispose();
 		}
 	}
 }

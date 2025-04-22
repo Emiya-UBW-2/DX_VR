@@ -82,7 +82,7 @@ namespace FPS_n2 {
 				(this->m_MuzzlePtr) ? (*this->m_MuzzlePtr)->GetModifySlot()->GetMyData()->GetGunShootSound() : GetModifySlot()->GetMyData()->GetGunShootSound()
 			))->Play3D(MuzzleMat.pos(), Scale3DRate * 50.f);
 			//エフェクト
-			EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec() * -1.f, 0.35f, 2.f);
+			EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec2(), 0.35f* this->m_MuzzleSmokeSize / (0.00762f * Scale3DRate), 2.f);
 			//発砲
 			for (int loop = 0, max = AmmoSpec->GetPellet(); loop < max; ++loop) {
 				Objects::AmmoPool::Instance()->Put(&AmmoSpec, MuzzleMat.pos(),
@@ -90,7 +90,7 @@ namespace FPS_n2 {
 						Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(AmmoSpec->GetAccuracy()))) *
 						Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(AmmoSpec->GetAccuracy()))) *
 						Matrix3x3DX::Get33DX(MuzzleMat)
-						).zvec() * -1.f, GetMyUserPlayerID());
+						).zvec2(), GetMyUserPlayerID());
 			}
 			//チャンバーを空にする
 			this->m_InChamber = false;
@@ -103,7 +103,7 @@ namespace FPS_n2 {
 			float Power = 0.0001f * GetRecoilPower();
 			this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power);
 			//ビジュアルリコイル
-			if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
+			if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 				Camera3D::Instance()->SetCamShake(0.1f, 0.1f);
 			}
 		}
@@ -194,9 +194,8 @@ namespace FPS_n2 {
 					time += 60.f * DXLib_refParts->GetDeltaTime() * (this->m_GunAnimeSpeed.at(index));
 				}
 				//
-#if defined(DEBUG)
-				auto* PlayerMngr = Player::PlayerManager::Instance();
-				if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
+#if defined(DEBUG) && FALSE
+				if (GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
 					printfDx("[%s]\n", (GetGunAnime() == Charas::GunAnimeID::Base) ? "Base" : Charas::GunAnimeIDName[static_cast<int>(GetGunAnime())]);
 					printfDx("[%f]\n", (GetGunAnime() == Charas::GunAnimeID::Base) ? 0.0f : GetNowAnimTimePerCache());
 				}
@@ -232,12 +231,12 @@ namespace FPS_n2 {
 				AnimPos = HeadPos + Matrix3x3DX::Vtrans(AnimPos, CharaRotationCache);
 				//オートエイム
 				if (IsSelectGun) {
-					this->m_AutoAimControl.Update(IsActiveAutoAim, GetMyUserPlayerID(), GetPartsFrameMatParent(GunFrame::Eyepos).pos(), GetMove().GetMat().zvec() * -1.f, GetAutoAimRadian());
+					this->m_AutoAimControl.Update(IsActiveAutoAim, GetMyUserPlayerID(), GetPartsFrameMatParent(GunFrame::Eyepos).pos(), GetMove().GetMat().zvec2(), GetAutoAimRadian());
 					this->m_AutoAimControl.CalcAutoAimMat(&AnimRot);
 				}
 				Easing(&m_GunShotZrandR, GetShotSwitch() ? GetRandf(90.f) : 0.f, 0.8f, EasingType::OutExpo);
 				Easing(&m_GunShotZrand, m_GunShotZrandR, 0.8f, EasingType::OutExpo);
-				AnimRot = AnimRot * Matrix3x3DX::RotAxis(AnimRot.zvec(), deg2rad(m_GunShotZrand * std::clamp(1.f - GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.f, 1.f)));
+				AnimRot = AnimRot * Matrix3x3DX::RotAxis(AnimRot.zvec2(), deg2rad(m_GunShotZrand * std::clamp(1.f - GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.f, 1.f)));
 			}
 			//武器座標
 			SetGunMat(Lerp(this->m_SlingRot * this->m_GunSwingMat2 * EyeYRot, AnimRot, this->m_SlingPer), Lerp(this->m_SlingPos, AnimPos, this->m_SlingPer));
@@ -484,7 +483,7 @@ namespace FPS_n2 {
 						if (IsActive()) {
 							SetActiveAll(false);//手にあるものは非表示にする
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Throw))->Play3D(GetMove().GetPos(), Scale3DRate * 2.f);
-							this->m_Grenade.SetFall(GetMove().GetPos(), this->m_GrenadeThrowRot, (this->m_GrenadeThrowRot.zvec() * -1.f).normalized() * (Scale3DRate * 15.f / 60.f), 3.5f, Objects::FallObjectType::Grenade);
+							this->m_Grenade.SetFall(GetMove().GetPos(), this->m_GrenadeThrowRot, (this->m_GrenadeThrowRot.zvec2()).normalized() * (Scale3DRate * 15.f / 60.f), 3.5f, Objects::FallObjectType::Grenade);
 						}
 					}
 					break;
@@ -503,7 +502,7 @@ namespace FPS_n2 {
 					for (int loop = 0, max = AmmoSpec->GetPellet(); loop < max; ++loop) {
 						//円周上にまき散らす
 						auto mat = Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-GetRand(30))) * Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180)));
-						Objects::AmmoPool::Instance()->Put(&AmmoSpec, grenade->GetMove().GetPos() + mat.zvec() * (0.5f * Scale3DRate) + Vector3DX::up() * (0.5f * Scale3DRate), mat.zvec(), GetMyUserPlayerID());
+						Objects::AmmoPool::Instance()->Put(&AmmoSpec, grenade->GetMove().GetPos() + mat.zvec2() * (0.5f * Scale3DRate) + Vector3DX::up() * (0.5f * Scale3DRate), mat.zvec2(), GetMyUserPlayerID());
 					}
 
 					//破壊
@@ -514,17 +513,7 @@ namespace FPS_n2 {
 					for (int xp = -xput / 2; xp < xput / 2; ++xp) {
 						for (int yp = 0; yp < yput; ++yp) {
 							for (int zp = -zput / 2; zp < zput / 2; ++zp) {
-								int xx = (Put.x + xp);
-								int yy = (Put.y + yp);
-								int zz = (Put.z + zp);
-								auto& cell = BackGroundParts->GetCellBuf(xx, yy, zz);
-								if (cell.GetCell() == 1) {
-									continue;
-								}
-								if (cell.GetCell() == 4) {
-									continue;
-								}
-								BackGroundParts->SetBlick(xx, yy, zz, BackGround::s_EmptyBlick);
+								BackGroundParts->DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, 100);
 							}
 						}
 					}
@@ -603,6 +592,10 @@ namespace FPS_n2 {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			if (IsFirstLoop()) {
 				this->m_MuzzleSmokeControl.InitMuzzleSmoke(GetPartsFrameMatParent(GunFrame::Muzzle).pos());
+				if (this->m_MagazinePtr) {
+					const auto& AmmoSpec = Objects::AmmoDataManager::Instance()->Get((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecID(0));//マガジンの一番上の弾データをチャンバーイン
+					this->m_MuzzleSmokeSize = AmmoSpec->GetCaliber() * AmmoSpec->GetPellet() * Scale3DRate;
+				}
 			}
 			else {
 				this->m_MuzzleSmokeControl.UpdateMuzzleSmoke(GetPartsFrameMatParent(GunFrame::Muzzle).pos(), GetGunAnime() != Charas::GunAnimeID::Shot && !IsNeedCalcSling());
@@ -717,8 +710,7 @@ namespace FPS_n2 {
 			GetObj().DrawModel();
 		}
 		void				GunObj::CheckDraw_Sub(int) noexcept {
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
+			if (GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
 				auto* PostPassParts = PostPassEffect::Instance();
 				if (!GetCanShot()) {
 					if (!IsNeedCalcSling()) {
@@ -727,7 +719,7 @@ namespace FPS_n2 {
 					}
 					return;
 				}
-				this->m_AimPoint.Calc(GetPartsFrameMatParent(GunFrame::Muzzle).pos() + GetMove().GetMat().zvec() * (-50.f * Scale3DRate));
+				this->m_AimPoint.Calc(GetPartsFrameMatParent(GunFrame::Muzzle).pos() + GetMove().GetMat().zvec2() * (50.f * Scale3DRate));
 				Vector3DX LensPos = GetPartsFrameMatParent(GunFrame::Lens).pos();
 				if (this->m_Lens.Calc(LensPos)) {
 					if (this->m_LensSize.Calc(GetPartsFrameMatParent(GunFrame::LensSize).pos())) {
@@ -759,9 +751,8 @@ namespace FPS_n2 {
 		void				GunObj::Draw(bool isDrawSemiTrans, int Range) noexcept {
 			if (!IsActive()) { return; }
 			if (!IsDraw(Range)) { return; }
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-			if (isDrawSemiTrans && GetMyUserPlayerID() == PlayerMngr->GetWatchPlayer()) {
-				this->m_MuzzleSmokeControl.DrawMuzzleSmoke();
+			if (isDrawSemiTrans && GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
+				this->m_MuzzleSmokeControl.DrawMuzzleSmoke(this->m_MuzzleSmokeSize);
 			}
 			BaseObject::Draw(isDrawSemiTrans, Range);
 		}

@@ -68,20 +68,8 @@ namespace FPS_n2 {
 					for (int xp = -xput / 2; xp <= xput / 2; ++xp) {
 						for (int yp = -yput / 2; yp <= yput / 2; ++yp) {
 							for (int zp = -zput / 2; zp <= zput / 2; ++zp) {
-								int xx = (Put.x + xp);
-								int yy = (Put.y + yp);
-								int zz = (Put.z + zp);
-								auto& cell = BackGroundParts->GetCellBuf(xx, yy, zz);
-								switch (cell.GetCell()) {
-								case 2:
-									BackGroundParts->SetBlick(xx, yy, zz, 3);
-									break;
-								case 3:
-									BackGroundParts->SetBlick(xx, yy, zz, BackGround::s_EmptyBlick);
+								if (BackGroundParts->DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, 50)) {
 									IsChanged = true;
-									break;
-								default:
-									break;
 								}
 							}
 						}
@@ -91,7 +79,7 @@ namespace FPS_n2 {
 					}
 				}
 				//エフェクト
-				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, pos_tmp, norm_tmp, std::min(0.0127f,(*this->m_AmmoData)->GetCaliber()) / 0.02f * Scale3DRate);//0.00762f
+				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, pos_tmp, norm_tmp, std::min(0.0127f,(*this->m_AmmoData)->GetCaliber()) / 0.02f * Scale3DRate);
 				//サウンド
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGround0) + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
 			}

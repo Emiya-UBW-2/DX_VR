@@ -7,7 +7,7 @@
 #include	"MainScene/NetworkBrowser.hpp"
 
 #if defined(DEBUG) && DEBUG_CAM
-int DBG_CamSelect = -1;
+int DBG_CamSelect = InvalidID;
 #endif
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {

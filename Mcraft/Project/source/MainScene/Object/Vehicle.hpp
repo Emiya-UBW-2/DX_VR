@@ -10,7 +10,7 @@ namespace FPS_n2 {
 	namespace Objects {
 		//êÌé‘
 		class VehicleObj : public BaseObject, public EffectControl {
-			static const PlayerID								m_MyPlayerID{ 0 };//é‘óºÇÕÇ∆ÇËÇ†Ç¶Ç∏-1
+			static const PlayerID								m_MyPlayerID{ -1 };//é‘óºÇÕÇ∆ÇËÇ†Ç¶Ç∏-1
 		private:
 			//ëÄçÏ
 			InputControl										m_Input;

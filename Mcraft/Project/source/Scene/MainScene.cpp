@@ -74,11 +74,11 @@ namespace FPS_n2 {
 			Player::PlayerManager::Create();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			PlayerMngr->Init(NetWork::Player_num);
-			PlayerMngr->SetWatchPlayer(GetViewPlayerID());
+			PlayerMngr->SetWatchPlayerID(GetViewPlayerID());
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				//
-				if (loop == PlayerMngr->GetWatchPlayer()) {
+				if (loop == PlayerMngr->GetWatchPlayerID()) {
 					Charas::CharacterObj::LoadChara("Main", (PlayerID)loop);
 #if DEBUG_NET
 					chara->LoadCharaGun("type20E", 0);
@@ -110,7 +110,7 @@ namespace FPS_n2 {
 				}
 				//
 				chara->SetPlayerID((PlayerID)loop);
-				chara->SetCharaTypeID((loop == PlayerMngr->GetWatchPlayer()) ? CharaTypeID::Team : CharaTypeID::Enemy);
+				chara->SetCharaTypeID((loop == PlayerMngr->GetWatchPlayerID()) ? CharaTypeID::Team : CharaTypeID::Enemy);
 				//
 				for (int loop2 = 0; loop2 < 3; ++loop2) {
 					auto& g = chara->GetGunPtr(loop2);
@@ -126,7 +126,6 @@ namespace FPS_n2 {
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			auto* CameraParts = Camera3D::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			//
@@ -136,7 +135,7 @@ namespace FPS_n2 {
 
 			PostPassParts->SetShadowScale(0.5f);
 			//
-			BackGroundParts->Init();
+			BackGround::BackGroundControl::Instance()->Init();
 			//
 			Vector3DX LightVec = Vector3DX::vget(0.05f, -0.3f, 0.15f); LightVec = LightVec.normalized();
 			PostPassParts->SetAmbientLight(LightVec);
@@ -167,15 +166,7 @@ namespace FPS_n2 {
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				//人の座標設定
-				Vector3DX pos_t;
-				pos_t.Set(GetRandf(10.f), -20.f, GetRandf(10.f));
-				pos_t *= Scale3DRate;
-
-				Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
-				if (BackGroundParts->CheckLinetoMap(pos_t + Vector3DX::up() * 0.f * Scale3DRate, &EndPos)) {
-					pos_t = EndPos;
-				}
-				chara->Spawn(deg2rad(0.f), deg2rad(GetRand(360)), pos_t, 0);
+				chara->Spawn(deg2rad(0.f), deg2rad(GetRand(360)), Vector3DX::vget(GetRandf(10.f), -20.f, GetRandf(10.f)) * Scale3DRate, 0);
 			}
 			//UI
 			this->m_UIclass.Set();
@@ -201,7 +192,6 @@ namespace FPS_n2 {
 			auto* CameraParts = Camera3D::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
-			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			auto* ObjMngr = ObjectManager::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SceneParts = SceneControl::Instance();
@@ -210,7 +200,7 @@ namespace FPS_n2 {
 			auto* NetBrowser = NetWorkBrowser::Instance();
 			auto* OptionParts = OptionManager::Instance();
 
-			PlayerMngr->SetWatchPlayer(GetViewPlayerID());
+			PlayerMngr->SetWatchPlayerID(GetViewPlayerID());
 			PostPassParts->SetLevelFilter(38, 154, 1.f);
 			this->m_PauseMenuControl.Update();
 			if (this->m_PauseMenuControl.IsRetire()) {
@@ -225,7 +215,7 @@ namespace FPS_n2 {
 
 			this->m_FadeControl.Update();
 
-			auto& ViewChara = PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
+			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 
 			Pad->SetMouseMoveEnable(true);
 #if DEBUG_NET
@@ -266,7 +256,7 @@ namespace FPS_n2 {
 				});
 			if (SceneParts->IsPause()) {
 				Pad->SetMouseMoveEnable(false);
-				BackGroundParts->SettingChange();
+				BackGround::BackGroundControl::Instance()->SettingChange();
 				if (!this->m_NetWorkController) {
 					return true;
 				}
@@ -333,7 +323,7 @@ namespace FPS_n2 {
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetServerPlayerData((PlayerID)loop);
-						if (loop == PlayerMngr->GetWatchPlayer() && !IsServerNotPlayer) {
+						if (loop == PlayerMngr->GetWatchPlayerID() && !IsServerNotPlayer) {
 							chara->Input(MyInput);//自身が動かすもの
 						}
 						else {//サーバーからのデータで動くもの
@@ -354,7 +344,7 @@ namespace FPS_n2 {
 				else {//オフライン
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
-						if (loop == PlayerMngr->GetWatchPlayer()) {
+						if (loop == PlayerMngr->GetWatchPlayerID()) {
 							chara->Input(MyInput);
 						}
 						else {
@@ -392,11 +382,11 @@ namespace FPS_n2 {
 				Vector3DX BaseCamPos = ViewChara->GetCameraPosition();
 				CameraParts->SetMainCamera().SetCamPos(
 					BaseCamPos + Camera3D::Instance()->GetCamShake(),
-					BaseCamPos + ViewChara->GetEyeRotationCache().zvec() * -1.f + Camera3D::Instance()->GetCamShake() * 2.f,
+					BaseCamPos + ViewChara->GetEyeRotationCache().zvec2() + Camera3D::Instance()->GetCamShake() * 2.f,
 					ViewChara->GetEyeRotationCache().yvec());
 #if defined(DEBUG) && DEBUG_CAM
 				if (CheckHitKey(KEY_INPUT_F1) != 0) {
-					DBG_CamSelect = -1;
+					DBG_CamSelect = InvalidID;
 				}
 				if (CheckHitKey(KEY_INPUT_F2) != 0) {
 					DBG_CamSelect = 0;
@@ -426,11 +416,11 @@ namespace FPS_n2 {
 						break;
 					case 2:
 						CamVec = CamPos;
-						CamPos += Rot.yvec() * (3.f * Scale3DRate) + Rot.zvec() * 0.1f;
+						CamPos += Rot.yvec() * (3.f * Scale3DRate) + Rot.zvec2() * 0.1f;
 						break;
 					case 3:
 						CamVec = CamPos;
-						CamPos += Rot.zvec() * (-3.f * Scale3DRate);
+						CamPos += Rot.zvec2() * (3.f * Scale3DRate);
 						break;
 					default:
 						break;
@@ -465,7 +455,7 @@ namespace FPS_n2 {
 			//PlayerMngr->GetVehicle()->SetCam(CameraParts->SetMainCamera());
 
 
-#if defined(DEBUG)
+#if defined(DEBUG) && FALSE
 			auto Put = CameraParts->GetMainCamera().GetCamPos() / Scale3DRate;
 			printfDx("%f,%f,%f\n", Put.x, Put.y, Put.z);
 #endif
@@ -484,7 +474,7 @@ namespace FPS_n2 {
 				EffectSingleton::Instance()->SetEffectColor(Effect::ef_dust, 255, 255, 255, 64);
 			}
 			//背景
-			BackGroundParts->Update();
+			BackGround::BackGroundControl::Instance()->Update();
 			//UIパラメーター
 			{
 				//timer
@@ -552,7 +542,7 @@ namespace FPS_n2 {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SceneParts = SceneControl::Instance();
-			auto& ViewChara = PlayerMngr->GetPlayer(PlayerMngr->GetWatchPlayer())->GetChara();
+			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 			if (!ViewChara->IsAlive()) { return; }
 			//レティクル表示
 			if (ViewChara->GetGunPtrNow()) {

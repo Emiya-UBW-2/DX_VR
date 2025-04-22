@@ -11,7 +11,6 @@ namespace FPS_n2 {
 		void			AutoAimControl::Update(bool isActive, PlayerID MyPlayerID, const Vector3DX& EyePos, const Vector3DX& AimVector, float Radian) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			if (isActive) {
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 					if (loop == MyPlayerID) { continue; }
@@ -22,7 +21,7 @@ namespace FPS_n2 {
 					float CosMax = -1.f;
 					for (const auto& hitbox : chara->GetHitBoxList()) {
 						Vector3DX EndPost = hitbox.GetPos();
-						if (BackGroundParts->CheckLinetoMap(EyePos, &EndPost)) { continue; }
+						if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(EyePos, &EndPost)) { continue; }
 						switch (hitbox.GetColType()) {
 						case Charas::HitType::Head:
 						case Charas::HitType::Body:

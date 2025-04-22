@@ -29,7 +29,7 @@ namespace FPS_n2 {
 			bool												m_IsStuckGun{ false };
 			float												m_HPRec{ 0.f };
 			bool												m_ArmBreak{ false };
-			int													m_CharaSound{ -1 };			//サウンド
+			int													m_CharaSound{ InvalidID };			//サウンド
 			Pendulum2D											m_SlingArmZrad;
 			float												m_ArmBreakPer{};
 			Pendulum2D											m_SlingZrad;
@@ -158,7 +158,12 @@ namespace FPS_n2 {
 				this->m_LeanControl.Init();
 				for (auto& per : this->m_AnimPerBuf) { per = 0.f; }
 				this->m_IsSquat = false;
-				SetMove().SetAll(pPos, pPos, pPos, Vector3DX::zero(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y));
+				Vector3DX pos_t = pPos;
+				Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
+				if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(pos_t + Vector3DX::up() * 200.f * Scale3DRate, &EndPos)) {
+					pos_t = EndPos;
+				}
+				SetMove().SetAll(pos_t, pos_t, pos_t, Vector3DX::zero(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y));
 				//
 				this->m_GunPtrControl.SelectGun(GunSelect);
 				for (int loop = 0, max = this->m_GunPtrControl.GetGunNum(); loop < max; ++loop) {

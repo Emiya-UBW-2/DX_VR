@@ -15,6 +15,7 @@ namespace FPS_n2 {
 		class GunObj : public BaseObject , public std::enable_shared_from_this<GunObj> {
 		private:
 			MuzzleSmokeControl									m_MuzzleSmokeControl{};
+			float												m_MuzzleSmokeSize{ 0.00762f };
 			std::unique_ptr<ModifySlot>							m_ModifySlot{};
 			AutoAimControl										m_AutoAimControl;
 			std::unique_ptr<GunsModify>							m_GunsModify;

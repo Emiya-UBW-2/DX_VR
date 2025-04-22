@@ -60,7 +60,7 @@ namespace FPS_n2 {
 				if (isDrawSemiTrans) { return; }
 				SetUseLighting(false);
 				SetUseHalfLambertLighting(false);
-				DrawCapsule_3D(this->m_pos, this->m_repos, 1.f * (((*this->m_AmmoData)->GetCaliber() - 0.00762f) * 0.1f + 0.00762f) * Scale3DRate, GetColor(255, 255, 172), Yellow);
+				DrawCapsule_3D(this->m_pos, this->m_repos, (((*this->m_AmmoData)->GetCaliber() - 0.00762f) * 0.1f + 0.00762f) * Scale3DRate, GetColor(255, 255, 172), Yellow);
 				SetUseLighting(true);
 				SetUseHalfLambertLighting(true);
 			}

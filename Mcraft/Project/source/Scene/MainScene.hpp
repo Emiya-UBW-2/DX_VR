@@ -20,7 +20,7 @@ namespace FPS_n2 {
 			PauseMenuControl							m_PauseMenuControl;
 			FadeControl									m_FadeControl;
 			//UIŠÖ˜A
-			MainSceneUI										m_UIclass;
+			MainSceneUI									m_UIclass;
 			//NetWork
 			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };
 			std::vector<DamageEvent>					m_DamageEvents;
@@ -71,7 +71,7 @@ namespace FPS_n2 {
 				BackGround::BackGroundControl::Instance()->SetShadow_Draw_Rigid();
 			}
 			void			SetShadowDraw_Sub(void) const noexcept override {
-				ObjectManager::Instance()->Draw(false, -1);
+				ObjectManager::Instance()->Draw(false, InvalidID);
 			}
 			void			MainDraw_Sub(int Range) const noexcept override;
 			//UI•\Ž¦

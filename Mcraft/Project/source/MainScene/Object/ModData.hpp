@@ -111,7 +111,7 @@ namespace FPS_n2 {
 				this->m_path = path_;
 
 				FILEINFO FileInfo;
-				if (FileRead_findFirst((this->m_path + "reticle_0.png").c_str(), &FileInfo) != (DWORD_PTR)-1) {
+				if (FileRead_findFirst((this->m_path + "reticle_0.png").c_str(), &FileInfo) != (DWORD_PTR)InvalidID) {
 					this->m_Reitcle.Load(this->m_path + "reticle_0.png");
 				}
 

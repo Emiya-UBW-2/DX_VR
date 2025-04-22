@@ -60,7 +60,7 @@ namespace FPS_n2 {
 			const auto		GetAutoAimActive(void) const noexcept { return this->m_AutoAimActive; }
 		public:
 			void CalcAutoAimMat(Matrix3x3DX* ptmp_gunmat) const noexcept {
-				*ptmp_gunmat = Lerp(*ptmp_gunmat, (*ptmp_gunmat) * Matrix3x3DX::RotVec2(ptmp_gunmat->zvec() * -1.f, this->m_AutoAimVec), this->m_AutoAimPer);
+				*ptmp_gunmat = Lerp(*ptmp_gunmat, (*ptmp_gunmat) * Matrix3x3DX::RotVec2(ptmp_gunmat->zvec2(), this->m_AutoAimVec), this->m_AutoAimPer);
 			}
 		public:
 			void				OverrideAutoAimID(PlayerID ID, int pos) noexcept {
@@ -125,7 +125,7 @@ namespace FPS_n2 {
 				++this->m_LineSelect %= this->m_LineTotal;
 				this->m_LinePer = std::clamp(this->m_LinePer - DXLib_refParts->GetDeltaTime() / 30.f, 0.f, 1.f);
 			}
-			void		DrawMuzzleSmoke(void) noexcept {
+			void		DrawMuzzleSmoke(float Caliber) noexcept {
 				SetUseLighting(false);
 				SetUseHalfLambertLighting(false);
 				int min = 1 + static_cast<int>((1.f - this->m_LinePer) * this->m_LineTotal);
@@ -135,7 +135,7 @@ namespace FPS_n2 {
 					if (this->m_Line[p2].second <= 0.f) { continue; }
 					float Per = static_cast<float>(loop - min) / this->m_LineTotal;
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255.f * Per));
-					DrawCapsule_3D(this->m_Line[p1].first.get(), this->m_Line[p2].first.get(), 0.00762f * Scale3DRate * Per, GetColor(216, 216, 216), GetColor(96, 96, 64));
+					DrawCapsule_3D(this->m_Line[p1].first.get(), this->m_Line[p2].first.get(), Caliber * Per, GetColor(216, 216, 216), GetColor(96, 96, 64));
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 				SetUseLighting(true);

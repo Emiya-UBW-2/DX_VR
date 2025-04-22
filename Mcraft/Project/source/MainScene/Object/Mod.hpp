@@ -21,23 +21,18 @@ namespace FPS_n2 {
 			void						SetIsDrawMesh(int meshID, bool IsDraw) noexcept {
 				this->m_IsMeshDraw.at(meshID) = IsDraw ? TRUE : FALSE;
 			}
-		public:
-			void			Init_Sub(void) noexcept override;
-			void			FirstUpdate(void) noexcept override { FirstUpdate_GunParts(); }
-			void			SetGunPartsMatrix(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept;
-			void			DrawShadow(void) noexcept override {
-				if (!IsActive()) { return; }
-
-				auto* CameraParts = Camera3D::Instance();
-				if ((GetMove().GetPos() - CameraParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale3DRate) { return; }
-
-				bool AllDraw = true;
+		private:
+			bool			IsDrawAllMesh(void) const noexcept {
 				for (auto& isdraw : this->m_IsMeshDraw) {
 					if (isdraw != TRUE) {
-						AllDraw = false;
+						return false;
 					}
 				}
-				if (AllDraw) {
+				return true;
+			}
+			void			DrawCommon(void) const noexcept {
+				if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.f * Scale3DRate * 10.f * Scale3DRate)) { return; }
+				if (IsDrawAllMesh()) {
 					GetObj().DrawModel();
 				}
 				else {
@@ -49,31 +44,19 @@ namespace FPS_n2 {
 					}
 				}
 			}
+		public:
+			void			Init_Sub(void) noexcept override;
+			void			FirstUpdate(void) noexcept override { FirstUpdate_GunParts(); }
+			void			SetGunPartsMatrix(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept;
+			void			DrawShadow(void) noexcept override {
+				if (!IsActive()) { return; }
+				DrawCommon();
+			}
 			void			Draw(bool isDrawSemiTrans, int Range) noexcept override {
 				if (!IsActive()) { return; }
 				if (!IsDraw(Range)) { return; }
 				if (isDrawSemiTrans) { return; }
-
-				auto* CameraParts = Camera3D::Instance();
-				if ((GetMove().GetPos() - CameraParts->GetMainCamera().GetCamPos()).magnitude() > 10.f * Scale3DRate) { return; }
-
-				bool AllDraw = true;
-				for (auto& isdraw : this->m_IsMeshDraw) {
-					if (isdraw != TRUE) {
-						AllDraw = false;
-					}
-				}
-				if (AllDraw) {
-					GetObj().DrawModel();
-				}
-				else {
-					for (auto& isdraw : this->m_IsMeshDraw) {
-						if (isdraw == TRUE) {
-							int index = static_cast<int>(&isdraw - &this->m_IsMeshDraw.front());
-							GetObj().DrawMesh(index);
-						}
-					}
-				}
+				DrawCommon();
 			}
 			void			Dispose_Sub(void) noexcept override;
 		private:
