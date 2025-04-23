@@ -332,6 +332,7 @@ namespace FPS_n2 {
 			if (IsMoveBack()) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSelect(); }
 			if (IsMoveFront()) { this->m_BottomAnimSelect = GetBottomWalkAnimSelect(); }
 			Easing(&this->m_AnimPerBuf.at(static_cast<int>(GetBottomTurnAnimSelect())), (!this->m_IsSquat && this->m_RotateControl.IsTurnBody()) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Rappelling)), 0.f, 0.8f, EasingType::OutExpo);
 			for (int loop = 0; loop < static_cast<int>(CharaAnimeID::AnimeIDMax); ++loop) {
 				CharaAnimeID ID = static_cast<CharaAnimeID>(loop);
 				if (
@@ -352,6 +353,28 @@ namespace FPS_n2 {
 					this->m_AnimPerBuf[loop] = std::clamp(this->m_AnimPerBuf[loop] + ((ID == this->m_BottomAnimSelect) ? 2.f : -2.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				}
 			}
+			if (this->m_IsRappelling) {
+				for (int loop = 0; loop < static_cast<int>(CharaAnimeID::AnimeIDMax); ++loop) {
+					CharaAnimeID ID = static_cast<CharaAnimeID>(loop);
+					if (ID == CharaAnimeID::Rappelling) {
+						this->m_AnimPerBuf[loop] = 1.f;
+					}
+					else {
+						this->m_AnimPerBuf[loop] = 0.f;
+					}
+				}
+				if (!this->m_IsRappellingEnd) {
+					SetObj().SetAnim(static_cast<int>(CharaAnimeID::Rappelling)).GoStart();
+				}
+				else {
+					SetAnimOnce(static_cast<int>(CharaAnimeID::Rappelling), 0.5f);
+					if (GetObj().GetAnim(static_cast<int>(CharaAnimeID::Rappelling)).TimeEnd()) {
+						this->m_IsRappelling = false;
+						this->m_IsRappellingEnd = false;
+					}
+				}
+			}
+
 			//足音
 			if (this->m_BottomAnimSelect != GetBottomStandAnimSelect()) {
 				auto Time = GetObj().GetAnim(static_cast<int>(this->m_BottomAnimSelect)).GetTime();
@@ -498,9 +521,14 @@ namespace FPS_n2 {
 						Easing(&PosBuf.y, GroundHight, 0.6f, EasingType::OutExpo);//それ以外は即時反映
 					}
 					vec.y = 0.f;
+					if (this->m_IsRappelling) {
+						this->m_IsRappellingEnd = true;
+					}
 				}
 				else {
-					vec.y = (GetMove().GetVec().y + (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps())));
+					if (!this->m_IsRappelling) {
+						vec.y = (GetMove().GetVec().y + (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps())));
+					}
 				}
 				//床判定を加味した移動ベクトル
 				SetMove().SetVec(vec);
@@ -516,6 +544,7 @@ namespace FPS_n2 {
 						if (loop == GetMyPlayerID()) { continue; }
 						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 						if (!chara->IsAlive()) { continue; }
+						if (chara->GetIsRappelling()) { continue; }
 						//自分が当たったら押し戻す
 						Vector3DX Vec = (chara->GetMove().GetPos() - GetMove().GetPos()); Vec.y = (0.f);
 						float Len = Vec.magnitude();

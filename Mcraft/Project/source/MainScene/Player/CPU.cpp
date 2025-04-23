@@ -11,7 +11,12 @@ namespace FPS_n2 {
 			auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 			//auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 
-			MyChara->Spawn(deg2rad(0.f), deg2rad(GetRandf(180.f)), Vector3DX::vget(GetRandf(10.f), -20.f, GetRandf(10.f)) * Scale3DRate, 0);
+			Vector3DX ZVec = PlayerMngr->GetHelicopter()->GetMove().GetMat().xvec();
+			float rot = std::atan2(ZVec.x, ZVec.z);
+			MyChara->Spawn(deg2rad(0.f), rot + deg2rad(GetRandf(10.f)),
+				PlayerMngr->GetHelicopter()->GetObj().GetFrameLocalWorldMatrix(PlayerMngr->GetHelicopter()->GetFrame(static_cast<int>(Objects::HeliFrame::Rappelling1))).pos(),
+				0, false);
+			MyChara->SetRappelling();
 		}
 		//
 		void AIControl::Init(PlayerID MyID) noexcept {
@@ -24,11 +29,25 @@ namespace FPS_n2 {
 			//auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 			if (MyChara->IsAlive()) {
 				this->m_RepopTimer = 0.f;
+
+				if (MyChara->GetIsRappelling()) {
+					Vector3DX Vec = Vector3DX::down() * (10.f * 60.f * DXLib_refParts->GetDeltaTime());
+					NetWork::MoveInfo MoveInfoData;
+					MoveInfoData.repos = MyChara->GetMove().GetRePos();
+					MoveInfoData.pos = MyChara->GetMove().GetPos() + Vec;
+					MoveInfoData.vec = Vec;
+					MoveInfoData.mat = MyChara->GetMove().GetMat();
+					MoveInfoData.WatchRad = MyChara->GetRotateRad();
+					MyChara->SetMoveOverRide(MoveInfoData);
+				}
 			}
 			else {
 				this->m_RepopTimer += DXLib_refParts->GetDeltaTime();
 				if (this->m_RepopTimer > 5.f) {
-					Repop();
+					this->m_RepopTimer -= 5.f;
+					if (PlayerMngr->GetHelicopter()->GetIsActiveRappelling()) {
+						Repop();
+					}
 				}
 			}
 		}

@@ -18,6 +18,8 @@ namespace FPS_n2 {
 			MoveControl											m_MoveControl{};
 			RotateControl										m_RotateControl{};
 
+			bool												m_IsRappelling{};
+			bool												m_IsRappellingEnd{};
 			InputControl										m_Input;
 			bool												m_IsSquat{ false };
 			std::array<float, static_cast<int>(CharaAnimeID::AnimeIDMax)>	m_AnimPerBuf{ 0 };
@@ -142,7 +144,7 @@ namespace FPS_n2 {
 				MV1::SetAnime(&SetRagDoll(), GetObj());
 				this->m_RagDollControl.Init(GetObj());
 			}
-			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect) noexcept {
+			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect, bool CheckGround) noexcept {
 				this->m_HP.Init();
 				this->m_AP.Init();
 				Heal(100);
@@ -159,9 +161,11 @@ namespace FPS_n2 {
 				for (auto& per : this->m_AnimPerBuf) { per = 0.f; }
 				this->m_IsSquat = false;
 				Vector3DX pos_t = pPos;
-				Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
-				if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(pos_t + Vector3DX::up() * 200.f * Scale3DRate, &EndPos)) {
-					pos_t = EndPos;
+				if (CheckGround) {
+					Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
+					if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(pos_t + Vector3DX::up() * 200.f * Scale3DRate, &EndPos)) {
+						pos_t = EndPos;
+					}
 				}
 				SetMove().SetAll(pos_t, pos_t, pos_t, Vector3DX::zero(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y));
 				//
@@ -171,6 +175,12 @@ namespace FPS_n2 {
 					this->m_GunPtrControl.GetGunPtr(loop)->Spawn();
 				}
 				this->m_SlingZrad.Init(0.05f * Scale3DRate, 3.f, deg2rad(50));
+			}
+
+			const auto& GetIsRappelling() const noexcept { return this->m_IsRappelling && !this->m_IsRappellingEnd; }
+			void			SetRappelling(void) noexcept {
+				this->m_IsRappelling = true;
+				this->m_IsRappellingEnd = false;
 			}
 			void			Input(const InputControl& pInput) noexcept { this->m_Input = pInput; }
 		private:

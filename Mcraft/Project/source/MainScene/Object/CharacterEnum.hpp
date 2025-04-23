@@ -33,6 +33,9 @@ namespace FPS_n2 {
 			Left_Ring,
 			Left_Pinky,
 			//
+			NotUse,
+			Rappelling,
+			//
 			AnimeIDMax,
 		};
 		enum class CharaFrame {

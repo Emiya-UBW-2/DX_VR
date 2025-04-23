@@ -60,6 +60,9 @@ namespace FPS_n2 {
 				auto* SE = SoundPool::Instance();
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->SetPosition(GetMove().GetPos());
 			}
+			const auto		GetIsActiveRappelling() const noexcept {
+				return (this->m_HelicopterMove == HelicopterMove::Rappelling) && (13.f <= this->m_Timer && this->m_Timer <= 30.f);
+			}
 		private:
 			void				SetAction(HelicopterMove Move) noexcept {
 				m_HelicopterMove = Move;
@@ -71,7 +74,7 @@ namespace FPS_n2 {
 					break;
 				case HelicopterMove::Rappelling:
 					m_PrevPos = m_NowPos;
-					m_TargetPos = Vector3DX::vget(GetRandf(50.f), 0.f, GetRandf(50.f)) * Scale3DRate;
+					m_TargetPos = Vector3DX::vget(GetRandf(10.f), 0.f, GetRandf(10.f)) * Scale3DRate;
 					break;
 				default:
 					break;

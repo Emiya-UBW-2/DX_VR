@@ -166,7 +166,12 @@ namespace FPS_n2 {
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				//l‚ÌÀ•WÝ’è
-				chara->Spawn(deg2rad(0.f), deg2rad(GetRand(360)), Vector3DX::vget(GetRandf(10.f), -20.f, GetRandf(10.f)) * Scale3DRate, 0);
+				if (loop == PlayerMngr->GetWatchPlayerID()) {
+					chara->Spawn(deg2rad(0.f), deg2rad(GetRand(360)), Vector3DX::vget(GetRandf(10.f), -20.f, GetRandf(10.f)) * Scale3DRate, 0, true);
+				}
+				else{
+					chara->Spawn(deg2rad(0.f), deg2rad(GetRand(360)), Vector3DX::vget(GetRandf(10.f), -20.f, GetRandf(10.f)) * Scale3DRate, 0, true);
+				}
 			}
 			//UI
 			this->m_UIclass.Set();
