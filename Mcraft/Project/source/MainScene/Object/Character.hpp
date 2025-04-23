@@ -177,7 +177,7 @@ namespace FPS_n2 {
 				this->m_SlingZrad.Init(0.05f * Scale3DRate, 3.f, deg2rad(50));
 			}
 
-			const auto& GetIsRappelling() const noexcept { return this->m_IsRappelling && !this->m_IsRappellingEnd; }
+			const auto		GetIsRappelling() const noexcept { return this->m_IsRappelling && !this->m_IsRappellingEnd; }
 			void			SetRappelling(void) noexcept {
 				this->m_IsRappelling = true;
 				this->m_IsRappellingEnd = false;
