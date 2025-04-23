@@ -16,6 +16,8 @@ namespace FPS_n2 {
 			PlayerID								m_TargetCharaID{ 0 };
 
 			float									m_RepopTimer{ 0.f };
+
+			bool									m_IsLeftHeli{};
 		public:
 			void Repop(void) noexcept;
 		public:

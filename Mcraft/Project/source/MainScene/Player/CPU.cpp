@@ -11,11 +11,17 @@ namespace FPS_n2 {
 			auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 			//auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 
-			Vector3DX ZVec = PlayerMngr->GetHelicopter()->GetMove().GetMat().xvec();
-			float rot = std::atan2(ZVec.x, ZVec.z);
-			MyChara->Spawn(deg2rad(0.f), rot + deg2rad(GetRandf(10.f)),
-				PlayerMngr->GetHelicopter()->GetObj().GetFrameLocalWorldMatrix(PlayerMngr->GetHelicopter()->GetFrame(static_cast<int>(Objects::HeliFrame::Rappelling1))).pos(),
-				0, false);
+			Vector3DX ZVec{};
+			Vector3DX Pos{};
+			if (this->m_IsLeftHeli) {
+				ZVec = PlayerMngr->GetHelicopter()->GetMove().GetMat().xvec() * -1.f;
+				Pos = PlayerMngr->GetHelicopter()->GetObj().GetFrameLocalWorldMatrix(PlayerMngr->GetHelicopter()->GetFrame(static_cast<int>(Objects::HeliFrame::Rappelling2))).pos();
+			}
+			else {
+				ZVec = PlayerMngr->GetHelicopter()->GetMove().GetMat().xvec();
+				Pos = PlayerMngr->GetHelicopter()->GetObj().GetFrameLocalWorldMatrix(PlayerMngr->GetHelicopter()->GetFrame(static_cast<int>(Objects::HeliFrame::Rappelling1))).pos();
+			}
+			MyChara->Spawn(deg2rad(0.f), std::atan2(ZVec.x, ZVec.z) + deg2rad(GetRandf(10.f)), Pos, 0, false);
 			MyChara->SetRappelling();
 		}
 		//
@@ -46,6 +52,7 @@ namespace FPS_n2 {
 				if (this->m_RepopTimer > 5.f) {
 					this->m_RepopTimer -= 5.f;
 					if (PlayerMngr->GetHelicopter()->GetIsActiveRappelling()) {
+						this->m_IsLeftHeli = (PlayerMngr->GetHelicopter()->PopSpawnPoint() % 2) == 0;
 						Repop();
 					}
 				}

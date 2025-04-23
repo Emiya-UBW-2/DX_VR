@@ -46,6 +46,7 @@ namespace FPS_n2 {
 			float m_RopePer = 0.f;
 
 			HelicopterMove m_HelicopterMove{ HelicopterMove::Random };
+			int m_SpawnPoint{};
 		private:
 			int					GetFrameNum(void) noexcept override { return static_cast<int>(HeliFrame::Max); }
 			const char*			GetFrameStr(int id) noexcept override { return HeliFrameName[id]; }
@@ -61,7 +62,12 @@ namespace FPS_n2 {
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->SetPosition(GetMove().GetPos());
 			}
 			const auto		GetIsActiveRappelling() const noexcept {
-				return (this->m_HelicopterMove == HelicopterMove::Rappelling) && (13.f <= this->m_Timer && this->m_Timer <= 30.f);
+				return (this->m_HelicopterMove == HelicopterMove::Rappelling) && (13.f <= this->m_Timer && this->m_Timer <= 30.f) && (this->m_SpawnPoint > 0);
+			}
+			const auto		PopSpawnPoint() noexcept {
+				auto Answer = this->m_SpawnPoint;
+				--this->m_SpawnPoint;
+				return Answer;
 			}
 		private:
 			void				SetAction(HelicopterMove Move) noexcept {
@@ -97,75 +103,7 @@ namespace FPS_n2 {
 				m_NowPos = Vector3DX::vget(0.f, 0.f, 0.f) * Scale3DRate;
 				SetAction(HelicopterMove::Random);
 			}
-			void				FirstUpdate(void) noexcept override {
-				auto* DXLib_refParts = DXLib_ref::Instance();
-
-				m_RopePer = std::clamp(m_RopePer + (m_Rope ? 10.f : -5.f) * DXLib_refParts->GetDeltaTime(), 0.f, 10.f);
-				Easing(&m_OpenPer, (m_Open) ? 1.f : 0.f, 0.95f, EasingType::OutExpo);
-
-				SetAnimLoop(static_cast<int>(0), 1.f);
-				SetObj().SetAnim(static_cast<int>(0)).SetPer(1.f);
-				SetAnimLoop(static_cast<int>(1), 1.f);
-				SetObj().SetAnim(static_cast<int>(1)).SetPer(m_OpenPer);
-				SetObj().UpdateAnimAll();
-
-				m_Timer += DXLib_refParts->GetDeltaTime();
-
-				switch (this->m_HelicopterMove) {
-				case HelicopterMove::Random:
-					if (m_Timer > 10.f) {
-						SetAction(HelicopterMove::Random);
-
-						SetAction(HelicopterMove::Rappelling);
-					}
-					m_NowPos = Lerp(m_PrevPos, m_TargetPos, std::clamp(m_Timer / 8.f, 0.f, 1.f));
-
-
-					break;
-				case HelicopterMove::Rappelling:
-					if (m_Timer > 8.f) {
-						m_Open = true;
-					}
-					if (m_Timer > 13.f) {
-						m_Rope = true;
-					}
-					if (m_Timer > 33.f) {
-						m_Rope = false;
-					}
-					if (m_Timer > 38.f) {
-						SetAction(HelicopterMove::Random);
-						m_Open = false;
-					}
-					m_NowPos = Lerp(m_PrevPos, m_TargetPos, std::clamp(m_Timer / 8.f, 0.f, 1.f));
-					break;
-				default:
-					break;
-				}
-
-
-
-				auto PrevPos = m_Pos;
-
-				Easing(&m_PosR, m_NowPos + (Vector3DX::vget(0.f, -20.f, 0.f) + Vector3DX::vget(GetRandf(1.f), GetRandf(1.f), GetRandf(1.f))) * Scale3DRate, 0.95f, EasingType::OutExpo);
-				Easing(&m_Pos, m_PosR, 0.95f, EasingType::OutExpo);
-
-				auto Vec = Matrix3x3DX::Vtrans((m_Pos - PrevPos), GetMove().GetMat().inverse()) / (60.f * DXLib_refParts->GetDeltaTime());
-				Easing(&m_flontSpeedPer, std::clamp(-Vec.z, -1.f, 1.f), 0.975f, EasingType::OutExpo);
-				Easing(&m_SideSpeedPer, std::clamp(-Vec.x, -1.f, 1.f), 0.975f, EasingType::OutExpo);
-
-				auto PrevYrad = m_Yrad;
-				Easing(&m_YradR, m_YradRT, 0.985f, EasingType::OutExpo);
-				Easing(&m_Yrad, m_YradR, 0.985f, EasingType::OutExpo);
-
-				Easing(&m_ZradR, GetRandf(30) + (m_Yrad - PrevYrad) * 50.f, 0.95f, EasingType::OutExpo);
-				Easing(&m_Zrad, m_ZradR, 0.95f, EasingType::OutExpo);
-
-				SetMat(m_Pos,
-					Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(m_Zrad + 20.f * m_SideSpeedPer)) *
-					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-30.f * m_flontSpeedPer)) *
-					Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(m_Yrad)));
-
-			}
+			void				FirstUpdate(void) noexcept override;
 			void				DrawShadow(void) noexcept override {
 				SetObj().SetMaterialDrawAlphaTestAll(TRUE, DX_CMP_GREATER, 128);
 				BaseObject::DrawShadow();
