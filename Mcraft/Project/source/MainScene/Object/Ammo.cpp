@@ -51,7 +51,7 @@ namespace FPS_n2 {
 				//•Ç”j‰ó
 				{
 					int								xput = 4;
-					int								yput = 1;
+					int								yput = 2;
 					int								zput = 4;
 					if ((*this->m_AmmoData)->GetCaliber() > 0.0127f) {
 						xput = 6;

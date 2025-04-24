@@ -21,8 +21,9 @@ namespace FPS_n2 {
 				ZVec = PlayerMngr->GetHelicopter()->GetMove().GetMat().xvec();
 				Pos = PlayerMngr->GetHelicopter()->GetObj().GetFrameLocalWorldMatrix(PlayerMngr->GetHelicopter()->GetFrame(static_cast<int>(Objects::HeliFrame::Rappelling1))).pos();
 			}
-			MyChara->Spawn(deg2rad(0.f), std::atan2(ZVec.x, ZVec.z) + deg2rad(GetRandf(10.f)), Pos, 0, false);
+			MyChara->Spawn(deg2rad(0.f), std::atan2(ZVec.x, ZVec.z) + deg2rad(GetRandf(10.f)), Pos, 2, false);
 			MyChara->SetRappelling();
+			this->m_RapeTimer = 0.f;
 		}
 		//
 		void AIControl::Init(PlayerID MyID) noexcept {
@@ -37,11 +38,19 @@ namespace FPS_n2 {
 				this->m_RepopTimer = 0.f;
 
 				if (MyChara->GetIsRappelling()) {
-					Vector3DX Vec = Vector3DX::down() * (10.f * 60.f * DXLib_refParts->GetDeltaTime());
+					this->m_RapeTimer += DXLib_refParts->GetDeltaTime();
+
+					Vector3DX Pos{};
+					if (this->m_IsLeftHeli) {
+						Pos = PlayerMngr->GetHelicopter()->GetObj().GetFrameLocalWorldMatrix(PlayerMngr->GetHelicopter()->GetFrame(static_cast<int>(Objects::HeliFrame::Rappelling2))).pos();
+					}
+					else {
+						Pos = PlayerMngr->GetHelicopter()->GetObj().GetFrameLocalWorldMatrix(PlayerMngr->GetHelicopter()->GetFrame(static_cast<int>(Objects::HeliFrame::Rappelling1))).pos();
+					}
 					NetWork::MoveInfo MoveInfoData;
 					MoveInfoData.repos = MyChara->GetMove().GetRePos();
-					MoveInfoData.pos = MyChara->GetMove().GetPos() + Vec;
-					MoveInfoData.vec = Vec;
+					MoveInfoData.pos = Pos - PlayerMngr->GetHelicopter()->GetMove().GetMat().yvec()*(60.f * this->m_RapeTimer);
+					MoveInfoData.vec = Vector3DX::zero();
 					MoveInfoData.mat = MyChara->GetMove().GetMat();
 					MoveInfoData.WatchRad = MyChara->GetRotateRad();
 					MyChara->SetMoveOverRide(MoveInfoData);

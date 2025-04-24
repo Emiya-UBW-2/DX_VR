@@ -18,6 +18,7 @@ namespace FPS_n2 {
 			float									m_RepopTimer{ 0.f };
 
 			bool									m_IsLeftHeli{};
+			float									m_RapeTimer{ 0.f };
 		public:
 			void Repop(void) noexcept;
 		public:
