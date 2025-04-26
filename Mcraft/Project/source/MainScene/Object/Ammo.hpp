@@ -18,6 +18,8 @@ namespace FPS_n2 {
 			Vector3DX		m_pos;
 			Vector3DX		m_vec;
 			Vector3DX		m_repos;
+
+			bool			m_IsDrawLine{ false };
 		public:
 			//接地
 			void			Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, int pMyID) {
@@ -32,6 +34,7 @@ namespace FPS_n2 {
 				this->m_Timer = 0.f;
 				this->m_ShootCheraID = pMyID;
 				SetActive(true);
+				this->m_IsDrawLine = true;
 			}
 			/*
 			//跳ね返された
@@ -48,6 +51,7 @@ namespace FPS_n2 {
 			virtual ~AmmoObj(void) noexcept { this->m_AmmoData = nullptr; }
 		public: //継承
 			void			Init_Sub(void) noexcept override {
+				this->m_IsDrawLine = false;
 				SetActive(false);
 				SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
 				SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
@@ -55,7 +59,7 @@ namespace FPS_n2 {
 			void			FirstUpdate(void) noexcept override;
 			void			DrawShadow(void) noexcept override {}
 			void			Draw(bool isDrawSemiTrans, int Range) noexcept override {
-				if (!IsActive()) { return; }
+				if (!this->m_IsDrawLine) { return; }
 				if (!IsDraw(Range)) { return; }
 				if (isDrawSemiTrans) { return; }
 				SetUseLighting(false);

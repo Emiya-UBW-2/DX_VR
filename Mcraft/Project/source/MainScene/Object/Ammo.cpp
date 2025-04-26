@@ -9,7 +9,10 @@ const FPS_n2::Objects::AmmoPool* SingletonBase<FPS_n2::Objects::AmmoPool>::m_Sin
 namespace FPS_n2 {
 	namespace Objects {
 		void		AmmoObj::FirstUpdate(void) noexcept {
-			if (!IsActive()) { return; }
+			if (!IsActive()) {
+				this->m_IsDrawLine = false;
+				return;
+			}
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
@@ -88,6 +91,7 @@ namespace FPS_n2 {
 				SetActive(false);
 			}
 			this->m_Timer += DXLib_refParts->GetDeltaTime();
+			this->m_pos = pos_tmp;
 		}
 	}
 }
