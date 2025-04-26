@@ -4,6 +4,20 @@
 
 namespace FPS_n2 {
 	namespace Objects {
+		const bool HelicopterObj::CheckAmmoHit(const Vector3DX& StartPos, Vector3DX* EndPos) noexcept {
+			auto* SE = SoundPool::Instance();
+			//とりあえず当たったかどうか探す
+			if (!RefreshCol(StartPos, *EndPos, 10.f * Scale3DRate)) {
+				return false;
+			}
+			auto colres_t = GetColLine(StartPos, *EndPos, 0);
+			if (colres_t.HitFlag == TRUE) {
+				*EndPos = colres_t.HitPosition;
+				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, *EndPos, colres_t.Normal, 2.0f);
+				return true;
+			}
+			return false;
+		}
 		void HelicopterObj::FirstUpdate(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();

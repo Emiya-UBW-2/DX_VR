@@ -208,7 +208,7 @@ namespace FPS_n2 {
 				}
 
 
-				this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + pxRad, deg2rad(-70.f), deg2rad(24.f));
+				this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + pxRad, deg2rad(-70.f), deg2rad(35.f));
 				this->m_rad_Buf.y = this->m_rad_Buf.y + pyRad;
 				Easing(&this->m_rad.x, this->m_rad_Buf.x, 0.5f, EasingType::OutExpo);
 				Easing(&this->m_rad.y, this->m_rad_Buf.y, 0.8f, EasingType::OutExpo);

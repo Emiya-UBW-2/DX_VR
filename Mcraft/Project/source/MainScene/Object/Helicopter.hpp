@@ -69,6 +69,7 @@ namespace FPS_n2 {
 				--this->m_SpawnPoint;
 				return Answer;
 			}
+			const bool		CheckAmmoHit(const Vector3DX& StartPos, Vector3DX* EndPos) noexcept;
 		private:
 			void				SetAction(HelicopterMove Move) noexcept {
 				m_HelicopterMove = Move;
@@ -114,6 +115,7 @@ namespace FPS_n2 {
 				if (!GetObj().IsActive()) { return; }
 				if (isDrawSemiTrans) { return; }
 				GetObj().DrawModel();
+				//GetCol().DrawModel();
 
 				if (m_RopePer > 0.f) {
 					Vector3DX Pos;

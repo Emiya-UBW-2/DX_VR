@@ -133,7 +133,7 @@ namespace FPS_n2 {
 					//PlayerMngr->GetVehicle()->SetDamage(GetMyPlayerID(), Damage, ArmerDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
 				else {
-					//TODO PlayerMngr->GetHelicopter()
+					//PlayerMngr->GetHelicopter()->SetDamage(GetMyPlayerID(), Damage, ArmerDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
 				return true;
 			}

@@ -33,7 +33,13 @@ namespace FPS_n2 {
 			//地面との判定
 			auto ColResGround = BackGroundParts->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
 			//ヘリとの判定
-			//TODO PlayerMngr->GetHelicopter()
+			if (this->m_ShootCheraID != -1 && PlayerMngr->GetHelicopter()->CheckAmmoHit(repos_tmp, &pos_tmp)) {
+				SetActive(false);
+				is_HitAll = true;
+				if (this->m_ShootCheraID == PlayerMngr->GetWatchPlayerID()) {//撃ったキャラ
+					HitMarkerPool::Instance()->AddMarker(pos_tmp, 0, (*this->m_AmmoData)->GetDamage());
+				}
+			}
 			/*
 			//戦車との判定
 			if (this->m_ShootCheraID != -1 && PlayerMngr->GetVehicle()->CheckAmmoHit(repos_tmp, &pos_tmp)) {

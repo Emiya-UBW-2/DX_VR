@@ -4,6 +4,8 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		constexpr float FarMax = std::min(std::min(BackGround::DrawMaxXPlus, BackGround::DrawMaxZPlus), BackGround::DrawMaxYPlus) * BackGround::CellScale;
+
 		void			MainGameScene::Load_Sub(void) noexcept {
 			BackGround::BackGroundControl::Create();
 			Charas::GunAnimManager::Create();
@@ -150,8 +152,7 @@ namespace FPS_n2 {
 			//Cam
 			CameraParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 			//info
-			constexpr float FarMax = std::min(std::min(BackGround::DrawMaxXPlus, BackGround::DrawMaxZPlus), BackGround::DrawMaxYPlus) * BackGround::CellScale;
-			CameraParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.03f, FarMax);
+			CameraParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.1f, Scale3DRate * 100.f);
 			//Fog
 			SetVerticalFogEnable(true);
 			SetVerticalFogMode(DX_FOGMODE_LINEAR);
@@ -463,8 +464,8 @@ namespace FPS_n2 {
 #endif
 			//DoF
 			PostPassEffect::Instance()->Set_DoFNearFar(
-				ViewChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), ViewChara->GetIsADS() ? (CameraParts->GetMainCamera().GetCamFar() * 0.8f) : Scale3DRate * 5.f,
-				ViewChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), CameraParts->GetMainCamera().GetCamFar());
+				ViewChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), ViewChara->GetIsADS() ? (FarMax * 0.8f) : Scale3DRate * 5.f,
+				ViewChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), FarMax);
 			//埃エフェクト
 			if (GetIsFirstLoop()) {
 				this->m_EffectPos = CameraParts->GetMainCamera().GetCamPos();
