@@ -1,4 +1,4 @@
-#include	"CommonUIControl.hpp"
+﻿#include	"CommonUIControl.hpp"
 
 const FPS_n2::UIs::ButtonControl* SingletonBase<FPS_n2::UIs::ButtonControl>::m_Singleton = nullptr;
 namespace FPS_n2 {

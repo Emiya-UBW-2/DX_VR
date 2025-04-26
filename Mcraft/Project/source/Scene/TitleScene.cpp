@@ -1,4 +1,4 @@
-#include	"TitleScene.hpp"
+ï»¿#include	"TitleScene.hpp"
 
 #include	"../MainScene/Player/Player.hpp"
 
@@ -16,7 +16,7 @@ namespace FPS_n2 {
 			ButtonParts->AddStringButton("Start Game", 52, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 2, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
 			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, BaseScreenWidth - 96 - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, BaseScreenWidth - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
-			// ƒNƒŒƒWƒbƒg
+			// ã‚¯ãƒ¬ã‚¸ãƒƒãƒˆ
 			this->m_CreditControl = std::make_unique<UIs::CreditControl>();
 			// 
 			/*
@@ -50,7 +50,7 @@ namespace FPS_n2 {
 			);
 			if (!PopUpParts->IsActivePop() && this->m_FadeControl.IsClear()) {
 				ButtonParts->UpdateInput();
-				// ‘I‘ğ‚Ì‹““®
+				// é¸æŠæ™‚ã®æŒ™å‹•
 				if (ButtonParts->GetTriggerButton()) {
 					switch (ButtonParts->GetSelect()) {
 					case 0:
@@ -101,15 +101,15 @@ namespace FPS_n2 {
 			ButtonParts->Dispose();
 			// 
 			this->m_TitleImage.Dispose();
-			// ƒZ[ƒu
+			// ã‚»ãƒ¼ãƒ–
 			SaveDataParts->Save();
-			// ŸƒV[ƒ“Œˆ’è
+			// æ¬¡ã‚·ãƒ¼ãƒ³æ±ºå®š
 			SetNextSelect(static_cast<size_t>(ButtonParts->GetSelect()));
 		}
 		// 
 		void			TitleScene::DrawUI_Base_Sub(void) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
-			// ”wŒi
+			// èƒŒæ™¯
 			DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Gray50, true);
 			auto* PopUpParts = PopUp::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();

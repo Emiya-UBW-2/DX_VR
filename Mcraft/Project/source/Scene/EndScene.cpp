@@ -1,4 +1,4 @@
-#pragma warning(disable:4464)
+Ôªø#pragma warning(disable:4464)
 #include	"EndScene.hpp"
 
 namespace FPS_n2 {
@@ -110,7 +110,7 @@ namespace FPS_n2 {
 			if (m_IsEventSceneActive) {
 				m_EventScene.Dispose();
 			}
-			SetNextSelect(0);//É^ÉCÉgÉãÇ…ñﬂÇÈ
+			SetNextSelect(0);//„Çø„Ç§„Éà„É´„Å´Êàª„Çã
 		}
 		void			EndScene::Dispose_Load_Sub(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -137,7 +137,7 @@ namespace FPS_n2 {
 				m_EventScene.MainDraw();
 			}
 		}
-		//UIï\é¶
+		//UIË°®Á§∫
 		void			EndScene::DrawUI_Base_Sub(void) const noexcept {
 			if (m_IsEventSceneActive) {
 				m_EventScene.UIDraw();

@@ -1,11 +1,11 @@
-#pragma once
+ï»¿#pragma once
 #include	"../../Header.hpp"
 #include	"../../sub.hpp"
 #include "AmmoData.hpp"
 
 namespace FPS_n2 {
 	namespace Objects {
-		//íÔ–Cƒf[ƒ^
+		//æˆ¦è»Šç ²ãƒ‡ãƒ¼ã‚¿
 		class GunData {
 		private:
 			float								m_loadTime{};
@@ -26,7 +26,7 @@ namespace FPS_n2 {
 			const auto&		GetGunTurretFrame(void) const noexcept { return this->m_frame.at(0); }
 			const auto&		GetGunTrunnionFrame(void) const noexcept { return this->m_frame.at(1); }
 			const auto&		GetGunMuzzleFrame(void) const noexcept { return this->m_frame.at(2); }
-		public: //ƒRƒ“ƒXƒgƒ‰ƒNƒ^AƒfƒXƒgƒ‰ƒNƒ^
+		public: //ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 			GunData(void) noexcept { }
 			~GunData(void) noexcept { }
 		public:
@@ -52,20 +52,20 @@ namespace FPS_n2 {
 				this->m_RightRadLimit = std::stof(FileStreamDX::getright(File->SeekLineAndGetStr()));
 			}
 		};
-		//íÔƒf[ƒ^
+		//æˆ¦è»Šãƒ‡ãƒ¼ã‚¿
 		class VhehicleData {
-			float								m_MaxFrontSpeed{};		//‘Oi‘¬“x(km/h)
-			float								m_MaxBackSpeed{};		//Œã‘Ş‘¬“x(km/h)
-			float								m_MaxBodyRad{};			//ù‰ñ‘¬“x(“x/•b)
-			float								m_MaxTurretRad{};		//–C“ƒ‹ì“®‘¬“x(“x/•b)
+			float								m_MaxFrontSpeed{};		//å‰é€²é€Ÿåº¦(km/h)
+			float								m_MaxBackSpeed{};		//å¾Œé€€é€Ÿåº¦(km/h)
+			float								m_MaxBodyRad{};			//æ—‹å›é€Ÿåº¦(åº¦/ç§’)
+			float								m_MaxTurretRad{};		//ç ²å¡”é§†å‹•é€Ÿåº¦(åº¦/ç§’)
 			std::vector<GunData>				m_GunData;				//
-			std::vector<frames>					m_WheelFrame;			//“]—Ö
-			std::vector<frames>					m_NoSpringWheelFrame;	//—U“±—Ö‰ñ“]
-			std::vector<std::pair<int, float>>	m_ArmerMesh;			//‘•bID
-			std::vector<int>					m_SpaceArmerMesh;		//‘•bID
-			std::vector<int>					m_ModuleMesh;			//‘•bID
-			std::array<int, 4>					m_SquareFrameID{};		//Ôçp‚Ìl•Ó
-			std::array<std::vector<frames>, 2>	m_CrawlerFrame;			//—š‘Ñ
+			std::vector<frames>					m_WheelFrame;			//è»¢è¼ª
+			std::vector<frames>					m_NoSpringWheelFrame;	//èª˜å°è¼ªå›è»¢
+			std::vector<std::pair<int, float>>	m_ArmerMesh;			//è£…ç”²ID
+			std::vector<int>					m_SpaceArmerMesh;		//è£…ç”²ID
+			std::vector<int>					m_ModuleMesh;			//è£…ç”²ID
+			std::array<int, 4>					m_SquareFrameID{};		//è»Šè¼›ã®å››è¾º
+			std::array<std::vector<frames>, 2>	m_CrawlerFrame;			//å±¥å¸¯
 		private:
 			const auto		GetSide(bool isLeft, bool isFront) const noexcept {
 				int ans = 0;
@@ -111,24 +111,24 @@ namespace FPS_n2 {
 			const auto& GetSquareFrameID(size_t ID_t)const noexcept { return this->m_SquareFrameID[ID_t]; }
 			const auto& GetSquareFrameList(void) const noexcept { return this->m_SquareFrameID; }
 			const auto& GetCrawlerFrameList(void) const noexcept { return this->m_CrawlerFrame; }
-		public: //ƒRƒ“ƒXƒgƒ‰ƒNƒ^AƒfƒXƒgƒ‰ƒNƒ^
+		public: //ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 			VhehicleData(const MV1& DataObj, const MV1& DataCol, const char* path) noexcept {
-				//ƒtƒŒ[ƒ€î•ñ
+				//ãƒ•ãƒ¬ãƒ¼ãƒ æƒ…å ±
 				for (int i = 0; i < DataObj.GetFrameNum(); i++) {
 					std::string p = DataObj.GetFrameName(i);
-					if (p.find("“]—Ö", 0) != std::string::npos) {
+					if (p.find("è»¢è¼ª", 0) != std::string::npos) {
 						this->m_WheelFrame.resize(this->m_WheelFrame.size() + 1);
 						this->m_WheelFrame.back().Set(i, DataObj);
 					}
-					else if ((p.find("—Ö", 0) != std::string::npos) && (p.find("“]—Ö", 0) == std::string::npos)) {
+					else if ((p.find("è¼ª", 0) != std::string::npos) && (p.find("è»¢è¼ª", 0) == std::string::npos)) {
 						this->m_NoSpringWheelFrame.resize(this->m_NoSpringWheelFrame.size() + 1);
 						this->m_NoSpringWheelFrame.back().Set(i, DataObj);
 					}
-					else if (p.find("ù‰ñ", 0) != std::string::npos) {
+					else if (p.find("æ—‹å›", 0) != std::string::npos) {
 						this->m_GunData.resize(this->m_GunData.size() + 1);
 						this->m_GunData.back().Set(i, DataObj);
 					}
-					else if (p.find("—š‘Ñİ’u•”", 0) != std::string::npos) { //2D•¨—
+					else if (p.find("å±¥å¸¯è¨­ç½®éƒ¨", 0) != std::string::npos) { //2Dç‰©ç†
 						this->m_CrawlerFrame[0].clear();
 						this->m_CrawlerFrame[1].clear();
 						for (int z = 0; z < DataObj.GetFrameChildNum(i); z++) {
@@ -143,47 +143,47 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				//ƒƒbƒVƒ…î•ñ
+				//ãƒ¡ãƒƒã‚·ãƒ¥æƒ…å ±
 				for (int i = 0; i < DataCol.GetMeshNum(); i++) {
 					std::string p = DataCol.GetMaterialName(i);
-					//Ô‘Ìƒ‚ƒWƒ…[ƒ‹
+					//è»Šä½“ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 					if (p.find("armer", 0) != std::string::npos) {
-						this->m_ArmerMesh.emplace_back(i, std::stof(FileStreamDX::getright(p)));//‘•b
+						this->m_ArmerMesh.emplace_back(i, std::stof(FileStreamDX::getright(p)));//è£…ç”²
 					}
 					else if (p.find("space", 0) != std::string::npos) {
-						this->m_SpaceArmerMesh.emplace_back(i);//‹óŠÔ‘•b
+						this->m_SpaceArmerMesh.emplace_back(i);//ç©ºé–“è£…ç”²
 					}
 					else if (p.find("left_foot", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//ƒ‚ƒWƒ…[ƒ‹
+						this->m_ModuleMesh.emplace_back(i);//ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 					}
 					else if (p.find("right_foot", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//ƒ‚ƒWƒ…[ƒ‹
+						this->m_ModuleMesh.emplace_back(i);//ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 					}
 					else if (p.find("engine", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//ƒ‚ƒWƒ…[ƒ‹
+						this->m_ModuleMesh.emplace_back(i);//ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 					}
 					else if (p.find("human_body", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//ƒ‚ƒWƒ…[ƒ‹
+						this->m_ModuleMesh.emplace_back(i);//ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 					}
 					else if (p.find("ammo_body", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//ƒ‚ƒWƒ…[ƒ‹
+						this->m_ModuleMesh.emplace_back(i);//ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 					}
-					//–C“ƒƒ‚ƒWƒ…[ƒ‹
+					//ç ²å¡”ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 					if (p.find("gun", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//ƒ‚ƒWƒ…[ƒ‹
+						this->m_ModuleMesh.emplace_back(i);//ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 					}
 					else if (p.find("human_turret", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//ƒ‚ƒWƒ…[ƒ‹
+						this->m_ModuleMesh.emplace_back(i);//ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 					}
 					else if (p.find("ammo_turret", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//ƒ‚ƒWƒ…[ƒ‹
+						this->m_ModuleMesh.emplace_back(i);//ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 					}
 				}
-				//4‹÷Šm’è
-				this->m_SquareFrameID[0] = GetSide(true, false);			//2		¶Œã•”0
-				this->m_SquareFrameID[1] = GetSide(true, true);				//10	¶‘O•”1
-				this->m_SquareFrameID[2] = GetSide(false, false);			//3		‰EŒã•”2
-				this->m_SquareFrameID[3] = GetSide(false, true);			//11	‰E‘O•”3
+				//4éš…ç¢ºå®š
+				this->m_SquareFrameID[0] = GetSide(true, false);			//2		å·¦å¾Œéƒ¨0
+				this->m_SquareFrameID[1] = GetSide(true, true);				//10	å·¦å‰éƒ¨1
+				this->m_SquareFrameID[2] = GetSide(false, false);			//3		å³å¾Œéƒ¨2
+				this->m_SquareFrameID[3] = GetSide(false, true);			//11	å³å‰éƒ¨3
 				//data
 				{
 					std::string Path = path;
@@ -209,12 +209,12 @@ namespace FPS_n2 {
 				}
 			}
 		};
-		//–C
+		//ç ²
 		class Guns {
 		private:
-			float							m_loadtimer{};			//‘•‚Ä‚ñƒJƒEƒ“ƒ^[
-			float							m_Recoil{};			//’“‘Ş
-			float							m_React{};				//”½“®
+			float							m_loadtimer{};			//è£…ã¦ã‚“ã‚«ã‚¦ãƒ³ã‚¿ãƒ¼
+			float							m_Recoil{};			//é§é€€
+			float							m_React{};				//åå‹•
 			const GunData*					m_GunSpec{ nullptr };		//
 			Vector3DX						m_ShotRadAdd;				//
 			Vector2DX						m_ShotTargetRad;			//
@@ -227,12 +227,12 @@ namespace FPS_n2 {
 			const auto& GetShotTargetRad(void) const noexcept { return this->m_ShotTargetRad; }
 			const auto& GetRecoil(void) const noexcept { return this->m_Recoil; }
 			const auto& GetShotRadAdd(void) const noexcept { return this->m_ShotRadAdd; }
-			//ËŒ‚‰Â”\
+			//å°„æ’ƒå¯èƒ½
 			bool		CanShot(void) const noexcept { return this->m_loadtimer == 0; }
 		public:
 			void		UpdateAim(const Vector3DX& NowVec, const Vector3DX& TargetVec, const std::unique_ptr<VhehicleData>& pData) noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
-				//”½‰f
+				//åæ˜ 
 				float a_hyp = std::hypotf(TargetVec.x, TargetVec.z);
 				float z_hyp = std::hypotf(NowVec.x, NowVec.z);
 
@@ -243,19 +243,19 @@ namespace FPS_n2 {
 
 				this->m_ShotTargetRad.x += std::clamp(view_XradAdd / 5.0f * 60.f, -pData->GetMaxTurretRad(), pData->GetMaxTurretRad()) * DXLib_refParts->GetDeltaTime();
 				this->m_ShotTargetRad.y += std::clamp(view_YradAdd / 5.0f * 60.f, -pData->GetMaxTurretRad(), pData->GetMaxTurretRad()) * DXLib_refParts->GetDeltaTime();
-				//‹Â˜ëŠp§ŒÀ
+				//ä»°ä¿¯è§’åˆ¶é™
 				if (this->m_GunSpec->GetLeftRadLimit() >= 0.f && this->m_GunSpec->GetRightRadLimit() >= 0.f) {
 					this->m_ShotTargetRad.y = std::clamp(this->m_ShotTargetRad.y, deg2rad(this->m_GunSpec->GetLeftRadLimit()), deg2rad(this->m_GunSpec->GetRightRadLimit()));
 				}
 				this->m_ShotTargetRad.x = std::clamp(this->m_ShotTargetRad.x, deg2rad(this->m_GunSpec->GetDownRadLimit()), deg2rad(this->m_GunSpec->GetUpRadLimit()));
 			}
-			//ËŒ‚‚µ‚½
+			//å°„æ’ƒã—ãŸ
 			void		Shot(void) noexcept {
 				this->m_loadtimer = this->m_GunSpec->GetLoadTime();
 				this->m_Recoil = 1.0f;
 				this->m_React = std::clamp(this->m_React + GetAmmoSpec()->GetCaliber() * 10.0f, 0.0f, 3.0f);
 			}
-		public: //ƒRƒ“ƒXƒgƒ‰ƒNƒ^AƒfƒXƒgƒ‰ƒNƒ^
+		public: //ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 			Guns(void) noexcept { }
 			Guns(const Guns&) noexcept { }
 		public:
@@ -265,7 +265,7 @@ namespace FPS_n2 {
 			}
 			void		Update(void) noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
-				//ËŒ‚
+				//å°„æ’ƒ
 				this->m_loadtimer = std::max(this->m_loadtimer - DXLib_refParts->GetDeltaTime(), 0.0f);
 				this->m_Recoil = std::max(this->m_Recoil - DXLib_refParts->GetDeltaTime(), 0.0f);
 				this->m_React = std::max(this->m_React - DXLib_refParts->GetDeltaTime(), 0.0f);
@@ -280,7 +280,7 @@ namespace FPS_n2 {
 				this->m_ShotRadAdd = Vector3DX::zero();
 			}
 		};
-		//–½’†ŠÖ˜A
+		//å‘½ä¸­é–¢é€£
 		class HitSortInfo {
 			size_t					m_hitmesh{ SIZE_MAX };
 			float					m_hitDistance{ (std::numeric_limits<float>::max)() };
@@ -293,7 +293,7 @@ namespace FPS_n2 {
 			const auto		GetHitMesh(void) const noexcept { return this->m_hitmesh; }
 			const auto		IsHit(void) const noexcept { return (this->m_hitDistance != (std::numeric_limits<float>::max)()); }
 		};
-		//—š‘Ñ
+		//å±¥å¸¯
 		class CrawlerFrameControl {
 		private:
 			frames					m_frame;

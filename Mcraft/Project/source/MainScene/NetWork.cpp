@@ -1,17 +1,17 @@
-#pragma warning(disable:4464)
+ï»¿#pragma warning(disable:4464)
 #include	"NetWork.hpp"
 
 namespace FPS_n2 {
 	namespace NetWork {
-		//ƒT[ƒo[ê—p
+		//ã‚µãƒ¼ãƒãƒ¼å°‚ç”¨
 		void ServerControl::Update(PlayerNetWork* pPlayerNetwork) noexcept {
 			pPlayerNetwork->UpdateTick();
 			bool AllReady = true;
 			for (int loop = 0; loop < Player_num; ++loop) {
 				if (GetIsServerPlayer(static_cast<PlayerID>(loop))) {
-					// ƒT[ƒo[ƒvƒŒƒCƒ„[‚Ìƒf[ƒ^‚ðƒAƒbƒvƒf[ƒg
+					// ã‚µãƒ¼ãƒãƒ¼ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¢ãƒƒãƒ—ãƒ‡ãƒ¼ãƒˆ
 					pPlayerNetwork->SetLastServerDataBuffer().m_PlayerData[loop] = pPlayerNetwork->GetLocalPlayerData();
-					// È‚Í–„‚Ü‚Á‚Ä‚Ü‚·
+					// å¸­ã¯åŸ‹ã¾ã£ã¦ã¾ã™
 					pPlayerNetwork->SetLastServerDataBuffer().m_PlayerFill[loop] = 2;
 					continue;
 				}
@@ -25,26 +25,26 @@ namespace FPS_n2 {
 				}
 				const auto& player = this->m_LastPlayerData.at(loop);
 				switch (net.m_Phase) {
-				case ClientPhase::Server_WaitConnect:// –³·•ÊŽó•t
-					if (IsDataUpdated) {// ŠY“–ƒ\ƒPƒbƒg‚ÉƒNƒ‰ƒCƒAƒ“ƒg‚©‚ç‚È‚É‚©ŽóM‚µ‚½‚ç
+				case ClientPhase::Server_WaitConnect:// ç„¡å·®åˆ¥å—ä»˜
+					if (IsDataUpdated) {// è©²å½“ã‚½ã‚±ãƒƒãƒˆã«ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã‹ã‚‰ãªã«ã‹å—ä¿¡ã—ãŸã‚‰
 						net.m_Phase = ClientPhase::Ready;
-						// È‚Í–„‚Ü‚Á‚Ä‚Ü‚·
+						// å¸­ã¯åŸ‹ã¾ã£ã¦ã¾ã™
 						pPlayerNetwork->SetLastServerDataBuffer().m_PlayerFill[loop] = 1;
-						//ƒ}ƒbƒ`ƒ“ƒO’†‚Æ‚·‚é
+						//ãƒžãƒƒãƒãƒ³ã‚°ä¸­ã¨ã™ã‚‹
 						if (pPlayerNetwork->SetLastServerDataBuffer().m_ServerPhase != ServerPhase::Matching) {
 							pPlayerNetwork->SetLastServerDataBuffer().m_ServerPhase = ServerPhase::Matching;
 						}
 					}
 					break;
 				case ClientPhase::Ready:
-					//“¾‚½ƒvƒŒƒCƒ„[‚Ìƒf[ƒ^‚ðƒAƒbƒvƒf[ƒg
+					//å¾—ãŸãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ãƒ‡ãƒ¼ã‚¿ã‚’ã‚¢ãƒƒãƒ—ãƒ‡ãƒ¼ãƒˆ
 					if (IsDataUpdated) {
 						if (player.GetID() == loop) {
 							pPlayerNetwork->SetLastServerDataBuffer().m_PlayerFill[loop] = 2;
 						}
 						pPlayerNetwork->SetLastServerDataBuffer().m_PlayerData[loop] = player;
 					}
-					// ƒNƒ‰ƒCƒAƒ“ƒg‚Éƒf[ƒ^‚ð‘—‚é
+					// ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã«ãƒ‡ãƒ¼ã‚¿ã‚’é€ã‚‹
 					if (pPlayerNetwork->GetTickUpdateFlag()) {
 						pPlayerNetwork->SetLastServerDataBuffer().SetCheckSum();
 						net.m_NetWork.ReturnData(pPlayerNetwork->GetLastServerDataBuffer());
@@ -62,13 +62,13 @@ namespace FPS_n2 {
 				pPlayerNetwork->SetLastServerDataBuffer().m_ServerFrame = 0;
 			}
 			else {
-				++pPlayerNetwork->SetLastServerDataBuffer().m_ServerFrame;	// ƒT[ƒo[ƒtƒŒ[ƒ€XV
-				pPlayerNetwork->SetLastServerDataBuffer().m_ServerPhase = ServerPhase::Ingame; // ƒCƒ“ƒQ[ƒ€‚Å‚·
+				++pPlayerNetwork->SetLastServerDataBuffer().m_ServerFrame;	// ã‚µãƒ¼ãƒãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ æ›´æ–°
+				pPlayerNetwork->SetLastServerDataBuffer().m_ServerPhase = ServerPhase::Ingame; // ã‚¤ãƒ³ã‚²ãƒ¼ãƒ ã§ã™
 			}
 			//
 			pPlayerNetwork->Update();
 		}
-		//ƒNƒ‰ƒCƒAƒ“ƒgê—p
+		//ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆå°‚ç”¨
 		void ClientControl::Update(PlayerNetWork* pPlayerNetwork) noexcept {
 			pPlayerNetwork->UpdateTick();
 
@@ -84,12 +84,12 @@ namespace FPS_n2 {
 					this->m_CannotConnectTimer = 0.f;
 					int EmptyID = pPlayerNetwork->SetLastServerDataBuffer().GetEmptyID();
 					if (EmptyID != InvalidID) {
-						//È‚ª‹ó‚¢‚Ä‚¢‚ÄAŽ©•ª‚ÌID‚ð‚à‚ç‚¦‚½‚Ì‚ÅŽŸ‚Ö
+						//å¸­ãŒç©ºã„ã¦ã„ã¦ã€è‡ªåˆ†ã®IDã‚’ã‚‚ã‚‰ãˆãŸã®ã§æ¬¡ã¸
 						pPlayerNetwork->SetLocalPlayerID(static_cast<PlayerID>(EmptyID));
 						this->m_PlayerUDPPhase.m_Phase = ClientPhase::Client_GotPlayerID;
 					}
 				}
-				//‚à‚ç‚¦‚Ä‚È‚¢‚Ì‚ÅŠ’èŽžŠÔ‚ªŒo‚Á‚½‚çƒ\ƒPƒbƒg‚ð•Ï‚¦‚ÄÄÚ‘±
+				//ã‚‚ã‚‰ãˆã¦ãªã„ã®ã§æ‰€å®šæ™‚é–“ãŒçµŒã£ãŸã‚‰ã‚½ã‚±ãƒƒãƒˆã‚’å¤‰ãˆã¦å†æŽ¥ç¶š
 				else {
 					auto* DXLib_refParts = DXLib_ref::Instance();
 					this->m_CannotConnectTimer += DXLib_refParts->GetDeltaTime();
@@ -102,21 +102,21 @@ namespace FPS_n2 {
 							this->m_PlayerUDPPhase.Init(false, this->m_Port + this->m_NetWorkSelect);
 						}
 						else {
-							this->m_PlayerUDPPhase.SendError(ClientPhase::Error_CannotConnect);	//–žƒ^ƒ“‚È‚Ì‚ÅÚ‘±Ž¸”s
+							this->m_PlayerUDPPhase.SendError(ClientPhase::Error_CannotConnect);	//æº€ã‚¿ãƒ³ãªã®ã§æŽ¥ç¶šå¤±æ•—
 						}
 					}
 				}
 				break;
 			case ClientPhase::Client_GotPlayerID:
 				if (pPlayerNetwork->GetLastServerDataBuffer().m_ServerPhase == ServerPhase::Ingame) {
-					//ƒ}ƒbƒ`Ï‚È‚Ì‚ÅŽŸ‚Ö
+					//ãƒžãƒƒãƒæ¸ˆãªã®ã§æ¬¡ã¸
 					this->m_PlayerUDPPhase.m_Phase = ClientPhase::Ready;
 				}
 				break;
 			default:
 				break;
 			}
-			// Ž©g‚Ìƒf[ƒ^‚ð‘—M
+			// è‡ªèº«ã®ãƒ‡ãƒ¼ã‚¿ã‚’é€ä¿¡
 			switch (this->m_PlayerUDPPhase.m_Phase) {
 			case ClientPhase::Client_WaitConnect:
 			case ClientPhase::Client_GotPlayerID:
@@ -130,20 +130,20 @@ namespace FPS_n2 {
 			}
 			pPlayerNetwork->Update();
 		}
-		//’ÊM
+		//é€šä¿¡
 		void NetWorkController::Update(void) noexcept {
-			//ƒ[ƒJƒ‹ƒf[ƒ^XV
+			//ãƒ­ãƒ¼ã‚«ãƒ«ãƒ‡ãƒ¼ã‚¿æ›´æ–°
 			this->m_PlayerNet.UpdateLocalData(this->m_LocalData, IsInGame());
 			if (this->m_IsClient) {
 				this->m_ClientCtrl.Update(&this->m_PlayerNet);
 			}
 			else {
 				if (this->m_ServerCtrl.GetIsServerPlayer(0)) {
-					//Ž©•ª‚ÌPlayerIDŒˆ’è
+					//è‡ªåˆ†ã®PlayerIDæ±ºå®š
 					this->m_PlayerNet.SetLocalPlayerID((PlayerID)0);
 				}
 				else {
-					//ƒT[ƒo[Œ“ŠÏíŽÒ
+					//ã‚µãƒ¼ãƒãƒ¼å…¼è¦³æˆ¦è€…
 					static const int KeyInputs[] = {
 						KEY_INPUT_NUMPAD0,
 						KEY_INPUT_NUMPAD1,
@@ -165,10 +165,10 @@ namespace FPS_n2 {
 				}
 				this->m_ServerCtrl.Update(&this->m_PlayerNet);
 			}
-			//PINGŒv‘ª
+			//PINGè¨ˆæ¸¬
 			if (this->m_PlayerNet.GetTickUpdateFlag()) {
 				if (this->m_PlayerNet.GetPingTime() == MAXLONGLONG) {
-					CalcPing(InvalidID); //ƒƒXƒg
+					CalcPing(InvalidID); //ãƒ­ã‚¹ãƒˆ
 				}
 				else if (this->m_PlayerNet.GetPingTime() != 0) {
 					CalcPing(this->m_PlayerNet.GetPingTime());

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include	"../../Header.hpp"
 
 #include	"../../sub.hpp"
@@ -10,7 +10,7 @@
 
 namespace FPS_n2 {
 	namespace Charas {
-		//ƒLƒƒƒ‰‚Ì‚¤‚¿“Á’è‹@”\‚¾‚¯”²‚«o‚µ‚½‚à‚Ì
+		//ã‚­ãƒ£ãƒ©ã®ã†ã¡ç‰¹å®šæ©Ÿèƒ½ã ã‘æŠœãå‡ºã—ãŸã‚‚ã®
 		//
 		enum class HitType {
 			Head,
@@ -67,14 +67,14 @@ namespace FPS_n2 {
 				return false;
 			}
 		};
-		//ƒqƒbƒgƒ|ƒCƒ“ƒg‚È‚Ç‚Ìƒpƒ‰ƒ[ƒ^[
+		//ãƒ’ãƒƒãƒˆãƒã‚¤ãƒ³ãƒˆãªã©ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼
 		template<class Point, int MaxPoint>
 		class PointControl {
-		private://ƒpƒ‰ƒ[ƒ^[
+		private://ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼
 			const Point											Max = MaxPoint;
 		private:
 			Point												m_Point{ 0 };
-		public://ƒQƒbƒ^[
+		public://ã‚²ãƒƒã‚¿ãƒ¼
 			const auto		IsNotZero(void) const noexcept { return this->m_Point != 0; }
 			const auto&		GetPoint(void) const noexcept { return this->m_Point; }
 			const auto&		GetMax(void) const noexcept { return Max; }
@@ -82,12 +82,12 @@ namespace FPS_n2 {
 		public:
 			void			Init(void) noexcept { Sub(-Max); }
 		};
-		//ƒLƒƒƒ‰“ü—Í
+		//ã‚­ãƒ£ãƒ©å…¥åŠ›
 		class LeanControl {
 		private:
 			float												m_Rad{ 0.f };
 			int													m_Rate{ 0 };
-		public://ƒQƒbƒ^[
+		public://ã‚²ãƒƒã‚¿ãƒ¼
 			const auto& GetRad(void) const noexcept { return this->m_Rad; }
 			const auto& GetRate(void) const noexcept { return this->m_Rate; }
 		public:
@@ -96,7 +96,7 @@ namespace FPS_n2 {
 				this->m_Rate = 0;
 			}
 			bool			Update(bool LeftTrigger, bool RightTrigger) {
-				//“ü—Í
+				//å…¥åŠ›
 				auto Prev = this->m_Rate;
 				//*
 				if (LeftTrigger) {
@@ -134,7 +134,7 @@ namespace FPS_n2 {
 			float												m_VecPower{ 0.f };
 			Vector3DX											m_VecTotal;
 			std::array<float, 4>								m_Vec{ 0,0,0,0 };
-		public://ƒQƒbƒ^[
+		public://ã‚²ãƒƒã‚¿ãƒ¼
 			const auto& GetVecTotal(void) const noexcept { return this->m_VecTotal; }
 			const auto GetVecMove(void) const noexcept {
 				if (this->m_VecPower > 0.f) {
@@ -175,7 +175,7 @@ namespace FPS_n2 {
 			Vector3DX											m_rad_Buf, m_rad;
 			float												m_yrad_Upper{ 0.f }, m_yrad_Bottom{ 0.f };
 			bool												m_TurnBody{ false };
-		public://ƒZƒbƒ^[
+		public://ã‚»ãƒƒã‚¿ãƒ¼
 			const auto&		IsTurnBody(void) const noexcept { return this->m_TurnBody; }
 			const auto&		GetRad(void) const noexcept { return this->m_rad; }
 			const auto&		GetYRadUpper(void) const noexcept { return this->m_yrad_Upper; }
@@ -265,7 +265,7 @@ namespace FPS_n2 {
 			}
 #endif
 		};
-		//•à‚­‚Ì—h‚ê
+		//æ­©ãæ™‚ã®æºã‚Œ
 		class WalkSwingControl {
 		private:
 			Vector3DX											m_WalkSwing{};
@@ -338,14 +338,14 @@ namespace FPS_n2 {
 		private:
 			int													m_GunSelect{ 0 };
 			int													m_ReserveGunSelect{ 0 };
-			std::array<std::shared_ptr<Guns::GunObj>, 3>		m_GunPtr{};			//e
-		public://ƒQƒbƒ^[
+			std::array<std::shared_ptr<Guns::GunObj>, 3>		m_GunPtr{};			//éŠƒ
+		public://ã‚²ãƒƒã‚¿ãƒ¼
 			auto&				GetGunPtr(int ID) noexcept { return this->m_GunPtr[ID]; }
 			const auto&			GetGunPtr(int ID) const noexcept { return this->m_GunPtr[ID]; }
 			const auto			GetGunNum(void) const noexcept { return static_cast<int>(this->m_GunPtr.size()); }
 			const auto			GetNowGunSelect(void) const noexcept { return this->m_GunSelect; }
-		public://ƒZƒbƒ^[
-			//Ÿ‚Ì•Ší‚ÉØ‚è‘Ö‚¦
+		public://ã‚»ãƒƒã‚¿ãƒ¼
+			//æ¬¡ã®æ­¦å™¨ã«åˆ‡ã‚Šæ›¿ãˆ
 			void				GunChangeNext(bool IsUpDown) noexcept {
 				int Next = GetNowGunSelect();
 				while (true) {
@@ -362,7 +362,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			//“Š‚°•Ší‚Å‚Í‚È‚¢Å‰‚Ì•Ší‚ÉØ‚è‘Ö‚¦
+			//æŠ•ã’æ­¦å™¨ã§ã¯ãªã„æœ€åˆã®æ­¦å™¨ã«åˆ‡ã‚Šæ›¿ãˆ
 			void				GunChangeThrowWeapon(bool isThrow) noexcept {
 				for (int loop = 0, max = GetGunNum(); loop < max; ++loop) {
 					auto& pGun = GetGunPtr(loop);
@@ -415,32 +415,32 @@ namespace FPS_n2 {
 				this->m_HitPower = std::max(this->m_HitPower - DXLib_refParts->GetDeltaTime() / 0.3f, 0.f);
 			}
 		};
-		//ƒ‰ƒOƒh[ƒ‹
+		//ãƒ©ã‚°ãƒ‰ãƒ¼ãƒ«
 		enum class RagFrame {
-			//“ª
+			//é ­
 			head,
-			//“·‘Ì
+			//èƒ´ä½“
 			bodyg,
 			bodyc,
 			bodyb,
 			body,
-			//‰EèÀ•WŒn
+			//å³æ‰‹åº§æ¨™ç³»
 			RIGHThand2,
 			RIGHThand,
 			RIGHTarm2,
 			RIGHTarm1,
-			//¶èÀ•WŒn
+			//å·¦æ‰‹åº§æ¨™ç³»
 			LEFThand2,
 			LEFThand,
 			LEFTarm2,
 			LEFTarm1,
 
-			//‰EèÀ•WŒn
+			//å³æ‰‹åº§æ¨™ç³»
 			RIGHTreg2,
 			RIGHTreg,
 			RIGHTfoot2,
 			RIGHTfoot1,
-			//¶èÀ•WŒn
+			//å·¦æ‰‹åº§æ¨™ç³»
 			LEFTreg2,
 			LEFTreg,
 			LEFTfoot2,
@@ -449,31 +449,31 @@ namespace FPS_n2 {
 			Max,
 		};
 		static const char* RagFrameName[static_cast<int>(RagFrame::Max)] = {
-			"“ª",
-			"ƒOƒ‹[ƒu",
-			"‰º”¼g",
-			"ã”¼g",
-			"ã”¼g2",
-			"‰Eèñæ",
-			"‰Eèñ",
-			"‰E‚Ğ‚¶",
-			"‰E˜r",
-			"¶èñæ",
-			"¶èñ",
-			"¶‚Ğ‚¶",
-			"¶˜r",
-			"‰E‘«ñæ",
-			"‰E‘«ñ",
-			"‰E‚Ğ‚´",
-			"‰E‘«",
-			"¶‘«ñæ",
-			"¶‘«ñ",
-			"¶‚Ğ‚´",
-			"¶‘«",
+			"é ­",
+			"ã‚°ãƒ«ãƒ¼ãƒ–",
+			"ä¸‹åŠèº«",
+			"ä¸ŠåŠèº«",
+			"ä¸ŠåŠèº«2",
+			"å³æ‰‹é¦–å…ˆ",
+			"å³æ‰‹é¦–",
+			"å³ã²ã˜",
+			"å³è…•",
+			"å·¦æ‰‹é¦–å…ˆ",
+			"å·¦æ‰‹é¦–",
+			"å·¦ã²ã˜",
+			"å·¦è…•",
+			"å³è¶³é¦–å…ˆ",
+			"å³è¶³é¦–",
+			"å³ã²ã–",
+			"å³è¶³",
+			"å·¦è¶³é¦–å…ˆ",
+			"å·¦è¶³é¦–",
+			"å·¦ã²ã–",
+			"å·¦è¶³",
 		};
 		class RagDollControl {
 		private:
-			//‘Ì‚ÌƒtƒŒ[ƒ€î•ñ
+			//ä½“ã®ãƒ•ãƒ¬ãƒ¼ãƒ æƒ…å ±
 			class frame_body {
 			public:
 				std::array<frames, static_cast<int>(RagFrame::Max)>	m_Frames;
@@ -508,9 +508,9 @@ namespace FPS_n2 {
 		private:
 			const MV1*											m_pBaseObj{nullptr};
 			MV1													m_RagDoll;
-			float												m_Timer{ 0.f };						//ƒ‰ƒOƒh[ƒ‹‚Ì•¨—‰‰Zƒ^ƒCƒ}[
-			frame_body											m_RagObjFrame;						//ƒtƒŒ[ƒ€
-			frame_body											m_BaseObjFrame;						//ƒtƒŒ[ƒ€
+			float												m_Timer{ 0.f };						//ãƒ©ã‚°ãƒ‰ãƒ¼ãƒ«ã®ç‰©ç†æ¼”ç®—ã‚¿ã‚¤ãƒãƒ¼
+			frame_body											m_RagObjFrame;						//ãƒ•ãƒ¬ãƒ¼ãƒ 
+			frame_body											m_BaseObjFrame;						//ãƒ•ãƒ¬ãƒ¼ãƒ 
 		public:
 		public:
 			RagDollControl(void) noexcept {}
@@ -528,8 +528,8 @@ namespace FPS_n2 {
 			void Init(const MV1& obj_body_t) noexcept {
 				this->m_pBaseObj = &obj_body_t;
 				if (!this->m_pBaseObj) { return; }
-				this->m_BaseObjFrame.SetupFrameInfo(*this->m_pBaseObj);				//g‘Ì
-				this->m_RagObjFrame.SetupFrameInfo(this->m_RagDoll);			//ƒ‰ƒOƒh[ƒ‹
+				this->m_BaseObjFrame.SetupFrameInfo(*this->m_pBaseObj);				//èº«ä½“
+				this->m_RagObjFrame.SetupFrameInfo(this->m_RagDoll);			//ãƒ©ã‚°ãƒ‰ãƒ¼ãƒ«
 			}
 			void Update(bool isAlive) noexcept {
 				if (!this->m_pBaseObj) { return; }

@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 
 #pragma once
 #include	"../../Header.hpp"
@@ -19,7 +19,7 @@ namespace FPS_n2 {
 			Vector3DX		m_vec;
 			Vector3DX		m_repos;
 		public:
-			//ê⁄ín
+			//Êé•Âú∞
 			void			Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, int pMyID) {
 				this->m_RicochetCnt = 0;
 				this->m_pos = pos_t;
@@ -34,7 +34,7 @@ namespace FPS_n2 {
 				SetActive(true);
 			}
 			/*
-			//íµÇÀï‘Ç≥ÇÍÇΩ
+			//Ë∑≥„Å≠Ëøî„Åï„Çå„Åü
 			const auto		PenetrationCheck(float pArmer, const Vector3DX& normal) const noexcept { return (this->m_penetration > (pArmer * (1.0f / std::abs(Vector3DX::Dot(this->m_vec.normalized(), normal))))); }
 			void			Ricochet(const Vector3DX& position, const Vector3DX& normal) {
 				++this->m_RicochetCnt;
@@ -43,10 +43,10 @@ namespace FPS_n2 {
 				this->m_yAdd = 0.f;
 			}
 			//*/
-		public: //ÉRÉìÉXÉgÉâÉNÉ^ÅAÉfÉXÉgÉâÉNÉ^
+		public: //„Ç≥„É≥„Çπ„Éà„É©„ÇØ„Çø„ÄÅ„Éá„Çπ„Éà„É©„ÇØ„Çø
 			AmmoObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::Ammo); }
 			virtual ~AmmoObj(void) noexcept { this->m_AmmoData = nullptr; }
-		public: //åpè≥
+		public: //Á∂ôÊâø
 			void			Init_Sub(void) noexcept override {
 				SetActive(false);
 				SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include	"../../Header.hpp"
 
 #include	"FallObj.hpp"
@@ -54,7 +54,7 @@ namespace FPS_n2 {
 		public:
 			AutoAimControl(void) noexcept {}
 			virtual ~AutoAimControl(void) noexcept {}
-		public://ƒQƒbƒ^[
+		public://ã‚²ãƒƒã‚¿ãƒ¼
 			const auto&		GetAutoAimID(void) const noexcept { return this->m_AutoAim; }
 			const auto&		GetAutoAimPos(void) const noexcept { return this->m_AutoAimPoint; }
 			const auto		GetAutoAimActive(void) const noexcept { return this->m_AutoAimActive; }
@@ -104,7 +104,7 @@ namespace FPS_n2 {
 			std::array<std::pair<Vector3DX,float>, m_LineTotal>		m_Line;
 			int														m_LineSelect = 0;
 			float													m_LinePer{ 0.f };
-		public://ƒQƒbƒ^[
+		public://ã‚²ãƒƒã‚¿ãƒ¼
 			void			AddMuzzleSmokePower(void) noexcept { this->m_LinePer = std::clamp(this->m_LinePer + 0.1f, 0.f, 1.f); }
 		public:
 			void		InitMuzzleSmoke(const Vector3DX& pPos) {
@@ -146,11 +146,11 @@ namespace FPS_n2 {
 		class GunObj;
 		class GunPartsObj;
 		using SharedGunParts = std::shared_ptr<GunPartsObj>;
-		//eAƒp[ƒc‚Ì‹¤’Êƒ\ƒPƒbƒg
+		//éŠƒã€ãƒ‘ãƒ¼ãƒ„ã®å…±é€šã‚½ã‚±ãƒƒãƒˆ
 		class ModifySlot {
 		private:
-			std::array<SharedGunParts, static_cast<int>(GunSlot::Max)>	m_PartsObj{ nullptr };//qƒp[ƒc‚Ìƒ|ƒCƒ“ƒ^
-			int															m_MyDataID{};//©•ª‚ÌƒXƒyƒbƒN‚ğŠÜ‚ß‚½ƒf[ƒ^
+			std::array<SharedGunParts, static_cast<int>(GunSlot::Max)>	m_PartsObj{ nullptr };//å­ãƒ‘ãƒ¼ãƒ„ã®ãƒã‚¤ãƒ³ã‚¿
+			int															m_MyDataID{};//è‡ªåˆ†ã®ã‚¹ãƒšãƒƒã‚¯ã‚’å«ã‚ãŸãƒ‡ãƒ¼ã‚¿
 		public:
 			ModifySlot(const std::string& FilePath) noexcept {
 				this->m_MyDataID = GunPartsDataManager::Instance()->Add(FilePath);
@@ -170,13 +170,13 @@ namespace FPS_n2 {
 			const auto&	GetMyData(void) const noexcept { return *GunPartsDataManager::Instance()->GetData(this->m_MyDataID); }
 			const auto&	GetParts(GunSlot gunSlot) const noexcept { return this->m_PartsObj[static_cast<int>(gunSlot)]; }
 			const auto	IsAttachedParts(GunSlot gunSlot) const noexcept { return GetParts(gunSlot) != nullptr; }
-			//©•ª‚Ìq‘·‚Ìƒp[ƒc‚ğQÆ‚·‚é
+			//è‡ªåˆ†ã®å­å­«ã®ãƒ‘ãƒ¼ãƒ„ã‚’å‚ç…§ã™ã‚‹
 			void		GetAnyByChild(const std::function<void(const SharedGunParts&)>& Doing) const noexcept;
-			//¬‘·‚Ì’†‚ÅŠY“–‚ÌƒtƒŒ[ƒ€‚É‰e‹¿‚·‚éƒp[ƒc‚Ìs—ñ‚ğ“¾‚é
+			//å°å­«ã®ä¸­ã§è©²å½“ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã«å½±éŸ¿ã™ã‚‹ãƒ‘ãƒ¼ãƒ„ã®è¡Œåˆ—ã‚’å¾—ã‚‹
 			const bool	GetPartsFrameMatChild(GunFrame frame, Matrix4x4DX* pOutMat) const noexcept;
-			//ƒp[ƒc‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‚ğXV‚·‚é
+			//ãƒ‘ãƒ¼ãƒ„ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’æ›´æ–°ã™ã‚‹
 			void		UpdatePartsAnim(const MV1& pParent);
-			//ƒp[ƒc‚ÌÀ•W‚ğXV‚·‚é
+			//ãƒ‘ãƒ¼ãƒ„ã®åº§æ¨™ã‚’æ›´æ–°ã™ã‚‹
 			void		UpdatePartsMove(GunSlot gunSlot, const Matrix4x4DX& pMat);
 		};
 		class GunsModify {
@@ -192,7 +192,7 @@ namespace FPS_n2 {
 				GunSlot										m_SlotType{ GunSlot::Magazine };
 				const std::unique_ptr<SlotData>* m_ParentSlot{ nullptr };
 				const std::unique_ptr<ModifySlot>* m_MySlot{ nullptr };
-				int											m_select{ 0 };//ƒZ[ƒu‚Ö‚Ì•Û‚É‚µ‚©g‚í‚ñ
+				int											m_select{ 0 };//ã‚»ãƒ¼ãƒ–ã¸ã®ä¿æŒã«ã—ã‹ä½¿ã‚ã‚“
 			public:
 				bool IsAttachedParts(void) const noexcept { return (*this->m_MySlot)->IsAttachedParts(this->m_SlotType); }
 				const std::unique_ptr<ModifySlot>& GetAttachedPartsSlot(void) const noexcept;
@@ -215,7 +215,7 @@ namespace FPS_n2 {
 					}
 				}
 			public:
-				//‚Á‚Ä‚¢‚éƒf[ƒ^‚ÌƒZ[ƒuƒf[ƒ^‚Ö‚Ì•ÏŠ·
+				//æŒã£ã¦ã„ã‚‹ãƒ‡ãƒ¼ã‚¿ã®ã‚»ãƒ¼ãƒ–ãƒ‡ãƒ¼ã‚¿ã¸ã®å¤‰æ›
 				SlotSaveData GetSaveData(void) const noexcept {
 					SlotSaveData Tmp;
 					Tmp.m_SlotType = this->m_SlotType;
@@ -224,7 +224,7 @@ namespace FPS_n2 {
 					Tmp.m_Parentselect = (this->m_ParentSlot) ? (*this->m_ParentSlot)->m_select : 0;
 					return Tmp;
 				}
-				//©g‚ªŠY“–‚ÌƒXƒƒbƒg‚Æ“¯ˆê‚©‚Ç‚¤‚©Šm”F
+				//è‡ªèº«ãŒè©²å½“ã®ã‚¹ãƒ­ãƒƒãƒˆã¨åŒä¸€ã‹ã©ã†ã‹ç¢ºèª
 				bool IsSavedSlot(const SlotSaveData& S) {
 					if (this->m_ParentSlot) {
 						if (!(S.m_ParentSlotType == (*this->m_ParentSlot)->m_SlotType) && (S.m_Parentselect == (*this->m_ParentSlot)->m_select)) { return false; }
@@ -249,15 +249,15 @@ namespace FPS_n2 {
 				this->m_BaseGun.reset();
 			}
 		private:
-			//pBaseParts‚Ìq‹ŸˆÈ~‚ÌƒXƒƒbƒg‚ÉƒfƒtƒHƒ‹ƒgƒp[ƒc‚ğİ’è
+			//pBasePartsã®å­ä¾›ä»¥é™ã®ã‚¹ãƒ­ãƒƒãƒˆã«ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒ‘ãƒ¼ãƒ„ã‚’è¨­å®š
 			void			SetupDefaultGunParts(const std::unique_ptr<ModifySlot>* pBaseParts, const std::unique_ptr<SlotData>* pParentSlot, bool isPreset) noexcept;
-			//ŠY“–ƒXƒƒbƒgˆÈ‰º‚Ìƒp[ƒc‚ğ‚·‚×‚ÄŠO‚·
+			//è©²å½“ã‚¹ãƒ­ãƒƒãƒˆä»¥ä¸‹ã®ãƒ‘ãƒ¼ãƒ„ã‚’ã™ã¹ã¦å¤–ã™
 			bool			DeleteSlotsChildParts(const std::unique_ptr<SlotData>* pSlot) noexcept;
 		public:
-			//ŠY“–ƒXƒƒbƒg‚Ìƒp[ƒc‚ğselect‚Ì”Ô†‚Ìƒp[ƒc‚Éæ‚èŠ·‚¦‚é(q‹ŸˆÈ~‚ÌƒXƒƒbƒg‚ÍƒfƒtƒHƒ‹ƒgƒp[ƒc)
+			//è©²å½“ã‚¹ãƒ­ãƒƒãƒˆã®ãƒ‘ãƒ¼ãƒ„ã‚’selectã®ç•ªå·ã®ãƒ‘ãƒ¼ãƒ„ã«å–ã‚Šæ›ãˆã‚‹(å­ä¾›ä»¥é™ã®ã‚¹ãƒ­ãƒƒãƒˆã¯ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒ‘ãƒ¼ãƒ„)
 			void			ChangeSelectData(const std::unique_ptr<SlotData>* pSlot, int select) noexcept;
 		public:
-			//ƒvƒŠƒZƒbƒgƒf[ƒ^‚Ìƒ[ƒhAƒZ[ƒu
+			//ãƒ—ãƒªã‚»ãƒƒãƒˆãƒ‡ãƒ¼ã‚¿ã®ãƒ­ãƒ¼ãƒ‰ã€ã‚»ãƒ¼ãƒ–
 			void			LoadSlots(const char* path) noexcept;
 			void			SaveSlots(const char* path) noexcept;
 		};

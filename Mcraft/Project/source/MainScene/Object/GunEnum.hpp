@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include	"../../Header.hpp"
 #include	"CharaAnimData.hpp"
 
@@ -37,7 +37,7 @@ namespace FPS_n2 {
 			Max,
 		};
 		static const char* GunFrameName[static_cast<int>(GunFrame::Max)] = {
-			"ƒZƒ“ƒ^[",
+			"ã‚»ãƒ³ã‚¿ãƒ¼",
 			"cart",
 			"cartvec",
 			"muzzle",
@@ -55,9 +55,9 @@ namespace FPS_n2 {
 			"lefthandcock",
 			"lefthandcock_yvec",
 			"lefthandcock_zvec",
-			"“®ì²",
-			"“®ì“_",
-			"ˆÚ“®",
+			"å‹•ä½œè»¸",
+			"å‹•ä½œç‚¹",
+			"ç§»å‹•",
 			"Lower",
 			"Upper",
 			"Barrel",
@@ -118,7 +118,7 @@ namespace FPS_n2 {
 				SoundEnum::Load2
 			},
 			{
-				//ƒnƒ“ƒhƒKƒ“
+				//ãƒãƒ³ãƒ‰ã‚¬ãƒ³
 				SoundEnum::Cocking3_0,
 				SoundEnum::Cocking3_1,
 				SoundEnum::Shot3,

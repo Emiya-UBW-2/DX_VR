@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include	"../../Header.hpp"
 
 #include	"GunEnum.hpp"
@@ -56,14 +56,14 @@ namespace FPS_n2 {
 			~GunPartsData(void) noexcept {
 				this->m_AmmoSpecID.clear();
 			}
-		public://ƒQƒbƒ^[
+		public://ã‚²ãƒƒã‚¿ãƒ¼
 			const auto& GetPath(void) const noexcept { return this->m_path; }
 			const auto& GetName(void) const noexcept { return this->m_name; }
 			//
 			const auto& GetShotRate(void) const noexcept { return this->m_ShotRate; }
 			const auto& GetSoundSelect(void) const noexcept { return this->m_SoundSelect; }
 			const auto& GetReloadType(void) const noexcept { return this->m_ReloadType; }
-			//«”\
+			//æ€§èƒ½
 			const auto& GetIsThrowWeapon(void) const noexcept { return this->m_IsThrowWeapon; }
 			const auto& GetCanADS(void) const noexcept { return this->m_CanADS; }
 			const auto& GetCanSwitch(void) const noexcept { return this->m_CanSwitch; }
@@ -79,15 +79,15 @@ namespace FPS_n2 {
 			const auto& GetInfo(void) const noexcept { return this->m_Info; }
 			const auto& GetInfoEng(void) const noexcept { return this->m_InfoEng; }
 
-			//eº
+			//éŠƒå£°
 			const auto& GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
-			//ƒXƒR[ƒv
+			//ã‚¹ã‚³ãƒ¼ãƒ—
 			const auto& GetReitcleGraph(void) const noexcept { return this->m_Reitcle; }
 			const auto& GetSightZoomSize(void) const noexcept { return this->m_ZoomSize; }
-			//ƒ}ƒKƒWƒ“
+			//ãƒã‚¬ã‚¸ãƒ³
 			const auto& GetAmmoAll(void) const noexcept { return this->m_CapacityMax; }
 			const auto& GetAmmoSpecID(int index) const noexcept { return this->m_AmmoSpecID[index]; }
-			//«”\ü‚è
+			//æ€§èƒ½å‘¨ã‚Š
 			const auto& GetShootRate_Diff(void) const noexcept { return this->m_ShootRate_Diff; }
 			const auto& GetRecoil_Diff(void) const noexcept { return this->m_Recoil_Diff; }
 
@@ -123,7 +123,7 @@ namespace FPS_n2 {
 				while (true) {
 					if (FileStream.ComeEof()) { break; }
 					auto ALL = FileStream.SeekLineAndGetStr();
-					//ƒRƒƒ“ƒgƒAƒEƒg
+					//ã‚³ãƒ¡ãƒ³ãƒˆã‚¢ã‚¦ãƒˆ
 					if (ALL.find("//") != std::string::npos) {
 						ALL = ALL.substr(0, ALL.find("//"));
 					}
@@ -131,7 +131,7 @@ namespace FPS_n2 {
 					if (ALL == "") { continue; }
 					auto LEFT = FileStreamDX::getleft(ALL);
 					auto RIGHT = FileStreamDX::getright(ALL);
-					//ƒAƒCƒeƒ€ƒf[ƒ^“Ç‚İ‚Æ‚è
+					//ã‚¢ã‚¤ãƒ†ãƒ ãƒ‡ãƒ¼ã‚¿èª­ã¿ã¨ã‚Š
 					SetSlot(LEFT, RIGHT);
 				}
 			}

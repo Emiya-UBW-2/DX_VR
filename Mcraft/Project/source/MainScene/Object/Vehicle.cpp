@@ -1,13 +1,13 @@
-#pragma once
+ï»¿#pragma once
 #include "Vehicle.hpp"
 #include	"../../MainScene/BackGround/BackGround.hpp"
 
 namespace FPS_n2 {
 	namespace Objects {
-		//”í’eˆ—
+		//è¢«å¼¾å‡¦ç†
 		const bool		VehicleObj::CheckAmmoHit(const Vector3DX& StartPos, Vector3DX* EndPos) noexcept {
 			auto* SE = SoundPool::Instance();
-			//‚Æ‚è‚ ‚¦‚¸“–‚½‚Á‚½‚©‚Ç‚¤‚©’T‚·
+			//ã¨ã‚Šã‚ãˆãšå½“ãŸã£ãŸã‹ã©ã†ã‹æŽ¢ã™
 			if (!RefreshCol(StartPos, *EndPos, 10.0f * Scale3DRate)) {
 				return false;
 			}
@@ -24,10 +24,10 @@ namespace FPS_n2 {
 					}
 					};
 				bool is_Hit = false;
-				//‘•b(ˆê”Ô‹ß‚¢ˆÊ’u‚Ì‚à‚Ì‚ÉŒÀ’è‚·‚é)
+				//è£…ç”²(ä¸€ç•ªè¿‘ã„ä½ç½®ã®ã‚‚ã®ã«é™å®šã™ã‚‹)
 				int t = InvalidID;
 				MV1_COLL_RESULT_POLY colres{}; colres.HitFlag = FALSE;
-				for (const auto& m : this->m_VecData->GetArmerMeshIDList()) { HitCheck_Tank(m.first, StartPos, colres); }//‘SƒŠƒZƒbƒg
+				for (const auto& m : this->m_VecData->GetArmerMeshIDList()) { HitCheck_Tank(m.first, StartPos, colres); }//å…¨ãƒªã‚»ãƒƒãƒˆ
 				for (const auto& m : this->m_VecData->GetArmerMeshIDList()) {
 					auto colres_t = GetColLine(StartPos, *EndPos, m.first);
 					if (colres_t.HitFlag == TRUE) {
@@ -37,10 +37,10 @@ namespace FPS_n2 {
 					}
 				}
 				//
-				for (auto& m : this->m_VecData->GetModuleMeshIDList()) {//ƒ‚ƒWƒ…[ƒ‹
+				for (auto& m : this->m_VecData->GetModuleMeshIDList()) {//ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 					is_Hit |= HitCheck_Tank(m, StartPos, GetColLine(StartPos, *EndPos, m));
 				}
-				for (auto& m : this->m_VecData->GetSpaceArmerMeshIDList()) {//‹óŠÔ‘•b
+				for (auto& m : this->m_VecData->GetSpaceArmerMeshIDList()) {//ç©ºé–“è£…ç”²
 					is_Hit |= HitCheck_Tank(m, StartPos, GetColLine(StartPos, *EndPos, m));
 				}
 				//
@@ -51,9 +51,9 @@ namespace FPS_n2 {
 					return false;
 				}
 			}
-			//“–‚½‚è”»’è‚ð‹ß‚¢‡‚Éƒ\[ƒg
+			//å½“ãŸã‚Šåˆ¤å®šã‚’è¿‘ã„é †ã«ã‚½ãƒ¼ãƒˆ
 			std::sort(this->m_hitssort.begin(), this->m_hitssort.end(), [](const HitSortInfo& x, const HitSortInfo& y) { return x < y; });
-			//ƒ_ƒ[ƒW–Ê‚É“Í‚­‚Ü‚Å”»’è
+			//ãƒ€ãƒ¡ãƒ¼ã‚¸é¢ã«å±Šãã¾ã§åˆ¤å®š
 			for (const auto& tt : this->m_hitssort) {
 				if (tt.IsHit()) {
 					if (tt.GetHitMesh() >= this->m_hitres.size()) { continue; }
@@ -71,7 +71,7 @@ namespace FPS_n2 {
 							EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 1.f);
 						}
 					}
-					//ƒ_ƒ[ƒW–Ê‚É“–‚½‚Á‚½
+					//ãƒ€ãƒ¡ãƒ¼ã‚¸é¢ã«å½“ãŸã£ãŸ
 					for (auto& mesh : this->m_VecData->GetArmerMeshIDList()) {
 						if (tt.GetHitMesh() == mesh.first) {
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_Ricochet))->Play3D(HitPos, 100.0f * Scale3DRate);
@@ -87,7 +87,7 @@ namespace FPS_n2 {
 			return true;
 		}
 		//----------------------------------------------------------
-		//XVŠÖ˜A
+		//æ›´æ–°é–¢é€£
 		//----------------------------------------------------------
 		void			VehicleObj::Init_Sub(void) noexcept {
 			this->m_VecData = std::make_unique<VhehicleData>(GetObj(), GetCol(), GetFilePath().c_str());
@@ -99,7 +99,7 @@ namespace FPS_n2 {
 				}
 			}
 			this->m_WheelHeight.resize(this->m_VecData->GetWheelFrameList().size());
-			//–C
+			//ç ²
 			this->m_Gun.resize(this->m_VecData->GetGunData().size());
 			for (auto& g : this->m_Gun) {
 				g.Init(&this->m_VecData->GetGunData().at(&g - &this->m_Gun.front()));
@@ -109,19 +109,19 @@ namespace FPS_n2 {
 			SetMinAABB(Vector3DX::vget(-10.0f, -1.0f, -10.0f) * Scale3DRate);
 			SetMaxAABB(Vector3DX::vget(10.0f, 10.0f, 10.0f) * Scale3DRate);
 			GetObj().SetMaterialDrawAlphaTestAll(true, DX_CMP_GREATER, 128);
-			this->m_hitres.resize(GetCol().GetMeshNum());											//ƒ‚ƒWƒ…[ƒ‹‚²‚Æ‚Ì“–‚½‚è”»’èŒ‹‰Ê‚ðŠm•Û
-			this->m_hitssort.resize(GetCol().GetMeshNum());											//ƒ‚ƒWƒ…[ƒ‹‚²‚Æ‚Ì“–‚½‚è”»’è‡˜‚ðŠm•Û
+			this->m_hitres.resize(GetCol().GetMeshNum());											//ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã”ã¨ã®å½“ãŸã‚Šåˆ¤å®šçµæžœã‚’ç¢ºä¿
+			this->m_hitssort.resize(GetCol().GetMeshNum());											//ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã”ã¨ã®å½“ãŸã‚Šåˆ¤å®šé †åºã‚’ç¢ºä¿
 		}
 		void			VehicleObj::FirstUpdate(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
-			//‰‰ñ‚Ì‚ÝXV‚·‚é“à—e
+			//åˆå›žã®ã¿æ›´æ–°ã™ã‚‹å†…å®¹
 			if (IsFirstLoop()) {
 				this->m_engine_time = (float)GetRand(100) / 100.0f;
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_move))->Play3D(GetMove().GetPos(), 30.0f * Scale3DRate, DX_PLAYTYPE_LOOP);
 			}
-			//ƒGƒ“ƒWƒ“‰¹
+			//ã‚¨ãƒ³ã‚¸ãƒ³éŸ³
 			if (this->m_engine_time <= 0.0f) {
 				this->m_engine_time += 0.9f;
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_engine))->Play3D(GetMove().GetPos(), 30.0f * Scale3DRate);//, DX_PLAYTYPE_LOOP
@@ -132,14 +132,14 @@ namespace FPS_n2 {
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_move))->SetLocalVolume(
 				std::clamp((int)(128.0f * (std::abs(GetMove().GetVec().magnitude() / DXLib_refParts->GetDeltaTime()) * 0.005f + std::abs(this->m_radAdd.y) * 0.1f) * 10.0f), 0, 128)
 			);
-			//‘_‚¢
+			//ç‹™ã„
 			for (auto& g : this->m_Gun) {
 				Vector3DX StartPos = GetObj().GetFramePosition(g.GetGunMuzzleFrame().GetFrameID());
-				Vector3DX EndPos = StartPos + (this->m_MouseVec.zvec2()).normalized() * (500.0f * Scale3DRate);//‘_‚¤êŠ
+				Vector3DX EndPos = StartPos + (this->m_MouseVec.zvec2()).normalized() * (500.0f * Scale3DRate);//ç‹™ã†å ´æ‰€
 				Vector3DX BasePos = GetObj().GetFramePosition(g.GetGunTrunnionFrame().GetFrameID());
 				g.UpdateAim((StartPos - BasePos).normalized(), (EndPos - BasePos).normalized(), this->m_VecData);
 			}
-			//–C“ƒù‰ñ
+			//ç ²å¡”æ—‹å›ž
 			for (auto& g : this->m_Gun) {
 				frames id;
 				id = g.GetGunTurretFrame();
@@ -161,7 +161,7 @@ namespace FPS_n2 {
 					SetCol().SetFrameLocalMatrix(id.GetFrameID(), Recoil * id.GetFrameLocalPosition());
 				}
 			}
-			//“]—Ö
+			//è»¢è¼ª
 			for (auto& Y : this->m_WheelHeight) {
 				auto index = static_cast<int>(&Y - &this->m_WheelHeight.front());
 				auto& f = this->m_VecData->GetWheelFrameList().at(index);
@@ -178,7 +178,7 @@ namespace FPS_n2 {
 					);
 				}
 			}
-			//ã•”ŽxŽ—Ö‚È‚ÇƒTƒXƒyƒ“ƒVƒ‡ƒ“‚ª‚¢‚ç‚È‚¢‚à‚Ì
+			//ä¸Šéƒ¨æ”¯æŒè¼ªãªã©ã‚µã‚¹ãƒšãƒ³ã‚·ãƒ§ãƒ³ãŒã„ã‚‰ãªã„ã‚‚ã®
 			for (const auto& f : this->m_VecData->GetNoSpringWheelFrameList()) {
 				if (f.GetFrameID() >= 0) {
 					SetObj().SetFrameLocalMatrix(f.GetFrameID(),
@@ -186,7 +186,7 @@ namespace FPS_n2 {
 						f.GetFrameWorldPosition());
 				}
 			}
-			//—š‘Ñ
+			//å±¥å¸¯
 			for (auto& LR : this->m_CrawlerFrame) {
 				for (auto& f : LR) {
 					if (f.GetFrame().GetFrameID() >= 0) {
@@ -206,10 +206,10 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			//ˆÚ“®‰‰ŽZ
+			//ç§»å‹•æ¼”ç®—
 			Vector3DX MoveVec = GetMove().GetVec();
 			Matrix3x3DX MoveMat = GetMove().GetMat();
-			//ŒX‚«‚ÌŽæ“¾
+			//å‚¾ãã®å–å¾—
 			{
 				Easing(&this->m_BodyNormal,
 					Vector3DX::Cross(
@@ -217,16 +217,16 @@ namespace FPS_n2 {
 						GetObj().GetFramePosition(this->m_VecData->GetSquareFrameID(1)) - GetObj().GetFramePosition(this->m_VecData->GetSquareFrameID(2))
 					).normalized(),
 					0.95f, EasingType::OutExpo);
-				//ŒX‚«‚ð‚à‚Æ‚ÉÅ‰‚ÌÀ•WŠm’è
+				//å‚¾ãã‚’ã‚‚ã¨ã«æœ€åˆã®åº§æ¨™ç¢ºå®š
 				auto pp = (GetMove().GetMat() * Matrix3x3DX::RotVec2(Vector3DX::up(), this->m_BodyNormal).inverse()).zvec2();
 				float yradBody = std::atan2f(pp.x, pp.z);
 				MoveMat = Matrix3x3DX::Axis1(this->m_BodyNormal, (Matrix3x3DX::RotAxis(Vector3DX::up(), yradBody) * Matrix3x3DX::RotVec2(Vector3DX::up(), this->m_BodyNormal)).zvec2());
 			}
-			//’n–Ê”»’è
+			//åœ°é¢åˆ¤å®š
 			float OnGroundHeight = 0.0f;
 			int OnGroundCount = 0;
 			{
-				//—š‘Ñ‚ÌÚ’n”»’è
+				//å±¥å¸¯ã®æŽ¥åœ°åˆ¤å®š
 				for (const auto& LR : this->m_CrawlerFrame) {
 					for (const auto& f : LR) {
 						if (f.OnGround()) {
@@ -246,16 +246,16 @@ namespace FPS_n2 {
 						++OnGroundCountSquare;
 					}
 				}
-				//’n–Êor…–Ê‚É‚¢‚é‚©‚Ç‚¤‚©
+				//åœ°é¢oræ°´é¢ã«ã„ã‚‹ã‹ã©ã†ã‹
 				if ((OnGroundCount > 0)) {
-					//‘OiŒã‘Þ
+					//å‰é€²å¾Œé€€
 					this->m_speed_add = std::clamp(this->m_speed_add +
 						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) ? 3.0f : -12.0f) * DXLib_refParts->GetDeltaTime(),
 						0.0f, this->m_VecData->GetMaxFrontSpeed());
 					this->m_speed_sub = std::clamp(this->m_speed_sub -
 						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) ? 3.0f : -12.0f) * DXLib_refParts->GetDeltaTime(),
 						this->m_VecData->GetMaxBackSpeed(), 0.f);
-					//ù‰ñ
+					//æ—‹å›ž
 					this->m_yradadd_right = std::clamp(this->m_yradadd_right +
 						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_A) ? 60.f : -120.f) * DXLib_refParts->GetDeltaTime(),
 						0.0f, this->m_VecData->GetMaxBodyRad());
@@ -265,7 +265,7 @@ namespace FPS_n2 {
 				}
 				Easing(&this->m_speed, (this->m_speed_add + this->m_speed_sub) * 20.f, 0.9f, EasingType::OutExpo);
 				Easing(&this->m_radAdd.y, deg2rad(this->m_yradadd_left + this->m_yradadd_right), 0.9f, EasingType::OutExpo);
-				//Šµ«
+				//æ…£æ€§
 				const auto radold = this->m_radAdd;
 				this->m_radAdd.x = deg2rad(this->m_speed * -1.0f);
 				this->m_radAdd.z = deg2rad(this->m_radAdd.y / deg2rad(5.0f) * -5.0f);
@@ -280,30 +280,30 @@ namespace FPS_n2 {
 					MoveVec.y = GetMove().GetVec().y + (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));
 				}
 			}
-			//ŽËŒ‚”½“®
+			//å°„æ’ƒåå‹•
 			for (auto& cg : this->m_Gun) {
 				int index = static_cast<int>(&cg - &this->m_Gun.front());
 				cg.Update();
-				//”½“®
+				//åå‹•
 				MoveMat *= Matrix3x3DX::RotAxis(MoveMat.xvec(), cg.GetShotRadAdd().x) * Matrix3x3DX::RotAxis(MoveMat.zvec(), cg.GetShotRadAdd().z);
-				//ŽËŒ‚
+				//å°„æ’ƒ
 				if ((index == 0) ? this->m_Input.GetPADSPress(Controls::PADS::SHOT) : this->m_Input.GetPADSPress(Controls::PADS::ULT)) {
 					if (cg.CanShot()) {
 						cg.Shot();
 						Vector3DX MuzzlePos = GetObj().GetFramePosition(cg.GetGunMuzzleFrame().GetFrameID());
 						Vector3DX MuzzleVec = (MuzzlePos - GetObj().GetFramePosition(cg.GetGunTrunnionFrame().GetFrameID())).normalized();
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_Shot))->Play3D(GetMove().GetPos(), 100.0f * Scale3DRate);													//ƒTƒEƒ“ƒh
-						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, cg.GetAmmoSpec()->GetCaliber() * 10.0f * Scale3DRate, 2.f);	//e”­–CƒGƒtƒFƒNƒg‚ÌƒZƒbƒg
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_Shot))->Play3D(GetMove().GetPos(), 100.0f * Scale3DRate);													//ã‚µã‚¦ãƒ³ãƒ‰
+						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, cg.GetAmmoSpec()->GetCaliber() * 10.0f * Scale3DRate, 2.f);	//éŠƒç™ºç ²ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®ã‚»ãƒƒãƒˆ
 						Objects::AmmoPool::Instance()->Put(&cg.GetAmmoSpec(), MuzzlePos, MuzzleVec, this->m_MyPlayerID);
 					}
 				}
 			}
-			//“]—Ö
+			//è»¢è¼ª
 			this->m_CrawlerRotateLeft += -this->m_speed / 3.6f * 0.0015f + this->m_radAdd.y * 0.1f;
 			this->m_CrawlerRotateRight += -this->m_speed / 3.6f * 0.0015f - this->m_radAdd.y * 0.1f;
 
 			MoveMat = MoveMat * Matrix3x3DX::RotAxis(Vector3DX::up(), -this->m_radAdd.y * DXLib_refParts->GetDeltaTime());
-			//ˆÚ“®
+			//ç§»å‹•
 			SetMove().SetVec(MoveVec);
 
 			auto Pos = GetMove().GetPos() + GetMove().GetVec();
@@ -323,7 +323,7 @@ namespace FPS_n2 {
 			SetMove().Update(0.8f, 0.0f);
 			UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 
-			//”j‰ó
+			//ç ´å£Š
 			{
 				int								xput = 24;
 				int								yput = 12;

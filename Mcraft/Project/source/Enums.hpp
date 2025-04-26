@@ -1,8 +1,8 @@
-#pragma once
+ï»¿#pragma once
 #include	"Header.hpp"
 
 namespace FPS_n2 {
-	//’è”
+	//å®šæ•°
 	enum class ObjType {
 		Human,
 		Ammo,
@@ -125,12 +125,12 @@ namespace FPS_n2 {
 	};
 
 	enum class Effect {
-		ef_gndsmoke,		// ’n–Êƒqƒbƒg
-		ef_fire2,			// ”­–C‰Š
-		ef_hitblood,		// ŒŒ‚µ‚Ô‚«
-		ef_greexp,			// ƒOƒŒ”š”­
-		ef_dust,			// ‚Ü‚í‚è‚Ìšº
-		ef_break,			// ƒuƒƒbƒN”j‰ó
+		ef_gndsmoke,		// åœ°é¢ãƒ’ãƒƒãƒˆ
+		ef_fire2,			// ç™ºç ²ç‚
+		ef_hitblood,		// è¡€ã—ã¶ã
+		ef_greexp,			// ã‚°ãƒ¬çˆ†ç™º
+		ef_dust,			// ã¾ã‚ã‚Šã®åŸƒ
+		ef_break,			// ãƒ–ãƒ­ãƒƒã‚¯ç ´å£Š
 	};
 
 	typedef char PlayerID;

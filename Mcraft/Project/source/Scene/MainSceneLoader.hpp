@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include	"../Header.hpp"
 
 namespace FPS_n2 {
@@ -17,7 +17,7 @@ namespace FPS_n2 {
 		public:
 			void Set_Sub(void) noexcept override {
 				SetUseASyncLoadFlag(true);
-				Get_Next()->Load();//ŽŸƒV[ƒ“‚Ìƒ[ƒh•¨
+				Get_Next()->Load();//æ¬¡ã‚·ãƒ¼ãƒ³ã®ãƒ­ãƒ¼ãƒ‰ç‰©
 				SetUseASyncLoadFlag(false);
 				ASyncLoadNum = GetASyncLoadNum();
 			}
@@ -28,10 +28,10 @@ namespace FPS_n2 {
 				Get_Next()->LoadEnd();
 			}
 		public:
-			//UI•\Ž¦
+			//UIè¡¨ç¤º
 			void DrawUI_Base_Sub(void) const noexcept override {
 				auto* DrawCtrls = WindowSystem::DrawControl::Instance();
-				// ”wŒi
+				// èƒŒæ™¯
 				DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Gray50, true);
 				// 
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),

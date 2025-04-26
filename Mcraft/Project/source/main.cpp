@@ -1,4 +1,4 @@
-#include	"Header.hpp"
+Ôªø#include	"Header.hpp"
 
 #include	"Scene/MainScene.hpp"
 #include	"Scene/MainSceneLoader.hpp"
@@ -12,9 +12,9 @@ int DBG_CamSelect = InvalidID;
 
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetDoubleStartValidFlag(true);
-	//SetEnableXAudioFlag(true);//Xaudio(ÉçÅ[ÉhÇ™í∑Ç¢Ç∆ÉçÉXÉgÇ∑ÇÈÇÃÇ≈ïKóvÇ…âûÇ∂Çƒ)
+	//SetEnableXAudioFlag(true);//Xaudio(„É≠„Éº„Éâ„ÅåÈï∑„ÅÑ„Å®„É≠„Çπ„Éà„Åô„Çã„ÅÆ„ÅßÂøÖË¶Å„Å´Âøú„Åò„Å¶)
 	DXLib_ref::Create();
-	//égópÇ∑ÇÈÉ{É^ÉìÇÃéwíË
+	//‰ΩøÁî®„Åô„Çã„Éú„Çø„É≥„ÅÆÊåáÂÆö
 	auto* Pad = PadControl::Instance();
 	Pad->SetIsUseButton(Controls::PADS::MOVE_W, true);
 	Pad->SetIsUseButton(Controls::PADS::MOVE_A, true);
@@ -29,7 +29,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(Controls::PADS::LEAN_L, true);
 	Pad->SetIsUseButton(Controls::PADS::LEAN_R, true);
 	Pad->SetIsUseButton(Controls::PADS::RELOAD, true);
-	Pad->SetIsUseButton(Controls::PADS::INTERACT, true);//UIÇÃÇ›
+	Pad->SetIsUseButton(Controls::PADS::INTERACT, true);//UI„ÅÆ„Åø
 	Pad->SetIsUseButton(Controls::PADS::THROW, true);
 	Pad->SetIsUseButton(Controls::PADS::MELEE, false);
 	Pad->SetIsUseButton(Controls::PADS::JUMP, false);
@@ -46,10 +46,10 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	auto* DXLib_refParts = DXLib_ref::Instance();
 	if (DXLib_refParts->FirstBootSetting()) { return 0; }
 	DXLib_refParts->StartLogic();
-	//í«â¡ê›íË
+	//ËøΩÂä†Ë®≠ÂÆö
 	std::string Title = "Phantom of the Bunker";
 	Title += std::to_string(GetRand(1000));
-	SetMainWindowText(Title.c_str());						//É^ÉCÉgÉã
+	SetMainWindowText(Title.c_str());						//„Çø„Ç§„Éà„É´
 	SetUseHalfLambertLighting(true);
 	MV1SetLoadModelReMakeNormal(true);
 	//SetUsePixelLighting(true);
@@ -61,25 +61,25 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//
 	FPS_n2::Guns::GunPartsDataManager::Create();
 	FPS_n2::Objects::AmmoDataManager::Create();
-	//èâä˙ÉZÅ[Éu
+	//ÂàùÊúü„Çª„Éº„Éñ
 	SaveData::Instance()->Save();
 	//BGM
 	/*
 	auto* SE = SoundPool::Instance();
 	SE->Add(SoundType::BGM, 0, 1, "data/Sound/BGM/Title.wav");
 	//*/
-	//ÉVÅ[Éì
+	//„Ç∑„Éº„É≥
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto LoadScenePtr = std::make_shared<FPS_n2::Sceneclass::LoadScene>();
 	auto MainGameScenePtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
-	//ëJà⁄êÊéwíË
+	//ÈÅ∑ÁßªÂÖàÊåáÂÆö
 	Titlescene->SetNextSceneList(0, LoadScenePtr);
 	LoadScenePtr->SetNextSceneList(0, MainGameScenePtr);
 	MainGameScenePtr->SetNextSceneList(0, Titlescene);
 	MainGameScenePtr->SetNextSceneList(1, LoadScenePtr);
 	SceneControl::Instance()->SetFirstScene(Titlescene);
 	//SceneControl::Instance()->SetFirstScene(LoadScenePtr);
-	//ÉÅÉCÉìÉçÉWÉbÉNäJén
+	//„É°„Ç§„É≥„É≠„Ç∏„ÉÉ„ÇØÈñãÂßã
 	DXLib_refParts->MainLogic();
 	return 0;
 }

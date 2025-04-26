@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include	"../../Header.hpp"
 
 #include	"ModData.hpp"
@@ -105,7 +105,7 @@ namespace FPS_n2 {
 
 		class LowerPartsObj : public GunPartsObj {
 		private:
-		public://ƒQƒbƒ^[
+		public://ã‚²ãƒƒã‚¿ãƒ¼
 		public:
 			LowerPartsObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::Lower); }
 			virtual ~LowerPartsObj(void) noexcept {}
@@ -120,7 +120,7 @@ namespace FPS_n2 {
 
 		class BarrelPartsObj : public GunPartsObj {
 		private:
-		public://ƒQƒbƒ^[
+		public://ã‚²ãƒƒã‚¿ãƒ¼
 		public:
 			BarrelPartsObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::Barrel); }
 			virtual ~BarrelPartsObj(void) noexcept {}
@@ -129,7 +129,7 @@ namespace FPS_n2 {
 
 		class UnderRailPartsObj : public GunPartsObj {
 		private:
-		public://ƒQƒbƒ^[
+		public://ã‚²ãƒƒã‚¿ãƒ¼
 		public:
 			UnderRailPartsObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::UnderRail); }
 			virtual ~UnderRailPartsObj(void) noexcept {}

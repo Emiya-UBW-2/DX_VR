@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #pragma warning(disable:4464)
 #include	"../../Header.hpp"
 
@@ -50,7 +50,7 @@ namespace FPS_n2 {
 			struct CellBuffer {
 				int8_t					m_Life{};
 				int8_t					m_Cell{};
-				int8_t					m_FillInfo{};//ü‚è‚ÌÕ•Áƒf[ƒ^‚Ìbitƒtƒ‰ƒO
+				int8_t					m_FillInfo{};//å‘¨ã‚Šã®é®è”½ãƒ‡ãƒ¼ã‚¿ã®bitãƒ•ãƒ©ã‚°
 			public:
 				const auto& GetCell(void) const noexcept { return this->m_Cell; }
 				bool IsEmpty(void) const noexcept { return GetCell() == s_EmptyBlick; }
@@ -65,7 +65,7 @@ namespace FPS_n2 {
 			struct CellsData {
 				std::vector<CellBuffer>	m_CellBuffer;
 				int		m_scale = 0;
-				//Zp•â•Œn
+				//ç®—è¡“è£œåŠ©ç³»
 				int		m_scaleRate = static_cast<int>(std::pow(MulPer, this->m_scale));
 				int		m_All = 256 / this->m_scaleRate;
 				int		m_Half = this->m_All / 2;
@@ -135,7 +135,7 @@ namespace FPS_n2 {
 					this->m_scale = scale;
 					this->m_scaleRate = static_cast<int>(std::pow(MulPer, this->m_scale));
 					this->m_All = 256 / this->m_scaleRate;
-					//Zp•â•Œn
+					//ç®—è¡“è£œåŠ©ç³»
 					this->m_Half = this->m_All / 2;
 					this->m_AllPow2 = this->m_All * this->m_All;
 					this->m_Scale = (CellScale * this->m_scaleRate);
@@ -216,7 +216,7 @@ namespace FPS_n2 {
 								this->m_IsDoEnd = true;
 								});
 							this->m_Job.swap(tmp);
-							//‹­§‘Ò‹@
+							//å¼·åˆ¶å¾…æ©Ÿ
 							//this->m_Job.join();
 						}
 					}
@@ -315,8 +315,8 @@ namespace FPS_n2 {
 				Vector3DX			m_CamPos;
 				Vector3DX			m_CamVec;
 			};
-			//0~TotalCellLayer-1 : •\¦ƒ|ƒŠƒSƒ“ƒXƒŒƒbƒh—p
-			//TotalCellLayer~:‰eƒXƒŒƒbƒh—p
+			//0~TotalCellLayer-1 : è¡¨ç¤ºãƒãƒªã‚´ãƒ³ã‚¹ãƒ¬ãƒƒãƒ‰ç”¨
+			//TotalCellLayer~:å½±ã‚¹ãƒ¬ãƒƒãƒ‰ç”¨
 			std::array<Draw, TotalCellLayer + TotalCellLayer>	m_Draws;
 		public:
 			BackGroundControl(void) noexcept { Load(); }
@@ -405,7 +405,7 @@ namespace FPS_n2 {
 			}
 			inline static bool		ColRayBox(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AABBMinPos, const Vector3DX& AABBMaxPos, Vector3DX* Normal = nullptr) noexcept {
 				Vector3DX Vec = (*EndPos - StartPos);
-				// Œğ·”»’è
+				// äº¤å·®åˆ¤å®š
 				float start[3]{}, dir[3]{}, min[3]{}, max[3]{};
 				start[0] = StartPos.x;
 				start[1] = StartPos.y;
@@ -429,13 +429,13 @@ namespace FPS_n2 {
 					/*
 					if (abs(dir[loop]) < FLT_EPSILON) {
 						if (start[loop] < min[loop] || start[loop] > max[loop])
-							return false; // Œğ·‚µ‚Ä‚¢‚È‚¢
+							return false; // äº¤å·®ã—ã¦ã„ãªã„
 					}
 					else 
 					//*/
 					{
-						// ƒXƒ‰ƒu‚Æ‚Ì‹——£‚ğZo
-						// t1‚ª‹ßƒXƒ‰ƒuAt2‚ª‰“ƒXƒ‰ƒu‚Æ‚Ì‹——£
+						// ã‚¹ãƒ©ãƒ–ã¨ã®è·é›¢ã‚’ç®—å‡º
+						// t1ãŒè¿‘ã‚¹ãƒ©ãƒ–ã€t2ãŒé ã‚¹ãƒ©ãƒ–ã¨ã®è·é›¢
 						float odd = 1.0f / dir[loop];
 						float t1 = (min[loop] - start[loop]) * odd;
 						float t2 = (max[loop] - start[loop]) * odd;
@@ -452,19 +452,19 @@ namespace FPS_n2 {
 							t_max = t2;
 						}
 
-						// ƒXƒ‰ƒuŒğ·ƒ`ƒFƒbƒN
+						// ã‚¹ãƒ©ãƒ–äº¤å·®ãƒã‚§ãƒƒã‚¯
 						if (t_min >= t_max) {
 							return false;
 						}
 					}
 				}
 
-				// Œğ·‚µ‚Ä‚¢‚é
+				// äº¤å·®ã—ã¦ã„ã‚‹
 				if (EndPos) {
 					*EndPos = StartPos + Vec * t_min;
 				}
 				float ret[3] = { EndPos->x, EndPos->y, EndPos->z };
-				//‚Ç‚ÌŒü‚«H
+				//ã©ã®å‘ãï¼Ÿ
 				if (Normal) {
 					for (int loop = 0; loop < 3; ++loop) {
 						if (std::abs(ret[loop] - min[loop]) < 0.00001f) {
@@ -503,14 +503,14 @@ namespace FPS_n2 {
 				return true;
 			}
 		private:
-			//Še•ûŒü‚ÉŒü‚¢‚Ä‚¢‚éƒ|ƒŠƒSƒ“‚Ì’Ç‰Á
+			//å„æ–¹å‘ã«å‘ã„ã¦ã„ã‚‹ãƒãƒªã‚´ãƒ³ã®è¿½åŠ 
 			void			AddPlaneXPlus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xpos, int ypos, int zmin, int zmax, bool IsCalcUV) noexcept;
 			void			AddPlaneXMinus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xpos, int ypos, int zmin, int zmax, bool IsCalcUV) noexcept;
 			void			AddPlaneYPlus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xpos, int ypos, int zmin, int zmax, bool IsCalcUV) noexcept;
 			void			AddPlaneYMinus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xpos, int ypos, int zmin, int zmax, bool IsCalcUV) noexcept;
 			void			AddPlaneZPlus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xmin, int xmax, int ypos, int zpos, bool IsCalcUV) noexcept;
 			void			AddPlaneZMinus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xmin, int xmax, int ypos, int zpos, bool IsCalcUV) noexcept;
-			//XZ•ûŒü‚É‘–¸‚µ‚Äƒ|ƒŠƒSƒ“‚ğ‚È‚é‚×‚­­‚È‚¢ƒ|ƒŠƒSƒ“”‚Å•\¦‚·‚é
+			//XZæ–¹å‘ã«èµ°æŸ»ã—ã¦ãƒãƒªã‚´ãƒ³ã‚’ãªã‚‹ã¹ãå°‘ãªã„ãƒãƒªã‚´ãƒ³æ•°ã§è¡¨ç¤ºã™ã‚‹
 			void			AddPlanesXY(vert32* pTarget, float camVecX, float camVecY, const CellsData& cellx, const Vector3Int& center, int xpos, int ypos, int zMaxminT, int zMaxmaxT, bool CheckInsideXY, bool CheckFillXY, bool IsCalcUV) {
 				int zmin = 0;
 				int zmax = 0;
@@ -531,7 +531,7 @@ namespace FPS_n2 {
 						|| (!isHitmin && CheckBlockID)
 						|| !CellBuff.CanDraw()
 						) {
-						//’u‚¯‚È‚¢•”•ª‚È‚Ì‚Å¡‚Ü‚Å’u‚¯‚Ä‚¢‚½•ª‚ğ‚Ü‚Æ‚ß‚Äƒ|ƒŠƒSƒ“‰»
+						//ç½®ã‘ãªã„éƒ¨åˆ†ãªã®ã§ä»Šã¾ã§ç½®ã‘ã¦ã„ãŸåˆ†ã‚’ã¾ã¨ã‚ã¦ãƒãƒªã‚´ãƒ³åŒ–
 						if (!isHitmin) {
 							isHitmin = true;
 							if (camVecX < 0.f) {
@@ -554,14 +554,14 @@ namespace FPS_n2 {
 									AddPlaneYMinus(pTarget, cellx, center, xpos, ypos, zmin, zmax, IsCalcUV);
 								}
 							}
-							//‚±‚Ìê‡‚¾‚¯‚à‚¤ˆê‰ñ”»’è‚³‚¹‚éƒhƒ“
+							//ã“ã®å ´åˆã ã‘ã‚‚ã†ä¸€å›åˆ¤å®šã•ã›ã‚‹ãƒ‰ãƒ³
 							if (CheckBlockID) {
 								--zpos;
 							}
 						}
 					}
 					else {
-						//ƒuƒƒbƒN‚ª’u‚¯‚é•”•ª
+						//ãƒ–ãƒ­ãƒƒã‚¯ãŒç½®ã‘ã‚‹éƒ¨åˆ†
 						if (isHitmin) {
 							isHitmin = false;
 							zmin = zpos;
@@ -614,7 +614,7 @@ namespace FPS_n2 {
 						|| (!isHitmin && CheckBlockID)
 						|| !CellBuff.CanDraw()
 						) {
-						//’u‚¯‚È‚¢•”•ª‚È‚Ì‚Å¡‚Ü‚Å’u‚¯‚Ä‚¢‚½•ª‚ğ‚Ü‚Æ‚ß‚Äƒ|ƒŠƒSƒ“‰»
+						//ç½®ã‘ãªã„éƒ¨åˆ†ãªã®ã§ä»Šã¾ã§ç½®ã‘ã¦ã„ãŸåˆ†ã‚’ã¾ã¨ã‚ã¦ãƒãƒªã‚´ãƒ³åŒ–
 						if (!isHitmin) {
 							isHitmin = true;
 							if (camVecZ < 0) {
@@ -627,14 +627,14 @@ namespace FPS_n2 {
 									AddPlaneZMinus(pTarget, cellx, center, xmin, xmax, ypos, zpos, IsCalcUV);
 								}
 							}
-							//‚±‚Ìê‡‚¾‚¯‚à‚¤ˆê‰ñ”»’è‚³‚¹‚éƒhƒ“
+							//ã“ã®å ´åˆã ã‘ã‚‚ã†ä¸€å›åˆ¤å®šã•ã›ã‚‹ãƒ‰ãƒ³
 							if (CheckBlockID) {
 								--xpos;
 							}
 						}
 					}
 					else {
-						//ƒuƒƒbƒN‚ª’u‚¯‚é•”•ª
+						//ãƒ–ãƒ­ãƒƒã‚¯ãŒç½®ã‘ã‚‹éƒ¨åˆ†
 						if (isHitmin) {
 							isHitmin = false;
 							xmin = xpos;
@@ -657,10 +657,10 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			//‹ŠE‚©‚çŒ©‚Ä‰f‚é‚à‚Ì‚¾‚¯‚ğƒeƒNƒXƒ`ƒƒŠÖŒW‚İ‚ÅXV
+			//è¦–ç•Œã‹ã‚‰è¦‹ã¦æ˜ ã‚‹ã‚‚ã®ã ã‘ã‚’ãƒ†ã‚¯ã‚¹ãƒãƒ£é–¢ä¿‚è¾¼ã¿ã§æ›´æ–°
 			void			AddCubes(size_t id) noexcept;
 			void			FlipCubes(size_t id) noexcept;
-			//ƒ‰ƒCƒg‚©‚çŒ©‚Ä‰f‚é‚à‚Ì‚¾‚¯‚ğXV
+			//ãƒ©ã‚¤ãƒˆã‹ã‚‰è¦‹ã¦æ˜ ã‚‹ã‚‚ã®ã ã‘ã‚’æ›´æ–°
 			void			AddShadowCubes(size_t id) noexcept;
 			void			FlipShadowCubes(size_t id) noexcept;
 		private:
@@ -685,7 +685,7 @@ namespace FPS_n2 {
 			void			SetBlick(int xpos, int ypos, int zpos, int8_t select) noexcept;
 			const Vector3Int GetPoint(const Vector3DX& pos) const noexcept { return GetReferenceCells().GetPoint(pos); }
 			const Vector3DX GetPos(int xpos, int ypos, int zpos) const noexcept { return GetReferenceCells().GetPos(xpos, ypos, zpos); }
-			//ƒuƒƒbƒN‚Éƒ_ƒ[ƒW‚ğ—^‚¦‚é
+			//ãƒ–ãƒ­ãƒƒã‚¯ã«ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’ä¸ãˆã‚‹
 			bool			DamageCell(int xpos, int ypos, int zpos, int8_t Damage) noexcept {
 				auto& cell = GetReferenceCells().GetCellBuf(xpos, ypos, zpos);
 				if (cell.IsEmpty()) { return false; }

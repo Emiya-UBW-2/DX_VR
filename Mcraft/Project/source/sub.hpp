@@ -1,9 +1,9 @@
-#pragma once
+ï»¿#pragma once
 #include	"Header.hpp"
 //
 namespace FPS_n2 {
 
-	//ƒ_ƒ[ƒWƒCƒxƒ“ƒg
+	//ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚¤ãƒ™ãƒ³ãƒˆ
 	struct DamageEvent {
 		PlayerID				ShotID{ 127 };
 		PlayerID				DamageID{ 127 };
@@ -49,7 +49,7 @@ namespace FPS_n2 {
 	};
 	//
 	class FadeControl {
-		bool						m_IsBlackOut{ false };//ƒJƒbƒgƒV[ƒ“’†ƒtƒ‰ƒO
+		bool						m_IsBlackOut{ false };//ã‚«ãƒƒãƒˆã‚·ãƒ¼ãƒ³ä¸­ãƒ•ãƒ©ã‚°
 		float						m_BlackOutAlpha{ 0.f };
 	public:
 		auto		IsClear(void) const noexcept { return this->m_BlackOutAlpha == 0.f; }
@@ -112,10 +112,10 @@ namespace FPS_n2 {
 			this->m_Hit_AddY = GetRand(32);
 			this->m_IsActive = true;
 		}
-	public: //ƒRƒ“ƒXƒgƒ‰ƒNƒ^AƒfƒXƒgƒ‰ƒNƒ^
+	public: //ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 		HitMarker(void) noexcept {}
 		virtual ~HitMarker(void) noexcept {}
-	public: //Œp³
+	public: //ç¶™æ‰¿
 		void			Init(void) noexcept {
 			this->m_IsActive = false;
 		}
@@ -160,7 +160,7 @@ namespace FPS_n2 {
 							24, FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 							static_cast<int>(this->m_Hit_DispPos.XScreenPos() + this->m_Hit_AddX), static_cast<int>(this->m_Hit_DispPos.YScreenPos() + this->m_Hit_AddY), GetColor(red, green, 0), Black, "%d", this->m_Damage);
 					}
-					//–h‚¢‚¾ƒ_ƒ[ƒW
+					//é˜²ã„ã ãƒ€ãƒ¡ãƒ¼ã‚¸
 					if (this->m_ArmerDamage > 0) {
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic,
 							20, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
@@ -230,11 +230,11 @@ namespace FPS_n2 {
 	private:
 		EffectControl								m_EffectControl;
 	public:
-		// •¡”ƒGƒtƒFƒNƒg‚ÌÄ¶
+		// è¤‡æ•°ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®å†ç”Ÿ
 		void		SetOnce_Any(Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.f, float speed = 1.f) noexcept {
 			this->m_EffectControl.SetOnce_Any(static_cast<int>(ID), pos_t, nomal_t, scale, speed);
 		}
-		// ’P‘Ì‚Å§Œä‚µ‚½‚¢ƒGƒtƒFƒNƒg‚Ì§Œä
+		// å˜ä½“ã§åˆ¶å¾¡ã—ãŸã„ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®åˆ¶å¾¡
 		void		StopEffect(Effect ID) noexcept {
 			this->m_EffectControl.StopEffect(static_cast<int>(ID));
 		}

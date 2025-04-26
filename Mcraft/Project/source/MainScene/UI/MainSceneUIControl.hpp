@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 #include	"../../Header.hpp"
 
 namespace FPS_n2 {
@@ -386,7 +386,7 @@ namespace FPS_n2 {
 				auto* HitMarkParts = HitMark::Instance();
 				//
 				HitMarkParts->Draw();
-				//ãCçá
+				//Ê∞óÂêà
 				{
 					float radius = Lerp(static_cast<float>(1.f), static_cast<float>(1.01f), floatParam[2]);
 					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal,
@@ -403,7 +403,7 @@ namespace FPS_n2 {
 						255, 255, 255);
 				}
 				int xp1, yp1;
-				//É^ÉCÉÄ
+				//„Çø„Ç§„É†
 				{
 					xp1 = (30);
 					yp1 = (static_cast<int>(Lerp(10.0f, -50.f, std::clamp(((intParam[3]) ? 2.f : std::max(m_GameStartTimer, 0.f)) - 0.5f, 0.f, 1.f))));
@@ -418,7 +418,7 @@ namespace FPS_n2 {
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
 				}
-				//ÉXÉRÉA
+				//„Çπ„Ç≥„Ç¢
 				{
 					xp1 = (1920 / 2);
 					yp1 = (static_cast<int>(Lerp(28.0f, -100.f, std::clamp(((intParam[3]) ? 2.f : std::max(m_GameStartTimer, 0.f)) - 0.5f, 0.f, 1.f))));
@@ -465,9 +465,9 @@ namespace FPS_n2 {
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
 						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp1 + (20), yp1, White, Black, "%d", intParam[1]);
 				}
-				//èÓïÒ
+				//ÊÉÖÂ†±
 				{
-					//êSîèêî
+					//ÂøÉÊãçÊï∞
 					xp1 = ((24 + 300 + 24 + 32));
 					yp1 = (1080 - 80 - 28 * 1 + 6 / 2);
 					float per = Lerp(0.4f, 0.6f, floatParam[2]);
@@ -485,7 +485,7 @@ namespace FPS_n2 {
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE, xp1, yp1, GetColor(255, 150, 150), Black, "%d", intParam[2]);
 
-					//ãCçá
+					//Ê∞óÂêà
 					xp1 = (24 + 9 * 2);
 					yp1 = (1080 - 80 - 28 * 2);
 
@@ -502,7 +502,7 @@ namespace FPS_n2 {
 							xp1, yp1, xp1 + (300), yp1 + (6), White, false);
 					}
 
-					//ÉXÉ^É~Éi
+					//„Çπ„Çø„Éü„Éä
 					xp1 = (24 + 9 * 1);
 					yp1 = (1080 - 80 - 28 * 1);
 
@@ -514,7 +514,7 @@ namespace FPS_n2 {
 						GetColorU8(0, 0, 128, 255), GetColorU8(128, 0, 0, 255)
 					);
 
-					//ÉKÅ[Éh
+					//„Ç¨„Éº„Éâ
 					xp1 = (24 + 9 * 0);
 					yp1 = (1080 - 80 - 28 * 0);
 
@@ -562,7 +562,7 @@ namespace FPS_n2 {
 							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, (64), (900),
 								Yellow, Black,
-								"èÍäOÇ‹Ç≈Ç†Ç∆%3.1fïb", floatParam[1]);
+								"Â†¥Â§ñ„Åæ„Åß„ÅÇ„Å®%3.1fÁßí", floatParam[1]);
 						}
 					}
 				}

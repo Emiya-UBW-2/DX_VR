@@ -1,4 +1,4 @@
-#include	"MainSceneSub.hpp"
+ï»¿#include	"MainSceneSub.hpp"
 
 #include	"Player/Player.hpp"
 
@@ -36,7 +36,7 @@ namespace FPS_n2 {
 						});
 					if (!OptionPopup::Instance()->IsActive()) {
 						ButtonParts->UpdateInput();
-						// ‘I‘ðŽž‚Ì‹““®
+						// é¸æŠžæ™‚ã®æŒ™å‹•
 						if (ButtonParts->GetTriggerButton()) {
 							switch (ButtonParts->GetSelect()) {
 							case 0:
@@ -217,7 +217,7 @@ namespace FPS_n2 {
 			int xp1{}, yp1{};
 			int xp2{}, yp2{};
 			int xp3{}, yp3{};
-			//ƒ^ƒCƒ€,ƒXƒRƒA
+			//ã‚¿ã‚¤ãƒ ,ã‚¹ã‚³ã‚¢
 			{
 				xp1 = (30);
 				yp1 = (10);
@@ -316,7 +316,7 @@ namespace FPS_n2 {
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
 
-				//ƒXƒ^[ƒgƒ^ƒCƒ}[
+				//ã‚¹ã‚¿ãƒ¼ãƒˆã‚¿ã‚¤ãƒžãƒ¼
 				if (floatParam[1] > 0.f) {
 					xp1 = 1920 / 2;
 					yp1 = (340);
@@ -326,7 +326,7 @@ namespace FPS_n2 {
 				}
 
 			}
-			//•ûˆÊŽ¥j
+			//æ–¹ä½ç£é‡
 			{
 				Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec2(); Vec.y = 0.f; Vec = Vec.normalized();
 				float radian = std::atan2f(Vec.x, Vec.z);

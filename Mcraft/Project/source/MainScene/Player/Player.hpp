@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #pragma warning(disable:4464)
 #include	"../../MainScene/NetWork.hpp"
 #include	"CPU.hpp"
@@ -17,10 +17,10 @@ namespace FPS_n2 {
 			private:
 				std::shared_ptr<Charas::CharacterObj>	m_Chara{ nullptr };
 				std::shared_ptr<AIs::AIControl>			m_AI{ nullptr };
-				int										m_Score{ 0 };							//ƒXƒRƒA
-				int										m_Kill{ 0 };							//ƒXƒRƒA
-				int										m_Hit{ 0 };							//ƒXƒRƒA
-				int										m_Shot{ 0 };							//ƒXƒRƒA
+				int										m_Score{ 0 };							//ã‚¹ã‚³ã‚¢
+				int										m_Kill{ 0 };							//ã‚¹ã‚³ã‚¢
+				int										m_Hit{ 0 };							//ã‚¹ã‚³ã‚¢
+				int										m_Shot{ 0 };							//ã‚¹ã‚³ã‚¢
 			public:
 				PlayerControl(void) noexcept {
 					this->m_Score = 0;

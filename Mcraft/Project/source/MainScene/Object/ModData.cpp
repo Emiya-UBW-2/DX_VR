@@ -1,4 +1,4 @@
-#include	"ModData.hpp"
+ï»¿#include	"ModData.hpp"
 
 const FPS_n2::Guns::GunPartsDataManager* SingletonBase<FPS_n2::Guns::GunPartsDataManager>::m_Singleton = nullptr;
 namespace FPS_n2 {
@@ -69,7 +69,7 @@ namespace FPS_n2 {
 			}
 
 			else if (LEFT == "capacity") {
-				this->m_CapacityMax = (HitPoint)std::stoi(RIGHT);		//‘’e”
+				this->m_CapacityMax = (HitPoint)std::stoi(RIGHT);		//ç·å¼¾æ•°
 			}
 			else if (LEFT.find("useammo" + std::to_string(this->m_AmmoSpecID.size())) != std::string::npos) {
 				this->m_AmmoSpecID.emplace_back(Objects::AmmoDataManager::Instance()->Add("data/ammo/" + RIGHT + "/"));

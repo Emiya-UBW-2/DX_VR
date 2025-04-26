@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #pragma warning(disable:4464)
 #include	"../Header.hpp"
 
@@ -20,13 +20,13 @@ namespace FPS_n2 {
 	namespace Sceneclass {
 		class EndScene : public TEMPSCENE {
 		private:
-			//ƒCƒxƒ“ƒg
+			//ã‚¤ãƒ™ãƒ³ãƒˆ
 			EventScene									m_EventScene;
 			bool										m_IsEventSceneActive{ false };
 			bool										m_IsEventSceneFlag{ false };
 			std::string									m_EventSelect;
 			//
-			bool										m_IsEnd{ false };//ƒV[ƒ“‘S‘Ì‚ÌI—¹ƒtƒ‰ƒO
+			bool										m_IsEnd{ false };//ã‚·ãƒ¼ãƒ³å…¨ä½“ã®çµ‚äº†ãƒ•ãƒ©ã‚°
 		private:
 			void			SetupEvent(const char* Path) noexcept;
 			void			UpdateEvent(void) noexcept;
@@ -49,7 +49,7 @@ namespace FPS_n2 {
 			void			ShadowDraw_Sub(void) const noexcept override;
 			void			SetShadowDraw_Sub(void) const noexcept override;
 			void			MainDraw_Sub(void) const noexcept override;
-			//UI•\¦
+			//UIè¡¨ç¤º
 			void			DrawUI_Base_Sub(void) const noexcept override;
 			void			DrawUI_In_Sub(void) const noexcept override;
 		};

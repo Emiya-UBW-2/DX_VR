@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include	"../../Header.hpp"
 
 namespace FPS_n2 {
@@ -8,9 +8,9 @@ namespace FPS_n2 {
 			std::string		m_path;
 			std::string		m_name;
 			float			m_caliber{ 0.f };
-			float			m_speed{ 100.f };				//’e‘¬
-			float			m_penetration{ 10.f };			//ŠÑ’Ê
-			HitPoint		m_damage{ 10 };					//ƒ_ƒ[ƒW
+			float			m_speed{ 100.f };				//å¼¾é€Ÿ
+			float			m_penetration{ 10.f };			//è²«é€š
+			HitPoint		m_damage{ 10 };					//ãƒ€ãƒ¡ãƒ¼ã‚¸
 			int				m_Pellet{ 1 };
 			float			m_Accuracy{ 0.f };
 			int				m_FallSound{ 0 };
@@ -36,7 +36,7 @@ namespace FPS_n2 {
 				while (true) {
 					if (FileStream.ComeEof()) { break; }
 					auto ALL = FileStream.SeekLineAndGetStr();
-					//ƒRƒƒ“ƒgƒAƒEƒg
+					//ã‚³ãƒ¡ãƒ³ãƒˆã‚¢ã‚¦ãƒˆ
 					if (ALL.find("//") != std::string::npos) {
 						ALL = ALL.substr(0, ALL.find("//"));
 					}
@@ -44,7 +44,7 @@ namespace FPS_n2 {
 					if (ALL == "") { continue; }
 					auto LEFT = FileStreamDX::getleft(ALL);
 					auto RIGHT = FileStreamDX::getright(ALL);
-					//ƒAƒCƒeƒ€ƒf[ƒ^“Ç‚İ‚Æ‚è
+					//ã‚¢ã‚¤ãƒ†ãƒ ãƒ‡ãƒ¼ã‚¿èª­ã¿ã¨ã‚Š
 					Set_Sub(LEFT, RIGHT);
 				}
 			}
@@ -53,25 +53,25 @@ namespace FPS_n2 {
 					this->m_name = RIGHT;
 				}
 				else if (LEFT == "ammo_cal(mm)") {
-					this->m_caliber = std::stof(RIGHT) * 0.001f;		//ŒûŒa
+					this->m_caliber = std::stof(RIGHT) * 0.001f;		//å£å¾„
 				}
 				else if (LEFT == "ammo_speed(m/s)") {
-					this->m_speed = std::stof(RIGHT);				//’e‘¬
+					this->m_speed = std::stof(RIGHT);				//å¼¾é€Ÿ
 				}
 				else if (LEFT == "ammo_pene(mm)") {
-					this->m_penetration = std::stof(RIGHT);			//ŠÑ’Ê
+					this->m_penetration = std::stof(RIGHT);			//è²«é€š
 				}
 				else if (LEFT == "ammo_damage") {
-					this->m_damage = (HitPoint)std::stoi(RIGHT);		//ƒ_ƒ[ƒW
+					this->m_damage = (HitPoint)std::stoi(RIGHT);		//ãƒ€ãƒ¡ãƒ¼ã‚¸
 				}
 				else if (LEFT == "Pellets") {
-					this->m_Pellet = std::stoi(RIGHT);				//ƒyƒŒƒbƒg‚Ì”
+					this->m_Pellet = std::stoi(RIGHT);				//ãƒšãƒ¬ãƒƒãƒˆã®æ•°
 				}
 				else if (LEFT == "Accuracy") {
-					this->m_Accuracy = std::stof(RIGHT);				//ƒyƒŒƒbƒg‚Ì”
+					this->m_Accuracy = std::stof(RIGHT);				//ãƒšãƒ¬ãƒƒãƒˆã®æ•°
 				}
 				else if (LEFT == "FallSound") {
-					this->m_FallSound = std::stoi(RIGHT);				//ƒyƒŒƒbƒg‚Ì”
+					this->m_FallSound = std::stoi(RIGHT);				//ãƒšãƒ¬ãƒƒãƒˆã®æ•°
 				}
 			}
 		};

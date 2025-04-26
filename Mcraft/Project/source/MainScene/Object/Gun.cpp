@@ -1,4 +1,4 @@
-#include	"Gun.hpp"
+ï»¿#include	"Gun.hpp"
 
 #include	"../../MainScene/Player/Player.hpp"
 #include	"../../MainScene/BackGround/BackGround.hpp"
@@ -73,17 +73,17 @@ namespace FPS_n2 {
 			if (GetModifySlot()->GetMyData()->GetIsThrowWeapon()) { return; }
 			auto* SE = SoundPool::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
-			//‚±‚ÌƒvƒŒƒCƒ„[‚ÍƒyƒŒƒbƒg”­Œ‚‚¿‚Ü‚µ‚½‚æ
-			const auto& AmmoSpec = Objects::AmmoDataManager::Instance()->Get((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecID(0));//ƒ}ƒKƒWƒ“‚Ìˆê”Ôã‚Ì’eƒf[ƒ^‚ğƒ`ƒƒƒ“ƒo[ƒCƒ“
+			//ã“ã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¯ãƒšãƒ¬ãƒƒãƒˆç™ºæ’ƒã¡ã¾ã—ãŸã‚ˆ
+			const auto& AmmoSpec = Objects::AmmoDataManager::Instance()->Get((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecID(0));//ãƒã‚¬ã‚¸ãƒ³ã®ä¸€ç•ªä¸Šã®å¼¾ãƒ‡ãƒ¼ã‚¿ã‚’ãƒãƒ£ãƒ³ãƒãƒ¼ã‚¤ãƒ³
 			PlayerMngr->GetPlayer(GetMyUserPlayerID())->AddShot(AmmoSpec->GetPellet());
 			auto MuzzleMat = GetPartsFrameMatParent(GunFrame::Muzzle);
-			//eº
+			//éŠƒå£°
 			SE->Get(SoundType::SE, GetGunSoundSet(
 				(this->m_MuzzlePtr) ? (*this->m_MuzzlePtr)->GetModifySlot()->GetMyData()->GetGunShootSound() : GetModifySlot()->GetMyData()->GetGunShootSound()
 			))->Play3D(MuzzleMat.pos(), Scale3DRate * 50.f);
-			//ƒGƒtƒFƒNƒg
+			//ã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
 			EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec2(), 0.35f* this->m_MuzzleSmokeSize / (0.00762f * Scale3DRate), 2.f);
-			//”­–C
+			//ç™ºç ²
 			for (int loop = 0, max = AmmoSpec->GetPellet(); loop < max; ++loop) {
 				Objects::AmmoPool::Instance()->Put(&AmmoSpec, MuzzleMat.pos(),
 					(
@@ -92,17 +92,17 @@ namespace FPS_n2 {
 						Matrix3x3DX::Get33DX(MuzzleMat)
 						).zvec2(), GetMyUserPlayerID());
 			}
-			//ƒ`ƒƒƒ“ƒo[‚ğ‹ó‚É‚·‚é
+			//ãƒãƒ£ãƒ³ãƒãƒ¼ã‚’ç©ºã«ã™ã‚‹
 			this->m_InChamber = false;
-			//eŒû‰Œ‚Ì’Ç‰Á
+			//éŠƒå£ç…™ã®è¿½åŠ 
 			this->m_MuzzleSmokeControl.AddMuzzleSmokePower();
-			//Œ‚‚¿ƒAƒjƒ‚ÉˆÚs
+			//æ’ƒã¡ã‚¢ãƒ‹ãƒ¡ã«ç§»è¡Œ
 			SetGunAnime(Charas::GunAnimeID::Shot);
 			this->m_AmmoInChamberObj->SetActive(true);
-			//ƒŠƒRƒCƒ‹
+			//ãƒªã‚³ã‚¤ãƒ«
 			float Power = 0.0001f * GetRecoilPower();
 			this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power);
-			//ƒrƒWƒ…ƒAƒ‹ƒŠƒRƒCƒ‹
+			//ãƒ“ã‚¸ãƒ¥ã‚¢ãƒ«ãƒªã‚³ã‚¤ãƒ«
 			if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 				Camera3D::Instance()->SetCamShake(0.1f, 0.1f);
 			}
@@ -112,14 +112,14 @@ namespace FPS_n2 {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* SE = SoundPool::Instance();
 			if (IsSelectGun) {
-				//ƒAƒjƒ[ƒVƒ‡ƒ“
+				//ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
 				if (GetNowGunAnimeID() != InvalidID) {
 					SetAnimOnce(GetNowGunAnimeID(), this->m_GunAnimeSpeed.at(static_cast<int>(GetGunAnime())));
 				}
 				switch (GetGunAnime()) {
 				case Charas::GunAnimeID::Base:
 					if (!IsInChamber() && this->m_Capacity != 0) {
-						SetGunAnime(Charas::GunAnimeID::Cocking);//ƒ`ƒƒƒ“ƒo[‚ª‹ó‚Å’e‘q‚ª‹ó‚Å‚È‚¢‚È‚ç
+						SetGunAnime(Charas::GunAnimeID::Cocking);//ãƒãƒ£ãƒ³ãƒãƒ¼ãŒç©ºã§å¼¾å€‰ãŒç©ºã§ãªã„ãªã‚‰
 					}
 					break;
 				case Charas::GunAnimeID::Shot:
@@ -155,11 +155,11 @@ namespace FPS_n2 {
 					if (GetNowAnimTimePerCache() >= (this->m_isMagSuccess ? 0.75f : 1.0f)) {
 						switch (GetReloadType()) {
 						case RELOADTYPE::MAG:
-							this->m_Capacity = GetAmmoAll();//ƒ}ƒKƒWƒ“‘•“U
+							this->m_Capacity = GetAmmoAll();//ãƒã‚¬ã‚¸ãƒ³è£…å¡«
 							SetGunAnime(Charas::GunAnimeID::ReloadEnd);
 							break;
 						case RELOADTYPE::AMMO:
-							++this->m_Capacity;//ƒ}ƒKƒWƒ“‘•“U
+							++this->m_Capacity;//ãƒã‚¬ã‚¸ãƒ³è£…å¡«
 							if ((this->m_Capacity == GetAmmoAll()) || this->m_ReloadAmmoCancel) {
 								this->m_ReloadAmmoCancel = false;
 								SetGunAnime(Charas::GunAnimeID::ReloadEnd);
@@ -201,7 +201,7 @@ namespace FPS_n2 {
 				}
 #endif
 			}
-			//e‚Ì—h‚ê
+			//éŠƒã®æºã‚Œ
 			if (!IsFirstLoop()) {
 				Easing(&this->m_UpperRad, (this->m_UpperPrevRad - RotRad), 0.9f, EasingType::OutExpo);
 			}
@@ -214,13 +214,13 @@ namespace FPS_n2 {
 					deg2rad(-10), deg2rad(10))),
 					0.8f, EasingType::OutExpo);
 			Easing(&this->m_GunSwingMat2, this->m_GunSwingMat, 0.8f, EasingType::OutExpo);
-			//ƒXƒŠƒ“ƒO
+			//ã‚¹ãƒªãƒ³ã‚°
 			Easing(&this->m_SlingPer, IsSelectGun ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 			if (this->m_SlingPer <= 0.001f) { this->m_SlingPer = 0.f; }
 			if (this->m_SlingPer >= 0.999f) { this->m_SlingPer = 1.f; }
 			//
 			auto EyeYRot = Matrix3x3DX::RotVec2(Lerp(GetMove().GetMat().yvec(), GetPartsFrameMatParent(GunFrame::Eyepos).yvec(), GetGunAnimBlendPer(Charas::GunAnimeID::ADS)), GetMove().GetMat().yvec());
-			//ƒAƒjƒ‰‰Z‚ÌŒ‹‰Ê‚ğƒLƒƒƒbƒVƒ…
+			//ã‚¢ãƒ‹ãƒ¡æ¼”ç®—ã®çµæœã‚’ã‚­ãƒ£ãƒƒã‚·ãƒ¥
 			this->m_AnimNowCache = GetAnimDataNow(Charas::GunAnimeID::Aim);
 			for (int loop = 0; loop < static_cast<int>(Charas::GunAnimeID::ChoiceOnceMax); ++loop) {
 				if (GetGunAnimBlendPer((Charas::GunAnimeID)loop) != 0.f) {
@@ -235,7 +235,7 @@ namespace FPS_n2 {
 				AnimPos = GetGunAnimeNow().GetPos();
 				AnimPos.x *= GetSwitchPer();
 				AnimPos = HeadPos + Matrix3x3DX::Vtrans(AnimPos, CharaRotationCache);
-				//ƒI[ƒgƒGƒCƒ€
+				//ã‚ªãƒ¼ãƒˆã‚¨ã‚¤ãƒ 
 				if (IsSelectGun) {
 					this->m_AutoAimControl.Update(IsActiveAutoAim, GetMyUserPlayerID(), GetPartsFrameMatParent(GunFrame::Eyepos).pos(), GetMove().GetMat().zvec2(), GetAutoAimRadian());
 					this->m_AutoAimControl.CalcAutoAimMat(&AnimRot);
@@ -244,9 +244,9 @@ namespace FPS_n2 {
 				Easing(&m_GunShotZrand, m_GunShotZrandR, 0.8f, EasingType::OutExpo);
 				AnimRot = AnimRot * Matrix3x3DX::RotAxis(AnimRot.zvec2(), deg2rad(m_GunShotZrand * std::clamp(1.f - GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.f, 1.f)));
 			}
-			//•ŠíÀ•W
+			//æ­¦å™¨åº§æ¨™
 			SetGunMat(Lerp(this->m_SlingRot * this->m_GunSwingMat2 * EyeYRot, AnimRot, this->m_SlingPer), Lerp(this->m_SlingPos, AnimPos, this->m_SlingPer));
-			//ƒAƒjƒ[ƒVƒ‡ƒ“‚É‰‚¶‚½‚¢‚ë‚¢‚ë‚ÌXV
+			//ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã«å¿œã˜ãŸã„ã‚ã„ã‚ã®æ›´æ–°
 			{
 				Matrix4x4DX MatMin;
 				Matrix4x4DX MatMax;
@@ -410,7 +410,7 @@ namespace FPS_n2 {
 						MatMax = this->m_MagazinePoachMat;
 						SetMagMatLerp(this->m_MagazinePoachMat, 0.1f);
 						if (GetNowAnimTimePerCache() <= 0.1f) {
-							//ƒ}ƒOƒ`ƒFƒ“ƒW¬Œ÷Šm—¦
+							//ãƒã‚°ãƒã‚§ãƒ³ã‚¸æˆåŠŸç¢ºç‡
 							this->m_isMagSuccess = GetRand(100) < 50;
 							float MissPer = GetRandf(0.025f);
 							this->m_MagMiss = Matrix4x4DX::Mtrans(GetMove().GetMat().xvec() * (MissPer * Scale3DRate));
@@ -487,7 +487,7 @@ namespace FPS_n2 {
 				case Charas::GunAnimeID::Throw:
 					if (GetNowAnimTimePerCache() >= 0.4f) {
 						if (IsActive()) {
-							SetActiveAll(false);//è‚É‚ ‚é‚à‚Ì‚Í”ñ•\¦‚É‚·‚é
+							SetActiveAll(false);//æ‰‹ã«ã‚ã‚‹ã‚‚ã®ã¯éè¡¨ç¤ºã«ã™ã‚‹
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Throw))->Play3D(GetMove().GetPos(), Scale3DRate * 2.f);
 							this->m_Grenade.SetFall(GetMove().GetPos(), this->m_GrenadeThrowRot, (this->m_GrenadeThrowRot.zvec2()).normalized() * (Scale3DRate * 15.f / 60.f), 3.5f, Objects::FallObjectType::Grenade);
 						}
@@ -498,7 +498,7 @@ namespace FPS_n2 {
 				}
 			}
 		}
-		//ƒOƒŒƒl[ƒhXV
+		//ã‚°ãƒ¬ãƒãƒ¼ãƒ‰æ›´æ–°
 		void				GunObj::UpdateGrenade(void) noexcept {
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 
@@ -506,12 +506,12 @@ namespace FPS_n2 {
 				if (grenade->PopIsEndFall()) {
 					auto& AmmoSpec = Objects::AmmoDataManager::Instance()->Get(GetModifySlot()->GetMyData()->GetAmmoSpecID(0));
 					for (int loop = 0, max = AmmoSpec->GetPellet(); loop < max; ++loop) {
-						//‰~üã‚É‚Ü‚«U‚ç‚·
+						//å††å‘¨ä¸Šã«ã¾ãæ•£ã‚‰ã™
 						auto mat = Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-GetRand(30))) * Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180)));
 						Objects::AmmoPool::Instance()->Put(&AmmoSpec, grenade->GetMove().GetPos() + mat.zvec2() * (0.5f * Scale3DRate) + Vector3DX::up() * (0.5f * Scale3DRate), mat.zvec2(), GetMyUserPlayerID());
 					}
 
-					//”j‰ó
+					//ç ´å£Š
 					int								xput = 6;
 					int								yput = 8;
 					int								zput = 6;
@@ -531,7 +531,7 @@ namespace FPS_n2 {
 			this->m_ModifySlot = std::make_unique<ModifySlot>(GetFilePath());
 			this->m_GunsModify = std::make_unique<GunsModify>(shared_from_this(), false);
 			{
-				//¬‘·‚Æ‚µ‚Ä“o˜^‚³‚ê‚Ä‚¢‚éƒp[ƒc‚ğƒŠƒXƒg‰»
+				//å°å­«ã¨ã—ã¦ç™»éŒ²ã•ã‚Œã¦ã„ã‚‹ãƒ‘ãƒ¼ãƒ„ã‚’ãƒªã‚¹ãƒˆåŒ–
 				std::vector<const SharedGunParts*> PartsList;
 				GetModifySlot()->GetAnyByChild([&](const SharedGunParts& ptr) { if (ptr) { PartsList.emplace_back(&ptr); } });
 				this->m_SightPtr = nullptr;
@@ -562,7 +562,7 @@ namespace FPS_n2 {
 				this->m_ShootRate_Diff = 0;
 				this->m_Recoil_Diff = 0;
 				for (auto& parts : PartsList) {
-					//«”\ü‚è
+					//æ€§èƒ½å‘¨ã‚Š
 					auto& data = (*parts)->GetModifySlot()->GetMyData();
 					this->m_ShootRate_Diff += data->GetShootRate_Diff();
 					this->m_Recoil_Diff += data->GetRecoil_Diff();
@@ -572,10 +572,10 @@ namespace FPS_n2 {
 			if (this->m_MagazinePtr) {
 				this->m_MagFall.Init((*this->m_MagazinePtr)->GetFilePath(), 1);
 				const char* AmmoSpecPath = Objects::AmmoDataManager::Instance()->Get((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecID(0))->GetPath().c_str();
-				this->m_CartFall.Init(AmmoSpecPath, 4);	//‘•“U‚µ‚½ƒ}ƒKƒWƒ“‚Ì’e‚É‡‚í‚¹‚Ä–òä°¶¬
+				this->m_CartFall.Init(AmmoSpecPath, 4);	//è£…å¡«ã—ãŸãƒã‚¬ã‚¸ãƒ³ã®å¼¾ã«åˆã‚ã›ã¦è–¬è¢ç”Ÿæˆ
 				this->m_AmmoInChamberObj = std::make_shared<Objects::AmmoInChamberObj>();
 				ObjectManager::Instance()->InitObject(this->m_AmmoInChamberObj, AmmoSpecPath);
-				(*this->m_MagazinePtr)->SetAmmoActive(GetReloadType() == RELOADTYPE::MAG);//’e‚ß®‚È‚çƒ}ƒKƒWƒ““à•”‚Ì’e‚Í•`‰æ‚µ‚È‚¢
+				(*this->m_MagazinePtr)->SetAmmoActive(GetReloadType() == RELOADTYPE::MAG);//å¼¾è¾¼ã‚å¼ãªã‚‰ãƒã‚¬ã‚¸ãƒ³å†…éƒ¨ã®å¼¾ã¯æç”»ã—ãªã„
 			}
 			if (GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
 				this->m_Grenade.Init(GetFilePath(), 1);
@@ -599,7 +599,7 @@ namespace FPS_n2 {
 			if (IsFirstLoop()) {
 				this->m_MuzzleSmokeControl.InitMuzzleSmoke(GetPartsFrameMatParent(GunFrame::Muzzle).pos());
 				if (this->m_MagazinePtr) {
-					const auto& AmmoSpec = Objects::AmmoDataManager::Instance()->Get((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecID(0));//ƒ}ƒKƒWƒ“‚Ìˆê”Ôã‚Ì’eƒf[ƒ^‚ğƒ`ƒƒƒ“ƒo[ƒCƒ“
+					const auto& AmmoSpec = Objects::AmmoDataManager::Instance()->Get((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecID(0));//ãƒã‚¬ã‚¸ãƒ³ã®ä¸€ç•ªä¸Šã®å¼¾ãƒ‡ãƒ¼ã‚¿ã‚’ãƒãƒ£ãƒ³ãƒãƒ¼ã‚¤ãƒ³
 					this->m_MuzzleSmokeSize = AmmoSpec->GetCaliber() * AmmoSpec->GetPellet() * Scale3DRate;
 				}
 			}
@@ -627,7 +627,7 @@ namespace FPS_n2 {
 						break;
 					case Charas::GunAnimeID::Open:
 					{
-						//ËŒ‚‚Ìƒ{ƒ‹ƒgƒAƒjƒ‚ğs‚í‚¹‚é
+						//å°„æ’ƒæ™‚ã®ãƒœãƒ«ãƒˆã‚¢ãƒ‹ãƒ¡ã‚’è¡Œã‚ã›ã‚‹
 						switch (GetGunAnime()) {
 						case Charas::GunAnimeID::Shot:
 							if (GetShotType() == SHOTTYPE::FULL || GetShotType() == SHOTTYPE::SEMI) {
@@ -652,7 +652,7 @@ namespace FPS_n2 {
 						{
 							float Per = 19.f / 35.f;
 							if (GetNowAnimTimePerCache() < Per) {
-								//Œ³‚©‚çŠJ‚¢‚Ä‚¢‚½‚ç1‚Ì‚Ü‚Ü
+								//å…ƒã‹ã‚‰é–‹ã„ã¦ã„ãŸã‚‰1ã®ã¾ã¾
 								SetObj().SetAnim(ID).SetPer(std::max(GetObj().GetAnim(ID).GetPer(), std::clamp(GetNowAnimTimePerCache() / Per, 0.f, 1.f)));
 							}
 							else {
@@ -694,14 +694,14 @@ namespace FPS_n2 {
 			this->m_MagArm.Update(this->m_MagHand, 0.1f, 0.1f, 0.7f, 0.7f);
 			this->m_CockArm.Update(this->m_CockHand, 0.0f, 0.1f, 0.7f, 0.7f);
 			SetObj().UpdateAnimAll();
-			//ƒŠƒRƒCƒ‹‚Ì‰‰Z
+			//ãƒªã‚³ã‚¤ãƒ«ã®æ¼”ç®—
 			if (this->m_RecoilRadAdd.y < 0.f) {
 				Easing(&this->m_RecoilRadAdd, Vector2DX::vget(0.f, 0.01f), GetRecoilReturn(), EasingType::OutExpo);
 			}
 			else {
 				Easing(&this->m_RecoilRadAdd, Vector2DX::zero(), 0.7f, EasingType::OutExpo);
 			}
-			//ƒOƒŒƒl[ƒh‰‰Z
+			//ã‚°ãƒ¬ãƒãƒ¼ãƒ‰æ¼”ç®—
 			UpdateGrenade();
 			//
 			if (this->m_SightPtr && GetSightZoomSize() > 1.f) {
@@ -738,7 +738,7 @@ namespace FPS_n2 {
 						this->m_Reticle_on = false;
 					}
 				}
-				//ƒŒƒ“ƒY•\¦‹@”\‚Ö‚Ì”½‰f
+				//ãƒ¬ãƒ³ã‚ºè¡¨ç¤ºæ©Ÿèƒ½ã¸ã®åæ˜ 
 				if (GetSightZoomSize() > 1.f) {
 					if (this->m_Reticle_on) {
 						PostPassParts->Set_is_lens(true);

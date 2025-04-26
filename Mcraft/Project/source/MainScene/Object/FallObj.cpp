@@ -1,9 +1,9 @@
-#include	"FallObj.hpp"
+ï»¿#include	"FallObj.hpp"
 #include	"../../MainScene/Player/Player.hpp"
 
 namespace FPS_n2 {
 	namespace Objects {
-		//‚»‚ê‚¼‚ê‚ÌƒIƒuƒWƒFƒNƒg‚Ì“®‚«
+		//ãã‚Œãžã‚Œã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å‹•ã
 		class FallObjCart : public FallObjChildBase {
 		public:
 			FallObjCart(void) noexcept {}
@@ -12,12 +12,12 @@ namespace FPS_n2 {
 			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::CartFall; }
 		public:
 			void RotateOnAir(moves* objMove) noexcept override {
-				//ƒeƒLƒg[‚É”ò‚Ñ‰ñ‚é
+				//ãƒ†ã‚­ãƒˆãƒ¼ã«é£›ã³å›žã‚‹
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				objMove->SetMat(Matrix3x3DX::RotAxis(Vector3DX::Cross(objMove->GetVec().normalized(), objMove->GetMat().zvec()), deg2rad(-50.f * 60.f * DXLib_refParts->GetDeltaTime())) * objMove->GetMat());
 			}
 			void RotateOnGround(moves*) noexcept override {}
-			void OnTimeEnd(const moves&) noexcept override {}//‚È‚É‚à‚µ‚È‚¢
+			void OnTimeEnd(const moves&) noexcept override {}//ãªã«ã‚‚ã—ãªã„
 		};
 		class FallObjMagazine : public FallObjChildBase {
 		public:
@@ -26,12 +26,12 @@ namespace FPS_n2 {
 		public:
 			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::MagFall; }
 		public:
-			void RotateOnAir(moves*) noexcept override {}// ‚È‚É‚à‚µ‚È‚¢
+			void RotateOnAir(moves*) noexcept override {}// ãªã«ã‚‚ã—ãªã„
 			void RotateOnGround(moves* objMove) noexcept override {
-				//Normal‚ðXŽ²‚ÉŽw’è‚µ‚Ä‰¡‚ÉŒü‚­
+				//Normalã‚’Xè»¸ã«æŒ‡å®šã—ã¦æ¨ªã«å‘ã
 				objMove->SetMat(objMove->GetMat() * Matrix3x3DX::RotVec2(objMove->GetMat().xvec(), Vector3DX::up()));
 			}
-			void OnTimeEnd(const moves&) noexcept override {}//‚È‚É‚à‚µ‚È‚¢
+			void OnTimeEnd(const moves&) noexcept override {}//ãªã«ã‚‚ã—ãªã„
 		};
 		class FallObjGrenade : public FallObjChildBase {
 		public:
@@ -41,11 +41,11 @@ namespace FPS_n2 {
 			SoundEnum GetFallSound(void) const noexcept override { return SoundEnum::FallGrenade; }
 		public:
 			void RotateOnAir(moves* objMove) noexcept override {
-				//ƒeƒLƒg[‚É”ò‚Ñ‰ñ‚é
+				//ãƒ†ã‚­ãƒˆãƒ¼ã«é£›ã³å›žã‚‹
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				objMove->SetMat(Matrix3x3DX::RotAxis(Vector3DX::Cross(objMove->GetVec().normalized(), objMove->GetMat().zvec()), deg2rad(-50.f * 60.f * DXLib_refParts->GetDeltaTime())) * objMove->GetMat());
 			}
-			void RotateOnGround(moves*) noexcept override {}//‚È‚É‚à‚µ‚È‚¢
+			void RotateOnGround(moves*) noexcept override {}//ãªã«ã‚‚ã—ãªã„
 			void OnTimeEnd(const moves& objMove) noexcept override {
 				auto* SE = SoundPool::Instance();
 				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_greexp, objMove.GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate, 2.f);

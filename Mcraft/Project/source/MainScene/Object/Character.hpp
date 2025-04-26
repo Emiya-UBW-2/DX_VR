@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 #include	"../../Header.hpp"
 #include	"CharacterEnum.hpp"
 #include	"Character_before.hpp"
@@ -31,7 +31,7 @@ namespace FPS_n2 {
 			bool												m_IsStuckGun{ false };
 			float												m_HPRec{ 0.f };
 			bool												m_ArmBreak{ false };
-			int													m_CharaSound{ InvalidID };			//ÉTÉEÉìÉh
+			int													m_CharaSound{ InvalidID };			//„Çµ„Ç¶„É≥„Éâ
 			Pendulum2D											m_SlingArmZrad;
 			float												m_ArmBreakPer{};
 			Pendulum2D											m_SlingZrad;
@@ -44,7 +44,7 @@ namespace FPS_n2 {
 			bool												m_ConcussionSwitch{};
 			float												m_Concussion{ 0.f };
 			float												m_ConcussionPer{ 0.f };
-		private://ÉLÉÉÉbÉVÉÖ
+		private://„Ç≠„É£„ÉÉ„Ç∑„É•
 			Matrix3x3DX											m_EyeRotationCache{};
 			Vector3DX											m_EyePositionCache{};
 			bool												m_IsActiveCameraPos{ false };
@@ -75,12 +75,12 @@ namespace FPS_n2 {
 			const auto		GetBottomLeftStepAnimSelect(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_LeftStep : CharaAnimeID::Bottom_Stand_LeftStep; }
 			const auto		GetBottomRightStepAnimSelect(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_RightStep : CharaAnimeID::Bottom_Stand_RightStep; }
 			const auto		GetBottomTurnAnimSelect(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_Turn : CharaAnimeID::Bottom_Stand_Turn; }
-		public://ÉvÉåÉCÉÑÅ[ÉLÉÉÉâÇ©ÇÁå©ÇΩç€ÇÃèÓïÒ
+		public://„Éó„É¨„Ç§„É§„Éº„Ç≠„É£„É©„Åã„ÇâË¶ã„ÅüÈöõ„ÅÆÊÉÖÂ†±
 			const auto&		GetCanLookByPlayer(void) const noexcept { return this->m_CanLookTarget; }
 			const auto&		GetLengthToPlayer(void) const noexcept { return this->m_Length; }
 			const auto&		GetIsActiveCameraPosToPlayer(void) const noexcept { return this->m_IsActiveCameraPos; }
 			const auto&		GetCameraPosToPlayer(void) const noexcept { return this->m_CameraPos; }
-		public://ÉQÉbÉ^Å[
+		public://„Ç≤„ÉÉ„Çø„Éº
 			const auto&		GetMoveEyePos(void) const noexcept { return this->m_WalkSwingControl.GetMoveEyePos(); }
 			const auto&		GetRagDoll(void) const noexcept { return this->m_RagDollControl.GetRagDoll(); }
 			const auto&		GetLeanRad(void) const noexcept { return this->m_LeanControl.GetRad(); }
@@ -102,10 +102,10 @@ namespace FPS_n2 {
 				}
 				return GetEyePositionCache();
 			}
-		public://ÉZÉbÉ^Å[
+		public://„Çª„ÉÉ„Çø„Éº
 			void			SetPlayerID(PlayerID ID) noexcept {
 				this->m_MyID = ID;
-				//èeÇÃIDÉZÉbÉgÉAÉbÉv
+				//ÈäÉ„ÅÆID„Çª„ÉÉ„Éà„Ç¢„ÉÉ„Éó
 				for (int loop = 0, max = this->m_GunPtrControl.GetGunNum(); loop < max; ++loop) {
 					if (this->m_GunPtrControl.GetGunPtr(loop)) {
 						this->m_GunPtrControl.GetGunPtr(loop)->SetPlayerID(GetMyPlayerID());
@@ -119,7 +119,7 @@ namespace FPS_n2 {
 			}
 			void			SetDamageEventReset(void) noexcept { this->m_Damage.Reset(); }
 			void			PopDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.Pop(pRet); }
-			//é©ï™Ç™É_ÉÅÅ[ÉWÇó^Ç¶ÇΩÇ∆í ím
+			//Ëá™ÂàÜ„Åå„ÉÄ„É°„Éº„Ç∏„Çí‰∏é„Åà„Åü„Å®ÈÄöÁü•
 			void			SetDamage(PlayerID DamageID_t, HitPoint Damage, ArmerPoint ArmerDamage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
 				this->m_Damage.Add(GetMyPlayerID(), DamageID_t, Damage, ArmerDamage, HitType, StartPos, EndPos);
 			}
@@ -131,10 +131,10 @@ namespace FPS_n2 {
 			const auto&		GetAutoAimID() const noexcept { return GetGunPtrNow()->GetAutoAimID(); }
 			const auto&		GetAutoAimPos() const noexcept { return GetGunPtrNow()->GetAutoAimPos(); }
 			void			OverrideAutoAimID(PlayerID ID, int pos) const noexcept { GetGunPtrNow()->OverrideAutoAimID(ID, pos); }
-		private: //çXêVä÷òA
+		private: //Êõ¥Êñ∞Èñ¢ÈÄ£
 			void			UpdateInput(void) noexcept;
 			void			UpdateMatrix(void) noexcept;
-		public: //ÉRÉìÉXÉgÉâÉNÉ^ÅAÉfÉXÉgÉâÉNÉ^
+		public: //„Ç≥„É≥„Çπ„Éà„É©„ÇØ„Çø„ÄÅ„Éá„Çπ„Éà„É©„ÇØ„Çø
 			CharacterObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::Human); }
 			virtual ~CharacterObj(void) noexcept {}
 		public:
@@ -189,7 +189,7 @@ namespace FPS_n2 {
 
 			int				GetShapeNum(void) noexcept override { return static_cast<int>(CharaShape::Max); }
 			const char*		GetShapeStr(int id) noexcept override { return CharaShapeName[id]; }
-		private: //åpè≥
+		private: //Á∂ôÊâø
 			void			Init_Sub(void) noexcept override;
 			void			FirstUpdate(void) noexcept override;
 			void			CheckDraw_Sub(int) noexcept override;

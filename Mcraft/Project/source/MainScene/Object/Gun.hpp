@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include	"../../Header.hpp"
 
 #include	"GunEnum.hpp"
@@ -38,8 +38,8 @@ namespace FPS_n2 {
 			Charas::GunAnimeID									m_GunAnime{ Charas::GunAnimeID::Base };	//
 			bool												m_ReloadAmmoCancel{ false };		//
 			bool												m_ShotEnd{ false };		//
-			EnumGunSound										m_EnumGunSoundNow{ EnumGunSound::Max };			//ƒTƒEƒ“ƒh
-			bool												m_IsChamberOn{ false };				//ƒ`ƒƒƒ“ƒo[‚É’e‚ğ‚ß‚é‚©
+			EnumGunSound										m_EnumGunSoundNow{ EnumGunSound::Max };			//ã‚µã‚¦ãƒ³ãƒ‰
+			bool												m_IsChamberOn{ false };				//ãƒãƒ£ãƒ³ãƒãƒ¼ã«å¼¾ã‚’è¾¼ã‚ã‚‹ã‹
 			bool												m_IsEject{ false };
 			FallControl											m_MagFall;
 			FallControl											m_CartFall;
@@ -52,7 +52,7 @@ namespace FPS_n2 {
 			const std::shared_ptr<MagazinePartsObj>*			m_MagazinePtr{ nullptr };
 			int													m_ShootRate_Diff{ 0 };
 			int													m_Recoil_Diff{ 0 };
-			int													m_Capacity{ 0 };//’e”
+			int													m_Capacity{ 0 };//å¼¾æ•°
 			bool												m_isMagSuccess{};
 			PlayerID											m_MyID{ 0 };
 			Matrix4x4DX											m_MagMiss{}, m_MagSuccess{};
@@ -155,12 +155,12 @@ namespace FPS_n2 {
 				Vector3DX Handzvec = GetPartsFrameMatParent(GunFrame::LeftHandZvecCock).pos() - HandPos;
 				return Matrix4x4DX::Axis1(Handyvec.normalized(), Handzvec.normalized(), HandPos);
 			}
-		public://ƒQƒbƒ^[
+		public://ã‚²ãƒƒã‚¿ãƒ¼
 			const std::unique_ptr<ModifySlot>& GetModifySlot(void) const noexcept { return this->m_ModifySlot; }
 			const Charas::GunAnimeID&	GetGunAnime(void) const noexcept { return this->m_GunAnime; }
 			const Matrix4x4DX	GetPartsFrameMatParent(GunFrame frame) const noexcept {
 				if (this->m_SightPtr) {
-					//ƒTƒCƒg‚ª‚ ‚é‚È‚ç‚»‚ê‚ğÅ—Dæ‚Æ‚·‚é
+					//ã‚µã‚¤ãƒˆãŒã‚ã‚‹ãªã‚‰ãã‚Œã‚’æœ€å„ªå…ˆã¨ã™ã‚‹
 					switch (frame) {
 					case GunFrame::Eyepos:
 					case GunFrame::Lens:
@@ -259,12 +259,12 @@ namespace FPS_n2 {
 					this->m_GunAnimeTime.at(static_cast<int>(GetGunAnime())) = 0.f;
 				}
 			}
-			void				SetShotStart(void) noexcept;//”­–C
+			void				SetShotStart(void) noexcept;//ç™ºç ²
 			bool				ReloadStart(void) noexcept {
 				if (GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
 					return false;
 				}
-				if (this->m_Capacity == this->GetAmmoAll()) { return false; }//ƒŠƒ[ƒh‚Ì•K—v‚ª‚ ‚éê‡‚Ì‚İƒŠƒ[ƒh
+				if (this->m_Capacity == this->GetAmmoAll()) { return false; }//ãƒªãƒ­ãƒ¼ãƒ‰ã®å¿…è¦ãŒã‚ã‚‹å ´åˆã®ã¿ãƒªãƒ­ãƒ¼ãƒ‰
 				if (this->m_Capacity != 0) {
 					SetGunAnime(Charas::GunAnimeID::ReloadStart);
 				}
@@ -276,7 +276,7 @@ namespace FPS_n2 {
 			void				SetActiveAll(bool value) noexcept {
 				if (value != IsActive()) {
 					SetActive(value);
-					//¬‘·‚É‚àÀs
+					//å°å­«ã«ã‚‚å®Ÿè¡Œ
 					GetModifySlot()->GetAnyByChild([&](const SharedGunParts& ptr) { if (ptr) { ptr->SetActive(IsActive()); } });
 				}
 			}
@@ -297,14 +297,14 @@ namespace FPS_n2 {
 				this->m_SlingPer = 1.f;
 				this->m_IsChamberOn = false;
 				SetGunAnime(Charas::GunAnimeID::Base);
-				this->m_Capacity = GetAmmoAll();//ƒ}ƒKƒWƒ“‘•“U
+				this->m_Capacity = GetAmmoAll();//ãƒã‚¬ã‚¸ãƒ³è£…å¡«
 				ChamberIn();
 			}
 
 			void				InitGunAnimePer(void) noexcept;
 			void				UpdateGunAnimePer(bool IsADS) noexcept;
 			void				SetGunMat(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept {
-				//•ŠíÀ•W
+				//æ­¦å™¨åº§æ¨™
 				SetMove().SetMat(rotation);
 				SetMove().SetPos(pos);
 				SetMove().Update(0.f, 0.f);
@@ -329,7 +329,7 @@ namespace FPS_n2 {
 			const char*			GetFrameStr(int id) noexcept override { return GunFrameName[id]; }
 		public:
 			void				SetupGun(void) noexcept;
-		private: //Œp³
+		private: //ç¶™æ‰¿
 			void				Init_Sub(void) noexcept override;
 			void				FirstUpdate(void) noexcept override;
 			void				DrawShadow(void) noexcept override;

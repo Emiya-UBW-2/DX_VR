@@ -1,4 +1,4 @@
-#pragma warning(disable:4464)
+ï»¿#pragma warning(disable:4464)
 #include	"NetworkBrowser.hpp"
 
 const FPS_n2::NetWorkBrowser* SingletonBase<FPS_n2::NetWorkBrowser>::m_Singleton = nullptr;
@@ -13,7 +13,7 @@ namespace FPS_n2 {
 		xs = 500;
 		ys = 300;
 
-		//ƒ‰ƒ€ƒ_
+		//ãƒ©ãƒ ãƒ€
 		auto AddSubBox = [&](int xp, int yp, std::function<void()> UpFunc, std::function<void()> DownFunc) {
 			int xp1, yp1;
 			int xp2, yp2;
@@ -36,7 +36,7 @@ namespace FPS_n2 {
 			};
 		//
 		{
-			DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp - 10, yp - 10, xp + xs + 10, yp + ys + 10, Gray25, true);//”wŒi
+			DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp - 10, yp - 10, xp + xs + 10, yp + ys + 10, Gray25, true);//èƒŒæ™¯
 			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 				FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp + xs, yp, White, Black, " %d/%d", static_cast<int>(this->m_Sequence), static_cast<int>(BrowserSequence::Ready));
 		}
@@ -45,25 +45,25 @@ namespace FPS_n2 {
 		int y1p = yp + 50;
 		switch (this->m_Sequence) {
 		case BrowserSequence::SelectMode:
-			if (WindowSystem::SetMsgClickBox(xp, y1p, xp + xs, y1p + LineHeight * 2, LineHeight, Gray75, false, true, "ƒNƒ‰ƒCƒAƒ“ƒg‚É‚È‚é")) {
+			if (WindowSystem::SetMsgClickBox(xp, y1p, xp + xs, y1p + LineHeight * 2, LineHeight, Gray75, false, true, "ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã«ãªã‚‹")) {
 				BeClient();
 				this->m_Sequence = BrowserSequence::CheckPreset;
 			}
-			if (WindowSystem::SetMsgClickBox(xp, y1p + 50, xp + xs, y1p + 50 + LineHeight * 2, LineHeight, Gray75, false, true, "ƒT[ƒo[‚É‚È‚é")) {
+			if (WindowSystem::SetMsgClickBox(xp, y1p + 50, xp + xs, y1p + 50 + LineHeight * 2, LineHeight, Gray75, false, true, "ã‚µãƒ¼ãƒãƒ¼ã«ãªã‚‹")) {
 				BeServerPlayer();
 				this->m_Sequence = BrowserSequence::CheckPreset;
 			}
-			if (WindowSystem::SetMsgClickBox(xp, y1p + 100, xp + xs, y1p + 100 + LineHeight * 2, LineHeight, Gray75, false, true, "ƒT[ƒo[‚É‚È‚é(”ñƒvƒŒƒCƒ„[)")) {
+			if (WindowSystem::SetMsgClickBox(xp, y1p + 100, xp + xs, y1p + 100 + LineHeight * 2, LineHeight, Gray75, false, true, "ã‚µãƒ¼ãƒãƒ¼ã«ãªã‚‹(éžãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼)")) {
 				BeServer();
 				this->m_Sequence = BrowserSequence::CheckPreset;
 			}
 			//
-			if (WindowSystem::SetMsgClickBox(xp, y1p + 150, xp + xs, y1p + 150 + LineHeight * 2, LineHeight, Gray75, false, true, "ƒNƒ‰ƒCƒAƒ“ƒg‚Å‘¦ƒvƒŒƒC")) {
+			if (WindowSystem::SetMsgClickBox(xp, y1p + 150, xp + xs, y1p + 150 + LineHeight * 2, LineHeight, Gray75, false, true, "ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã§å³ãƒ—ãƒ¬ã‚¤")) {
 				BeClient();
 				this->m_NewWorkSettings.Load();
 				ReadyConnect(this->m_NewWorkSettings.Get(0));
 			}
-			if (WindowSystem::SetMsgClickBox(xp, y1p + 200, xp + xs, y1p + 200 + LineHeight * 2, LineHeight, Gray75, false, true, "ƒT[ƒo[‚Å‘¦ƒvƒŒƒC")) {
+			if (WindowSystem::SetMsgClickBox(xp, y1p + 200, xp + xs, y1p + 200 + LineHeight * 2, LineHeight, Gray75, false, true, "ã‚µãƒ¼ãƒãƒ¼ã§å³ãƒ—ãƒ¬ã‚¤")) {
 				BeServerPlayer();
 				this->m_NewWorkSettings.Load();
 				ReadyConnect(this->m_NewWorkSettings.Get(0));
@@ -71,7 +71,7 @@ namespace FPS_n2 {
 			break;
 		case BrowserSequence::CheckPreset:
 			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp, White, Black, "ƒvƒŠƒZƒbƒgÝ’è");
+				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp, White, Black, "ãƒ—ãƒªã‚»ãƒƒãƒˆè¨­å®š");
 			if (this->m_SeqFirst) {
 				this->m_NewWorkSettings.Load();
 			}
@@ -84,7 +84,7 @@ namespace FPS_n2 {
 					}
 				}
 				else {
-					if (WindowSystem::SetMsgClickBox(xp, y1p + 50 * loop, xp + xs, y1p + 50 * loop + LineHeight * 2, LineHeight, Gray75, false, true, "Ý’è‚ð’Ç‰Á‚·‚é")) {
+					if (WindowSystem::SetMsgClickBox(xp, y1p + 50 * loop, xp + xs, y1p + 50 * loop + LineHeight * 2, LineHeight, Gray75, false, true, "è¨­å®šã‚’è¿½åŠ ã™ã‚‹")) {
 						this->m_Sequence = BrowserSequence::SetNewData;
 						break;
 					}
@@ -93,16 +93,16 @@ namespace FPS_n2 {
 			break;
 		case BrowserSequence::SetNewData:
 			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp, White, Black, "V‹KÝ’è");
+				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp, White, Black, "æ–°è¦è¨­å®š");
 			if (this->m_SeqFirst) {
 				this->m_NewWorkSettings.AddBack();
 			}
 			{
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-					FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp + xs / 2, y1p, White, Black, "ƒ|[ƒg=[%d-%d]", this->m_NetSetting.UsePort, this->m_NetSetting.UsePort + NetWork::Player_num - 1);
+					FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp + xs / 2, y1p, White, Black, "ãƒãƒ¼ãƒˆ=[%d-%d]", this->m_NetSetting.UsePort, this->m_NetSetting.UsePort + NetWork::Player_num - 1);
 				AddSubBox(xp + xs / 2, y1p + LineHeight / 2, [&]() { ++this->m_NetSetting.UsePort; }, [&]() { --this->m_NetSetting.UsePort; });
 			}
-			if (this->m_IsClient) {//ƒT[ƒo-‚Í‚¢‚ç‚È‚¢
+			if (this->m_IsClient) {//ã‚µãƒ¼ãƒ-ã¯ã„ã‚‰ãªã„
 				int yp1 = y1p + 100;
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 					FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp + xs / 2, yp1, White, Black, "IP=[%d,%d,%d,%d]", this->m_NetSetting.IP.d1, this->m_NetSetting.IP.d2, this->m_NetSetting.IP.d3, this->m_NetSetting.IP.d4);
@@ -135,13 +135,13 @@ namespace FPS_n2 {
 			break;
 		case BrowserSequence::Ready:
 			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp, White, Black, "’ÊM’†!");
+				FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp, White, Black, "é€šä¿¡ä¸­!");
 			{
 				int yp1 = y1p;
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp1, White, Black, "Ží•Ê[%s]", this->m_IsClient ? "ƒNƒ‰ƒCƒAƒ“ƒg" : "ƒT[ƒo["); yp1 += LineHeight;
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp1, White, Black, "ç¨®åˆ¥[%s]", this->m_IsClient ? "ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆ" : "ã‚µãƒ¼ãƒãƒ¼"); yp1 += LineHeight;
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp1, White, Black, "Žg—pƒ|[ƒg[%d-%d]", this->m_NetSetting.UsePort, this->m_NetSetting.UsePort + NetWork::Player_num - 1); yp1 += LineHeight;
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp1, White, Black, "ä½¿ç”¨ãƒãƒ¼ãƒˆ[%d-%d]", this->m_NetSetting.UsePort, this->m_NetSetting.UsePort + NetWork::Player_num - 1); yp1 += LineHeight;
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp1, White, Black, "IP=[%d,%d,%d,%d]", this->m_NetSetting.IP.d1, this->m_NetSetting.IP.d2, this->m_NetSetting.IP.d3, this->m_NetSetting.IP.d4); yp1 += LineHeight;
 			}

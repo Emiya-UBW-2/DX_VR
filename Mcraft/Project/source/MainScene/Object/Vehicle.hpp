@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include	"../../Header.hpp"
 #include	"VehicleEnum.hpp"
 #include	"VehicleData.hpp"
@@ -8,19 +8,19 @@
 
 namespace FPS_n2 {
 	namespace Objects {
-		//íÔ
+		//æˆ¦è»Š
 		class VehicleObj : public BaseObject, public EffectControl {
-			static const PlayerID								m_MyPlayerID{ -1 };//Ô—¼‚Í‚Æ‚è‚ ‚¦‚¸-1
+			static const PlayerID								m_MyPlayerID{ -1 };//è»Šä¸¡ã¯ã¨ã‚Šã‚ãˆãš-1
 		private:
-			//‘€ì
+			//æ“ä½œ
 			InputControl										m_Input;
-			Matrix3x3DX											m_MouseVec;								//ƒ}ƒEƒXƒGƒCƒ€—p•Ï”Šm•Û
+			Matrix3x3DX											m_MouseVec;								//ãƒã‚¦ã‚¹ã‚¨ã‚¤ãƒ ç”¨å¤‰æ•°ç¢ºä¿
 			float												m_range{ 6.0f };						//
-			//Ô‘Ì
-			std::unique_ptr<VhehicleData>						m_VecData{ nullptr };					//ŒÅ—L’l
+			//è»Šä½“
+			std::unique_ptr<VhehicleData>						m_VecData{ nullptr };					//å›ºæœ‰å€¤
 			std::vector<Guns>									m_Gun;									//
 			//
-			float												m_speed{};								//ˆÚ“®‘¬“x
+			float												m_speed{};								//ç§»å‹•é€Ÿåº¦
 			Vector3DX											m_radAdd;								//
 			float												m_speed_add{};							//
 			float												m_speed_sub{};							//
@@ -29,14 +29,14 @@ namespace FPS_n2 {
 			Vector3DX											m_BodyNormal{ Vector3DX::up() };		//
 			Vector2DX											m_Tilt;									//
 			//
-			float												m_engine_time{};						//ƒGƒ“ƒWƒ“‰¹º
-			std::vector<HitSortInfo>							m_hitssort;								//ƒtƒŒ[ƒ€‚É“–‚½‚Á‚½‡”Ô
-			std::vector<MV1_COLL_RESULT_POLY>					m_hitres;								//Šm•Û
-			//“]—Ö
-			float												m_CrawlerRotateLeft{};					//“]—Ö‰ñ“]
-			float												m_CrawlerRotateRight{};					//“]—Ö‰ñ“]
-			std::vector<float>									m_WheelHeight{};						//“]—Ö‚ÌY•ûŒü•Û
-			std::array<std::vector<CrawlerFrameControl>, 2>		m_CrawlerFrame;							//—š‘Ñ
+			float												m_engine_time{};						//ã‚¨ãƒ³ã‚¸ãƒ³éŸ³å£°
+			std::vector<HitSortInfo>							m_hitssort;								//ãƒ•ãƒ¬ãƒ¼ãƒ ã«å½“ãŸã£ãŸé †ç•ª
+			std::vector<MV1_COLL_RESULT_POLY>					m_hitres;								//ç¢ºä¿
+			//è»¢è¼ª
+			float												m_CrawlerRotateLeft{};					//è»¢è¼ªå›è»¢
+			float												m_CrawlerRotateRight{};					//è»¢è¼ªå›è»¢
+			std::vector<float>									m_WheelHeight{};						//è»¢è¼ªã®Yæ–¹å‘ä¿æŒ
+			std::array<std::vector<CrawlerFrameControl>, 2>		m_CrawlerFrame;							//å±¥å¸¯
 			//
 			DamageEventControl									m_Damage;
 		public:
@@ -49,7 +49,7 @@ namespace FPS_n2 {
 				for (auto& w : this->m_WheelHeight) { w = 0.0f; }
 
 				this->m_MouseVec = GetMove().GetMat();
-				//íÔƒXƒ|[ƒ“
+				//æˆ¦è»Šã‚¹ãƒãƒ¼ãƒ³
 				this->m_speed = 0.0f;
 				this->m_speed_add = 0.0f;
 				this->m_speed_sub = 0.0f;
@@ -59,7 +59,7 @@ namespace FPS_n2 {
 				this->m_radAdd = Vector3DX::zero();
 			}
 			void			SetInput(const InputControl& pInput, bool pReady) noexcept {
-				//ƒGƒCƒ€
+				//ã‚¨ã‚¤ãƒ 
 				auto Vec = this->m_MouseVec.zvec();
 				auto y_mouse = std::atan2f(Vec.x, Vec.z) + pInput.GetAddyRad();
 				auto x_mouse = std::clamp(std::atan2f(-Vec.y, std::hypotf(Vec.x, Vec.z)) + pInput.GetAddxRad(), -deg2rad(40.0f), deg2rad(40.0f));
@@ -82,7 +82,7 @@ namespace FPS_n2 {
 				);
 			}
 			const bool		CheckAmmoHit(const Vector3DX& StartPos, Vector3DX* EndPos) noexcept;
-			//ˆê”Ô‹ß‚¢‘•b‚ğƒ`ƒFƒbƒN
+			//ä¸€ç•ªè¿‘ã„è£…ç”²ã‚’ãƒã‚§ãƒƒã‚¯
 			const bool		CheckLine(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) noexcept {
 				if (!RefreshCol(StartPos, *EndPos, 10.0f * Scale3DRate)) {
 					return false;
@@ -100,17 +100,17 @@ namespace FPS_n2 {
 				}
 				return IsHit;
 			}
-			//©•ª‚ªƒ_ƒ[ƒW‚ğ—^‚¦‚½‚Æ’Ê’m
+			//è‡ªåˆ†ãŒãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’ä¸ãˆãŸã¨é€šçŸ¥
 			void			SetDamage(PlayerID DamageID_t, HitPoint Damage, ArmerPoint ArmerDamage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
 				this->m_Damage.Add(this->m_MyPlayerID, DamageID_t, Damage, ArmerDamage, HitType, StartPos, EndPos);
 			}
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_Damage; }
 			void			SetDamageEventReset(void) noexcept { this->m_Damage.Reset(); }
 			void			PopDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.Pop(pRet); }
-		public: //ƒRƒ“ƒXƒgƒ‰ƒNƒ^AƒfƒXƒgƒ‰ƒNƒ^
+		public: //ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ã€ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 			VehicleObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::Vehicle); }
 			~VehicleObj(void) noexcept {}
-		public: //Œp³
+		public: //ç¶™æ‰¿
 			void			Init_Sub(void) noexcept override;
 			void			FirstUpdate(void) noexcept override;
 			void			Draw(bool isDrawSemiTrans, int Range) noexcept override;

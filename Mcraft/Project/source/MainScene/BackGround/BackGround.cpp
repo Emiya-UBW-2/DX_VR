@@ -1,10 +1,10 @@
-#include	"BackGround.hpp"
+ï»¿#include	"BackGround.hpp"
 #include	<random>
 
 const FPS_n2::BackGround::BackGroundControl* SingletonBase<FPS_n2::BackGround::BackGroundControl>::m_Singleton = nullptr;
 namespace FPS_n2 {
 	namespace BackGround {
-		//–À˜H¶¬
+		//è¿·è·¯ç”Ÿæˆ
 		class MazeControl {
 			enum class MAZETYPE :int {
 				WALL,
@@ -15,13 +15,13 @@ namespace FPS_n2 {
 			int		m_Height{ 1 };
 			std::vector<std::vector<MAZETYPE>>		m_Maze;
 		private:
-			//ŒŠŒ@‚è
+			//ç©´æ˜ã‚Š
 			void dig(int xmaze, int ymaze, const std::function<int()>& Rand) {
-				//w’è‚µ‚½•”•ª‚ğŒ@‚Á‚Ä‚¨‚­
+				//æŒ‡å®šã—ãŸéƒ¨åˆ†ã‚’æ˜ã£ã¦ãŠã
 				this->m_Maze[xmaze][ymaze] = MAZETYPE::PATH;
-				// ‚Ç‚Ì•ûŒü‚ğŒ@‚ë‚¤‚Æ‚µ‚½‚©‚ğŠo‚¦‚Ä‚¨‚­•Ï”
+				// ã©ã®æ–¹å‘ã‚’æ˜ã‚ã†ã¨ã—ãŸã‹ã‚’è¦šãˆã¦ãŠãå¤‰æ•°
 				int ok = 0;
-				// ‘S•ûŒü‚·‚Ü‚Åƒ‹[ƒv
+				// å…¨æ–¹å‘è©¦ã™ã¾ã§ãƒ«ãƒ¼ãƒ—
 				while (ok != 0b1111) {
 					int Dir = Rand() % 4;
 					ok |= (1 << Dir);
@@ -31,14 +31,14 @@ namespace FPS_n2 {
 					if ((0 <= next_x && next_x < this->m_Width) && (0 <= next_y && next_y < this->m_Height)) {
 						if (this->m_Maze[next_x][next_y] == MAZETYPE::WALL) {
 							this->m_Maze[static_cast<size_t>((next_x + xmaze) / 2)][static_cast<size_t>((next_y + ymaze) / 2)] = MAZETYPE::PATH;
-							//‚»‚Ìê‚©‚çŸ‚ÌŒŠŒ@‚è
+							//ãã®å ´ã‹ã‚‰æ¬¡ã®ç©´æ˜ã‚Š
 							dig(next_x, next_y, Rand);
 						}
 					}
 				}
 			}
 		public:
-			//ŠY“–À•W‚ª’Ê˜H‚©‚Ç‚¤‚©
+			//è©²å½“åº§æ¨™ãŒé€šè·¯ã‹ã©ã†ã‹
 			const auto PosIsPath(int xmaze, int ymaze) {
 				if ((0 <= xmaze && xmaze < this->m_Width) && (0 <= ymaze && ymaze < this->m_Height)) {
 					return this->m_Maze[xmaze][ymaze] == MAZETYPE::PATH;
@@ -47,7 +47,7 @@ namespace FPS_n2 {
 					return false;
 				}
 			}
-			//’Ê˜H‚Ì‘”‚ğæ“¾
+			//é€šè·¯ã®ç·æ•°ã‚’å–å¾—
 			const auto GetPachCount(void) noexcept {
 				int OneSize = 0;
 				for (int ymaze = 0; ymaze < this->m_Height; ++ymaze) {
@@ -60,7 +60,7 @@ namespace FPS_n2 {
 				return OneSize;
 			}
 		public:
-			// –À˜H‚ğì¬‚·‚é
+			// è¿·è·¯ã‚’ä½œæˆã™ã‚‹
 			void createMaze(int width, int height, int seed) {
 				this->m_Width = width;
 				this->m_Height = height;
@@ -69,7 +69,7 @@ namespace FPS_n2 {
 				for (auto& mazeX : this->m_Maze) {
 					mazeX.resize(this->m_Height);
 					for (auto& cell : mazeX) {
-						cell = MAZETYPE::WALL; // ‘Sƒ}ƒX•Ç‚É‚·‚é
+						cell = MAZETYPE::WALL; // å…¨ãƒã‚¹å£ã«ã™ã‚‹
 					}
 				}
 				std::default_random_engine Rand = std::default_random_engine(seed);
@@ -77,12 +77,12 @@ namespace FPS_n2 {
 				std::uniform_int_distribution<int> distY(0, this->m_Height / 2);
 				std::uniform_int_distribution<int> distR(0, 3);
 				;
-				// ŠJn“_‚ğƒ‰ƒ“ƒ_ƒ€iŠï”À•Wj‚ÉŒˆ’è‚·‚é
+				// é–‹å§‹ç‚¹ã‚’ãƒ©ãƒ³ãƒ€ãƒ ï¼ˆå¥‡æ•°åº§æ¨™ï¼‰ã«æ±ºå®šã™ã‚‹
 				dig(
 					std::clamp(2 * distX(Rand) + 1, 0, this->m_Width - 1),
 					std::clamp(2 * distY(Rand) + 1, 0, this->m_Height - 1),
 					[&]() {return static_cast<int>(distR(Rand)); });
-				//’Ç‰Á‚ÅŒŠ‚ ‚¯
+				//è¿½åŠ ã§ç©´ã‚ã‘
 				for (int ymaze = 1; ymaze < this->m_Height - 1; ++ymaze) {
 					for (int xmaze = 1; xmaze < this->m_Width - 1; ++xmaze) {
 						bool isHit = false;
@@ -96,7 +96,7 @@ namespace FPS_n2 {
 						this->m_Maze[xmaze][ymaze] = MAZETYPE::PATH;
 					}
 				}
-				//’Ç‰Á‚ÅŒŠ‚ ‚¯
+				//è¿½åŠ ã§ç©´ã‚ã‘
 				for (int ymaze = 1; ymaze < this->m_Height - 1; ++ymaze) {
 					for (int xmaze = 1; xmaze < this->m_Width - 1; ++xmaze) {
 						bool isHit = false;
@@ -117,10 +117,10 @@ namespace FPS_n2 {
 				this->m_Height = 1;
 			}
 		};
-		//ƒmƒCƒY
+		//ãƒã‚¤ã‚º
 		class PerlinNoise {
 		private:
-			//ƒƒ“ƒo•Ï”
+			//ãƒ¡ãƒ³ãƒå¤‰æ•°
 			std::array<uint_fast8_t, 512> perlinNoise{ 0 };
 
 			constexpr float getFade(const float t_) const noexcept {
@@ -182,7 +182,7 @@ namespace FPS_n2 {
 				setSeed(seed);
 			}
 
-			//SEED’l‚ğİ’è‚·‚é
+			//SEEDå€¤ã‚’è¨­å®šã™ã‚‹
 			void setSeed(int seed) noexcept {
 				for (std::size_t loop = 0; loop < 256; ++loop) {
 					this->perlinNoise[loop] = static_cast<uint_fast8_t>(loop);
@@ -192,11 +192,11 @@ namespace FPS_n2 {
 					this->perlinNoise[256 + loop] = this->perlinNoise[loop];
 				}
 			}
-			//ƒIƒNƒ^[ƒu–³‚µƒmƒCƒY‚ğæ“¾‚·‚é
+			//ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–ç„¡ã—ãƒã‚¤ã‚ºã‚’å–å¾—ã™ã‚‹
 			float noise(float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) const noexcept {
 				return setNoise(x_, y_, z_) * 0.5f + 0.5f;
 			}
-			//ƒIƒNƒ^[ƒu—L‚èƒmƒCƒY‚ğæ“¾‚·‚é
+			//ã‚ªã‚¯ã‚¿ãƒ¼ãƒ–æœ‰ã‚Šãƒã‚¤ã‚ºã‚’å–å¾—ã™ã‚‹
 			float octaveNoise(const std::size_t octaves_, float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) const noexcept {
 				return setOctaveNoise(octaves_, x_, y_, z_) * 0.5f + 0.5f;
 			}
@@ -584,7 +584,7 @@ namespace FPS_n2 {
 			//X
 			for (int zpos = DrawMaxZMinus; zpos <= DrawMaxZPlus; ++zpos) {
 				float CamZZ = Draws.m_CamVec.z * (static_cast<float>(zpos) + 0.5f);
-				//‹éŒ`‚ªƒJƒƒ‰‚Ì•½–ÊŠñ‚è— ‚É‚ ‚éê‡(4“_‚ª‚·‚×‚Ä— ‚É‚ ‚éê‡)‚ÍƒXƒLƒbƒv
+				//çŸ©å½¢ãŒã‚«ãƒ¡ãƒ©ã®å¹³é¢å¯„ã‚Šè£ã«ã‚ã‚‹å ´åˆ(4ç‚¹ãŒã™ã¹ã¦è£ã«ã‚ã‚‹å ´åˆ)ã¯ã‚¹ã‚­ãƒƒãƒ—
 				if (
 					((CamXMinX + CamYMinY + CamZZ) <= 0.f) &&//Dot
 					((CamXMaxX + CamYMaxY + CamZZ) <= 0.f) &&//Dot
@@ -627,7 +627,7 @@ namespace FPS_n2 {
 			//Z
 			for (int xpos = DrawMaxXMinus; xpos <= DrawMaxXPlus; ++xpos) {
 				float CamXX = Draws.m_CamVec.x * (static_cast<float>(xpos) + 0.5f);
-				//‹éŒ`‚ªƒJƒƒ‰‚Ì•½–ÊŠñ‚è— ‚É‚ ‚éê‡(4“_‚ª‚·‚×‚Ä— ‚É‚ ‚éê‡)‚ÍƒXƒLƒbƒv
+				//çŸ©å½¢ãŒã‚«ãƒ¡ãƒ©ã®å¹³é¢å¯„ã‚Šè£ã«ã‚ã‚‹å ´åˆ(4ç‚¹ãŒã™ã¹ã¦è£ã«ã‚ã‚‹å ´åˆ)ã¯ã‚¹ã‚­ãƒƒãƒ—
 				if (
 					((CamXX + CamYMinY + CamZMinZ) <= 0.f) &&//Dot
 					((CamXX + CamYMaxY + CamZMaxZ) <= 0.f) &&//Dot
@@ -750,8 +750,8 @@ namespace FPS_n2 {
 		}
 		bool		BackGroundControl::CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept {
 			auto MoveVector = *EndPos - StartPos;
-			// ƒvƒŒƒCƒ„[‚ÌüˆÍ‚É‚ ‚éƒXƒe[ƒWƒ|ƒŠƒSƒ“‚ğæ“¾‚·‚é( ŒŸo‚·‚é”ÍˆÍ‚ÍˆÚ“®‹——£‚àl—¶‚·‚é )
-			std::vector<MV1_COLL_RESULT_POLY> kabes;// •Çƒ|ƒŠƒSƒ“‚Æ”»’f‚³‚ê‚½ƒ|ƒŠƒSƒ“‚Ì\‘¢‘Ì‚ÌƒAƒhƒŒƒX‚ğ•Û‘¶‚µ‚Ä‚¨‚­
+			// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®å‘¨å›²ã«ã‚ã‚‹ã‚¹ãƒ†ãƒ¼ã‚¸ãƒãƒªã‚´ãƒ³ã‚’å–å¾—ã™ã‚‹( æ¤œå‡ºã™ã‚‹ç¯„å›²ã¯ç§»å‹•è·é›¢ã‚‚è€ƒæ…®ã™ã‚‹ )
+			std::vector<MV1_COLL_RESULT_POLY> kabes;// å£ãƒãƒªã‚´ãƒ³ã¨åˆ¤æ–­ã•ã‚ŒãŸãƒãƒªã‚´ãƒ³ã®æ§‹é€ ä½“ã®ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ä¿å­˜ã—ã¦ãŠã
 			auto Start = GetReferenceCells().GetPoint(StartPos);
 			auto End = GetReferenceCells().GetPoint(*EndPos);// *EndPos
 
@@ -818,27 +818,27 @@ namespace FPS_n2 {
 				}
 			}
 			bool HitFlag = false;
-			// •Çƒ|ƒŠƒSƒ“‚Æ‚Ì“–‚½‚è”»’èˆ—
+			// å£ãƒãƒªã‚´ãƒ³ã¨ã®å½“ãŸã‚Šåˆ¤å®šå‡¦ç†
 			if (kabes.size() > 0) {
 				HitFlag = false;
 				for (auto& kabe : kabes) {
-					// ƒ|ƒŠƒSƒ“‚ÆƒvƒŒƒCƒ„[‚ª“–‚½‚Á‚Ä‚¢‚È‚©‚Á‚½‚çŸ‚ÌƒJƒEƒ“ƒg‚Ö
+					// ãƒãƒªã‚´ãƒ³ã¨ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒå½“ãŸã£ã¦ã„ãªã‹ã£ãŸã‚‰æ¬¡ã®ã‚«ã‚¦ãƒ³ãƒˆã¸
 					if (GetHitCapsuleToTriangle(*EndPos + AddCapsuleMin, *EndPos + AddCapsuleMax, Radius, kabe.Position[0], kabe.Position[1], kabe.Position[2])) {
-						HitFlag = true;// ‚±‚±‚É‚«‚½‚çƒ|ƒŠƒSƒ“‚ÆƒvƒŒƒCƒ„[‚ª“–‚½‚Á‚Ä‚¢‚é‚Æ‚¢‚¤‚±‚Æ‚È‚Ì‚ÅAƒ|ƒŠƒSƒ“‚É“–‚½‚Á‚½ƒtƒ‰ƒO‚ğ—§‚Ä‚é
-						if (MoveVector.magnitude() >= 0.001f) {	// x²‚©z²•ûŒü‚É 0.001f ˆÈãˆÚ“®‚µ‚½ê‡‚ÍˆÚ“®‚µ‚½‚Æ”»’è
-							// •Ç‚É“–‚½‚Á‚½‚ç•Ç‚ÉÕ‚ç‚ê‚È‚¢ˆÚ“®¬•ª•ª‚¾‚¯ˆÚ“®‚·‚é
+						HitFlag = true;// ã“ã“ã«ããŸã‚‰ãƒãƒªã‚´ãƒ³ã¨ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒå½“ãŸã£ã¦ã„ã‚‹ã¨ã„ã†ã“ã¨ãªã®ã§ã€ãƒãƒªã‚´ãƒ³ã«å½“ãŸã£ãŸãƒ•ãƒ©ã‚°ã‚’ç«‹ã¦ã‚‹
+						if (MoveVector.magnitude() >= 0.001f) {	// xè»¸ã‹zè»¸æ–¹å‘ã« 0.001f ä»¥ä¸Šç§»å‹•ã—ãŸå ´åˆã¯ç§»å‹•ã—ãŸã¨åˆ¤å®š
+							// å£ã«å½“ãŸã£ãŸã‚‰å£ã«é®ã‚‰ã‚Œãªã„ç§»å‹•æˆåˆ†åˆ†ã ã‘ç§»å‹•ã™ã‚‹
 							*EndPos = Vector3DX::Cross(kabe.Normal, Vector3DX::Cross(MoveVector, kabe.Normal)) + StartPos;
 							//EndPos->y(StartPos.y);
 							bool isHit = false;
 							for (auto& kabe2 : kabes) {
 								if (GetHitCapsuleToTriangle(*EndPos + AddCapsuleMin, *EndPos + AddCapsuleMax, Radius, kabe2.Position[0], kabe2.Position[1], kabe2.Position[2])) {
 									isHit = true;
-									break;// “–‚½‚Á‚Ä‚¢‚½‚çƒ‹[ƒv‚©‚ç”²‚¯‚é
+									break;// å½“ãŸã£ã¦ã„ãŸã‚‰ãƒ«ãƒ¼ãƒ—ã‹ã‚‰æŠœã‘ã‚‹
 								}
 							}
 							if (!isHit) {
 								HitFlag = false;
-								break;//‚Ç‚Ìƒ|ƒŠƒSƒ“‚Æ‚à“–‚½‚ç‚È‚©‚Á‚½‚Æ‚¢‚¤‚±‚Æ‚È‚Ì‚Å•Ç‚É“–‚½‚Á‚½ƒtƒ‰ƒO‚ğ“|‚µ‚½ã‚Åƒ‹[ƒv‚©‚ç”²‚¯‚é
+								break;//ã©ã®ãƒãƒªã‚´ãƒ³ã¨ã‚‚å½“ãŸã‚‰ãªã‹ã£ãŸã¨ã„ã†ã“ã¨ãªã®ã§å£ã«å½“ãŸã£ãŸãƒ•ãƒ©ã‚°ã‚’å€’ã—ãŸä¸Šã§ãƒ«ãƒ¼ãƒ—ã‹ã‚‰æŠœã‘ã‚‹
 							}
 						}
 						else {
@@ -846,28 +846,28 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				if (HitFlag) {		// •Ç‚É“–‚½‚Á‚Ä‚¢‚½‚ç•Ç‚©‚ç‰Ÿ‚µo‚·ˆ—‚ğs‚¤
-					for (int loop = 0; loop < 32; ++loop) {			// •Ç‚©‚ç‚Ì‰Ÿ‚µo‚µˆ—‚ğ‚İ‚éÅ‘å”‚¾‚¯ŒJ‚è•Ô‚µ
+				if (HitFlag) {		// å£ã«å½“ãŸã£ã¦ã„ãŸã‚‰å£ã‹ã‚‰æŠ¼ã—å‡ºã™å‡¦ç†ã‚’è¡Œã†
+					for (int loop = 0; loop < 32; ++loop) {			// å£ã‹ã‚‰ã®æŠ¼ã—å‡ºã—å‡¦ç†ã‚’è©¦ã¿ã‚‹æœ€å¤§æ•°ã ã‘ç¹°ã‚Šè¿”ã—
 						bool HitF = false;
 						for (auto& kabe : kabes) {
-							// ƒvƒŒƒCƒ„[‚Æ“–‚½‚Á‚Ä‚¢‚é‚©‚ğ”»’è
+							// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¨å½“ãŸã£ã¦ã„ã‚‹ã‹ã‚’åˆ¤å®š
 							if (GetHitCapsuleToTriangle(*EndPos + AddCapsuleMin, *EndPos + AddCapsuleMax, Radius, kabe.Position[0], kabe.Position[1], kabe.Position[2])) {
-								*EndPos += Vector3DX(kabe.Normal) * (0.015f * Scale3DRate);					// “–‚½‚Á‚Ä‚¢‚½‚ç‹K’è‹——£•ªƒvƒŒƒCƒ„[‚ğ•Ç‚Ì–@ü•ûŒü‚ÉˆÚ“®‚³‚¹‚é
+								*EndPos += Vector3DX(kabe.Normal) * (0.015f * Scale3DRate);					// å½“ãŸã£ã¦ã„ãŸã‚‰è¦å®šè·é›¢åˆ†ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’å£ã®æ³•ç·šæ–¹å‘ã«ç§»å‹•ã•ã›ã‚‹
 								bool isHit = false;
 								for (auto& kabe2 : kabes) {
-									// “–‚½‚Á‚Ä‚¢‚½‚çƒ‹[ƒv‚ğ”²‚¯‚é
+									// å½“ãŸã£ã¦ã„ãŸã‚‰ãƒ«ãƒ¼ãƒ—ã‚’æŠœã‘ã‚‹
 									if (GetHitCapsuleToTriangle(*EndPos + AddCapsuleMin, *EndPos + AddCapsuleMax, Radius, kabe2.Position[0], kabe2.Position[1], kabe2.Position[2])) {
 										isHit = true;
 										break;
 									}
 								}
-								if (!isHit) {// ‘S‚Ä‚Ìƒ|ƒŠƒSƒ“‚Æ“–‚½‚Á‚Ä‚¢‚È‚©‚Á‚½‚ç‚±‚±‚Åƒ‹[ƒvI—¹
+								if (!isHit) {// å…¨ã¦ã®ãƒãƒªã‚´ãƒ³ã¨å½“ãŸã£ã¦ã„ãªã‹ã£ãŸã‚‰ã“ã“ã§ãƒ«ãƒ¼ãƒ—çµ‚äº†
 									break;
 								}
 								HitF = true;
 							}
 						}
-						if (!HitF) {//‘S•”‚Ìƒ|ƒŠƒSƒ“‚Å‰Ÿ‚µo‚µ‚ğ‚İ‚é‘O‚É‘S‚Ä‚Ì•Çƒ|ƒŠƒSƒ“‚ÆÚG‚µ‚È‚­‚È‚Á‚½‚Æ‚¢‚¤‚±‚Æ‚È‚Ì‚Åƒ‹[ƒv‚©‚ç”²‚¯‚é
+						if (!HitF) {//å…¨éƒ¨ã®ãƒãƒªã‚´ãƒ³ã§æŠ¼ã—å‡ºã—ã‚’è©¦ã¿ã‚‹å‰ã«å…¨ã¦ã®å£ãƒãƒªã‚´ãƒ³ã¨æ¥è§¦ã—ãªããªã£ãŸã¨ã„ã†ã“ã¨ãªã®ã§ãƒ«ãƒ¼ãƒ—ã‹ã‚‰æŠœã‘ã‚‹
 							break;
 						}
 					}
@@ -894,7 +894,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			//ˆê•”‚ğƒy[ƒXƒg
+			//ä¸€éƒ¨ã‚’ãƒšãƒ¼ã‚¹ãƒˆ
 			//LoadCellsClip(0, 128, 0);
 			/*
 			for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
@@ -931,9 +931,9 @@ namespace FPS_n2 {
 				std::ofstream fout{};
 				fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
 				fout.write((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0))) * 256 * 256 * 256);
-				fout.close(); //ƒtƒ@ƒCƒ‹‚ğ•Â‚¶‚é
+				fout.close(); //ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‰ã˜ã‚‹
 			}
-			//ˆê•”‚ğØ‚èæ‚Á‚Ä•Û‘¶
+			//ä¸€éƒ¨ã‚’åˆ‡ã‚Šå–ã£ã¦ä¿å­˜
 			/*
 			int XMin = 37;
 			int XMax = 144;
@@ -955,7 +955,7 @@ namespace FPS_n2 {
 			fin.read((char*)&ZTotal, sizeof(ZTotal));
 			this->m_CellBase.resize(static_cast<size_t>(XTotal * YTotal * ZTotal));
 			fin.read((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0))) * XTotal * YTotal * ZTotal);
-			fin.close(); //ƒtƒ@ƒCƒ‹‚ğ•Â‚¶‚é
+			fin.close(); //ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‰ã˜ã‚‹
 
 			for (int xm = 0; xm < XTotal; ++xm) {
 				for (int ym = 0; ym < YTotal; ++ym) {
@@ -986,7 +986,7 @@ namespace FPS_n2 {
 			fout.write((char*)&YTotal, sizeof(YTotal));
 			fout.write((char*)&ZTotal, sizeof(ZTotal));
 			fout.write((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0)) * XTotal * YTotal * ZTotal));
-			fout.close(); //ƒtƒ@ƒCƒ‹‚ğ•Â‚¶‚é
+			fout.close(); //ãƒ•ã‚¡ã‚¤ãƒ«ã‚’é–‰ã˜ã‚‹
 		}
 		//
 		void		BackGroundControl::SettingChange(void) noexcept {
@@ -996,7 +996,7 @@ namespace FPS_n2 {
 		//
 		void		BackGroundControl::SetBlick(int xpos, int ypos, int zpos, int8_t select) noexcept {
 			if (!GetReferenceCells().isInside(ypos)) { return; }
-			//ƒeƒNƒXƒ`ƒƒ‚¾‚¯•Ï‚¦‚é
+			//ãƒ†ã‚¯ã‚¹ãƒãƒ£ã ã‘å¤‰ãˆã‚‹
 			/*
 			if (GetReferenceCells().GetCellBuf(xpos, ypos, zpos).IsEmpty()) { return; }
 			SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = select;
@@ -1004,7 +1004,7 @@ namespace FPS_n2 {
 			//*/
 			//
 			SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = select;
-			//ŠÈˆÕ”Å‚ğXV
+			//ç°¡æ˜“ç‰ˆã‚’æ›´æ–°
 			for (int loop = 1; loop < TotalCellLayer; ++loop) {
 				auto& cell1 = this->m_CellxN.at(loop);
 
@@ -1014,7 +1014,7 @@ namespace FPS_n2 {
 
 				cell1.SetCellBuf(xm, ym, zm).m_Cell = GetReferenceCells().isFill(xm, ym, zm, cell1.m_scaleRate);
 			}
-			//Õ•ÁŒŸõ
+			//é®è”½æ¤œç´¢
 			for (auto& cellx : this->m_CellxN) {
 				int xm = xpos / cellx.m_scaleRate;
 				int ym = ypos / cellx.m_scaleRate;
@@ -1034,7 +1034,7 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundControl::Init(void) noexcept {
-			//‹ó
+			//ç©º
 			this->m_ObjSky.SetScale(Vector3DX::vget(10.f, 10.f, 10.f));
 			this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
 			for (int loop = 0, num = this->m_ObjSky.GetMaterialNum(); loop < num; ++loop) {
@@ -1043,7 +1043,7 @@ namespace FPS_n2 {
 				this->m_ObjSky.SetMaterialAmbColor(loop, GetColorF(0.f, 0.f, 0.f, 1.f));
 			}
 			if (true) {
-				//‹ó‚Á‚Û
+				//ç©ºã£ã½
 				SetReferenceCells().SetScale(0);
 
 				int seed = GetRand(100);
@@ -1072,7 +1072,7 @@ namespace FPS_n2 {
 					for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
 						int xPos = -Size * Rate / 2 + xpos;
 						int zPos = -Size * Rate / 2 + zpos;
-						//ŠO•Ç
+						//å¤–å£
 						if ((-EdgeP <= xpos && xpos <= Size * Rate + EdgeP - 1) && (-EdgeP <= zpos && zpos <= Size * Rate + EdgeP - 1)) {
 							if ((xpos == -EdgeP || xpos == Size * Rate + EdgeP - 1) || (zpos == -EdgeP || zpos == Size * Rate + EdgeP - 1)) {
 								for (int ypos = 0; ypos <= GetReferenceCells().m_All / 8; ++ypos) {
@@ -1080,7 +1080,7 @@ namespace FPS_n2 {
 								}
 							}
 						}
-						//°
+						//åºŠ
 						if ((-EdgeP < xpos && xpos < Size * Rate + EdgeP - 1) && (-EdgeP < zpos && zpos < Size * Rate + EdgeP - 1)) {
 							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(xpos)) / (Size * Rate - 1),
@@ -1091,7 +1091,7 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				//“à•Ç
+				//å†…å£
 				//*
 				for (int zpos = -Edge; zpos < Size * Rate + Edge; ++zpos) {
 					for (int xpos = -Edge; xpos < Size * Rate + Edge; ++xpos) {
@@ -1155,7 +1155,7 @@ namespace FPS_n2 {
 			else {
 				LoadCellsFile();
 			}
-			//ŠÈ—ª”Å‚ğ§ì
+			//ç°¡ç•¥ç‰ˆã‚’åˆ¶ä½œ
 			for (int loop = 1; loop < TotalCellLayer; ++loop) {
 				auto& cell1 = this->m_CellxN.at(loop);
 				cell1.SetScale(loop);
@@ -1167,7 +1167,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			//Õ•ÁŒŸõ
+			//é®è”½æ¤œç´¢
 			for (auto& cellx : this->m_CellxN) {
 				for (int xpos = 0; xpos < cellx.m_All; ++xpos) {
 					for (int ypos = 0; ypos < cellx.m_All; ++ypos) {
@@ -1179,11 +1179,11 @@ namespace FPS_n2 {
 			}
 
 			MATERIALPARAM Param{};
-			Param.Diffuse = GetColorF(0.0f, 0.0f, 0.0f, 1.0f);						// ƒfƒBƒtƒ…[ƒYƒJƒ‰[
-			Param.Ambient = GetColorF(0.5f, 0.5f, 0.5f, 1.0f);						// ƒAƒ“ƒrƒGƒ“ƒgƒJƒ‰[
-			Param.Specular = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// ƒXƒyƒLƒ…ƒ‰ƒJƒ‰[
-			Param.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// ƒGƒ~ƒbƒVƒuƒJƒ‰[
-			Param.Power = 500.f;													// ƒXƒyƒLƒ…ƒ‰ƒnƒCƒ‰ƒCƒg‚Ì‘N–¾“x
+			Param.Diffuse = GetColorF(0.0f, 0.0f, 0.0f, 1.0f);						// ãƒ‡ã‚£ãƒ•ãƒ¥ãƒ¼ã‚ºã‚«ãƒ©ãƒ¼
+			Param.Ambient = GetColorF(0.5f, 0.5f, 0.5f, 1.0f);						// ã‚¢ãƒ³ãƒ“ã‚¨ãƒ³ãƒˆã‚«ãƒ©ãƒ¼
+			Param.Specular = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// ã‚¹ãƒšã‚­ãƒ¥ãƒ©ã‚«ãƒ©ãƒ¼
+			Param.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// ã‚¨ãƒŸãƒƒã‚·ãƒ–ã‚«ãƒ©ãƒ¼
+			Param.Power = 500.f;													// ã‚¹ãƒšã‚­ãƒ¥ãƒ©ãƒã‚¤ãƒ©ã‚¤ãƒˆã®é®®æ˜åº¦
 			SetMaterialParam(Param);
 			//
 			constexpr size_t size = (DrawMaxXPlus - DrawMaxXMinus) * (DrawMaxYPlus - DrawMaxYMinus) * (DrawMaxZPlus - DrawMaxZMinus) / 2 * 3 / 100;

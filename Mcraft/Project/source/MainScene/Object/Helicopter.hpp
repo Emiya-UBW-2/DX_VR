@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include	"../../Header.hpp"
 
 namespace FPS_n2 {
@@ -9,8 +9,8 @@ namespace FPS_n2 {
 			Max,
 		};
 		static const char* HeliFrameName[static_cast<int>(HeliFrame::Max)] = {
-			"AƒLƒƒƒrƒ“‰º",
-			"BƒLƒƒƒrƒ“‰º",
+			"Aã‚­ãƒ£ãƒ“ãƒ³ä¸‹",
+			"Bã‚­ãƒ£ãƒ“ãƒ³ä¸‹",
 		};
 
 

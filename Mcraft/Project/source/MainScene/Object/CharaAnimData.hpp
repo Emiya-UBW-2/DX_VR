@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 #include	"../../Header.hpp"
 
 namespace FPS_n2 {
 	namespace Charas {
 		enum class GunAnimeID {
-			//‚Ç‚ê‚©‘ğˆê‚Ås‚¤ƒAƒjƒ[ƒVƒ‡ƒ“
+			//ã©ã‚Œã‹æŠä¸€ã§è¡Œã†ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
 			HighReady,
 			LowReady,
 			ADS,
@@ -18,14 +18,14 @@ namespace FPS_n2 {
 			ThrowReady,
 			Throw,
 
-			ChoiceOnceMax,//‚Ç‚ê‚©‘ğˆê‚Ås‚¤ƒAƒjƒ[ƒVƒ‡ƒ“ ‚Ì‘”
-			//‚±‚±‚©‚ç‚Íí/“Áêƒpƒ^[ƒ“‚ÌƒAƒjƒ[ƒVƒ‡ƒ“
+			ChoiceOnceMax,//ã©ã‚Œã‹æŠä¸€ã§è¡Œã†ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ ã®ç·æ•°
+			//ã“ã“ã‹ã‚‰ã¯å¸¸æ™‚/ç‰¹æ®Šãƒ‘ã‚¿ãƒ¼ãƒ³ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
 			Aim = ChoiceOnceMax,
 			Shot,
 			Hammer,
 			Open,
 
-			Max,//‘S‘Ì
+			Max,//å…¨ä½“
 
 			Base,
 
@@ -246,7 +246,7 @@ namespace FPS_n2 {
 				void Set(const std::string& data, EnumGunAnim EnumSelect) {
 					std::vector<std::string> Args;
 					std::string RIGHTBuf = data;
-					//ƒ^ƒu‚¯‚µ
+					//ã‚¿ãƒ–ã‘ã—
 					while (true) {
 						auto RIGHTBufLen = RIGHTBuf.find("\t");
 						if (RIGHTBufLen != std::string::npos) {
@@ -291,7 +291,7 @@ namespace FPS_n2 {
 					void Set(const std::string& data) {
 						std::vector<std::string> Args;
 						std::string RIGHTBuf = data;
-						//ƒ^ƒu‚¯‚µ
+						//ã‚¿ãƒ–ã‘ã—
 						while (true) {
 							auto RIGHTBufLen = RIGHTBuf.find("\t");
 							if (RIGHTBufLen != std::string::npos) {
@@ -516,7 +516,7 @@ namespace FPS_n2 {
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 			},
-			//ƒnƒ“ƒhƒKƒ“
+			//ãƒãƒ³ãƒ‰ã‚¬ãƒ³
 			{
 				EnumGunAnim::AK_highready,
 				EnumGunAnim::M1911_ready,
@@ -554,7 +554,7 @@ namespace FPS_n2 {
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 			},
-			//ƒOƒŒƒl[ƒh
+			//ã‚°ãƒ¬ãƒãƒ¼ãƒ‰
 			{
 				EnumGunAnim::AK_highready,
 				EnumGunAnim::RGD5_down,

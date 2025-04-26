@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #pragma warning(disable:4464)
 #include	"../Header.hpp"
 #include	"NetWork.hpp"
@@ -66,7 +66,7 @@ namespace FPS_n2 {
 		bool					m_IsClient{ true };
 		bool					m_IsServerPlayer{ true };
 		NewSetting				m_NetSetting;
-		//‹¤’Ê
+		//å…±é€š
 		BrowserSequence			m_Sequence{ BrowserSequence::SelectMode };
 		bool					m_SeqFirst{ false };
 		NewWorkSetting			m_NewWorkSettings;

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #pragma warning(disable:4464)
 #include	"../Header.hpp"
 
@@ -19,13 +19,13 @@ namespace FPS_n2 {
 		private:
 			PauseMenuControl							m_PauseMenuControl;
 			FadeControl									m_FadeControl;
-			//UIŠÖ˜A
+			//UIé–¢é€£
 			MainSceneUI									m_UIclass;
 			//NetWork
 			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };
 			std::vector<DamageEvent>					m_DamageEvents;
 			//
-			bool										m_IsEnd{ false };//ƒV[ƒ“‘S‘Ì‚ÌI—¹ƒtƒ‰ƒO
+			bool										m_IsEnd{ false };//ã‚·ãƒ¼ãƒ³å…¨ä½“ã®çµ‚äº†ãƒ•ãƒ©ã‚°
 			float										m_StartTimer{ 0.f };
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
@@ -74,7 +74,7 @@ namespace FPS_n2 {
 				ObjectManager::Instance()->Draw(false, InvalidID);
 			}
 			void			MainDraw_Sub(int Range) const noexcept override;
-			//UI•\Ž¦
+			//UIè¡¨ç¤º
 			void			DrawUI_Base_Sub(void) const noexcept override;
 			void			DrawUI_In_Sub(void) const noexcept override {
 				auto* SceneParts = SceneControl::Instance();

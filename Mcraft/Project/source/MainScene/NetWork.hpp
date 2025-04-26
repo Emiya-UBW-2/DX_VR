@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #pragma warning(disable:4464)
 #include	"../Header.hpp"
 #include	"../sub.hpp"
@@ -16,11 +16,11 @@ namespace FPS_n2 {
 
 		class MoveInfo {
 		public:
-			Vector3DX repos;		// ”½‰f—pÀ•W
-			Vector3DX pos;		// ”½‰f—pÀ•W
-			Vector3DX vec;		// ‰Á‘¬
-			Matrix3x3DX mat;	// ‰ñ“]
-			Vector3DX WatchRad;	// ‰Á‘¬
+			Vector3DX repos;		// åæ˜ ç”¨åº§æ¨™
+			Vector3DX pos;		// åæ˜ ç”¨åº§æ¨™
+			Vector3DX vec;		// åŠ é€Ÿ
+			Matrix3x3DX mat;	// å›è»¢
+			Vector3DX WatchRad;	// åŠ é€Ÿ
 		public:
 			auto LerpMove(const MoveInfo& o, float Per) const noexcept {
 				MoveInfo tmp;
@@ -33,7 +33,7 @@ namespace FPS_n2 {
 			}
 		};
 
-		//ƒNƒ‰ƒCƒAƒ“ƒg‚ª‘—M‚·‚éƒf[ƒ^ ƒ[ƒJƒ‹”Å
+		//ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆãŒé€ä¿¡ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ ãƒ­ãƒ¼ã‚«ãƒ«ç‰ˆ
 		class PlayerSendData {
 		private:
 			InputControl				m_Input;
@@ -75,11 +75,11 @@ namespace FPS_n2 {
 					);
 			}
 		};
-		//ƒNƒ‰ƒCƒAƒ“ƒg‚ª‘—M‚·‚éƒf[ƒ^@’ÊM”Å
+		//ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆãŒé€ä¿¡ã™ã‚‹ãƒ‡ãƒ¼ã‚¿ã€€é€šä¿¡ç‰ˆ
 		class PlayerNetData {
 		private:
-			size_t						m_CheckSum{};			//ƒ`ƒFƒbƒNƒTƒ€
-			NetTime						m_ClientTime{ 0 };		//‚»‚ÌƒvƒŒƒCƒ„[‚ÌƒCƒ“ƒQ[ƒ€ŠÔ
+			size_t						m_CheckSum{};			//ãƒã‚§ãƒƒã‚¯ã‚µãƒ 
+			NetTime						m_ClientTime{ 0 };		//ãã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ã‚¤ãƒ³ã‚²ãƒ¼ãƒ æ™‚é–“
 			PlayerSendData				m_PlayerSendData{};
 			PlayerID					m_ID{ 0 };
 		private:
@@ -121,12 +121,12 @@ namespace FPS_n2 {
 			Matching,
 			Ingame,
 		};
-		//ƒT[ƒo[‚ªŠÇ—‚·‚éƒf[ƒ^
+		//ã‚µãƒ¼ãƒãƒ¼ãŒç®¡ç†ã™ã‚‹ãƒ‡ãƒ¼ã‚¿
 		class ServerNetData {
 		private:
 		public:
-			size_t				m_CheckSum{};			//ƒ`ƒFƒbƒNƒTƒ€
-			size_t				m_ServerFrame{ 0 };			//ƒT[ƒo[ƒtƒŒ[ƒ€
+			size_t				m_CheckSum{};			//ãƒã‚§ãƒƒã‚¯ã‚µãƒ 
+			size_t				m_ServerFrame{ 0 };			//ã‚µãƒ¼ãƒãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ 
 			PlayerNetData		m_PlayerData[Player_num];
 			size_t				m_PlayerFill[Player_num]{ 0 };
 			ServerPhase			m_ServerPhase{ ServerPhase::Empty };
@@ -165,20 +165,20 @@ namespace FPS_n2 {
 				Init();
 			}
 		};
-		//’ÊM
+		//é€šä¿¡
 		class PlayerNetWork {
 		private:
-			size_t											m_LastServerFrame{ 0 };//ÅŒã‚ÉƒT[ƒo[‚©‚çóM‚µ‚½ƒT[ƒo[ƒtƒŒ[ƒ€
+			size_t											m_LastServerFrame{ 0 };//æœ€å¾Œã«ã‚µãƒ¼ãƒãƒ¼ã‹ã‚‰å—ä¿¡ã—ãŸã‚µãƒ¼ãƒãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ 
 			size_t											m_LeapFrame{};
 			size_t											m_LeapFrameMax{};
-			ServerNetData									m_LastServerDataBuffer;	//‚»‚ê‚¼‚ê‚ÌƒRƒ“ƒgƒ[ƒ‰[‚©‚ç‚à‚ç‚Á‚½ƒf[ƒ^
-			ServerNetData									m_LastServerData;	//ÅV‚ÌóMƒf[ƒ^
-			ServerNetData									m_PrevServerData;	//‘O‰ñ‚ÌóMƒf[ƒ^
-			PlayerNetData									m_LocalData;		//ƒ[ƒJƒ‹‚ÌƒvƒŒƒCƒ„[ƒf[ƒ^
+			ServerNetData									m_LastServerDataBuffer;	//ãã‚Œãã‚Œã®ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ã‹ã‚‰ã‚‚ã‚‰ã£ãŸãƒ‡ãƒ¼ã‚¿
+			ServerNetData									m_LastServerData;	//æœ€æ–°ã®å—ä¿¡ãƒ‡ãƒ¼ã‚¿
+			ServerNetData									m_PrevServerData;	//å‰å›ã®å—ä¿¡ãƒ‡ãƒ¼ã‚¿
+			PlayerNetData									m_LocalData;		//ãƒ­ãƒ¼ã‚«ãƒ«ã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãƒ‡ãƒ¼ã‚¿
 			NetTime											m_TickCnt{ 0 };
 			NetTime											m_TickRate{ 0 };
 			NetTime											m_PrevFrame{ 0 };
-			NetTime											m_ClientTime{ 0 };	//‚»‚ÌƒvƒŒƒCƒ„[‚ÌƒCƒ“ƒQ[ƒ€ŠÔ
+			NetTime											m_ClientTime{ 0 };	//ãã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ã‚¤ãƒ³ã‚²ãƒ¼ãƒ æ™‚é–“
 			NetTime											m_PrevTime{ 0 };
 
 			bool											m_TickUpdateFlag{ false };
@@ -220,7 +220,7 @@ namespace FPS_n2 {
 				this->m_LastServerDataBuffer.Init();
 			}
 			void			UpdateLocalData(const PlayerSendData& pdata, bool TimerStart) noexcept {
-				//XVŠÔŠu
+				//æ›´æ–°é–“éš”
 				if (!TimerStart) {
 					this->m_ClientTime = 0;
 					this->m_PrevTime = GetNowHiPerformanceCount();
@@ -246,7 +246,7 @@ namespace FPS_n2 {
 			void			Update(void) noexcept {
 				if (this->m_TickUpdateFlag) {
 					this->m_PingTime = MAXLONGLONG;
-					if (this->m_LastServerFrame < this->m_LastServerDataBuffer.m_ServerFrame && this->m_LastServerDataBuffer.m_ServerFrame <= (this->m_LastServerFrame + 60)) {//“ü—Í‚³‚ê‚½ƒf[ƒ^‚ªˆÈ‘O‚à‚ç‚Á‚½‚à‚Ì‚©‚ç0~60FŒã‚¾‚Á‚½‚ç
+					if (this->m_LastServerFrame < this->m_LastServerDataBuffer.m_ServerFrame && this->m_LastServerDataBuffer.m_ServerFrame <= (this->m_LastServerFrame + 60)) {//å…¥åŠ›ã•ã‚ŒãŸãƒ‡ãƒ¼ã‚¿ãŒä»¥å‰ã‚‚ã‚‰ã£ãŸã‚‚ã®ã‹ã‚‰0~60Få¾Œã ã£ãŸã‚‰
 						this->m_LastServerFrame = this->m_LastServerDataBuffer.m_ServerFrame;
 						this->m_LeapFrame = 0;
 						this->m_PrevServerData = this->m_LastServerData;
@@ -254,7 +254,7 @@ namespace FPS_n2 {
 						auto Total = static_cast<int>(this->m_LastServerData.m_ServerFrame) - static_cast<int>(this->m_PrevServerData.m_ServerFrame);
 						if (Total <= 0) { Total = 20; }
 						this->m_LeapFrameMax = static_cast<size_t>(Total);
-						this->m_PingTime = this->m_LocalData.GetClientTime() - this->m_LastServerData.m_PlayerData[this->m_LocalData.GetID()].GetClientTime();//‚à‚ç‚Á‚½ƒf[ƒ^‚Æ©•ª‚ÌƒtƒŒ[ƒ€‚Æ‚Ì·ˆÙ‚ªping‚É‚È‚é
+						this->m_PingTime = this->m_LocalData.GetClientTime() - this->m_LastServerData.m_PlayerData[this->m_LocalData.GetID()].GetClientTime();//ã‚‚ã‚‰ã£ãŸãƒ‡ãƒ¼ã‚¿ã¨è‡ªåˆ†ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã¨ã®å·®ç•°ãŒpingã«ãªã‚‹
 					}
 				}
 				else {
@@ -294,13 +294,13 @@ namespace FPS_n2 {
 				this->m_NetWork.Dispose();
 			}
 		};
-		//ƒT[ƒo[ê—p
+		//ã‚µãƒ¼ãƒãƒ¼å°‚ç”¨
 		class ServerControl {
 			const PlayerID							m_ServerPlayerID = 0;
 		private:
 			std::array<PlayerNetData, Player_num>	m_LastPlayerData;
 			std::array<UDPS, Player_num>			m_PlayerUDPPhase;
-			bool									m_IsServerPlay{ false };//ƒT[ƒo[‚àƒvƒŒƒCƒ„[‚Æ‚µ‚ÄQí‚·‚é‚©
+			bool									m_IsServerPlay{ false };//ã‚µãƒ¼ãƒãƒ¼ã‚‚ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¨ã—ã¦å‚æˆ¦ã™ã‚‹ã‹
 		public:
 			ServerControl(void) noexcept {}
 			ServerControl(const ServerControl&) = delete;
@@ -328,7 +328,7 @@ namespace FPS_n2 {
 				}
 			}
 		};
-		//ƒNƒ‰ƒCƒAƒ“ƒgê—p
+		//ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆå°‚ç”¨
 		class ClientControl {
 			float					m_CannotConnectTimer{ 0.f };
 			int						m_Port{ 0 };
@@ -360,17 +360,17 @@ namespace FPS_n2 {
 		};
 
 
-		//’ÊM
+		//é€šä¿¡
 		class NetWorkController {
 			static const int		m_PingTotal{ 60 };
-			float					m_Tick{ 15.f };//ƒeƒBƒbƒNƒŒ[ƒg@ƒvƒŒƒCƒ„[‚ÌFPS‚æ‚è’á‚¢‚Æ‹l‚Ü‚é
+			float					m_Tick{ 15.f };//ãƒ†ã‚£ãƒƒã‚¯ãƒ¬ãƒ¼ãƒˆã€€ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®FPSã‚ˆã‚Šä½ã„ã¨è©°ã¾ã‚‹
 
 			bool					m_IsClient{ true };
 			bool					m_IsServerPlayer{ true };
 			PlayerSendData			m_LocalData;
 			PlayerNetWork			m_PlayerNet;
-			ServerControl			m_ServerCtrl;			//ƒT[ƒo[ê—p
-			ClientControl			m_ClientCtrl;			//ƒNƒ‰ƒCƒAƒ“ƒgê—p
+			ServerControl			m_ServerCtrl;			//ã‚µãƒ¼ãƒãƒ¼å°‚ç”¨
+			ClientControl			m_ClientCtrl;			//ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆå°‚ç”¨
 			std::array<float, m_PingTotal>	m_Pings{};
 			float					m_Ping{ 0 };
 			size_t					m_PingNow{ 0 };
@@ -390,7 +390,7 @@ namespace FPS_n2 {
 					this->m_Ping = -1.f;
 					return;
 				}
-				this->m_Pings.at(this->m_PingNow) = std::max(0.f, static_cast<float>(microsec) / 1000.f - (1000.f / this->m_Tick));//ƒeƒBƒbƒN•ªˆø‚­
+				this->m_Pings.at(this->m_PingNow) = std::max(0.f, static_cast<float>(microsec) / 1000.f - (1000.f / this->m_Tick));//ãƒ†ã‚£ãƒƒã‚¯åˆ†å¼•ã
 				++this->m_PingNow %= this->m_PingTotal;
 				this->m_Ping = 0.f;
 				for (auto& ping : this->m_Pings) {

@@ -1,4 +1,4 @@
-#include	"Character_before.hpp"
+﻿#include	"Character_before.hpp"
 #include	"Character.hpp"
 #include	"../../MainScene/Player/Player.hpp"
 

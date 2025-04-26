@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #pragma warning(disable:4464)
 #include	"../Header.hpp"
 #include	"../sub.hpp"
@@ -9,7 +9,7 @@ namespace FPS_n2 {
 		class TitleScene : public TEMPSCENE {
 		private:
 			FadeControl							m_FadeControl;
-			bool								m_IsEnd{ false };//ƒV[ƒ“‘S‘Ì‚ÌI—¹ƒtƒ‰ƒO
+			bool								m_IsEnd{ false };//ã‚·ãƒ¼ãƒ³å…¨ä½“ã®çµ‚äº†ãƒ•ãƒ©ã‚°
 			GraphHandle							m_TitleImage;
 			std::unique_ptr<UIs::CreditControl>		m_CreditControl;
 		public:

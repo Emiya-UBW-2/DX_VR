@@ -1,4 +1,4 @@
-#include	"Player.hpp"
+﻿#include	"Player.hpp"
 #include	"../../sub.hpp"
 #include	"../../MainScene/Object/Character.hpp"
 

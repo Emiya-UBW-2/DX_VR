@@ -1,4 +1,4 @@
-#include	"Ammo.hpp"
+ï»¿#include	"Ammo.hpp"
 
 #include	"../../MainScene/BackGround/BackGround.hpp"
 #include	"../../MainScene/Object/Character.hpp"
@@ -15,7 +15,7 @@ namespace FPS_n2 {
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			auto* SE = SoundPool::Instance();
 
-			//ˆÚ“®Šm’è
+			//ç§»å‹•ç¢ºå®š
 			this->m_repos = this->m_pos;
 			this->m_pos = this->m_pos + (this->m_vec * (this->m_speed * DXLib_refParts->GetDeltaTime())) + Vector3DX::up() * this->m_yAdd;
 			this->m_yAdd += (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));
@@ -27,28 +27,28 @@ namespace FPS_n2 {
 
 			bool is_HitAll = false;
 
-			//’n–Ê‚Æ‚Ì”»’è
+			//åœ°é¢ã¨ã®åˆ¤å®š
 			auto ColResGround = BackGroundParts->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
-			//ƒwƒŠ‚Æ‚Ì”»’è
+			//ãƒ˜ãƒªã¨ã®åˆ¤å®š
 			//TODO PlayerMngr->GetHelicopter()
 			/*
-			//íÔ‚Æ‚Ì”»’è
+			//æˆ¦è»Šã¨ã®åˆ¤å®š
 			if (this->m_ShootCheraID != -1 && PlayerMngr->GetVehicle()->CheckAmmoHit(repos_tmp, &pos_tmp)) {
 				SetActive(false);
 				is_HitAll = true;
 			}
 			//*/
-			//ƒLƒƒƒ‰‚Æ‚Ì”»’è
+			//ã‚­ãƒ£ãƒ©ã¨ã®åˆ¤å®š
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				if (PlayerMngr->GetPlayer(loop)->GetChara()->CheckDamageRay((*this->m_AmmoData)->GetDamage(), (PlayerID)this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
 					SetActive(false);
 					is_HitAll = true;
 				}
 			}
-			//ƒLƒƒƒ‰‚É“–‚½‚ç‚¸Ú’n‚µ‚½‚ç
+			//ã‚­ãƒ£ãƒ©ã«å½“ãŸã‚‰ãšæ¥åœ°ã—ãŸã‚‰
 			if (ColResGround && !is_HitAll) {
 				SetActive(false);
-				//•Ç”j‰ó
+				//å£ç ´å£Š
 				{
 					int								xput = 4;
 					int								yput = 2;
@@ -78,12 +78,12 @@ namespace FPS_n2 {
 						BackGroundParts->UpdateOnce();
 					}
 				}
-				//ƒGƒtƒFƒNƒg
+				//ã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
 				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, pos_tmp, norm_tmp, std::min(0.0127f,(*this->m_AmmoData)->GetCaliber()) / 0.02f * Scale3DRate);
-				//ƒTƒEƒ“ƒh
+				//ã‚µã‚¦ãƒ³ãƒ‰
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGround0) + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
 			}
-			//Á‚·(ƒXƒs[ƒh‚ª0ˆÈ‰ºAŠÑ’Ê‚ª0ˆÈ‰ºA5‰ñ”½Ë‚·‚é)
+			//æ¶ˆã™(ã‚¹ãƒ”ãƒ¼ãƒ‰ãŒ0ä»¥ä¸‹ã€è²«é€šãŒ0ä»¥ä¸‹ã€5å›åå°„ã™ã‚‹)
 			if (this->m_speed <= 0.f || this->m_penetration <= 0.f || this->m_RicochetCnt > 5 || this->m_Timer > 5.f) {
 				SetActive(false);
 			}

@@ -1,4 +1,4 @@
-#include	"Gun_before.hpp"
+ï»¿#include	"Gun_before.hpp"
 #include	"Mod.hpp"
 
 #include	"../../MainScene/Player/Player.hpp"
@@ -163,11 +163,11 @@ namespace FPS_n2 {
 			return false;
 		}
 		void			ModifySlot::GetAnyByChild(const std::function<void(const SharedGunParts&)>& Doing) const noexcept {
-			//q‹Ÿ‚ğQÆ
+			//å­ä¾›ã‚’å‚ç…§
 			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 				Doing(this->m_PartsObj[loop]);
 			}
-			//‘·‚ª‚ ‚ê‚Î‚»‚¿‚ç‚à
+			//å­«ãŒã‚ã‚Œã°ãã¡ã‚‰ã‚‚
 			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 				if (this->m_PartsObj[loop]) {
 					this->m_PartsObj[loop]->GetModifySlot()->GetAnyByChild(Doing);
@@ -199,7 +199,7 @@ namespace FPS_n2 {
 			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 				GunSlot gunSlot = static_cast<GunSlot>(loop);
 				if (IsAttachedParts(gunSlot)) {
-					//1‚ÌƒtƒŒ[ƒ€ˆÚ“®—Ê‚ğ–³‹‚·‚é
+					//1ã®ãƒ•ãƒ¬ãƒ¼ãƒ ç§»å‹•é‡ã‚’ç„¡è¦–ã™ã‚‹
 					auto& Obj = this->m_PartsObj[static_cast<int>(gunSlot)];
 					for (int loop2 = 0, max = static_cast<int>(Obj->GetObj().GetAnimNum()); loop2 < max; ++loop2) {
 						Obj->SetObj().SetAnim(loop2).SetPer(pParent.GetAnim(loop2).GetPer());
@@ -216,7 +216,7 @@ namespace FPS_n2 {
 		void			ModifySlot::Attach(GunSlot gunSlot, int ID, const SharedObj& BaseModel) noexcept {
 			auto* pSlotInfo = GetMyData()->GetSlotInfo(gunSlot);
 			if (!pSlotInfo) { return; }
-			//ƒp[ƒc‚ª‚ ‚éê‡‚Ííœ
+			//ãƒ‘ãƒ¼ãƒ„ãŒã‚ã‚‹å ´åˆã¯å‰Šé™¤
 			if (IsAttachedParts(gunSlot)) {
 				Remove(gunSlot);
 			}
@@ -257,15 +257,15 @@ namespace FPS_n2 {
 		}
 		void			GunsModify::SetupDefaultGunParts(const std::unique_ptr<ModifySlot>* pBaseParts, const std::unique_ptr<SlotData>* pParentSlot, bool isPreset) noexcept {
 			if (!pBaseParts) { return; }
-			//q‹Ÿ‚ÉƒfƒtƒHƒ‹ƒg‚Ìİ’è‚ğ’Ç‰Á
+			//å­ä¾›ã«ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®è¨­å®šã‚’è¿½åŠ 
 			for (int loop = 0; loop < static_cast<int>(GunSlot::Max); ++loop) {
 				GunSlot NowSlot = (GunSlot)loop;
 				const auto& pSlotInfo = (*pBaseParts)->GetMyData()->GetSlotInfo(NowSlot);
-				if (!pSlotInfo) { continue; }// ƒXƒƒbƒg‚ª‚È‚¢‚ÆƒXƒ‹[
-				//’Ç‰Á
+				if (!pSlotInfo) { continue; }// ã‚¹ãƒ­ãƒƒãƒˆãŒãªã„ã¨ã‚¹ãƒ«ãƒ¼
+				//è¿½åŠ 
 				this->m_SlotDataPool.emplace_back(std::make_unique<SlotData>(NowSlot, pParentSlot, pBaseParts));
 				auto& data = this->m_SlotDataPool.back();
-				//ƒXƒƒbƒg‚Éİ’è‚·‚éƒIƒuƒWƒFƒNƒg‚Ì‘I‘ğ
+				//ã‚¹ãƒ­ãƒƒãƒˆã«è¨­å®šã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®é¸æŠ
 				int Select = pSlotInfo->m_IsNeed ? 0 : InvalidID;
 				if (isPreset) {
 					for (const auto& S : this->m_SlotSave) {
@@ -275,17 +275,17 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				//‘I‘ğ‚µ‚½ƒp[ƒc‚ğƒZƒbƒg
+				//é¸æŠã—ãŸãƒ‘ãƒ¼ãƒ„ã‚’ã‚»ãƒƒãƒˆ
 				data->Set(this->m_BaseGun, Select);
-				//ƒp[ƒc‚ª‚ ‚éê‡
+				//ãƒ‘ãƒ¼ãƒ„ãŒã‚ã‚‹å ´åˆ
 				if (data->IsAttachedParts()) {
-					//ƒXƒƒbƒg‚Éİ’è‚µ‚½‚à‚Ì‚É‰ˆ‚Á‚ÄƒfƒtƒHƒ‹ƒg‚Ìqƒp[ƒc‚ğİ’è
+					//ã‚¹ãƒ­ãƒƒãƒˆã«è¨­å®šã—ãŸã‚‚ã®ã«æ²¿ã£ã¦ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®å­ãƒ‘ãƒ¼ãƒ„ã‚’è¨­å®š
 					SetupDefaultGunParts(&data->GetAttachedPartsSlot(), &data, isPreset);
 				}
 			}
 		}
 		bool			GunsModify::DeleteSlotsChildParts(const std::unique_ptr<SlotData>* pSlot) noexcept {
-			//İ’è‚µ‚½‚¢ƒp[ƒc‚ªe‚Å‚ ‚éƒp[ƒc‚àq‚ğ‚·‚×‚ÄE‚·
+			//è¨­å®šã—ãŸã„ãƒ‘ãƒ¼ãƒ„ãŒè¦ªã§ã‚ã‚‹ãƒ‘ãƒ¼ãƒ„ã‚‚å­ã‚’ã™ã¹ã¦æ®ºã™
 			for (int loop = 0; loop < static_cast<int>(this->m_SlotDataPool.size()); ++loop) {
 				const auto& data = this->m_SlotDataPool[loop];
 				if (&data == pSlot) { continue; }
@@ -297,7 +297,7 @@ namespace FPS_n2 {
 			for (auto& data : this->m_SlotDataPool) {
 				if (&data == pSlot) { continue; }
 				int index = static_cast<int>(&data - &this->m_SlotDataPool.front());
-				//‚»‚Ìƒf[ƒ^©‘Ì‚ğíœ
+				//ãã®ãƒ‡ãƒ¼ã‚¿è‡ªä½“ã‚’å‰Šé™¤
 				data.reset();
 				this->m_SlotDataPool.erase(this->m_SlotDataPool.begin() + index);
 				return true;
@@ -307,12 +307,12 @@ namespace FPS_n2 {
 		void			GunsModify::ChangeSelectData(const std::unique_ptr<SlotData>* pSlot, int select) noexcept {
 			DeleteSlotsChildParts(pSlot);
 			//
-			//ˆê’UƒNƒŠ[ƒ“‚É‚·‚é
+			//ä¸€æ—¦ã‚¯ãƒªãƒ¼ãƒ³ã«ã™ã‚‹
 			auto& data = *pSlot;
 			data->Set(this->m_BaseGun, select);
-			//ƒp[ƒc‚ª‚ ‚éê‡
+			//ãƒ‘ãƒ¼ãƒ„ãŒã‚ã‚‹å ´åˆ
 			if (data->IsAttachedParts()) {
-				//ƒXƒƒbƒg‚Éİ’è‚µ‚½‚à‚Ì‚É‰ˆ‚Á‚ÄƒfƒtƒHƒ‹ƒg‚Ìƒp[ƒc‚ğİ’è
+				//ã‚¹ãƒ­ãƒƒãƒˆã«è¨­å®šã—ãŸã‚‚ã®ã«æ²¿ã£ã¦ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ãƒ‘ãƒ¼ãƒ„ã‚’è¨­å®š
 				SetupDefaultGunParts(&data->GetAttachedPartsSlot(), &data, false);
 			}
 		}
@@ -324,7 +324,7 @@ namespace FPS_n2 {
 					int ULTSelect = 0;
 					inputfile.read(reinterpret_cast<char*>(&ULTSelect), sizeof(ULTSelect));
 				}
-				while (!inputfile.eof()) { //ƒtƒ@ƒCƒ‹‚ÌÅŒã‚Ü‚Å‘±‚¯‚é
+				while (!inputfile.eof()) { //ãƒ•ã‚¡ã‚¤ãƒ«ã®æœ€å¾Œã¾ã§ç¶šã‘ã‚‹
 					SlotSaveData Tmp;
 					inputfile.read(reinterpret_cast<char*>(&Tmp), sizeof(Tmp));
 					this->m_SlotSave.emplace_back(Tmp);

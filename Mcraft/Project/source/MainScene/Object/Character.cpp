@@ -1,4 +1,4 @@
-#include	"Character.hpp"
+ï»¿#include	"Character.hpp"
 
 #include	"../../MainScene/Player/Player.hpp"
 
@@ -14,7 +14,7 @@ namespace FPS_n2 {
 				this->m_AP.Sub(Event.ArmerDamage);
 				bool IsDeath = PrevLive && !IsAlive();
 
-				if (Event.ShotID == PlayerMngr->GetWatchPlayerID()) {//Œ‚‚Á‚½ƒLƒƒƒ‰
+				if (Event.ShotID == PlayerMngr->GetWatchPlayerID()) {//æ’ƒã£ãŸã‚­ãƒ£ãƒ©
 					//SE
 					if (Event.Damage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Hit))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
@@ -22,10 +22,10 @@ namespace FPS_n2 {
 					else if (Event.ArmerDamage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f, 128);
 					}
-					//ƒqƒbƒgƒJƒEƒ“ƒg
+					//ãƒ’ãƒƒãƒˆã‚«ã‚¦ãƒ³ãƒˆ
 					if ((Event.Damage >= 0) && (Event.ArmerDamage >= 0)) {
 						PlayerMngr->GetPlayer(Event.ShotID)->AddHit(1);
-						//ƒqƒbƒgÀ•W•\¦‚ğ“o˜^
+						//ãƒ’ãƒƒãƒˆåº§æ¨™è¡¨ç¤ºã‚’ç™»éŒ²
 						HitMarkerPool::Instance()->AddMarker(Event.m_EndPos, Event.Damage, Event.ArmerDamage);
 					}
 					if (IsDeath) {
@@ -33,7 +33,7 @@ namespace FPS_n2 {
 						PlayerMngr->GetPlayer(Event.ShotID)->AddKill(1);
 					}
 				}
-				if (Event.DamageID == PlayerMngr->GetWatchPlayerID()) {//Œ‚‚½‚ê‚½ƒLƒƒƒ‰
+				if (Event.DamageID == PlayerMngr->GetWatchPlayerID()) {//æ’ƒãŸã‚ŒãŸã‚­ãƒ£ãƒ©
 					if (Event.Damage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitMe))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 					}
@@ -41,7 +41,7 @@ namespace FPS_n2 {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f, 255);
 					}
 				}
-				//ƒGƒtƒFƒNƒgƒZƒbƒg
+				//ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚»ãƒƒãƒˆ
 				if (Event.Damage > 0) {
 					EffectSingleton::Instance()->SetOnce(Effect::ef_hitblood, Event.m_EndPos, Vector3DX::forward(), Scale3DRate);
 					EffectSingleton::Instance()->SetEffectSpeed(Effect::ef_hitblood, 2.f);
@@ -49,7 +49,7 @@ namespace FPS_n2 {
 				else if (Event.ArmerDamage > 0) {
 					EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, Event.m_EndPos, (Event.m_StartPos - Event.m_EndPos).normalized(), 0.25f * Scale3DRate);
 				}
-				//ƒqƒbƒgƒ‚[ƒVƒ‡ƒ“
+				//ãƒ’ãƒƒãƒˆãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³
 				if (Event.Damage > 0) {
 					this->m_HitReactionControl.SetHit(Matrix3x3DX::Vtrans(Vector3DX::Cross((Event.m_EndPos - Event.m_StartPos).normalized(), Vector3DX::up()) * -1.f, Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::Upper2)).inverse()));
 					switch (static_cast<HitType>(Event.m_HitType)) {
@@ -67,15 +67,15 @@ namespace FPS_n2 {
 						break;
 					}
 				}
-				//ƒ{ƒCƒX
+				//ãƒœã‚¤ã‚¹
 				if (IsAlive()) {
-					//”í’eƒ{ƒCƒX
+					//è¢«å¼¾ãƒœã‚¤ã‚¹
 					if ((Event.Damage >= 0) && (Event.ArmerDamage >= 0)) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_Hurt1) + GetRand(6 - 1))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
 					}
 				}
 				else if (IsDeath) {
-					//€–Sƒ{ƒCƒX
+					//æ­»äº¡ãƒœã‚¤ã‚¹
 					for (int loop = 0; loop < 6; ++loop) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_Hurt1) + loop)->StopAll();
 					}
@@ -100,15 +100,15 @@ namespace FPS_n2 {
 			if (AttackID != PlayerMngr->GetWatchPlayerID()) {
 				this->m_ConcussionSwitch = true;
 			}
-			//”í’eˆ—
+			//è¢«å¼¾å‡¦ç†
 			auto* HitPtr = this->m_HitBoxControl.GetLineHit(StartPos, pEndPos);
 			if (HitPtr) {
 				HitPoint Damage = BaseDamage;
 				ArmerPoint ArmerDamage = 0;
-				//•”ˆÊƒ_ƒ[ƒW‰‰Z
+				//éƒ¨ä½ãƒ€ãƒ¡ãƒ¼ã‚¸æ¼”ç®—
 				switch (HitPtr->GetColType()) {
 				case HitType::Head:
-					if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {//©‹@‚ÍƒwƒbƒVƒ‡‚³‚ê‚È‚¢
+					if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {//è‡ªæ©Ÿã¯ãƒ˜ãƒƒã‚·ãƒ§ã•ã‚Œãªã„
 						Damage = std::clamp<HitPoint>(BaseDamage * 1000 / 100, 0, this->m_HP.GetMax());
 					}
 					break;
@@ -125,7 +125,7 @@ namespace FPS_n2 {
 				default:
 					break;
 				}
-				//ƒ_ƒ[ƒW“o˜^
+				//ãƒ€ãƒ¡ãƒ¼ã‚¸ç™»éŒ²
 				if (AttackID >= 0) {
 					PlayerMngr->GetPlayer(AttackID)->GetChara()->SetDamage(GetMyPlayerID(), Damage, ArmerDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
@@ -139,7 +139,7 @@ namespace FPS_n2 {
 			}
 			return false;
 		}
-		//‘€ì
+		//æ“ä½œ
 		void			CharacterObj::UpdateInput(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
@@ -148,20 +148,20 @@ namespace FPS_n2 {
 			if (!IsAlive()) { return; }
 			if (this->m_Input.GetPADSTrigger(Controls::PADS::SQUAT)) {
 				this->m_IsSquat ^= 1;
-				//‚µ‚á‚ª‚İ‰¹
+				//ã—ã‚ƒãŒã¿éŸ³
 				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
 				}
 			}
 			if (GetGunPtrNow()) {
-				//e‚Ğ‚Á‚±‚ß
+				//éŠƒã²ã£ã“ã‚
 				if (this->m_StuckGunTimer == 0.f) {
 					this->m_StuckGunTimer = 0.1f;
 
 					Vector3DX GunStart = GetEyePositionCache();
 					Vector3DX GunEnd = (GetGunPtrNow()->GetBaseMuzzleMat() * GetFrameWorldMat(CharaFrame::Head)).pos();
 					bool IsHit = BackGround::BackGroundControl::Instance()->CheckLinetoMap(GunStart, GunEnd);
-					//‚Ù‚©ƒvƒŒƒCƒ„[‚Æ‚Ì”»’è
+					//ã»ã‹ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¨ã®åˆ¤å®š
 					if(!IsHit) {
 						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 							if (loop == GetMyPlayerID()) { continue; }
@@ -203,7 +203,7 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				//•ŠíØ‘Ö
+				//æ­¦å™¨åˆ‡æ›¿
 				if (GetGunPtrNow()->GetGunAnime() != GunAnimeID::LowReady) {
 					int Wheel = 0;
 					if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
@@ -217,7 +217,7 @@ namespace FPS_n2 {
 						this->m_GunPtrControl.GunChangeNext((Wheel > 0));
 					}
 				}
-				//ƒAƒNƒVƒ‡ƒ“
+				//ã‚¢ã‚¯ã‚·ãƒ§ãƒ³
 				switch (GetGunPtrNow()->GetGunAnime()) {
 				case GunAnimeID::LowReady:
 					if (this->m_GunPtrControl.IsChangeGunSelect() && GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::LowReady) > 0.95f) {
@@ -228,7 +228,7 @@ namespace FPS_n2 {
 					break;
 				case GunAnimeID::Base:
 					if (GetGunPtrNow()->GetCanShot()) {
-						//•Ší‚ğ’­‚ß‚é
+						//æ­¦å™¨ã‚’çœºã‚ã‚‹
 						if (this->m_Input.GetPADSPress(Controls::PADS::CHECK)) {
 							GetGunPtrNow()->SetGunAnime(GunAnimeID::Watch);
 						}
@@ -247,7 +247,7 @@ namespace FPS_n2 {
 									}
 								}
 							}
-							//ËŒ‚
+							//å°„æ’ƒ
 							else if (this->m_Input.GetPADSPress(Controls::PADS::SHOT)) {
 								if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 									if (this->m_Input.GetPADSTrigger(Controls::PADS::SHOT)) {
@@ -256,15 +256,15 @@ namespace FPS_n2 {
 								}
 								GetGunPtrNow()->SetShotStart();
 							}
-							//ƒOƒŒƒl[ƒh\‚¦
+							//ã‚°ãƒ¬ãƒãƒ¼ãƒ‰æ§‹ãˆ
 							else if (this->m_Input.GetPADSPress(Controls::PADS::THROW)) {
 								GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
-								//“Š‚°•Ší‚Å‚ ‚éÅ‰‚Ì•Ší‚ÉØ‚è‘Ö‚¦
+								//æŠ•ã’æ­¦å™¨ã§ã‚ã‚‹æœ€åˆã®æ­¦å™¨ã«åˆ‡ã‚Šæ›¿ãˆ
 								this->m_GunPtrControl.GunChangeThrowWeapon(true);
 							}
 						}
 						else {
-							//ƒOƒŒƒl[ƒh“Š‚Ä‚«
+							//ã‚°ãƒ¬ãƒãƒ¼ãƒ‰æŠ•ã¦ã
 							if (this->m_Input.GetPADSPress(Controls::PADS::THROW) || this->m_Input.GetPADSPress(Controls::PADS::SHOT)) {
 								GetGunPtrNow()->SetGunAnime(GunAnimeID::ThrowReady);
 							}
@@ -272,7 +272,7 @@ namespace FPS_n2 {
 					}
 					break;
 				case GunAnimeID::Shot:
-					//ËŒ‚I—¹ƒtƒ‰ƒO
+					//å°„æ’ƒçµ‚äº†ãƒ•ãƒ©ã‚°
 					if (GetGunPtrNow()->GetShotType() == Guns::SHOTTYPE::FULL) {
 						GetGunPtrNow()->SetShotEnd(true);
 					}
@@ -298,7 +298,7 @@ namespace FPS_n2 {
 				case GunAnimeID::Throw:
 					if (GetGunPtrNow()->GetNowAnimTimePerCache() >= 0.6f) {
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
-						//“Š‚°•Ší‚Å‚Í‚È‚¢Å‰‚Ì•Ší‚ÉØ‚è‘Ö‚¦
+						//æŠ•ã’æ­¦å™¨ã§ã¯ãªã„æœ€åˆã®æ­¦å™¨ã«åˆ‡ã‚Šæ›¿ãˆ
 						this->m_GunPtrControl.GunChangeThrowWeapon(false);
 					}
 					break;
@@ -318,14 +318,14 @@ namespace FPS_n2 {
 			this->m_RotateControl.Update(
 				this->m_Input.GetAddxRad() - RecoilRadAdd.y, this->m_Input.GetAddyRad() + RecoilRadAdd.x,
 				this->m_MoveControl.GetVecPower() > 0.1f, (IsMoveFront() ? this->m_MoveControl.GoFrontRad() : 0.f) + (IsMoveBack() ? this->m_MoveControl.GoBackRad() : 0.f));
-			//ƒŠ[ƒ“
+			//ãƒªãƒ¼ãƒ³
 			if (this->m_LeanControl.Update(this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_L), this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_R))) {
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
 			}
 			if (GetGunPtrNow()) {
 				GetGunPtrNow()->CalcSwitchPer(this->m_LeanControl.GetRate() >= 0 || !GetGunPtrNow()->IsCanShot());
 			}
-			//‰º”¼g
+			//ä¸‹åŠèº«
 			this->m_BottomAnimSelect = GetBottomStandAnimSelect();
 			if (IsMoveLeft()) { this->m_BottomAnimSelect = GetBottomLeftStepAnimSelect(); }
 			if (IsMoveRight()) { this->m_BottomAnimSelect = GetBottomRightStepAnimSelect(); }
@@ -375,7 +375,7 @@ namespace FPS_n2 {
 				}
 			}
 
-			//‘«‰¹
+			//è¶³éŸ³
 			if (this->m_BottomAnimSelect != GetBottomStandAnimSelect()) {
 				auto Time = GetObj().GetAnim(static_cast<int>(this->m_BottomAnimSelect)).GetTime();
 				//L
@@ -397,7 +397,7 @@ namespace FPS_n2 {
 				this->m_CharaSound = InvalidID;
 			}
 		}
-		//SetMatw¦XV
+		//SetMatæŒ‡ç¤ºæ›´æ–°
 		void			CharacterObj::UpdateMatrix(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
@@ -455,13 +455,13 @@ namespace FPS_n2 {
 					Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(12 * SwitchPer))
 					).Get44DX() * GetFrameBaseLocalMat(static_cast<int>(CharaFrame::Neck)));
 			this->m_HitReactionControl.Update();
-			//ã”¼gƒAƒjƒ‰‰Z
+			//ä¸ŠåŠèº«ã‚¢ãƒ‹ãƒ¡æ¼”ç®—
 			this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Upper_Ready)) = 1.f;
-			//w‰‰Z
+			//æŒ‡æ¼”ç®—
 			if (GetGunPtrNow()) {
 				auto& FingerPer = GetGunPtrNow()->GetGunAnimeNow().GetFingerPer();
 				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Thumb)), FingerPer.GetFingerPer(0, 0), 0.8f, EasingType::OutExpo);
-				if (GetGunPtrNow()->GetGunAnime() == GunAnimeID::Shot) {//Œ‚‚Â‚Æ‚«‚Í‚»‚¿‚ç‚ğQÆ‚·‚é
+				if (GetGunPtrNow()->GetGunAnime() == GunAnimeID::Shot) {//æ’ƒã¤ã¨ãã¯ãã¡ã‚‰ã‚’å‚ç…§ã™ã‚‹
 					Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Point)), 0.4f, 0.5f, EasingType::OutExpo);
 				}
 				else {
@@ -477,7 +477,7 @@ namespace FPS_n2 {
 				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Ring)), FingerPer.GetFingerPer(1, 3), 0.8f, EasingType::OutExpo);
 				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Pinky)), FingerPer.GetFingerPer(1, 4), 0.8f, EasingType::OutExpo);
 			}
-			//‰º”¼gƒAƒjƒ‰‰Z
+			//ä¸‹åŠèº«ã‚¢ãƒ‹ãƒ¡æ¼”ç®—
 			if (IsDraw(0) || IsDraw(1) || IsDraw(2)) {
 				if (this->m_AnimPerBuf[static_cast<int>(GetBottomTurnAnimSelect())] > 0.f) {
 					SetAnimLoop(static_cast<int>(GetBottomTurnAnimSelect()), 0.5f);
@@ -498,7 +498,7 @@ namespace FPS_n2 {
 				if (this->m_AnimPerBuf[static_cast<int>(GetBottomRightStepAnimSelect())] > 0.f) {
 					SetAnimLoop(static_cast<int>(GetBottomRightStepAnimSelect()), this->m_MoveControl.GetVecRight() * AnimSpeed);
 				}
-				//ƒAƒjƒ”½‰f
+				//ã‚¢ãƒ‹ãƒ¡åæ˜ 
 				for (int loop = 0, max = static_cast<int>(GetObj().GetAnimNum()); loop < max; ++loop) {
 					SetObj().SetAnim(loop).SetPer(this->m_AnimPerBuf.at(loop));
 				}
@@ -506,25 +506,25 @@ namespace FPS_n2 {
 			}
 			{
 				Vector3DX PosBuf = GetMove().GetPosBuf();
-				//‘f‚ÌˆÚ“®ƒxƒNƒgƒ‹
+				//ç´ ã®ç§»å‹•ãƒ™ã‚¯ãƒˆãƒ«
 				Vector3DX vec = (this->m_MoveControl.GetVecPower() > 0.f) ?
 					Matrix3x3DX::Vtrans(this->m_MoveControl.GetVecMove() * GetSpeed() * 60.f * DXLib_refParts->GetDeltaTime(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetYRadUpper())) :
 					Vector3DX::zero();
-				//°”»’è
+				//åºŠåˆ¤å®š
 				Vector3DX EndPos = PosBuf - Vector3DX::up() * (0.5f * Scale3DRate);
 				if (BackGroundParts->CheckLinetoMap(PosBuf + Vector3DX::up() * (0.f * Scale3DRate), &EndPos)) {
 					float GroundHight = EndPos.y - (0.12f * Scale3DRate);
 					if ((PosBuf.y - GroundHight) > (0.008f * Scale3DRate / DXLib_refParts->GetDeltaTime())) {
-						PosBuf.y = GroundHight;//‚Š—‰º‚ÌÛ‚Í‘¦”½‰f
+						PosBuf.y = GroundHight;//é«˜æ‰€è½ä¸‹ã®éš›ã¯å³æ™‚åæ˜ 
 					}
 					else {
-						Easing(&PosBuf.y, GroundHight, 0.6f, EasingType::OutExpo);//‚»‚êˆÈŠO‚Í‘¦”½‰f
+						Easing(&PosBuf.y, GroundHight, 0.6f, EasingType::OutExpo);//ãã‚Œä»¥å¤–ã¯å³æ™‚åæ˜ 
 					}
 					vec.y = 0.f;
 					if (this->m_IsRappelling) {
 						this->m_IsRappellingEnd = true;
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
-						//“Š‚°•Ší‚Å‚Í‚È‚¢Å‰‚Ì•Ší‚ÉØ‚è‘Ö‚¦
+						//æŠ•ã’æ­¦å™¨ã§ã¯ãªã„æœ€åˆã®æ­¦å™¨ã«åˆ‡ã‚Šæ›¿ãˆ
 						this->m_GunPtrControl.GunChangeThrowWeapon(false);
 					}
 				}
@@ -533,14 +533,14 @@ namespace FPS_n2 {
 						vec.y = (GetMove().GetVec().y + (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps())));
 					}
 				}
-				//°”»’è‚ğ‰Á–¡‚µ‚½ˆÚ“®ƒxƒNƒgƒ‹
+				//åºŠåˆ¤å®šã‚’åŠ å‘³ã—ãŸç§»å‹•ãƒ™ã‚¯ãƒˆãƒ«
 				SetMove().SetVec(vec);
 				PosBuf += GetMove().GetVec();
-				//•Ç”»’è
+				//å£åˆ¤å®š
 				if (GetMove().GetVec().sqrMagnitude() > 0.01f * 0.01f) {
 					BackGroundParts->CheckMapWall(GetMove().GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * (1.6f * Scale3DRate), 0.7f * Scale3DRate);
 				}
-				//‚Ù‚©ƒvƒŒƒCƒ„[‚Æ‚Ì”»’è
+				//ã»ã‹ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã¨ã®åˆ¤å®š
 				{
 					float Radius = 2.f * 0.5f * Scale3DRate;
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
@@ -548,7 +548,7 @@ namespace FPS_n2 {
 						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 						if (!chara->IsAlive()) { continue; }
 						if (chara->GetIsRappelling()) { continue; }
-						//©•ª‚ª“–‚½‚Á‚½‚ç‰Ÿ‚µ–ß‚·
+						//è‡ªåˆ†ãŒå½“ãŸã£ãŸã‚‰æŠ¼ã—æˆ»ã™
 						Vector3DX Vec = (chara->GetMove().GetPos() - GetMove().GetPos()); Vec.y = (0.f);
 						float Len = Vec.magnitude();
 						if (Len < Radius) {
@@ -556,10 +556,10 @@ namespace FPS_n2 {
 						}
 					}
 				}
-				//ƒx[ƒX‚É”½‰f
+				//ãƒ™ãƒ¼ã‚¹ã«åæ˜ 
 				SetMove().SetPos(PosBuf);
 				SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetYRadBottom()));
-				//À•WƒI[ƒo[ƒ‰ƒCƒh
+				//åº§æ¨™ã‚ªãƒ¼ãƒãƒ¼ãƒ©ã‚¤ãƒ‰
 				if (this->m_MoveOverRideFlag) {
 					this->m_MoveOverRideFlag = false;
 					SetMove().SetPos(this->m_OverRideInfo.pos);
@@ -572,15 +572,15 @@ namespace FPS_n2 {
 			}
 			if (IsAlive()) {
 				Matrix3x3DX CharaRotationCache = CharaLocalRotationCache * GetMove().GetMat();
-				//e‚ÌˆÊ’u‚ğw’è‚·‚éƒAƒjƒ
+				//éŠƒã®ä½ç½®ã‚’æŒ‡å®šã™ã‚‹ã‚¢ãƒ‹ãƒ¡
 				for (int loop = 0, max = this->m_GunPtrControl.GetGunNum(); loop < max; ++loop) {
 					auto& pGun = this->m_GunPtrControl.GetGunPtr(loop);
 					if (!pGun) { continue; }
 
-					//ƒXƒŠƒ“ƒOêŠ’Tõ
+					//ã‚¹ãƒªãƒ³ã‚°å ´æ‰€æ¢ç´¢
 					if (pGun->IsNeedCalcSling()) {
 						switch (loop) {
-						case 0://ƒƒCƒ“•Ší‚ÌƒXƒŠƒ“ƒO
+						case 0://ãƒ¡ã‚¤ãƒ³æ­¦å™¨ã®ã‚¹ãƒªãƒ³ã‚°
 							this->m_SlingZrad.Update(DXLib_refParts->GetDeltaTime());
 							this->m_SlingZrad.AddRad((0.5f * (this->m_RotateControl.GetRad().y - this->m_RotateControl.GetYRadBottom())) * DXLib_refParts->GetDeltaTime());
 							pGun->SetSlingMat(
@@ -598,13 +598,13 @@ namespace FPS_n2 {
 									) * -(0.5f * Scale3DRate)
 							);
 							break;
-						case 1://ƒzƒ‹ƒXƒ^[
+						case 1://ãƒ›ãƒ«ã‚¹ã‚¿ãƒ¼
 							pGun->SetSlingMat(
 								Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-90)) * Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::Upper)),
 								GetFrameWorldMat(CharaFrame::Upper).pos() + GetFrameWorldMat(CharaFrame::Upper).yvec() * (-0.5f * Scale3DRate) + GetFrameWorldMat(CharaFrame::Upper).xvec() * (-0.3f * Scale3DRate)
 							);
 							break;
-						case 2://ƒOƒŒƒl[ƒh
+						case 2://ã‚°ãƒ¬ãƒãƒ¼ãƒ‰
 							pGun->SetSlingMat(
 								Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::LeftMag)),
 								GetFrameWorldMat(CharaFrame::LeftMag).pos()
@@ -619,21 +619,21 @@ namespace FPS_n2 {
 					if (IsSelect) {
 						pGun->SetMagazinePoachMat(GetFrameWorldMat(CharaFrame::LeftMag));
 						pGun->SetGrenadeThrowRot(GetEyeRotationCache());
-						//ƒAƒjƒ[ƒVƒ‡ƒ“
+						//ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
 						pGun->UpdateGunAnimePer(GetIsADS());
 					}
 					else {
 						pGun->SetActiveAll(true);
-						//ƒAƒjƒ[ƒVƒ‡ƒ“
+						//ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³
 						pGun->InitGunAnimePer();
 					}
 					pGun->UpdateGunMat(IsSelect, GetIsADS(), CharaRotationCache, GetFrameWorldMat(CharaFrame::Head).pos(), this->m_RotateControl.GetRad());
 				}
-				//è‚ÌˆÊ’u‚ğ§Œä
+				//æ‰‹ã®ä½ç½®ã‚’åˆ¶å¾¡
 				if (((GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) || GetCanLookByPlayer())) {
 					if (!GetIsRappelling()) {
 						if (GetGunPtrNow()) {
-							//eÀ•W
+							//éŠƒåº§æ¨™
 							{
 								IK_RightArm(
 									&SetObj(),
@@ -650,8 +650,8 @@ namespace FPS_n2 {
 								HandMat = GetGunPtrNow()->GetLeftHandMat();
 								Easing(&this->m_ArmBreakPer, (
 									(GetGunPtrNow()->IsCanShot() && this->m_ArmBreak)
-									|| (GetGunPtrNow()->GetGunAnime() == GunAnimeID::Watch)//TODO:ê—p‚Ì¶˜rƒAƒNƒVƒ‡ƒ“
-									|| (GetGunPtrNow()->GetModifySlot()->GetMyData()->GetIsThrowWeapon() && (GetGunPtrNow()->GetGunAnime() != GunAnimeID::ThrowReady))//TODO:ê—p‚Ì¶˜rƒAƒNƒVƒ‡ƒ“
+									|| (GetGunPtrNow()->GetGunAnime() == GunAnimeID::Watch)//TODO:å°‚ç”¨ã®å·¦è…•ã‚¢ã‚¯ã‚·ãƒ§ãƒ³
+									|| (GetGunPtrNow()->GetModifySlot()->GetMyData()->GetIsThrowWeapon() && (GetGunPtrNow()->GetGunAnime() != GunAnimeID::ThrowReady))//TODO:å°‚ç”¨ã®å·¦è…•ã‚¢ã‚¯ã‚·ãƒ§ãƒ³
 									) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
 								if (this->m_ArmBreakPer > 0.01f) {
 									this->m_SlingArmZrad.Update(DXLib_refParts->GetDeltaTime());
@@ -702,9 +702,9 @@ namespace FPS_n2 {
 
 					}
 				}
-				//ƒqƒbƒgƒ{ƒbƒNƒX
+				//ãƒ’ãƒƒãƒˆãƒœãƒƒã‚¯ã‚¹
 				this->m_HitBoxControl.Update(this, (GetCharaType() == CharaTypeID::Enemy) ? 1.1f : 1.f);
-				//–Ú‚ÌÀ•Wæ“¾
+				//ç›®ã®åº§æ¨™å–å¾—
 				{
 					bool HeadBobbing = ((GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
 					this->m_EyePositionCache = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f;
@@ -736,9 +736,9 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			//ƒ‰ƒOƒh[ƒ‹
+			//ãƒ©ã‚°ãƒ‰ãƒ¼ãƒ«
 			this->m_RagDollControl.Update(IsAlive());
-			//‹”F”»’èŒn
+			//è¦–èªåˆ¤å®šç³»
 			this->m_IsActiveCameraPos = false;
 			if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {
 				auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
@@ -746,7 +746,7 @@ namespace FPS_n2 {
 				this->m_CanLookTarget = !BackGroundParts->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos);
 				this->m_Length = (GetEyePositionCache() - ViewChara->GetEyePositionCache()).magnitude();
 			}
-			//ƒRƒ“ƒJƒbƒVƒ‡ƒ“
+			//ã‚³ãƒ³ã‚«ãƒƒã‚·ãƒ§ãƒ³
 			if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 				if (this->m_ConcussionSwitch) {
 					this->m_ConcussionSwitch = false;
@@ -812,9 +812,9 @@ namespace FPS_n2 {
 			if (!IsActive()) { return; }
 			if (!IsDraw(Range)) { return; }
 			int fog_r, fog_g, fog_b;
-			GetFogColor(&fog_r, &fog_g, &fog_b);											// ƒtƒHƒOƒJƒ‰[‚ğæ“¾‚·‚é
+			GetFogColor(&fog_r, &fog_g, &fog_b);											// ãƒ•ã‚©ã‚°ã‚«ãƒ©ãƒ¼ã‚’å–å¾—ã™ã‚‹
 			SetFogColor(0, 0, 0);
-			//ƒLƒƒƒ‰•`‰æ
+			//ã‚­ãƒ£ãƒ©æç”»
 			//MV1SetMaterialTypeAll(GetObj().GetHandle(), DX_MATERIAL_TYPE_MAT_SPEC_LUMINANCE_CLIP_UNORM);
 			if (IsAlive()) {
 				for (int loop = 0, max = GetObj().GetMeshNum(); loop < max; ++loop) {
@@ -830,7 +830,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			//hitbox•`‰æ
+			//hitboxæç”»
 #if defined(DEBUG) && DRAW_HITBOX
 			this->m_HitBoxControl.Draw();
 #endif

@@ -1,4 +1,4 @@
-#pragma warning(disable:4464)
+ï»¿#pragma warning(disable:4464)
 #include	"../MainScene/NetworkBrowser.hpp"
 #include	"MainScene.hpp"
 
@@ -64,7 +64,7 @@ namespace FPS_n2 {
 				}
 			}
 
-			MV1::Load("data/Charactor/Soldier/model_Rag.mv1", &m_RagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//g‘Ìƒ‰ƒOƒh[ƒ‹
+			MV1::Load("data/Charactor/Soldier/model_Rag.mv1", &m_RagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//èº«ä½“ãƒ©ã‚°ãƒ‰ãƒ¼ãƒ«
 
 			ObjectManager::Instance()->LoadModelBefore("data/model/hindD/");
 			ObjectManager::Instance()->LoadModelBefore("data/model/BMP3/");
@@ -104,7 +104,7 @@ namespace FPS_n2 {
 					Charas::CharacterObj::LoadChara("Soldier", (PlayerID)loop);
 					chara->LoadCharaGun("AKS-74", 0);
 					chara->LoadCharaGun("RGD5", 2);
-					//ƒ‰ƒOƒh[ƒ‹
+					//ãƒ©ã‚°ãƒ‰ãƒ¼ãƒ«
 					chara->SetRagDoll().Duplicate(m_RagDoll);
 					chara->SetupRagDoll();
 				}
@@ -165,7 +165,7 @@ namespace FPS_n2 {
 			//
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
-				//l‚ÌÀ•Wİ’è
+				//äººã®åº§æ¨™è¨­å®š
 				if (loop == PlayerMngr->GetWatchPlayerID()) {
 					chara->Spawn(deg2rad(0.f), deg2rad(GetRand(360)), Vector3DX::vget(GetRandf(10.f), -20.f, GetRandf(10.f)) * Scale3DRate, 0, true);
 				}
@@ -298,7 +298,7 @@ namespace FPS_n2 {
 					MyInput.SetInputPADS(Controls::PADS::WALK, Pad->GetPadsInfo(Controls::PADS::WALK).GetKey().press());
 					//MyInput.SetInputPADS(Controls::PADS::JUMP, Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().press());
 				}
-				//ƒlƒbƒgƒ[ƒN
+				//ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯
 				if (NetBrowser->IsDataReady() && !this->m_NetWorkController) {
 					this->m_NetWorkController = std::make_unique<NetWork::NetWorkController>(NetBrowser->GetClient(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
 				}
@@ -317,36 +317,36 @@ namespace FPS_n2 {
 					this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, MoveInfoData, ViewChara->GetDamageEvent(), FreeData);
 					this->m_NetWorkController->Update();
 					ViewChara->SetDamageEventReset();
-					//ƒzƒXƒg‚È‚çBMP‚Ì”»’è‚à‚â‚é
+					//ãƒ›ã‚¹ãƒˆãªã‚‰BMPã®åˆ¤å®šã‚‚ã‚„ã‚‹
 					if (!this->m_NetWorkController->GetClient() && this->m_NetWorkController->GetServerPlayer()) {
 						//PlayerMngr->GetVehicle()->GetDamageEvent()//TODO
 						//PlayerMngr->GetVehicle()->SetDamageEventReset();
 					}
 				}
-				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//ƒIƒ“ƒ‰ƒCƒ“
+				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//ã‚ªãƒ³ãƒ©ã‚¤ãƒ³
 					bool IsServerNotPlayer = !this->m_NetWorkController->GetClient() && !this->m_NetWorkController->GetServerPlayer();
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetServerPlayerData((PlayerID)loop);
 						if (loop == PlayerMngr->GetWatchPlayerID() && !IsServerNotPlayer) {
-							chara->Input(MyInput);//©g‚ª“®‚©‚·‚à‚Ì
+							chara->Input(MyInput);//è‡ªèº«ãŒå‹•ã‹ã™ã‚‚ã®
 						}
-						else {//ƒT[ƒo[‚©‚ç‚Ìƒf[ƒ^‚Å“®‚­‚à‚Ì
-							//ƒT[ƒo[‚ªCPU‚ğ“®‚©‚·ê‡
+						else {//ã‚µãƒ¼ãƒãƒ¼ã‹ã‚‰ã®ãƒ‡ãƒ¼ã‚¿ã§å‹•ãã‚‚ã®
+							//ã‚µãƒ¼ãƒãƒ¼ãŒCPUã‚’å‹•ã‹ã™å ´åˆ
 							if (!this->m_NetWorkController->GetClient()) {
 								//cpu
-								//PlayerMngr->GetPlayer(loop)->GetAI()->Update(&MyInput);//AI‚É“ü—Í‚³‚¹‚é
+								//PlayerMngr->GetPlayer(loop)->GetAI()->Update(&MyInput);//AIã«å…¥åŠ›ã•ã›ã‚‹
 							}
-							//ƒT[ƒo[‚©‚ç‚Ìƒf[ƒ^‚ÅƒLƒƒƒ‰‚ğ“®‚©‚·
+							//ã‚µãƒ¼ãƒãƒ¼ã‹ã‚‰ã®ãƒ‡ãƒ¼ã‚¿ã§ã‚­ãƒ£ãƒ©ã‚’å‹•ã‹ã™
 							chara->OverrideAutoAimID(static_cast<PlayerID>(Ret.GetPlayerSendData().GetFreeData()[0]), Ret.GetPlayerSendData().GetFreeData()[1]);
 							chara->Input(Ret.GetPlayerSendData().GetInput());
 							chara->SetMoveOverRide(Ret.GetPlayerSendData().GetMove());
 						}
-						//‚±‚ÌƒvƒŒƒCƒ„[‚ªo‚µ‚½ƒ_ƒ[ƒWƒCƒxƒ“ƒg‚ğƒŠƒXƒg‚É’Ç‰Á
+						//ã“ã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒå‡ºã—ãŸãƒ€ãƒ¡ãƒ¼ã‚¸ã‚¤ãƒ™ãƒ³ãƒˆã‚’ãƒªã‚¹ãƒˆã«è¿½åŠ 
 						Ret.PopDamageEvent(&this->m_DamageEvents);
 					}
 				}
-				else {//ƒIƒtƒ‰ƒCƒ“
+				else {//ã‚ªãƒ•ãƒ©ã‚¤ãƒ³
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 						if (loop == PlayerMngr->GetWatchPlayerID()) {
@@ -354,15 +354,15 @@ namespace FPS_n2 {
 						}
 						else {
 							InputControl OtherInput;
-							PlayerMngr->GetPlayer(loop)->GetAI()->Update(&OtherInput);//AI‚É“ü—Í‚³‚¹‚é
+							PlayerMngr->GetPlayer(loop)->GetAI()->Update(&OtherInput);//AIã«å…¥åŠ›ã•ã›ã‚‹
 							chara->Input(OtherInput);
 						}
-						//‚±‚ÌƒvƒŒƒCƒ„[‚ªo‚µ‚½ƒ_ƒ[ƒWƒCƒxƒ“ƒg‚ğƒŠƒXƒg‚É’Ç‰Á
+						//ã“ã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒå‡ºã—ãŸãƒ€ãƒ¡ãƒ¼ã‚¸ã‚¤ãƒ™ãƒ³ãƒˆã‚’ãƒªã‚¹ãƒˆã«è¿½åŠ 
 						chara->PopDamageEvent(&this->m_DamageEvents);
 					}
 					//PlayerMngr->GetVehicle()->PopDamageEvent(&this->m_DamageEvents);
 				}
-				//ƒ_ƒ[ƒWƒCƒxƒ“ƒg
+				//ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚¤ãƒ™ãƒ³ãƒˆ
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 					auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 					for (int loop2 = 0, Num = static_cast<int>(this->m_DamageEvents.size()); loop2 < Num; ++loop2) {
@@ -381,9 +381,9 @@ namespace FPS_n2 {
 			//Update
 			ObjMngr->UpdateObject();
 			ObjMngr->LateUpdateObject();
-			//‹“_
+			//è¦–ç‚¹
 			{
-				//ƒJƒƒ‰
+				//ã‚«ãƒ¡ãƒ©
 				Vector3DX BaseCamPos = ViewChara->GetCameraPosition();
 				CameraParts->SetMainCamera().SetCamPos(
 					BaseCamPos + Camera3D::Instance()->GetCamShake(),
@@ -468,7 +468,7 @@ namespace FPS_n2 {
 			PostPassEffect::Instance()->Set_DoFNearFar(
 				ViewChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), ViewChara->GetIsADS() ? (CameraParts->GetMainCamera().GetCamFar() * 0.8f) : Scale3DRate * 5.f,
 				ViewChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), CameraParts->GetMainCamera().GetCamFar());
-			//šºƒGƒtƒFƒNƒg
+			//åŸƒã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
 			if (GetIsFirstLoop()) {
 				this->m_EffectPos = CameraParts->GetMainCamera().GetCamPos();
 				EffectSingleton::Instance()->SetLoop(Effect::ef_dust, this->m_EffectPos);
@@ -478,9 +478,9 @@ namespace FPS_n2 {
 				EffectSingleton::Instance()->Update_LoopEffect(Effect::ef_dust, this->m_EffectPos, Vector3DX::forward(), 0.5f);
 				EffectSingleton::Instance()->SetEffectColor(Effect::ef_dust, 255, 255, 255, 64);
 			}
-			//”wŒi
+			//èƒŒæ™¯
 			BackGround::BackGroundControl::Instance()->Update();
-			//UIƒpƒ‰ƒ[ƒ^[
+			//UIãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼
 			{
 				//timer
 				this->m_UIclass.SetfloatParam(0, 0.f);
@@ -499,7 +499,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->StopAll();
 			EffectSingleton::Instance()->StopEffect(Effect::ef_dust);
-			//g‚¢‰ñ‚µƒIƒuƒWƒFŒn
+			//ä½¿ã„å›ã—ã‚ªãƒ–ã‚¸ã‚§ç³»
 			BackGround::BackGroundControl::Instance()->Dispose();
 			//
 			if (this->m_NetWorkController) {
@@ -516,10 +516,10 @@ namespace FPS_n2 {
 			}
 			EffectSingleton::Release();
 			NetWorkBrowser::Release();
-			if (this->m_IsEnd) {//ƒ^ƒCƒgƒ‹‚É–ß‚é
+			if (this->m_IsEnd) {//ã‚¿ã‚¤ãƒˆãƒ«ã«æˆ»ã‚‹
 				SetNextSelect(0);
 			}
-			else {//Ÿ‚ÌƒV[ƒ“‚Ö
+			else {//æ¬¡ã®ã‚·ãƒ¼ãƒ³ã¸
 				SetNextSelect(1);
 			}
 		}
@@ -542,21 +542,21 @@ namespace FPS_n2 {
 			//ObjectManager::Instance()->Draw_Depth();
 			HitMarkerPool::Instance()->Check();
 		}
-		//UI•\¦
+		//UIè¡¨ç¤º
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 			if (!ViewChara->IsAlive()) { return; }
-			//ƒŒƒeƒBƒNƒ‹•\¦
+			//ãƒ¬ãƒ†ã‚£ã‚¯ãƒ«è¡¨ç¤º
 			if (ViewChara->GetGunPtrNow()) {
 				ViewChara->GetGunPtrNow()->DrawReticle(ViewChara->GetLeanRad());
 			}
 			HitMarkerPool::Instance()->Draw();
 			if (!SceneParts->IsPause()) { this->m_UIclass.Draw(); }		//UI
 #if DEBUG_NET
-			NetWorkBrowser::Instance()->Draw();						//’ÊMİ’è
+			NetWorkBrowser::Instance()->Draw();						//é€šä¿¡è¨­å®š
 #endif
 			if (this->m_NetWorkController) {
 				std::string PingMes;

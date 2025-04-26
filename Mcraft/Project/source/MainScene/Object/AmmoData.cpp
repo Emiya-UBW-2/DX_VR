@@ -1,4 +1,4 @@
-#include	"AmmoData.hpp"
+﻿#include	"AmmoData.hpp"
 
 
 const FPS_n2::Objects::AmmoDataManager* SingletonBase<FPS_n2::Objects::AmmoDataManager>::m_Singleton = nullptr;
