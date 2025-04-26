@@ -331,8 +331,8 @@ namespace FPS_n2 {
 			if (IsMoveRight()) { this->m_BottomAnimSelect = GetBottomRightStepAnimSelect(); }
 			if (IsMoveBack()) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSelect(); }
 			if (IsMoveFront()) { this->m_BottomAnimSelect = GetBottomWalkAnimSelect(); }
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(GetBottomTurnAnimSelect())), (!this->m_IsSquat && this->m_RotateControl.IsTurnBody()) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
-			Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Rappelling)), 0.f, 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf[static_cast<int>(GetBottomTurnAnimSelect())], (!this->m_IsSquat && this->m_RotateControl.IsTurnBody()) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Rappelling)], 0.f, 0.8f, EasingType::OutExpo);
 			for (int loop = 0; loop < static_cast<int>(CharaAnimeID::AnimeIDMax); ++loop) {
 				CharaAnimeID ID = static_cast<CharaAnimeID>(loop);
 				if (
@@ -456,26 +456,26 @@ namespace FPS_n2 {
 					).Get44DX() * GetFrameBaseLocalMat(static_cast<int>(CharaFrame::Neck)));
 			this->m_HitReactionControl.Update();
 			//上半身アニメ演算
-			this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Upper_Ready)) = 1.f;
+			this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Upper_Ready)] = 1.f;
 			//指演算
 			if (GetGunPtrNow()) {
 				auto& FingerPer = GetGunPtrNow()->GetGunAnimeNow().GetFingerPer();
-				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Thumb)), FingerPer.GetFingerPer(0, 0), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Right_Thumb)], FingerPer.GetFingerPer(0, 0), 0.8f, EasingType::OutExpo);
 				if (GetGunPtrNow()->GetGunAnime() == GunAnimeID::Shot) {//撃つときはそちらを参照する
-					Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Point)), 0.4f, 0.5f, EasingType::OutExpo);
+					Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Right_Point)], 0.4f, 0.5f, EasingType::OutExpo);
 				}
 				else {
-					Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Point)), FingerPer.GetFingerPer(0, 1), 0.8f, EasingType::OutExpo);
+					Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Right_Point)], FingerPer.GetFingerPer(0, 1), 0.8f, EasingType::OutExpo);
 				}
-				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_middle)), FingerPer.GetFingerPer(0, 2), 0.8f, EasingType::OutExpo);
-				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Ring)), FingerPer.GetFingerPer(0, 3), 0.8f, EasingType::OutExpo);
-				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Right_Pinky)), FingerPer.GetFingerPer(0, 4), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Right_middle)], FingerPer.GetFingerPer(0, 2), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Right_Ring)], FingerPer.GetFingerPer(0, 3), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Right_Pinky)], FingerPer.GetFingerPer(0, 4), 0.8f, EasingType::OutExpo);
 				//
-				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Thumb)), FingerPer.GetFingerPer(1, 0), 0.8f, EasingType::OutExpo);
-				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Point)), FingerPer.GetFingerPer(1, 1), 0.8f, EasingType::OutExpo);
-				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_middle)), FingerPer.GetFingerPer(1, 2), 0.8f, EasingType::OutExpo);
-				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Ring)), FingerPer.GetFingerPer(1, 3), 0.8f, EasingType::OutExpo);
-				Easing(&this->m_AnimPerBuf.at(static_cast<int>(CharaAnimeID::Left_Pinky)), FingerPer.GetFingerPer(1, 4), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Left_Thumb)], FingerPer.GetFingerPer(1, 0), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Left_Point)], FingerPer.GetFingerPer(1, 1), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Left_middle)], FingerPer.GetFingerPer(1, 2), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Left_Ring)], FingerPer.GetFingerPer(1, 3), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Left_Pinky)], FingerPer.GetFingerPer(1, 4), 0.8f, EasingType::OutExpo);
 			}
 			//下半身アニメ演算
 			if (IsDraw(0) || IsDraw(1) || IsDraw(2)) {
@@ -500,7 +500,7 @@ namespace FPS_n2 {
 				}
 				//アニメ反映
 				for (int loop = 0, max = static_cast<int>(GetObj().GetAnimNum()); loop < max; ++loop) {
-					SetObj().SetAnim(loop).SetPer(this->m_AnimPerBuf.at(loop));
+					SetObj().SetAnim(loop).SetPer(this->m_AnimPerBuf[loop]);
 				}
 				SetObj().UpdateAnimAll();
 			}

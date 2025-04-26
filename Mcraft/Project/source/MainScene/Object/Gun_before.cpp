@@ -63,7 +63,7 @@ namespace FPS_n2 {
 
 			if (this->m_AutoAim != InvalidID) {
 				auto& TargetChara = PlayerMngr->GetPlayer(this->m_AutoAim)->GetChara();
-				Easing(&this->m_AutoAimVec, (TargetChara->GetHitBoxList().at(this->m_AutoAimPoint).GetPos() - EyePos).normalized(), 0.8f, EasingType::OutExpo);
+				Easing(&this->m_AutoAimVec, (TargetChara->GetHitBoxList()[this->m_AutoAimPoint].GetPos() - EyePos).normalized(), 0.8f, EasingType::OutExpo);
 			}
 			else {
 				Easing(&this->m_AutoAimVec, AimVector, 0.95f, EasingType::OutExpo);
@@ -220,7 +220,7 @@ namespace FPS_n2 {
 			if (IsAttachedParts(gunSlot)) {
 				Remove(gunSlot);
 			}
-			const auto* FilePath = (*GunPartsDataManager::Instance()->GetData(pSlotInfo->m_CanAttachItemsUniqueID.at(ID)))->GetPath().c_str();
+			const auto* FilePath = (*GunPartsDataManager::Instance()->GetData(pSlotInfo->m_CanAttachItemsUniqueID[ID]))->GetPath().c_str();
 
 			switch (gunSlot) {
 			case GunSlot::Magazine:

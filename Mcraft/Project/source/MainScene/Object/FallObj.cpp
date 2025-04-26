@@ -18,6 +18,8 @@ namespace FPS_n2 {
 			}
 			void RotateOnGround(moves*) noexcept override {}
 			void OnTimeEnd(const moves&) noexcept override {}//なにもしない
+		public:
+			bool IsDrawFar(void) const noexcept override { return false; }
 		};
 		class FallObjMagazine : public FallObjChildBase {
 		public:
@@ -32,6 +34,8 @@ namespace FPS_n2 {
 				objMove->SetMat(objMove->GetMat() * Matrix3x3DX::RotVec2(objMove->GetMat().xvec(), Vector3DX::up()));
 			}
 			void OnTimeEnd(const moves&) noexcept override {}//なにもしない
+		public:
+			bool IsDrawFar(void) const noexcept override { return false; }
 		};
 		class FallObjGrenade : public FallObjChildBase {
 		public:
@@ -51,6 +55,8 @@ namespace FPS_n2 {
 				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_greexp, objMove.GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate, 2.f);
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Explosion))->Play3D(objMove.GetPos(), Scale3DRate * 25.f);
 			}
+		public:
+			bool IsDrawFar(void) const noexcept override { return true; }
 		};
 
 

@@ -59,7 +59,7 @@ namespace FPS_n2 {
 					for (auto& select : this->m_ButtonSelect) {
 						select->SetNone();
 					}
-					this->m_ButtonSelect.at(static_cast<size_t>(this->m_select))->SetFocus();
+					this->m_ButtonSelect[static_cast<size_t>(this->m_select)]->SetFocus();
 					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 				}
 				else {
@@ -95,12 +95,12 @@ namespace FPS_n2 {
 				if (ALL.find('=') != std::string::npos) {
 					auto LEFT = FileStreamDX::getleft(ALL);
 					auto RIGHT = FileStreamDX::getright(ALL);
-					sprintfDx(this->m_CreditStr.at(static_cast<size_t>(this->m_CreditCoulm)).first, LEFT.c_str());
-					sprintfDx(this->m_CreditStr.at(static_cast<size_t>(this->m_CreditCoulm)).second, RIGHT.c_str());
+					sprintfDx(this->m_CreditStr[static_cast<size_t>(this->m_CreditCoulm)].first, LEFT.c_str());
+					sprintfDx(this->m_CreditStr[static_cast<size_t>(this->m_CreditCoulm)].second, RIGHT.c_str());
 				}
 				else {
-					sprintfDx(this->m_CreditStr.at(static_cast<size_t>(this->m_CreditCoulm)).first, ALL.c_str());
-					sprintfDx(this->m_CreditStr.at(static_cast<size_t>(this->m_CreditCoulm)).second, "");
+					sprintfDx(this->m_CreditStr[static_cast<size_t>(this->m_CreditCoulm)].first, ALL.c_str());
+					sprintfDx(this->m_CreditStr[static_cast<size_t>(this->m_CreditCoulm)].second, "");
 				}
 				++this->m_CreditCoulm;
 			}

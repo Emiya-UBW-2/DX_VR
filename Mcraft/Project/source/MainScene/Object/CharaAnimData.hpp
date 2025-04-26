@@ -146,8 +146,8 @@ namespace FPS_n2 {
 		class FingerData {
 			std::array<std::array<float, 5>, 2>	m_Fingers{};
 		public:
-			auto& SetFingerPer(int LR, int Number) noexcept { return this->m_Fingers.at(LR).at(Number); }
-			const auto& GetFingerPer(int LR, int Number) const noexcept { return this->m_Fingers.at(LR).at(Number); }
+			auto& SetFingerPer(int LR, int Number) noexcept { return this->m_Fingers[LR][Number]; }
+			const auto& GetFingerPer(int LR, int Number) const noexcept { return this->m_Fingers[LR][Number]; }
 		public:
 			FingerData operator+(const FingerData& p) const noexcept {
 				FingerData Ret;
@@ -159,7 +159,7 @@ namespace FPS_n2 {
 				for (const auto& LR : this->m_Fingers) {
 					int Numberindex = 0;
 					for (auto& finger : LR) {
-						Ret.m_Fingers.at(LRindex).at(Numberindex) = finger + p.m_Fingers.at(LRindex).at(Numberindex);
+						Ret.m_Fingers[LRindex][Numberindex] = finger + p.m_Fingers[LRindex][Numberindex];
 						++Numberindex;
 					}
 					++LRindex;
@@ -176,7 +176,7 @@ namespace FPS_n2 {
 				for (const auto& LR : this->m_Fingers) {
 					int Numberindex = 0;
 					for (auto& finger : LR) {
-						Ret.m_Fingers.at(LRindex).at(Numberindex) = finger - p.m_Fingers.at(LRindex).at(Numberindex);
+						Ret.m_Fingers[LRindex][Numberindex] = finger - p.m_Fingers[LRindex][Numberindex];
 						++Numberindex;
 					}
 					++LRindex;
@@ -193,7 +193,7 @@ namespace FPS_n2 {
 				for (const auto& LR : this->m_Fingers) {
 					int Numberindex = 0;
 					for (auto& finger : LR) {
-						Ret.m_Fingers.at(LRindex).at(Numberindex) = finger * scale;
+						Ret.m_Fingers[LRindex][Numberindex] = finger * scale;
 						++Numberindex;
 					}
 					++LRindex;

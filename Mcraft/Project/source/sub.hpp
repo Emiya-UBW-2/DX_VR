@@ -43,7 +43,7 @@ namespace FPS_n2 {
 			this->m_DamageCount = 0;
 		}
 		void			Add(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint pDamage, ArmerPoint pArmerDamage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
-			this->m_Damage.at(this->m_DamageCount).SetEvent(ShotID_t, DamageID_t, pDamage, pArmerDamage, HitType, StartPos, EndPos);
+			this->m_Damage[this->m_DamageCount].SetEvent(ShotID_t, DamageID_t, pDamage, pArmerDamage, HitType, StartPos, EndPos);
 			++this->m_DamageCount %= static_cast<uint8_t>(this->m_Damage.size());
 		}
 	};
@@ -185,7 +185,7 @@ namespace FPS_n2 {
 		GraphHandle					guard_Graph;
 	public:
 		void			AddMarker(const Vector3DX& position, HitPoint Damage, ArmerPoint ArmerDamage) noexcept {
-			this->m_HitMarkerList.at(this->m_Now).AddMarker(position, Damage, ArmerDamage);
+			this->m_HitMarkerList[this->m_Now].AddMarker(position, Damage, ArmerDamage);
 			++this->m_Now %= static_cast<int>(this->m_HitMarkerList.size());
 		}
 	public:

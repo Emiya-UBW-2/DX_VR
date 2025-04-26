@@ -75,7 +75,7 @@ namespace FPS_n2 {
 		private:
 			Charas::GunAnimNow								m_AnimNowCache{};
 		private:
-			const auto			GetGunSoundSet(EnumGunSound Select) const noexcept { return static_cast<int>(GunSoundSets[GetModifySlot()->GetMyData()->GetSoundSelect()].m_Sound.at(static_cast<int>(Select))); }
+			const auto			GetGunSoundSet(EnumGunSound Select) const noexcept { return static_cast<int>(GunSoundSets[GetModifySlot()->GetMyData()->GetSoundSelect()].m_Sound[static_cast<int>(Select)]); }
 			void				PlayGunSound(EnumGunSound Select) noexcept {
 				auto* SE = SoundPool::Instance();
 				if (this->m_EnumGunSoundNow != Select) {
@@ -92,7 +92,7 @@ namespace FPS_n2 {
 					HumanAnimType = GetModifySlot()->GetMyData()->GetHumanAnimType();
 				}
 
-				return Charas::GunAnimeSets[HumanAnimType].Anim.at(static_cast<int>(AnimID));
+				return Charas::GunAnimeSets[HumanAnimType].Anim[static_cast<int>(AnimID)];
 			}
 			const auto&			GetRecoilReturn(void) const noexcept {
 				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetIsRecoilReturn()) {
@@ -128,11 +128,11 @@ namespace FPS_n2 {
 			void				UpdateGrenade(void) noexcept;
 			const auto			GetAnimDataNow(Charas::GunAnimeID ID) const noexcept {
 				auto* AnimMngr = Charas::GunAnimManager::Instance();
-				return AnimMngr->GetAnimNow(GetMyUserPlayerID(), AnimMngr->GetAnimData(GetGunAnim(ID)), this->m_GunAnimeTime.at(static_cast<int>(ID)));
+				return AnimMngr->GetAnimNow(GetMyUserPlayerID(), AnimMngr->GetAnimData(GetGunAnim(ID)), this->m_GunAnimeTime[static_cast<int>(ID)]);
 			}
 			const auto			GetNowGunAnimeID(void) const noexcept {
 				if (GetGunAnime() == Charas::GunAnimeID::Base) { return InvalidID; }
-				return GetModifySlot()->GetMyData()->GetAnimSelectList().at(static_cast<int>(GetGunAnime()));
+				return GetModifySlot()->GetMyData()->GetAnimSelectList()[static_cast<int>(GetGunAnime())];
 			}
 			const auto			GetBaseLeftHandMat(void) const noexcept {
 				Vector3DX HandPos = GetPartsFrameMatParent(GunFrame::LeftHandPos).pos();
@@ -191,7 +191,7 @@ namespace FPS_n2 {
 					auto* pData = AnimMngr->GetAnimData(GetGunAnim(GetGunAnime()));
 					if (pData) {
 						float totalTime = static_cast<float>((*pData)->GetTotalTime());
-						return (totalTime > 0.f) ? std::clamp(this->m_GunAnimeTime.at(static_cast<int>(GetGunAnime())) / totalTime, 0.f, 1.f) : 1.f;
+						return (totalTime > 0.f) ? std::clamp(this->m_GunAnimeTime[static_cast<int>(GetGunAnime())] / totalTime, 0.f, 1.f) : 1.f;
 					}
 				}
 				return 1.f;
@@ -232,7 +232,7 @@ namespace FPS_n2 {
 				auto* pData = AnimMngr->GetAnimData(GetGunAnim(GetGunAnime()));
 				if (!pData) { return 0.f; }
 				float totalTime = static_cast<float>((*pData)->GetTotalTime());
-				return (totalTime > 0.f) ? std::clamp(this->m_GunAnimeTime.at(static_cast<int>(GetGunAnime())) / totalTime, 0.f, 1.f) : 1.f;
+				return (totalTime > 0.f) ? std::clamp(this->m_GunAnimeTime[static_cast<int>(GetGunAnime())] / totalTime, 0.f, 1.f) : 1.f;
 			}
 			const auto			IsNowGunAnimeEnd(void) const noexcept { return GetNowAnimTimePerCache() >= 1.f; }
 			const auto			GetShotSwitch(void) const noexcept { return GetGunAnime() == Charas::GunAnimeID::Shot && (GetNowAnimTimePerCache() < 0.5f); }
@@ -256,7 +256,7 @@ namespace FPS_n2 {
 			void				SetGunAnime(Charas::GunAnimeID GunAnime) noexcept {
 				this->m_GunAnime = GunAnime;
 				if (GetGunAnime() < Charas::GunAnimeID::Max) {
-					this->m_GunAnimeTime.at(static_cast<int>(GetGunAnime())) = 0.f;
+					this->m_GunAnimeTime[static_cast<int>(GetGunAnime())] = 0.f;
 				}
 			}
 			void				SetShotStart(void) noexcept;//発砲

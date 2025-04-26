@@ -515,6 +515,7 @@ namespace FPS_n2 {
 			float												m_Timer{ 0.f };						//ラグドールの物理演算タイマー
 			frame_body											m_RagObjFrame;						//フレーム
 			frame_body											m_BaseObjFrame;						//フレーム
+			float												m_PhysicsTime{ 0.f };				//ラグドールの物理演算タイマー
 		public:
 		public:
 			RagDollControl(void) noexcept {}
@@ -524,7 +525,7 @@ namespace FPS_n2 {
 			const auto& GetRagDoll(void) const noexcept { return this->m_RagDoll; }
 
 			const auto GetFrameMat(RagFrame select) const noexcept {
-				auto& frame = this->m_RagObjFrame.m_Frames.at(static_cast<int>(select));
+				auto& frame = this->m_RagObjFrame.m_Frames[static_cast<int>(select)];
 				return frame.GetFrameWorldPosition().rotation().inverse() * this->m_RagDoll.GetFrameLocalWorldMatrix(frame.GetFrameID());
 			}
 
@@ -545,12 +546,27 @@ namespace FPS_n2 {
 					if (this->m_Timer < 3.f) {
 						this->m_RagDoll.SetPrioritizePhysicsOverAnimFlag(true);
 						this->m_BaseObjFrame.CopyFrame(*this->m_pBaseObj, this->m_RagObjFrame, &this->m_RagDoll, GroundPos);
-					}
-					if (this->m_Timer == 0.f) {
-						this->m_RagDoll.PhysicsResetState();
-					}
-					if (this->m_Timer < 3.f) {
-						this->m_RagDoll.PhysicsCalculation(1000.f * DXLib_refParts->GetDeltaTime());
+						//物理演算
+						if (this->m_Timer == 0.f) {
+							this->m_RagDoll.PhysicsResetState();
+							this->m_PhysicsTime = 0.f;
+						}
+						this->m_PhysicsTime += DXLib_refParts->GetDeltaTime();
+
+						bool isCalc = false;
+						while (true) {
+							if (this->m_PhysicsTime >= 1.f / 60.f) {
+								this->m_PhysicsTime -= 1.f / 60.f;
+								this->m_RagDoll.PhysicsCalculation(1000.f / 60.f);
+								isCalc = true;
+							}
+							else {
+								break;
+							}
+						}
+						if(!isCalc) {
+							this->m_RagDoll.PhysicsCalculation(0.f);
+						}
 					}
 					this->m_Timer += DXLib_refParts->GetDeltaTime();
 				}

@@ -317,14 +317,14 @@ namespace FPS_n2 {
 				int PortOffset = 0;
 				for (int loop = 0; loop < Player_num; ++loop) {
 					if (GetIsServerPlayer(static_cast<PlayerID>(loop))) { continue; }
-					this->m_PlayerUDPPhase.at(loop).Init(true, pPort + PortOffset); ++PortOffset;
-					this->m_PlayerUDPPhase.at(loop).m_Phase = ClientPhase::Server_WaitConnect;
+					this->m_PlayerUDPPhase[loop].Init(true, pPort + PortOffset); ++PortOffset;
+					this->m_PlayerUDPPhase[loop].m_Phase = ClientPhase::Server_WaitConnect;
 				}
 			}
 			void			Update(PlayerNetWork* pPlayerNetwork) noexcept;
 			void			Dispose(void) noexcept {
 				for (int loop = 0; loop < Player_num; ++loop) {
-					this->m_PlayerUDPPhase.at(loop).Dispose();
+					this->m_PlayerUDPPhase[loop].Dispose();
 				}
 			}
 		};
@@ -390,7 +390,7 @@ namespace FPS_n2 {
 					this->m_Ping = -1.f;
 					return;
 				}
-				this->m_Pings.at(this->m_PingNow) = std::max(0.f, static_cast<float>(microsec) / 1000.f - (1000.f / this->m_Tick));//ティック分引く
+				this->m_Pings[this->m_PingNow] = std::max(0.f, static_cast<float>(microsec) / 1000.f - (1000.f / this->m_Tick));//ティック分引く
 				++this->m_PingNow %= this->m_PingTotal;
 				this->m_Ping = 0.f;
 				for (auto& ping : this->m_Pings) {

@@ -116,7 +116,7 @@ namespace FPS_n2 {
 			if (IsSelectGun) {
 				//アニメーション
 				if (GetNowGunAnimeID() != InvalidID) {
-					SetAnimOnce(GetNowGunAnimeID(), this->m_GunAnimeSpeed.at(static_cast<int>(GetGunAnime())));
+					SetAnimOnce(GetNowGunAnimeID(), this->m_GunAnimeSpeed[static_cast<int>(GetGunAnime())]);
 				}
 				switch (GetGunAnime()) {
 				case Charas::GunAnimeID::Base:
@@ -193,7 +193,7 @@ namespace FPS_n2 {
 				}
 				for (auto& time : this->m_GunAnimeTime) {
 					int index = static_cast<int>(&time - &this->m_GunAnimeTime.front());
-					time += 60.f * DXLib_refParts->GetDeltaTime() * (this->m_GunAnimeSpeed.at(index));
+					time += 60.f * DXLib_refParts->GetDeltaTime() * (this->m_GunAnimeSpeed[index]);
 				}
 				//
 #if defined(DEBUG) && FALSE
@@ -586,7 +586,7 @@ namespace FPS_n2 {
 			for (auto& speed : this->m_GunAnimeSpeed) {
 				speed = 1.f;
 			}
-			this->m_GunAnimeSpeed.at(static_cast<int>(Charas::GunAnimeID::Shot)) = static_cast<float>(GetModifySlot()->GetMyData()->GetShotRate()) / 60.f / 10.f;
+			this->m_GunAnimeSpeed[static_cast<int>(Charas::GunAnimeID::Shot)] = static_cast<float>(GetModifySlot()->GetMyData()->GetShotRate()) / 60.f / 10.f;
 			auto BaseAnim = GetAnimDataNow(Charas::GunAnimeID::Aim);
 			SetGunMat(BaseAnim.GetRot(), BaseAnim.GetPos());
 			this->m_BaseMuzzle = GetPartsFrameMatParent(GunFrame::Muzzle);
@@ -617,7 +617,7 @@ namespace FPS_n2 {
 			}
 			//
 			for (int loop = 0; loop < static_cast<int>(Charas::GunAnimeID::ChoiceOnceMax); ++loop) {
-				int ID = GetModifySlot()->GetMyData()->GetAnimSelectList().at(loop);
+				int ID = GetModifySlot()->GetMyData()->GetAnimSelectList()[loop];
 				if (ID != InvalidID) {
 					if (GetGunAnime() == (Charas::GunAnimeID)loop) {
 						SetObj().SetAnim(ID).SetPer(1.f);
@@ -628,7 +628,7 @@ namespace FPS_n2 {
 				}
 			}
 			for (int loop = static_cast<int>(Charas::GunAnimeID::ChoiceOnceMax); loop < static_cast<int>(Charas::GunAnimeID::Max); ++loop) {
-				int ID = GetModifySlot()->GetMyData()->GetAnimSelectList().at(loop);
+				int ID = GetModifySlot()->GetMyData()->GetAnimSelectList()[loop];
 				if (ID != InvalidID) {
 					switch ((Charas::GunAnimeID)loop) {
 					case Charas::GunAnimeID::Hammer:

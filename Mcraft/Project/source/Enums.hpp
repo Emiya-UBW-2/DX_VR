@@ -39,7 +39,6 @@ namespace FPS_n2 {
 	enum class SoundEnum {
 		RunFoot = static_cast<int>(SoundSelectCommon::Num),
 		StandupFoot,
-		Heart,
 		Heli,
 		Envi,
 		//

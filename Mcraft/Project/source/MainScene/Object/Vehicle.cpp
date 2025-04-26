@@ -92,17 +92,17 @@ namespace FPS_n2 {
 		void			VehicleObj::Init_Sub(void) noexcept {
 			this->m_VecData = std::make_unique<VhehicleData>(GetObj(), GetCol(), GetFilePath().c_str());
 			for (auto& LR : this->m_CrawlerFrame) {
-				const auto& w = this->m_VecData->GetCrawlerFrameList().at(&LR - &this->m_CrawlerFrame.front());
+				const auto& w = this->m_VecData->GetCrawlerFrameList()[&LR - &this->m_CrawlerFrame.front()];
 				LR.resize(w.size());
 				for (auto& t : LR) {
-					t.Init(w.at(&t - &LR.front()));
+					t.Init(w[&t - &LR.front()]);
 				}
 			}
 			this->m_WheelHeight.resize(this->m_VecData->GetWheelFrameList().size());
 			//砲
 			this->m_Gun.resize(this->m_VecData->GetGunData().size());
 			for (auto& g : this->m_Gun) {
-				g.Init(&this->m_VecData->GetGunData().at(&g - &this->m_Gun.front()));
+				g.Init(&this->m_VecData->GetGunData()[&g - &this->m_Gun.front()]);
 			}
 
 			SetActive(true);
@@ -164,7 +164,7 @@ namespace FPS_n2 {
 			//転輪
 			for (auto& Y : this->m_WheelHeight) {
 				auto index = static_cast<int>(&Y - &this->m_WheelHeight.front());
-				auto& f = this->m_VecData->GetWheelFrameList().at(index);
+				auto& f = this->m_VecData->GetWheelFrameList()[index];
 				if (f.GetFrameID() >= 0) {
 					SetObj().ResetFrameUserLocalMatrix(f.GetFrameID());
 					auto startpos = GetObj().GetFramePosition(f.GetFrameID()) - GetMove().GetMat().yvec() * f.GetFrameWorldPosition().pos().y;

@@ -101,7 +101,7 @@ namespace FPS_n2 {
 								if (cell > IDCount.size()) {
 									IDCount.resize(cell);
 								}
-								++IDCount.at(static_cast<size_t>(cell - 1));
+								++IDCount[static_cast<size_t>(cell - 1)];
 							}
 						}
 					}
@@ -242,54 +242,57 @@ namespace FPS_n2 {
 				std::array<std::vector<uint32_t>, 2>			m_index32;
 				std::array<size_t, 2>							m_32Num{ 0 };
 			public:
-				const auto& GetInNum(void) const noexcept { return this->m_32Num.at(this->m_Now); }
-				auto& SetInVert(void) noexcept { return this->m_vert32.at(this->m_Now); }
-				auto& SetInIndex(void) noexcept { return this->m_index32.at(this->m_Now); }
+				const auto& GetInNum(void) const noexcept { return this->m_32Num[this->m_Now]; }
+				auto& SetInVert(void) noexcept { return this->m_vert32[this->m_Now]; }
 			public:
-				const auto& GetOutNum(void) const noexcept { return this->m_32Num.at(static_cast<size_t>(1 - this->m_Now)); }
-				const auto& GetOutVert(void) const noexcept { return this->m_vert32.at(static_cast<size_t>(1 - this->m_Now)); }
-				const auto& GetOutindex(void) const noexcept { return this->m_index32.at(static_cast<size_t>(1 - this->m_Now)); }
+				const auto& GetOutNum(void) const noexcept { return this->m_32Num[static_cast<size_t>(1 - this->m_Now)]; }
+				const auto& GetOutVert(void) const noexcept { return this->m_vert32[static_cast<size_t>(1 - this->m_Now)]; }
+				const auto& GetOutindex(void) const noexcept { return this->m_index32[static_cast<size_t>(1 - this->m_Now)]; }
 			public:
 				void		Init(size_t size) noexcept {
 					for (int loop = 0; loop < 2; ++loop) {
-						this->m_vert32.at(loop).resize(size * 4);
-						this->m_index32.at(loop).resize(size * 6);
+						this->m_vert32[loop].resize(size * 4);
+						this->m_index32[loop].resize(size * 6);
+						this->m_32Num[loop] = 0;
 					}
-					this->m_32Num.at(this->m_Now) = 0;
+					this->m_Now = 0;
 					this->m_32Size = size;
 				}
 				void		Dispose(void) noexcept {
 					for (int loop = 0; loop < 2; ++loop) {
-						this->m_vert32.at(loop).clear();
-						this->m_index32.at(loop).clear();
+						this->m_vert32[loop].clear();
+						this->m_index32[loop].clear();
+						this->m_32Num[loop] = 0;
 					}
+					this->m_32Size = 0;
 				}
 				void		ResetNum(void) noexcept {
-					this->m_32Num.at(this->m_Now) = 0;
+					this->m_32Num[this->m_Now] = 0;
 				}
 				void		AllocatePlane(void) noexcept {
-					++this->m_32Num.at(this->m_Now);
+					++this->m_32Num[this->m_Now];
 					if (GetInNum() > this->m_32Size) {
 						this->m_32Size = GetInNum();
 						for (int loop = 0; loop < 2; ++loop) {
-							this->m_vert32.at(loop).resize(this->m_32Size * 4);
-							this->m_index32.at(loop).resize(this->m_32Size * 6);
+							this->m_vert32[loop].resize(this->m_32Size * 4);
+							this->m_index32[loop].resize(this->m_32Size * 6);
 						}
 					}
 					auto ZERO = (uint32_t)(GetInNum() * 4 - 4);
-					SetInIndex()[GetInNum() * 6 - 6] = ZERO;
-					SetInIndex()[GetInNum() * 6 - 5] = ZERO + 1;
-					SetInIndex()[GetInNum() * 6 - 4] = ZERO + 2;
-					SetInIndex()[GetInNum() * 6 - 3] = ZERO + 3;
-					SetInIndex()[GetInNum() * 6 - 2] = ZERO + 2;
-					SetInIndex()[GetInNum() * 6 - 1] = ZERO + 1;
+					this->m_index32[this->m_Now][GetInNum() * 6 - 6] = ZERO;
+					this->m_index32[this->m_Now][GetInNum() * 6 - 5] = ZERO + 1;
+					this->m_index32[this->m_Now][GetInNum() * 6 - 4] = ZERO + 2;
+					this->m_index32[this->m_Now][GetInNum() * 6 - 3] = ZERO + 3;
+					this->m_index32[this->m_Now][GetInNum() * 6 - 2] = ZERO + 2;
+					this->m_index32[this->m_Now][GetInNum() * 6 - 1] = ZERO + 1;
 				}
 				void		FlipVerts(void) noexcept {
 					this->m_Now = 1 - this->m_Now;
 				}
 				void		Disable(void) noexcept {
-					ResetNum();
-					this->m_32Num.at(static_cast<size_t>(1 - this->m_Now)) = 0;
+					for (int loop = 0; loop < 2; ++loop) {
+						this->m_32Num[loop] = 0;
+					}
 				}
 				void		DrawByShader(void) const noexcept {
 					if (GetOutNum() == 0) { return; }

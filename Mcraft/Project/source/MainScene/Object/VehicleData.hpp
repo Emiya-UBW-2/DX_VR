@@ -23,9 +23,9 @@ namespace FPS_n2 {
 			const auto&		GetLeftRadLimit(void) const noexcept { return this->m_LeftRadLimit; }
 			const auto&		GetRightRadLimit(void) const noexcept { return this->m_RightRadLimit; }
 			const auto&		GetAmmoSpec(void) const noexcept { return this->m_AmmoSpecID; }
-			const auto&		GetGunTurretFrame(void) const noexcept { return this->m_frame.at(0); }
-			const auto&		GetGunTrunnionFrame(void) const noexcept { return this->m_frame.at(1); }
-			const auto&		GetGunMuzzleFrame(void) const noexcept { return this->m_frame.at(2); }
+			const auto&		GetGunTurretFrame(void) const noexcept { return this->m_frame[0]; }
+			const auto&		GetGunTrunnionFrame(void) const noexcept { return this->m_frame[1]; }
+			const auto&		GetGunMuzzleFrame(void) const noexcept { return this->m_frame[2]; }
 		public: //コンストラクタ、デストラクタ
 			GunData(void) noexcept { }
 			~GunData(void) noexcept { }
@@ -44,7 +44,7 @@ namespace FPS_n2 {
 				std::string ChildPath = "data/ammo/";
 				ChildPath += FileStreamDX::getright(File->SeekLineAndGetStr());
 				ChildPath += "/";
-				this->m_AmmoSpecID.at(0) = Objects::AmmoDataManager::Instance()->Add(ChildPath.c_str());
+				this->m_AmmoSpecID[0] = Objects::AmmoDataManager::Instance()->Add(ChildPath.c_str());
 				this->m_loadTime = std::stof(FileStreamDX::getright(File->SeekLineAndGetStr()));
 				this->m_UpRadLimit = std::stof(FileStreamDX::getright(File->SeekLineAndGetStr()));
 				this->m_DownRadLimit = std::stof(FileStreamDX::getright(File->SeekLineAndGetStr()));
@@ -223,7 +223,7 @@ namespace FPS_n2 {
 			const auto& GetGunTurretFrame(void) const noexcept { return this->m_GunSpec->GetGunTurretFrame(); }
 			const auto&	GetGunTrunnionFrame(void) const noexcept { return this->m_GunSpec->GetGunTrunnionFrame(); }
 			const auto&	GetGunMuzzleFrame(void) const noexcept { return this->m_GunSpec->GetGunMuzzleFrame(); }
-			const auto& GetAmmoSpec(void) const noexcept { return Objects::AmmoDataManager::Instance()->Get(this->m_GunSpec->GetAmmoSpec().at(0)); }
+			const auto& GetAmmoSpec(void) const noexcept { return Objects::AmmoDataManager::Instance()->Get(this->m_GunSpec->GetAmmoSpec()[0]); }
 			const auto& GetShotTargetRad(void) const noexcept { return this->m_ShotTargetRad; }
 			const auto& GetRecoil(void) const noexcept { return this->m_Recoil; }
 			const auto& GetShotRadAdd(void) const noexcept { return this->m_ShotRadAdd; }

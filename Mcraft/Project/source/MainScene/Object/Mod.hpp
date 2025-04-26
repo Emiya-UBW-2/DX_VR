@@ -19,7 +19,7 @@ namespace FPS_n2 {
 			const Matrix4x4DX		GetFramePartsMat(GunFrame frame) const noexcept;
 
 			void						SetIsDrawMesh(int meshID, bool IsDraw) noexcept {
-				this->m_IsMeshDraw.at(meshID) = IsDraw ? TRUE : FALSE;
+				this->m_IsMeshDraw[meshID] = IsDraw ? TRUE : FALSE;
 			}
 		private:
 			bool			IsDrawAllMesh(void) const noexcept {

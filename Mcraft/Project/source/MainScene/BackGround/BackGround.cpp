@@ -570,8 +570,8 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundControl::AddCubes(size_t id) noexcept {
-			auto& cellx = this->m_CellxN.at(id);
-			auto& Draws = this->m_Draws.at(id);
+			auto& cellx = this->m_CellxN[id];
+			auto& Draws = this->m_Draws[id];
 			Draws.m_vert32.ResetNum();
 			auto center = cellx.GetPoint(Draws.m_CamPos);
 
@@ -670,7 +670,7 @@ namespace FPS_n2 {
 			}
 		}
 		void		BackGroundControl::FlipCubes(size_t id) noexcept {
-			auto& Draws = this->m_Draws.at(id);
+			auto& Draws = this->m_Draws[id];
 			Draws.m_vert32.FlipVerts();
 			auto* CameraParts = Camera3D::Instance();
 			Draws.m_CamPos = CameraParts->GetMainCamera().GetCamPos();
@@ -678,8 +678,8 @@ namespace FPS_n2 {
 		}
 		void		BackGroundControl::AddShadowCubes(size_t id) noexcept {
 			size_t shadow = TotalCellLayer + id;
-			auto& cellx = this->m_CellxN.at(id);
-			auto& Draws = this->m_Draws.at(shadow);
+			auto& cellx = this->m_CellxN[id];
+			auto& Draws = this->m_Draws[shadow];
 			Draws.m_vert32.ResetNum();
 			auto center = cellx.GetPoint(Draws.m_CamPos);
 			//X
@@ -705,10 +705,10 @@ namespace FPS_n2 {
 			size_t shadow = TotalCellLayer + id;
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* SceneParts = SceneControl::Instance();
-			auto& Draws = this->m_Draws.at(shadow);
+			auto& Draws = this->m_Draws[shadow];
 			Draws.m_vert32.FlipVerts();
 			//Draws.m_CamPos =  Camera3D::Instance()->GetMainCamera().GetCamPos();
-			Draws.m_CamPos = Vector3DX::vget(0.f, -30.f, 0.f) * Scale3DRate;
+			Draws.m_CamPos = Vector3DX::vget(0.f, -25.f, 0.f) * Scale3DRate;
 			Draws.m_CamVec = PostPassParts->GetShadowDir();
 			SceneParts->SetIsUpdateFarShadowActive();
 		}
@@ -884,7 +884,7 @@ namespace FPS_n2 {
 				std::ifstream fin{};
 				fin.open("data/Map.txt", std::ios::in | std::ios::binary);
 				this->m_CellBase.resize(static_cast<size_t>(256 * 256 * 256));
-				fin.read((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0))) * 256 * 256 * 256);
+				fin.read((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase[0])) * 256 * 256 * 256);
 				fin.close();
 				for (int xm = 0; xm < GetReferenceCells().m_All; ++xm) {
 					for (int ym = 0; ym < GetReferenceCells().m_All; ++ym) {
@@ -930,7 +930,7 @@ namespace FPS_n2 {
 
 				std::ofstream fout{};
 				fout.open("data/Map.txt", std::ios::out | std::ios::binary | std::ios::trunc);
-				fout.write((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0))) * 256 * 256 * 256);
+				fout.write((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase[0])) * 256 * 256 * 256);
 				fout.close(); //ファイルを閉じる
 			}
 			//一部を切り取って保存
@@ -954,7 +954,7 @@ namespace FPS_n2 {
 			fin.read((char*)&YTotal, sizeof(YTotal));
 			fin.read((char*)&ZTotal, sizeof(ZTotal));
 			this->m_CellBase.resize(static_cast<size_t>(XTotal * YTotal * ZTotal));
-			fin.read((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0))) * XTotal * YTotal * ZTotal);
+			fin.read((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase[0])) * XTotal * YTotal * ZTotal);
 			fin.close(); //ファイルを閉じる
 
 			for (int xm = 0; xm < XTotal; ++xm) {
@@ -985,7 +985,7 @@ namespace FPS_n2 {
 			fout.write((char*)&XTotal, sizeof(XTotal));
 			fout.write((char*)&YTotal, sizeof(YTotal));
 			fout.write((char*)&ZTotal, sizeof(ZTotal));
-			fout.write((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase.at(0)) * XTotal * YTotal * ZTotal));
+			fout.write((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase[0]) * XTotal * YTotal * ZTotal));
 			fout.close(); //ファイルを閉じる
 		}
 		//
@@ -1006,7 +1006,7 @@ namespace FPS_n2 {
 			SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = select;
 			//簡易版を更新
 			for (int loop = 1; loop < TotalCellLayer; ++loop) {
-				auto& cell1 = this->m_CellxN.at(loop);
+				auto& cell1 = this->m_CellxN[loop];
 
 				int xm = xpos / cell1.m_scaleRate;
 				int ym = ypos / cell1.m_scaleRate;
@@ -1157,7 +1157,7 @@ namespace FPS_n2 {
 			}
 			//簡略版を制作
 			for (int loop = 1; loop < TotalCellLayer; ++loop) {
-				auto& cell1 = this->m_CellxN.at(loop);
+				auto& cell1 = this->m_CellxN[loop];
 				cell1.SetScale(loop);
 				for (int xm = 0; xm < cell1.m_All; ++xm) {
 					for (int ym = 0; ym < cell1.m_All; ++ym) {
@@ -1191,28 +1191,28 @@ namespace FPS_n2 {
 				Vert.m_vert32.Init(size);
 			}
 			//
-			this->m_Jobs.at(0).Init(
+			this->m_Jobs[0].Init(
 				[&]() { AddCubes(0); },
 				[&]() { FlipCubes(0); }, false);
-			this->m_Jobs.at(1).Init(
+			this->m_Jobs[1].Init(
 				[&]() { AddCubes(1); },
 				[&]() { FlipCubes(1); }, false);
-			this->m_Jobs.at(2).Init(
+			this->m_Jobs[2].Init(
 				[&]() { AddCubes(2); },
 				[&]() { FlipCubes(2); }, false);
-			this->m_Jobs.at(3).Init(
+			this->m_Jobs[3].Init(
 				[&]() { AddCubes(3); },
 				[&]() { FlipCubes(3); }, false);
-			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 0)).Init(
+			this->m_Jobs[static_cast<size_t>(TotalCellLayer + 0)].Init(
 				[&]() { AddShadowCubes(0); },
 				[&]() { FlipShadowCubes(0); }, true);
-			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 1)).Init(
+			this->m_Jobs[static_cast<size_t>(TotalCellLayer + 1)].Init(
 				[&]() { AddShadowCubes(1); },
 				[&]() { FlipShadowCubes(1); }, true);
-			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 2)).Init(
+			this->m_Jobs[static_cast<size_t>(TotalCellLayer + 2)].Init(
 				[&]() { AddShadowCubes(2); },
 				[&]() { FlipShadowCubes(2); }, true);
-			this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + 3)).Init(
+			this->m_Jobs[static_cast<size_t>(TotalCellLayer + 3)].Init(
 				[&]() { AddShadowCubes(3); },
 				[&]() { FlipShadowCubes(3); }, true);
 			SettingChange();
@@ -1220,7 +1220,7 @@ namespace FPS_n2 {
 		}
 		void		BackGroundControl::UpdateOnce(void) noexcept {
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
-				this->m_Jobs.at(static_cast<size_t>(TotalCellLayer + loop)).JobStart();
+				this->m_Jobs[static_cast<size_t>(TotalCellLayer + loop)].JobStart();
 			}
 		}
 		//
@@ -1228,22 +1228,22 @@ namespace FPS_n2 {
 			auto* OptionParts = OptionManager::Instance();
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
 				if ((loop != 0) && (loop != this->m_ThreadCounter)) { continue; }
-				auto& cell1 = this->m_CellxN.at(loop);
+				auto& cell1 = this->m_CellxN[loop];
 				//
 				if (this->m_BaseRate < cell1.m_scale) {
-					this->m_Draws.at(loop).m_vert32.Disable();
+					this->m_Draws[loop].m_vert32.Disable();
 				}
 				else {
-					this->m_Jobs.at(loop).Update();
+					this->m_Jobs[loop].Update();
 				}
 				//
 				int shadow = TotalCellLayer + loop;
 				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (this->m_ShadowRate < cell1.m_scale)) {
-					this->m_Draws.at(shadow).m_vert32.Disable();
-					this->m_Jobs.at(static_cast<size_t>(shadow)).m_isEnd = false;
+					this->m_Draws[shadow].m_vert32.Disable();
+					this->m_Jobs[shadow].m_isEnd = false;
 				}
 				else {
-					this->m_Jobs.at(static_cast<size_t>(shadow)).Update();
+					this->m_Jobs[shadow].Update();
 				}
 			}
 			++this->m_ThreadCounter %= TotalCellLayer;
@@ -1251,8 +1251,8 @@ namespace FPS_n2 {
 #if defined(DEBUG) && FALSE
 			{
 				for (int loop = 0; loop < TotalCellLayer; ++loop) {
-					auto& Vert = this->m_Draws.at(loop).m_vert32;
-					auto& cell1 = this->m_CellxN.at(loop);
+					auto& Vert = this->m_Draws[loop].m_vert32;
+					auto& cell1 = this->m_CellxN[loop];
 					if (Vert.GetOutNum() == 0) { continue; }
 					printfDx("Vertex[%d]\n", Vert.GetOutNum() * 4);
 				}
@@ -1273,7 +1273,7 @@ namespace FPS_n2 {
 		}
 		void		BackGroundControl::Shadow_Draw(void) const noexcept {
 			for (int shadow = TotalCellLayer; shadow < TotalCellLayer + TotalCellLayer; ++shadow) {
-				auto& Vert = this->m_Draws.at(shadow).m_vert32;
+				auto& Vert = this->m_Draws[shadow].m_vert32;
 				Vert.Draw(this->m_tex);
 			}
 		}
@@ -1285,8 +1285,8 @@ namespace FPS_n2 {
 
 			SetUseTextureToShader(0, this->m_tex.get());
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
-				auto& Vert = this->m_Draws.at(loop).m_vert32;
-				auto& cell1 = this->m_CellxN.at(loop);
+				auto& Vert = this->m_Draws[loop].m_vert32;
+				auto& cell1 = this->m_CellxN[loop];
 				if (Vert.GetOutNum() == 0) { continue; }
 				if (!cell1.isFarCells() && !(cell1.m_Scale < Far)) { continue; }
 				if (cell1.isFarCells() && !(Near < cell1.m_Scale && cell1.m_Scale < Far)) { continue; }
@@ -1301,8 +1301,8 @@ namespace FPS_n2 {
 			float Far = GetCameraFar() / MinLimit;
 
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
-				auto& Vert = this->m_Draws.at(loop).m_vert32;
-				auto& cell1 = this->m_CellxN.at(loop);
+				auto& Vert = this->m_Draws[loop].m_vert32;
+				auto& cell1 = this->m_CellxN[loop];
 				if (Vert.GetOutNum() == 0) { continue; }
 				if (!cell1.isFarCells() && !(cell1.m_Scale < Far)) { continue; }
 				if (cell1.isFarCells() && !(Near < cell1.m_Scale && cell1.m_Scale < Far)) { continue; }

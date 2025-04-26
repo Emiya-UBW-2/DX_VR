@@ -21,6 +21,8 @@ namespace FPS_n2 {
 			virtual void RotateOnAir(moves* objMove) noexcept = 0;
 			virtual void RotateOnGround(moves* objMove) noexcept = 0;
 			virtual void OnTimeEnd(const moves& objMove) noexcept = 0;
+		public:
+			virtual bool IsDrawFar(void) const noexcept = 0;
 		};
 
 		class FallObj : public BaseObject {
@@ -57,7 +59,9 @@ namespace FPS_n2 {
 				if (!IsActive()) { return; }
 				if (!IsDraw(Range)) { return; }
 				if (isDrawSemiTrans) { return; }
-				if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.f * Scale3DRate * 10.f * Scale3DRate)) { return; }
+				if (!this->m_FallObject->IsDrawFar()) {
+					if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.f * Scale3DRate * 10.f * Scale3DRate)) { return; }
+				}
 				GetObj().DrawModel();
 			}
 			void			Dispose_Sub(void) noexcept override {}

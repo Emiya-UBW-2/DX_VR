@@ -15,15 +15,15 @@ namespace FPS_n2 {
 					pPlayerNetwork->SetLastServerDataBuffer().m_PlayerFill[loop] = 2;
 					continue;
 				}
-				auto& net = this->m_PlayerUDPPhase.at(loop);
+				auto& net = this->m_PlayerUDPPhase[loop];
 
 				PlayerNetData tmpData;
 				int recvRet = InvalidID;
 				auto IsDataUpdated = net.m_NetWork.RecvData(&tmpData, &recvRet, false) && tmpData.IsCheckSum();
 				if (IsDataUpdated) {
-					this->m_LastPlayerData.at(loop) = tmpData;
+					this->m_LastPlayerData[loop] = tmpData;
 				}
-				const auto& player = this->m_LastPlayerData.at(loop);
+				const auto& player = this->m_LastPlayerData[loop];
 				switch (net.m_Phase) {
 				case ClientPhase::Server_WaitConnect:// 無差別受付
 					if (IsDataUpdated) {// 該当ソケットにクライアントからなにか受信したら

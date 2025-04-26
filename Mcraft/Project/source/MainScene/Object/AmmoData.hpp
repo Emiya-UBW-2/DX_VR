@@ -90,7 +90,7 @@ namespace FPS_n2 {
 				this->m_Data.clear();
 			}
 		public:
-			const auto& Get(int index) const noexcept { return this->m_Data.at(index); }
+			const auto& Get(int index) const noexcept { return this->m_Data[index]; }
 			const int Add(const std::string& filepath) noexcept {
 				auto Find = std::find_if(this->m_Data.begin(), this->m_Data.end(), [&](const std::unique_ptr<AmmoData>& tgt) {return tgt->GetPath() == filepath; });
 				if (Find != this->m_Data.end()) {

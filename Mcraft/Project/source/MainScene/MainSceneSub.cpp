@@ -83,12 +83,6 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Heli), 1, "data/Sound/SE/Heli.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Envi), 1, "data/Sound/SE/Envi.wav", false);
 
-			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Tank_Shot), 1, "data/Sound/SE/Tank/Shot.wav");
-			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Tank_Ricochet), 1, "data/Sound/SE/Tank/Ricochet.wav");
-			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Tank_engine), 1, "data/Sound/SE/Tank/Engine.wav");
-			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Tank_move), 1, "data/Sound/SE/Tank/Move.wav");
-
-
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::CartFall), 6, "data/Sound/SE/gun/case.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::MagFall), 6, "data/Sound/SE/gun/ModFall.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Trigger), 1, "data/Sound/SE/gun/trigger.wav");
@@ -127,8 +121,6 @@ namespace FPS_n2 {
 		void			CommonBattleResource::Set(void) noexcept {
 			auto* SE = SoundPool::Instance();
 
-			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_engine))->SetLocalVolume(64);
-
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::CartFall))->SetLocalVolume(48);
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::MagFall))->SetLocalVolume(48);
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Trigger))->SetLocalVolume(48);
@@ -150,10 +142,6 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Heli));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Envi));
-			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Tank_Shot));
-			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Tank_Ricochet));
-			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Tank_engine));
-			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Tank_move));
 
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::CartFall));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::MagFall));
