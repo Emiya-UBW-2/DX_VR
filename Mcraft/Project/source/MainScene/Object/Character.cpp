@@ -737,7 +737,16 @@ namespace FPS_n2 {
 				}
 			}
 			//ラグドール
-			this->m_RagDollControl.Update(IsAlive());
+			{
+				Vector3DX StartPos = GetMove().GetPosBuf();
+				if (!IsAlive()) {
+					Vector3DX EndPos = StartPos - Vector3DX::up() * (20.f * Scale3DRate);
+					if (BackGroundParts->CheckLinetoMap(StartPos, &EndPos)) {
+						StartPos = EndPos;
+					}
+				}
+				this->m_RagDollControl.Update(IsAlive(), StartPos);
+			}
 			//視認判定系
 			this->m_IsActiveCameraPos = false;
 			if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {

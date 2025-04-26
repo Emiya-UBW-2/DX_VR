@@ -492,10 +492,14 @@ namespace FPS_n2 {
 					}
 				}
 				//
-				void CopyFrame(const MV1& mine, const frame_body& frame_tgt_, MV1* tgt) noexcept {
-					tgt->SetMatrix(mine.GetMatrix());
+				void CopyFrame(const MV1& mine, const frame_body& frame_tgt_, MV1* tgt, const Vector3DX& GroundPos) noexcept {
+					tgt->SetMatrix(mine.GetMatrix().rotation() * Matrix4x4DX::Mtrans(GroundPos));
 					for (const auto& frame : frame_tgt_.m_Frames) {
 						tgt->SetFrameLocalMatrix(frame.GetFrameID(), mine.GetFrameLocalMatrix(frame.GetFrameID()));
+					}
+					{
+						int Frame = 2;
+						tgt->SetFrameLocalMatrix(Frame, mine.GetFrameLocalMatrix(Frame) * Matrix4x4DX::Mtrans(Vector3DX::vget(0.f, (mine.GetMatrix().pos() - GroundPos).y, 0.f)));
 					}
 					for (int loop = 0, max = static_cast<int>(tgt->GetAnimNum()); loop < max; ++loop) {
 						tgt->SetAnim(loop).SetPer(mine.GetAnim(loop).GetPer());
@@ -531,21 +535,21 @@ namespace FPS_n2 {
 				this->m_BaseObjFrame.SetupFrameInfo(*this->m_pBaseObj);				//身体
 				this->m_RagObjFrame.SetupFrameInfo(this->m_RagDoll);			//ラグドール
 			}
-			void Update(bool isAlive) noexcept {
+			void Update(bool isAlive, const Vector3DX& GroundPos) noexcept {
 				if (!this->m_pBaseObj) { return; }
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (isAlive) {
 					this->m_Timer = 0.f;
 				}
 				else {
-					if (this->m_Timer == 0.f) {
+					if (this->m_Timer < 3.f) {
 						this->m_RagDoll.SetPrioritizePhysicsOverAnimFlag(true);
-						this->m_BaseObjFrame.CopyFrame(*this->m_pBaseObj, this->m_RagObjFrame, &this->m_RagDoll);
+						this->m_BaseObjFrame.CopyFrame(*this->m_pBaseObj, this->m_RagObjFrame, &this->m_RagDoll, GroundPos);
+					}
+					if (this->m_Timer == 0.f) {
 						this->m_RagDoll.PhysicsResetState();
 					}
 					if (this->m_Timer < 3.f) {
-						this->m_RagDoll.SetPrioritizePhysicsOverAnimFlag(true);
-						this->m_BaseObjFrame.CopyFrame(*this->m_pBaseObj, this->m_RagObjFrame, &this->m_RagDoll);
 						this->m_RagDoll.PhysicsCalculation(1000.f * DXLib_refParts->GetDeltaTime());
 					}
 					this->m_Timer += DXLib_refParts->GetDeltaTime();
