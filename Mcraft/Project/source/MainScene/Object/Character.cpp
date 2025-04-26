@@ -805,8 +805,8 @@ namespace FPS_n2 {
 		void			CharacterObj::Init_Sub(void) noexcept {
 			this->m_HitBoxControl.Init();
 			this->m_ArmBreak = false;
-			SetMinAABB(Vector3DX::vget(-2.5f, -0.5, -2.5f) * Scale3DRate);
-			SetMaxAABB(Vector3DX::vget(2.5f, 2.0f, 2.5f) * Scale3DRate);
+			SetMinAABB(Vector3DX::vget(-2.0f, -0.0, -2.0f) * Scale3DRate);
+			SetMaxAABB(Vector3DX::vget(2.0f, 2.0f, 2.0f) * Scale3DRate);
 		}
 		void			CharacterObj::FirstUpdate(void) noexcept {
 			UpdateInput();

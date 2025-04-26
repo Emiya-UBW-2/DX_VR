@@ -191,9 +191,6 @@ namespace FPS_n2 {
 			//PlayerMngr->GetVehicle()->Spawn(std::atan2f(pos_t.x, pos_t.z), pos_t);
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
-#if defined(DEBUG)
-			DebugDraw::Instance()->SetPoint("Update=Start");
-#endif // DEBUG
 			auto* CameraParts = Camera3D::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
@@ -490,9 +487,6 @@ namespace FPS_n2 {
 			}
 			HitMarkerPool::Instance()->Update();
 			EffectSingleton::Instance()->Update();
-#if defined(DEBUG)
-			DebugDraw::Instance()->SetPoint("Update=End");
-#endif // DEBUG
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {

@@ -136,7 +136,7 @@ namespace FPS_n2 {
 			if (!this->m_IsActive) { return; }
 			this->m_IsDraw |= this->m_Hit_DispPos.Calc(this->pos);
 		}
-		void			Draw(const GraphHandle& hit_Graph, const GraphHandle& guard_Graph) const noexcept {
+		bool			Draw(const GraphHandle& hit_Graph, const GraphHandle& guard_Graph) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			if (this->m_IsActive && this->m_IsDraw) {
 				int			Alpha = static_cast<int>(this->m_Hit_alpha * 255.f);
@@ -166,8 +166,10 @@ namespace FPS_n2 {
 							20, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
 							static_cast<int>(this->m_Hit_DispPos.XScreenPos() + this->m_Hit_AddX) - 10, static_cast<int>(this->m_Hit_DispPos.YScreenPos() + this->m_Hit_AddY), Gray50, Black, "%d", this->m_ArmerDamage);
 					}
+					return true;
 				}
 			}
+			return false;
 		}
 	};
 	class HitMarkerPool : public SingletonBase<HitMarkerPool> {
@@ -206,10 +208,13 @@ namespace FPS_n2 {
 		}
 		void			Draw(void) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
+			bool isDraw = false;
 			for (auto& hitmarker : this->m_HitMarkerList) {
-				hitmarker.Draw(this->hit_Graph, this->guard_Graph);
+				isDraw |= hitmarker.Draw(this->hit_Graph, this->guard_Graph);
 			}
-			DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+			if (isDraw) {
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+			}
 		}
 		void			Dispose(void) noexcept {
 			this->hit_Graph.Dispose();

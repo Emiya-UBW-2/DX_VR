@@ -44,6 +44,8 @@ namespace FPS_n2 {
 		public:
 			void				Init_Sub(void) noexcept override {
 				SetActive(false);
+				SetMinAABB(Vector3DX::vget(-0.1f, -0.1f, -0.1f) * Scale3DRate);
+				SetMaxAABB(Vector3DX::vget(0.1f, 0.1f, 0.1f) * Scale3DRate);
 			}
 			void				FirstUpdate(void) noexcept override;
 			void				DrawShadow(void) noexcept override {
@@ -73,8 +75,8 @@ namespace FPS_n2 {
 			}
 		public:
 			void				Init_Sub(void) noexcept override {
-				SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
-				SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
+				SetMinAABB(Vector3DX::vget(-0.1f, -0.1f, -0.1f) * Scale3DRate);
+				SetMaxAABB(Vector3DX::vget(0.1f, 0.1f, 0.1f) * Scale3DRate);
 				SetActive(true);
 			}
 			void				FirstUpdate(void) noexcept override{}

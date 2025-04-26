@@ -13,6 +13,7 @@ namespace FPS_n2 {
 		this->m_BlackOutAlpha = std::clamp(this->m_BlackOutAlpha + (this->m_IsBlackOut ? 1.f : -1.f) * DXLib_refParts->GetDeltaTime() / 0.5f, 0.f, 1.f);
 	}
 	void FadeControl::Draw(void) const noexcept {
+		if (this->m_BlackOutAlpha <= 1.f / 255.f) { return; }
 		auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 		DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(255.f * this->m_BlackOutAlpha), 0, 255));
 		DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Black, true);

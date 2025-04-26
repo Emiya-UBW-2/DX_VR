@@ -990,7 +990,7 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundControl::SettingChange(void) noexcept {
-			this->m_ShadowRate = 1;
+			this->m_ShadowRate = 0;
 			this->m_BaseRate = 1;
 		}
 		//
@@ -1247,6 +1247,17 @@ namespace FPS_n2 {
 				}
 			}
 			++this->m_ThreadCounter %= TotalCellLayer;
+
+#if defined(DEBUG) && FALSE
+			{
+				for (int loop = 0; loop < TotalCellLayer; ++loop) {
+					auto& Vert = this->m_Draws.at(loop).m_vert32;
+					auto& cell1 = this->m_CellxN.at(loop);
+					if (Vert.GetOutNum() == 0) { continue; }
+					printfDx("Vertex[%d]\n", Vert.GetOutNum() * 4);
+				}
+			}
+#endif
 		}
 		//
 		void		BackGroundControl::BG_Draw(void) const noexcept {

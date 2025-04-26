@@ -92,8 +92,8 @@ namespace FPS_n2 {
 			}
 		public:
 			void				Init_Sub(void) noexcept override {
-				SetMinAABB(Vector3DX::vget(-10.f, -10.f, -10.f) * Scale3DRate);
-				SetMaxAABB(Vector3DX::vget(10.f, 10.f, 10.f) * Scale3DRate);
+				SetMinAABB(Vector3DX::vget(-6.5f, -6.5f, -6.5f) * Scale3DRate);
+				SetMaxAABB(Vector3DX::vget(6.5f, 6.5f, 6.5f) * Scale3DRate);
 				SetActive(true);
 				auto* SE = SoundPool::Instance();
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->Play3D(GetMove().GetPos(), 50.f * Scale3DRate, DX_PLAYTYPE_LOOP);

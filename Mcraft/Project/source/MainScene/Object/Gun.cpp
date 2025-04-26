@@ -98,7 +98,9 @@ namespace FPS_n2 {
 			this->m_MuzzleSmokeControl.AddMuzzleSmokePower();
 			//撃ちアニメに移行
 			SetGunAnime(Charas::GunAnimeID::Shot);
-			this->m_AmmoInChamberObj->SetActive(true);
+			if (GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
+				this->m_AmmoInChamberObj->SetActive(true);
+			}
 			//リコイル
 			float Power = 0.0001f * GetRecoilPower();
 			this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power);
@@ -575,7 +577,8 @@ namespace FPS_n2 {
 				this->m_CartFall.Init(AmmoSpecPath, 4);	//装填したマガジンの弾に合わせて薬莢生成
 				this->m_AmmoInChamberObj = std::make_shared<Objects::AmmoInChamberObj>();
 				ObjectManager::Instance()->InitObject(this->m_AmmoInChamberObj, AmmoSpecPath);
-				(*this->m_MagazinePtr)->SetAmmoActive(GetReloadType() == RELOADTYPE::MAG);//弾込め式ならマガジン内部の弾は描画しない
+				this->m_AmmoInChamberObj->SetActive(false);
+				(*this->m_MagazinePtr)->SetAmmoActive(false);
 			}
 			if (GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
 				this->m_Grenade.Init(GetFilePath(), 1);
@@ -605,6 +608,12 @@ namespace FPS_n2 {
 			}
 			else {
 				this->m_MuzzleSmokeControl.UpdateMuzzleSmoke(GetPartsFrameMatParent(GunFrame::Muzzle).pos(), GetGunAnime() != Charas::GunAnimeID::Shot && !IsNeedCalcSling());
+			}
+			if (this->m_MagazinePtr) {
+				(*this->m_MagazinePtr)->SetAmmoActive(
+					(GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) &&
+					(GetReloadType() == RELOADTYPE::MAG) &&//弾込め式ならマガジン内部の弾は描画しない
+				(GetReloading()));
 			}
 			//
 			for (int loop = 0; loop < static_cast<int>(Charas::GunAnimeID::ChoiceOnceMax); ++loop) {

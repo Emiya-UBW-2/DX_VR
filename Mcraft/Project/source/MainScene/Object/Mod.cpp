@@ -22,8 +22,8 @@ namespace FPS_n2 {
 		}
 		void GunPartsObj::Init_Sub(void) noexcept {
 			this->m_ModifySlot = std::make_unique<ModifySlot>(GetFilePath());
-			SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
-			SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
+			SetMinAABB(Vector3DX::vget(-0.25f, -0.25f, -0.25f) * Scale3DRate);
+			SetMaxAABB(Vector3DX::vget(0.25f, 0.25f, 0.25f) * Scale3DRate);
 			this->m_IsMeshDraw.resize(GetObj().GetMeshNum());
 			for (auto& isdraw : this->m_IsMeshDraw) {
 				isdraw = true;
