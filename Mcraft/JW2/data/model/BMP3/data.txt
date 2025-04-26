@@ -1,5 +1,5 @@
-speed_flont=25
-speed_back=-15
+speed_flont=5
+speed_back=-5
 body_rad=25
 turret_rad=60
 gun_0_ammoName=OF32HE
