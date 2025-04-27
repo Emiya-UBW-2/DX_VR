@@ -1,14 +1,20 @@
 ﻿#pragma once
 #include	"../../Header.hpp"
+#include	"../../sub.hpp"
+#include "Ammo.hpp"
 
 namespace FPS_n2 {
 	namespace Objects {
 		enum class HeliFrame {
+			GunRot,
+			GunAngle,
 			Rappelling1,
 			Rappelling2,
 			Max,
 		};
 		static const char* HeliFrameName[static_cast<int>(HeliFrame::Max)] = {
+			"機銃旋回",
+			"機銃仰角",
 			"Aキャビン下",
 			"Bキャビン下",
 		};
@@ -47,6 +53,17 @@ namespace FPS_n2 {
 
 			HelicopterMove m_HelicopterMove{ HelicopterMove::Random };
 			int m_SpawnPoint{};
+
+			frames m_GunRot{};
+			frames m_GunAngle{};
+
+			Vector3DX m_GunRotR{};
+			//
+			DamageEventControl									m_Damage;
+			//
+			float m_ShotTimer{};
+			int m_AmmoSpecID{};
+			bool m_CanShot{};
 		private:
 			int					GetFrameNum(void) noexcept override { return static_cast<int>(HeliFrame::Max); }
 			const char*			GetFrameStr(int id) noexcept override { return HeliFrameName[id]; }
@@ -92,7 +109,18 @@ namespace FPS_n2 {
 				}
 			}
 		public:
+			//自分がダメージを与えたと通知
+			void			SetDamage(PlayerID DamageID_t, HitPoint Damage, ArmerPoint ArmerDamage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
+				this->m_Damage.Add(-2, DamageID_t, Damage, ArmerDamage, HitType, StartPos, EndPos);
+			}
+			const auto& GetDamageEvent(void) const noexcept { return this->m_Damage; }
+			void			SetDamageEventReset(void) noexcept { this->m_Damage.Reset(); }
+			void			PopDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.Pop(pRet); }
+		public:
 			void				Init_Sub(void) noexcept override {
+				m_GunRot.Set(GetFrame(static_cast<int>(HeliFrame::GunRot)), GetObj());
+				m_GunAngle.Set(GetFrame(static_cast<int>(HeliFrame::GunAngle)), GetObj());
+
 				SetMinAABB(Vector3DX::vget(-6.5f, -6.5f, -6.5f) * Scale3DRate);
 				SetMaxAABB(Vector3DX::vget(6.5f, 6.5f, 6.5f) * Scale3DRate);
 				SetActive(true);
@@ -103,6 +131,12 @@ namespace FPS_n2 {
 				m_YradR = 0.f;
 				m_NowPos = Vector3DX::vget(0.f, 0.f, 0.f) * Scale3DRate;
 				SetAction(HelicopterMove::Random);
+				this->m_ShotTimer = 0.f;
+
+				std::string ChildPath = "data/ammo/";
+				ChildPath += "APIB32";
+				ChildPath += "/";
+				this->m_AmmoSpecID = Objects::AmmoDataManager::Instance()->Add(ChildPath);
 			}
 			void				FirstUpdate(void) noexcept override;
 			void				DrawShadow(void) noexcept override {
@@ -116,7 +150,15 @@ namespace FPS_n2 {
 				if (isDrawSemiTrans) { return; }
 				GetObj().DrawModel();
 				//GetCol().DrawModel();
-
+				//*
+				{
+					Vector3DX Pos;
+					Vector3DX Vec;
+					Pos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::GunAngle))).pos();
+					Vec = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::GunAngle))).zvec2();
+					DxLib::DrawCapsule3D(Pos.get(), (Pos + Vec * (300.f * Scale3DRate)).get(), 0.01f * Scale3DRate, 4, GetColor(64, 0, 0), GetColor(0, 0, 0), TRUE);
+				}
+				//*/
 				if (m_RopePer > 0.f) {
 					Vector3DX Pos;
 

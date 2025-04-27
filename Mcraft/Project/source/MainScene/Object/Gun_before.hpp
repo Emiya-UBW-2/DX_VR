@@ -82,7 +82,7 @@ namespace FPS_n2 {
 				this->m_Ptr.resize(count);
 				for (auto& ptr : this->m_Ptr) {
 					ptr = std::make_shared<Objects::FallObj>();
-					ObjectManager::Instance()->InitObject(ptr, pPath.c_str());
+					ObjectManager::Instance()->InitObject(ptr, pPath);
 				}
 			}
 			void		SetFall(const Vector3DX& pPos, const Matrix3x3DX& pMat, const Vector3DX& pVec, float time, Objects::FallObjectType Type) {

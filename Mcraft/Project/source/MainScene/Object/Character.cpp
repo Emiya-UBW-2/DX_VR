@@ -133,7 +133,7 @@ namespace FPS_n2 {
 					//PlayerMngr->GetVehicle()->SetDamage(GetMyPlayerID(), Damage, ArmerDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
 				else {
-					//PlayerMngr->GetHelicopter()->SetDamage(GetMyPlayerID(), Damage, ArmerDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+					PlayerMngr->GetHelicopter()->SetDamage(GetMyPlayerID(), Damage, ArmerDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
 				return true;
 			}
@@ -791,7 +791,7 @@ namespace FPS_n2 {
 			Path += FolderName;
 			Path += "/";
 			player->SetChara(std::make_shared<CharacterObj>());
-			ObjectManager::Instance()->InitObject(player->GetChara(), Path.c_str());
+			ObjectManager::Instance()->InitObject(player->GetChara(), Path);
 			player->SetAI(std::make_shared<AIs::AIControl>(ID));
 		}
 		void			CharacterObj::LoadCharaGun(const std::string& FolderName, int Select) noexcept {
@@ -799,7 +799,7 @@ namespace FPS_n2 {
 			Path += FolderName;
 			Path += "/";
 			this->m_GunPtrControl.SetGunPtr(Select, std::make_shared<Guns::GunObj>());
-			ObjectManager::Instance()->InitObject(this->m_GunPtrControl.GetGunPtr(Select), Path.c_str());
+			ObjectManager::Instance()->InitObject(this->m_GunPtrControl.GetGunPtr(Select), Path);
 		}
 		//
 		void			CharacterObj::Init_Sub(void) noexcept {

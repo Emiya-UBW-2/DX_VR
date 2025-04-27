@@ -44,7 +44,7 @@ namespace FPS_n2 {
 				std::string ChildPath = "data/ammo/";
 				ChildPath += FileStreamDX::getright(File->SeekLineAndGetStr());
 				ChildPath += "/";
-				this->m_AmmoSpecID[0] = Objects::AmmoDataManager::Instance()->Add(ChildPath.c_str());
+				this->m_AmmoSpecID[0] = Objects::AmmoDataManager::Instance()->Add(ChildPath);
 				this->m_loadTime = std::stof(FileStreamDX::getright(File->SeekLineAndGetStr()));
 				this->m_UpRadLimit = std::stof(FileStreamDX::getright(File->SeekLineAndGetStr()));
 				this->m_DownRadLimit = std::stof(FileStreamDX::getright(File->SeekLineAndGetStr()));

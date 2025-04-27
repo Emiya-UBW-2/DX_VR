@@ -23,7 +23,7 @@ namespace FPS_n2 {
 					std::string ChildPath = Path;
 					ChildPath += data.cFileName;
 					ChildPath += "/";
-					ObjectManager::Instance()->LoadModelBefore(ChildPath.c_str());
+					ObjectManager::Instance()->LoadModelBefore(ChildPath);
 				}
 			}
 			//
@@ -35,8 +35,8 @@ namespace FPS_n2 {
 					std::string ChildPath = Path;
 					ChildPath += data.cFileName;
 					ChildPath += "/";
-					ObjectManager::Instance()->LoadModelBefore(ChildPath.c_str());
-					Guns::GunPartsDataManager::Instance()->Add(ChildPath.c_str());
+					ObjectManager::Instance()->LoadModelBefore(ChildPath);
+					Guns::GunPartsDataManager::Instance()->Add(ChildPath);
 				}
 			}
 			//
@@ -48,8 +48,8 @@ namespace FPS_n2 {
 					std::string ChildPath = Path;
 					ChildPath += data.cFileName;
 					ChildPath += "/";
-					ObjectManager::Instance()->LoadModelBefore(ChildPath.c_str());
-					Guns::GunPartsDataManager::Instance()->Add(ChildPath.c_str());
+					ObjectManager::Instance()->LoadModelBefore(ChildPath);
+					Guns::GunPartsDataManager::Instance()->Add(ChildPath);
 				}
 			}
 			//
@@ -61,8 +61,8 @@ namespace FPS_n2 {
 					std::string ChildPath = Path;
 					ChildPath += data.cFileName;
 					ChildPath += "/";
-					ObjectManager::Instance()->LoadModelBefore(ChildPath.c_str());
-					Objects::AmmoDataManager::Instance()->Add(ChildPath.c_str());
+					ObjectManager::Instance()->LoadModelBefore(ChildPath);
+					Objects::AmmoDataManager::Instance()->Add(ChildPath);
 				}
 			}
 
@@ -152,7 +152,7 @@ namespace FPS_n2 {
 			//Cam
 			CameraParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 			//info
-			CameraParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.1f, Scale3DRate * 100.f);
+			CameraParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.03f, Scale3DRate * 100.f);
 			//Fog
 			SetVerticalFogEnable(true);
 			SetVerticalFogMode(DX_FOGMODE_LINEAR);
@@ -319,6 +319,8 @@ namespace FPS_n2 {
 					if (!this->m_NetWorkController->GetClient() && this->m_NetWorkController->GetServerPlayer()) {
 						//PlayerMngr->GetVehicle()->GetDamageEvent()//TODO
 						//PlayerMngr->GetVehicle()->SetDamageEventReset();
+						//PlayerMngr->GetHelicopter()->GetDamageEvent()//TODO
+						PlayerMngr->GetHelicopter()->SetDamageEventReset();
 					}
 				}
 				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//オンライン
@@ -359,6 +361,7 @@ namespace FPS_n2 {
 						chara->PopDamageEvent(&this->m_DamageEvents);
 					}
 					//PlayerMngr->GetVehicle()->PopDamageEvent(&this->m_DamageEvents);
+					PlayerMngr->GetHelicopter()->PopDamageEvent(&this->m_DamageEvents);
 				}
 				//ダメージイベント
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
@@ -571,7 +574,7 @@ namespace FPS_n2 {
 				}
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (64), White, Black,
-					PingMes.c_str());
+					PingMes);
 			}
 			this->m_FadeControl.Draw();
 		}

@@ -5,7 +5,7 @@
 namespace FPS_n2 {
 	namespace Objects {
 		const bool HelicopterObj::CheckAmmoHit(const Vector3DX& StartPos, Vector3DX* EndPos) noexcept {
-			auto* SE = SoundPool::Instance();
+			//auto* SE = SoundPool::Instance();
 			//とりあえず当たったかどうか探す
 			if (!RefreshCol(StartPos, *EndPos, 10.f * Scale3DRate)) {
 				return false;
@@ -19,6 +19,7 @@ namespace FPS_n2 {
 			return false;
 		}
 		void HelicopterObj::FirstUpdate(void) noexcept {
+			auto* SE = SoundPool::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 
@@ -31,19 +32,50 @@ namespace FPS_n2 {
 			SetObj().SetAnim(static_cast<int>(1)).SetPer(m_OpenPer);
 			SetObj().UpdateAnimAll();
 
+			{
+				auto& chara = PlayerMngr->GetPlayer(0)->GetChara();
+
+				Vector3DX Vec = Matrix3x3DX::Vtrans((chara->GetFrameWorldMat(Charas::CharaFrame::Upper).pos() - SetObj().GetFramePosition(m_GunRot.GetFrameID())).normalized(), GetMove().GetMat().inverse());
+
+				float YVec = std::clamp(std::atan2f(-Vec.x, -Vec.z), deg2rad(-90), deg2rad(90));
+				float XVec = std::clamp(std::atan2f(Vec.y, std::hypotf(Vec.x, Vec.z)), deg2rad(-90), deg2rad(0));
+
+				this->m_CanShot = (deg2rad(-90) < YVec && YVec < deg2rad(90)) && (deg2rad(-90) < XVec && XVec< deg2rad(0));
+
+				Easing(&m_GunRotR, Vector3DX::vget(XVec, YVec, 0.f), 0.95f, EasingType::OutExpo);
+
+				SetObj().SetFrameLocalMatrix(m_GunRot.GetFrameID(), Matrix4x4DX::RotAxis(Vector3DX::up(), m_GunRotR.y) * m_GunRot.GetFrameLocalPosition());
+				SetObj().SetFrameLocalMatrix(m_GunAngle.GetFrameID(), Matrix4x4DX::RotAxis(Vector3DX::right(), m_GunRotR.x) * m_GunAngle.GetFrameLocalPosition());
+			}
+			if (this->m_ShotTimer == 0.f) {
+				if (this->m_CanShot) {
+					this->m_ShotTimer = 0.5f;
+					Vector3DX MuzzlePos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::GunAngle))).pos();
+					Vector3DX MuzzleVec = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::GunAngle))).zvec2();
+					MuzzlePos += MuzzleVec * (1.f * Scale3DRate);
+
+					auto& AmmoData = Objects::AmmoDataManager::Instance()->Get(this->m_AmmoSpecID);
+
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Shot1))->Play3D(GetMove().GetPos(), 100.0f * Scale3DRate);													//サウンド
+					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, AmmoData->GetCaliber() * 10.0f * Scale3DRate, 2.f);	//銃発砲エフェクトのセット
+					Objects::AmmoPool::Instance()->Put(&AmmoData, MuzzlePos, MuzzleVec, -2);
+				}
+			}
+			else {
+				this->m_ShotTimer = std::max(this->m_ShotTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+			}
+
 			m_Timer += DXLib_refParts->GetDeltaTime();
 
 			switch (this->m_HelicopterMove) {
 			case HelicopterMove::Random:
 				if (m_Timer > 10.f) {
-					SetAction(HelicopterMove::Random);
+					//SetAction(HelicopterMove::Random);
 
 					this->m_SpawnPoint = PlayerMngr->GetPlayerNum() - 1;
 					SetAction(HelicopterMove::Rappelling);
 				}
 				m_NowPos = Lerp(m_PrevPos, m_TargetPos, std::clamp(m_Timer / 8.f, 0.f, 1.f));
-
-
 				break;
 			case HelicopterMove::Rappelling:
 				if (m_Timer > 8.f) {

@@ -573,7 +573,7 @@ namespace FPS_n2 {
 			}
 			if (this->m_MagazinePtr) {
 				this->m_MagFall.Init((*this->m_MagazinePtr)->GetFilePath(), 1);
-				const char* AmmoSpecPath = Objects::AmmoDataManager::Instance()->Get((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecID(0))->GetPath().c_str();
+				const auto& AmmoSpecPath = Objects::AmmoDataManager::Instance()->Get((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoSpecID(0))->GetPath();
 				this->m_CartFall.Init(AmmoSpecPath, 4);	//装填したマガジンの弾に合わせて薬莢生成
 				this->m_AmmoInChamberObj = std::make_shared<Objects::AmmoInChamberObj>();
 				ObjectManager::Instance()->InitObject(this->m_AmmoInChamberObj, AmmoSpecPath);
