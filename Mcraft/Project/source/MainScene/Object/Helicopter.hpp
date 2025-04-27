@@ -23,6 +23,7 @@ namespace FPS_n2 {
 		enum class HelicopterMove {
 			Random,
 			Rappelling,
+			Intercept,
 		};
 
 		class HelicopterObj : public BaseObject {
@@ -48,6 +49,8 @@ namespace FPS_n2 {
 			bool m_Open = false;
 			float m_OpenPer = 0.f;
 
+			bool m_IsHit = false;
+
 			bool m_Rope = false;
 			float m_RopePer = 0.f;
 
@@ -61,6 +64,9 @@ namespace FPS_n2 {
 			//
 			DamageEventControl									m_Damage;
 			//
+
+			float m_ReloadTimer{};
+			int m_GunAmmo{5};
 			float m_ShotTimer{};
 			int m_AmmoSpecID{};
 			bool m_CanShot{};
@@ -100,12 +106,16 @@ namespace FPS_n2 {
 					m_PrevPos = m_NowPos;
 					m_TargetPos = Vector3DX::vget(GetRandf(10.f), 0.f, GetRandf(10.f)) * Scale3DRate;
 					break;
+				case HelicopterMove::Intercept:
+					m_PrevPos = m_NowPos;
+					m_TargetPos = Matrix3x3DX::Vtrans(Vector3DX::vget(0.f, 0.f, 15.f + GetRandf(10.f)) * Scale3DRate,Matrix3x3DX::RotAxis(Vector3DX::up(),deg2rad(GetRandf(180.f))));
+					break;
 				default:
 					break;
 				}
 				auto Vec = (m_TargetPos - m_PrevPos);
 				if (Vec.magnitude() > 0.f) {
-					m_YradRT = rad2deg(std::atan2(Vec.x, Vec.z) + DX_PI_F);
+					m_YradRT = rad2deg(std::atan2(-Vec.x, -Vec.z));
 				}
 			}
 		public:
@@ -132,6 +142,8 @@ namespace FPS_n2 {
 				m_NowPos = Vector3DX::vget(0.f, 0.f, 0.f) * Scale3DRate;
 				SetAction(HelicopterMove::Random);
 				this->m_ShotTimer = 0.f;
+				this->m_ReloadTimer = 2.f;
+				this->m_GunAmmo = 5;
 
 				std::string ChildPath = "data/ammo/";
 				ChildPath += "APIB32";
@@ -150,15 +162,13 @@ namespace FPS_n2 {
 				if (isDrawSemiTrans) { return; }
 				GetObj().DrawModel();
 				//GetCol().DrawModel();
-				//*
-				{
+				if (this->m_HelicopterMove == HelicopterMove::Intercept) {
 					Vector3DX Pos;
 					Vector3DX Vec;
 					Pos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::GunAngle))).pos();
 					Vec = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::GunAngle))).zvec2();
 					DxLib::DrawCapsule3D(Pos.get(), (Pos + Vec * (300.f * Scale3DRate)).get(), 0.01f * Scale3DRate, 4, GetColor(64, 0, 0), GetColor(0, 0, 0), TRUE);
 				}
-				//*/
 				if (m_RopePer > 0.f) {
 					Vector3DX Pos;
 
