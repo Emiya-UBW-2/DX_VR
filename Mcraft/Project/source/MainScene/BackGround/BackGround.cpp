@@ -1140,7 +1140,7 @@ namespace FPS_n2 {
 					}
 				}
 				//*/
-				/*
+				//*
 				for (int zpos = -Edge * 2; zpos < Size * Rate + Edge * 3; ++zpos) {
 					for (int xpos = -Edge * 2; xpos < Size * Rate + Edge * 3; ++xpos) {
 						auto SetWall = [&](int xt, int zt) {
@@ -1175,6 +1175,49 @@ namespace FPS_n2 {
 					}
 				}
 				//SaveCellsFile();
+			}
+			else if (false) {
+				//空っぽ
+				SetReferenceCells().SetScale(0);
+
+				for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
+					for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
+						for (int ypos = 0; ypos < GetReferenceCells().m_All; ++ypos) {
+							SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = s_EmptyBlick;
+						}
+					}
+				}
+				{
+					MV1 Model;
+					MV1::Load("data/block.mv1", &Model);
+					{
+						MV1SetupReferenceMesh(Model.get(), 0, FALSE);
+						MV1_REF_POLYGONLIST Data = MV1GetReferenceMesh(Model.get(), 0, FALSE);
+						for (int loop = 0; loop < Data.VertexNum; ++loop) {
+							auto& Ver = Data.Vertexs[loop];
+							Vector3DX Pos = Ver.Position;
+							Vector3DX Dif = Ver.Position;
+							Dif.x = Pos.x - static_cast<int>(Pos.x);
+							Dif.y = Pos.y - static_cast<int>(Pos.y);
+							Dif.z = Pos.z - static_cast<int>(Pos.z);
+							if (Dif.sqrMagnitude() < 0.25f * 0.25f) {
+								int xPos = static_cast<int>(Pos.x * 1);
+								int yPos = static_cast<int>(Pos.y * 1);
+								int zPos = static_cast<int>(Pos.z * 1);
+								for (int xp = 0; xp < 1; ++xp) {
+									for (int yp = 0; yp < 1; ++yp) {
+										for (int zp = 0; zp < 1; ++zp) {
+											SetReferenceCells().SetCellBuf(GetReferenceCells().m_Half + xPos + xp, yPos + yp, GetReferenceCells().m_Half + zPos + zp).m_Cell = 1;
+										}
+									}
+								}
+							}
+						}
+						MV1TerminateReferenceMesh(Model.get(), 0, FALSE);
+					}
+					Model.Dispose();
+				}
+				SaveCellsFile();
 			}
 			else {
 				LoadCellsFile();
