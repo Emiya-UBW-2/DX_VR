@@ -1060,7 +1060,7 @@ namespace FPS_n2 {
 				int Heights = 10;
 				int Edge = -Rate;
 				int EdgeP = -0;
-
+				int Maxheight = 0;
 				for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
 					for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
 						for (int ypos = 0; ypos < GetReferenceCells().m_All; ++ypos) {
@@ -1085,6 +1085,9 @@ namespace FPS_n2 {
 							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(xpos)) / (Size * Rate - 1),
 								(static_cast<float>(zpos)) / (Size * Rate - 1)) * static_cast<float>(GetReferenceCells().m_All * 1 / 10));
+							if (Maxheight < Height) {
+								Maxheight = Height;
+							}
 							for (int ypos = 0; ypos <= Height; ++ypos) {
 								SetReferenceCells().SetCellBuf(GetReferenceCells().m_Half + xPos, ypos, GetReferenceCells().m_Half + zPos).m_Cell = 4;
 							}
@@ -1137,7 +1140,28 @@ namespace FPS_n2 {
 					}
 				}
 				//*/
-
+				/*
+				for (int zpos = -Edge * 2; zpos < Size * Rate + Edge * 3; ++zpos) {
+					for (int xpos = -Edge * 2; xpos < Size * Rate + Edge * 3; ++xpos) {
+						auto SetWall = [&](int xt, int zt) {
+#if DEBUG_NET
+							return;
+#endif
+							int xPos = -Size * Rate / 2 + xpos + xt;
+							int zPos = -Size * Rate / 2 + zpos + zt;
+							int ypos = Maxheight + Heights;
+							SetReferenceCells().SetCellBuf(GetReferenceCells().m_Half + xPos, ypos, GetReferenceCells().m_Half + zPos).m_Cell = 4;
+							};
+						if ((xpos % Rate == 0) && (zpos % Rate == 0)) {
+							for (int xt = 0; xt <= Rate; ++xt) {
+								for (int zt = 0; zt <= Rate; ++zt) {
+									SetWall(xt, zt);
+								}
+							}
+						}
+					}
+				}
+				//*/
 				for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
 					for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
 						for (int ypos = 0; ypos < GetReferenceCells().m_All; ++ypos) {
