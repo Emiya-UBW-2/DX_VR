@@ -57,6 +57,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetTextureAddressMode(DX_TEXADDRESS_WRAP);
 	//MV1SetLoadModelUsePackDraw(TRUE);
 	//
+	FPS_n2::FadeControl::Create();
 	FPS_n2::UIs::ButtonControl::Create();
 	//
 	FPS_n2::Guns::GunPartsDataManager::Create();

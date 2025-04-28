@@ -159,7 +159,7 @@ namespace FPS_n2 {
 				for (const auto& LR : this->m_Fingers) {
 					int Numberindex = 0;
 					for (auto& finger : LR) {
-						Ret.m_Fingers[LRindex][Numberindex] = finger + p.m_Fingers[LRindex][Numberindex];
+						Ret.SetFingerPer(LRindex, Numberindex) = finger + p.GetFingerPer(LRindex, Numberindex);
 						++Numberindex;
 					}
 					++LRindex;
@@ -176,7 +176,7 @@ namespace FPS_n2 {
 				for (const auto& LR : this->m_Fingers) {
 					int Numberindex = 0;
 					for (auto& finger : LR) {
-						Ret.m_Fingers[LRindex][Numberindex] = finger - p.m_Fingers[LRindex][Numberindex];
+						Ret.SetFingerPer(LRindex, Numberindex) = finger - p.GetFingerPer(LRindex, Numberindex);
 						++Numberindex;
 					}
 					++LRindex;
@@ -193,7 +193,7 @@ namespace FPS_n2 {
 				for (const auto& LR : this->m_Fingers) {
 					int Numberindex = 0;
 					for (auto& finger : LR) {
-						Ret.m_Fingers[LRindex][Numberindex] = finger * scale;
+						Ret.SetFingerPer(LRindex, Numberindex) = finger * scale;
 						++Numberindex;
 					}
 					++LRindex;
@@ -276,7 +276,7 @@ namespace FPS_n2 {
 				const auto& GetIsLoop(void) const noexcept { return this->m_IsLoop; }
 			};
 
-			struct AnimDatas {
+			class AnimDatas {
 			public:
 				class GunAnim {
 					Vector3DX		m_Rotate;
@@ -593,5 +593,5 @@ namespace FPS_n2 {
 				EnumGunAnim::Max,
 			},
 		};
-	};
-};
+	}
+}

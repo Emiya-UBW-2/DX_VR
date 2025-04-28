@@ -182,10 +182,10 @@ namespace FPS_n2 {
 		class GunsModify {
 		private:
 			struct SlotSaveData {
-				GunSlot										m_SlotType{ GunSlot::Magazine };
-				int											m_select{ 0 };
-				GunSlot										m_ParentSlotType{ GunSlot::Gun };
-				int											m_Parentselect{ 0 };
+				GunSlot										SlotType{ GunSlot::Magazine };
+				int											Select{ 0 };
+				GunSlot										ParentSlotType{ GunSlot::Gun };
+				int											Parentselect{ 0 };
 			};
 			class SlotData {
 			private:
@@ -218,21 +218,21 @@ namespace FPS_n2 {
 				//持っているデータのセーブデータへの変換
 				SlotSaveData GetSaveData(void) const noexcept {
 					SlotSaveData Tmp;
-					Tmp.m_SlotType = this->m_SlotType;
-					Tmp.m_select = this->m_select;
-					Tmp.m_ParentSlotType = (this->m_ParentSlot) ? (*this->m_ParentSlot)->m_SlotType : GunSlot::Gun;
-					Tmp.m_Parentselect = (this->m_ParentSlot) ? (*this->m_ParentSlot)->m_select : 0;
+					Tmp.SlotType = this->m_SlotType;
+					Tmp.Select = this->m_select;
+					Tmp.ParentSlotType = (this->m_ParentSlot) ? (*this->m_ParentSlot)->m_SlotType : GunSlot::Gun;
+					Tmp.Parentselect = (this->m_ParentSlot) ? (*this->m_ParentSlot)->m_select : 0;
 					return Tmp;
 				}
 				//自身が該当のスロットと同一かどうか確認
 				bool IsSavedSlot(const SlotSaveData& S) {
 					if (this->m_ParentSlot) {
-						if (!(S.m_ParentSlotType == (*this->m_ParentSlot)->m_SlotType) && (S.m_Parentselect == (*this->m_ParentSlot)->m_select)) { return false; }
+						if (!(S.ParentSlotType == (*this->m_ParentSlot)->m_SlotType) && (S.Parentselect == (*this->m_ParentSlot)->m_select)) { return false; }
 					}
 					else {
-						if (S.m_ParentSlotType != GunSlot::Gun) { return false; }
+						if (S.ParentSlotType != GunSlot::Gun) { return false; }
 					}
-					return (this->m_SlotType == S.m_SlotType);
+					return (this->m_SlotType == S.SlotType);
 				}
 			};
 		private:
@@ -261,5 +261,5 @@ namespace FPS_n2 {
 			void			LoadSlots(const char* path) noexcept;
 			void			SaveSlots(const char* path) noexcept;
 		};
-	};
-};
+	}
+}

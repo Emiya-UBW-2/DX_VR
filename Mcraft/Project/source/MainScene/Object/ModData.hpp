@@ -8,10 +8,10 @@ namespace FPS_n2 {
 	namespace Guns {
 		class GunPartsData {
 			struct SlotInfo {
-				GunSlot						m_SlotType{ GunSlot::Gun };
-				std::vector<int>			m_CanAttachItemsUniqueID;
-				std::vector<std::string>	m_ConflictsItemsUniqueID;
-				bool						m_IsNeed{ false };
+				GunSlot						SlotType{ GunSlot::Gun };
+				std::vector<int>			CanAttachItemsUniqueID;
+				std::vector<std::string>	ConflictsItemsUniqueID;
+				bool						IsNeed{ false };
 			};
 		private:
 			std::string						m_path;
@@ -93,7 +93,7 @@ namespace FPS_n2 {
 
 			const SlotInfo* GetSlotInfo(GunSlot select) const noexcept {
 				for (const auto& slot : this->m_SlotInfo) {
-					if (slot->m_SlotType == select) {
+					if (slot->SlotType == select) {
 						return slot.get();
 					}
 				}
@@ -164,5 +164,5 @@ namespace FPS_n2 {
 		public:
 			const int Add(const std::string& filepath) noexcept;
 		};
-	};
-};
+	}
+}

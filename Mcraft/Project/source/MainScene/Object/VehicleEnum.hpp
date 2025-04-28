@@ -3,5 +3,5 @@
 
 namespace FPS_n2 {
 	namespace Objects {
-	};
-};
+	}
+}

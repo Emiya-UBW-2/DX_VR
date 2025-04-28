@@ -152,5 +152,5 @@ namespace FPS_n2 {
 			MuzzlePartsObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::MuzzleAdapter); }
 			virtual ~MuzzlePartsObj(void) noexcept {}
 		};
-	};
-};
+	}
+}

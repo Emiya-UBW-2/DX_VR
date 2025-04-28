@@ -134,5 +134,5 @@ namespace FPS_n2 {
 				this->m_Timer -= DXLib_refParts->GetDeltaTime();
 			}
 		}
-	};
-};
+	}
+}

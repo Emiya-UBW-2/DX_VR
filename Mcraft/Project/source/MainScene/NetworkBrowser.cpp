@@ -102,7 +102,7 @@ namespace FPS_n2 {
 					FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp + xs / 2, y1p, White, Black, "ポート=[%d-%d]", this->m_NetSetting.UsePort, this->m_NetSetting.UsePort + NetWork::Player_num - 1);
 				AddSubBox(xp + xs / 2, y1p + LineHeight / 2, [&]() { ++this->m_NetSetting.UsePort; }, [&]() { --this->m_NetSetting.UsePort; });
 			}
-			if (this->m_IsClient) {//サーバ-はいらない
+			if (!this->m_IsServer) {//サーバ-はいらない
 				int yp1 = y1p + 100;
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 					FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp + xs / 2, yp1, White, Black, "IP=[%d,%d,%d,%d]", this->m_NetSetting.IP.d1, this->m_NetSetting.IP.d2, this->m_NetSetting.IP.d3, this->m_NetSetting.IP.d4);
@@ -139,7 +139,7 @@ namespace FPS_n2 {
 			{
 				int yp1 = y1p;
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp1, White, Black, "種別[%s]", this->m_IsClient ? "クライアント" : "サーバー"); yp1 += LineHeight;
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp1, White, Black, "種別[%s]", this->m_IsServer ? "サーバー" : "クライアント"); yp1 += LineHeight;
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp, yp1, White, Black, "使用ポート[%d-%d]", this->m_NetSetting.UsePort, this->m_NetSetting.UsePort + NetWork::Player_num - 1); yp1 += LineHeight;
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
@@ -151,4 +151,4 @@ namespace FPS_n2 {
 		}
 		this->m_SeqFirst = (Prev != this->m_Sequence);
 	}
-};
+}

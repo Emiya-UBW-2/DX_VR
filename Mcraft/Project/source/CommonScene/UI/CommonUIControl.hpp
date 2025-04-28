@@ -33,10 +33,9 @@ namespace FPS_n2 {
 				ButtonStatus	m_ButtonStatus{ButtonStatus::Ready};
 				ButtonMode		m_ButtonMode{ButtonMode::String};
 				bool			m_EnableSelect{false};
-			private:
+
 				char			m_String[64]{};
 				GraphHandle		m_Icon;
-
 			public:
 				ButtonOnce(GraphHandle* BGPath, int xp, int yp, FontSystem::FontXCenter FontX, FontSystem::FontYCenter FontY) noexcept {
 					LoadCommon(BGPath);
@@ -249,9 +248,6 @@ namespace FPS_n2 {
 			std::vector<std::unique_ptr<ButtonOnce>>	m_ButtonSelect{};
 			int							m_select{0};
 			bool						m_MouseSelectMode{false};
-		public:
-			const auto& GetSelect(void) const noexcept { return this->m_select; }
-			bool		GetTriggerButton(void) const noexcept;
 		private:
 			ButtonControl(void) noexcept;
 			ButtonControl(const ButtonControl&) = delete;
@@ -261,14 +257,8 @@ namespace FPS_n2 {
 				
 			virtual ~ButtonControl(void) noexcept;
 		public:
-			void ResetSelect(void) noexcept {
-				this->m_select = 0;
-				this->m_MouseSelectMode = false;
-			}
-			void UpdateInput(void) noexcept;
-			void Update(void) noexcept;
-			void Draw(void) noexcept;
-			void Dispose(void) noexcept;
+			const auto& GetSelect(void) const noexcept { return this->m_select; }
+			bool		GetTriggerButton(void) const noexcept;
 		public:
 			void AddStringButton(
 				const char* String, int fontsize, bool IsEnableSelect,
@@ -284,6 +274,15 @@ namespace FPS_n2 {
 				this->m_ButtonSelect.emplace_back(std::make_unique<ButtonOnce>(&this->m_SelectBackImage, xp, yp, FontX, FontY));
 				this->m_ButtonSelect.back()->Load_Icon(IconPath, IsEnableSelect);
 			}
+		public:
+			void ResetSelect(void) noexcept {
+				this->m_select = 0;
+				this->m_MouseSelectMode = false;
+			}
+			void UpdateInput(void) noexcept;
+			void Update(void) noexcept;
+			void Draw(void) noexcept;
+			void Dispose(void) noexcept;
 		};
 		// 
 		class CreditControl {
@@ -302,5 +301,5 @@ namespace FPS_n2 {
 			void Draw(int xmin, int ymin, int xmax) const noexcept;
 		};
 		// 
-	};
-};
+	}
+}

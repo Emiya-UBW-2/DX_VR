@@ -165,5 +165,5 @@ namespace FPS_n2 {
 				Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(m_Yrad)));
 
 		}
-	};
-};
+	}
+}

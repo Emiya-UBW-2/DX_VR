@@ -4,7 +4,6 @@
 namespace FPS_n2 {
 	namespace Objects {
 		class AmmoData {
-		private:
 			std::string		m_path;
 			std::string		m_name;
 			float			m_caliber{ 0.f };
@@ -45,33 +44,32 @@ namespace FPS_n2 {
 					auto LEFT = FileStreamDX::getleft(ALL);
 					auto RIGHT = FileStreamDX::getright(ALL);
 					//アイテムデータ読みとり
-					Set_Sub(LEFT, RIGHT);
-				}
-			}
-			void			Set_Sub(const std::string& LEFT, const std::string& RIGHT) noexcept {
-				if (LEFT == "Name") {
-					this->m_name = RIGHT;
-				}
-				else if (LEFT == "ammo_cal(mm)") {
-					this->m_caliber = std::stof(RIGHT) * 0.001f;		//口径
-				}
-				else if (LEFT == "ammo_speed(m/s)") {
-					this->m_speed = std::stof(RIGHT);				//弾速
-				}
-				else if (LEFT == "ammo_pene(mm)") {
-					this->m_penetration = std::stof(RIGHT);			//貫通
-				}
-				else if (LEFT == "ammo_damage") {
-					this->m_damage = (HitPoint)std::stoi(RIGHT);		//ダメージ
-				}
-				else if (LEFT == "Pellets") {
-					this->m_Pellet = std::stoi(RIGHT);				//ペレットの数
-				}
-				else if (LEFT == "Accuracy") {
-					this->m_Accuracy = std::stof(RIGHT);				//ペレットの数
-				}
-				else if (LEFT == "FallSound") {
-					this->m_FallSound = std::stoi(RIGHT);				//ペレットの数
+					{
+						if (LEFT == "Name") {
+							this->m_name = RIGHT;
+						}
+						else if (LEFT == "ammo_cal(mm)") {
+							this->m_caliber = std::stof(RIGHT) * 0.001f;		//口径
+						}
+						else if (LEFT == "ammo_speed(m/s)") {
+							this->m_speed = std::stof(RIGHT);				//弾速
+						}
+						else if (LEFT == "ammo_pene(mm)") {
+							this->m_penetration = std::stof(RIGHT);			//貫通
+						}
+						else if (LEFT == "ammo_damage") {
+							this->m_damage = (HitPoint)std::stoi(RIGHT);		//ダメージ
+						}
+						else if (LEFT == "Pellets") {
+							this->m_Pellet = std::stoi(RIGHT);				//ペレットの数
+						}
+						else if (LEFT == "Accuracy") {
+							this->m_Accuracy = std::stof(RIGHT);				//ペレットの数
+						}
+						else if (LEFT == "FallSound") {
+							this->m_FallSound = std::stoi(RIGHT);				//ペレットの数
+						}
+					}
 				}
 			}
 		};
@@ -101,5 +99,5 @@ namespace FPS_n2 {
 				return static_cast<int>(this->m_Data.size() - 1);
 			}
 		};
-	};
-};
+	}
+}

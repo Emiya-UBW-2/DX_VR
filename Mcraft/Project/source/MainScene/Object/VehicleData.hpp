@@ -7,7 +7,6 @@ namespace FPS_n2 {
 	namespace Objects {
 		//戦車砲データ
 		class GunData {
-		private:
 			float								m_loadTime{};
 			float								m_UpRadLimit{};
 			float								m_DownRadLimit{};
@@ -30,8 +29,8 @@ namespace FPS_n2 {
 			GunData(void) noexcept { }
 			~GunData(void) noexcept { }
 		public:
-			void			Set(int i, const MV1& obj) noexcept {
-				this->m_frame[0].Set(i, obj);
+			void			Set(int ID, const MV1& obj) noexcept {
+				this->m_frame[0].Set(ID, obj);
 				if (obj.GetFrameChildNum(GetGunTurretFrame().GetFrameID()) > 0) {
 					this->m_frame[1].Set(obj.GetFrameChild(GetGunTurretFrame().GetFrameID(), 0), obj);
 				}
@@ -114,69 +113,69 @@ namespace FPS_n2 {
 		public: //コンストラクタ、デストラクタ
 			VhehicleData(const MV1& DataObj, const MV1& DataCol, const char* path) noexcept {
 				//フレーム情報
-				for (int i = 0; i < DataObj.GetFrameNum(); i++) {
-					std::string p = DataObj.GetFrameName(i);
+				for (int loop = 0; loop < DataObj.GetFrameNum(); loop++) {
+					std::string p = DataObj.GetFrameName(loop);
 					if (p.find("転輪", 0) != std::string::npos) {
 						this->m_WheelFrame.resize(this->m_WheelFrame.size() + 1);
-						this->m_WheelFrame.back().Set(i, DataObj);
+						this->m_WheelFrame.back().Set(loop, DataObj);
 					}
 					else if ((p.find("輪", 0) != std::string::npos) && (p.find("転輪", 0) == std::string::npos)) {
 						this->m_NoSpringWheelFrame.resize(this->m_NoSpringWheelFrame.size() + 1);
-						this->m_NoSpringWheelFrame.back().Set(i, DataObj);
+						this->m_NoSpringWheelFrame.back().Set(loop, DataObj);
 					}
 					else if (p.find("旋回", 0) != std::string::npos) {
 						this->m_GunData.resize(this->m_GunData.size() + 1);
-						this->m_GunData.back().Set(i, DataObj);
+						this->m_GunData.back().Set(loop, DataObj);
 					}
 					else if (p.find("履帯設置部", 0) != std::string::npos) { //2D物理
 						this->m_CrawlerFrame[0].clear();
 						this->m_CrawlerFrame[1].clear();
-						for (int z = 0; z < DataObj.GetFrameChildNum(i); z++) {
-							if (DataObj.GetFramePosition(i + 1 + z).x > 0) {
+						for (int z = 0; z < DataObj.GetFrameChildNum(loop); z++) {
+							if (DataObj.GetFramePosition(loop + 1 + z).x > 0) {
 								this->m_CrawlerFrame[0].resize(this->m_CrawlerFrame[0].size() + 1);
-								this->m_CrawlerFrame[0].back().Set(i + 1 + z, DataObj);
+								this->m_CrawlerFrame[0].back().Set(loop + 1 + z, DataObj);
 							}
 							else {
 								this->m_CrawlerFrame[1].resize(this->m_CrawlerFrame[1].size() + 1);
-								this->m_CrawlerFrame[1].back().Set(i + 1 + z, DataObj);
+								this->m_CrawlerFrame[1].back().Set(loop + 1 + z, DataObj);
 							}
 						}
 					}
 				}
 				//メッシュ情報
-				for (int i = 0; i < DataCol.GetMeshNum(); i++) {
-					std::string p = DataCol.GetMaterialName(i);
+				for (int loop = 0; loop < DataCol.GetMeshNum(); loop++) {
+					std::string p = DataCol.GetMaterialName(loop);
 					//車体モジュール
 					if (p.find("armer", 0) != std::string::npos) {
-						this->m_ArmerMesh.emplace_back(i, std::stof(FileStreamDX::getright(p)));//装甲
+						this->m_ArmerMesh.emplace_back(loop, std::stof(FileStreamDX::getright(p)));//装甲
 					}
 					else if (p.find("space", 0) != std::string::npos) {
-						this->m_SpaceArmerMesh.emplace_back(i);//空間装甲
+						this->m_SpaceArmerMesh.emplace_back(loop);//空間装甲
 					}
 					else if (p.find("left_foot", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//モジュール
+						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
 					else if (p.find("right_foot", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//モジュール
+						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
 					else if (p.find("engine", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//モジュール
+						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
 					else if (p.find("human_body", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//モジュール
+						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
 					else if (p.find("ammo_body", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//モジュール
+						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
 					//砲塔モジュール
 					if (p.find("gun", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//モジュール
+						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
 					else if (p.find("human_turret", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//モジュール
+						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
 					else if (p.find("ammo_turret", 0) != std::string::npos) {
-						this->m_ModuleMesh.emplace_back(i);//モジュール
+						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
 				}
 				//4隅確定
@@ -211,7 +210,6 @@ namespace FPS_n2 {
 		};
 		//砲
 		class Guns {
-		private:
 			float							m_loadtimer{};			//装てんカウンター
 			float							m_Recoil{};			//駐退
 			float							m_React{};				//反動
@@ -295,7 +293,6 @@ namespace FPS_n2 {
 		};
 		//履帯
 		class CrawlerFrameControl {
-		private:
 			frames					m_frame;
 			float					m_HitHeight{ (std::numeric_limits<float>::max)() };
 		public:
@@ -312,5 +309,5 @@ namespace FPS_n2 {
 				this->m_HitHeight = (ColRes) ? Height : (std::numeric_limits<float>::max)();
 			}
 		};
-	};
-};
+	}
+}

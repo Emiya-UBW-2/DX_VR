@@ -177,9 +177,8 @@ namespace FPS_n2 {
 			//UI
 			this->m_UIclass.Set();
 			//
-			this->m_DamageEvents.clear();
 			this->m_PauseMenuControl.Init();
-			this->m_FadeControl.Init();
+			FadeControl::Instance()->Init();
 			this->m_IsEnd = false;
 			this->m_StartTimer = 3.f;
 
@@ -208,15 +207,15 @@ namespace FPS_n2 {
 			this->m_PauseMenuControl.Update();
 			if (this->m_PauseMenuControl.IsRetire()) {
 				if (!this->m_IsEnd) {
-					this->m_FadeControl.SetBlackOut(true);
+					FadeControl::Instance()->SetBlackOut(true);
 				}
 				this->m_IsEnd = true;
 			}
-			if (this->m_IsEnd && this->m_FadeControl.IsAll()) {
+			if (this->m_IsEnd && FadeControl::Instance()->IsAll()) {
 				return false;
 			}
 
-			this->m_FadeControl.Update();
+			FadeControl::Instance()->Update();
 
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 
@@ -272,7 +271,7 @@ namespace FPS_n2 {
 					this->m_StartTimer = std::max(this->m_StartTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 				}
 				MyInput.ResetAllInput();
-				if (!SceneParts->IsPause() && this->m_FadeControl.IsClear() && (this->m_StartTimer <= 0.f)) {
+				if (!SceneParts->IsPause() && FadeControl::Instance()->IsClear() && (this->m_StartTimer <= 0.f)) {
 					float AimPer = 1.f / std::max(1.f, ViewChara->GetIsADS() ? ViewChara->GetGunPtrNow()->GetSightZoomSize() : 1.f);
 					MyInput.SetAddxRad(Pad->GetLS_Y() / 200.f * AimPer);
 					MyInput.SetAddyRad(Pad->GetLS_X() / 200.f * AimPer);
@@ -298,7 +297,7 @@ namespace FPS_n2 {
 				}
 				//ネットワーク
 				if (NetBrowser->IsDataReady() && !this->m_NetWorkController) {
-					this->m_NetWorkController = std::make_unique<NetWork::NetWorkController>(NetBrowser->GetClient(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
+					this->m_NetWorkController = std::make_unique<NetWork::NetWorkController>(NetBrowser->IsServer(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
 				}
 				if (this->m_NetWorkController) {
 					NetWork::MoveInfo MoveInfoData;
@@ -312,30 +311,34 @@ namespace FPS_n2 {
 					MoveInfoData.vec = ViewChara->GetMove().GetVec();
 					MoveInfoData.mat = ViewChara->GetMove().GetMat();
 					MoveInfoData.WatchRad = ViewChara->GetRotateRad();
-					this->m_NetWorkController->SetLocalData().SetMyPlayer(MyInput, MoveInfoData, ViewChara->GetDamageEvent(), FreeData);
-					this->m_NetWorkController->Update();
+
+					m_LocalSend.SetMyPlayer(MyInput, MoveInfoData, ViewChara->GetDamageEvent(), FreeData);
 					ViewChara->SetDamageEventReset();
-					//ホストならBMPの判定もやる
-					if (!this->m_NetWorkController->GetClient() && this->m_NetWorkController->GetServerPlayer()) {
-						//PlayerMngr->GetVehicle()->GetDamageEvent()//TODO
-						//PlayerMngr->GetVehicle()->SetDamageEventReset();
-						//PlayerMngr->GetHelicopter()->GetDamageEvent()//TODO
-						PlayerMngr->GetHelicopter()->SetDamageEventReset();
+					if (this->m_NetWorkController->IsServer()) {
+						//ホストならBMP、ヘリの射撃判定もやる
+						if (PlayerMngr->GetVehicle()) {
+							//PlayerMngr->GetVehicle()->GetDamageEvent()//TODO
+							PlayerMngr->GetVehicle()->SetDamageEventReset();
+						}
+						if (PlayerMngr->GetHelicopter()) {
+							//PlayerMngr->GetHelicopter()->GetDamageEvent()//TODO
+							PlayerMngr->GetHelicopter()->SetDamageEventReset();
+						}
 					}
+					this->m_NetWorkController->Update(m_LocalSend);
 				}
+				std::vector<DamageEvent>	DamageEvents;
 				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//オンライン
-					bool IsServerNotPlayer = !this->m_NetWorkController->GetClient() && !this->m_NetWorkController->GetServerPlayer();
+					bool IsServerNotPlayer = this->m_NetWorkController->IsServer() && !this->m_NetWorkController->GetServerPlayer();//サーバーだけど遊ばないよ
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
-						NetWork::PlayerNetData Ret = this->m_NetWorkController->GetServerPlayerData((PlayerID)loop);
+						NetWork::PlayerDataOnNetwork Ret = this->m_NetWorkController->GetServerPlayerData((PlayerID)loop);
 						if (loop == PlayerMngr->GetWatchPlayerID() && !IsServerNotPlayer) {
 							chara->Input(MyInput);//自身が動かすもの
 						}
 						else {//サーバーからのデータで動くもの
-							//サーバーがCPUを動かす場合
-							if (!this->m_NetWorkController->GetClient()) {
-								//cpu
-								//PlayerMngr->GetPlayer(loop)->GetAI()->Update(&MyInput);//AIに入力させる
+							if (this->m_NetWorkController->IsServer()) {
+								//サーバーがCPUを動かす場合
 							}
 							//サーバーからのデータでキャラを動かす
 							chara->OverrideAutoAimID(static_cast<PlayerID>(Ret.GetPlayerSendData().GetFreeData()[0]), Ret.GetPlayerSendData().GetFreeData()[1]);
@@ -343,7 +346,7 @@ namespace FPS_n2 {
 							chara->SetMoveOverRide(Ret.GetPlayerSendData().GetMove());
 						}
 						//このプレイヤーが出したダメージイベントをリストに追加
-						Ret.PopDamageEvent(&this->m_DamageEvents);
+						Ret.PopDamageEvent(&DamageEvents);
 					}
 				}
 				else {//オフライン
@@ -353,28 +356,27 @@ namespace FPS_n2 {
 							chara->Input(MyInput);
 						}
 						else {
-							InputControl OtherInput;
-							PlayerMngr->GetPlayer(loop)->GetAI()->Update(&OtherInput);//AIに入力させる
-							chara->Input(OtherInput);
+							chara->Input(PlayerMngr->GetPlayer(loop)->GetAI()->Update());//AIに入力させる
 						}
 						//このプレイヤーが出したダメージイベントをリストに追加
-						chara->PopDamageEvent(&this->m_DamageEvents);
+						chara->PopDamageEvent(&DamageEvents);
 					}
-					//PlayerMngr->GetVehicle()->PopDamageEvent(&this->m_DamageEvents);
-					PlayerMngr->GetHelicopter()->PopDamageEvent(&this->m_DamageEvents);
+					//PlayerMngr->GetVehicle()->PopDamageEvent(&DamageEvents);
+					PlayerMngr->GetHelicopter()->PopDamageEvent(&DamageEvents);
 				}
 				//ダメージイベント
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 					auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
-					for (int loop2 = 0, Num = static_cast<int>(this->m_DamageEvents.size()); loop2 < Num; ++loop2) {
-						if (chara->SetDamageEvent(this->m_DamageEvents[static_cast<size_t>(loop2)])) {
-							std::swap(this->m_DamageEvents.back(), this->m_DamageEvents[static_cast<size_t>(loop2)]);
-							this->m_DamageEvents.pop_back();
-							--Num;
+					for (size_t loop2 = 0, Max = DamageEvents.size(); loop2 < Max; ++loop2) {
+						if (chara->SetDamageEvent(DamageEvents[loop2])) {
+							std::swap(DamageEvents[static_cast<size_t>(Max - 1)], DamageEvents[loop2]);
+							//DamageEvents.pop_back();//ループ範囲外なのでやらなくてよい
+							--Max;
 							--loop2;
 						}
 					}
 				}
+				DamageEvents.clear();
 			}
 
 			//PlayerMngr->GetVehicle()->SetInput(MyInput, true);
@@ -565,7 +567,7 @@ namespace FPS_n2 {
 					PingMes = Mes;
 				}
 				else {
-					if (this->m_NetWorkController->GetClient()) {
+					if (!this->m_NetWorkController->IsServer()) {
 						PingMes = "Lost Connection";
 					}
 					else {
@@ -576,7 +578,7 @@ namespace FPS_n2 {
 					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (64), White, Black,
 					PingMes);
 			}
-			this->m_FadeControl.Draw();
+			FadeControl::Instance()->Draw();
 		}
 	}
 }

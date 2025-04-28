@@ -11,7 +11,6 @@ namespace FPS_n2 {
 		//戦車
 		class VehicleObj : public BaseObject, public EffectControl {
 			static const PlayerID								m_MyPlayerID{ -1 };//車両はとりあえず-1
-		private:
 			//操作
 			InputControl										m_Input;
 			Matrix3x3DX											m_MouseVec;								//マウスエイム用変数確保
@@ -128,5 +127,5 @@ namespace FPS_n2 {
 				this->m_hitssort.clear();
 			}
 		};
-	};
-};
+	}
+}

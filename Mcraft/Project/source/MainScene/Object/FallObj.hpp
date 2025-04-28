@@ -98,5 +98,5 @@ namespace FPS_n2 {
 			}
 			void			Dispose_Sub(void) noexcept override {}
 		};
-	};
-};
+	}
+}

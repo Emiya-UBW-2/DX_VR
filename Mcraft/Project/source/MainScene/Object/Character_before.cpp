@@ -41,5 +41,5 @@ namespace FPS_n2 {
 			this->m_HitBox[ID].Update((Ptr->GetFrameWorldMat((CharaFrame::LeftFoot)).pos() * 0.75f + Ptr->GetFrameWorldMat((CharaFrame::LeftFoot2)).pos() * 0.25f), 0.095f * SizeRate, HitType::Leg); ++ID;
 			this->m_HitBox[ID].Update(Ptr->GetFrameWorldMat((CharaFrame::LeftFoot)).pos(), 0.095f * SizeRate, HitType::Leg); ++ID;
 		}
-	};
-};
+	}
+}

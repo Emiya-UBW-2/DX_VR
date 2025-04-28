@@ -4,7 +4,6 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class LoadScene : public TEMPSCENE {
-		private:
 			int ASyncLoadNum = 0;
 		public:
 			LoadScene(void) noexcept {}

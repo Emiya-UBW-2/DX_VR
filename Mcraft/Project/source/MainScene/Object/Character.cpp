@@ -26,7 +26,7 @@ namespace FPS_n2 {
 					if ((Event.Damage >= 0) && (Event.ArmerDamage >= 0)) {
 						PlayerMngr->GetPlayer(Event.ShotID)->AddHit(1);
 						//ヒット座標表示を登録
-						HitMarkerPool::Instance()->AddMarker(Event.m_EndPos, Event.Damage, Event.ArmerDamage);
+						HitMarkerPool::Instance()->AddMarker(Event.EndPos, Event.Damage, Event.ArmerDamage);
 					}
 					if (IsDeath) {
 						PlayerMngr->GetPlayer(Event.ShotID)->AddScore(100);
@@ -43,16 +43,16 @@ namespace FPS_n2 {
 				}
 				//エフェクトセット
 				if (Event.Damage > 0) {
-					EffectSingleton::Instance()->SetOnce(Effect::ef_hitblood, Event.m_EndPos, Vector3DX::forward(), Scale3DRate);
+					EffectSingleton::Instance()->SetOnce(Effect::ef_hitblood, Event.EndPos, Vector3DX::forward(), Scale3DRate);
 					EffectSingleton::Instance()->SetEffectSpeed(Effect::ef_hitblood, 2.f);
 				}
 				else if (Event.ArmerDamage > 0) {
-					EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, Event.m_EndPos, (Event.m_StartPos - Event.m_EndPos).normalized(), 0.25f * Scale3DRate);
+					EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, Event.EndPos, (Event.StartPos - Event.EndPos).normalized(), 0.25f * Scale3DRate);
 				}
 				//ヒットモーション
 				if (Event.Damage > 0) {
-					this->m_HitReactionControl.SetHit(Matrix3x3DX::Vtrans(Vector3DX::Cross((Event.m_EndPos - Event.m_StartPos).normalized(), Vector3DX::up()) * -1.f, Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::Upper2)).inverse()));
-					switch (static_cast<HitType>(Event.m_HitType)) {
+					this->m_HitReactionControl.SetHit(Matrix3x3DX::Vtrans(Vector3DX::Cross((Event.EndPos - Event.StartPos).normalized(), Vector3DX::up()) * -1.f, Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::Upper2)).inverse()));
+					switch (static_cast<HitType>(Event.HitType)) {
 					case HitType::Head:
 						break;
 					case HitType::Body:
@@ -855,5 +855,5 @@ namespace FPS_n2 {
 				GetRagDoll().DrawModel();
 			}
 		}
-	};
-};
+	}
+}

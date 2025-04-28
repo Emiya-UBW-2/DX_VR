@@ -7,8 +7,6 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class TitleScene : public TEMPSCENE {
-		private:
-			FadeControl							m_FadeControl;
 			bool								m_IsEnd{ false };//シーン全体の終了フラグ
 			GraphHandle							m_TitleImage;
 			std::unique_ptr<UIs::CreditControl>		m_CreditControl;
@@ -27,5 +25,5 @@ namespace FPS_n2 {
 			void			MainDraw_Sub(int) const noexcept override {}
 			void			DrawUI_Base_Sub(void) const noexcept override;
 		};
-	};
-};
+	}
+}

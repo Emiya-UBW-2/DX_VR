@@ -133,5 +133,5 @@ namespace FPS_n2 {
 				yp1 += Height;
 			}
 		}
-	};
-};
+	}
+}

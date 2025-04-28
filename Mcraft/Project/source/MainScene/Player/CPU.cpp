@@ -29,7 +29,8 @@ namespace FPS_n2 {
 		void AIControl::Init(PlayerID MyID) noexcept {
 			this->m_MyCharaID = MyID;
 		}
-		void AIControl::Update(InputControl*) noexcept {
+		const InputControl AIControl::Update(void) noexcept {
+			InputControl Input;
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
@@ -66,6 +67,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
+			return Input;
 		}
-	};
-};
+	}
+}

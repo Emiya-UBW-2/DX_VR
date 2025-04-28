@@ -475,9 +475,9 @@ namespace FPS_n2 {
 		private:
 			//体のフレーム情報
 			class frame_body {
-			public:
 				std::array<frames, static_cast<int>(RagFrame::Max)>	m_Frames;
 			public:
+				const auto& GetFrame(RagFrame select) const noexcept { return this->m_Frames[static_cast<int>(select)]; }
 				//
 				void SetupFrameInfo(const MV1& obj_) noexcept {
 					for (int loop = 0, max = int(obj_.GetFrameNum()); loop < max; ++loop) {
@@ -525,7 +525,7 @@ namespace FPS_n2 {
 			const auto& GetRagDoll(void) const noexcept { return this->m_RagDoll; }
 
 			const auto GetFrameMat(RagFrame select) const noexcept {
-				auto& frame = this->m_RagObjFrame.m_Frames[static_cast<int>(select)];
+				auto& frame = this->m_RagObjFrame.GetFrame(select);
 				return frame.GetFrameWorldPosition().rotation().inverse() * this->m_RagDoll.GetFrameLocalWorldMatrix(frame.GetFrameID());
 			}
 
@@ -577,5 +577,5 @@ namespace FPS_n2 {
 				this->m_RagDoll.Dispose();
 			}
 		};
-	};
-};
+	}
+}

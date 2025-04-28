@@ -366,10 +366,10 @@ namespace FPS_n2 {
 			GetObj().DrawMesh(1);
 			MV1ResetFrameTextureAddressTransform(GetObj().get(), 0);
 			GetObj().DrawMesh(2);
-			for (int i = 2; i < GetObj().GetMeshNum(); i++) {
-				GetObj().DrawMesh(i);
+			for (int loop = 2; loop < GetObj().GetMeshNum(); loop++) {
+				GetObj().DrawMesh(loop);
 			}
 			//GetCol().DrawModel();
 		}
-	};
-};
+	}
+}

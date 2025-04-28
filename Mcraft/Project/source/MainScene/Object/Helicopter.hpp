@@ -186,5 +186,5 @@ namespace FPS_n2 {
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->StopAll();
 			}
 		};
-	};
-};
+	}
+}

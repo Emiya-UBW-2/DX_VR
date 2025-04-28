@@ -35,7 +35,6 @@ namespace FPS_n2 {
 
 		//クライアントが送信するデータ ローカル版
 		class PlayerSendData {
-		private:
 			InputControl				m_Input;
 			MoveInfo					m_move;
 			DamageEventControl			m_DamageEvent;
@@ -76,43 +75,41 @@ namespace FPS_n2 {
 			}
 		};
 		//クライアントが送信するデータ　通信版
-		class PlayerNetData {
-		private:
+		class PlayerDataOnNetwork {
 			size_t						m_CheckSum{};			//チェックサム
 			NetTime						m_ClientTime{ 0 };		//そのプレイヤーのインゲーム時間
 			PlayerSendData				m_PlayerSendData{};
 			PlayerID					m_ID{ 0 };
 		private:
-			int			CalcCheckSum(void) const noexcept {
+			int				CalcCheckSum(void) const noexcept {
 				return (
 					500 +
 					static_cast<int>(this->m_ID) +
 					static_cast<int>(this->m_ClientTime) +
-					this->m_PlayerSendData.CalcCheckSum()
+					static_cast<int>(this->m_PlayerSendData.CalcCheckSum())
 					);
 			}
 		public:
 			auto			IsCheckSum(void) const noexcept { return this->m_CheckSum == static_cast<size_t>(CalcCheckSum()); }
-			const auto& GetClientTime(void) const noexcept { return this->m_ClientTime; }
-			const auto& GetID(void) const noexcept { return this->m_ID; }
-			const auto& GetPlayerSendData(void) const noexcept { return this->m_PlayerSendData; }
-		public:
-			void			SetID(PlayerID ID) noexcept { this->m_ID = ID; }
+			const auto&		GetClientTime(void) const noexcept { return this->m_ClientTime; }
+			const auto&		GetID(void) const noexcept { return this->m_ID; }
+			const auto&		GetPlayerSendData(void) const noexcept { return this->m_PlayerSendData; }
 			void			PopDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_PlayerSendData.PopDamageEvent(pRet); }
 		public:
-			void			SetData(const PlayerSendData& sendData, NetTime ClientTime) noexcept {
-				this->m_PlayerSendData = sendData;
+			void			SetID(PlayerID ID) noexcept { this->m_ID = ID; }
+			void			SetData(const PlayerSendData& Players, NetTime ClientTime) noexcept {
+				this->m_PlayerSendData = Players;
 				this->m_ClientTime = ClientTime;
 				this->m_CheckSum = static_cast<size_t>(CalcCheckSum());
 			}
 		public:
-			static PlayerNetData	GetLerpData(const PlayerNetData& PrevData, const PlayerNetData& NewData, float Per) noexcept {
-				PlayerNetData tmp;
-				//
-				tmp.m_PlayerSendData = PlayerSendData::GetLerpData(PrevData.GetPlayerSendData(), NewData.GetPlayerSendData(), Per);
+			static PlayerDataOnNetwork	GetLerpData(const PlayerDataOnNetwork& PrevData, const PlayerDataOnNetwork& NewData, float Per) noexcept {
+				PlayerDataOnNetwork tmp;
 				//
 				tmp.m_ID = NewData.m_ID;
 				tmp.m_ClientTime = NewData.m_ClientTime;
+				//
+				tmp.m_PlayerSendData = PlayerSendData::GetLerpData(PrevData.m_PlayerSendData, NewData.m_PlayerSendData, Per);
 				return tmp;
 			}
 		};
@@ -123,31 +120,33 @@ namespace FPS_n2 {
 		};
 		//サーバーが管理するデータ
 		class ServerNetData {
-		private:
-		public:
 			size_t				m_CheckSum{};			//チェックサム
 			size_t				m_ServerFrame{ 0 };			//サーバーフレーム
-			PlayerNetData		m_PlayerData[Player_num];
+			PlayerDataOnNetwork	m_PlayerData[Player_num];
 			size_t				m_PlayerFill[Player_num]{ 0 };
 			ServerPhase			m_ServerPhase{ ServerPhase::Empty };
 		private:
 			int					CalcCheckSum(void) const noexcept {
 				int Players = 0;
-				for (int loop = 0; loop < Player_num; ++loop) {
-					Players += static_cast<int>(this->m_PlayerData[loop].IsCheckSum() ? 100 : 0);
-					Players += static_cast<int>(this->m_PlayerFill[loop] * 10);
+				for (size_t loop = 0; loop < Player_num; ++loop) {
+					Players += static_cast<int>(GetPlayerData(loop).IsCheckSum() ? 100 : 0);
+					Players += static_cast<int>(GetPlayerFill(loop) * 10);
 				}
 				return (
 					500 +
-					static_cast<int>(this->m_ServerFrame) +
+					static_cast<int>(GetServerFrame()) +
 					Players
 					);
 			}
 		public:
-			const auto			IsCheckSum(void) const noexcept { return this->m_CheckSum == static_cast<size_t>(CalcCheckSum()); }
-			const auto			GetEmptyID(void) const noexcept {
+			const auto&				GetServerPhase(void) const noexcept { return this->m_ServerPhase; }
+			const size_t&			GetServerFrame(void) const noexcept { return this->m_ServerFrame; }
+			const PlayerDataOnNetwork&	GetPlayerData(size_t ID) const noexcept { return this->m_PlayerData[ID]; }
+			const size_t&			GetPlayerFill(size_t ID) const noexcept { return this->m_PlayerFill[ID]; }
+			const auto				IsCheckSum(void) const noexcept { return this->m_CheckSum == static_cast<size_t>(CalcCheckSum()); }
+			const auto				GetEmptyID(void) const noexcept {
 				for (int loop = 0; loop < Player_num; ++loop) {
-					if (this->m_PlayerFill[loop] == 1) {
+					if (GetPlayerFill(loop) == 1) {
 						return loop;
 					}
 				}
@@ -156,28 +155,48 @@ namespace FPS_n2 {
 		public:
 			void				SetCheckSum(void) noexcept { this->m_CheckSum = static_cast<size_t>(CalcCheckSum()); }
 		public:
+			void				SetReady(PlayerID loop) noexcept {
+				// 席は埋まってます
+				this->m_PlayerFill[loop] = 1;
+				//マッチング中とする
+				this->m_ServerPhase = ServerPhase::Matching;
+			}
+			void				UpdatePlayerData(const PlayerDataOnNetwork& Data) noexcept {
+				this->m_PlayerData[Data.GetID()] = Data;
+				this->m_PlayerFill[Data.GetID()] = 2;
+			}
+		public:
 			void Init(void) noexcept {
+				this->m_ServerFrame = 0;
 				for (int loop = 0; loop < Player_num; ++loop) {
 					this->m_PlayerFill[loop] = 0;
 				}
 			}
+			void Update(bool IsAllready) noexcept {
+				if (!IsAllready) {
+					this->m_ServerFrame = 0;
+				}
+				else {
+					++this->m_ServerFrame;	// サーバーフレーム更新
+					this->m_ServerPhase = ServerPhase::Ingame; // インゲームです
+				}
+			}
+		public:
 			ServerNetData(void) noexcept {
 				Init();
 			}
 		};
 		//通信
 		class PlayerNetWork {
-		private:
 			size_t											m_LastServerFrame{ 0 };//最後にサーバーから受信したサーバーフレーム
 			size_t											m_LeapFrame{};
 			size_t											m_LeapFrameMax{};
 			ServerNetData									m_LastServerDataBuffer;	//それぞれのコントローラーからもらったデータ
 			ServerNetData									m_LastServerData;	//最新の受信データ
 			ServerNetData									m_PrevServerData;	//前回の受信データ
-			PlayerNetData									m_LocalData;		//ローカルのプレイヤーデータ
+			PlayerDataOnNetwork									m_LocalData;		//ローカルのプレイヤーデータ
 			NetTime											m_TickCnt{ 0 };
 			NetTime											m_TickRate{ 0 };
-			NetTime											m_PrevFrame{ 0 };
 			NetTime											m_ClientTime{ 0 };	//そのプレイヤーのインゲーム時間
 			NetTime											m_PrevTime{ 0 };
 
@@ -194,67 +213,63 @@ namespace FPS_n2 {
 		public:
 			auto& SetLastServerDataBuffer(void) noexcept { return this->m_LastServerDataBuffer; }
 			const auto& GetLastServerDataBuffer(void) const noexcept { return this->m_LastServerDataBuffer; }
-			const auto& GetMyLocalPlayerID(void) const noexcept { return this->m_LocalData.GetID(); }
 			const auto& GetLocalPlayerData(void) const noexcept { return this->m_LocalData; }
+			const auto& GetMyLocalPlayerID(void) const noexcept { return this->m_LocalData.GetID(); }
 			const auto& GetTickUpdateFlag(void) const noexcept { return this->m_TickUpdateFlag; }
-			const auto& GetPingTime(void) const noexcept { return this->m_PingTime; }
+			const auto GetPingTime(void) const noexcept { return (this->m_PingTime == MAXLONGLONG) ? InvalidID : this->m_PingTime; }
+			const auto IsNeedUpdatePing(void) const noexcept { return this->m_TickUpdateFlag && (this->m_PingTime != 0 || this->m_PingTime == MAXLONGLONG); }
 		public:
 			void			SetLocalPlayerID(PlayerID ID) noexcept { this->m_LocalData.SetID(ID); }
 		public:
-			PlayerNetData 	GetLerpServerPlayerData(PlayerID ID) const noexcept {
-				return PlayerNetData::GetLerpData(
-					this->m_PrevServerData.m_PlayerData[static_cast<size_t>(ID)], this->m_LastServerData.m_PlayerData[static_cast<size_t>(ID)],
+			PlayerDataOnNetwork 	GetLerpServerPlayerData(PlayerID ID) const noexcept {
+				return PlayerDataOnNetwork::GetLerpData(
+					this->m_PrevServerData.GetPlayerData(static_cast<size_t>(ID)), this->m_LastServerData.GetPlayerData(static_cast<size_t>(ID)),
 					std::clamp(static_cast<float>(this->m_LeapFrame) / static_cast<float>(this->m_LeapFrameMax), 0.f, 1.f));
 			}
 		public:
 			void			Int(NetTime Tick) noexcept {
+				this->m_LastServerData.Init();
+				this->m_PrevServerData.Init();
+				this->m_LastServerDataBuffer.Init();
 				this->m_LastServerFrame = 0;
 				this->m_LeapFrame = 0;
 				this->m_LeapFrameMax = 20;
-				this->m_LastServerData.m_ServerFrame = 0;
-				this->m_PrevServerData.m_ServerFrame = 0;
 				this->m_TickCnt = 0;
+				this->m_ClientTime = 0;
 				this->m_TickRate = Tick;
-				LONGLONG NowFrame = GetNowHiPerformanceCount();
-				this->m_PrevFrame = NowFrame;
-				this->m_LastServerDataBuffer.Init();
+				this->m_PrevTime = GetNowHiPerformanceCount();
 			}
-			void			UpdateLocalData(const PlayerSendData& pdata, bool TimerStart) noexcept {
+			void			UpdateLocalData(const PlayerSendData& Players, bool TimerStart) noexcept {
+				LONGLONG NowTime = GetNowHiPerformanceCount();
+				LONGLONG DeltaTime = NowTime - this->m_PrevTime;
+				this->m_PrevTime = NowTime;
 				//更新間隔
 				if (!TimerStart) {
 					this->m_ClientTime = 0;
-					this->m_PrevTime = GetNowHiPerformanceCount();
 				}
 				else {
-					LONGLONG NowTime = GetNowHiPerformanceCount();
-					this->m_ClientTime += NowTime - this->m_PrevTime;
-					this->m_PrevTime = NowTime;
+					this->m_ClientTime += DeltaTime;
 				}
-				this->m_LocalData.SetData(pdata, this->m_ClientTime);
-			}
-			void			UpdateTick(void) noexcept {
-				LONGLONG NowFrame = GetNowHiPerformanceCount();
-				this->m_TickCnt += NowFrame - this->m_PrevFrame;
-				this->m_PrevFrame = NowFrame;
-				if (this->m_TickCnt > this->m_TickRate) {
+				this->m_LocalData.SetData(Players, this->m_ClientTime);
+				//Tick更新
+				this->m_TickCnt += DeltaTime;
+				this->m_TickUpdateFlag = (this->m_TickCnt > this->m_TickRate);
+				if (this->m_TickUpdateFlag) {
 					this->m_TickCnt -= this->m_TickRate;
-					this->m_TickUpdateFlag = true;
-					return;
 				}
-				this->m_TickUpdateFlag = false;
 			}
 			void			Update(void) noexcept {
 				if (this->m_TickUpdateFlag) {
 					this->m_PingTime = MAXLONGLONG;
-					if (this->m_LastServerFrame < this->m_LastServerDataBuffer.m_ServerFrame && this->m_LastServerDataBuffer.m_ServerFrame <= (this->m_LastServerFrame + 60)) {//入力されたデータが以前もらったものから0~60F後だったら
-						this->m_LastServerFrame = this->m_LastServerDataBuffer.m_ServerFrame;
+					if (this->m_LastServerFrame < this->m_LastServerDataBuffer.GetServerFrame() && this->m_LastServerDataBuffer.GetServerFrame() <= (this->m_LastServerFrame + 60)) {//入力されたデータが以前もらったものから0~60F後だったら
+						this->m_LastServerFrame = this->m_LastServerDataBuffer.GetServerFrame();
 						this->m_LeapFrame = 0;
 						this->m_PrevServerData = this->m_LastServerData;
 						this->m_LastServerData = this->m_LastServerDataBuffer;
-						auto Total = static_cast<int>(this->m_LastServerData.m_ServerFrame) - static_cast<int>(this->m_PrevServerData.m_ServerFrame);
+						auto Total = static_cast<int>(this->m_LastServerData.GetServerFrame()) - static_cast<int>(this->m_PrevServerData.GetServerFrame());
 						if (Total <= 0) { Total = 20; }
 						this->m_LeapFrameMax = static_cast<size_t>(Total);
-						this->m_PingTime = this->m_LocalData.GetClientTime() - this->m_LastServerData.m_PlayerData[this->m_LocalData.GetID()].GetClientTime();//もらったデータと自分のフレームとの差異がpingになる
+						this->m_PingTime = this->m_LocalData.GetClientTime() - this->m_LastServerData.GetPlayerData(this->m_LocalData.GetID()).GetClientTime();//もらったデータと自分のフレームとの差異がpingになる
 					}
 				}
 				else {
@@ -265,30 +280,43 @@ namespace FPS_n2 {
 		};
 		//
 		enum class ClientPhase : int8_t {
-			Error_CannotConnect = -1,
-			Error_ServerInGame = -2,
-
 			NotConnect = 0,
-
-			Client_WaitConnect,
-			Client_GotPlayerID,
-
-			Server_WaitConnect,
-
+			WaitConnect,
+			Client_WaitReady,
 			Ready,
 		};
-		struct UDPS {
+		class UDPS {
 			UDPNetWorkDX			m_NetWork;
 			ClientPhase				m_Phase{};
 		public:
-			bool IsReady(void) const noexcept { return this->m_Phase == ClientPhase::Ready; }
-			void SendError(ClientPhase ErrorMessage) noexcept {
-				this->Dispose();
-				this->m_Phase = ErrorMessage;
+			const auto&		GetPhase(void) const noexcept { return this->m_Phase; }
+			void			SetPhase(ClientPhase Phase) noexcept { this->m_Phase = Phase; }
+		public:
+			template<class T>
+			bool			RecvData(T* Data) noexcept {
+				T tmpData{};
+				int recvRet = InvalidID;
+				if (this->m_NetWork.RecvData(&tmpData, &recvRet, false) && tmpData.IsCheckSum()) {
+					*Data = tmpData;
+					return true;
+				}
+				return false;
+			}
+			// 返送
+			template<class T>
+			void			SendData(const T& Data) noexcept {
+				if (this->m_NetWork.IsServer()) {
+					this->m_NetWork.ReturnData(Data);
+				}
+				else {
+					this->m_NetWork.SendData(Data);
+				}
 			}
 		public:
-			void Init(bool IsServer, int PORT) noexcept {
+			void Init(bool IsServer, int PORT, const IPDATA& IP) noexcept {
+				this->m_NetWork.SetServerIP(IP);
 				this->m_NetWork.Init(IsServer, PORT);
+				SetPhase(ClientPhase::WaitConnect);
 			}
 			void Dispose(void) noexcept {
 				this->m_NetWork.Dispose();
@@ -297,8 +325,8 @@ namespace FPS_n2 {
 		//サーバー専用
 		class ServerControl {
 			const PlayerID							m_ServerPlayerID = 0;
-		private:
-			std::array<PlayerNetData, Player_num>	m_LastPlayerData;
+
+			std::array<PlayerDataOnNetwork, Player_num>	m_LastPlayerData;
 			std::array<UDPS, Player_num>			m_PlayerUDPPhase;
 			bool									m_IsServerPlay{ false };//サーバーもプレイヤーとして参戦するか
 		public:
@@ -311,14 +339,42 @@ namespace FPS_n2 {
 			virtual ~ServerControl(void) noexcept {}
 		public:
 			const bool		GetIsServerPlayer(PlayerID ID) const noexcept { return this->m_IsServerPlay && (ID == this->m_ServerPlayerID); }
+			int				GetViewPlayerID(void) const noexcept {
+				if (GetIsServerPlayer(m_ServerPlayerID)) {
+					//自分のPlayerID決定
+					return m_ServerPlayerID;
+				}
+				else {
+					//サーバー兼観戦者
+					static const int KeyInputs[] = {
+						KEY_INPUT_NUMPAD0,
+						KEY_INPUT_NUMPAD1,
+						KEY_INPUT_NUMPAD2,
+						KEY_INPUT_NUMPAD3,
+						KEY_INPUT_NUMPAD4,
+						KEY_INPUT_NUMPAD5,
+						KEY_INPUT_NUMPAD6,
+						KEY_INPUT_NUMPAD7,
+						KEY_INPUT_NUMPAD8,
+						KEY_INPUT_NUMPAD9,
+					};
+					for (int loop = 0; loop < Player_num; ++loop) {
+						if (CheckHitKey(KeyInputs[loop]) != 0) {
+							return loop;
+							break;
+						}
+					}
+				}
+				return InvalidID;
+			}
 		public:
 			void			Init(int pPort, bool IsServerPlay) noexcept {
 				this->m_IsServerPlay = IsServerPlay;
 				int PortOffset = 0;
+				IPDATA IP{};//サーバーは指定しないで良い
 				for (int loop = 0; loop < Player_num; ++loop) {
 					if (GetIsServerPlayer(static_cast<PlayerID>(loop))) { continue; }
-					this->m_PlayerUDPPhase[loop].Init(true, pPort + PortOffset); ++PortOffset;
-					this->m_PlayerUDPPhase[loop].m_Phase = ClientPhase::Server_WaitConnect;
+					this->m_PlayerUDPPhase[loop].Init(true, pPort + PortOffset, IP); ++PortOffset;
 				}
 			}
 			void			Update(PlayerNetWork* pPlayerNetwork) noexcept;
@@ -349,9 +405,7 @@ namespace FPS_n2 {
 				this->m_IP = pIP;
 				this->m_CannotConnectTimer = 0.f;
 				this->m_NetWorkSelect = 0;
-				this->m_PlayerUDPPhase.m_NetWork.SetServerIP(this->m_IP);
-				this->m_PlayerUDPPhase.Init(false, this->m_Port + this->m_NetWorkSelect);
-				this->m_PlayerUDPPhase.m_Phase = ClientPhase::Client_WaitConnect;
+				this->m_PlayerUDPPhase.Init(false, this->m_Port + this->m_NetWorkSelect, this->m_IP);
 			}
 			void			Update(PlayerNetWork* pPlayerNetwork) noexcept;
 			void			Dispose(void) noexcept {
@@ -365,9 +419,8 @@ namespace FPS_n2 {
 			static const int		m_PingTotal{ 60 };
 			float					m_Tick{ 15.f };//ティックレート　プレイヤーのFPSより低いと詰まる
 
-			bool					m_IsClient{ true };
+			bool					m_IsServer{ true };
 			bool					m_IsServerPlayer{ true };
-			PlayerSendData			m_LocalData;
 			PlayerNetWork			m_PlayerNet;
 			ServerControl			m_ServerCtrl;			//サーバー専用
 			ClientControl			m_ClientCtrl;			//クライアント専用
@@ -375,8 +428,8 @@ namespace FPS_n2 {
 			float					m_Ping{ 0 };
 			size_t					m_PingNow{ 0 };
 		public:
-			NetWorkController(bool IsClient, int Port, const IPDATA& ip, bool IsServerPlayer) noexcept {
-				Init(IsClient, Port, ip, IsServerPlayer);
+			NetWorkController(bool IsServer, int Port, const IPDATA& ip, bool IsServerPlayer) noexcept {
+				Init(IsServer, Port, ip, IsServerPlayer);
 			}
 			NetWorkController(const NetWorkController&) = delete;
 			NetWorkController(NetWorkController&&) = delete;
@@ -399,26 +452,24 @@ namespace FPS_n2 {
 				this->m_Ping /= static_cast<float>(this->m_PingTotal);
 			}
 		public:
-			auto			IsInGame(void) const noexcept { return this->m_PlayerNet.GetLastServerDataBuffer().m_ServerPhase == ServerPhase::Ingame; }
-			PlayerNetData 	GetServerPlayerData(PlayerID ID) noexcept { return this->m_PlayerNet.GetLerpServerPlayerData(ID); }
-			const auto& GetClient(void) const noexcept { return this->m_IsClient; }
+			auto			IsInGame(void) const noexcept { return this->m_PlayerNet.GetLastServerDataBuffer().GetServerPhase() == ServerPhase::Ingame; }
+			PlayerDataOnNetwork 	GetServerPlayerData(PlayerID ID) noexcept { return this->m_PlayerNet.GetLerpServerPlayerData(ID); }
+			const auto& IsServer(void) const noexcept { return this->m_IsServer; }
 			const auto& GetServerPlayer(void) const noexcept { return this->m_IsServerPlayer; }
 			const auto& GetPing(void) const noexcept { return this->m_Ping; }
 			const auto& GetMyLocalPlayerID(void) const noexcept { return this->m_PlayerNet.GetMyLocalPlayerID(); }
 
 			const auto& GetPlayerData(void) const noexcept { return this->m_PlayerNet; }
-
-			auto& SetLocalData(void) noexcept { return this->m_LocalData; }
 		private:
-			void Init(bool IsClient, int Port, const IPDATA& ip, bool IsServerPlayer) noexcept {
+			void Init(bool IsServer, int Port, const IPDATA& ip, bool IsServerPlayer) noexcept {
 				this->m_PlayerNet.Int(static_cast<NetTime>((1000.f / this->m_Tick) * 1000.f));
-				this->m_IsClient = IsClient;
+				this->m_IsServer = IsServer;
 				this->m_IsServerPlayer = IsServerPlayer;
-				if (this->m_IsClient) {
-					this->m_ClientCtrl.Init(Port, ip);
+				if (this->m_IsServer) {
+					this->m_ServerCtrl.Init(Port, this->m_IsServerPlayer);
 				}
 				else {
-					this->m_ServerCtrl.Init(Port, this->m_IsServerPlayer);
+					this->m_ClientCtrl.Init(Port, ip);
 				}
 			}
 			void Dispose(void) noexcept {
@@ -426,7 +477,7 @@ namespace FPS_n2 {
 				this->m_ClientCtrl.Dispose();
 			}
 		public:
-			void Update(void) noexcept;
+			void Update(const PlayerSendData& Players) noexcept;
 		};
 	}
 }

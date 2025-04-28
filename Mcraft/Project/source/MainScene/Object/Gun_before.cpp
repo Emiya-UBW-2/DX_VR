@@ -220,7 +220,7 @@ namespace FPS_n2 {
 			if (IsAttachedParts(gunSlot)) {
 				Remove(gunSlot);
 			}
-			const auto* FilePath = (*GunPartsDataManager::Instance()->GetData(pSlotInfo->m_CanAttachItemsUniqueID[ID]))->GetPath().c_str();
+			const auto* FilePath = (*GunPartsDataManager::Instance()->GetData(pSlotInfo->CanAttachItemsUniqueID[ID]))->GetPath().c_str();
 
 			switch (gunSlot) {
 			case GunSlot::Magazine:
@@ -249,7 +249,7 @@ namespace FPS_n2 {
 			}
 		}
 		//
-		const std::unique_ptr<ModifySlot>&	GunsModify::SlotData::GetAttachedPartsSlot(void) const noexcept { return (*this->m_MySlot)->GetParts(this->m_SlotType)->GetModifySlot(); }
+		const std::unique_ptr<ModifySlot>& GunsModify::SlotData::GetAttachedPartsSlot(void) const noexcept { return (*this->m_MySlot)->GetParts(this->m_SlotType)->GetModifySlot(); }
 		//
 		GunsModify::GunsModify(const std::shared_ptr<GunObj>& pBaseGun, bool isPreset) noexcept {
 			this->m_BaseGun = pBaseGun;
@@ -266,11 +266,11 @@ namespace FPS_n2 {
 				this->m_SlotDataPool.emplace_back(std::make_unique<SlotData>(NowSlot, pParentSlot, pBaseParts));
 				auto& data = this->m_SlotDataPool.back();
 				//スロットに設定するオブジェクトの選択
-				int Select = pSlotInfo->m_IsNeed ? 0 : InvalidID;
+				int Select = pSlotInfo->IsNeed ? 0 : InvalidID;
 				if (isPreset) {
 					for (const auto& S : this->m_SlotSave) {
 						if (data->IsSavedSlot(S)) {
-							Select = S.m_select;
+							Select = S.Select;
 							break;
 						}
 					}
@@ -344,5 +344,5 @@ namespace FPS_n2 {
 			}
 			outputfile.close();
 		}
-};
-};
+	}
+}

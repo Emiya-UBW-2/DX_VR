@@ -104,5 +104,5 @@ namespace FPS_n2 {
 				this->m_AmmoList.back()->Put(pAmmoData, pos_t, pVec, pMyID);
 			}
 		};
-	};
-};
+	}
+}

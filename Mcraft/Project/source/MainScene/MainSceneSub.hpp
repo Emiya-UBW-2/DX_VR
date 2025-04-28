@@ -27,7 +27,6 @@ namespace FPS_n2 {
 		};
 
 		class MainSceneUI {
-		private:
 			std::array<int, 6>				intParam{};
 			std::array<float, 6>			floatParam{};
 			std::array<std::string, 1>		strParam;
@@ -54,5 +53,5 @@ namespace FPS_n2 {
 			void			SetfloatParam(int ID, float value) noexcept { floatParam[static_cast<size_t>(ID)] = value; }
 			void			SetStrParam(int ID, std::string_view value) noexcept { strParam[static_cast<size_t>(ID)] = value; }
 		};
-	};
-};
+	}
+}

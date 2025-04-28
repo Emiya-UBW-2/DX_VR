@@ -32,8 +32,8 @@ namespace FPS_n2 {
 			void Init(PlayerID MyID) noexcept;
 			void Dispose(void) noexcept {}
 		public:
-			void Update(InputControl*) noexcept;
+			const InputControl Update(void) noexcept;
 			void Draw(void) noexcept {}
 		};
-	};
-};
+	}
+}

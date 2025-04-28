@@ -63,7 +63,7 @@ namespace FPS_n2 {
 			void		SetBack(const NewSetting& per) noexcept { this->m_NewWorkSetting.back() = per; }
 		};
 	private:
-		bool					m_IsClient{ true };
+		bool					m_IsServer{ true };
 		bool					m_IsServerPlayer{ true };
 		NewSetting				m_NetSetting;
 		//共通
@@ -82,19 +82,19 @@ namespace FPS_n2 {
 		virtual ~NetWorkBrowser(void) noexcept {}
 	public:
 		auto			IsDataReady(void) const noexcept { return this->m_Sequence == BrowserSequence::Ready; }
-		const auto& GetClient(void) const noexcept { return this->m_IsClient; }
+		const auto& IsServer(void) const noexcept { return this->m_IsServer; }
 		const auto& GetServerPlayer(void) const noexcept { return this->m_IsServerPlayer; }
 		const auto& GetNetSetting(void) const noexcept { return this->m_NetSetting; }
 	public:
 		void			BeClient(void) noexcept {
-			this->m_IsClient = true;
+			this->m_IsServer = false;
 		}
 		void			BeServerPlayer(void) noexcept {
-			this->m_IsClient = false;
+			this->m_IsServer = true;
 			this->m_IsServerPlayer = true;
 		}
 		void			BeServer(void) noexcept {
-			this->m_IsClient = false;
+			this->m_IsServer = true;
 			this->m_IsServerPlayer = false;
 		}
 		void			ReadyConnect(const NewSetting& netset) noexcept {
@@ -104,4 +104,4 @@ namespace FPS_n2 {
 	public:
 		void Draw(void) noexcept;
 	};
-};
+}

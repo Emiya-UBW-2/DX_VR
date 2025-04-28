@@ -14,7 +14,6 @@ namespace FPS_n2 {
 			friend class SingletonBase<PlayerManager>;
 		private:
 			class PlayerControl {
-			private:
 				std::shared_ptr<Charas::CharacterObj>	m_Chara{ nullptr };
 				std::shared_ptr<AIs::AIControl>			m_AI{ nullptr };
 				int										m_Score{ 0 };							//スコア
@@ -126,4 +125,4 @@ namespace FPS_n2 {
 			}
 		};
 	}
-};
+}

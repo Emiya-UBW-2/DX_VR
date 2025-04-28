@@ -54,5 +54,5 @@ namespace FPS_n2 {
 				ammo->SetActive(true);
 			}
 		}
-	};
-};
+	}
+}

@@ -8,7 +8,6 @@ namespace FPS_n2 {
 	namespace Charas {
 
 		class CharacterObj : public BaseObject {
-		private:
 			HitBoxControl										m_HitBoxControl;
 			WalkSwingControl									m_WalkSwingControl;
 			HitReactionControl									m_HitReactionControl;
@@ -50,7 +49,6 @@ namespace FPS_n2 {
 			bool												m_IsActiveCameraPos{ false };
 			ScreenPosition										m_CameraPos;
 		private:
-			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
 			const auto		GetSpeed(void) const noexcept {
 				if (this->m_IsSquat) {
 					if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
@@ -81,6 +79,7 @@ namespace FPS_n2 {
 			const auto&		GetIsActiveCameraPosToPlayer(void) const noexcept { return this->m_IsActiveCameraPos; }
 			const auto&		GetCameraPosToPlayer(void) const noexcept { return this->m_CameraPos; }
 		public://ゲッター
+			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
 			const auto&		GetMoveEyePos(void) const noexcept { return this->m_WalkSwingControl.GetMoveEyePos(); }
 			const auto&		GetRagDoll(void) const noexcept { return this->m_RagDollControl.GetRagDoll(); }
 			const auto&		GetLeanRad(void) const noexcept { return this->m_LeanControl.GetRad(); }
@@ -200,5 +199,5 @@ namespace FPS_n2 {
 				this->m_GunPtrControl.Dispose();
 			}
 		};
-	};
-};
+	}
+}

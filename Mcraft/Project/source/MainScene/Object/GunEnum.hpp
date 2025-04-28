@@ -105,7 +105,7 @@ namespace FPS_n2 {
 		};
 
 		struct GunSoundSet {
-			std::array<SoundEnum, static_cast<int>(EnumGunSound::Max)>	m_Sound{ };
+			std::array<SoundEnum, static_cast<int>(EnumGunSound::Max)>	Sound{ };
 		};
 		const GunSoundSet GunSoundSets[] = {
 			{
@@ -166,5 +166,5 @@ namespace FPS_n2 {
 			"Sight",
 			"MuzzleAdapter",
 		};
-	};
-};
+	}
+}

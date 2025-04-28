@@ -48,42 +48,42 @@ namespace FPS_n2 {
 				}
 			};
 			struct CellBuffer {
-				int8_t					m_Life{};
-				int8_t					m_Cell{};
-				int8_t					m_FillInfo{};//周りの遮蔽データのbitフラグ
+				int8_t					Life{};
+				int8_t					Cell{};
+				int8_t					FillInfo{};//周りの遮蔽データのbitフラグ
 			public:
-				const auto& GetCell(void) const noexcept { return this->m_Cell; }
+				const auto& GetCell(void) const noexcept { return this->Cell; }
 				bool IsEmpty(void) const noexcept { return GetCell() == s_EmptyBlick; }
-				bool IsOcclusion(void) const noexcept { return this->m_FillInfo == 0b111111; }
-				bool IsOcclusion(int id) const noexcept { return (this->m_FillInfo & (1 << id)) != 0; }
+				bool IsOcclusion(void) const noexcept { return this->FillInfo == 0b111111; }
+				bool IsOcclusion(int id) const noexcept { return (this->FillInfo & (1 << id)) != 0; }
 
 				bool CanDraw(void) const noexcept { return !IsEmpty() && !IsOcclusion(); }
 			public:
-				void ResetOcclusion(void) noexcept { m_FillInfo = 0; }
-				void SetOcclusion(int id) noexcept { m_FillInfo |= (1 << id); }
+				void ResetOcclusion(void) noexcept { FillInfo = 0; }
+				void SetOcclusion(int id) noexcept { FillInfo |= (1 << id); }
 			};
 			struct CellsData {
-				std::vector<CellBuffer>	m_CellBuffer;
-				int		m_scale = 0;
+				std::vector<CellBuffer>	CellBuffer;
+				int						ScaleInt = 0;
 				//算術補助系
-				int		m_scaleRate = static_cast<int>(std::pow(MulPer, this->m_scale));
-				int		m_All = 256 / this->m_scaleRate;
-				int		m_Half = this->m_All / 2;
-				int		m_AllPow2 = this->m_All * this->m_All;
-				float	m_Scale = (CellScale * this->m_scaleRate);
+				int						ScaleRate = static_cast<int>(std::pow(MulPer, this->ScaleInt));
+				int						All = 256 / this->ScaleRate;
+				int						Half = this->All / 2;
+				int						AllPow2 = this->All * this->All;
+				float					Scale = (CellScale * this->ScaleRate);
 			public:
-				const bool		isFarCells(void) const noexcept { return this->m_scale != 0; }
+				const bool		isFarCells(void) const noexcept { return this->ScaleInt != 0; }
 				//
-				const int		GetIndex(int t) const noexcept { return (t % this->m_All + this->m_All) % this->m_All; }
-				const size_t	GetCellNum(int xpos, int ypos, int zpos) const noexcept { return static_cast<size_t>(GetIndex(xpos) * this->m_AllPow2 + ypos * this->m_All + GetIndex(zpos)); }
+				const int		GetIndex(int t) const noexcept { return (t % this->All + this->All) % this->All; }
+				const size_t	GetCellNum(int xpos, int ypos, int zpos) const noexcept { return static_cast<size_t>(GetIndex(xpos) * this->AllPow2 + ypos * this->All + GetIndex(zpos)); }
 				//
-				const auto&		GetCellBuf(int xpos, int ypos, int zpos) const noexcept { return this->m_CellBuffer[GetCellNum(xpos, ypos, zpos)]; }
-				auto&			SetCellBuf(int xpos, int ypos, int zpos) noexcept { return this->m_CellBuffer[GetCellNum(xpos, ypos, zpos)]; }
+				const auto&		GetCellBuf(int xpos, int ypos, int zpos) const noexcept { return this->CellBuffer[GetCellNum(xpos, ypos, zpos)]; }
+				auto&			SetCellBuf(int xpos, int ypos, int zpos) noexcept { return this->CellBuffer[GetCellNum(xpos, ypos, zpos)]; }
 				//
 				const auto		GetPosBuffer(int xpos, int ypos, int zpos, int ID) const noexcept { return GetPos(xpos + ((ID >> 2) & 1), ypos + ((ID >> 1) & 1), zpos + (ID & 1)); }
 				//
 				const int8_t	isFill(int xpos, int ypos, int zpos, int mul) const noexcept {
-					mul /= this->m_scaleRate;
+					mul /= this->ScaleRate;
 					int FillCount = 0;
 					int FillAll = 0;
 
@@ -92,7 +92,7 @@ namespace FPS_n2 {
 					int zMaxmin = zpos * mul + mul - 1;
 					std::vector<int> IDCount;
 					for (int xt = xMaxmin; xt < xMaxmin + mul; ++xt) {
-						for (int yt = yMaxmin; yt < std::min(yMaxmin + mul, this->m_All); ++yt) {
+						for (int yt = yMaxmin; yt < std::min(yMaxmin + mul, this->All); ++yt) {
 							for (int zt = zMaxmin; zt < zMaxmin + mul; ++zt) {
 								++FillAll;
 								if (GetCellBuf(xt, yt, zt).IsEmpty()) { continue; }
@@ -121,25 +121,25 @@ namespace FPS_n2 {
 						return s_EmptyBlick;
 					}
 				}
-				const bool		isInside(int ypos) const noexcept { return ((0 <= ypos) && (ypos < this->m_All)); }
+				const bool		isInside(int ypos) const noexcept { return ((0 <= ypos) && (ypos < this->All)); }
 				const Vector3DX	GetPos(int xpos, int ypos, int zpos) const noexcept {
-					return Vector3DX::vget(static_cast<float>(xpos - this->m_Half), static_cast<float>(ypos - this->m_Half), static_cast<float>(zpos - this->m_Half)) * this->m_Scale;
+					return Vector3DX::vget(static_cast<float>(xpos - this->Half), static_cast<float>(ypos - this->Half), static_cast<float>(zpos - this->Half)) * this->Scale;
 				}
 				const Vector3Int	GetPoint(const Vector3DX& pos) const noexcept {
-					Vector3DX Start = pos / this->m_Scale;
-					return Vector3Int(static_cast<int>(Start.x) + this->m_Half, static_cast<int>(Start.y) + this->m_Half, static_cast<int>(Start.z) + this->m_Half);
+					Vector3DX Start = pos / this->Scale;
+					return Vector3Int(static_cast<int>(Start.x) + this->Half, static_cast<int>(Start.y) + this->Half, static_cast<int>(Start.z) + this->Half);
 				}
 
 				//
 				void			SetScale(int scale) noexcept {
-					this->m_scale = scale;
-					this->m_scaleRate = static_cast<int>(std::pow(MulPer, this->m_scale));
-					this->m_All = 256 / this->m_scaleRate;
+					this->ScaleInt = scale;
+					this->ScaleRate = static_cast<int>(std::pow(MulPer, this->ScaleInt));
+					this->All = 256 / this->ScaleRate;
 					//算術補助系
-					this->m_Half = this->m_All / 2;
-					this->m_AllPow2 = this->m_All * this->m_All;
-					this->m_Scale = (CellScale * this->m_scaleRate);
-					this->m_CellBuffer.resize(static_cast<size_t>(this->m_All * this->m_All * this->m_All));
+					this->Half = this->All / 2;
+					this->AllPow2 = this->All * this->All;
+					this->Scale = (CellScale * this->ScaleRate);
+					this->CellBuffer.resize(static_cast<size_t>(this->All * this->All * this->All));
 				}
 				//
 				void			CalcOcclusion(int xpos, int ypos, int zpos) noexcept {
@@ -150,14 +150,14 @@ namespace FPS_n2 {
 					if (!GetCellBuf(xpos + 1, ypos, zpos).IsEmpty()) { SetCellBuf(xpos, ypos, zpos).SetOcclusion(0); }
 
 					if (!GetCellBuf(xpos - 1, ypos, zpos).IsEmpty()) { SetCellBuf(xpos, ypos, zpos).SetOcclusion(1); }
-					if ((ypos == this->m_All - 1) ? true : !GetCellBuf(xpos, ypos + 1, zpos).IsEmpty()) { SetCellBuf(xpos, ypos, zpos).SetOcclusion(2); }
+					if ((ypos == this->All - 1) ? true : !GetCellBuf(xpos, ypos + 1, zpos).IsEmpty()) { SetCellBuf(xpos, ypos, zpos).SetOcclusion(2); }
 					if ((ypos == 0) ? true : !GetCellBuf(xpos, ypos - 1, zpos).IsEmpty()) { SetCellBuf(xpos, ypos, zpos).SetOcclusion(3); }
 					if (!GetCellBuf(xpos, ypos, zpos + 1).IsEmpty()) { SetCellBuf(xpos, ypos, zpos).SetOcclusion(4); }
 					if (!GetCellBuf(xpos, ypos, zpos - 1).IsEmpty()) { SetCellBuf(xpos, ypos, zpos).SetOcclusion(5); }
 				}
 			};
 			//
-			struct ThreadJobs {
+			class ThreadJobs {
 				std::thread						m_Job;
 				bool							m_JobEnd{};
 				bool							m_IsDoOnce{};
@@ -184,6 +184,10 @@ namespace FPS_n2 {
 					this->m_isEnd = true;
 					JobStart();
 					this->m_IsDoEnd = true;
+				}
+
+				void UpdateDisable(void) noexcept {
+					this->m_isEnd = false;
 				}
 
 				void Update(void) noexcept {
@@ -304,6 +308,12 @@ namespace FPS_n2 {
 				}
 			};
 			//
+			struct Draw {
+				vert32				Vert32;
+				Vector3DX			CamPos;
+				Vector3DX			CamVec;
+			};
+		private:
 			MV1								m_ObjSky;
 			GraphHandle						m_tex{};
 			std::vector<int8_t>				m_CellBase{};
@@ -313,15 +323,10 @@ namespace FPS_n2 {
 			int								m_BaseRate = 1;
 			int								m_ShadowRate = 1;
 			int								m_ThreadCounter = 0;
-			struct Draw {
-				vert32				m_vert32;
-				Vector3DX			m_CamPos;
-				Vector3DX			m_CamVec;
-			};
 			//0~TotalCellLayer-1 : 表示ポリゴンスレッド用
 			//TotalCellLayer~:影スレッド用
 			std::array<Draw, TotalCellLayer + TotalCellLayer>	m_Draws;
-		public:
+		private:
 			BackGroundControl(void) noexcept { Load(); }
 			BackGroundControl(const BackGroundControl&) = delete;
 			BackGroundControl(BackGroundControl&&) = delete;
@@ -330,6 +335,7 @@ namespace FPS_n2 {
 
 			virtual ~BackGroundControl(void) noexcept { Dispose_Load(); }
 		private:
+			//
 			inline static void		Bresenham3D(int x1, int y1, int z1, int x2, int y2, int z2, const std::function<bool(int, int, int)>& OutPutLine) noexcept {
 				int err_1{}, err_2{};
 				int point[3]{};
@@ -505,7 +511,6 @@ namespace FPS_n2 {
 
 				return true;
 			}
-		private:
 			//各方向に向いているポリゴンの追加
 			void			AddPlaneXPlus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xpos, int ypos, int zmin, int zmax, bool IsCalcUV) noexcept;
 			void			AddPlaneXMinus(vert32* pTarget, const CellsData& cellx, const Vector3Int& center, int xpos, int ypos, int zmin, int zmax, bool IsCalcUV) noexcept;
@@ -666,9 +671,9 @@ namespace FPS_n2 {
 			//ライトから見て映るものだけを更新
 			void			AddShadowCubes(size_t id) noexcept;
 			void			FlipShadowCubes(size_t id) noexcept;
-		private:
-			const auto& GetReferenceCells(void) const noexcept { return this->m_CellxN[0]; }
-			auto& SetReferenceCells(void) noexcept { return this->m_CellxN[0]; }
+			//
+			const auto&		GetReferenceCells(void) const noexcept { return this->m_CellxN[0]; }
+			auto&			SetReferenceCells(void) noexcept { return this->m_CellxN[0]; }
 		public:
 			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
 			bool			CheckLinetoMap(const Vector3DX& StartPos, const Vector3DX& EndPos) const noexcept {
@@ -694,12 +699,12 @@ namespace FPS_n2 {
 				if (cell.IsEmpty()) { return false; }
 				if (cell.GetCell() == 1) { return false; }
 				if (cell.GetCell() == 4) { return false; }
-				SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Life -= Damage;
-				if (cell.m_Life <= 0) {
+				SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Life -= Damage;
+				if (cell.Life <= 0) {
 					SetBlick(xpos, ypos, zpos, BackGround::s_EmptyBlick);
 					return true;
 				}
-				else if (cell.m_Life <= 50) {
+				else if (cell.Life <= 50) {
 					if (cell.GetCell() == 2) {
 						SetBlick(xpos, ypos, zpos, 3);
 					}

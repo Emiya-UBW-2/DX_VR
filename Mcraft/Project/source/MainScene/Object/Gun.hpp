@@ -73,9 +73,9 @@ namespace FPS_n2 {
 			bool												m_ReleasePin{ false };
 			Matrix4x4DX											m_BaseMuzzle{};
 		private:
-			Charas::GunAnimNow								m_AnimNowCache{};
+			Charas::GunAnimNow									m_AnimNowCache{};
 		private:
-			const auto			GetGunSoundSet(EnumGunSound Select) const noexcept { return static_cast<int>(GunSoundSets[GetModifySlot()->GetMyData()->GetSoundSelect()].m_Sound[static_cast<int>(Select)]); }
+			const auto			GetGunSoundSet(EnumGunSound Select) const noexcept { return static_cast<int>(GunSoundSets[GetModifySlot()->GetMyData()->GetSoundSelect()].Sound[static_cast<int>(Select)]); }
 			void				PlayGunSound(EnumGunSound Select) noexcept {
 				auto* SE = SoundPool::Instance();
 				if (this->m_EnumGunSoundNow != Select) {
@@ -337,5 +337,5 @@ namespace FPS_n2 {
 			void				Draw(bool isDrawSemiTrans, int Range) noexcept override;
 			void				Dispose_Sub(void) noexcept override;
 		};
-	};
-};
+	}
+}

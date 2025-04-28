@@ -16,20 +16,14 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class MainGameScene : public TEMPSCENE {
-		private:
 			PauseMenuControl							m_PauseMenuControl;
-			FadeControl									m_FadeControl;
-			//UI関連
-			MainSceneUI									m_UIclass;
-			//NetWork
-			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };
-			std::vector<DamageEvent>					m_DamageEvents;
-			//
+			MainSceneUI									m_UIclass;			//UI関連
+			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };			//NetWork
+			NetWork::PlayerSendData						m_LocalSend;
 			bool										m_IsEnd{ false };//シーン全体の終了フラグ
 			float										m_StartTimer{ 0.f };
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
-
 			MV1											m_RagDoll;
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
@@ -38,6 +32,7 @@ namespace FPS_n2 {
 				}
 				return (PlayerID)0;
 			}
+
 		public:
 			MainGameScene(void) noexcept {}
 			MainGameScene(const MainGameScene&) = delete;

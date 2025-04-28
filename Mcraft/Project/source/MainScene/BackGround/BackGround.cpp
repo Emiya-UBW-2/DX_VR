@@ -119,10 +119,8 @@ namespace FPS_n2 {
 		};
 		//ノイズ
 		class PerlinNoise {
-		private:
-			//メンバ変数
 			std::array<uint_fast8_t, 512> perlinNoise{ 0 };
-
+		private:
 			constexpr float getFade(const float t_) const noexcept {
 				return t_ * t_ * t_ * (t_ * (t_ * 6 - 15) + 10);
 			}
@@ -211,7 +209,7 @@ namespace FPS_n2 {
 			float uAdd{};
 			float vAdd{};
 			if (IsCalcUV) {
-				zscale = (zmax - zmin + 1) * cellx.m_scaleRate;
+				zscale = (zmax - zmin + 1) * cellx.ScaleRate;
 				Xofs = (center.z + zmin) % 2 == 0;
 				Yofs = ((cellx.GetCellBuf(center.x + xpos, center.y + ypos, center.z + zmin).GetCell() - 1) * 3) + 1;
 				uAdd = 1.f / 2.f;
@@ -272,7 +270,7 @@ namespace FPS_n2 {
 			float uAdd{};
 			float vAdd{};
 			if (IsCalcUV) {
-				zscale = (zmax - zmin + 1) * cellx.m_scaleRate;
+				zscale = (zmax - zmin + 1) * cellx.ScaleRate;
 				Xofs = (center.z + zmin) % 2 == 0;
 				Yofs = ((cellx.GetCellBuf(center.x + xpos, center.y + ypos, center.z + zmin).GetCell() - 1) * 3) + 1;
 				uAdd = 1.f / 2.f;
@@ -333,7 +331,7 @@ namespace FPS_n2 {
 			float uAdd{};
 			float vAdd{};
 			if (IsCalcUV) {
-				zscale = (zmax - zmin + 1) * cellx.m_scaleRate;
+				zscale = (zmax - zmin + 1) * cellx.ScaleRate;
 				Xofs = (center.z + zmin) % 2 == 0;
 				Yofs = ((cellx.GetCellBuf(center.x + xpos, center.y + ypos, center.z + zmin).GetCell() - 1) * 3) + 0;
 				uAdd = 1.f / 2.f;
@@ -394,7 +392,7 @@ namespace FPS_n2 {
 			float uAdd{};
 			float vAdd{};
 			if (IsCalcUV) {
-				zscale = (zmax - zmin + 1) * cellx.m_scaleRate;
+				zscale = (zmax - zmin + 1) * cellx.ScaleRate;
 				Xofs = (center.z + zmin) % 2 == 0;
 				Yofs = ((cellx.GetCellBuf(center.x + xpos, center.y + ypos, center.z + zmin).GetCell() - 1) * 3) + 2;
 				uAdd = 1.f / 2.f;
@@ -455,7 +453,7 @@ namespace FPS_n2 {
 			float uAdd{};
 			float vAdd{};
 			if (IsCalcUV) {
-				xscale = (xmax - xmin + 1) * cellx.m_scaleRate;
+				xscale = (xmax - xmin + 1) * cellx.ScaleRate;
 				Xofs = (center.x + xmax) % 2 == 0;
 				Yofs = ((cellx.GetCellBuf(center.x + xmin, center.y + ypos, center.z + zpos).GetCell() - 1) * 3) + 1;
 				uAdd = 1.f / 2.f;
@@ -516,7 +514,7 @@ namespace FPS_n2 {
 			float uAdd{};
 			float vAdd{};
 			if (IsCalcUV) {
-				xscale = (xmax - xmin + 1) * cellx.m_scaleRate;
+				xscale = (xmax - xmin + 1) * cellx.ScaleRate;
 				Xofs = (center.x + xmax) % 2 == 0;
 				Yofs = ((cellx.GetCellBuf(center.x + xmin, center.y + ypos, center.z + zpos).GetCell() - 1) * 3) + 1;
 				uAdd = 1.f / 2.f;
@@ -572,18 +570,18 @@ namespace FPS_n2 {
 		void		BackGroundControl::AddCubes(size_t id) noexcept {
 			auto& cellx = this->m_CellxN[id];
 			auto& Draws = this->m_Draws[id];
-			Draws.m_vert32.ResetNum();
-			auto center = cellx.GetPoint(Draws.m_CamPos);
+			Draws.Vert32.ResetNum();
+			auto center = cellx.GetPoint(Draws.CamPos);
 
-			float CamXMinX = Draws.m_CamVec.x * (static_cast<float>(DrawMaxXMinus) + 0.5f);
-			float CamXMaxX = Draws.m_CamVec.x * (static_cast<float>(DrawMaxXPlus) + 0.5f);
-			float CamYMinY = Draws.m_CamVec.y * (static_cast<float>(DrawMaxYMinus) + 0.5f);
-			float CamYMaxY = Draws.m_CamVec.y * (static_cast<float>(DrawMaxYPlus) + 0.5f);
-			float CamZMinZ = Draws.m_CamVec.z * (static_cast<float>(DrawMaxZMinus) + 0.5f);
-			float CamZMaxZ = Draws.m_CamVec.z * (static_cast<float>(DrawMaxZPlus) + 0.5f);
+			float CamXMinX = Draws.CamVec.x * (static_cast<float>(DrawMaxXMinus) + 0.5f);
+			float CamXMaxX = Draws.CamVec.x * (static_cast<float>(DrawMaxXPlus) + 0.5f);
+			float CamYMinY = Draws.CamVec.y * (static_cast<float>(DrawMaxYMinus) + 0.5f);
+			float CamYMaxY = Draws.CamVec.y * (static_cast<float>(DrawMaxYPlus) + 0.5f);
+			float CamZMinZ = Draws.CamVec.z * (static_cast<float>(DrawMaxZMinus) + 0.5f);
+			float CamZMaxZ = Draws.CamVec.z * (static_cast<float>(DrawMaxZPlus) + 0.5f);
 			//X
 			for (int zpos = DrawMaxZMinus; zpos <= DrawMaxZPlus; ++zpos) {
-				float CamZZ = Draws.m_CamVec.z * (static_cast<float>(zpos) + 0.5f);
+				float CamZZ = Draws.CamVec.z * (static_cast<float>(zpos) + 0.5f);
 				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
 				if (
 					((CamXMinX + CamYMinY + CamZZ) <= 0.f) &&//Dot
@@ -597,7 +595,7 @@ namespace FPS_n2 {
 
 				for (int ypos = DrawMaxYMinus; ypos <= DrawMaxYPlus; ++ypos) {
 					if (!cellx.isInside(center.y + ypos)) { continue; }
-					float CamYY = Draws.m_CamVec.y * (static_cast<float>(ypos) + 0.5f);
+					float CamYY = Draws.CamVec.y * (static_cast<float>(ypos) + 0.5f);
 
 					int xMaxminT = DrawMaxXMinus;
 					int xMaxmaxT = DrawMaxXPlus;
@@ -621,12 +619,12 @@ namespace FPS_n2 {
 
 					bool CheckFillYZ = CheckFillZ && ((DrawMinYMinus <= ypos) && (ypos <= DrawMinYPlus));
 					bool CheckInsideYZ = CheckInsideZ && ((DrawMinYMinus < ypos) && (ypos < DrawMinYPlus));
-					AddPlanesZ(&Draws.m_vert32, static_cast<float>(zpos), cellx, center, xMaxminT, xMaxmaxT, ypos, zpos, CheckInsideYZ, CheckFillYZ, true);
+					AddPlanesZ(&Draws.Vert32, static_cast<float>(zpos), cellx, center, xMaxminT, xMaxmaxT, ypos, zpos, CheckInsideYZ, CheckFillYZ, true);
 				}
 			}
 			//Z
 			for (int xpos = DrawMaxXMinus; xpos <= DrawMaxXPlus; ++xpos) {
-				float CamXX = Draws.m_CamVec.x * (static_cast<float>(xpos) + 0.5f);
+				float CamXX = Draws.CamVec.x * (static_cast<float>(xpos) + 0.5f);
 				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
 				if (
 					((CamXX + CamYMinY + CamZMinZ) <= 0.f) &&//Dot
@@ -642,7 +640,7 @@ namespace FPS_n2 {
 
 				for (int ypos = DrawMaxYMinus; ypos <= DrawMaxYPlus; ++ypos) {
 					if (!cellx.isInside(center.y + ypos)) { continue; }
-					float CamYY = Draws.m_CamVec.y * (static_cast<float>(ypos) + 0.5f);
+					float CamYY = Draws.CamVec.y * (static_cast<float>(ypos) + 0.5f);
 
 					int zMaxminT = DrawMaxZMinus;
 					int zMaxmaxT = DrawMaxZPlus;
@@ -665,30 +663,30 @@ namespace FPS_n2 {
 					}
 					bool CheckFillXY = CheckFillX && ((DrawMinYMinus <= ypos) && (ypos <= DrawMinYPlus));
 					bool CheckInsideXY = CheckInsideX && ((DrawMinYMinus < ypos) && (ypos < DrawMinYPlus));
-					AddPlanesXY(&Draws.m_vert32, static_cast<float>(xpos), static_cast<float>(ypos), cellx, center, xpos, ypos, zMaxminT, zMaxmaxT, CheckInsideXY, CheckFillXY, true);
+					AddPlanesXY(&Draws.Vert32, static_cast<float>(xpos), static_cast<float>(ypos), cellx, center, xpos, ypos, zMaxminT, zMaxmaxT, CheckInsideXY, CheckFillXY, true);
 				}
 			}
 		}
 		void		BackGroundControl::FlipCubes(size_t id) noexcept {
 			auto& Draws = this->m_Draws[id];
-			Draws.m_vert32.FlipVerts();
+			Draws.Vert32.FlipVerts();
 			auto* CameraParts = Camera3D::Instance();
-			Draws.m_CamPos = CameraParts->GetMainCamera().GetCamPos();
-			Draws.m_CamVec = (CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized();
+			Draws.CamPos = CameraParts->GetMainCamera().GetCamPos();
+			Draws.CamVec = (CameraParts->GetMainCamera().GetCamVec() - CameraParts->GetMainCamera().GetCamPos()).normalized();
 		}
 		void		BackGroundControl::AddShadowCubes(size_t id) noexcept {
 			size_t shadow = TotalCellLayer + id;
 			auto& cellx = this->m_CellxN[id];
 			auto& Draws = this->m_Draws[shadow];
-			Draws.m_vert32.ResetNum();
-			auto center = cellx.GetPoint(Draws.m_CamPos);
+			Draws.Vert32.ResetNum();
+			auto center = cellx.GetPoint(Draws.CamPos);
 			//X
 			for (int zpos = DrawMaxZMinus; zpos <= DrawMaxZPlus; ++zpos) {
 				bool CheckInsideZ = cellx.isFarCells() && ((DrawMinZMinus < zpos) && (zpos < DrawMinZPlus));
 				for (int ypos = DrawMaxYMinus; ypos <= DrawMaxYPlus; ++ypos) {
 					if (!cellx.isInside(center.y + ypos)) { continue; }
 					bool CheckInsideYZ = CheckInsideZ && ((DrawMinYMinus < ypos) && (ypos < DrawMinYPlus));
-					AddPlanesZ(&Draws.m_vert32, Draws.m_CamVec.z, cellx, center, DrawMaxXMinus, DrawMaxXPlus, ypos, zpos, CheckInsideYZ, false, false);
+					AddPlanesZ(&Draws.Vert32, Draws.CamVec.z, cellx, center, DrawMaxXMinus, DrawMaxXPlus, ypos, zpos, CheckInsideYZ, false, false);
 				}
 			}
 			//Z
@@ -697,7 +695,7 @@ namespace FPS_n2 {
 				for (int ypos = DrawMaxYMinus; ypos <= DrawMaxYPlus; ++ypos) {
 					if (!cellx.isInside(center.y + ypos)) { continue; }
 					bool CheckInsideXY = CheckInsideX && ((DrawMinYMinus < ypos) && (ypos < DrawMinYPlus));
-					AddPlanesXY(&Draws.m_vert32, Draws.m_CamVec.x, Draws.m_CamVec.y, cellx, center, xpos, ypos, DrawMaxZMinus, DrawMaxZPlus, CheckInsideXY, false, false);
+					AddPlanesXY(&Draws.Vert32, Draws.CamVec.x, Draws.CamVec.y, cellx, center, xpos, ypos, DrawMaxZMinus, DrawMaxZPlus, CheckInsideXY, false, false);
 				}
 			}
 		}
@@ -706,10 +704,10 @@ namespace FPS_n2 {
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			auto& Draws = this->m_Draws[shadow];
-			Draws.m_vert32.FlipVerts();
-			//Draws.m_CamPos =  Camera3D::Instance()->GetMainCamera().GetCamPos();
-			Draws.m_CamPos = Vector3DX::vget(0.f, -25.f, 0.f) * Scale3DRate;
-			Draws.m_CamVec = PostPassParts->GetShadowDir();
+			Draws.Vert32.FlipVerts();
+			//Draws.CamPos =  Camera3D::Instance()->GetMainCamera().GetCamPos();
+			Draws.CamPos = Vector3DX::vget(0.f, -25.f, 0.f) * Scale3DRate;
+			Draws.CamVec = PostPassParts->GetShadowDir();
 			SceneParts->SetIsUpdateFarShadowActive();
 		}
 		//
@@ -886,10 +884,10 @@ namespace FPS_n2 {
 				this->m_CellBase.resize(static_cast<size_t>(256 * 256 * 256));
 				fin.read((char*)this->m_CellBase.data(), static_cast<size_t>(sizeof(this->m_CellBase[0])) * 256 * 256 * 256);
 				fin.close();
-				for (int xm = 0; xm < GetReferenceCells().m_All; ++xm) {
-					for (int ym = 0; ym < GetReferenceCells().m_All; ++ym) {
-						for (int zm = 0; zm < GetReferenceCells().m_All; ++zm) {
-							SetReferenceCells().SetCellBuf(xm, ym, zm).m_Cell = this->m_CellBase[GetReferenceCells().GetCellNum(xm, ym, zm)];
+				for (int xm = 0; xm < GetReferenceCells().All; ++xm) {
+					for (int ym = 0; ym < GetReferenceCells().All; ++ym) {
+						for (int zm = 0; zm < GetReferenceCells().All; ++zm) {
+							SetReferenceCells().SetCellBuf(xm, ym, zm).Cell = this->m_CellBase[GetReferenceCells().GetCellNum(xm, ym, zm)];
 						}
 					}
 				}
@@ -897,21 +895,21 @@ namespace FPS_n2 {
 			//一部をペースト
 			//LoadCellsClip(0, 128, 0);
 			/*
-			for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
-				if (xpos - GetReferenceCells().m_Half > -72) {
-					for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
-						for (int ypos = GetReferenceCells().m_All; ypos >=130+15 ; --ypos) {
-							SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = GetReferenceCells().GetCellBuf(xpos, ypos - 15, zpos).GetCell();
+			for (int xpos = 0; xpos < GetReferenceCells().All; ++xpos) {
+				if (xpos - GetReferenceCells().Half > -72) {
+					for (int zpos = 0; zpos < GetReferenceCells().All; ++zpos) {
+						for (int ypos = GetReferenceCells().All; ypos >=130+15 ; --ypos) {
+							SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Cell = GetReferenceCells().GetCellBuf(xpos, ypos - 15, zpos).GetCell();
 						}
 					}
 				}
 			}
 			//*/
 			/*
-			for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
-				for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
-					for (int ypos = GetReferenceCells().m_All; ypos >= 133; --ypos) {
-						SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = 0;
+			for (int xpos = 0; xpos < GetReferenceCells().All; ++xpos) {
+				for (int zpos = 0; zpos < GetReferenceCells().All; ++zpos) {
+					for (int ypos = GetReferenceCells().All; ypos >= 133; --ypos) {
+						SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Cell = 0;
 					}
 				}
 			}
@@ -920,9 +918,9 @@ namespace FPS_n2 {
 		void		BackGroundControl::SaveCellsFile(void) noexcept {
 			{
 				this->m_CellBase.resize(static_cast<size_t>(256 * 256 * 256));
-				for (int xm = 0; xm < GetReferenceCells().m_All; ++xm) {
-					for (int ym = 0; ym < GetReferenceCells().m_All; ++ym) {
-						for (int zm = 0; zm < GetReferenceCells().m_All; ++zm) {
+				for (int xm = 0; xm < GetReferenceCells().All; ++xm) {
+					for (int ym = 0; ym < GetReferenceCells().All; ++ym) {
+						for (int zm = 0; zm < GetReferenceCells().All; ++zm) {
 							this->m_CellBase[GetReferenceCells().GetCellNum(xm, ym, zm)] = GetReferenceCells().GetCellBuf(xm, ym, zm).GetCell();
 						}
 					}
@@ -960,7 +958,7 @@ namespace FPS_n2 {
 			for (int xm = 0; xm < XTotal; ++xm) {
 				for (int ym = 0; ym < YTotal; ++ym) {
 					for (int zm = 0; zm < ZTotal; ++zm) {
-						SetReferenceCells().SetCellBuf(xm + xbasepos, ym + ybasepos, zm + zbasepos).m_Cell =
+						SetReferenceCells().SetCellBuf(xm + xbasepos, ym + ybasepos, zm + zbasepos).Cell =
 							this->m_CellBase[static_cast<size_t>(xm * YTotal * ZTotal + ym * ZTotal + zm)];
 					}
 				}
@@ -999,26 +997,26 @@ namespace FPS_n2 {
 			//テクスチャだけ変える
 			/*
 			if (GetReferenceCells().GetCellBuf(xpos, ypos, zpos).IsEmpty()) { return; }
-			SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = select;
+			SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Cell = select;
 			return;
 			//*/
 			//
-			SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = select;
+			SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Cell = select;
 			//簡易版を更新
 			for (int loop = 1; loop < TotalCellLayer; ++loop) {
 				auto& cell1 = this->m_CellxN[loop];
 
-				int xm = xpos / cell1.m_scaleRate;
-				int ym = ypos / cell1.m_scaleRate;
-				int zm = zpos / cell1.m_scaleRate;
+				int xm = xpos / cell1.ScaleRate;
+				int ym = ypos / cell1.ScaleRate;
+				int zm = zpos / cell1.ScaleRate;
 
-				cell1.SetCellBuf(xm, ym, zm).m_Cell = GetReferenceCells().isFill(xm, ym, zm, cell1.m_scaleRate);
+				cell1.SetCellBuf(xm, ym, zm).Cell = GetReferenceCells().isFill(xm, ym, zm, cell1.ScaleRate);
 			}
 			//遮蔽検索
 			for (auto& cellx : this->m_CellxN) {
-				int xm = xpos / cellx.m_scaleRate;
-				int ym = ypos / cellx.m_scaleRate;
-				int zm = zpos / cellx.m_scaleRate;
+				int xm = xpos / cellx.ScaleRate;
+				int ym = ypos / cellx.ScaleRate;
+				int zm = zpos / cellx.ScaleRate;
 				cellx.CalcOcclusion(xm + 1, ym, zm);
 				cellx.CalcOcclusion(xm - 1, ym, zm);
 				cellx.CalcOcclusion(xm, ym + 1, zm);
@@ -1061,22 +1059,22 @@ namespace FPS_n2 {
 				int Edge = -Rate;
 				int EdgeP = -0;
 				int Maxheight = 0;
-				for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
-					for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
-						for (int ypos = 0; ypos < GetReferenceCells().m_All; ++ypos) {
-							SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = s_EmptyBlick;
+				for (int xpos = 0; xpos < GetReferenceCells().All; ++xpos) {
+					for (int zpos = 0; zpos < GetReferenceCells().All; ++zpos) {
+						for (int ypos = 0; ypos < GetReferenceCells().All; ++ypos) {
+							SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Cell = s_EmptyBlick;
 						}
 					}
 				}
-				for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
-					for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
+				for (int xpos = 0; xpos < GetReferenceCells().All; ++xpos) {
+					for (int zpos = 0; zpos < GetReferenceCells().All; ++zpos) {
 						int xPos = -Size * Rate / 2 + xpos;
 						int zPos = -Size * Rate / 2 + zpos;
 						//外壁
 						if ((-EdgeP <= xpos && xpos <= Size * Rate + EdgeP - 1) && (-EdgeP <= zpos && zpos <= Size * Rate + EdgeP - 1)) {
 							if ((xpos == -EdgeP || xpos == Size * Rate + EdgeP - 1) || (zpos == -EdgeP || zpos == Size * Rate + EdgeP - 1)) {
-								for (int ypos = 0; ypos <= GetReferenceCells().m_All / 8; ++ypos) {
-									SetReferenceCells().SetCellBuf(GetReferenceCells().m_Half + xPos, ypos, GetReferenceCells().m_Half + zPos).m_Cell = 1;
+								for (int ypos = 0; ypos <= GetReferenceCells().All / 8; ++ypos) {
+									SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos, ypos, GetReferenceCells().Half + zPos).Cell = 1;
 								}
 							}
 						}
@@ -1084,12 +1082,12 @@ namespace FPS_n2 {
 						if ((-EdgeP < xpos && xpos < Size * Rate + EdgeP - 1) && (-EdgeP < zpos && zpos < Size * Rate + EdgeP - 1)) {
 							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(xpos)) / (Size * Rate - 1),
-								(static_cast<float>(zpos)) / (Size * Rate - 1)) * static_cast<float>(GetReferenceCells().m_All * 1 / 10));
+								(static_cast<float>(zpos)) / (Size * Rate - 1)) * static_cast<float>(GetReferenceCells().All * 1 / 10));
 							if (Maxheight < Height) {
 								Maxheight = Height;
 							}
 							for (int ypos = 0; ypos <= Height; ++ypos) {
-								SetReferenceCells().SetCellBuf(GetReferenceCells().m_Half + xPos, ypos, GetReferenceCells().m_Half + zPos).m_Cell = 4;
+								SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos, ypos, GetReferenceCells().Half + zPos).Cell = 4;
 							}
 						}
 					}
@@ -1107,9 +1105,9 @@ namespace FPS_n2 {
 							int zPos = -Size * Rate / 2 + zpos + zt;
 							auto Height = static_cast<int>(ns.octaveNoise(2, 
 								(static_cast<float>(xpos + xt)) / (Size * Rate),
-								(static_cast<float>(zpos + zt)) / (Size * Rate)) * static_cast<float>(GetReferenceCells().m_All * 1 / 10));
+								(static_cast<float>(zpos + zt)) / (Size * Rate)) * static_cast<float>(GetReferenceCells().All * 1 / 10));
 							for (int ypos = Height; ypos <= Height + Heights; ++ypos) {
-								SetReferenceCells().SetCellBuf(GetReferenceCells().m_Half + xPos, ypos, GetReferenceCells().m_Half + zPos).m_Cell = 2;
+								SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos, ypos, GetReferenceCells().Half + zPos).Cell = 2;
 							}
 						};
 						int xp = xpos / Rate;
@@ -1140,7 +1138,7 @@ namespace FPS_n2 {
 					}
 				}
 				//*/
-				//*
+				/*
 				for (int zpos = -Edge * 2; zpos < Size * Rate + Edge * 3; ++zpos) {
 					for (int xpos = -Edge * 2; xpos < Size * Rate + Edge * 3; ++xpos) {
 						auto SetWall = [&](int xt, int zt) {
@@ -1150,7 +1148,7 @@ namespace FPS_n2 {
 							int xPos = -Size * Rate / 2 + xpos + xt;
 							int zPos = -Size * Rate / 2 + zpos + zt;
 							int ypos = Maxheight + Heights;
-							SetReferenceCells().SetCellBuf(GetReferenceCells().m_Half + xPos, ypos, GetReferenceCells().m_Half + zPos).m_Cell = 4;
+							SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos, ypos, GetReferenceCells().Half + zPos).Cell = 4;
 							};
 						if ((xpos % Rate == 0) && (zpos % Rate == 0)) {
 							for (int xt = 0; xt <= Rate; ++xt) {
@@ -1162,14 +1160,14 @@ namespace FPS_n2 {
 					}
 				}
 				//*/
-				for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
-					for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
-						for (int ypos = 0; ypos < GetReferenceCells().m_All; ++ypos) {
+				for (int xpos = 0; xpos < GetReferenceCells().All; ++xpos) {
+					for (int zpos = 0; zpos < GetReferenceCells().All; ++zpos) {
+						for (int ypos = 0; ypos < GetReferenceCells().All; ++ypos) {
 							if (GetReferenceCells().GetCellBuf(xpos, ypos, zpos).GetCell() != s_EmptyBlick) {
-								SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Life = 100;
+								SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Life = 100;
 							}
 							else {
-								SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Life = 0;
+								SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Life = 0;
 							}
 						}
 					}
@@ -1180,10 +1178,10 @@ namespace FPS_n2 {
 				//空っぽ
 				SetReferenceCells().SetScale(0);
 
-				for (int xpos = 0; xpos < GetReferenceCells().m_All; ++xpos) {
-					for (int zpos = 0; zpos < GetReferenceCells().m_All; ++zpos) {
-						for (int ypos = 0; ypos < GetReferenceCells().m_All; ++ypos) {
-							SetReferenceCells().SetCellBuf(xpos, ypos, zpos).m_Cell = s_EmptyBlick;
+				for (int xpos = 0; xpos < GetReferenceCells().All; ++xpos) {
+					for (int zpos = 0; zpos < GetReferenceCells().All; ++zpos) {
+						for (int ypos = 0; ypos < GetReferenceCells().All; ++ypos) {
+							SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Cell = s_EmptyBlick;
 						}
 					}
 				}
@@ -1207,7 +1205,7 @@ namespace FPS_n2 {
 								for (int xp = 0; xp < 1; ++xp) {
 									for (int yp = 0; yp < 1; ++yp) {
 										for (int zp = 0; zp < 1; ++zp) {
-											SetReferenceCells().SetCellBuf(GetReferenceCells().m_Half + xPos + xp, yPos + yp, GetReferenceCells().m_Half + zPos + zp).m_Cell = 1;
+											SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos + xp, yPos + yp, GetReferenceCells().Half + zPos + zp).Cell = 1;
 										}
 									}
 								}
@@ -1226,19 +1224,19 @@ namespace FPS_n2 {
 			for (int loop = 1; loop < TotalCellLayer; ++loop) {
 				auto& cell1 = this->m_CellxN[loop];
 				cell1.SetScale(loop);
-				for (int xm = 0; xm < cell1.m_All; ++xm) {
-					for (int ym = 0; ym < cell1.m_All; ++ym) {
-						for (int zm = 0; zm < cell1.m_All; ++zm) {
-							cell1.SetCellBuf(xm, ym, zm).m_Cell = GetReferenceCells().isFill(xm, ym, zm, cell1.m_scaleRate);
+				for (int xm = 0; xm < cell1.All; ++xm) {
+					for (int ym = 0; ym < cell1.All; ++ym) {
+						for (int zm = 0; zm < cell1.All; ++zm) {
+							cell1.SetCellBuf(xm, ym, zm).Cell = GetReferenceCells().isFill(xm, ym, zm, cell1.ScaleRate);
 						}
 					}
 				}
 			}
 			//遮蔽検索
 			for (auto& cellx : this->m_CellxN) {
-				for (int xpos = 0; xpos < cellx.m_All; ++xpos) {
-					for (int ypos = 0; ypos < cellx.m_All; ++ypos) {
-						for (int zpos = 0; zpos < cellx.m_All; ++zpos) {
+				for (int xpos = 0; xpos < cellx.All; ++xpos) {
+					for (int ypos = 0; ypos < cellx.All; ++ypos) {
+						for (int zpos = 0; zpos < cellx.All; ++zpos) {
 							cellx.CalcOcclusion(xpos, ypos, zpos);
 						}
 					}
@@ -1255,7 +1253,7 @@ namespace FPS_n2 {
 			//
 			constexpr size_t size = (DrawMaxXPlus - DrawMaxXMinus) * (DrawMaxYPlus - DrawMaxYMinus) * (DrawMaxZPlus - DrawMaxZMinus) / 2 * 3 / 100;
 			for (auto& Vert : this->m_Draws) {
-				Vert.m_vert32.Init(size);
+				Vert.Vert32.Init(size);
 			}
 			//
 			this->m_Jobs[0].Init(
@@ -1297,17 +1295,17 @@ namespace FPS_n2 {
 				if ((loop != 0) && (loop != this->m_ThreadCounter)) { continue; }
 				auto& cell1 = this->m_CellxN[loop];
 				//
-				if (this->m_BaseRate < cell1.m_scale) {
-					this->m_Draws[loop].m_vert32.Disable();
+				if (this->m_BaseRate < cell1.ScaleInt) {
+					this->m_Draws[loop].Vert32.Disable();
 				}
 				else {
 					this->m_Jobs[loop].Update();
 				}
 				//
 				int shadow = TotalCellLayer + loop;
-				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (this->m_ShadowRate < cell1.m_scale)) {
-					this->m_Draws[shadow].m_vert32.Disable();
-					this->m_Jobs[shadow].m_isEnd = false;
+				if ((OptionParts->GetParamInt(EnumSaveParam::shadow) == 0) || (this->m_ShadowRate < cell1.ScaleInt)) {
+					this->m_Draws[shadow].Vert32.Disable();
+					this->m_Jobs[shadow].UpdateDisable();
 				}
 				else {
 					this->m_Jobs[shadow].Update();
@@ -1318,7 +1316,7 @@ namespace FPS_n2 {
 #if defined(DEBUG) && FALSE
 			{
 				for (int loop = 0; loop < TotalCellLayer; ++loop) {
-					auto& Vert = this->m_Draws[loop].m_vert32;
+					auto& Vert = this->m_Draws[loop].Vert32;
 					auto& cell1 = this->m_CellxN[loop];
 					if (Vert.GetOutNum() == 0) { continue; }
 					printfDx("Vertex[%d]\n", Vert.GetOutNum() * 4);
@@ -1340,7 +1338,7 @@ namespace FPS_n2 {
 		}
 		void		BackGroundControl::Shadow_Draw(void) const noexcept {
 			for (int shadow = TotalCellLayer; shadow < TotalCellLayer + TotalCellLayer; ++shadow) {
-				auto& Vert = this->m_Draws[shadow].m_vert32;
+				auto& Vert = this->m_Draws[shadow].Vert32;
 				Vert.Draw(this->m_tex);
 			}
 		}
@@ -1352,11 +1350,11 @@ namespace FPS_n2 {
 
 			SetUseTextureToShader(0, this->m_tex.get());
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
-				auto& Vert = this->m_Draws[loop].m_vert32;
+				auto& Vert = this->m_Draws[loop].Vert32;
 				auto& cell1 = this->m_CellxN[loop];
 				if (Vert.GetOutNum() == 0) { continue; }
-				if (!cell1.isFarCells() && !(cell1.m_Scale < Far)) { continue; }
-				if (cell1.isFarCells() && !(Near < cell1.m_Scale && cell1.m_Scale < Far)) { continue; }
+				if (!cell1.isFarCells() && !(cell1.Scale < Far)) { continue; }
+				if (cell1.isFarCells() && !(Near < cell1.Scale && cell1.Scale < Far)) { continue; }
 				Vert.DrawByShader();
 			}
 			SetUseTextureToShader(0, InvalidID);
@@ -1368,11 +1366,11 @@ namespace FPS_n2 {
 			float Far = GetCameraFar() / MinLimit;
 
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
-				auto& Vert = this->m_Draws[loop].m_vert32;
+				auto& Vert = this->m_Draws[loop].Vert32;
 				auto& cell1 = this->m_CellxN[loop];
 				if (Vert.GetOutNum() == 0) { continue; }
-				if (!cell1.isFarCells() && !(cell1.m_Scale < Far)) { continue; }
-				if (cell1.isFarCells() && !(Near < cell1.m_Scale && cell1.m_Scale < Far)) { continue; }
+				if (!cell1.isFarCells() && !(cell1.Scale < Far)) { continue; }
+				if (cell1.isFarCells() && !(Near < cell1.Scale && cell1.Scale < Far)) { continue; }
 				Vert.Draw(this->m_tex);
 			}
 		}
@@ -1382,10 +1380,10 @@ namespace FPS_n2 {
 				t.Dispose();
 			}
 			for (auto& Vert : this->m_Draws) {
-				Vert.m_vert32.Dispose();
+				Vert.Vert32.Dispose();
 			}
 			for (auto& cellx : this->m_CellxN) {
-				cellx.m_CellBuffer.clear();
+				cellx.CellBuffer.clear();
 			}
 		}
 		void		BackGroundControl::Dispose_Load(void) noexcept {

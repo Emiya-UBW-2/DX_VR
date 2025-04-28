@@ -1,5 +1,6 @@
 ﻿#include	"sub.hpp"
 
+const FPS_n2::FadeControl* SingletonBase<FPS_n2::FadeControl>::m_Singleton = nullptr;
 const FPS_n2::HitMarkerPool* SingletonBase<FPS_n2::HitMarkerPool>::m_Singleton = nullptr;
 const FPS_n2::EffectSingleton* SingletonBase<FPS_n2::EffectSingleton>::m_Singleton = nullptr;
 

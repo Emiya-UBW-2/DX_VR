@@ -782,5 +782,5 @@ namespace FPS_n2 {
 				this->m_AmmoInChamberObj.reset();
 			}
 		}
-	};
-};
+	}
+}
