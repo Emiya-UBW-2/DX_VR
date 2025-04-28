@@ -24,7 +24,7 @@ namespace FPS_n2 {
 			std::array<float, static_cast<int>(CharaAnimeID::AnimeIDMax)>	m_AnimPerBuf{ 0 };
 			CharaAnimeID										m_BottomAnimSelect{};
 			PointControl<HitPoint, 100>							m_HP{};
-			PointControl<ArmerPoint, 100>						m_AP{};
+			PointControl<ArmerPoint, 150>						m_AP{};
 			DamageEventControl									m_Damage;
 			float												m_StuckGunTimer{ 0.f };
 			bool												m_IsStuckGun{ false };
@@ -119,10 +119,10 @@ namespace FPS_n2 {
 			void			SetDamageEventReset(void) noexcept { this->m_Damage.Reset(); }
 			void			PopDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.Pop(pRet); }
 			//自分がダメージを与えたと通知
-			void			SetDamage(PlayerID DamageID_t, HitPoint Damage, ArmerPoint ArmerDamage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
-				this->m_Damage.Add(GetMyPlayerID(), DamageID_t, Damage, ArmerDamage, HitType, StartPos, EndPos);
+			void			SetDamage(PlayerID DamageID_t, HitPoint Damage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
+				this->m_Damage.Add(GetMyPlayerID(), DamageID_t, Damage, HitType, StartPos, EndPos);
 			}
-			void			Heal(HitPoint Point) noexcept { SetDamage(GetMyPlayerID(), -Point, -Point, static_cast<int>(HitType::Body), GetMove().GetPos(), GetMove().GetPos()); }
+			void			Heal(HitPoint Point) noexcept { SetDamage(GetMyPlayerID(), -Point, static_cast<int>(HitType::Body), GetMove().GetPos(), GetMove().GetPos()); }
 			auto&			SetRagDoll(void) noexcept { return this->m_RagDollControl.SetRagDoll(); }
 			bool			SetDamageEvent(const DamageEvent& Event) noexcept;
 			const bool		CheckDamageRay(HitPoint Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;

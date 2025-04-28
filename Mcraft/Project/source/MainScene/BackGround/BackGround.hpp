@@ -231,7 +231,8 @@ namespace FPS_n2 {
 
 				void Dispose(void) noexcept {
 					if (this->m_Job.joinable()) {
-						this->m_Job.detach();
+						this->m_Job.join();
+						//this->m_Job.detach();
 					}
 					this->m_Doing = nullptr;
 					this->m_EndDoing = nullptr;

@@ -120,8 +120,8 @@ namespace FPS_n2 {
 			}
 		public:
 			//自分がダメージを与えたと通知
-			void			SetDamage(PlayerID DamageID_t, HitPoint Damage, ArmerPoint ArmerDamage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
-				this->m_Damage.Add(-2, DamageID_t, Damage, ArmerDamage, HitType, StartPos, EndPos);
+			void			SetDamage(PlayerID DamageID_t, HitPoint Damage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
+				this->m_Damage.Add(-2, DamageID_t, Damage, HitType, StartPos, EndPos);
 			}
 			const auto& GetDamageEvent(void) const noexcept { return this->m_Damage; }
 			void			SetDamageEventReset(void) noexcept { this->m_Damage.Reset(); }

@@ -8,16 +8,14 @@ namespace FPS_n2 {
 		PlayerID				ShotID{ 127 };
 		PlayerID				DamageID{ 127 };
 		HitPoint				Damage{ 0 };
-		ArmerPoint				ArmerDamage{ 0 };
 		int						HitType{};
 		Vector3DX				StartPos;
 		Vector3DX				EndPos;
 	public:
-		void SetEvent(PlayerID shotID, PlayerID damageID, HitPoint damage, ArmerPoint armerDamage, int hitType, const Vector3DX& startPos, const Vector3DX& endPos) noexcept {
+		void SetEvent(PlayerID shotID, PlayerID damageID, HitPoint damage, int hitType, const Vector3DX& startPos, const Vector3DX& endPos) noexcept {
 			this->ShotID = shotID;
 			this->DamageID = damageID;
 			this->Damage = damage;
-			this->ArmerDamage = armerDamage;
 			this->HitType = hitType;
 			this->StartPos = startPos;
 			this->EndPos = endPos;
@@ -32,8 +30,8 @@ namespace FPS_n2 {
 			this->m_DamageCount = 0;
 		}
 		//データを追加
-		void			Add(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint pDamage, ArmerPoint pArmerDamage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
-			this->m_Damage[this->m_DamageCount].SetEvent(ShotID_t, DamageID_t, pDamage, pArmerDamage, HitType, StartPos, EndPos);
+		void			Add(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint pDamage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
+			this->m_Damage[this->m_DamageCount].SetEvent(ShotID_t, DamageID_t, pDamage, HitType, StartPos, EndPos);
 			++this->m_DamageCount %= static_cast<uint8_t>(this->m_Damage.size());
 		}
 		//データを引数のVectorに引き渡す
