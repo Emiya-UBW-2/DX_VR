@@ -84,40 +84,54 @@ namespace FPS_n2 {
 			this->m_yAdd = 0.f;
 			this->m_SoundSwitch = true;
 			this->m_IsEndFall = false;
+			this->m_CalcTimer = 0.f;
 		}
 		void			FallObj::FirstUpdate(void) noexcept {
 			if (!IsActive()) { return; }
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* SE = SoundPool::Instance();
-			Vector3DX PosBuf = GetMove().GetPos() + GetMove().GetVec() * 60.f * DXLib_refParts->GetDeltaTime() + Vector3DX::up() * this->m_yAdd;
-			this->m_yAdd += (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));
-			{
-				Vector3DX EndPos = PosBuf;
-				Vector3DX Normal;
-/*
-				if (Player::PlayerManager::Instance()->GetVehicle()->CheckLine(GetMove().GetRePos(), &EndPos, &Normal)) {
-					PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
-					SetMove().SetVec(Vector3DX::Reflect(GetMove().GetVec(), Normal) * 0.5f);
-					this->m_yAdd = 0.f;
-					if (this->m_SoundSwitch) {
-						this->m_SoundSwitch = false;
-						SE->Get(SoundType::SE, static_cast<int>(this->m_FallObject->GetFallSound()))->Play3D(PosBuf, Scale3DRate * 5.f);
+
+			Vector3DX PosBuf = GetMove().GetPos();
+			m_CalcTimer += DXLib_refParts->GetDeltaTime();
+			while(true) {
+				if (m_CalcTimer > 1.f / 60.f) {
+					m_CalcTimer -= 1.f / 60.f;
+					Vector3DX RePos = PosBuf;
+					PosBuf = PosBuf + GetMove().GetVec() + Vector3DX::up() * this->m_yAdd;
+					this->m_yAdd += (GravityRate / (60.f * 60.f));
+					{
+						Vector3DX EndPos = PosBuf;
+						Vector3DX Normal;
+						/*
+										if (Player::PlayerManager::Instance()->GetVehicle()->CheckLine(GetMove().GetRePos(), &EndPos, &Normal)) {
+											PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
+											SetMove().SetVec(Vector3DX::Reflect(GetMove().GetVec(), Normal) * 0.5f);
+											this->m_yAdd = 0.f;
+											if (this->m_SoundSwitch) {
+												this->m_SoundSwitch = false;
+												SE->Get(SoundType::SE, static_cast<int>(this->m_FallObject->GetFallSound()))->Play3D(PosBuf, Scale3DRate * 5.f);
+											}
+											this->m_FallObject->RotateOnGround(&SetMove());
+										}
+										else
+						//*/
+						if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(RePos, &EndPos, &Normal)) {
+							PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
+							SetMove().SetVec(Vector3DX::Reflect(GetMove().GetVec(), Normal) * 0.5f);
+							this->m_yAdd = 0.f;
+							if (this->m_SoundSwitch) {
+								this->m_SoundSwitch = false;
+								SE->Get(SoundType::SE, static_cast<int>(this->m_FallObject->GetFallSound()))->Play3D(PosBuf, Scale3DRate * 5.f);
+							}
+							this->m_FallObject->RotateOnGround(&SetMove());
+						}
 					}
-					this->m_FallObject->RotateOnGround(&SetMove());
 				}
-				else
-//*/
-				if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(GetMove().GetRePos(), &EndPos, &Normal)) {
-					PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
-					SetMove().SetVec(Vector3DX::Reflect(GetMove().GetVec(), Normal) * 0.5f);
-					this->m_yAdd = 0.f;
-					if (this->m_SoundSwitch) {
-						this->m_SoundSwitch = false;
-						SE->Get(SoundType::SE, static_cast<int>(this->m_FallObject->GetFallSound()))->Play3D(PosBuf, Scale3DRate * 5.f);
-					}
-					this->m_FallObject->RotateOnGround(&SetMove());
+				else {
+					break;
 				}
 			}
+
 			this->m_FallObject->RotateOnAir(&SetMove());
 
 			SetMove().SetPos(PosBuf);

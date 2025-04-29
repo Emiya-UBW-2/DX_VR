@@ -31,6 +31,7 @@ namespace FPS_n2 {
 			bool	m_SoundSwitch{ false };
 			std::unique_ptr<FallObjChildBase>	m_FallObject{};
 			bool	m_IsEndFall{ false };
+			float	m_CalcTimer{ 0.f };
 		public:
 			FallObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::FallObj); }
 			virtual ~FallObj(void) noexcept {}

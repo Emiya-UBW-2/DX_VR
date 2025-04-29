@@ -770,6 +770,37 @@ namespace FPS_n2 {
 				this->m_MuzzleSmokeControl.DrawMuzzleSmoke(this->m_MuzzleSmokeSize);
 			}
 			BaseObject::Draw(isDrawSemiTrans, Range);
+			if (isDrawSemiTrans && GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
+				if (GetGunAnime() == Charas::GunAnimeID::ThrowReady) {
+					SetUseLighting(false);
+					SetUseHalfLambertLighting(false);
+
+					Vector3DX Pos = GetMove().GetPos();
+					Vector3DX Vect = (this->m_GrenadeThrowRot.zvec2()).normalized() * (Scale3DRate * 15.f / 60.f);
+					float yAdd = 0.f;
+					Vector3DX RePosDraw = Pos;
+					for (int loop = 0; loop < 60; ++loop) {
+						Vector3DX RePos = Pos;
+						Pos = Pos + Vect + Vector3DX::up() * yAdd;
+						yAdd += (GravityRate / (60.f * 60.f));
+						{
+							Vector3DX EndPos = Pos;
+							Vector3DX Normal;
+							if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(RePos, &EndPos, &Normal)) {
+								Pos = EndPos + Normal * (0.5f * Scale3DRate);
+								Vect = (Vector3DX::Reflect(Vect, Normal) * 0.5f);
+								yAdd = 0.f;
+							}
+						}
+						if (loop % 3 == 0) {
+							DrawCapsule_3D(RePos.get(), Pos.get(), 0.01f * Scale3DRate, GetColor(192, 0, 0), GetColor(0, 0, 0));
+							RePosDraw = Pos;
+						}
+					}
+					SetUseLighting(true);
+					SetUseHalfLambertLighting(true);
+				}
+			}
 		}
 		void GunObj::Dispose_Sub(void) noexcept {
 			this->m_GunsModify.reset();
