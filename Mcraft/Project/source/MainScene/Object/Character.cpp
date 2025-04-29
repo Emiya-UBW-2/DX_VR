@@ -14,20 +14,21 @@ namespace FPS_n2 {
 
 				ArmerPoint ArmerDamage = 0;
 				HitPoint Damage = Event.Damage;
-
-				switch (static_cast<HitType>(Event.HitType)) {
-				case HitType::Head:
-					break;
-				case HitType::Body:
-					ArmerDamage = std::clamp<ArmerPoint>(Damage, 0, this->m_AP.GetPoint());
-					Damage = std::clamp<HitPoint>(Damage - ArmerDamage, 0, this->m_HP.GetMax());
-					break;
-				case HitType::Arm:
-					break;
-				case HitType::Leg:
-					break;
-				default:
-					break;
+				if (Damage > 0) {
+					switch (static_cast<HitType>(Event.HitType)) {
+					case HitType::Head:
+						break;
+					case HitType::Body:
+						ArmerDamage = std::clamp<ArmerPoint>(Damage, 0, this->m_AP.GetPoint());
+						Damage = std::clamp<HitPoint>(Damage - ArmerDamage, 0, this->m_HP.GetMax());
+						break;
+					case HitType::Arm:
+						break;
+					case HitType::Leg:
+						break;
+					default:
+						break;
+					}
 				}
 
 				this->m_HP.Sub(Damage);
