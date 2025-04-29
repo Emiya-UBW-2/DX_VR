@@ -74,7 +74,7 @@ namespace FPS_n2 {
 			public:
 				const bool		isFarCells(void) const noexcept { return this->ScaleInt != 0; }
 				//
-				const int		GetIndex(int t) const noexcept { return (t % this->All + this->All) % this->All; }
+				const int		GetIndex(int pos) const noexcept { return (pos % this->All + this->All) % this->All; }
 				const size_t	GetCellNum(int xpos, int ypos, int zpos) const noexcept { return static_cast<size_t>(GetIndex(xpos) * this->AllPow2 + ypos * this->All + GetIndex(zpos)); }
 				//
 				const auto&		GetCellBuf(int xpos, int ypos, int zpos) const noexcept { return this->CellBuffer[GetCellNum(xpos, ypos, zpos)]; }
@@ -97,23 +97,22 @@ namespace FPS_n2 {
 								++FillAll;
 								if (GetCellBuf(xt, yt, zt).IsEmpty()) { continue; }
 								++FillCount;
-								auto cell = GetCellBuf(xt, yt, zt).GetCell() + 1;
+								auto cell = static_cast<size_t>(GetCellBuf(xt, yt, zt).GetCell() + 1);
 								if (cell > IDCount.size()) {
 									IDCount.resize(cell);
 								}
-								++IDCount[static_cast<size_t>(cell - 1)];
+								++IDCount[cell - 1];
 							}
 						}
 					}
 					if ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.0f / 4.0f))) {
 						int max = -1;
 						int8_t id = 1;
-						for (int8_t loop = 0; auto & idc : IDCount) {
+						for (auto& idc : IDCount) {
 							if (max < idc) {
 								max = idc;
-								id = loop;
+								id = static_cast<int8_t>(&idc - &IDCount.front());
 							}
-							++loop;
 						}
 						return id;
 					}
@@ -283,7 +282,7 @@ namespace FPS_n2 {
 							this->m_index32[loop].resize(this->m_32Size * 6);
 						}
 					}
-					auto ZERO = (uint32_t)(GetInNum() * 4 - 4);
+					auto ZERO = static_cast<uint32_t>(GetInNum() * 4 - 4);
 					this->m_index32[this->m_Now][GetInNum() * 6 - 6] = ZERO;
 					this->m_index32[this->m_Now][GetInNum() * 6 - 5] = ZERO + 1;
 					this->m_index32[this->m_Now][GetInNum() * 6 - 4] = ZERO + 2;
@@ -350,14 +349,14 @@ namespace FPS_n2 {
 				const int x_inc = (dx < 0) ? -1 : 1;
 				const int Length = std::abs(dx);
 				const int y_inc = (dy < 0) ? -1 : 1;
-				const int m = std::abs(dy);
+				const int dyAbs = std::abs(dy);
 				const int z_inc = (dz < 0) ? -1 : 1;
-				const int n = std::abs(dz);
+				const int dzAbs = std::abs(dz);
 				const int dx2 = Length << 1;
-				const int dy2 = m << 1;
-				const int dz2 = n << 1;
+				const int dy2 = dyAbs << 1;
+				const int dz2 = dzAbs << 1;
 
-				if ((Length >= m) && (Length >= n)) {
+				if ((Length >= dyAbs) && (Length >= dzAbs)) {
 					err_1 = dy2 - Length;
 					err_2 = dz2 - Length;
 					for (int loop = 0; loop < Length; ++loop) {
@@ -375,10 +374,10 @@ namespace FPS_n2 {
 						point[0] += x_inc;
 					}
 				}
-				else if ((m >= Length) && (m >= n)) {
-					err_1 = dx2 - m;
-					err_2 = dz2 - m;
-					for (int loop = 0; loop < m; ++loop) {
+				else if ((dyAbs >= Length) && (dyAbs >= dzAbs)) {
+					err_1 = dx2 - dyAbs;
+					err_2 = dz2 - dyAbs;
+					for (int loop = 0; loop < dyAbs; ++loop) {
 						if (OutPutLine(point[0], point[1], point[2])) { return; }
 						if (err_1 > 0) {
 							point[0] += x_inc;
@@ -394,9 +393,9 @@ namespace FPS_n2 {
 					}
 				}
 				else {
-					err_1 = dy2 - n;
-					err_2 = dx2 - n;
-					for (int loop = 0; loop < n; ++loop) {
+					err_1 = dy2 - dzAbs;
+					err_2 = dx2 - dzAbs;
+					for (int loop = 0; loop < dzAbs; ++loop) {
 						if (OutPutLine(point[0], point[1], point[2])) { return; }
 						if (err_1 > 0) {
 							point[1] += y_inc;

@@ -149,7 +149,7 @@ namespace FPS_n2 {
 			auto& SetFingerPer(int LR, int Number) noexcept { return this->m_Fingers[LR][Number]; }
 			const auto& GetFingerPer(int LR, int Number) const noexcept { return this->m_Fingers[LR][Number]; }
 		public:
-			FingerData operator+(const FingerData& p) const noexcept {
+			FingerData operator+(const FingerData& param) const noexcept {
 				FingerData Ret;
 				for (int LRindex = 0; LRindex < 2; ++LRindex) {
 					for (int Numberindex = 0; Numberindex < 5; ++Numberindex) {
@@ -159,14 +159,14 @@ namespace FPS_n2 {
 				for (const auto& LR : this->m_Fingers) {
 					int Numberindex = 0;
 					for (auto& finger : LR) {
-						Ret.SetFingerPer(LRindex, Numberindex) = finger + p.GetFingerPer(LRindex, Numberindex);
+						Ret.SetFingerPer(LRindex, Numberindex) = finger + param.GetFingerPer(LRindex, Numberindex);
 						++Numberindex;
 					}
 					++LRindex;
 				}
 				return Ret;
 			}
-			FingerData operator-(const FingerData& p) const noexcept {
+			FingerData operator-(const FingerData& param) const noexcept {
 				FingerData Ret;
 				for (int LRindex = 0; LRindex < 2; ++LRindex) {
 					for (int Numberindex = 0; Numberindex < 5; ++Numberindex) {
@@ -176,7 +176,7 @@ namespace FPS_n2 {
 				for (const auto& LR : this->m_Fingers) {
 					int Numberindex = 0;
 					for (auto& finger : LR) {
-						Ret.SetFingerPer(LRindex, Numberindex) = finger - p.GetFingerPer(LRindex, Numberindex);
+						Ret.SetFingerPer(LRindex, Numberindex) = finger - param.GetFingerPer(LRindex, Numberindex);
 						++Numberindex;
 					}
 					++LRindex;

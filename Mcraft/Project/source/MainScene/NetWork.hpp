@@ -16,28 +16,28 @@ namespace FPS_n2 {
 
 		class MoveInfo {
 		public:
-			Vector3DX repos;		// 反映用座標
-			Vector3DX pos;		// 反映用座標
-			Vector3DX vec;		// 加速
-			Matrix3x3DX mat;	// 回転
-			Vector3DX WatchRad;	// 加速
+			Vector3DX repos{};		// 反映用座標
+			Vector3DX pos{};		// 反映用座標
+			Vector3DX vec{};		// 加速
+			Matrix3x3DX mat{};	// 回転
+			Vector3DX WatchRad{};	// 加速
 		public:
-			auto LerpMove(const MoveInfo& o, float Per) const noexcept {
+			auto LerpMove(const MoveInfo& target, float Per) const noexcept {
 				MoveInfo tmp;
-				tmp.repos = Lerp(this->repos, o.repos, Per);
-				tmp.pos = Lerp(this->pos, o.pos, Per);
-				tmp.vec = Lerp(this->vec, o.vec, Per);
-				tmp.mat = Lerp(this->mat, o.mat, Per);
-				tmp.WatchRad = Lerp(this->WatchRad, o.WatchRad, Per);
+				tmp.repos = Lerp(this->repos, target.repos, Per);
+				tmp.pos = Lerp(this->pos, target.pos, Per);
+				tmp.vec = Lerp(this->vec, target.vec, Per);
+				tmp.mat = Lerp(this->mat, target.mat, Per);
+				tmp.WatchRad = Lerp(this->WatchRad, target.WatchRad, Per);
 				return tmp;
 			}
 		};
 
 		//クライアントが送信するデータ ローカル版
 		class PlayerSendData {
-			InputControl				m_Input;
-			MoveInfo					m_move;
-			DamageEventControl			m_DamageEvent;
+			InputControl				m_Input{};
+			MoveInfo					m_move{};
+			DamageEventControl			m_DamageEvent{};
 			int32_t						m_FreeData[10]{};
 		public:
 			const auto&		GetInput(void) const noexcept { return this->m_Input; }
@@ -47,12 +47,12 @@ namespace FPS_n2 {
 		public:
 			void			PopDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_DamageEvent.Pop(pRet); }
 		public:
-			void			SetMyPlayer(const InputControl& pInput, const MoveInfo& move_t, const DamageEventControl& Damage_t, int32_t* pFreeData) noexcept {
-				this->m_Input = pInput;
-				this->m_move = move_t;
-				this->m_DamageEvent = Damage_t;
+			void			SetMyPlayer(const InputControl& input, const MoveInfo& move, const DamageEventControl& damage, int32_t freeData[10]) noexcept {
+				this->m_Input = input;
+				this->m_move = move;
+				this->m_DamageEvent = damage;
 				for (int loop = 0; loop < 10; ++loop) {
-					this->m_FreeData[loop] = pFreeData[loop];
+					this->m_FreeData[loop] = freeData[loop];
 				}
 			}
 			static PlayerSendData	GetLerpData(const PlayerSendData& PrevData, const PlayerSendData& NewData, float Per) noexcept {

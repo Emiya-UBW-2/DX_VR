@@ -10,10 +10,10 @@ namespace FPS_n2 {
 			if (!RefreshCol(StartPos, *EndPos, 10.0f * Scale3DRate)) {
 				return false;
 			}
-			auto colres_t = GetColLine(StartPos, *EndPos, 0);
-			if (colres_t.HitFlag == TRUE) {
-				*EndPos = colres_t.HitPosition;
-				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, *EndPos, colres_t.Normal, 2.0f);
+			auto colres = GetColLine(StartPos, *EndPos, 0);
+			if (colres.HitFlag == TRUE) {
+				*EndPos = colres.HitPosition;
+				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, *EndPos, colres.Normal, 2.0f);
 				this->m_IsHit = true;
 				return true;
 			}

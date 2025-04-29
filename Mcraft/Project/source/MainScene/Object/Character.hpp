@@ -119,8 +119,8 @@ namespace FPS_n2 {
 			void			SetDamageEventReset(void) noexcept { this->m_Damage.Reset(); }
 			void			PopDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.Pop(pRet); }
 			//自分がダメージを与えたと通知
-			void			SetDamage(PlayerID DamageID_t, HitPoint Damage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
-				this->m_Damage.Add(GetMyPlayerID(), DamageID_t, Damage, HitType, StartPos, EndPos);
+			void			SetDamage(PlayerID damageID, HitPoint damage, int hitType, const Vector3DX& startPos, const Vector3DX& endPos) noexcept {
+				this->m_Damage.Add(GetMyPlayerID(), damageID, damage, hitType, startPos, endPos);
 			}
 			void			Heal(HitPoint Point) noexcept { SetDamage(GetMyPlayerID(), -Point, static_cast<int>(HitType::Body), GetMove().GetPos(), GetMove().GetPos()); }
 			auto&			SetRagDoll(void) noexcept { return this->m_RagDollControl.SetRagDoll(); }
@@ -159,14 +159,14 @@ namespace FPS_n2 {
 				this->m_LeanControl.Init();
 				for (auto& per : this->m_AnimPerBuf) { per = 0.0f; }
 				this->m_IsSquat = false;
-				Vector3DX pos_t = pPos;
+				Vector3DX posBuf = pPos;
 				if (CheckGround) {
-					Vector3DX EndPos = pos_t - Vector3DX::up() * 200.0f * Scale3DRate;
-					if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(pos_t + Vector3DX::up() * 200.0f * Scale3DRate, &EndPos)) {
-						pos_t = EndPos;
+					Vector3DX EndPos = posBuf - Vector3DX::up() * 200.0f * Scale3DRate;
+					if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(posBuf + Vector3DX::up() * 200.0f * Scale3DRate, &EndPos)) {
+						posBuf = EndPos;
 					}
 				}
-				SetMove().SetAll(pos_t, pos_t, pos_t, Vector3DX::zero(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y));
+				SetMove().SetAll(posBuf, posBuf, posBuf, Vector3DX::zero(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y));
 				//
 				this->m_GunPtrControl.SelectGun(GunSelect);
 				for (int loop = 0, max = this->m_GunPtrControl.GetGunNum(); loop < max; ++loop) {

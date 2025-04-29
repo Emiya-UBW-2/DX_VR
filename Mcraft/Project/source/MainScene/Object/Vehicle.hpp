@@ -39,13 +39,13 @@ namespace FPS_n2 {
 			//
 			DamageEventControl									m_Damage;
 		public:
-			void			Spawn(float pyRad, const Vector3DX& pos_t) noexcept {
-				SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), pyRad));
-				SetMove().SetPos(pos_t);
+			void			Spawn(float yRad, const Vector3DX& pos) noexcept {
+				SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), yRad));
+				SetMove().SetPos(pos);
 				SetMove().SetVec(Vector3DX::zero());
 				SetMove().Update(0.0f, 0.0f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
-				for (auto& w : this->m_WheelHeight) { w = 0.0f; }
+				for (auto& height : this->m_WheelHeight) { height = 0.0f; }
 
 				this->m_MouseVec = GetMove().GetMat();
 				//戦車スポーン
@@ -71,10 +71,10 @@ namespace FPS_n2 {
 					this->m_Input.ResetAllInput();
 				}
 			}
-			void			SetCam(Camera3DInfo& MainCamera_t) noexcept {
+			void			SetCam(Camera3DInfo* pMainCamera) noexcept {
 				this->m_range = std::clamp(this->m_range - float(PadControl::Instance()->GetMouseWheelRot()), 1.0f, 4.0f);
 				Vector3DX eyeposBase = GetMove().GetPos() + (GetMove().GetMat().yvec() * (3.0f * Scale3DRate));
-				MainCamera_t.SetCamPos(
+				pMainCamera->SetCamPos(
 					eyeposBase + this->m_MouseVec.zvec() * (this->m_range * Scale3DRate) + Camera3D::Instance()->GetCamShake() * 10.0f,
 					eyeposBase + this->m_MouseVec.zvec() * -std::max(this->m_range * Scale3DRate, 1.0f) + Camera3D::Instance()->GetCamShake()*2.0f * 10.0f,
 					Lerp(GetMove().GetMat().yvec(), Vector3DX::up(), std::clamp(this->m_range / 3.0f, 0.0f, 1.0f))
@@ -87,8 +87,8 @@ namespace FPS_n2 {
 					return false;
 				}
 				bool IsHit = false;
-				for (const auto& m : this->m_VecData->GetArmerMeshIDList()) {
-					auto Res = GetColLine(StartPos, *EndPos, m.first);
+				for (const auto& mesh : this->m_VecData->GetArmerMeshIDList()) {
+					auto Res = GetColLine(StartPos, *EndPos, mesh.first);
 					if (Res.HitFlag) {
 						IsHit = true;
 						*EndPos = Res.HitPosition;
@@ -100,8 +100,8 @@ namespace FPS_n2 {
 				return IsHit;
 			}
 			//自分がダメージを与えたと通知
-			void			SetDamage(PlayerID DamageID_t, HitPoint Damage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
-				this->m_Damage.Add(this->m_MyPlayerID, DamageID_t, Damage, HitType, StartPos, EndPos);
+			void			SetDamage(PlayerID damageID, HitPoint damage, int hitType, const Vector3DX& startPos, const Vector3DX& endPos) noexcept {
+				this->m_Damage.Add(this->m_MyPlayerID, damageID, damage, hitType, startPos, endPos);
 			}
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_Damage; }
 			void			SetDamageEventReset(void) noexcept { this->m_Damage.Reset(); }
@@ -115,8 +115,8 @@ namespace FPS_n2 {
 			void			Draw(bool isDrawSemiTrans, int Range) noexcept override;
 			void			Dispose_Sub(void) noexcept override {
 				this->m_VecData.reset();
-				for (auto& f : this->m_CrawlerFrame) {
-					f.clear();
+				for (auto& frame : this->m_CrawlerFrame) {
+					frame.clear();
 				}
 				this->m_WheelHeight.clear();
 				for (auto& cg : this->m_Gun) {

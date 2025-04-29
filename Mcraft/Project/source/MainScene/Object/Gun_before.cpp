@@ -268,9 +268,9 @@ namespace FPS_n2 {
 				//スロットに設定するオブジェクトの選択
 				int Select = pSlotInfo->IsNeed ? 0 : InvalidID;
 				if (isPreset) {
-					for (const auto& S : this->m_SlotSave) {
-						if (data->IsSavedSlot(S)) {
-							Select = S.Select;
+					for (const auto& slotSave : this->m_SlotSave) {
+						if (data->IsSavedSlot(slotSave)) {
+							Select = slotSave.Select;
 							break;
 						}
 					}

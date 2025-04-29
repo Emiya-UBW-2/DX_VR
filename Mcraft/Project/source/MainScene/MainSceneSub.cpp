@@ -235,8 +235,7 @@ namespace FPS_n2 {
 					int RetX = ViewChara->GetGunPtrNow()->GetAimXPos() + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
 					int RetY = ViewChara->GetGunPtrNow()->GetAimYPos() + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.0f);
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, IsDrawAimUIPer));
-					auto fov_t = CameraParts->GetMainCamera().GetCamFov();
-					int Scale = static_cast<int>(1080 * ViewChara->GetGunPtrNow()->GetAutoAimRadian() / fov_t);
+					int Scale = static_cast<int>(1080 * ViewChara->GetGunPtrNow()->GetAutoAimRadian() / CameraParts->GetMainCamera().GetCamFov());
 					DrawCtrls->SetDrawCircle(WindowSystem::DrawLayer::Normal, RetX, RetY, Scale, Green, false, 2);
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, LookPer * IsDrawAimUIPer));
 					DrawCtrls->SetDrawCircle(WindowSystem::DrawLayer::Normal, RetX, RetY, Scale + 4 + Lerp(100, 0, LookPer), Green, false, 2);

@@ -31,7 +31,7 @@ namespace FPS_n2 {
 			std::array<float, 6>			floatParam{};
 			std::array<std::string, 1>		strParam;
 
-			bool CanLookTarget = false;
+			bool CanLookTarget{ false };
 			float LookPer{};
 			float IsDrawAimUIPer{};
 		public:
@@ -49,9 +49,9 @@ namespace FPS_n2 {
 			void			Draw(void) const noexcept;
 			void			Dispose(void) noexcept {}
 		public:
-			void			SetIntParam(int ID, int value) noexcept { intParam[static_cast<size_t>(ID)] = value; }
-			void			SetfloatParam(int ID, float value) noexcept { floatParam[static_cast<size_t>(ID)] = value; }
-			void			SetStrParam(int ID, std::string_view value) noexcept { strParam[static_cast<size_t>(ID)] = value; }
+			void			SetIntParam(size_t ID, int value) noexcept { intParam[ID] = value; }
+			void			SetfloatParam(size_t ID, float value) noexcept { floatParam[ID] = value; }
+			void			SetStrParam(size_t ID, std::string_view value) noexcept { strParam[ID] = value; }
 		};
 	}
 }

@@ -37,24 +37,24 @@ namespace FPS_n2 {
 			Vector3DX m_PosR{};
 			Vector3DX m_Pos{};
 
-			float m_Yrad = 0.0f;
-			float m_YradR = 0.0f;
-			float m_YradRT = 0.0f;
-			float m_Zrad = 0.0f;
-			float m_ZradR = 0.0f;
+			float m_Yrad{ 0.0f };
+			float m_YradR{ 0.0f };
+			float m_YradRT{ 0.0f };
+			float m_Zrad{ 0.0f };
+			float m_ZradR{ 0.0f };
 
-			float m_SideSpeedPer = 0.0f;
-			float m_flontSpeedPer = 0.0f;
+			float m_SideSpeedPer{ 0.0f };
+			float m_flontSpeedPer{ 0.0f };
 
-			float m_Timer = 0.0f;
+			float m_Timer{ 0.0f };
 
-			bool m_Open = false;
-			float m_OpenPer = 0.0f;
+			bool m_Open{ false };
+			float m_OpenPer{ 0.0f };
 
-			bool m_IsHit = false;
+			bool m_IsHit{ false };
 
-			bool m_Rope = false;
-			float m_RopePer = 0.0f;
+			bool m_Rope{ false };
+			float m_RopePer{ 0.0f };
 
 			HelicopterMove m_HelicopterMove{ HelicopterMove::Random };
 			int m_SpawnPoint{};
@@ -68,7 +68,7 @@ namespace FPS_n2 {
 			//
 
 			float m_ReloadTimer{};
-			int m_GunAmmo{5};
+			int m_GunAmmo{ 5 };
 			float m_ShotTimer{};
 			int m_AmmoSpecID{};
 			bool m_CanShot{};
@@ -110,7 +110,7 @@ namespace FPS_n2 {
 					break;
 				case HelicopterMove::Intercept:
 					m_PrevPos = m_NowPos;
-					m_TargetPos = Matrix3x3DX::Vtrans(Vector3DX::vget(0.0f, 0.0f, 15.0f + GetRandf(10.0f)) * Scale3DRate,Matrix3x3DX::RotAxis(Vector3DX::up(),deg2rad(GetRandf(180.0f))));
+					m_TargetPos = Matrix3x3DX::Vtrans(Vector3DX::vget(0.0f, 0.0f, 15.0f + GetRandf(10.0f)) * Scale3DRate, Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f))));
 					break;
 				default:
 					break;
@@ -122,8 +122,8 @@ namespace FPS_n2 {
 			}
 		public:
 			//自分がダメージを与えたと通知
-			void			SetDamage(PlayerID DamageID_t, HitPoint Damage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
-				this->m_Damage.Add(this->m_MyPlayerID, DamageID_t, Damage, HitType, StartPos, EndPos);
+			void			SetDamage(PlayerID damageID, HitPoint damage, int hitType, const Vector3DX& startPos, const Vector3DX& endPos) noexcept {
+				this->m_Damage.Add(this->m_MyPlayerID, damageID, damage, hitType, startPos, endPos);
 			}
 			const auto& GetDamageEvent(void) const noexcept { return this->m_Damage; }
 			void			SetDamageEventReset(void) noexcept { this->m_Damage.Reset(); }

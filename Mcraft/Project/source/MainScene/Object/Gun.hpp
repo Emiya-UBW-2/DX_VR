@@ -17,20 +17,20 @@ namespace FPS_n2 {
 			MuzzleSmokeControl									m_MuzzleSmokeControl{};
 			float												m_MuzzleSmokeSize{ 0.00762f };
 			std::unique_ptr<ModifySlot>							m_ModifySlot{};
-			AutoAimControl										m_AutoAimControl;
-			std::unique_ptr<GunsModify>							m_GunsModify;
+			AutoAimControl										m_AutoAimControl{};
+			std::unique_ptr<GunsModify>							m_GunsModify{};
 
 			ScreenPosition										m_AimPoint{};
-			ScreenPosition										m_Reticle;
-			ScreenPosition										m_Lens;
-			ScreenPosition										m_LensSize;
-			bool												m_Reticle_on = false;
+			ScreenPosition										m_Reticle{};
+			ScreenPosition										m_Lens{};
+			ScreenPosition										m_LensSize{};
+			bool												m_Reticle_on{ false };
 			float												m_LensSizeLen{10000};
 
 			float												m_GunShotZrand{};
 			float												m_GunShotZrandR{};
 
-			FallControl											m_Grenade;
+			FallControl											m_Grenade{};
 			bool												m_InChamber{ false };
 			std::array<ArmMovePer, static_cast<int>(Charas::GunAnimeID::ChoiceOnceMax)>	m_GunAnimePer{};
 			std::array<float, static_cast<int>(Charas::GunAnimeID::Max)>	m_GunAnimeTime{};

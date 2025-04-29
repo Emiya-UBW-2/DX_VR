@@ -22,17 +22,17 @@ namespace FPS_n2 {
 			bool			m_IsDrawLine{ false };
 		public:
 			//接地
-			void			Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, int pMyID) {
+			void			Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos ,const Vector3DX& vec, int myID) {
 				this->m_RicochetCnt = 0;
-				this->m_pos = pos_t;
-				this->m_repos = pos_t;
-				this->m_vec = pVec;
+				this->m_pos = pos;
+				this->m_repos = pos;
+				this->m_vec = vec;
 				this->m_AmmoData = pAmmoData;
 				this->m_speed = (*this->m_AmmoData)->GetSpeed() * Scale3DRate;
 				this->m_penetration = (*this->m_AmmoData)->GetPenetration();
 				this->m_yAdd = 0.0f;
 				this->m_Timer = 0.0f;
-				this->m_ShootCheraID = pMyID;
+				this->m_ShootCheraID = myID;
 				SetActive(true);
 				this->m_IsDrawLine = true;
 			}
@@ -92,16 +92,16 @@ namespace FPS_n2 {
 				this->m_AmmoList.clear();
 			}
 		public:
-			void Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos_t, const Vector3DX& pVec, int pMyID) noexcept {
+			void Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos, const Vector3DX& vec, int myID) noexcept {
 				for (auto& ammo : this->m_AmmoList) {
 					if (!ammo->IsActive()) {
-						ammo->Put(pAmmoData, pos_t, pVec, pMyID);
+						ammo->Put(pAmmoData, pos, vec, myID);
 						return;
 					}
 				}
 				this->m_AmmoList.emplace_back(std::make_shared<Objects::AmmoObj>());
 				ObjectManager::Instance()->InitObject(this->m_AmmoList.back());
-				this->m_AmmoList.back()->Put(pAmmoData, pos_t, pVec, pMyID);
+				this->m_AmmoList.back()->Put(pAmmoData, pos, vec, myID);
 			}
 		};
 	}

@@ -78,7 +78,7 @@ namespace FPS_n2 {
 			const auto		IsNotZero(void) const noexcept { return this->m_Point != 0; }
 			const auto&		GetPoint(void) const noexcept { return this->m_Point; }
 			const auto&		GetMax(void) const noexcept { return Max; }
-			void			Sub(Point damage_t) noexcept { this->m_Point = std::clamp<Point>(this->m_Point - damage_t, 0, Max); }
+			void			Sub(Point point) noexcept { this->m_Point = std::clamp<Point>(this->m_Point - point, 0, Max); }
 		public:
 			void			Init(void) noexcept { Sub(-Max); }
 		};
@@ -269,8 +269,8 @@ namespace FPS_n2 {
 		class WalkSwingControl {
 		private:
 			Vector3DX											m_WalkSwing{};
-			Vector3DX											m_WalkSwing_p{};
-			Vector3DX											m_WalkSwing_t{};
+			Vector3DX											m_Buffer{};
+			Vector3DX											m_Base{};
 			float												m_PrevY{};
 			float												m_MoveEyePosTimer{ 0.0f };
 			Vector3DX											m_MoveEyePosLocal{};
@@ -287,27 +287,27 @@ namespace FPS_n2 {
 				//X
 				{
 					if (this->m_PrevY > Pos.y) {
-						this->m_WalkSwing_t.x = 1.0f;
+						this->m_Base.x = 1.0f;
 					}
 					else {
-						this->m_WalkSwing_t.x = std::max(this->m_WalkSwing_t.x - 15.0f * DXLib_refParts->GetDeltaTime(), 0.0f);
+						this->m_Base.x = std::max(this->m_Base.x - 15.0f * DXLib_refParts->GetDeltaTime(), 0.0f);
 					}
 					this->m_PrevY = Pos.y;
 				}
 				//Z
 				{
-					if (this->m_WalkSwing_t.x == 1.0f) {
-						if (this->m_WalkSwing_t.z >= 0.0f) {
-							this->m_WalkSwing_t.z = -1.0f;
+					if (this->m_Base.x == 1.0f) {
+						if (this->m_Base.z >= 0.0f) {
+							this->m_Base.z = -1.0f;
 						}
 						else {
-							this->m_WalkSwing_t.z = 1.0f;
+							this->m_Base.z = 1.0f;
 						}
 					}
 				}
-				Easing(&this->m_WalkSwing_p.x, this->m_WalkSwing_t.x * SwingPer, (this->m_WalkSwing_p.x > this->m_WalkSwing_t.x * SwingPer) ? 0.6f : 0.9f, EasingType::OutExpo);
-				Easing(&this->m_WalkSwing_p.z, this->m_WalkSwing_t.z * SwingPer, 0.95f, EasingType::OutExpo);
-				Easing(&this->m_WalkSwing, this->m_WalkSwing_p, 0.5f, EasingType::OutExpo);
+				Easing(&this->m_Buffer.x, this->m_Base.x * SwingPer, (this->m_Buffer.x > this->m_Base.x * SwingPer) ? 0.6f : 0.9f, EasingType::OutExpo);
+				Easing(&this->m_Buffer.z, this->m_Base.z * SwingPer, 0.95f, EasingType::OutExpo);
+				Easing(&this->m_WalkSwing, this->m_Buffer, 0.5f, EasingType::OutExpo);
 				Vector3DX WalkSwingRad = Vector3DX::vget(5.0f, 0.0f, 10.0f);
 				return Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(this->m_WalkSwing.z * WalkSwingRad.z)) *
 					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(this->m_WalkSwing.x * WalkSwingRad.x));
@@ -492,14 +492,14 @@ namespace FPS_n2 {
 					}
 				}
 				//
-				void CopyFrame(const MV1& mine, const frame_body& frame_tgt_, MV1* tgt, const Vector3DX& GroundPos) noexcept {
-					tgt->SetMatrix(mine.GetMatrix().rotation() * Matrix4x4DX::Mtrans(GroundPos));
-					for (const auto& frame : frame_tgt_.m_Frames) {
+				void CopyFrame(const MV1& mine, const frame_body& targetFrame, MV1* tgt, const Vector3DX& groundPos) noexcept {
+					tgt->SetMatrix(mine.GetMatrix().rotation() * Matrix4x4DX::Mtrans(groundPos));
+					for (const auto& frame : targetFrame.m_Frames) {
 						tgt->SetFrameLocalMatrix(frame.GetFrameID(), mine.GetFrameLocalMatrix(frame.GetFrameID()));
 					}
 					{
 						int Frame = 2;
-						tgt->SetFrameLocalMatrix(Frame, mine.GetFrameLocalMatrix(Frame) * Matrix4x4DX::Mtrans(Vector3DX::vget(0.0f, (mine.GetMatrix().pos() - GroundPos).y, 0.0f)));
+						tgt->SetFrameLocalMatrix(Frame, mine.GetFrameLocalMatrix(Frame) * Matrix4x4DX::Mtrans(Vector3DX::vget(0.0f, (mine.GetMatrix().pos() - groundPos).y, 0.0f)));
 					}
 					for (int loop = 0, max = static_cast<int>(tgt->GetAnimNum()); loop < max; ++loop) {
 						tgt->SetAnim(loop).SetPer(mine.GetAnim(loop).GetPer());
@@ -530,13 +530,13 @@ namespace FPS_n2 {
 			}
 
 		public:
-			void Init(const MV1& obj_body_t) noexcept {
-				this->m_pBaseObj = &obj_body_t;
+			void Init(const MV1& baseObj) noexcept {
+				this->m_pBaseObj = &baseObj;
 				if (!this->m_pBaseObj) { return; }
 				this->m_BaseObjFrame.SetupFrameInfo(*this->m_pBaseObj);				//身体
 				this->m_RagObjFrame.SetupFrameInfo(this->m_RagDoll);			//ラグドール
 			}
-			void Update(bool isAlive, const Vector3DX& GroundPos) noexcept {
+			void Update(bool isAlive, const Vector3DX& groundPos) noexcept {
 				if (!this->m_pBaseObj) { return; }
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (isAlive) {
@@ -545,7 +545,7 @@ namespace FPS_n2 {
 				else {
 					if (this->m_Timer < 3.0f) {
 						this->m_RagDoll.SetPrioritizePhysicsOverAnimFlag(true);
-						this->m_BaseObjFrame.CopyFrame(*this->m_pBaseObj, this->m_RagObjFrame, &this->m_RagDoll, GroundPos);
+						this->m_BaseObjFrame.CopyFrame(*this->m_pBaseObj, this->m_RagObjFrame, &this->m_RagDoll, groundPos);
 						//物理演算
 						if (this->m_Timer == 0.0f) {
 							this->m_RagDoll.PhysicsResetState();

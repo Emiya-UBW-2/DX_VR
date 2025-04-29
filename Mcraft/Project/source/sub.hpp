@@ -12,7 +12,7 @@ namespace FPS_n2 {
 		Vector3DX				StartPos;
 		Vector3DX				EndPos;
 	public:
-		void SetEvent(PlayerID shotID, PlayerID damageID, HitPoint damage, int hitType, const Vector3DX& startPos, const Vector3DX& endPos) noexcept {
+		void Set(PlayerID shotID, PlayerID damageID, HitPoint damage, int hitType, const Vector3DX& startPos, const Vector3DX& endPos) noexcept {
 			this->ShotID = shotID;
 			this->DamageID = damageID;
 			this->Damage = damage;
@@ -30,8 +30,8 @@ namespace FPS_n2 {
 			this->m_DamageCount = 0;
 		}
 		//データを追加
-		void			Add(PlayerID ShotID_t, PlayerID DamageID_t, HitPoint pDamage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
-			this->m_Damage[this->m_DamageCount].SetEvent(ShotID_t, DamageID_t, pDamage, HitType, StartPos, EndPos);
+		void			Add(PlayerID shotID, PlayerID damageID, HitPoint damage, int hitType, const Vector3DX& startPos, const Vector3DX& endPos) noexcept {
+			this->m_Damage[this->m_DamageCount].Set(shotID, damageID, damage, hitType, startPos, endPos);
 			++this->m_DamageCount %= static_cast<uint8_t>(this->m_Damage.size());
 		}
 		//データを引数のVectorに引き渡す
@@ -241,27 +241,27 @@ namespace FPS_n2 {
 		EffectControl								m_EffectControl;
 	public:
 		// 複数エフェクトの再生
-		void		SetOnce_Any(Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.0f, float speed = 1.0f) noexcept {
-			this->m_EffectControl.SetOnce_Any(static_cast<int>(ID), pos_t, nomal_t, scale, speed);
+		void		SetOnce_Any(Effect ID, const Vector3DX& pos, const Vector3DX& nomal, float scale = 1.0f, float speed = 1.0f) noexcept {
+			this->m_EffectControl.SetOnce_Any(static_cast<EffectControl::EffectID>(ID), pos, nomal, scale, speed);
 		}
 		// 単体で制御したいエフェクトの制御
 		void		StopEffect(Effect ID) noexcept {
-			this->m_EffectControl.StopEffect(static_cast<int>(ID));
+			this->m_EffectControl.StopEffect(static_cast<EffectControl::EffectID>(ID));
 		}
-		void		SetLoop(Effect ID, const Vector3DX& pos_t) noexcept {
-			this->m_EffectControl.SetLoop(static_cast<int>(ID), pos_t);
+		void		SetLoop(Effect ID, const Vector3DX& pos) noexcept {
+			this->m_EffectControl.SetLoop(static_cast<EffectControl::EffectID>(ID), pos);
 		}
-		void		Update_LoopEffect(Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.0f) noexcept {
-			this->m_EffectControl.Update_LoopEffect(static_cast<int>(ID), pos_t, nomal_t, scale);
+		void		Update_LoopEffect(Effect ID, const Vector3DX& pos, const Vector3DX& nomal, float scale = 1.0f) noexcept {
+			this->m_EffectControl.Update_LoopEffect(static_cast<EffectControl::EffectID>(ID), pos, nomal, scale);
 		}
-		void		SetOnce(Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.0f) noexcept {
-			this->m_EffectControl.SetOnce(static_cast<int>(ID), pos_t, nomal_t, scale);
+		void		SetOnce(Effect ID, const Vector3DX& pos, const Vector3DX& nomal, float scale = 1.0f) noexcept {
+			this->m_EffectControl.SetOnce(static_cast<EffectControl::EffectID>(ID), pos, nomal, scale);
 		}
 		void		SetEffectSpeed(Effect ID, float speed) noexcept {
-			this->m_EffectControl.SetEffectSpeed(static_cast<int>(ID), speed);
+			this->m_EffectControl.SetEffectSpeed(static_cast<EffectControl::EffectID>(ID), speed);
 		}
-		void		SetEffectColor(Effect ID, int r, int g, int b, int a) noexcept {
-			this->m_EffectControl.SetEffectColor(static_cast<int>(ID), r, g, b, a);
+		void		SetEffectColor(Effect ID, int red, int green, int blue, int alpha) noexcept {
+			this->m_EffectControl.SetEffectColor(static_cast<EffectControl::EffectID>(ID), red, green, blue, alpha);
 		}
 	public:
 		void			Update(void) noexcept {

@@ -103,17 +103,17 @@ namespace FPS_n2 {
 						Vector3DX EndPos = PosBuf;
 						Vector3DX Normal;
 						/*
-										if (Player::PlayerManager::Instance()->GetVehicle()->CheckLine(GetMove().GetRePos(), &EndPos, &Normal)) {
-											PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
-											SetMove().SetVec(Vector3DX::Reflect(GetMove().GetVec(), Normal) * 0.5f);
-											this->m_yAdd = 0.0f;
-											if (this->m_SoundSwitch) {
-												this->m_SoundSwitch = false;
-												SE->Get(SoundType::SE, static_cast<int>(this->m_FallObject->GetFallSound()))->Play3D(PosBuf, Scale3DRate * 5.0f);
-											}
-											this->m_FallObject->RotateOnGround(&SetMove());
-										}
-										else
+						if (Player::PlayerManager::Instance()->GetVehicle()->CheckLine(GetMove().GetRePos(), &EndPos, &Normal)) {
+							PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
+							SetMove().SetVec(Vector3DX::Reflect(GetMove().GetVec(), Normal) * 0.5f);
+							this->m_yAdd = 0.0f;
+							if (this->m_SoundSwitch) {
+								this->m_SoundSwitch = false;
+								SE->Get(SoundType::SE, static_cast<int>(this->m_FallObject->GetFallSound()))->Play3D(PosBuf, Scale3DRate * 5.0f);
+							}
+							this->m_FallObject->RotateOnGround(&SetMove());
+						}
+						else
 						//*/
 						if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(RePos, &EndPos, &Normal)) {
 							PosBuf = EndPos + Normal * (0.5f * Scale3DRate);

@@ -225,14 +225,14 @@ namespace FPS_n2 {
 					return Tmp;
 				}
 				//自身が該当のスロットと同一かどうか確認
-				bool IsSavedSlot(const SlotSaveData& S) {
+				bool IsSavedSlot(const SlotSaveData& slotSave) {
 					if (this->m_ParentSlot) {
-						if (!(S.ParentSlotType == (*this->m_ParentSlot)->m_SlotType) && (S.Parentselect == (*this->m_ParentSlot)->m_select)) { return false; }
+						if (!(slotSave.ParentSlotType == (*this->m_ParentSlot)->m_SlotType) && (slotSave.Parentselect == (*this->m_ParentSlot)->m_select)) { return false; }
 					}
 					else {
-						if (S.ParentSlotType != GunSlot::Gun) { return false; }
+						if (slotSave.ParentSlotType != GunSlot::Gun) { return false; }
 					}
-					return (this->m_SlotType == S.SlotType);
+					return (this->m_SlotType == slotSave.SlotType);
 				}
 			};
 		private:

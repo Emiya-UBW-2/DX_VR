@@ -12,40 +12,40 @@ namespace FPS_n2 {
 				return false;
 			}
 			{
-				auto HitCheck_Tank = [&](int m, const Vector3DX& ray_repos, const MV1_COLL_RESULT_POLY& hitres) {
-					this->m_hitres[m] = hitres;
-					if (this->m_hitres[m].HitFlag == TRUE) {
-						this->m_hitssort[m].Set(m, (ray_repos - this->m_hitres[m].HitPosition).magnitude());
+				auto HitCheck_Tank = [&](int mesh, const Vector3DX& ray_repos, const MV1_COLL_RESULT_POLY& hitres) {
+					this->m_hitres[mesh] = hitres;
+					if (this->m_hitres[mesh].HitFlag == TRUE) {
+						this->m_hitssort[mesh].Set(mesh, (ray_repos - this->m_hitres[mesh].HitPosition).magnitude());
 						return true;
 					}
 					else {
-						this->m_hitssort[m].Set(m);
+						this->m_hitssort[mesh].Set(mesh);
 						return false;
 					}
 					};
 				bool is_Hit = false;
 				//装甲(一番近い位置のものに限定する)
-				int t = InvalidID;
+				int answer = InvalidID;
 				MV1_COLL_RESULT_POLY colres{}; colres.HitFlag = FALSE;
-				for (const auto& m : this->m_VecData->GetArmerMeshIDList()) { HitCheck_Tank(m.first, StartPos, colres); }//全リセット
-				for (const auto& m : this->m_VecData->GetArmerMeshIDList()) {
-					auto colres_t = GetColLine(StartPos, *EndPos, m.first);
-					if (colres_t.HitFlag == TRUE) {
-						t = m.first;
-						colres = colres_t;
-						*EndPos = colres_t.HitPosition;
+				for (const auto& mesh : this->m_VecData->GetArmerMeshIDList()) { HitCheck_Tank(mesh.first, StartPos, colres); }//全リセット
+				for (const auto& mesh : this->m_VecData->GetArmerMeshIDList()) {
+					auto colresBuf = GetColLine(StartPos, *EndPos, mesh.first);
+					if (colresBuf.HitFlag == TRUE) {
+						answer = mesh.first;
+						colres = colresBuf;
+						*EndPos = colresBuf.HitPosition;
 					}
 				}
 				//
-				for (auto& m : this->m_VecData->GetModuleMeshIDList()) {//モジュール
-					is_Hit |= HitCheck_Tank(m, StartPos, GetColLine(StartPos, *EndPos, m));
+				for (auto& mesh : this->m_VecData->GetModuleMeshIDList()) {//モジュール
+					is_Hit |= HitCheck_Tank(mesh, StartPos, GetColLine(StartPos, *EndPos, mesh));
 				}
-				for (auto& m : this->m_VecData->GetSpaceArmerMeshIDList()) {//空間装甲
-					is_Hit |= HitCheck_Tank(m, StartPos, GetColLine(StartPos, *EndPos, m));
+				for (auto& mesh : this->m_VecData->GetSpaceArmerMeshIDList()) {//空間装甲
+					is_Hit |= HitCheck_Tank(mesh, StartPos, GetColLine(StartPos, *EndPos, mesh));
 				}
 				//
-				if (t != InvalidID) {
-					is_Hit |= HitCheck_Tank(t, StartPos, colres);
+				if (answer != InvalidID) {
+					is_Hit |= HitCheck_Tank(answer, StartPos, colres);
 				}
 				if (!is_Hit) {
 					return false;
@@ -92,17 +92,17 @@ namespace FPS_n2 {
 		void			VehicleObj::Init_Sub(void) noexcept {
 			this->m_VecData = std::make_unique<VhehicleData>(GetObj(), GetCol(), GetFilePath().c_str());
 			for (auto& LR : this->m_CrawlerFrame) {
-				const auto& w = this->m_VecData->GetCrawlerFrameList()[&LR - &this->m_CrawlerFrame.front()];
-				LR.resize(w.size());
-				for (auto& t : LR) {
-					t.Init(w[&t - &LR.front()]);
+				const auto& crawlerFrame = this->m_VecData->GetCrawlerFrameList()[&LR - &this->m_CrawlerFrame.front()];
+				LR.resize(crawlerFrame.size());
+				for (auto& frame : LR) {
+					frame.Init(crawlerFrame[&frame - &LR.front()]);
 				}
 			}
 			this->m_WheelHeight.resize(this->m_VecData->GetWheelFrameList().size());
 			//砲
 			this->m_Gun.resize(this->m_VecData->GetGunData().size());
-			for (auto& g : this->m_Gun) {
-				g.Init(&this->m_VecData->GetGunData()[&g - &this->m_Gun.front()]);
+			for (auto& gun : this->m_Gun) {
+				gun.Init(&this->m_VecData->GetGunData()[&gun - &this->m_Gun.front()]);
 			}
 
 			SetActive(true);
@@ -118,7 +118,7 @@ namespace FPS_n2 {
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			//初回のみ更新する内容
 			if (IsFirstLoop()) {
-				this->m_engine_time = (float)GetRand(100) / 100.0f;
+				this->m_engine_time = static_cast<float>(GetRand(100)) / 100.0f;
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_move))->Play3D(GetMove().GetPos(), 30.0f * Scale3DRate, DX_PLAYTYPE_LOOP);
 			}
 			//エンジン音
@@ -130,78 +130,78 @@ namespace FPS_n2 {
 
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_move))->SetPosition(GetMove().GetPos());
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_move))->SetLocalVolume(
-				std::clamp((int)(128.0f * (std::abs(GetMove().GetVec().magnitude() / DXLib_refParts->GetDeltaTime()) * 0.005f + std::abs(this->m_radAdd.y) * 0.1f) * 10.0f), 0, 128)
+				std::clamp(static_cast<int>(128.0f * (std::abs(GetMove().GetVec().magnitude() / DXLib_refParts->GetDeltaTime()) * 0.005f + std::abs(this->m_radAdd.y) * 0.1f) * 10.0f), 0, 128)
 			);
 			//狙い
-			for (auto& g : this->m_Gun) {
-				Vector3DX StartPos = GetObj().GetFramePosition(g.GetGunMuzzleFrame().GetFrameID());
+			for (auto& gun : this->m_Gun) {
+				Vector3DX StartPos = GetObj().GetFramePosition(gun.GetGunMuzzleFrame().GetFrameID());
 				Vector3DX EndPos = StartPos + (this->m_MouseVec.zvec2()).normalized() * (500.0f * Scale3DRate);//狙う場所
-				Vector3DX BasePos = GetObj().GetFramePosition(g.GetGunTrunnionFrame().GetFrameID());
-				g.UpdateAim((StartPos - BasePos).normalized(), (EndPos - BasePos).normalized(), this->m_VecData);
+				Vector3DX BasePos = GetObj().GetFramePosition(gun.GetGunTrunnionFrame().GetFrameID());
+				gun.UpdateAim((StartPos - BasePos).normalized(), (EndPos - BasePos).normalized(), this->m_VecData);
 			}
 			//砲塔旋回
-			for (auto& g : this->m_Gun) {
+			for (auto& gun : this->m_Gun) {
 				frames id;
-				id = g.GetGunTurretFrame();
+				id = gun.GetGunTurretFrame();
 				if (id.GetFrameID() >= 0) {
-					auto RotateY = Matrix4x4DX::RotAxis(Vector3DX::up(), g.GetShotTargetRad().y);
+					auto RotateY = Matrix4x4DX::RotAxis(Vector3DX::up(), gun.GetShotTargetRad().y);
 					SetObj().SetFrameLocalMatrix(id.GetFrameID(), RotateY * id.GetFrameLocalPosition());
 					SetCol().SetFrameLocalMatrix(id.GetFrameID(), RotateY * id.GetFrameLocalPosition());
 				}
-				id = g.GetGunTrunnionFrame();
+				id = gun.GetGunTrunnionFrame();
 				if (id.GetFrameID() >= 0) {
-					auto RotateX = Matrix4x4DX::RotAxis(Vector3DX::right(), g.GetShotTargetRad().x);
+					auto RotateX = Matrix4x4DX::RotAxis(Vector3DX::right(), gun.GetShotTargetRad().x);
 					SetObj().SetFrameLocalMatrix(id.GetFrameID(), RotateX * id.GetFrameLocalPosition());
 					SetCol().SetFrameLocalMatrix(id.GetFrameID(), RotateX * id.GetFrameLocalPosition());
 				}
-				id = g.GetGunMuzzleFrame();
+				id = gun.GetGunMuzzleFrame();
 				if (id.GetFrameID() >= 0) {
-					auto Recoil = Matrix4x4DX::Mtrans(Vector3DX::vget(0.0f, 0.0f, g.GetRecoil() * 0.5f * Scale3DRate));
+					auto Recoil = Matrix4x4DX::Mtrans(Vector3DX::vget(0.0f, 0.0f, gun.GetRecoil() * 0.5f * Scale3DRate));
 					SetObj().SetFrameLocalMatrix(id.GetFrameID(), Recoil * id.GetFrameLocalPosition());
 					SetCol().SetFrameLocalMatrix(id.GetFrameID(), Recoil * id.GetFrameLocalPosition());
 				}
 			}
 			//転輪
-			for (auto& Y : this->m_WheelHeight) {
-				auto index = static_cast<int>(&Y - &this->m_WheelHeight.front());
-				auto& f = this->m_VecData->GetWheelFrameList()[index];
-				if (f.GetFrameID() >= 0) {
-					SetObj().ResetFrameUserLocalMatrix(f.GetFrameID());
-					auto startpos = GetObj().GetFramePosition(f.GetFrameID()) - GetMove().GetMat().yvec() * f.GetFrameWorldPosition().pos().y;
-					auto pos_t1 = startpos + GetMove().GetMat().yvec() * (1.0f * Scale3DRate);
-					auto pos_t2 = startpos + GetMove().GetMat().yvec() * (-0.1f * Scale3DRate);
-					auto ColRes = BackGroundParts->CheckLinetoMap(pos_t1, &pos_t2);
-					Easing(&Y, (ColRes) ? (pos_t2.y - startpos.y) : -0.1f * Scale3DRate, 0.9f, EasingType::OutExpo);
-					SetObj().SetFrameLocalMatrix(f.GetFrameID(),
-						Matrix4x4DX::RotAxis(Vector3DX::right(), (f.GetFrameWorldPosition().pos().x >= 0) ? this->m_CrawlerRotateLeft : this->m_CrawlerRotateRight) *
-						Matrix4x4DX::Mtrans(Vector3DX::up() * Y) * f.GetFrameWorldPosition()
+			for (auto& height : this->m_WheelHeight) {
+				auto index = static_cast<int>(&height - &this->m_WheelHeight.front());
+				auto& frame = this->m_VecData->GetWheelFrameList()[index];
+				if (frame.GetFrameID() >= 0) {
+					SetObj().ResetFrameUserLocalMatrix(frame.GetFrameID());
+					auto startpos = GetObj().GetFramePosition(frame.GetFrameID()) - GetMove().GetMat().yvec() * frame.GetFrameWorldPosition().pos().y;
+					auto pos1 = startpos + GetMove().GetMat().yvec() * (1.0f * Scale3DRate);
+					auto pos2 = startpos + GetMove().GetMat().yvec() * (-0.1f * Scale3DRate);
+					auto ColRes = BackGroundParts->CheckLinetoMap(pos1, &pos2);
+					Easing(&height, (ColRes) ? (pos2.y - startpos.y) : -0.1f * Scale3DRate, 0.9f, EasingType::OutExpo);
+					SetObj().SetFrameLocalMatrix(frame.GetFrameID(),
+						Matrix4x4DX::RotAxis(Vector3DX::right(), (frame.GetFrameWorldPosition().pos().x >= 0) ? this->m_CrawlerRotateLeft : this->m_CrawlerRotateRight) *
+						Matrix4x4DX::Mtrans(Vector3DX::up() * height) * frame.GetFrameWorldPosition()
 					);
 				}
 			}
 			//上部支持輪などサスペンションがいらないもの
-			for (const auto& f : this->m_VecData->GetNoSpringWheelFrameList()) {
-				if (f.GetFrameID() >= 0) {
-					SetObj().SetFrameLocalMatrix(f.GetFrameID(),
-						Matrix4x4DX::RotAxis(Vector3DX::right(), (f.GetFrameWorldPosition().pos().x >= 0) ? this->m_CrawlerRotateLeft : this->m_CrawlerRotateRight) *
-						f.GetFrameWorldPosition());
+			for (const auto& frame : this->m_VecData->GetNoSpringWheelFrameList()) {
+				if (frame.GetFrameID() >= 0) {
+					SetObj().SetFrameLocalMatrix(frame.GetFrameID(),
+						Matrix4x4DX::RotAxis(Vector3DX::right(), (frame.GetFrameWorldPosition().pos().x >= 0) ? this->m_CrawlerRotateLeft : this->m_CrawlerRotateRight) *
+						frame.GetFrameWorldPosition());
 				}
 			}
 			//履帯
 			for (auto& LR : this->m_CrawlerFrame) {
-				for (auto& f : LR) {
-					if (f.GetFrame().GetFrameID() >= 0) {
-						SetObj().ResetFrameUserLocalMatrix(f.GetFrame().GetFrameID());
-						auto startpos = GetObj().GetFramePosition(f.GetFrame().GetFrameID()) - GetMove().GetMat().yvec() * f.GetFrame().GetFrameWorldPosition().pos().y;
-						auto pos_t1 = startpos + GetMove().GetMat().yvec() * (1.0f * Scale3DRate);
-						auto pos_t2 = startpos + GetMove().GetMat().yvec() * (-0.2f * Scale3DRate);
-						auto ColRes = BackGroundParts->CheckLinetoMap(pos_t1, &pos_t2);
-						f.Update(ColRes, pos_t2.y);
-						float Y = -0.2f * Scale3DRate;
+				for (auto& frame : LR) {
+					if (frame.GetFrame().GetFrameID() >= 0) {
+						SetObj().ResetFrameUserLocalMatrix(frame.GetFrame().GetFrameID());
+						auto startpos = GetObj().GetFramePosition(frame.GetFrame().GetFrameID()) - GetMove().GetMat().yvec() * frame.GetFrame().GetFrameWorldPosition().pos().y;
+						auto pos1 = startpos + GetMove().GetMat().yvec() * (1.0f * Scale3DRate);
+						auto pos2 = startpos + GetMove().GetMat().yvec() * (-0.2f * Scale3DRate);
+						auto ColRes = BackGroundParts->CheckLinetoMap(pos1, &pos2);
+						frame.Update(ColRes, pos2.y);
+						float height = -0.2f * Scale3DRate;
 						if (ColRes) {
-							Y = (pos_t2.y - startpos.y);
+							height = (pos2.y - startpos.y);
 						}
-						SetObj().SetFrameLocalMatrix(f.GetFrame().GetFrameID(),
-							Matrix4x4DX::Mtrans(Vector3DX::up() * Y) * f.GetFrame().GetFrameWorldPosition()
+						SetObj().SetFrameLocalMatrix(frame.GetFrame().GetFrameID(),
+							Matrix4x4DX::Mtrans(Vector3DX::up() * height) * frame.GetFrame().GetFrameWorldPosition()
 						);
 					}
 				}
@@ -228,20 +228,20 @@ namespace FPS_n2 {
 			{
 				//履帯の接地判定
 				for (const auto& LR : this->m_CrawlerFrame) {
-					for (const auto& f : LR) {
-						if (f.OnGround()) {
-							OnGroundHeight += f.GetHitHeight();
+					for (const auto& frame : LR) {
+						if (frame.OnGround()) {
+							OnGroundHeight += frame.GetHitHeight();
 							++OnGroundCount;
 						}
 					}
 				}
 				int OnGroundCountSquare = 0;
-				for (const auto& s : this->m_VecData->GetSquareFrameList()) {
-					auto p_t = GetObj().GetFramePosition(s);
-					auto pos_t1 = p_t + (Vector3DX::up() * 1.0f * Scale3DRate);
-					auto pos_t2 = p_t + (Vector3DX::up() * -1.0f * Scale3DRate);
-					if (BackGroundParts->CheckLinetoMap(pos_t1, &pos_t2)) {
-						OnGroundHeight += pos_t2.y;
+				for (const auto& frame : this->m_VecData->GetSquareFrameList()) {
+					auto pos = GetObj().GetFramePosition(frame);
+					auto pos1 = pos + (Vector3DX::up() * 1.0f * Scale3DRate);
+					auto pos2 = pos + (Vector3DX::up() * -1.0f * Scale3DRate);
+					if (BackGroundParts->CheckLinetoMap(pos1, &pos2)) {
+						OnGroundHeight += pos2.y;
 						++OnGroundCount;
 						++OnGroundCountSquare;
 					}

@@ -69,26 +69,26 @@ namespace FPS_n2 {
 			const auto		GetSide(bool isLeft, bool isFront) const noexcept {
 				int ans = 0;
 				float tmp = 0.0f;
-				for (auto& f : this->m_WheelFrame) {
-					if ((isLeft ? 1.0f : -1.0f) * f.GetFrameWorldPosition().pos().x >= 0) {
-						ans = f.GetFrameID();
-						tmp = f.GetFrameWorldPosition().pos().z;
+				for (auto& frame : this->m_WheelFrame) {
+					if ((isLeft ? 1.0f : -1.0f) * frame.GetFrameWorldPosition().pos().x >= 0) {
+						ans = frame.GetFrameID();
+						tmp = frame.GetFrameWorldPosition().pos().z;
 						break;
 					}
 				}
-				for (auto& f : this->m_WheelFrame) {
-					if (ans != f.GetFrameID()) {
-						if ((isLeft ? 1.0f : -1.0f) * f.GetFrameWorldPosition().pos().x >= 0) {
+				for (auto& frame : this->m_WheelFrame) {
+					if (ans != frame.GetFrameID()) {
+						if ((isLeft ? 1.0f : -1.0f) * frame.GetFrameWorldPosition().pos().x >= 0) {
 							if (isFront) {
-								if (tmp > f.GetFrameWorldPosition().pos().z) {
-									ans = f.GetFrameID();
-									tmp = f.GetFrameWorldPosition().pos().z;
+								if (tmp > frame.GetFrameWorldPosition().pos().z) {
+									ans = frame.GetFrameID();
+									tmp = frame.GetFrameWorldPosition().pos().z;
 								}
 							}
 							else {
-								if (tmp < f.GetFrameWorldPosition().pos().z) {
-									ans = f.GetFrameID();
-									tmp = f.GetFrameWorldPosition().pos().z;
+								if (tmp < frame.GetFrameWorldPosition().pos().z) {
+									ans = frame.GetFrameID();
+									tmp = frame.GetFrameWorldPosition().pos().z;
 								}
 							}
 						}
@@ -107,27 +107,27 @@ namespace FPS_n2 {
 			const auto& GetArmerMeshIDList(void) const noexcept { return this->m_ArmerMesh; }
 			const auto& GetSpaceArmerMeshIDList(void) const noexcept { return this->m_SpaceArmerMesh; }
 			const auto& GetModuleMeshIDList(void) const noexcept { return this->m_ModuleMesh; }
-			const auto& GetSquareFrameID(size_t ID_t)const noexcept { return this->m_SquareFrameID[ID_t]; }
+			const auto& GetSquareFrameID(size_t ID)const noexcept { return this->m_SquareFrameID[ID]; }
 			const auto& GetSquareFrameList(void) const noexcept { return this->m_SquareFrameID; }
 			const auto& GetCrawlerFrameList(void) const noexcept { return this->m_CrawlerFrame; }
 		public: //コンストラクタ、デストラクタ
 			VhehicleData(const MV1& DataObj, const MV1& DataCol, const char* path) noexcept {
 				//フレーム情報
 				for (int loop = 0; loop < DataObj.GetFrameNum(); loop++) {
-					std::string p = DataObj.GetFrameName(loop);
-					if (p.find("転輪", 0) != std::string::npos) {
+					std::string frameName = DataObj.GetFrameName(loop);
+					if (frameName.find("転輪", 0) != std::string::npos) {
 						this->m_WheelFrame.resize(this->m_WheelFrame.size() + 1);
 						this->m_WheelFrame.back().Set(loop, DataObj);
 					}
-					else if ((p.find("輪", 0) != std::string::npos) && (p.find("転輪", 0) == std::string::npos)) {
+					else if ((frameName.find("輪", 0) != std::string::npos) && (frameName.find("転輪", 0) == std::string::npos)) {
 						this->m_NoSpringWheelFrame.resize(this->m_NoSpringWheelFrame.size() + 1);
 						this->m_NoSpringWheelFrame.back().Set(loop, DataObj);
 					}
-					else if (p.find("旋回", 0) != std::string::npos) {
+					else if (frameName.find("旋回", 0) != std::string::npos) {
 						this->m_GunData.resize(this->m_GunData.size() + 1);
 						this->m_GunData.back().Set(loop, DataObj);
 					}
-					else if (p.find("履帯設置部", 0) != std::string::npos) { //2D物理
+					else if (frameName.find("履帯設置部", 0) != std::string::npos) { //2D物理
 						this->m_CrawlerFrame[0].clear();
 						this->m_CrawlerFrame[1].clear();
 						for (int z = 0; z < DataObj.GetFrameChildNum(loop); z++) {
@@ -144,37 +144,37 @@ namespace FPS_n2 {
 				}
 				//メッシュ情報
 				for (int loop = 0; loop < DataCol.GetMeshNum(); loop++) {
-					std::string p = DataCol.GetMaterialName(loop);
+					std::string materialName = DataCol.GetMaterialName(loop);
 					//車体モジュール
-					if (p.find("armer", 0) != std::string::npos) {
-						this->m_ArmerMesh.emplace_back(loop, std::stof(FileStreamDX::getright(p)));//装甲
+					if (materialName.find("armer", 0) != std::string::npos) {
+						this->m_ArmerMesh.emplace_back(loop, std::stof(FileStreamDX::getright(materialName)));//装甲
 					}
-					else if (p.find("space", 0) != std::string::npos) {
+					else if (materialName.find("space", 0) != std::string::npos) {
 						this->m_SpaceArmerMesh.emplace_back(loop);//空間装甲
 					}
-					else if (p.find("left_foot", 0) != std::string::npos) {
+					else if (materialName.find("left_foot", 0) != std::string::npos) {
 						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
-					else if (p.find("right_foot", 0) != std::string::npos) {
+					else if (materialName.find("right_foot", 0) != std::string::npos) {
 						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
-					else if (p.find("engine", 0) != std::string::npos) {
+					else if (materialName.find("engine", 0) != std::string::npos) {
 						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
-					else if (p.find("human_body", 0) != std::string::npos) {
+					else if (materialName.find("human_body", 0) != std::string::npos) {
 						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
-					else if (p.find("ammo_body", 0) != std::string::npos) {
+					else if (materialName.find("ammo_body", 0) != std::string::npos) {
 						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
 					//砲塔モジュール
-					if (p.find("gun", 0) != std::string::npos) {
+					if (materialName.find("gun", 0) != std::string::npos) {
 						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
-					else if (p.find("human_turret", 0) != std::string::npos) {
+					else if (materialName.find("human_turret", 0) != std::string::npos) {
 						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
-					else if (p.find("ammo_turret", 0) != std::string::npos) {
+					else if (materialName.find("ammo_turret", 0) != std::string::npos) {
 						this->m_ModuleMesh.emplace_back(loop);//モジュール
 					}
 				}
@@ -191,8 +191,8 @@ namespace FPS_n2 {
 					this->m_MaxBackSpeed = std::stof(FileStreamDX::getright(File.SeekLineAndGetStr()));
 					this->m_MaxBodyRad = std::stof(FileStreamDX::getright(File.SeekLineAndGetStr()));
 					this->m_MaxTurretRad = deg2rad(std::stof(FileStreamDX::getright(File.SeekLineAndGetStr())));
-					for (auto& g : this->m_GunData) {
-						g.SetData(&File);
+					for (auto& gundata : this->m_GunData) {
+						gundata.SetData(&File);
 					}
 				}
 			}
@@ -280,16 +280,16 @@ namespace FPS_n2 {
 		};
 		//命中関連
 		class HitSortInfo {
-			size_t					m_hitmesh{ SIZE_MAX };
-			float					m_hitDistance{ (std::numeric_limits<float>::max)() };
+			size_t					m_HitMesh{ SIZE_MAX };
+			float					m_HitDistance{ (std::numeric_limits<float>::max)() };
 		public:
-			const auto		operator<(const HitSortInfo& tgt) const noexcept { return this->m_hitDistance < tgt.m_hitDistance; }
-			void			Set(size_t f_t, float s_t = (std::numeric_limits<float>::max)())noexcept {
-				this->m_hitmesh = f_t;
-				this->m_hitDistance = s_t;
+			const auto		operator<(const HitSortInfo& tgt) const noexcept { return this->m_HitDistance < tgt.m_HitDistance; }
+			void			Set(size_t hitMesh, float hitDistance = (std::numeric_limits<float>::max)())noexcept {
+				this->m_HitMesh = hitMesh;
+				this->m_HitDistance = hitDistance;
 			}
-			const auto		GetHitMesh(void) const noexcept { return this->m_hitmesh; }
-			const auto		IsHit(void) const noexcept { return (this->m_hitDistance != (std::numeric_limits<float>::max)()); }
+			const auto		GetHitMesh(void) const noexcept { return this->m_HitMesh; }
+			const auto		IsHit(void) const noexcept { return (this->m_HitDistance != (std::numeric_limits<float>::max)()); }
 		};
 		//履帯
 		class CrawlerFrameControl {

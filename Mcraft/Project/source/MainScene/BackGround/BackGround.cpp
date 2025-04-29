@@ -119,7 +119,7 @@ namespace FPS_n2 {
 		};
 		//ノイズ
 		class PerlinNoise {
-			std::array<uint_fast8_t, 512> perlinNoise{ 0 };
+			std::array<uint8_t, 512> perlinNoise{ 0 };
 		private:
 			constexpr float getFade(const float t_) const noexcept {
 				return t_ * t_ * t_ * (t_ * (t_ * 6 - 15) + 10);
@@ -127,32 +127,32 @@ namespace FPS_n2 {
 			constexpr float getLerp(const float t_, const float a_, const float b_) const noexcept {
 				return a_ + t_ * (b_ - a_);
 			}
-			constexpr float makeGrad(const uint_fast8_t hash_, const float u_, const float v_) const noexcept {
+			constexpr float makeGrad(const uint8_t hash_, const float u_, const float v_) const noexcept {
 				return (((hash_ & 1) == 0) ? u_ : -u_) + (((hash_ & 2) == 0) ? v_ : -v_);
 			}
-			constexpr float makeGrad(const uint_fast8_t hash_, const float x_, const float y_, const float z_) const noexcept {
+			constexpr float makeGrad(const uint8_t hash_, const float x_, const float y_, const float z_) const noexcept {
 				return makeGrad(hash_, hash_ < 8 ? x_ : y_, hash_ < 4 ? y_ : hash_ == 12 || hash_ == 14 ? x_ : z_);
 			}
-			constexpr float getGrad(const uint_fast8_t hash_, const float x_, const float y_, const float z_) const noexcept {
+			constexpr float getGrad(const uint8_t hash_, const float x_, const float y_, const float z_) const noexcept {
 				return makeGrad(hash_ & 15, x_, y_, z_);
 			}
 
 			float setNoise(float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) const noexcept {
-				const std::size_t x_int = static_cast<std::size_t>(static_cast<std::size_t>(std::floor(x_)) & 255);
-				const std::size_t y_int = static_cast<std::size_t>(static_cast<std::size_t>(std::floor(y_)) & 255);
-				const std::size_t z_int = static_cast<std::size_t>(static_cast<std::size_t>(std::floor(z_)) & 255);
+				const size_t x_int = static_cast<size_t>(static_cast<size_t>(std::floor(x_)) & 255);
+				const size_t y_int = static_cast<size_t>(static_cast<size_t>(std::floor(y_)) & 255);
+				const size_t z_int = static_cast<size_t>(static_cast<size_t>(std::floor(z_)) & 255);
 				x_ -= std::floor(x_);
 				y_ -= std::floor(y_);
 				z_ -= std::floor(z_);
 				const float u = getFade(x_);
 				const float v = getFade(y_);
 				const float w = getFade(z_);
-				const std::size_t a0 = static_cast<std::size_t>(this->perlinNoise[x_int] + y_int);
-				const std::size_t a1 = static_cast<std::size_t>(this->perlinNoise[a0] + z_int);
-				const std::size_t a2 = static_cast<std::size_t>(this->perlinNoise[a0 + 1] + z_int);
-				const std::size_t b0 = static_cast<std::size_t>(this->perlinNoise[x_int + 1] + y_int);
-				const std::size_t b1 = static_cast<std::size_t>(this->perlinNoise[b0] + z_int);
-				const std::size_t b2 = static_cast<std::size_t>(this->perlinNoise[b0 + 1] + z_int);
+				const size_t a0 = static_cast<size_t>(this->perlinNoise[x_int] + y_int);
+				const size_t a1 = static_cast<size_t>(this->perlinNoise[a0] + z_int);
+				const size_t a2 = static_cast<size_t>(this->perlinNoise[a0 + 1] + z_int);
+				const size_t b0 = static_cast<size_t>(this->perlinNoise[x_int + 1] + y_int);
+				const size_t b1 = static_cast<size_t>(this->perlinNoise[b0] + z_int);
+				const size_t b2 = static_cast<size_t>(this->perlinNoise[b0 + 1] + z_int);
 
 				return getLerp(w,
 					getLerp(v,
@@ -162,10 +162,10 @@ namespace FPS_n2 {
 						getLerp(u, getGrad(this->perlinNoise[a1 + 1], x_, y_, z_ - 1), getGrad(this->perlinNoise[b1 + 1], x_ - 1, y_, z_ - 1)),
 						getLerp(u, getGrad(this->perlinNoise[a2 + 1], x_, y_ - 1, z_ - 1), getGrad(this->perlinNoise[b2 + 1], x_ - 1, y_ - 1, z_ - 1))));
 			}
-			float setOctaveNoise(const std::size_t octaves_, float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) const noexcept {
+			float setOctaveNoise(const size_t octaves_, float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) const noexcept {
 				float noise_value = 0.0f;
 				float amp = 1.0f;
-				for (std::size_t loop = 0; loop < octaves_; ++loop) {
+				for (size_t loop = 0; loop < octaves_; ++loop) {
 					noise_value += setNoise(x_, y_, z_) * amp;
 					x_ *= 2.0f;
 					y_ *= 2.0f;
@@ -182,11 +182,11 @@ namespace FPS_n2 {
 
 			//SEED値を設定する
 			void setSeed(int seed) noexcept {
-				for (std::size_t loop = 0; loop < 256; ++loop) {
-					this->perlinNoise[loop] = static_cast<uint_fast8_t>(loop);
+				for (size_t loop = 0; loop < 256; ++loop) {
+					this->perlinNoise[loop] = static_cast<uint8_t>(loop);
 				}
 				std::shuffle(this->perlinNoise.begin(), this->perlinNoise.begin() + 256, std::default_random_engine(seed));
-				for (std::size_t loop = 0; loop < 256; ++loop) {
+				for (size_t loop = 0; loop < 256; ++loop) {
 					this->perlinNoise[256 + loop] = this->perlinNoise[loop];
 				}
 			}
@@ -195,7 +195,7 @@ namespace FPS_n2 {
 				return setNoise(x_, y_, z_) * 0.5f + 0.5f;
 			}
 			//オクターブ有りノイズを取得する
-			float octaveNoise(const std::size_t octaves_, float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) const noexcept {
+			float octaveNoise(const size_t octaves_, float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) const noexcept {
 				return setOctaveNoise(octaves_, x_, y_, z_) * 0.5f + 0.5f;
 			}
 		};
@@ -217,47 +217,47 @@ namespace FPS_n2 {
 			}
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 0];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b101).get();
-				V.norm = Vector3DX::right().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 0];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b101).get();
+				Vert.norm = Vector3DX::right().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + zscale);
-					V.v = vAdd * static_cast<float>(Yofs + 0);
+					Vert.u = uAdd * static_cast<float>(Xofs + zscale);
+					Vert.v = vAdd * static_cast<float>(Yofs + 0);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 1];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b100).get();
-				V.norm = Vector3DX::right().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 1];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b100).get();
+				Vert.norm = Vector3DX::right().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + 0);
-					V.v = vAdd * static_cast<float>(Yofs + 0);
+					Vert.u = uAdd * static_cast<float>(Xofs + 0);
+					Vert.v = vAdd * static_cast<float>(Yofs + 0);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 2];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b111).get();
-				V.norm = Vector3DX::right().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 2];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b111).get();
+				Vert.norm = Vector3DX::right().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + zscale);
-					V.v = vAdd * static_cast<float>(Yofs + 1);
+					Vert.u = uAdd * static_cast<float>(Xofs + zscale);
+					Vert.v = vAdd * static_cast<float>(Yofs + 1);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 3];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b110).get();
-				V.norm = Vector3DX::right().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 3];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b110).get();
+				Vert.norm = Vector3DX::right().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + 0);
-					V.v = vAdd * static_cast<float>(Yofs + 1);
+					Vert.u = uAdd * static_cast<float>(Xofs + 0);
+					Vert.v = vAdd * static_cast<float>(Yofs + 1);
 				}
 			}
 		}
@@ -278,47 +278,47 @@ namespace FPS_n2 {
 			}
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 0];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b011).get();
-				V.norm = Vector3DX::left().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 0];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b011).get();
+				Vert.norm = Vector3DX::left().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + zscale);
-					V.v = vAdd * static_cast<float>(Yofs + 0);
+					Vert.u = uAdd * static_cast<float>(Xofs + zscale);
+					Vert.v = vAdd * static_cast<float>(Yofs + 0);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 1];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b010).get();
-				V.norm = Vector3DX::left().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 1];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b010).get();
+				Vert.norm = Vector3DX::left().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + 0);
-					V.v = vAdd * static_cast<float>(Yofs + 0);
+					Vert.u = uAdd * static_cast<float>(Xofs + 0);
+					Vert.v = vAdd * static_cast<float>(Yofs + 0);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 2];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b001).get();
-				V.norm = Vector3DX::left().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 2];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b001).get();
+				Vert.norm = Vector3DX::left().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + zscale);
-					V.v = vAdd * static_cast<float>(Yofs + 1);
+					Vert.u = uAdd * static_cast<float>(Xofs + zscale);
+					Vert.v = vAdd * static_cast<float>(Yofs + 1);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 3];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b000).get();
-				V.norm = Vector3DX::left().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 3];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b000).get();
+				Vert.norm = Vector3DX::left().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + 0);
-					V.v = vAdd * static_cast<float>(Yofs + 1);
+					Vert.u = uAdd * static_cast<float>(Xofs + 0);
+					Vert.v = vAdd * static_cast<float>(Yofs + 1);
 				}
 			}
 		}
@@ -339,47 +339,47 @@ namespace FPS_n2 {
 			}
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 0];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b111).get();
-				V.norm = Vector3DX::up().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 0];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b111).get();
+				Vert.norm = Vector3DX::up().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + zscale);
-					V.v = vAdd * static_cast<float>(Yofs + 0);
+					Vert.u = uAdd * static_cast<float>(Xofs + zscale);
+					Vert.v = vAdd * static_cast<float>(Yofs + 0);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 1];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b110).get();
-				V.norm = Vector3DX::up().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 1];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b110).get();
+				Vert.norm = Vector3DX::up().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + 0);
-					V.v = vAdd * static_cast<float>(Yofs + 0);
+					Vert.u = uAdd * static_cast<float>(Xofs + 0);
+					Vert.v = vAdd * static_cast<float>(Yofs + 0);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 2];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b011).get();
-				V.norm = Vector3DX::up().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 2];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b011).get();
+				Vert.norm = Vector3DX::up().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + zscale);
-					V.v = vAdd * static_cast<float>(Yofs + 1);
+					Vert.u = uAdd * static_cast<float>(Xofs + zscale);
+					Vert.v = vAdd * static_cast<float>(Yofs + 1);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 3];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b010).get();
-				V.norm = Vector3DX::up().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 3];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b010).get();
+				Vert.norm = Vector3DX::up().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + 0);
-					V.v = vAdd * static_cast<float>(Yofs + 1);
+					Vert.u = uAdd * static_cast<float>(Xofs + 0);
+					Vert.v = vAdd * static_cast<float>(Yofs + 1);
 				}
 			}
 		}
@@ -400,47 +400,47 @@ namespace FPS_n2 {
 			}
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 0];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b001).get();
-				V.norm = Vector3DX::down().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 0];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b001).get();
+				Vert.norm = Vector3DX::down().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + zscale);
-					V.v = vAdd * static_cast<float>(Yofs + 0);
+					Vert.u = uAdd * static_cast<float>(Xofs + zscale);
+					Vert.v = vAdd * static_cast<float>(Yofs + 0);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 1];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b000).get();
-				V.norm = Vector3DX::down().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 1];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b000).get();
+				Vert.norm = Vector3DX::down().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + 0);
-					V.v = vAdd * static_cast<float>(Yofs + 0);
+					Vert.u = uAdd * static_cast<float>(Xofs + 0);
+					Vert.v = vAdd * static_cast<float>(Yofs + 0);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 2];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b101).get();
-				V.norm = Vector3DX::down().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 2];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmax, 0b101).get();
+				Vert.norm = Vector3DX::down().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + zscale);
-					V.v = vAdd * static_cast<float>(Yofs + 1);
+					Vert.u = uAdd * static_cast<float>(Xofs + zscale);
+					Vert.v = vAdd * static_cast<float>(Yofs + 1);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 3];
-				V.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b100).get();
-				V.norm = Vector3DX::down().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 3];
+				Vert.pos = cellx.GetPosBuffer(center.x + xpos, center.y + ypos, center.z + zmin, 0b100).get();
+				Vert.norm = Vector3DX::down().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + 0);
-					V.v = vAdd * static_cast<float>(Yofs + 1);
+					Vert.u = uAdd * static_cast<float>(Xofs + 0);
+					Vert.v = vAdd * static_cast<float>(Yofs + 1);
 				}
 			}
 		}
@@ -461,47 +461,47 @@ namespace FPS_n2 {
 			}
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 0];
-				V.pos = cellx.GetPosBuffer(center.x + xmin, center.y + ypos, center.z + zpos, 0b001).get();
-				V.norm = Vector3DX::forward().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 0];
+				Vert.pos = cellx.GetPosBuffer(center.x + xmin, center.y + ypos, center.z + zpos, 0b001).get();
+				Vert.norm = Vector3DX::forward().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + xscale);
-					V.v = vAdd * static_cast<float>(Yofs + 0);
+					Vert.u = uAdd * static_cast<float>(Xofs + xscale);
+					Vert.v = vAdd * static_cast<float>(Yofs + 0);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 1];
-				V.pos = cellx.GetPosBuffer(center.x + xmax, center.y + ypos, center.z + zpos, 0b101).get();
-				V.norm = Vector3DX::forward().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 1];
+				Vert.pos = cellx.GetPosBuffer(center.x + xmax, center.y + ypos, center.z + zpos, 0b101).get();
+				Vert.norm = Vector3DX::forward().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + 0);
-					V.v = vAdd * static_cast<float>(Yofs + 0);
+					Vert.u = uAdd * static_cast<float>(Xofs + 0);
+					Vert.v = vAdd * static_cast<float>(Yofs + 0);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 2];
-				V.pos = cellx.GetPosBuffer(center.x + xmin, center.y + ypos, center.z + zpos, 0b011).get();
-				V.norm = Vector3DX::forward().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 2];
+				Vert.pos = cellx.GetPosBuffer(center.x + xmin, center.y + ypos, center.z + zpos, 0b011).get();
+				Vert.norm = Vector3DX::forward().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + xscale);
-					V.v = vAdd * static_cast<float>(Yofs + 1);
+					Vert.u = uAdd * static_cast<float>(Xofs + xscale);
+					Vert.v = vAdd * static_cast<float>(Yofs + 1);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 3];
-				V.pos = cellx.GetPosBuffer(center.x + xmax, center.y + ypos, center.z + zpos, 0b111).get();
-				V.norm = Vector3DX::forward().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 3];
+				Vert.pos = cellx.GetPosBuffer(center.x + xmax, center.y + ypos, center.z + zpos, 0b111).get();
+				Vert.norm = Vector3DX::forward().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + 0);
-					V.v = vAdd * static_cast<float>(Yofs + 1);
+					Vert.u = uAdd * static_cast<float>(Xofs + 0);
+					Vert.v = vAdd * static_cast<float>(Yofs + 1);
 				}
 			}
 		}
@@ -522,47 +522,47 @@ namespace FPS_n2 {
 			}
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 0];
-				V.pos = cellx.GetPosBuffer(center.x + xmin, center.y + ypos, center.z + zpos, 0b010).get();
-				V.norm = Vector3DX::back().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 0];
+				Vert.pos = cellx.GetPosBuffer(center.x + xmin, center.y + ypos, center.z + zpos, 0b010).get();
+				Vert.norm = Vector3DX::back().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + xscale);
-					V.v = vAdd * static_cast<float>(Yofs + 0);
+					Vert.u = uAdd * static_cast<float>(Xofs + xscale);
+					Vert.v = vAdd * static_cast<float>(Yofs + 0);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 1];
-				V.pos = cellx.GetPosBuffer(center.x + xmax, center.y + ypos, center.z + zpos, 0b110).get();
-				V.norm = Vector3DX::back().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 1];
+				Vert.pos = cellx.GetPosBuffer(center.x + xmax, center.y + ypos, center.z + zpos, 0b110).get();
+				Vert.norm = Vector3DX::back().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + 0);
-					V.v = vAdd * static_cast<float>(Yofs + 0);
+					Vert.u = uAdd * static_cast<float>(Xofs + 0);
+					Vert.v = vAdd * static_cast<float>(Yofs + 0);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 2];
-				V.pos = cellx.GetPosBuffer(center.x + xmin, center.y + ypos, center.z + zpos, 0b000).get();
-				V.norm = Vector3DX::back().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 2];
+				Vert.pos = cellx.GetPosBuffer(center.x + xmin, center.y + ypos, center.z + zpos, 0b000).get();
+				Vert.norm = Vector3DX::back().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + xscale);
-					V.v = vAdd * static_cast<float>(Yofs + 1);
+					Vert.u = uAdd * static_cast<float>(Xofs + xscale);
+					Vert.v = vAdd * static_cast<float>(Yofs + 1);
 				}
 			}
 			{
-				auto& V = pTarget->SetInVert()[ZERO + 3];
-				V.pos = cellx.GetPosBuffer(center.x + xmax, center.y + ypos, center.z + zpos, 0b100).get();
-				V.norm = Vector3DX::back().get();
-				V.dif = GetColorU8(128, 128, 128, 255);
-				V.spc = GetColorU8(64, 64, 64, 255);
+				auto& Vert = pTarget->SetInVert()[ZERO + 3];
+				Vert.pos = cellx.GetPosBuffer(center.x + xmax, center.y + ypos, center.z + zpos, 0b100).get();
+				Vert.norm = Vector3DX::back().get();
+				Vert.dif = GetColorU8(128, 128, 128, 255);
+				Vert.spc = GetColorU8(64, 64, 64, 255);
 				if (IsCalcUV) {
-					V.u = uAdd * static_cast<float>(Xofs + 0);
-					V.v = vAdd * static_cast<float>(Yofs + 1);
+					Vert.u = uAdd * static_cast<float>(Xofs + 0);
+					Vert.v = vAdd * static_cast<float>(Yofs + 1);
 				}
 			}
 		}
@@ -1376,8 +1376,8 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundControl::Dispose(void) noexcept {
-			for (auto& t : m_Jobs) {
-				t.Dispose();
+			for (auto& job : m_Jobs) {
+				job.Dispose();
 			}
 			for (auto& Vert : this->m_Draws) {
 				Vert.Vert32.Dispose();

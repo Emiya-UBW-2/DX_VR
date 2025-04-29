@@ -115,9 +115,9 @@ namespace FPS_n2 {
 				chara->SetCharaTypeID((loop == PlayerMngr->GetWatchPlayerID()) ? CharaTypeID::Team : CharaTypeID::Enemy);
 				//
 				for (int loop2 = 0; loop2 < 3; ++loop2) {
-					auto& g = chara->GetGunPtr(loop2);
-					if (!g) { continue; }
-					g->SetupGun();
+					auto& gun = chara->GetGunPtr(loop2);
+					if (!gun) { continue; }
+					gun->SetupGun();
 				}
 			}
 			PlayerMngr->SetHelicopter(std::make_shared<Objects::HelicopterObj>());
@@ -185,10 +185,9 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
 
-			//Vector3DX pos_t = Matrix3x3DX::Vtrans(Vector3DX::forward() * (15.0f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
-			//pos_t.y = -25.0f * Scale3DRate;
-
-			//PlayerMngr->GetVehicle()->Spawn(std::atan2f(pos_t.x, pos_t.z), pos_t);
+			//Vector3DX posBuf = Matrix3x3DX::Vtrans(Vector3DX::forward() * (15.0f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
+			//posBuf.y = -25.0f * Scale3DRate;
+			//PlayerMngr->GetVehicle()->Spawn(std::atan2f(posBuf.x, posBuf.z), posBuf);
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* CameraParts = Camera3D::Instance();
@@ -369,7 +368,7 @@ namespace FPS_n2 {
 					auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 					for (size_t loop2 = 0, Max = DamageEvents.size(); loop2 < Max; ++loop2) {
 						if (chara->SetDamageEvent(DamageEvents[loop2])) {
-							std::swap(DamageEvents[static_cast<size_t>(Max - 1)], DamageEvents[loop2]);
+							std::swap(DamageEvents[Max - 1], DamageEvents[loop2]);
 							//DamageEvents.pop_back();//ループ範囲外なのでやらなくてよい
 							--Max;
 							--loop2;
@@ -436,28 +435,28 @@ namespace FPS_n2 {
 					CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, CamUp);
 				}
 #endif
-				auto fov_t = CameraParts->GetMainCamera().GetCamFov();
+				auto fovBuf = CameraParts->GetMainCamera().GetCamFov();
 				//fov
 				{
-					float fov = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
+					float fovTarget = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
 					if (ViewChara->GetIsADS()) {
-						fov -= deg2rad(15);
-						fov /= std::max(1.0f, ViewChara->GetGunPtrNow()->GetSightZoomSize() / 2.0f);
+						fovTarget -= deg2rad(15);
+						fovTarget /= std::max(1.0f, ViewChara->GetGunPtrNow()->GetSightZoomSize() / 2.0f);
 					}
 					if (ViewChara->GetGunPtrNow() && ViewChara->GetGunPtrNow()->GetShotSwitch()) {
-						fov -= deg2rad(5);
-						Easing(&fov_t, fov, 0.5f, EasingType::OutExpo);
+						fovTarget -= deg2rad(5);
+						Easing(&fovBuf, fovTarget, 0.5f, EasingType::OutExpo);
 					}
 					else {
-						Easing(&fov_t, fov, 0.8f, EasingType::OutExpo);
+						Easing(&fovBuf, fovTarget, 0.8f, EasingType::OutExpo);
 					}
 #if defined(DEBUG) && DEBUG_CAM
 					if (0 <= DBG_CamSelect && DBG_CamSelect <= 3) {
-						fov_t = deg2rad(15);
+						fovBuf = deg2rad(15);
 					}
 #endif
 				}
-				CameraParts->SetMainCamera().SetCamInfo(fov_t, CameraParts->GetMainCamera().GetCamNear(), CameraParts->GetMainCamera().GetCamFar());
+				CameraParts->SetMainCamera().SetCamInfo(fovBuf, CameraParts->GetMainCamera().GetCamNear(), CameraParts->GetMainCamera().GetCamFar());
 			}
 
 			//PlayerMngr->GetVehicle()->SetCam(CameraParts->SetMainCamera());
