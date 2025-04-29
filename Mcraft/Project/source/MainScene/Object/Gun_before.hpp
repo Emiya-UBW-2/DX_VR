@@ -8,32 +8,32 @@ namespace FPS_n2 {
 	namespace Guns {
 		//
 		class ArmMovePer {
-			float												m_ArmPer{ 0.f };
+			float												m_ArmPer{ 0.0f };
 			bool												m_Armon{ false };
 		public:
 			void Init(bool isOn)noexcept {
 				this->m_Armon = isOn;
-				this->m_ArmPer = isOn ? 1.f : 0.f;
+				this->m_ArmPer = isOn ? 1.0f : 0.0f;
 			}
 			void Update(bool isOn, float OnOver = 0.2f, float OffOver = 0.2f, float UpPer = 0.8f, float DownPer = 0.8f) noexcept {
 				if (isOn) {
 					if (this->m_Armon) {
-						Easing(&this->m_ArmPer, 1.f, 0.9f, EasingType::OutExpo);
+						Easing(&this->m_ArmPer, 1.0f, 0.9f, EasingType::OutExpo);
 					}
 					else {
-						Easing(&this->m_ArmPer, 1.f + OnOver, UpPer, EasingType::OutExpo);
-						if (this->m_ArmPer >= 1.f + OnOver / 2.f) {
+						Easing(&this->m_ArmPer, 1.0f + OnOver, UpPer, EasingType::OutExpo);
+						if (this->m_ArmPer >= 1.0f + OnOver / 2.0f) {
 							this->m_Armon = true;
 						}
 					}
 				}
 				else {
 					if (!this->m_Armon) {
-						Easing(&this->m_ArmPer, 0.f, 0.9f, EasingType::OutExpo);
+						Easing(&this->m_ArmPer, 0.0f, 0.9f, EasingType::OutExpo);
 					}
 					else {
-						Easing(&this->m_ArmPer, 0.f - OffOver, DownPer, EasingType::OutExpo);
-						if (this->m_ArmPer <= 0.f - OffOver / 2.f) {
+						Easing(&this->m_ArmPer, 0.0f - OffOver, DownPer, EasingType::OutExpo);
+						if (this->m_ArmPer <= 0.0f - OffOver / 2.0f) {
 							this->m_Armon = false;
 						}
 					}
@@ -47,10 +47,10 @@ namespace FPS_n2 {
 		private:
 			int													m_AutoAim{ InvalidID };
 			int													m_AutoAimPoint{ InvalidID };
-			float												m_AutoAimTimer{ 0.f };
+			float												m_AutoAimTimer{ 0.0f };
 			Vector3DX											m_AutoAimVec{};
 			bool												m_AutoAimActive{};
-			float												m_AutoAimPer{ 0.f };
+			float												m_AutoAimPer{ 0.0f };
 		public:
 			AutoAimControl(void) noexcept {}
 			virtual ~AutoAimControl(void) noexcept {}
@@ -64,7 +64,7 @@ namespace FPS_n2 {
 			}
 		public:
 			void				OverrideAutoAimID(PlayerID ID, int pos) noexcept {
-				this->m_AutoAimTimer = 1.f;
+				this->m_AutoAimTimer = 1.0f;
 				this->m_AutoAim = ID;
 				this->m_AutoAimPoint = pos;
 			}
@@ -103,14 +103,14 @@ namespace FPS_n2 {
 		private:
 			std::array<std::pair<Vector3DX,float>, m_LineTotal>		m_Line;
 			int														m_LineSelect = 0;
-			float													m_LinePer{ 0.f };
+			float													m_LinePer{ 0.0f };
 		public://ゲッター
-			void			AddMuzzleSmokePower(void) noexcept { this->m_LinePer = std::clamp(this->m_LinePer + 0.1f, 0.f, 1.f); }
+			void			AddMuzzleSmokePower(void) noexcept { this->m_LinePer = std::clamp(this->m_LinePer + 0.1f, 0.0f, 1.0f); }
 		public:
 			void		InitMuzzleSmoke(const Vector3DX& pPos) {
 				for (auto& line : this->m_Line) {
 					line.first = pPos;
-					line.second = 1.f;
+					line.second = 1.0f;
 				}
 			}
 			void		UpdateMuzzleSmoke(const Vector3DX& pPos, bool IsAddSmoke) {
@@ -118,23 +118,23 @@ namespace FPS_n2 {
 				for (auto& line : this->m_Line) {
 					float Per = 0.1f * line.second;
 					line.first += Vector3DX::vget(GetRandf(Per), 0.8f + GetRandf(Per), GetRandf(Per)) * Scale3DRate * DXLib_refParts->GetDeltaTime();
-					Easing(&line.second, 0.f, 0.8f, EasingType::OutExpo);
+					Easing(&line.second, 0.0f, 0.8f, EasingType::OutExpo);
 				}
 				this->m_Line[this->m_LineSelect].first = pPos;
-				this->m_Line[this->m_LineSelect].second = IsAddSmoke ? 1.f : 0.f;
+				this->m_Line[this->m_LineSelect].second = IsAddSmoke ? 1.0f : 0.0f;
 				++this->m_LineSelect %= this->m_LineTotal;
-				this->m_LinePer = std::clamp(this->m_LinePer - DXLib_refParts->GetDeltaTime() / 30.f, 0.f, 1.f);
+				this->m_LinePer = std::clamp(this->m_LinePer - DXLib_refParts->GetDeltaTime() / 30.0f, 0.0f, 1.0f);
 			}
 			void		DrawMuzzleSmoke(float Caliber) noexcept {
 				SetUseLighting(false);
 				SetUseHalfLambertLighting(false);
-				int min = 1 + static_cast<int>((1.f - this->m_LinePer) * this->m_LineTotal);
+				int min = 1 + static_cast<int>((1.0f - this->m_LinePer) * this->m_LineTotal);
 				for (int loop = this->m_LineTotal - 1; loop >= min; --loop) {
 					auto p1 = (this->m_LineSelect + loop - 1) % this->m_LineTotal;
 					auto p2 = (this->m_LineSelect + loop) % this->m_LineTotal;
-					if (this->m_Line[p2].second <= 0.f) { continue; }
+					if (this->m_Line[p2].second <= 0.0f) { continue; }
 					float Per = static_cast<float>(loop - min) / this->m_LineTotal;
-					SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255.f * Per));
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(255.0f * Per));
 					DrawCapsule_3D(this->m_Line[p1].first.get(), this->m_Line[p2].first.get(), Caliber * Per, GetColor(216, 216, 216), GetColor(96, 96, 64));
 				}
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);

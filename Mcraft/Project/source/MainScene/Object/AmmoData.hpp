@@ -6,12 +6,12 @@ namespace FPS_n2 {
 		class AmmoData {
 			std::string		m_path;
 			std::string		m_name;
-			float			m_caliber{ 0.f };
-			float			m_speed{ 100.f };				//弾速
-			float			m_penetration{ 10.f };			//貫通
+			float			m_caliber{ 0.0f };
+			float			m_speed{ 100.0f };				//弾速
+			float			m_penetration{ 10.0f };			//貫通
 			HitPoint		m_damage{ 10 };					//ダメージ
 			int				m_Pellet{ 1 };
-			float			m_Accuracy{ 0.f };
+			float			m_Accuracy{ 0.0f };
 			int				m_FallSound{ 0 };
 		public://getter
 			const auto& GetPath(void) const noexcept { return this->m_path; }

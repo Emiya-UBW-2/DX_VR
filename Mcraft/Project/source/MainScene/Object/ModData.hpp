@@ -31,7 +31,7 @@ namespace FPS_n2 {
 			EnumGunSound					m_GunShootSound{ EnumGunSound::ShotNormal };
 
 			GraphHandle						m_Reitcle;
-			float							m_ZoomSize{ 1.f };
+			float							m_ZoomSize{ 1.0f };
 			int								m_HumanAnimType{ InvalidID };
 
 			int								m_ShootRate_Diff{ 0 };

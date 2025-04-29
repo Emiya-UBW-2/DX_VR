@@ -239,10 +239,10 @@ namespace FPS_n2 {
 				float view_YradAdd = std::atan2f(cost, sint);
 				float view_XradAdd = std::atan2f(TargetVec.y, a_hyp) - std::atan2f(NowVec.y, z_hyp);
 
-				this->m_ShotTargetRad.x += std::clamp(view_XradAdd / 5.0f * 60.f, -pData->GetMaxTurretRad(), pData->GetMaxTurretRad()) * DXLib_refParts->GetDeltaTime();
-				this->m_ShotTargetRad.y += std::clamp(view_YradAdd / 5.0f * 60.f, -pData->GetMaxTurretRad(), pData->GetMaxTurretRad()) * DXLib_refParts->GetDeltaTime();
+				this->m_ShotTargetRad.x += std::clamp(view_XradAdd / 5.0f * 60.0f, -pData->GetMaxTurretRad(), pData->GetMaxTurretRad()) * DXLib_refParts->GetDeltaTime();
+				this->m_ShotTargetRad.y += std::clamp(view_YradAdd / 5.0f * 60.0f, -pData->GetMaxTurretRad(), pData->GetMaxTurretRad()) * DXLib_refParts->GetDeltaTime();
 				//仰俯角制限
-				if (this->m_GunSpec->GetLeftRadLimit() >= 0.f && this->m_GunSpec->GetRightRadLimit() >= 0.f) {
+				if (this->m_GunSpec->GetLeftRadLimit() >= 0.0f && this->m_GunSpec->GetRightRadLimit() >= 0.0f) {
 					this->m_ShotTargetRad.y = std::clamp(this->m_ShotTargetRad.y, deg2rad(this->m_GunSpec->GetLeftRadLimit()), deg2rad(this->m_GunSpec->GetRightRadLimit()));
 				}
 				this->m_ShotTargetRad.x = std::clamp(this->m_ShotTargetRad.x, deg2rad(this->m_GunSpec->GetDownRadLimit()), deg2rad(this->m_GunSpec->GetUpRadLimit()));

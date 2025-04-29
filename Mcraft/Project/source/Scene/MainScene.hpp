@@ -21,7 +21,7 @@ namespace FPS_n2 {
 			std::unique_ptr<NetWork::NetWorkController>	m_NetWorkController{ nullptr };			//NetWork
 			NetWork::PlayerSendData						m_LocalSend;
 			bool										m_IsEnd{ false };//シーン全体の終了フラグ
-			float										m_StartTimer{ 0.f };
+			float										m_StartTimer{ 0.0f };
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
 			MV1											m_RagDoll;

@@ -51,7 +51,7 @@ namespace FPS_n2 {
 			switch (net.GetPhase()) {
 			case ClientPhase::WaitConnect:
 				if (IsDataUpdated) {
-					this->m_CannotConnectTimer = 0.f;
+					this->m_CannotConnectTimer = 0.0f;
 					int EmptyID = pPlayerNetwork->SetLastServerDataBuffer().GetEmptyID();
 					if (EmptyID != InvalidID) {
 						//席が空いていて、自分のIDをもらえたので次へ
@@ -62,8 +62,8 @@ namespace FPS_n2 {
 				else {
 					auto* DXLib_refParts = DXLib_ref::Instance();
 					this->m_CannotConnectTimer += DXLib_refParts->GetDeltaTime();
-					if (this->m_CannotConnectTimer > 1.f) {
-						this->m_CannotConnectTimer -= 1.f;
+					if (this->m_CannotConnectTimer > 1.0f) {
+						this->m_CannotConnectTimer -= 1.0f;
 						++this->m_NetWorkSelect;
 						net.Dispose();
 						if (this->m_NetWorkSelect < Player_num) {

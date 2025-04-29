@@ -8,7 +8,7 @@ namespace FPS_n2 {
 		static constexpr int8_t s_EmptyBlick = 0;
 		static constexpr int TotalCellLayer = 4;
 		static constexpr int MulPer = 2;
-		static constexpr float CellScale = Scale3DRate / 2.f / 2.f;
+		static constexpr float CellScale = Scale3DRate / 2.0f / 2.0f;
 
 		static constexpr int DrawMax = 70;//65
 
@@ -105,7 +105,7 @@ namespace FPS_n2 {
 							}
 						}
 					}
-					if ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.f / 4.f))) {
+					if ((FillAll != 0) && (static_cast<float>(FillCount) / FillAll >= (1.0f / 4.0f))) {
 						int max = -1;
 						int8_t id = 1;
 						for (int8_t loop = 0; auto & idc : IDCount) {
@@ -225,7 +225,7 @@ namespace FPS_n2 {
 						}
 					}
 #if defined(DEBUG) && CHECKTHREADTIME
-					printfDx("%5.2fms \n", static_cast<float>(this->m_TotalTime) / 1000.f);
+					printfDx("%5.2fms \n", static_cast<float>(this->m_TotalTime) / 1000.0f);
 #endif
 				}
 
@@ -543,7 +543,7 @@ namespace FPS_n2 {
 						//置けない部分なので今まで置けていた分をまとめてポリゴン化
 						if (!isHitmin) {
 							isHitmin = true;
-							if (camVecX < 0.f) {
+							if (camVecX < 0.0f) {
 								if (CheckFillXYZ || CanDrawXPlus) {
 									AddPlaneXPlus(pTarget, cellx, center, xpos, ypos, zmin, zmax, IsCalcUV);
 								}
@@ -553,7 +553,7 @@ namespace FPS_n2 {
 									AddPlaneXMinus(pTarget, cellx, center, xpos, ypos, zmin, zmax, IsCalcUV);
 								}
 							}
-							if (camVecY < 0.f) {
+							if (camVecY < 0.0f) {
 								if (CheckFillXYZ || CanDrawYPlus) {
 									AddPlaneYPlus(pTarget, cellx, center, xpos, ypos, zmin, zmax, IsCalcUV);
 								}

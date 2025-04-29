@@ -90,10 +90,10 @@ namespace FPS_n2 {
 				//エフェクト
 				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, pos_tmp, norm_tmp, std::min(0.0127f,(*this->m_AmmoData)->GetCaliber()) / 0.02f * Scale3DRate);
 				//サウンド
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGround0) + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.f);
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGround0) + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.0f);
 			}
 			//消す(スピードが0以下、貫通が0以下、5回反射する)
-			if (this->m_speed <= 0.f || this->m_penetration <= 0.f || this->m_RicochetCnt > 5 || this->m_Timer > 5.f) {
+			if (this->m_speed <= 0.0f || this->m_penetration <= 0.0f || this->m_RicochetCnt > 5 || this->m_Timer > 5.0f) {
 				SetActive(false);
 			}
 			this->m_Timer += DXLib_refParts->GetDeltaTime();

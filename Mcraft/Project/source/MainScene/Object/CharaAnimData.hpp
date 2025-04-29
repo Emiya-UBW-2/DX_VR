@@ -354,7 +354,7 @@ namespace FPS_n2 {
 		private:
 			std::vector<std::unique_ptr<AnimDatas>>	m_Data;
 #if defined(DEBUG) && DEBUG_CAM && DEBUG_ANIM
-			Vector3DX DBG_AnimRot = Vector3DX::vget(0.f, 0.f, deg2rad(0));
+			Vector3DX DBG_AnimRot = Vector3DX::vget(0.0f, 0.0f, deg2rad(0));
 			Vector3DX DBG_AnimPos = Vector3DX::vget(-0.06f, -0.15f, -0.23f);
 #endif
 		private:
@@ -400,7 +400,7 @@ namespace FPS_n2 {
 					float totalTime = static_cast<float>((*data)->GetTotalTime());
 					if ((*data)->m_AnimData->GetIsLoop()) {
 						while (true) {
-							if ((nowframe - totalTime) > 0.f) {
+							if ((nowframe - totalTime) > 0.0f) {
 								nowframe -= totalTime;
 							}
 							else {
@@ -409,13 +409,13 @@ namespace FPS_n2 {
 						}
 					}
 					else {
-						if ((nowframe - totalTime) > 0.f) {
+						if ((nowframe - totalTime) > 0.0f) {
 							nowframe = totalTime;
 						}
 					}
 					for (auto ani = (*data)->m_AnimPoint.begin(), endi = (*data)->m_AnimPoint.end() - 1; ani != endi; ++ani) {
 						float Frame = static_cast<float>((*ani)->GetFrame());
-						if ((nowframe - Frame) <= 0.f) {
+						if ((nowframe - Frame) <= 0.0f) {
 							Finger = Lerp((*ani)->GetFingerPer(), (*(ani + 1))->GetFingerPer(), nowframe / Frame);
 
 							Ret.Set(
@@ -431,24 +431,24 @@ namespace FPS_n2 {
 									//
 									if (CheckHitKey(KEY_INPUT_RCONTROL) != 0) {
 										if (CheckHitKey(KEY_INPUT_J) != 0) {
-											DBG_AnimRot.x += 5.f * DXLib_refParts->GetDeltaTime();
+											DBG_AnimRot.x += 5.0f * DXLib_refParts->GetDeltaTime();
 										}
 										if (CheckHitKey(KEY_INPUT_L) != 0) {
-											DBG_AnimRot.x -= 5.f * DXLib_refParts->GetDeltaTime();
+											DBG_AnimRot.x -= 5.0f * DXLib_refParts->GetDeltaTime();
 										}
 										//
 										if (CheckHitKey(KEY_INPUT_I) != 0) {
-											DBG_AnimRot.y += 5.f * DXLib_refParts->GetDeltaTime();
+											DBG_AnimRot.y += 5.0f * DXLib_refParts->GetDeltaTime();
 										}
 										if (CheckHitKey(KEY_INPUT_K) != 0) {
-											DBG_AnimRot.y -= 5.f * DXLib_refParts->GetDeltaTime();
+											DBG_AnimRot.y -= 5.0f * DXLib_refParts->GetDeltaTime();
 										}
 										//
 										if (CheckHitKey(KEY_INPUT_U) != 0) {
-											DBG_AnimRot.z += 5.f * DXLib_refParts->GetDeltaTime();
+											DBG_AnimRot.z += 5.0f * DXLib_refParts->GetDeltaTime();
 										}
 										if (CheckHitKey(KEY_INPUT_O) != 0) {
-											DBG_AnimRot.z -= 5.f * DXLib_refParts->GetDeltaTime();
+											DBG_AnimRot.z -= 5.0f * DXLib_refParts->GetDeltaTime();
 										}
 									}
 									else {

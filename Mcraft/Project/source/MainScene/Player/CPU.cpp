@@ -14,16 +14,16 @@ namespace FPS_n2 {
 			Vector3DX ZVec{};
 			Vector3DX Pos{};
 			if (this->m_IsLeftHeli) {
-				ZVec = PlayerMngr->GetHelicopter()->GetMove().GetMat().xvec() * -1.f;
+				ZVec = PlayerMngr->GetHelicopter()->GetMove().GetMat().xvec() * -1.0f;
 				Pos = PlayerMngr->GetHelicopter()->GetObj().GetFrameLocalWorldMatrix(PlayerMngr->GetHelicopter()->GetFrame(static_cast<int>(Objects::HeliFrame::Rappelling2))).pos();
 			}
 			else {
 				ZVec = PlayerMngr->GetHelicopter()->GetMove().GetMat().xvec();
 				Pos = PlayerMngr->GetHelicopter()->GetObj().GetFrameLocalWorldMatrix(PlayerMngr->GetHelicopter()->GetFrame(static_cast<int>(Objects::HeliFrame::Rappelling1))).pos();
 			}
-			MyChara->Spawn(deg2rad(0.f), std::atan2(ZVec.x, ZVec.z) + deg2rad(GetRandf(10.f)), Pos, 2, false);
+			MyChara->Spawn(deg2rad(0.0f), std::atan2(ZVec.x, ZVec.z) + deg2rad(GetRandf(10.0f)), Pos, 2, false);
 			MyChara->SetRappelling();
-			this->m_RapeTimer = 0.f;
+			this->m_RapeTimer = 0.0f;
 		}
 		//
 		void AIControl::Init(PlayerID MyID) noexcept {
@@ -36,7 +36,7 @@ namespace FPS_n2 {
 			auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 			//auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 			if (MyChara->IsAlive()) {
-				this->m_RepopTimer = 0.f;
+				this->m_RepopTimer = 0.0f;
 
 				if (MyChara->GetIsRappelling()) {
 					this->m_RapeTimer += DXLib_refParts->GetDeltaTime();
@@ -50,7 +50,7 @@ namespace FPS_n2 {
 					}
 					NetWork::MoveInfo MoveInfoData;
 					MoveInfoData.repos = MyChara->GetMove().GetRePos();
-					MoveInfoData.pos = Pos - PlayerMngr->GetHelicopter()->GetMove().GetMat().yvec()*(60.f * this->m_RapeTimer);
+					MoveInfoData.pos = Pos - PlayerMngr->GetHelicopter()->GetMove().GetMat().yvec()*(60.0f * this->m_RapeTimer);
 					MoveInfoData.vec = Vector3DX::zero();
 					MoveInfoData.mat = MyChara->GetMove().GetMat();
 					MoveInfoData.WatchRad = MyChara->GetRotateRad();
@@ -59,8 +59,8 @@ namespace FPS_n2 {
 			}
 			else {
 				this->m_RepopTimer += DXLib_refParts->GetDeltaTime();
-				if (this->m_RepopTimer > 5.f) {
-					this->m_RepopTimer -= 5.f;
+				if (this->m_RepopTimer > 5.0f) {
+					this->m_RepopTimer -= 5.0f;
 					if (PlayerMngr->GetHelicopter()->GetIsActiveRappelling()) {
 						this->m_IsLeftHeli = (PlayerMngr->GetHelicopter()->PopSpawnPoint() % 2) == 0;
 						Repop();

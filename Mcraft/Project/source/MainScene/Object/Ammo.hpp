@@ -9,11 +9,11 @@ namespace FPS_n2 {
 		class AmmoObj : public BaseObject {
 			int				m_RicochetCnt{ 0 };
 			const std::unique_ptr<AmmoData>*	m_AmmoData{ nullptr };
-			float			m_speed{ 0.f };
-			float			m_penetration{ 0.f };
+			float			m_speed{ 0.0f };
+			float			m_penetration{ 0.0f };
 			int				m_ShootCheraID{ InvalidID };
-			float			m_yAdd{ 0.f };
-			float			m_Timer{ 0.f };
+			float			m_yAdd{ 0.0f };
+			float			m_Timer{ 0.0f };
 
 			Vector3DX		m_pos;
 			Vector3DX		m_vec;
@@ -30,8 +30,8 @@ namespace FPS_n2 {
 				this->m_AmmoData = pAmmoData;
 				this->m_speed = (*this->m_AmmoData)->GetSpeed() * Scale3DRate;
 				this->m_penetration = (*this->m_AmmoData)->GetPenetration();
-				this->m_yAdd = 0.f;
-				this->m_Timer = 0.f;
+				this->m_yAdd = 0.0f;
+				this->m_Timer = 0.0f;
 				this->m_ShootCheraID = pMyID;
 				SetActive(true);
 				this->m_IsDrawLine = true;
@@ -43,7 +43,7 @@ namespace FPS_n2 {
 				++this->m_RicochetCnt;
 				this->m_vec = ((this->m_vec + normal * ((Vector3DX::Dot(this->m_vec, normal)) * -2.0f)).normalized());
 				this->m_pos = this->m_vec * (0.1f) + position;
-				this->m_yAdd = 0.f;
+				this->m_yAdd = 0.0f;
 			}
 			//*/
 		public: //コンストラクタ、デストラクタ
@@ -53,8 +53,8 @@ namespace FPS_n2 {
 			void			Init_Sub(void) noexcept override {
 				this->m_IsDrawLine = false;
 				SetActive(false);
-				SetMinAABB(Vector3DX::vget(-1.f, -1.f, -1.f) * Scale3DRate);
-				SetMaxAABB(Vector3DX::vget(1.f, 1.f, 1.f) * Scale3DRate);
+				SetMinAABB(Vector3DX::vget(-1.0f, -1.0f, -1.0f) * Scale3DRate);
+				SetMaxAABB(Vector3DX::vget(1.0f, 1.0f, 1.0f) * Scale3DRate);
 			}
 			void			FirstUpdate(void) noexcept override;
 			void			DrawShadow(void) noexcept override {}

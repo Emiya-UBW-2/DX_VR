@@ -26,9 +26,9 @@ namespace FPS_n2 {
 			PointControl<HitPoint, 100>							m_HP{};
 			PointControl<ArmerPoint, 150>						m_AP{};
 			DamageEventControl									m_Damage;
-			float												m_StuckGunTimer{ 0.f };
+			float												m_StuckGunTimer{ 0.0f };
 			bool												m_IsStuckGun{ false };
-			float												m_HPRec{ 0.f };
+			float												m_HPRec{ 0.0f };
 			bool												m_ArmBreak{ false };
 			int													m_CharaSound{ InvalidID };			//サウンド
 			Pendulum2D											m_SlingArmZrad;
@@ -41,8 +41,8 @@ namespace FPS_n2 {
 			bool												m_CanLookTarget{ true };
 			float												m_Length{};
 			bool												m_ConcussionSwitch{};
-			float												m_Concussion{ 0.f };
-			float												m_ConcussionPer{ 0.f };
+			float												m_Concussion{ 0.0f };
+			float												m_ConcussionPer{ 0.0f };
 		private://キャッシュ
 			Matrix3x3DX											m_EyeRotationCache{};
 			Vector3DX											m_EyePositionCache{};
@@ -148,21 +148,21 @@ namespace FPS_n2 {
 				this->m_AP.Init();
 				Heal(100);
 				this->m_ArmBreak = false;
-				this->m_ArmBreakPer = 0.f;
-				this->m_SlingArmZrad.Init(0.08f * Scale3DRate, 3.f, deg2rad(50));
-				this->m_HPRec = 0.f;
+				this->m_ArmBreakPer = 0.0f;
+				this->m_SlingArmZrad.Init(0.08f * Scale3DRate, 3.0f, deg2rad(50));
+				this->m_HPRec = 0.0f;
 
 				this->m_MoveOverRideFlag = false;
 				this->m_Input.ResetAllInput();
 				this->m_RotateControl.Init(pxRad, pyRad);
 				this->m_MoveControl.Init();
 				this->m_LeanControl.Init();
-				for (auto& per : this->m_AnimPerBuf) { per = 0.f; }
+				for (auto& per : this->m_AnimPerBuf) { per = 0.0f; }
 				this->m_IsSquat = false;
 				Vector3DX pos_t = pPos;
 				if (CheckGround) {
-					Vector3DX EndPos = pos_t - Vector3DX::up() * 200.f * Scale3DRate;
-					if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(pos_t + Vector3DX::up() * 200.f * Scale3DRate, &EndPos)) {
+					Vector3DX EndPos = pos_t - Vector3DX::up() * 200.0f * Scale3DRate;
+					if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(pos_t + Vector3DX::up() * 200.0f * Scale3DRate, &EndPos)) {
 						pos_t = EndPos;
 					}
 				}
@@ -173,7 +173,7 @@ namespace FPS_n2 {
 					if (!this->m_GunPtrControl.GetGunPtr(loop)) { continue; }
 					this->m_GunPtrControl.GetGunPtr(loop)->Spawn();
 				}
-				this->m_SlingZrad.Init(0.05f * Scale3DRate, 3.f, deg2rad(50));
+				this->m_SlingZrad.Init(0.05f * Scale3DRate, 3.0f, deg2rad(50));
 			}
 
 			const auto		GetIsRappelling() const noexcept { return this->m_IsRappelling && !this->m_IsRappellingEnd; }

@@ -38,10 +38,10 @@ namespace FPS_n2 {
 				if (Event.ShotID == PlayerMngr->GetWatchPlayerID()) {//撃ったキャラ
 					//SE
 					if (Damage > 0) {
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Hit))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Hit))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
 					}
 					else if (ArmerDamage > 0) {
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f, 128);
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f, 128);
 					}
 					//ヒットカウント
 					if ((Damage >= 0) && (ArmerDamage >= 0)) {
@@ -52,28 +52,28 @@ namespace FPS_n2 {
 					if (IsDeath) {
 						PlayerMngr->GetPlayer(Event.ShotID)->AddScore(100);
 						PlayerMngr->GetPlayer(Event.ShotID)->AddKill(1);
-						SideLogParts->Add(5.f, 0.f, Red, "Kill +100");
+						SideLogParts->Add(5.0f, 0.0f, Red, "Kill +100");
 					}
 				}
 				if (Event.DamageID == PlayerMngr->GetWatchPlayerID()) {//撃たれたキャラ
 					if (Damage > 0) {
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitMe))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitMe))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
 					}
 					else if (ArmerDamage > 0) {
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f, 255);
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f, 255);
 					}
 				}
 				//エフェクトセット
 				if (Damage > 0) {
 					EffectSingleton::Instance()->SetOnce(Effect::ef_hitblood, Event.EndPos, Vector3DX::forward(), Scale3DRate);
-					EffectSingleton::Instance()->SetEffectSpeed(Effect::ef_hitblood, 2.f);
+					EffectSingleton::Instance()->SetEffectSpeed(Effect::ef_hitblood, 2.0f);
 				}
 				else if (ArmerDamage > 0) {
 					EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, Event.EndPos, (Event.StartPos - Event.EndPos).normalized(), 0.25f * Scale3DRate);
 				}
 				//ヒットモーション
 				if (Damage > 0) {
-					this->m_HitReactionControl.SetHit(Matrix3x3DX::Vtrans(Vector3DX::Cross((Event.EndPos - Event.StartPos).normalized(), Vector3DX::up()) * -1.f, Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::Upper2)).inverse()));
+					this->m_HitReactionControl.SetHit(Matrix3x3DX::Vtrans(Vector3DX::Cross((Event.EndPos - Event.StartPos).normalized(), Vector3DX::up()) * -1.0f, Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::Upper2)).inverse()));
 					switch (static_cast<HitType>(Event.HitType)) {
 					case HitType::Head:
 						break;
@@ -93,7 +93,7 @@ namespace FPS_n2 {
 				if (IsAlive()) {
 					//被弾ボイス
 					if ((Damage >= 0) && (ArmerDamage >= 0)) {
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_Hurt1) + GetRand(6 - 1))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_Hurt1) + GetRand(6 - 1))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
 					}
 				}
 				else if (IsDeath) {
@@ -108,7 +108,7 @@ namespace FPS_n2 {
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing))->StopAll();
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend))->StopAll();
 
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_Death1) + GetRand(8 - 1))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_Death1) + GetRand(8 - 1))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
 				}
 				return true;
 			}
@@ -170,12 +170,12 @@ namespace FPS_n2 {
 				this->m_IsSquat ^= 1;
 				//しゃがみ音
 				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.0f);
 				}
 			}
 			if (GetGunPtrNow()) {
 				//銃ひっこめ
-				if (this->m_StuckGunTimer == 0.f) {
+				if (this->m_StuckGunTimer == 0.0f) {
 					this->m_StuckGunTimer = 0.1f;
 
 					Vector3DX GunStart = GetEyePositionCache();
@@ -212,7 +212,7 @@ namespace FPS_n2 {
 					}
 				}
 				else {
-					this->m_StuckGunTimer = std::max(this->m_StuckGunTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+					this->m_StuckGunTimer = std::max(this->m_StuckGunTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
 					if (this->m_IsStuckGun) {
 						auto Zvec = GetFrameWorldMat(CharaFrame::Head).zvec2();
 						if (Zvec.y < std::sin(deg2rad(-30))) {
@@ -243,7 +243,7 @@ namespace FPS_n2 {
 					if (this->m_GunPtrControl.IsChangeGunSelect() && GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::LowReady) > 0.95f) {
 						this->m_GunPtrControl.InvokeReserveGunSelect();
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::Base);
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.0f);
 					}
 					break;
 				case GunAnimeID::Base:
@@ -259,10 +259,10 @@ namespace FPS_n2 {
 								if (GetGunPtrNow()->ReloadStart()) {
 									if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {
 										if (GetRand(100) < 50) {
-											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_reload))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_reload))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
 										}
 										else {
-											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover))->Play3D(GetEyePositionCache(), Scale3DRate * 10.f);
+											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
 										}
 									}
 								}
@@ -271,7 +271,7 @@ namespace FPS_n2 {
 							else if (this->m_Input.GetPADSPress(Controls::PADS::SHOT)) {
 								if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 									if (this->m_Input.GetPADSTrigger(Controls::PADS::SHOT)) {
-										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Trigger))->Play3D(GetEyePositionCache(), Scale3DRate * 5.f);
+										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Trigger))->Play3D(GetEyePositionCache(), Scale3DRate * 5.0f);
 									}
 								}
 								GetGunPtrNow()->SetShotStart();
@@ -337,10 +337,10 @@ namespace FPS_n2 {
 			}
 			this->m_RotateControl.Update(
 				this->m_Input.GetAddxRad() - RecoilRadAdd.y, this->m_Input.GetAddyRad() + RecoilRadAdd.x,
-				this->m_MoveControl.GetVecPower() > 0.1f, (IsMoveFront() ? this->m_MoveControl.GoFrontRad() : 0.f) + (IsMoveBack() ? this->m_MoveControl.GoBackRad() : 0.f));
+				this->m_MoveControl.GetVecPower() > 0.1f, (IsMoveFront() ? this->m_MoveControl.GoFrontRad() : 0.0f) + (IsMoveBack() ? this->m_MoveControl.GoBackRad() : 0.0f));
 			//リーン
 			if (this->m_LeanControl.Update(this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_L), this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_R))) {
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.f);
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.0f);
 			}
 			if (GetGunPtrNow()) {
 				GetGunPtrNow()->CalcSwitchPer(this->m_LeanControl.GetRate() >= 0 || !GetGunPtrNow()->IsCanShot());
@@ -351,8 +351,8 @@ namespace FPS_n2 {
 			if (IsMoveRight()) { this->m_BottomAnimSelect = GetBottomRightStepAnimSelect(); }
 			if (IsMoveBack()) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSelect(); }
 			if (IsMoveFront()) { this->m_BottomAnimSelect = GetBottomWalkAnimSelect(); }
-			Easing(&this->m_AnimPerBuf[static_cast<int>(GetBottomTurnAnimSelect())], (!this->m_IsSquat && this->m_RotateControl.IsTurnBody()) ? 1.f : 0.f, 0.8f, EasingType::OutExpo);
-			Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Rappelling)], 0.f, 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf[static_cast<int>(GetBottomTurnAnimSelect())], (!this->m_IsSquat && this->m_RotateControl.IsTurnBody()) ? 1.0f : 0.0f, 0.8f, EasingType::OutExpo);
+			Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Rappelling)], 0.0f, 0.8f, EasingType::OutExpo);
 			for (int loop = 0; loop < static_cast<int>(CharaAnimeID::AnimeIDMax); ++loop) {
 				CharaAnimeID ID = static_cast<CharaAnimeID>(loop);
 				if (
@@ -362,7 +362,7 @@ namespace FPS_n2 {
 					ID == CharaAnimeID::Bottom_Stand_LeftStep ||
 					ID == CharaAnimeID::Bottom_Stand_RightStep ||
 					ID == CharaAnimeID::Bottom_Stand_WalkBack) {
-					this->m_AnimPerBuf[loop] = std::clamp(this->m_AnimPerBuf[loop] + ((ID == this->m_BottomAnimSelect) ? 6.f : -2.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+					this->m_AnimPerBuf[loop] = std::clamp(this->m_AnimPerBuf[loop] + ((ID == this->m_BottomAnimSelect) ? 6.0f : -2.0f) * DXLib_refParts->GetDeltaTime(), 0.0f, 1.0f);
 				}
 				if (
 					ID == CharaAnimeID::Bottom_Squat ||
@@ -370,17 +370,17 @@ namespace FPS_n2 {
 					ID == CharaAnimeID::Bottom_Squat_LeftStep ||
 					ID == CharaAnimeID::Bottom_Squat_RightStep ||
 					ID == CharaAnimeID::Bottom_Squat_WalkBack) {
-					this->m_AnimPerBuf[loop] = std::clamp(this->m_AnimPerBuf[loop] + ((ID == this->m_BottomAnimSelect) ? 2.f : -2.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+					this->m_AnimPerBuf[loop] = std::clamp(this->m_AnimPerBuf[loop] + ((ID == this->m_BottomAnimSelect) ? 2.0f : -2.0f) * DXLib_refParts->GetDeltaTime(), 0.0f, 1.0f);
 				}
 			}
 			if (this->m_IsRappelling) {
 				for (int loop = 0; loop < static_cast<int>(CharaAnimeID::AnimeIDMax); ++loop) {
 					CharaAnimeID ID = static_cast<CharaAnimeID>(loop);
 					if (ID == CharaAnimeID::Rappelling) {
-						this->m_AnimPerBuf[loop] = 1.f;
+						this->m_AnimPerBuf[loop] = 1.0f;
 					}
 					else {
-						this->m_AnimPerBuf[loop] = 0.f;
+						this->m_AnimPerBuf[loop] = 0.0f;
 					}
 				}
 				if (!this->m_IsRappellingEnd) {
@@ -399,17 +399,17 @@ namespace FPS_n2 {
 			if (this->m_BottomAnimSelect != GetBottomStandAnimSelect()) {
 				auto Time = GetObj().GetAnim(static_cast<int>(this->m_BottomAnimSelect)).GetTime();
 				//L
-				if ((9.f < Time && Time < 10.f)) {
+				if ((9.0f < Time && Time < 10.0f)) {
 					if (this->m_CharaSound != 0) {
 						this->m_CharaSound = 0;
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::RunFoot))->Play3D(GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale3DRate * 5.f);
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::RunFoot))->Play3D(GetFrameWorldMat(CharaFrame::LeftFoot).pos(), Scale3DRate * 5.0f);
 					}
 				}
 				//R
-				if ((27.f < Time && Time < 28.f)) {
+				if ((27.0f < Time && Time < 28.0f)) {
 					if (this->m_CharaSound != 1) {
 						this->m_CharaSound = 1;
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::RunFoot))->Play3D(GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale3DRate * 5.f);
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::RunFoot))->Play3D(GetFrameWorldMat(CharaFrame::RightFoot).pos(), Scale3DRate * 5.0f);
 					}
 				}
 			}
@@ -429,8 +429,8 @@ namespace FPS_n2 {
 			if (IsAlive()) {
 				if (IsLowHP()) {
 					this->m_HPRec += DXLib_refParts->GetDeltaTime();
-					if (this->m_HPRec >= 0.f) {
-						this->m_HPRec -= 2.f;
+					if (this->m_HPRec >= 0.0f) {
+						this->m_HPRec -= 2.0f;
 						Heal(2);
 						if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing))->Play(DX_PLAYTYPE_BACK);
@@ -438,16 +438,16 @@ namespace FPS_n2 {
 					}
 				}
 				else {
-					if (this->m_HPRec != 0.f) {
+					if (this->m_HPRec != 0.0f) {
 						if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing))->StopAll();
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend))->Play(DX_PLAYTYPE_BACK);
 						}
 					}
-					this->m_HPRec = 0.f;
+					this->m_HPRec = 0.0f;
 				}
 			}
-			float SwitchPer = 1.f;
+			float SwitchPer = 1.0f;
 			if (GetGunPtrNow()) {
 				SwitchPer = GetGunPtrNow()->GetSwitchPer();
 			}
@@ -458,14 +458,14 @@ namespace FPS_n2 {
 			//
 			GetObj().SetFrameLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Upper)),
 				(
-					Matrix3x3DX::RotAxis(Vector3DX::right(), -this->m_RotateControl.GetRad().x / 2.f) *
+					Matrix3x3DX::RotAxis(Vector3DX::right(), -this->m_RotateControl.GetRad().x / 2.0f) *
 					CharaLocalRotationCache
 					).Get44DX() * GetFrameBaseLocalMat(static_cast<int>(CharaFrame::Upper)));
 			GetObj().SetFrameLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Upper2)),
 				(
 					Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(32 * SwitchPer)) *
 					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-35)) *
-					Matrix3x3DX::RotAxis(Vector3DX::right(), this->m_RotateControl.GetRad().x / 2.f) *
+					Matrix3x3DX::RotAxis(Vector3DX::right(), this->m_RotateControl.GetRad().x / 2.0f) *
 					this->m_HitReactionControl.GetHitReactionMat()
 					).Get44DX() * GetFrameBaseLocalMat(static_cast<int>(CharaFrame::Upper2)));
 			GetObj().SetFrameLocalMatrix(GetFrame(static_cast<int>(CharaFrame::Neck)),
@@ -476,7 +476,7 @@ namespace FPS_n2 {
 					).Get44DX() * GetFrameBaseLocalMat(static_cast<int>(CharaFrame::Neck)));
 			this->m_HitReactionControl.Update();
 			//上半身アニメ演算
-			this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Upper_Ready)] = 1.f;
+			this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Upper_Ready)] = 1.0f;
 			//指演算
 			if (GetGunPtrNow()) {
 				auto& FingerPer = GetGunPtrNow()->GetGunAnimeNow().GetFingerPer();
@@ -499,23 +499,23 @@ namespace FPS_n2 {
 			}
 			//下半身アニメ演算
 			if (IsDraw(0) || IsDraw(1) || IsDraw(2)) {
-				if (this->m_AnimPerBuf[static_cast<int>(GetBottomTurnAnimSelect())] > 0.f) {
+				if (this->m_AnimPerBuf[static_cast<int>(GetBottomTurnAnimSelect())] > 0.0f) {
 					SetAnimLoop(static_cast<int>(GetBottomTurnAnimSelect()), 0.5f);
 				}
-				if (this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Bottom_Stand_Run)] > 0.f) {
+				if (this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Bottom_Stand_Run)] > 0.0f) {
 					SetAnimLoop(static_cast<int>(CharaAnimeID::Bottom_Stand_Run), GetSpeed() * 0.5f);
 				}
-				float AnimSpeed = 1.15f * std::clamp(GetSpeed() / 0.65f, 0.5f, 1.f);
-				if (this->m_AnimPerBuf[static_cast<int>(GetBottomWalkAnimSelect())] > 0.f) {
+				float AnimSpeed = 1.15f * std::clamp(GetSpeed() / 0.65f, 0.5f, 1.0f);
+				if (this->m_AnimPerBuf[static_cast<int>(GetBottomWalkAnimSelect())] > 0.0f) {
 					SetAnimLoop(static_cast<int>(GetBottomWalkAnimSelect()), this->m_MoveControl.GetVecFront() * AnimSpeed);
 				}
-				if (this->m_AnimPerBuf[static_cast<int>(GetBottomLeftStepAnimSelect())] > 0.f) {
+				if (this->m_AnimPerBuf[static_cast<int>(GetBottomLeftStepAnimSelect())] > 0.0f) {
 					SetAnimLoop(static_cast<int>(GetBottomLeftStepAnimSelect()), this->m_MoveControl.GetVecLeft() * AnimSpeed);
 				}
-				if (this->m_AnimPerBuf[static_cast<int>(GetBottomWalkBackAnimSelect())] > 0.f) {
+				if (this->m_AnimPerBuf[static_cast<int>(GetBottomWalkBackAnimSelect())] > 0.0f) {
 					SetAnimLoop(static_cast<int>(GetBottomWalkBackAnimSelect()), this->m_MoveControl.GetVecRear() * AnimSpeed);
 				}
-				if (this->m_AnimPerBuf[static_cast<int>(GetBottomRightStepAnimSelect())] > 0.f) {
+				if (this->m_AnimPerBuf[static_cast<int>(GetBottomRightStepAnimSelect())] > 0.0f) {
 					SetAnimLoop(static_cast<int>(GetBottomRightStepAnimSelect()), this->m_MoveControl.GetVecRight() * AnimSpeed);
 				}
 				//アニメ反映
@@ -527,12 +527,12 @@ namespace FPS_n2 {
 			{
 				Vector3DX PosBuf = GetMove().GetPosBuf();
 				//素の移動ベクトル
-				Vector3DX vec = (this->m_MoveControl.GetVecPower() > 0.f) ?
-					Matrix3x3DX::Vtrans(this->m_MoveControl.GetVecMove() * GetSpeed() * 60.f * DXLib_refParts->GetDeltaTime(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetYRadUpper())) :
+				Vector3DX vec = (this->m_MoveControl.GetVecPower() > 0.0f) ?
+					Matrix3x3DX::Vtrans(this->m_MoveControl.GetVecMove() * GetSpeed() * 60.0f * DXLib_refParts->GetDeltaTime(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetYRadUpper())) :
 					Vector3DX::zero();
 				//床判定
 				Vector3DX EndPos = PosBuf - Vector3DX::up() * (0.5f * Scale3DRate);
-				if (BackGroundParts->CheckLinetoMap(PosBuf + Vector3DX::up() * (0.f * Scale3DRate), &EndPos)) {
+				if (BackGroundParts->CheckLinetoMap(PosBuf + Vector3DX::up() * (0.0f * Scale3DRate), &EndPos)) {
 					float GroundHight = EndPos.y - (0.12f * Scale3DRate);
 					if ((PosBuf.y - GroundHight) > (0.008f * Scale3DRate / DXLib_refParts->GetDeltaTime())) {
 						PosBuf.y = GroundHight;//高所落下の際は即時反映
@@ -540,7 +540,7 @@ namespace FPS_n2 {
 					else {
 						Easing(&PosBuf.y, GroundHight, 0.6f, EasingType::OutExpo);//それ以外は即時反映
 					}
-					vec.y = 0.f;
+					vec.y = 0.0f;
 					if (this->m_IsRappelling) {
 						this->m_IsRappellingEnd = true;
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
@@ -562,14 +562,14 @@ namespace FPS_n2 {
 				}
 				//ほかプレイヤーとの判定
 				{
-					float Radius = 2.f * 0.5f * Scale3DRate;
+					float Radius = 2.0f * 0.5f * Scale3DRate;
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						if (loop == GetMyPlayerID()) { continue; }
 						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 						if (!chara->IsAlive()) { continue; }
 						if (chara->GetIsRappelling()) { continue; }
 						//自分が当たったら押し戻す
-						Vector3DX Vec = (chara->GetMove().GetPos() - GetMove().GetPos()); Vec.y = (0.f);
+						Vector3DX Vec = (chara->GetMove().GetPos() - GetMove().GetPos()); Vec.y = (0.0f);
 						float Len = Vec.magnitude();
 						if (Len < Radius) {
 							PosBuf = PosBuf + Vec.normalized() * (Len - Radius);
@@ -587,7 +587,7 @@ namespace FPS_n2 {
 					SetMove().SetVec(this->m_OverRideInfo.vec);
 					this->m_RotateControl.SetRad(this->m_OverRideInfo.WatchRad);
 				}
-				SetMove().Update(0.8f, 0.f);
+				SetMove().Update(0.8f, 0.0f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}
 			if (IsAlive()) {
@@ -672,7 +672,7 @@ namespace FPS_n2 {
 									(GetGunPtrNow()->IsCanShot() && this->m_ArmBreak)
 									|| (GetGunPtrNow()->GetGunAnime() == GunAnimeID::Watch)//TODO:専用の左腕アクション
 									|| (GetGunPtrNow()->GetModifySlot()->GetMyData()->GetIsThrowWeapon() && (GetGunPtrNow()->GetGunAnime() != GunAnimeID::ThrowReady))//TODO:専用の左腕アクション
-									) ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+									) ? 1.0f : 0.0f, 0.9f, EasingType::OutExpo);
 								if (this->m_ArmBreakPer > 0.01f) {
 									this->m_SlingArmZrad.Update(DXLib_refParts->GetDeltaTime());
 									this->m_SlingArmZrad.AddRad((0.2f * (this->m_RotateControl.GetRad().y - this->m_RotateControl.GetYRadBottom())) * DXLib_refParts->GetDeltaTime());
@@ -697,7 +697,7 @@ namespace FPS_n2 {
 									HandMat = Lerp(HandMat, SlingArmMat, this->m_ArmBreakPer);
 								}
 								if (this->m_ArmBreak) {
-									HandMat = HandMat.rotation() * Matrix4x4DX::Mtrans(HandMat.pos() + Vector3DX::vget(GetRandf(1.f), GetRandf(1.f), GetRandf(1.f)) * (0.002f * Scale3DRate));
+									HandMat = HandMat.rotation() * Matrix4x4DX::Mtrans(HandMat.pos() + Vector3DX::vget(GetRandf(1.0f), GetRandf(1.0f), GetRandf(1.0f)) * (0.002f * Scale3DRate));
 								}
 								IK_LeftArm(
 									&SetObj(),
@@ -723,20 +723,20 @@ namespace FPS_n2 {
 					}
 				}
 				//ヒットボックス
-				this->m_HitBoxControl.Update(this, (GetCharaType() == CharaTypeID::Enemy) ? 1.1f : 1.f);
+				this->m_HitBoxControl.Update(this, (GetCharaType() == CharaTypeID::Enemy) ? 1.1f : 1.0f);
 				//目の座標取得
 				{
 					bool HeadBobbing = ((GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) || OptionParts->GetParamBoolean(EnumSaveParam::HeadBobbing));
-					this->m_EyePositionCache = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.f;
+					this->m_EyePositionCache = (GetFrameWorldMat(CharaFrame::LeftEye).pos() + GetFrameWorldMat(CharaFrame::RightEye).pos()) / 2.0f;
 					if (HeadBobbing) {
-						this->m_EyePositionCache += this->m_WalkSwingControl.CalcEye(CharaRotationCache, std::clamp(std::clamp(this->m_MoveControl.GetVecPower(), 0.f, 1.f) * GetSpeed() / 0.625f, 0.f, 0.85f) / 0.65f, 5.f);
+						this->m_EyePositionCache += this->m_WalkSwingControl.CalcEye(CharaRotationCache, std::clamp(std::clamp(this->m_MoveControl.GetVecPower(), 0.0f, 1.0f) * GetSpeed() / 0.625f, 0.0f, 0.85f) / 0.65f, 5.0f);
 					}
 					this->m_EyeRotationCache = Matrix3x3DX::identity();
 					if (HeadBobbing) {
-						this->m_EyeRotationCache = this->m_WalkSwingControl.CalcWalk(GetEyePositionCache() - GetMove().GetPos(), std::clamp(GetMove().GetVec().magnitude() / 2.f, 0.f, 0.5f));
+						this->m_EyeRotationCache = this->m_WalkSwingControl.CalcWalk(GetEyePositionCache() - GetMove().GetPos(), std::clamp(GetMove().GetVec().magnitude() / 2.0f, 0.0f, 0.5f));
 					}
 					this->m_EyeRotationCache *=
-						Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_LeanControl.GetRad() / 5.f) *
+						Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_LeanControl.GetRad() / 5.0f) *
 						Matrix3x3DX::RotAxis(Vector3DX::right(), this->m_RotateControl.GetRad().x) *
 						Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetYRadBottomChange()) *
 						GetMove().GetMat();
@@ -760,7 +760,7 @@ namespace FPS_n2 {
 			{
 				Vector3DX StartPos = GetMove().GetPosBuf();
 				if (!IsAlive()) {
-					Vector3DX EndPos = StartPos - Vector3DX::up() * (20.f * Scale3DRate);
+					Vector3DX EndPos = StartPos - Vector3DX::up() * (20.0f * Scale3DRate);
 					if (BackGroundParts->CheckLinetoMap(StartPos, &EndPos)) {
 						StartPos = EndPos;
 					}
@@ -779,28 +779,28 @@ namespace FPS_n2 {
 			if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 				if (this->m_ConcussionSwitch) {
 					this->m_ConcussionSwitch = false;
-					this->m_Concussion = 1.f;
+					this->m_Concussion = 1.0f;
 				}
-				PostPassParts->Set_is_Blackout(this->m_Concussion > 0.f);
-				if (this->m_Concussion == 1.f) {
+				PostPassParts->Set_is_Blackout(this->m_Concussion > 0.0f);
+				if (this->m_Concussion == 1.0f) {
 					Camera3D::Instance()->SetCamShake(0.5f, 0.01f * Scale3DRate);
 				}
 				if (this->m_Concussion > 0.9f) {
-					Easing(&this->m_ConcussionPer, 1.f, 0.1f, EasingType::OutExpo);
+					Easing(&this->m_ConcussionPer, 1.0f, 0.1f, EasingType::OutExpo);
 				}
 				else if (this->m_Concussion > 0.25f) {
 					if (this->m_ConcussionPer > 0.25f) {
-						Easing(&this->m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
+						Easing(&this->m_ConcussionPer, 0.0f, 0.8f, EasingType::OutExpo);
 					}
 					else {
 						this->m_ConcussionPer = 0.25f;
 					}
 				}
 				else {
-					Easing(&this->m_ConcussionPer, 0.f, 0.8f, EasingType::OutExpo);
+					Easing(&this->m_ConcussionPer, 0.0f, 0.8f, EasingType::OutExpo);
 				}
-				PostPassParts->Set_Per_Blackout(this->m_ConcussionPer * 2.f);
-				this->m_Concussion = std::max(this->m_Concussion - DXLib_refParts->GetDeltaTime(), 0.f);
+				PostPassParts->Set_Per_Blackout(this->m_ConcussionPer * 2.0f);
+				this->m_Concussion = std::max(this->m_Concussion - DXLib_refParts->GetDeltaTime(), 0.0f);
 			}
 		}
 		//
@@ -825,7 +825,7 @@ namespace FPS_n2 {
 		void			CharacterObj::Init_Sub(void) noexcept {
 			this->m_HitBoxControl.Init();
 			this->m_ArmBreak = false;
-			SetMinAABB(Vector3DX::vget(-2.0f, -0.0, -2.0f) * Scale3DRate);
+			SetMinAABB(Vector3DX::vget(2.0f, 0.0f, 2.0f) * -Scale3DRate);
 			SetMaxAABB(Vector3DX::vget(2.0f, 2.0f, 2.0f) * Scale3DRate);
 		}
 		void			CharacterObj::FirstUpdate(void) noexcept {

@@ -69,8 +69,8 @@ namespace FPS_n2 {
 			}
 			int			CalcCheckSum(void) const noexcept {
 				return (
-					(static_cast<int>(GetMove().pos.x * 100.f) + static_cast<int>(GetMove().pos.y * 100.f) + static_cast<int>(GetMove().pos.z * 100.f)) +
-					(static_cast<int>(GetMove().vec.x * 100.f) + static_cast<int>(GetMove().vec.y * 100.f) + static_cast<int>(GetMove().vec.z * 100.f))
+					(static_cast<int>(GetMove().pos.x * 100.0f) + static_cast<int>(GetMove().pos.y * 100.0f) + static_cast<int>(GetMove().pos.z * 100.0f)) +
+					(static_cast<int>(GetMove().vec.x * 100.0f) + static_cast<int>(GetMove().vec.y * 100.0f) + static_cast<int>(GetMove().vec.z * 100.0f))
 					);
 			}
 		};
@@ -224,7 +224,7 @@ namespace FPS_n2 {
 			PlayerDataOnNetwork 	GetLerpServerPlayerData(PlayerID ID) const noexcept {
 				return PlayerDataOnNetwork::GetLerpData(
 					this->m_PrevServerData.GetPlayerData(static_cast<size_t>(ID)), this->m_LastServerData.GetPlayerData(static_cast<size_t>(ID)),
-					std::clamp(static_cast<float>(this->m_LeapFrame) / static_cast<float>(this->m_LeapFrameMax), 0.f, 1.f));
+					std::clamp(static_cast<float>(this->m_LeapFrame) / static_cast<float>(this->m_LeapFrameMax), 0.0f, 1.0f));
 			}
 		public:
 			void			Int(NetTime Tick) noexcept {
@@ -386,7 +386,7 @@ namespace FPS_n2 {
 		};
 		//クライアント専用
 		class ClientControl {
-			float					m_CannotConnectTimer{ 0.f };
+			float					m_CannotConnectTimer{ 0.0f };
 			int						m_Port{ 0 };
 			IPDATA					m_IP{ 127,0,0,1 };
 			int						m_NetWorkSelect{ 0 };
@@ -403,7 +403,7 @@ namespace FPS_n2 {
 			void			Init(int pPort, const IPDATA& pIP) noexcept {
 				this->m_Port = pPort;
 				this->m_IP = pIP;
-				this->m_CannotConnectTimer = 0.f;
+				this->m_CannotConnectTimer = 0.0f;
 				this->m_NetWorkSelect = 0;
 				this->m_PlayerUDPPhase.Init(false, this->m_Port + this->m_NetWorkSelect, this->m_IP);
 			}
@@ -417,7 +417,7 @@ namespace FPS_n2 {
 		//通信
 		class NetWorkController {
 			static const int		m_PingTotal{ 60 };
-			float					m_Tick{ 15.f };//ティックレート　プレイヤーのFPSより低いと詰まる
+			float					m_Tick{ 15.0f };//ティックレート　プレイヤーのFPSより低いと詰まる
 
 			bool					m_IsServer{ true };
 			bool					m_IsServerPlayer{ true };
@@ -440,12 +440,12 @@ namespace FPS_n2 {
 		private:
 			void			CalcPing(LONGLONG microsec) noexcept {
 				if (microsec == InvalidID) {
-					this->m_Ping = -1.f;
+					this->m_Ping = -1.0f;
 					return;
 				}
-				this->m_Pings[this->m_PingNow] = std::max(0.f, static_cast<float>(microsec) / 1000.f - (1000.f / this->m_Tick));//ティック分引く
+				this->m_Pings[this->m_PingNow] = std::max(0.0f, static_cast<float>(microsec) / 1000.0f - (1000.0f / this->m_Tick));//ティック分引く
 				++this->m_PingNow %= this->m_PingTotal;
-				this->m_Ping = 0.f;
+				this->m_Ping = 0.0f;
 				for (auto& ping : this->m_Pings) {
 					this->m_Ping += ping;
 				}
@@ -462,7 +462,7 @@ namespace FPS_n2 {
 			const auto& GetPlayerData(void) const noexcept { return this->m_PlayerNet; }
 		private:
 			void Init(bool IsServer, int Port, const IPDATA& ip, bool IsServerPlayer) noexcept {
-				this->m_PlayerNet.Int(static_cast<NetTime>((1000.f / this->m_Tick) * 1000.f));
+				this->m_PlayerNet.Int(static_cast<NetTime>((1000.0f / this->m_Tick) * 1000.0f));
 				this->m_IsServer = IsServer;
 				this->m_IsServerPlayer = IsServerPlayer;
 				if (this->m_IsServer) {

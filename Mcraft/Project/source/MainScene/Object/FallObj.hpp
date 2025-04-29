@@ -26,12 +26,12 @@ namespace FPS_n2 {
 		};
 
 		class FallObj : public BaseObject {
-			float	m_yAdd{ 0.f };
-			float	m_Timer{ 0.f };
+			float	m_yAdd{ 0.0f };
+			float	m_Timer{ 0.0f };
 			bool	m_SoundSwitch{ false };
 			std::unique_ptr<FallObjChildBase>	m_FallObject{};
 			bool	m_IsEndFall{ false };
-			float	m_CalcTimer{ 0.f };
+			float	m_CalcTimer{ 0.0f };
 		public:
 			FallObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::FallObj); }
 			virtual ~FallObj(void) noexcept {}
@@ -53,7 +53,7 @@ namespace FPS_n2 {
 			void				FirstUpdate(void) noexcept override;
 			void				DrawShadow(void) noexcept override {
 				if (!IsActive()) { return; }
-				if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.f * Scale3DRate * 10.f * Scale3DRate)) { return; }
+				if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.0f * Scale3DRate * 10.0f * Scale3DRate)) { return; }
 				GetObj().DrawModel();
 			}
 			void			Draw(bool isDrawSemiTrans, int Range) noexcept override {
@@ -61,7 +61,7 @@ namespace FPS_n2 {
 				if (!IsDraw(Range)) { return; }
 				if (isDrawSemiTrans) { return; }
 				if (!this->m_FallObject->IsDrawFar()) {
-					if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.f * Scale3DRate * 10.f * Scale3DRate)) { return; }
+					if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.0f * Scale3DRate * 10.0f * Scale3DRate)) { return; }
 				}
 				GetObj().DrawModel();
 			}
@@ -75,7 +75,7 @@ namespace FPS_n2 {
 		public:
 			void			SetMat(const Vector3DX& pos, const Matrix3x3DX& mat) noexcept {
 				SetMove().SetAll(pos, pos, pos, Vector3DX::zero(), mat, mat);
-				SetMove().Update(0.f, 0.f);
+				SetMove().Update(0.0f, 0.0f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}
 		public:
@@ -87,14 +87,14 @@ namespace FPS_n2 {
 			void				FirstUpdate(void) noexcept override{}
 			void				DrawShadow(void) noexcept override {
 				if (!IsActive()) { return; }
-				if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.f * Scale3DRate * 10.f * Scale3DRate)) { return; }
+				if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.0f * Scale3DRate * 10.0f * Scale3DRate)) { return; }
 				GetObj().DrawModel();
 			}
 			void			Draw(bool isDrawSemiTrans, int Range) noexcept override {
 				if (!IsActive()) { return; }
 				if (!IsDraw(Range)) { return; }
 				if (isDrawSemiTrans) { return; }
-				if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.f * Scale3DRate * 10.f * Scale3DRate)) { return; }
+				if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.0f * Scale3DRate * 10.0f * Scale3DRate)) { return; }
 				GetObj().DrawModel();
 			}
 			void			Dispose_Sub(void) noexcept override {}

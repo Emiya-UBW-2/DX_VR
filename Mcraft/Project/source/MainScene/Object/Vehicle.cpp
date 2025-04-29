@@ -63,12 +63,12 @@ namespace FPS_n2 {
 
 					for (auto& mesh : this->m_VecData->GetSpaceArmerMeshIDList()) {
 						if (tt.GetHitMesh() == mesh) {
-							EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 1.f);
+							EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 1.0f);
 						}
 					}
 					for (auto& mesh : this->m_VecData->GetModuleMeshIDList()) {
 						if (tt.GetHitMesh() == mesh) {
-							EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 1.f);
+							EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 1.0f);
 						}
 					}
 					//ダメージ面に当たった
@@ -156,7 +156,7 @@ namespace FPS_n2 {
 				}
 				id = g.GetGunMuzzleFrame();
 				if (id.GetFrameID() >= 0) {
-					auto Recoil = Matrix4x4DX::Mtrans(Vector3DX::vget(0.f, 0.f, g.GetRecoil() * 0.5f * Scale3DRate));
+					auto Recoil = Matrix4x4DX::Mtrans(Vector3DX::vget(0.0f, 0.0f, g.GetRecoil() * 0.5f * Scale3DRate));
 					SetObj().SetFrameLocalMatrix(id.GetFrameID(), Recoil * id.GetFrameLocalPosition());
 					SetCol().SetFrameLocalMatrix(id.GetFrameID(), Recoil * id.GetFrameLocalPosition());
 				}
@@ -254,16 +254,16 @@ namespace FPS_n2 {
 						0.0f, this->m_VecData->GetMaxFrontSpeed());
 					this->m_speed_sub = std::clamp(this->m_speed_sub -
 						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) ? 3.0f : -12.0f) * DXLib_refParts->GetDeltaTime(),
-						this->m_VecData->GetMaxBackSpeed(), 0.f);
+						this->m_VecData->GetMaxBackSpeed(), 0.0f);
 					//旋回
 					this->m_yradadd_right = std::clamp(this->m_yradadd_right +
-						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_A) ? 60.f : -120.f) * DXLib_refParts->GetDeltaTime(),
+						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_A) ? 60.0f : -120.0f) * DXLib_refParts->GetDeltaTime(),
 						0.0f, this->m_VecData->GetMaxBodyRad());
 					this->m_yradadd_left = std::clamp(this->m_yradadd_left -
-						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_D) ? 60.f : -120.f) * DXLib_refParts->GetDeltaTime(),
+						(this->m_Input.GetPADSPress(Controls::PADS::MOVE_D) ? 60.0f : -120.0f) * DXLib_refParts->GetDeltaTime(),
 						-this->m_VecData->GetMaxBodyRad(), 0.0f);
 				}
-				Easing(&this->m_speed, (this->m_speed_add + this->m_speed_sub) * 20.f, 0.9f, EasingType::OutExpo);
+				Easing(&this->m_speed, (this->m_speed_add + this->m_speed_sub) * 20.0f, 0.9f, EasingType::OutExpo);
 				Easing(&this->m_radAdd.y, deg2rad(this->m_yradadd_left + this->m_yradadd_right), 0.9f, EasingType::OutExpo);
 				//慣性
 				const auto radold = this->m_radAdd;
@@ -293,7 +293,7 @@ namespace FPS_n2 {
 						Vector3DX MuzzlePos = GetObj().GetFramePosition(cg.GetGunMuzzleFrame().GetFrameID());
 						Vector3DX MuzzleVec = (MuzzlePos - GetObj().GetFramePosition(cg.GetGunTrunnionFrame().GetFrameID())).normalized();
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_Shot))->Play3D(GetMove().GetPos(), 100.0f * Scale3DRate);													//サウンド
-						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, cg.GetAmmoSpec()->GetCaliber() * 10.0f * Scale3DRate, 2.f);	//銃発砲エフェクトのセット
+						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, cg.GetAmmoSpec()->GetCaliber() * 10.0f * Scale3DRate, 2.0f);	//銃発砲エフェクトのセット
 						Objects::AmmoPool::Instance()->Put(&cg.GetAmmoSpec(), MuzzlePos, MuzzleVec, this->m_MyPlayerID);
 					}
 				}
@@ -315,8 +315,8 @@ namespace FPS_n2 {
 			}
 
 
-			Pos.x = std::clamp(Pos.x, -15.f * Scale3DRate, 15.f * Scale3DRate);
-			Pos.z = std::clamp(Pos.z, -15.f * Scale3DRate, 15.f * Scale3DRate);
+			Pos.x = std::clamp(Pos.x, -15.0f * Scale3DRate, 15.0f * Scale3DRate);
+			Pos.z = std::clamp(Pos.z, -15.0f * Scale3DRate, 15.0f * Scale3DRate);
 			SetMove().SetPos(Pos);
 
 			SetMove().SetMat(MoveMat);
@@ -336,7 +336,7 @@ namespace FPS_n2 {
 							if (BackGroundParts->DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, 100)) {
 								if ((xp % 3 == 0) || (zp % 3 == 0)) {
 									//EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(xx, yy, zz),
-									//	Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.f)))), 3.f + GetRandf(2.f), 3.f);
+									//	Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f)))), 3.0f + GetRandf(2.0f), 3.0f);
 								}
 								++IsBreak;
 							}

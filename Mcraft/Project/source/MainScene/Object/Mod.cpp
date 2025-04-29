@@ -33,7 +33,7 @@ namespace FPS_n2 {
 		void GunPartsObj::SetGunPartsMatrix(const Matrix3x3DX& rotation, const Vector3DX& pos) noexcept {
 			SetMove().SetMat(rotation);
 			SetMove().SetPos(pos);
-			SetMove().Update(0.f, 0.f);
+			SetMove().Update(0.0f, 0.0f);
 			UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			this->m_ModifySlot->UpdatePartsAnim(GetObj());
 			this->m_ModifySlot->UpdatePartsMove(GunSlot::UnderRail, GetFramePartsMat(GunFrame::UnderRail));

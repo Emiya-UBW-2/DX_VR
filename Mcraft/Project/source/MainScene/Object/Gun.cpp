@@ -24,16 +24,16 @@ namespace FPS_n2 {
 #if true
 				switch (static_cast<Charas::GunAnimeID>(loop)) {
 				case Charas::GunAnimeID::HighReady:
-					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.f, 0.f, 0.87f, 0.87f);
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.0f, 0.0f, 0.87f, 0.87f);
 					break;
 				case Charas::GunAnimeID::LowReady:
-					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.f, 0.f, 0.87f, 0.87f);
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.0f, 0.0f, 0.87f, 0.87f);
 					break;
 				case Charas::GunAnimeID::ADS:
-					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.f, 0.2f, 0.9f, 0.9f);
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.0f, 0.2f, 0.9f, 0.9f);
 					break;
 				case Charas::GunAnimeID::Cocking:
-					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.f, 0.f, 0.1f, 0.9f);
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.0f, 0.0f, 0.1f, 0.9f);
 					break;
 				case Charas::GunAnimeID::ReloadStart_Empty:
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.5f, 0.0f, 0.9f, 0.0f);
@@ -80,9 +80,9 @@ namespace FPS_n2 {
 			//銃声
 			SE->Get(SoundType::SE, GetGunSoundSet(
 				(this->m_MuzzlePtr) ? (*this->m_MuzzlePtr)->GetModifySlot()->GetMyData()->GetGunShootSound() : GetModifySlot()->GetMyData()->GetGunShootSound()
-			))->Play3D(MuzzleMat.pos(), Scale3DRate * 50.f);
+			))->Play3D(MuzzleMat.pos(), Scale3DRate * 50.0f);
 			//エフェクト
-			EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec2(), 0.35f* this->m_MuzzleSmokeSize / (0.00762f * Scale3DRate), 2.f);
+			EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec2(), 0.35f* this->m_MuzzleSmokeSize / (0.00762f * Scale3DRate), 2.0f);
 			//発砲
 			for (int loop = 0, max = AmmoSpec->GetPellet(); loop < max; ++loop) {
 				Objects::AmmoPool::Instance()->Put(&AmmoSpec, MuzzleMat.pos(),
@@ -103,7 +103,7 @@ namespace FPS_n2 {
 			}
 			//リコイル
 			float Power = 0.0001f * GetRecoilPower();
-			this->m_RecoilRadAdd.Set(GetRandf(Power / 4.f), -Power);
+			this->m_RecoilRadAdd.Set(GetRandf(Power / 4.0f), -Power);
 			//ビジュアルリコイル
 			if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 				Camera3D::Instance()->SetCamShake(0.1f, 0.1f);
@@ -150,7 +150,7 @@ namespace FPS_n2 {
 				case Charas::GunAnimeID::ReloadWait:
 					if (IsNowGunAnimeEnd()) {
 						SetGunAnime(Charas::GunAnimeID::Reload);
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetMove().GetPos(), Scale3DRate * 3.f);
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetMove().GetPos(), Scale3DRate * 3.0f);
 					}
 					break;
 				case Charas::GunAnimeID::Reload:
@@ -193,7 +193,7 @@ namespace FPS_n2 {
 				}
 				for (auto& time : this->m_GunAnimeTime) {
 					int index = static_cast<int>(&time - &this->m_GunAnimeTime.front());
-					time += 60.f * DXLib_refParts->GetDeltaTime() * (this->m_GunAnimeSpeed[index]);
+					time += 60.0f * DXLib_refParts->GetDeltaTime() * (this->m_GunAnimeSpeed[index]);
 				}
 				//
 #if defined(DEBUG) && FALSE
@@ -212,27 +212,27 @@ namespace FPS_n2 {
 				Matrix3x3DX::RotAxis(Vector3DX::right(), this->m_UpperRad.x) *
 				Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_UpperRad.y) *
 				Matrix3x3DX::RotAxis(Vector3DX::forward(), std::clamp(
-					-this->m_UpperRad.y * 10.f * std::clamp(1.f - GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.f, 1.f),
+					-this->m_UpperRad.y * 10.0f * std::clamp(1.0f - GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.0f, 1.0f),
 					deg2rad(-10), deg2rad(10))),
 					0.8f, EasingType::OutExpo);
 			Easing(&this->m_GunSwingMat2, this->m_GunSwingMat, 0.8f, EasingType::OutExpo);
 			//スリング
-			Easing(&this->m_SlingPer, IsSelectGun ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
-			if (this->m_SlingPer <= 0.001f) { this->m_SlingPer = 0.f; }
-			if (this->m_SlingPer >= 0.999f) { this->m_SlingPer = 1.f; }
+			Easing(&this->m_SlingPer, IsSelectGun ? 1.0f : 0.0f, 0.9f, EasingType::OutExpo);
+			if (this->m_SlingPer <= 0.001f) { this->m_SlingPer = 0.0f; }
+			if (this->m_SlingPer >= 0.999f) { this->m_SlingPer = 1.0f; }
 			//
 			auto EyeYRot = Matrix3x3DX::RotVec2(Lerp(GetMove().GetMat().yvec(), GetPartsFrameMatParent(GunFrame::Eyepos).yvec(), GetGunAnimBlendPer(Charas::GunAnimeID::ADS)), GetMove().GetMat().yvec());
 			//アニメ演算の結果をキャッシュ
 			this->m_AnimNowCache = GetAnimDataNow(Charas::GunAnimeID::Aim);
 			for (int loop = 0; loop < static_cast<int>(Charas::GunAnimeID::ChoiceOnceMax); ++loop) {
-				if (GetGunAnimBlendPer((Charas::GunAnimeID)loop) != 0.f) {
+				if (GetGunAnimBlendPer((Charas::GunAnimeID)loop) != 0.0f) {
 					this->m_AnimNowCache.LerpNow(GetAnimDataNow((Charas::GunAnimeID)loop), GetGunAnimBlendPer((Charas::GunAnimeID)loop));
 				}
 			}
 			//
 			Matrix3x3DX AnimRot;
 			Vector3DX AnimPos;
-			if (this->m_SlingPer > 0.f) {
+			if (this->m_SlingPer > 0.0f) {
 				AnimRot = GetGunAnimeNow().GetRot() * this->m_GunSwingMat2 * CharaRotationCache * EyeYRot;
 				AnimPos = GetGunAnimeNow().GetPos();
 				AnimPos.x *= GetSwitchPer();
@@ -242,9 +242,9 @@ namespace FPS_n2 {
 					this->m_AutoAimControl.Update(IsActiveAutoAim, GetMyUserPlayerID(), GetPartsFrameMatParent(GunFrame::Eyepos).pos(), GetMove().GetMat().zvec2(), GetAutoAimRadian());
 					this->m_AutoAimControl.CalcAutoAimMat(&AnimRot);
 				}
-				Easing(&m_GunShotZrandR, GetShotSwitch() ? GetRandf(90.f) : 0.f, 0.8f, EasingType::OutExpo);
+				Easing(&m_GunShotZrandR, GetShotSwitch() ? GetRandf(90.0f) : 0.0f, 0.8f, EasingType::OutExpo);
 				Easing(&m_GunShotZrand, m_GunShotZrandR, 0.8f, EasingType::OutExpo);
-				AnimRot = AnimRot * Matrix3x3DX::RotAxis(AnimRot.zvec2(), deg2rad(m_GunShotZrand * std::clamp(1.f - GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.f, 1.f)));
+				AnimRot = AnimRot * Matrix3x3DX::RotAxis(AnimRot.zvec2(), deg2rad(m_GunShotZrand * std::clamp(1.0f - GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.0f, 1.0f)));
 			}
 			//武器座標
 			SetGunMat(Lerp(this->m_SlingRot * this->m_GunSwingMat2 * EyeYRot, AnimRot, this->m_SlingPer), Lerp(this->m_SlingPos, AnimPos, this->m_SlingPer));
@@ -252,8 +252,8 @@ namespace FPS_n2 {
 			{
 				Matrix4x4DX MatMin;
 				Matrix4x4DX MatMax;
-				float BasePer = 0.f;
-				float MaxPer = 0.f;
+				float BasePer = 0.0f;
+				float MaxPer = 0.0f;
 
 				auto SetMagMatLerp = [&](const Matrix4x4DX& MaxMat, float PerMax) {
 					MatMin = MatMax;
@@ -262,7 +262,7 @@ namespace FPS_n2 {
 					MaxPer = PerMax;
 					if (BasePer <= GetNowAnimTimePerCache() && GetNowAnimTimePerCache() <= MaxPer) {
 						if (this->m_MagazinePtr) {
-							(*this->m_MagazinePtr)->SetHandMatrix(Lerp(MatMin, MatMax, std::clamp((GetNowAnimTimePerCache() - BasePer) / (MaxPer - BasePer), 0.f, 1.f)));
+							(*this->m_MagazinePtr)->SetHandMatrix(Lerp(MatMin, MatMax, std::clamp((GetNowAnimTimePerCache() - BasePer) / (MaxPer - BasePer), 0.0f, 1.0f)));
 						}
 					}
 					};
@@ -293,29 +293,29 @@ namespace FPS_n2 {
 					switch (GetShotType()) {
 					case SHOTTYPE::BOLT:
 					case SHOTTYPE::PUMP:
-						if ((5.f / 35.f < GetNowAnimTimePerCache() && GetNowAnimTimePerCache() < 6.f / 35.f)) {
+						if ((5.0f / 35.0f < GetNowAnimTimePerCache() && GetNowAnimTimePerCache() < 6.0f / 35.0f)) {
 							PlayGunSound(EnumGunSound::CockingPull);
 						}
-						if ((28.f / 35.f < GetNowAnimTimePerCache() && GetNowAnimTimePerCache() < 29.f / 35.f)) {
+						if ((28.0f / 35.0f < GetNowAnimTimePerCache() && GetNowAnimTimePerCache() < 29.0f / 35.0f)) {
 							PlayGunSound(EnumGunSound::CockingRelease);
 						}
 						break;
 					case SHOTTYPE::FULL:
 					case SHOTTYPE::SEMI:
-						if ((8.f / 35.f < GetNowAnimTimePerCache() && GetNowAnimTimePerCache() < 9.f / 35.f)) {
+						if ((8.0f / 35.0f < GetNowAnimTimePerCache() && GetNowAnimTimePerCache() < 9.0f / 35.0f)) {
 							PlayGunSound(EnumGunSound::CockingPull);
 						}
-						if ((18.f / 35.f < GetNowAnimTimePerCache() && GetNowAnimTimePerCache() < 19.f / 35.f)) {
+						if ((18.0f / 35.0f < GetNowAnimTimePerCache() && GetNowAnimTimePerCache() < 19.0f / 35.0f)) {
 							PlayGunSound(EnumGunSound::CockingRelease);
 						}
 						break;
 					default:
 						break;
 					}
-					if (GetNowAnimTimePerCache() >= 25.f / 35.f) {
+					if (GetNowAnimTimePerCache() >= 25.0f / 35.0f) {
 						this->m_CockHand = false;
 					}
-					if (GetNowAnimTimePerCache() >= 19.f / 35.f) {
+					if (GetNowAnimTimePerCache() >= 19.0f / 35.0f) {
 						ChamberIn();
 						if (GetShotType() == SHOTTYPE::BOLT || GetShotType() == SHOTTYPE::PUMP) {
 							EjectCart();
@@ -329,10 +329,10 @@ namespace FPS_n2 {
 				case Charas::GunAnimeID::ReloadStart_Empty:
 					if (GetShotType() == SHOTTYPE::PUMP) {
 						MatMax = GetPartsFrameMatParent(GunFrame::Magpos);
-						SetMagMatLerp(this->m_MagazinePoachMat, 15.f / 60.f);
-						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 25.f / 60.f);
-						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 35.f / 60.f);
-						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 48.f / 60.f);
+						SetMagMatLerp(this->m_MagazinePoachMat, 15.0f / 60.0f);
+						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 25.0f / 60.0f);
+						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 35.0f / 60.0f);
+						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 48.0f / 60.0f);
 						SetMagMatLerp(this->m_MagazinePoachMat, 1.0f);
 
 						if (0.5f < GetNowAnimTimePerCache() && GetNowAnimTimePerCache() < 0.7f) {
@@ -346,7 +346,7 @@ namespace FPS_n2 {
 							this->m_EnumGunSoundNow = EnumGunSound::Max;
 							this->m_IsChamberOn = false;
 						}
-						float Per = 35.f / 60.f;
+						float Per = 35.0f / 60.0f;
 						if (GetShotType() == SHOTTYPE::PUMP) {
 							this->m_MagHand = true;
 							if (Per <= GetNowAnimTimePerCache()) {
@@ -365,14 +365,14 @@ namespace FPS_n2 {
 									this->m_isMagFall = true;
 									auto MagposMat = GetPartsFrameMatParent(GunFrame::Magpos);
 									this->m_MagFall.SetFall(
-										MagposMat.pos(), Matrix3x3DX::Get33DX(MagposMat), MagposMat.yvec() * (Scale3DRate * -3.f / 60.f),
-										12.f, Objects::FallObjectType::Magazine);
+										MagposMat.pos(), Matrix3x3DX::Get33DX(MagposMat), MagposMat.yvec() * (Scale3DRate * -3.0f / 60.0f),
+										12.0f, Objects::FallObjectType::Magazine);
 								}
 							}
 							else {
 								this->m_isMagFall = false;
 							}
-							if (0.f < GetNowAnimTimePerCache()) {
+							if (0.0f < GetNowAnimTimePerCache()) {
 								PlayGunSound(EnumGunSound::UnloadMag);
 							}
 						}
@@ -382,7 +382,7 @@ namespace FPS_n2 {
 					MatMax = GetPartsFrameMatParent(GunFrame::Magpos);
 					SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 0.3f);
 					SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 0.6f);
-					SetMagMatLerp(this->m_MagazinePoachMat, 1.f);
+					SetMagMatLerp(this->m_MagazinePoachMat, 1.0f);
 
 					this->m_MagHand = true;
 					this->m_ReloadAmmoCancel = false;
@@ -418,7 +418,7 @@ namespace FPS_n2 {
 							this->m_MagMiss = Matrix4x4DX::Mtrans(GetMove().GetMat().xvec() * (MissPer * Scale3DRate));
 							this->m_MagSuccess = Matrix4x4DX::Mtrans(
 								GetMove().GetMat().yvec() * (-0.05f * Scale3DRate) +
-								GetMove().GetMat().xvec() * (MissPer / 3.f * Scale3DRate)
+								GetMove().GetMat().xvec() * (MissPer / 3.0f * Scale3DRate)
 							);
 						}
 						else {
@@ -479,7 +479,7 @@ namespace FPS_n2 {
 					if (GetNowAnimTimePerCache() >= 0.55f) {
 						if (!this->m_ReleasePin) {
 							this->m_ReleasePin = true;
-							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Pin))->Play3D(GetMove().GetPos(), Scale3DRate * 2.f);
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Pin))->Play3D(GetMove().GetPos(), Scale3DRate * 2.0f);
 						}
 					}
 					else {
@@ -490,8 +490,8 @@ namespace FPS_n2 {
 					if (GetNowAnimTimePerCache() >= 0.4f) {
 						if (IsActive()) {
 							SetActiveAll(false);//手にあるものは非表示にする
-							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Throw))->Play3D(GetMove().GetPos(), Scale3DRate * 2.f);
-							this->m_Grenade.SetFall(GetMove().GetPos(), this->m_GrenadeThrowRot, (this->m_GrenadeThrowRot.zvec2()).normalized() * (Scale3DRate * 15.f / 60.f), 3.5f, Objects::FallObjectType::Grenade);
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Throw))->Play3D(GetMove().GetPos(), Scale3DRate * 2.0f);
+							this->m_Grenade.SetFall(GetMove().GetPos(), this->m_GrenadeThrowRot, (this->m_GrenadeThrowRot.zvec2()).normalized() * (Scale3DRate * 15.0f / 60.0f), 3.5f, Objects::FallObjectType::Grenade);
 						}
 					}
 					break;
@@ -584,9 +584,9 @@ namespace FPS_n2 {
 				this->m_Grenade.Init(GetFilePath(), 1);
 			}
 			for (auto& speed : this->m_GunAnimeSpeed) {
-				speed = 1.f;
+				speed = 1.0f;
 			}
-			this->m_GunAnimeSpeed[static_cast<int>(Charas::GunAnimeID::Shot)] = static_cast<float>(GetModifySlot()->GetMyData()->GetShotRate()) / 60.f / 10.f;
+			this->m_GunAnimeSpeed[static_cast<int>(Charas::GunAnimeID::Shot)] = static_cast<float>(GetModifySlot()->GetMyData()->GetShotRate()) / 60.0f / 10.0f;
 			auto BaseAnim = GetAnimDataNow(Charas::GunAnimeID::Aim);
 			SetGunMat(BaseAnim.GetRot(), BaseAnim.GetPos());
 			this->m_BaseMuzzle = GetPartsFrameMatParent(GunFrame::Muzzle);
@@ -620,7 +620,7 @@ namespace FPS_n2 {
 				int ID = GetModifySlot()->GetMyData()->GetAnimSelectList()[loop];
 				if (ID != InvalidID) {
 					if (GetGunAnime() == (Charas::GunAnimeID)loop) {
-						SetObj().SetAnim(ID).SetPer(1.f);
+						SetObj().SetAnim(ID).SetPer(1.0f);
 					}
 					else {
 						SetObj().SetAnim(ID).Reset();
@@ -632,7 +632,7 @@ namespace FPS_n2 {
 				if (ID != InvalidID) {
 					switch ((Charas::GunAnimeID)loop) {
 					case Charas::GunAnimeID::Hammer:
-						SetObj().SetAnim(ID).SetPer(std::clamp(GetObj().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * (GetShotSwitch() ? -10.f : 10.f), 0.f, 1.f));
+						SetObj().SetAnim(ID).SetPer(std::clamp(GetObj().GetAnim(ID).GetPer() + DXLib_refParts->GetDeltaTime() * (GetShotSwitch() ? -10.0f : 10.0f), 0.0f, 1.0f));
 						break;
 					case Charas::GunAnimeID::Open:
 					{
@@ -642,49 +642,49 @@ namespace FPS_n2 {
 							if (GetShotType() == SHOTTYPE::FULL || GetShotType() == SHOTTYPE::SEMI) {
 								float Per = 0.6f;
 								if (GetNowAnimTimePerCache() < Per) {
-									SetObj().SetAnim(ID).SetPer(std::clamp(GetNowAnimTimePerCache() / Per, 0.f, 1.f));
+									SetObj().SetAnim(ID).SetPer(std::clamp(GetNowAnimTimePerCache() / Per, 0.0f, 1.0f));
 								}
 								else {
 									if (GetAmmoNumTotal() == 0) {
-										SetObj().SetAnim(ID).SetPer(1.f);
+										SetObj().SetAnim(ID).SetPer(1.0f);
 									}
 									else {
-										SetObj().SetAnim(ID).SetPer(std::clamp(1.f - (GetNowAnimTimePerCache() - Per) / (1.f - Per), 0.f, 1.f));
+										SetObj().SetAnim(ID).SetPer(std::clamp(1.0f - (GetNowAnimTimePerCache() - Per) / (1.0f - Per), 0.0f, 1.0f));
 									}
 								}
 							}
 							else {
-								SetObj().SetAnim(ID).SetPer(0.f);
+								SetObj().SetAnim(ID).SetPer(0.0f);
 							}
 							break;
 						case Charas::GunAnimeID::Cocking:
 						{
-							float Per = 19.f / 35.f;
+							float Per = 19.0f / 35.0f;
 							if (GetNowAnimTimePerCache() < Per) {
 								//元から開いていたら1のまま
-								SetObj().SetAnim(ID).SetPer(std::max(GetObj().GetAnim(ID).GetPer(), std::clamp(GetNowAnimTimePerCache() / Per, 0.f, 1.f)));
+								SetObj().SetAnim(ID).SetPer(std::max(GetObj().GetAnim(ID).GetPer(), std::clamp(GetNowAnimTimePerCache() / Per, 0.0f, 1.0f)));
 							}
 							else {
 								if (GetShotType() == SHOTTYPE::PUMP) {
 									if (GetAmmoNumTotal() == 0) {
-										SetObj().SetAnim(ID).SetPer(1.f);
+										SetObj().SetAnim(ID).SetPer(1.0f);
 									}
 									else {
-										SetObj().SetAnim(ID).SetPer(std::clamp(1.f - (GetNowAnimTimePerCache() - Per) / (1.f - Per), 0.f, 1.f));
+										SetObj().SetAnim(ID).SetPer(std::clamp(1.0f - (GetNowAnimTimePerCache() - Per) / (1.0f - Per), 0.0f, 1.0f));
 									}
 								}
 								else {
-									SetObj().SetAnim(ID).SetPer(std::clamp(1.f - (GetNowAnimTimePerCache() - Per) / (1.f - Per), 0.f, 1.f));
+									SetObj().SetAnim(ID).SetPer(std::clamp(1.0f - (GetNowAnimTimePerCache() - Per) / (1.0f - Per), 0.0f, 1.0f));
 								}
 							}
 						}
 							break;
 						case Charas::GunAnimeID::ReloadStart_Empty:
 						{
-							float Per = 35.f / 60.f;
+							float Per = 35.0f / 60.0f;
 							if (GetShotType() == SHOTTYPE::PUMP) {
 								if (Per <= GetNowAnimTimePerCache()) {
-									SetObj().SetAnim(ID).SetPer(std::clamp(1.f - (GetNowAnimTimePerCache() - Per) / (1.f - Per), 0.f, 1.f));
+									SetObj().SetAnim(ID).SetPer(std::clamp(1.0f - (GetNowAnimTimePerCache() - Per) / (1.0f - Per), 0.0f, 1.0f));
 								}
 							}
 						}
@@ -704,8 +704,8 @@ namespace FPS_n2 {
 			this->m_CockArm.Update(this->m_CockHand, 0.0f, 0.1f, 0.7f, 0.7f);
 			SetObj().UpdateAnimAll();
 			//リコイルの演算
-			if (this->m_RecoilRadAdd.y < 0.f) {
-				Easing(&this->m_RecoilRadAdd, Vector2DX::vget(0.f, 0.01f), GetRecoilReturn(), EasingType::OutExpo);
+			if (this->m_RecoilRadAdd.y < 0.0f) {
+				Easing(&this->m_RecoilRadAdd, Vector2DX::vget(0.0f, 0.01f), GetRecoilReturn(), EasingType::OutExpo);
 			}
 			else {
 				Easing(&this->m_RecoilRadAdd, Vector2DX::zero(), 0.7f, EasingType::OutExpo);
@@ -713,9 +713,9 @@ namespace FPS_n2 {
 			//グレネード演算
 			UpdateGrenade();
 			//
-			if (this->m_SightPtr && GetSightZoomSize() > 1.f) {
-				float Per = 1.f - std::clamp(GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.f, 1.f);
-				if (Per < 1.f) {
+			if (this->m_SightPtr && GetSightZoomSize() > 1.0f) {
+				float Per = 1.0f - std::clamp(GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.0f, 1.0f);
+				if (Per < 1.0f) {
 					(*this->m_SightPtr)->SetScopeAlpha(Per);
 				}
 			}
@@ -734,13 +734,13 @@ namespace FPS_n2 {
 					}
 					return;
 				}
-				this->m_AimPoint.Calc(GetPartsFrameMatParent(GunFrame::Muzzle).pos() + GetMove().GetMat().zvec2() * (50.f * Scale3DRate));
+				this->m_AimPoint.Calc(GetPartsFrameMatParent(GunFrame::Muzzle).pos() + GetMove().GetMat().zvec2() * (50.0f * Scale3DRate));
 				Vector3DX LensPos = GetPartsFrameMatParent(GunFrame::Lens).pos();
 				if (this->m_Lens.Calc(LensPos)) {
 					if (this->m_LensSize.Calc(GetPartsFrameMatParent(GunFrame::LensSize).pos())) {
 						this->m_LensSizeLen = static_cast<float>(std::hypot(this->m_Lens.XPos() - this->m_LensSize.XPos(), this->m_Lens.YPos() - this->m_LensSize.YPos()));
 					}
-					if (this->m_Reticle.Calc(LensPos + (LensPos - GetPartsFrameMatParent(GunFrame::Eyepos).pos()).normalized() * (1.f * Scale3DRate))) {
+					if (this->m_Reticle.Calc(LensPos + (LensPos - GetPartsFrameMatParent(GunFrame::Eyepos).pos()).normalized() * (1.0f * Scale3DRate))) {
 						this->m_Reticle_on = (this->m_LensSizeLen > std::hypot(this->m_Lens.XPos() - this->m_Reticle.XPos(), this->m_Lens.YPos() - this->m_Reticle.YPos()));
 					}
 					else {
@@ -748,17 +748,17 @@ namespace FPS_n2 {
 					}
 				}
 				//レンズ表示機能への反映
-				if (GetSightZoomSize() > 1.f) {
+				if (GetSightZoomSize() > 1.0f) {
 					if (this->m_Reticle_on) {
 						PostPassParts->Set_is_lens(true);
-						PostPassParts->Set_zoom_lens(std::max(1.f, GetSightZoomSize() / 2.f));
+						PostPassParts->Set_zoom_lens(std::max(1.0f, GetSightZoomSize() / 2.0f));
 						PostPassParts->Set_xp_lens(static_cast<float>(this->m_Lens.XPos()));
 						PostPassParts->Set_yp_lens(static_cast<float>(this->m_Lens.YPos()));
 						PostPassParts->Set_size_lens(this->m_LensSizeLen);
 					}
 					else if (GetGunAnimBlendPer(Charas::GunAnimeID::ADS) < 0.5f) {
 						PostPassParts->Set_is_lens(false);
-						PostPassParts->Set_zoom_lens(1.f);
+						PostPassParts->Set_zoom_lens(1.0f);
 					}
 				}
 			}
@@ -776,20 +776,20 @@ namespace FPS_n2 {
 					SetUseHalfLambertLighting(false);
 
 					Vector3DX Pos = GetMove().GetPos();
-					Vector3DX Vect = (this->m_GrenadeThrowRot.zvec2()).normalized() * (Scale3DRate * 15.f / 60.f);
-					float yAdd = 0.f;
+					Vector3DX Vect = (this->m_GrenadeThrowRot.zvec2()).normalized() * (Scale3DRate * 15.0f / 60.0f);
+					float yAdd = 0.0f;
 					Vector3DX RePosDraw = Pos;
 					for (int loop = 0; loop < 60; ++loop) {
 						Vector3DX RePos = Pos;
 						Pos = Pos + Vect + Vector3DX::up() * yAdd;
-						yAdd += (GravityRate / (60.f * 60.f));
+						yAdd += (GravityRate / (60.0f * 60.0f));
 						{
 							Vector3DX EndPos = Pos;
 							Vector3DX Normal;
 							if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(RePos, &EndPos, &Normal)) {
 								Pos = EndPos + Normal * (0.5f * Scale3DRate);
 								Vect = (Vector3DX::Reflect(Vect, Normal) * 0.5f);
-								yAdd = 0.f;
+								yAdd = 0.0f;
 							}
 						}
 						if (loop % 3 == 0) {

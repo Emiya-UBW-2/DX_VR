@@ -27,6 +27,8 @@ namespace FPS_n2 {
 		};
 
 		class HelicopterObj : public BaseObject {
+			static const PlayerID								m_MyPlayerID{ -2 };//車両はとりあえず-1
+
 			Vector3DX m_TargetPos{};
 			Vector3DX m_PrevPos{};
 			Vector3DX m_NowPos{};
@@ -35,24 +37,24 @@ namespace FPS_n2 {
 			Vector3DX m_PosR{};
 			Vector3DX m_Pos{};
 
-			float m_Yrad = 0.f;
-			float m_YradR = 0.f;
-			float m_YradRT = 0.f;
-			float m_Zrad = 0.f;
-			float m_ZradR = 0.f;
+			float m_Yrad = 0.0f;
+			float m_YradR = 0.0f;
+			float m_YradRT = 0.0f;
+			float m_Zrad = 0.0f;
+			float m_ZradR = 0.0f;
 
-			float m_SideSpeedPer = 0.f;
-			float m_flontSpeedPer = 0.f;
+			float m_SideSpeedPer = 0.0f;
+			float m_flontSpeedPer = 0.0f;
 
-			float m_Timer = 0.f;
+			float m_Timer = 0.0f;
 
 			bool m_Open = false;
-			float m_OpenPer = 0.f;
+			float m_OpenPer = 0.0f;
 
 			bool m_IsHit = false;
 
 			bool m_Rope = false;
-			float m_RopePer = 0.f;
+			float m_RopePer = 0.0f;
 
 			HelicopterMove m_HelicopterMove{ HelicopterMove::Random };
 			int m_SpawnPoint{};
@@ -79,13 +81,13 @@ namespace FPS_n2 {
 		public:
 			void			SetMat(const Vector3DX& pos, const Matrix3x3DX& mat) noexcept {
 				SetMove().SetAll(pos, pos, pos, Vector3DX::zero(), mat, mat);
-				SetMove().Update(0.f, 0.f);
+				SetMove().Update(0.0f, 0.0f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 				auto* SE = SoundPool::Instance();
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->SetPosition(GetMove().GetPos());
 			}
 			const auto		GetIsActiveRappelling() const noexcept {
-				return (this->m_HelicopterMove == HelicopterMove::Rappelling) && (13.f <= this->m_Timer && this->m_Timer <= 30.f) && (this->m_SpawnPoint > 0);
+				return (this->m_HelicopterMove == HelicopterMove::Rappelling) && (13.0f <= this->m_Timer && this->m_Timer <= 30.0f) && (this->m_SpawnPoint > 0);
 			}
 			const auto		PopSpawnPoint() noexcept {
 				auto Answer = this->m_SpawnPoint;
@@ -96,32 +98,32 @@ namespace FPS_n2 {
 		private:
 			void				SetAction(HelicopterMove Move) noexcept {
 				m_HelicopterMove = Move;
-				m_Timer = 0.f;
+				m_Timer = 0.0f;
 				switch (this->m_HelicopterMove) {
 				case HelicopterMove::Random:
 					m_PrevPos = m_NowPos;
-					m_TargetPos = Vector3DX::vget(GetRandf(50.f), 0.f, GetRandf(50.f)) * Scale3DRate;
+					m_TargetPos = Vector3DX::vget(GetRandf(50.0f), 0.0f, GetRandf(50.0f)) * Scale3DRate;
 					break;
 				case HelicopterMove::Rappelling:
 					m_PrevPos = m_NowPos;
-					m_TargetPos = Vector3DX::vget(GetRandf(10.f), 0.f, GetRandf(10.f)) * Scale3DRate;
+					m_TargetPos = Vector3DX::vget(GetRandf(10.0f), 0.0f, GetRandf(10.0f)) * Scale3DRate;
 					break;
 				case HelicopterMove::Intercept:
 					m_PrevPos = m_NowPos;
-					m_TargetPos = Matrix3x3DX::Vtrans(Vector3DX::vget(0.f, 0.f, 15.f + GetRandf(10.f)) * Scale3DRate,Matrix3x3DX::RotAxis(Vector3DX::up(),deg2rad(GetRandf(180.f))));
+					m_TargetPos = Matrix3x3DX::Vtrans(Vector3DX::vget(0.0f, 0.0f, 15.0f + GetRandf(10.0f)) * Scale3DRate,Matrix3x3DX::RotAxis(Vector3DX::up(),deg2rad(GetRandf(180.0f))));
 					break;
 				default:
 					break;
 				}
 				auto Vec = (m_TargetPos - m_PrevPos);
-				if (Vec.magnitude() > 0.f) {
+				if (Vec.magnitude() > 0.0f) {
 					m_YradRT = rad2deg(std::atan2(-Vec.x, -Vec.z));
 				}
 			}
 		public:
 			//自分がダメージを与えたと通知
 			void			SetDamage(PlayerID DamageID_t, HitPoint Damage, int HitType, const Vector3DX& StartPos, const Vector3DX& EndPos) noexcept {
-				this->m_Damage.Add(-2, DamageID_t, Damage, HitType, StartPos, EndPos);
+				this->m_Damage.Add(this->m_MyPlayerID, DamageID_t, Damage, HitType, StartPos, EndPos);
 			}
 			const auto& GetDamageEvent(void) const noexcept { return this->m_Damage; }
 			void			SetDamageEventReset(void) noexcept { this->m_Damage.Reset(); }
@@ -135,14 +137,14 @@ namespace FPS_n2 {
 				SetMaxAABB(Vector3DX::vget(6.5f, 6.5f, 6.5f) * Scale3DRate);
 				SetActive(true);
 				auto* SE = SoundPool::Instance();
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->Play3D(GetMove().GetPos(), 50.f * Scale3DRate, DX_PLAYTYPE_LOOP);
-				m_PosR = Vector3DX::vget(0.f, -20.f, 0.f) * Scale3DRate;
-				m_Yrad = 0.f;
-				m_YradR = 0.f;
-				m_NowPos = Vector3DX::vget(0.f, 0.f, 0.f) * Scale3DRate;
+				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->Play3D(GetMove().GetPos(), 50.0f * Scale3DRate, DX_PLAYTYPE_LOOP);
+				m_PosR = Vector3DX::vget(0.0f, -20.0f, 0.0f) * Scale3DRate;
+				m_Yrad = 0.0f;
+				m_YradR = 0.0f;
+				m_NowPos = Vector3DX::vget(0.0f, 0.0f, 0.0f) * Scale3DRate;
 				SetAction(HelicopterMove::Random);
-				this->m_ShotTimer = 0.f;
-				this->m_ReloadTimer = 2.f;
+				this->m_ShotTimer = 0.0f;
+				this->m_ReloadTimer = 2.0f;
 				this->m_GunAmmo = 5;
 
 				std::string ChildPath = "data/ammo/";
@@ -167,9 +169,9 @@ namespace FPS_n2 {
 					Vector3DX Vec;
 					Pos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::GunAngle))).pos();
 					Vec = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::GunAngle))).zvec2();
-					DxLib::DrawCapsule3D(Pos.get(), (Pos + Vec * (300.f * Scale3DRate)).get(), 0.01f * Scale3DRate, 4, GetColor(64, 0, 0), GetColor(0, 0, 0), TRUE);
+					DxLib::DrawCapsule3D(Pos.get(), (Pos + Vec * (300.0f * Scale3DRate)).get(), 0.01f * Scale3DRate, 4, GetColor(64, 0, 0), GetColor(0, 0, 0), TRUE);
 				}
-				if (m_RopePer > 0.f) {
+				if (m_RopePer > 0.0f) {
 					Vector3DX Pos;
 
 					Pos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::Rappelling1))).pos();

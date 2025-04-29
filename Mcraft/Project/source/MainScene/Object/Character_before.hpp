@@ -21,7 +21,7 @@ namespace FPS_n2 {
 		//
 		class HitBox {
 			Vector3DX	m_pos;
-			float		m_radius{ 0.f };
+			float		m_radius{ 0.0f };
 			HitType		m_HitType{ HitType::Body };
 		public:
 			const auto&		GetColType(void) const noexcept { return this->m_HitType; }
@@ -85,14 +85,14 @@ namespace FPS_n2 {
 		//キャラ入力
 		class LeanControl {
 		private:
-			float												m_Rad{ 0.f };
+			float												m_Rad{ 0.0f };
 			int													m_Rate{ 0 };
 		public://ゲッター
 			const auto& GetRad(void) const noexcept { return this->m_Rad; }
 			const auto& GetRate(void) const noexcept { return this->m_Rate; }
 		public:
 			void			Init(void) noexcept {
-				this->m_Rad = 0.f;
+				this->m_Rad = 0.0f;
 				this->m_Rate = 0;
 			}
 			bool			Update(bool LeftTrigger, bool RightTrigger) {
@@ -131,14 +131,14 @@ namespace FPS_n2 {
 		};
 		class MoveControl {
 		private:
-			float												m_VecPower{ 0.f };
+			float												m_VecPower{ 0.0f };
 			Vector3DX											m_VecTotal;
 			std::array<float, 4>								m_Vec{ 0,0,0,0 };
 		public://ゲッター
 			const auto& GetVecTotal(void) const noexcept { return this->m_VecTotal; }
 			const auto GetVecMove(void) const noexcept {
-				if (this->m_VecPower > 0.f) {
-					return this->m_VecTotal.normalized() * std::clamp(this->m_VecPower, 0.f, 1.f);
+				if (this->m_VecPower > 0.0f) {
+					return this->m_VecTotal.normalized() * std::clamp(this->m_VecPower, 0.0f, 1.0f);
 				}
 				return Vector3DX::zero();
 			}
@@ -157,15 +157,15 @@ namespace FPS_n2 {
 		public:
 			void			Init(void) noexcept {
 				for (int loop = 0; loop < 4; ++loop) {
-					this->m_Vec[loop] = 0.f;
+					this->m_Vec[loop] = 0.0f;
 				}
 			}
 			void			Update(bool WKey, bool AKey, bool SKey, bool DKey) {
 				auto* DXLib_refParts = DXLib_ref::Instance();
-				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (WKey ? 3.f : -7.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (AKey ? 3.f : -7.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (SKey ? 3.f : -7.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (DKey ? 3.f : -7.f) * DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+				this->m_Vec[0] = std::clamp(this->m_Vec[0] + (WKey ? 3.0f : -7.0f) * DXLib_refParts->GetDeltaTime(), 0.0f, 1.0f);
+				this->m_Vec[1] = std::clamp(this->m_Vec[1] + (AKey ? 3.0f : -7.0f) * DXLib_refParts->GetDeltaTime(), 0.0f, 1.0f);
+				this->m_Vec[2] = std::clamp(this->m_Vec[2] + (SKey ? 3.0f : -7.0f) * DXLib_refParts->GetDeltaTime(), 0.0f, 1.0f);
+				this->m_Vec[3] = std::clamp(this->m_Vec[3] + (DKey ? 3.0f : -7.0f) * DXLib_refParts->GetDeltaTime(), 0.0f, 1.0f);
 				this->m_VecTotal = Vector3DX::vget(this->m_Vec[1] - this->m_Vec[3], 0, this->m_Vec[2] - this->m_Vec[0]);
 				this->m_VecPower = this->m_VecTotal.magnitude();
 			}
@@ -173,7 +173,7 @@ namespace FPS_n2 {
 		class RotateControl {
 		private:
 			Vector3DX											m_rad_Buf, m_rad;
-			float												m_yrad_Upper{ 0.f }, m_yrad_Bottom{ 0.f };
+			float												m_yrad_Upper{ 0.0f }, m_yrad_Bottom{ 0.0f };
 			bool												m_TurnBody{ false };
 		public://セッター
 			const auto&		IsTurnBody(void) const noexcept { return this->m_TurnBody; }
@@ -196,7 +196,7 @@ namespace FPS_n2 {
 			void Update(float pxRad, float pyRad, bool IsMove, float pyRadFront) {
 				if (!IsMove) {
 					float Change = abs(GetRad().y - this->m_yrad_Upper);
-					if (deg2rad(50.f) < Change) {
+					if (deg2rad(50.0f) < Change) {
 						this->m_TurnBody = true;
 					}
 					if (Change < deg2rad(0.5f)) {
@@ -208,7 +208,7 @@ namespace FPS_n2 {
 				}
 
 
-				this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + pxRad, deg2rad(-70.f), deg2rad(35.f));
+				this->m_rad_Buf.x = std::clamp(this->m_rad_Buf.x + pxRad, deg2rad(-70.0f), deg2rad(35.0f));
 				this->m_rad_Buf.y = this->m_rad_Buf.y + pyRad;
 				Easing(&this->m_rad.x, this->m_rad_Buf.x, 0.5f, EasingType::OutExpo);
 				Easing(&this->m_rad.y, this->m_rad_Buf.y, 0.8f, EasingType::OutExpo);
@@ -220,7 +220,7 @@ namespace FPS_n2 {
 				auto PrevYradBottom = this->m_yrad_Bottom;
 				Easing(&this->m_yrad_Bottom, this->m_yrad_Upper - pyRadFront, 0.85f, EasingType::OutExpo);
 				auto YradChange = this->m_yrad_Bottom - PrevYradBottom;
-				Easing(&this->m_rad_Buf.z, (abs(YradChange) > deg2rad(10)) ? 0.f : std::clamp(YradChange * 3.f, -deg2rad(10), deg2rad(10)), 0.9f, EasingType::OutExpo);
+				Easing(&this->m_rad_Buf.z, (abs(YradChange) > deg2rad(10)) ? 0.0f : std::clamp(YradChange * 3.0f, -deg2rad(10), deg2rad(10)), 0.9f, EasingType::OutExpo);
 			}
 		};
 		//
@@ -272,10 +272,10 @@ namespace FPS_n2 {
 			Vector3DX											m_WalkSwing_p{};
 			Vector3DX											m_WalkSwing_t{};
 			float												m_PrevY{};
-			float												m_MoveEyePosTimer{ 0.f };
+			float												m_MoveEyePosTimer{ 0.0f };
 			Vector3DX											m_MoveEyePosLocal{};
 			Vector3DX											m_MoveEyePos{};
-			float												m_BreathEyePosTimer{ 0.f };
+			float												m_BreathEyePosTimer{ 0.0f };
 		public:
 			WalkSwingControl(void) noexcept {}
 			virtual ~WalkSwingControl(void) noexcept {}
@@ -287,38 +287,38 @@ namespace FPS_n2 {
 				//X
 				{
 					if (this->m_PrevY > Pos.y) {
-						this->m_WalkSwing_t.x = 1.f;
+						this->m_WalkSwing_t.x = 1.0f;
 					}
 					else {
-						this->m_WalkSwing_t.x = std::max(this->m_WalkSwing_t.x - 15.f * DXLib_refParts->GetDeltaTime(), 0.f);
+						this->m_WalkSwing_t.x = std::max(this->m_WalkSwing_t.x - 15.0f * DXLib_refParts->GetDeltaTime(), 0.0f);
 					}
 					this->m_PrevY = Pos.y;
 				}
 				//Z
 				{
-					if (this->m_WalkSwing_t.x == 1.f) {
-						if (this->m_WalkSwing_t.z >= 0.f) {
-							this->m_WalkSwing_t.z = -1.f;
+					if (this->m_WalkSwing_t.x == 1.0f) {
+						if (this->m_WalkSwing_t.z >= 0.0f) {
+							this->m_WalkSwing_t.z = -1.0f;
 						}
 						else {
-							this->m_WalkSwing_t.z = 1.f;
+							this->m_WalkSwing_t.z = 1.0f;
 						}
 					}
 				}
 				Easing(&this->m_WalkSwing_p.x, this->m_WalkSwing_t.x * SwingPer, (this->m_WalkSwing_p.x > this->m_WalkSwing_t.x * SwingPer) ? 0.6f : 0.9f, EasingType::OutExpo);
 				Easing(&this->m_WalkSwing_p.z, this->m_WalkSwing_t.z * SwingPer, 0.95f, EasingType::OutExpo);
 				Easing(&this->m_WalkSwing, this->m_WalkSwing_p, 0.5f, EasingType::OutExpo);
-				Vector3DX WalkSwingRad = Vector3DX::vget(5.f, 0.f, 10.f);
+				Vector3DX WalkSwingRad = Vector3DX::vget(5.0f, 0.0f, 10.0f);
 				return Matrix3x3DX::RotAxis(Vector3DX::forward(), deg2rad(this->m_WalkSwing.z * WalkSwingRad.z)) *
 					Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(this->m_WalkSwing.x * WalkSwingRad.x));
 			}
 			const auto& CalcEye(const Matrix3x3DX& pCharaMat, float SwingPer, float SwingSpeed) noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
-				if (SwingPer > 0.f) {
-					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed) * 60.f * DXLib_refParts->GetDeltaTime();
+				if (SwingPer > 0.0f) {
+					this->m_MoveEyePosTimer += SwingPer * deg2rad(SwingSpeed) * 60.0f * DXLib_refParts->GetDeltaTime();
 				}
 				else {
-					this->m_MoveEyePosTimer = 0.f;
+					this->m_MoveEyePosTimer = 0.0f;
 				}
 				auto EyePos = Matrix3x3DX::Vtrans(Vector3DX::up() * (0.25f * SwingPer), Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_MoveEyePosTimer));
 				EyePos.y = -std::abs(EyePos.y);
@@ -395,24 +395,24 @@ namespace FPS_n2 {
 		class HitReactionControl {
 		private:
 			Vector3DX											m_HitAxis{ Vector3DX::forward() };
-			float												m_HitPower{ 0.f };
-			float												m_HitPowerR{ 0.f };
+			float												m_HitPower{ 0.0f };
+			float												m_HitPowerR{ 0.0f };
 		private:
 		public:
 			HitReactionControl(void) noexcept {}
 			virtual ~HitReactionControl(void) noexcept {}
 		public:
-			const auto GetHitReactionMat(void) const noexcept { return Matrix3x3DX::RotAxis(this->m_HitAxis, this->m_HitPowerR * deg2rad(90.f)); }
-			const auto IsDamaging(void) const noexcept { return this->m_HitPower > 0.f; }
+			const auto GetHitReactionMat(void) const noexcept { return Matrix3x3DX::RotAxis(this->m_HitAxis, this->m_HitPowerR * deg2rad(90.0f)); }
+			const auto IsDamaging(void) const noexcept { return this->m_HitPower > 0.0f; }
 		public:
 			void SetHit(const Vector3DX& Axis) noexcept {
 				this->m_HitAxis = Axis;
-				this->m_HitPower = 1.f;
+				this->m_HitPower = 1.0f;
 			}
 			void Update(void) noexcept {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				Easing(&this->m_HitPowerR, this->m_HitPower, 0.8f, EasingType::OutExpo);
-				this->m_HitPower = std::max(this->m_HitPower - DXLib_refParts->GetDeltaTime() / 0.3f, 0.f);
+				this->m_HitPower = std::max(this->m_HitPower - DXLib_refParts->GetDeltaTime() / 0.3f, 0.0f);
 			}
 		};
 		//ラグドール
@@ -499,7 +499,7 @@ namespace FPS_n2 {
 					}
 					{
 						int Frame = 2;
-						tgt->SetFrameLocalMatrix(Frame, mine.GetFrameLocalMatrix(Frame) * Matrix4x4DX::Mtrans(Vector3DX::vget(0.f, (mine.GetMatrix().pos() - GroundPos).y, 0.f)));
+						tgt->SetFrameLocalMatrix(Frame, mine.GetFrameLocalMatrix(Frame) * Matrix4x4DX::Mtrans(Vector3DX::vget(0.0f, (mine.GetMatrix().pos() - GroundPos).y, 0.0f)));
 					}
 					for (int loop = 0, max = static_cast<int>(tgt->GetAnimNum()); loop < max; ++loop) {
 						tgt->SetAnim(loop).SetPer(mine.GetAnim(loop).GetPer());
@@ -512,10 +512,10 @@ namespace FPS_n2 {
 		private:
 			const MV1*											m_pBaseObj{nullptr};
 			MV1													m_RagDoll;
-			float												m_Timer{ 0.f };						//ラグドールの物理演算タイマー
+			float												m_Timer{ 0.0f };						//ラグドールの物理演算タイマー
 			frame_body											m_RagObjFrame;						//フレーム
 			frame_body											m_BaseObjFrame;						//フレーム
-			float												m_PhysicsTime{ 0.f };				//ラグドールの物理演算タイマー
+			float												m_PhysicsTime{ 0.0f };				//ラグドールの物理演算タイマー
 		public:
 		public:
 			RagDollControl(void) noexcept {}
@@ -540,24 +540,24 @@ namespace FPS_n2 {
 				if (!this->m_pBaseObj) { return; }
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				if (isAlive) {
-					this->m_Timer = 0.f;
+					this->m_Timer = 0.0f;
 				}
 				else {
-					if (this->m_Timer < 3.f) {
+					if (this->m_Timer < 3.0f) {
 						this->m_RagDoll.SetPrioritizePhysicsOverAnimFlag(true);
 						this->m_BaseObjFrame.CopyFrame(*this->m_pBaseObj, this->m_RagObjFrame, &this->m_RagDoll, GroundPos);
 						//物理演算
-						if (this->m_Timer == 0.f) {
+						if (this->m_Timer == 0.0f) {
 							this->m_RagDoll.PhysicsResetState();
-							this->m_PhysicsTime = 0.f;
+							this->m_PhysicsTime = 0.0f;
 						}
 						this->m_PhysicsTime += DXLib_refParts->GetDeltaTime();
 
 						bool isCalc = false;
 						while (true) {
-							if (this->m_PhysicsTime >= 1.f / 60.f) {
-								this->m_PhysicsTime -= 1.f / 60.f;
-								this->m_RagDoll.PhysicsCalculation(1000.f / 60.f);
+							if (this->m_PhysicsTime >= 1.0f / 60.0f) {
+								this->m_PhysicsTime -= 1.0f / 60.0f;
+								this->m_RagDoll.PhysicsCalculation(1000.0f / 60.0f);
 								isCalc = true;
 							}
 							else {
@@ -565,7 +565,7 @@ namespace FPS_n2 {
 							}
 						}
 						if(!isCalc) {
-							this->m_RagDoll.PhysicsCalculation(0.f);
+							this->m_RagDoll.PhysicsCalculation(0.0f);
 						}
 					}
 					this->m_Timer += DXLib_refParts->GetDeltaTime();

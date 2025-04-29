@@ -152,26 +152,26 @@ namespace FPS_n2 {
 			//Cam
 			CameraParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 			//info
-			CameraParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.03f, Scale3DRate * 100.f);
+			CameraParts->SetMainCamera().SetCamInfo(deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov)), Scale3DRate * 0.03f, Scale3DRate * 100.0f);
 			//Fog
 			SetVerticalFogEnable(true);
 			SetVerticalFogMode(DX_FOGMODE_LINEAR);
-			SetVerticalFogStartEnd(-26.f * Scale3DRate, -10.f * Scale3DRate);
+			SetVerticalFogStartEnd(-26.0f * Scale3DRate, -10.0f * Scale3DRate);
 			SetVerticalFogColor(0, 0, 0);
 			//Fog
 			SetFogEnable(true);
 			SetFogMode(DX_FOGMODE_LINEAR);
-			SetFogStartEnd(FarMax, FarMax * 20.f);
+			SetFogStartEnd(FarMax, FarMax * 20.0f);
 			SetFogColor(114, 120, 128);
 			//
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				//人の座標設定
 				if (loop == PlayerMngr->GetWatchPlayerID()) {
-					chara->Spawn(deg2rad(0.f), deg2rad(GetRand(360)), Vector3DX::vget(GetRandf(10.f), -20.f, GetRandf(10.f)) * Scale3DRate, 0, true);
+					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), Vector3DX::vget(GetRandf(10.0f), -20.0f, GetRandf(10.0f)) * Scale3DRate, 0, true);
 				}
 				else{
-					chara->Spawn(deg2rad(0.f), deg2rad(GetRand(360)), Vector3DX::vget(GetRandf(10.f), -20.f, GetRandf(10.f)) * Scale3DRate, 0, true);
+					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), Vector3DX::vget(GetRandf(10.0f), -20.0f, GetRandf(10.0f)) * Scale3DRate, 0, true);
 				}
 			}
 			//UI
@@ -180,13 +180,13 @@ namespace FPS_n2 {
 			this->m_PauseMenuControl.Init();
 			FadeControl::Instance()->Init();
 			this->m_IsEnd = false;
-			this->m_StartTimer = 3.f;
+			this->m_StartTimer = 3.0f;
 
 			auto* SE = SoundPool::Instance();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
 
-			//Vector3DX pos_t = Matrix3x3DX::Vtrans(Vector3DX::forward() * (15.f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
-			//pos_t.y = -25.f * Scale3DRate;
+			//Vector3DX pos_t = Matrix3x3DX::Vtrans(Vector3DX::forward() * (15.0f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
+			//pos_t.y = -25.0f * Scale3DRate;
 
 			//PlayerMngr->GetVehicle()->Spawn(std::atan2f(pos_t.x, pos_t.z), pos_t);
 		}
@@ -203,7 +203,7 @@ namespace FPS_n2 {
 			auto* OptionParts = OptionManager::Instance();
 
 			PlayerMngr->SetWatchPlayerID(GetViewPlayerID());
-			PostPassParts->SetLevelFilter(38, 154, 1.f);
+			PostPassParts->SetLevelFilter(38, 154, 1.0f);
 			this->m_PauseMenuControl.Update();
 			if (this->m_PauseMenuControl.IsRetire()) {
 				if (!this->m_IsEnd) {
@@ -268,13 +268,13 @@ namespace FPS_n2 {
 			//Input,AI
 			{
 				if (!GetIsFirstLoop()) {
-					this->m_StartTimer = std::max(this->m_StartTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+					this->m_StartTimer = std::max(this->m_StartTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
 				}
 				MyInput.ResetAllInput();
-				if (!SceneParts->IsPause() && FadeControl::Instance()->IsClear() && (this->m_StartTimer <= 0.f)) {
-					float AimPer = 1.f / std::max(1.f, ViewChara->GetIsADS() ? ViewChara->GetGunPtrNow()->GetSightZoomSize() : 1.f);
-					MyInput.SetAddxRad(Pad->GetLS_Y() / 200.f * AimPer);
-					MyInput.SetAddyRad(Pad->GetLS_X() / 200.f * AimPer);
+				if (!SceneParts->IsPause() && FadeControl::Instance()->IsClear() && (this->m_StartTimer <= 0.0f)) {
+					float AimPer = 1.0f / std::max(1.0f, ViewChara->GetIsADS() ? ViewChara->GetGunPtrNow()->GetSightZoomSize() : 1.0f);
+					MyInput.SetAddxRad(Pad->GetLS_Y() / 200.0f * AimPer);
+					MyInput.SetAddyRad(Pad->GetLS_X() / 200.0f * AimPer);
 					MyInput.SetInputPADS(Controls::PADS::MOVE_W, Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::MOVE_S, Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::MOVE_A, Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().press());
@@ -390,7 +390,7 @@ namespace FPS_n2 {
 				Vector3DX BaseCamPos = ViewChara->GetCameraPosition();
 				CameraParts->SetMainCamera().SetCamPos(
 					BaseCamPos + Camera3D::Instance()->GetCamShake(),
-					BaseCamPos + ViewChara->GetEyeRotationCache().zvec2() + Camera3D::Instance()->GetCamShake() * 2.f,
+					BaseCamPos + ViewChara->GetEyeRotationCache().zvec2() + Camera3D::Instance()->GetCamShake() * 2.0f,
 					ViewChara->GetEyeRotationCache().yvec());
 #if defined(DEBUG) && DEBUG_CAM
 				if (CheckHitKey(KEY_INPUT_F1) != 0) {
@@ -416,19 +416,19 @@ namespace FPS_n2 {
 					switch (DBG_CamSelect) {
 					case 0:
 						CamVec = CamPos;
-						CamPos += Rot.xvec() * (3.f * Scale3DRate);
+						CamPos += Rot.xvec() * (3.0f * Scale3DRate);
 						break;
 					case 1:
 						CamVec = CamPos;
-						CamPos += Rot.xvec() * (-3.f * Scale3DRate);
+						CamPos += Rot.xvec() * (-3.0f * Scale3DRate);
 						break;
 					case 2:
 						CamVec = CamPos;
-						CamPos += Rot.yvec() * (3.f * Scale3DRate) + Rot.zvec2() * 0.1f;
+						CamPos += Rot.yvec() * (3.0f * Scale3DRate) + Rot.zvec2() * 0.1f;
 						break;
 					case 3:
 						CamVec = CamPos;
-						CamPos += Rot.zvec2() * (3.f * Scale3DRate);
+						CamPos += Rot.zvec2() * (3.0f * Scale3DRate);
 						break;
 					default:
 						break;
@@ -442,7 +442,7 @@ namespace FPS_n2 {
 					float fov = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
 					if (ViewChara->GetIsADS()) {
 						fov -= deg2rad(15);
-						fov /= std::max(1.f, ViewChara->GetGunPtrNow()->GetSightZoomSize() / 2.f);
+						fov /= std::max(1.0f, ViewChara->GetGunPtrNow()->GetSightZoomSize() / 2.0f);
 					}
 					if (ViewChara->GetGunPtrNow() && ViewChara->GetGunPtrNow()->GetShotSwitch()) {
 						fov -= deg2rad(5);
@@ -469,7 +469,7 @@ namespace FPS_n2 {
 #endif
 			//DoF
 			PostPassEffect::Instance()->Set_DoFNearFar(
-				ViewChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), ViewChara->GetIsADS() ? (FarMax * 0.8f) : Scale3DRate * 5.f,
+				ViewChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), ViewChara->GetIsADS() ? (FarMax * 0.8f) : Scale3DRate * 5.0f,
 				ViewChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), FarMax);
 			//埃エフェクト
 			if (GetIsFirstLoop()) {
@@ -486,7 +486,7 @@ namespace FPS_n2 {
 			//UIパラメーター
 			{
 				//timer
-				this->m_UIclass.SetfloatParam(0, 0.f);
+				this->m_UIclass.SetfloatParam(0, 0.0f);
 				this->m_UIclass.SetfloatParam(1, this->m_StartTimer);
 
 				this->m_UIclass.Update();
@@ -507,12 +507,12 @@ namespace FPS_n2 {
 			}
 			{
 				auto* PostPassParts = PostPassEffect::Instance();
-				PostPassParts->SetLevelFilter(0, 255, 1.f);
-				PostPassParts->SetAberrationPower(1.f);
+				PostPassParts->SetLevelFilter(0, 255, 1.0f);
+				PostPassParts->SetAberrationPower(1.0f);
 				PostPassParts->Set_is_Blackout(false);
-				PostPassParts->Set_Per_Blackout(0.f);
+				PostPassParts->Set_Per_Blackout(0.0f);
 				PostPassParts->Set_is_lens(false);
-				PostPassParts->Set_zoom_lens(1.f);
+				PostPassParts->Set_zoom_lens(1.0f);
 			}
 			EffectSingleton::Release();
 			NetWorkBrowser::Release();
@@ -560,7 +560,7 @@ namespace FPS_n2 {
 #endif
 			if (this->m_NetWorkController) {
 				std::string PingMes;
-				if (this->m_NetWorkController->GetPing() >= 0.f) {
+				if (this->m_NetWorkController->GetPing() >= 0.0f) {
 					char Mes[260];
 					sprintfDx(Mes, "Ping:%3dms", static_cast<int>(this->m_NetWorkController->GetPing()));
 

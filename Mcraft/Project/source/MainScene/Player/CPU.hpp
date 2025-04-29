@@ -15,10 +15,10 @@ namespace FPS_n2 {
 			PlayerID								m_MyCharaID{ 0 };
 			PlayerID								m_TargetCharaID{ 0 };
 
-			float									m_RepopTimer{ 0.f };
+			float									m_RepopTimer{ 0.0f };
 
 			bool									m_IsLeftHeli{};
-			float									m_RapeTimer{ 0.f };
+			float									m_RapeTimer{ 0.0f };
 		public:
 			void Repop(void) noexcept;
 		public:

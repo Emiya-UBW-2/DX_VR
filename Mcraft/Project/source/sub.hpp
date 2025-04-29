@@ -51,13 +51,13 @@ namespace FPS_n2 {
 		friend class SingletonBase<FadeControl>;
 	private:
 		bool						m_IsBlackOut{ false };//カットシーン中フラグ
-		float						m_BlackOutAlpha{ 0.f };
+		float						m_BlackOutAlpha{ 0.0f };
 	private:
 		FadeControl() noexcept {}
 		virtual ~FadeControl()noexcept {}
 	public:
-		auto		IsClear(void) const noexcept { return this->m_BlackOutAlpha == 0.f; }
-		auto		IsAll(void) const noexcept { return this->m_BlackOutAlpha >= 1.f; }
+		auto		IsClear(void) const noexcept { return this->m_BlackOutAlpha == 0.0f; }
+		auto		IsAll(void) const noexcept { return this->m_BlackOutAlpha >= 1.0f; }
 	public:
 		void			SetBlackOut(bool value) noexcept { this->m_IsBlackOut = value; }
 	public:
@@ -82,7 +82,7 @@ namespace FPS_n2 {
 	public:
 		bool Calc(const Vector3DX& Pos3D) noexcept {
 			Vector3DX Pos = ConvWorldPosToScreenPos(Pos3D.get());
-			if (0.f < Pos.z && Pos.z < 1.f) {
+			if (0.0f < Pos.z && Pos.z < 1.0f) {
 				auto* WindowSizeParts = WindowSizeControl::Instance();
 				this->m_XPos = static_cast<int>(Pos.x);
 				this->m_YPos = static_cast<int>(Pos.y);
@@ -101,13 +101,13 @@ namespace FPS_n2 {
 		class HitMarker {
 			bool			m_IsActive{ false };
 			bool			m_IsDraw{ false };
-			float			m_Hit_alpha{ 0.f };
+			float			m_Hit_alpha{ 0.0f };
 			ScreenPosition	m_Hit_DispPos;
 			int				m_Hit_AddX{ 0 };
 			int				m_Hit_AddY{ 0 };
 			HitPoint		m_Damage{ 0 };
 			ArmerPoint		m_ArmerDamage{ 0 };
-			float			m_HitTimer{ 0.f };
+			float			m_HitTimer{ 0.0f };
 			Vector3DX		pos;
 		public:
 			void			AddMarker(const Vector3DX& position, HitPoint Damage, ArmerPoint ArmerDamage) noexcept {
@@ -115,7 +115,7 @@ namespace FPS_n2 {
 				this->m_Damage = Damage;
 				this->m_ArmerDamage = ArmerDamage;
 				this->m_HitTimer = 0.25f;
-				this->m_Hit_alpha = 1.f;
+				this->m_Hit_alpha = 1.0f;
 				this->m_Hit_AddX = GetRand(32);
 				this->m_Hit_AddY = GetRand(32);
 				this->m_IsActive = true;
@@ -130,9 +130,9 @@ namespace FPS_n2 {
 			void			Update(void) noexcept {
 				if (!this->m_IsActive) { return; }
 				auto* DXLib_refParts = DXLib_ref::Instance();
-				this->m_HitTimer = std::clamp(this->m_HitTimer - DXLib_refParts->GetDeltaTime(), 0.f, 0.25f);
-				if (this->m_Hit_alpha > 0.f) {
-					Easing(&this->m_Hit_alpha, (this->m_HitTimer > 0.f) ? 2.f : 0.f, 0.95f, EasingType::OutExpo);
+				this->m_HitTimer = std::clamp(this->m_HitTimer - DXLib_refParts->GetDeltaTime(), 0.0f, 0.25f);
+				if (this->m_Hit_alpha > 0.0f) {
+					Easing(&this->m_Hit_alpha, (this->m_HitTimer > 0.0f) ? 2.0f : 0.0f, 0.95f, EasingType::OutExpo);
 					if (this->m_Hit_alpha <= 0.01f) {
 						this->m_Hit_alpha = 0;
 						this->m_IsActive = false;
@@ -147,19 +147,19 @@ namespace FPS_n2 {
 			bool			Draw(const GraphHandle& hit_Graph, const GraphHandle& guard_Graph) const noexcept {
 				auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 				if (this->m_IsActive && this->m_IsDraw) {
-					int			Alpha = static_cast<int>(this->m_Hit_alpha * 255.f);
+					int			Alpha = static_cast<int>(this->m_Hit_alpha * 255.0f);
 					if (Alpha >= 10) {
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Alpha);
 						//
-						int red = static_cast<int>(255 * std::clamp(static_cast<float>(this->m_Damage) / 100.f * 2.f, 0.f, 1.f));
+						int red = static_cast<int>(255 * std::clamp(static_cast<float>(this->m_Damage) / 100.0f * 2.0f, 0.0f, 1.0f));
 						int green = 255 - red;
 						if (this->m_Damage > 0) {
 							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, red, green, 0);
-							DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &hit_Graph, static_cast<int>(this->m_Hit_DispPos.XScreenPos()), static_cast<int>(this->m_Hit_DispPos.YScreenPos()), static_cast<float>(static_cast<int>(static_cast<float>(Alpha) / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
+							DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &hit_Graph, static_cast<int>(this->m_Hit_DispPos.XScreenPos()), static_cast<int>(this->m_Hit_DispPos.YScreenPos()), static_cast<float>(static_cast<int>(static_cast<float>(Alpha) / 255.0f * 0.5f * 100.0f)) / 100.0f, 0.0f, true);
 						}
 						if (this->m_ArmerDamage > 0) {
 							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 128, 128, 128);
-							DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &guard_Graph, static_cast<int>(this->m_Hit_DispPos.XScreenPos()), static_cast<int>(this->m_Hit_DispPos.YScreenPos()), static_cast<float>(static_cast<int>(static_cast<float>(Alpha) / 255.f * 0.5f * 100.0f)) / 100.f, 0.f, true);
+							DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &guard_Graph, static_cast<int>(this->m_Hit_DispPos.XScreenPos()), static_cast<int>(this->m_Hit_DispPos.YScreenPos()), static_cast<float>(static_cast<int>(static_cast<float>(Alpha) / 255.0f * 0.5f * 100.0f)) / 100.0f, 0.0f, true);
 						}
 						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 						//
@@ -241,7 +241,7 @@ namespace FPS_n2 {
 		EffectControl								m_EffectControl;
 	public:
 		// 複数エフェクトの再生
-		void		SetOnce_Any(Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.f, float speed = 1.f) noexcept {
+		void		SetOnce_Any(Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.0f, float speed = 1.0f) noexcept {
 			this->m_EffectControl.SetOnce_Any(static_cast<int>(ID), pos_t, nomal_t, scale, speed);
 		}
 		// 単体で制御したいエフェクトの制御
@@ -251,10 +251,10 @@ namespace FPS_n2 {
 		void		SetLoop(Effect ID, const Vector3DX& pos_t) noexcept {
 			this->m_EffectControl.SetLoop(static_cast<int>(ID), pos_t);
 		}
-		void		Update_LoopEffect(Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.f) noexcept {
+		void		Update_LoopEffect(Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.0f) noexcept {
 			this->m_EffectControl.Update_LoopEffect(static_cast<int>(ID), pos_t, nomal_t, scale);
 		}
-		void		SetOnce(Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.f) noexcept {
+		void		SetOnce(Effect ID, const Vector3DX& pos_t, const Vector3DX& nomal_t, float scale = 1.0f) noexcept {
 			this->m_EffectControl.SetOnce(static_cast<int>(ID), pos_t, nomal_t, scale);
 		}
 		void		SetEffectSpeed(Effect ID, float speed) noexcept {

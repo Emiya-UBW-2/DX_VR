@@ -18,7 +18,7 @@ namespace FPS_n2 {
 					if (!chara->IsAlive()) { continue; }
 					if (!chara->GetCanLookByPlayer()) { continue; }
 					int pos = InvalidID;
-					float CosMax = -1.f;
+					float CosMax = -1.0f;
 					for (const auto& hitbox : chara->GetHitBoxList()) {
 						Vector3DX EndPost = hitbox.GetPos();
 						if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(EyePos, &EndPost)) { continue; }
@@ -39,7 +39,7 @@ namespace FPS_n2 {
 						}
 					}
 					if (pos != InvalidID) {
-						this->m_AutoAimTimer = 1.f;
+						this->m_AutoAimTimer = 1.0f;
 						this->m_AutoAim = loop;
 						this->m_AutoAimPoint = pos;
 						break;
@@ -48,8 +48,8 @@ namespace FPS_n2 {
 			}
 
 			auto prev = this->m_AutoAimTimer;
-			this->m_AutoAimTimer = std::max(this->m_AutoAimTimer - DXLib_refParts->GetDeltaTime(), 0.f);
-			if (prev > 0.f && this->m_AutoAimTimer == 0.f) {
+			this->m_AutoAimTimer = std::max(this->m_AutoAimTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
+			if (prev > 0.0f && this->m_AutoAimTimer == 0.0f) {
 				this->m_AutoAim = InvalidID;
 			}
 			if (this->m_AutoAim != InvalidID) {
@@ -59,7 +59,7 @@ namespace FPS_n2 {
 				}
 			}
 			this->m_AutoAimActive = (isActive && this->m_AutoAim != InvalidID);
-			Easing(&this->m_AutoAimPer, this->m_AutoAimActive ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+			Easing(&this->m_AutoAimPer, this->m_AutoAimActive ? 1.0f : 0.0f, 0.9f, EasingType::OutExpo);
 
 			if (this->m_AutoAim != InvalidID) {
 				auto& TargetChara = PlayerMngr->GetPlayer(this->m_AutoAim)->GetChara();

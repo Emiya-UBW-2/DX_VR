@@ -31,7 +31,7 @@ namespace FPS_n2 {
 				return true;
 			}
 			void			DrawCommon(void) const noexcept {
-				if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.f * Scale3DRate * 10.f * Scale3DRate)) { return; }
+				if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.0f * Scale3DRate * 10.0f * Scale3DRate)) { return; }
 				if (IsDrawAllMesh()) {
 					GetObj().DrawModel();
 				}
@@ -98,7 +98,7 @@ namespace FPS_n2 {
 			void			SetHandMatrix(const Matrix4x4DX& Mat) noexcept {
 				SetMove().SetMat(Matrix3x3DX::Get33DX(Mat));
 				SetMove().SetPos(Mat.pos());
-				SetMove().Update(0.f, 0.f);
+				SetMove().Update(0.0f, 0.0f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 			}
 		};

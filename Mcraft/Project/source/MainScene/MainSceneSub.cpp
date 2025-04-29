@@ -188,13 +188,13 @@ namespace FPS_n2 {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				CanLookTarget |= chara->IsAlive() && chara->GetCanLookByPlayer();
 			}
-			Easing(&LookPer, CanLookTarget ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
+			Easing(&LookPer, CanLookTarget ? 1.0f : 0.0f, 0.9f, EasingType::OutExpo);
 			bool IsDrawAimUI = false;
 			if (ViewChara->GetGunPtrNow()) {
 				IsDrawAimUI = ViewChara->GetGunPtrNow()->GetCanShot() && (ViewChara->GetGunPtrNow()->GetGunAnime() != Charas::GunAnimeID::Watch);
 			}
-			Easing(&IsDrawAimUIPer, IsDrawAimUI ? 1.f : 0.f, 0.9f, EasingType::OutExpo);
-			if (IsDrawAimUIPer < 0.1f && !IsDrawAimUI) { IsDrawAimUIPer = 0.f; }
+			Easing(&IsDrawAimUIPer, IsDrawAimUI ? 1.0f : 0.0f, 0.9f, EasingType::OutExpo);
+			if (IsDrawAimUIPer < 0.1f && !IsDrawAimUI) { IsDrawAimUIPer = 0.0f; }
 		}
 		void			MainSceneUI::Draw(void) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
@@ -213,7 +213,7 @@ namespace FPS_n2 {
 					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
 					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 + (240), yp1, White, Black, "%d:%05.2f",
-					static_cast<int>(floatParam[0] / 60.f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
+					static_cast<int>(floatParam[0] / 60.0f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
 
 
 
@@ -232,8 +232,8 @@ namespace FPS_n2 {
 				}
 
 				if (IsDrawAimUIPer > 0.1f && ViewChara->GetGunPtrNow()) {
-					int RetX = ViewChara->GetGunPtrNow()->GetAimXPos() + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.f);
-					int RetY = ViewChara->GetGunPtrNow()->GetAimYPos() + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.f);
+					int RetX = ViewChara->GetGunPtrNow()->GetAimXPos() + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
+					int RetY = ViewChara->GetGunPtrNow()->GetAimYPos() + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.0f);
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, IsDrawAimUIPer));
 					auto fov_t = CameraParts->GetMainCamera().GetCamFov();
 					int Scale = static_cast<int>(1080 * ViewChara->GetGunPtrNow()->GetAutoAimRadian() / fov_t);
@@ -246,14 +246,14 @@ namespace FPS_n2 {
 					int Scale2 = Scale + 4 + Lerp(100, 0, LookPer);
 
 					Vector3DX StartPos = CameraParts->GetMainCamera().GetCamPos();
-					Vector3DX Vec1 = CameraParts->GetMainCamera().GetCamVec() - StartPos; Vec1.y = 0.f; Vec1 = Vec1.normalized();
+					Vector3DX Vec1 = CameraParts->GetMainCamera().GetCamVec() - StartPos; Vec1.y = 0.0f; Vec1 = Vec1.normalized();
 					{
 						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 							if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
 							auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 							if (!chara->IsAlive() || !chara->GetCanLookByPlayer()) { continue; }
-							Vector3DX Vec2 = (chara->GetEyePositionCache() - StartPos); Vec2.y = 0.f; Vec2 = Vec2.normalized();
-							float Angle = DX_PI_F + Vector3DX::Angle(Vec1, Vec2) * (Vector3DX::Cross(Vec1, Vec2).y > 0.f ? 1.f : -1.f);
+							Vector3DX Vec2 = (chara->GetEyePositionCache() - StartPos); Vec2.y = 0.0f; Vec2 = Vec2.normalized();
+							float Angle = DX_PI_F + Vector3DX::Angle(Vec1, Vec2) * (Vector3DX::Cross(Vec1, Vec2).y > 0.0f ? 1.0f : -1.0f);
 
 							xp1 = RetX - static_cast<int>(Scale2 * 1.5f * sin(Angle + deg2rad(5)));
 							yp1 = RetY + static_cast<int>(Scale2 * 1.5f * cos(Angle + deg2rad(5)));
@@ -305,26 +305,26 @@ namespace FPS_n2 {
 				}
 
 				//スタートタイマー
-				if (floatParam[1] > 0.f) {
+				if (floatParam[1] > 0.0f) {
 					xp1 = 1920 / 2;
 					yp1 = (340);
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
 						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, White, Black, "%d:%05.2f",
-						static_cast<int>(floatParam[1] / 60.f), static_cast<float>(static_cast<int>(floatParam[1]) % 60) + (floatParam[1] - static_cast<float>(static_cast<int>(floatParam[1]))));
+						static_cast<int>(floatParam[1] / 60.0f), static_cast<float>(static_cast<int>(floatParam[1]) % 60) + (floatParam[1] - static_cast<float>(static_cast<int>(floatParam[1]))));
 				}
 
 			}
 			//方位磁針
 			{
-				Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec2(); Vec.y = 0.f; Vec = Vec.normalized();
+				Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec2(); Vec.y = 0.0f; Vec = Vec.normalized();
 				float radian = std::atan2f(Vec.x, Vec.z);
 				float degreeBase = rad2deg(radian);
 
 
 				for (int loop = -25; loop <= 25; ++loop) {
 					int degree = (360 + static_cast<int>(degreeBase) + loop) % 360;
-					xp1 = 960 + static_cast<int>((static_cast<int>(degreeBase) - degreeBase + loop) * 10) + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.f);
-					yp1 = 1080 * 2 / 10 + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.f);
+					xp1 = 960 + static_cast<int>((static_cast<int>(degreeBase) - degreeBase + loop) * 10) + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
+					yp1 = 1080 * 2 / 10 + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.0f);
 					if (degree % 90 == 0) {
 						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 - 10, xp1, yp1 + 20, Green, 4);
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),

@@ -26,8 +26,8 @@ namespace FPS_n2 {
 					int Dir = Rand() % 4;
 					ok |= (1 << Dir);
 					float rad = deg2rad(Dir * 90);
-					int next_x = xmaze + static_cast<int>(sin(rad) * 2.f);//0 2 0 -2
-					int next_y = ymaze + static_cast<int>(cos(rad) * 2.f);//2 0 -2 0
+					int next_x = xmaze + static_cast<int>(sin(rad) * 2.0f);//0 2 0 -2
+					int next_y = ymaze + static_cast<int>(cos(rad) * 2.0f);//2 0 -2 0
 					if ((0 <= next_x && next_x < this->m_Width) && (0 <= next_y && next_y < this->m_Height)) {
 						if (this->m_Maze[next_x][next_y] == MAZETYPE::WALL) {
 							this->m_Maze[static_cast<size_t>((next_x + xmaze) / 2)][static_cast<size_t>((next_y + ymaze) / 2)] = MAZETYPE::PATH;
@@ -163,7 +163,7 @@ namespace FPS_n2 {
 						getLerp(u, getGrad(this->perlinNoise[a2 + 1], x_, y_ - 1, z_ - 1), getGrad(this->perlinNoise[b2 + 1], x_ - 1, y_ - 1, z_ - 1))));
 			}
 			float setOctaveNoise(const std::size_t octaves_, float x_ = 0.0f, float y_ = 0.0f, float z_ = 0.0f) const noexcept {
-				float noise_value = 0.f;
+				float noise_value = 0.0f;
 				float amp = 1.0f;
 				for (std::size_t loop = 0; loop < octaves_; ++loop) {
 					noise_value += setNoise(x_, y_, z_) * amp;
@@ -212,8 +212,8 @@ namespace FPS_n2 {
 				zscale = (zmax - zmin + 1) * cellx.ScaleRate;
 				Xofs = (center.z + zmin) % 2 == 0;
 				Yofs = ((cellx.GetCellBuf(center.x + xpos, center.y + ypos, center.z + zmin).GetCell() - 1) * 3) + 1;
-				uAdd = 1.f / 2.f;
-				vAdd = 1.f / 16.f;
+				uAdd = 1.0f / 2.0f;
+				vAdd = 1.0f / 16.0f;
 			}
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
@@ -273,8 +273,8 @@ namespace FPS_n2 {
 				zscale = (zmax - zmin + 1) * cellx.ScaleRate;
 				Xofs = (center.z + zmin) % 2 == 0;
 				Yofs = ((cellx.GetCellBuf(center.x + xpos, center.y + ypos, center.z + zmin).GetCell() - 1) * 3) + 1;
-				uAdd = 1.f / 2.f;
-				vAdd = 1.f / 16.f;
+				uAdd = 1.0f / 2.0f;
+				vAdd = 1.0f / 16.0f;
 			}
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
@@ -334,8 +334,8 @@ namespace FPS_n2 {
 				zscale = (zmax - zmin + 1) * cellx.ScaleRate;
 				Xofs = (center.z + zmin) % 2 == 0;
 				Yofs = ((cellx.GetCellBuf(center.x + xpos, center.y + ypos, center.z + zmin).GetCell() - 1) * 3) + 0;
-				uAdd = 1.f / 2.f;
-				vAdd = 1.f / 16.f;
+				uAdd = 1.0f / 2.0f;
+				vAdd = 1.0f / 16.0f;
 			}
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
@@ -395,8 +395,8 @@ namespace FPS_n2 {
 				zscale = (zmax - zmin + 1) * cellx.ScaleRate;
 				Xofs = (center.z + zmin) % 2 == 0;
 				Yofs = ((cellx.GetCellBuf(center.x + xpos, center.y + ypos, center.z + zmin).GetCell() - 1) * 3) + 2;
-				uAdd = 1.f / 2.f;
-				vAdd = 1.f / 16.f;
+				uAdd = 1.0f / 2.0f;
+				vAdd = 1.0f / 16.0f;
 			}
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
@@ -456,8 +456,8 @@ namespace FPS_n2 {
 				xscale = (xmax - xmin + 1) * cellx.ScaleRate;
 				Xofs = (center.x + xmax) % 2 == 0;
 				Yofs = ((cellx.GetCellBuf(center.x + xmin, center.y + ypos, center.z + zpos).GetCell() - 1) * 3) + 1;
-				uAdd = 1.f / 2.f;
-				vAdd = 1.f / 16.f;
+				uAdd = 1.0f / 2.0f;
+				vAdd = 1.0f / 16.0f;
 			}
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
@@ -517,8 +517,8 @@ namespace FPS_n2 {
 				xscale = (xmax - xmin + 1) * cellx.ScaleRate;
 				Xofs = (center.x + xmax) % 2 == 0;
 				Yofs = ((cellx.GetCellBuf(center.x + xmin, center.y + ypos, center.z + zpos).GetCell() - 1) * 3) + 1;
-				uAdd = 1.f / 2.f;
-				vAdd = 1.f / 16.f;
+				uAdd = 1.0f / 2.0f;
+				vAdd = 1.0f / 16.0f;
 			}
 			auto ZERO = pTarget->GetInNum() * 4 - 4;
 			{
@@ -584,10 +584,10 @@ namespace FPS_n2 {
 				float CamZZ = Draws.CamVec.z * (static_cast<float>(zpos) + 0.5f);
 				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
 				if (
-					((CamXMinX + CamYMinY + CamZZ) <= 0.f) &&//Dot
-					((CamXMaxX + CamYMaxY + CamZZ) <= 0.f) &&//Dot
-					((CamXMaxX + CamYMinY + CamZZ) <= 0.f) &&//Dot
-					((CamXMinX + CamYMaxY + CamZZ) <= 0.f)//Dot
+					((CamXMinX + CamYMinY + CamZZ) <= 0.0f) &&//Dot
+					((CamXMaxX + CamYMaxY + CamZZ) <= 0.0f) &&//Dot
+					((CamXMaxX + CamYMinY + CamZZ) <= 0.0f) &&//Dot
+					((CamXMinX + CamYMaxY + CamZZ) <= 0.0f)//Dot
 					) { continue; }
 
 				bool CheckFillZ = cellx.isFarCells() && ((DrawMinZMinus <= zpos) && (zpos <= DrawMinZPlus));
@@ -602,13 +602,13 @@ namespace FPS_n2 {
 					{
 						float dTa = (CamXMinX + CamYY + CamZZ);//Dot
 						float dTb = (CamXMaxX + CamYY + CamZZ);//Dot
-						bool OnFront = (dTa >= 0.f && dTb >= 0.f);
-						bool Onbehind = (dTa < 0.f && dTb < 0.f);
+						bool OnFront = (dTa >= 0.0f && dTb >= 0.0f);
+						bool Onbehind = (dTa < 0.0f && dTb < 0.0f);
 						if (Onbehind && !OnFront) {
 							continue;
 						}
 						if (!OnFront && !Onbehind) {
-							if (dTa < 0.f) {
+							if (dTa < 0.0f) {
 								xMaxminT = std::max(DrawMaxXMinus + static_cast<int>((DrawMaxXPlus - DrawMaxXMinus) * (dTa / (dTa - dTb))) - 1, DrawMaxXMinus);
 							}
 							else {
@@ -627,10 +627,10 @@ namespace FPS_n2 {
 				float CamXX = Draws.CamVec.x * (static_cast<float>(xpos) + 0.5f);
 				//矩形がカメラの平面寄り裏にある場合(4点がすべて裏にある場合)はスキップ
 				if (
-					((CamXX + CamYMinY + CamZMinZ) <= 0.f) &&//Dot
-					((CamXX + CamYMaxY + CamZMaxZ) <= 0.f) &&//Dot
-					((CamXX + CamYMinY + CamZMaxZ) <= 0.f) &&//Dot
-					((CamXX + CamYMaxY + CamZMinZ) <= 0.f)//Dot
+					((CamXX + CamYMinY + CamZMinZ) <= 0.0f) &&//Dot
+					((CamXX + CamYMaxY + CamZMaxZ) <= 0.0f) &&//Dot
+					((CamXX + CamYMinY + CamZMaxZ) <= 0.0f) &&//Dot
+					((CamXX + CamYMaxY + CamZMinZ) <= 0.0f)//Dot
 					) {
 					continue;
 				}
@@ -647,13 +647,13 @@ namespace FPS_n2 {
 					{
 						float dTa = (CamXX + CamYY + CamZMinZ);//Dot
 						float dTb = (CamXX + CamYY + CamZMaxZ);//Dot
-						bool OnFront = (dTa >= 0.f && dTb >= 0.f);
-						bool Onbehind = (dTa < 0.f && dTb < 0.f);
+						bool OnFront = (dTa >= 0.0f && dTb >= 0.0f);
+						bool Onbehind = (dTa < 0.0f && dTb < 0.0f);
 						if (Onbehind && !OnFront) {
 							continue;
 						}
 						if (!OnFront && !Onbehind) {
-							if (dTa < 0.f) {
+							if (dTa < 0.0f) {
 								zMaxminT = std::max(DrawMaxZMinus + static_cast<int>((DrawMaxZPlus - DrawMaxZMinus) * (dTa / (dTa - dTb))) - 1, DrawMaxZMinus);
 							}
 							else {
@@ -706,7 +706,7 @@ namespace FPS_n2 {
 			auto& Draws = this->m_Draws[shadow];
 			Draws.Vert32.FlipVerts();
 			//Draws.CamPos =  Camera3D::Instance()->GetMainCamera().GetCamPos();
-			Draws.CamPos = Vector3DX::vget(0.f, -25.f, 0.f) * Scale3DRate;
+			Draws.CamPos = Vector3DX::vget(0.0f, -25.0f, 0.0f) * Scale3DRate;
 			Draws.CamVec = PostPassParts->GetShadowDir();
 			SceneParts->SetIsUpdateFarShadowActive();
 		}
@@ -1033,12 +1033,12 @@ namespace FPS_n2 {
 		//
 		void		BackGroundControl::Init(void) noexcept {
 			//空
-			this->m_ObjSky.SetScale(Vector3DX::vget(10.f, 10.f, 10.f));
+			this->m_ObjSky.SetScale(Vector3DX::vget(10.0f, 10.0f, 10.0f));
 			this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
 			for (int loop = 0, num = this->m_ObjSky.GetMaterialNum(); loop < num; ++loop) {
-				//this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.5f, 0.5f, 0.5f, 1.f));
-				this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.7f, 0.7f, 0.7f, 1.f));
-				this->m_ObjSky.SetMaterialAmbColor(loop, GetColorF(0.f, 0.f, 0.f, 1.f));
+				//this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.5f, 0.5f, 0.5f, 1.0f));
+				this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.7f, 0.7f, 0.7f, 1.0f));
+				this->m_ObjSky.SetMaterialAmbColor(loop, GetColorF(0.0f, 0.0f, 0.0f, 1.0f));
 			}
 			if (true) {
 				//空っぽ
@@ -1248,7 +1248,7 @@ namespace FPS_n2 {
 			Param.Ambient = GetColorF(0.5f, 0.5f, 0.5f, 1.0f);						// アンビエントカラー
 			Param.Specular = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// スペキュラカラー
 			Param.Emissive = GetColorF(0.0f, 0.0f, 0.0f, 0.0f);						// エミッシブカラー
-			Param.Power = 500.f;													// スペキュラハイライトの鮮明度
+			Param.Power = 500.0f;													// スペキュラハイライトの鮮明度
 			SetMaterialParam(Param);
 			//
 			constexpr size_t size = (DrawMaxXPlus - DrawMaxXMinus) * (DrawMaxYPlus - DrawMaxYMinus) * (DrawMaxZPlus - DrawMaxZMinus) / 2 * 3 / 100;

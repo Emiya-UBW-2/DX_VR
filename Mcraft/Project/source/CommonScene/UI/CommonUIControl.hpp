@@ -28,7 +28,7 @@ namespace FPS_n2 {
 				FontSystem::FontXCenter	m_LMR{ FontSystem::FontXCenter::LEFT };
 				FontSystem::FontYCenter	m_TMB{ FontSystem::FontYCenter::TOP };
 
-				float			m_SelectYadd{0.f};
+				float			m_SelectYadd{0.0f};
 
 				ButtonStatus	m_ButtonStatus{ButtonStatus::Ready};
 				ButtonMode		m_ButtonMode{ButtonMode::String};
@@ -55,7 +55,7 @@ namespace FPS_n2 {
 					this->m_yp1 = yp;
 					this->m_LMR = FontX;
 					this->m_TMB = FontY;
-					this->m_SelectYadd = 0.f;
+					this->m_SelectYadd = 0.0f;
 					this->m_ButtonStatus = ButtonStatus::Ready;
 				}
 				void			Load_Icon(const char* IconPath, bool IsEnableSelect) noexcept {
@@ -72,7 +72,7 @@ namespace FPS_n2 {
 					this->m_EnableSelect = IsEnableSelect;
 				}
 				void			Update(void) noexcept {
-					Easing(&this->m_SelectYadd, 0.f, 0.93f, EasingType::OutExpo);
+					Easing(&this->m_SelectYadd, 0.0f, 0.93f, EasingType::OutExpo);
 				}
 				void			Dispose(void) noexcept {
 					this->m_Icon.Dispose();
@@ -82,7 +82,7 @@ namespace FPS_n2 {
 				void			SetNone(void) noexcept { this->m_ButtonStatus = ButtonStatus::None; }
 				void			SetReady(void) noexcept { this->m_ButtonStatus = ButtonStatus::Ready; }
 				void			SetFocus(void) noexcept {
-					this->m_SelectYadd = 10.f;
+					this->m_SelectYadd = 10.0f;
 					this->m_ButtonStatus = ButtonStatus::Focus;
 				}
 			public:
@@ -122,7 +122,7 @@ namespace FPS_n2 {
 					switch (this->m_ButtonMode) {
 						case ButtonMode::String:
 							{
-								if (this->m_SelectYadd > 0.f) {
+								if (this->m_SelectYadd > 0.0f) {
 									int xp = this->m_xp1;
 									int yp = this->m_yp1;
 									switch (this->m_LMR) {
@@ -152,9 +152,9 @@ namespace FPS_n2 {
 											break;
 									}
 
-									float per = std::clamp(this->m_SelectYadd / 5.f, 0.f, 1.f);
-									float per2 = 1.f - std::clamp(this->m_SelectYadd / 10.f, 0.f, 1.f);
-									DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(128.f * per), 0, 255));
+									float per = std::clamp(this->m_SelectYadd / 5.0f, 0.0f, 1.0f);
+									float per2 = 1.0f - std::clamp(this->m_SelectYadd / 10.0f, 0.0f, 1.0f);
+									DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(128.0f * per), 0, 255));
 									DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, 
 										this->m_SelectBackImage,
 										xp + this->m_xsize / 2 - static_cast<int>(static_cast<float>(this->m_xsize / 2 + (300)) * per2), yp + this->m_ysize - (12) - static_cast<int>(static_cast<float>(this->m_ysize / 6) * per),
@@ -208,10 +208,10 @@ namespace FPS_n2 {
 							break;
 						case ButtonMode::Icon:
 							{
-								if (this->m_SelectYadd > 0.f) {
-									float per1 = std::clamp(this->m_SelectYadd / 5.f, 0.f, 1.f);
-									float per2 = 1.f - std::clamp(this->m_SelectYadd / 10.f, 0.f, 1.f);
-									DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(128.f * per1), 0, 255));
+								if (this->m_SelectYadd > 0.0f) {
+									float per1 = std::clamp(this->m_SelectYadd / 5.0f, 0.0f, 1.0f);
+									float per2 = 1.0f - std::clamp(this->m_SelectYadd / 10.0f, 0.0f, 1.0f);
+									DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, std::clamp(static_cast<int>(128.0f * per1), 0, 255));
 									DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
 										this->m_SelectBackImage,
 										this->m_xp1 - static_cast<int>(static_cast<float>(this->m_xsize) * per2), this->m_yp1 - static_cast<int>(static_cast<float>(this->m_ysize) * per2),
@@ -234,7 +234,7 @@ namespace FPS_n2 {
 								}
 								DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
 									&this->m_Icon,
-									this->m_xp1, this->m_yp1, static_cast<float>((100)) / 100.f * (1.f + this->m_SelectYadd / 50.f), 0.f, true);
+									this->m_xp1, this->m_yp1, static_cast<float>((100)) / 100.0f * (1.0f + this->m_SelectYadd / 50.0f), 0.0f, true);
 								DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 							}
 							break;
