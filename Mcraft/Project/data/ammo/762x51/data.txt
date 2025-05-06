@@ -1,0 +1,8 @@
+Name=7.62x51
+ammo_cal(mm)=7.62
+ammo_speed(m/s)=900
+ammo_pene(mm)=30
+ammo_damage=175
+FallSound=0
+Pellets=1
+Accuracy=0.1

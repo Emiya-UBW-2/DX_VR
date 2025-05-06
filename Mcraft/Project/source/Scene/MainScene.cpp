@@ -87,11 +87,14 @@ namespace FPS_n2 {
 #else
 					//*
 					int Rand = GetRand(100);
-					if (Rand < 30) {
+					if (Rand < 25) {
 						chara->LoadCharaGun("type89", 0);
 					}
-					else if (Rand < 30 + 40) {
+					else if (Rand < 25 + 25) {
 						chara->LoadCharaGun("type20E", 0);
+					}
+					else if (Rand < 25 + 25 + 25) {
+						chara->LoadCharaGun("M700", 0);
 					}
 					else {
 						chara->LoadCharaGun("Mod870", 0);

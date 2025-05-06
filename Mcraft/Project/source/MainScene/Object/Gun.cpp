@@ -347,11 +347,9 @@ namespace FPS_n2 {
 							this->m_IsChamberOn = false;
 						}
 						float Per = 35.0f / 60.0f;
-						if (GetShotType() == SHOTTYPE::PUMP) {
-							this->m_MagHand = true;
-							if (Per <= GetNowAnimTimePerCache()) {
-								this->m_MagHand = false;
-							}
+						this->m_MagHand = true;
+						if (Per <= GetNowAnimTimePerCache()) {
+							this->m_MagHand = false;
 						}
 					}
 					else {
@@ -665,7 +663,7 @@ namespace FPS_n2 {
 								SetObj().SetAnim(ID).SetPer(std::max(GetObj().GetAnim(ID).GetPer(), std::clamp(GetNowAnimTimePerCache() / Per, 0.0f, 1.0f)));
 							}
 							else {
-								if (GetShotType() == SHOTTYPE::PUMP) {
+								if (GetShotType() == SHOTTYPE::BOLT || GetShotType() == SHOTTYPE::PUMP) {
 									if (GetAmmoNumTotal() == 0) {
 										SetObj().SetAnim(ID).SetPer(1.0f);
 									}
