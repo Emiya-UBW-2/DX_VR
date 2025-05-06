@@ -22,4 +22,6 @@ Slot0Item=M700Mag
 
 Open=0
 
+zoom=6.0
+
 end

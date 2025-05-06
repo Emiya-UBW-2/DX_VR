@@ -594,6 +594,10 @@ namespace FPS_n2 {
 			SetMinAABB(Vector3DX::vget(-0.5f, -0.5f, -0.5f) * Scale3DRate);
 			SetMaxAABB(Vector3DX::vget(0.5f, 0.5f, 0.5f) * Scale3DRate);
 			InitGunAnimePer();
+			this->m_IsMeshDraw.resize(GetObj().GetMeshNum());
+			for (auto& isdraw : this->m_IsMeshDraw) {
+				isdraw = true;
+			}
 		}
 		void				GunObj::FirstUpdate(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();
@@ -711,10 +715,20 @@ namespace FPS_n2 {
 			//グレネード演算
 			UpdateGrenade();
 			//
-			if (this->m_SightPtr && GetSightZoomSize() > 1.0f) {
-				float Per = 1.0f - std::clamp(GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.0f, 1.0f);
-				if (Per < 1.0f) {
-					(*this->m_SightPtr)->SetScopeAlpha(Per);
+			if (this->m_SightPtr) {
+				if (GetSightZoomSize() > 1.0f) {
+					float Per = 1.0f - std::clamp(GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.0f, 1.0f);
+					if (Per < 1.0f) {
+						(*this->m_SightPtr)->SetScopeAlpha(Per);
+					}
+				}
+			}
+			else {
+				if (GetSightZoomSize() > 1.0f) {
+					float Per = 1.0f - std::clamp(GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.0f, 1.0f);
+					if (Per < 1.0f) {
+						SetScopeAlpha(Per);
+					}
 				}
 			}
 		}
@@ -767,7 +781,21 @@ namespace FPS_n2 {
 			if (isDrawSemiTrans && GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
 				this->m_MuzzleSmokeControl.DrawMuzzleSmoke(this->m_MuzzleSmokeSize);
 			}
-			BaseObject::Draw(isDrawSemiTrans, Range);
+
+			if (!isDrawSemiTrans) {
+				if (IsDrawAllMesh()) {
+					GetObj().DrawModel();
+				}
+				else {
+					for (auto& isdraw : this->m_IsMeshDraw) {
+						if (isdraw == TRUE) {
+							int index = static_cast<int>(&isdraw - &this->m_IsMeshDraw.front());
+							GetObj().DrawMesh(index);
+						}
+					}
+				}
+			}
+
 			if (isDrawSemiTrans && GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
 				if (GetGunAnime() == Charas::GunAnimeID::ThrowReady) {
 					SetUseLighting(false);
@@ -801,6 +829,7 @@ namespace FPS_n2 {
 			}
 		}
 		void GunObj::Dispose_Sub(void) noexcept {
+			this->m_IsMeshDraw.clear();
 			this->m_GunsModify.reset();
 			this->m_ModifySlot.reset();
 			this->m_MagFall.Dispose();

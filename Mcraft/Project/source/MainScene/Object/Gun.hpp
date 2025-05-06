@@ -72,6 +72,24 @@ namespace FPS_n2 {
 			Vector3DX											m_SlingPos{};
 			bool												m_ReleasePin{ false };
 			Matrix4x4DX											m_BaseMuzzle{};
+
+			std::vector<int>													m_IsMeshDraw{};
+		public:
+			void						SetIsDrawMesh(int meshID, bool IsDraw) noexcept {
+				this->m_IsMeshDraw[meshID] = IsDraw ? TRUE : FALSE;
+			}
+			bool			IsDrawAllMesh(void) const noexcept {
+				for (auto& isdraw : this->m_IsMeshDraw) {
+					if (isdraw != TRUE) {
+						return false;
+					}
+				}
+				return true;
+			}
+			void SetScopeAlpha(float Per) noexcept {
+				SetObj().SetMaterialOpacityRate(1, Per);
+				SetIsDrawMesh(1, Per > 0.2f);
+			}
 		private:
 			Charas::GunAnimNow									m_AnimNowCache{};
 		private:
@@ -211,7 +229,7 @@ namespace FPS_n2 {
 			const auto			GetCanShot(void) const noexcept { return GetGunAnimBlendPer(Charas::GunAnimeID::LowReady) <= 0.1f && GetGunAnimBlendPer(Charas::GunAnimeID::HighReady) <= 0.1f; }
 			const auto			IsCanShot(void) const noexcept { return GetGunAnime() == Charas::GunAnimeID::Base || GetGunAnime() == Charas::GunAnimeID::Shot; }
 			const auto			GetCanADS(void) const noexcept { return IsCanShot() && GetCanShot() && GetModifySlot()->GetMyData()->GetCanADS(); }
-			const auto			GetSightZoomSize(void) const noexcept { return this->m_SightPtr ? (*this->m_SightPtr)->GetModifySlot()->GetMyData()->GetSightZoomSize() : 1.0f; }
+			const auto			GetSightZoomSize(void) const noexcept { return this->m_SightPtr ? (*this->m_SightPtr)->GetModifySlot()->GetMyData()->GetSightZoomSize() : GetModifySlot()->GetMyData()->GetSightZoomSize(); }
 			const auto			GetAmmoAll(void) const noexcept { return this->m_MagazinePtr ? (*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoAll() : 0; }
 			const auto			GetReloadType(void) const noexcept { return GetModifySlot()->GetMyData()->GetReloadType(); }
 			const auto			GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd * (60.0f * DXLib_ref::Instance()->GetDeltaTime()); }
@@ -283,9 +301,16 @@ namespace FPS_n2 {
 			void				SetMagazinePoachMat(const Matrix4x4DX& MagPoachMat) noexcept { this->m_MagazinePoachMat = MagPoachMat; }
 			void				SetGrenadeThrowRot(const Matrix3x3DX& Rot) noexcept { this->m_GrenadeThrowRot = Rot; }
 			void				DrawReticle(float Rad) const noexcept {
-				if (GetCanShot() && this->m_Reticle_on && this->m_SightPtr && ((GetGunAnimBlendPer(Charas::GunAnimeID::ADS) >= 0.8f) || (GetSightZoomSize() == 1.0f))) {
+				if (GetCanShot() && this->m_Reticle_on && ((GetGunAnimBlendPer(Charas::GunAnimeID::ADS) >= 0.8f) || (GetSightZoomSize() == 1.0f))) {
+					const GraphHandle* Ptr = nullptr;
+					if (this->m_SightPtr && (*this->m_SightPtr)->GetModifySlot()->GetMyData()->GetReitcleGraph().IsActive()) {
+						Ptr = &(*this->m_SightPtr)->GetModifySlot()->GetMyData()->GetReitcleGraph();
+					}
+					else if (GetModifySlot()->GetMyData()->GetReitcleGraph().IsActive()) {
+						Ptr = &GetModifySlot()->GetMyData()->GetReitcleGraph();
+					}
 					auto* DrawCtrls = WindowSystem::DrawControl::Instance();
-					DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &(*this->m_SightPtr)->GetModifySlot()->GetMyData()->GetReitcleGraph(),
+					DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, Ptr,
 						this->m_Reticle.XScreenPos(), this->m_Reticle.YScreenPos(), 1.0f, Rad, true);
 				}
 			}
