@@ -173,6 +173,12 @@ namespace FPS_n2 {
 				Vector3DX Handzvec = GetPartsFrameMatParent(GunFrame::LeftHandZvecCock).pos() - HandPos;
 				return Matrix4x4DX::Axis1(Handyvec.normalized(), Handzvec.normalized(), HandPos);
 			}
+			const auto			GetCockRightHandMat(void) const noexcept {
+				Vector3DX HandPos = GetPartsFrameMatParent(GunFrame::RightHandPosCock).pos();
+				Vector3DX Handyvec = GetPartsFrameMatParent(GunFrame::RightHandYvecCock).pos() - HandPos;
+				Vector3DX Handzvec = GetPartsFrameMatParent(GunFrame::RightHandZvecCock).pos() - HandPos;
+				return Matrix4x4DX::Axis1(Handyvec.normalized(), Handzvec.normalized(), HandPos);
+			}
 		public://ゲッター
 			const std::unique_ptr<ModifySlot>& GetModifySlot(void) const noexcept { return this->m_ModifySlot; }
 			const Charas::GunAnimeID&	GetGunAnime(void) const noexcept { return this->m_GunAnime; }
@@ -234,13 +240,30 @@ namespace FPS_n2 {
 			const auto			GetReloadType(void) const noexcept { return GetModifySlot()->GetMyData()->GetReloadType(); }
 			const auto			GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd * (60.0f * DXLib_ref::Instance()->GetDeltaTime()); }
 			const auto			GetReloading(void) const noexcept { return (Charas::GunAnimeID::ReloadStart_Empty <= GetGunAnime()) && (GetGunAnime() <= Charas::GunAnimeID::ReloadEnd); }
-			const auto			GetRightHandMat(void) const noexcept {
+			const auto			GetBaseRightHandMat(void) const noexcept {
 				Vector3DX GunPos = GetPartsFrameMatParent(GunFrame::RightHandPos).pos();
 				Vector3DX Gunyvec = GetPartsFrameMatParent(GunFrame::RightHandYvec).pos() - GunPos;
 				Vector3DX Gunzvec = GetPartsFrameMatParent(GunFrame::RightHandZvec).pos() - GunPos;
 				return Matrix4x4DX::Axis1(Gunyvec.normalized(), Gunzvec.normalized(), GunPos);
 			}
-			const auto			GetLeftHandMat(void) const noexcept { return Lerp(Lerp(GetBaseLeftHandMat(), GetMagHandMat(), this->m_MagArm.Per()), GetCockLeftHandMat(), this->m_CockArm.Per()); }
+			const auto			GetRightHandMat(void) const noexcept {
+				auto Mat = GetBaseRightHandMat();
+				if (HaveFrame(static_cast<int>(GunFrame::RightHandPosCock))) {
+					return Lerp(Mat, GetCockRightHandMat(), this->m_CockArm.Per());
+				}
+				else {
+					return Mat;
+				}
+			}
+			const auto			GetLeftHandMat(void) const noexcept {
+				auto Mat = Lerp(GetBaseLeftHandMat(), GetMagHandMat(), this->m_MagArm.Per());
+				if (HaveFrame(static_cast<int>(GunFrame::LeftHandPosCock))) {
+					return Lerp(Mat, GetCockLeftHandMat(), this->m_CockArm.Per());
+				}
+				else {
+					return Mat;
+				}
+			}
 			const auto			GetAmmoNumTotal(void) const noexcept { return this->m_Capacity + (IsInChamber() ? 1 : 0); }
 			const auto			GetNowGunAnimePer(void) const noexcept {
 				if (GetGunAnime() >= Charas::GunAnimeID::Max) {
