@@ -592,6 +592,25 @@ namespace FPS_n2 {
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 			},
+			//M870
+			{
+				EnumGunAnim::AK_highready,
+				EnumGunAnim::M870_ready,
+				EnumGunAnim::M870_ads,
+				EnumGunAnim::M870_cocking,
+				EnumGunAnim::M870_reloadstart,
+				EnumGunAnim::M870_reloadstart,
+				EnumGunAnim::M870_raloadwait,
+				EnumGunAnim::M870_raload,
+				EnumGunAnim::M870_reloadend,
+				EnumGunAnim::M870_watch,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
+				EnumGunAnim::M870_aim,
+				EnumGunAnim::M870_shot,
+				EnumGunAnim::Max,
+				EnumGunAnim::Max,
+			},
 		};
 	}
 }

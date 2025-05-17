@@ -12,7 +12,7 @@ ShotRate=300
 RecoilPower=300
 RecoilReturn=0.95
 shottype=BOLT
-usehumanAnim=2
+usehumanAnim=5
 soundsel=2
 reloadType=AMMO
 
