@@ -85,7 +85,7 @@ namespace FPS_n2 {
 #if DEBUG_NET
 					chara->LoadCharaGun("type20E", 0);
 #else
-					/*
+					//*
 					int Rand = GetRand(100);
 					if (Rand < 25) {
 						chara->LoadCharaGun("type89", 0);
@@ -100,7 +100,7 @@ namespace FPS_n2 {
 						chara->LoadCharaGun("Mod870", 0);
 					}
 					//*/
-					chara->LoadCharaGun("M700", 0);
+					//chara->LoadCharaGun("M700", 0);
 #endif
 					chara->LoadCharaGun("P226", 1);
 					chara->LoadCharaGun("RGD5", 2);
