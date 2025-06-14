@@ -1,4 +1,4 @@
-Name=M700Mag 5Round
+Name=M700 5Round Magazine
 
 capacity=5
 useammo0=762x51

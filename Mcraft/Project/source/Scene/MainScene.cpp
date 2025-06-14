@@ -447,7 +447,7 @@ namespace FPS_n2 {
 						fovTarget /= std::max(1.0f, ViewChara->GetGunPtrNow()->GetSightZoomSize() / 2.0f);
 					}
 					if (ViewChara->GetGunPtrNow() && ViewChara->GetGunPtrNow()->GetShotSwitch()) {
-						fovTarget -= deg2rad(5);
+						fovTarget -= deg2rad(8) * ViewChara->GetGunPtrNow()->GetRecoilRandViewScale();
 						Easing(&fovBuf, fovTarget, 0.5f, EasingType::OutExpo);
 					}
 					else {

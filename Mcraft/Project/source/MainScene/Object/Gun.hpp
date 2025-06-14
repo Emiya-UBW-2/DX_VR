@@ -66,6 +66,7 @@ namespace FPS_n2 {
 			Vector3DX											m_UpperPrevRad, m_UpperRad;
 			Matrix3x3DX											m_GunSwingMat, m_GunSwingMat2;
 			Vector2DX											m_RecoilRadAdd;
+			int													m_RecoilCount{ 0 };
 			float												m_SwitchPer{};
 			float												m_SlingPer{};
 			Matrix3x3DX											m_SlingRot{};
@@ -111,18 +112,6 @@ namespace FPS_n2 {
 				}
 
 				return Charas::GunAnimeSets[HumanAnimType].Anim[static_cast<int>(AnimID)];
-			}
-			const auto&			GetRecoilReturn(void) const noexcept {
-				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetIsRecoilReturn()) {
-					return (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetRecoilReturn();
-				}
-				return GetModifySlot()->GetMyData()->GetRecoilReturn();
-			}
-			const auto			GetRecoilPower(void) const noexcept {
-				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetIsRecoilPower()) {
-					return (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetRecoilPower();
-				}
-				return GetModifySlot()->GetMyData()->GetRecoilPower() + this->m_Recoil_Diff;
 			}
 			const auto&			IsInChamber(void) const noexcept { return this->m_InChamber; }
 			void				ChamberIn(void) noexcept {
@@ -238,7 +227,62 @@ namespace FPS_n2 {
 			const auto			GetSightZoomSize(void) const noexcept { return this->m_SightPtr ? (*this->m_SightPtr)->GetModifySlot()->GetMyData()->GetSightZoomSize() : GetModifySlot()->GetMyData()->GetSightZoomSize(); }
 			const auto			GetAmmoAll(void) const noexcept { return this->m_MagazinePtr ? (*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoAll() : 0; }
 			const auto			GetReloadType(void) const noexcept { return GetModifySlot()->GetMyData()->GetReloadType(); }
+
+
+			const auto			GetRecoilPower(void) const noexcept {
+				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetIsRecoilPower()) {
+					return (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetRecoilPower();
+				}
+				return GetModifySlot()->GetMyData()->GetRecoilPower() + this->m_Recoil_Diff;
+			}
+			const auto&			GetRecoilReturn(void) const noexcept {
+				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetIsRecoilReturn()) {
+					return (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetRecoilReturn();
+				}
+				return GetModifySlot()->GetMyData()->GetRecoilReturn();
+			}
+			const auto& GetRecoilScaleRate(void) const noexcept {
+				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetIsRecoilScaleRate()) {
+					return (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetRecoilScaleRate();
+				}
+				return GetModifySlot()->GetMyData()->GetRecoilScaleRate();
+			}
+
 			const auto			GetRecoilRadAdd(void) const noexcept { return this->m_RecoilRadAdd * (60.0f * DXLib_ref::Instance()->GetDeltaTime()); }
+			const auto			GetRecoilRandScale(void) const noexcept {
+				float RandScale = 1.f;
+				for (int scale = 0; scale < 3; ++scale) {
+					if (this->m_RecoilCount > GetRecoilScaleRate() * (scale + 2 - 1)) {
+						RandScale = static_cast<float>(scale + 2) * 2.f;
+					}
+					else {
+						break;
+					}
+				}
+				return RandScale;
+			}
+
+			const auto			GetRecoilRandViewScale(void) const noexcept {
+				return (1.f + (GetRecoilRandScale() - 1.f) * 0.075f);
+			}
+			void				AddRecoil(void) noexcept {
+				float Power = 0.0001f * GetRecoilPower();
+				this->m_RecoilRadAdd.Set(GetRandf(Power / 4.0f * GetRecoilRandScale()), -Power);
+				++this->m_RecoilCount;
+			}
+			void				CalcRecoil(void) noexcept {
+				if (this->m_RecoilRadAdd.y < 0.0f) {
+					Easing(&this->m_RecoilRadAdd, Vector2DX::vget(0.0f, 0.01f), GetRecoilReturn(), EasingType::OutExpo);
+				}
+				else {
+					if (std::abs(this->m_RecoilRadAdd.y) < 0.000001f) {
+						this->m_RecoilCount = 0;
+					}
+					Easing(&this->m_RecoilRadAdd, Vector2DX::vget(0.0f, 0.0f), 0.7f, EasingType::OutExpo);
+				}
+			}
+
+
 			const auto			GetReloading(void) const noexcept { return (Charas::GunAnimeID::ReloadStart_Empty <= GetGunAnime()) && (GetGunAnime() <= Charas::GunAnimeID::ReloadEnd); }
 			const auto			GetBaseRightHandMat(void) const noexcept {
 				Vector3DX GunPos = GetPartsFrameMatParent(GunFrame::RightHandPos).pos();

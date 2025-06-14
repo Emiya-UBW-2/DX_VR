@@ -102,11 +102,10 @@ namespace FPS_n2 {
 				this->m_AmmoInChamberObj->SetActive(true);
 			}
 			//リコイル
-			float Power = 0.0001f * GetRecoilPower();
-			this->m_RecoilRadAdd.Set(GetRandf(Power / 4.0f), -Power);
+			AddRecoil();
 			//ビジュアルリコイル
 			if (GetMyUserPlayerID() == PlayerMngr->GetWatchPlayerID()) {
-				Camera3D::Instance()->SetCamShake(0.1f, 0.1f);
+				Camera3D::Instance()->SetCamShake(0.1f, 0.1f* GetRecoilRandViewScale());
 			}
 		}
 		//
@@ -706,12 +705,7 @@ namespace FPS_n2 {
 			this->m_CockArm.Update(this->m_CockHand, 0.0f, 0.1f, 0.7f, 0.7f);
 			SetObj().UpdateAnimAll();
 			//リコイルの演算
-			if (this->m_RecoilRadAdd.y < 0.0f) {
-				Easing(&this->m_RecoilRadAdd, Vector2DX::vget(0.0f, 0.01f), GetRecoilReturn(), EasingType::OutExpo);
-			}
-			else {
-				Easing(&this->m_RecoilRadAdd, Vector2DX::zero(), 0.7f, EasingType::OutExpo);
-			}
+			CalcRecoil();
 			//グレネード演算
 			UpdateGrenade();
 			//

@@ -1,16 +1,17 @@
-Name=700 Shotgun
+Name=M700 Varmint rifle
 
-Info=散弾を用いるポンプアクションショットガン。
-Info=銃身の絞りをなくし、広範囲にばらまくように調整されている。
-Info=途中での装弾も可能で至近での戦闘に特化している。
+Info=カスタマイズされたM700ボルトアクションライフル。
+Info=6倍率のスコープを搭載。
+Info=軽量なパーツを選別し多少の精度を犠牲に機動性を重視している。
 
-Info_Far=A pump-action shotgun that uses OO buckshot.
-Info_Far=Barrel has no chokes and is adjusted to spread over a wide area.。
-Info_Far=It specialized for close combat.
+Info_Far=Customized M700 bolt-action rifle.
+Info_Far=Equipped with a 6x scope.
+Info_Far=select Lightweight parts to sacrifice some accuracy in favor of mobility.
 
 ShotRate=300
-RecoilPower=300
-RecoilReturn=0.95
+RecoilPower=100
+RecoilReturn=0.8
+RecoilScaleRate=1
 shottype=BOLT
 usehumanAnim=5
 soundsel=2

@@ -1,8 +1,12 @@
-Name=RGD5
+Name=RGD5 HandGrenade
 
-Info=AA
+Info=ソ連製の破片手榴弾。
+Info=投げたあと3.5秒後に爆発し、破片をまき散らす。
+Info=安価ながらも効果的な兵器。
 
-Info_Eng=AA
+Info_Eng=Soviet fragmentation grenade.
+Info_Eng=Explodes 3.5 seconds after being thrown, scattering shrapnel.
+Info_Eng=A cheap but effective weapon.
 
 usehumanAnim=3
 IsThrowWeapon=True

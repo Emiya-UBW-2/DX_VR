@@ -1,4 +1,4 @@
-Name=M870Mag 8Round
+Name=M870 8Round Magazine
 
 capacity=8
 useammo0=12ga_BuckShot

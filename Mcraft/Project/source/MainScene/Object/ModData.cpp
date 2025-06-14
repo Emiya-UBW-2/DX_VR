@@ -41,6 +41,10 @@ namespace FPS_n2 {
 				this->m_RecoilReturn = std::stof(RIGHT);
 				this->m_IsRecoilReturn = true;
 			}
+			else if (LEFT == "RecoilScaleRate") {
+				this->m_RecoilScaleRate = std::stoi(RIGHT);
+				this->m_IsRecoilScaleRate = true;
+			}
 			else if (LEFT == "shottype") {
 				for (int loop = 0; loop < static_cast<int>(SHOTTYPE::Max); ++loop) {
 					if (RIGHT == SHOTTYPEName[loop]) {

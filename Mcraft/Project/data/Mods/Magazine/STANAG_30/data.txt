@@ -1,4 +1,4 @@
-Name=STANAG 30Round
+Name=STANAG 30Round Magazine
 
 capacity=30
 useammo0=556x45

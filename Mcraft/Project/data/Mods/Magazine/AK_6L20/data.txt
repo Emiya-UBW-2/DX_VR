@@ -1,4 +1,4 @@
-Name=6L20 30Round
+Name=AK-74 6L20 30Round Magazine
 
 capacity=30
 useammo0=545x39

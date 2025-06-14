@@ -23,6 +23,9 @@ namespace FPS_n2 {
 			bool							m_IsRecoilReturn{ false };
 			bool							m_IsShotType{ false };
 
+			bool							m_IsRecoilScaleRate{ false };
+			int								m_RecoilScaleRate{ 5 };
+
 			int								m_RecoilPower{ 120 };
 			float							m_RecoilReturn{ 0.9f };
 			SHOTTYPE						m_ShotType{ SHOTTYPE::SEMI };
@@ -70,6 +73,10 @@ namespace FPS_n2 {
 			const auto& GetAnimSelectList(void) const noexcept { return this->m_AnimSelect; }
 			const auto& GetIsRecoilPower(void) const noexcept { return this->m_IsRecoilPower; }
 			const auto& GetIsRecoilReturn(void) const noexcept { return this->m_IsRecoilReturn; }
+
+			const auto& GetIsRecoilScaleRate(void) const noexcept { return this->m_IsRecoilScaleRate; }
+			const auto& GetRecoilScaleRate(void) const noexcept { return this->m_RecoilScaleRate; }
+
 			const auto& GetIsShotType(void) const noexcept { return this->m_IsShotType; }
 			const auto& GetRecoilPower(void) const noexcept { return this->m_RecoilPower; }
 			const auto& GetRecoilReturn(void) const noexcept { return this->m_RecoilReturn; }
