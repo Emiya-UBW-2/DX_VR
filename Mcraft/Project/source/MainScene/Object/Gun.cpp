@@ -194,6 +194,7 @@ namespace FPS_n2 {
 					int index = static_cast<int>(&time - &this->m_GunAnimeTime.front());
 					time += 60.0f * DXLib_refParts->GetDeltaTime() * (this->m_GunAnimeSpeed[index]);
 				}
+				m_CommonGunAnimeTime += 60.0f * DXLib_refParts->GetDeltaTime();
 				//
 #if defined(DEBUG) && FALSE
 				if (GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
@@ -211,8 +212,8 @@ namespace FPS_n2 {
 				Matrix3x3DX::RotAxis(Vector3DX::right(), this->m_UpperRad.x) *
 				Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_UpperRad.y) *
 				Matrix3x3DX::RotAxis(Vector3DX::forward(), std::clamp(
-					-this->m_UpperRad.y * 10.0f * std::clamp(1.0f - GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.0f, 1.0f),
-					deg2rad(-10), deg2rad(10))),
+					-this->m_UpperRad.y * 5.0f * std::clamp(1.0f - GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.0f, 1.0f),
+					deg2rad(-5), deg2rad(5))),
 					0.8f, EasingType::OutExpo);
 			Easing(&this->m_GunSwingMat2, this->m_GunSwingMat, 0.8f, EasingType::OutExpo);
 			//スリング

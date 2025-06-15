@@ -35,6 +35,9 @@ namespace FPS_n2 {
 			std::array<ArmMovePer, static_cast<int>(Charas::GunAnimeID::ChoiceOnceMax)>	m_GunAnimePer{};
 			std::array<float, static_cast<int>(Charas::GunAnimeID::Max)>	m_GunAnimeTime{};
 			std::array<float, static_cast<int>(Charas::GunAnimeID::Max)>	m_GunAnimeSpeed{};
+
+			float												m_CommonGunAnimeTime{};
+
 			Charas::GunAnimeID									m_GunAnime{ Charas::GunAnimeID::Base };	//
 			bool												m_ReloadAmmoCancel{ false };		//
 			bool												m_ShotEnd{ false };		//
@@ -209,6 +212,9 @@ namespace FPS_n2 {
 				}
 				return 1.0f;
 			}
+			const auto&			GetNowAnimTime(void) const noexcept {
+				return this->m_CommonGunAnimeTime;
+			}
 			const auto&			GetShotType(void) const noexcept {
 				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetIsShotType()) {
 					return (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetShotType();
@@ -343,6 +349,7 @@ namespace FPS_n2 {
 				if (GetGunAnime() < Charas::GunAnimeID::Max) {
 					this->m_GunAnimeTime[static_cast<int>(GetGunAnime())] = 0.0f;
 				}
+				this->m_CommonGunAnimeTime = 0.f;
 			}
 			void				SetShotStart(void) noexcept;//発砲
 			bool				ReloadStart(void) noexcept {

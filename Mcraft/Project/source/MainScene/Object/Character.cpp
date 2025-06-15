@@ -254,8 +254,11 @@ namespace FPS_n2 {
 						}
 						if (!GetGunPtrNow()->GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
 							//Reload
-							if (this->m_Input.GetPADSPress(Controls::PADS::RELOAD) ||
-								((GetGunPtrNow()->GetAmmoNumTotal() == 0) && this->m_Input.GetPADSPress(Controls::PADS::SHOT))) {
+							if (
+								(GetGunPtrNow()->GetNowAnimTime() > 30.f) &&
+								(this->m_Input.GetPADSPress(Controls::PADS::RELOAD) ||
+									((GetGunPtrNow()->GetAmmoNumTotal() == 0) && this->m_Input.GetPADSPress(Controls::PADS::SHOT)))
+								) {
 								if (GetGunPtrNow()->ReloadStart()) {
 									if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {
 										if (GetRand(100) < 50) {
