@@ -96,30 +96,7 @@ namespace FPS_n2 {
 			}
 			const bool		CheckAmmoHit(const Vector3DX& StartPos, Vector3DX* EndPos) noexcept;
 		private:
-			void				SetAction(HelicopterMove Move) noexcept {
-				m_HelicopterMove = Move;
-				m_Timer = 0.0f;
-				switch (this->m_HelicopterMove) {
-				case HelicopterMove::Random:
-					m_PrevPos = m_NowPos;
-					m_TargetPos = Vector3DX::vget(GetRandf(50.0f), 0.0f, GetRandf(50.0f)) * Scale3DRate;
-					break;
-				case HelicopterMove::Rappelling:
-					m_PrevPos = m_NowPos;
-					m_TargetPos = Vector3DX::vget(GetRandf(10.0f), 0.0f, GetRandf(10.0f)) * Scale3DRate;
-					break;
-				case HelicopterMove::Intercept:
-					m_PrevPos = m_NowPos;
-					m_TargetPos = Matrix3x3DX::Vtrans(Vector3DX::vget(0.0f, 0.0f, 15.0f + GetRandf(10.0f)) * Scale3DRate, Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f))));
-					break;
-				default:
-					break;
-				}
-				auto Vec = (m_TargetPos - m_PrevPos);
-				if (Vec.magnitude() > 0.0f) {
-					m_YradRT = rad2deg(std::atan2(-Vec.x, -Vec.z));
-				}
-			}
+			void				SetAction(HelicopterMove Move) noexcept;
 		public:
 			//自分がダメージを与えたと通知
 			void			SetDamage(PlayerID damageID, HitPoint damage, int hitType, const Vector3DX& startPos, const Vector3DX& endPos) noexcept {

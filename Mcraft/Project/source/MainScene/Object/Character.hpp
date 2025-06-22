@@ -20,6 +20,7 @@ namespace FPS_n2 {
 			bool												m_IsRappelling{};
 			bool												m_IsRappellingEnd{};
 			InputControl										m_Input;
+			bool												m_ReserveReload{ false };
 			bool												m_IsSquat{ false };
 			std::array<float, static_cast<int>(CharaAnimeID::AnimeIDMax)>	m_AnimPerBuf{ 0 };
 			CharaAnimeID										m_BottomAnimSelect{};
@@ -78,6 +79,7 @@ namespace FPS_n2 {
 			const auto&		GetLengthToPlayer(void) const noexcept { return this->m_Length; }
 			const auto&		GetIsActiveCameraPosToPlayer(void) const noexcept { return this->m_IsActiveCameraPos; }
 			const auto&		GetCameraPosToPlayer(void) const noexcept { return this->m_CameraPos; }
+			const auto&		GetIsSquat(void) const noexcept { return this->m_IsSquat; }
 		public://ゲッター
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
 			const auto&		GetMoveEyePos(void) const noexcept { return this->m_WalkSwingControl.GetMoveEyePos(); }

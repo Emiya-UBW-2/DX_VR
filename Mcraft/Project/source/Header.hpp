@@ -6,7 +6,7 @@ using namespace DXLibRef;
 #include	"Enums.hpp"
 
 //周りから見まわしができる機能
-#define DEBUG_CAM (false)
+#define DEBUG_CAM (true)
 //DEBUG_CAMが有効なうえでアニメーションの編集ができる機能
 #define DEBUG_ANIM (false)
 //ネット対戦のデバッグ

@@ -19,6 +19,39 @@ namespace FPS_n2 {
 			}
 			return false;
 		}
+		void HelicopterObj::SetAction(HelicopterMove Move) noexcept {
+			m_HelicopterMove = Move;
+			m_Timer = 0.0f;
+			switch (this->m_HelicopterMove) {
+			case HelicopterMove::Random:
+				m_PrevPos = m_NowPos;
+				m_TargetPos = Vector3DX::vget(GetRandf(50.0f), 0.0f, GetRandf(50.0f)) * Scale3DRate;
+				break;
+			case HelicopterMove::Rappelling:
+				m_PrevPos = m_NowPos;
+				{
+					auto* BackGroundParts = BackGround::BackGroundControl::Instance();
+					while (true) {
+						m_TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
+						if (std::abs(m_TargetPos.x) < 30.f * Scale3DRate && std::abs(m_TargetPos.z) < 30.f * Scale3DRate) {
+							break;
+						}
+					}
+					m_TargetPos.y = 0.f;
+				}
+				break;
+			case HelicopterMove::Intercept:
+				m_PrevPos = m_NowPos;
+				m_TargetPos = Matrix3x3DX::Vtrans(Vector3DX::vget(0.0f, 0.0f, 15.0f + GetRandf(10.0f)) * Scale3DRate, Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f))));
+				break;
+			default:
+				break;
+			}
+			auto Vec = (m_TargetPos - m_PrevPos);
+			if (Vec.magnitude() > 0.0f) {
+				m_YradRT = rad2deg(std::atan2(-Vec.x, -Vec.z));
+			}
+		}
 		void HelicopterObj::FirstUpdate(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();

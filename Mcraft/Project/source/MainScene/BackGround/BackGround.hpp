@@ -675,6 +675,198 @@ namespace FPS_n2 {
 			const auto&		GetReferenceCells(void) const noexcept { return this->m_CellxN[0]; }
 			auto&			SetReferenceCells(void) noexcept { return this->m_CellxN[0]; }
 		public:
+			class Builds {
+				int						m_mesh{ -1 };
+				Vector3DX				m_MinPos;
+				Vector3DX				m_Pos;
+				Vector3DX				m_MaxPos;
+
+				int							MyIndex{ 0 };
+				int							LinkPolyIndex[4]{ -1,-1,-1,-1 };
+			public:
+				const int	GetIndex() const noexcept { return MyIndex; }
+				const int	GetLinkPolyIndex(int ID) const noexcept { return LinkPolyIndex[ID]; }
+				void		SetLink(int tris, int index) { LinkPolyIndex[tris] = index; }
+			public:
+				const auto& GetMinPos(void) const noexcept { return m_MinPos; }
+				const auto& GetPos(void) const noexcept { return m_Pos; }
+				const auto& GetMaxPos(void) const noexcept { return m_MaxPos; }
+			public:
+				void		Set(int index) {
+					this->MyIndex = index;
+					for (int i = 0; i < 4; i++) {
+						LinkPolyIndex[i] = -1;
+					}
+				}
+				void		SetPosition(Vector3DX MinPos, Vector3DX MaxPos) {
+					this->m_MinPos = MinPos;
+					this->m_MaxPos = MaxPos;
+					this->m_Pos = (MinPos + MaxPos) / 2;
+				}
+			};
+			std::vector<Builds>			m_ObjBuilds;
+		public:
+			const auto&		GetBuildData(void) noexcept { return this->m_ObjBuilds; }
+
+			const int		GetNearestBuilds(const Vector3DX& NowPosition) const noexcept {
+				for (auto& bu : this->m_ObjBuilds) {
+					if (
+						(bu.GetMaxPos().x >= NowPosition.x && NowPosition.x >= bu.GetMinPos().x) &&
+						(bu.GetMaxPos().z >= NowPosition.z && NowPosition.z >= bu.GetMinPos().z)
+						) {
+						return static_cast<int>(&bu - &this->m_ObjBuilds.front());
+					}
+				}
+				return -1;
+			}
+			const int		GetNearestBuilds2(const Vector3DX& NowPosition) const noexcept {
+				float Len = 1000000.f;
+				int Answer = -1;
+				for (auto& bu : this->m_ObjBuilds) {
+					Vector3DX Length = bu.GetPos() - NowPosition;
+					Length.y = 0.f;
+					if (Len >= Length.sqrMagnitude()) {
+						Len = Length.sqrMagnitude();
+						Answer = static_cast<int>(&bu - &this->m_ObjBuilds.front());
+					}
+				}
+				return Answer;
+			}
+			// ポリゴン同士の連結情報を使用して指定の二つの座標間を直線的に移動できるかどうかをチェックする( 戻り値 true:直線的に移動できる false:直線的に移動できない )
+			bool CheckPolyMove(Vector3DX StartPos, Vector3DX TargetPos) const {
+				int Rate = 6;
+
+				int CheckPoly[4]{};
+				int CheckPolyPrev[4]{};
+				int NextCheckPoly[4]{};
+				int NextCheckPolyPrev[4]{};
+
+				// 開始座標と目標座標の y座標値を 0.0f にして、平面上の判定にする
+				StartPos.y = (0.0f);
+				TargetPos.y = (0.0f);
+
+				// 開始座標と目標座標の直上、若しくは直下に存在するポリゴンを検索する
+				int StartPoly = this->GetNearestBuilds(StartPos);
+				int TargetPoly = this->GetNearestBuilds(TargetPos);
+
+				// ポリゴンが存在しなかったら移動できないので false を返す
+				if (StartPoly == -1 || TargetPoly == -1) { return false; }
+
+				// 指定線分上にあるかどうかをチェックするポリゴンとして開始座標の直上、若しくは直下に存在するポリゴンを登録
+				int CheckPolyNum = 1;
+				CheckPoly[0] = StartPoly;
+				int CheckPolyPrevNum = 0;
+				CheckPolyPrev[0] = -1;
+
+				// 結果が出るまで無条件で繰り返し
+				while (true) {
+					int NextCheckPolyNum = 0;			// 次のループでチェック対象になるポリゴンの数をリセットしておく
+					int NextCheckPolyPrevNum = 0;			// 次のループでチェック対象から外すポリゴンの数をリセットしておく
+					// チェック対象のポリゴンの数だけ繰り返し
+					for (int i = 0; i < CheckPolyNum; i++) {
+						int Index = CheckPoly[i];
+						// チェック対象のポリゴンの３座標を取得 y座標を0.0にして、平面的な判定を行うようにする
+						Vector3DX Pos = this->m_ObjBuilds.at(Index).GetPos(); Pos.y = (0.f);
+
+						for (int K = 0; K < 4; K++) {
+							int LinkIndex = this->m_ObjBuilds.at(Index).GetLinkPolyIndex(K);
+
+							;
+
+							Vector3DX PolyPos = Pos;
+							PolyPos.x += ((Rate / 2.f) * ((K == 0 || K == 1) ? 1.f : -1.f));
+							PolyPos.z += ((Rate / 2.f) * ((K == 1 || K == 2) ? 1.f : -1.f));
+							int K2 = (K + 1) % 4;
+							Vector3DX PolyPos2 = Pos;
+							PolyPos2.x += ((Rate / 2.f) * ((K2 == 0 || K2 == 1) ? 1.f : -1.f));
+							PolyPos2.z += ((Rate / 2.f) * ((K2 == 1 || K2 == 2) ? 1.f : -1.f));
+							// ポリゴンの頂点番号0と1の辺に隣接するポリゴンが存在する場合で、
+							// 且つ辺の線分と移動開始点、終了点で形成する線分が接していたら if 文が真になる
+							if (LinkIndex != -1 && GetMinLenSegmentToSegment(StartPos, TargetPos, PolyPos, PolyPos2) < 0.01f) {
+								// もし辺と接しているポリゴンが目標座標上に存在するポリゴンだったら 開始座標から目標座標上まで途切れなくポリゴンが存在するということなので true を返す
+								if (LinkIndex == TargetPoly) { return true; }
+
+								// 辺と接しているポリゴンを次のチェック対象のポリゴンに加える
+
+								// 既に登録されているポリゴンの場合は加えない
+								int j = 0;
+								for (j = 0; j < NextCheckPolyNum; j++) {
+									if (NextCheckPoly[j] == LinkIndex) { break; }
+								}
+								if (j == NextCheckPolyNum) {
+									// 次のループで除外するポリゴンの対象に加える
+
+									// 既に登録されている除外ポリゴンの場合は加えない
+									int j2 = 0;
+									for (j2 = 0; j2 < NextCheckPolyPrevNum; j2++) {
+										if (NextCheckPolyPrev[j2] == Index) { break; }
+									}
+									if (j2 == NextCheckPolyPrevNum) {
+										NextCheckPolyPrev[NextCheckPolyPrevNum] = Index;
+										NextCheckPolyPrevNum++;
+									}
+
+									// 一つ前のループでチェック対象になったポリゴンの場合も加えない
+									int j3 = 0;
+									for (j3 = 0; j3 < CheckPolyPrevNum; j3++) {
+										if (CheckPolyPrev[j3] == LinkIndex) { break; }
+									}
+									if (j3 == CheckPolyPrevNum) {
+										// ここまで来たら漸く次のチェック対象のポリゴンに加える
+										NextCheckPoly[NextCheckPolyNum] = LinkIndex;
+										NextCheckPolyNum++;
+									}
+								}
+							}
+						}
+					}
+
+					// 次のループでチェック対象になるポリゴンが一つもなかったということは
+					// 移動開始点、終了点で形成する線分と接するチェック対象のポリゴンに隣接する
+					// ポリゴンが一つもなかったということなので、直線的な移動はできないということで false を返す
+					if (NextCheckPolyNum == 0) { return false; }
+
+					// 次にチェック対象となるポリゴンの情報をコピーする
+					for (int i = 0; i < NextCheckPolyNum; i++) {
+						CheckPoly[i] = NextCheckPoly[i];
+					}
+					CheckPolyNum = NextCheckPolyNum;
+
+					// 次にチェック対象外となるポリゴンの情報をコピーする
+					for (int i = 0; i < NextCheckPolyPrevNum; i++) {
+						CheckPolyPrev[i] = NextCheckPolyPrev[i];
+					}
+					CheckPolyPrevNum = NextCheckPolyPrevNum;
+				}
+			}
+			bool CheckPolyMoveWidth(Vector3DX StartPos, int TargetIndex, float Width) const {
+				// ポリゴン同士の連結情報を使用して指定の二つの座標間を直線的に移動できるかどうかをチェックする( 戻り値 true:直線的に移動できる false:直線的に移動できない )( 幅指定版 )
+				Vector3DX TargetPos = this->m_ObjBuilds.at(TargetIndex).GetPos();
+				// 最初に開始座標から目標座標に直線的に移動できるかどうかをチェック
+				if (CheckPolyMove(StartPos, TargetPos) == false) { return false; }
+
+				Vector3DX Direction = TargetPos - StartPos;		// 開始座標から目標座標に向かうベクトルを算出
+				Direction.y = (0.0f);		// y座標を 0.0f にして平面的なベクトルにする
+
+				// 開始座標から目標座標に向かうベクトルに直角な正規化ベクトルを算出
+				Vector3DX SideDirection = Vector3DX::Cross(Direction, Vector3DX::up()).normalized();
+				{
+					// 開始座標と目標座標を Width / 2.0f 分だけ垂直方向にずらして、再度直線的に移動できるかどうかをチェック
+					Vector3DX TempVec = SideDirection * (Width / 2.0f);
+					if (CheckPolyMove(StartPos + TempVec, TargetPos + TempVec) == false) {
+						return false;
+					}
+				}
+				{
+					// 開始座標と目標座標を Width / 2.0f 分だけ一つ前とは逆方向の垂直方向にずらして、再度直線的に移動できるかどうかをチェック
+					Vector3DX TempVec = SideDirection * (-Width / 2.0f);
+					if (CheckPolyMove(StartPos + TempVec, TargetPos + TempVec) == false) {
+						return false;
+					}
+				}
+				return true;		// ここまできたら指定の幅があっても直線的に移動できるということなので true を返す
+			}
+		public:
 			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
 			bool			CheckLinetoMap(const Vector3DX& StartPos, const Vector3DX& EndPos) const noexcept {
 				Vector3DX pEndPos = EndPos;

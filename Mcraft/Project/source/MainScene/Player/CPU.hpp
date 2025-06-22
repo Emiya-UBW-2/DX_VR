@@ -19,21 +19,21 @@ namespace FPS_n2 {
 
 			bool									m_IsLeftHeli{};
 			float									m_RapeTimer{ 0.0f };
+		private:
+			class Impl;
+			Impl* m_Param;
+			Impl* GetParam() noexcept { return m_Param; }
 		public:
 			void Repop(void) noexcept;
 		public:
-			AIControl(PlayerID MyID) noexcept {
-				Init(MyID);
-			}
-			virtual ~AIControl(void) noexcept {
-				Dispose();
-			}
+			AIControl(PlayerID MyID) noexcept;
+			virtual ~AIControl(void) noexcept;
 		private:
 			void Init(PlayerID MyID) noexcept;
 			void Dispose(void) noexcept {}
 		public:
 			const InputControl Update(void) noexcept;
-			void Draw(void) noexcept {}
+			void Draw(void) noexcept;
 		};
 	}
 }

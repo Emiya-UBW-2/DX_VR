@@ -145,6 +145,9 @@ namespace FPS_n2 {
 				default:
 					break;
 				}
+				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {//自機はヘッショされない
+					Damage = 0;
+				}
 				//ダメージ登録
 				if (AttackID >= 0) {
 					PlayerMngr->GetPlayer(AttackID)->GetChara()->SetDamage(GetMyPlayerID(), Damage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
@@ -254,11 +257,13 @@ namespace FPS_n2 {
 						}
 						if (!GetGunPtrNow()->GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
 							//Reload
-							if (
-								(GetGunPtrNow()->GetNowAnimTime() > 30.f) &&
-								(this->m_Input.GetPADSPress(Controls::PADS::RELOAD) ||
-									((GetGunPtrNow()->GetAmmoNumTotal() == 0) && this->m_Input.GetPADSPress(Controls::PADS::SHOT)))
-								) {
+							if (this->m_Input.GetPADSPress(Controls::PADS::RELOAD) ||
+								((GetGunPtrNow()->GetAmmoNumTotal() == 0) && this->m_Input.GetPADSPress(Controls::PADS::SHOT))) {
+								this->m_ReserveReload = true;
+							}
+
+							if ((GetGunPtrNow()->GetNowAnimTime() > 30.f) && this->m_ReserveReload) {
+								this->m_ReserveReload = false;
 								if (GetGunPtrNow()->ReloadStart()) {
 									if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {
 										if (GetRand(100) < 50) {

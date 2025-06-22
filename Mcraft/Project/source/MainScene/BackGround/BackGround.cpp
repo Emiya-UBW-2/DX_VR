@@ -1,6 +1,8 @@
 ﻿#include	"BackGround.hpp"
 #include	<random>
 
+#include"../Player/Player.hpp"
+
 const FPS_n2::BackGround::BackGroundControl* SingletonBase<FPS_n2::BackGround::BackGroundControl>::m_Singleton = nullptr;
 namespace FPS_n2 {
 	namespace BackGround {
@@ -725,8 +727,8 @@ namespace FPS_n2 {
 							[&](int xpos, int ypos, int zpos) {
 								if (!GetReferenceCells().isInside(ypos)) { return false; }
 								if (!GetReferenceCells().GetCellBuf(xpos, ypos, zpos).CanDraw()) { return false; }
-								Vector3DX MinPos = GetReferenceCells().GetPos(xpos, ypos, zpos) + Vector3DX::one() * -0.1f * Scale3DRate;
-								Vector3DX MaxPos = GetReferenceCells().GetPos(xpos + 1, ypos + 1, zpos + 1) + Vector3DX::one() * 0.1f * Scale3DRate;
+								Vector3DX MinPos = GetPos(xpos, ypos, zpos) + Vector3DX::one() * -0.1f * Scale3DRate;
+								Vector3DX MaxPos = GetPos(xpos + 1, ypos + 1, zpos + 1) + Vector3DX::one() * 0.1f * Scale3DRate;
 								Vector3DX tmpEndPos = *EndPos;
 								Vector3DX tmpNormal;
 								if (ColRayBox(StartPos, &tmpEndPos, MinPos, MaxPos, &tmpNormal)) {
@@ -762,8 +764,8 @@ namespace FPS_n2 {
 							[&](int xpos, int ypos, int zpos) {
 								if (!GetReferenceCells().isInside(ypos)) { return false; }
 								if (!GetReferenceCells().GetCellBuf(xpos, ypos, zpos).CanDraw()) { return false; }
-								Vector3DX MinPos = GetReferenceCells().GetPos(xpos, ypos, zpos);
-								Vector3DX MaxPos = GetReferenceCells().GetPos(xpos + 1, ypos + 1, zpos + 1);
+								Vector3DX MinPos = GetPos(xpos, ypos, zpos);
+								Vector3DX MaxPos = GetPos(xpos + 1, ypos + 1, zpos + 1);
 
 								MV1_COLL_RESULT_POLY tmp{};
 								// Left
@@ -1173,6 +1175,103 @@ namespace FPS_n2 {
 					}
 				}
 				//SaveCellsFile();
+
+
+
+
+
+
+						//
+				this->m_ObjBuilds.resize(mazeControl.GetPachCount());
+				{
+					float deg = 0.f;
+					int loop = 0;
+					for (int y = 0; y < Size; y++) {
+						for (int x = 0; x < Size; x++) {
+							if (mazeControl.PosIsPath(x, y)) {
+								int count = 0;
+
+								bool XP = mazeControl.PosIsPath(x + 1, y);
+								bool XM = mazeControl.PosIsPath(x - 1, y);
+								bool ZP = mazeControl.PosIsPath(x, y + 1);
+								bool ZM = mazeControl.PosIsPath(x, y - 1);
+
+								if (XP) { count++; }
+								if (XM) { count++; }
+								if (ZP) { count++; }
+								if (ZM) { count++; }
+
+								int ID = 0;
+								switch (count) {
+								case 1:
+									ID = 0;
+									if (ZM) { deg = 0.f; }
+									if (XM) { deg = 90.f; }
+									if (ZP) { deg = 180.f; }
+									if (XP) { deg = 270.f; }
+									break;
+								case 2:
+									if (ZP && ZM) { ID = 1; deg = 0.f; }
+									if (XP && XM) { ID = 1; deg = 90.f; }
+
+									if (XP && ZP) { ID = 4; deg = 270.f; }
+									if (XM && ZP) { ID = 4; deg = 180.f; }
+									if (XM && ZM) { ID = 4; deg = 90.f; }
+									if (XP && ZM) { ID = 4; deg = 0.f; }
+									break;
+								case 3:
+									ID = 2;
+									if (ZP && XP && ZM) { deg = 0.f; }
+									if (ZP && XM && ZM) { deg = 180.f; }
+									if (XP && ZP && XM) { deg = 270.f; }
+									if (XP && ZM && XM) { deg = 90.f; }
+									break;
+								case 4:
+									ID = 3;
+									break;
+								default:
+									break;
+								}
+								this->m_ObjBuilds[loop].Set(loop);
+								int xPos = GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate;
+								int zPos = GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate;
+								this->m_ObjBuilds[loop].SetPosition(GetPos(xPos, 0, zPos), GetPos(xPos + Rate, 0, zPos + Rate));
+								loop++;
+							}
+						}
+					}
+				}
+				{
+					int loop = 0;
+					for (int y = 0; y < Size; y++) {
+						for (int x = 0; x < Size; x++) {
+							if (mazeControl.PosIsPath(x, y)) {
+								auto& bu = this->m_ObjBuilds[loop];
+								if (mazeControl.PosIsPath(x + 1, y)) {
+									int xPos = GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate + Rate;
+									int zPos = GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate;
+									bu.SetLink(0, GetNearestBuilds((GetPos(xPos, 0, zPos) + GetPos(xPos + Rate, 0, zPos + Rate)) / 2));
+								}
+								if (mazeControl.PosIsPath(x, y + 1)) {
+									int xPos = GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate;
+									int zPos = GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate + Rate;
+									bu.SetLink(1, GetNearestBuilds((GetPos(xPos, 0, zPos) + GetPos(xPos + Rate, 0, zPos + Rate)) / 2));
+								}
+								if (mazeControl.PosIsPath(x - 1, y)) {
+									int xPos = GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate - Rate;
+									int zPos = GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate;
+									bu.SetLink(2, GetNearestBuilds((GetPos(xPos, 0, zPos) + GetPos(xPos + Rate, 0, zPos + Rate)) / 2));
+								}
+								if (mazeControl.PosIsPath(x, y - 1)) {
+									int xPos = GetReferenceCells().Half + (-Size / 2 + x - 1) * Rate;
+									int zPos = GetReferenceCells().Half + (-Size / 2 + y - 1) * Rate - Rate;
+									bu.SetLink(3, GetNearestBuilds((GetPos(xPos, 0, zPos) + GetPos(xPos + Rate, 0, zPos + Rate)) / 2));
+								}
+								loop++;
+							}
+						}
+					}
+				}
 			}
 			else if (false) {
 				//空っぽ
@@ -1373,6 +1472,17 @@ namespace FPS_n2 {
 				if (cell1.isFarCells() && !(Near < cell1.Scale && cell1.Scale < Far)) { continue; }
 				Vert.Draw(this->m_tex);
 			}
+
+			/*
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
+			float Height = ViewChara->GetEyePositionCache().y;
+			for (auto& b : this->m_ObjBuilds) {
+				Vector3DX Pos = b.GetPos();
+				Pos.y = Height;
+				DrawCube3D((Pos - Vector3DX::vget(1.f, 1.f, 1.f)).get(), (Pos + Vector3DX::vget(1.f, 1.f, 1.f)).get(), GetColor(0, 255, 0), GetColor(0, 255, 0), true);
+			}
+			//*/
 		}
 		//
 		void		BackGroundControl::Dispose(void) noexcept {

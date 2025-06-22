@@ -111,7 +111,25 @@ namespace FPS_n2 {
 				}
 				else {
 					Charas::CharacterObj::LoadChara("Soldier", (PlayerID)loop);
-					chara->LoadCharaGun("AKS-74", 0);
+
+					int Rand = GetRand(100);
+					int rate = 100 / 5;
+					if (Rand < rate) {
+						chara->LoadCharaGun("type89", 0);
+					}
+					else if (Rand < rate * 2) {
+						chara->LoadCharaGun("type20E", 0);
+					}
+					else if (Rand < rate * 3) {
+						chara->LoadCharaGun("M700", 0);
+					}
+					else if (Rand < rate * 4) {
+						chara->LoadCharaGun("AKS-74", 0);
+					}
+					else {
+						chara->LoadCharaGun("Mod870", 0);
+					}
+					//chara->LoadCharaGun("AKS-74", 0);
 					chara->LoadCharaGun("RGD5", 2);
 					//ラグドール
 					chara->SetRagDoll().Duplicate(m_RagDoll);
@@ -173,12 +191,18 @@ namespace FPS_n2 {
 			//
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+				Vector3DX TargetPos;
+				{
+					auto* BackGroundParts = BackGround::BackGroundControl::Instance();
+					TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
+				}
+				TargetPos.y = -20.f * Scale3DRate;
 				//人の座標設定
 				if (loop == PlayerMngr->GetWatchPlayerID()) {
-					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), Vector3DX::vget(GetRandf(10.0f), -20.0f, GetRandf(10.0f)) * Scale3DRate, 0, true);
+					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true);
 				}
 				else{
-					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), Vector3DX::vget(GetRandf(10.0f), -20.0f, GetRandf(10.0f)) * Scale3DRate, 0, true);
+					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true);
 				}
 			}
 			//UI
@@ -362,7 +386,9 @@ namespace FPS_n2 {
 							chara->Input(MyInput);
 						}
 						else {
-							chara->Input(PlayerMngr->GetPlayer(loop)->GetAI()->Update());//AIに入力させる
+							if (!SceneParts->IsPause() && FadeControl::Instance()->IsClear() && (this->m_StartTimer <= 0.0f)) {
+								chara->Input(PlayerMngr->GetPlayer(loop)->GetAI()->Update());//AIに入力させる
+							}
 						}
 						//このプレイヤーが出したダメージイベントをリストに追加
 						chara->PopDamageEvent(&DamageEvents);
@@ -391,13 +417,14 @@ namespace FPS_n2 {
 			ObjMngr->UpdateObject();
 			ObjMngr->LateUpdateObject();
 			//視点
+			auto& CamChara = PlayerMngr->GetPlayer(0)->GetChara();//PlayerMngr->GetWatchPlayer()->GetChara();
 			{
 				//カメラ
-				Vector3DX BaseCamPos = ViewChara->GetCameraPosition();
+				Vector3DX BaseCamPos = CamChara->GetCameraPosition();
 				CameraParts->SetMainCamera().SetCamPos(
 					BaseCamPos + Camera3D::Instance()->GetCamShake(),
-					BaseCamPos + ViewChara->GetEyeRotationCache().zvec2() + Camera3D::Instance()->GetCamShake() * 2.0f,
-					ViewChara->GetEyeRotationCache().yvec());
+					BaseCamPos + CamChara->GetEyeRotationCache().zvec2() + Camera3D::Instance()->GetCamShake() * 2.0f,
+					CamChara->GetEyeRotationCache().yvec());
 #if defined(DEBUG) && DEBUG_CAM
 				if (CheckHitKey(KEY_INPUT_F1) != 0) {
 					DBG_CamSelect = InvalidID;
@@ -446,12 +473,12 @@ namespace FPS_n2 {
 				//fov
 				{
 					float fovTarget = deg2rad(OptionParts->GetParamInt(EnumSaveParam::fov));
-					if (ViewChara->GetIsADS()) {
+					if (CamChara->GetIsADS()) {
 						fovTarget -= deg2rad(15);
-						fovTarget /= std::max(1.0f, ViewChara->GetGunPtrNow()->GetSightZoomSize() / 2.0f);
+						fovTarget /= std::max(1.0f, CamChara->GetGunPtrNow()->GetSightZoomSize() / 2.0f);
 					}
-					if (ViewChara->GetGunPtrNow() && ViewChara->GetGunPtrNow()->GetShotSwitch()) {
-						fovTarget -= deg2rad(8) * ViewChara->GetGunPtrNow()->GetRecoilRandViewScale();
+					if (CamChara->GetGunPtrNow() && CamChara->GetGunPtrNow()->GetShotSwitch()) {
+						fovTarget -= deg2rad(8) * CamChara->GetGunPtrNow()->GetRecoilRandViewScale();
 						Easing(&fovBuf, fovTarget, 0.5f, EasingType::OutExpo);
 					}
 					else {
@@ -459,7 +486,7 @@ namespace FPS_n2 {
 					}
 #if defined(DEBUG) && DEBUG_CAM
 					if (0 <= DBG_CamSelect && DBG_CamSelect <= 3) {
-						fovBuf = deg2rad(15);
+						fovBuf = deg2rad(65);
 					}
 #endif
 				}
@@ -475,8 +502,8 @@ namespace FPS_n2 {
 #endif
 			//DoF
 			PostPassEffect::Instance()->Set_DoFNearFar(
-				ViewChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), ViewChara->GetIsADS() ? (FarMax * 0.8f) : Scale3DRate * 5.0f,
-				ViewChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), FarMax);
+				CamChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), CamChara->GetIsADS() ? (FarMax * 0.8f) : Scale3DRate * 5.0f,
+				CamChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), FarMax);
 			//埃エフェクト
 			if (GetIsFirstLoop()) {
 				this->m_EffectPos = CameraParts->GetMainCamera().GetCamPos();
@@ -547,6 +574,11 @@ namespace FPS_n2 {
 			ObjectManager::Instance()->Draw(true, Range);
 			//ObjectManager::Instance()->Draw_Depth();
 			HitMarkerPool::Instance()->Check();
+
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+				PlayerMngr->GetPlayer(loop)->GetAI()->Draw();
+			}
 		}
 		//UI表示
 		void			MainGameScene::DrawUI_Base_Sub(void) const noexcept {
