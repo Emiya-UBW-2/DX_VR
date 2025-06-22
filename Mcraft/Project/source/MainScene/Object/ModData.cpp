@@ -55,6 +55,15 @@ namespace FPS_n2 {
 				}
 			}
 
+			else if (LEFT == "stockType") {
+				for (int loop = 0; loop < static_cast<int>(STOCKTYPE::Max); ++loop) {
+					if (RIGHT == STOCKTYPEName[loop]) {
+						this->m_StockType = (STOCKTYPE)loop;
+						break;
+					}
+				}
+			}
+
 			else if (LEFT == "GunShootSound") {
 				for (int loop = 0; loop < static_cast<int>(EnumGunSound::Max); ++loop) {
 					if (RIGHT == EnumGunSoundName[loop]) {

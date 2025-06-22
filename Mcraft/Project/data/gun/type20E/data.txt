@@ -16,6 +16,7 @@ shottype=FULL
 usehumanAnim=0
 soundsel=1
 reloadType=MAG
+stockType=straight
 
 Slot0Type=Magazine
 Slot0IsNeed=true

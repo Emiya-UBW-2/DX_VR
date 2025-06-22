@@ -16,6 +16,7 @@ shottype=BOLT
 usehumanAnim=5
 soundsel=2
 reloadType=AMMO
+stockType=curve
 
 Slot0Type=Magazine
 Slot0IsNeed=true

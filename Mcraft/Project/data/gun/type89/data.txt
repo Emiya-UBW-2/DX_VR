@@ -16,11 +16,15 @@ shottype=FULL
 usehumanAnim=0
 soundsel=1
 reloadType=MAG
+stockType=straight
 
 Slot0Type=Magazine
 Slot0IsNeed=true
 Slot0Item=STANAG_30
 
 Open=0
+ReloadStart_Empty=1
+ReloadStart=1
+ReloadEnd=1
 
 end

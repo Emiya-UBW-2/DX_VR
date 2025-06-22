@@ -83,6 +83,56 @@ namespace FPS_n2 {
 			))->Play3D(MuzzleMat.pos(), Scale3DRate * 50.0f);
 			//エフェクト
 			EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec2(), 0.35f* this->m_MuzzleSmokeSize / (0.00762f * Scale3DRate), 2.0f);
+			{
+				if (HaveFrame(static_cast<int>(GunFrame::smoke1))) {
+					int Frame = GetFrame(static_cast<int>(GunFrame::smoke1));
+					auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
+					Vector3DX Pos = Mat.pos();
+					Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
+					Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
+
+					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
+				}
+				if (HaveFrame(static_cast<int>(GunFrame::smoke2))) {
+					int Frame = GetFrame(static_cast<int>(GunFrame::smoke2));
+					auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
+					Vector3DX Pos = Mat.pos();
+					Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
+					Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
+
+					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
+				}
+				if (HaveFrame(static_cast<int>(GunFrame::smoke3))) {
+					int Frame = GetFrame(static_cast<int>(GunFrame::smoke3));
+					auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
+					Vector3DX Pos = Mat.pos();
+					Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
+					Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
+
+					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
+				}
+				if (HaveFrame(static_cast<int>(GunFrame::smoke4))) {
+					int Frame = GetFrame(static_cast<int>(GunFrame::smoke4));
+					auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
+					Vector3DX Pos = Mat.pos();
+					Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
+					Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
+
+					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
+				}
+				if (HaveFrame(static_cast<int>(GunFrame::smoke5))) {
+					int Frame = GetFrame(static_cast<int>(GunFrame::smoke5));
+					auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
+					Vector3DX Pos = Mat.pos();
+					Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
+					Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
+
+					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
+				}
+
+			}
+
+
 			//発砲
 			for (int loop = 0, max = AmmoSpec->GetPellet(); loop < max; ++loop) {
 				Objects::AmmoPool::Instance()->Put(&AmmoSpec, MuzzleMat.pos(),
@@ -205,8 +255,26 @@ namespace FPS_n2 {
 			}
 			//銃の揺れ
 			if (!IsFirstLoop()) {
+				Vector3DX Target = Vector3DX::zero();
+				if ((GetGunAnime() == Charas::GunAnimeID::Shot) && (GetNowAnimTimePerCache() <= 0.4f) && GetGunAnimBlendPer(Charas::GunAnimeID::ADS) < 0.5f) {
+					switch (GetStockType()) {
+					case Guns::STOCKTYPE::none:
+						Target.x += deg2rad(15);
+						break;
+					case Guns::STOCKTYPE::curve:
+						Target.x += deg2rad(5);
+						break;
+					default:
+						break;
+					}
+					Easing(&this->m_UpperRad2, Target, 0.f, EasingType::OutExpo);
+				}
+				else {
+					Easing(&this->m_UpperRad2, Target, 0.8f, EasingType::OutExpo);
+				}
 				Easing(&this->m_UpperRad, (this->m_UpperPrevRad - RotRad), 0.9f, EasingType::OutExpo);
 			}
+
 			this->m_UpperPrevRad = RotRad;
 			Easing(&this->m_GunSwingMat,
 				Matrix3x3DX::RotAxis(Vector3DX::right(), this->m_UpperRad.x) *
@@ -216,6 +284,11 @@ namespace FPS_n2 {
 					deg2rad(-5), deg2rad(5))),
 					0.8f, EasingType::OutExpo);
 			Easing(&this->m_GunSwingMat2, this->m_GunSwingMat, 0.8f, EasingType::OutExpo);
+
+			Easing(&this->m_GunSwingShotMat,
+				Matrix3x3DX::RotAxis(Vector3DX::right(), this->m_UpperRad2.x)*
+				Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_UpperRad2.y),
+				0.8f, EasingType::OutExpo);
 			//スリング
 			Easing(&this->m_SlingPer, IsSelectGun ? 1.0f : 0.0f, 0.9f, EasingType::OutExpo);
 			if (this->m_SlingPer <= 0.001f) { this->m_SlingPer = 0.0f; }
@@ -233,7 +306,7 @@ namespace FPS_n2 {
 			Matrix3x3DX AnimRot;
 			Vector3DX AnimPos;
 			if (this->m_SlingPer > 0.0f) {
-				AnimRot = GetGunAnimeNow().GetRot() * this->m_GunSwingMat2 * CharaRotationCache * EyeYRot;
+				AnimRot = GetGunAnimeNow().GetRot() * this->m_GunSwingMat2 * this->m_GunSwingShotMat * CharaRotationCache * EyeYRot;
 				AnimPos = GetGunAnimeNow().GetPos();
 				AnimPos.x *= GetSwitchPer();
 				AnimPos = HeadPos + Matrix3x3DX::Vtrans(AnimPos, CharaRotationCache);
@@ -247,7 +320,7 @@ namespace FPS_n2 {
 				AnimRot = AnimRot * Matrix3x3DX::RotAxis(AnimRot.zvec2(), deg2rad(m_GunShotZrand * std::clamp(1.0f - GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.0f, 1.0f)));
 			}
 			//武器座標
-			SetGunMat(Lerp(this->m_SlingRot * this->m_GunSwingMat2 * EyeYRot, AnimRot, this->m_SlingPer), Lerp(this->m_SlingPos, AnimPos, this->m_SlingPer));
+			SetGunMat(Lerp(this->m_SlingRot * this->m_GunSwingMat2* this->m_GunSwingShotMat* EyeYRot, AnimRot, this->m_SlingPer), Lerp(this->m_SlingPos, AnimPos, this->m_SlingPer));
 			//アニメーションに応じたいろいろの更新
 			{
 				Matrix4x4DX MatMin;

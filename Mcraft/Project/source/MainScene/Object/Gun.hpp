@@ -66,8 +66,9 @@ namespace FPS_n2 {
 			ArmMovePer											m_MagArm;
 			bool												m_CockHand{ false };
 			ArmMovePer											m_CockArm;
-			Vector3DX											m_UpperPrevRad, m_UpperRad;
+			Vector3DX											m_UpperPrevRad, m_UpperRad, m_UpperRad2;
 			Matrix3x3DX											m_GunSwingMat, m_GunSwingMat2;
+			Matrix3x3DX											m_GunSwingShotMat;
 			Vector2DX											m_RecoilRadAdd;
 			int													m_RecoilCount{ 0 };
 			float												m_SwitchPer{};
@@ -221,6 +222,10 @@ namespace FPS_n2 {
 				}
 				return GetModifySlot()->GetMyData()->GetShotType();
 			}
+			const auto& GetStockType(void) const noexcept {
+				return GetModifySlot()->GetMyData()->GetStockType();
+			}
+
 			const auto			IsNeedCalcSling(void) const noexcept { return this->m_SlingPer < 1.0f; }
 			const auto			GetAimXPos(void) const noexcept { return this->m_AimPoint.XScreenPos(); }
 			const auto			GetAimYPos(void) const noexcept { return this->m_AimPoint.YScreenPos(); }

@@ -17,6 +17,7 @@ usehumanAnim=1
 soundsel=1
 reloadType=MAG
 CanSwitch=False
+stockType=none
 
 Slot0Type=Magazine
 Slot0IsNeed=true

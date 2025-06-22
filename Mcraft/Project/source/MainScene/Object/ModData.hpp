@@ -31,6 +31,8 @@ namespace FPS_n2 {
 			SHOTTYPE						m_ShotType{ SHOTTYPE::SEMI };
 			bool							m_IronSight{ false };
 
+			STOCKTYPE						m_StockType{ STOCKTYPE::none };
+
 			EnumGunSound					m_GunShootSound{ EnumGunSound::ShotNormal };
 
 			GraphHandle						m_Reitcle;
@@ -86,6 +88,7 @@ namespace FPS_n2 {
 			const auto& GetInfo(void) const noexcept { return this->m_Info; }
 			const auto& GetInfoEng(void) const noexcept { return this->m_InfoEng; }
 
+			const auto& GetStockType(void) const noexcept { return this->m_StockType; }
 			//銃声
 			const auto& GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
 			//スコープ

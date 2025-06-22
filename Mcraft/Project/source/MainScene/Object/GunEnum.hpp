@@ -37,6 +37,11 @@ namespace FPS_n2 {
 			MuzzleAdapter,
 			LaserSight,
 			Light,
+			smoke1,
+			smoke2,
+			smoke3,
+			smoke4,
+			smoke5,
 			Max,
 		};
 		static const char* GunFrameName[static_cast<int>(GunFrame::Max)] = {
@@ -72,6 +77,11 @@ namespace FPS_n2 {
 			"MuzzleAdapter",
 			"LaserSight",
 			"Light",
+			"smoke1",
+			"smoke2",
+			"smoke3",
+			"smoke4",
+			"smoke5",
 		};
 
 		enum class SHOTTYPE {
@@ -90,6 +100,18 @@ namespace FPS_n2 {
 		enum class RELOADTYPE {
 			AMMO,
 			MAG,
+		};
+
+		enum class STOCKTYPE {
+			none,
+			curve,
+			straight,
+			Max,
+		};
+		static const char* STOCKTYPEName[static_cast<int>(STOCKTYPE::Max)] = {
+			"none",
+			"curve",
+			"straight",
 		};
 
 		enum class EnumGunSound {
