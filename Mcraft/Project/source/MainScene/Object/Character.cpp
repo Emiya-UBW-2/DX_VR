@@ -145,8 +145,8 @@ namespace FPS_n2 {
 				default:
 					break;
 				}
-				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {//自機はヘッショされない
-					Damage = 0;
+				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {//無敵debug
+					//Damage = 0;
 				}
 				//ダメージ登録
 				if (AttackID >= 0) {

@@ -113,23 +113,16 @@ namespace FPS_n2 {
 					Charas::CharacterObj::LoadChara("Soldier", (PlayerID)loop);
 
 					int Rand = GetRand(100);
-					int rate = 100 / 5;
+					int rate = 100 / 3;
 					if (Rand < rate) {
 						chara->LoadCharaGun("type89", 0);
 					}
 					else if (Rand < rate * 2) {
-						chara->LoadCharaGun("type20E", 0);
-					}
-					else if (Rand < rate * 3) {
-						chara->LoadCharaGun("M700", 0);
-					}
-					else if (Rand < rate * 4) {
 						chara->LoadCharaGun("AKS-74", 0);
 					}
 					else {
 						chara->LoadCharaGun("Mod870", 0);
 					}
-					//chara->LoadCharaGun("AKS-74", 0);
 					chara->LoadCharaGun("RGD5", 2);
 					//ラグドール
 					chara->SetRagDoll().Duplicate(m_RagDoll);
