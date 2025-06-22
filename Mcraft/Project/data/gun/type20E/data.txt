@@ -27,5 +27,8 @@ Slot1IsNeed=true
 Slot1Item=ACOG
 
 Open=0
+ReloadStart_Empty=1
+ReloadStart=1
+ReloadEnd=1
 
 end

@@ -16,7 +16,7 @@ shottype=FULL
 usehumanAnim=4
 soundsel=3
 reloadType=MAG
-stockType=straight
+stockType=curve
 
 Slot0Type=Magazine
 Slot0IsNeed=true
@@ -24,5 +24,8 @@ Slot0Item=AK_6L20
 
 Cocking=0
 Open=1
+ReloadStart_Empty=2
+ReloadStart=2
+ReloadEnd=2
 
 end

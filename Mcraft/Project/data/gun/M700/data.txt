@@ -15,7 +15,7 @@ RecoilScaleRate=1
 shottype=BOLT
 usehumanAnim=5
 soundsel=2
-reloadType=AMMO
+reloadType=MAG
 stockType=curve
 
 Slot0Type=Magazine
