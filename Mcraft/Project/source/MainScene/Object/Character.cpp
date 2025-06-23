@@ -253,7 +253,13 @@ namespace FPS_n2 {
 					if (GetGunPtrNow()->GetCanShot()) {
 						//武器を眺める
 						if (this->m_Input.GetPADSPress(Controls::PADS::CHECK)) {
-							GetGunPtrNow()->SetGunAnime(GunAnimeID::Watch);
+							if (this->m_CanWatch) {
+								GetGunPtrNow()->SetGunAnime(GunAnimeID::Watch);
+								this->m_CanWatch = false;
+							}
+						}
+						else {
+							this->m_CanWatch = true;
 						}
 						if (!GetGunPtrNow()->GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
 							//Reload

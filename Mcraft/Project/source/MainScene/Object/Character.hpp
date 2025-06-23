@@ -44,6 +44,7 @@ namespace FPS_n2 {
 			bool												m_ConcussionSwitch{};
 			float												m_Concussion{ 0.0f };
 			float												m_ConcussionPer{ 0.0f };
+			bool												m_CanWatch{ true };
 		private://キャッシュ
 			Matrix3x3DX											m_EyeRotationCache{};
 			Vector3DX											m_EyePositionCache{};
