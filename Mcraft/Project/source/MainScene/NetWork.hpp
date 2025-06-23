@@ -9,7 +9,7 @@ namespace FPS_n2 {
 #if DEBUG_NET
 		static const int		Player_num = 2;
 #else
-		static const int		Player_num = 10;
+		static const int		Player_num = 5;
 #endif
 
 		using NetTime = LONGLONG;

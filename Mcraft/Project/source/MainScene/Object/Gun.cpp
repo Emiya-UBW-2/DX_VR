@@ -585,18 +585,25 @@ namespace FPS_n2 {
 					}
 
 					//破壊
-					int								xput = 6;
+					int								xput = 8;
 					int								yput = 8;
-					int								zput = 6;
+					int								zput = 8;
 					auto Put = BackGroundParts->GetPoint(grenade->GetMove().GetPos());
+					bool IsChanged = false;
 					for (int xp = -xput / 2; xp < xput / 2; ++xp) {
 						for (int yp = 0; yp < yput; ++yp) {
 							for (int zp = -zput / 2; zp < zput / 2; ++zp) {
-								BackGroundParts->DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, 100);
+								if (BackGroundParts->DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, 100)) {
+									IsChanged = true;
+								}
 							}
 						}
 					}
-					BackGroundParts->UpdateOnce();
+					if (IsChanged) {
+						BackGroundParts->UpdateOnce();
+						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(Put.x, Put.y, Put.z),
+							Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f)))), 3.0f + GetRandf(2.0f), 3.0f);
+					}
 				}
 			}
 		}

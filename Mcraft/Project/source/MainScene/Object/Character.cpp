@@ -146,7 +146,7 @@ namespace FPS_n2 {
 					break;
 				}
 				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {//無敵debug
-					//Damage = 0;
+					Damage = 0;
 				}
 				//ダメージ登録
 				if (AttackID >= 0) {
@@ -399,6 +399,7 @@ namespace FPS_n2 {
 					if (GetObj().GetAnim(static_cast<int>(CharaAnimeID::Rappelling)).TimeEnd()) {
 						this->m_IsRappelling = false;
 						this->m_IsRappellingEnd = false;
+						GetGunPtrNow()->SetGunAnime(GunAnimeID::Base);
 					}
 				}
 			}

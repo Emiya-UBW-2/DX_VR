@@ -714,6 +714,20 @@ namespace FPS_n2 {
 		}
 		//
 		bool		BackGroundControl::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
+			if (isnan<float>(StartPos.x) || isnan<float>(StartPos.y) || isnan<float>(StartPos.z)) {
+				return false;
+			}
+			if (isnan<float>((*EndPos).x) || isnan<float>((*EndPos).y) || isnan<float>((*EndPos).z)) {
+				return false;
+			}
+			float scale = 200.f * Scale3DRate;
+			auto SP = StartPos; SP.y = 0.f;
+			auto EP = (*EndPos); SP.y = 0.f;
+			if ((SP.sqrMagnitude() > scale * scale) || (EP.sqrMagnitude() > scale * scale)) {
+				return false;
+			}
+
+
 			auto Start = GetReferenceCells().GetPoint(StartPos);
 			auto End = GetReferenceCells().GetPoint(*EndPos);// *EndPos
 

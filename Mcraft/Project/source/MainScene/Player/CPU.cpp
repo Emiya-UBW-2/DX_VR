@@ -439,7 +439,9 @@ namespace FPS_n2 {
 				//
 				this->m_ShotTimer = std::max(this->m_ShotTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 				if (this->m_ShotTimer == 0.f) {
-					m_MyInput.SetInputPADS(Controls::PADS::SHOT, true);
+					if (MyChara->GetCanLookByPlayer()) {
+						m_MyInput.SetInputPADS(Controls::PADS::SHOT, true);
+					}
 					this->m_ShotTimer = MyChara->GetCanLookByPlayer() ? (static_cast<float>(10 + GetRand(100)) / 100.f) : (static_cast<float>(50 + GetRand(400)) / 100.f);
 				}
 				//
