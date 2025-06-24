@@ -573,7 +573,8 @@ namespace FPS_n2 {
 				PosBuf += GetMove().GetVec();
 				//壁判定
 				if (GetMove().GetVec().sqrMagnitude() > 0.01f * 0.01f) {
-					BackGroundParts->CheckMapWall(GetMove().GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * (1.6f * Scale3DRate), 0.7f * Scale3DRate);
+					
+					BackGroundParts->CheckMapWall(GetMove().GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * ((this->GetIsSquat() ? 0.8f : 1.6f) * Scale3DRate), 0.7f * Scale3DRate);
 				}
 				//ほかプレイヤーとの判定
 				{

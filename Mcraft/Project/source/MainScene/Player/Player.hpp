@@ -82,6 +82,8 @@ namespace FPS_n2 {
 	
 			std::shared_ptr<Objects::VehicleObj>		m_VehicleObj;
 			std::shared_ptr<Objects::HelicopterObj>		m_HelicopterObj;
+		public:
+			float										m_FindCount{};
 		private:
 			PlayerManager(void) noexcept {}
 			PlayerManager(const PlayerManager&) = delete;

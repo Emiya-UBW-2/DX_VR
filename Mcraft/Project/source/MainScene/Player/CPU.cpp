@@ -401,13 +401,16 @@ namespace FPS_n2 {
 				if (MyChara->GetCanLookByPlayer()) {
 					this->m_CheckAgain = 0.f;
 					this->m_Phase = ENUM_AI_PHASE::Shot;
-					if (GetLengthToTarget() < 10.f * Scale3DRate) {
-						auto SE = SoundPool::Instance();
-						if (GetRand(1) == 0) {
-							SE->Get(SoundType::SE, (int)SoundEnum::Man_contact)->Play3D(MyPos, Scale3DRate * 10.f);
-						}
-						else {
-							SE->Get(SoundType::SE, (int)SoundEnum::Man_openfire)->Play3D(MyPos, Scale3DRate * 10.f);
+					if (PlayerMngr->m_FindCount <= 0.f) {
+						PlayerMngr->m_FindCount = 10.f;
+						if (GetLengthToTarget() < 10.f * Scale3DRate) {
+							auto SE = SoundPool::Instance();
+							if (GetRand(1) == 0) {
+								SE->Get(SoundType::SE, (int)SoundEnum::Man_contact)->Play3D(MyPos, Scale3DRate * 10.f);
+							}
+							else {
+								SE->Get(SoundType::SE, (int)SoundEnum::Man_openfire)->Play3D(MyPos, Scale3DRate * 10.f);
+							}
 						}
 					}
 				}

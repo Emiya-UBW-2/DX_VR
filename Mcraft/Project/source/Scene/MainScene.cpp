@@ -406,6 +406,7 @@ namespace FPS_n2 {
 
 			//PlayerMngr->GetVehicle()->SetInput(MyInput, true);
 
+			PlayerMngr->m_FindCount = std::max(PlayerMngr->m_FindCount - DXLib_refParts->GetDeltaTime(), 0.f);
 			//Update
 			ObjMngr->UpdateObject();
 			ObjMngr->LateUpdateObject();
