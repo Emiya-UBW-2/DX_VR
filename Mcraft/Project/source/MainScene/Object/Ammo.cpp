@@ -77,14 +77,13 @@ namespace FPS_n2 {
 					for (int xp = -xput / 2; xp <= xput / 2; ++xp) {
 						for (int yp = -yput / 2; yp <= yput / 2; ++yp) {
 							for (int zp = -zput / 2; zp <= zput / 2; ++zp) {
-								if (BackGroundParts->DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, 50)) {
+								if (BackGroundParts->DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, 34)) {
 									IsChanged = true;
 								}
 							}
 						}
 					}
 					if (IsChanged) {
-						BackGroundParts->UpdateOnce();
 						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(Put.x, Put.y, Put.z),
 							Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f)))), 3.0f + GetRandf(2.0f), 3.0f);
 					}

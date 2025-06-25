@@ -344,7 +344,6 @@ namespace FPS_n2 {
 					}
 				}
 				if (IsBreak>0) {
-					BackGroundParts->UpdateOnce();
 					if (IsBreak > 20) {
 						//this->m_speed_add *= 0.5f;
 						//this->m_speed_sub *= 0.5f;

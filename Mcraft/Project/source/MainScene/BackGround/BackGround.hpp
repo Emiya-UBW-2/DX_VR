@@ -326,6 +326,7 @@ namespace FPS_n2 {
 			//0~TotalCellLayer-1 : 表示ポリゴンスレッド用
 			//TotalCellLayer~:影スレッド用
 			std::array<Draw, TotalCellLayer + TotalCellLayer>	m_Draws;
+			bool							m_isChangeBlock{ false };
 		private:
 			BackGroundControl(void) noexcept { Load(); }
 			BackGroundControl(const BackGroundControl&) = delete;
@@ -894,6 +895,7 @@ namespace FPS_n2 {
 				SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Life -= Damage;
 				if (cell.Life <= 0) {
 					SetBlick(xpos, ypos, zpos, BackGround::s_EmptyBlick);
+					m_isChangeBlock = true;
 					return true;
 				}
 				else if (cell.Life <= 50) {
@@ -907,9 +909,6 @@ namespace FPS_n2 {
 			void			Load(void) noexcept;
 			//
 			void			Init(void) noexcept;
-			//
-			void			UpdateOnce(void) noexcept;
-
 			void			Update(void) noexcept;
 			//
 			void			BG_Draw(void) const noexcept;

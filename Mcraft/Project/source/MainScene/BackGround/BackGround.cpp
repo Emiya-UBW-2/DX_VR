@@ -1395,14 +1395,17 @@ namespace FPS_n2 {
 				[&]() { FlipShadowCubes(3); }, true);
 			SettingChange();
 			this->m_ThreadCounter = 0;
-		}
-		void		BackGroundControl::UpdateOnce(void) noexcept {
-			for (int loop = 0; loop < TotalCellLayer; ++loop) {
-				this->m_Jobs[static_cast<size_t>(TotalCellLayer + loop)].JobStart();
-			}
+			this->m_isChangeBlock = false;
 		}
 		//
 		void		BackGroundControl::Update(void) noexcept {
+			if (this->m_isChangeBlock) {
+				this->m_isChangeBlock = false;
+				//UpdateOnce
+				for (int loop = 0; loop < TotalCellLayer; ++loop) {
+					this->m_Jobs[static_cast<size_t>(TotalCellLayer + loop)].JobStart();
+				}
+			}
 			auto* OptionParts = OptionManager::Instance();
 			for (int loop = 0; loop < TotalCellLayer; ++loop) {
 				if ((loop != 0) && (loop != this->m_ThreadCounter)) { continue; }
