@@ -157,14 +157,14 @@ namespace FPS_n2 {
 			//
 			BackGround::BackGroundControl::Instance()->Init();
 			//
-			Vector3DX LightVec = Vector3DX::vget(0.05f, -0.3f, 0.15f); LightVec = LightVec.normalized();
+			Vector3DX LightVec = Vector3DX::vget(0.05f, -0.2f, -0.15f); LightVec = LightVec.normalized();
 			PostPassParts->SetAmbientLight(LightVec);
 
 			SetLightEnable(false);
 
 			auto& FirstLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec);
-			SetLightAmbColorHandle(FirstLight.get(), GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
-			SetLightDifColorHandle(FirstLight.get(), GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
+			SetLightAmbColorHandle(FirstLight.get(), GetColorF(1.0f, 0.9f, 0.8f, 1.0f));
+			SetLightDifColorHandle(FirstLight.get(), GetColorF(1.0f, 0.9f, 0.8f, 1.0f));
 
 			PostPassParts->SetGodRayPer(0.5f);
 			//Cam

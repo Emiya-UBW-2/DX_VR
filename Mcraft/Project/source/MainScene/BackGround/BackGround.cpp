@@ -1049,7 +1049,6 @@ namespace FPS_n2 {
 		//
 		void		BackGroundControl::Init(void) noexcept {
 			//空
-			this->m_ObjSky.SetScale(Vector3DX::vget(10.0f, 10.0f, 10.0f));
 			this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
 			for (int loop = 0, num = this->m_ObjSky.GetMaterialNum(); loop < num; ++loop) {
 				//this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.5f, 0.5f, 0.5f, 1.0f));

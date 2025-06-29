@@ -10,7 +10,6 @@ namespace FPS_n2 {
 		}
 		void			TitleScene::Set_Sub(void) noexcept {
 			//空
-			this->m_ObjSky.SetScale(Vector3DX::vget(10.0f, 10.0f, 10.0f));
 			this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
 			for (int loop = 0, num = this->m_ObjSky.GetMaterialNum(); loop < num; ++loop) {
 				//this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.5f, 0.5f, 0.5f, 1.0f));
@@ -25,14 +24,14 @@ namespace FPS_n2 {
 			// 
 			PostPassParts->SetShadowScale(0.5f);
 			//
-			Vector3DX LightVec = Vector3DX::vget(0.05f, -0.3f, 0.15f); LightVec = LightVec.normalized();
+			Vector3DX LightVec = Vector3DX::vget(0.05f, -0.2f, -0.15f); LightVec = LightVec.normalized();
 			PostPassParts->SetAmbientLight(LightVec);
 
 			SetLightEnable(false);
 
 			auto& FirstLight = LightPool::Instance()->Put(LightType::DIRECTIONAL, LightVec);
-			SetLightAmbColorHandle(FirstLight.get(), GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
-			SetLightDifColorHandle(FirstLight.get(), GetColorF(1.0f, 0.96f, 0.94f, 1.0f));
+			SetLightAmbColorHandle(FirstLight.get(), GetColorF(1.0f, 0.9f, 0.8f, 1.0f));
+			SetLightDifColorHandle(FirstLight.get(), GetColorF(1.0f, 0.9f, 0.8f, 1.0f));
 
 			PostPassParts->SetGodRayPer(0.5f);
 
