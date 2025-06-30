@@ -1,0 +1,9 @@
+Name=S-5 Rocket
+ammo_cal(mm)=55.0
+ammo_speed(m/s)=20
+ammo_pene(mm)=130
+ammo_damage=50
+FallSound=0
+Pellets=1
+Accuracy=0.2
+UseEffect=7

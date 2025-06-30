@@ -20,22 +20,12 @@ namespace FPS_n2 {
 			Vector3DX		m_repos;
 
 			bool			m_IsDrawLine{ false };
+
+			int				m_EffectUniqueID{ InvalidID };
+			float			m_EffectTimer{ 0.0f };
 		public:
 			//接地
-			void			Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos ,const Vector3DX& vec, int myID) {
-				this->m_RicochetCnt = 0;
-				this->m_pos = pos;
-				this->m_repos = pos;
-				this->m_vec = vec;
-				this->m_AmmoData = pAmmoData;
-				this->m_speed = (*this->m_AmmoData)->GetSpeed() * Scale3DRate;
-				this->m_penetration = (*this->m_AmmoData)->GetPenetration();
-				this->m_yAdd = 0.0f;
-				this->m_Timer = 0.0f;
-				this->m_ShootCheraID = myID;
-				SetActive(true);
-				this->m_IsDrawLine = true;
-			}
+			void			Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos, const Vector3DX& vec, int myID) noexcept;
 			/*
 			//跳ね返された
 			const auto		PenetrationCheck(float pArmer, const Vector3DX& normal) const noexcept { return (this->m_penetration > (pArmer * (1.0f / std::abs(Vector3DX::Dot(this->m_vec.normalized(), normal))))); }
@@ -90,6 +80,12 @@ namespace FPS_n2 {
 					ammo.reset();
 				}
 				this->m_AmmoList.clear();
+			}
+		public:
+			void FirstUpdate() noexcept {
+				for (auto& ammo : this->m_AmmoList) {
+					ammo->FirstUpdate();
+				}
 			}
 		public:
 			void Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos, const Vector3DX& vec, int myID) noexcept {

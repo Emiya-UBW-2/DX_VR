@@ -254,6 +254,17 @@ namespace FPS_n2 {
 		void		Update_LoopEffect(Effect ID, const Vector3DX& pos, const Vector3DX& nomal, float scale = 1.0f) noexcept {
 			this->m_EffectControl.Update_LoopEffect(static_cast<EffectControl::EffectID>(ID), pos, nomal, scale);
 		}
+
+		void		StopEffectAny(Effect ID, int UniqueID) noexcept {
+			this->m_EffectControl.StopEffectAny(static_cast<EffectControl::EffectID>(ID), UniqueID);
+		}
+		int 		SetLoopAny(Effect ID, const Vector3DX& pos) noexcept {
+			return this->m_EffectControl.SetLoopAny(static_cast<EffectControl::EffectID>(ID), pos);
+		}
+		void		Update_LoopAnyEffect(Effect ID, int UniqueID, const Vector3DX& pos, const Vector3DX& nomal, float scale = 1.0f) noexcept {
+			this->m_EffectControl.Update_LoopAnyEffect(static_cast<EffectControl::EffectID>(ID), UniqueID, pos, nomal, scale);
+		}
+
 		void		SetOnce(Effect ID, const Vector3DX& pos, const Vector3DX& nomal, float scale = 1.0f) noexcept {
 			this->m_EffectControl.SetOnce(static_cast<EffectControl::EffectID>(ID), pos, nomal, scale);
 		}

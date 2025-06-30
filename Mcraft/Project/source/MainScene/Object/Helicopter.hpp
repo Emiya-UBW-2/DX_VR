@@ -10,6 +10,8 @@ namespace FPS_n2 {
 			GunAngle,
 			Rappelling1,
 			Rappelling2,
+			rocket1,
+			rocket2,
 			Max,
 		};
 		static const char* HeliFrameName[static_cast<int>(HeliFrame::Max)] = {
@@ -17,6 +19,8 @@ namespace FPS_n2 {
 			"機銃仰角",
 			"Aキャビン下",
 			"Bキャビン下",
+			"rocket1",
+			"rocket2",
 		};
 
 
@@ -66,6 +70,10 @@ namespace FPS_n2 {
 			//
 			DamageEventControl									m_Damage;
 			//
+			float m_RocketReloadTimer{};
+			int m_RocketGunAmmo{ 20 };
+			float m_RocketShotTimer{};
+			int m_RocketSpecID{};
 
 			float m_ReloadTimer{};
 			int m_GunAmmo{ 5 };
@@ -124,10 +132,8 @@ namespace FPS_n2 {
 				this->m_ReloadTimer = 2.0f;
 				this->m_GunAmmo = 5;
 
-				std::string ChildPath = "data/ammo/";
-				ChildPath += "APIB32";
-				ChildPath += "/";
-				this->m_AmmoSpecID = Objects::AmmoDataManager::Instance()->Add(ChildPath);
+				this->m_AmmoSpecID = Objects::AmmoDataManager::Instance()->Add("data/ammo/APIB32/");
+				this->m_RocketSpecID = Objects::AmmoDataManager::Instance()->Add("data/ammo/rocket/");
 			}
 			void				FirstUpdate(void) noexcept override;
 			void				DrawShadow(void) noexcept override {

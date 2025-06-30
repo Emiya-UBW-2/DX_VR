@@ -131,6 +131,7 @@ namespace FPS_n2 {
 		ef_dust,			// まわりの埃
 		ef_break,			// ブロック破壊
 		ef_shotdust,		// 発砲時の煙
+		ef_rocket,
 	};
 
 	typedef char PlayerID;

@@ -112,6 +112,34 @@ namespace FPS_n2 {
 				this->m_ShotTimer = std::max(this->m_ShotTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
 			}
 
+			if (this->m_RocketGunAmmo == 0) {
+				this->m_RocketReloadTimer = std::max(this->m_RocketReloadTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
+				if (this->m_RocketReloadTimer <= 0.0f) {
+					this->m_RocketGunAmmo = 20;
+				}
+			}
+			else {
+				this->m_RocketReloadTimer = 5.0f;
+			}
+			if (this->m_RocketShotTimer == 0.0f) {
+				if (this->m_CanShot && (this->m_HelicopterMove == HelicopterMove::Intercept)) {
+					this->m_RocketShotTimer = 0.5f;
+					Vector3DX MuzzlePos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>((m_RocketGunAmmo % 2 == 0) ? HeliFrame::rocket1 : HeliFrame::rocket2))).pos();
+					Vector3DX MuzzleVec = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>((m_RocketGunAmmo % 2 == 0) ? HeliFrame::rocket1 : HeliFrame::rocket2))).zvec2();
+					MuzzlePos += MuzzleVec * (1.0f * Scale3DRate);
+
+					auto& AmmoData = Objects::AmmoDataManager::Instance()->Get(this->m_RocketSpecID);
+
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Shot1))->Play3D(GetMove().GetPos(), 100.0f * Scale3DRate);													//サウンド
+					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, 0.1f * Scale3DRate, 2.0f);	//銃発砲エフェクトのセット
+					Objects::AmmoPool::Instance()->Put(&AmmoData, MuzzlePos, MuzzleVec, this->m_MyPlayerID);
+					--this->m_RocketGunAmmo;
+				}
+			}
+			else {
+				this->m_RocketShotTimer = std::max(this->m_RocketShotTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
+			}
+
 			m_Timer += DXLib_refParts->GetDeltaTime();
 
 			switch (this->m_HelicopterMove) {

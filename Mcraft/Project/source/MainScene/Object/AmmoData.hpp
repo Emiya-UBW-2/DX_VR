@@ -13,6 +13,7 @@ namespace FPS_n2 {
 			int				m_Pellet{ 1 };
 			float			m_Accuracy{ 0.0f };
 			int				m_FallSound{ 0 };
+			int				m_EffectID{ -1 };
 		public://getter
 			const auto& GetPath(void) const noexcept { return this->m_path; }
 			const auto& GetName(void) const noexcept { return this->m_name; }
@@ -23,6 +24,7 @@ namespace FPS_n2 {
 			const auto& GetPellet(void) const noexcept { return this->m_Pellet; }
 			const auto& GetAccuracy(void) const noexcept { return this->m_Accuracy; }
 			const auto& GetFallSound(void) const noexcept { return this->m_FallSound; }
+			const auto& GetEffectID(void) const noexcept { return this->m_EffectID; }
 		public:
 			AmmoData(std::string path_) noexcept { Set(path_); }
 		private:
@@ -68,6 +70,9 @@ namespace FPS_n2 {
 						}
 						else if (LEFT == "FallSound") {
 							this->m_FallSound = std::stoi(RIGHT);				//ペレットの数
+						}
+						else if (LEFT == "UseEffect") {
+							this->m_EffectID = std::stoi(RIGHT);
 						}
 					}
 				}

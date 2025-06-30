@@ -8,12 +8,46 @@ const FPS_n2::Objects::AmmoPool* SingletonBase<FPS_n2::Objects::AmmoPool>::m_Sin
 
 namespace FPS_n2 {
 	namespace Objects {
+		void		AmmoObj::Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos, const Vector3DX& vec, int myID) noexcept {
+			this->m_RicochetCnt = 0;
+			this->m_pos = pos;
+			this->m_repos = pos;
+			this->m_vec = vec;
+			this->m_AmmoData = pAmmoData;
+			this->m_speed = (*this->m_AmmoData)->GetSpeed() * Scale3DRate;
+			this->m_penetration = (*this->m_AmmoData)->GetPenetration();
+			this->m_yAdd = 0.0f;
+			this->m_Timer = 0.0f;
+			this->m_ShootCheraID = myID;
+			SetActive(true);
+			this->m_IsDrawLine = true;
+			this->m_EffectTimer = 5.f;
+
+			if ((*this->m_AmmoData)->GetEffectID() != -1) {
+				if (this->m_EffectUniqueID != InvalidID) {
+					EffectSingleton::Instance()->StopEffectAny(Effect::ef_rocket, this->m_EffectUniqueID);
+				}
+				this->m_EffectUniqueID = EffectSingleton::Instance()->SetLoopAny(Effect::ef_rocket, this->m_pos);
+			}
+		}
 		void		AmmoObj::FirstUpdate(void) noexcept {
+			auto* DXLib_refParts = DXLib_ref::Instance();
+
 			if (!IsActive()) {
 				this->m_IsDrawLine = false;
+				if (this->m_AmmoData && (this->m_EffectUniqueID != InvalidID)) {
+					if (this->m_EffectTimer < 0.f) {
+						if ((*this->m_AmmoData)->GetEffectID() != -1) {
+							EffectSingleton::Instance()->StopEffectAny(Effect::ef_rocket, this->m_EffectUniqueID);
+							this->m_EffectUniqueID = InvalidID;
+						}
+					}
+					else {
+						this->m_EffectTimer -= DXLib_refParts->GetDeltaTime();
+					}
+				}
 				return;
 			}
-			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			auto* SE = SoundPool::Instance();
@@ -62,12 +96,21 @@ namespace FPS_n2 {
 					int								xput = 4;
 					int								yput = 2;
 					int								zput = 4;
+					int								damage = 34;
+					if ((*this->m_AmmoData)->GetCaliber() >= 0.025f) {
+						damage = 100;
+						xput = 9;
+						yput = 9;
+						zput = 9;
+					}
 					if ((*this->m_AmmoData)->GetCaliber() >= 0.0127f) {
+						damage = 50;
 						xput = 6;
 						yput = 3;
 						zput = 6;
 					}
 					if ((*this->m_AmmoData)->GetCaliber() > 0.050f) {
+						damage = 34;
 						xput = 8;
 						yput = 5;
 						zput = 8;
@@ -77,7 +120,7 @@ namespace FPS_n2 {
 					for (int xp = -xput / 2; xp <= xput / 2; ++xp) {
 						for (int yp = -yput / 2; yp <= yput / 2; ++yp) {
 							for (int zp = -zput / 2; zp <= zput / 2; ++zp) {
-								if (BackGroundParts->DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, 34)) {
+								if (BackGroundParts->DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, damage)) {
 									IsChanged = true;
 								}
 							}
@@ -99,6 +142,9 @@ namespace FPS_n2 {
 			}
 			this->m_Timer += DXLib_refParts->GetDeltaTime();
 			this->m_pos = pos_tmp;
+			if ((*this->m_AmmoData)->GetEffectID() != -1) {
+				EffectSingleton::Instance()->Update_LoopAnyEffect(Effect::ef_rocket, this->m_EffectUniqueID, this->m_pos, this->m_vec, 1.0f);
+			}
 		}
 	}
 }
