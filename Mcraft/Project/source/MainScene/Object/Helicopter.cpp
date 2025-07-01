@@ -74,7 +74,7 @@ namespace FPS_n2 {
 				float YVec = std::clamp(std::atan2f(-Vec.x, -Vec.z), deg2rad(-90), deg2rad(90));
 				float XVec = std::clamp(std::atan2f(Vec.y, std::hypotf(Vec.x, Vec.z)), deg2rad(-90), deg2rad(0));
 
-				this->m_CanShot = (this->m_GunAmmo > 0) && (deg2rad(-90) < YVec && YVec < deg2rad(90)) && (deg2rad(-90) < XVec && XVec < deg2rad(0));
+				this->m_CanShot = (deg2rad(-90) < YVec && YVec < deg2rad(90)) && (deg2rad(-90) < XVec && XVec < deg2rad(0));
 				if (this->m_HelicopterMove != HelicopterMove::Intercept) {
 					XVec = 0.0f;
 					YVec = 0.0f;
@@ -94,7 +94,7 @@ namespace FPS_n2 {
 				this->m_ReloadTimer = 2.0f;
 			}
 			if (this->m_ShotTimer == 0.0f) {
-				if (this->m_CanShot && (this->m_HelicopterMove == HelicopterMove::Intercept)) {
+				if (this->m_CanShot && (this->m_GunAmmo > 0) && (this->m_HelicopterMove == HelicopterMove::Intercept)) {
 					this->m_ShotTimer = 0.2f;
 					Vector3DX MuzzlePos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::GunAngle))).pos();
 					Vector3DX MuzzleVec = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::GunAngle))).zvec2();
@@ -122,15 +122,15 @@ namespace FPS_n2 {
 				this->m_RocketReloadTimer = 5.0f;
 			}
 			if (this->m_RocketShotTimer == 0.0f) {
-				if (this->m_CanShot && (this->m_HelicopterMove == HelicopterMove::Intercept)) {
-					this->m_RocketShotTimer = 0.5f;
+				if (this->m_CanShot && (this->m_RocketGunAmmo > 0) && (this->m_HelicopterMove == HelicopterMove::Intercept)) {
+					this->m_RocketShotTimer = 0.15f;
 					Vector3DX MuzzlePos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>((m_RocketGunAmmo % 2 == 0) ? HeliFrame::rocket1 : HeliFrame::rocket2))).pos();
 					Vector3DX MuzzleVec = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>((m_RocketGunAmmo % 2 == 0) ? HeliFrame::rocket1 : HeliFrame::rocket2))).zvec2();
 					MuzzlePos += MuzzleVec * (1.0f * Scale3DRate);
 
 					auto& AmmoData = Objects::AmmoDataManager::Instance()->Get(this->m_RocketSpecID);
 
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Shot1))->Play3D(GetMove().GetPos(), 100.0f * Scale3DRate);													//サウンド
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::rolling_rocket))->Play3D(GetMove().GetPos(), 100.0f * Scale3DRate);													//サウンド
 					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, 0.1f * Scale3DRate, 2.0f);	//銃発砲エフェクトのセット
 					Objects::AmmoPool::Instance()->Put(&AmmoData, MuzzlePos, MuzzleVec, this->m_MyPlayerID);
 					--this->m_RocketGunAmmo;

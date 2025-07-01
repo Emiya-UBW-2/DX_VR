@@ -48,6 +48,7 @@ namespace FPS_n2 {
 		Explosion,
 		//
 		Trigger,
+		rolling_rocket,
 		//
 		Cocking1_0,
 		Cocking1_1,

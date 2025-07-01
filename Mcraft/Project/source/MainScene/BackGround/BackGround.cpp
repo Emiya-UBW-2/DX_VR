@@ -1098,6 +1098,8 @@ namespace FPS_n2 {
 							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(xpos)) / (Size * Rate - 1),
 								(static_cast<float>(zpos)) / (Size * Rate - 1)) * static_cast<float>(GetReferenceCells().All * 1 / 10));
+
+							//Height = GetReferenceCells().All / 8-15;
 							if (Maxheight < Height) {
 								Maxheight = Height;
 							}
@@ -1121,6 +1123,7 @@ namespace FPS_n2 {
 							auto Height = static_cast<int>(ns.octaveNoise(2, 
 								(static_cast<float>(xpos + xt)) / (Size * Rate),
 								(static_cast<float>(zpos + zt)) / (Size * Rate)) * static_cast<float>(GetReferenceCells().All * 1 / 10));
+							//Height = GetReferenceCells().All / 8 - 15;
 							for (int ypos = Height; ypos <= Height + Heights; ++ypos) {
 								SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos, ypos, GetReferenceCells().Half + zPos).Cell = 2;
 							}

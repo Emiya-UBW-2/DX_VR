@@ -21,7 +21,7 @@ namespace FPS_n2 {
 			this->m_ShootCheraID = myID;
 			SetActive(true);
 			this->m_IsDrawLine = true;
-			this->m_EffectTimer = 5.f;
+			this->m_EffectTimer = 1.f;
 
 			if ((*this->m_AmmoData)->GetEffectID() != -1) {
 				if (this->m_EffectUniqueID != InvalidID) {

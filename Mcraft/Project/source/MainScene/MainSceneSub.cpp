@@ -86,6 +86,7 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::CartFall), 6, "data/Sound/SE/gun/case.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::MagFall), 6, "data/Sound/SE/gun/ModFall.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Trigger), 1, "data/Sound/SE/gun/trigger.wav");
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::rolling_rocket), 1, "data/Sound/SE/rolling_rocket.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Pin), 4, "data/Sound/SE/pin.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Throw), 4, "data/Sound/SE/throw.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::FallGrenade), 4, "data/Sound/SE/fallgrenade.wav");
@@ -124,6 +125,7 @@ namespace FPS_n2 {
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::CartFall))->SetLocalVolume(48);
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::MagFall))->SetLocalVolume(48);
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Trigger))->SetLocalVolume(48);
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::rolling_rocket))->SetLocalVolume(128);
 			//SE->Get(SoundType::SE, static_cast<int>(SoundEnum::AmmoLoad))->SetLocalVolume(48);
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Shot2))->SetLocalVolume(216);
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Shot3))->SetLocalVolume(216);
@@ -146,6 +148,7 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::CartFall));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::MagFall));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Trigger));
+			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::rolling_rocket));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Pin));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Throw));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::FallGrenade));

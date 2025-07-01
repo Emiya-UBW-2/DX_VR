@@ -180,7 +180,7 @@ namespace FPS_n2 {
 			SetFogEnable(true);
 			SetFogMode(DX_FOGMODE_LINEAR);
 			SetFogStartEnd(FarMax, FarMax * 20.0f);
-			SetFogColor(114, 120, 128);
+			SetFogColor(128, 110, 110);
 			//
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
