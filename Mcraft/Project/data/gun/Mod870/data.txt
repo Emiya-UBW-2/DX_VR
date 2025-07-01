@@ -14,7 +14,7 @@ RecoilReturn=0.95
 RecoilScaleRate=1
 shottype=PUMP
 usehumanAnim=2
-soundsel=2
+soundsel=0
 reloadType=AMMO
 stockType=curve
 
