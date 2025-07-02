@@ -165,7 +165,7 @@ namespace FPS_n2 {
 				Vector3DX posBuf = pPos;
 				if (CheckGround) {
 					Vector3DX EndPos = posBuf - Vector3DX::up() * 200.0f * Scale3DRate;
-					if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(posBuf + Vector3DX::up() * 200.0f * Scale3DRate, &EndPos)) {
+					if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(posBuf + Vector3DX::up() * 200.0f * Scale3DRate, &EndPos) != 0) {
 						posBuf = EndPos;
 					}
 				}

@@ -197,7 +197,7 @@ namespace FPS_n2 {
 				auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 				auto TgtPos = TargetChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos();
 
-				auto MyPos = MyChara->GetEyePositionCache();
+				Vector3DX MyPos = MyChara->GetEyePositionCache();
 
 				LengthToTarget = (TgtPos - MyPos).magnitude();
 				VectorToTarget = (TgtPos - MyPos).normalized();
@@ -214,7 +214,7 @@ namespace FPS_n2 {
 				auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 				auto TgtPos = TargetChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos();
 
-				auto MyPos = MyChara->GetEyePositionCache();
+				Vector3DX MyPos = MyChara->GetEyePositionCache();
 
 				LengthToTarget = (TgtPos - MyPos).magnitude();
 				VectorToTarget = (TgtPos - MyPos).normalized();
@@ -232,8 +232,8 @@ namespace FPS_n2 {
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 				auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos();
-				auto MyPos = MyChara->GetEyePositionCache();
+				Vector3DX TgtPos = TargetChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos();
+				Vector3DX MyPos = MyChara->GetEyePositionCache();
 
 				auto Target = TgtPos;
 				std::vector<int> SelList;
@@ -296,12 +296,12 @@ namespace FPS_n2 {
 					else {
 						if ((TgtPos - EndPos).magnitude() >= 15.f * Scale3DRate) { continue; }
 					}
-					if (BackGroundParts->CheckLinetoMap(TgtPos, &EndPos)) { break; }
+					if (BackGroundParts->CheckLinetoMap(TgtPos, &EndPos) != 0) { break; }
 				}
 
 				/*
 				Vector3DX EndPos = pos_t + Vector3DX::up() * 10.f*Scale3DRate;
-				if (BackGroundParts->CheckLinetoMap(pos_t + Vector3DX::up() * -10.f*Scale3DRate, &EndPos, false)) {
+				if (BackGroundParts->CheckLinetoMap(pos_t + Vector3DX::up() * -10.f*Scale3DRate, &EndPos, false) != 0) {
 					pos_t = EndPos;
 				}
 				//*/
@@ -383,7 +383,7 @@ namespace FPS_n2 {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
-				auto MyPos = MyChara->GetEyePositionCache();
+				Vector3DX MyPos = MyChara->GetEyePositionCache();
 				//
 				/*
 				if (this->m_MoveFrontTimer > 6.f) {

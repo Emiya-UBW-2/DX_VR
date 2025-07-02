@@ -170,7 +170,7 @@ namespace FPS_n2 {
 					auto startpos = GetObj().GetFramePosition(frame.GetFrameID()) - GetMove().GetMat().yvec() * frame.GetFrameWorldPosition().pos().y;
 					auto pos1 = startpos + GetMove().GetMat().yvec() * (1.0f * Scale3DRate);
 					auto pos2 = startpos + GetMove().GetMat().yvec() * (-0.1f * Scale3DRate);
-					auto ColRes = BackGroundParts->CheckLinetoMap(pos1, &pos2);
+					auto ColRes = BackGroundParts->CheckLinetoMap(pos1, &pos2) != 0;
 					Easing(&height, (ColRes) ? (pos2.y - startpos.y) : -0.1f * Scale3DRate, 0.9f, EasingType::OutExpo);
 					SetObj().SetFrameLocalMatrix(frame.GetFrameID(),
 						Matrix4x4DX::RotAxis(Vector3DX::right(), (frame.GetFrameWorldPosition().pos().x >= 0) ? this->m_CrawlerRotateLeft : this->m_CrawlerRotateRight) *
@@ -194,7 +194,7 @@ namespace FPS_n2 {
 						auto startpos = GetObj().GetFramePosition(frame.GetFrame().GetFrameID()) - GetMove().GetMat().yvec() * frame.GetFrame().GetFrameWorldPosition().pos().y;
 						auto pos1 = startpos + GetMove().GetMat().yvec() * (1.0f * Scale3DRate);
 						auto pos2 = startpos + GetMove().GetMat().yvec() * (-0.2f * Scale3DRate);
-						auto ColRes = BackGroundParts->CheckLinetoMap(pos1, &pos2);
+						auto ColRes = BackGroundParts->CheckLinetoMap(pos1, &pos2) != 0;
 						frame.Update(ColRes, pos2.y);
 						float height = -0.2f * Scale3DRate;
 						if (ColRes) {
@@ -240,7 +240,7 @@ namespace FPS_n2 {
 					auto pos = GetObj().GetFramePosition(frame);
 					auto pos1 = pos + (Vector3DX::up() * 1.0f * Scale3DRate);
 					auto pos2 = pos + (Vector3DX::up() * -1.0f * Scale3DRate);
-					if (BackGroundParts->CheckLinetoMap(pos1, &pos2)) {
+					if (BackGroundParts->CheckLinetoMap(pos1, &pos2) != 0) {
 						OnGroundHeight += pos2.y;
 						++OnGroundCount;
 						++OnGroundCountSquare;

@@ -106,7 +106,7 @@ namespace FPS_n2 {
 					//*/
 					//chara->LoadCharaGun("M700", 0);
 #endif
-					chara->LoadCharaGun("P226", 1);
+					chara->LoadCharaGun("MP443", 1);
 					chara->LoadCharaGun("RGD5", 2);
 				}
 				else {

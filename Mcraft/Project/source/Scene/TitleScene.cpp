@@ -19,7 +19,6 @@ namespace FPS_n2 {
 			//
 			auto* ButtonParts = UIs::ButtonControl::Instance();
 			auto* CameraParts = Camera3D::Instance();
-			auto* OptionParts = OptionManager::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			// 
 			PostPassParts->SetShadowScale(0.5f);

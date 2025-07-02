@@ -21,7 +21,7 @@ namespace FPS_n2 {
 					float CosMax = -1.0f;
 					for (const auto& hitbox : chara->GetHitBoxList()) {
 						Vector3DX EndPost = hitbox.GetPos();
-						if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(EyePos, &EndPost)) { continue; }
+						if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(EyePos, &EndPost) != 0) { continue; }
 						switch (hitbox.GetColType()) {
 						case Charas::HitType::Head:
 						case Charas::HitType::Body:

@@ -19,6 +19,8 @@ namespace FPS_n2 {
 			Vector3DX		m_vec;
 			Vector3DX		m_repos;
 
+			int				m_HP{};
+
 			bool			m_IsDrawLine{ false };
 
 			int				m_EffectUniqueID{ InvalidID };

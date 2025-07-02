@@ -22,6 +22,7 @@ namespace FPS_n2 {
 			SetActive(true);
 			this->m_IsDrawLine = true;
 			this->m_EffectTimer = 1.f;
+			this->m_HP = 2;
 
 			if ((*this->m_AmmoData)->GetEffectID() != -1) {
 				if (this->m_EffectUniqueID != InvalidID) {
@@ -62,41 +63,13 @@ namespace FPS_n2 {
 			Vector3DX pos_tmp = this->m_pos;
 			Vector3DX norm_tmp = Vector3DX::zero();
 
-			bool is_HitAll = false;
-
-			//地面との判定
-			auto ColResGround = BackGroundParts->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
-			//ヘリとの判定
-			if (this->m_ShootCheraID != -1 && PlayerMngr->GetHelicopter()->CheckAmmoHit(repos_tmp, &pos_tmp)) {
-				SetActive(false);
-				is_HitAll = true;
-				if (this->m_ShootCheraID == PlayerMngr->GetWatchPlayerID()) {//撃ったキャラ
-					HitMarkerPool::Instance()->AddMarker(pos_tmp, 0, (*this->m_AmmoData)->GetDamage());
-				}
-			}
-			/*
-			//戦車との判定
-			if (this->m_ShootCheraID != -1 && PlayerMngr->GetVehicle()->CheckAmmoHit(repos_tmp, &pos_tmp)) {
-				SetActive(false);
-				is_HitAll = true;
-			}
-			//*/
-			//キャラとの判定
-			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-				if (PlayerMngr->GetPlayer(loop)->GetChara()->CheckDamageRay((*this->m_AmmoData)->GetDamage(), (PlayerID)this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
-					SetActive(false);
-					is_HitAll = true;
-				}
-			}
-			//キャラに当たらず接地したら
-			if (ColResGround && !is_HitAll) {
-				SetActive(false);
+			auto SetBreakWall = [&]() {
 				//壁破壊
 				{
 					int								xput = 4;
 					int								yput = 2;
 					int								zput = 4;
-					int								damage = 34;
+					int8_t							damage = 34;
 					if ((*this->m_AmmoData)->GetCaliber() >= 0.025f) {
 						damage = 100;
 						xput = 9;
@@ -132,7 +105,49 @@ namespace FPS_n2 {
 					}
 				}
 				//エフェクト
-				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, pos_tmp, norm_tmp, std::min(0.0127f,(*this->m_AmmoData)->GetCaliber()) / 0.02f * Scale3DRate);
+				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, pos_tmp, norm_tmp, std::min(0.0127f, (*this->m_AmmoData)->GetCaliber()) / 0.02f * Scale3DRate);
+				};
+
+			bool is_HitAll = false;
+
+			//地面との判定
+			bool ColResGround = false;
+
+			auto Sub = BackGroundParts->CheckLinetoMap(repos_tmp, &pos_tmp, &norm_tmp);
+			if (Sub != 0) {
+				this->m_HP -= Sub;
+				ColResGround = (this->m_HP <= 0);
+				if (!ColResGround) {
+					SetBreakWall();
+					pos_tmp = this->m_pos;
+				}
+			}
+			//ヘリとの判定
+			if (this->m_ShootCheraID != -1 && PlayerMngr->GetHelicopter()->CheckAmmoHit(repos_tmp, &pos_tmp)) {
+				SetActive(false);
+				is_HitAll = true;
+				if (this->m_ShootCheraID == PlayerMngr->GetWatchPlayerID()) {//撃ったキャラ
+					HitMarkerPool::Instance()->AddMarker(pos_tmp, 0, (*this->m_AmmoData)->GetDamage());
+				}
+			}
+			/*
+			//戦車との判定
+			if (this->m_ShootCheraID != -1 && PlayerMngr->GetVehicle()->CheckAmmoHit(repos_tmp, &pos_tmp)) {
+				SetActive(false);
+				is_HitAll = true;
+			}
+			//*/
+			//キャラとの判定
+			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+				if (PlayerMngr->GetPlayer(loop)->GetChara()->CheckDamageRay((*this->m_AmmoData)->GetDamage(), (PlayerID)this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
+					SetActive(false);
+					is_HitAll = true;
+				}
+			}
+			//キャラに当たらず接地したら
+			if (ColResGround && !is_HitAll) {
+				SetActive(false);
+				SetBreakWall();
 				//サウンド
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGround0) + GetRand(5 - 1))->Play3D(pos_tmp, Scale3DRate * 10.0f);
 			}

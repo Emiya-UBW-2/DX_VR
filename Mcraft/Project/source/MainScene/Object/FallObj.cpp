@@ -115,7 +115,7 @@ namespace FPS_n2 {
 						}
 						else
 						//*/
-						if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(RePos, &EndPos, &Normal)) {
+						if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(RePos, &EndPos, &Normal) != 0) {
 							PosBuf = EndPos + Normal * (0.5f * Scale3DRate);
 							SetMove().SetVec(Vector3DX::Reflect(GetMove().GetVec(), Normal) * 0.5f);
 							this->m_yAdd = 0.0f;

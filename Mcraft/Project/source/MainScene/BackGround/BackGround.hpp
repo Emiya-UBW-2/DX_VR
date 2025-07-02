@@ -707,7 +707,7 @@ namespace FPS_n2 {
 			};
 			std::vector<Builds>			m_ObjBuilds;
 		public:
-			const auto&		GetBuildData(void) noexcept { return this->m_ObjBuilds; }
+			const auto&		GetBuildData(void) const noexcept { return this->m_ObjBuilds; }
 
 			const int		GetNearestBuilds(const Vector3DX& NowPosition) const noexcept {
 				for (auto& bu : this->m_ObjBuilds) {
@@ -868,8 +868,8 @@ namespace FPS_n2 {
 				return true;		// ここまできたら指定の幅があっても直線的に移動できるということなので true を返す
 			}
 		public:
-			bool			CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
-			bool			CheckLinetoMap(const Vector3DX& StartPos, const Vector3DX& EndPos) const noexcept {
+			int				CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
+			int				CheckLinetoMap(const Vector3DX& StartPos, const Vector3DX& EndPos) const noexcept {
 				Vector3DX pEndPos = EndPos;
 				return CheckLinetoMap(StartPos, &pEndPos);
 			}

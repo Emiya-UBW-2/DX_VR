@@ -713,18 +713,19 @@ namespace FPS_n2 {
 			SceneParts->SetIsUpdateFarShadowActive();
 		}
 		//
-		bool		BackGroundControl::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
+		int		BackGroundControl::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
+			int HitCount = 0;
 			if (isnan<float>(StartPos.x) || isnan<float>(StartPos.y) || isnan<float>(StartPos.z)) {
-				return false;
+				return HitCount;
 			}
 			if (isnan<float>((*EndPos).x) || isnan<float>((*EndPos).y) || isnan<float>((*EndPos).z)) {
-				return false;
+				return HitCount;
 			}
 			float scale = 200.f * Scale3DRate;
-			auto SP = StartPos; SP.y = 0.f;
-			auto EP = (*EndPos); SP.y = 0.f;
+			Vector3DX SP = StartPos; SP.y = 0.f;
+			Vector3DX EP = (*EndPos); SP.y = 0.f;
 			if ((SP.sqrMagnitude() > scale * scale) || (EP.sqrMagnitude() > scale * scale)) {
-				return false;
+				return HitCount;
 			}
 
 
@@ -753,14 +754,17 @@ namespace FPS_n2 {
 										}
 									}
 									isHit = true;
+									++HitCount;
 								}
 								return false;
 							});
-						if (isHit) { return true; }
+						if (isHit) {
+							return HitCount;
+						}
 					}
 				}
 			}
-			return false;
+			return HitCount;
 		}
 		bool		BackGroundControl::CheckMapWall(const Vector3DX& StartPos, Vector3DX* EndPos, const Vector3DX& AddCapsuleMin, const Vector3DX& AddCapsuleMax, float Radius) const noexcept {
 			auto MoveVector = *EndPos - StartPos;

@@ -886,7 +886,7 @@ namespace FPS_n2 {
 						{
 							Vector3DX EndPos = Pos;
 							Vector3DX Normal;
-							if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(RePos, &EndPos, &Normal)) {
+							if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(RePos, &EndPos, &Normal) != 0) {
 								Pos = EndPos + Normal * (0.5f * Scale3DRate);
 								Vect = (Vector3DX::Reflect(Vect, Normal) * 0.5f);
 								yAdd = 0.0f;

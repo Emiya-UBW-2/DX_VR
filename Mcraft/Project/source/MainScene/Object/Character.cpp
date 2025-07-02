@@ -183,7 +183,7 @@ namespace FPS_n2 {
 
 					Vector3DX GunStart = GetEyePositionCache();
 					Vector3DX GunEnd = (GetGunPtrNow()->GetBaseMuzzleMat() * GetFrameWorldMat(CharaFrame::Head)).pos();
-					bool IsHit = BackGround::BackGroundControl::Instance()->CheckLinetoMap(GunStart, GunEnd);
+					bool IsHit = BackGround::BackGroundControl::Instance()->CheckLinetoMap(GunStart, GunEnd) != 0;
 					//ほかプレイヤーとの判定
 					if(!IsHit) {
 						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
@@ -547,7 +547,7 @@ namespace FPS_n2 {
 					Vector3DX::zero();
 				//床判定
 				Vector3DX EndPos = PosBuf - Vector3DX::up() * (0.5f * Scale3DRate);
-				if (BackGroundParts->CheckLinetoMap(PosBuf + Vector3DX::up() * (0.0f * Scale3DRate), &EndPos)) {
+				if (BackGroundParts->CheckLinetoMap(PosBuf + Vector3DX::up() * (0.0f * Scale3DRate), &EndPos) != 0) {
 					float GroundHight = EndPos.y - (0.12f * Scale3DRate);
 					if ((PosBuf.y - GroundHight) > (0.008f * Scale3DRate / DXLib_refParts->GetDeltaTime())) {
 						PosBuf.y = GroundHight;//高所落下の際は即時反映
@@ -777,7 +777,7 @@ namespace FPS_n2 {
 				Vector3DX StartPos = GetMove().GetPosBuf();
 				if (!IsAlive()) {
 					Vector3DX EndPos = StartPos - Vector3DX::up() * (20.0f * Scale3DRate);
-					if (BackGroundParts->CheckLinetoMap(StartPos, &EndPos)) {
+					if (BackGroundParts->CheckLinetoMap(StartPos, &EndPos) != 0) {
 						StartPos = EndPos;
 					}
 				}
@@ -788,7 +788,7 @@ namespace FPS_n2 {
 			if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {
 				auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 				Vector3DX EndPos = GetEyePositionCache();
-				this->m_CanLookTarget = !BackGroundParts->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos);
+				this->m_CanLookTarget = BackGroundParts->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0;
 				this->m_Length = (GetEyePositionCache() - ViewChara->GetEyePositionCache()).magnitude();
 			}
 			//コンカッション

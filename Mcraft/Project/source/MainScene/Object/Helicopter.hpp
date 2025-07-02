@@ -159,11 +159,11 @@ namespace FPS_n2 {
 
 					Pos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::Rappelling1))).pos();
 
-					DxLib::DrawCapsule3D(Pos.get(), (Pos - GetMove().GetMat().yvec() * (m_RopePer * Scale3DRate)).get(), 0.05f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
+					DxLib::DrawCapsule3D(Pos.get(), (Pos - GetMove().GetMat().yvec() * (m_RopePer * Scale3DRate)).get(), 0.02f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
 
 					Pos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::Rappelling2))).pos();
 
-					DxLib::DrawCapsule3D(Pos.get(), (Pos - GetMove().GetMat().yvec() * (m_RopePer * Scale3DRate)).get(), 0.05f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
+					DxLib::DrawCapsule3D(Pos.get(), (Pos - GetMove().GetMat().yvec() * (m_RopePer * Scale3DRate)).get(), 0.02f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
 				}
 			}
 			void				Dispose_Sub(void) noexcept override {
