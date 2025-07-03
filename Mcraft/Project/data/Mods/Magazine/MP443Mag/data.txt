@@ -1,6 +1,6 @@
-Name=MP443 15Round Magazine
+Name=MP443 18Round Magazine
 
-capacity=15
+capacity=18
 useammo0=9x19
 
 end
