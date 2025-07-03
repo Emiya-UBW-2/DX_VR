@@ -28,6 +28,18 @@ namespace FPS_n2 {
 			}
 			//
 			{
+				std::string Path = "data/Item/";
+				std::vector<WIN32_FIND_DATA> pData;
+				GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+				for (auto& data : pData) {
+					std::string ChildPath = Path;
+					ChildPath += data.cFileName;
+					ChildPath += "/";
+					ObjectManager::Instance()->LoadModelBefore(ChildPath);
+				}
+			}
+			//
+			{
 				std::string Path = "data/gun/";
 				std::vector<WIN32_FIND_DATA> pData;
 				GetFileNamesInDirectory((Path + "*").c_str(), &pData);
@@ -77,6 +89,23 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			PlayerMngr->Init(NetWork::Player_num);
 			PlayerMngr->SetWatchPlayerID(GetViewPlayerID());
+			{
+				std::string Path = "data/Item/";
+				std::vector<WIN32_FIND_DATA> pData;
+				GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+				for (auto& data : pData) {
+					std::string ChildPath = Path;
+					ChildPath += data.cFileName;
+					ChildPath += "/";
+					m_ItemList.emplace_back(std::make_shared<Objects::ItemObj>());
+					ObjectManager::Instance()->InitObject(m_ItemList.back(), ChildPath);
+				}
+			}
+			for (auto& g : m_ItemList) {
+				g->Spawn(Vector3DX::vget(GetRandf(1.f), 0.f, GetRandf(1.f)) * Scale3DRate);
+			}
+
+
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				//
@@ -407,6 +436,24 @@ namespace FPS_n2 {
 			//PlayerMngr->GetVehicle()->SetInput(MyInput, true);
 
 			PlayerMngr->m_FindCount = std::max(PlayerMngr->m_FindCount - DXLib_refParts->GetDeltaTime(), 0.f);
+			//ほかプレイヤーとの判定
+			{
+				float Radius = 2.0f * 1.f * Scale3DRate;
+				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+					auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+					if (!chara->IsAlive()) { continue; }
+					if (chara->GetIsRappelling()) { continue; }
+					//自分が当たったら押し出す
+					for (auto& g : m_ItemList) {
+						Vector3DX Vec = (chara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
+						float Len = Vec.magnitude();
+						if (Len < Radius) {
+							g->SetMove().SetPos(g->GetMove().GetPos() + Vec.normalized() * (Len - Radius));
+							g->SetMove().Update(0.f, 0.f);
+						}
+					}
+				}
+			}
 			//Update
 			ObjMngr->UpdateObject();
 			ObjMngr->LateUpdateObject();
@@ -528,6 +575,12 @@ namespace FPS_n2 {
 			EffectSingleton::Instance()->StopEffect(Effect::ef_dust);
 			//使い回しオブジェ系
 			BackGround::BackGroundControl::Instance()->Dispose();
+
+			for (auto& g : m_ItemList) {
+				g.reset();
+			}
+			m_ItemList.clear();
+
 			//
 			if (this->m_NetWorkController) {
 				this->m_NetWorkController.reset();

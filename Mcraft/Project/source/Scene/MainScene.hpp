@@ -13,6 +13,8 @@
 
 #include "../MainScene/Object/Helicopter.hpp"
 
+#include	"../MainScene/Object/ItemObj.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class MainGameScene : public TEMPSCENE {
@@ -25,6 +27,8 @@ namespace FPS_n2 {
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
 			MV1											m_RagDoll;
+
+			std::vector<std::shared_ptr<Objects::ItemObj>>		m_ItemList;
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
 				if (this->m_NetWorkController) {
