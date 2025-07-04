@@ -183,6 +183,8 @@ namespace FPS_n2 {
 		//
 		void			MainSceneUI::Update(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
+			auto* DXLib_refParts = DXLib_ref::Instance();
+			
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 
 			CanLookTarget = false;
@@ -198,6 +200,15 @@ namespace FPS_n2 {
 			}
 			Easing(&IsDrawAimUIPer, IsDrawAimUI ? 1.0f : 0.0f, 0.9f, EasingType::OutExpo);
 			if (IsDrawAimUIPer < 0.1f && !IsDrawAimUI) { IsDrawAimUIPer = 0.0f; }
+
+			if (this->m_ReHP > ViewChara->GetHP().GetPoint()) {
+				this->m_DamagePer = 2.f;
+			}
+			else {
+				this->m_DamagePer = std::max(this->m_DamagePer - DXLib_refParts->GetDeltaTime(), 0.f);
+			}
+			Easing(&this->m_DamagePerR, std::clamp(this->m_DamagePer, 0.f, 1.f), 0.8f, EasingType::OutExpo);
+			this->m_ReHP = ViewChara->GetHP().GetPoint();
 		}
 		void			MainSceneUI::Draw(void) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
@@ -208,6 +219,12 @@ namespace FPS_n2 {
 			int xp1{}, yp1{};
 			int xp2{}, yp2{};
 			int xp3{}, yp3{};
+			//ダメージ表示
+			if (this->m_DamagePerR > 0.f) {
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(216.f * this->m_DamagePerR));
+				DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &OIL_Graph, 0, 0, 1920, 1080, true);
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+			}
 			//タイム,スコア
 			{
 				xp1 = (30);

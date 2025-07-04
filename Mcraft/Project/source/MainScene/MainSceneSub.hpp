@@ -40,6 +40,12 @@ namespace FPS_n2 {
 
 			GraphHandle					m_BodyCGraph;
 			GraphHandle					m_ArmorCGraph;
+
+			GraphHandle					OIL_Graph;
+
+			float						m_DamagePer{};
+			float						m_DamagePerR{};
+			int							m_ReHP{};
 		public:
 			MainSceneUI(void) noexcept {}
 			MainSceneUI(const MainSceneUI&) = delete;
@@ -55,6 +61,7 @@ namespace FPS_n2 {
 				this->m_ArmorGraph.Load("data/UI/Armor.bmp");
 				this->m_BodyCGraph.Load("data/UI/BodyC.bmp");
 				this->m_ArmorCGraph.Load("data/UI/ArmorC.bmp");
+				this->OIL_Graph.Load("data/UI/back.png");
 			}
 			void			Update(void) noexcept;
 			void			Draw(void) const noexcept;
@@ -63,6 +70,7 @@ namespace FPS_n2 {
 				this->m_ArmorGraph.Dispose();
 				this->m_BodyCGraph.Dispose();
 				this->m_ArmorCGraph.Dispose();
+				this->OIL_Graph.Dispose();
 			}
 		public:
 			void			SetIntParam(size_t ID, int value) noexcept { intParam[ID] = value; }
