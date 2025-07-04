@@ -146,7 +146,7 @@ namespace FPS_n2 {
 					break;
 				}
 				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {//無敵debug
-					Damage = 0;
+					//Damage = 0;
 				}
 				//ダメージ登録
 				if (AttackID >= 0) {

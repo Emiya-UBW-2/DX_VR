@@ -95,6 +95,8 @@ namespace FPS_n2 {
 			const auto&		GetEyePositionCache(void) const noexcept { return this->m_EyePositionCache; }
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
 			const auto		GetIsADS(void) const noexcept { return (!this->m_IsStuckGun && GetGunPtrNow() && GetGunPtrNow()->GetCanADS()) && this->m_Input.GetPADSPress(Controls::PADS::AIM); }
+			const auto&		GetHP(void) const noexcept { return this->m_HP; }
+			const auto&		GetAP(void) const noexcept { return this->m_AP; }
 			const auto		IsAlive(void) const noexcept { return this->m_HP.IsNotZero(); }
 			const auto		IsLowHP(void) const noexcept { return this->m_HP.GetPoint() < (this->m_HP.GetMax() * 35 / 100); }
 			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }

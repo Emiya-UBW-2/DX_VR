@@ -316,6 +316,24 @@ namespace FPS_n2 {
 				}
 
 			}
+			//
+			{
+				xp1 = 16 + 64;
+				yp1 = (1080 - 16 - 64 - 64);
+				int hitpointRateG = std::clamp(2 * 255 * ViewChara->GetHP().GetPoint() / ViewChara->GetHP().GetMax(), 0, 255);
+				int hitpointRateR = std::clamp(2 * (255 - 255 * ViewChara->GetHP().GetPoint() / ViewChara->GetHP().GetMax()), 0, 255);
+				int armorpointRate = 255 * ViewChara->GetAP().GetPoint() / ViewChara->GetAP().GetMax();
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 192);
+				DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, hitpointRateR, hitpointRateG, 0);
+				DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, (ViewChara->GetIsSquat()) ? &this->m_BodyCGraph : &this->m_BodyGraph, xp1, yp1, 128.f / 500.f, 0.f, true);
+
+				//DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+				DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, armorpointRate, armorpointRate, armorpointRate);
+				DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, (ViewChara->GetIsSquat()) ? &this->m_ArmorCGraph : &this->m_ArmorGraph, xp1, yp1, 128.f / 500.f, 0.f, true);
+
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+				DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+			}
 			//方位磁針
 			{
 				Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec2(); Vec.y = 0.0f; Vec = Vec.normalized();

@@ -34,6 +34,12 @@ namespace FPS_n2 {
 			bool CanLookTarget{ false };
 			float LookPer{};
 			float IsDrawAimUIPer{};
+
+			GraphHandle					m_BodyGraph;
+			GraphHandle					m_ArmorGraph;
+
+			GraphHandle					m_BodyCGraph;
+			GraphHandle					m_ArmorCGraph;
 		public:
 			MainSceneUI(void) noexcept {}
 			MainSceneUI(const MainSceneUI&) = delete;
@@ -44,10 +50,20 @@ namespace FPS_n2 {
 			virtual ~MainSceneUI(void) noexcept {}
 		public:
 			void			Load(void) noexcept {}
-			void			Set(void) noexcept {}
+			void			Set(void) noexcept {
+				this->m_BodyGraph.Load("data/UI/Body.bmp");
+				this->m_ArmorGraph.Load("data/UI/Armor.bmp");
+				this->m_BodyCGraph.Load("data/UI/BodyC.bmp");
+				this->m_ArmorCGraph.Load("data/UI/ArmorC.bmp");
+			}
 			void			Update(void) noexcept;
 			void			Draw(void) const noexcept;
-			void			Dispose(void) noexcept {}
+			void			Dispose(void) noexcept {
+				this->m_BodyGraph.Dispose();
+				this->m_ArmorGraph.Dispose();
+				this->m_BodyCGraph.Dispose();
+				this->m_ArmorCGraph.Dispose();
+			}
 		public:
 			void			SetIntParam(size_t ID, int value) noexcept { intParam[ID] = value; }
 			void			SetfloatParam(size_t ID, float value) noexcept { floatParam[ID] = value; }
