@@ -5,6 +5,7 @@
 #include	"../../MainScene/Player/Player.hpp"
 
 const FPS_n2::Objects::AmmoPool* SingletonBase<FPS_n2::Objects::AmmoPool>::m_Singleton = nullptr;
+const FPS_n2::Objects::AmmoLinePool* SingletonBase<FPS_n2::Objects::AmmoLinePool>::m_Singleton = nullptr;
 
 namespace FPS_n2 {
 	namespace Objects {
@@ -160,6 +161,13 @@ namespace FPS_n2 {
 			if ((*this->m_AmmoData)->GetEffectID() != -1) {
 				EffectSingleton::Instance()->Update_LoopAnyEffect(Effect::ef_rocket, this->m_EffectUniqueID, this->m_pos, this->m_vec, 1.0f);
 			}
+		}
+
+		void		AmmoLine::Update() noexcept {
+			if (!IsActive()) { return; }
+			auto* DXLib_refParts = DXLib_ref::Instance();
+			m_Time -= DXLib_refParts->GetDeltaTime();
+			Easing(&m_Per, std::clamp(m_Time, 0.f, 1.f), 0.9f, EasingType::OutExpo);
 		}
 	}
 }

@@ -121,17 +121,19 @@ namespace FPS_n2 {
 
 			if (AttackID != PlayerMngr->GetWatchPlayerID()) {
 				this->m_ConcussionSwitch = true;
+				//弾道線プール
+				Objects::AmmoLinePool::Instance()->Put(StartPos, (*pEndPos - StartPos), GetEyePositionCache());
 			}
 			//被弾処理
 			auto* HitPtr = this->m_HitBoxControl.GetLineHit(StartPos, pEndPos);
 			if (HitPtr) {
 				HitPoint Damage = BaseDamage;
 				//部位ダメージ演算
-				m_HeadShotSwitch = true;
 				switch (HitPtr->GetColType()) {
 				case HitType::Head:
 					if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {//自機はヘッショされない
 						Damage = std::clamp<HitPoint>(BaseDamage * 1000 / 100, 0, this->m_HP.GetMax());
+						m_HeadShotSwitch = true;
 					}
 					break;
 				case HitType::Body:

@@ -102,5 +102,80 @@ namespace FPS_n2 {
 				this->m_AmmoList.back()->Put(pAmmoData, pos, vec, myID);
 			}
 		};
+
+		class AmmoLine {
+			float m_Time{ 0.f };
+			Vector3DX m_Pos;
+			Vector3DX m_Vec;
+			float m_Per{ 0.f };
+		public:
+			bool IsActive() const noexcept {
+				return m_Time > 0.f;
+			}
+			void Put(const Vector3DX& pos, const Vector3DX& vec, const Vector3DX& MyPos) noexcept {
+				m_Time = 2.f;
+
+
+				m_Vec = vec.normalized();
+				m_Pos = pos;// GetMinPosSegmentToPoint(pos - m_Vec * (1000.f * Scale3DRate), pos + m_Vec * (1000.f * Scale3DRate), MyPos);
+			}
+		public:
+			void Update() noexcept;
+			void Draw() noexcept {
+				if (!IsActive()) { return; }
+				SetUseLighting(false);
+				SetUseHalfLambertLighting(false);
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(128.0f * m_Per));
+				DrawCapsule_3D(
+					this->m_Pos,
+					this->m_Pos + this->m_Vec * (10.f * Scale3DRate),
+					0.001f * Scale3DRate, GetColor(255, 255, 255), Yellow);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+				SetUseLighting(true);
+				SetUseHalfLambertLighting(true);
+			}
+		};
+
+		class AmmoLinePool : public SingletonBase<AmmoLinePool> {
+		private:
+			friend class SingletonBase<AmmoLinePool>;
+		private:
+			std::vector<std::shared_ptr<AmmoLine>> m_AmmoList;
+		private:
+			AmmoLinePool(void) noexcept {
+				this->m_AmmoList.resize(64);
+				for (auto& ammo : this->m_AmmoList) {
+					ammo = std::make_shared<AmmoLine>();
+				}
+			}
+			virtual ~AmmoLinePool(void) noexcept {
+				for (auto& ammo : this->m_AmmoList) {
+					ammo.reset();
+				}
+				this->m_AmmoList.clear();
+			}
+		public:
+			void Put(const Vector3DX& pos, const Vector3DX& vec, const Vector3DX& MyPos) noexcept {
+				for (auto& ammo : this->m_AmmoList) {
+					if (!ammo->IsActive()) {
+						ammo->Put(pos, vec, MyPos);
+						return;
+					}
+				}
+				this->m_AmmoList.emplace_back(std::make_shared<AmmoLine>());
+				this->m_AmmoList.back()->Put(pos, vec, MyPos);
+			}
+		public:
+			void Update() noexcept {
+				for (auto& ammo : this->m_AmmoList) {
+					ammo->Update();
+				}
+			}
+			void Draw() noexcept {
+				for (auto& ammo : this->m_AmmoList) {
+					ammo->Draw();
+				}
+			}
+		};
 	}
 }
