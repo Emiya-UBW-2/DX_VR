@@ -120,6 +120,8 @@ namespace FPS_n2 {
 		Tank_Ricochet,
 		Tank_engine,
 		Tank_move,
+		//
+		Tinnitus,
 	};
 	enum class CharaTypeID {
 		Team,

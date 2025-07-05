@@ -34,6 +34,7 @@ namespace FPS_n2 {
 			bool CanLookTarget{ false };
 			float LookPer{};
 			float IsDrawAimUIPer{};
+			float IsDownUIPer{};
 
 			GraphHandle					m_BodyGraph;
 			GraphHandle					m_ArmorGraph;
@@ -46,6 +47,11 @@ namespace FPS_n2 {
 			float						m_DamagePer{};
 			float						m_DamagePerR{};
 			int							m_ReHP{};
+
+			float						m_AmmoRand{};
+			float						m_AmmoRandR{};
+			float						m_AmmoInPer{};
+			int							m_AmmoNumTotal{};
 		public:
 			MainSceneUI(void) noexcept {}
 			MainSceneUI(const MainSceneUI&) = delete;

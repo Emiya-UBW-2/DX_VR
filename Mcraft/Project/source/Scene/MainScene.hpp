@@ -27,6 +27,7 @@ namespace FPS_n2 {
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
 			MV1											m_RagDoll;
+			float										AberrationPower{ 1.f };
 
 			std::vector<std::shared_ptr<Objects::ItemObj>>		m_ItemList;
 		private:

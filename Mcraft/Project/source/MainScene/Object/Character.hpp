@@ -45,6 +45,7 @@ namespace FPS_n2 {
 			float												m_Concussion{ 0.0f };
 			float												m_ConcussionPer{ 0.0f };
 			bool												m_CanWatch{ true };
+			bool												m_HeadShotSwitch{ false };
 		private://キャッシュ
 			Matrix3x3DX											m_EyeRotationCache{};
 			Vector3DX											m_EyePositionCache{};
@@ -135,6 +136,13 @@ namespace FPS_n2 {
 			const auto&		GetAutoAimID() const noexcept { return GetGunPtrNow()->GetAutoAimID(); }
 			const auto&		GetAutoAimPos() const noexcept { return GetGunPtrNow()->GetAutoAimPos(); }
 			void			OverrideAutoAimID(PlayerID ID, int pos) const noexcept { GetGunPtrNow()->OverrideAutoAimID(ID, pos); }
+
+			void			SetHeadShot(void) noexcept { this->m_LeanControl.SetHeadShot(); }
+			const auto		PopHeadShotSwitch() noexcept {
+				auto ret = this->m_HeadShotSwitch;
+				this->m_HeadShotSwitch = false;
+				return ret;
+			}
 		private: //更新関連
 			void			UpdateInput(void) noexcept;
 			void			UpdateMatrix(void) noexcept;

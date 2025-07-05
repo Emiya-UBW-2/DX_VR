@@ -87,9 +87,12 @@ namespace FPS_n2 {
 		private:
 			float												m_Rad{ 0.0f };
 			int													m_Rate{ 0 };
+			float												m_HeadShotPer{ 0.f };
 		public://ゲッター
 			const auto& GetRad(void) const noexcept { return this->m_Rad; }
 			const auto& GetRate(void) const noexcept { return this->m_Rate; }
+		public:
+			void			SetHeadShot(void) noexcept { m_HeadShotPer = 1.f; }
 		public:
 			void			Init(void) noexcept {
 				this->m_Rad = 0.0f;
@@ -125,7 +128,8 @@ namespace FPS_n2 {
 					this->m_Rate = 1;
 				}
 				//*/
-				Easing(&this->m_Rad, static_cast<float>(this->m_Rate) * deg2rad(25), 0.9f, EasingType::OutExpo);
+				Easing(&this->m_Rad, (static_cast<float>(this->m_Rate) + this->m_HeadShotPer) * deg2rad(25), 0.9f, EasingType::OutExpo);
+				Easing(&this->m_HeadShotPer, 0.f, 0.9f, EasingType::OutExpo);
 				return (Prev != this->m_Rate);
 			}
 		};

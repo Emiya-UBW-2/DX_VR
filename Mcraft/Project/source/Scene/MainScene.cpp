@@ -534,6 +534,18 @@ namespace FPS_n2 {
 				CameraParts->SetMainCamera().SetCamInfo(fovBuf, CameraParts->GetMainCamera().GetCamNear(), CameraParts->GetMainCamera().GetCamFar());
 			}
 
+			{
+				Easing(&AberrationPower,
+					(CamChara->IsLowHP()) ? (10.f + GetRandf(30.f)) : 1.f,
+					0.95f, EasingType::OutExpo);
+				if (CamChara->PopHeadShotSwitch()) {
+					auto* SE = SoundPool::Instance();
+					SE->Get(SoundType::SE, (int)SoundEnum::Tinnitus)->Play3D(CamChara->GetEyePositionCache(), Scale3DRate * 50.f);
+					CamChara->SetHeadShot();
+					AberrationPower = 30.f;
+				}
+				PostPassParts->SetAberrationPower(AberrationPower);
+			}
 			//PlayerMngr->GetVehicle()->SetCam(CameraParts->SetMainCamera());
 
 

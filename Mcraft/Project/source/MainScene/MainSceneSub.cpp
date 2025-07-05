@@ -87,6 +87,7 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::MagFall), 6, "data/Sound/SE/gun/ModFall.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Trigger), 1, "data/Sound/SE/gun/trigger.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::rolling_rocket), 1, "data/Sound/SE/rolling_rocket.wav");
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Tinnitus), 2, "data/Sound/SE/Tinnitus.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Pin), 4, "data/Sound/SE/pin.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Throw), 4, "data/Sound/SE/throw.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::FallGrenade), 4, "data/Sound/SE/fallgrenade.wav");
@@ -149,6 +150,7 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::MagFall));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Trigger));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::rolling_rocket));
+			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Tinnitus));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Pin));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Throw));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::FallGrenade));
@@ -200,6 +202,15 @@ namespace FPS_n2 {
 			}
 			Easing(&IsDrawAimUIPer, IsDrawAimUI ? 1.0f : 0.0f, 0.9f, EasingType::OutExpo);
 			if (IsDrawAimUIPer < 0.1f && !IsDrawAimUI) { IsDrawAimUIPer = 0.0f; }
+			Easing(&IsDownUIPer, !IsDrawAimUI ? 1.0f : 0.0f, 0.9f, EasingType::OutExpo);
+
+			Easing(&m_AmmoInPer, 0.f, 0.9f, EasingType::OutExpo);
+			if (m_AmmoNumTotal != ViewChara->GetGunPtrNow()->GetAmmoNumTotal()) {
+				m_AmmoNumTotal = ViewChara->GetGunPtrNow()->GetAmmoNumTotal();
+				m_AmmoInPer = 1.f;
+				m_AmmoRand = (GetRand(100) < 50) ? 1.f : -1.f;
+			}
+			Easing(&m_AmmoRandR, m_AmmoRand, 0.9f, EasingType::OutExpo);
 
 			if (this->m_ReHP > ViewChara->GetHP().GetPoint()) {
 				this->m_DamagePer = 2.f;
@@ -251,76 +262,98 @@ namespace FPS_n2 {
 					}
 				}
 
-				if (IsDrawAimUIPer > 0.1f && ViewChara->GetGunPtrNow()) {
-					int RetX = ViewChara->GetGunPtrNow()->GetAimXPos() + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
-					int RetY = ViewChara->GetGunPtrNow()->GetAimYPos() + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.0f);
-					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, IsDrawAimUIPer));
-					int Scale = static_cast<int>(1080 * ViewChara->GetGunPtrNow()->GetAutoAimRadian() / CameraParts->GetMainCamera().GetCamFov());
-					DrawCtrls->SetDrawCircle(WindowSystem::DrawLayer::Normal, RetX, RetY, Scale, Green, false, 2);
-					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, LookPer * IsDrawAimUIPer));
-					DrawCtrls->SetDrawCircle(WindowSystem::DrawLayer::Normal, RetX, RetY, Scale + 4 + Lerp(100, 0, LookPer), Green, false, 2);
-					//DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, IsDrawAimUIPer));
+				if (ViewChara->GetGunPtrNow()) {
+					auto DrawCircle = [&](int X, int Y, float scale, float Per) {
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, Per));
+						int Scale = static_cast<int>(1080 * ViewChara->GetGunPtrNow()->GetAutoAimRadian() / CameraParts->GetMainCamera().GetCamFov()) * scale;
+						DrawCtrls->SetDrawCircle(WindowSystem::DrawLayer::Normal, X, Y, Scale, Green, false, 2);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, LookPer * (Per)));
+						DrawCtrls->SetDrawCircle(WindowSystem::DrawLayer::Normal, X, Y, Scale + 4 + Lerp(100, 0, LookPer), Green, false, 2);
+						//DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, Per));
 
-					int Scale2 = Scale + 4 + Lerp(100, 0, LookPer);
+						int Scale2 = Scale + 4 + Lerp(100, 0, LookPer);
 
-					Vector3DX StartPos = CameraParts->GetMainCamera().GetCamPos();
-					Vector3DX Vec1 = CameraParts->GetMainCamera().GetCamVec() - StartPos; Vec1.y = 0.0f; Vec1 = Vec1.normalized();
-					{
-						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-							if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
-							auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
-							if (!chara->IsAlive() || !chara->GetCanLookByPlayer()) { continue; }
-							Vector3DX Vec2 = (chara->GetEyePositionCache() - StartPos); Vec2.y = 0.0f; Vec2 = Vec2.normalized();
-							float Angle = DX_PI_F + Vector3DX::Angle(Vec1, Vec2) * (Vector3DX::Cross(Vec1, Vec2).y > 0.0f ? 1.0f : -1.0f);
+						Vector3DX StartPos = CameraParts->GetMainCamera().GetCamPos();
+						Vector3DX Vec1 = CameraParts->GetMainCamera().GetCamVec() - StartPos; Vec1.y = 0.0f; Vec1 = Vec1.normalized();
+						{
+							for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+								if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
+								auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+								if (!chara->IsAlive() || !chara->GetCanLookByPlayer()) { continue; }
+								Vector3DX Vec2 = (chara->GetEyePositionCache() - StartPos); Vec2.y = 0.0f; Vec2 = Vec2.normalized();
+								float Angle = DX_PI_F + Vector3DX::Angle(Vec1, Vec2) * (Vector3DX::Cross(Vec1, Vec2).y > 0.0f ? 1.0f : -1.0f);
 
-							xp1 = RetX - static_cast<int>(Scale2 * 1.5f * sin(Angle + deg2rad(5)));
-							yp1 = RetY + static_cast<int>(Scale2 * 1.5f * cos(Angle + deg2rad(5)));
-							xp2 = RetX - static_cast<int>(Scale2 * sin(Angle));
-							yp2 = RetY + static_cast<int>(Scale2 * cos(Angle));
-							xp3 = RetX - static_cast<int>(Scale2 * 1.5f * sin(Angle - deg2rad(5)));
-							yp3 = RetY + static_cast<int>(Scale2 * 1.5f * cos(Angle - deg2rad(5)));
-							unsigned int Color = (loop == ViewChara->GetGunPtrNow()->GetAutoAimID()) ? Green : DarkGreen;
-							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Color, 2);
-							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp2, yp2, xp3, yp3, Color, 2);
-							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3, xp1, yp1, Color, 2);
+								xp1 = X - static_cast<int>(Scale2 * 1.5f * sin(Angle + deg2rad(5)));
+								yp1 = Y + static_cast<int>(Scale2 * 1.5f * cos(Angle + deg2rad(5)));
+								xp2 = X - static_cast<int>(Scale2 * sin(Angle));
+								yp2 = Y + static_cast<int>(Scale2 * cos(Angle));
+								xp3 = X - static_cast<int>(Scale2 * 1.5f * sin(Angle - deg2rad(5)));
+								yp3 = Y + static_cast<int>(Scale2 * 1.5f * cos(Angle - deg2rad(5)));
+								unsigned int Color = (loop == ViewChara->GetGunPtrNow()->GetAutoAimID()) ? Red : Green;
+								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Color, 2);
+								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp2, yp2, xp3, yp3, Color, 2);
+								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3, xp1, yp1, Color, 2);
+							}
 						}
-					}
-					float BaseRad = ViewChara->GetLeanRad();
-					xp1 = RetX - static_cast<int>(Scale * 1.0f * sin(deg2rad(90) + BaseRad));
-					yp1 = RetY + static_cast<int>(Scale * 1.0f * cos(deg2rad(90) + BaseRad));
-					xp2 = RetX - static_cast<int>(Scale * 0.85f * sin(deg2rad(90) + BaseRad));
-					yp2 = RetY + static_cast<int>(Scale * 0.85f * cos(deg2rad(90) + BaseRad));
-					DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
+						};
+					if (IsDrawAimUIPer > 0.1f) {
+						int RetX = ViewChara->GetGunPtrNow()->GetAimXPos() + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
+						int RetY = ViewChara->GetGunPtrNow()->GetAimYPos() + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.0f);
 
-					xp1 = RetX - static_cast<int>(Scale * 1.0f * sin(deg2rad(-90) + BaseRad));
-					yp1 = RetY + static_cast<int>(Scale * 1.0f * cos(deg2rad(-90) + BaseRad));
-					xp2 = RetX - static_cast<int>(Scale * 0.85f * sin(deg2rad(-90) + BaseRad));
-					yp2 = RetY + static_cast<int>(Scale * 0.85f * cos(deg2rad(-90) + BaseRad));
-					DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
+						DrawCircle(RetX, RetY, 1.f, IsDrawAimUIPer);
 
-					xp1 = RetX - static_cast<int>(Scale * 1.0f * sin(deg2rad(0) + BaseRad));
-					yp1 = RetY + static_cast<int>(Scale * 1.0f * cos(deg2rad(0) + BaseRad));
-					xp2 = RetX - static_cast<int>(Scale * 0.5f * sin(deg2rad(0) + BaseRad));
-					yp2 = RetY + static_cast<int>(Scale * 0.5f * cos(deg2rad(0) + BaseRad));
-					DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
+						int Scale = static_cast<int>(1080 * ViewChara->GetGunPtrNow()->GetAutoAimRadian() / CameraParts->GetMainCamera().GetCamFov());
 
-					if (ViewChara->GetGunPtrNow()->GetAmmoAll() > 0) {
-						xp1 = RetX - static_cast<int>(Scale * 1.5f * sin(deg2rad(60) + BaseRad));
-						yp1 = RetY + static_cast<int>(Scale * 1.5f * cos(deg2rad(60) + BaseRad));
-						xp2 = RetX - static_cast<int>(Scale * sin(deg2rad(60) + BaseRad));
-						yp2 = RetY + static_cast<int>(Scale * cos(deg2rad(60) + BaseRad));
+						float BaseRad = ViewChara->GetLeanRad();
+						xp1 = RetX - static_cast<int>(Scale * 1.0f * sin(deg2rad(90) + BaseRad));
+						yp1 = RetY + static_cast<int>(Scale * 1.0f * cos(deg2rad(90) + BaseRad));
+						xp2 = RetX - static_cast<int>(Scale * 0.85f * sin(deg2rad(90) + BaseRad));
+						yp2 = RetY + static_cast<int>(Scale * 0.85f * cos(deg2rad(90) + BaseRad));
 						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
-						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 100, yp1, xp1, yp1, Green, 2);
 
-						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
-							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1 - 65, yp1 - 3, Green, Black, "/%d", ViewChara->GetGunPtrNow()->GetAmmoAll());
-						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
-							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1 - 100, yp1 - 3, Green, Black, "%d", ViewChara->GetGunPtrNow()->GetAmmoNumTotal());
+						xp1 = RetX - static_cast<int>(Scale * 1.0f * sin(deg2rad(-90) + BaseRad));
+						yp1 = RetY + static_cast<int>(Scale * 1.0f * cos(deg2rad(-90) + BaseRad));
+						xp2 = RetX - static_cast<int>(Scale * 0.85f * sin(deg2rad(-90) + BaseRad));
+						yp2 = RetY + static_cast<int>(Scale * 0.85f * cos(deg2rad(-90) + BaseRad));
+						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
 
+						xp1 = RetX - static_cast<int>(Scale * 1.0f * sin(deg2rad(0) + BaseRad));
+						yp1 = RetY + static_cast<int>(Scale * 1.0f * cos(deg2rad(0) + BaseRad));
+						xp2 = RetX - static_cast<int>(Scale * 0.5f * sin(deg2rad(0) + BaseRad));
+						yp2 = RetY + static_cast<int>(Scale * 0.5f * cos(deg2rad(0) + BaseRad));
+						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
+
+						if (ViewChara->GetGunPtrNow()->GetAmmoAll() > 0) {
+							xp1 = RetX - static_cast<int>(Scale * 1.5f * sin(deg2rad(60) + BaseRad));
+							yp1 = RetY + static_cast<int>(Scale * 1.5f * cos(deg2rad(60) + BaseRad));
+							xp2 = RetX - static_cast<int>(Scale * sin(deg2rad(60) + BaseRad));
+							yp2 = RetY + static_cast<int>(Scale * cos(deg2rad(60) + BaseRad));
+							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
+							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 100, yp1, xp1, yp1, Green, 2);
+							bool isLow = (100 * ViewChara->GetGunPtrNow()->GetAmmoNumTotal() / ViewChara->GetGunPtrNow()->GetAmmoAll() < 30);
+							unsigned int Color = GetColor(
+								Lerp(isLow ? 255 : 0, 255, m_AmmoInPer),
+								Lerp(!isLow ? 255 : 0, 255, m_AmmoInPer),
+								Lerp(0, 255, m_AmmoInPer));
+
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1 - 65, yp1 - 3, Color, Black, "/%d", ViewChara->GetGunPtrNow()->GetAmmoAll());
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
+								xp1 - 100 - static_cast<int>(m_AmmoRandR * m_AmmoInPer * 10.f),
+								yp1 - 3 - static_cast<int>(m_AmmoInPer * 3.f),
+								Color, Black, "%d", ViewChara->GetGunPtrNow()->GetAmmoNumTotal());
+
+						}
+
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
-
-					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					if (IsDrawAimUIPer < 0.9f) {
+						int RetX = 1920 / 2;
+						int RetY = 1080 / 2;
+						DrawCircle(RetX, RetY, 2.f * IsDownUIPer, 1.f - IsDrawAimUIPer);
+					}
 				}
 
 				//スタートタイマー

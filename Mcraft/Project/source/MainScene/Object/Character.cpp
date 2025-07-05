@@ -127,6 +127,7 @@ namespace FPS_n2 {
 			if (HitPtr) {
 				HitPoint Damage = BaseDamage;
 				//部位ダメージ演算
+				m_HeadShotSwitch = true;
 				switch (HitPtr->GetColType()) {
 				case HitType::Head:
 					if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {//自機はヘッショされない
@@ -146,7 +147,7 @@ namespace FPS_n2 {
 					break;
 				}
 				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {//無敵debug
-					//Damage = 0;
+					Damage = 0;
 				}
 				//ダメージ登録
 				if (AttackID >= 0) {
