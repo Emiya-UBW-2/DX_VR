@@ -83,7 +83,7 @@ namespace FPS_n2 {
 				}
 				if (NowIndex != this->GoalUnit->GetPolyIndex()) {																	// 現在乗っているポリゴンがゴール地点にあるポリゴンの場合は処理を分岐
 					if (NowIndex == *TargetPathPlanningIndex) {													// 現在乗っているポリゴンが移動中間地点のポリゴンの場合は次の中間地点を決定する処理を行う
-						const float COLLWIDTH = 0.1f * Scale3DRate;				// 当たり判定のサイズ
+						const float COLLWIDTH = 0.001f * Scale3DRate;												// 当たり判定のサイズ
 						while (true) {																				// 次の中間地点が決定するまでループし続ける
 							if (!this->UnitArray.at(*TargetPathPlanningIndex).GetNextPolyUnit()) { break; }
 							auto NextIndex = this->UnitArray.at(*TargetPathPlanningIndex).GetNextPolyUnit()->GetPolyIndex();
@@ -253,9 +253,7 @@ namespace FPS_n2 {
 					};
 				auto CheckPathToTarget = [&]() {
 					m_PathChecker.Dispose();
-					Vector3DX MyPos_XZ = MyPos; MyPos_XZ.y = (0.f);
-					Target.y = (0.f);
-					return m_PathChecker.Init(MyPos_XZ, Target);	// 指定の２点の経路情報を探索する
+					return m_PathChecker.Init(MyPos, Target);	// 指定の２点の経路情報を探索する
 					};
 
 				if (GetLengthToTarget() > 20.f * Scale3DRate) {
@@ -386,18 +384,13 @@ namespace FPS_n2 {
 				auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 				Vector3DX MyPos = MyChara->GetEyePositionCache();
 				//
-				/*
-				if (this->m_MoveFrontTimer > 6.f) {
-					this->m_MoveFrontTimer -= 6.f;
-				}
-				//*/
-				this->m_MoveFrontTimer += DXLib_refParts->GetDeltaTime();
-				m_MyInput.SetInputPADS(Controls::PADS::MOVE_W, this->m_MoveFrontTimer > 4.f);
+				//エイム
+				Vector3DX Vec = m_PathChecker.GetNextPoint(MyChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos(), &this->TargetPathPlanningIndex) - MyPos; Vec.y = (0.f);
+				AimDir(Matrix4x4DX::Vtrans(Vec, Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(15.f))) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(15.f)))));
+				//
+				m_MyInput.SetInputPADS(Controls::PADS::MOVE_W, true);
 				m_MyInput.SetInputPADS(Controls::PADS::MOVE_A, GetRand(100) > 50);
 				m_MyInput.SetInputPADS(Controls::PADS::MOVE_D, GetRand(100) > 50);
-				//エイム
-				Vector3DX Vec = m_PathChecker.GetNextPoint(MyPos, &this->TargetPathPlanningIndex) - MyPos; Vec.y = (0.f);
-				AimDir(Matrix4x4DX::Vtrans(Vec, Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(15.f))) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(15.f)))));
 				//
 				if (MyChara->GetCanLookByPlayer()) {
 					this->m_CheckAgain = 0.f;

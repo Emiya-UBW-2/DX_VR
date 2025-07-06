@@ -230,7 +230,6 @@ namespace FPS_n2 {
 					auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 					TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
 				}
-				TargetPos.y = -20.f * Scale3DRate;
 				//人の座標設定
 				if (loop == PlayerMngr->GetWatchPlayerID()) {
 					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true);
