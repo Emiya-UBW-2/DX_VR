@@ -427,37 +427,37 @@ namespace FPS_n2 {
 
 							}
 						}
+						//
+						{
+							xp1 = X - static_cast<int>(Scale * 1.0f * sin(deg2rad(90) + BaseRad));
+							yp1 = Y + static_cast<int>(Scale * 1.0f * cos(deg2rad(90) + BaseRad));
+							xp2 = X - static_cast<int>(Scale * 0.85f * sin(deg2rad(90) + BaseRad));
+							yp2 = Y + static_cast<int>(Scale * 0.85f * cos(deg2rad(90) + BaseRad));
+							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
+
+							xp1 = X - static_cast<int>(Scale * 1.0f * sin(deg2rad(-90) + BaseRad));
+							yp1 = Y + static_cast<int>(Scale * 1.0f * cos(deg2rad(-90) + BaseRad));
+							xp2 = X - static_cast<int>(Scale * 0.85f * sin(deg2rad(-90) + BaseRad));
+							yp2 = Y + static_cast<int>(Scale * 0.85f * cos(deg2rad(-90) + BaseRad));
+							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
+
+							xp1 = X - static_cast<int>(Scale * 1.0f * sin(deg2rad(0) + BaseRad));
+							yp1 = Y + static_cast<int>(Scale * 1.0f * cos(deg2rad(0) + BaseRad));
+							xp2 = X - static_cast<int>(Scale * 0.5f * sin(deg2rad(0) + BaseRad));
+							yp2 = Y + static_cast<int>(Scale * 0.5f * cos(deg2rad(0) + BaseRad));
+							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
+
+							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						}
 					};
 
-					if (IsDrawAimUIPer > 0.1f) {
+					if (IsDrawAimUIPer > 0.01f) {
 						int RetX = ViewChara->GetGunPtrNow()->GetAimXPos() + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
 						int RetY = ViewChara->GetGunPtrNow()->GetAimYPos() + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.0f);
 
-						DrawCircle(RetX, RetY, 1.f, IsDrawAimUIPer);
-
-						int Scale = static_cast<int>(1080 * ViewChara->GetGunPtrNow()->GetAutoAimRadian() / CameraParts->GetMainCamera().GetCamFov());
-
-						xp1 = RetX - static_cast<int>(Scale * 1.0f * sin(deg2rad(90) + BaseRad));
-						yp1 = RetY + static_cast<int>(Scale * 1.0f * cos(deg2rad(90) + BaseRad));
-						xp2 = RetX - static_cast<int>(Scale * 0.85f * sin(deg2rad(90) + BaseRad));
-						yp2 = RetY + static_cast<int>(Scale * 0.85f * cos(deg2rad(90) + BaseRad));
-						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
-
-						xp1 = RetX - static_cast<int>(Scale * 1.0f * sin(deg2rad(-90) + BaseRad));
-						yp1 = RetY + static_cast<int>(Scale * 1.0f * cos(deg2rad(-90) + BaseRad));
-						xp2 = RetX - static_cast<int>(Scale * 0.85f * sin(deg2rad(-90) + BaseRad));
-						yp2 = RetY + static_cast<int>(Scale * 0.85f * cos(deg2rad(-90) + BaseRad));
-						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
-
-						xp1 = RetX - static_cast<int>(Scale * 1.0f * sin(deg2rad(0) + BaseRad));
-						yp1 = RetY + static_cast<int>(Scale * 1.0f * cos(deg2rad(0) + BaseRad));
-						xp2 = RetX - static_cast<int>(Scale * 0.5f * sin(deg2rad(0) + BaseRad));
-						yp2 = RetY + static_cast<int>(Scale * 0.5f * cos(deg2rad(0) + BaseRad));
-						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
-
-						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						DrawCircle(RetX, RetY, 1.f * (1.f - IsDownUIPer), IsDrawAimUIPer);
 					}
-					if (IsDrawAimUIPer < 0.9f) {
+					if ((1.f - IsDrawAimUIPer) > 0.01f) {
 						int RetX = 1920 / 2;
 						int RetY = 1080 / 2;
 						DrawCircle(RetX, RetY, 2.f * IsDownUIPer, 1.f - IsDrawAimUIPer);

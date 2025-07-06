@@ -174,8 +174,8 @@ namespace FPS_n2 {
 				this->m_IsSquat = false;
 				Vector3DX posBuf = pPos;
 				if (CheckGround) {
-					Vector3DX EndPos = posBuf - Vector3DX::up() * 200.0f * Scale3DRate;
-					if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(posBuf + Vector3DX::up() * 200.0f * Scale3DRate, &EndPos) != 0) {
+					Vector3DX EndPos = posBuf - Vector3DX::up() * 30.0f * Scale3DRate;
+					if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(posBuf + Vector3DX::up() * 30.0f * Scale3DRate, &EndPos) != 0) {
 						posBuf = EndPos;
 					}
 				}
