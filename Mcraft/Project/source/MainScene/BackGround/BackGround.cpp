@@ -1496,7 +1496,7 @@ namespace FPS_n2 {
 				Vert.Draw(this->m_tex);
 			}
 
-			//*
+			/*
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 			float Height = ViewChara->GetEyePositionCache().y;
