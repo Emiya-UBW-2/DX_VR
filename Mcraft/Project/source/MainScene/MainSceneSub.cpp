@@ -296,7 +296,28 @@ namespace FPS_n2 {
 								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3, xp1, yp1, Color, 2);
 							}
 						}
-						};
+						//
+						{
+							float BaseRad = ViewChara->GetLeanRad();
+							xp1 = X - static_cast<int>((Scale + 64.f) * sin(deg2rad(-45) + BaseRad));
+							yp1 = Y + static_cast<int>((Scale + 64.f) * cos(deg2rad(-45) + BaseRad));
+
+							int hitpointRateG = std::clamp(2 * 255 * ViewChara->GetHP().GetPoint() / ViewChara->GetHP().GetMax(), 0, 255);
+							int hitpointRateR = std::clamp(2 * (255 - 255 * ViewChara->GetHP().GetPoint() / ViewChara->GetHP().GetMax()), 0, 255);
+							int armorpointRate = 255 * ViewChara->GetAP().GetPoint() / ViewChara->GetAP().GetMax();
+							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 192, Per));
+							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, hitpointRateR, hitpointRateG, 0);
+							DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, (ViewChara->GetIsSquat()) ? &this->m_BodyCGraph : &this->m_BodyGraph, xp1, yp1, 128.f / 500.f, BaseRad, true);
+
+							//DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, armorpointRate, armorpointRate, armorpointRate);
+							DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, (ViewChara->GetIsSquat()) ? &this->m_ArmorCGraph : &this->m_ArmorGraph, xp1, yp1, 128.f / 500.f, BaseRad, true);
+
+							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+						}
+					};
+
 					if (IsDrawAimUIPer > 0.1f) {
 						int RetX = ViewChara->GetGunPtrNow()->GetAimXPos() + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
 						int RetY = ViewChara->GetGunPtrNow()->GetAimYPos() + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.0f);
@@ -365,24 +386,6 @@ namespace FPS_n2 {
 						static_cast<int>(floatParam[1] / 60.0f), static_cast<float>(static_cast<int>(floatParam[1]) % 60) + (floatParam[1] - static_cast<float>(static_cast<int>(floatParam[1]))));
 				}
 
-			}
-			//
-			{
-				xp1 = 16 + 64;
-				yp1 = (1080 - 16 - 64 - 64);
-				int hitpointRateG = std::clamp(2 * 255 * ViewChara->GetHP().GetPoint() / ViewChara->GetHP().GetMax(), 0, 255);
-				int hitpointRateR = std::clamp(2 * (255 - 255 * ViewChara->GetHP().GetPoint() / ViewChara->GetHP().GetMax()), 0, 255);
-				int armorpointRate = 255 * ViewChara->GetAP().GetPoint() / ViewChara->GetAP().GetMax();
-				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 192);
-				DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, hitpointRateR, hitpointRateG, 0);
-				DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, (ViewChara->GetIsSquat()) ? &this->m_BodyCGraph : &this->m_BodyGraph, xp1, yp1, 128.f / 500.f, 0.f, true);
-
-				//DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-				DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, armorpointRate, armorpointRate, armorpointRate);
-				DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, (ViewChara->GetIsSquat()) ? &this->m_ArmorCGraph : &this->m_ArmorGraph, xp1, yp1, 128.f / 500.f, 0.f, true);
-
-				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-				DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 			}
 			//方位磁針
 			{

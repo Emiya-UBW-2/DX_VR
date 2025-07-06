@@ -26,6 +26,7 @@ namespace FPS_n2 {
 			float										m_StartTimer{ 0.0f };
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
+			MV1											m_MainRagDoll;
 			MV1											m_RagDoll;
 			float										AberrationPower{ 1.f };
 

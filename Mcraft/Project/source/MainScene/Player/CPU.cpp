@@ -187,6 +187,11 @@ namespace FPS_n2 {
 			bool									IsGotLengthToTarget{ true };
 			float									LengthToTarget{ 0.f };
 			Vector3DX								VectorToTarget;
+			const Vector3DX GetTargetPos() {
+				auto* PlayerMngr = Player::PlayerManager::Instance();
+				auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
+				return TargetChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos();
+			}
 			float					GetLengthToTarget() {
 				if (IsGotLengthToTarget) {
 					return LengthToTarget;
@@ -194,8 +199,7 @@ namespace FPS_n2 {
 				IsGotLengthToTarget = true;
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
-				auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos();
+				auto TgtPos = GetTargetPos();
 
 				Vector3DX MyPos = MyChara->GetEyePositionCache();
 
@@ -211,8 +215,7 @@ namespace FPS_n2 {
 				IsGotLengthToTarget = true;
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
-				auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos();
+				auto TgtPos = GetTargetPos();
 
 				Vector3DX MyPos = MyChara->GetEyePositionCache();
 
@@ -231,8 +234,7 @@ namespace FPS_n2 {
 				auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
-				auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
-				Vector3DX TgtPos = TargetChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos();
+				auto TgtPos = GetTargetPos();
 				Vector3DX MyPos = MyChara->GetEyePositionCache();
 
 				auto Target = TgtPos;
@@ -282,8 +284,7 @@ namespace FPS_n2 {
 				auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
-				auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
-				auto TgtPos = TargetChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos();
+				auto TgtPos = GetTargetPos();
 
 				Vector3DX pos_t;
 				while (true) {
@@ -486,7 +487,6 @@ namespace FPS_n2 {
 		void		AIControl::Repop(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
-			//auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 
 			Vector3DX ZVec{};
 			Vector3DX Pos{};
@@ -521,7 +521,7 @@ namespace FPS_n2 {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
-			//auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
+
 			if (MyChara->IsAlive()) {
 				this->m_RepopTimer = 0.0f;
 

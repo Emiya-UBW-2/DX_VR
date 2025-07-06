@@ -112,7 +112,7 @@ namespace FPS_n2 {
 			bool IsActive() const noexcept {
 				return m_Time > 0.f;
 			}
-			void Put(const Vector3DX& pos, const Vector3DX& vec, const Vector3DX& MyPos) noexcept {
+			void Put(const Vector3DX& pos, const Vector3DX& vec, const Vector3DX&) noexcept {
 				m_Time = 2.f;
 
 
@@ -123,16 +123,11 @@ namespace FPS_n2 {
 			void Update() noexcept;
 			void Draw() noexcept {
 				if (!IsActive()) { return; }
-				SetUseLighting(false);
-				SetUseHalfLambertLighting(false);
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, static_cast<int>(128.0f * m_Per));
 				DrawCapsule_3D(
 					this->m_Pos,
 					this->m_Pos + this->m_Vec * (10.f * Scale3DRate),
 					0.001f * Scale3DRate, GetColor(255, 255, 255), Yellow);
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-				SetUseLighting(true);
-				SetUseHalfLambertLighting(true);
 			}
 		};
 
@@ -172,9 +167,14 @@ namespace FPS_n2 {
 				}
 			}
 			void Draw() noexcept {
+				SetUseLighting(false);
+				SetUseHalfLambertLighting(false);
 				for (auto& ammo : this->m_AmmoList) {
 					ammo->Draw();
 				}
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+				SetUseLighting(true);
+				SetUseHalfLambertLighting(true);
 			}
 		};
 	}

@@ -85,7 +85,6 @@ namespace FPS_n2 {
 		public://ゲッター
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
 			const auto&		GetMoveEyePos(void) const noexcept { return this->m_WalkSwingControl.GetMoveEyePos(); }
-			const auto&		GetRagDoll(void) const noexcept { return this->m_RagDollControl.GetRagDoll(); }
 			const auto&		GetLeanRad(void) const noexcept { return this->m_LeanControl.GetRad(); }
 			const auto&		GetRotateRad(void) const noexcept { return this->m_RotateControl.GetRad(); }
 			const auto&		GetHitBoxList(void) const noexcept { return this->m_HitBoxControl.GetHitBoxPointList(); }
@@ -129,7 +128,6 @@ namespace FPS_n2 {
 				this->m_Damage.Add(GetMyPlayerID(), damageID, damage, hitType, startPos, endPos);
 			}
 			void			Heal(HitPoint Point) noexcept { SetDamage(GetMyPlayerID(), -Point, static_cast<int>(HitType::Body), GetMove().GetPos(), GetMove().GetPos()); }
-			auto&			SetRagDoll(void) noexcept { return this->m_RagDollControl.SetRagDoll(); }
 			bool			SetDamageEvent(const DamageEvent& Event) noexcept;
 			const bool		CheckDamageRay(HitPoint Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
 
@@ -152,8 +150,9 @@ namespace FPS_n2 {
 		public:
 			static void		LoadChara(const std::string& FolderName, PlayerID ID) noexcept;
 			void			LoadCharaGun(const std::string& FolderName, int Select) noexcept;
-			void			SetupRagDoll(void) noexcept {
-				MV1::SetAnime(&SetRagDoll(), GetObj());
+			void			SetupRagDoll(const MV1& baseModel) noexcept {
+				this->m_RagDollControl.SetRagDoll().Duplicate(baseModel);
+				MV1::SetAnime(&this->m_RagDollControl.SetRagDoll(), GetObj());
 				this->m_RagDollControl.Init(GetObj());
 			}
 			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect, bool CheckGround) noexcept {

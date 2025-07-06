@@ -149,7 +149,7 @@ namespace FPS_n2 {
 					break;
 				}
 				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {//無敵debug
-					Damage = 0;
+					//Damage = 0;
 				}
 				//ダメージ登録
 				if (AttackID >= 0) {
@@ -545,7 +545,7 @@ namespace FPS_n2 {
 			{
 				Vector3DX PosBuf = GetMove().GetPosBuf();
 				//素の移動ベクトル
-				Vector3DX vec = (this->m_MoveControl.GetVecPower() > 0.0f) ?
+				Vector3DX vec = (IsAlive() && this->m_MoveControl.GetVecPower() > 0.0f) ?
 					Matrix3x3DX::Vtrans(this->m_MoveControl.GetVecMove() * GetSpeed() * 60.0f * DXLib_refParts->GetDeltaTime(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetYRadUpper())) :
 					Vector3DX::zero();
 				//床判定
@@ -774,6 +774,14 @@ namespace FPS_n2 {
 						pGun->SetActiveAll(false);
 					}
 				}
+				//目の座標取得
+				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
+					auto Mat1 = this->m_RagDollControl.GetFrameMat(RagFrame::LeftEye);
+					auto Mat2 = this->m_RagDollControl.GetFrameMat(RagFrame::RightEye);
+					this->m_EyePositionCache = (Mat1.pos() + Mat2.pos()) / 2.0f;
+
+					this->m_EyeRotationCache = Matrix3x3DX::Get33DX(Mat1);
+				}
 			}
 			//ラグドール
 			{
@@ -872,9 +880,9 @@ namespace FPS_n2 {
 				}
 			}
 			else {
-				for (int loop = 0, max = GetRagDoll().GetMeshNum(); loop < max; ++loop) {
-					if (GetRagDoll().GetMeshSemiTransState(loop) == isDrawSemiTrans) {
-						GetRagDoll().DrawMesh(loop);
+				for (int loop = 0, max = this->m_RagDollControl.GetRagDoll().GetMeshNum(); loop < max; ++loop) {
+					if (this->m_RagDollControl.GetRagDoll().GetMeshSemiTransState(loop) == isDrawSemiTrans) {
+						this->m_RagDollControl.GetRagDoll().DrawMesh(loop);
 					}
 				}
 			}
@@ -891,7 +899,7 @@ namespace FPS_n2 {
 				GetObj().DrawModel();
 			}
 			else {
-				GetRagDoll().DrawModel();
+				this->m_RagDollControl.GetRagDoll().DrawModel();
 			}
 		}
 	}

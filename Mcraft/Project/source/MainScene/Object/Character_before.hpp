@@ -423,7 +423,10 @@ namespace FPS_n2 {
 		enum class RagFrame {
 			//頭
 			head,
+			LeftEye,
+			RightEye,
 			//胴体
+			center,
 			bodyg,
 			bodyc,
 			bodyb,
@@ -433,11 +436,13 @@ namespace FPS_n2 {
 			RIGHThand,
 			RIGHTarm2,
 			RIGHTarm1,
+			RIGHTShoulder,
 			//左手座標系
 			LEFThand2,
 			LEFThand,
 			LEFTarm2,
 			LEFTarm1,
+			LEFTShoulder,
 
 			//右手座標系
 			RIGHTreg2,
@@ -452,8 +457,12 @@ namespace FPS_n2 {
 
 			Max,
 		};
-		static const char* RagFrameName[static_cast<int>(RagFrame::Max)] = {
+		static const char* RagFrameName[] = {
 			"頭",
+			"左目",
+			"右目",
+
+			"センター",
 			"グルーブ",
 			"下半身",
 			"上半身",
@@ -462,10 +471,14 @@ namespace FPS_n2 {
 			"右手首",
 			"右ひじ",
 			"右腕",
+			"右肩",
+
 			"左手首先",
 			"左手首",
 			"左ひじ",
 			"左腕",
+			"左肩",
+
 			"右足首先",
 			"右足首",
 			"右ひざ",
@@ -479,7 +492,7 @@ namespace FPS_n2 {
 		private:
 			//体のフレーム情報
 			class frame_body {
-				std::array<frames, static_cast<int>(RagFrame::Max)>	m_Frames;
+				std::array<frames, static_cast<int>(sizeof(RagFrameName)/sizeof(RagFrameName[0]))>	m_Frames;
 			public:
 				const auto& GetFrame(RagFrame select) const noexcept { return this->m_Frames[static_cast<int>(select)]; }
 				//

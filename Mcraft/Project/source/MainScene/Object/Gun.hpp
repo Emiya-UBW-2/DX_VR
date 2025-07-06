@@ -127,15 +127,7 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			void				EjectCart(void) noexcept {
-				if (!this->m_IsEject) {
-					this->m_IsEject = true;
-					this->m_AmmoInChamberObj->SetActive(false);
-					this->m_CartFall.SetFall(
-						GetPartsFrameMatParent(GunFrame::Cart).pos(), GetMove().GetMat(),
-						(GetPartsFrameMatParent(GunFrame::CartVec).pos() - GetPartsFrameMatParent(GunFrame::Cart).pos() + Vector3DX::vget(GetRandf(0.2f), 0.5f + GetRandf(1.0f), GetRandf(0.2f))).normalized() * (Scale3DRate * 2.0f / 60.0f), 2.0f, Objects::FallObjectType::Cart);
-				}
-			}
+			void				EjectCart(void) noexcept;
 			void				UpdateGrenade(void) noexcept;
 			const auto			GetAnimDataNow(Charas::GunAnimeID ID) const noexcept {
 				auto* AnimMngr = Charas::GunAnimManager::Instance();
@@ -336,7 +328,7 @@ namespace FPS_n2 {
 			void				OverrideAutoAimID(PlayerID ID, int pos) noexcept { this->m_AutoAimControl.OverrideAutoAimID(ID, pos); }
 			void				SetPlayerID(PlayerID ID) noexcept { this->m_MyID = ID; }
 			void				CalcSwitchPer(bool IsRight) noexcept {
-				if (GetModifySlot()->GetMyData()->GetCanSwitch()) {
+				if (GetModifySlot()->GetMyData()->GetCanSwitch() && this->GetMyUserPlayerID() == 0) {
 					Easing(&this->m_SwitchPer, IsRight ? 1.0f : -1.0f, 0.9f, EasingType::OutExpo);
 				}
 				else {

@@ -571,6 +571,18 @@ namespace FPS_n2 {
 				}
 			}
 		}
+		void GunObj::EjectCart(void) noexcept {
+			if (!this->m_IsEject) {
+				this->m_IsEject = true;
+				this->m_AmmoInChamberObj->SetActive(false);
+				auto* PlayerMngr = Player::PlayerManager::Instance();
+				if (this->GetMyUserPlayerID() == PlayerMngr->GetWatchPlayerID()) {
+					this->m_CartFall.SetFall(
+						GetPartsFrameMatParent(GunFrame::Cart).pos(), GetMove().GetMat(),
+						(GetPartsFrameMatParent(GunFrame::CartVec).pos() - GetPartsFrameMatParent(GunFrame::Cart).pos() + Vector3DX::vget(GetRandf(0.2f), 0.5f + GetRandf(1.0f), GetRandf(0.2f))).normalized() * (Scale3DRate * 2.0f / 60.0f), 2.0f, Objects::FallObjectType::Cart);
+				}
+			}
+		}
 		//グレネード更新
 		void				GunObj::UpdateGrenade(void) noexcept {
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
