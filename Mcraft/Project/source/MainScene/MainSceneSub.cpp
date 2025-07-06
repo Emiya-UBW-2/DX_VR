@@ -316,7 +316,7 @@ namespace FPS_n2 {
 							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 						}
-					};
+						};
 
 					if (IsDrawAimUIPer > 0.1f) {
 						int RetX = ViewChara->GetGunPtrNow()->GetAimXPos() + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
@@ -411,6 +411,39 @@ namespace FPS_n2 {
 					}
 				}
 			}
+			//
+			{
+				int All = 0;
+				int Now = 0;
+				for (int gunNum = 0; gunNum < 3; ++gunNum) {
+					if (ViewChara->GetGunPtrNowSel() == gunNum) {
+						Now = All;
+					}
+					if (ViewChara->GetGunPtr(gunNum)) {
+						++All;
+					}
+				}
+				int Count = 0;
+				for (int gunNum = 0; gunNum < 3; ++gunNum) {
+					if (ViewChara->GetGunPtr(gunNum)) {
+						float Rad = deg2rad(360) * (Count- Now) / All;
+
+						xp1 = (1920 / 2) - static_cast<int>(180.f * sin(deg2rad(120) + Rad));
+						yp1 = (1080 / 2) + static_cast<int>(180.f * cos(deg2rad(120) + Rad));
+
+						const GraphHandle* Ptr = nullptr;
+						if (ViewChara->GetGunPtr(gunNum)->GetModifySlot()->GetMyData()->GetIconGraph().IsActive()) {
+							Ptr = &ViewChara->GetGunPtr(gunNum)->GetModifySlot()->GetMyData()->GetIconGraph();
+						}
+						if (Ptr) {
+							DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+								Ptr, xp1, yp1, 1.f, Rad, true);
+						}
+						++Count;
+					}
+				}
+			}
+			//
 		}
 	}
 }
