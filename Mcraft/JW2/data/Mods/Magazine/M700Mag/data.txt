@@ -1,0 +1,6 @@
+Name=M700 5Round Magazine
+
+capacity=5
+useammo0=762x51
+
+end

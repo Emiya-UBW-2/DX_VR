@@ -1,21 +1,30 @@
-Name=89式
+Name=Type89 Infantry
 
-Info=AA
+Info=自衛隊の正式小銃。
+Info=度重なる整備により多少ガタがきているものの、
+Info=以前として頼りになるアサルトライフル。
 
-Info_Eng=AA
+Info_Eng=The official rifle of the Japan Self-Defense Forces.
+Info_Eng=Although it has deteriorated somewhat due to repeated maintenance,
+Info_Eng=it is a highly reliable assault rifle.
 
 ShotRate=850
-RecoilPower=120
-RecoilReturn=0.9
+RecoilPower=80
+RecoilReturn=0.7
+RecoilScaleRate=5
 shottype=FULL
 usehumanAnim=0
 soundsel=1
 reloadType=MAG
+stockType=straight
 
 Slot0Type=Magazine
 Slot0IsNeed=true
 Slot0Item=STANAG_30
 
 Open=0
+ReloadStart_Empty=1
+ReloadStart=1
+ReloadEnd=1
 
 end

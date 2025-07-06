@@ -1,0 +1,29 @@
+Name=M700 Varmint rifle
+
+Info=カスタマイズされたM700ボルトアクションライフル。
+Info=6倍率のスコープを搭載。
+Info=軽量なパーツを選別し多少の精度を犠牲に機動性を重視している。
+
+Info_Far=Customized M700 bolt-action rifle.
+Info_Far=Equipped with a 6x scope.
+Info_Far=select Lightweight parts to sacrifice some accuracy in favor of mobility.
+
+ShotRate=300
+RecoilPower=100
+RecoilReturn=0.8
+RecoilScaleRate=1
+shottype=BOLT
+usehumanAnim=5
+soundsel=2
+reloadType=MAG
+stockType=curve
+
+Slot0Type=Magazine
+Slot0IsNeed=true
+Slot0Item=M700Mag
+
+Open=0
+
+zoom=6.0
+
+end

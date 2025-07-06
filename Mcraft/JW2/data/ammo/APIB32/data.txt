@@ -1,0 +1,8 @@
+Name=API B32
+ammo_cal(mm)=12.7
+ammo_speed(m/s)=860
+ammo_pene(mm)=30
+ammo_damage=50
+FallSound=0
+Pellets=1
+Accuracy=0.2

@@ -1,16 +1,22 @@
-Name=20式
+Name=Type 20 Early Stock
 
-Info=AA
+Info=ストックされていた20式小銃の試作品。
+Info=一般品と同様の機能を保持している。
+Info=最新の設計により取り回しの良さを誇る。
 
-Info_Eng=AA
+Info_Eng=A prototype of the Type 20 rifle that was in stock.
+Info_Eng=It has the same functions as the standard model.
+Info_Eng=It boasts easy handling thanks to its latest design.
 
 ShotRate=850
-RecoilPower=120
-RecoilReturn=0.9
+RecoilPower=50
+RecoilReturn=0.7
+RecoilScaleRate=5
 shottype=FULL
 usehumanAnim=0
 soundsel=1
 reloadType=MAG
+stockType=straight
 
 Slot0Type=Magazine
 Slot0IsNeed=true
@@ -21,5 +27,8 @@ Slot1IsNeed=true
 Slot1Item=ACOG
 
 Open=0
+ReloadStart_Empty=1
+ReloadStart=1
+ReloadEnd=1
 
 end

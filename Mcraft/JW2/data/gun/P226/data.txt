@@ -1,17 +1,23 @@
-Name=P226
+Name=P226 Handgun
 
-Info=AA
+Info=ダブルカラムマガジン、デコッキング機能を搭載した拳銃。
+Info=高級ながら優秀な耐久性、精度、反動を備える。
+Info=バックアップガンとして最適。
 
-Info_Eng=AA
+Info_Eng=A handgun equipped with a double column magazine and decocking function.
+Info_Eng=High-end product with excellent durability, accuracy, and recoil.
+Info_Eng=Ideal as a back-up gun.
 
 ShotRate=600
-RecoilPower=100
-RecoilReturn=0.95
+RecoilPower=60
+RecoilReturn=0.9
+RecoilScaleRate=2
 shottype=SEMI
 usehumanAnim=1
-soundsel=1
+soundsel=2
 reloadType=MAG
 CanSwitch=False
+stockType=none
 
 Slot0Type=Magazine
 Slot0IsNeed=true

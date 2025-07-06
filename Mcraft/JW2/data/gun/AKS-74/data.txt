@@ -1,4 +1,4 @@
-Name=AKS-74N AssaultRifle
+Name=AKS-74
 
 Info=空挺部隊、搭乗員向けの突撃銃。
 Info=シンプルな構造により信頼性が高い。
@@ -9,12 +9,14 @@ Info_Eng=High reliability due to simple structure.
 Info_Eng=By folding the stock= it can be used in extremely close combat.
 
 ShotRate=600
-RecoilPower=210
+RecoilPower=120
 RecoilReturn=0.8
+RecoilScaleRate=5
 shottype=FULL
 usehumanAnim=4
 soundsel=3
 reloadType=MAG
+stockType=curve
 
 Slot0Type=Magazine
 Slot0IsNeed=true
@@ -22,5 +24,8 @@ Slot0Item=AK_6L20
 
 Cocking=0
 Open=1
+ReloadStart_Empty=2
+ReloadStart=2
+ReloadEnd=2
 
 end
