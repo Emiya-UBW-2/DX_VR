@@ -46,6 +46,8 @@ namespace FPS_n2 {
 			float												m_ConcussionPer{ 0.0f };
 			bool												m_CanWatch{ true };
 			bool												m_HeadShotSwitch{ false };
+			float												m_GunyAdd{ 0.0f };
+			bool												m_GunFallActive{ true };
 		private://キャッシュ
 			Matrix3x3DX											m_EyeRotationCache{};
 			Vector3DX											m_EyePositionCache{};
@@ -187,6 +189,8 @@ namespace FPS_n2 {
 					this->m_GunPtrControl.GetGunPtr(loop)->Spawn();
 				}
 				this->m_SlingZrad.Init(0.05f * Scale3DRate, 3.0f, deg2rad(50));
+				this->m_GunyAdd = 0.f;
+				this->m_GunFallActive = true;
 			}
 
 			const auto		GetIsRappelling() const noexcept { return this->m_IsRappelling && !this->m_IsRappellingEnd; }

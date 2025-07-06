@@ -766,9 +766,22 @@ namespace FPS_n2 {
 					auto& pGun = this->m_GunPtrControl.GetGunPtr(loop);
 					if (!pGun) { continue; }
 					if (loop == this->m_GunPtrControl.GetNowGunSelect()) {
-						auto Mat = this->m_RagDollControl.GetFrameMat(RagFrame::RIGHThand);
-						pGun->SetGunMat(Matrix3x3DX::Get33DX(Mat) * Matrix3x3DX::RotAxis(Vector3DX::right(),deg2rad(-90)), Mat.pos());
-						pGun->SetActiveAll(true);
+						if (this->m_GunFallActive) {
+							auto Mat = pGun->GetMove().GetMat();
+							auto Pos = pGun->GetMove().GetPos() + Vector3DX::up() * m_GunyAdd;
+							this->m_GunyAdd += (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));
+							if (BackGroundParts->CheckLinetoMap(pGun->GetMove().GetPos(), &Pos) != 0) {
+								this->m_GunFallActive = false;
+								this->m_GunyAdd = 0.f;
+								Mat *= Matrix3x3DX::RotVec2(Mat.xvec(), Vector3DX::up());
+								Pos + Vector3DX::up() * (0.1f * Scale3DRate);
+							}
+							else {
+								Mat = Matrix3x3DX::RotAxis(Vector3DX::vget(GetRandf(1.f), 1.f, GetRandf(1.f)).normalized(), deg2rad(180.f) * DXLib_refParts->GetDeltaTime()) * Mat;
+							}
+							pGun->SetGunMat(Mat, Pos);
+							pGun->SetActiveAll(true);
+						}
 					}
 					else {
 						pGun->SetActiveAll(false);
