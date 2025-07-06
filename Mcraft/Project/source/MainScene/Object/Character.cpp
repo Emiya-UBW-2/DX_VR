@@ -64,12 +64,15 @@ namespace FPS_n2 {
 					}
 				}
 				//エフェクトセット
-				if (Damage > 0) {
-					EffectSingleton::Instance()->SetOnce(Effect::ef_hitblood, Event.EndPos, Vector3DX::forward(), Scale3DRate);
-					EffectSingleton::Instance()->SetEffectSpeed(Effect::ef_hitblood, 2.0f);
-				}
-				else if (ArmerDamage > 0) {
-					EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, Event.EndPos, (Event.StartPos - Event.EndPos).normalized(), 0.25f * Scale3DRate);
+				auto* OptionParts = OptionManager::Instance();
+				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+					if (Damage > 0) {
+						EffectSingleton::Instance()->SetOnce(Effect::ef_hitblood, Event.EndPos, Vector3DX::forward(), Scale3DRate);
+						EffectSingleton::Instance()->SetEffectSpeed(Effect::ef_hitblood, 2.0f);
+					}
+					else if (ArmerDamage > 0) {
+						EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, Event.EndPos, (Event.StartPos - Event.EndPos).normalized(), 0.25f * Scale3DRate);
+					}
 				}
 				//ヒットモーション
 				if (Damage > 0) {

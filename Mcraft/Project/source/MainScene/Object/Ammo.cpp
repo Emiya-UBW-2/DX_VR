@@ -26,10 +26,13 @@ namespace FPS_n2 {
 			this->m_HP = 2;
 
 			if ((*this->m_AmmoData)->GetEffectID() != -1) {
-				if (this->m_EffectUniqueID != InvalidID) {
-					EffectSingleton::Instance()->StopEffectAny(Effect::ef_rocket, this->m_EffectUniqueID);
+				auto* OptionParts = OptionManager::Instance();
+				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+					if (this->m_EffectUniqueID != InvalidID) {
+						EffectSingleton::Instance()->StopEffectAny(Effect::ef_rocket, this->m_EffectUniqueID);
+					}
+					this->m_EffectUniqueID = EffectSingleton::Instance()->SetLoopAny(Effect::ef_rocket, this->m_pos);
 				}
-				this->m_EffectUniqueID = EffectSingleton::Instance()->SetLoopAny(Effect::ef_rocket, this->m_pos);
 			}
 		}
 		void		AmmoObj::FirstUpdate(void) noexcept {
@@ -40,7 +43,10 @@ namespace FPS_n2 {
 				if (this->m_AmmoData && (this->m_EffectUniqueID != InvalidID)) {
 					if (this->m_EffectTimer < 0.f) {
 						if ((*this->m_AmmoData)->GetEffectID() != -1) {
-							EffectSingleton::Instance()->StopEffectAny(Effect::ef_rocket, this->m_EffectUniqueID);
+							auto* OptionParts = OptionManager::Instance();
+							if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+								EffectSingleton::Instance()->StopEffectAny(Effect::ef_rocket, this->m_EffectUniqueID);
+							}
 							this->m_EffectUniqueID = InvalidID;
 						}
 					}
@@ -101,12 +107,18 @@ namespace FPS_n2 {
 						}
 					}
 					if (IsChanged) {
-						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(Put.x, Put.y, Put.z),
-							Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f)))), 3.0f + GetRandf(2.0f), 3.0f);
+						auto* OptionParts = OptionManager::Instance();
+						if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 2) {
+							EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(Put.x, Put.y, Put.z),
+								Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f)))), 3.0f + GetRandf(2.0f), 3.0f);
+						}
 					}
 				}
 				//エフェクト
-				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, pos_tmp, norm_tmp, std::min(0.0127f, (*this->m_AmmoData)->GetCaliber()) / 0.02f * Scale3DRate);
+				auto* OptionParts = OptionManager::Instance();
+				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, pos_tmp, norm_tmp, std::min(0.0127f, (*this->m_AmmoData)->GetCaliber()) / 0.02f * Scale3DRate);
+				}
 				};
 
 			bool is_HitAll = false;
@@ -159,7 +171,10 @@ namespace FPS_n2 {
 			this->m_Timer += DXLib_refParts->GetDeltaTime();
 			this->m_pos = pos_tmp;
 			if ((*this->m_AmmoData)->GetEffectID() != -1) {
-				EffectSingleton::Instance()->Update_LoopAnyEffect(Effect::ef_rocket, this->m_EffectUniqueID, this->m_pos, this->m_vec, 1.0f);
+				auto* OptionParts = OptionManager::Instance();
+				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+					EffectSingleton::Instance()->Update_LoopAnyEffect(Effect::ef_rocket, this->m_EffectUniqueID, this->m_pos, this->m_vec, 1.0f);
+				}
 			}
 		}
 

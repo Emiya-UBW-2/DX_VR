@@ -582,14 +582,21 @@ namespace FPS_n2 {
 				CamChara->GetIsADS() ? (Scale3DRate * 0.3f) : (Scale3DRate * 0.15f), CamChara->GetIsADS() ? (FarMax * 0.8f) : Scale3DRate * 5.0f,
 				CamChara->GetIsADS() ? (Scale3DRate * 0.1f) : (Scale3DRate * 0.05f), FarMax);
 			//埃エフェクト
-			if (GetIsFirstLoop()) {
-				this->m_EffectPos = CameraParts->GetMainCamera().GetCamPos();
-				EffectSingleton::Instance()->SetLoop(Effect::ef_dust, this->m_EffectPos);
+			if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 2) {
+				if (!EffectSingleton::Instance()->IsPlayLoopEffect(Effect::ef_dust)) {
+					this->m_EffectPos = CameraParts->GetMainCamera().GetCamPos();
+					EffectSingleton::Instance()->SetLoop(Effect::ef_dust, this->m_EffectPos);
+				}
+				else {
+					Easing(&this->m_EffectPos, CameraParts->GetMainCamera().GetCamPos(), 0.95f, EasingType::OutExpo);
+					EffectSingleton::Instance()->Update_LoopEffect(Effect::ef_dust, this->m_EffectPos, Vector3DX::forward(), 0.5f);
+					EffectSingleton::Instance()->SetEffectColor(Effect::ef_dust, 255, 255, 255, 64);
+				}
 			}
 			else {
-				Easing(&this->m_EffectPos, CameraParts->GetMainCamera().GetCamPos(), 0.95f, EasingType::OutExpo);
-				EffectSingleton::Instance()->Update_LoopEffect(Effect::ef_dust, this->m_EffectPos, Vector3DX::forward(), 0.5f);
-				EffectSingleton::Instance()->SetEffectColor(Effect::ef_dust, 255, 255, 255, 64);
+				if (EffectSingleton::Instance()->IsPlayLoopEffect(Effect::ef_dust)) {
+					EffectSingleton::Instance()->StopEffect(Effect::ef_dust);
+				}
 			}
 			//背景
 			BackGround::BackGroundControl::Instance()->Update();

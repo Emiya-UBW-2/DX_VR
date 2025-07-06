@@ -13,7 +13,10 @@ namespace FPS_n2 {
 			auto colres = GetColLine(StartPos, *EndPos, 0);
 			if (colres.HitFlag == TRUE) {
 				*EndPos = colres.HitPosition;
-				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, *EndPos, colres.Normal, 2.0f);
+				auto* OptionParts = OptionManager::Instance();
+				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, *EndPos, colres.Normal, 2.0f);
+				}
 				this->m_IsHit = true;
 				return true;
 			}
@@ -103,7 +106,10 @@ namespace FPS_n2 {
 					auto& AmmoData = Objects::AmmoDataManager::Instance()->Get(this->m_AmmoSpecID);
 
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Shot1))->Play3D(GetMove().GetPos(), 100.0f * Scale3DRate);													//サウンド
-					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, AmmoData->GetCaliber() * 10.0f * Scale3DRate, 2.0f);	//銃発砲エフェクトのセット
+					auto* OptionParts = OptionManager::Instance();
+					if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, AmmoData->GetCaliber() * 10.0f * Scale3DRate, 2.0f);	//銃発砲エフェクトのセット
+					}
 					Objects::AmmoPool::Instance()->Put(&AmmoData, MuzzlePos, MuzzleVec, this->m_MyPlayerID);
 					--this->m_GunAmmo;
 				}
@@ -131,7 +137,10 @@ namespace FPS_n2 {
 					auto& AmmoData = Objects::AmmoDataManager::Instance()->Get(this->m_RocketSpecID);
 
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::rolling_rocket))->Play3D(GetMove().GetPos(), 100.0f * Scale3DRate);													//サウンド
-					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, 0.1f * Scale3DRate, 2.0f);	//銃発砲エフェクトのセット
+					auto* OptionParts = OptionManager::Instance();
+					if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, 0.1f * Scale3DRate, 2.0f);	//銃発砲エフェクトのセット
+					}
 					Objects::AmmoPool::Instance()->Put(&AmmoData, MuzzlePos, MuzzleVec, this->m_MyPlayerID);
 					--this->m_RocketGunAmmo;
 				}

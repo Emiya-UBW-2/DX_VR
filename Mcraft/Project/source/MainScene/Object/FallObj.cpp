@@ -51,9 +51,12 @@ namespace FPS_n2 {
 			}
 			void RotateOnGround(moves*) noexcept override {}//なにもしない
 			void OnTimeEnd(const moves& objMove) noexcept override {
-				auto* SE = SoundPool::Instance();
-				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_greexp, objMove.GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate, 2.0f);
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Explosion))->Play3D(objMove.GetPos(), Scale3DRate * 25.0f);
+				auto* OptionParts = OptionManager::Instance();
+				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+					auto* SE = SoundPool::Instance();
+					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_greexp, objMove.GetPos(), Vector3DX::forward(), 0.5f * Scale3DRate, 2.0f);
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Explosion))->Play3D(objMove.GetPos(), Scale3DRate * 25.0f);
+				}
 			}
 		public:
 			bool IsDrawFar(void) const noexcept override { return true; }

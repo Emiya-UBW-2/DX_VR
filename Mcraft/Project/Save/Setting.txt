@@ -1,14 +1,14 @@
 GraphicsPreset=1
 DirectXVer=11
 usevr=false
-ObjLevel=1
+ObjLevel=0
 DoF=true
 bloom=true
 shadow=1
 SSAO=true
 fov=70
 vsync=false
-FpsLimit=240
+FpsLimit=360
 SE=0.500000
 VOICE=0.500000
 BGM=0.800000

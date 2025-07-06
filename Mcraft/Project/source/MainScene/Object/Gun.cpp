@@ -82,54 +82,58 @@ namespace FPS_n2 {
 				(this->m_MuzzlePtr) ? (*this->m_MuzzlePtr)->GetModifySlot()->GetMyData()->GetGunShootSound() : GetModifySlot()->GetMyData()->GetGunShootSound()
 			))->Play3D(MuzzleMat.pos(), Scale3DRate * 50.0f);
 			//エフェクト
-			EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec2(), 0.35f* this->m_MuzzleSmokeSize / (0.00762f * Scale3DRate), 2.0f);
-			{
-				if (HaveFrame(static_cast<int>(GunFrame::smoke1))) {
-					int Frame = GetFrame(static_cast<int>(GunFrame::smoke1));
-					auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
-					Vector3DX Pos = Mat.pos();
-					Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
-					Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
+			auto* OptionParts = OptionManager::Instance();
+			if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec2(), 0.35f * this->m_MuzzleSmokeSize / (0.00762f * Scale3DRate), 2.0f);
+			}
+			if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 2) {
+				if (GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
+					if (HaveFrame(static_cast<int>(GunFrame::smoke1))) {
+						int Frame = GetFrame(static_cast<int>(GunFrame::smoke1));
+						auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
+						Vector3DX Pos = Mat.pos();
+						Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
+						Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
 
-					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
+						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
+					}
+					if (HaveFrame(static_cast<int>(GunFrame::smoke2))) {
+						int Frame = GetFrame(static_cast<int>(GunFrame::smoke2));
+						auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
+						Vector3DX Pos = Mat.pos();
+						Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
+						Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
+
+						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
+					}
+					if (HaveFrame(static_cast<int>(GunFrame::smoke3))) {
+						int Frame = GetFrame(static_cast<int>(GunFrame::smoke3));
+						auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
+						Vector3DX Pos = Mat.pos();
+						Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
+						Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
+
+						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
+					}
+					if (HaveFrame(static_cast<int>(GunFrame::smoke4))) {
+						int Frame = GetFrame(static_cast<int>(GunFrame::smoke4));
+						auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
+						Vector3DX Pos = Mat.pos();
+						Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
+						Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
+
+						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
+					}
+					if (HaveFrame(static_cast<int>(GunFrame::smoke5))) {
+						int Frame = GetFrame(static_cast<int>(GunFrame::smoke5));
+						auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
+						Vector3DX Pos = Mat.pos();
+						Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
+						Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
+
+						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
+					}
 				}
-				if (HaveFrame(static_cast<int>(GunFrame::smoke2))) {
-					int Frame = GetFrame(static_cast<int>(GunFrame::smoke2));
-					auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
-					Vector3DX Pos = Mat.pos();
-					Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
-					Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
-
-					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
-				}
-				if (HaveFrame(static_cast<int>(GunFrame::smoke3))) {
-					int Frame = GetFrame(static_cast<int>(GunFrame::smoke3));
-					auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
-					Vector3DX Pos = Mat.pos();
-					Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
-					Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
-
-					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
-				}
-				if (HaveFrame(static_cast<int>(GunFrame::smoke4))) {
-					int Frame = GetFrame(static_cast<int>(GunFrame::smoke4));
-					auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
-					Vector3DX Pos = Mat.pos();
-					Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
-					Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
-
-					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
-				}
-				if (HaveFrame(static_cast<int>(GunFrame::smoke5))) {
-					int Frame = GetFrame(static_cast<int>(GunFrame::smoke5));
-					auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
-					Vector3DX Pos = Mat.pos();
-					Vector3DX Vec = (GetObj().GetFramePosition(GetObj().GetFrameChild(Frame, 0)) - Pos).normalized();
-					Vec = Matrix3x3DX::Vtrans(Vec, Matrix3x3DX::RotAxis(Vector3DX::Cross(Vec, Mat.yvec()), deg2rad(GetRandf(10))));
-
-					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_shotdust, Pos, Vec, 1.f, 2.f);
-				}
-
 			}
 
 
@@ -612,8 +616,11 @@ namespace FPS_n2 {
 						}
 					}
 					if (IsChanged) {
-						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(Put.x, Put.y, Put.z),
-							Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f)))), 3.0f + GetRandf(2.0f), 3.0f);
+						auto* OptionParts = OptionManager::Instance();
+						if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 2) {
+							EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(Put.x, Put.y, Put.z),
+								Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f)))), 3.0f + GetRandf(2.0f), 3.0f);
+						}
 					}
 				}
 			}

@@ -61,21 +61,27 @@ namespace FPS_n2 {
 					Vector3DX HitNormal = this->m_hitres[tt.GetHitMesh()].Normal;
 					HitNormal = HitNormal.normalized();
 
-					for (auto& mesh : this->m_VecData->GetSpaceArmerMeshIDList()) {
-						if (tt.GetHitMesh() == mesh) {
-							EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 1.0f);
+					auto* OptionParts = OptionManager::Instance();
+					if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+						for (auto& mesh : this->m_VecData->GetSpaceArmerMeshIDList()) {
+							if (tt.GetHitMesh() == mesh) {
+								EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 1.0f);
+							}
 						}
-					}
-					for (auto& mesh : this->m_VecData->GetModuleMeshIDList()) {
-						if (tt.GetHitMesh() == mesh) {
-							EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 1.0f);
+						for (auto& mesh : this->m_VecData->GetModuleMeshIDList()) {
+							if (tt.GetHitMesh() == mesh) {
+								EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 1.0f);
+							}
 						}
 					}
 					//ダメージ面に当たった
 					for (auto& mesh : this->m_VecData->GetArmerMeshIDList()) {
 						if (tt.GetHitMesh() == mesh.first) {
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_Ricochet))->Play3D(HitPos, 100.0f * Scale3DRate);
-							EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 2.0f);
+							auto* OptionParts = OptionManager::Instance();
+							if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+								EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 2.0f);
+							}
 							break;
 						}
 					}
@@ -293,7 +299,10 @@ namespace FPS_n2 {
 						Vector3DX MuzzlePos = GetObj().GetFramePosition(cg.GetGunMuzzleFrame().GetFrameID());
 						Vector3DX MuzzleVec = (MuzzlePos - GetObj().GetFramePosition(cg.GetGunTrunnionFrame().GetFrameID())).normalized();
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_Shot))->Play3D(GetMove().GetPos(), 100.0f * Scale3DRate);													//サウンド
-						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, cg.GetAmmoSpec()->GetCaliber() * 10.0f * Scale3DRate, 2.0f);	//銃発砲エフェクトのセット
+						auto* OptionParts = OptionManager::Instance();
+						if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+							EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, cg.GetAmmoSpec()->GetCaliber() * 10.0f * Scale3DRate, 2.0f);	//銃発砲エフェクトのセット
+						}
 						Objects::AmmoPool::Instance()->Put(&cg.GetAmmoSpec(), MuzzlePos, MuzzleVec, this->m_MyPlayerID);
 					}
 				}
@@ -335,8 +344,11 @@ namespace FPS_n2 {
 						for (int zp = -zput / 2; zp < zput / 2; ++zp) {
 							if (BackGroundParts->DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, 100)) {
 								if ((xp % 3 == 0) || (zp % 3 == 0)) {
-									//EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(xx, yy, zz),
-									//	Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f)))), 3.0f + GetRandf(2.0f), 3.0f);
+									//auto* OptionParts = OptionManager::Instance();
+									//if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 2) {
+									//	EffectSingleton::Instance()->SetOnce_Any(Effect::ef_break, BackGroundParts->GetPos(xx, yy, zz),
+									//		Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f)))), 3.0f + GetRandf(2.0f), 3.0f);
+									//}
 								}
 								++IsBreak;
 							}

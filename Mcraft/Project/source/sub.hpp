@@ -252,6 +252,9 @@ namespace FPS_n2 {
 		void		StopEffect(Effect ID) noexcept {
 			this->m_EffectControl.StopEffect(static_cast<EffectControl::EffectID>(ID));
 		}
+		bool		IsPlayLoopEffect(Effect ID) noexcept {
+			return this->m_EffectControl.IsPlayLoopEffect(static_cast<EffectControl::EffectID>(ID));
+		}
 		void		SetLoop(Effect ID, const Vector3DX& pos) noexcept {
 			this->m_EffectControl.SetLoop(static_cast<EffectControl::EffectID>(ID), pos);
 		}
