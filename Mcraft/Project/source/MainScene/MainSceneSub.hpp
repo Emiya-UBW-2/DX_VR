@@ -52,6 +52,9 @@ namespace FPS_n2 {
 			float						m_AmmoRandR{};
 			float						m_AmmoInPer{};
 			int							m_AmmoNumTotal{};
+
+			int							m_RadPrev{};
+			float						m_RadR{};
 		public:
 			MainSceneUI(void) noexcept {}
 			MainSceneUI(const MainSceneUI&) = delete;

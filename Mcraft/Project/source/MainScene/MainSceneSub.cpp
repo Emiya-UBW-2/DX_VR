@@ -186,7 +186,7 @@ namespace FPS_n2 {
 		void			MainSceneUI::Update(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
-			
+
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 
 			CanLookTarget = false;
@@ -200,8 +200,9 @@ namespace FPS_n2 {
 			if (ViewChara->GetGunPtrNow()) {
 				IsDrawAimUI = ViewChara->GetGunPtrNow()->GetCanShot() && (ViewChara->GetGunPtrNow()->GetGunAnime() != Charas::GunAnimeID::Watch);
 			}
-			Easing(&IsDrawAimUIPer, IsDrawAimUI ? 1.0f : 0.0f, 0.9f, EasingType::OutExpo);
-			if (IsDrawAimUIPer < 0.1f && !IsDrawAimUI) { IsDrawAimUIPer = 0.0f; }
+
+			IsDrawAimUIPer = std::clamp(IsDrawAimUIPer + (IsDrawAimUI ? 1.0f : -1.0f) * DXLib_refParts->GetDeltaTime() / 0.1f, 0.f, 1.f);
+
 			Easing(&IsDownUIPer, !IsDrawAimUI ? 1.0f : 0.0f, 0.9f, EasingType::OutExpo);
 
 			Easing(&m_AmmoInPer, 0.f, 0.9f, EasingType::OutExpo);
@@ -220,6 +221,43 @@ namespace FPS_n2 {
 			}
 			Easing(&this->m_DamagePerR, std::clamp(this->m_DamagePer, 0.f, 1.f), 0.8f, EasingType::OutExpo);
 			this->m_ReHP = ViewChara->GetHP().GetPoint();
+
+			{
+				int Count = 0;
+				int Now = 0;
+				for (int gunNum = 0; gunNum < 3; ++gunNum) {
+					if (ViewChara->GetGunPtrNowSel() == gunNum) {
+						Now = Count;
+					}
+					if (ViewChara->GetGunPtr(gunNum)) {
+						++Count;
+					}
+				}
+				if (m_RadPrev != Now) {
+					if (
+						(m_RadPrev == 0 && Now == 1) ||
+						(m_RadPrev == 1 && Now == 2) ||
+						(m_RadPrev == 2 && Now == 0)
+						) {
+						m_RadR = -1.f;
+					}
+					else if (
+						(m_RadPrev == 0 && Now == 2) ||
+						(m_RadPrev == 2 && Now == 1) ||
+						(m_RadPrev == 1 && Now == 0)
+						)
+					{
+						m_RadR = 1.f;
+					}
+					else {
+						m_RadR = 1.f;
+					}
+					m_RadPrev = Now;
+				}
+				else {
+					Easing(&m_RadR, 0.f, 0.9f, EasingType::OutExpo);
+				}
+			}
 		}
 		void			MainSceneUI::Draw(void) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
@@ -263,9 +301,10 @@ namespace FPS_n2 {
 				}
 
 				if (ViewChara->GetGunPtrNow()) {
+					float BaseRad = ViewChara->GetLeanRad();
 					auto DrawCircle = [&](int X, int Y, float scale, float Per) {
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, Per));
-						int Scale = static_cast<int>(1080 * ViewChara->GetGunPtrNow()->GetAutoAimRadian() / CameraParts->GetMainCamera().GetCamFov()) * scale;
+						int Scale = static_cast<int>(static_cast<float>(1080 * ViewChara->GetGunPtrNow()->GetAutoAimRadian() / CameraParts->GetMainCamera().GetCamFov()) * scale);
 						DrawCtrls->SetDrawCircle(WindowSystem::DrawLayer::Normal, X, Y, Scale, Green, false, 2);
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, LookPer * (Per)));
 						DrawCtrls->SetDrawCircle(WindowSystem::DrawLayer::Normal, X, Y, Scale + 4 + Lerp(100, 0, LookPer), Green, false, 2);
@@ -298,9 +337,8 @@ namespace FPS_n2 {
 						}
 						//
 						{
-							float BaseRad = ViewChara->GetLeanRad();
-							xp1 = X - static_cast<int>((Scale + 64.f) * sin(deg2rad(-45) + BaseRad));
-							yp1 = Y + static_cast<int>((Scale + 64.f) * cos(deg2rad(-45) + BaseRad));
+							xp1 = X - static_cast<int>((Scale + 64.f) * sin(deg2rad(-90) + BaseRad));
+							yp1 = Y + static_cast<int>((Scale + 64.f) * cos(deg2rad(-90) + BaseRad));
 
 							int hitpointRateG = std::clamp(2 * 255 * ViewChara->GetHP().GetPoint() / ViewChara->GetHP().GetMax(), 0, 255);
 							int hitpointRateR = std::clamp(2 * (255 - 255 * ViewChara->GetHP().GetPoint() / ViewChara->GetHP().GetMax()), 0, 255);
@@ -316,7 +354,80 @@ namespace FPS_n2 {
 							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 						}
-						};
+						//
+						{
+							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, Per));
+							{
+								int Bright = 128;
+								DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, Bright, 0);
+								for (int gunNum = -1; gunNum <= 1; gunNum += 2) {
+									int Now = ViewChara->GetGunPtrNowSel() + gunNum;
+									Now = (Now + 3) % 3;
+									{
+										float S = 0.2f * scale;
+										if (ViewChara->GetGunPtr(Now)) {
+											float Rad = deg2rad(30) * m_RadR - deg2rad(30) * gunNum + BaseRad;
+											xp1 = X - static_cast<int>((768.f / 2.f * S + Scale + 32.f) * sin(deg2rad(90) + Rad));
+											yp1 = Y + static_cast<int>((768.f / 2.f * S + Scale + 32.f) * cos(deg2rad(90) + Rad));
+											const GraphHandle* Ptr = nullptr;
+											if (ViewChara->GetGunPtr(Now)->GetModifySlot()->GetMyData()->GetIconGraph().IsActive()) {
+												Ptr = &ViewChara->GetGunPtr(Now)->GetModifySlot()->GetMyData()->GetIconGraph();
+											}
+											if (Ptr) {
+												DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+													Ptr, xp1, yp1, S, Rad, true);
+											}
+										}
+									}
+								}
+							}
+							{
+								int Bright = Lerp(255, 128, std::abs(m_RadR));
+								DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, Bright, 0);
+								float S = Lerp(0.3f, 0.2f, std::abs(m_RadR)) * scale;
+								if (ViewChara->GetGunPtrNow()) {
+									float Rad = deg2rad(30) * m_RadR + BaseRad;
+									xp1 = X - static_cast<int>((768.f / 2.f * S + Scale + 32.f) * sin(deg2rad(90) + Rad));
+									yp1 = Y + static_cast<int>((768.f / 2.f * S + Scale + 32.f) * cos(deg2rad(90) + Rad));
+									const GraphHandle* Ptr = nullptr;
+									if (ViewChara->GetGunPtrNow()->GetModifySlot()->GetMyData()->GetIconGraph().IsActive()) {
+										Ptr = &ViewChara->GetGunPtrNow()->GetModifySlot()->GetMyData()->GetIconGraph();
+									}
+									if (Ptr) {
+										DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+											Ptr, xp1, yp1, S, Rad, true);
+									}
+								}
+							}
+							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						}
+						//
+						{
+							if (ViewChara->GetGunPtrNow()->GetAmmoAll() > 0) {
+								xp1 = X - static_cast<int>(Scale * 2.f * sin(deg2rad(30) + BaseRad));
+								yp1 = Y + static_cast<int>(Scale * 2.f * cos(deg2rad(30) + BaseRad));
+								xp2 = X - static_cast<int>(Scale * sin(deg2rad(30) + BaseRad));
+								yp2 = Y + static_cast<int>(Scale * cos(deg2rad(30) + BaseRad));
+								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
+								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 100, yp1, xp1, yp1, Green, 2);
+								bool isLow = (100 * ViewChara->GetGunPtrNow()->GetAmmoNumTotal() / ViewChara->GetGunPtrNow()->GetAmmoAll() < 30);
+								unsigned int Color = GetColor(
+									Lerp(isLow ? 255 : 0, 255, m_AmmoInPer),
+									Lerp(!isLow ? 255 : 0, 255, m_AmmoInPer),
+									Lerp(0, 255, m_AmmoInPer));
+
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+									FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1 - 65, yp1 - 3, Color, Black, "/%d", ViewChara->GetGunPtrNow()->GetAmmoAll());
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+									FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
+									xp1 - 100 - static_cast<int>(m_AmmoRandR * m_AmmoInPer * 10.f),
+									yp1 - 3 - static_cast<int>(m_AmmoInPer * 3.f),
+									Color, Black, "%d", ViewChara->GetGunPtrNow()->GetAmmoNumTotal());
+
+							}
+						}
+					};
 
 					if (IsDrawAimUIPer > 0.1f) {
 						int RetX = ViewChara->GetGunPtrNow()->GetAimXPos() + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
@@ -326,7 +437,6 @@ namespace FPS_n2 {
 
 						int Scale = static_cast<int>(1080 * ViewChara->GetGunPtrNow()->GetAutoAimRadian() / CameraParts->GetMainCamera().GetCamFov());
 
-						float BaseRad = ViewChara->GetLeanRad();
 						xp1 = RetX - static_cast<int>(Scale * 1.0f * sin(deg2rad(90) + BaseRad));
 						yp1 = RetY + static_cast<int>(Scale * 1.0f * cos(deg2rad(90) + BaseRad));
 						xp2 = RetX - static_cast<int>(Scale * 0.85f * sin(deg2rad(90) + BaseRad));
@@ -344,29 +454,6 @@ namespace FPS_n2 {
 						xp2 = RetX - static_cast<int>(Scale * 0.5f * sin(deg2rad(0) + BaseRad));
 						yp2 = RetY + static_cast<int>(Scale * 0.5f * cos(deg2rad(0) + BaseRad));
 						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
-
-						if (ViewChara->GetGunPtrNow()->GetAmmoAll() > 0) {
-							xp1 = RetX - static_cast<int>(Scale * 1.5f * sin(deg2rad(60) + BaseRad));
-							yp1 = RetY + static_cast<int>(Scale * 1.5f * cos(deg2rad(60) + BaseRad));
-							xp2 = RetX - static_cast<int>(Scale * sin(deg2rad(60) + BaseRad));
-							yp2 = RetY + static_cast<int>(Scale * cos(deg2rad(60) + BaseRad));
-							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Green, 2);
-							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 100, yp1, xp1, yp1, Green, 2);
-							bool isLow = (100 * ViewChara->GetGunPtrNow()->GetAmmoNumTotal() / ViewChara->GetGunPtrNow()->GetAmmoAll() < 30);
-							unsigned int Color = GetColor(
-								Lerp(isLow ? 255 : 0, 255, m_AmmoInPer),
-								Lerp(!isLow ? 255 : 0, 255, m_AmmoInPer),
-								Lerp(0, 255, m_AmmoInPer));
-
-							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
-								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1 - 65, yp1 - 3, Color, Black, "/%d", ViewChara->GetGunPtrNow()->GetAmmoAll());
-							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
-								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
-								xp1 - 100 - static_cast<int>(m_AmmoRandR * m_AmmoInPer * 10.f),
-								yp1 - 3 - static_cast<int>(m_AmmoInPer * 3.f),
-								Color, Black, "%d", ViewChara->GetGunPtrNow()->GetAmmoNumTotal());
-
-						}
 
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
@@ -408,38 +495,6 @@ namespace FPS_n2 {
 					}
 					else {
 						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 - 6, xp1, yp1 + 6, Green, 2);
-					}
-				}
-			}
-			//
-			{
-				int All = 0;
-				int Now = 0;
-				for (int gunNum = 0; gunNum < 3; ++gunNum) {
-					if (ViewChara->GetGunPtrNowSel() == gunNum) {
-						Now = All;
-					}
-					if (ViewChara->GetGunPtr(gunNum)) {
-						++All;
-					}
-				}
-				int Count = 0;
-				for (int gunNum = 0; gunNum < 3; ++gunNum) {
-					if (ViewChara->GetGunPtr(gunNum)) {
-						float Rad = deg2rad(360) * (Count- Now) / All;
-
-						xp1 = (1920 / 2) - static_cast<int>(180.f * sin(deg2rad(120) + Rad));
-						yp1 = (1080 / 2) + static_cast<int>(180.f * cos(deg2rad(120) + Rad));
-
-						const GraphHandle* Ptr = nullptr;
-						if (ViewChara->GetGunPtr(gunNum)->GetModifySlot()->GetMyData()->GetIconGraph().IsActive()) {
-							Ptr = &ViewChara->GetGunPtr(gunNum)->GetModifySlot()->GetMyData()->GetIconGraph();
-						}
-						if (Ptr) {
-							DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
-								Ptr, xp1, yp1, 1.f, Rad, true);
-						}
-						++Count;
 					}
 				}
 			}
