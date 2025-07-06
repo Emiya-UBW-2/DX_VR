@@ -442,6 +442,13 @@ namespace FPS_n2 {
 					}
 				}
 				DamageEvents.clear();
+
+				if (!ViewChara->IsAlive()) {
+					if (!this->m_IsEnd) {
+						FadeControl::Instance()->SetBlackOut(true, 3.f);
+					}
+					this->m_IsEnd = true;
+				}
 			}
 
 			//PlayerMngr->GetVehicle()->SetInput(MyInput, true);
@@ -665,35 +672,36 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
-			if (!ViewChara->IsAlive()) { return; }
-			//レティクル表示
-			if (ViewChara->GetGunPtrNow()) {
-				ViewChara->GetGunPtrNow()->DrawReticle(ViewChara->GetLeanRad());
-			}
-			HitMarkerPool::Instance()->Draw();
-			if (!SceneParts->IsPause()) { this->m_UIclass.Draw(); }		//UI
-#if DEBUG_NET
-			NetWorkBrowser::Instance()->Draw();						//通信設定
-#endif
-			if (this->m_NetWorkController) {
-				std::string PingMes;
-				if (this->m_NetWorkController->GetPing() >= 0.0f) {
-					char Mes[260];
-					sprintfDx(Mes, "Ping:%3dms", static_cast<int>(this->m_NetWorkController->GetPing()));
-
-					PingMes = Mes;
+			if (ViewChara->IsAlive()) {
+				//レティクル表示
+				if (ViewChara->GetGunPtrNow()) {
+					ViewChara->GetGunPtrNow()->DrawReticle(ViewChara->GetLeanRad());
 				}
-				else {
-					if (!this->m_NetWorkController->IsServer()) {
-						PingMes = "Lost Connection";
+				HitMarkerPool::Instance()->Draw();
+				if (!SceneParts->IsPause()) { this->m_UIclass.Draw(); }		//UI
+#if DEBUG_NET
+				NetWorkBrowser::Instance()->Draw();						//通信設定
+#endif
+				if (this->m_NetWorkController) {
+					std::string PingMes;
+					if (this->m_NetWorkController->GetPing() >= 0.0f) {
+						char Mes[260];
+						sprintfDx(Mes, "Ping:%3dms", static_cast<int>(this->m_NetWorkController->GetPing()));
+
+						PingMes = Mes;
 					}
 					else {
-						PingMes = "Ping:---ms";
+						if (!this->m_NetWorkController->IsServer()) {
+							PingMes = "Lost Connection";
+						}
+						else {
+							PingMes = "Ping:---ms";
+						}
 					}
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (64), White, Black,
+						PingMes);
 				}
-				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (64), White, Black,
-					PingMes);
 			}
 			FadeControl::Instance()->Draw();
 		}

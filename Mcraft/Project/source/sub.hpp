@@ -52,6 +52,7 @@ namespace FPS_n2 {
 	private:
 		bool						m_IsBlackOut{ false };//カットシーン中フラグ
 		float						m_BlackOutAlpha{ 0.0f };
+		float						m_BlackSpeed{ 0.5f };
 	private:
 		FadeControl() noexcept {}
 		virtual ~FadeControl()noexcept {}
@@ -59,7 +60,10 @@ namespace FPS_n2 {
 		auto		IsClear(void) const noexcept { return this->m_BlackOutAlpha == 0.0f; }
 		auto		IsAll(void) const noexcept { return this->m_BlackOutAlpha >= 1.0f; }
 	public:
-		void			SetBlackOut(bool value) noexcept { this->m_IsBlackOut = value; }
+		void			SetBlackOut(bool value, float speed = 0.5f) noexcept {
+			this->m_IsBlackOut = value;
+			this->m_BlackSpeed = speed;
+		}
 	public:
 		void			Init(void) noexcept;
 		void			Update(void) noexcept;

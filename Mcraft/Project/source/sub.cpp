@@ -8,10 +8,11 @@ namespace FPS_n2 {
 	void FadeControl::Init(void) noexcept {
 		this->m_IsBlackOut = false;
 		this->m_BlackOutAlpha = 1.0f;
+		this->m_BlackSpeed = 0.5f;
 	}
 	void FadeControl::Update(void) noexcept {
 		auto* DXLib_refParts = DXLib_ref::Instance();
-		this->m_BlackOutAlpha = std::clamp(this->m_BlackOutAlpha + (this->m_IsBlackOut ? 1.0f : -1.0f) * DXLib_refParts->GetDeltaTime() / 0.5f, 0.0f, 1.0f);
+		this->m_BlackOutAlpha = std::clamp(this->m_BlackOutAlpha + (this->m_IsBlackOut ? 1.0f : -1.0f) * DXLib_refParts->GetDeltaTime() / this->m_BlackSpeed, 0.0f, 1.0f);
 	}
 	void FadeControl::Draw(void) const noexcept {
 		if (this->m_BlackOutAlpha <= 1.0f / 255.0f) { return; }
