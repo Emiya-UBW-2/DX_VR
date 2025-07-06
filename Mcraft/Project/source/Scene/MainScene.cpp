@@ -445,7 +445,7 @@ namespace FPS_n2 {
 
 			PlayerMngr->m_FindCount = std::max(PlayerMngr->m_FindCount - DXLib_refParts->GetDeltaTime(), 0.f);
 			//ほかプレイヤーとの判定
-			{
+			if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//オンライン
 				float Radius = 2.0f * 1.f * Scale3DRate;
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 					auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
@@ -453,7 +453,23 @@ namespace FPS_n2 {
 					if (chara->GetIsRappelling()) { continue; }
 					//自分が当たったら押し出す
 					for (auto& g : Objects::ItemObjPool::Instance()->GetList()) {
+						if (!g->IsActive()) { continue; }
 						Vector3DX Vec = (chara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
+						float Len = Vec.magnitude();
+						if (Len < Radius) {
+							g->SetMove().SetPos(g->GetMove().GetPos() + Vec.normalized() * (Len - Radius));
+							g->SetMove().Update(0.f, 0.f);
+						}
+					}
+				}
+			}
+			else {
+				if (ViewChara->IsAlive()) {
+					float Radius = 2.0f * 1.f * Scale3DRate;
+					//自分が当たったら押し出す
+					for (auto& g : Objects::ItemObjPool::Instance()->GetList()) {
+						if (!g->IsActive()) { continue; }
+						Vector3DX Vec = (ViewChara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
 						float Len = Vec.magnitude();
 						if (Len < Radius) {
 							g->SetMove().SetPos(g->GetMove().GetPos() + Vec.normalized() * (Len - Radius));
