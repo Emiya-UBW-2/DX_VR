@@ -84,12 +84,6 @@ namespace FPS_n2 {
 				this->m_AmmoList.clear();
 			}
 		public:
-			void FirstUpdate() noexcept {
-				for (auto& ammo : this->m_AmmoList) {
-					ammo->FirstUpdate();
-				}
-			}
-		public:
 			void Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos, const Vector3DX& vec, int myID) noexcept {
 				for (auto& ammo : this->m_AmmoList) {
 					if (!ammo->IsActive()) {

@@ -29,8 +29,6 @@ namespace FPS_n2 {
 			MV1											m_MainRagDoll;
 			MV1											m_RagDoll;
 			float										AberrationPower{ 1.f };
-
-			std::vector<std::shared_ptr<Objects::ItemObj>>		m_ItemList;
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
 				if (this->m_NetWorkController) {

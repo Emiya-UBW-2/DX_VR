@@ -62,6 +62,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//
 	FPS_n2::Guns::GunPartsDataManager::Create();
 	FPS_n2::Objects::AmmoDataManager::Create();
+	FPS_n2::Objects::ItemObjDataManager::Create();
 	//初期セーブ
 	SaveData::Instance()->Save();
 	//BGM

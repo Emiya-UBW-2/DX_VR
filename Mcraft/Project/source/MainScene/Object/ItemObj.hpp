@@ -5,7 +5,73 @@
 
 namespace FPS_n2 {
 	namespace Objects {
+		class ItemObjData {
+			std::string		m_path;
+			std::string		m_name;
+		public://getter
+			const auto& GetPath(void) const noexcept { return this->m_path; }
+			const auto& GetName(void) const noexcept { return this->m_name; }
+		public:
+			ItemObjData(std::string path_) noexcept { Set(path_); }
+		private:
+			void			Set(std::string path_) {
+				this->m_path = path_;
+
+				//Load_Sub(this->m_path);
+
+				FileStreamDX FileStream((this->m_path + "data.txt").c_str());
+				while (true) {
+					if (FileStream.ComeEof()) { break; }
+					auto ALL = FileStream.SeekLineAndGetStr();
+					//コメントアウト
+					if (ALL.find("//") != std::string::npos) {
+						ALL = ALL.substr(0, ALL.find("//"));
+					}
+					//
+					if (ALL == "") { continue; }
+					auto LEFT = FileStreamDX::getleft(ALL);
+					auto RIGHT = FileStreamDX::getright(ALL);
+					//アイテムデータ読みとり
+					{
+						if (LEFT == "Name") {
+							this->m_name = RIGHT;
+						}
+					}
+				}
+			}
+		};
+
+		class ItemObjDataManager : public SingletonBase<ItemObjDataManager> {
+		private:
+			friend class SingletonBase<ItemObjDataManager>;
+		private:
+			std::vector<std::unique_ptr<ItemObjData>>	m_Data;
+		private:
+			ItemObjDataManager(void) noexcept {}
+			virtual ~ItemObjDataManager(void) noexcept {
+				for (auto& obj : this->m_Data) {
+					obj.reset();
+				}
+				this->m_Data.clear();
+			}
+		public:
+			const auto& GetList(void) const noexcept { return this->m_Data; }
+			const auto& Get(int index) const noexcept { return this->m_Data[index]; }
+			const int Add(const std::string& filepath) noexcept {
+				auto Find = std::find_if(this->m_Data.begin(), this->m_Data.end(), [&](const std::unique_ptr<ItemObjData>& tgt) {return tgt->GetPath() == filepath; });
+				if (Find != this->m_Data.end()) {
+					int index = static_cast<int>(Find - this->m_Data.begin());
+					return index;
+				}
+				this->m_Data.emplace_back(std::make_unique<ItemObjData>(filepath));
+				return static_cast<int>(this->m_Data.size() - 1);
+			}
+		};
+
+
+
 		class ItemObj : public BaseObject {
+			int			m_ItemObjDataID{};
 			float		m_yAdd{ 0.0f };
 			Pendulum2D	m_Zrotate;
 			float		m_Yrad{};
@@ -17,7 +83,10 @@ namespace FPS_n2 {
 			ItemObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::ItemObj); }
 			virtual ~ItemObj(void) noexcept {}
 		public:
-			void				Spawn(const Vector3DX& pos) noexcept {
+			void				SetID(int ID) noexcept { this->m_ItemObjDataID = ID; }
+			const auto&			GetID(void) const noexcept { return this->m_ItemObjDataID; }
+			//接地
+			void				Put(const Vector3DX& pos) noexcept {
 				SetMove().SetPos(pos);
 				SetMove().Update(0.0f, 0.0f);
 				m_Zrotate.Init(0.08f * Scale3DRate, 3.0f, deg2rad(50));
@@ -43,6 +112,46 @@ namespace FPS_n2 {
 				GetObj().DrawModel();
 			}
 			void			Dispose_Sub(void) noexcept override {}
+		};
+
+
+		class ItemObjPool : public SingletonBase<ItemObjPool> {
+		private:
+			friend class SingletonBase<ItemObjPool>;
+		private:
+			std::vector<std::shared_ptr<Objects::ItemObj>> m_ItemObjList;
+		private:
+			ItemObjPool(void) noexcept {
+				this->m_ItemObjList.resize(64);
+				for (auto& ammo : this->m_ItemObjList) {
+					ammo = std::make_shared<Objects::ItemObj>();
+					ObjectManager::Instance()->InitObject(ammo);
+				}
+			}
+			virtual ~ItemObjPool(void) noexcept {
+				for (auto& ammo : this->m_ItemObjList) {
+					ObjectManager::Instance()->DelObj(ammo);
+					ammo.reset();
+				}
+				this->m_ItemObjList.clear();
+			}
+		public:
+			auto			GetList(void) noexcept { return this->m_ItemObjList; }
+
+			void Put(int pItemObjDataID, const Vector3DX& pos) noexcept {
+				for (auto& ammo : this->m_ItemObjList) {
+					if (!ammo->IsActive() && (ammo->GetID() == pItemObjDataID)) {
+						ammo->Put(pos);
+						return;
+					}
+				}
+				auto& ItemData = Objects::ItemObjDataManager::Instance()->Get(pItemObjDataID);
+
+				this->m_ItemObjList.emplace_back(std::make_shared<Objects::ItemObj>());
+				ObjectManager::Instance()->InitObject(this->m_ItemObjList.back(), ItemData->GetPath());
+				this->m_ItemObjList.back()->SetID(pItemObjDataID);
+				this->m_ItemObjList.back()->Put(pos);
+			}
 		};
 	}
 }

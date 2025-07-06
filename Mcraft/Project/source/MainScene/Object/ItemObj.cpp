@@ -1,5 +1,8 @@
 ﻿#include	"ItemObj.hpp"
 
+const FPS_n2::Objects::ItemObjDataManager* SingletonBase<FPS_n2::Objects::ItemObjDataManager>::m_Singleton = nullptr;
+const FPS_n2::Objects::ItemObjPool* SingletonBase<FPS_n2::Objects::ItemObjPool>::m_Singleton = nullptr;
+
 namespace FPS_n2 {
 	namespace Objects {
 		void ItemObj::FirstUpdate(void) noexcept {
