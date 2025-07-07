@@ -78,7 +78,6 @@ namespace FPS_n2 {
 					for (auto& mesh : this->m_VecData->GetArmerMeshIDList()) {
 						if (tt.GetHitMesh() == mesh.first) {
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Tank_Ricochet))->Play3D(HitPos, 100.0f * Scale3DRate);
-							auto* OptionParts = OptionManager::Instance();
 							if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
 								EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, HitPos, HitNormal, 2.0f);
 							}

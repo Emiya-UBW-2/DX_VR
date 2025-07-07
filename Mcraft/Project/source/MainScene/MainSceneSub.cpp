@@ -2,6 +2,8 @@
 
 #include	"Player/Player.hpp"
 
+#include	"../MainScene/Object/ItemObj.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		void			PauseMenuControl::Load(void) noexcept {
@@ -263,6 +265,7 @@ namespace FPS_n2 {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* CameraParts = Camera3D::Instance();
+			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 
 			int xp1{}, yp1{};
@@ -272,6 +275,30 @@ namespace FPS_n2 {
 			if (this->m_DamagePerR > 0.f) {
 				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(216.f * this->m_DamagePerR));
 				DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &OIL_Graph, 0, 0, 1920, 1080, true);
+				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+			}
+			//
+			{
+
+				xp1 = (400);
+				yp1 = (1080 * 4 / 5);
+
+				int Height = 100;
+
+				float Alpha = 1.f;
+
+				int loop = 0;
+				for (auto& ID : ViewPlayer->GetInventory()) {
+					auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID);
+					xp1 = 400 - Height * (static_cast<int>(ViewPlayer->GetInventory().size()) / 2) + Height * loop;
+
+					Alpha = static_cast<float>(loop + 1) / static_cast<float>(ViewPlayer->GetInventory().size());
+
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &item->GetIconGraph(), xp1, yp1, 192.f / 512.f, 0.f, true);
+
+					++loop;
+				}
 				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
 			//タイム,スコア

@@ -187,7 +187,7 @@ namespace FPS_n2 {
 			bool									IsGotLengthToTarget{ true };
 			float									LengthToTarget{ 0.f };
 			Vector3DX								VectorToTarget;
-			const Vector3DX GetTargetPos() {
+			const Vector3DX GetTargetPos() const noexcept {
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
 				return
@@ -381,7 +381,6 @@ namespace FPS_n2 {
 				}
 			}
 			void		Execute_Normal() noexcept {
-				auto* DXLib_refParts = DXLib_ref::Instance();
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
 				Vector3DX MyPos = MyChara->GetEyePositionCache();

@@ -8,16 +8,22 @@ namespace FPS_n2 {
 		class ItemObjData {
 			std::string		m_path;
 			std::string		m_name;
+
+			GraphHandle						m_Icon;
 		public://getter
 			const auto& GetPath(void) const noexcept { return this->m_path; }
 			const auto& GetName(void) const noexcept { return this->m_name; }
+			const auto& GetIconGraph(void) const noexcept { return this->m_Icon; }
 		public:
 			ItemObjData(std::string path_) noexcept { Set(path_); }
 		private:
 			void			Set(std::string path_) {
 				this->m_path = path_;
 
-				//Load_Sub(this->m_path);
+				FILEINFO FileInfo;
+				if (FileRead_findFirst((this->m_path + "icon.bmp").c_str(), &FileInfo) != (DWORD_PTR)InvalidID) {
+					this->m_Icon.Load(this->m_path + "icon.bmp");
+				}
 
 				FileStreamDX FileStream((this->m_path + "data.txt").c_str());
 				while (true) {
@@ -83,8 +89,8 @@ namespace FPS_n2 {
 			ItemObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::ItemObj); }
 			virtual ~ItemObj(void) noexcept {}
 		public:
-			void				SetID(int ID) noexcept { this->m_ItemObjDataID = ID; }
-			const auto&			GetID(void) const noexcept { return this->m_ItemObjDataID; }
+			void				SetUniqueID(int ID) noexcept { this->m_ItemObjDataID = ID; }
+			const auto&			GetUniqueID(void) const noexcept { return this->m_ItemObjDataID; }
 			//接地
 			void				Put(const Vector3DX& pos) noexcept {
 				SetMove().SetPos(pos);
@@ -122,11 +128,7 @@ namespace FPS_n2 {
 			std::vector<std::shared_ptr<Objects::ItemObj>> m_ItemObjList;
 		private:
 			ItemObjPool(void) noexcept {
-				this->m_ItemObjList.resize(64);
-				for (auto& ammo : this->m_ItemObjList) {
-					ammo = std::make_shared<Objects::ItemObj>();
-					ObjectManager::Instance()->InitObject(ammo);
-				}
+				this->m_ItemObjList.clear();
 			}
 			virtual ~ItemObjPool(void) noexcept {
 				for (auto& ammo : this->m_ItemObjList) {
@@ -140,7 +142,7 @@ namespace FPS_n2 {
 
 			void Put(int pItemObjDataID, const Vector3DX& pos) noexcept {
 				for (auto& ammo : this->m_ItemObjList) {
-					if (!ammo->IsActive() && (ammo->GetID() == pItemObjDataID)) {
+					if (!ammo->IsActive() && (ammo->GetUniqueID() == pItemObjDataID)) {
 						ammo->Put(pos);
 						return;
 					}
@@ -149,7 +151,7 @@ namespace FPS_n2 {
 
 				this->m_ItemObjList.emplace_back(std::make_shared<Objects::ItemObj>());
 				ObjectManager::Instance()->InitObject(this->m_ItemObjList.back(), ItemData->GetPath());
-				this->m_ItemObjList.back()->SetID(pItemObjDataID);
+				this->m_ItemObjList.back()->SetUniqueID(pItemObjDataID);
 				this->m_ItemObjList.back()->Put(pos);
 			}
 		};

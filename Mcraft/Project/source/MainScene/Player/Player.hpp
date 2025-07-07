@@ -7,6 +7,8 @@
 #include	"../Object/Vehicle.hpp"
 #include	"../Object/Helicopter.hpp"
 
+#include	"../Object/ItemObj.hpp"
+
 namespace FPS_n2 {
 	namespace Player {
 		class PlayerManager : public SingletonBase<PlayerManager> {
@@ -16,6 +18,7 @@ namespace FPS_n2 {
 			class PlayerControl {
 				std::shared_ptr<Charas::CharacterObj>	m_Chara{ nullptr };
 				std::shared_ptr<AIs::AIControl>			m_AI{ nullptr };
+				std::vector<int>						m_Inventory{};
 				int										m_Score{ 0 };							//スコア
 				int										m_Kill{ 0 };							//スコア
 				int										m_Hit{ 0 };							//スコア
@@ -42,6 +45,24 @@ namespace FPS_n2 {
 
 				void		SetAI(const std::shared_ptr<AIs::AIControl>& pAI) noexcept { this->m_AI = pAI; }
 				auto& GetAI(void) noexcept { return this->m_AI; }
+
+				const auto& GetInventory(void) const noexcept {
+					return this->m_Inventory;
+				}
+
+				void AddInventory(int ID) noexcept {
+					this->m_Inventory.emplace_back(ID);
+				}
+
+				void SubInventory(int ID) noexcept {
+					for (auto& i : this->m_Inventory) {
+						if (i == ID) {
+							std::swap(i, this->m_Inventory.back());
+							this->m_Inventory.pop_back();
+							return;
+						}
+					}
+				}
 
 				void		AddScore(int Score) noexcept { this->m_Score += Score; }
 				void		SetScore(int Score) noexcept { this->m_Score = Score; }

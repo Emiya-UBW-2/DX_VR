@@ -270,6 +270,7 @@ namespace FPS_n2 {
 
 			FadeControl::Instance()->Update();
 
+			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 
 			Pad->SetMouseMoveEnable(true);
@@ -457,8 +458,19 @@ namespace FPS_n2 {
 						Vector3DX Vec = (chara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
 						float Len = Vec.magnitude();
 						if (Len < Radius) {
-							g->SetMove().SetPos(g->GetMove().GetPos() + Vec.normalized() * (Len - Radius));
-							g->SetMove().Update(0.f, 0.f);
+							Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
+							if (
+								(ViewPlayer->GetInventory().size() < 5) &&
+								(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
+								) {
+								ViewPlayer->AddInventory(g->GetUniqueID());
+								g->SetActive(false);
+								continue;
+							}
+							else {
+								g->SetMove().SetPos(g->GetMove().GetPos() + Vec.normalized() * (Len - Radius));
+								g->SetMove().Update(0.f, 0.f);
+							}
 						}
 					}
 				}
@@ -472,8 +484,19 @@ namespace FPS_n2 {
 						Vector3DX Vec = (ViewChara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
 						float Len = Vec.magnitude();
 						if (Len < Radius) {
-							g->SetMove().SetPos(g->GetMove().GetPos() + Vec.normalized() * (Len - Radius));
-							g->SetMove().Update(0.f, 0.f);
+							Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
+							if (
+								(ViewPlayer->GetInventory().size() < 5) &&
+								(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
+								) {
+								ViewPlayer->AddInventory(g->GetUniqueID());
+								g->SetActive(false);
+								continue;
+							}
+							else {
+								g->SetMove().SetPos(g->GetMove().GetPos() + Vec.normalized() * (Len - Radius));
+								g->SetMove().Update(0.f, 0.f);
+							}
 						}
 					}
 				}
