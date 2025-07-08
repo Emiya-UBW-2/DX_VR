@@ -38,9 +38,11 @@ namespace FPS_n2 {
 
 			GraphHandle					m_BodyGraph;
 			GraphHandle					m_ArmorGraph;
+			GraphHandle					m_HeadGraph;
 
 			GraphHandle					m_BodyCGraph;
 			GraphHandle					m_ArmorCGraph;
+			GraphHandle					m_HeadCGraph;
 
 			GraphHandle					m_ItembackGraph;
 
@@ -70,8 +72,10 @@ namespace FPS_n2 {
 			void			Set(void) noexcept {
 				this->m_BodyGraph.Load("data/UI/Body.bmp");
 				this->m_ArmorGraph.Load("data/UI/Armor.bmp");
+				this->m_HeadGraph.Load("data/UI/Head.bmp");
 				this->m_BodyCGraph.Load("data/UI/BodyC.bmp");
 				this->m_ArmorCGraph.Load("data/UI/ArmorC.bmp");
+				this->m_HeadCGraph.Load("data/UI/HeadC.bmp");
 				this->m_ItembackGraph.Load("data/UI/itemback.png");
 				this->OIL_Graph.Load("data/UI/back.png");
 			}
@@ -80,8 +84,10 @@ namespace FPS_n2 {
 			void			Dispose(void) noexcept {
 				this->m_BodyGraph.Dispose();
 				this->m_ArmorGraph.Dispose();
+				this->m_HeadGraph.Dispose();
 				this->m_BodyCGraph.Dispose();
 				this->m_ArmorCGraph.Dispose();
+				this->m_HeadCGraph.Dispose();
 				m_ItembackGraph.Dispose();
 				this->OIL_Graph.Dispose();
 			}

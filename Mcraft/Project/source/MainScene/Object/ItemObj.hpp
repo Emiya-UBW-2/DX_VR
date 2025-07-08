@@ -10,10 +10,14 @@ namespace FPS_n2 {
 			std::string		m_name;
 
 			GraphHandle						m_Icon;
+			bool			m_EnableSpawnBySoldier{ false };
 		public://getter
 			const auto& GetPath(void) const noexcept { return this->m_path; }
 			const auto& GetName(void) const noexcept { return this->m_name; }
 			const auto& GetIconGraph(void) const noexcept { return this->m_Icon; }
+
+			const auto& EnableSpawnBySoldier(void) const noexcept { return this->m_EnableSpawnBySoldier; }
+			
 		public:
 			ItemObjData(std::string path_) noexcept { Set(path_); }
 		private:
@@ -41,6 +45,9 @@ namespace FPS_n2 {
 					{
 						if (LEFT == "Name") {
 							this->m_name = RIGHT;
+						}
+						else if (LEFT == "EnableSpawnBySoldier") {
+							this->m_EnableSpawnBySoldier = (RIGHT == "TRUE");
 						}
 					}
 				}
@@ -92,8 +99,12 @@ namespace FPS_n2 {
 			void				SetUniqueID(int ID) noexcept { this->m_ItemObjDataID = ID; }
 			const auto&			GetUniqueID(void) const noexcept { return this->m_ItemObjDataID; }
 			//接地
-			void				Put(const Vector3DX& pos) noexcept {
+			void				Put(const Vector3DX& pos, const Vector3DX& vec) noexcept {
+				SetActive(true);
+				m_Repos = pos;
+				m_Pos = pos;
 				SetMove().SetPos(pos);
+				SetMove().SetVec(vec);
 				SetMove().Update(0.0f, 0.0f);
 				m_Zrotate.Init(0.08f * Scale3DRate, 3.0f, deg2rad(50));
 				this->m_Yrad = deg2rad(GetRandf(360.f));
@@ -140,10 +151,10 @@ namespace FPS_n2 {
 		public:
 			auto			GetList(void) noexcept { return this->m_ItemObjList; }
 
-			void Put(int pItemObjDataID, const Vector3DX& pos) noexcept {
+			void Put(int pItemObjDataID, const Vector3DX& pos, const Vector3DX& vec) noexcept {
 				for (auto& ammo : this->m_ItemObjList) {
 					if (!ammo->IsActive() && (ammo->GetUniqueID() == pItemObjDataID)) {
-						ammo->Put(pos);
+						ammo->Put(pos, vec);
 						return;
 					}
 				}
@@ -152,7 +163,7 @@ namespace FPS_n2 {
 				this->m_ItemObjList.emplace_back(std::make_shared<Objects::ItemObj>());
 				ObjectManager::Instance()->InitObject(this->m_ItemObjList.back(), ItemData->GetPath());
 				this->m_ItemObjList.back()->SetUniqueID(pItemObjDataID);
-				this->m_ItemObjList.back()->Put(pos);
+				this->m_ItemObjList.back()->Put(pos, vec);
 			}
 		};
 	}

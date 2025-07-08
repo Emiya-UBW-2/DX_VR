@@ -25,7 +25,8 @@ namespace FPS_n2 {
 			std::array<float, static_cast<int>(CharaAnimeID::AnimeIDMax)>	m_AnimPerBuf{ 0 };
 			CharaAnimeID										m_BottomAnimSelect{};
 			PointControl<HitPoint, 100>							m_HP{};
-			PointControl<ArmerPoint, 150>						m_AP{};
+			PointControl<ArmerPoint, 160>						m_BodyPoint{};
+			PointControl<ArmerPoint, 100>						m_HeadPoint{};
 			DamageEventControl									m_Damage;
 			float												m_StuckGunTimer{ 0.0f };
 			bool												m_IsStuckGun{ false };
@@ -48,6 +49,8 @@ namespace FPS_n2 {
 			bool												m_HeadShotSwitch{ false };
 			float												m_GunyAdd{ 0.0f };
 			bool												m_GunFallActive{ true };
+
+			std::vector<int> m_ItemList_EnableSpawnBySoldier;
 		private://キャッシュ
 			Matrix3x3DX											m_EyeRotationCache{};
 			Vector3DX											m_EyePositionCache{};
@@ -99,7 +102,8 @@ namespace FPS_n2 {
 			const auto&		GetCharaType(void) const noexcept { return this->m_CharaType; }
 			const auto		GetIsADS(void) const noexcept { return (!this->m_IsStuckGun && GetGunPtrNow() && GetGunPtrNow()->GetCanADS()) && this->m_Input.GetPADSPress(Controls::PADS::AIM); }
 			const auto&		GetHP(void) const noexcept { return this->m_HP; }
-			const auto&		GetAP(void) const noexcept { return this->m_AP; }
+			const auto&		GetBodyAP(void) const noexcept { return this->m_BodyPoint; }
+			const auto&		GetHeadAP(void) const noexcept { return this->m_HeadPoint; }
 			const auto		IsAlive(void) const noexcept { return this->m_HP.IsNotZero(); }
 			const auto		IsLowHP(void) const noexcept { return this->m_HP.GetPoint() < (this->m_HP.GetMax() * 35 / 100); }
 			const auto		GetFrameWorldMat(CharaFrame frame) const noexcept { return GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(frame))); }
@@ -160,7 +164,8 @@ namespace FPS_n2 {
 			}
 			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect, bool CheckGround) noexcept {
 				this->m_HP.Init();
-				this->m_AP.Init();
+				this->m_BodyPoint.Init();
+				this->m_HeadPoint.Init();
 				Heal(100);
 				this->m_ArmBreak = false;
 				this->m_ArmBreakPer = 0.0f;

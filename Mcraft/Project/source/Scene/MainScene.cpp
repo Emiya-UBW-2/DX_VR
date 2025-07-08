@@ -94,10 +94,6 @@ namespace FPS_n2 {
 			PlayerMngr->Init(NetWork::Player_num);
 			PlayerMngr->SetWatchPlayerID(GetViewPlayerID());
 
-			for (int loop = 0; loop < 10; ++loop) {
-				Objects::ItemObjPool::Instance()->Put(loop % Objects::ItemObjDataManager::Instance()->GetList().size(), Vector3DX::vget(GetRandf(1.f), 0.f, GetRandf(1.f)) * Scale3DRate);
-			}
-
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				//
@@ -213,6 +209,22 @@ namespace FPS_n2 {
 			SetFogStartEnd(FarMax, FarMax * 20.0f);
 			SetFogColor(128, 110, 110);
 			//
+			for (int loop = 0; loop < 10; ++loop) {
+				auto* BackGroundParts = BackGround::BackGroundControl::Instance();
+				Vector3DX TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
+				{
+					Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
+					if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+						TargetPos = EndPos;
+					}
+				}
+				Objects::ItemObjPool::Instance()->Put(loop % Objects::ItemObjDataManager::Instance()->GetList().size(),
+					TargetPos,
+					Vector3DX::vget(GetRandf(1.f), 1.f, GetRandf(1.f)) * Scale3DRate * 0.01f
+				);
+			}
+
+
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				Vector3DX TargetPos;

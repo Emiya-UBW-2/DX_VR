@@ -11,7 +11,7 @@ namespace FPS_n2 {
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 
 			Vector3DX PosBuf = GetMove().GetPos();
-			PosBuf = PosBuf + Vector3DX::up() * this->m_yAdd;
+			PosBuf = PosBuf + GetMove().GetVec() * DXLib_refParts->GetDeltaTime() + Vector3DX::up() * this->m_yAdd;
 			this->m_yAdd += (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));
 			Vector3DX Vec = PosBuf - m_Repos; Vec.y = 0.f;
 			//壁判定
@@ -25,6 +25,9 @@ namespace FPS_n2 {
 				if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(PosBuf, &EndPos) != 0) {
 					PosBuf = EndPos;
 					this->m_yAdd = 0.0f;
+					Vector3DX Vector = GetMove().GetVec(); Vector.y = 0.f;
+					Easing(&Vector, Vector3DX::zero(), 0.8f, EasingType::OutExpo);
+					SetMove().SetVec(Vector);
 				}
 			}
 			this->m_Yrad += deg2rad(60.f * DXLib_refParts->GetDeltaTime() * (m_IsLR ? 1.f : -1.f));

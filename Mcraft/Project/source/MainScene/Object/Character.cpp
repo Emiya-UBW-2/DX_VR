@@ -12,27 +12,43 @@ namespace FPS_n2 {
 
 				auto PrevLive = IsAlive();
 
-				ArmerPoint ArmerDamage = 0;
+				ArmerPoint BodyArmerDamage = 0;
+				ArmerPoint HeadArmerDamage = 0;
 				HitPoint Damage = Event.Damage;
+
+				//部位ダメージ演算
 				if (Damage > 0) {
 					switch (static_cast<HitType>(Event.HitType)) {
 					case HitType::Head:
+						if (Event.DamageID != PlayerMngr->GetWatchPlayerID()) {//自機はヘッショされない
+							Damage = Damage * 500 / 100;
+						}
+						HeadArmerDamage = this->m_HeadPoint.GetPoint();
+						Damage = std::clamp<HitPoint>(Damage - HeadArmerDamage, 0, this->m_HP.GetMax());
+						this->m_HeadPoint.Sub(this->m_HeadPoint.GetMax() / 2);
 						break;
 					case HitType::Body:
-						ArmerDamage = std::clamp<ArmerPoint>(Damage, 0, this->m_AP.GetPoint());
-						Damage = std::clamp<HitPoint>(Damage - ArmerDamage, 0, this->m_HP.GetMax());
+						BodyArmerDamage = this->m_BodyPoint.GetPoint();
+						Damage = std::clamp<HitPoint>(Damage - BodyArmerDamage, 0, this->m_HP.GetMax());
+						this->m_BodyPoint.Sub(this->m_BodyPoint.GetMax() / 5);
 						break;
 					case HitType::Arm:
+						Damage = Damage * 30 / 100;
 						break;
 					case HitType::Leg:
+						Damage = Damage * 50 / 100;
 						break;
 					default:
 						break;
 					}
+					if (Event.DamageID == PlayerMngr->GetWatchPlayerID()) {//無敵debug
+						//Damage = 0;
+					}
 				}
 
+				auto Prev = this->m_HP.GetPoint();
 				this->m_HP.Sub(Damage);
-				this->m_AP.Sub(ArmerDamage);
+				Damage = std::min(Damage, Prev);
 				bool IsDeath = PrevLive && !IsAlive();
 
 				if (Event.ShotID == PlayerMngr->GetWatchPlayerID()) {//撃ったキャラ
@@ -40,14 +56,14 @@ namespace FPS_n2 {
 					if (Damage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Hit))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
 					}
-					else if (ArmerDamage > 0) {
+					if (BodyArmerDamage > 0 || HeadArmerDamage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f, 128);
 					}
 					//ヒットカウント
-					if ((Damage >= 0) && (ArmerDamage >= 0)) {
+					if ((Damage >= 0) && (BodyArmerDamage >= 0 || HeadArmerDamage >= 0)) {
 						PlayerMngr->GetPlayer(Event.ShotID)->AddHit(1);
 						//ヒット座標表示を登録
-						HitMarkerPool::Instance()->AddMarker(Event.EndPos, Damage, ArmerDamage);
+						HitMarkerPool::Instance()->AddMarker(Event.EndPos, Damage, std::max(BodyArmerDamage, HeadArmerDamage));
 					}
 					if (IsDeath) {
 						PlayerMngr->GetPlayer(Event.ShotID)->AddScore(100);
@@ -59,7 +75,7 @@ namespace FPS_n2 {
 					if (Damage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitMe))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
 					}
-					else if (ArmerDamage > 0) {
+					if (BodyArmerDamage > 0 || HeadArmerDamage>0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f, 255);
 					}
 				}
@@ -70,7 +86,7 @@ namespace FPS_n2 {
 						EffectSingleton::Instance()->SetOnce(Effect::ef_hitblood, Event.EndPos, Vector3DX::forward(), Scale3DRate);
 						EffectSingleton::Instance()->SetEffectSpeed(Effect::ef_hitblood, 2.0f);
 					}
-					else if (ArmerDamage > 0) {
+					if (BodyArmerDamage > 0 || HeadArmerDamage > 0) {
 						EffectSingleton::Instance()->SetOnce(Effect::ef_gndsmoke, Event.EndPos, (Event.StartPos - Event.EndPos).normalized(), 0.25f * Scale3DRate);
 					}
 				}
@@ -79,6 +95,7 @@ namespace FPS_n2 {
 					this->m_HitReactionControl.SetHit(Matrix3x3DX::Vtrans(Vector3DX::Cross((Event.EndPos - Event.StartPos).normalized(), Vector3DX::up()) * -1.0f, Matrix3x3DX::Get33DX(GetFrameWorldMat(CharaFrame::Upper2)).inverse()));
 					switch (static_cast<HitType>(Event.HitType)) {
 					case HitType::Head:
+						this->m_HeadShotSwitch = true;
 						break;
 					case HitType::Body:
 						break;
@@ -95,7 +112,7 @@ namespace FPS_n2 {
 				//ボイス
 				if (IsAlive()) {
 					//被弾ボイス
-					if ((Damage >= 0) && (ArmerDamage >= 0)) {
+					if ((Damage >= 0) && (BodyArmerDamage >= 0 || HeadArmerDamage >= 0)) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_Hurt1) + GetRand(6 - 1))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
 					}
 				}
@@ -112,6 +129,15 @@ namespace FPS_n2 {
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend))->StopAll();
 
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_Death1) + GetRand(8 - 1))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
+				}
+
+				if (IsDeath) {
+					for (auto& item : m_ItemList_EnableSpawnBySoldier) {
+						Objects::ItemObjPool::Instance()->Put(item,
+							GetFrameWorldMat(CharaFrame::Upper2).pos(),
+							Vector3DX::vget(GetRandf(1.f), 1.f, GetRandf(1.f)) * Scale3DRate
+						);
+					}
 				}
 				return true;
 			}
@@ -130,39 +156,15 @@ namespace FPS_n2 {
 			//被弾処理
 			auto* HitPtr = this->m_HitBoxControl.GetLineHit(StartPos, pEndPos);
 			if (HitPtr) {
-				HitPoint Damage = BaseDamage;
-				//部位ダメージ演算
-				switch (HitPtr->GetColType()) {
-				case HitType::Head:
-					if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {//自機はヘッショされない
-						Damage = std::clamp<HitPoint>(BaseDamage * 1000 / 100, 0, this->m_HP.GetMax());
-						m_HeadShotSwitch = true;
-					}
-					break;
-				case HitType::Body:
-					Damage = BaseDamage * 100 / 100;
-					break;
-				case HitType::Arm:
-					Damage = BaseDamage * 50 / 100;
-					break;
-				case HitType::Leg:
-					Damage = BaseDamage * 70 / 100;
-					break;
-				default:
-					break;
-				}
-				if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {//無敵debug
-					//Damage = 0;
-				}
 				//ダメージ登録
 				if (AttackID >= 0) {
-					PlayerMngr->GetPlayer(AttackID)->GetChara()->SetDamage(GetMyPlayerID(), Damage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+					PlayerMngr->GetPlayer(AttackID)->GetChara()->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
 				else if (AttackID == -1) {
-					//PlayerMngr->GetVehicle()->SetDamage(GetMyPlayerID(), Damage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+					//PlayerMngr->GetVehicle()->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
 				else {
-					PlayerMngr->GetHelicopter()->SetDamage(GetMyPlayerID(), Damage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+					PlayerMngr->GetHelicopter()->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
 				return true;
 			}
@@ -770,8 +772,8 @@ namespace FPS_n2 {
 					if (!pGun) { continue; }
 					if (loop == this->m_GunPtrControl.GetNowGunSelect()) {
 						if (this->m_GunFallActive) {
-							auto Mat = pGun->GetMove().GetMat();
-							auto Pos = pGun->GetMove().GetPos() + Vector3DX::up() * m_GunyAdd;
+							Matrix3x3DX Mat = pGun->GetMove().GetMat();
+							Vector3DX Pos = pGun->GetMove().GetPos() + Vector3DX::up() * m_GunyAdd;
 							this->m_GunyAdd += (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));
 							if (BackGroundParts->CheckLinetoMap(pGun->GetMove().GetPos(), &Pos) != 0) {
 								this->m_GunFallActive = false;
@@ -870,6 +872,13 @@ namespace FPS_n2 {
 			this->m_ArmBreak = false;
 			SetMinAABB(Vector3DX::vget(2.0f, 0.0f, 2.0f) * -Scale3DRate);
 			SetMaxAABB(Vector3DX::vget(2.0f, 2.0f, 2.0f) * Scale3DRate);
+
+			m_ItemList_EnableSpawnBySoldier.clear();
+			for (auto& item : Objects::ItemObjDataManager::Instance()->GetList()) {
+				if (item->EnableSpawnBySoldier()) {
+					m_ItemList_EnableSpawnBySoldier.emplace_back(static_cast<int>(&item - &Objects::ItemObjDataManager::Instance()->GetList().front()));
+				}
+			}
 		}
 		void			CharacterObj::FirstUpdate(void) noexcept {
 			UpdateInput();

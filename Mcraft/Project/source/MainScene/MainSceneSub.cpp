@@ -371,14 +371,17 @@ namespace FPS_n2 {
 
 							int hitpointRateG = std::clamp(2 * 255 * ViewChara->GetHP().GetPoint() / ViewChara->GetHP().GetMax(), 0, 255);
 							int hitpointRateR = std::clamp(2 * (255 - 255 * ViewChara->GetHP().GetPoint() / ViewChara->GetHP().GetMax()), 0, 255);
-							int armorpointRate = 255 * ViewChara->GetAP().GetPoint() / ViewChara->GetAP().GetMax();
 							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 192, Per));
 							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, hitpointRateR, hitpointRateG, 0);
 							DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, (ViewChara->GetIsSquat()) ? &this->m_BodyCGraph : &this->m_BodyGraph, xp1, yp1, 128.f / 500.f, BaseRad, true);
 
-							//DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, armorpointRate, armorpointRate, armorpointRate);
+							int BodyAPRate = 255 * ViewChara->GetBodyAP().GetPoint() / ViewChara->GetBodyAP().GetMax();
+							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, BodyAPRate, BodyAPRate, BodyAPRate);
 							DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, (ViewChara->GetIsSquat()) ? &this->m_ArmorCGraph : &this->m_ArmorGraph, xp1, yp1, 128.f / 500.f, BaseRad, true);
+
+							int HeadAPRate = 255 * ViewChara->GetHeadAP().GetPoint() / ViewChara->GetHeadAP().GetMax();
+							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, HeadAPRate, HeadAPRate, HeadAPRate);
+							DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, (ViewChara->GetIsSquat()) ? &this->m_HeadCGraph : &this->m_HeadGraph, xp1, yp1, 128.f / 500.f, BaseRad, true);
 
 							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
