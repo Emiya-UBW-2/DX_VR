@@ -42,6 +42,8 @@ namespace FPS_n2 {
 			GraphHandle					m_BodyCGraph;
 			GraphHandle					m_ArmorCGraph;
 
+			GraphHandle					m_ItembackGraph;
+
 			GraphHandle					OIL_Graph;
 
 			float						m_DamagePer{};
@@ -70,6 +72,7 @@ namespace FPS_n2 {
 				this->m_ArmorGraph.Load("data/UI/Armor.bmp");
 				this->m_BodyCGraph.Load("data/UI/BodyC.bmp");
 				this->m_ArmorCGraph.Load("data/UI/ArmorC.bmp");
+				this->m_ItembackGraph.Load("data/UI/itemback.png");
 				this->OIL_Graph.Load("data/UI/back.png");
 			}
 			void			Update(void) noexcept;
@@ -79,6 +82,7 @@ namespace FPS_n2 {
 				this->m_ArmorGraph.Dispose();
 				this->m_BodyCGraph.Dispose();
 				this->m_ArmorCGraph.Dispose();
+				m_ItembackGraph.Dispose();
 				this->OIL_Graph.Dispose();
 			}
 		public:
