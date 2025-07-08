@@ -414,6 +414,7 @@ namespace FPS_n2 {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto& MyChara = PlayerMngr->GetPlayer(this->m_MyCharaID)->GetChara();
+				Vector3DX MyPos = MyChara->GetEyePositionCache();
 				//エイム
 				AimDir(Matrix4x4DX::Vtrans(GetVectorToTarget(), Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(15.f))) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(15.f)))));
 				//リーン
@@ -431,6 +432,37 @@ namespace FPS_n2 {
 				}
 				else {
 					this->m_BackTimer = 3.f + GetRandf(2.f);
+				}
+
+				//近い他人から離れる
+				{
+					auto Dir = MyChara->GetEyeRotationCache().zvec() * -1.f;
+					auto Dir_XZ = Dir; Dir_XZ.y = (0.f);
+					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+						if (this->m_MyCharaID == loop) { continue; }
+						Vector3DX Vec = PlayerMngr->GetPlayer(loop)->GetChara()->GetEyePositionCache() - MyPos; Vec.y = 0.f;
+						if (Vec.sqrMagnitude() < (2.f * Scale3DRate) * (2.f * Scale3DRate)) {
+
+							auto IsFront = ((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized())) > 0.f);
+							auto cross = Vector3DX::Cross(Dir_XZ.normalized(), Vec.normalized()).y;
+							if (IsFront) {
+								m_MyInput.SetInputPADS(Controls::PADS::MOVE_S, true);
+							}
+							else {
+								m_MyInput.SetInputPADS(Controls::PADS::MOVE_W, true);
+							}
+							if (!(IsFront && (abs(cross) < 0.4f))) {
+								if (m_MyInput.GetAddyRad() > 0.07f) {
+									m_MyInput.SetInputPADS(Controls::PADS::MOVE_D, true);
+								}
+								if (m_MyInput.GetAddyRad() < -0.07f) {
+									m_MyInput.SetInputPADS(Controls::PADS::MOVE_A, true);
+								}
+							}
+
+							break;
+						}
+					}
 				}
 				//
 				m_MyInput.SetInputPADS(Controls::PADS::AIM, true);

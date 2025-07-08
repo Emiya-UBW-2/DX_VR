@@ -1,5 +1,5 @@
 Name=FragRGD
-ammo_cal(mm)=5.0
+ammo_cal(mm)=7.0
 ammo_speed(m/s)=15
 ammo_pene(mm)=10
 ammo_damage=50

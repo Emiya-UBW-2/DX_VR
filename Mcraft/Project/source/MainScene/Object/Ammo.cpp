@@ -76,20 +76,26 @@ namespace FPS_n2 {
 					int								xput = 4;
 					int								yput = 2;
 					int								zput = 4;
-					int8_t							damage = 34;
-					if ((*this->m_AmmoData)->GetCaliber() >= 0.025f) {
-						damage = 100;
-						xput = 9;
-						yput = 9;
-						zput = 9;
+					int8_t							damage = 21;
+					if ((*this->m_AmmoData)->GetCaliber() <= 0.006f) {//AR,散弾
+						damage = 15;
+						xput = 4;
+						yput = 2;
+						zput = 4;
 					}
-					if ((*this->m_AmmoData)->GetCaliber() >= 0.0127f) {
+					if ((*this->m_AmmoData)->GetCaliber() >= 0.0127f) {//機銃
 						damage = 50;
 						xput = 6;
 						yput = 3;
 						zput = 6;
 					}
-					if ((*this->m_AmmoData)->GetCaliber() > 0.050f) {
+					if ((*this->m_AmmoData)->GetCaliber() >= 0.025f) {//機関砲
+						damage = 100;
+						xput = 9;
+						yput = 9;
+						zput = 9;
+					}
+					if ((*this->m_AmmoData)->GetCaliber() > 0.050f) {//ロケット
 						damage = 34;
 						xput = 8;
 						yput = 5;
