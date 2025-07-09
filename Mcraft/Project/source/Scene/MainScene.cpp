@@ -175,6 +175,7 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* CameraParts = Camera3D::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
+			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 			//
 			CommonBattleResource::Set();
 			EffectSingleton::Create();
@@ -182,7 +183,7 @@ namespace FPS_n2 {
 
 			PostPassParts->SetShadowScale(0.5f);
 			//
-			BackGround::BackGroundControl::Instance()->Init();
+			BackGroundParts->Init();
 			//
 			Vector3DX LightVec = Vector3DX::vget(0.05f, -0.2f, -0.15f); LightVec = LightVec.normalized();
 			PostPassParts->SetAmbientLight(LightVec);
@@ -209,28 +210,30 @@ namespace FPS_n2 {
 			SetFogStartEnd(FarMax, FarMax * 20.0f);
 			SetFogColor(128, 110, 110);
 			//
-			for (int loop = 0; loop < 10; ++loop) {
-				auto* BackGroundParts = BackGround::BackGroundControl::Instance();
-				Vector3DX TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
-				{
-					Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
-					if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
-						TargetPos = EndPos;
-					}
-				}
-				Objects::ItemObjPool::Instance()->Put(loop % Objects::ItemObjDataManager::Instance()->GetList().size(),
-					TargetPos,
-					Vector3DX::vget(GetRandf(1.f), 1.f, GetRandf(1.f)) * Scale3DRate * 0.01f
-				);
-			}
-
+			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				Vector3DX TargetPos;
-				{
-					auto* BackGroundParts = BackGround::BackGroundControl::Instance();
+				if (loop == PlayerMngr->GetWatchPlayerID()) {
 					TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
+				}
+				else {
+					while (true) {
+						TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
+						Vector3DX Vec = ViewChara->GetMove().GetPos() - TargetPos; Vec.y = 0.f;
+						if (Vec.sqrMagnitude() > (5.f * Scale3DRate) * (5.f * Scale3DRate)) {
+							//
+							Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
+							if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+								TargetPos = EndPos;
+							}
+							EndPos = TargetPos;
+							if (BackGroundParts->CheckLinetoMap(ViewChara->GetMove().GetPos() + Vector3DX::up() * 1.0f * Scale3DRate, &EndPos) != 0) {
+								break;
+							}
+						}
+					}
 				}
 				//人の座標設定
 				if (loop == PlayerMngr->GetWatchPlayerID()) {
@@ -239,6 +242,27 @@ namespace FPS_n2 {
 				else{
 					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true);
 				}
+			}
+
+			for (int loop = 0; loop < 10; ++loop) {
+				Vector3DX TargetPos;
+				while (true) {
+					TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
+					Vector3DX Vec = ViewChara->GetMove().GetPos() - TargetPos; Vec.y = 0.f;
+					if (Vec.sqrMagnitude() > (5.f * Scale3DRate) * (5.f * Scale3DRate)) {
+						break;
+					}
+				}
+				{
+					Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
+					if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+						TargetPos = EndPos;
+					}
+				}
+				Objects::ItemObjPool::Instance()->Put(loop % Objects::ItemObjDataManager::Instance()->GetList().size(),
+					TargetPos,
+					Vector3DX::vget(GetRandf(1.f), 1.f, GetRandf(1.f)) * Scale3DRate * 0.01f
+				);
 			}
 			//UI
 			this->m_UIclass.Set();
@@ -472,7 +496,7 @@ namespace FPS_n2 {
 						if (Len < Radius) {
 							Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
 							if (
-								(ViewPlayer->GetInventory().size() < 5) &&
+								(ViewPlayer->HasEmptyInventory() != 0) &&
 								(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
 								) {
 								ViewPlayer->AddInventory(g->GetUniqueID());
@@ -498,7 +522,7 @@ namespace FPS_n2 {
 						if (Len < Radius) {
 							Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
 							if (
-								(ViewPlayer->GetInventory().size() < 5) &&
+								(ViewPlayer->HasEmptyInventory() != 0) &&
 								(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
 								) {
 								ViewPlayer->AddInventory(g->GetUniqueID());

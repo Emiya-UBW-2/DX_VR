@@ -18,7 +18,7 @@ namespace FPS_n2 {
 			class PlayerControl {
 				std::shared_ptr<Charas::CharacterObj>	m_Chara{ nullptr };
 				std::shared_ptr<AIs::AIControl>			m_AI{ nullptr };
-				std::vector<int>						m_Inventory{};
+				std::array<int, 5>						m_Inventory{};
 				int										m_Score{ 0 };							//スコア
 				int										m_Kill{ 0 };							//スコア
 				int										m_Hit{ 0 };							//スコア
@@ -41,29 +41,52 @@ namespace FPS_n2 {
 				}
 			public:
 				void		SetChara(const std::shared_ptr<Charas::CharacterObj>& pChara) noexcept { this->m_Chara = pChara; }
-				auto& GetChara(void) noexcept { return this->m_Chara; }
+				auto&		GetChara(void) noexcept { return this->m_Chara; }
 
 				void		SetAI(const std::shared_ptr<AIs::AIControl>& pAI) noexcept { this->m_AI = pAI; }
-				auto& GetAI(void) noexcept { return this->m_AI; }
+				auto&		GetAI(void) noexcept { return this->m_AI; }
 
-				const auto& GetInventory(void) const noexcept {
-					return this->m_Inventory;
-				}
-
-				void AddInventory(int ID) noexcept {
-					this->m_Inventory.emplace_back(ID);
-				}
-
-				void SubInventory(int ID) noexcept {
+				const auto& GetInventory(void) const noexcept { return this->m_Inventory; }
+				const auto HasEmptyInventory(void) const noexcept {
+					int count = 0;
 					for (auto& i : this->m_Inventory) {
-						if (i == ID) {
-							std::swap(i, this->m_Inventory.back());
-							this->m_Inventory.pop_back();
-							return;
+						if (i == InvalidID) {
+							++count;
 						}
 					}
+					return count;
+				}
+				bool AddInventory(int ID) noexcept {
+					for (auto& i : this->m_Inventory) {
+						if (i == InvalidID) {
+							i = ID;
+							return true;
+						}
+					}
+					return false;
+				}
+				bool SubInventory(int ID) noexcept {
+					for (auto& i : this->m_Inventory) {
+						if (i == ID) {
+							i = InvalidID;
+							return true;
+						}
+					}
+					return false;
+				}
+				bool SubInventoryIndex(int index) noexcept {
+					if (this->m_Inventory.at(index) != InvalidID) {
+						this->m_Inventory.at(index) = InvalidID;
+						return true;
+					}
+					return false;
 				}
 
+				void InitInventory() noexcept {
+					for (auto& i : this->m_Inventory) {
+						i = InvalidID;
+					}
+				}
 				void		AddScore(int Score) noexcept { this->m_Score += Score; }
 				void		SetScore(int Score) noexcept { this->m_Score = Score; }
 				const auto& GetScore(void) const noexcept { return this->m_Score; }
@@ -83,6 +106,7 @@ namespace FPS_n2 {
 				void Init(void) noexcept {
 					this->m_Chara = nullptr;
 					this->m_AI = nullptr;
+					InitInventory();
 				}
 
 				void Dispose(void) noexcept {

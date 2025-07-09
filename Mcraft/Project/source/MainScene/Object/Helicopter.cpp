@@ -28,16 +28,21 @@ namespace FPS_n2 {
 			switch (this->m_HelicopterMove) {
 			case HelicopterMove::Random:
 				m_PrevPos = m_NowPos;
-				m_TargetPos = Vector3DX::vget(GetRandf(50.0f), 0.0f, GetRandf(50.0f)) * Scale3DRate;
+				m_TargetPos = Vector3DX::vget(GetRandf(16.f), 0.0f, GetRandf(16.f)) * Scale3DRate;
 				break;
 			case HelicopterMove::Rappelling:
 				m_PrevPos = m_NowPos;
 				{
 					auto* BackGroundParts = BackGround::BackGroundControl::Instance();
+					auto* PlayerMngr = Player::PlayerManager::Instance();
+					auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 					while (true) {
 						m_TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
-						if (std::abs(m_TargetPos.x) < 30.f * Scale3DRate && std::abs(m_TargetPos.z) < 30.f * Scale3DRate) {
-							break;
+						if (std::abs(m_TargetPos.x) < 16.f * Scale3DRate && std::abs(m_TargetPos.z) < 16.f * Scale3DRate) {
+							Vector3DX Vec = ViewChara->GetMove().GetPos() - m_TargetPos; Vec.y = 0.f;
+							if (Vec.sqrMagnitude() > (8.f * Scale3DRate) * (8.f * Scale3DRate)) {
+								break;
+							}
 						}
 					}
 					m_TargetPos.y = 0.f;

@@ -1052,6 +1052,7 @@ namespace FPS_n2 {
 		}
 		//
 		void		BackGroundControl::Init(void) noexcept {
+			auto* OptionParts = OptionManager::Instance();
 			//空
 			this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
 			for (int loop = 0, num = this->m_ObjSky.GetMaterialNum(); loop < num; ++loop) {
@@ -1102,8 +1103,9 @@ namespace FPS_n2 {
 							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(xpos)) / (Size * Rate - 1),
 								(static_cast<float>(zpos)) / (Size * Rate - 1)) * static_cast<float>(GetReferenceCells().All * 1 / 10));
-
-							//Height = GetReferenceCells().All / 8-15;
+							if (OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)) {
+								Height = GetReferenceCells().All / 8 - 15;
+							}
 							if (Maxheight < Height) {
 								Maxheight = Height;
 							}
@@ -1127,7 +1129,9 @@ namespace FPS_n2 {
 							auto Height = static_cast<int>(ns.octaveNoise(2, 
 								(static_cast<float>(xpos + xt)) / (Size * Rate),
 								(static_cast<float>(zpos + zt)) / (Size * Rate)) * static_cast<float>(GetReferenceCells().All * 1 / 10));
-							//Height = GetReferenceCells().All / 8 - 15;
+							if (OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)) {
+								Height = GetReferenceCells().All / 8 - 15;
+							}
 							for (int ypos = Height; ypos <= Height + Heights; ++ypos) {
 								SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos, ypos, GetReferenceCells().Half + zPos).Cell = 2;
 							}

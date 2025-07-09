@@ -16,7 +16,7 @@ namespace FPS_n2 {
 			Vector3DX Vec = PosBuf - m_Repos; Vec.y = 0.f;
 			//壁判定
 			if (Vec.sqrMagnitude() > 0.01f * 0.01f) {
-				BackGroundParts->CheckMapWall(GetMove().GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * (0.8f * Scale3DRate), 0.2f * Scale3DRate);
+				BackGroundParts->CheckMapWall(GetMove().GetRePos(), &PosBuf, Vector3DX::up() * (0.6f * Scale3DRate + 0.1f), Vector3DX::up() * (0.8f * Scale3DRate), 0.7f * Scale3DRate);
 				this->m_Yrad = Vector3DX::Angle(Vector3DX::right() * -1.f, Vec);
 				this->m_IsLR ^= 1;
 			}
@@ -30,6 +30,10 @@ namespace FPS_n2 {
 					SetMove().SetVec(Vector);
 				}
 			}
+			PosBuf.x = std::clamp(PosBuf.x, -16.f * Scale3DRate, 16.f * Scale3DRate);
+			PosBuf.z = std::clamp(PosBuf.z, -16.f * Scale3DRate, 16.f * Scale3DRate);
+
+
 			this->m_Yrad += deg2rad(60.f * DXLib_refParts->GetDeltaTime() * (m_IsLR ? 1.f : -1.f));
 			this->m_Zrotate.Update(DXLib_refParts->GetDeltaTime());
 			this->m_Zrotate.AddRad(Vec.magnitude() * 0.02f);

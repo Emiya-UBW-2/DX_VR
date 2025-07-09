@@ -162,41 +162,7 @@ namespace FPS_n2 {
 				MV1::SetAnime(&this->m_RagDollControl.SetRagDoll(), GetObj());
 				this->m_RagDollControl.Init(GetObj());
 			}
-			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect, bool CheckGround) noexcept {
-				this->m_HP.Init();
-				this->m_BodyPoint.Init();
-				this->m_HeadPoint.Init();
-				Heal(100);
-				this->m_ArmBreak = false;
-				this->m_ArmBreakPer = 0.0f;
-				this->m_SlingArmZrad.Init(0.08f * Scale3DRate, 3.0f, deg2rad(50));
-				this->m_HPRec = 0.0f;
-
-				this->m_MoveOverRideFlag = false;
-				this->m_Input.ResetAllInput();
-				this->m_RotateControl.Init(pxRad, pyRad);
-				this->m_MoveControl.Init();
-				this->m_LeanControl.Init();
-				for (auto& per : this->m_AnimPerBuf) { per = 0.0f; }
-				this->m_IsSquat = false;
-				Vector3DX posBuf = pPos;
-				if (CheckGround) {
-					Vector3DX EndPos = posBuf - Vector3DX::up() * 50.0f * Scale3DRate;
-					if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(posBuf + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
-						posBuf = EndPos;
-					}
-				}
-				SetMove().SetAll(posBuf, posBuf, posBuf, Vector3DX::zero(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y));
-				//
-				this->m_GunPtrControl.SelectGun(GunSelect);
-				for (int loop = 0, max = this->m_GunPtrControl.GetGunNum(); loop < max; ++loop) {
-					if (!this->m_GunPtrControl.GetGunPtr(loop)) { continue; }
-					this->m_GunPtrControl.GetGunPtr(loop)->Spawn();
-				}
-				this->m_SlingZrad.Init(0.05f * Scale3DRate, 3.0f, deg2rad(50));
-				this->m_GunyAdd = 0.f;
-				this->m_GunFallActive = true;
-			}
+			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect, bool CheckGround) noexcept;
 
 			const auto		GetIsRappelling() const noexcept { return this->m_IsRappelling && !this->m_IsRappellingEnd; }
 			void			SetRappelling(void) noexcept {

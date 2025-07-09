@@ -289,16 +289,17 @@ namespace FPS_n2 {
 
 				int loop = 0;
 				for (auto& ID : ViewPlayer->GetInventory()) {
-					auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID);
 					xp1 = 400 - Height * (static_cast<int>(ViewPlayer->GetInventory().size()) / 2) + Height * loop;
 
 					Alpha = static_cast<float>(loop + 1) / static_cast<float>(ViewPlayer->GetInventory().size());
 
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 215);
 					DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &this->m_ItembackGraph, xp1, yp1, 96.f / 512.f, 0.f, true);
-					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-					DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &item->GetIconGraph(), xp1, yp1, 128.f / 512.f, 0.f, true);
-
+					if (ID != InvalidID) {
+						auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &item->GetIconGraph(), xp1, yp1, 128.f / 512.f, 0.f, true);
+					}
 					++loop;
 				}
 				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);

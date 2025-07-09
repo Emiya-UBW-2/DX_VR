@@ -66,7 +66,7 @@
 1136=Borderless
 1137=Change Render Scale(Need Restart)
 1138=Adds GodRay to shadow(with the shadow settings)
-1139=Enable Load Video (disable if you want to stop Game)
+1139=Flat terrain at initialization
 
 1140=Change X Sensitivity
 1141=Change Y Sensitivity

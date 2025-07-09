@@ -180,6 +180,35 @@ namespace FPS_n2 {
 			ObjectManager::Instance()->Draw(true, Range);
 		}
 		// 
+
+		// オンオフできるボタン
+		static bool CheckBox(int xp1, int yp1, bool switchturn) noexcept {
+			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
+			int xp3 = xp1 + EdgeSize;
+			int yp3 = yp1 + EdgeSize;
+			int xp4 = xp1 + LineHeight * 2 - EdgeSize;
+			int yp4 = yp1 + LineHeight - EdgeSize;
+
+			auto* Pad = PadControl::Instance();
+			bool MouseOver = IntoMouse(xp3, yp3, xp4, yp4);
+			if (MouseOver && Pad->GetMouseClick().trigger()) {
+				switchturn ^= 1;
+				auto* SE = SoundPool::Instance();
+				SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, TRUE);
+			}
+			int Edge = (5);
+			DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp3 + Edge / 2, yp3 + Edge / 2, xp4 - Edge / 2, yp4 - Edge / 2, DarkGreen, true);
+
+			DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp3 + Edge, yp3 + Edge, xp4 - Edge, yp4 - Edge, Black, true);
+			xp4 = xp1 + LineHeight * (switchturn ? 1 : 0) - EdgeSize;
+			DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp3 + Edge, yp3 + Edge, xp4 + Edge, yp4 - Edge, Gray50, true);
+			xp3 = xp1 + LineHeight * (switchturn ? 1 : 0) + EdgeSize;
+			xp4 = xp1 + LineHeight * (switchturn ? 2 : 1) - EdgeSize;
+			DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp3, yp3, xp4, yp4, Green, true);
+			return switchturn;
+		}
+
+
 		void			TitleScene::DrawUI_Base_Sub(void) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			// 背景
@@ -201,6 +230,20 @@ namespace FPS_n2 {
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18), 
 					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
 					(32), 1080 - (32 + 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
+			}
+			//
+			{
+				int xp = 64;
+				int yp = 1080-92;
+				auto* OptionParts = OptionManager::Instance();
+				auto prev = OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth);
+				OptionParts->SetParamBoolean(EnumSaveParam::FlatEarth, CheckBox(xp, yp, OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)));
+				if (prev != OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)) {
+					OptionParts->Save();
+				}
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp + 64, yp + LineHeight / 2,
+					White, Black, LocalizeParts->Get(1139));
 			}
 			// 
 			FadeControl::Instance()->Draw();

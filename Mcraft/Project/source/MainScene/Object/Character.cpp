@@ -454,7 +454,7 @@ namespace FPS_n2 {
 					this->m_HPRec += DXLib_refParts->GetDeltaTime();
 					if (this->m_HPRec >= 0.0f) {
 						this->m_HPRec -= 2.0f;
-						Heal(2);
+						Heal(5);
 						if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing))->Play(DX_PLAYTYPE_BACK);
 						}
@@ -602,6 +602,7 @@ namespace FPS_n2 {
 				}
 				//ベースに反映
 				SetMove().SetPos(PosBuf);
+				//printfDx("[%5.2f,%5.2f]\n", PosBuf.x, PosBuf.z);
 				SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetYRadBottom()));
 				//座標オーバーライド
 				if (this->m_MoveOverRideFlag) {
@@ -865,6 +866,44 @@ namespace FPS_n2 {
 			Path += "/";
 			this->m_GunPtrControl.SetGunPtr(Select, std::make_shared<Guns::GunObj>());
 			ObjectManager::Instance()->InitObject(this->m_GunPtrControl.GetGunPtr(Select), Path);
+		}
+		void CharacterObj::Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect, bool CheckGround) noexcept {
+			auto& player = Player::PlayerManager::Instance()->GetPlayer(this->GetMyPlayerID());
+			this->m_HP.Init();
+			this->m_BodyPoint.Init();
+			this->m_HeadPoint.Init();
+			Heal(100);
+			this->m_ArmBreak = false;
+			this->m_ArmBreakPer = 0.0f;
+			this->m_SlingArmZrad.Init(0.08f * Scale3DRate, 3.0f, deg2rad(50));
+			this->m_HPRec = 0.0f;
+
+			this->m_MoveOverRideFlag = false;
+			this->m_Input.ResetAllInput();
+			this->m_RotateControl.Init(pxRad, pyRad);
+			this->m_MoveControl.Init();
+			this->m_LeanControl.Init();
+			for (auto& per : this->m_AnimPerBuf) { per = 0.0f; }
+			this->m_IsSquat = false;
+			Vector3DX posBuf = pPos;
+			if (CheckGround) {
+				Vector3DX EndPos = posBuf - Vector3DX::up() * 50.0f * Scale3DRate;
+				if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(posBuf + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+					posBuf = EndPos;
+				}
+			}
+			SetMove().SetAll(posBuf, posBuf, posBuf, Vector3DX::zero(), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y), Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_RotateControl.GetRad().y));
+			//
+			this->m_GunPtrControl.SelectGun(GunSelect);
+			for (int loop = 0, max = this->m_GunPtrControl.GetGunNum(); loop < max; ++loop) {
+				if (!this->m_GunPtrControl.GetGunPtr(loop)) { continue; }
+				this->m_GunPtrControl.GetGunPtr(loop)->Spawn();
+			}
+			this->m_SlingZrad.Init(0.05f * Scale3DRate, 3.0f, deg2rad(50));
+			this->m_GunyAdd = 0.f;
+			this->m_GunFallActive = true;
+
+			player->InitInventory();
 		}
 		//
 		void			CharacterObj::Init_Sub(void) noexcept {
