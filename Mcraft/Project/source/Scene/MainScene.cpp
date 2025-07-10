@@ -513,21 +513,27 @@ namespace FPS_n2 {
 			if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//オンライン
 				float Radius = 2.0f * 1.f * Scale3DRate;
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+					auto& player = PlayerMngr->GetPlayer(loop);
 					auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 					if (!chara->IsAlive()) { continue; }
 					if (chara->GetIsRappelling()) { continue; }
+					auto Dir = chara->GetEyeRotationCache().zvec() * -1.f;
+					auto Dir_XZ = Dir; Dir_XZ.y = (0.f);
+
 					//自分が当たったら押し出す
 					for (auto& g : Objects::ItemObjPool::Instance()->GetList()) {
 						if (!g->IsActive()) { continue; }
+						if (!g->CanPick()) { continue; }
 						Vector3DX Vec = (chara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
 						float Len = Vec.magnitude();
 						if (Len < Radius) {
 							Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
 							if (
-								(ViewPlayer->HasEmptyInventory() != 0) &&
+								(player->HasEmptyInventory() != 0) &&
+								((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized() * -1.f)) > 0.f) && 
 								(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
 								) {
-								ViewPlayer->AddInventory(g->GetUniqueID());
+								player->AddInventory(g->GetUniqueID());
 								g->SetActive(false);
 								continue;
 							}
@@ -543,15 +549,20 @@ namespace FPS_n2 {
 				if (ViewChara->IsAlive()) {
 					float Radius = 2.0f * 1.f * Scale3DRate;
 					//自分が当たったら押し出す 取れるなら取る
+					auto Dir = ViewChara->GetEyeRotationCache().zvec() * -1.f;
+					auto Dir_XZ = Dir; Dir_XZ.y = (0.f);
+
+					//自分が当たったら押し出す
 					for (auto& g : Objects::ItemObjPool::Instance()->GetList()) {
 						if (!g->IsActive()) { continue; }
-						if(!g->CanPick()) { continue; }
+						if (!g->CanPick()) { continue; }
 						Vector3DX Vec = (ViewChara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
 						float Len = Vec.magnitude();
 						if (Len < Radius) {
 							Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
 							if (
 								(ViewPlayer->HasEmptyInventory() != 0) &&
+								((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized() * -1.f)) > 0.f) &&
 								(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
 								) {
 								ViewPlayer->AddInventory(g->GetUniqueID());
