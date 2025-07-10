@@ -597,7 +597,9 @@ namespace FPS_n2 {
 					for (int loop = 0, max = AmmoSpec->GetPellet(); loop < max; ++loop) {
 						//円周上にまき散らす
 						auto mat = Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(-GetRand(30))) * Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180)));
-						Objects::AmmoPool::Instance()->Put(&AmmoSpec, grenade->GetMove().GetPos() + mat.zvec2() * (0.5f * Scale3DRate) + Vector3DX::up() * (0.5f * Scale3DRate), mat.zvec2(), GetMyUserPlayerID());
+						Objects::AmmoPool::Instance()->Put(&AmmoSpec,
+							grenade->GetMove().GetPos() + mat.zvec2() * (0.5f * Scale3DRate) + Vector3DX::up() * (Lerp(0.5f, 1.5f, static_cast<float>(loop) / max) * Scale3DRate)
+							, mat.zvec2(), GetMyUserPlayerID());
 					}
 
 					//破壊
@@ -677,7 +679,7 @@ namespace FPS_n2 {
 				(*this->m_MagazinePtr)->SetAmmoActive(false);
 			}
 			if (GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
-				this->m_Grenade.Init(GetFilePath(), 1);
+				this->m_Grenade.Init(GetFilePath(), 2);
 			}
 			for (auto& speed : this->m_GunAnimeSpeed) {
 				speed = 1.0f;

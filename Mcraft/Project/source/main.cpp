@@ -42,6 +42,12 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(Controls::PADS::SQUAT, false);
 	Pad->SetIsUseButton(Controls::PADS::PRONE, false);
 	Pad->SetIsUseButton(Controls::PADS::CHECK, true);
+	Pad->SetIsUseButton(Controls::PADS::ITEMDELETE1, true);
+	Pad->SetIsUseButton(Controls::PADS::ITEMDELETE2, true);
+	Pad->SetIsUseButton(Controls::PADS::ITEMDELETE3, true);
+	Pad->SetIsUseButton(Controls::PADS::ITEMDELETE4, true);
+	Pad->SetIsUseButton(Controls::PADS::ITEMDELETE5, true);
+	Pad->SetIsUseButton(Controls::PADS::ITEMDELETE, true);
 	//
 	auto* DXLib_refParts = DXLib_ref::Instance();
 	if (DXLib_refParts->FirstBootSetting()) { return 0; }

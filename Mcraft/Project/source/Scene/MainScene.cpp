@@ -344,6 +344,13 @@ namespace FPS_n2 {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizePool::Instance()->Get(9904));
 
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::THROW), LocalizePool::Instance()->Get(9905));
+
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE1), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE2), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE3), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE4), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE5), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE), LocalizePool::Instance()->Get(9910));
 					}
 				});
 			if (SceneParts->IsPause()) {
@@ -386,29 +393,40 @@ namespace FPS_n2 {
 					//MyInput.SetInputPADS(Controls::PADS::JUMP, Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().press());
 
 					int loop = 0;
-					for (auto& ID : ViewPlayer->GetInventory()) {
-						if (ID != InvalidID) {
+					bool isFirst = true;
+					for (auto& ID : ViewPlayer->SetInventory()) {
+						if (ID.first != InvalidID) {
 							bool IsPress = false;
+							if (isFirst) {
+								IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE).GetKey().press();
+							}
 							switch (loop) {
-							case 0: IsPress = CheckHitKey(KEY_INPUT_1) != 0; break;
-							case 1: IsPress = CheckHitKey(KEY_INPUT_2) != 0; break;
-							case 2: IsPress = CheckHitKey(KEY_INPUT_3) != 0; break;
-							case 3: IsPress = CheckHitKey(KEY_INPUT_4) != 0; break;
-							case 4: IsPress = CheckHitKey(KEY_INPUT_5) != 0; break;
+							case 0: IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE1).GetKey().press(); break;
+							case 1: IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE2).GetKey().press(); break;
+							case 2: IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE3).GetKey().press(); break;
+							case 3: IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE4).GetKey().press(); break;
+							case 4: IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE5).GetKey().press(); break;
 							default:
 								break;
 							}
 							if (IsPress) {
-								//auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID);
-								Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec() * -1.f;
-								Vec.y = std::clamp(Vec.y, 0.1f, 0.3f); Vec = Vec.normalized();
+								ID.second += DXLib_refParts->GetDeltaTime();
+								if (ID.second > 0.5f) {
+									//auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
+									Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec() * -1.f;
+									Vec.y = std::clamp(Vec.y, 0.1f, 0.3f); Vec = Vec.normalized();
 
-								Objects::ItemObjPool::Instance()->Put(ID,
-									ViewChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos(),
-									Vec * (10.f * Scale3DRate)
-								);
-								ViewPlayer->SubInventoryIndex(loop);
+									Objects::ItemObjPool::Instance()->Put(ID.first,
+										ViewChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos(),
+										Vec * (10.f * Scale3DRate)
+									);
+									ViewPlayer->SubInventoryIndex(loop);
+								}
 							}
+							else {
+								ID.second = 0.f;
+							}
+							isFirst = false;
 						}
 						++loop;
 					}

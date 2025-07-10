@@ -48,6 +48,8 @@ namespace FPS_n2 {
 
 			GraphHandle					OIL_Graph;
 
+			GraphHandle					DeleteItemGraph;
+
 			float						m_DamagePer{};
 			float						m_DamagePerR{};
 			int							m_ReHP{};
@@ -82,8 +84,9 @@ namespace FPS_n2 {
 				this->m_BodyCGraph.Dispose();
 				this->m_ArmorCGraph.Dispose();
 				this->m_HeadCGraph.Dispose();
-				m_ItembackGraph.Dispose();
+				this->m_ItembackGraph.Dispose();
 				this->OIL_Graph.Dispose();
+				this->DeleteItemGraph.Dispose();
 			}
 		public:
 			void			SetIntParam(size_t ID, int value) noexcept { intParam[ID] = value; }

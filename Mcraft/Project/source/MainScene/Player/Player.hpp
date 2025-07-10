@@ -18,7 +18,7 @@ namespace FPS_n2 {
 			class PlayerControl {
 				std::shared_ptr<Charas::CharacterObj>	m_Chara{ nullptr };
 				std::shared_ptr<AIs::AIControl>			m_AI{ nullptr };
-				std::array<int, 5>						m_Inventory{};
+				std::array<std::pair<int, float>, 5>	m_Inventory{};
 				int										m_Score{ 0 };							//スコア
 				int										m_Kill{ 0 };							//スコア
 				int										m_Hit{ 0 };							//スコア
@@ -46,11 +46,12 @@ namespace FPS_n2 {
 				void		SetAI(const std::shared_ptr<AIs::AIControl>& pAI) noexcept { this->m_AI = pAI; }
 				auto&		GetAI(void) noexcept { return this->m_AI; }
 
+				auto& SetInventory(void) noexcept { return this->m_Inventory; }
 				const auto& GetInventory(void) const noexcept { return this->m_Inventory; }
 				const auto HasEmptyInventory(void) const noexcept {
 					int count = 0;
 					for (auto& i : this->m_Inventory) {
-						if (i == InvalidID) {
+						if (i.first == InvalidID) {
 							++count;
 						}
 					}
@@ -58,8 +59,9 @@ namespace FPS_n2 {
 				}
 				bool AddInventory(int ID) noexcept {
 					for (auto& i : this->m_Inventory) {
-						if (i == InvalidID) {
-							i = ID;
+						if (i.first == InvalidID) {
+							i.first = ID;
+							i.second = 0.f;
 							return true;
 						}
 					}
@@ -67,16 +69,16 @@ namespace FPS_n2 {
 				}
 				bool SubInventory(int ID) noexcept {
 					for (auto& i : this->m_Inventory) {
-						if (i == ID) {
-							i = InvalidID;
+						if (i.first == ID) {
+							i.first = InvalidID;
 							return true;
 						}
 					}
 					return false;
 				}
 				bool SubInventoryIndex(int index) noexcept {
-					if (this->m_Inventory.at(index) != InvalidID) {
-						this->m_Inventory.at(index) = InvalidID;
+					if (this->m_Inventory.at(index).first != InvalidID) {
+						this->m_Inventory.at(index).first = InvalidID;
 						return true;
 					}
 					return false;
@@ -84,7 +86,7 @@ namespace FPS_n2 {
 
 				void InitInventory() noexcept {
 					for (auto& i : this->m_Inventory) {
-						i = InvalidID;
+						i.first = InvalidID;
 					}
 				}
 				void		AddScore(int Score) noexcept { this->m_Score += Score; }

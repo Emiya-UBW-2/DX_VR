@@ -163,7 +163,9 @@ namespace FPS_n2 {
 
 					this->m_SpawnPoint = PlayerMngr->GetPlayerNum() - 1;
 					SetAction(HelicopterMove::Rappelling);
-					this->m_IsHit = false;
+				}
+				else if (this->m_IsHit) {
+					SetAction(HelicopterMove::Intercept);
 				}
 				m_NowPos = Lerp(m_PrevPos, m_TargetPos, std::clamp(m_Timer / 8.0f, 0.0f, 1.0f));
 				break;
@@ -209,6 +211,7 @@ namespace FPS_n2 {
 				}
 				if (m_Timer > 30.0f) {
 					SetAction(HelicopterMove::Random);
+					this->m_IsHit = false;
 				}
 				m_NowPos = Lerp(m_PrevPos, m_TargetPos, std::clamp(m_Timer / 8.0f, 0.0f, 1.0f));
 				break;

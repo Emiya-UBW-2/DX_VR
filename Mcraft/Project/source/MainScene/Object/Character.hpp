@@ -50,6 +50,7 @@ namespace FPS_n2 {
 			float												m_GunyAdd{ 0.0f };
 			bool												m_GunFallActive{ true };
 
+			int													m_GrenadeCount{ 3 };
 			std::vector<int> m_ItemList_EnableSpawnBySoldier;
 		private://キャッシュ
 			Matrix3x3DX											m_EyeRotationCache{};

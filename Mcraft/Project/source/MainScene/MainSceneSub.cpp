@@ -196,12 +196,13 @@ namespace FPS_n2 {
 			this->m_HeadCGraph.Load("data/UI/HeadC.bmp");
 			this->m_ItembackGraph.Load("data/UI/itemback.png");
 			this->OIL_Graph.Load("data/UI/back.png");
+			this->DeleteItemGraph.Load("data/UI/Delete.png");
 
 			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 			m_PrevItemID.resize(ViewPlayer->GetInventory().size());
 			m_ItemAnimTimer.resize(ViewPlayer->GetInventory().size());
 			for (int loop = 0; loop < m_PrevItemID.size(); ++loop) {
-				m_PrevItemID.at(loop) = ViewPlayer->GetInventory().at(loop);
+				m_PrevItemID.at(loop) = ViewPlayer->GetInventory().at(loop).first;
 			}
 			for (int loop = 0; loop < m_ItemAnimTimer.size(); ++loop) {
 				m_ItemAnimTimer.at(loop) = 0.f;
@@ -287,14 +288,14 @@ namespace FPS_n2 {
 				int loop = 0;
 				for (auto& ID : ViewPlayer->GetInventory()) {
 					bool Prev = m_PrevItemID.at(loop) != InvalidID;
-					bool Now = ID != InvalidID;
+					bool Now = ID.first != InvalidID;
 					if (Prev != Now) {
 						//開始アニメ
 						//終了アニメ
 						m_ItemAnimTimer.at(loop) += DXLib_refParts->GetDeltaTime();
 						if (m_ItemAnimTimer.at(loop) >= 0.3f) {
 							m_ItemAnimTimer.at(loop) = 0.f;
-							m_PrevItemID.at(loop) = ID;
+							m_PrevItemID.at(loop) = ID.first;
 						}
 					}
 					else {
@@ -333,14 +334,14 @@ namespace FPS_n2 {
 					float Yadd = 0.f;
 					float Scale = 1.f;
 					float Alpha = 1.f;
-					int DrawID = ID;
+					int DrawID = ID.first;
 					bool Prev = m_PrevItemID.at(loop) != InvalidID;
-					bool Now = ID != InvalidID;
+					bool Now = ID.first != InvalidID;
 					{
 						float Seek = m_ItemAnimTimer.at(loop) / 0.3f;
 						if (!Prev && Now) {
 							//開始アニメ
-							DrawID = ID;
+							DrawID = ID.first;
 							Yadd = 0.f;
 							if (Seek < 0.8f) {
 								Scale = Lerp(0.f, 1.2f, Seek / 0.8f);
@@ -378,6 +379,12 @@ namespace FPS_n2 {
 						auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(DrawID);
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * Alpha));
 						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &item->GetIconGraph(), xp1, yp1 - static_cast<int>(Yadd), (128.f / 512.f) * Scale, 0.f, true);
+
+						if (ID.second > 0.f) {
+							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 255, 0);
+							DrawCtrls->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, &this->DeleteItemGraph, xp1, yp1, 100.f * (ID.second / 0.5f), 0.f, 64.f / 128.f);
+							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+						}
 					}
 					++loop;
 				}
