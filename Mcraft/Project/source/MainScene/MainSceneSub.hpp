@@ -59,6 +59,9 @@ namespace FPS_n2 {
 
 			int							m_RadPrev{};
 			float						m_RadR{};
+
+			std::vector<int>			m_PrevItemID{};
+			std::vector<float>			m_ItemAnimTimer{};
 		public:
 			MainSceneUI(void) noexcept {}
 			MainSceneUI(const MainSceneUI&) = delete;
@@ -69,16 +72,7 @@ namespace FPS_n2 {
 			virtual ~MainSceneUI(void) noexcept {}
 		public:
 			void			Load(void) noexcept {}
-			void			Set(void) noexcept {
-				this->m_BodyGraph.Load("data/UI/Body.bmp");
-				this->m_ArmorGraph.Load("data/UI/Armor.bmp");
-				this->m_HeadGraph.Load("data/UI/Head.bmp");
-				this->m_BodyCGraph.Load("data/UI/BodyC.bmp");
-				this->m_ArmorCGraph.Load("data/UI/ArmorC.bmp");
-				this->m_HeadCGraph.Load("data/UI/HeadC.bmp");
-				this->m_ItembackGraph.Load("data/UI/itemback.png");
-				this->OIL_Graph.Load("data/UI/back.png");
-			}
+			void			Set(void) noexcept;
 			void			Update(void) noexcept;
 			void			Draw(void) const noexcept;
 			void			Dispose(void) noexcept {

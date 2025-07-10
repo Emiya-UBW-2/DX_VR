@@ -185,6 +185,28 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend));
 		}
 		//
+		void			MainSceneUI::Set(void) noexcept {
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+
+			this->m_BodyGraph.Load("data/UI/Body.bmp");
+			this->m_ArmorGraph.Load("data/UI/Armor.bmp");
+			this->m_HeadGraph.Load("data/UI/Head.bmp");
+			this->m_BodyCGraph.Load("data/UI/BodyC.bmp");
+			this->m_ArmorCGraph.Load("data/UI/ArmorC.bmp");
+			this->m_HeadCGraph.Load("data/UI/HeadC.bmp");
+			this->m_ItembackGraph.Load("data/UI/itemback.png");
+			this->OIL_Graph.Load("data/UI/back.png");
+
+			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
+			m_PrevItemID.resize(ViewPlayer->GetInventory().size());
+			m_ItemAnimTimer.resize(ViewPlayer->GetInventory().size());
+			for (int loop = 0; loop < m_PrevItemID.size(); ++loop) {
+				m_PrevItemID.at(loop) = ViewPlayer->GetInventory().at(loop);
+			}
+			for (int loop = 0; loop < m_ItemAnimTimer.size(); ++loop) {
+				m_ItemAnimTimer.at(loop) = 0.f;
+			}
+		}
 		void			MainSceneUI::Update(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
@@ -260,6 +282,27 @@ namespace FPS_n2 {
 					Easing(&m_RadR, 0.f, 0.9f, EasingType::OutExpo);
 				}
 			}
+			{
+				auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
+				int loop = 0;
+				for (auto& ID : ViewPlayer->GetInventory()) {
+					bool Prev = m_PrevItemID.at(loop) != InvalidID;
+					bool Now = ID != InvalidID;
+					if (Prev != Now) {
+						//開始アニメ
+						//終了アニメ
+						m_ItemAnimTimer.at(loop) += DXLib_refParts->GetDeltaTime();
+						if (m_ItemAnimTimer.at(loop) >= 0.3f) {
+							m_ItemAnimTimer.at(loop) = 0.f;
+							m_PrevItemID.at(loop) = ID;
+						}
+					}
+					else {
+						m_ItemAnimTimer.at(loop) = 0.f;
+					}
+					++loop;
+				}
+			}
 		}
 		void			MainSceneUI::Draw(void) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
@@ -285,20 +328,56 @@ namespace FPS_n2 {
 
 				int Height = 100;
 
-				float Alpha = 1.f;
-
 				int loop = 0;
 				for (auto& ID : ViewPlayer->GetInventory()) {
-					xp1 = 400 - Height * (static_cast<int>(ViewPlayer->GetInventory().size()) / 2) + Height * loop;
+					float Yadd = 0.f;
+					float Scale = 1.f;
+					float Alpha = 1.f;
+					int DrawID = ID;
+					bool Prev = m_PrevItemID.at(loop) != InvalidID;
+					bool Now = ID != InvalidID;
+					{
+						float Seek = m_ItemAnimTimer.at(loop) / 0.3f;
+						if (!Prev && Now) {
+							//開始アニメ
+							DrawID = ID;
+							Yadd = 0.f;
+							if (Seek < 0.8f) {
+								Scale = Lerp(0.f, 1.2f, Seek / 0.8f);
+							}
+							else {
+								Scale = Lerp(1.2f, 1.f, (Seek - 0.8f) / (1.f - 0.8f));
+							}
+							Alpha = Lerp(0.f, 1.f, Seek);
+						}
+						else if (Prev && !Now) {
+							//終了アニメ
+							DrawID = m_PrevItemID.at(loop);
+							if (Seek < 0.8f) {
+								Yadd = Lerp(0.f, 128.f, Seek / 0.8f);
+							}
+							else {
+								Yadd = 128.f;
+							}
+							Scale = 1.f;
+							Alpha = Lerp(1.f, 0.f, Seek);
+						}
+						else {
+							Yadd = 0.f;
+							Scale = 1.f;
+							Alpha = 1.f;
+						}
+					}
 
-					Alpha = static_cast<float>(loop + 1) / static_cast<float>(ViewPlayer->GetInventory().size());
+
+					xp1 = 400 - Height * (static_cast<int>(ViewPlayer->GetInventory().size()) / 2) + Height * loop;
 
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 215);
 					DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &this->m_ItembackGraph, xp1, yp1, 96.f / 512.f, 0.f, true);
-					if (ID != InvalidID) {
-						auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID);
-						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
-						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &item->GetIconGraph(), xp1, yp1, 128.f / 512.f, 0.f, true);
+					if (DrawID != InvalidID) {
+						auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(DrawID);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * Alpha));
+						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &item->GetIconGraph(), xp1, yp1 - static_cast<int>(Yadd), (128.f / 512.f) * Scale, 0.f, true);
 					}
 					++loop;
 				}
