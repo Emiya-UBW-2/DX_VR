@@ -384,6 +384,34 @@ namespace FPS_n2 {
 					MyInput.SetInputPADS(Controls::PADS::CHECK, Pad->GetPadsInfo(Controls::PADS::CHECK).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::WALK, Pad->GetPadsInfo(Controls::PADS::WALK).GetKey().press());
 					//MyInput.SetInputPADS(Controls::PADS::JUMP, Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().press());
+
+					int loop = 0;
+					for (auto& ID : ViewPlayer->GetInventory()) {
+						if (ID != InvalidID) {
+							bool IsPress = false;
+							switch (loop) {
+							case 0: IsPress = CheckHitKey(KEY_INPUT_1) != 0; break;
+							case 1: IsPress = CheckHitKey(KEY_INPUT_2) != 0; break;
+							case 2: IsPress = CheckHitKey(KEY_INPUT_3) != 0; break;
+							case 3: IsPress = CheckHitKey(KEY_INPUT_4) != 0; break;
+							case 4: IsPress = CheckHitKey(KEY_INPUT_5) != 0; break;
+							default:
+								break;
+							}
+							if (IsPress) {
+								//auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID);
+								Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec() * -1.f;
+								Vec.y = std::clamp(Vec.y, 0.1f, 0.3f); Vec = Vec.normalized();
+
+								Objects::ItemObjPool::Instance()->Put(ID,
+									ViewChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos(),
+									Vec * (10.f * Scale3DRate)
+								);
+								ViewPlayer->SubInventoryIndex(loop);
+							}
+						}
+						++loop;
+					}
 				}
 				//ネットワーク
 				if (NetBrowser->IsDataReady() && !this->m_NetWorkController) {
@@ -514,9 +542,10 @@ namespace FPS_n2 {
 			else {
 				if (ViewChara->IsAlive()) {
 					float Radius = 2.0f * 1.f * Scale3DRate;
-					//自分が当たったら押し出す
+					//自分が当たったら押し出す 取れるなら取る
 					for (auto& g : Objects::ItemObjPool::Instance()->GetList()) {
 						if (!g->IsActive()) { continue; }
+						if(!g->CanPick()) { continue; }
 						Vector3DX Vec = (ViewChara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
 						float Len = Vec.magnitude();
 						if (Len < Radius) {

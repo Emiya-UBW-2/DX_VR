@@ -10,6 +10,7 @@ namespace FPS_n2 {
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 
+			this->m_Timer += DXLib_refParts->GetDeltaTime();
 			Vector3DX PosBuf = GetMove().GetPos();
 			PosBuf = PosBuf + GetMove().GetVec() * DXLib_refParts->GetDeltaTime() + Vector3DX::up() * this->m_yAdd;
 			this->m_yAdd += (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));
@@ -26,7 +27,12 @@ namespace FPS_n2 {
 					PosBuf = EndPos;
 					this->m_yAdd = 0.0f;
 					Vector3DX Vector = GetMove().GetVec(); Vector.y = 0.f;
-					Easing(&Vector, Vector3DX::zero(), 0.8f, EasingType::OutExpo);
+					Easing(&Vector, Vector3DX::zero(), 0.9f, EasingType::OutExpo);
+					SetMove().SetVec(Vector);
+				}
+				else {
+					Vector3DX Vector = GetMove().GetVec();
+					Easing(&Vector, Vector3DX::zero(), 0.95f, EasingType::OutExpo);
 					SetMove().SetVec(Vector);
 				}
 			}

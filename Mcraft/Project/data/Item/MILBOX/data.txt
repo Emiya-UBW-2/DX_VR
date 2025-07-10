@@ -1,1 +1,2 @@
 Name=Item
+Weight=30000

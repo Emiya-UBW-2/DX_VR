@@ -4,6 +4,26 @@
 
 namespace FPS_n2 {
 	namespace Charas {
+		float CharacterObj::GetDebuff(void) const noexcept {
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+			int gram = 0;
+			for (auto& ID : PlayerMngr->GetPlayer(GetMyPlayerID())->GetInventory()) {
+				if (ID != InvalidID) {
+					auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID);
+					gram += item->GetWeight_gram();
+				}
+			}
+			if (gram == 0) {
+				return 1.f;
+			}
+			else if (gram < 60000) {
+				return Lerp(1.f, 0.25f, static_cast<float>(gram) / 60000);
+			}
+			else {
+				return 0.25f;
+			}
+		}
+
 		bool			CharacterObj::SetDamageEvent(const DamageEvent& Event) noexcept {
 			if (GetMyPlayerID() == Event.DamageID) {
 				auto* SE = SoundPool::Instance();

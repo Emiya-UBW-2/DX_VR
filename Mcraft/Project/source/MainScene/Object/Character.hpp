@@ -60,17 +60,19 @@ namespace FPS_n2 {
 			const auto		GetSpeed(void) const noexcept {
 				if (this->m_IsSquat) {
 					if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
-						return 0.15f;
+						return 0.15f * GetDebuff();
 					}
-					return 0.475f;
+					return 0.475f * GetDebuff();
 				}
 				else {
 					if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
-						return 0.2f;
+						return 0.2f * GetDebuff();
 					}
-					return 0.625f;
+					return 0.625f * GetDebuff();
 				}
 			}
+			float			GetDebuff(void) const noexcept;
+
 			const auto		IsMoveFront(void) const noexcept { return this->m_Input.GetPADSPress(Controls::PADS::MOVE_W) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_S); }
 			const auto		IsMoveBack(void) const noexcept { return this->m_Input.GetPADSPress(Controls::PADS::MOVE_S) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_W); }
 			const auto		IsMoveLeft(void) const noexcept { return this->m_Input.GetPADSPress(Controls::PADS::MOVE_A) && !this->m_Input.GetPADSPress(Controls::PADS::MOVE_D); }
@@ -169,7 +171,12 @@ namespace FPS_n2 {
 				this->m_IsRappelling = true;
 				this->m_IsRappellingEnd = false;
 			}
-			void			Input(const InputControl& pInput) noexcept { this->m_Input = pInput; }
+			void			Input(const InputControl& pInput) noexcept {
+				this->m_Input = pInput;
+				float debuff = GetDebuff();
+				this->m_Input.SetAddxRad(this->m_Input.GetAddxRad() * debuff);
+				this->m_Input.SetAddyRad(this->m_Input.GetAddyRad() * debuff);
+			}
 		private:
 			int				GetFrameNum(void) noexcept override { return static_cast<int>(CharaFrame::Max); }
 			const char*		GetFrameStr(int id) noexcept override { return CharaFrameName[id]; }

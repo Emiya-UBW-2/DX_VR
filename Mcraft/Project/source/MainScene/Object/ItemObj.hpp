@@ -11,13 +11,13 @@ namespace FPS_n2 {
 
 			GraphHandle						m_Icon;
 			bool			m_EnableSpawnBySoldier{ false };
+			int				m_Weight{};
 		public://getter
 			const auto& GetPath(void) const noexcept { return this->m_path; }
 			const auto& GetName(void) const noexcept { return this->m_name; }
 			const auto& GetIconGraph(void) const noexcept { return this->m_Icon; }
-
 			const auto& EnableSpawnBySoldier(void) const noexcept { return this->m_EnableSpawnBySoldier; }
-			
+			const auto& GetWeight_gram(void) const noexcept { return this->m_Weight; }
 		public:
 			ItemObjData(std::string path_) noexcept { Set(path_); }
 		private:
@@ -48,6 +48,9 @@ namespace FPS_n2 {
 						}
 						else if (LEFT == "EnableSpawnBySoldier") {
 							this->m_EnableSpawnBySoldier = (RIGHT == "TRUE");
+						}
+						else if (LEFT == "Weight") {
+							m_Weight = std::stoi(RIGHT);
 						}
 					}
 				}
@@ -92,12 +95,15 @@ namespace FPS_n2 {
 			Vector3DX	m_Pos;
 			Vector3DX	m_Repos;
 			bool		m_IsLR{};
+			float		m_Timer{};
 		public:
 			ItemObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::ItemObj); }
 			virtual ~ItemObj(void) noexcept {}
 		public:
 			void				SetUniqueID(int ID) noexcept { this->m_ItemObjDataID = ID; }
 			const auto&			GetUniqueID(void) const noexcept { return this->m_ItemObjDataID; }
+
+			const auto			CanPick(void) const noexcept { return this->m_Timer>3.f; }
 			//接地
 			void				Put(const Vector3DX& pos, const Vector3DX& vec) noexcept {
 				SetActive(true);
@@ -108,6 +114,7 @@ namespace FPS_n2 {
 				SetMove().Update(0.0f, 0.0f);
 				m_Zrotate.Init(0.08f * Scale3DRate, 3.0f, deg2rad(50));
 				this->m_Yrad = deg2rad(GetRandf(360.f));
+				this->m_Timer = 0.f;
 			}
 		public:
 			void				Init_Sub(void) noexcept override {
@@ -125,7 +132,8 @@ namespace FPS_n2 {
 				if (!IsActive()) { return; }
 				if (!IsDraw(Range)) { return; }
 				if (isDrawSemiTrans) { return; }
-				if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.0f * Scale3DRate * 10.0f * Scale3DRate)) { return; }
+				//if ((GetMove().GetPos() - Camera3D::Instance()->GetMainCamera().GetCamPos()).sqrMagnitude() > (10.0f * Scale3DRate * 10.0f * Scale3DRate)) { return; }
+				if (!CanPick() && (static_cast<int>(this->m_Timer * 60.f) % 10 < 5)) { return; }
 				GetObj().DrawModel();
 			}
 			void			Dispose_Sub(void) noexcept override {}
