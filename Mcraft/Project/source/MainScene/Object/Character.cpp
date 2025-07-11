@@ -693,7 +693,13 @@ namespace FPS_n2 {
 						//アニメーション
 						pGun->InitGunAnimePer();
 					}
-					pGun->UpdateGunMat(IsSelect, GetIsADS(), CharaRotationCache, GetFrameWorldMat(CharaFrame::Head).pos(), this->m_RotateControl.GetRad());
+					bool isActiveAutoAim = GetIsADS();
+					if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
+						if (!OptionParts->GetParamBoolean(EnumSaveParam::ActiveLockOn)) {
+							isActiveAutoAim = false;
+						}
+					}
+					pGun->UpdateGunMat(IsSelect, isActiveAutoAim, CharaRotationCache, GetFrameWorldMat(CharaFrame::Head).pos(), this->m_RotateControl.GetRad());
 				}
 				//手の位置を制御
 				if (((GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) || GetCanLookByPlayer())) {

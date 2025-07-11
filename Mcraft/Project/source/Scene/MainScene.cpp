@@ -421,6 +421,8 @@ namespace FPS_n2 {
 										Vec * (10.f * Scale3DRate)
 									);
 									ViewPlayer->SubInventoryIndex(loop);
+									auto* SE = SoundPool::Instance();
+									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::PutItem))->Play(DX_PLAYTYPE_BACK, true);
 								}
 							}
 							else {
@@ -552,6 +554,8 @@ namespace FPS_n2 {
 								(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
 								) {
 								player->AddInventory(g->GetUniqueID());
+								auto* SE = SoundPool::Instance();
+								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::GetItem))->Play(DX_PLAYTYPE_BACK, true);
 								g->SetActive(false);
 								continue;
 							}
@@ -584,6 +588,8 @@ namespace FPS_n2 {
 								(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
 								) {
 								ViewPlayer->AddInventory(g->GetUniqueID());
+								auto* SE = SoundPool::Instance();
+								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::GetItem))->Play(DX_PLAYTYPE_BACK, true);
 								g->SetActive(false);
 								continue;
 							}

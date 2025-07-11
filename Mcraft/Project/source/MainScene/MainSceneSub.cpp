@@ -85,8 +85,8 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Heli), 1, "data/Sound/SE/Heli.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Envi), 1, "data/Sound/SE/Envi.wav", false);
 
-			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::CartFall), 6, "data/Sound/SE/gun/case.wav", false);
-			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::MagFall), 6, "data/Sound/SE/gun/ModFall.wav", false);
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::CartFall), 6, "data/Sound/SE/gun/case.wav");
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::MagFall), 6, "data/Sound/SE/gun/ModFall.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Trigger), 1, "data/Sound/SE/gun/trigger.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::rolling_rocket), 1, "data/Sound/SE/rolling_rocket.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Tinnitus), 2, "data/Sound/SE/Tinnitus.wav");
@@ -94,6 +94,9 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Throw), 4, "data/Sound/SE/throw.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::FallGrenade), 4, "data/Sound/SE/fallgrenade.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Explosion), 4, "data/Sound/SE/explosion.wav");
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::GetItem), 4, "data/Sound/SE/getitem.wav", false);
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::PutItem), 4, "data/Sound/SE/putitem.wav", false);
+
 			for (int loop = 0; loop < 6; ++loop) {
 				SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Cocking1_0) + loop, 4, "data/Sound/SE/gun/autoM870/" + std::to_string(loop) + ".wav");
 				SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Cocking2_0) + loop, 4, "data/Sound/SE/gun/autoM16/" + std::to_string(loop) + ".wav");
@@ -157,6 +160,8 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Throw));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::FallGrenade));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Explosion));
+			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::GetItem));
+			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::PutItem));
 			for (int loop = 0; loop < 6; ++loop) {
 				SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Cocking1_0) + loop);
 				SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Cocking2_0) + loop);

@@ -48,6 +48,8 @@ namespace FPS_n2 {
 		Throw,
 		FallGrenade,
 		Explosion,
+		GetItem,
+		PutItem,
 		//
 		Trigger,
 		rolling_rocket,
