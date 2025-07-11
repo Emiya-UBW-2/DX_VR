@@ -1132,7 +1132,7 @@ namespace FPS_n2 {
 							if (OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)) {
 								Height = GetReferenceCells().All / 8 - 15;
 							}
-							for (int ypos = Height; ypos <= Height + Heights; ++ypos) {
+							for (int ypos = Height + 1; ypos <= Height + Heights; ++ypos) {
 								SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos, ypos, GetReferenceCells().Half + zPos).Cell = 2;
 							}
 						};

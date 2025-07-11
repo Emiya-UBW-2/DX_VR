@@ -424,6 +424,9 @@ namespace FPS_n2 {
 				if (ViewChara->GetGunPtrNow()) {
 					float BaseRad = ViewChara->GetLeanRad();
 					auto DrawCircle = [&](int X, int Y, float scale, float Per) {
+						auto* LocalizeParts = LocalizePool::Instance();
+						auto* KeyGuideParts = KeyGuide::Instance();
+
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, Lerp(0, 255, Per));
 						int Scale = static_cast<int>(static_cast<float>(1080 * ViewChara->GetGunPtrNow()->GetAutoAimRadian() / CameraParts->GetMainCamera().GetCamFov()) * scale);
 						DrawCtrls->SetDrawCircle(WindowSystem::DrawLayer::Normal, X, Y, Scale, Green, false, 2);
@@ -477,6 +480,18 @@ namespace FPS_n2 {
 
 							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+							if (
+								(ViewChara->GetBodyAP().GetPoint() != ViewChara->GetBodyAP().GetMax()) ||
+								(ViewChara->GetHeadAP().GetPoint() != ViewChara->GetHeadAP().GetMax())
+								) {
+								xp1 = xp1 + 64;
+								yp1 = yp1 + 64;
+
+								KeyGuideParts->DrawButton(xp1 - 32, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::HEALARMOR));
+
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+									FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3000));
+							}
 						}
 						//
 						{

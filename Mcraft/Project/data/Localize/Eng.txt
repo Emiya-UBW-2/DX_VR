@@ -126,3 +126,5 @@
 9909=Squat
 9910=Delete Item
 9913=Pause
+
+3000=Swap Armor by ItemSlot

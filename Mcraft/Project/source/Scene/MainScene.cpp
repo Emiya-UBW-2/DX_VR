@@ -392,6 +392,15 @@ namespace FPS_n2 {
 					MyInput.SetInputPADS(Controls::PADS::WALK, Pad->GetPadsInfo(Controls::PADS::WALK).GetKey().press());
 					//MyInput.SetInputPADS(Controls::PADS::JUMP, Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().press());
 
+					bool IsPressArmor = false;
+					if (
+						(ViewChara->GetBodyAP().GetPoint() != ViewChara->GetBodyAP().GetMax()) ||
+						(ViewChara->GetHeadAP().GetPoint() != ViewChara->GetHeadAP().GetMax())
+						) {
+						IsPressArmor = Pad->GetPadsInfo(Controls::PADS::HEALARMOR).GetKey().press();
+					}
+					//TODO
+
 					int loop = 0;
 					bool isFirst = true;
 					for (auto& ID : ViewPlayer->SetInventory()) {
@@ -399,6 +408,9 @@ namespace FPS_n2 {
 							bool IsPress = false;
 							if (isFirst) {
 								IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE).GetKey().press();
+							}
+							if (isFirst && false) {
+								IsPress |= IsPressArmor;
 							}
 							switch (loop) {
 							case 0: IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE1).GetKey().press(); break;

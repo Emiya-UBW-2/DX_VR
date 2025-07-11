@@ -48,6 +48,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(Controls::PADS::ITEMDELETE4, true);
 	Pad->SetIsUseButton(Controls::PADS::ITEMDELETE5, true);
 	Pad->SetIsUseButton(Controls::PADS::ITEMDELETE, true);
+	Pad->SetIsUseButton(Controls::PADS::HEALARMOR, true);
 	//
 	auto* DXLib_refParts = DXLib_ref::Instance();
 	if (DXLib_refParts->FirstBootSetting()) { return 0; }
