@@ -590,7 +590,9 @@ namespace FPS_n2 {
 					((CamXMaxX + CamYMaxY + CamZZ) <= 0.0f) &&//Dot
 					((CamXMaxX + CamYMinY + CamZZ) <= 0.0f) &&//Dot
 					((CamXMinX + CamYMaxY + CamZZ) <= 0.0f)//Dot
-					) { continue; }
+					) {
+					continue;
+				}
 
 				bool CheckFillZ = cellx.isFarCells() && ((DrawMinZMinus <= zpos) && (zpos <= DrawMinZPlus));
 				bool CheckInsideZ = cellx.isFarCells() && ((DrawMinZMinus < zpos) && (zpos < DrawMinZPlus));
@@ -1119,14 +1121,14 @@ namespace FPS_n2 {
 				//*
 				for (int zpos = -Edge; zpos < Size * Rate + Edge; ++zpos) {
 					for (int xpos = -Edge; xpos < Size * Rate + Edge; ++xpos) {
-						auto SetWall = [&](int xt,int zt) {
+						auto SetWall = [&](int xt, int zt) {
 #if DEBUG_NET
 							return;
 #endif
 
 							int xPos = -Size * Rate / 2 + xpos + xt;
 							int zPos = -Size * Rate / 2 + zpos + zt;
-							auto Height = static_cast<int>(ns.octaveNoise(2, 
+							auto Height = static_cast<int>(ns.octaveNoise(2,
 								(static_cast<float>(xpos + xt)) / (Size * Rate),
 								(static_cast<float>(zpos + zt)) / (Size * Rate)) * static_cast<float>(GetReferenceCells().All * 1 / 10));
 							if (OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)) {
@@ -1135,7 +1137,7 @@ namespace FPS_n2 {
 							for (int ypos = Height + 1; ypos <= Height + Heights; ++ypos) {
 								SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos, ypos, GetReferenceCells().Half + zPos).Cell = 2;
 							}
-						};
+							};
 						int xp = xpos / Rate;
 						int zp = zpos / Rate;
 						if (!mazeControl.PosIsPath(xp, zp) && (xpos % Rate == 0) && (zpos % Rate == 0)) {

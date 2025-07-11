@@ -77,8 +77,8 @@ namespace FPS_n2 {
 				const int		GetIndex(int pos) const noexcept { return (pos % this->All + this->All) % this->All; }
 				const size_t	GetCellNum(int xpos, int ypos, int zpos) const noexcept { return static_cast<size_t>(GetIndex(xpos) * this->AllPow2 + ypos * this->All + GetIndex(zpos)); }
 				//
-				const auto&		GetCellBuf(int xpos, int ypos, int zpos) const noexcept { return this->CellBuffer[GetCellNum(xpos, ypos, zpos)]; }
-				auto&			SetCellBuf(int xpos, int ypos, int zpos) noexcept { return this->CellBuffer[GetCellNum(xpos, ypos, zpos)]; }
+				const auto& GetCellBuf(int xpos, int ypos, int zpos) const noexcept { return this->CellBuffer[GetCellNum(xpos, ypos, zpos)]; }
+				auto& SetCellBuf(int xpos, int ypos, int zpos) noexcept { return this->CellBuffer[GetCellNum(xpos, ypos, zpos)]; }
 				//
 				const auto		GetPosBuffer(int xpos, int ypos, int zpos, int ID) const noexcept { return GetPos(xpos + ((ID >> 2) & 1), ypos + ((ID >> 1) & 1), zpos + (ID & 1)); }
 				//
@@ -206,7 +206,7 @@ namespace FPS_n2 {
 						if (!this->m_IsDoOnce) {
 							this->m_isEnd = false;
 						}
-						if(!this->m_isEnd) {
+						if (!this->m_isEnd) {
 							if (this->m_Job.joinable()) {
 								this->m_Job.detach();
 							}
@@ -441,7 +441,7 @@ namespace FPS_n2 {
 						if (start[loop] < min[loop] || start[loop] > max[loop])
 							return false; // 交差していない
 					}
-					else 
+					else
 					//*/
 					{
 						// スラブとの距離を算出
@@ -673,8 +673,8 @@ namespace FPS_n2 {
 			void			AddShadowCubes(size_t id) noexcept;
 			void			FlipShadowCubes(size_t id) noexcept;
 			//
-			const auto&		GetReferenceCells(void) const noexcept { return this->m_CellxN[0]; }
-			auto&			SetReferenceCells(void) noexcept { return this->m_CellxN[0]; }
+			const auto& GetReferenceCells(void) const noexcept { return this->m_CellxN[0]; }
+			auto& SetReferenceCells(void) noexcept { return this->m_CellxN[0]; }
 		public:
 			class Builds {
 				int						m_mesh{ -1 };
@@ -707,7 +707,7 @@ namespace FPS_n2 {
 			};
 			std::vector<Builds>			m_ObjBuilds;
 		public:
-			const auto&		GetBuildData(void) const noexcept { return this->m_ObjBuilds; }
+			const auto& GetBuildData(void) const noexcept { return this->m_ObjBuilds; }
 
 			const int		GetNearestBuilds(const Vector3DX& NowPosition) const noexcept {
 				for (auto& bu : this->m_ObjBuilds) {
@@ -878,7 +878,7 @@ namespace FPS_n2 {
 			void			LoadCellsFile(void) noexcept;
 			void			SaveCellsFile(void) noexcept;
 
-			void			LoadCellsClip(int xbasepos, int ybasepos,int zbasepos) noexcept;
+			void			LoadCellsClip(int xbasepos, int ybasepos, int zbasepos) noexcept;
 			void			SaveCellsClip(int XMin, int XMax, int YMin, int YMax, int ZMin, int ZMax) noexcept;
 
 			void			SettingChange(void) noexcept;

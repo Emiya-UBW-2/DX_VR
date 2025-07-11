@@ -10,7 +10,7 @@ namespace FPS_n2 {
 		class PauseMenuControl {
 			bool			m_IsRetire{ false };
 		public:
-			const auto&		IsRetire(void) const noexcept { return this->m_IsRetire; }
+			const auto& IsRetire(void) const noexcept { return this->m_IsRetire; }
 		public:
 			void			Load(void) noexcept;
 			void			Init(void) noexcept;

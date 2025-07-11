@@ -239,7 +239,7 @@ namespace FPS_n2 {
 				if (loop == PlayerMngr->GetWatchPlayerID()) {
 					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true);
 				}
-				else{
+				else {
 					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true);
 				}
 			}
@@ -562,7 +562,7 @@ namespace FPS_n2 {
 							Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
 							if (
 								(player->HasEmptyInventory() != 0) &&
-								((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized() * -1.f)) > 0.f) && 
+								((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized() * -1.f)) > 0.f) &&
 								(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
 								) {
 								player->AddInventory(g->GetUniqueID());

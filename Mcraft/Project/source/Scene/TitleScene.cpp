@@ -217,24 +217,24 @@ namespace FPS_n2 {
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = UIs::ButtonControl::Instance();
 			// 
-			DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, 
+			DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
 				&this->m_TitleImage, (64), (64), (64 + 369), (64 + 207), true);
 			// 
-			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18), 
+			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
 				FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
 				(64 + 369), (64 + 207), White, Black, "Ver 0.0.0");
 			// 
 			ButtonParts->Draw();
 			// 
 			if ((ButtonParts->GetSelect() != InvalidID) && !PopUpParts->IsActivePop()) {
-				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18), 
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
 					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
 					(32), 1080 - (32 + 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
 			}
 			//
 			{
 				int xp = 64;
-				int yp = 1080-92;
+				int yp = 1080 - 92;
 				auto* OptionParts = OptionManager::Instance();
 				{
 					auto prev = OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth);

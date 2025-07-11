@@ -588,7 +588,7 @@ namespace FPS_n2 {
 
 							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 						}
-					};
+						};
 
 					if (IsDrawAimUIPer > 0.01f) {
 						int RetX = ViewChara->GetGunPtrNow()->GetAimXPos() + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
