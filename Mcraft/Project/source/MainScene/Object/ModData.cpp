@@ -127,6 +127,9 @@ namespace FPS_n2 {
 			else if (LEFT == "CanSwitch") {
 				this->m_CanSwitch = RIGHT == "True";
 			}
+			else if (LEFT == "isHoldOpen") {
+				this->m_isHoldOpen = RIGHT == "True";
+			}
 			else {
 				for (int loop = 0; loop < static_cast<int>(Charas::GunAnimeID::Max); ++loop) {
 					if (LEFT == Charas::GunAnimeIDName[loop]) {

@@ -107,15 +107,25 @@ namespace FPS_n2 {
 					if (IsDeath) {
 						PlayerMngr->GetPlayer(Event.ShotID)->AddScore(100);
 						PlayerMngr->GetPlayer(Event.ShotID)->AddKill(1);
-						SideLogParts->Add(5.0f, 0.0f, Red, "Kill +100");
+						SideLogParts->Add(5.0f, 0.0f, Green, "Kill +100");
 					}
 				}
 				if (Event.DamageID == PlayerMngr->GetWatchPlayerID()) {//撃たれたキャラ
 					if (Damage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitMe))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
+						if (IsDeath) {
+							SideLogParts->Add(5.0f, 0.0f, Red50, "You Are Dead");
+						}
+						else {
+							SideLogParts->Add(5.0f, 0.0f, Red, (std::to_string(-Damage) + " Damage").c_str());
+						}
 					}
-					if (BodyArmerDamage > 0 || HeadArmerDamage>0) {
+					else if (BodyArmerDamage > 0 || HeadArmerDamage>0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f, 255);
+						SideLogParts->Add(5.0f, 0.0f, Yellow, "Armor Saved me");
+					}
+					else if (Damage == 0) {
+						SideLogParts->Add(5.0f, 0.0f, Green, "Armor has been Changed");
 					}
 				}
 				//エフェクトセット

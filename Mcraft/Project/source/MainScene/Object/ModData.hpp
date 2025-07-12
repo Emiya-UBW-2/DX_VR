@@ -50,6 +50,7 @@ namespace FPS_n2 {
 			bool							m_IsThrowWeapon{ false };
 			bool							m_CanADS{ true };
 			bool							m_CanSwitch{ true };
+			bool							m_isHoldOpen{ true };
 
 
 			std::array<int, static_cast<int>(Charas::GunAnimeID::Max)>	m_AnimSelect{ InvalidID };
@@ -74,6 +75,7 @@ namespace FPS_n2 {
 			const auto& GetIsThrowWeapon(void) const noexcept { return this->m_IsThrowWeapon; }
 			const auto& GetCanADS(void) const noexcept { return this->m_CanADS; }
 			const auto& GetCanSwitch(void) const noexcept { return this->m_CanSwitch; }
+			const auto& GetisHoldOpen(void) const noexcept { return this->m_isHoldOpen; }
 			const auto& GetAnimSelectList(void) const noexcept { return this->m_AnimSelect; }
 			const auto& GetIsRecoilPower(void) const noexcept { return this->m_IsRecoilPower; }
 			const auto& GetIsRecoilReturn(void) const noexcept { return this->m_IsRecoilReturn; }

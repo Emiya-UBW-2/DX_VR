@@ -747,7 +747,7 @@ namespace FPS_n2 {
 									SetObj().SetAnim(ID).SetPer(std::clamp(GetNowAnimTimePerCache() / Per, 0.0f, 1.0f));
 								}
 								else {
-									if (GetAmmoNumTotal() == 0) {
+									if (GetAmmoNumTotal() == 0 && GetModifySlot()->GetMyData()->GetisHoldOpen()) {
 										SetObj().SetAnim(ID).SetPer(1.0f);
 									}
 									else {
@@ -768,7 +768,7 @@ namespace FPS_n2 {
 							}
 							else {
 								if (GetShotType() == SHOTTYPE::BOLT || GetShotType() == SHOTTYPE::PUMP) {
-									if (GetAmmoNumTotal() == 0) {
+									if (GetAmmoNumTotal() == 0 && GetModifySlot()->GetMyData()->GetisHoldOpen()) {
 										SetObj().SetAnim(ID).SetPer(1.0f);
 									}
 									else {
