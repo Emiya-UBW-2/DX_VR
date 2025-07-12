@@ -403,14 +403,32 @@ namespace FPS_n2 {
 
 					int loop = 0;
 					bool isFirst = true;
+					bool isArmerHealing = true;
+					bool isPressed = false;
 					for (auto& ID : ViewPlayer->SetInventory()) {
 						if (ID.first != InvalidID) {
 							bool IsPress = false;
 							if (isFirst) {
 								IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE).GetKey().press();
 							}
-							if (isFirst && false) {
-								IsPress |= IsPressArmor;
+							if (isArmerHealing && IsPressArmor) {
+								auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
+								switch (item->GetItemType()) {
+								case Objects::ItemType::Helmet:
+									if (ViewChara->GetHeadAP().GetPoint() != ViewChara->GetHeadAP().GetMax()) {
+										IsPress |= true;
+										isArmerHealing = false;
+									}
+									break;
+								case Objects::ItemType::Armor:
+									if (ViewChara->GetBodyAP().GetPoint() != ViewChara->GetBodyAP().GetMax()) {
+										IsPress |= true;
+										isArmerHealing = false;
+									}
+									break;
+								default:
+									break;
+								}
 							}
 							switch (loop) {
 							case 0: IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE1).GetKey().press(); break;
@@ -421,17 +439,41 @@ namespace FPS_n2 {
 							default:
 								break;
 							}
+							//重複防止
+							if (IsPress) {
+								if (isPressed) {
+									IsPress = false;
+								}
+								isPressed = true;
+							}
+
 							if (IsPress) {
 								ID.second += DXLib_refParts->GetDeltaTime();
 								if (ID.second > 0.5f) {
-									//auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
-									Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec() * -1.f;
-									Vec.y = std::clamp(Vec.y, 0.1f, 0.3f); Vec = Vec.normalized();
+									//アーマーヒール
+									if (IsPressArmor) {
+										auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
+										switch (item->GetItemType()) {
+										case Objects::ItemType::Helmet:
+											ViewChara->HealHelmet();
+											break;
+										case Objects::ItemType::Armor:
+											ViewChara->HealArmor();
+											break;
+										default:
+											break;
+										}
+									}
+									else {
+										//auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
+										Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec() * -1.f;
+										Vec.y = std::clamp(Vec.y, 0.1f, 0.3f); Vec = Vec.normalized();
 
-									Objects::ItemObjPool::Instance()->Put(ID.first,
-										ViewChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos(),
-										Vec * (10.f * Scale3DRate)
-									);
+										Objects::ItemObjPool::Instance()->Put(ID.first,
+											ViewChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos(),
+											Vec * (10.f * Scale3DRate)
+										);
+									}
 									ViewPlayer->SubInventoryIndex(loop);
 									auto* SE = SoundPool::Instance();
 									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::PutItem))->Play(DX_PLAYTYPE_BACK, true);

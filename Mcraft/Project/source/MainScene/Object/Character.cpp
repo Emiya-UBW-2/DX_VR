@@ -65,6 +65,21 @@ namespace FPS_n2 {
 						//Damage = 0;
 					}
 				}
+				//アーマーヒール
+				if (Damage < 0) {
+					switch (static_cast<HitType>(Event.HitType)) {
+					case HitType::Helmet:
+						this->m_HeadPoint.Sub(-this->m_HeadPoint.GetMax());
+						Damage = 0.f;
+						break;
+					case HitType::Armor:
+						this->m_BodyPoint.Sub(-this->m_BodyPoint.GetMax());
+						Damage = 0.f;
+						break;
+					default:
+						break;
+					}
+				}
 
 				auto Prev = this->m_HP.GetPoint();
 				this->m_HP.Sub(Damage);

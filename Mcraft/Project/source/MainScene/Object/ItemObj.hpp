@@ -5,16 +5,30 @@
 
 namespace FPS_n2 {
 	namespace Objects {
+
+		enum class ItemType {
+			Item,
+			Armor,
+			Helmet,
+			Max
+		};
+		static const char* ItemTypeStr[static_cast<int>(ItemType::Max)] = {
+			"Item",
+			"Armor",
+			"Helmet",
+		};
+
 		class ItemObjData {
 			std::string		m_path;
 			std::string		m_name;
-
-			GraphHandle						m_Icon;
+			ItemType		m_ItemType;
+			GraphHandle		m_Icon;
 			bool			m_EnableSpawnBySoldier{ false };
 			int				m_Weight{};
 		public://getter
 			const auto& GetPath(void) const noexcept { return this->m_path; }
 			const auto& GetName(void) const noexcept { return this->m_name; }
+			const auto& GetItemType(void) const noexcept { return this->m_ItemType; }
 			const auto& GetIconGraph(void) const noexcept { return this->m_Icon; }
 			const auto& EnableSpawnBySoldier(void) const noexcept { return this->m_EnableSpawnBySoldier; }
 			const auto& GetWeight_gram(void) const noexcept { return this->m_Weight; }
@@ -45,6 +59,14 @@ namespace FPS_n2 {
 					{
 						if (LEFT == "Name") {
 							this->m_name = RIGHT;
+						}
+						else if (LEFT == "Type") {
+							for (int loop = 0; loop < static_cast<int>(ItemType::Max); ++loop) {
+								if (RIGHT == ItemTypeStr[loop]) {
+									m_ItemType = static_cast<ItemType>(loop);
+									break;
+								}
+							}
 						}
 						else if (LEFT == "EnableSpawnBySoldier") {
 							this->m_EnableSpawnBySoldier = (RIGHT == "TRUE");

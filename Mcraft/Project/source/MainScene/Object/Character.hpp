@@ -138,6 +138,10 @@ namespace FPS_n2 {
 				this->m_Damage.Add(GetMyPlayerID(), damageID, damage, hitType, startPos, endPos);
 			}
 			void			Heal(HitPoint Point) noexcept { SetDamage(GetMyPlayerID(), -Point, static_cast<int>(HitType::Body), GetMove().GetPos(), GetMove().GetPos()); }
+
+			void			HealHelmet() noexcept { SetDamage(GetMyPlayerID(), -1, static_cast<int>(HitType::Helmet), GetMove().GetPos(), GetMove().GetPos()); }
+			void			HealArmor() noexcept { SetDamage(GetMyPlayerID(), -1, static_cast<int>(HitType::Armor), GetMove().GetPos(), GetMove().GetPos()); }
+
 			bool			SetDamageEvent(const DamageEvent& Event) noexcept;
 			const bool		CheckDamageRay(HitPoint Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
 

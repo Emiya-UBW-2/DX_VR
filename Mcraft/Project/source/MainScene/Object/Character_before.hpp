@@ -17,6 +17,9 @@ namespace FPS_n2 {
 			Body,
 			Arm,
 			Leg,
+			//ヒール限定
+			Armor,
+			Helmet,
 		};
 		//
 		class HitBox {
