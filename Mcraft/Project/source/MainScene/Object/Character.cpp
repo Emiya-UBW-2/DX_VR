@@ -69,10 +69,14 @@ namespace FPS_n2 {
 				if (Damage < 0) {
 					switch (static_cast<HitType>(Event.HitType)) {
 					case HitType::Helmet:
+						HeadArmerDamage = -1;
+						BodyArmerDamage = -1;
 						this->m_HeadPoint.Sub(-this->m_HeadPoint.GetMax());
 						Damage = 0.f;
 						break;
 					case HitType::Armor:
+						HeadArmerDamage = -1;
+						BodyArmerDamage = -1;
 						this->m_BodyPoint.Sub(-this->m_BodyPoint.GetMax());
 						Damage = 0.f;
 						break;
