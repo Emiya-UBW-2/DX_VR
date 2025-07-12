@@ -8,6 +8,8 @@ Info_Eng=A handgun equipped with a double column magazine and decocking function
 Info_Eng=High-end product with excellent durability, accuracy, and recoil.
 Info_Eng=Ideal as a back-up gun.
 
+Weight=845
+
 ShotRate=600
 RecoilPower=60
 RecoilReturn=0.9

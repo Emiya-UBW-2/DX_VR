@@ -52,6 +52,8 @@ namespace FPS_n2 {
 			bool							m_CanSwitch{ true };
 			bool							m_isHoldOpen{ true };
 
+			int								m_Weight{ 0 };
+
 
 			std::array<int, static_cast<int>(Charas::GunAnimeID::Max)>	m_AnimSelect{ InvalidID };
 
@@ -94,6 +96,8 @@ namespace FPS_n2 {
 
 			const auto& GetStockType(void) const noexcept { return this->m_StockType; }
 			const auto& GetIconGraph(void) const noexcept { return this->m_Icon; }
+
+			const auto& GetWeight_gram(void) const noexcept { return this->m_Weight; }
 			//銃声
 			const auto& GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
 			//スコープ

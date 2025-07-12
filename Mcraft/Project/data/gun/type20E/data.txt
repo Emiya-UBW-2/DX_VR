@@ -8,6 +8,8 @@ Info_Eng=A prototype of the Type 20 rifle that was in stock.
 Info_Eng=It has the same functions as the standard model.
 Info_Eng=It boasts easy handling thanks to its latest design.
 
+Weight=3500
+
 ShotRate=850
 RecoilPower=50
 RecoilReturn=0.7

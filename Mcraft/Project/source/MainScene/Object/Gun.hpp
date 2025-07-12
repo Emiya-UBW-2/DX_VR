@@ -231,6 +231,7 @@ namespace FPS_n2 {
 			const auto			GetAmmoAll(void) const noexcept { return this->m_MagazinePtr ? (*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoAll() : 0; }
 			const auto			GetReloadType(void) const noexcept { return GetModifySlot()->GetMyData()->GetReloadType(); }
 
+			const auto			GetWeight_gram(void) const noexcept { return GetModifySlot()->GetMyData()->GetWeight_gram(); }
 
 			const auto			GetRecoilPower(void) const noexcept {
 				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetIsRecoilPower()) {

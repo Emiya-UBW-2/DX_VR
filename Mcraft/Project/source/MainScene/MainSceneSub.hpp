@@ -62,6 +62,8 @@ namespace FPS_n2 {
 			int							m_RadPrev{};
 			float						m_RadR{};
 
+			float						m_Gram{};
+
 			std::vector<int>			m_PrevItemID{};
 			std::vector<float>			m_ItemAnimTimer{};
 		public:

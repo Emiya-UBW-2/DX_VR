@@ -309,6 +309,20 @@ namespace FPS_n2 {
 					++loop;
 				}
 			}
+
+			{
+				float kirogram = static_cast<float>(ViewChara->GetWeight_gram()) / 1000.f;
+				if (std::abs(kirogram - m_Gram) > 5.f) {
+					Easing(&m_Gram, kirogram, 0.95f, EasingType::OutExpo);
+				}
+				else if(std::abs(kirogram - m_Gram) > 0.02f){
+					m_Gram += DXLib_refParts->GetDeltaTime() / 0.1f * ((kirogram - m_Gram) > 0.f ? 1.f : -1.f);
+				}
+				else {
+					m_Gram = kirogram;
+				}
+			}
+
 		}
 		void			MainSceneUI::Draw(void) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
@@ -326,7 +340,7 @@ namespace FPS_n2 {
 				DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &OIL_Graph, 0, 0, 1920, 1080, true);
 				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
-			//
+			//アイテムスロット
 			{
 
 				xp1 = (400);
@@ -392,6 +406,56 @@ namespace FPS_n2 {
 						}
 					}
 					++loop;
+				}
+				{
+					xp1 = 400;
+					yp1 = (1080 * 4 / 5) + 64;
+
+					int gram = ViewChara->GetWeight_gram();
+					unsigned int Color = Green;
+					if (gram == 0) {
+						Color = Blue;
+					}
+					else if (gram < 20000) {
+						float Per = static_cast<float>(gram) / 20000;
+						if (Per < 0.5f) {
+							Color = GetColor(
+								0,
+								Lerp(0, 255, Per / 0.5f),
+								255);
+						}
+						else {
+							Color = GetColor(
+								0,
+								255,
+								Lerp(255, 0, (Per - 0.5f) / 0.5f));
+						}
+					}
+					else if (gram < 80000) {
+						float Per = static_cast<float>(gram - 20000) / (80000 - 20000);
+						if (Per < 0.5f) {
+							Color = GetColor(
+								Lerp(0, 255, Per / 0.5f),
+								255,
+								0);
+						}
+						else {
+							Color = GetColor(
+								255,
+								Lerp(255, 0, (Per - 0.5f) / 0.5f),
+								0);
+						}
+					}
+					else {
+						Color = Red;
+					}
+
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
+						xp1,
+						yp1,
+						Color, Black, "Weight : %05.2f kg", m_Gram);
 				}
 				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}

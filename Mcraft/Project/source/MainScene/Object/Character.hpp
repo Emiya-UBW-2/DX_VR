@@ -91,6 +91,7 @@ namespace FPS_n2 {
 			const auto&		GetCameraPosToPlayer(void) const noexcept { return this->m_CameraPos; }
 			const auto&		GetIsSquat(void) const noexcept { return this->m_IsSquat; }
 		public://ゲッター
+			int				GetWeight_gram(void) const noexcept;
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
 			const auto&		GetMoveEyePos(void) const noexcept { return this->m_WalkSwingControl.GetMoveEyePos(); }
 			const auto&		GetLeanRad(void) const noexcept { return this->m_LeanControl.GetRad(); }

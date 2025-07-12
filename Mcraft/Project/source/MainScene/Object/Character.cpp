@@ -4,20 +4,40 @@
 
 namespace FPS_n2 {
 	namespace Charas {
-		float CharacterObj::GetDebuff(void) const noexcept {
-			auto* PlayerMngr = Player::PlayerManager::Instance();
+		int CharacterObj::GetWeight_gram(void) const noexcept{
+		auto* PlayerMngr = Player::PlayerManager::Instance();
 			int gram = 0;
+
+
+			gram += 15000;//アーマー分など
+
+
+			for (int loop = 0, max = this->m_GunPtrControl.GetGunNum(); loop < max; ++loop) {
+				auto& pGun = this->m_GunPtrControl.GetGunPtr(loop);
+				if (!pGun) { continue; }
+				gram += pGun->GetWeight_gram();
+			}
+
 			for (auto& ID : PlayerMngr->GetPlayer(GetMyPlayerID())->GetInventory()) {
 				if (ID.first != InvalidID) {
 					auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
 					gram += item->GetWeight_gram();
 				}
 			}
+			return gram;
+		}
+
+		float CharacterObj::GetDebuff(void) const noexcept {
+			int gram = GetWeight_gram();
+
 			if (gram == 0) {
-				return 1.f;
+				return 1.5f;
 			}
-			else if (gram < 60000) {
-				return Lerp(1.f, 0.25f, static_cast<float>(gram) / 60000);
+			else if (gram < 20000) {
+				return Lerp(1.5f, 1.f, static_cast<float>(gram) / 20000);
+			}
+			else if (gram < 80000) {
+				return Lerp(1.f, 0.25f, static_cast<float>(gram - 20000) / (80000 - 20000));
 			}
 			else {
 				return 0.25f;
@@ -82,6 +102,13 @@ namespace FPS_n2 {
 						break;
 					default:
 						break;
+					}
+				}
+
+				//自機だけダメージを半減
+				if (Damage > 0) {
+					if (Event.DamageID == PlayerMngr->GetWatchPlayerID()) {//無敵debug
+						Damage = Damage * 50 / 100;
 					}
 				}
 

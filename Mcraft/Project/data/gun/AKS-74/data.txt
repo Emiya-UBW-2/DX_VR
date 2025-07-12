@@ -8,6 +8,8 @@ Info_Eng=Assault rifle for airborne troops and crew.
 Info_Eng=High reliability due to simple structure. 
 Info_Eng=By folding the stock= it can be used in extremely close combat.
 
+Weight=3500
+
 ShotRate=600
 RecoilPower=120
 RecoilReturn=0.8

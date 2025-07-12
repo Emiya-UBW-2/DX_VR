@@ -8,6 +8,8 @@ Info_Eng=Soviet fragmentation grenade.
 Info_Eng=Explodes 3.5 seconds after being thrown, scattering shrapnel.
 Info_Eng=A cheap but effective weapon.
 
+Weight=310
+
 usehumanAnim=3
 IsThrowWeapon=True
 CanADS=False

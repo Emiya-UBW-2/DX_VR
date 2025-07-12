@@ -8,6 +8,8 @@ Info_Far=Customized M700 bolt-action rifle.
 Info_Far=Equipped with a 6x scope.
 Info_Far=select Lightweight parts to sacrifice some accuracy in favor of mobility.
 
+Weight=3200
+
 ShotRate=300
 RecoilPower=100
 RecoilReturn=0.8

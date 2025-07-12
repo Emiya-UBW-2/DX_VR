@@ -130,6 +130,9 @@ namespace FPS_n2 {
 			else if (LEFT == "isHoldOpen") {
 				this->m_isHoldOpen = RIGHT == "True";
 			}
+			else if (LEFT == "Weight") {
+				this->m_Weight = std::stoi(RIGHT);
+			}
 			else {
 				for (int loop = 0; loop < static_cast<int>(Charas::GunAnimeID::Max); ++loop) {
 					if (LEFT == Charas::GunAnimeIDName[loop]) {
