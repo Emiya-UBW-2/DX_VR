@@ -80,6 +80,8 @@ namespace FPS_n2 {
 			float m_ShotTimer{};
 			int m_AmmoSpecID{};
 			bool m_CanShot{};
+
+			Vector3DX RopeVec;
 		private:
 			int					GetFrameNum(void) noexcept override { return static_cast<int>(HeliFrame::Max); }
 			const char*			GetFrameStr(int id) noexcept override { return HeliFrameName[id]; }
@@ -95,11 +97,11 @@ namespace FPS_n2 {
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->SetPosition(GetMove().GetPos());
 			}
 			const auto		GetIsActiveRappelling() const noexcept {
-				return (this->m_HelicopterMove == HelicopterMove::Rappelling) && (13.0f <= this->m_Timer && this->m_Timer <= 30.0f) && (this->m_SpawnPoint > 0);
+				return (this->m_HelicopterMove == HelicopterMove::Rappelling) && (13.0f <= this->m_Timer);
 			}
 			const auto		PopSpawnPoint() noexcept {
 				auto Answer = this->m_SpawnPoint;
-				--this->m_SpawnPoint;
+				++this->m_SpawnPoint;
 				return Answer;
 			}
 			const bool		CheckAmmoHit(const Vector3DX& StartPos, Vector3DX* EndPos) noexcept;
@@ -156,14 +158,13 @@ namespace FPS_n2 {
 				}
 				if (m_RopePer > 0.0f) {
 					Vector3DX Pos;
-
 					Pos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::Rappelling1))).pos();
 
-					DxLib::DrawCapsule3D(Pos.get(), (Pos - GetMove().GetMat().yvec() * (m_RopePer * Scale3DRate)).get(), 0.02f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
+					DxLib::DrawCapsule3D(Pos.get(), (Pos - RopeVec * (m_RopePer * Scale3DRate)).get(), 0.02f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
 
 					Pos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::Rappelling2))).pos();
 
-					DxLib::DrawCapsule3D(Pos.get(), (Pos - GetMove().GetMat().yvec() * (m_RopePer * Scale3DRate)).get(), 0.02f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
+					DxLib::DrawCapsule3D(Pos.get(), (Pos - RopeVec * (m_RopePer * Scale3DRate)).get(), 0.02f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
 				}
 			}
 			void				Dispose_Sub(void) noexcept override {

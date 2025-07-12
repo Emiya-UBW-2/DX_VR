@@ -158,33 +158,43 @@ namespace FPS_n2 {
 
 			switch (this->m_HelicopterMove) {
 			case HelicopterMove::Random:
-				if (m_Timer > 10.0f) {
-					//SetAction(HelicopterMove::Random);
-
-					this->m_SpawnPoint = PlayerMngr->GetPlayerNum() - 1;
-					SetAction(HelicopterMove::Rappelling);
-				}
-				else if (this->m_IsHit) {
+				if (this->m_IsHit) {
 					SetAction(HelicopterMove::Intercept);
+				}
+				else {
+					bool IsDeadAll = true;
+					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+						if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
+						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+						if (chara->IsAlive()) {
+							IsDeadAll = false;
+							break;
+						}
+					}
+					if (IsDeadAll) {
+						SetAction(HelicopterMove::Rappelling);
+					}
+				}
+				if (m_Timer > 10.0f) {
+					SetAction(HelicopterMove::Random);
 				}
 				m_NowPos = Lerp(m_PrevPos, m_TargetPos, std::clamp(m_Timer / 8.0f, 0.0f, 1.0f));
 				break;
 			case HelicopterMove::Rappelling:
-				if (m_Timer > 8.0f) {
+				if (m_Timer <= 8.0f) {
+					if (this->m_IsHit) {
+						SetAction(HelicopterMove::Intercept);
+						m_Rope = false;
+						m_Open = false;
+					}
+				}
+				else if (m_Timer <= 10.f) {
 					m_Open = true;
 				}
-				if (m_Timer > 13.0f) {
+				else if (m_Timer <= 15.f) {
 					m_Rope = true;
 				}
-				if (m_Timer > 33.0f) {
-					m_Rope = false;
-				}
-				if (m_Timer > 38.0f) {
-					SetAction(HelicopterMove::Random);
-					m_Open = false;
-				}
-				//緊急退避
-				if (m_Timer > 15.0f) {
+				else {
 					bool IsRappellingAny = false;
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
@@ -193,10 +203,18 @@ namespace FPS_n2 {
 							break;
 						}
 					}
-					if (!IsRappellingAny && this->m_IsHit) {
-						SetAction(HelicopterMove::Intercept);
-						m_Rope = false;
-						m_Open = false;
+					if (!IsRappellingAny) {
+						//緊急退避
+						if (this->m_IsHit) {
+							SetAction(HelicopterMove::Intercept);
+							m_Rope = false;
+							m_Open = false;
+						}
+						else{
+							SetAction(HelicopterMove::Random);
+							m_Rope = false;
+							m_Open = false;
+						}
 					}
 				}
 				m_NowPos = Lerp(m_PrevPos, m_TargetPos, std::clamp(m_Timer / 8.0f, 0.0f, 1.0f));
@@ -219,6 +237,13 @@ namespace FPS_n2 {
 				break;
 			}
 
+
+			if (this->m_HelicopterMove == HelicopterMove::Rappelling) {
+				Easing(&RopeVec, GetMove().GetMat().yvec(), 0.9f, EasingType::OutExpo);
+			}
+			else {
+				Easing(&RopeVec, Vector3DX::up(), 0.9f, EasingType::OutExpo);
+			}
 
 
 			auto PrevPos = m_Pos;

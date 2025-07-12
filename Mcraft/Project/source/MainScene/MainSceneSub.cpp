@@ -452,7 +452,7 @@ namespace FPS_n2 {
 
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
-						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
+						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM,
 						xp1,
 						yp1,
 						Color, Black, "Weight : %05.2f kg", m_Gram);
@@ -544,10 +544,30 @@ namespace FPS_n2 {
 
 							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-							if (
-								(ViewChara->GetBodyAP().GetPoint() != ViewChara->GetBodyAP().GetMax()) ||
-								(ViewChara->GetHeadAP().GetPoint() != ViewChara->GetHeadAP().GetMax())
-								) {
+
+
+							bool HasSpare = false;
+							for (auto& ID : ViewPlayer->SetInventory()) {
+								if (ID.first != InvalidID) {
+									auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
+									switch (item->GetItemType()) {
+									case Objects::ItemType::Helmet:
+										if (ViewChara->GetHeadAP().GetPoint() != ViewChara->GetHeadAP().GetMax()) {
+											HasSpare = true;
+										}
+										break;
+									case Objects::ItemType::Armor:
+										if (ViewChara->GetBodyAP().GetPoint() != ViewChara->GetBodyAP().GetMax()) {
+											HasSpare = true;
+										}
+										break;
+									default:
+										break;
+									}
+								}
+							}
+
+							if (HasSpare) {
 								xp1 = xp1 + 64;
 								yp1 = yp1 + 64;
 
