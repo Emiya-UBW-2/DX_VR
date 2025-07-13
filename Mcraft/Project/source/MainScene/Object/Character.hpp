@@ -55,6 +55,7 @@ namespace FPS_n2 {
 
 			float												m_WearArmorTime{ 0.f };
 			float												m_WearArmorPer{ 0.f };
+			int													m_WearArmorFlag{ InvalidID };
 		private://キャッシュ
 			Matrix3x3DX											m_EyeRotationCache{};
 			Vector3DX											m_EyePositionCache{};
@@ -158,6 +159,9 @@ namespace FPS_n2 {
 				auto ret = this->m_HeadShotSwitch;
 				this->m_HeadShotSwitch = false;
 				return ret;
+			}
+			void			SetWearArmorFlag(int ID) noexcept {
+				this->m_WearArmorFlag = ID;
 			}
 		private: //更新関連
 			void			UpdateInput(void) noexcept;

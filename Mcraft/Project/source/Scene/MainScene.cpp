@@ -86,6 +86,7 @@ namespace FPS_n2 {
 			ObjectManager::Instance()->LoadModelBefore("data/model/BMP3/");
 
 			ObjectManager::Instance()->LoadModelBefore("data/model/PlateCarrler/");
+			ObjectManager::Instance()->LoadModelBefore("data/model/Helmet/");
 		}
 		void			MainGameScene::LoadEnd_Sub(void) noexcept {
 			Objects::AmmoPool::Create();
@@ -174,6 +175,9 @@ namespace FPS_n2 {
 
 			PlayerMngr->SetArmor(std::make_shared<Objects::ArmorObj>());
 			ObjectManager::Instance()->InitObject(PlayerMngr->GetArmor(), "data/model/PlateCarrler/");
+
+			PlayerMngr->SetHelmet(std::make_shared<Objects::ArmorObj>());
+			ObjectManager::Instance()->InitObject(PlayerMngr->GetHelmet(), "data/model/Helmet/");
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
@@ -425,12 +429,14 @@ namespace FPS_n2 {
 									if (ViewChara->GetHeadAP().GetPoint() != ViewChara->GetHeadAP().GetMax()) {
 										IsPress |= true;
 										isArmerHealing = false;
+										ViewChara->SetWearArmorFlag(1);
 									}
 									break;
 								case Objects::ItemType::Armor:
 									if (ViewChara->GetBodyAP().GetPoint() != ViewChara->GetBodyAP().GetMax()) {
 										IsPress |= true;
 										isArmerHealing = false;
+										ViewChara->SetWearArmorFlag(0);
 									}
 									break;
 								default:

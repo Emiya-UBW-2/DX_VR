@@ -348,7 +348,7 @@ namespace FPS_n2 {
 							this->m_CanWatch = true;
 						}
 
-						if (this->m_Input.GetPADSPress(Controls::PADS::HEALARMOR)) {
+						if (m_WearArmorFlag != InvalidID) {
 							GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
 							//オフ
 							this->m_GunPtrControl.SetOnOff();
@@ -435,7 +435,7 @@ namespace FPS_n2 {
 					break;
 				}
 			}
-			else {
+			else if (m_WearArmorFlag != InvalidID) {
 				m_WearArmorTime = std::clamp(m_WearArmorTime + DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 
 				float Per = m_WearArmorTime;
@@ -450,13 +450,15 @@ namespace FPS_n2 {
 					m_WearArmorPer = Lerp(0.4f, 1.f, std::clamp((Per - 0.5f) / (1.f - 0.5f), 0.f, 1.f));
 				}
 
+				auto& Armor = (m_WearArmorFlag == 1) ? PlayerMngr->GetHelmet() : PlayerMngr->GetArmor();
 
-				PlayerMngr->GetArmor()->SetActive(true);
+				Armor->SetActive(true);
 
 				if (m_WearArmorTime >= 1.f) {
 					m_WearArmorTime = 0.f;
 
-					PlayerMngr->GetArmor()->SetActive(false);
+					m_WearArmorFlag = InvalidID;
+					Armor->SetActive(false);
 					//オン
 					this->m_GunPtrControl.SetOnOff();
 					this->m_GunPtrControl.InvokeReserveGunSelect();
@@ -802,25 +804,40 @@ namespace FPS_n2 {
 				}
 				//手の位置を制御
 				if ((GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) || GetCanLookByPlayer()) {
-					if (!GetGunPtrNow()) {
+					if (!GetGunPtrNow() && (m_WearArmorFlag != InvalidID)) {
 						float Per = m_WearArmorPer;
 
-						Vector3DX Pos1 = Vector3DX::vget(-0.3f, 0.2f, -0.25f) * Scale3DRate;
-						Vector3DX Pos2 = Vector3DX::vget(0.f, -0.2f, -0.4f) * Scale3DRate;
-						Vector3DX Pos3 = Vector3DX::vget(0.f, -0.5f, 0.0f) * Scale3DRate;
+						float Rad{ 0.f };
+						Vector3DX Pos1;
+						Vector3DX Pos2;
+						Vector3DX Pos3;
 
+						auto& Armor = (m_WearArmorFlag == 1) ? PlayerMngr->GetHelmet() : PlayerMngr->GetArmor();
+
+						if (m_WearArmorFlag == 1) {
+							Rad = -50.f;
+							Pos1 = Vector3DX::vget(-0.3f, 0.0f, -0.3f) * Scale3DRate;
+							Pos2 = Vector3DX::vget(0.f, 0.1f, -0.4f) * Scale3DRate;
+							Pos3 = Vector3DX::vget(0.f, 0.f, 0.0f) * Scale3DRate;
+						}
+						else {
+							Rad = 30.f;
+							Pos1 = Vector3DX::vget(-0.3f, 0.2f, -0.25f) * Scale3DRate;
+							Pos2 = Vector3DX::vget(0.f, -0.2f, -0.4f) * Scale3DRate;
+							Pos3 = Vector3DX::vget(0.f, -0.5f, 0.0f) * Scale3DRate;
+						}
 
 						Vector3DX Pos = Lerp(
 							Lerp(Pos1, Pos2, std::clamp(Per / 0.5f, 0.f, 1.f)),
 							Pos3,
 							std::clamp((Per - 0.5f) / (1.f - 0.5f), 0.f, 1.f));
-						Matrix3x3DX Rot = Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(Lerp(30.f, 0.f, Per)));
+						Matrix3x3DX Rot = Matrix3x3DX::RotAxis(Vector3DX::right(), deg2rad(Lerp(Rad, 0.f, Per)));
 
-						PlayerMngr->GetArmor()->SetMove().SetPos(
+						Armor->SetMove().SetPos(
 							GetFrameWorldMat(CharaFrame::Head).pos() + Matrix3x3DX::Vtrans(Pos, CharaRotationCache));
-						PlayerMngr->GetArmor()->SetMove().SetMat(Rot * CharaRotationCache);
-						PlayerMngr->GetArmor()->SetMove().Update(0.f,0.f);
-						PlayerMngr->GetArmor()->UpdateObjMatrix(PlayerMngr->GetArmor()->GetMove().GetMat(), PlayerMngr->GetArmor()->GetMove().GetPos());
+						Armor->SetMove().SetMat(Rot * CharaRotationCache);
+						Armor->SetMove().Update(0.f, 0.f);
+						Armor->UpdateObjMatrix(Armor->GetMove().GetMat(), Armor->GetMove().GetPos());
 
 						IK_RightArm(
 							&SetObj(),
@@ -830,7 +847,7 @@ namespace FPS_n2 {
 							GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightArm2)),
 							GetFrame(static_cast<int>(CharaFrame::RightWrist)),
 							GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightWrist)),
-							PlayerMngr->GetArmor()->GetRightHandMat());
+							Armor->GetRightHandMat());
 
 						IK_LeftArm(
 							&SetObj(),
@@ -840,7 +857,7 @@ namespace FPS_n2 {
 							GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftArm2)),
 							GetFrame(static_cast<int>(CharaFrame::LeftWrist)),
 							GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftWrist)),
-							PlayerMngr->GetArmor()->GetLeftHandMat());
+							Armor->GetLeftHandMat());
 					}
 					else if (GetIsRappelling()) {
 						SetObj().ResetFrameUserLocalMatrix(GetFrame(static_cast<int>(CharaFrame::RightArm)));
