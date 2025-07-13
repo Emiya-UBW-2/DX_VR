@@ -190,6 +190,7 @@ namespace FPS_n2 {
 			const Vector3DX GetTargetPos() const noexcept {
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
+				//return TargetChara->GetEyePositionCache();
 				return
 					Lerp(TargetChara->GetMove().GetPos(), TargetChara->GetEyePositionCache(), std::clamp(static_cast<float>(GetRand(100)) / 100.f, 0.f, 1.f)) +
 					Vector3DX::vget(GetRandf(1.f), 0.f, GetRandf(1.f)) * Scale3DRate;
