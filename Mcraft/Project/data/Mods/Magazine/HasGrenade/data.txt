@@ -1,0 +1,6 @@
+Name=HasGrenade
+
+capacity=3
+useammo0=FragRGD
+
+end

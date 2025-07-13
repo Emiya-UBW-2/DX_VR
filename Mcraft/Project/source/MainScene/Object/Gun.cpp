@@ -567,6 +567,14 @@ namespace FPS_n2 {
 							SetActiveAll(false);//手にあるものは非表示にする
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Throw))->Play3D(GetMove().GetPos(), Scale3DRate * 2.0f);
 							this->m_Grenade.SetFall(GetMove().GetPos(), this->m_GrenadeThrowRot, (this->m_GrenadeThrowRot.zvec2()).normalized() * (Scale3DRate * 15.0f / 60.0f), 3.5f, Objects::FallObjectType::Grenade);
+
+							this->m_IsChamberOn = false;
+							if (this->m_Capacity != 0) {
+								ChamberIn();
+							}
+							else {
+								this->m_InChamber = false;
+							}
 						}
 					}
 					break;

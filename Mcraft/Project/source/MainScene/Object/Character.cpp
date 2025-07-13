@@ -385,7 +385,7 @@ namespace FPS_n2 {
 								GetGunPtrNow()->SetShotStart();
 							}
 							//グレネード構え
-							else if (this->m_GrenadeCount > 0 && this->m_Input.GetPADSPress(Controls::PADS::THROW)) {
+							else if (GetGunPtr(2)->GetAmmoNumTotal() > 0 && this->m_Input.GetPADSPress(Controls::PADS::THROW)) {
 								GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
 								//投げ武器である最初の武器に切り替え
 								this->m_GunPtrControl.GunChangeThrowWeapon(true);
@@ -428,7 +428,6 @@ namespace FPS_n2 {
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
 						//投げ武器ではない最初の武器に切り替え
 						this->m_GunPtrControl.GunChangeThrowWeapon(false);
-						--this->m_GrenadeCount;
 					}
 					break;
 				default:
@@ -1084,8 +1083,6 @@ namespace FPS_n2 {
 			this->m_SlingZrad.Init(0.05f * Scale3DRate, 3.0f, deg2rad(50));
 			this->m_GunyAdd = 0.f;
 			this->m_GunFallActive = true;
-
-			this->m_GrenadeCount = 3;
 
 			player->InitInventory();
 		}

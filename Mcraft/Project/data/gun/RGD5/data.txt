@@ -21,4 +21,8 @@ Throw=1
 
 useammo0=FragRGD
 
+Slot0Type=Magazine
+Slot0IsNeed=true
+Slot0Item=HasGrenade
+
 end
