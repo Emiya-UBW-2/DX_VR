@@ -457,7 +457,7 @@ namespace FPS_n2 {
 						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM,
 						xp1,
 						yp1,
-						Color, Black, "Weight : %05.2f kg", m_Gram);
+						Color, Black, "Weight %05.2f kg", m_Gram);
 				}
 				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
