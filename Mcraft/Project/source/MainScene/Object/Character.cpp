@@ -311,7 +311,7 @@ namespace FPS_n2 {
 					}
 				}
 				//武器切替
-				if (GetGunPtrNow()->GetGunAnime() != GunAnimeID::LowReady) {
+				if (GetGunPtrNow()->GetGunAnime() != GunAnimeID::LowReady && GetGunPtrNow()->GetGunAnime() != GunAnimeID::EmergencyReady) {
 					int Wheel = 0;
 					if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 						Wheel = -PadControl::Instance()->GetMouseWheelRot();
@@ -328,6 +328,15 @@ namespace FPS_n2 {
 				switch (GetGunPtrNow()->GetGunAnime()) {
 				case GunAnimeID::LowReady:
 					if (this->m_GunPtrControl.IsChangeGunSelect() && GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::LowReady) > 0.95f) {
+						this->m_GunPtrControl.InvokeReserveGunSelect();
+						if (GetGunPtrNow()) {
+							GetGunPtrNow()->SetGunAnime(GunAnimeID::Base);
+						}
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.0f);
+					}
+					break;
+				case GunAnimeID::EmergencyReady:
+					if (this->m_GunPtrControl.IsChangeGunSelect() && GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::EmergencyReady) > 0.1f) {
 						this->m_GunPtrControl.InvokeReserveGunSelect();
 						if (GetGunPtrNow()) {
 							GetGunPtrNow()->SetGunAnime(GunAnimeID::Base);
@@ -355,16 +364,34 @@ namespace FPS_n2 {
 							m_WearArmorTime = 0.f;
 						}
 
+						bool EmptyDo = ((GetGunPtrNow()->GetAmmoNumTotal() == 0) && this->m_Input.GetPADSPress(Controls::PADS::SHOT));
+						bool IsEmergencyReload = this->m_Input.GetPADSPress(Controls::PADS::RELOAD) || (EmptyDo && !GetIsADS());
+
+						if (EmptyDo && GetIsADS()) {
+							if (GetGunPtrNowSel() == 0) {
+								GetGunPtrNow()->SetGunAnime(GunAnimeID::EmergencyReady);
+								this->m_GunPtrControl.GunChangeNext(true);
+							}
+							else {
+								IsEmergencyReload = true;
+							}
+						}
+
 						if (!GetGunPtrNow()->GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
 							//Reload
-							if (this->m_Input.GetPADSPress(Controls::PADS::RELOAD) ||
-								((GetGunPtrNow()->GetAmmoNumTotal() == 0) && this->m_Input.GetPADSPress(Controls::PADS::SHOT))) {
+							if (IsEmergencyReload) {
 								this->m_ReserveReload = true;
 							}
 
 							if ((GetGunPtrNow()->GetNowAnimTime() > 30.f) && this->m_ReserveReload) {
 								this->m_ReserveReload = false;
 								if (GetGunPtrNow()->ReloadStart()) {
+									{
+										bool isEmergency = (GetGunPtr(0)->GetGunAnime() == GunAnimeID::EmergencyReady);
+										if (isEmergency) {
+											GetGunPtr(0)->SetGunAnime(GunAnimeID::LowReady);
+										}
+									}
 									if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {
 										if (GetRand(100) < 50) {
 											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_reload))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
@@ -739,6 +766,9 @@ namespace FPS_n2 {
 			if (IsAlive()) {
 				Matrix3x3DX CharaRotationCache = CharaLocalRotationCache * GetMove().GetMat();
 				//銃の位置を指定するアニメ
+
+				bool isEmergency = (GetGunPtr(0)->GetGunAnime() == GunAnimeID::EmergencyReady);
+
 				for (int loop = 0, max = this->m_GunPtrControl.GetGunNum(); loop < max; ++loop) {
 					auto pGun = this->m_GunPtrControl.GetGunPtr(loop);
 					if (!pGun) { continue; }
@@ -781,12 +811,19 @@ namespace FPS_n2 {
 						}
 					}
 
-					bool IsSelect = loop == this->m_GunPtrControl.GetNowGunSelect();
+					bool IsSelect = (loop == this->m_GunPtrControl.GetNowGunSelect());
+					bool IsActive = IsSelect || ((loop == 0) && isEmergency);
 					if (IsSelect) {
 						pGun->SetMagazinePoachMat(GetFrameWorldMat(CharaFrame::LeftMag));
 						pGun->SetGrenadeThrowRot(GetEyeRotationCache());
 						//アニメーション
 						pGun->UpdateGunAnimePer(GetIsADS());
+					}
+					else if (IsActive) {
+						pGun->SetMagazinePoachMat(GetFrameWorldMat(CharaFrame::LeftMag));
+						pGun->SetGrenadeThrowRot(GetEyeRotationCache());
+						//アニメーション
+						pGun->UpdateGunAnimePer(false);
 					}
 					else {
 						pGun->SetActiveAll(true);
@@ -799,7 +836,7 @@ namespace FPS_n2 {
 							isActiveAutoAim = false;
 						}
 					}
-					pGun->UpdateGunMat(IsSelect, isActiveAutoAim, CharaRotationCache, GetFrameWorldMat(CharaFrame::Head).pos(), this->m_RotateControl.GetRad());
+					pGun->UpdateGunMat(IsActive, isActiveAutoAim && IsSelect, CharaRotationCache, GetFrameWorldMat(CharaFrame::Head).pos(), this->m_RotateControl.GetRad());
 				}
 				//手の位置を制御
 				if ((GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) || GetCanLookByPlayer()) {
@@ -881,7 +918,18 @@ namespace FPS_n2 {
 									GetFrameBaseLocalMat(static_cast<int>(CharaFrame::RightWrist)),
 									GetGunPtrNow()->GetRightHandMat());
 							}
-							{
+							if (isEmergency) {
+								IK_LeftArm(
+									&SetObj(),
+									GetFrame(static_cast<int>(CharaFrame::LeftArm)),
+									GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftArm)),
+									GetFrame(static_cast<int>(CharaFrame::LeftArm2)),
+									GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftArm2)),
+									GetFrame(static_cast<int>(CharaFrame::LeftWrist)),
+									GetFrameBaseLocalMat(static_cast<int>(CharaFrame::LeftWrist)),
+									GetGunPtr(0)->GetLeftHandMat());
+							}
+							else {
 								Matrix4x4DX HandMat;
 								HandMat = GetGunPtrNow()->GetLeftHandMat();
 								Easing(&this->m_ArmBreakPer, (

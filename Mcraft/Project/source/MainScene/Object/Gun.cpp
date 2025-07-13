@@ -29,6 +29,9 @@ namespace FPS_n2 {
 				case Charas::GunAnimeID::LowReady:
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.0f, 0.0f, 0.87f, 0.87f);
 					break;
+				case Charas::GunAnimeID::EmergencyReady:
+					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.0f, 0.0f, 0.87f, 0.87f);
+					break;
 				case Charas::GunAnimeID::ADS:
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.0f, 0.2f, 0.9f, 0.9f);
 					break;
@@ -346,6 +349,7 @@ namespace FPS_n2 {
 				switch (GetGunAnime()) {
 				case Charas::GunAnimeID::HighReady:
 				case Charas::GunAnimeID::LowReady:
+				case Charas::GunAnimeID::EmergencyReady:
 					this->m_MagHand = false;
 					break;
 				case Charas::GunAnimeID::Shot:

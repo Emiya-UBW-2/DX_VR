@@ -7,6 +7,7 @@ namespace FPS_n2 {
 			//どれか択一で行うアニメーション
 			HighReady,
 			LowReady,
+			EmergencyReady,
 			ADS,
 			Cocking,
 			ReloadStart_Empty,
@@ -33,6 +34,7 @@ namespace FPS_n2 {
 		static const char* GunAnimeIDName[static_cast<int>(GunAnimeID::Max)] = {
 			"Ready",
 			"Ready",
+			"Ready",
 			"ADS",
 			"Cocking",
 			"ReloadStart_Empty",
@@ -50,6 +52,8 @@ namespace FPS_n2 {
 			"Open",
 		};
 		enum class EnumGunAnim {
+			common_sub,
+
 			M1911_ready,
 			M1911_aim,
 			M1911_shot,
@@ -108,6 +112,8 @@ namespace FPS_n2 {
 			Max,
 		};
 		static const char* EnumGunAnimName[static_cast<int>(EnumGunAnim::Max)] = {
+			"common_sub",
+
 			"M1911_ready",
 			"M1911_aim",
 			"M1911_shot",
@@ -523,6 +529,7 @@ namespace FPS_n2 {
 			{
 				EnumGunAnim::AK_highready,
 				EnumGunAnim::M16_ready,
+				EnumGunAnim::common_sub,
 				EnumGunAnim::M16_ads,
 				EnumGunAnim::M16_cocking,
 				EnumGunAnim::AK_reloadstart_empty,
@@ -542,6 +549,7 @@ namespace FPS_n2 {
 			{
 				EnumGunAnim::AK_highready,
 				EnumGunAnim::M1911_ready,
+				EnumGunAnim::common_sub,
 				EnumGunAnim::M1911_ads,
 				EnumGunAnim::M1911_cocking,
 				EnumGunAnim::M1911_reloadstart_empty,
@@ -561,6 +569,7 @@ namespace FPS_n2 {
 			{
 				EnumGunAnim::AK_highready,
 				EnumGunAnim::M870_ready,
+				EnumGunAnim::common_sub,
 				EnumGunAnim::M870_ads,
 				EnumGunAnim::M870_cocking,
 				EnumGunAnim::M870_reloadstart_empty,
@@ -587,6 +596,7 @@ namespace FPS_n2 {
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
 				EnumGunAnim::Max,
+				EnumGunAnim::Max,
 				EnumGunAnim::RGD5_watch,
 				EnumGunAnim::RGD5_Ready,
 				EnumGunAnim::RGD5_throw,
@@ -599,6 +609,7 @@ namespace FPS_n2 {
 			{
 				EnumGunAnim::AK_highready,
 				EnumGunAnim::AK_ready,
+				EnumGunAnim::common_sub,
 				EnumGunAnim::M16_ads,
 				EnumGunAnim::AK_cocking,
 				EnumGunAnim::AK_reloadstart_empty,
@@ -618,6 +629,7 @@ namespace FPS_n2 {
 			{
 				EnumGunAnim::M700_highready,
 				EnumGunAnim::M700_ready,
+				EnumGunAnim::common_sub,
 				EnumGunAnim::M700_ads,
 				EnumGunAnim::M700_cocking,
 				EnumGunAnim::M700_reloadstart,
