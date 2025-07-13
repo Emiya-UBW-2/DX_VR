@@ -144,8 +144,17 @@ namespace FPS_n2 {
 			}
 			void			Heal(HitPoint Point) noexcept { SetDamage(GetMyPlayerID(), -Point, static_cast<int>(HitType::Body), GetMove().GetPos(), GetMove().GetPos()); }
 
-			void			HealHelmet() noexcept { SetDamage(GetMyPlayerID(), -1, static_cast<int>(HitType::Helmet), GetMove().GetPos(), GetMove().GetPos()); }
-			void			HealArmor() noexcept { SetDamage(GetMyPlayerID(), -1, static_cast<int>(HitType::Armor), GetMove().GetPos(), GetMove().GetPos()); }
+			void			SetWearArmorFlag(int ID) noexcept {
+				this->m_WearArmorFlag = ID;
+			}
+			void			HealHelmet() noexcept {
+				SetDamage(GetMyPlayerID(), -1, static_cast<int>(HitType::Helmet), GetMove().GetPos(), GetMove().GetPos());
+				SetWearArmorFlag(1);
+			}
+			void			HealArmor() noexcept {
+				SetDamage(GetMyPlayerID(), -1, static_cast<int>(HitType::Armor), GetMove().GetPos(), GetMove().GetPos());
+				SetWearArmorFlag(0);
+			}
 
 			bool			SetDamageEvent(const DamageEvent& Event) noexcept;
 			const bool		CheckDamageRay(HitPoint Damage, PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* pEndPos) noexcept;
@@ -160,9 +169,7 @@ namespace FPS_n2 {
 				this->m_HeadShotSwitch = false;
 				return ret;
 			}
-			void			SetWearArmorFlag(int ID) noexcept {
-				this->m_WearArmorFlag = ID;
-			}
+			bool			IsWearingArmor() const noexcept { return this->m_WearArmorFlag != InvalidID; }
 		private: //更新関連
 			void			UpdateInput(void) noexcept;
 			void			UpdateMatrix(void) noexcept;

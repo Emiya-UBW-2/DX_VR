@@ -348,7 +348,7 @@ namespace FPS_n2 {
 							this->m_CanWatch = true;
 						}
 
-						if (m_WearArmorFlag != InvalidID) {
+						if (IsWearingArmor()) {
 							GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
 							//オフ
 							this->m_GunPtrControl.SetOnOff();
@@ -435,7 +435,7 @@ namespace FPS_n2 {
 					break;
 				}
 			}
-			else if (m_WearArmorFlag != InvalidID) {
+			else if (IsWearingArmor()) {
 				m_WearArmorTime = std::clamp(m_WearArmorTime + DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 
 				float Per = m_WearArmorTime;
@@ -804,7 +804,7 @@ namespace FPS_n2 {
 				}
 				//手の位置を制御
 				if ((GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) || GetCanLookByPlayer()) {
-					if (!GetGunPtrNow() && (m_WearArmorFlag != InvalidID)) {
+					if (!GetGunPtrNow() && IsWearingArmor()) {
 						float Per = m_WearArmorPer;
 
 						float Rad{ 0.f };

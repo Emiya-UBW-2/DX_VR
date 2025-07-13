@@ -429,14 +429,12 @@ namespace FPS_n2 {
 									if (ViewChara->GetHeadAP().GetPoint() != ViewChara->GetHeadAP().GetMax()) {
 										IsPress |= true;
 										isArmerHealing = false;
-										ViewChara->SetWearArmorFlag(1);
 									}
 									break;
 								case Objects::ItemType::Armor:
 									if (ViewChara->GetBodyAP().GetPoint() != ViewChara->GetBodyAP().GetMax()) {
 										IsPress |= true;
 										isArmerHealing = false;
-										ViewChara->SetWearArmorFlag(0);
 									}
 									break;
 								default:
