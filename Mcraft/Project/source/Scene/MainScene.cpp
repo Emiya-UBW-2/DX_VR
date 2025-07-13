@@ -280,7 +280,7 @@ namespace FPS_n2 {
 			FadeControl::Instance()->Init();
 			this->m_IsEnd = false;
 			this->m_StartTimer = 3.0f;
-			this->m_Timer = 180.f;
+			this->m_BattleTimer = 180.f;
 
 			auto* SE = SoundPool::Instance();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
@@ -377,7 +377,7 @@ namespace FPS_n2 {
 				if (!GetIsFirstLoop()) {
 					this->m_StartTimer = std::max(this->m_StartTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
 					if (IsStartedBattle()) {
-						this->m_Timer = std::max(this->m_Timer - DXLib_refParts->GetDeltaTime(), 0.0f);
+						this->m_BattleTimer = std::max(this->m_BattleTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
 					}
 				}
 				MyInput.ResetAllInput();
@@ -801,7 +801,7 @@ namespace FPS_n2 {
 			//UIパラメーター
 			{
 				//timer
-				this->m_UIclass.SetfloatParam(0, this->m_Timer);
+				this->m_UIclass.SetfloatParam(0, this->m_BattleTimer);
 				this->m_UIclass.SetfloatParam(1, this->m_StartTimer);
 
 				this->m_UIclass.Update();
