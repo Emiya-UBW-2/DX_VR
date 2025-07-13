@@ -25,6 +25,7 @@ namespace FPS_n2 {
 			NetWork::PlayerSendData						m_LocalSend;
 			bool										m_IsEnd{ false };//シーン全体の終了フラグ
 			float										m_StartTimer{ 0.0f };
+			float										m_Timer{ 0.0f };
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
 			MV1											m_MainRagDoll;
@@ -38,6 +39,7 @@ namespace FPS_n2 {
 				return (PlayerID)0;
 			}
 
+			bool		IsStartedBattle(void) const noexcept { return this->m_StartTimer <= 0.0f; }
 		public:
 			MainGameScene(void) noexcept {}
 			MainGameScene(const MainGameScene&) = delete;

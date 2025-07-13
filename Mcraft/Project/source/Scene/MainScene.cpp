@@ -280,6 +280,7 @@ namespace FPS_n2 {
 			FadeControl::Instance()->Init();
 			this->m_IsEnd = false;
 			this->m_StartTimer = 3.0f;
+			this->m_Timer = 180.f;
 
 			auto* SE = SoundPool::Instance();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
@@ -375,9 +376,12 @@ namespace FPS_n2 {
 			{
 				if (!GetIsFirstLoop()) {
 					this->m_StartTimer = std::max(this->m_StartTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
+					if (IsStartedBattle()) {
+						this->m_Timer = std::max(this->m_Timer - DXLib_refParts->GetDeltaTime(), 0.0f);
+					}
 				}
 				MyInput.ResetAllInput();
-				if (!SceneParts->IsPause() && FadeControl::Instance()->IsClear() && (this->m_StartTimer <= 0.0f)) {
+				if (!SceneParts->IsPause() && FadeControl::Instance()->IsClear() && IsStartedBattle()) {
 					float AimPer = 1.0f / std::max(1.0f, ViewChara->GetIsADS() ? ViewChara->GetGunPtrNow()->GetSightZoomSize() : 1.0f);
 					MyInput.SetAddxRad(Pad->GetLS_Y() / 200.0f * AimPer);
 					MyInput.SetAddyRad(Pad->GetLS_X() / 200.0f * AimPer);
@@ -559,7 +563,7 @@ namespace FPS_n2 {
 							chara->Input(MyInput);
 						}
 						else {
-							if (!SceneParts->IsPause() && FadeControl::Instance()->IsClear() && (this->m_StartTimer <= 0.0f)) {
+							if (!SceneParts->IsPause() && FadeControl::Instance()->IsClear() && IsStartedBattle()) {
 								chara->Input(PlayerMngr->GetPlayer(loop)->GetAI()->Update());//AIに入力させる
 							}
 						}
@@ -797,7 +801,7 @@ namespace FPS_n2 {
 			//UIパラメーター
 			{
 				//timer
-				this->m_UIclass.SetfloatParam(0, 0.0f);
+				this->m_UIclass.SetfloatParam(0, this->m_Timer);
 				this->m_UIclass.SetfloatParam(1, this->m_StartTimer);
 
 				this->m_UIclass.Update();
