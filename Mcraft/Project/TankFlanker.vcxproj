@@ -20,6 +20,7 @@
     <ClInclude Include="source\MainScene\NetworkBrowser.hpp" />
     <ClInclude Include="source\MainScene\Object\Ammo.hpp" />
     <ClInclude Include="source\MainScene\Object\AmmoData.hpp" />
+    <ClInclude Include="source\MainScene\Object\Armer.hpp" />
     <ClInclude Include="source\MainScene\Object\CharaAnimData.hpp" />
     <ClInclude Include="source\MainScene\Object\Character.hpp" />
     <ClInclude Include="source\MainScene\Object\CharacterEnum.hpp" />
@@ -52,6 +53,7 @@
     <ClCompile Include="source\MainScene\NetworkBrowser.cpp" />
     <ClCompile Include="source\MainScene\Object\Ammo.cpp" />
     <ClCompile Include="source\MainScene\Object\AmmoData.cpp" />
+    <ClCompile Include="source\MainScene\Object\Armer.cpp" />
     <ClCompile Include="source\MainScene\Object\CharaAnimData.cpp" />
     <ClCompile Include="source\MainScene\Object\Character.cpp" />
     <ClCompile Include="source\MainScene\Object\Character_before.cpp" />

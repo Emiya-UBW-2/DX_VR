@@ -2,12 +2,12 @@
 #pragma warning(disable:4464)
 #include	"../../MainScene/NetWork.hpp"
 #include	"CPU.hpp"
-#include	"../Object/Character.hpp"
 
+#include	"../Object/Character.hpp"
 #include	"../Object/Vehicle.hpp"
 #include	"../Object/Helicopter.hpp"
-
 #include	"../Object/ItemObj.hpp"
+#include	"../Object/Armer.hpp"
 
 namespace FPS_n2 {
 	namespace Player {
@@ -129,6 +129,7 @@ namespace FPS_n2 {
 	
 			std::shared_ptr<Objects::VehicleObj>		m_VehicleObj;
 			std::shared_ptr<Objects::HelicopterObj>		m_HelicopterObj;
+			std::shared_ptr<Objects::ArmorObj>			m_ArmorObj;
 		public:
 			float										m_FindCount{};
 		private:
@@ -154,6 +155,9 @@ namespace FPS_n2 {
 
 			void		SetHelicopter(const std::shared_ptr<Objects::HelicopterObj>& pObj) noexcept { this->m_HelicopterObj = pObj; }
 			auto&		GetHelicopter(void) noexcept { return this->m_HelicopterObj; }
+
+			void		SetArmor(const std::shared_ptr<Objects::ArmorObj>& pObj) noexcept { this->m_ArmorObj = pObj; }
+			auto&		GetArmor(void) noexcept { return this->m_ArmorObj; }
 		public:
 			void Init(int playerNum) noexcept {
 				if (playerNum > 0) {
@@ -167,6 +171,7 @@ namespace FPS_n2 {
 			void Dispose(void) noexcept {
 				m_VehicleObj.reset();
 				m_HelicopterObj.reset();
+				m_ArmorObj.reset();
 				for (auto& player : this->m_Player) {
 					player.reset();
 				}

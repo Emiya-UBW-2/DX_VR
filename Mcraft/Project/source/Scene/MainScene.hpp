@@ -11,9 +11,10 @@
 #include	"../CommonScene/UI/CommonUIControl.hpp"
 #include	"../MainScene/MainSceneSub.hpp"
 
-#include "../MainScene/Object/Helicopter.hpp"
+#include	"../MainScene/Object/Helicopter.hpp"
 
 #include	"../MainScene/Object/ItemObj.hpp"
+#include	"../MainScene/Object/Armer.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {

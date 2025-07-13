@@ -52,6 +52,9 @@ namespace FPS_n2 {
 
 			int													m_GrenadeCount{ 3 };
 			std::vector<int> m_ItemList_EnableSpawnBySoldier;
+
+			float												m_WearArmorTime{ 0.f };
+			float												m_WearArmorPer{ 0.f };
 		private://キャッシュ
 			Matrix3x3DX											m_EyeRotationCache{};
 			Vector3DX											m_EyePositionCache{};
@@ -97,9 +100,9 @@ namespace FPS_n2 {
 			const auto&		GetLeanRad(void) const noexcept { return this->m_LeanControl.GetRad(); }
 			const auto&		GetRotateRad(void) const noexcept { return this->m_RotateControl.GetRad(); }
 			const auto&		GetHitBoxList(void) const noexcept { return this->m_HitBoxControl.GetHitBoxPointList(); }
-			const auto&		GetGunPtr(int ID) const noexcept { return this->m_GunPtrControl.GetGunPtr(ID); }
+			const auto		GetGunPtr(int ID) const noexcept { return this->m_GunPtrControl.GetGunPtr(ID); }
 			const auto		GetGunPtrNowSel(void) const noexcept { return this->m_GunPtrControl.GetNowGunSelect(); }
-			const auto&		GetGunPtrNow(void) const noexcept { return GetGunPtr(this->m_GunPtrControl.GetNowGunSelect()); }
+			const auto		GetGunPtrNow(void) const noexcept { return GetGunPtr(this->m_GunPtrControl.GetNowGunSelect()); }
 			const auto&		GetDamageEvent(void) const noexcept { return this->m_Damage; }
 			const auto&		GetEyeRotationCache(void) const noexcept { return this->m_EyeRotationCache; }
 			const auto&		GetEyePositionCache(void) const noexcept { return this->m_EyePositionCache; }

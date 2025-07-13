@@ -347,9 +347,19 @@ namespace FPS_n2 {
 			int													m_ReserveGunSelect{ 0 };
 			std::array<std::shared_ptr<Guns::GunObj>, 3>		m_GunPtr{};			//銃
 		public://ゲッター
-			auto&				GetGunPtr(int ID) noexcept { return this->m_GunPtr[ID]; }
-			const auto&			GetGunPtr(int ID) const noexcept { return this->m_GunPtr[ID]; }
 			const auto			GetGunNum(void) const noexcept { return static_cast<int>(this->m_GunPtr.size()); }
+			std::shared_ptr<Guns::GunObj> GetGunPtr(int ID) noexcept {
+				if (0 <= ID && ID < GetGunNum()) {
+					return this->m_GunPtr[ID];
+				}
+				return nullptr;
+			}
+			const std::shared_ptr<Guns::GunObj> GetGunPtr(int ID) const noexcept {
+				if (0 <= ID && ID < GetGunNum()) {
+					return this->m_GunPtr[ID];
+				}
+				return nullptr;
+			}
 			const auto			GetNowGunSelect(void) const noexcept { return this->m_GunSelect; }
 		public://セッター
 			//次の武器に切り替え
@@ -372,13 +382,23 @@ namespace FPS_n2 {
 			//投げ武器ではない最初の武器に切り替え
 			void				GunChangeThrowWeapon(bool isThrow) noexcept {
 				for (int loop = 0, max = GetGunNum(); loop < max; ++loop) {
-					auto& pGun = GetGunPtr(loop);
+					auto pGun = GetGunPtr(loop);
 					if (!pGun) { continue; }
 
 					if (isThrow ? pGun->GetModifySlot()->GetMyData()->GetIsThrowWeapon() : !pGun->GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
 						this->m_ReserveGunSelect = loop;
 						break;
 					}
+				}
+			}
+			//武器を外す
+			void				SetOnOff() noexcept {
+				if (this->m_GunSelect != this->m_ReserveGunSelect) { return; }
+				if (GetGunPtr(this->m_ReserveGunSelect)) {
+					this->m_ReserveGunSelect = InvalidID;
+				}
+				else {
+					this->m_ReserveGunSelect = 0;
 				}
 			}
 

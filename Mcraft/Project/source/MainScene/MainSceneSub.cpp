@@ -236,10 +236,12 @@ namespace FPS_n2 {
 			Easing(&IsDownUIPer, !IsDrawAimUI ? 1.0f : 0.0f, 0.9f, EasingType::OutExpo);
 
 			Easing(&m_AmmoInPer, 0.f, 0.9f, EasingType::OutExpo);
-			if (m_AmmoNumTotal != ViewChara->GetGunPtrNow()->GetAmmoNumTotal()) {
-				m_AmmoNumTotal = ViewChara->GetGunPtrNow()->GetAmmoNumTotal();
-				m_AmmoInPer = 1.f;
-				m_AmmoRand = (GetRand(100) < 50) ? 1.f : -1.f;
+			if (ViewChara->GetGunPtrNow()) {
+				if (m_AmmoNumTotal != ViewChara->GetGunPtrNow()->GetAmmoNumTotal()) {
+					m_AmmoNumTotal = ViewChara->GetGunPtrNow()->GetAmmoNumTotal();
+					m_AmmoInPer = 1.f;
+					m_AmmoRand = (GetRand(100) < 50) ? 1.f : -1.f;
+				}
 			}
 			Easing(&m_AmmoRandR, m_AmmoRand, 0.9f, EasingType::OutExpo);
 

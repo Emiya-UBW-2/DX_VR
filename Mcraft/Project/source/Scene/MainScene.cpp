@@ -84,6 +84,8 @@ namespace FPS_n2 {
 
 			ObjectManager::Instance()->LoadModelBefore("data/model/hindD/");
 			ObjectManager::Instance()->LoadModelBefore("data/model/BMP3/");
+
+			ObjectManager::Instance()->LoadModelBefore("data/model/PlateCarrler/");
 		}
 		void			MainGameScene::LoadEnd_Sub(void) noexcept {
 			Objects::AmmoPool::Create();
@@ -169,6 +171,9 @@ namespace FPS_n2 {
 			ObjectManager::Instance()->InitObject(PlayerMngr->GetHelicopter(), "data/model/hindD/");
 			//PlayerMngr->SetVehicle(std::make_shared<Objects::VehicleObj>());
 			//ObjectManager::Instance()->InitObject(PlayerMngr->GetVehicle(), "data/model/BMP3/");
+
+			PlayerMngr->SetArmor(std::make_shared<Objects::ArmorObj>());
+			ObjectManager::Instance()->InitObject(PlayerMngr->GetArmor(), "data/model/PlateCarrler/");
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
@@ -392,12 +397,14 @@ namespace FPS_n2 {
 					MyInput.SetInputPADS(Controls::PADS::WALK, Pad->GetPadsInfo(Controls::PADS::WALK).GetKey().press());
 					//MyInput.SetInputPADS(Controls::PADS::JUMP, Pad->GetPadsInfo(Controls::PADS::JUMP).GetKey().press());
 
+					MyInput.SetInputPADS(Controls::PADS::HEALARMOR, Pad->GetPadsInfo(Controls::PADS::HEALARMOR).GetKey().press());
+
 					bool IsPressArmor = false;
 					if (
 						(ViewChara->GetBodyAP().GetPoint() != ViewChara->GetBodyAP().GetMax()) ||
 						(ViewChara->GetHeadAP().GetPoint() != ViewChara->GetHeadAP().GetMax())
 						) {
-						IsPressArmor = Pad->GetPadsInfo(Controls::PADS::HEALARMOR).GetKey().press();
+						IsPressArmor = MyInput.GetPADSPress(Controls::PADS::HEALARMOR);
 					}
 					//TODO
 
