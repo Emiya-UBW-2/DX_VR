@@ -358,6 +358,12 @@ namespace FPS_n2 {
 						}
 
 						if (IsWearingArmor()) {
+							{
+								bool isEmergency = (GetGunPtr(0)->GetGunAnime() == GunAnimeID::EmergencyReady);
+								if (isEmergency) {
+									GetGunPtr(0)->SetGunAnime(GunAnimeID::LowReady);
+								}
+							}
 							GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
 							//オフ
 							this->m_GunPtrControl.SetOnOff(false);
@@ -403,7 +409,7 @@ namespace FPS_n2 {
 								}
 							}
 							//射撃
-							else if (this->m_Input.GetPADSPress(Controls::PADS::SHOT)) {
+							else if (this->m_Input.GetPADSPress(Controls::PADS::SHOT) && GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::Base) >= 1.f) {
 								if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 									if (this->m_Input.GetPADSTrigger(Controls::PADS::SHOT)) {
 										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Trigger))->Play3D(GetEyePositionCache(), Scale3DRate * 5.0f);
@@ -413,6 +419,12 @@ namespace FPS_n2 {
 							}
 							//グレネード構え
 							else if (GetGunPtr(2)->GetAmmoNumTotal() > 0 && this->m_Input.GetPADSPress(Controls::PADS::THROW)) {
+								{
+									bool isEmergency = (GetGunPtr(0)->GetGunAnime() == GunAnimeID::EmergencyReady);
+									if (isEmergency) {
+										GetGunPtr(0)->SetGunAnime(GunAnimeID::LowReady);
+									}
+								}
 								GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
 								//投げ武器である最初の武器に切り替え
 								this->m_GunPtrControl.GunChangeThrowWeapon(true);

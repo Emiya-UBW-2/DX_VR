@@ -224,7 +224,7 @@ namespace FPS_n2 {
 			const auto			GetAutoAimActive(void) const noexcept { return this->m_AutoAimControl.GetAutoAimActive(); }
 			const auto			GetAutoAimRadian(void) const noexcept { return deg2rad(5) * std::clamp(100.0f / std::max(0.01f, std::hypotf(static_cast<float>(GetAimXPos() - 1920 / 2), static_cast<float>(GetAimYPos() - 1080 / 2))), 0.0f, 1.0f); }
 			const auto			GetGunAnimBlendPer(Charas::GunAnimeID ID) const noexcept { return this->m_GunAnimePer[static_cast<int>(ID)].Per(); }
-			const auto			GetCanShot(void) const noexcept { return GetGunAnimBlendPer(Charas::GunAnimeID::LowReady) <= 0.1f && GetGunAnimBlendPer(Charas::GunAnimeID::HighReady) <= 0.1f; }
+			const auto			GetCanShot(void) const noexcept { return GetGunAnimBlendPer(Charas::GunAnimeID::EmergencyReady) <= 0.05f && GetGunAnimBlendPer(Charas::GunAnimeID::LowReady) <= 0.05f && GetGunAnimBlendPer(Charas::GunAnimeID::HighReady) <= 0.05f; }
 			const auto			IsCanShot(void) const noexcept { return GetGunAnime() == Charas::GunAnimeID::Base || GetGunAnime() == Charas::GunAnimeID::Shot; }
 			const auto			GetCanADS(void) const noexcept { return IsCanShot() && GetCanShot() && GetModifySlot()->GetMyData()->GetCanADS(); }
 			const auto			GetSightZoomSize(void) const noexcept { return this->m_SightPtr ? (*this->m_SightPtr)->GetModifySlot()->GetMyData()->GetSightZoomSize() : GetModifySlot()->GetMyData()->GetSightZoomSize(); }
