@@ -392,9 +392,9 @@ namespace FPS_n2 {
 				}
 			}
 			//武器を外す
-			void				SetOnOff() noexcept {
+			void				SetOnOff(bool IsOn) noexcept {
 				if (this->m_GunSelect != this->m_ReserveGunSelect) { return; }
-				if (GetGunPtr(this->m_ReserveGunSelect)) {
+				if (!IsOn) {
 					this->m_ReserveGunSelect = InvalidID;
 				}
 				else {

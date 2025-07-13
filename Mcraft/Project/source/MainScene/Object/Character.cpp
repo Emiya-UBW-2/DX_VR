@@ -351,7 +351,7 @@ namespace FPS_n2 {
 						if (IsWearingArmor()) {
 							GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
 							//オフ
-							this->m_GunPtrControl.SetOnOff();
+							this->m_GunPtrControl.SetOnOff(false);
 							m_WearArmorTime = 0.f;
 						}
 
@@ -459,7 +459,7 @@ namespace FPS_n2 {
 					m_WearArmorFlag = InvalidID;
 					Armor->SetActive(false);
 					//オン
-					this->m_GunPtrControl.SetOnOff();
+					this->m_GunPtrControl.SetOnOff(true);
 					this->m_GunPtrControl.InvokeReserveGunSelect();
 
 					if (GetGunPtrNow()) {
