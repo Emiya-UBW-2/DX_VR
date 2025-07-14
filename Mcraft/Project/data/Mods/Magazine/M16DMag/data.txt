@@ -1,0 +1,5 @@
+Name=M16 60Round Magazine
+
+capacity=60
+useammo0=556x45
+end

@@ -22,6 +22,7 @@ stockType=straight
 
 Slot0Type=Magazine
 Slot0IsNeed=true
+Slot0Item=M16DMag
 Slot0Item=STANAG_30
 
 Slot1Type=Sight
