@@ -409,7 +409,7 @@ namespace FPS_n2 {
 								}
 							}
 							//射撃
-							else if (this->m_Input.GetPADSPress(Controls::PADS::SHOT) && GetGunPtrNow()->GetGunAnimBlendPer(GunAnimeID::Base) >= 1.f) {
+							else if (this->m_Input.GetPADSPress(Controls::PADS::SHOT)) {
 								if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 									if (this->m_Input.GetPADSTrigger(Controls::PADS::SHOT)) {
 										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Trigger))->Play3D(GetEyePositionCache(), Scale3DRate * 5.0f);

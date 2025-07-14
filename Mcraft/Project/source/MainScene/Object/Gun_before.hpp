@@ -190,23 +190,26 @@ namespace FPS_n2 {
 			class SlotData {
 			private:
 				GunSlot										m_SlotType{ GunSlot::Magazine };
-				const std::unique_ptr<SlotData>* m_ParentSlot{ nullptr };
-				const std::unique_ptr<ModifySlot>* m_MySlot{ nullptr };
+				const SlotData*								m_ParentSlot{ nullptr };
+				const std::unique_ptr<ModifySlot>*			m_MySlot{ nullptr };
 				int											m_select{ 0 };//セーブへの保持にしか使わん
 			public:
 				bool IsAttachedParts(void) const noexcept { return (*this->m_MySlot)->IsAttachedParts(this->m_SlotType); }
 				const std::unique_ptr<ModifySlot>& GetAttachedPartsSlot(void) const noexcept;
 				const auto& GetParentSlot(void) const noexcept { return this->m_ParentSlot; }
 			public:
-				SlotData(GunSlot SlotSelect, const std::unique_ptr<SlotData>* pParent, const std::unique_ptr<ModifySlot>* pParts) noexcept {
+				SlotData() noexcept {}
+				virtual ~SlotData(void) noexcept {
+					if (this->m_MySlot && (*this->m_MySlot)) {
+						(*this->m_MySlot)->Remove(this->m_SlotType);
+					}
+				}
+			public:
+				void Init(GunSlot SlotSelect, const SlotData* pParent, const std::unique_ptr<ModifySlot>* pParts) noexcept {
 					this->m_SlotType = SlotSelect;
 					this->m_ParentSlot = pParent;
 					this->m_MySlot = pParts;
 				}
-				virtual ~SlotData(void) noexcept {
-					(*this->m_MySlot)->Remove(this->m_SlotType);
-				}
-			public:
 				void Set(const SharedObj& BaseModel, int select) noexcept {
 					this->m_select = select;
 					(*this->m_MySlot)->Remove(this->m_SlotType);
@@ -220,14 +223,14 @@ namespace FPS_n2 {
 					SlotSaveData Tmp;
 					Tmp.SlotType = this->m_SlotType;
 					Tmp.Select = this->m_select;
-					Tmp.ParentSlotType = (this->m_ParentSlot) ? (*this->m_ParentSlot)->m_SlotType : GunSlot::Gun;
-					Tmp.Parentselect = (this->m_ParentSlot) ? (*this->m_ParentSlot)->m_select : 0;
+					Tmp.ParentSlotType = (this->m_ParentSlot) ? (this->m_ParentSlot)->m_SlotType : GunSlot::Gun;
+					Tmp.Parentselect = (this->m_ParentSlot) ? (this->m_ParentSlot)->m_select : 0;
 					return Tmp;
 				}
 				//自身が該当のスロットと同一かどうか確認
 				bool IsSavedSlot(const SlotSaveData& slotSave) {
 					if (this->m_ParentSlot) {
-						if (!(slotSave.ParentSlotType == (*this->m_ParentSlot)->m_SlotType) && (slotSave.Parentselect == (*this->m_ParentSlot)->m_select)) { return false; }
+						if (!(slotSave.ParentSlotType == (this->m_ParentSlot)->m_SlotType) && (slotSave.Parentselect == (this->m_ParentSlot)->m_select)) { return false; }
 					}
 					else {
 						if (slotSave.ParentSlotType != GunSlot::Gun) { return false; }
@@ -236,26 +239,32 @@ namespace FPS_n2 {
 				}
 			};
 		private:
-			std::vector<std::unique_ptr<SlotData>>			m_SlotDataPool;
+			std::vector<SlotData>							m_SlotDataPool;
 			std::vector<SlotSaveData>						m_SlotSave;
 			std::shared_ptr<GunObj>							m_BaseGun{ nullptr };
 		public:
 			GunsModify(const std::shared_ptr<GunObj>& pBaseGun, bool isPreset) noexcept;
 			virtual ~GunsModify(void) noexcept {
-				for (auto& data : this->m_SlotDataPool) {
-					data.reset();
-				}
 				this->m_SlotDataPool.clear();
 				this->m_BaseGun.reset();
 			}
+		public:
+			void	DeleteAllSlot() noexcept {
+				for (int loop = 0; loop < static_cast<int>(this->m_SlotDataPool.size()); ++loop) {
+					const auto* data = &this->m_SlotDataPool[loop];
+					if (DeleteSlotsChildParts(data)) {
+						--loop;
+					}
+				}
+			}
 		private:
 			//pBasePartsの子供以降のスロットにデフォルトパーツを設定
-			void			SetupDefaultGunParts(const std::unique_ptr<ModifySlot>* pBaseParts, const std::unique_ptr<SlotData>* pParentSlot, bool isPreset) noexcept;
+			void			SetupDefaultGunParts(const std::unique_ptr<ModifySlot>* pBaseParts, const SlotData* pParentSlot, bool isPreset) noexcept;
 			//該当スロット以下のパーツをすべて外す
-			bool			DeleteSlotsChildParts(const std::unique_ptr<SlotData>* pSlot) noexcept;
+			bool			DeleteSlotsChildParts(const SlotData* pSlot) noexcept;
 		public:
 			//該当スロットのパーツをselectの番号のパーツに取り換える(子供以降のスロットはデフォルトパーツ)
-			void			ChangeSelectData(const std::unique_ptr<SlotData>* pSlot, int select) noexcept;
+			void			ChangeSelectData(const SlotData* pSlot, int select) noexcept;
 		public:
 			//プリセットデータのロード、セーブ
 			void			LoadSlots(const char* path) noexcept;

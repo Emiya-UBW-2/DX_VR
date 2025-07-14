@@ -29,6 +29,10 @@ Slot1Type=Sight
 Slot1IsNeed=true
 Slot1Item=OKP7
 
+Slot2Type=UnderRail
+Slot2IsNeed=false
+Slot2Item=MTK83
+
 Cocking=0
 Open=1
 ReloadStart_Empty=2

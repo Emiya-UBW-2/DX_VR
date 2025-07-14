@@ -24,6 +24,10 @@ Slot0Type=Magazine
 Slot0IsNeed=true
 Slot0Item=STANAG_30
 
+Slot1Type=UnderRail
+Slot1IsNeed=true
+Slot1Item=mount89
+
 Open=0
 ReloadStart_Empty=1
 ReloadStart=1

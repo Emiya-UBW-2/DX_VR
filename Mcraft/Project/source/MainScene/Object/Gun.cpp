@@ -937,6 +937,9 @@ namespace FPS_n2 {
 		}
 		void GunObj::Dispose_Sub(void) noexcept {
 			this->m_IsMeshDraw.clear();
+			
+			this->m_GunsModify->DeleteAllSlot();
+
 			this->m_GunsModify.reset();
 			this->m_ModifySlot.reset();
 			this->m_MagFall.Dispose();
