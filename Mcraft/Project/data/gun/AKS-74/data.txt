@@ -25,6 +25,10 @@ Slot0Type=Magazine
 Slot0IsNeed=true
 Slot0Item=AK_6L20
 
+Slot1Type=Sight
+Slot1IsNeed=true
+Slot1Item=OKP7
+
 Cocking=0
 Open=1
 ReloadStart_Empty=2
