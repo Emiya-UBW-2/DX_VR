@@ -79,6 +79,9 @@ namespace FPS_n2 {
 			Matrix4x4DX											m_BaseMuzzle{};
 
 			std::vector<int>													m_IsMeshDraw{};
+
+			bool												m_JungleFast{ true };
+
 		public:
 			void						SetIsDrawMesh(int meshID, bool IsDraw) noexcept {
 				this->m_IsMeshDraw[meshID] = IsDraw ? TRUE : FALSE;

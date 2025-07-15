@@ -77,6 +77,15 @@ namespace FPS_n2 {
 					bool HasActiveFrame = false;
 					switch (static_cast<GunSlot>(loop)) {
 					case GunSlot::Magazine:
+						switch (frame) {
+						case GunFrame::SecondPos:
+						case GunFrame::SecondPos_yvec:
+						case GunFrame::SecondPos_zvec:
+							HasActiveFrame = true;
+							break;
+						default:
+							break;
+						}
 						break;
 					case GunSlot::Lower:
 						switch (frame) {

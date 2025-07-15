@@ -204,9 +204,17 @@ namespace FPS_n2 {
 					}
 					break;
 				case Charas::GunAnimeID::ReloadWait:
-					if (IsNowGunAnimeEnd()) {
-						SetGunAnime(Charas::GunAnimeID::Reload);
-						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetMove().GetPos(), Scale3DRate * 3.0f);
+					if ((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetIsJungle() && this->m_JungleFast) {
+						if (GetNowAnimTimePerCache() >= 0.5f) {
+							SetGunAnime(Charas::GunAnimeID::Reload);
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetMove().GetPos(), Scale3DRate * 3.0f);
+						}
+					}
+					else {
+						if (IsNowGunAnimeEnd()) {
+							SetGunAnime(Charas::GunAnimeID::Reload);
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetMove().GetPos(), Scale3DRate * 3.0f);
+						}
 					}
 					break;
 				case Charas::GunAnimeID::Reload:
@@ -215,12 +223,14 @@ namespace FPS_n2 {
 						case RELOADTYPE::MAG:
 							this->m_Capacity = GetAmmoAll();//マガジン装填
 							SetGunAnime(Charas::GunAnimeID::ReloadEnd);
+							this->m_JungleFast ^= 1;
 							break;
 						case RELOADTYPE::AMMO:
 							++this->m_Capacity;//マガジン装填
 							if ((this->m_Capacity == GetAmmoAll()) || this->m_ReloadAmmoCancel) {
 								this->m_ReloadAmmoCancel = false;
 								SetGunAnime(Charas::GunAnimeID::ReloadEnd);
+								this->m_JungleFast ^= 1;
 							}
 							else {
 								SetGunAnime(Charas::GunAnimeID::ReloadWait);
@@ -346,6 +356,24 @@ namespace FPS_n2 {
 						}
 					}
 					};
+
+				Matrix4x4DX JungleMat;
+				if ((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetIsJungle()) {
+
+					Vector3DX Pos = (*this->m_MagazinePtr)->GetFrameBaseLocalWorldMat(static_cast<int>(GunFrame::SecondPos)).pos();
+					Vector3DX YVec = ((*this->m_MagazinePtr)->GetFrameBaseLocalWorldMat(static_cast<int>(GunFrame::SecondPos_yvec)).pos() - Pos).normalized();
+					Vector3DX ZVec = ((*this->m_MagazinePtr)->GetFrameBaseLocalWorldMat(static_cast<int>(GunFrame::SecondPos_zvec)).pos() - Pos).normalized();
+					JungleMat = Matrix4x4DX::Axis1(YVec, ZVec*-1.f, Pos);
+
+					JungleMat = Matrix3x3DX::Get33DX(JungleMat).Get44DX() * Matrix4x4DX::Mtrans(JungleMat.pos());
+
+					JungleMat = JungleMat.inverse();
+				}
+				auto CalcJungleMat = [&](const Matrix4x4DX& Mat) {
+					return (JungleMat.rotation() * Mat.rotation()) * Matrix4x4DX::Mtrans(Matrix4x4DX::Vtrans(JungleMat.pos(), Mat.rotation()) + Mat.pos());
+					};
+
+
 				switch (GetGunAnime()) {
 				case Charas::GunAnimeID::HighReady:
 				case Charas::GunAnimeID::LowReady:
@@ -408,150 +436,199 @@ namespace FPS_n2 {
 					}
 					break;
 				case Charas::GunAnimeID::ReloadStart_Empty:
-					if (GetShotType() == SHOTTYPE::PUMP) {
+					if ((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetIsJungle() && this->m_JungleFast) {
 						MatMax = GetPartsFrameMatParent(GunFrame::Magpos);
-						SetMagMatLerp(this->m_MagazinePoachMat, 15.0f / 60.0f);
-						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 25.0f / 60.0f);
-						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 35.0f / 60.0f);
-						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 48.0f / 60.0f);
-						SetMagMatLerp(this->m_MagazinePoachMat, 1.0f);
-
-						if (0.5f < GetNowAnimTimePerCache() && GetNowAnimTimePerCache() < 0.7f) {
-							PlayGunSound(EnumGunSound::LoadMag);
-							if (!this->m_IsChamberOn) {
-								++this->m_Capacity;
-							}
-							ChamberIn();
-						}
-						else {
-							this->m_EnumGunSoundNow = EnumGunSound::Max;
-							this->m_IsChamberOn = false;
-						}
-						float Per = 35.0f / 60.0f;
+						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 1.0f);
 						this->m_MagHand = true;
-						if (Per <= GetNowAnimTimePerCache()) {
-							this->m_MagHand = false;
+						if (0.95f <= GetNowAnimTimePerCache()) {
+							PlayGunSound(EnumGunSound::UnloadMag);
 						}
 					}
 					else {
-						if (this->m_MagazinePtr) {
-							(*this->m_MagazinePtr)->SetHandMatrix(this->m_MagazinePoachMat);
-						}
-						this->m_MagHand = true;
-						if (GetReloadType() == RELOADTYPE::MAG) {
-							if (GetNowAnimTimePerCache() >= 0.5f) {
-								if (!this->m_isMagFall) {
-									this->m_isMagFall = true;
-									auto MagposMat = GetPartsFrameMatParent(GunFrame::Magpos);
-									this->m_MagFall.SetFall(
-										MagposMat.pos(), Matrix3x3DX::Get33DX(MagposMat), MagposMat.yvec() * (Scale3DRate * -3.0f / 60.0f),
-										12.0f, Objects::FallObjectType::Magazine);
+						if (GetShotType() == SHOTTYPE::PUMP) {
+							MatMax = GetPartsFrameMatParent(GunFrame::Magpos);
+							SetMagMatLerp(this->m_MagazinePoachMat, 15.0f / 60.0f);
+							SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 25.0f / 60.0f);
+							SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 35.0f / 60.0f);
+							SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 48.0f / 60.0f);
+							SetMagMatLerp(this->m_MagazinePoachMat, 1.0f);
+
+							if (0.5f < GetNowAnimTimePerCache() && GetNowAnimTimePerCache() < 0.7f) {
+								PlayGunSound(EnumGunSound::LoadMag);
+								if (!this->m_IsChamberOn) {
+									++this->m_Capacity;
 								}
+								ChamberIn();
 							}
 							else {
-								this->m_isMagFall = false;
+								this->m_EnumGunSoundNow = EnumGunSound::Max;
+								this->m_IsChamberOn = false;
 							}
-							if (0.0f < GetNowAnimTimePerCache()) {
-								PlayGunSound(EnumGunSound::UnloadMag);
+							float Per = 35.0f / 60.0f;
+							this->m_MagHand = true;
+							if (Per <= GetNowAnimTimePerCache()) {
+								this->m_MagHand = false;
+							}
+						}
+						else {
+							if (this->m_MagazinePtr) {
+								(*this->m_MagazinePtr)->SetHandMatrix(this->m_MagazinePoachMat);
+							}
+							this->m_MagHand = true;
+							if (GetReloadType() == RELOADTYPE::MAG) {
+								if (GetNowAnimTimePerCache() >= 0.5f) {
+									if (!this->m_isMagFall) {
+										this->m_isMagFall = true;
+										auto MagposMat = GetPartsFrameMatParent(GunFrame::Magpos);
+										this->m_MagFall.SetFall(
+											MagposMat.pos(), Matrix3x3DX::Get33DX(MagposMat), MagposMat.yvec() * (Scale3DRate * -3.0f / 60.0f),
+											12.0f, Objects::FallObjectType::Magazine);
+									}
+								}
+								else {
+									this->m_isMagFall = false;
+								}
+								if (0.0f < GetNowAnimTimePerCache()) {
+									PlayGunSound(EnumGunSound::UnloadMag);
+								}
 							}
 						}
 					}
 					break;
 				case Charas::GunAnimeID::ReloadStart:
-					MatMax = GetPartsFrameMatParent(GunFrame::Magpos);
-					SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 0.3f);
-					SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 0.6f);
-					SetMagMatLerp(this->m_MagazinePoachMat, 1.0f);
-
-					this->m_MagHand = true;
-					this->m_ReloadAmmoCancel = false;
-
-					switch (GetReloadType()) {
-					case RELOADTYPE::MAG:
-						if (0.3f <= GetNowAnimTimePerCache()) {
+					if ((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetIsJungle() && this->m_JungleFast) {
+						MatMax = GetPartsFrameMatParent(GunFrame::Magpos);
+						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 1.0f);
+						this->m_MagHand = true;
+						if (0.95f <= GetNowAnimTimePerCache()) {
 							PlayGunSound(EnumGunSound::UnloadMag);
 						}
-						break;
-					case RELOADTYPE::AMMO:
-						break;
-					default:
-						break;
+					}
+					else {
+						MatMax = GetPartsFrameMatParent(GunFrame::Magpos);
+						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 0.3f);
+						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 0.6f);
+						SetMagMatLerp(this->m_MagazinePoachMat, 1.0f);
+
+						this->m_MagHand = true;
+						this->m_ReloadAmmoCancel = false;
+
+						switch (GetReloadType()) {
+						case RELOADTYPE::MAG:
+							if (0.3f <= GetNowAnimTimePerCache()) {
+								PlayGunSound(EnumGunSound::UnloadMag);
+							}
+							break;
+						case RELOADTYPE::AMMO:
+							break;
+						default:
+							break;
+						}
 					}
 					break;
 				case Charas::GunAnimeID::ReloadWait:
-					this->m_MagHand = true;
-					if (this->m_MagazinePtr) {
-						(*this->m_MagazinePtr)->SetHandMatrix(this->m_MagazinePoachMat);
+					if ((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetIsJungle() && this->m_JungleFast) {
+						this->m_MagHand = true;
+						MatMax = GetPartsFrameMatParent(GunFrame::Mag2);
+						SetMagMatLerp(CalcJungleMat(GetPartsFrameMatParent(GunFrame::Mag2)), 0.5f);
+					}
+					else {
+						this->m_MagHand = true;
+						if (this->m_MagazinePtr) {
+							(*this->m_MagazinePtr)->SetHandMatrix(this->m_MagazinePoachMat);
+						}
 					}
 					break;
 				case Charas::GunAnimeID::Reload:
-					this->m_MagHand = true;
-					switch (GetReloadType()) {
-					case RELOADTYPE::MAG:
-						MatMax = this->m_MagazinePoachMat;
-						SetMagMatLerp(this->m_MagazinePoachMat, 0.1f);
-						if (GetNowAnimTimePerCache() <= 0.1f) {
-							//マグチェンジ成功確率
-							this->m_isMagSuccess = GetRand(100) < 50;
-							float MissPer = GetRandf(0.025f);
-							this->m_MagMiss = Matrix4x4DX::Mtrans(GetMove().GetMat().xvec() * (MissPer * Scale3DRate));
-							this->m_MagSuccess = Matrix4x4DX::Mtrans(
-								GetMove().GetMat().yvec() * (-0.05f * Scale3DRate) +
-								GetMove().GetMat().xvec() * (MissPer / 3.0f * Scale3DRate)
-							);
-						}
-						else {
-							if (this->m_isMagSuccess) {
-								SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 0.55f);
-								SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 0.75f);
-								SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 1.0f);
-								if (GetNowAnimTimePerCache() >= 0.55f) {
-									PlayGunSound(EnumGunSound::LoadMag);
-								}
-							}
-							else {
-								SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2) * this->m_MagMiss, 0.55f);
-								SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2) * this->m_MagSuccess, 0.75f);
-								SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 0.85f);
-								SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 1.0f);
-								if (GetNowAnimTimePerCache() >= 0.75f) {
-									PlayGunSound(EnumGunSound::LoadMag);
-								}
-							}
-						}
-						break;
-					case RELOADTYPE::AMMO:
-						this->m_isMagSuccess = false;
-
-						MatMax = this->m_MagazinePoachMat;
-						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 0.5f);
-						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 0.7f);
-						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 0.9f);
-						SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 1.0f);
-
-						if (0.5f < GetNowAnimTimePerCache()) {
+					if ((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetIsJungle() && this->m_JungleFast) {
+						this->m_MagHand = true;
+						MatMax = CalcJungleMat(GetPartsFrameMatParent(GunFrame::Mag2));
+						SetMagMatLerp(CalcJungleMat(GetPartsFrameMatParent(GunFrame::Mag2)), 0.55f);
+						SetMagMatLerp(CalcJungleMat(GetPartsFrameMatParent(GunFrame::Magpos)), 0.75f);
+						SetMagMatLerp(CalcJungleMat(GetPartsFrameMatParent(GunFrame::Magpos)), 1.0f);
+						if (GetNowAnimTimePerCache() >= 0.55f) {
 							PlayGunSound(EnumGunSound::LoadMag);
 						}
-						else {
-							this->m_EnumGunSoundNow = EnumGunSound::Max;
+					}
+					else {
+						this->m_MagHand = true;
+						switch (GetReloadType()) {
+						case RELOADTYPE::MAG:
+							MatMax = this->m_MagazinePoachMat;
+							SetMagMatLerp(this->m_MagazinePoachMat, 0.1f);
+							if (GetNowAnimTimePerCache() <= 0.1f) {
+								//マグチェンジ成功確率
+								this->m_isMagSuccess = GetRand(100) < 50;
+								float MissPer = GetRandf(0.025f);
+								this->m_MagMiss = Matrix4x4DX::Mtrans(GetMove().GetMat().xvec() * (MissPer * Scale3DRate));
+								this->m_MagSuccess = Matrix4x4DX::Mtrans(
+									GetMove().GetMat().yvec() * (-0.05f * Scale3DRate) +
+									GetMove().GetMat().xvec() * (MissPer / 3.0f * Scale3DRate)
+								);
+							}
+							else {
+								if (this->m_isMagSuccess) {
+									SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 0.55f);
+									SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 0.75f);
+									SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 1.0f);
+									if (GetNowAnimTimePerCache() >= 0.55f) {
+										PlayGunSound(EnumGunSound::LoadMag);
+									}
+								}
+								else {
+									SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2) * this->m_MagMiss, 0.55f);
+									SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2) * this->m_MagSuccess, 0.75f);
+									SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 0.85f);
+									SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 1.0f);
+									if (GetNowAnimTimePerCache() >= 0.75f) {
+										PlayGunSound(EnumGunSound::LoadMag);
+									}
+								}
+							}
+							break;
+						case RELOADTYPE::AMMO:
+							this->m_isMagSuccess = false;
+
+							MatMax = this->m_MagazinePoachMat;
+							SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 0.5f);
+							SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Mag2), 0.7f);
+							SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 0.9f);
+							SetMagMatLerp(GetPartsFrameMatParent(GunFrame::Magpos), 1.0f);
+
+							if (0.5f < GetNowAnimTimePerCache()) {
+								PlayGunSound(EnumGunSound::LoadMag);
+							}
+							else {
+								this->m_EnumGunSoundNow = EnumGunSound::Max;
+							}
+							break;
+						default:
+							break;
 						}
-						break;
-					default:
-						break;
 					}
 					break;
 				case Charas::GunAnimeID::ReloadEnd:
-					switch (GetReloadType()) {
-					case RELOADTYPE::MAG:
-						if (GetNowAnimTimePerCache() > 0.6f) {
-							this->m_MagHand = false;
-						}
-						break;
-					case RELOADTYPE::AMMO:
+					if ((*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetIsJungle() && this->m_JungleFast) {
 						this->m_MagHand = false;
-						break;
-					default:
-						break;
+						if (GetNowAnimTimePerCache() > 0.95f) {
+							if (this->m_MagazinePtr) {
+								(*this->m_MagazinePtr)->SetHandMatrix(CalcJungleMat(GetPartsFrameMatParent(GunFrame::Magpos)));
+							}
+						}
+					}
+					else {
+						switch (GetReloadType()) {
+						case RELOADTYPE::MAG:
+							if (GetNowAnimTimePerCache() > 0.6f) {
+								this->m_MagHand = false;
+							}
+							break;
+						case RELOADTYPE::AMMO:
+							this->m_MagHand = false;
+							break;
+						default:
+							break;
+						}
 					}
 					break;
 				case Charas::GunAnimeID::ThrowReady:

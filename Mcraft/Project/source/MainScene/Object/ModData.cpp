@@ -130,6 +130,9 @@ namespace FPS_n2 {
 			else if (LEFT == "isHoldOpen") {
 				this->m_isHoldOpen = RIGHT == "True";
 			}
+			else if (LEFT == "IsJungle") {
+				this->m_IsJungle = RIGHT == "True";
+			}
 			else if (LEFT == "Weight") {
 				this->m_Weight = std::stoi(RIGHT);
 			}

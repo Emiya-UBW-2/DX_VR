@@ -42,6 +42,9 @@ namespace FPS_n2 {
 			smoke3,
 			smoke4,
 			smoke5,
+			SecondPos,
+			SecondPos_yvec,
+			SecondPos_zvec,
 			Max,
 		};
 		static const char* GunFrameName[static_cast<int>(GunFrame::Max)] = {
@@ -82,6 +85,9 @@ namespace FPS_n2 {
 			"smoke3",
 			"smoke4",
 			"smoke5",
+			"SecondPos",
+			"SecondPos_yvec",
+			"SecondPos_zvec",
 		};
 
 		enum class SHOTTYPE {

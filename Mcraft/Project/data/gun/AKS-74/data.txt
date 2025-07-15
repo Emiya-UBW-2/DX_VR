@@ -23,6 +23,7 @@ isHoldOpen=false
 
 Slot0Type=Magazine
 Slot0IsNeed=true
+Slot0Item=AK_6L20_jungle
 Slot0Item=AK_6L20
 
 Slot1Type=Sight

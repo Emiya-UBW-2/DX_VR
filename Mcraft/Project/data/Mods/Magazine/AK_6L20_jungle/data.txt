@@ -1,0 +1,8 @@
+Name=AK-74 6L20 30Round Magazine x2
+
+capacity=30
+useammo0=545x39
+
+IsJungle=True
+
+end

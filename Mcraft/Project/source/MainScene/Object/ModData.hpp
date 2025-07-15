@@ -52,6 +52,8 @@ namespace FPS_n2 {
 			bool							m_CanSwitch{ true };
 			bool							m_isHoldOpen{ true };
 
+			bool							m_IsJungle{ true };
+
 			int								m_Weight{ 0 };
 
 
@@ -78,6 +80,7 @@ namespace FPS_n2 {
 			const auto& GetCanADS(void) const noexcept { return this->m_CanADS; }
 			const auto& GetCanSwitch(void) const noexcept { return this->m_CanSwitch; }
 			const auto& GetisHoldOpen(void) const noexcept { return this->m_isHoldOpen; }
+			const auto& GetIsJungle(void) const noexcept { return this->m_IsJungle; }
 			const auto& GetAnimSelectList(void) const noexcept { return this->m_AnimSelect; }
 			const auto& GetIsRecoilPower(void) const noexcept { return this->m_IsRecoilPower; }
 			const auto& GetIsRecoilReturn(void) const noexcept { return this->m_IsRecoilReturn; }
