@@ -44,6 +44,7 @@ namespace FPS_n2 {
 		RunFoot = static_cast<int>(SoundSelectCommon::Num),
 		StandupFoot,
 		Heli,
+		Heli2,
 		Envi,
 		//
 		Pin,

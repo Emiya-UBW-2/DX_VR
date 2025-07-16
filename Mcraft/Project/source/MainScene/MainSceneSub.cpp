@@ -83,6 +83,7 @@ namespace FPS_n2 {
 			auto* SE = SoundPool::Instance();
 
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Heli), 1, "data/Sound/SE/Heli.wav");
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Heli2), 1, "data/Sound/SE/Heli.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Envi), 1, "data/Sound/SE/Envi.wav", false);
 
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::CartFall), 6, "data/Sound/SE/gun/case.wav");
@@ -149,6 +150,7 @@ namespace FPS_n2 {
 		void			CommonBattleResource::Dispose(void) noexcept {
 			auto* SE = SoundPool::Instance();
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Heli));
+			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Heli2));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Envi));
 
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::CartFall));

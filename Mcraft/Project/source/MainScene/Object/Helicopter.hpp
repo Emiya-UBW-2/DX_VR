@@ -97,7 +97,7 @@ namespace FPS_n2 {
 				SetMove().Update(0.0f, 0.0f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 				auto* SE = SoundPool::Instance();
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->SetPosition(GetMove().GetPos());
+				SE->Get(SoundType::SE, static_cast<int>((m_MyPlayerID == 2) ? SoundEnum::Heli : SoundEnum::Heli2))->SetPosition(GetMove().GetPos());
 			}
 			const auto		GetIsActiveRappelling() const noexcept {
 				return (this->m_HelicopterMove == HelicopterMove::Rappelling) && (13.0f <= this->m_Timer);
@@ -129,7 +129,7 @@ namespace FPS_n2 {
 				SetMaxAABB(Vector3DX::vget(6.5f, 6.5f, 6.5f) * Scale3DRate);
 				SetActive(true);
 				auto* SE = SoundPool::Instance();
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->Play3D(GetMove().GetPos(), 50.0f * Scale3DRate, DX_PLAYTYPE_LOOP);
+				SE->Get(SoundType::SE, static_cast<int>((m_MyPlayerID == 2) ? SoundEnum::Heli : SoundEnum::Heli2))->Play3D(GetMove().GetPos(), 50.0f * Scale3DRate, DX_PLAYTYPE_LOOP);
 				m_PosR = Vector3DX::vget(0.0f, -20.0f, 0.0f) * Scale3DRate;
 				m_Yrad = 0.0f;
 				m_YradR = 0.0f;
@@ -174,7 +174,7 @@ namespace FPS_n2 {
 			}
 			void				Dispose_Sub(void) noexcept override {
 				auto* SE = SoundPool::Instance();
-				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->StopAll();
+				SE->Get(SoundType::SE, static_cast<int>((m_MyPlayerID == 2) ? SoundEnum::Heli : SoundEnum::Heli2))->StopAll();
 			}
 		};
 	}
