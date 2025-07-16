@@ -239,8 +239,11 @@ namespace FPS_n2 {
 				else if (AttackID == -1) {
 					//PlayerMngr->GetVehicle()->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
-				else {
-					PlayerMngr->GetHelicopter()->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+				else if (AttackID == -2) {
+					PlayerMngr->GetHelicopter(0)->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+				}
+				else if (AttackID == -3) {
+					PlayerMngr->GetHelicopter(1)->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
 				return true;
 			}
@@ -315,9 +318,9 @@ namespace FPS_n2 {
 					int Wheel = 0;
 					if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 						Wheel = -PadControl::Instance()->GetMouseWheelRot();
-					}
-					if (this->m_Input.GetPADSTrigger(Controls::PADS::ULT)) {
-						Wheel = 1;
+						if (this->m_Input.GetPADSTrigger(Controls::PADS::ULT)) {
+							Wheel = 1;
+						}
 					}
 					if (Wheel != 0) {
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
@@ -374,9 +377,14 @@ namespace FPS_n2 {
 						bool IsEmergencyReload = this->m_Input.GetPADSPress(Controls::PADS::RELOAD) || (EmptyDo && !GetIsADS());
 
 						if (EmptyDo && GetIsADS()) {
-							if (GetGunPtrNowSel() == 0) {
-								GetGunPtrNow()->SetGunAnime(GunAnimeID::EmergencyReady);
-								this->m_GunPtrControl.GunChangeNext(true);
+							if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
+								if (GetGunPtrNowSel() == 0) {
+									GetGunPtrNow()->SetGunAnime(GunAnimeID::EmergencyReady);
+									this->m_GunPtrControl.GunChangeNext(true);
+								}
+								else {
+									IsEmergencyReload = true;
+								}
 							}
 							else {
 								IsEmergencyReload = true;
@@ -1060,6 +1068,12 @@ namespace FPS_n2 {
 				auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 				Vector3DX EndPos = GetEyePositionCache();
 				this->m_CanLookTarget = BackGroundParts->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0;
+				if (this->m_CanLookTarget) {
+					this->m_CanLookTargetTimer = std::max(this->m_CanLookTargetTimer + DXLib_refParts->GetDeltaTime(), 0.f);
+				}
+				else {
+					this->m_CanLookTargetTimer = 0.f;
+				}
 				this->m_Length = (GetEyePositionCache() - ViewChara->GetEyePositionCache()).magnitude();
 			}
 			//コンカッション

@@ -23,18 +23,34 @@ namespace FPS_n2 {
 			return false;
 		}
 		void HelicopterObj::SetAction(HelicopterMove Move) noexcept {
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+
 			m_HelicopterMove = Move;
 			m_Timer = 0.0f;
 			switch (this->m_HelicopterMove) {
 			case HelicopterMove::Random:
 				m_PrevPos = m_NowPos;
-				m_TargetPos = Vector3DX::vget(GetRandf(16.f), 0.0f, GetRandf(16.f)) * Scale3DRate;
+				while (true) {
+					m_TargetPos = Vector3DX::vget(GetRandf(16.f), 0.0f, GetRandf(16.f)) * Scale3DRate;
+					if (m_MyPlayerID == -2) {
+						if (!PlayerMngr->GetHelicopter(1)) { break; }
+						Vector3DX Vec = PlayerMngr->GetHelicopter(1)->GetMove().GetPos() - m_TargetPos; Vec.y = 0.f;
+						if (Vec.magnitude() > (10.f * Scale3DRate)) {
+							break;
+						}
+					}
+					else {
+						Vector3DX Vec = PlayerMngr->GetHelicopter(0)->GetMove().GetPos() - m_TargetPos; Vec.y = 0.f;
+						if (Vec.magnitude() > (10.f * Scale3DRate)) {
+							break;
+						}
+					}
+				}
 				break;
 			case HelicopterMove::Rappelling:
 				m_PrevPos = m_NowPos;
 				{
 					auto* BackGroundParts = BackGround::BackGroundControl::Instance();
-					auto* PlayerMngr = Player::PlayerManager::Instance();
 					auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 					while (true) {
 						m_TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
@@ -58,6 +74,12 @@ namespace FPS_n2 {
 			auto Vec = (m_TargetPos - m_PrevPos);
 			if (Vec.magnitude() > 0.0f) {
 				m_YradRT = rad2deg(std::atan2(-Vec.x, -Vec.z));
+				if ((m_YradRT - m_Yrad) > deg2rad(180)) {
+					m_YradRT -= deg2rad(360);
+				}
+				else if ((m_YradRT - m_Yrad) < -deg2rad(180)) {
+					m_YradRT += deg2rad(360);
+				}
 			}
 		}
 		void HelicopterObj::FirstUpdate(void) noexcept {
@@ -75,14 +97,23 @@ namespace FPS_n2 {
 			SetObj().UpdateAnimAll();
 
 			{
-				auto& chara = PlayerMngr->GetPlayer(0)->GetChara();
+				auto& chara = PlayerMngr->GetPlayer(m_TargetPlayerID)->GetChara();
 
 				Vector3DX Vec = Matrix3x3DX::Vtrans((chara->GetFrameWorldMat(Charas::CharaFrame::Upper).pos() - SetObj().GetFramePosition(m_GunRot.GetFrameID())).normalized(), GetMove().GetMat().inverse());
 
-				float YVec = std::clamp(std::atan2f(-Vec.x, -Vec.z), deg2rad(-90), deg2rad(90));
-				float XVec = std::clamp(std::atan2f(Vec.y, std::hypotf(Vec.x, Vec.z)), deg2rad(-90), deg2rad(0));
+				float YVec = 0.f;
+				float XVec = 0.f;
 
-				this->m_CanShot = (deg2rad(-90) < YVec && YVec < deg2rad(90)) && (deg2rad(-90) < XVec && XVec < deg2rad(0));
+				if (m_MyPlayerID == -2) {
+					YVec = std::clamp(std::atan2f(-Vec.x, -Vec.z), deg2rad(-90), deg2rad(90));
+					XVec = std::clamp(std::atan2f(Vec.y, std::hypotf(Vec.x, Vec.z)), deg2rad(-50), deg2rad(0));
+					this->m_CanShot = (deg2rad(-90) < YVec && YVec < deg2rad(90)) && (deg2rad(-50) < XVec && XVec < deg2rad(0));
+				}
+				else {
+					YVec = std::clamp(std::atan2f(-Vec.x, -Vec.z), deg2rad(30), deg2rad(150));
+					XVec = std::clamp(std::atan2f(Vec.y, std::hypotf(Vec.x, Vec.z)), deg2rad(-70), deg2rad(0));
+					this->m_CanShot = (deg2rad(30) < YVec && YVec < deg2rad(150)) && (deg2rad(-70) < XVec && XVec < deg2rad(0));
+				}
 				if (this->m_HelicopterMove != HelicopterMove::Intercept) {
 					XVec = 0.0f;
 					YVec = 0.0f;
@@ -132,26 +163,28 @@ namespace FPS_n2 {
 			else {
 				this->m_RocketReloadTimer = 5.0f;
 			}
-			if (this->m_RocketShotTimer == 0.0f) {
-				if (this->m_CanShot && (this->m_RocketGunAmmo > 0) && (this->m_HelicopterMove == HelicopterMove::Intercept)) {
-					this->m_RocketShotTimer = 0.15f;
-					Vector3DX MuzzlePos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>((m_RocketGunAmmo % 2 == 0) ? HeliFrame::rocket1 : HeliFrame::rocket2))).pos();
-					Vector3DX MuzzleVec = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>((m_RocketGunAmmo % 2 == 0) ? HeliFrame::rocket1 : HeliFrame::rocket2))).zvec2();
-					MuzzlePos += MuzzleVec * (1.0f * Scale3DRate);
+			if (m_MyPlayerID == -2) {
+				if (this->m_RocketShotTimer == 0.0f) {
+					if (this->m_CanShot && (this->m_RocketGunAmmo > 0) && (this->m_HelicopterMove == HelicopterMove::Intercept)) {
+						this->m_RocketShotTimer = 0.15f;
+						Vector3DX MuzzlePos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>((m_RocketGunAmmo % 2 == 0) ? HeliFrame::rocket1 : HeliFrame::rocket2))).pos();
+						Vector3DX MuzzleVec = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>((m_RocketGunAmmo % 2 == 0) ? HeliFrame::rocket1 : HeliFrame::rocket2))).zvec2();
+						MuzzlePos += MuzzleVec * (1.0f * Scale3DRate);
 
-					auto& AmmoData = Objects::AmmoDataManager::Instance()->Get(this->m_RocketSpecID);
+						auto& AmmoData = Objects::AmmoDataManager::Instance()->Get(this->m_RocketSpecID);
 
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::rolling_rocket))->Play3D(GetMove().GetPos(), 100.0f * Scale3DRate);													//サウンド
-					auto* OptionParts = OptionManager::Instance();
-					if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
-						EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, 0.1f * Scale3DRate, 2.0f);	//銃発砲エフェクトのセット
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::rolling_rocket))->Play3D(GetMove().GetPos(), 100.0f * Scale3DRate);													//サウンド
+						auto* OptionParts = OptionManager::Instance();
+						if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
+							EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzlePos, MuzzleVec, 0.1f * Scale3DRate, 2.0f);	//銃発砲エフェクトのセット
+						}
+						Objects::AmmoPool::Instance()->Put(&AmmoData, MuzzlePos, MuzzleVec, this->m_MyPlayerID);
+						--this->m_RocketGunAmmo;
 					}
-					Objects::AmmoPool::Instance()->Put(&AmmoData, MuzzlePos, MuzzleVec, this->m_MyPlayerID);
-					--this->m_RocketGunAmmo;
 				}
-			}
-			else {
-				this->m_RocketShotTimer = std::max(this->m_RocketShotTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
+				else {
+					this->m_RocketShotTimer = std::max(this->m_RocketShotTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
+				}
 			}
 
 			m_Timer += DXLib_refParts->GetDeltaTime();
@@ -159,20 +192,38 @@ namespace FPS_n2 {
 			switch (this->m_HelicopterMove) {
 			case HelicopterMove::Random:
 				if (this->m_IsHit) {
-					SetAction(HelicopterMove::Intercept);
+					if (m_MyPlayerID == -2) {
+						SetAction(HelicopterMove::Intercept);
+					}
+					else {
+						this->m_IsHit = false;
+					}
 				}
 				else {
-					bool IsDeadAll = true;
-					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-						if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
-						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
-						if (chara->IsAlive()) {
-							IsDeadAll = false;
-							break;
+					if (m_MyPlayerID == -2) {
+						bool IsDeadAll = true;
+						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+							if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
+							auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+							if (chara->IsAlive()) {
+								IsDeadAll = false;
+								break;
+							}
+						}
+						if (IsDeadAll) {
+							SetAction(HelicopterMove::Rappelling);
 						}
 					}
-					if (IsDeadAll) {
-						SetAction(HelicopterMove::Rappelling);
+					else {
+						for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+							if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
+							auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
+							if (!chara->IsAlive()) { continue; }
+							if (chara->GetCanLookByPlayerTimer() < 5.f) { continue; }
+							m_TargetPlayerID = static_cast<PlayerID>(loop);
+							SetAction(HelicopterMove::Intercept);
+							break;
+						}
 					}
 				}
 				if (m_Timer > 10.0f) {
@@ -221,10 +272,24 @@ namespace FPS_n2 {
 				break;
 			case HelicopterMove::Intercept:
 				if (m_Timer > 8.0f) {
-					auto& chara = PlayerMngr->GetPlayer(0)->GetChara();
+					auto& chara = PlayerMngr->GetPlayer(m_TargetPlayerID)->GetChara();
 					Vector3DX Vec = (chara->GetFrameWorldMat(Charas::CharaFrame::Upper).pos() - SetObj().GetFramePosition(m_GunRot.GetFrameID())).normalized();
 					if (Vec.magnitude() > 0.0f) {
 						m_YradRT = rad2deg(std::atan2(-Vec.x, -Vec.z));
+						if (!(m_MyPlayerID == -2)) {
+							m_YradRT += -90;
+						}
+						if ((m_YradRT - m_Yrad) > deg2rad(180)) {
+							m_YradRT -= deg2rad(360);
+						}
+						else if ((m_YradRT - m_Yrad) < -deg2rad(180)) {
+							m_YradRT += deg2rad(360);
+						}
+
+					}
+					if (!chara->IsAlive()) {
+						SetAction(HelicopterMove::Random);
+						this->m_IsHit = false;
 					}
 				}
 				if (m_Timer > 30.0f) {

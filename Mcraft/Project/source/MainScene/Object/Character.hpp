@@ -41,6 +41,7 @@ namespace FPS_n2 {
 			PlayerID											m_MyID{ 0 };
 			CharaTypeID											m_CharaType{};
 			bool												m_CanLookTarget{ true };
+			float												m_CanLookTargetTimer{ 0.f };
 			float												m_Length{};
 			bool												m_ConcussionSwitch{};
 			float												m_Concussion{ 0.0f };
@@ -89,6 +90,7 @@ namespace FPS_n2 {
 			const auto		GetBottomTurnAnimSelect(void) const noexcept { return this->m_IsSquat ? CharaAnimeID::Bottom_Squat_Turn : CharaAnimeID::Bottom_Stand_Turn; }
 		public://プレイヤーキャラから見た際の情報
 			const auto&		GetCanLookByPlayer(void) const noexcept { return this->m_CanLookTarget; }
+			const auto&		GetCanLookByPlayerTimer(void) const noexcept { return this->m_CanLookTargetTimer; }
 			const auto&		GetLengthToPlayer(void) const noexcept { return this->m_Length; }
 			const auto&		GetIsActiveCameraPosToPlayer(void) const noexcept { return this->m_IsActiveCameraPos; }
 			const auto&		GetCameraPosToPlayer(void) const noexcept { return this->m_CameraPos; }

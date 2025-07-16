@@ -31,7 +31,10 @@ namespace FPS_n2 {
 		};
 
 		class HelicopterObj : public BaseObject {
-			static const PlayerID								m_MyPlayerID{ -2 };//車両はとりあえず-1
+			PlayerID								m_MyPlayerID{ -2 };//車両はとりあえず-1
+
+
+			PlayerID								m_TargetPlayerID{ 0 };
 
 			Vector3DX m_TargetPos{};
 			Vector3DX m_PrevPos{};
@@ -115,6 +118,8 @@ namespace FPS_n2 {
 			const auto& GetDamageEvent(void) const noexcept { return this->m_Damage; }
 			void			SetDamageEventReset(void) noexcept { this->m_Damage.Reset(); }
 			void			PopDamageEvent(std::vector<DamageEvent>* pRet) noexcept { this->m_Damage.Pop(pRet); }
+
+			void			SetPlayerID(PlayerID ID = -2) noexcept { this->m_MyPlayerID = ID; }
 		public:
 			void				Init_Sub(void) noexcept override {
 				m_GunRot.Set(GetFrame(static_cast<int>(HeliFrame::GunRot)), GetObj());
@@ -128,7 +133,7 @@ namespace FPS_n2 {
 				m_PosR = Vector3DX::vget(0.0f, -20.0f, 0.0f) * Scale3DRate;
 				m_Yrad = 0.0f;
 				m_YradR = 0.0f;
-				m_NowPos = Vector3DX::vget(0.0f, 0.0f, 0.0f) * Scale3DRate;
+				m_TargetPos = Vector3DX::vget(GetRandf(16.f), 0.0f, GetRandf(16.f)) * 2.f * Scale3DRate;
 				SetAction(HelicopterMove::Random);
 				this->m_ShotTimer = 0.0f;
 				this->m_ReloadTimer = 2.0f;

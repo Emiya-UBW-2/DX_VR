@@ -343,6 +343,7 @@ namespace FPS_n2 {
 		class GunPtrControl {
 		private:
 		private:
+			bool												m_IsChange{ false };
 			int													m_GunSelect{ 0 };
 			int													m_ReserveGunSelect{ 0 };
 			std::array<std::shared_ptr<Guns::GunObj>, 3>		m_GunPtr{};			//銃
@@ -373,8 +374,9 @@ namespace FPS_n2 {
 					else if (Next < 0) {
 						Next += GetGunNum();
 					}
-					if (GetGunPtr(Next)) {
+					if (GetGunPtr(Next) && (GetGunPtr(Next)->GetModifySlot()->GetMyData()->GetIsThrowWeapon() && GetGunPtr(Next)->GetAmmoNumTotal() != 0)) {
 						this->m_ReserveGunSelect = Next;
+						this->m_IsChange = true;
 						break;
 					}
 				}
@@ -387,6 +389,7 @@ namespace FPS_n2 {
 
 					if (isThrow ? pGun->GetModifySlot()->GetMyData()->GetIsThrowWeapon() : !pGun->GetModifySlot()->GetMyData()->GetIsThrowWeapon()) {
 						this->m_ReserveGunSelect = loop;
+						this->m_IsChange = true;
 						break;
 					}
 				}
@@ -396,15 +399,23 @@ namespace FPS_n2 {
 				if (this->m_GunSelect != this->m_ReserveGunSelect) { return; }
 				if (!IsOn) {
 					this->m_ReserveGunSelect = InvalidID;
+					this->m_IsChange = true;
 				}
 				else {
 					this->m_ReserveGunSelect = 0;
+					this->m_IsChange = true;
 				}
 			}
 
-			const auto			IsChangeGunSelect(void) const noexcept { return GetNowGunSelect() != this->m_ReserveGunSelect; }
-			void				InvokeReserveGunSelect(void) noexcept { this->m_GunSelect = this->m_ReserveGunSelect; }
-			void				SelectGun(int ID) noexcept { this->m_GunSelect = this->m_ReserveGunSelect = ID; }
+			const auto			IsChangeGunSelect(void) const noexcept { return this->m_IsChange; }
+			void				InvokeReserveGunSelect(void) noexcept {
+				this->m_GunSelect = this->m_ReserveGunSelect;
+				this->m_IsChange = false;
+			}
+			void				SelectGun(int ID) noexcept {
+				this->m_GunSelect = this->m_ReserveGunSelect = ID;
+				this->m_IsChange = false;
+			}
 			void				SetGunPtr(int ID, const std::shared_ptr<Guns::GunObj>& pGunPtr0) noexcept { this->m_GunPtr[ID] = pGunPtr0; }
 		public:
 			GunPtrControl(void) noexcept {}

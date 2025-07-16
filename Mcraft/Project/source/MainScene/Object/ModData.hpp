@@ -52,7 +52,7 @@ namespace FPS_n2 {
 			bool							m_CanSwitch{ true };
 			bool							m_isHoldOpen{ true };
 
-			bool							m_IsJungle{ true };
+			bool							m_IsJungle{ false };
 
 			int								m_Weight{ 0 };
 
