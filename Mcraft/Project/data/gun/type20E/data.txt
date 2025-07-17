@@ -27,6 +27,7 @@ Slot0Item=STANAG_30
 
 Slot1Type=Sight
 Slot1IsNeed=true
+Slot1Item=iron20
 Slot1Item=APCOMP2
 Slot1Item=ACOG
 
