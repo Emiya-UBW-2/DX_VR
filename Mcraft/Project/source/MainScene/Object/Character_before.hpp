@@ -374,7 +374,13 @@ namespace FPS_n2 {
 					else if (Next < 0) {
 						Next += GetGunNum();
 					}
-					if (GetGunPtr(Next) && (GetGunPtr(Next)->GetModifySlot()->GetMyData()->GetIsThrowWeapon() && GetGunPtr(Next)->GetAmmoNumTotal() != 0)) {
+					if (
+						GetGunPtr(Next) &&
+						(
+							!GetGunPtr(Next)->GetModifySlot()->GetMyData()->GetIsThrowWeapon() ||
+							(GetGunPtr(Next)->GetModifySlot()->GetMyData()->GetIsThrowWeapon() && GetGunPtr(Next)->GetAmmoNumTotal() != 0)
+						)
+						) {
 						this->m_ReserveGunSelect = Next;
 						this->m_IsChange = true;
 						break;

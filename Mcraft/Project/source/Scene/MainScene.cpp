@@ -232,7 +232,17 @@ namespace FPS_n2 {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				Vector3DX TargetPos;
 				if (loop == PlayerMngr->GetWatchPlayerID()) {
-					TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
+					while (true) {
+						TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
+						Vector3DX Vec = TargetPos; Vec.y = 0.f;
+						if (Vec.sqrMagnitude() <= (5.f * Scale3DRate) * (5.f * Scale3DRate)) {
+							Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
+							if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+								TargetPos = EndPos;
+							}
+							break;
+						}
+					}
 				}
 				else {
 					while (true) {

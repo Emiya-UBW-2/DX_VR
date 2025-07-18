@@ -684,7 +684,9 @@ namespace FPS_n2 {
 
 						DrawCircle(RetX, RetY, 1.f * (1.f - IsDownUIPer), IsDrawAimUIPer);
 					}
-					if ((1.f - IsDrawAimUIPer) > 0.01f) {
+					if ((1.f - IsDrawAimUIPer) > 0.01f && 
+						(ViewChara->GetGunPtrNow() && (ViewChara->GetGunPtrNow()->GetGunAnime() != Charas::GunAnimeID::Watch))
+						) {
 						int RetX = 1920 / 2;
 						int RetY = 1080 / 2;
 						DrawCircle(RetX, RetY, 2.f * IsDownUIPer, 1.f - IsDrawAimUIPer);

@@ -1095,7 +1095,7 @@ namespace FPS_n2 {
 						//外壁
 						if ((-EdgeP <= xpos && xpos <= Size * Rate + EdgeP - 1) && (-EdgeP <= zpos && zpos <= Size * Rate + EdgeP - 1)) {
 							if ((xpos == -EdgeP || xpos == Size * Rate + EdgeP - 1) || (zpos == -EdgeP || zpos == Size * Rate + EdgeP - 1)) {
-								for (int ypos = 0; ypos <= GetReferenceCells().All / 8; ++ypos) {
+								for (int ypos = 0; ypos <= GetReferenceCells().All / 8 - 10; ++ypos) {
 									SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos, ypos, GetReferenceCells().Half + zPos).Cell = 1;
 								}
 							}
