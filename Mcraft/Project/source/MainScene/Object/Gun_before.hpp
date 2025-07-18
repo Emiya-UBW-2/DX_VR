@@ -8,6 +8,7 @@ namespace FPS_n2 {
 	namespace Guns {
 		//
 		class ArmMovePer {
+		public:
 			float												m_ArmPer{ 0.0f };
 			bool												m_Armon{ false };
 		public:

@@ -136,6 +136,12 @@ namespace FPS_n2 {
 			else if (LEFT == "Weight") {
 				this->m_Weight = std::stoi(RIGHT);
 			}
+			else if (LEFT == "ReloadSpeedAdd") {
+				this->m_ReloadSpeedAdd = std::stof(RIGHT);
+			}
+			else if (LEFT == "AimSpeedAdd") {
+				this->m_AimSpeedAdd = std::stof(RIGHT);
+			}
 			else {
 				for (int loop = 0; loop < static_cast<int>(Charas::GunAnimeID::Max); ++loop) {
 					if (LEFT == Charas::GunAnimeIDName[loop]) {

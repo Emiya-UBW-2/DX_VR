@@ -56,6 +56,8 @@ namespace FPS_n2 {
 
 			int								m_Weight{ 0 };
 
+			float							m_ReloadSpeedAdd{ 0.f };
+			float							m_AimSpeedAdd{ 0.f };
 
 			std::array<int, static_cast<int>(Charas::GunAnimeID::Max)>	m_AnimSelect{ InvalidID };
 
@@ -101,6 +103,9 @@ namespace FPS_n2 {
 			const auto& GetIconGraph(void) const noexcept { return this->m_Icon; }
 
 			const auto& GetWeight_gram(void) const noexcept { return this->m_Weight; }
+
+			const auto& GetReloadSpeedAdd(void) const noexcept { return this->m_ReloadSpeedAdd; }
+			const auto& GetAimSpeedAdd(void) const noexcept { return this->m_AimSpeedAdd; }
 			//銃声
 			const auto& GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
 			//スコープ

@@ -14,8 +14,11 @@ namespace FPS_n2 {
 				}
 				this->m_GunAnimePer[loop].Init(IsActiveGunAnim);
 			}
+			this->m_AimSpeedBase = 0.f;
 		}
 		void				GunObj::UpdateGunAnimePer(bool IsADS) noexcept {
+			auto* DXLib_refParts = DXLib_ref::Instance();
+
 			for (int loop = 0; loop < static_cast<int>(Charas::GunAnimeID::ChoiceOnceMax); ++loop) {
 				bool IsActiveGunAnim = GetGunAnime() == static_cast<Charas::GunAnimeID>(loop);
 				if (static_cast<Charas::GunAnimeID>(loop) == Charas::GunAnimeID::ADS) {
@@ -33,7 +36,14 @@ namespace FPS_n2 {
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.0f, 0.0f, 0.87f, 0.87f);
 					break;
 				case Charas::GunAnimeID::ADS:
-					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.0f, 0.2f, 0.9f, 0.9f);
+				{
+					if (IsActiveGunAnim) {
+						this->m_AimSpeedBase = std::clamp(this->m_AimSpeedBase + DXLib_refParts->GetDeltaTime() / 0.3f * GetAimSpeed(), 0.f, 1.f);
+					}else{
+						this->m_AimSpeedBase = std::clamp(this->m_AimSpeedBase - DXLib_refParts->GetDeltaTime() / 0.3f * GetAimSpeed(), 0.f, 1.f);
+					}
+					Easing(&this->m_GunAnimePer[loop].m_ArmPer, this->m_AimSpeedBase, 0.8f, EasingType::OutExpo);
+				}
 					break;
 				case Charas::GunAnimeID::Cocking:
 					this->m_GunAnimePer[loop].Update(IsActiveGunAnim, 0.0f, 0.0f, 0.1f, 0.9f);
@@ -774,6 +784,13 @@ namespace FPS_n2 {
 				speed = 1.0f;
 			}
 			this->m_GunAnimeSpeed[static_cast<int>(Charas::GunAnimeID::Shot)] = static_cast<float>(GetModifySlot()->GetMyData()->GetShotRate()) / 60.0f / 10.0f;
+
+			this->m_GunAnimeSpeed[static_cast<int>(Charas::GunAnimeID::ReloadStart_Empty)] = GetReloadSpeed();
+			this->m_GunAnimeSpeed[static_cast<int>(Charas::GunAnimeID::ReloadStart)] = GetReloadSpeed();
+			this->m_GunAnimeSpeed[static_cast<int>(Charas::GunAnimeID::ReloadWait)] = GetReloadSpeed();
+			this->m_GunAnimeSpeed[static_cast<int>(Charas::GunAnimeID::Reload)] = GetReloadSpeed();
+			this->m_GunAnimeSpeed[static_cast<int>(Charas::GunAnimeID::ReloadEnd)] = GetReloadSpeed();
+
 			auto BaseAnim = GetAnimDataNow(Charas::GunAnimeID::Aim);
 			SetGunMat(BaseAnim.GetRot(), BaseAnim.GetPos());
 			this->m_BaseMuzzle = GetPartsFrameMatParent(GunFrame::Muzzle);
