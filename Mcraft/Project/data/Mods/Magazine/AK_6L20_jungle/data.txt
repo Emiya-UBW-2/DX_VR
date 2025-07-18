@@ -5,4 +5,6 @@ useammo0=545x39
 
 IsJungle=True
 
+Weight=1000
+
 end

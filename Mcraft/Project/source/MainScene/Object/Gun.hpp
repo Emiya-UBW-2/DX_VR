@@ -81,7 +81,8 @@ namespace FPS_n2 {
 			std::vector<int>													m_IsMeshDraw{};
 
 			bool												m_JungleFast{ true };
-
+		private://キャッシュ
+			int													m_Weight_gram{ InvalidID };
 		public:
 			void						SetIsDrawMesh(int meshID, bool IsDraw) noexcept {
 				this->m_IsMeshDraw[meshID] = IsDraw ? TRUE : FALSE;
@@ -234,7 +235,20 @@ namespace FPS_n2 {
 			const auto			GetAmmoAll(void) const noexcept { return this->m_MagazinePtr ? (*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoAll() : 0; }
 			const auto			GetReloadType(void) const noexcept { return GetModifySlot()->GetMyData()->GetReloadType(); }
 
-			const auto			GetWeight_gram(void) const noexcept { return GetModifySlot()->GetMyData()->GetWeight_gram(); }
+			const auto			GetWeight_gram(void) noexcept {
+				if (m_Weight_gram <= 0) {
+					return m_Weight_gram;
+				}
+				int gram = 0;
+				std::vector<const Guns::SharedGunParts*> PartsList;
+				GetModifySlot()->GetAnyByChild([&](const Guns::SharedGunParts& ptr) { if (ptr) { PartsList.emplace_back(&ptr); } });
+				for (auto& g : PartsList) {
+					gram += (*g)->GetModifySlot()->GetMyData()->GetWeight_gram();
+				}
+				gram += GetModifySlot()->GetMyData()->GetWeight_gram();
+				m_Weight_gram = gram;
+				return gram;
+			}
 
 			const auto			GetRecoilPower(void) const noexcept {
 				if (this->m_UpperPtr && (*this->m_UpperPtr)->GetModifySlot()->GetMyData()->GetIsRecoilPower()) {

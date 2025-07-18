@@ -3,4 +3,6 @@ Name=HasGrenade
 capacity=3
 useammo0=FragRGD
 
+Weight=0
+
 end

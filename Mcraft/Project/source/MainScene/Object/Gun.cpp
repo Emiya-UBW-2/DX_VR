@@ -787,6 +787,7 @@ namespace FPS_n2 {
 			for (auto& isdraw : this->m_IsMeshDraw) {
 				isdraw = true;
 			}
+			m_Weight_gram = InvalidID;
 		}
 		void				GunObj::FirstUpdate(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();

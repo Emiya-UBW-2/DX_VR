@@ -3,4 +3,6 @@ Name=MP443 18Round Magazine
 capacity=18
 useammo0=9x19
 
+Weight=200
+
 end
