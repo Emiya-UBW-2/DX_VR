@@ -82,6 +82,7 @@ namespace FPS_n2 {
 			std::vector<int>													m_IsMeshDraw{};
 
 			bool												m_JungleFast{ true };
+			float												m_IsActiveAutoAimTimer{ 0.f };
 		public:
 			void						SetIsDrawMesh(int meshID, bool IsDraw) noexcept {
 				this->m_IsMeshDraw[meshID] = IsDraw ? TRUE : FALSE;
@@ -103,6 +104,7 @@ namespace FPS_n2 {
 			Charas::GunAnimNow									m_AnimNowCache{};
 			float												m_ReloadSpeed{ -1.f };
 			float												m_AimSpeed{ -1.f };
+			float												m_AutoAimSpeed{ -1.f };
 		private:
 			const auto			GetGunSoundSet(EnumGunSound Select) const noexcept { return static_cast<int>(GunSoundSets[GetModifySlot()->GetMyData()->GetSoundSelect()].Sound[static_cast<int>(Select)]); }
 			void				PlayGunSound(EnumGunSound Select) noexcept {
@@ -256,30 +258,47 @@ namespace FPS_n2 {
 				if (m_ReloadSpeed > 0) {
 					return m_ReloadSpeed;
 				}
-				float gram = 1.f;
+				float speed = 1.f;
 				std::vector<const Guns::SharedGunParts*> PartsList;
 				GetModifySlot()->GetAnyByChild([&](const Guns::SharedGunParts& ptr) { if (ptr) { PartsList.emplace_back(&ptr); } });
 				for (auto& g : PartsList) {
-					gram += (*g)->GetModifySlot()->GetMyData()->GetReloadSpeedAdd();
+					speed += (*g)->GetModifySlot()->GetMyData()->GetReloadSpeedAdd();
 				}
-				gram += GetModifySlot()->GetMyData()->GetReloadSpeedAdd();
-				m_ReloadSpeed = gram;
-				return gram;
+				speed += GetModifySlot()->GetMyData()->GetReloadSpeedAdd();
+				speed = std::max(speed, 0.1f);
+				m_ReloadSpeed = speed;
+				return speed;
 			}
 
 			const auto			GetAimSpeed(void) noexcept {
 				if (m_AimSpeed > 0) {
 					return m_AimSpeed;
 				}
-				float gram = 1.f;
+				float speed = 1.f;
 				std::vector<const Guns::SharedGunParts*> PartsList;
 				GetModifySlot()->GetAnyByChild([&](const Guns::SharedGunParts& ptr) { if (ptr) { PartsList.emplace_back(&ptr); } });
 				for (auto& g : PartsList) {
-					gram += (*g)->GetModifySlot()->GetMyData()->GetAimSpeedAdd();
+					speed += (*g)->GetModifySlot()->GetMyData()->GetAimSpeedAdd();
 				}
-				gram += GetModifySlot()->GetMyData()->GetAimSpeedAdd();
-				m_AimSpeed = gram;
-				return gram;
+				speed += GetModifySlot()->GetMyData()->GetAimSpeedAdd();
+				speed = std::max(speed, 0.1f);
+				m_AimSpeed = speed;
+				return speed;
+			}
+
+			const auto			GetAutoAimSpeed(void) noexcept {
+				if (m_AutoAimSpeed > 0) {
+					return m_AutoAimSpeed;
+				}
+				float speed = 1.f;
+				std::vector<const Guns::SharedGunParts*> PartsList;
+				GetModifySlot()->GetAnyByChild([&](const Guns::SharedGunParts& ptr) { if (ptr) { PartsList.emplace_back(&ptr); } });
+				for (auto& g : PartsList) {
+					speed += (*g)->GetModifySlot()->GetMyData()->GetAutoAimSpeedAdd();
+				}
+				speed += GetModifySlot()->GetMyData()->GetAutoAimSpeedAdd();
+				m_AutoAimSpeed = speed;
+				return speed;
 			}
 
 			const auto			GetRecoilPower(void) const noexcept {

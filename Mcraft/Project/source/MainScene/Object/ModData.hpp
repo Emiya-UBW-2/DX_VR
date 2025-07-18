@@ -58,6 +58,7 @@ namespace FPS_n2 {
 
 			float							m_ReloadSpeedAdd{ 0.f };
 			float							m_AimSpeedAdd{ 0.f };
+			float							m_AutoAimSpeedAdd{ 0.f };
 
 			std::array<int, static_cast<int>(Charas::GunAnimeID::Max)>	m_AnimSelect{ InvalidID };
 
@@ -106,6 +107,7 @@ namespace FPS_n2 {
 
 			const auto& GetReloadSpeedAdd(void) const noexcept { return this->m_ReloadSpeedAdd; }
 			const auto& GetAimSpeedAdd(void) const noexcept { return this->m_AimSpeedAdd; }
+			const auto& GetAutoAimSpeedAdd(void) const noexcept { return this->m_AutoAimSpeedAdd; }
 			//銃声
 			const auto& GetGunShootSound(void) const noexcept { return this->m_GunShootSound; }
 			//スコープ

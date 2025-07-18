@@ -339,7 +339,13 @@ namespace FPS_n2 {
 				AnimPos = HeadPos + Matrix3x3DX::Vtrans(AnimPos, CharaRotationCache);
 				//オートエイム
 				if (IsSelectGun) {
-					this->m_AutoAimControl.Update(IsActiveAutoAim, GetMyUserPlayerID(), GetPartsFrameMatParent(GunFrame::Eyepos).pos(), GetMove().GetMat().zvec2(), GetAutoAimRadian());
+					if (IsActiveAutoAim) {
+						m_IsActiveAutoAimTimer = std::clamp(m_IsActiveAutoAimTimer + DXLib_refParts->GetDeltaTime() / 0.6f * GetAutoAimSpeed(), 0.f, 1.f);
+					}
+					else {
+						m_IsActiveAutoAimTimer = 0.f;
+					}
+					this->m_AutoAimControl.Update(IsActiveAutoAim && (m_IsActiveAutoAimTimer >= 1.f), GetMyUserPlayerID(), GetPartsFrameMatParent(GunFrame::Eyepos).pos(), GetMove().GetMat().zvec2(), GetAutoAimRadian());
 					this->m_AutoAimControl.CalcAutoAimMat(&AnimRot);
 				}
 				Easing(&m_GunShotZrandR, GetShotSwitch() ? GetRandf(90.0f) : 0.0f, 0.8f, EasingType::OutExpo);

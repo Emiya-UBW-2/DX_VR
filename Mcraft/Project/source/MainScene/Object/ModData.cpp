@@ -142,6 +142,9 @@ namespace FPS_n2 {
 			else if (LEFT == "AimSpeedAdd") {
 				this->m_AimSpeedAdd = std::stof(RIGHT);
 			}
+			else if (LEFT == "AutoAimSpeedAdd") {
+				this->m_AutoAimSpeedAdd = std::stof(RIGHT);
+				}
 			else {
 				for (int loop = 0; loop < static_cast<int>(Charas::GunAnimeID::Max); ++loop) {
 					if (LEFT == Charas::GunAnimeIDName[loop]) {
