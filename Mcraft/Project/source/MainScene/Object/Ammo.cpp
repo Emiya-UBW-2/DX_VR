@@ -9,7 +9,7 @@ const FPS_n2::Objects::AmmoLinePool* SingletonBase<FPS_n2::Objects::AmmoLinePool
 
 namespace FPS_n2 {
 	namespace Objects {
-		void		AmmoObj::Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos, const Vector3DX& vec, int myID) noexcept {
+		void		AmmoObj::Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos, const Vector3DX& vec, PlayerID myID) noexcept {
 			this->m_RicochetCnt = 0;
 			this->m_pos = pos;
 			this->m_repos = pos;
@@ -142,14 +142,14 @@ namespace FPS_n2 {
 				}
 			}
 			//ヘリとの判定
-			if (this->m_ShootCheraID != -1 && PlayerMngr->GetHelicopter(0)->CheckAmmoHit(repos_tmp, &pos_tmp)) {
+			if (this->m_ShootCheraID != -1 && PlayerMngr->GetHelicopter(0)->CheckAmmoHit(this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
 				SetActive(false);
 				is_HitAll = true;
 				if (this->m_ShootCheraID == PlayerMngr->GetWatchPlayerID()) {//撃ったキャラ
 					HitMarkerPool::Instance()->AddMarker(pos_tmp, 0, (*this->m_AmmoData)->GetDamage());
 				}
 			}
-			if (this->m_ShootCheraID != -1 && PlayerMngr->GetHelicopter(1)->CheckAmmoHit(repos_tmp, &pos_tmp)) {
+			if (this->m_ShootCheraID != -1 && PlayerMngr->GetHelicopter(1)->CheckAmmoHit(this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
 				SetActive(false);
 				is_HitAll = true;
 				if (this->m_ShootCheraID == PlayerMngr->GetWatchPlayerID()) {//撃ったキャラ
@@ -158,7 +158,7 @@ namespace FPS_n2 {
 			}
 			/*
 			//戦車との判定
-			if (this->m_ShootCheraID != -1 && PlayerMngr->GetVehicle()->CheckAmmoHit(repos_tmp, &pos_tmp)) {
+			if (this->m_ShootCheraID != -1 && PlayerMngr->GetVehicle()->CheckAmmoHit(this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
 				SetActive(false);
 				is_HitAll = true;
 			}

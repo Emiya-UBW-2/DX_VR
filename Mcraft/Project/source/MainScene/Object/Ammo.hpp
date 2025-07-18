@@ -11,7 +11,7 @@ namespace FPS_n2 {
 			const std::unique_ptr<AmmoData>*	m_AmmoData{ nullptr };
 			float			m_speed{ 0.0f };
 			float			m_penetration{ 0.0f };
-			int				m_ShootCheraID{ InvalidID };
+			PlayerID		m_ShootCheraID{ InvalidID };
 			float			m_yAdd{ 0.0f };
 			float			m_Timer{ 0.0f };
 
@@ -27,7 +27,7 @@ namespace FPS_n2 {
 			float			m_EffectTimer{ 0.0f };
 		public:
 			//接地
-			void			Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos, const Vector3DX& vec, int myID) noexcept;
+			void			Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos, const Vector3DX& vec, PlayerID myID) noexcept;
 			/*
 			//跳ね返された
 			const auto		PenetrationCheck(float pArmer, const Vector3DX& normal) const noexcept { return (this->m_penetration > (pArmer * (1.0f / std::abs(Vector3DX::Dot(this->m_vec.normalized(), normal))))); }
@@ -84,7 +84,7 @@ namespace FPS_n2 {
 				this->m_AmmoList.clear();
 			}
 		public:
-			void Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos, const Vector3DX& vec, int myID) noexcept {
+			void Put(const std::unique_ptr<AmmoData>* pAmmoData, const Vector3DX& pos, const Vector3DX& vec, PlayerID myID) noexcept {
 				for (auto& ammo : this->m_AmmoList) {
 					if (!ammo->IsActive()) {
 						ammo->Put(pAmmoData, pos, vec, myID);

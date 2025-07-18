@@ -107,7 +107,7 @@ namespace FPS_n2 {
 				++this->m_SpawnPoint;
 				return Answer;
 			}
-			const bool		CheckAmmoHit(const Vector3DX& StartPos, Vector3DX* EndPos) noexcept;
+			const bool		CheckAmmoHit(PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* EndPos) noexcept;
 		private:
 			void				SetAction(HelicopterMove Move) noexcept;
 		public:

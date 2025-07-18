@@ -4,7 +4,7 @@
 
 namespace FPS_n2 {
 	namespace Objects {
-		const bool HelicopterObj::CheckAmmoHit(const Vector3DX& StartPos, Vector3DX* EndPos) noexcept {
+		const bool HelicopterObj::CheckAmmoHit(PlayerID AttackID, const Vector3DX& StartPos, Vector3DX* EndPos) noexcept {
 			//auto* SE = SoundPool::Instance();
 			//とりあえず当たったかどうか探す
 			if (!RefreshCol(StartPos, *EndPos, 10.0f * Scale3DRate)) {
@@ -17,8 +17,10 @@ namespace FPS_n2 {
 				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
 					EffectSingleton::Instance()->SetOnce_Any(Effect::ef_gndsmoke, *EndPos, colres.Normal, 2.0f);
 				}
-				this->m_IsHit = true;
-				return true;
+				if (AttackID >= 0) {
+					this->m_IsHit = true;
+					return true;
+				}
 			}
 			return false;
 		}
