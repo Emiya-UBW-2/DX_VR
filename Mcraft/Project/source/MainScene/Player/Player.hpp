@@ -128,7 +128,8 @@ namespace FPS_n2 {
 			PlayerID									m_WatchPlayer{};
 	
 			std::shared_ptr<Objects::VehicleObj>		m_VehicleObj;
-			std::array<std::shared_ptr<Objects::HelicopterObj>,2>		m_HelicopterObj;
+			std::shared_ptr<Objects::HelicopterObj>		m_HelicopterObj;
+			std::shared_ptr<Objects::TeamHelicopterObj>	m_TeamHelicopterObj;
 			std::shared_ptr<Objects::ArmorObj>			m_ArmorObj;
 			std::shared_ptr<Objects::ArmorObj>			m_HelmetObj;
 		public:
@@ -154,8 +155,11 @@ namespace FPS_n2 {
 			void		SetVehicle(const std::shared_ptr<Objects::VehicleObj>& pObj) noexcept { this->m_VehicleObj = pObj; }
 			auto&		GetVehicle(void) noexcept { return this->m_VehicleObj; }
 
-			void		SetHelicopter(int ID, const std::shared_ptr<Objects::HelicopterObj>& pObj) noexcept { this->m_HelicopterObj.at(ID) = pObj; }
-			auto&		GetHelicopter(int ID) noexcept { return this->m_HelicopterObj.at(ID); }
+			void		SetHelicopter(const std::shared_ptr<Objects::HelicopterObj>& pObj) noexcept { this->m_HelicopterObj = pObj; }
+			auto&		GetHelicopter() noexcept { return this->m_HelicopterObj; }
+
+			void		SetTeamHelicopter(const std::shared_ptr<Objects::TeamHelicopterObj>& pObj) noexcept { this->m_TeamHelicopterObj = pObj; }
+			auto&		GetTeamHelicopter() noexcept { return this->m_TeamHelicopterObj; }
 
 			void		SetArmor(const std::shared_ptr<Objects::ArmorObj>& pObj) noexcept { this->m_ArmorObj = pObj; }
 			auto&		GetArmor(void) noexcept { return this->m_ArmorObj; }
@@ -174,9 +178,8 @@ namespace FPS_n2 {
 			}
 			void Dispose(void) noexcept {
 				m_VehicleObj.reset();
-				for (auto& h : m_HelicopterObj) {
-					h.reset();
-				}
+				m_HelicopterObj.reset();
+				m_TeamHelicopterObj.reset();
 				m_ArmorObj.reset();
 				m_HelmetObj.reset();
 				for (auto& player : this->m_Player) {

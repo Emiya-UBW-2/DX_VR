@@ -169,13 +169,11 @@ namespace FPS_n2 {
 					gun->SetupGun();
 				}
 			}
-			PlayerMngr->SetHelicopter(0, std::make_shared<Objects::HelicopterObj>());
-			ObjectManager::Instance()->InitObject(PlayerMngr->GetHelicopter(0), "data/model/hindD/");
-			PlayerMngr->GetHelicopter(0)->SetPlayerID(-2);
+			PlayerMngr->SetHelicopter(std::make_shared<Objects::HelicopterObj>());
+			ObjectManager::Instance()->InitObject(PlayerMngr->GetHelicopter(), "data/model/hindD/");
 
-			PlayerMngr->SetHelicopter(1, std::make_shared<Objects::HelicopterObj>());
-			ObjectManager::Instance()->InitObject(PlayerMngr->GetHelicopter(1), "data/model/UH60/");
-			PlayerMngr->GetHelicopter(1)->SetPlayerID(-3);
+			PlayerMngr->SetTeamHelicopter(std::make_shared<Objects::TeamHelicopterObj>());
+			ObjectManager::Instance()->InitObject(PlayerMngr->GetTeamHelicopter(), "data/model/UH60/");
 
 			//PlayerMngr->SetVehicle(std::make_shared<Objects::VehicleObj>());
 			//ObjectManager::Instance()->InitObject(PlayerMngr->GetVehicle(), "data/model/BMP3/");
@@ -544,13 +542,13 @@ namespace FPS_n2 {
 							//PlayerMngr->GetVehicle()->GetDamageEvent()//TODO
 							PlayerMngr->GetVehicle()->SetDamageEventReset();
 						}
-						if (PlayerMngr->GetHelicopter(0)) {
-							//PlayerMngr->GetHelicopter(0)->GetDamageEvent()//TODO
-							PlayerMngr->GetHelicopter(0)->SetDamageEventReset();
+						if (PlayerMngr->GetHelicopter()) {
+							//PlayerMngr->GetHelicopter()->GetDamageEvent()//TODO
+							PlayerMngr->GetHelicopter()->SetDamageEventReset();
 						}
-						if (PlayerMngr->GetHelicopter(1)) {
-							//PlayerMngr->GetHelicopter(1)->GetDamageEvent()//TODO
-							PlayerMngr->GetHelicopter(1)->SetDamageEventReset();
+						if (PlayerMngr->GetTeamHelicopter()) {
+							//PlayerMngr->GetTeamHelicopter()->GetDamageEvent()//TODO
+							PlayerMngr->GetTeamHelicopter()->SetDamageEventReset();
 						}
 					}
 					this->m_NetWorkController->Update(m_LocalSend);
@@ -592,8 +590,8 @@ namespace FPS_n2 {
 						chara->PopDamageEvent(&DamageEvents);
 					}
 					//PlayerMngr->GetVehicle()->PopDamageEvent(&DamageEvents);
-					PlayerMngr->GetHelicopter(0)->PopDamageEvent(&DamageEvents);
-					PlayerMngr->GetHelicopter(1)->PopDamageEvent(&DamageEvents);
+					PlayerMngr->GetHelicopter()->PopDamageEvent(&DamageEvents);
+					PlayerMngr->GetTeamHelicopter()->PopDamageEvent(&DamageEvents);
 				}
 				//ダメージイベント
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {

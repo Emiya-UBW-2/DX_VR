@@ -240,10 +240,10 @@ namespace FPS_n2 {
 					//PlayerMngr->GetVehicle()->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
 				else if (AttackID == -2) {
-					PlayerMngr->GetHelicopter(0)->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+					PlayerMngr->GetHelicopter()->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
 				else if (AttackID == -3) {
-					PlayerMngr->GetHelicopter(1)->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+					PlayerMngr->GetTeamHelicopter()->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
 				return true;
 			}
