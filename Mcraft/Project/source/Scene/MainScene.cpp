@@ -88,6 +88,7 @@ namespace FPS_n2 {
 
 			ObjectManager::Instance()->LoadModelBefore("data/model/PlateCarrler/");
 			ObjectManager::Instance()->LoadModelBefore("data/model/Helmet/");
+			ObjectManager::Instance()->LoadModelBefore("data/model/container/");
 		}
 		void			MainGameScene::LoadEnd_Sub(void) noexcept {
 			Objects::AmmoPool::Create();
@@ -183,6 +184,10 @@ namespace FPS_n2 {
 
 			PlayerMngr->SetHelmet(std::make_shared<Objects::ArmorObj>());
 			ObjectManager::Instance()->InitObject(PlayerMngr->GetHelmet(), "data/model/Helmet/");
+
+			//ItemContainerObj
+			PlayerMngr->SetItemContainerObj(std::make_shared<Objects::ItemContainerObj>());
+			ObjectManager::Instance()->InitObject(PlayerMngr->GetItemContainerObj(), "data/model/container/");
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
@@ -287,6 +292,40 @@ namespace FPS_n2 {
 					TargetPos,
 					Vector3DX::vget(GetRandf(1.f), 1.f, GetRandf(1.f)) * Scale3DRate * 0.01f
 				);
+			}
+
+			{
+				Vector3DX TargetPos = Vector3DX::zero();
+
+				TargetPos = Matrix3x3DX::Vtrans(Vector3DX::vget(0.f, 0.f, 16.f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
+
+				{
+					Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
+					if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+						TargetPos = EndPos- Vector3DX::up() * 0.5f * Scale3DRate;;
+					}
+				}
+				PlayerMngr->GetItemContainerObj()->Put(TargetPos, Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
+				//周りの壁を破壊する
+				//壁破壊
+				{
+					int								xput = 20;
+					int								yput = 20;
+					int								zput = 20;
+					int8_t							damage = 100;
+					auto Put = BackGroundParts->GetPoint(TargetPos);
+					for (int xp = -xput / 2; xp <= xput / 2; ++xp) {
+						for (int zp = -zput / 2; zp <= zput / 2; ++zp) {
+							for (int yp = -yput / 2; yp <= yput / 2; ++yp) {
+								BackGroundParts->DamageCell(Put.x + xp, Put.y + yp, Put.z + zp, damage);
+							}
+							for (int yp = -yput / 2; yp <= 0; ++yp) {
+								//BackGroundParts->SetBlick(Put.x + xp, Put.y + yp, Put.z + zp, 1);
+							}
+						}
+
+					}
+				}
 			}
 			//UI
 			this->m_UIclass.Set();

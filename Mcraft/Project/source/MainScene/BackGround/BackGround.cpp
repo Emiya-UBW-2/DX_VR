@@ -837,6 +837,27 @@ namespace FPS_n2 {
 					}
 				}
 			}
+			auto* PlayerMngr = Player::PlayerManager::Instance();
+
+			{
+#define PLAYER_ENUM_MIN_SIZE		(0.1f * Scale3DRate)		// 周囲のポリゴン検出に使用する球の初期サイズ
+#define PLAYER_ENUM_DEFAULT_SIZE	(1.6f * Scale3DRate)		// 周囲のポリゴン検出に使用する球の初期サイズ
+				auto HitDim = PlayerMngr->GetItemContainerObj()->GetCol().CollCheck_Sphere(StartPos, PLAYER_ENUM_DEFAULT_SIZE + MoveVector.magnitude());
+				// 検出されたポリゴンが壁ポリゴン( ＸＺ平面に垂直なポリゴン )か床ポリゴン( ＸＺ平面に垂直ではないポリゴン )かを判断する
+				for (int i = 0; i < HitDim.HitNum; ++i) {
+					auto& h_d = HitDim.Dim[i];
+					//壁ポリゴンと判断された場合でも、プレイヤーのＹ座標＋PLAYER_ENUM_MIN_SIZEより高いポリゴンのみ当たり判定を行う
+					if (
+						(abs(atan2f(h_d.Normal.y, std::hypotf(h_d.Normal.x, h_d.Normal.z))) <= deg2rad(30))
+						&& (h_d.Position[0].y > StartPos.y + PLAYER_ENUM_MIN_SIZE || h_d.Position[1].y > StartPos.y + PLAYER_ENUM_MIN_SIZE || h_d.Position[2].y > StartPos.y + PLAYER_ENUM_MIN_SIZE)
+						&& (h_d.Position[0].y < StartPos.y + PLAYER_ENUM_DEFAULT_SIZE || h_d.Position[1].y < StartPos.y + PLAYER_ENUM_DEFAULT_SIZE || h_d.Position[2].y < StartPos.y + PLAYER_ENUM_DEFAULT_SIZE)
+						) {
+						kabes.emplace_back(h_d);// ポリゴンの構造体のアドレスを壁ポリゴンポインタ配列に保存する
+					}
+				}
+				MV1CollResultPolyDimTerminate(HitDim);	// 検出したプレイヤーの周囲のポリゴン情報を開放する
+			}
+
 			bool HitFlag = false;
 			// 壁ポリゴンとの当たり判定処理
 			if (kabes.size() > 0) {
@@ -1095,7 +1116,7 @@ namespace FPS_n2 {
 						//外壁
 						if ((-EdgeP <= xpos && xpos <= Size * Rate + EdgeP - 1) && (-EdgeP <= zpos && zpos <= Size * Rate + EdgeP - 1)) {
 							if ((xpos == -EdgeP || xpos == Size * Rate + EdgeP - 1) || (zpos == -EdgeP || zpos == Size * Rate + EdgeP - 1)) {
-								for (int ypos = 0; ypos <= GetReferenceCells().All / 8 - 10; ++ypos) {
+								for (int ypos = 0; ypos <= GetReferenceCells().All / 8 - 5; ++ypos) {
 									SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos, ypos, GetReferenceCells().Half + zPos).Cell = 1;
 								}
 							}

@@ -132,6 +132,7 @@ namespace FPS_n2 {
 			std::shared_ptr<Objects::TeamHelicopterObj>	m_TeamHelicopterObj;
 			std::shared_ptr<Objects::ArmorObj>			m_ArmorObj;
 			std::shared_ptr<Objects::ArmorObj>			m_HelmetObj;
+			std::shared_ptr<Objects::ItemContainerObj>	m_ItemContainerObj;
 		public:
 			float										m_FindCount{};
 		private:
@@ -166,6 +167,9 @@ namespace FPS_n2 {
 
 			void		SetHelmet(const std::shared_ptr<Objects::ArmorObj>& pObj) noexcept { this->m_HelmetObj = pObj; }
 			auto&		GetHelmet(void) noexcept { return this->m_HelmetObj; }
+
+			void		SetItemContainerObj(const std::shared_ptr<Objects::ItemContainerObj>& pObj) noexcept { this->m_ItemContainerObj = pObj; }
+			auto&		GetItemContainerObj(void) noexcept { return this->m_ItemContainerObj; }
 		public:
 			void Init(int playerNum) noexcept {
 				if (playerNum > 0) {
@@ -182,6 +186,7 @@ namespace FPS_n2 {
 				m_TeamHelicopterObj.reset();
 				m_ArmorObj.reset();
 				m_HelmetObj.reset();
+				m_ItemContainerObj.reset();
 				for (auto& player : this->m_Player) {
 					player.reset();
 				}

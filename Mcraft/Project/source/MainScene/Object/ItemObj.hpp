@@ -123,9 +123,9 @@ namespace FPS_n2 {
 			virtual ~ItemObj(void) noexcept {}
 		public:
 			void				SetUniqueID(int ID) noexcept { this->m_ItemObjDataID = ID; }
-			const auto&			GetUniqueID(void) const noexcept { return this->m_ItemObjDataID; }
+			const auto& GetUniqueID(void) const noexcept { return this->m_ItemObjDataID; }
 
-			const auto			CanPick(void) const noexcept { return this->m_Timer>3.f; }
+			const auto			CanPick(void) const noexcept { return this->m_Timer > 3.f; }
 			//接地
 			void				Put(const Vector3DX& pos, const Vector3DX& vec) noexcept {
 				SetActive(true);
@@ -195,6 +195,30 @@ namespace FPS_n2 {
 				this->m_ItemObjList.back()->SetUniqueID(pItemObjDataID);
 				this->m_ItemObjList.back()->Put(pos, vec);
 			}
+		};
+
+
+		class ItemContainerObj : public BaseObject {
+		public:
+			ItemContainerObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::ItemContainerObj); }
+			virtual ~ItemContainerObj(void) noexcept {}
+		public:
+			//接地
+			void				Put(const Vector3DX& pos, const Matrix3x3DX& rot) noexcept {
+				SetActive(true);
+				SetMove().SetPos(pos);
+				SetMove().SetMat(rot);
+				SetMove().Update(0.0f, 0.0f);
+				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
+			}
+		public:
+			void				Init_Sub(void) noexcept override {
+				SetActive(true);
+				SetMinAABB(Vector3DX::vget(-5.f, 0.f, -5.f) * Scale3DRate);
+				SetMaxAABB(Vector3DX::vget(5.f, 5.f, 5.f) * Scale3DRate);
+			}
+			void				FirstUpdate(void) noexcept override {}
+			void			Dispose_Sub(void) noexcept override {}
 		};
 	}
 }
