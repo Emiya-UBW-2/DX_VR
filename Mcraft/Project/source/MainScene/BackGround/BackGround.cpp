@@ -717,6 +717,22 @@ namespace FPS_n2 {
 		//
 		int		BackGroundControl::CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal) const noexcept {
 			int HitCount = 0;
+
+			{
+				auto* PlayerMngr = Player::PlayerManager::Instance();
+				if (PlayerMngr->GetItemContainerObj()) {
+					auto ColLine = PlayerMngr->GetItemContainerObj()->GetCol().CollCheck_Line(StartPos, *EndPos);
+					if (ColLine.HitFlag == TRUE) {
+						*EndPos = ColLine.HitPosition;
+						if (Normal) {
+							*Normal = ColLine.Normal;
+						}
+						HitCount += 3;
+					}
+				}
+			}
+
+
 			if (isnan<float>(StartPos.x) || isnan<float>(StartPos.y) || isnan<float>(StartPos.z)) {
 				return HitCount;
 			}
@@ -846,14 +862,7 @@ namespace FPS_n2 {
 				// 検出されたポリゴンが壁ポリゴン( ＸＺ平面に垂直なポリゴン )か床ポリゴン( ＸＺ平面に垂直ではないポリゴン )かを判断する
 				for (int i = 0; i < HitDim.HitNum; ++i) {
 					auto& h_d = HitDim.Dim[i];
-					//壁ポリゴンと判断された場合でも、プレイヤーのＹ座標＋PLAYER_ENUM_MIN_SIZEより高いポリゴンのみ当たり判定を行う
-					if (
-						(abs(atan2f(h_d.Normal.y, std::hypotf(h_d.Normal.x, h_d.Normal.z))) <= deg2rad(30))
-						&& (h_d.Position[0].y > StartPos.y + PLAYER_ENUM_MIN_SIZE || h_d.Position[1].y > StartPos.y + PLAYER_ENUM_MIN_SIZE || h_d.Position[2].y > StartPos.y + PLAYER_ENUM_MIN_SIZE)
-						&& (h_d.Position[0].y < StartPos.y + PLAYER_ENUM_DEFAULT_SIZE || h_d.Position[1].y < StartPos.y + PLAYER_ENUM_DEFAULT_SIZE || h_d.Position[2].y < StartPos.y + PLAYER_ENUM_DEFAULT_SIZE)
-						) {
-						kabes.emplace_back(h_d);// ポリゴンの構造体のアドレスを壁ポリゴンポインタ配列に保存する
-					}
+					kabes.emplace_back(h_d);// ポリゴンの構造体のアドレスを壁ポリゴンポインタ配列に保存する
 				}
 				MV1CollResultPolyDimTerminate(HitDim);	// 検出したプレイヤーの周囲のポリゴン情報を開放する
 			}

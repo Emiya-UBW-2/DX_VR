@@ -210,6 +210,7 @@ namespace FPS_n2 {
 				SetMove().SetMat(rot);
 				SetMove().Update(0.0f, 0.0f);
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
+				GetCol().RefreshCollInfo();
 			}
 		public:
 			void				Init_Sub(void) noexcept override {

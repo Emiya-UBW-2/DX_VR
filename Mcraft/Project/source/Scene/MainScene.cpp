@@ -309,9 +309,9 @@ namespace FPS_n2 {
 				//周りの壁を破壊する
 				//壁破壊
 				{
-					int								xput = 20;
+					int								xput = 25;
 					int								yput = 20;
-					int								zput = 20;
+					int								zput = 25;
 					int8_t							damage = 100;
 					auto Put = BackGroundParts->GetPoint(TargetPos);
 					for (int xp = -xput / 2; xp <= xput / 2; ++xp) {
