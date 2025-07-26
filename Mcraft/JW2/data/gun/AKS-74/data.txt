@@ -8,6 +8,8 @@ Info_Eng=Assault rifle for airborne troops and crew.
 Info_Eng=High reliability due to simple structure. 
 Info_Eng=By folding the stock= it can be used in extremely close combat.
 
+Weight=3500
+
 ShotRate=600
 RecoilPower=120
 RecoilReturn=0.8
@@ -16,11 +18,21 @@ shottype=FULL
 usehumanAnim=4
 soundsel=3
 reloadType=MAG
-stockType=curve
+stockType=straight
+isHoldOpen=false
 
 Slot0Type=Magazine
 Slot0IsNeed=true
+Slot0Item=AK_6L20_jungle
 Slot0Item=AK_6L20
+
+Slot1Type=Sight
+Slot1IsNeed=true
+Slot1Item=OKP7
+
+Slot2Type=UnderRail
+Slot2IsNeed=false
+Slot2Item=MTK83
 
 Cocking=0
 Open=1

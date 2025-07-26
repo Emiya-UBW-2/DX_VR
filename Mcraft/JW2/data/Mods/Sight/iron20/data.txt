@@ -1,0 +1,5 @@
+Name=ironsight 20
+
+AimSpeedAdd=0.0
+
+end

@@ -1,3 +1,7 @@
 Name=VIPER RedDotSight
 
+AimSpeedAdd=-0.1
+
+AutoAimSpeedAdd=0.25
+
 end

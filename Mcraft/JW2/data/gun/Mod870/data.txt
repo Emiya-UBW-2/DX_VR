@@ -1,4 +1,4 @@
-Name=870 Shotgun
+Name=Model870 Shotgun
 
 Info=散弾を用いるポンプアクションショットガン。
 Info=銃身の絞りをなくし、広範囲にばらまくように調整されている。
@@ -7,6 +7,8 @@ Info=途中での装弾も可能で至近での戦闘に特化している。
 Info_Far=A pump-action shotgun that uses OO buckshot.
 Info_Far=Barrel has no chokes and is adjusted to spread over a wide area.。
 Info_Far=It specialized for close combat.
+
+Weight=3600
 
 ShotRate=300
 RecoilPower=175

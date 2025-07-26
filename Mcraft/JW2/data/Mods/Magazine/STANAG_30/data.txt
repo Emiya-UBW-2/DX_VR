@@ -2,4 +2,7 @@ Name=STANAG 30Round Magazine
 
 capacity=30
 useammo0=556x45
+
+Weight=500
+
 end

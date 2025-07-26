@@ -66,7 +66,8 @@
 1136=Borderless
 1137=Change Render Scale(Need Restart)
 1138=Adds GodRay to shadow(with the shadow settings)
-1139=Enable Load Video (disable if you want to stop Game)
+1139=Flat terrain at initialization
+1146=Lock on Enemy When Aim Down Sight
 
 1140=Change X Sensitivity
 1141=Change Y Sensitivity
@@ -96,6 +97,12 @@
 1169=(Not Use)
 1170=(Not Use)
 1171=(Not Use)
+1172=Delete Item1
+1173=Delete Item2
+1174=Delete Item3
+1175=Delete Item4
+1176=Delete Item5
+1177=Delete Left Item
 
 0200=(アイテムログ)
 
@@ -117,4 +124,7 @@
 9907=Change Weapon
 9908=Aim Down Sight
 9909=Squat
+9910=Delete Item
 9913=Pause
+
+3000=Swap Armor by ItemSlot
