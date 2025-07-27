@@ -110,7 +110,7 @@ namespace FPS_n2 {
 					//*
 					{
 						int Rand = GetRand(100);
-						int rate = 100 / 5;
+						int rate = 100 / 6;
 						if (Rand < rate) {
 							chara->LoadCharaGun("type89", 0);
 						}
@@ -123,9 +123,13 @@ namespace FPS_n2 {
 						else if (Rand < rate * 4) {
 							chara->LoadCharaGun("AKS-74", 0);
 						}
+						else if (Rand < rate * 5) {
+							chara->LoadCharaGun("AK12", 0);
+						}
 						else {
 							chara->LoadCharaGun("Mod870", 0);
 						}
+
 					}
 					//*/
 					//chara->LoadCharaGun("AKS-74", 0);
@@ -148,9 +152,12 @@ namespace FPS_n2 {
 					Charas::CharacterObj::LoadChara("Soldier", (PlayerID)loop);
 
 					int Rand = GetRand(100);
-					int rate = 100 / 2;
+					int rate = 100 / 3;
 					if (Rand < rate) {
 						chara->LoadCharaGun("type89", 0);
+					}
+					else if (Rand < rate * 2) {
+						chara->LoadCharaGun("AK12", 0);
 					}
 					else {
 						chara->LoadCharaGun("AKS-74", 0);

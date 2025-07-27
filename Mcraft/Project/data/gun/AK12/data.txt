@@ -1,0 +1,40 @@
+Name=AK-12
+
+Info=最新式の突撃銃。
+Info=AK-74Mからより近代的に改修されている。
+Info=EVOストック装備。
+
+Info_Eng=Assault rifle for airborne troops and crew. 
+Info_Eng=High reliability due to simple structure. 
+Info_Eng=By folding the stock= it can be used in extremely close combat.
+
+Weight=3400
+
+ShotRate=700
+RecoilPower=90
+RecoilReturn=0.85
+RecoilScaleRate=5
+shottype=FULL
+usehumanAnim=4
+soundsel=3
+reloadType=MAG
+stockType=straight
+isHoldOpen=false
+
+Slot0Type=Magazine
+Slot0IsNeed=true
+Slot0Item=AK12Mag
+Slot0Item=AK_6L20
+
+Slot1Type=Sight
+Slot1IsNeed=true
+Slot1Item=APCOMP2
+Slot1Item=ACOG
+
+Cocking=0
+Open=1
+ReloadStart_Empty=2
+ReloadStart=2
+ReloadEnd=2
+
+end
