@@ -55,6 +55,7 @@ namespace FPS_n2 {
 		Explosion,
 		GetItem,
 		PutItem,
+		Delivery,
 		//
 		Trigger,
 		rolling_rocket,

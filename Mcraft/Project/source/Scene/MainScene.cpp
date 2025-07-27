@@ -305,7 +305,7 @@ namespace FPS_n2 {
 						TargetPos = EndPos- Vector3DX::up() * 0.5f * Scale3DRate;;
 					}
 				}
-				PlayerMngr->GetItemContainerObj()->Put(TargetPos, Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
+
 				//周りの壁を破壊する
 				//壁破壊
 				{
@@ -326,6 +326,15 @@ namespace FPS_n2 {
 
 					}
 				}
+
+				{
+					Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
+					if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+						TargetPos = EndPos - Vector3DX::up() * 0.5f * Scale3DRate;;
+					}
+				}
+
+				PlayerMngr->GetItemContainerObj()->Put(TargetPos, Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
 			}
 			//UI
 			this->m_UIclass.Set();
@@ -354,6 +363,7 @@ namespace FPS_n2 {
 			auto* KeyGuideParts = KeyGuide::Instance();
 			auto* NetBrowser = NetWorkBrowser::Instance();
 			auto* OptionParts = OptionManager::Instance();
+			auto* SideLogParts = SideLog::Instance();
 
 			PlayerMngr->SetWatchPlayerID(GetViewPlayerID());
 			PostPassParts->SetLevelFilter(38, 154, 1.0f);
@@ -468,7 +478,16 @@ namespace FPS_n2 {
 						) {
 						IsPressArmor = MyInput.GetPADSPress(Controls::PADS::HEALARMOR);
 					}
-					//TODO
+
+					m_IsAddScoreArea = false;
+					if (PlayerMngr->GetItemContainerObj()) {
+						auto Vec = ViewChara->GetMove().GetPos() - PlayerMngr->GetItemContainerObj()->GetMove().GetPos(); Vec.y = 0.f;
+						if (Vec.magnitude() < 3.f * Scale3DRate) {
+							//捨てると納品できるエリア
+							m_IsAddScoreArea = true;
+						}
+					}
+
 
 					int loop = 0;
 					bool isFirst = true;
@@ -534,14 +553,23 @@ namespace FPS_n2 {
 										}
 									}
 									else {
-										//auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
-										Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec() * -1.f;
-										Vec.y = std::clamp(Vec.y, 0.1f, 0.3f); Vec = Vec.normalized();
+										if (m_IsAddScoreArea) {
+											//納品
+											PlayerMngr->GetPlayer(0)->AddScore(100);
+											SideLogParts->Add(5.0f, 0.0f, Green, "Delivery +100");
+											auto* SE = SoundPool::Instance();
+											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Delivery))->Play(DX_PLAYTYPE_BACK, true);
+										}
+										else {
+											//auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
+											Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec() * -1.f;
+											Vec.y = std::clamp(Vec.y, 0.1f, 0.3f); Vec = Vec.normalized();
 
-										Objects::ItemObjPool::Instance()->Put(ID.first,
-											ViewChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos(),
-											Vec * (10.f * Scale3DRate)
-										);
+											Objects::ItemObjPool::Instance()->Put(ID.first,
+												ViewChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos(),
+												Vec * (10.f * Scale3DRate)
+											);
+										}
 									}
 									ViewPlayer->SubInventoryIndex(loop);
 									auto* SE = SoundPool::Instance();

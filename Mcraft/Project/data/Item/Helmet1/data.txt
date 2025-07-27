@@ -1,4 +1,4 @@
 Name=Item
 Type=Helmet
-EnableSpawnBySoldier=TRUE
+EnableSpawnBySoldier=FALSE
 Weight=1500
