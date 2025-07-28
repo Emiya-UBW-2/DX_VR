@@ -86,7 +86,7 @@
 1158=Select Right Tab
 1159=Return
 1160=Decision
-1161=(Not Use)
+1161=Grenade
 1162=(Not Use)
 1163=(Not Use)
 1164=(Not Use)
@@ -96,7 +96,7 @@
 1168=Change Weapon
 1169=(Not Use)
 1170=(Not Use)
-1171=(Not Use)
+1171=Watch Gun
 1172=Delete Item1
 1173=Delete Item2
 1174=Delete Item3
@@ -118,13 +118,14 @@
 9900=Move
 9902=Lean
 9903=Walk
-9904=Reload
 9905=Grenade
 9906=Shot
 9907=Change Weapon
 9908=Aim Down Sight
 9909=Squat
-9910=Delete Item
 9913=Pause
 
 3000=Swap Armor by ItemSlot
+3001=Reload
+3002=Delete Left Item
+3003=Stand up
