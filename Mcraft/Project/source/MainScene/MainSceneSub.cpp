@@ -216,11 +216,13 @@ namespace FPS_n2 {
 			for (int loop = 0; loop < m_ItemAnimTimer.size(); ++loop) {
 				m_ItemAnimTimer.at(loop) = 0.f;
 			}
+			m_Score = ViewPlayer->GetScore();
 		}
 		void			MainSceneUI::Update(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* DXLib_refParts = DXLib_ref::Instance();
 
+			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 
 			CanLookTarget = false;
@@ -295,7 +297,6 @@ namespace FPS_n2 {
 				}
 			}
 			{
-				auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 				int loop = 0;
 				for (auto& ID : ViewPlayer->GetInventory()) {
 					bool Prev = m_PrevItemID.at(loop) != InvalidID;
@@ -329,6 +330,19 @@ namespace FPS_n2 {
 				}
 			}
 
+			{
+				float Score = ViewPlayer->GetScore();
+				if (std::abs(Score - m_Score) > 5.f) {
+					Easing(&m_Score, Score, 0.95f, EasingType::OutExpo);
+				}
+				else if (std::abs(Score - m_Score) > 0.02f) {
+					m_Score += DXLib_refParts->GetDeltaTime() / 0.1f * ((Score - m_Score) > 0.f ? 1.f : -1.f);
+				}
+				else {
+					m_Score = Score;
+				}
+			}
+
 		}
 		void			MainSceneUI::Draw(void) const noexcept {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
@@ -336,6 +350,8 @@ namespace FPS_n2 {
 			auto* CameraParts = Camera3D::Instance();
 			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
+			auto* KeyGuideParts = KeyGuide::Instance();
+			auto* LocalizeParts = LocalizePool::Instance();
 
 			int xp1{}, yp1{};
 			int xp2{}, yp2{};
@@ -410,12 +426,24 @@ namespace FPS_n2 {
 							DrawCtrls->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, &this->DeleteItemGraph, xp1, yp1, 100.f * (ID.second / 0.5f), 0.f, 64.f / 128.f);
 							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 						}
+						Controls::PADS Guide{};
+						switch (loop) {
+						case 0: Guide = Controls::PADS::ITEMDELETE1; break;
+						case 1: Guide = Controls::PADS::ITEMDELETE2; break;
+						case 2: Guide = Controls::PADS::ITEMDELETE3; break;
+						case 3: Guide = Controls::PADS::ITEMDELETE4; break;
+						case 4: Guide = Controls::PADS::ITEMDELETE5; break;
+						default:
+							break;
+						}
+
+						KeyGuideParts->DrawButton(xp1 + 64 - 32, yp1 + 64 - 32, KeyGuide::GetPADStoOffset(Guide));
 					}
 					++loop;
 				}
 				{
 					xp1 = 400;
-					yp1 = (1080 * 4 / 5) + 64;
+					yp1 = (1080 * 4 / 5) + 64 + 16;
 
 					int gram = ViewChara->GetWeight_gram();
 					unsigned int Color = Green;
@@ -462,6 +490,15 @@ namespace FPS_n2 {
 						xp1,
 						yp1,
 						Color, Black, "Weight %05.2f kg", m_Gram);
+
+					xp1 = 400 - Height * 3;
+					yp1 += 24;
+					KeyGuideParts->DrawButton(xp1 - 32, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE));
+
+					xp1 -= 32;
+					yp1 += 0;
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3002));
 				}
 				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
@@ -475,6 +512,12 @@ namespace FPS_n2 {
 					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 + (280), yp1, White, Black, "%d:%05.2f",
 					static_cast<int>(floatParam[0] / 60.0f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
 
+				yp1 = (10+32+10);
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, White, Black, "SCORE");
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 + (280), yp1, White, Black, "%04d",
+					static_cast<int>(m_Score));
 
 
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
@@ -573,14 +616,21 @@ namespace FPS_n2 {
 								}
 							}
 
+							xp1 = xp1 + 64;
 							if (HasSpare) {
-								xp1 = xp1 + 64;
 								yp1 = yp1 + 64;
 
 								KeyGuideParts->DrawButton(xp1 - 32, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::HEALARMOR));
 
 								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
 									FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3000));
+							}
+							if (ViewChara->GetIsSquat()) {
+								yp1 = yp1 + 64;
+								KeyGuideParts->DrawButton(xp1 - 32, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::SQUAT));
+
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+									FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3003));
 							}
 						}
 						//
@@ -654,6 +704,15 @@ namespace FPS_n2 {
 									yp1 - 3 - static_cast<int>(m_AmmoInPer * 3.f),
 									Color, Black, "%d", ViewChara->GetGunPtrNow()->GetAmmoNumTotal());
 
+								if (isLow) {
+									xp1 = xp1 - 64;
+									yp1 = yp1 + 64;
+
+									KeyGuideParts->DrawButton(xp1 - 32, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD));
+
+									DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+										FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3001));
+								}
 							}
 						}
 						//

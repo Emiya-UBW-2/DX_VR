@@ -64,6 +64,8 @@ namespace FPS_n2 {
 
 			float						m_Gram{};
 
+			float						m_Score{};
+
 			std::vector<int>			m_PrevItemID{};
 			std::vector<float>			m_ItemAnimTimer{};
 		public:

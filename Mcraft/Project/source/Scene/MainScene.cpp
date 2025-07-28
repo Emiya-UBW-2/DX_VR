@@ -89,6 +89,7 @@ namespace FPS_n2 {
 			ObjectManager::Instance()->LoadModelBefore("data/model/PlateCarrler/");
 			ObjectManager::Instance()->LoadModelBefore("data/model/Helmet/");
 			ObjectManager::Instance()->LoadModelBefore("data/model/container/");
+			ObjectManager::Instance()->LoadModelBefore("data/model/circle/");
 		}
 		void			MainGameScene::LoadEnd_Sub(void) noexcept {
 			Objects::AmmoPool::Create();
@@ -342,6 +343,11 @@ namespace FPS_n2 {
 				}
 
 				PlayerMngr->GetItemContainerObj()->Put(TargetPos, Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
+				{
+					auto obj = std::make_shared<Objects::CircleEffect>();
+					ObjectManager::Instance()->InitObject(obj, "data/model/circle/");
+					obj->Put(TargetPos);
+				}
 			}
 			//UI
 			this->m_UIclass.Set();
@@ -420,18 +426,18 @@ namespace FPS_n2 {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ULT), LocalizePool::Instance()->Get(9907));
 
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::SQUAT), LocalizePool::Instance()->Get(9909));
-						//KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::WALK), LocalizePool::Instance()->Get(9903));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::WALK), LocalizePool::Instance()->Get(9903));
 
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizePool::Instance()->Get(9904));
+						//KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizePool::Instance()->Get(9904));
 
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::THROW), LocalizePool::Instance()->Get(9905));
 
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE1), "");
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE2), "");
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE3), "");
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE4), "");
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE5), "");
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE), LocalizePool::Instance()->Get(9910));
+						//KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE1), "");
+						//KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE2), "");
+						//KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE3), "");
+						//KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE4), "");
+						//KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE5), "");
+						//KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE), LocalizePool::Instance()->Get(9910));
 					}
 				});
 			if (SceneParts->IsPause()) {
@@ -545,9 +551,9 @@ namespace FPS_n2 {
 							if (IsPress) {
 								ID.second += DXLib_refParts->GetDeltaTime();
 								if (ID.second > 0.5f) {
+									auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
 									//アーマーヒール
 									if (IsPressArmor) {
-										auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
 										switch (item->GetItemType()) {
 										case Objects::ItemType::Helmet:
 											ViewChara->HealHelmet();
@@ -562,8 +568,8 @@ namespace FPS_n2 {
 									else {
 										if (m_IsAddScoreArea) {
 											//納品
-											PlayerMngr->GetPlayer(0)->AddScore(100);
-											SideLogParts->Add(5.0f, 0.0f, Green, "Delivery +100");
+											PlayerMngr->GetPlayer(0)->AddScore(item->GetScore());
+											SideLogParts->Add(5.0f, 0.0f, Green, ("Delivery +" + std::to_string(item->GetScore())).c_str());
 											auto* SE = SoundPool::Instance();
 											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Delivery))->Play(DX_PLAYTYPE_BACK, true);
 										}

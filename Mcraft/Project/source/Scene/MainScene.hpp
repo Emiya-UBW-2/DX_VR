@@ -66,6 +66,9 @@ namespace FPS_n2 {
 			void			ShadowDraw_Sub(void) const noexcept override {
 				ObjectManager::Instance()->Draw_Shadow();
 			}
+			void			DepthDraw_Sub(int layer) const noexcept override {
+				ObjectManager::Instance()->Draw_Depth(layer);
+			}
 			void			CubeMap_Sub(void) const noexcept override {
 				BackGround::BackGroundControl::Instance()->Draw();
 			}

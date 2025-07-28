@@ -21,6 +21,7 @@ namespace FPS_n2 {
 		ItemObj,
 		Armor,
 		ItemContainerObj,
+		CircleEffect,
 		Max,
 	};
 	static const char* ObjTypeName[static_cast<int>(ObjType::Max)] = {
@@ -41,6 +42,7 @@ namespace FPS_n2 {
 		"ItemObj",
 		"Armor",
 		"ItemContainerObj",
+		"CircleEffect",
 	};
 	enum class SoundEnum {
 		RunFoot = static_cast<int>(SoundSelectCommon::Num),

@@ -25,6 +25,7 @@ namespace FPS_n2 {
 			GraphHandle		m_Icon;
 			bool			m_EnableSpawnBySoldier{ false };
 			int				m_Weight{};
+			int				m_Score{};
 		public://getter
 			const auto& GetPath(void) const noexcept { return this->m_path; }
 			const auto& GetName(void) const noexcept { return this->m_name; }
@@ -32,6 +33,7 @@ namespace FPS_n2 {
 			const auto& GetIconGraph(void) const noexcept { return this->m_Icon; }
 			const auto& EnableSpawnBySoldier(void) const noexcept { return this->m_EnableSpawnBySoldier; }
 			const auto& GetWeight_gram(void) const noexcept { return this->m_Weight; }
+			const auto& GetScore(void) const noexcept { return this->m_Score; }
 		public:
 			ItemObjData(std::string path_) noexcept { Set(path_); }
 		private:
@@ -73,6 +75,9 @@ namespace FPS_n2 {
 						}
 						else if (LEFT == "Weight") {
 							m_Weight = std::stoi(RIGHT);
+						}
+						else if (LEFT == "Score") {
+							m_Score = std::stoi(RIGHT);
 						}
 					}
 				}
@@ -219,6 +224,36 @@ namespace FPS_n2 {
 				SetMaxAABB(Vector3DX::vget(5.f, 5.f, 5.f) * Scale3DRate);
 			}
 			void				FirstUpdate(void) noexcept override {}
+			void			Dispose_Sub(void) noexcept override {}
+		};
+
+		class CircleEffect : public BaseObject {
+		public:
+			CircleEffect(void) noexcept { this->m_objType = static_cast<int>(ObjType::CircleEffect); }
+			virtual ~CircleEffect(void) noexcept {}
+		public:
+			//接地
+			void				Put(const Vector3DX& pos) noexcept {
+				SetActive(true);
+				SetMove().SetPos(pos);
+				SetMove().Update(0.0f, 0.0f);
+				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
+				GetCol().RefreshCollInfo();
+			}
+		public:
+			void				Init_Sub(void) noexcept override {
+				SetActive(true);
+				SetMinAABB(Vector3DX::vget(-5.f, 0.f, -5.f) * Scale3DRate);
+				SetMaxAABB(Vector3DX::vget(5.f, 5.f, 5.f) * Scale3DRate);
+			}
+			void				FirstUpdate(void) noexcept override {}
+
+			void				DrawShadow(void) noexcept override {}
+			void				Draw(bool, int) noexcept override {}
+			void				DrawDepth(int layer) noexcept override {
+				if (!GetObj().IsActive()) { return; }
+				GetObj().DrawMesh(layer);
+			}
 			void			Dispose_Sub(void) noexcept override {}
 		};
 	}
