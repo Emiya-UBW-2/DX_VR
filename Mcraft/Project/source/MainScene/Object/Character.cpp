@@ -49,6 +49,7 @@ namespace FPS_n2 {
 				auto* SE = SoundPool::Instance();
 				auto* PlayerMngr = Player::PlayerManager::Instance();
 				auto* SideLogParts = SideLog::Instance();
+				auto* LocalizeParts = LocalizePool::Instance();
 
 				auto PrevLive = IsAlive();
 
@@ -134,25 +135,25 @@ namespace FPS_n2 {
 					if (IsDeath) {
 						PlayerMngr->GetPlayer(Event.ShotID)->AddScore(100);
 						PlayerMngr->GetPlayer(Event.ShotID)->AddKill(1);
-						SideLogParts->Add(5.0f, 0.0f, Green, "Kill +100");
+						SideLogParts->Add(5.0f, 0.0f, Green, (LocalizeParts->Get(204) + (std::string)(" +100")).c_str());
 					}
 				}
 				if (Event.DamageID == PlayerMngr->GetWatchPlayerID()) {//撃たれたキャラ
 					if (Damage > 0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitMe))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f);
 						if (IsDeath) {
-							SideLogParts->Add(5.0f, 0.0f, Red50, "You Are Dead");
+							SideLogParts->Add(5.0f, 0.0f, Red50, LocalizeParts->Get(203));
 						}
 						else {
-							SideLogParts->Add(5.0f, 0.0f, Red, (std::to_string(-Damage) + " Damage").c_str());
+							SideLogParts->Add(5.0f, 0.0f, Red, (std::to_string(-Damage) + " " + LocalizeParts->Get(200)).c_str());
 						}
 					}
 					else if (BodyArmerDamage > 0 || HeadArmerDamage>0) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::HitGuard))->Play3D(GetEyePositionCache(), Scale3DRate * 10.0f, 255);
-						SideLogParts->Add(5.0f, 0.0f, Yellow, "Armor Saved me");
+						SideLogParts->Add(5.0f, 0.0f, Yellow, LocalizeParts->Get(201));
 					}
 					else if (Damage == 0) {
-						SideLogParts->Add(5.0f, 0.0f, Green, "Armor has been Changed");
+						SideLogParts->Add(5.0f, 0.0f, Green, LocalizeParts->Get(202));
 					}
 				}
 				//エフェクトセット
@@ -760,8 +761,8 @@ namespace FPS_n2 {
 					if (!GetIsRappelling()) {
 						vec.y = (GetMove().GetVec().y + (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps())));
 					}
-					else if (GetMove().GetPos().y < -50.f * Scale3DRate) {
-						SetDamage(GetMyPlayerID(), 10000, static_cast<int>(Charas::HitType::Body), GetMove().GetPos(), GetMove().GetPos());
+					else if (GetMove().GetPos().y < -50.f * Scale3DRate && IsAlive()) {
+						SetDamage(GetMyPlayerID(), 1000, static_cast<int>(Charas::HitType::Body), GetMove().GetPos(), GetMove().GetPos());
 					}
 				}
 				//床判定を加味した移動ベクトル

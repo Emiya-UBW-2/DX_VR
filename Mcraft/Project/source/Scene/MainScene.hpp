@@ -27,6 +27,9 @@ namespace FPS_n2 {
 			float										m_StartTimer{ 0.0f };
 			float										m_BattleTimer{ 0.0f };
 			float										m_ReturnPer{ 0.0f };
+
+			bool										m_IsGameClear = false;
+
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
 			MV1											m_MainRagDoll;

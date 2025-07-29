@@ -365,6 +365,7 @@ namespace FPS_n2 {
 			//Vector3DX posBuf = Matrix3x3DX::Vtrans(Vector3DX::forward() * (15.0f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
 			//posBuf.y = -25.0f * Scale3DRate;
 			//PlayerMngr->GetVehicle()->Spawn(std::atan2f(posBuf.x, posBuf.z), posBuf);
+			m_IsGameClear = false;
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* CameraParts = Camera3D::Instance();
@@ -448,6 +449,10 @@ namespace FPS_n2 {
 					return true;
 				}
 			}
+			if (m_IsGameClear) {
+				return true;
+			}
+
 			//FirstDoingv
 			if (GetIsFirstLoop()) {}
 			//Input,AI
@@ -600,18 +605,20 @@ namespace FPS_n2 {
 				}
 				{
 					//タイムオーバー
-					if (this->m_BattleTimer <= 0.f) {
+					if (this->m_BattleTimer <= 0.f && ViewChara->IsAlive()) {
 						if (!this->m_IsAddScoreArea) {
 							//デス
 							ViewChara->SetDamage(ViewChara->GetMyPlayerID(), 1000, static_cast<int>(Charas::HitType::Head), ViewChara->GetMove().GetPos(), ViewChara->GetMove().GetPos());
 						}
 						else {
 							//帰還する
+							m_IsGameClear = true;
 						}
 					}
 					//
 					else if (this->m_IsAddScoreArea && this->m_BattleTimer < 60.f && this->m_ReturnPer >= 1.f) {
 						//帰還する
+						m_IsGameClear = true;
 					}
 				}
 
@@ -929,7 +936,7 @@ namespace FPS_n2 {
 				this->m_UIclass.SetfloatParam(1, this->m_StartTimer);
 				this->m_UIclass.SetfloatParam(2, this->m_ReturnPer);
 				this->m_UIclass.SetIntParam(0, this->m_IsAddScoreArea);
-				this->m_UIclass.SetIntParam(1, this->m_IsAddScoreArea && this->m_BattleTimer < 60.f);
+				this->m_UIclass.SetIntParam(1, this->m_BattleTimer < 60.f);
 				this->m_UIclass.Update();
 			}
 			HitMarkerPool::Instance()->Update();
@@ -998,7 +1005,7 @@ namespace FPS_n2 {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SceneParts = SceneControl::Instance();
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
-			if (ViewChara->IsAlive()) {
+			if (ViewChara->IsAlive() && !m_IsGameClear) {
 				//レティクル表示
 				if (ViewChara->GetGunPtrNow()) {
 					ViewChara->GetGunPtrNow()->DrawReticle(ViewChara->GetLeanRad());

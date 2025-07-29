@@ -516,7 +516,7 @@ namespace FPS_n2 {
 
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
 							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3005));
-						if (this->floatParam[2]) {
+						if (this->floatParam[2] > 0.f) {
 							//xp1 = 1920 / 2;
 							yp1 += 64;
 							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 255, 0);
@@ -788,6 +788,10 @@ namespace FPS_n2 {
 						static_cast<int>(floatParam[1] / 60.0f), static_cast<float>(static_cast<int>(floatParam[1]) % 60) + (floatParam[1] - static_cast<float>(static_cast<int>(floatParam[1]))));
 				}
 
+				xp1 = 1920 / 2;
+				yp1 = 400;
+				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+					FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(this->intParam[1] ? 4001 : 4000));
 			}
 			//方位磁針
 			{

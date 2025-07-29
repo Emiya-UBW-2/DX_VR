@@ -104,7 +104,11 @@
 1176=Delete Item5
 1177=Delete Left Item
 
-0200=(アイテムログ)
+0200=Damage
+0201=Armor Saved me
+0202=Armor has been Changed
+0203=You Are Dead
+0204=Kill
 
 0300=(注意表示)
 
