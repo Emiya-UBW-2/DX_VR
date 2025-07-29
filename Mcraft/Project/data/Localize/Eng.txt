@@ -129,3 +129,8 @@
 3001=Reload
 3002=Delete Left Item
 3003=Stand up
+3004=Delivery Item
+3005=Request for return
+
+4000=Delivery Items in containers
+4001=Get into the container and wait for the helicopter to arrive.

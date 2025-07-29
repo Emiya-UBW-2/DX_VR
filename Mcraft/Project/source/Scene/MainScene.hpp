@@ -26,6 +26,7 @@ namespace FPS_n2 {
 			bool										m_IsEnd{ false };//シーン全体の終了フラグ
 			float										m_StartTimer{ 0.0f };
 			float										m_BattleTimer{ 0.0f };
+			float										m_ReturnPer{ 0.0f };
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
 			MV1											m_MainRagDoll;

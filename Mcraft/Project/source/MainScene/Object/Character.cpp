@@ -426,7 +426,7 @@ namespace FPS_n2 {
 								GetGunPtrNow()->SetShotStart();
 							}
 							//グレネード構え
-							else if (GetGunPtr(2)->GetAmmoNumTotal() > 0 && this->m_Input.GetPADSPress(Controls::PADS::THROW)) {
+							else if (GetGunPtr(2) && GetGunPtr(2)->GetAmmoNumTotal() > 0 && this->m_Input.GetPADSPress(Controls::PADS::THROW)) {
 								{
 									bool isEmergency = (GetGunPtr(0)->GetGunAnime() == GunAnimeID::EmergencyReady);
 									if (isEmergency) {
@@ -581,7 +581,9 @@ namespace FPS_n2 {
 					if (GetObj().GetAnim(static_cast<int>(CharaAnimeID::Rappelling)).TimeEnd()) {
 						this->m_IsRappelling = false;
 						this->m_IsRappellingEnd = false;
-						GetGunPtrNow()->SetGunAnime(GunAnimeID::Base);
+						if (GetGunPtrNow()) {
+							GetGunPtrNow()->SetGunAnime(GunAnimeID::Base);
+						}
 					}
 				}
 			}
@@ -627,15 +629,27 @@ namespace FPS_n2 {
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing))->Play(DX_PLAYTYPE_BACK);
 						}
 					}
+					this->m_HPLowSwitch = true;
 				}
-				else {
-					if (this->m_HPRec != 0.0f) {
+				else if (this->m_HP.GetPoint() < this->m_HP.GetMax()) {
+					this->m_HPRec += DXLib_refParts->GetDeltaTime();
+					if (this->m_HPRec >= 0.0f) {
+						this->m_HPRec -= 2.0f;
+						Heal(2);
+					}
+				}
+				else{
+					this->m_HPRec = 0.0f;
+				}
+				//
+				if (!IsLowHP()) {
+					if (this->m_HPLowSwitch) {
+						this->m_HPLowSwitch = false;
 						if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing))->StopAll();
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend))->Play(DX_PLAYTYPE_BACK);
 						}
 					}
-					this->m_HPRec = 0.0f;
 				}
 			}
 			float SwitchPer = 1.0f;
@@ -734,14 +748,20 @@ namespace FPS_n2 {
 					vec.y = 0.0f;
 					if (this->m_IsRappelling) {
 						this->m_IsRappellingEnd = true;
-						GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
-						//投げ武器ではない最初の武器に切り替え
-						this->m_GunPtrControl.GunChangeThrowWeapon(false);
+
+						this->m_GunPtrControl.SetOnOff(true);
+						this->m_GunPtrControl.InvokeReserveGunSelect();
+						if (GetGunPtrNow()) {
+							GetGunPtrNow()->SetGunAnime(GunAnimeID::Base);
+						}
 					}
 				}
 				else {
 					if (!GetIsRappelling()) {
 						vec.y = (GetMove().GetVec().y + (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps())));
+					}
+					else if (GetMove().GetPos().y < -50.f * Scale3DRate) {
+						SetDamage(GetMyPlayerID(), 10000, static_cast<int>(Charas::HitType::Body), GetMove().GetPos(), GetMove().GetPos());
 					}
 				}
 				//床判定を加味した移動ベクトル

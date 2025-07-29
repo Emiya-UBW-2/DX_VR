@@ -29,7 +29,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(Controls::PADS::LEAN_L, true);
 	Pad->SetIsUseButton(Controls::PADS::LEAN_R, true);
 	Pad->SetIsUseButton(Controls::PADS::RELOAD, true);
-	Pad->SetIsUseButton(Controls::PADS::INTERACT, true);//UIのみ
+	Pad->SetIsUseButton(Controls::PADS::INTERACT, true);
 	Pad->SetIsUseButton(Controls::PADS::THROW, true);
 	Pad->SetIsUseButton(Controls::PADS::MELEE, false);
 	Pad->SetIsUseButton(Controls::PADS::JUMP, false);
@@ -39,7 +39,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(Controls::PADS::SHOT, true);
 	Pad->SetIsUseButton(Controls::PADS::AIM, true);
 	Pad->SetIsUseButton(Controls::PADS::ULT, true);
-	Pad->SetIsUseButton(Controls::PADS::SQUAT, false);
+	Pad->SetIsUseButton(Controls::PADS::SQUAT, true);
 	Pad->SetIsUseButton(Controls::PADS::PRONE, false);
 	Pad->SetIsUseButton(Controls::PADS::CHECK, true);
 	Pad->SetIsUseButton(Controls::PADS::ITEMDELETE1, true);

@@ -31,6 +31,8 @@ namespace FPS_n2 {
 			float												m_StuckGunTimer{ 0.0f };
 			bool												m_IsStuckGun{ false };
 			float												m_HPRec{ 0.0f };
+			bool												m_HPLowSwitch{ false };
+
 			bool												m_ArmBreak{ false };
 			int													m_CharaSound{ InvalidID };			//サウンド
 			Pendulum2D											m_SlingArmZrad;

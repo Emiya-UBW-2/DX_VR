@@ -164,7 +164,7 @@ namespace FPS_n2 {
 						chara->LoadCharaGun("AKS-74", 0);
 					}
 					//chara->LoadCharaGun("MP443", 1);
-					chara->LoadCharaGun("RGD5", 2);
+					//chara->LoadCharaGun("RGD5", 2);
 					//ラグドール
 					chara->SetupRagDoll(m_RagDoll);
 				}
@@ -357,6 +357,7 @@ namespace FPS_n2 {
 			this->m_IsEnd = false;
 			this->m_StartTimer = 3.0f;
 			this->m_BattleTimer = 180.f;
+			this->m_ReturnPer = 0.f;
 
 			auto* SE = SoundPool::Instance();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
@@ -597,6 +598,23 @@ namespace FPS_n2 {
 						++loop;
 					}
 				}
+				{
+					//タイムオーバー
+					if (this->m_BattleTimer <= 0.f) {
+						if (!this->m_IsAddScoreArea) {
+							//デス
+							ViewChara->SetDamage(ViewChara->GetMyPlayerID(), 1000, static_cast<int>(Charas::HitType::Head), ViewChara->GetMove().GetPos(), ViewChara->GetMove().GetPos());
+						}
+						else {
+							//帰還する
+						}
+					}
+					//
+					else if (this->m_IsAddScoreArea && this->m_BattleTimer < 60.f && this->m_ReturnPer >= 1.f) {
+						//帰還する
+					}
+				}
+
 				//ネットワーク
 				if (NetBrowser->IsDataReady() && !this->m_NetWorkController) {
 					this->m_NetWorkController = std::make_unique<NetWork::NetWorkController>(NetBrowser->IsServer(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
@@ -900,10 +918,18 @@ namespace FPS_n2 {
 			BackGround::BackGroundControl::Instance()->Update();
 			//UIパラメーター
 			{
+				if ((this->m_IsAddScoreArea && this->m_BattleTimer < 60.f) && Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().press()) {
+					this->m_ReturnPer = std::clamp(this->m_ReturnPer + DXLib_refParts->GetDeltaTime() / 5.f, 0.f, 1.f);
+				}
+				else {
+					this->m_ReturnPer = 0.f;
+				}
 				//timer
 				this->m_UIclass.SetfloatParam(0, this->m_BattleTimer);
 				this->m_UIclass.SetfloatParam(1, this->m_StartTimer);
-
+				this->m_UIclass.SetfloatParam(2, this->m_ReturnPer);
+				this->m_UIclass.SetIntParam(0, this->m_IsAddScoreArea);
+				this->m_UIclass.SetIntParam(1, this->m_IsAddScoreArea && this->m_BattleTimer < 60.f);
 				this->m_UIclass.Update();
 			}
 			HitMarkerPool::Instance()->Update();

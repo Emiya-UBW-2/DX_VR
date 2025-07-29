@@ -206,6 +206,7 @@ namespace FPS_n2 {
 			this->m_ItembackGraph.Load("data/UI/itemback.png");
 			this->OIL_Graph.Load("data/UI/back.png");
 			this->DeleteItemGraph.Load("data/UI/Delete.png");
+			this->ReturnGraph.Load("data/UI/Return.png");
 
 			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 			m_PrevItemID.resize(ViewPlayer->GetInventory().size());
@@ -371,6 +372,7 @@ namespace FPS_n2 {
 				int Height = 100;
 
 				int loop = 0;
+				bool hasItem = false;
 				for (auto& ID : ViewPlayer->GetInventory()) {
 					float Yadd = 0.f;
 					float Scale = 1.f;
@@ -417,6 +419,7 @@ namespace FPS_n2 {
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 215);
 					DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &this->m_ItembackGraph, xp1, yp1, 96.f / 512.f, 0.f, true);
 					if (DrawID != InvalidID) {
+						hasItem = true;
 						auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(DrawID);
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * Alpha));
 						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &item->GetIconGraph(), xp1, yp1 - static_cast<int>(Yadd), (128.f / 512.f) * Scale, 0.f, true);
@@ -499,6 +502,28 @@ namespace FPS_n2 {
 					yp1 += 0;
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
 						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3002));
+
+					xp1 = 1920 / 2;
+					yp1 = 720 - 32;
+					if (hasItem  && this->intParam[0]) {
+						KeyGuideParts->DrawButton(xp1 - 32/2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::ITEMDELETE));
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3004));
+						yp1 += 64;
+					}
+					if (this->intParam[0] && this->intParam[1]) {
+						KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
+
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3005));
+						if (this->floatParam[2]) {
+							//xp1 = 1920 / 2;
+							yp1 += 64;
+							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 255, 0);
+							DrawCtrls->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, &this->ReturnGraph, xp1, yp1, 100.f * this->floatParam[2], 0.f, 64.f / 128.f);
+							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+						}
+					}
 				}
 				DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 			}
@@ -566,7 +591,7 @@ namespace FPS_n2 {
 								yp2 = Y + static_cast<int>(Scale2 * cos(Angle));
 								xp3 = X - static_cast<int>(Scale2 * 1.5f * sin(Angle - deg2rad(5)));
 								yp3 = Y + static_cast<int>(Scale2 * 1.5f * cos(Angle - deg2rad(5)));
-								unsigned int Color = (loop == ViewChara->GetGunPtrNow()->GetAutoAimID()) ? Red : Green;
+								unsigned int Color = (loop == ViewChara->GetGunPtrNow()->GetAutoAimID()) ? Red : Yellow;
 								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Color, 2);
 								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp2, yp2, xp3, yp3, Color, 2);
 								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3, xp1, yp1, Color, 2);
