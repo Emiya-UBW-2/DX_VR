@@ -109,6 +109,7 @@
 0202=Armor has been Changed
 0203=You Are Dead
 0204=Kill
+0205=Delivery
 
 0300=(íçà”ï\é¶)
 

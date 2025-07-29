@@ -573,9 +573,10 @@ namespace FPS_n2 {
 									}
 									else {
 										if (m_IsAddScoreArea) {
+											auto* LocalizeParts = LocalizePool::Instance();
 											//納品
 											PlayerMngr->GetPlayer(0)->AddScore(item->GetScore());
-											SideLogParts->Add(5.0f, 0.0f, Green, ("Delivery +" + std::to_string(item->GetScore())).c_str());
+											SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(205)) + " +" + std::to_string(item->GetScore())).c_str());
 											auto* SE = SoundPool::Instance();
 											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Delivery))->Play(DX_PLAYTYPE_BACK, true);
 										}
