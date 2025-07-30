@@ -7,6 +7,8 @@ namespace FPS_n2 {
 		constexpr float FarMax = std::min(std::min(BackGround::DrawMaxXPlus, BackGround::DrawMaxZPlus), BackGround::DrawMaxYPlus) * BackGround::CellScale;
 
 		void			MainGameScene::Load_Sub(void) noexcept {
+			auto* SceneParts = SceneControl::Instance();
+			SceneParts->SetPauseEnable(false);
 			BackGround::BackGroundControl::Create();
 			Charas::GunAnimManager::Create();
 			Charas::GunAnimManager::Instance()->Load("data/CharaAnime/");
@@ -392,6 +394,9 @@ namespace FPS_n2 {
 				}
 				this->m_IsEnd = true;
 			}
+			if (this->m_IsEnd) {
+				SceneParts->SetPauseEnable(false);
+			}
 			if (this->m_IsEnd && FadeControl::Instance()->IsAll()) {
 				return false;
 			}
@@ -406,10 +411,13 @@ namespace FPS_n2 {
 			Pad->SetMouseMoveEnable(false);
 #endif
 			KeyGuideParts->ChangeGuide(
-				[]() {
+				[this]() {
 					auto* SceneParts = SceneControl::Instance();
 					auto* KeyGuideParts = KeyGuide::Instance();
-					if (SceneParts->IsPause()) {
+					if (m_IsGameClear) {
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizePool::Instance()->Get(9992));
+					}
+					else if (SceneParts->IsPause()) {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizePool::Instance()->Get(9992));
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizePool::Instance()->Get(9991));
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
@@ -453,15 +461,26 @@ namespace FPS_n2 {
 				}
 			}
 			if (m_IsGameClear) {
+				SceneParts->SetPauseEnable(false);
 				m_GameClearCount += DXLib_refParts->GetDeltaTime();
+				m_GameClearTimer += DXLib_refParts->GetDeltaTime();
 				if (m_GameClearCount > 0.05f) {
 					m_GameClearCount -= 0.05f;
 					m_GameEndScreen.GraphFilter(DX_GRAPH_FILTER_GAUSS, 32, 100);
+				}
+				if (m_GameClearTimer > 0.5f) {
+					if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
+						if (!this->m_IsEnd) {
+							FadeControl::Instance()->SetBlackOut(true);
+						}
+						this->m_IsEnd = true;
+					}
 				}
 				return true;
 			}
 			else {
 				m_GameClearCount = 0.f;
+				m_GameClearTimer = 0.f;
 			}
 
 			//FirstDoingv
@@ -469,8 +488,12 @@ namespace FPS_n2 {
 			//Input,AI
 			{
 				if (!GetIsFirstLoop()) {
+					bool Prev = IsStartedBattle();
 					this->m_StartTimer = std::max(this->m_StartTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
 					if (IsStartedBattle()) {
+						if (!Prev) {
+							SceneParts->SetPauseEnable(true);
+						}
 						this->m_BattleTimer = std::max(this->m_BattleTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
 					}
 				}
@@ -625,6 +648,7 @@ namespace FPS_n2 {
 						else {
 							//帰還する
 							m_IsGameClear = true;
+							KeyGuideParts->SetGuideFlip();
 							m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
 						}
 					}
@@ -632,6 +656,7 @@ namespace FPS_n2 {
 					else if (this->m_IsAddScoreArea && this->m_BattleTimer < 60.f && this->m_ReturnPer >= 1.f) {
 						//帰還する
 						m_IsGameClear = true;
+						KeyGuideParts->SetGuideFlip();
 						m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
 					}
 				}
@@ -958,6 +983,8 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
+			auto* SceneParts = SceneControl::Instance();
+			SceneParts->SetPauseEnable(true);
 			auto* SE = SoundPool::Instance();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->StopAll();
 			EffectSingleton::Instance()->StopEffect(Effect::ef_dust);

@@ -31,6 +31,7 @@ namespace FPS_n2 {
 			bool										m_IsGameOver = false;
 			bool										m_IsGameClear = false;
 			float										m_GameClearCount = 0.f;
+			float										m_GameClearTimer = 0.f;
 			GraphHandle									m_GameEndScreen;
 
 			Vector3DX									m_EffectPos;
