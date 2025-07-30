@@ -414,9 +414,7 @@ namespace FPS_n2 {
 				[this]() {
 					auto* SceneParts = SceneControl::Instance();
 					auto* KeyGuideParts = KeyGuide::Instance();
-					if (m_IsGameClear) {
-						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizePool::Instance()->Get(9992));
-					}
+					if (m_IsGameClear) {}
 					else if (SceneParts->IsPause()) {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizePool::Instance()->Get(9992));
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizePool::Instance()->Get(9991));
@@ -492,6 +490,7 @@ namespace FPS_n2 {
 					this->m_StartTimer = std::max(this->m_StartTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
 					if (IsStartedBattle()) {
 						if (!Prev) {
+							KeyGuideParts->SetGuideFlip();
 							SceneParts->SetPauseEnable(true);
 						}
 						this->m_BattleTimer = std::max(this->m_BattleTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
@@ -1046,6 +1045,10 @@ namespace FPS_n2 {
 			auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			auto* SceneParts = SceneControl::Instance();
+			auto* KeyGuideParts = KeyGuide::Instance();
+			auto* LocalizeParts = LocalizePool::Instance();
+
+			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 			if (ViewChara->IsAlive() && !m_IsGameClear) {
 				//レティクル表示
@@ -1081,8 +1084,38 @@ namespace FPS_n2 {
 
 			if (m_IsGameClear) {
 				DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_GameEndScreen, 0, 0, 1920, 1080, false);
-			}
+				if (m_GameClearTimer > 0.5f) {
+					//リザルト描画
+					int xp1 = 960;
+					int yp1 = 720;
+					KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
 
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3006));
+
+					xp1 = (960);
+					yp1 = (540);
+
+					float AliveTime = 180.f - m_BattleTimer;
+
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - 32, yp1, White, Black, "TIME");
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + 32, yp1, White, Black, "%d:%05.2f",
+						static_cast<int>(AliveTime / 60.0f), static_cast<float>(static_cast<int>(AliveTime) % 60) + (AliveTime - static_cast<float>(static_cast<int>(AliveTime))));
+
+					yp1 += (32 + 10);
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - 32, yp1, White, Black, "SCORE");
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + 32, yp1, White, Black, "%04d",
+						static_cast<int>(ViewPlayer->GetScore()));
+
+					xp1 = (960);
+					yp1 = (270);
+					//クリア、ハイスコアなどのアイコン
+				}
+			}
 			FadeControl::Instance()->Draw();
 		}
 	}

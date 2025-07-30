@@ -136,6 +136,7 @@
 3003=Stand up
 3004=Delivery Item
 3005=Request for return
+3006=Return Title
 
 4000=Delivery Items in containers
 4001=Get into the container and wait for the helicopter to arrive.
