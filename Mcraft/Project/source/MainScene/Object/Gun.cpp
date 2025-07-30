@@ -1023,6 +1023,8 @@ namespace FPS_n2 {
 							if (BackGround::BackGroundControl::Instance()->CheckLinetoMap(RePos, &EndPos, &Normal) != 0) {
 								Pos = EndPos + Normal * (0.5f * Scale3DRate);
 								Vect = (Vector3DX::Reflect(Vect, Normal) * 0.5f);
+								Vect.x = 0.f;
+								Vect.z = 0.f;
 								yAdd = 0.0f;
 							}
 						}

@@ -49,7 +49,12 @@ namespace FPS_n2 {
 				auto* DXLib_refParts = DXLib_ref::Instance();
 				objMove->SetMat(Matrix3x3DX::RotAxis(Vector3DX::Cross(objMove->GetVec().normalized(), objMove->GetMat().zvec()), deg2rad(-50.0f * 60.0f * DXLib_refParts->GetDeltaTime())) * objMove->GetMat());
 			}
-			void RotateOnGround(moves*) noexcept override {}//なにもしない
+			void RotateOnGround(moves* objMove) noexcept override {
+				Vector3DX Vec = objMove->GetVec();
+				Vec.x = 0.f;
+				Vec.z = 0.f;
+				objMove->SetVec(Vec);
+			}//なにもしない
 			void OnTimeEnd(const moves& objMove) noexcept override {
 				auto* OptionParts = OptionManager::Instance();
 				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {

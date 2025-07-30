@@ -281,7 +281,7 @@ namespace FPS_n2 {
 				}
 			}
 
-			for (int loop = 0; loop < 10; ++loop) {
+			for (int loop = 0; loop < 20; ++loop) {
 				Vector3DX TargetPos;
 				while (true) {
 					TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();

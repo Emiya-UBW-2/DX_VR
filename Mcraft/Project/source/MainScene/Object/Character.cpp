@@ -761,7 +761,13 @@ namespace FPS_n2 {
 					if (!GetIsRappelling()) {
 						vec.y = (GetMove().GetVec().y + (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps())));
 					}
-					else if (GetMove().GetPos().y < -50.f * Scale3DRate && IsAlive()) {
+					else if (
+						(
+							(GetMove().GetPos().y < -50.f * Scale3DRate) ||
+							(std::abs(GetMove().GetPos().x) > 20.f * Scale3DRate) ||
+							(std::abs(GetMove().GetPos().z) > 20.f * Scale3DRate))
+						&& IsAlive()
+						) {
 						SetDamage(GetMyPlayerID(), 1000, static_cast<int>(Charas::HitType::Body), GetMove().GetPos(), GetMove().GetPos());
 					}
 				}
@@ -1088,7 +1094,7 @@ namespace FPS_n2 {
 			if (GetMyPlayerID() != PlayerMngr->GetWatchPlayerID()) {
 				auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 				Vector3DX EndPos = GetEyePositionCache();
-				this->m_CanLookTarget = BackGroundParts->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0;
+				this->m_CanLookTarget = !GetIsRappelling() && BackGroundParts->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0;
 				if (this->m_CanLookTarget) {
 					this->m_CanLookTargetTimer = std::max(this->m_CanLookTargetTimer + DXLib_refParts->GetDeltaTime(), 0.f);
 				}
