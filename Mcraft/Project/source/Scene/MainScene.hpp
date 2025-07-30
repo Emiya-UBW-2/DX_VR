@@ -28,7 +28,10 @@ namespace FPS_n2 {
 			float										m_BattleTimer{ 0.0f };
 			float										m_ReturnPer{ 0.0f };
 
+			bool										m_IsGameOver = false;
 			bool										m_IsGameClear = false;
+			float										m_GameClearCount = 0.f;
+			GraphHandle									m_GameEndScreen;
 
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;

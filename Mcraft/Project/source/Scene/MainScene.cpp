@@ -90,6 +90,9 @@ namespace FPS_n2 {
 			ObjectManager::Instance()->LoadModelBefore("data/model/Helmet/");
 			ObjectManager::Instance()->LoadModelBefore("data/model/container/");
 			ObjectManager::Instance()->LoadModelBefore("data/model/circle/");
+
+			auto* WindowSizeParts = WindowSizeControl::Instance();
+			m_GameEndScreen.Make(WindowSizeParts->GetScreenXMax(), WindowSizeParts->GetScreenYMax(), false);
 		}
 		void			MainGameScene::LoadEnd_Sub(void) noexcept {
 			Objects::AmmoPool::Create();
@@ -450,7 +453,15 @@ namespace FPS_n2 {
 				}
 			}
 			if (m_IsGameClear) {
+				m_GameClearCount += DXLib_refParts->GetDeltaTime();
+				if (m_GameClearCount > 0.05f) {
+					m_GameClearCount -= 0.05f;
+					m_GameEndScreen.GraphFilter(DX_GRAPH_FILTER_GAUSS, 32, 100);
+				}
 				return true;
+			}
+			else {
+				m_GameClearCount = 0.f;
 			}
 
 			//FirstDoingv
@@ -614,12 +625,14 @@ namespace FPS_n2 {
 						else {
 							//帰還する
 							m_IsGameClear = true;
+							m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
 						}
 					}
 					//
 					else if (this->m_IsAddScoreArea && this->m_BattleTimer < 60.f && this->m_ReturnPer >= 1.f) {
 						//帰還する
 						m_IsGameClear = true;
+						m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
 					}
 				}
 
@@ -973,6 +986,7 @@ namespace FPS_n2 {
 			}
 		}
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
+			m_GameEndScreen.Dispose();
 			Objects::AmmoPool::Release();
 			Objects::AmmoLinePool::Release();
 			Objects::ItemObjPool::Release();
@@ -1037,6 +1051,11 @@ namespace FPS_n2 {
 						PingMes);
 				}
 			}
+
+			if (m_IsGameClear) {
+				DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_GameEndScreen, 0, 0, 1920, 1080, false);
+			}
+
 			FadeControl::Instance()->Draw();
 		}
 	}
