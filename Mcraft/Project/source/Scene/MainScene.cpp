@@ -406,10 +406,15 @@ namespace FPS_n2 {
 			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 
-			Pad->SetMouseMoveEnable(true);
+			if (!m_IsGameClear) {
+				Pad->SetMouseMoveEnable(true);
 #if DEBUG_NET
-			Pad->SetMouseMoveEnable(false);
+				Pad->SetMouseMoveEnable(false);
 #endif
+			}
+			else {
+				Pad->SetMouseMoveEnable(true);
+			}
 			KeyGuideParts->ChangeGuide(
 				[this]() {
 					auto* SceneParts = SceneControl::Instance();
@@ -1085,9 +1090,12 @@ namespace FPS_n2 {
 			if (m_IsGameClear) {
 				DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_GameEndScreen, 0, 0, 1920, 1080, false);
 				if (m_GameClearTimer > 0.5f) {
+					float Per = std::clamp((m_GameClearTimer - 0.5f) / 1.f, 0.f, 1.f);
+					float LocalPer = 0.f;
+					float Value = 0.f;
 					//リザルト描画
 					int xp1 = 960;
-					int yp1 = 720;
+					int yp1 = 860;
 					KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
 
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
@@ -1096,21 +1104,48 @@ namespace FPS_n2 {
 					xp1 = (960);
 					yp1 = (540);
 
-					float AliveTime = 180.f - m_BattleTimer;
-
+					LocalPer = std::clamp((Per - 0.f) / (0.2f - 0.f), 0.f, 1.f);
+					Value = Lerp(0.f, 180.f - m_BattleTimer, LocalPer);
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - 32, yp1, White, Black, "TIME");
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
 						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + 32, yp1, White, Black, "%d:%05.2f",
-						static_cast<int>(AliveTime / 60.0f), static_cast<float>(static_cast<int>(AliveTime) % 60) + (AliveTime - static_cast<float>(static_cast<int>(AliveTime))));
+						static_cast<int>(Value / 60.0f), static_cast<float>(static_cast<int>(Value) % 60) + (Value - static_cast<float>(static_cast<int>(Value))));
 
 					yp1 += (32 + 10);
+					LocalPer = std::clamp((Per - 0.25f) / (0.45f - 0.25f), 0.f, 1.f);
+					Value = Lerp(0.f, static_cast<float>(ViewPlayer->GetScore()), LocalPer);
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - 32, yp1, White, Black, "SCORE");
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
 						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + 32, yp1, White, Black, "%04d",
-						static_cast<int>(ViewPlayer->GetScore()));
+						static_cast<int>(Value));
 
+					yp1 += (32 + 10);
+					LocalPer = std::clamp((Per - 0.5f) / (0.7f - 0.5f), 0.f, 1.f);
+					Value = Lerp(0.f, static_cast<float> (ViewPlayer->GetKill()), LocalPer);
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - 32, yp1, White, Black, "KILL");
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + 32, yp1, White, Black, "%d",
+						static_cast<int>(Value));
+
+					if (ViewPlayer->GetShot() > 0) {
+						yp1 += (32 + 10);
+						LocalPer = std::clamp((Per - 0.75f) / (0.95f - 0.75f), 0.f, 1.f);
+						Value = Lerp(0.f, 100.f * static_cast<float>(ViewPlayer->GetHit()) / ViewPlayer->GetShot(), LocalPer);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - 32, yp1, White, Black, "HIT RATE");
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + 32, yp1, White, Black, "%05.2f %",
+							Value);
+					}
+
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					xp1 = (960);
 					yp1 = (270);
 					//クリア、ハイスコアなどのアイコン
