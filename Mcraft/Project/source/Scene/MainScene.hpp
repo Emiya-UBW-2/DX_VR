@@ -31,8 +31,10 @@ namespace FPS_n2 {
 			bool										m_IsGameOver = false;
 			bool										m_IsGameClear = false;
 			float										m_GameClearCount = 0.f;
+			float										m_GameClearCount2 = 0.f;
 			float										m_GameClearTimer = 0.f;
 			GraphHandle									m_GameEndScreen;
+			GraphHandle									m_ResultGraph;
 
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
@@ -40,6 +42,9 @@ namespace FPS_n2 {
 			MV1											m_RagDoll;
 			float										AberrationPower{ 1.f };
 			bool										m_IsAddScoreArea = false;
+
+			int											m_m_LimitAlarmCount{};
+			float										m_LimitAlarmTimer{ 0.0f };
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
 				if (this->m_NetWorkController) {

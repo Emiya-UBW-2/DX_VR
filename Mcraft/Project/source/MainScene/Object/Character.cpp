@@ -37,7 +37,7 @@ namespace FPS_n2 {
 				return Lerp(1.5f, 1.f, static_cast<float>(gram) / 20000);
 			}
 			else if (gram < 80000) {
-				return Lerp(1.f, 0.25f, static_cast<float>(gram - 20000) / (80000 - 20000));
+				return Lerp(1.f, 0.45f, static_cast<float>(gram - 20000) / (80000 - 20000));
 			}
 			else {
 				return 0.25f;
@@ -764,8 +764,8 @@ namespace FPS_n2 {
 					else if (
 						(
 							(GetMove().GetPos().y < -50.f * Scale3DRate) ||
-							(std::abs(GetMove().GetPos().x) > 20.f * Scale3DRate) ||
-							(std::abs(GetMove().GetPos().z) > 20.f * Scale3DRate))
+							(std::abs(GetMove().GetPos().x) > 16.f * Scale3DRate) ||
+							(std::abs(GetMove().GetPos().z) > 16.f * Scale3DRate))
 						&& IsAlive()
 						) {
 						SetDamage(GetMyPlayerID(), 1000, static_cast<int>(Charas::HitType::Body), GetMove().GetPos(), GetMove().GetPos());

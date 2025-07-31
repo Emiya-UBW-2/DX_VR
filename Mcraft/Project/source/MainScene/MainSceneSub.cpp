@@ -98,7 +98,11 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::GetItem), 4, "data/Sound/SE/getitem.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::PutItem), 4, "data/Sound/SE/putitem.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Delivery), 2, "data/Sound/SE/Delivery.wav", false);
-
+			//
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::resultEnv), 2, "data/Sound/SE/resultEnv.wav", false);
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::resultbutton), 2, "data/Sound/SE/resultbutton.wav", false);
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::alarm), 2, "data/Sound/SE/alarm.wav", false);
+			
 			for (int loop = 0; loop < 6; ++loop) {
 				SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Cocking1_0) + loop, 4, "data/Sound/SE/gun/autoM870/" + std::to_string(loop) + ".wav");
 				SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Cocking2_0) + loop, 4, "data/Sound/SE/gun/autoM16/" + std::to_string(loop) + ".wav");
@@ -166,6 +170,9 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::GetItem));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::PutItem));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Delivery));
+			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::resultEnv));
+			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::resultbutton));
+			
 			for (int loop = 0; loop < 6; ++loop) {
 				SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Cocking1_0) + loop);
 				SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Cocking2_0) + loop);

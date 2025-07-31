@@ -95,6 +95,8 @@ namespace FPS_n2 {
 
 			auto* WindowSizeParts = WindowSizeControl::Instance();
 			m_GameEndScreen.Make(WindowSizeParts->GetScreenXMax(), WindowSizeParts->GetScreenYMax(), false);
+
+			m_ResultGraph.Load("data/UI/result.png");
 		}
 		void			MainGameScene::LoadEnd_Sub(void) noexcept {
 			Objects::AmmoPool::Create();
@@ -464,25 +466,50 @@ namespace FPS_n2 {
 				}
 			}
 			if (m_IsGameClear) {
+				auto* SE = SoundPool::Instance();
+
 				SceneParts->SetPauseEnable(false);
 				m_GameClearCount += DXLib_refParts->GetDeltaTime();
 				m_GameClearTimer += DXLib_refParts->GetDeltaTime();
 				if (m_GameClearCount > 0.05f) {
 					m_GameClearCount -= 0.05f;
 					m_GameEndScreen.GraphFilter(DX_GRAPH_FILTER_GAUSS, 32, 100);
+					//
+					if (m_GameClearTimer > 0.5f) {
+						float Per = (m_GameClearTimer - 0.5f) / 2.f;
+						float LocalPer = 0.f;
+						const float LerpPer = 0.5f;
+
+						for (int loop = 0; loop < 4; ++loop) {
+							LocalPer = std::clamp((Per - (LerpPer + 0.1f) * loop) / LerpPer, 0.f, 1.f);
+							if (0.f < LocalPer && LocalPer < 1.f) {
+								if ((loop == 3) && (ViewPlayer->GetShot() == 0)) {
+									continue;
+								}
+								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultbutton))->Play(DX_PLAYTYPE_BACK, true);
+								break;
+							}
+						}
+					}
 				}
 				if (m_GameClearTimer > 0.5f) {
 					if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
 						if (!this->m_IsEnd) {
 							FadeControl::Instance()->SetBlackOut(true);
+							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
 						}
 						this->m_IsEnd = true;
 					}
 				}
+				if (m_GameClearTimer >= 2.f) {
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->SetLocalVolume(static_cast<int>(Lerp(255, 0, std::clamp(m_GameClearTimer / 2.f, 0.f, 1.f))));
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli2))->SetLocalVolume(static_cast<int>(Lerp(255, 0, std::clamp(m_GameClearTimer / 2.f, 0.f, 1.f))));
+				}
+
 				return true;
 			}
 			else {
-				m_GameClearCount = 0.f;
+				m_GameClearCount = 0.6f;
 				m_GameClearTimer = 0.f;
 			}
 
@@ -499,6 +526,57 @@ namespace FPS_n2 {
 							SceneParts->SetPauseEnable(true);
 						}
 						this->m_BattleTimer = std::max(this->m_BattleTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
+
+						if (!m_IsGameClear) {
+							if (this->m_BattleTimer < 4.f * 5.f + 10.f) {
+								this->m_LimitAlarmTimer += DXLib_refParts->GetDeltaTime();
+								//
+								int Count = 0;
+								if (this->m_BattleTimer < 4.f * 4.f + 5.f) {
+									Count = 1;
+								}
+								if (this->m_BattleTimer < 4.f * 3.f + 5.f) {
+									Count = 2;
+								}
+								if (this->m_BattleTimer < 4.f * 2.f + 5.f) {
+									Count = 3;
+								}
+								if (this->m_BattleTimer < 4.f * 1.f + 5.f) {
+									Count = 4;
+								}
+
+								if (this->m_LimitAlarmTimer > 0.125f) {
+									this->m_LimitAlarmTimer -= 0.125f;
+									bool value = false;
+									switch (Count) {
+									case 0:
+										value = ((((this->m_m_LimitAlarmCount) % 4) == 0)) && ((this->m_m_LimitAlarmCount) % 8 < 4);
+										break;
+									case 1:
+										value = ((((this->m_m_LimitAlarmCount) % 4) == 0) || (((this->m_m_LimitAlarmCount) % 4) == 2)) && ((this->m_m_LimitAlarmCount) % 8 < 4);
+										break;
+									case 2:
+										value = ((((this->m_m_LimitAlarmCount) % 4) == 0) || (((this->m_m_LimitAlarmCount) % 4) == 1) || (((this->m_m_LimitAlarmCount) % 4) == 2)) && ((this->m_m_LimitAlarmCount) % 8 < 4);
+										break;
+									case 3:
+										value = true && ((this->m_m_LimitAlarmCount) % 8 < 4);
+										break;
+									default:
+										value = true;
+										break;
+									}
+									if (value) {
+										auto* SE = SoundPool::Instance();
+										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::alarm))->Play(DX_PLAYTYPE_BACK, true);
+									}
+									++this->m_m_LimitAlarmCount;
+								}
+							}
+							else {
+								this->m_m_LimitAlarmCount = 0;
+								this->m_LimitAlarmTimer = 0.f;
+							}
+						}
 					}
 				}
 				MyInput.ResetAllInput();
@@ -654,6 +732,8 @@ namespace FPS_n2 {
 							m_IsGameClear = true;
 							KeyGuideParts->SetGuideFlip();
 							m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
+							auto* SE = SoundPool::Instance();
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
 						}
 					}
 					//
@@ -662,6 +742,8 @@ namespace FPS_n2 {
 						m_IsGameClear = true;
 						KeyGuideParts->SetGuideFlip();
 						m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
+						auto* SE = SoundPool::Instance();
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
 					}
 				}
 
@@ -969,6 +1051,10 @@ namespace FPS_n2 {
 			//UIパラメーター
 			{
 				if ((this->m_IsAddScoreArea && this->m_BattleTimer < 60.f) && Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().press()) {
+					if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
+						auto* SE = SoundPool::Instance();
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
+					}
 					this->m_ReturnPer = std::clamp(this->m_ReturnPer + DXLib_refParts->GetDeltaTime() / 5.f, 0.f, 1.f);
 				}
 				else {
@@ -991,6 +1077,7 @@ namespace FPS_n2 {
 			SceneParts->SetPauseEnable(true);
 			auto* SE = SoundPool::Instance();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->StopAll();
+			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->StopAll();
 			EffectSingleton::Instance()->StopEffect(Effect::ef_dust);
 			//使い回しオブジェ系
 			BackGround::BackGroundControl::Instance()->Dispose();
@@ -1018,6 +1105,7 @@ namespace FPS_n2 {
 		}
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
 			m_GameEndScreen.Dispose();
+			m_ResultGraph.Dispose();
 			Objects::AmmoPool::Release();
 			Objects::AmmoLinePool::Release();
 			Objects::ItemObjPool::Release();
@@ -1090,9 +1178,10 @@ namespace FPS_n2 {
 			if (m_IsGameClear) {
 				DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_GameEndScreen, 0, 0, 1920, 1080, false);
 				if (m_GameClearTimer > 0.5f) {
-					float Per = std::clamp((m_GameClearTimer - 0.5f) / 1.f, 0.f, 1.f);
+					float Per = (m_GameClearTimer - 0.5f) / 2.f;
 					float LocalPer = 0.f;
 					float Value = 0.f;
+					const float LerpPer = 0.5f;
 					//リザルト描画
 					int xp1 = 960;
 					int yp1 = 860;
@@ -1104,51 +1193,57 @@ namespace FPS_n2 {
 					xp1 = (960);
 					yp1 = (540);
 
-					LocalPer = std::clamp((Per - 0.f) / (0.2f - 0.f), 0.f, 1.f);
+					LocalPer = std::clamp((Per - 0.f) / LerpPer, 0.f, 1.f);
 					Value = Lerp(0.f, 180.f - m_BattleTimer, LocalPer);
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - 32, yp1, White, Black, "TIME");
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "TIME");
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + 32, yp1, White, Black, "%d:%05.2f",
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%d:%05.2f",
 						static_cast<int>(Value / 60.0f), static_cast<float>(static_cast<int>(Value) % 60) + (Value - static_cast<float>(static_cast<int>(Value))));
 
 					yp1 += (32 + 10);
-					LocalPer = std::clamp((Per - 0.25f) / (0.45f - 0.25f), 0.f, 1.f);
+					LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 1.f) / LerpPer, 0.f, 1.f);
 					Value = Lerp(0.f, static_cast<float>(ViewPlayer->GetScore()), LocalPer);
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - 32, yp1, White, Black, "SCORE");
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "SCORE");
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + 32, yp1, White, Black, "%04d",
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%04d",
 						static_cast<int>(Value));
 
 					yp1 += (32 + 10);
-					LocalPer = std::clamp((Per - 0.5f) / (0.7f - 0.5f), 0.f, 1.f);
+					LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 2.f) / LerpPer, 0.f, 1.f);
 					Value = Lerp(0.f, static_cast<float> (ViewPlayer->GetKill()), LocalPer);
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - 32, yp1, White, Black, "KILL");
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "KILL");
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + 32, yp1, White, Black, "%d",
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%d",
 						static_cast<int>(Value));
 
 					if (ViewPlayer->GetShot() > 0) {
 						yp1 += (32 + 10);
-						LocalPer = std::clamp((Per - 0.75f) / (0.95f - 0.75f), 0.f, 1.f);
+						LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 3.f) / LerpPer, 0.f, 1.f);
 						Value = Lerp(0.f, 100.f * static_cast<float>(ViewPlayer->GetHit()) / ViewPlayer->GetShot(), LocalPer);
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - 32, yp1, White, Black, "HIT RATE");
+							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "HIT RATE");
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + 32, yp1, White, Black, "%05.2f %",
+							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%05.2f %%",
 							Value);
 					}
 
-					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					xp1 = (960);
 					yp1 = (270);
-					//クリア、ハイスコアなどのアイコン
+					LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 5.f) / 0.1f, 0.f, 1.f);
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
+					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_ResultGraph, xp1 - static_cast<int>(256.f * LocalPer), yp1 - static_cast<int>(128.f * LocalPer), xp1 + static_cast<int>(256.f * LocalPer), yp1 + static_cast<int>(128.f * LocalPer), true);
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+
+
+					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
 			}
 			FadeControl::Instance()->Draw();

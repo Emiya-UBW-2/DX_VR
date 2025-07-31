@@ -132,6 +132,10 @@ namespace FPS_n2 {
 		Tank_move,
 		//
 		Tinnitus,
+		//
+		resultEnv,
+		resultbutton,
+		alarm,
 	};
 	enum class CharaTypeID {
 		Team,
