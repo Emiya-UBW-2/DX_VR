@@ -158,18 +158,7 @@ namespace FPS_n2 {
 				}
 				else {
 					Charas::CharacterObj::LoadChara("Soldier", (PlayerID)loop);
-
-					int Rand = GetRand(100);
-					int rate = 100 / 3;
-					if (Rand < rate) {
-						chara->LoadCharaGun("type89", 0);
-					}
-					else if (Rand < rate * 2) {
-						chara->LoadCharaGun("AK12", 0);
-					}
-					else {
-						chara->LoadCharaGun("AKS-74", 0);
-					}
+					chara->LoadCharaGun("AK12E", 0);
 					//chara->LoadCharaGun("MP443", 1);
 					//chara->LoadCharaGun("RGD5", 2);
 					//ラグドール
@@ -1238,7 +1227,14 @@ namespace FPS_n2 {
 					yp1 = (270);
 					LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 5.f) / 0.1f, 0.f, 1.f);
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
-					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 0);
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+
+					if (LocalPer < 0.8f) {
+						LocalPer = Lerp(5.f, 0.9f, (LocalPer - 0.f) / (0.8f - 0.0f));
+					}
+					else {
+						LocalPer = Lerp(0.9f, 1.f, (LocalPer - 0.8f) / (1.f - 0.8f));
+					}
 					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_ResultGraph, xp1 - static_cast<int>(256.f * LocalPer), yp1 - static_cast<int>(128.f * LocalPer), xp1 + static_cast<int>(256.f * LocalPer), yp1 + static_cast<int>(128.f * LocalPer), true);
 					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 
