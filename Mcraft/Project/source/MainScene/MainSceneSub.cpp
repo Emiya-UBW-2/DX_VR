@@ -224,7 +224,7 @@ namespace FPS_n2 {
 			for (int loop = 0; loop < m_ItemAnimTimer.size(); ++loop) {
 				m_ItemAnimTimer.at(loop) = 0.f;
 			}
-			m_Score = ViewPlayer->GetScore();
+			m_Score = static_cast<float>(ViewPlayer->GetScore());
 		}
 		void			MainSceneUI::Update(void) noexcept {
 			auto* PlayerMngr = Player::PlayerManager::Instance();
@@ -339,7 +339,7 @@ namespace FPS_n2 {
 			}
 
 			{
-				float Score = ViewPlayer->GetScore();
+				float Score = static_cast<float>(ViewPlayer->GetScore());
 				if (std::abs(Score - m_Score) > 5.f) {
 					Easing(&m_Score, Score, 0.95f, EasingType::OutExpo);
 				}

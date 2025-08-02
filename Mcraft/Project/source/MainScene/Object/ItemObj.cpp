@@ -6,11 +6,15 @@ const FPS_n2::Objects::ItemObjPool* SingletonBase<FPS_n2::Objects::ItemObjPool>:
 namespace FPS_n2 {
 	namespace Objects {
 		void ItemObj::FirstUpdate(void) noexcept {
-			if (!IsActive()) { return; }
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 
+			if (!IsActive()) { return; }
+
 			this->m_Timer += DXLib_refParts->GetDeltaTime();
+
+			if (CanPick() && !((IsDraw(0) || IsDraw(1) || IsDraw(2)))) { return; }
+
 			Vector3DX PosBuf = GetMove().GetPos();
 			PosBuf = PosBuf + GetMove().GetVec() * DXLib_refParts->GetDeltaTime() + Vector3DX::up() * this->m_yAdd;
 			this->m_yAdd += (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps()));

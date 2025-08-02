@@ -199,6 +199,7 @@ namespace FPS_n2 {
 			auto* CameraParts = Camera3D::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
 			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
+			auto* SE = SoundPool::Instance();
 			//
 			CommonBattleResource::Set();
 			EffectSingleton::Create();
@@ -355,7 +356,6 @@ namespace FPS_n2 {
 			this->m_BattleTimer = 180.f;
 			this->m_ReturnPer = 0.f;
 
-			auto* SE = SoundPool::Instance();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
 
 			//Vector3DX posBuf = Matrix3x3DX::Vtrans(Vector3DX::forward() * (15.0f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
@@ -375,6 +375,8 @@ namespace FPS_n2 {
 			auto* NetBrowser = NetWorkBrowser::Instance();
 			auto* OptionParts = OptionManager::Instance();
 			auto* SideLogParts = SideLog::Instance();
+			auto* SE = SoundPool::Instance();
+			auto* LocalizeParts = LocalizePool::Instance();
 
 			PlayerMngr->SetWatchPlayerID(GetViewPlayerID());
 			PostPassParts->SetLevelFilter(38, 154, 1.0f);
@@ -455,8 +457,6 @@ namespace FPS_n2 {
 				}
 			}
 			if (m_IsGameClear) {
-				auto* SE = SoundPool::Instance();
-
 				SceneParts->SetPauseEnable(false);
 				m_GameClearCount += DXLib_refParts->GetDeltaTime();
 				m_GameClearTimer += DXLib_refParts->GetDeltaTime();
@@ -555,7 +555,6 @@ namespace FPS_n2 {
 										break;
 									}
 									if (value) {
-										auto* SE = SoundPool::Instance();
 										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::alarm))->Play(DX_PLAYTYPE_BACK, true);
 									}
 									++this->m_m_LimitAlarmCount;
@@ -678,11 +677,9 @@ namespace FPS_n2 {
 									}
 									else {
 										if (m_IsAddScoreArea) {
-											auto* LocalizeParts = LocalizePool::Instance();
 											//納品
 											PlayerMngr->GetPlayer(0)->AddScore(item->GetScore());
 											SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(205)) + " +" + std::to_string(item->GetScore())).c_str());
-											auto* SE = SoundPool::Instance();
 											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Delivery))->Play(DX_PLAYTYPE_BACK, true);
 										}
 										else {
@@ -697,7 +694,6 @@ namespace FPS_n2 {
 										}
 									}
 									ViewPlayer->SubInventoryIndex(loop);
-									auto* SE = SoundPool::Instance();
 									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::PutItem))->Play(DX_PLAYTYPE_BACK, true);
 								}
 							}
@@ -721,7 +717,6 @@ namespace FPS_n2 {
 							m_IsGameClear = true;
 							KeyGuideParts->SetGuideFlip();
 							m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
-							auto* SE = SoundPool::Instance();
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
 						}
 					}
@@ -731,7 +726,6 @@ namespace FPS_n2 {
 						m_IsGameClear = true;
 						KeyGuideParts->SetGuideFlip();
 						m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
-						auto* SE = SoundPool::Instance();
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
 					}
 				}
@@ -838,72 +832,71 @@ namespace FPS_n2 {
 
 			PlayerMngr->m_FindCount = std::max(PlayerMngr->m_FindCount - DXLib_refParts->GetDeltaTime(), 0.f);
 			//ほかプレイヤーとの判定
-			if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//オンライン
+			{
 				float Radius = 2.0f * 1.f * Scale3DRate;
-				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-					auto& player = PlayerMngr->GetPlayer(loop);
-					auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
-					if (!chara->IsAlive()) { continue; }
-					if (chara->GetIsRappelling()) { continue; }
-					auto Dir = chara->GetEyeRotationCache().zvec() * -1.f;
-					auto Dir_XZ = Dir; Dir_XZ.y = (0.f);
+				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//オンライン
+					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
+						auto& player = PlayerMngr->GetPlayer(loop);
+						auto& chara = player->GetChara();
+						if (!chara->IsAlive()) { continue; }
+						if (chara->GetIsRappelling()) { continue; }
+						auto Dir = chara->GetEyeRotationCache().zvec() * -1.f;
+						auto Dir_XZ = Dir; Dir_XZ.y = (0.f);
 
-					//自分が当たったら押し出す
-					for (auto& g : Objects::ItemObjPool::Instance()->GetList()) {
-						if (!g->IsActive()) { continue; }
-						if (!g->CanPick()) { continue; }
-						Vector3DX Vec = (chara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
-						float Len = Vec.magnitude();
-						if (Len < Radius) {
-							Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
-							if (
-								(player->HasEmptyInventory() != 0) &&
-								((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized() * -1.f)) > 0.f) &&
-								(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
-								) {
-								player->AddInventory(g->GetUniqueID());
-								auto* SE = SoundPool::Instance();
-								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::GetItem))->Play(DX_PLAYTYPE_BACK, true);
-								g->SetActive(false);
-								continue;
-							}
-							else {
-								g->SetMove().SetPos(g->GetMove().GetPos() + Vec.normalized() * (Len - Radius));
-								g->SetMove().Update(0.f, 0.f);
+						//自分が当たったら押し出す
+						for (auto& g : Objects::ItemObjPool::Instance()->GetList()) {
+							if (!g->IsActive()) { continue; }
+							Vector3DX Vec = (chara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
+							float Len = Vec.magnitude();
+							if (Len < Radius) {
+								Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
+								if (
+									g->CanPick() &&
+									(player->HasEmptyInventory() != 0) &&
+									((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized() * -1.f)) > 0.f) &&
+									(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
+									) {
+									player->AddInventory(g->GetUniqueID());
+									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::GetItem))->Play(DX_PLAYTYPE_BACK, true);
+									g->SetActive(false);
+									continue;
+								}
+								else {
+									g->SetMove().SetPos(g->GetMove().GetPos() + Vec.normalized() * (Len - Radius));
+									g->SetMove().Update(0.f, 0.f);
+								}
 							}
 						}
 					}
 				}
-			}
-			else {
-				if (ViewChara->IsAlive()) {
-					float Radius = 2.0f * 1.f * Scale3DRate;
-					//自分が当たったら押し出す 取れるなら取る
-					auto Dir = ViewChara->GetEyeRotationCache().zvec() * -1.f;
-					auto Dir_XZ = Dir; Dir_XZ.y = (0.f);
+				else {
+					if (ViewChara->IsAlive()) {
+						//自分が当たったら押し出す 取れるなら取る
+						auto Dir = ViewChara->GetEyeRotationCache().zvec() * -1.f;
+						auto Dir_XZ = Dir; Dir_XZ.y = (0.f);
 
-					//自分が当たったら押し出す
-					for (auto& g : Objects::ItemObjPool::Instance()->GetList()) {
-						if (!g->IsActive()) { continue; }
-						if (!g->CanPick()) { continue; }
-						Vector3DX Vec = (ViewChara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
-						float Len = Vec.magnitude();
-						if (Len < Radius) {
-							Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
-							if (
-								(ViewPlayer->HasEmptyInventory() != 0) &&
-								((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized() * -1.f)) > 0.f) &&
-								(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
-								) {
-								ViewPlayer->AddInventory(g->GetUniqueID());
-								auto* SE = SoundPool::Instance();
-								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::GetItem))->Play(DX_PLAYTYPE_BACK, true);
-								g->SetActive(false);
-								continue;
-							}
-							else {
-								g->SetMove().SetPos(g->GetMove().GetPos() + Vec.normalized() * (Len - Radius));
-								g->SetMove().Update(0.f, 0.f);
+						//自分が当たったら押し出す
+						for (auto& g : Objects::ItemObjPool::Instance()->GetList()) {
+							if (!g->IsActive()) { continue; }
+							Vector3DX Vec = (ViewChara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
+							float Len = Vec.magnitude();
+							if (Len < Radius) {
+								Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
+								if (
+									g->CanPick() &&
+									(ViewPlayer->HasEmptyInventory() != 0) &&
+									((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized() * -1.f)) > 0.f) &&
+									(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
+									) {
+									ViewPlayer->AddInventory(g->GetUniqueID());
+									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::GetItem))->Play(DX_PLAYTYPE_BACK, true);
+									g->SetActive(false);
+									continue;
+								}
+								else {
+									g->SetMove().SetPos(g->GetMove().GetPos() + Vec.normalized() * (Len - Radius));
+									g->SetMove().Update(0.f, 0.f);
+								}
 							}
 						}
 					}
@@ -1000,7 +993,6 @@ namespace FPS_n2 {
 					(CamChara->IsLowHP()) ? (10.f + GetRandf(30.f)) : 1.f,
 					0.95f, EasingType::OutExpo);
 				if (CamChara->PopHeadShotSwitch()) {
-					auto* SE = SoundPool::Instance();
 					SE->Get(SoundType::SE, (int)SoundEnum::Tinnitus)->Play3D(CamChara->GetEyePositionCache(), Scale3DRate * 50.f);
 					CamChara->SetHeadShot();
 					AberrationPower = 30.f;
@@ -1041,7 +1033,6 @@ namespace FPS_n2 {
 			{
 				if ((this->m_IsAddScoreArea && this->m_BattleTimer < 60.f) && Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().press()) {
 					if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
-						auto* SE = SoundPool::Instance();
 						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
 					}
 					this->m_ReturnPer = std::clamp(this->m_ReturnPer + DXLib_refParts->GetDeltaTime() / 5.f, 0.f, 1.f);
@@ -1063,8 +1054,9 @@ namespace FPS_n2 {
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
 			auto* SceneParts = SceneControl::Instance();
-			SceneParts->SetPauseEnable(true);
 			auto* SE = SoundPool::Instance();
+			auto* PostPassParts = PostPassEffect::Instance();
+			SceneParts->SetPauseEnable(true);
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->StopAll();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->StopAll();
 			EffectSingleton::Instance()->StopEffect(Effect::ef_dust);
@@ -1075,7 +1067,6 @@ namespace FPS_n2 {
 				this->m_NetWorkController.reset();
 			}
 			{
-				auto* PostPassParts = PostPassEffect::Instance();
 				PostPassParts->SetLevelFilter(0, 255, 1.0f);
 				PostPassParts->SetAberrationPower(1.0f);
 				PostPassParts->Set_is_Blackout(false);
