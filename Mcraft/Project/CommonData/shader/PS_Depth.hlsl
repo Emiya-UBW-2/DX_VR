@@ -55,7 +55,7 @@ PS_OUTPUT main(PS_INPUT PSInput)
     float Diff = (Tex1 - Tex2) / 10.f;
 
 	// 出力カラー = テクスチャカラー * ディフューズカラー
-    PSOutput.color0.rgb = float3(1, 0, 0);
+    PSOutput.color0.rgb = float3(1, 1, 1);
     if (Tex2 > 0.f && 1.f > Diff && Diff > 0.f)
     {
         PSOutput.color0.a = 1.f - Diff;

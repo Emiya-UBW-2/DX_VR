@@ -154,7 +154,7 @@ namespace FPS_n2 {
 					}
 					chara->LoadCharaGun("RGD5", 2);
 					//ラグドール
-					chara->SetupRagDoll(m_MainRagDoll);
+					chara->SetupRagDoll(this->m_MainRagDoll);
 				}
 				else {
 					Charas::CharacterObj::LoadChara("Soldier", (PlayerID)loop);
@@ -162,7 +162,7 @@ namespace FPS_n2 {
 					//chara->LoadCharaGun("MP443", 1);
 					//chara->LoadCharaGun("RGD5", 2);
 					//ラグドール
-					chara->SetupRagDoll(m_RagDoll);
+					chara->SetupRagDoll(this->m_RagDoll);
 				}
 				//
 				chara->SetPlayerID((PlayerID)loop);
@@ -353,7 +353,7 @@ namespace FPS_n2 {
 			FadeControl::Instance()->Init();
 			this->m_IsEnd = false;
 			this->m_StartTimer = 3.0f;
-			this->m_BattleTimer = 180.f;
+			this->m_BattleTimer = 30.f;
 			this->m_ReturnPer = 0.f;
 
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
@@ -377,6 +377,7 @@ namespace FPS_n2 {
 			auto* SideLogParts = SideLog::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* LocalizeParts = LocalizePool::Instance();
+			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 
 			PlayerMngr->SetWatchPlayerID(GetViewPlayerID());
 			PostPassParts->SetLevelFilter(38, 154, 1.0f);
@@ -391,7 +392,13 @@ namespace FPS_n2 {
 				SceneParts->SetPauseEnable(false);
 			}
 			if (this->m_IsEnd && FadeControl::Instance()->IsAll()) {
-				return false;
+				m_FadeoutEndTimer += DXLib_refParts->GetDeltaTime();
+				if (this->m_FadeoutEndTimer > 2.f) {
+					return false;
+				}
+			}
+			else {
+				m_FadeoutEndTimer = 0.f;
 			}
 
 			FadeControl::Instance()->Update();
@@ -412,7 +419,7 @@ namespace FPS_n2 {
 				[this]() {
 					auto* SceneParts = SceneControl::Instance();
 					auto* KeyGuideParts = KeyGuide::Instance();
-					if (m_IsGameClear) {}
+					if (this->m_IsGameClear) {}
 					else if (SceneParts->IsPause()) {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizePool::Instance()->Get(9992));
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizePool::Instance()->Get(9991));
@@ -456,16 +463,16 @@ namespace FPS_n2 {
 					return true;
 				}
 			}
-			if (m_IsGameClear) {
+			if (this->m_IsGameClear) {
 				SceneParts->SetPauseEnable(false);
 				m_GameClearCount += DXLib_refParts->GetDeltaTime();
 				m_GameClearTimer += DXLib_refParts->GetDeltaTime();
-				if (m_GameClearCount > 0.05f) {
+				if (this->m_GameClearCount > 0.05f && !m_IsGameClearEnd) {
 					m_GameClearCount -= 0.05f;
 					m_GameEndScreen.GraphFilter(DX_GRAPH_FILTER_GAUSS, 32, 100);
 					//
-					if (m_GameClearTimer > 0.5f) {
-						float Per = (m_GameClearTimer - 0.5f) / 2.f;
+					if (this->m_GameClearTimer > 1.5f) {
+						float Per = (this->m_GameClearTimer - 1.5f) / 2.f;
 						float LocalPer = 0.f;
 						const float LerpPer = 0.5f;
 
@@ -479,9 +486,14 @@ namespace FPS_n2 {
 								break;
 							}
 						}
+
+						if (this->m_GameClearTimer > 1.5f + (0.5f + 0.1f) * 5.f * 2.f) {
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnd))->Play(DX_PLAYTYPE_BACK, true);
+							m_IsGameClearEnd = true;
+						}
 					}
 				}
-				if (m_GameClearTimer > 0.5f) {
+				if (this->m_GameClearTimer > 1.5f) {
 					if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
 						if (!this->m_IsEnd) {
 							FadeControl::Instance()->SetBlackOut(true);
@@ -490,9 +502,9 @@ namespace FPS_n2 {
 						this->m_IsEnd = true;
 					}
 				}
-				if (m_GameClearTimer >= 2.f) {
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->SetLocalVolume(static_cast<int>(Lerp(255, 0, std::clamp(m_GameClearTimer / 2.f, 0.f, 1.f))));
-					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli2))->SetLocalVolume(static_cast<int>(Lerp(255, 0, std::clamp(m_GameClearTimer / 2.f, 0.f, 1.f))));
+				if (this->m_GameClearTimer >= 2.f) {
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->SetLocalVolume(static_cast<int>(Lerp(255, 0, std::clamp(this->m_GameClearTimer / 2.f, 0.f, 1.f))));
+					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli2))->SetLocalVolume(static_cast<int>(Lerp(255, 0, std::clamp(this->m_GameClearTimer / 2.f, 0.f, 1.f))));
 				}
 
 				return true;
@@ -503,7 +515,9 @@ namespace FPS_n2 {
 			}
 
 			//FirstDoingv
-			if (GetIsFirstLoop()) {}
+			if (GetIsFirstLoop()) {
+				m_IsFindContainer = false;
+			}
 			//Input,AI
 			{
 				if (!GetIsFirstLoop()) {
@@ -514,7 +528,55 @@ namespace FPS_n2 {
 							KeyGuideParts->SetGuideFlip();
 							SceneParts->SetPauseEnable(true);
 						}
+						float prevBattleTimer = this->m_BattleTimer;
 						this->m_BattleTimer = std::max(this->m_BattleTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
+
+						bool PrevFindContainer = m_IsFindContainer;
+						if (!m_IsFindContainer) {
+							if (PlayerMngr->GetItemContainerObj()) {
+								Vector3DX StartPos = PlayerMngr->GetItemContainerObj()->GetMove().GetPos() + Vector3DX::up() * 1.0f * Scale3DRate;
+								Vector3DX EndPos = ViewChara->GetEyePositionCache();
+
+								StartPos = StartPos - ((StartPos - EndPos).normalized()*(3.f*Scale3DRate));
+								if (BackGroundParts->CheckLinetoMap(StartPos, &EndPos) == 0) {
+									m_IsFindContainer = true;
+								}
+							}
+						}
+						if (!this->m_IsEnd) {
+							if (this->m_IsFindContainer) {
+								m_FindContainerTimer += DXLib_refParts->GetDeltaTime();
+								if (!PrevFindContainer) {
+									if (static_cast<int>(this->m_BattleTimer) > 60) {
+										SideLogParts->Add(5.0f, 0.0f, Red, LocalizeParts->Get(4001));
+									}
+									else if (static_cast<int>(this->m_BattleTimer) < 60) {
+										SideLogParts->Add(5.0f, 0.0f, Red, LocalizeParts->Get(4002));
+									}
+									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
+									m_AnnounceTimer = 1.f;
+								}
+								else {
+									if ((static_cast<int>(this->m_BattleTimer) != static_cast<int>(prevBattleTimer))) {
+										if (static_cast<int>(this->m_BattleTimer) == 60) {
+											SideLogParts->Add(5.0f, 0.0f, Red, LocalizeParts->Get(4002));
+											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
+											m_AnnounceTimer = 1.f;
+										}
+									}
+								}
+							}
+							else {
+								m_FindContainerTimer = 0.f;
+								if ((static_cast<int>(this->m_BattleTimer) != static_cast<int>(prevBattleTimer))) {
+									if (static_cast<int>(this->m_BattleTimer) == 179) {
+										SideLogParts->Add(5.0f, 0.0f, Red, LocalizeParts->Get(4000));
+										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
+										m_AnnounceTimer = 1.f;
+									}
+								}
+							}
+						}
 
 						if (!m_IsGameClear) {
 							if (this->m_BattleTimer < 4.f * 5.f + 10.f) {
@@ -676,7 +738,7 @@ namespace FPS_n2 {
 										}
 									}
 									else {
-										if (m_IsAddScoreArea) {
+										if (this->m_IsAddScoreArea) {
 											//納品
 											PlayerMngr->GetPlayer(0)->AddScore(item->GetScore());
 											SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(205)) + " +" + std::to_string(item->GetScore())).c_str());
@@ -715,18 +777,22 @@ namespace FPS_n2 {
 						else {
 							//帰還する
 							m_IsGameClear = true;
+							m_IsGameClearEnd = false;
 							KeyGuideParts->SetGuideFlip();
 							m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
+							SE->Get(SoundType::BGM, 2)->Play(DX_PLAYTYPE_BACK, true);
 						}
 					}
 					//
 					else if (this->m_IsAddScoreArea && this->m_BattleTimer < 60.f && this->m_ReturnPer >= 1.f) {
 						//帰還する
 						m_IsGameClear = true;
+						m_IsGameClearEnd = false;
 						KeyGuideParts->SetGuideFlip();
 						m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
+						SE->Get(SoundType::BGM,2)->Play(DX_PLAYTYPE_BACK, true);
 					}
 				}
 
@@ -764,7 +830,7 @@ namespace FPS_n2 {
 							PlayerMngr->GetTeamHelicopter()->SetDamageEventReset();
 						}
 					}
-					this->m_NetWorkController->Update(m_LocalSend);
+					this->m_NetWorkController->Update(this->m_LocalSend);
 				}
 				std::vector<DamageEvent>	DamageEvents;
 				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//オンライン
@@ -1040,12 +1106,23 @@ namespace FPS_n2 {
 				else {
 					this->m_ReturnPer = 0.f;
 				}
+				this->m_AnnounceTimer = std::clamp(this->m_AnnounceTimer - DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				//timer
 				this->m_UIclass.SetfloatParam(0, this->m_BattleTimer);
 				this->m_UIclass.SetfloatParam(1, this->m_StartTimer);
 				this->m_UIclass.SetfloatParam(2, this->m_ReturnPer);
+				this->m_UIclass.SetfloatParam(3, this->m_AnnounceTimer);
 				this->m_UIclass.SetIntParam(0, this->m_IsAddScoreArea);
-				this->m_UIclass.SetIntParam(1, this->m_BattleTimer < 60.f);
+				{
+					int select = 1;
+					if (this->m_BattleTimer < 60.f) {
+						select = 2;
+					}
+					if (!this->m_IsFindContainer) {
+						select = 0;
+					}
+					this->m_UIclass.SetIntParam(1, select);
+				}
 				this->m_UIclass.Update();
 			}
 			HitMarkerPool::Instance()->Update();
@@ -1059,6 +1136,7 @@ namespace FPS_n2 {
 			SceneParts->SetPauseEnable(true);
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->StopAll();
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->StopAll();
+			SE->Get(SoundType::BGM, 2)->StopAll();
 			EffectSingleton::Instance()->StopEffect(Effect::ef_dust);
 			//使い回しオブジェ系
 			BackGround::BackGroundControl::Instance()->Dispose();
@@ -1106,7 +1184,6 @@ namespace FPS_n2 {
 			ObjectManager::Instance()->Draw(true, Range);
 			//ObjectManager::Instance()->Draw_Depth();
 			HitMarkerPool::Instance()->Check();
-
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				PlayerMngr->GetPlayer(loop)->GetAI()->Draw();
@@ -1153,12 +1230,53 @@ namespace FPS_n2 {
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (64), White, Black,
 						PingMes);
 				}
+
+
+				if (this->m_IsFindContainer) {
+					if (PlayerMngr->GetItemContainerObj()) {
+						if (PlayerMngr->GetItemContainerObj()->IsDrawUI()) {
+							auto DispPos = PlayerMngr->GetItemContainerObj()->GetDispPos();
+
+							float Per = std::clamp(this->m_FindContainerTimer / 0.5f, 0.f, 1.f);
+
+							float LocalPer = 0.f;
+							if (Per < 0.8f) {
+								LocalPer = Lerp(0.f, 1.2f, (Per - 0.f) / (0.8f - 0.f));
+							}
+							else {
+								LocalPer = Lerp(1.2f, 1.f, (Per - 0.8f) / (1.f - 0.8f));
+							}
+							bool IsDraw = true;
+							if (Per >= 1.f) {
+								if ((this->m_FindContainerTimer / 2.f - static_cast<int>(this->m_FindContainerTimer / 2.f)) > 0.5f) {
+									IsDraw = false;
+								}
+							}
+							if (IsDraw) {
+								int xp1 = static_cast<int>(DispPos.XScreenPos() - 10.f * LocalPer);
+								int yp1 = static_cast<int>(DispPos.YScreenPos() - 20.f * LocalPer);
+								int xp2 = static_cast<int>(DispPos.XScreenPos());
+								int yp2 = static_cast<int>(DispPos.YScreenPos());
+								int xp3 = static_cast<int>(DispPos.XScreenPos() + 10.f * LocalPer);
+								int yp3 = static_cast<int>(DispPos.YScreenPos() - 20.f * LocalPer);
+								if (Per >= 0.8f) {
+									DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic,
+										18, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM,
+										(xp1 + xp3) / 2, (yp1 + yp3) / 2 - 30, Yellow, Black, "CONTAINER");
+								}
+								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Yellow, 2);
+								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp2, yp2, xp3, yp3, Yellow, 2);
+								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3, xp1, yp1, Yellow, 2);
+							}
+						}
+					}
+				}
 			}
 
-			if (m_IsGameClear) {
+			if (this->m_IsGameClear) {
 				DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_GameEndScreen, 0, 0, 1920, 1080, false);
-				if (m_GameClearTimer > 0.5f) {
-					float Per = (m_GameClearTimer - 0.5f) / 2.f;
+				if (this->m_GameClearTimer > 1.5f) {
+					float Per = (this->m_GameClearTimer - 1.5f) / 2.f;
 					float LocalPer = 0.f;
 					float Value = 0.f;
 					const float LerpPer = 0.5f;
@@ -1218,7 +1336,6 @@ namespace FPS_n2 {
 					yp1 = (270);
 					LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 5.f) / 0.1f, 0.f, 1.f);
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
-					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
 
 					if (LocalPer < 0.8f) {
 						LocalPer = Lerp(5.f, 0.9f, (LocalPer - 0.f) / (0.8f - 0.0f));
@@ -1226,6 +1343,18 @@ namespace FPS_n2 {
 					else {
 						LocalPer = Lerp(0.9f, 1.f, (LocalPer - 0.8f) / (1.f - 0.8f));
 					}
+
+					int ShadowOfs = 10 + static_cast<int>((LocalPer - 1.f) * 10.f);
+
+					xp1 += ShadowOfs;
+					yp1 += ShadowOfs;
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 0, 0);
+					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_ResultGraph, xp1 - static_cast<int>(256.f * LocalPer), yp1 - static_cast<int>(128.f * LocalPer), xp1 + static_cast<int>(256.f * LocalPer), yp1 + static_cast<int>(128.f * LocalPer), true);
+					xp1 -= ShadowOfs;
+					yp1 -= ShadowOfs;
+
+					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+
 					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_ResultGraph, xp1 - static_cast<int>(256.f * LocalPer), yp1 - static_cast<int>(128.f * LocalPer), xp1 + static_cast<int>(256.f * LocalPer), yp1 + static_cast<int>(128.f * LocalPer), true);
 					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 

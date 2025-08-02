@@ -73,9 +73,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//初期セーブ
 	SaveData::Instance()->Save();
 	//BGM
-	/*
+	//*
 	auto* SE = SoundPool::Instance();
-	SE->Add(SoundType::BGM, 0, 1, "data/Sound/BGM/Title.wav");
+	SE->Add(SoundType::BGM, 0, 1, "data/Sound/BGM/title.wav", false);
+	SE->Add(SoundType::BGM, 1, 1, "data/Sound/BGM/opening.wav", false);
+	SE->Add(SoundType::BGM, 2, 1, "data/Sound/BGM/result.wav", false);
 	//*/
 	//シーン
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();

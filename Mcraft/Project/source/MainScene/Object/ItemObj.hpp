@@ -204,9 +204,14 @@ namespace FPS_n2 {
 
 
 		class ItemContainerObj : public BaseObject {
+			bool										m_IsDrawUI{ false };
+			ScreenPosition								m_DispPos;
 		public:
 			ItemContainerObj(void) noexcept { this->m_objType = static_cast<int>(ObjType::ItemContainerObj); }
 			virtual ~ItemContainerObj(void) noexcept {}
+		public:
+			auto				IsDrawUI(void) const noexcept { return m_IsDrawUI; }
+			auto				GetDispPos(void) const noexcept { return m_DispPos; }
 		public:
 			//接地
 			void				Put(const Vector3DX& pos, const Matrix3x3DX& rot) noexcept {
@@ -224,6 +229,10 @@ namespace FPS_n2 {
 				SetMaxAABB(Vector3DX::vget(5.f, 5.f, 5.f) * Scale3DRate);
 			}
 			void				FirstUpdate(void) noexcept override {}
+			void				CheckDraw_Sub(int) noexcept override {
+				Vector3DX StartPos = GetMove().GetPos() + Vector3DX::up() * 1.0f * Scale3DRate;
+				this->m_IsDrawUI |= this->m_DispPos.Calc(StartPos);
+			}
 			void			Dispose_Sub(void) noexcept override {}
 		};
 

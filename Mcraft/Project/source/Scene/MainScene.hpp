@@ -27,12 +27,17 @@ namespace FPS_n2 {
 			float										m_StartTimer{ 0.0f };
 			float										m_BattleTimer{ 0.0f };
 			float										m_ReturnPer{ 0.0f };
+			bool										m_IsFindContainer{ false };
+			float										m_FindContainerTimer{ 0.0f };
+			float										m_AnnounceTimer{ 0.0f };
 
 			bool										m_IsGameOver = false;
 			bool										m_IsGameClear = false;
+			bool										m_IsGameClearEnd = false;
 			float										m_GameClearCount = 0.f;
 			float										m_GameClearCount2 = 0.f;
 			float										m_GameClearTimer = 0.f;
+			float										m_FadeoutEndTimer = 0.f;
 			GraphHandle									m_GameEndScreen;
 			GraphHandle									m_ResultGraph;
 

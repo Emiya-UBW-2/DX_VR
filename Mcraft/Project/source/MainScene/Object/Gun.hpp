@@ -240,7 +240,7 @@ namespace FPS_n2 {
 			const auto			GetReloadType(void) const noexcept { return GetModifySlot()->GetMyData()->GetReloadType(); }
 
 			const auto			GetWeight_gram(void) noexcept {
-				if (m_Weight_gram > 0) {
+				if (this->m_Weight_gram > 0) {
 					return m_Weight_gram;
 				}
 				int gram = 0;
@@ -255,7 +255,7 @@ namespace FPS_n2 {
 			}
 
 			const auto			GetReloadSpeed(void) noexcept {
-				if (m_ReloadSpeed > 0) {
+				if (this->m_ReloadSpeed > 0) {
 					return m_ReloadSpeed;
 				}
 				float speed = 1.f;
@@ -271,7 +271,7 @@ namespace FPS_n2 {
 			}
 
 			const auto			GetAimSpeed(void) noexcept {
-				if (m_AimSpeed > 0) {
+				if (this->m_AimSpeed > 0) {
 					return m_AimSpeed;
 				}
 				float speed = 1.f;
@@ -287,7 +287,7 @@ namespace FPS_n2 {
 			}
 
 			const auto			GetAutoAimSpeed(void) noexcept {
-				if (m_AutoAimSpeed > 0) {
+				if (this->m_AutoAimSpeed > 0) {
 					return m_AutoAimSpeed;
 				}
 				float speed = 1.f;

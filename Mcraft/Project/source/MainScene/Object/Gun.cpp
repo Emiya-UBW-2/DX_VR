@@ -340,17 +340,17 @@ namespace FPS_n2 {
 				//オートエイム
 				if (IsSelectGun) {
 					if (IsActiveAutoAim) {
-						m_IsActiveAutoAimTimer = std::clamp(m_IsActiveAutoAimTimer + DXLib_refParts->GetDeltaTime() / 0.6f * GetAutoAimSpeed(), 0.f, 1.f);
+						m_IsActiveAutoAimTimer = std::clamp(this->m_IsActiveAutoAimTimer + DXLib_refParts->GetDeltaTime() / 0.6f * GetAutoAimSpeed(), 0.f, 1.f);
 					}
 					else {
 						m_IsActiveAutoAimTimer = 0.f;
 					}
-					this->m_AutoAimControl.Update(IsActiveAutoAim && (m_IsActiveAutoAimTimer >= 1.f), GetMyUserPlayerID(), GetPartsFrameMatParent(GunFrame::Eyepos).pos(), GetMove().GetMat().zvec2(), GetAutoAimRadian());
+					this->m_AutoAimControl.Update(IsActiveAutoAim && (this->m_IsActiveAutoAimTimer >= 1.f), GetMyUserPlayerID(), GetPartsFrameMatParent(GunFrame::Eyepos).pos(), GetMove().GetMat().zvec2(), GetAutoAimRadian());
 					this->m_AutoAimControl.CalcAutoAimMat(&AnimRot);
 				}
 				Easing(&m_GunShotZrandR, GetShotSwitch() ? GetRandf(90.0f) : 0.0f, 0.8f, EasingType::OutExpo);
 				Easing(&m_GunShotZrand, m_GunShotZrandR, 0.8f, EasingType::OutExpo);
-				AnimRot = AnimRot * Matrix3x3DX::RotAxis(AnimRot.zvec2(), deg2rad(m_GunShotZrand * std::clamp(1.0f - GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.0f, 1.0f)));
+				AnimRot = AnimRot * Matrix3x3DX::RotAxis(AnimRot.zvec2(), deg2rad(this->m_GunShotZrand * std::clamp(1.0f - GetGunAnimBlendPer(Charas::GunAnimeID::ADS), 0.0f, 1.0f)));
 			}
 			//武器座標
 			SetGunMat(Lerp(this->m_SlingRot * this->m_GunSwingMat2* this->m_GunSwingShotMat* EyeYRot, AnimRot, this->m_SlingPer), Lerp(this->m_SlingPos, AnimPos, this->m_SlingPer));

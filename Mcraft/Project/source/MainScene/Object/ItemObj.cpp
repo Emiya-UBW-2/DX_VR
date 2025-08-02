@@ -44,7 +44,7 @@ namespace FPS_n2 {
 			PosBuf.z = std::clamp(PosBuf.z, -16.f * Scale3DRate, 16.f * Scale3DRate);
 
 
-			this->m_Yrad += deg2rad(60.f * DXLib_refParts->GetDeltaTime() * (m_IsLR ? 1.f : -1.f));
+			this->m_Yrad += deg2rad(60.f * DXLib_refParts->GetDeltaTime() * (this->m_IsLR ? 1.f : -1.f));
 			this->m_Zrotate.Update(DXLib_refParts->GetDeltaTime());
 			this->m_Zrotate.AddRad(Vec.magnitude() * 0.02f);
 			SetMove().SetMat(Matrix3x3DX::RotAxis(Vector3DX::forward(), this->m_Zrotate.GetRad()) * Matrix3x3DX::RotAxis(Vector3DX::up(), this->m_Yrad));
@@ -52,7 +52,7 @@ namespace FPS_n2 {
 			SetMove().Update(0.0f, 0.0f);
 			Easing(&m_Rot, GetMove().GetMat(), 0.95f, EasingType::OutExpo);
 			Easing(&m_Pos, GetMove().GetPos(), 0.95f, EasingType::OutExpo);
-			UpdateObjMatrix(m_Rot, m_Pos);
+			UpdateObjMatrix(this->m_Rot, m_Pos);
 			m_Repos = PosBuf;
 
 		}

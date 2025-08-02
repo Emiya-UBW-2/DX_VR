@@ -340,7 +340,7 @@ namespace FPS_n2 {
 		public:
 			const bool		GetIsServerPlayer(PlayerID ID) const noexcept { return this->m_IsServerPlay && (ID == this->m_ServerPlayerID); }
 			int				GetViewPlayerID(void) const noexcept {
-				if (GetIsServerPlayer(m_ServerPlayerID)) {
+				if (GetIsServerPlayer(this->m_ServerPlayerID)) {
 					//自分のPlayerID決定
 					return m_ServerPlayerID;
 				}

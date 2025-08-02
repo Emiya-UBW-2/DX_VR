@@ -341,10 +341,10 @@ namespace FPS_n2 {
 						m_MyInput.SetAddyRad((cross > 0) ? 0.1f : -0.1f);
 					}
 					if (!(IsFront && (abs(cross) < 0.4f))) {
-						if (m_MyInput.GetAddyRad() > 0.07f) {
+						if (this->m_MyInput.GetAddyRad() > 0.07f) {
 							this->m_LeanLR = 1;
 						}
-						if (m_MyInput.GetAddyRad() < -0.07f) {
+						if (this->m_MyInput.GetAddyRad() < -0.07f) {
 							this->m_LeanLR = -1;
 						}
 					}
@@ -365,8 +365,8 @@ namespace FPS_n2 {
 				m_MyInput.ResetAllInput();
 				IsGotLengthToTarget = false;
 				//前準備
-				m_PathUpdateTimer = std::max(m_PathUpdateTimer - DXLib_refParts->GetDeltaTime(), 0.f);
-				if (m_PathUpdateTimer <= 0.f) {
+				m_PathUpdateTimer = std::max(this->m_PathUpdateTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+				if (this->m_PathUpdateTimer <= 0.f) {
 					m_PathUpdateTimer += 1.f;
 					this->ChangePoint();
 				}
@@ -453,10 +453,10 @@ namespace FPS_n2 {
 								m_MyInput.SetInputPADS(Controls::PADS::MOVE_W, true);
 							}
 							if (!(IsFront && (abs(cross) < 0.4f))) {
-								if (m_MyInput.GetAddyRad() > 0.07f) {
+								if (this->m_MyInput.GetAddyRad() > 0.07f) {
 									m_MyInput.SetInputPADS(Controls::PADS::MOVE_D, true);
 								}
-								if (m_MyInput.GetAddyRad() < -0.07f) {
+								if (this->m_MyInput.GetAddyRad() < -0.07f) {
 									m_MyInput.SetInputPADS(Controls::PADS::MOVE_A, true);
 								}
 							}

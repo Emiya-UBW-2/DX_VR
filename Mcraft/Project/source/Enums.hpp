@@ -58,6 +58,7 @@ namespace FPS_n2 {
 		GetItem,
 		PutItem,
 		Delivery,
+		announce,
 		//
 		Trigger,
 		rolling_rocket,
@@ -135,6 +136,8 @@ namespace FPS_n2 {
 		//
 		resultEnv,
 		resultbutton,
+		resultEnd,
+
 		alarm,
 	};
 	enum class CharaTypeID {

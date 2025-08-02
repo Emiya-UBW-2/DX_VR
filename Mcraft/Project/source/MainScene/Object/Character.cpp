@@ -483,7 +483,7 @@ namespace FPS_n2 {
 				}
 			}
 			else if (IsWearingArmor()) {
-				m_WearArmorTime = std::clamp(m_WearArmorTime + DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+				m_WearArmorTime = std::clamp(this->m_WearArmorTime + DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 
 				float Per = m_WearArmorTime;
 				if (0.f <= Per && Per <= 0.3f) {
@@ -497,11 +497,11 @@ namespace FPS_n2 {
 					m_WearArmorPer = Lerp(0.4f, 1.f, std::clamp((Per - 0.5f) / (1.f - 0.5f), 0.f, 1.f));
 				}
 
-				auto& Armor = (m_WearArmorFlag == 1) ? PlayerMngr->GetHelmet() : PlayerMngr->GetArmor();
+				auto& Armor = (this->m_WearArmorFlag == 1) ? PlayerMngr->GetHelmet() : PlayerMngr->GetArmor();
 
 				Armor->SetActive(true);
 
-				if (m_WearArmorTime >= 1.f) {
+				if (this->m_WearArmorTime >= 1.f) {
 					m_WearArmorTime = 0.f;
 
 					m_WearArmorFlag = InvalidID;
@@ -760,15 +760,16 @@ namespace FPS_n2 {
 				else {
 					if (!GetIsRappelling()) {
 						vec.y = (GetMove().GetVec().y + (GravityRate / (DXLib_refParts->GetFps() * DXLib_refParts->GetFps())));
-					}
-					else if (
-						(
-							(GetMove().GetPos().y < -50.f * Scale3DRate) ||
-							(std::abs(GetMove().GetPos().x) > 16.f * Scale3DRate) ||
-							(std::abs(GetMove().GetPos().z) > 16.f * Scale3DRate))
-						&& IsAlive()
-						) {
-						SetDamage(GetMyPlayerID(), 1000, static_cast<int>(Charas::HitType::Body), GetMove().GetPos(), GetMove().GetPos());
+
+						if (
+							(
+								(GetMove().GetPos().y < -50.f * Scale3DRate) ||
+								(std::abs(GetMove().GetPos().x) > 16.f * Scale3DRate) ||
+								(std::abs(GetMove().GetPos().z) > 16.f * Scale3DRate))
+							&& IsAlive()
+							) {
+							SetDamage(GetMyPlayerID(), 1000, static_cast<int>(Charas::HitType::Body), GetMove().GetPos(), GetMove().GetPos());
+						}
 					}
 				}
 				//床判定を加味した移動ベクトル
@@ -895,9 +896,9 @@ namespace FPS_n2 {
 						Vector3DX Pos2;
 						Vector3DX Pos3;
 
-						auto& Armor = (m_WearArmorFlag == 1) ? PlayerMngr->GetHelmet() : PlayerMngr->GetArmor();
+						auto& Armor = (this->m_WearArmorFlag == 1) ? PlayerMngr->GetHelmet() : PlayerMngr->GetArmor();
 
-						if (m_WearArmorFlag == 1) {
+						if (this->m_WearArmorFlag == 1) {
 							Rad = -50.f;
 							Pos1 = Vector3DX::vget(-0.3f, 0.0f, -0.3f) * Scale3DRate;
 							Pos2 = Vector3DX::vget(0.f, 0.1f, -0.4f) * Scale3DRate;

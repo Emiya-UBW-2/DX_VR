@@ -51,12 +51,12 @@ namespace FPS_n2 {
 			// クレジット
 			this->m_CreditControl = std::make_unique<UIs::CreditControl>();
 			// 
-			/*
+			//*
 			auto* SE = SoundPool::Instance();
 			SE->Get(SoundType::BGM, 0)->Play(DX_PLAYTYPE_LOOP, true);
 			// */
 			m_MovieCharacter = std::make_shared<Charas::MovieCharacter>();
-			ObjectManager::Instance()->InitObject(m_MovieCharacter, "data/Charactor/Main_Movie/");
+			ObjectManager::Instance()->InitObject(this->m_MovieCharacter, "data/Charactor/Main_Movie/");
 			//Cam
 			CameraParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
 			//info
@@ -146,7 +146,7 @@ namespace FPS_n2 {
 			auto* ButtonParts = UIs::ButtonControl::Instance();
 			//
 			m_MovieCharacter.reset();
-			/*
+			//*
 			auto* SE = SoundPool::Instance();
 			SE->Get(SoundType::BGM, 0)->StopAll();
 			//*/

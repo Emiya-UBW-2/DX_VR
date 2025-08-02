@@ -102,7 +102,7 @@ namespace FPS_n2 {
 			Vector3DX PosBuf = GetMove().GetPos();
 			m_CalcTimer += DXLib_refParts->GetDeltaTime();
 			while(true) {
-				if (m_CalcTimer > 1.0f / 60.0f) {
+				if (this->m_CalcTimer > 1.0f / 60.0f) {
 					m_CalcTimer -= 1.0f / 60.0f;
 					Vector3DX RePos = PosBuf;
 					PosBuf = PosBuf + GetMove().GetVec() + Vector3DX::up() * this->m_yAdd;

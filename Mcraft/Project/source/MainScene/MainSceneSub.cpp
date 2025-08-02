@@ -98,9 +98,11 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::GetItem), 4, "data/Sound/SE/getitem.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::PutItem), 4, "data/Sound/SE/putitem.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Delivery), 2, "data/Sound/SE/Delivery.wav", false);
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::announce), 2, "data/Sound/SE/announce.wav", false);
 			//
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::resultEnv), 2, "data/Sound/SE/resultEnv.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::resultbutton), 2, "data/Sound/SE/resultbutton.wav", false);
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::resultEnd), 2, "data/Sound/SE/resultEnd.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::alarm), 2, "data/Sound/SE/alarm.wav", false);
 			
 			for (int loop = 0; loop < 6; ++loop) {
@@ -170,8 +172,10 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::GetItem));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::PutItem));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Delivery));
+			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::announce));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::resultEnv));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::resultbutton));
+			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::resultEnd));
 			
 			for (int loop = 0; loop < 6; ++loop) {
 				SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Cocking1_0) + loop);
@@ -251,7 +255,7 @@ namespace FPS_n2 {
 
 			Easing(&m_AmmoInPer, 0.f, 0.9f, EasingType::OutExpo);
 			if (ViewChara->GetGunPtrNow()) {
-				if (m_AmmoNumTotal != ViewChara->GetGunPtrNow()->GetAmmoNumTotal()) {
+				if (this->m_AmmoNumTotal != ViewChara->GetGunPtrNow()->GetAmmoNumTotal()) {
 					m_AmmoNumTotal = ViewChara->GetGunPtrNow()->GetAmmoNumTotal();
 					m_AmmoInPer = 1.f;
 					m_AmmoRand = (GetRand(100) < 50) ? 1.f : -1.f;
@@ -279,18 +283,18 @@ namespace FPS_n2 {
 						++Count;
 					}
 				}
-				if (m_RadPrev != Now) {
+				if (this->m_RadPrev != Now) {
 					if (
-						(m_RadPrev == 0 && Now == 1) ||
-						(m_RadPrev == 1 && Now == 2) ||
-						(m_RadPrev == 2 && Now == 0)
+						(this->m_RadPrev == 0 && Now == 1) ||
+						(this->m_RadPrev == 1 && Now == 2) ||
+						(this->m_RadPrev == 2 && Now == 0)
 						) {
 						m_RadR = -1.f;
 					}
 					else if (
-						(m_RadPrev == 0 && Now == 2) ||
-						(m_RadPrev == 2 && Now == 1) ||
-						(m_RadPrev == 1 && Now == 0)
+						(this->m_RadPrev == 0 && Now == 2) ||
+						(this->m_RadPrev == 2 && Now == 1) ||
+						(this->m_RadPrev == 1 && Now == 0)
 						)
 					{
 						m_RadR = 1.f;
@@ -313,7 +317,7 @@ namespace FPS_n2 {
 						//開始アニメ
 						//終了アニメ
 						m_ItemAnimTimer.at(loop) += DXLib_refParts->GetDeltaTime();
-						if (m_ItemAnimTimer.at(loop) >= 0.3f) {
+						if (this->m_ItemAnimTimer.at(loop) >= 0.3f) {
 							m_ItemAnimTimer.at(loop) = 0.f;
 							m_PrevItemID.at(loop) = ID.first;
 						}
@@ -518,7 +522,7 @@ namespace FPS_n2 {
 							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3004));
 						yp1 += 64;
 					}
-					if (this->intParam[0] && this->intParam[1]) {
+					if (this->intParam[0] && this->floatParam[0] < 60.f) {
 						KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
 
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
@@ -539,17 +543,18 @@ namespace FPS_n2 {
 				xp1 = (30);
 				yp1 = (10);
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, White, Black, "TIME");
-				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 + (280), yp1, White, Black, "%d:%05.2f",
-					static_cast<int>(floatParam[0] / 60.0f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
-
+					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, (this->floatParam[0] < 60.f) ? Red : White, Black, "TIME");
+				if ((this->floatParam[0] >= 60.f) || ((this->floatParam[0] < 60.f) && ((this->floatParam[0] * 2.f - static_cast<int>(this->floatParam[0] * 2.f)) > 0.5f))) {
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 + (280), yp1, (this->floatParam[0] < 60.f) ? Red : White, Black, "%d:%05.2f",
+						static_cast<int>(floatParam[0] / 60.0f), static_cast<float>(static_cast<int>(floatParam[0]) % 60) + (floatParam[0] - static_cast<float>(static_cast<int>(floatParam[0]))));
+				}
 				yp1 = (10+32+10);
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
 					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1, yp1, White, Black, "SCORE");
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
 					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 + (280), yp1, White, Black, "%04d",
-					static_cast<int>(m_Score));
+					static_cast<int>(this->m_Score));
 
 
 				for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
@@ -693,9 +698,9 @@ namespace FPS_n2 {
 								}
 							}
 							{
-								int Bright = Lerp(255, 128, std::abs(m_RadR));
+								int Bright = Lerp(255, 128, std::abs(this->m_RadR));
 								DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, Bright, 0);
-								float S = Lerp(0.3f, 0.2f, std::abs(m_RadR)) * scale;
+								float S = Lerp(0.3f, 0.2f, std::abs(this->m_RadR)) * scale;
 								if (ViewChara->GetGunPtrNow()) {
 									float Rad = deg2rad(30) * m_RadR + BaseRad;
 									xp1 = X - static_cast<int>((768.f / 2.f * S + Scale + 32.f) * sin(deg2rad(90) + Rad));
@@ -732,8 +737,8 @@ namespace FPS_n2 {
 									FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM, xp1 - 65, yp1 - 3, Color, Black, "/%d", ViewChara->GetGunPtrNow()->GetAmmoAll());
 								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 									FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
-									xp1 - 100 - static_cast<int>(m_AmmoRandR * m_AmmoInPer * 10.f),
-									yp1 - 3 - static_cast<int>(m_AmmoInPer * 3.f),
+									xp1 - 100 - static_cast<int>(this->m_AmmoRandR * m_AmmoInPer * 10.f),
+									yp1 - 3 - static_cast<int>(this->m_AmmoInPer * 3.f),
 									Color, Black, "%d", ViewChara->GetGunPtrNow()->GetAmmoNumTotal());
 
 								if (isLow) {
@@ -795,17 +800,22 @@ namespace FPS_n2 {
 						static_cast<int>(floatParam[1] / 60.0f), static_cast<float>(static_cast<int>(floatParam[1]) % 60) + (floatParam[1] - static_cast<float>(static_cast<int>(floatParam[1]))));
 				}
 
-				xp1 = 1920 / 2;
-				yp1 = 400;
-				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
-					FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(this->intParam[1] ? 4001 : 4000));
+				if ((this->floatParam[3] == 0) || ((this->floatParam[3] * 4.f - static_cast<int>(this->floatParam[3] * 4.f)) > 0.5f)) {
+					xp1 = 1920 / 2;
+					yp1 = 400;
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(4000 + this->intParam[1]));
+				}
 			}
 			//方位磁針
 			{
 				Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec2(); Vec.y = 0.0f; Vec = Vec.normalized();
-				float radian = std::atan2f(Vec.x, Vec.z);
-				float degreeBase = rad2deg(radian);
-
+				float degreeBase = rad2deg(std::atan2f(Vec.x, Vec.z));
+				float degreeBase2 = 0.f;
+				if (PlayerMngr->GetItemContainerObj()) {
+					Vector3DX Vec2 = PlayerMngr->GetItemContainerObj()->GetMove().GetPos() - ViewChara->GetEyePositionCache(); Vec2.y = 0.f; Vec2 = Vec2.normalized();
+					degreeBase2 = rad2deg(Vector3DX::SignedAngle(Vec, Vec2, Vector3DX::up()));
+				}
 
 				for (int loop = -25; loop <= 25; ++loop) {
 					int degree = (360 + static_cast<int>(degreeBase) + loop) % 360;
@@ -821,6 +831,23 @@ namespace FPS_n2 {
 					}
 					else {
 						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 - 6, xp1, yp1 + 6, Green, 2);
+					}
+				}
+				if (-25 < degreeBase2 && degreeBase2 < 25) {
+					xp1 = 960 + static_cast<int>(degreeBase2 * 10) + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
+					yp1 = 1080 * 2 / 10 + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.0f);
+					DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 - 10, xp1, yp1 + 10, Yellow, 8);
+				}
+				else {
+					if (degreeBase2 < 0) {
+						xp1 = 960 + static_cast<int>(-28 * 10) + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
+						yp1 = 1080 * 2 / 10 + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.0f);
+						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 - 10, xp1, yp1 + 10, Yellow, 8);
+					}
+					else {
+						xp1 = 960 + static_cast<int>(28 * 10) + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
+						yp1 = 1080 * 2 / 10 + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.0f);
+						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 - 10, xp1, yp1 + 10, Yellow, 8);
 					}
 				}
 			}

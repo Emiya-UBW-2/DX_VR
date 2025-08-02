@@ -159,15 +159,15 @@ namespace FPS_n2 {
 					Vec = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::GunAngle))).zvec2();
 					DxLib::DrawCapsule3D(Pos.get(), (Pos + Vec * (300.0f * Scale3DRate)).get(), 0.01f * Scale3DRate, 4, GetColor(64, 0, 0), GetColor(0, 0, 0), TRUE);
 				}
-				if (m_RopePer > 0.0f) {
+				if (this->m_RopePer > 0.0f) {
 					Vector3DX Pos;
 					Pos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::Rappelling1))).pos();
 
-					DxLib::DrawCapsule3D(Pos.get(), (Pos - RopeVec * (m_RopePer * Scale3DRate)).get(), 0.02f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
+					DxLib::DrawCapsule3D(Pos.get(), (Pos - RopeVec * (this->m_RopePer * Scale3DRate)).get(), 0.02f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
 
 					Pos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::Rappelling2))).pos();
 
-					DxLib::DrawCapsule3D(Pos.get(), (Pos - RopeVec * (m_RopePer * Scale3DRate)).get(), 0.02f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
+					DxLib::DrawCapsule3D(Pos.get(), (Pos - RopeVec * (this->m_RopePer * Scale3DRate)).get(), 0.02f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
 				}
 			}
 			void				Dispose_Sub(void) noexcept override {
@@ -305,15 +305,15 @@ namespace FPS_n2 {
 					Vec = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::GunAngle))).zvec2();
 					DxLib::DrawCapsule3D(Pos.get(), (Pos + Vec * (300.0f * Scale3DRate)).get(), 0.01f * Scale3DRate, 4, GetColor(64, 0, 0), GetColor(0, 0, 0), TRUE);
 				}
-				if (m_RopePer > 0.0f) {
+				if (this->m_RopePer > 0.0f) {
 					Vector3DX Pos;
 					Pos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::Rappelling1))).pos();
 
-					DxLib::DrawCapsule3D(Pos.get(), (Pos - RopeVec * (m_RopePer * Scale3DRate)).get(), 0.02f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
+					DxLib::DrawCapsule3D(Pos.get(), (Pos - RopeVec * (this->m_RopePer * Scale3DRate)).get(), 0.02f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
 
 					Pos = GetObj().GetFrameLocalWorldMatrix(GetFrame(static_cast<int>(HeliFrame::Rappelling2))).pos();
 
-					DxLib::DrawCapsule3D(Pos.get(), (Pos - RopeVec * (m_RopePer * Scale3DRate)).get(), 0.02f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
+					DxLib::DrawCapsule3D(Pos.get(), (Pos - RopeVec * (this->m_RopePer * Scale3DRate)).get(), 0.02f * Scale3DRate, 4, GetColor(32, 32, 32), GetColor(32, 32, 32), TRUE);
 				}
 			}
 			void				Dispose_Sub(void) noexcept override {

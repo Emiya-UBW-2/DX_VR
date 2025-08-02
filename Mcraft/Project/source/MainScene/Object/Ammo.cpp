@@ -195,7 +195,7 @@ namespace FPS_n2 {
 			if (!IsActive()) { return; }
 			auto* DXLib_refParts = DXLib_ref::Instance();
 			m_Time -= DXLib_refParts->GetDeltaTime();
-			Easing(&m_Per, std::clamp(m_Time, 0.f, 1.f), 0.9f, EasingType::OutExpo);
+			Easing(&m_Per, std::clamp(this->m_Time, 0.f, 1.f), 0.9f, EasingType::OutExpo);
 		}
 	}
 }
