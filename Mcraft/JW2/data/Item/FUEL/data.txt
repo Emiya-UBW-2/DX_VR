@@ -1,3 +1,4 @@
 Name=Item
 Type=Item
 Weight=20000
+Score=300

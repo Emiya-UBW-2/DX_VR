@@ -1,0 +1,8 @@
+Name=AK-12 30Round Magazine
+
+capacity=30
+useammo0=545x39
+
+Weight=350
+
+end

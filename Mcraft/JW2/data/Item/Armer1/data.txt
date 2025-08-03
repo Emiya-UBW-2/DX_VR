@@ -2,3 +2,4 @@ Name=Item
 Type=Armor
 EnableSpawnBySoldier=TRUE
 Weight=11000
+Score=30
