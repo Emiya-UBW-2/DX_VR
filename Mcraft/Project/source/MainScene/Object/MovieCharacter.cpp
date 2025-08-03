@@ -32,6 +32,9 @@ namespace FPS_n2 {
 			SetAnimLoop(static_cast<int>(0), 1.0f);
 			SetObj().SetAnim(static_cast<int>(0)).SetPer(1.0f);
 
+			SetAnimOnce(static_cast<int>(1), 1.0f);
+			SetObj().SetAnim(static_cast<int>(1)).SetPer(1.0f);
+
 			SetObj().UpdateAnimAll();
 		}
 	}

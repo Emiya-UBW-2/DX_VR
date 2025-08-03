@@ -118,6 +118,21 @@ namespace FPS_n2 {
 				Damage = std::min(Damage, Prev);
 				bool IsDeath = PrevLive && !IsAlive();
 
+				//回復による腕の復旧
+				if (Damage < 0) {
+					switch (static_cast<HitType>(Event.HitType)) {
+					case HitType::Helmet:
+						break;
+					case HitType::Armor:
+						break;
+					default:
+						if (this->m_HP.GetPoint()== this->m_HP.GetMax()) {
+							this->m_ArmBreak = false;
+						}
+						break;
+					}
+				}
+
 				if (Event.ShotID == PlayerMngr->GetWatchPlayerID()) {//撃ったキャラ
 					//SE
 					if (Damage > 0) {

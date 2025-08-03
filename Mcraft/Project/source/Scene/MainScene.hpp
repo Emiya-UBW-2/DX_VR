@@ -54,6 +54,7 @@ namespace FPS_n2 {
 			float										m_LimitAlarmTimer{ 0.0f };
 
 			bool										m_IsGameReady = false;
+			float										m_StartAnimTimer{ 0.0f };
 
 			std::shared_ptr<Charas::MovieObject>		m_MovieHeli;
 
@@ -84,7 +85,7 @@ namespace FPS_n2 {
 			//
 			void			BG_Draw_Sub(void) const noexcept override {
 				if (!this->m_IsGameReady) {
-					FillGraph(GetDrawScreen(), 144, 77, 35);
+					FillGraph(GetDrawScreen(), 0, 0, 0);
 				}
 				BackGround::BackGroundControl::Instance()->BG_Draw();
 			}
