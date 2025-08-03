@@ -13,8 +13,8 @@ namespace FPS_n2 {
 			GraphHandle							m_TitleImage;
 			std::unique_ptr<UIs::CreditControl>		m_CreditControl;
 
-			std::shared_ptr< Charas::MovieCharacter>	m_MovieCharacter{};
-			MV1											m_ObjSky;
+			std::shared_ptr<Charas::MovieCharacter>	m_MovieCharacter{};
+			MV1										m_ObjSky;
 		public:
 			TitleScene(void) noexcept {}
 			TitleScene(const TitleScene&) = delete;

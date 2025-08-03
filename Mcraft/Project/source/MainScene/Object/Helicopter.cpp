@@ -455,7 +455,7 @@ namespace FPS_n2 {
 						if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
 						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 						if (!chara->IsAlive()) { continue; }
-						if (chara->GetCanLookByPlayerTimer() < 5.f) { continue; }
+						if (chara->GetCanLookByPlayerTimer() < 3.f) { continue; }
 						m_TargetPlayerID = static_cast<PlayerID>(loop);
 						SetAction(HelicopterMove::Intercept);
 						break;

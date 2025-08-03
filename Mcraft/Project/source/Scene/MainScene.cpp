@@ -7,8 +7,6 @@ namespace FPS_n2 {
 		constexpr float FarMax = std::min(std::min(BackGround::DrawMaxXPlus, BackGround::DrawMaxZPlus), BackGround::DrawMaxYPlus) * BackGround::CellScale;
 
 		void			MainGameScene::Load_Sub(void) noexcept {
-			auto* SceneParts = SceneControl::Instance();
-			SceneParts->SetPauseEnable(false);
 			BackGround::BackGroundControl::Create();
 			Charas::GunAnimManager::Create();
 			Charas::GunAnimManager::Instance()->Load("data/CharaAnime/");
@@ -92,6 +90,8 @@ namespace FPS_n2 {
 			ObjectManager::Instance()->LoadModelBefore("data/model/Helmet/");
 			ObjectManager::Instance()->LoadModelBefore("data/model/container/");
 			ObjectManager::Instance()->LoadModelBefore("data/model/circle/");
+
+			ObjectManager::Instance()->LoadModelBefore("data/model/UH60_Movie/");
 
 			auto* WindowSizeParts = WindowSizeControl::Instance();
 			m_GameEndScreen.Make(WindowSizeParts->GetScreenXMax(), WindowSizeParts->GetScreenYMax(), false);
@@ -192,6 +192,9 @@ namespace FPS_n2 {
 			//ItemContainerObj
 			PlayerMngr->SetItemContainerObj(std::make_shared<Objects::ItemContainerObj>());
 			ObjectManager::Instance()->InitObject(PlayerMngr->GetItemContainerObj(), "data/model/container/");
+
+			m_MovieHeli = std::make_shared<Charas::MovieObject>();
+			ObjectManager::Instance()->InitObject(this->m_MovieHeli, "data/model/UH60_Movie/");
 		}
 		void			MainGameScene::Set_Sub(void) noexcept {
 			auto* OptionParts = OptionManager::Instance();
@@ -353,7 +356,7 @@ namespace FPS_n2 {
 			FadeControl::Instance()->Init();
 			this->m_IsEnd = false;
 			this->m_StartTimer = 3.0f;
-			this->m_BattleTimer = 30.f;
+			this->m_BattleTimer = 180.f;
 			this->m_ReturnPer = 0.f;
 
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
@@ -362,6 +365,9 @@ namespace FPS_n2 {
 			//posBuf.y = -25.0f * Scale3DRate;
 			//PlayerMngr->GetVehicle()->Spawn(std::atan2f(posBuf.x, posBuf.z), posBuf);
 			m_IsGameClear = false;
+
+			m_IsGameReady = false;
+			m_IsGameReady = true;
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* CameraParts = Camera3D::Instance();
@@ -406,14 +412,20 @@ namespace FPS_n2 {
 			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
 
-			if (!m_IsGameClear) {
-				Pad->SetMouseMoveEnable(true);
-#if DEBUG_NET
+			if (!this->m_IsGameReady) {
 				Pad->SetMouseMoveEnable(false);
-#endif
+				SceneParts->SetPauseEnable(true);
 			}
 			else {
-				Pad->SetMouseMoveEnable(true);
+				if (!m_IsGameClear) {
+					Pad->SetMouseMoveEnable(true);
+#if DEBUG_NET
+					Pad->SetMouseMoveEnable(false);
+#endif
+				}
+				else {
+					Pad->SetMouseMoveEnable(false);
+				}
 			}
 			KeyGuideParts->ChangeGuide(
 				[this]() {
@@ -458,11 +470,53 @@ namespace FPS_n2 {
 				});
 			if (SceneParts->IsPause()) {
 				Pad->SetMouseMoveEnable(false);
-				BackGround::BackGroundControl::Instance()->SettingChange();
+				BackGroundParts->SettingChange();
 				if (!this->m_NetWorkController) {
 					return true;
 				}
 			}
+			if (!this->m_IsGameReady) {
+				//OPムービー制御
+				{
+					if (PlayerMngr->GetHelicopter()) {
+						PlayerMngr->GetHelicopter()->SetActive(false);
+					}
+					if (PlayerMngr->GetTeamHelicopter()) {
+						PlayerMngr->GetTeamHelicopter()->SetActive(false);
+					}
+
+					Vector3DX Pos = PlayerMngr->GetItemContainerObj()->GetMove().GetPos(); Pos.y = -20.f * Scale3DRate;
+					m_MovieHeli->SetMove().SetPos(Pos);
+
+					m_MovieHeli->UpdateLocal();
+
+					//カメラ
+					Vector3DX BaseCamPos = m_MovieHeli->GetMove().GetPos();
+					CameraParts->SetMainCamera().SetCamPos(
+						BaseCamPos + Vector3DX::vget(0.f, 10.f * Scale3DRate, 1.f * Scale3DRate) + Camera3D::Instance()->GetCamShake(),
+						BaseCamPos + Camera3D::Instance()->GetCamShake() * 2.0f,
+						Vector3DX::up());
+					auto fovBuf = CameraParts->GetMainCamera().GetCamFov();
+					CameraParts->SetMainCamera().SetCamInfo(fovBuf, CameraParts->GetMainCamera().GetCamNear(), CameraParts->GetMainCamera().GetCamFar());
+
+
+					//背景
+					BackGroundParts->Update();
+					SetFogEnable(false);
+				}
+				return true;
+			}
+			else {
+				//SceneParts->SetPauseEnable(false);
+				SetFogEnable(true);
+				if (PlayerMngr->GetHelicopter()) {
+					PlayerMngr->GetHelicopter()->SetActive(true);
+				}
+				if (PlayerMngr->GetTeamHelicopter()) {
+					PlayerMngr->GetTeamHelicopter()->SetActive(true);
+				}
+			}
+
 			if (this->m_IsGameClear) {
 				SceneParts->SetPauseEnable(false);
 				m_GameClearCount += DXLib_refParts->GetDeltaTime();
@@ -782,6 +836,15 @@ namespace FPS_n2 {
 							m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
 							SE->Get(SoundType::BGM, 2)->Play(DX_PLAYTYPE_BACK, true);
+							//納品
+							for (auto& ID : ViewPlayer->SetInventory()) {
+								if (ID.first != InvalidID) {
+									auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
+									PlayerMngr->GetPlayer(0)->AddScore(item->GetScore());
+									SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(205)) + " +" + std::to_string(item->GetScore())).c_str());
+									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Delivery))->Play(DX_PLAYTYPE_BACK, true);
+								}
+							}
 						}
 					}
 					//
@@ -793,6 +856,15 @@ namespace FPS_n2 {
 						m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
 						SE->Get(SoundType::BGM,2)->Play(DX_PLAYTYPE_BACK, true);
+						//納品
+						for (auto& ID : ViewPlayer->SetInventory()) {
+							if (ID.first != InvalidID) {
+								auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
+								PlayerMngr->GetPlayer(0)->AddScore(item->GetScore());
+								SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(205)) + " +" + std::to_string(item->GetScore())).c_str());
+								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Delivery))->Play(DX_PLAYTYPE_BACK, true);
+							}
+						}
 					}
 				}
 
@@ -920,7 +992,7 @@ namespace FPS_n2 {
 									g->CanPick() &&
 									(player->HasEmptyInventory() != 0) &&
 									((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized() * -1.f)) > 0.f) &&
-									(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
+									(BackGroundParts->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
 									) {
 									player->AddInventory(g->GetUniqueID());
 									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::GetItem))->Play(DX_PLAYTYPE_BACK, true);
@@ -952,7 +1024,7 @@ namespace FPS_n2 {
 									g->CanPick() &&
 									(ViewPlayer->HasEmptyInventory() != 0) &&
 									((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized() * -1.f)) > 0.f) &&
-									(BackGround::BackGroundControl::Instance()->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
+									(BackGroundParts->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
 									) {
 									ViewPlayer->AddInventory(g->GetUniqueID());
 									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::GetItem))->Play(DX_PLAYTYPE_BACK, true);
@@ -1094,7 +1166,7 @@ namespace FPS_n2 {
 				}
 			}
 			//背景
-			BackGround::BackGroundControl::Instance()->Update();
+			BackGroundParts->Update();
 			//UIパラメーター
 			{
 				if ((this->m_IsAddScoreArea && this->m_BattleTimer < 60.f) && Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().press()) {
@@ -1130,6 +1202,7 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
+			m_MovieHeli.reset();
 			auto* SceneParts = SceneControl::Instance();
 			auto* SE = SoundPool::Instance();
 			auto* PostPassParts = PostPassEffect::Instance();
@@ -1200,166 +1273,168 @@ namespace FPS_n2 {
 
 			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 			auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
-			if (ViewChara->IsAlive() && !m_IsGameClear) {
-				//レティクル表示
-				if (ViewChara->GetGunPtrNow()) {
-					ViewChara->GetGunPtrNow()->DrawReticle(ViewChara->GetLeanRad());
-				}
-				HitMarkerPool::Instance()->Draw();
-				if (!SceneParts->IsPause()) { this->m_UIclass.Draw(); }		//UI
-#if DEBUG_NET
-				NetWorkBrowser::Instance()->Draw();						//通信設定
-#endif
-				if (this->m_NetWorkController) {
-					std::string PingMes;
-					if (this->m_NetWorkController->GetPing() >= 0.0f) {
-						char Mes[260];
-						sprintfDx(Mes, "Ping:%3dms", static_cast<int>(this->m_NetWorkController->GetPing()));
-
-						PingMes = Mes;
+			if (this->m_IsGameReady) {
+				if (ViewChara->IsAlive() && !m_IsGameClear) {
+					//レティクル表示
+					if (ViewChara->GetGunPtrNow()) {
+						ViewChara->GetGunPtrNow()->DrawReticle(ViewChara->GetLeanRad());
 					}
-					else {
-						if (!this->m_NetWorkController->IsServer()) {
-							PingMes = "Lost Connection";
+					HitMarkerPool::Instance()->Draw();
+					if (!SceneParts->IsPause()) { this->m_UIclass.Draw(); }		//UI
+#if DEBUG_NET
+					NetWorkBrowser::Instance()->Draw();						//通信設定
+#endif
+					if (this->m_NetWorkController) {
+						std::string PingMes;
+						if (this->m_NetWorkController->GetPing() >= 0.0f) {
+							char Mes[260];
+							sprintfDx(Mes, "Ping:%3dms", static_cast<int>(this->m_NetWorkController->GetPing()));
+
+							PingMes = Mes;
 						}
 						else {
-							PingMes = "Ping:---ms";
-						}
-					}
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (64), White, Black,
-						PingMes);
-				}
-
-
-				if (this->m_IsFindContainer) {
-					if (PlayerMngr->GetItemContainerObj()) {
-						if (PlayerMngr->GetItemContainerObj()->IsDrawUI()) {
-							auto DispPos = PlayerMngr->GetItemContainerObj()->GetDispPos();
-
-							float Per = std::clamp(this->m_FindContainerTimer / 0.5f, 0.f, 1.f);
-
-							float LocalPer = 0.f;
-							if (Per < 0.8f) {
-								LocalPer = Lerp(0.f, 1.2f, (Per - 0.f) / (0.8f - 0.f));
+							if (!this->m_NetWorkController->IsServer()) {
+								PingMes = "Lost Connection";
 							}
 							else {
-								LocalPer = Lerp(1.2f, 1.f, (Per - 0.8f) / (1.f - 0.8f));
+								PingMes = "Ping:---ms";
 							}
-							bool IsDraw = true;
-							if (Per >= 1.f) {
-								if ((this->m_FindContainerTimer / 2.f - static_cast<int>(this->m_FindContainerTimer / 2.f)) > 0.5f) {
-									IsDraw = false;
+						}
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, (1920), (64), White, Black,
+							PingMes);
+					}
+
+
+					if (this->m_IsFindContainer) {
+						if (PlayerMngr->GetItemContainerObj()) {
+							if (PlayerMngr->GetItemContainerObj()->IsDrawUI()) {
+								auto DispPos = PlayerMngr->GetItemContainerObj()->GetDispPos();
+
+								float Per = std::clamp(this->m_FindContainerTimer / 0.5f, 0.f, 1.f);
+
+								float LocalPer = 0.f;
+								if (Per < 0.8f) {
+									LocalPer = Lerp(0.f, 1.2f, (Per - 0.f) / (0.8f - 0.f));
 								}
-							}
-							if (IsDraw) {
-								int xp1 = static_cast<int>(DispPos.XScreenPos() - 10.f * LocalPer);
-								int yp1 = static_cast<int>(DispPos.YScreenPos() - 20.f * LocalPer);
-								int xp2 = static_cast<int>(DispPos.XScreenPos());
-								int yp2 = static_cast<int>(DispPos.YScreenPos());
-								int xp3 = static_cast<int>(DispPos.XScreenPos() + 10.f * LocalPer);
-								int yp3 = static_cast<int>(DispPos.YScreenPos() - 20.f * LocalPer);
-								if (Per >= 0.8f) {
-									DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic,
-										18, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM,
-										(xp1 + xp3) / 2, (yp1 + yp3) / 2 - 30, Yellow, Black, "CONTAINER");
+								else {
+									LocalPer = Lerp(1.2f, 1.f, (Per - 0.8f) / (1.f - 0.8f));
 								}
-								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Yellow, 2);
-								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp2, yp2, xp3, yp3, Yellow, 2);
-								DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3, xp1, yp1, Yellow, 2);
+								bool IsDraw = true;
+								if (Per >= 1.f) {
+									if ((this->m_FindContainerTimer / 2.f - static_cast<int>(this->m_FindContainerTimer / 2.f)) > 0.5f) {
+										IsDraw = false;
+									}
+								}
+								if (IsDraw) {
+									int xp1 = static_cast<int>(DispPos.XScreenPos() - 10.f * LocalPer);
+									int yp1 = static_cast<int>(DispPos.YScreenPos() - 20.f * LocalPer);
+									int xp2 = static_cast<int>(DispPos.XScreenPos());
+									int yp2 = static_cast<int>(DispPos.YScreenPos());
+									int xp3 = static_cast<int>(DispPos.XScreenPos() + 10.f * LocalPer);
+									int yp3 = static_cast<int>(DispPos.YScreenPos() - 20.f * LocalPer);
+									if (Per >= 0.8f) {
+										DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic,
+											18, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM,
+											(xp1 + xp3) / 2, (yp1 + yp3) / 2 - 30, Yellow, Black, "CONTAINER");
+									}
+									DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Yellow, 2);
+									DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp2, yp2, xp3, yp3, Yellow, 2);
+									DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3, xp1, yp1, Yellow, 2);
+								}
 							}
 						}
 					}
 				}
-			}
 
-			if (this->m_IsGameClear) {
-				DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_GameEndScreen, 0, 0, 1920, 1080, false);
-				if (this->m_GameClearTimer > 1.5f) {
-					float Per = (this->m_GameClearTimer - 1.5f) / 2.f;
-					float LocalPer = 0.f;
-					float Value = 0.f;
-					const float LerpPer = 0.5f;
-					//リザルト描画
-					int xp1 = 960;
-					int yp1 = 860;
-					KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
+				if (this->m_IsGameClear) {
+					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_GameEndScreen, 0, 0, 1920, 1080, false);
+					if (this->m_GameClearTimer > 1.5f) {
+						float Per = (this->m_GameClearTimer - 1.5f) / 2.f;
+						float LocalPer = 0.f;
+						float Value = 0.f;
+						const float LerpPer = 0.5f;
+						//リザルト描画
+						int xp1 = 960;
+						int yp1 = 860;
+						KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
 
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
-						FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3006));
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3006));
 
-					xp1 = (960);
-					yp1 = (540);
+						xp1 = (960);
+						yp1 = (540);
 
-					LocalPer = std::clamp((Per - 0.f) / LerpPer, 0.f, 1.f);
-					Value = Lerp(0.f, 180.f - m_BattleTimer, LocalPer);
-					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "TIME");
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%d:%05.2f",
-						static_cast<int>(Value / 60.0f), static_cast<float>(static_cast<int>(Value) % 60) + (Value - static_cast<float>(static_cast<int>(Value))));
-
-					yp1 += (32 + 10);
-					LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 1.f) / LerpPer, 0.f, 1.f);
-					Value = Lerp(0.f, static_cast<float>(ViewPlayer->GetScore()), LocalPer);
-					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "SCORE");
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%04d",
-						static_cast<int>(Value));
-
-					yp1 += (32 + 10);
-					LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 2.f) / LerpPer, 0.f, 1.f);
-					Value = Lerp(0.f, static_cast<float> (ViewPlayer->GetKill()), LocalPer);
-					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "KILL");
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%d",
-						static_cast<int>(Value));
-
-					if (ViewPlayer->GetShot() > 0) {
-						yp1 += (32 + 10);
-						LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 3.f) / LerpPer, 0.f, 1.f);
-						Value = Lerp(0.f, 100.f * static_cast<float>(ViewPlayer->GetHit()) / ViewPlayer->GetShot(), LocalPer);
+						LocalPer = std::clamp((Per - 0.f) / LerpPer, 0.f, 1.f);
+						Value = Lerp(0.f, 180.f - m_BattleTimer, LocalPer);
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "HIT RATE");
+							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "TIME");
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%05.2f %%",
-							Value);
+							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%d:%05.2f",
+							static_cast<int>(Value / 60.0f), static_cast<float>(static_cast<int>(Value) % 60) + (Value - static_cast<float>(static_cast<int>(Value))));
+
+						yp1 += (32 + 10);
+						LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 1.f) / LerpPer, 0.f, 1.f);
+						Value = Lerp(0.f, static_cast<float>(ViewPlayer->GetScore()), LocalPer);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "SCORE");
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%04d",
+							static_cast<int>(Value));
+
+						yp1 += (32 + 10);
+						LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 2.f) / LerpPer, 0.f, 1.f);
+						Value = Lerp(0.f, static_cast<float> (ViewPlayer->GetKill()), LocalPer);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "KILL");
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%d",
+							static_cast<int>(Value));
+
+						if (ViewPlayer->GetShot() > 0) {
+							yp1 += (32 + 10);
+							LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 3.f) / LerpPer, 0.f, 1.f);
+							Value = Lerp(0.f, 100.f * static_cast<float>(ViewPlayer->GetHit()) / ViewPlayer->GetShot(), LocalPer);
+							DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+								FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP, xp1 - static_cast<int>(32.f * LocalPer), yp1, White, Black, "HIT RATE");
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP, xp1 + static_cast<int>(32.f * LocalPer), yp1, White, Black, "%05.2f ％",
+								Value);
+						}
+
+						xp1 = (960);
+						yp1 = (270);
+						LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 5.f) / 0.1f, 0.f, 1.f);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
+
+						if (LocalPer < 0.8f) {
+							LocalPer = Lerp(5.f, 0.9f, (LocalPer - 0.f) / (0.8f - 0.0f));
+						}
+						else {
+							LocalPer = Lerp(0.9f, 1.f, (LocalPer - 0.8f) / (1.f - 0.8f));
+						}
+
+						int ShadowOfs = 10 + static_cast<int>((LocalPer - 1.f) * 10.f);
+
+						xp1 += ShadowOfs;
+						yp1 += ShadowOfs;
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 0, 0);
+						DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_ResultGraph, xp1 - static_cast<int>(256.f * LocalPer), yp1 - static_cast<int>(128.f * LocalPer), xp1 + static_cast<int>(256.f * LocalPer), yp1 + static_cast<int>(128.f * LocalPer), true);
+						xp1 -= ShadowOfs;
+						yp1 -= ShadowOfs;
+
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
+
+						DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_ResultGraph, xp1 - static_cast<int>(256.f * LocalPer), yp1 - static_cast<int>(128.f * LocalPer), xp1 + static_cast<int>(256.f * LocalPer), yp1 + static_cast<int>(128.f * LocalPer), true);
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+
+
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
-
-					xp1 = (960);
-					yp1 = (270);
-					LocalPer = std::clamp((Per - (LerpPer + 0.1f) * 5.f) / 0.1f, 0.f, 1.f);
-					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * LocalPer));
-
-					if (LocalPer < 0.8f) {
-						LocalPer = Lerp(5.f, 0.9f, (LocalPer - 0.f) / (0.8f - 0.0f));
-					}
-					else {
-						LocalPer = Lerp(0.9f, 1.f, (LocalPer - 0.8f) / (1.f - 0.8f));
-					}
-
-					int ShadowOfs = 10 + static_cast<int>((LocalPer - 1.f) * 10.f);
-
-					xp1 += ShadowOfs;
-					yp1 += ShadowOfs;
-					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 0, 0);
-					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_ResultGraph, xp1 - static_cast<int>(256.f * LocalPer), yp1 - static_cast<int>(128.f * LocalPer), xp1 + static_cast<int>(256.f * LocalPer), yp1 + static_cast<int>(128.f * LocalPer), true);
-					xp1 -= ShadowOfs;
-					yp1 -= ShadowOfs;
-
-					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 0, 0);
-
-					DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal, &m_ResultGraph, xp1 - static_cast<int>(256.f * LocalPer), yp1 - static_cast<int>(128.f * LocalPer), xp1 + static_cast<int>(256.f * LocalPer), yp1 + static_cast<int>(128.f * LocalPer), true);
-					DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-
-
-					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 				}
 			}
 			FadeControl::Instance()->Draw();

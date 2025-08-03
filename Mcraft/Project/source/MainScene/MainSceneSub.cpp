@@ -130,8 +130,8 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_openfire), 10, "data/Sound/SE/voice/openfire.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_reload), 10, "data/Sound/SE/voice/reload.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover), 10, "data/Sound/SE/voice/takecover.wav");
-			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing), 10, "data/Sound/SE/voice/breathing.wav", false);
-			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend), 10, "data/Sound/SE/voice/breathend.wav", false);
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing), 5, "data/Sound/SE/voice/breathing.wav", false);
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend), 5, "data/Sound/SE/voice/breathend.wav", false);
 		}
 		void			CommonBattleResource::Set(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -836,18 +836,22 @@ namespace FPS_n2 {
 				if (-25 < degreeBase2 && degreeBase2 < 25) {
 					xp1 = 960 + static_cast<int>(degreeBase2 * 10) + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
 					yp1 = 1080 * 2 / 10 + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.0f);
-					DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 - 10, xp1, yp1 + 10, Yellow, 8);
+					DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 - 10, xp1, yp1 + 16, Yellow, 8);
 				}
 				else {
 					if (degreeBase2 < 0) {
 						xp1 = 960 + static_cast<int>(-28 * 10) + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
 						yp1 = 1080 * 2 / 10 + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.0f);
-						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 - 10, xp1, yp1 + 10, Yellow, 8);
+						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 - 10, xp1, yp1 + 10, Yellow, 2);
+						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 5, yp1, xp1, yp1 + 10, Yellow, 2);
+						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 - 5, yp1, xp1, yp1 - 10,Yellow, 2);
 					}
 					else {
 						xp1 = 960 + static_cast<int>(28 * 10) + static_cast<int>(ViewChara->GetMoveEyePos().x * 100.0f);
 						yp1 = 1080 * 2 / 10 + static_cast<int>(ViewChara->GetMoveEyePos().y * 100.0f);
-						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 - 10, xp1, yp1 + 10, Yellow, 8);
+						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1 - 10, xp1, yp1 + 10, Yellow, 2);
+						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 + 5, yp1, xp1, yp1 + 10, Yellow, 2);
+						DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1 + 5, yp1, xp1, yp1 - 10, Yellow, 2);
 					}
 				}
 			}

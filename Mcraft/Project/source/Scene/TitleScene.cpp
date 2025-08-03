@@ -222,7 +222,7 @@ namespace FPS_n2 {
 			// 
 			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
 				FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
-				(64 + 369), (64 + 207), White, Black, "Ver 0.0.0");
+				(64 + 369), (64 + 207), White, Black, "Ver 1.0.0");
 			// 
 			ButtonParts->Draw();
 			// 

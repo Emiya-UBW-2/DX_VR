@@ -16,6 +16,8 @@
 #include	"../MainScene/Object/ItemObj.hpp"
 #include	"../MainScene/Object/Armer.hpp"
 
+#include	"../MainScene/Object/MovieCharacter.hpp"
+
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class MainGameScene : public TEMPSCENE {
@@ -50,6 +52,11 @@ namespace FPS_n2 {
 
 			int											m_m_LimitAlarmCount{};
 			float										m_LimitAlarmTimer{ 0.0f };
+
+			bool										m_IsGameReady = false;
+
+			std::shared_ptr<Charas::MovieObject>		m_MovieHeli;
+
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
 				if (this->m_NetWorkController) {
@@ -76,6 +83,9 @@ namespace FPS_n2 {
 			void			Dispose_Load_Sub(void) noexcept override;
 			//
 			void			BG_Draw_Sub(void) const noexcept override {
+				if (!this->m_IsGameReady) {
+					FillGraph(GetDrawScreen(), 144, 77, 35);
+				}
 				BackGround::BackGroundControl::Instance()->BG_Draw();
 			}
 			void			ShadowDraw_Far_Sub(void) const noexcept override {
