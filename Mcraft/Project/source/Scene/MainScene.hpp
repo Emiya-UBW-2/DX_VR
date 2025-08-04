@@ -20,6 +20,19 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+
+		enum class TaskType {
+			Obtain,
+			KillEnemy,
+		};
+
+		class TaskInfo {
+		public:
+			TaskType	m_TaskType{};
+			int		m_ItemID{ InvalidID };
+			int		m_Count{ 1 };
+		};
+
 		class MainGameScene : public TEMPSCENE {
 			PauseMenuControl							m_PauseMenuControl;
 			MainSceneUI									m_UIclass;			//UI関連
@@ -42,6 +55,7 @@ namespace FPS_n2 {
 			float										m_FadeoutEndTimer = 0.f;
 			GraphHandle									m_GameEndScreen;
 			GraphHandle									m_ResultGraph;
+			GraphHandle									m_KillGraph;
 
 			Vector3DX									m_EffectPos;
 			InputControl								MyInput;
@@ -58,6 +72,8 @@ namespace FPS_n2 {
 
 			std::shared_ptr<Charas::MovieObject>		m_MovieHeli;
 
+
+			std::vector<std::pair<TaskInfo, int>>		m_TaskInfoList;
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
 				if (this->m_NetWorkController) {

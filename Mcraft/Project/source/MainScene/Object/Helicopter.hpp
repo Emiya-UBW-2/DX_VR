@@ -212,6 +212,8 @@ namespace FPS_n2 {
 			HelicopterMove m_HelicopterMove{ HelicopterMove::Random };
 			int m_SpawnPoint{};
 
+			float m_Rotate = 0.f;
+
 			frames m_GunRot{};
 			frames m_GunAngle{};
 

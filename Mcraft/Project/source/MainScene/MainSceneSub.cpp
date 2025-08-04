@@ -103,6 +103,7 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::resultEnv), 2, "data/Sound/SE/resultEnv.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::resultbutton), 2, "data/Sound/SE/resultbutton.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::resultEnd), 2, "data/Sound/SE/resultEnd.wav", false);
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::taskstart), 2, "data/Sound/SE/taskstart.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::alarm), 2, "data/Sound/SE/alarm.wav", false);
 			
 			for (int loop = 0; loop < 6; ++loop) {
@@ -132,6 +133,14 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover), 10, "data/Sound/SE/voice/takecover.wav");
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing), 5, "data/Sound/SE/voice/breathing.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend), 5, "data/Sound/SE/voice/breathend.wav", false);
+
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::GameStart000), 1, "data/Sound/VOICE/vo000.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission000), 1, "data/Sound/VOICE/vo001.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission001), 1, "data/Sound/VOICE/vo002.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission002), 1, "data/Sound/VOICE/vo003.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::GameEnd000), 1, "data/Sound/VOICE/vo004.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble000), 1, "data/Sound/VOICE/vo010.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble001), 1, "data/Sound/VOICE/vo011.wav", false);
 		}
 		void			CommonBattleResource::Set(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -176,7 +185,8 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::resultEnv));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::resultbutton));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::resultEnd));
-			
+			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::taskstart));
+
 			for (int loop = 0; loop < 6; ++loop) {
 				SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Cocking1_0) + loop);
 				SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Cocking2_0) + loop);
@@ -203,6 +213,14 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Man_takecover));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend));
+
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::GameStart000));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission000));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission001));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission002));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::GameEnd000));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble000));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble001));
 		}
 		//
 		void			MainSceneUI::Set(void) noexcept {

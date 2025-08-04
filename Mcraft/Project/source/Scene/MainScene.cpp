@@ -1,6 +1,7 @@
 ﻿#pragma warning(disable:4464)
 #include	"../MainScene/NetworkBrowser.hpp"
 #include	"MainScene.hpp"
+#include <random>
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -97,6 +98,7 @@ namespace FPS_n2 {
 			m_GameEndScreen.Make(WindowSizeParts->GetScreenXMax(), WindowSizeParts->GetScreenYMax(), false);
 
 			m_ResultGraph.Load("data/UI/result.png");
+			m_KillGraph.Load("data/UI/kill.png");
 		}
 		void			MainGameScene::LoadEnd_Sub(void) noexcept {
 			Objects::AmmoPool::Create();
@@ -301,7 +303,27 @@ namespace FPS_n2 {
 					Vector3DX::vget(GetRandf(1.f), 1.f, GetRandf(1.f)) * Scale3DRate * 0.01f
 				);
 			}
-
+			{
+				m_TaskInfoList.clear();
+				{
+					std::pair<TaskInfo, int> Tmp;
+					Tmp.first.m_TaskType = TaskType::KillEnemy;
+					Tmp.first.m_Count = 2 + GetRand(2);//1～3
+					Tmp.second = 0;
+					m_TaskInfoList.emplace_back(Tmp);
+				}
+				for (int loop = 0; loop < Objects::ItemObjDataManager::Instance()->GetList().size(); ++loop) {
+					std::pair<TaskInfo, int> Tmp;
+					Tmp.first.m_TaskType = TaskType::Obtain;
+					Tmp.first.m_ItemID = loop;
+					Tmp.first.m_Count = 1 + GetRand(2);//1～3
+					Tmp.second = 0;
+					m_TaskInfoList.emplace_back(Tmp);
+				}
+				std::random_device seed_gen;
+				std::mt19937 engine(seed_gen());
+				std::shuffle(m_TaskInfoList.begin(), m_TaskInfoList.end(), engine);
+			}
 			{
 				Vector3DX TargetPos = Vector3DX::zero();
 
@@ -480,6 +502,10 @@ namespace FPS_n2 {
 				//OPムービー制御
 				{
 					SetFogEnable(false);
+					if (m_StartAnimTimer == 0.f) {
+						SE->Get(SoundType::BGM, 1)->Play(DX_PLAYTYPE_BACK, true);
+						SE->Get(SoundType::VOICE, static_cast<int>(VoiceEnum::GameStart000))->Play(DX_PLAYTYPE_BACK, true);
+					}
 					m_StartAnimTimer += DXLib_refParts->GetDeltaTime();
 
 					if (PlayerMngr->GetHelicopter()) {
@@ -512,15 +538,16 @@ namespace FPS_n2 {
 						Easing(&fovBuf, deg2rad(140), 0.9f, EasingType::OutExpo);
 					}
 					else {
-						CamPos = Pos + Vector3DX::vget(3.f, -1.0f, 10.f) * Scale3DRate;
+						CamPos = Vector3DX::vget(0.f, -24.0f, 0.f) * Scale3DRate;
 						if (m_StartAnimTimer < 4.5f + 1.5f) {
 							CamVec = Pos;
 							Camera3D::Instance()->SetCamShake(0.5f, 0.5f * Scale3DRate);
+							fovBuf = deg2rad(70);
 						}
 						else {
 							Easing(&CamVec, PlayerMngr->GetItemContainerObj()->GetMove().GetPos(), 0.95f, EasingType::OutExpo);
+							Easing(&fovBuf, deg2rad(35), 0.9f, EasingType::OutExpo);
 						}
-						fovBuf = deg2rad(70);
 
 						if (m_StartAnimTimer >= 4.5f + 3.f) {
 							if (FadeControl::Instance()->IsClear()) {
@@ -648,6 +675,7 @@ namespace FPS_n2 {
 									}
 									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
 									m_AnnounceTimer = 1.f;
+									SE->Get(SoundType::VOICE,static_cast<int>(VoiceEnum::Mission001))->Play(DX_PLAYTYPE_BACK, true);
 								}
 								else {
 									if ((static_cast<int>(this->m_BattleTimer) != static_cast<int>(prevBattleTimer))) {
@@ -655,6 +683,7 @@ namespace FPS_n2 {
 											SideLogParts->Add(5.0f, 0.0f, Red, LocalizeParts->Get(4002));
 											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
 											m_AnnounceTimer = 1.f;
+											SE->Get(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission002))->Play(DX_PLAYTYPE_BACK, true);
 										}
 									}
 								}
@@ -666,6 +695,15 @@ namespace FPS_n2 {
 										SideLogParts->Add(5.0f, 0.0f, Red, LocalizeParts->Get(4000));
 										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
 										m_AnnounceTimer = 1.f;
+										SE->Get(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission000))->Play(DX_PLAYTYPE_BACK, true);
+									}
+								}
+							}
+							if ((static_cast<int>(this->m_BattleTimer) != static_cast<int>(prevBattleTimer))) {
+								if (static_cast<int>(this->m_BattleTimer) == 174) {
+									if (m_TaskInfoList.size() > 0) {
+										SideLogParts->Add(5.0f, 0.0f, Yellow, LocalizeParts->Get(250 + static_cast<int>(m_TaskInfoList.begin()->first.m_TaskType)));
+										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::taskstart))->Play(DX_PLAYTYPE_BACK, true);
 									}
 								}
 							}
@@ -836,6 +874,17 @@ namespace FPS_n2 {
 											PlayerMngr->GetPlayer(0)->AddScore(item->GetScore());
 											SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(205)) + " +" + std::to_string(item->GetScore())).c_str());
 											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Delivery))->Play(DX_PLAYTYPE_BACK, true);
+											//タスク
+											if (m_TaskInfoList.size() > 0 && m_TaskInfoList.begin()->first.m_TaskType == TaskType::Obtain && m_TaskInfoList.begin()->first.m_ItemID == ID.first) {
+												++m_TaskInfoList.begin()->second;
+												if (m_TaskInfoList.begin()->second >= m_TaskInfoList.begin()->first.m_Count) {
+													m_TaskInfoList.erase(m_TaskInfoList.begin());
+													PlayerMngr->GetPlayer(0)->AddScore(200);
+													SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(206)) + " +" + std::to_string(200)).c_str());
+													SideLogParts->Add(5.0f, 0.0f, Yellow, LocalizeParts->Get(250 + static_cast<int>(m_TaskInfoList.begin()->first.m_TaskType)));
+													SE->Get(SoundType::SE, static_cast<int>(SoundEnum::taskstart))->Play(DX_PLAYTYPE_BACK, true);
+												}
+											}
 										}
 										else {
 											//auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
@@ -862,6 +911,7 @@ namespace FPS_n2 {
 				}
 				{
 					//タイムオーバー
+					bool isEnd = false;
 					if (this->m_BattleTimer <= 0.f && ViewChara->IsAlive()) {
 						if (!this->m_IsAddScoreArea) {
 							//デス
@@ -869,32 +919,22 @@ namespace FPS_n2 {
 						}
 						else {
 							//帰還する
-							m_IsGameClear = true;
-							m_IsGameClearEnd = false;
-							KeyGuideParts->SetGuideFlip();
-							m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
-							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
-							SE->Get(SoundType::BGM, 2)->Play(DX_PLAYTYPE_BACK, true);
-							//納品
-							for (auto& ID : ViewPlayer->SetInventory()) {
-								if (ID.first != InvalidID) {
-									auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
-									PlayerMngr->GetPlayer(0)->AddScore(item->GetScore());
-									SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(205)) + " +" + std::to_string(item->GetScore())).c_str());
-									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Delivery))->Play(DX_PLAYTYPE_BACK, true);
-								}
-							}
+							isEnd = true;
 						}
 					}
 					//
 					else if (this->m_IsAddScoreArea && this->m_BattleTimer < 60.f && this->m_ReturnPer >= 1.f) {
 						//帰還する
+						isEnd = true;
+					}
+					if (isEnd) {
 						m_IsGameClear = true;
 						m_IsGameClearEnd = false;
 						KeyGuideParts->SetGuideFlip();
 						m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
-						SE->Get(SoundType::BGM,2)->Play(DX_PLAYTYPE_BACK, true);
+						SE->Get(SoundType::BGM, 2)->Play(DX_PLAYTYPE_BACK, true);
+						SE->Get(SoundType::VOICE, static_cast<int>(VoiceEnum::GameEnd000))->Play(DX_PLAYTYPE_BACK, true);
 						//納品
 						for (auto& ID : ViewPlayer->SetInventory()) {
 							if (ID.first != InvalidID) {
@@ -911,6 +951,7 @@ namespace FPS_n2 {
 				if (NetBrowser->IsDataReady() && !this->m_NetWorkController) {
 					this->m_NetWorkController = std::make_unique<NetWork::NetWorkController>(NetBrowser->IsServer(), NetBrowser->GetNetSetting().UsePort, NetBrowser->GetNetSetting().IP, NetBrowser->GetServerPlayer());
 				}
+				int PrevKill = PlayerMngr->GetWatchPlayer()->GetKill();
 				if (this->m_NetWorkController) {
 					NetWork::MoveInfo MoveInfoData;
 					int32_t FreeData[10]{};
@@ -996,7 +1037,18 @@ namespace FPS_n2 {
 					}
 				}
 				DamageEvents.clear();
-
+				{
+					if (m_TaskInfoList.size() > 0 && m_TaskInfoList.begin()->first.m_TaskType == TaskType::KillEnemy && (PrevKill != PlayerMngr->GetWatchPlayer()->GetKill())) {
+						++m_TaskInfoList.begin()->second;
+						if (m_TaskInfoList.begin()->second >= m_TaskInfoList.begin()->first.m_Count) {
+							m_TaskInfoList.erase(m_TaskInfoList.begin());
+							PlayerMngr->GetPlayer(0)->AddScore(200);
+							SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(206)) + " +" + std::to_string(200)).c_str());
+							SideLogParts->Add(5.0f, 0.0f, Yellow, LocalizeParts->Get(250 + static_cast<int>(m_TaskInfoList.begin()->first.m_TaskType)));
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::taskstart))->Play(DX_PLAYTYPE_BACK, true);
+						}
+					}
+				}
 				if (!ViewChara->IsAlive()) {
 					if (!this->m_IsEnd) {
 						FadeControl::Instance()->SetBlackOut(true, 3.f);
@@ -1276,6 +1328,7 @@ namespace FPS_n2 {
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
 			m_GameEndScreen.Dispose();
 			m_ResultGraph.Dispose();
+			m_KillGraph.Dispose();
 			Objects::AmmoPool::Release();
 			Objects::AmmoLinePool::Release();
 			Objects::ItemObjPool::Release();
@@ -1344,43 +1397,72 @@ namespace FPS_n2 {
 							PingMes);
 					}
 
+					if (!SceneParts->IsPause()) {
+						if (this->m_IsFindContainer) {
+							if (PlayerMngr->GetItemContainerObj()) {
+								if (PlayerMngr->GetItemContainerObj()->IsDrawUI()) {
+									auto DispPos = PlayerMngr->GetItemContainerObj()->GetDispPos();
 
-					if (this->m_IsFindContainer) {
-						if (PlayerMngr->GetItemContainerObj()) {
-							if (PlayerMngr->GetItemContainerObj()->IsDrawUI()) {
-								auto DispPos = PlayerMngr->GetItemContainerObj()->GetDispPos();
+									float Per = std::clamp(this->m_FindContainerTimer / 0.5f, 0.f, 1.f);
 
-								float Per = std::clamp(this->m_FindContainerTimer / 0.5f, 0.f, 1.f);
-
-								float LocalPer = 0.f;
-								if (Per < 0.8f) {
-									LocalPer = Lerp(0.f, 1.2f, (Per - 0.f) / (0.8f - 0.f));
-								}
-								else {
-									LocalPer = Lerp(1.2f, 1.f, (Per - 0.8f) / (1.f - 0.8f));
-								}
-								bool IsDraw = true;
-								if (Per >= 1.f) {
-									if ((this->m_FindContainerTimer / 2.f - static_cast<int>(this->m_FindContainerTimer / 2.f)) > 0.5f) {
-										IsDraw = false;
+									float LocalPer = 0.f;
+									if (Per < 0.8f) {
+										LocalPer = Lerp(0.f, 1.2f, (Per - 0.f) / (0.8f - 0.f));
+									}
+									else {
+										LocalPer = Lerp(1.2f, 1.f, (Per - 0.8f) / (1.f - 0.8f));
+									}
+									bool IsDraw = true;
+									if (Per >= 1.f) {
+										if ((this->m_FindContainerTimer / 2.f - static_cast<int>(this->m_FindContainerTimer / 2.f)) > 0.5f) {
+											IsDraw = false;
+										}
+									}
+									if (IsDraw) {
+										int xp1 = static_cast<int>(DispPos.XScreenPos() - 10.f * LocalPer);
+										int yp1 = static_cast<int>(DispPos.YScreenPos() - 20.f * LocalPer);
+										int xp2 = static_cast<int>(DispPos.XScreenPos());
+										int yp2 = static_cast<int>(DispPos.YScreenPos());
+										int xp3 = static_cast<int>(DispPos.XScreenPos() + 10.f * LocalPer);
+										int yp3 = static_cast<int>(DispPos.YScreenPos() - 20.f * LocalPer);
+										if (Per >= 0.8f) {
+											DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic,
+												18, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM,
+												(xp1 + xp3) / 2, (yp1 + yp3) / 2 - 30, Yellow, Black, "CONTAINER");
+										}
+										DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Yellow, 2);
+										DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp2, yp2, xp3, yp3, Yellow, 2);
+										DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3, xp1, yp1, Yellow, 2);
 									}
 								}
-								if (IsDraw) {
-									int xp1 = static_cast<int>(DispPos.XScreenPos() - 10.f * LocalPer);
-									int yp1 = static_cast<int>(DispPos.YScreenPos() - 20.f * LocalPer);
-									int xp2 = static_cast<int>(DispPos.XScreenPos());
-									int yp2 = static_cast<int>(DispPos.YScreenPos());
-									int xp3 = static_cast<int>(DispPos.XScreenPos() + 10.f * LocalPer);
-									int yp3 = static_cast<int>(DispPos.YScreenPos() - 20.f * LocalPer);
-									if (Per >= 0.8f) {
-										DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic,
-											18, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM,
-											(xp1 + xp3) / 2, (yp1 + yp3) / 2 - 30, Yellow, Black, "CONTAINER");
-									}
-									DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp1, yp1, xp2, yp2, Yellow, 2);
-									DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp2, yp2, xp3, yp3, Yellow, 2);
-									DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3, xp1, yp1, Yellow, 2);
+							}
+						}
+
+						{
+							if (m_TaskInfoList.size() > 0) {
+								int xp1 = 400;
+								int yp1 = 1080 * 3 / 4 - 64;
+								DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - 64, yp1 - 64, xp1 + 64, yp1 + 64, Black, true);
+								DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - 64, yp1 - 64, xp1 + 64, yp1 + 64, Green, false, 3);
+								switch (m_TaskInfoList.begin()->first.m_TaskType) {
+								case FPS_n2::Sceneclass::TaskType::Obtain:
+								{
+									int ID = m_TaskInfoList.begin()->first.m_ItemID;
+									auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID);
+									DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &item->GetIconGraph(), xp1, yp1, (128.f / 512.f) * 1.f, 0.f, true);
 								}
+								break;
+								case FPS_n2::Sceneclass::TaskType::KillEnemy:
+								{
+									DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &m_KillGraph, xp1, yp1, (128.f / 512.f) * 1.f, 0.f, true);
+								}
+								break;
+								default:
+									break;
+								}
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+									FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM, xp1, yp1 + 64 - 10, Green, Black, "%d / %d",
+									m_TaskInfoList.begin()->second, m_TaskInfoList.begin()->first.m_Count);
 							}
 						}
 					}

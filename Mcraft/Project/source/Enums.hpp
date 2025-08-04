@@ -139,9 +139,20 @@ namespace FPS_n2 {
 		resultEnv,
 		resultbutton,
 		resultEnd,
+		taskstart,
 
 		alarm,
 	};
+	enum class VoiceEnum {
+		GameStart000 = 1,//テスト分があるので
+		Mission000,
+		Mission001,
+		Mission002,
+		GameEnd000,
+		Mumble000,
+		Mumble001,
+	};
+
 	enum class CharaTypeID {
 		Team,
 		Enemy,

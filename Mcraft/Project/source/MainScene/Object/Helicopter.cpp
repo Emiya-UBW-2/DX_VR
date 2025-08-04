@@ -464,7 +464,20 @@ namespace FPS_n2 {
 				if (this->m_Timer > 10.0f) {
 					SetAction(HelicopterMove::Random);
 				}
-				m_NowPos = Lerp(this->m_PrevPos, m_TargetPos, std::clamp(this->m_Timer / 8.0f, 0.0f, 1.0f));
+				m_Rotate += deg2rad(10.f) * DXLib_refParts->GetDeltaTime();
+
+				m_NowPos = Matrix3x3DX::Vtrans(Vector3DX::forward()*(20.f*Scale3DRate),Matrix3x3DX::RotAxis(Vector3DX::up(),m_Rotate));
+				{
+					auto Vec = m_NowPos;
+					m_YradRT = rad2deg(std::atan2(-Vec.x, -Vec.z));
+					m_YradRT += 90;
+					if ((this->m_YradRT - m_Yrad) > deg2rad(180)) {
+						m_YradRT -= deg2rad(360);
+					}
+					else if ((this->m_YradRT - m_Yrad) < -deg2rad(180)) {
+						m_YradRT += deg2rad(360);
+					}
+				}
 				break;
 			case HelicopterMove::Rappelling:
 				if (this->m_Timer <= 8.0f) {

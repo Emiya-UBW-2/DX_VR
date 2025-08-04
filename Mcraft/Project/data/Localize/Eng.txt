@@ -47,6 +47,7 @@
 0110=Option
 1110=Change BGM volume
 1111=Change SE volume
+1112=Change VOICE volume
 1120=Select Graphics Preset
 1121=Select Window or Borderless
 1122=Change Vertical Fov
@@ -110,6 +111,9 @@
 0203=You Are Dead
 0204=Kill
 0205=Delivery
+0206=TaskClear
+0250=Delivery Item
+0251=Kill Enemy
 
 0300=(íçà”ï\é¶)
 
