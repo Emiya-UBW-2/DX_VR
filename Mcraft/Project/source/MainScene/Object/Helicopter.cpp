@@ -559,7 +559,7 @@ namespace FPS_n2 {
 
 			auto PrevPos = m_Pos;
 
-			Easing(&m_PosR, m_NowPos + (Vector3DX::vget(0.0f, -20.0f, 0.0f) + Vector3DX::vget(GetRandf(1.0f), GetRandf(1.0f), GetRandf(1.0f))) * Scale3DRate, 0.95f, EasingType::OutExpo);
+			Easing(&m_PosR, m_NowPos + (Vector3DX::vget(0.0f, -22.5f, 0.0f) + Vector3DX::vget(GetRandf(1.0f), GetRandf(1.0f), GetRandf(1.0f))) * Scale3DRate, 0.95f, EasingType::OutExpo);
 			Easing(&m_Pos, m_PosR, 0.95f, EasingType::OutExpo);
 
 			auto Vec = Matrix3x3DX::Vtrans((this->m_Pos - PrevPos), GetMove().GetMat().inverse()) / (60.0f * DXLib_refParts->GetDeltaTime());
