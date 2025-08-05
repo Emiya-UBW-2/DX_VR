@@ -308,7 +308,7 @@ namespace FPS_n2 {
 				}
 				//*/
 
-				MyChara->Spawn(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, 0, true);
+				MyChara->Spawn(deg2rad(0.f), deg2rad(GetRandf(180.f)), pos_t, 0, true, 0.f);
 				this->Reset();
 			}
 			void		AimDir(const Vector3DX& VEC) {
@@ -526,7 +526,7 @@ namespace FPS_n2 {
 				ZVec = PlayerMngr->GetHelicopter()->GetMove().GetMat().xvec();
 				Pos = PlayerMngr->GetHelicopter()->GetObj().GetFrameLocalWorldMatrix(PlayerMngr->GetHelicopter()->GetFrame(static_cast<int>(Objects::HeliFrame::Rappelling1))).pos();
 			}
-			MyChara->Spawn(deg2rad(0.0f), std::atan2(ZVec.x, ZVec.z) + deg2rad(GetRandf(10.0f)), Pos, 2, false);
+			MyChara->Spawn(deg2rad(0.0f), std::atan2(ZVec.x, ZVec.z) + deg2rad(GetRandf(10.0f)), Pos, 2, false, 0.f);
 			MyChara->SetRappelling();
 			this->m_RapeTimer = 0.0f;
 		}

@@ -58,6 +58,10 @@ namespace FPS_n2 {
 			float												m_WearArmorTime{ 0.f };
 			float												m_WearArmorPer{ 0.f };
 			int													m_WearArmorFlag{ InvalidID };
+
+			bool												m_IsRun{ false };
+			float												m_RunGauge{ 0.f };
+			float												m_RunGaugeMax{ 1.f };
 		private://キャッシュ
 			Matrix3x3DX											m_EyeRotationCache{};
 			Vector3DX											m_EyePositionCache{};
@@ -65,6 +69,9 @@ namespace FPS_n2 {
 			ScreenPosition										m_CameraPos;
 		private:
 			const auto		GetSpeed(void) const noexcept {
+				if (this->m_IsRun) {
+					return 0.75f;
+				}
 				if (this->m_IsSquat) {
 					if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
 						return 0.15f * GetDebuff();
@@ -97,6 +104,8 @@ namespace FPS_n2 {
 			const auto&		GetIsActiveCameraPosToPlayer(void) const noexcept { return this->m_IsActiveCameraPos; }
 			const auto&		GetCameraPosToPlayer(void) const noexcept { return this->m_CameraPos; }
 			const auto&		GetIsSquat(void) const noexcept { return this->m_IsSquat; }
+			const auto&		GetRunGauge(void) const noexcept { return this->m_RunGauge / this->m_RunGaugeMax; }
+			const auto&		GetRunGaugeTimer(void) const noexcept { return this->m_RunGauge; }
 		public://ゲッター
 			int				GetWeight_gram(void) const noexcept;
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
@@ -187,7 +196,7 @@ namespace FPS_n2 {
 				MV1::SetAnime(&this->m_RagDollControl.SetRagDoll(), GetObj());
 				this->m_RagDollControl.Init(GetObj());
 			}
-			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect, bool CheckGround) noexcept;
+			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect, bool CheckGround, float RunGauge) noexcept;
 
 			const auto		GetIsRappelling() const noexcept { return this->m_IsRappelling && !this->m_IsRappellingEnd; }
 			void			SetRappelling(void) noexcept {

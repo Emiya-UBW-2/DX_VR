@@ -276,10 +276,10 @@ namespace FPS_n2 {
 				}
 				//人の座標設定
 				if (loop == PlayerMngr->GetWatchPlayerID()) {
-					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true);
+					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true, 5.f);
 				}
 				else {
-					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true);
+					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true, 0.f);
 				}
 			}
 
@@ -769,7 +769,7 @@ namespace FPS_n2 {
 					MyInput.SetInputPADS(Controls::PADS::MOVE_S, Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::MOVE_A, Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::MOVE_D, Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().press());
-					//MyInput.SetInputPADS(Controls::PADS::RUN, Pad->GetPadsInfo(Controls::PADS::RUN).GetKey().press());
+					MyInput.SetInputPADS(Controls::PADS::RUN, Pad->GetPadsInfo(Controls::PADS::RUN).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::LEAN_L, Pad->GetPadsInfo(Controls::PADS::LEAN_L).GetKey().press());
 					MyInput.SetInputPADS(Controls::PADS::LEAN_R, Pad->GetPadsInfo(Controls::PADS::LEAN_R).GetKey().press());
 					//MyInput.SetInputPADS(Controls::PADS::MELEE, Pad->GetPadsInfo(Controls::PADS::MELEE).GetKey().press());
@@ -883,6 +883,7 @@ namespace FPS_n2 {
 													SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(206)) + " +" + std::to_string(200)).c_str());
 													SideLogParts->Add(5.0f, 0.0f, Yellow, LocalizeParts->Get(250 + static_cast<int>(m_TaskInfoList.begin()->first.m_TaskType)));
 													SE->Get(SoundType::SE, static_cast<int>(SoundEnum::taskstart))->Play(DX_PLAYTYPE_BACK, true);
+													this->m_TaskClearOnce = true;
 												}
 											}
 										}
@@ -1046,6 +1047,7 @@ namespace FPS_n2 {
 							SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(206)) + " +" + std::to_string(200)).c_str());
 							SideLogParts->Add(5.0f, 0.0f, Yellow, LocalizeParts->Get(250 + static_cast<int>(m_TaskInfoList.begin()->first.m_TaskType)));
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::taskstart))->Play(DX_PLAYTYPE_BACK, true);
+							this->m_TaskClearOnce = true;
 						}
 					}
 				}
@@ -1260,7 +1262,9 @@ namespace FPS_n2 {
 			BackGroundParts->Update();
 			//UIパラメーター
 			{
-				if ((this->m_IsAddScoreArea && this->m_BattleTimer < 60.f) && Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().press()) {
+				bool CanReturn = ((ViewPlayer->GetScore() >= 1000) || (this->m_BattleTimer < 60.f) || this->m_TaskClearOnce);
+
+				if (CanReturn && this->m_IsAddScoreArea &&  Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().press()) {
 					if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
 					}
@@ -1286,6 +1290,7 @@ namespace FPS_n2 {
 					}
 					this->m_UIclass.SetIntParam(1, select);
 				}
+				this->m_UIclass.SetIntParam(2, CanReturn);
 				this->m_UIclass.Update();
 			}
 			HitMarkerPool::Instance()->Update();

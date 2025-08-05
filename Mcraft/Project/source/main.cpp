@@ -34,7 +34,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	Pad->SetIsUseButton(Controls::PADS::MELEE, false);
 	Pad->SetIsUseButton(Controls::PADS::JUMP, false);
 	Pad->SetIsUseButton(Controls::PADS::INVENTORY, true);
-	Pad->SetIsUseButton(Controls::PADS::RUN, false);
+	Pad->SetIsUseButton(Controls::PADS::RUN, true);
 	Pad->SetIsUseButton(Controls::PADS::WALK, true);
 	Pad->SetIsUseButton(Controls::PADS::SHOT, true);
 	Pad->SetIsUseButton(Controls::PADS::AIM, true);

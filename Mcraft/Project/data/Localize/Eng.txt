@@ -141,6 +141,7 @@
 3004=Delivery Item
 3005=Request for return
 3006=Return Title
+3007=Earn 1000pts or Complete 1 task, Can request return.
 
 4000=Find Container
 4001=Delivery Items in container

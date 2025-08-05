@@ -101,7 +101,7 @@ namespace FPS_n2 {
 				this->m_Rad = 0.0f;
 				this->m_Rate = 0;
 			}
-			bool			Update(bool LeftTrigger, bool RightTrigger) {
+			bool			Update(bool LeftTrigger, bool RightTrigger, bool IsReset) {
 				//入力
 				auto Prev = this->m_Rate;
 				//*
@@ -131,6 +131,9 @@ namespace FPS_n2 {
 					this->m_Rate = 1;
 				}
 				//*/
+				if (IsReset) {
+					this->m_Rate = 0;
+				}
 				Easing(&this->m_Rad, (static_cast<float>(this->m_Rate) + this->m_HeadShotPer) * deg2rad(25), 0.9f, EasingType::OutExpo);
 				Easing(&this->m_HeadShotPer, 0.f, 0.9f, EasingType::OutExpo);
 				return (Prev != this->m_Rate);

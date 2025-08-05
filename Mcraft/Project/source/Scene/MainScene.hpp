@@ -74,6 +74,7 @@ namespace FPS_n2 {
 
 
 			std::vector<std::pair<TaskInfo, int>>		m_TaskInfoList;
+			bool										m_TaskClearOnce{ false };
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
 				if (this->m_NetWorkController) {

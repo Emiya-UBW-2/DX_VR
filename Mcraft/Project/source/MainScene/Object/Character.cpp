@@ -279,6 +279,16 @@ namespace FPS_n2 {
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.0f);
 				}
 			}
+			if (this->m_IsRun) {
+				bool Prev = this->m_IsSquat;
+				this->m_IsSquat = false;
+				if (Prev != this->m_IsSquat) {
+					//しゃがみ音
+					if (GetMyPlayerID() == PlayerMngr->GetWatchPlayerID()) {
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.0f);
+					}
+				}
+			}
 			if (GetGunPtrNow()) {
 				//銃ひっこめ
 				if (this->m_StuckGunTimer == 0.0f) {
@@ -322,12 +332,16 @@ namespace FPS_n2 {
 					if (this->m_IsStuckGun) {
 						auto Zvec = GetFrameWorldMat(CharaFrame::Head).zvec2();
 						if (Zvec.y < std::sin(deg2rad(-30))) {
-							GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
 						}
 						else {
 							GetGunPtrNow()->SetGunAnime(GunAnimeID::HighReady);
 						}
 					}
+				}
+				//
+				if (this->m_IsRun) {
+					GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
+					this->m_IsStuckGun = true;
 				}
 				//武器切替
 				if (GetGunPtrNow()->GetGunAnime() != GunAnimeID::LowReady && GetGunPtrNow()->GetGunAnime() != GunAnimeID::EmergencyReady) {
@@ -337,6 +351,9 @@ namespace FPS_n2 {
 						if (this->m_Input.GetPADSTrigger(Controls::PADS::ULT)) {
 							Wheel = 1;
 						}
+					}
+					if (this->m_IsRun) {
+						Wheel = 0;
 					}
 					if (Wheel != 0) {
 						GetGunPtrNow()->SetGunAnime(GunAnimeID::LowReady);
@@ -537,6 +554,16 @@ namespace FPS_n2 {
 				this->m_Input.GetPADSPress(Controls::PADS::MOVE_A),
 				this->m_Input.GetPADSPress(Controls::PADS::MOVE_S),
 				this->m_Input.GetPADSPress(Controls::PADS::MOVE_D));
+
+			this->m_IsRun = this->m_Input.GetPADSPress(Controls::PADS::RUN);
+			if (this->m_RunGauge > 0.f) {
+				if (this->m_IsRun) {
+					this->m_RunGauge = std::max(this->m_RunGauge - DXLib_refParts->GetDeltaTime(), 0.f);
+				}
+			}
+			else {
+				this->m_IsRun = false;
+			}
 			Vector2DX RecoilRadAdd;
 			if (GetGunPtrNow()) {
 				RecoilRadAdd = GetGunPtrNow()->GetRecoilRadAdd();
@@ -545,7 +572,7 @@ namespace FPS_n2 {
 				this->m_Input.GetAddxRad() - RecoilRadAdd.y, this->m_Input.GetAddyRad() + RecoilRadAdd.x,
 				this->m_MoveControl.GetVecPower() > 0.1f, (IsMoveFront() ? this->m_MoveControl.GoFrontRad() : 0.0f) + (IsMoveBack() ? this->m_MoveControl.GoBackRad() : 0.0f));
 			//リーン
-			if (this->m_LeanControl.Update(this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_L), this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_R))) {
+			if (this->m_LeanControl.Update(this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_L), this->m_Input.GetPADSTrigger(Controls::PADS::LEAN_R), this->m_IsRun)) {
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::StandupFoot))->Play3D(GetEyePositionCache(), Scale3DRate * 3.0f);
 			}
 			if (GetGunPtrNow()) {
@@ -557,6 +584,9 @@ namespace FPS_n2 {
 			if (IsMoveRight()) { this->m_BottomAnimSelect = GetBottomRightStepAnimSelect(); }
 			if (IsMoveBack()) { this->m_BottomAnimSelect = GetBottomWalkBackAnimSelect(); }
 			if (IsMoveFront()) { this->m_BottomAnimSelect = GetBottomWalkAnimSelect(); }
+
+			if (this->m_IsRun) { this->m_BottomAnimSelect = CharaAnimeID::Bottom_Stand_Run; }
+
 			Easing(&this->m_AnimPerBuf[static_cast<int>(GetBottomTurnAnimSelect())], (!this->m_IsSquat && this->m_RotateControl.IsTurnBody()) ? 1.0f : 0.0f, 0.8f, EasingType::OutExpo);
 			Easing(&this->m_AnimPerBuf[static_cast<int>(CharaAnimeID::Rappelling)], 0.0f, 0.8f, EasingType::OutExpo);
 			for (int loop = 0; loop < static_cast<int>(CharaAnimeID::AnimeIDMax); ++loop) {
@@ -1165,7 +1195,7 @@ namespace FPS_n2 {
 			this->m_GunPtrControl.SetGunPtr(Select, std::make_shared<Guns::GunObj>());
 			ObjectManager::Instance()->InitObject(this->m_GunPtrControl.GetGunPtr(Select), Path);
 		}
-		void CharacterObj::Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect, bool CheckGround) noexcept {
+		void CharacterObj::Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect, bool CheckGround, float RunGauge) noexcept {
 			auto& player = Player::PlayerManager::Instance()->GetPlayer(this->GetMyPlayerID());
 			this->m_HP.Init();
 			this->m_BodyPoint.Init();
@@ -1202,6 +1232,9 @@ namespace FPS_n2 {
 			this->m_GunFallActive = true;
 
 			player->InitInventory();
+
+			this->m_RunGauge = RunGauge;
+			this->m_RunGaugeMax = RunGauge;
 		}
 		//
 		void			CharacterObj::Init_Sub(void) noexcept {
