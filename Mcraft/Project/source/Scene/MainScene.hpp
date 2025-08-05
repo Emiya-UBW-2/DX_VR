@@ -75,6 +75,9 @@ namespace FPS_n2 {
 
 			std::vector<std::pair<TaskInfo, int>>		m_TaskInfoList;
 			bool										m_TaskClearOnce{ false };
+
+			bool										m_IsSkipMovie{ false };
+			float										m_MovieEndTimer{ 0.0f };
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
 				if (this->m_NetWorkController) {

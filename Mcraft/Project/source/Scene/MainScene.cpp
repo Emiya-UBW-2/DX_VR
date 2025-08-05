@@ -391,6 +391,8 @@ namespace FPS_n2 {
 			m_IsGameReady = false;
 			//m_IsGameReady = true;
 			m_StartAnimTimer = 0.f;
+			m_IsSkipMovie = false;
+			m_MovieEndTimer = 1.f;
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* CameraParts = Camera3D::Instance();
@@ -549,11 +551,39 @@ namespace FPS_n2 {
 							Easing(&fovBuf, deg2rad(35), 0.9f, EasingType::OutExpo);
 						}
 
-						if (m_StartAnimTimer >= 4.5f + 3.f) {
+						if (m_StartAnimTimer >= 4.5f + 3.f && !m_IsSkipMovie) {
 							if (FadeControl::Instance()->IsClear()) {
 								FadeControl::Instance()->SetBlackOut(true);
 							}
 							else if (FadeControl::Instance()->IsAll()) {
+								m_MovieEndTimer = std::max(m_MovieEndTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+								if (m_MovieEndTimer == 0.f) {
+									m_MovieHeli->SetActive(false);
+									FadeControl::Instance()->SetBlackOut(false);
+									this->m_IsGameReady = true;
+									fovBuf = fovTarget;
+									SceneParts->SetPauseEnable(false);
+									SetFogEnable(true);
+									if (PlayerMngr->GetHelicopter()) {
+										PlayerMngr->GetHelicopter()->SetActive(true);
+									}
+									if (PlayerMngr->GetTeamHelicopter()) {
+										PlayerMngr->GetTeamHelicopter()->SetActive(true);
+									}
+								}
+							}
+						}
+					}
+					if (m_StartAnimTimer < 4.5f + 3.f) {
+						if (!m_IsSkipMovie) {
+							if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
+								m_IsSkipMovie = true;
+								FadeControl::Instance()->SetBlackOut(true);
+							}
+						}
+						else if (FadeControl::Instance()->IsAll()) {
+							m_MovieEndTimer = std::max(m_MovieEndTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+							if (m_MovieEndTimer == 0.f) {
 								m_MovieHeli->SetActive(false);
 								FadeControl::Instance()->SetBlackOut(false);
 								this->m_IsGameReady = true;
@@ -813,7 +843,16 @@ namespace FPS_n2 {
 						if (ID.first != InvalidID) {
 							bool IsPress = false;
 							if (isFirst) {
-								IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE).GetKey().press();
+								if (this->m_IsAddScoreArea && (m_TaskInfoList.size() > 0 && m_TaskInfoList.begin()->first.m_TaskType == TaskType::Obtain)) {
+									if (m_TaskInfoList.begin()->first.m_ItemID == ID.first) {
+										isFirst = false;
+										IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE).GetKey().press();
+									}
+								}
+								else {
+									isFirst = false;
+									IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE).GetKey().press();
+								}
 							}
 							if (isArmerHealing && IsPressArmor) {
 								auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
@@ -884,6 +923,7 @@ namespace FPS_n2 {
 													SideLogParts->Add(5.0f, 0.0f, Yellow, LocalizeParts->Get(250 + static_cast<int>(m_TaskInfoList.begin()->first.m_TaskType)));
 													SE->Get(SoundType::SE, static_cast<int>(SoundEnum::taskstart))->Play(DX_PLAYTYPE_BACK, true);
 													this->m_TaskClearOnce = true;
+													SE->Get(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble001))->Play(DX_PLAYTYPE_BACK, true);
 												}
 											}
 										}
@@ -905,7 +945,6 @@ namespace FPS_n2 {
 							else {
 								ID.second = 0.f;
 							}
-							isFirst = false;
 						}
 						++loop;
 					}
@@ -924,7 +963,7 @@ namespace FPS_n2 {
 						}
 					}
 					//
-					else if (this->m_IsAddScoreArea && this->m_BattleTimer < 60.f && this->m_ReturnPer >= 1.f) {
+					else if (this->m_ReturnPer >= 1.f) {
 						//帰還する
 						isEnd = true;
 					}
@@ -1048,6 +1087,7 @@ namespace FPS_n2 {
 							SideLogParts->Add(5.0f, 0.0f, Yellow, LocalizeParts->Get(250 + static_cast<int>(m_TaskInfoList.begin()->first.m_TaskType)));
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::taskstart))->Play(DX_PLAYTYPE_BACK, true);
 							this->m_TaskClearOnce = true;
+							SE->Get(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble000))->Play(DX_PLAYTYPE_BACK, true);
 						}
 					}
 				}
