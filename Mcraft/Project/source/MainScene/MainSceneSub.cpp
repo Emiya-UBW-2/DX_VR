@@ -238,7 +238,7 @@ namespace FPS_n2 {
 			this->ReturnGraph.Load("data/UI/Return.png");
 			this->GaugeGraph.Load("data/UI/Gauge.bmp");
 			this->RunGraph.Load("data/UI/Run.png");
-			
+			this->AdrenalineGraph.Load("data/UI/Adrenaline.png");
 
 			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 			m_PrevItemID.resize(ViewPlayer->GetInventory().size());
@@ -684,9 +684,6 @@ namespace FPS_n2 {
 							if (ViewChara->GetRunGauge() > 0.f) {
 								yp1 = yp1 + 64;
 
-								DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 0, 0);
-								DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &this->RunGraph, xp1 - 16 + 2, yp1 + 16 + 2, 32.f / 64.f, 0.f, true);
-								DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 								DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &this->RunGraph, xp1 - 16, yp1 + 16, 32.f / 64.f, 0.f, true);
 								DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 255, 0);
 								DrawCtrls->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, &this->GaugeGraph, xp1 - 16, yp1 + 16, 100.f * ViewChara->GetRunGauge(), 0.f, 32.f / 64.f);
@@ -694,6 +691,17 @@ namespace FPS_n2 {
 
 								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
 									FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp1, yp1 + 16, (ViewChara->GetRunGauge() * 0.3f) ? Green : Red, Black, "%05.2f s", ViewChara->GetRunGaugeTimer());
+							}
+							if (ViewChara->GetAdrenalineTime() > 0.f) {
+								yp1 = yp1 + 64;
+
+								DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &this->AdrenalineGraph, xp1 - 16, yp1 + 16, 32.f / 64.f, 0.f, true);
+								DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 255, 0);
+								DrawCtrls->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, &this->GaugeGraph, xp1 - 16, yp1 + 16, 100.f * ViewChara->GetAdrenalineTime(), 0.f, 32.f / 64.f);
+								DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+									FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp1, yp1 + 16, (ViewChara->GetAdrenalineTime() * 0.3f) ? Green : Red, Black, "%05.2f s", ViewChara->GetAdrenalineTimeTimer());
 							}
 							if (HasSpare) {
 								yp1 = yp1 + 64;

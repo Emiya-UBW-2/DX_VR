@@ -11,6 +11,47 @@
 
 namespace FPS_n2 {
 	namespace Player {
+		enum class SkillType {
+			Runner,			//・1ゲージぶんだけ走れるようにする（次プレイまで回復しない）
+			Guts,			//・即死しそうな時に1度だけ踏みとどまれる
+			AP_AMMO,		//・弾がアーマーを貫通する代わりにダメージが落ちるAP弾に
+			ItemEater,		//・Fキーを押すと3m以内のアイテムを吸い寄せる
+			PeaceMaker,		//・対面している時だけ敵が撃ってこなくなる
+			TeiziTaisha,	//・帰還要請と援護射撃までのタイマーを早める
+			Adrenaline,		//・物を拾って5秒だけ重さデバフを無視できる
+			DamageCut,		//・アーマーを含め被ダメージを5% カット
+			Max,
+		};
+
+		class SkillInfo {
+		public:
+			SkillType	m_SkillType{};
+			int			m_Level{ 1 };
+		};
+
+		class SkillList : public SingletonBase<SkillList> {
+		private:
+			friend class SingletonBase<SkillList>;
+		private:
+			std::vector<SkillInfo>						m_SkillInfo;
+		public:
+			const auto	GetSkilLevel(SkillType type) const noexcept {
+				for (auto& s : m_SkillInfo) {
+					if (s.m_SkillType == type) {
+						return s.m_Level;
+					}
+				}
+				return 0;
+			}
+		private:
+			SkillList() noexcept {
+				m_SkillInfo.clear();
+			}
+			virtual ~SkillList() noexcept {
+
+			}
+		};
+
 		class PlayerManager : public SingletonBase<PlayerManager> {
 		private:
 			friend class SingletonBase<PlayerManager>;

@@ -52,6 +52,7 @@ namespace FPS_n2 {
 			GraphHandle					ReturnGraph;
 			GraphHandle					GaugeGraph;
 			GraphHandle					RunGraph;
+			GraphHandle					AdrenalineGraph;
 
 			float						m_DamagePer{};
 			float						m_DamagePerR{};
@@ -97,6 +98,7 @@ namespace FPS_n2 {
 				this->ReturnGraph.Dispose();
 				this->GaugeGraph.Dispose();
 				this->RunGraph.Dispose();
+				this->AdrenalineGraph.Dispose();
 			}
 		public:
 			void			SetIntParam(size_t ID, int value) noexcept { intParam[ID] = value; }

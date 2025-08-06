@@ -49,6 +49,8 @@ namespace FPS_n2 {
 			bool										m_IsGameOver = false;
 			bool										m_IsGameClear = false;
 			bool										m_IsGameClearEnd = false;
+			std::array<Player::SkillType, 3>			m_SkillSelect{};
+			bool										m_IsSkillSelect = false;
 			float										m_GameClearCount = 0.f;
 			float										m_GameClearCount2 = 0.f;
 			float										m_GameClearTimer = 0.f;

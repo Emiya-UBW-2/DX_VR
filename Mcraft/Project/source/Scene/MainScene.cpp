@@ -105,6 +105,9 @@ namespace FPS_n2 {
 			Objects::AmmoLinePool::Create();
 			Objects::ItemObjPool::Create();
 			Player::PlayerManager::Create();
+
+			//スキルをセーブから読み取り
+			Player::SkillList::Create();
 			auto* PlayerMngr = Player::PlayerManager::Instance();
 			PlayerMngr->Init(NetWork::Player_num);
 			PlayerMngr->SetWatchPlayerID(GetViewPlayerID());
@@ -276,7 +279,21 @@ namespace FPS_n2 {
 				}
 				//人の座標設定
 				if (loop == PlayerMngr->GetWatchPlayerID()) {
-					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true, 5.f);
+					float RunTime = 0.f;
+					switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::Runner)) {
+					case 1:
+						RunTime = 5.f;
+						break;
+					case 2:
+						RunTime = 10.f;
+						break;
+					case 3:
+						RunTime = 15.f;
+						break;
+					default:
+						break;
+					}
+					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true, RunTime);
 				}
 				else {
 					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true, 0.f);
@@ -617,6 +634,7 @@ namespace FPS_n2 {
 				SceneParts->SetPauseEnable(false);
 				m_GameClearCount += DXLib_refParts->GetDeltaTime();
 				m_GameClearTimer += DXLib_refParts->GetDeltaTime();
+				bool Prev = m_IsSkillSelect;
 				if (this->m_GameClearCount > 0.05f && !m_IsGameClearEnd) {
 					m_GameClearCount -= 0.05f;
 					m_GameEndScreen.GraphFilter(DX_GRAPH_FILTER_GAUSS, 32, 100);
@@ -643,15 +661,66 @@ namespace FPS_n2 {
 						}
 					}
 				}
+				if (this->m_GameClearTimer > 1.5f + (0.5f + 0.1f) * 5.f * 2.f + 1.f) {
+					m_IsSkillSelect = true;
+				}
 				if (this->m_GameClearTimer > 1.5f) {
 					if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
-						if (!this->m_IsEnd) {
-							FadeControl::Instance()->SetBlackOut(true);
-							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
+						if (!m_IsGameClearEnd) {
+							this->m_GameClearTimer = 1.5f + (0.5f + 0.1f) * 5.f * 2.f;
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnd))->Play(DX_PLAYTYPE_BACK, true);
+							m_IsGameClearEnd = true;
 						}
-						this->m_IsEnd = true;
+						else if(!m_IsSkillSelect){
+							m_IsSkillSelect = true;
+						}
+						else {
+							if (!this->m_IsEnd) {
+								FadeControl::Instance()->SetBlackOut(true);
+								SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
+							}
+							this->m_IsEnd = true;
+						}
 					}
 				}
+				if (Prev != m_IsSkillSelect && m_IsSkillSelect) {
+					//選べるスキル総数
+					int CanPicSkill = 0;
+					for (int loop = 0; loop < static_cast<int>(Player::SkillType::Max); ++loop) {
+						if (!(Player::SkillList::Instance()->GetSkilLevel(static_cast<Player::SkillType>(loop)) >= 3)) {
+							++CanPicSkill;
+						}
+					}
+					//
+					for (int loop = 0; loop < 3; ++loop) {
+						if (loop >= CanPicSkill) {
+							m_SkillSelect.at(loop) = Player::SkillType::Max;//次遊ぶ際のスコアを+500
+							continue;
+						}
+						m_SkillSelect.at(loop) = static_cast<Player::SkillType>(GetRand(static_cast<int>(Player::SkillType::Max) - 1));
+						bool isContinue = false;
+						//スキルラインナップに被りがある
+						if (!isContinue) {
+							for (int loop2 = 0; loop2 < loop; ++loop2) {
+								if (m_SkillSelect.at(loop2) == m_SkillSelect.at(loop)) {
+									isContinue = true;
+									break;
+								}
+							}
+						}
+						//もう選べないスキル
+						if (!isContinue) {
+							if (Player::SkillList::Instance()->GetSkilLevel(m_SkillSelect.at(loop)) >= 3) {
+								isContinue = true;
+							}
+						}
+						if (isContinue) {
+							--loop;
+							continue;
+						}
+					}
+				}
+
 				if (this->m_GameClearTimer >= 2.f) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->SetLocalVolume(static_cast<int>(Lerp(255, 0, std::clamp(this->m_GameClearTimer / 2.f, 0.f, 1.f))));
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli2))->SetLocalVolume(static_cast<int>(Lerp(255, 0, std::clamp(this->m_GameClearTimer / 2.f, 0.f, 1.f))));
@@ -970,6 +1039,7 @@ namespace FPS_n2 {
 					if (isEnd) {
 						m_IsGameClear = true;
 						m_IsGameClearEnd = false;
+						m_IsSkillSelect = false;
 						KeyGuideParts->SetGuideFlip();
 						m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
@@ -1104,6 +1174,21 @@ namespace FPS_n2 {
 			PlayerMngr->m_FindCount = std::max(PlayerMngr->m_FindCount - DXLib_refParts->GetDeltaTime(), 0.f);
 			//ほかプレイヤーとの判定
 			{
+				float EatLength = 0.f;
+				switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::ItemEater)) {
+				case 1:
+					EatLength = 4.f * Scale3DRate;
+					break;
+				case 2:
+					EatLength = 5.f * Scale3DRate;
+					break;
+				case 3:
+					EatLength = 6.f * Scale3DRate;
+					break;
+				default:
+					break;
+				}
+
 				float Radius = 2.0f * 1.f * Scale3DRate;
 				if (this->m_NetWorkController && this->m_NetWorkController->IsInGame()) {//オンライン
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
@@ -1119,6 +1204,8 @@ namespace FPS_n2 {
 							if (!g->IsActive()) { continue; }
 							Vector3DX Vec = (chara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
 							float Len = Vec.magnitude();
+							if ((loop == GetViewPlayerID()) && Len < EatLength) {
+							}
 							if (Len < Radius) {
 								Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
 								if (
@@ -1151,6 +1238,17 @@ namespace FPS_n2 {
 							if (!g->IsActive()) { continue; }
 							Vector3DX Vec = (ViewChara->GetMove().GetPos() - g->GetMove().GetPos()); Vec.y = (0.0f);
 							float Len = Vec.magnitude();
+							if (Len < EatLength) {
+								Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
+								if (
+									(ViewPlayer->HasEmptyInventory() != 0) &&
+									((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized() * -1.f)) > 0.f) &&
+									(BackGroundParts->CheckLinetoMap(ViewChara->GetEyePositionCache(), &EndPos) == 0)
+									) {
+									g->SetMove().SetPos(g->GetMove().GetPos() + Vec.normalized() * (1.f * Scale3DRate * DXLib_refParts->GetDeltaTime()));
+									g->SetMove().Update(0.f, 0.f);
+								}
+							}
 							if (Len < Radius) {
 								Vector3DX EndPos = g->GetMove().GetPos() + Vector3DX::up() * (1.f * Scale3DRate);
 								if (
@@ -1162,6 +1260,20 @@ namespace FPS_n2 {
 									ViewPlayer->AddInventory(g->GetUniqueID());
 									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::GetItem))->Play(DX_PLAYTYPE_BACK, true);
 									g->SetActive(false);
+
+									switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::Adrenaline)) {
+									case 1:
+										ViewChara->SetAdrenalineTime(1.f);
+										break;
+									case 2:
+										ViewChara->SetAdrenalineTime(2.f);
+										break;
+									case 3:
+										ViewChara->SetAdrenalineTime(3.f);
+										break;
+									default:
+										break;
+									}
 									continue;
 								}
 								else {
@@ -1308,7 +1420,21 @@ namespace FPS_n2 {
 					if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
 					}
-					this->m_ReturnPer = std::clamp(this->m_ReturnPer + DXLib_refParts->GetDeltaTime() / 5.f, 0.f, 1.f);
+					float SpeedUP = 1.f;
+					switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::TeiziTaisha)) {
+					case 1:
+						SpeedUP = 1.1f;
+						break;
+					case 2:
+						SpeedUP = 1.25f;
+						break;
+					case 3:
+						SpeedUP = 1.5f;
+						break;
+					default:
+						break;
+					}
+					this->m_ReturnPer = std::clamp(this->m_ReturnPer + DXLib_refParts->GetDeltaTime() / 5.f* SpeedUP, 0.f, 1.f);
 				}
 				else {
 					this->m_ReturnPer = 0.f;
@@ -1381,6 +1507,7 @@ namespace FPS_n2 {
 			CommonBattleResource::Dispose();
 			this->m_UIclass.Dispose();
 			Player::PlayerManager::Release();
+			Player::SkillList::Release();
 			ObjectManager::Instance()->DeleteAll();
 			this->m_PauseMenuControl.Dispose();
 			HitMarkerPool::Release();
@@ -1601,6 +1728,43 @@ namespace FPS_n2 {
 
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 					}
+
+					//スキル選択
+					if (m_IsGameClearEnd && m_IsSkillSelect) {
+						int xp1 = 1920 / 2;
+						int yp1 = 1080 / 2;
+						float wide = 400.f;
+						for (int loop = 0; loop < 3; ++loop) {
+							xp1 = 1920 / 2 + static_cast<int>(wide * (-(3.f - 1.f) / 2.f + loop));
+							yp1 = 1080 / 2;
+
+							int ID = static_cast<int>(m_SkillSelect.at(loop));
+
+							DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - (wide / 2 - 8), yp1 - 540 / 2, xp1 + (wide / 2 - 8), yp1 + 540 / 2, DarkGreen, true);
+
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
+								FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1 - 200, White, Black, LocalizeParts->Get(5000 + ID));
+
+							std::string Str = LocalizeParts->Get(5100 + ID);
+							{
+								std::string t = "[d]";  // 検索文字列
+								auto pos = Str.find(t);
+								auto len = t.length();
+								if (pos != std::string::npos) {
+									Str.replace(pos, len, std::to_string(100));
+								}
+							}
+							DrawCtrls->SetStringAutoFit(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+								xp1 - (wide / 2 - 8 - 64), yp1 + 32, xp1 + (wide / 2 - 8 - 64), yp1 + 540 / 2,
+								White, Black, Str);
+							if (loop == 0) {
+								DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 
+									xp1 - (wide / 2 - 8), yp1 - 540 / 2, xp1 + (wide / 2 - 8), yp1 + 540 / 2,
+									Green, false, 5);
+							}
+						}
+					}
+
 				}
 			}
 			FadeControl::Instance()->Draw();

@@ -62,6 +62,8 @@ namespace FPS_n2 {
 			bool												m_IsRun{ false };
 			float												m_RunGauge{ 0.f };
 			float												m_RunGaugeMax{ 1.f };
+			float												m_AdrenalineTime{ 0.f };
+			float												m_AdrenalineTimeMax{ 0.f };
 		private://キャッシュ
 			Matrix3x3DX											m_EyeRotationCache{};
 			Vector3DX											m_EyePositionCache{};
@@ -106,6 +108,9 @@ namespace FPS_n2 {
 			const auto&		GetIsSquat(void) const noexcept { return this->m_IsSquat; }
 			const auto&		GetRunGauge(void) const noexcept { return this->m_RunGauge / this->m_RunGaugeMax; }
 			const auto&		GetRunGaugeTimer(void) const noexcept { return this->m_RunGauge; }
+
+			const auto&		GetAdrenalineTime(void) const noexcept { return this->m_AdrenalineTime / this->m_AdrenalineTimeMax; }
+			const auto&		GetAdrenalineTimeTimer(void) const noexcept { return this->m_AdrenalineTime; }
 		public://ゲッター
 			int				GetWeight_gram(void) const noexcept;
 			const auto&		GetMyPlayerID(void) const noexcept { return this->m_MyID; }
@@ -181,6 +186,11 @@ namespace FPS_n2 {
 				this->m_HeadShotSwitch = false;
 				return ret;
 			}
+			void			SetAdrenalineTime(float value) noexcept {
+				m_AdrenalineTime = value;
+				m_AdrenalineTimeMax = value;
+			}
+
 			bool			IsWearingArmor() const noexcept { return this->m_WearArmorFlag != InvalidID; }
 		private: //更新関連
 			void			UpdateInput(void) noexcept;

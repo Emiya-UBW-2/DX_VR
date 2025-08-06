@@ -28,6 +28,9 @@ namespace FPS_n2 {
 		}
 
 		float CharacterObj::GetDebuff(void) const noexcept {
+			if (m_AdrenalineTime > 0.f) {
+				return 1.5f;
+			}
 			int gram = GetWeight_gram();
 
 			if (gram == 0) {
@@ -59,19 +62,59 @@ namespace FPS_n2 {
 
 				//部位ダメージ演算
 				if (Damage > 0) {
+					bool isAP = false;
+					if (Event.ShotID == PlayerMngr->GetWatchPlayerID()) {
+						//弾の貫通力を上げる
+						switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::AP_AMMO)) {
+						case 1:
+							Damage = Damage * 20 / 100;
+							isAP = true;
+							break;
+						case 2:
+							Damage = Damage * 40 / 100;
+							isAP = true;
+							break;
+						case 3:
+							Damage = Damage * 60 / 100;
+							isAP = true;
+							break;
+						default:
+							break;
+						}
+					}
+					if (Event.DamageID == PlayerMngr->GetWatchPlayerID()) {
+						switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::DamageCut)) {
+						case 1:
+							Damage = Damage * 95 / 100;
+							break;
+						case 2:
+							Damage = Damage * 80 / 100;
+							break;
+						case 3:
+							Damage = Damage * 85 / 100;
+							break;
+						default:
+							break;
+						}
+					}
+
 					switch (static_cast<HitType>(Event.HitType)) {
 					case HitType::Head:
 						if (Event.DamageID != PlayerMngr->GetWatchPlayerID()) {//自機はヘッショされない
 							Damage = Damage * 500 / 100;
 						}
-						HeadArmerDamage = this->m_HeadPoint.GetPoint();
-						Damage = std::clamp<HitPoint>(Damage - HeadArmerDamage, 0, this->m_HP.GetMax());
-						this->m_HeadPoint.Sub(this->m_HeadPoint.GetMax() / 2);
+						if (!isAP) {
+							HeadArmerDamage = this->m_HeadPoint.GetPoint();
+							Damage = std::clamp<HitPoint>(Damage - HeadArmerDamage, 0, this->m_HP.GetMax());
+							this->m_HeadPoint.Sub(this->m_HeadPoint.GetMax() / 2);
+						}
 						break;
 					case HitType::Body:
-						BodyArmerDamage = this->m_BodyPoint.GetPoint();
-						Damage = std::clamp<HitPoint>(Damage - BodyArmerDamage, 0, this->m_HP.GetMax());
-						this->m_BodyPoint.Sub(this->m_BodyPoint.GetMax() / 5);
+						if (!isAP) {
+							BodyArmerDamage = this->m_BodyPoint.GetPoint();
+							Damage = std::clamp<HitPoint>(Damage - BodyArmerDamage, 0, this->m_HP.GetMax());
+							this->m_BodyPoint.Sub(this->m_BodyPoint.GetMax() / 5);
+						}
 						break;
 					case HitType::Arm:
 						Damage = Damage * 30 / 100;
@@ -114,6 +157,26 @@ namespace FPS_n2 {
 				}
 
 				auto Prev = this->m_HP.GetPoint();
+				//一定以上のダメージに対して踏ん張る
+				switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::Guts)) {
+				case 1:
+					if (Prev > 30) {
+						Damage = std::min<HitPoint>(Damage, Prev + 1);
+					}
+					break;
+				case 2:
+					if (Prev > 20) {
+						Damage = std::min<HitPoint>(Damage, Prev + 1);
+					}
+					break;
+				case 3:
+					if (Prev > 10) {
+						Damage = std::min<HitPoint>(Damage, Prev + 1);
+					}
+					break;
+				default:
+					break;
+				}
 				this->m_HP.Sub(Damage);
 				Damage = std::min(Damage, Prev);
 				bool IsDeath = PrevLive && !IsAlive();
@@ -634,6 +697,7 @@ namespace FPS_n2 {
 				}
 			}
 
+			this->m_AdrenalineTime = std::max(this->m_AdrenalineTime - DXLib_refParts->GetDeltaTime(), 0.f);
 			//足音
 			if (this->m_BottomAnimSelect != GetBottomStandAnimSelect()) {
 				auto Time = GetObj().GetAnim(static_cast<int>(this->m_BottomAnimSelect)).GetTime();

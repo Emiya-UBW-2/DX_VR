@@ -451,11 +451,25 @@ namespace FPS_n2 {
 					this->m_IsHit = false;
 				}
 				else {
+					float SpeedUP = 1.f;
+					switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::TeiziTaisha)) {
+					case 1:
+						SpeedUP = 1.1f;
+						break;
+					case 2:
+						SpeedUP = 1.25f;
+						break;
+					case 3:
+						SpeedUP = 1.5f;
+						break;
+					default:
+						break;
+					}
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
 						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 						if (!chara->IsAlive()) { continue; }
-						if (chara->GetCanLookByPlayerTimer() < 3.f) { continue; }
+						if (chara->GetCanLookByPlayerTimer() < 3.f / SpeedUP) { continue; }
 						m_TargetPlayerID = static_cast<PlayerID>(loop);
 						SetAction(HelicopterMove::Intercept);
 						break;

@@ -180,6 +180,8 @@ namespace FPS_n2 {
 			float									m_MoveFrontTimer{ 0.f };
 
 			int										m_LeanLR{ 0 };
+
+			float									m_PeaceMakerLength{ 0.f };
 		public:
 			Impl(void) noexcept {}
 			~Impl(void) noexcept {}
@@ -357,6 +359,20 @@ namespace FPS_n2 {
 				this->Reset();
 				this->m_PathUpdateTimer = 0.f;
 				this->m_MoveFrontTimer = static_cast<float>(GetRand(6));
+				m_PeaceMakerLength = 0.f;
+				switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::PeaceMaker)) {
+				case 1:
+					m_PeaceMakerLength = 2.f * Scale3DRate;
+					break;
+				case 2:
+					m_PeaceMakerLength = 5.f * Scale3DRate;
+					break;
+				case 3:
+					m_PeaceMakerLength = 8.f * Scale3DRate;
+					break;
+				default:
+					break;
+				}
 			}
 			//
 			void		Execute_Before() noexcept {
@@ -469,6 +485,15 @@ namespace FPS_n2 {
 				m_MyInput.SetInputPADS(Controls::PADS::AIM, true);
 				//
 				this->m_ShotTimer = std::max(this->m_ShotTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+				if (GetLengthToTarget() < m_PeaceMakerLength) {
+					auto& TargetChara = PlayerMngr->GetPlayer(this->m_TargetCharaID)->GetChara();
+					Vector3DX Vec = GetVectorToTarget(); Vec.y = 0.f;
+					Vector3DX Vec2 = TargetChara->GetEyeRotationCache().zvec() * -1.f; Vec2.y = 0.f;
+					if (Vector3DX::Dot(Vec, Vec2) < 0.f) {
+						this->m_ShotTimer = 1.f;
+					}
+				}
+
 				if (this->m_ShotTimer == 0.f) {
 					this->m_ShotTimer = static_cast<float>(50 + GetRand(100)) / 100.f;
 					Vector3DX Vec = GetVectorToTarget(); Vec.y = 0.f;
