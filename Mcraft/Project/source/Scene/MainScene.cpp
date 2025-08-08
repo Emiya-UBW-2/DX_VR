@@ -879,8 +879,12 @@ namespace FPS_n2 {
 									}
 								}
 							}
+							if ((static_cast<int>(this->m_BattleTimer) != static_cast<int>(prevBattleTimer))) {
+								if (static_cast<int>(this->m_BattleTimer) == 30) {
+									SE->Get(SoundType::VOICE, static_cast<int>(VoiceEnum::Last30))->Play(DX_PLAYTYPE_BACK, true);
+								}
+							}
 						}
-
 						if (!m_IsGameClear) {
 							if (this->m_BattleTimer < 4.f * 5.f + 10.f) {
 								this->m_LimitAlarmTimer += DXLib_refParts->GetDeltaTime();
@@ -981,19 +985,34 @@ namespace FPS_n2 {
 					bool isFirst = true;
 					bool isArmerHealing = true;
 					bool isPressed = false;
+					bool HasTaskItem = false;
+					if (m_TaskInfoList.size() > 0 && m_TaskInfoList.begin()->first.m_TaskType == TaskType::Obtain) {
+						for (auto& ID : ViewPlayer->SetInventory()) {
+							if (ID.first != InvalidID) {
+								if (m_TaskInfoList.begin()->first.m_ItemID == ID.first) {
+									HasTaskItem = true;
+									break;
+								}
+							}
+						}
+					}
 					for (auto& ID : ViewPlayer->SetInventory()) {
 						if (ID.first != InvalidID) {
 							bool IsPress = false;
 							if (isFirst) {
-								if (this->m_IsAddScoreArea && (m_TaskInfoList.size() > 0 && m_TaskInfoList.begin()->first.m_TaskType == TaskType::Obtain)) {
-									if (m_TaskInfoList.begin()->first.m_ItemID == ID.first) {
+								if (this->m_IsAddScoreArea) {
+									//エリア中では納品アイテムから先に捨てる
+									if ((HasTaskItem && m_TaskInfoList.begin()->first.m_ItemID == ID.first) || !HasTaskItem) {
 										isFirst = false;
 										IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE).GetKey().press();
 									}
 								}
 								else {
-									isFirst = false;
-									IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE).GetKey().press();
+									//エリア外では納品アイテム以外から先に捨てる
+									if ((HasTaskItem && m_TaskInfoList.begin()->first.m_ItemID != ID.first) || !HasTaskItem) {
+										isFirst = false;
+										IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE).GetKey().press();
+									}
 								}
 							}
 							if (isArmerHealing && IsPressArmor) {
@@ -1237,6 +1256,9 @@ namespace FPS_n2 {
 				if (!ViewChara->IsAlive()) {
 					if (!this->m_IsEnd) {
 						FadeControl::Instance()->SetBlackOut(true, 3.f);
+						for (int loop = 0; loop < static_cast<int>(Player::SkillType::Max); ++loop) {
+							SaveData::Instance()->SetParam("skill" + std::to_string(loop), 0);
+						}
 					}
 					this->m_IsEnd = true;
 				}

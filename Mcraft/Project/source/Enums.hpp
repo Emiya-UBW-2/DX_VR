@@ -149,6 +149,7 @@ namespace FPS_n2 {
 		Mission001,
 		Mission002,
 		GameEnd000,
+		Last30,
 		Mumble000,
 		Mumble001,
 	};

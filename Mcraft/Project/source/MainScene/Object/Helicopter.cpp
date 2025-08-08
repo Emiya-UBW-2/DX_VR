@@ -326,47 +326,12 @@ namespace FPS_n2 {
 			switch (this->m_HelicopterMove) {
 			case HelicopterMove::Random:
 				m_PrevPos = m_NowPos;
-				while (true) {
-					m_TargetPos = Vector3DX::vget(GetRandf(16.f), 0.0f, GetRandf(16.f)) * Scale3DRate;
-					Vector3DX Vec = PlayerMngr->GetHelicopter()->GetMove().GetPos() - m_TargetPos; Vec.y = 0.f;
-					if (Vec.magnitude() > (10.f * Scale3DRate)) {
-						break;
-					}
-				}
-				break;
-			case HelicopterMove::Rappelling:
-				m_PrevPos = m_NowPos;
-				{
-					auto* BackGroundParts = BackGround::BackGroundControl::Instance();
-					auto& ViewChara = PlayerMngr->GetWatchPlayer()->GetChara();
-					while (true) {
-						m_TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
-						if (std::abs(this->m_TargetPos.x) < 16.f * Scale3DRate && std::abs(this->m_TargetPos.z) < 16.f * Scale3DRate) {
-							Vector3DX Vec = ViewChara->GetMove().GetPos() - m_TargetPos; Vec.y = 0.f;
-							if (Vec.sqrMagnitude() > (8.f * Scale3DRate) * (8.f * Scale3DRate)) {
-								break;
-							}
-						}
-					}
-					m_TargetPos.y = 0.f;
-				}
 				break;
 			case HelicopterMove::Intercept:
 				m_PrevPos = m_NowPos;
-				m_TargetPos = Matrix3x3DX::Vtrans(Vector3DX::vget(0.0f, 0.0f, 15.0f + GetRandf(10.0f)) * Scale3DRate, Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f))));
 				break;
 			default:
 				break;
-			}
-			auto Vec = (this->m_TargetPos - m_PrevPos);
-			if (Vec.magnitude() > 0.0f) {
-				m_YradRT = rad2deg(std::atan2(-Vec.x, -Vec.z));
-				if ((this->m_YradRT - m_Yrad) > deg2rad(180)) {
-					m_YradRT -= deg2rad(360);
-				}
-				else if ((this->m_YradRT - m_Yrad) < -deg2rad(180)) {
-					m_YradRT += deg2rad(360);
-				}
 			}
 		}
 		void TeamHelicopterObj::FirstUpdate(void) noexcept {
@@ -475,88 +440,35 @@ namespace FPS_n2 {
 						break;
 					}
 				}
-				if (this->m_Timer > 10.0f) {
-					SetAction(HelicopterMove::Random);
-				}
 				m_Rotate += deg2rad(10.f) * DXLib_refParts->GetDeltaTime();
 
-				m_NowPos = Matrix3x3DX::Vtrans(Vector3DX::forward()*(20.f*Scale3DRate),Matrix3x3DX::RotAxis(Vector3DX::up(),m_Rotate));
-				{
-					auto Vec = m_NowPos;
-					m_YradRT = rad2deg(std::atan2(-Vec.x, -Vec.z));
-					m_YradRT += 90;
-					if ((this->m_YradRT - m_Yrad) > deg2rad(180)) {
-						m_YradRT -= deg2rad(360);
-					}
-					else if ((this->m_YradRT - m_Yrad) < -deg2rad(180)) {
-						m_YradRT += deg2rad(360);
-					}
-				}
-				break;
-			case HelicopterMove::Rappelling:
-				if (this->m_Timer <= 8.0f) {
-					if (this->m_IsHit) {
-						SetAction(HelicopterMove::Intercept);
-						m_Rope = false;
-						m_Open = false;
-					}
-				}
-				else if (this->m_Timer <= 10.f) {
-					m_Open = true;
-				}
-				else if (this->m_Timer <= 15.f) {
-					m_Rope = true;
-				}
-				else {
-					bool IsRappellingAny = false;
-					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
-						auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
-						if (chara->GetIsRappelling()) {
-							IsRappellingAny = true;
-							break;
-						}
-					}
-					if (!IsRappellingAny) {
-						//緊急退避
-						if (this->m_IsHit) {
-							SetAction(HelicopterMove::Intercept);
-							m_Rope = false;
-							m_Open = false;
-						}
-						else {
-							SetAction(HelicopterMove::Random);
-							m_Rope = false;
-							m_Open = false;
-						}
-					}
-				}
+				m_TargetPos = Matrix3x3DX::Vtrans(Vector3DX::forward()*(20.f*Scale3DRate),Matrix3x3DX::RotAxis(Vector3DX::up(),m_Rotate));
 				m_NowPos = Lerp(this->m_PrevPos, m_TargetPos, std::clamp(this->m_Timer / 8.0f, 0.0f, 1.0f));
+				{
+					m_YradRT = rad2deg(m_Rotate);
+					m_YradRT -= 90;
+				}
 				break;
 			case HelicopterMove::Intercept:
-				if (this->m_Timer > 8.0f) {
+				{
 					auto& chara = PlayerMngr->GetPlayer(this->m_TargetPlayerID)->GetChara();
-					Vector3DX Vec = (chara->GetFrameWorldMat(Charas::CharaFrame::Upper).pos() - SetObj().GetFramePosition(this->m_GunRot.GetFrameID())).normalized();
-					if (Vec.magnitude() > 0.0f) {
-						m_YradRT = rad2deg(std::atan2(-Vec.x, -Vec.z));
-						m_YradRT += -90;
-						if ((this->m_YradRT - m_Yrad) > deg2rad(180)) {
-							m_YradRT -= deg2rad(360);
-						}
-						else if ((this->m_YradRT - m_Yrad) < -deg2rad(180)) {
-							m_YradRT += deg2rad(360);
-						}
-
-					}
 					if (!chara->IsAlive()) {
 						SetAction(HelicopterMove::Random);
 						this->m_IsHit = false;
 					}
 				}
-				if (this->m_Timer > 30.0f) {
+				if (this->m_Timer > 15.0f) {
 					SetAction(HelicopterMove::Random);
 					this->m_IsHit = false;
 				}
+				m_Rotate += deg2rad(10.f) * DXLib_refParts->GetDeltaTime();
+
+				m_TargetPos = Matrix3x3DX::Vtrans(Vector3DX::forward() * (20.f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), m_Rotate));
 				m_NowPos = Lerp(this->m_PrevPos, m_TargetPos, std::clamp(this->m_Timer / 8.0f, 0.0f, 1.0f));
+				{
+					m_YradRT = rad2deg(m_Rotate);
+					m_YradRT -= 90;
+				}
 				break;
 			default:
 				break;
@@ -581,8 +493,17 @@ namespace FPS_n2 {
 			Easing(&m_SideSpeedPer, std::clamp(-Vec.x, -1.0f, 1.0f), 0.975f, EasingType::OutExpo);
 
 			auto PrevYrad = m_Yrad;
-			Easing(&m_YradR, m_YradRT, 0.985f, EasingType::OutExpo);
-			Easing(&m_Yrad, m_YradR, 0.985f, EasingType::OutExpo);
+			if (std::abs(m_Yrad - m_YradRT) > 90.f) {
+				if (m_Yrad < m_YradRT) {
+					m_Yrad += 20.f * DXLib_refParts->GetDeltaTime();
+				}
+				else {
+					m_Yrad -= 20.f * DXLib_refParts->GetDeltaTime();
+				}
+			}
+			else {
+				Easing(&m_Yrad, m_YradRT, 0.995f, EasingType::OutExpo);
+			}
 
 			Easing(&m_ZradR, GetRandf(30) + (this->m_Yrad - PrevYrad) * 50.0f, 0.95f, EasingType::OutExpo);
 			Easing(&m_Zrad, m_ZradR, 0.95f, EasingType::OutExpo);

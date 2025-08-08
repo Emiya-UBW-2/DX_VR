@@ -139,6 +139,7 @@ namespace FPS_n2 {
 			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission001), 1, "data/Sound/VOICE/vo002.wav", false);
 			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission002), 1, "data/Sound/VOICE/vo003.wav", false);
 			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::GameEnd000), 1, "data/Sound/VOICE/vo004.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Last30), 1, "data/Sound/VOICE/vo005.wav", false);
 			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble000), 1, "data/Sound/VOICE/vo010.wav", false);
 			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble001), 1, "data/Sound/VOICE/vo011.wav", false);
 		}
@@ -219,6 +220,7 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission001));
 			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission002));
 			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::GameEnd000));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Last30));
 			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble000));
 			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble001));
 		}
