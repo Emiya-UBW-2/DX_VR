@@ -397,19 +397,34 @@ namespace FPS_n2 {
 			this->m_StartTimer = 3.0f;
 			this->m_BattleTimer = 180.f;
 			this->m_ReturnPer = 0.f;
+			this->m_IsFindContainer = false;
+			this->m_FindContainerTimer = 0.f;
+			this->m_AnnounceTimer = 0.f;
+			this->m_IsGameOver = false;
+			this->m_IsGameClearEnd = false;
+			this->m_IsSkillSelect = false;
+			this->m_SkillSelectNow = 0;
+			this->m_GameClearCount = 0.f;
+			this->m_GameClearCount2 = 0.f;
+			this->m_GameClearTimer = 0.f;
+			this->m_FadeoutEndTimer = 0.f;
+			this->AberrationPower = 1.f;
+			this->m_IsAddScoreArea = false;
+			this->m_LimitAlarmCount = 0;
+			this->m_LimitAlarmTimer = 0.f;
+			this->m_TaskClearOnce = false;
+			this->m_IsGameClear = false;
+
+			this->m_IsGameReady = false;
+			//this->m_IsGameReady = true;
+			this->m_StartAnimTimer = 0.f;
+			this->m_IsSkipMovie = false;
+			this->m_MovieEndTimer = 1.f;
 
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
-
 			//Vector3DX posBuf = Matrix3x3DX::Vtrans(Vector3DX::forward() * (15.0f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
 			//posBuf.y = -25.0f * Scale3DRate;
 			//PlayerMngr->GetVehicle()->Spawn(std::atan2f(posBuf.x, posBuf.z), posBuf);
-			m_IsGameClear = false;
-
-			m_IsGameReady = false;
-			//m_IsGameReady = true;
-			m_StartAnimTimer = 0.f;
-			m_IsSkipMovie = false;
-			m_MovieEndTimer = 1.f;
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* CameraParts = Camera3D::Instance();
@@ -678,6 +693,14 @@ namespace FPS_n2 {
 							if (!this->m_IsEnd) {
 								FadeControl::Instance()->SetBlackOut(true);
 								SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
+								//セーブデータにIDを追加
+								int ID = static_cast<int>(m_SkillSelect.at(m_SkillSelectNow));
+								if (SaveData::Instance()->GetParam("skill" + std::to_string(ID)) > 0) {
+									SaveData::Instance()->SetParam("skill" + std::to_string(ID), SaveData::Instance()->GetParam("skill" + std::to_string(ID)) + 1);
+								}
+								else {
+									SaveData::Instance()->SetParam("skill" + std::to_string(ID), 1);
+								}
 							}
 							this->m_IsEnd = true;
 						}
@@ -720,6 +743,56 @@ namespace FPS_n2 {
 						}
 					}
 				}
+
+				if (!this->m_IsEnd) {
+					//スキル選択
+					if (m_IsGameClearEnd && m_IsSkillSelect) {
+						int xp1 = 1920 / 2;
+						int yp1 = 1080 / 2;
+						float wide = 400.f;
+						bool isSelect = false;
+						for (int loop = 0; loop < 3; ++loop) {
+							xp1 = 1920 / 2 + static_cast<int>(wide * (-(3.f - 1.f) / 2.f + loop));
+							yp1 = 1080 / 2;
+							if (HitPointToRectangle(Pad->GetMS_X(), Pad->GetMS_Y(), xp1 - (static_cast<int>(wide) / 2 - 8), yp1 - 540 / 2, xp1 + (static_cast<int>(wide) / 2 - 8), yp1 + 540 / 2)) {
+								m_SkillSelectNow = loop;
+								isSelect = true;
+								if (Pad->GetMouseClick().trigger()) {
+									if (!this->m_IsEnd) {
+										FadeControl::Instance()->SetBlackOut(true);
+										SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
+										int ID = static_cast<int>(m_SkillSelect.at(m_SkillSelectNow));
+										//セーブデータにIDを追加
+										if (SaveData::Instance()->GetParam("skill" + std::to_string(ID)) > 0) {
+											SaveData::Instance()->SetParam("skill" + std::to_string(ID), SaveData::Instance()->GetParam("skill" + std::to_string(ID)) + 1);
+										}
+										else {
+											SaveData::Instance()->SetParam("skill" + std::to_string(ID), 1);
+										}
+									}
+									this->m_IsEnd = true;
+								}
+								break;
+							}
+						}
+						if (!isSelect) {
+							if (Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
+								--m_SkillSelectNow;
+								if (m_SkillSelectNow < 0) {
+									m_SkillSelectNow = 3 - 1;
+								}
+							}
+							if (Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
+								++m_SkillSelectNow;
+								if (m_SkillSelectNow > 3 - 1) {
+									m_SkillSelectNow = 0;
+								}
+							}
+						}
+					}
+
+				}
+
 
 				if (this->m_GameClearTimer >= 2.f) {
 					SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli))->SetLocalVolume(static_cast<int>(Lerp(255, 0, std::clamp(this->m_GameClearTimer / 2.f, 0.f, 1.f))));
@@ -831,16 +904,16 @@ namespace FPS_n2 {
 									bool value = false;
 									switch (Count) {
 									case 0:
-										value = ((((this->m_m_LimitAlarmCount) % 4) == 0)) && ((this->m_m_LimitAlarmCount) % 8 < 4);
+										value = ((((this->m_LimitAlarmCount) % 4) == 0)) && ((this->m_LimitAlarmCount) % 8 < 4);
 										break;
 									case 1:
-										value = ((((this->m_m_LimitAlarmCount) % 4) == 0) || (((this->m_m_LimitAlarmCount) % 4) == 2)) && ((this->m_m_LimitAlarmCount) % 8 < 4);
+										value = ((((this->m_LimitAlarmCount) % 4) == 0) || (((this->m_LimitAlarmCount) % 4) == 2)) && ((this->m_LimitAlarmCount) % 8 < 4);
 										break;
 									case 2:
-										value = ((((this->m_m_LimitAlarmCount) % 4) == 0) || (((this->m_m_LimitAlarmCount) % 4) == 1) || (((this->m_m_LimitAlarmCount) % 4) == 2)) && ((this->m_m_LimitAlarmCount) % 8 < 4);
+										value = ((((this->m_LimitAlarmCount) % 4) == 0) || (((this->m_LimitAlarmCount) % 4) == 1) || (((this->m_LimitAlarmCount) % 4) == 2)) && ((this->m_LimitAlarmCount) % 8 < 4);
 										break;
 									case 3:
-										value = true && ((this->m_m_LimitAlarmCount) % 8 < 4);
+										value = true && ((this->m_LimitAlarmCount) % 8 < 4);
 										break;
 									default:
 										value = true;
@@ -849,11 +922,11 @@ namespace FPS_n2 {
 									if (value) {
 										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::alarm))->Play(DX_PLAYTYPE_BACK, true);
 									}
-									++this->m_m_LimitAlarmCount;
+									++this->m_LimitAlarmCount;
 								}
 							}
 							else {
-								this->m_m_LimitAlarmCount = 0;
+								this->m_LimitAlarmCount = 0;
 								this->m_LimitAlarmTimer = 0.f;
 							}
 						}
@@ -1740,7 +1813,7 @@ namespace FPS_n2 {
 
 							int ID = static_cast<int>(m_SkillSelect.at(loop));
 
-							DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - (wide / 2 - 8), yp1 - 540 / 2, xp1 + (wide / 2 - 8), yp1 + 540 / 2, DarkGreen, true);
+							DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - (static_cast<int>(wide) / 2 - 8), yp1 - 540 / 2, xp1 + (static_cast<int>(wide) / 2 - 8), yp1 + 540 / 2, DarkGreen, true);
 
 							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
 								FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1 - 200, White, Black, LocalizeParts->Get(5000 + ID));
@@ -1755,11 +1828,11 @@ namespace FPS_n2 {
 								}
 							}
 							DrawCtrls->SetStringAutoFit(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
-								xp1 - (wide / 2 - 8 - 64), yp1 + 32, xp1 + (wide / 2 - 8 - 64), yp1 + 540 / 2,
+								xp1 - (static_cast<int>(wide) / 2 - 8 - 64), yp1 + 32, xp1 + (static_cast<int>(wide) / 2 - 8 - 64), yp1 + 540 / 2,
 								White, Black, Str);
-							if (loop == 0) {
+							if (loop == m_SkillSelectNow) {
 								DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 
-									xp1 - (wide / 2 - 8), yp1 - 540 / 2, xp1 + (wide / 2 - 8), yp1 + 540 / 2,
+									xp1 - (static_cast<int>(wide) / 2 - 8), yp1 - 540 / 2, xp1 + (static_cast<int>(wide) / 2 - 8), yp1 + 540 / 2,
 									Green, false, 5);
 							}
 						}

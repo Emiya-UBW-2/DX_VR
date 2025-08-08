@@ -46,6 +46,14 @@ namespace FPS_n2 {
 		private:
 			SkillList() noexcept {
 				m_SkillInfo.clear();
+				for (int loop = 0; loop < static_cast<int>(Player::SkillType::Max); ++loop) {
+					int LV = static_cast<int>(SaveData::Instance()->GetParam("skill" + std::to_string(loop)));
+					if (LV > 0) {
+						m_SkillInfo.emplace_back();
+						m_SkillInfo.back().m_SkillType = static_cast<Player::SkillType>(loop);
+						m_SkillInfo.back().m_Level = LV;
+					}
+				}
 			}
 			virtual ~SkillList() noexcept {
 

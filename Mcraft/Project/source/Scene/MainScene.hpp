@@ -51,6 +51,7 @@ namespace FPS_n2 {
 			bool										m_IsGameClearEnd = false;
 			std::array<Player::SkillType, 3>			m_SkillSelect{};
 			bool										m_IsSkillSelect = false;
+			int											m_SkillSelectNow = 0;
 			float										m_GameClearCount = 0.f;
 			float										m_GameClearCount2 = 0.f;
 			float										m_GameClearTimer = 0.f;
@@ -66,7 +67,7 @@ namespace FPS_n2 {
 			float										AberrationPower{ 1.f };
 			bool										m_IsAddScoreArea = false;
 
-			int											m_m_LimitAlarmCount{};
+			int											m_LimitAlarmCount{};
 			float										m_LimitAlarmTimer{ 0.0f };
 
 			bool										m_IsGameReady = false;
