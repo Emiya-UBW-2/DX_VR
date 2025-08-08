@@ -68,36 +68,16 @@ namespace FPS_n2 {
 					bool isAP = false;
 					if (Event.ShotID == PlayerMngr->GetWatchPlayerID()) {
 						//弾の貫通力を上げる
-						switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::AP_AMMO)) {
-						case 1:
-							Damage = Damage * 20 / 100;
+						float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::AP_AMMO);
+						if (value > 0.f) {
+							Damage -= static_cast<HitPoint>(static_cast<float>(Damage) * value / 100.f);
 							isAP = true;
-							break;
-						case 2:
-							Damage = Damage * 40 / 100;
-							isAP = true;
-							break;
-						case 3:
-							Damage = Damage * 60 / 100;
-							isAP = true;
-							break;
-						default:
-							break;
 						}
 					}
 					if (Event.DamageID == PlayerMngr->GetWatchPlayerID()) {
-						switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::DamageCut)) {
-						case 1:
-							Damage = Damage * 95 / 100;
-							break;
-						case 2:
-							Damage = Damage * 80 / 100;
-							break;
-						case 3:
-							Damage = Damage * 85 / 100;
-							break;
-						default:
-							break;
+						float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::DamageCut);
+						if (value > 0.f) {
+							Damage -= static_cast<HitPoint>(static_cast<float>(Damage) * value / 100.f);
 						}
 					}
 
@@ -161,24 +141,11 @@ namespace FPS_n2 {
 
 				auto Prev = this->m_HP.GetPoint();
 				//一定以上のダメージに対して踏ん張る
-				switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::Guts)) {
-				case 1:
-					if (Prev > 30) {
+				float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::Guts);
+				if (value > 0.f) {
+					if (Prev > value) {
 						Damage = std::min<HitPoint>(Damage, Prev + 1);
 					}
-					break;
-				case 2:
-					if (Prev > 20) {
-						Damage = std::min<HitPoint>(Damage, Prev + 1);
-					}
-					break;
-				case 3:
-					if (Prev > 10) {
-						Damage = std::min<HitPoint>(Damage, Prev + 1);
-					}
-					break;
-				default:
-					break;
 				}
 				this->m_HP.Sub(Damage);
 				Damage = std::min(Damage, Prev);

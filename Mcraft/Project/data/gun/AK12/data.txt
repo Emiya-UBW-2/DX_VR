@@ -9,6 +9,7 @@ Info_Eng=High reliability due to simple structure.
 Info_Eng=By folding the stock= it can be used in extremely close combat.
 
 Weight=3400
+WeaponType=Main
 
 ShotRate=700
 RecoilPower=90

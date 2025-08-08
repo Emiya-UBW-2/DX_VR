@@ -319,8 +319,6 @@ namespace FPS_n2 {
 			return false;
 		}
 		void TeamHelicopterObj::SetAction(HelicopterMove Move) noexcept {
-			auto* PlayerMngr = Player::PlayerManager::Instance();
-
 			m_HelicopterMove = Move;
 			m_Timer = 0.0f;
 			switch (this->m_HelicopterMove) {
@@ -417,18 +415,9 @@ namespace FPS_n2 {
 				}
 				else {
 					float SpeedUP = 1.f;
-					switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::TeiziTaisha)) {
-					case 1:
-						SpeedUP = 1.1f;
-						break;
-					case 2:
-						SpeedUP = 1.25f;
-						break;
-					case 3:
-						SpeedUP = 1.5f;
-						break;
-					default:
-						break;
+					float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::TeiziTaisha);
+					if (value > 0.f) {
+						SpeedUP += value / 100.f;
 					}
 					for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 						if (loop == PlayerMngr->GetWatchPlayerID()) { continue; }
@@ -461,7 +450,7 @@ namespace FPS_n2 {
 					SetAction(HelicopterMove::Random);
 					this->m_IsHit = false;
 				}
-				m_Rotate += deg2rad(10.f) * DXLib_refParts->GetDeltaTime();
+				m_Rotate += deg2rad(2.f) * DXLib_refParts->GetDeltaTime();
 
 				m_TargetPos = Matrix3x3DX::Vtrans(Vector3DX::forward() * (20.f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), m_Rotate));
 				m_NowPos = Lerp(this->m_PrevPos, m_TargetPos, std::clamp(this->m_Timer / 8.0f, 0.0f, 1.0f));

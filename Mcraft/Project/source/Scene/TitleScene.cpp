@@ -7,14 +7,85 @@ namespace FPS_n2 {
 		void TitleScene::Load_Sub(void) noexcept {
 			ObjectManager::Instance()->LoadModelBefore("data/Charactor/Main_Movie/");
 			MV1::Load("data/model/sky/model.mv1", &this->m_ObjSky);
+
+			Charas::GunAnimManager::Create();
+			Charas::GunAnimManager::Instance()->Load("data/CharaAnime/");
+			//
+			{
+				std::string Path = "data/gun/";
+				std::vector<WIN32_FIND_DATA> pData;
+				GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+				for (auto& data : pData) {
+					std::string ChildPath = Path;
+					ChildPath += data.cFileName;
+					ChildPath += "/";
+					ObjectManager::Instance()->LoadModelBefore(ChildPath);
+					Guns::GunPartsDataManager::Instance()->Add(ChildPath);
+				}
+			}
+			//
+			{
+				std::string Path = "data/Mods/";
+				std::vector<WIN32_FIND_DATA> pData;
+				GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+				for (auto& data : pData) {
+					std::string ChildPath = Path;
+					ChildPath += data.cFileName;
+					ChildPath += "/";
+					ObjectManager::Instance()->LoadModelBefore(ChildPath);
+					Guns::GunPartsDataManager::Instance()->Add(ChildPath);
+				}
+			}
+		}
+		void			TitleScene::LoadEnd_Sub(void) noexcept {
+			//
+			this->m_GunPtr.clear();
+			this->m_GunPtr.reserve(12);
+			{
+				std::string Path = "data/gun/";
+				std::vector<WIN32_FIND_DATA> pData;
+				GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+				for (auto& data : pData) {
+					std::string ChildPath = Path;
+					ChildPath += data.cFileName;
+					ChildPath += "/";
+					this->m_GunPtr.emplace_back(std::make_shared<Guns::GunObj>());
+					ObjectManager::Instance()->InitObject(this->m_GunPtr.back(), ChildPath);
+					this->m_GunPtr.back()->SetupGun();
+					this->m_GunPtr.back()->SetPlayerID(InvalidID);
+				}
+			}
+			//デフォ装備
+			for (auto& guns : FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList) {
+				if (guns =="type89" ) {
+					SaveData::Instance()->SetParam(guns, 1);
+				}
+				if (guns =="P226" ) {
+					SaveData::Instance()->SetParam(guns, 2);
+				}
+				if (guns =="RGD5" ) {
+					SaveData::Instance()->SetParam(guns, 3);
+				}
+			}
 		}
 		void			TitleScene::Set_Sub(void) noexcept {
+			EffectSingleton::Create();
 			//空
 			this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
 			for (int loop = 0, num = this->m_ObjSky.GetMaterialNum(); loop < num; ++loop) {
 				//this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.5f, 0.5f, 0.5f, 1.0f));
 				this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.7f, 0.7f, 0.7f, 1.0f));
 				this->m_ObjSky.SetMaterialAmbColor(loop, GetColorF(0.0f, 0.0f, 0.0f, 1.0f));
+			}
+			float X = 0.45f;
+			for (auto& g : this->m_GunPtr) {
+				if (g->GetModifySlot()->GetMyData()->IsPlayableWeapon() != InvalidID) {
+					g->SetGunMat(Matrix3x3DX::identity(), Vector3DX::vget(X, 1.f, 0.f) * Scale3DRate);
+					X += 0.1f;
+				}
+				else {
+					g->SetActive(false);
+				}
 			}
 			//
 			auto* ButtonParts = UIs::ButtonControl::Instance();
@@ -136,6 +207,8 @@ namespace FPS_n2 {
 			}
 			// 
 			FadeControl::Instance()->Update();
+			EffectSingleton::Instance()->Update();
+
 			if (this->m_IsEnd && FadeControl::Instance()->IsAll()) {
 				return false;
 			}
@@ -162,8 +235,12 @@ namespace FPS_n2 {
 			SetNextSelect(static_cast<size_t>(ButtonParts->GetSelect()));
 		}
 		void TitleScene::Dispose_Load_Sub(void) noexcept {
+			m_GunPtr.clear();
 			ObjectManager::Instance()->DeleteAll();
 			this->m_ObjSky.Dispose();
+
+			EffectSingleton::Release();
+			Charas::GunAnimManager::Release();
 		}
 		void TitleScene::BG_Draw_Sub(void) const noexcept {
 			auto Fog = GetFogEnable();

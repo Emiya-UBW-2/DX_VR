@@ -117,52 +117,19 @@ namespace FPS_n2 {
 				//
 				if (loop == PlayerMngr->GetWatchPlayerID()) {
 					Charas::CharacterObj::LoadChara("Main", (PlayerID)loop);
-#if DEBUG_NET
-					chara->LoadCharaGun("type20E", 0);
-#else
-					//*
-					{
-						int Rand = GetRand(100);
-						int rate = 100 / 6;
-						if (Rand < rate) {
-							chara->LoadCharaGun("type89", 0);
-						}
-						else if (Rand < rate * 2) {
-							chara->LoadCharaGun("type20E", 0);
-						}
-						else if (Rand < rate * 3) {
-							chara->LoadCharaGun("M700", 0);
-						}
-						else if (Rand < rate * 4) {
-							chara->LoadCharaGun("AKS-74", 0);
-						}
-						else if (Rand < rate * 5) {
-							chara->LoadCharaGun("AK12", 0);
-						}
-						else {
-							chara->LoadCharaGun("Mod870", 0);
-						}
-
-					}
-					//*/
-					//chara->LoadCharaGun("AKS-74", 0);
-#endif
-					{
-						int Rand = GetRand(100);
-						int rate = 100 / 2;
-						if (Rand < rate) {
-							chara->LoadCharaGun("P226", 1);
-						}
-						else {
-							chara->LoadCharaGun("MP443", 1);
+					//GUN
+					for (auto& guns : FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList) {
+						int ID = static_cast<int>(SaveData::Instance()->GetParam(guns));
+						if (ID >= 1) {
+							chara->LoadCharaGun(guns, ID - 1);
 						}
 					}
-					chara->LoadCharaGun("RGD5", 2);
 					//ラグドール
 					chara->SetupRagDoll(this->m_MainRagDoll);
 				}
 				else {
 					Charas::CharacterObj::LoadChara("Soldier", (PlayerID)loop);
+					//GUN
 					chara->LoadCharaGun("AK12E", 0);
 					//chara->LoadCharaGun("MP443", 1);
 					//chara->LoadCharaGun("RGD5", 2);
@@ -280,18 +247,9 @@ namespace FPS_n2 {
 				//人の座標設定
 				if (loop == PlayerMngr->GetWatchPlayerID()) {
 					float RunTime = 0.f;
-					switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::Runner)) {
-					case 1:
-						RunTime = 5.f;
-						break;
-					case 2:
-						RunTime = 10.f;
-						break;
-					case 3:
-						RunTime = 15.f;
-						break;
-					default:
-						break;
+					float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::Runner);
+					if (value > 0.f) {
+						RunTime = value;
 					}
 					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true, RunTime);
 				}
@@ -583,7 +541,7 @@ namespace FPS_n2 {
 							Easing(&fovBuf, deg2rad(35), 0.9f, EasingType::OutExpo);
 						}
 
-						if (m_StartAnimTimer >= 4.5f + 3.f && !m_IsSkipMovie) {
+						if (m_StartAnimTimer >= 4.5f + 3.f && !m_IsSkipMovie && !this->m_PauseMenuControl.IsRetire()) {
 							if (FadeControl::Instance()->IsClear()) {
 								FadeControl::Instance()->SetBlackOut(true);
 							}
@@ -606,7 +564,7 @@ namespace FPS_n2 {
 							}
 						}
 					}
-					if (m_StartAnimTimer < 4.5f + 3.f) {
+					if (m_StartAnimTimer < 4.5f + 3.f && !this->m_PauseMenuControl.IsRetire()) {
 						if (!m_IsSkipMovie) {
 							if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
 								m_IsSkipMovie = true;
@@ -645,7 +603,7 @@ namespace FPS_n2 {
 				return true;
 			}
 
-			if (this->m_IsGameClear) {
+			if (this->m_IsGameClear && !this->m_PauseMenuControl.IsRetire()) {
 				SceneParts->SetPauseEnable(false);
 				m_GameClearCount += DXLib_refParts->GetDeltaTime();
 				m_GameClearTimer += DXLib_refParts->GetDeltaTime();
@@ -1271,18 +1229,9 @@ namespace FPS_n2 {
 			{
 				float EatLength = 0.f;
 				if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().press()) {
-					switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::ItemEater)) {
-					case 1:
-						EatLength = 4.f * Scale3DRate;
-						break;
-					case 2:
-						EatLength = 5.f * Scale3DRate;
-						break;
-					case 3:
-						EatLength = 6.f * Scale3DRate;
-						break;
-					default:
-						break;
+					float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::ItemEater);
+					if (value > 0.f) {
+						EatLength = value * Scale3DRate;
 					}
 				}
 
@@ -1358,18 +1307,9 @@ namespace FPS_n2 {
 									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::GetItem))->Play(DX_PLAYTYPE_BACK, true);
 									g->SetActive(false);
 
-									switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::Adrenaline)) {
-									case 1:
-										ViewChara->SetAdrenalineTime(1.f);
-										break;
-									case 2:
-										ViewChara->SetAdrenalineTime(2.f);
-										break;
-									case 3:
-										ViewChara->SetAdrenalineTime(3.f);
-										break;
-									default:
-										break;
+									float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::Adrenaline);
+									if (value > 0.f) {
+										ViewChara->SetAdrenalineTime(value);
 									}
 									continue;
 								}
@@ -1518,18 +1458,9 @@ namespace FPS_n2 {
 						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
 					}
 					float SpeedUP = 1.f;
-					switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::TeiziTaisha)) {
-					case 1:
-						SpeedUP = 1.1f;
-						break;
-					case 2:
-						SpeedUP = 1.25f;
-						break;
-					case 3:
-						SpeedUP = 1.5f;
-						break;
-					default:
-						break;
+					float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::TeiziTaisha);
+					if (value > 0.f) {
+						SpeedUP += value / 100.f;
 					}
 					this->m_ReturnPer = std::clamp(this->m_ReturnPer + DXLib_refParts->GetDeltaTime() / 5.f* SpeedUP, 0.f, 1.f);
 				}
@@ -1836,7 +1767,6 @@ namespace FPS_n2 {
 							yp1 = 1080 / 2;
 
 							int ID = static_cast<int>(m_SkillSelect.at(loop));
-
 							DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - (static_cast<int>(wide) / 2 - 8), yp1 - 540 / 2, xp1 + (static_cast<int>(wide) / 2 - 8), yp1 + 540 / 2, DarkGreen, true);
 
 							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
@@ -1848,7 +1778,7 @@ namespace FPS_n2 {
 								auto pos = Str.find(t);
 								auto len = t.length();
 								if (pos != std::string::npos) {
-									Str.replace(pos, len, std::to_string(100));
+									Str.replace(pos, len, std::to_string(static_cast<int>(Player::SkillList::Instance()->GetSkillValueNext(m_SkillSelect.at(loop)))));
 								}
 							}
 							DrawCtrls->SetStringAutoFit(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),

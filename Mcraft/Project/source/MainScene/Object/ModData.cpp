@@ -97,6 +97,17 @@ namespace FPS_n2 {
 			else if (LEFT == "IronSight") {
 				this->m_IronSight = true;
 			}
+			else if (LEFT == "WeaponType") {
+				if (RIGHT == "Main") {
+					m_IsPlayableWeapon = 0;
+				}
+				if (RIGHT == "Sub") {
+					m_IsPlayableWeapon = 1;
+				}
+				if (RIGHT == "Gadget") {
+					m_IsPlayableWeapon = 2;
+				}
+			}
 			else if (LEFT == "Info") {
 				this->m_Info.emplace_back(RIGHT);
 			}

@@ -9,6 +9,7 @@ Info_Eng=Explodes 3.5 seconds after being thrown, scattering shrapnel.
 Info_Eng=A cheap but effective weapon.
 
 Weight=310
+WeaponType=Gadget
 
 usehumanAnim=3
 IsThrowWeapon=True

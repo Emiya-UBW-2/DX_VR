@@ -9,6 +9,7 @@ Info_Far=Barrel has no chokes and is adjusted to spread over a wide area.ÅB
 Info_Far=It specialized for close combat.
 
 Weight=3600
+WeaponType=Main
 
 ShotRate=300
 RecoilPower=175

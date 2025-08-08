@@ -100,7 +100,7 @@ namespace FPS_n2 {
 				EffectSingleton::Instance()->SetOnce_Any(Effect::ef_fire2, MuzzleMat.pos(), MuzzleMat.zvec2(), 0.35f * this->m_MuzzleSmokeSize / (0.00762f * Scale3DRate), 2.0f);
 			}
 			if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 2) {
-				if (GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
+				if ((GetMyUserPlayerID() == InvalidID || GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID())) {
 					if (HaveFrame(static_cast<int>(GunFrame::smoke1))) {
 						int Frame = GetFrame(static_cast<int>(GunFrame::smoke1));
 						auto Mat = GetObj().GetFrameLocalWorldMatrix(Frame);
@@ -165,7 +165,7 @@ namespace FPS_n2 {
 			this->m_MuzzleSmokeControl.AddMuzzleSmokePower();
 			//撃ちアニメに移行
 			SetGunAnime(Charas::GunAnimeID::Shot);
-			if (GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
+			if ((GetMyUserPlayerID() == InvalidID || GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID())) {
 				this->m_AmmoInChamberObj->SetActive(true);
 			}
 			//リコイル
@@ -274,7 +274,7 @@ namespace FPS_n2 {
 				m_CommonGunAnimeTime += 60.0f * DXLib_refParts->GetDeltaTime();
 				//
 #if defined(DEBUG) && FALSE
-				if (GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
+				if ((GetMyUserPlayerID() == InvalidID || GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID())) {
 					printfDx("[%s]\n", (GetGunAnime() == Charas::GunAnimeID::Base) ? "Base" : Charas::GunAnimeIDName[static_cast<int>(GetGunAnime())]);
 					printfDx("[%f]\n", (GetGunAnime() == Charas::GunAnimeID::Base) ? 0.0f : GetNowAnimTimePerCache());
 				}
@@ -694,10 +694,10 @@ namespace FPS_n2 {
 		}
 		//グレネード更新
 		void				GunObj::UpdateGrenade(void) noexcept {
-			auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 
 			for (const auto& grenade : this->m_Grenade.GetPtrList()) {
 				if (grenade->PopIsEndFall()) {
+					auto* BackGroundParts = BackGround::BackGroundControl::Instance();
 					auto& AmmoSpec = Objects::AmmoDataManager::Instance()->Get(GetModifySlot()->GetMyData()->GetAmmoSpecID(0));
 					for (int loop = 0, max = AmmoSpec->GetPellet(); loop < max; ++loop) {
 						//円周上にまき散らす
@@ -826,7 +826,7 @@ namespace FPS_n2 {
 			}
 			if (this->m_MagazinePtr) {
 				(*this->m_MagazinePtr)->SetAmmoActive(
-					(GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) &&
+					(GetMyUserPlayerID() == InvalidID || GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) &&
 					(GetReloadType() == RELOADTYPE::MAG) &&//弾込め式ならマガジン内部の弾は描画しない
 				(GetReloading()));
 			}
@@ -945,7 +945,7 @@ namespace FPS_n2 {
 			GetObj().DrawModel();
 		}
 		void				GunObj::CheckDraw_Sub(int) noexcept {
-			if (GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
+			if (GetMyUserPlayerID() == InvalidID || GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
 				auto* PostPassParts = PostPassEffect::Instance();
 				if (!GetCanShot()) {
 					if (!IsNeedCalcSling()) {
@@ -986,7 +986,7 @@ namespace FPS_n2 {
 		void				GunObj::Draw(bool isDrawSemiTrans, int Range) noexcept {
 			if (!IsActive()) { return; }
 			if (!IsDraw(Range)) { return; }
-			if (isDrawSemiTrans && GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
+			if (isDrawSemiTrans && (GetMyUserPlayerID() == InvalidID || GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID())) {
 				this->m_MuzzleSmokeControl.DrawMuzzleSmoke(this->m_MuzzleSmokeSize);
 			}
 
@@ -1004,7 +1004,7 @@ namespace FPS_n2 {
 				}
 			}
 
-			if (isDrawSemiTrans && GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID()) {
+			if (isDrawSemiTrans && (GetMyUserPlayerID() == InvalidID || GetMyUserPlayerID() == Player::PlayerManager::Instance()->GetWatchPlayerID())) {
 				if (GetGunAnime() == Charas::GunAnimeID::ThrowReady) {
 					SetUseLighting(false);
 					SetUseHalfLambertLighting(false);

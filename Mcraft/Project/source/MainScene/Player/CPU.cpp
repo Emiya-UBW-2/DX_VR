@@ -360,18 +360,9 @@ namespace FPS_n2 {
 				this->m_PathUpdateTimer = 0.f;
 				this->m_MoveFrontTimer = static_cast<float>(GetRand(6));
 				m_PeaceMakerLength = 0.f;
-				switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::PeaceMaker)) {
-				case 1:
-					m_PeaceMakerLength = 2.f * Scale3DRate;
-					break;
-				case 2:
-					m_PeaceMakerLength = 5.f * Scale3DRate;
-					break;
-				case 3:
-					m_PeaceMakerLength = 8.f * Scale3DRate;
-					break;
-				default:
-					break;
+				float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::PeaceMaker);
+				if (value > 0.f) {
+					m_PeaceMakerLength = value * Scale3DRate;
 				}
 			}
 			//

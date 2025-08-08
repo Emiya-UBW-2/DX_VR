@@ -30,6 +30,7 @@ namespace FPS_n2 {
 			float							m_RecoilReturn{ 0.9f };
 			SHOTTYPE						m_ShotType{ SHOTTYPE::SEMI };
 			bool							m_IronSight{ false };
+			int								m_IsPlayableWeapon{ InvalidID };
 
 			STOCKTYPE						m_StockType{ STOCKTYPE::none };
 
@@ -97,6 +98,7 @@ namespace FPS_n2 {
 			const auto& GetShotType(void) const noexcept { return this->m_ShotType; }
 			const auto& GetHumanAnimType(void) const noexcept { return this->m_HumanAnimType; }
 			const auto& IsIronSight(void) const noexcept { return this->m_IronSight; }
+			const auto& IsPlayableWeapon(void) const noexcept { return this->m_IsPlayableWeapon; }
 			const auto& GetInfo(void) const noexcept { return this->m_Info; }
 			const auto& GetInfoEng(void) const noexcept { return this->m_InfoEng; }
 
@@ -174,6 +176,8 @@ namespace FPS_n2 {
 		class GunPartsDataManager : public SingletonBase<GunPartsDataManager> {
 		private:
 			friend class SingletonBase<GunPartsDataManager>;
+		public:
+			std::vector<std::string>					m_GunList;
 		private:
 			std::list<std::unique_ptr<GunPartsData>>	m_Data;
 			int											m_LastUniqueID{ 0 };

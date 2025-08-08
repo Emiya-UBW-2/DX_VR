@@ -71,6 +71,21 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::Objects::AmmoDataManager::Create();
 	FPS_n2::Objects::ItemObjDataManager::Create();
 	//初期セーブ
+	{
+		FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.clear();
+
+		std::string Path = "data/gun/";
+		std::vector<WIN32_FIND_DATA> pData;
+		GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+		for (auto& data : pData) {
+			FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.emplace_back(data.cFileName);
+		}
+		for (auto& guns : FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList) {
+			if (SaveData::Instance()->GetParam(guns) <= 0) {
+				SaveData::Instance()->SetParam(guns, 0);
+			}
+		}
+	}
 	SaveData::Instance()->Save();
 	//BGM
 	//*
@@ -80,16 +95,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SE->Add(SoundType::BGM, 2, 1, "data/Sound/BGM/result.wav", false);
 	//*/
 	//シーン
+	auto TitleLoadScenePtr = std::make_shared<FPS_n2::Sceneclass::LoadScene>();
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
-	auto LoadScenePtr = std::make_shared<FPS_n2::Sceneclass::LoadScene>();
+	auto MainLoadScenePtr = std::make_shared<FPS_n2::Sceneclass::LoadScene>();
 	auto MainGameScenePtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
 	//遷移先指定
-	Titlescene->SetNextSceneList(0, LoadScenePtr);
-	LoadScenePtr->SetNextSceneList(0, MainGameScenePtr);
-	MainGameScenePtr->SetNextSceneList(0, Titlescene);
-	MainGameScenePtr->SetNextSceneList(1, LoadScenePtr);
-	SceneControl::Instance()->SetFirstScene(Titlescene);
-	//SceneControl::Instance()->SetFirstScene(LoadScenePtr);
+	TitleLoadScenePtr->SetNextSceneList(0, Titlescene);
+	Titlescene->SetNextSceneList(0, MainLoadScenePtr);
+	MainLoadScenePtr->SetNextSceneList(0, MainGameScenePtr);
+	MainGameScenePtr->SetNextSceneList(0, TitleLoadScenePtr);
+	MainGameScenePtr->SetNextSceneList(1, MainLoadScenePtr);
+	SceneControl::Instance()->SetFirstScene(TitleLoadScenePtr);
+	//SceneControl::Instance()->SetFirstScene(MainLoadScenePtr);
 	//メインロジック開始
 	DXLib_refParts->MainLogic();
 	return 0;

@@ -5,6 +5,7 @@
 #include	"../CommonScene/UI/CommonUIControl.hpp"
 
 #include	"../MainScene/Object/MovieCharacter.hpp"
+#include	"../MainScene/Object/Gun.hpp"
 
 namespace FPS_n2 {
 	namespace Sceneclass {
@@ -15,6 +16,8 @@ namespace FPS_n2 {
 
 			std::shared_ptr<Charas::MovieCharacter>	m_MovieCharacter{};
 			MV1										m_ObjSky;
+
+			std::vector<std::shared_ptr<Guns::GunObj>>		m_GunPtr{};			//銃
 		public:
 			TitleScene(void) noexcept {}
 			TitleScene(const TitleScene&) = delete;
@@ -25,6 +28,7 @@ namespace FPS_n2 {
 			virtual ~TitleScene(void) noexcept {}
 		public:
 			void			Load_Sub(void) noexcept override;
+			void			LoadEnd_Sub(void) noexcept override;
 			void			Set_Sub(void) noexcept override;
 			bool			Update_Sub(void) noexcept override;
 			void			Dispose_Sub(void) noexcept override;

@@ -43,6 +43,139 @@ namespace FPS_n2 {
 				}
 				return 0;
 			}
+
+			const auto GetSkillValue(SkillType type, int Level) const noexcept {
+				float Num = 0.f;
+				switch (type) {
+				case Player::SkillType::Runner:
+					switch (Level) {
+					case 1:
+						Num = 5.f;
+						break;
+					case 2:
+						Num = 10.f;
+						break;
+					case 3:
+						Num = 15.f;
+						break;
+					default:
+						break;
+					}
+					break;
+				case Player::SkillType::Guts:
+					switch (Level) {
+					case 1:
+						Num = 30.f;
+						break;
+					case 2:
+						Num = 20.f;
+						break;
+					case 3:
+						Num = 10.f;
+						break;
+					default:
+						break;
+					}
+					break;
+				case Player::SkillType::AP_AMMO:
+					switch (Level) {
+					case 1:
+						Num = 80.f;
+						break;
+					case 2:
+						Num = 60.f;
+						break;
+					case 3:
+						Num = 40.f;
+						break;
+					default:
+						break;
+					}
+					break;
+				case Player::SkillType::ItemEater:
+					switch (Level) {
+					case 1:
+						Num = 4.f;
+						break;
+					case 2:
+						Num = 5.f;
+						break;
+					case 3:
+						Num = 6.f;
+						break;
+					default:
+						break;
+					}
+					break;
+				case Player::SkillType::PeaceMaker:
+					switch (Level) {
+					case 1:
+						Num = 2.f;
+						break;
+					case 2:
+						Num = 5.f;
+						break;
+					case 3:
+						Num = 8.f;
+						break;
+					default:
+						break;
+					}
+					break;
+				case Player::SkillType::TeiziTaisha:
+					switch (Level) {
+					case 1:
+						Num = 10.f;
+						break;
+					case 2:
+						Num = 25.f;
+						break;
+					case 3:
+						Num = 50.f;
+						break;
+					default:
+						break;
+					}
+					break;
+				case Player::SkillType::Adrenaline:
+					switch (Level) {
+					case 1:
+						Num = 1.f;
+						break;
+					case 2:
+						Num = 2.f;
+						break;
+					case 3:
+						Num = 3.f;
+						break;
+					default:
+						break;
+					}
+					break;
+				case Player::SkillType::DamageCut:
+					switch (Level) {
+					case 1:
+						Num = 5.f;
+						break;
+					case 2:
+						Num = 15.f;
+						break;
+					case 3:
+						Num = 20.f;
+						break;
+					default:
+						break;
+					}
+					break;
+				default:
+					break;
+				}
+				return Num;
+			}
+
+			const auto GetSkillValueNow(SkillType type) const noexcept { return GetSkillValue(type, GetSkilLevel(type)); }
+
+			const auto GetSkillValueNext(SkillType type) const noexcept { return GetSkillValue(type, std::clamp(GetSkilLevel(type) + 1, 1, 3)); }
 		private:
 			SkillList() noexcept {
 				m_SkillInfo.clear();
