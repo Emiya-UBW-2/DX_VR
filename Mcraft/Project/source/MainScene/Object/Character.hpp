@@ -64,6 +64,8 @@ namespace FPS_n2 {
 			float												m_RunGaugeMax{ 1.f };
 			float												m_AdrenalineTime{ 0.f };
 			float												m_AdrenalineTimeMax{ 0.f };
+
+			float												m_Debuff{ 1.f };
 		private://キャッシュ
 			Matrix3x3DX											m_EyeRotationCache{};
 			Vector3DX											m_EyePositionCache{};
@@ -76,15 +78,15 @@ namespace FPS_n2 {
 				}
 				if (this->m_IsSquat) {
 					if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
-						return 0.15f * GetDebuff();
+						return 0.15f * this->m_Debuff;
 					}
-					return 0.475f * GetDebuff();
+					return 0.475f * this->m_Debuff;
 				}
 				else {
 					if (this->m_Input.GetPADSPress(Controls::PADS::WALK)) {
-						return 0.2f * GetDebuff();
+						return 0.2f * this->m_Debuff;
 					}
-					return 0.625f * GetDebuff();
+					return 0.625f * this->m_Debuff;
 				}
 			}
 			float			GetDebuff(void) const noexcept;
@@ -215,9 +217,8 @@ namespace FPS_n2 {
 			}
 			void			Input(const InputControl& pInput) noexcept {
 				this->m_Input = pInput;
-				float debuff = GetDebuff();
-				this->m_Input.SetAddxRad(this->m_Input.GetAddxRad() * debuff);
-				this->m_Input.SetAddyRad(this->m_Input.GetAddyRad() * debuff);
+				this->m_Input.SetAddxRad(this->m_Input.GetAddxRad() * this->m_Debuff);
+				this->m_Input.SetAddyRad(this->m_Input.GetAddyRad() * this->m_Debuff);
 			}
 		private:
 			int				GetFrameNum(void) noexcept override { return static_cast<int>(CharaFrame::Max); }

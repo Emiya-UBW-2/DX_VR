@@ -1270,18 +1270,20 @@ namespace FPS_n2 {
 			//ほかプレイヤーとの判定
 			{
 				float EatLength = 0.f;
-				switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::ItemEater)) {
-				case 1:
-					EatLength = 4.f * Scale3DRate;
-					break;
-				case 2:
-					EatLength = 5.f * Scale3DRate;
-					break;
-				case 3:
-					EatLength = 6.f * Scale3DRate;
-					break;
-				default:
-					break;
+				if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().press()) {
+					switch (Player::SkillList::Instance()->GetSkilLevel(Player::SkillType::ItemEater)) {
+					case 1:
+						EatLength = 4.f * Scale3DRate;
+						break;
+					case 2:
+						EatLength = 5.f * Scale3DRate;
+						break;
+					case 3:
+						EatLength = 6.f * Scale3DRate;
+						break;
+					default:
+						break;
+					}
 				}
 
 				float Radius = 2.0f * 1.f * Scale3DRate;

@@ -404,11 +404,25 @@ namespace FPS_n2 {
 				//
 				//エイム
 				Vector3DX Vec = m_PathChecker.GetNextPoint(MyChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos(), &this->TargetPathPlanningIndex) - MyPos; Vec.y = (0.f);
-				AimDir(Matrix4x4DX::Vtrans(Vec, Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(15.f))) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(15.f)))));
-				//
-				m_MyInput.SetInputPADS(Controls::PADS::MOVE_W, true);
-				m_MyInput.SetInputPADS(Controls::PADS::MOVE_A, GetRand(100) > 50);
-				m_MyInput.SetInputPADS(Controls::PADS::MOVE_D, GetRand(100) > 50);
+				if (Vec.sqrMagnitude() < (0.5f * Scale3DRate) && (0.5f * Scale3DRate)) {
+					Vec.y = (0.f);
+					auto Dir = MyChara->GetEyeRotationCache().zvec() * -1.f;
+					auto Dir_XZ = Dir; Dir_XZ.y = (0.f);
+
+					auto IsFront = ((Vector3DX::Dot(Dir_XZ.normalized(), Vec.normalized())) > 0.f);
+					auto cross = Vector3DX::Cross(Dir_XZ.normalized(), Vec.normalized()).y;
+					m_MyInput.SetInputPADS(Controls::PADS::MOVE_W, IsFront);
+					m_MyInput.SetInputPADS(Controls::PADS::MOVE_S, !IsFront);
+					m_MyInput.SetInputPADS(Controls::PADS::MOVE_A, !(cross > 0));
+					m_MyInput.SetInputPADS(Controls::PADS::MOVE_D, (cross > 0));
+				}
+				else{
+					AimDir(Matrix4x4DX::Vtrans(Vec, Matrix4x4DX::RotAxis(Vector3DX::right(), deg2rad(GetRandf(15.f))) * Matrix4x4DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(15.f)))));
+					//
+					m_MyInput.SetInputPADS(Controls::PADS::MOVE_W, true);
+					m_MyInput.SetInputPADS(Controls::PADS::MOVE_A, GetRand(100) > 50);
+					m_MyInput.SetInputPADS(Controls::PADS::MOVE_D, GetRand(100) > 50);
+				}
 				//
 				if (MyChara->GetCanLookByPlayer()) {
 					this->m_CheckAgain = 0.f;

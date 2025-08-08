@@ -28,9 +28,6 @@ namespace FPS_n2 {
 		}
 
 		float CharacterObj::GetDebuff(void) const noexcept {
-			if (m_AdrenalineTime > 0.f) {
-				return 1.5f;
-			}
 			int gram = GetWeight_gram();
 
 			if (gram == 0) {
@@ -40,9 +37,15 @@ namespace FPS_n2 {
 				return Lerp(1.5f, 1.f, static_cast<float>(gram) / 20000);
 			}
 			else if (gram < 80000) {
+				if (m_AdrenalineTime > 0.f) {
+					return 1.f;
+				}
 				return Lerp(1.f, 0.45f, static_cast<float>(gram - 20000) / (80000 - 20000));
 			}
 			else {
+				if (m_AdrenalineTime > 0.f) {
+					return 1.f;
+				}
 				return 0.25f;
 			}
 		}
@@ -698,6 +701,7 @@ namespace FPS_n2 {
 			}
 
 			this->m_AdrenalineTime = std::max(this->m_AdrenalineTime - DXLib_refParts->GetDeltaTime(), 0.f);
+			Easing(&this->m_Debuff, GetDebuff(), 0.95f, EasingType::OutExpo);
 			//足音
 			if (this->m_BottomAnimSelect != GetBottomStandAnimSelect()) {
 				auto Time = GetObj().GetAnim(static_cast<int>(this->m_BottomAnimSelect)).GetTime();
