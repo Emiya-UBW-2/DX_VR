@@ -108,10 +108,10 @@ namespace FPS_n2 {
 			const auto&		GetIsActiveCameraPosToPlayer(void) const noexcept { return this->m_IsActiveCameraPos; }
 			const auto&		GetCameraPosToPlayer(void) const noexcept { return this->m_CameraPos; }
 			const auto&		GetIsSquat(void) const noexcept { return this->m_IsSquat; }
-			const auto&		GetRunGauge(void) const noexcept { return this->m_RunGauge / this->m_RunGaugeMax; }
+			const auto		GetRunGauge(void) const noexcept { return this->m_RunGauge / this->m_RunGaugeMax; }
 			const auto&		GetRunGaugeTimer(void) const noexcept { return this->m_RunGauge; }
 
-			const auto&		GetAdrenalineTime(void) const noexcept { return this->m_AdrenalineTime / this->m_AdrenalineTimeMax; }
+			const auto		GetAdrenalineTime(void) const noexcept { return this->m_AdrenalineTime / this->m_AdrenalineTimeMax; }
 			const auto&		GetAdrenalineTimeTimer(void) const noexcept { return this->m_AdrenalineTime; }
 		public://ゲッター
 			int				GetWeight_gram(void) const noexcept;
