@@ -460,10 +460,11 @@ namespace FPS_n2 {
 				this->m_CockHand = false;
 				this->m_CockArm.Init(this->m_CockHand);
 				this->m_SlingPer = 1.0f;
-				this->m_IsChamberOn = false;
-				SetGunAnime(Charas::GunAnimeID::Base);
+				this->m_IsChamberOn = true;
+				this->m_InChamber = true;
 				this->m_Capacity = GetAmmoAll();//マガジン装填
 				ChamberIn();
+				SetGunAnime(Charas::GunAnimeID::Base);
 			}
 
 			void				InitGunAnimePer(void) noexcept;

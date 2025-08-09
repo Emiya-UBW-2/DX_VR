@@ -31,7 +31,7 @@ namespace FPS_n2 {
 			void DrawUI_Base_Sub(void) const noexcept override {
 				auto* DrawCtrls = WindowSystem::DrawControl::Instance();
 				// 背景
-				DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Gray50, true);
+				DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Black, true);
 				// 
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
 					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM,

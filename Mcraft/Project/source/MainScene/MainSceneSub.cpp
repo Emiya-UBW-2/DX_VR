@@ -142,6 +142,12 @@ namespace FPS_n2 {
 			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Last30), 1, "data/Sound/VOICE/vo005.wav", false);
 			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble000), 1, "data/Sound/VOICE/vo010.wav", false);
 			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble001), 1, "data/Sound/VOICE/vo011.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial001), 1, "data/Sound/VOICE/vo101.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial002), 1, "data/Sound/VOICE/vo102.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial003), 1, "data/Sound/VOICE/vo103.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial004), 1, "data/Sound/VOICE/vo104.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial005), 1, "data/Sound/VOICE/vo105.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial006), 1, "data/Sound/VOICE/vo106.wav", false);
 		}
 		void			CommonBattleResource::Set(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -223,6 +229,12 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Last30));
 			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble000));
 			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble001));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial001));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial002));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial003));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial004));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial005));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial006));
 		}
 		//
 		void			MainSceneUI::Set(void) noexcept {

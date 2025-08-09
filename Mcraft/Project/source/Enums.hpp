@@ -152,6 +152,12 @@ namespace FPS_n2 {
 		Last30,
 		Mumble000,
 		Mumble001,
+		Tutorial001,
+		Tutorial002,
+		Tutorial003,
+		Tutorial004,
+		Tutorial005,
+		Tutorial006,
 	};
 
 	enum class CharaTypeID {
