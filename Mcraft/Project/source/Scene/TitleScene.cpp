@@ -55,18 +55,6 @@ namespace FPS_n2 {
 					this->m_GunPtr.back()->SetPlayerID(InvalidID);
 				}
 			}
-			//デフォ装備
-			for (auto& guns : FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList) {
-				if (guns =="type89" ) {
-					SaveData::Instance()->SetParam(guns, 1);
-				}
-				if (guns =="P226" ) {
-					SaveData::Instance()->SetParam(guns, 2);
-				}
-				if (guns =="RGD5" ) {
-					SaveData::Instance()->SetParam(guns, 3);
-				}
-			}
 		}
 		void			TitleScene::Set_Sub(void) noexcept {
 			EffectSingleton::Create();
@@ -77,11 +65,34 @@ namespace FPS_n2 {
 				this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.7f, 0.7f, 0.7f, 1.0f));
 				this->m_ObjSky.SetMaterialAmbColor(loop, GetColorF(0.0f, 0.0f, 0.0f, 1.0f));
 			}
-			float X = 0.45f;
+			int X1 = 0;
+			int X2 = 0;
+			int X3 = 0;
+
+			this->m_GunPoint.resize(this->m_GunPtr.size());
+			this->m_GunAnimTimer.resize(this->m_GunPtr.size());
 			for (auto& g : this->m_GunPtr) {
+				int index = &g - &this->m_GunPtr.front();
+				this->m_GunAnimTimer.at(index) = 0.f;
 				if (g->GetModifySlot()->GetMyData()->IsPlayableWeapon() != InvalidID) {
-					g->SetGunMat(Matrix3x3DX::identity(), Vector3DX::vget(X, 1.f, 0.f) * Scale3DRate);
-					X += 0.1f;
+					this->m_GunPoint.at(index).second = g->GetModifySlot()->GetMyData()->IsPlayableWeapon();
+					switch (this->m_GunPoint.at(index).second) {
+					case 0:
+						this->m_GunPoint.at(index).first = X1;
+						X1++;
+						break;
+					case 1:
+						this->m_GunPoint.at(index).first = X2;
+						X2++;
+						break;
+					case 2:
+						this->m_GunPoint.at(index).first = X3;
+						X3++;
+						break;
+					default:
+						break;
+					}
+					g->SetGunMat(Matrix3x3DX::identity(), Vector3DX::vget(2.45f + 0.15f * this->m_GunPoint.at(index).first, 1.f, 1.5f * this->m_GunPoint.at(index).second) * Scale3DRate);
 				}
 				else {
 					g->SetActive(false);
@@ -116,7 +127,8 @@ namespace FPS_n2 {
 			// 
 			ButtonParts->ResetSelect();
 			// 
-			ButtonParts->AddStringButton("Start Game", 52, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 2, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton("Start Game", 52, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 3, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton("Customize", 48, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 2, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
 			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, BaseScreenWidth - 96 - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, BaseScreenWidth - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			// クレジット
@@ -128,10 +140,29 @@ namespace FPS_n2 {
 			// */
 			m_MovieCharacter = std::make_shared<Charas::MovieCharacter>();
 			ObjectManager::Instance()->InitObject(this->m_MovieCharacter, "data/Charactor/Main_Movie/");
+
+			Vector3DX BaseCamPos = m_MovieCharacter->GetMove().GetPos() + Vector3DX::vget(0.5f, 0.8f, 0.f) * Scale3DRate;
+			CamPos = BaseCamPos + Vector3DX::vget(0.8f, -0.25f, 2.f) * Scale3DRate;
+			CamVec = BaseCamPos;
+			CamFov = deg2rad(35);
 			//Cam
-			CameraParts->SetMainCamera().SetCamPos(Vector3DX::vget(0, 15, -20), Vector3DX::vget(0, 15, 0), Vector3DX::vget(0, 1, 0));
+			CameraParts->SetMainCamera().SetCamPos(CamPos, CamVec, Vector3DX::up());
 			//info
-			CameraParts->SetMainCamera().SetCamInfo(deg2rad(35), Scale3DRate * 0.03f, Scale3DRate * 100.0f);
+			CameraParts->SetMainCamera().SetCamInfo(CamFov, Scale3DRate * 0.03f, Scale3DRate * 100.0f);
+			//
+			{
+				int Now = 1;
+				for (auto& sel : m_GunSelect) {
+					for (auto& guns : FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList) {
+						int index = &guns - &FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.front();
+						if (SaveData::Instance()->GetParam(guns) == Now) {
+							sel = index;
+							break;
+						}
+					}
+					++Now;
+				}
+			}
 		}
 		bool			TitleScene::Update_Sub(void) noexcept {
 			auto* CameraParts = Camera3D::Instance();
@@ -142,68 +173,192 @@ namespace FPS_n2 {
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = UIs::ButtonControl::Instance();
 			auto* SceneParts = SceneControl::Instance();
+			auto* DXLib_refParts = DXLib_ref::Instance();
 			if (SceneParts->IsPause()) {
 				return true;
 			}
 			Pad->SetMouseMoveEnable(false);
 			auto* KeyGuideParts = KeyGuide::Instance();
 			KeyGuideParts->ChangeGuide(
-				[]() {
+				[this]() {
 					auto* LocalizeParts = LocalizePool::Instance();
 					auto* KeyGuideParts = KeyGuide::Instance();
-					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
-					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_S), "");
-					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_A), "");
-					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_D), "");
-					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), LocalizeParts->Get(9993));
-					KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizeParts->Get(9992));
+					if (!m_IsCustomize) {
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_S), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_A), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_D), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), LocalizeParts->Get(9993));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizeParts->Get(9992));
+					}
+					else {
+
+					}
 				}
 			);
-			if (!PopUpParts->IsActivePop() && FadeControl::Instance()->IsClear()) {
-				ButtonParts->UpdateInput();
-				// 選択時の挙動
-				if (ButtonParts->GetTriggerButton()) {
-					switch (ButtonParts->GetSelect()) {
-					case 0:
-						if (!this->m_IsEnd) {
-							FadeControl::Instance()->SetBlackOut(true);
+			if (!m_IsCustomize) {
+				if (!PopUpParts->IsActivePop() && FadeControl::Instance()->IsClear()) {
+					ButtonParts->UpdateInput();
+					// 選択時の挙動
+					if (ButtonParts->GetTriggerButton()) {
+						switch (ButtonParts->GetSelect()) {
+						case 0:
+							if (!this->m_IsEnd) {
+								FadeControl::Instance()->SetBlackOut(true);
+							}
+							this->m_IsEnd = true;
+							break;
+						case 1:
+							m_IsCustomize = true;
+							KeyGuideParts->SetGuideFlip();
+							break;
+						case 2:
+							OptionPopup::Instance()->SetActive();
+							break;
+						case 3:
+							PopUpParts->Add(LocalizeParts->Get(120), (720), (840),
+								[&](int xmin, int ymin, int xmax, int, bool) {
+									this->m_CreditControl->Draw(xmin, ymin, xmax);
+								},
+								[]() {},
+								[]() {},
+								true
+							);
+							break;
+						default:
+							break;
 						}
-						this->m_IsEnd = true;
-						break;
-					case 1:
-						OptionPopup::Instance()->SetActive();
-						break;
-					case 2:
-						PopUpParts->Add(LocalizeParts->Get(120), (720), (840),
-							[&](int xmin, int ymin, int xmax, int, bool) {
-								this->m_CreditControl->Draw(xmin, ymin, xmax);
-							},
-							[]() {},
-							[]() {},
-							true
-						);
-						break;
-					default:
-						break;
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
 					}
-					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
 				}
+				// 
+				ButtonParts->Update();
+
+				Vector3DX BaseCamPos = m_MovieCharacter->GetMove().GetPos() + Vector3DX::vget(0.5f, 0.8f, 0.f) * Scale3DRate;
+				Easing(&CamPos, BaseCamPos + Vector3DX::vget(0.8f, -0.25f, 2.f) * Scale3DRate, 0.9f, EasingType::OutExpo);
+				Easing(&CamVec, BaseCamPos, 0.9f, EasingType::OutExpo);
+				Easing(&CamFov, deg2rad(35), 0.9f, EasingType::OutExpo);
+
+				m_GunTypeSel = 0;
+				CamYrad = deg2rad(0);
+				m_CamTimer = 0.f;
+
+				m_MovieCharacter->SetActive(true);
 			}
-			// 
-			ButtonParts->Update();
+			else {
+				if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
+					m_IsCustomize = false;
+					KeyGuideParts->SetGuideFlip();
+				}
+				if (Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
+					int Next = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).first - 1;
+					int Slot = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).second;
+					int Highest = -1;
+					int HighestID = -1;
+					for (auto& gp : this->m_GunPoint) {
+						int index = &gp - &this->m_GunPoint.front();
+						if (Slot == gp.second) {
+							if (Next >= 0) {
+								if (Next == gp.first) {
+									m_GunSelect.at(m_GunTypeSel) = index;
+									break;
+								}
+							}
+							else {
+								//一番IDがでかいやつを保持しておく
+								if (Highest < gp.first) {
+									Highest = gp.first;
+									HighestID = index;
+								}
+							}
+						}
+					}
+					if (HighestID != -1) {
+						m_GunSelect.at(m_GunTypeSel) = HighestID;
+					}
+				}
+				if (Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
+					int Next = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).first + 1;
+					int Slot = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).second;
+					int Lowest = 10000;
+					int LowestID = -1;
+					for (auto& gp : this->m_GunPoint) {
+						int index = &gp - &this->m_GunPoint.front();
+						if (Slot == gp.second) {
+							if (Next == gp.first) {
+								m_GunSelect.at(m_GunTypeSel) = index;
+								LowestID = -1;
+								break;
+							}
+							//一番IDがでかいやつを保持しておく
+							if (Lowest > gp.first) {
+								Lowest = gp.first;
+								LowestID = index;
+							}
+						}
+					}
+					if (LowestID != -1) {
+						m_GunSelect.at(m_GunTypeSel) = LowestID;
+					}
+				}
+				if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger()) {
+					m_GunTypeSel++;
+					if (m_GunTypeSel > 3 - 1) {
+						m_GunTypeSel = 0;
+					}
+				}
+				if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger()) {
+					m_GunTypeSel--;
+					if (m_GunTypeSel < 0) {
+						m_GunTypeSel = 3 - 1;
+					}
+				}
+
+				m_CamTimer = std::clamp(m_CamTimer + DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
+				CamYrad += deg2rad(Pad->GetLS_X());
+				//
+				Vector3DX BaseCamPos = Vector3DX::vget(2.45f, 2.5f, 1.5f * m_GunTypeSel) * Scale3DRate;
+				Easing(&CamYradR, CamYrad, 0.9f, EasingType::OutExpo);
+
+				CamPos = Lerp(CamPos,
+					BaseCamPos + Matrix3x3DX::Vtrans(Vector3DX::vget(0.0f, 0.1f, -2.f) * Scale3DRate, Matrix3x3DX::RotAxis(Vector3DX::up(), CamYradR)),
+					m_CamTimer);
+				Easing(&CamVec, BaseCamPos, 0.9f, EasingType::OutExpo);
+				Easing(&CamFov, deg2rad(25), 0.9f, EasingType::OutExpo);
+
+				m_MovieCharacter->SetActive(false);
+			}
+			for (auto& g : this->m_GunAnimTimer) {
+				int index = &g - &this->m_GunAnimTimer.front();
+				if (m_IsCustomize && index == m_GunSelect.at(m_GunTypeSel)) {
+					g = std::clamp(g + DXLib_refParts->GetDeltaTime() / 0.25f, 0.f, 1.f);
+				}
+				else {
+					g = std::clamp(g - DXLib_refParts->GetDeltaTime() / 0.25f, 0.f, 1.f);
+				}
+				auto& guns = this->m_GunPtr.at(index);
+				guns->SetActive(g > 0.5f);
+
+				Matrix3x3DX Rot = Lerp(Matrix3x3DX::identity(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(90)), g);
+				Vector3DX Pos = Lerp(
+					Vector3DX::vget(2.45f + 0.15f * this->m_GunPoint.at(index).first, 1.f, 1.5f * this->m_GunPoint.at(index).second) * Scale3DRate,
+					Vector3DX::vget(2.45f + Lerp(0.25f, 0.f, this->m_GunPoint.at(index).second == 0 ? 0.f : 1.f), 2.5f, 1.5f * this->m_GunPoint.at(index).second) * Scale3DRate,
+					g * g
+				);
+				this->m_GunPtr.at(index)->SetGunMat(Rot, Pos);
+			}
+
 			//Update
 			ObjMngr->UpdateObject();
 			ObjMngr->LateUpdateObject();
 			//視点
 			{
 				//カメラ
-				Vector3DX BaseCamPos = m_MovieCharacter->GetMove().GetPos() + Vector3DX::vget(0.5f, 0.8f, 0.f) * Scale3DRate;
 				CameraParts->SetMainCamera().SetCamPos(
-					BaseCamPos + Vector3DX::vget(0.8f, -0.25f, 2.f) * Scale3DRate,
-					BaseCamPos,
+					CamPos,
+					CamVec,
 					Vector3DX::up());
-				auto fovBuf = CameraParts->GetMainCamera().GetCamFov();
-				CameraParts->SetMainCamera().SetCamInfo(fovBuf, CameraParts->GetMainCamera().GetCamNear(), CameraParts->GetMainCamera().GetCamFar());
+				CameraParts->SetMainCamera().SetCamInfo(CamFov, CameraParts->GetMainCamera().GetCamNear(), CameraParts->GetMainCamera().GetCamFar());
 			}
 			// 
 			FadeControl::Instance()->Update();
@@ -232,7 +387,13 @@ namespace FPS_n2 {
 			// セーブ
 			SaveDataParts->Save();
 			// 次シーン決定
-			SetNextSelect(static_cast<size_t>(ButtonParts->GetSelect()));
+			switch (ButtonParts->GetSelect()) {
+			case 0:
+				SetNextSelect(0);
+				break;
+			default:
+				break;
+			}
 		}
 		void TitleScene::Dispose_Load_Sub(void) noexcept {
 			m_GunPtr.clear();
@@ -243,6 +404,8 @@ namespace FPS_n2 {
 			Charas::GunAnimManager::Release();
 		}
 		void TitleScene::BG_Draw_Sub(void) const noexcept {
+			FillGraph(GetDrawScreen(), 0, 0, 0);
+
 			auto Fog = GetFogEnable();
 			auto VFog = GetVerticalFogEnable();
 			SetFogEnable(false);
@@ -294,47 +457,52 @@ namespace FPS_n2 {
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = UIs::ButtonControl::Instance();
 			// 
-			DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
-				&this->m_TitleImage, (64), (64), (64 + 369), (64 + 207), true);
-			// 
-			DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
-				FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
-				(64 + 369), (64 + 207), White, Black, "Ver 1.0.0");
-			// 
-			ButtonParts->Draw();
-			// 
-			if ((ButtonParts->GetSelect() != InvalidID) && !PopUpParts->IsActivePop()) {
+			if (!m_IsCustomize) {
+				DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
+					&this->m_TitleImage, (64), (64), (64 + 369), (64 + 207), true);
+				// 
 				DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
-					FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
-					(32), 1080 - (32 + 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
-			}
-			//
-			{
-				int xp = 64;
-				int yp = 1080 - 92;
-				auto* OptionParts = OptionManager::Instance();
-				{
-					auto prev = OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth);
-					OptionParts->SetParamBoolean(EnumSaveParam::FlatEarth, CheckBox(xp, yp, OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)));
-					if (prev != OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)) {
-						OptionParts->Save();
-					}
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp + 64, yp + LineHeight / 2,
-						White, Black, LocalizeParts->Get(1139));
+					FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
+					(64 + 369), (64 + 207), White, Black, "Ver 1.0.0");
+				// 
+				ButtonParts->Draw();
+				// 
+				if ((ButtonParts->GetSelect() != InvalidID) && !PopUpParts->IsActivePop()) {
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::BOTTOM,
+						(32), 1080 - (32 + 32), White, Black, LocalizeParts->Get(9020 + ButtonParts->GetSelect()));
 				}
+				//
 				{
-					yp -= LineHeight + 12;
+					int xp = 64;
+					int yp = 1080 - 92;
+					auto* OptionParts = OptionManager::Instance();
+					{
+						auto prev = OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth);
+						OptionParts->SetParamBoolean(EnumSaveParam::FlatEarth, CheckBox(xp, yp, OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)));
+						if (prev != OptionParts->GetParamBoolean(EnumSaveParam::FlatEarth)) {
+							OptionParts->Save();
+						}
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp + 64, yp + LineHeight / 2,
+							White, Black, LocalizeParts->Get(1139));
+					}
+					{
+						yp -= LineHeight + 12;
 
-					auto prev = OptionParts->GetParamBoolean(EnumSaveParam::ActiveLockOn);
-					OptionParts->SetParamBoolean(EnumSaveParam::ActiveLockOn, CheckBox(xp, yp, OptionParts->GetParamBoolean(EnumSaveParam::ActiveLockOn)));
-					if (prev != OptionParts->GetParamBoolean(EnumSaveParam::ActiveLockOn)) {
-						OptionParts->Save();
+						auto prev = OptionParts->GetParamBoolean(EnumSaveParam::ActiveLockOn);
+						OptionParts->SetParamBoolean(EnumSaveParam::ActiveLockOn, CheckBox(xp, yp, OptionParts->GetParamBoolean(EnumSaveParam::ActiveLockOn)));
+						if (prev != OptionParts->GetParamBoolean(EnumSaveParam::ActiveLockOn)) {
+							OptionParts->Save();
+						}
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp + 64, yp + LineHeight / 2,
+							White, Black, LocalizeParts->Get(1146));
 					}
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
-						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp + 64, yp + LineHeight / 2,
-						White, Black, LocalizeParts->Get(1146));
 				}
+			}
+			else {
+
 			}
 			// 
 			FadeControl::Instance()->Draw();

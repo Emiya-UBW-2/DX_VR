@@ -18,6 +18,21 @@ namespace FPS_n2 {
 			MV1										m_ObjSky;
 
 			std::vector<std::shared_ptr<Guns::GunObj>>		m_GunPtr{};			//銃
+
+			bool									m_IsCustomize = false;
+			Vector3DX CamPos;
+			Vector3DX CamVec = Vector3DX::forward();
+			float CamFov = deg2rad(45);
+			float CamYrad = deg2rad(0);
+			float CamYradR = deg2rad(0);
+			std::vector<std::pair<int, int>>		m_GunPoint;
+			std::array<int,3>						m_GunSelect;
+			int										m_GunTypeSel = 0;
+			int										m_GunSel = 0;
+
+			float									m_CamTimer = 0.f;
+
+			std::vector<float>						m_GunAnimTimer;
 		public:
 			TitleScene(void) noexcept {}
 			TitleScene(const TitleScene&) = delete;

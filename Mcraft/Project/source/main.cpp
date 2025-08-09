@@ -80,10 +80,20 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		for (auto& data : pData) {
 			FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.emplace_back(data.cFileName);
 		}
+		bool isEquiped = false;
 		for (auto& guns : FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList) {
 			if (SaveData::Instance()->GetParam(guns) <= 0) {
 				SaveData::Instance()->SetParam(guns, 0);
 			}
+			else {
+				isEquiped = true;
+			}
+		}
+		if (!isEquiped) {
+			//デフォ装備
+			SaveData::Instance()->SetParam("type89", 1);
+			SaveData::Instance()->SetParam("P226", 2);
+			SaveData::Instance()->SetParam("RGD5", 3);
 		}
 	}
 	SaveData::Instance()->Save();
