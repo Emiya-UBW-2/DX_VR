@@ -373,6 +373,18 @@ namespace FPS_n2 {
 			auto* SaveDataParts = SaveData::Instance();
 			auto* ButtonParts = UIs::ButtonControl::Instance();
 			//
+			for (auto& guns : FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList) {
+				SaveData::Instance()->SetParam(guns, 0);
+				int index = &guns - &FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.front();
+				int Now = 1;
+				for (auto& sel : m_GunSelect) {
+					if (sel == index) {
+						SaveData::Instance()->SetParam(guns, Now);
+					}
+					++Now;
+				}
+			}
+			//
 			m_MovieCharacter.reset();
 			//*
 			auto* SE = SoundPool::Instance();
