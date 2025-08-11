@@ -741,31 +741,31 @@ namespace FPS_n2 {
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 							xp1, yp1, Green, Black, "%05.3fkg", static_cast<float>(guns->GetWeight_gram()) / 1000.f);
-						yp1 += 24;
+						yp1 += 32;
 						switch (slot->GetMyData()->GetShotType()) {
 						case Guns::SHOTTYPE::PUMP:
 							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 								xp1, yp1, Green, Black, "PUMP");
-							yp1 += 24;
+							yp1 += 32;
 							break;
 						case Guns::SHOTTYPE::BOLT:
 							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 								xp1, yp1, Green, Black, "BOLT");
-							yp1 += 24;
+							yp1 += 32;
 							break;
 						case Guns::SHOTTYPE::SEMI:
 							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 								xp1, yp1, Green, Black, "SEMIAUTO");
-							yp1 += 24;
+							yp1 += 32;
 							break;
 						case Guns::SHOTTYPE::FULL:
 							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 								xp1, yp1, Green, Black, "FULLAUTO %04d RPM", slot->GetMyData()->GetShotRate());
-							yp1 += 24;
+							yp1 += 32;
 							break;
 						default:
 							break;
@@ -785,7 +785,7 @@ namespace FPS_n2 {
 							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 								xp1, yp1, Green, Black, ("%d round "+ LoadType), guns->GetAmmoAll());
-							yp1 += 24;
+							yp1 += 32;
 						}
 					}
 					yp1 += 24;
