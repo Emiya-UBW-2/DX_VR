@@ -27,7 +27,7 @@ namespace FPS_n2 {
 			float CamYrad = deg2rad(0);
 			float CamYradR = deg2rad(0);
 			std::vector<std::pair<int, int>>		m_GunPoint{};
-			std::array<int,3>						m_GunSelect{};
+			std::array<int, 3>						m_GunSelect{};
 			int										m_GunTypeSel = 0;
 			int										m_GunSel = 0;
 			int										m_GunCustomSel = 0;

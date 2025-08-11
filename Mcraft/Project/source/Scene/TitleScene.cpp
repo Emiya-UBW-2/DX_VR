@@ -686,6 +686,110 @@ namespace FPS_n2 {
 					XPos += Len;
 				}
 
+				{
+					auto& guns = this->m_GunPtr.at(m_GunSelect.at(m_GunTypeSel));
+					auto& slot = guns->GetModifySlot();
+
+					int xp1 = 128;
+					int yp1 = 128;
+					int xp2 = 512;
+					//int yp2 = 960;
+					const GraphHandle* Ptr = nullptr;
+					if (slot->GetMyData()->GetIconGraph().IsActive()) {
+						Ptr = &slot->GetMyData()->GetIconGraph();
+					}
+					if (Ptr) {
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 255, 0);
+						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+							Ptr, (xp1 + xp2) / 2, yp1 + 120, 0.5f, 0.f, true);
+						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+						yp1 += 240;
+					}
+					//Info
+					{
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+							xp1, yp1, Green, Black, slot->GetMyData()->GetName());
+						yp1 += 24;
+					}
+					yp1 += 24;
+					{
+						auto* OptionParts = OptionManager::Instance();
+						switch ((LanguageType)OptionParts->GetParamInt(EnumSaveParam::Language)) {
+						case LanguageType::Eng:
+							for (auto& info : slot->GetMyData()->GetInfoEng()) {
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+									FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+									xp1, yp1, Green, Black, info);
+								yp1 += 18;
+							}
+							break;
+						case LanguageType::Jpn:
+							for (auto& info : slot->GetMyData()->GetInfo()) {
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+									FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+									xp1, yp1, Green, Black, info);
+								yp1 += 18;
+							}
+							break;
+						default:
+							break;
+						}
+					}
+					yp1 += 24;
+					{
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+							xp1, yp1, Green, Black, "%05.3fkg", static_cast<float>(guns->GetWeight_gram()) / 1000.f);
+						yp1 += 24;
+						switch (slot->GetMyData()->GetShotType()) {
+						case Guns::SHOTTYPE::PUMP:
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+								xp1, yp1, Green, Black, "PUMP");
+							yp1 += 24;
+							break;
+						case Guns::SHOTTYPE::BOLT:
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+								xp1, yp1, Green, Black, "BOLT");
+							yp1 += 24;
+							break;
+						case Guns::SHOTTYPE::SEMI:
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+								xp1, yp1, Green, Black, "SEMIAUTO");
+							yp1 += 24;
+							break;
+						case Guns::SHOTTYPE::FULL:
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+								xp1, yp1, Green, Black, "FULLAUTO %04d RPM", slot->GetMyData()->GetShotRate());
+							yp1 += 24;
+							break;
+						default:
+							break;
+						}
+						{
+							std::string LoadType = "";
+							switch (guns->GetReloadType()) {
+							case Guns::RELOADTYPE::AMMO:
+								LoadType = "Ammo";
+								break;
+							case Guns::RELOADTYPE::MAG:
+								LoadType = "Magazine";
+								break;
+							default:
+								break;
+							}
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+								xp1, yp1, Green, Black, ("%d round "+ LoadType), guns->GetAmmoAll());
+							yp1 += 24;
+						}
+					}
+					yp1 += 24;
+				}
 			}
 			// 
 			FadeControl::Instance()->Draw();

@@ -1779,8 +1779,12 @@ namespace FPS_n2 {
 							int ID = static_cast<int>(m_SkillSelect.at(loop));
 							DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - (static_cast<int>(wide) / 2 - 8), yp1 - 540 / 2, xp1 + (static_cast<int>(wide) / 2 - 8), yp1 + 540 / 2, DarkGreen, true);
 
+							std::string Title = LocalizeParts->Get(5000 + ID);
+							Title += " Lv.";
+							Title += std::to_string(Player::SkillList::Instance()->GetSkilLevel(m_SkillSelect.at(loop)) + 1);
+
 							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
-								FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1 - 200, White, Black, LocalizeParts->Get(5000 + ID));
+								FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1 - 200, White, Black, Title.c_str());
 
 							std::string Str = LocalizeParts->Get(5100 + ID);
 							{
