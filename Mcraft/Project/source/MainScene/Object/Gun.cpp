@@ -733,8 +733,6 @@ namespace FPS_n2 {
 			}
 		}
 		void				GunObj::SetupGun(void) noexcept {
-			this->m_ModifySlot = std::make_unique<ModifySlot>(GetFilePath());
-			this->m_GunsModify = std::make_unique<GunsModify>(shared_from_this(), false);
 			{
 				//小孫として登録されているパーツをリスト化
 				std::vector<const SharedGunParts*> PartsList;
@@ -811,6 +809,9 @@ namespace FPS_n2 {
 				isdraw = true;
 			}
 			m_Weight_gram = InvalidID;
+
+			this->m_ModifySlot = std::make_unique<ModifySlot>(GetFilePath());
+			this->m_GunsModify = std::make_unique<GunsModify>(shared_from_this(), false);
 		}
 		void				GunObj::FirstUpdate(void) noexcept {
 			auto* DXLib_refParts = DXLib_ref::Instance();

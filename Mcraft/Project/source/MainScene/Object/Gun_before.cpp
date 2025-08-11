@@ -226,9 +226,8 @@ namespace FPS_n2 {
 			auto* pSlotInfo = GetMyData()->GetSlotInfo(gunSlot);
 			if (!pSlotInfo) { return; }
 			//パーツがある場合は削除
-			if (IsAttachedParts(gunSlot)) {
-				Remove(gunSlot);
-			}
+			Remove(gunSlot);
+			if (ID == InvalidID) { return; }
 			const auto* FilePath = (*GunPartsDataManager::Instance()->GetData(pSlotInfo->CanAttachItemsUniqueID[ID]))->GetPath().c_str();
 
 			switch (gunSlot) {
@@ -263,7 +262,11 @@ namespace FPS_n2 {
 		GunsModify::GunsModify(const std::shared_ptr<GunObj>& pBaseGun, bool isPreset) noexcept {
 			this->m_BaseGun = pBaseGun;
 			this->m_SlotDataPool.reserve(128);
-			SetupDefaultGunParts(&pBaseGun->GetModifySlot(), nullptr, isPreset);
+			SetupDefaultGunParts(&this->m_BaseGun->GetModifySlot(), nullptr, isPreset);
+		}
+		void GunsModify::ChangeToSaveData() noexcept {
+			DeleteAllSlot();
+			SetupDefaultGunParts(&this->m_BaseGun->GetModifySlot(), nullptr, true);
 		}
 		void			GunsModify::SetupDefaultGunParts(const std::unique_ptr<ModifySlot>* pBaseParts, const SlotData* pParentSlot, bool isPreset) noexcept {
 			if (!pBaseParts) { return; }
@@ -306,7 +309,7 @@ namespace FPS_n2 {
 				}
 			}
 			for (auto& data : this->m_SlotDataPool) {
-				if (&data == pSlot) { continue; }
+				if (!data.IsSavedSlot(pSlot->GetSaveData())) { continue; }
 				int index = static_cast<int>(&data - &this->m_SlotDataPool.front());
 				//そのデータ自体を削除
 				this->m_SlotDataPool.erase(this->m_SlotDataPool.begin() + index);
@@ -314,39 +317,44 @@ namespace FPS_n2 {
 			}
 			return false;
 		}
-		void			GunsModify::ChangeSelectData(const SlotData* pSlot, int select) noexcept {
-			DeleteSlotsChildParts(pSlot);
+		void			GunsModify::ChangeSelectData(const SlotData pSlot, int select) noexcept {
+			pSlot.m_ParentSlot;
+			//子のパーツをぶっ飛ばす
+			DeleteSlotsChildParts(&pSlot);
 			//
-			//一旦クリーンにする
-			SlotData* data = (SlotData*)pSlot;
+			this->m_SlotDataPool.emplace_back();
+			this->m_SlotDataPool.back() = pSlot;
+			auto* data = &this->m_SlotDataPool.back();
 			data->Set(this->m_BaseGun, select);
 			//パーツがある場合
 			if (data->IsAttachedParts()) {
 				//スロットに設定したものに沿ってデフォルトのパーツを設定
-				SetupDefaultGunParts(&data->GetAttachedPartsSlot(), data, false);
+				SetupDefaultGunParts(&data->GetAttachedPartsSlot(), data, true);
 			}
 		}
 		void			GunsModify::LoadSlots(const char* path) noexcept {
 			this->m_SlotSave.clear();
 			std::ifstream inputfile(path, std::ios::binary);
 			if (inputfile) {
+				int SlotSize = 0;
 				{
-					int ULTSelect = 0;
-					inputfile.read(reinterpret_cast<char*>(&ULTSelect), sizeof(ULTSelect));
+					inputfile.read(reinterpret_cast<char*>(&SlotSize), sizeof(SlotSize));
 				}
-				while (!inputfile.eof()) { //ファイルの最後まで続ける
+				//while (!inputfile.eof()) { //ファイルの最後まで続ける
+				for (int loop = 0; loop < SlotSize; ++loop) {
 					SlotSaveData Tmp;
 					inputfile.read(reinterpret_cast<char*>(&Tmp), sizeof(Tmp));
 					this->m_SlotSave.emplace_back(Tmp);
 				}
 			}
 			inputfile.close();
+			ChangeToSaveData();
 		}
 		void			GunsModify::SaveSlots(const char* path) noexcept {
 			std::ofstream outputfile(path, std::ios::binary);
 			{
-				int ULTSelect = 0;
-				outputfile.write(reinterpret_cast<char*>(&ULTSelect), sizeof(ULTSelect));
+				int SlotSize = static_cast<int>(this->m_SlotDataPool.size());
+				outputfile.write(reinterpret_cast<char*>(&SlotSize), sizeof(SlotSize));
 			}
 			for (auto& data : this->m_SlotDataPool) {
 				SlotSaveData Tmp = data.GetSaveData();

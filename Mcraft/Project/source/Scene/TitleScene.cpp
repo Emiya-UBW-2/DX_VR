@@ -53,6 +53,14 @@ namespace FPS_n2 {
 					ObjectManager::Instance()->InitObject(this->m_GunPtr.back(), ChildPath);
 					this->m_GunPtr.back()->SetupGun();
 					this->m_GunPtr.back()->SetPlayerID(InvalidID);
+
+					auto& mod = this->m_GunPtr.back()->GetModifySlot();
+					std::string PresetPath = "Save/";
+					PresetPath += mod->GetMyData()->GetName();
+					PresetPath += ".dat";
+					if (IsFileExist(PresetPath.c_str())) {
+						this->m_GunPtr.back()->GetGunsModify()->LoadSlots(PresetPath.c_str());
+					}
 				}
 			}
 		}
@@ -72,7 +80,7 @@ namespace FPS_n2 {
 			this->m_GunPoint.resize(this->m_GunPtr.size());
 			this->m_GunAnimTimer.resize(this->m_GunPtr.size());
 			for (auto& g : this->m_GunPtr) {
-				int index = &g - &this->m_GunPtr.front();
+				int index = static_cast<int>(&g - &this->m_GunPtr.front());
 				this->m_GunAnimTimer.at(index) = 0.f;
 				if (g->GetModifySlot()->GetMyData()->IsPlayableWeapon() != InvalidID) {
 					this->m_GunPoint.at(index).second = g->GetModifySlot()->GetMyData()->IsPlayableWeapon();
@@ -154,7 +162,7 @@ namespace FPS_n2 {
 				int Now = 1;
 				for (auto& sel : m_GunSelect) {
 					for (auto& guns : FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList) {
-						int index = &guns - &FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.front();
+						int index = static_cast<int>(&guns - &FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.front());
 						if (SaveData::Instance()->GetParam(guns) == Now) {
 							sel = index;
 							break;
@@ -244,76 +252,158 @@ namespace FPS_n2 {
 				m_CamTimer = 0.f;
 
 				m_MovieCharacter->SetActive(true);
+				m_IsCustomizeGun = false;
+				SlotSel = Guns::GunSlot::Magazine;
 			}
 			else {
-				if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
-					m_IsCustomize = false;
-					KeyGuideParts->SetGuideFlip();
-				}
-				if (Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
-					int Next = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).first - 1;
-					int Slot = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).second;
-					int Highest = -1;
-					int HighestID = -1;
-					for (auto& gp : this->m_GunPoint) {
-						int index = &gp - &this->m_GunPoint.front();
-						if (Slot == gp.second) {
-							if (Next >= 0) {
+				if (!m_IsCustomizeGun) {
+					if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
+						m_IsCustomize = false;
+						KeyGuideParts->SetGuideFlip();
+					}
+					if (Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
+						int Next = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).first - 1;
+						int Slot = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).second;
+						int Highest = -1;
+						int HighestID = -1;
+						for (auto& gp : this->m_GunPoint) {
+							int index = static_cast<int>(&gp - &this->m_GunPoint.front());
+							if (Slot == gp.second) {
+								if (Next >= 0) {
+									if (Next == gp.first) {
+										m_GunSelect.at(m_GunTypeSel) = index;
+										break;
+									}
+								}
+								else {
+									//一番IDがでかいやつを保持しておく
+									if (Highest < gp.first) {
+										Highest = gp.first;
+										HighestID = index;
+									}
+								}
+							}
+						}
+						if (HighestID != -1) {
+							m_GunSelect.at(m_GunTypeSel) = HighestID;
+						}
+					}
+					if (Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
+						int Next = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).first + 1;
+						int Slot = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).second;
+						int Lowest = 10000;
+						int LowestID = -1;
+						for (auto& gp : this->m_GunPoint) {
+							int index = static_cast<int>(&gp - &this->m_GunPoint.front());
+							if (Slot == gp.second) {
 								if (Next == gp.first) {
 									m_GunSelect.at(m_GunTypeSel) = index;
+									LowestID = -1;
 									break;
 								}
-							}
-							else {
 								//一番IDがでかいやつを保持しておく
-								if (Highest < gp.first) {
-									Highest = gp.first;
-									HighestID = index;
+								if (Lowest > gp.first) {
+									Lowest = gp.first;
+									LowestID = index;
 								}
 							}
 						}
+						if (LowestID != -1) {
+							m_GunSelect.at(m_GunTypeSel) = LowestID;
+						}
 					}
-					if (HighestID != -1) {
-						m_GunSelect.at(m_GunTypeSel) = HighestID;
+					if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger()) {
+						m_GunTypeSel++;
+						if (m_GunTypeSel > 3 - 1) {
+							m_GunTypeSel = 0;
+						}
+						m_CamTimer = 0.f;
 					}
-				}
-				if (Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
-					int Next = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).first + 1;
-					int Slot = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).second;
-					int Lowest = 10000;
-					int LowestID = -1;
-					for (auto& gp : this->m_GunPoint) {
-						int index = &gp - &this->m_GunPoint.front();
-						if (Slot == gp.second) {
-							if (Next == gp.first) {
-								m_GunSelect.at(m_GunTypeSel) = index;
-								LowestID = -1;
-								break;
-							}
-							//一番IDがでかいやつを保持しておく
-							if (Lowest > gp.first) {
-								Lowest = gp.first;
-								LowestID = index;
+					if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger()) {
+						m_GunTypeSel--;
+						if (m_GunTypeSel < 0) {
+							m_GunTypeSel = 3 - 1;
+						}
+						m_CamTimer = 0.f;
+					}
+					if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
+						m_IsCustomizeGun = true;
+						KeyGuideParts->SetGuideFlip();
+
+						auto& mod = this->m_GunPtr.at(m_GunSelect.at(m_GunTypeSel))->GetModifySlot();
+						auto& List = mod->GetMyData()->GetSlotInfo(Guns::GunSlot::Magazine)->CanAttachItemsUniqueID;
+						int Now = mod->GetParts(Guns::GunSlot::Magazine)->GetModifySlot()->GetMyData()->GetUniqueID();
+						for (auto& l : List) {
+							int index = static_cast<int>(&l - &List.front());
+							if (l == Now) {
+								m_GunCustomSel = index;
 							}
 						}
 					}
-					if (LowestID != -1) {
-						m_GunSelect.at(m_GunTypeSel) = LowestID;
-					}
 				}
-				if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger()) {
-					m_GunTypeSel++;
-					if (m_GunTypeSel > 3 - 1) {
-						m_GunTypeSel = 0;
-					}
-				}
-				if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger()) {
-					m_GunTypeSel--;
-					if (m_GunTypeSel < 0) {
-						m_GunTypeSel = 3 - 1;
-					}
-				}
+				else {
+					auto& guns = this->m_GunPtr.at(m_GunSelect.at(m_GunTypeSel));
+					auto& mod = guns->GetGunsModify();
+					auto& slot = guns->GetModifySlot();
 
+					if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
+						m_IsCustomizeGun = false;
+						KeyGuideParts->SetGuideFlip();
+
+						std::string PresetPath = "Save/";
+						PresetPath += slot->GetMyData()->GetName();
+						PresetPath += ".dat";
+						mod->SaveSlots(PresetPath.c_str());
+					}
+
+					if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger()) {
+						switch (SlotSel)						{
+						case FPS_n2::Guns::GunSlot::Magazine:
+							SlotSel = Guns::GunSlot::Sight;
+							break;
+						case FPS_n2::Guns::GunSlot::Sight:
+							SlotSel = Guns::GunSlot::Magazine;
+							break;
+						default:
+							break;
+						}
+					}
+					if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger()) {
+						switch (SlotSel) {
+						case FPS_n2::Guns::GunSlot::Magazine:
+							SlotSel = Guns::GunSlot::Sight;
+							break;
+						case FPS_n2::Guns::GunSlot::Sight:
+							SlotSel = Guns::GunSlot::Magazine;
+							break;
+						default:
+							break;
+						}
+					}
+					if (slot->GetMyData()->GetSlotInfo(SlotSel)) {
+						auto& List = slot->GetMyData()->GetSlotInfo(SlotSel)->CanAttachItemsUniqueID;
+						int size = static_cast<int>(List.size());
+						if (!slot->GetMyData()->GetSlotInfo(SlotSel)->IsNeed) {
+							size++;
+						}
+						if (Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
+							--m_GunCustomSel;
+							if (m_GunCustomSel < 0) {
+								m_GunCustomSel = size - 1;
+							}
+							mod->ChangeSelectData(*mod->GetSlotData(SlotSel), m_GunCustomSel);
+							guns->SetupGun();
+						}
+						if (Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
+							++m_GunCustomSel;
+							if (m_GunCustomSel > size - 1) {
+								m_GunCustomSel = 0;
+							}
+							mod->ChangeSelectData(*mod->GetSlotData(SlotSel), m_GunCustomSel);
+							guns->SetupGun();
+						}
+					}
+				}
 				m_CamTimer = std::clamp(m_CamTimer + DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				CamYrad += deg2rad(Pad->GetLS_X());
 				//
@@ -329,7 +419,7 @@ namespace FPS_n2 {
 				m_MovieCharacter->SetActive(false);
 			}
 			for (auto& g : this->m_GunAnimTimer) {
-				int index = &g - &this->m_GunAnimTimer.front();
+				int index = static_cast<int>(&g - &this->m_GunAnimTimer.front());
 				if (m_IsCustomize && index == m_GunSelect.at(m_GunTypeSel)) {
 					g = std::clamp(g + DXLib_refParts->GetDeltaTime() / 0.25f, 0.f, 1.f);
 				}
@@ -340,9 +430,25 @@ namespace FPS_n2 {
 				guns->SetActive(g > 0.5f);
 
 				Matrix3x3DX Rot = Lerp(Matrix3x3DX::identity(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(90)), g);
+
+				float Ofs = 0.f;
+				switch (this->m_GunPoint.at(index).second) {
+				case 0:
+					Ofs = 0.25f;
+					break;
+				case 1:
+					Ofs = 0.125f;
+					break;
+				case 2:
+					Ofs = 0.0f;
+					break;
+				default:
+					break;
+				}
+
 				Vector3DX Pos = Lerp(
 					Vector3DX::vget(2.45f + 0.15f * this->m_GunPoint.at(index).first, 1.f, 1.5f * this->m_GunPoint.at(index).second) * Scale3DRate,
-					Vector3DX::vget(2.45f + Lerp(0.25f, 0.f, this->m_GunPoint.at(index).second == 0 ? 0.f : 1.f), 2.5f, 1.5f * this->m_GunPoint.at(index).second) * Scale3DRate,
+					Vector3DX::vget(2.45f + Ofs, 2.5f, 1.5f * this->m_GunPoint.at(index).second) * Scale3DRate,
 					g * g
 				);
 				this->m_GunPtr.at(index)->SetGunMat(Rot, Pos);
@@ -375,7 +481,7 @@ namespace FPS_n2 {
 			//
 			for (auto& guns : FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList) {
 				SaveData::Instance()->SetParam(guns, 0);
-				int index = &guns - &FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.front();
+				int index = static_cast<int>(&guns - &FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.front());
 				int Now = 1;
 				for (auto& sel : m_GunSelect) {
 					if (sel == index) {
@@ -514,6 +620,35 @@ namespace FPS_n2 {
 				}
 			}
 			else {
+				int XPos = 64;
+				{
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (48),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+						XPos, (48), Green, Black, "Equip Customize");
+					XPos += FontSystem::FontPool::Instance()->Get(FontSystem::FontType::MS_Gothic, 64, 3)->GetStringWidth("Equip Customize");
+				}
+				if (m_IsCustomizeGun) {
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (48),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+						XPos, (48), Green, Black, " > Gun Setup");
+					XPos += FontSystem::FontPool::Instance()->Get(FontSystem::FontType::MS_Gothic, 64, 3)->GetStringWidth(" > Gun Setup");
+
+					std::string CustomPoint = "";
+					switch (SlotSel) {
+					case FPS_n2::Guns::GunSlot::Magazine:
+						CustomPoint = "Magazine";
+						break;
+					case FPS_n2::Guns::GunSlot::Sight:
+						CustomPoint = "Sight";
+						break;
+					default:
+						break;
+					}
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (48),
+						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+						XPos, (48), Green, Black, (" > " + CustomPoint).c_str());
+					XPos += FontSystem::FontPool::Instance()->Get(FontSystem::FontType::MS_Gothic, 64, 3)->GetStringWidth((" > " + CustomPoint).c_str());
+				}
 
 			}
 			// 

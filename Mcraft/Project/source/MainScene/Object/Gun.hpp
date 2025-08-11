@@ -176,7 +176,7 @@ namespace FPS_n2 {
 			const std::unique_ptr<ModifySlot>& GetModifySlot(void) const noexcept { return this->m_ModifySlot; }
 			const Charas::GunAnimeID&	GetGunAnime(void) const noexcept { return this->m_GunAnime; }
 			const Matrix4x4DX	GetPartsFrameMatParent(GunFrame frame) const noexcept {
-				if (this->m_SightPtr) {
+				if (this->m_SightPtr && (*this->m_SightPtr)) {
 					//サイトがあるならそれを最優先とする
 					switch (frame) {
 					case GunFrame::Eyepos:
@@ -202,6 +202,7 @@ namespace FPS_n2 {
 			const auto&			GetAutoAimID(void) const noexcept { return this->m_AutoAimControl.GetAutoAimID(); }
 			const auto&			GetAutoAimPos(void) const noexcept { return this->m_AutoAimControl.GetAutoAimPos(); }
 			const auto&			GetGunAnimeNow(void) const noexcept { return this->m_AnimNowCache; }
+			const auto&			GetGunsModify(void) const noexcept { return this->m_GunsModify; }
 			const auto			GetNowAnimTimePerCache(void) const noexcept {
 				if (GetGunAnime() < Charas::GunAnimeID::Max) {
 					auto* AnimMngr = Charas::GunAnimManager::Instance();
@@ -235,8 +236,13 @@ namespace FPS_n2 {
 			const auto			GetCanShot(void) const noexcept { return GetGunAnimBlendPer(Charas::GunAnimeID::EmergencyReady) <= 0.05f && GetGunAnimBlendPer(Charas::GunAnimeID::LowReady) <= 0.05f && GetGunAnimBlendPer(Charas::GunAnimeID::HighReady) <= 0.05f; }
 			const auto			IsCanShot(void) const noexcept { return GetGunAnime() == Charas::GunAnimeID::Base || GetGunAnime() == Charas::GunAnimeID::Shot; }
 			const auto			GetCanADS(void) const noexcept { return IsCanShot() && GetCanShot() && GetModifySlot()->GetMyData()->GetCanADS(); }
-			const auto			GetSightZoomSize(void) const noexcept { return this->m_SightPtr ? (*this->m_SightPtr)->GetModifySlot()->GetMyData()->GetSightZoomSize() : GetModifySlot()->GetMyData()->GetSightZoomSize(); }
-			const auto			GetAmmoAll(void) const noexcept { return this->m_MagazinePtr ? (*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoAll() : 0; }
+			const auto			GetSightZoomSize(void) const noexcept {
+				if (this->m_SightPtr && (*this->m_SightPtr)) {
+					return (*this->m_SightPtr)->GetModifySlot()->GetMyData()->GetSightZoomSize();
+				}
+				return GetModifySlot()->GetMyData()->GetSightZoomSize();
+			}
+			const auto			GetAmmoAll(void) const noexcept { return (this->m_MagazinePtr && (*this->m_MagazinePtr)) ? (*this->m_MagazinePtr)->GetModifySlot()->GetMyData()->GetAmmoAll() : 0; }
 			const auto			GetReloadType(void) const noexcept { return GetModifySlot()->GetMyData()->GetReloadType(); }
 
 			const auto			GetWeight_gram(void) noexcept {

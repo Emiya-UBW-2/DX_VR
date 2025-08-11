@@ -190,6 +190,7 @@ namespace FPS_n2 {
 			};
 			class SlotData {
 			private:
+			public:
 				GunSlot										m_SlotType{ GunSlot::Magazine };
 				const SlotData*								m_ParentSlot{ nullptr };
 				const std::unique_ptr<ModifySlot>*			m_MySlot{ nullptr };
@@ -201,9 +202,11 @@ namespace FPS_n2 {
 			public:
 				SlotData() noexcept {}
 				virtual ~SlotData(void) noexcept {
+					/*
 					if (this->m_MySlot && (*this->m_MySlot)) {
 						(*this->m_MySlot)->Remove(this->m_SlotType);
 					}
+					//*/
 				}
 			public:
 				void Init(GunSlot SlotSelect, const SlotData* pParent, const std::unique_ptr<ModifySlot>* pParts) noexcept {
@@ -213,10 +216,7 @@ namespace FPS_n2 {
 				}
 				void Set(const SharedObj& BaseModel, int select) noexcept {
 					this->m_select = select;
-					(*this->m_MySlot)->Remove(this->m_SlotType);
-					if (select != InvalidID) {
-						(*this->m_MySlot)->Attach(this->m_SlotType, select, BaseModel);
-					}
+					(*this->m_MySlot)->Attach(this->m_SlotType, select, BaseModel);
 				}
 			public:
 				//持っているデータのセーブデータへの変換
@@ -229,7 +229,7 @@ namespace FPS_n2 {
 					return Tmp;
 				}
 				//自身が該当のスロットと同一かどうか確認
-				bool IsSavedSlot(const SlotSaveData& slotSave) {
+				bool IsSavedSlot(const SlotSaveData& slotSave) const noexcept {
 					if (this->m_ParentSlot) {
 						if (!(slotSave.ParentSlotType == (this->m_ParentSlot)->m_SlotType) && (slotSave.Parentselect == (this->m_ParentSlot)->m_select)) { return false; }
 					}
@@ -250,6 +250,14 @@ namespace FPS_n2 {
 				this->m_BaseGun.reset();
 			}
 		public:
+			const SlotData* GetSlotData(const GunSlot Slot)const noexcept {
+				for (auto& data : this->m_SlotDataPool) {
+					if (data.m_SlotType == Slot) {
+						return &data;
+					}
+				}
+				return nullptr;
+			}
 			void	DeleteAllSlot() noexcept {
 				for (int loop = 0; loop < static_cast<int>(this->m_SlotDataPool.size()); ++loop) {
 					const auto* data = &this->m_SlotDataPool[loop];
@@ -257,7 +265,9 @@ namespace FPS_n2 {
 						--loop;
 					}
 				}
+				this->m_SlotDataPool.clear();
 			}
+			void ChangeToSaveData() noexcept;
 		private:
 			//pBasePartsの子供以降のスロットにデフォルトパーツを設定
 			void			SetupDefaultGunParts(const std::unique_ptr<ModifySlot>* pBaseParts, const SlotData* pParentSlot, bool isPreset) noexcept;
@@ -265,7 +275,7 @@ namespace FPS_n2 {
 			bool			DeleteSlotsChildParts(const SlotData* pSlot) noexcept;
 		public:
 			//該当スロットのパーツをselectの番号のパーツに取り換える(子供以降のスロットはデフォルトパーツ)
-			void			ChangeSelectData(const SlotData* pSlot, int select) noexcept;
+			void			ChangeSelectData(const SlotData pSlot, int select) noexcept;
 		public:
 			//プリセットデータのロード、セーブ
 			void			LoadSlots(const char* path) noexcept;

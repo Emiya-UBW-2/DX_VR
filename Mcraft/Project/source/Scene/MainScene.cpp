@@ -144,6 +144,16 @@ namespace FPS_n2 {
 					auto& gun = chara->GetGunPtr(loop2);
 					if (!gun) { continue; }
 					gun->SetupGun();
+
+					if (loop == PlayerMngr->GetWatchPlayerID()) {
+						auto& mod = gun->GetModifySlot();
+						std::string PresetPath = "Save/";
+						PresetPath += mod->GetMyData()->GetName();
+						PresetPath += ".dat";
+						if (IsFileExist(PresetPath.c_str())) {
+							gun->GetGunsModify()->LoadSlots(PresetPath.c_str());
+						}
+					}
 				}
 			}
 			PlayerMngr->SetHelicopter(std::make_shared<Objects::HelicopterObj>());

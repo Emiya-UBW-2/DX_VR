@@ -10,29 +10,32 @@
 namespace FPS_n2 {
 	namespace Sceneclass {
 		class TitleScene : public TEMPSCENE {
-			bool								m_IsEnd{ false };//シーン全体の終了フラグ
-			GraphHandle							m_TitleImage;
-			std::unique_ptr<UIs::CreditControl>		m_CreditControl;
+			bool									m_IsEnd{ false };//シーン全体の終了フラグ
+			GraphHandle								m_TitleImage{};
+			std::unique_ptr<UIs::CreditControl>		m_CreditControl{};
 
 			std::shared_ptr<Charas::MovieCharacter>	m_MovieCharacter{};
-			MV1										m_ObjSky;
+			MV1										m_ObjSky{};
 
 			std::vector<std::shared_ptr<Guns::GunObj>>		m_GunPtr{};			//銃
 
 			bool									m_IsCustomize = false;
+			bool									m_IsCustomizeGun = false;
 			Vector3DX CamPos;
 			Vector3DX CamVec = Vector3DX::forward();
 			float CamFov = deg2rad(45);
 			float CamYrad = deg2rad(0);
 			float CamYradR = deg2rad(0);
-			std::vector<std::pair<int, int>>		m_GunPoint;
-			std::array<int,3>						m_GunSelect;
+			std::vector<std::pair<int, int>>		m_GunPoint{};
+			std::array<int,3>						m_GunSelect{};
 			int										m_GunTypeSel = 0;
 			int										m_GunSel = 0;
+			int										m_GunCustomSel = 0;
 
 			float									m_CamTimer = 0.f;
 
-			std::vector<float>						m_GunAnimTimer;
+			std::vector<float>						m_GunAnimTimer{};
+			Guns::GunSlot							SlotSel = Guns::GunSlot::Magazine;
 		public:
 			TitleScene(void) noexcept {}
 			TitleScene(const TitleScene&) = delete;
