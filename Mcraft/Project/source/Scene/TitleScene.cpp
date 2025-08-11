@@ -199,8 +199,22 @@ namespace FPS_n2 {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), LocalizeParts->Get(9993));
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizeParts->Get(9992));
 					}
+					else if (!m_IsCustomizeGun) {
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_A), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_D), LocalizeParts->Get(9980));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_S), LocalizeParts->Get(9981));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizeParts->Get(9982));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizeParts->Get(9991));
+					}
 					else {
-
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_A), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_D), LocalizeParts->Get(9983));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_S), LocalizeParts->Get(9984));
+						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD), LocalizeParts->Get(9991));
 					}
 				}
 			);
@@ -625,29 +639,51 @@ namespace FPS_n2 {
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (48),
 						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 						XPos, (48), Green, Black, "Equip Customize");
-					XPos += FontSystem::FontPool::Instance()->Get(FontSystem::FontType::MS_Gothic, 64, 3)->GetStringWidth("Equip Customize");
+					int Len = FontSystem::FontPool::Instance()->Get(FontSystem::FontType::MS_Gothic, (48), 3)->GetStringWidth("Equip Customize");
+					if (!m_IsCustomizeGun) {
+						std::string CustomPoint = "";
+						switch (m_GunTypeSel) {
+						case 0:
+							CustomPoint = "Main";
+							break;
+						case 1:
+							CustomPoint = "Sub";
+							break;
+						case 2:
+							CustomPoint = "Gadget";
+							break;
+						default:
+							break;
+						}
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (48),
+							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP,
+							XPos + Len / 2, (48) + 48, Green, Black, CustomPoint.c_str());
+					}
+					XPos += Len;
 				}
 				if (m_IsCustomizeGun) {
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (48),
 						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 						XPos, (48), Green, Black, " > Gun Setup");
-					XPos += FontSystem::FontPool::Instance()->Get(FontSystem::FontType::MS_Gothic, 64, 3)->GetStringWidth(" > Gun Setup");
 
-					std::string CustomPoint = "";
-					switch (SlotSel) {
-					case FPS_n2::Guns::GunSlot::Magazine:
-						CustomPoint = "Magazine";
-						break;
-					case FPS_n2::Guns::GunSlot::Sight:
-						CustomPoint = "Sight";
-						break;
-					default:
-						break;
+					int Len = FontSystem::FontPool::Instance()->Get(FontSystem::FontType::MS_Gothic, (48), 3)->GetStringWidth(" > Gun Setup");
+					{
+						std::string CustomPoint = "";
+						switch (SlotSel) {
+						case FPS_n2::Guns::GunSlot::Magazine:
+							CustomPoint = "Magazine";
+							break;
+						case FPS_n2::Guns::GunSlot::Sight:
+							CustomPoint = "Sight";
+							break;
+						default:
+							break;
+						}
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (48),
+							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP,
+							XPos + Len / 2, (48) + 48, Green, Black, CustomPoint.c_str());
 					}
-					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (48),
-						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
-						XPos, (48), Green, Black, (" > " + CustomPoint).c_str());
-					XPos += FontSystem::FontPool::Instance()->Get(FontSystem::FontType::MS_Gothic, 64, 3)->GetStringWidth((" > " + CustomPoint).c_str());
+					XPos += Len;
 				}
 
 			}
