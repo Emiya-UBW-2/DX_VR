@@ -77,12 +77,20 @@ namespace FPS_n2 {
 			int X2 = 0;
 			int X3 = 0;
 
+			int NowScore = SaveData::Instance()->GetParam("score");
+
 			this->m_GunPoint.resize(this->m_GunPtr.size());
 			this->m_GunAnimTimer.resize(this->m_GunPtr.size());
 			for (auto& g : this->m_GunPtr) {
 				int index = static_cast<int>(&g - &this->m_GunPtr.front());
 				this->m_GunAnimTimer.at(index) = 0.f;
-				if (g->GetModifySlot()->GetMyData()->IsPlayableWeapon() != InvalidID) {
+				int NeedScore = g->GetModifySlot()->GetMyData()->GetUnlockScore();
+				this->m_GunPoint.at(index).IsActive = ((g->GetModifySlot()->GetMyData()->IsPlayableWeapon() != InvalidID) && (NowScore >= NeedScore));
+				if (this->m_GunPoint.at(index).IsActive) {
+					if (m_PrevScore != InvalidID && NeedScore > m_PrevScore) {
+						auto* SideLogParts = SideLog::Instance();
+						SideLogParts->Add(5.0f, 0.0f, Green, ("Unlock : " + g->GetModifySlot()->GetMyData()->GetName()).c_str());
+					}
 					this->m_GunPoint.at(index).second = g->GetModifySlot()->GetMyData()->IsPlayableWeapon();
 					switch (this->m_GunPoint.at(index).second) {
 					case 0:
@@ -106,6 +114,8 @@ namespace FPS_n2 {
 					g->SetActive(false);
 				}
 			}
+
+			m_PrevScore = NowScore;
 			//
 			auto* ButtonParts = UIs::ButtonControl::Instance();
 			auto* CameraParts = Camera3D::Instance();
@@ -280,6 +290,7 @@ namespace FPS_n2 {
 						int Highest = -1;
 						int HighestID = -1;
 						for (auto& gp : this->m_GunPoint) {
+							if (!gp.IsActive) { continue; }
 							int index = static_cast<int>(&gp - &this->m_GunPoint.front());
 							if (Slot == gp.second) {
 								if (Next >= 0) {
@@ -307,6 +318,7 @@ namespace FPS_n2 {
 						int Lowest = 10000;
 						int LowestID = -1;
 						for (auto& gp : this->m_GunPoint) {
+							if (!gp.IsActive) { continue; }
 							int index = static_cast<int>(&gp - &this->m_GunPoint.front());
 							if (Slot == gp.second) {
 								if (Next == gp.first) {
@@ -425,7 +437,6 @@ namespace FPS_n2 {
 				}
 
 				m_SelAlpha = std::max(m_SelAlpha - DXLib_refParts->GetDeltaTime(), 0.f);
-
 
 				m_CamTimer = std::clamp(m_CamTimer + DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				CamYrad += deg2rad(Pad->GetLS_X());

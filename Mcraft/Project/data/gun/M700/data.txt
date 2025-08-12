@@ -10,6 +10,7 @@ Info_Far=select Lightweight parts to sacrifice some accuracy in favor of mobilit
 
 Weight=3200
 WeaponType=Main
+UnlockScore=2000
 
 ShotRate=300
 RecoilPower=100

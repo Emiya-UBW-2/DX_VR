@@ -26,7 +26,13 @@ namespace FPS_n2 {
 			float CamFov = deg2rad(45);
 			float CamYrad = deg2rad(0);
 			float CamYradR = deg2rad(0);
-			std::vector<std::pair<int, int>>		m_GunPoint{};
+
+			struct Point {
+				int first{};
+				int second{};
+				bool IsActive{ false };
+			};
+			std::vector<Point>						m_GunPoint{};
 			std::array<int, 3>						m_GunSelect{};
 			int										m_GunTypeSel = 0;
 			int										m_GunSel = 0;
@@ -37,6 +43,8 @@ namespace FPS_n2 {
 			std::vector<float>						m_GunAnimTimer{};
 			Guns::GunSlot							SlotSel = Guns::GunSlot::Magazine;
 			float									m_SelAlpha{ 0.f };
+
+			int										m_PrevScore{ InvalidID };
 		public:
 			TitleScene(void) noexcept {}
 			TitleScene(const TitleScene&) = delete;

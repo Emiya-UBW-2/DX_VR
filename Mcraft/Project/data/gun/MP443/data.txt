@@ -9,6 +9,7 @@ Info_Eng=Ideal as a back-up gun.
 
 Weight=950
 WeaponType=Sub
+UnlockScore=2000
 
 ShotRate=600
 RecoilPower=80

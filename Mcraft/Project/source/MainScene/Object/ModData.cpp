@@ -108,6 +108,9 @@ namespace FPS_n2 {
 					m_IsPlayableWeapon = 2;
 				}
 			}
+			else if (LEFT == "UnlockScore") {
+				m_UnlockScore = std::stoi(RIGHT);
+			}
 			else if (LEFT == "Info") {
 				this->m_Info.emplace_back(RIGHT);
 			}

@@ -10,6 +10,7 @@ Info_Eng=it is a highly reliable assault rifle.
 
 Weight=3800
 WeaponType=Main
+UnlockScore=0
 
 ShotRate=850
 RecoilPower=80

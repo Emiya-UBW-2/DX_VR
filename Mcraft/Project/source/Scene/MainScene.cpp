@@ -669,6 +669,12 @@ namespace FPS_n2 {
 								else {
 									SaveData::Instance()->SetParam("skill" + std::to_string(ID), 1);
 								}
+								if (SaveData::Instance()->GetParam("score") > 0) {
+									SaveData::Instance()->SetParam("score", SaveData::Instance()->GetParam("score") + ViewPlayer->GetScore());
+								}
+								else {
+									SaveData::Instance()->SetParam("score", ViewPlayer->GetScore());
+								}
 							}
 							this->m_IsEnd = true;
 						}
@@ -736,6 +742,12 @@ namespace FPS_n2 {
 										}
 										else {
 											SaveData::Instance()->SetParam("skill" + std::to_string(ID), 1);
+										}
+										if (SaveData::Instance()->GetParam("score") > 0) {
+											SaveData::Instance()->SetParam("score", SaveData::Instance()->GetParam("score") + ViewPlayer->GetScore());
+										}
+										else {
+											SaveData::Instance()->SetParam("score", ViewPlayer->GetScore());
 										}
 									}
 									this->m_IsEnd = true;

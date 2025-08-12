@@ -31,6 +31,7 @@ namespace FPS_n2 {
 			SHOTTYPE						m_ShotType{ SHOTTYPE::SEMI };
 			bool							m_IronSight{ false };
 			int								m_IsPlayableWeapon{ InvalidID };
+			int								m_UnlockScore{ 0 };
 
 			STOCKTYPE						m_StockType{ STOCKTYPE::none };
 
@@ -99,6 +100,7 @@ namespace FPS_n2 {
 			const auto& GetHumanAnimType(void) const noexcept { return this->m_HumanAnimType; }
 			const auto& IsIronSight(void) const noexcept { return this->m_IronSight; }
 			const auto& IsPlayableWeapon(void) const noexcept { return this->m_IsPlayableWeapon; }
+			const auto& GetUnlockScore(void) const noexcept { return this->m_UnlockScore; }
 			const auto& GetInfo(void) const noexcept { return this->m_Info; }
 			const auto& GetInfoEng(void) const noexcept { return this->m_InfoEng; }
 

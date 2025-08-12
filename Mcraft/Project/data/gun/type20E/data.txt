@@ -10,6 +10,7 @@ Info_Eng=It boasts easy handling thanks to its latest design.
 
 Weight=3500
 WeaponType=Main
+UnlockScore=2000
 
 ShotRate=850
 RecoilPower=50
