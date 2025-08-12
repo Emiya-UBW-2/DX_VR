@@ -267,7 +267,6 @@ namespace FPS_n2 {
 
 				m_MovieCharacter->SetActive(true);
 				m_IsCustomizeGun = false;
-				SlotSel = Guns::GunSlot::Magazine;
 			}
 			else {
 				if (!m_IsCustomizeGun) {
@@ -344,15 +343,17 @@ namespace FPS_n2 {
 						m_IsCustomizeGun = true;
 						KeyGuideParts->SetGuideFlip();
 
+						SlotSel = Guns::GunSlot::Magazine;
 						auto& mod = this->m_GunPtr.at(m_GunSelect.at(m_GunTypeSel))->GetModifySlot();
-						auto& List = mod->GetMyData()->GetSlotInfo(Guns::GunSlot::Magazine)->CanAttachItemsUniqueID;
-						int Now = mod->GetParts(Guns::GunSlot::Magazine)->GetModifySlot()->GetMyData()->GetUniqueID();
+						auto& List = mod->GetMyData()->GetSlotInfo(SlotSel)->CanAttachItemsUniqueID;
+						int Now = mod->GetParts(SlotSel)->GetModifySlot()->GetMyData()->GetUniqueID();
 						for (auto& l : List) {
 							int index = static_cast<int>(&l - &List.front());
 							if (l == Now) {
 								m_GunCustomSel = index;
 							}
 						}
+						m_SelAlpha = 2.f;
 					}
 				}
 				else {
@@ -381,6 +382,7 @@ namespace FPS_n2 {
 						default:
 							break;
 						}
+						m_SelAlpha = 2.f;
 					}
 					if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger()) {
 						switch (SlotSel) {
@@ -393,6 +395,7 @@ namespace FPS_n2 {
 						default:
 							break;
 						}
+						m_SelAlpha = 2.f;
 					}
 					if (slot->GetMyData()->GetSlotInfo(SlotSel)) {
 						auto& List = slot->GetMyData()->GetSlotInfo(SlotSel)->CanAttachItemsUniqueID;
@@ -407,6 +410,7 @@ namespace FPS_n2 {
 							}
 							mod->ChangeSelectData(*mod->GetSlotData(SlotSel), m_GunCustomSel);
 							guns->SetupGun();
+							m_SelAlpha = 2.f;
 						}
 						if (Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
 							++m_GunCustomSel;
@@ -415,9 +419,14 @@ namespace FPS_n2 {
 							}
 							mod->ChangeSelectData(*mod->GetSlotData(SlotSel), m_GunCustomSel);
 							guns->SetupGun();
+							m_SelAlpha = 2.f;
 						}
 					}
 				}
+
+				m_SelAlpha = std::max(m_SelAlpha - DXLib_refParts->GetDeltaTime(), 0.f);
+
+
 				m_CamTimer = std::clamp(m_CamTimer + DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				CamYrad += deg2rad(Pad->GetLS_X());
 				//
@@ -550,6 +559,22 @@ namespace FPS_n2 {
 		}
 		void TitleScene::MainDraw_Sub(int Range) const noexcept {
 			ObjectManager::Instance()->Draw(true, Range);
+
+			if (Range == 1 && m_SelAlpha > 0.f) {
+				auto& guns = this->m_GunPtr.at(m_GunSelect.at(m_GunTypeSel));
+				auto& slot = guns->GetModifySlot();
+				auto& ModPtr1 = slot->GetParts(SlotSel);
+				if (ModPtr1) {
+					ClearDrawScreenZBuffer();
+					SetUseLighting(FALSE);
+					ModPtr1->GetObj().SetOpacityRate(0.5f * std::clamp(m_SelAlpha, 0.f, 1.f));
+					ModPtr1->GetObj().SetMaterialDrawAddColorAll(-255, 255, -255);
+					ModPtr1->GetObj().DrawModel();
+					ModPtr1->GetObj().SetMaterialDrawAddColorAll(0, 0, 0);
+					ModPtr1->GetObj().SetOpacityRate(1.f);
+					SetUseLighting(TRUE);
+				}
+			}
 		}
 		// 
 

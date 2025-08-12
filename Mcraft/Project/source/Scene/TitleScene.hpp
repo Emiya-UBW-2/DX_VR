@@ -36,6 +36,7 @@ namespace FPS_n2 {
 
 			std::vector<float>						m_GunAnimTimer{};
 			Guns::GunSlot							SlotSel = Guns::GunSlot::Magazine;
+			float									m_SelAlpha{ 0.f };
 		public:
 			TitleScene(void) noexcept {}
 			TitleScene(const TitleScene&) = delete;
