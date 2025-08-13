@@ -441,7 +441,7 @@ namespace FPS_n2 {
 				m_CamTimer = std::clamp(m_CamTimer + DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
 				CamYrad += deg2rad(Pad->GetLS_X());
 				//
-				Vector3DX BaseCamPos = Vector3DX::vget(2.45f, 2.5f, 1.5f * m_GunTypeSel) * Scale3DRate;
+				Vector3DX BaseCamPos = Vector3DX::vget(2.45f, 2.5f, 0.f) * Scale3DRate;
 				Easing(&CamYradR, CamYrad, 0.9f, EasingType::OutExpo);
 
 				CamPos = Lerp(CamPos,
@@ -466,7 +466,7 @@ namespace FPS_n2 {
 				Matrix3x3DX Rot = Lerp(Matrix3x3DX::identity(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(90)), g);
 
 				float Ofs = 0.f;
-				switch (this->m_GunPoint.at(index).second) {
+				switch (m_GunTypeSel) {
 				case 0:
 					Ofs = 0.25f;
 					break;
@@ -474,7 +474,7 @@ namespace FPS_n2 {
 					Ofs = 0.125f;
 					break;
 				case 2:
-					Ofs = 0.0f;
+					Ofs = 0.f;
 					break;
 				default:
 					break;
@@ -482,7 +482,7 @@ namespace FPS_n2 {
 
 				Vector3DX Pos = Lerp(
 					Vector3DX::vget(2.45f + 0.15f * this->m_GunPoint.at(index).first, 1.f, 1.5f * this->m_GunPoint.at(index).second) * Scale3DRate,
-					Vector3DX::vget(2.45f + Ofs, 2.5f, 1.5f * this->m_GunPoint.at(index).second) * Scale3DRate,
+					Vector3DX::vget(2.45f + Ofs, 2.5f, 0.f) * Scale3DRate,
 					g * g
 				);
 				this->m_GunPtr.at(index)->SetGunMat(Rot, Pos);
@@ -739,6 +739,19 @@ namespace FPS_n2 {
 						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
 							Ptr, (xp1 + xp2) / 2, yp1 + 120, 0.5f, 0.f, true);
 						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
+						if (!m_IsCustomizeGun) {
+							int xp3 = xp1 - 64;
+							int yp3 = yp1 + 120;
+							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3 - 10, xp3, yp3 + 10, Green, 2);
+							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3 - 5, yp3, xp3, yp3 + 10, Green, 2);
+							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3 - 5, yp3, xp3, yp3 - 10, Green, 2);
+
+							xp3 = xp2 + 64;
+							yp3 = yp1 + 120;
+							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3 - 10, xp3, yp3 + 10, Green, 2);
+							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3 + 5, yp3, xp3, yp3 + 10, Green, 2);
+							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3 + 5, yp3, xp3, yp3 - 10, Green, 2);
+						}
 						yp1 += 240;
 					}
 					//Info
