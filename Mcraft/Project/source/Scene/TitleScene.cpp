@@ -836,6 +836,18 @@ namespace FPS_n2 {
 								xp1, yp1, Green, Black, ("%d round "+ LoadType), guns->GetAmmoAll());
 							yp1 += 32;
 						}
+						{
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+								xp1, yp1, Green, Black, "Aim Speed %5.2f %%", guns->GetAimSpeed());
+							yp1 += 32;
+						}
+						{
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+								xp1, yp1, Green, Black, "Reload Speed %5.2f %%", guns->GetReloadSpeed());
+							yp1 += 32;
+						}
 					}
 					yp1 += 24;
 				}

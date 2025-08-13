@@ -1,1 +1,43 @@
-A=B
+﻿自機(アルバート(オリキャラ))=キツネツキ様
+敵兵士(Russian Soldier)=Bzovius様
+
+Howa Type 89 Assault Rifle=8sianDude様
+Howa Type 20=Hung Do様
+AKS-74=Armored Wave様
+AK-12=lolmaniamsohandsome様
+Remington 870 Shotgun=Andrei Milin様
+M700=CannonMonkey様
+MP443=​QUAPPA-EL様
+Sig Sauer P226=calico16様
+ACOG Scope=GC_3D_ART様
+Aim Point Pro Red Dot Sight=Armored Wave様
+Vortex Viper Red Dot=epavlenko様
+MTK-83 AK Mount=Johannes Bazaryan様
+OKP-7 Reflex Sight=Minte Elseviers様
+Iron Sight=Michael Karel様
+RGD-5=Navizena_Liarva様
+12ゲージ薬莢(KINGHUNTER Armory)=deadcomrade様
+アーマー(Plate Carrler)=ロウロー様
+6b7=mickeymoose1204様
+アーマーアイテム=短足沼地人様
+UH-60M=Yi Tsung Lee様
+ハインドD=短足沼地人様
+Garbage Container=Mehdi Shahsavan様
+Fuel Tank=castleonsandYT様
+Military box with ammunition PG-7V=Ivan Norman様
+
+ボイスライン=replicastudios様
+サウンド素材(Oculus Audio Pack 1)=Meta様
+サウンド素材=効果音ラボ様
+耳鳴り音(nc293976)=TecoMalu(テコまる)様
+オペレーター(VOICEPEAK 桜乃そら)=AHS様
+BGM:Flame of Fate=H/MIX GALLERY様
+BGM:メタリック・ジングル =shimtone様
+BGM:チャイコフスキー 1812年=クラシック名曲サウンドライブラリー様
+
+ダメージエフェクト(nc184166)=ポクテ様
+血痕(nc202223)=フリー素材あそび様
+UI用アイコン=icooon-mono.com様
+キーボードのアイコン=Digipot様
+
+DXライブラリ=山田巧様

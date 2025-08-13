@@ -798,6 +798,10 @@ namespace FPS_n2 {
 			auto BaseAnim = GetAnimDataNow(Charas::GunAnimeID::Aim);
 			SetGunMat(BaseAnim.GetRot(), BaseAnim.GetPos());
 			this->m_BaseMuzzle = GetPartsFrameMatParent(GunFrame::Muzzle);
+			this->m_Weight_gram = InvalidID;
+			this->m_ReloadSpeed = -1.f;
+			this->m_AimSpeed = -1.f;
+			this->m_AutoAimSpeed = -1.f;
 		}
 		//
 		void				GunObj::Init_Sub(void) noexcept {
