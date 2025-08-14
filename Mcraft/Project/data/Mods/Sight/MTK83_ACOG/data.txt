@@ -1,0 +1,7 @@
+Name=Offset Mount
+
+Slot0Type=Sight
+Slot0IsNeed=true
+Slot0Item=ACOG
+
+end

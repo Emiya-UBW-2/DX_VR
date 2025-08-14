@@ -44,6 +44,8 @@
 2047=Have to Set Low Graphics Preset.
 2048=If DirectX11 is not available, screen effects cannot be used.
 
+2050=グラフィック タブの プリセットを左に設定することで画質を犠牲にFPSを向上できます。ゲーム起動後、プリセット最低の状態でも60FPSを切ってしまう場合はレンダリングスケールを落としてください。コントローラーはリアルタイムの抜き差しに対応しています。キーボードで操作する際にはInputTypeを指定してください。
+
 0110=Option
 1110=Change BGM volume
 1111=Change SE volume
