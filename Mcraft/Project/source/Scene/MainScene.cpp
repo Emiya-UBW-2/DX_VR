@@ -1808,12 +1808,15 @@ namespace FPS_n2 {
 						for (int loop = 0; loop < 3; ++loop) {
 							xp1 = 1920 / 2 + static_cast<int>(wide * (-(3.f - 1.f) / 2.f + loop));
 							yp1 = 1080 / 2;
-
+							bool IsADDSCORE = (m_SkillSelect.at(loop) == Player::SkillType::ADDSCORE);
 							int ID = static_cast<int>(m_SkillSelect.at(loop));
+							if (IsADDSCORE) {
+								ID = static_cast<int>(Player::SkillType::Max);
+							}
 							DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - (static_cast<int>(wide) / 2 - 8), yp1 - 540 / 2, xp1 + (static_cast<int>(wide) / 2 - 8), yp1 + 540 / 2, DarkGreen, true);
 
 							std::string Title = LocalizeParts->Get(5000 + ID);
-							if (ID != static_cast<int>(Player::SkillType::ADDSCORE)) {
+							if (!IsADDSCORE) {
 								Title += " Lv.";
 								Title += std::to_string(Player::SkillList::Instance()->GetSkilLevel(m_SkillSelect.at(loop)) + 1);
 							}
@@ -1828,7 +1831,7 @@ namespace FPS_n2 {
 								auto len = t.length();
 								if (pos != std::string::npos) {
 									int ADD = 1000;
-									if (ID != static_cast<int>(Player::SkillType::ADDSCORE)) {
+									if (!IsADDSCORE) {
 										ADD = static_cast<int>(Player::SkillList::Instance()->GetSkillValueNext(m_SkillSelect.at(loop)));
 									}
 									Str.replace(pos, len, std::to_string(ADD));
