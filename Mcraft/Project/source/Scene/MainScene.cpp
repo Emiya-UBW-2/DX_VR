@@ -619,6 +619,46 @@ namespace FPS_n2 {
 			}
 
 			if (this->m_IsGameClear && !this->m_PauseMenuControl.IsRetire()) {
+				auto GameClear = [this](bool ReturnTitle) {
+					auto* PlayerMngr = Player::PlayerManager::Instance();
+					auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
+					auto* SE = SoundPool::Instance();
+					FadeControl::Instance()->SetBlackOut(true);
+					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
+					//セーブデータにIDを追加
+					int ID = static_cast<int>(m_SkillSelect.at(m_SkillSelectNow));
+
+					if (ID == static_cast<int>(Player::SkillType::ADDSCORE)) {
+						SaveData::Instance()->SetParam("BuffNextRound", 1);
+					}
+					else {
+						if (SaveData::Instance()->GetParam("skill" + std::to_string(ID)) > 0) {
+							SaveData::Instance()->SetParam("skill" + std::to_string(ID), SaveData::Instance()->GetParam("skill" + std::to_string(ID)) + 1);
+						}
+						else {
+							SaveData::Instance()->SetParam("skill" + std::to_string(ID), 1);
+						}
+					}
+					if (SaveData::Instance()->GetParam("score") > 0) {
+						SaveData::Instance()->SetParam("score", SaveData::Instance()->GetParam("score") + ViewPlayer->GetScore());
+					}
+					else {
+						SaveData::Instance()->SetParam("score", ViewPlayer->GetScore());
+					}
+					SaveData::Instance()->SetParam("HighScore", std::max(SaveData::Instance()->GetParam("HighScore"), SaveData::Instance()->GetParam("score")));
+					if (SaveData::Instance()->GetParam("round") > 0) {
+						SaveData::Instance()->SetParam("round", SaveData::Instance()->GetParam("round") + 1);
+					}
+					else {
+						SaveData::Instance()->SetParam("round", 1);
+					}
+					if (ReturnTitle) {
+						SetNextSelect(0);
+					}
+					else {
+						SetNextSelect(1);
+					}
+					};
 				SceneParts->SetPauseEnable(false);
 				m_GameClearCount += DXLib_refParts->GetDeltaTime();
 				m_GameClearTimer += DXLib_refParts->GetDeltaTime();
@@ -664,28 +704,17 @@ namespace FPS_n2 {
 						}
 						else {
 							if (!this->m_IsEnd) {
-								FadeControl::Instance()->SetBlackOut(true);
-								SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
-								//セーブデータにIDを追加
-								int ID = static_cast<int>(m_SkillSelect.at(m_SkillSelectNow));
-
-								if (ID == static_cast<int>(Player::SkillType::ADDSCORE)) {
-									SaveData::Instance()->SetParam("BuffNextRound", 1);
-								}
-								else {
-									if (SaveData::Instance()->GetParam("skill" + std::to_string(ID)) > 0) {
-										SaveData::Instance()->SetParam("skill" + std::to_string(ID), SaveData::Instance()->GetParam("skill" + std::to_string(ID)) + 1);
-									}
-									else {
-										SaveData::Instance()->SetParam("skill" + std::to_string(ID), 1);
-									}
-									if (SaveData::Instance()->GetParam("score") > 0) {
-										SaveData::Instance()->SetParam("score", SaveData::Instance()->GetParam("score") + ViewPlayer->GetScore());
-									}
-									else {
-										SaveData::Instance()->SetParam("score", ViewPlayer->GetScore());
-									}
-								}
+								GameClear(false);
+							}
+							this->m_IsEnd = true;
+						}
+					}
+					if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
+						if (!m_IsGameClearEnd) {}
+						else if (!m_IsSkillSelect) {}
+						else {
+							if (!this->m_IsEnd) {
+								GameClear(true);
 							}
 							this->m_IsEnd = true;
 						}
@@ -744,27 +773,7 @@ namespace FPS_n2 {
 								isSelect = true;
 								if (Pad->GetMouseClick().trigger()) {
 									if (!this->m_IsEnd) {
-										FadeControl::Instance()->SetBlackOut(true);
-										SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
-										int ID = static_cast<int>(m_SkillSelect.at(m_SkillSelectNow));
-										if (ID == static_cast<int>(Player::SkillType::ADDSCORE)) {
-											SaveData::Instance()->SetParam("BuffNextRound", 1);
-										}
-										else {
-											//セーブデータにIDを追加
-											if (SaveData::Instance()->GetParam("skill" + std::to_string(ID)) > 0) {
-												SaveData::Instance()->SetParam("skill" + std::to_string(ID), SaveData::Instance()->GetParam("skill" + std::to_string(ID)) + 1);
-											}
-											else {
-												SaveData::Instance()->SetParam("skill" + std::to_string(ID), 1);
-											}
-											if (SaveData::Instance()->GetParam("score") > 0) {
-												SaveData::Instance()->SetParam("score", SaveData::Instance()->GetParam("score") + ViewPlayer->GetScore());
-											}
-											else {
-												SaveData::Instance()->SetParam("score", ViewPlayer->GetScore());
-											}
-										}
+										GameClear(false);
 									}
 									this->m_IsEnd = true;
 								}
@@ -1257,6 +1266,7 @@ namespace FPS_n2 {
 							SaveData::Instance()->SetParam("skill" + std::to_string(loop), 0);
 						}
 						SaveData::Instance()->SetParam("score", 0);
+						SaveData::Instance()->SetParam("round", 0);
 					}
 					this->m_IsEnd = true;
 				}
@@ -1535,6 +1545,9 @@ namespace FPS_n2 {
 			return true;
 		}
 		void			MainGameScene::Dispose_Sub(void) noexcept {
+			if (!(this->m_IsGameClear && !this->m_PauseMenuControl.IsRetire())) {
+				SetNextSelect(0);
+			}
 			m_MovieHeli.reset();
 			auto* SceneParts = SceneControl::Instance();
 			auto* SE = SoundPool::Instance();
@@ -1560,12 +1573,6 @@ namespace FPS_n2 {
 			}
 			EffectSingleton::Release();
 			NetWorkBrowser::Release();
-			if (this->m_IsEnd) {//タイトルに戻る
-				SetNextSelect(0);
-			}
-			else {//次のシーンへ
-				SetNextSelect(1);
-			}
 		}
 		void			MainGameScene::Dispose_Load_Sub(void) noexcept {
 			m_GameEndScreen.Dispose();
@@ -1720,11 +1727,15 @@ namespace FPS_n2 {
 						const float LerpPer = 0.5f;
 						//リザルト描画
 						int xp1 = 960;
-						int yp1 = 860;
-						KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
+						int yp1 = 930;
 
-						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
-							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3006));
+						if (!m_IsGameClearEnd || !m_IsSkillSelect) {
+							KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
+
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+								FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3008));
+						}
+
 
 						xp1 = (960);
 						yp1 = (540);
@@ -1802,6 +1813,10 @@ namespace FPS_n2 {
 
 					//スキル選択
 					if (m_IsGameClearEnd && m_IsSkillSelect) {
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 128);
+						DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Black, true);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
+
 						int xp1 = 1920 / 2;
 						int yp1 = 1080 / 2;
 						float wide = 400.f;
@@ -1846,6 +1861,25 @@ namespace FPS_n2 {
 									Green, false, 5);
 							}
 						}
+
+						xp1 = 960;
+						yp1 = 70;
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (64),
+							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Green, Black, "Select Skill!");
+
+
+						xp1 = 960;
+						yp1 = 930;
+						KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
+
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3009));
+
+						yp1 -= 64;
+						KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD));
+
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3006));
 					}
 
 				}

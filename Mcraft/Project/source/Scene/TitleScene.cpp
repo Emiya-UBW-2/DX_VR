@@ -76,7 +76,7 @@ namespace FPS_n2 {
 			int X2 = 0;
 			int X3 = 0;
 
-			int NowScore = static_cast<int>(SaveData::Instance()->GetParam("score"));
+			int NowScore = static_cast<int>(SaveData::Instance()->GetParam("HighScore"));
 
 			this->m_GunPoint.resize(this->m_GunPtr.size());
 			this->m_GunAnimTimer.resize(this->m_GunPtr.size());
@@ -689,14 +689,31 @@ namespace FPS_n2 {
 				{
 					int xp = 1920 - 48;
 					int yp = 128;
-					int NowScore = std::max(static_cast<int>(SaveData::Instance()->GetParam("score")), 0);
+
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
+						xp - 200, yp, Green, Black, "Round : ");
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
+						xp, yp, Green, Black, "%03d", std::max(static_cast<int>(SaveData::Instance()->GetParam("round")), 0));
+					yp += 32;
+
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
 						xp - 200, yp, Green, Black, "Score : ");
 
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
-						xp, yp, Green, Black, "%05d", NowScore);
+						xp, yp, Green, Black, "%05d", std::max(static_cast<int>(SaveData::Instance()->GetParam("score")), 0));
+					yp += 32;
+
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
+						xp - 200, yp, Green, Black, "HighScore : ");
+
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
+						xp, yp, Green, Black, "%05d", std::max(static_cast<int>(SaveData::Instance()->GetParam("HighScore")), 0));
 					yp += 32;
 
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
