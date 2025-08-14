@@ -1,205 +1,195 @@
 ﻿0:ファイルアクセス処理の初期化...成功
-19:ディスプレイ情報のセットアップ開始
-19:	モニターの数：1  ディスプレイデバイスの数：3
-21:	No.0  モニター名：\\.\DISPLAY1　1920x1080　32bit　144Hz  96x96dpi
-40:ディスプレイ情報のセットアップ完了
-43:ChangeWindowMode実行 
-44:ウインドウモードフラグが立てられました
-46:ＤＸライブラリの初期化処理開始
-48:	システムの情報を出力します
-48:		ＤＸライブラリ Ver3.25 
-48:		論理プロセッサの数 : 12
-49:		ＯＳ  Windows11 ( Build 26100  )
-149:		現時点のＣＰＵ動作速度：大体2.57GHz
-149:		ＭＭＸ命令を使用します
-149:		ＳＳＥ命令が使用可能です
-149:		ＳＳＥ２命令が使用可能です
-149:		ＣＰＵベンダ：GenuineIntel
-152:		ＣＰＵ名：Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz
-152:	ＣＯＭの初期化... 成功
-155:	非同期読み込み処理の初期化...成功
-155:	メモリ総量:32587.55MB  空きメモリ領域:22582.03MB 
-156:	タイマーの精度を検査します
-156:	精度結果 更新回数 マルチメディアタイマー：0  パフォーマンスカウンター：60
-156:	 パフォーマンスカウンターを使用します タイマー精度 : 10000.000000 KHz 
-156:	 
-156:	ソフトの二重起動検査... 二重起動はされていませんでした
-158:	ウインドウクラスを登録します... 登録に成功しました
-159:	ウインドウモード起動用のウインドウを作成します
-159:	ウインドウ矩形 ( -16, -50 )-( 1920, 1069 )
-163:	ウインドウの作成に成功しました
-163:	ウインドウを表示します
-201:	ＩＭＥを無効にしました
-204:	ウインドウスタイルをウインドウモード用に変更します... 完了
-246:	XInput DLL の読み込み中... 成功
-253:	DirectInput関係初期化処理
-254:		DirectInput8 の取得を試みます...成功
-285:			引き続き初期化処理... 初期化成功
-293:		ジョイパッドの初期化... 
-294:			XInput 対応コントローラーのチェックを開始します
-294:				XInput 対応コントローラー No.0 をチェック
-295:				XInput 対応コントローラー No.0 の接続は確認できませんでした
-295:				XInput 対応コントローラー No.1 をチェック
-296:				XInput 対応コントローラー No.1 の接続は確認できませんでした
-296:				XInput 対応コントローラー No.2 をチェック
-297:				XInput 対応コントローラー No.2 の接続は確認できませんでした
-298:				XInput 対応コントローラー No.3 をチェック
-299:				XInput 対応コントローラー No.3 の接続は確認できませんでした
-299:			XInput 対応コントローラーのチェック完了
-300:			DirectInput 対応ジョイパッドの列挙を開始します
-382:			DirectInput 対応ジョイパッドの列挙終了
-382:		ジョイパッドの初期化は正常に終了しました
-383:		マウスデバイスの初期化... 初期化成功
-384:		キーボードデバイスの初期化... 初期化成功
-390:	DirectInput 関連の初期化は正常に終了しました
-396:	WASAPI の初期化を行います
-410:		デバイス名 : スピーカー (Realtek(R) Audio)
-421:		デフォルト遅延時間 : 10.000 ms
-422:		最小遅延時間       : 3.000 ms
-422:		遅延時間           : 10.000 ms
-423:		チャンネル数  　   : 2 ch
-424:		量子化ビット深度   : 32 bit
-425:		有効ビット深度　   : 32 bit
-425:		サンプリングレート : 48000 Hz
-425:		データ形式         : 浮動小数点型
-492:		動作モード         : 共有モード
-493:	WASAPI の初期化は正常に終了しました
-500:	d3d11.dll の読み込み.... 成功
-521:	dxgi.dll の読み込み.... 成功
-522:	API CreateDXGIFactory2 のアドレスを取得します.... 成功
-523:	IDXGIFactory2 を作成します.... 成功
-552:	API CreateDXGIFactory6 のアドレスを取得します.... 成功
-554:	IDXGIAdapter を列挙
-555:		Adapter No.0 Desc:NVIDIA GeForce GTX 1650 Ti  VRAM:3935MB
-555:			Output Device No.0 Name:\\.\DISPLAY1 ( 0, 0 )-( 1920, 1080 )
-556:		Adapter No.1 Desc:Intel(R) UHD Graphics  VRAM:128MB
-557:		Adapter No.2 Desc:Microsoft Basic Render Driver  VRAM:0MB
-558:	API D3D11CreateDevice のアドレスを取得します.... 成功
-559:	IDXGIAdapter を取得します.... 成功
-561:	IDXGIAdapter1 を取得します.... 成功
-562:	IDXGIAdapter2 を取得します.... 成功
-563:	IDXGIAdapter3 を取得します.... 成功
-564:	IDXGIAdapter4 を取得します.... 成功
-565:	Direct3D 11 FeatureLevel 11_0 以上を対象とします
-566:	ID3D11Device オブジェクトを取得します.... 成功
-940:	IDXGIDevice1 を取得します.... 成功
-941:	IDXGIDevice1->SetMaximunFrameLatency( 1 ); を実行しました
-942:	[ウインドウモード 1920x1080 ( 0, 0 )-( 1920, 1080 )]
-943:	IDXGISwapChain2 を作成します.... 成功
-945:	IDXGIFactory2->CreateSwapChainForHwnd の戻り値：0x00000000
-946:	IDXGIOutput を取得します.... 成功
-948:	Graphics Device:NVIDIA GeForce GTX 1650 Ti
-949:	画面のフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
-949:	16bit Zバッファフォーマットは DXGI_FORMAT_D16_UNORM です
-950:	24bit Zバッファフォーマットは DXGI_FORMAT_D24_UNORM_S8_UINT です
-950:	32bit Zバッファフォーマットは DXGI_FORMAT_D32_FLOAT です
-952:	16bit カラーフォーマットは DXGI_FORMAT_B5G6R5_UNORM です
-953:	32bit カラーフォーマットは DXGI_FORMAT_B8G8R8X8_UNORM です
-953:	アルファ付き 16bit カラーフォーマットは DXGI_FORMAT_B4G4R4A4_UNORM です
-954:	アルファ付き 32bit カラーフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
-954:	アルファテスト用 16bit カラーフォーマットは DXGI_FORMAT_B5G5R5A1_UNORM です
-955:	アルファテスト用 32bit カラーフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
-956:	ＤＸＴ１テクスチャフォーマットは DXGI_FORMAT_BC1_UNORM です
-956:	ＤＸＴ２テクスチャフォーマットは使えません
-957:	ＤＸＴ３テクスチャフォーマットは DXGI_FORMAT_BC2_UNORM です
-957:	ＤＸＴ４テクスチャフォーマットは使えません
-958:	ＤＸＴ５テクスチャフォーマットは DXGI_FORMAT_BC3_UNORM です
-958:	BC7_UNORM テクスチャフォーマットは DXGI_FORMAT_BC7_UNORM です
-959:	BC7_UNORM_SRGB テクスチャフォーマットは DXGI_FORMAT_BC7_UNORM_SRGB です
-959:	ABGR 整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_UNORM です
-960:	ABGR 浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_FLOAT です
-960:	ABGR 浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32B32A32_FLOAT です
-961:	１チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8_UNORM です
-961:	１チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_UNORM です
-962:	１チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_FLOAT です
-963:	１チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32_FLOAT です
-963:	２チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8G8_UNORM です
-964:	２チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_UNORM です
-965:	２チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_FLOAT です
-965:	２チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32_FLOAT です
-966:	描画用 16bit カラーフォーマットは DXGI_FORMAT_B5G6R5_UNORM です
-966:	描画用 32bit カラーフォーマットは DXGI_FORMAT_B8G8R8X8_UNORM です
-967:	描画用アルファ付き 32bit カラーフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
-967:	描画用 ABGR 整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_UNORM です
-968:	描画用 ABGR 浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_FLOAT です
-969:	描画用 ABGR 浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32B32A32_FLOAT です
-969:	描画用１チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8_UNORM です
-970:	描画用１チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_UNORM です
-971:	描画用１チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_FLOAT です
-971:	描画用１チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32_FLOAT です
-971:	描画用２チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8G8_UNORM です
-972:	描画用２チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_UNORM です
-972:	描画用２チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_FLOAT です
-973:	描画用２チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32_FLOAT です
-974:	使用する機能レベル:D3D_FEATURE_LEVEL_11_1
-974:	同時にレンダリングできるバッファの数:8
-975:	最大テクスチャサイズ　幅:16384 高さ:16384
-976:	標準描画用の頂点バッファの作成.... 成功
-977:	シェーダーコード関係の初期化.... 成功
-997:	各種シェーダー用定数バッファの作成.... 成功
-999:	各種 ID3D11InputLayout の作成.... 成功
-1048:	画像の単純転送処理の初期化... 成功
-1050:	深度バッファを作成します.... 成功
-1055:	フォントの初期化を行います
-1059:	フォントの初期化は正常に終了しました
-1145:	文字コードバッファの初期化を行います... 完了しました
-1154:ＤＸライブラリの初期化処理終了
-1175:ウインドウスタイルをウインドウモード用に変更します... 完了
-1201:ChangeWindowMode実行 
-159393:フォントの初期化を行います
-159418:フォントの初期化は正常に終了しました
-159660:d3d11.dll の解放 1
-159661:dxgi.dll の解放 1
-159662:Direct3D11 のオブジェクト数を出力
-159662:Direct3D11 のオブジェクト合計数 : 0
-159668:DirectInput 関連の終了処理... 完了
-159670:サウンド関連の終了処理... 完了
-159718:ウィンドウ関連の終了処理... ウインドウを閉じようとしています
-159728:ウインドウが破棄されようとしています
-159730:ソフトを終了する準備が整いました
-159852:完了
-159854:ＣＯＭを終了... 完了
-159854:
-159855:Alloc memory dump
-159855:	size:       176(     0.172kb)  user size:        16(     0.016kb)  time:47365  file:in\DxArchive_.cpp           line:4213    ID:1938583  addr:000001f212374440  data:[00 00 00 00 00 00 00 00 50 46 37 12 f2 01 00 00]
-159856:	size:       320(     0.312kb)  user size:         8(     0.008kb)  time:47365  file:y\Main\DxFile.cpp           line:7489    ID:1938752  addr:000001f212374650  data:[e0 5e 47 45 f2 01 00 00]
-159857:	size:       176(     0.172kb)  user size:        16(     0.016kb)  time:47365  file:in\DxArchive_.cpp           line:4213    ID:1937290  addr:000001f2123d1e50  data:[00 00 00 00 00 00 00 00 00 1f 3d 12 f2 01 00 00]
-159857:	size:       320(     0.312kb)  user size:         8(     0.008kb)  time:47365  file:y\Main\DxFile.cpp           line:7489    ID:1937377  addr:000001f2123d1f00  data:[20 61 47 45 f2 01 00 00]
-159858:	size:       256(     0.250kb)  user size:        16(     0.016kb)  time:47365  file:in\DxArchive_.cpp           line:4213    ID:1938234  addr:000001f2178af5e0  data:[00 00 00 00 00 00 00 00 80 29 98 17 f2 01 00 00]
-159858:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:6848   addr:000001f2178dd1d0  data:[d0 3e 9b 1e f2 01 00 00]
-159859:	size:       176(     0.172kb)  user size:        16(     0.016kb)  time:47365  file:in\DxArchive_.cpp           line:4213    ID:1937493  addr:000001f2178f26e0  data:[00 00 00 00 00 00 00 00 50 8a 92 17 f2 01 00 00]
-159859:	size:       176(     0.172kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:7697   addr:000001f2179054f0  data:[00 00 00 00 00 00 00 00 c0 66 90 17 f2 01 00 00]
-159860:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:8106   addr:000001f2179055a0  data:[b0 37 6a 1e f2 01 00 00]
-159860:	size:       336(     0.328kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:8111   addr:000001f217905650  data:[00 00 00 00 00 00 00 00 b0 03 91 17 f2 01 00 00]
-159860:	size:       272(     0.266kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:8555   addr:000001f217905ac0  data:[00 00 00 00 00 00 00 00 10 07 92 17 f2 01 00 00]
-159861:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:7723   addr:000001f2179066c0  data:[30 51 9b 1e f2 01 00 00]
-159861:	size:       272(     0.266kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:6540   addr:000001f2179086b0  data:[f0 4b 9b 1e f2 01 00 00]
-159862:	size:       176(     0.172kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:6669   addr:000001f2179087c0  data:[00 00 00 00 00 00 00 00 f0 ab 90 17 f2 01 00 00]
-159863:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:6695   addr:000001f21790abf0  data:[30 48 9b 1e f2 01 00 00]
-159863:	size:       256(     0.250kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:6376   addr:000001f21790ad80  data:[00 00 00 00 00 00 00 00 b0 86 90 17 f2 01 00 00]
-159864:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:7235   addr:000001f21790e410  data:[30 3f 9b 1e f2 01 00 00]
-159864:	size:       288(     0.281kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:9249   addr:000001f21790ece0  data:[e0 d5 d6 1e f2 01 00 00]
-159865:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:8159   addr:000001f2179103b0  data:[50 43 6a 1e f2 01 00 00]
-159865:	size:       288(     0.281kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:6805   addr:000001f217910940  data:[00 00 00 00 00 00 00 00 d0 d1 8d 17 f2 01 00 00]
-159866:	size:       272(     0.266kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:6021   addr:000001f217911780  data:[50 34 9b 1e f2 01 00 00]
-159866:	size:       272(     0.266kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:9404   addr:000001f2179196f0  data:[c0 c5 d6 1e f2 01 00 00]
-159867:	size:       256(     0.250kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:5978   addr:000001f21791a9a0  data:[00 00 00 00 00 00 00 00 80 17 91 17 f2 01 00 00]
-159867:	size:       176(     0.172kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:10917  addr:000001f217920410  data:[00 00 00 00 00 00 00 00 f0 15 92 17 f2 01 00 00]
-159868:	size:       288(     0.281kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:8578   addr:000001f217920710  data:[f0 48 9b 1e f2 01 00 00]
-159868:	size:       256(     0.250kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:10965  addr:000001f2179215f0  data:[00 d4 d6 1e f2 01 00 00]
-159869:	size:       256(     0.250kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:7192   addr:000001f2179220f0  data:[00 00 00 00 00 00 00 00 10 e4 90 17 f2 01 00 00]
-159869:	size:       288(     0.281kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:8063   addr:000001f217922ad0  data:[00 00 00 00 00 00 00 00 a0 55 90 17 f2 01 00 00]
-159870:	size:       320(     0.312kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:9692   addr:000001f2179231d0  data:[e0 cf d6 1e f2 01 00 00]
-159870:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:11646  addr:000001f217926e80  data:[20 d2 d6 1e f2 01 00 00]
-159871:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47365  file:y\Main\DxFile.cpp           line:7489    ID:1937669  addr:000001f217928a50  data:[00 5d 47 45 f2 01 00 00]
-159871:	size:       304(     0.297kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:9647   addr:000001f21792a060  data:[00 00 00 00 00 00 00 00 d0 31 92 17 f2 01 00 00]
-159872:	size:       240(     0.234kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:9186   addr:000001f21792ade0  data:[00 00 00 00 00 00 00 00 e0 ec 90 17 f2 01 00 00]
-159872:	size:       336(     0.328kb)  user size:         8(     0.008kb)  time:47349  file:y\Main\DxFile.cpp           line:7489    ID:10236  addr:000001f2179305c0  data:[40 d0 d6 1e f2 01 00 00]
-159873:	size:       176(     0.172kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:11602  addr:000001f217930870  data:[00 00 00 00 00 00 00 00 80 6e 92 17 f2 01 00 00]
-159873:	size:       256(     0.250kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:9359   addr:000001f217931350  data:[00 00 00 00 00 00 00 00 f0 96 91 17 f2 01 00 00]
-159874:	size:       320(     0.312kb)  user size:        16(     0.016kb)  time:47349  file:in\DxArchive_.cpp           line:4213    ID:10189  addr:000001f217932050  data:[00 00 00 00 00 00 00 00 c0 05 93 17 f2 01 00 00]
-159875:	size:       288(     0.281kb)  user size:         8(     0.008kb)  time:47365  file:y\Main\DxFile.cpp           line:7489    ID:1938367  addr:000001f217982980  data:[80 52 47 45 f2 01 00 00]
-159875:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47365  file:y\Main\DxFile.cpp           line:7489    ID:1938088  addr:000001f217abc900  data:[a0 50 47 45 f2 01 00 00]
-159876:	size:       256(     0.250kb)  user size:        16(     0.016kb)  time:47365  file:in\DxArchive_.cpp           line:4213    ID:1937904  addr:000001f217c3dbf0  data:[00 00 00 00 00 00 00 00 00 c9 ab 17 f2 01 00 00]
-159876:	Total size:480(0.469kb)  Alloc num:40
-159877:
+21:ディスプレイ情報のセットアップ開始
+21:	モニターの数：1  ディスプレイデバイスの数：3
+23:	No.0  モニター名：\\.\DISPLAY1　1920x1080　32bit　144Hz  96x96dpi
+33:ディスプレイ情報のセットアップ完了
+36:ChangeWindowMode実行 
+36:ウインドウモードフラグが立てられました
+39:ＤＸライブラリの初期化処理開始
+40:	システムの情報を出力します
+40:		ＤＸライブラリ Ver3.25 
+41:		論理プロセッサの数 : 12
+41:		ＯＳ  Windows11 ( Build 26100  )
+142:		現時点のＣＰＵ動作速度：大体2.58GHz
+142:		ＭＭＸ命令を使用します
+142:		ＳＳＥ命令が使用可能です
+143:		ＳＳＥ２命令が使用可能です
+143:		ＣＰＵベンダ：GenuineIntel
+144:		ＣＰＵ名：Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz
+145:	ＣＯＭの初期化... 成功
+148:	非同期読み込み処理の初期化...成功
+148:	メモリ総量:32587.55MB  空きメモリ領域:22260.12MB 
+149:	タイマーの精度を検査します
+149:	精度結果 更新回数 マルチメディアタイマー：0  パフォーマンスカウンター：60
+149:	 パフォーマンスカウンターを使用します タイマー精度 : 10000.000000 KHz 
+150:	 
+151:	ソフトの二重起動検査... 二重起動はされていませんでした
+151:	ウインドウクラスを登録します... 登録に成功しました
+152:	ウインドウモード起動用のウインドウを作成します
+152:	ウインドウ矩形 ( -16, -50 )-( 1920, 1069 )
+156:	ウインドウの作成に成功しました
+157:	ウインドウを表示します
+188:	ＩＭＥを無効にしました
+191:	ウインドウスタイルをウインドウモード用に変更します... 完了
+228:	XInput DLL の読み込み中... 成功
+234:	DirectInput関係初期化処理
+235:		DirectInput8 の取得を試みます...成功
+268:			引き続き初期化処理... 初期化成功
+277:		ジョイパッドの初期化... 
+278:			XInput 対応コントローラーのチェックを開始します
+278:				XInput 対応コントローラー No.0 をチェック
+279:				XInput 対応コントローラー No.0 の接続は確認できませんでした
+280:				XInput 対応コントローラー No.1 をチェック
+280:				XInput 対応コントローラー No.1 の接続は確認できませんでした
+281:				XInput 対応コントローラー No.2 をチェック
+281:				XInput 対応コントローラー No.2 の接続は確認できませんでした
+282:				XInput 対応コントローラー No.3 をチェック
+283:				XInput 対応コントローラー No.3 の接続は確認できませんでした
+284:			XInput 対応コントローラーのチェック完了
+284:			DirectInput 対応ジョイパッドの列挙を開始します
+358:			DirectInput 対応ジョイパッドの列挙終了
+359:		ジョイパッドの初期化は正常に終了しました
+359:		マウスデバイスの初期化... 初期化成功
+360:		キーボードデバイスの初期化... 初期化成功
+365:	DirectInput 関連の初期化は正常に終了しました
+369:	WASAPI の初期化を行います
+378:		デバイス名 : スピーカー (Realtek(R) Audio)
+386:		デフォルト遅延時間 : 10.000 ms
+387:		最小遅延時間       : 3.000 ms
+387:		遅延時間           : 10.000 ms
+388:		チャンネル数  　   : 2 ch
+388:		量子化ビット深度   : 32 bit
+389:		有効ビット深度　   : 32 bit
+389:		サンプリングレート : 48000 Hz
+389:		データ形式         : 浮動小数点型
+436:		動作モード         : 共有モード
+436:	WASAPI の初期化は正常に終了しました
+471:	d3d11.dll の読み込み.... 成功
+487:	dxgi.dll の読み込み.... 成功
+488:	API CreateDXGIFactory2 のアドレスを取得します.... 成功
+488:	IDXGIFactory2 を作成します.... 成功
+507:	API CreateDXGIFactory6 のアドレスを取得します.... 成功
+508:	IDXGIAdapter を列挙
+509:		Adapter No.0 Desc:NVIDIA GeForce GTX 1650 Ti  VRAM:3935MB
+509:			Output Device No.0 Name:\\.\DISPLAY1 ( 0, 0 )-( 1920, 1080 )
+510:		Adapter No.1 Desc:Intel(R) UHD Graphics  VRAM:128MB
+511:		Adapter No.2 Desc:Microsoft Basic Render Driver  VRAM:0MB
+511:	API D3D11CreateDevice のアドレスを取得します.... 成功
+512:	IDXGIAdapter を取得します.... 成功
+513:	IDXGIAdapter1 を取得します.... 成功
+514:	IDXGIAdapter2 を取得します.... 成功
+515:	IDXGIAdapter3 を取得します.... 成功
+516:	IDXGIAdapter4 を取得します.... 成功
+516:	Direct3D 11 FeatureLevel 11_0 以上を対象とします
+517:	ID3D11Device オブジェクトを取得します.... 成功
+783:	IDXGIDevice1 を取得します.... 成功
+784:	IDXGIDevice1->SetMaximunFrameLatency( 1 ); を実行しました
+784:	[ウインドウモード 1920x1080 ( 0, 0 )-( 1920, 1080 )]
+786:	IDXGISwapChain2 を作成します.... 成功
+788:	IDXGIFactory2->CreateSwapChainForHwnd の戻り値：0x00000000
+788:	IDXGIOutput を取得します.... 成功
+790:	Graphics Device:NVIDIA GeForce GTX 1650 Ti
+790:	画面のフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
+790:	16bit Zバッファフォーマットは DXGI_FORMAT_D16_UNORM です
+791:	24bit Zバッファフォーマットは DXGI_FORMAT_D24_UNORM_S8_UINT です
+791:	32bit Zバッファフォーマットは DXGI_FORMAT_D32_FLOAT です
+792:	16bit カラーフォーマットは DXGI_FORMAT_B5G6R5_UNORM です
+792:	32bit カラーフォーマットは DXGI_FORMAT_B8G8R8X8_UNORM です
+792:	アルファ付き 16bit カラーフォーマットは DXGI_FORMAT_B4G4R4A4_UNORM です
+793:	アルファ付き 32bit カラーフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
+793:	アルファテスト用 16bit カラーフォーマットは DXGI_FORMAT_B5G5R5A1_UNORM です
+793:	アルファテスト用 32bit カラーフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
+793:	ＤＸＴ１テクスチャフォーマットは DXGI_FORMAT_BC1_UNORM です
+794:	ＤＸＴ２テクスチャフォーマットは使えません
+794:	ＤＸＴ３テクスチャフォーマットは DXGI_FORMAT_BC2_UNORM です
+794:	ＤＸＴ４テクスチャフォーマットは使えません
+795:	ＤＸＴ５テクスチャフォーマットは DXGI_FORMAT_BC3_UNORM です
+795:	BC7_UNORM テクスチャフォーマットは DXGI_FORMAT_BC7_UNORM です
+795:	BC7_UNORM_SRGB テクスチャフォーマットは DXGI_FORMAT_BC7_UNORM_SRGB です
+796:	ABGR 整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_UNORM です
+796:	ABGR 浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_FLOAT です
+796:	ABGR 浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32B32A32_FLOAT です
+796:	１チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8_UNORM です
+797:	１チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_UNORM です
+797:	１チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_FLOAT です
+797:	１チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32_FLOAT です
+798:	２チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8G8_UNORM です
+798:	２チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_UNORM です
+798:	２チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_FLOAT です
+799:	２チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32_FLOAT です
+799:	描画用 16bit カラーフォーマットは DXGI_FORMAT_B5G6R5_UNORM です
+799:	描画用 32bit カラーフォーマットは DXGI_FORMAT_B8G8R8X8_UNORM です
+800:	描画用アルファ付き 32bit カラーフォーマットは DXGI_FORMAT_R8G8B8A8_UNORM です
+800:	描画用 ABGR 整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_UNORM です
+801:	描画用 ABGR 浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16B16A16_FLOAT です
+801:	描画用 ABGR 浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32B32A32_FLOAT です
+801:	描画用１チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8_UNORM です
+802:	描画用１チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_UNORM です
+802:	描画用１チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16_FLOAT です
+802:	描画用１チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32_FLOAT です
+803:	描画用２チャンネル整数 8 ビット型カラーフォーマットは DXGI_FORMAT_R8G8_UNORM です
+803:	描画用２チャンネル整数 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_UNORM です
+803:	描画用２チャンネル浮動小数点 16 ビット型カラーフォーマットは DXGI_FORMAT_R16G16_FLOAT です
+804:	描画用２チャンネル浮動小数点 32 ビット型カラーフォーマットは DXGI_FORMAT_R32G32_FLOAT です
+804:	使用する機能レベル:D3D_FEATURE_LEVEL_11_1
+804:	同時にレンダリングできるバッファの数:8
+804:	最大テクスチャサイズ　幅:16384 高さ:16384
+805:	標準描画用の頂点バッファの作成.... 成功
+806:	シェーダーコード関係の初期化.... 成功
+819:	各種シェーダー用定数バッファの作成.... 成功
+821:	各種 ID3D11InputLayout の作成.... 成功
+857:	画像の単純転送処理の初期化... 成功
+859:	深度バッファを作成します.... 成功
+862:	フォントの初期化を行います
+866:	フォントの初期化は正常に終了しました
+933:	文字コードバッファの初期化を行います... 完了しました
+938:ＤＸライブラリの初期化処理終了
+953:ウインドウスタイルをウインドウモード用に変更します... 完了
+965:ChangeWindowMode実行 
+25855:フォントの初期化を行います
+25877:フォントの初期化は正常に終了しました
+26028:d3d11.dll の解放 1
+26029:dxgi.dll の解放 1
+26030:Direct3D11 のオブジェクト数を出力
+26030:Direct3D11 のオブジェクト合計数 : 0
+26031:DirectInput 関連の終了処理... 完了
+26031:サウンド関連の終了処理... 完了
+26049:ウィンドウ関連の終了処理... ウインドウを閉じようとしています
+26057:ウインドウが破棄されようとしています
+26058:ソフトを終了する準備が整いました
+26154:完了
+26155:ＣＯＭを終了... 完了
+26155:
+26155:Alloc memory dump
+26156:	size:       176(     0.172kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:7201   addr:000001ccfb8dd550  data:[00 00 00 00 00 00 00 00 50 e1 8d fb cc 01 00 00]
+26156:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:7245   addr:000001ccfb8de150  data:[90 04 a5 82 cc 01 00 00]
+26156:	size:       288(     0.281kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:6038   addr:000001ccfb8deb00  data:[00 00 00 00 00 00 00 00 d0 f6 8d fb cc 01 00 00]
+26157:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:6063   addr:000001ccfb8df6d0  data:[b0 ea a4 82 cc 01 00 00]
+26157:	size:       288(     0.281kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:6173   addr:000001ccfb8df780  data:[00 00 00 00 00 00 00 00 20 7a 8e fb cc 01 00 00]
+26157:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:8992   addr:000001ccfb8e0620  data:[70 03 a5 82 cc 01 00 00]
+26158:	size:       288(     0.281kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:8947   addr:000001ccfb8e11c0  data:[00 00 00 00 00 00 00 00 20 06 8e fb cc 01 00 00]
+26158:	size:       176(     0.172kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:7816   addr:000001ccfb8e12e0  data:[00 00 00 00 00 00 00 00 90 13 8e fb cc 01 00 00]
+26158:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:7860   addr:000001ccfb8e1390  data:[10 00 a5 82 cc 01 00 00]
+26158:	size:       256(     0.250kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:5352   addr:000001ccfb8e46a0  data:[00 00 00 00 00 00 00 00 a0 1f 8f fb cc 01 00 00]
+26159:	size:       288(     0.281kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:8626   addr:000001ccfb8e5310  data:[b0 fc a4 82 cc 01 00 00]
+26159:	size:       288(     0.281kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:10866  addr:000001ccfb8e5df0  data:[b0 f0 a4 82 cc 01 00 00]
+26159:	size:       320(     0.312kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:6484   addr:000001ccfb8e6470  data:[10 f7 a4 82 cc 01 00 00]
+26160:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:7299   addr:000001ccfb8e6b70  data:[d0 f7 a4 82 cc 01 00 00]
+26160:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:8471   addr:000001ccfb8e6d80  data:[50 ff a4 82 cc 01 00 00]
+26160:	size:       272(     0.266kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:8583   addr:000001ccfb8e6e30  data:[00 00 00 00 00 00 00 00 10 53 8e fb cc 01 00 00]
+26161:	size:       288(     0.281kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:5910   addr:000001ccfb8e7590  data:[70 e5 a4 82 cc 01 00 00]
+26161:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:6216   addr:000001ccfb8e7a20  data:[70 fa a4 82 cc 01 00 00]
+26162:	size:       240(     0.234kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:6416   addr:000001ccfb8e7ad0  data:[00 00 00 00 00 00 00 00 70 64 8e fb cc 01 00 00]
+26162:	size:       176(     0.172kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:7250   addr:000001ccfb8f1e30  data:[00 00 00 00 00 00 00 00 70 6b 8e fb cc 01 00 00]
+26162:	size:       272(     0.266kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:5395   addr:000001ccfb8f1fa0  data:[b0 de a4 82 cc 01 00 00]
+26163:	size:       256(     0.250kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:9499   addr:000001ccfb8f6f70  data:[00 00 00 00 00 00 00 00 10 b1 8f fb cc 01 00 00]
+26163:	size:       240(     0.234kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:8446   addr:000001ccfb8f8020  data:[00 00 00 00 00 00 00 00 80 6d 8e fb cc 01 00 00]
+26163:	size:       176(     0.172kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:9570   addr:000001ccfb8fb110  data:[10 fa a4 82 cc 01 00 00]
+26164:	size:       288(     0.281kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:6997   addr:000001ccfb8ff3d0  data:[30 f8 a4 82 cc 01 00 00]
+26164:	size:       256(     0.250kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:5885   addr:000001ccfb8ff650  data:[00 00 00 00 00 00 00 00 90 75 8e fb cc 01 00 00]
+26164:	size:       288(     0.281kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:6972   addr:000001ccfb904a40  data:[00 00 00 00 00 00 00 00 d0 f3 8f fb cc 01 00 00]
+26165:	size:       288(     0.281kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:10167  addr:000001ccfb9067e0  data:[00 00 00 00 00 00 00 00 a0 ae 90 fb cc 01 00 00]
+26165:	size:       288(     0.281kb)  user size:         8(     0.008kb)  time:47797  file:y\Main\DxFile.cpp           line:7489    ID:10219  addr:000001ccfb90aea0  data:[10 d6 a4 82 cc 01 00 00]
+26165:	size:       256(     0.250kb)  user size:        16(     0.016kb)  time:47797  file:in\DxArchive_.cpp           line:4213    ID:10821  addr:000001ccfb91ceb0  data:[00 00 00 00 00 00 00 00 f0 5d 8e fb cc 01 00 00]
+26166:	Total size:360(0.352kb)  Alloc num:30
+26166:

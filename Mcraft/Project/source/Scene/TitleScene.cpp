@@ -687,7 +687,7 @@ namespace FPS_n2 {
 				}
 				//
 				{
-					int NowScore = static_cast<int>(SaveData::Instance()->GetParam("score"));
+					int NowScore = std::max(static_cast<int>(SaveData::Instance()->GetParam("score")), 0);
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
 						1920 - 48-256, 48, Green, Black, "Score : %05d", NowScore);
