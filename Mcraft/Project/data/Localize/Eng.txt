@@ -90,12 +90,12 @@
 1161=Grenade
 1162=(Not Use)
 1163=(Not Use)
-1164=(Not Use)
+1164=Run
 1165=Slow Walk
 1166=Shot
 1167=Aim Down Sight
 1168=Change Weapon
-1169=(Not Use)
+1169=Squat
 1170=(Not Use)
 1171=Watch Gun
 1172=Delete Item1

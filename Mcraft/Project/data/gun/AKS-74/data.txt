@@ -30,7 +30,7 @@ Slot0Item=AK_6L20_jungle
 Slot0Item=AK_6L20
 
 Slot1Type=Sight
-Slot1IsNeed=true
+Slot1IsNeed=false
 Slot1Item=OKP7
 
 Slot2Type=UnderRail

@@ -228,6 +228,7 @@ namespace FPS_n2 {
 			//パーツがある場合は削除
 			Remove(gunSlot);
 			if (ID == InvalidID) { return; }
+			if (ID == pSlotInfo->CanAttachItemsUniqueID.size()) { return; }
 			const auto* FilePath = (*GunPartsDataManager::Instance()->GetData(pSlotInfo->CanAttachItemsUniqueID[ID]))->GetPath().c_str();
 
 			switch (gunSlot) {
