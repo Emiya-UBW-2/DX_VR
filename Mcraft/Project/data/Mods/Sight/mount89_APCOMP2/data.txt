@@ -1,8 +1,10 @@
-Name=Offset Mount
+Name=Comp2 On Offset Mount
+Info=素早い狙いがつけやすくなるチューブ型ドットサイト。
+Info_Eng=素早い狙いがつけやすくなるチューブ型ドットサイト。
 
-Slot0Type=Sight
-Slot0IsNeed=true
-Slot0Item=ACOG
-Slot0Item=APCOMP2
+
+AimSpeedAdd=-0.1
+
+AutoAimSpeedAdd=0.25
 
 end

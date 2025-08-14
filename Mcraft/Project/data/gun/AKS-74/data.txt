@@ -32,10 +32,7 @@ Slot0Item=AK_6L20
 Slot1Type=Sight
 Slot1IsNeed=false
 Slot1Item=OKP7
-
-Slot2Type=UnderRail
-Slot2IsNeed=false
-Slot2Item=MTK83
+Slot2Item=MTK83_ACOG
 
 Cocking=0
 Open=1

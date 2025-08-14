@@ -28,9 +28,11 @@ Slot0IsNeed=true
 Slot0Item=STANAG_20
 Slot0Item=STANAG_30
 
-Slot1Type=UnderRail
-Slot1IsNeed=true
-Slot1Item=mount89
+Slot1Type=Sight
+Slot1IsNeed=false
+Slot1Item=mount89_ACOG
+Slot1Item=mount89_APCOMP2
+
 
 Open=0
 ReloadStart_Empty=1
