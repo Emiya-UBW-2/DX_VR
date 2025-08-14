@@ -1240,6 +1240,7 @@ namespace FPS_n2 {
 						for (int loop = 0; loop < static_cast<int>(Player::SkillType::Max); ++loop) {
 							SaveData::Instance()->SetParam("skill" + std::to_string(loop), 0);
 						}
+						SaveData::Instance()->SetParam("score", 0);
 					}
 					this->m_IsEnd = true;
 				}

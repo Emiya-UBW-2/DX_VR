@@ -687,10 +687,37 @@ namespace FPS_n2 {
 				}
 				//
 				{
+					int xp = 1920 - 48;
+					int yp = 128;
 					int NowScore = std::max(static_cast<int>(SaveData::Instance()->GetParam("score")), 0);
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
-						1920 - 48-256, 48, Green, Black, "Score : %05d", NowScore);
+						xp - 200, yp, Green, Black, "Score : ");
+
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
+						xp, yp, Green, Black, "%05d", NowScore);
+					yp += 32;
+
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
+						xp - 200, yp, Green, Black, "Skill : ");
+					yp += 32;
+					for (int LV = 3; LV >= 1; --LV) {
+						for (int loop = 0; loop < static_cast<int>(Player::SkillType::Max); ++loop) {
+							int Level = static_cast<int>(SaveData::Instance()->GetParam("skill" + std::to_string(loop)));
+							if (Level > 0 && LV == Level) {
+								std::string Title = LocalizeParts->Get(5000 + loop);
+								Title += " Lv.";
+								Title += std::to_string(Level);
+
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+									FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
+									xp, yp, (LV == 3) ? Yellow : Green, Black, Title);
+								yp += 32;
+							}
+						}
+					}
 				}
 			}
 			else {
