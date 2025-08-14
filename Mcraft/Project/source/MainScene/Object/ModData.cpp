@@ -147,6 +147,9 @@ namespace FPS_n2 {
 			else if (LEFT == "IsJungle") {
 				this->m_IsJungle = RIGHT == "True";
 			}
+			else if (LEFT == "IsCustomize") {
+				this->m_IsCustomize = RIGHT == "True";
+			}
 			else if (LEFT == "Weight") {
 				this->m_Weight = std::stoi(RIGHT);
 			}

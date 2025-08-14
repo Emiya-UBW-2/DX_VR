@@ -1,4 +1,6 @@
 Name=AK-74 6L20 30Round Magazine x2
+Info=AK-74標準マガジンをテープで括り付けたもの。2回に1回素早く再装填を行う。
+Info_Eng=AK-74標準マガジンをテープで括り付けたもの。2回に1回素早く再装填を行う。
 
 capacity=30
 useammo0=545x39

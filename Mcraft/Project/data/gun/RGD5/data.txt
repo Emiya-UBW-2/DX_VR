@@ -11,6 +11,7 @@ Info_Eng=A cheap but effective weapon.
 Weight=310
 WeaponType=Gadget
 UnlockScore=0
+IsCustomize=false
 
 usehumanAnim=3
 IsThrowWeapon=True

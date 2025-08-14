@@ -387,7 +387,7 @@ namespace FPS_n2 {
 			//this->m_IsGameReady = true;
 			this->m_StartAnimTimer = 0.f;
 			this->m_IsSkipMovie = false;
-			this->m_MovieEndTimer = 1.f;
+			this->m_MovieEndTimer = 1.5f;
 
 			SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Envi))->Play(DX_PLAYTYPE_LOOP, true);
 			//Vector3DX posBuf = Matrix3x3DX::Vtrans(Vector3DX::forward() * (15.0f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
@@ -551,11 +551,11 @@ namespace FPS_n2 {
 							Easing(&fovBuf, deg2rad(35), 0.9f, EasingType::OutExpo);
 						}
 
-						if (m_StartAnimTimer >= 4.5f + 3.f && !m_IsSkipMovie && !this->m_PauseMenuControl.IsRetire()) {
-							if (FadeControl::Instance()->IsClear()) {
+						if (m_StartAnimTimer >= 4.5f + 3.f && !this->m_PauseMenuControl.IsRetire()) {
+							if (FadeControl::Instance()->IsClear() && !m_IsSkipMovie) {
 								FadeControl::Instance()->SetBlackOut(true);
 							}
-							else if (FadeControl::Instance()->IsAll()) {
+							else {
 								m_MovieEndTimer = std::max(m_MovieEndTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 								if (m_MovieEndTimer == 0.f) {
 									m_MovieHeli->SetActive(false);
@@ -581,7 +581,7 @@ namespace FPS_n2 {
 								FadeControl::Instance()->SetBlackOut(true);
 							}
 						}
-						else if (FadeControl::Instance()->IsAll()) {
+						else {
 							m_MovieEndTimer = std::max(m_MovieEndTimer - DXLib_refParts->GetDeltaTime(), 0.f);
 							if (m_MovieEndTimer == 0.f) {
 								m_MovieHeli->SetActive(false);

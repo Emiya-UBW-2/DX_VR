@@ -58,6 +58,8 @@ namespace FPS_n2 {
 
 			int								m_Weight{ 0 };
 
+			bool							m_IsCustomize{ false };
+
 			float							m_ReloadSpeedAdd{ 0.f };
 			float							m_AimSpeedAdd{ 0.f };
 			float							m_AutoAimSpeedAdd{ 0.f };
@@ -86,6 +88,7 @@ namespace FPS_n2 {
 			const auto& GetCanSwitch(void) const noexcept { return this->m_CanSwitch; }
 			const auto& GetisHoldOpen(void) const noexcept { return this->m_isHoldOpen; }
 			const auto& GetIsJungle(void) const noexcept { return this->m_IsJungle; }
+			const auto& GetIsCustomize(void) const noexcept { return this->m_IsCustomize; }
 			const auto& GetAnimSelectList(void) const noexcept { return this->m_AnimSelect; }
 			const auto& GetIsRecoilPower(void) const noexcept { return this->m_IsRecoilPower; }
 			const auto& GetIsRecoilReturn(void) const noexcept { return this->m_IsRecoilReturn; }

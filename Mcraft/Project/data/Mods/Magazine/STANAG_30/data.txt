@@ -1,4 +1,6 @@
 Name=STANAG 30Round Magazine
+Info=STANAG規格向けのポリマー製30連マガジン。
+Info_Eng=STANAG規格向けのポリマー製30連マガジン。
 
 capacity=30
 useammo0=556x45

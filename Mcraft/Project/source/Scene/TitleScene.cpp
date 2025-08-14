@@ -51,7 +51,6 @@ namespace FPS_n2 {
 					ChildPath += "/";
 					this->m_GunPtr.emplace_back(std::make_shared<Guns::GunObj>());
 					ObjectManager::Instance()->InitObject(this->m_GunPtr.back(), ChildPath);
-					this->m_GunPtr.back()->SetupGun();
 					this->m_GunPtr.back()->SetPlayerID(InvalidID);
 
 					auto& mod = this->m_GunPtr.back()->GetModifySlot();
@@ -113,6 +112,9 @@ namespace FPS_n2 {
 				else {
 					g->SetActive(false);
 				}
+			}
+			for (auto& g : this->m_GunPtr) {
+				g->SetupGun();
 			}
 
 			m_PrevScore = NowScore;
@@ -352,20 +354,23 @@ namespace FPS_n2 {
 						m_CamTimer = 0.f;
 					}
 					if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
-						m_IsCustomizeGun = true;
-						KeyGuideParts->SetGuideFlip();
-
-						SlotSel = Guns::GunSlot::Magazine;
 						auto& mod = this->m_GunPtr.at(m_GunSelect.at(m_GunTypeSel))->GetModifySlot();
-						auto& List = mod->GetMyData()->GetSlotInfo(SlotSel)->CanAttachItemsUniqueID;
-						int Now = mod->GetParts(SlotSel)->GetModifySlot()->GetMyData()->GetUniqueID();
-						for (auto& l : List) {
-							int index = static_cast<int>(&l - &List.front());
-							if (l == Now) {
-								m_GunCustomSel = index;
+						if (mod->GetMyData()->GetIsCustomize()) {
+							m_IsCustomizeGun = true;
+							KeyGuideParts->SetGuideFlip();
+
+							SlotSel = Guns::GunSlot::Magazine;
+							auto& mod = this->m_GunPtr.at(m_GunSelect.at(m_GunTypeSel))->GetModifySlot();
+							auto& List = mod->GetMyData()->GetSlotInfo(SlotSel)->CanAttachItemsUniqueID;
+							int Now = mod->GetParts(SlotSel)->GetModifySlot()->GetMyData()->GetUniqueID();
+							for (auto& l : List) {
+								int index = static_cast<int>(&l - &List.front());
+								if (l == Now) {
+									m_GunCustomSel = index;
+								}
 							}
+							m_SelAlpha = 2.f;
 						}
-						m_SelAlpha = 2.f;
 					}
 				}
 				else {
@@ -489,8 +494,10 @@ namespace FPS_n2 {
 			}
 
 			//Update
-			ObjMngr->UpdateObject();
-			ObjMngr->LateUpdateObject();
+			if (!GetIsFirstLoop()) {
+				ObjMngr->UpdateObject();
+				ObjMngr->LateUpdateObject();
+			}
 			//視点
 			{
 				//カメラ
@@ -846,6 +853,12 @@ namespace FPS_n2 {
 							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 								xp1, yp1, Green, Black, "Reload Speed %5.2f %%", guns->GetReloadSpeed());
+							yp1 += 32;
+						}
+						if (guns->GetModifySlot()->GetMyData()->GetIsCustomize()) {
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+								xp1, yp1, Green, Black, "Can Customize");
 							yp1 += 32;
 						}
 					}

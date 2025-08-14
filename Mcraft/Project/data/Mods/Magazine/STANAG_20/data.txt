@@ -1,5 +1,8 @@
 Name=STANAG 20Round
 
+Info=古めのアルミ製20連マガジン。
+Info_Eng=古めのアルミ製20連マガジン。
+
 capacity=20
 useammo0=556x45
 
