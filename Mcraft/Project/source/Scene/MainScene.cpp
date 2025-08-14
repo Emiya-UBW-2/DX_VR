@@ -371,6 +371,7 @@ namespace FPS_n2 {
 			this->m_IsGameOver = false;
 			this->m_IsGameClearEnd = false;
 			this->m_IsSkillSelect = false;
+			this->m_SkillSelectTimer = false;
 			this->m_SkillSelectNow = 0;
 			this->m_GameClearCount = 0.f;
 			this->m_GameClearCount2 = 0.f;
@@ -757,10 +758,12 @@ namespace FPS_n2 {
 						}
 					}
 				}
-
+				if (m_IsSkillSelect) {
+					m_SkillSelectTimer = std::clamp(m_SkillSelectTimer + DXLib_refParts->GetDeltaTime() / 0.25f, 0.f, 1.f);
+				}
 				if (!this->m_IsEnd) {
 					//スキル選択
-					if (m_IsGameClearEnd && m_IsSkillSelect) {
+					if (m_IsGameClearEnd && m_IsSkillSelect && m_SkillSelectTimer >= 1.f) {
 						int xp1 = 1920 / 2;
 						int yp1 = 1080 / 2;
 						float wide = 400.f;
@@ -795,7 +798,6 @@ namespace FPS_n2 {
 							}
 						}
 					}
-
 				}
 
 
@@ -1138,6 +1140,7 @@ namespace FPS_n2 {
 						m_IsGameClear = true;
 						m_IsGameClearEnd = false;
 						m_IsSkillSelect = false;
+						m_SkillSelectTimer = 0.f;
 						KeyGuideParts->SetGuideFlip();
 						m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
@@ -1812,17 +1815,24 @@ namespace FPS_n2 {
 					}
 
 					//スキル選択
-					if (m_IsGameClearEnd && m_IsSkillSelect) {
-						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 128);
+					if (m_IsGameClearEnd && m_IsSkillSelect && m_SkillSelectTimer > 0.f) {
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(Lerp(0.f, 128.f, m_SkillSelectTimer)));
 						DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, 0, 0, 1920, 1080, Black, true);
 						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 255);
 
 						int xp1 = 1920 / 2;
 						int yp1 = 1080 / 2;
+
+						if (m_SkillSelectTimer < 0.8f) {
+							yp1 += static_cast<int>(Lerp(-1080.f, 64.f, (m_SkillSelectTimer - 0.f) / (0.8f - 0.f)));
+						}
+						else if (m_SkillSelectTimer < 1.f) {
+							yp1 += static_cast<int>(Lerp(64.f, 0.f, (m_SkillSelectTimer - 0.8f) / (1.f - 0.8f)));
+						}
+
 						float wide = 400.f;
 						for (int loop = 0; loop < 3; ++loop) {
 							xp1 = 1920 / 2 + static_cast<int>(wide * (-(3.f - 1.f) / 2.f + loop));
-							yp1 = 1080 / 2;
 							bool IsADDSCORE = (m_SkillSelect.at(loop) == Player::SkillType::ADDSCORE);
 							int ID = static_cast<int>(m_SkillSelect.at(loop));
 							if (IsADDSCORE) {
@@ -1862,24 +1872,35 @@ namespace FPS_n2 {
 							}
 						}
 
-						xp1 = 960;
-						yp1 = 70;
-						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (64),
-							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Green, Black, "Select Skill!");
+						{
+							xp1 = 960;
+							yp1 = 70;
 
+							if (m_SkillSelectTimer < 0.9f) {
+								yp1 += static_cast<int>(Lerp(-1080.f, 64.f, (m_SkillSelectTimer - 0.f) / (0.9f - 0.f)));
+							}
+							else if (m_SkillSelectTimer < 1.f) {
+								yp1 += static_cast<int>(Lerp(64.f, 0.f, (m_SkillSelectTimer - 0.9f) / (1.f - 0.9f)));
+							}
 
-						xp1 = 960;
-						yp1 = 930;
-						KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (64),
+								FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Green, Black, "Select Skill!");
+						}
 
-						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
-							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3009));
+						if (m_SkillSelectTimer == 1.f) {
+							xp1 = 960;
+							yp1 = 930;
+							KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
 
-						yp1 -= 64;
-						KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD));
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+								FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3009));
 
-						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
-							FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3006));
+							yp1 -= 64;
+							KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD));
+
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
+								FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3006));
+						}
 					}
 
 				}
