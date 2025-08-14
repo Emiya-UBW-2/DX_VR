@@ -702,6 +702,19 @@ namespace FPS_n2 {
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
 						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
 						xp - 200, yp, Green, Black, "Skill : ");
+					bool Complete = true;
+					for (int loop = 0; loop < static_cast<int>(Player::SkillType::Max); ++loop) {
+						int Level = static_cast<int>(SaveData::Instance()->GetParam("skill" + std::to_string(loop)));
+						if (Level != 3) {
+							Complete = false;
+							break;
+						}
+					}
+					if (Complete) {
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+							FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
+							xp, yp, Red, Black, "Complete!");
+					}
 					yp += 32;
 					for (int LV = 3; LV >= 1; --LV) {
 						for (int loop = 0; loop < static_cast<int>(Player::SkillType::Max); ++loop) {

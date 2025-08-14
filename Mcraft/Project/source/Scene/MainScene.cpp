@@ -393,6 +393,11 @@ namespace FPS_n2 {
 			//Vector3DX posBuf = Matrix3x3DX::Vtrans(Vector3DX::forward() * (15.0f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
 			//posBuf.y = -25.0f * Scale3DRate;
 			//PlayerMngr->GetVehicle()->Spawn(std::atan2f(posBuf.x, posBuf.z), posBuf);
+
+			if (SaveData::Instance()->GetParam("BuffNextRound") > 0) {
+				PlayerMngr->GetPlayer(0)->AddScore(1000);
+				SaveData::Instance()->SetParam("BuffNextRound", 0);
+			}
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
 			auto* CameraParts = Camera3D::Instance();
@@ -663,17 +668,23 @@ namespace FPS_n2 {
 								SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
 								//セーブデータにIDを追加
 								int ID = static_cast<int>(m_SkillSelect.at(m_SkillSelectNow));
-								if (SaveData::Instance()->GetParam("skill" + std::to_string(ID)) > 0) {
-									SaveData::Instance()->SetParam("skill" + std::to_string(ID), SaveData::Instance()->GetParam("skill" + std::to_string(ID)) + 1);
+
+								if (ID == static_cast<int>(Player::SkillType::ADDSCORE)) {
+									SaveData::Instance()->SetParam("BuffNextRound", 1);
 								}
 								else {
-									SaveData::Instance()->SetParam("skill" + std::to_string(ID), 1);
-								}
-								if (SaveData::Instance()->GetParam("score") > 0) {
-									SaveData::Instance()->SetParam("score", SaveData::Instance()->GetParam("score") + ViewPlayer->GetScore());
-								}
-								else {
-									SaveData::Instance()->SetParam("score", ViewPlayer->GetScore());
+									if (SaveData::Instance()->GetParam("skill" + std::to_string(ID)) > 0) {
+										SaveData::Instance()->SetParam("skill" + std::to_string(ID), SaveData::Instance()->GetParam("skill" + std::to_string(ID)) + 1);
+									}
+									else {
+										SaveData::Instance()->SetParam("skill" + std::to_string(ID), 1);
+									}
+									if (SaveData::Instance()->GetParam("score") > 0) {
+										SaveData::Instance()->SetParam("score", SaveData::Instance()->GetParam("score") + ViewPlayer->GetScore());
+									}
+									else {
+										SaveData::Instance()->SetParam("score", ViewPlayer->GetScore());
+									}
 								}
 							}
 							this->m_IsEnd = true;
@@ -691,7 +702,7 @@ namespace FPS_n2 {
 					//
 					for (int loop = 0; loop < 3; ++loop) {
 						if (loop >= CanPicSkill) {
-							m_SkillSelect.at(loop) = Player::SkillType::Max;//次遊ぶ際のスコアを+500
+							m_SkillSelect.at(loop) = Player::SkillType::ADDSCORE;//次遊ぶ際のスコアを+500
 							continue;
 						}
 						m_SkillSelect.at(loop) = static_cast<Player::SkillType>(GetRand(static_cast<int>(Player::SkillType::Max) - 1));
@@ -736,18 +747,23 @@ namespace FPS_n2 {
 										FadeControl::Instance()->SetBlackOut(true);
 										SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
 										int ID = static_cast<int>(m_SkillSelect.at(m_SkillSelectNow));
-										//セーブデータにIDを追加
-										if (SaveData::Instance()->GetParam("skill" + std::to_string(ID)) > 0) {
-											SaveData::Instance()->SetParam("skill" + std::to_string(ID), SaveData::Instance()->GetParam("skill" + std::to_string(ID)) + 1);
+										if (ID == static_cast<int>(Player::SkillType::ADDSCORE)) {
+											SaveData::Instance()->SetParam("BuffNextRound", 1);
 										}
 										else {
-											SaveData::Instance()->SetParam("skill" + std::to_string(ID), 1);
-										}
-										if (SaveData::Instance()->GetParam("score") > 0) {
-											SaveData::Instance()->SetParam("score", SaveData::Instance()->GetParam("score") + ViewPlayer->GetScore());
-										}
-										else {
-											SaveData::Instance()->SetParam("score", ViewPlayer->GetScore());
+											//セーブデータにIDを追加
+											if (SaveData::Instance()->GetParam("skill" + std::to_string(ID)) > 0) {
+												SaveData::Instance()->SetParam("skill" + std::to_string(ID), SaveData::Instance()->GetParam("skill" + std::to_string(ID)) + 1);
+											}
+											else {
+												SaveData::Instance()->SetParam("skill" + std::to_string(ID), 1);
+											}
+											if (SaveData::Instance()->GetParam("score") > 0) {
+												SaveData::Instance()->SetParam("score", SaveData::Instance()->GetParam("score") + ViewPlayer->GetScore());
+											}
+											else {
+												SaveData::Instance()->SetParam("score", ViewPlayer->GetScore());
+											}
 										}
 									}
 									this->m_IsEnd = true;
@@ -1797,8 +1813,10 @@ namespace FPS_n2 {
 							DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - (static_cast<int>(wide) / 2 - 8), yp1 - 540 / 2, xp1 + (static_cast<int>(wide) / 2 - 8), yp1 + 540 / 2, DarkGreen, true);
 
 							std::string Title = LocalizeParts->Get(5000 + ID);
-							Title += " Lv.";
-							Title += std::to_string(Player::SkillList::Instance()->GetSkilLevel(m_SkillSelect.at(loop)) + 1);
+							if (ID != static_cast<int>(Player::SkillType::ADDSCORE)) {
+								Title += " Lv.";
+								Title += std::to_string(Player::SkillList::Instance()->GetSkilLevel(m_SkillSelect.at(loop)) + 1);
+							}
 
 							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (32),
 								FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1 - 200, White, Black, Title.c_str());
@@ -1809,7 +1827,11 @@ namespace FPS_n2 {
 								auto pos = Str.find(t);
 								auto len = t.length();
 								if (pos != std::string::npos) {
-									Str.replace(pos, len, std::to_string(static_cast<int>(Player::SkillList::Instance()->GetSkillValueNext(m_SkillSelect.at(loop)))));
+									int ADD = 1000;
+									if (ID != static_cast<int>(Player::SkillType::ADDSCORE)) {
+										ADD = static_cast<int>(Player::SkillList::Instance()->GetSkillValueNext(m_SkillSelect.at(loop)));
+									}
+									Str.replace(pos, len, std::to_string(ADD));
 								}
 							}
 							DrawCtrls->SetStringAutoFit(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),

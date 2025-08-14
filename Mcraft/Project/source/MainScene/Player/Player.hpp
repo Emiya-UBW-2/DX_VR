@@ -21,6 +21,8 @@ namespace FPS_n2 {
 			Adrenaline,		//・物を拾って5秒だけ重さデバフを無視できる
 			DamageCut,		//・アーマーを含め被ダメージを5% カット
 			Max,
+
+			ADDSCORE,//なんも取れるスコアなくなったらこれになる
 		};
 
 		class SkillInfo {
