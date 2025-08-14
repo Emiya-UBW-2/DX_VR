@@ -10,7 +10,7 @@ Info_Eng=It boasts easy handling thanks to its latest design.
 
 Weight=3500
 WeaponType=Main
-UnlockScore=2000
+UnlockScore=5000
 IsCustomize=True
 
 ShotRate=850

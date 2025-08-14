@@ -1105,6 +1105,7 @@ namespace FPS_n2 {
 					}
 					//
 					else if (this->m_ReturnPer >= 1.f) {
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::returnButton))->StopAll();
 						//帰還する
 						isEnd = true;
 					}
@@ -1477,7 +1478,7 @@ namespace FPS_n2 {
 
 				if (CanReturn && this->m_IsAddScoreArea &&  Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().press()) {
 					if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
-						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::returnButton))->Play(DX_PLAYTYPE_BACK, true);
 					}
 					float SpeedUP = 1.f;
 					float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::TeiziTaisha);
@@ -1487,6 +1488,9 @@ namespace FPS_n2 {
 					this->m_ReturnPer = std::clamp(this->m_ReturnPer + DXLib_refParts->GetDeltaTime() / 5.f* SpeedUP, 0.f, 1.f);
 				}
 				else {
+					if (this->m_ReturnPer != 0.f) {
+						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::returnButton))->StopAll();
+					}
 					this->m_ReturnPer = 0.f;
 				}
 				this->m_AnnounceTimer = std::clamp(this->m_AnnounceTimer - DXLib_refParts->GetDeltaTime(), 0.f, 1.f);

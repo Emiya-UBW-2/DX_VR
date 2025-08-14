@@ -105,6 +105,7 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::resultEnd), 2, "data/Sound/SE/resultEnd.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::taskstart), 2, "data/Sound/SE/taskstart.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::alarm), 2, "data/Sound/SE/alarm.wav", false);
+			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::returnButton), 1, "data/Sound/SE/returnButton.wav", false);
 			
 			for (int loop = 0; loop < 6; ++loop) {
 				SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Cocking1_0) + loop, 4, "data/Sound/SE/gun/autoM870/" + std::to_string(loop) + ".wav");
@@ -193,6 +194,8 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::resultbutton));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::resultEnd));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::taskstart));
+			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::alarm));
+			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::returnButton));
 
 			for (int loop = 0; loop < 6; ++loop) {
 				SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Cocking1_0) + loop);

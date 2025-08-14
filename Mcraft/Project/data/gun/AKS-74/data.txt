@@ -10,7 +10,7 @@ Info_Eng=By folding the stock= it can be used in extremely close combat.
 
 Weight=3500
 WeaponType=Main
-UnlockScore=0
+UnlockScore=2500
 IsCustomize=True
 
 ShotRate=600

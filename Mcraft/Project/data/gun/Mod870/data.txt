@@ -10,7 +10,7 @@ Info_Far=It specialized for close combat.
 
 Weight=3600
 WeaponType=Main
-UnlockScore=0
+UnlockScore=2000
 IsCustomize=false
 
 ShotRate=300

@@ -76,7 +76,7 @@ namespace FPS_n2 {
 			int X2 = 0;
 			int X3 = 0;
 
-			int NowScore = SaveData::Instance()->GetParam("score");
+			int NowScore = static_cast<int>(SaveData::Instance()->GetParam("score"));
 
 			this->m_GunPoint.resize(this->m_GunPtr.size());
 			this->m_GunAnimTimer.resize(this->m_GunPtr.size());
@@ -283,10 +283,12 @@ namespace FPS_n2 {
 			else {
 				if (!m_IsCustomizeGun) {
 					if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 						m_IsCustomize = false;
 						KeyGuideParts->SetGuideFlip();
 					}
 					if (Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 						int Next = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).first - 1;
 						int Slot = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).second;
 						int Highest = -1;
@@ -315,6 +317,7 @@ namespace FPS_n2 {
 						}
 					}
 					if (Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 						int Next = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).first + 1;
 						int Slot = this->m_GunPoint.at(m_GunSelect.at(m_GunTypeSel)).second;
 						int Lowest = 10000;
@@ -340,6 +343,7 @@ namespace FPS_n2 {
 						}
 					}
 					if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger()) {
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 						m_GunTypeSel++;
 						if (m_GunTypeSel > 3 - 1) {
 							m_GunTypeSel = 0;
@@ -347,6 +351,7 @@ namespace FPS_n2 {
 						m_CamTimer = 0.f;
 					}
 					if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger()) {
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 						m_GunTypeSel--;
 						if (m_GunTypeSel < 0) {
 							m_GunTypeSel = 3 - 1;
@@ -354,13 +359,13 @@ namespace FPS_n2 {
 						m_CamTimer = 0.f;
 					}
 					if (Pad->GetPadsInfo(Controls::PADS::INTERACT).GetKey().trigger()) {
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 						auto& mod = this->m_GunPtr.at(m_GunSelect.at(m_GunTypeSel))->GetModifySlot();
 						if (mod->GetMyData()->GetIsCustomize()) {
 							m_IsCustomizeGun = true;
 							KeyGuideParts->SetGuideFlip();
 
 							SlotSel = Guns::GunSlot::Magazine;
-							auto& mod = this->m_GunPtr.at(m_GunSelect.at(m_GunTypeSel))->GetModifySlot();
 							auto& List = mod->GetMyData()->GetSlotInfo(SlotSel)->CanAttachItemsUniqueID;
 							int Now = mod->GetParts(SlotSel)->GetModifySlot()->GetMyData()->GetUniqueID();
 							for (auto& l : List) {
@@ -379,6 +384,7 @@ namespace FPS_n2 {
 					auto& slot = guns->GetModifySlot();
 
 					if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 						m_IsCustomizeGun = false;
 						KeyGuideParts->SetGuideFlip();
 
@@ -389,6 +395,7 @@ namespace FPS_n2 {
 					}
 
 					if (Pad->GetPadsInfo(Controls::PADS::MOVE_W).GetKey().trigger()) {
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 						switch (SlotSel)						{
 						case FPS_n2::Guns::GunSlot::Magazine:
 							SlotSel = Guns::GunSlot::Sight;
@@ -402,6 +409,7 @@ namespace FPS_n2 {
 						m_SelAlpha = 2.f;
 					}
 					if (Pad->GetPadsInfo(Controls::PADS::MOVE_S).GetKey().trigger()) {
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 						switch (SlotSel) {
 						case FPS_n2::Guns::GunSlot::Magazine:
 							SlotSel = Guns::GunSlot::Sight;
@@ -421,6 +429,7 @@ namespace FPS_n2 {
 							size++;
 						}
 						if (Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
+							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 							--m_GunCustomSel;
 							if (m_GunCustomSel < 0) {
 								m_GunCustomSel = size - 1;
@@ -430,6 +439,7 @@ namespace FPS_n2 {
 							m_SelAlpha = 2.f;
 						}
 						if (Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
+							SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 							++m_GunCustomSel;
 							if (m_GunCustomSel > size - 1) {
 								m_GunCustomSel = 0;
@@ -674,6 +684,13 @@ namespace FPS_n2 {
 							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp + 64, yp + LineHeight / 2,
 							White, Black, LocalizeParts->Get(1146));
 					}
+				}
+				//
+				{
+					int NowScore = static_cast<int>(SaveData::Instance()->GetParam("score"));
+					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+						FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::TOP,
+						1920 - 48-256, 48, Green, Black, "Score : %05d", NowScore);
 				}
 			}
 			else {

@@ -142,6 +142,7 @@ namespace FPS_n2 {
 		taskstart,
 
 		alarm,
+		returnButton,
 	};
 	enum class VoiceEnum {
 		GameStart000 = 1,//テスト分があるので
