@@ -149,6 +149,7 @@ namespace FPS_n2 {
 			// 
 			ButtonParts->AddStringButton("Start Game", 52, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 3, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
 			ButtonParts->AddStringButton("Customize", 48, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 2, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
+			ButtonParts->AddStringButton("Tutorial", 48, true, BaseScreenWidth - 64 - 48, BaseScreenHeight - 84 - 64 * 1, FontSystem::FontXCenter::RIGHT, FontSystem::FontYCenter::BOTTOM);
 			ButtonParts->AddIconButton("CommonData/UI/setting.png", true, BaseScreenWidth - 96 - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			ButtonParts->AddIconButton("CommonData/UI/credit.png", true, BaseScreenWidth - 64, 64, FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::MIDDLE);
 			// クレジット
@@ -247,9 +248,15 @@ namespace FPS_n2 {
 							KeyGuideParts->SetGuideFlip();
 							break;
 						case 2:
-							OptionPopup::Instance()->SetActive();
+							if (!this->m_IsEnd) {
+								FadeControl::Instance()->SetBlackOut(true);
+							}
+							this->m_IsEnd = true;
 							break;
 						case 3:
+							OptionPopup::Instance()->SetActive();
+							break;
+						case 4:
 							PopUpParts->Add(LocalizeParts->Get(120), (720), (840),
 								[&](int xmin, int ymin, int xmax, int, bool) {
 									this->m_CreditControl->Draw(xmin, ymin, xmax);
@@ -560,6 +567,9 @@ namespace FPS_n2 {
 			case 0:
 				SetNextSelect(0);
 				break;
+			case 2:
+				SetNextSelect(1);
+				break;
 			default:
 				break;
 			}
@@ -671,10 +681,9 @@ namespace FPS_n2 {
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp + 64, yp + LineHeight / 2,
 							White, Black, LocalizeParts->Get(1139));
+						yp -= LineHeight + 12;
 					}
 					{
-						yp -= LineHeight + 12;
-
 						auto prev = OptionParts->GetParamBoolean(EnumSaveParam::ActiveLockOn);
 						OptionParts->SetParamBoolean(EnumSaveParam::ActiveLockOn, CheckBox(xp, yp, OptionParts->GetParamBoolean(EnumSaveParam::ActiveLockOn)));
 						if (prev != OptionParts->GetParamBoolean(EnumSaveParam::ActiveLockOn)) {
@@ -683,6 +692,13 @@ namespace FPS_n2 {
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp + 64, yp + LineHeight / 2,
 							White, Black, LocalizeParts->Get(1146));
+						yp -= LineHeight + 12;
+					}
+					{
+						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+							FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::MIDDLE, xp + 64, yp + LineHeight / 2,
+							White, Black, "Press F1 Display ItemInfo");
+						yp -= LineHeight + 12;
 					}
 				}
 				//
@@ -747,6 +763,59 @@ namespace FPS_n2 {
 								yp += 32;
 							}
 						}
+					}
+				}
+				//
+				if (CheckHitKey(KEY_INPUT_F1) != 0) {
+					int xp1 = 128;
+					int yp1 = 128;
+
+					xp1 += 64;
+					for (int loop = 0; loop < Objects::ItemObjDataManager::Instance()->GetList().size(); ++loop) {
+						auto& item = Objects::ItemObjDataManager::Instance()->Get(loop);
+						int PrevY = yp1;
+						{
+							xp1 -= 64;
+							yp1 += 64;
+							DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - 64, yp1 - 64, xp1 + 64, yp1 + 64, Black, true);
+							DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - 64, yp1 - 64, xp1 + 64, yp1 + 64, Green, false, 3);
+							DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &item->GetIconGraph(), xp1, yp1, (128.f / 512.f) * 1.f, 0.f, true);
+							xp1 += 64;
+							yp1 -= 64;
+						}
+						//Info
+						{
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+								xp1, yp1, Green, Black, item->GetName());
+							yp1 += 24;
+						}
+						yp1 += 24;
+						{
+							auto* OptionParts = OptionManager::Instance();
+							switch ((LanguageType)OptionParts->GetParamInt(EnumSaveParam::Language)) {
+							case LanguageType::Eng:
+								for (auto& info : item->GetInfoEng()) {
+									DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+										FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+										xp1, yp1, Green, Black, info);
+									yp1 += 18;
+								}
+								break;
+							case LanguageType::Jpn:
+								for (auto& info : item->GetInfo()) {
+									DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+										FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+										xp1, yp1, Green, Black, info);
+									yp1 += 18;
+								}
+								break;
+							default:
+								break;
+							}
+						}
+
+						yp1 = PrevY + 144;
 					}
 				}
 			}

@@ -145,20 +145,25 @@ namespace FPS_n2 {
 		returnButton,
 	};
 	enum class VoiceEnum {
-		GameStart000 = 1,//テスト分があるので
-		Mission000,
-		Mission001,
-		Mission002,
-		GameEnd000,
-		Last30,
-		Mumble000,
-		Mumble001,
-		Tutorial001,
-		Tutorial002,
-		Tutorial003,
-		Tutorial004,
-		Tutorial005,
-		Tutorial006,
+		V000 = 1,//テスト分があるので
+		V001,
+		V002,
+		V003,
+		V004,
+		V005,
+
+		V010,
+		V011,
+
+		V100,
+		V101,
+		V102,
+		V103,
+		V104,
+		V105,
+		V106,
+		V107,
+		V108,
 	};
 
 	enum class CharaTypeID {

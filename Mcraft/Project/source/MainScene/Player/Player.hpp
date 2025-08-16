@@ -202,7 +202,72 @@ namespace FPS_n2 {
 			class PlayerControl {
 				std::shared_ptr<Charas::CharacterObj>	m_Chara{ nullptr };
 				std::shared_ptr<AIs::AIControl>			m_AI{ nullptr };
-				std::array<std::pair<int, float>, 5>	m_Inventory{};
+
+				struct Inv {
+					int m_PrevItemID{ InvalidID };
+					int m_ItemID{ InvalidID };
+					float m_timer{ 0.f };
+					float m_AnimTimer{ 0.f };
+
+					float m_Yadd{ 0.f };
+					float m_Scale{ 0.f };
+					float m_Alpha{ 0.f };
+					int m_DrawID{ InvalidID };
+				public:
+					bool HasItem() const noexcept { return m_ItemID != InvalidID; }
+					bool CanPicItem() const noexcept { return !this->HasItem() && this->m_timer == 0.f; }
+					const auto& GetItem() const noexcept { return Objects::ItemObjDataManager::Instance()->GetList().at(this->m_ItemID); }
+					void SetItem(int ID) noexcept {
+						this->m_ItemID = ID;
+						this->m_timer = -0.5f;
+					}
+				public:
+					void Init() noexcept {
+						this->m_ItemID = InvalidID;
+						this->m_timer = 0.f;
+						this->m_PrevItemID = this->m_ItemID;
+						this->m_AnimTimer = 0.f;
+					}
+					void UpdateAnim() noexcept {
+						auto* DXLib_refParts = DXLib_ref::Instance();
+						if (this->m_PrevItemID != this->m_ItemID) {
+							this->m_AnimTimer += DXLib_refParts->GetDeltaTime();
+							float Seek = this->m_AnimTimer / 0.3f;
+							if (this->HasItem()) {
+								//開始アニメ
+								this->m_DrawID = this->m_ItemID;
+								this->m_Yadd = 0.f;
+								if (Seek < 0.8f) {
+									this->m_Scale = Lerp(0.f, 1.2f, Seek / 0.8f);
+								}
+								else {
+									this->m_Scale = Lerp(1.2f, 1.f, (Seek - 0.8f) / (1.f - 0.8f));
+								}
+								this->m_Alpha = Lerp(0.f, 1.f, Seek);
+							}
+							else {
+								//終了アニメ
+								this->m_DrawID = this->m_PrevItemID;
+								this->m_Yadd = Lerp(0.f, 128.f, std::clamp(Seek / 0.8f, 0.f, 1.f));
+								this->m_Scale = 1.f;
+								this->m_Alpha = Lerp(1.f, 0.f, Seek);
+							}
+							if (this->m_AnimTimer >= 0.3f) {
+								this->m_AnimTimer = 0.f;
+								this->m_PrevItemID = this->m_ItemID;
+							}
+						}
+						else {
+							this->m_AnimTimer = 0.f;
+							this->m_DrawID = this->m_ItemID;
+							this->m_Yadd = 0.f;
+							this->m_Scale = 1.f;
+							this->m_Alpha = 1.f;
+						}
+					}
+				};
+
+				std::array<Inv, 5>						m_Inventory{};
 				int										m_Score{ 0 };							//スコア
 				int										m_Kill{ 0 };							//スコア
 				int										m_Hit{ 0 };							//スコア
@@ -235,7 +300,7 @@ namespace FPS_n2 {
 				const auto HasEmptyInventory(void) const noexcept {
 					int count = 0;
 					for (auto& i : this->m_Inventory) {
-						if (i.first == InvalidID) {
+						if (!i.HasItem()) {
 							++count;
 						}
 					}
@@ -243,9 +308,8 @@ namespace FPS_n2 {
 				}
 				bool AddInventory(int ID) noexcept {
 					for (auto& i : this->m_Inventory) {
-						if (i.first == InvalidID) {
-							i.first = ID;
-							i.second = 0.f;
+						if (i.CanPicItem()) {
+							i.SetItem(ID);
 							return true;
 						}
 					}
@@ -253,24 +317,22 @@ namespace FPS_n2 {
 				}
 				bool SubInventory(int ID) noexcept {
 					for (auto& i : this->m_Inventory) {
-						if (i.first == ID) {
-							i.first = InvalidID;
+						if (i.m_ItemID == ID) {
+							i.SetItem(InvalidID);
 							return true;
 						}
 					}
 					return false;
 				}
 				bool SubInventoryIndex(int index) noexcept {
-					if (this->m_Inventory.at(index).first != InvalidID) {
-						this->m_Inventory.at(index).first = InvalidID;
-						return true;
-					}
-					return false;
+					if (!this->m_Inventory.at(index).HasItem()) { return false; }
+					this->m_Inventory.at(index).SetItem(InvalidID);
+					return true;
 				}
 
 				void InitInventory() noexcept {
 					for (auto& i : this->m_Inventory) {
-						i.first = InvalidID;
+						i.Init();
 					}
 				}
 				void		AddScore(int Score) noexcept { this->m_Score += Score; }

@@ -1,4 +1,8 @@
-Name=Item
+Name=6B43 BodyArmor
+Info=敵規格品のボディアーマー。傷ついているがまだ使えそうだ。
+Info=自身のボディーアーマーが損傷している際に交換することができる。
+Info_Eng=敵規格品のボディアーマー。傷ついているがまだ使えそうだ。
+Info_Eng=自身のボディーアーマーが損傷している際に交換することができる。
 Type=Armor
 EnableSpawnBySoldier=TRUE
 Weight=11000

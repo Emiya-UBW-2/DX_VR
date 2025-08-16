@@ -43,7 +43,7 @@ namespace FPS_n2 {
 				}
 				return false;
 			}
-			void			SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float timer, FallObjectType Type) noexcept;
+			void			SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float time, FallObjectType Type) noexcept;
 		public:
 			void				Init_Sub(void) noexcept override {
 				SetActive(false);

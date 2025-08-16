@@ -1083,7 +1083,7 @@ namespace FPS_n2 {
 			this->m_tex.Load("data/tex.png");
 		}
 		//
-		void		BackGroundControl::Init(void) noexcept {
+		void		BackGroundControl::Init(bool IsTutorial) noexcept {
 			auto* OptionParts = OptionManager::Instance();
 			//空
 			this->m_ObjSky.SetDifColorScale(GetColorF(0.9f, 0.9f, 0.9f, 1.0f));
@@ -1092,7 +1092,87 @@ namespace FPS_n2 {
 				this->m_ObjSky.SetMaterialDifColor(loop, GetColorF(0.7f, 0.7f, 0.7f, 1.0f));
 				this->m_ObjSky.SetMaterialAmbColor(loop, GetColorF(0.0f, 0.0f, 0.0f, 1.0f));
 			}
-			if (true) {
+			if (IsTutorial) {
+				//空っぽ
+				SetReferenceCells().SetScale(0);
+
+				int Size = 23;
+				int Rate = 6;
+				int Heights = 10;
+				int Edge = -Rate;
+				int EdgePX = -54;
+				int EdgeP = -0;
+				int Maxheight = 0;
+				for (int xpos = 0; xpos < GetReferenceCells().All; ++xpos) {
+					for (int zpos = 0; zpos < GetReferenceCells().All; ++zpos) {
+						for (int ypos = 0; ypos < GetReferenceCells().All; ++ypos) {
+							SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Cell = s_EmptyBlick;
+						}
+					}
+				}
+				for (int xpos = 0; xpos < GetReferenceCells().All; ++xpos) {
+					for (int zpos = 0; zpos < GetReferenceCells().All; ++zpos) {
+						int xPos = -Size * Rate / 2 + xpos;
+						int zPos = -Size * Rate / 2 + zpos;
+						//外壁
+						if ((-EdgePX <= xpos && xpos <= Size * Rate + EdgePX - 1) && (-EdgeP <= zpos && zpos <= Size * Rate + EdgeP - 1)) {
+							if ((xpos == -EdgePX || xpos == Size * Rate + EdgePX - 1) || (zpos == -EdgeP || zpos == Size * Rate + EdgeP - 1)) {
+								for (int ypos = 0; ypos <= GetReferenceCells().All / 8 - 5; ++ypos) {
+									SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos, ypos, GetReferenceCells().Half + zPos).Cell = 1;
+								}
+							}
+						}
+						//床
+						if ((-EdgePX < xpos && xpos < Size * Rate + EdgePX - 1) && (-EdgeP < zpos && zpos < Size * Rate + EdgeP - 1)) {
+							auto Height = GetReferenceCells().All / 8 - 15;
+							if (Maxheight < Height) {
+								Maxheight = Height;
+							}
+							for (int ypos = 0; ypos <= Height; ++ypos) {
+								SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos, ypos, GetReferenceCells().Half + zPos).Cell = 4;
+							}
+						}
+					}
+				}
+				//内壁
+				for (int zpos = -Edge; zpos < Size * Rate + Edge; ++zpos) {
+					for (int xpos = -Edge; xpos < Size * Rate + Edge; ++xpos) {
+						auto SetWall = [&](int xt, int zt) {
+							int xPos = -Size * Rate / 2 + xpos + xt;
+							int zPos = -Size * Rate / 2 + zpos + zt;
+							auto Height = GetReferenceCells().All / 8 - 15;
+							for (int ypos = Height + 1; ypos <= Height + Heights; ++ypos) {
+								SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos, ypos, GetReferenceCells().Half + zPos).Cell = 2;
+							}
+							};
+						if ((-EdgePX <= xpos && xpos <= Size * Rate + EdgePX - 1)) {
+							if (zpos == Size / 2 * Rate) {
+								SetWall(0, 0);
+							}
+							if (zpos == (Size / 2) * Rate - 1) {
+								SetWall(0, 0);
+							}
+						}
+
+					}
+				}
+				for (int xpos = 0; xpos < GetReferenceCells().All; ++xpos) {
+					for (int zpos = 0; zpos < GetReferenceCells().All; ++zpos) {
+						for (int ypos = 0; ypos < GetReferenceCells().All; ++ypos) {
+							if (GetReferenceCells().GetCellBuf(xpos, ypos, zpos).GetCell() != s_EmptyBlick) {
+								SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Life = 100;
+							}
+							else {
+								SetReferenceCells().SetCellBuf(xpos, ypos, zpos).Life = 0;
+							}
+						}
+					}
+				}
+				this->m_ObjBuilds.resize(1);
+				this->m_ObjBuilds.back().Set(0);
+				this->m_ObjBuilds.back().SetPosition(Vector3DX::zero(), Vector3DX::zero());
+			}
+			else if (true) {
 				//空っぽ
 				SetReferenceCells().SetScale(0);
 
@@ -1167,7 +1247,7 @@ namespace FPS_n2 {
 							for (int ypos = Height + 1; ypos <= Height + Heights; ++ypos) {
 								SetReferenceCells().SetCellBuf(GetReferenceCells().Half + xPos, ypos, GetReferenceCells().Half + zPos).Cell = 2;
 							}
-							};
+				};
 						int xp = xpos / Rate;
 						int zp = zpos / Rate;
 						if (!mazeControl.PosIsPath(xp, zp) && (xpos % Rate == 0) && (zpos % Rate == 0)) {
@@ -1193,8 +1273,8 @@ namespace FPS_n2 {
 								}
 							}
 						}
-					}
-				}
+			}
+		}
 				//*/
 				/*
 				for (int zpos = -Edge * 2; zpos < Size * Rate + Edge * 3; ++zpos) {

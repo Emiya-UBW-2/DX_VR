@@ -413,7 +413,7 @@ namespace FPS_n2 {
 				if (this->m_IsHit) {
 					this->m_IsHit = false;
 				}
-				else {
+				else if (m_IsIntercept) {
 					float SpeedUP = 1.f;
 					float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::TeiziTaisha);
 					if (value > 0.f) {

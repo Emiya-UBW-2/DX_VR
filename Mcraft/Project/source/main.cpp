@@ -70,6 +70,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::Guns::GunPartsDataManager::Create();
 	FPS_n2::Objects::AmmoDataManager::Create();
 	FPS_n2::Objects::ItemObjDataManager::Create();
+	//
+	{
+		std::string Path = "data/Item/";
+		std::vector<WIN32_FIND_DATA> pData;
+		GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+		for (auto& data : pData) {
+			std::string ChildPath = Path;
+			ChildPath += data.cFileName;
+			ChildPath += "/";
+			FPS_n2::Objects::ItemObjDataManager::Instance()->Add(ChildPath);
+		}
+	}
 	//初期セーブ
 	{
 		FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.clear();
@@ -109,12 +121,20 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	auto Titlescene = std::make_shared<FPS_n2::Sceneclass::TitleScene>();
 	auto MainLoadScenePtr = std::make_shared<FPS_n2::Sceneclass::LoadScene>();
 	auto MainGameScenePtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
+	auto TutorialLoadScenePtr = std::make_shared<FPS_n2::Sceneclass::LoadScene>();
+	auto TutorialScenePtr = std::make_shared<FPS_n2::Sceneclass::MainGameScene>();
+	MainGameScenePtr->SetTutorial(false);
+	TutorialScenePtr->SetTutorial(true);
 	//遷移先指定
 	TitleLoadScenePtr->SetNextSceneList(0, Titlescene);
 	Titlescene->SetNextSceneList(0, MainLoadScenePtr);
+	Titlescene->SetNextSceneList(1, TutorialLoadScenePtr);
 	MainLoadScenePtr->SetNextSceneList(0, MainGameScenePtr);
+	TutorialLoadScenePtr->SetNextSceneList(0, TutorialScenePtr);
 	MainGameScenePtr->SetNextSceneList(0, TitleLoadScenePtr);
 	MainGameScenePtr->SetNextSceneList(1, MainLoadScenePtr);
+	TutorialScenePtr->SetNextSceneList(0, TitleLoadScenePtr);
+	TutorialScenePtr->SetNextSceneList(1, MainLoadScenePtr);
 	SceneControl::Instance()->SetFirstScene(TitleLoadScenePtr);
 	//SceneControl::Instance()->SetFirstScene(MainLoadScenePtr);
 	//メインロジック開始

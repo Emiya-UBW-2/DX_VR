@@ -37,7 +37,6 @@ namespace FPS_n2 {
 					ChildPath += data.cFileName;
 					ChildPath += "/";
 					ObjectManager::Instance()->LoadModelBefore(ChildPath);
-					Objects::ItemObjDataManager::Instance()->Add(ChildPath);
 				}
 			}
 			//
@@ -156,11 +155,14 @@ namespace FPS_n2 {
 					}
 				}
 			}
-			PlayerMngr->SetHelicopter(std::make_shared<Objects::HelicopterObj>());
-			ObjectManager::Instance()->InitObject(PlayerMngr->GetHelicopter(), "data/model/hindD/");
+			if (!this->m_IsTutorial) {
+				PlayerMngr->SetHelicopter(std::make_shared<Objects::HelicopterObj>());
+				ObjectManager::Instance()->InitObject(PlayerMngr->GetHelicopter(), "data/model/hindD/");
+			}
 
 			PlayerMngr->SetTeamHelicopter(std::make_shared<Objects::TeamHelicopterObj>());
 			ObjectManager::Instance()->InitObject(PlayerMngr->GetTeamHelicopter(), "data/model/UH60/");
+			PlayerMngr->GetTeamHelicopter()->SetIsIntercept(!this->m_IsTutorial);
 
 			//PlayerMngr->SetVehicle(std::make_shared<Objects::VehicleObj>());
 			//ObjectManager::Instance()->InitObject(PlayerMngr->GetVehicle(), "data/model/BMP3/");
@@ -192,7 +194,7 @@ namespace FPS_n2 {
 
 			PostPassParts->SetShadowScale(0.5f);
 			//
-			BackGroundParts->Init();
+			BackGroundParts->Init(this->m_IsTutorial);
 			//
 			Vector3DX LightVec = Vector3DX::vget(0.05f, -0.2f, -0.15f); LightVec = LightVec.normalized();
 			PostPassParts->SetAmbientLight(LightVec);
@@ -224,71 +226,156 @@ namespace FPS_n2 {
 			for (int loop = 0; loop < PlayerMngr->GetPlayerNum(); ++loop) {
 				auto& chara = PlayerMngr->GetPlayer(loop)->GetChara();
 				Vector3DX TargetPos;
-				if (loop == PlayerMngr->GetWatchPlayerID()) {
-					while (true) {
-						TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
-						Vector3DX Vec = TargetPos; Vec.y = 0.f;
-						if (Vec.sqrMagnitude() <= (5.f * Scale3DRate) * (5.f * Scale3DRate)) {
-							Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
-							if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
-								TargetPos = EndPos;
-							}
-							break;
+				if (this->m_IsTutorial) {
+					if (loop == PlayerMngr->GetWatchPlayerID()) {
+						TargetPos = Vector3DX::vget(0.f, 0.f, 16.f) * Scale3DRate;
+						Vector3DX EndPos = TargetPos - Vector3DX::up() * 40.0f * Scale3DRate;
+						if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+							TargetPos = EndPos;
 						}
+					}
+					else if (loop == 1) {
+						TargetPos = Vector3DX::vget(0.f, 0.f, 10.f) * Scale3DRate;
+						Vector3DX EndPos = TargetPos - Vector3DX::up() * 40.0f * Scale3DRate;
+						if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+							TargetPos = EndPos;
+						}
+					}
+					else {
+						TargetPos = Vector3DX::vget((loop - 2) * -0.5f, 0.f, -8.f + -(loop-2) * 2.f) * Scale3DRate;
+						Vector3DX EndPos = TargetPos - Vector3DX::up() * 40.0f * Scale3DRate;
+						if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+							TargetPos = EndPos;
+						}
+					}
+					//人の座標設定
+					if (loop == PlayerMngr->GetWatchPlayerID()) {
+						float RunTime = 0.f;
+						float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::Runner);
+						if (value > 0.f) {
+							RunTime = value;
+						}
+						chara->Spawn(deg2rad(0.0f), deg2rad(0), TargetPos, 0, true, RunTime, false);
+					}
+					else {
+						chara->Spawn(deg2rad(0.0f), deg2rad(180), TargetPos, 0, true, 0.f);
 					}
 				}
 				else {
-					while (true) {
-						TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
-						Vector3DX Vec = ViewChara->GetMove().GetPos() - TargetPos; Vec.y = 0.f;
-						if (Vec.sqrMagnitude() > (5.f * Scale3DRate) * (5.f * Scale3DRate)) {
-							//
-							Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
-							if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
-								TargetPos = EndPos;
-							}
-							EndPos = TargetPos;
-							if (BackGroundParts->CheckLinetoMap(ViewChara->GetMove().GetPos() + Vector3DX::up() * 1.0f * Scale3DRate, &EndPos) != 0) {
+					if (loop == PlayerMngr->GetWatchPlayerID()) {
+						while (true) {
+							TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
+							Vector3DX Vec = TargetPos; Vec.y = 0.f;
+							if (Vec.sqrMagnitude() <= (5.f * Scale3DRate) * (5.f * Scale3DRate)) {
+								Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
+								if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+									TargetPos = EndPos;
+								}
 								break;
 							}
 						}
 					}
-				}
-				//人の座標設定
-				if (loop == PlayerMngr->GetWatchPlayerID()) {
-					float RunTime = 0.f;
-					float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::Runner);
-					if (value > 0.f) {
-						RunTime = value;
+					else {
+						while (true) {
+							TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
+							Vector3DX Vec = ViewChara->GetMove().GetPos() - TargetPos; Vec.y = 0.f;
+							if (Vec.sqrMagnitude() > (5.f * Scale3DRate) * (5.f * Scale3DRate)) {
+								//
+								Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
+								if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+									TargetPos = EndPos;
+								}
+								EndPos = TargetPos;
+								if (BackGroundParts->CheckLinetoMap(ViewChara->GetMove().GetPos() + Vector3DX::up() * 1.0f * Scale3DRate, &EndPos) != 0) {
+									break;
+								}
+							}
+						}
 					}
-					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true, RunTime);
-				}
-				else {
-					chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true, 0.f);
+					//人の座標設定
+					if (loop == PlayerMngr->GetWatchPlayerID()) {
+						float RunTime = 0.f;
+						float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::Runner);
+						if (value > 0.f) {
+							RunTime = value;
+						}
+						chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true, RunTime);
+					}
+					else {
+						chara->Spawn(deg2rad(0.0f), deg2rad(GetRand(360)), TargetPos, 0, true, 0.f);
+					}
 				}
 			}
 
-			for (int loop = 0; loop < 20; ++loop) {
-				Vector3DX TargetPos;
-				while (true) {
-					TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
-					Vector3DX Vec = ViewChara->GetMove().GetPos() - TargetPos; Vec.y = 0.f;
-					if (Vec.sqrMagnitude() > (5.f * Scale3DRate) * (5.f * Scale3DRate)) {
-						break;
+			if (this->m_IsTutorial) {
+				for (int loop = 0; loop < Objects::ItemObjDataManager::Instance()->GetList().size(); ++loop) {
+					Vector3DX TargetPos;
+					TargetPos = Vector3DX::vget(1.5f, 0.f, -8.f-loop * 1.f) * Scale3DRate;
+					{
+						Vector3DX EndPos = TargetPos - Vector3DX::up() * 40.0f * Scale3DRate;
+						if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+							TargetPos = EndPos;
+						}
 					}
+					Objects::ItemObjPool::Instance()->Put(loop,
+						TargetPos,
+						Vector3DX::vget(GetRandf(1.f), 1.f, GetRandf(1.f)) * Scale3DRate * 0.01f
+					);
+				}
+			}
+			else {
+				for (int loop = 0; loop < 20; ++loop) {
+					Vector3DX TargetPos;
+					while (true) {
+						TargetPos = BackGroundParts->GetBuildData().at(static_cast<size_t>(GetRand(static_cast<int>(BackGroundParts->GetBuildData().size()) - 1))).GetPos();
+						Vector3DX Vec = ViewChara->GetMove().GetPos() - TargetPos; Vec.y = 0.f;
+						if (Vec.sqrMagnitude() > (5.f * Scale3DRate) * (5.f * Scale3DRate)) {
+							break;
+						}
+					}
+					{
+						Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
+						if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
+							TargetPos = EndPos;
+						}
+					}
+					Objects::ItemObjPool::Instance()->Put(loop % Objects::ItemObjDataManager::Instance()->GetList().size(),
+						TargetPos,
+						Vector3DX::vget(GetRandf(1.f), 1.f, GetRandf(1.f)) * Scale3DRate * 0.01f
+					);
+				}
+			}
+			if (this->m_IsTutorial) {
+				m_TaskInfoList.clear();
+				{
+					std::pair<TaskInfo, int> Tmp;
+					Tmp.first.m_TaskType = TaskType::KillEnemy;
+					Tmp.first.m_Count = 1;
+					Tmp.second = 0;
+					m_TaskInfoList.emplace_back(Tmp);
 				}
 				{
-					Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
-					if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
-						TargetPos = EndPos;
-					}
+					std::pair<TaskInfo, int> Tmp;
+					Tmp.first.m_TaskType = TaskType::KillEnemy;
+					Tmp.first.m_Count = 3;
+					Tmp.second = 0;
+					m_TaskInfoList.emplace_back(Tmp);
 				}
-				Objects::ItemObjPool::Instance()->Put(loop % Objects::ItemObjDataManager::Instance()->GetList().size(),
-					TargetPos,
-					Vector3DX::vget(GetRandf(1.f), 1.f, GetRandf(1.f)) * Scale3DRate * 0.01f
-				);
+				{
+					std::pair<TaskInfo, int> Tmp;
+					Tmp.first.m_TaskType = TaskType::Obtain;
+					for (int loop = 0; loop < Objects::ItemObjDataManager::Instance()->GetList().size(); ++loop) {
+						if (Objects::ItemObjDataManager::Instance()->Get(loop)->EnableSpawnBySoldier()) {
+							Tmp.first.m_ItemID = loop;
+							break;
+						}
+					}
+					Tmp.first.m_Count = 1;
+					Tmp.second = 0;
+					m_TaskInfoList.emplace_back(Tmp);
+				}
 			}
-			{
+			else{
 				m_TaskInfoList.clear();
 				{
 					std::pair<TaskInfo, int> Tmp;
@@ -311,9 +398,12 @@ namespace FPS_n2 {
 			}
 			{
 				Vector3DX TargetPos = Vector3DX::zero();
-
-				TargetPos = Matrix3x3DX::Vtrans(Vector3DX::vget(0.f, 0.f, 16.f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
-
+				if (this->m_IsTutorial) {
+					TargetPos = Vector3DX::vget(0.f, 0.f, -16.f) * Scale3DRate;
+				}
+				else {
+					TargetPos = Matrix3x3DX::Vtrans(Vector3DX::vget(0.f, 0.f, 16.f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180))));
+				}
 				{
 					Vector3DX EndPos = TargetPos - Vector3DX::up() * 50.0f * Scale3DRate;
 					if (BackGroundParts->CheckLinetoMap(TargetPos + Vector3DX::up() * 10.0f * Scale3DRate, &EndPos) != 0) {
@@ -385,7 +475,9 @@ namespace FPS_n2 {
 			this->m_IsGameClear = false;
 
 			this->m_IsGameReady = false;
-			//this->m_IsGameReady = true;
+			if (this->m_IsTutorial) {
+				this->m_IsGameReady = true;
+			}
 			this->m_StartAnimTimer = 0.f;
 			this->m_IsSkipMovie = false;
 			this->m_MovieEndTimer = 1.5f;
@@ -395,9 +487,14 @@ namespace FPS_n2 {
 			//posBuf.y = -25.0f * Scale3DRate;
 			//PlayerMngr->GetVehicle()->Spawn(std::atan2f(posBuf.x, posBuf.z), posBuf);
 
-			if (SaveData::Instance()->GetParam("BuffNextRound") > 0) {
-				PlayerMngr->GetPlayer(0)->AddScore(1000);
-				SaveData::Instance()->SetParam("BuffNextRound", 0);
+			if (!this->m_IsTutorial) {
+				if (SaveData::Instance()->GetParam("BuffNextRound") > 0) {
+					PlayerMngr->GetPlayer(0)->AddScore(1000);
+					SaveData::Instance()->SetParam("BuffNextRound", 0);
+				}
+			}
+			if (this->m_IsTutorial) {
+				m_TextID = 100;
 			}
 		}
 		bool			MainGameScene::Update_Sub(void) noexcept {
@@ -506,13 +603,65 @@ namespace FPS_n2 {
 					return true;
 				}
 			}
+
+			{
+				int SoundID = InvalidID;
+				if (m_TextID < 10) {
+					SoundID = static_cast<int>(VoiceEnum::V000) + m_TextID;
+				}
+				else if (m_TextID < 20) {
+					SoundID = static_cast<int>(VoiceEnum::V010) + (m_TextID - 10);
+				}
+				else if (m_TextID < 100) {
+				}
+				else if (m_TextID < 110) {
+					SoundID = static_cast<int>(VoiceEnum::V100) + (m_TextID - 100);
+				}
+				if (!this->m_IsTutorial) {
+					if (m_TextID != InvalidID) {
+						if (m_PrevTextSoundID != SoundID) {
+							if (SoundID != InvalidID) {
+								if (SE->Get(SoundType::VOICE, m_PrevTextSoundID)->CheckPlay()) {
+									SE->Get(SoundType::VOICE, m_PrevTextSoundID)->StopAll();
+								}
+								SE->Get(SoundType::VOICE, SoundID)->Play(DX_PLAYTYPE_BACK, true);
+								m_TextTimer = static_cast<float>(SE->Get(SoundType::VOICE, SoundID)->GetTotalTIme()) / 1000.f;
+							}
+							else {
+								m_TextTimer = 3.f;
+							}
+							m_PrevTextSoundID = SoundID;
+						}
+						if (m_TextTimer > 0.f) {
+							m_TextTimer = std::max(m_TextTimer - DXLib_refParts->GetDeltaTime(), 0.f);
+							if (m_TextTimer == 0.f) {
+								m_TextID = InvalidID;
+							}
+						}
+					}
+				}
+				else {
+					if (m_PrevTextSoundID != SoundID) {
+						if (SoundID != InvalidID) {
+							if (SE->Get(SoundType::VOICE, m_PrevTextSoundID)->CheckPlay()) {
+								SE->Get(SoundType::VOICE, m_PrevTextSoundID)->StopAll();
+							}
+							SE->Get(SoundType::VOICE, SoundID)->Play(DX_PLAYTYPE_BACK, true);
+						}
+						m_PrevTextSoundID = SoundID;
+					}
+				}
+			}
+
 			if (!this->m_IsGameReady) {
 				//OPムービー制御
 				{
 					SetFogEnable(false);
 					if (m_StartAnimTimer == 0.f) {
 						SE->Get(SoundType::BGM, 1)->Play(DX_PLAYTYPE_BACK, true);
-						SE->Get(SoundType::VOICE, static_cast<int>(VoiceEnum::GameStart000))->Play(DX_PLAYTYPE_BACK, true);
+						if (!this->m_IsTutorial) {
+							m_TextID = 0;
+						}
 					}
 					m_StartAnimTimer += DXLib_refParts->GetDeltaTime();
 
@@ -629,29 +778,31 @@ namespace FPS_n2 {
 					//セーブデータにIDを追加
 					int ID = static_cast<int>(m_SkillSelect.at(m_SkillSelectNow));
 
-					if (ID == static_cast<int>(Player::SkillType::ADDSCORE)) {
-						SaveData::Instance()->SetParam("BuffNextRound", 1);
-					}
-					else {
-						if (SaveData::Instance()->GetParam("skill" + std::to_string(ID)) > 0) {
-							SaveData::Instance()->SetParam("skill" + std::to_string(ID), SaveData::Instance()->GetParam("skill" + std::to_string(ID)) + 1);
+					if (!this->m_IsTutorial) {
+						if (ID == static_cast<int>(Player::SkillType::ADDSCORE)) {
+							SaveData::Instance()->SetParam("BuffNextRound", 1);
 						}
 						else {
-							SaveData::Instance()->SetParam("skill" + std::to_string(ID), 1);
+							if (SaveData::Instance()->GetParam("skill" + std::to_string(ID)) > 0) {
+								SaveData::Instance()->SetParam("skill" + std::to_string(ID), SaveData::Instance()->GetParam("skill" + std::to_string(ID)) + 1);
+							}
+							else {
+								SaveData::Instance()->SetParam("skill" + std::to_string(ID), 1);
+							}
 						}
-					}
-					if (SaveData::Instance()->GetParam("score") > 0) {
-						SaveData::Instance()->SetParam("score", SaveData::Instance()->GetParam("score") + ViewPlayer->GetScore());
-					}
-					else {
-						SaveData::Instance()->SetParam("score", ViewPlayer->GetScore());
-					}
-					SaveData::Instance()->SetParam("HighScore", std::max(SaveData::Instance()->GetParam("HighScore"), SaveData::Instance()->GetParam("score")));
-					if (SaveData::Instance()->GetParam("round") > 0) {
-						SaveData::Instance()->SetParam("round", SaveData::Instance()->GetParam("round") + 1);
-					}
-					else {
-						SaveData::Instance()->SetParam("round", 1);
+						if (SaveData::Instance()->GetParam("score") > 0) {
+							SaveData::Instance()->SetParam("score", SaveData::Instance()->GetParam("score") + ViewPlayer->GetScore());
+						}
+						else {
+							SaveData::Instance()->SetParam("score", ViewPlayer->GetScore());
+						}
+						SaveData::Instance()->SetParam("HighScore", std::max(SaveData::Instance()->GetParam("HighScore"), SaveData::Instance()->GetParam("score")));
+						if (SaveData::Instance()->GetParam("round") > 0) {
+							SaveData::Instance()->SetParam("round", SaveData::Instance()->GetParam("round") + 1);
+						}
+						else {
+							SaveData::Instance()->SetParam("round", 1);
+						}
 					}
 					if (ReturnTitle) {
 						SetNextSelect(0);
@@ -826,6 +977,10 @@ namespace FPS_n2 {
 						if (!Prev) {
 							KeyGuideParts->SetGuideFlip();
 							SceneParts->SetPauseEnable(true);
+
+							if (m_TextID == 100) {
+								m_TextID = 101;
+							}
 						}
 						float prevBattleTimer = this->m_BattleTimer;
 						this->m_BattleTimer = std::max(this->m_BattleTimer - DXLib_refParts->GetDeltaTime(), 0.0f);
@@ -854,7 +1009,9 @@ namespace FPS_n2 {
 									}
 									SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
 									m_AnnounceTimer = 1.f;
-									SE->Get(SoundType::VOICE,static_cast<int>(VoiceEnum::Mission001))->Play(DX_PLAYTYPE_BACK, true);
+									if (!this->m_IsTutorial) {
+										m_TextID = 2;
+									}
 								}
 								else {
 									if ((static_cast<int>(this->m_BattleTimer) != static_cast<int>(prevBattleTimer))) {
@@ -862,7 +1019,9 @@ namespace FPS_n2 {
 											SideLogParts->Add(5.0f, 0.0f, Red, LocalizeParts->Get(4002));
 											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
 											m_AnnounceTimer = 1.f;
-											SE->Get(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission002))->Play(DX_PLAYTYPE_BACK, true);
+											if (!this->m_IsTutorial) {
+												m_TextID = 3;
+											}
 										}
 									}
 								}
@@ -874,7 +1033,9 @@ namespace FPS_n2 {
 										SideLogParts->Add(5.0f, 0.0f, Red, LocalizeParts->Get(4000));
 										SE->Get(SoundType::SE, static_cast<int>(SoundEnum::announce))->Play(DX_PLAYTYPE_BACK, true);
 										m_AnnounceTimer = 1.f;
-										SE->Get(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission000))->Play(DX_PLAYTYPE_BACK, true);
+										if (!this->m_IsTutorial) {
+											m_TextID = 1;
+										}
 									}
 								}
 							}
@@ -888,7 +1049,9 @@ namespace FPS_n2 {
 							}
 							if ((static_cast<int>(this->m_BattleTimer) != static_cast<int>(prevBattleTimer))) {
 								if (static_cast<int>(this->m_BattleTimer) == 30) {
-									SE->Get(SoundType::VOICE, static_cast<int>(VoiceEnum::Last30))->Play(DX_PLAYTYPE_BACK, true);
+									if (!this->m_IsTutorial) {
+										m_TextID = 5;
+									}
 								}
 							}
 						}
@@ -992,39 +1155,32 @@ namespace FPS_n2 {
 					bool isFirst = true;
 					bool isArmerHealing = true;
 					bool isPressed = false;
-					bool HasTaskItem = false;
+					int TaskItemID = InvalidID;
 					if (m_TaskInfoList.size() > 0 && m_TaskInfoList.begin()->first.m_TaskType == TaskType::Obtain) {
-						for (auto& ID : ViewPlayer->SetInventory()) {
-							if (ID.first != InvalidID) {
-								if (m_TaskInfoList.begin()->first.m_ItemID == ID.first) {
-									HasTaskItem = true;
-									break;
-								}
+						for (auto& ID : ViewPlayer->GetInventory()) {
+							if (!ID.HasItem()) { continue; }
+							if (m_TaskInfoList.begin()->first.m_ItemID == ID.m_ItemID) {
+								TaskItemID = ID.m_ItemID;
+								break;
 							}
 						}
 					}
 					for (auto& ID : ViewPlayer->SetInventory()) {
-						if (ID.first != InvalidID) {
+						ID.m_timer += DXLib_refParts->GetDeltaTime();
+						if (ID.HasItem()) {
 							bool IsPress = false;
-							if (isFirst) {
-								if (this->m_IsAddScoreArea) {
-									//エリア中では納品アイテムから先に捨てる
-									if ((HasTaskItem && m_TaskInfoList.begin()->first.m_ItemID == ID.first) || !HasTaskItem) {
-										isFirst = false;
-										IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE).GetKey().press();
-									}
-								}
-								else {
-									//エリア外では納品アイテム以外から先に捨てる
-									if ((HasTaskItem && m_TaskInfoList.begin()->first.m_ItemID != ID.first) || !HasTaskItem) {
-										isFirst = false;
-										IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE).GetKey().press();
-									}
-								}
+							if (
+								isFirst && (
+									(TaskItemID == InvalidID) ||								//タスクがないときか
+									(this->m_IsAddScoreArea && TaskItemID == ID.m_ItemID) ||	//タスクがあってエリア中では納品アイテムから先に捨てる
+									!(this->m_IsAddScoreArea || TaskItemID == ID.m_ItemID)		//タスクがあってエリア外では納品アイテム以外から先に捨てる
+									)
+								) {
+								isFirst = false;
+								IsPress |= Pad->GetPadsInfo(Controls::PADS::ITEMDELETE).GetKey().press();
 							}
 							if (isArmerHealing && IsPressArmor) {
-								auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
-								switch (item->GetItemType()) {
+								switch (ID.GetItem()->GetItemType()) {
 								case Objects::ItemType::Helmet:
 									if (ViewChara->GetHeadAP().GetPoint() != ViewChara->GetHeadAP().GetMax()) {
 										IsPress |= true;
@@ -1059,17 +1215,19 @@ namespace FPS_n2 {
 							}
 
 							if (IsPress) {
-								ID.second += DXLib_refParts->GetDeltaTime();
-								if (ID.second > 0.5f) {
-									auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
+								if (ID.m_timer > 0.5f) {
+									ID.m_timer = -0.5f;
 									//アーマーヒール
 									if (IsPressArmor) {
-										switch (item->GetItemType()) {
+										switch (ID.GetItem()->GetItemType()) {
 										case Objects::ItemType::Helmet:
 											ViewChara->HealHelmet();
 											break;
 										case Objects::ItemType::Armor:
 											ViewChara->HealArmor();
+											if (m_TextID == 102) {
+												m_TextID = 103;
+											}
 											break;
 										default:
 											break;
@@ -1077,12 +1235,13 @@ namespace FPS_n2 {
 									}
 									else {
 										if (this->m_IsAddScoreArea) {
+											auto Score = ID.GetItem()->GetScore();
 											//納品
-											PlayerMngr->GetPlayer(0)->AddScore(item->GetScore());
-											SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(205)) + " +" + std::to_string(item->GetScore())).c_str());
+											PlayerMngr->GetPlayer(0)->AddScore(Score);
+											SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(205)) + " +" + std::to_string(Score)).c_str());
 											SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Delivery))->Play(DX_PLAYTYPE_BACK, true);
 											//タスク
-											if (m_TaskInfoList.size() > 0 && m_TaskInfoList.begin()->first.m_TaskType == TaskType::Obtain && m_TaskInfoList.begin()->first.m_ItemID == ID.first) {
+											if (m_TaskInfoList.size() > 0 && m_TaskInfoList.begin()->first.m_TaskType == TaskType::Obtain && m_TaskInfoList.begin()->first.m_ItemID == ID.m_ItemID) {
 												++m_TaskInfoList.begin()->second;
 												if (m_TaskInfoList.begin()->second >= m_TaskInfoList.begin()->first.m_Count) {
 													m_TaskInfoList.erase(m_TaskInfoList.begin());
@@ -1091,16 +1250,24 @@ namespace FPS_n2 {
 													SideLogParts->Add(5.0f, 0.0f, Yellow, LocalizeParts->Get(250 + static_cast<int>(m_TaskInfoList.begin()->first.m_TaskType)));
 													SE->Get(SoundType::SE, static_cast<int>(SoundEnum::taskstart))->Play(DX_PLAYTYPE_BACK, true);
 													this->m_TaskClearOnce = true;
-													SE->Get(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble001))->Play(DX_PLAYTYPE_BACK, true);
+													if (!this->m_IsTutorial) {
+														m_TextID = 11;
+													}
+													if (m_TextID == 105) {
+														m_TextID = 106;
+													}
+												}
+											}
+											else {
+												if (m_TextID == 106) {
+													m_TextID = 107;
 												}
 											}
 										}
 										else {
-											//auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
 											Vector3DX Vec = ViewChara->GetEyeRotationCache().zvec() * -1.f;
 											Vec.y = std::clamp(Vec.y, 0.1f, 0.3f); Vec = Vec.normalized();
-
-											Objects::ItemObjPool::Instance()->Put(ID.first,
+											Objects::ItemObjPool::Instance()->Put(ID.m_ItemID,
 												ViewChara->GetFrameWorldMat(Charas::CharaFrame::Upper2).pos(),
 												Vec * (10.f * Scale3DRate)
 											);
@@ -1111,9 +1278,17 @@ namespace FPS_n2 {
 								}
 							}
 							else {
-								ID.second = 0.f;
+								if (ID.m_timer >= 0.f) {
+									ID.m_timer = 0.f;
+								}
 							}
 						}
+						else {
+							if (ID.m_timer >= 0.f) {
+								ID.m_timer = 0.f;
+							}
+						}
+						ID.UpdateAnim();
 						++loop;
 					}
 				}
@@ -1137,6 +1312,9 @@ namespace FPS_n2 {
 						isEnd = true;
 					}
 					if (isEnd) {
+						if (this->m_IsTutorial) {
+							m_TextID = 108;
+						}
 						m_IsGameClear = true;
 						m_IsGameClearEnd = false;
 						m_IsSkillSelect = false;
@@ -1145,15 +1323,16 @@ namespace FPS_n2 {
 						m_GameEndScreen.GraphFilterBlt(PostPassEffect::Instance()->GetBufferScreen(), DX_GRAPH_FILTER_DOWN_SCALE, 1);
 						SE->Get(SoundType::SE, static_cast<int>(SoundEnum::resultEnv))->Play(DX_PLAYTYPE_BACK, true);
 						SE->Get(SoundType::BGM, 2)->Play(DX_PLAYTYPE_BACK, true);
-						SE->Get(SoundType::VOICE, static_cast<int>(VoiceEnum::GameEnd000))->Play(DX_PLAYTYPE_BACK, true);
+						if (!this->m_IsTutorial) {
+							m_TextID = 4;
+						}
 						//納品
-						for (auto& ID : ViewPlayer->SetInventory()) {
-							if (ID.first != InvalidID) {
-								auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
-								PlayerMngr->GetPlayer(0)->AddScore(item->GetScore());
-								SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(205)) + " +" + std::to_string(item->GetScore())).c_str());
-								SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Delivery))->Play(DX_PLAYTYPE_BACK, true);
-							}
+						for (auto& ID : ViewPlayer->GetInventory()) {
+							if (!ID.HasItem()) { continue; }
+							auto Score = ID.GetItem()->GetScore();
+							PlayerMngr->GetPlayer(0)->AddScore(Score);
+							SideLogParts->Add(5.0f, 0.0f, Green, ((std::string)(LocalizeParts->Get(205)) + " +" + std::to_string(Score)).c_str());
+							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Delivery))->Play(DX_PLAYTYPE_BACK, true);
 						}
 					}
 				}
@@ -1224,7 +1403,11 @@ namespace FPS_n2 {
 							chara->Input(MyInput);
 						}
 						else {
-							if (!SceneParts->IsPause() && FadeControl::Instance()->IsClear() && IsStartedBattle()) {
+							if (
+								!SceneParts->IsPause() &&
+								FadeControl::Instance()->IsClear() &&
+								IsStartedBattle() &&
+								!this->m_IsTutorial) {
 								chara->Input(PlayerMngr->GetPlayer(loop)->GetAI()->Update());//AIに入力させる
 							}
 						}
@@ -1232,7 +1415,9 @@ namespace FPS_n2 {
 						chara->PopDamageEvent(&DamageEvents);
 					}
 					//PlayerMngr->GetVehicle()->PopDamageEvent(&DamageEvents);
-					PlayerMngr->GetHelicopter()->PopDamageEvent(&DamageEvents);
+					if (PlayerMngr->GetHelicopter()) {
+						PlayerMngr->GetHelicopter()->PopDamageEvent(&DamageEvents);
+					}
 					PlayerMngr->GetTeamHelicopter()->PopDamageEvent(&DamageEvents);
 				}
 				//ダメージイベント
@@ -1258,18 +1443,28 @@ namespace FPS_n2 {
 							SideLogParts->Add(5.0f, 0.0f, Yellow, LocalizeParts->Get(250 + static_cast<int>(m_TaskInfoList.begin()->first.m_TaskType)));
 							SE->Get(SoundType::SE, static_cast<int>(SoundEnum::taskstart))->Play(DX_PLAYTYPE_BACK, true);
 							this->m_TaskClearOnce = true;
-							SE->Get(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble000))->Play(DX_PLAYTYPE_BACK, true);
+							if (!this->m_IsTutorial) {
+								m_TextID = 10;
+							}
+							if (m_TextID == 101) {
+								m_TextID = 102;
+							}
+							else if (m_TextID <= 104) {
+								m_TextID = 105;
+							}
 						}
 					}
 				}
 				if (!ViewChara->IsAlive()) {
 					if (!this->m_IsEnd) {
 						FadeControl::Instance()->SetBlackOut(true, 3.f);
-						for (int loop = 0; loop < static_cast<int>(Player::SkillType::Max); ++loop) {
-							SaveData::Instance()->SetParam("skill" + std::to_string(loop), 0);
+						if (!this->m_IsTutorial) {
+							for (int loop = 0; loop < static_cast<int>(Player::SkillType::Max); ++loop) {
+								SaveData::Instance()->SetParam("skill" + std::to_string(loop), 0);
+							}
+							SaveData::Instance()->SetParam("score", 0);
+							SaveData::Instance()->SetParam("round", 0);
 						}
-						SaveData::Instance()->SetParam("score", 0);
-						SaveData::Instance()->SetParam("round", 0);
 					}
 					this->m_IsEnd = true;
 				}
@@ -1379,6 +1574,12 @@ namespace FPS_n2 {
 			ObjMngr->UpdateObject();
 			ObjMngr->LateUpdateObject();
 			Objects::AmmoLinePool::Instance()->Update();
+			//
+			if (BackGroundParts->PopGrenadeBomb()) {
+				if (m_TextID <= 103) {
+					m_TextID = 104;
+				}
+			}
 			//視点
 			auto& CamChara = PlayerMngr->GetPlayer(0)->GetChara();//PlayerMngr->GetWatchPlayer()->GetChara();
 			{
@@ -1524,7 +1725,7 @@ namespace FPS_n2 {
 					this->m_ReturnPer = 0.f;
 				}
 				this->m_AnnounceTimer = std::clamp(this->m_AnnounceTimer - DXLib_refParts->GetDeltaTime(), 0.f, 1.f);
-				//timer
+				//タイマー
 				this->m_UIclass.SetfloatParam(0, this->m_BattleTimer);
 				this->m_UIclass.SetfloatParam(1, this->m_StartTimer);
 				this->m_UIclass.SetfloatParam(2, this->m_ReturnPer);
@@ -1690,7 +1891,17 @@ namespace FPS_n2 {
 								}
 							}
 						}
-
+						if (m_TextID != InvalidID) {
+							std::string Str = "";
+							Str += "[ ";
+							Str += LocalizeParts->Get(6000 + m_TextID);
+							Str += " ]";
+							DrawCtrls->SetStringAutoFit(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, 24,
+								(1920 / 2 - 480), (1080 - 128 - 24),
+								(1920 / 2 + 480), (1080 - 128 + 24),
+								White, Black,
+								Str);
+						}
 						{
 							if (m_TaskInfoList.size() > 0) {
 								int xp1 = 400;
@@ -1700,9 +1911,9 @@ namespace FPS_n2 {
 								switch (m_TaskInfoList.begin()->first.m_TaskType) {
 								case FPS_n2::Sceneclass::TaskType::Obtain:
 								{
-									int ID = m_TaskInfoList.begin()->first.m_ItemID;
-									auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID);
-									DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &item->GetIconGraph(), xp1, yp1, (128.f / 512.f) * 1.f, 0.f, true);
+									DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+										&Objects::ItemObjDataManager::Instance()->GetList().at(m_TaskInfoList.begin()->first.m_ItemID)->GetIconGraph(),
+										xp1, yp1, (128.f / 512.f) * 1.f, 0.f, true);
 								}
 								break;
 								case FPS_n2::Sceneclass::TaskType::KillEnemy:
@@ -1716,6 +1927,14 @@ namespace FPS_n2 {
 								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
 									FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM, xp1, yp1 + 64 - 10, Green, Black, "%d / %d",
 									m_TaskInfoList.begin()->second, m_TaskInfoList.begin()->first.m_Count);
+							}
+							else {
+								int xp1 = 400;
+								int yp1 = 1080 * 3 / 4 - 64;
+								DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - 64, yp1 - 64, xp1 + 64, yp1 + 64, Black, true);
+								DrawCtrls->SetDrawBox(WindowSystem::DrawLayer::Normal, xp1 - 64, yp1 - 64, xp1 + 64, yp1 + 64, Green, false, 3);
+								DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, LineHeight,
+									FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::BOTTOM, xp1, yp1 + 64 - 10, Green, Black, "ALL CLEAR");
 							}
 						}
 					}
@@ -1903,6 +2122,31 @@ namespace FPS_n2 {
 						}
 					}
 
+					//
+					{
+						if (m_TextID != InvalidID) {
+							std::string Str = "";
+							Str += "[ ";
+							Str += LocalizeParts->Get(6000 + m_TextID);
+							Str += " ]";
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, 24,
+								FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, (1920 / 2), (1080 - 128), White, Black,
+								Str);
+						}
+					}
+				}
+			}
+			else {
+				if (m_TextID != InvalidID) {
+					std::string Str = "";
+					Str += "[ ";
+					Str += LocalizeParts->Get(6000 + m_TextID);
+					Str += " ]";
+					DrawCtrls->SetStringAutoFit(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, 24,
+						(1920 / 2 - 480), (1080 - 128 - 24),
+						(1920 / 2 + 480), (1080 - 128 + 24),
+						White, Black,
+						Str);
 				}
 			}
 			FadeControl::Instance()->Draw();

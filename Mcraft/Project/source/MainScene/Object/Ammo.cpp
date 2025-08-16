@@ -142,7 +142,7 @@ namespace FPS_n2 {
 				}
 			}
 			//ヘリとの判定
-			if (this->m_ShootCheraID != -1 && PlayerMngr->GetHelicopter()->CheckAmmoHit(this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
+			if (this->m_ShootCheraID != -1 && PlayerMngr->GetHelicopter() && PlayerMngr->GetHelicopter()->CheckAmmoHit(this->m_ShootCheraID, repos_tmp, &pos_tmp)) {
 				SetActive(false);
 				is_HitAll = true;
 				if (this->m_ShootCheraID == PlayerMngr->GetWatchPlayerID()) {//撃ったキャラ

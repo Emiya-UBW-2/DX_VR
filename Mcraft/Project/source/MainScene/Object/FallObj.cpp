@@ -68,8 +68,8 @@ namespace FPS_n2 {
 		};
 
 
-		void			FallObj::SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float timer, FallObjectType Type) noexcept {
-			this->m_Timer = timer;
+		void			FallObj::SetFall(const Vector3DX& pos, const Matrix3x3DX& mat, const Vector3DX& vec, float time, FallObjectType Type) noexcept {
+			this->m_Timer = time;
 			switch (Type) {
 			case FallObjectType::Cart:
 				this->m_FallObject = std::make_unique<FallObjCart>();

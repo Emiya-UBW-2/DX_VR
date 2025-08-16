@@ -19,10 +19,8 @@ namespace FPS_n2 {
 			}
 
 			for (auto& ID : PlayerMngr->GetPlayer(GetMyPlayerID())->GetInventory()) {
-				if (ID.first != InvalidID) {
-					auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
-					gram += item->GetWeight_gram();
-				}
+				if (!ID.HasItem()) { continue; }
+				gram += ID.GetItem()->GetWeight_gram();
 			}
 			return gram;
 		}
@@ -289,7 +287,9 @@ namespace FPS_n2 {
 					//PlayerMngr->GetVehicle()->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
 				}
 				else if (AttackID == -2) {
-					PlayerMngr->GetHelicopter()->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+					if (PlayerMngr->GetHelicopter()) {
+						PlayerMngr->GetHelicopter()->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
+					}
 				}
 				else if (AttackID == -3) {
 					PlayerMngr->GetTeamHelicopter()->SetDamage(GetMyPlayerID(), BaseDamage, static_cast<int>(HitPtr->GetColType()), StartPos, *pEndPos);
@@ -1230,12 +1230,15 @@ namespace FPS_n2 {
 			this->m_GunPtrControl.SetGunPtr(Select, std::make_shared<Guns::GunObj>());
 			ObjectManager::Instance()->InitObject(this->m_GunPtrControl.GetGunPtr(Select), Path);
 		}
-		void CharacterObj::Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect, bool CheckGround, float RunGauge) noexcept {
+		void CharacterObj::Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect, bool CheckGround, float RunGauge, bool WearArmer) noexcept {
 			auto& player = Player::PlayerManager::Instance()->GetPlayer(this->GetMyPlayerID());
 			this->m_HP.Init();
 			this->m_BodyPoint.Init();
 			this->m_HeadPoint.Init();
 			Heal(100);
+			if (!WearArmer) {
+				this->m_BodyPoint.Sub(this->m_BodyPoint.GetMax());
+			}
 			this->m_ArmBreak = false;
 			this->m_ArmBreakPer = 0.0f;
 			this->m_SlingArmZrad.Init(0.08f * Scale3DRate, 3.0f, deg2rad(50));

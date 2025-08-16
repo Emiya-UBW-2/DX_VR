@@ -1,4 +1,8 @@
-Name=Item
+Name=6B47 Helmet
+Info=敵規格品のヘルメット。傷ついているがまだ使えそうだ。
+Info=自身のヘルメットが損傷している際に交換することができる。
+Info_Eng=敵規格品のヘルメット。傷ついているがまだ使えそうだ。
+Info_Eng=自身のヘルメットが損傷している際に交換することができる。
 Type=Helmet
 EnableSpawnBySoldier=FALSE
 Weight=1500

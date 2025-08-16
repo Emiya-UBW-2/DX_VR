@@ -729,6 +729,7 @@ namespace FPS_n2 {
 								Matrix3x3DX::Vtrans(Vector3DX::forward(), Matrix3x3DX::RotAxis(Vector3DX::up(), deg2rad(GetRandf(180.0f)))), 3.0f + GetRandf(2.0f), 3.0f);
 						}
 					}
+					BackGroundParts->SetGrenadeBomb();
 				}
 			}
 		}

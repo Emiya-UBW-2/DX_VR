@@ -83,6 +83,12 @@ namespace FPS_n2 {
 
 			bool										m_IsSkipMovie{ false };
 			float										m_MovieEndTimer{ 0.0f };
+
+			bool										m_IsTutorial{ false };
+			int m_TextID = InvalidID;
+
+			int m_PrevTextSoundID = InvalidID;
+			float m_TextTimer{ 0.f };
 		private:
 			auto		GetViewPlayerID(void) const noexcept {
 				if (this->m_NetWorkController) {
@@ -92,6 +98,8 @@ namespace FPS_n2 {
 			}
 
 			bool		IsStartedBattle(void) const noexcept { return this->m_StartTimer <= 0.0f; }
+		public:
+			void		SetTutorial(bool value) noexcept { this->m_IsTutorial = value; }
 		public:
 			MainGameScene(void) noexcept {}
 			MainGameScene(const MainGameScene&) = delete;

@@ -208,7 +208,7 @@ namespace FPS_n2 {
 				MV1::SetAnime(&this->m_RagDollControl.SetRagDoll(), GetObj());
 				this->m_RagDollControl.Init(GetObj());
 			}
-			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect, bool CheckGround, float RunGauge) noexcept;
+			void			Spawn(float pxRad, float pyRad, const Vector3DX& pPos, int GunSelect, bool CheckGround, float RunGauge, bool WearArmer = true) noexcept;
 
 			const auto		GetIsRappelling() const noexcept { return this->m_IsRappelling && !this->m_IsRappellingEnd; }
 			void			SetRappelling(void) noexcept {

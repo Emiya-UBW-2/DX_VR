@@ -327,6 +327,7 @@ namespace FPS_n2 {
 			//TotalCellLayer~:影スレッド用
 			std::array<Draw, TotalCellLayer + TotalCellLayer>	m_Draws;
 			bool							m_isChangeBlock{ false };
+			bool							m_GrenadeBomb{ false };
 		private:
 			BackGroundControl(void) noexcept { Load(); }
 			BackGroundControl(const BackGroundControl&) = delete;
@@ -867,6 +868,15 @@ namespace FPS_n2 {
 				}
 				return true;		// ここまできたら指定の幅があっても直線的に移動できるということなので true を返す
 			}
+
+			void SetGrenadeBomb() noexcept {
+				m_GrenadeBomb = true;
+			}
+			bool PopGrenadeBomb() noexcept {
+				auto G = m_GrenadeBomb;
+				m_GrenadeBomb = false;
+				return G;
+			}
 		public:
 			int				CheckLinetoMap(const Vector3DX& StartPos, Vector3DX* EndPos, Vector3DX* Normal = nullptr) const noexcept;
 			int				CheckLinetoMap(const Vector3DX& StartPos, const Vector3DX& EndPos) const noexcept {
@@ -908,7 +918,7 @@ namespace FPS_n2 {
 		public://
 			void			Load(void) noexcept;
 			//
-			void			Init(void) noexcept;
+			void			Init(bool IsTutorial) noexcept;
 			void			Update(void) noexcept;
 			//
 			void			BG_Draw(void) const noexcept;

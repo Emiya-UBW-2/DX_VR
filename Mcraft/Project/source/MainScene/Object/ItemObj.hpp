@@ -21,6 +21,8 @@ namespace FPS_n2 {
 		class ItemObjData {
 			std::string		m_path;
 			std::string		m_name;
+			std::vector<std::string>					m_Info;
+			std::vector<std::string>					m_InfoEng;
 			ItemType		m_ItemType;
 			GraphHandle		m_Icon;
 			bool			m_EnableSpawnBySoldier{ false };
@@ -29,6 +31,8 @@ namespace FPS_n2 {
 		public://getter
 			const auto& GetPath(void) const noexcept { return this->m_path; }
 			const auto& GetName(void) const noexcept { return this->m_name; }
+			const auto& GetInfo(void) const noexcept { return this->m_Info; }
+			const auto& GetInfoEng(void) const noexcept { return this->m_InfoEng; }
 			const auto& GetItemType(void) const noexcept { return this->m_ItemType; }
 			const auto& GetIconGraph(void) const noexcept { return this->m_Icon; }
 			const auto& EnableSpawnBySoldier(void) const noexcept { return this->m_EnableSpawnBySoldier; }
@@ -61,6 +65,12 @@ namespace FPS_n2 {
 					{
 						if (LEFT == "Name") {
 							this->m_name = RIGHT;
+						}
+						else if (LEFT == "Info") {
+							this->m_Info.emplace_back(RIGHT);
+						}
+						else if (LEFT == "Info_Eng") {
+							this->m_InfoEng.emplace_back(RIGHT);
 						}
 						else if (LEFT == "Type") {
 							for (int loop = 0; loop < static_cast<int>(ItemType::Max); ++loop) {

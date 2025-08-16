@@ -233,6 +233,7 @@ namespace FPS_n2 {
 			bool m_CanShot{};
 
 			Vector3DX RopeVec;
+			bool m_IsIntercept{ true };
 		private:
 			int					GetFrameNum(void) noexcept override { return static_cast<int>(HeliFrame::Max); }
 			const char* GetFrameStr(int id) noexcept override { return HeliFrameName[id]; }
@@ -246,6 +247,9 @@ namespace FPS_n2 {
 				UpdateObjMatrix(GetMove().GetMat(), GetMove().GetPos());
 				auto* SE = SoundPool::Instance();
 				SE->Get(SoundType::SE, static_cast<int>(SoundEnum::Heli2))->SetPosition(GetMove().GetPos());
+			}
+			void			SetIsIntercept(bool value) noexcept {
+				m_IsIntercept = value;
 			}
 			const auto		GetIsActiveRappelling() const noexcept {
 				return (this->m_HelicopterMove == HelicopterMove::Rappelling) && (13.0f <= this->m_Timer);

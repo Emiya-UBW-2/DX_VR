@@ -135,20 +135,23 @@ namespace FPS_n2 {
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing), 5, "data/Sound/SE/voice/breathing.wav", false);
 			SE->Add(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend), 5, "data/Sound/SE/voice/breathend.wav", false);
 
-			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::GameStart000), 1, "data/Sound/VOICE/vo000.wav", false);
-			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission000), 1, "data/Sound/VOICE/vo001.wav", false);
-			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission001), 1, "data/Sound/VOICE/vo002.wav", false);
-			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission002), 1, "data/Sound/VOICE/vo003.wav", false);
-			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::GameEnd000), 1, "data/Sound/VOICE/vo004.wav", false);
-			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Last30), 1, "data/Sound/VOICE/vo005.wav", false);
-			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble000), 1, "data/Sound/VOICE/vo010.wav", false);
-			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble001), 1, "data/Sound/VOICE/vo011.wav", false);
-			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial001), 1, "data/Sound/VOICE/vo101.wav", false);
-			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial002), 1, "data/Sound/VOICE/vo102.wav", false);
-			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial003), 1, "data/Sound/VOICE/vo103.wav", false);
-			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial004), 1, "data/Sound/VOICE/vo104.wav", false);
-			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial005), 1, "data/Sound/VOICE/vo105.wav", false);
-			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial006), 1, "data/Sound/VOICE/vo106.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V000), 1, "data/Sound/VOICE/vo000.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V001), 1, "data/Sound/VOICE/vo001.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V002), 1, "data/Sound/VOICE/vo002.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V003), 1, "data/Sound/VOICE/vo003.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V004), 1, "data/Sound/VOICE/vo004.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V005), 1, "data/Sound/VOICE/vo005.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V010), 1, "data/Sound/VOICE/vo010.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V011), 1, "data/Sound/VOICE/vo011.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V100), 1, "data/Sound/VOICE/vo100.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V101), 1, "data/Sound/VOICE/vo101.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V102), 1, "data/Sound/VOICE/vo102.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V103), 1, "data/Sound/VOICE/vo103.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V104), 1, "data/Sound/VOICE/vo104.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V105), 1, "data/Sound/VOICE/vo105.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V106), 1, "data/Sound/VOICE/vo106.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V107), 1, "data/Sound/VOICE/vo107.wav", false);
+			SE->Add(SoundType::VOICE, static_cast<int>(VoiceEnum::V108), 1, "data/Sound/VOICE/vo108.wav", false);
 		}
 		void			CommonBattleResource::Set(void) noexcept {
 			auto* SE = SoundPool::Instance();
@@ -224,20 +227,23 @@ namespace FPS_n2 {
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Man_breathing));
 			SE->Delete(SoundType::SE, static_cast<int>(SoundEnum::Man_breathend));
 
-			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::GameStart000));
-			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission000));
-			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission001));
-			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mission002));
-			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::GameEnd000));
-			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Last30));
-			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble000));
-			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Mumble001));
-			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial001));
-			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial002));
-			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial003));
-			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial004));
-			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial005));
-			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::Tutorial006));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V000));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V001));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V002));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V003));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V004));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V005));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V010));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V011));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V100));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V101));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V102));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V103));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V104));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V105));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V106));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V107));
+			SE->Delete(SoundType::VOICE, static_cast<int>(VoiceEnum::V108));
 		}
 		//
 		void			MainSceneUI::Set(void) noexcept {
@@ -258,14 +264,6 @@ namespace FPS_n2 {
 			this->AdrenalineGraph.Load("data/UI/Adrenaline.png");
 
 			auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
-			m_PrevItemID.resize(ViewPlayer->GetInventory().size());
-			m_ItemAnimTimer.resize(ViewPlayer->GetInventory().size());
-			for (int loop = 0; loop < m_PrevItemID.size(); ++loop) {
-				m_PrevItemID.at(loop) = ViewPlayer->GetInventory().at(loop).first;
-			}
-			for (int loop = 0; loop < m_ItemAnimTimer.size(); ++loop) {
-				m_ItemAnimTimer.at(loop) = 0.f;
-			}
 			m_Score = static_cast<float>(ViewPlayer->GetScore());
 		}
 		void			MainSceneUI::Update(void) noexcept {
@@ -347,27 +345,6 @@ namespace FPS_n2 {
 				}
 			}
 			{
-				int loop = 0;
-				for (auto& ID : ViewPlayer->GetInventory()) {
-					bool Prev = m_PrevItemID.at(loop) != InvalidID;
-					bool Now = ID.first != InvalidID;
-					if (Prev != Now) {
-						//開始アニメ
-						//終了アニメ
-						m_ItemAnimTimer.at(loop) += DXLib_refParts->GetDeltaTime();
-						if (this->m_ItemAnimTimer.at(loop) >= 0.3f) {
-							m_ItemAnimTimer.at(loop) = 0.f;
-							m_PrevItemID.at(loop) = ID.first;
-						}
-					}
-					else {
-						m_ItemAnimTimer.at(loop) = 0.f;
-					}
-					++loop;
-				}
-			}
-
-			{
 				float kirogram = static_cast<float>(ViewChara->GetWeight_gram()) / 1000.f;
 				if (std::abs(kirogram - m_Gram) > 5.f) {
 					Easing(&m_Gram, kirogram, 0.95f, EasingType::OutExpo);
@@ -423,59 +400,20 @@ namespace FPS_n2 {
 				int loop = 0;
 				bool hasItem = false;
 				for (auto& ID : ViewPlayer->GetInventory()) {
-					float Yadd = 0.f;
-					float Scale = 1.f;
-					float Alpha = 1.f;
-					int DrawID = ID.first;
-					bool Prev = m_PrevItemID.at(loop) != InvalidID;
-					bool Now = ID.first != InvalidID;
-					{
-						float Seek = m_ItemAnimTimer.at(loop) / 0.3f;
-						if (!Prev && Now) {
-							//開始アニメ
-							DrawID = ID.first;
-							Yadd = 0.f;
-							if (Seek < 0.8f) {
-								Scale = Lerp(0.f, 1.2f, Seek / 0.8f);
-							}
-							else {
-								Scale = Lerp(1.2f, 1.f, (Seek - 0.8f) / (1.f - 0.8f));
-							}
-							Alpha = Lerp(0.f, 1.f, Seek);
-						}
-						else if (Prev && !Now) {
-							//終了アニメ
-							DrawID = m_PrevItemID.at(loop);
-							if (Seek < 0.8f) {
-								Yadd = Lerp(0.f, 128.f, Seek / 0.8f);
-							}
-							else {
-								Yadd = 128.f;
-							}
-							Scale = 1.f;
-							Alpha = Lerp(1.f, 0.f, Seek);
-						}
-						else {
-							Yadd = 0.f;
-							Scale = 1.f;
-							Alpha = 1.f;
-						}
-					}
-
-
 					xp1 = 400 - Height * (static_cast<int>(ViewPlayer->GetInventory().size()) / 2) + Height * loop;
 
 					DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, 215);
 					DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &this->m_ItembackGraph, xp1, yp1, 96.f / 512.f, 0.f, true);
-					if (DrawID != InvalidID) {
+					if (ID.m_DrawID != InvalidID) {
 						hasItem = true;
-						auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(DrawID);
-						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * Alpha));
-						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal, &item->GetIconGraph(), xp1, yp1 - static_cast<int>(Yadd), (128.f / 512.f) * Scale, 0.f, true);
+						DrawCtrls->SetAlpha(WindowSystem::DrawLayer::Normal, static_cast<int>(255.f * ID.m_Alpha));
+						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
+							&Objects::ItemObjDataManager::Instance()->GetList().at(ID.m_DrawID)->GetIconGraph(),
+							xp1, yp1 - static_cast<int>(ID.m_Yadd), (128.f / 512.f) * ID.m_Scale, 0.f, true);
 
-						if (ID.second > 0.f) {
+						if (ID.m_timer > 0.f) {
 							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 0, 255, 0);
-							DrawCtrls->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, &this->DeleteItemGraph, xp1, yp1, 100.f * (ID.second / 0.5f), 0.f, 64.f / 128.f);
+							DrawCtrls->SetDrawCircleGauge(WindowSystem::DrawLayer::Normal, &this->DeleteItemGraph, xp1, yp1, 100.f * (ID.m_timer / 0.5f), 0.f, 64.f / 128.f);
 							DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
 						}
 						Controls::PADS Guide{};
@@ -677,23 +615,21 @@ namespace FPS_n2 {
 
 
 							bool HasSpare = false;
-							for (auto& ID : ViewPlayer->SetInventory()) {
-								if (ID.first != InvalidID) {
-									auto& item = Objects::ItemObjDataManager::Instance()->GetList().at(ID.first);
-									switch (item->GetItemType()) {
-									case Objects::ItemType::Helmet:
-										if (ViewChara->GetHeadAP().GetPoint() != ViewChara->GetHeadAP().GetMax()) {
-											HasSpare = true;
-										}
-										break;
-									case Objects::ItemType::Armor:
-										if (ViewChara->GetBodyAP().GetPoint() != ViewChara->GetBodyAP().GetMax()) {
-											HasSpare = true;
-										}
-										break;
-									default:
-										break;
+							for (auto& ID : ViewPlayer->GetInventory()) {
+								if (!ID.HasItem()) { continue; }
+								switch (ID.GetItem()->GetItemType()) {
+								case Objects::ItemType::Helmet:
+									if (ViewChara->GetHeadAP().GetPoint() != ViewChara->GetHeadAP().GetMax()) {
+										HasSpare = true;
 									}
+									break;
+								case Objects::ItemType::Armor:
+									if (ViewChara->GetBodyAP().GetPoint() != ViewChara->GetBodyAP().GetMax()) {
+										HasSpare = true;
+									}
+									break;
+								default:
+									break;
 								}
 							}
 
