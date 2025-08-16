@@ -20,7 +20,6 @@ namespace FPS_n2 {
 					ChildPath += data.cFileName;
 					ChildPath += "/";
 					ObjectManager::Instance()->LoadModelBefore(ChildPath);
-					Guns::GunPartsDataManager::Instance()->Add(ChildPath);
 				}
 			}
 			//
@@ -33,7 +32,6 @@ namespace FPS_n2 {
 					ChildPath += data.cFileName;
 					ChildPath += "/";
 					ObjectManager::Instance()->LoadModelBefore(ChildPath);
-					Guns::GunPartsDataManager::Instance()->Add(ChildPath);
 				}
 			}
 		}
@@ -904,6 +902,7 @@ namespace FPS_n2 {
 						}
 						yp1 += 240;
 					}
+					int YPrev = yp1;
 					//Info
 					{
 						DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
@@ -1006,6 +1005,43 @@ namespace FPS_n2 {
 						}
 					}
 					yp1 += 24;
+
+					//パーツInfo
+					if (m_IsCustomizeGun && slot->IsAttachedParts(SlotSel)) {
+						auto& partsslot = slot->GetParts(SlotSel)->GetModifySlot();
+						xp1 = 128 + 512 + 64;
+						yp1 = YPrev;
+						{
+							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (24),
+								FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+								xp1, yp1, Green, Black, partsslot->GetMyData()->GetName());
+							yp1 += 24;
+						}
+						yp1 += 24;
+						{
+							auto* OptionParts = OptionManager::Instance();
+							switch ((LanguageType)OptionParts->GetParamInt(EnumSaveParam::Language)) {
+							case LanguageType::Eng:
+								for (auto& info : partsslot->GetMyData()->GetInfoEng()) {
+									DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+										FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+										xp1, yp1, Green, Black, info);
+									yp1 += 18;
+								}
+								break;
+							case LanguageType::Jpn:
+								for (auto& info : partsslot->GetMyData()->GetInfo()) {
+									DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (18),
+										FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
+										xp1, yp1, Green, Black, info);
+									yp1 += 18;
+								}
+								break;
+							default:
+								break;
+							}
+						}
+					}
 				}
 			}
 			// 

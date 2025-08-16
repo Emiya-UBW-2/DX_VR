@@ -49,7 +49,6 @@ namespace FPS_n2 {
 					ChildPath += data.cFileName;
 					ChildPath += "/";
 					ObjectManager::Instance()->LoadModelBefore(ChildPath);
-					Guns::GunPartsDataManager::Instance()->Add(ChildPath);
 				}
 			}
 			//
@@ -62,7 +61,6 @@ namespace FPS_n2 {
 					ChildPath += data.cFileName;
 					ChildPath += "/";
 					ObjectManager::Instance()->LoadModelBefore(ChildPath);
-					Guns::GunPartsDataManager::Instance()->Add(ChildPath);
 				}
 			}
 			//
@@ -151,6 +149,7 @@ namespace FPS_n2 {
 						PresetPath += ".dat";
 						if (IsFileExist(PresetPath.c_str())) {
 							gun->GetGunsModify()->LoadSlots(PresetPath.c_str());
+							gun->SetupGun();
 						}
 					}
 				}

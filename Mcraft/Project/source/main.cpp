@@ -85,13 +85,39 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//初期セーブ
 	{
 		FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.clear();
-
-		std::string Path = "data/gun/";
-		std::vector<WIN32_FIND_DATA> pData;
-		GetFileNamesInDirectory((Path + "*").c_str(), &pData);
-		for (auto& data : pData) {
-			FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.emplace_back(data.cFileName);
+		{
+			std::string Path = "data/gun/";
+			std::vector<WIN32_FIND_DATA> pData;
+			GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+			for (auto& data : pData) {
+				FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.emplace_back(data.cFileName);
+			}
 		}
+		//
+		{
+			std::string Path = "data/gun/";
+			std::vector<WIN32_FIND_DATA> pData;
+			GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+			for (auto& data : pData) {
+				std::string ChildPath = Path;
+				ChildPath += data.cFileName;
+				ChildPath += "/";
+				FPS_n2::Guns::GunPartsDataManager::Instance()->Add(ChildPath);
+			}
+		}
+		//
+		{
+			std::string Path = "data/Mods/";
+			std::vector<WIN32_FIND_DATA> pData;
+			GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+			for (auto& data : pData) {
+				std::string ChildPath = Path;
+				ChildPath += data.cFileName;
+				ChildPath += "/";
+				FPS_n2::Guns::GunPartsDataManager::Instance()->Add(ChildPath);
+			}
+		}
+
 		bool isEquiped = false;
 		for (auto& guns : FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList) {
 			if (SaveData::Instance()->GetParam(guns) <= 0) {
