@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 #include	"../../Header.hpp"
 
 namespace FPS_n2 {
@@ -14,7 +14,7 @@ namespace FPS_n2 {
 			Max,
 		};
 		static const char* ArmorFrameName[static_cast<int>(ArmorFrame::Max)] = {
-			"ÉZÉìÉ^Å[",
+			"„Çª„É≥„Çø„Éº",
 			"lefthand",
 			"lefthand_yvec",
 			"lefthand_zvec",

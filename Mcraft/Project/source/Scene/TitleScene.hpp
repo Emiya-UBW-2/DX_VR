@@ -9,6 +9,12 @@
 
 namespace FPS_n2 {
 	namespace Sceneclass {
+		enum class TitleWindow {
+			Main,
+			Custom,
+			CustomizeGun,
+		};
+
 		class TitleScene : public TEMPSCENE {
 			bool									m_IsEnd{ false };//シーン全体の終了フラグ
 			GraphHandle								m_TitleImage{};
@@ -19,8 +25,7 @@ namespace FPS_n2 {
 
 			std::vector<std::shared_ptr<Guns::GunObj>>		m_GunPtr{};			//銃
 
-			bool									m_IsCustomize = false;
-			bool									m_IsCustomizeGun = false;
+			TitleWindow								m_TitleWindow{ TitleWindow::Main };
 			Vector3DX CamPos;
 			Vector3DX CamVec = Vector3DX::forward();
 			float CamFov = deg2rad(45);

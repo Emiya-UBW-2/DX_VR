@@ -182,6 +182,8 @@ namespace FPS_n2 {
 					++Now;
 				}
 			}
+
+			m_TitleWindow = TitleWindow::Main;
 		}
 		bool			TitleScene::Update_Sub(void) noexcept {
 			auto* CameraParts = Camera3D::Instance();
@@ -202,7 +204,8 @@ namespace FPS_n2 {
 				[this]() {
 					auto* LocalizeParts = LocalizePool::Instance();
 					auto* KeyGuideParts = KeyGuide::Instance();
-					if (!m_IsCustomize) {
+					
+					if (!(m_TitleWindow == TitleWindow::Custom)) {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_W), "");
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_S), "");
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_A), "");
@@ -210,7 +213,7 @@ namespace FPS_n2 {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), LocalizeParts->Get(9993));
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT), LocalizeParts->Get(9992));
 					}
-					else if (!m_IsCustomizeGun) {
+					else if (!(m_TitleWindow == TitleWindow::CustomizeGun)) {
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_STICK), "");
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_A), "");
 						KeyGuideParts->AddGuide(KeyGuide::GetPADStoOffset(Controls::PADS::MOVE_D), LocalizeParts->Get(9980));
@@ -229,7 +232,7 @@ namespace FPS_n2 {
 					}
 				}
 			);
-			if (!m_IsCustomize) {
+			if (!(m_TitleWindow == TitleWindow::Custom)) {
 				if (!PopUpParts->IsActivePop() && FadeControl::Instance()->IsClear()) {
 					ButtonParts->UpdateInput();
 					// 選択時の挙動
@@ -242,7 +245,7 @@ namespace FPS_n2 {
 							this->m_IsEnd = true;
 							break;
 						case 1:
-							m_IsCustomize = true;
+							m_TitleWindow = TitleWindow::Custom;
 							KeyGuideParts->SetGuideFlip();
 							break;
 						case 2:
@@ -283,13 +286,13 @@ namespace FPS_n2 {
 				m_CamTimer = 0.f;
 
 				m_MovieCharacter->SetActive(true);
-				m_IsCustomizeGun = false;
+				m_TitleWindow = TitleWindow::Custom;
 			}
 			else {
-				if (!m_IsCustomizeGun) {
+				if (!(m_TitleWindow == TitleWindow::CustomizeGun)) {
 					if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
-						m_IsCustomize = false;
+						m_TitleWindow = TitleWindow::Main;
 						KeyGuideParts->SetGuideFlip();
 					}
 					if (Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
@@ -367,7 +370,7 @@ namespace FPS_n2 {
 						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 						auto& mod = this->m_GunPtr.at(m_GunSelect.at(m_GunTypeSel))->GetModifySlot();
 						if (mod->GetMyData()->GetIsCustomize()) {
-							m_IsCustomizeGun = true;
+							m_TitleWindow = TitleWindow::CustomizeGun;
 							KeyGuideParts->SetGuideFlip();
 
 							SlotSel = Guns::GunSlot::Magazine;
@@ -390,7 +393,7 @@ namespace FPS_n2 {
 
 					if (Pad->GetPadsInfo(Controls::PADS::RELOAD).GetKey().trigger()) {
 						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
-						m_IsCustomizeGun = false;
+						m_TitleWindow = TitleWindow::Custom;
 						KeyGuideParts->SetGuideFlip();
 
 						std::string PresetPath = "Save/";
@@ -474,7 +477,7 @@ namespace FPS_n2 {
 			}
 			for (auto& g : this->m_GunAnimTimer) {
 				int index = static_cast<int>(&g - &this->m_GunAnimTimer.front());
-				if (m_IsCustomize && index == m_GunSelect.at(m_GunTypeSel)) {
+				if ((m_TitleWindow == TitleWindow::Custom) && index == m_GunSelect.at(m_GunTypeSel)) {
 					g = std::clamp(g + DXLib_refParts->GetDeltaTime() / 0.25f, 0.f, 1.f);
 				}
 				else {
@@ -650,7 +653,7 @@ namespace FPS_n2 {
 			auto* LocalizeParts = LocalizePool::Instance();
 			auto* ButtonParts = UIs::ButtonControl::Instance();
 			// 
-			if (!m_IsCustomize) {
+			if (!(m_TitleWindow == TitleWindow::Custom)) {
 				DrawCtrls->SetDrawExtendGraph(WindowSystem::DrawLayer::Normal,
 					&this->m_TitleImage, (64), (64), (64 + 369), (64 + 207), true);
 				// 
@@ -824,7 +827,7 @@ namespace FPS_n2 {
 						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 						XPos, (48), Green, Black, "Equip Customize");
 					int Len = FontSystem::FontPool::Instance()->Get(FontSystem::FontType::MS_Gothic, (48), 3)->GetStringWidth("Equip Customize");
-					if (!m_IsCustomizeGun) {
+					if (!(m_TitleWindow == TitleWindow::CustomizeGun)) {
 						std::string CustomPoint = "";
 						switch (m_GunTypeSel) {
 						case 0:
@@ -845,7 +848,7 @@ namespace FPS_n2 {
 					}
 					XPos += Len;
 				}
-				if (m_IsCustomizeGun) {
+				if ((m_TitleWindow == TitleWindow::CustomizeGun)) {
 					DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (48),
 						FontSystem::FontXCenter::LEFT, FontSystem::FontYCenter::TOP,
 						XPos, (48), Green, Black, " > Gun Setup");
@@ -887,7 +890,7 @@ namespace FPS_n2 {
 						DrawCtrls->SetDrawRotaGraph(WindowSystem::DrawLayer::Normal,
 							Ptr, (xp1 + xp2) / 2, yp1 + 120, 0.5f, 0.f, true);
 						DrawCtrls->SetBright(WindowSystem::DrawLayer::Normal, 255, 255, 255);
-						if (!m_IsCustomizeGun) {
+						if (!(m_TitleWindow == TitleWindow::CustomizeGun)) {
 							int xp3 = xp1 - 64;
 							int yp3 = yp1 + 120;
 							DrawCtrls->SetDrawLine(WindowSystem::DrawLayer::Normal, xp3, yp3 - 10, xp3, yp3 + 10, Green, 2);
@@ -1007,7 +1010,7 @@ namespace FPS_n2 {
 					yp1 += 24;
 
 					//パーツInfo
-					if (m_IsCustomizeGun && slot->IsAttachedParts(SlotSel)) {
+					if ((m_TitleWindow == TitleWindow::CustomizeGun) && slot->IsAttachedParts(SlotSel)) {
 						auto& partsslot = slot->GetParts(SlotSel)->GetModifySlot();
 						xp1 = 128 + 512 + 64;
 						yp1 = YPrev;
