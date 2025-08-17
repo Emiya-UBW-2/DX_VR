@@ -30,8 +30,8 @@ Slot0Item=STANAG_30
 
 Slot1Type=Sight
 Slot1IsNeed=false
-Slot1Item=mount89_ACOG
 Slot1Item=mount89_APCOMP2
+Slot1Item=mount89_ACOG
 
 
 Open=0

@@ -25,14 +25,14 @@ stockType=straight
 
 Slot0Type=Magazine
 Slot0IsNeed=true
-Slot0Item=M16DMag
 Slot0Item=STANAG_30
+Slot0Item=M16DMag
 
 Slot1Type=Sight
 Slot1IsNeed=true
-Slot1Item=ACOG
 Slot1Item=iron20
 Slot1Item=APCOMP2
+Slot1Item=ACOG
 
 Open=0
 ReloadStart_Empty=1

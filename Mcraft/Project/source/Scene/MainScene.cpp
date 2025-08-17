@@ -976,9 +976,10 @@ namespace FPS_n2 {
 						if (!Prev) {
 							KeyGuideParts->SetGuideFlip();
 							SceneParts->SetPauseEnable(true);
-
-							if (m_TextID == 100) {
-								m_TextID = 101;
+							if (this->m_IsTutorial) {
+								if (m_TextID == 100) {
+									m_TextID = 101;
+								}
 							}
 						}
 						float prevBattleTimer = this->m_BattleTimer;
@@ -1224,8 +1225,10 @@ namespace FPS_n2 {
 											break;
 										case Objects::ItemType::Armor:
 											ViewChara->HealArmor();
-											if (m_TextID == 102) {
-												m_TextID = 103;
+											if (this->m_IsTutorial) {
+												if (m_TextID == 102) {
+													m_TextID = 103;
+												}
 											}
 											break;
 										default:
@@ -1252,14 +1255,18 @@ namespace FPS_n2 {
 													if (!this->m_IsTutorial) {
 														m_TextID = 11;
 													}
-													if (m_TextID == 105) {
-														m_TextID = 106;
+													if (this->m_IsTutorial) {
+														if (m_TextID == 105) {
+															m_TextID = 106;
+														}
 													}
 												}
 											}
 											else {
-												if (m_TextID == 106) {
-													m_TextID = 107;
+												if (this->m_IsTutorial) {
+													if (m_TextID == 106) {
+														m_TextID = 107;
+													}
 												}
 											}
 										}
@@ -1445,11 +1452,13 @@ namespace FPS_n2 {
 							if (!this->m_IsTutorial) {
 								m_TextID = 10;
 							}
-							if (m_TextID == 101) {
-								m_TextID = 102;
-							}
-							else if (m_TextID <= 104) {
-								m_TextID = 105;
+							if (this->m_IsTutorial) {
+								if (m_TextID == 101) {
+									m_TextID = 102;
+								}
+								else if (m_TextID <= 104) {
+									m_TextID = 105;
+								}
 							}
 						}
 					}
@@ -1575,8 +1584,10 @@ namespace FPS_n2 {
 			Objects::AmmoLinePool::Instance()->Update();
 			//
 			if (BackGroundParts->PopGrenadeBomb()) {
-				if (m_TextID <= 103) {
-					m_TextID = 104;
+				if (this->m_IsTutorial) {
+					if (m_TextID <= 103) {
+						m_TextID = 104;
+					}
 				}
 			}
 			//視点
@@ -1896,8 +1907,8 @@ namespace FPS_n2 {
 							Str += LocalizeParts->Get(6000 + m_TextID);
 							Str += " ]";
 							DrawCtrls->SetStringAutoFit(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, 24,
-								(1920 / 2 - 480), (1080 - 128 - 24),
-								(1920 / 2 + 480), (1080 - 128 + 24),
+								(1920 / 2 - 520), (1080 - 128 - 24),
+								(1920 / 2 + 520), (1080 - 128 + 24),
 								White, Black,
 								Str);
 						}
@@ -2128,8 +2139,10 @@ namespace FPS_n2 {
 							Str += "[ ";
 							Str += LocalizeParts->Get(6000 + m_TextID);
 							Str += " ]";
-							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, 24,
-								FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, (1920 / 2), (1080 - 128), White, Black,
+							DrawCtrls->SetStringAutoFit(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, 24,
+								(1920 / 2 - 520), (1080 - 128),
+								(1920 / 2 + 520), (1080 - 128 + 24 * 3),
+								White, Black,
 								Str);
 						}
 					}
@@ -2142,8 +2155,8 @@ namespace FPS_n2 {
 					Str += LocalizeParts->Get(6000 + m_TextID);
 					Str += " ]";
 					DrawCtrls->SetStringAutoFit(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, 24,
-						(1920 / 2 - 480), (1080 - 128 - 24),
-						(1920 / 2 + 480), (1080 - 128 + 24),
+						(1920 / 2 - 520), (1080 - 128 - 24),
+						(1920 / 2 + 520), (1080 - 128 + 24),
 						White, Black,
 						Str);
 				}
