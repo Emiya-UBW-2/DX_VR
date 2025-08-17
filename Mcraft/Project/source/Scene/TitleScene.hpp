@@ -19,36 +19,31 @@ namespace FPS_n2 {
 			bool									m_IsEnd{ false };//シーン全体の終了フラグ
 			GraphHandle								m_TitleImage{};
 			std::unique_ptr<UIs::CreditControl>		m_CreditControl{};
-
 			std::shared_ptr<Charas::MovieCharacter>	m_MovieCharacter{};
 			MV1										m_ObjSky{};
-
-			std::vector<std::shared_ptr<Guns::GunObj>>		m_GunPtr{};			//銃
-
+			std::vector<std::shared_ptr<Guns::GunObj>>m_GunPtr{};			//銃
 			TitleWindow								m_TitleWindow{ TitleWindow::Main };
-			Vector3DX CamPos;
-			Vector3DX CamVec = Vector3DX::forward();
-			float CamFov = deg2rad(45);
-			float CamYrad = deg2rad(0);
-			float CamYradR = deg2rad(0);
+			Vector3DX								m_CamPos;
+			Vector3DX								m_CamVec = Vector3DX::forward();
+			float									m_CamFov = deg2rad(45);
+			float									m_CamYrad = deg2rad(0);
+			float									m_CamYradR = deg2rad(0);
 
 			struct Point {
 				int first{};
 				int second{};
 				bool IsActive{ false };
 			};
+
 			std::vector<Point>						m_GunPoint{};
 			std::array<int, 3>						m_GunSelect{};
 			int										m_GunTypeSel = 0;
 			int										m_GunSel = 0;
 			int										m_GunCustomSel = 0;
-
 			float									m_CamTimer = 0.f;
-
 			std::vector<float>						m_GunAnimTimer{};
-			Guns::GunSlot							SlotSel = Guns::GunSlot::Magazine;
+			Guns::GunSlot							m_SlotSel = Guns::GunSlot::Magazine;
 			float									m_SelAlpha{ 0.f };
-
 			int										m_PrevScore{ InvalidID };
 		public:
 			TitleScene(void) noexcept {}

@@ -84,8 +84,17 @@ namespace FPS_n2 {
 			friend class SingletonBase<AmmoDataManager>;
 		private:
 			std::vector<std::unique_ptr<AmmoData>>	m_Data;
+		public:
+			std::vector<std::string>					m_AmmoList;
 		private:
-			AmmoDataManager(void) noexcept {}
+			AmmoDataManager(void) noexcept {
+				this->m_AmmoList.clear();
+				std::vector<WIN32_FIND_DATA> pData;
+				GetFileNamesInDirectory("data/ammo/*", &pData);
+				for (auto& data : pData) {
+					this->m_AmmoList.emplace_back(data.cFileName);
+				}
+			}
 			virtual ~AmmoDataManager(void) noexcept {
 				for (auto& obj : this->m_Data) {
 					obj.reset();
@@ -102,6 +111,15 @@ namespace FPS_n2 {
 				}
 				this->m_Data.emplace_back(std::make_unique<AmmoData>(filepath));
 				return static_cast<int>(this->m_Data.size() - 1);
+			}
+		public:
+			void Init() noexcept {
+				for (auto& name : this->m_AmmoList) {
+					std::string ChildPath = "data/ammo/";
+					ChildPath += name;
+					ChildPath += "/";
+					this->Add(ChildPath);
+				}
 			}
 		};
 	}

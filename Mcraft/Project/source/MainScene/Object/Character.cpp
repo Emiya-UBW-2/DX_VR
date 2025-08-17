@@ -35,13 +35,13 @@ namespace FPS_n2 {
 				return Lerp(1.5f, 1.f, static_cast<float>(gram) / 20000);
 			}
 			else if (gram < 80000) {
-				if (m_AdrenalineTime > 0.f) {
+				if (this->m_AdrenalineTime > 0.f) {
 					return 1.f;
 				}
 				return Lerp(1.f, 0.45f, static_cast<float>(gram - 20000) / (80000 - 20000));
 			}
 			else {
-				if (m_AdrenalineTime > 0.f) {
+				if (this->m_AdrenalineTime > 0.f) {
 					return 1.f;
 				}
 				return 0.25f;

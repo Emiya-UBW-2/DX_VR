@@ -183,11 +183,42 @@ namespace FPS_n2 {
 			friend class SingletonBase<GunPartsDataManager>;
 		public:
 			std::vector<std::string>					m_GunList;
+			std::vector<std::string>					m_ModList;
 		private:
 			std::list<std::unique_ptr<GunPartsData>>	m_Data;
 			int											m_LastUniqueID{ 0 };
 		private:
-			GunPartsDataManager(void) noexcept {}
+			GunPartsDataManager(void) noexcept {
+				//銃オブジェ文字列リストの生成
+				{
+					this->m_GunList.clear();
+					std::vector<WIN32_FIND_DATA> pData;
+					GetFileNamesInDirectory("data/gun/*", &pData);
+					for (auto& data : pData) {
+						this->m_GunList.emplace_back(data.cFileName);
+					}
+				}
+				{
+					this->m_ModList.clear();
+					std::string Path = "data/Mods/";
+					std::vector<WIN32_FIND_DATA> pData;
+					GetFileNamesInDirectory((Path + "*").c_str(), &pData);
+					for (auto& data : pData) {
+						std::string Path2 = Path;
+						Path2 += data.cFileName;
+						Path2 += "/";
+						std::vector<WIN32_FIND_DATA> pData2;
+						GetFileNamesInDirectory((Path2 + "*").c_str(), &pData2);
+						for (auto& data2 : pData2) {
+							std::string Path3 = "";
+							Path3 += data.cFileName;
+							Path3 += "/";
+							Path3 += data2.cFileName;
+							this->m_ModList.emplace_back(Path3);
+						}
+					}
+				}
+			}
 			virtual ~GunPartsDataManager(void) noexcept {
 				for (auto& obj : this->m_Data) {
 					obj.reset();
@@ -202,8 +233,29 @@ namespace FPS_n2 {
 				}
 				return nullptr;
 			}
-		public:
 			const int Add(const std::string& filepath) noexcept;
+		public:
+			void Init() noexcept {
+				//銃オブジェ文字列リストの生成
+				{
+					std::string Path = "data/Mods/";
+					for (auto& name : this->m_ModList) {
+						std::string ChildPath = Path;
+						ChildPath += name;
+						ChildPath += "/";
+						this->Add(ChildPath);
+					}
+				}
+				{
+					std::string Path = "data/gun/";
+					for (auto& name : this->m_GunList) {
+						std::string ChildPath = Path;
+						ChildPath += name;
+						ChildPath += "/";
+						this->Add(ChildPath);
+					}
+				}
+			}
 		};
 	}
 }

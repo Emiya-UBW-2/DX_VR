@@ -67,57 +67,18 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	FPS_n2::FadeControl::Create();
 	FPS_n2::UIs::ButtonControl::Create();
 	//
-	FPS_n2::Guns::GunPartsDataManager::Create();
 	FPS_n2::Objects::AmmoDataManager::Create();
+	FPS_n2::Guns::GunPartsDataManager::Create();
 	FPS_n2::Objects::ItemObjDataManager::Create();
-	//
-	{
-		std::string Path = "data/Item/";
-		std::vector<WIN32_FIND_DATA> pData;
-		GetFileNamesInDirectory((Path + "*").c_str(), &pData);
-		for (auto& data : pData) {
-			std::string ChildPath = Path;
-			ChildPath += data.cFileName;
-			ChildPath += "/";
-			FPS_n2::Objects::ItemObjDataManager::Instance()->Add(ChildPath);
-		}
-	}
+	FPS_n2::Charas::GunAnimManager::Create();
+	FPS_n2::EffectSingleton::Create();
+
+	FPS_n2::Objects::AmmoDataManager::Instance()->Init();
+	FPS_n2::Guns::GunPartsDataManager::Instance()->Init();
+	FPS_n2::Objects::ItemObjDataManager::Instance()->Init();
+	FPS_n2::Charas::GunAnimManager::Instance()->Load("data/CharaAnime/");
 	//初期セーブ
 	{
-		FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.clear();
-		{
-			std::string Path = "data/gun/";
-			std::vector<WIN32_FIND_DATA> pData;
-			GetFileNamesInDirectory((Path + "*").c_str(), &pData);
-			for (auto& data : pData) {
-				FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList.emplace_back(data.cFileName);
-			}
-		}
-		//
-		{
-			std::string Path = "data/gun/";
-			std::vector<WIN32_FIND_DATA> pData;
-			GetFileNamesInDirectory((Path + "*").c_str(), &pData);
-			for (auto& data : pData) {
-				std::string ChildPath = Path;
-				ChildPath += data.cFileName;
-				ChildPath += "/";
-				FPS_n2::Guns::GunPartsDataManager::Instance()->Add(ChildPath);
-			}
-		}
-		//
-		{
-			std::string Path = "data/Mods/";
-			std::vector<WIN32_FIND_DATA> pData;
-			GetFileNamesInDirectory((Path + "*").c_str(), &pData);
-			for (auto& data : pData) {
-				std::string ChildPath = Path;
-				ChildPath += data.cFileName;
-				ChildPath += "/";
-				FPS_n2::Guns::GunPartsDataManager::Instance()->Add(ChildPath);
-			}
-		}
-
 		bool isEquiped = false;
 		for (auto& guns : FPS_n2::Guns::GunPartsDataManager::Instance()->m_GunList) {
 			if (SaveData::Instance()->GetParam(guns) <= 0) {
@@ -165,5 +126,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//SceneControl::Instance()->SetFirstScene(MainLoadScenePtr);
 	//メインロジック開始
 	DXLib_refParts->MainLogic();
+
+	FPS_n2::EffectSingleton::Release();
+	FPS_n2::Charas::GunAnimManager::Release();
 	return 0;
 }

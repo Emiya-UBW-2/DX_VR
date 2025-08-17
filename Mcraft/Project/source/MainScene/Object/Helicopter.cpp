@@ -413,7 +413,7 @@ namespace FPS_n2 {
 				if (this->m_IsHit) {
 					this->m_IsHit = false;
 				}
-				else if (m_IsIntercept) {
+				else if (this->m_IsIntercept) {
 					float SpeedUP = 1.f;
 					float value = Player::SkillList::Instance()->GetSkillValueNow(Player::SkillType::TeiziTaisha);
 					if (value > 0.f) {
@@ -434,7 +434,7 @@ namespace FPS_n2 {
 				m_TargetPos = Matrix3x3DX::Vtrans(Vector3DX::forward()*(20.f*Scale3DRate),Matrix3x3DX::RotAxis(Vector3DX::up(),m_Rotate));
 				m_NowPos = Lerp(this->m_PrevPos, m_TargetPos, std::clamp(this->m_Timer / 8.0f, 0.0f, 1.0f));
 				{
-					m_YradRT = rad2deg(m_Rotate);
+					m_YradRT = rad2deg(this->m_Rotate);
 					m_YradRT -= 90;
 				}
 				break;
@@ -455,7 +455,7 @@ namespace FPS_n2 {
 				m_TargetPos = Matrix3x3DX::Vtrans(Vector3DX::forward() * (20.f * Scale3DRate), Matrix3x3DX::RotAxis(Vector3DX::up(), m_Rotate));
 				m_NowPos = Lerp(this->m_PrevPos, m_TargetPos, std::clamp(this->m_Timer / 8.0f, 0.0f, 1.0f));
 				{
-					m_YradRT = rad2deg(m_Rotate);
+					m_YradRT = rad2deg(this->m_Rotate);
 					m_YradRT -= 90;
 				}
 				break;
@@ -482,8 +482,8 @@ namespace FPS_n2 {
 			Easing(&m_SideSpeedPer, std::clamp(-Vec.x, -1.0f, 1.0f), 0.975f, EasingType::OutExpo);
 
 			auto PrevYrad = m_Yrad;
-			if (std::abs(m_Yrad - m_YradRT) > 90.f) {
-				if (m_Yrad < m_YradRT) {
+			if (std::abs(this->m_Yrad - m_YradRT) > 90.f) {
+				if (this->m_Yrad < m_YradRT) {
 					m_Yrad += 20.f * DXLib_refParts->GetDeltaTime();
 				}
 				else {

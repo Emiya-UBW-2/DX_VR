@@ -99,8 +99,17 @@ namespace FPS_n2 {
 			friend class SingletonBase<ItemObjDataManager>;
 		private:
 			std::vector<std::unique_ptr<ItemObjData>>	m_Data;
+		public:
+			std::vector<std::string>					m_ItemList;
 		private:
-			ItemObjDataManager(void) noexcept {}
+			ItemObjDataManager(void) noexcept {
+				this->m_ItemList.clear();
+				std::vector<WIN32_FIND_DATA> pData;
+				GetFileNamesInDirectory("data/Item/*", &pData);
+				for (auto& data : pData) {
+					this->m_ItemList.emplace_back(data.cFileName);
+				}
+			}
 			virtual ~ItemObjDataManager(void) noexcept {
 				for (auto& obj : this->m_Data) {
 					obj.reset();
@@ -118,6 +127,16 @@ namespace FPS_n2 {
 				}
 				this->m_Data.emplace_back(std::make_unique<ItemObjData>(filepath));
 				return static_cast<int>(this->m_Data.size() - 1);
+			}
+		public:
+			void Init() noexcept {
+				std::string Path = "data/Item/";
+				for (auto& name : this->m_ItemList) {
+					std::string ChildPath = Path;
+					ChildPath += name;
+					ChildPath += "/";
+					this->Add(ChildPath);
+				}
 			}
 		};
 
