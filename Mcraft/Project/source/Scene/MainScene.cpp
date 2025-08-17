@@ -773,7 +773,6 @@ namespace FPS_n2 {
 					auto& ViewPlayer = PlayerMngr->GetWatchPlayer();
 					auto* SE = SoundPool::Instance();
 					FadeControl::Instance()->SetBlackOut(true);
-					SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
 					//セーブデータにIDを追加
 					int ID = static_cast<int>(m_SkillSelect.at(m_SkillSelectNow));
 
@@ -803,11 +802,28 @@ namespace FPS_n2 {
 							SaveData::Instance()->SetParam("round", 1);
 						}
 					}
+					else {
+						if (SaveData::Instance()->GetParam("round") <= 0) {
+							if (ID == static_cast<int>(Player::SkillType::ADDSCORE)) {
+								SaveData::Instance()->SetParam("BuffNextRound", 1);
+							}
+							else {
+								if (SaveData::Instance()->GetParam("skill" + std::to_string(ID)) > 0) {
+									SaveData::Instance()->SetParam("skill" + std::to_string(ID), SaveData::Instance()->GetParam("skill" + std::to_string(ID)) + 1);
+								}
+								else {
+									SaveData::Instance()->SetParam("skill" + std::to_string(ID), 1);
+								}
+							}
+						}
+					}
 					if (ReturnTitle) {
 						SetNextSelect(0);
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_CANCEL))->Play(DX_PLAYTYPE_BACK, true);
 					}
 					else {
 						SetNextSelect(1);
+						SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_OK))->Play(DX_PLAYTYPE_BACK, true);
 					}
 					};
 				SceneParts->SetPauseEnable(false);
@@ -922,11 +938,14 @@ namespace FPS_n2 {
 							xp1 = 1920 / 2 + static_cast<int>(wide * (-(3.f - 1.f) / 2.f + loop));
 							yp1 = 1080 / 2;
 							if (HitPointToRectangle(Pad->GetMS_X(), Pad->GetMS_Y(), xp1 - (static_cast<int>(wide) / 2 - 8), yp1 - 540 / 2, xp1 + (static_cast<int>(wide) / 2 - 8), yp1 + 540 / 2)) {
+								if (m_SkillSelectNow != loop) {
+									SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
+								}
 								m_SkillSelectNow = loop;
 								isSelect = true;
-								if (Pad->GetMouseClick().trigger()) {
+								if (Pad->GetPadsInfo(Controls::PADS::SHOT).GetKey().press() || Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().press()) {
 									if (!this->m_IsEnd) {
-										GameClear(false);
+										GameClear(Pad->GetPadsInfo(Controls::PADS::AIM).GetKey().press());
 									}
 									this->m_IsEnd = true;
 								}
@@ -935,12 +954,14 @@ namespace FPS_n2 {
 						}
 						if (!isSelect) {
 							if (Pad->GetPadsInfo(Controls::PADS::MOVE_A).GetKey().trigger()) {
+								SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 								--m_SkillSelectNow;
 								if (m_SkillSelectNow < 0) {
 									m_SkillSelectNow = 3 - 1;
 								}
 							}
 							if (Pad->GetPadsInfo(Controls::PADS::MOVE_D).GetKey().trigger()) {
+								SE->Get(SoundType::SE, static_cast<int>(SoundSelectCommon::UI_Select))->Play(DX_PLAYTYPE_BACK, true);
 								++m_SkillSelectNow;
 								if (m_SkillSelectNow > 3 - 1) {
 									m_SkillSelectNow = 0;
@@ -2120,13 +2141,13 @@ namespace FPS_n2 {
 							xp1 = 960;
 							yp1 = 930;
 							KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::INTERACT));
-
+							KeyGuideParts->DrawButton(xp1 + 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::SHOT));
 							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
 								FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3009));
 
 							yp1 -= 64;
 							KeyGuideParts->DrawButton(xp1 - 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::RELOAD));
-
+							KeyGuideParts->DrawButton(xp1 + 32 / 2, yp1 - 32, KeyGuide::GetPADStoOffset(Controls::PADS::AIM));
 							DrawCtrls->SetString(WindowSystem::DrawLayer::Normal, FontSystem::FontType::MS_Gothic, (16),
 								FontSystem::FontXCenter::MIDDLE, FontSystem::FontYCenter::TOP, xp1, yp1, Red, Black, LocalizeParts->Get(3006));
 						}
