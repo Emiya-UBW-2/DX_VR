@@ -9,6 +9,9 @@ Info_Eng=High-end product with excellent durability, accuracy, and recoil.
 Info_Eng=Ideal as a back-up gun.
 
 Weight=845
+WeaponType=Sub
+UnlockScore=0
+IsCustomize=false
 
 ShotRate=600
 RecoilPower=60

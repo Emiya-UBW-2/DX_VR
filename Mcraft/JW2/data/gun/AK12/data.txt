@@ -9,6 +9,9 @@ Info_Eng=High reliability due to simple structure.
 Info_Eng=By folding the stock= it can be used in extremely close combat.
 
 Weight=3400
+WeaponType=Main
+UnlockScore=1000
+IsCustomize=True
 
 ShotRate=700
 RecoilPower=90
@@ -27,7 +30,7 @@ Slot0Item=AK12Mag
 Slot0Item=AK_6L20
 
 Slot1Type=Sight
-Slot1IsNeed=true
+Slot1IsNeed=false
 Slot1Item=APCOMP2
 Slot1Item=ACOG
 

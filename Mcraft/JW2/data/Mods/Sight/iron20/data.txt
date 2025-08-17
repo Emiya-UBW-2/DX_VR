@@ -1,4 +1,6 @@
-Name=ironsight 20
+Name=BackUp IronSight
+Info=フラットトップレールに対応するバックアップアイアンサイト。
+Info_Eng=フラットトップレールに対応するバックアップアイアンサイト。
 
 AimSpeedAdd=0.0
 

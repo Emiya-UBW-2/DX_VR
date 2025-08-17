@@ -1,4 +1,6 @@
 Name=AK-12 30Round Magazine
+Info=AK-12標準の軽量ポリマー製30連マガジン。
+Info_Eng=AK-12標準の軽量ポリマー製30連マガジン。
 
 capacity=30
 useammo0=545x39

@@ -1,4 +1,6 @@
 Name=M16 60Round Magazine
+Info=STANAG規格向けの60連ドラムマガジン。
+Info_Eng=STANAG規格向けの60連ドラムマガジン。
 
 capacity=60
 useammo0=556x45

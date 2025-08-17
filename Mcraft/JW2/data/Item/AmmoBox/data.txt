@@ -1,4 +1,6 @@
-Name=Item
+Name=AmmoBox
+Info=敵規格品の弾薬。資材にはなるだろうか。
+Info_Eng=敵規格品の弾薬。資材にはなるだろうか。
 Type=Item
 Weight=5500
 Score=100

@@ -44,9 +44,12 @@
 2047=Have to Set Low Graphics Preset.
 2048=If DirectX11 is not available, screen effects cannot be used.
 
+2050=グラフィック タブの プリセットを左に設定することで画質を犠牲にFPSを向上できます。ゲーム起動後、プリセット最低の状態でも60FPSを切ってしまう場合はレンダリングスケールを落としてください。コントローラーはリアルタイムの抜き差しに対応しています。キーボードで操作する際にはInputTypeを指定してください。
+
 0110=Option
 1110=Change BGM volume
 1111=Change SE volume
+1112=Change VOICE volume
 1120=Select Graphics Preset
 1121=Select Window or Borderless
 1122=Change Vertical Fov
@@ -89,12 +92,12 @@
 1161=Grenade
 1162=(Not Use)
 1163=(Not Use)
-1164=(Not Use)
+1164=Run
 1165=Slow Walk
 1166=Shot
 1167=Aim Down Sight
 1168=Change Weapon
-1169=(Not Use)
+1169=Squat
 1170=(Not Use)
 1171=Watch Gun
 1172=Delete Item1
@@ -110,6 +113,9 @@
 0203=You Are Dead
 0204=Kill
 0205=Delivery
+0206=TaskClear
+0250=Delivery Item
+0251=Kill Enemy
 
 0300=(注意表示)
 
@@ -119,6 +125,11 @@
 9993=Select
 9994=Change Tab
 9995=Pause
+9980=武器選択
+9981=武器種切り替え
+9982=パーツ選択に進む
+9983=パーツ選択
+9984=部位切り替え
 
 9900=Move
 9902=Lean
@@ -137,7 +148,49 @@
 3004=Delivery Item
 3005=Request for return
 3006=Return Title
+3007=Earn 1000pts or Complete 1 task, Can request return.
+3008=Skip
+3009=Next Mission
 
 4000=Find Container
 4001=Delivery Items in container
 4002=Get into the container and wait for the helicopter to arrive.
+
+5000=Runner
+5100=[d]秒間走ることができる
+5001=Guts
+5101=[d]のダメージに対して踏ん張る
+5002=AP
+5102=弾の貫通力を上げる(ダメージ[d])
+5003=ItemEater
+5103=Fキーを押すと[d]m以内のアイテムを吸い寄せる
+5004=Peace Maker
+5104=%m以内の対面している敵が撃ってこなくなる
+5005=Teiji Taisha
+5105=帰還要請と援護射撃までの時間を[d]%%を早める
+5006=Adrenaline
+5106=物を拾って[d]秒だけ重さデバフを無視できる
+5007=DamageCut
+5107=アーマーを含め被ダメージを[d] %%カット
+5008=ScoreUp
+5108=次の出撃時のスコアに+[d]
+
+6000=ヘリによるコンテナ展開完了、状況を開始せよ。
+6001=コンテナを探せ。
+6002=敵をかわしつつ、コンテナに物資を集めろ。
+6003=ヘリの支援限界だ、撤退せよ。コンテナにつかまれ!
+6004=オペレーターの回収を確認。よくやった。
+6005=残り30秒、急げ!
+
+6010=よし。
+6011=いいぞ。
+
+6100=今から訓練を始める。
+6101=前方にいる敵を倒せ。最初のタスクだ。
+6102=敵は倒すとアーマーを落とす。それに着替えろ。アーマーを着ることで被弾による負傷を防ぐことができる。
+6103=壁は回り道することもできるが、手榴弾や銃撃で吹き飛ばすこともできる。壁に向かって手榴弾を投げてみろ。
+6104=壁の向こうにコンテナと敵が見えるだろう、まずは敵を排除し安全を確保しろ。
+6105=一定以上の成果を上げれば、コンテナごと引き上げてやる。コンテナにアーマーを納品し、タスクをクリアするんだ。
+6106=左にはほかにもアイテムがある。納品すればポイントになるだろう。納品してみろ。
+6107=よし。コンテナの近くでインタラクトボタンを長押しして帰還しろ。
+6108=これで訓練終了だ、今回の経験を選べ。そしてそれを活かして実戦へ進むんだ。いったん戻って準備を整えるのもよいだろう。

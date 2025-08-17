@@ -1,14 +1,16 @@
-Name=P226 Handgun
+Name=MP443 Handgun
 
-Info=ダブルカラムマガジン、デコッキング機能を搭載した拳銃。
-Info=高級ながら優秀な耐久性、精度、反動を備える。
-Info=バックアップガンとして最適。
+Info=最新のいわゆるヤリギン拳銃。
+Info=大容量のマガジンを保持しており、戦闘力が高い。
 
 Info_Eng=A handgun equipped with a double column magazine and decocking function.
 Info_Eng=High-end product with excellent durability, accuracy, and recoil.
 Info_Eng=Ideal as a back-up gun.
 
 Weight=950
+WeaponType=Sub
+UnlockScore=4000
+IsCustomize=false
 
 ShotRate=600
 RecoilPower=80

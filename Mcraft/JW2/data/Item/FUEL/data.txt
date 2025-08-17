@@ -1,4 +1,6 @@
-Name=Item
+Name=Fuel Tank
+Info=業務用燃料缶。資材にはなるだろうか。
+Info_Eng=業務用燃料缶。資材にはなるだろうか。
 Type=Item
 Weight=20000
 Score=300

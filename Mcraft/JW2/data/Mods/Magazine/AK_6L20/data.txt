@@ -1,4 +1,6 @@
 Name=AK-74 6L20 30Round Magazine
+Info=AK-74標準のベークライト製30連マガジン。
+Info_Eng=AK-74標準のベークライト製30連マガジン。
 
 capacity=30
 useammo0=545x39

@@ -9,6 +9,9 @@ Info_Eng=It has the same functions as the standard model.
 Info_Eng=It boasts easy handling thanks to its latest design.
 
 Weight=3500
+WeaponType=Main
+UnlockScore=5000
+IsCustomize=True
 
 ShotRate=850
 RecoilPower=50

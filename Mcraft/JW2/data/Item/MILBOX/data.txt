@@ -1,4 +1,6 @@
-Name=Item
+Name=ItemBox
+Info=なんらかの敵の物資。持ち帰ればなかなかの資材となるだろう。
+Info_Eng=なんらかの敵の物資。持ち帰ればなかなかの資材となるだろう。
 Type=Item
 Weight=30000
 Score=200

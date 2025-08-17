@@ -1,0 +1,11 @@
+Name=ACOG On Offset Mount
+Info=3.5倍率のアサルトスコープ。中距離戦に有用。
+Info_Eng=3.5倍率のアサルトスコープ。中距離戦に有用。
+zoom=3.5
+Recoil_Diff=-10
+
+AimSpeedAdd=-0.25
+
+AutoAimSpeedAdd=0.25
+
+end

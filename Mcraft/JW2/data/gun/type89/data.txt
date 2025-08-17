@@ -9,6 +9,9 @@ Info_Eng=Although it has deteriorated somewhat due to repeated maintenance,
 Info_Eng=it is a highly reliable assault rifle.
 
 Weight=3800
+WeaponType=Main
+UnlockScore=0
+IsCustomize=True
 
 ShotRate=850
 RecoilPower=80
@@ -25,9 +28,11 @@ Slot0IsNeed=true
 Slot0Item=STANAG_20
 Slot0Item=STANAG_30
 
-Slot1Type=UnderRail
-Slot1IsNeed=true
-Slot1Item=mount89
+Slot1Type=Sight
+Slot1IsNeed=false
+Slot1Item=mount89_ACOG
+Slot1Item=mount89_APCOMP2
+
 
 Open=0
 ReloadStart_Empty=1

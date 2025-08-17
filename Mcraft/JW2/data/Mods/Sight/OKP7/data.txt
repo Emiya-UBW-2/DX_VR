@@ -1,5 +1,8 @@
 Name=OKP-7 DotSight
 
+Info=独特な形状のドットサイト。下方視界が良好であることが特徴。
+Info_Eng=独特な形状のドットサイト。下方視界が良好であることが特徴。
+
 AimSpeedAdd=-0.1
 
 AutoAimSpeedAdd=0.25
