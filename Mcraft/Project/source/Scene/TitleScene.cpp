@@ -114,7 +114,7 @@ namespace FPS_n2 {
 			SetLightAmbColorHandle(FirstLight.get(), GetColorF(1.0f, 0.9f, 0.8f, 1.0f));
 			SetLightDifColorHandle(FirstLight.get(), GetColorF(1.0f, 0.9f, 0.8f, 1.0f));
 
-			PostPassParts->SetGodRayPer(0.f);
+			PostPassParts->SetGodRayPer(0.1f);
 			//Fog
 			SetVerticalFogEnable(false);
 			SetFogEnable(false);
