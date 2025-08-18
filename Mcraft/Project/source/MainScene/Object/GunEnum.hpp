@@ -106,6 +106,11 @@ namespace FPS_n2 {
 		enum class RELOADTYPE {
 			AMMO,
 			MAG,
+			Max,
+		};
+		static const char* RELOADTYPEName[static_cast<int>(RELOADTYPE::Max)] = {
+			"AMMO",
+			"MAGAZINE",
 		};
 
 		enum class STOCKTYPE {

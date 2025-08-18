@@ -19,20 +19,25 @@ namespace FPS_n2 {
 			bool									m_IsEnd{ false };//シーン全体の終了フラグ
 			GraphHandle								m_TitleImage{};
 			std::unique_ptr<UIs::CreditControl>		m_CreditControl{};
+
 			std::shared_ptr<Charas::MovieCharacter>	m_MovieCharacter{};
 			MV1										m_ObjSky{};
 			std::vector<std::shared_ptr<Guns::GunObj>>m_GunPtr{};			//銃
+
 			TitleWindow								m_TitleWindow{ TitleWindow::Main };
+
 			Vector3DX								m_CamPos;
 			Vector3DX								m_CamVec = Vector3DX::forward();
 			float									m_CamFov = deg2rad(45);
+
 			float									m_CamYrad = deg2rad(0);
 			float									m_CamYradR = deg2rad(0);
 
 			struct Point {
-				int first{};
-				int second{};
+				int Xofs{};
+				int GunType{};
 				bool IsActive{ false };
+				float AnimTimer{ 0.f };
 			};
 
 			std::vector<Point>						m_GunPoint{};
@@ -41,10 +46,13 @@ namespace FPS_n2 {
 			int										m_GunSel = 0;
 			int										m_GunCustomSel = 0;
 			float									m_CamTimer = 0.f;
-			std::vector<float>						m_GunAnimTimer{};
 			Guns::GunSlot							m_SlotSel = Guns::GunSlot::Magazine;
 			float									m_SelAlpha{ 0.f };
 			int										m_PrevScore{ InvalidID };
+
+			bool									m_EndScoreDisp{ false };
+		private:
+			const auto& GetNowEditWeaponID() const noexcept { return this->m_GunSelect.at(this->m_GunTypeSel); }
 		public:
 			TitleScene(void) noexcept {}
 			TitleScene(const TitleScene&) = delete;

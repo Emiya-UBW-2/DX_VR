@@ -104,8 +104,17 @@ namespace FPS_n2 {
 			const auto& IsIronSight(void) const noexcept { return this->m_IronSight; }
 			const auto& IsPlayableWeapon(void) const noexcept { return this->m_IsPlayableWeapon; }
 			const auto& GetUnlockScore(void) const noexcept { return this->m_UnlockScore; }
-			const auto& GetInfo(void) const noexcept { return this->m_Info; }
-			const auto& GetInfoEng(void) const noexcept { return this->m_InfoEng; }
+			const auto& GetInfo(void) const noexcept {
+				auto* OptionParts = OptionManager::Instance();
+				switch ((LanguageType)OptionParts->GetParamInt(EnumSaveParam::Language)) {
+				case LanguageType::Eng:
+					return this->m_InfoEng;
+				case LanguageType::Jpn:
+					return this->m_Info;
+				default:
+					return this->m_Info;
+				}
+			}
 
 			const auto& GetStockType(void) const noexcept { return this->m_StockType; }
 			const auto& GetIconGraph(void) const noexcept { return this->m_Icon; }
@@ -183,7 +192,7 @@ namespace FPS_n2 {
 			friend class SingletonBase<GunPartsDataManager>;
 		public:
 			std::vector<std::string>					m_GunList;
-			std::vector<std::string>					m_ModList;
+			std::vector<std::string>					m_ModPathList;
 		private:
 			std::list<std::unique_ptr<GunPartsData>>	m_Data;
 			int											m_LastUniqueID{ 0 };
@@ -199,22 +208,16 @@ namespace FPS_n2 {
 					}
 				}
 				{
-					this->m_ModList.clear();
+					this->m_ModPathList.clear();
 					std::string Path = "data/Mods/";
 					std::vector<WIN32_FIND_DATA> pData;
 					GetFileNamesInDirectory((Path + "*").c_str(), &pData);
 					for (auto& data : pData) {
-						std::string Path2 = Path;
-						Path2 += data.cFileName;
-						Path2 += "/";
+						std::string Path2 = Path + data.cFileName + "/";
 						std::vector<WIN32_FIND_DATA> pData2;
 						GetFileNamesInDirectory((Path2 + "*").c_str(), &pData2);
 						for (auto& data2 : pData2) {
-							std::string Path3 = "";
-							Path3 += data.cFileName;
-							Path3 += "/";
-							Path3 += data2.cFileName;
-							this->m_ModList.emplace_back(Path3);
+							this->m_ModPathList.emplace_back(Path2 + data2.cFileName + "/");
 						}
 					}
 				}
@@ -238,12 +241,8 @@ namespace FPS_n2 {
 			void Init() noexcept {
 				//銃オブジェ文字列リストの生成
 				{
-					std::string Path = "data/Mods/";
-					for (auto& name : this->m_ModList) {
-						std::string ChildPath = Path;
-						ChildPath += name;
-						ChildPath += "/";
-						this->Add(ChildPath);
+					for (auto& Path : this->m_ModPathList) {
+						this->Add(Path);
 					}
 				}
 				{

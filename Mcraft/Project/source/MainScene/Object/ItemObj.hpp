@@ -31,8 +31,17 @@ namespace FPS_n2 {
 		public://getter
 			const auto& GetPath(void) const noexcept { return this->m_path; }
 			const auto& GetName(void) const noexcept { return this->m_name; }
-			const auto& GetInfo(void) const noexcept { return this->m_Info; }
-			const auto& GetInfoEng(void) const noexcept { return this->m_InfoEng; }
+			const auto& GetInfo(void) const noexcept {
+				auto* OptionParts = OptionManager::Instance();
+				switch ((LanguageType)OptionParts->GetParamInt(EnumSaveParam::Language)) {
+				case LanguageType::Eng:
+					return this->m_InfoEng;
+				case LanguageType::Jpn:
+					return this->m_Info;
+				default:
+					return this->m_Info;
+				}
+			}
 			const auto& GetItemType(void) const noexcept { return this->m_ItemType; }
 			const auto& GetIconGraph(void) const noexcept { return this->m_Icon; }
 			const auto& EnableSpawnBySoldier(void) const noexcept { return this->m_EnableSpawnBySoldier; }
@@ -100,14 +109,15 @@ namespace FPS_n2 {
 		private:
 			std::vector<std::unique_ptr<ItemObjData>>	m_Data;
 		public:
-			std::vector<std::string>					m_ItemList;
+			std::vector<std::string>					m_ItemPathList;
 		private:
 			ItemObjDataManager(void) noexcept {
-				this->m_ItemList.clear();
+				this->m_ItemPathList.clear();
+				std::string Path = "data/Item/";
 				std::vector<WIN32_FIND_DATA> pData;
-				GetFileNamesInDirectory("data/Item/*", &pData);
+				GetFileNamesInDirectory((Path + "*").c_str(), &pData);
 				for (auto& data : pData) {
-					this->m_ItemList.emplace_back(data.cFileName);
+					this->m_ItemPathList.emplace_back(Path + data.cFileName + "/");
 				}
 			}
 			virtual ~ItemObjDataManager(void) noexcept {
@@ -130,12 +140,8 @@ namespace FPS_n2 {
 			}
 		public:
 			void Init() noexcept {
-				std::string Path = "data/Item/";
-				for (auto& name : this->m_ItemList) {
-					std::string ChildPath = Path;
-					ChildPath += name;
-					ChildPath += "/";
-					this->Add(ChildPath);
+				for (auto& Path : this->m_ItemPathList) {
+					this->Add(Path);
 				}
 			}
 		};

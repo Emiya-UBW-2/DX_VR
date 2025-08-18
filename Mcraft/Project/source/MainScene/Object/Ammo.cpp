@@ -25,7 +25,7 @@ namespace FPS_n2 {
 			this->m_EffectTimer = 1.f;
 			this->m_HP = 2;
 
-			if ((*this->m_AmmoData)->GetEffectID() != -1) {
+			if ((*this->m_AmmoData)->GetEffectID() != InvalidID) {
 				auto* OptionParts = OptionManager::Instance();
 				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
 					if (this->m_EffectUniqueID != InvalidID) {
@@ -42,7 +42,7 @@ namespace FPS_n2 {
 				this->m_IsDrawLine = false;
 				if (this->m_AmmoData && (this->m_EffectUniqueID != InvalidID)) {
 					if (this->m_EffectTimer < 0.f) {
-						if ((*this->m_AmmoData)->GetEffectID() != -1) {
+						if ((*this->m_AmmoData)->GetEffectID() != InvalidID) {
 							auto* OptionParts = OptionManager::Instance();
 							if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
 								EffectSingleton::Instance()->StopEffectAny(Effect::ef_rocket, this->m_EffectUniqueID);
@@ -183,7 +183,7 @@ namespace FPS_n2 {
 			}
 			this->m_Timer += DXLib_refParts->GetDeltaTime();
 			this->m_pos = pos_tmp;
-			if ((*this->m_AmmoData)->GetEffectID() != -1) {
+			if ((*this->m_AmmoData)->GetEffectID() != InvalidID) {
 				auto* OptionParts = OptionManager::Instance();
 				if (OptionParts->GetParamInt(EnumSaveParam::ObjLevel) >= 1) {
 					EffectSingleton::Instance()->Update_LoopAnyEffect(Effect::ef_rocket, this->m_EffectUniqueID, this->m_pos, this->m_vec, 1.0f);

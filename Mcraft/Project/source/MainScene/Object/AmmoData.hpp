@@ -13,7 +13,7 @@ namespace FPS_n2 {
 			int				m_Pellet{ 1 };
 			float			m_Accuracy{ 0.0f };
 			int				m_FallSound{ 0 };
-			int				m_EffectID{ -1 };
+			int				m_EffectID{ InvalidID };
 		public://getter
 			const auto& GetPath(void) const noexcept { return this->m_path; }
 			const auto& GetName(void) const noexcept { return this->m_name; }
@@ -85,14 +85,15 @@ namespace FPS_n2 {
 		private:
 			std::vector<std::unique_ptr<AmmoData>>	m_Data;
 		public:
-			std::vector<std::string>					m_AmmoList;
+			std::vector<std::string>					m_AmmoPathList;
 		private:
 			AmmoDataManager(void) noexcept {
-				this->m_AmmoList.clear();
+				this->m_AmmoPathList.clear();
+				std::string Path = "data/ammo/";
 				std::vector<WIN32_FIND_DATA> pData;
-				GetFileNamesInDirectory("data/ammo/*", &pData);
+				GetFileNamesInDirectory((Path + "*").c_str(), &pData);
 				for (auto& data : pData) {
-					this->m_AmmoList.emplace_back(data.cFileName);
+					this->m_AmmoPathList.emplace_back(Path + data.cFileName + "/");
 				}
 			}
 			virtual ~AmmoDataManager(void) noexcept {
@@ -114,11 +115,8 @@ namespace FPS_n2 {
 			}
 		public:
 			void Init() noexcept {
-				for (auto& name : this->m_AmmoList) {
-					std::string ChildPath = "data/ammo/";
-					ChildPath += name;
-					ChildPath += "/";
-					this->Add(ChildPath);
+				for (auto& Path : this->m_AmmoPathList) {
+					this->Add(Path);
 				}
 			}
 		};

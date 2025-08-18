@@ -14,11 +14,8 @@ namespace FPS_n2 {
 			this->m_UIclass.Load();
 			this->m_PauseMenuControl.Load();
 			//
-			for (auto& name : Objects::ItemObjDataManager::Instance()->m_ItemList) {
-				std::string ChildPath = "data/Item/";
-				ChildPath += name;
-				ChildPath += "/";
-				ObjectManager::Instance()->LoadModelBefore(ChildPath);
+			for (auto& Path : Objects::ItemObjDataManager::Instance()->m_ItemPathList) {
+				ObjectManager::Instance()->LoadModelBefore(Path);
 			}
 			//
 			for (auto& name : Guns::GunPartsDataManager::Instance()->m_GunList) {
@@ -27,11 +24,8 @@ namespace FPS_n2 {
 				ChildPath += "/";
 				ObjectManager::Instance()->LoadModelBefore(ChildPath);
 			}
-			for (auto& name : Guns::GunPartsDataManager::Instance()->m_ModList) {
-				std::string ChildPath = "data/Mods/";
-				ChildPath += name;
-				ChildPath += "/";
-				ObjectManager::Instance()->LoadModelBefore(ChildPath);
+			for (auto& Path : Guns::GunPartsDataManager::Instance()->m_ModPathList) {
+				ObjectManager::Instance()->LoadModelBefore(Path);
 			}
 			//
 			{
@@ -45,17 +39,10 @@ namespace FPS_n2 {
 					ObjectManager::Instance()->LoadModelBefore(ChildPath);
 				}
 			}
-			//
-			{
-				std::string Path = "data/ammo/";
-				for (auto& name : Objects::AmmoDataManager::Instance()->m_AmmoList) {
-					std::string ChildPath = Path;
-					ChildPath += name;
-					ChildPath += "/";
-					ObjectManager::Instance()->LoadModelBefore(ChildPath);
-				}
+			for (auto& Path : Objects::AmmoDataManager::Instance()->m_AmmoPathList) {
+				ObjectManager::Instance()->LoadModelBefore(Path);
 			}
-
+			//
 			MV1::Load("data/Charactor/Main/model_Rag.mv1", &m_MainRagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
 			MV1::Load("data/Charactor/Soldier/model_Rag.mv1", &m_RagDoll, DX_LOADMODEL_PHYSICS_REALTIME);//身体ラグドール
 
